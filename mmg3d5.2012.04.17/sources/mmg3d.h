@@ -1,0 +1,268 @@
+#ifndef _MMG3D_H
+#define _MMG3D_H
+
+#include <assert.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <limits.h>
+#include <string.h>
+#include <signal.h>
+#include <ctype.h>
+#include <float.h>
+#include <math.h>
+
+#include "chrono.h"
+#include "memory.h"
+#include "libmesh5.h"
+
+#define MG_VER   "5.1a"
+#define MG_REL   "Mar. 02, 2012"
+#define MG_CPY   "Copyright (c) IMB-LJLL, 2004-"
+#define MG_STR   "&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&"
+
+#define MG_MAX(a,b) (((a) > (b)) ? (a) : (b))
+#define MG_MIN(a,b) (((a) < (b)) ? (a) : (b))
+
+#define MG_SMSGN(a,b)  (((double)(a)*(double)(b) > (0.0)) ? (1) : (0))  
+
+/* numerical accuracy */
+#define ALPHAD    20.7846096908265    //0.04811252243247      /* 12*sqrt(3) */
+#define LLONG     1.414213562373
+#define LSHRT     0.707106781186
+#define ANGEDG    0.707106781186548   /*0.573576436351046 */
+#define ANGLIM   -0.999999
+#define SQR32     0.866025403784
+#define ATHIRD    0.333333333333
+#define EPSD      1.e-30
+#define EPSD2     1.0e-200
+#define EPS       1.e-06
+#define LMAX      10240
+#define BADKAL    1.e-3
+#define NULKAL    1.e-20
+
+#define NPMAX   1000000
+#define NAMAX    200000
+#define NTMAX   2000000
+#define NEMAX   6000000
+
+#ifndef M_PI
+#define M_PI            3.14159265358979323846   /* pi   */
+#define M_PI_2          1.57079632679489661923   /* pi/2 */
+#endif
+
+/* tags */
+#define  MG_NOTAG     (0)
+#define  MG_REF       (1 << 0)        /* 1 edge reference  */
+#define  MG_GEO       (1 << 1)        /* 2 geometric ridge */
+#define  MG_REQ       (1 << 2)        /* 4 required entity */
+#define  MG_NOM       (1 << 3)        /* 8 non manifold    */
+#define  MG_BDY       (1 << 4)        /* 16 boundary entity */
+#define  MG_CRN       (1 << 5)        /* 32 corner         */
+#define  MG_NUL       (1 << 6)        /* 64 vertex removed */
+
+#define MG_VOK(ppt)      (ppt && (ppt->tag < MG_NUL))
+#define MG_EOK(pt)       (pt && (pt->v[0] > 0))
+#define MG_EDG(tag)      ((tag & MG_GEO) || (tag & MG_REF))
+#define MG_SIN(tag)      ((tag & MG_CRN) || (tag & MG_REQ) || (tag & MG_NOM))
+
+#define MG_SET(flag,bit) ((flag) |= (1 << (bit)))
+#define MG_CLR(flag,bit) ((flag) &= ~(1 << (bit)))  
+#define MG_GET(flag,bit) ((flag) & (1 << (bit)))
+
+extern unsigned char inxt2[3];
+extern unsigned char iprv2[3];
+extern unsigned char inxt3[7];
+extern unsigned char iprv3[7];
+extern unsigned char idir[4][3];
+extern          char idirinv[4][4];
+extern unsigned char iarf[4][3];
+extern unsigned char iarfinv[4][6];
+extern unsigned char iare[6][2];
+extern unsigned char ifar[6][2];
+extern unsigned char isar[6][2];
+extern unsigned char arpt[4][3];
+
+typedef struct {
+  double   c[3],h;
+  int      ref,xp,tmp,flag;
+  unsigned char  tag;
+} Point;
+typedef Point * pPoint;
+
+typedef struct {
+	double   n1[3],n2[3],t[3];
+} xPoint;
+typedef xPoint * pxPoint;
+
+typedef struct {
+	int      a,b,ref;
+	char     tag;
+} Edge;
+typedef Edge * pEdge;
+	
+typedef struct {
+	int      v[3],base,ref,edg[3];
+	unsigned char  flag,tag[3];
+} Tria;
+typedef Tria * pTria;
+	
+typedef struct {
+  int      v[4],ref,base,xt,flag;
+  unsigned char  tag;
+} Tetra;
+typedef Tetra * pTetra;
+
+typedef struct {
+	int      ref[4],edg[6];
+	unsigned char  ftag[4],tag[6];
+} xTetra;
+typedef xTetra * pxTetra;
+
+typedef struct {
+  double  b[10][3],n[6][3],t[6][3];
+  pPoint  p[3];
+} Bezier;
+typedef Bezier * pBezier;
+
+typedef struct {
+  double    dhd,hmin,hmax,hgrad,hausd,min[3],max[3],delta;
+  int       mem;
+  char      imprim,ddebug,badkal;
+  mytime    ctim[TIMEMAX];
+} Info;
+
+/* used to hash edges */
+typedef struct {
+  int   a,b,s,k,nxt;
+} hedge;
+typedef struct {
+  int     siz,max,nxt;
+  hedge  *item;
+} Hash;
+
+/* to store geometric edges */
+typedef struct {
+  int   a,b,ref,nxt;
+  char  tag;
+} hgeom;
+typedef struct {
+  int     siz,max,nxt;
+  hgeom  *geom;
+} HGeom;
+
+typedef struct {
+  int       ver,dim,type;
+  int       npi,nai,nei,np,na,nt,ne,xp,xt,npmax,namax,nemax,xpmax,xtmax,npnil,nenil,base;
+  int      *adja,*adjt;
+  char     *namein,*nameout;
+  
+  pPoint    point;
+  pxPoint   xpoint;
+  pTetra    tetra;
+  pxTetra   xtetra;
+  pTria     tria;
+	pEdge     edge;
+  HGeom     htab;
+} Mesh;
+typedef Mesh  * pMesh;
+
+typedef struct {
+  int       dim,ver,np,npmax,size,type;
+  double   *m;
+  char     *namein,*nameout;
+} Sol;
+typedef Sol * pSol;
+
+/* prototypes */
+void rotmatrix(double n[3],double r[3][3]);
+double det3pt1vec(double c0[3],double c1[3],double c2[3],double v[3]);
+double det4pt(double c0[3],double c1[3],double c2[3],double c3[3]);
+double orvol(pPoint point,int *v);
+int directsurfball(pMesh mesh, int ip, int *list, int ilist, double n[3]);
+
+char chkedg(pMesh mesh,pTria pt);
+void tet2tri(pMesh mesh,int k,char ie,Tria *ptt);
+int  newPt(pMesh mesh,double c[3],char tag);
+int  bezierCP(pMesh mesh,Tria *pt,pBezier pb);
+int  BezierTgt(double c1[3],double c2[3],double n1[3],double n2[3],double t1[3],double t2[3]);
+double BezierGeod(double c1[3], double c2[3], double t1[3], double t2[3]);
+int  bezierInt(pBezier pb,double uv[2],double o[3],double no[3],double to[3]); 
+int  BezierReg(pMesh mesh,int ip0, int ip1, double s, double v[3], double *o, double *no);
+int  BezierRef(pMesh mesh,int ip0, int ip1, double s, double *o, double *no, double *to);
+int  BezierEdge(pMesh mesh,int ip0, int ip1, double b0[3], double b1[3],char isrid, double v[3]);
+int  BezierRidge(pMesh mesh,int ip0, int ip1, double s, double *o, double *no1, double *no2, double *to);
+int  norface(pMesh mesh ,int k, int iface, double v[3]); 
+int  boulen(pMesh mesh,int start,int ip,double *nn);
+int  bouler(pMesh mesh,int start,int ip,int *list);
+int  boulec(pMesh mesh,int start,int ip,double *tt);
+int  boulevolp(pMesh mesh, int start, int ip, int * list);
+int  coquil(pMesh mesh, int start, int ia, int * list);
+int  coquilface(pMesh mesh, int start, int ia, int * list, int * it1, int *it2);
+int  gettag(pMesh,int,int,int *,int *);
+int  settag(pMesh,int,int,int,int);
+int  chkcolint(pMesh,int,char,char,int *);
+int  chkcolbdy(pMesh,int,char,char,int *);
+int  colver(pMesh,int *,int,char);
+int  loadMesh(pMesh );
+int  saveMesh(pMesh );
+int  loadMet(pSol );
+int  saveSize(pMesh mesh);
+int  analys(pMesh mesh);
+int  hashTetra(pMesh mesh);
+int  hashTria(pMesh mesh);
+int  hashEdge(Hash *hash,int a,int b,int k);
+int  hashGet(Hash *hash,int a,int b);
+int  hashPop(Hash *hash,int a,int b);
+int  hashNew(Hash *hash,int hsiz,int hmax);
+int  hPop(HGeom *hash,int a,int b,int *ref,char *tag);
+void hTag(HGeom *hash,int a,int b,int ref,char tag);
+int  hGet(HGeom *hash,int a,int b,int *ref,char *tag);
+void hEdge(HGeom *hash,int a,int b,int ref,char tag);
+void hNew(HGeom *hash,int hsiz,int hmax);
+int  hGeom(pMesh mesh);
+int  bdryTria(pMesh );
+int  bdrySet(pMesh );
+int  bdryPerm(pMesh );
+int  chkmsh(pMesh,int,int); 
+int  mmg3d1(pMesh ,pSol );
+int  split1_sim(pMesh mesh,pSol met,int k,int vx[6]);
+void split1(pMesh mesh,pSol met,int k,int vx[6]);
+void split1b(pMesh mesh,int *list,int ret,int ip);
+int  split2sf_sim(pMesh mesh,pSol met,int k,int vx[6]);
+void split2sf(pMesh mesh,pSol met,int k,int vx[6]);
+void split2(pMesh mesh,pSol met,int k,int vx[6]);
+int  split3_sim(pMesh mesh,pSol met,int k,int vx[6]);
+void split3(pMesh mesh,pSol met,int k,int vx[6]);
+void split3cone(pMesh mesh,pSol met,int k,int vx[6]);
+void split3op(pMesh mesh, pSol met, int k, int vx[6]);
+void split4sf(pMesh mesh,pSol met,int k,int vx[6]);
+void split4op(pMesh mesh,pSol met,int k,int vx[6]);
+void split5(pMesh mesh,pSol met,int k,int vx[6]);
+void split6(pMesh mesh,pSol met,int k,int vx[6]);
+int  simbulgept(pMesh mesh, int *list, int ilist, double o[3]);
+int  dichoto1b(pMesh mesh,int *list,int ret,double o[3],double ro[3]);
+void nsort(int ,double *,char *);
+int  nortri(pMesh mesh,pTria pt,double *n);
+double orcal(pMesh mesh,int iel);
+int  defsize_iso(pMesh,pSol);
+int  gradsiz_iso(pMesh);
+int  movintpt(pMesh mesh, int *list, int ilist);
+int  movbdyregpt(pMesh mesh, int *listv, int ilistv, int *lists, int ilists);
+int  movbdyrefpt(pMesh mesh, int *listv, int ilistv, int *lists, int ilists);
+int  movbdyridpt(pMesh mesh, int *listv, int ilistv, int *lists, int ilists);
+double caleltsurf(pMesh mesh, pTria ptt);
+int  scaleMesh(pMesh mesh,pSol met);
+int  chkswpbdy(pMesh mesh, int *list, int ilist, int it1, int it2);
+void swpbdy(pMesh mesh, int *list, int ret, int it1);
+
+/* pointers */
+double caltet_ani(pMesh mesh,pSol met,int ia,int ib,int ic,int id);
+double caltet_iso(pMesh mesh,pSol met,int ia,int ib,int ic,int id);
+double lenedg_ani(pMesh ,int ,int );
+double lenedg_iso(pMesh ,int ,int );
+
+double (*caltet)(pMesh mesh,pSol met,int ia,int ib,int ic,int id);
+double (*lenedg)(pMesh ,int ,int );
+
+
+#endif

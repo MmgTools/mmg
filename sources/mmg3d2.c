@@ -1,0 +1,722 @@
+#include "mmg3d.h"
+
+extern Info  info;
+
+
+/* solve 3*3 non symmetric system Ar = b */
+static inline int invsl(double A[3][3],double b[3],double r[3]) {
+  double detA;
+  
+  detA = A[0][0]*(A[1][1]*A[2][2] - A[2][1]*A[1][2]) \
+       - A[0][1]*(A[1][0]*A[2][2] - A[2][0]*A[1][2]) \
+       + A[0][2]*(A[1][0]*A[2][1] - A[2][0]*A[1][1]);
+  if ( detA < EPSD )  return(0);
+  detA = 1.0 / detA;
+
+  r[0] =  b[0]*(A[1][1]*A[2][2] - A[2][1]*A[1][2]) \
+       - A[0][1]*(b[1]*A[2][2] - b[2]*A[1][2]) \
+       + A[0][2]*(b[1]*A[2][1] - b[2]*A[1][1]);
+
+  r[1] = A[0][0]*(b[1]*A[2][2] - b[2]*A[1][2]) \
+       - b[0]*(A[1][0]*A[2][2] - A[2][0]*A[1][2]) \
+       + A[0][2]*(A[1][0]*b[2] - A[2][0]*b[1]);  
+
+  r[2] = A[0][0]*(A[1][1]*b[2] - A[2][1]*b[1]) \
+       - A[0][1]*(A[1][0]*b[2] - A[2][0]*b[1]) \
+       + b[0]*(A[1][0]*A[2][1] - A[2][0]*A[1][1]);    
+
+  r[0] *= detA;
+  r[1] *= detA;
+  r[2] *= detA;
+    
+  return(1);
+}
+
+/* Check ball of point np, return 0 if a nonmanifold situation is created */
+static int ismaniball(pMesh mesh,pSol sol,int k,int indp) {
+  pTetra   pt,pt1;
+  double   v,v1,v2;
+  int     *adja,list[LMAX+1],oth[LMAX+1],np,ilist,noth,base,cur,iel,jel,res,l; 
+  char     i,i1,i2,j,ip;
+  
+  pt = &mesh->tetra[k];
+  np = pt->v[indp];
+  if ( fabs(sol->m[np]) > EPSD2 )  return(1);
+  
+  memset(list,0,(LMAX+1)*sizeof(int));
+  memset(oth,0,(LMAX+1)*sizeof(int));
+
+  /* Sign of a starting point in ball of np */
+  for (j=0; j<3; j++) {
+    ip = idir[indp][j];
+    if ( sol->m[pt->v[ip]] != 0.0 )  break;
+  }
+  if ( j == 3) {
+    fprintf(stdout,"  *** Problem in function ismaniball : tetra %d : 4 null values",k);
+    exit(0);
+  }
+  
+  v = sol->m[pt->v[ip]];
+  base = ++mesh->base;
+  pt->flag = base;
+  ilist = 0;
+  list[ilist] = 4*k + indp; 
+  ilist++;
+  
+  noth = 0;
+    
+  /* travel list and pile up, by adjacency, faces of ball of np while they have at least 
+     a vertex with same sign as v */
+  res = cur = 0;
+  while ( cur < ilist ) {
+    iel = list[cur] / 4;
+    i   = list[cur] % 4; 
+    pt  = &mesh->tetra[iel];
+    adja = &mesh->adja[4*(iel-1)+1];
+    
+    /* Store a face for starting back enumeration with the opposite sign */
+    if ( !res ) {
+      for (j=0; j<3; j++) {
+        i1 = idir[i][j];
+        v1 = sol->m[pt->v[i1]];
+        if ( (v1 != 0.0 ) && !MG_SMSGN(v,v1) ) {
+          if( !res ) res = 4*iel + i;
+          oth[noth] = 4*iel + i; 
+          noth++;
+          break;
+        }
+      }
+    }
+    
+    /* Pile up faces sharing a vertex with same sign as v */
+    for (j=0; j<3; j++) {
+      i1 = idir[i][inxt2[j]];
+      i2 = idir[i][iprv2[j]];
+      v1 = sol->m[pt->v[i1]];
+      v2 = sol->m[pt->v[i2]];
+            
+      if ( ((v1 != 0.0) && MG_SMSGN(v,v1)) || ((v2 != 0.0) && MG_SMSGN(v,v2)) ) {
+        jel = adja[idir[i][j]] / 4;
+        if( !jel ) continue;
+        pt1 = &mesh->tetra[jel]; 
+      
+        if ( pt1->flag == base )  continue;
+        for (ip=0; ip<4; ip++) {
+          if ( pt1->v[ip] == np )  break; 
+        }
+        assert( ip < 4 );
+        pt1->flag   = base;
+        list[ilist] = 4*jel + ip;
+        ilist++;
+        assert(ilist < LMAX);        
+      }
+    }
+    cur++;
+  } 
+  /* 0 value has been snapped accidentally */
+  if ( !res )  return(0);
+   
+  /* Reset the current part of the ball, and take its complementary in ball of np */
+  memset(list,0,(LMAX+1)*sizeof(int));
+  ilist = cur = 0;
+  list[ilist] = res;
+  ilist++;
+  while ( cur < ilist ) {
+    iel = list[cur] / 4;
+    i   = list[cur] % 4; 
+    pt  = &mesh->tetra[iel];
+    adja = &mesh->adja[4*(iel-1)+1];
+    for (j=0; j<3; j++) {
+      jel = adja[idir[i][j]] / 4;
+      if( !jel ) continue;
+      
+      pt1 = &mesh->tetra[jel];
+      if ( pt1->flag == base )  continue;
+      for (l=0; l<4; l++) {
+        if ( pt1->v[l] == np )  break; 
+      }
+      assert(l<4);    
+      pt1->flag   = base;
+      list[ilist] = 4*jel + l;
+      ilist++;
+      assert(ilist < LMAX);        
+    }
+    cur++;
+  }
+  
+  /* Travel list oth and ensure that all the elements of complementary sign to v 
+     have already been found (pathological case of multiple components in the exterior) */
+  cur = 0;
+  while ( cur < noth ){
+    iel = oth[cur] / 4;
+    i = oth[cur] % 4;
+    pt = &mesh->tetra[iel];
+    adja = &mesh->adja[4*(iel-1)+1];
+    
+    for (j=0; j<3; j++) {
+      jel = adja[idir[i][j]] / 4;
+      if( !jel ) continue;
+      
+      pt1 = &mesh->tetra[jel];
+      if ( pt1->flag != base ) {
+        printf("*** Multiple components by snapping ");
+        return(0);
+      } 
+    }
+    cur++;
+  }
+      
+  /* At this point, list contains all the tets of the ball of np that have not been enumerated
+     during the first stage ; configurations is valid iff all elements (except first) have only 
+     negative or null values */
+  for (l=1; l<ilist; l++) {
+    iel = list[l] / 4;
+    i   = list[l] % 4;
+    pt  = &mesh->tetra[iel];
+    for (j=0; j<3; j++) {
+      i1 = idir[i][j];
+      v1 = sol->m[pt->v[i1]];
+      if ( v1 != 0.0 && MG_SMSGN(v,v1) )  return(0);
+    }
+  }
+  return(1);
+}
+
+/* Snap values of the level set function very close to 0 to exaclty 0, 
+   and prevent nonmanifold patterns from being generated */
+static int snpval_ls(pMesh mesh,pSol sol) {
+  pTetra   pt;
+  pPoint   p0;
+  int      k,nc,ns,ip;
+  char     i;
+
+  /* create tetra adjacency */
+  if ( !hashTetra(mesh) ) {
+    fprintf(stdout,"  ## Hashing problem (1). Exit program.\n");
+    return(0);
+  }
+
+  /* Reset point flags and h */
+  for (k=1; k<=mesh->np; k++) {
+    mesh->point[k].flag = 0;
+    mesh->point[k].h    = 0.0;
+  }
+
+  /* Snap values of sol that are close to 0 to 0 exactly */
+  ns = nc = 0;
+  for (k=1; k<=mesh->np; k++) {
+    if ( fabs(sol->m[k]) < EPS ) {
+      p0 = &mesh->point[k];
+      p0->h    = sol->m[k];
+      p0->flag = 1;
+      sol->m[k] = 0.0;  
+      ns ++;  
+    }
+  }
+                
+  /* Check snapping did not lead to a nonmanifold situation */
+  for (k=1; k<=mesh->ne; k++) {
+    pt = &mesh->tetra[k];
+    for (i=0; i<4; i++) {
+      ip = pt->v[i];
+      p0 = &mesh->point[ip];
+      if ( p0->flag ) {
+        if ( !ismaniball(mesh,sol,k,i) ) {
+          sol->m[ip] = p0->h > 0.0 ? EPSD : -EPSD;
+          nc++;
+        }
+        p0->flag = 0;
+      }
+    }
+  }   
+  if ( (abs(info.imprim) > 5 || info.ddebug) && ns+nc > 0 )
+    fprintf(stdout,"     %8d points snapped, %d corrected\n",ns,nc);
+
+  /* memory free */
+  free(mesh->adja);
+  mesh->adja = 0;
+  return(1);
+}
+
+/* Proceed to discretization of the implicit function carried by sol into mesh, once values 
+   of sol have been snapped/checked */
+static int cuttet_ls(pMesh mesh, pSol sol){
+  pTetra   pt;
+  pPoint   p0,p1,p[4];
+  Hash     hash;
+  double  *grad,A[3][3],b[3],c[3],*g0,*g1,v0,v1,area,a,d,dd,s,s1,s2;
+  int      ip[4],vx[6],nb,ng,k,ip0,ip1,np,ns,ne;
+  char     ia,i,ier;
+  
+  /* reset point flags and h */
+  for (k=1; k<=mesh->np; k++) {
+    mesh->point[k].flag = 0;
+    mesh->point[k].h    = 0.0;
+  }
+  
+  /* compute the number nb of intersection points on edges */ 
+  nb = 0;
+  for (k=1; k<=mesh->ne; k++) {
+    pt = &mesh->tetra[k];
+    for (ia=0; ia<6; ia++) {
+      ip0 = pt->v[iare[ia][0]];
+      ip1 = pt->v[iare[ia][1]];
+      p0  = &mesh->point[ip0];
+      p1  = &mesh->point[ip1];
+      if ( p0->flag && p1->flag )  continue;
+      v0  = sol->m[ip0];
+      v1  = sol->m[ip1];
+      if ( fabs(v0) > EPSD2 && fabs(v1) > EPSD2 && v0*v1 < 0.0 ) {
+        if ( !p0->flag ) {
+          p0->flag = nb;
+          nb++;
+        }
+        if ( !p1->flag ) {
+          p1->flag = nb;
+          nb++;
+        }
+      }
+    }
+  } 
+  if ( ! nb )  return(1);
+
+  /* Store gradients of level set function at those points */
+  grad = (double*)calloc(3*nb+1,sizeof(double));
+  assert(grad);
+
+  for (k=1; k<=mesh->ne; k++) {
+    pt = &mesh->tetra[k];
+    ia = 0;
+    for (i=0; i<4; i++) {
+      ip[i] = pt->v[i];
+      p[i]  = &mesh->point[ip[i]];
+      if ( p[i]->flag == 0 )  ia++;
+    }    
+    if ( ia == 4 )  continue;
+
+    A[0][0] = p[1]->c[0] - p[0]->c[0];  A[0][1] = p[1]->c[1] - p[0]->c[1];  A[0][2] = p[1]->c[2] - p[0]->c[2];
+    A[1][0] = p[2]->c[0] - p[0]->c[0];  A[1][1] = p[2]->c[1] - p[0]->c[1];  A[1][2] = p[2]->c[2] - p[0]->c[2];
+    A[2][0] = p[3]->c[0] - p[0]->c[0];  A[2][1] = p[3]->c[1] - p[0]->c[1];  A[2][2] = p[3]->c[2] - p[0]->c[2];
+
+    b[0] = sol->m[ip[1]] - sol->m[ip[0]];
+    b[1] = sol->m[ip[2]] - sol->m[ip[0]];
+    b[2] = sol->m[ip[3]] - sol->m[ip[0]];
+    
+    area = det4pt(p[0]->c,p[1]->c,p[2]->c,p[3]->c);
+    ier  = invsl(A,b,c);
+    if ( !ier )  continue;
+
+    for (i=0; i<4; i++) {
+      if ( p[i]->flag ) {
+        ng = p[i]->flag;
+        p[i]->h += fabs(area);      
+        grad[3*(ng-1)+1] += (area*c[0]);
+        grad[3*(ng-1)+2] += (area*c[1]);
+        grad[3*(ng-1)+3] += (area*c[2]);
+      }
+    }
+  }
+  for (k=1; k<=mesh->np; k++) {
+    p0 = &mesh->point[k];
+    if ( p0->flag ) {
+      area = MG_MAX(EPSD2,p0->h);
+      area = 1.0 / area;
+      ng   = p0->flag;
+      grad[3*(ng-1)+1] *= area;
+      grad[3*(ng-1)+2] *= area;
+      grad[3*(ng-1)+3] *= area;
+    }
+  }
+  
+  /* Create intersection points at 0 isovalue and set flags to tetras */
+  hashNew(&hash,nb,7*nb);
+  for (k=1; k<=mesh->ne; k++) {
+    pt = &mesh->tetra[k];
+    if ( !MG_EOK(pt) )  continue;
+
+    for (ia=0; ia<6; ia++) {
+      ip0 = pt->v[iare[ia][0]];
+      ip1 = pt->v[iare[ia][1]];
+      np  = hashGet(&hash,ip0,ip1);
+      if ( np )  continue;
+
+      p0 = &mesh->point[ip0];
+      p1 = &mesh->point[ip1];
+      v0 = sol->m[ip0];
+      v1 = sol->m[ip1];
+      if ( fabs(v0) < EPSD2 || fabs(v1) < EPSD2 )  continue;
+      else if ( MG_SMSGN(v0,v1) )  continue;
+      else if ( !p0->flag || !p1->flag )  continue;
+
+      g0 = &grad[3*(p0->flag -1)+1];
+      g1 = &grad[3*(p1->flag -1)+1];
+      a = 0.5 * ((g1[0]-g0[0])*(p1->c[0]-p0->c[0]) + (g1[1]-g0[1])*(p1->c[1]-p0->c[1]) \
+               + (g1[2]-g0[2])*(p1->c[2]-p0->c[2]));       
+      d  = v1 - v0 - a;
+      dd = d*d - 4.0*a*v0;
+      dd = MG_MAX(EPSD2,dd);
+      dd = sqrt(dd);
+      if ( fabs(a) < EPSD2 )
+        s = v0 / (v0-v1);
+      else {
+        s1 = 0.5*( dd -d) / a; 
+        s2 = 0.5*(-dd -d) / a;
+        if ( s1 > 0.0 && s1 < 1.0 )
+          s = s1;
+        else if (s2 > 0.0 && s2 < 1.0)
+          s = s2;
+        else
+          s = MG_MIN(fabs(s1),fabs(s1-1.0)) < MG_MIN(fabs(s2),fabs(s2-1.0)) ? s1 : s2 ;
+      }
+// IMPORTANT A REGARDER 
+s = v0 / (v0-v1);
+
+      s = MG_MAX(MG_MIN(s,1.0-EPS),EPS);
+      c[0] = p0->c[0] + s*(p1->c[0]-p0->c[0]);
+      c[1] = p0->c[1] + s*(p1->c[1]-p0->c[1]);
+      c[2] = p0->c[2] + s*(p1->c[2]-p0->c[2]);
+
+      np = newPt(mesh,c,0);
+      assert(np);
+      sol->m[np] = 0.0;
+      hashEdge(&hash,ip0,ip1,np);
+    }
+  }
+  
+  /* Proceed to splitting, according to flags to tets */
+  ne = mesh->ne;
+  ns = 0;
+  for (k=1; k<=ne; k++) {
+    pt = &mesh->tetra[k];
+    if ( !MG_EOK(pt) || MG_SIN(pt->tag) )  continue;
+    pt->flag = 0;
+    memset(vx,0,6*sizeof(int));
+    for (ia=0; ia<6; ia++) {
+        vx[ia] = hashGet(&hash,pt->v[iare[ia][0]],pt->v[iare[ia][1]]);
+        if ( vx[ia] )  MG_SET(pt->flag,ia);
+    }
+    switch (pt->flag) {
+      case 1: case 2: case 4: case 8: case 16: case 32: /* 1 edge split */
+        split1(mesh,sol,k,vx);
+        ns++;
+      break;
+      
+      case 48: case 24: case 40: case 6: case 34: case 36: 
+      case 20: case 5: case 17: case 9: case 3: case 10: /* 2 edges (same face) split */
+        split2sf(mesh,sol,k,vx);
+        ns++;
+      break;
+        
+      case 7: case 25: case 42: case 52: /* 3 edges on conic configuration splitted */
+        split3cone(mesh,sol,k,vx);
+        ns++;
+      break;
+      
+      case 30: case 45: case 51: 
+        split4op(mesh,sol,k,vx);
+        ns++;
+      break;
+      
+      default :
+        assert(pt->flag == 0);
+      break;
+    }
+  }
+  if ( (info.ddebug || abs(info.imprim) > 5) && ns > 0 )  
+    fprintf(stdout,"     %7d splitted\n",ns);
+                  
+  free(hash.item);
+  return(ns);
+}
+
+/* Set references to tets according to the sign of the level set function */
+static int setref_ls(pMesh mesh, pSol sol) {
+  pTetra   pt;
+  int      k,ip;
+  char     nmns,npls,nz,i; 
+  
+  for (k=1; k<=mesh->ne; k++) {
+    pt = &mesh->tetra[k];
+    nmns = npls = nz = 0; 
+    for (i=0; i<4; i++) {
+      ip = pt->v[i];
+      if ( sol->m[ip] > 0.0 )
+        npls++;
+      else if ( sol->m[ip] < 0.0 ) 
+        nmns++;
+      else
+        nz ++;
+    }
+    assert(nz < 4); 
+    if ( npls ) {
+      assert(!nmns);
+      pt->ref = MG_PLUS;
+    }
+    else {
+      assert(nmns);
+      pt->ref = MG_MINUS;
+    }
+  }
+  return(1);
+}
+
+/* Check whether implicit surface is orientable in ball of point ip in tet iel ; 
+   Beware : may return 0 when implicit boundary is tangent to outer boundary */  
+int chkmaniball(pMesh mesh, int start, char ip){
+  pTetra    pt,pt1;
+  pPoint    p0;
+  int       ref,base,ilist,nump,k,nexel,cur,k1;
+  int       *adja,list[LMAX+2];
+  char      i,l,j;
+  
+  base = ++mesh->base;
+  ilist = 0;
+  nexel = 0;
+  
+  pt = &mesh->tetra[start];
+  nump = pt->v[ip];
+  ref = pt->ref;
+
+  /* Store initial tetrahedron */
+  pt->flag = base;
+  list[ilist] = 4*start+ip;
+  ilist++;
+ 
+  /* explore list, and find all tets in ball of p belonging to the component ref */
+  cur = 0;
+  while(cur < ilist){
+    k = list[cur] / 4;
+    i = list[cur] % 4;
+    pt = &mesh->tetra[k];
+    
+    adja = &mesh->adja[4*(k-1)+1];
+    for(l=0; l<3; l++){
+      i = inxt3[i];
+      
+      /* Travel only through non boundary faces.  
+         Else, continue, and save element in the other component */
+      k1 = adja[i] / 4;
+      if(!k1) continue;
+      pt1 = &mesh->tetra[k1];
+     
+      if(pt1->ref != ref){
+        if(!nexel) nexel = k1;
+        continue;
+      }
+
+      if(pt1->flag == base) continue;
+      pt1->flag = base;
+      
+      for(j=0; j<4 ; j++){
+        if(pt1->v[j] == nump)
+          break;
+      }
+      assert(j<4);
+      
+      /* overflow */
+      assert ( ilist <= LMAX-3 );
+      list[ilist] = 4*k1+j; 
+      ilist++;    
+    }
+    cur++;
+  }      
+  
+  /* Reset list, and pile up other component, checking all references are of same kind */
+  ilist = 0;
+  memset(list,0,(LMAX+2)*sizeof(int));
+  
+  if(!nexel){
+    printf("Ball of point %d : no surface part through a surface point \n",nump);
+    return(0);
+  }
+  
+  pt = &mesh->tetra[nexel];
+  for(j=0; j<4 ; j++){
+    if(pt->v[j] == nump)
+      break;
+  }
+  assert(j<4);
+  list[ilist] = 4*nexel+j;
+  ilist++;
+  pt->flag = base;
+ 
+  cur = 0;
+  while(cur < ilist){
+    k = list[cur] / 4;
+    i = list[cur] % 4;
+    pt = &mesh->tetra[k];
+    
+    if(pt->ref ==  ref){
+      printf("Ball of point %d : wrong orientation \n",nump);
+      return(0);
+    }
+    
+    adja = &mesh->adja[4*(k-1)+1];
+    for(l=0; l<3; l++){
+      i = inxt3[i];
+      
+      k1 = adja[i]/4;
+      if(!k1) continue;
+      pt1 = &mesh->tetra[k1];
+      if(pt1->flag == base) continue;
+      pt1->flag = base;
+      
+      for(j=0; j<4 ; j++){
+        if(pt1->v[j] == nump)
+          break;
+      }
+      assert(j<4);
+      
+      /* overflow */
+      assert ( ilist <= LMAX-3 );
+      list[ilist] = 4*k1+j; 
+      ilist++;    
+    }
+    cur++;
+  }      
+                                                              
+  return(1);
+}
+
+/* Check whether implicit surface enclosed in volume is orientable */
+int chkmani(pMesh mesh){
+  pTetra    pt,pt1;
+  pPoint    p0;
+  int       k,iel;
+  int       *adja;
+  char      i,j,ip,cnt;
+    
+  for(k=1; k<=mesh->np; k++){
+    mesh->point[k].flag = 0;
+  }
+
+  /* Check whether configuration is manifold in each ball */
+  for(k=1; k<=mesh->ne; k++){
+    pt = &mesh->tetra[k];
+    if ( !MG_EOK(pt) || MG_SIN(pt->tag))   continue;
+    adja = &mesh->adja[4*(k-1)+1]; 
+    
+    for(i=0; i<4; i++){
+      if(!adja[i]) continue; 
+      iel = adja[i] / 4;
+      pt1 = &mesh->tetra[iel];
+      if(pt1->ref == pt->ref) continue;
+      
+      for(j=0; j<3; j++){
+        ip = idir[i][j];
+        p0 = &mesh->point[pt->v[ip]];
+        
+        if(!chkmaniball(mesh,k,ip)){
+          printf("Non orientable implicit surface : ball of point %d\n",pt->v[ip]);
+          exit(0);
+        }
+      }
+    }
+  }
+  
+  return(1);
+}
+
+/* Check whether implicit surface enclosed in volume is orientable (perform an additionnal 
+   test w.r.t. chkmani) */
+int chkmani2(pMesh mesh,pSol sol){
+  pTetra    pt,pt1;
+  pPoint    p0;
+  int       k,basep,iel;
+  int       *adja;
+  char      i,j,ip,cnt;
+  
+  basep = ++mesh->base;
+  
+  for(k=1; k<=mesh->np; k++){
+    mesh->point[k].flag = 0;
+  }
+        
+  /* First test : assure no tetra has its 4 vertices on implicit boundary */
+  for(k=1; k<=mesh->ne; k++){
+    pt = &mesh->tetra[k];
+    if ( !MG_EOK(pt) || MG_SIN(pt->tag))   continue;
+
+    cnt = 0;
+    for(j=0; j<4; j++){
+      p0 = &mesh->point[pt->v[j]];
+      if(sol->m[pt->v[j]] == 0.0) cnt++;    
+    }
+    if(cnt == 4){
+      printf("Problem in tetra %d : 4 vertices on implicit boundary",k);
+      exit(0);
+    }
+  }
+    
+  /* Second test : check whether configuration is manifold in each ball */
+  for(k=1; k<=mesh->ne; k++){
+    pt = &mesh->tetra[k];
+    if ( !MG_EOK(pt) || MG_SIN(pt->tag))   continue;
+    adja = &mesh->adja[4*(k-1)+1]; 
+
+    for(i=0; i<4; i++){
+      if(!adja[i]) continue; 
+      iel = adja[i] / 4;
+      pt1 = &mesh->tetra[iel];
+      if(pt1->ref == pt->ref) continue;
+      
+      for(j=0; j<3; j++){
+        ip = idir[i][j];
+        p0 = &mesh->point[pt->v[ip]];
+        
+        if(!chkmaniball(mesh,k,ip)){
+          printf("Non orientable implicit surface : ball of point %d\n",pt->v[ip]);
+          exit(0);
+        }
+      }
+    }
+  }
+
+  return(1);
+}
+
+/* Create implicit surface in mesh */
+int mmg3d2(pMesh mesh,pSol sol) {
+  if ( abs(info.imprim) > 4 )
+    fprintf(stdout,"  ** ISOSURFACE EXTRACTION\n");
+    
+  /* Snap values of level set function if need be, then discretize it */
+  if ( !snpval_ls(mesh,sol) ) {
+    fprintf(stdout,"  ## Problem with implicit function. Exit program.\n");
+    return(0);
+  }
+    
+  if ( !hashTetra(mesh) ) {
+   fprintf(stdout,"  ## Hashing problem. Exit program.\n");
+   return(0);
+  }
+    
+  /* build hash table for initial edges */  
+  if ( !hGeom(mesh) ) {
+    fprintf(stdout,"  ## Hashing problem (0). Exit program.\n");
+    return(0);
+  }
+    
+  if ( !bdrySet(mesh) ) {
+    fprintf(stdout,"  ## Problem in setting boundary. Exit program.\n");
+    return(0);
+  }
+
+  if ( !cuttet_ls(mesh,sol) ) {
+    fprintf(stdout,"  ## Problem in discretizing implicit function. Exit program.\n");
+    return(0);
+  }
+  
+  free(mesh->adja);
+  free(mesh->tria);
+  mesh->adja = 0;
+  mesh->tria = 0;
+  mesh->nt = 0;
+  
+  if ( !setref_ls(mesh,sol) ) {
+    fprintf(stdout,"  ## Problem in setting references. Exit program.\n");
+    return(0);
+  }
+  
+  return(1);
+}
