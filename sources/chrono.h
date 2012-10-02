@@ -16,9 +16,9 @@
 #define  TIMEMAX  12
 
 typedef struct mytime {
-	double  gini,gend,gdif,uini,uend,udif,sini,send,sdif;
+  double  gini,gend,gdif,uini,uend,udif,sini,send,sdif;
   struct  timeval rutim;
-	struct  rusage  ru;
+  struct  rusage  ru;
   int     call;
 } mytime;
 

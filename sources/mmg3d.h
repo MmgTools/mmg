@@ -23,7 +23,7 @@
 #define MG_MAX(a,b) (((a) > (b)) ? (a) : (b))
 #define MG_MIN(a,b) (((a) < (b)) ? (a) : (b))
 
-#define MG_SMSGN(a,b)  (((double)(a)*(double)(b) > (0.0)) ? (1) : (0))  
+#define MG_SMSGN(a,b)  (((double)(a)*(double)(b) > (0.0)) ? (1) : (0))
 
 /* numerical accuracy */
 #define ALPHAD    20.7846096908265    //0.04811252243247      /* 12*sqrt(3) */
@@ -62,9 +62,9 @@
 #define  MG_CRN       (1 << 5)        /* 32 corner         */
 #define  MG_NUL       (1 << 6)        /* 64 vertex removed */
 
-#define MG_PLUS   2
-#define MG_MINUS  3
-#define MG_ISO    -1024
+#define MG_PLUS    2
+#define MG_MINUS   3
+#define MG_ISO   100
 
 #define MG_VOK(ppt)      (ppt && (ppt->tag < MG_NUL))
 #define MG_EOK(pt)       (pt && (pt->v[0] > 0))
@@ -72,7 +72,7 @@
 #define MG_SIN(tag)      ((tag & MG_CRN) || (tag & MG_REQ))
 
 #define MG_SET(flag,bit) ((flag) |= (1 << (bit)))
-#define MG_CLR(flag,bit) ((flag) &= ~(1 << (bit)))  
+#define MG_CLR(flag,bit) ((flag) &= ~(1 << (bit)))
 #define MG_GET(flag,bit) ((flag) & (1 << (bit)))
 
 extern unsigned char inxt2[3];
@@ -96,22 +96,22 @@ typedef struct {
 typedef Point * pPoint;
 
 typedef struct {
-	double   n1[3],n2[3],t[3];
+  double   n1[3],n2[3],t[3];
 } xPoint;
 typedef xPoint * pxPoint;
 
 typedef struct {
-	int      a,b,ref;
-	char     tag;
+  int      a,b,ref;
+  char     tag;
 } Edge;
 typedef Edge * pEdge;
-	
+
 typedef struct {
-	int      v[3],base,ref,edg[3];
-	unsigned char  flag,tag[3];
+  int      v[3],base,ref,edg[3];
+  unsigned char  flag,tag[3];
 } Tria;
 typedef Tria * pTria;
-	
+
 typedef struct {
   int      v[4],ref,base,xt,flag;
   unsigned char  tag;
@@ -119,8 +119,8 @@ typedef struct {
 typedef Tetra * pTetra;
 
 typedef struct {
-	int      ref[4],edg[6];
-	unsigned char  ftag[4],tag[6];
+  int      ref[4],edg[6];
+  unsigned char  ftag[4],tag[6];
 } xTetra;
 typedef xTetra * pxTetra;
 
@@ -161,13 +161,13 @@ typedef struct {
   int       npi,nai,nei,np,na,nt,ne,xp,xt,npmax,namax,ntmax,nemax,xpmax,xtmax,npnil,nenil,base;
   int      *adja,*adjt;
   char     *namein,*nameout;
-  
+
   pPoint    point;
   pxPoint   xpoint;
   pTetra    tetra;
   pxTetra   xtetra;
   pTria     tria;
-	pEdge     edge;
+  pEdge     edge;
   HGeom     htab;
 } Mesh;
 typedef Mesh  * pMesh;
@@ -192,13 +192,13 @@ int  newPt(pMesh mesh,double c[3],char tag);
 int  bezierCP(pMesh mesh,Tria *pt,pBezier pb);
 int  BezierTgt(double c1[3],double c2[3],double n1[3],double n2[3],double t1[3],double t2[3]);
 double BezierGeod(double c1[3], double c2[3], double t1[3], double t2[3]);
-int  bezierInt(pBezier pb,double uv[2],double o[3],double no[3],double to[3]); 
+int  bezierInt(pBezier pb,double uv[2],double o[3],double no[3],double to[3]);
 int  BezierReg(pMesh mesh,int ip0, int ip1, double s, double v[3], double *o, double *no);
 int  BezierRef(pMesh mesh,int ip0, int ip1, double s, double *o, double *no, double *to);
 int  BezierEdge(pMesh mesh,int ip0, int ip1, double b0[3], double b1[3],char isrid, double v[3]);
 int  BezierRidge(pMesh mesh,int ip0, int ip1, double s, double *o, double *no1, double *no2, double *to);
 int  BezierNom(pMesh mesh,int ip0,int ip1,double s,double *o,double *no,double *to);
-int  norface(pMesh mesh ,int k, int iface, double v[3]); 
+int  norface(pMesh mesh ,int k, int iface, double v[3]);
 int  boulen(pMesh mesh,int start,int ip,double *nn);
 int  bouler(pMesh mesh,int start,int ip,int *list);
 int  boulenm(pMesh mesh, int start, int ip, int iface, double n[3],double t[3]);

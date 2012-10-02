@@ -11,19 +11,19 @@ void  chrono(int cmode,mytime *ptt) {
 
   if ( cmode == RESET ) {
     ptt->call = 0;
-		ptt->gini = ptt->gend = ptt->gdif = 0.0;
-		ptt->sini = ptt->send = ptt->sdif = 0.0;
-		ptt->uini = ptt->uend = ptt->udif = 0.0;
+    ptt->gini = ptt->gend = ptt->gdif = 0.0;
+    ptt->sini = ptt->send = ptt->sdif = 0.0;
+    ptt->uini = ptt->uend = ptt->udif = 0.0;
   }
 
   else {
-	  gettimeofday(&(ptt->rutim), NULL);
- 
-    if ( cmode == ON ) {
-			ptt->gini  = (double)((ptt->rutim.tv_sec ) + (ptt->rutim.tv_usec) * BIG1);
+    gettimeofday(&(ptt->rutim), NULL);
 
-			getrusage(RUSAGE_SELF,&(ptt->ru));
-			ptt->rutim = ptt->ru.ru_utime;
+    if ( cmode == ON ) {
+      ptt->gini  = (double)((ptt->rutim.tv_sec ) + (ptt->rutim.tv_usec) * BIG1);
+
+      getrusage(RUSAGE_SELF,&(ptt->ru));
+      ptt->rutim = ptt->ru.ru_utime;
       ptt->uini  = (double)((ptt->rutim.tv_sec) * BIG + (ptt->rutim.tv_usec));
       ptt->rutim = ptt->ru.ru_stime;
       ptt->sini  = (double)((ptt->rutim.tv_sec )* BIG + (ptt->rutim.tv_usec));
@@ -38,10 +38,10 @@ void  chrono(int cmode,mytime *ptt) {
       ptt->send  = (double)((ptt->rutim.tv_sec ) * BIG + (ptt->rutim.tv_usec));
 
       ptt->gdif += ptt->gend - ptt->gini;
-      
+
       ptt->udif += (ptt->uend - ptt->uini) * BIG1;
       ptt->sdif += (ptt->send - ptt->sini) * BIG1;
-    
+
       ptt->call++;
     }
   }
@@ -50,26 +50,26 @@ void  chrono(int cmode,mytime *ptt) {
 
 /* initialize time table */
 void  tminit(mytime *t,int maxtim) {
-	mytime  *ptt;
+  mytime  *ptt;
   int      k;
 
   for (k=0; k<maxtim; k++) {
-		ptt = &t[k];
+    ptt = &t[k];
     ptt->call = 0;
-		ptt->gini = ptt->gend = ptt->gdif = 0.0;
-		ptt->sini = ptt->send = ptt->sdif = 0.0;
-		ptt->uini = ptt->uend = ptt->udif = 0.0;
+    ptt->gini = ptt->gend = ptt->gdif = 0.0;
+    ptt->sini = ptt->send = ptt->sdif = 0.0;
+    ptt->uini = ptt->uend = ptt->udif = 0.0;
   }
 }
 
 
 /* print real time */
 char *printim(double elps) {
-	int    hh,mm,ss;
-	char  *data;
-	
-	data = malloc(32*sizeof(char));
-	assert(data);
+  int    hh,mm,ss;
+  char  *data;
+
+  data = malloc(32*sizeof(char));
+  assert(data);
   if ( elps < 60.0 )
     sprintf(data,"%5.3lfs",elps);
   else if ( elps < 3600.0 ) {
@@ -84,7 +84,5 @@ char *printim(double elps) {
     sprintf(data,"%dh%dm%ds",hh,mm,ss);
   }
 
-	return(data);
+  return(data);
 }
-
-

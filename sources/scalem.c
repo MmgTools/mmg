@@ -21,8 +21,8 @@ int scaleMesh(pMesh mesh,pSol met) {
       if ( ppt->c[i] < info.min[i] )  info.min[i] = ppt->c[i];
     }
   }
-	info.delta = 0.0;
-	for (i=0; i<3; i++) {
+  info.delta = 0.0;
+  for (i=0; i<3; i++) {
     dd = info.max[i] - info.min[i];
     if ( dd > info.delta )  info.delta = dd;
   }
@@ -42,17 +42,17 @@ int scaleMesh(pMesh mesh,pSol met) {
   }
 
   /* normalize values */
-	info.hmin  *= dd;
-	info.hmax  *= dd;
-	info.hausd *= dd;
+  info.hmin  *= dd;
+  info.hmax  *= dd;
+  info.hausd *= dd;
 
   /* normalize sizes */
   if ( met->size == 1 && met->m ) {
-	  for (k=1; k<=mesh->np; k++)
-			met->m[k] *= dd;
-	}
+    for (k=1; k<=mesh->np; k++)
+      met->m[k] *= dd;
+  }
 
-	return(1);
+  return(1);
 }
 
 int unscaleMesh(pMesh mesh,pSol met) {
@@ -69,12 +69,12 @@ int unscaleMesh(pMesh mesh,pSol met) {
     ppt->c[1] = ppt->c[1] * dd + info.min[1];
     ppt->c[2] = ppt->c[2] * dd + info.min[2];
   }
-  
+
   /* unscale sizes */
-	for (k=1; k<=mesh->np; k++) {
+  for (k=1; k<=mesh->np; k++) {
     ppt = &mesh->point[k];
-		if ( !MG_VOK(ppt) )  continue;
-		ppt->h *= dd;
-	}
-	return(1);
+    if ( !MG_VOK(ppt) )  continue;
+    ppt->h *= dd;
+  }
+  return(1);
 }

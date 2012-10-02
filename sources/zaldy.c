@@ -20,29 +20,29 @@ int newPt(pMesh mesh,double c[3],char tag) {
 
   /* point on geometry */
   if ( tag & MG_BDY ) {
-	  mesh->xp++;
+    mesh->xp++;
     assert(mesh->xp < mesh->xpmax);
-		ppt->tag = MG_BDY;
-		ppt->xp  = mesh->xp;
-	}
+    ppt->tag = MG_BDY;
+    ppt->xp  = mesh->xp;
+  }
   return(curpt);
 }
 
 void delPt(pMesh mesh,int ip) {
   pPoint   ppt;
-	xPoint  *pxp;
+  xPoint  *pxp;
 
   ppt = &mesh->point[ip];
-	if ( ppt->xp ) {
-		pxp = &mesh->xpoint[ppt->xp];
-		memset(pxp,0,sizeof(xPoint));
-	}
+  if ( ppt->xp ) {
+    pxp = &mesh->xpoint[ppt->xp];
+    memset(pxp,0,sizeof(xPoint));
+  }
   memset(ppt,0,sizeof(Point));
   ppt->tag    = MG_NUL;
   ppt->tmp    = mesh->npnil;
   mesh->npnil = ip;
   if ( ip == mesh->np ) {
-	  while ( !MG_VOK((&mesh->point[mesh->np])) )  mesh->np--;
+    while ( !MG_VOK((&mesh->point[mesh->np])) )  mesh->np--;
   }
 }
 
@@ -76,9 +76,9 @@ void delElt(pMesh mesh,int iel) {
   if ( mesh->adja )
     memset(&mesh->adja[iadr],0,4*sizeof(int));
   mesh->nenil = iel;
-	if ( iel == mesh->ne ) {
-		while ( !MG_EOK((&mesh->tetra[mesh->ne])) )  mesh->ne--;       
-	}
+  if ( iel == mesh->ne ) {
+    while ( !MG_EOK((&mesh->tetra[mesh->ne])) )  mesh->ne--;
+  }
 }
 
 
@@ -94,7 +94,7 @@ int zaldy(pMesh mesh) {
   }
   else {
     /* point+tria+tets+adja+sol */
-		bytes = sizeof(Point) + 6*sizeof(Tetra) + 4*sizeof(int);
+    bytes = sizeof(Point) + 6*sizeof(Tetra) + 4*sizeof(int);
 
     npask = (double)info.mem / bytes * million;
     mesh->npmax = MG_MAX(1.5*mesh->np,npask);
@@ -108,12 +108,12 @@ int zaldy(pMesh mesh) {
   assert(mesh->tetra);
   if ( mesh->nt ) {
     mesh->tria = (pTria)calloc(mesh->ntmax+1,sizeof(Tria));
-		assert(mesh->tria);
-	}
+    assert(mesh->tria);
+  }
   if ( mesh->na ) {
-		mesh->edge = (pEdge)calloc(mesh->na+1,sizeof(Edge));
-		assert(mesh->edge);
-	}
+    mesh->edge = (pEdge)calloc(mesh->na+1,sizeof(Edge));
+    assert(mesh->edge);
+  }
   /* keep track of empty links */
   mesh->npnil = mesh->np + 1;
   mesh->nenil = mesh->ne + 1;
@@ -126,5 +126,3 @@ int zaldy(pMesh mesh) {
 
   return(1);
 }
-
-

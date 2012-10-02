@@ -18,7 +18,7 @@ static int setadj(pMesh mesh){
   ipil    = 1;
   pt = &mesh->tria[1];
   pt->flag = 1;
-  
+
   while ( ipil > 0 ) {
     ncc++;
     do {
@@ -27,93 +27,93 @@ static int setadj(pMesh mesh){
       if ( !MG_EOK(pt) )  continue;
       adja = &mesh->adjt[3*(k-1)+1];
       for (i=0; i<3; i++) {
-        i1  = inxt2[i];
-        i2  = iprv2[i];
-        ip1 = pt->v[i1];
-        ip2 = pt->v[i2];
-        if ( !mesh->point[ip1].tmp )  mesh->point[ip1].tmp = ++nvf;
-        if ( !mesh->point[ip2].tmp )  mesh->point[ip2].tmp = ++nvf;
-        if ( MG_EDG(pt->tag[i]) ) {
-          mesh->point[ip1].tag |= pt->tag[i];
-          mesh->point[ip2].tag |= pt->tag[i];
-        }
+	i1  = inxt2[i];
+	i2  = iprv2[i];
+	ip1 = pt->v[i1];
+	ip2 = pt->v[i2];
+	if ( !mesh->point[ip1].tmp )  mesh->point[ip1].tmp = ++nvf;
+	if ( !mesh->point[ip2].tmp )  mesh->point[ip2].tmp = ++nvf;
+	if ( MG_EDG(pt->tag[i]) ) {
+	  mesh->point[ip1].tag |= pt->tag[i];
+	  mesh->point[ip2].tag |= pt->tag[i];
+	}
 
-        /* open boundary */
-        if ( !adja[i] ) {
-          pt->tag[i] |= MG_GEO;
-          mesh->point[ip1].tag |= MG_GEO;
-          mesh->point[ip2].tag |= MG_GEO;
-          ned++;
-          continue;
-        }
-        kk = adja[i] / 3;
-        ii = adja[i] % 3;
-        if ( kk > k )  ned++;
+	/* open boundary */
+	if ( !adja[i] ) {
+	  pt->tag[i] |= MG_GEO;
+	  mesh->point[ip1].tag |= MG_GEO;
+	  mesh->point[ip2].tag |= MG_GEO;
+	  ned++;
+	  continue;
+	}
+	kk = adja[i] / 3;
+	ii = adja[i] % 3;
+	if ( kk > k )  ned++;
 
-        /* non manifold edge */    
-        if ( pt->tag[i] & MG_NOM ) {
-          mesh->point[ip1].tag |= MG_NOM;
-          mesh->point[ip2].tag |= MG_NOM;
-          continue; 
-        }
+	/* non manifold edge */
+	if ( pt->tag[i] & MG_NOM ) {
+	  mesh->point[ip1].tag |= MG_NOM;
+	  mesh->point[ip2].tag |= MG_NOM;
+	  continue;
+	}
 
-        /* store adjacent */ 
-        pt1 = &mesh->tria[kk];    
-        if ( abs(pt1->ref) != abs(pt->ref) ) {
-          pt->tag[i]   |= MG_REF;
-          if ( !(pt->tag[i] & MG_NOM) )  pt1->tag[ii] |= MG_REF;
-          mesh->point[ip1].tag |= MG_REF;
-          mesh->point[ip2].tag |= MG_REF;
-        }
+	/* store adjacent */
+	pt1 = &mesh->tria[kk];
+	if ( abs(pt1->ref) != abs(pt->ref) ) {
+	  pt->tag[i]   |= MG_REF;
+	  if ( !(pt->tag[i] & MG_NOM) )  pt1->tag[ii] |= MG_REF;
+	  mesh->point[ip1].tag |= MG_REF;
+	  mesh->point[ip2].tag |= MG_REF;
+	}
 
-        if ( pt1->flag == 0 ) {
-          pt1->flag    = ncc;
-          pile[++ipil] = kk;
-        }
+	if ( pt1->flag == 0 ) {
+	  pt1->flag    = ncc;
+	  pile[++ipil] = kk;
+	}
 
-        /* check orientation */
-        ii1 = inxt2[ii];
-        ii2 = iprv2[ii];
-        if ( pt1->v[ii1] == ip1 ) {
-          /* Moebius strip */
-          if ( pt1->base < 0 ) {
-            fprintf(stdout,"  ## Orientation problem (1).\n");
-            return(0);
-          }
-          /* flip orientation */
-          else {
-            pt1->base   = -pt1->base;
-            pt1->v[ii1] = ip2;
-            pt1->v[ii2] = ip1;
+	/* check orientation */
+	ii1 = inxt2[ii];
+	ii2 = iprv2[ii];
+	if ( pt1->v[ii1] == ip1 ) {
+	  /* Moebius strip */
+	  if ( pt1->base < 0 ) {
+	    fprintf(stdout,"  ## Orientation problem (1).\n");
+	    return(0);
+	  }
+	  /* flip orientation */
+	  else {
+	    pt1->base   = -pt1->base;
+	    pt1->v[ii1] = ip2;
+	    pt1->v[ii2] = ip1;
 
-            /* update adj */
-            iad   = 3*(kk-1)+1;
-            adjb  = &mesh->adjt[iad];
-            adji1 = mesh->adjt[iad+ii1];
-            adji2 = mesh->adjt[iad+ii2];
-            adjb[ii1] = adji2;
-            adjb[ii2] = adji1;
-            tag = pt1->tag[ii1];
-            pt1->tag[ii1] = pt1->tag[ii2];
-            pt1->tag[ii2] = tag;
-            edg = pt1->edg[ii1];
-            pt1->edg[ii1] = pt1->edg[ii2];
-            pt1->edg[ii2] = edg;
+	    /* update adj */
+	    iad   = 3*(kk-1)+1;
+	    adjb  = &mesh->adjt[iad];
+	    adji1 = mesh->adjt[iad+ii1];
+	    adji2 = mesh->adjt[iad+ii2];
+	    adjb[ii1] = adji2;
+	    adjb[ii2] = adji1;
+	    tag = pt1->tag[ii1];
+	    pt1->tag[ii1] = pt1->tag[ii2];
+	    pt1->tag[ii2] = tag;
+	    edg = pt1->edg[ii1];
+	    pt1->edg[ii1] = pt1->edg[ii2];
+	    pt1->edg[ii2] = edg;
 
-            /* modif voyeurs */
-            if ( adjb[ii1] ) {
-              iel = adjb[ii1] / 3;
-              voy = adjb[ii1] % 3;
-              mesh->adjt[3*(iel-1)+1+voy] = 3*kk + ii1;
-            }
-            if ( adjb[ii2] ) {
-              iel = adjb[ii2] / 3;
-              voy = adjb[ii2] % 3;
-              mesh->adjt[3*(iel-1)+1+voy] = 3*kk + ii2;
-            }
-            nf++;
-          }
-        }
+	    /* modif voyeurs */
+	    if ( adjb[ii1] ) {
+	      iel = adjb[ii1] / 3;
+	      voy = adjb[ii1] % 3;
+	      mesh->adjt[3*(iel-1)+1+voy] = 3*kk + ii1;
+	    }
+	    if ( adjb[ii2] ) {
+	      iel = adjb[ii2] / 3;
+	      voy = adjb[ii2] % 3;
+	      mesh->adjt[3*(iel-1)+1+voy] = 3*kk + ii2;
+	    }
+	    nf++;
+	  }
+	}
       }
     }
     while ( ipil > 0 );
@@ -123,10 +123,10 @@ static int setadj(pMesh mesh){
     for (kk=1; kk<=mesh->nt; kk++) {    //old kk = k+1 ?
       pt = &mesh->tria[kk];
       if ( MG_EOK(pt) && (pt->flag == 0) ) {
-        ipil = 1;
-        pile[ipil] = kk;
-        pt->flag   = ncc+1;
-        break;
+	ipil = 1;
+	pile[ipil] = kk;
+	pt->flag   = ncc+1;
+	break;
       }
     }
   }
@@ -141,14 +141,14 @@ static int setadj(pMesh mesh){
     for (i=0; i<3; i++) {
       ppt = &mesh->point[pt->v[i]];
       if ( !ppt->tmp ) {
-        ppt->tmp = 1;
-        np++;
+	ppt->tmp = 1;
+	np++;
       }
       if ( !MG_EDG(pt->tag[i]) )  continue;
       jel  = adja[i] / 3;
       if ( !jel || jel > k ) {
-        if ( pt->tag[i] & MG_GEO )  nr++;
-        if ( pt->tag[i] & MG_REF )  nre++;
+	if ( pt->tag[i] & MG_GEO )  nr++;
+	if ( pt->tag[i] & MG_REF )  nre++;
       }
     }
   }
@@ -177,7 +177,7 @@ static int setdhd(pMesh mesh) {
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
     if ( !MG_EOK(pt) )  continue;
-    
+
     /* triangle normal */
     nortri(mesh,pt,n1);
     adja = &mesh->adjt[3*(k-1)+1];
@@ -185,31 +185,31 @@ static int setdhd(pMesh mesh) {
       kk  = adja[i] / 3;
       ii  = adja[i] % 3;
       if ( !kk )
-        pt->tag[i] |= MG_GEO;
+	pt->tag[i] |= MG_GEO;
       else if ( k < kk ) {
-        pt1 = &mesh->tria[kk];
-        /* reference curve */
-        if ( pt1->ref != pt->ref ) {
-          pt->tag[i]   |= MG_REF;
-          pt1->tag[ii] |= MG_REF;
-          i1 = inxt2[i];
-          i2 = inxt2[i1];
-          mesh->point[pt->v[i1]].tag |= MG_REF;
-          mesh->point[pt->v[i2]].tag |= MG_REF;
-          ne++;
-        }
-        /* check angle w. neighbor */
-        nortri(mesh,pt1,n2);
-        dhd = n1[0]*n2[0] + n1[1]*n2[1] + n1[2]*n2[2];
-        if ( dhd <= info.dhd ) {
-          pt->tag[i]   |= MG_GEO;
-          pt1->tag[ii] |= MG_GEO;
-          i1 = inxt2[i];
-          i2 = inxt2[i1];
-          mesh->point[pt->v[i1]].tag |= MG_GEO;
-          mesh->point[pt->v[i2]].tag |= MG_GEO;
-          nr++;
-        }
+	pt1 = &mesh->tria[kk];
+	/* reference curve */
+	if ( pt1->ref != pt->ref ) {
+	  pt->tag[i]   |= MG_REF;
+	  pt1->tag[ii] |= MG_REF;
+	  i1 = inxt2[i];
+	  i2 = inxt2[i1];
+	  mesh->point[pt->v[i1]].tag |= MG_REF;
+	  mesh->point[pt->v[i2]].tag |= MG_REF;
+	  ne++;
+	}
+	/* check angle w. neighbor */
+	nortri(mesh,pt1,n2);
+	dhd = n1[0]*n2[0] + n1[1]*n2[1] + n1[2]*n2[2];
+	if ( dhd <= info.dhd ) {
+	  pt->tag[i]   |= MG_GEO;
+	  pt1->tag[ii] |= MG_GEO;
+	  i1 = inxt2[i];
+	  i2 = inxt2[i1];
+	  mesh->point[pt->v[i1]].tag |= MG_GEO;
+	  mesh->point[pt->v[i2]].tag |= MG_GEO;
+	  nr++;
+	}
       }
     }
   }
@@ -228,7 +228,7 @@ static int singul(pMesh mesh) {
   char      i;
 
   nre = nc = 0;
-      
+
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
 
@@ -238,31 +238,31 @@ static int singul(pMesh mesh) {
 
       nr = bouler(mesh,k,i,list);
       if ( nr != 2 ) {
-        ppt->tag |= MG_REQ;
-        nre++;
+	ppt->tag |= MG_REQ;
+	nre++;
       }
       /* check ridge angle */
       else {
-        p1 = &mesh->point[list[1]];
-        p2 = &mesh->point[list[2]];
-        ux = p1->c[0] - ppt->c[0];
-        uy = p1->c[1] - ppt->c[1];
-        uz = p1->c[2] - ppt->c[2];
-        vx = p2->c[0] - ppt->c[0];
-        vy = p2->c[1] - ppt->c[1];
-        vz = p2->c[2] - ppt->c[2];
-        dd = (ux*ux + uy*uy + uz*uz) * (vx*vx + vy*vy + vz*vz);
-        if ( fabs(dd) > EPSD ) {
-          dd = (ux*vx + uy*vy + uz*vz) / sqrt(dd);
-          if ( dd > -info.dhd ) {
-            ppt->tag |= MG_CRN;
-            nc++;
-          }
-        }
+	p1 = &mesh->point[list[1]];
+	p2 = &mesh->point[list[2]];
+	ux = p1->c[0] - ppt->c[0];
+	uy = p1->c[1] - ppt->c[1];
+	uz = p1->c[2] - ppt->c[2];
+	vx = p2->c[0] - ppt->c[0];
+	vy = p2->c[1] - ppt->c[1];
+	vz = p2->c[2] - ppt->c[2];
+	dd = (ux*ux + uy*uy + uz*uz) * (vx*vx + vy*vy + vz*vz);
+	if ( fabs(dd) > EPSD ) {
+	  dd = (ux*vx + uy*vy + uz*vz) / sqrt(dd);
+	  if ( dd > -info.dhd ) {
+	    ppt->tag |= MG_CRN;
+	    nc++;
+	  }
+	}
       }
     }
-  } 
-  
+  }
+
   if ( abs(info.imprim) > 4 && nre > 0 )
     fprintf(stdout,"     %d corners, %d singular points detected\n",nc,nre);
   return(1);
@@ -288,8 +288,8 @@ static int norver(pMesh mesh) {
       ppt = &mesh->point[pt->v[i]];
       if ( ppt->flag == mesh->base )  continue;
       else {
-        ++mesh->xp;
-        ppt->flag = mesh->base;
+	++mesh->xp;
+	ppt->flag = mesh->base;
       }
     }
   }
@@ -314,27 +314,27 @@ static int norver(pMesh mesh) {
 
       /* C1 point */
       if ( !MG_EDG(ppt->tag) ) {
-        if ( !boulen(mesh,k,i,n) ) {
-          ++nf;
-          continue;
-        }
-        else {
-          ++mesh->xp;
-          assert(mesh->xp < mesh->xpmax);
-          ppt->xp = mesh->xp;
-          pxp = &mesh->xpoint[ppt->xp];
-          memcpy(pxp->n1,n,3*sizeof(double));
-          ppt->flag = mesh->base;
-          nn++;
-        }
+	if ( !boulen(mesh,k,i,n) ) {
+	  ++nf;
+	  continue;
+	}
+	else {
+	  ++mesh->xp;
+	  assert(mesh->xp < mesh->xpmax);
+	  ppt->xp = mesh->xp;
+	  pxp = &mesh->xpoint[ppt->xp];
+	  memcpy(pxp->n1,n,3*sizeof(double));
+	  ppt->flag = mesh->base;
+	  nn++;
+	}
       }
 
       /* along ridge-curve */
       i1  = inxt2[i];
       if ( !MG_EDG(pt->tag[i1]) )  continue;
       else if ( !boulen(mesh,k,i,n) ) {
-        ++nf;
-        continue;
+	++nf;
+	continue;
       }
       ++mesh->xp;
       assert(mesh->xp < mesh->xpmax);
@@ -343,37 +343,37 @@ static int norver(pMesh mesh) {
       memcpy(pxp->n1,n,3*sizeof(double));
 
       if ( pt->tag[i1] & MG_GEO && adja[i1] > 0 ) {
-        kk = adja[i1] / 3;
-        ii = adja[i1] % 3;
-        ii = inxt2[ii];
-        if ( !boulen(mesh,kk,ii,n) ) {
-          ++nf;
-          continue;
-        }
-        memcpy(pxp->n2,n,3*sizeof(double));
+	kk = adja[i1] / 3;
+	ii = adja[i1] % 3;
+	ii = inxt2[ii];
+	if ( !boulen(mesh,kk,ii,n) ) {
+	  ++nf;
+	  continue;
+	}
+	memcpy(pxp->n2,n,3*sizeof(double));
 
-        /* compute tangent as intersection of n1 + n2 */
-        pxp->t[0] = pxp->n1[1]*pxp->n2[2] - pxp->n1[2]*pxp->n2[1];
-        pxp->t[1] = pxp->n1[2]*pxp->n2[0] - pxp->n1[0]*pxp->n2[2];
-        pxp->t[2] = pxp->n1[0]*pxp->n2[1] - pxp->n1[1]*pxp->n2[0];
-        dd = pxp->t[0]*pxp->t[0] + pxp->t[1]*pxp->t[1] + pxp->t[2]*pxp->t[2];
-        if ( dd > EPSD2 ) {
-          dd = 1.0 / sqrt(dd);
-          pxp->t[0] *= dd;
-          pxp->t[1] *= dd;
-          pxp->t[2] *= dd;
-        }
-        ppt->flag = mesh->base;
-        ++nt;
-        continue;
+	/* compute tangent as intersection of n1 + n2 */
+	pxp->t[0] = pxp->n1[1]*pxp->n2[2] - pxp->n1[2]*pxp->n2[1];
+	pxp->t[1] = pxp->n1[2]*pxp->n2[0] - pxp->n1[0]*pxp->n2[2];
+	pxp->t[2] = pxp->n1[0]*pxp->n2[1] - pxp->n1[1]*pxp->n2[0];
+	dd = pxp->t[0]*pxp->t[0] + pxp->t[1]*pxp->t[1] + pxp->t[2]*pxp->t[2];
+	if ( dd > EPSD2 ) {
+	  dd = 1.0 / sqrt(dd);
+	  pxp->t[0] *= dd;
+	  pxp->t[1] *= dd;
+	  pxp->t[2] *= dd;
+	}
+	ppt->flag = mesh->base;
+	++nt;
+	continue;
       }
 
       /* compute tgte */
       ppt->flag = mesh->base;
       ++nt;
       if ( !boulec(mesh,k,i,pxp->t) ) {
-        ++nf;
-        continue;
+	++nf;
+	continue;
       }
       dd = pxp->n1[0]*pxp->t[0] + pxp->n1[1]*pxp->t[1] + pxp->n1[2]*pxp->t[2];
       pxp->t[0] -= dd*pxp->n1[0];
@@ -381,10 +381,10 @@ static int norver(pMesh mesh) {
       pxp->t[2] -= dd*pxp->n1[2];
       dd = pxp->t[0]*pxp->t[0] + pxp->t[1]*pxp->t[1] + pxp->t[2]*pxp->t[2];
       if ( dd > EPSD2 ) {
-        dd = 1.0 / sqrt(dd);
-        pxp->t[0] *= dd;
-        pxp->t[1] *= dd;
-        pxp->t[2] *= dd;
+	dd = 1.0 / sqrt(dd);
+	pxp->t[0] *= dd;
+	pxp->t[1] *= dd;
+	pxp->t[2] *= dd;
       }
     }
   }
@@ -411,31 +411,26 @@ static int nmgeom(pMesh mesh){
     for (i=0; i<4; i++) {
       if ( adja[i] ) continue;
       for (j=0; j<3; j++) {
-        ip = idir[i][j];
-        p0 = &mesh->point[pt->v[ip]];
-				if ( p0->flag == base )  continue;
-				else if ( !(p0->tag & MG_NOM) )  continue;
+	ip = idir[i][j];
+	p0 = &mesh->point[pt->v[ip]];
+	if ( p0->flag == base )  continue;
+	else if ( !(p0->tag & MG_NOM) )  continue;
 
-        p0->flag = base;
-        ier = boulenm(mesh,k,ip,i,n,t);
-        
-        if ( !ier ) {
-          p0->tag |= MG_REQ;
-          if ( p0->ref != 0 )
-            p0->ref = -abs(p0->ref);
-          else
-            p0->ref = MG_ISO;
-        }
-        else {
-          if ( !p0->xp ) {
-            ++mesh->xp;
-            assert(mesh->xp < mesh->xpmax);
-            p0->xp = mesh->xp;
-          }
-          pxp = &mesh->xpoint[p0->xp];
-          memcpy(pxp->n1,n,3*sizeof(double));
-          memcpy(pxp->t,t,3*sizeof(double));
-        }  
+	p0->flag = base;
+	ier = boulenm(mesh,k,ip,i,n,t);
+
+	if ( !ier )
+	  p0->tag |= MG_REQ;
+	else {
+	  if ( !p0->xp ) {
+	    ++mesh->xp;
+	    assert(mesh->xp < mesh->xpmax);
+	    p0->xp = mesh->xp;
+	  }
+	  pxp = &mesh->xpoint[p0->xp];
+	  memcpy(pxp->n1,n,3*sizeof(double));
+	  memcpy(pxp->t,t,3*sizeof(double));
+	}
       }
     }
   }
@@ -454,7 +449,7 @@ int analys(pMesh mesh) {
     fprintf(stdout,"  ## Hashing problem (1). Exit program.\n");
     return(0);
   }
-      
+
   /* identify surface mesh */
   if ( !mesh->nt ) {
     if ( !bdryTria(mesh) ) {
@@ -463,23 +458,23 @@ int analys(pMesh mesh) {
     }
   }
   /* compatibility triangle orientation w/r tetras */
-  else if ( info.iso ) {  
+  else if ( info.iso ) {
     if ( !bdryIso(mesh) ) {
       fprintf(stdout,"  ## Failed to extract boundary. Exit program.\n");
-		  return(0);
-	  }
+      return(0);
+    }
   }
   else if ( !bdryPerm(mesh) ) {
     fprintf(stdout,"  ## Boundary orientation problem. Exit program.\n");
     return(0);
-  } 
+  }
 
   /* create surface adjacency */
   if ( !hashTria(mesh) ) {
     fprintf(stdout,"  ## Hashing problem (2). Exit program.\n");
     return(0);
-  } 
-  
+  }
+
   /* build hash table for geometric edges */
   if ( !hGeom(mesh) ) {
     fprintf(stdout,"  ## Hashing problem (0). Exit program.\n");
@@ -501,7 +496,7 @@ int analys(pMesh mesh) {
     fprintf(stdout,"  ## Geometry problem. Exit program.\n");
     return(0);
   }
-  
+
   /* identify singularities */
   if ( !singul(mesh) ) {
     fprintf(stdout,"  ## Singularity problem. Exit program.\n");
@@ -509,19 +504,20 @@ int analys(pMesh mesh) {
   }
 
   if ( abs(info.imprim) > 4 || info.ddebug )
-    fprintf(stdout,"  ** DEFINING GEOMETRY\n"); 
+    fprintf(stdout,"  ** DEFINING GEOMETRY\n");
 
   /* define (and regularize) normals */
   if ( !norver(mesh) ) {
     fprintf(stdout,"  ## Normal problem. Exit program.\n");
     return(0);
   }
-  
+
   /* set bdry entities to tetra */
   if ( !bdrySet(mesh) ) {
     fprintf(stdout,"  ## Boundary problem. Exit program.\n");
     return(0);
   }
+
   /* build hash table for geometric edges */
   if ( !mesh->na && !hGeom(mesh) ) {
     fprintf(stdout,"  ## Hashing problem (0). Exit program.\n");
@@ -543,5 +539,3 @@ int analys(pMesh mesh) {
 
   return(1);
 }
-
-
