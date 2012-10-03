@@ -389,7 +389,8 @@ int chkmsh(pMesh mesh,int severe,int base) {
   return(1);
 }
 
-int chkptonbdy(pMesh mesh){
+/* Search boundary faces containing point np */
+int chkptonbdy(pMesh mesh,int np){
   pTetra      pt;
   pxTetra     pxt;
   pPoint      p0;
@@ -409,7 +410,7 @@ int chkptonbdy(pMesh mesh){
       if(!(pxt->ftag[i] & MG_BDY)) continue;
       for(j=0; j<3; j++){
 	ip = idir[i][j];
-	if(pt->v[ip] == 244688) printf("Le pt : %d sur la face %d du tetra %d : %d %d %d %d \n",pt->v[ip],i,k,pt->v[0],pt->v[1],pt->v[2],pt->v[3]);
+	if(pt->v[ip] == np) printf("Le pt : %d sur la face %d du tetra %d : %d %d %d %d \n",pt->v[ip],i,k,pt->v[0],pt->v[1],pt->v[2],pt->v[3]);
 	p0 = &mesh->point[pt->v[ip]];
 	p0->flag = 1;
       }
@@ -449,7 +450,7 @@ int cntbdypt(pMesh mesh, int nump){
       for(j=0; j<3; j++){
 	ip = idir[i][j];
 	if(pt->v[ip] == nump){
-	  //printf("La face : %d %d %d \n dans le tetra : %d %d %d %d \n",pt->v[idir[i][0]],pt->v[idir[i][1]],pt->v[idir[i][2]],pt->v[0],pt->v[1],pt->v[2],pt->v[3]);
+	  printf("La face : %d %d %d \n dans le tetra : %d %d %d %d \n",pt->v[idir[i][0]],pt->v[idir[i][1]],pt->v[idir[i][2]],pt->v[0],pt->v[1],pt->v[2],pt->v[3]);
 	  nf++;
 	}
       }
@@ -532,6 +533,44 @@ int chkfemtopo(pMesh mesh) {
   }
 
   printf("  *** %d internal edges connecting boundary points.\n",ned);
+
+  return(1);
+}
+
+/* Search face n0,n1,n2 in mesh, and get the support tetras, with the corresponding refs */
+int srcface(pMesh mesh,int n0,int n1,int n2) {
+  pTetra    pt;
+  pxTetra   pxt;
+  int       k,ip0,ip1,ip2,minn,maxn,sn,mins,maxs,sum,ref;
+  char      i,tag;
+
+  minn = MG_MIN(n0,MG_MIN(n1,n2));
+  maxn = MG_MAX(n0,MG_MAX(n1,n2));
+  sn   = n0 + n1 + n2;
+  pxt = 0;
+
+  for(k=1; k<=mesh->ne; k++) {
+    pt = &mesh->tetra[k];
+    if( !MG_EOK(pt) ) continue;
+
+    if( pt->xt ) pxt = &mesh->xtetra[pt->xt];
+    for(i=0; i<4; i++) {
+      ip0 = pt->v[idir[i][0]];
+      ip1 = pt->v[idir[i][1]];
+      ip2 = pt->v[idir[i][2]];
+
+      mins = MG_MIN(ip0,MG_MIN(ip1,ip2));
+      maxs = MG_MAX(ip0,MG_MAX(ip1,ip2));
+      sum  = ip0 + ip1 + ip2;
+      tag  = pt->xt ? pxt->ftag[i] : 0;
+      ref  = pt->xt ? pxt->ref[i] : 0;
+
+      if( mins == minn && maxs == maxn && sum == sn ) {
+	printf("Face %d in tetra %d with ref %d : corresponding ref %d , tag : %d\n",i,k,pt->ref,ref,tag);
+      }
+    }
+  }
+
 
   return(1);
 }

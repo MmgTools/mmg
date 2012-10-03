@@ -166,6 +166,8 @@ void swpgen(pMesh mesh, int nconf, int ilist, int *list){
   m[2] = 0.5*(p0->c[2] + p1->c[2]);
 
   np  = newPt(mesh,m,0);
+  assert(np);
+
   ppt = &mesh->point[np];
   ppt->h = 0.5*(p0->h + p1->h);
 

@@ -7,7 +7,6 @@
 extern Info  info;
 extern char  ddb;
 
-
 /* tetra packing */
 static void paktet(pMesh mesh) {
   pTetra   pt,pt1;
@@ -132,6 +131,7 @@ int hashTetra(pMesh mesh) {
   return(1);
 }
 
+/* Create surface adjacency */
 int hashTria(pMesh mesh) {
   pTria     pt,pt1;
   Hash      hash;
@@ -150,6 +150,7 @@ int hashTria(pMesh mesh) {
   hash.siz  = mesh->np;
   hash.max  = hmax + 1;
   hash.nxt  = hash.siz;
+
   for (k=hash.siz; k<hash.max; k++)
     hash.item[k].nxt = k+1;
 
@@ -611,8 +612,11 @@ int hGeom(pMesh mesh) {
 	i1  = inxt2[i];
 	i2  = iprv2[i];
 	kk  = adja[i] / 3;
-	if ( !kk || pt->tag[i] & MG_NOM )
+	if ( !kk || pt->tag[i] & MG_NOM ) {
+	  if ( pt->tag[i] & MG_NOM )
+	    pt->edg[i] = ( info.iso && pt->edg[i] != 0 ) ?  -abs(pt->edg[i]) : MG_ISO;
 	  hEdge(&mesh->htab,pt->v[i1],pt->v[i2],pt->edg[i],pt->tag[i]);
+	}
 	else if ( k < kk && pt->edg[i]+pt->tag[i] )
 	  hEdge(&mesh->htab,pt->v[i1],pt->v[i2],pt->edg[i],pt->tag[i]);
       }
@@ -680,7 +684,7 @@ int bdryTria(pMesh mesh) {
 	if ( k < adj && pt->ref != pt1->ref )
 	  ptt->ref = info.iso ? MG_ISO : 0;
 	else
-	  ptt->ref  = pxt ? pxt->ref[i] : (info.iso ? MG_ISO : 0);
+	  ptt->ref  = pxt ? pxt->ref[i] : 0;  /* useful only when saving mesh */
       }
     }
   }
@@ -719,7 +723,7 @@ int bdryIso(pMesh mesh) {
   int      *adja,adj,k,nt;
   char      i,alloc;
 
-  alloc = (mesh->nt == 0);
+  alloc = mesh->nt == 0;
   /* step 1: count external faces */
   nt = 0;
   for (k=1; k<=mesh->ne; k++) {
@@ -736,7 +740,7 @@ int bdryIso(pMesh mesh) {
 
   /* step 2 : create triangles */
   if ( alloc )
-    mesh->tria = (pTria)calloc(nt+1,sizeof(Tria));
+    mesh->tria = (pTria)calloc(mesh->nt+nt+1,sizeof(Tria));
   else if ( mesh->nt+nt >= mesh->ntmax )
     mesh->tria = (pTria)realloc(mesh->tria,(mesh->nt+nt+1)*sizeof(Tria));
   assert(mesh->tria);
@@ -754,7 +758,7 @@ int bdryIso(pMesh mesh) {
 	ptt->v[0] = pt->v[idir[i][0]];
 	ptt->v[1] = pt->v[idir[i][1]];
 	ptt->v[2] = pt->v[idir[i][2]];
-	ptt->ref  = info.iso ? MG_ISO : 0;
+	ptt->ref  = info.iso ? 100 : 0;  /* useful only when saving mesh */
       }
     }
   }
@@ -854,7 +858,7 @@ int bdrySet(pMesh mesh) {
     hashFace(&hash,ptt->v[0],ptt->v[1],ptt->v[2],k);
   }
   mesh->xt     = 0;
-  mesh->xtmax  = mesh->ntmax;
+  mesh->xtmax  = mesh->ntmax; //10 * NTMAX;
   mesh->xtetra = (pxTetra)calloc(mesh->xtmax+1,sizeof(xTetra));
   assert(mesh->xtetra);
 

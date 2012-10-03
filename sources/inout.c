@@ -9,7 +9,7 @@ int loadMesh(pMesh mesh) {
   pEdge        pa;
   pPoint       ppt;
   float        fp1,fp2,fp3;
-  int          i,k,inm,ia,nr,aux;
+  int          i,k,inm,ia,nr,aux,nt,ref,v[3],na,*ina;
   char        *ptr,*name,data[128];
 
   name = mesh->namein;
@@ -63,31 +63,78 @@ int loadMesh(pMesh mesh) {
   }
   /* read mesh triangles */
   if ( mesh->nt ) {
-    GmfGotoKwd(inm,GmfTriangles);
-    for (k=1; k<=mesh->nt; k++) {
-      pt1 = &mesh->tria[k];
-      GmfGetLin(inm,GmfTriangles,&pt1->v[0],&pt1->v[1],&pt1->v[2],&pt1->ref);
+    /* Skip triangles with negative refs */
+    if( info.iso ){
+      GmfGotoKwd(inm,GmfTriangles);
+      nt = mesh->nt;
+      mesh->nt = 0;
+      for (k=1; k<=nt; k++) {
+	GmfGetLin(inm,GmfTriangles,&v[0],&v[1],&v[2],&ref);
+	if( ref >= 0 ) {
+	  pt1 = &mesh->tria[++mesh->nt];
+	  pt1->v[0] = v[0];
+	  pt1->v[1] = v[1];
+	  pt1->v[2] = v[2];
+	  pt1->ref = ref;
+	}
+      }
+      if( !mesh->nt )
+	free(mesh->tria);
+      else if ( mesh->nt < nt )
+	mesh->tria = (pTria)realloc(mesh->tria,(mesh->nt+1)*sizeof(Tria));
+    }
+    else {
+      GmfGotoKwd(inm,GmfTriangles);
+      for (k=1; k<=mesh->nt; k++) {
+	pt1 = &mesh->tria[k];
+	GmfGetLin(inm,GmfTriangles,&pt1->v[0],&pt1->v[1],&pt1->v[2],&pt1->ref);
+      }
     }
   }
 
   /* read mesh edges */
   nr = 0;
   if ( mesh->na ) {
+    na = mesh->na;
+    if (info.iso ) {
+      mesh->na = 0;
+      ina = (int*)calloc(na+1,sizeof(int));
+    }
+
     GmfGotoKwd(inm,GmfEdges);
-    for (k=1; k<=mesh->na; k++) {
+
+    for (k=1; k<=na; k++) {
       pa = &mesh->edge[k];
       GmfGetLin(inm,GmfEdges,&pa->a,&pa->b,&pa->ref);
       pa->tag |= MG_REF;
+      if ( info.iso ) {
+	if( pa->ref != MG_ISO ) {
+	  ++mesh->na;
+	  pa->ref = abs(pa->ref);
+	  memcpy(&mesh->edge[mesh->na],&mesh->edge[k],sizeof(Edge));
+	  ina[k] = mesh->na;
+	}
+      }
     }
+
     /* get ridges */
     nr = GmfStatKwd(inm,GmfRidges);
     if ( nr ) {
       GmfGotoKwd(inm,GmfRidges);
       for (k=1; k<=nr; k++) {
 	GmfGetLin(inm,GmfRidges,&ia);
-	assert(ia <= mesh->na);
-	pa = &mesh->edge[ia];
-	pa->tag |= MG_GEO;
+	assert(ia <= na);
+	if( info.iso ){
+	  if( ina[ia] == 0) continue;
+	  else {
+	    pa = &mesh->edge[ina[ia]];
+	    pa->tag |= MG_GEO;
+	  }
+	}
+	else{
+	  pa = &mesh->edge[ia];
+	  pa->tag |= MG_GEO;
+	}
       }
     }
     /* get required edges */
@@ -96,11 +143,22 @@ int loadMesh(pMesh mesh) {
       GmfGotoKwd(inm,GmfRequiredEdges);
       for (k=1; k<=nr; k++) {
 	GmfGetLin(inm,GmfRequiredEdges,&ia);
-	assert(ia <= mesh->na);
-	pa = &mesh->edge[ia];
-	pa->tag |= MG_REQ;
+	assert(ia <= na);
+	if( info.iso ){
+	  if( ina[ia] == 0) continue;
+	  else {
+	    pa = &mesh->edge[ina[ia]];
+	    pa->tag |= MG_REQ;
+	  }
+	}
+	else{
+	  pa = &mesh->edge[ia];
+	  pa->tag |= MG_REQ;
+	}
+
       }
     }
+    if (info.iso ) free(ina);
   }
 
   /* read mesh tetrahedra */
@@ -112,6 +170,9 @@ int loadMesh(pMesh mesh) {
       ppt = &mesh->point[pt->v[i]];
       ppt->tag &= ~MG_NUL;
     }
+
+    if (info.iso ) pt->ref = 0;
+
     /* Possibly switch 2 vertices number so that each tet is positively oriented */
     if ( orvol(mesh->point,pt->v) < 0.0 ) {
       aux = pt->v[2];
@@ -133,6 +194,7 @@ int loadMesh(pMesh mesh) {
   return(1);
 }
 
+/* Save mesh data */
 int saveMesh(pMesh mesh) {
   pPoint       ppt;
   pTetra       pt;
@@ -235,9 +297,8 @@ int saveMesh(pMesh mesh) {
   GmfSetKwd(outm,GmfTetrahedra,ne);
   for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
-    if ( MG_EOK(pt) )
-      GmfSetLin(outm,GmfTetrahedra,mesh->point[pt->v[0]].tmp,mesh->point[pt->v[1]].tmp, \
-		mesh->point[pt->v[2]].tmp,mesh->point[pt->v[3]].tmp,pt->ref);
+    if ( MG_EOK(pt) ) GmfSetLin(outm,GmfTetrahedra,mesh->point[pt->v[0]].tmp,mesh->point[pt->v[1]].tmp, \
+				mesh->point[pt->v[2]].tmp,mesh->point[pt->v[3]].tmp,pt->ref);
   }
 
   /* write normals */

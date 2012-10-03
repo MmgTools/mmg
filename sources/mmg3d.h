@@ -64,7 +64,7 @@
 
 #define MG_PLUS    2
 #define MG_MINUS   3
-#define MG_ISO   100
+#define MG_ISO    -1024
 
 #define MG_VOK(ppt)      (ppt && (ppt->tag < MG_NUL))
 #define MG_EOK(pt)       (pt && (pt->v[0] > 0))
@@ -270,7 +270,7 @@ void swpgen(pMesh mesh, int nconf, int ilist, int *list);
 int  chkswpgen(pMesh mesh, int start, int ia, int *ilist, int *list);
 int  srcface(pMesh mesh,int n0,int n1,int n2);
 int  bouleext(pMesh mesh, int start, int ip, int iface, int *listv, int *ilistv, int *lists, int*ilists);
-
+int chkptonbdy(pMesh,int);
 int norpts(pMesh,int,int,int,double *);
 double orcal_poi(double a[3],double b[3],double c[3],double d[3]);
 int trydisp(pMesh,double *,short);

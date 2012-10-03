@@ -419,8 +419,13 @@ static int nmgeom(pMesh mesh){
 	p0->flag = base;
 	ier = boulenm(mesh,k,ip,i,n,t);
 
-	if ( !ier )
+	if ( !ier ) {
 	  p0->tag |= MG_REQ;
+	  if ( p0->ref != 0 )
+	    p0->ref = -abs(p0->ref);
+	  else
+	    p0->ref = MG_ISO;
+	}
 	else {
 	  if ( !p0->xp ) {
 	    ++mesh->xp;

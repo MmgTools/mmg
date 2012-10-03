@@ -1327,6 +1327,11 @@ int mmg3d1(pMesh mesh,pSol met) {
   if ( abs(info.imprim) > 4 )
     fprintf(stdout,"  ** MESH ANALYSIS\n");
 
+  if ( !chkmani(mesh) ) {
+    fprintf(stdout,"  ## Non orientable implicit surface. Exit program.\n");
+    return(0);
+  }
+
   /*--- stage 1: geometric mesh */
   if ( abs(info.imprim) > 4 || info.ddebug )
     fprintf(stdout,"  ** GEOMETRIC MESH\n");
@@ -1358,6 +1363,16 @@ int mmg3d1(pMesh mesh,pSol met) {
 
   if ( !adptet(mesh,met) ) {
     fprintf(stdout,"  ## Unable to adapt. Exit program.\n");
+    return(0);
+  }
+
+  if ( !chkfemtopo(mesh) ) {
+    fprintf(stdout,"  ## Topology of mesh unsuited for fem computations. Exit program.\n");
+    return(0);
+  }
+
+  if ( !chkmani(mesh) ) {
+    fprintf(stdout,"  ## Non orientable implicit surface. Exit program.\n");
     return(0);
   }
 

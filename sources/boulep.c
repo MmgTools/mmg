@@ -1010,7 +1010,7 @@ int coquilface(pMesh mesh,int start,int ia,int *list,int *it1,int *it2) {
     if( !(*it1 && *it2) ){
       printf("Le numero des points : %d %d, leurs tags %d %d \n",na,nb,mesh->point[na].tag,mesh->point[nb].tag);
       printf("Combien de faces ? %d %d\n",cntbdypt(mesh,na),cntbdypt(mesh,nb));
-      chkptonbdy(mesh);
+      chkptonbdy(mesh,125959);
       saveMesh(mesh);
     }
     assert(*it1 && *it2);

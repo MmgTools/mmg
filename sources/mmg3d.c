@@ -27,7 +27,7 @@ static void excfun(int sigid) {
   fprintf(stdout,"\n Unexpected error:");  fflush(stdout);
   switch(sigid) {
   case SIGABRT:
-    fprintf(stdout,"  Abnormal stop\n");  break;
+    fprintf(stdout,"  *** potential lack of memory.\n");  break;
   case SIGFPE:
     fprintf(stdout,"  Floating-point exception\n"); break;
   case SIGILL:
@@ -277,14 +277,14 @@ int main(int argc,char *argv[]) {
   info.imprim = -99;
   info.ddebug = 0;
   info.mem    = -1;
-	info.iso    = 0;
+  info.iso    = 0;
   info.dhd    = ANGEDG;
   info.hmin   = 0.0;
   info.hmax   = FLT_MAX;
   info.hgrad  = 0.1;
   info.hausd  = 0.01;
-	info.ls     = 0.0;
-	info.fem    = 0;
+  info.ls     = 0.0;
+  info.fem    = 0;
 
   /* command line */
   if ( !parsar(argc,argv,&mesh,&met) )  return(1);

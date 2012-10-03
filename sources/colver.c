@@ -72,10 +72,11 @@ int chkcol_bdy(pMesh mesh,int k,char iface,char iedg,int *listv) {
   pPoint        p0;
   Tria          tt;
   double        calold,calnew,caltmp,nprvold[3],nprvnew[3],ncurold[3],ncurnew[3],ps,devold,devnew;
-  int           ipp,ilistv,nump,numq,ilists,lists[LMAX+2],l,iel,ref,nbbdy;
-  unsigned char iopp,ia,ip,tag,i,j,i0,i1;
+  int           ipp,ilistv,nump,numq,ilists,lists[LMAX+2],l,iel,ref,nbbdy,ndepmin,ndepplus;
+  unsigned char iopp,ia,ip,tag,i,iq,i0,i1,ier;
 
   pt   = &mesh->tetra[k];
+  pxt  = 0;
   pt0  = &mesh->tetra[0];
   ia   = iarf[iface][iedg];
   ip   = idir[iface][inxt2[iedg]];
@@ -85,6 +86,8 @@ int chkcol_bdy(pMesh mesh,int k,char iface,char iedg,int *listv) {
   assert(p0->tag & MG_BDY);
   assert(p0->xp);
 
+  ndepmin = ndepplus = 0;
+
   /* collect triangles and tetras around ip */
   if ( p0->tag & MG_NOM )
     bouleext(mesh,k,ip,iface,listv,&ilistv,lists,&ilists);
@@ -92,7 +95,7 @@ int chkcol_bdy(pMesh mesh,int k,char iface,char iedg,int *listv) {
     boulesurfvolp(mesh,k,ip,iface,listv,&ilistv,lists,&ilists);
 
   /* prevent collapse in case surface ball has 3 triangles */
-  if ( ilists <= 2 )  return(0);  // ATTENTION, Normalement, 2 c est bon !
+  if ( ilists <= 2 )  return(0);  // ATTENTION, Normalement, avec 2 c est bon !
 
   /* Surfacic ball is enumerated with first tet having (pq) as edge n° iprv2[ip] on face iopp */
   startedgsurfball(mesh,nump,numq,lists,ilists);
@@ -105,8 +108,10 @@ int chkcol_bdy(pMesh mesh,int k,char iface,char iedg,int *listv) {
     pt  = &mesh->tetra[iel];
 
     /* Topological test for tetras of the shell */
-    for (j=0; j<4; j++)  if ( pt->v[j] == numq )  break;
-    if ( j < 4 ) {
+    for (iq=0; iq<4; iq++)
+      if ( pt->v[iq] == numq )  break;
+
+    if ( iq < 4 ) {
       nbbdy = 0;
       if ( pt->xt )  pxt = &mesh->xtetra[pt->xt];
       for (i=0; i<4; i++) {
@@ -115,7 +120,9 @@ int chkcol_bdy(pMesh mesh,int k,char iface,char iedg,int *listv) {
 
       /* Topological problem triggered when one of the two faces of collapsed edge is the only
 	 internal one : closing a part of the domain */
-      if ( nbbdy >= 3 ) {
+      if (nbbdy == 4)
+	return(0);
+      else if ( nbbdy == 3 ) {
 	for (ia=0; ia<6; ia++) {
 	  i0 = iare[ia][0];
 	  i1 = iare[ia][1];
@@ -129,7 +136,20 @@ int chkcol_bdy(pMesh mesh,int k,char iface,char iedg,int *listv) {
 	if ( pt->xt && (!(pxt->ftag[i0] & MG_BDY) || !(pxt->ftag[i1] & MG_BDY)) )
 	  return(0);
       }
+
+      /* Now check that the 2 faces identified by collapse are not boundary */
+      if ( pt->xt && (pxt->ftag[ipp] & MG_BDY) && (pxt->ftag[iq] & MG_BDY) )
+	return(0);
+
       continue;
+    }
+
+    /* Volume test for tetras outside the shell */
+    if ( info.iso ) {
+      if ( !ndepmin && pt->ref == MG_MINUS )
+	ndepmin = iel;
+      else if ( !ndepplus && pt->ref == MG_PLUS )
+	ndepplus = iel;
     }
 
     memcpy(pt0,pt,sizeof(Tetra));
@@ -220,6 +240,14 @@ int chkcol_bdy(pMesh mesh,int k,char iface,char iedg,int *listv) {
     memcpy(nprvnew,ncurnew,3*sizeof(double));
   }
 
+  /* Ensure collapse does not lead to a non manifold configuration (case of implicit surface)*/
+  if ( info.iso ) {
+    if ( ndepmin && ndepplus ) {
+      ier = chkmanicoll(mesh,k,iface,iedg,ndepmin,ndepplus);
+      if (!ier ) return(0);
+    }
+  }
+
   return(ilistv);
 }
 
@@ -240,16 +268,12 @@ int colver(pMesh mesh,int *list,int ilist,char indq) {
   np  = pt->v[ip];
   nq  = pt->v[indq];
 
-  /*if(np == 245862 && nq == 245866){
-    saveMesh(mesh);
-    exit(0);
-    } */
-
   /* Mark elements of the shell of edge (pq) */
   for (k=0; k<ilist; k++) {
     iel = list[k] / 4;
     i   = list[k] % 4;
     pt  = &mesh->tetra[iel];
+
     for (j=0; j<3; j++) {
       i = inxt3[i];
       if ( pt->v[i] == nq ) {
@@ -288,6 +312,7 @@ int colver(pMesh mesh,int *list,int ilist,char indq) {
     assert(j<3);
 
     adja = &mesh->adja[4*(iel-1)+1];
+
     /* pel = neighbour of iel that belongs to ball of p \setminus shell, same for qel */
     pel  = adja[iq] / 4;
     voyp = adja[iq] % 4;
