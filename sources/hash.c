@@ -253,6 +253,7 @@ int hashTria(pMesh mesh) {
     fprintf(stdout,"\n");
   }
   if ( info.ddebug )  fprintf(stdout,"  h- completed.\n");
+  return(1);
 }
 
 int hashEdge(Hash *hash,int a,int b,int k) {
