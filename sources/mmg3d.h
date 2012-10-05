@@ -26,11 +26,11 @@
 
 #define MG_SMSGN(a,b)  (((double)(a)*(double)(b) > (0.0)) ? (1) : (0))
 
-#define PRINT_TIME(chaine,tps) do		\
-    {						\
-      char *tpsm= printim(tps);			\
-      fprintf(stdout,chaine,tpsm);		\
-      free(tpsm);				\
+#define PRINT_TIME(chaine,tps) do               \
+    {                                           \
+      char *tpsm= printim(tps);                 \
+      fprintf(stdout,chaine,tpsm);              \
+      free(tpsm);                               \
     }while(0)
 
 /* numerical accuracy */

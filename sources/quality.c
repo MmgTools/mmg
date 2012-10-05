@@ -312,23 +312,23 @@ int MMG_prilen(pMesh mesh, pSol sol) {
       }
       if ( lon < 2 )  continue;
       for (l=2; l<= lon; l++)
-      if ( list[l] < 6*k ) break;
-      
+	if ( list[l] < 6*k ) break;
+
       if ( l <= lon ) continue;
-      
+
       ipa = iare[ia][0];
       ipb = iare[ia][1];
-      
+
       len = lenedg(mesh,pt->v[ipa],pt->v[ipb]);
 
       navg++;
-      ecart = len; 
+      ecart = len;
       lavg += len;
       /* update efficiency index */
-      if ( ecart > 1.0 )  ecart = 1.0 / ecart; 
+      if ( ecart > 1.0 )  ecart = 1.0 / ecart;
 
-      som  += (ecart - 1.0); 
-      
+      som  += (ecart - 1.0);
+
       /* find largest, smallest edge */
       if (len < lmin) {
 	lmin  = len;
@@ -361,9 +361,9 @@ int MMG_prilen(pMesh mesh, pSol sol) {
   fprintf(stdout,"\n  -- RESULTING EDGE LENGTHS  %d\n",navg);
   fprintf(stdout,"     AVERAGE LENGTH         %12.4f\n",lavg / (double)navg);
   fprintf(stdout,"     SMALLEST EDGE LENGTH   %12.4f   %6d %6d\n",
-  	  lmin,iamin,ibmin);
+	  lmin,iamin,ibmin);
   fprintf(stdout,"     LARGEST  EDGE LENGTH   %12.4f   %6d %6d \n",
-  	  lmax,iamax,ibmax);
+	  lmax,iamax,ibmax);
   fprintf(stdout,"     EFFICIENCY INDEX       %12.4f\n",exp(som/(double)navg));
   if ( hl[4]+hl[5]+hl[6] )
     fprintf(stdout,"   %6.2f < L <%5.2f  %8d   %5.2f %%  \n",
@@ -376,13 +376,13 @@ int MMG_prilen(pMesh mesh, pSol sol) {
 	      hl[1],100.*(hl[1]/(float)navg));
     if ( lmax > 0.2 ) {
       for (k=2; k<9; k++) {
-        if ( hl[k] > 0 )
-  	  fprintf(stdout,"   %6.2f < L <%5.2f  %8d   %5.2f %%  \n",
+	if ( hl[k] > 0 )
+	  fprintf(stdout,"   %6.2f < L <%5.2f  %8d   %5.2f %%  \n",
 		  bd[k-1],bd[k],hl[k],100.*(hl[k]/(float)navg));
       }
       if ( hl[9] )
-        fprintf(stdout,"     5.   < L         %8d   %5.2f %%  \n",
-	        hl[9],100.*(hl[9]/(float)navg));
+	fprintf(stdout,"     5.   < L         %8d   %5.2f %%  \n",
+		hl[9],100.*(hl[9]/(float)navg));
     }
   }
 

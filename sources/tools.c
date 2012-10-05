@@ -972,6 +972,6 @@ int DoSol(pMesh mesh,pSol met) {
     mark[k] = 0;
   }
 
-    
+
   return(1);
 }
