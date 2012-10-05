@@ -25,6 +25,7 @@ inline double lenedg_iso(pMesh mesh,int ip1,int ip2) {
   return(len);
 }
 
+
 /* Return quality of surface triangle */
 inline double caltri(pMesh mesh,pTria ptt) {
   double   *a,*b,*c,cal,abx,aby,abz,acx,acy,acz,bcx,bcy,bcz,rap;
@@ -211,7 +212,7 @@ inline int nortri(pMesh mesh,pTria pt,double *n) {
 int badelt(pMesh mesh,pSol met) {
   pTetra   pt;
   double   kal;
-  int      k,ier,it,maxit,nd;
+  int      k,it,maxit,nd;
 
   it = 0;
   maxit = 1;
@@ -277,4 +278,113 @@ int outqua(pMesh mesh,pSol met) {
     fprintf(stdout,"     %5.1f < Q < %5.1f   %7d   %6.2f %%\n",
 	    i/5.,i/5.+0.2,his[i],100.*(his[i]/(float)(mesh->ne-nex)));
   }
+}
+
+/* print histo of edge lengths */
+int MMG_prilen(pMesh mesh, pSol sol) {
+  pTetra      pt;
+  double      lavg,len,ecart,som,lmin,lmax;
+  int         k,l,lon,navg,ia,ipa,ipb,iamin,ibmin,iamax,ibmax,hl[10];
+  int         list[LMAX+2];
+  static double bd[9] = {0.0, 0.2, 0.5, 0.7071, 0.9, 1.111, 1.4142, 2.0, 5.0 };
+  navg  = 0;
+  lavg  = 0.0;
+  lmin  = 1.e20;
+  lmax  = 0.0;
+  som   = 0.0;
+  iamin = 0;
+  ibmin = 0;
+  iamax = 0;
+  ibmax = 0;
+
+  for (k=1; k<10; k++)  hl[k] = 0;
+
+  for (k=1; k<=mesh->ne; k++) {
+    pt = &mesh->tetra[k];
+    if ( !pt->v[0] )  continue;
+
+    for (ia=0; ia<6; ia++) {
+      lon = coquil(mesh,k,ia,&list[1]);
+      if (lon%2){
+	lon=0;
+      }else{
+	lon=lon*0.5;
+      }
+      if ( lon < 2 )  continue;
+      for (l=2; l<= lon; l++)
+      if ( list[l] < 6*k ) break;
+      
+      if ( l <= lon ) continue;
+      
+      ipa = iare[ia][0];
+      ipb = iare[ia][1];
+      
+      len = lenedg(mesh,pt->v[ipa],pt->v[ipb]);
+
+      navg++;
+      ecart = len; 
+      lavg += len;
+      /* update efficiency index */
+      if ( ecart > 1.0 )  ecart = 1.0 / ecart; 
+
+      som  += (ecart - 1.0); 
+      
+      /* find largest, smallest edge */
+      if (len < lmin) {
+	lmin  = len;
+	iamin = pt->v[ipa];
+	ibmin = pt->v[ipb];
+      }
+      else if (len > lmax) {
+	lmax  = len;
+	iamax = pt->v[ipa];
+	ibmax = pt->v[ipb];
+      }
+
+      /* update histogram */
+      if (len < bd[3]) {
+	if (len > bd[2])       hl[3]++;
+	else if (len > bd[1])  hl[2]++;
+	else                   hl[1]++;
+      }
+      else if (len < bd[5]) {
+	if (len > bd[4])       hl[5]++;
+	else if (len > bd[3])  hl[4]++;
+      }
+      else if (len < bd[6])    hl[6]++;
+      else if (len < bd[7])    hl[7]++;
+      else if (len < bd[8])    hl[8]++;
+      else                     hl[9]++;
+    }
+  }
+
+  fprintf(stdout,"\n  -- RESULTING EDGE LENGTHS  %d\n",navg);
+  fprintf(stdout,"     AVERAGE LENGTH         %12.4f\n",lavg / (double)navg);
+  fprintf(stdout,"     SMALLEST EDGE LENGTH   %12.4f   %6d %6d\n",
+  	  lmin,iamin,ibmin);
+  fprintf(stdout,"     LARGEST  EDGE LENGTH   %12.4f   %6d %6d \n",
+  	  lmax,iamax,ibmax);
+  fprintf(stdout,"     EFFICIENCY INDEX       %12.4f\n",exp(som/(double)navg));
+  if ( hl[4]+hl[5]+hl[6] )
+    fprintf(stdout,"   %6.2f < L <%5.2f  %8d   %5.2f %%  \n",
+	    bd[3],bd[6],hl[4]+hl[5]+hl[6],100.*(hl[4]+hl[5]+hl[6])/(double)navg);
+
+  if ( abs(info.imprim) > 4 ) {
+    fprintf(stdout,"\n     HISTOGRAMM\n");
+    if ( hl[1] )
+      fprintf(stdout,"     0.00 < L < 0.20  %8d   %5.2f %%  \n",
+	      hl[1],100.*(hl[1]/(float)navg));
+    if ( lmax > 0.2 ) {
+      for (k=2; k<9; k++) {
+        if ( hl[k] > 0 )
+  	  fprintf(stdout,"   %6.2f < L <%5.2f  %8d   %5.2f %%  \n",
+		  bd[k-1],bd[k],hl[k],100.*(hl[k]/(float)navg));
+      }
+      if ( hl[9] )
+        fprintf(stdout,"     5.   < L         %8d   %5.2f %%  \n",
+	        hl[9],100.*(hl[9]/(float)navg));
+    }
+  }
+
+  return(1);
 }

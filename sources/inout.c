@@ -376,7 +376,7 @@ int loadMet(pSol met) {
     *ptr = '\0';
     strcat(data,".sol");
     if (!(inm = GmfOpenMesh(data,GmfRead,&met->ver,&met->dim)) ) {
-      if ( info.imprim < 0 )
+      if ( info.imprim > 0 )
 	fprintf(stderr,"  ** %s  NOT FOUND. USE DEFAULT METRIC.\n",data);
       return(-1);
     }

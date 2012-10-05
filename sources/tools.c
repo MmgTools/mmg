@@ -919,3 +919,59 @@ inline int BezierReg(pMesh mesh,int ip0, int ip1, double s, double v[3], double 
 
   return(1);
 }
+
+/* compute iso size map */
+int DoSol(pMesh mesh,pSol met) {
+  pTetra     pt;
+  pPoint     p1,p2;
+  double     ux,uy,uz,dd;
+  int        i,k,ia,ib,ipa,ipb;
+  int        mark[mesh->np+1];
+  memset(mark,0,(mesh->np+1)*sizeof(int));
+
+  /* Memory alloc */
+  met->np     = mesh->np;
+  met->npmax  = mesh->npmax;
+  met->size = 1;
+
+  met->m = (double*)calloc(met->npmax+1,met->size*sizeof(double));
+  assert(met->m);
+
+  /* internal edges */
+  for (k=1; k<=mesh->ne; k++) {
+    pt = &mesh->tetra[k];
+    if ( !pt->v[0] )  continue;
+
+    /* internal edges */
+    for (i=0; i<6; i++) {
+      ia  = iare[i][0];
+      ib  = iare[i][1];
+      ipa = pt->v[ia];
+      ipb = pt->v[ib];
+      p1  = &mesh->point[ipa];
+      p2  = &mesh->point[ipb];
+
+      ux  = p1->c[0] - p2->c[0];
+      uy  = p1->c[1] - p2->c[1];
+      uz  = p1->c[2] - p2->c[2];
+      dd  = sqrt(ux*ux + uy*uy + uz*uz);
+
+      met->m[ipa] += dd;
+      mark[ipa]++;
+      met->m[ipb] += dd;
+      mark[ipb]++;
+    }
+  }
+
+  /* vertex size */
+  for (k=1; k<=mesh->np; k++) {
+    p1 = &mesh->point[k];
+    if ( !mark[k] )  continue;
+
+    met->m[k] = met->m[k] / (double)mark[k];
+    mark[k] = 0;
+  }
+
+    
+  return(1);
+}

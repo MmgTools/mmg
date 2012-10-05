@@ -230,7 +230,7 @@ static int parsar(int argc,char *argv[],pMesh mesh,pSol met) {
 
 static void endcod() {
   chrono(OFF,&info.ctim[0]);
-  fprintf(stdout,"\n   ELAPSED TIME  %s\n",printim(info.ctim[0].gdif));
+  PRINT_TIME("\n   ELAPSED TIME  %s\n",info.ctim[0].gdif);
 }
 
 
@@ -303,9 +303,10 @@ int main(int argc,char *argv[]) {
     fprintf(stdout,"  ## WARNING: WRONG SOLUTION NUMBER. IGNORED\n");
     free(met.m);
     memset(&met,0,sizeof(Sol));
+    met.np=0;
   }
   chrono(OFF,&info.ctim[1]);
-  fprintf(stdout,"  -- DATA READING COMPLETED.     %s\n",printim(info.ctim[1].gdif));
+  PRINT_TIME("  -- DATA READING COMPLETED.     %s\n",info.ctim[1].gdif);
 
   /* analysis */
   chrono(ON,&info.ctim[2]);
@@ -314,24 +315,38 @@ int main(int argc,char *argv[]) {
   fprintf(stdout,"\n  %s\n   MODULE MMG3D: IMB-LJLL : %s (%s)\n  %s\n",MG_STR,MG_VER,MG_REL,MG_STR);
   if ( info.imprim )   fprintf(stdout,"\n  -- PHASE 1 : ANALYSIS\n");
   if ( !scaleMesh(&mesh,&met) )  return(1);
-  if ( info.iso && !mmg3d2(&mesh,&met) )  return(1);
+  if ( !met.np ){
+    if ( info.iso ){
+      fprintf(stdout,"\n  ## ERROR : A VALID SOLUTION FILE IS NEEDED : %s \n",met.namein);
+      return(1);
+    }else{
+      if ( !DoSol(&mesh,&met) )  return(1);
+      setfunc(&mesh,&met);
+    }
+  }
+
+  if( info.iso && !mmg3d2(&mesh,&met) ) return(1);
   if ( !analys(&mesh) )  return(1);
+
   chrono(OFF,&info.ctim[2]);
   if ( info.imprim )
-    fprintf(stdout,"  -- PHASE 1 COMPLETED.     %s\n",printim(info.ctim[2].gdif));
+    PRINT_TIME("  -- PHASE 1 COMPLETED.     %s\n",info.ctim[2].gdif);
 
   /* solve */
   chrono(ON,&info.ctim[3]);
   if ( info.imprim )
     fprintf(stdout,"\n  -- PHASE 2 : %s MESHING\n",met.size < 6 ? "ISOTROPIC" : "ANISOTROPIC");
   if ( !mmg3d1(&mesh,&met) )  return(1);
+
   chrono(OFF,&info.ctim[3]);
-  if ( info.imprim )
-    fprintf(stdout,"  -- PHASE 2 COMPLETED.     %s\n",printim(info.ctim[3].gdif));
+  if ( info.imprim ){
+    PRINT_TIME("  -- PHASE 2 COMPLETED.     %s\n",info.ctim[3].gdif);}
   fprintf(stdout,"\n  %s\n   END OF MODULE MMG3d: IMB-LJLL \n  %s\n",MG_STR,MG_STR);
 
   /* save file */
   outqua(&mesh,&met);
+  MMG_prilen(&mesh);
+
   chrono(ON,&info.ctim[1]);
   if ( info.imprim )  fprintf(stdout,"\n  -- WRITING DATA FILE %s\n",mesh.nameout);
   if ( !unscaleMesh(&mesh,&met) )  return(1);

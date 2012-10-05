@@ -20,10 +20,18 @@
 #define MG_CPY   "Copyright (c) IMB-LJLL, 2004-"
 #define MG_STR   "&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&"
 
+/* Macros */
 #define MG_MAX(a,b) (((a) > (b)) ? (a) : (b))
 #define MG_MIN(a,b) (((a) < (b)) ? (a) : (b))
 
 #define MG_SMSGN(a,b)  (((double)(a)*(double)(b) > (0.0)) ? (1) : (0))
+
+#define PRINT_TIME(chaine,tps) do		\
+    {						\
+      char *tpsm= printim(tps);			\
+      fprintf(stdout,chaine,tpsm);		\
+      free(tpsm);				\
+    }while(0)
 
 /* numerical accuracy */
 #define ALPHAD    20.7846096908265    //0.04811252243247      /* 12*sqrt(3) */
