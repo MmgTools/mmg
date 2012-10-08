@@ -288,7 +288,9 @@ int main(int argc,char *argv[]) {
 
   /* command line */
   if ( !parsar(argc,argv,&mesh,&met) )  return(1);
-  
+  printf("RECAP ARGS: \n");
+  printf("-ar %e; -hmin %e; -hmax %e; -hgrad  %e; -hausd %e; -ls %e; -fem %d\n",
+	 info.dhd,info.hmin,info.hmax,info.hgrad,info.hausd, info.ls, info.fem);
   /* load data */
   fprintf(stdout,"\n  -- INPUT DATA\n");
   chrono(ON,&info.ctim[1]);
