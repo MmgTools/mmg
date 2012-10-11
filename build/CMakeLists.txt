@@ -1,32 +1,70 @@
 CMAKE_MINIMUM_REQUIRED (VERSION 2.6)
 PROJECT (MMG3D5)     
 
-# integration continue
+# Continuous integration
 ENABLE_TESTING()
 
 SET(EXECUTABLE_OUTPUT_PATH $ENV{HOME}/bin/$ENV{ARCHI}/)
 SET(CMAKELISTS_PATH .) 
 
-MESSAGE(STATUS "EXECUTABLE SAVED IN :" ${EXECUTABLE_OUTPUT_PATH})
+# Find "exotic" compilers
+IF (${CMAKE_C_COMPILER} MATCHES Clang OR ${CMAKE_C_COMPILER} MATCHES clang)
+  # using clang
+  SET(CMAKE_COMPILER_IS_CLANG TRUE)
+ELSEIF(${CMAKE_C_COMPILER} MATCHES Icc OR ${CMAKE_C_COMPILER} MATCHES icc)
+  # using icc
+  SET(CMAKE_COMPILER_IS_INTEL TRUE)
+ENDIF()
 
-IF(APPLE) 
-   ADD_DEFINITIONS(-static-libgcc -mmacosx-version-min=10.4 -arch x86_64) 
-   #to avoid pbs with binary files... 
-   SET(CMAKE_EXE_LINKER_FLAGS "-arch x86_64")
-   # determine if the processor supports 64bit execution
-   EXECUTE_PROCESS(
+
+IF(CMAKE_COMPILER_IS_GNUCC)
+  IF(APPLE) 
+    # Add flags to the compiler
+    ADD_DEFINITIONS(-static-libgcc -mmacosx-version-min=10.4 -arch x86_64) 
+    
+    # To avoid pbs with binary files... 
+    SET(CMAKE_EXE_LINKER_FLAGS "-arch x86_64")
+    # Determine if the processor supports 64bit execution
+    EXECUTE_PROCESS(
       COMMAND sysctl hw.cpu64bit_capable
       ERROR_QUIET
       OUTPUT_VARIABLE 64_CMD
       OUTPUT_STRIP_TRAILING_WHITESPACE
-   )
-   STRING(REGEX REPLACE "^hw.cpu64bit_capable: (.*)" "\\1" 64_BIT "${64_CMD}")
-   
-   # display the results
-   MESSAGE(STATUS "CMAKE_OSX_ARCHITECTURES: " ${CMAKE_OSX_ARCHITECTURES})
-ENDIF(APPLE)  
+      )
+    STRING(REGEX REPLACE "^hw.cpu64bit_capable: (.*)" "\\1" 64_BIT "${64_CMD}")
+  ELSEIF(UNIX)# UNIX must be after APPLE becaus APPLE is UNIX too
+  ENDIF(APPLE)
 
-#file sources  
+ELSEIF(CMAKE_COMPILER_IS_INTEL)
+  ADD_DEFINITIONS(-Bstatic)
+ENDIF(CMAKE_COMPILER_IS_GNUCC)
+
+IF(NOT CMAKE_COMPILER_IS_CLANG)
+  # Compiler options for profiling... but not possible with clang
+  SET(PROFILING CACHE BOOL "Enable/Disable PROFILING")
+  IF(PROFILING)
+    ADD_DEFINITIONS(-pg)
+  ENDIF(PROFILING)
+ENDIF(NOT CMAKE_COMPILER_IS_CLANG)
+
+  
+
+  # Add openMP flags if OpenMP found
+INCLUDE(FindOpenMP)
+IF(OPENMP_FOUND) 
+  SET(OPENMP CACHE BOOL "Enable/Disable OpenMP")
+  IF(OPENMP)
+    SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+    SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
+    MESSAGE(STATUS "OpenMP added: " ${CMAKE_C_FLAGS})
+  ENDIF(OPENMP)
+ELSE(OPENMP_FOUND)
+  MESSAGE(STATUS "OpenMP not found")
+ENDIF(OPENMP_FOUND)
+
+# Header files
+INCLUDE_DIRECTORIES(${CMAKELISTS_PATH}/sources/)
+# Source files  
 FILE(
 	GLOB
 	source_files
@@ -41,27 +79,29 @@ IF (NOT EXISTS ${CMAKELISTS_PATH}/sources/compil.date)
     OUTPUT ${CMAKELISTS_PATH}/sources/compil.date
     COMMAND ${CMAKE_COMMAND} -E echo \"\#define COMPIL \" '\"' `date` '\"' > ${CMAKELISTS_PATH}/sources/compil.date
     DEPENDS ${sources_files}
-    COMMENT "Creation de compil.date"
+    COMMENT "compil.date creation"
     )
 ELSEIF(EXISTS ${CMAKELISTS_PATH}/sources/compil.date) 
  ADD_CUSTOM_COMMAND(
     OUTPUT ${CMAKELISTS_PATH}/sources/compil.date
     COMMAND ${CMAKE_COMMAND} -E echo \"\#define COMPIL \" '\"' `date` '\"' > ${CMAKELISTS_PATH}/sources/compil.date
     DEPENDS ${source_files}
-    COMMENT "Modification de compil.date"
+    COMMENT "compil.date modification"
     )
 ENDIF(NOT EXISTS ${CMAKELISTS_PATH}/sources/compil.date)
 
-# Executable et dependances
+# Executable and dependencies
 ADD_EXECUTABLE(mmg3d5 ${CMAKELISTS_PATH}/sources/compil.date ${source_files})
 ADD_CUSTOM_TARGET(compil_date DEPENDS ${CMAKELISTS_PATH}/sources/compil.date)
 ADD_DEPENDENCIES(mmg3d5 compil_date)
 
 # Libraries
 FIND_LIBRARY(M_LIB m)
-TARGET_LINK_LIBRARIES(mmg3d5 ${M_LIB})
+TARGET_LINK_LIBRARIES(mmg3d5 ${M_LIB} gcov)
 
-# Tests
+# Continuous integration: Tests
 INCLUDE(CTest)
+#SET(WITH_MEMCHECK TRUE)
+SET(WITH_COVERAGE FALSE)
 SET(REG_TESTS_PATH ${CMAKELISTS_PATH}/../../RegTests)
 ADD_TEST(SimpleCube $ENV{HOME}/bin/$ENV{ARCHI}/mmg3d5 ${REG_TESTS_PATH}/Cube/cube.mesh)
