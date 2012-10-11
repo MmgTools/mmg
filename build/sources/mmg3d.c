@@ -288,8 +288,6 @@ int main(int argc,char *argv[]) {
 
   /* command line */
   if ( !parsar(argc,argv,&mesh,&met) )  return(1);
-  printf("RECAP ARGS: \n");
-  printf("-ar %e; -hmin %e; -hmax %e; -hgrad  %e; -hausd %e; -ls %e; -fem %d\n",
 	 info.dhd,info.hmin,info.hmax,info.hgrad,info.hausd, info.ls, info.fem);
   /* load data */
   fprintf(stdout,"\n  -- INPUT DATA\n");
@@ -329,6 +327,8 @@ int main(int argc,char *argv[]) {
 
   if( info.iso && !mmg3d2(&mesh,&met) ) return(1);
   if ( !analys(&mesh) )  return(1);
+  PutMetIn_h(&mesh,&met);
+  prilen(&mesh);
 
   chrono(OFF,&info.ctim[2]);
   if ( info.imprim )
@@ -347,7 +347,7 @@ int main(int argc,char *argv[]) {
 
   /* save file */
   outqua(&mesh,&met);
-  MMG_prilen(&mesh);
+  prilen(&mesh);
 
   chrono(ON,&info.ctim[1]);
   if ( info.imprim )  fprintf(stdout,"\n  -- WRITING DATA FILE %s\n",mesh.nameout);

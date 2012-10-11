@@ -288,7 +288,7 @@ int bezierCP(pMesh mesh,Tria *pt,pBezier pb) {
   for(i=0; i<3; i++){
     if(p[i]->tag & MG_NOM)
       isnm++;
-    else if(im = -1)
+    else if(im == -1)
       im = i;
   }
 
@@ -439,9 +439,11 @@ int bezierInt(pBezier pb,double uv[2],double o[3],double no[3],double to[3]) {
   double    dd,u,v,w,ps,ux,uy,uz;
   char      i;
 
+  to[0]=to[1]=to[2]=0;
   u = uv[0];
   v = uv[1];
   w = 1 - u - v;
+
   for (i=0; i<3; i++) {
     o[i]  = pb->b[0][i]*w*w*w + pb->b[1][i]*u*u*u + pb->b[2][i]*v*v*v \
       + 3.0 * (pb->b[3][i]*u*u*v + pb->b[4][i]*u*v*v + pb->b[5][i]*w*v*v \

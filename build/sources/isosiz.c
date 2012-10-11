@@ -84,7 +84,7 @@ static double defsizreg(pMesh mesh,int nump,int *lists,int ilists) {
     lispoi[3*k+2] =      r[1][0]*ux + r[1][1]*uy + r[1][2]*uz;
     lispoi[3*k+3] =      r[2][0]*ux + r[2][1]*uy + r[2][2]*uz;
 
-    ll = lispoi[3*k+1]*lispoi[3*k+1] + lispoi[3*k+2]*lispoi[3*k+2] + lispoi[3*k+2]*lispoi[3*k+2];
+    ll = lispoi[3*k+1]*lispoi[3*k+1] + lispoi[3*k+2]*lispoi[3*k+2] + lispoi[3*k+3]*lispoi[3*k+3];
     lmin = MG_MIN(lmin,ll);
     lmax = MG_MAX(lmax,ll);
 
@@ -92,7 +92,7 @@ static double defsizreg(pMesh mesh,int nump,int *lists,int ilists) {
     nb = ntempb;
   }
 
-  /* Finish with point 0 */;
+  /* Finish with point 0 */
   iel           = lists[0] / 4;
   iface = lists[0] % 4;
   pt            = &mesh->tetra[iel];
@@ -124,7 +124,7 @@ static double defsizreg(pMesh mesh,int nump,int *lists,int ilists) {
   lispoi[2] =    r[1][0]*ux + r[1][1]*uy + r[1][2]*uz;
   lispoi[3] =    r[2][0]*ux + r[2][1]*uy + r[2][2]*uz;
 
-  ll = lispoi[3*k+1]*lispoi[3*k+1] + lispoi[3*k+2]*lispoi[3*k+2] + lispoi[3*k+2]*lispoi[3*k+2];
+  ll = lispoi[1]*lispoi[1] + lispoi[2]*lispoi[2] + lispoi[3]*lispoi[3];
   lmin = MG_MIN(lmin,ll);
   lmax = MG_MAX(lmax,ll);
 

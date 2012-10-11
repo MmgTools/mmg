@@ -288,6 +288,9 @@ int ppgdisp(pMesh,double *);
 int denoisbdy(pMesh);
 int eigensym(double m[3],double lambda[2],double vp[2][2]);
 int sys33sym(double a[6], double b[3], double r[3]);
+int prilen(pMesh mesh);
+int DoSol(pMesh mesh,pSol met);
+int PutMetIn_h(pMesh mesh,pSol met);
 
 int meancur(pMesh mesh,int np,double c[3],int ilist,int *list,double h[3]);
 double surftri(pMesh,int,int);

@@ -269,7 +269,7 @@ int outqua(pMesh mesh,pSol met) {
   fprintf(stdout,"\n  -- MESH QUALITY   %d\n",mesh->ne - nex);
   fprintf(stdout,"     BEST   %8.6f  AVRG.   %8.6f  WRST.   %8.6f (%d)\n",
 	  rapmax,rapavg / (mesh->ne-nex),rapmin,iel);
-  if ( abs(info.imprim) < 5 )  return;
+  if ( abs(info.imprim) < 5 )  return(1);
 
   /* print histo */
   fprintf(stdout,"     HISTOGRAMM:  %6.2f %% > 0.5\n",100.0*(med/(float)(mesh->ne-nex)));
@@ -278,10 +278,11 @@ int outqua(pMesh mesh,pSol met) {
     fprintf(stdout,"     %5.1f < Q < %5.1f   %7d   %6.2f %%\n",
 	    i/5.,i/5.+0.2,his[i],100.*(his[i]/(float)(mesh->ne-nex)));
   }
+  return(1);
 }
 
 /* print histo of edge lengths */
-int MMG_prilen(pMesh mesh, pSol sol) {
+int prilen(pMesh mesh) {
   pTetra      pt;
   double      lavg,len,ecart,som,lmin,lmax;
   int         k,l,lon,navg,ia,ipa,ipb,iamin,ibmin,iamax,ibmax,hl[10];
@@ -385,6 +386,5 @@ int MMG_prilen(pMesh mesh, pSol sol) {
 		hl[9],100.*(hl[9]/(float)navg));
     }
   }
-
   return(1);
 }

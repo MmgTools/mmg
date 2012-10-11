@@ -23,6 +23,7 @@ int chksiz(pMesh mesh) {
   }
   if ( np )  printf("\n---> %d problemes\n",np);
   assert(ier);
+  return(1);
 }
 
 int chkvol(pMesh mesh) {
@@ -39,6 +40,7 @@ int chkvol(pMesh mesh) {
     }
   }
   assert(ier);
+  return(1);
 }
 
 int chkmshsurf(pMesh mesh){

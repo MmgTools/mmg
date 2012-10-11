@@ -971,7 +971,14 @@ int DoSol(pMesh mesh,pSol met) {
     met->m[k] = met->m[k] / (double)mark[k];
     mark[k] = 0;
   }
+  return(1);
+}
 
-
+/* Put the metric values in mesh->point.h*/
+int PutMetIn_h(pMesh mesh, pSol met){
+  int k;
+  for (k=1; k<=mesh->np; k++) {
+    mesh->point[k].h=met->m[k];
+  }
   return(1);
 }
