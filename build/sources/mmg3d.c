@@ -23,6 +23,13 @@ unsigned char isar[6][2] = { {2,3}, {3,1}, {1,2}, {0,3}, {2,0}, {0,1} };
 unsigned char arpt[4][3] = { {0,1,2}, {0,4,3}, {1,3,5}, {2,5,4} };
 
 
+static inline void printTime(char *chaine,double tps){
+  char *tpsm;
+  tpsm= printim(tps);                
+  fprintf(stdout,chaine,tpsm);			
+  free(tpsm);					
+}
+
 static void excfun(int sigid) {
   fprintf(stdout,"\n Unexpected error:");  fflush(stdout);
   switch(sigid) {
@@ -230,7 +237,7 @@ static int parsar(int argc,char *argv[],pMesh mesh,pSol met) {
 
 static void endcod() {
   chrono(OFF,&info.ctim[0]);
-  PRINT_TIME("\n   ELAPSED TIME  %s\n",info.ctim[0].gdif);
+  printTime("\n   ELAPSED TIME  %s\n",info.ctim[0].gdif);
 }
 
 
@@ -288,7 +295,6 @@ int main(int argc,char *argv[]) {
 
   /* command line */
   if ( !parsar(argc,argv,&mesh,&met) )  return(1);
-	 info.dhd,info.hmin,info.hmax,info.hgrad,info.hausd, info.ls, info.fem);
   /* load data */
   fprintf(stdout,"\n  -- INPUT DATA\n");
   chrono(ON,&info.ctim[1]);
@@ -306,7 +312,7 @@ int main(int argc,char *argv[]) {
     met.np=0;
   }
   chrono(OFF,&info.ctim[1]);
-  PRINT_TIME("  -- DATA READING COMPLETED.     %s\n",info.ctim[1].gdif);
+  printTime("  -- DATA READING COMPLETED.     %s\n",info.ctim[1].gdif);
 
   /* analysis */
   chrono(ON,&info.ctim[2]);
@@ -332,7 +338,7 @@ int main(int argc,char *argv[]) {
 
   chrono(OFF,&info.ctim[2]);
   if ( info.imprim )
-    PRINT_TIME("  -- PHASE 1 COMPLETED.     %s\n",info.ctim[2].gdif);
+    printTime("  -- PHASE 1 COMPLETED.     %s\n",info.ctim[2].gdif);
 
   /* solve */
   chrono(ON,&info.ctim[3]);
@@ -342,7 +348,7 @@ int main(int argc,char *argv[]) {
 
   chrono(OFF,&info.ctim[3]);
   if ( info.imprim ){
-    PRINT_TIME("  -- PHASE 2 COMPLETED.     %s\n",info.ctim[3].gdif);}
+    printTime("  -- PHASE 2 COMPLETED.     %s\n",info.ctim[3].gdif);}
   fprintf(stdout,"\n  %s\n   END OF MODULE MMG3d: IMB-LJLL \n  %s\n",MG_STR,MG_STR);
 
   /* save file */
