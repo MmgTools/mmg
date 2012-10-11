@@ -54,7 +54,7 @@ static void usage(char *prog) {
 
   fprintf(stdout,"\n** Generic options :\n");
   fprintf(stdout,"-h      Print this message\n");
-  fprintf(stdout,"-v [n]  Tune level of verbosity, [-10..10]\n");
+  fprintf(stdout,"-v [n]  Tune level of verbosity, [-10..10]\n");
   fprintf(stdout,"-m [n]  Set memory size to n Mbytes\n");
   fprintf(stdout,"-d      Turn on debug mode\n");
 
@@ -333,8 +333,11 @@ int main(int argc,char *argv[]) {
 
   if( info.iso && !mmg3d2(&mesh,&met) ) return(1);
   if ( !analys(&mesh) )  return(1);
-  PutMetIn_h(&mesh,&met);
-  prilen(&mesh);
+  
+  if ( abs(info.imprim) > 0 ) {
+    PutMetIn_h(&mesh,&met);
+    prilen(&mesh);
+  }
 
   chrono(OFF,&info.ctim[2]);
   if ( info.imprim )
