@@ -1,0 +1,8 @@
+Pour recompiler la doc : doxygen doxyfile
+
+Pour l'avoir en .pdf :
+cd latex
+make
+
+Pour la voir en html : firefox html/index.html
+Pour la voir en pdf : elle est dans latex/refman.pdf
