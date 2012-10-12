@@ -44,7 +44,7 @@ int chkvol(pMesh mesh) {
 }
 
 int chkmshsurf(pMesh mesh){
-  pTria      pt,pt1;
+  pTria      pt;
   int        k,k1;
   int        *adja,*adja1;
   char       i,voy;
@@ -58,7 +58,6 @@ int chkmshsurf(pMesh mesh){
       voy = adja[i] % 3;
 
       if(!k1) continue;
-      pt1 = &mesh->tria[k1];
       adja1 = &mesh->adjt[3*(k1-1)+1];
 
       if(adja1[voy] / 3 != k){
@@ -72,12 +71,19 @@ int chkmshsurf(pMesh mesh){
 }
 
 int chkmsh(pMesh mesh,int severe,int base) {
-  pTetra        pt,pt0,pt1,pt2;
-  pxTetra   pxt,pxt0,pxt1,pxt2;
-  int           *adja,*adja1,adj,adj1,k,i,iadr,ilists,ilistv,lists[LMAX+2],listv[LMAX+2],ip;
-  int       iel,ielprv,ielnxt,l,nump,np,nq;
+  pTetra        pt,pt1,pt2;
+  pxTetra   pxt;
+  int           *adja,*adja1,adj,adj1,k,i,iadr;
+  int       iel;
   int       a0,a1,a2,b0,b1,b2;
-  unsigned char voy,voy1,j,iface,ifaceprv,ifacenxt,indp,indpprv,indpnxt,tag0,tag1,tag2,ia;
+  unsigned char voy,voy1;
+  /* commentated part variables
+  pTetra        pt0;
+  pxTetra       pxt0,pxt1,pxt2;
+  int           ilists,ilistv,lists[LMAX+2],listv[LMAX+2];
+  int           ielprv,ielnxt,l,nump,np,nq;
+  unsigned char j,iface,ifaceprv,ifacenxt,indp,indpprv,indpnxt,tag0,tag1,tag2,ia;
+  */
 
   for (k=1; k<=mesh->ne; k++) {
     pt1 = &mesh->tetra[k];

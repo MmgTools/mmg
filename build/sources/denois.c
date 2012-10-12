@@ -817,9 +817,9 @@ int ppgdisp(pMesh mesh,double *optpos){
   pPoint     p0,p1;
   double     l,r,norm,inorm;
   double     v[3];
-  int        k,ipile,iel,np,np1,it,maxit,base,newbase;
+  int        k,iel,np,np1,it,maxit,base,newbase;
   int        *pile,*adja,*w;
-  char       i,j,ip,ip1,cn;
+  char       i,j,ip,ip1;
 
   for(k=1; k<=mesh->np; k++)
     mesh->point[k].flag = 0;
@@ -828,7 +828,6 @@ int ppgdisp(pMesh mesh,double *optpos){
     mesh->tetra[k].flag = 0;
   }
 
-  ipile = 0;
   pile = (int*)calloc(mesh->ne+1,sizeof(int));
   assert(pile);
 

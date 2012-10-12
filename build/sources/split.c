@@ -1280,7 +1280,7 @@ void split3cone(pMesh mesh,pSol met,int k,int vx[6]) {
   xTetra    xt[4];
   pxTetra   pxt0;
   int       iel,i,ref0,ref1,ref2;
-  char      flg,firstxt,isxt[4],ia,ib,ic,tag0,tag1,tag2;
+  char      flg,firstxt,isxt[4],ia,ib,tag0,tag1,tag2;//ic;
   unsigned char tau[4],*taued;
 
   pt[0]  = &mesh->tetra[k];
@@ -1369,17 +1369,17 @@ void split3cone(pMesh mesh,pSol met,int k,int vx[6]) {
   }
 
   if((pt[0])->v[tau[3]] < (pt[0])->v[ia]){
-    ic = ib;
+    //ic = ib;
     ib = ia;
     ia = tau[3];
   }
   else{
     if((pt[0])->v[tau[3]] < (pt[0])->v[ib]){
-      ic = ib;
+      //ic = ib;
       ib = tau[3];
     }
     else{
-      ic = tau[3];
+      //ic = tau[3];
     }
   }
 

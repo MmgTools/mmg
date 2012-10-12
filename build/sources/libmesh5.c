@@ -389,12 +389,12 @@ int GmfCloseMesh(int MshIdx)
 
   /* In write down the "End" kw in write mode */
 
-  if(msh->mod == GmfWrite)
+  if(msh->mod == GmfWrite){
     if(msh->typ & Asc)
       fprintf(msh->hdl, "\n%s\n", GmfKwdFmt[ GmfEnd ][0]);
     else
       GmfSetKwd(MshIdx, GmfEnd, 0);
-
+  }
   /* Close the file and free the mesh structure */
 
   if(fclose(msh->hdl))

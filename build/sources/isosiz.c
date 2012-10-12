@@ -349,7 +349,7 @@ int defsiz_iso(pMesh mesh,pSol met) {
   double    v[3],b0[3],b1[3],b0p0[3],b1b0[3],p1b1[3];
   double    secder0[3],secder1[3],kappa,tau[3],gammasec[3],ntau2,intau,ps,lm,*n;
   int       lists[LMAX+2],listv[LMAX+2],ilists,ilistv,k,ip0,ip1,l,ref;
-  char      i,j,ia,ised,i0,i1,tag,ier;
+  char      i,j,ia,ised,i0,i1,tag;
 
   if ( abs(info.imprim) > 5 || info.ddebug )
     fprintf(stdout,"  ** Defining map\n");
@@ -377,7 +377,7 @@ int defsiz_iso(pMesh mesh,pSol met) {
 	if ( !boulesurfvolp(mesh,k,i0,i,listv,&ilistv,lists,&ilists) )  continue;
 
 	n     = &mesh->xpoint[p0->xp].n1[0];
-	ier   = directsurfball(mesh, pt->v[i0],lists,ilists,n);
+  directsurfball(mesh, pt->v[i0],lists,ilists,n);
 	p0->h = defsizreg(mesh,pt->v[i0],lists,ilists);
       }
     }
