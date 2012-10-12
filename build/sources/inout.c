@@ -22,8 +22,8 @@ int loadMesh(pMesh mesh) {
       *ptr = '\0';
       strcat(data,".mesh");
       if( !(inm = GmfOpenMesh(data,GmfRead,&mesh->ver,&mesh->dim)) ) {
-	fprintf(stderr,"  ** %s  NOT FOUND.\n",data);
-	return(0);
+        fprintf(stderr,"  ** %s  NOT FOUND.\n",data);
+        return(0);
       }
     }
   }
@@ -69,25 +69,25 @@ int loadMesh(pMesh mesh) {
       nt = mesh->nt;
       mesh->nt = 0;
       for (k=1; k<=nt; k++) {
-	GmfGetLin(inm,GmfTriangles,&v[0],&v[1],&v[2],&ref);
-	if( ref >= 0 ) {
-	  pt1 = &mesh->tria[++mesh->nt];
-	  pt1->v[0] = v[0];
-	  pt1->v[1] = v[1];
-	  pt1->v[2] = v[2];
-	  pt1->ref = ref;
-	}
+        GmfGetLin(inm,GmfTriangles,&v[0],&v[1],&v[2],&ref);
+        if( ref >= 0 ) {
+          pt1 = &mesh->tria[++mesh->nt];
+          pt1->v[0] = v[0];
+          pt1->v[1] = v[1];
+          pt1->v[2] = v[2];
+          pt1->ref = ref;
+        }
       }
       if( !mesh->nt )
-	free(mesh->tria);
+        free(mesh->tria);
       else if ( mesh->nt < nt )
-	mesh->tria = (pTria)realloc(mesh->tria,(mesh->nt+1)*sizeof(Tria));
+        mesh->tria = (pTria)realloc(mesh->tria,(mesh->nt+1)*sizeof(Tria));
     }
     else {
       GmfGotoKwd(inm,GmfTriangles);
       for (k=1; k<=mesh->nt; k++) {
-	pt1 = &mesh->tria[k];
-	GmfGetLin(inm,GmfTriangles,&pt1->v[0],&pt1->v[1],&pt1->v[2],&pt1->ref);
+        pt1 = &mesh->tria[k];
+        GmfGetLin(inm,GmfTriangles,&pt1->v[0],&pt1->v[1],&pt1->v[2],&pt1->ref);
       }
     }
   }
@@ -108,12 +108,12 @@ int loadMesh(pMesh mesh) {
       GmfGetLin(inm,GmfEdges,&pa->a,&pa->b,&pa->ref);
       pa->tag |= MG_REF;
       if ( info.iso ) {
-	if( pa->ref != MG_ISO ) {
-	  ++mesh->na;
-	  pa->ref = abs(pa->ref);
-	  memcpy(&mesh->edge[mesh->na],&mesh->edge[k],sizeof(Edge));
-	  ina[k] = mesh->na;
-	}
+        if( pa->ref != MG_ISO ) {
+          ++mesh->na;
+          pa->ref = abs(pa->ref);
+          memcpy(&mesh->edge[mesh->na],&mesh->edge[k],sizeof(Edge));
+          ina[k] = mesh->na;
+        }
       }
     }
 
@@ -122,19 +122,19 @@ int loadMesh(pMesh mesh) {
     if ( nr ) {
       GmfGotoKwd(inm,GmfRidges);
       for (k=1; k<=nr; k++) {
-	GmfGetLin(inm,GmfRidges,&ia);
-	assert(ia <= na);
-	if( info.iso ){
-	  if( ina[ia] == 0) continue;
-	  else {
-	    pa = &mesh->edge[ina[ia]];
-	    pa->tag |= MG_GEO;
-	  }
-	}
-	else{
-	  pa = &mesh->edge[ia];
-	  pa->tag |= MG_GEO;
-	}
+        GmfGetLin(inm,GmfRidges,&ia);
+        assert(ia <= na);
+        if( info.iso ){
+          if( ina[ia] == 0) continue;
+          else {
+            pa = &mesh->edge[ina[ia]];
+            pa->tag |= MG_GEO;
+          }
+        }
+        else{
+          pa = &mesh->edge[ia];
+          pa->tag |= MG_GEO;
+        }
       }
     }
     /* get required edges */
@@ -142,19 +142,19 @@ int loadMesh(pMesh mesh) {
     if ( nr ) {
       GmfGotoKwd(inm,GmfRequiredEdges);
       for (k=1; k<=nr; k++) {
-	GmfGetLin(inm,GmfRequiredEdges,&ia);
-	assert(ia <= na);
-	if( info.iso ){
-	  if( ina[ia] == 0) continue;
-	  else {
-	    pa = &mesh->edge[ina[ia]];
-	    pa->tag |= MG_REQ;
-	  }
-	}
-	else{
-	  pa = &mesh->edge[ia];
-	  pa->tag |= MG_REQ;
-	}
+        GmfGetLin(inm,GmfRequiredEdges,&ia);
+        assert(ia <= na);
+        if( info.iso ){
+          if( ina[ia] == 0) continue;
+          else {
+            pa = &mesh->edge[ina[ia]];
+            pa->tag |= MG_REQ;
+          }
+        }
+        else{
+          pa = &mesh->edge[ia];
+          pa->tag |= MG_REQ;
+        }
 
       }
     }
@@ -237,7 +237,7 @@ int saveMesh(pMesh mesh) {
     for (k=1; k<=mesh->nt; k++) {
       ptt = &mesh->tria[k];
       GmfSetLin(outm,GmfTriangles,mesh->point[ptt->v[0]].tmp,mesh->point[ptt->v[1]].tmp,\
-		mesh->point[ptt->v[2]].tmp,ptt->ref);
+                mesh->point[ptt->v[2]].tmp,ptt->ref);
     }
     free(mesh->adjt);
     free(mesh->tria);
@@ -253,19 +253,19 @@ int saveMesh(pMesh mesh) {
     if ( na ) {
       GmfSetKwd(outm,GmfEdges,na);
       for (k=0; k<=mesh->htab.max; k++) {
-	ph = &mesh->htab.geom[k];
-	if ( !ph->a )  continue;
-	GmfSetLin(outm,GmfEdges,mesh->point[ph->a].tmp,mesh->point[ph->b].tmp,ph->ref);
+        ph = &mesh->htab.geom[k];
+        if ( !ph->a )  continue;
+        GmfSetLin(outm,GmfEdges,mesh->point[ph->a].tmp,mesh->point[ph->b].tmp,ph->ref);
       }
       if ( nr ) {
-	GmfSetKwd(outm,GmfRidges,nr);
-	na = 0;
-	for (k=0; k<=mesh->htab.max; k++) {
-	  ph = &mesh->htab.geom[k];
-	  if ( !ph->a )  continue;
-	  na++;
-	  if ( ph->tag & MG_GEO )  GmfSetLin(outm,GmfRidges,na);
-	}
+        GmfSetKwd(outm,GmfRidges,nr);
+        na = 0;
+        for (k=0; k<=mesh->htab.max; k++) {
+          ph = &mesh->htab.geom[k];
+          if ( !ph->a )  continue;
+          na++;
+          if ( ph->tag & MG_GEO )  GmfSetLin(outm,GmfRidges,na);
+        }
       }
     }
   }
@@ -276,7 +276,7 @@ int saveMesh(pMesh mesh) {
     for (k=1; k<=mesh->np; k++) {
       ppt = &mesh->point[k];
       if ( MG_VOK(ppt) && ppt->tag & MG_CRN )
-	GmfSetLin(outm,GmfCorners,ppt->tmp);
+        GmfSetLin(outm,GmfCorners,ppt->tmp);
     }
   }
   if ( nre ) {
@@ -284,7 +284,7 @@ int saveMesh(pMesh mesh) {
     for (k=1; k<=mesh->np; k++) {
       ppt = &mesh->point[k];
       if ( MG_VOK(ppt) && ppt->tag & MG_REQ )
-	GmfSetLin(outm,GmfRequiredVertices,ppt->tmp);
+        GmfSetLin(outm,GmfRequiredVertices,ppt->tmp);
     }
   }
 
@@ -298,7 +298,7 @@ int saveMesh(pMesh mesh) {
   for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
     if ( MG_EOK(pt) ) GmfSetLin(outm,GmfTetrahedra,mesh->point[pt->v[0]].tmp,mesh->point[pt->v[1]].tmp, \
-				mesh->point[pt->v[2]].tmp,mesh->point[pt->v[3]].tmp,pt->ref);
+                                mesh->point[pt->v[2]].tmp,mesh->point[pt->v[3]].tmp,pt->ref);
   }
 
   /* write normals */
@@ -331,8 +331,8 @@ int saveMesh(pMesh mesh) {
       ppt = &mesh->point[k];
       if ( MG_SIN(ppt->tag) )  continue;
       else if ( MG_VOK(ppt) && (MG_EDG(ppt->tag) || (ppt->tag & MG_NOM) )) {
-	pxp = &mesh->xpoint[ppt->xp];
-	GmfSetLin(outm,GmfTangents,pxp->t[0],pxp->t[1],pxp->t[2]);
+        pxp = &mesh->xpoint[ppt->xp];
+        GmfSetLin(outm,GmfTangents,pxp->t[0],pxp->t[1],pxp->t[2]);
       }
     }
     GmfSetKwd(outm,GmfTangentAtVertices,nt);
@@ -341,7 +341,7 @@ int saveMesh(pMesh mesh) {
       ppt = &mesh->point[k];
       if ( MG_SIN(ppt->tag) )  continue;
       else if ( MG_VOK(ppt) && (MG_EDG(ppt->tag) || (ppt->tag & MG_NOM) ) )
-	GmfSetLin(outm,GmfTangentAtVertices,ppt->tmp,++nt);
+        GmfSetLin(outm,GmfTangentAtVertices,ppt->tmp,++nt);
     }
   }
 
@@ -377,7 +377,7 @@ int loadMet(pSol met) {
     strcat(data,".sol");
     if (!(inm = GmfOpenMesh(data,GmfRead,&met->ver,&met->dim)) ) {
       if ( info.imprim > 0 )
-	fprintf(stderr,"  ** %s  NOT FOUND. USE DEFAULT METRIC.\n",data);
+        fprintf(stderr,"  ** %s  NOT FOUND. USE DEFAULT METRIC.\n",data);
       return(-1);
     }
   }

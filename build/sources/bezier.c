@@ -129,9 +129,9 @@ inline int BezierEdge(pMesh mesh,int ip0,int ip1,double b0[3],double b1[3],char 
       memcpy(t0,&(pxp0->t[0]),3*sizeof(double));
       ps = t0[0]*ux + t0[1]*uy + t0[2]*uz;
       if ( ps < 0.0 ) {
-	t0[0] *= -1.0;
-	t0[1] *= -1.0;
-	t0[2] *= -1.0;
+        t0[0] *= -1.0;
+        t0[1] *= -1.0;
+        t0[2] *= -1.0;
       }
     }
     if ( MG_SIN(p1->tag) ) {
@@ -143,9 +143,9 @@ inline int BezierEdge(pMesh mesh,int ip0,int ip1,double b0[3],double b1[3],char 
       memcpy(t1,&(pxp1->t[0]),3*sizeof(double));
       ps = -( t1[0]*ux + t1[1]*uy + t1[2]*uz );
       if ( ps < 0.0 ) {
-	t1[0] *= -1.0;
-	t1[1] *= -1.0;
-	t1[2] *= -1.0;
+        t1[0] *= -1.0;
+        t1[1] *= -1.0;
+        t1[2] *= -1.0;
       }
     }
   }
@@ -153,32 +153,32 @@ inline int BezierEdge(pMesh mesh,int ip0,int ip1,double b0[3],double b1[3],char 
   else {
     if ( !MG_SIN(p0->tag) && !( p0->tag & MG_NOM ) ) {
       if ( p0->tag & MG_GEO ) {
-	n1 = &(pxp0->n1[0]);
-	n2 = &(pxp0->n2[0]);
-	ps1 = v[0]*n1[0] + v[1]*n1[1] + v[2]*n1[2];
-	ps2 = v[0]*n2[0] + v[1]*n2[1] + v[2]*n2[2];
-	if ( fabs(ps2) > fabs(ps1) )
-	  memcpy(np0,&(pxp0->n2[0]),3*sizeof(double));
-	else
-	  memcpy(np0,&(pxp0->n1[0]),3*sizeof(double));
+        n1 = &(pxp0->n1[0]);
+        n2 = &(pxp0->n2[0]);
+        ps1 = v[0]*n1[0] + v[1]*n1[1] + v[2]*n1[2];
+        ps2 = v[0]*n2[0] + v[1]*n2[1] + v[2]*n2[2];
+        if ( fabs(ps2) > fabs(ps1) )
+          memcpy(np0,&(pxp0->n2[0]),3*sizeof(double));
+        else
+          memcpy(np0,&(pxp0->n1[0]),3*sizeof(double));
       }
       else
-	memcpy(np0,&(pxp0->n1[0]),3*sizeof(double));
+        memcpy(np0,&(pxp0->n1[0]),3*sizeof(double));
     }
 
     if ( !MG_SIN(p1->tag) && !( p1->tag & MG_NOM )) {
       if ( p1->tag & MG_GEO ) {
-	n1 = &(pxp1->n1[0]);
-	n2 = &(pxp1->n2[0]);
-	ps1 = -(v[0]*n1[0] + v[1]*n1[1] + v[2]*n1[2]);
-	ps2 = -(v[0]*n2[0] + v[1]*n2[1] + v[2]*n2[2]);
-	if ( fabs(ps2) > fabs(ps1) )
-	  memcpy(np1,&(pxp1->n2[0]),3*sizeof(double));
-	else
-	  memcpy(np1,&(pxp1->n1[0]),3*sizeof(double));
+        n1 = &(pxp1->n1[0]);
+        n2 = &(pxp1->n2[0]);
+        ps1 = -(v[0]*n1[0] + v[1]*n1[1] + v[2]*n1[2]);
+        ps2 = -(v[0]*n2[0] + v[1]*n2[1] + v[2]*n2[2]);
+        if ( fabs(ps2) > fabs(ps1) )
+          memcpy(np1,&(pxp1->n2[0]),3*sizeof(double));
+        else
+          memcpy(np1,&(pxp1->n1[0]),3*sizeof(double));
       }
       else
-	memcpy(np1,&(pxp1->n1[0]),3*sizeof(double));
+        memcpy(np1,&(pxp1->n1[0]),3*sizeof(double));
     }
     if ( ( MG_SIN(p0->tag) || ( p0->tag & MG_NOM )) && ( MG_SIN(p1->tag) || ( p1->tag & MG_NOM ))) {
       t0[0] = ux * il;
@@ -191,9 +191,9 @@ inline int BezierEdge(pMesh mesh,int ip0,int ip1,double b0[3],double b1[3],char 
     }
     else if ( (!MG_SIN(p0->tag)  && !( p0->tag & MG_NOM )) && ( MG_SIN(p1->tag) || ( p1->tag & MG_NOM ))) {
       if ( !BezierTgt(p0->c,p1->c,np0,np0,t0,t1) ) {
-	t0[0] = ux * il;
-	t0[1] = uy * il;
-	t0[2] = uz * il;
+        t0[0] = ux * il;
+        t0[1] = uy * il;
+        t0[2] = uz * il;
       }
       t1[0] = -ux * il;
       t1[1] = -uy * il;
@@ -201,9 +201,9 @@ inline int BezierEdge(pMesh mesh,int ip0,int ip1,double b0[3],double b1[3],char 
     }
     else if ( ( MG_SIN(p0->tag) || ( p0->tag & MG_NOM ) ) && (!MG_SIN(p1->tag) && !( p1->tag & MG_NOM ))) {
       if ( !BezierTgt(p0->c,p1->c,np1,np1,t0,t1) ) {
-	t1[0] = - ux * il;
-	t1[1] = - uy * il;
-	t1[2] = - uz * il;
+        t1[0] = - ux * il;
+        t1[1] = - uy * il;
+        t1[2] = - uz * il;
       }
       t0[0] = ux * il;
       t0[1] = uy * il;
@@ -211,13 +211,13 @@ inline int BezierEdge(pMesh mesh,int ip0,int ip1,double b0[3],double b1[3],char 
     }
     else {
       if ( !BezierTgt(p0->c,p1->c,np0,np1,t0,t1) ) {
-	t0[0] = ux * il;
-	t0[1] = uy * il;
-	t0[2] = uz * il;
+        t0[0] = ux * il;
+        t0[1] = uy * il;
+        t0[2] = uz * il;
 
-	t1[0] = - ux * il;
-	t1[1] = - uy * il;
-	t1[2] = - uz * il;
+        t1[0] = - ux * il;
+        t1[1] = - uy * il;
+        t1[2] = - uz * il;
       }
     }
   }
@@ -269,17 +269,17 @@ int bezierCP(pMesh mesh,Tria *pt,pBezier pb) {
       assert(p[i]->xp);
       pxp = &mesh->xpoint[p[i]->xp];
       if ( MG_EDG(p[i]->tag) ) {
-	nortri(mesh,pt,nt);
-	ps  = pxp->n1[0]*nt[0] + pxp->n1[1]*nt[1] + pxp->n1[2]*nt[2];
-	ps2 = pxp->n2[0]*nt[0] + pxp->n2[1]*nt[1] + pxp->n2[2]*nt[2];
-	if ( fabs(ps) > fabs(ps2) )
-	  memcpy(&pb->n[i],pxp->n1,3*sizeof(double));
-	else
-	  memcpy(&pb->n[i],pxp->n2,3*sizeof(double));
-	memcpy(&pb->t[i],pxp->t,3*sizeof(double));
+        nortri(mesh,pt,nt);
+        ps  = pxp->n1[0]*nt[0] + pxp->n1[1]*nt[1] + pxp->n1[2]*nt[2];
+        ps2 = pxp->n2[0]*nt[0] + pxp->n2[1]*nt[1] + pxp->n2[2]*nt[2];
+        if ( fabs(ps) > fabs(ps2) )
+          memcpy(&pb->n[i],pxp->n1,3*sizeof(double));
+        else
+          memcpy(&pb->n[i],pxp->n2,3*sizeof(double));
+        memcpy(&pb->t[i],pxp->t,3*sizeof(double));
       }
       else
-	memcpy(&pb->n[i],pxp->n1,3*sizeof(double));
+        memcpy(&pb->n[i],pxp->n1,3*sizeof(double));
     }
   }
 
@@ -295,26 +295,26 @@ int bezierCP(pMesh mesh,Tria *pt,pBezier pb) {
   if(isnm){
     if( im != -1 ){
       for(i=0; i<3; i++){
-	if(p[i]->tag & MG_NOM){
-	  ps = pb->n[i][0]*pb->n[im][0] + pb->n[i][1]*pb->n[im][1] + pb->n[i][2]*pb->n[im][2];
-	  if( ps < 0.0 ){
-	    pb->n[i][0] *= -1.0;
-	    pb->n[i][1] *= -1.0;
-	    pb->n[i][2] *= -1.0;
-	  }
-	}
+        if(p[i]->tag & MG_NOM){
+          ps = pb->n[i][0]*pb->n[im][0] + pb->n[i][1]*pb->n[im][1] + pb->n[i][2]*pb->n[im][2];
+          if( ps < 0.0 ){
+            pb->n[i][0] *= -1.0;
+            pb->n[i][1] *= -1.0;
+            pb->n[i][2] *= -1.0;
+          }
+        }
       }
     }
     else{
       for(i=1; i<3; i++){
-	if(p[i]->tag & MG_NOM){
-	  ps = pb->n[i][0]*pb->n[0][0] + pb->n[i][1]*pb->n[0][1] + pb->n[i][2]*pb->n[0][2];
-	  if( ps < 0.0 ){
-	    pb->n[i][0] *= -1.0;
-	    pb->n[i][1] *= -1.0;
-	    pb->n[i][2] *= -1.0;
-	  }
-	}
+        if(p[i]->tag & MG_NOM){
+          ps = pb->n[i][0]*pb->n[0][0] + pb->n[i][1]*pb->n[0][1] + pb->n[i][2]*pb->n[0][2];
+          if( ps < 0.0 ){
+            pb->n[i][0] *= -1.0;
+            pb->n[i][1] *= -1.0;
+            pb->n[i][2] *= -1.0;
+          }
+        }
       }
     }
   }
@@ -338,32 +338,32 @@ int bezierCP(pMesh mesh,Tria *pt,pBezier pb) {
     /* check for boundary curve */
     if ( MG_EDG(pt->tag[i]) || (pt->tag[i] & MG_NOM)) {
       if ( MG_SIN(p[i1]->tag) ) {
-	t1[0] = ux / l;
-	t1[1] = uy / l;
-	t1[2] = uz / l;
+        t1[0] = ux / l;
+        t1[1] = uy / l;
+        t1[2] = uz / l;
       }
       else {
-	memcpy(t1,&pb->t[i1],3*sizeof(double));
-	ps = t1[0]*ux + t1[1]*uy + t1[2]*uz;
-	if(ps < 0.0){
-	  t1[0] *= -1.0;
-	  t1[1] *= -1.0;
-	  t1[2] *= -1.0;
-	}
+        memcpy(t1,&pb->t[i1],3*sizeof(double));
+        ps = t1[0]*ux + t1[1]*uy + t1[2]*uz;
+        if(ps < 0.0){
+          t1[0] *= -1.0;
+          t1[1] *= -1.0;
+          t1[2] *= -1.0;
+        }
       }
       if ( MG_SIN(p[i2]->tag) ) {
-	t2[0] = - ux / l;
-	t2[1] = - uy / l;
-	t2[2] = - uz / l;
+        t2[0] = - ux / l;
+        t2[1] = - uy / l;
+        t2[2] = - uz / l;
       }
       else {
-	memcpy(t2,&pb->t[i2],3*sizeof(double));
-	ps = -(t2[0]*ux + t2[1]*uy + t2[2]*uz);
-	if(ps < 0.0){
-	  t2[0] *= -1.0;
-	  t2[1] *= -1.0;
-	  t2[2] *= -1.0;
-	}
+        memcpy(t2,&pb->t[i2],3*sizeof(double));
+        ps = -(t2[0]*ux + t2[1]*uy + t2[2]*uz);
+        if(ps < 0.0){
+          t2[0] *= -1.0;
+          t2[1] *= -1.0;
+          t2[2] *= -1.0;
+        }
       }
 
       /* tangent evaluation */
@@ -374,22 +374,22 @@ int bezierCP(pMesh mesh,Tria *pt,pBezier pb) {
       pb->t[i+3][2] = pb->t[i1][2] + pb->t[i2][2] - ps*uz;
       dd = pb->t[i+3][0]*pb->t[i+3][0] + pb->t[i+3][1]*pb->t[i+3][1] + pb->t[i+3][2]*pb->t[i+3][2];
       if ( dd > EPSD2 ) {
-	dd = 1.0 / sqrt(dd);
-	pb->t[i+3][0] *= dd;
-	pb->t[i+3][1] *= dd;
-	pb->t[i+3][2] *= dd;
+        dd = 1.0 / sqrt(dd);
+        pb->t[i+3][0] *= dd;
+        pb->t[i+3][1] *= dd;
+        pb->t[i+3][2] *= dd;
       }
     }
 
     else { /* internal edge */
       if(!BezierTgt(p[i1]->c,p[i2]->c,n1,n2,t1,t2)){
-	t1[0] = ux / l;
-	t1[1] = uy / l;
-	t1[2] = uz / l;
+        t1[0] = ux / l;
+        t1[1] = uy / l;
+        t1[2] = uz / l;
 
-	t2[0] = - ux / l;
-	t2[1] = - uy / l;
-	t2[2] = - uz / l;
+        t2[0] = - ux / l;
+        t2[1] = - uy / l;
+        t2[2] = - uz / l;
       }
     }
 
@@ -447,7 +447,7 @@ int bezierInt(pBezier pb,double uv[2],double o[3],double no[3],double to[3]) {
   for (i=0; i<3; i++) {
     o[i]  = pb->b[0][i]*w*w*w + pb->b[1][i]*u*u*u + pb->b[2][i]*v*v*v \
       + 3.0 * (pb->b[3][i]*u*u*v + pb->b[4][i]*u*v*v + pb->b[5][i]*w*v*v \
-	       + pb->b[6][i]*w*w*v + pb->b[7][i]*w*w*u + pb->b[8][i]*w*u*u)\
+               + pb->b[6][i]*w*w*v + pb->b[7][i]*w*w*u + pb->b[8][i]*w*u*u)\
       + 6.0 * pb->b[9][i]*u*v*w;
 
     /* quadratic interpolation of normals */

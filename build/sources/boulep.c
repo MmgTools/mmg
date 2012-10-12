@@ -111,8 +111,8 @@ int boulec(pMesh mesh,int start,int ip,double *tt) {
     do {
       pt = &mesh->tria[k];
       if ( MG_EDG(pt->tag[i2]) ) {
-	p2 = &mesh->point[pt->v[i1]];
-	break;
+        p2 = &mesh->point[pt->v[i1]];
+        break;
       }
       adja = &mesh->adjt[3*(k-1)+1];
       k  = adja[i2] / 3;
@@ -180,10 +180,10 @@ int bouler(pMesh mesh,int start,int ip,int *list) {
       pt = &mesh->tria[k];
       i2 = iprv2[i];
       if ( MG_EDG(pt->tag[i2]) ) {
-	i1 = inxt2[i];
-	nr++;
-	list[nr] = pt->v[i1];
-	if ( nr > LMAX-2 )  return(-nr);
+        i1 = inxt2[i];
+        nr++;
+        list[nr] = pt->v[i1];
+        if ( nr > LMAX-2 )  return(-nr);
       }
       adja = &mesh->adjt[3*(k-1)+1];
       k  = adja[i2] / 3;
@@ -229,7 +229,7 @@ int boulevolp (pMesh mesh, int start, int ip, int * list){
       if ( pt1->flag == base )  continue;
       pt1->flag = base;
       for (j=0; j<4; j++)
-	if ( pt1->v[j] == nump )  break;
+        if ( pt1->v[j] == nump )  break;
       assert(j<4);
       /* overflow */
       if ( ilist > LMAX-3 )  return(0);
@@ -282,9 +282,9 @@ int boulenm(pMesh mesh,int start,int ip,int iface,double n[3],double t[3]) {
     else if ( tag & MG_NOM ) {
       nnm++;
       if ( !ip0 )
-	ip0 = nb;
+        ip0 = nb;
       else
-	ip1 = nb;
+        ip1 = nb;
     }
 
     /* A boundary face has been hit : change travel edge */
@@ -300,33 +300,33 @@ int boulenm(pMesh mesh,int start,int ip,int iface,double n[3],double t[3]) {
       pt = &mesh->tetra[k];
       adja = &mesh->adja[4*(k-1)+1];
       if ( pt->flag != base ) {
-	for (i=0; i<4; i++)
-	  if ( pt->v[i] == nump )  break;
-	assert(i<4);
-	pt->flag = base;
+        for (i=0; i<4; i++)
+          if ( pt->v[i] == nump )  break;
+        assert(i<4);
+        pt->flag = base;
       }
 
       /* identification of edge number in tetra k */
       for (i=0; i<6; i++) {
-	ipa = iare[i][0];
-	ipb = iare[i][1];
-	if ( (pt->v[ipa] == na && pt->v[ipb] == nb) ||
-	     (pt->v[ipa] == nb && pt->v[ipb] == na))  break;
+        ipa = iare[i][0];
+        ipb = iare[i][1];
+        if ( (pt->v[ipa] == na && pt->v[ipb] == nb) ||
+             (pt->v[ipa] == nb && pt->v[ipb] == na))  break;
       }
       assert(i<6);
 
       /* set sense of travel */
       if ( pt->v[ ifar[i][0] ] == piv ) {
-	adj = adja[ ifar[i][0] ] / 4;
-	ipiv = ifar[i][1];
-	iopp = ifar[i][0];
-	piv = pt->v[ipiv];
+        adj = adja[ ifar[i][0] ] / 4;
+        ipiv = ifar[i][1];
+        iopp = ifar[i][0];
+        piv = pt->v[ipiv];
       }
       else {
-	adj = adja[ ifar[i][1] ] / 4;
-	ipiv = ifar[i][0];
-	iopp = ifar[i][1];
-	piv = pt->v[ipiv];
+        adj = adja[ ifar[i][1] ] / 4;
+        ipiv = ifar[i][0];
+        iopp = ifar[i][1];
+        piv = pt->v[ipiv];
       }
       isface = (adja[iopp] == 0);
     }
@@ -431,35 +431,35 @@ int bouleext(pMesh mesh, int start, int ip, int iface, int *listv, int *ilistv, 
       pt = &mesh->tetra[k];
       adja = &mesh->adja[4*(k-1)+1];
       if ( pt->flag != base ) {
-	for (i=0; i<4; i++)
-	  if ( pt->v[i] == nump )  break;
-	assert(i<4);
-	listv[(*ilistv)] = 4*k+i;
-	(*ilistv)++;
-	pt->flag = base;
+        for (i=0; i<4; i++)
+          if ( pt->v[i] == nump )  break;
+        assert(i<4);
+        listv[(*ilistv)] = 4*k+i;
+        (*ilistv)++;
+        pt->flag = base;
       }
 
       /* identification of edge number in tetra k */
       for (i=0; i<6; i++) {
-	ipa = iare[i][0];
-	ipb = iare[i][1];
-	if ( (pt->v[ipa] == na && pt->v[ipb] == nb) ||
-	     (pt->v[ipa] == nb && pt->v[ipb] == na))  break;
+        ipa = iare[i][0];
+        ipb = iare[i][1];
+        if ( (pt->v[ipa] == na && pt->v[ipb] == nb) ||
+             (pt->v[ipa] == nb && pt->v[ipb] == na))  break;
       }
       assert(i<6);
 
       /* set sense of travel */
       if ( pt->v[ ifar[i][0] ] == piv ) {
-	adj = adja[ ifar[i][0] ] / 4;
-	ipiv = ifar[i][1];
-	iopp = ifar[i][0];
-	piv = pt->v[ipiv];
+        adj = adja[ ifar[i][0] ] / 4;
+        ipiv = ifar[i][1];
+        iopp = ifar[i][0];
+        piv = pt->v[ipiv];
       }
       else {
-	adj = adja[ ifar[i][1] ] / 4;
-	ipiv = ifar[i][0];
-	iopp = ifar[i][1];
-	piv = pt->v[ipiv];
+        adj = adja[ ifar[i][1] ] / 4;
+        ipiv = ifar[i][0];
+        iopp = ifar[i][1];
+        piv = pt->v[ipiv];
       }
       isface = (adja[iopp] == 0);
     }
@@ -483,7 +483,7 @@ int bouleext(pMesh mesh, int start, int ip, int iface, int *listv, int *ilistv, 
       pt1->flag = base;
 
       for (j=0; j<4; j++)
-	if ( pt1->v[j] == nump )  break;
+        if ( pt1->v[j] == nump )  break;
       assert(j<4);
       /* overflow */
       assert ( (*ilistv) <= LMAX-3 );
@@ -539,40 +539,40 @@ int boulesurfvolp(pMesh mesh, int start, int ip, int iface, int *listv, int *ili
       pt = &mesh->tetra[k];
       adja = &mesh->adja[4*(k-1)+1];
       if ( pt->flag != base ) {
-	for (i=0; i<4; i++)
-	  if ( pt->v[i] == nump )  break;
-	assert(i<4);
-	listv[(*ilistv)] = 4*k+i;
-	(*ilistv)++;
-	pt->flag = base;
+        for (i=0; i<4; i++)
+          if ( pt->v[i] == nump )  break;
+        assert(i<4);
+        listv[(*ilistv)] = 4*k+i;
+        (*ilistv)++;
+        pt->flag = base;
       }
 
       /* identification of edge number in tetra k */
       for (i=0; i<6; i++) {
-	ipa = iare[i][0];
-	ipb = iare[i][1];
-	if ( (pt->v[ipa] == na && pt->v[ipb] == nb) ||
-	     (pt->v[ipa] == nb && pt->v[ipb] == na))  break;
+        ipa = iare[i][0];
+        ipb = iare[i][1];
+        if ( (pt->v[ipa] == na && pt->v[ipb] == nb) ||
+             (pt->v[ipa] == nb && pt->v[ipb] == na))  break;
       }
       assert(i<6);
 
       /* set sense of travel */
       if ( pt->v[ ifar[i][0] ] == piv ) {
-	adj = adja[ ifar[i][0] ] / 4;
-	ipiv = ifar[i][1];
-	iopp = ifar[i][0];
-	piv = pt->v[ipiv];
+        adj = adja[ ifar[i][0] ] / 4;
+        ipiv = ifar[i][1];
+        iopp = ifar[i][0];
+        piv = pt->v[ipiv];
       }
       else {
-	adj = adja[ ifar[i][1] ] / 4;
-	ipiv = ifar[i][0];
-	iopp = ifar[i][1];
-	piv = pt->v[ipiv];
+        adj = adja[ ifar[i][1] ] / 4;
+        ipiv = ifar[i][0];
+        iopp = ifar[i][1];
+        piv = pt->v[ipiv];
       }
       isface = 0;
       if(pt->xt){
-	pxt = &mesh->xtetra[pt->xt];
-	isface = (MG_BDY & pxt->ftag[iopp]);
+        pxt = &mesh->xtetra[pt->xt];
+        isface = (MG_BDY & pxt->ftag[iopp]);
       }
     }
     while ( adj && (adj != nvstart) && !isface );
@@ -595,7 +595,7 @@ int boulesurfvolp(pMesh mesh, int start, int ip, int iface, int *listv, int *ili
       pt1->flag = base;
 
       for (j=0; j<4; j++)
-	if ( pt1->v[j] == nump )  break;
+        if ( pt1->v[j] == nump )  break;
       assert(j<4);
       /* overflow */
       assert ( (*ilistv) <= LMAX-3 );
@@ -642,15 +642,15 @@ inline int gettag(pMesh mesh,int start,int ia,int *tag,int *edg) {
       ipa = iare[i][0];
       ipb = iare[i][1];
       if ( (pt->v[ipa] == na && pt->v[ipb] == nb) ||
-	   (pt->v[ipa] == nb && pt->v[ipb] == na))  break;
+           (pt->v[ipa] == nb && pt->v[ipb] == na))  break;
     }
     assert(i<6);
     if ( pt->xt ) {
       pxt = &mesh->xtetra[pt->xt];
       if ( (pxt->ftag[ifar[i][0]] & MG_BDY) || (pxt->ftag[ifar[i][1]] & MG_BDY) ) {
-	*tag = pxt->tag[i];
-	*edg = pxt->edg[i];
-	return(1);
+        *tag = pxt->tag[i];
+        *edg = pxt->edg[i];
+        return(1);
       }
     }
 
@@ -698,7 +698,7 @@ inline int settag(pMesh mesh,int start,int ia,int tag,int edg) {
       ipa = iare[i][0];
       ipb = iare[i][1];
       if ( (pt->v[ipa] == na && pt->v[ipb] == nb) ||
-	   (pt->v[ipa] == nb && pt->v[ipb] == na))  break;
+           (pt->v[ipa] == nb && pt->v[ipb] == na))  break;
     }
     assert(i<6);
     if ( pt->xt ) {
@@ -734,7 +734,7 @@ inline int settag(pMesh mesh,int start,int ia,int tag,int edg) {
       ipa = iare[i][0];
       ipb = iare[i][1];
       if ( (pt->v[ipa] == na && pt->v[ipb] == nb) ||
-	   (pt->v[ipa] == nb && pt->v[ipb] == na))  break;
+           (pt->v[ipa] == nb && pt->v[ipb] == na))  break;
     }
     assert(i<6);
     if ( pt->xt ) {
@@ -784,7 +784,7 @@ int coquil(pMesh mesh,int start,int ia,int * list) {
       ipa = iare[i][0];
       ipb = iare[i][1];
       if ( (pt->v[ipa] == na && pt->v[ipb] == nb) ||
-	   (pt->v[ipa] == nb && pt->v[ipb] == na))  break;
+           (pt->v[ipa] == nb && pt->v[ipb] == na))  break;
     }
     assert(i<6);
     list[ilist] = 6*adj +i;
@@ -837,7 +837,7 @@ int coquil(pMesh mesh,int start,int ia,int * list) {
       ipa = iare[i][0];
       ipb = iare[i][1];
       if ( (pt->v[ipa] == na && pt->v[ipb] == nb) ||
-	   (pt->v[ipa] == nb && pt->v[ipb] == na))  break;
+           (pt->v[ipa] == nb && pt->v[ipb] == na))  break;
     }
     assert(i<6);
     list[ilist] = 6*adj +i;
@@ -891,7 +891,7 @@ int srcbdy(pMesh mesh,int start,int ia) {
       ipa = iare[i][0];
       ipb = iare[i][1];
       if( ( pt->v[ipa] == na && pt->v[ipb] == nb ) || ( pt->v[ipa] == nb && pt->v[ipb] == na ))
-	break;
+        break;
 
     }
     assert(i<6);
@@ -912,7 +912,7 @@ int srcbdy(pMesh mesh,int start,int ia) {
     if(pt->xt){
       pxt = &mesh->xtetra[pt->xt];
       if( pxt->ftag[iadj] & MG_BDY )
-	return(1);
+        return(1);
     }
   }
 
@@ -966,7 +966,7 @@ int coquilface(pMesh mesh,int start,int ia,int *list,int *it1,int *it2) {
       ipa = iare[i][0];
       ipb = iare[i][1];
       if ( (pt->v[ipa] == na && pt->v[ipb] == nb) ||
-	   (pt->v[ipa] == nb && pt->v[ipb] == na))  break;
+           (pt->v[ipa] == nb && pt->v[ipb] == na))  break;
     }
     assert(i<6);
     list[ilist] = 6*adj +i;
@@ -992,14 +992,14 @@ int coquilface(pMesh mesh,int start,int ia,int *list,int *it1,int *it2) {
 
     if ( isbdy ) {
       if ( *it1 == 0 )
-	*it1 = 4*pradj+iface;
+        *it1 = 4*pradj+iface;
       else {
-	if ( *it2 != 0 ) {
-	  return(0);
-	  //saveMesh(mesh);
-	}
-	assert( *it2 == 0 );
-	*it2 = 4*pradj+iface;
+        if ( *it2 != 0 ) {
+          return(0);
+          //saveMesh(mesh);
+        }
+        assert( *it2 == 0 );
+        *it2 = 4*pradj+iface;
       }
     }
   }
@@ -1052,7 +1052,7 @@ int coquilface(pMesh mesh,int start,int ia,int *list,int *it1,int *it2) {
       ipa = iare[i][0];
       ipb = iare[i][1];
       if ( (pt->v[ipa] == na && pt->v[ipb] == nb) ||
-	   (pt->v[ipa] == nb && pt->v[ipb] == na) )  break;
+           (pt->v[ipa] == nb && pt->v[ipb] == na) )  break;
     }
     assert(i<6);
     list[ilist] = 6*adj +i;

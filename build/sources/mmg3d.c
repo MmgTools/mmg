@@ -25,9 +25,9 @@ unsigned char arpt[4][3] = { {0,1,2}, {0,4,3}, {1,3,5}, {2,5,4} };
 
 static inline void printTime(char *chaine,double tps){
   char *tpsm;
-  tpsm= printim(tps);                
-  fprintf(stdout,chaine,tpsm);			
-  free(tpsm);					
+  tpsm= printim(tps);
+  fprintf(stdout,chaine,tpsm);
+  free(tpsm);
 }
 
 static void excfun(int sigid) {
@@ -85,104 +85,104 @@ static int parsar(int argc,char *argv[],pMesh mesh,pSol met) {
     if ( *argv[i] == '-' ) {
       switch(argv[i][1]) {
       case '?':
-	usage(argv[0]);
-	break;
+        usage(argv[0]);
+        break;
 
       case 'a':
-	if ( !strcmp(argv[i],"-ar") && ++i < argc ) {
-	  info.dhd = atof(argv[i]);
-	  info.dhd = MG_MAX(0.0, MG_MIN(180.0,info.dhd));
-	  info.dhd = cos(info.dhd*M_PI/180.0);
-	}
-	break;
+        if ( !strcmp(argv[i],"-ar") && ++i < argc ) {
+          info.dhd = atof(argv[i]);
+          info.dhd = MG_MAX(0.0, MG_MIN(180.0,info.dhd));
+          info.dhd = cos(info.dhd*M_PI/180.0);
+        }
+        break;
       case 'd':  /* debug */
-	info.ddebug = 1;
-	break;
+        info.ddebug = 1;
+        break;
       case 'h':
-	if ( !strcmp(argv[i],"-hmin") && ++i < argc )
-	  info.hmin = atof(argv[i]);
-	else if ( !strcmp(argv[i],"-hmax") && ++i < argc )
-	  info.hmax = atof(argv[i]);
-	else if ( !strcmp(argv[i],"-hausd") && ++i <= argc ) {
-	  info.hausd = atof(argv[i]);
-	}
-	else if ( !strcmp(argv[i],"-hgrad") && ++i <= argc ) {
-	  info.hgrad = atof(argv[i]);
-	  if ( info.hgrad < 0.0 )
-	    info.hgrad = -1.0;
-	  else
-	    info.hgrad = log(info.hgrad);
-	}
-	else
-	  usage(argv[0]);
-	break;
+        if ( !strcmp(argv[i],"-hmin") && ++i < argc )
+          info.hmin = atof(argv[i]);
+        else if ( !strcmp(argv[i],"-hmax") && ++i < argc )
+          info.hmax = atof(argv[i]);
+        else if ( !strcmp(argv[i],"-hausd") && ++i <= argc ) {
+          info.hausd = atof(argv[i]);
+        }
+        else if ( !strcmp(argv[i],"-hgrad") && ++i <= argc ) {
+          info.hgrad = atof(argv[i]);
+          if ( info.hgrad < 0.0 )
+            info.hgrad = -1.0;
+          else
+            info.hgrad = log(info.hgrad);
+        }
+        else
+          usage(argv[0]);
+        break;
       case 'i':
-	if ( !strcmp(argv[i],"-in") ) {
-	  ++i;
-	  mesh->namein = argv[i];
-	  info.imprim = 5;
-	}
-	break;
+        if ( !strcmp(argv[i],"-in") ) {
+          ++i;
+          mesh->namein = argv[i];
+          info.imprim = 5;
+        }
+        break;
       case 'l':
-	if ( !strcmp(argv[i],"-ls") ) {
-	  info.iso = 1;
-	  if ( i < argc+1 && isdigit(argv[i+1][0]) ) {
-	    i++;
-	    info.ls = atof(argv[i]);
-	  }
-	}
-	break;
+        if ( !strcmp(argv[i],"-ls") ) {
+          info.iso = 1;
+          if ( i < argc+1 && isdigit(argv[i+1][0]) ) {
+            i++;
+            info.ls = atof(argv[i]);
+          }
+        }
+        break;
       case 'm':  /* memory */
-	if ( ++i < argc && isdigit(argv[i][0]) )
-	  info.mem = atoi(argv[i]);
-	else {
-	  fprintf(stderr,"Missing argument option %c\n",argv[i-1][1]);
-	  usage(argv[0]);
-	}
-	break;
+        if ( ++i < argc && isdigit(argv[i][0]) )
+          info.mem = atoi(argv[i]);
+        else {
+          fprintf(stderr,"Missing argument option %c\n",argv[i-1][1]);
+          usage(argv[0]);
+        }
+        break;
       case 'n':
-	if ( !strcmp(argv[i],"-nr") )
-	  info.dhd = -1.0;
-	break;
+        if ( !strcmp(argv[i],"-nr") )
+          info.dhd = -1.0;
+        break;
       case 'o':
-	if ( !strcmp(argv[i],"-out") ) {
-	  ++i;
-	  mesh->nameout = argv[i];
-	}
-	break;
+        if ( !strcmp(argv[i],"-out") ) {
+          ++i;
+          mesh->nameout = argv[i];
+        }
+        break;
       case 's':
-	if ( !strcmp(argv[i],"-sol") ) {
-	  ++i;
-	  met->namein = argv[i];
-	}
-	break;
+        if ( !strcmp(argv[i],"-sol") ) {
+          ++i;
+          met->namein = argv[i];
+        }
+        break;
       case 'v':
-	if ( ++i < argc ) {
-	  if ( argv[i][0] == '-' || isdigit(argv[i][0]) )
-	    info.imprim = atoi(argv[i]);
-	  else
-	    i--;
-	}
-	else {
-	  fprintf(stderr,"Missing argument option %c\n",argv[i-1][1]);
-	  usage(argv[0]);
-	}
-	break;
+        if ( ++i < argc ) {
+          if ( argv[i][0] == '-' || isdigit(argv[i][0]) )
+            info.imprim = atoi(argv[i]);
+          else
+            i--;
+        }
+        else {
+          fprintf(stderr,"Missing argument option %c\n",argv[i-1][1]);
+          usage(argv[0]);
+        }
+        break;
       default:
-	fprintf(stderr,"Unrecognized option %s\n",argv[i]);
-	usage(argv[0]);
+        fprintf(stderr,"Unrecognized option %s\n",argv[i]);
+        usage(argv[0]);
       }
     }
     else {
       if ( mesh->namein == NULL ) {
-	mesh->namein = argv[i];
-	if ( info.imprim == -99 )  info.imprim = 5;
+        mesh->namein = argv[i];
+        if ( info.imprim == -99 )  info.imprim = 5;
       }
       else if ( mesh->nameout == NULL )
-	mesh->nameout = argv[i];
+        mesh->nameout = argv[i];
       else {
-	fprintf(stdout,"Argument %s ignored\n",argv[i]);
-	usage(argv[0]);
+        fprintf(stdout,"Argument %s ignored\n",argv[i]);
+        usage(argv[0]);
       }
     }
     i++;
@@ -333,7 +333,7 @@ int main(int argc,char *argv[]) {
 
   if( info.iso && !mmg3d2(&mesh,&met) ) return(1);
   if ( !analys(&mesh) )  return(1);
-  
+
   if ( abs(info.imprim) > 0 ) {
     PutMetIn_h(&mesh,&met);
     prilen(&mesh);

@@ -33,9 +33,9 @@ int chkswpbdy(pMesh mesh,int *list,int ilist,int it1,int it2) {
       iel = list[k] / 6;
       pt = &mesh->tetra[iel];
       if ( pt->ref == MG_MINUS )
-	nminus++;
+        nminus++;
       else
-	nplus++;
+        nplus++;
     }
     if ( nplus == 1 || nminus == 1 )  return(0);
   }
@@ -52,7 +52,7 @@ int chkswpbdy(pMesh mesh,int *list,int ilist,int it1,int it2) {
   assert(ia1 < 3);
   na1 = tt1.v[ia1];
   if ( !((tt1.v[inxt2[ia1]] == np && tt1.v[iprv2[ia1]] == nq)
-	 || (tt1.v[inxt2[ia1]] == nq && tt1.v[iprv2[ia1]] == np))) {
+         || (tt1.v[inxt2[ia1]] == nq && tt1.v[iprv2[ia1]] == np))) {
     return(0);
   }
 
@@ -62,7 +62,7 @@ int chkswpbdy(pMesh mesh,int *list,int ilist,int it1,int it2) {
   assert(ia2 < 3);
   na2 = tt2.v[ia2];
   if ( !((tt2.v[inxt2[ia2]] == np && tt2.v[iprv2[ia2]] == nq)
-	 || (tt2.v[inxt2[ia2]] == nq && tt2.v[iprv2[ia2]] == np))) {
+         || (tt2.v[inxt2[ia2]] == nq && tt2.v[iprv2[ia2]] == np))) {
     return(0);
   }
 

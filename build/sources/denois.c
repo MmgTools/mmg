@@ -77,13 +77,13 @@ int trydisp(pMesh mesh,double *optpos,short t){
       np = pt->v[i];
       p0 = &mesh->point[np];
       if(p0->flag){
-	c[0] = p0->c[0] + alpha*(optpos[3*(np-1)+1] - p0->c[0]);
-	c[1] = p0->c[1] + alpha*(optpos[3*(np-1)+2] - p0->c[1]);
-	c[2] = p0->c[2] + alpha*(optpos[3*(np-1)+3] - p0->c[2]);
-	memcpy(&(a[i][0]),c,3*sizeof(double));
+        c[0] = p0->c[0] + alpha*(optpos[3*(np-1)+1] - p0->c[0]);
+        c[1] = p0->c[1] + alpha*(optpos[3*(np-1)+2] - p0->c[1]);
+        c[2] = p0->c[2] + alpha*(optpos[3*(np-1)+3] - p0->c[2]);
+        memcpy(&(a[i][0]),c,3*sizeof(double));
       }
       else
-	memcpy(&(a[i][0]),p0->c,3*sizeof(double));
+        memcpy(&(a[i][0]),p0->c,3*sizeof(double));
     }
 
     cal = orcal_poi(&(a[0][0]),&(a[1][0]),&(a[2][0]),&(a[3][0]));
@@ -129,12 +129,12 @@ int dichodisp(pMesh mesh,double *optpos){
       t = t >> 1;
       nd = trydisp(mesh,optpos,t);
       if(nd){
-	tm += t;
-	lastit = it;
+        tm += t;
+        lastit = it;
       }
       else{
-	if(lastit <= it-2)
-	  break;
+        if(lastit <= it-2)
+          break;
       }
       it++;
     }
@@ -170,15 +170,15 @@ int lapantilap(pMesh mesh,double *optpos){
       if(mesh->tetra[iel].ref == pt->ref) continue;
 
       for(j=0; j<3; j++){
-	ip = idir[i][j];
-	np = pt->v[ip];
-	p0 = &mesh->point[np];
-	if(p0->flag)
-	  continue;
-	else{
-	  nb++;
-	  p0->flag = nb;
-	}
+        ip = idir[i][j];
+        np = pt->v[ip];
+        p0 = &mesh->point[np];
+        if(p0->flag)
+          continue;
+        else{
+          nb++;
+          p0->flag = nb;
+        }
       }
     }
   }
@@ -202,27 +202,27 @@ int lapantilap(pMesh mesh,double *optpos){
       if(mesh->tetra[iel].ref == pt->ref) continue;
 
       for(j=0; j<3; j++){
-	ip = idir[i][j];
-	np = pt->v[ip];
-	p0 = &mesh->point[np];
+        ip = idir[i][j];
+        np = pt->v[ip];
+        p0 = &mesh->point[np];
 
-	nw = p0->flag;
-	assert(nw);
+        nw = p0->flag;
+        assert(nw);
 
-	i0 = idir[i][inxt2[j]];
-	i1 = idir[i][iprv2[j]];
+        i0 = idir[i][inxt2[j]];
+        i1 = idir[i][iprv2[j]];
 
-	p1 = &mesh->point[pt->v[i0]];
-	intpos[3*(nw-1)+1] += p1->c[0];
-	intpos[3*(nw-1)+2] += p1->c[1];
-	intpos[3*(nw-1)+3] += p1->c[2];
-	w[nw]++;
+        p1 = &mesh->point[pt->v[i0]];
+        intpos[3*(nw-1)+1] += p1->c[0];
+        intpos[3*(nw-1)+2] += p1->c[1];
+        intpos[3*(nw-1)+3] += p1->c[2];
+        w[nw]++;
 
-	p1 = &mesh->point[pt->v[i1]];
-	intpos[3*(nw-1)+1] += p1->c[0];
-	intpos[3*(nw-1)+2] += p1->c[1];
-	intpos[3*(nw-1)+3] += p1->c[2];
-	w[nw]++;
+        p1 = &mesh->point[pt->v[i1]];
+        intpos[3*(nw-1)+1] += p1->c[0];
+        intpos[3*(nw-1)+2] += p1->c[1];
+        intpos[3*(nw-1)+3] += p1->c[2];
+        w[nw]++;
       }
     }
   }
@@ -250,27 +250,27 @@ int lapantilap(pMesh mesh,double *optpos){
       if(mesh->tetra[iel].ref == pt->ref) continue;
 
       for(j=0; j<3; j++){
-	ip = idir[i][j];
-	np = pt->v[ip];
+        ip = idir[i][j];
+        np = pt->v[ip];
 
-	i0 = idir[i][inxt2[j]];
-	i1 = idir[i][iprv2[j]];
+        i0 = idir[i][inxt2[j]];
+        i1 = idir[i][iprv2[j]];
 
-	p1 = &mesh->point[pt->v[i0]];
-	nw1 = p1->flag;
-	assert(nw1);
+        p1 = &mesh->point[pt->v[i0]];
+        nw1 = p1->flag;
+        assert(nw1);
 
-	optpos[3*(np-1)+1] += intpos[3*(nw1-1)+1];
-	optpos[3*(np-1)+2] += intpos[3*(nw1-1)+2];
-	optpos[3*(np-1)+3] += intpos[3*(nw1-1)+3];
+        optpos[3*(np-1)+1] += intpos[3*(nw1-1)+1];
+        optpos[3*(np-1)+2] += intpos[3*(nw1-1)+2];
+        optpos[3*(np-1)+3] += intpos[3*(nw1-1)+3];
 
-	p1 = &mesh->point[pt->v[i1]];
-	nw1 = p1->flag;
-	assert(nw1);
+        p1 = &mesh->point[pt->v[i1]];
+        nw1 = p1->flag;
+        assert(nw1);
 
-	optpos[3*(np-1)+1] += intpos[3*(nw1-1)+1];
-	optpos[3*(np-1)+2] += intpos[3*(nw1-1)+2];
-	optpos[3*(np-1)+3] += intpos[3*(nw1-1)+3];
+        optpos[3*(np-1)+1] += intpos[3*(nw1-1)+1];
+        optpos[3*(np-1)+2] += intpos[3*(nw1-1)+2];
+        optpos[3*(np-1)+3] += intpos[3*(nw1-1)+3];
       }
     }
   }
@@ -445,7 +445,7 @@ inline int meancur(pMesh mesh,int np,double c[3],int ilist,int *list,double h[3]
     for(j=0; j<3; j++){
       i = idir[iface][j];
       if(pt->v[i] == np)
-	break;
+        break;
     }
     assert( j < 3 );
 
@@ -577,25 +577,25 @@ double timestepMCF(pMesh mesh,double defrate){
       area += surftri(mesh,k,i);
 
       for(j=0; j<3; j++){
-	ip = idir[i][j];
-	np = pt->v[ip];
-	p0 = &mesh->point[np];
+        ip = idir[i][j];
+        np = pt->v[ip];
+        p0 = &mesh->point[np];
 
-	if(p0->flag) continue;
+        if(p0->flag) continue;
 
-	p0->flag = 1;
-	assert(boulesurfvolp(mesh,k,ip,i,listv,&ilistv,lists,&ilists));
-	assert(meancur(mesh,np,p0->c,ilists,lists,h));
+        p0->flag = 1;
+        assert(boulesurfvolp(mesh,k,ip,i,listv,&ilistv,lists,&ilists));
+        assert(meancur(mesh,np,p0->c,ilists,lists,h));
 
-	locarea = 0.0;
-	for(l=0; l<ilists; l++){
-	  jel = lists[l] / 4;
-	  jface = lists[l] % 4;
-	  locarea += surftri(mesh,jel,jface);
-	}
+        locarea = 0.0;
+        for(l=0; l<ilists; l++){
+          jel = lists[l] / 4;
+          jface = lists[l] % 4;
+          locarea += surftri(mesh,jel,jface);
+        }
 
-	dd = h[0]*h[0] + h[1]*h[1] + h[2]*h[2];
-	intk2 += locarea * dd;
+        dd = h[0]*h[0] + h[1]*h[1] + h[2]*h[2];
+        intk2 += locarea * dd;
       }
     }
   }
@@ -654,18 +654,18 @@ int bdyMCF(pMesh mesh){
     for(i=0; i<4; i++){
       iel = adja[i] / 4;
       if(!iel){
-	for(j=0; j<3; j++){
-	  ip = idir[i][j];
-	  p0 = &mesh->point[pt->v[ip]];
-	  p0->flag = -2;
-	}
+        for(j=0; j<3; j++){
+          ip = idir[i][j];
+          p0 = &mesh->point[pt->v[ip]];
+          p0->flag = -2;
+        }
       }
       else if(mesh->tetra[iel].ref != pt->ref){
-	for(j=0; j<3; j++){
-	  ip = idir[i][j];
-	  p0 = &mesh->point[pt->v[ip]];
-	  if(p0->flag != -2) p0->flag = -1;
-	}
+        for(j=0; j<3; j++){
+          ip = idir[i][j];
+          p0 = &mesh->point[pt->v[ip]];
+          if(p0->flag != -2) p0->flag = -1;
+        }
       }
     }
   }
@@ -681,121 +681,121 @@ int bdyMCF(pMesh mesh){
 
       adja = &mesh->adja[4*(k-1)+1];
       for(i=0; i<4; i++){
-	iel = adja[i] / 4;
-	if(!iel) continue;
+        iel = adja[i] / 4;
+        if(!iel) continue;
 
-	/* Case of an implicit boundary face */
-	if(mesh->tetra[iel].ref != pt->ref){
-	  for(j=0; j<3; j++){
-	    ip = idir[i][j];
-	    np = pt->v[ip];
+        /* Case of an implicit boundary face */
+        if(mesh->tetra[iel].ref != pt->ref){
+          for(j=0; j<3; j++){
+            ip = idir[i][j];
+            np = pt->v[ip];
 
-	    p0 = &mesh->point[np];
-	    if(p0->flag == -2 || p0->flag == -base) continue;
+            p0 = &mesh->point[np];
+            if(p0->flag == -2 || p0->flag == -base) continue;
 
-	    p0->flag = -base;
+            p0->flag = -base;
 
-	    assert(boulesurfvolp(mesh,k,ip,i,listv,&ilistv,lists,&ilists));
+            assert(boulesurfvolp(mesh,k,ip,i,listv,&ilistv,lists,&ilists));
 
-	    /* Forward step of mean curvature flow */
-	    assert(meancur(mesh,np,p0->c,ilists,lists,h));
+            /* Forward step of mean curvature flow */
+            assert(meancur(mesh,np,p0->c,ilists,lists,h));
 
-	    o[0] = p0->c[0] - dt*h[0];
-	    o[1] = p0->c[1] - dt*h[1];
-	    o[2] = p0->c[2] - dt*h[2];
+            o[0] = p0->c[0] - dt*h[0];
+            o[1] = p0->c[1] - dt*h[1];
+            o[2] = p0->c[2] - dt*h[2];
 
-	    /* Backward step from intermediate position */
-	    assert(meancur(mesh,np,o,ilists,lists,h));
+            /* Backward step from intermediate position */
+            assert(meancur(mesh,np,o,ilists,lists,h));
 
-	    o[0] += dt*h[0];
-	    o[1] += dt*h[1];
-	    o[2] += dt*h[2];
+            o[0] += dt*h[0];
+            o[1] += dt*h[1];
+            o[2] += dt*h[2];
 
-	    /* Check validity of resulting position */
-	    isok = 1;
-	    for(l=0; l<ilistv; l++){
-	      jel = listv[l] / 4;
-	      jj = listv[l] % 4;
+            /* Check validity of resulting position */
+            isok = 1;
+            for(l=0; l<ilistv; l++){
+              jel = listv[l] / 4;
+              jj = listv[l] % 4;
 
-	      pt1 = &mesh->tetra[jel];
-	      memcpy(pt0,pt1,sizeof(Tetra));
-	      memcpy(ppt0,p0,sizeof(Point));
-	      memcpy(ppt0->c,o,3*sizeof(double));
+              pt1 = &mesh->tetra[jel];
+              memcpy(pt0,pt1,sizeof(Tetra));
+              memcpy(ppt0,p0,sizeof(Point));
+              memcpy(ppt0->c,o,3*sizeof(double));
 
-	      if(orcal(mesh,0)<NULKAL){
-		isok = 0;
-		break;
-	      }
-	    }
+              if(orcal(mesh,0)<NULKAL){
+                isok = 0;
+                break;
+              }
+            }
 
-	    if(isok){
-	      nbdy++;
-	      memcpy(p0->c,o,3*sizeof(double));
-	    }
-	  }
-	}
+            if(isok){
+              nbdy++;
+              memcpy(p0->c,o,3*sizeof(double));
+            }
+          }
+        }
 
-	/* Case of an internal face */
-	else{
-	  for(j=0; j<3; j++){
-	    ip = idir[i][j];
-	    np = pt->v[ip];
+        /* Case of an internal face */
+        else{
+          for(j=0; j<3; j++){
+            ip = idir[i][j];
+            np = pt->v[ip];
 
-	    p0 = &mesh->point[np];
-	    if(p0->flag < 0.0 || p0->flag == base) continue;
+            p0 = &mesh->point[np];
+            if(p0->flag < 0.0 || p0->flag == base) continue;
 
-	    p0->flag = base;
+            p0->flag = base;
 
-	    ilistv = boulevolp(mesh,k,ip,listv);
+            ilistv = boulevolp(mesh,k,ip,listv);
 
-	    memset(o,0.0,3*sizeof(double));
-	    totvol = 0.0;
-	    for(l=0; l<ilistv; l++){
-	      jel = listv[l] / 4;
-	      pt1 = &mesh->tetra[jel];
+            memset(o,0.0,3*sizeof(double));
+            totvol = 0.0;
+            for(l=0; l<ilistv; l++){
+              jel = listv[l] / 4;
+              pt1 = &mesh->tetra[jel];
 
-	      vol= det4pt(mesh->point[pt1->v[0]].c,mesh->point[pt1->v[1]].c,\
-			  mesh->point[pt1->v[2]].c,mesh->point[pt1->v[3]].c);
+              vol= det4pt(mesh->point[pt1->v[0]].c,mesh->point[pt1->v[1]].c,\
+                          mesh->point[pt1->v[2]].c,mesh->point[pt1->v[3]].c);
 
-	      totvol += vol;
+              totvol += vol;
 
-	      for(jj=0; jj<4; jj++){
-		p1 = &mesh->point[pt1->v[jj]];
-		o[0] += 0.25*vol*p1->c[0];
-		o[1] += 0.25*vol*p1->c[1];
-		o[2] += 0.25*vol*p1->c[2];
-	      }
-	    }
-	    if(totvol < EPSD2) continue;
-	    totvol = 1.0 / totvol;
+              for(jj=0; jj<4; jj++){
+                p1 = &mesh->point[pt1->v[jj]];
+                o[0] += 0.25*vol*p1->c[0];
+                o[1] += 0.25*vol*p1->c[1];
+                o[2] += 0.25*vol*p1->c[2];
+              }
+            }
+            if(totvol < EPSD2) continue;
+            totvol = 1.0 / totvol;
 
-	    o[0] *= totvol;
-	    o[1] *= totvol;
-	    o[2] *= totvol;
+            o[0] *= totvol;
+            o[1] *= totvol;
+            o[2] *= totvol;
 
-	    /* Check validity of resulting position */
-	    isok = 1;
-	    for(l=0; l<ilistv; l++){
-	      jel = listv[l] / 4;
-	      jj = listv[l] % 4;
+            /* Check validity of resulting position */
+            isok = 1;
+            for(l=0; l<ilistv; l++){
+              jel = listv[l] / 4;
+              jj = listv[l] % 4;
 
-	      pt1 = &mesh->tetra[jel];
-	      memcpy(pt0,pt1,sizeof(Tetra));
-	      memcpy(ppt0,p0,sizeof(Point));
-	      memcpy(ppt0->c,o,3*sizeof(double));
+              pt1 = &mesh->tetra[jel];
+              memcpy(pt0,pt1,sizeof(Tetra));
+              memcpy(ppt0,p0,sizeof(Point));
+              memcpy(ppt0->c,o,3*sizeof(double));
 
-	      if(orcal(mesh,0)<NULKAL){
-		isok = 0;
-		break;
-	      }
-	    }
+              if(orcal(mesh,0)<NULKAL){
+                isok = 0;
+                break;
+              }
+            }
 
-	    if(isok){
-	      nint++;
-	      memcpy(p0->c,o,3*sizeof(double));
-	    }
-	  }
-	}
+            if(isok){
+              nint++;
+              memcpy(p0->c,o,3*sizeof(double));
+            }
+          }
+        }
       }
     }
 
@@ -852,14 +852,14 @@ int ppgdisp(pMesh mesh,double *optpos){
       if(mesh->tetra[iel].ref != pt->ref) continue;
 
       for(j=0; j<3; j++){
-	ip = idir[i][j];
-	np = pt->v[ip];
-	p0 = &mesh->point[np];
+        ip = idir[i][j];
+        np = pt->v[ip];
+        p0 = &mesh->point[np];
 
-	if(!p0->flag){
-	  p0->flag = 1;
-	  w[np] = 1;
-	}
+        if(!p0->flag){
+          p0->flag = 1;
+          w[np] = 1;
+        }
       }
     }
   }
@@ -886,10 +886,10 @@ int ppgdisp(pMesh mesh,double *optpos){
       if(pt->flag) continue;
 
       for(i=0; i<4; i++){
-	np = pt->v[i];
-	p0 = &mesh->point[np];
-	if(p0->flag == base)
-	  break;
+        np = pt->v[i];
+        p0 = &mesh->point[np];
+        if(p0->flag == base)
+          break;
       }
 
       if(i == 4) continue;
@@ -897,44 +897,44 @@ int ppgdisp(pMesh mesh,double *optpos){
       pt->flag = base;
 
       for(i=0; i<4; i++){
-	np = pt->v[i];
-	p0 = &mesh->point[np];
-	if(p0->flag) continue;
+        np = pt->v[i];
+        p0 = &mesh->point[np];
+        if(p0->flag) continue;
 
-	ip1 = i;
-	for(j=0; j<3; j++){
-	  ip1 = inxt3[ip1];
-	  np1 = pt->v[ip1];
-	  p1 = &mesh->point[np1];
+        ip1 = i;
+        for(j=0; j<3; j++){
+          ip1 = inxt3[ip1];
+          np1 = pt->v[ip1];
+          p1 = &mesh->point[np1];
 
-	  if(!p1->flag || p1->flag == newbase) continue;
+          if(!p1->flag || p1->flag == newbase) continue;
 
-	  w[np]++;
+          w[np]++;
 
-	  v[0] = optpos[3*(np1-1)+1] - p1->c[0];
-	  v[1] = optpos[3*(np1-1)+2] - p1->c[1];
-	  v[2] = optpos[3*(np1-1)+3] - p1->c[2];
+          v[0] = optpos[3*(np1-1)+1] - p1->c[0];
+          v[1] = optpos[3*(np1-1)+2] - p1->c[1];
+          v[2] = optpos[3*(np1-1)+3] - p1->c[2];
 
-	  norm = v[0]*v[0] + v[1]*v[1] + v[2]*v[2];
-	  norm = sqrt(norm);
+          norm = v[0]*v[0] + v[1]*v[1] + v[2]*v[2];
+          norm = sqrt(norm);
 
-	  if(norm < EPSD) continue;
-	  inorm = 1.0 / norm;
-	  v[0] *= inorm;
-	  v[1] *= inorm;
-	  v[2] *= inorm;
+          if(norm < EPSD) continue;
+          inorm = 1.0 / norm;
+          v[0] *= inorm;
+          v[1] *= inorm;
+          v[2] *= inorm;
 
-	  l = (p1->c[0]-p0->c[0])*(p1->c[0]-p0->c[0]) + (p1->c[1]-p0->c[1])*(p1->c[1]-p0->c[1])\
-	    + (p1->c[2]-p0->c[2])*(p1->c[2]-p0->c[2]);
+          l = (p1->c[0]-p0->c[0])*(p1->c[0]-p0->c[0]) + (p1->c[1]-p0->c[1])*(p1->c[1]-p0->c[1])\
+            + (p1->c[2]-p0->c[2])*(p1->c[2]-p0->c[2]);
 
-	  l = MG_MAX(0.0,norm - r*l);
+          l = MG_MAX(0.0,norm - r*l);
 
-	  optpos[3*(np-1)+1] += p0->c[0] + l*v[0];
-	  optpos[3*(np-1)+2] += p0->c[1] + l*v[1];
-	  optpos[3*(np-1)+3] += p0->c[2] + l*v[2];
-	}
+          optpos[3*(np-1)+1] += p0->c[0] + l*v[0];
+          optpos[3*(np-1)+2] += p0->c[1] + l*v[1];
+          optpos[3*(np-1)+3] += p0->c[2] + l*v[2];
+        }
 
-	p0->flag = newbase;
+        p0->flag = newbase;
       }
     }
   }

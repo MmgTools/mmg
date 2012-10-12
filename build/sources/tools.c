@@ -11,9 +11,9 @@ inline void nsort(int n,double *val,char *perm){
   for (i=0; i<n; i++) {
     for (j=i+1; j<n; j++) {
       if ( val[perm[i]] > val[perm[j]] ) {
-	aux = perm[i];
-	perm[i] = perm[j];
-	perm[j] = aux;
+        aux = perm[i];
+        perm[i] = perm[j];
+        perm[j] = aux;
       }
     }
   }
@@ -793,10 +793,10 @@ inline int BezierReg(pMesh mesh,int ip0, int ip1, double s, double v[3], double 
       ps2 = n2[0]*v[0] + n2[1]*v[1] + n2[2]*v[2];
 
       if(fabs(ps1) < fabs(ps2)){
-	memcpy(np1,&mesh->xpoint[p1->xp].n2[0],3*sizeof(double));
+        memcpy(np1,&mesh->xpoint[p1->xp].n2[0],3*sizeof(double));
       }
       else{
-	memcpy(np1,&mesh->xpoint[p1->xp].n1[0],3*sizeof(double));
+        memcpy(np1,&mesh->xpoint[p1->xp].n1[0],3*sizeof(double));
       }
     }
     else{
@@ -812,10 +812,10 @@ inline int BezierReg(pMesh mesh,int ip0, int ip1, double s, double v[3], double 
       ps2 = n2[0]*v[0] + n2[1]*v[1] + n2[2]*v[2];
 
       if(fabs(ps1) < fabs(ps2)){
-	memcpy(np0,&mesh->xpoint[p0->xp].n2[0],3*sizeof(double));
+        memcpy(np0,&mesh->xpoint[p0->xp].n2[0],3*sizeof(double));
       }
       else{
-	memcpy(np0,&mesh->xpoint[p0->xp].n1[0],3*sizeof(double));
+        memcpy(np0,&mesh->xpoint[p0->xp].n1[0],3*sizeof(double));
       }
     }
     else{
@@ -831,10 +831,10 @@ inline int BezierReg(pMesh mesh,int ip0, int ip1, double s, double v[3], double 
       ps2 = n2[0]*v[0] + n2[1]*v[1] + n2[2]*v[2];
 
       if(fabs(ps1) < fabs(ps2)){
-	memcpy(np0,&mesh->xpoint[p0->xp].n2[0],3*sizeof(double));
+        memcpy(np0,&mesh->xpoint[p0->xp].n2[0],3*sizeof(double));
       }
       else{
-	memcpy(np0,&mesh->xpoint[p0->xp].n1[0],3*sizeof(double));
+        memcpy(np0,&mesh->xpoint[p0->xp].n1[0],3*sizeof(double));
       }
     }
     else{
@@ -848,10 +848,10 @@ inline int BezierReg(pMesh mesh,int ip0, int ip1, double s, double v[3], double 
       ps2 = n2[0]*v[0] + n2[1]*v[1] + n2[2]*v[2];
 
       if(fabs(ps1) < fabs(ps2)){
-	memcpy(np1,&mesh->xpoint[p1->xp].n2[0],3*sizeof(double));
+        memcpy(np1,&mesh->xpoint[p1->xp].n2[0],3*sizeof(double));
       }
       else{
-	memcpy(np1,&mesh->xpoint[p1->xp].n1[0],3*sizeof(double));
+        memcpy(np1,&mesh->xpoint[p1->xp].n1[0],3*sizeof(double));
       }
     }
     else{

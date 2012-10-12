@@ -71,85 +71,85 @@ int GmfIniFlg=0;
 GmfMshSct *GmfMshTab[ MaxMsh + 1 ];
 char *GmfKwdFmt[ GmfMaxKwd + 1 ][4] =
   {     {"Reserved", "", "", ""},
-	{"MeshVersionFormatted", "", "", "i"},
-	{"Reserved", "", "", ""},
-	{"Dimension", "", "", "i"},
-	{"Vertices", "Vertex", "i", "dri"},
-	{"Edges", "Edge", "i", "iii"},
-	{"Triangles", "Triangle", "i", "iiii"},
-	{"Quadrilaterals", "Quadrilateral", "i", "iiiii"},
-	{"Tetrahedra", "Tetrahedron", "i", "iiiii"},
-	{"Pentahedra", "Pentahedron", "i", "iiiiiii"},
-	{"Hexahedra", "Hexahedron", "i", "iiiiiiiii"},
-	{"Reserved", "", "", ""},
-	{"Reserved", "", "", ""},
-	{"Corners", "Corner", "i", "i"},
-	{"Ridges", "Ridge", "i", "i"},
-	{"RequiredVertices", "RequiredVertex", "i", "i"},
-	{"RequiredEdges", "RequiredEdge", "i", "i"},
-	{"RequiredTriangles", "RequiredTriangle", "i", "i"},
-	{"RequiredQuadrilaterals", "RequiredQuadrilateral", "i", "i"},
-	{"TangentAtEdgeVertices", "TangentAtEdgeVertex", "i", "iii"},
-	{"NormalAtVertices", "NormalAtVertex", "i", "ii"},
-	{"NormalAtTriangleVertices", "NormalAtTriangleVertex", "i", "iii"},
-	{"NormalAtQuadrilateralVertices", "NormalAtQuadrilateralVertex", "i", "iiii"},
-	{"AngleOfCornerBound", "", "", "r"},
-	{"TrianglesP2", "TriangleP2", "i", "iiiiiii"},
-	{"TrianglesP3", "TriangleP3", "i", "iiiiiiiiii"},
-	{"TrianglesP4", "TriangleP4", "i", "iiiiiiiiiiiii"},
-	{"QuadrilateralsP2", "QuadrilateralP2", "i", "iiiiiiiii"},
-	{"QuadrilateralsP3", "QuadrilateralP3", "i", "iiiiiiiiiiiii"},
-	{"QuadrilateralsP4", "QuadrilateralP4", "i", "iiiiiiiiiiiiiiiii"},
-	{"TetrahedraP2", "TetrahedronP2", "i", "iiiiiiiiii"},
-	{"TetrahedraP3", "TetrahedronP3", "i", "iiiiiiiiiiiiiiii"},
-	{"TetrahedraP4", "TetrahedronP4", "i", "iiiiiiiiiiiiiiiiiiiiii"},
-	{"HexahedraP2", "HexahedronP2", "i", "iiiiiiiiiiiiiiiiiiiii"},
-	{"HexahedraP3", "HexahedronP3", "i", "iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii"},
-	{"HexahedraP4", "HexahedronP4", "i", "iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii"},
-	{"Reserved", "", "", ""},
-	{"Reserved", "", "", ""},
-	{"Reserved", "", "", ""},
-	{"Reserved", "", "", ""},
-	{"Reserved", "", "", ""},
-	{"Reserved", "", "", ""},
-	{"Reserved", "", "", ""},
-	{"Reserved", "", "", ""},
-	{"Reserved", "", "", ""},
-	{"Reserved", "", "", ""},
-	{"Reserved", "", "", ""},
-	{"Reserved", "", "", ""},
-	{"Reserved", "", "", ""},
-	{"Reserved", "", "", ""},
-	{"BoundingBox", "", "", "drdr"},
-	{"Reserved", "", "", ""},
-	{"Reserved", "", "", ""},
-	{"Reserved", "", "", ""},
-	{"End", "", "", ""},
-	{"Reserved", "", "", ""},
-	{"Reserved", "", "", ""},
-	{"Reserved", "", "", ""},
-	{"Reserved", "", "", ""},
-	{"Tangents", "Tangent", "i", "dr"},
-	{"Normals", "Normal", "i", "dr"},
-	{"TangentAtVertices", "TangentAtVertex", "i", "ii"},
-	{"SolAtVertices", "SolAtVertex", "i", "sr"},
-	{"SolAtEdges", "SolAtEdge", "i", "sr"},
-	{"SolAtTriangles", "SolAtTriangle", "i", "sr"},
-	{"SolAtQuadrilaterals", "SolAtQuadrilateral", "i", "sr"},
-	{"SolAtTetrahedra", "SolAtTetrahedron", "i", "sr"},
-	{"SolAtPentahedra", "SolAtPentahedron", "i", "sr"},
-	{"SolAtHexahedra", "SolAtHexahedron", "i", "sr"},
-	{"DSolAtVertices", "DSolAtVertex", "i", "sr"},
-	{"ISolAtVertices", "ISolAtVertex", "i", "i"},
-	{"ISolAtEdges", "ISolAtEdge", "i", "ii"},
-	{"ISolAtTriangles", "ISolAtTriangle", "i", "iii"},
-	{"ISolAtQuadrilaterals", "ISolAtQuadrilateral", "i", "iiii"},
-	{"ISolAtTetrahedra", "ISolAtTetrahedron", "i", "iiii"},
-	{"ISolAtPentahedra", "ISolAtPentahedron", "i", "iiiiii"},
-	{"ISolAtHexahedra", "ISolAtHexahedron", "i", "iiiiiiii"},
-	{"Iterations", "","","i"},
-	{"Time", "","","r"},
-	{"Reserved", "","",""}
+        {"MeshVersionFormatted", "", "", "i"},
+        {"Reserved", "", "", ""},
+        {"Dimension", "", "", "i"},
+        {"Vertices", "Vertex", "i", "dri"},
+        {"Edges", "Edge", "i", "iii"},
+        {"Triangles", "Triangle", "i", "iiii"},
+        {"Quadrilaterals", "Quadrilateral", "i", "iiiii"},
+        {"Tetrahedra", "Tetrahedron", "i", "iiiii"},
+        {"Pentahedra", "Pentahedron", "i", "iiiiiii"},
+        {"Hexahedra", "Hexahedron", "i", "iiiiiiiii"},
+        {"Reserved", "", "", ""},
+        {"Reserved", "", "", ""},
+        {"Corners", "Corner", "i", "i"},
+        {"Ridges", "Ridge", "i", "i"},
+        {"RequiredVertices", "RequiredVertex", "i", "i"},
+        {"RequiredEdges", "RequiredEdge", "i", "i"},
+        {"RequiredTriangles", "RequiredTriangle", "i", "i"},
+        {"RequiredQuadrilaterals", "RequiredQuadrilateral", "i", "i"},
+        {"TangentAtEdgeVertices", "TangentAtEdgeVertex", "i", "iii"},
+        {"NormalAtVertices", "NormalAtVertex", "i", "ii"},
+        {"NormalAtTriangleVertices", "NormalAtTriangleVertex", "i", "iii"},
+        {"NormalAtQuadrilateralVertices", "NormalAtQuadrilateralVertex", "i", "iiii"},
+        {"AngleOfCornerBound", "", "", "r"},
+        {"TrianglesP2", "TriangleP2", "i", "iiiiiii"},
+        {"TrianglesP3", "TriangleP3", "i", "iiiiiiiiii"},
+        {"TrianglesP4", "TriangleP4", "i", "iiiiiiiiiiiii"},
+        {"QuadrilateralsP2", "QuadrilateralP2", "i", "iiiiiiiii"},
+        {"QuadrilateralsP3", "QuadrilateralP3", "i", "iiiiiiiiiiiii"},
+        {"QuadrilateralsP4", "QuadrilateralP4", "i", "iiiiiiiiiiiiiiiii"},
+        {"TetrahedraP2", "TetrahedronP2", "i", "iiiiiiiiii"},
+        {"TetrahedraP3", "TetrahedronP3", "i", "iiiiiiiiiiiiiiii"},
+        {"TetrahedraP4", "TetrahedronP4", "i", "iiiiiiiiiiiiiiiiiiiiii"},
+        {"HexahedraP2", "HexahedronP2", "i", "iiiiiiiiiiiiiiiiiiiii"},
+        {"HexahedraP3", "HexahedronP3", "i", "iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii"},
+        {"HexahedraP4", "HexahedronP4", "i", "iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii"},
+        {"Reserved", "", "", ""},
+        {"Reserved", "", "", ""},
+        {"Reserved", "", "", ""},
+        {"Reserved", "", "", ""},
+        {"Reserved", "", "", ""},
+        {"Reserved", "", "", ""},
+        {"Reserved", "", "", ""},
+        {"Reserved", "", "", ""},
+        {"Reserved", "", "", ""},
+        {"Reserved", "", "", ""},
+        {"Reserved", "", "", ""},
+        {"Reserved", "", "", ""},
+        {"Reserved", "", "", ""},
+        {"Reserved", "", "", ""},
+        {"BoundingBox", "", "", "drdr"},
+        {"Reserved", "", "", ""},
+        {"Reserved", "", "", ""},
+        {"Reserved", "", "", ""},
+        {"End", "", "", ""},
+        {"Reserved", "", "", ""},
+        {"Reserved", "", "", ""},
+        {"Reserved", "", "", ""},
+        {"Reserved", "", "", ""},
+        {"Tangents", "Tangent", "i", "dr"},
+        {"Normals", "Normal", "i", "dr"},
+        {"TangentAtVertices", "TangentAtVertex", "i", "ii"},
+        {"SolAtVertices", "SolAtVertex", "i", "sr"},
+        {"SolAtEdges", "SolAtEdge", "i", "sr"},
+        {"SolAtTriangles", "SolAtTriangle", "i", "sr"},
+        {"SolAtQuadrilaterals", "SolAtQuadrilateral", "i", "sr"},
+        {"SolAtTetrahedra", "SolAtTetrahedron", "i", "sr"},
+        {"SolAtPentahedra", "SolAtPentahedron", "i", "sr"},
+        {"SolAtHexahedra", "SolAtHexahedron", "i", "sr"},
+        {"DSolAtVertices", "DSolAtVertex", "i", "sr"},
+        {"ISolAtVertices", "ISolAtVertex", "i", "i"},
+        {"ISolAtEdges", "ISolAtEdge", "i", "ii"},
+        {"ISolAtTriangles", "ISolAtTriangle", "i", "iii"},
+        {"ISolAtQuadrilaterals", "ISolAtQuadrilateral", "i", "iiii"},
+        {"ISolAtTetrahedra", "ISolAtTetrahedron", "i", "iiii"},
+        {"ISolAtPentahedra", "ISolAtPentahedron", "i", "iiiiii"},
+        {"ISolAtHexahedra", "ISolAtHexahedron", "i", "iiiiiiii"},
+        {"Iterations", "","","i"},
+        {"Time", "","","r"},
+        {"Reserved", "","",""}
   };
 
 
@@ -184,7 +184,7 @@ int GmfOpenMesh(char *FilNam, int mod, ...)
   if(!GmfIniFlg)
     {
       for(i=0;i<MaxMsh;i++)
-	GmfMshTab[i] = NULL;
+        GmfMshTab[i] = NULL;
 
       GmfIniFlg = 1;
     }
@@ -196,8 +196,8 @@ int GmfOpenMesh(char *FilNam, int mod, ...)
   for(i=1;i<MaxMsh;i++)
     if(!GmfMshTab[i])
       {
-	MshIdx = i;
-	break;
+        MshIdx = i;
+        break;
       }
 
   if( !MshIdx || !(msh = calloc(1, sizeof(GmfMshSct))) )
@@ -242,61 +242,61 @@ int GmfOpenMesh(char *FilNam, int mod, ...)
       /* Create the name string and open the file */
 
       if(!(msh->hdl = fopen(msh->FilNam, "rb")))
-	return(0);
+        return(0);
 
       /* Read the endian coding tag, the mesh version and the mesh dimension (mandatory kwd) */
 
       if(msh->typ & Bin)
-	{
-	  fread((unsigned char *)&msh->cod, WrdSiz, 1, msh->hdl);
+        {
+          fread((unsigned char *)&msh->cod, WrdSiz, 1, msh->hdl);
 
-	  if( (msh->cod != 1) && (msh->cod != 16777216) )
-	    return(0);
+          if( (msh->cod != 1) && (msh->cod != 16777216) )
+            return(0);
 
-	  ScaWrd(msh, (unsigned char *)&msh->ver);
+          ScaWrd(msh, (unsigned char *)&msh->ver);
 
-	  if( (msh->ver < 1) || (msh->ver > 3) )
-	    return(0);
+          if( (msh->ver < 1) || (msh->ver > 3) )
+            return(0);
 
-	  if( (msh->ver == 3) && (sizeof(long) == 4) )
-	    return(0);
+          if( (msh->ver == 3) && (sizeof(long) == 4) )
+            return(0);
 
-	  ScaWrd(msh, (unsigned char *)&KwdCod);
+          ScaWrd(msh, (unsigned char *)&KwdCod);
 
-	  if(KwdCod != GmfDimension)
-	    return(0);
+          if(KwdCod != GmfDimension)
+            return(0);
 
-	  GetPos(msh);
-	  ScaWrd(msh, (unsigned char *)&msh->dim);
-	}
+          GetPos(msh);
+          ScaWrd(msh, (unsigned char *)&msh->dim);
+        }
       else
-	{
-	  do
-	    {
-	      res = fscanf(msh->hdl, "%s", str);
-	    }while( (res != EOF) && strcmp(str, "MeshVersionFormatted") );
+        {
+          do
+            {
+              res = fscanf(msh->hdl, "%s", str);
+            }while( (res != EOF) && strcmp(str, "MeshVersionFormatted") );
 
-	  if(res == EOF)
-	    return(0);
+          if(res == EOF)
+            return(0);
 
-	  fscanf(msh->hdl, "%d", &msh->ver);
+          fscanf(msh->hdl, "%d", &msh->ver);
 
-	  if( (msh->ver < 1) || (msh->ver > 3) )
-	    return(0);
+          if( (msh->ver < 1) || (msh->ver > 3) )
+            return(0);
 
-	  do
-	    {
-	      res = fscanf(msh->hdl, "%s", str);
-	    }while( (res != EOF) && strcmp(str, "Dimension") );
+          do
+            {
+              res = fscanf(msh->hdl, "%s", str);
+            }while( (res != EOF) && strcmp(str, "Dimension") );
 
-	  if(res == EOF)
-	    return(0);
+          if(res == EOF)
+            return(0);
 
-	  fscanf(msh->hdl, "%d", &msh->dim);
-	}
+          fscanf(msh->hdl, "%d", &msh->dim);
+        }
 
       if( (msh->dim != 2) && (msh->dim != 3) )
-	return(0);
+        return(0);
 
       (*PtrVer) = msh->ver;
       (*PtrDim) = msh->dim;
@@ -308,7 +308,7 @@ int GmfOpenMesh(char *FilNam, int mod, ...)
       /* Read the list of kw present in the file */
 
       if(!ScaKwdTab(msh))
-	return(0);
+        return(0);
 
       GmfMshTab[ MshIdx ] = msh;
 
@@ -331,18 +331,18 @@ int GmfOpenMesh(char *FilNam, int mod, ...)
       va_end(VarArg);
 
       if( (msh->ver < 1) || (msh->ver > 3) )
-	return(0);
+        return(0);
 
       if( (msh->ver == 3) && (sizeof(long) == 4) )
-	return(0);
+        return(0);
 
       if( (msh->dim != 2) && (msh->dim != 3) )
-	return(0);
+        return(0);
 
       /* Create the mesh file */
 
       if(!(msh->hdl = fopen(msh->FilNam, "wb")))
-	return(0);
+        return(0);
 
       GmfMshTab[ MshIdx ] = msh;
 
@@ -354,17 +354,17 @@ int GmfOpenMesh(char *FilNam, int mod, ...)
       /* Write the mesh version and dimension */
 
       if(msh->typ & Asc)
-	{
-	  fprintf(msh->hdl, "%s %d\n\n", GmfKwdFmt[ GmfVersionFormatted ][0], msh->ver);
-	  fprintf(msh->hdl, "%s %d\n", GmfKwdFmt[ GmfDimension ][0], msh->dim);
-	}
+        {
+          fprintf(msh->hdl, "%s %d\n\n", GmfKwdFmt[ GmfVersionFormatted ][0], msh->ver);
+          fprintf(msh->hdl, "%s %d\n", GmfKwdFmt[ GmfDimension ][0], msh->dim);
+        }
       else
-	{
-	  RecWrd(msh, (unsigned char *)&msh->cod);
-	  RecWrd(msh, (unsigned char *)&msh->ver);
-	  GmfSetKwd(MshIdx, GmfDimension, 0);
-	  RecWrd(msh, (unsigned char *)&msh->dim);
-	}
+        {
+          RecWrd(msh, (unsigned char *)&msh->cod);
+          RecWrd(msh, (unsigned char *)&msh->ver);
+          GmfSetKwd(MshIdx, GmfDimension, 0);
+          RecWrd(msh, (unsigned char *)&msh->dim);
+        }
 
       return(MshIdx);
     }
@@ -446,7 +446,7 @@ int GmfStatKwd(int MshIdx, int KwdCod, ...)
       TypTab = va_arg(VarArg, int *);
 
       for(i=0;i<kwd->NmbTyp;i++)
-	TypTab[i] = kwd->TypTab[i];
+        TypTab[i] = kwd->TypTab[i];
 
       va_end(VarArg);
     }
@@ -511,13 +511,13 @@ int GmfSetKwd(int MshIdx, int KwdCod, ...)
       NmbLin = va_arg(VarArg, int);
 
       if(!strcmp(GmfKwdFmt[ KwdCod ][3], "sr"))
-	{
-	  kwd->NmbTyp = va_arg(VarArg, int);
-	  TypTab = va_arg(VarArg, int *);
+        {
+          kwd->NmbTyp = va_arg(VarArg, int);
+          TypTab = va_arg(VarArg, int *);
 
-	  for(i=0;i<kwd->NmbTyp;i++)
-	    kwd->TypTab[i] = TypTab[i];
-	}
+          for(i=0;i<kwd->NmbTyp;i++)
+            kwd->TypTab[i] = TypTab[i];
+        }
 
       va_end(VarArg);
     }
@@ -550,19 +550,19 @@ int GmfSetKwd(int MshIdx, int KwdCod, ...)
       fprintf(msh->hdl, "\n%s\n", GmfKwdFmt[ KwdCod ][0]);
 
       if(kwd->typ != InfKwd)
-	fprintf(msh->hdl, "%d\n", kwd->NmbLin);
+        fprintf(msh->hdl, "%d\n", kwd->NmbLin);
 
       /* In case of solution field, write the extended header */
 
       if(kwd->typ == SolKwd)
-	{
-	  fprintf(msh->hdl, "%d ", kwd->NmbTyp);
+        {
+          fprintf(msh->hdl, "%d ", kwd->NmbTyp);
 
-	  for(i=0;i<kwd->NmbTyp;i++)
-	    fprintf(msh->hdl, "%d ", kwd->TypTab[i]);
+          for(i=0;i<kwd->NmbTyp;i++)
+            fprintf(msh->hdl, "%d ", kwd->TypTab[i]);
 
-	  fprintf(msh->hdl, "\n\n");
-	}
+          fprintf(msh->hdl, "\n\n");
+        }
     }
   else
     {
@@ -571,17 +571,17 @@ int GmfSetKwd(int MshIdx, int KwdCod, ...)
       SetPos(msh, 0);
 
       if(kwd->typ != InfKwd)
-	RecWrd(msh, (unsigned char *)&kwd->NmbLin);
+        RecWrd(msh, (unsigned char *)&kwd->NmbLin);
 
       /* In case of solution field, write the extended header at once */
 
       if(kwd->typ == SolKwd)
-	{
-	  RecWrd(msh, (unsigned char *)&kwd->NmbTyp);
+        {
+          RecWrd(msh, (unsigned char *)&kwd->NmbTyp);
 
-	  for(i=0;i<kwd->NmbTyp;i++)
-	    RecWrd(msh, (unsigned char *)&kwd->TypTab[i]);
-	}
+          for(i=0;i<kwd->NmbTyp;i++)
+            RecWrd(msh, (unsigned char *)&kwd->TypTab[i]);
+        }
     }
 
   return(kwd->NmbLin);
@@ -609,102 +609,102 @@ void GmfGetLin(int MshIdx, int KwdCod, ...)
   if(kwd->typ != SolKwd)
     {
       if(msh->ver == 1)
-	{
-	  if(msh->typ & Asc)
-	    {
-	      for(i=0;i<kwd->SolSiz;i++)
-		{
-		  if(kwd->fmt[i] == 'r')
-		    {
-		      FltPtr = va_arg(VarArg, float *);
-		      fscanf(msh->hdl, "%f", FltPtr);
-		    }
-		  else
-		    {
-		      IntPtr = va_arg(VarArg, int *);
-		      fscanf(msh->hdl, "%d", IntPtr);
-		    }
-		}
-	    }
-	  else
-	    {
-	      ScaBlk(msh, buf, kwd->SolSiz);
+        {
+          if(msh->typ & Asc)
+            {
+              for(i=0;i<kwd->SolSiz;i++)
+                {
+                  if(kwd->fmt[i] == 'r')
+                    {
+                      FltPtr = va_arg(VarArg, float *);
+                      fscanf(msh->hdl, "%f", FltPtr);
+                    }
+                  else
+                    {
+                      IntPtr = va_arg(VarArg, int *);
+                      fscanf(msh->hdl, "%d", IntPtr);
+                    }
+                }
+            }
+          else
+            {
+              ScaBlk(msh, buf, kwd->SolSiz);
 
-	      for(i=0;i<kwd->SolSiz;i++)
-		{
-		  if(kwd->fmt[i] == 'r')
-		    {
-		      FltPtr = va_arg(VarArg, float *);
-		      *FltPtr = FltBuf[i];
-		    }
-		  else
-		    {
-		      IntPtr = va_arg(VarArg, int *);
-		      *IntPtr = IntBuf[i];
-		    }
-		}
-	    }
-	}
+              for(i=0;i<kwd->SolSiz;i++)
+                {
+                  if(kwd->fmt[i] == 'r')
+                    {
+                      FltPtr = va_arg(VarArg, float *);
+                      *FltPtr = FltBuf[i];
+                    }
+                  else
+                    {
+                      IntPtr = va_arg(VarArg, int *);
+                      *IntPtr = IntBuf[i];
+                    }
+                }
+            }
+        }
       else
-	{
-	  if(msh->typ & Asc)
-	    {
-	      for(i=0;i<kwd->SolSiz;i++)
-		{
-		  if(kwd->fmt[i] == 'r')
-		    {
-		      DblPtr = va_arg(VarArg, double *);
-		      fscanf(msh->hdl, "%lf", DblPtr);
-		    }
-		  else
-		    {
-		      IntPtr = va_arg(VarArg, int *);
-		      fscanf(msh->hdl, "%d", IntPtr);
-		    }
-		}
-	    }
-	  else
-	    {
-	      for(i=0;i<kwd->SolSiz;i++)
-		{
-		  if(kwd->fmt[i] == 'r')
-		    {
-		      DblPtr = va_arg(VarArg, double *);
-		      ScaDblWrd(msh, (unsigned char *)DblPtr);
-		    }
-		  else
-		    {
-		      IntPtr = va_arg(VarArg, int *);
-		      ScaWrd(msh, (unsigned char *)IntPtr);
-		    }
-		}
-	    }
-	}
+        {
+          if(msh->typ & Asc)
+            {
+              for(i=0;i<kwd->SolSiz;i++)
+                {
+                  if(kwd->fmt[i] == 'r')
+                    {
+                      DblPtr = va_arg(VarArg, double *);
+                      fscanf(msh->hdl, "%lf", DblPtr);
+                    }
+                  else
+                    {
+                      IntPtr = va_arg(VarArg, int *);
+                      fscanf(msh->hdl, "%d", IntPtr);
+                    }
+                }
+            }
+          else
+            {
+              for(i=0;i<kwd->SolSiz;i++)
+                {
+                  if(kwd->fmt[i] == 'r')
+                    {
+                      DblPtr = va_arg(VarArg, double *);
+                      ScaDblWrd(msh, (unsigned char *)DblPtr);
+                    }
+                  else
+                    {
+                      IntPtr = va_arg(VarArg, int *);
+                      ScaWrd(msh, (unsigned char *)IntPtr);
+                    }
+                }
+            }
+        }
     }
   else
     {
       if(msh->ver == 1)
-	{
-	  FltSolTab = va_arg(VarArg, float *);
+        {
+          FltSolTab = va_arg(VarArg, float *);
 
-	  if(msh->typ & Asc)
-	    for(j=0;j<kwd->SolSiz;j++)
-	      fscanf(msh->hdl, "%f", &FltSolTab[j]);
-	  else
-	    for(j=0;j<kwd->SolSiz;j++)
-	      ScaWrd(msh, (unsigned char *)&FltSolTab[j]);
-	}
+          if(msh->typ & Asc)
+            for(j=0;j<kwd->SolSiz;j++)
+              fscanf(msh->hdl, "%f", &FltSolTab[j]);
+          else
+            for(j=0;j<kwd->SolSiz;j++)
+              ScaWrd(msh, (unsigned char *)&FltSolTab[j]);
+        }
       else if(msh->ver == 2)
-	{
-	  DblSolTab = va_arg(VarArg, double *);
+        {
+          DblSolTab = va_arg(VarArg, double *);
 
-	  if(msh->typ & Asc)
-	    for(j=0;j<kwd->SolSiz;j++)
-	      fscanf(msh->hdl, "%lf", &DblSolTab[j]);
-	  else
-	    for(j=0;j<kwd->SolSiz;j++)
-	      ScaDblWrd(msh, (unsigned char *)&DblSolTab[j]);
-	}
+          if(msh->typ & Asc)
+            for(j=0;j<kwd->SolSiz;j++)
+              fscanf(msh->hdl, "%lf", &DblSolTab[j]);
+          else
+            for(j=0;j<kwd->SolSiz;j++)
+              ScaDblWrd(msh, (unsigned char *)&DblSolTab[j]);
+        }
     }
 
   va_end(VarArg);
@@ -732,102 +732,102 @@ void GmfSetLin(int MshIdx, int KwdCod, ...)
   if(kwd->typ != SolKwd)
     {
       if(msh->ver == 1)
-	{
-	  if(msh->typ & Asc)
-	    {
-	      for(i=0;i<kwd->SolSiz;i++)
-		{
-		  if(kwd->fmt[i] == 'r')
-		    {
-		      d = va_arg(VarArg, double);
-		      fprintf(msh->hdl, "%g ", (float)d);
-		    }
-		  else
-		    {
-		      j = va_arg(VarArg, int);
-		      fprintf(msh->hdl, "%d ", j);
-		    }
-		}
-	    }
-	  else
-	    {
-	      for(i=0;i<kwd->SolSiz;i++)
-		{
-		  if(kwd->fmt[i] == 'r')
-		    {
-		      d = va_arg(VarArg, double);
-		      FltBuf[i] = d;
-		    }
-		  else
-		    {
-		      j = va_arg(VarArg, int);
-		      IntBuf[i] = j;
-		    }
-		}
+        {
+          if(msh->typ & Asc)
+            {
+              for(i=0;i<kwd->SolSiz;i++)
+                {
+                  if(kwd->fmt[i] == 'r')
+                    {
+                      d = va_arg(VarArg, double);
+                      fprintf(msh->hdl, "%g ", (float)d);
+                    }
+                  else
+                    {
+                      j = va_arg(VarArg, int);
+                      fprintf(msh->hdl, "%d ", j);
+                    }
+                }
+            }
+          else
+            {
+              for(i=0;i<kwd->SolSiz;i++)
+                {
+                  if(kwd->fmt[i] == 'r')
+                    {
+                      d = va_arg(VarArg, double);
+                      FltBuf[i] = d;
+                    }
+                  else
+                    {
+                      j = va_arg(VarArg, int);
+                      IntBuf[i] = j;
+                    }
+                }
 
-	      RecBlk(msh, buf, kwd->SolSiz);
-	    }
-	}
+              RecBlk(msh, buf, kwd->SolSiz);
+            }
+        }
       else
-	{
-	  if(msh->typ & Asc)
-	    {
-	      for(i=0;i<kwd->SolSiz;i++)
-		{
-		  if(kwd->fmt[i] == 'r')
-		    {
-		      d = va_arg(VarArg, double);
-		      fprintf(msh->hdl, "%.15lg ", d);
-		    }
-		  else
-		    {
-		      j = va_arg(VarArg, int);
-		      fprintf(msh->hdl, "%d ", j);
-		    }
-		}
-	    }
-	  else
-	    {
-	      for(i=0;i<kwd->SolSiz;i++)
-		{
-		  if(kwd->fmt[i] == 'r')
-		    {
-		      d = va_arg(VarArg, double);
-		      RecDblWrd(msh, (unsigned char *)&d);
-		    }
-		  else
-		    {
-		      j = va_arg(VarArg, int);
-		      RecWrd(msh, (unsigned char *)&j);
-		    }
-		}
-	    }
-	}
+        {
+          if(msh->typ & Asc)
+            {
+              for(i=0;i<kwd->SolSiz;i++)
+                {
+                  if(kwd->fmt[i] == 'r')
+                    {
+                      d = va_arg(VarArg, double);
+                      fprintf(msh->hdl, "%.15lg ", d);
+                    }
+                  else
+                    {
+                      j = va_arg(VarArg, int);
+                      fprintf(msh->hdl, "%d ", j);
+                    }
+                }
+            }
+          else
+            {
+              for(i=0;i<kwd->SolSiz;i++)
+                {
+                  if(kwd->fmt[i] == 'r')
+                    {
+                      d = va_arg(VarArg, double);
+                      RecDblWrd(msh, (unsigned char *)&d);
+                    }
+                  else
+                    {
+                      j = va_arg(VarArg, int);
+                      RecWrd(msh, (unsigned char *)&j);
+                    }
+                }
+            }
+        }
     }
   else
     {
       if(msh->ver == 1)
-	{
-	  FltSolTab = va_arg(VarArg, float *);
+        {
+          FltSolTab = va_arg(VarArg, float *);
 
-	  if(msh->typ & Asc)
-	    for(j=0;j<kwd->SolSiz;j++)
-	      fprintf(msh->hdl, "%g ", FltSolTab[j]);
-	  else
-	    for(j=0;j<kwd->SolSiz;j++)
-	      RecWrd(msh, (unsigned char *)&FltSolTab[j]);
-	}
+          if(msh->typ & Asc)
+            for(j=0;j<kwd->SolSiz;j++)
+              fprintf(msh->hdl, "%g ", FltSolTab[j]);
+          else
+            for(j=0;j<kwd->SolSiz;j++)
+              RecWrd(msh, (unsigned char *)&FltSolTab[j]);
+        }
       else if(msh->ver == 2)
-	{
-	  DblSolTab = va_arg(VarArg, double *);
+        {
+          DblSolTab = va_arg(VarArg, double *);
 
-	  if(msh->typ & Asc)
-	    for(j=0;j<kwd->SolSiz;j++)
-	      fprintf(msh->hdl, "%.15lg ", DblSolTab[j]);
-	  else
-	    for(j=0;j<kwd->SolSiz;j++)
-	      RecDblWrd(msh, (unsigned char *)&DblSolTab[j]);
-	}
+          if(msh->typ & Asc)
+            for(j=0;j<kwd->SolSiz;j++)
+              fprintf(msh->hdl, "%.15lg ", DblSolTab[j]);
+          else
+            for(j=0;j<kwd->SolSiz;j++)
+              RecDblWrd(msh, (unsigned char *)&DblSolTab[j]);
+        }
     }
 
   va_end(VarArg);
@@ -852,49 +852,49 @@ void GmfCpyLin(int InpIdx, int OutIdx, int KwdCod)
   for(i=0;i<kwd->SolSiz;i++)
     {
       if(kwd->fmt[i] == 'r')
-	{
-	  if(InpMsh->ver == 1)
-	    {
-	      if(InpMsh->typ & Asc)
-		fscanf(InpMsh->hdl, "%f", &f);
-	      else
-		ScaWrd(InpMsh, (unsigned char *)&f);
+        {
+          if(InpMsh->ver == 1)
+            {
+              if(InpMsh->typ & Asc)
+                fscanf(InpMsh->hdl, "%f", &f);
+              else
+                ScaWrd(InpMsh, (unsigned char *)&f);
 
-	      d = f;
-	    }
-	  else
-	    {
-	      if(InpMsh->typ & Asc)
-		fscanf(InpMsh->hdl, "%lf", &d);
-	      else
-		ScaDblWrd(InpMsh, (unsigned char *)&d);
+              d = f;
+            }
+          else
+            {
+              if(InpMsh->typ & Asc)
+                fscanf(InpMsh->hdl, "%lf", &d);
+              else
+                ScaDblWrd(InpMsh, (unsigned char *)&d);
 
-	      f = (float)d;
-	    }
+              f = (float)d;
+            }
 
-	  if(OutMsh->ver == 1)
-	    if(OutMsh->typ & Asc)
-	      fprintf(OutMsh->hdl, "%g ", f);
-	    else
-	      RecWrd(OutMsh, (unsigned char *)&f);
-	  else
-	    if(OutMsh->typ & Asc)
-	      fprintf(OutMsh->hdl, "%.15g ", d);
-	    else
-	      RecDblWrd(OutMsh, (unsigned char *)&d);
-	}
+          if(OutMsh->ver == 1)
+            if(OutMsh->typ & Asc)
+              fprintf(OutMsh->hdl, "%g ", f);
+            else
+              RecWrd(OutMsh, (unsigned char *)&f);
+          else
+            if(OutMsh->typ & Asc)
+              fprintf(OutMsh->hdl, "%.15g ", d);
+            else
+              RecDblWrd(OutMsh, (unsigned char *)&d);
+        }
       else
-	{
-	  if(InpMsh->typ & Asc)
-	    fscanf(InpMsh->hdl, "%d", &a);
-	  else
-	    ScaWrd(InpMsh, (unsigned char *)&a);
+        {
+          if(InpMsh->typ & Asc)
+            fscanf(InpMsh->hdl, "%d", &a);
+          else
+            ScaWrd(InpMsh, (unsigned char *)&a);
 
-	  if(OutMsh->typ & Asc)
-	    fprintf(OutMsh->hdl, "%d ", a);
-	  else
-	    RecWrd(OutMsh, (unsigned char *)&a);
-	}
+          if(OutMsh->typ & Asc)
+            fprintf(OutMsh->hdl, "%d ", a);
+          else
+            RecWrd(OutMsh, (unsigned char *)&a);
+        }
     }
 
   if(OutMsh->typ & Asc)
@@ -917,24 +917,24 @@ static int ScaKwdTab(GmfMshSct *msh)
       /* Scan each string in the file until the end */
 
       while(fscanf(msh->hdl, "%s", str) != EOF)
-	{
-	  /* Fast test in order to reject quickly the numeric values */
+        {
+          /* Fast test in order to reject quickly the numeric values */
 
-	  if(isalpha(str[0]))
-	    {
-	      /* Search which kwd code this string is associated with,
-		 then get its header and save the curent position in file (just before the data) */
+          if(isalpha(str[0]))
+            {
+              /* Search which kwd code this string is associated with,
+                 then get its header and save the curent position in file (just before the data) */
 
-	      for(KwdCod=1; KwdCod<= GmfMaxKwd; KwdCod++)
-		if(!strcmp(str, GmfKwdFmt[ KwdCod ][0]))
-		  {
-		    ScaKwdHdr(msh, KwdCod);
-		    break;
-		  }
-	    }
-	  else if(str[0] == '#')
-	    while(fgetc(msh->hdl) != '\n');
-	}
+              for(KwdCod=1; KwdCod<= GmfMaxKwd; KwdCod++)
+                if(!strcmp(str, GmfKwdFmt[ KwdCod ][0]))
+                  {
+                    ScaKwdHdr(msh, KwdCod);
+                    break;
+                  }
+            }
+          else if(str[0] == '#')
+            while(fgetc(msh->hdl) != '\n');
+        }
     }
   else
     {
@@ -948,25 +948,25 @@ static int ScaKwdTab(GmfMshSct *msh)
       /* Jump through kwd positions in the file */
 
       do
-	{
-	  /* Get the kwd code and the next kwd position */
+        {
+          /* Get the kwd code and the next kwd position */
 
-	  ScaWrd(msh, (unsigned char *)&KwdCod);
-	  NexPos = GetPos(msh);
+          ScaWrd(msh, (unsigned char *)&KwdCod);
+          NexPos = GetPos(msh);
 
-	  if(NexPos > EndPos)
-	    return(0);
+          if(NexPos > EndPos)
+            return(0);
 
-	  /* Check if this kwd belongs to this mesh version */
+          /* Check if this kwd belongs to this mesh version */
 
-	  if( (KwdCod >= 1) && (KwdCod <= GmfMaxKwd) )
-	    ScaKwdHdr(msh, KwdCod);
+          if( (KwdCod >= 1) && (KwdCod <= GmfMaxKwd) )
+            ScaKwdHdr(msh, KwdCod);
 
-	  /* Go to the next kwd */
+          /* Go to the next kwd */
 
-	  if(NexPos)
-	    fseek(msh->hdl, NexPos, SEEK_SET);
-	}while(NexPos && (KwdCod != GmfEnd));
+          if(NexPos)
+            fseek(msh->hdl, NexPos, SEEK_SET);
+        }while(NexPos && (KwdCod != GmfEnd));
     }
 
   return(1);
@@ -985,9 +985,9 @@ static void ScaKwdHdr(GmfMshSct *msh, int KwdCod)
   if(!strcmp("i", GmfKwdFmt[ KwdCod ][2]))
     {
       if(msh->typ & Asc)
-	fscanf(msh->hdl, "%d", &kwd->NmbLin);
+        fscanf(msh->hdl, "%d", &kwd->NmbLin);
       else
-	ScaWrd(msh, (unsigned char *)&kwd->NmbLin);
+        ScaWrd(msh, (unsigned char *)&kwd->NmbLin);
     }
   else
     kwd->NmbLin = 1;
@@ -995,19 +995,19 @@ static void ScaKwdHdr(GmfMshSct *msh, int KwdCod)
   if(!strcmp("sr", GmfKwdFmt[ KwdCod ][3]))
     {
       if(msh->typ & Asc)
-	{
-	  fscanf(msh->hdl, "%d", &kwd->NmbTyp);
+        {
+          fscanf(msh->hdl, "%d", &kwd->NmbTyp);
 
-	  for(i=0;i<kwd->NmbTyp;i++)
-	    fscanf(msh->hdl, "%d", &kwd->TypTab[i]);
-	}
+          for(i=0;i<kwd->NmbTyp;i++)
+            fscanf(msh->hdl, "%d", &kwd->TypTab[i]);
+        }
       else
-	{
-	  ScaWrd(msh, (unsigned char *)&kwd->NmbTyp);
+        {
+          ScaWrd(msh, (unsigned char *)&kwd->NmbTyp);
 
-	  for(i=0;i<kwd->NmbTyp;i++)
-	    ScaWrd(msh, (unsigned char *)&kwd->TypTab[i]);
-	}
+          for(i=0;i<kwd->NmbTyp;i++)
+            ScaWrd(msh, (unsigned char *)&kwd->TypTab[i]);
+        }
     }
 
   ExpFmt(msh, KwdCod);
@@ -1039,12 +1039,12 @@ static void ExpFmt(GmfMshSct *msh, int KwdCod)
   if(kwd->typ == SolKwd)
     for(i=0;i<kwd->NmbTyp;i++)
       switch(kwd->TypTab[i])
-	{
-	case GmfSca    : TmpSiz += 1; break;
-	case GmfVec    : TmpSiz += msh->dim; break;
-	case GmfSymMat : TmpSiz += (msh->dim * (msh->dim+1)) / 2; break;
-	case GmfMat    : TmpSiz += msh->dim * msh->dim; break;
-	}
+        {
+        case GmfSca    : TmpSiz += 1; break;
+        case GmfVec    : TmpSiz += msh->dim; break;
+        case GmfSymMat : TmpSiz += (msh->dim * (msh->dim+1)) / 2; break;
+        case GmfMat    : TmpSiz += msh->dim * msh->dim; break;
+        }
 
   /* Scan each character from the format string */
 
@@ -1055,21 +1055,21 @@ static void ExpFmt(GmfMshSct *msh, int KwdCod)
       chr = InpFmt[ i++ ];
 
       if(chr == 'd')
-	{
-	  chr = InpFmt[i++];
+        {
+          chr = InpFmt[i++];
 
-	  for(j=0;j<msh->dim;j++)
-	    kwd->fmt[ kwd->SolSiz++ ] = chr;
-	}
+          for(j=0;j<msh->dim;j++)
+            kwd->fmt[ kwd->SolSiz++ ] = chr;
+        }
       else if(chr == 's')
-	{
-	  chr = InpFmt[i++];
+        {
+          chr = InpFmt[i++];
 
-	  for(j=0;j<TmpSiz;j++)
-	    kwd->fmt[ kwd->SolSiz++ ] = chr;
-	}
+          for(j=0;j<TmpSiz;j++)
+            kwd->fmt[ kwd->SolSiz++ ] = chr;
+        }
       else
-	kwd->fmt[ kwd->SolSiz++ ] = chr;
+        kwd->fmt[ kwd->SolSiz++ ] = chr;
     }
 }
 
@@ -1124,117 +1124,117 @@ int main()
   for(i=1;i<=GmfMaxKwd;i++)
     {
       if(strcmp(GmfKwdFmt[i][2], "i"))
-	continue;
+        continue;
 
       kwd = &msh.KwdTab[i];
 
       if(strchr(GmfKwdFmt[i][3], 'd'))
-	DimMod = 1;
+        DimMod = 1;
       else
-	DimMod = 0;
+        DimMod = 0;
 
       if(strchr(GmfKwdFmt[i][3], 'r'))
-	FltMod = 1;
+        FltMod = 1;
       else
-	FltMod = 0;
+        FltMod = 0;
 
       for(j=0;j<2;j++)
-	for(k=0;k<=DimMod;k++)
-	  for(l=0;l<=FltMod;l++)
-	    {
-	      /* Generate function name's strings */
+        for(k=0;k<=DimMod;k++)
+          for(l=0;l<=FltMod;l++)
+            {
+              /* Generate function name's strings */
 
-	      sprintf(F77Nam, "Gmf%s%s%s%s",ActStr[0][j], GmfKwdFmt[i][1], DimStr[ DimMod ][k], FltStr[ FltMod ][l]);
-	      sprintf(PrcNam, "Gmf%sLin",ActStr[0][j]);
+              sprintf(F77Nam, "Gmf%s%s%s%s",ActStr[0][j], GmfKwdFmt[i][1], DimStr[ DimMod ][k], FltStr[ FltMod ][l]);
+              sprintf(PrcNam, "Gmf%sLin",ActStr[0][j]);
 
-	      for(m=0;m<strlen(F77Nam);m++)
-		F77Nam[m] = tolower(F77Nam[m]);
-
-
-	      /* Write f77api.c */
-
-	      fprintf(hdl, "void call(%s)(int *MshIdx", F77Nam);
-
-	      msh.dim = k+2;
-	      ExpFmt(&msh, i);
-
-	      if(kwd->typ == RegKwd)
-		{
-		  for(m=0;m<kwd->SolSiz;m++)
-		    if(kwd->fmt[m] == 'i')
-		      fprintf(hdl, ", int *i%d", m);
-		    else if(kwd->fmt[m] == 'r')
-		      fprintf(hdl, ", %s *r%d", FltStr[2][l], m);
-		}
-	      else if(kwd->typ == SolKwd)
-		{
-		  fprintf(hdl, ", %s *SolTab", FltStr[2][l]);
-		}
-
-	      fprintf(hdl, ")\n");
-
-	      fprintf(hdl, "{\n %s(*MshIdx, Gmf%s",PrcNam,GmfKwdFmt[i][0]);
-
-	      if(kwd->typ == RegKwd)
-		{
-		  for(m=0;m<kwd->SolSiz;m++)
-		    if(kwd->fmt[m] == 'i')
-		      fprintf(hdl, ", %si%d", ActStr[1][j], m);
-		    else if(kwd->fmt[m] == 'r')
-		      fprintf(hdl, ", %sr%d", ActStr[1][j], m);
-		}
-	      else if(kwd->typ == SolKwd)
-		{
-		  fprintf(hdl, ", SolTab", FltStr[2][l]);
-		}
-
-	      fprintf(hdl, ");\n}\n\n");
+              for(m=0;m<strlen(F77Nam);m++)
+                F77Nam[m] = tolower(F77Nam[m]);
 
 
-	      /* Write f77api.f90 */
+              /* Write f77api.c */
 
-	      fprintf(F90Hdl, "\ninterface\n");
-	      fprintf(F90Hdl, "  subroutine %s(MshIdx", F77Nam);
+              fprintf(hdl, "void call(%s)(int *MshIdx", F77Nam);
 
-	      msh.dim = k+2;
-	      ExpFmt(&msh, i);
+              msh.dim = k+2;
+              ExpFmt(&msh, i);
 
-	      if(kwd->typ == RegKwd)
-		{
-		  for(m=0;m<kwd->SolSiz;m++)
-		    if(kwd->fmt[m] == 'i')
-		      fprintf(F90Hdl, ", i%d",m);
-		    else if(kwd->fmt[m] == 'r')
-		      fprintf(F90Hdl, ", r%d", m);
-		}
-	      else if(kwd->typ == SolKwd)
-		{
-		  fprintf(F90Hdl, ", SolTab");
-		}
+              if(kwd->typ == RegKwd)
+                {
+                  for(m=0;m<kwd->SolSiz;m++)
+                    if(kwd->fmt[m] == 'i')
+                      fprintf(hdl, ", int *i%d", m);
+                    else if(kwd->fmt[m] == 'r')
+                      fprintf(hdl, ", %s *r%d", FltStr[2][l], m);
+                }
+              else if(kwd->typ == SolKwd)
+                {
+                  fprintf(hdl, ", %s *SolTab", FltStr[2][l]);
+                }
 
-	      fprintf(F90Hdl, ")\n");
+              fprintf(hdl, ")\n");
 
-	      fprintf(F90Hdl, "  integer :: MshIdx\n");
+              fprintf(hdl, "{\n %s(*MshIdx, Gmf%s",PrcNam,GmfKwdFmt[i][0]);
 
-	      if(kwd->typ == RegKwd)
-		{
-		  for(m=0;m<kwd->SolSiz;m++)
-		    if(kwd->fmt[m] == 'i')
-		      fprintf(F90Hdl, "  integer :: i%d\n",m);
-		    else if(kwd->fmt[m] == 'r')
-		      fprintf(F90Hdl, "  %s :: r%d\n", FltStr[3][l],m);
-		}
-	      else if(kwd->typ == SolKwd)
-		fprintf(F90Hdl, "  %s :: SolTab(*)\n", FltStr[3][l]);
+              if(kwd->typ == RegKwd)
+                {
+                  for(m=0;m<kwd->SolSiz;m++)
+                    if(kwd->fmt[m] == 'i')
+                      fprintf(hdl, ", %si%d", ActStr[1][j], m);
+                    else if(kwd->fmt[m] == 'r')
+                      fprintf(hdl, ", %sr%d", ActStr[1][j], m);
+                }
+              else if(kwd->typ == SolKwd)
+                {
+                  fprintf(hdl, ", SolTab", FltStr[2][l]);
+                }
 
-	      fprintf(F90Hdl, "  end subroutine %s\n", F77Nam);
-	      fprintf(F90Hdl, "end interface\n");
+              fprintf(hdl, ");\n}\n\n");
 
 
-	      /* Write f77api.ins */
+              /* Write f77api.f90 */
 
-	      fprintf(F77Hdl, "      external %s\n", F77Nam);
-	    }
+              fprintf(F90Hdl, "\ninterface\n");
+              fprintf(F90Hdl, "  subroutine %s(MshIdx", F77Nam);
+
+              msh.dim = k+2;
+              ExpFmt(&msh, i);
+
+              if(kwd->typ == RegKwd)
+                {
+                  for(m=0;m<kwd->SolSiz;m++)
+                    if(kwd->fmt[m] == 'i')
+                      fprintf(F90Hdl, ", i%d",m);
+                    else if(kwd->fmt[m] == 'r')
+                      fprintf(F90Hdl, ", r%d", m);
+                }
+              else if(kwd->typ == SolKwd)
+                {
+                  fprintf(F90Hdl, ", SolTab");
+                }
+
+              fprintf(F90Hdl, ")\n");
+
+              fprintf(F90Hdl, "  integer :: MshIdx\n");
+
+              if(kwd->typ == RegKwd)
+                {
+                  for(m=0;m<kwd->SolSiz;m++)
+                    if(kwd->fmt[m] == 'i')
+                      fprintf(F90Hdl, "  integer :: i%d\n",m);
+                    else if(kwd->fmt[m] == 'r')
+                      fprintf(F90Hdl, "  %s :: r%d\n", FltStr[3][l],m);
+                }
+              else if(kwd->typ == SolKwd)
+                fprintf(F90Hdl, "  %s :: SolTab(*)\n", FltStr[3][l]);
+
+              fprintf(F90Hdl, "  end subroutine %s\n", F77Nam);
+              fprintf(F90Hdl, "end interface\n");
+
+
+              /* Write f77api.ins */
+
+              fprintf(F77Hdl, "      external %s\n", F77Nam);
+            }
     }
 
   /* Generate f90 keywords */
@@ -1361,11 +1361,11 @@ static void ScaBlk(GmfMshSct *msh, unsigned char *blk, int siz)
       wrd = &blk[ i * 4 ];
 
       for(j=0;j<2;j++)
-	{
-	  swp = wrd[ 3-j ];
-	  wrd[ 3-j ] = wrd[j];
-	  wrd[j] = swp;
-	}
+        {
+          swp = wrd[ 3-j ];
+          wrd[ 3-j ] = wrd[j];
+          wrd[j] = swp;
+        }
     }
 }
 

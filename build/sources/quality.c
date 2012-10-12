@@ -268,7 +268,7 @@ int outqua(pMesh mesh,pSol met) {
 
   fprintf(stdout,"\n  -- MESH QUALITY   %d\n",mesh->ne - nex);
   fprintf(stdout,"     BEST   %8.6f  AVRG.   %8.6f  WRST.   %8.6f (%d)\n",
-	  rapmax,rapavg / (mesh->ne-nex),rapmin,iel);
+          rapmax,rapavg / (mesh->ne-nex),rapmin,iel);
   if ( abs(info.imprim) < 5 )  return(1);
 
   /* print histo */
@@ -276,7 +276,7 @@ int outqua(pMesh mesh,pSol met) {
   imax = MG_MIN(4,(int)(5.*rapmax));
   for (i=imax; i>=(int)(5*rapmin); i--) {
     fprintf(stdout,"     %5.1f < Q < %5.1f   %7d   %6.2f %%\n",
-	    i/5.,i/5.+0.2,his[i],100.*(his[i]/(float)(mesh->ne-nex)));
+            i/5.,i/5.+0.2,his[i],100.*(his[i]/(float)(mesh->ne-nex)));
   }
   return(1);
 }
@@ -307,13 +307,13 @@ int prilen(pMesh mesh) {
     for (ia=0; ia<6; ia++) {
       lon = coquil(mesh,k,ia,&list[1]);
       if (lon%2){
-	lon=0;
+        lon=0;
       }else{
-	lon=lon*0.5;
+        lon=lon*0.5;
       }
       if ( lon < 2 )  continue;
       for (l=2; l<= lon; l++)
-	if ( list[l] < 6*k ) break;
+        if ( list[l] < 6*k ) break;
 
       if ( l <= lon ) continue;
 
@@ -332,25 +332,25 @@ int prilen(pMesh mesh) {
 
       /* find largest, smallest edge */
       if (len < lmin) {
-	lmin  = len;
-	iamin = pt->v[ipa];
-	ibmin = pt->v[ipb];
+        lmin  = len;
+        iamin = pt->v[ipa];
+        ibmin = pt->v[ipb];
       }
       else if (len > lmax) {
-	lmax  = len;
-	iamax = pt->v[ipa];
-	ibmax = pt->v[ipb];
+        lmax  = len;
+        iamax = pt->v[ipa];
+        ibmax = pt->v[ipb];
       }
 
       /* update histogram */
       if (len < bd[3]) {
-	if (len > bd[2])       hl[3]++;
-	else if (len > bd[1])  hl[2]++;
-	else                   hl[1]++;
+        if (len > bd[2])       hl[3]++;
+        else if (len > bd[1])  hl[2]++;
+        else                   hl[1]++;
       }
       else if (len < bd[5]) {
-	if (len > bd[4])       hl[5]++;
-	else if (len > bd[3])  hl[4]++;
+        if (len > bd[4])       hl[5]++;
+        else if (len > bd[3])  hl[4]++;
       }
       else if (len < bd[6])    hl[6]++;
       else if (len < bd[7])    hl[7]++;
@@ -362,28 +362,28 @@ int prilen(pMesh mesh) {
   fprintf(stdout,"\n  -- RESULTING EDGE LENGTHS  %d\n",navg);
   fprintf(stdout,"     AVERAGE LENGTH         %12.4f\n",lavg / (double)navg);
   fprintf(stdout,"     SMALLEST EDGE LENGTH   %12.4f   %6d %6d\n",
-	  lmin,iamin,ibmin);
+          lmin,iamin,ibmin);
   fprintf(stdout,"     LARGEST  EDGE LENGTH   %12.4f   %6d %6d \n",
-	  lmax,iamax,ibmax);
+          lmax,iamax,ibmax);
   fprintf(stdout,"     EFFICIENCY INDEX       %12.4f\n",exp(som/(double)navg));
   if ( hl[4]+hl[5]+hl[6] )
     fprintf(stdout,"   %6.2f < L <%5.2f  %8d   %5.2f %%  \n",
-	    bd[3],bd[6],hl[4]+hl[5]+hl[6],100.*(hl[4]+hl[5]+hl[6])/(double)navg);
+            bd[3],bd[6],hl[4]+hl[5]+hl[6],100.*(hl[4]+hl[5]+hl[6])/(double)navg);
 
   if ( abs(info.imprim) > 4 ) {
     fprintf(stdout,"\n     HISTOGRAMM\n");
     if ( hl[1] )
       fprintf(stdout,"     0.00 < L < 0.20  %8d   %5.2f %%  \n",
-	      hl[1],100.*(hl[1]/(float)navg));
+              hl[1],100.*(hl[1]/(float)navg));
     if ( lmax > 0.2 ) {
       for (k=2; k<9; k++) {
-	if ( hl[k] > 0 )
-	  fprintf(stdout,"   %6.2f < L <%5.2f  %8d   %5.2f %%  \n",
-		  bd[k-1],bd[k],hl[k],100.*(hl[k]/(float)navg));
+        if ( hl[k] > 0 )
+          fprintf(stdout,"   %6.2f < L <%5.2f  %8d   %5.2f %%  \n",
+                  bd[k-1],bd[k],hl[k],100.*(hl[k]/(float)navg));
       }
       if ( hl[9] )
-	fprintf(stdout,"     5.   < L         %8d   %5.2f %%  \n",
-		hl[9],100.*(hl[9]/(float)navg));
+        fprintf(stdout,"     5.   < L         %8d   %5.2f %%  \n",
+                hl[9],100.*(hl[9]/(float)navg));
     }
   }
   return(1);

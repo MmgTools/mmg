@@ -51,7 +51,7 @@ int chkswpgen(pMesh mesh, int start, int ia, int *ilist, int *list){
       ipa = iare[i][0];
       ipb = iare[i][1];
       if ( (pt->v[ipa] == na && pt->v[ipb] == nb) ||
-	   (pt->v[ipa] == nb && pt->v[ipb] == na))  break;
+           (pt->v[ipa] == nb && pt->v[ipb] == na))  break;
     }
     assert(i<6);
     list[(*ilist)] = 6*adj +i;
@@ -92,22 +92,22 @@ int chkswpgen(pMesh mesh, int start, int ia, int *ilist, int *list){
     if ( info.fem ) {
       p0 = &mesh->point[np];
       if ( p0->tag & MG_BDY ) {
-	for (l=0; l<npol;l++) {
-	  if ( k < npol-1 ) {
-	    if ( l == k || l == k+1 )  continue;
-	  }
-	  else {
-	    if ( l == npol-1 || l == 0 )  continue;
-	  }
-	  iel = pol[l] / 4;
-	  ip  = pol[l] % 4;
-	  pt = &mesh->tetra[iel];
-	  p0 = &mesh->point[pt->v[ip]];
-	  if ( p0->tag & MG_BDY ) {
-	    ier = 0;
-	    break;
-	  }
-	}
+        for (l=0; l<npol;l++) {
+          if ( k < npol-1 ) {
+            if ( l == k || l == k+1 )  continue;
+          }
+          else {
+            if ( l == npol-1 || l == 0 )  continue;
+          }
+          iel = pol[l] / 4;
+          ip  = pol[l] % 4;
+          pt = &mesh->tetra[iel];
+          p0 = &mesh->point[pt->v[ip]];
+          if ( p0->tag & MG_BDY ) {
+            ier = 0;
+            break;
+          }
+        }
       }
       if ( !ier )  continue;
       ier = 1;
@@ -116,10 +116,10 @@ int chkswpgen(pMesh mesh, int start, int ia, int *ilist, int *list){
     for (l=0; l<(*ilist); l++) {
       /* Do not consider tets of the shell of collapsed edge */
       if ( k < npol-1 ) {
-	if ( l == k || l == k+1 )  continue;
+        if ( l == k || l == k+1 )  continue;
       }
       else {
-	if ( l == npol-1 || l == 0 )  continue;
+        if ( l == npol-1 || l == 0 )  continue;
       }
       iel = list[l] / 6;
       i   = list[l] % 6;

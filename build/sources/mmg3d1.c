@@ -62,10 +62,10 @@ static int dichoto(pMesh mesh,pSol met,int k,int *vx) {
     t = 0.5 * (tp + to);
     for (i=0; i<6; i++) {
       if ( vx[i] > 0 ) {
-	ps = &mesh->point[vx[i]];
-	ps->c[0] = o[i][0] + t*(p[i][0] - o[i][0]);
-	ps->c[1] = o[i][1] + t*(p[i][1] - o[i][1]);
-	ps->c[2] = o[i][2] + t*(p[i][2] - o[i][2]);
+        ps = &mesh->point[vx[i]];
+        ps->c[0] = o[i][0] + t*(p[i][0] - o[i][0]);
+        ps->c[1] = o[i][1] + t*(p[i][1] - o[i][1]);
+        ps->c[2] = o[i][2] + t*(p[i][2] - o[i][2]);
       }
     }
     switch (pt->flag) {
@@ -96,10 +96,10 @@ static int dichoto(pMesh mesh,pSol met,int k,int *vx) {
       t = 0.0;
     for (i=0; i<6; i++) {
       if ( vx[i] > 0 ) {
-	ps = &mesh->point[vx[i]];
-	ps->c[0] = o[i][0] + t*(p[i][0] - o[i][0]);
-	ps->c[1] = o[i][1] + t*(p[i][1] - o[i][1]);
-	ps->c[2] = o[i][2] + t*(p[i][2] - o[i][2]);
+        ps = &mesh->point[vx[i]];
+        ps->c[0] = o[i][0] + t*(p[i][0] - o[i][0]);
+        ps->c[1] = o[i][1] + t*(p[i][1] - o[i][1]);
+        ps->c[2] = o[i][2] + t*(p[i][2] - o[i][2]);
       }
     }
   }
@@ -194,17 +194,17 @@ char chkedg(pMesh mesh,Tria *pt) {
       assert(p[i]->xp);
       pxp = &mesh->xpoint[p[i]->xp];
       if ( MG_EDG(p[i]->tag) ) {
-	memcpy(&t[i],pxp->t,3*sizeof(double));
-	nortri(mesh,pt,nt);
-	ps  = pxp->n1[0]*nt[0] + pxp->n1[1]*nt[1] + pxp->n1[2]*nt[2];
-	ps2 = pxp->n2[0]*nt[0] + pxp->n2[1]*nt[1] + pxp->n2[2]*nt[2];
-	if ( fabs(ps) > fabs(ps2) )
-	  memcpy(&n[i],pxp->n1,3*sizeof(double));
-	else
-	  memcpy(&n[i],pxp->n2,3*sizeof(double));
+        memcpy(&t[i],pxp->t,3*sizeof(double));
+        nortri(mesh,pt,nt);
+        ps  = pxp->n1[0]*nt[0] + pxp->n1[1]*nt[1] + pxp->n1[2]*nt[2];
+        ps2 = pxp->n2[0]*nt[0] + pxp->n2[1]*nt[1] + pxp->n2[2]*nt[2];
+        if ( fabs(ps) > fabs(ps2) )
+          memcpy(&n[i],pxp->n1,3*sizeof(double));
+        else
+          memcpy(&n[i],pxp->n2,3*sizeof(double));
       }
       else
-	memcpy(&n[i],pxp->n1,3*sizeof(double));
+        memcpy(&n[i],pxp->n1,3*sizeof(double));
     }
   }
 
@@ -228,45 +228,45 @@ char chkedg(pMesh mesh,Tria *pt) {
     /* Hausdorff w/r tangent direction */
     if ( MG_EDG(pt->tag[i]) || ( pt->tag[i] & MG_NOM )) {
       if ( MG_SIN(p[i1]->tag) ) {
-	t1[0] = il * ux;
-	t1[1] = il * uy;
-	t1[2] = il * uz;
+        t1[0] = il * ux;
+        t1[1] = il * uy;
+        t1[2] = il * uz;
       }
       else {
-	memcpy(t1,t[i1],3*sizeof(double));
-	ps = t1[0]*ux + t1[1]*uy + t1[2]*uz;
-	if ( ps < 0.0 ) {
-	  t1[0] *= -1.0;
-	  t1[1] *= -1.0;
-	  t1[2] *= -1.0;
-	}
+        memcpy(t1,t[i1],3*sizeof(double));
+        ps = t1[0]*ux + t1[1]*uy + t1[2]*uz;
+        if ( ps < 0.0 ) {
+          t1[0] *= -1.0;
+          t1[1] *= -1.0;
+          t1[2] *= -1.0;
+        }
       }
       if ( MG_SIN(p[i2]->tag) ) {
-	t2[0] = -il * ux;
-	t2[1] = -il * uy;
-	t2[2] = -il * uz;
+        t2[0] = -il * ux;
+        t2[1] = -il * uy;
+        t2[2] = -il * uz;
       }
       else {
-	memcpy(t2,t[i2],3*sizeof(double));
-	ps = - ( t2[0]*ux + t2[1]*uy + t2[2]*uz );
-	if ( ps < 0.0 ) {
-	  t2[0] *= -1.0;
-	  t2[1] *= -1.0;
-	  t2[2] *= -1.0;
-	}
+        memcpy(t2,t[i2],3*sizeof(double));
+        ps = - ( t2[0]*ux + t2[1]*uy + t2[2]*uz );
+        if ( ps < 0.0 ) {
+          t2[0] *= -1.0;
+          t2[1] *= -1.0;
+          t2[2] *= -1.0;
+        }
       }
     }
     else {
       n1 = n[i1];
       n2 = n[i2];
       if ( !BezierTgt(p[i1]->c,p[i2]->c,n1,n2,t1,t2) ) {
-	t1[0] = ux * il;
-	t1[1] = uy * il;
-	t1[2] = uz * il;
+        t1[0] = ux * il;
+        t1[1] = uy * il;
+        t1[2] = uz * il;
 
-	t2[0] = -ux * il;
-	t2[1] = -uy * il;
-	t2[2] = -uz * il;
+        t2[0] = -ux * il;
+        t2[1] = -uy * il;
+        t2[2] = -uz * il;
       }
     }
     alpha = BezierGeod(p[i1]->c,p[i2]->c,t1,t2);
@@ -307,23 +307,23 @@ static int swpmsh(pMesh mesh) {
       pxt = &mesh->xtetra[pt->xt];
 
       for (i=0; i<4; i++) {
-	ier = 0;
-	if ( !(pxt->ftag[i] & MG_BDY) ) continue;
-	for (j=0; j<3; j++) {
-	  ia  = iarf[i][j];
-	  ret = coquilface(mesh,k,ia,list,&it1,&it2);
-	  ilist = ret / 2;
+        ier = 0;
+        if ( !(pxt->ftag[i] & MG_BDY) ) continue;
+        for (j=0; j<3; j++) {
+          ia  = iarf[i][j];
+          ret = coquilface(mesh,k,ia,list,&it1,&it2);
+          ilist = ret / 2;
 
-	  /* CAUTION: trigger collapse with 2 elements */
-	  if ( ilist <= 1 )  continue;
-	  ier = chkswpbdy(mesh,list,ilist,it1,it2);
-	  if ( ier ) {
-	    ier = swpbdy(mesh,list,ret,it1);
-	    ns++;
-	    break;
-	  }
-	}
-	if ( ier )  break;
+          /* CAUTION: trigger collapse with 2 elements */
+          if ( ilist <= 1 )  continue;
+          ier = chkswpbdy(mesh,list,ilist,it1,it2);
+          if ( ier ) {
+            ier = swpbdy(mesh,list,ret,it1);
+            ns++;
+            break;
+          }
+        }
+        if ( ier )  break;
       }
     }
     nns += ns;
@@ -351,12 +351,12 @@ static int swptet(pMesh mesh,pSol met) {
       if ( !MG_EOK(pt) )  continue;
 
       for (i=0; i<6; i++) {
-	nconf = chkswpgen(mesh,k,i,&ilist,list);
-	if ( nconf ) {
-	  ns++;
-	  swpgen(mesh,nconf,ilist,list);
-	  break;
-	}
+        nconf = chkswpgen(mesh,k,i,&ilist,list);
+        if ( nconf ) {
+          ns++;
+          swpgen(mesh,nconf,ilist,list);
+          break;
+        }
       }
     }
     nns += ns;
@@ -394,47 +394,47 @@ static int movtet(pMesh mesh,pSol met,int maxit) {
 
       /* point j on face i */
       for (i=0; i<4; i++) {
-	for (j=0; j<3; j++) {
-	  i0  = idir[i][j];
-	  ppt = &mesh->point[pt->v[i0]];
-	  if ( ppt->flag == base )  continue;
-	  else if ( MG_SIN(ppt->tag) )  continue;
+        for (j=0; j<3; j++) {
+          i0  = idir[i][j];
+          ppt = &mesh->point[pt->v[i0]];
+          if ( ppt->flag == base )  continue;
+          else if ( MG_SIN(ppt->tag) )  continue;
 
-	  ier = 0;
-	  if ( ppt->tag & MG_BDY ) {
-	    pxt = &mesh->xtetra[pt->xt];
-	    if ( !(MG_BDY & pxt->ftag[i]) )  continue; // Catch a boundary point by a boundary face
-	    else if( ppt->tag & MG_NOM ){
-	      if( mesh->adja[4*(k-1)+1+i] ) continue;
-	      if( !bouleext(mesh,k,i0,i,listv,&ilistv,lists,&ilists) )  continue;
-	      ier = movbdynompt(mesh,listv,ilistv,lists,ilists);
-	    }
-	    else if ( ppt->tag & MG_GEO ) {
-	      if ( !boulesurfvolp(mesh,k,i0,i,listv,&ilistv,lists,&ilists) )  continue;
-	      ier = movbdyridpt(mesh,listv,ilistv,lists,ilists);
-	    }
-	    else if ( ppt->tag & MG_REF ) {
-	      if ( !boulesurfvolp(mesh,k,i0,i,listv,&ilistv,lists,&ilists) )  continue;
-	      ier = movbdyrefpt(mesh,listv,ilistv,lists,ilists);
-	    }
-	    else {
-	      if ( !boulesurfvolp(mesh,k,i0,i,listv,&ilistv,lists,&ilists) )  continue;
-	      n = &(mesh->xpoint[ppt->xp].n1[0]);
-	      if ( !directsurfball(mesh, pt->v[i0],lists,ilists,n) )  continue;
-	      ier = movbdyregpt(mesh,listv,ilistv,lists,ilists);
-	      if ( ier )  ns++;
-	    }
-	  }
-	  else {
-	    ilistv = boulevolp(mesh,k,i0,listv);
-	    if ( !ilistv )  continue;
-	    ier = movintpt(mesh,listv,ilistv);
-	  }
-	  if ( ier ) {
-	    nm++;
-	    ppt->flag = base;
-	  }
-	}
+          ier = 0;
+          if ( ppt->tag & MG_BDY ) {
+            pxt = &mesh->xtetra[pt->xt];
+            if ( !(MG_BDY & pxt->ftag[i]) )  continue; // Catch a boundary point by a boundary face
+            else if( ppt->tag & MG_NOM ){
+              if( mesh->adja[4*(k-1)+1+i] ) continue;
+              if( !bouleext(mesh,k,i0,i,listv,&ilistv,lists,&ilists) )  continue;
+              ier = movbdynompt(mesh,listv,ilistv,lists,ilists);
+            }
+            else if ( ppt->tag & MG_GEO ) {
+              if ( !boulesurfvolp(mesh,k,i0,i,listv,&ilistv,lists,&ilists) )  continue;
+              ier = movbdyridpt(mesh,listv,ilistv,lists,ilists);
+            }
+            else if ( ppt->tag & MG_REF ) {
+              if ( !boulesurfvolp(mesh,k,i0,i,listv,&ilistv,lists,&ilists) )  continue;
+              ier = movbdyrefpt(mesh,listv,ilistv,lists,ilists);
+            }
+            else {
+              if ( !boulesurfvolp(mesh,k,i0,i,listv,&ilistv,lists,&ilists) )  continue;
+              n = &(mesh->xpoint[ppt->xp].n1[0]);
+              if ( !directsurfball(mesh, pt->v[i0],lists,ilists,n) )  continue;
+              ier = movbdyregpt(mesh,listv,ilistv,lists,ilists);
+              if ( ier )  ns++;
+            }
+          }
+          else {
+            ilistv = boulevolp(mesh,k,i0,listv);
+            if ( !ilistv )  continue;
+            ier = movintpt(mesh,listv,ilistv);
+          }
+          if ( ier ) {
+            nm++;
+            ppt->flag = base;
+          }
+        }
       }
     }
     nnm += nm;
@@ -466,57 +466,57 @@ static int coltet(pMesh mesh,pSol met,char typchk) {
     pxt = pt->xt ? &mesh->xtetra[pt->xt] : 0;
     for (i=0; i<4; i++) {
       for (j=0; j<3; j++) {
-	ier = 0;
-	ip = idir[i][inxt2[j]];
-	iq = idir[i][iprv2[j]];
+        ier = 0;
+        ip = idir[i][inxt2[j]];
+        iq = idir[i][iprv2[j]];
 
-	p0 = &mesh->point[pt->v[ip]];
-	p1 = &mesh->point[pt->v[iq]];
-	if ( p0->flag == base )  continue;
-	else if ( p0->tag > p1->tag )  continue;
+        p0 = &mesh->point[pt->v[ip]];
+        p1 = &mesh->point[pt->v[iq]];
+        if ( p0->flag == base )  continue;
+        else if ( p0->tag > p1->tag )  continue;
 
-	/* check length */
-	if ( typchk == 1 ) {
-	  ux = p1->c[0] - p0->c[0];
-	  uy = p1->c[1] - p0->c[1];
-	  uz = p1->c[2] - p0->c[2];
-	  ll = ux*ux + uy*uy + uz*uz;
-	  if ( ll > info.hmin*info.hmin )  continue;
-	}
-	else if ( typchk == 2 ) {
-	  ll = lenedg(mesh,pt->v[ip],pt->v[iq]);
-	  if ( ll > LSHRT )  continue;
-	}
+        /* check length */
+        if ( typchk == 1 ) {
+          ux = p1->c[0] - p0->c[0];
+          uy = p1->c[1] - p0->c[1];
+          uz = p1->c[2] - p0->c[2];
+          ll = ux*ux + uy*uy + uz*uz;
+          if ( ll > info.hmin*info.hmin )  continue;
+        }
+        else if ( typchk == 2 ) {
+          ll = lenedg(mesh,pt->v[ip],pt->v[iq]);
+          if ( ll > LSHRT )  continue;
+        }
 
-	/* boundary face: collapse ip on iq */
-	if ( pt->xt && (pxt->ftag[i] & MG_BDY) ) {
-	  hGet(&mesh->htab,pt->v[ip],pt->v[iq],&ref,&tag);
-	  tag |= MG_BDY;
+        /* boundary face: collapse ip on iq */
+        if ( pt->xt && (pxt->ftag[i] & MG_BDY) ) {
+          hGet(&mesh->htab,pt->v[ip],pt->v[iq],&ref,&tag);
+          tag |= MG_BDY;
 
-	  isnm = (tag & MG_NOM);
-	  if(isnm){
-	    if(mesh->adja[4*(k-1)+1+i]) continue;
-	  }
+          isnm = (tag & MG_NOM);
+          if(isnm){
+            if(mesh->adja[4*(k-1)+1+i]) continue;
+          }
 
-	  if ( MG_SIN(tag) || p0->tag > tag )  continue;
-	  ilist = chkcol_bdy(mesh,k,i,j,list);
-	}
-	/* internal face */
-	else {
-	  isnm = 0;
-	  if ( p0->tag & MG_BDY )  continue;
-	  ilist = chkcol_int(mesh,k,i,j,list);
-	}
-	if ( ilist ) {
-	  ier = colver(mesh,list,ilist,iq);
-	  if ( ier )  break;
-	}
+          if ( MG_SIN(tag) || p0->tag > tag )  continue;
+          ilist = chkcol_bdy(mesh,k,i,j,list);
+        }
+        /* internal face */
+        else {
+          isnm = 0;
+          if ( p0->tag & MG_BDY )  continue;
+          ilist = chkcol_int(mesh,k,i,j,list);
+        }
+        if ( ilist ) {
+          ier = colver(mesh,list,ilist,iq);
+          if ( ier )  break;
+        }
       }
       if ( ier ) {
-	p1->flag = base;
-	if(isnm) nnm++;
-	nc++;
-	break;
+        p1->flag = base;
+        if(isnm) nnm++;
+        nc++;
+        break;
       }
     }
   }
@@ -548,13 +548,13 @@ static int anatetv(pMesh mesh,pSol met,char typchk) {
     pxt = &mesh->xtetra[pt->xt];
     for (i=0; i<4; i++) {
       if ( pxt->ftag[i] & MG_BDY ) {
-	for (j=0; j<3; j++) {
-	  ip1 = pt->v[idir[i][inxt2[j]]];
-	  ip2 = pt->v[idir[i][iprv2[j]]];
-	  ip  = -1;
-	  assert(hashEdge(&hash,ip1,ip2,ip));
-	}
-	break;
+        for (j=0; j<3; j++) {
+          ip1 = pt->v[idir[i][inxt2[j]]];
+          ip2 = pt->v[idir[i][iprv2[j]]];
+          ip  = -1;
+          assert(hashEdge(&hash,ip1,ip2,ip));
+        }
+        break;
       }
     }
   }
@@ -571,33 +571,33 @@ static int anatetv(pMesh mesh,pSol met,char typchk) {
       p1  = &mesh->point[ip1];
       p2  = &mesh->point[ip2];
       if ( (p1->tag & MG_BDY) && (p2->tag & MG_BDY) ) {
-	ip = hashGet(&hash,ip1,ip2);
+        ip = hashGet(&hash,ip1,ip2);
       }
       else {
-	ux = p2->c[0] - p1->c[0];
-	uy = p2->c[1] - p1->c[1];
-	uz = p2->c[2] - p1->c[2];
-	ll = ux*ux + uy*uy + uz*uz;
-	if ( ll > info.hmax*info.hmax )
-	  ip = hashGet(&hash,ip1,ip2);
+        ux = p2->c[0] - p1->c[0];
+        uy = p2->c[1] - p1->c[1];
+        uz = p2->c[2] - p1->c[2];
+        ll = ux*ux + uy*uy + uz*uz;
+        if ( ll > info.hmax*info.hmax )
+          ip = hashGet(&hash,ip1,ip2);
 
-	else if ( typchk == 2 ) {
-	  ll = lenedg(mesh,ip1,ip2);
-	  if ( ll > LLONG )
-	    ip = hashGet(&hash,ip1,ip2);
-	}
+        else if ( typchk == 2 ) {
+          ll = lenedg(mesh,ip1,ip2);
+          if ( ll > LLONG )
+            ip = hashGet(&hash,ip1,ip2);
+        }
       }
       /* new midpoint */
       if ( ip == 0 ) {
-	o[0] = 0.5 * (p1->c[0]+p2->c[0]);
-	o[1] = 0.5 * (p1->c[1]+p2->c[1]);
-	o[2] = 0.5 * (p1->c[2]+p2->c[2]);
-	ip = newPt(mesh,o,0);
-	ppt = &mesh->point[ip];
-	ppt->h = 0.5 * (p1->h + p2->h);
-	hashEdge(&hash,ip1,ip2,ip);
-	MG_SET(pt->flag,i);
-	nap++;
+        o[0] = 0.5 * (p1->c[0]+p2->c[0]);
+        o[1] = 0.5 * (p1->c[1]+p2->c[1]);
+        o[2] = 0.5 * (p1->c[2]+p2->c[2]);
+        ip = newPt(mesh,o,0);
+        ppt = &mesh->point[ip];
+        ppt->h = 0.5 * (p1->h + p2->h);
+        hashEdge(&hash,ip1,ip2,ip);
+        MG_SET(pt->flag,i);
+        nap++;
       }
     }
   }
@@ -612,8 +612,8 @@ static int anatetv(pMesh mesh,pSol met,char typchk) {
     pt->flag = 0;
     for (ia=0,i=0; i<3; i++) {
       for (j=i+1; j<4; j++,ia++) {
-	vx[ia] = hashGet(&hash,pt->v[i],pt->v[j]);
-	if ( vx[ia] > 0 )  MG_SET(pt->flag,ia);
+        vx[ia] = hashGet(&hash,pt->v[i],pt->v[j]);
+        if ( vx[ia] > 0 )  MG_SET(pt->flag,ia);
       }
     }
     switch (pt->flag) {
@@ -712,17 +712,17 @@ static int anatets(pMesh mesh,pSol met,char typchk) {
       if ( !chkedg(mesh,&ptt) )  continue;
       /* put back flag on tetra */
       for (j=0; j<3; j++)
-	if ( MG_GET(ptt.flag,j) )  MG_SET(pt->flag,iarf[i][j]);
+        if ( MG_GET(ptt.flag,j) )  MG_SET(pt->flag,iarf[i][j]);
     }
     else if ( typchk == 2 ) {
       for (j=0; j<3; j++) {
-	ia = iarf[i][j];
-	i1  = iare[ia][0];
-	i2  = iare[ia][1];
-	ip1 = pt->v[i1];
-	ip2 = pt->v[i2];
-	len = lenedg(mesh,ip1,ip2);
-	if ( len > LOPTL )  MG_SET(pt->flag,ia);
+        ia = iarf[i][j];
+        i1  = iare[ia][0];
+        i2  = iare[ia][1];
+        ip1 = pt->v[i1];
+        ip2 = pt->v[i2];
+        len = lenedg(mesh,ip1,ip2);
+        if ( len > LOPTL )  MG_SET(pt->flag,ia);
       }
     }
     if ( !pt->flag )  continue;
@@ -746,39 +746,39 @@ static int anatets(pMesh mesh,pSol met,char typchk) {
       /* new point along edge */
       ier = bezierInt(&pb,&uv[j][0],o,no,to);
       if ( !ip ) {
-	ip = newPt(mesh,o,MG_BDY);
-	assert(ip);
-	hashEdge(&hash,ip1,ip2,ip);
-	ppt = &mesh->point[ip];
-	p1  = &mesh->point[ip1];
-	p2  = &mesh->point[ip2];
-	ppt->h    = 0.5  *(p1->h + p2->h);
-	if ( MG_EDG(ptt.tag[j]) || (ptt.tag[j] & MG_NOM) )
-	  ppt->ref = ptt.edg[j];
-	else
-	  ppt->ref = ptt.ref;
-	ppt->tag |= ptt.tag[j];
-	pxp = &mesh->xpoint[ppt->xp];
-	memcpy(pxp->n1,no,3*sizeof(double));
-	memcpy(pxp->t,to,3*sizeof(double));
-	nap++;
+        ip = newPt(mesh,o,MG_BDY);
+        assert(ip);
+        hashEdge(&hash,ip1,ip2,ip);
+        ppt = &mesh->point[ip];
+        p1  = &mesh->point[ip1];
+        p2  = &mesh->point[ip2];
+        ppt->h    = 0.5  *(p1->h + p2->h);
+        if ( MG_EDG(ptt.tag[j]) || (ptt.tag[j] & MG_NOM) )
+          ppt->ref = ptt.edg[j];
+        else
+          ppt->ref = ptt.ref;
+        ppt->tag |= ptt.tag[j];
+        pxp = &mesh->xpoint[ppt->xp];
+        memcpy(pxp->n1,no,3*sizeof(double));
+        memcpy(pxp->t,to,3*sizeof(double));
+        nap++;
       }
       else if ( MG_EDG(ptt.tag[j]) && !(ptt.tag[j] & MG_NOM) ) {
-	ppt = &mesh->point[ip];
-	assert(ppt->xp);
-	pxp = &mesh->xpoint[ppt->xp];
-	memcpy(pxp->n2,no,3*sizeof(double));
-	/* a computation of the tangent with respect to these two normals is possible */
-	pxp->t[0] = pxp->n1[1]*pxp->n2[2] - pxp->n1[2]*pxp->n2[1];
-	pxp->t[1] = pxp->n1[2]*pxp->n2[0] - pxp->n1[0]*pxp->n2[2];
-	pxp->t[2] = pxp->n1[0]*pxp->n2[1] - pxp->n1[1]*pxp->n2[0];
-	dd = pxp->t[0]*pxp->t[0] + pxp->t[1]*pxp->t[1] + pxp->t[2]*pxp->t[2];
-	if ( dd > EPSD2 ) {
-	  dd = 1.0 / sqrt(dd);
-	  pxp->t[0] *= dd;
-	  pxp->t[1] *= dd;
-	  pxp->t[2] *= dd;
-	}
+        ppt = &mesh->point[ip];
+        assert(ppt->xp);
+        pxp = &mesh->xpoint[ppt->xp];
+        memcpy(pxp->n2,no,3*sizeof(double));
+        /* a computation of the tangent with respect to these two normals is possible */
+        pxp->t[0] = pxp->n1[1]*pxp->n2[2] - pxp->n1[2]*pxp->n2[1];
+        pxp->t[1] = pxp->n1[2]*pxp->n2[0] - pxp->n1[0]*pxp->n2[2];
+        pxp->t[2] = pxp->n1[0]*pxp->n2[1] - pxp->n1[1]*pxp->n2[0];
+        dd = pxp->t[0]*pxp->t[0] + pxp->t[1]*pxp->t[1] + pxp->t[2]*pxp->t[2];
+        if ( dd > EPSD2 ) {
+          dd = 1.0 / sqrt(dd);
+          pxp->t[0] *= dd;
+          pxp->t[1] *= dd;
+          pxp->t[2] *= dd;
+        }
       }
     }
   }
@@ -800,27 +800,27 @@ static int anatets(pMesh mesh,pSol met,char typchk) {
       /* virtual triangle */
       memset(&ptt,0,sizeof(Tria));
       if ( pt->xt && pxt->ftag[i] )
-	tet2tri(mesh,k,i,&ptt);
+        tet2tri(mesh,k,i,&ptt);
 
       for (j=0; j<3; j++) {
-	ia  = iarf[i][j];
-	if ( MG_GET(pt->flag,ia) )  continue;
-	else if ( MG_SIN(ptt.tag[j]) )  continue;
-	ip1 = pt->v[iare[ia][0]];
-	ip2 = pt->v[iare[ia][1]];
-	ip  = hashGet(&hash,ip1,ip2);
-	if ( ip > 0 ) {
-	  MG_SET(pt->flag,ia);
-	  nc++;
-	  /* ridge on a boundary face */
-	  if ( !(ptt.tag[j] & MG_GEO) && !(ptt.tag[j] & MG_NOM) )  continue;
-	  ppt = &mesh->point[ip];
-	  assert(ppt->xp);
-	  pxp = &mesh->xpoint[ppt->xp];
-	  ier = bezierCP(mesh,&ptt,&pb);
-	  ier = bezierInt(&pb,&uv[j][0],o,no,to);
-	  memcpy(pxp->n2,no,3*sizeof(double));
-	}
+        ia  = iarf[i][j];
+        if ( MG_GET(pt->flag,ia) )  continue;
+        else if ( MG_SIN(ptt.tag[j]) )  continue;
+        ip1 = pt->v[iare[ia][0]];
+        ip2 = pt->v[iare[ia][1]];
+        ip  = hashGet(&hash,ip1,ip2);
+        if ( ip > 0 ) {
+          MG_SET(pt->flag,ia);
+          nc++;
+          /* ridge on a boundary face */
+          if ( !(ptt.tag[j] & MG_GEO) && !(ptt.tag[j] & MG_NOM) )  continue;
+          ppt = &mesh->point[ip];
+          assert(ppt->xp);
+          pxp = &mesh->xpoint[ppt->xp];
+          ier = bezierCP(mesh,&ptt,&pb);
+          ier = bezierInt(&pb,&uv[j][0],o,no,to);
+          memcpy(pxp->n2,no,3*sizeof(double));
+        }
       }
     }
   }
@@ -842,46 +842,46 @@ static int anatets(pMesh mesh,pSol met,char typchk) {
       memset(vx,0,6*sizeof(int));
       pt->flag = ic = 0;
       for (ia=0,i=0; i<3; i++) {
-	for (j=i+1; j<4; j++,ia++) {
-	  vx[ia] = hashGet(&hash,pt->v[i],pt->v[j]);
-	  if ( vx[ia] > 0 ) {
-	    MG_SET(pt->flag,ia);
-	    if ( mesh->point[vx[ia]].flag > 2 )  ic = 1;
-	  }
-	}
+        for (j=i+1; j<4; j++,ia++) {
+          vx[ia] = hashGet(&hash,pt->v[i],pt->v[j]);
+          if ( vx[ia] > 0 ) {
+            MG_SET(pt->flag,ia);
+            if ( mesh->point[vx[ia]].flag > 2 )  ic = 1;
+          }
+        }
       }
       if ( !pt->flag )  continue;
       switch (pt->flag) {
       case 1: case 2: case 4: case 8: case 16: case 32:
-	ier = split1_sim(mesh,met,k,vx);
-	break;
+        ier = split1_sim(mesh,met,k,vx);
+        break;
       case 11: case 21: case 38: case 56:
-	ier = split3_sim(mesh,met,k,vx);
-	break;
+        ier = split3_sim(mesh,met,k,vx);
+        break;
       default:
-	ier = split2sf_sim(mesh,met,k,vx);
-	break;
+        ier = split2sf_sim(mesh,met,k,vx);
+        break;
       }
       if ( ier )  continue;
 
       nc++;
       if ( ic == 0 && dichoto(mesh,met,k,vx) ) {
-	for (ia=0; ia<6; ia++)
-	  if ( vx[ia] > 0 )  mesh->point[vx[ia]].flag++;
+        for (ia=0; ia<6; ia++)
+          if ( vx[ia] > 0 )  mesh->point[vx[ia]].flag++;
       }
       else {
-	for (ia=0,i=0; i<3; i++) {
-	  for (j=i+1; j<4; j++,ia++) {
-	    if ( vx[ia] > 0 ) {
-	      p1 = &mesh->point[pt->v[iare[ia][0]]];
-	      p2 = &mesh->point[pt->v[iare[ia][1]]];
-	      ppt = &mesh->point[vx[ia]];
-	      ppt->c[0] = 0.5 * (p1->c[0] + p2->c[0]);
-	      ppt->c[1] = 0.5 * (p1->c[1] + p2->c[1]);
-	      ppt->c[2] = 0.5 * (p1->c[2] + p2->c[2]);
-	    }
-	  }
-	}
+        for (ia=0,i=0; i<3; i++) {
+          for (j=i+1; j<4; j++,ia++) {
+            if ( vx[ia] > 0 ) {
+              p1 = &mesh->point[pt->v[iare[ia][0]]];
+              p2 = &mesh->point[pt->v[iare[ia][1]]];
+              ppt = &mesh->point[vx[ia]];
+              ppt->c[0] = 0.5 * (p1->c[0] + p2->c[0]);
+              ppt->c[1] = 0.5 * (p1->c[1] + p2->c[1]);
+              ppt->c[2] = 0.5 * (p1->c[2] + p2->c[2]);
+            }
+          }
+        }
       }
     }
   }
@@ -900,10 +900,10 @@ static int anatets(pMesh mesh,pSol met,char typchk) {
     memset(vx,0,6*sizeof(int));
     for (ia=0,i=0; i<3; i++) {
       for (j=i+1; j<4; j++,ia++) {
-	if ( MG_GET(pt->flag,ia) )  {
-	  vx[ia] = hashGet(&hash,pt->v[i],pt->v[j]);
-	  assert(vx[ia]);
-	}
+        if ( MG_GET(pt->flag,ia) )  {
+          vx[ia] = hashGet(&hash,pt->v[i],pt->v[j]);
+          assert(vx[ia]);
+        }
       }
     }
     switch (pt->flag) {
@@ -951,8 +951,8 @@ static int adpspl(pMesh mesh,pSol met) {
       iq  = iare[i][1];
       len = lenedg(mesh,pt->v[ip],pt->v[iq]);
       if ( len > lmax ) {
-	lmax = len;
-	imax = i;
+        lmax = len;
+        imax = i;
       }
     }
     if ( lmax < LOPTL )  continue;
@@ -979,79 +979,79 @@ static int adpspl(pMesh mesh,pSol met) {
       if ( !ilist )  continue;
 
       if ( tag & MG_NOM ){
-	if( !BezierNom(mesh,ip,iq,0.5,o,no1,to) )
-	  continue;
-	else if ( MG_SIN(p0->tag) && MG_SIN(p1->tag) ) {
-	  tet2tri(mesh,k,i,&ptt);
-	  nortri(mesh,&ptt,no1);
-	}
+        if( !BezierNom(mesh,ip,iq,0.5,o,no1,to) )
+          continue;
+        else if ( MG_SIN(p0->tag) && MG_SIN(p1->tag) ) {
+          tet2tri(mesh,k,i,&ptt);
+          nortri(mesh,&ptt,no1);
+        }
       }
       else if ( tag & MG_GEO ) {
-	if ( !BezierRidge(mesh,ip,iq,0.5,o,no1,no2,to) )
-	  continue;
-	if ( MG_SIN(p0->tag) && MG_SIN(p1->tag) ) {
-	  tet2tri(mesh,k,i,&ptt);
-	  nortri(mesh,&ptt,no1);
-	  no2[0] = to[1]*no1[2] - to[2]*no1[1];
-	  no2[1] = to[2]*no1[0] - to[0]*no1[2];
-	  no2[2] = to[0]*no1[1] - to[1]*no1[0];
-	  dd = no2[0]*no2[0] + no2[1]*no2[1] + no2[2]*no2[2];
-	  if ( dd > EPSD2 ) {
-	    dd = 1.0 / sqrt(dd);
-	    no2[0] *= dd;
-	    no2[1] *= dd;
-	    no2[2] *= dd;
-	  }
-	}
-	else if ( tag & MG_REF ) {
-	  if ( !BezierRef(mesh,ip,iq,0.5,o,no1,to) )
-	    continue;
-	  else if ( MG_SIN(p0->tag) && MG_SIN(p1->tag) ) {
-	    tet2tri(mesh,k,i,&ptt);
-	    nortri(mesh,&ptt,no1);
-	  }
-	}
-	else {
-	  if ( !norface(mesh,k,i,v) )  continue;
-	  else if ( !BezierReg(mesh,ip,iq,0.5,v,o,no1) )
-	    continue;
-	}
-	ier = simbulgept(mesh,list,ilist,o);
-	if ( !ier ) {
-	  ier = dichoto1b(mesh,list,ilist,o,ro);
-	  memcpy(o,ro,3*sizeof(double));
-	}
-	ip = newPt(mesh,o,MG_NOTAG);
-	if ( !ip )  break;
-	split1b(mesh,list,ilist,ip);
-	ns++;
-	ppt = &mesh->point[ip];
-	if ( MG_EDG(tag) || (tag & MG_NOM) )
-	  ppt->ref = ref;
-	else
-	  ppt->ref = pxt->ref[i];
-	ppt->tag = tag;
-	ppt->h   = 0.5 * (p0->h + p1->h);
-	mesh->xp++;
-	assert(mesh->xp < mesh->xpmax);
-	ppt->xp = mesh->xp;
-	pxp = &mesh->xpoint[ppt->xp];
+        if ( !BezierRidge(mesh,ip,iq,0.5,o,no1,no2,to) )
+          continue;
+        if ( MG_SIN(p0->tag) && MG_SIN(p1->tag) ) {
+          tet2tri(mesh,k,i,&ptt);
+          nortri(mesh,&ptt,no1);
+          no2[0] = to[1]*no1[2] - to[2]*no1[1];
+          no2[1] = to[2]*no1[0] - to[0]*no1[2];
+          no2[2] = to[0]*no1[1] - to[1]*no1[0];
+          dd = no2[0]*no2[0] + no2[1]*no2[1] + no2[2]*no2[2];
+          if ( dd > EPSD2 ) {
+            dd = 1.0 / sqrt(dd);
+            no2[0] *= dd;
+            no2[1] *= dd;
+            no2[2] *= dd;
+          }
+        }
+        else if ( tag & MG_REF ) {
+          if ( !BezierRef(mesh,ip,iq,0.5,o,no1,to) )
+            continue;
+          else if ( MG_SIN(p0->tag) && MG_SIN(p1->tag) ) {
+            tet2tri(mesh,k,i,&ptt);
+            nortri(mesh,&ptt,no1);
+          }
+        }
+        else {
+          if ( !norface(mesh,k,i,v) )  continue;
+          else if ( !BezierReg(mesh,ip,iq,0.5,v,o,no1) )
+            continue;
+        }
+        ier = simbulgept(mesh,list,ilist,o);
+        if ( !ier ) {
+          ier = dichoto1b(mesh,list,ilist,o,ro);
+          memcpy(o,ro,3*sizeof(double));
+        }
+        ip = newPt(mesh,o,MG_NOTAG);
+        if ( !ip )  break;
+        split1b(mesh,list,ilist,ip);
+        ns++;
+        ppt = &mesh->point[ip];
+        if ( MG_EDG(tag) || (tag & MG_NOM) )
+          ppt->ref = ref;
+        else
+          ppt->ref = pxt->ref[i];
+        ppt->tag = tag;
+        ppt->h   = 0.5 * (p0->h + p1->h);
+        mesh->xp++;
+        assert(mesh->xp < mesh->xpmax);
+        ppt->xp = mesh->xp;
+        pxp = &mesh->xpoint[ppt->xp];
 
-	if ( tag & MG_NOM ){
-	  memcpy(pxp->n1,no1,3*sizeof(double));
-	  memcpy(pxp->t,to,3*sizeof(double));
-	}
-	else if ( tag & MG_GEO ) {
-	  memcpy(pxp->n1,no1,3*sizeof(double));
-	  memcpy(pxp->n2,no2,3*sizeof(double));
-	  memcpy(pxp->t,to,3*sizeof(double));
-	}
-	else if ( tag & MG_REF ) {
-	  memcpy(pxp->n1,no1,3*sizeof(double));
-	  memcpy(pxp->t,to,3*sizeof(double));
-	}
-	else
-	  memcpy(pxp->n1,no1,3*sizeof(double));
+        if ( tag & MG_NOM ){
+          memcpy(pxp->n1,no1,3*sizeof(double));
+          memcpy(pxp->t,to,3*sizeof(double));
+        }
+        else if ( tag & MG_GEO ) {
+          memcpy(pxp->n1,no1,3*sizeof(double));
+          memcpy(pxp->n2,no2,3*sizeof(double));
+          memcpy(pxp->t,to,3*sizeof(double));
+        }
+        else if ( tag & MG_REF ) {
+          memcpy(pxp->n1,no1,3*sizeof(double));
+          memcpy(pxp->t,to,3*sizeof(double));
+        }
+        else
+          memcpy(pxp->n1,no1,3*sizeof(double));
       }
     }
     /* Case of an internal face */
@@ -1096,8 +1096,8 @@ static int adpcol(pMesh mesh,pSol met) {
       i2  = iare[i][1];
       len = lenedg(mesh,pt->v[i1],pt->v[i2]);
       if ( len < lmin ) {
-	lmin = len;
-	imin = i;
+        lmin = len;
+        imin = i;
       }
     }
     if ( lmin > LOPTS )  continue;
@@ -1222,7 +1222,7 @@ static int anatet4(pMesh mesh, pSol met) {
     if ( pt->xt ) {
       pxt = &mesh->xtetra[pt->xt];
       for (j=0; j<4; j++)
-	if ( pxt->ftag[j] & MG_BDY )  nf++;
+        if ( pxt->ftag[j] & MG_BDY )  nf++;
     }
     if ( nf > 1 ) {
       split4bar(mesh,met,k);
@@ -1231,12 +1231,12 @@ static int anatet4(pMesh mesh, pSol met) {
     else {
       nf = 0;
       for (j=0; j<4; j++) {
-	ppt = &mesh->point[pt->v[j]];
-	if ( ppt->tag & MG_BDY )  nf++;
+        ppt = &mesh->point[pt->v[j]];
+        if ( ppt->tag & MG_BDY )  nf++;
       }
       if ( nf == 4 ) {
-	split4bar(mesh,met,k);
-	ns++;
+        split4bar(mesh,met,k);
+        ns++;
       }
     }
   }

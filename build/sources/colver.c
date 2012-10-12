@@ -36,12 +36,12 @@ int chkcol_int(pMesh mesh,int k,char iface,char iedg,int *list) {
     if ( info.fem ) {
       p0 = &mesh->point[nq];
       if ( p0->tag & MG_BDY ) {
-	i = ip;
-	for (jj=0; jj<3; jj++) {
-	  i = inxt3[i];
-	  p0 = &mesh->point[pt->v[i]];
-	  if ( p0->tag & MG_BDY )  return(0);
-	}
+        i = ip;
+        for (jj=0; jj<3; jj++) {
+          i = inxt3[i];
+          p0 = &mesh->point[pt->v[i]];
+          if ( p0->tag & MG_BDY )  return(0);
+        }
       }
     }
 
@@ -115,31 +115,31 @@ int chkcol_bdy(pMesh mesh,int k,char iface,char iedg,int *listv) {
       nbbdy = 0;
       if ( pt->xt )  pxt = &mesh->xtetra[pt->xt];
       for (i=0; i<4; i++) {
-	if ( pt->xt && (pxt->ftag[i] & MG_BDY) )  nbbdy++;
+        if ( pt->xt && (pxt->ftag[i] & MG_BDY) )  nbbdy++;
       }
 
       /* Topological problem triggered when one of the two faces of collapsed edge is the only
-	 internal one : closing a part of the domain */
+         internal one : closing a part of the domain */
       if (nbbdy == 4)
-	return(0);
+        return(0);
       else if ( nbbdy == 3 ) {
-	for (ia=0; ia<6; ia++) {
-	  i0 = iare[ia][0];
-	  i1 = iare[ia][1];
-	  if ( ((pt->v[i0] == nump) && (pt->v[i1] == numq)) ||
-	       ((pt->v[i0] == numq) && (pt->v[i1] == nump)) )
-	    break;
-	}
-	assert(ia < 6);
-	i0 = ifar[ia][0];
-	i1 = ifar[ia][1];
-	if ( pt->xt && (!(pxt->ftag[i0] & MG_BDY) || !(pxt->ftag[i1] & MG_BDY)) )
-	  return(0);
+        for (ia=0; ia<6; ia++) {
+          i0 = iare[ia][0];
+          i1 = iare[ia][1];
+          if ( ((pt->v[i0] == nump) && (pt->v[i1] == numq)) ||
+               ((pt->v[i0] == numq) && (pt->v[i1] == nump)) )
+            break;
+        }
+        assert(ia < 6);
+        i0 = ifar[ia][0];
+        i1 = ifar[ia][1];
+        if ( pt->xt && (!(pxt->ftag[i0] & MG_BDY) || !(pxt->ftag[i1] & MG_BDY)) )
+          return(0);
       }
 
       /* Now check that the 2 faces identified by collapse are not boundary */
       if ( pt->xt && (pxt->ftag[ipp] & MG_BDY) && (pxt->ftag[iq] & MG_BDY) )
-	return(0);
+        return(0);
 
       continue;
     }
@@ -147,9 +147,9 @@ int chkcol_bdy(pMesh mesh,int k,char iface,char iedg,int *listv) {
     /* Volume test for tetras outside the shell */
     if ( info.iso ) {
       if ( !ndepmin && pt->ref == MG_MINUS )
-	ndepmin = iel;
+        ndepmin = iel;
       else if ( !ndepplus && pt->ref == MG_PLUS )
-	ndepplus = iel;
+        ndepplus = iel;
     }
 
     memcpy(pt0,pt,sizeof(Tetra));
@@ -195,12 +195,12 @@ int chkcol_bdy(pMesh mesh,int k,char iface,char iedg,int *listv) {
 
       hGet(&mesh->htab,pt->v[iare[ia][0]],pt->v[iare[ia][1]],&ref,&tag);
       if ( !(tag & MG_GEO) ) {
-	devold = nprvold[0]*ncurold[0] + nprvold[1]*ncurold[1] + nprvold[2]*ncurold[2];
-	devnew = nprvnew[0]*ncurnew[0] + nprvnew[1]*ncurnew[1] + nprvnew[2]*ncurnew[2];
-	if ( devold < ANGEDG ) {
-	  if ( devnew < devold )  return(0);
-	}
-	else if ( devnew < ANGEDG )  return(0);
+        devold = nprvold[0]*ncurold[0] + nprvold[1]*ncurold[1] + nprvold[2]*ncurold[2];
+        devnew = nprvnew[0]*ncurnew[0] + nprvnew[1]*ncurnew[1] + nprvnew[2]*ncurnew[2];
+        if ( devold < ANGEDG ) {
+          if ( devnew < devold )  return(0);
+        }
+        else if ( devnew < ANGEDG )  return(0);
       }
     }
 
@@ -208,7 +208,7 @@ int chkcol_bdy(pMesh mesh,int k,char iface,char iedg,int *listv) {
     tet2tri(mesh,iel,iopp,&tt);
     if ( l == 1 ) {
       for (i=0; i<3; i++) {
-	if ( tt.v[i] == nump )  break;
+        if ( tt.v[i] == nump )  break;
       }
       assert(i<3);
       /* Index of the third point of the first collapsed triangle */
@@ -219,7 +219,7 @@ int chkcol_bdy(pMesh mesh,int k,char iface,char iedg,int *listv) {
     }
     else if ( l == ilists-2 ) {
       for (i=0; i<3; i++) {
-	if ( tt.v[i] == nump )  break;
+        if ( tt.v[i] == nump )  break;
       }
       assert(i<3);
       /* Index of the third point of the first collapsed triangle */
@@ -277,8 +277,8 @@ int colver(pMesh mesh,int *list,int ilist,char indq) {
     for (j=0; j<3; j++) {
       i = inxt3[i];
       if ( pt->v[i] == nq ) {
-	list[k] *= -1;
-	break;
+        list[k] *= -1;
+        break;
       }
     }
   }
@@ -344,7 +344,7 @@ int colver(pMesh mesh,int *list,int ilist,char indq) {
       if ( j == ip || j == iq )  continue;
       hPop(&mesh->htab,np,pt->v[j],&ref,&tag);
       if( tag || ref )
-	hEdge(&mesh->htab,nq,pt->v[j],ref,tag);
+        hEdge(&mesh->htab,nq,pt->v[j],ref,tag);
     }
 
     /* Update references for faces (one in pel) ;
@@ -352,82 +352,82 @@ int colver(pMesh mesh,int *list,int ilist,char indq) {
     if ( pel ) {
       pt1 = &mesh->tetra[pel];
       if ( pt->xt ) {
-	pxt = &mesh->xtetra[pt->xt];
-	memcpy(&xts,pxt,sizeof(xTetra));
-	if ( pt1->xt > 0 ) {
-	  pxt1 = &mesh->xtetra[pt1->xt];
-	  pxt1->ref[voyp] = MG_MAX(pxt1->ref[voyp],pxt->ref[ip]);
-	  pxt1->ftag[voyp] = pxt1->ftag[voyp] | pxt->ftag[ip];
-	}
-	else {
-	  pxt1 = &xt;
-	  memset(pxt1,0,sizeof(xTetra));
-	  pxt1->ref[voyp] = pxt->ref[ip];
-	  pxt1->ftag[voyp] = pxt->ftag[ip];
-	  /* Recover the already used place by pxt */
-	  pt1->xt = pt->xt;
-	  memcpy(pxt,pxt1,sizeof(xTetra));
-	}
+        pxt = &mesh->xtetra[pt->xt];
+        memcpy(&xts,pxt,sizeof(xTetra));
+        if ( pt1->xt > 0 ) {
+          pxt1 = &mesh->xtetra[pt1->xt];
+          pxt1->ref[voyp] = MG_MAX(pxt1->ref[voyp],pxt->ref[ip]);
+          pxt1->ftag[voyp] = pxt1->ftag[voyp] | pxt->ftag[ip];
+        }
+        else {
+          pxt1 = &xt;
+          memset(pxt1,0,sizeof(xTetra));
+          pxt1->ref[voyp] = pxt->ref[ip];
+          pxt1->ftag[voyp] = pxt->ftag[ip];
+          /* Recover the already used place by pxt */
+          pt1->xt = pt->xt;
+          memcpy(pxt,pxt1,sizeof(xTetra));
+        }
       }
       else {
-	/* Only the values corresponding to pt become 0 */
-	if ( pt1->xt > 0 ) {
-	  pxt1 = &mesh->xtetra[pt1->xt];
-	  pxt1->ref[voyp]  = 0;
-	  pxt1->ftag[voyp] = 0;
-	}
+        /* Only the values corresponding to pt become 0 */
+        if ( pt1->xt > 0 ) {
+          pxt1 = &mesh->xtetra[pt1->xt];
+          pxt1->ref[voyp]  = 0;
+          pxt1->ftag[voyp] = 0;
+        }
       }
 
       if ( qel ) {
-	pt1 = &mesh->tetra[qel];
-	if ( pt->xt ) {
-	  pxt = &xts;
-	  if ( pt1->xt > 0 ) {
-	    pxt1 = &mesh->xtetra[pt1->xt];
-	    pxt1->ref[voyq] = MG_MAX(pxt1->ref[voyq],pxt->ref[iq]);
-	    pxt1->ftag[voyq] = (pxt1->ftag[voyq] | pxt->ftag[iq]);
-	  }
-	  else {
-	    pxt1 = &xt;
-	    memset(pxt1,0,sizeof(xTetra));
-	    pxt1->ref[voyq] = pxt->ref[iq];
-	    pxt1->ftag[voyq] = pxt->ftag[iq];
-	    /* Create new field xt */
-	    mesh->xt++;
-	    pt1->xt = mesh->xt;
-	    pxt = &mesh->xtetra[pt1->xt];
-	    memcpy(pxt,pxt1,sizeof(xTetra));
-	  }
-	}
-	else {
-	  /* Only the values corresponding to pt become 0 */
-	  if ( pt1->xt > 0 ) {
-	    pxt1 = &mesh->xtetra[pt1->xt];
-	    pxt1->ref[voyq]  = 0;
-	    pxt1->ftag[voyq] = 0;
-	  }
-	}
+        pt1 = &mesh->tetra[qel];
+        if ( pt->xt ) {
+          pxt = &xts;
+          if ( pt1->xt > 0 ) {
+            pxt1 = &mesh->xtetra[pt1->xt];
+            pxt1->ref[voyq] = MG_MAX(pxt1->ref[voyq],pxt->ref[iq]);
+            pxt1->ftag[voyq] = (pxt1->ftag[voyq] | pxt->ftag[iq]);
+          }
+          else {
+            pxt1 = &xt;
+            memset(pxt1,0,sizeof(xTetra));
+            pxt1->ref[voyq] = pxt->ref[iq];
+            pxt1->ftag[voyq] = pxt->ftag[iq];
+            /* Create new field xt */
+            mesh->xt++;
+            pt1->xt = mesh->xt;
+            pxt = &mesh->xtetra[pt1->xt];
+            memcpy(pxt,pxt1,sizeof(xTetra));
+          }
+        }
+        else {
+          /* Only the values corresponding to pt become 0 */
+          if ( pt1->xt > 0 ) {
+            pxt1 = &mesh->xtetra[pt1->xt];
+            pxt1->ref[voyq]  = 0;
+            pxt1->ftag[voyq] = 0;
+          }
+        }
       }
     }
     else {
       assert(pt->xt);
       pxt = &mesh->xtetra[pt->xt];
       if ( qel ) {
-	pt1 = &mesh->tetra[qel];
-	if ( pt1->xt > 0 ) {
-	  pxt1 = &mesh->xtetra[pt1->xt];
-	  pxt1->ref[voyq] = pxt->ref[iq];
-	  pxt1->ftag[voyq] = pxt->ftag[iq];
-	}
-	else {
-	  pxt1 = &xt;
-	  memset(pxt1,0,sizeof(xTetra));
-	  pxt1->ref[voyq] = pxt->ref[iq];
-	  pxt1->ftag[voyq] = pxt->ftag[iq];
-	  /* Recover the already used place by pxt */
-	  pt1->xt = pt->xt;
-	  memcpy(pxt,pxt1,sizeof(xTetra));
-	}
+        pt1 = &mesh->tetra[qel];
+        if ( pt1->xt > 0 ) {
+          pxt1 = &mesh->xtetra[pt1->xt];
+          pxt1->ref[voyq] = pxt->ref[iq];
+          pxt1->ftag[voyq] = pxt->ftag[iq];
+        }
+        else {
+          pxt1 = &xt;
+          memset(pxt1,0,sizeof(xTetra));
+          pxt1->ref[voyq] = pxt->ref[iq];
+          pxt1->ftag[voyq] = pxt->ftag[iq];
+          /* Recover the already used place by pxt */
+          pt1->xt = pt->xt;
+          memcpy(pxt,pxt1,sizeof(xTetra));
+        }
       }
     }
     delElt(mesh,iel);
@@ -443,7 +443,7 @@ int colver(pMesh mesh,int *list,int ilist,char indq) {
       if ( j==ip )  continue;
       hPop(&mesh->htab,np,pt->v[j],&ref,&tag);
       if ( tag || ref )
-	hEdge(&mesh->htab,nq,pt->v[j],ref,tag);
+        hEdge(&mesh->htab,nq,pt->v[j],ref,tag);
     }
     pt->v[ip] = nq;
   }

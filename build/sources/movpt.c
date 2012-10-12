@@ -102,9 +102,9 @@ int movbdyregpt(pMesh mesh,int *listv,int ilistv,int *lists,int ilists) {
   for (i=0; i<3; i++) {
     if ( pt->v[idir[iface][i]] != n0 ) {
       if ( !na )
-	na = pt->v[idir[iface][i]];
+        na = pt->v[idir[iface][i]];
       else
-	nb = pt->v[idir[iface][i]];
+        nb = pt->v[idir[iface][i]];
     }
   }
 
@@ -115,10 +115,10 @@ int movbdyregpt(pMesh mesh,int *listv,int ilistv,int *lists,int ilists) {
     ntempa = ntempb = 0;
     for (i=0; i<3; i++) {
       if ( pt->v[idir[iface][i]] != n0 ) {
-	if ( !ntempa )
-	  ntempa = pt->v[idir[iface][i]];
-	else
-	  ntempb = pt->v[idir[iface][i]];
+        if ( !ntempa )
+          ntempa = pt->v[idir[iface][i]];
+        else
+          ntempb = pt->v[idir[iface][i]];
       }
     }
     if ( ntempa == na )
@@ -151,9 +151,9 @@ int movbdyregpt(pMesh mesh,int *listv,int ilistv,int *lists,int ilists) {
   for (i=0; i<3; i++) {
     if ( pt->v[idir[iface][i]] != n0 ) {
       if ( !ntempa )
-	ntempa = pt->v[idir[iface][i]];
+        ntempa = pt->v[idir[iface][i]];
       else
-	ntempb = pt->v[idir[iface][i]];
+        ntempb = pt->v[idir[iface][i]];
     }
   }
   if ( ntempa == na )
@@ -214,8 +214,8 @@ int movbdyregpt(pMesh mesh,int *listv,int ilistv,int *lists,int ilists) {
     for (k=0; k<ilists; k++) {
       detloc = oppt[0]*lispoi[3*(k+1)+2] - oppt[1]*lispoi[3*(k+1)+1];
       if ( detloc >= 0.0 ) {
-	kel = k;
-	break;
+        kel = k;
+        break;
       }
     }
     if ( k == ilists ) return(0);
@@ -224,8 +224,8 @@ int movbdyregpt(pMesh mesh,int *listv,int ilistv,int *lists,int ilists) {
     for (k=ilists-1; k>=0; k--) {
       detloc = lispoi[3*k+1]*oppt[1] - lispoi[3*k+2]*oppt[0];
       if ( detloc >= 0.0 ) {
-	kel = k;
-	break;
+        kel = k;
+        break;
       }
     }
     if ( k == -1 ) return(0);
@@ -274,9 +274,9 @@ int movbdyregpt(pMesh mesh,int *listv,int ilistv,int *lists,int ilists) {
   for( i=0 ; i<4 ; i++ ){
     if ( (pt->v[i] != n0) && (pt->v[i] != pt->v[iface]) ) {
       if ( !na )
-	na = pt->v[i];
+        na = pt->v[i];
       else
-	nb = pt->v[i];
+        nb = pt->v[i];
     }
   }
   p1 = &mesh->point[na];
@@ -429,9 +429,9 @@ int movbdyrefpt(pMesh mesh, int *listv, int ilistv, int *lists, int ilists){
   for (i=0; i<3; i++) {
     if ( pt->v[idir[iface][i]] != ip0 ) {
       if ( !ipa )
-	ipa = pt->v[idir[iface][i]];
+        ipa = pt->v[idir[iface][i]];
       else
-	ipb = pt->v[idir[iface][i]];
+        ipb = pt->v[idir[iface][i]];
     }
   }
   assert(ipa && ipb);
@@ -444,10 +444,10 @@ int movbdyrefpt(pMesh mesh, int *listv, int ilistv, int *lists, int ilists){
     for (i=0; i<3; i++) {
       ie = iarf[iface][i]; //edge i on face iface
       if ( (pt->v[iare[ie][0]] == ip0) || (pt->v[iare[ie][1]] == ip0) ) {
-	if ( !iea )
-	  iea = ie;
-	else
-	  ieb = ie;
+        if ( !iea )
+          iea = ie;
+        else
+          ieb = ie;
       }
     }
     if ( pt->v[iare[iea][0]] != ip0 )
@@ -465,21 +465,21 @@ int movbdyrefpt(pMesh mesh, int *listv, int ilistv, int *lists, int ilists){
     if ( (iptmpa == ipa) || (iptmpa == ipb) ) {
       hGet(&mesh->htab,ip0,iptmpa,&ref,&tag);
       if ( MG_REF & tag ) {
-	it1 = iel;
-	ip1 = iptmpa;
-	ie1 = iea;
-	iface1 = iface;
-	break;
+        it1 = iel;
+        ip1 = iptmpa;
+        ie1 = iea;
+        iface1 = iface;
+        break;
       }
     }
     if ( (iptmpb == ipa) || (iptmpb == ipb) ) {
       hGet(&mesh->htab,ip0,iptmpb,&ref,&tag);
       if ( MG_REF & tag ) {
-	it1 = iel;
-	ip1 = iptmpb;
-	ie1 = ieb;
-	iface1 = iface;
-	break;
+        it1 = iel;
+        ip1 = iptmpb;
+        ie1 = ieb;
+        iface1 = iface;
+        break;
       }
     }
     ipa = iptmpa;
@@ -494,9 +494,9 @@ int movbdyrefpt(pMesh mesh, int *listv, int ilistv, int *lists, int ilists){
   for (i=0; i<3; i++) {
     if ( pt->v[idir[iface][i]] != ip0 ) {
       if ( !ipa )
-	ipa = pt->v[idir[iface][i]];
+        ipa = pt->v[idir[iface][i]];
       else
-	ipb = pt->v[idir[iface][i]];
+        ipb = pt->v[idir[iface][i]];
     }
   }
   assert(ipa && ipb);
@@ -509,10 +509,10 @@ int movbdyrefpt(pMesh mesh, int *listv, int ilistv, int *lists, int ilists){
     for (i=0; i<3; i++) {
       ie = iarf[iface][i]; //edge i on face iface
       if ( (pt->v[iare[ie][0]] == ip0) || (pt->v[iare[ie][1]] == ip0) ) {
-	if ( !iea )
-	  iea = ie;
-	else
-	  ieb = ie;
+        if ( !iea )
+          iea = ie;
+        else
+          ieb = ie;
       }
     }
     if ( pt->v[iare[iea][0]] != ip0 )
@@ -530,22 +530,22 @@ int movbdyrefpt(pMesh mesh, int *listv, int ilistv, int *lists, int ilists){
     if ( (iptmpa == ipa) || (iptmpa == ipb) ) {
       hGet(&mesh->htab,ip0,iptmpa,&ref,&tag);
       if ( MG_REF & tag ) {
-	it2 = iel;
-	ip2 = iptmpa;
-	ie2 = iea;
-	iface2 = iface;
-	break;
+        it2 = iel;
+        ip2 = iptmpa;
+        ie2 = iea;
+        iface2 = iface;
+        break;
       }
     }
     if ( (iptmpb == ipa) || (iptmpb == ipb) ) {
       assert(pt->xt);
       hGet(&mesh->htab,ip0,iptmpb,&ref,&tag);
       if ( MG_REF & tag ) {
-	it2 = iel;
-	ip2 = iptmpb;
-	ie2 = ieb;
-	iface2 = iface;
-	break;
+        it2 = iel;
+        ip2 = iptmpb;
+        ie2 = ieb;
+        iface2 = iface;
+        break;
       }
     }
     ipa = iptmpa;
@@ -695,9 +695,9 @@ int movbdynompt(pMesh mesh, int *listv, int ilistv, int *lists, int ilists){
   for (i=0; i<3; i++) {
     if ( pt->v[idir[iface][i]] != ip0 ) {
       if ( !ipa )
-	ipa = pt->v[idir[iface][i]];
+        ipa = pt->v[idir[iface][i]];
       else
-	ipb = pt->v[idir[iface][i]];
+        ipb = pt->v[idir[iface][i]];
     }
   }
   assert(ipa && ipb);
@@ -710,10 +710,10 @@ int movbdynompt(pMesh mesh, int *listv, int ilistv, int *lists, int ilists){
     for (i=0; i<3; i++) {
       ie = iarf[iface][i]; //edge i on face iface
       if ( (pt->v[iare[ie][0]] == ip0) || (pt->v[iare[ie][1]] == ip0) ) {
-	if ( !iea )
-	  iea = ie;
-	else
-	  ieb = ie;
+        if ( !iea )
+          iea = ie;
+        else
+          ieb = ie;
       }
     }
     if ( pt->v[iare[iea][0]] != ip0 )
@@ -731,21 +731,21 @@ int movbdynompt(pMesh mesh, int *listv, int ilistv, int *lists, int ilists){
     if ( (iptmpa == ipa) || (iptmpa == ipb) ) {
       hGet(&mesh->htab,ip0,iptmpa,&ref,&tag);
       if ( MG_NOM & tag ) {
-	it1 = iel;
-	ip1 = iptmpa;
-	ie1 = iea;
-	iface1 = iface;
-	break;
+        it1 = iel;
+        ip1 = iptmpa;
+        ie1 = iea;
+        iface1 = iface;
+        break;
       }
     }
     if ( (iptmpb == ipa) || (iptmpb == ipb) ) {
       hGet(&mesh->htab,ip0,iptmpb,&ref,&tag);
       if ( MG_NOM & tag ) {
-	it1 = iel;
-	ip1 = iptmpb;
-	ie1 = ieb;
-	iface1 = iface;
-	break;
+        it1 = iel;
+        ip1 = iptmpb;
+        ie1 = ieb;
+        iface1 = iface;
+        break;
       }
     }
     ipa = iptmpa;
@@ -760,9 +760,9 @@ int movbdynompt(pMesh mesh, int *listv, int ilistv, int *lists, int ilists){
   for (i=0; i<3; i++) {
     if ( pt->v[idir[iface][i]] != ip0 ) {
       if ( !ipa )
-	ipa = pt->v[idir[iface][i]];
+        ipa = pt->v[idir[iface][i]];
       else
-	ipb = pt->v[idir[iface][i]];
+        ipb = pt->v[idir[iface][i]];
     }
   }
   assert(ipa && ipb);
@@ -775,10 +775,10 @@ int movbdynompt(pMesh mesh, int *listv, int ilistv, int *lists, int ilists){
     for (i=0; i<3; i++) {
       ie = iarf[iface][i]; //edge i on face iface
       if ( (pt->v[iare[ie][0]] == ip0) || (pt->v[iare[ie][1]] == ip0) ) {
-	if ( !iea )
-	  iea = ie;
-	else
-	  ieb = ie;
+        if ( !iea )
+          iea = ie;
+        else
+          ieb = ie;
       }
     }
     if ( pt->v[iare[iea][0]] != ip0 )
@@ -796,22 +796,22 @@ int movbdynompt(pMesh mesh, int *listv, int ilistv, int *lists, int ilists){
     if ( (iptmpa == ipa) || (iptmpa == ipb) ) {
       hGet(&mesh->htab,ip0,iptmpa,&ref,&tag);
       if ( MG_NOM & tag ) {
-	it2 = iel;
-	ip2 = iptmpa;
-	ie2 = iea;
-	iface2 = iface;
-	break;
+        it2 = iel;
+        ip2 = iptmpa;
+        ie2 = iea;
+        iface2 = iface;
+        break;
       }
     }
     if ( (iptmpb == ipa) || (iptmpb == ipb) ) {
       assert(pt->xt);
       hGet(&mesh->htab,ip0,iptmpb,&ref,&tag);
       if ( MG_NOM & tag ) {
-	it2 = iel;
-	ip2 = iptmpb;
-	ie2 = ieb;
-	iface2 = iface;
-	break;
+        it2 = iel;
+        ip2 = iptmpb;
+        ie2 = ieb;
+        iface2 = iface;
+        break;
       }
     }
     ipa = iptmpa;
@@ -960,9 +960,9 @@ int movbdyridpt(pMesh mesh,int *listv,int ilistv,int *lists,int ilists) {
   for (i=0; i<3; i++) {
     if ( pt->v[idir[iface][i]] != ip0 ) {
       if ( !ipa )
-	ipa = pt->v[idir[iface][i]];
+        ipa = pt->v[idir[iface][i]];
       else
-	ipb = pt->v[idir[iface][i]];
+        ipb = pt->v[idir[iface][i]];
     }
   }
   assert(ipa && ipb);
@@ -975,10 +975,10 @@ int movbdyridpt(pMesh mesh,int *listv,int ilistv,int *lists,int ilists) {
     for (i=0; i<3; i++) {
       ie = iarf[iface][i]; //edge i on face iface
       if ( (pt->v[iare[ie][0]] == ip0) || (pt->v[iare[ie][1]] == ip0) ) {
-	if ( !iea )
-	  iea = ie;
-	else
-	  ieb = ie;
+        if ( !iea )
+          iea = ie;
+        else
+          ieb = ie;
       }
     }
     if ( pt->v[iare[iea][0]] != ip0 )
@@ -996,21 +996,21 @@ int movbdyridpt(pMesh mesh,int *listv,int ilistv,int *lists,int ilists) {
     if ( (iptmpa == ipa) || (iptmpa == ipb) ) {
       hGet(&mesh->htab,ip0,iptmpa,&ref,&tag);
       if ( MG_GEO & tag ) {
-	it1 = iel;
-	ip1 = iptmpa;
-	ie1 = iea;
-	iface1 = iface;
-	break;
+        it1 = iel;
+        ip1 = iptmpa;
+        ie1 = iea;
+        iface1 = iface;
+        break;
       }
     }
     if ( (iptmpb == ipa) || (iptmpb == ipb) ) {
       hGet(&mesh->htab,ip0,iptmpb,&ref,&tag);
       if ( MG_GEO & tag ) {
-	it1 = iel;
-	ip1 = iptmpb;
-	ie1 = ieb;
-	iface1 = iface;
-	break;
+        it1 = iel;
+        ip1 = iptmpb;
+        ie1 = ieb;
+        iface1 = iface;
+        break;
       }
     }
     ipa = iptmpa;
@@ -1025,9 +1025,9 @@ int movbdyridpt(pMesh mesh,int *listv,int ilistv,int *lists,int ilists) {
   for (i=0; i<3; i++) {
     if ( pt->v[idir[iface][i]] != ip0 ) {
       if ( !ipa )
-	ipa = pt->v[idir[iface][i]];
+        ipa = pt->v[idir[iface][i]];
       else
-	ipb = pt->v[idir[iface][i]];
+        ipb = pt->v[idir[iface][i]];
     }
   }
   assert(ipa && ipb);
@@ -1040,10 +1040,10 @@ int movbdyridpt(pMesh mesh,int *listv,int ilistv,int *lists,int ilists) {
     for (i=0; i<3; i++) {
       ie = iarf[iface][i]; //edge i on face iface
       if ( (pt->v[iare[ie][0]] == ip0) || (pt->v[iare[ie][1]] == ip0) ) {
-	if ( !iea )
-	  iea = ie;
-	else
-	  ieb = ie;
+        if ( !iea )
+          iea = ie;
+        else
+          ieb = ie;
       }
     }
     if ( pt->v[iare[iea][0]] != ip0 )
@@ -1061,21 +1061,21 @@ int movbdyridpt(pMesh mesh,int *listv,int ilistv,int *lists,int ilists) {
     if ( (iptmpa == ipa) || (iptmpa == ipb) ) {
       hGet(&mesh->htab,ip0,iptmpa,&ref,&tag);
       if ( MG_GEO & tag ) {
-	it2 = iel;
-	ip2 = iptmpa;
-	ie2 = iea;
-	iface2 = iface;
-	break;
+        it2 = iel;
+        ip2 = iptmpa;
+        ie2 = iea;
+        iface2 = iface;
+        break;
       }
     }
     if ( (iptmpb == ipa) || (iptmpb == ipb) ) {
       hGet(&mesh->htab,ip0,iptmpb,&ref,&tag);
       if ( MG_GEO & tag ) {
-	it2 = iel;
-	ip2 = iptmpb;
-	ie2 = ieb;
-	iface2 = iface;
-	break;
+        it2 = iel;
+        ip2 = iptmpb;
+        ie2 = ieb;
+        iface2 = iface;
+        break;
       }
     }
     ipa = iptmpa;

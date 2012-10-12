@@ -47,9 +47,9 @@ static double defsizreg(pMesh mesh,int nump,int *lists,int ilists) {
   for (i=0; i<3; i++) {
     if ( pt->v[idir[iface][i]] != nump ) {
       if ( !na )
-	na = pt->v[idir[iface][i]];
+        na = pt->v[idir[iface][i]];
       else
-	nb = pt->v[idir[iface][i]];
+        nb = pt->v[idir[iface][i]];
     }
   }
 
@@ -60,10 +60,10 @@ static double defsizreg(pMesh mesh,int nump,int *lists,int ilists) {
     ntempa = ntempb = 0;
     for (i=0; i<3; i++) {
       if ( pt->v[idir[iface][i]] != nump ) {
-	if ( !ntempa )
-	  ntempa = pt->v[idir[iface][i]];
-	else
-	  ntempb = pt->v[idir[iface][i]];
+        if ( !ntempa )
+          ntempa = pt->v[idir[iface][i]];
+        else
+          ntempb = pt->v[idir[iface][i]];
       }
     }
     if ( ntempa == na )
@@ -100,9 +100,9 @@ static double defsizreg(pMesh mesh,int nump,int *lists,int ilists) {
   for (i=0; i<3; i++) {
     if ( pt->v[idir[iface][i]] != nump ) {
       if ( !ntempa )
-	ntempa = pt->v[idir[iface][i]];
+        ntempa = pt->v[idir[iface][i]];
       else
-	ntempb = pt->v[idir[iface][i]];
+        ntempb = pt->v[idir[iface][i]];
     }
   }
   if ( ntempa == na )
@@ -228,11 +228,11 @@ static double defsizreg(pMesh mesh,int nump,int *lists,int ilists) {
     /* Mid-point along median edge and endpoint in the rotated frame */
     if ( i0 == 0 ) {
       c[0] = A64TH*(b.b[1][0] + b.b[2][0] + 3.0*(b.b[3][0] + b.b[4][0])) \
-	+ 3.0*A16TH*(b.b[6][0] + b.b[7][0] + b.b[9][0]) + A32TH*(b.b[5][0] + b.b[8][0]);
+        + 3.0*A16TH*(b.b[6][0] + b.b[7][0] + b.b[9][0]) + A32TH*(b.b[5][0] + b.b[8][0]);
       c[1] = A64TH*(b.b[1][1] + b.b[2][1] + 3.0*(b.b[3][1] + b.b[4][1])) \
-	+ 3.0*A16TH*(b.b[6][1] + b.b[7][1] + b.b[9][1]) + A32TH*(b.b[5][1] + b.b[8][1]);
+        + 3.0*A16TH*(b.b[6][1] + b.b[7][1] + b.b[9][1]) + A32TH*(b.b[5][1] + b.b[8][1]);
       c[2] = A64TH*(b.b[1][2] + b.b[2][2] + 3.0*(b.b[3][2] + b.b[4][2])) \
-	+ 3.0*A16TH*(b.b[6][2] + b.b[7][2] + b.b[9][2]) + A32TH*(b.b[5][2] + b.b[8][2]);
+        + 3.0*A16TH*(b.b[6][2] + b.b[7][2] + b.b[9][2]) + A32TH*(b.b[5][2] + b.b[8][2]);
 
       d[0] = 0.125*b.b[1][0] + 0.375*(b.b[3][0] + b.b[4][0]) + 0.125*b.b[2][0];
       d[1] = 0.125*b.b[1][1] + 0.375*(b.b[3][1] + b.b[4][1]) + 0.125*b.b[2][1];
@@ -240,11 +240,11 @@ static double defsizreg(pMesh mesh,int nump,int *lists,int ilists) {
     }
     else if (i0 == 1) {
       c[0] = A64TH*(b.b[0][0] + b.b[2][0] + 3.0*(b.b[5][0] + b.b[6][0])) \
-	+ 3.0*A16TH*(b.b[3][0] + b.b[8][0] + b.b[9][0]) + A32TH*(b.b[4][0] + b.b[7][0]);
+        + 3.0*A16TH*(b.b[3][0] + b.b[8][0] + b.b[9][0]) + A32TH*(b.b[4][0] + b.b[7][0]);
       c[1] = A64TH*(b.b[0][1] + b.b[2][1] + 3.0*(b.b[5][1] + b.b[6][1])) \
-	+ 3.0*A16TH*(b.b[3][1] + b.b[8][1] + b.b[9][1]) + A32TH*(b.b[4][1] + b.b[7][1]);
+        + 3.0*A16TH*(b.b[3][1] + b.b[8][1] + b.b[9][1]) + A32TH*(b.b[4][1] + b.b[7][1]);
       c[2] = A64TH*(b.b[0][2] + b.b[2][2] + 3.0*(b.b[5][2] + b.b[6][2])) \
-	+ 3.0*A16TH*(b.b[3][2] + b.b[8][2] + b.b[9][2]) + A32TH*(b.b[4][2] + b.b[7][2]);
+        + 3.0*A16TH*(b.b[3][2] + b.b[8][2] + b.b[9][2]) + A32TH*(b.b[4][2] + b.b[7][2]);
 
       d[0] = 0.125*b.b[2][0] + 0.375*(b.b[5][0] + b.b[6][0]) + 0.125*b.b[0][0];
       d[1] = 0.125*b.b[2][1] + 0.375*(b.b[5][1] + b.b[6][1]) + 0.125*b.b[0][1];
@@ -252,11 +252,11 @@ static double defsizreg(pMesh mesh,int nump,int *lists,int ilists) {
     }
     else {
       c[0] = A64TH*(b.b[0][0] + b.b[1][0] + 3.0*(b.b[7][0] + b.b[8][0])) \
-	+ 3.0*A16TH*(b.b[4][0] + b.b[5][0] + b.b[9][0]) + A32TH*(b.b[3][0] + b.b[6][0]);
+        + 3.0*A16TH*(b.b[4][0] + b.b[5][0] + b.b[9][0]) + A32TH*(b.b[3][0] + b.b[6][0]);
       c[1] = A64TH*(b.b[0][1] + b.b[1][1] + 3.0*(b.b[7][1] + b.b[8][1])) \
-	+ 3.0*A16TH*(b.b[4][1] + b.b[5][1] + b.b[9][1]) + A32TH*(b.b[3][1] + b.b[6][1]);
+        + 3.0*A16TH*(b.b[4][1] + b.b[5][1] + b.b[9][1]) + A32TH*(b.b[3][1] + b.b[6][1]);
       c[2] = A64TH*(b.b[0][2] + b.b[1][2] + 3.0*(b.b[7][2] + b.b[8][2])) \
-	+ 3.0*A16TH*(b.b[4][2] + b.b[5][2] + b.b[9][2]) + A32TH*(b.b[3][2] + b.b[6][2]);
+        + 3.0*A16TH*(b.b[4][2] + b.b[5][2] + b.b[9][2]) + A32TH*(b.b[3][2] + b.b[6][2]);
 
       d[0] = 0.125*b.b[0][0] + 0.375*(b.b[7][0] + b.b[8][0]) + 0.125*b.b[1][0];
       d[1] = 0.125*b.b[0][1] + 0.375*(b.b[7][1] + b.b[8][1]) + 0.125*b.b[1][1];
@@ -370,15 +370,15 @@ int defsiz_iso(pMesh mesh,pSol met) {
     for (i=0; i<4; i++) {
       if ( !(pxt->ftag[i] & MG_BDY) ) continue;
       for (j=0; j<3; j++) {
-	i0 = idir[i][j];
-	p0 = &mesh->point[pt->v[i0]];
+        i0 = idir[i][j];
+        p0 = &mesh->point[pt->v[i0]];
 
-	if( MG_SIN(p0->tag) || MG_EDG(p0->tag) || (p0->tag & MG_NOM) ) continue;
-	if ( !boulesurfvolp(mesh,k,i0,i,listv,&ilistv,lists,&ilists) )  continue;
+        if( MG_SIN(p0->tag) || MG_EDG(p0->tag) || (p0->tag & MG_NOM) ) continue;
+        if ( !boulesurfvolp(mesh,k,i0,i,listv,&ilistv,lists,&ilists) )  continue;
 
-	n     = &mesh->xpoint[p0->xp].n1[0];
-  directsurfball(mesh, pt->v[i0],lists,ilists,n);
-	p0->h = defsizreg(mesh,pt->v[i0],lists,ilists);
+        n     = &mesh->xpoint[p0->xp].n1[0];
+        directsurfball(mesh, pt->v[i0],lists,ilists,n);
+        p0->h = defsizreg(mesh,pt->v[i0],lists,ilists);
       }
     }
   }
@@ -395,77 +395,77 @@ int defsiz_iso(pMesh mesh,pSol met) {
       else if ( !norface(mesh,k,i,v) )  continue;
 
       for (j=0; j<3; j++) {
-	ia = iarf[i][j];
-	i0 = iare[ia][0];
-	i1 = iare[ia][1];
-	ip0 = pt->v[i0];
-	ip1 = pt->v[i1];
-	p0  = &mesh->point[ip0];
-	p1  = &mesh->point[ip1];
-	if ( !MG_EDG(p0->tag) && !MG_EDG(p1->tag) )  continue;
+        ia = iarf[i][j];
+        i0 = iare[ia][0];
+        i1 = iare[ia][1];
+        ip0 = pt->v[i0];
+        ip1 = pt->v[i1];
+        p0  = &mesh->point[ip0];
+        p1  = &mesh->point[ip1];
+        if ( !MG_EDG(p0->tag) && !MG_EDG(p1->tag) )  continue;
 
-	hGet(&mesh->htab,pt->v[i0],pt->v[i1],&ref,&tag);
-	ised = MG_EDG(tag) || ( tag & MG_NOM );
+        hGet(&mesh->htab,pt->v[i0],pt->v[i1],&ref,&tag);
+        ised = MG_EDG(tag) || ( tag & MG_NOM );
 
-	BezierEdge(mesh,ip0,ip1,b0,b1,ised,v);
+        BezierEdge(mesh,ip0,ip1,b0,b1,ised,v);
 
-	b0p0[0] = b0[0] - p0->c[0];
-	b0p0[1] = b0[1] - p0->c[1];
-	b0p0[2] = b0[2] - p0->c[2];
+        b0p0[0] = b0[0] - p0->c[0];
+        b0p0[1] = b0[1] - p0->c[1];
+        b0p0[2] = b0[2] - p0->c[2];
 
-	b1b0[0] = b1[0] - b0[0];
-	b1b0[1] = b1[1] - b0[1];
-	b1b0[2] = b1[2] - b0[2];
+        b1b0[0] = b1[0] - b0[0];
+        b1b0[1] = b1[1] - b0[1];
+        b1b0[2] = b1[2] - b0[2];
 
-	p1b1[0] = p1->c[0] - b1[0];
-	p1b1[1] = p1->c[1] - b1[1];
-	p1b1[2] = p1->c[2] - b1[2];
+        p1b1[0] = p1->c[0] - b1[0];
+        p1b1[1] = p1->c[1] - b1[1];
+        p1b1[2] = p1->c[2] - b1[2];
 
-	secder0[0] = p0->c[0] + b1[0] - 2.0*b0[0];
-	secder0[1] = p0->c[1] + b1[1] - 2.0*b0[1];
-	secder0[2] = p0->c[2] + b1[2] - 2.0*b0[2];
+        secder0[0] = p0->c[0] + b1[0] - 2.0*b0[0];
+        secder0[1] = p0->c[1] + b1[1] - 2.0*b0[1];
+        secder0[2] = p0->c[2] + b1[2] - 2.0*b0[2];
 
-	secder1[0] = p1->c[0] + b0[0] - 2.0*b1[0];
-	secder1[1] = p1->c[1] + b0[1] - 2.0*b1[1];
-	secder1[2] = p1->c[2] + b0[2] - 2.0*b1[2];
+        secder1[0] = p1->c[0] + b0[0] - 2.0*b1[0];
+        secder1[1] = p1->c[1] + b0[1] - 2.0*b1[1];
+        secder1[2] = p1->c[2] + b0[2] - 2.0*b1[2];
 
-	kappa = 0.0;
-	for (l=0; l<4; l++) {
-	  tau[0] = 3.0*(1.0-ATHIRD*l)*(1.0-ATHIRD*l)*b0p0[0] + 6.0*ATHIRD*l*(1.0-ATHIRD*l)*b1b0[0]\
-	    + 3.0*ATHIRD*l*ATHIRD*l*p1b1[0];
-	  tau[1] = 3.0*(1.0-ATHIRD*l)*(1.0-ATHIRD*l)*b0p0[1] + 6.0*ATHIRD*l*(1.0-ATHIRD*l)*b1b0[1]\
-	    + 3.0*ATHIRD*l*ATHIRD*l*p1b1[1];
-	  tau[2] = 3.0*(1.0-ATHIRD*l)*(1.0-ATHIRD*l)*b0p0[2] + 6.0*ATHIRD*l*(1.0-ATHIRD*l)*b1b0[2]\
-	    + 3.0*ATHIRD*l*ATHIRD*l*p1b1[2];
+        kappa = 0.0;
+        for (l=0; l<4; l++) {
+          tau[0] = 3.0*(1.0-ATHIRD*l)*(1.0-ATHIRD*l)*b0p0[0] + 6.0*ATHIRD*l*(1.0-ATHIRD*l)*b1b0[0]\
+            + 3.0*ATHIRD*l*ATHIRD*l*p1b1[0];
+          tau[1] = 3.0*(1.0-ATHIRD*l)*(1.0-ATHIRD*l)*b0p0[1] + 6.0*ATHIRD*l*(1.0-ATHIRD*l)*b1b0[1]\
+            + 3.0*ATHIRD*l*ATHIRD*l*p1b1[1];
+          tau[2] = 3.0*(1.0-ATHIRD*l)*(1.0-ATHIRD*l)*b0p0[2] + 6.0*ATHIRD*l*(1.0-ATHIRD*l)*b1b0[2]\
+            + 3.0*ATHIRD*l*ATHIRD*l*p1b1[2];
 
-	  gammasec[0] = 6.0*((1.0-ATHIRD*l)*secder0[0] + ATHIRD*l*secder1[0]);
-	  gammasec[1] = 6.0*((1.0-ATHIRD*l)*secder0[1] + ATHIRD*l*secder1[1]);
-	  gammasec[2] = 6.0*((1.0-ATHIRD*l)*secder0[2] + ATHIRD*l*secder1[2]);
+          gammasec[0] = 6.0*((1.0-ATHIRD*l)*secder0[0] + ATHIRD*l*secder1[0]);
+          gammasec[1] = 6.0*((1.0-ATHIRD*l)*secder0[1] + ATHIRD*l*secder1[1]);
+          gammasec[2] = 6.0*((1.0-ATHIRD*l)*secder0[2] + ATHIRD*l*secder1[2]);
 
-	  ntau2 = tau[0]*tau[0] + tau[1]*tau[1] + tau[2]*tau[2];
-	  if ( ntau2 < EPSD )  continue;
-	  intau = 1.0/sqrt(ntau2);
-	  ntau2 = 1.0/ntau2;
-	  tau[0] *= intau;
-	  tau[1] *= intau;
-	  tau[2] *= intau;
+          ntau2 = tau[0]*tau[0] + tau[1]*tau[1] + tau[2]*tau[2];
+          if ( ntau2 < EPSD )  continue;
+          intau = 1.0/sqrt(ntau2);
+          ntau2 = 1.0/ntau2;
+          tau[0] *= intau;
+          tau[1] *= intau;
+          tau[2] *= intau;
 
-	  ps = gammasec[0]*tau[0] + gammasec[1]*tau[1] + gammasec[2]*tau[2];
-	  gammasec[0] = gammasec[0]*ntau2 - ps*ntau2*tau[0];
-	  gammasec[1] = gammasec[1]*ntau2 - ps*ntau2*tau[1];
-	  gammasec[2] = gammasec[2]*ntau2 - ps*ntau2*tau[2];
-	  kappa = MG_MAX(kappa,gammasec[0]*gammasec[0] + gammasec[1]*gammasec[1] + gammasec[2]*gammasec[2] );
-	}
-	kappa = sqrt(kappa);
-	if ( kappa < EPSD )
-	  lm = MAXLEN;
-	else
-	  lm = sqrt(8.0*info.hausd / kappa);
+          ps = gammasec[0]*tau[0] + gammasec[1]*tau[1] + gammasec[2]*tau[2];
+          gammasec[0] = gammasec[0]*ntau2 - ps*ntau2*tau[0];
+          gammasec[1] = gammasec[1]*ntau2 - ps*ntau2*tau[1];
+          gammasec[2] = gammasec[2]*ntau2 - ps*ntau2*tau[2];
+          kappa = MG_MAX(kappa,gammasec[0]*gammasec[0] + gammasec[1]*gammasec[1] + gammasec[2]*gammasec[2] );
+        }
+        kappa = sqrt(kappa);
+        if ( kappa < EPSD )
+          lm = MAXLEN;
+        else
+          lm = sqrt(8.0*info.hausd / kappa);
 
-	if ( MG_EDG(p0->tag) && !(p0->tag & MG_NOM) && !MG_SIN(p0->tag) )
-	  p0->h = MG_MAX(info.hmin,MG_MIN(p0->h,lm));
-	if ( MG_EDG(p1->tag) && !(p1->tag & MG_NOM) && !MG_SIN(p1->tag) )
-	  p1->h = MG_MAX(info.hmin,MG_MIN(p1->h,lm));
+        if ( MG_EDG(p0->tag) && !(p0->tag & MG_NOM) && !MG_SIN(p0->tag) )
+          p0->h = MG_MAX(info.hmin,MG_MIN(p0->h,lm));
+        if ( MG_EDG(p1->tag) && !(p1->tag & MG_NOM) && !MG_SIN(p1->tag) )
+          p1->h = MG_MAX(info.hmin,MG_MIN(p1->h,lm));
       }
     }
   }
@@ -477,7 +477,7 @@ int defsiz_iso(pMesh mesh,pSol met) {
     p0 = &mesh->point[k];
     if ( MG_VOK(p0) ) {
       if ( met->size == 1 && met->m && k <= mesh->npi )
-	p0->h = MG_MAX(info.hmin,MG_MIN(p0->h,met->m[k]));
+        p0->h = MG_MAX(info.hmin,MG_MIN(p0->h,met->m[k]));
     }
   }
 
@@ -509,37 +509,37 @@ int gradsiz_iso(pMesh mesh) {
       if ( !MG_EOK(pt) )  continue;
 
       for (i=0; i<4; i++) {
-	for (j=0; j<3; j++) {
-	  ia = iarf[i][j];
-	  i0 = iare[ia][0];
-	  i1 = iare[ia][1];
-	  p0 = &mesh->point[pt->v[i0]];
-	  p1 = &mesh->point[pt->v[i1]];
-	  if ( p0->flag < mesh->base-1 && p1->flag < mesh->base-1 )  continue;
+        for (j=0; j<3; j++) {
+          ia = iarf[i][j];
+          i0 = iare[ia][0];
+          i1 = iare[ia][1];
+          p0 = &mesh->point[pt->v[i0]];
+          p1 = &mesh->point[pt->v[i1]];
+          if ( p0->flag < mesh->base-1 && p1->flag < mesh->base-1 )  continue;
 
-	  l = (p1->c[0]-p0->c[0])*(p1->c[0]-p0->c[0]) + (p1->c[1]-p0->c[1])*(p1->c[1]-p0->c[1])\
-	    + (p1->c[2]-p0->c[2])*(p1->c[2]-p0->c[2]);
-	  l = sqrt(l);
+          l = (p1->c[0]-p0->c[0])*(p1->c[0]-p0->c[0]) + (p1->c[1]-p0->c[1])*(p1->c[1]-p0->c[1])\
+            + (p1->c[2]-p0->c[2])*(p1->c[2]-p0->c[2]);
+          l = sqrt(l);
 
-	  if ( p0->h < p1->h ) {
-	    if ( p0->h < EPSD )  continue;
-	    hn = p0->h + info.hgrad*l;
-	    if ( p1->h > hn ) {
-	      p1->h    = hn;
-	      p1->flag = mesh->base;
-	      nu++;
-	    }
-	  }
-	  else {
-	    if ( p1->h < EPSD )  continue;
-	    hn = p1->h + info.hgrad*l;
-	    if ( p0->h > hn ) {
-	      p0->h    = hn;
-	      p0->flag = mesh->base;
-	      nu++;
-	    }
-	  }
-	}
+          if ( p0->h < p1->h ) {
+            if ( p0->h < EPSD )  continue;
+            hn = p0->h + info.hgrad*l;
+            if ( p1->h > hn ) {
+              p1->h    = hn;
+              p1->flag = mesh->base;
+              nu++;
+            }
+          }
+          else {
+            if ( p1->h < EPSD )  continue;
+            hn = p1->h + info.hgrad*l;
+            if ( p0->h > hn ) {
+              p0->h    = hn;
+              p0->flag = mesh->base;
+              nu++;
+            }
+          }
+        }
       }
     }
     nup += nu;

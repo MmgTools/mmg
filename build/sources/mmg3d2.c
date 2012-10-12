@@ -74,12 +74,12 @@ static int ismaniball(pMesh mesh,pSol sol,int k,int indp) {
     /* Store a face for starting back enumeration with the opposite sign */
     if ( !res ) {
       for (j=0; j<3; j++) {
-	i1 = idir[i][j];
-	v1 = sol->m[pt->v[i1]];
-	if ( (v1 != 0.0 ) && !MG_SMSGN(v,v1) ) {
-	  res = 4*iel + i;
-	  break;
-	}
+        i1 = idir[i][j];
+        v1 = sol->m[pt->v[i1]];
+        if ( (v1 != 0.0 ) && !MG_SMSGN(v,v1) ) {
+          res = 4*iel + i;
+          break;
+        }
       }
     }
 
@@ -91,19 +91,19 @@ static int ismaniball(pMesh mesh,pSol sol,int k,int indp) {
       v2 = sol->m[pt->v[i2]];
 
       if ( ((v1 != 0.0) && MG_SMSGN(v,v1)) || ((v2 != 0.0) && MG_SMSGN(v,v2)) ) {
-	jel = adja[idir[i][j]] / 4;
-	if( !jel ) continue;
-	pt1 = &mesh->tetra[jel];
+        jel = adja[idir[i][j]] / 4;
+        if( !jel ) continue;
+        pt1 = &mesh->tetra[jel];
 
-	if ( pt1->flag == base )  continue;
-	for (ip=0; ip<4; ip++) {
-	  if ( pt1->v[ip] == np )  break;
-	}
-	assert( ip < 4 );
-	pt1->flag   = base;
-	list[ilist] = 4*jel + ip;
-	ilist++;
-	assert(ilist < LMAX);
+        if ( pt1->flag == base )  continue;
+        for (ip=0; ip<4; ip++) {
+          if ( pt1->v[ip] == np )  break;
+        }
+        assert( ip < 4 );
+        pt1->flag   = base;
+        list[ilist] = 4*jel + ip;
+        ilist++;
+        assert(ilist < LMAX);
       }
     }
     cur++;
@@ -180,61 +180,61 @@ static int ismaniball(pMesh mesh,pSol sol,int k,int indp) {
       v2 = sol->m[pt->v[i2]];
 
       if ( v1 == 0.0 && v2 == 0.0 ) {
-	jel = adja[idir[i][j]] / 4;
-	if( !jel ) continue;
-	pt1 = &mesh->tetra[jel];
-	pt1->flag = base;
+        jel = adja[idir[i][j]] / 4;
+        if( !jel ) continue;
+        pt1 = &mesh->tetra[jel];
+        pt1->flag = base;
       }
 
       else if ( ( ( v1 != 0.0 ) && (!MG_SMSGN(v,v1)) ) || ( ( v2 != 0.0 ) && (!MG_SMSGN(v,v2)) ) ) {
-	jel = adja[idir[i][j]] / 4;
-	if( !jel ) continue;
-	pt1 = &mesh->tetra[jel];
+        jel = adja[idir[i][j]] / 4;
+        if( !jel ) continue;
+        pt1 = &mesh->tetra[jel];
 
-	j0 = idir[i][0];
-	j1 = idir[i][1];
-	j2 = idir[i][2];
+        j0 = idir[i][0];
+        j1 = idir[i][1];
+        j2 = idir[i][2];
 
-	v0 = sol->m[pt1->v[j0]];
-	v1 = sol->m[pt1->v[j1]];
-	v2 = sol->m[pt1->v[j2]];
+        v0 = sol->m[pt1->v[j0]];
+        v1 = sol->m[pt1->v[j1]];
+        v2 = sol->m[pt1->v[j2]];
 
-	nzeros = nsame = nopp = 0;
+        nzeros = nsame = nopp = 0;
 
-	if ( v0 == 0.0 )
-	  nzeros++;
-	else if ( MG_SMSGN(v,v0) )
-	  nsame++;
-	else
-	  nopp++;
+        if ( v0 == 0.0 )
+          nzeros++;
+        else if ( MG_SMSGN(v,v0) )
+          nsame++;
+        else
+          nopp++;
 
-	if ( v1 == 0.0 )
-	  nzeros++;
-	else if ( MG_SMSGN(v,v1) )
-	  nsame++;
-	else
-	  nopp++;
+        if ( v1 == 0.0 )
+          nzeros++;
+        else if ( MG_SMSGN(v,v1) )
+          nsame++;
+        else
+          nopp++;
 
-	if ( v2 == 0.0 )
-	  nzeros++;
-	else if ( MG_SMSGN(v,v2) )
-	  nsame++;
-	else
-	  nopp++;
+        if ( v2 == 0.0 )
+          nzeros++;
+        else if ( MG_SMSGN(v,v2) )
+          nsame++;
+        else
+          nopp++;
 
-	if ( ( nzeros == 2 && nsame == 1 ) || ( nsame >= 1 && nopp >= 1 ) )  {
-	  if ( pt1->flag < base - 1 ) return(0);
-	}
+        if ( ( nzeros == 2 && nsame == 1 ) || ( nsame >= 1 && nopp >= 1 ) )  {
+          if ( pt1->flag < base - 1 ) return(0);
+        }
 
-	if ( pt1->flag == base )  continue;
-	for (ip=0; ip<4; ip++) {
-	  if ( pt1->v[ip] == np )  break;
-	}
-	assert( ip < 4 );
-	pt1->flag   = base;
-	list[ilist] = 4*jel + ip;
-	ilist++;
-	assert(ilist < LMAX);
+        if ( pt1->flag == base )  continue;
+        for (ip=0; ip<4; ip++) {
+          if ( pt1->v[ip] == np )  break;
+        }
+        assert( ip < 4 );
+        pt1->flag   = base;
+        list[ilist] = 4*jel + ip;
+        ilist++;
+        assert(ilist < LMAX);
       }
     }
     cur++;
@@ -292,12 +292,12 @@ static int snpval_ls(pMesh mesh,pSol sol) {
       ip = pt->v[i];
       p0 = &mesh->point[ip];
       if ( p0->flag ) {
-	if ( !ismaniball(mesh,sol,k,i) ) {
-	  sol->m[ip] = p0->h;
-	  nc++;
-	}
-	p0->flag = 0;
-	p0->h = 0.0;
+        if ( !ismaniball(mesh,sol,k,i) ) {
+          sol->m[ip] = p0->h;
+          nc++;
+        }
+        p0->flag = 0;
+        p0->h = 0.0;
       }
     }
   }
@@ -339,14 +339,14 @@ static int cuttet_ls(pMesh mesh, pSol sol){
       v0  = sol->m[ip0];
       v1  = sol->m[ip1];
       if ( fabs(v0) > EPSD2 && fabs(v1) > EPSD2 && v0*v1 < 0.0 ) {
-	if ( !p0->flag ) {
-	  p0->flag = nb;
-	  nb++;
-	}
-	if ( !p1->flag ) {
-	  p1->flag = nb;
-	  nb++;
-	}
+        if ( !p0->flag ) {
+          p0->flag = nb;
+          nb++;
+        }
+        if ( !p1->flag ) {
+          p1->flag = nb;
+          nb++;
+        }
       }
     }
   }
@@ -380,11 +380,11 @@ static int cuttet_ls(pMesh mesh, pSol sol){
 
     for (i=0; i<4; i++) {
       if ( p[i]->flag ) {
-	ng = p[i]->flag;
-	p[i]->h += fabs(area);
-	grad[3*(ng-1)+1] += (area*c[0]);
-	grad[3*(ng-1)+2] += (area*c[1]);
-	grad[3*(ng-1)+3] += (area*c[2]);
+        ng = p[i]->flag;
+        p[i]->h += fabs(area);
+        grad[3*(ng-1)+1] += (area*c[0]);
+        grad[3*(ng-1)+2] += (area*c[1]);
+        grad[3*(ng-1)+3] += (area*c[2]);
       }
     }
   }
@@ -423,22 +423,22 @@ static int cuttet_ls(pMesh mesh, pSol sol){
       g0 = &grad[3*(p0->flag -1)+1];
       g1 = &grad[3*(p1->flag -1)+1];
       a = 0.5 * ((g1[0]-g0[0])*(p1->c[0]-p0->c[0]) + (g1[1]-g0[1])*(p1->c[1]-p0->c[1]) \
-		 + (g1[2]-g0[2])*(p1->c[2]-p0->c[2]));
+                 + (g1[2]-g0[2])*(p1->c[2]-p0->c[2]));
       d  = v1 - v0 - a;
       dd = d*d - 4.0*a*v0;
       dd = MG_MAX(EPSD2,dd);
       dd = sqrt(dd);
       if ( fabs(a) < EPSD2 )
-	s = v0 / (v0-v1);
+        s = v0 / (v0-v1);
       else {
-	s1 = 0.5*( dd -d) / a;
-	s2 = 0.5*(-dd -d) / a;
-	if ( s1 > 0.0 && s1 < 1.0 )
-	  s = s1;
-	else if (s2 > 0.0 && s2 < 1.0)
-	  s = s2;
-	else
-	  s = MG_MIN(fabs(s1),fabs(s1-1.0)) < MG_MIN(fabs(s2),fabs(s2-1.0)) ? s1 : s2 ;
+        s1 = 0.5*( dd -d) / a;
+        s2 = 0.5*(-dd -d) / a;
+        if ( s1 > 0.0 && s1 < 1.0 )
+          s = s1;
+        else if (s2 > 0.0 && s2 < 1.0)
+          s = s2;
+        else
+          s = MG_MIN(fabs(s1),fabs(s1-1.0)) < MG_MIN(fabs(s2),fabs(s2-1.0)) ? s1 : s2 ;
       }
       // IMPORTANT A REGARDER
       s = v0 / (v0-v1);
@@ -513,11 +513,11 @@ static int setref_ls(pMesh mesh, pSol sol) {
     for (i=0; i<4; i++) {
       ip = pt->v[i];
       if ( sol->m[ip] > 0.0 )
-	npls++;
+        npls++;
       else if ( sol->m[ip] < 0.0 )
-	nmns++;
+        nmns++;
       else
-	nz ++;
+        nz ++;
     }
     assert(nz < 4);
     if ( npls ) {
@@ -574,8 +574,8 @@ int chkmaniball(pMesh mesh, int start, char ip){
       pt1->flag = base;
 
       for(j=0; j<4 ; j++){
-	if(pt1->v[j] == nump)
-	  break;
+        if(pt1->v[j] == nump)
+          break;
       }
       assert(j<4);
 
@@ -608,8 +608,8 @@ int chkmaniball(pMesh mesh, int start, char ip){
       pt1->flag = base;
 
       for(j=0; j<4 ; j++){
-	if(pt1->v[j] == nump)
-	  break;
+        if(pt1->v[j] == nump)
+          break;
       }
       assert(j<4);
 
@@ -655,11 +655,11 @@ int chkmani(pMesh mesh){
     cnt = 0;
     for(i=0; i<4; i++) {
       if( !adja[i] ) {
-	cnt++;
+        cnt++;
       }
       else {
-	pt1 = &mesh->tetra[adja[i]/4];
-	if ( pt1->ref != ref ) cnt++;
+        pt1 = &mesh->tetra[adja[i]/4];
+        if ( pt1->ref != ref ) cnt++;
       }
     }
     if ( cnt == 4 ) {
@@ -681,14 +681,14 @@ int chkmani(pMesh mesh){
       if(pt1->ref == pt->ref) continue;
 
       for(j=0; j<3; j++){
-	ip = idir[i][j];
+        ip = idir[i][j];
 
-	if(!chkmaniball(mesh,k,ip)){
-	  printf("Non orientable implicit surface : ball of point %d\n",pt->v[ip]);
-	  saveMesh(mesh);
+        if(!chkmaniball(mesh,k,ip)){
+          printf("Non orientable implicit surface : ball of point %d\n",pt->v[ip]);
+          saveMesh(mesh);
 
-	  return(0);
-	}
+          return(0);
+        }
       }
     }
   }
@@ -737,12 +737,12 @@ int chkmani2(pMesh mesh,pSol sol){
       if(pt1->ref == pt->ref) continue;
 
       for(j=0; j<3; j++){
-	ip = idir[i][j];
+        ip = idir[i][j];
 
-	if(!chkmaniball(mesh,k,ip)){
-	  printf("Non orientable implicit surface : ball of point %d\n",pt->v[ip]);
-	  exit(0);
-	}
+        if(!chkmaniball(mesh,k,ip)){
+          printf("Non orientable implicit surface : ball of point %d\n",pt->v[ip]);
+          exit(0);
+        }
       }
     }
   }
@@ -797,48 +797,48 @@ int chkmanicoll(pMesh mesh,int k,int iface,int iedg,int ndepmin,int ndepplus) {
 
       jp = ip;
       for (i=0; i<3; i++) {
-	jp = inxt3[jp];
-	jel = adja[jp] / 4;
-	voy = adja[jp] % 4;
-	if ( !jel ) continue;
+        jp = inxt3[jp];
+        jel = adja[jp] / 4;
+        voy = adja[jp] % 4;
+        if ( !jel ) continue;
 
-	pt1 = &mesh->tetra[jel];
-	if ( pt1->ref != ref ) continue;
+        pt1 = &mesh->tetra[jel];
+        if ( pt1->ref != ref ) continue;
 
-	/* Current tetra is neighbour of a tetra of the shell of (np,nq) */
-	if( pt1->v[voy] == numq ) {
-	  adja1 = &mesh->adja[4*(jel-1)+1];
-	  for(j=0; j<4; j++)
-	    if (pt1->v[j] == nump ) break;
-	  assert( j< 4);
+        /* Current tetra is neighbour of a tetra of the shell of (np,nq) */
+        if( pt1->v[voy] == numq ) {
+          adja1 = &mesh->adja[4*(jel-1)+1];
+          for(j=0; j<4; j++)
+            if (pt1->v[j] == nump ) break;
+          assert( j< 4);
 
-	  jel = adja1[j] / 4;
-	  if (!jel ) continue;
+          jel = adja1[j] / 4;
+          if (!jel ) continue;
 
-	  pt1 = &mesh->tetra[jel];
-	  if ( pt1->ref != ref) continue;
-	  if ( pt1->flag == base ) continue;
-	  pt1->flag = base;
+          pt1 = &mesh->tetra[jel];
+          if ( pt1->ref != ref) continue;
+          if ( pt1->flag == base ) continue;
+          pt1->flag = base;
 
-	  for(j=0; j<4; j++)
-	    if (pt1->v[j] == numq ) break;
-	  assert( j< 4);
+          for(j=0; j<4; j++)
+            if (pt1->v[j] == numq ) break;
+          assert( j< 4);
 
-	  list[ilist] = 4*jel+j;
-	  ilist++;
-	  assert( ilist < LMAX+1 );
-	}
-	else {
-	  if ( pt1->flag == base ) continue;
-	  pt1->flag = base;
-	  for(j=0; j<4; j++)
-	    if (pt1->v[j] == nump ) break;
-	  assert( j< 4);
+          list[ilist] = 4*jel+j;
+          ilist++;
+          assert( ilist < LMAX+1 );
+        }
+        else {
+          if ( pt1->flag == base ) continue;
+          pt1->flag = base;
+          for(j=0; j<4; j++)
+            if (pt1->v[j] == nump ) break;
+          assert( j< 4);
 
-	  list[ilist] = - (4*jel+j);
-	  ilist++;
-	  assert( ilist < LMAX+1 );
-	}
+          list[ilist] = - (4*jel+j);
+          ilist++;
+          assert( ilist < LMAX+1 );
+        }
       }
     }
     /* Element belongs to the ball of nq */
@@ -851,47 +851,47 @@ int chkmanicoll(pMesh mesh,int k,int iface,int iedg,int ndepmin,int ndepplus) {
 
       jq = iq;
       for (i=0; i<3; i++) {
-	jq = inxt3[jq];
-	jel = adja[jq] / 4;
-	voy = adja[jq] % 4;
-	if ( !jel ) continue;
+        jq = inxt3[jq];
+        jel = adja[jq] / 4;
+        voy = adja[jq] % 4;
+        if ( !jel ) continue;
 
-	pt1 = &mesh->tetra[jel];
-	if ( pt1->ref != ref ) continue;
+        pt1 = &mesh->tetra[jel];
+        if ( pt1->ref != ref ) continue;
 
-	/* Current tetra is neighbour of a tetra of the shell of (np,nq) */
-	if( pt1->v[voy] == nump ) {
-	  adja1 = &mesh->adja[4*(jel-1)+1];
-	  for(j=0; j<4; j++)
-	    if (pt1->v[j] == numq ) break;
-	  assert( j< 4);
+        /* Current tetra is neighbour of a tetra of the shell of (np,nq) */
+        if( pt1->v[voy] == nump ) {
+          adja1 = &mesh->adja[4*(jel-1)+1];
+          for(j=0; j<4; j++)
+            if (pt1->v[j] == numq ) break;
+          assert( j< 4);
 
-	  jel = adja1[j] / 4;
-	  if (!jel ) continue;
+          jel = adja1[j] / 4;
+          if (!jel ) continue;
 
-	  pt1 = &mesh->tetra[jel];
-	  if ( pt1->ref != ref) continue;
-	  if ( pt1->flag == base ) continue;
-	  pt1->flag = base;
-	  for(j=0; j<4; j++)
-	    if (pt1->v[j] == nump ) break;
-	  assert( j< 4);
+          pt1 = &mesh->tetra[jel];
+          if ( pt1->ref != ref) continue;
+          if ( pt1->flag == base ) continue;
+          pt1->flag = base;
+          for(j=0; j<4; j++)
+            if (pt1->v[j] == nump ) break;
+          assert( j< 4);
 
-	  list[ilist] = -(4*jel+j);
-	  ilist++;
-	  assert( ilist < LMAX+1 );
-	}
-	else {
-	  if ( pt1->flag == base ) continue;
-	  pt1->flag = base;
-	  for(j=0; j<4; j++)
-	    if (pt1->v[j] == numq ) break;
-	  assert( j< 4);
+          list[ilist] = -(4*jel+j);
+          ilist++;
+          assert( ilist < LMAX+1 );
+        }
+        else {
+          if ( pt1->flag == base ) continue;
+          pt1->flag = base;
+          for(j=0; j<4; j++)
+            if (pt1->v[j] == numq ) break;
+          assert( j< 4);
 
-	  list[ilist] = 4*jel+j;
-	  ilist++;
-	  assert( ilist < LMAX+1 );
-	}
+          list[ilist] = 4*jel+j;
+          ilist++;
+          assert( ilist < LMAX+1 );
+        }
       }
     }
     cur++;
@@ -925,47 +925,47 @@ int chkmanicoll(pMesh mesh,int k,int iface,int iedg,int ndepmin,int ndepplus) {
       jp = ip;
 
       for (i=0; i<3; i++) {
-	jp = inxt3[jp];
-	jel = adja[jp] / 4;
-	voy = adja[jp] % 4;
-	if ( !jel ) continue;
+        jp = inxt3[jp];
+        jel = adja[jp] / 4;
+        voy = adja[jp] % 4;
+        if ( !jel ) continue;
 
-	pt1 = &mesh->tetra[jel];
-	if ( pt1->ref != ref ) continue;
+        pt1 = &mesh->tetra[jel];
+        if ( pt1->ref != ref ) continue;
 
-	/* Current tetra is neighbour of a tetra of the shell of (np,nq) */
-	if( pt1->v[voy] == numq ) {
-	  adja1 = &mesh->adja[4*(jel-1)+1];
-	  for(j=0; j<4; j++)
-	    if (pt1->v[j] == nump ) break;
-	  assert( j< 4);
+        /* Current tetra is neighbour of a tetra of the shell of (np,nq) */
+        if( pt1->v[voy] == numq ) {
+          adja1 = &mesh->adja[4*(jel-1)+1];
+          for(j=0; j<4; j++)
+            if (pt1->v[j] == nump ) break;
+          assert( j< 4);
 
-	  jel = adja1[j] / 4;
-	  if (!jel ) continue;
+          jel = adja1[j] / 4;
+          if (!jel ) continue;
 
-	  pt1 = &mesh->tetra[jel];
-	  if ( pt1->ref != ref) continue;
-	  if ( pt1->flag == base ) continue;
-	  pt1->flag = base;
-	  for(j=0; j<4; j++)
-	    if ( pt1->v[j] == numq ) break;
-	  assert( j< 4 );
+          pt1 = &mesh->tetra[jel];
+          if ( pt1->ref != ref) continue;
+          if ( pt1->flag == base ) continue;
+          pt1->flag = base;
+          for(j=0; j<4; j++)
+            if ( pt1->v[j] == numq ) break;
+          assert( j< 4 );
 
-	  list[ilist] = 4*jel+j;
-	  ilist++;
-	  assert( ilist < LMAX+1 );
-	}
-	else {
-	  if ( pt1->flag == base ) continue;
-	  pt1->flag = base;
-	  for(j=0; j<4; j++)
-	    if (pt1->v[j] == nump ) break;
-	  assert( j< 4);
+          list[ilist] = 4*jel+j;
+          ilist++;
+          assert( ilist < LMAX+1 );
+        }
+        else {
+          if ( pt1->flag == base ) continue;
+          pt1->flag = base;
+          for(j=0; j<4; j++)
+            if (pt1->v[j] == nump ) break;
+          assert( j< 4);
 
-	  list[ilist] = - (4*jel+j);
-	  ilist++;
-	  assert( ilist < LMAX+1 );
-	}
+          list[ilist] = - (4*jel+j);
+          ilist++;
+          assert( ilist < LMAX+1 );
+        }
       }
     }
     /* Element belongs to the ball of nq */
@@ -979,49 +979,49 @@ int chkmanicoll(pMesh mesh,int k,int iface,int iedg,int ndepmin,int ndepplus) {
       jq = iq;
 
       for (i=0; i<3; i++) {
-	jq = inxt3[jq];
-	jel = adja[jq] / 4;
-	voy = adja[jq] % 4;
+        jq = inxt3[jq];
+        jel = adja[jq] / 4;
+        voy = adja[jq] % 4;
 
-	if ( !jel ) continue;
+        if ( !jel ) continue;
 
-	pt1 = &mesh->tetra[jel];
+        pt1 = &mesh->tetra[jel];
 
-	if ( pt1->ref != ref ) continue;
+        if ( pt1->ref != ref ) continue;
 
-	/* Current tetra is neighbour of a tetra of the shell of (np,nq) */
-	if( pt1->v[voy] == nump ) {
-	  adja1 = &mesh->adja[4*(jel-1)+1];
-	  for(j=0; j<4; j++)
-	    if (pt1->v[j] == numq ) break;
-	  assert( j< 4);
+        /* Current tetra is neighbour of a tetra of the shell of (np,nq) */
+        if( pt1->v[voy] == nump ) {
+          adja1 = &mesh->adja[4*(jel-1)+1];
+          for(j=0; j<4; j++)
+            if (pt1->v[j] == numq ) break;
+          assert( j< 4);
 
-	  jel = adja1[j] / 4;
-	  if (!jel ) continue;
+          jel = adja1[j] / 4;
+          if (!jel ) continue;
 
-	  pt1 = &mesh->tetra[jel];
-	  if ( pt1->ref != ref) continue;
-	  if ( pt1->flag == base ) continue;
-	  pt1->flag = base;
-	  for(j=0; j<4; j++)
-	    if (pt1->v[j] == nump ) break;
-	  assert( j< 4);
+          pt1 = &mesh->tetra[jel];
+          if ( pt1->ref != ref) continue;
+          if ( pt1->flag == base ) continue;
+          pt1->flag = base;
+          for(j=0; j<4; j++)
+            if (pt1->v[j] == nump ) break;
+          assert( j< 4);
 
-	  list[ilist] = -(4*jel+j);
-	  ilist++;
-	  assert( ilist < LMAX+1 );
-	}
-	else {
-	  if ( pt1->flag == base ) continue;
-	  pt1->flag = base;
-	  for(j=0; j<4; j++)
-	    if (pt1->v[j] == numq ) break;
-	  assert( j< 4 );
+          list[ilist] = -(4*jel+j);
+          ilist++;
+          assert( ilist < LMAX+1 );
+        }
+        else {
+          if ( pt1->flag == base ) continue;
+          pt1->flag = base;
+          for(j=0; j<4; j++)
+            if (pt1->v[j] == numq ) break;
+          assert( j< 4 );
 
-	  list[ilist] = 4*jel+j;
-	  ilist++;
-	  assert( ilist < LMAX+1 );
-	}
+          list[ilist] = 4*jel+j;
+          ilist++;
+          assert( ilist < LMAX+1 );
+        }
       }
     }
     cur++;
@@ -1043,33 +1043,33 @@ int chkmanicoll(pMesh mesh,int k,int iface,int iedg,int ndepmin,int ndepplus) {
 
       jp = ip;
       for(i=0; i<3; i++) {
-	jp = inxt3[jp];
-	jel = adja[jp] / 4;
+        jp = inxt3[jp];
+        jel = adja[jp] / 4;
 
-	if ( !jel ) continue;
-	pt1 = &mesh->tetra[jel];
-	if (pt1->flag == base ) continue;
-	pt1->flag = base;
+        if ( !jel ) continue;
+        pt1 = &mesh->tetra[jel];
+        if (pt1->flag == base ) continue;
+        pt1->flag = base;
 
-	indp = -1;
-	indq = -1;
-	for(j=0; j<4; j++) {
-	  if ( pt1->v[j] == nump )
-	    indp = j;
-	  else if ( pt1->v[j] == numq )
-	    indq = j;
-	}
-	assert( indp >= 0 && indp < 4 );
+        indp = -1;
+        indq = -1;
+        for(j=0; j<4; j++) {
+          if ( pt1->v[j] == nump )
+            indp = j;
+          else if ( pt1->v[j] == numq )
+            indq = j;
+        }
+        assert( indp >= 0 && indp < 4 );
 
-	/* Only tets of the shell of (np,nq) can be added, unless future ball is non manifold */
-	if ( indq == -1 ) {
-	  printf("On devrait passer ici TRES rarement : tetra numero %d =  %d %d %d %d , sa ref = %d\n",jel,pt1->v[0],pt1->v[1],pt1->v[2],pt1->v[3],pt1->ref);
-	  return(0);
-	}
+        /* Only tets of the shell of (np,nq) can be added, unless future ball is non manifold */
+        if ( indq == -1 ) {
+          printf("On devrait passer ici TRES rarement : tetra numero %d =  %d %d %d %d , sa ref = %d\n",jel,pt1->v[0],pt1->v[1],pt1->v[2],pt1->v[3],pt1->ref);
+          return(0);
+        }
 
-	list[ilist] = -(4*jel+indp);
-	ilist++;
-	assert( ilist < LMAX +1 );
+        list[ilist] = -(4*jel+indp);
+        ilist++;
+        assert( ilist < LMAX +1 );
       }
     }
     else {
@@ -1080,34 +1080,34 @@ int chkmanicoll(pMesh mesh,int k,int iface,int iedg,int ndepmin,int ndepplus) {
 
       jq = iq;
       for(i=0; i<3; i++) {
-	jq = inxt3[jq];
-	jel = adja[jq] / 4;
+        jq = inxt3[jq];
+        jel = adja[jq] / 4;
 
-	if ( !jel ) continue;
-	pt1 = &mesh->tetra[jel];
-	if (pt1->flag == base ) continue;
-	pt1->flag = base;
+        if ( !jel ) continue;
+        pt1 = &mesh->tetra[jel];
+        if (pt1->flag == base ) continue;
+        pt1->flag = base;
 
-	indp = -1;
-	indq = -1;
+        indp = -1;
+        indq = -1;
 
-	for(j=0; j<4; j++) {
-	  if ( pt1->v[j] == nump )
-	    indp = j;
-	  else if ( pt1->v[j] == numq )
-	    indq = j;
-	}
-	assert( indq >= 0 && indq < 4 );
+        for(j=0; j<4; j++) {
+          if ( pt1->v[j] == nump )
+            indp = j;
+          else if ( pt1->v[j] == numq )
+            indq = j;
+        }
+        assert( indq >= 0 && indq < 4 );
 
-	/* Only tets of the shell of (np,nq) can be added, unless future ball is non manifold */
-	if ( indp == -1 ) {
-	  printf("On devrait pas passer la \n");
-	  return(0);
-	}
+        /* Only tets of the shell of (np,nq) can be added, unless future ball is non manifold */
+        if ( indp == -1 ) {
+          printf("On devrait pas passer la \n");
+          return(0);
+        }
 
-	list[ilist] = 4*jel+indq;
-	ilist++;
-	assert( ilist < LMAX +1 );
+        list[ilist] = 4*jel+indq;
+        ilist++;
+        assert( ilist < LMAX +1 );
       }
     }
     cur++;

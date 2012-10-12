@@ -112,16 +112,16 @@ int hashTetra(pMesh mesh) {
       pt1  = &mesh->tetra[kk];
       sum1 = pt1->v[i1] + pt1->v[i2] + pt1->v[i3];
       if ( sum1 == sum ) {
-	mins1 = MG_MIN(pt1->v[i1],MG_MIN(pt1->v[i2],pt1->v[i3]));
-	maxs1 = MG_MAX(pt1->v[i1],MG_MAX(pt1->v[i2],pt1->v[i3]));
+        mins1 = MG_MIN(pt1->v[i1],MG_MIN(pt1->v[i2],pt1->v[i3]));
+        maxs1 = MG_MAX(pt1->v[i1],MG_MAX(pt1->v[i2],pt1->v[i3]));
 
-	/* adjacent found */
-	if ( mins1 == mins && maxs1 == maxs ) {
-	  if ( pp != 0 )  link[pp] = link[ll];
-	  link[l]  = 4*kk + ii;
-	  link[ll] = 4*k + i;
-	  break;
-	}
+        /* adjacent found */
+        if ( mins1 == mins && maxs1 == maxs ) {
+          if ( pp != 0 )  link[pp] = link[ll];
+          link[l]  = 4*kk + ii;
+          link[ll] = 4*k + i;
+          break;
+        }
       }
       pp = ll;
       ll = -link[ll];
@@ -178,58 +178,58 @@ int hashTria(pMesh mesh) {
 
       /* store edge */
       if ( ph->a == 0 ) {
-	ph->a = ia;
-	ph->b = ib;
-	ph->k = 3*k + i;
-	ph->nxt = 0;
-	continue;
+        ph->a = ia;
+        ph->b = ib;
+        ph->k = 3*k + i;
+        ph->nxt = 0;
+        continue;
       }
       /* update info about adjacent */
       ok = 0;
       while ( ph->a ) {
-	if ( ph->a == ia && ph->b == ib ) {
-	  jel = ph->k / 3;
-	  j   = ph->k % 3;
-	  pt1 = &mesh->tria[jel];
-	  /* discard duplicate face */
-	  if ( pt1->v[j] == pt->v[i] ) {
-	    pt1->v[0] = 0;
-	    dup++;
-	  }
-	  /* update adjacent */
-	  else if ( !mesh->adjt[3*(jel-1)+1+j] ) {
-	    adja[i] = 3*jel + j;
-	    mesh->adjt[3*(jel-1)+1+j] = 3*k + i;
-	  }
-	  /* non-manifold case */
-	  else if ( adja[i] != 3*jel+j ) {
-	    pt->tag[i] |= MG_GEO + MG_NOM;
-	    pt1->tag[j]|= MG_GEO + MG_NOM;
-	    nmf++;
-	  }
-	  ok = 1;
-	  break;
-	}
-	else if ( !ph->nxt ) {
-	  ph->nxt = hash.nxt;
-	  ph = &hash.item[ph->nxt];
-	  assert(ph);
-	  hash.nxt = ph->nxt;
-	  ph->a = ia;
-	  ph->b = ib;
-	  ph->k = 3*k + i;
-	  ph->nxt = 0;
-	  ok = 1;
-	  break;
-	}
-	else
-	  ph = &hash.item[ph->nxt];
+        if ( ph->a == ia && ph->b == ib ) {
+          jel = ph->k / 3;
+          j   = ph->k % 3;
+          pt1 = &mesh->tria[jel];
+          /* discard duplicate face */
+          if ( pt1->v[j] == pt->v[i] ) {
+            pt1->v[0] = 0;
+            dup++;
+          }
+          /* update adjacent */
+          else if ( !mesh->adjt[3*(jel-1)+1+j] ) {
+            adja[i] = 3*jel + j;
+            mesh->adjt[3*(jel-1)+1+j] = 3*k + i;
+          }
+          /* non-manifold case */
+          else if ( adja[i] != 3*jel+j ) {
+            pt->tag[i] |= MG_GEO + MG_NOM;
+            pt1->tag[j]|= MG_GEO + MG_NOM;
+            nmf++;
+          }
+          ok = 1;
+          break;
+        }
+        else if ( !ph->nxt ) {
+          ph->nxt = hash.nxt;
+          ph = &hash.item[ph->nxt];
+          assert(ph);
+          hash.nxt = ph->nxt;
+          ph->a = ia;
+          ph->b = ib;
+          ph->k = 3*k + i;
+          ph->nxt = 0;
+          ok = 1;
+          break;
+        }
+        else
+          ph = &hash.item[ph->nxt];
       }
       if ( !ok ) {
-	ph->a = ia;
-	ph->b = ib;
-	ph->k = 3*k + i;
-	ph->nxt = 0;
+        ph->a = ia;
+        ph->b = ib;
+        ph->k = 3*k + i;
+        ph->nxt = 0;
       }
     }
   }
@@ -240,8 +240,8 @@ int hashTria(pMesh mesh) {
     pt  = &mesh->tria[k];
     for (i=0; i<3; i++) {
       if ( pt->tag[i] & MG_NOM ) {
-	mesh->point[pt->v[inxt2[i]]].tag |= MG_NOM;
-	mesh->point[pt->v[iprv2[i]]].tag |= MG_NOM;
+        mesh->point[pt->v[inxt2[i]]].tag |= MG_NOM;
+        mesh->point[pt->v[iprv2[i]]].tag |= MG_NOM;
       }
     }
   }
@@ -345,18 +345,18 @@ int hashPop(Hash *hash,int a,int b) {
     ph  = &hash->item[ph->nxt];
     if ( ph->a == ia && ph->b == ib ) {
       if ( !ph->nxt ) {
-	memset(ph,0,sizeof(hedge));
-	ph->nxt   = hash->nxt;
-	hash->nxt = php->nxt;
-	php->nxt  = 0;
+        memset(ph,0,sizeof(hedge));
+        ph->nxt   = hash->nxt;
+        hash->nxt = php->nxt;
+        php->nxt  = 0;
       }
       else {
-	iph  = ph->nxt;
-	iphp = php->nxt;
-	php->nxt = iph;
-	memset(ph,0,sizeof(hedge));
-	ph->nxt   = hash->nxt;
-	hash->nxt = iphp;
+        iph  = ph->nxt;
+        iphp = php->nxt;
+        php->nxt = iph;
+        memset(ph,0,sizeof(hedge));
+        ph->nxt   = hash->nxt;
+        hash->nxt = iphp;
       }
       return(1);
     }
@@ -447,18 +447,18 @@ int hPop(HGeom *hash,int a,int b,int *ref,char *tag) {
       *ref = ph->ref;
       *tag = ph->tag;
       if ( !ph->nxt ) {
-	memset(ph,0,sizeof(hgeom));
-	ph->nxt   = hash->nxt;
-	hash->nxt = php->nxt;
-	php->nxt  = 0;
+        memset(ph,0,sizeof(hgeom));
+        ph->nxt   = hash->nxt;
+        hash->nxt = php->nxt;
+        php->nxt  = 0;
       }
       else {
-	iph  = ph->nxt;
-	iphp = php->nxt;
-	php->nxt = iph;
-	memset(ph,0,sizeof(hgeom));
-	ph->nxt   = hash->nxt;
-	hash->nxt = iphp;
+        iph  = ph->nxt;
+        iphp = php->nxt;
+        php->nxt = iph;
+        memset(ph,0,sizeof(hgeom));
+        ph->nxt   = hash->nxt;
+        hash->nxt = iphp;
       }
       return(1);
     }
@@ -575,15 +575,15 @@ int hGeom(pMesh mesh) {
     for (k=1; k<=mesh->nt; k++) {
       pt = &mesh->tria[k];
       for (i=0; i<3; i++) {
-	i1 = inxt2[i];
-	i2 = iprv2[i];
-	/* transfer non manifold tag to edges */
-	if ( pt->tag[i] & MG_NOM )
-	  hTag(&mesh->htab,pt->v[i1],pt->v[i2],pt->edg[i],pt->tag[i]);
+        i1 = inxt2[i];
+        i2 = iprv2[i];
+        /* transfer non manifold tag to edges */
+        if ( pt->tag[i] & MG_NOM )
+          hTag(&mesh->htab,pt->v[i1],pt->v[i2],pt->edg[i],pt->tag[i]);
 
-	hGet(&mesh->htab,pt->v[i1],pt->v[i2],&edg,&tag);
-	pt->edg[i] |= edg;
-	pt->tag[i] |= tag;
+        hGet(&mesh->htab,pt->v[i1],pt->v[i2],&edg,&tag);
+        pt->edg[i] |= edg;
+        pt->tag[i] |= tag;
       }
     }
   }
@@ -593,12 +593,12 @@ int hGeom(pMesh mesh) {
       pt   = &mesh->tria[k];
       adja = &mesh->adjt[3*(k-1)+1];
       for (i=0; i<3; i++) {
-	i1  = inxt2[i];
-	i2  = iprv2[i];
-	kk  = adja[i] / 3;
-	if ( !kk || pt->tag[i] & MG_NOM )
-	  mesh->na++;
-	else if ( (k < kk) && pt->edg[i]+pt->tag[i] )  mesh->na++;
+        i1  = inxt2[i];
+        i2  = iprv2[i];
+        kk  = adja[i] / 3;
+        if ( !kk || pt->tag[i] & MG_NOM )
+          mesh->na++;
+        else if ( (k < kk) && pt->edg[i]+pt->tag[i] )  mesh->na++;
       }
     }
     mesh->namax = MG_MAX(1.5*mesh->na,NAMAX);
@@ -610,27 +610,27 @@ int hGeom(pMesh mesh) {
       pt   = &mesh->tria[k];
       adja = &mesh->adjt[3*(k-1)+1];
       for (i=0; i<3; i++) {
-	i1  = inxt2[i];
-	i2  = iprv2[i];
-	kk  = adja[i] / 3;
-	if ( !kk || pt->tag[i] & MG_NOM ) {
-	  if ( pt->tag[i] & MG_NOM )
-	    pt->edg[i] = ( info.iso && pt->edg[i] != 0 ) ?  -abs(pt->edg[i]) : MG_ISO;
-	  hEdge(&mesh->htab,pt->v[i1],pt->v[i2],pt->edg[i],pt->tag[i]);
-	}
-	else if ( k < kk && pt->edg[i]+pt->tag[i] )
-	  hEdge(&mesh->htab,pt->v[i1],pt->v[i2],pt->edg[i],pt->tag[i]);
+        i1  = inxt2[i];
+        i2  = iprv2[i];
+        kk  = adja[i] / 3;
+        if ( !kk || pt->tag[i] & MG_NOM ) {
+          if ( pt->tag[i] & MG_NOM )
+            pt->edg[i] = ( info.iso && pt->edg[i] != 0 ) ?  -abs(pt->edg[i]) : MG_ISO;
+          hEdge(&mesh->htab,pt->v[i1],pt->v[i2],pt->edg[i],pt->tag[i]);
+        }
+        else if ( k < kk && pt->edg[i]+pt->tag[i] )
+          hEdge(&mesh->htab,pt->v[i1],pt->v[i2],pt->edg[i],pt->tag[i]);
       }
     }
     /* now check triangles */
     for (k=1; k<=mesh->nt; k++) {
       pt = &mesh->tria[k];
       for (i=0; i<3; i++) {
-	i1 = inxt2[i];
-	i2 = iprv2[i];
-	hGet(&mesh->htab,pt->v[i1],pt->v[i2],&edg,&tag);
-	pt->edg[i] |= edg;
-	pt->tag[i] |= tag;
+        i1 = inxt2[i];
+        i2 = iprv2[i];
+        hGet(&mesh->htab,pt->v[i1],pt->v[i2],&edg,&tag);
+        pt->edg[i] |= edg;
+        pt->tag[i] |= tag;
       }
     }
   }
@@ -657,7 +657,7 @@ int bdryTria(pMesh mesh) {
       adj = adja[i] / 4;
       pt1 = &mesh->tetra[adj];
       if ( !adj || (k < adj && pt->ref != pt1->ref) )
-	mesh->nt++;
+        mesh->nt++;
     }
   }
   if ( !mesh->nt )  return(1);
@@ -677,15 +677,15 @@ int bdryTria(pMesh mesh) {
       adj = adja[i] / 4;
       pt1 = &mesh->tetra[adj];
       if ( !adj || (k < adj && pt->ref != pt1->ref) ) {
-	mesh->nt++;
-	ptt = &mesh->tria[mesh->nt];
-	ptt->v[0] = pt->v[idir[i][0]];
-	ptt->v[1] = pt->v[idir[i][1]];
-	ptt->v[2] = pt->v[idir[i][2]];
-	if ( k < adj && pt->ref != pt1->ref )
-	  ptt->ref = info.iso ? MG_ISO : 0;
-	else
-	  ptt->ref  = pxt ? pxt->ref[i] : 0;  /* useful only when saving mesh */
+        mesh->nt++;
+        ptt = &mesh->tria[mesh->nt];
+        ptt->v[0] = pt->v[idir[i][0]];
+        ptt->v[1] = pt->v[idir[i][1]];
+        ptt->v[2] = pt->v[idir[i][2]];
+        if ( k < adj && pt->ref != pt1->ref )
+          ptt->ref = info.iso ? MG_ISO : 0;
+        else
+          ptt->ref  = pxt ? pxt->ref[i] : 0;  /* useful only when saving mesh */
       }
     }
   }
@@ -754,12 +754,12 @@ int bdryIso(pMesh mesh) {
       adj = adja[i] / 4;
       pt1 = &mesh->tetra[adj];
       if ( k < adj && pt->ref != pt1->ref ) {
-	mesh->nt++;
-	ptt = &mesh->tria[mesh->nt];
-	ptt->v[0] = pt->v[idir[i][0]];
-	ptt->v[1] = pt->v[idir[i][1]];
-	ptt->v[2] = pt->v[idir[i][2]];
-	ptt->ref  = info.iso ? 100 : 0;  /* useful only when saving mesh */
+        mesh->nt++;
+        ptt = &mesh->tria[mesh->nt];
+        ptt->v[0] = pt->v[idir[i][0]];
+        ptt->v[1] = pt->v[idir[i][1]];
+        ptt->v[2] = pt->v[idir[i][2]];
+        ptt->ref  = info.iso ? 100 : 0;  /* useful only when saving mesh */
       }
     }
   }
@@ -793,8 +793,8 @@ static int hashFace(Hash *hash,int ia,int ib,int ic,int k) {
       return(ph->k);
     else {
       while ( ph->nxt && ph->nxt < hash->max ) {
-	ph = &hash->item[ph->nxt];
-	if ( ph->a == mins && ph->b == maxs && ph->s == sum )  return(ph->k);
+        ph = &hash->item[ph->nxt];
+        if ( ph->a == mins && ph->b == maxs && ph->s == sum )  return(ph->k);
       }
     }
     ph->nxt = hash->nxt;
@@ -833,8 +833,8 @@ static int hashGetFace(Hash *hash,int ia,int ib,int ic) {
       return(ph->k);
     else {
       while ( ph->nxt ) {
-	ph = &hash->item[ph->nxt];
-	if ( ph->a == mins && ph->b == maxs && ph->s == sum )  return(ph->k);
+        ph = &hash->item[ph->nxt];
+        if ( ph->a == mins && ph->b == maxs && ph->s == sum )  return(ph->k);
       }
     }
   }
@@ -872,19 +872,19 @@ int bdrySet(pMesh mesh) {
       adj = adja[i] / 4;
       pt1 = &mesh->tetra[adj];
       if ( !adj || (adj > 0 && pt->ref != pt1->ref) ) {
-	ia = pt->v[idir[i][0]];
-	ib = pt->v[idir[i][1]];
-	ic = pt->v[idir[i][2]];
-	kt = hashGetFace(&hash,ia,ib,ic);
-	assert(kt);
-	if ( !pt->xt ) {
-	  mesh->xt++;
-	  pt->xt = mesh->xt;
-	}
-	ptt = &mesh->tria[kt];
-	pxt = &mesh->xtetra[mesh->xt];
-	pxt->ref[i]   = ptt->ref;
-	pxt->ftag[i] |= MG_BDY;
+        ia = pt->v[idir[i][0]];
+        ib = pt->v[idir[i][1]];
+        ic = pt->v[idir[i][2]];
+        kt = hashGetFace(&hash,ia,ib,ic);
+        assert(kt);
+        if ( !pt->xt ) {
+          mesh->xt++;
+          pt->xt = mesh->xt;
+        }
+        ptt = &mesh->tria[kt];
+        pxt = &mesh->xtetra[mesh->xt];
+        pxt->ref[i]   = ptt->ref;
+        pxt->ftag[i] |= MG_BDY;
       }
     }
   }
@@ -924,24 +924,24 @@ int bdryPerm(pMesh mesh) {
       adj = adja[i] / 4;
       pt1 = &mesh->tetra[adj];
       if ( adj && (pt->ref == pt1->ref || pt->ref == MG_PLUS) )
-	continue;
+        continue;
       else {
-	ia = pt->v[idir[i][0]];
-	ib = pt->v[idir[i][1]];
-	ic = pt->v[idir[i][2]];
-	kt = hashGetFace(&hash,ia,ib,ic);
-	assert(kt);
+        ia = pt->v[idir[i][0]];
+        ib = pt->v[idir[i][1]];
+        ic = pt->v[idir[i][2]];
+        kt = hashGetFace(&hash,ia,ib,ic);
+        assert(kt);
 
-	/* check orientation */
-	ptt = &mesh->tria[kt];
-	if ( ptt->v[0] == ia && ptt->v[1] == ib && ptt->v[2] == ic )
-	  continue;
-	else {
-	  ptt->v[0] = ia;
-	  ptt->v[1] = ib;
-	  ptt->v[2] = ic;
-	  nf++;
-	}
+        /* check orientation */
+        ptt = &mesh->tria[kt];
+        if ( ptt->v[0] == ia && ptt->v[1] == ib && ptt->v[2] == ic )
+          continue;
+        else {
+          ptt->v[0] = ia;
+          ptt->v[1] = ib;
+          ptt->v[2] = ic;
+          nf++;
+        }
       }
     }
   }
