@@ -1,11 +1,11 @@
 CMAKE_MINIMUM_REQUIRED (VERSION 2.6)
-PROJECT (MMG3D5)     
+PROJECT (MMG3D5)
 
 # Continuous integration
 ENABLE_TESTING()
 
 SET(EXECUTABLE_OUTPUT_PATH $ENV{HOME}/bin/$ENV{ARCHI}/)
-SET(CMAKELISTS_PATH .) 
+SET(CMAKELISTS_PATH .)
 
 # Find "exotic" compilers
 IF (${CMAKE_C_COMPILER} MATCHES Clang OR ${CMAKE_C_COMPILER} MATCHES clang)
@@ -18,11 +18,11 @@ ENDIF()
 
 
 IF(CMAKE_COMPILER_IS_GNUCC)
-  IF(APPLE) 
+  IF(APPLE)
     # Add flags to the compiler
-    ADD_DEFINITIONS(-static-libgcc -mmacosx-version-min=10.4 -arch x86_64) 
-    
-    # To avoid pbs with binary files... 
+    ADD_DEFINITIONS(-static-libgcc -mmacosx-version-min=10.4 -arch x86_64)
+
+    # To avoid pbs with binary files...
     SET(CMAKE_EXE_LINKER_FLAGS "-arch x86_64")
     # Determine if the processor supports 64bit execution
     EXECUTE_PROCESS(
@@ -47,11 +47,11 @@ IF(NOT CMAKE_COMPILER_IS_CLANG)
   ENDIF(PROFILING)
 ENDIF(NOT CMAKE_COMPILER_IS_CLANG)
 
-  
+
 
   # Add openMP flags if OpenMP found
 INCLUDE(FindOpenMP)
-IF(OPENMP_FOUND) 
+IF(OPENMP_FOUND)
   SET(OPENMP CACHE BOOL "Enable/Disable OpenMP")
   IF(OPENMP)
     SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
@@ -64,24 +64,24 @@ ENDIF(OPENMP_FOUND)
 
 # Header files
 INCLUDE_DIRECTORIES(${CMAKELISTS_PATH}/sources/)
-# Source files  
+# Source files
 FILE(
 	GLOB
 	source_files
-	${CMAKELISTS_PATH}/sources/*.c 
+	${CMAKELISTS_PATH}/sources/*.c
 )
 
 #compil.date
 IF (NOT EXISTS ${CMAKELISTS_PATH}/sources/compil.date)
-  SET_SOURCE_FILES_PROPERTIES( ${CMAKELISTS_PATH}/sources/compil.date PROPERTIES GENERATED TRUE ) 
-  
+  SET_SOURCE_FILES_PROPERTIES( ${CMAKELISTS_PATH}/sources/compil.date PROPERTIES GENERATED TRUE )
+
   ADD_CUSTOM_COMMAND(
     OUTPUT ${CMAKELISTS_PATH}/sources/compil.date
     COMMAND ${CMAKE_COMMAND} -E echo \"\#define COMPIL \" '\"' `date` '\"' > ${CMAKELISTS_PATH}/sources/compil.date
     DEPENDS ${sources_files}
     COMMENT "compil.date creation"
     )
-ELSEIF(EXISTS ${CMAKELISTS_PATH}/sources/compil.date) 
+ELSEIF(EXISTS ${CMAKELISTS_PATH}/sources/compil.date)
  ADD_CUSTOM_COMMAND(
     OUTPUT ${CMAKELISTS_PATH}/sources/compil.date
     COMMAND ${CMAKE_COMMAND} -E echo \"\#define COMPIL \" '\"' `date` '\"' > ${CMAKELISTS_PATH}/sources/compil.date
@@ -97,11 +97,19 @@ ADD_DEPENDENCIES(mmg3d5 compil_date)
 
 # Libraries
 FIND_LIBRARY(M_LIB m)
-TARGET_LINK_LIBRARIES(mmg3d5 ${M_LIB} gcov)
+TARGET_LINK_LIBRARIES(mmg3d5 ${M_LIB})
 
 # Continuous integration: Tests
-INCLUDE(CTest)
-#SET(WITH_MEMCHECK TRUE)
-SET(WITH_COVERAGE FALSE)
-SET(REG_TESTS_PATH ${CMAKELISTS_PATH}/../../RegTests)
-ADD_TEST(SimpleCube $ENV{HOME}/bin/$ENV{ARCHI}/mmg3d5 ${REG_TESTS_PATH}/Cube/cube.mesh)
+IF(BUILD_TESTING)
+  INCLUDE(CTest)
+
+# coverage
+#TARGET_LINK_LIBRARIES(mmg3d5 ${M_LIB} gcov)
+#  SET(WITH_MEMCHECK TRUE)
+#  SET(WITH_COVERAGE FALSE)
+  IF (CMAKE_COMPILER_IS_GNUCC)
+    SET(CMAKE_C_FLAGS "-Wall")
+    SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}")
+  ENDIF(CMAKE_COMPILER_IS_GNUCC)
+  INCLUDE( ${CMAKE_SOURCE_DIR}/testing.cmake )
+ENDIF(BUILD_TESTING)
