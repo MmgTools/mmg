@@ -1531,7 +1531,7 @@ void split3op(pMesh mesh, pSol met, int k, int vx[6]){
   char          flg,tag0,tag1,tag5;
   int           iel,ref0,ref1,ref5;
   unsigned char imin12,imin03,tau[4],*taued,sym[4],symed[6],ip0,ip1,ip2,ip3,ie0,ie1;
-  unsigned char ie2,ie3,ie4,ie5,isxt[4],firstxt,i;
+  unsigned char ie2,ie3,ie4,ie5,isxt[5],firstxt,i;
 
   pt[0]  = &mesh->tetra[k];
   flg = pt[0]->flag;
