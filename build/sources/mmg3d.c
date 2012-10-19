@@ -22,7 +22,6 @@ unsigned char ifar[6][2] = { {2,3}, {1,3}, {1,2}, {0,3}, {0,2}, {0,1} };
 unsigned char isar[6][2] = { {2,3}, {3,1}, {1,2}, {0,3}, {2,0}, {0,1} };
 unsigned char arpt[4][3] = { {0,1,2}, {0,4,3}, {1,3,5}, {2,5,4} };
 
-
 static inline void printTime(char *chaine,double tps){
   char *tpsm;
   tpsm= printim(tps);
@@ -61,7 +60,6 @@ static void usage(char *prog) {
   fprintf(stdout,"\n**  File specifications\n");
   fprintf(stdout,"-in  file  input triangulation\n");
   fprintf(stdout,"-out file  output triangulation\n");
-  fprintf(stdout,"-met file  load metric field\n");
   fprintf(stdout,"-sol file  load solution file\n");
 
   fprintf(stdout,"\n**  Parameters\n");
@@ -71,6 +69,7 @@ static void usage(char *prog) {
   fprintf(stdout,"-hmax val  maximal mesh size\n");
   fprintf(stdout,"-hausd val control Hausdorff distance\n");
   fprintf(stdout,"-hgrad val control gradation\n");
+  fprintf(stdout,"-ls        levelset meshing \n");
 
   exit(1);
 }
@@ -118,17 +117,24 @@ static int parsar(int argc,char *argv[],pMesh mesh,pSol met) {
         break;
       case 'i':
         if ( !strcmp(argv[i],"-in") ) {
-          ++i;
-          mesh->namein = argv[i];
-          info.imprim = 5;
+          if ( ++i < argc && isascii(argv[i][0]) && argv[i][0]!='-') {
+            mesh->namein = (char*) calloc(strlen(argv[i])+1,sizeof(char));
+            strcpy(mesh->namein,argv[i]);
+            info.imprim = 5;
+          }else{
+            fprintf(stderr,"Missing filname for %c%c\n",argv[i-1][1],argv[i-1][2]);
+            usage(argv[0]);
+          }
         }
         break;
       case 'l':
         if ( !strcmp(argv[i],"-ls") ) {
           info.iso = 1;
-          if ( i < argc+1 && isdigit(argv[i+1][0]) ) {
-            i++;
+          if ( ++i < argc && isdigit(argv[i][0]) ) {
             info.ls = atof(argv[i]);
+          }else{
+            fprintf(stderr,"Missing argument option %c%c\n",argv[i-1][1],argv[i-1][2]);
+            usage(argv[0]);
           }
         }
         break;
@@ -146,14 +152,26 @@ static int parsar(int argc,char *argv[],pMesh mesh,pSol met) {
         break;
       case 'o':
         if ( !strcmp(argv[i],"-out") ) {
-          ++i;
-          mesh->nameout = argv[i];
+          if ( ++i < argc && isascii(argv[i][0])  && argv[i][0]!='-') {
+            mesh->nameout = (char*) calloc(strlen(argv[i])+1,sizeof(char));
+            strcpy(mesh->nameout,argv[i]);
+          }else{
+            fprintf(stderr,"Missing filname for %c%c%c\n",
+                    argv[i-1][1],argv[i-1][2],argv[i-1][3]);
+            usage(argv[0]);
+          }
         }
         break;
       case 's':
         if ( !strcmp(argv[i],"-sol") ) {
-          ++i;
-          met->namein = argv[i];
+          if ( ++i < argc && isascii(argv[i][0]) && argv[i][0]!='-' ) {
+            met->namein = (char*) calloc(strlen(argv[i])+1,sizeof(char));
+            strcpy(met->namein,argv[i]);
+          }else{
+            fprintf(stderr,"Missing filname for %c%c%c\n",
+                    argv[i-1][1],argv[i-1][2],argv[i-1][3]);
+            usage(argv[0]);
+          }
         }
         break;
       case 'v':
@@ -175,11 +193,14 @@ static int parsar(int argc,char *argv[],pMesh mesh,pSol met) {
     }
     else {
       if ( mesh->namein == NULL ) {
-        mesh->namein = argv[i];
+        mesh->namein = (char*) calloc(strlen(argv[i])+1,sizeof(char));
+        strcpy(mesh->namein,argv[i]);
         if ( info.imprim == -99 )  info.imprim = 5;
       }
-      else if ( mesh->nameout == NULL )
-        mesh->nameout = argv[i];
+      else if ( mesh->nameout == NULL ){
+        mesh->nameout = (char*) calloc(strlen(argv[i])+1,sizeof(char));
+        strcpy(mesh->nameout,argv[i]);
+      }
       else {
         fprintf(stdout,"Argument %s ignored\n",argv[i]);
         usage(argv[0]);
@@ -234,6 +255,20 @@ static int parsar(int argc,char *argv[],pMesh mesh,pSol met) {
   return(1);
 }
 
+/* Deallocations before return */
+static void freeAll(pMesh mesh,pSol met){
+  free(mesh->point);
+  free(mesh->tetra);
+  free(mesh->adja);
+  free(mesh->nameout);
+  free(mesh->namein);
+  if(mesh->xpoint)    free(mesh->xpoint);
+  if(mesh->htab.geom) free(mesh->htab.geom);
+  if(mesh->tria)      free(mesh->tria);
+  if(met ->namein)    free(met ->namein);
+  if(met ->nameout)   free(met ->nameout);
+  if(met ->m)         free(met->m);
+}
 
 static void endcod() {
   chrono(OFF,&info.ctim[0]);
@@ -256,7 +291,6 @@ static void setfunc(pMesh mesh,pSol met) {
       gradsiz = gradsiz_ani;*/
   }
 }
-
 
 int main(int argc,char *argv[]) {
   Mesh       mesh;
@@ -299,15 +333,16 @@ int main(int argc,char *argv[]) {
   fprintf(stdout,"\n  -- INPUT DATA\n");
   chrono(ON,&info.ctim[1]);
   /* read mesh file */
-  if ( !loadMesh(&mesh) )  return(1);
+  if ( !loadMesh(&mesh) ) RETURN_AND_FREE(&mesh,&met,1);
   met.npmax = mesh.npmax;
   /* read metric if any */
   ier = loadMet(&met);
-  if ( !ier )
-    return(1);
+  if ( !ier ) RETURN_AND_FREE(&mesh,&met,1);
   else if ( ier > 0 && met.np != mesh.np ) {
     fprintf(stdout,"  ## WARNING: WRONG SOLUTION NUMBER. IGNORED\n");
     free(met.m);
+    free(met.namein);
+    free(met.nameout);
     memset(&met,0,sizeof(Sol));
     met.np=0;
   }
@@ -320,19 +355,19 @@ int main(int argc,char *argv[]) {
   if ( abs(info.imprim) > 0 )  outqua(&mesh,&met);
   fprintf(stdout,"\n  %s\n   MODULE MMG3D: IMB-LJLL : %s (%s)\n  %s\n",MG_STR,MG_VER,MG_REL,MG_STR);
   if ( info.imprim )   fprintf(stdout,"\n  -- PHASE 1 : ANALYSIS\n");
-  if ( !scaleMesh(&mesh,&met) )  return(1);
+  if ( !scaleMesh(&mesh,&met) ) RETURN_AND_FREE(&mesh,&met,1);
   if ( !met.np ){
     if ( info.iso ){
-      fprintf(stdout,"\n  ## ERROR : A VALID SOLUTION FILE IS NEEDED : %s \n",met.namein);
-      return(1);
+      fprintf(stdout,"\n  ## ERROR : A VALID SOLUTION FILE IS NEEDED \n");
+      RETURN_AND_FREE(&mesh,&met,1);
     }else{
-      if ( !DoSol(&mesh,&met) )  return(1);
+      if ( !DoSol(&mesh,&met) ) RETURN_AND_FREE(&mesh,&met,1);
       setfunc(&mesh,&met);
     }
   }
 
-  if( info.iso && !mmg3d2(&mesh,&met) ) return(1);
-  if ( !analys(&mesh) )  return(1);
+  if( info.iso && !mmg3d2(&mesh,&met) ) RETURN_AND_FREE(&mesh,&met,1);
+  if ( !analys(&mesh) ) {RETURN_AND_FREE(&mesh,&met,1);}
 
   if ( abs(info.imprim) > 0 ) {
     PutMetIn_h(&mesh,&met);
@@ -347,7 +382,7 @@ int main(int argc,char *argv[]) {
   chrono(ON,&info.ctim[3]);
   if ( info.imprim )
     fprintf(stdout,"\n  -- PHASE 2 : %s MESHING\n",met.size < 6 ? "ISOTROPIC" : "ANISOTROPIC");
-  if ( !mmg3d1(&mesh,&met) )  return(1);
+  if ( !mmg3d1(&mesh,&met) ) {RETURN_AND_FREE(&mesh,&met,1);}
 
   chrono(OFF,&info.ctim[3]);
   if ( info.imprim ){
@@ -360,17 +395,12 @@ int main(int argc,char *argv[]) {
 
   chrono(ON,&info.ctim[1]);
   if ( info.imprim )  fprintf(stdout,"\n  -- WRITING DATA FILE %s\n",mesh.nameout);
-  if ( !unscaleMesh(&mesh,&met) )  return(1);
-  if ( !saveMesh(&mesh) )  return(1);
-  if ( !saveSize(&mesh) )  return(1);
+  if ( !unscaleMesh(&mesh,&met) ) {RETURN_AND_FREE(&mesh,&met,1);}
+  if ( !saveMesh(&mesh) ) {RETURN_AND_FREE(&mesh,&met,1);}
+  if ( !saveSize(&mesh) ) {RETURN_AND_FREE(&mesh,&met,1);}
   chrono(OFF,&info.ctim[1]);
   if ( info.imprim )  fprintf(stdout,"  -- WRITING COMPLETED\n");
 
   /* free mem */
-  free(mesh.point);
-  free(mesh.tetra);
-  free(mesh.adja);
-  if ( met.m )  free(met.m);
-
-  return(0);
+  RETURN_AND_FREE(&mesh,&met,0);
 }

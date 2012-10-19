@@ -481,10 +481,11 @@ int analys(pMesh mesh) {
   }
 
   /* build hash table for geometric edges */
-  if ( !hGeom(mesh) ) {
-    fprintf(stdout,"  ## Hashing problem (0). Exit program.\n");
-    return(0);
-  }
+  //  if ( !hGeom(mesh) ) {
+  //  fprintf(stdout,"  ## Hashing problem (0). Exit program.\n");
+  //  free(mesh->htab.geom);
+  //  return(0);
+  //}
 
   /*--- stage 2: surface analysis */
   if ( abs(info.imprim) > 5  || info.ddebug )
@@ -520,18 +521,28 @@ int analys(pMesh mesh) {
   /* set bdry entities to tetra */
   if ( !bdrySet(mesh) ) {
     fprintf(stdout,"  ## Boundary problem. Exit program.\n");
+    free(mesh->xpoint);
+    mesh->xpoint=NULL;
     return(0);
   }
 
   /* build hash table for geometric edges */
   if ( !mesh->na && !hGeom(mesh) ) {
     fprintf(stdout,"  ## Hashing problem (0). Exit program.\n");
+    free(mesh->xpoint);
+    mesh->xpoint=NULL;
+    free(mesh->htab.geom);
+    mesh->htab.geom=NULL;   
     return(0);
   }
 
   /* define geometry for non manifold points */
   if ( !nmgeom(mesh) ) {
     fprintf(stdout,"  ## Problem in defining geometry for non manifold points. Exit program.\n");
+    free(mesh->xpoint);
+    mesh->xpoint=NULL;
+    free(mesh->htab.geom);
+    mesh->htab.geom=NULL;   
     return(0);
   }
 

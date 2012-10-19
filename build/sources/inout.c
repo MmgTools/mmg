@@ -241,6 +241,8 @@ int saveMesh(pMesh mesh) {
     }
     free(mesh->adjt);
     free(mesh->tria);
+    mesh->adjt=NULL;
+    mesh->tria=NULL;
 
     /* edges + ridges */
     na = nr = 0;
