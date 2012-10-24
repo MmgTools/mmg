@@ -182,7 +182,7 @@ int chkswpbdy(pMesh mesh,int *list,int ilist,int it1,int it2) {
    carrying the beforehand tested terminal point for collapse */
 int swpbdy(pMesh mesh,pSol met,int *list,int ret,int it1) {
   pTetra   pt,pt1;
-  pPoint   p0,p1,ppt;
+  pPoint   p0,p1;
   int      iel,iel1,ilist,np,nq,na,nm;
   double   c[3];
   char     ia,ier,iface1,j,ipa,im;
@@ -219,7 +219,6 @@ int swpbdy(pMesh mesh,pSol met,int *list,int ret,int it1) {
   c[2] = 0.5*( p0->c[2] + p1->c[2]);
   nm = newPt(mesh,c,MG_BDY);
   if ( !nm )  return(0);
-  ppt = &mesh->point[nm];
   if ( met->m )  met->m[nm] = 0.5 *(met->m[np]+met->m[nq]);
   split1b(mesh,list,ret,nm);
 

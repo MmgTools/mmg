@@ -1945,11 +1945,12 @@ int split4bar(pMesh mesh, pSol met, int k){
   o[0] = o[1] = o[2] = 0.0;
   hnew = 0.0;
   for (i=0; i<4; i++) {
-    ppt   = &mesh->point[pt[0]->v[i]];
+    ib    = pt[0]->v[i];
+    ppt   = &mesh->point[ib];
     o[0] += ppt->c[0];
     o[1] += ppt->c[1];
     o[2] += ppt->c[2];
-    hnew += ppt->h;
+    if ( met->m )  hnew += met->m[ib];
   }
   o[0] *= 0.25;
   o[1] *= 0.25;
@@ -1958,7 +1959,7 @@ int split4bar(pMesh mesh, pSol met, int k){
 
   ib = newPt(mesh,o,0);
   assert(ib);
-  mesh->point[ib].h = hnew;
+  if ( met->m )  met->m[ib] = hnew;
 
   /* create 3 new tetras */
   iel = newElt(mesh);

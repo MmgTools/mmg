@@ -301,6 +301,7 @@ int eigensym(double m[3],double lambda[2],double vp[2][2]);
 int sys33sym(double a[6], double b[3], double r[3]);
 void outqua(pMesh mesh,pSol met);
 int  badelt(pMesh mesh,pSol met);
+int prilen(pMesh mesh,pSol met);
 int DoSol(pMesh mesh,pSol met);
 //int PutMetIn_h(pMesh mesh,pSol met);
 

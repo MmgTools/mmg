@@ -528,7 +528,7 @@ static int coltet(pMesh mesh,pSol met,char typchk) {
 /* analyze volume tetra and split if needed */
 static int anatetv(pMesh mesh,pSol met,char typchk) {
   pTetra   pt;
-  pPoint   ppt,p1,p2;
+  pPoint   p1,p2;
   xTetra  *pxt;
   Hash     hash;
   double   ll,o[3],ux,uy,uz;
@@ -592,7 +592,6 @@ static int anatetv(pMesh mesh,pSol met,char typchk) {
         o[1] = 0.5 * (p1->c[1]+p2->c[1]);
         o[2] = 0.5 * (p1->c[2]+p2->c[2]);
         ip  = newPt(mesh,o,0);
-        ppt = &mesh->point[ip];
         if ( met->m )
           met->m[ip] = 0.5 * (met->m[ip1]+met->m[ip2]);
         hashEdge(&hash,ip1,ip2,ip);

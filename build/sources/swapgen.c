@@ -146,7 +146,7 @@ int chkswpgen(pMesh mesh,int start,int ia,int *ilist,int *list) {
 /* Perform swap of edge whose shell is passed according to configuration nconf */
 void swpgen(pMesh mesh,pSol met,int nconf,int ilist,int *list) {
   pTetra    pt;
-  pPoint    p0,p1,ppt;
+  pPoint    p0,p1;
   int       iel,na,nb,np,nball,ret,start;
   double    m[3];
   char      ia,ip,iq;
@@ -167,7 +167,6 @@ void swpgen(pMesh mesh,pSol met,int nconf,int ilist,int *list) {
 
   np  = newPt(mesh,m,0);
   assert(np);
-  ppt = &mesh->point[np];
   if ( met->m )  met->m[np] = 0.5*(met->m[na]+met->m[nb]);
 
   /* First step : split of edge (na,nb) */

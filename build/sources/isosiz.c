@@ -392,7 +392,7 @@ int defsiz_iso(pMesh mesh,pSol met) {
         if ( !boulesurfvolp(mesh,k,i0,i,listv,&ilistv,lists,&ilists) )  continue;
 
         n   = &mesh->xpoint[p0->xp].n1[0];
-        ier = directsurfball(mesh,ip0,lists,ilists,n);
+        directsurfball(mesh,ip0,lists,ilists,n);
         hp  = defsizreg(mesh,met,ip0,lists,ilists);
         met->m[ip0] = MG_MIN(met->m[ip0],hp);
       }

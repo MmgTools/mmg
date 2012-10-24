@@ -371,7 +371,7 @@ int main(int argc,char *argv[]) {
 
   if ( info.imprim ) {
     //PutMetIn_h(&mesh,&met);
-    prilen(&mesh);
+    prilen(&mesh, &met);
   }
 
   chrono(OFF,&info.ctim[2]);
@@ -393,7 +393,7 @@ int main(int argc,char *argv[]) {
 
   /* save file */
   outqua(&mesh,&met);
-  prilen(&mesh);
+  prilen(&mesh,&met);
 
   chrono(ON,&info.ctim[1]);
   if ( info.imprim )  fprintf(stdout,"\n  -- WRITING DATA FILE %s\n",mesh.nameout);
