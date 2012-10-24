@@ -6,10 +6,37 @@
 extern Info  info;
 extern char ddb;
 
-void chkvol(pMesh mesh) {
+<<<<<<< HEAD:mmg3d5/build/sources/chkmsh.c
+int chksiz(pMesh mesh) {
+  pPoint    ppt;
+  int       k,ier,np;
+
+  ier = 1;
+  np  = 0;
+  for (k=1; k<=mesh->np; k++) {
+    ppt = &mesh->point[k];
+    if ( !MG_VOK(ppt) )  continue;
+    if ( ppt->h < info.hmin || ppt->h > info.hmax ) {
+      printf("  point %d  %f < tail %f < %f\n",k,info.hmin,ppt->h,info.hmax);
+      ier = 0;
+      np++;
+    }
+  }
+  if ( np )  printf("\n---> %d problemes\n",np);
+  assert(ier);
+  return(1);
+}
+
+int chkvol(pMesh mesh) {
   pTetra    pt;
   int       k,ier;
 
+=======
+void chkvol(pMesh mesh) {
+  pTetra    pt;
+  int       k,ier;
+  
+>>>>>>> 6c93f76... 2012-10-19.tgz:mmg3d5/sources/chkmsh.c
   ier = 1;
   for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
@@ -20,6 +47,10 @@ void chkvol(pMesh mesh) {
     }
   }
   assert(ier);
+<<<<<<< HEAD:mmg3d5/build/sources/chkmsh.c
+  return(1);
+=======
+>>>>>>> 6c93f76... 2012-10-19.tgz:mmg3d5/sources/chkmsh.c
 }
 
 int chkmshsurf(pMesh mesh){
@@ -36,10 +67,18 @@ int chkmshsurf(pMesh mesh){
       k1  = adja[i] / 3;
       voy = adja[i] % 3;
 
+<<<<<<< HEAD:mmg3d5/build/sources/chkmsh.c
       if(!k1) continue;
       adja1 = &mesh->adjt[3*(k1-1)+1];
 
       if(adja1[voy] / 3 != k){
+=======
+      if ( !k1 )  continue;
+      pt1   = &mesh->tria[k1];
+      adja1 = &mesh->adjt[3*(k1-1)+1];
+
+      if ( adja1[voy] / 3 != k ) {
+>>>>>>> 6c93f76... 2012-10-19.tgz:mmg3d5/sources/chkmsh.c
         printf("Wrong adjacency relation for triangles : %d %d \n",k,k1);
         exit(0);
       }
@@ -49,10 +88,12 @@ int chkmshsurf(pMesh mesh){
 }
 
 int chkmsh(pMesh mesh,int severe,int base) {
-  pTetra    pt,pt1,pt2;
+<<<<<<< HEAD:mmg3d5/build/sources/chkmsh.c
+  pTetra        pt,pt1,pt2;
   pxTetra   pxt;
-  int       *adja,*adja1,adj,adj1,k,i,iadr;
-  int       iel,a0,a1,a2,b0,b1,b2;
+  int           *adja,*adja1,adj,adj1,k,i,iadr;
+  int       iel;
+  int       a0,a1,a2,b0,b1,b2;
   unsigned char voy,voy1;
   /* commentated part variables
      pTetra        pt0;
@@ -61,6 +102,13 @@ int chkmsh(pMesh mesh,int severe,int base) {
      int           ielprv,ielnxt,l,nump,np,nq;
      unsigned char j,iface,ifaceprv,ifacenxt,indp,indpprv,indpnxt,tag0,tag1,tag2,ia;
   */
+=======
+  pTetra    pt,pt1,pt2;
+  pxTetra   pxt;
+  int      *adja,*adja1,adj,adj1,k,i,iadr;
+  int       iel,a0,a1,a2,b0,b1,b2;
+  unsigned char voy,voy1;
+>>>>>>> 6c93f76... 2012-10-19.tgz:mmg3d5/sources/chkmsh.c
 
   for (k=1; k<=mesh->ne; k++) {
     pt1 = &mesh->tetra[k];
@@ -99,7 +147,11 @@ int chkmsh(pMesh mesh,int severe,int base) {
         printf("adj(%d): %d %d %d %d\n",adj,adja1[0]/4,adja1[1]/4,adja1[2]/4,adja1[3]/4);
         exit(1);
       }
+<<<<<<< HEAD:mmg3d5/build/sources/chkmsh.c
 
+=======
+      
+>>>>>>> 6c93f76... 2012-10-19.tgz:mmg3d5/sources/chkmsh.c
       a0 = pt1->v[idir[i][0]];
       a1 = pt1->v[idir[i][1]];
       a2 = pt1->v[idir[i][2]];
@@ -124,7 +176,11 @@ int chkmsh(pMesh mesh,int severe,int base) {
   for(k=1;k<=mesh->ne;k++){
     pt = &mesh->tetra[k];
     if ( !MG_EOK(pt) || pt->ref < 0 )   continue;
+<<<<<<< HEAD:mmg3d5/build/sources/chkmsh.c
     adja = &mesh->adja[4*(k-1)+1];
+=======
+      adja = &mesh->adja[4*(k-1)+1];
+>>>>>>> 6c93f76... 2012-10-19.tgz:mmg3d5/sources/chkmsh.c
     for(i=0;i<4;i++){
       if(!adja[i]){
         if(!pt->xt){
@@ -142,9 +198,15 @@ int chkmsh(pMesh mesh,int severe,int base) {
         }
       }
     }
+<<<<<<< HEAD:mmg3d5/build/sources/chkmsh.c
   }
 
   /* Case of an implicit surface embedded in mesh : check whether a face separating two
+=======
+  } 
+  
+  /* Case of an implicit surface embedded in mesh : check whether a face separating two 
+>>>>>>> 6c93f76... 2012-10-19.tgz:mmg3d5/sources/chkmsh.c
      different subdomains is tagged bdy */
   for(k=1; k<=mesh->ne; k++){
     pt = &mesh->tetra[k];
@@ -176,6 +238,7 @@ int chkmsh(pMesh mesh,int severe,int base) {
 
   /*for(k=1;k<=mesh->ne;k++){
     pt = &mesh->tetra[k];
+<<<<<<< HEAD:mmg3d5/build/sources/chkmsh.c
     if ( !MG_EOK(pt) || pt->ref < 0 )   continue;
     if(!pt->xt) continue;
 
@@ -294,6 +357,126 @@ int chkmsh(pMesh mesh,int severe,int base) {
 
     }*/
 
+=======
+  if ( !MG_EOK(pt) || pt->ref < 0 )   continue;
+  if(!pt->xt) continue;
+  
+  pxt = &mesh->xtetra[pt->xt];
+  
+  for(ia = 0;ia<6;ia++){
+    np = pt->v[iare[ia][0]];
+    nq = pt->v[iare[ia][1]];
+    
+    if(!(((np == 6)&&(nq == 3204))||((nq == 6)&&(np == 3204))))
+      continue;
+        
+    if(!(pxt->tag[ia] & MG_REF)){
+    saveMesh(mesh);
+      exit(0);
+    }
+  }
+  }*/
+    
+  /* Test Boundary references : do they match, from one face to its neighbour ? */
+  /*for(k=1;k<=mesh->ne;k++){
+  pt = &mesh->tetra[k];
+  if ( !MG_EOK(pt) || pt->ref < 0 )   continue;
+  if(!pt->xt) continue;
+  
+  pxt = &mesh->xtetra[pt->xt];
+  
+  for(i=0;i<4;i++){
+    if(!(pxt->ftag[i] & MG_BDY)) continue;
+    
+    for(j=0;j<3;j++){
+      ip = idir[i][j];
+    nump = pt->v[ip];
+    
+      assert(boulesurfvolp(mesh,k,ip,i,listv,&ilistv,lists,&ilists));
+    
+    for(l=0;l<ilists;l++){
+      iel = lists[l]/4;
+      iface = lists[l]%4; 
+      
+      if(l==0){
+        ielprv = lists[ilists-1]/4;
+      ifaceprv = lists[ilists-1]%4;
+      }
+      else{
+      ielprv = lists[l-1]/4;
+      ifaceprv = lists[l-1]%4;
+      }
+      
+      if(l==ilists-1){
+        ielnxt = lists[0]/4;
+      ifacenxt = lists[0]%4;
+      }
+      else{
+      ielnxt = lists[l+1]/4;
+      ifacenxt = lists[l+1]%4;
+      }
+      
+      pt0 = &mesh->tetra[iel];
+      pt1 = &mesh->tetra[ielprv];
+      pt2 = &mesh->tetra[ielnxt];
+      assert(pt0->xt && pt1->xt && pt2->xt);
+      pxt0 = &mesh->xtetra[pt0->xt];
+      pxt1 = &mesh->xtetra[pt1->xt];
+      pxt2 = &mesh->xtetra[pt2->xt];
+      
+      for(indp = 0;indp<3;indp++){
+        if(pt0->v[idir[iface][indp]] == nump){
+        break;
+      }
+      }
+      assert(indp < 3);
+      
+      for(indpprv = 0;indpprv<3;indpprv++){
+        if(pt1->v[idir[ifaceprv][indpprv]] == nump){
+        break;
+      }
+      }
+      assert(indpprv < 3);
+      
+      for(indpnxt = 0;indpnxt<3;indpnxt++){
+        if(pt2->v[idir[ifacenxt][indpnxt]] == nump){
+        break;
+      }
+      }
+      assert(indpnxt < 3);
+      
+      assert(pxt0->ftag[iface] & MG_BDY);
+      assert(pxt1->ftag[ifaceprv] & MG_BDY);
+      assert(pxt2->ftag[ifacenxt] & MG_BDY);*/
+      
+      /* Cannot rely on tag boundary of edges */ 
+      /*tag0 = (pxt0->tag[iarf[iface][iprv2[indp]]]) & (~MG_BDY);
+      tag1 = (pxt1->tag[iarf[ifaceprv][inxt2[indpprv]]]) & (~MG_BDY);
+      
+      if(tag0 != tag1){
+        printf("Unconsistent tag of edge : tetra %d %d pour le point %d\n",iel,ielprv,nump);
+      printf("tags : %d %d \n",tag0,tag1);
+
+      saveMesh(mesh);
+      exit(0);
+      }
+      
+      tag0 = (pxt0->tag[iarf[iface][inxt2[indp]]]) & (~MG_BDY);
+      tag2 = (pxt2->tag[iarf[ifacenxt][iprv2[indpnxt]]]) & (~MG_BDY);
+      
+      if(tag0 != tag2){
+      printf("Unconsistent tag of edge : tetra %d %d pour le point %d\n",iel,ielnxt,nump);
+      printf("tags : %d %d \n",tag0,tag2);
+      saveMesh(mesh);
+      exit(0);
+      }     
+    }
+    }
+  }
+  
+  }*/
+    
+>>>>>>> 6c93f76... 2012-10-19.tgz:mmg3d5/sources/chkmsh.c
   /* Delaunay criterion */
   /*
     for (k=1; k<=mesh->ne; k++) {
@@ -309,6 +492,7 @@ int chkmsh(pMesh mesh,int severe,int base) {
     voy = adja[i] % 4;
     pt2 = &mesh->tetra[adj];
 
+<<<<<<< HEAD:mmg3d5/build/sources/chkmsh.c
     ppt = &mesh->point[ pt2->v[voy] ];
     dd = (ppt->c[0] - c[0]) * (ppt->c[0] - c[0]) \
     + (ppt->c[1] - c[1]) * (ppt->c[1] - c[1]) \
@@ -316,6 +500,16 @@ int chkmsh(pMesh mesh,int severe,int base) {
     if ( EPSLOC*EPSLOC*dd < ray ) {
     fprintf(stdout,"  ## Non-Delaunay mesh:  %.14f < %.14f\n",dd,ray);
     exit(1);
+=======
+      ppt = &mesh->point[ pt2->v[voy] ];
+      dd = (ppt->c[0] - c[0]) * (ppt->c[0] - c[0]) \
+         + (ppt->c[1] - c[1]) * (ppt->c[1] - c[1]) \
+         + (ppt->c[2] - c[2]) * (ppt->c[2] - c[2]);
+      if ( EPSLOC*EPSLOC*dd < ray ) {
+        fprintf(stdout,"  ## Non-Delaunay mesh:  %.14f < %.14f\n",dd,ray);
+  exit(1);
+      }
+>>>>>>> 6c93f76... 2012-10-19.tgz:mmg3d5/sources/chkmsh.c
     }
     }
     }
@@ -338,6 +532,7 @@ int chkmsh(pMesh mesh,int severe,int base) {
       ip  = pt1->v[i];
       ppt = &mesh->point[ip];
       if ( ppt->tag & M_UNUSED ) {
+<<<<<<< HEAD:mmg3d5/build/sources/chkmsh.c
       fprintf(stdout,"  6. Unused vertex %d  %d\n",k,ip);
       printf("%d %d %d %d\n",pt1->v[0],pt1->v[1],pt1->v[2],pt1->v[3]);
       exit(1);
@@ -351,10 +546,26 @@ int chkmsh(pMesh mesh,int severe,int base) {
       fprintf(stdout,"  5. Wrong ball %d, %d\n",ip,pt2->v[nk]);
       exit(1);
       }
+=======
+        fprintf(stdout,"  6. Unused vertex %d  %d\n",k,ip);
+  printf("%d %d %d %d\n",pt1->v[0],pt1->v[1],pt1->v[2],pt1->v[3]);
+  exit(1);
+      }
+      lon = MMG_boulep(mesh,k,i,&list);
+      for (l=1; l<=lon; l++) {
+        kk  = list.tetra[l] / 4;
+  nk  = list.tetra[l] % 4;
+  pt2 = &mesh->tetra[kk];
+  if ( pt2->v[nk] != ip ) {
+    fprintf(stdout,"  5. Wrong ball %d, %d\n",ip,pt2->v[nk]);
+    exit(1);
+  }
+>>>>>>> 6c93f76... 2012-10-19.tgz:mmg3d5/sources/chkmsh.c
       }
       if ( lon < 1 )  continue;
       len = 0;
       for (kk=1; kk<=mesh->ne; kk++) {
+<<<<<<< HEAD:mmg3d5/build/sources/chkmsh.c
       pt2 = &mesh->tetra[kk];
       if ( !pt2->v[0] )  continue;
       for (j=0; j<4; j++)
@@ -362,6 +573,15 @@ int chkmsh(pMesh mesh,int severe,int base) {
       len++;
       break;
       }
+=======
+        pt2 = &mesh->tetra[kk];
+  if ( !pt2->v[0] )  continue;
+  for (j=0; j<4; j++)
+    if ( pt2->v[j] == ip ) {
+      len++;
+      break;
+    }
+>>>>>>> 6c93f76... 2012-10-19.tgz:mmg3d5/sources/chkmsh.c
       }
       if ( len != lon ) {
       fprintf(stdout,"  7. Incorrect ball %d: %d %d\n",pt1->v[i],lon,len);
@@ -454,8 +674,13 @@ int chkfemtopo(pMesh mesh) {
   char        i0,j,i,i1,ia;
 
   ntet = ned = 0;
+<<<<<<< HEAD:mmg3d5/build/sources/chkmsh.c
+
   for(k=1; k<=mesh->np; k++)
     mesh->point[k].flag = 0;
+=======
+  for (k=1; k<=mesh->np; k++)  mesh->point[k].flag = 0;
+>>>>>>> 6c93f76... 2012-10-19.tgz:mmg3d5/sources/chkmsh.c
 
   /* Count elements with at least two boundary faces */
   for (k=1; k<=mesh->ne; k++) {
@@ -468,50 +693,97 @@ int chkfemtopo(pMesh mesh) {
     for (i=0; i<4; i++) {
       if ( pxt->ftag[i] & MG_BDY )  nf++;
     }
+<<<<<<< HEAD:mmg3d5/build/sources/chkmsh.c
+    if(nf >= 2) ntet++;
+  }
+
+  printf("  *** %d tetras with at least 2 boundary faces.\n",ntet);
+
+=======
     if ( nf >= 2 )  ntet++;
   }
-  if ( ntet )  printf("  *** %d tetras with at least 2 boundary faces.\n",ntet);
-
+  if ( ntet )  printf("  *** %d tetras with at least 2 boundary faces.\n",ntet);  
+  
+>>>>>>> 6c93f76... 2012-10-19.tgz:mmg3d5/sources/chkmsh.c
   /* Count internal edges connecting two points of the boundary */
   for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
+<<<<<<< HEAD:mmg3d5/build/sources/chkmsh.c
+    if(!MG_EOK(pt)) continue;
+
+    for(i=0; i<4; i++){
+      np = pt->v[i];
+      p0 = &mesh->point[np];
+      if( !(p0->tag & MG_BDY) ) continue;
+
+      ischk = p0->flag % 2;
+      if(ischk) continue;
+
+=======
     if ( !MG_EOK(pt) )  continue;
 
     for (i=0; i<4; i++) {
       np = pt->v[i];
       p0 = &mesh->point[np];
-      if ( !(p0->tag & MG_BDY) )  continue;
+      if ( !(p0->tag & MG_BDY) )  continue; 
 
       ischk = p0->flag % 2;
-      if ( ischk )  continue;
+			if ( ischk )  continue;
+>>>>>>> 6c93f76... 2012-10-19.tgz:mmg3d5/sources/chkmsh.c
       p0->flag += 1;
 
       ilist = boulevolp(mesh,k,i,list);
       for (l=0; l<ilist; l++) {
         iel = list[l] / 4;
+<<<<<<< HEAD:mmg3d5/build/sources/chkmsh.c
+        i0 = list[l] % 4;
+        i1 = i0;
+=======
         i0  = list[l] % 4;
         i1  = i0;
+>>>>>>> 6c93f76... 2012-10-19.tgz:mmg3d5/sources/chkmsh.c
 
         pt1 = &mesh->tetra[iel];
         for (j=0; j<3; j++) {
           i1  = inxt3[i1];
           np1 = pt1->v[i1];
+<<<<<<< HEAD:mmg3d5/build/sources/chkmsh.c
+          if(np1 < np) continue;
+
+          p1 = &mesh->point[np1];
+          if( !(p1->tag & MG_BDY) ) continue;
+
+          ischk = p1->flag % 2;
+          npchk = p1->flag / 2;
+          if(npchk == np) continue;
+
+          ia = IEDG(i0,i1);
+          p1->flag = 2*np + ischk;
+          if( !srcbdy(mesh,iel,ia) ) ned++;
+=======
           if ( np1 < np )  continue;
           p1 = &mesh->point[np1];
-          if ( !(p1->tag & MG_BDY) )  continue;
+          if ( !(p1->tag & MG_BDY) )  continue; 
 
           ischk = p1->flag % 2;
           npchk = p1->flag / 2;
           if ( npchk == np )  continue;
 
           ia = IEDG(i0,i1);
-          p1->flag = 2*np + ischk;
+          p1->flag = 2*np + ischk; 
           if ( !srcbdy(mesh,iel,ia) )  ned++;
+>>>>>>> 6c93f76... 2012-10-19.tgz:mmg3d5/sources/chkmsh.c
         }
       }
     }
   }
+<<<<<<< HEAD:mmg3d5/build/sources/chkmsh.c
+
+  printf("  *** %d internal edges connecting boundary points.\n",ned);
+
+=======
   if ( ned )  printf("  *** %d internal edges connecting boundary points.\n",ned);
+>>>>>>> 6c93f76... 2012-10-19.tgz:mmg3d5/sources/chkmsh.c
   return(1);
 }
 

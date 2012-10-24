@@ -59,7 +59,7 @@ static int ismaniball(pMesh mesh,pSol sol,int k,int indp) {
   base = ++mesh->base;
   pt->flag = base;
   ilist = 0;
-  list[ilist] = 4*k+indp;
+  list[ilist] = 4*k + indp;
   ilist++;
 
   /* travel list and pile up, by adjacency, faces of ball of np while they have at least
@@ -76,7 +76,7 @@ static int ismaniball(pMesh mesh,pSol sol,int k,int indp) {
       for (j=0; j<3; j++) {
         i1 = idir[i][j];
         v1 = sol->m[pt->v[i1]];
-        if ( ( v1 != 0.0 ) && !MG_SMSGN(v,v1) ) {
+        if ( (v1 != 0.0 ) && !MG_SMSGN(v,v1) ) {
           res = 4*iel + i;
           break;
         }
@@ -113,6 +113,10 @@ static int ismaniball(pMesh mesh,pSol sol,int k,int indp) {
 
   /* Fill in list bdy, corresponding to the support tetras of the boundary to be created */
   ibdy = 0;
+<<<<<<< HEAD:mmg3d5/build/sources/mmg3d2.c
+
+=======
+>>>>>>> 6c93f76... 2012-10-19.tgz:mmg3d5/sources/mmg3d2.c
   for(l=0; l<ilist; l++) {
     iel = list[l] / 4;
     i = list[l] % 4;
@@ -242,8 +246,13 @@ static int ismaniball(pMesh mesh,pSol sol,int k,int indp) {
   /* Now, all elements of bdy should have been marked by a flag base + 1 */
   for (l=0; l<ibdy; l++) {
     iel = bdy[l] / 4;
+<<<<<<< HEAD:mmg3d5/build/sources/mmg3d2.c
+    pt  = &mesh->tetra[iel];
+    if( pt->flag != base ) return(0);
+=======
     pt = &mesh->tetra[iel];
-    if ( pt->flag != base ) return(0);
+    if ( pt->flag != base ) return(0); 
+>>>>>>> 6c93f76... 2012-10-19.tgz:mmg3d5/sources/mmg3d2.c
   }
 
   return(1);
@@ -277,7 +286,7 @@ static int snpval_ls(pMesh mesh,pSol sol,double *tmp) {
       tmp[k] = ( fabs(sol->m[k]) < EPSD ) ? (-100.0*EPS) : sol->m[k];
       p0->flag = 1;
       sol->m[k] = 0.0;
-      ns++;
+      ns ++;
     }
   }
 
@@ -290,7 +299,7 @@ static int snpval_ls(pMesh mesh,pSol sol,double *tmp) {
       p0 = &mesh->point[ip];
       if ( p0->flag ) {
         if ( !ismaniball(mesh,sol,k,i) ) {
-          sol->m[ip] = tmp[ip];
+					sol->m[ip] = tmp[ip];
           nc++;
         }
         p0->flag = 0;
@@ -320,8 +329,15 @@ static int cuttet_ls(pMesh mesh, pSol sol,double *tmp){
   /* reset point flags and h */
   for (k=1; k<=mesh->np; k++)
     mesh->point[k].flag = 0;
+<<<<<<< HEAD:mmg3d5/build/sources/mmg3d2.c
+    mesh->point[k].h    = 0.0;
+  }
 
   /* compute the number nb of intersection points on edges */
+=======
+  
+  /* compute the number nb of intersection points on edges */ 
+>>>>>>> 6c93f76... 2012-10-19.tgz:mmg3d5/sources/mmg3d2.c
   nb = 0;
   for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
@@ -376,7 +392,11 @@ static int cuttet_ls(pMesh mesh, pSol sol,double *tmp){
     for (i=0; i<4; i++) {
       if ( p[i]->flag ) {
         ng = p[i]->flag;
-        tmp[ip[i]] += fabs(area);
+<<<<<<< HEAD:mmg3d5/build/sources/mmg3d2.c
+        p[i]->h += fabs(area);
+=======
+        tmp[ip[i]] += fabs(area);      
+>>>>>>> 6c93f76... 2012-10-19.tgz:mmg3d5/sources/mmg3d2.c
         grad[3*(ng-1)+1] += (area*c[0]);
         grad[3*(ng-1)+2] += (area*c[1]);
         grad[3*(ng-1)+3] += (area*c[2]);
@@ -634,9 +654,17 @@ int chkmani(pMesh mesh) {
   pTetra    pt,pt1;
   int       k,iel,ref;
   int       *adja;
+<<<<<<< HEAD:mmg3d5/build/sources/mmg3d2.c
   char      i,j,ip,cnt;
 
+  for(k=1; k<=mesh->np; k++){
+    mesh->point[k].flag = 0;
+  }
+=======
+  char      i,j,ip,cnt,ier;
+    
   for(k=1; k<=mesh->np; k++)  mesh->point[k].flag = 0;
+>>>>>>> 6c93f76... 2012-10-19.tgz:mmg3d5/sources/mmg3d2.c
 
   /* First test : check whether a tetra has 4 boundary faces */
   for (k=1; k<=mesh->ne; k++) {
@@ -647,9 +675,8 @@ int chkmani(pMesh mesh) {
     ref = pt->ref;
     cnt = 0;
     for (i=0; i<4; i++) {
-      if ( !adja[i] ) {
+      if ( !adja[i] )
         cnt++;
-      }
       else {
         pt1 = &mesh->tetra[adja[i]/4];
         if ( pt1->ref != ref ) cnt++;
@@ -665,16 +692,34 @@ int chkmani(pMesh mesh) {
   for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
     if ( !MG_EOK(pt) || MG_SIN(pt->tag))   continue;
+<<<<<<< HEAD:mmg3d5/build/sources/mmg3d2.c
     adja = &mesh->adja[4*(k-1)+1];
 
+    for(i=0; i<4; i++){
+      if(!adja[i]) continue;
+      iel = adja[i] / 4;
+      pt1 = &mesh->tetra[iel];
+      if(pt1->ref == pt->ref) continue;
+
+      for(j=0; j<3; j++){
+        ip = idir[i][j];
+
+        if(!chkmaniball(mesh,k,ip)){
+          printf("Non orientable implicit surface : ball of point %d\n",pt->v[ip]);
+          saveMesh(mesh);
+=======
+    adja = &mesh->adja[4*(k-1)+1]; 
+    
     for (i=0; i<4; i++) {
-      if ( !adja[i] )  continue;
+      if ( !adja[i] )  continue; 
       iel = adja[i] / 4;
       pt1 = &mesh->tetra[iel];
       if ( pt1->ref == pt->ref )  continue;
-
+      
       for (j=0; j<3; j++) {
         ip = idir[i][j];
+        p0 = &mesh->point[pt->v[ip]];
+>>>>>>> 6c93f76... 2012-10-19.tgz:mmg3d5/sources/mmg3d2.c
 
         if ( !chkmaniball(mesh,k,ip) ) {
           if ( info.ddebug )  printf("Non orientable implicit surface : ball of point %d\n",pt->v[ip]);
@@ -683,7 +728,12 @@ int chkmani(pMesh mesh) {
       }
     }
   }
+<<<<<<< HEAD:mmg3d5/build/sources/mmg3d2.c
+
+  printf("  *** Manifold implicit surface.\n");
+=======
   //printf("  *** Manifold implicit surface.\n");
+>>>>>>> 6c93f76... 2012-10-19.tgz:mmg3d5/sources/mmg3d2.c
   return(1);
 }
 
@@ -1108,13 +1158,17 @@ int chkmanicoll(pMesh mesh,int k,int iface,int iedg,int ndepmin,int ndepplus) {
 
 /* Create implicit surface in mesh */
 int mmg3d2(pMesh mesh,pSol sol) {
-  double   *tmp;
+	double   *tmp;
 
   if ( abs(info.imprim) > 4 )
     fprintf(stdout,"  ** ISOSURFACE EXTRACTION\n");
+<<<<<<< HEAD:mmg3d5/build/sources/mmg3d2.c
+=======
+    
+	tmp = (double*)calloc(mesh->npmax+1,sizeof(double));
+	assert(tmp);
+>>>>>>> 6c93f76... 2012-10-19.tgz:mmg3d5/sources/mmg3d2.c
 
-  tmp = (double*)calloc(mesh->npmax+1,sizeof(double));
-  assert(tmp);
   /* Snap values of level set function if need be, then discretize it */
   if ( !snpval_ls(mesh,sol,tmp) ) {
     fprintf(stdout,"  ## Problem with implicit function. Exit program.\n");
@@ -1122,30 +1176,39 @@ int mmg3d2(pMesh mesh,pSol sol) {
   }
 
   if ( !hashTetra(mesh) ) {
+<<<<<<< HEAD:mmg3d5/build/sources/mmg3d2.c
     fprintf(stdout,"  ## Hashing problem. Exit program.\n");
-    free(tmp);
     return(0);
+=======
+   fprintf(stdout,"  ## Hashing problem. Exit program.\n");
+	 free(tmp);
+   return(0);
+>>>>>>> 6c93f76... 2012-10-19.tgz:mmg3d5/sources/mmg3d2.c
   }
 
   /* build hash table for initial edges */
   if ( !hGeom(mesh) ) {
     fprintf(stdout,"  ## Hashing problem (0). Exit program.\n");
-    free(tmp);
+	  free(tmp);
     return(0);
   }
 
   if ( !bdrySet(mesh) ) {
     fprintf(stdout,"  ## Problem in setting boundary. Exit program.\n");
-    free(tmp);
+	  free(tmp);
     return(0);
   }
 
   if ( !cuttet_ls(mesh,sol,tmp) ) {
     fprintf(stdout,"  ## Problem in discretizing implicit function. Exit program.\n");
-    free(tmp);
+	  free(tmp);
     return(0);
   }
+<<<<<<< HEAD:mmg3d5/build/sources/mmg3d2.c
+
+=======
   free(tmp);
+>>>>>>> 6c93f76... 2012-10-19.tgz:mmg3d5/sources/mmg3d2.c
   free(mesh->adja);
   free(mesh->tria);
   mesh->adja = 0;

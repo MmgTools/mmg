@@ -274,9 +274,15 @@ inline int directsurfball(pMesh mesh, int ip, int *list, int ilist, double n[3])
 }
 
 /* If need be, reorder the surfacic ball of point ip, so that its first element has
+<<<<<<< HEAD:mmg3d5/build/sources/tools.c
    edge (p,q) (nump,q = global num) as edge iprv2[ip] of face iface.
    return 2 = orientation reversed, 1 otherwise */
+inline int startedgsurfball(pMesh mesh, int nump, int numq, int *list, int ilist){
+=======
+  edge (p,q) (nump,q = global num) as edge iprv2[ip] of face iface. 
+     return 2 = orientation reversed, 1 otherwise */
 int startedgsurfball(pMesh mesh,int nump,int numq,int *list,int ilist) {
+>>>>>>> 6c93f76... 2012-10-19.tgz:mmg3d5/sources/tools.c
   pTetra          pt;
   int             iel,tmp,l;
   unsigned char   iface,ip,ipt;
@@ -975,12 +981,10 @@ int DoSol(pMesh mesh,pSol met) {
 }
 
 /* Put the metric values in mesh->point.h*/
-/*
-  int PutMetIn_h(pMesh mesh, pSol met){
+int PutMetIn_h(pMesh mesh, pSol met){
   int k;
   for (k=1; k<=mesh->np; k++) {
-  mesh->point[k].h=met->m[k];
+    mesh->point[k].h=met->m[k];
   }
   return(1);
-  }
-*/
+}

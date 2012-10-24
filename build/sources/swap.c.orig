@@ -178,9 +178,15 @@ int chkswpbdy(pMesh mesh,int *list,int ilist,int it1,int it2) {
   return(1);
 }
 
+<<<<<<< HEAD:mmg3d5/build/sources/swap.c
 /* Swap boundary edge whose shell is provided ; it1 = boundary face
    carrying the beforehand tested terminal point for collapse */
+int swpbdy(pMesh mesh, int *list, int ret, int it1){
+=======
+/* Swap boundary edge whose shell is provided ; it1 = boundary face 
+    carrying the beforehand tested terminal point for collapse */
 int swpbdy(pMesh mesh,pSol met,int *list,int ret,int it1) {
+>>>>>>> 6c93f76... 2012-10-19.tgz:mmg3d5/sources/swap.c
   pTetra   pt,pt1;
   pPoint   p0,p1,ppt;
   int      iel,iel1,ilist,np,nq,na,nm;
@@ -189,8 +195,13 @@ int swpbdy(pMesh mesh,pSol met,int *list,int ret,int it1) {
 
   iel = list[0] / 6;
   ia  = list[0] % 6;
-  pt  = &mesh->tetra[iel];
+<<<<<<< HEAD:mmg3d5/build/sources/swap.c
+  pt = &mesh->tetra[iel];
 
+=======
+  pt  = &mesh->tetra[iel]; 
+  
+>>>>>>> 6c93f76... 2012-10-19.tgz:mmg3d5/sources/swap.c
   np = pt->v[iare[ia][0]];
   nq = pt->v[iare[ia][1]];
   na = 0;

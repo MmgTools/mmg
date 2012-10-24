@@ -167,9 +167,16 @@ void swpgen(pMesh mesh,pSol met,int nconf,int ilist,int *list) {
 
   np  = newPt(mesh,m,0);
   assert(np);
-  ppt = &mesh->point[np];
-  if ( met->m )  met->m[np] = 0.5*(met->m[na]+met->m[nb]);
+<<<<<<< HEAD:mmg3d5/build/sources/swapgen.c
 
+  ppt = &mesh->point[np];
+  ppt->h = 0.5*(p0->h + p1->h);
+
+=======
+  ppt = &mesh->point[np];
+  if ( met->m )  met->m[np] = 0.5*(met->m[na]+met->m[nb]); 
+  
+>>>>>>> 6c93f76... 2012-10-19.tgz:mmg3d5/sources/swapgen.c
   /* First step : split of edge (na,nb) */
   ret = 2*ilist + 0;
   split1b(mesh,list,ret,np);

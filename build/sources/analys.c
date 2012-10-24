@@ -532,7 +532,7 @@ int analys(pMesh mesh) {
     free(mesh->xpoint);
     mesh->xpoint=NULL;
     free(mesh->htab.geom);
-    mesh->htab.geom=NULL;   
+    mesh->htab.geom=NULL;
     return(0);
   }
 
@@ -542,7 +542,7 @@ int analys(pMesh mesh) {
     free(mesh->xpoint);
     mesh->xpoint=NULL;
     free(mesh->htab.geom);
-    mesh->htab.geom=NULL;   
+    mesh->htab.geom=NULL;
     return(0);
   }
 

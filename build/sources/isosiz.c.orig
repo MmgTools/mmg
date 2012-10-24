@@ -43,6 +43,7 @@ static double defsizreg(pMesh mesh,pSol met,int nump,int *lists,int ilists) {
   lmin  = MAXLEN;
   lmax  = 0.0;
 
+<<<<<<< HEAD:mmg3d5/build/sources/isosiz.c
   na = nb = 0;
   for (i=0; i<3; i++) {
     if ( pt->v[idir[iface][i]] != nump ) {
@@ -80,9 +81,9 @@ static double defsizreg(pMesh mesh,pSol met,int nump,int *lists,int ilists) {
     uy = p1->c[1] - p0->c[1];
     uz = p1->c[2] - p0->c[2];
 
-    lispoi[3*k+1] =  r[0][0]*ux + r[0][1]*uy + r[0][2]*uz;
-    lispoi[3*k+2] =  r[1][0]*ux + r[1][1]*uy + r[1][2]*uz;
-    lispoi[3*k+3] =  r[2][0]*ux + r[2][1]*uy + r[2][2]*uz;
+    lispoi[3*k+1] =      r[0][0]*ux + r[0][1]*uy + r[0][2]*uz;
+    lispoi[3*k+2] =      r[1][0]*ux + r[1][1]*uy + r[1][2]*uz;
+    lispoi[3*k+3] =      r[2][0]*ux + r[2][1]*uy + r[2][2]*uz;
 
     ll = lispoi[3*k+1]*lispoi[3*k+1] + lispoi[3*k+2]*lispoi[3*k+2] + lispoi[3*k+3]*lispoi[3*k+3];
     lmin = MG_MIN(lmin,ll);
@@ -120,9 +121,9 @@ static double defsizreg(pMesh mesh,pSol met,int nump,int *lists,int ilists) {
   uy = p1->c[1] - p0->c[1];
   uz = p1->c[2] - p0->c[2];
 
-  lispoi[1] =  r[0][0]*ux + r[0][1]*uy + r[0][2]*uz;
-  lispoi[2] =  r[1][0]*ux + r[1][1]*uy + r[1][2]*uz;
-  lispoi[3] =  r[2][0]*ux + r[2][1]*uy + r[2][2]*uz;
+  lispoi[1] =    r[0][0]*ux + r[0][1]*uy + r[0][2]*uz;
+  lispoi[2] =    r[1][0]*ux + r[1][1]*uy + r[1][2]*uz;
+  lispoi[3] =    r[2][0]*ux + r[2][1]*uy + r[2][2]*uz;
 
   ll = lispoi[1]*lispoi[1] + lispoi[2]*lispoi[2] + lispoi[3]*lispoi[3];
   lmin = MG_MIN(lmin,ll);
@@ -136,6 +137,101 @@ static double defsizreg(pMesh mesh,pSol met,int nump,int *lists,int ilists) {
   /* At this point, lispoi contains the oriented surface ball of point p0, that has been rotated
      through r, with the convention that triangle l has edges lispoi[l]; lispoi[l+1] */
   if ( lmax/lmin > 4.0*info.hmax*info.hmax/(info.hmin*info.hmin) )  return(info.hmax);
+=======
+	na = nb = 0;
+	for (i=0; i<3; i++) {
+		if ( pt->v[idir[iface][i]] != nump ) {
+			if ( !na )
+				na = pt->v[idir[iface][i]]; 
+			else
+				nb = pt->v[idir[iface][i]];
+		}
+	}
+	
+	for (k=1; k<ilists; k++) {	
+		iel		= lists[k] / 4;
+		iface = lists[k] % 4;
+		pt		= &mesh->tetra[iel];
+		ntempa = ntempb = 0;
+		for (i=0; i<3; i++) {
+			if ( pt->v[idir[iface][i]] != nump ) {
+				if ( !ntempa )
+					ntempa = pt->v[idir[iface][i]]; 
+				else
+					ntempb = pt->v[idir[iface][i]];
+			}
+		}
+		if ( ntempa == na )
+			p1 = &mesh->point[na];
+		else if ( ntempa == nb )
+			p1 = &mesh->point[nb];		
+		else if ( ntempb == na )
+			p1 = &mesh->point[na];
+		else {
+			assert(ntempb == nb);
+			p1 = &mesh->point[nb];
+		}
+		ux = p1->c[0] - p0->c[0];
+		uy = p1->c[1] - p0->c[1];
+		uz = p1->c[2] - p0->c[2];
+    
+		lispoi[3*k+1] =	 r[0][0]*ux + r[0][1]*uy + r[0][2]*uz;
+		lispoi[3*k+2] =	 r[1][0]*ux + r[1][1]*uy + r[1][2]*uz;
+		lispoi[3*k+3] =	 r[2][0]*ux + r[2][1]*uy + r[2][2]*uz;
+    
+    ll = lispoi[3*k+1]*lispoi[3*k+1] + lispoi[3*k+2]*lispoi[3*k+2] + lispoi[3*k+3]*lispoi[3*k+3];
+    lmin = MG_MIN(lmin,ll);
+    lmax = MG_MAX(lmax,ll);
+    
+		na = ntempa;
+		nb = ntempb;
+	}
+	
+	/* Finish with point 0 */;
+	iel		= lists[0] / 4;
+	iface = lists[0] % 4;
+	pt		= &mesh->tetra[iel];
+	ntempa = ntempb = 0;
+	for (i=0; i<3; i++) {
+		if ( pt->v[idir[iface][i]] != nump ) {
+			if ( !ntempa )
+				ntempa = pt->v[idir[iface][i]]; 
+			else
+				ntempb = pt->v[idir[iface][i]];
+		}
+	}	 
+	if ( ntempa == na )	 
+		p1 = &mesh->point[na];
+	else if ( ntempa == nb )
+		p1 = &mesh->point[nb];
+	else if ( ntempb == na )
+		p1 = &mesh->point[na];
+	else {
+		assert(ntempb == nb);
+		p1 = &mesh->point[nb];
+	}
+	
+	ux = p1->c[0] - p0->c[0];
+	uy = p1->c[1] - p0->c[1];
+	uz = p1->c[2] - p0->c[2];
+	
+	lispoi[1] =	 r[0][0]*ux + r[0][1]*uy + r[0][2]*uz;
+	lispoi[2] =	 r[1][0]*ux + r[1][1]*uy + r[1][2]*uz;
+	lispoi[3] =	 r[2][0]*ux + r[2][1]*uy + r[2][2]*uz;
+  
+  ll = lispoi[3*k+1]*lispoi[3*k+1] + lispoi[3*k+2]*lispoi[3*k+2] + lispoi[3*k+3]*lispoi[3*k+3];
+  lmin = MG_MIN(lmin,ll);
+  lmax = MG_MAX(lmax,ll);
+  
+	/* list goes modulo ilist */
+	lispoi[3*ilists+1] = lispoi[1];
+	lispoi[3*ilists+2] = lispoi[2];
+	lispoi[3*ilists+3] = lispoi[3];
+  	
+	/* At this point, lispoi contains the oriented surface ball of point p0, that has been rotated
+   through r, with the convention that triangle l has edges lispoi[l]; lispoi[l+1] */
+  if ( lmax/lmin > 4.0*info.hmax*info.hmax/(info.hmin*info.hmin) )  return(info.hmax); 
+>>>>>>> 6c93f76... 2012-10-19.tgz:mmg3d5/sources/isosiz.c
 
   /* Check all projections over tangent plane. */
   for (k=0; k<ilists-1; k++) {
@@ -317,9 +413,14 @@ static double defsizreg(pMesh mesh,pSol met,int nump,int *lists,int ilists) {
     iface = lists[k] % 4;
 
     for (j=0; j<3; j++) {
+<<<<<<< HEAD:mmg3d5/build/sources/isosiz.c
+      i0 = idir[iface][j];
+      p1 = &mesh->point[pt->v[i0]];
+=======
       i0  = idir[iface][j];
-      ip0 = pt->v[i0];
+			ip0 = pt->v[i0];
       p1  = &mesh->point[ip0];
+>>>>>>> 6c93f76... 2012-10-19.tgz:mmg3d5/sources/isosiz.c
       if( !(p1->tag & MG_NOM) || MG_SIN(p1->tag) ) continue;
       assert(p1->xp);
       t = &mesh->xpoint[p1->xp].t[0];
@@ -333,8 +434,14 @@ static double defsizreg(pMesh mesh,pSol met,int nump,int *lists,int ilists) {
       hnm = MG_MIN(hnm,isqhmin);
       hnm = MG_MAX(hnm,isqhmax);
       hnm = 1.0 / sqrt(hnm);
-      met->m[ip0] = MG_MIN(met->m[ip0],hnm);
+<<<<<<< HEAD:mmg3d5/build/sources/isosiz.c
+
+      p1->h = MG_MIN(p1->h,hnm);
     }
+=======
+      met->m[ip0] = MG_MIN(met->m[ip0],hnm); 
+    } 
+>>>>>>> 6c93f76... 2012-10-19.tgz:mmg3d5/sources/isosiz.c
   }
   return(h);
 }
@@ -361,7 +468,7 @@ int defsiz_iso(pMesh mesh,pSol met) {
     met->np    = mesh->np;
     met->npmax = mesh->npmax;
     met->size  = 1;
-    met->dim   = 3;
+		met->dim   = 3;
     met->m = (double*)malloc((mesh->npmax+1)*sizeof(double));
     assert(met->m);
     /* init constant size */
@@ -369,10 +476,10 @@ int defsiz_iso(pMesh mesh,pSol met) {
       met->m[k] = info.hmax;
   }
   else {
-    /* size truncation */
+	  /* size truncation */
     for (k=1; k<=mesh->np; k++)
       met->m[k] = MG_MIN(info.hmax,MG_MAX(info.hmin,met->m[k]));
-  }
+	}
 
   /* size at regular surface points */
   for(k=1; k<=mesh->ne; k++){
@@ -384,17 +491,29 @@ int defsiz_iso(pMesh mesh,pSol met) {
     for (i=0; i<4; i++) {
       if ( !(pxt->ftag[i] & MG_BDY) ) continue;
       for (j=0; j<3; j++) {
-        i0  = idir[i][j];
-        ip0 = pt->v[i0];
-        p0  = &mesh->point[ip0];
+<<<<<<< HEAD:mmg3d5/build/sources/isosiz.c
+        i0 = idir[i][j];
+        p0 = &mesh->point[pt->v[i0]];
 
+        if( MG_SIN(p0->tag) || MG_EDG(p0->tag) || (p0->tag & MG_NOM) ) continue;
+        if ( !boulesurfvolp(mesh,k,i0,i,listv,&ilistv,lists,&ilists) )  continue;
+
+        n     = &mesh->xpoint[p0->xp].n1[0];
+        directsurfball(mesh, pt->v[i0],lists,ilists,n);
+        p0->h = defsizreg(mesh,pt->v[i0],lists,ilists);
+=======
+        i0  = idir[i][j];
+				ip0 = pt->v[i0];
+        p0  = &mesh->point[ip0];
+  
         if( MG_SIN(p0->tag) || MG_EDG(p0->tag) || (p0->tag & MG_NOM) ) continue;
         if ( !boulesurfvolp(mesh,k,i0,i,listv,&ilistv,lists,&ilists) )  continue;
 
         n   = &mesh->xpoint[p0->xp].n1[0];
         ier = directsurfball(mesh,ip0,lists,ilists,n);
         hp  = defsizreg(mesh,met,ip0,lists,ilists);
-        met->m[ip0] = MG_MIN(met->m[ip0],hp);
+				met->m[ip0] = MG_MIN(met->m[ip0],hp);
+>>>>>>> 6c93f76... 2012-10-19.tgz:mmg3d5/sources/isosiz.c
       }
     }
   }
@@ -479,10 +598,28 @@ int defsiz_iso(pMesh mesh,pSol met) {
           lm = sqrt(8.0*info.hausd / kappa);
 
         if ( MG_EDG(p0->tag) && !(p0->tag & MG_NOM) && !MG_SIN(p0->tag) )
-          met->m[ip0] = MG_MAX(info.hmin,MG_MIN(met->m[ip0],lm));
+<<<<<<< HEAD:mmg3d5/build/sources/isosiz.c
+          p0->h = MG_MAX(info.hmin,MG_MIN(p0->h,lm));
+        if ( MG_EDG(p1->tag) && !(p1->tag & MG_NOM) && !MG_SIN(p1->tag) )
+          p1->h = MG_MAX(info.hmin,MG_MIN(p1->h,lm));
+      }
+    }
+  }
+
+  if ( info.iso )  return(1);
+
+  /* take input metric into account only if metric file given */
+  for (k=1; k<=mesh->np; k++) {
+    p0 = &mesh->point[k];
+    if ( MG_VOK(p0) ) {
+      if ( met->size == 1 && met->m && k <= mesh->npi )
+        p0->h = MG_MAX(info.hmin,MG_MIN(p0->h,met->m[k]));
+=======
+           met->m[ip0] = MG_MAX(info.hmin,MG_MIN(met->m[ip0],lm));
         if ( MG_EDG(p1->tag) && !(p1->tag & MG_NOM) && !MG_SIN(p1->tag) )
           met->m[ip1] = MG_MAX(info.hmin,MG_MIN(met->m[ip1],lm));
       }
+>>>>>>> 6c93f76... 2012-10-19.tgz:mmg3d5/sources/isosiz.c
     }
   }
   return(1);
@@ -517,8 +654,8 @@ int gradsiz_iso(pMesh mesh,pSol met) {
           ia  = iarf[i][j];
           i0  = iare[ia][0];
           i1  = iare[ia][1];
-          ip0 = pt->v[i0];
-          ip1 = pt->v[i1];
+					ip0 = pt->v[i0];
+					ip1 = pt->v[i1];
           p0  = &mesh->point[ip0];
           p1  = &mesh->point[ip1];
           if ( p0->flag < mesh->base-1 && p1->flag < mesh->base-1 )  continue;

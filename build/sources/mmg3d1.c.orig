@@ -483,8 +483,13 @@ static int coltet(pMesh mesh,pSol met,char typchk) {
           ll = ux*ux + uy*uy + uz*uz;
           if ( ll > info.hmin*info.hmin )  continue;
         }
+<<<<<<< HEAD:mmg3d5/build/sources/mmg3d1.c
         else if ( typchk == 2 ) {
+          ll = lenedg(mesh,pt->v[ip],pt->v[iq]);
+=======
+        else if ( typchk == 2 ) {        
           ll = lenedg(mesh,met,pt->v[ip],pt->v[iq]);
+>>>>>>> 6c93f76... 2012-10-19.tgz:mmg3d5/sources/mmg3d1.c
           if ( ll > LSHRT )  continue;
         }
 
@@ -492,12 +497,22 @@ static int coltet(pMesh mesh,pSol met,char typchk) {
         if ( pt->xt && (pxt->ftag[i] & MG_BDY) ) {
           hGet(&mesh->htab,pt->v[ip],pt->v[iq],&ref,&tag);
           tag |= MG_BDY;
+<<<<<<< HEAD:mmg3d5/build/sources/mmg3d1.c
 
+          isnm = (tag & MG_NOM);
+          if(isnm){
+            if(mesh->adja[4*(k-1)+1+i]) continue;
+          }
+
+          if ( MG_SIN(tag) || p0->tag > tag )  continue;
+=======
+                              
           isnm = ( tag & MG_NOM );
           if ( isnm ) {
             if ( mesh->adja[4*(k-1)+1+i] )  continue;
-          }
-          if ( MG_SIN(tag) || p0->tag > tag )  continue;
+          }                         
+          if ( MG_SIN(tag) || p0->tag > tag )  continue;   
+>>>>>>> 6c93f76... 2012-10-19.tgz:mmg3d5/sources/mmg3d1.c
           ilist = chkcol_bdy(mesh,k,i,j,list);
         }
         /* internal face */
@@ -594,7 +609,7 @@ static int anatetv(pMesh mesh,pSol met,char typchk) {
         ip  = newPt(mesh,o,0);
         ppt = &mesh->point[ip];
         if ( met->m )
-          met->m[ip] = 0.5 * (met->m[ip1]+met->m[ip2]);
+					met->m[ip] = 0.5 * (met->m[ip1]+met->m[ip2]);
         hashEdge(&hash,ip1,ip2,ip);
         MG_SET(pt->flag,i);
         nap++;
@@ -753,7 +768,7 @@ static int anatets(pMesh mesh,pSol met,char typchk) {
         p1  = &mesh->point[ip1];
         p2  = &mesh->point[ip2];
         if ( met->m )
-          met->m[ip] = 0.5 * (met->m[ip1]+met->m[ip2]);
+					met->m[ip] = 0.5 * (met->m[ip1]+met->m[ip2]);        
         if ( MG_EDG(ptt.tag[j]) || (ptt.tag[j] & MG_NOM) )
           ppt->ref = ptt.edg[j];
         else
@@ -974,7 +989,12 @@ static int adpspl(pMesh mesh,pSol met) {
     if ( pt->xt && (pxt->ftag[i] & MG_BDY) ) {
       hGet(&mesh->htab,ip1,ip2,&ref,&tag);
       if ( MG_SIN(tag) )  continue;
+<<<<<<< HEAD:mmg3d5/build/sources/mmg3d1.c
       tag |= MG_BDY;
+      //ilist = coquil(mesh,k,iarf[i][j],list);
+=======
+      tag |= MG_BDY;  
+>>>>>>> 6c93f76... 2012-10-19.tgz:mmg3d5/sources/mmg3d1.c
       ilist = coquil(mesh,k,imax,list);
       if ( !ilist )  continue;
 
@@ -1013,9 +1033,15 @@ static int adpspl(pMesh mesh,pSol met) {
         }
         else {
           if ( !norface(mesh,k,i,v) )  continue;
-          else if ( !BezierReg(mesh,ip1,ip2,0.5,v,o,no1) )
+<<<<<<< HEAD:mmg3d5/build/sources/mmg3d1.c
+          else if ( !BezierReg(mesh,ip,iq,0.5,v,o,no1) )
             continue;
         }
+=======
+          else if ( !BezierReg(mesh,ip1,ip2,0.5,v,o,no1) )
+            continue;  
+        }    
+>>>>>>> 6c93f76... 2012-10-19.tgz:mmg3d5/sources/mmg3d1.c
         ier = simbulgept(mesh,list,ilist,o);
         if ( !ier ) {
           ier = dichoto1b(mesh,list,ilist,o,ro);
@@ -1031,8 +1057,12 @@ static int adpspl(pMesh mesh,pSol met) {
         else
           ppt->ref = pxt->ref[i];
         ppt->tag = tag;
+<<<<<<< HEAD:mmg3d5/build/sources/mmg3d1.c
+        ppt->h   = 0.5 * (p0->h + p1->h);
+=======
         if ( met->m )
-          met->m[ip] = 0.5 * (met->m[ip1]+met->m[ip2]);
+					met->m[ip] = 0.5 * (met->m[ip1]+met->m[ip2]);
+>>>>>>> 6c93f76... 2012-10-19.tgz:mmg3d5/sources/mmg3d1.c
         mesh->xp++;
         assert(mesh->xp < mesh->xpmax);
         ppt->xp = mesh->xp;
@@ -1064,8 +1094,13 @@ static int adpspl(pMesh mesh,pSol met) {
       o[1] = 0.5*(p0->c[1] + p1->c[1]);
       o[2] = 0.5*(p0->c[2] + p1->c[2]);
       ip = newPt(mesh,o,MG_NOTAG);
-      if ( !ip )  break;
+<<<<<<< HEAD:mmg3d5/build/sources/mmg3d1.c
+      if ( ! ip )  break;
       split1b(mesh,list,ilist,ip);               //Et on teste pas du tout les qualités ici ?
+=======
+      if ( !ip )  break;
+      split1b(mesh,list,ilist,ip);               //Et on teste pas du tout les qualités ici ? 
+>>>>>>> 6c93f76... 2012-10-19.tgz:mmg3d5/sources/mmg3d1.c
       ppt = &mesh->point[ip];
       met->m[ip] = 0.5 * (met->m[ip1] + met->m[ip2]);
       ns++;
@@ -1128,8 +1163,13 @@ static int adpcol(pMesh mesh,pSol met) {
     /* Case of an internal face */
     else {
       if ( p0->tag & MG_BDY )  continue;
-      ilist = chkcol_int(mesh,met,k,i,j,list,2);
+<<<<<<< HEAD:mmg3d5/build/sources/mmg3d1.c
+      ilist = chkcol_int(mesh,k,i,j,list);
     }
+=======
+      ilist = chkcol_int(mesh,met,k,i,j,list,2);
+    }    
+>>>>>>> 6c93f76... 2012-10-19.tgz:mmg3d5/sources/mmg3d1.c
     if ( ilist ) {
       ier = colver(mesh,list,ilist,i2);
       nc += ier;
@@ -1284,7 +1324,11 @@ static int anatet(pMesh mesh,pSol met,char typchk) {
       fprintf(stdout,"  ## Hashing problem. Exit program.\n");
       return(0);
     }
+<<<<<<< HEAD:mmg3d5/build/sources/mmg3d1.c
     if ( typchk == 2 && it == maxit-1 )  info.fem = 1;
+=======
+		if ( typchk == 2 && it == maxit-1 )  info.fem = 1;
+>>>>>>> 6c93f76... 2012-10-19.tgz:mmg3d5/sources/mmg3d1.c
 
     /* collapse short edges */
     nc = coltet(mesh,met,typchk);
@@ -1350,10 +1394,17 @@ int mmg3d1(pMesh mesh,pSol met) {
     fprintf(stdout,"  ## Metric undefined. Exit program.\n");
     return(0);
   }
+<<<<<<< HEAD:mmg3d5/build/sources/mmg3d1.c
 
-  if ( info.hgrad > 0. && !gradsiz(mesh,met) ) {
+  if ( info.hgrad > 0. && !gradsiz(mesh) ) {
     fprintf(stdout,"  ## Gradation problem. Exit program.\n");
     return(0);
+=======
+                                               
+  if ( info.hgrad > 0. && !gradsiz(mesh,met) ) {
+   fprintf(stdout,"  ## Gradation problem. Exit program.\n");
+   return(0);
+>>>>>>> 6c93f76... 2012-10-19.tgz:mmg3d5/sources/mmg3d1.c
   }
 
   if ( !anatet(mesh,met,2) ) {
@@ -1375,7 +1426,11 @@ int mmg3d1(pMesh mesh,pSol met) {
   if ( !chkmani(mesh) ) {
     fprintf(stdout,"  ## Non orientable implicit surface. Exit program.\n");
     return(0);
+<<<<<<< HEAD:mmg3d5/build/sources/mmg3d1.c
   }
+=======
+  }  
+>>>>>>> 6c93f76... 2012-10-19.tgz:mmg3d5/sources/mmg3d1.c
 
   return(1);
 }

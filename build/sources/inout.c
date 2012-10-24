@@ -360,12 +360,11 @@ int saveMesh(pMesh mesh) {
   return(1);
 }
 
-
 /* load metric field */
 int loadMet(pSol met) {
   double       dbuf[GmfMaxTyp];
   float        fbuf[GmfMaxTyp];
-  int          i,k,iad,inm,typtab[GmfMaxTyp];
+  int          k,inm,typtab[GmfMaxTyp];
   char        *ptr,data[128];
 
   if ( !met->namein )  return(0);
@@ -403,34 +402,61 @@ int loadMet(pSol met) {
 
   /* read mesh solutions */
   GmfGotoKwd(inm,GmfSolAtVertices);
-  for (k=1; k<=met->np; k++) {
-    iad = met->size*(k-1)+1;
+  /* isotropic metric */
+  if ( met->size == 1 ) {
     if ( met->ver == GmfFloat ) {
-      GmfGetLin(inm,GmfSolAtVertices,fbuf);
-      for (i=0; i<met->size; i++)  met->m[iad+i] = fbuf[i];
+      for (k=1; k<=met->np; k++) {
+        GmfGetLin(inm,GmfSolAtVertices,fbuf);
+        met->m[k] = fbuf[0];
+      }
     }
     else {
-      GmfGetLin(inm,GmfSolAtVertices,dbuf);
-      for (i=0; i<met->size; i++)  met->m[iad+i] = dbuf[i];
+      for (k=1; k<=met->np; k++) {
+        GmfGetLin(inm,GmfSolAtVertices,dbuf);
+        met->m[k] = fbuf[0];
+      }
     }
   }
-
+  /* anisotropic metric */
+  /*else {
+    if ( met->ver == GmfFloat ) {
+    for (k=1; k<=met->np; k++) {
+    GmfGetLin(inm,GmfSolAtVertices,fbuf);
+    tmpf    = fbuf[2];
+    fbuf[2] = fbuf[3];
+    fbuf[3] = tmpf;
+    for (i=0; i<6; i++)  met->m[6*k+1+i] = fbuf[i];
+    }
+    }
+    else {
+    for (k=1; k<=met->np; k++) {
+    GmfGetLin(inm,GmfSolAtVertices,dbuf);
+    tmpd    = dbuf[2];
+    dbuf[2] = dbuf[3];
+    dbuf[3] = tmpd;
+    for (i=0; i<met->size; i++)  met->m[6*k+1+i] = dbuf[i];
+    }
+    }
+    }*/
   GmfCloseMesh(inm);
   return(1);
 }
 
+/* write iso or aniso metric */
+int saveMet(pMesh mesh,pSol met) {
+  pPoint     ppt;
+  double     dbuf[GmfMaxTyp],tmp;
+  int        k,i,np,outm,nbm,typtab[GmfMaxTyp];
+  char      *ptr,data[128];
 
-int saveSize(pMesh mesh) {
-  pPoint       ppt;
-  int          k,inm,np,type,typtab[GmfMaxTyp],ver;
-  char        *ptr,data[128];
-
-  strcpy(data,mesh->nameout);
+  if ( !met->m )  return(-1);
+  met->ver = GmfDouble;
+  strcpy(data,met->nameout);
   ptr = strstr(data,".mesh");
   if ( ptr )  *ptr = '\0';
-  strcat(data,".sol");
-  ver = GmfDouble;
-  if (!(inm = GmfOpenMesh(data,GmfWrite,ver,mesh->dim)) ) {
+  ptr = strstr(data,".sol");
+  if ( !ptr )  strcat(data,".sol");
+  if ( !(outm = GmfOpenMesh(data,GmfWrite,met->ver,met->dim)) ) {
     fprintf(stderr,"  ** UNABLE TO OPEN %s\n",data);
     return(0);
   }
@@ -439,19 +465,38 @@ int saveSize(pMesh mesh) {
   np = 0;
   for (k=1; k<=mesh->np; k++) {
     ppt = &mesh->point[k];
-    if ( MG_VOK(ppt) ) np++;
+    if ( MG_VOK(ppt) )  np++;
   }
 
-  /* write sol */
-  type   = 1;
-  typtab[0] = GmfSca;
-  GmfSetKwd(inm,GmfSolAtVertices,np,type,typtab);
-  for (k=1; k<=mesh->np; k++) {
-    ppt = &mesh->point[k];
-    if ( MG_VOK(ppt) ) {
-      GmfSetLin(inm,GmfSolAtVertices,&ppt->h);
+  /* write isotropic metric */
+  if ( met->size == 1 ) {
+    typtab[0] = 1;
+    nbm = 1;
+    GmfSetKwd(outm,GmfSolAtVertices,np,nbm,typtab);
+    for (k=1; k<=mesh->np; k++) {
+      ppt = &mesh->point[k];
+      if ( MG_VOK(ppt) ) {
+        dbuf[0] = met->m[k];
+        GmfSetLin(outm,GmfSolAtVertices,dbuf);
+      }
     }
   }
-  GmfCloseMesh(inm);
+  /* write anisotropic metric */
+  else {
+    typtab[0] = 3;
+    nbm = 1;
+    GmfSetKwd(outm,GmfSolAtVertices,np,nbm,typtab);
+    for (k=1; k<=mesh->np; k++) {
+      ppt = &mesh->point[k];
+      if ( MG_VOK(ppt) ) {
+        for (i=0; i<met->size; i++)  dbuf[i] = met->m[met->size*(k)+1+i];
+        tmp = dbuf[2];
+        dbuf[2] = dbuf[3];
+        dbuf[3] = tmp;
+        GmfSetLin(outm,GmfSolAtVertices,dbuf);
+      }
+    }
+  }
+  GmfCloseMesh(outm);
   return(1);
 }

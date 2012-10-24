@@ -22,6 +22,13 @@ unsigned char ifar[6][2] = { {2,3}, {1,3}, {1,2}, {0,3}, {0,2}, {0,1} };
 unsigned char isar[6][2] = { {2,3}, {3,1}, {1,2}, {0,3}, {2,0}, {0,1} };
 unsigned char arpt[4][3] = { {0,1,2}, {0,4,3}, {1,3,5}, {2,5,4} };
 
+static inline void printTime(char *chaine,double tps){
+  char *tpsm;
+  tpsm= printim(tps);
+  fprintf(stdout,chaine,tpsm);
+  free(tpsm);
+}
+
 static void excfun(int sigid) {
   fprintf(stdout,"\n Unexpected error:");  fflush(stdout);
   switch(sigid) {
@@ -264,11 +271,15 @@ static void freeAll(pMesh mesh,pSol met){
 }
 
 static void endcod() {
-  char    stim[32];
-
+	char    stim[32];
+	
   chrono(OFF,&info.ctim[0]);
-  printim(info.ctim[0].gdif,stim);
+<<<<<<< HEAD:mmg3d5/build/sources/mmg3d.c
+  printTime("\n   ELAPSED TIME  %s\n",info.ctim[0].gdif);
+=======
+	printim(info.ctim[0].gdif,stim);
   fprintf(stdout,"\n   ELAPSED TIME  %s\n",stim);
+>>>>>>> 6c93f76... 2012-10-19.tgz:mmg3d5/sources/mmg3d.c
 }
 
 
@@ -292,7 +303,7 @@ int main(int argc,char *argv[]) {
   Mesh      mesh;
   Sol       met;
   int       ier;
-  char      stim[32];
+	char      stim[32];
 
   fprintf(stdout,"  -- MMG3d, Release %s (%s) \n",MG_VER,MG_REL);
   fprintf(stdout,"     %s\n",MG_CPY);
@@ -326,7 +337,6 @@ int main(int argc,char *argv[]) {
 
   /* command line */
   if ( !parsar(argc,argv,&mesh,&met) )  return(1);
-
   /* load data */
   fprintf(stdout,"\n  -- INPUT DATA\n");
   chrono(ON,&info.ctim[1]);
@@ -335,8 +345,7 @@ int main(int argc,char *argv[]) {
   met.npmax = mesh.npmax;
   /* read metric if any */
   ier = loadMet(&met);
-  if ( !ier )
-    RETURN_AND_FREE(&mesh,&met,1);
+  if ( !ier ) RETURN_AND_FREE(&mesh,&met,1);
   else if ( ier > 0 && met.np != mesh.np ) {
     fprintf(stdout,"  ## WARNING: WRONG SOLUTION NUMBER. IGNORED\n");
     free(met.m);
@@ -346,8 +355,12 @@ int main(int argc,char *argv[]) {
     met.np=0;
   }
   chrono(OFF,&info.ctim[1]);
-  printim(info.ctim[1].gdif,stim);
+<<<<<<< HEAD:mmg3d5/build/sources/mmg3d.c
+  printTime("  -- DATA READING COMPLETED.     %s\n",info.ctim[1].gdif);
+=======
+	printim(info.ctim[1].gdif,stim);
   fprintf(stdout,"  -- DATA READING COMPLETED.     %s\n",stim);
+>>>>>>> 6c93f76... 2012-10-19.tgz:mmg3d5/sources/mmg3d.c
 
   /* analysis */
   chrono(ON,&info.ctim[2]);
@@ -369,26 +382,36 @@ int main(int argc,char *argv[]) {
   if( info.iso && !mmg3d2(&mesh,&met) ) RETURN_AND_FREE(&mesh,&met,1);
   if ( !analys(&mesh) ) {RETURN_AND_FREE(&mesh,&met,1);}
 
-  if ( info.imprim ) {
-    //PutMetIn_h(&mesh,&met);
+  if ( abs(info.imprim) > 0 ) {
+    PutMetIn_h(&mesh,&met);
     prilen(&mesh);
   }
 
   chrono(OFF,&info.ctim[2]);
-  printim(info.ctim[2].gdif,stim);
+<<<<<<< HEAD:mmg3d5/build/sources/mmg3d.c
   if ( info.imprim )
+    printTime("  -- PHASE 1 COMPLETED.     %s\n",info.ctim[2].gdif);
+=======
+	printim(info.ctim[2].gdif,stim);
+  if ( info.imprim )   
     fprintf(stdout,"  -- PHASE 1 COMPLETED.     %s\n",stim);
+>>>>>>> 6c93f76... 2012-10-19.tgz:mmg3d5/sources/mmg3d.c
 
   /* solve */
   chrono(ON,&info.ctim[3]);
   if ( info.imprim )
     fprintf(stdout,"\n  -- PHASE 2 : %s MESHING\n",met.size < 6 ? "ISOTROPIC" : "ANISOTROPIC");
-  if ( !mmg3d1(&mesh,&met) ) RETURN_AND_FREE(&mesh,&met,1);
+  if ( !mmg3d1(&mesh,&met) ) {RETURN_AND_FREE(&mesh,&met,1);}
 
   chrono(OFF,&info.ctim[3]);
-  printim(info.ctim[3].gdif,stim);
+<<<<<<< HEAD:mmg3d5/build/sources/mmg3d.c
+  if ( info.imprim ){
+    printTime("  -- PHASE 2 COMPLETED.     %s\n",info.ctim[3].gdif);}
+=======
+	printim(info.ctim[3].gdif,stim);
   if ( info.imprim )
     fprintf(stdout,"  -- PHASE 2 COMPLETED.     %s\n",stim);
+>>>>>>> 6c93f76... 2012-10-19.tgz:mmg3d5/sources/mmg3d.c
   fprintf(stdout,"\n  %s\n   END OF MODULE MMG3d: IMB-LJLL \n  %s\n",MG_STR,MG_STR);
 
   /* save file */
@@ -397,9 +420,15 @@ int main(int argc,char *argv[]) {
 
   chrono(ON,&info.ctim[1]);
   if ( info.imprim )  fprintf(stdout,"\n  -- WRITING DATA FILE %s\n",mesh.nameout);
+<<<<<<< HEAD:mmg3d5/build/sources/mmg3d.c
   if ( !unscaleMesh(&mesh,&met) ) {RETURN_AND_FREE(&mesh,&met,1);}
   if ( !saveMesh(&mesh) ) {RETURN_AND_FREE(&mesh,&met,1);}
-  if ( !saveMet(&mesh,&met) ) {RETURN_AND_FREE(&mesh,&met,1);}
+  if ( !saveSize(&mesh) ) {RETURN_AND_FREE(&mesh,&met,1);}
+=======
+  if ( !unscaleMesh(&mesh,&met) )  return(1);
+  if ( !saveMesh(&mesh) )  return(1);
+  if ( !saveMet(&mesh,&met) )  return(1);
+>>>>>>> 6c93f76... 2012-10-19.tgz:mmg3d5/sources/mmg3d.c
   chrono(OFF,&info.ctim[1]);
   if ( info.imprim )  fprintf(stdout,"  -- WRITING COMPLETED\n");
 

@@ -26,11 +26,11 @@
 
 #define MG_SMSGN(a,b)  (((double)(a)*(double)(b) > (0.0)) ? (1) : (0))
 
-#define RETURN_AND_FREE(mesh,met,val)do         \
-    {                                           \
-      freeAll(mesh,met);                        \
-      return(val);                              \
-    }while(0)
+#define RETURN_AND_FREE(mesh,met,val)do            \
+  {                                                \
+    freeAll(mesh,met);                             \
+    return(val);                                   \
+  }while(0)
 
 #define free(ptr) do{free(ptr); ptr=NULL;}while(0)
 
@@ -116,8 +116,13 @@ typedef struct {
 typedef Edge * pEdge;
 
 typedef struct {
+<<<<<<< HEAD:mmg3d5/build/sources/mmg3d.h
   int      v[3],base,ref,edg[3];
-  char     flag,tag[3];
+  unsigned char  flag,tag[3];
+=======
+	int      v[3],base,ref,edg[3];
+	char     flag,tag[3];
+>>>>>>> 6c93f76... 2012-10-19.tgz:mmg3d5/sources/mmg3d.h
 } Tria;
 typedef Tria * pTria;
 
@@ -128,8 +133,13 @@ typedef struct {
 typedef Tetra * pTetra;
 
 typedef struct {
+<<<<<<< HEAD:mmg3d5/build/sources/mmg3d.h
   int      ref[4],edg[6];
-  char     ftag[4],tag[6];
+  unsigned char  ftag[4],tag[6];
+=======
+	int      ref[4],edg[6];
+	char     ftag[4],tag[6];
+>>>>>>> 6c93f76... 2012-10-19.tgz:mmg3d5/sources/mmg3d.h
 } xTetra;
 typedef xTetra * pxTetra;
 
@@ -199,9 +209,18 @@ int  newPt(pMesh mesh,double c[3],char tag);
 int  newElt(pMesh mesh);
 void delElt(pMesh mesh,int iel);
 void delPt(pMesh mesh,int ip);
+int  newPt(pMesh mesh,double c[3],char tag);
 int  zaldy(pMesh mesh);
 char chkedg(pMesh mesh,pTria pt);
 void tet2tri(pMesh mesh,int k,char ie,Tria *ptt);
+<<<<<<< HEAD:mmg3d5/build/sources/mmg3d.h
+int  newPt (pMesh mesh,double c[3],char tag);
+void delPt (pMesh mesh,int ip);
+int  newElt(pMesh mesh);
+void delElt(pMesh mesh,int iel);
+int  zaldy(pMesh mesh);
+=======
+>>>>>>> 6c93f76... 2012-10-19.tgz:mmg3d5/sources/mmg3d.h
 int  bezierCP(pMesh mesh,Tria *pt,pBezier pb);
 int  BezierTgt(double c1[3],double c2[3],double n1[3],double n2[3],double t1[3],double t2[3]);
 double BezierGeod(double c1[3], double c2[3], double t1[3], double t2[3]);
@@ -224,10 +243,17 @@ int  coquil(pMesh mesh, int start, int ia, int * list);
 int  coquilface(pMesh mesh, int start, int ia, int * list, int * it1, int *it2);
 int  gettag(pMesh,int,int,int *,int *);
 int  settag(pMesh,int,int,int,int);
+<<<<<<< HEAD:mmg3d5/build/sources/mmg3d.h
+int  chkcol_int(pMesh,int,char,char,int *);
+int  chkcol_bdy(pMesh,int,char,char,int *);
+int  chkmani(pMesh mesh);
+int  chkmanicoll(pMesh mesh,int k,int iface,int iedg,int ndepmin,int ndepplus);
+=======
 int  chkcol_int(pMesh ,pSol met,int,char,char,int *,char typchk);
 int  chkcol_bdy(pMesh,int,char,char,int *);
 int  chkmanicoll(pMesh mesh,int k,int iface,int iedg,int ndepmin,int ndepplus);
 int  chkmani(pMesh mesh);
+>>>>>>> 6c93f76... 2012-10-19.tgz:mmg3d5/sources/mmg3d.h
 int  colver(pMesh,int *,int,char);
 int  loadMesh(pMesh );
 int  saveMesh(pMesh );
@@ -265,6 +291,7 @@ int  split3_sim(pMesh mesh,pSol met,int k,int vx[6]);
 void split3(pMesh mesh,pSol met,int k,int vx[6]);
 void split3cone(pMesh mesh,pSol met,int k,int vx[6]);
 void split3op(pMesh mesh, pSol met, int k, int vx[6]);
+int  split4bar(pMesh mesh, pSol met, int k);
 void split4sf(pMesh mesh,pSol met,int k,int vx[6]);
 void split4op(pMesh mesh,pSol met,int k,int vx[6]);
 void split5(pMesh mesh,pSol met,int k,int vx[6]);
@@ -275,6 +302,8 @@ int  dichoto1b(pMesh mesh,int *list,int ret,double o[3],double ro[3]);
 void nsort(int ,double *,char *);
 int  nortri(pMesh mesh,pTria pt,double *n);
 double orcal(pMesh mesh,int iel);
+int  outqua(pMesh mesh,pSol met);
+int  badelt(pMesh mesh,pSol met);
 int  movintpt(pMesh mesh, int *list, int ilist);
 int  movbdyregpt(pMesh mesh, int *listv, int ilistv, int *lists, int ilists);
 int  movbdyrefpt(pMesh mesh, int *listv, int ilistv, int *lists, int ilists);
@@ -289,6 +318,7 @@ void swpgen(pMesh mesh,pSol met,int nconf, int ilist, int *list);
 int  chkswpgen(pMesh mesh, int start, int ia, int *ilist, int *list);
 int  srcface(pMesh mesh,int n0,int n1,int n2);
 int  bouleext(pMesh mesh, int start, int ip, int iface, int *listv, int *ilistv, int *lists, int*ilists);
+int  boulesurfvolp(pMesh mesh, int start, int ip, int iface, int *listv, int *ilistv, int *lists, int*ilists);
 int chkptonbdy(pMesh,int);
 int norpts(pMesh,int,int,int,double *);
 double orcal_poi(double a[3],double b[3],double c[3],double d[3]);
@@ -299,10 +329,15 @@ int ppgdisp(pMesh,double *);
 int denoisbdy(pMesh);
 int eigensym(double m[3],double lambda[2],double vp[2][2]);
 int sys33sym(double a[6], double b[3], double r[3]);
+<<<<<<< HEAD:mmg3d5/build/sources/mmg3d.h
+int startedgsurfball(pMesh mesh, int nump, int numq, int *list, int ilist);
+int prilen(pMesh mesh);
+int DoSol(pMesh mesh,pSol met);
+int PutMetIn_h(pMesh mesh,pSol met);
+=======
 void outqua(pMesh mesh,pSol met);
 int  badelt(pMesh mesh,pSol met);
-int DoSol(pMesh mesh,pSol met);
-//int PutMetIn_h(pMesh mesh,pSol met);
+>>>>>>> 6c93f76... 2012-10-19.tgz:mmg3d5/sources/mmg3d.h
 
 int meancur(pMesh mesh,int np,double c[3],int ilist,int *list,double h[3]);
 double surftri(pMesh,int,int);

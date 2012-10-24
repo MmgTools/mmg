@@ -497,10 +497,17 @@ int bouleext(pMesh mesh, int start, int ip, int iface, int *listv, int *ilistv, 
 }
 
 /* Return volumic ball of a SURFACE point p, as well as its surfacic ball, starting from tetra
+<<<<<<< HEAD:mmg3d5/build/sources/boulep.c
    start, with point ip, and face if in tetra
    volumic ball ; list[k] = 4*number of tet + index of point
    surfacic ball : list[k] = 4*number of tet + index of FACE */
+int boulesurfvolp(pMesh mesh, int start, int ip, int iface, int *listv, int *ilistv, int *lists, int*ilists){
+=======
+ start, with point ip, and face if in tetra 
+  volumic ball ; list[k] = 4*number of tet + index of point 
+  surfacic ball : list[k] = 4*number of tet + index of FACE */
 int boulesurfvolp(pMesh mesh,int start,int ip,int iface,int *listv,int *ilistv,int *lists,int*ilists) {
+>>>>>>> 6c93f76... 2012-10-19.tgz:mmg3d5/sources/boulep.c
   pTetra pt,pt1;
   pxTetra pxt;
   int base,nump,k,k1,*adja,piv,na,nb,adj,cur,nvstart,fstart,aux;

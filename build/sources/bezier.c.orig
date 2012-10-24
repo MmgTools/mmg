@@ -288,14 +288,25 @@ int bezierCP(pMesh mesh,Tria *pt,pBezier pb) {
   for (i=0; i<3; i++) {
     if ( p[i]->tag & MG_NOM )
       isnm++;
-    else if ( im == -1 )
+<<<<<<< HEAD:mmg3d5/build/sources/bezier.c
+    else if(im == -1)
       im = i;
   }
 
+  if(isnm){
+    if( im != -1 ){
+      for(i=0; i<3; i++){
+        if(p[i]->tag & MG_NOM){
+=======
+    else if ( im == -1 )
+      im = i;
+  }
+  
   if ( isnm ) {
     if ( im != -1 ) {
       for (i=0; i<3; i++) {
         if ( p[i]->tag & MG_NOM ) {
+>>>>>>> 6c93f76... 2012-10-19.tgz:mmg3d5/sources/bezier.c
           ps = pb->n[i][0]*pb->n[im][0] + pb->n[i][1]*pb->n[im][1] + pb->n[i][2]*pb->n[im][2];
           if ( ps < 0.0 ) {
             pb->n[i][0] *= -1.0;
@@ -380,7 +391,10 @@ int bezierCP(pMesh mesh,Tria *pt,pBezier pb) {
         pb->t[i+3][2] *= dd;
       }
     }
+<<<<<<< HEAD:mmg3d5/build/sources/bezier.c
 
+=======
+>>>>>>> 6c93f76... 2012-10-19.tgz:mmg3d5/sources/bezier.c
     else { /* internal edge */
       if ( !BezierTgt(p[i1]->c,p[i2]->c,n1,n2,t1,t2) ) {
         t1[0] = ux / l;
@@ -392,7 +406,10 @@ int bezierCP(pMesh mesh,Tria *pt,pBezier pb) {
         t2[2] = - uz / l;
       }
     }
+<<<<<<< HEAD:mmg3d5/build/sources/bezier.c
 
+=======
+>>>>>>> 6c93f76... 2012-10-19.tgz:mmg3d5/sources/bezier.c
     alpha = BezierGeod(p[i1]->c,p[i2]->c,t1,t2);
 
     pb->b[2*i+3][0] = p[i1]->c[0] + alpha * t1[0];
@@ -439,7 +456,11 @@ int bezierInt(pBezier pb,double uv[2],double o[3],double no[3],double to[3]) {
   double    dd,u,v,w,ps,ux,uy,uz;
   char      i;
 
-  memset(to,0,3*sizeof(double));
+<<<<<<< HEAD:mmg3d5/build/sources/bezier.c
+  to[0]=to[1]=to[2]=0;
+=======
+	memset(to,0,3*sizeof(double));
+>>>>>>> 6c93f76... 2012-10-19.tgz:mmg3d5/sources/bezier.c
   u = uv[0];
   v = uv[1];
   w = 1 - u - v;

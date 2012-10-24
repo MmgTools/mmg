@@ -19,7 +19,7 @@ int chkcol_int(pMesh mesh,pSol met,int k,char iface,char iedg,int *list,char typ
   nq  = pt->v[iq];
   ilist = boulevolp(mesh,k,ip,list);
   if ( typchk == 2 && met->m ) {
-    lon = lenedg(mesh,met,ip,iq);
+	  lon = lenedg(mesh,met,ip,iq);
     lon = MG_MIN(lon,LSHRT);
     lon = MG_MAX(1.0/lon,LLONG);
   }
@@ -56,7 +56,7 @@ int chkcol_int(pMesh mesh,pSol met,int k,char iface,char iedg,int *list,char typ
     if ( typchk == 2 && met->m ) {
       for (jj=0; jj<6; jj++) {
         if ( lenedg(mesh,met,pt0->v[iare[jj][0]],pt0->v[iare[jj][1]]) > lon )  return(0);
-      }
+      } 
     }
   }
   if ( calold < NULKAL && calnew <= calold )  return(0);
@@ -66,10 +66,23 @@ int chkcol_int(pMesh mesh,pSol met,int k,char iface,char iedg,int *list,char typ
 }
 
 /* Check whether collapse ip -> iq could be performed, ip boundary point ;
+<<<<<<< HEAD:mmg3d5/build/sources/colver.c
    'mechanical' tests (positive jacobian) are not performed here ;
    iface = boundary face on which lie edge iedg - in local face num.
    (pq, or ia in local tet notation) */
 int chkcol_bdy(pMesh mesh,int k,char iface,char iedg,int *listv) {
+  pTetra        pt,pt0;
+  pxTetra       pxt;
+  pPoint        p0;
+  Tria          tt;
+  double        calold,calnew,caltmp,nprvold[3],nprvnew[3],ncurold[3],ncurnew[3],ps,devold,devnew;
+  int           ipp,ilistv,nump,numq,ilists,lists[LMAX+2],l,iel,ref,nbbdy,ndepmin,ndepplus;
+  unsigned char iopp,ia,ip,tag,i,iq,i0,i1,ier;
+=======
+ 'mechanical' tests (positive jacobian) are not performed here ; 
+ iface = boundary face on which lie edge iedg - in local face num. 
+      (pq, or ia in local tet notation) */
+ int chkcol_bdy(pMesh mesh,int k,char iface,char iedg,int *listv) {
   pTetra     pt,pt0;
   pxTetra    pxt;
   pPoint     p0;
@@ -77,6 +90,7 @@ int chkcol_bdy(pMesh mesh,int k,char iface,char iedg,int *listv) {
   double     calold,calnew,caltmp,nprvold[3],nprvnew[3],ncurold[3],ncurnew[3],ps,devold,devnew;
   int        ipp,ilistv,nump,numq,ilists,lists[LMAX+2],l,iel,ref,nbbdy,ndepmin,ndepplus;
   char       iopp,ia,ip,tag,i,iq,i0,i1,ier;
+>>>>>>> 6c93f76... 2012-10-19.tgz:mmg3d5/sources/colver.c
 
   pt   = &mesh->tetra[k];
   pxt  = 0;
