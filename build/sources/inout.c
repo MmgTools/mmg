@@ -202,7 +202,7 @@ int saveMesh(pMesh mesh) {
   xPoint      *pxp;
   hgeom       *ph;
   int          k,na,nc,np,ne,nn,nr,nre,nt,outm;
-  char         data[128]; 
+  char         data[128];
 
   mesh->ver = GmfDouble;
   strcpy(data,mesh->nameout);
@@ -501,4 +501,3 @@ int saveMet(pMesh mesh,pSol met) {
   GmfCloseMesh(outm);
   return(1);
 }
-

@@ -113,7 +113,7 @@ int chkcol_bdy(pMesh mesh,int k,char iface,char iedg,int *listv) {
     /* Topological test for tetras of the shell */
     for (iq=0; iq<4; iq++)
       if ( pt->v[iq] == numq )  break;
-    
+
     if ( iq < 4 ) {
       nbbdy = 0;
       if ( pt->xt )  pxt = &mesh->xtetra[pt->xt];
