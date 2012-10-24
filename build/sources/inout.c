@@ -202,7 +202,7 @@ int saveMesh(pMesh mesh) {
   xPoint      *pxp;
   hgeom       *ph;
   int          k,na,nc,np,ne,nn,nr,nre,nt,outm;
-  char         data[128];
+  char         data[128]; 
 
   mesh->ver = GmfDouble;
   strcpy(data,mesh->nameout);
@@ -377,7 +377,7 @@ int loadMet(pSol met) {
     *ptr = '\0';
     strcat(data,".sol");
     if (!(inm = GmfOpenMesh(data,GmfRead,&met->ver,&met->dim)) ) {
-      if ( info.imprim > 0 )
+      if ( info.imprim < 0 )
         fprintf(stderr,"  ** %s  NOT FOUND. USE DEFAULT METRIC.\n",data);
       return(-1);
     }
@@ -438,6 +438,7 @@ int loadMet(pSol met) {
     }
     }
     }*/
+
   GmfCloseMesh(inm);
   return(1);
 }
@@ -500,3 +501,4 @@ int saveMet(pMesh mesh,pSol met) {
   GmfCloseMesh(outm);
   return(1);
 }
+

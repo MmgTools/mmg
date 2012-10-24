@@ -391,5 +391,3 @@ void outqua(pMesh mesh,pSol met) {
             i/5.,i/5.+0.2,his[i],100.*(his[i]/(float)(mesh->ne-nex)));
   }
 }
-
-

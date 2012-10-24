@@ -153,16 +153,16 @@ int hashTria(pMesh mesh) {
 
   for (k=hash.siz; k<hash.max; k++)
     hash.item[k].nxt = k+1;
-
+  
   if ( info.ddebug )  fprintf(stdout,"  h- stage 1: init\n");
-
+  
   /* hash triangles */
   mesh->base = 1;
   dup = nmf = 0;
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
     if ( !MG_EOK(pt) )  continue;
-
+    
     pt->flag = 0;
     pt->base = mesh->base;
     adja = &mesh->adjt[3*(k-1)+1];
@@ -234,7 +234,7 @@ int hashTria(pMesh mesh) {
     }
   }
   free(hash.item);
-
+  
   /* set tag */
   for (k=1; k<=mesh->nt; k++) {
     pt  = &mesh->tria[k];

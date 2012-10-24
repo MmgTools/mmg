@@ -506,9 +506,11 @@ static int coltet(pMesh mesh,pSol met,char typchk) {
           if ( p0->tag & MG_BDY )  continue;
           ilist = chkcol_int(mesh,met,k,i,j,list,typchk);
         }
+        
         if ( ilist ) {
           ier = colver(mesh,list,ilist,iq);
           if ( ier )  break;
+
         }
       }
       if ( ier ) {
@@ -1176,6 +1178,7 @@ static int adptet(pMesh mesh,pSol met) {
       fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
       return(0);
     }
+    
     nnc += nc;
     nns += ns;
     nnf += nf;
@@ -1354,7 +1357,7 @@ int mmg3d1(pMesh mesh,pSol met) {
     fprintf(stdout,"  ## Gradation problem. Exit program.\n");
     return(0);
   }
-
+    
   if ( !anatet(mesh,met,2) ) {
     fprintf(stdout,"  ## Unable to split mesh. Exiting.\n");
     return(0);
