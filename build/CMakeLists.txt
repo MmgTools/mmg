@@ -106,18 +106,20 @@ TARGET_LINK_LIBRARIES(mmg3d5 ${M_LIB})
 
 OPTION(BUILD_TESTING "Enable/Disable continuous integration" OFF)
 IF(BUILD_TESTING)
+  # Ignore errors coming from the libmesh5 library
+  SET(MEMORYCHECK_SUPPRESSIONS_FILE "${CMAKE_SOURCE_DIR}/../libmesh5.supp")
+
   ENABLE_TESTING()
   INCLUDE(CTest)
 
-  # coverage
-  TARGET_LINK_LIBRARIES(mmg3d5 ${M_LIB} gcov)
-  #  SET(WITH_MEMCHECK TRUE)
-  #  SET(WITH_COVERAGE FALSE)
+  # Coverage
+  # TARGET_LINK_LIBRARIES(mmg3d5 ${M_LIB} gcov)
+
   IF (CMAKE_COMPILER_IS_GNUCC)
     #SET(CMAKE_C_FLAGS "-Wall -fprofile-arcs -ftest-coverage")
     SET(CMAKE_C_FLAGS "-Wall")
     #SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fprofile-arcs -ftest-coverage -lgcov")
-    SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}")
+    #SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}")
   ENDIF(CMAKE_COMPILER_IS_GNUCC)
   INCLUDE( ${CMAKE_SOURCE_DIR}/testing.cmake )
 ENDIF(BUILD_TESTING)

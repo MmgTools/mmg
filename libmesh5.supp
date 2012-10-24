@@ -1,0 +1,6 @@
+{
+   <libmesh5_free_msh>
+   Memcheck:Leak
+   fun:calloc
+   fun:GmfOpenMesh
+ }

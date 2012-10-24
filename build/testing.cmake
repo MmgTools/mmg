@@ -27,11 +27,12 @@ ADD_TEST(NAME SimpleCube
 #####
 ###############################################################################
 #####
-ADD_TEST(NAME LeakCheck_AbnormalEnd0
-  COMMAND $ENV{HOME}/bin/$ENV{ARCHI}/mmg3d5 ${REG_TESTS_PATH}/LeakCheck_AbnormalEnd0/d.mesh)
-SET(passRegex "LeakCheck_AbnormalEnd0/d.mesh  NOT FOUND.")
-SET_PROPERTY(TEST LeakCheck_AbnormalEnd0
-  PROPERTY PASS_REGULAR_EXPRESSION "${passRegex}")
+#ADD_TEST(NAME LeakCheck_AbnormalEnd0
+#  COMMAND $ENV{HOME}/bin/$ENV{ARCHI}/mmg3d5 ${REG_TESTS_PATH}/LeakCheck_AbnormalEnd0/d.mesh -DCOMMAND1="chmod -r" -P "chmod.cmake")
+#SET(passRegex "LeakCheck_AbnormalEnd0/d.mesh  NOT FOUND.")
+#SET_PROPERTY(TEST LeakCheck_AbnormalEnd0
+#  PROPERTY PASS_REGULAR_EXPRESSION "${passRegex}")
+#
 #####
 #ADD_TEST(NAME LeakCheck_AbnormalEnd1
 #  COMMAND $ENV{HOME}/bin/$ENV{ARCHI}/mmg3d5 ${REG_TESTS_PATH}/LeakCheck_AbnormalEnd1) ## no possible for now
