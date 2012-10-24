@@ -1,11 +1,14 @@
 CMAKE_MINIMUM_REQUIRED (VERSION 2.6)
 PROJECT (MMG3D5)
-
 # Continuous integration
 ENABLE_TESTING()
 
+# To see falgs and options of compilation
+#SET(CMAKE_VERBOSE_MAKEFILE TRUE)
+
+# Executable path
 SET(EXECUTABLE_OUTPUT_PATH $ENV{HOME}/bin/$ENV{ARCHI}/)
-SET(CMAKELISTS_PATH .)
+SET(CMAKELISTS_PATH $ENV{PWD})
 
 # Find "exotic" compilers
 IF (${CMAKE_C_COMPILER} MATCHES Clang OR ${CMAKE_C_COMPILER} MATCHES clang)
@@ -99,16 +102,21 @@ ADD_DEPENDENCIES(mmg3d5 compil_date)
 FIND_LIBRARY(M_LIB m)
 TARGET_LINK_LIBRARIES(mmg3d5 ${M_LIB})
 
-# Continuous integration: Tests
+# Continuous integration
+
+OPTION(BUILD_TESTING "Enable/Disable continuous integration" OFF)
 IF(BUILD_TESTING)
+  ENABLE_TESTING()
   INCLUDE(CTest)
 
-# coverage
-#TARGET_LINK_LIBRARIES(mmg3d5 ${M_LIB} gcov)
-#  SET(WITH_MEMCHECK TRUE)
-#  SET(WITH_COVERAGE FALSE)
+  # coverage
+  TARGET_LINK_LIBRARIES(mmg3d5 ${M_LIB} gcov)
+  #  SET(WITH_MEMCHECK TRUE)
+  #  SET(WITH_COVERAGE FALSE)
   IF (CMAKE_COMPILER_IS_GNUCC)
+    #SET(CMAKE_C_FLAGS "-Wall -fprofile-arcs -ftest-coverage")
     SET(CMAKE_C_FLAGS "-Wall")
+    #SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fprofile-arcs -ftest-coverage -lgcov")
     SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}")
   ENDIF(CMAKE_COMPILER_IS_GNUCC)
   INCLUDE( ${CMAKE_SOURCE_DIR}/testing.cmake )
