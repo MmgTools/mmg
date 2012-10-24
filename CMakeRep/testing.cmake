@@ -4,7 +4,7 @@
 #####
 ###############################################################################
 
-SET(REG_TESTS_PATH ${CMAKELISTS_PATH}/../../RegTests)
+SET(REG_TESTS_PATH ${CMAKE_SOURCE_DIR}/../../RegTests)
 
 # simple test: must already pass
 ADD_TEST(NAME SimpleCube

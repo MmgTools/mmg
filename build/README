@@ -1,8 +1,3 @@
-We use crontab to run the nigthly test:
-    $crontab -e #to configure the task (for now, we run nightly_run.sh every day at 23:55)
+do not remove CTestCustom.cmake
 
-The script nightly_run.sh run CTest in option Nightly and print the output in ctest.log
-
-CTestConfig.cmake contains the configuration for CTest (name of the project, hour of the nighly run...)
-
-CTestCustom.cmake contains the cusomisation of the CTest options
+The other file are temporary

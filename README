@@ -1,0 +1,10 @@
+CMakeRep = Directory for the cmake commands
+Doxygen  = Directory for automatic documentation
+build    = Directory for temporary files of cmake
+Scripts  = useful scripts (to run automatid tests and clean build)
+
+to compile :
+$cd build
+$ccmake ../CMakeRep   # if you need to configure or :
+$cmake ../CMakeRep
+$make

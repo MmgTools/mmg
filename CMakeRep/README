@@ -1,0 +1,7 @@
+CMakeLists.txt rule the makefile generation
+
+testing.cmake is the list of tests
+
+CTestConfig.cmake contains the configuration for CTest (name of the project, hour of the nighly run...)
+
+CTestCustom.cmake contains the cusomisation of the CTest options

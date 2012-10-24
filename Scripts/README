@@ -1,0 +1,4 @@
+We use crontab to run the nigthly test:
+    $crontab -e #to configure the task (for now, we run nightly_run.sh every day at 23:55)
+
+The script nightly_run.sh run CTest in option Nightly and print the output in ../build/ctest.log

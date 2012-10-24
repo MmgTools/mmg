@@ -8,8 +8,7 @@ ENABLE_TESTING()
 
 # Executable path
 SET(EXECUTABLE_OUTPUT_PATH $ENV{HOME}/bin/$ENV{ARCHI}/)
-SET(CMAKELISTS_PATH $ENV{PWD})
-
+SET(MMG_SOURCE_DIR ${CMAKE_SOURCE_DIR}/../sources/)
 # Find "exotic" compilers
 IF (${CMAKE_C_COMPILER} MATCHES Clang OR ${CMAKE_C_COMPILER} MATCHES clang)
   # using clang
@@ -66,36 +65,36 @@ ELSE(OPENMP_FOUND)
 ENDIF(OPENMP_FOUND)
 
 # Header files
-INCLUDE_DIRECTORIES(${CMAKELISTS_PATH}/sources/)
+INCLUDE_DIRECTORIES(${MMG_SOURCE_DIR})
 # Source files
 FILE(
 	GLOB
 	source_files
-	${CMAKELISTS_PATH}/sources/*.c
+	${MMG_SOURCE_DIR}/*.c
 )
 
 #compil.date
-IF (NOT EXISTS ${CMAKELISTS_PATH}/sources/compil.date)
-  SET_SOURCE_FILES_PROPERTIES( ${CMAKELISTS_PATH}/sources/compil.date PROPERTIES GENERATED TRUE )
+IF (NOT EXISTS ${MMG_SOURCE_DIR}/compil.date)
+  SET_SOURCE_FILES_PROPERTIES( ${MMG_SOURCE_DIR}/compil.date PROPERTIES GENERATED TRUE )
 
   ADD_CUSTOM_COMMAND(
-    OUTPUT ${CMAKELISTS_PATH}/sources/compil.date
-    COMMAND ${CMAKE_COMMAND} -E echo \"\#define COMPIL \" '\"' `date` '\"' > ${CMAKELISTS_PATH}/sources/compil.date
+    OUTPUT ${MMG_SOURCE_DIR}/compil.date
+    COMMAND ${CMAKE_COMMAND} -E echo \"\#define COMPIL \" '\"' `date` '\"' > ${MMG_SOURCE_DIR}/compil.date
     DEPENDS ${sources_files}
     COMMENT "compil.date creation"
     )
-ELSEIF(EXISTS ${CMAKELISTS_PATH}/sources/compil.date)
+ELSEIF(EXISTS ${MMG_SOURCE_DIR}/compil.date)
  ADD_CUSTOM_COMMAND(
-    OUTPUT ${CMAKELISTS_PATH}/sources/compil.date
-    COMMAND ${CMAKE_COMMAND} -E echo \"\#define COMPIL \" '\"' `date` '\"' > ${CMAKELISTS_PATH}/sources/compil.date
+    OUTPUT ${MMG_SOURCE_DIR}/compil.date
+    COMMAND ${CMAKE_COMMAND} -E echo \"\#define COMPIL \" '\"' `date` '\"' > ${MMG_SOURCE_DIR}/compil.date
     DEPENDS ${source_files}
     COMMENT "compil.date modification"
     )
-ENDIF(NOT EXISTS ${CMAKELISTS_PATH}/sources/compil.date)
+ENDIF(NOT EXISTS ${MMG_SOURCE_DIR}/compil.date)
 
 # Executable and dependencies
-ADD_EXECUTABLE(mmg3d5 ${CMAKELISTS_PATH}/sources/compil.date ${source_files})
-ADD_CUSTOM_TARGET(compil_date DEPENDS ${CMAKELISTS_PATH}/sources/compil.date)
+ADD_EXECUTABLE(mmg3d5 ${MMG_SOURCE_DIR}/compil.date ${source_files})
+ADD_CUSTOM_TARGET(compil_date DEPENDS ${MMG_SOURCE_DIR}/compil.date)
 ADD_DEPENDENCIES(mmg3d5 compil_date)
 
 # Libraries
