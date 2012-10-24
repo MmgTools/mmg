@@ -341,6 +341,7 @@ int prilen(pMesh mesh, pSol met) {
   }
 
   free(hash.item);
+  hash.item=NULL;
   return(1);
 }
 

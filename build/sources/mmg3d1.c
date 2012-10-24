@@ -675,6 +675,7 @@ static int anatetv(pMesh mesh,pSol met,char typchk) {
     fprintf(stdout,"     %7d splitted\n",nap);
 
   free(hash.item);
+  hash.item=NULL;
   return(nap);
 }
 
@@ -786,6 +787,7 @@ static int anatets(pMesh mesh,pSol met,char typchk) {
   }
   if ( !ns ) {
     free(hash.item);
+    hash.item=NULL;
     return(ns);
   }
 
@@ -927,6 +929,7 @@ static int anatets(pMesh mesh,pSol met,char typchk) {
     fprintf(stdout,"       %7d elements splitted\n",nap);
 
   free(hash.item);
+  hash.item=NULL;
   return(nap);
 }
 

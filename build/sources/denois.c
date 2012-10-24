@@ -295,6 +295,8 @@ int lapantilap(pMesh mesh,double *optpos){
 
   free(w);
   free(intpos);
+  w=NULL;
+  intpos=NULL;
 
   return(1);
 }
@@ -973,5 +975,6 @@ int denoisbdy(pMesh mesh){
   }
 
   free(optpos);
+  optpos=NULL;
   return(1);
 }

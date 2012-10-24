@@ -32,8 +32,6 @@
       return(val);                              \
     }while(0)
 
-#define free(ptr) do{free(ptr); ptr=NULL;}while(0)
-
 /* numerical accuracy */
 #define ALPHAD    20.7846096908265    //0.04811252243247      /* 12*sqrt(3) */
 #define LLONG     2.0   // 1.414213562373

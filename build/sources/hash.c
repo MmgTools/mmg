@@ -128,6 +128,7 @@ int hashTetra(pMesh mesh) {
     }
   }
   free(hcode);
+  hcode=NULL;
   return(1);
 }
 
@@ -234,6 +235,7 @@ int hashTria(pMesh mesh) {
     }
   }
   free(hash.item);
+  hash.item=NULL;
 
   /* set tag */
   for (k=1; k<=mesh->nt; k++) {
@@ -889,6 +891,7 @@ int bdrySet(pMesh mesh) {
     }
   }
   free(hash.item);
+  hash.item=NULL;
   return(1);
 }
 
@@ -949,5 +952,6 @@ int bdryPerm(pMesh mesh) {
     fprintf(stdout,"  ## %d faces reoriented\n",nf);
 
   free(hash.item);
+  hash.item=NULL;
   return(1);
 }

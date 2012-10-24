@@ -493,6 +493,7 @@ static int cuttet_ls(pMesh mesh, pSol sol,double *tmp){
     fprintf(stdout,"     %7d splitted\n",ns);
 
   free(hash.item);
+  hash.item=NULL;
   return(ns);
 }
 
@@ -1124,6 +1125,7 @@ int mmg3d2(pMesh mesh,pSol sol) {
   if ( !hashTetra(mesh) ) {
     fprintf(stdout,"  ## Hashing problem. Exit program.\n");
     free(tmp);
+    tmp=NULL;
     return(0);
   }
 
@@ -1131,21 +1133,25 @@ int mmg3d2(pMesh mesh,pSol sol) {
   if ( !hGeom(mesh) ) {
     fprintf(stdout,"  ## Hashing problem (0). Exit program.\n");
     free(tmp);
+    tmp=NULL;
     return(0);
   }
 
   if ( !bdrySet(mesh) ) {
     fprintf(stdout,"  ## Problem in setting boundary. Exit program.\n");
     free(tmp);
+    tmp=NULL;
     return(0);
   }
 
   if ( !cuttet_ls(mesh,sol,tmp) ) {
     fprintf(stdout,"  ## Problem in discretizing implicit function. Exit program.\n");
     free(tmp);
+    tmp=NULL;
     return(0);
   }
   free(tmp);
+  tmp=NULL;
   free(mesh->adja);
   free(mesh->tria);
   mesh->adja = 0;

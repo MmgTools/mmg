@@ -251,16 +251,43 @@ static int parsar(int argc,char *argv[],pMesh mesh,pSol met) {
 /* Deallocations before return */
 static void freeAll(pMesh mesh,pSol met){
   free(mesh->point);
+  mesh->point=NULL;
   free(mesh->tetra);
+  mesh->tetra=NULL;
   free(mesh->adja);
+  mesh->adja=NULL;
   free(mesh->nameout);
+  mesh->nameout=NULL;
   free(mesh->namein);
-  if(mesh->xpoint)    free(mesh->xpoint);
-  if(mesh->htab.geom) free(mesh->htab.geom);
-  if(mesh->tria)      free(mesh->tria);
-  if(met ->namein)    free(met ->namein);
-  if(met ->nameout)   free(met ->nameout);
-  if(met ->m)         free(met->m);
+  mesh->namein=NULL;
+  if(mesh->xpoint){
+    free(mesh->xpoint);
+    mesh->xpoint=NULL;
+  }
+  if(mesh->htab.geom){
+    free(mesh->htab.geom);
+    mesh->htab.geom=NULL;
+  }
+  if(mesh->tria){
+    free(mesh->tria);
+    mesh->tria=NULL;
+  }
+  if(met ->namein){
+    free(met ->namein);
+    met->namein=NULL;
+  }
+  if(met ->nameout){
+    free(met ->nameout);
+    met->nameout=NULL;
+  }
+  if(met ->m){
+    free(met ->m);
+    met->m=NULL;
+  }
+  if(mesh->xtetra){
+    free(mesh->xtetra);
+    mesh->xtetra=NULL;
+  }
 }
 
 static void endcod() {
@@ -342,6 +369,9 @@ int main(int argc,char *argv[]) {
     free(met.m);
     free(met.namein);
     free(met.nameout);
+    met.m=NULL;
+    met.namein=NULL;
+    met.nameout=NULL;
     memset(&met,0,sizeof(Sol));
     met.np=0;
   }

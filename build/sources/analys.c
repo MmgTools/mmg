@@ -163,6 +163,7 @@ static int setadj(pMesh mesh){
     fprintf(stdout,"     Edges: %d,  tagged: %d,  ridges: %d,  refs: %d\n",ned,nr+nre,nr,nre);
   }
   free(pile);
+  pile=NULL;
   return(1);
 }
 
@@ -484,6 +485,7 @@ int analys(pMesh mesh) {
   //  if ( !hGeom(mesh) ) {
   //  fprintf(stdout,"  ## Hashing problem (0). Exit program.\n");
   //  free(mesh->htab.geom);
+  //  mesh->htab.geom=NULL
   //  return(0);
   //}
 

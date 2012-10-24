@@ -395,6 +395,7 @@ void split1b(pMesh mesh, int *list, int ret, int ip){
     }
 
     free(newtet);
+    newtet=NULL;
     return;
   }
 
@@ -676,7 +677,7 @@ void split1b(pMesh mesh, int *list, int ret, int ip){
   }
 
   free(newtet);
-
+  newtet=NULL;
 }
 
 /* Simulate split of two edges that belong to a common face */

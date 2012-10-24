@@ -78,8 +78,10 @@ int loadMesh(pMesh mesh) {
           pt1->ref = ref;
         }
       }
-      if( !mesh->nt )
+      if( !mesh->nt ){
         free(mesh->tria);
+        mesh->tria=NULL;
+      }
       else if ( mesh->nt < nt )
         mesh->tria = (pTria)realloc(mesh->tria,(mesh->nt+1)*sizeof(Tria));
     }
@@ -158,7 +160,10 @@ int loadMesh(pMesh mesh) {
 
       }
     }
-    if (info.iso ) free(ina);
+    if (info.iso ) {
+      free(ina);
+      ina=NULL;
+    }
   }
 
   /* read mesh tetrahedra */
@@ -231,7 +236,10 @@ int saveMesh(pMesh mesh) {
 
   /* boundary mesh */
   mesh->nt = 0;
-  if ( mesh->tria)  free(mesh->tria);
+  if ( mesh->tria){
+    free(mesh->tria);
+    mesh->tria=NULL;
+  }
   if ( bdryTria(mesh) ) {
     GmfSetKwd(outm,GmfTriangles,mesh->nt);
     for (k=1; k<=mesh->nt; k++) {
@@ -373,6 +381,7 @@ int loadMet(pSol met) {
   if ( ptr )  *ptr = '\0';
   strcat(data,".solb");
   if (!(inm = GmfOpenMesh(data,GmfRead,&met->ver,&met->dim)) ) {
+
     ptr  = strstr(data,".sol");
     *ptr = '\0';
     strcat(data,".sol");
@@ -413,7 +422,7 @@ int loadMet(pSol met) {
     else {
       for (k=1; k<=met->np; k++) {
         GmfGetLin(inm,GmfSolAtVertices,dbuf);
-        met->m[k] = fbuf[0];
+        met->m[k] = dbuf[0];
       }
     }
   }

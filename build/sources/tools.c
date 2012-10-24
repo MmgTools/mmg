@@ -932,7 +932,8 @@ int DoSol(pMesh mesh,pSol met) {
   /* Memory alloc */
   met->np     = mesh->np;
   met->npmax  = mesh->npmax;
-  met->size = 1;
+  met->size   = 1;
+  met->dim    = mesh->dim;
 
   met->m = (double*)calloc(met->npmax+1,met->size*sizeof(double));
   assert(met->m);
