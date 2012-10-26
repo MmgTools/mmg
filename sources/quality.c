@@ -296,7 +296,7 @@ int prilen(pMesh mesh, pSol met) {
 
         /* Locate size of edge among given table */
         for(i=0; i<8; i++) {
-          if ( bd[i] <= len || len < bd[i+1] ) {
+          if ( bd[i] <= len && len < bd[i+1] ) {
             hl[i]++;
             break;
           }
@@ -329,7 +329,7 @@ int prilen(pMesh mesh, pSol met) {
       fprintf(stdout,"     0.00 < L < 0.20  %8d   %5.2f %%  \n",
               hl[0],100.*(hl[0]/(float)ned));
     if ( lmax > 0.2 ) {
-      for (k=1; k<8; k++) {
+      for (k=2; k<8; k++) {
         if ( hl[k-1] > 0 )
           fprintf(stdout,"   %6.2f < L <%5.2f  %8d   %5.2f %%  \n",
                   bd[k-1],bd[k],hl[k-1],100.*(hl[k-1]/(float)ned));

@@ -4,5 +4,5 @@
 REP=$1
 cd $REP
 make clean
-rm -rf CMakeFiles/ CMakeCache.txt Makefile DartConfiguration.tcl CTestTestfile.cmake cmake_install.cmake Testing
+rm -rf CMakeFiles/ CMakeCache.txt Makefile DartConfiguration.tcl CTestTestfile.cmake cmake_install.cmake Testing CTestCustom.cmake
 cd ..

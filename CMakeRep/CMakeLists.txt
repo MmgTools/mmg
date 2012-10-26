@@ -107,6 +107,11 @@ OPTION(BUILD_TESTING "Enable/Disable continuous integration" OFF)
 IF(BUILD_TESTING)
   # Ignore errors coming from the libmesh5 library
   SET(MEMORYCHECK_SUPPRESSIONS_FILE "${CMAKE_SOURCE_DIR}/../libmesh5.supp")
+  # Copy custom file in the good directory
+  IF(NOT EXISTS "CTestCustom.cmake")
+    EXECUTE_PROCESS(
+      COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/CTestCustom.cmake ./CTestCustom.cmake)
+  ENDIF(NOT EXISTS "CTestCustom.cmake")
 
   ENABLE_TESTING()
   INCLUDE(CTest)

@@ -399,8 +399,7 @@ int main(int argc,char *argv[]) {
   if( info.iso && !mmg3d2(&mesh,&met) ) RETURN_AND_FREE(&mesh,&met,1);
   if ( !analys(&mesh) ) {RETURN_AND_FREE(&mesh,&met,1);}
 
-  if ( info.imprim ) {
-    //PutMetIn_h(&mesh,&met);
+  if ( info.imprim>4 ) {
     prilen(&mesh, &met);
   }
 
@@ -423,7 +422,8 @@ int main(int argc,char *argv[]) {
 
   /* save file */
   outqua(&mesh,&met);
-  prilen(&mesh,&met);
+  if(info.imprim>4)
+    prilen(&mesh,&met);
 
   chrono(ON,&info.ctim[1]);
   if ( info.imprim )  fprintf(stdout,"\n  -- WRITING DATA FILE %s\n",mesh.nameout);
