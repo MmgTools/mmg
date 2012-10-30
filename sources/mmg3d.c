@@ -391,7 +391,7 @@ int main(int argc,char *argv[]) {
       fprintf(stdout,"\n  ## ERROR : A VALID SOLUTION FILE IS NEEDED \n");
       RETURN_AND_FREE(&mesh,&met,1);
     }else{
-      if ( !DoSol(&mesh,&met) ) RETURN_AND_FREE(&mesh,&met,1);
+      if ( !DoSol(&mesh,&met,&info) ) RETURN_AND_FREE(&mesh,&met,1);
       setfunc(&mesh,&met);
     }
   }

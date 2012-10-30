@@ -482,12 +482,12 @@ int analys(pMesh mesh) {
   }
 
   /* build hash table for geometric edges */
-  //  if ( !hGeom(mesh) ) {
-  //  fprintf(stdout,"  ## Hashing problem (0). Exit program.\n");
-  //  free(mesh->htab.geom);
-  //  mesh->htab.geom=NULL
-  //  return(0);
-  //}
+  if ( mesh->na && !hGeom(mesh) ) {
+    fprintf(stdout,"  ## Hashing problem (0). Exit program.\n");
+    free(mesh->htab.geom);
+    mesh->htab.geom=NULL;
+    return(0);
+  }
 
   /*--- stage 2: surface analysis */
   if ( abs(info.imprim) > 5  || info.ddebug )

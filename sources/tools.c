@@ -921,7 +921,7 @@ inline int BezierReg(pMesh mesh,int ip0, int ip1, double s, double v[3], double 
 }
 
 /* compute iso size map */
-int DoSol(pMesh mesh,pSol met) {
+int DoSol(pMesh mesh,pSol met,Info* info) {
   pTetra     pt;
   pPoint     p1,p2;
   double     ux,uy,uz,dd;
@@ -969,19 +969,8 @@ int DoSol(pMesh mesh,pSol met) {
     p1 = &mesh->point[k];
     if ( !mark[k] )  continue;
 
-    met->m[k] = met->m[k] / (double)mark[k];
+    met->m[k] = MG_MIN(info->hmax,MG_MAX(info->hmin,met->m[k] / (double)mark[k]));
     mark[k] = 0;
   }
   return(1);
 }
-
-/* Put the metric values in mesh->point.h*/
-/*
-  int PutMetIn_h(pMesh mesh, pSol met){
-  int k;
-  for (k=1; k<=mesh->np; k++) {
-  mesh->point[k].h=met->m[k];
-  }
-  return(1);
-  }
-*/
