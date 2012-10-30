@@ -275,7 +275,7 @@ int prilen(pMesh mesh, pSol met) {
       np = pt->v[i0];
       nq = pt->v[i1];
 
-      /* Remove edge from hash ; ier = 1 iff edge has been found */
+      /* Remove edge from hash ; ier = 1 if edge has been found */
       ier = hashPop(&hash,np,nq);
       if( ier ) {
         ned ++;
