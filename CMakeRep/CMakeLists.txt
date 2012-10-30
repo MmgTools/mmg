@@ -75,12 +75,13 @@ FILE(
 
 #compil.date
 IF (NOT EXISTS ${MMG_SOURCE_DIR}/compil.date)
+
   SET_SOURCE_FILES_PROPERTIES( ${MMG_SOURCE_DIR}/compil.date PROPERTIES GENERATED TRUE )
 
   ADD_CUSTOM_COMMAND(
     OUTPUT ${MMG_SOURCE_DIR}/compil.date
     COMMAND ${CMAKE_COMMAND} -E echo \"\#define COMPIL \" '\"' `date` '\"' > ${MMG_SOURCE_DIR}/compil.date
-    DEPENDS ${sources_files}
+    DEPENDS ${MMG_SOURCE_DIR}
     COMMENT "compil.date creation"
     )
 ELSEIF(EXISTS ${MMG_SOURCE_DIR}/compil.date)
@@ -94,7 +95,7 @@ ENDIF(NOT EXISTS ${MMG_SOURCE_DIR}/compil.date)
 
 # Executable and dependencies
 ADD_EXECUTABLE(mmg3d5 ${MMG_SOURCE_DIR}/compil.date ${source_files})
-ADD_CUSTOM_TARGET(compil_date DEPENDS ${MMG_SOURCE_DIR}/compil.date)
+#ADD_CUSTOM_TARGET(compil_date)
 ADD_DEPENDENCIES(mmg3d5 compil_date)
 
 # Libraries
