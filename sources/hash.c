@@ -604,6 +604,10 @@ int hGeom(pMesh mesh) {
       }
     }
     mesh->namax = MG_MAX(1.5*mesh->na,NAMAX);
+    if(mesh->htab.geom){
+      free(mesh->htab.geom);
+      mesh->htab.geom=NULL;
+    }
     hNew(&mesh->htab,mesh->na,3*mesh->namax);
     mesh->na = 0;
 

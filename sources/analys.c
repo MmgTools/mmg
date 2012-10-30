@@ -482,7 +482,7 @@ int analys(pMesh mesh) {
   }
 
   /* build hash table for geometric edges */
-  if ( mesh->na && !hGeom(mesh) ) {
+  if ( !hGeom(mesh) ) {
     fprintf(stdout,"  ## Hashing problem (0). Exit program.\n");
     free(mesh->htab.geom);
     mesh->htab.geom=NULL;
