@@ -3,7 +3,7 @@
 extern Info  info;
 char  ddb;
 
-/* set triangle corresponding to face ie of tetra k */
+/** set triangle corresponding to face ie of tetra k */
 void tet2tri(pMesh mesh,int k,char ie,Tria *ptt) {
   pTetra  pt;
   pxTetra pxt;
@@ -25,7 +25,7 @@ void tet2tri(pMesh mesh,int k,char ie,Tria *ptt) {
   }
 }
 
-/* find acceptable position for splitting */
+/** find acceptable position for splitting */
 static int dichoto(pMesh mesh,pSol met,int k,int *vx) {
   pTetra  pt;
   pPoint  pa,pb,ps;
@@ -106,7 +106,7 @@ static int dichoto(pMesh mesh,pSol met,int k,int *vx) {
   return(1);
 }
 
-/* Find acceptable position for split1b, passing the shell of considered edge, starting from o */
+/** Find acceptable position for split1b, passing the shell of considered edge, starting from o */
 int dichoto1b(pMesh mesh,int *list,int ret,double o[3],double ro[3]) {
   pTetra  pt;
   pPoint  p0,p1;
@@ -162,7 +162,7 @@ int dichoto1b(pMesh mesh,int *list,int ret,double o[3],double ro[3]) {
   return(1);
 }
 
-/* return edges of (virtual) triangle pt that need to be split w/r Hausdorff criterion */
+/** return edges of (virtual) triangle pt that need to be split w/r Hausdorff criterion */
 char chkedg(pMesh mesh,Tria *pt) {
   pPoint   p[3];
   xPoint  *pxp;
@@ -289,7 +289,7 @@ char chkedg(pMesh mesh,Tria *pt) {
   return(pt->flag);
 }
 
-/* Search for boundary edges that could be swapped for geometric approximation */
+/** Search for boundary edges that could be swapped for geometric approximation */
 static int swpmsh(pMesh mesh,pSol met) {
   pTetra   pt;
   pxTetra  pxt;
@@ -335,7 +335,7 @@ static int swpmsh(pMesh mesh,pSol met) {
   return(nns);
 }
 
-/* Internal edge flipping */
+/** Internal edge flipping */
 static int swptet(pMesh mesh,pSol met) {
   pTetra   pt;
   int      list[LMAX+2],ilist,k,it,nconf,maxit,ns,nns;
@@ -368,7 +368,7 @@ static int swptet(pMesh mesh,pSol met) {
   return(nns);
 }
 
-/* Analyze tetrahedra and move points so as to make mesh more uniform */
+/** Analyze tetrahedra and move points so as to make mesh more uniform */
 static int movtet(pMesh mesh,pSol met,int maxit) {
   pTetra        pt;
   pPoint        ppt;
@@ -448,7 +448,7 @@ static int movtet(pMesh mesh,pSol met,int maxit) {
   return(nnm);
 }
 
-/* attempt to collapse small edges */
+/** attempt to collapse small edges */
 static int coltet(pMesh mesh,pSol met,char typchk) {
   pTetra     pt;
   pxTetra    pxt;
@@ -527,7 +527,7 @@ static int coltet(pMesh mesh,pSol met,char typchk) {
   return(nc);
 }
 
-/* analyze volume tetra and split if needed */
+/** analyze volume tetra and split if needed */
 static int anatetv(pMesh mesh,pSol met,char typchk) {
   pTetra   pt;
   pPoint   p1,p2;
@@ -537,7 +537,7 @@ static int anatetv(pMesh mesh,pSol met,char typchk) {
   int      vx[6],k,ip,ip1,ip2,nap,ns,ne;
   char     i,j,ia;
 
-  /* 1. analysis */
+  /** 1. analysis */
   hashNew(&hash,mesh->np,7*mesh->np);
   ns = nap = 0;
 
@@ -560,7 +560,7 @@ static int anatetv(pMesh mesh,pSol met,char typchk) {
     }
   }
 
-  /* 2. Set flags and split internal edges */
+  /** 2. Set flags and split internal edges */
   for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
     if ( !MG_EOK(pt) || MG_SIN(pt->tag) )  continue;
@@ -603,7 +603,7 @@ static int anatetv(pMesh mesh,pSol met,char typchk) {
     }
   }
 
-  /* 3. check and split */
+  /** 3. check and split */
   ns = 0;
   ne = mesh->ne;
   for (k=1; k<=ne; k++) {
@@ -679,7 +679,7 @@ static int anatetv(pMesh mesh,pSol met,char typchk) {
   return(nap);
 }
 
-/* analyze tetra and split on geometric criterion */
+/** analyze tetra and split on geometric criterion */
 static int anatets(pMesh mesh,pSol met,char typchk) {
   pTetra   pt;
   pPoint   ppt,p1,p2;
@@ -693,7 +693,7 @@ static int anatets(pMesh mesh,pSol met,char typchk) {
   char     i,j,ia,i1,i2;
   static double uv[3][2] = { {0.5,0.5}, {0.,0.5}, {0.5,0.} };
 
-  /* 1. analysis of boundary elements */
+  /** 1. analysis of boundary elements */
   hashNew(&hash,mesh->np,7*mesh->np);
   ns = nap = 0;
   for (k=1; k<=mesh->ne; k++) {
@@ -791,7 +791,7 @@ static int anatets(pMesh mesh,pSol met,char typchk) {
     return(ns);
   }
 
-  /* 2. check if split by adjacent; besides, a triangle may have been splitted and not its adjacent
+  /** 2. check if split by adjacent; besides, a triangle may have been splitted and not its adjacent
      (thus, the associated n2 may not exist) : update this normal if need be */
   nc = 0;
   for (k=1; k<=mesh->ne; k++) {
@@ -833,7 +833,7 @@ static int anatets(pMesh mesh,pSol met,char typchk) {
     fflush(stdout);
   }
 
-  /* 3. Simulate splitting and delete points leading to invalid configurations */
+  /** 3. Simulate splitting and delete points leading to invalid configurations */
   for (k=1; k<=mesh->np; k++)
     mesh->point[k].flag = 0;
 
@@ -895,7 +895,7 @@ static int anatets(pMesh mesh,pSol met,char typchk) {
     fflush(stdout);
   }
 
-  /* 4. splitting */
+  /** 4. splitting */
   ns = 0;
   ne = mesh->ne;
   for (k=1; k<=ne; k++) {
@@ -1143,7 +1143,7 @@ static int adpcol(pMesh mesh,pSol met) {
   return(nc);
 }
 
-/* Analyze tetrahedra and split long / collapse short, according to prescribed metric */
+/** Analyze tetrahedra and split long / collapse short, according to prescribed metric */
 static int adptet(pMesh mesh,pSol met) {
   int        ier,it,nnc,nns,nnf,nnm,maxit,nc,ns,nf,nm;
 
@@ -1212,7 +1212,7 @@ static int adptet(pMesh mesh,pSol met) {
   return(1);
 }
 
-/* split tetra into 4 when more than 1 boundary face */
+/** split tetra into 4 when more than 1 boundary face */
 static int anatet4(pMesh mesh, pSol met) {
   pTetra      pt;
   pPoint      ppt;
@@ -1252,7 +1252,7 @@ static int anatet4(pMesh mesh, pSol met) {
 }
 
 
-/* analyze tetrahedra and split if needed */
+/** analyze tetrahedra and split if needed */
 static int anatet(pMesh mesh,pSol met,char typchk) {
   int     ier,nc,ns,nf,nnc,nns,nnf,it,maxit;
 
@@ -1290,14 +1290,14 @@ static int anatet(pMesh mesh,pSol met,char typchk) {
       return(0);
     }
     if ( typchk == 2 && it == maxit-1 )  info.fem = 1;
-
+    //prilen(&mesh, &met);
     /* collapse short edges */
     nc = coltet(mesh,met,typchk);
     if ( nc < 0 ) {
       fprintf(stdout,"  ## Unable to collapse mesh. Exiting.\n");
       return(0);
     }
-
+    //prilen(&mesh, &met);
     /* attempt to swap */
     nf = swpmsh(mesh,met);
     if ( nf < 0 ) {
@@ -1307,6 +1307,7 @@ static int anatet(pMesh mesh,pSol met,char typchk) {
     nnf += nf;
 
     nf = swptet(mesh,met);
+    prilen(&mesh, &met);
     if ( nf < 0 ) {
       fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
       return(0);
@@ -1327,7 +1328,7 @@ static int anatet(pMesh mesh,pSol met,char typchk) {
   return(1);
 }
 
-/* main adaptation routine */
+/** main adaptation routine */
 int mmg3d1(pMesh mesh,pSol met) {
   if ( abs(info.imprim) > 4 )
     fprintf(stdout,"  ** MESH ANALYSIS\n");
@@ -1337,7 +1338,7 @@ int mmg3d1(pMesh mesh,pSol met) {
     return(0);
   }
 
-  /*--- stage 1: geometric mesh */
+  /**--- stage 1: geometric mesh */
   if ( abs(info.imprim) > 4 || info.ddebug )
     fprintf(stdout,"  ** GEOMETRIC MESH\n");
 
@@ -1346,7 +1347,7 @@ int mmg3d1(pMesh mesh,pSol met) {
     return(0);
   }
 
-  /*--- stage 2: computational mesh */
+  /**--- stage 2: computational mesh */
   if ( abs(info.imprim) > 4 || info.ddebug )
     fprintf(stdout,"  ** COMPUTATIONAL MESH\n");
 

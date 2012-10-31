@@ -3,7 +3,7 @@
 extern Info  info;
 extern char  ddb;
 
-/* Check whether collapse ip -> iq could be performed, ip internal ;
+/** Check whether collapse ip -> iq could be performed, ip internal ;
    'mechanical' tests (positive jacobian) are not performed here */
 int chkcol_int(pMesh mesh,pSol met,int k,char iface,char iedg,int *list,char typchk) {
   pTetra   pt,pt0;
@@ -65,7 +65,7 @@ int chkcol_int(pMesh mesh,pSol met,int k,char iface,char iedg,int *list,char typ
   return(ilist);
 }
 
-/* Check whether collapse ip -> iq could be performed, ip boundary point ;
+/** Check whether collapse ip -> iq could be performed, ip boundary point ;
    'mechanical' tests (positive jacobian) are not performed here ;
    iface = boundary face on which lie edge iedg - in local face num.
    (pq, or ia in local tet notation) */
@@ -257,7 +257,7 @@ int chkcol_bdy(pMesh mesh,int k,char iface,char iedg,int *listv) {
   return(ilistv);
 }
 
-/* Collapse vertex p = list[0]%4 of tetra list[0]/4 over vertex indq of tetra list[0]/4.
+/** Collapse vertex p = list[0]%4 of tetra list[0]/4 over vertex indq of tetra list[0]/4.
    Only physical tests (positive jacobian) are done (i.e. approximation of the surface,
    etc... must be performed outside). */
 int colver(pMesh mesh,int *list,int ilist,char indq) {

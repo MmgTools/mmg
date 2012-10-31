@@ -48,7 +48,7 @@ void  chrono(int cmode,mytime *ptt) {
 }
 
 
-/* initialize time table */
+/** initialize time table */
 void  tminit(mytime *t,int maxtim) {
   mytime  *ptt;
   int      k;
@@ -63,7 +63,7 @@ void  tminit(mytime *t,int maxtim) {
 }
 
 
-/* print real time */
+/** print real time */
 void printim(double elps,char *stim) {
   int    hh,mm,ss;
 

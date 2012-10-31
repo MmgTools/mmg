@@ -374,7 +374,7 @@ int chkmsh(pMesh mesh,int severe,int base) {
   return(1);
 }
 
-/* Search boundary faces containing point np */
+/** Search boundary faces containing point np */
 int chkptonbdy(pMesh mesh,int np){
   pTetra      pt;
   pxTetra     pxt;
@@ -416,7 +416,7 @@ int chkptonbdy(pMesh mesh,int np){
   return(1);
 }
 
-/* Count how many boundary faces share point nump */
+/** Count how many boundary faces share point nump */
 int cntbdypt(pMesh mesh, int nump){
   pTetra pt;
   pxTetra pxt;
@@ -444,7 +444,7 @@ int cntbdypt(pMesh mesh, int nump){
   return(nf);
 }
 
-/* Count the number of tetras that have several boundary faces, as well as the number of internal
+/** Count the number of tetras that have several boundary faces, as well as the number of internal
    edges connecting points of the boundary */
 int chkfemtopo(pMesh mesh) {
   pTetra      pt,pt1;
@@ -515,7 +515,7 @@ int chkfemtopo(pMesh mesh) {
   return(1);
 }
 
-/* Search face n0,n1,n2 in mesh, and get the support tetras, with the corresponding refs */
+/** Search face n0,n1,n2 in mesh, and get the support tetras, with the corresponding refs */
 int srcface(pMesh mesh,int n0,int n1,int n2) {
   pTetra    pt;
   pxTetra   pxt;

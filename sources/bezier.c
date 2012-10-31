@@ -2,7 +2,7 @@
 
 extern char ddb;
 
-/* Compute tangent to geometric support curve passing through c1,c2, with normals n1,n2*/
+/** Compute tangent to geometric support curve passing through c1,c2, with normals n1,n2*/
 inline int BezierTgt(double c1[3],double c2[3],double n1[3],double n2[3],double t1[3],double t2[3]) {
   double ux,uy,uz,b[3],n[3],dd;
 
@@ -49,7 +49,7 @@ inline int BezierTgt(double c1[3],double c2[3],double n1[3],double n2[3],double 
   return(1);
 }
 
-/* Compute value of the parameter that makes the underlying Bezier curve with 'constant speed'*/
+/** Compute value of the parameter that makes the underlying Bezier curve with 'constant speed'*/
 inline double BezierGeod(double c1[3],double c2[3],double t1[3],double t2[3]) {
   double alpha,t[3],ll,ps,nt2,ux,uy,uz;
 
@@ -74,7 +74,7 @@ inline double BezierGeod(double c1[3],double c2[3],double t1[3],double t2[3]) {
   return(ATHIRD*sqrt(ll));
 }
 
-/* Compute control points associated to the underlying curve to [p0p1]
+/** Compute control points associated to the underlying curve to [p0p1]
    ised = 1 if [p0p1] must be considered as a special edge, 0 otherwise
    Provide a direction v which will be considered as reference when dealing with
    choice of normal vectors */
@@ -234,7 +234,7 @@ inline int BezierEdge(pMesh mesh,int ip0,int ip1,double b0[3],double b1[3],char 
   return(1);
 }
 
-/* return Bezier control points on triangle pt (cf. Vlachos) */
+/** return Bezier control points on triangle pt (cf. Vlachos) */
 int bezierCP(pMesh mesh,Tria *pt,pBezier pb) {
   pPoint    p[3];
   xPoint   *pxp;
@@ -434,7 +434,7 @@ int bezierCP(pMesh mesh,Tria *pt,pBezier pb) {
   return(1);
 }
 
-/* return point o at (u,v) in Bezier patch and normal */
+/** return point o at (u,v) in Bezier patch and normal */
 int bezierInt(pBezier pb,double uv[2],double o[3],double no[3],double to[3]) {
   double    dd,u,v,w,ps,ux,uy,uz;
   char      i;

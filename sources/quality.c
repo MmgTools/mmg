@@ -7,7 +7,7 @@ inline double lenedg_ani(pMesh mesh,pSol met,int ip1,int ip2) {
   return(0.0);
 }
 
-/* Compute length of edge [ip1,ip2] according to the size prescription */
+/** Compute length of edge [ip1,ip2] according to the size prescription */
 inline double lenedg_iso(pMesh mesh,pSol met,int ip1,int ip2) {
   pPoint   p1,p2;
   double   h1,h2,l,r,len;
@@ -26,7 +26,7 @@ inline double lenedg_iso(pMesh mesh,pSol met,int ip1,int ip2) {
 }
 
 
-/* Return quality of surface triangle */
+/** Return quality of surface triangle */
 inline double caltri(pMesh mesh,pTria ptt) {
   double   *a,*b,*c,cal,abx,aby,abz,acx,acy,acz,bcx,bcy,bcz,rap;
 
@@ -59,7 +59,7 @@ inline double caltri(pMesh mesh,pTria ptt) {
   return(sqrt(cal) / rap);
 }
 
-/* compute tetra oriented quality of iel (return 0.0 when element is inverted) */
+/** compute tetra oriented quality of iel (return 0.0 when element is inverted) */
 inline double orcal(pMesh mesh,int iel) {
   pTetra     pt;
   double     abx,aby,abz,acx,acy,acz,adx,ady,adz,bcx,bcy,bcz,bdx,bdy,bdz,cdx,cdy,cdz;
@@ -118,7 +118,7 @@ inline double orcal(pMesh mesh,int iel) {
 }
 
 
-/* compute tetra quality iso */
+/** compute tetra quality iso */
 inline double caltet_iso(pMesh mesh,pSol met,int ia,int ib,int ic,int id) {
   double     abx,aby,abz,acx,acy,acz,adx,ady,adz,bcx,bcy,bcz,bdx,bdy,bdz,cdx,cdy,cdz;
   double     vol,v1,v2,v3,rap;
@@ -178,7 +178,7 @@ inline double caltet_ani(pMesh mesh,pSol met,int ia,int ib,int ic,int id) {
 }
 
 
-/* compute face normal */
+/** compute face normal */
 inline int nortri(pMesh mesh,pTria pt,double *n) {
   double   *a,*b,*c,dd,abx,aby,abz,acx,acy,acz,det;
 
@@ -231,7 +231,7 @@ int badelt(pMesh mesh,pSol met) {
   return(nd);
 }
 
-/* Compute sizes of edges of the mesh, and displays histo */
+/** Compute sizes of edges of the mesh, and displays histo */
 int prilen(pMesh mesh, pSol met) {
   pTetra          pt;
   Hash            hash;
@@ -345,7 +345,7 @@ int prilen(pMesh mesh, pSol met) {
   return(1);
 }
 
-/* print mesh quality histo */
+/** print mesh quality histo */
 void outqua(pMesh mesh,pSol met) {
   pTetra    pt;
   double   rap,rapmin,rapmax,rapavg,med;

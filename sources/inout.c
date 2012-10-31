@@ -2,7 +2,7 @@
 
 extern Info  info;
 
-/* read mesh data */
+/** read mesh data */
 int loadMesh(pMesh mesh) {
   pTetra       pt;
   pTria        pt1;
@@ -199,7 +199,7 @@ int loadMesh(pMesh mesh) {
   return(1);
 }
 
-/* Save mesh data */
+/** Save mesh data */
 int saveMesh(pMesh mesh) {
   pPoint       ppt;
   pTetra       pt;
@@ -368,7 +368,7 @@ int saveMesh(pMesh mesh) {
   return(1);
 }
 
-/* load metric field */
+/** load metric field */
 int loadMet(pSol met) {
   double       dbuf[GmfMaxTyp];
   float        fbuf[GmfMaxTyp];
@@ -452,7 +452,7 @@ int loadMet(pSol met) {
   return(1);
 }
 
-/* write iso or aniso metric */
+/** write iso or aniso metric */
 int saveMet(pMesh mesh,pSol met) {
   pPoint     ppt;
   double     dbuf[GmfMaxTyp],tmp;

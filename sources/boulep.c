@@ -2,7 +2,7 @@
 
 extern char ddb;
 
-/* return average normal of triangles sharing P without crossing ridge */
+/** return average normal of triangles sharing P without crossing ridge */
 int boulen(pMesh mesh,int start,int ip,double *nn) {
   pTria    pt;
   double   n[3],dd;
@@ -69,7 +69,7 @@ int boulen(pMesh mesh,int start,int ip,double *nn) {
 }
 
 
-/* return tangent to curve at ip */
+/** return tangent to curve at ip */
 int boulec(pMesh mesh,int start,int ip,double *tt) {
   pTria    pt;
   pPoint   p0,p1,p2;
@@ -143,7 +143,7 @@ int boulec(pMesh mesh,int start,int ip,double *tt) {
 }
 
 
-/* store edges and return number (ref+geo) incident to ip */
+/** store edges and return number (ref+geo) incident to ip */
 int bouler(pMesh mesh,int start,int ip,int *list) {
   pTria    pt;
   int     *adja,k,nr;
@@ -196,7 +196,7 @@ int bouler(pMesh mesh,int start,int ip,int *list) {
   return(nr);
 }
 
-/* Return volumic ball (i.e. filled with tetrahedra) of point ip in tetra start.
+/** Return volumic ball (i.e. filled with tetrahedra) of point ip in tetra start.
    Results are stored under the form 4*kel + jel , kel = number of the tetra, jel = local
    index of p within kel */
 int boulevolp (pMesh mesh, int start, int ip, int * list){
@@ -241,7 +241,7 @@ int boulevolp (pMesh mesh, int start, int ip, int * list){
   return(ilist);
 }
 
-/* Define normal and tangent vectors at a non manifold point (ip in start, supported by
+/** Define normal and tangent vectors at a non manifold point (ip in start, supported by
    face iface), enumerating its (outer)surfacic ball ; return sng = whether point is singular
    or not */
 int boulenm(pMesh mesh,int start,int ip,int iface,double n[3],double t[3]) {
@@ -389,7 +389,7 @@ int boulenm(pMesh mesh,int start,int ip,int iface,double n[3],double t[3]) {
   return(1);
 }
 
-/* Return volumic ball of a surfacic point p, as well as the part of its surfacic ball
+/** Return volumic ball of a surfacic point p, as well as the part of its surfacic ball
    supported in the outer boundary starting from tet start, with point ip, and face if in tetra
    volumic ball ; list[k] = 4*number of tet + index of point
    surfacic ball : list[k] = 4*number of tet + index of FACE */
@@ -467,7 +467,7 @@ int bouleext(pMesh mesh, int start, int ip, int iface, int *listv, int *ilistv, 
   }
   while ( 4*k+iopp != fstart );
 
-  /* Now, surfacic ball is complete ; finish travel of volumic ball */
+  /** Now, surfacic ball is complete ; finish travel of volumic ball */
   cur = 0;
   while ( cur < (*ilistv) ) {
     k = listv[cur]/4;
@@ -496,7 +496,7 @@ int bouleext(pMesh mesh, int start, int ip, int iface, int *listv, int *ilistv, 
   return(1);
 }
 
-/* Return volumic ball of a SURFACE point p, as well as its surfacic ball, starting from tetra
+/** Return volumic ball of a SURFACE point p, as well as its surfacic ball, starting from tetra
    start, with point ip, and face if in tetra
    volumic ball ; list[k] = 4*number of tet + index of point
    surfacic ball : list[k] = 4*number of tet + index of FACE */
@@ -608,7 +608,7 @@ int boulesurfvolp(pMesh mesh,int start,int ip,int iface,int *listv,int *ilistv,i
   return(1);
 }
 
-/* Get tag of edge ia in tetra start by travelling its shell until meeting a boundary face */
+/** Get tag of edge ia in tetra start by travelling its shell until meeting a boundary face */
 inline int gettag(pMesh mesh,int start,int ia,int *tag,int *edg) {
   pTetra        pt;
   pxTetra       pxt;
@@ -668,7 +668,7 @@ inline int gettag(pMesh mesh,int start,int ia,int *tag,int *edg) {
   return(0);
 }
 
-/* Set tag and edg of edge ia (if need be) in tetra start by travelling its shell */
+/** Set tag and edg of edge ia (if need be) in tetra start by travelling its shell */
 inline int settag(pMesh mesh,int start,int ia,int tag,int edg) {
   pTetra        pt;
   pxTetra       pxt;
@@ -756,7 +756,7 @@ inline int settag(pMesh mesh,int start,int ia,int tag,int edg) {
   return(1);
 }
 
-/* Find all tets sharing edge ia of tetra start
+/** Find all tets sharing edge ia of tetra start
    return 2*ilist if shell is closed, 2*ilist +1 otherwise */
 int coquil(pMesh mesh,int start,int ia,int * list) {
   pTetra  pt;
@@ -860,7 +860,7 @@ int coquil(pMesh mesh,int start,int ia,int * list) {
   return(2*ilist+1);
 }
 
-/* Identify whether edge ia in start is a boundary edge by unfolding its shell */
+/** Identify whether edge ia in start is a boundary edge by unfolding its shell */
 int srcbdy(pMesh mesh,int start,int ia) {
   pTetra      pt;
   pxTetra     pxt;
@@ -919,7 +919,7 @@ int srcbdy(pMesh mesh,int start,int ia) {
   return(0);
 }
 
-/* Find all tets sharing edge ia of tetra start, and stores boundary faces when met
+/** Find all tets sharing edge ia of tetra start, and stores boundary faces when met
    it1 & it2 = 6*iel + iface, iel = index of tetra, iface = index of face in tetra
    return 2*ilist if shell is closed, 2*ilist +1 otherwise */
 int coquilface(pMesh mesh,int start,int ia,int *list,int *it1,int *it2) {

@@ -1,7 +1,7 @@
 #include "mmg3d.h"
 
 
-/* Move internal point */
+/** Move internal point */
 int movintpt(pMesh mesh,int *list,int ilist) {
   pTetra                 pt,pt0;
   pPoint                 p0,p1,p2,p3,ppt0;
@@ -61,7 +61,7 @@ int movintpt(pMesh mesh,int *list,int ilist) {
   return(1);
 }
 
-/* Move boundary regular point, whose volumic and surfacic balls are passed */
+/** Move boundary regular point, whose volumic and surfacic balls are passed */
 int movbdyregpt(pMesh mesh,int *listv,int ilistv,int *lists,int ilists) {
   pTetra                                        pt,pt0;
   pPoint                                        p0,p1,p2,ppt0;
@@ -90,10 +90,10 @@ int movbdyregpt(pMesh mesh,int *listv,int ilistv,int *lists,int ilists) {
   }
   n = &(mesh->xpoint[p0->xp].n1[0]);
 
-  /* Step 1 : rotation matrix that sends normal n to the third coordinate vector of R^3 */
+  /** Step 1 : rotation matrix that sends normal n to the third coordinate vector of R^3 */
   rotmatrix(n,r);
 
-  /* Step 2 : rotation of the oriented surfacic ball with r : lispoi[k] is the common edge
+  /** Step 2 : rotation of the oriented surfacic ball with r : lispoi[k] is the common edge
      between faces lists[k-1] and lists[k] */
   k                     = lists[0] / 4;
   iface = lists[0] % 4;
@@ -191,7 +191,7 @@ int movbdyregpt(pMesh mesh,int *listv,int ilistv,int *lists,int ilists) {
   det2d = lispoi[3*(ilists-1)+1]*lispoi[3*0+2] - lispoi[3*(ilists-1)+2]*lispoi[3*0+1];
   if ( det2d < 0.0 )    return(0);
 
-  /* Step 3 : Compute optimal position to make current triangle equilateral, and average of
+  /** Step 3 : Compute optimal position to make current triangle equilateral, and average of
      these positions*/
   for (k=0; k<ilists; k++) {
     m[0] = 0.5*(lispoi[3*(k+1)+1] + lispoi[3*k+1]);
@@ -207,7 +207,7 @@ int movbdyregpt(pMesh mesh,int *listv,int ilistv,int *lists,int ilists) {
   oppt[0] *= (1.0 / nut);
   oppt[1] *= (1.0 / nut);
 
-  /* Step 4 : locate new point in the ball, and compute its barycentric coordinates */
+  /** Step 4 : locate new point in the ball, and compute its barycentric coordinates */
   det2d = lispoi[1]*oppt[1] - lispoi[2]*oppt[0];
   kel = 0;
   if ( det2d >= 0.0 ) {
@@ -256,7 +256,7 @@ int movbdyregpt(pMesh mesh,int *listv,int ilistv,int *lists,int ilists) {
   lambda[2]*= (det2d);
   lambda[0] = 1.0 - lambda[1] - lambda[2];
 
-  /* Step 5 : come back to original problem, and compute patch in triangle iel */
+  /** Step 5 : come back to original problem, and compute patch in triangle iel */
   iel = lists[kel] / 4;
   iface  = lists[kel] % 4;
   pt    = &mesh->tetra[iel];
@@ -398,7 +398,7 @@ int movbdyregpt(pMesh mesh,int *listv,int ilistv,int *lists,int ilists) {
   return(1);
 }
 
-/* Move boundary reference point, whose volumic and surfacic balls are passed */
+/** Move boundary reference point, whose volumic and surfacic balls are passed */
 int movbdyrefpt(pMesh mesh, int *listv, int ilistv, int *lists, int ilists){
   pTetra                                        pt,pt0;
   pPoint                                        p0,p1,p2,ppt0;
@@ -664,7 +664,7 @@ int movbdyrefpt(pMesh mesh, int *listv, int ilistv, int *lists, int ilists){
 }
 
 
-/* Move boundary non manifold point, whose volumic and (exterior) surfacic balls are passed */
+/** Move boundary non manifold point, whose volumic and (exterior) surfacic balls are passed */
 int movbdynompt(pMesh mesh, int *listv, int ilistv, int *lists, int ilists){
   pTetra       pt,pt0;
   pPoint       p0,p1,p2,ppt0;
@@ -930,7 +930,7 @@ int movbdynompt(pMesh mesh, int *listv, int ilistv, int *lists, int ilists){
   return(1);
 }
 
-/* Move boundary ridge point, whose volumic and surfacic balls are passed */
+/** Move boundary ridge point, whose volumic and surfacic balls are passed */
 int movbdyridpt(pMesh mesh,int *listv,int ilistv,int *lists,int ilists) {
   pTetra                                        pt,pt0;
   pPoint                                        p0,p1,p2,ppt0;

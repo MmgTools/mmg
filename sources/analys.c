@@ -3,7 +3,7 @@
 extern Info  info;
 
 
-/* topology: set adjacent, detect Moebius, flip faces, count connected comp. */
+/** topology: set adjacent, detect Moebius, flip faces, count connected comp. */
 static int setadj(pMesh mesh){
   pTria   pt,pt1;
   pPoint  ppt;
@@ -167,7 +167,7 @@ static int setadj(pMesh mesh){
   return(1);
 }
 
-/* check for ridges: dihedral angle */
+/** check for ridges: dihedral angle */
 static int setdhd(pMesh mesh) {
   pTria    pt,pt1;
   double   n1[3],n2[3],dhd;
@@ -220,7 +220,7 @@ static int setdhd(pMesh mesh) {
   return(1);
 }
 
-/* check for singularities */
+/** check for singularities */
 static int singul(pMesh mesh) {
   pTria     pt;
   pPoint    ppt,p1,p2;
@@ -269,7 +269,7 @@ static int singul(pMesh mesh) {
   return(1);
 }
 
-/* compute normals at C1 vertices, for C0: tangents */
+/** compute normals at C1 vertices, for C0: tangents */
 static int norver(pMesh mesh) {
   pTria     pt;
   pPoint    ppt;
@@ -395,7 +395,7 @@ static int norver(pMesh mesh) {
   return(1);
 }
 
-/* Define continuous geometric support at non manifold vertices, using volume information */
+/** Define continuous geometric support at non manifold vertices, using volume information */
 static int nmgeom(pMesh mesh){
   pTetra     pt;
   pPoint     p0;
@@ -443,10 +443,10 @@ static int nmgeom(pMesh mesh){
   return(1);
 }
 
-/* preprocessing stage: mesh analysis */
+/** preprocessing stage: mesh analysis */
 int analys(pMesh mesh) {
 
-  /*--- stage 1: data structures for surface */
+  /**--- stage 1: data structures for surface */
   if ( abs(info.imprim) > 4 )
     fprintf(stdout,"  ** SURFACE ANALYSIS\n");
 
@@ -489,7 +489,7 @@ int analys(pMesh mesh) {
     return(0);
   }
 
-  /*--- stage 2: surface analysis */
+  /**--- stage 2: surface analysis */
   if ( abs(info.imprim) > 5  || info.ddebug )
     fprintf(stdout,"  ** SETTING TOPOLOGY\n");
 

@@ -3,7 +3,7 @@
 extern Info info;
 extern char ddb;
 
-/* Check whether edge whose shell is provided should be swapped for
+/** Check whether edge whose shell is provided should be swapped for
    geometric approximation purposes (the 2 surface triangles are also provided) */
 int chkswpbdy(pMesh mesh,int *list,int ilist,int it1,int it2) {
   pTetra   pt,pt0;
@@ -178,7 +178,7 @@ int chkswpbdy(pMesh mesh,int *list,int ilist,int it1,int it2) {
   return(1);
 }
 
-/* Swap boundary edge whose shell is provided ; it1 = boundary face
+/** Swap boundary edge whose shell is provided ; it1 = boundary face
    carrying the beforehand tested terminal point for collapse */
 int swpbdy(pMesh mesh,pSol met,int *list,int ret,int it1) {
   pTetra   pt,pt1;

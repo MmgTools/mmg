@@ -2,7 +2,7 @@
 
 extern char ddb;
 
-/* naive (increasing) sorting algorithm, for very small tabs ; permutation is stored in perm */
+/** naive (increasing) sorting algorithm, for very small tabs ; permutation is stored in perm */
 inline void nsort(int n,double *val,char *perm){
   int   i,j,aux;
 
@@ -19,7 +19,7 @@ inline void nsort(int n,double *val,char *perm){
   }
 }
 
-/* Compute rotation matrix that sends vector n to the third vector of canonical basis */
+/** Compute rotation matrix that sends vector n to the third vector of canonical basis */
 inline void rotmatrix(double n[3],double r[3][3]) {
   double   aa,bb,ab,ll,l,cosalpha,sinalpha;
 
@@ -57,7 +57,7 @@ inline void rotmatrix(double n[3],double r[3][3]) {
   }
 }
 
-/* Compute 3 * 3 determinant : det(c1-c0,c2-c0,v) */
+/** Compute 3 * 3 determinant : det(c1-c0,c2-c0,v) */
 inline double det3pt1vec(double c0[3],double c1[3],double c2[3],double v[3]) {
   double m00,m10,m20,m01,m11,m21,det;
 
@@ -69,7 +69,7 @@ inline double det3pt1vec(double c0[3],double c1[3],double c2[3],double v[3]) {
   return(det);
 }
 
-/* Compute 3 * 3 determinant : det(c1-c0,c2-c0,c3-c0) */
+/** Compute 3 * 3 determinant : det(c1-c0,c2-c0,c3-c0) */
 inline double det4pt(double c0[3],double c1[3],double c2[3],double c3[3]) {
   double m00,m10,m20,m01,m11,m21,m02,m12,m22,det;
 
@@ -81,7 +81,7 @@ inline double det4pt(double c0[3],double c1[3],double c2[3],double c3[3]) {
   return(det);
 }
 
-/* Compute oriented volume of a tetrahedron */
+/** Compute oriented volume of a tetrahedron */
 inline double orvol(pPoint point,int *v) {
   pPoint  p0,p1,p2,p3;
 
@@ -93,7 +93,7 @@ inline double orvol(pPoint point,int *v) {
   return(det4pt(p0->c,p1->c,p2->c,p3->c));
 }
 
-/* Compute normal to face iface of tetra k, exterior to tetra k */
+/** Compute normal to face iface of tetra k, exterior to tetra k */
 inline int norface(pMesh mesh,int k,int iface,double n[3]) {
   pTetra     pt;
   pPoint     p0,p1,p2;
@@ -125,7 +125,7 @@ inline int norface(pMesh mesh,int k,int iface,double n[3]) {
   return(1);
 }
 
-/* compute face normal */
+/** compute face normal */
 inline int norpts(pMesh mesh,int ip1,int ip2, int ip3,double *n) {
   pPoint   p1,p2,p3;
   double   dd,abx,aby,abz,acx,acy,acz,det;
@@ -159,7 +159,7 @@ inline int norpts(pMesh mesh,int ip1,int ip2, int ip3,double *n) {
 }
 
 
-/* Solve 3*3 symmetric system A*r = b */
+/** Solve 3*3 symmetric system A*r = b */
 inline int sys33sym(double a[6], double b[3], double r[3]){
   double ia[6],as[6],det,m;
   int    i;
@@ -207,7 +207,7 @@ inline int sys33sym(double a[6], double b[3], double r[3]){
   return(1);
 }
 
-/* Compute eigenelements of a SYMMETRIC matrix m. Eigenvectors are orthogonal. Return order */
+/** Compute eigenelements of a SYMMETRIC matrix m. Eigenvectors are orthogonal. Return order */
 inline int eigensym(double m[3],double lambda[2],double vp[2][2]) {
   double   sqDelta,dd,trm,vnorm;
 
@@ -249,7 +249,7 @@ inline int eigensym(double m[3],double lambda[2],double vp[2][2]) {
   return(1);
 }
 
-/* If need be, invert the travelling sense of surfacic ball so that it is travelled in
+/** If need be, invert the travelling sense of surfacic ball so that it is travelled in
    the direct sense with respect to direction n anchored at point ip (ip = global num.):
    return 2 = orientation reversed, 1 otherwise */
 inline int directsurfball(pMesh mesh, int ip, int *list, int ilist, double n[3]){
@@ -273,7 +273,7 @@ inline int directsurfball(pMesh mesh, int ip, int *list, int ilist, double n[3])
   return(2);
 }
 
-/* If need be, reorder the surfacic ball of point ip, so that its first element has
+/** If need be, reorder the surfacic ball of point ip, so that its first element has
    edge (p,q) (nump,q = global num) as edge iprv2[ip] of face iface.
    return 2 = orientation reversed, 1 otherwise */
 int startedgsurfball(pMesh mesh,int nump,int numq,int *list,int ilist) {
@@ -311,7 +311,7 @@ int startedgsurfball(pMesh mesh,int nump,int numq,int *list,int ilist) {
   return(2);
 }
 
-/* Compute point located at parameter value step from point ip0, as well as interpolate
+/** Compute point located at parameter value step from point ip0, as well as interpolate
    of normals, tangent for a RIDGE edge */
 inline int BezierRidge(pMesh mesh,int ip0,int ip1,double s,double *o,double *no1,double *no2,double *to){
   pPoint    p0,p1;
@@ -475,7 +475,7 @@ inline int BezierRidge(pMesh mesh,int ip0,int ip1,double s,double *o,double *no1
   return(1);
 }
 
-/* Compute point located at parameter value step from point ip0, as well as interpolate
+/** Compute point located at parameter value step from point ip0, as well as interpolate
    of normals, tangent for a REF edge */
 inline int BezierRef(pMesh mesh,int ip0,int ip1,double s,double *o,double *no,double *to) {
   pPoint          p0,p1;
@@ -615,7 +615,7 @@ inline int BezierRef(pMesh mesh,int ip0,int ip1,double s,double *o,double *no,do
   return(1);
 }
 
-/* Compute point located at parameter value step from point ip0, as well as interpolate
+/** Compute point located at parameter value step from point ip0, as well as interpolate
    of normals, tangent for a NOM edge */
 inline int BezierNom(pMesh mesh,int ip0,int ip1,double s,double *o,double *no,double *to) {
   pPoint      p0,p1;
@@ -757,7 +757,7 @@ inline int BezierNom(pMesh mesh,int ip0,int ip1,double s,double *o,double *no,do
   return(1);
 }
 
-/* Compute point located at parameter value step from point ip0, as well as interpolate
+/** Compute point located at parameter value step from point ip0, as well as interpolate
    of normals, tangent for a regular edge ; v = ref vector (normal) for choice of normals if need be */
 inline int BezierReg(pMesh mesh,int ip0, int ip1, double s, double v[3], double *o, double *no){
   pPoint p0,p1;
@@ -920,7 +920,7 @@ inline int BezierReg(pMesh mesh,int ip0, int ip1, double s, double v[3], double 
   return(1);
 }
 
-/* compute iso size map */
+/** compute iso size map */
 int DoSol(pMesh mesh,pSol met,Info* info) {
   pTetra     pt;
   pPoint     p1,p2;

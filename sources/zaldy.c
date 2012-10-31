@@ -3,7 +3,7 @@
 extern Info  info;
 
 
-/* get new point address */
+/** get new point address */
 int newPt(pMesh mesh,double c[3],char tag) {
   pPoint  ppt;
   int     curpt;
@@ -46,7 +46,7 @@ void delPt(pMesh mesh,int ip) {
   }
 }
 
-/* get new elt address */
+/** get new elt address */
 int newElt(pMesh mesh) {
   int     curiel;
 
@@ -82,7 +82,7 @@ void delElt(pMesh mesh,int iel) {
 }
 
 
-/* allocate main structure */
+/** allocate main structure */
 int zaldy(pMesh mesh) {
   int     million = 1048576L;
   int     k,npask,bytes;

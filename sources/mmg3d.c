@@ -1,4 +1,4 @@
-/* mmg3d: 3d mesh adaptation
+/** mmg3d: 3d mesh adaptation
  *
  * Written by Cecile Dobrzynski (IMB), Charles Dapogny and Pascal Frey (LJLL)
  * Copyright (c) 2004- IMB/LJLL.
@@ -248,7 +248,7 @@ static int parsar(int argc,char *argv[],pMesh mesh,pSol met) {
   return(1);
 }
 
-/* Deallocations before return */
+/** Deallocations before return */
 static void freeAll(pMesh mesh,pSol met){
   free(mesh->point);
   mesh->point=NULL;
@@ -299,7 +299,7 @@ static void endcod() {
 }
 
 
-/* set function pointers */
+/** set function pointers */
 static void setfunc(pMesh mesh,pSol met) {
   if ( met->size < 6 ) {
     caltet = caltet_iso;

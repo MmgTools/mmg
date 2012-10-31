@@ -3,7 +3,7 @@
 extern Info  info;
 extern char  ddb;
 
-/* solve 3*3 non symmetric system Ar = b */
+/** solve 3*3 non symmetric system Ar = b */
 static inline int invsl(double A[3][3],double b[3],double r[3]) {
   double detA;
 
@@ -32,7 +32,7 @@ static inline int invsl(double A[3][3],double b[3],double r[3]) {
   return(1);
 }
 
-/* Check ball of point np, return 0 if a nonmanifold situation is created */
+/** Check ball of point np, return 0 if a nonmanifold situation is created */
 static int ismaniball(pMesh mesh,pSol sol,int k,int indp) {
   pTetra   pt,pt1;
   double   v,v0,v1,v2;
@@ -249,7 +249,7 @@ static int ismaniball(pMesh mesh,pSol sol,int k,int indp) {
   return(1);
 }
 
-/* Snap values of the level set function very close to 0 to exaclty 0,
+/** Snap values of the level set function very close to 0 to exaclty 0,
    and prevent nonmanifold patterns from being generated */
 static int snpval_ls(pMesh mesh,pSol sol,double *tmp) {
   pTetra   pt;
@@ -307,7 +307,7 @@ static int snpval_ls(pMesh mesh,pSol sol,double *tmp) {
   return(1);
 }
 
-/* Proceed to discretization of the implicit function carried by sol into mesh, once values
+/** Proceed to discretization of the implicit function carried by sol into mesh, once values
    of sol have been snapped/checked */
 static int cuttet_ls(pMesh mesh, pSol sol,double *tmp){
   pTetra   pt;
@@ -497,7 +497,7 @@ static int cuttet_ls(pMesh mesh, pSol sol,double *tmp){
   return(ns);
 }
 
-/* Set references to tets according to the sign of the level set function */
+/** Set references to tets according to the sign of the level set function */
 static int setref_ls(pMesh mesh, pSol sol) {
   pTetra   pt;
   int      k,ip;
@@ -528,7 +528,7 @@ static int setref_ls(pMesh mesh, pSol sol) {
   return(1);
 }
 
-/* Check whether implicit surface is orientable in ball of point ip in tet iel ;
+/** Check whether implicit surface is orientable in ball of point ip in tet iel ;
    Beware : may return 0 when implicit boundary is tangent to outer boundary */
 int chkmaniball(pMesh mesh, int start, char ip){
   pTetra    pt,pt1;
@@ -630,7 +630,7 @@ int chkmaniball(pMesh mesh, int start, char ip){
   return(1);
 }
 
-/* Check whether implicit surface enclosed in volume is orientable */
+/** Check whether implicit surface enclosed in volume is orientable */
 int chkmani(pMesh mesh) {
   pTetra    pt,pt1;
   int       k,iel,ref;
@@ -639,7 +639,7 @@ int chkmani(pMesh mesh) {
 
   for(k=1; k<=mesh->np; k++)  mesh->point[k].flag = 0;
 
-  /* First test : check whether a tetra has 4 boundary faces */
+  /** First test : check whether a tetra has 4 boundary faces */
   for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
     if ( !MG_EOK(pt) )   continue;
@@ -688,7 +688,7 @@ int chkmani(pMesh mesh) {
   return(1);
 }
 
-/* Check whether implicit surface enclosed in volume is orientable (perform an additionnal
+/** Check whether implicit surface enclosed in volume is orientable (perform an additionnal
    test w.r.t. chkmani) */
 int chkmani2(pMesh mesh,pSol sol){
   pTetra    pt,pt1;
@@ -700,7 +700,7 @@ int chkmani2(pMesh mesh,pSol sol){
     mesh->point[k].flag = 0;
   }
 
-  /* First test : assure no tetra has its 4 vertices on implicit boundary */
+  /** First test : assure no tetra has its 4 vertices on implicit boundary */
   for(k=1; k<=mesh->ne; k++){
     pt = &mesh->tetra[k];
     if ( !MG_EOK(pt) || MG_SIN(pt->tag))   continue;
@@ -715,7 +715,7 @@ int chkmani2(pMesh mesh,pSol sol){
     }
   }
 
-  /* Second test : check whether configuration is manifold in each ball */
+  /** Second test : check whether configuration is manifold in each ball */
   for(k=1; k<=mesh->ne; k++){
     pt = &mesh->tetra[k];
     if ( !MG_EOK(pt) || MG_SIN(pt->tag))   continue;
@@ -742,7 +742,7 @@ int chkmani2(pMesh mesh,pSol sol){
   return(1);
 }
 
-/* Check whether collapse of point np to nq does not create a non manifold situation at nq
+/** Check whether collapse of point np to nq does not create a non manifold situation at nq
    ndepmin, ndepplus = tetra of ref minus, plus in ball of np, not in shell of (np,nq). */
 int chkmanicoll(pMesh mesh,int k,int iface,int iedg,int ndepmin,int ndepplus) {
   pTetra    pt,pt1;
@@ -759,7 +759,7 @@ int chkmanicoll(pMesh mesh,int k,int iface,int iedg,int ndepmin,int ndepplus) {
   nump  = pt->v[ip];
   numq  = pt->v[iq];
 
-  /* First step : pile up tetras of future ball of nq, crossing
+  /** First step : pile up tetras of future ball of nq, crossing
      through the shell of (np,nq), as long as they have same ref as ndepmin
      list[l] <= 0 if element of ball of np, >= 0, if element of ball of nq */
   pt = &mesh->tetra[ndepmin];
@@ -890,7 +890,7 @@ int chkmanicoll(pMesh mesh,int k,int iface,int iedg,int ndepmin,int ndepplus) {
 
   assert( cur == ilist );
 
-  /* Second step : same process, starting with a tetra of different reference, in the ball of np */
+  /** Second step : same process, starting with a tetra of different reference, in the ball of np */
   pt = &mesh->tetra[ndepplus];
   for(j=0; j<4; j++) {
     if ( pt->v[j] == nump ) break;
@@ -1107,7 +1107,7 @@ int chkmanicoll(pMesh mesh,int k,int iface,int iedg,int ndepmin,int ndepplus) {
   return(1);
 }
 
-/* Create implicit surface in mesh */
+/** Create implicit surface in mesh */
 int mmg3d2(pMesh mesh,pSol sol) {
   double   *tmp;
 

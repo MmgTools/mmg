@@ -4,20 +4,20 @@ extern Info  info;
 extern char  ddb;
 
 /** Table that associates to each (even) permutation of the 4 vertices of a tetrahedron
-    the corresponding permutation of its edges. Labels :
-    0  : [0,1,2,3]
-    1  : [0,2,3,1]
-    2  : [0,3,1,2]
-    3  : [1,0,3,2]
-    4  : [1,2,0,3]
-    5  : [1,3,2,0]
-    6  : [2,0,1,3]
-    7  : [2,1,3,0]
-    8  : [2,3,0,1]
-    9  : [3,0,2,1]
-    10 : [3,1,0,2]
-    11 : [3,2,1,0]
-    The edge 0 of the config 1 become the edge 1 of the reference config so permedge[1][0]=1 ...
+ *  the corresponding permutation of its edges. Labels :
+ *  0  : [0,1,2,3]
+ *  1  : [0,2,3,1]
+ *  2  : [0,3,1,2]
+ *  3  : [1,0,3,2]
+ *  4  : [1,2,0,3]
+ *  5  : [1,3,2,0]
+ *  6  : [2,0,1,3]
+ *  7  : [2,1,3,0]
+ *  8  : [2,3,0,1]
+ *  9  : [3,0,2,1]
+ *  10 : [3,1,0,2]
+ *  11 : [3,2,1,0]
+ *  The edge 0 of the config 1 become the edge 1 of the reference config so permedge[1][0]=1 ...
 */
 
 unsigned char permedge[12][6] = {
@@ -25,7 +25,7 @@ unsigned char permedge[12][6] = {
   {3,0,4,1,5,2}, {4,3,0,5,2,1}, {1,3,5,0,2,4}, {3,5,1,4,0,2},
   {5,1,3,2,4,0}, {2,5,4,1,0,3}, {4,2,5,0,3,1}, {5,4,2,3,1,0} };
 
-/* simulate split 1 edge of tetra : return 0 if split leads to invalid situation, else 1 */
+/** simulate split 1 edge of tetra : return 0 if split leads to invalid situation, else 1 */
 int split1_sim(pMesh mesh,pSol met,int k,int vx[6]) {
   pTetra   pt,pt0;
   double   vold,vnew;
@@ -78,7 +78,7 @@ int split1_sim(pMesh mesh,pSol met,int k,int vx[6]) {
   return(1);
 }
 
-/* split 1 edge of tetra */
+/** split 1 edge of tetra */
 void split1(pMesh mesh,pSol met,int k,int vx[6]) {
   pTetra   pt,pt1;
   xTetra   xt,xt1;
@@ -179,7 +179,7 @@ void split1(pMesh mesh,pSol met,int k,int vx[6]) {
   }
 }
 
-/* Simulate at the same time creation and bulging of one point, with new position o,
+/** Simulate at the same time creation and bulging of one point, with new position o,
    to be inserted at an edge, whose shell is passed :
    return 0 if final position is invalid, 1 if all checks are ok */
 int simbulgept(pMesh mesh,int *list,int ret,double o[3]) {
@@ -224,7 +224,7 @@ int simbulgept(pMesh mesh,int *list,int ret,double o[3]) {
   return(1);
 }
 
-/* Split edge list[0]%6, whose shell list is passed, introducing point ip
+/** Split edge list[0]%6, whose shell list is passed, introducing point ip
    Beware : shell has to be enumerated in ONLY ONE TRAVEL (always same sense) */
 void split1b(pMesh mesh, int *list, int ret, int ip){
   pTetra    pt,pt1;
@@ -680,7 +680,7 @@ void split1b(pMesh mesh, int *list, int ret, int ip){
   newtet=NULL;
 }
 
-/* Simulate split of two edges that belong to a common face */
+/** Simulate split of two edges that belong to a common face */
 int split2sf_sim(pMesh mesh,pSol met,int k,int vx[6]){
   pTetra        pt,pt0;
   double   vold,vnew;
@@ -781,7 +781,7 @@ int split2sf_sim(pMesh mesh,pSol met,int k,int vx[6]){
   return(1);
 }
 
-/* Split of two edges that belong to a common face : 1 tetra becomes 3 */
+/** Split of two edges that belong to a common face : 1 tetra becomes 3 */
 void split2sf(pMesh mesh,pSol met,int k,int vx[6]){
   pTetra        pt[3];
   xTetra        xt[3];
@@ -944,7 +944,7 @@ void split2sf(pMesh mesh,pSol met,int k,int vx[6]){
   }
 }
 
-/* Split of two OPPOSITE edges */
+/** Split of two OPPOSITE edges */
 void split2(pMesh mesh,pSol met,int k,int vx[6]) {
   pTetra   pt[4];
   xTetra   xt[4];
@@ -1079,7 +1079,7 @@ void split2(pMesh mesh,pSol met,int k,int vx[6]) {
   }
 }
 
-/* Simulate split of 1 face (3 edges) */
+/** Simulate split of 1 face (3 edges) */
 int split3_sim(pMesh mesh,pSol met,int k,int vx[6]) {
   pTetra    pt,pt0;
   double    vold,vnew;
@@ -1140,7 +1140,7 @@ int split3_sim(pMesh mesh,pSol met,int k,int vx[6]) {
   return(1);
 }
 
-/* 1 face (3 edges) subdivided */
+/** 1 face (3 edges) subdivided */
 void split3(pMesh mesh,pSol met,int k,int vx[6]) {
   pTetra    pt[4];
   xTetra    xt[4];
@@ -1276,7 +1276,7 @@ void split3(pMesh mesh,pSol met,int k,int vx[6]) {
   }
 }
 
-/* Split 3 edge in cone configuration */
+/** Split 3 edge in cone configuration */
 void split3cone(pMesh mesh,pSol met,int k,int vx[6]) {
   pTetra    pt[4];
   xTetra    xt[4];
@@ -1929,7 +1929,7 @@ void split3op(pMesh mesh, pSol met, int k, int vx[6]){
 
 }
 
-/* Split a tetra in 4 tetras by introducing its barycenter
+/** Split a tetra in 4 tetras by introducing its barycenter
    FOR NOW : flags, that tell which edge should be split, are not updated (erased) : UPDATE NEEDED ?*/
 int split4bar(pMesh mesh, pSol met, int k){
   pTetra   pt[4];
@@ -2057,7 +2057,7 @@ int split4bar(pMesh mesh, pSol met, int k){
   return(1);
 }
 
-/* Split 4 edges in a configuration when 3 lie on the same face */
+/** Split 4 edges in a configuration when 3 lie on the same face */
 void split4sf(pMesh mesh,pSol met,int k,int vx[6]) {
   pTetra    pt[6];
   xTetra    xt[6];
@@ -2280,7 +2280,7 @@ void split4sf(pMesh mesh,pSol met,int k,int vx[6]) {
   }
 }
 
-/* Split 4 edges in a configuration when no 3 edges lie on the same face */
+/** Split 4 edges in a configuration when no 3 edges lie on the same face */
 void split4op(pMesh mesh,pSol met,int k,int vx[6]) {
   pTetra        pt[6];
   xTetra        xt[6];
@@ -2466,7 +2466,7 @@ void split4op(pMesh mesh,pSol met,int k,int vx[6]) {
   }
 }
 
-/* Split 5 edges */
+/** Split 5 edges */
 void split5(pMesh mesh,pSol met,int k,int vx[6]) {
   pTetra    pt[7];
   xTetra    xt[7];
@@ -2663,7 +2663,7 @@ void split5(pMesh mesh,pSol met,int k,int vx[6]) {
   }
 }
 
-/* split all faces (6 edges) */
+/** split all faces (6 edges) */
 void split6(pMesh mesh,pSol met,int k,int vx[6]) {
   pTetra    pt[8];
   xTetra    xt0,xt;

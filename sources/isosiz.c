@@ -9,7 +9,7 @@ extern char   ddb;
 #define A32TH     0.03125
 
 
-/* Define isotropic size at regular point nump, whose surfacic ball is provided */
+/** Define isotropic size at regular point nump, whose surfacic ball is provided */
 static double defsizreg(pMesh mesh,pSol met,int nump,int *lists,int ilists) {
   pTetra       pt;
   pPoint       p0,p1;
@@ -339,7 +339,7 @@ static double defsizreg(pMesh mesh,pSol met,int nump,int *lists,int ilists) {
   return(h);
 }
 
-/* Define isotropic size map at all boundary vertices of the mesh,
+/** Define isotropic size map at all boundary vertices of the mesh,
    associated with geometric approx, and prescribe hmax at the internal vertices
    Field h of Point is used, to store the prescribed size (not inverse, squared,...) */
 int defsiz_iso(pMesh mesh,pSol met) {
@@ -488,7 +488,7 @@ int defsiz_iso(pMesh mesh,pSol met) {
   return(1);
 }
 
-/* Enforce mesh gradation by truncating size map */
+/** Enforce mesh gradation by truncating size map */
 int gradsiz_iso(pMesh mesh,pSol met) {
   pTetra    pt;
   pPoint    p0,p1;

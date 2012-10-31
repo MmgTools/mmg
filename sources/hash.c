@@ -7,7 +7,7 @@
 extern Info  info;
 extern char  ddb;
 
-/* tetra packing */
+/** tetra packing */
 static void paktet(pMesh mesh) {
   pTetra   pt,pt1;
   int      k;
@@ -132,7 +132,7 @@ int hashTetra(pMesh mesh) {
   return(1);
 }
 
-/* Create surface adjacency */
+/** Create surface adjacency */
 int hashTria(pMesh mesh) {
   pTria     pt,pt1;
   Hash      hash;
@@ -296,7 +296,7 @@ int hashEdge(Hash *hash,int a,int b,int k) {
   return(1);
 }
 
-/* return index of point stored along (ia,ib) */
+/** return index of point stored along (ia,ib) */
 int hashGet(Hash *hash,int a,int b) {
   hedge  *ph;
   int     key,ia,ib;
@@ -315,7 +315,7 @@ int hashGet(Hash *hash,int a,int b) {
   return(0);
 }
 
-/* remove edge from hash table */
+/** remove edge from hash table */
 int hashPop(Hash *hash,int a,int b) {
   hedge  *ph,*php;
   int     key,ia,ib,iph,iphp;
@@ -366,7 +366,7 @@ int hashPop(Hash *hash,int a,int b) {
   return(0);
 }
 
-/* used to hash edges or faces */
+/** used to hash edges or faces */
 int hashNew(Hash *hash,int hsiz,int hmax) {
   int   k;
 
@@ -382,7 +382,7 @@ int hashNew(Hash *hash,int hsiz,int hmax) {
   return(1);
 }
 
-/* set tag to edge on geometry */
+/** set tag to edge on geometry */
 int hTag(HGeom *hash,int a,int b,int ref,char tag) {
   hgeom  *ph;
   int     key,ia,ib;
@@ -410,7 +410,7 @@ int hTag(HGeom *hash,int a,int b,int ref,char tag) {
   return(0);
 }
 
-/* remove edge from hash table */
+/** remove edge from hash table */
 int hPop(HGeom *hash,int a,int b,int *ref,char *tag) {
   hgeom  *ph,*php;
   int     key,ia,ib,iph,iphp;
@@ -468,7 +468,7 @@ int hPop(HGeom *hash,int a,int b,int *ref,char *tag) {
   return(0);
 }
 
-/* get ref and tag to edge on geometry */
+/** get ref and tag to edge on geometry */
 int hGet(HGeom *hash,int a,int b,int *ref,char *tag) {
   hgeom  *ph;
   int     key,ia,ib;
@@ -498,7 +498,7 @@ int hGet(HGeom *hash,int a,int b,int *ref,char *tag) {
   return(0);
 }
 
-/* store edge on geometry */
+/** store edge on geometry */
 void hEdge(HGeom *hash,int a,int b,int ref,char tag) {
   hgeom  *ph;
   int     key,ia,ib,j;
@@ -538,7 +538,7 @@ void hEdge(HGeom *hash,int a,int b,int ref,char tag) {
   return;
 }
 
-/* to store edge on geometry */
+/** to store edge on geometry */
 void hNew(HGeom *hash,int hsiz,int hmax) {
   int   k;
 
@@ -643,7 +643,7 @@ int hGeom(pMesh mesh) {
   return(1);
 }
 
-/* identify boundary triangles */
+/** identify boundary triangles */
 int bdryTria(pMesh mesh) {
   pTetra    pt,pt1;
   pTria     ptt;
@@ -722,7 +722,7 @@ int bdryTria(pMesh mesh) {
   return(1);
 }
 
-/* identify boundary triangles for implicit surface */
+/** identify boundary triangles for implicit surface */
 int bdryIso(pMesh mesh) {
   pTetra    pt,pt1;
   pTria     ptt;
@@ -848,7 +848,7 @@ static int hashGetFace(Hash *hash,int ia,int ib,int ic) {
   return(0);
 }
 
-/* if triangles, set ref to tetra faces and edges */
+/** if triangles, set ref to tetra faces and edges */
 int bdrySet(pMesh mesh) {
   pTetra   pt,pt1;
   pTria    ptt;
@@ -899,7 +899,7 @@ int bdrySet(pMesh mesh) {
   return(1);
 }
 
-/* make orientation of triangles compatible with tetra faces */
+/** make orientation of triangles compatible with tetra faces */
 int bdryPerm(pMesh mesh) {
   pTetra   pt,pt1;
   pTria    ptt;

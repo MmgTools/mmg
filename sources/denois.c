@@ -8,7 +8,7 @@
 extern Info  info;
 extern char  ddb;
 
-/* compute oriented quality of tetra defined by vertices (a,b,c,d)
+/** compute oriented quality of tetra defined by vertices (a,b,c,d)
    (return 0.0 when element is inverted) */
 inline double orcal_poi(double a[3],double b[3],double c[3],double d[3]) {
   double     abx,aby,abz,acx,acy,acz,adx,ady,adz,bcx,bcy,bcz,bdx,bdy,bdz,cdx,cdy,cdz;
@@ -57,7 +57,7 @@ inline double orcal_poi(double a[3],double b[3],double c[3],double d[3]) {
   return(vol / rap);
 }
 
-/* Attempts displacement of ALL nodes of the mesh at a position p+ t/SHORT_MAX * (optpos - p) */
+/** Attempts displacement of ALL nodes of the mesh at a position p+ t/SHORT_MAX * (optpos - p) */
 int trydisp(pMesh mesh,double *optpos,short t){
   pTetra    pt;
   pPoint    p0;
@@ -108,7 +108,7 @@ int trydisp(pMesh mesh,double *optpos,short t){
   return(nd);
 }
 
-/* Find last valid position for the move of mesh nodes in attempt to reach optimal position
+/** Find last valid position for the move of mesh nodes in attempt to reach optimal position
    by a dichotomic process */
 int dichodisp(pMesh mesh,double *optpos){
   int   it,maxit,lastit,nd;
@@ -143,7 +143,7 @@ int dichodisp(pMesh mesh,double *optpos){
   return(tm);
 }
 
-/* Generate a denoised optimal position by the laplacian/antilaplacian smoothing approach */
+/** Generate a denoised optimal position by the laplacian/antilaplacian smoothing approach */
 int lapantilap(pMesh mesh,double *optpos){
   pTetra      pt;
   pPoint      p0,p1;
@@ -425,7 +425,7 @@ int lapantilap(pMesh mesh,double *optpos){
    return(1);
    }
 */
-/* Compute mean curvature vector at point np, whose surfacic ball is passed. Coordinates of np
+/** Compute mean curvature vector at point np, whose surfacic ball is passed. Coordinates of np
    are passed, in case intermediate position of this point is simulated */
 inline int meancur(pMesh mesh,int np,double c[3],int ilist,int *list,double h[3]){
   pTetra     pt;
@@ -496,7 +496,7 @@ inline int meancur(pMesh mesh,int np,double c[3],int ilist,int *list,double h[3]
   return(1);
 }
 
-/* Compute volume of the interior (ref MG_MINUS) part of a mesh */
+/** Compute volume of the interior (ref MG_MINUS) part of a mesh */
 inline double volint(pMesh mesh){
   pTetra      pt;
   pPoint      p0,p1,p2,p3;
@@ -522,7 +522,7 @@ inline double volint(pMesh mesh){
   return(vol);
 }
 
-/* Compute (unoriented) area of face iface in tetra iel */
+/** Compute (unoriented) area of face iface in tetra iel */
 inline double surftri(pMesh mesh, int iel, int iface){
   pTetra      pt;
   pPoint      pa,pb,pc;
@@ -552,7 +552,7 @@ inline double surftri(pMesh mesh, int iel, int iface){
   return(area);
 }
 
-/* Dimension time step of mean curvature flow so that loss of perimeter between initial and
+/** Dimension time step of mean curvature flow so that loss of perimeter between initial and
    deformed configurations is no more than defrate (in %) */
 double timestepMCF(pMesh mesh,double defrate){
   pTetra      pt;
@@ -610,7 +610,7 @@ double timestepMCF(pMesh mesh,double defrate){
   return(dt);
 }
 
-/* Move each point of the implicit boundary mesh according to a mean curvature flow / anti
+/** Move each point of the implicit boundary mesh according to a mean curvature flow / anti
    mean curvature flow approach */
 int bdyMCF(pMesh mesh){
   pTetra      pt,pt0,pt1;
@@ -813,7 +813,7 @@ int bdyMCF(pMesh mesh){
   return(1);
 }
 
-/* Extend displacement field, defined only at boundary points, to all vertices of mesh */
+/** Extend displacement field, defined only at boundary points, to all vertices of mesh */
 int ppgdisp(pMesh mesh,double *optpos){
   pTetra     pt;
   pPoint     p0,p1;
@@ -945,7 +945,7 @@ int ppgdisp(pMesh mesh,double *optpos){
   return(1);
 }
 
-/* Denoise boundary mesh */
+/** Denoise boundary mesh */
 int denoisbdy(pMesh mesh){
   int       ier,it,maxit;
   short     tm;

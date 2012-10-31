@@ -2,7 +2,7 @@
 
 extern Info info;
 
-/* Check whether swap of edge ia in start should be performed, and return 4*k+i =
+/** Check whether swap of edge ia in start should be performed, and return 4*k+i =
    index of point corresponding to the swapped configuration ; shell of edge is
    built during the process */
 int chkswpgen(pMesh mesh,int start,int ia,int *ilist,int *list) {
@@ -143,7 +143,7 @@ int chkswpgen(pMesh mesh,int start,int ia,int *ilist,int *list) {
   return(0);
 }
 
-/* Perform swap of edge whose shell is passed according to configuration nconf */
+/** Perform swap of edge whose shell is passed according to configuration nconf */
 void swpgen(pMesh mesh,pSol met,int nconf,int ilist,int *list) {
   pTetra    pt;
   pPoint    p0,p1;
@@ -169,11 +169,11 @@ void swpgen(pMesh mesh,pSol met,int nconf,int ilist,int *list) {
   assert(np);
   if ( met->m )  met->m[np] = 0.5*(met->m[na]+met->m[nb]);
 
-  /* First step : split of edge (na,nb) */
+  /** First step : split of edge (na,nb) */
   ret = 2*ilist + 0;
   split1b(mesh,list,ret,np);
 
-  /* Second step : collapse of np towards enhancing configuration */
+  /** Second step : collapse of np towards enhancing configuration */
   start = nconf / 4;
   iq = nconf % 4;
 
