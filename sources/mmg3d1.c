@@ -1290,14 +1290,14 @@ static int anatet(pMesh mesh,pSol met,char typchk) {
       return(0);
     }
     if ( typchk == 2 && it == maxit-1 )  info.fem = 1;
-    //prilen(&mesh, &met);
+
     /* collapse short edges */
     nc = coltet(mesh,met,typchk);
     if ( nc < 0 ) {
       fprintf(stdout,"  ## Unable to collapse mesh. Exiting.\n");
       return(0);
     }
-    //prilen(&mesh, &met);
+
     /* attempt to swap */
     nf = swpmsh(mesh,met);
     if ( nf < 0 ) {
@@ -1307,7 +1307,7 @@ static int anatet(pMesh mesh,pSol met,char typchk) {
     nnf += nf;
 
     nf = swptet(mesh,met);
-    prilen(&mesh, &met);
+
     if ( nf < 0 ) {
       fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
       return(0);
