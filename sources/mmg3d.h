@@ -78,9 +78,9 @@
 #define MG_EDG(tag)      ((tag & MG_GEO) || (tag & MG_REF))
 #define MG_SIN(tag)      ((tag & MG_CRN) || (tag & MG_REQ))
 
-#define MG_SET(flag,bit) ((flag) |= (1 << (bit)))
-#define MG_CLR(flag,bit) ((flag) &= ~(1 << (bit)))
-#define MG_GET(flag,bit) ((flag) & (1 << (bit)))
+#define MG_SET(flag,bit) ((flag) |= (1 << (bit)))  /* bit number bit is set to 1 */
+#define MG_CLR(flag,bit) ((flag) &= ~(1 << (bit))) /* bit number bit is set to 0 */
+#define MG_GET(flag,bit) ((flag) & (1 << (bit)))   /* return bit number bit value */
 
 extern unsigned char inxt2[3];
 extern unsigned char iprv2[3];
