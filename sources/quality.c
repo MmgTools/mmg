@@ -238,7 +238,19 @@ int prilen(pMesh mesh, pSol met) {
   double          len,avlen,dned,lmin,lmax;
   int             k,np,nq,amin,bmin,amax,bmax,ned,hl[9];
   char            ia,i0,i1,ier,i;
-  static double   bd[9] = {0.0, 0.2, 0.5, 0.7071, 0.9, 1.111, 1.4142, 2.0, 5.0};
+  static double   bd[9]; //= {0.0, 0.2, 0.5, 0.7071, 0.9, 1.111, 1.4142, 2.0, 5.0};
+
+  bd[3]=LSHRT;bd[6]=LLONG;
+
+  for (i=0;i<3;i++){
+    bd[i]=i*LSHRT/3.0;
+  }
+  for (i=1;i<3;i++){
+    bd[i+3]=LSHRT+i*(LLONG-LSHRT)/3.0;
+  }
+  for (i=1;i<3;i++){
+    bd[i+6]=LLONG+i*(5.0-LLONG)/2.0;
+  }
 
   memset(hl,0,9*sizeof(int));
   ned = 0;
