@@ -933,6 +933,7 @@ static int anatets(pMesh mesh,pSol met,char typchk) {
   return(nap);
 }
 
+/** Split edges of length bigger than LOPTL */
 static int adpspl(pMesh mesh,pSol met) {
   pTetra     pt;
   pxTetra    pxt;
@@ -1079,6 +1080,7 @@ static int adpspl(pMesh mesh,pSol met) {
   return(ns);
 }
 
+/** Collapse edges of length smaller than LOPTS */
 static int adpcol(pMesh mesh,pSol met) {
   pTetra     pt;
   pxTetra    pxt;

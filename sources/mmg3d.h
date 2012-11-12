@@ -76,7 +76,7 @@
 #define MG_VOK(ppt)      (ppt && (ppt->tag < MG_NUL)) /**< Vertex OK */
 #define MG_EOK(pt)       (pt && (pt->v[0] > 0))       /**< Element OK */
 #define MG_EDG(tag)      ((tag & MG_GEO) || (tag & MG_REF)) /**< Edge or Ridge */
-#define MG_SIN(tag)      ((tag & MG_CRN) || (tag & MG_REQ)) /**< Corner or Required vertex */
+#define MG_SIN(tag)      ((tag & MG_CRN) || (tag & MG_REQ)) /**< Corner or Required */
 
 #define MG_SET(flag,bit) ((flag) |= (1 << (bit)))  /**< bit number bit is set to 1 */
 #define MG_CLR(flag,bit) ((flag) &= ~(1 << (bit))) /**< bit number bit is set to 0 */
@@ -161,7 +161,7 @@ typedef struct {
 /** used to hash edges */
 typedef struct {
   int   a,b,nxt;
-  int   s,k; /**< seem to be unused */
+  int   s,k; /** k = point along edge a b */
 } hedge;
 typedef struct {
   int     siz,max,nxt;
