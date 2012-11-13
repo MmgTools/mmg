@@ -95,7 +95,7 @@ ENDIF(NOT EXISTS ${MMG_SOURCE_DIR}/compil.date)
 
 # Executable and dependencies
 ADD_EXECUTABLE(mmg3d5 ${MMG_SOURCE_DIR}/compil.date ${source_files})
-# /!\ ADD_CUSTOM_TARGET don't work with cmake-2.8.4 but is necessary for other versions 
+# /!\ ADD_CUSTOM_TARGET don't work with cmake-2.8.4 but is necessary for other versions
 IF ( ${CMAKE_COMMAND} MATCHES 2.8.4 )
 ELSE ()
     ADD_CUSTOM_TARGET(compil_date DEPENDS ${MMG_SOURCE_DIR}/compil.date)	
@@ -112,7 +112,11 @@ TARGET_LINK_LIBRARIES(mmg3d5 ${M_LIB})
 OPTION(BUILD_TESTING "Enable/Disable continuous integration" OFF)
 IF(BUILD_TESTING)
   # Ignore errors coming from the libmesh5 library
-  SET(MEMORYCHECK_SUPPRESSIONS_FILE "${CMAKE_SOURCE_DIR}/../libmesh5.supp")
+  SET(MEMORYCHECK_SUPPRESSIONS_FILE "${CMAKE_SOURCE_DIR}/libmesh5.supp")
+  IF(APPLE)
+     # and errors from the libSystem.B library
+     SET(MEMORYCHECK_SUPPRESSIONS_FILE "${CMAKE_SOURCE_DIR}/libSystem+libmesh5.supp")
+  ENDIF(APPLE)
   # Copy custom file in the good directory
   IF(NOT EXISTS "CTestCustom.cmake")
     EXECUTE_PROCESS(
