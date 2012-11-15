@@ -73,7 +73,7 @@ FILE(
 	${MMG_SOURCE_DIR}/*.c
 )
 
-#compil.date : if problem with the file creation, see ADD_CUSTOM_TARGET 
+#compil.date : if problem with the file creation, see ADD_CUSTOM_TARGET
 IF (NOT EXISTS ${MMG_SOURCE_DIR}/compil.date)
 
   SET_SOURCE_FILES_PROPERTIES( ${MMG_SOURCE_DIR}/compil.date PROPERTIES GENERATED TRUE )
@@ -98,7 +98,7 @@ ADD_EXECUTABLE(mmg3d5 ${MMG_SOURCE_DIR}/compil.date ${source_files})
 # /!\ ADD_CUSTOM_TARGET don't work with cmake-2.8.4 but is necessary for other versions
 IF ( ${CMAKE_COMMAND} MATCHES 2.8.4 )
 ELSE ()
-    ADD_CUSTOM_TARGET(compil_date DEPENDS ${MMG_SOURCE_DIR}/compil.date)	
+    ADD_CUSTOM_TARGET(compil_date DEPENDS ${MMG_SOURCE_DIR}/compil.date)
 ENDIF ( ${CMAKE_COMMAND} MATCHES 2.8.4 )
 
 ADD_DEPENDENCIES(mmg3d5 compil_date)
@@ -135,5 +135,6 @@ IF(BUILD_TESTING)
     #SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fprofile-arcs -ftest-coverage -lgcov")
     #SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}")
   ENDIF(CMAKE_COMPILER_IS_GNUCC)
+
   INCLUDE( ${CMAKE_SOURCE_DIR}/testing.cmake )
 ENDIF(BUILD_TESTING)
