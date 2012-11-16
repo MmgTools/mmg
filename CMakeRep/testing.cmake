@@ -141,31 +141,57 @@ endif()
 
 # Check what happend when we refine an isotropic cube of size h with a constant
 # metric (h, h/2, h/4, h/8 and h/16)
-ADD_TEST(NAME CubeIso_h
+#---First with hmin=hmax
+ADD_TEST(NAME CubeIso_h_hminMax
   COMMAND $ENV{HOME}/bin/$ENV{ARCHI}/mmg3d5 -v 5
-  ${REG_TESTS_PATH}/CubeIso_h/CubeIso0.1.mesh -hmax 0.1 -hmin 0.1)
-ADD_TEST(NAME CubeIso_0.5h
+  ${REG_TESTS_PATH}/CubeIso_h_hminMax/CubeIso0.1.mesh -hmax 0.1 -hmin 0.1)
+ADD_TEST(NAME CubeIso_0.5h_hminMax
   COMMAND $ENV{HOME}/bin/$ENV{ARCHI}/mmg3d5 -v 5
-  ${REG_TESTS_PATH}/CubeIso_0.5h/CubeIso0.1.mesh -hmax 0.05 -hmin 0.05)
-ADD_TEST(NAME CubeIso_0.25h
+  ${REG_TESTS_PATH}/CubeIso_0.5h_hminMax/CubeIso0.1.mesh -hmax 0.05 -hmin 0.05)
+ADD_TEST(NAME CubeIso_0.25h_hminMax
   COMMAND $ENV{HOME}/bin/$ENV{ARCHI}/mmg3d5 -v 5
-  ${REG_TESTS_PATH}/CubeIso_0.25h/CubeIso0.1.mesh -hmax 0.025 -hmin 0.025)
+  ${REG_TESTS_PATH}/CubeIso_0.25h_hminMax/CubeIso0.1.mesh -hmax 0.025 -hmin 0.025)
+#---Second with sol file
+ADD_TEST(NAME CubeIso_h_met
+  COMMAND $ENV{HOME}/bin/$ENV{ARCHI}/mmg3d5 -v 5
+  ${REG_TESTS_PATH}/CubeIso_h_met/CubeIso0.1.mesh)
+ADD_TEST(NAME CubeIso_0.5h_met
+  COMMAND $ENV{HOME}/bin/$ENV{ARCHI}/mmg3d5 -v 5
+  ${REG_TESTS_PATH}/CubeIso_0.5h_met/CubeIso0.1.mesh)
+ADD_TEST(NAME CubeIso_0.25h_met
+  COMMAND $ENV{HOME}/bin/$ENV{ARCHI}/mmg3d5 -v 5
+  ${REG_TESTS_PATH}/CubeIso_0.25h_met/CubeIso0.1.mesh)
+
 #####
 
 # Check what happend when we refine a sphere of size h with a constant metric
 # (h, h/2, h/4 and h/8)
-ADD_TEST(NAME SphereIso_h
+#---First with hmin=hmax
+ADD_TEST(NAME SphereIso_h_hminMax
   COMMAND $ENV{HOME}/bin/$ENV{ARCHI}/mmg3d5 -v 5
-  ${REG_TESTS_PATH}/SphereIso_h/SphereIso0.5.mesh -hmax 0.5 -hmin 0.5)
-ADD_TEST(NAME SphereIso_0.5h
+  ${REG_TESTS_PATH}/SphereIso_h_hminMax/SphereIso0.5.mesh -hmax 0.5 -hmin 0.5)
+ADD_TEST(NAME SphereIso_0.5h_hminMax
   COMMAND $ENV{HOME}/bin/$ENV{ARCHI}/mmg3d5 -v 5
-  ${REG_TESTS_PATH}/SphereIso_0.5h/SphereIso0.5.mesh -hmax 0.25 -hmin 0.25)
-ADD_TEST(NAME SphereIso_0.25h
+  ${REG_TESTS_PATH}/SphereIso_0.5h_hminMax/SphereIso0.5.mesh -hmax 0.25 -hmin 0.25)
+ADD_TEST(NAME SphereIso_0.25h_hminMax
   COMMAND $ENV{HOME}/bin/$ENV{ARCHI}/mmg3d5 -v 5
-  ${REG_TESTS_PATH}/SphereIso_0.25h/SphereIso0.5.mesh -hmax 0.125 -hmin 0.125)
-ADD_TEST(NAME SphereIso_0.125h
+  ${REG_TESTS_PATH}/SphereIso_0.25h_hminMax/SphereIso0.5.mesh -hmax 0.125 -hmin 0.125)
+ADD_TEST(NAME SphereIso_0.125h_hminMax
   COMMAND $ENV{HOME}/bin/$ENV{ARCHI}/mmg3d5 -v 5
-  ${REG_TESTS_PATH}/SphereIso_0.125h/SphereIso0.5.mesh -hmax 0.0625 -hmin 0.0625)
+  ${REG_TESTS_PATH}/SphereIso_0.125h_hminMax/SphereIso0.5.mesh -hmax 0.0625 -hmin 0.0625)
+#---Second with sol file
+ADD_TEST(NAME SphereIso_h_met
+  COMMAND $ENV{HOME}/bin/$ENV{ARCHI}/mmg3d5 -v 5
+  ${REG_TESTS_PATH}/SphereIso_h_met/SphereIso0.5.mesh)
+ADD_TEST(NAME SphereIso_0.5h_met
+  COMMAND $ENV{HOME}/bin/$ENV{ARCHI}/mmg3d5 -v 5
+  ${REG_TESTS_PATH}/SphereIso_0.5h_met/SphereIso0.5.mesh)
+ADD_TEST(NAME SphereIso_0.25h_met
+  COMMAND $ENV{HOME}/bin/$ENV{ARCHI}/mmg3d5 -v 5
+  ${REG_TESTS_PATH}/SphereIso_0.25h_met/SphereIso0.5.mesh)
+ADD_TEST(NAME SphereIso_0.125h_met
+  COMMAND $ENV{HOME}/bin/$ENV{ARCHI}/mmg3d5 -v 5
+  ${REG_TESTS_PATH}/SphereIso_0.125h_met/SphereIso0.5.mesh)
 
 # Check what happend when we refine a cube whose skin has already the good size
 ADD_TEST(NAME CubeSkin_0.05
