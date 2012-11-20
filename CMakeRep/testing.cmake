@@ -197,6 +197,19 @@ ADD_TEST(NAME SphereIso_0.125h_met
   COMMAND $ENV{HOME}/bin/$ENV{ARCHI}/mmg3d5 -v 5
   ${REG_TESTS_PATH}/SphereIso_0.125h_met/SphereIso0.5.mesh -hausd 1)
 
+# Check what happend when we unrefine a sphere of size smallh with a constant metric
+# (2*smallh, 4*smallh and 8*smallh)
+ADD_TEST(NAME SphereIso_2smallh_met
+  COMMAND $ENV{HOME}/bin/$ENV{ARCHI}/mmg3d5 -v 5
+  ${REG_TESTS_PATH}/SphereIso_2smallh_met/SphereIso0.0625.mesh -hausd 1)
+ADD_TEST(NAME SphereIso_4smallh_met
+  COMMAND $ENV{HOME}/bin/$ENV{ARCHI}/mmg3d5 -v 5
+  ${REG_TESTS_PATH}/SphereIso_4smallh_met/SphereIso0.0625.mesh -hausd 1)
+ADD_TEST(NAME SphereIso_8smallh_met
+  COMMAND $ENV{HOME}/bin/$ENV{ARCHI}/mmg3d5 -v 5
+  ${REG_TESTS_PATH}/SphereIso_8smallh_met/SphereIso0.0625.mesh -hausd 1)
+
+
 # Check what happend when we refine a cube whose skin has already the good size
 ADD_TEST(NAME CubeSkin_0.05
   COMMAND $ENV{HOME}/bin/$ENV{ARCHI}/mmg3d5 -v 5

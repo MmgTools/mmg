@@ -2,7 +2,8 @@
 
 extern Info  info;
 extern char  ddb;
-
+extern  int      tabtmp[11][3];
+double lmintmp,lmaxtmp,lentmp;
 /** Table that associates to each (even) permutation of the 4 vertices of a tetrahedron
  *  the corresponding permutation of its edges. Labels :
  *  0  : [0,1,2,3]
@@ -87,8 +88,20 @@ void split1(pMesh mesh,pSol met,int k,int vx[6]) {
   char     i,tag,isxt,isxt1;
   unsigned char tau[4],*taued;
 
+  lmintmp=0.6;lmaxtmp=1.3;
   /* create a new tetras */
   pt  = &mesh->tetra[k];
+  for(i=0;i<6;i++)
+    {
+      lentmp=lenedg(mesh,met,pt->v[iare[i][0]],pt->v[iare[i][1]]);
+      if(lentmp<lmintmp) {
+        //       tabtmp[0][1]++;
+        lmintmp=lentmp;
+      }else if(lentmp>lmaxtmp) {
+        //tabtmp[0][2]++;
+        lmaxtmp=lentmp;
+      }
+    }
   iel = newElt(mesh);
   assert(iel);
   pt1 = &mesh->tetra[iel];
@@ -177,6 +190,27 @@ void split1(pMesh mesh,pSol met,int k,int vx[6]) {
       pt1->xt = 0;
     }
   }
+  //LLLLLLLLLL
+    for(i=0;i<6;i++)
+    {
+      lentmp=lenedg(mesh,met,pt->v[iare[i][0]],pt->v[iare[i][1]]);
+      if(lentmp<lmintmp) {
+        tabtmp[0][1]++;
+        //lmintmp=lentmp;
+      }else if(lentmp>lmaxtmp) {
+        tabtmp[0][2]++;
+        //lmaxtmp=lentmp;
+      }
+     lentmp=lenedg(mesh,met,pt1->v[iare[i][0]],pt1->v[iare[i][1]]);
+      if(lentmp<lmintmp) {
+        tabtmp[0][1]++;
+        //lmintmp=lentmp;
+      }else if(lentmp>lmaxtmp) {
+        tabtmp[0][2]++;
+        //lmaxtmp=lentmp;
+      }
+    }
+
 }
 
 /** Simulate at the same time creation and bulging of one point, with new position o,
@@ -942,6 +976,26 @@ void split2sf(pMesh mesh,pSol met,int k,int vx[6]){
       pt[0]->xt = 0;
     }
   }
+    for(i=0;i<6;i++)
+    {
+      lentmp=lenedg(mesh,met,pt->v[iare[i][0]],pt->v[iare[i][1]]);
+      if(lentmp<lmintmp) {
+        tabtmp[0][1]++;
+        //lmintmp=lentmp;
+      }else if(lentmp>lmaxtmp) {
+        tabtmp[0][2]++;
+        //lmaxtmp=lentmp;
+      }
+     lentmp=lenedg(mesh,met,pt1->v[iare[i][0]],pt1->v[iare[i][1]]);
+      if(lentmp<lmintmp) {
+        tabtmp[0][1]++;
+        //lmintmp=lentmp;
+      }else if(lentmp>lmaxtmp) {
+        tabtmp[0][2]++;
+        //lmaxtmp=lentmp;
+      }
+    }
+
 }
 
 /** Split of two OPPOSITE edges */
