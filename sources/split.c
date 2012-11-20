@@ -2,8 +2,10 @@
 
 extern Info  info;
 extern char  ddb;
-extern  int      tabtmp[11][3];
+extern double      tabtmp[11][7];
 double lmintmp,lmaxtmp,lentmp;
+int tabeltmp[4][7],iatmp,ibtmp;
+
 /** Table that associates to each (even) permutation of the 4 vertices of a tetrahedron
  *  the corresponding permutation of its edges. Labels :
  *  0  : [0,1,2,3]
@@ -191,9 +193,12 @@ void split1(pMesh mesh,pSol met,int k,int vx[6]) {
     }
   }
   //LLLLLLLLLL
+  tabtmp[0][3]=lmintmp;  tabtmp[0][4]=lmaxtmp;
+  tabtmp[0][5]=DBL_MAX;  tabtmp[0][6]=DBL_MIN;
     for(i=0;i<6;i++)
     {
       lentmp=lenedg(mesh,met,pt->v[iare[i][0]],pt->v[iare[i][1]]);
+      // tabtmp[0][5]=MG_MIN(tabtmp[0][5],lentmp)
       if(lentmp<lmintmp) {
         tabtmp[0][1]++;
         //lmintmp=lentmp;
@@ -825,6 +830,20 @@ void split2sf(pMesh mesh,pSol met,int k,int vx[6]){
   unsigned char tau[4],*taued;
 
   pt[0] = &mesh->tetra[k];
+
+  lmintmp=0.6;lmaxtmp=1.3;
+  for(i=0;i<6;i++)
+    {
+      lentmp=lenedg(mesh,met,pt[0]->v[iare[i][0]],pt[0]->v[iare[i][1]]);
+      if(lentmp<lmintmp) {
+        //       tabtmp[0][1]++;
+        lmintmp=lentmp;
+      }else if(lentmp>lmaxtmp) {
+        //tabtmp[0][2]++;
+        lmaxtmp=lentmp;
+      }
+    }
+
   flg   = pt[0]->flag;
   pt[0]->flag = 0;
 
@@ -976,26 +995,37 @@ void split2sf(pMesh mesh,pSol met,int k,int vx[6]){
       pt[0]->xt = 0;
     }
   }
+
+    //LLLLLLLLLL
+  tabtmp[1][3]=lmintmp;  tabtmp[1][4]=lmaxtmp;
     for(i=0;i<6;i++)
     {
-      lentmp=lenedg(mesh,met,pt->v[iare[i][0]],pt->v[iare[i][1]]);
+      lentmp=lenedg(mesh,met,pt[0]->v[iare[i][0]],pt[0]->v[iare[i][1]]);
       if(lentmp<lmintmp) {
-        tabtmp[0][1]++;
+        tabtmp[1][1]++;
         //lmintmp=lentmp;
       }else if(lentmp>lmaxtmp) {
-        tabtmp[0][2]++;
+        tabtmp[1][2]++;
         //lmaxtmp=lentmp;
       }
-     lentmp=lenedg(mesh,met,pt1->v[iare[i][0]],pt1->v[iare[i][1]]);
+     lentmp=lenedg(mesh,met,pt[1]->v[iare[i][0]],pt[1]->v[iare[i][1]]);
       if(lentmp<lmintmp) {
-        tabtmp[0][1]++;
+        tabtmp[1][1]++;
         //lmintmp=lentmp;
       }else if(lentmp>lmaxtmp) {
-        tabtmp[0][2]++;
+        tabtmp[1][2]++;
         //lmaxtmp=lentmp;
       }
-    }
+    lentmp=lenedg(mesh,met,pt[2]->v[iare[i][0]],pt[2]->v[iare[i][1]]);
+      if(lentmp<lmintmp) {
+        tabtmp[1][1]++;
+        //lmintmp=lentmp;
+      }else if(lentmp>lmaxtmp) {
+        tabtmp[1][2]++;
+        //lmaxtmp=lentmp;
+      }
 
+    }
 }
 
 /** Split of two OPPOSITE edges */
@@ -1008,20 +1038,49 @@ void split2(pMesh mesh,pSol met,int k,int vx[6]) {
   unsigned char tau[4],*taued;
 
   pt[0] = &mesh->tetra[k];
+
+  lmintmp=0.6;lmaxtmp=1.3;
+  for(i=0;i<6;i++)
+    {
+      lentmp=lenedg(mesh,met,pt[0]->v[iare[i][0]],pt[0]->v[iare[i][1]]);
+      if(lentmp<lmintmp) {
+        //       tabtmp[0][1]++;
+        lmintmp=lentmp;
+      }else if(lentmp>lmaxtmp) {
+        //tabtmp[0][2]++;
+        lmaxtmp=lentmp;
+      }
+    }
+
+  iatmp=0;ibtmp=0;
+  for(i=0;i<6;i++){
+    if(iatmp==0 && vx[i]>0){
+      iatmp=i;
+    }else if(iatmp>0 && vx[i]>0){
+      ibtmp=i;
+    }
+  }
+
   flg   = pt[0]->flag;
   pt[0]->flag = 0;
-
+  // tmp
+  tabeltmp[0][6]=k;
   iel = newElt(mesh);
+  //tmp
+  tabeltmp[1][6]=iel;
   assert(iel);
   pt[1] = &mesh->tetra[iel];
   memcpy(pt[1],pt[0],sizeof(Tetra));
 
   iel = newElt(mesh);
+  //tmp
+  tabeltmp[2][6]=iel;
   assert(iel);
   pt[2] = &mesh->tetra[iel];
   memcpy(pt[2],pt[0],sizeof(Tetra));
 
   iel = newElt(mesh);
+  //iel
   assert(iel);
   pt[3] = &mesh->tetra[iel];
   memcpy(pt[3],pt[0],sizeof(Tetra));
@@ -1131,6 +1190,83 @@ void split2(pMesh mesh,pSol met,int k,int vx[6]) {
       pt[0]->xt = 0;
     }
   }
+  //LLLLLLLLLL
+  tabtmp[2][3]=lmintmp;  tabtmp[2][4]=lmaxtmp;
+  
+  for(i=0;i<6;i++)
+    {
+      lentmp=lenedg(mesh,met,pt[0]->v[iare[i][0]],pt[0]->v[iare[i][1]]);
+      if(lentmp<lmintmp) {
+        if((pt[0]->v[iare[i][0]]==iatmp && pt[0]->v[iare[i][1]]==ibtmp)||
+           (pt[0]->v[iare[i][0]]==ibtmp && pt[0]->v[iare[i][1]]==iatmp)) {
+          tabtmp[2][1]= tabtmp[2][1]+0.25;
+        }else{
+          tabtmp[2][1]= tabtmp[2][1]+0.5;
+        }
+      }else if(lentmp>lmaxtmp) {
+        if((pt[0]->v[iare[i][0]]==iatmp && pt[0]->v[iare[i][1]]==ibtmp)||
+           (pt[0]->v[iare[i][0]]==ibtmp && pt[0]->v[iare[i][1]]==iatmp)) {
+          tabtmp[2][2]= tabtmp[2][2]+0.25;
+        }else{
+          tabtmp[2][2]= tabtmp[2][2]+0.5;
+        }
+      }
+     lentmp=lenedg(mesh,met,pt[1]->v[iare[i][0]],pt[1]->v[iare[i][1]]);
+      if(lentmp<lmintmp) {
+        if((pt[1]->v[iare[i][0]]==iatmp && pt[1]->v[iare[i][1]]==ibtmp)||
+           (pt[1]->v[iare[i][0]]==ibtmp && pt[1]->v[iare[i][1]]==iatmp)) {
+          tabtmp[2][1]= tabtmp[2][1]+0.25;
+        }else{
+          tabtmp[2][1]= tabtmp[2][1]+0.5;
+        }
+        //lmintmp=lentmp;
+      }else if(lentmp>lmaxtmp) {
+        if((pt[1]->v[iare[i][0]]==iatmp && pt[1]->v[iare[i][1]]==ibtmp)||
+           (pt[1]->v[iare[i][0]]==ibtmp && pt[1]->v[iare[i][1]]==iatmp)) {
+          tabtmp[2][2]= tabtmp[2][2]+0.25;
+        }else{
+          tabtmp[2][2]= tabtmp[2][2]+0.5;
+        }
+
+      }
+    lentmp=lenedg(mesh,met,pt[2]->v[iare[i][0]],pt[2]->v[iare[i][1]]);
+      if(lentmp<lmintmp) {
+        if((pt[2]->v[iare[i][0]]==iatmp && pt[2]->v[iare[i][1]]==ibtmp)||
+           (pt[2]->v[iare[i][0]]==ibtmp && pt[2]->v[iare[i][1]]==iatmp)) {
+          tabtmp[2][1]= tabtmp[2][1]+0.25;
+        }else{
+          tabtmp[2][1]= tabtmp[2][1]+0.5;
+        }
+
+      }else if(lentmp>lmaxtmp) {
+        if((pt[2]->v[iare[i][0]]==iatmp && pt[2]->v[iare[i][1]]==ibtmp)||
+           (pt[2]->v[iare[i][0]]==ibtmp && pt[2]->v[iare[i][1]]==iatmp)) {
+          tabtmp[2][2]= tabtmp[2][2]+0.25;
+        }else{
+          tabtmp[2][2]= tabtmp[2][2]+0.5;
+        }
+      }
+      lentmp=lenedg(mesh,met,pt[3]->v[iare[i][0]],pt[3]->v[iare[i][1]]);
+      if(lentmp<lmintmp) {
+      if((pt[3]->v[iare[i][0]]==iatmp && pt[3]->v[iare[i][1]]==ibtmp)||
+         (pt[3]->v[iare[i][0]]==ibtmp && pt[3]->v[iare[i][1]]==iatmp)) {
+          tabtmp[2][1]= tabtmp[2][1]+0.25;
+        }else{
+          tabtmp[2][1]= tabtmp[2][1]+0.5;
+        }
+
+        tabtmp[2][1]++;
+        //lmintmp=lentmp;
+      }else if(lentmp>lmaxtmp) {
+      if((pt[3]->v[iare[i][0]]==iatmp && pt[3]->v[iare[i][1]]==ibtmp)||
+         (pt[3]->v[iare[i][0]]==ibtmp && pt[3]->v[iare[i][1]]==iatmp)) {
+          tabtmp[2][2]= tabtmp[2][2]+0.25;
+        }else{
+          tabtmp[2][2]= tabtmp[2][2]+0.5;
+        }
+      }
+    }
+
 }
 
 /** Simulate split of 1 face (3 edges) */
@@ -1206,6 +1342,19 @@ void split3(pMesh mesh,pSol met,int k,int vx[6]) {
   pt[0] = &mesh->tetra[k];
   flg   = pt[0]->flag;
   pt[0]->flag  = 0;
+
+  lmintmp=0.6;lmaxtmp=1.3;
+  for(i=0;i<6;i++)
+    {
+      lentmp=lenedg(mesh,met,pt[0]->v[iare[i][0]],pt[0]->v[iare[i][1]]);
+      if(lentmp<lmintmp) {
+        //       tabtmp[0][1]++;
+        lmintmp=lentmp;
+      }else if(lentmp>lmaxtmp) {
+        //tabtmp[0][2]++;
+        lmaxtmp=lentmp;
+      }
+    }
 
   /* create 3 new tetras */
   iel = newElt(mesh);
@@ -1328,6 +1477,45 @@ void split3(pMesh mesh,pSol met,int k,int vx[6]) {
       pt[0]->xt = 0;
     }
   }
+
+  //LLLLLLLLLL
+  tabtmp[3][3]=lmintmp;  tabtmp[3][4]=lmaxtmp;
+
+    for(i=0;i<6;i++)
+    {
+      lentmp=lenedg(mesh,met,pt[0]->v[iare[i][0]],pt[0]->v[iare[i][1]]);
+      if(lentmp<lmintmp) {
+        tabtmp[3][1]++;
+        //lmintmp=lentmp;
+      }else if(lentmp>lmaxtmp) {
+        tabtmp[3][2]++;
+        //lmaxtmp=lentmp;
+      }
+     lentmp=lenedg(mesh,met,pt[1]->v[iare[i][0]],pt[1]->v[iare[i][1]]);
+      if(lentmp<lmintmp) {
+        tabtmp[3][1]++;
+        //lmintmp=lentmp;
+      }else if(lentmp>lmaxtmp) {
+        tabtmp[3][2]++;
+        //lmaxtmp=lentmp;
+      }
+    lentmp=lenedg(mesh,met,pt[2]->v[iare[i][0]],pt[2]->v[iare[i][1]]);
+      if(lentmp<lmintmp) {
+        tabtmp[3][1]++;
+        //lmintmp=lentmp;
+      }else if(lentmp>lmaxtmp) {
+        tabtmp[3][2]++;
+        //lmaxtmp=lentmp;
+      }
+    lentmp=lenedg(mesh,met,pt[3]->v[iare[i][0]],pt[3]->v[iare[i][1]]);
+      if(lentmp<lmintmp) {
+        tabtmp[3][1]++;
+        //lmintmp=lentmp;
+      }else if(lentmp>lmaxtmp) {
+        tabtmp[3][2]++;
+        //lmaxtmp=lentmp;
+      }
+    }
 }
 
 /** Split 3 edge in cone configuration */
@@ -1342,6 +1530,19 @@ void split3cone(pMesh mesh,pSol met,int k,int vx[6]) {
   pt[0]  = &mesh->tetra[k];
   flg = pt[0]->flag;
   pt[0]->flag  = 0;
+
+  lmintmp=0.6;lmaxtmp=1.3;
+  for(i=0;i<6;i++)
+    {
+      lentmp=lenedg(mesh,met,pt[0]->v[iare[i][0]],pt[0]->v[iare[i][1]]);
+      if(lentmp<lmintmp) {
+        //       tabtmp[0][1]++;
+        lmintmp=lentmp;
+      }else if(lentmp>lmaxtmp) {
+        //tabtmp[0][2]++;
+        lmaxtmp=lentmp;
+      }
+    }
 
   /* create 3 new tetras */
   iel = newElt(mesh);
@@ -1577,6 +1778,43 @@ void split3cone(pMesh mesh,pSol met,int k,int vx[6]) {
     }
   }
 
+  //LLLLLLLLLL
+  tabtmp[4][3]=lmintmp;  tabtmp[4][4]=lmaxtmp;
+    for(i=0;i<6;i++)
+    {
+      lentmp=lenedg(mesh,met,pt[0]->v[iare[i][0]],pt[0]->v[iare[i][1]]);
+      if(lentmp<lmintmp) {
+        tabtmp[4][1]++;
+        //lmintmp=lentmp;
+      }else if(lentmp>lmaxtmp) {
+        tabtmp[4][2]++;
+        //lmaxtmp=lentmp;
+      }
+     lentmp=lenedg(mesh,met,pt[1]->v[iare[i][0]],pt[1]->v[iare[i][1]]);
+      if(lentmp<lmintmp) {
+        tabtmp[4][1]++;
+        //lmintmp=lentmp;
+      }else if(lentmp>lmaxtmp) {
+        tabtmp[4][2]++;
+        //lmaxtmp=lentmp;
+      }
+    lentmp=lenedg(mesh,met,pt[2]->v[iare[i][0]],pt[2]->v[iare[i][1]]);
+      if(lentmp<lmintmp) {
+        tabtmp[4][1]++;
+        //lmintmp=lentmp;
+      }else if(lentmp>lmaxtmp) {
+        tabtmp[4][2]++;
+        //lmaxtmp=lentmp;
+      }
+    lentmp=lenedg(mesh,met,pt[3]->v[iare[i][0]],pt[3]->v[iare[i][1]]);
+      if(lentmp<lmintmp) {
+        tabtmp[4][1]++;
+        //lmintmp=lentmp;
+      }else if(lentmp>lmaxtmp) {
+        tabtmp[4][2]++;
+        //lmaxtmp=lentmp;
+      }
+    }
 }
 
 void split3op(pMesh mesh, pSol met, int k, int vx[6]){
@@ -1591,6 +1829,19 @@ void split3op(pMesh mesh, pSol met, int k, int vx[6]){
   pt[0]  = &mesh->tetra[k];
   flg = pt[0]->flag;
   pt[0]->flag  = 0;
+
+  lmintmp=0.6;lmaxtmp=1.3;
+  for(i=0;i<6;i++)
+    {
+      lentmp=lenedg(mesh,met,pt[0]->v[iare[i][0]],pt[0]->v[iare[i][1]]);
+      if(lentmp<lmintmp) {
+        //       tabtmp[0][1]++;
+        lmintmp=lentmp;
+      }else if(lentmp>lmaxtmp) {
+        //tabtmp[0][2]++;
+        lmaxtmp=lentmp;
+      }
+    }
 
   /* Set permutation /symmetry of vertices : generic case : 35 */
   tau[0] = 0 ; tau[1] = 1 ; tau[2] = 2 ; tau[3] = 3;
@@ -1981,6 +2232,53 @@ void split3op(pMesh mesh, pSol met, int k, int vx[6]){
     }
   }
 
+  //LLLLLLLLLL
+  tabtmp[5][3]=lmintmp;  tabtmp[5][4]=lmaxtmp;
+     for(i=0;i<6;i++)
+    {
+      lentmp=lenedg(mesh,met,pt[0]->v[iare[i][0]],pt[0]->v[iare[i][1]]);
+      if(lentmp<lmintmp) {
+        tabtmp[5][1]++;
+        //lmintmp=lentmp;
+      }else if(lentmp>lmaxtmp) {
+        tabtmp[5][2]++;
+        //lmaxtmp=lentmp;
+      }
+     lentmp=lenedg(mesh,met,pt[1]->v[iare[i][0]],pt[1]->v[iare[i][1]]);
+      if(lentmp<lmintmp) {
+        tabtmp[5][1]++;
+        //lmintmp=lentmp;
+      }else if(lentmp>lmaxtmp) {
+        tabtmp[5][2]++;
+        //lmaxtmp=lentmp;
+      }
+    lentmp=lenedg(mesh,met,pt[2]->v[iare[i][0]],pt[2]->v[iare[i][1]]);
+      if(lentmp<lmintmp) {
+        tabtmp[5][1]++;
+        //lmintmp=lentmp;
+      }else if(lentmp>lmaxtmp) {
+        tabtmp[5][2]++;
+        //lmaxtmp=lentmp;
+      }
+    lentmp=lenedg(mesh,met,pt[3]->v[iare[i][0]],pt[3]->v[iare[i][1]]);
+      if(lentmp<lmintmp) {
+        tabtmp[5][1]++;
+        //lmintmp=lentmp;
+      }else if(lentmp>lmaxtmp) {
+        tabtmp[5][2]++;
+        //lmaxtmp=lentmp;
+      }
+      if(!((imin12 == ip1) && (imin03 == ip3))){
+        lentmp=lenedg(mesh,met,pt[4]->v[iare[i][0]],pt[4]->v[iare[i][1]]);
+        if(lentmp<lmintmp) {
+          tabtmp[5][1]++;
+          //lmintmp=lentmp;
+        }else if(lentmp>lmaxtmp) {
+          tabtmp[5][2]++;
+          //lmaxtmp=lentmp;
+        }
+      }
+    }
 }
 
 /** Split a tetra in 4 tetras by introducing its barycenter
@@ -1996,6 +2294,19 @@ int split4bar(pMesh mesh, pSol met, int k){
 
   pt[0] = &mesh->tetra[k];
   pt[0]->flag = 0;
+
+  lmintmp=0.6;lmaxtmp=1.3;
+  for(i=0;i<6;i++)
+    {
+      lentmp=lenedg(mesh,met,pt[0]->v[iare[i][0]],pt[0]->v[iare[i][1]]);
+      if(lentmp<lmintmp) {
+        //       tabtmp[0][1]++;
+        lmintmp=lentmp;
+      }else if(lentmp>lmaxtmp) {
+        //tabtmp[0][2]++;
+        lmaxtmp=lentmp;
+      }
+    }
 
   o[0] = o[1] = o[2] = 0.0;
   hnew = 0.0;
@@ -2108,6 +2419,44 @@ int split4bar(pMesh mesh, pSol met, int k){
       pt[0]->xt = 0;
     }
   }
+
+  //LLLLLLLLLL
+  tabtmp[6][3]=lmintmp;  tabtmp[6][4]=lmaxtmp;
+      for(i=0;i<6;i++)
+    {
+      lentmp=lenedg(mesh,met,pt[0]->v[iare[i][0]],pt[0]->v[iare[i][1]]);
+      if(lentmp<lmintmp) {
+        tabtmp[6][1]++;
+        //lmintmp=lentmp;
+      }else if(lentmp>lmaxtmp) {
+        tabtmp[6][2]++;
+        //lmaxtmp=lentmp;
+      }
+     lentmp=lenedg(mesh,met,pt[1]->v[iare[i][0]],pt[1]->v[iare[i][1]]);
+      if(lentmp<lmintmp) {
+        tabtmp[6][1]++;
+        //lmintmp=lentmp;
+      }else if(lentmp>lmaxtmp) {
+        tabtmp[6][2]++;
+        //lmaxtmp=lentmp;
+      }
+    lentmp=lenedg(mesh,met,pt[2]->v[iare[i][0]],pt[2]->v[iare[i][1]]);
+      if(lentmp<lmintmp) {
+        tabtmp[6][1]++;
+        //lmintmp=lentmp;
+      }else if(lentmp>lmaxtmp) {
+        tabtmp[6][2]++;
+        //lmaxtmp=lentmp;
+      }
+    lentmp=lenedg(mesh,met,pt[3]->v[iare[i][0]],pt[3]->v[iare[i][1]]);
+      if(lentmp<lmintmp) {
+        tabtmp[6][1]++;
+        //lmintmp=lentmp;
+      }else if(lentmp>lmaxtmp) {
+        tabtmp[6][2]++;
+        //lmaxtmp=lentmp;
+      }
+    }
   return(1);
 }
 
@@ -2123,6 +2472,19 @@ void split4sf(pMesh mesh,pSol met,int k,int vx[6]) {
   pt[0]  = &mesh->tetra[k];
   flg = pt[0]->flag;
   pt[0]->flag  = 0;
+
+  lmintmp=0.6;lmaxtmp=1.3;
+  for(i=0;i<6;i++)
+    {
+      lentmp=lenedg(mesh,met,pt[0]->v[iare[i][0]],pt[0]->v[iare[i][1]]);
+      if(lentmp<lmintmp) {
+        //       tabtmp[0][1]++;
+        lmintmp=lentmp;
+      }else if(lentmp>lmaxtmp) {
+        //tabtmp[0][2]++;
+        lmaxtmp=lentmp;
+      }
+    }
 
   /* Set permutation of vertices : reference configuration : 23 */
   tau[0] = 0 ; tau[1] = 1 ; tau[2] = 2 ; tau[3] = 3;
@@ -2332,6 +2694,61 @@ void split4sf(pMesh mesh,pSol met,int k,int vx[6]) {
       pt[0]->xt = 0;
     }
   }
+
+  //LLLLLLLLLL
+  tabtmp[7][3]=lmintmp;  tabtmp[7][4]=lmaxtmp;
+     for(i=0;i<6;i++)
+    {
+      lentmp=lenedg(mesh,met,pt[0]->v[iare[i][0]],pt[0]->v[iare[i][1]]);
+      if(lentmp<lmintmp) {
+        tabtmp[7][1]++;
+        //lmintmp=lentmp;
+      }else if(lentmp>lmaxtmp) {
+        tabtmp[7][2]++;
+        //lmaxtmp=lentmp;
+      }
+     lentmp=lenedg(mesh,met,pt[1]->v[iare[i][0]],pt[1]->v[iare[i][1]]);
+      if(lentmp<lmintmp) {
+        tabtmp[7][1]++;
+        //lmintmp=lentmp;
+      }else if(lentmp>lmaxtmp) {
+        tabtmp[7][2]++;
+        //lmaxtmp=lentmp;
+      }
+    lentmp=lenedg(mesh,met,pt[2]->v[iare[i][0]],pt[2]->v[iare[i][1]]);
+      if(lentmp<lmintmp) {
+        tabtmp[7][1]++;
+        //lmintmp=lentmp;
+      }else if(lentmp>lmaxtmp) {
+        tabtmp[7][2]++;
+        //lmaxtmp=lentmp;
+      }
+    lentmp=lenedg(mesh,met,pt[3]->v[iare[i][0]],pt[3]->v[iare[i][1]]);
+      if(lentmp<lmintmp) {
+        tabtmp[7][1]++;
+        //lmintmp=lentmp;
+      }else if(lentmp>lmaxtmp) {
+        tabtmp[7][2]++;
+        //lmaxtmp=lentmp;
+      }
+    lentmp=lenedg(mesh,met,pt[4]->v[iare[i][0]],pt[4]->v[iare[i][1]]);
+      if(lentmp<lmintmp) {
+        tabtmp[7][1]++;
+        //lmintmp=lentmp;
+      }else if(lentmp>lmaxtmp) {
+        tabtmp[7][2]++;
+        //lmaxtmp=lentmp;
+      }
+   lentmp=lenedg(mesh,met,pt[5]->v[iare[i][0]],pt[5]->v[iare[i][1]]);
+      if(lentmp<lmintmp) {
+        tabtmp[7][1]++;
+        //lmintmp=lentmp;
+      }else if(lentmp>lmaxtmp) {
+        tabtmp[7][2]++;
+        //lmaxtmp=lentmp;
+      }
+    }
+
 }
 
 /** Split 4 edges in a configuration when no 3 edges lie on the same face */
@@ -2346,6 +2763,19 @@ void split4op(pMesh mesh,pSol met,int k,int vx[6]) {
   pt[0]  = &mesh->tetra[k];
   flg = pt[0]->flag;
   pt[0]->flag  = 0;
+
+  lmintmp=0.6;lmaxtmp=1.3;
+  for(i=0;i<6;i++)
+    {
+      lentmp=lenedg(mesh,met,pt[0]->v[iare[i][0]],pt[0]->v[iare[i][1]]);
+      if(lentmp<lmintmp) {
+        //       tabtmp[0][1]++;
+        lmintmp=lentmp;
+      }else if(lentmp>lmaxtmp) {
+        //tabtmp[0][2]++;
+        lmaxtmp=lentmp;
+      }
+    }
 
   /* Set permutation of vertices : reference configuration 30 */
   tau[0] = 0 ; tau[1] = 1 ; tau[2] = 2 ; tau[3] = 3;
@@ -2518,6 +2948,60 @@ void split4op(pMesh mesh,pSol met,int k,int vx[6]) {
 
     }
   }
+
+  //LLLLLLLLLL
+  tabtmp[8][3]=lmintmp;  tabtmp[8][4]=lmaxtmp;
+     for(i=0;i<6;i++)
+    {
+      lentmp=lenedg(mesh,met,pt[0]->v[iare[i][0]],pt[0]->v[iare[i][1]]);
+      if(lentmp<lmintmp) {
+        tabtmp[8][1]++;
+        //lmintmp=lentmp;
+      }else if(lentmp>lmaxtmp) {
+        tabtmp[8][2]++;
+        //lmaxtmp=lentmp;
+      }
+     lentmp=lenedg(mesh,met,pt[1]->v[iare[i][0]],pt[1]->v[iare[i][1]]);
+      if(lentmp<lmintmp) {
+        tabtmp[8][1]++;
+        //lmintmp=lentmp;
+      }else if(lentmp>lmaxtmp) {
+        tabtmp[8][2]++;
+        //lmaxtmp=lentmp;
+      }
+    lentmp=lenedg(mesh,met,pt[2]->v[iare[i][0]],pt[2]->v[iare[i][1]]);
+      if(lentmp<lmintmp) {
+        tabtmp[8][1]++;
+        //lmintmp=lentmp;
+      }else if(lentmp>lmaxtmp) {
+        tabtmp[8][2]++;
+        //lmaxtmp=lentmp;
+      }
+    lentmp=lenedg(mesh,met,pt[3]->v[iare[i][0]],pt[3]->v[iare[i][1]]);
+      if(lentmp<lmintmp) {
+        tabtmp[8][1]++;
+        //lmintmp=lentmp;
+      }else if(lentmp>lmaxtmp) {
+        tabtmp[8][2]++;
+        //lmaxtmp=lentmp;
+      }
+    lentmp=lenedg(mesh,met,pt[4]->v[iare[i][0]],pt[4]->v[iare[i][1]]);
+      if(lentmp<lmintmp) {
+        tabtmp[8][1]++;
+        //lmintmp=lentmp;
+      }else if(lentmp>lmaxtmp) {
+        tabtmp[8][2]++;
+        //lmaxtmp=lentmp;
+      }
+   lentmp=lenedg(mesh,met,pt[5]->v[iare[i][0]],pt[5]->v[iare[i][1]]);
+      if(lentmp<lmintmp) {
+        tabtmp[8][1]++;
+        //lmintmp=lentmp;
+      }else if(lentmp>lmaxtmp) {
+        tabtmp[8][2]++;
+        //lmaxtmp=lentmp;
+      }
+    }
 }
 
 /** Split 5 edges */
@@ -2532,6 +3016,19 @@ void split5(pMesh mesh,pSol met,int k,int vx[6]) {
   pt[0]  = &mesh->tetra[k];
   flg = pt[0]->flag;
   pt[0]->flag  = 0;
+
+  lmintmp=0.6;lmaxtmp=1.3;
+  for(i=0;i<6;i++)
+    {
+      lentmp=lenedg(mesh,met,pt[0]->v[iare[i][0]],pt[0]->v[iare[i][1]]);
+      if(lentmp<lmintmp) {
+        //       tabtmp[0][1]++;
+        lmintmp=lentmp;
+      }else if(lentmp>lmaxtmp) {
+        //tabtmp[0][2]++;
+        lmaxtmp=lentmp;
+      }
+    }
 
   /* create 6 new tetras */
   for(i=1;i<7;i++){
@@ -2715,6 +3212,69 @@ void split5(pMesh mesh,pSol met,int k,int vx[6]) {
 
     }
   }
+
+
+  //LLLLLLLLLL
+  tabtmp[9][3]=lmintmp;  tabtmp[9][4]=lmaxtmp;
+     for(i=0;i<6;i++)
+    {
+      lentmp=lenedg(mesh,met,pt[0]->v[iare[i][0]],pt[0]->v[iare[i][1]]);
+      if(lentmp<lmintmp) {
+        tabtmp[9][1]++;
+        //lmintmp=lentmp;
+      }else if(lentmp>lmaxtmp) {
+        tabtmp[9][2]++;
+        //lmaxtmp=lentmp;
+      }
+     lentmp=lenedg(mesh,met,pt[1]->v[iare[i][0]],pt[1]->v[iare[i][1]]);
+      if(lentmp<lmintmp) {
+        tabtmp[9][1]++;
+        //lmintmp=lentmp;
+      }else if(lentmp>lmaxtmp) {
+        tabtmp[9][2]++;
+        //lmaxtmp=lentmp;
+      }
+    lentmp=lenedg(mesh,met,pt[2]->v[iare[i][0]],pt[2]->v[iare[i][1]]);
+      if(lentmp<lmintmp) {
+        tabtmp[9][1]++;
+        //lmintmp=lentmp;
+      }else if(lentmp>lmaxtmp) {
+        tabtmp[9][2]++;
+        //lmaxtmp=lentmp;
+      }
+    lentmp=lenedg(mesh,met,pt[3]->v[iare[i][0]],pt[3]->v[iare[i][1]]);
+      if(lentmp<lmintmp) {
+        tabtmp[9][1]++;
+        //lmintmp=lentmp;
+      }else if(lentmp>lmaxtmp) {
+        tabtmp[9][2]++;
+        //lmaxtmp=lentmp;
+      }
+    lentmp=lenedg(mesh,met,pt[4]->v[iare[i][0]],pt[4]->v[iare[i][1]]);
+      if(lentmp<lmintmp) {
+        tabtmp[9][1]++;
+        //lmintmp=lentmp;
+      }else if(lentmp>lmaxtmp) {
+        tabtmp[9][2]++;
+        //lmaxtmp=lentmp;
+      }
+   lentmp=lenedg(mesh,met,pt[5]->v[iare[i][0]],pt[5]->v[iare[i][1]]);
+      if(lentmp<lmintmp) {
+        tabtmp[9][1]++;
+        //lmintmp=lentmp;
+      }else if(lentmp>lmaxtmp) {
+        tabtmp[9][2]++;
+        //lmaxtmp=lentmp;
+      }
+  lentmp=lenedg(mesh,met,pt[6]->v[iare[i][0]],pt[6]->v[iare[i][1]]);
+      if(lentmp<lmintmp) {
+        tabtmp[9][1]++;
+        //lmintmp=lentmp;
+      }else if(lentmp>lmaxtmp) {
+        tabtmp[9][2]++;
+        //lmaxtmp=lentmp;
+      }
+    }
 }
 
 /** split all faces (6 edges) */
@@ -2727,6 +3287,19 @@ void split6(pMesh mesh,pSol met,int k,int vx[6]) {
 
   pt[0]  = &mesh->tetra[k];
   pt[0]->flag  = 0;
+
+  lmintmp=0.6;lmaxtmp=1.3;
+  for(i=0;i<6;i++)
+    {
+      lentmp=lenedg(mesh,met,pt[0]->v[iare[i][0]],pt[0]->v[iare[i][1]]);
+      if(lentmp<lmintmp) {
+        //       tabtmp[0][1]++;
+        lmintmp=lentmp;
+      }else if(lentmp>lmaxtmp) {
+        //tabtmp[0][2]++;
+        lmaxtmp=lentmp;
+      }
+    }
 
   nxt0 = pt[0]->xt;
   pxt = &mesh->xtetra[nxt0];
@@ -3017,5 +3590,65 @@ void split6(pMesh mesh,pSol met,int k,int vx[6]) {
       }
     }
   }
-
+  //LLLLLLLLLL
+  tabtmp[10][3]=lmintmp;  tabtmp[10][4]=lmaxtmp;
+     for(i=0;i<6;i++)
+    {
+      lentmp=lenedg(mesh,met,pt[0]->v[iare[i][0]],pt[0]->v[iare[i][1]]);
+      if(lentmp<lmintmp) {
+        tabtmp[10][1]++;
+        //lmintmp=lentmp;
+      }else if(lentmp>lmaxtmp) {
+        tabtmp[10][2]++;
+        //lmaxtmp=lentmp;
+      }
+     lentmp=lenedg(mesh,met,pt[1]->v[iare[i][0]],pt[1]->v[iare[i][1]]);
+      if(lentmp<lmintmp) {
+        tabtmp[10][1]++;
+        //lmintmp=lentmp;
+      }else if(lentmp>lmaxtmp) {
+        tabtmp[10][2]++;
+        //lmaxtmp=lentmp;
+      }
+    lentmp=lenedg(mesh,met,pt[2]->v[iare[i][0]],pt[2]->v[iare[i][1]]);
+      if(lentmp<lmintmp) {
+        tabtmp[10][1]++;
+        //lmintmp=lentmp;
+      }else if(lentmp>lmaxtmp) {
+        tabtmp[10][2]++;
+        //lmaxtmp=lentmp;
+      }
+    lentmp=lenedg(mesh,met,pt[3]->v[iare[i][0]],pt[3]->v[iare[i][1]]);
+      if(lentmp<lmintmp) {
+        tabtmp[10][1]++;
+        //lmintmp=lentmp;
+      }else if(lentmp>lmaxtmp) {
+        tabtmp[10][2]++;
+        //lmaxtmp=lentmp;
+      }
+    lentmp=lenedg(mesh,met,pt[4]->v[iare[i][0]],pt[4]->v[iare[i][1]]);
+      if(lentmp<lmintmp) {
+        tabtmp[10][1]++;
+        //lmintmp=lentmp;
+      }else if(lentmp>lmaxtmp) {
+        tabtmp[10][2]++;
+        //lmaxtmp=lentmp;
+      }
+   lentmp=lenedg(mesh,met,pt[5]->v[iare[i][0]],pt[5]->v[iare[i][1]]);
+      if(lentmp<lmintmp) {
+        tabtmp[10][1]++;
+        //lmintmp=lentmp;
+      }else if(lentmp>lmaxtmp) {
+        tabtmp[10][2]++;
+        //lmaxtmp=lentmp;
+      }
+  lentmp=lenedg(mesh,met,pt[7]->v[iare[i][0]],pt[7]->v[iare[i][1]]);
+      if(lentmp<lmintmp) {
+        tabtmp[10][1]++;
+        //lmintmp=lentmp;
+      }else if(lentmp>lmaxtmp) {
+        tabtmp[10][2]++;
+        //lmaxtmp=lentmp;
+      }
+    }
 }

@@ -2,7 +2,8 @@
 
 extern Info  info;
 char  ddb;
-int      tabtmp[11][3];
+double      tabtmp[11][7];
+
 /** set triangle corresponding to face ie of tetra k */
 void tet2tri(pMesh mesh,int k,char ie,Tria *ptt) {
   pTetra  pt;
@@ -606,7 +607,7 @@ static int anatetv(pMesh mesh,pSol met,char typchk) {
 
   /** 3. check and split */
   for(k=0;k<11;k++){
-    for(j=0;j<3;j++){
+    for(j=0;j<5;j++){
       tabtmp[k][j]=0;
     }
   }
@@ -629,59 +630,68 @@ static int anatetv(pMesh mesh,pSol met,char typchk) {
       split1(mesh,met,k,vx);
       ns++;
       tabtmp[0][0]++;
+      tabtmp[0][1]/=2;
+      tabtmp[0][2]/=2;
       break;
     case 48: case 24: case 40: case 6: case 34: case 36:
     case 20: case 5: case 17: case 9: case 3: case 10: /* 2 edges (same face) split */
       split2sf(mesh,met,k,vx);
       ns++;
       tabtmp[1][0]++;
+      tabtmp[1][1]/=2;
+      tabtmp[1][2]/=2;
       break;
 
     case 33: case 18: case 12: /* 2 opposite edges split */
       split2(mesh,met,k,vx);
       ns++;
-      tabtmp[1][0]++;
+      tabtmp[2][0]++;
       break;
 
     case 11: case 21: case 38: case 56: /* 3 edges on the same faces splitted */
       split3(mesh,met,k,vx);
       ns++;
-      tabtmp[2][0]++;
+      tabtmp[3][0]++;
+      tabtmp[3][1]/=2;
+      tabtmp[3][2]/=2;
       break;
 
     case 7: case 25: case 42: case 52: /* 3 edges on conic configuration splitted */
       split3cone(mesh,met,k,vx);
       ns++;
-      tabtmp[3][0]++;
+      tabtmp[4][0]++;
+      tabtmp[4][1]/=2;
+      tabtmp[4][2]/=2;
       break;
 
     case 35: case 19: case 13: case 37: case 22: case 28: case 26:
     case 14: case 49: case 50: case 44: case 41: /* 3 edges on opposite configuration splitted */
       split3op(mesh,met,k,vx);
       ns++;
-      tabtmp[4][0]++;
+      tabtmp[5][0]++;
       break;
 
     case 23: case 29: case 53: case 60: case 57: case 58:
     case 27: case 15: case 43: case 39: case 54: case 46: /* 4 edges with 3 lying on the same face splitted */
       split4sf(mesh,met,k,vx);
       ns++;
-      tabtmp[5][0]++;
+      tabtmp[6][0]++;
       break;
 
       /* 4 edges with no 3 lying on the same face splitted */
     case 30: case 45: case 51:
       split4op(mesh,met,k,vx);
       ns++;
-      tabtmp[6][0]++;
+      tabtmp[7][0]++;
       break;
     case 62: case 61: case 59: case 55: case 47: case 31: /* 5 edges split */
       split5(mesh,met,k,vx);
       ns++;
+      tabtmp[8][0]++;
       break;
     case 63: /* 6 edges split */
       split6(mesh,met,k,vx);
-      tabtmp[7][0]++;
+      tabtmp[9][0]++;
       ns++;
       break;
     }
@@ -693,8 +703,10 @@ static int anatetv(pMesh mesh,pSol met,char typchk) {
   free(hash.item);
   hash.item=NULL;
     printf("RESULTATS \n");
-  for(k=0;k<11;k++){
-    printf(" k %d : %d %d %d\n",k+1,tabtmp[k][0],tabtmp[k][1],tabtmp[k][2]);
+  for(k=0;k<10;k++){
+    printf(" k %d : %5.1f %5.1f %5.1f -init- %e %e \n",k+1,tabtmp[k][0],tabtmp[k][1],
+           tabtmp[k][2],
+           tabtmp[k][3],tabtmp[k][4]/*,tabtmp[k][5],tabtmp[k][6]*/);
   }
   return(nap);
 }
@@ -1350,11 +1362,14 @@ static int anatet(pMesh mesh,pSol met,char typchk) {
   if ( (abs(info.imprim) < 5 || info.ddebug ) && nns+nnc > 0 )
     fprintf(stdout,"     %8d splitted, %8d collapsed, %8d swapped, %d iter.\n",nns,nnc,nnf,it);
 
+  puts("FIN ANATET");
+  prilen(mesh,met);
   return(1);
 }
 
 /** main adaptation routine */
 int mmg3d1(pMesh mesh,pSol met) {
+
   if ( abs(info.imprim) > 4 )
     fprintf(stdout,"  ** MESH ANALYSIS\n");
 
