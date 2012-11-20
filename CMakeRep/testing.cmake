@@ -169,29 +169,33 @@ ADD_TEST(NAME CubeIso_0.25h_met
 #---First with hmin=hmax
 ADD_TEST(NAME SphereIso_h_hminMax
   COMMAND $ENV{HOME}/bin/$ENV{ARCHI}/mmg3d5 -v 5
-  ${REG_TESTS_PATH}/SphereIso_h_hminMax/SphereIso0.5.mesh -hmax 0.5 -hmin 0.5)
+  ${REG_TESTS_PATH}/SphereIso_h_hminMax/SphereIso0.5.mesh
+  -hmax 0.5 -hmin 0.5 -hausd 1)
 ADD_TEST(NAME SphereIso_0.5h_hminMax
   COMMAND $ENV{HOME}/bin/$ENV{ARCHI}/mmg3d5 -v 5
-  ${REG_TESTS_PATH}/SphereIso_0.5h_hminMax/SphereIso0.5.mesh -hmax 0.25 -hmin 0.25)
+  ${REG_TESTS_PATH}/SphereIso_0.5h_hminMax/SphereIso0.5.mesh
+  -hmax 0.25 -hmin 0.25 -hausd 1)
 ADD_TEST(NAME SphereIso_0.25h_hminMax
   COMMAND $ENV{HOME}/bin/$ENV{ARCHI}/mmg3d5 -v 5
-  ${REG_TESTS_PATH}/SphereIso_0.25h_hminMax/SphereIso0.5.mesh -hmax 0.125 -hmin 0.125)
+  ${REG_TESTS_PATH}/SphereIso_0.25h_hminMax/SphereIso0.5.mesh
+  -hmax 0.125 -hmin 0.125 -hausd 1)
 ADD_TEST(NAME SphereIso_0.125h_hminMax
   COMMAND $ENV{HOME}/bin/$ENV{ARCHI}/mmg3d5 -v 5
-  ${REG_TESTS_PATH}/SphereIso_0.125h_hminMax/SphereIso0.5.mesh -hmax 0.0625 -hmin 0.0625)
+  ${REG_TESTS_PATH}/SphereIso_0.125h_hminMax/SphereIso0.5.mesh
+  -hmax 0.0625 -hmin 0.0625 -hausd 1)
 #---Second with sol file
 ADD_TEST(NAME SphereIso_h_met
   COMMAND $ENV{HOME}/bin/$ENV{ARCHI}/mmg3d5 -v 5
-  ${REG_TESTS_PATH}/SphereIso_h_met/SphereIso0.5.mesh)
+  ${REG_TESTS_PATH}/SphereIso_h_met/SphereIso0.5.mesh -hausd 1)
 ADD_TEST(NAME SphereIso_0.5h_met
   COMMAND $ENV{HOME}/bin/$ENV{ARCHI}/mmg3d5 -v 5
-  ${REG_TESTS_PATH}/SphereIso_0.5h_met/SphereIso0.5.mesh)
+  ${REG_TESTS_PATH}/SphereIso_0.5h_met/SphereIso0.5.mesh -hausd 1)
 ADD_TEST(NAME SphereIso_0.25h_met
   COMMAND $ENV{HOME}/bin/$ENV{ARCHI}/mmg3d5 -v 5
-  ${REG_TESTS_PATH}/SphereIso_0.25h_met/SphereIso0.5.mesh)
+  ${REG_TESTS_PATH}/SphereIso_0.25h_met/SphereIso0.5.mesh -hausd 1)
 ADD_TEST(NAME SphereIso_0.125h_met
   COMMAND $ENV{HOME}/bin/$ENV{ARCHI}/mmg3d5 -v 5
-  ${REG_TESTS_PATH}/SphereIso_0.125h_met/SphereIso0.5.mesh)
+  ${REG_TESTS_PATH}/SphereIso_0.125h_met/SphereIso0.5.mesh -hausd 1)
 
 # Check what happend when we refine a cube whose skin has already the good size
 ADD_TEST(NAME CubeSkin_0.05
