@@ -220,7 +220,7 @@ int swpbdy(pMesh mesh,pSol met,int *list,int ret,int it1) {
   nm = newPt(mesh,c,MG_BDY);
   if ( !nm )  return(0);
   if ( met->m )  met->m[nm] = 0.5 *(met->m[np]+met->m[nq]);
-  split1b(mesh,list,ret,nm);
+  split1b(mesh,met,list,ret,nm,0);
 
   /* Collapse m on na after taking (new) ball of m */
   memset(list,0,(LMAX+2)*sizeof(int));

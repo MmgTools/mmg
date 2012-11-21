@@ -2,7 +2,7 @@
 
 extern Info  info;
 char  ddb;
-double      tabtmp[11][7];
+double      tabtmp[12][7];
 
 /** set triangle corresponding to face ie of tetra k */
 void tet2tri(pMesh mesh,int k,char ie,Tria *ptt) {
@@ -606,8 +606,8 @@ static int anatetv(pMesh mesh,pSol met,char typchk) {
   }
 
   /** 3. check and split */
-  for(k=0;k<11;k++){
-    for(j=0;j<5;j++){
+  for(k=0;k<12;k++){
+    for(j=0;j<7;j++){
       tabtmp[k][j]=0;
     }
   }
@@ -675,23 +675,23 @@ static int anatetv(pMesh mesh,pSol met,char typchk) {
     case 27: case 15: case 43: case 39: case 54: case 46: /* 4 edges with 3 lying on the same face splitted */
       split4sf(mesh,met,k,vx);
       ns++;
-      tabtmp[6][0]++;
+      tabtmp[8][0]++;
       break;
 
       /* 4 edges with no 3 lying on the same face splitted */
     case 30: case 45: case 51:
       split4op(mesh,met,k,vx);
       ns++;
-      tabtmp[7][0]++;
+      tabtmp[9][0]++;
       break;
     case 62: case 61: case 59: case 55: case 47: case 31: /* 5 edges split */
       split5(mesh,met,k,vx);
       ns++;
-      tabtmp[8][0]++;
+      tabtmp[10][0]++;
       break;
     case 63: /* 6 edges split */
       split6(mesh,met,k,vx);
-      tabtmp[9][0]++;
+      tabtmp[11][0]++;
       ns++;
       break;
     }
@@ -702,11 +702,16 @@ static int anatetv(pMesh mesh,pSol met,char typchk) {
 
   free(hash.item);
   hash.item=NULL;
-    printf("RESULTATS \n");
-  for(k=0;k<10;k++){
-    printf(" k %d : %5.1f %5.1f %5.1f -init- %e %e \n",k+1,tabtmp[k][0],tabtmp[k][1],
-           tabtmp[k][2],
-           tabtmp[k][3],tabtmp[k][4]/*,tabtmp[k][5],tabtmp[k][6]*/);
+  if(ns) {
+    printf("RESULTATS ns %d\n",ns);
+    ns = 0;
+    for(k=0;k<12;k++){
+      printf(" k %d : %5.1f %5.1f %5.1f -init- %e %e \n",k+1,tabtmp[k][0],tabtmp[k][1],
+             tabtmp[k][2],
+             tabtmp[k][3],tabtmp[k][4]/*,tabtmp[k][5],tabtmp[k][6]*/);
+      ns+=tabtmp[k][0];
+    }
+    printf("on trouve %d split \n",ns);
   }
   return(nap);
 }
@@ -1060,7 +1065,15 @@ static int adpspl(pMesh mesh,pSol met) {
         }
         ip = newPt(mesh,o,MG_NOTAG);
         if ( !ip )  break;
-        split1b(mesh,list,ilist,ip);
+        puts("FIRST CALLLLLLLLLLLLLLLLL");
+	//CECILE
+	if ( met->m )
+          met->m[ip] = 0.5 * (met->m[ip1]+met->m[ip2]);
+	//CECILE
+        if(!split1b(mesh,met,list,ilist,ip,1)) {
+	  delPt(mesh,ip);
+	  continue;
+	} 
         ns++;
         ppt = &mesh->point[ip];
         if ( MG_EDG(tag) || (tag & MG_NOM) )
@@ -1102,10 +1115,17 @@ static int adpspl(pMesh mesh,pSol met) {
       o[2] = 0.5*(p0->c[2] + p1->c[2]);
       ip = newPt(mesh,o,MG_NOTAG);
       if ( !ip )  break;
-      split1b(mesh,list,ilist,ip);               //Et on teste pas du tout les qualités ici ?
-      ppt = &mesh->point[ip];
-      met->m[ip] = 0.5 * (met->m[ip1] + met->m[ip2]);
-      ns++;
+
+      //CECILE
+      met->m[ip] = 0.5 * (met->m[ip1]+met->m[ip2]);
+      //CECILE
+      if(!split1b(mesh,met,list,ilist,ip,1)) {//Et on teste pas du tout les qualités ici ?
+	delPt(mesh,ip);
+      } else {              
+	ppt = &mesh->point[ip];
+	met->m[ip] = 0.5 * (met->m[ip1] + met->m[ip2]);
+	ns++;
+      }
     }
   }
 
@@ -1184,14 +1204,22 @@ static int adptet(pMesh mesh,pSol met) {
   /* Iterative mesh modifications */
   it = nnc = nns = nnf = nnm = 0;
   maxit = 5;
+
   do {
+    tabtmp[0][0]=0;
+    tabtmp[0][1]=0;     tabtmp[0][2]=0;
     ns = adpspl(mesh,met);
+    if(ns){ printf("APS ADPSPL == %d\n",ns);
+      prilen(mesh,met);
+      printf(" histo %5.1f  %5.1f %5.1f\n", tabtmp[0][0],tabtmp[0][1],tabtmp[0][2]);}
     if ( ns < 0 ) {
       fprintf(stdout,"  ## Unable to complete mesh. Exit program.\n");
       return(0);
     }
 
     nc = adpcol(mesh,met);
+    if(nc){ printf("APS ADPCOL == %d\n",nc);
+      prilen(mesh,met);}
     if ( nc < 0 ) {
       fprintf(stdout,"  ## Unable to complete mesh. Exit program.\n");
       return(0);
@@ -1215,6 +1243,8 @@ static int adptet(pMesh mesh,pSol met) {
       fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
       return(0);
     }
+    if(nm+nf){ printf("FIN== %d\n",nm+nf);
+      prilen(mesh,met);}
 
     nnc += nc;
     nns += ns;
@@ -1308,6 +1338,9 @@ static int anatet(pMesh mesh,pSol met,char typchk) {
 
     /* analyze surface tetras */
     ier = anatets(mesh,met,typchk);
+    if(ier){ printf("APS ANATETS == %d\n",ier);
+      prilen(mesh,met);}
+
     if ( ier < 0 ) {
       fprintf(stdout,"  ## Unable to complete surface mesh. Exit program.\n");
       return(0);
@@ -1316,6 +1349,8 @@ static int anatet(pMesh mesh,pSol met,char typchk) {
 
     /* analyze internal tetras */
     ier = anatetv(mesh,met,typchk);
+    if(ier){ printf("APS ANATETV == %d\n",ier);
+      prilen(mesh,met);}
     if ( ier < 0 ) {
       fprintf(stdout,"  ## Unable to complete volume mesh. Exit program.\n");
       return(0);
@@ -1353,7 +1388,7 @@ static int anatet(pMesh mesh,pSol met,char typchk) {
     nnc += nc;
     nns += ns;
     nnf += nf;
-    if ( (abs(info.imprim) > 4 || info.ddebug) && ns+nc > 0 )
+    if ( (abs(info.imprim) > 4 || info.ddebug) && ns+nc+nf > 0 )
       fprintf(stdout,"     %8d splitted, %8d collapsed, %8d swapped\n",ns,nc,nf);
     if ( it > 3 && abs(nc-ns) < 0.1 * MG_MAX(nc,ns) )  break;
   }
@@ -1386,7 +1421,8 @@ int mmg3d1(pMesh mesh,pSol met) {
     fprintf(stdout,"  ## Unable to split mesh. Exiting.\n");
     return(0);
   }
-
+  //mesh->nameout="tmp0.mesh";
+  //saveMesh(mesh);
   /**--- stage 2: computational mesh */
   if ( abs(info.imprim) > 4 || info.ddebug )
     fprintf(stdout,"  ** COMPUTATIONAL MESH\n");
@@ -1406,12 +1442,15 @@ int mmg3d1(pMesh mesh,pSol met) {
     fprintf(stdout,"  ## Unable to split mesh. Exiting.\n");
     return(0);
   }
-
+//  mesh->nameout="tmp1.mesh";
+//  saveMesh(mesh);
   if ( !adptet(mesh,met) ) {
     fprintf(stdout,"  ## Unable to adapt. Exit program.\n");
     return(0);
   }
-
+//  mesh->nameout="tmp2.mesh";
+//  saveMesh(mesh);
+//  mesh->nameout="ajeter.mesh";
   /* in test phase: check if no element with 2 bdry faces */
   if ( !chkfemtopo(mesh) ) {
     fprintf(stdout,"  ## Topology of mesh unsuited for fem computations. Exit program.\n");

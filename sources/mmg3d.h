@@ -34,7 +34,7 @@
 
 /* numerical accuracy */
 #define ALPHAD    20.7846096908265    //0.04811252243247      /* 12*sqrt(3) */
-#define LLONG     2.0   // 1.414213562373
+#define LLONG     2.//2.0   // 1.414213562373
 #define LSHRT     0.3  // 0.707106781186
 #define LOPTL     1.3
 #define LOPTS     0.6
@@ -278,7 +278,7 @@ int  mmg3d1(pMesh ,pSol );
 int  mmg3d2(pMesh ,pSol );
 int  split1_sim(pMesh mesh,pSol met,int k,int vx[6]);
 void split1(pMesh mesh,pSol met,int k,int vx[6]);
-void split1b(pMesh mesh,int *list,int ret,int ip);
+int split1b(pMesh mesh,pSol met,int *list,int ret,int ip,int cas);
 int  split2sf_sim(pMesh mesh,pSol met,int k,int vx[6]);
 void split2sf(pMesh mesh,pSol met,int k,int vx[6]);
 void split2(pMesh mesh,pSol met,int k,int vx[6]);

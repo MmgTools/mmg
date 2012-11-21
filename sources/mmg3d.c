@@ -407,7 +407,8 @@ int main(int argc,char *argv[]) {
   printim(info.ctim[2].gdif,stim);
   if ( info.imprim )
     fprintf(stdout,"  -- PHASE 1 COMPLETED.     %s\n",stim);
-
+  //saveMesh(&mesh);
+  //exit(0);
   /* solve */
   chrono(ON,&info.ctim[3]);
   if ( info.imprim )
