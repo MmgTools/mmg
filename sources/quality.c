@@ -323,6 +323,10 @@ int prilen(pMesh mesh, pSol met) {
   if ( hl[3]+hl[4]+hl[5] )
     fprintf(stdout,"   %6.2f < L <%5.2f  %8d   %5.2f %%  \n",
             bd[3],bd[6],hl[3]+hl[4]+hl[5],100.*(hl[3]+hl[4]+hl[5])/(double)ned);
+  if ( hl[2]+hl[3]+hl[4] )
+    fprintf(stdout,"   %6.2f < L <%5.2f  %8d   %5.2f %%  \n",
+            bd[2],bd[5],hl[2]+hl[3]+hl[4],100.*(hl[2]+hl[3]+hl[4])/(double)ned);
+
 
   if ( abs(info.imprim) > 4 ) {
     fprintf(stdout,"\n     HISTOGRAMM\n");

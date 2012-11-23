@@ -1,16 +1,16 @@
 #include "mmg3d.h"
 
 extern Info  info;
-
+int ajeter,ni=0,nd=0;
 
 /** get new point address */
 int newPt(pMesh mesh,double c[3],char tag) {
   pPoint  ppt;
   int     curpt;
-
+  //ajeter=fopen("track2.dat","a");
   if ( !mesh->npnil )  return(0);
-
   curpt = mesh->npnil;
+  //fprintf(ajeter," INSER : %d -->nb insert %d\n",mesh->npnil,++ni);
   if ( mesh->npnil > mesh->np )  mesh->np = mesh->npnil;
   ppt   = &mesh->point[curpt];
   memcpy(ppt->c,c,3*sizeof(double));
@@ -25,14 +25,16 @@ int newPt(pMesh mesh,double c[3],char tag) {
     ppt->tag = MG_BDY;
     ppt->xp  = mesh->xp;
   }
+  //fclose(ajeter);
   return(curpt);
 }
 
 void delPt(pMesh mesh,int ip) {
   pPoint   ppt;
   xPoint  *pxp;
-
   ppt = &mesh->point[ip];
+  //  ajeter=fopen("track2.dat","a");
+  //  fprintf(ajeter," DELETE : %d -->nb del %d\n",ip,++nd);
   if ( ppt->xp ) {
     pxp = &mesh->xpoint[ppt->xp];
     memset(pxp,0,sizeof(xPoint));
@@ -44,6 +46,7 @@ void delPt(pMesh mesh,int ip) {
   if ( ip == mesh->np ) {
     while ( !MG_VOK((&mesh->point[mesh->np])) )  mesh->np--;
   }
+  //fclose(ajeter);
 }
 
 /** get new elt address */
