@@ -1089,7 +1089,6 @@ static int adpspl(pMesh mesh,pSol met) {
           memcpy(o,ro,3*sizeof(double));
         }
         ip = newPt(mesh,o,MG_NOTAG);
-        met->m[ip] = 0.5 * (met->m[ip1]+met->m[ip2]);//ajeter
         if ( !ip )  break;
         //CECILE
         if ( met->m )
@@ -1139,7 +1138,6 @@ static int adpspl(pMesh mesh,pSol met) {
       o[1] = 0.5*(p0->c[1] + p1->c[1]);
       o[2] = 0.5*(p0->c[2] + p1->c[2]);
       ip = newPt(mesh,o,MG_NOTAG);
-      met->m[ip] = 0.5 * (met->m[ip1]+met->m[ip2]);//ajeter
       if ( !ip )  break;
       //CECILE
       met->m[ip] = 0.5 * (met->m[ip1]+met->m[ip2]);
@@ -1461,8 +1459,6 @@ int mmg3d1(pMesh mesh,pSol met) {
     fprintf(stdout,"  ## Unable to split mesh. Exiting.\n");
     return(0);
   }
-  //mesh->nameout="tmp0.mesh";
-  //saveMesh(mesh);
   /**--- stage 2: computational mesh */
   if ( abs(info.imprim) > 4 || info.ddebug )
     fprintf(stdout,"  ** COMPUTATIONAL MESH\n");
@@ -1482,15 +1478,12 @@ int mmg3d1(pMesh mesh,pSol met) {
     fprintf(stdout,"  ## Unable to split mesh. Exiting.\n");
     return(0);
   }
-//  mesh->nameout="tmp1.mesh";
-//  saveMesh(mesh);
+
   if ( !adptet(mesh,met) ) {
     fprintf(stdout,"  ## Unable to adapt. Exit program.\n");
     return(0);
   }
-//  mesh->nameout="tmp2.mesh";
-//  saveMesh(mesh);
-//  mesh->nameout="ajeter.mesh";
+
   /* in test phase: check if no element with 2 bdry faces */
   if ( !chkfemtopo(mesh) ) {
     fprintf(stdout,"  ## Topology of mesh unsuited for fem computations. Exit program.\n");

@@ -35,6 +35,9 @@ void delPt(pMesh mesh,int ip) {
   ppt = &mesh->point[ip];
   //  ajeter=fopen("track2.dat","a");
   //  fprintf(ajeter," DELETE : %d -->nb del %d\n",ip,++nd);
+  if(ppt->tmp){
+    fprintf(stdout,"Warning: We delete the point %d already deleted. \n",ip);
+  }
   if ( ppt->xp ) {
     pxp = &mesh->xpoint[ppt->xp];
     memset(pxp,0,sizeof(xPoint));

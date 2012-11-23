@@ -237,8 +237,8 @@ int saveMesh(pMesh mesh) {
   /* boundary mesh */
   mesh->nt = 0;
   if ( mesh->tria){
-    //free(mesh->tria);
-    //mesh->tria=NULL;
+    free(mesh->tria);
+    mesh->tria=NULL;
   }
   if ( bdryTria(mesh) ) {
     GmfSetKwd(outm,GmfTriangles,mesh->nt);
@@ -247,10 +247,10 @@ int saveMesh(pMesh mesh) {
       GmfSetLin(outm,GmfTriangles,mesh->point[ptt->v[0]].tmp,mesh->point[ptt->v[1]].tmp,\
                 mesh->point[ptt->v[2]].tmp,ptt->ref);
     }
-    //    free(mesh->adjt);
-    //free(mesh->tria);
-    //mesh->adjt=NULL;
-    //mesh->tria=NULL;
+    free(mesh->adjt);
+    free(mesh->tria);
+    mesh->adjt=NULL;
+    mesh->tria=NULL;
 
     /* edges + ridges */
     na = nr = 0;
