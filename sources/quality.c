@@ -384,13 +384,16 @@ void outqua(pMesh mesh,pSol met) {
     his[ir] += 1;
   }
 
+#ifndef DEBUG
   fprintf(stdout,"\n  -- MESH QUALITY   %d\n",mesh->ne - nex);
-// fprintf(stdout,"     BEST   %8.6f  AVRG.   %8.6f  WRST.   %8.6f (%d)\n",
-//         rapmax,rapavg / (mesh->ne-nex),rapmin,iel);
+  fprintf(stdout,"     BEST   %8.6f  AVRG.   %8.6f  WRST.   %8.6f (%d)\n",
+          rapmax,rapavg / (mesh->ne-nex),rapmin,iel);
+#else
   fprintf(stdout,"     BEST   %e  AVRG.   %e  WRST.   %e (%d)\n => %d %d %d %d\n",
-	  rapmax,rapavg / (mesh->ne-nex),rapmin,iel, 
+	  rapmax,rapavg / (mesh->ne-nex),rapmin,iel,
 	  mesh->tetra[iel].v[0],mesh->tetra[iel].v[1],mesh->tetra[iel].v[2],
 	  mesh->tetra[iel].v[3]);
+#endif
   if ( abs(info.imprim) < 5 )  return;
 
   /* print histo */
