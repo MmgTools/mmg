@@ -1484,8 +1484,8 @@ int mmg3d1(pMesh mesh,pSol met) {
 #ifdef DEBUG
   puts("Fin anatet");
   outqua(mesh,met);
-    saveMesh(mesh);
-    exit(0);
+  //saveMesh(mesh);
+  //exit(0);
 #endif
   if ( !adptet(mesh,met) ) {
     fprintf(stdout,"  ## Unable to adapt. Exit program.\n");
