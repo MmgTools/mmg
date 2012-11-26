@@ -1,13 +1,14 @@
 #include "mmg3d.h"
 
 extern Info  info;
-int ajeter,ni=0,nd=0;
+//FILE *ajeter;
+//int ni=0,nd=0;
 
 /** get new point address */
 int newPt(pMesh mesh,double c[3],char tag) {
   pPoint  ppt;
   int     curpt;
-  //ajeter=fopen("track2.dat","a");
+  //  ajeter=fopen("track2.dat","a");
   if ( !mesh->npnil )  return(0);
   curpt = mesh->npnil;
   //fprintf(ajeter," INSER : %d -->nb insert %d\n",mesh->npnil,++ni);
@@ -33,11 +34,8 @@ void delPt(pMesh mesh,int ip) {
   pPoint   ppt;
   xPoint  *pxp;
   ppt = &mesh->point[ip];
-  //  ajeter=fopen("track2.dat","a");
-  //  fprintf(ajeter," DELETE : %d -->nb del %d\n",ip,++nd);
-  if(ppt->tmp){
-    fprintf(stdout,"Warning: We delete the point %d already deleted. \n",ip);
-  }
+  //ajeter=fopen("track2.dat","a");
+  //fprintf(ajeter," DELETE : %d -->nb del %d\n",ip,++nd);
   if ( ppt->xp ) {
     pxp = &mesh->xpoint[ppt->xp];
     memset(pxp,0,sizeof(xPoint));

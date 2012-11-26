@@ -1459,6 +1459,9 @@ int mmg3d1(pMesh mesh,pSol met) {
     fprintf(stdout,"  ## Unable to split mesh. Exiting.\n");
     return(0);
   }
+#ifdef DEBUG
+  outqua(mesh,met);
+#endif
   /**--- stage 2: computational mesh */
   if ( abs(info.imprim) > 4 || info.ddebug )
     fprintf(stdout,"  ** COMPUTATIONAL MESH\n");
@@ -1478,12 +1481,20 @@ int mmg3d1(pMesh mesh,pSol met) {
     fprintf(stdout,"  ## Unable to split mesh. Exiting.\n");
     return(0);
   }
-
+#ifdef DEBUG
+  puts("Fin anatet");
+  outqua(mesh,met);
+    saveMesh(mesh);
+    exit(0);
+#endif
   if ( !adptet(mesh,met) ) {
     fprintf(stdout,"  ## Unable to adapt. Exit program.\n");
     return(0);
   }
-
+#ifdef DEBUG
+  puts("Fin adptet");
+  outqua(mesh,met);
+#endif
   /* in test phase: check if no element with 2 bdry faces */
   if ( !chkfemtopo(mesh) ) {
     fprintf(stdout,"  ## Topology of mesh unsuited for fem computations. Exit program.\n");
