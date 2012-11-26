@@ -1234,6 +1234,14 @@ static int adptet(pMesh mesh,pSol met) {
     tabtmp[0][1]=0;     tabtmp[0][2]=0;
 #endif
     ns = adpspl(mesh,met);
+    if(ns){
+      // A JETER
+      puts("-ADPSPL");
+      outqua(mesh,met);
+      mesh->nameout="adpspl.mesh";
+      saveMesh(mesh);
+    }
+
 #ifdef DEBUG
     if(ns){ printf("APS ADPSPL == %d\n",ns);
       prilen(mesh,met);
@@ -1245,6 +1253,13 @@ static int adptet(pMesh mesh,pSol met) {
     }
 
     nc = adpcol(mesh,met);
+    if(nc){
+      // A JETER
+      puts("-ADPCOL");
+      outqua(mesh,met);
+      mesh->nameout="adpcol.mesh";
+      saveMesh(mesh);
+    }
 #ifdef DEBUG
     if(nc){ printf("APS ADPCOL == %d\n",nc);
       prilen(mesh,met);}
@@ -1259,8 +1274,21 @@ static int adptet(pMesh mesh,pSol met) {
       fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
       return(0);
     }
-
+    if(nm){
+      // A JETER
+      puts("-MOVTET");
+      outqua(mesh,met);
+      mesh->nameout="movtet.mesh";
+      saveMesh(mesh);
+    }
     nf = swpmsh(mesh,met);
+    if(nf){
+      // A JETER
+      puts("-SWPMSH");
+      outqua(mesh,met);
+      mesh->nameout="swpmsh.mesh";
+      saveMesh(mesh);
+    }
     if ( nf < 0 ) {
       fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
       return(0);
@@ -1268,6 +1296,13 @@ static int adptet(pMesh mesh,pSol met) {
     nnf += nf;
 
     nf = swptet(mesh,met);
+    if(nf){
+      // A JETER
+      puts("-SWPTET");
+      outqua(mesh,met);
+      mesh->nameout="swptet.mesh";
+      saveMesh(mesh);
+    }
     if ( nf < 0 ) {
       fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
       return(0);
@@ -1280,6 +1315,8 @@ static int adptet(pMesh mesh,pSol met) {
     nns += ns;
     nnf += nf;
     nnm += nm;
+    // A JETER
+    exit(0);
     if ( (abs(info.imprim) > 4 || info.ddebug) && ns+nc > 0 )
       fprintf(stdout,"     %8d splitted, %8d collapsed, %8d swapped, %8d moved\n",ns,nc,nf,nm);
     if ( ns < 10 && abs(nc-ns) < 3 )  break;
@@ -1459,6 +1496,9 @@ int mmg3d1(pMesh mesh,pSol met) {
     fprintf(stdout,"  ## Unable to split mesh. Exiting.\n");
     return(0);
   }
+  // A JETER
+  //mesh->nameout="geom.mesh";
+  //saveMesh(mesh);
 #ifdef DEBUG
   outqua(mesh,met);
 #endif
@@ -1476,23 +1516,32 @@ int mmg3d1(pMesh mesh,pSol met) {
     fprintf(stdout,"  ## Gradation problem. Exit program.\n");
     return(0);
   }
+  // A JETER
+  // mesh->nameout="hgrad.mesh";
+  //saveMesh(mesh);
 
   if ( !anatet(mesh,met,2) ) {
     fprintf(stdout,"  ## Unable to split mesh. Exiting.\n");
     return(0);
   }
-#ifdef DEBUG
-  puts("Fin anatet");
+  //#ifdef DEBUG
+  puts("---------------------------Fin anatet---------------------");
   outqua(mesh,met);
-  //saveMesh(mesh);
+  // A JETER
+  mesh->nameout="anatetF.mesh";
+  saveMesh(mesh);
   //exit(0);
-#endif
+  //#endif
   if ( !adptet(mesh,met) ) {
     fprintf(stdout,"  ## Unable to adapt. Exit program.\n");
     return(0);
   }
+  // A JETER
+  mesh->nameout="adptetF.mesh";
+  saveMesh(mesh);
+
 #ifdef DEBUG
-  puts("Fin adptet");
+  puts("---------------------Fin adptet-----------------");
   outqua(mesh,met);
 #endif
   /* in test phase: check if no element with 2 bdry faces */

@@ -237,22 +237,22 @@ int saveMesh(pMesh mesh) {
   /* boundary mesh */
   mesh->nt = 0;
   if ( mesh->tria){
-    free(mesh->tria);
-    mesh->tria=NULL;
+//    free(mesh->tria); A REMETTRE
+//    mesh->tria=NULL;
   }
   if ( bdryTria(mesh) ) {
     GmfSetKwd(outm,GmfTriangles,mesh->nt);
     for (k=1; k<=mesh->nt; k++) {
       ptt = &mesh->tria[k];
-      GmfSetLin(outm,GmfTriangles,mesh->point[ptt->v[0]].tmp,mesh->point[ptt->v[1]].tmp,\
+      GmfSetLin(outm,GmfTriangles,mesh->point[ptt->v[0]].tmp,mesh->point[ptt->v[1]].tmp, \
                 mesh->point[ptt->v[2]].tmp,ptt->ref);
     }
-    free(mesh->adjt);
-    free(mesh->tria);
-    mesh->adjt=NULL;
-    mesh->tria=NULL;
+    //free(mesh->adjt); //A REMETTRE
+    //free(mesh->tria); //A REMETTRE
+    //mesh->adjt=NULL;
+    //mesh->tria=NULL;
 
-    /* edges + ridges */
+  /* edges + ridges */
     na = nr = 0;
     for (k=0; k<=mesh->htab.max; k++) {
       ph = &mesh->htab.geom[k];

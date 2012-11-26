@@ -2,7 +2,7 @@
 
 extern Info  info;
 extern char ddb;
-
+FILE *tmp;
 inline double lenedg_ani(pMesh mesh,pSol met,int ip1,int ip2) {
   return(0.0);
 }
