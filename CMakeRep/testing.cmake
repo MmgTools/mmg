@@ -151,6 +151,10 @@ ADD_TEST(NAME CubeIso_0.5h_hminMax
 ADD_TEST(NAME CubeIso_0.25h_hminMax
   COMMAND $ENV{HOME}/bin/$ENV{ARCHI}/mmg3d5 -v 5
   ${REG_TESTS_PATH}/CubeIso_0.25h_hminMax/CubeIso0.1.mesh -hmax 0.025 -hmin 0.025)
+#ADD_TEST(NAME CubeIso_0.125h_hminMax
+#  COMMAND $ENV{HOME}/bin/$ENV{ARCHI}/mmg3d5 -v 5
+#  ${REG_TESTS_PATH}/CubeIso_0.125h_hminMax/CubeIso0.1.mesh -hmax 0.0125 -hmin 0.0125)
+
 #---Second with sol file
 ADD_TEST(NAME CubeIso_h_met
   COMMAND $ENV{HOME}/bin/$ENV{ARCHI}/mmg3d5 -v 5
@@ -161,28 +165,31 @@ ADD_TEST(NAME CubeIso_0.5h_met
 ADD_TEST(NAME CubeIso_0.25h_met
   COMMAND $ENV{HOME}/bin/$ENV{ARCHI}/mmg3d5 -v 5
   ${REG_TESTS_PATH}/CubeIso_0.25h_met/CubeIso0.1.mesh)
+ADD_TEST(NAME CubeIso_0.125h_met
+  COMMAND $ENV{HOME}/bin/$ENV{ARCHI}/mmg3d5 -v 5
+  ${REG_TESTS_PATH}/CubeIso_0.125h_met/CubeIso0.1.mesh)
 
 #####
 
 # Check what happend when we refine a sphere of size h with a constant metric
 # (h, h/2, h/4 and h/8)
-#---First with hmin=hmax
-ADD_TEST(NAME SphereIso_h_hminMax
-  COMMAND $ENV{HOME}/bin/$ENV{ARCHI}/mmg3d5 -v 5
-  ${REG_TESTS_PATH}/SphereIso_h_hminMax/SphereIso0.5.mesh
-  -hmax 0.5 -hmin 0.5 -hausd 1)
-ADD_TEST(NAME SphereIso_0.5h_hminMax
-  COMMAND $ENV{HOME}/bin/$ENV{ARCHI}/mmg3d5 -v 5
-  ${REG_TESTS_PATH}/SphereIso_0.5h_hminMax/SphereIso0.5.mesh
-  -hmax 0.25 -hmin 0.25 -hausd 1)
-ADD_TEST(NAME SphereIso_0.25h_hminMax
-  COMMAND $ENV{HOME}/bin/$ENV{ARCHI}/mmg3d5 -v 5
-  ${REG_TESTS_PATH}/SphereIso_0.25h_hminMax/SphereIso0.5.mesh
-  -hmax 0.125 -hmin 0.125 -hausd 1)
-ADD_TEST(NAME SphereIso_0.125h_hminMax
-  COMMAND $ENV{HOME}/bin/$ENV{ARCHI}/mmg3d5 -v 5
-  ${REG_TESTS_PATH}/SphereIso_0.125h_hminMax/SphereIso0.5.mesh
-  -hmax 0.0625 -hmin 0.0625 -hausd 1)
+##---First with hmin=hmax
+#ADD_TEST(NAME SphereIso_h_hminMax
+#  COMMAND $ENV{HOME}/bin/$ENV{ARCHI}/mmg3d5 -v 5
+#  ${REG_TESTS_PATH}/SphereIso_h_hminMax/SphereIso0.5.mesh
+#  -hmax 0.5 -hmin 0.5 -hausd 1)
+#ADD_TEST(NAME SphereIso_0.5h_hminMax
+#  COMMAND $ENV{HOME}/bin/$ENV{ARCHI}/mmg3d5 -v 5
+#  ${REG_TESTS_PATH}/SphereIso_0.5h_hminMax/SphereIso0.5.mesh
+#  -hmax 0.25 -hmin 0.25 -hausd 1)
+#ADD_TEST(NAME SphereIso_0.25h_hminMax
+#  COMMAND $ENV{HOME}/bin/$ENV{ARCHI}/mmg3d5 -v 5
+#  ${REG_TESTS_PATH}/SphereIso_0.25h_hminMax/SphereIso0.5.mesh
+#  -hmax 0.125 -hmin 0.125 -hausd 1)
+#ADD_TEST(NAME SphereIso_0.125h_hminMax
+#  COMMAND $ENV{HOME}/bin/$ENV{ARCHI}/mmg3d5 -v 5
+#  ${REG_TESTS_PATH}/SphereIso_0.125h_hminMax/SphereIso0.5.mesh
+#  -hmax 0.0625 -hmin 0.0625 -hausd 1)
 #---Second with sol file
 ADD_TEST(NAME SphereIso_h_met
   COMMAND $ENV{HOME}/bin/$ENV{ARCHI}/mmg3d5 -v 5
@@ -209,6 +216,14 @@ ADD_TEST(NAME SphereIso_8smallh_met
   COMMAND $ENV{HOME}/bin/$ENV{ARCHI}/mmg3d5 -v 5
   ${REG_TESTS_PATH}/SphereIso_8smallh_met/SphereIso0.0625.mesh -hausd 1)
 
+# Check what happend when we use hausdorff number to refine the skin and a big hgrad
+# to have an inside of the initial size (0.5)
+ADD_TEST(NAME SphereIso_h_hausd0.001
+  COMMAND $ENV{HOME}/bin/$ENV{ARCHI}/mmg3d5 -v 5
+  ${REG_TESTS_PATH}/SphereIso_h_hausd0.001/SphereIso0.5.mesh -hausd 0.001 -hgrad 500)
+ADD_TEST(NAME SphereIso_h_hausd0.005
+  COMMAND $ENV{HOME}/bin/$ENV{ARCHI}/mmg3d5 -v 5
+  ${REG_TESTS_PATH}/SphereIso_h_hausd0.005/SphereIso0.5.mesh -hausd 0.005 -hgrad 100)
 
 # Check what happend when we refine a cube whose skin has already the good size
 ADD_TEST(NAME CubeSkin_0.05
@@ -224,12 +239,50 @@ ADD_TEST(NAME CubeSkin_0.2
 
 # Check results on various meshes
 # First: Meshes that we want unrefined
-#ADD_TEST(NAME VariousMeshes_unrefined_santa
-#  COMMAND $ENV{HOME}/bin/$ENV{ARCHI}/mmg3d5 -v 5
-#  ${REG_TESTS_PATH}/VariousMeshes_unrefined_santa/santa.meshb -hmax 0.5 -hmin 0.5)
+ADD_TEST(NAME Various_unref_Linkrods_met0.2
+  COMMAND $ENV{HOME}/bin/$ENV{ARCHI}/mmg3d5 -v 5
+  ${REG_TESTS_PATH}/Various_unref_Linkrods_met0.2/linkrods.mesh -hausd 1)
+ADD_TEST(NAME Various_unref_Linkrods_met0.2_hausd0.01
+  COMMAND $ENV{HOME}/bin/$ENV{ARCHI}/mmg3d5 -v 5
+  ${REG_TESTS_PATH}/Various_unref_Linkrods_met0.2_hausd0.01/linkrods.mesh
+  -hausd 0.01)
+
+
 
 # Second: Meshes that we want refined
+ADD_TEST(NAME Various_ref_Linkrods_met0.05
+  COMMAND $ENV{HOME}/bin/$ENV{ARCHI}/mmg3d5 -v 5
+  ${REG_TESTS_PATH}/Various_ref_Linkrods_met0.05/linkrods.mesh -hausd 1)
+ADD_TEST(NAME Various_ref_Linkrods_met0.05_hausd0.01
+  COMMAND $ENV{HOME}/bin/$ENV{ARCHI}/mmg3d5 -v 5
+  ${REG_TESTS_PATH}/Various_ref_Linkrods_met0.05_hausd0.01/linkrods.mesh
+  -hausd 0.01)
+ADD_TEST(NAME Various_ref_Linkrods_met0.05_hausd0.001
+  COMMAND $ENV{HOME}/bin/$ENV{ARCHI}/mmg3d5 -v 5
+  ${REG_TESTS_PATH}/Various_ref_Linkrods_met0.05_hausd0.001/linkrods.mesh
+  -hausd 0.001)
 
+# Third: We refine some parts and unrefined others
+ADD_TEST(NAME Various_refunref_Santa_met0.05_hausd0.001_ar90
+  COMMAND $ENV{HOME}/bin/$ENV{ARCHI}/mmg3d5 -v 5
+  ${REG_TESTS_PATH}/Various_refunref_Santa_met0.05_hausd0.001_ar90/santa.mesh
+  -hausd 0.001 -ar 90)
+ADD_TEST(NAME Various_refunref_Santa_met0.05_hausd0.0001_ar90
+  COMMAND $ENV{HOME}/bin/$ENV{ARCHI}/mmg3d5 -v 5
+  ${REG_TESTS_PATH}/Various_refunref_Santa_met0.05_hausd0.0001_ar90/santa.mesh
+  -hausd 0.0001 -ar 90)
+
+# 4: Refinment on a solution
+#ADD_TEST(NAME Various_adpsol_M6Mach_Eps0.0005_hmin0.0001_hmax20
+#  COMMAND $ENV{HOME}/bin/$ENV{ARCHI}/mmg3d5 -v 5
+#  ${REG_TESTS_PATH}/Various_adpsol_M6Mach_Eps0.0005_hmin0.0001_hmax20/M6
+#  -sol ${REG_TESTS_PATH}/Various_adpsol_M6Mach_Eps0.0005_hmin0.0001_hmax20/metM6.sol
+#  -hausd 0.1 -ar 90)
+ADD_TEST(NAME Various_adpsol_M6Mach_Eps0.001_hmin0.001_hmax10
+  COMMAND $ENV{HOME}/bin/$ENV{ARCHI}/mmg3d5 -v 5
+  ${REG_TESTS_PATH}/Various_adpsol_M6Mach_Eps0.001_hmin0.001_hmax10/M6
+  -sol ${REG_TESTS_PATH}/Various_adpsol_M6Mach_Eps0.001_hmin0.001_hmax10/metM6.sol
+  -hausd 0.1 -ar 90)
 
 
 

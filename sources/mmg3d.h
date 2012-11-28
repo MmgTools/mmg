@@ -34,7 +34,7 @@
 
 /* numerical accuracy */
 #define ALPHAD    20.7846096908265    //0.04811252243247      /* 12*sqrt(3) */
-#define LLONG     2.//2.0   // 1.414213562373
+#define LLONG     3.//2.0   // 1.414213562373
 #define LSHRT     0.3  // 0.707106781186
 #define LOPTL     1.3
 #define LOPTS     0.6

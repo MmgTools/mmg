@@ -290,7 +290,7 @@ int split1b(pMesh mesh, pSol mettmp,int *list, int ret, int ip,int cas){
 
   //cree-t-on une trop petite arete ? (voir le bug de BUG_Split1b_SpereIso_0.125h_met)
   if(cas) {
-    //    lmintmp=0.6;
+    //lmintmp=0.6;
     for(jtmp=0;jtmp<ilist;jtmp++){
       iel = list[jtmp] / 6;
       pt = &mesh->tetra[iel];
