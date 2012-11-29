@@ -353,8 +353,6 @@ int main(int argc,char *argv[]) {
 
   /* command line */
   if ( !parsar(argc,argv,&mesh,&met) )  return(1);
-  puts("test : ctest fait un svn up???\n");
-  exit(0);
   /* load data */
   fprintf(stdout,"\n  -- INPUT DATA\n");
   chrono(ON,&info.ctim[1]);
