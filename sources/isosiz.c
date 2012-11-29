@@ -296,7 +296,8 @@ static double defsizreg(pMesh mesh,pSol met,int nump,int *lists,int ilists) {
 
   /* At this point, intm stands for the integral matrix of Taubin's approach : vp[0] and vp[1]
      are the two pr. directions of curvature, and the two curvatures can be inferred from lambdas*/
-  assert(eigensym(intm,kappa,vp));
+  ier=eigensym(intm,kappa,vp);
+  assert(ier);
 
   kappa[0] = 2.0/9.0 * fabs(kappa[0]) / info.hausd;
   kappa[0] = MG_MIN(kappa[0],isqhmin);

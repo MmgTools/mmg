@@ -325,7 +325,7 @@ int hashPop(Hash *hash,int a,int b) {
   key = (KA*ia + KB*ib) % hash->siz;
   ph  = &hash->item[key];
 
-  if ( !ph->a )  return(0);
+  if ( !ph->a ) return(0);
   else if ( ph->a == ia && ph->b == ib ) {
     if ( !ph->nxt ) {
       memset(ph,0,sizeof(hedge));

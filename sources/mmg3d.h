@@ -1,6 +1,8 @@
 #ifndef _MMG3D_H
 #define _MMG3D_H
 
+/* Warning: never ever use assert() with a function,
+   the option -DNDEBUG suppress all assert()*/
 #include <assert.h>
 #include <stdlib.h>
 #include <stdio.h>

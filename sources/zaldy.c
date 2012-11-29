@@ -23,7 +23,6 @@ int newPt(pMesh mesh,double c[3],char tag) {
     ppt->tag = MG_BDY;
     ppt->xp  = mesh->xp;
   }
-  //fclose(ajeter);
   return(curpt);
 }
 

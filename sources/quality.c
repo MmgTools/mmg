@@ -260,8 +260,9 @@ int prilen(pMesh mesh, pSol met) {
       i1 = iare[ia][1];
       np = pt->v[i0];
       nq = pt->v[i1];
-
-      assert( hashEdge(&hash,np,nq,0) );
+      // We can't do assert(hashEdge(&hash,np,nq,0)) with optim O3
+      ier = hashEdge(&hash,np,nq,0);
+      assert( ier );
     }
   }
 
@@ -301,13 +302,11 @@ int prilen(pMesh mesh, pSol met) {
             hl[i]++;
             break;
           }
-          if( i == 8 )
-            hl[8]++;
         }
+        if( i == 8 ) hl[8]++;
       }
     }
   }
-
 
   /* Display histogram */
   dned = (double)ned;
