@@ -273,10 +273,10 @@ ADD_TEST(NAME Various_refunref_Santa_met0.05_hausd0.0001_ar90
   -hausd 0.0001 -ar 90)
 
 # 4: Refinment on a solution
-ADD_TEST(NAME Various_adpsol_hgrad1_M6Mach_Eps0.001_hmin0.001_hmax_2
+ADD_TEST(NAME Various_adpsol_hgrad1_M6Mach_Eps0.001_hmin0.001_hmax2
   COMMAND $ENV{HOME}/bin/$ENV{ARCHI}/mmg3d5 -v 5
-  ${REG_TESTS_PATH}/Various_adpsol_hgrad1_M6Mach_Eps0.001_hmin0.001_hmax_2/M6
-  -sol ${REG_TESTS_PATH}/Various_adpsol_hgrad1_M6Mach_Eps0.001_hmin0.001_hmax_2/metM6.sol
+  ${REG_TESTS_PATH}/Various_adpsol_hgrad1_M6Mach_Eps0.001_hmin0.001_hmax2/M6
+  -sol ${REG_TESTS_PATH}/Various_adpsol_hgrad1_M6Mach_Eps0.001_hmin0.001_hmax2/metM6.sol
   -hausd 0.1 -ar 60 -hgrad 1)
 ADD_TEST(NAME Various_adpsol_hgrad1_M6Mach_Eps0.0005_hmin0.0001_hmax3
   COMMAND $ENV{HOME}/bin/$ENV{ARCHI}/mmg3d5 -v 5
