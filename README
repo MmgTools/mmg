@@ -1,10 +1,24 @@
-CMakeRep = Directory for the cmake commands
-Doxygen  = Directory for automatic documentation
-build    = Directory for temporary files of cmake
-Scripts  = useful scripts (to run automatid tests and clean build)
+DIRECTORIES
+  Doxygen  = Directory for automatic documentation
+  build    = Directory for temporary files of cmake
+  Scripts  = useful scripts (to run automatid tests and clean build)
 
-to compile :
-$cd build
-$ccmake ../CMakeRep   # if you need to configure or :
-$cmake ../CMakeRep
-$make
+FILES
+  CMakeLists.txt = rule the makefile generation
+  testing.cmake  = list of tests
+  CTestConfig.cmake = configuration for CTest (name of the project, hour of the nighly run...)
+  CTestCustom.cmake = cusomisation of the CTest options
+  libSystem+libmesh5.supp = Valgrind suppression file for mac
+  libmesh5.supp = Valgrind suppression file for debian
+
+TO COMPILE :
+  $cd build
+  $ccmake ..   # if you need to configure or :
+  $cmake ..
+  $make
+
+OUTPUT : 
+  mmg3d5 in normal mode
+  mmg3d5_debug in Debug mode
+  mmg3d5_O3 in Release mode
+  mmg3d5_Os in MinSizeRel mode

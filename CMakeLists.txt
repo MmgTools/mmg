@@ -8,7 +8,7 @@ ENABLE_TESTING()
 
 # Executable path
 SET(EXECUTABLE_OUTPUT_PATH $ENV{HOME}/bin/$ENV{ARCHI}/)
-SET(MMG_SOURCE_DIR ${CMAKE_SOURCE_DIR}/../sources/)
+SET(MMG_SOURCE_DIR ${CMAKE_SOURCE_DIR}/sources/)
 # Find "exotic" compilers
 IF (${CMAKE_C_COMPILER} MATCHES Clang OR ${CMAKE_C_COMPILER} MATCHES clang)
   # using clang
@@ -95,6 +95,9 @@ ENDIF(NOT EXISTS ${MMG_SOURCE_DIR}/compil.date)
 
 # Executable and dependencies
 ADD_EXECUTABLE(mmg3d5 ${MMG_SOURCE_DIR}/compil.date ${source_files})
+SET_TARGET_PROPERTIES(mmg3d5 PROPERTIES DEBUG_POSTFIX _debug) # in debug mode we name the executable mmg3d5_debug
+SET_TARGET_PROPERTIES(mmg3d5 PROPERTIES RELEASE_POSTFIX _O3) # in Release mode we name the executable mmg3d5_O3
+SET_TARGET_PROPERTIES(mmg3d5 PROPERTIES MINSIZEREL_POSTFIX _Os) 
 # /!\ ADD_CUSTOM_TARGET don't work with cmake-2.8.4 but is necessary for other versions
 IF ( ${CMAKE_COMMAND} MATCHES 2.8.4 )
 ELSE ()
