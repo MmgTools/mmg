@@ -63,14 +63,14 @@ int movintpt(pMesh mesh,int *list,int ilist) {
 
 /** Move boundary regular point, whose volumic and surfacic balls are passed */
 int movbdyregpt(pMesh mesh,int *listv,int ilistv,int *lists,int ilists) {
-  pTetra                                        pt,pt0;
-  pPoint                                        p0,p1,p2,ppt0;
-  Tria                                          tt;
-  pxPoint                                       pxp;
-  Bezier                                        b;
-  double                                        *n,r[3][3],lispoi[3*LMAX+1],ux,uy,uz,det2d,detloc,oppt[2],step,lambda[3];
-  double                                        ll,m[2],uv[2],o[3],no[3],to[3],calold,calnew,caltmp;
-  int                                                   ier,k,kel,iel,l,n0,na,nb,ntempa,ntempb,ntempc,nut,nxp;
+  pTetra                pt,pt0;
+  pPoint                p0,p1,p2,ppt0;
+  Tria                  tt;
+  pxPoint               pxp;
+  Bezier                b;
+  double                *n,r[3][3],lispoi[3*LMAX+1],ux,uy,uz,det2d,detloc,oppt[2],step,lambda[3];
+  double                ll,m[2],uv[2],o[3],no[3],to[3],calold,calnew,caltmp;
+  int                   ier,k,kel,iel,l,n0,na,nb,ntempa,ntempb,ntempc,nut,nxp;
   unsigned char         i0,iface,i;
 
   step = 0.1;
