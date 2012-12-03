@@ -8,10 +8,13 @@ SET(REG_TESTS_PATH ${CMAKE_SOURCE_DIR}/../RegTests)
 GET_TARGET_PROPERTY(EXEC mmg3d5 LOCATION)
 IF(${CMAKE_BUILD_TYPE} MATCHES "Debug")
   SET(EXEC ${EXEC}_debug)
+  SET(BUILDNAME ${BUILDNAME}_debug CACHE STRING "build name variable")
 ELSEIF(${CMAKE_BUILD_TYPE} MATCHES "Release")
   SET(EXEC ${EXEC}_O3)
+  SET(BUILDNAME ${BUILDNAME}_O3 CACHE STRING "build name variable")
 ELSEIF(${CMAKE_BUILD_TYPE} MATCHES "Minsizerel")
   SET(EXEC ${EXEC}_Os)
+  SET(BUILDNAME ${BUILDNAME}_Os CACHE STRING "build name variable")
 ENDIF()
 
 # simple test: must already pass
