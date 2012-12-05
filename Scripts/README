@@ -2,3 +2,5 @@ We use crontab to run the nigthly test:
     $crontab -e #to configure the task (for now, we run nightly_run.sh every day at 23:55)
 
 The script nightly_run.sh run CTest in option Nightly and print the output in ../build/ctest.log
+
+The script continuous_run.sh check the repository at each commit. To complete this tests, we run every nights the nightlySVN_run.sh script that check the repository with different option of compilation (Os, O3).

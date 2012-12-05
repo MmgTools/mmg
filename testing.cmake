@@ -16,6 +16,7 @@ ELSEIF(${CMAKE_BUILD_TYPE} MATCHES "Minsizerel")
   SET(EXEC ${EXEC}_Os)
   SET(BUILDNAME ${BUILDNAME}_Os CACHE STRING "build name variable")
 ENDIF()
+#  SET(BUILDNAME ${BUILDNAME}_LLONG2_nomov CACHE STRING "build name variable")
 
 # simple test: must already pass
 ADD_TEST(NAME SimpleCube
@@ -188,44 +189,44 @@ ADD_TEST(NAME CubeIso_0.125h_met
 #ADD_TEST(NAME SphereIso_h_hminMax
 #  COMMAND ${EXEC} -v 5
 #  ${REG_TESTS_PATH}/SphereIso_h_hminMax/SphereIso0.5.mesh
-#  -hmax 0.5 -hmin 0.5 -hausd 1)
+#  -hmax 0.5 -hmin 0.5 -hausd 0.1)
 #ADD_TEST(NAME SphereIso_0.5h_hminMax
 #  COMMAND ${EXEC} -v 5
 #  ${REG_TESTS_PATH}/SphereIso_0.5h_hminMax/SphereIso0.5.mesh
-#  -hmax 0.25 -hmin 0.25 -hausd 1)
+#  -hmax 0.25 -hmin 0.25 -hausd 0.1)
 #ADD_TEST(NAME SphereIso_0.25h_hminMax
 #  COMMAND ${EXEC} -v 5
 #  ${REG_TESTS_PATH}/SphereIso_0.25h_hminMax/SphereIso0.5.mesh
-#  -hmax 0.125 -hmin 0.125 -hausd 1)
+#  -hmax 0.125 -hmin 0.125 -hausd 0.1)
 #ADD_TEST(NAME SphereIso_0.125h_hminMax
 #  COMMAND ${EXEC} -v 5
 #  ${REG_TESTS_PATH}/SphereIso_0.125h_hminMax/SphereIso0.5.mesh
-#  -hmax 0.0625 -hmin 0.0625 -hausd 1)
+#  -hmax 0.0625 -hmin 0.0625 -hausd 0.1)
 #---Second with sol file
 ADD_TEST(NAME SphereIso_h_met
   COMMAND ${EXEC} -v 5
-  ${REG_TESTS_PATH}/SphereIso_h_met/SphereIso0.5.mesh -hausd 1)
+  ${REG_TESTS_PATH}/SphereIso_h_met/SphereIso0.5.mesh -hausd 0.1)
 ADD_TEST(NAME SphereIso_0.5h_met
   COMMAND ${EXEC} -v 5
-  ${REG_TESTS_PATH}/SphereIso_0.5h_met/SphereIso0.5.mesh -hausd 1)
+  ${REG_TESTS_PATH}/SphereIso_0.5h_met/SphereIso0.5.mesh -hausd 0.1)
 ADD_TEST(NAME SphereIso_0.25h_met
   COMMAND ${EXEC} -v 5
-  ${REG_TESTS_PATH}/SphereIso_0.25h_met/SphereIso0.5.mesh -hausd 1)
+  ${REG_TESTS_PATH}/SphereIso_0.25h_met/SphereIso0.5.mesh -hausd 0.1)
 ADD_TEST(NAME SphereIso_0.125h_met
   COMMAND ${EXEC} -v 5
-  ${REG_TESTS_PATH}/SphereIso_0.125h_met/SphereIso0.5.mesh -hausd 1)
+  ${REG_TESTS_PATH}/SphereIso_0.125h_met/SphereIso0.5.mesh -hausd 0.1)
 
 # Check what happend when we unrefine a sphere of size smallh with a constant metric
 # (2*smallh, 4*smallh and 8*smallh)
 ADD_TEST(NAME SphereIso_2smallh_met
   COMMAND ${EXEC} -v 5
-  ${REG_TESTS_PATH}/SphereIso_2smallh_met/SphereIso0.0625.mesh -hausd 1)
+  ${REG_TESTS_PATH}/SphereIso_2smallh_met/SphereIso0.0625.mesh -hausd 0.1)
 ADD_TEST(NAME SphereIso_4smallh_met
   COMMAND ${EXEC} -v 5
-  ${REG_TESTS_PATH}/SphereIso_4smallh_met/SphereIso0.0625.mesh -hausd 1)
+  ${REG_TESTS_PATH}/SphereIso_4smallh_met/SphereIso0.0625.mesh -hausd 0.1)
 ADD_TEST(NAME SphereIso_8smallh_met
   COMMAND ${EXEC} -v 5
-  ${REG_TESTS_PATH}/SphereIso_8smallh_met/SphereIso0.0625.mesh -hausd 1)
+  ${REG_TESTS_PATH}/SphereIso_8smallh_met/SphereIso0.0625.mesh -hausd 0.1)
 
 # Check what happend when we use hausdorff number to refine the skin and a big hgrad
 # to have an inside of the initial size (0.5)
@@ -252,7 +253,7 @@ ADD_TEST(NAME CubeSkin_0.2
 # First: Meshes that we want unrefined
 ADD_TEST(NAME Various_unref_Linkrods_met0.2
   COMMAND ${EXEC} -v 5
-  ${REG_TESTS_PATH}/Various_unref_Linkrods_met0.2/linkrods.mesh -hausd 1)
+  ${REG_TESTS_PATH}/Various_unref_Linkrods_met0.2/linkrods.mesh -hausd 0.1)
 ADD_TEST(NAME Various_unref_Linkrods_met0.2_hausd0.01
   COMMAND ${EXEC} -v 5
   ${REG_TESTS_PATH}/Various_unref_Linkrods_met0.2_hausd0.01/linkrods.mesh
@@ -263,7 +264,7 @@ ADD_TEST(NAME Various_unref_Linkrods_met0.2_hausd0.01
 # Second: Meshes that we want refined
 ADD_TEST(NAME Various_ref_Linkrods_met0.05
   COMMAND ${EXEC} -v 5
-  ${REG_TESTS_PATH}/Various_ref_Linkrods_met0.05/linkrods.mesh -hausd 1)
+  ${REG_TESTS_PATH}/Various_ref_Linkrods_met0.05/linkrods.mesh -hausd 0.1)
 ADD_TEST(NAME Various_ref_Linkrods_met0.05_hausd0.01
   COMMAND ${EXEC} -v 5
   ${REG_TESTS_PATH}/Various_ref_Linkrods_met0.05_hausd0.01/linkrods.mesh

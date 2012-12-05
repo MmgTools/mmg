@@ -559,7 +559,7 @@ double timestepMCF(pMesh mesh,double defrate){
   pPoint      p0;
   double      dt,dd,locarea,area,intk2;
   double      h[3];
-  int         k,l,ier,iel,jel,np,ilistv,ilists;
+  int         k,l,iel,jel,np,ilistv,ilists;
   int         *adja,listv[LMAX+2],lists[LMAX+2];
   char        i,j,jface,ip;
 
@@ -586,10 +586,16 @@ double timestepMCF(pMesh mesh,double defrate){
         if(p0->flag) continue;
 
         p0->flag = 1;
-        ier=boulesurfvolp(mesh,k,ip,i,listv,&ilistv,lists,&ilists);
-        assert(ier);
-        ier=meancur(mesh,np,p0->c,ilists,lists,h);
-        assert(ier);
+
+        if(!boulesurfvolp(mesh,k,ip,i,listv,&ilistv,lists,&ilists)){
+          printf("%s:%d: Error: function boulesurfvolp return 0\n",
+                 __FILE__,__LINE__);
+          exit(0);
+        }
+        if(!meancur(mesh,np,p0->c,ilists,lists,h)){
+          printf("%s:%d: Error: function meancur return 0\n",__FILE__,__LINE__);
+          exit(0);
+        }
 
         locarea = 0.0;
         for(l=0; l<ilists; l++){
@@ -617,7 +623,7 @@ double timestepMCF(pMesh mesh,double defrate){
 int bdyMCF(pMesh mesh){
   pTetra      pt,pt0,pt1;
   pPoint      p0,p1,ppt0;
-  int         k,l,ier,iel,jel,maxit,it,base,np,ilistv,ilists,nbdy,nint;
+  int         k,l,iel,jel,maxit,it,base,np,ilistv,ilists,nbdy,nint;
   int         *adja,listv[LMAX+2],lists[LMAX+2];
   double      defrate,dt,vol,totvol,volbeg,volend;
   double      h[3],o[3];
@@ -698,20 +704,28 @@ int bdyMCF(pMesh mesh){
             if(p0->flag == -2 || p0->flag == -base) continue;
 
             p0->flag = -base;
-            ier=boulesurfvolp(mesh,k,ip,i,listv,&ilistv,lists,&ilists);
-            assert(ier);
+            if(!boulesurfvolp(mesh,k,ip,i,listv,&ilistv,lists,&ilists)){
+              printf("%s:%d: Error: function boulesurfvolp return 0\n",
+                     __FILE__,__LINE__);
+              exit(0);
+            }
 
             /* Forward step of mean curvature flow */
-            ier=meancur(mesh,np,p0->c,ilists,lists,h);
-            assert(ier);
-
+            if(!meancur(mesh,np,p0->c,ilists,lists,h)){
+              printf("%s:%d: Error: function meancur return 0\n",
+                     __FILE__,__LINE__);
+              exit(0);
+            }
             o[0] = p0->c[0] - dt*h[0];
             o[1] = p0->c[1] - dt*h[1];
             o[2] = p0->c[2] - dt*h[2];
 
             /* Backward step from intermediate position */
-            ier=meancur(mesh,np,o,ilists,lists,h);
-            assert(ier);
+            if(!  meancur(mesh,np,o,ilists,lists,h)){
+              printf("%s:%d: Error: function meancur return 0\n",
+                     __FILE__,__LINE__);
+              exit(0);
+            }
 
             o[0] += dt*h[0];
             o[1] += dt*h[1];

@@ -58,7 +58,7 @@ int chkmsh(pMesh mesh,int severe,int base) {
      pTetra        pt0;
      pxTetra       pxt0,pxt1,pxt2;
      int           ilists,ilistv,lists[LMAX+2],listv[LMAX+2];
-     int           ielprv,ielnxt,l,nump,np,nq,ier;
+     int           ielprv,ielnxt,l,nump,np,nq;
      unsigned char j,iface,ifaceprv,ifacenxt,indp,indpprv,indpnxt,tag0,tag1,tag2,ia;
   */
 
@@ -210,8 +210,10 @@ int chkmsh(pMesh mesh,int severe,int base) {
     ip = idir[i][j];
     nump = pt->v[ip];
 
-    ier = boulesurfvolp(mesh,k,ip,i,listv,&ilistv,lists,&ilists);
-    assert(ier);
+    if(!boulesurfvolp(mesh,k,ip,i,listv,&ilistv,lists,&ilists)){
+    printf("%s:%d: Error: function boulesurfvolp return 0\n",__FILE__,__LINE__)
+    exit(0);
+    }
 
     for(l=0;l<ilists;l++){
     iel = lists[l]/4;

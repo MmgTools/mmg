@@ -537,7 +537,7 @@ static int anatetv(pMesh mesh,pSol met,char typchk) {
   xTetra  *pxt;
   Hash     hash;
   double   ll,o[3],ux,uy,uz;
-  int      vx[6],k,ip,ip1,ip2,nap,ns,ne,ier;
+  int      vx[6],k,ip,ip1,ip2,nap,ns,ne;
   char     i,j,ia;
 
 
@@ -557,8 +557,10 @@ static int anatetv(pMesh mesh,pSol met,char typchk) {
           ip1 = pt->v[idir[i][inxt2[j]]];
           ip2 = pt->v[idir[i][iprv2[j]]];
           ip  = -1;
-          ier=hashEdge(&hash,ip1,ip2,ip);
-          assert(ier);
+          if(!hashEdge(&hash,ip1,ip2,ip)){
+            printf("%s:%d: Error: function hashEdge return 0\n",__FILE__,__LINE__);
+            exit(0);
+          }
         }
         break;
       }

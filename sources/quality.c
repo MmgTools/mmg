@@ -260,9 +260,11 @@ int prilen(pMesh mesh, pSol met) {
       i1 = iare[ia][1];
       np = pt->v[i0];
       nq = pt->v[i1];
-      // We can't do assert(hashEdge(&hash,np,nq,0)) with optim O3
-      ier = hashEdge(&hash,np,nq,0);
-      assert( ier );
+
+      if(!hashEdge(&hash,np,nq,0)){
+        printf("%s:%d: Error: function hashEdge return 0\n",__FILE__,__LINE__);
+        exit(0);
+      }
     }
   }
 

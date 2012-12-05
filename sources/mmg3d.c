@@ -387,7 +387,7 @@ int main(int argc,char *argv[]) {
   if ( !scaleMesh(&mesh,&met) ) RETURN_AND_FREE(&mesh,&met,1);
   if ( !met.np ){
     if ( info.iso ){
-      fprintf(stdout,"\n  ## ERROR : A VALID SOLUTION FILE IS NEEDED \n");
+      fprintf(stdout,"\n  ## ERROR: A VALID SOLUTION FILE IS NEEDED \n");
       RETURN_AND_FREE(&mesh,&met,1);
     }else{
       if ( !DoSol(&mesh,&met,&info) ) RETURN_AND_FREE(&mesh,&met,1);
