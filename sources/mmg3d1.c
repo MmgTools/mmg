@@ -5,6 +5,7 @@ char  ddb;
 #ifdef DEBUG
 double      tabtmp[12][7];
 #endif
+
 /** set triangle corresponding to face ie of tetra k */
 void tet2tri(pMesh mesh,int k,char ie,Tria *ptt) {
   pTetra  pt;
@@ -1449,7 +1450,7 @@ int mmg3d1(pMesh mesh,pSol met) {
   if ( abs(info.imprim) > 4 )
     fprintf(stdout,"  ** MESH ANALYSIS\n");
 
-  if ( !chkmani(mesh) ) {
+  if ( info.iso && !chkmani(mesh) ) {
     fprintf(stdout,"  ## Non orientable implicit surface. Exit program.\n");
     return(0);
   }
@@ -1503,7 +1504,7 @@ int mmg3d1(pMesh mesh,pSol met) {
     return(0);
   }
 
-  if ( !chkmani(mesh) ) {
+  if ( info.iso && !chkmani(mesh) ) {
     fprintf(stdout,"  ## Non orientable implicit surface. Exit program.\n");
     return(0);
   }

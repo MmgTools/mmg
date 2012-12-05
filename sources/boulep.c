@@ -144,9 +144,9 @@ int boulec(pMesh mesh,int start,int ip,double *tt) {
 
 
 /** store edges and return number (ref+geo) incident to ip */
-int bouler(pMesh mesh,int start,int ip,int *list) {
+int bouler(pMesh mesh,int start,int ip,int *list,int *ng,int *nr) {
   pTria    pt;
-  int     *adja,k,nr;
+  int     *adja,k,ns;
   char     i,i1,i2;
 
   pt  = &mesh->tria[start];
@@ -155,14 +155,18 @@ int bouler(pMesh mesh,int start,int ip,int *list) {
   /* check other triangle vertices */
   k  = start;
   i  = ip;
-  nr = 0;
+  *ng = *nr = ns = 0;
   do {
     i1 = inxt2[i];
     if ( MG_EDG(pt->tag[i1])) {
       i2 = iprv2[i];
-      nr++;
-      list[nr] = pt->v[i2];
-      if ( nr > LMAX-2 )  return(-nr);
+      ns++;
+      if ( pt->tag[i] & MG_GEO ) 
+				*ng = *ng + 1;
+			else  
+				*nr = *nr + 1;
+      list[ns] = pt->v[i2];
+      if ( ns > LMAX-2 )  return(-ns);
     }
     adja = &mesh->adjt[3*(k-1)+1];
     k  = adja[i1] / 3;
@@ -181,19 +185,22 @@ int bouler(pMesh mesh,int start,int ip,int *list) {
       i2 = iprv2[i];
       if ( MG_EDG(pt->tag[i2]) ) {
         i1 = inxt2[i];
-        nr++;
-        list[nr] = pt->v[i1];
-        if ( nr > LMAX-2 )  return(-nr);
+        ns++;
+	      if ( pt->tag[i] & MG_GEO )
+					*ng = *ng + 1;
+				else 
+					*nr = *nr + 1;
+        list[ns] = pt->v[i1];
+        if ( ns > LMAX-2 )  return(-ns);
       }
       adja = &mesh->adjt[3*(k-1)+1];
-      k  = adja[i2] / 3;
-      i  = adja[i2] % 3;
-      i  = iprv2[i];
+      k = adja[i2] / 3;
+      i = adja[i2] % 3;
+      i = iprv2[i];
     }
     while ( k && k != start );
   }
-
-  return(nr);
+  return(ns);
 }
 
 /** Return volumic ball (i.e. filled with tetrahedra) of point ip in tetra start.

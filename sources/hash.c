@@ -146,11 +146,11 @@ int hashTria(pMesh mesh) {
 
   /* adjust hash table params */
   hmax = 3.71*mesh->np;
-  hash.item = (hedge*)calloc(hmax+1,sizeof(hedge));
-  assert(hash.item);
   hash.siz  = mesh->np;
   hash.max  = hmax + 1;
   hash.nxt  = hash.siz;
+  hash.item = (hedge*)calloc(hmax+1,sizeof(hedge));
+  assert(hash.item);
 
   for (k=hash.siz; k<hash.max; k++)
     hash.item[k].nxt = k+1;
@@ -235,7 +235,7 @@ int hashTria(pMesh mesh) {
     }
   }
   free(hash.item);
-  hash.item=NULL;
+  hash.item = NULL;
 
   /* set tag */
   for (k=1; k<=mesh->nt; k++) {

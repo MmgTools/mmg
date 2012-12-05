@@ -225,39 +225,40 @@ static int singul(pMesh mesh) {
   pTria     pt;
   pPoint    ppt,p1,p2;
   double    ux,uy,uz,vx,vy,vz,dd;
-  int       list[LMAX+2],k,nc,nr,nre;
+  int       list[LMAX+2],k,nc,ng,nr,nre;
   char      i;
 
   nre = nc = 0;
-
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
+    if ( !MG_EOK(pt) )  continue;
 
     for (i=0; i<3; i++) {
       ppt = &mesh->point[pt->v[i]];
-      if ( MG_SIN(ppt->tag) || ppt->tag & MG_NOM || !MG_EDG(ppt->tag) )  continue;
-
-      nr = bouler(mesh,k,i,list);
-      if ( nr != 2 ) {
-        ppt->tag |= MG_REQ;
-        nre++;
-      }
-      /* check ridge angle */
-      else {
-        p1 = &mesh->point[list[1]];
-        p2 = &mesh->point[list[2]];
-        ux = p1->c[0] - ppt->c[0];
-        uy = p1->c[1] - ppt->c[1];
-        uz = p1->c[2] - ppt->c[2];
-        vx = p2->c[0] - ppt->c[0];
-        vy = p2->c[1] - ppt->c[1];
-        vz = p2->c[2] - ppt->c[2];
-        dd = (ux*ux + uy*uy + uz*uz) * (vx*vx + vy*vy + vz*vz);
-        if ( fabs(dd) > EPSD ) {
-          dd = (ux*vx + uy*vy + uz*vz) / sqrt(dd);
-          if ( dd > -info.dhd ) {
-            ppt->tag |= MG_CRN;
-            nc++;
+			if ( !MG_VOK(ppt) || MG_SIN(ppt->tag) )  continue;
+      else if ( MG_EDG(ppt->tag) ) {
+        nr = bouler(mesh,k,i,list,&ng,&nr);
+        if ( (ng != 2) || (nr != 2) ) {
+          ppt->tag |= MG_REQ;
+          nre++;
+        }
+        /* check ridge angle */
+        else {
+          p1 = &mesh->point[list[1]];
+          p2 = &mesh->point[list[2]];
+          ux = p1->c[0] - ppt->c[0];
+          uy = p1->c[1] - ppt->c[1];
+          uz = p1->c[2] - ppt->c[2];
+          vx = p2->c[0] - ppt->c[0];
+          vy = p2->c[1] - ppt->c[1];
+          vz = p2->c[2] - ppt->c[2];
+          dd = (ux*ux + uy*uy + uz*uz) * (vx*vx + vy*vy + vz*vz);
+          if ( fabs(dd) > EPSD ) {
+            dd = (ux*vx + uy*vy + uz*vz) / sqrt(dd);
+            if ( dd > -info.dhd ) {
+              ppt->tag |= MG_CRN;
+              nc++;
+						}
           }
         }
       }
@@ -396,7 +397,7 @@ static int norver(pMesh mesh) {
 }
 
 /** Define continuous geometric support at non manifold vertices, using volume information */
-static int nmgeom(pMesh mesh){
+static void nmgeom(pMesh mesh){
   pTetra     pt;
   pPoint     p0;
   pxPoint    pxp;
@@ -440,7 +441,6 @@ static int nmgeom(pMesh mesh){
       }
     }
   }
-  return(1);
 }
 
 /** preprocessing stage: mesh analysis */
@@ -485,7 +485,7 @@ int analys(pMesh mesh) {
   if ( !hGeom(mesh) ) {
     fprintf(stdout,"  ## Hashing problem (0). Exit program.\n");
     free(mesh->htab.geom);
-    mesh->htab.geom=NULL;
+    mesh->htab.geom = NULL;
     return(0);
   }
 
@@ -524,7 +524,7 @@ int analys(pMesh mesh) {
   if ( !bdrySet(mesh) ) {
     fprintf(stdout,"  ## Boundary problem. Exit program.\n");
     free(mesh->xpoint);
-    mesh->xpoint=NULL;
+    mesh->xpoint = NULL;
     return(0);
   }
 
@@ -532,21 +532,14 @@ int analys(pMesh mesh) {
   if ( !mesh->na && !hGeom(mesh) ) {
     fprintf(stdout,"  ## Hashing problem (0). Exit program.\n");
     free(mesh->xpoint);
-    mesh->xpoint=NULL;
     free(mesh->htab.geom);
-    mesh->htab.geom=NULL;
+    mesh->xpoint    = NULL;
+    mesh->htab.geom = NULL;
     return(0);
   }
 
   /* define geometry for non manifold points */
-  if ( !nmgeom(mesh) ) {
-    fprintf(stdout,"  ## Problem in defining geometry for non manifold points. Exit program.\n");
-    free(mesh->xpoint);
-    mesh->xpoint=NULL;
-    free(mesh->htab.geom);
-    mesh->htab.geom=NULL;
-    return(0);
-  }
+  nmgeom(mesh);
 
   /* release memory */
   free(mesh->tria);

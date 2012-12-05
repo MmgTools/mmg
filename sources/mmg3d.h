@@ -78,7 +78,7 @@
 #define MG_VOK(ppt)      (ppt && (ppt->tag < MG_NUL)) /**< Vertex OK */
 #define MG_EOK(pt)       (pt && (pt->v[0] > 0))       /**< Element OK */
 #define MG_EDG(tag)      ((tag & MG_GEO) || (tag & MG_REF)) /**< Edge or Ridge */
-#define MG_SIN(tag)      ((tag & MG_CRN) || (tag & MG_REQ)) /**< Corner or Required */
+#define MG_SIN(tag)      ((tag & MG_CRN) || (tag & MG_REQ) || (tag & MG_NOM)) /**< Corner or Required or nonmanifold */
 
 #define MG_SET(flag,bit) ((flag) |= (1 << (bit)))  /**< bit number bit is set to 1 */
 #define MG_CLR(flag,bit) ((flag) &= ~(1 << (bit))) /**< bit number bit is set to 0 */
@@ -236,7 +236,7 @@ int  BezierRidge(pMesh mesh,int ip0, int ip1, double s, double *o, double *no1, 
 int  BezierNom(pMesh mesh,int ip0,int ip1,double s,double *o,double *no,double *to);
 int  norface(pMesh mesh ,int k, int iface, double v[3]);
 int  boulen(pMesh mesh,int start,int ip,double *nn);
-int  bouler(pMesh mesh,int start,int ip,int *list);
+int  bouler(pMesh mesh,int start,int ip,int *list,int *ng,int *nr);
 int  boulenm(pMesh mesh, int start, int ip, int iface, double n[3],double t[3]);
 int  boulec(pMesh mesh,int start,int ip,double *tt);
 int  boulevolp(pMesh mesh, int start, int ip, int * list);
@@ -249,7 +249,7 @@ int  gettag(pMesh,int,int,int *,int *);
 int  settag(pMesh,int,int,int,int);
 int  chkcol_int(pMesh ,pSol met,int,char,char,int *,char typchk);
 int  chkcol_bdy(pMesh,int,char,char,int *);
-int  chkmanicoll(pMesh mesh,int k,int iface,int iedg,int ndepmin,int ndepplus);
+int  chkmanicoll(pMesh mesh,int k,int iface,int iedg,int ndepmin,int ndepplus,char isminp,char isplp);
 int  chkmani(pMesh mesh);
 int  colver(pMesh,int *,int,char);
 int  loadMesh(pMesh );
