@@ -1,6 +1,15 @@
-We use crontab to run the nigthly test:
-    $crontab -e #to configure the task (for now, we run nightly_run.sh every day at 23:55)
+FILES:
+   experimental-run.sh: run a panel of tests in experimental mode (-h for help)
+   nightly-run.sh     : run all tests during night (must be used with crontab or another task scheduler). ctest is run in verbose mode and the output is available in build/ctest$DATE.log.
+   continuous-run.sh  : check automatically the repository at each commit and run nightlySVN-run.sh
+   nighltySVN-run.sh  : check some build (compilation in Release or Minsizerel mod) and memory errors at each commit
 
-The script nightly_run.sh run CTest in option Nightly and print the output in ../build/ctest.log
+USAGE:
+  Only experimental-run and nightly-run are useful to developper.
+  Results of tests are submitted on the local host vulcain so to see it you need to configure
+  your ssh (.ssh/config) to have acces on vulcain. Then:
+     you must forward the port 2000:
+	$ssh -L 2000:localhost:80 vulcain
+     and go to http://localhost:2000/CDash/user.php
 
-The script continuous_run.sh check the repository at each commit. To complete this tests, we run every nights the nightlySVN_run.sh script that check the repository with different option of compilation (Os, O3).
+   experimental-run.sh forward automatically the port 2000 during 2h.
