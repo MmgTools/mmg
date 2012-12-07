@@ -37,7 +37,7 @@ static void excfun(int sigid) {
   case SIGINT:
     fprintf(stdout,"  Program killed\n");  break;
   }
-  exit(1);
+  exit(EXIT_FAILURE);
 }
 
 
@@ -64,7 +64,7 @@ static void usage(char *prog) {
   fprintf(stdout,"-hgrad val control gradation\n");
   fprintf(stdout,"-ls        levelset meshing \n");
 
-  exit(1);
+  exit(EXIT_FAILURE);
 }
 
 

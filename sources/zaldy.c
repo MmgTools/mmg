@@ -66,7 +66,7 @@ void delElt(pMesh mesh,int iel) {
   pt = &mesh->tetra[iel];
   if ( !MG_EOK(pt) ) {
     fprintf(stdout,"  ## INVALID ELEMENT %d.\n",iel);
-    exit(1);
+    exit(EXIT_FAILURE);
   }
   memset(pt,0,sizeof(Tetra));
   pt->v[3] = mesh->nenil;

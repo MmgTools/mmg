@@ -590,11 +590,11 @@ double timestepMCF(pMesh mesh,double defrate){
         if(!boulesurfvolp(mesh,k,ip,i,listv,&ilistv,lists,&ilists)){
           printf("%s:%d: Error: function boulesurfvolp return 0\n",
                  __FILE__,__LINE__);
-          exit(0);
+          exit(EXIT_FAILURE);
         }
         if(!meancur(mesh,np,p0->c,ilists,lists,h)){
           printf("%s:%d: Error: function meancur return 0\n",__FILE__,__LINE__);
-          exit(0);
+          exit(EXIT_FAILURE);
         }
 
         locarea = 0.0;
@@ -707,14 +707,14 @@ int bdyMCF(pMesh mesh){
             if(!boulesurfvolp(mesh,k,ip,i,listv,&ilistv,lists,&ilists)){
               printf("%s:%d: Error: function boulesurfvolp return 0\n",
                      __FILE__,__LINE__);
-              exit(0);
+              exit(EXIT_FAILURE);
             }
 
             /* Forward step of mean curvature flow */
             if(!meancur(mesh,np,p0->c,ilists,lists,h)){
               printf("%s:%d: Error: function meancur return 0\n",
                      __FILE__,__LINE__);
-              exit(0);
+              exit(EXIT_FAILURE);
             }
             o[0] = p0->c[0] - dt*h[0];
             o[1] = p0->c[1] - dt*h[1];
@@ -724,7 +724,7 @@ int bdyMCF(pMesh mesh){
             if(!  meancur(mesh,np,o,ilists,lists,h)){
               printf("%s:%d: Error: function meancur return 0\n",
                      __FILE__,__LINE__);
-              exit(0);
+              exit(EXIT_FAILURE);
             }
 
             o[0] += dt*h[0];

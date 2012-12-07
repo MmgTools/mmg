@@ -559,7 +559,7 @@ static int anatetv(pMesh mesh,pSol met,char typchk) {
           ip  = -1;
           if(!hashEdge(&hash,ip1,ip2,ip)){
             printf("%s:%d: Error: function hashEdge return 0\n",__FILE__,__LINE__);
-            exit(0);
+            exit(EXIT_FAILURE);
           }
         }
         break;

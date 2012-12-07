@@ -263,7 +263,7 @@ int prilen(pMesh mesh, pSol met) {
 
       if(!hashEdge(&hash,np,nq,0)){
         printf("%s:%d: Error: function hashEdge return 0\n",__FILE__,__LINE__);
-        exit(0);
+        exit(EXIT_FAILURE);
       }
     }
   }
@@ -395,7 +395,13 @@ void outqua(pMesh mesh,pSol met) {
 	  mesh->tetra[iel].v[0],mesh->tetra[iel].v[1],mesh->tetra[iel].v[2],
 	  mesh->tetra[iel].v[3]);
 #endif
-  if ( abs(info.imprim) < 5 )  return;
+  if ( abs(info.imprim) < 5 ){
+    if (rapmin == 0){
+      fprintf(stdout,"  ## WARNING: TOO BAD QUALITY FOR THE WORST ELEMENT\n");
+      exit(EXIT_FAILURE);
+    }
+    return;
+  }
 
   /* print histo */
   fprintf(stdout,"     HISTOGRAMM:  %6.2f %% > 0.5\n",100.0*(med/(float)(mesh->ne-nex)));
@@ -403,5 +409,9 @@ void outqua(pMesh mesh,pSol met) {
   for (i=imax; i>=(int)(5*rapmin); i--) {
     fprintf(stdout,"     %5.1f < Q < %5.1f   %7d   %6.2f %%\n",
             i/5.,i/5.+0.2,his[i],100.*(his[i]/(float)(mesh->ne-nex)));
+  }
+  if (rapmin == 0){
+    fprintf(stdout,"  ## WARNING: TOO BAD QUALITY FOR THE WORST ELEMENT\n");
+    exit(EXIT_FAILURE);
   }
 }

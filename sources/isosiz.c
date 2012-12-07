@@ -298,7 +298,7 @@ static double defsizreg(pMesh mesh,pSol met,int nump,int *lists,int ilists) {
      are the two pr. directions of curvature, and the two curvatures can be inferred from lambdas*/
   if(!eigensym(intm,kappa,vp)){
     printf("%s:%d: Error: function eigensym return 0\n",__FILE__,__LINE__);
-    exit(0);
+    exit(EXIT_FAILURE);
   }
 
   kappa[0] = 2.0/9.0 * fabs(kappa[0]) / info.hausd;
