@@ -633,16 +633,14 @@ int chkmaniball(pMesh mesh, int start, char ip){
 /** Check whether implicit surface enclosed in volume is orientable */
 int chkmani(pMesh mesh){
   pTetra    pt,pt1;
-  pPoint    p0;
   int       k,iel,ref;
   int       *adja;
-  char      i,j,ip,cnt,ier;
+  char      i,j,ip,cnt;
 
   for(k=1; k<=mesh->np; k++){
     mesh->point[k].flag = 0;
   }
 
-  ier = 1;
   /** First test : check whether a tetra has 4 boundary faces */
   for(k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
@@ -680,7 +678,6 @@ int chkmani(pMesh mesh){
 
       for(j=0; j<3; j++){
         ip = idir[i][j];
-        p0 = &mesh->point[pt->v[ip]];
 
         if(!chkmaniball(mesh,k,ip)){
           printf("Non orientable implicit surface : ball of point %d\n",pt->v[ip]);
@@ -700,12 +697,9 @@ int chkmani(pMesh mesh){
     test w.r.t. chkmani) */
 int chkmani2(pMesh mesh,pSol sol) {
   pTetra    pt,pt1;
-  pPoint    p0;
-  int       k,basep,iel;
+  int       k,iel;
   int       *adja;
   char      i,j,ip,cnt;
-
-  basep = ++mesh->base;
 
   for(k=1; k<=mesh->np; k++){
     mesh->point[k].flag = 0;
@@ -718,7 +712,6 @@ int chkmani2(pMesh mesh,pSol sol) {
 
     cnt = 0;
     for(j=0; j<4; j++) {
-      p0 = &mesh->point[pt->v[j]];
       if( sol->m[pt->v[j]] == 0.0 ) cnt++;
     }
     if(cnt == 4) {
@@ -741,7 +734,6 @@ int chkmani2(pMesh mesh,pSol sol) {
 
       for(j=0; j<3; j++){
         ip = idir[i][j];
-        p0 = &mesh->point[pt->v[ip]];
 
         if(!chkmaniball(mesh,k,ip)){
           printf("Non orientable implicit surface : ball of point %d\n",pt->v[ip]);
@@ -760,14 +752,13 @@ int chkmanicoll(pMesh mesh,int k,int iface,int iedg,int ndepmin,int ndepplus,cha
   pTetra    pt,pt1;
   int       nump,numq,ilist,ref,cur,stor,iel,jel,base,ndepmq,ndeppq;
   int       list[LMAX+2],*adja,*adja1;
-  char      i,j,ia,ip,jp,iq,jq,voy,indp,indq,isminq,isplq,ismin,ispl;
+  char      i,j,ip,jp,iq,jq,voy,indp,indq,isminq,isplq,ismin,ispl;
 
   ilist = 0;
   ndepmq = ndeppq = 0;
   isplq = isminq = 0;
 
   pt    = &mesh->tetra[k];
-  ia    = iarf[iface][iedg];
   ip    = idir[iface][inxt2[iedg]];
   iq    = idir[iface][iprv2[iedg]];
   nump  = pt->v[ip];

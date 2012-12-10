@@ -238,15 +238,24 @@ ADD_TEST(NAME SphereIso_h_hausd0.005
   ${REG_TESTS_PATH}/SphereIso_h_hausd0.005/SphereIso0.5.mesh -hausd 0.005 -hgrad 100)
 
 # Check what happend when we refine a cube whose skin has already the good size
-ADD_TEST(NAME CubeSkin_0.05
+ADD_TEST(NAME CubeSkin0.05_Inside0.4
   COMMAND ${EXEC} -v 5
-  ${REG_TESTS_PATH}/CubeSkin_0.05/CubeSkin_0.05.mesh -hmax 0.05 -hmin 0.05)
-ADD_TEST(NAME CubeSkin_0.1
+  ${REG_TESTS_PATH}/CubeSkin0.05_Inside0.4/CubeSkin0.05.mesh)
+ADD_TEST(NAME CubeSkin0.1_Inside0.4
   COMMAND ${EXEC} -v 5
-  ${REG_TESTS_PATH}/CubeSkin_0.1/CubeSkin_0.1.mesh -hmax 0.1 -hmin 0.1)
-ADD_TEST(NAME CubeSkin_0.2
+  ${REG_TESTS_PATH}/CubeSkin0.1_Inside0.4/CubeSkin0.1.mesh)
+ADD_TEST(NAME CubeSkin0.2_Inside0.4
   COMMAND ${EXEC} -v 5
-  ${REG_TESTS_PATH}/CubeSkin_0.2/CubeSkin_0.2.mesh -hmax 0.2 -hmin 0.2)
+  ${REG_TESTS_PATH}/CubeSkin0.2_Inside0.4/CubeSkin0.2.mesh)
+ADD_TEST(NAME CubeSkin0.0125_Inside0.125
+  COMMAND ${EXEC} -v 5
+  ${REG_TESTS_PATH}/CubeSkin0.0125_Inside0.125/CubeSkin0.125.meshb)
+ADD_TEST(NAME CubeSkin0.0125_Inside0.25
+  COMMAND ${EXEC} -v 5
+  ${REG_TESTS_PATH}/CubeSkin0.0125_Inside0.25/CubeSkin0.25.meshb)
+ADD_TEST(NAME CubeSkin0.0125_Inside0.5
+  COMMAND ${EXEC} -v 5
+  ${REG_TESTS_PATH}/CubeSkin0.0125_Inside0.25/CubeSkin0.25.meshb)
 
 
 # Check results on various meshes
