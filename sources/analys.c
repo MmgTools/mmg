@@ -225,7 +225,7 @@ static int singul(pMesh mesh) {
   pTria     pt;
   pPoint    ppt,p1,p2;
   double    ux,uy,uz,vx,vy,vz,dd;
-  int       list[LMAX+2],k,nc,ng,nr,nre;
+  int       list[LMAX+2],k,nc,ng,nr,ns,nre;
   char      i;
 
   nre = nc = 0;
@@ -237,11 +237,28 @@ static int singul(pMesh mesh) {
       ppt = &mesh->point[pt->v[i]];
 			if ( !MG_VOK(ppt) || MG_SIN(ppt->tag) )  continue;
       else if ( MG_EDG(ppt->tag) ) {
-        nr = bouler(mesh,k,i,list,&ng,&nr);
-        if ( (ng != 2) || (nr != 2) ) {
-          ppt->tag |= MG_REQ;
+        ns = bouler(mesh,k,i,list,&ng,&nr);
+				if ( !ns )  continue;
+
+        if ( (ng+nr) > 2 ) {
+          ppt->tag |= MG_CRN + MG_REQ;
           nre++;
+					nc++;
         }
+				else if ( (ng == 1) && (nr == 1) ) {
+					ppt->tag |= MG_REQ;
+					nre++;
+				}
+			  else if ( ng == 1 && !nr ){
+          ppt->tag |= MG_CRN + MG_REQ;
+          nre++;
+					nc++;
+			  }
+			  else if ( nr == 1 && !ng ){
+          ppt->tag |= MG_CRN + MG_REQ;
+          nre++;
+					nc++;
+			  }
         /* check ridge angle */
         else {
           p1 = &mesh->point[list[1]];
