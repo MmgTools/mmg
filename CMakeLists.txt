@@ -21,11 +21,12 @@ ENDIF()
 
 IF(CMAKE_COMPILER_IS_GNUCC)
   IF(APPLE)
-    # Add flags to the compiler
-    ADD_DEFINITIONS(-static-libgcc -mmacosx-version-min=10.4 -arch x86_64)
+    # Add flags to the compiler to work on old mac
+    ADD_DEFINITIONS( -mmacosx-version-min=10.4 -arch i386 -arch x86_64)
 
     # To avoid pbs with binary files...
-    SET(CMAKE_EXE_LINKER_FLAGS "-arch x86_64")
+    SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -arch i386 -arch x86_64")
+    #SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static-libgcc")
     # Determine if the processor supports 64bit execution
     EXECUTE_PROCESS(
       COMMAND sysctl hw.cpu64bit_capable
@@ -34,18 +35,23 @@ IF(CMAKE_COMPILER_IS_GNUCC)
       OUTPUT_STRIP_TRAILING_WHITESPACE
       )
     STRING(REGEX REPLACE "^hw.cpu64bit_capable: (.*)" "\\1" 64_BIT "${64_CMD}")
-  ELSEIF(UNIX)# UNIX must be after APPLE becaus APPLE is UNIX too
-  ENDIF(APPLE)
+    #  ELSEIF(UNIX)# UNIX must be after APPLE becaus APPLE is UNIX too
+  ENDIF()
 
-ELSEIF(CMAKE_COMPILER_IS_INTEL)
-  ADD_DEFINITIONS(-Bstatic)
-ENDIF(CMAKE_COMPILER_IS_GNUCC)
+#ELSEIF(CMAKE_COMPILER_IS_INTEL)
+  # Static Link??
+  #SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Bstatic") # all is static
+ENDIF()
+
+# Static Link??
+#SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static-libgcc")
 
 IF(NOT CMAKE_COMPILER_IS_CLANG)
   # Compiler options for profiling... but not possible with clang
   SET(PROFILING CACHE BOOL "Enable/Disable PROFILING")
   IF(PROFILING)
     ADD_DEFINITIONS(-pg)
+    SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -pg")
   ENDIF(PROFILING)
 ENDIF(NOT CMAKE_COMPILER_IS_CLANG)
 
