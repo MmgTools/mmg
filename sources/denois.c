@@ -9,7 +9,7 @@ extern Info  info;
 extern char  ddb;
 
 /** compute oriented quality of tetra defined by vertices (a,b,c,d)
-   (return 0.0 when element is inverted) */
+    (return 0.0 when element is inverted) */
 inline double orcal_poi(double a[3],double b[3],double c[3],double d[3]) {
   double     abx,aby,abz,acx,acy,acz,adx,ady,adz,bcx,bcy,bcz,bdx,bdy,bdz,cdx,cdy,cdz;
   double     vol,v1,v2,v3,rap;
@@ -109,7 +109,7 @@ int trydisp(pMesh mesh,double *optpos,short t){
 }
 
 /** Find last valid position for the move of mesh nodes in attempt to reach optimal position
-   by a dichotomic process */
+    by a dichotomic process */
 int dichodisp(pMesh mesh,double *optpos){
   int   it,maxit,lastit,nd;
   short t,tm;
@@ -426,7 +426,7 @@ int lapantilap(pMesh mesh,double *optpos){
    }
 */
 /** Compute mean curvature vector at point np, whose surfacic ball is passed. Coordinates of np
-   are passed, in case intermediate position of this point is simulated */
+    are passed, in case intermediate position of this point is simulated */
 inline int meancur(pMesh mesh,int np,double c[3],int ilist,int *list,double h[3]){
   pTetra     pt;
   pPoint     pa,pb;
@@ -553,7 +553,7 @@ inline double surftri(pMesh mesh, int iel, int iface){
 }
 
 /** Dimension time step of mean curvature flow so that loss of perimeter between initial and
-   deformed configurations is no more than defrate (in %) */
+    deformed configurations is no more than defrate (in %) */
 double timestepMCF(pMesh mesh,double defrate){
   pTetra      pt;
   pPoint      p0;
@@ -619,7 +619,7 @@ double timestepMCF(pMesh mesh,double defrate){
 }
 
 /** Move each point of the implicit boundary mesh according to a mean curvature flow / anti
-   mean curvature flow approach */
+    mean curvature flow approach */
 int bdyMCF(pMesh mesh){
   pTetra      pt,pt0,pt1;
   pPoint      p0,p1,ppt0;

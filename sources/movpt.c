@@ -3,10 +3,11 @@
 
 /** Move internal point */
 int movintpt(pMesh mesh,int *list,int ilist) {
-  pTetra                 pt,pt0;
-  pPoint                 p0,p1,p2,p3,ppt0;
-  double                 vol,totvol,calold,calnew,caltmp;
-  int                            k,iel,i0;
+  pTetra               pt,pt0;
+  pPoint               p0,p1,p2,p3,ppt0;
+  double               vol,totvol;
+  double               calold,calnew,callist[ilist],caltmp;
+  int                  k,iel,i0;
 
   pt0    = &mesh->tetra[0];
   ppt0 = &mesh->point[0];
@@ -28,8 +29,9 @@ int movintpt(pMesh mesh,int *list,int ilist) {
     ppt0->c[0] += 0.25 * vol*(p0->c[0] + p1->c[0] + p2->c[0] + p3->c[0]);
     ppt0->c[1] += 0.25 * vol*(p0->c[1] + p1->c[1] + p2->c[1] + p3->c[1]);
     ppt0->c[2] += 0.25 * vol*(p0->c[2] + p1->c[2] + p2->c[2] + p3->c[2]);
-    caltmp = orcal(mesh,iel);
-    calold = MG_MIN(calold,caltmp);
+    if((&mesh->tetra[iel])->qual==-10)
+      (&mesh->tetra[iel])->qual=orcal(mesh,iel);
+    calold = MG_MIN(calold,(&mesh->tetra[iel])->qual);
   }
   if ( totvol < EPSD2 )  return(0);
   totvol = 1.0 / totvol;
@@ -45,9 +47,9 @@ int movintpt(pMesh mesh,int *list,int ilist) {
     pt  = &mesh->tetra[iel];
     memcpy(pt0,pt,sizeof(Tetra));
     pt0->v[i0] = 0;
-    caltmp = orcal(mesh,0);
-    if ( caltmp < EPSD2 )        return(0);
-    calnew = MG_MIN(calnew,caltmp);
+    callist[k] = orcal(mesh,0);
+    if ( callist[k] < EPSD2 )        return(0);
+    calnew = MG_MIN(calnew,callist[k]);
   }
   if ( calold < NULKAL && calnew <= calold )    return(0);
   else if ( calnew < 0.3 * calold )     return(0);
@@ -57,6 +59,9 @@ int movintpt(pMesh mesh,int *list,int ilist) {
   p0->c[0] = ppt0->c[0];
   p0->c[1] = ppt0->c[1];
   p0->c[2] = ppt0->c[2];
+  for (k=0; k<ilist; k++) {
+    (&mesh->tetra[list[k]/4])->qual=callist[k];
+  }
 
   return(1);
 }
@@ -69,8 +74,9 @@ int movbdyregpt(pMesh mesh,int *listv,int ilistv,int *lists,int ilists) {
   pxPoint               pxp;
   Bezier                b;
   double                *n,r[3][3],lispoi[3*LMAX+1],ux,uy,uz,det2d,detloc,oppt[2],step,lambda[3];
-  double                ll,m[2],uv[2],o[3],no[3],to[3],calold,calnew,caltmp;
-  int                   k,kel,iel,l,n0,na,nb,ntempa,ntempb,ntempc,nut,nxp;
+  double                ll,m[2],uv[2],o[3],no[3],to[3];
+  double                calold,calnew,caltmp,callist[ilistv];
+  int                   ier,k,kel,iel,l,n0,na,nb,ntempa,ntempb,ntempc,nut,nxp;
   unsigned char         i0,iface,i;
 
   step = 0.1;
@@ -94,7 +100,7 @@ int movbdyregpt(pMesh mesh,int *listv,int ilistv,int *lists,int ilists) {
   rotmatrix(n,r);
 
   /** Step 2 : rotation of the oriented surfacic ball with r : lispoi[k] is the common edge
-     between faces lists[k-1] and lists[k] */
+      between faces lists[k-1] and lists[k] */
   k                     = lists[0] / 4;
   iface = lists[0] % 4;
   pt            = &mesh->tetra[k];
@@ -192,7 +198,7 @@ int movbdyregpt(pMesh mesh,int *listv,int ilistv,int *lists,int ilists) {
   if ( det2d < 0.0 )    return(0);
 
   /** Step 3 : Compute optimal position to make current triangle equilateral, and average of
-     these positions*/
+      these positions*/
   for (k=0; k<ilists; k++) {
     m[0] = 0.5*(lispoi[3*(k+1)+1] + lispoi[3*k+1]);
     m[1] = 0.5*(lispoi[3*(k+1)+2] + lispoi[3*k+2]);
@@ -381,11 +387,12 @@ int movbdyregpt(pMesh mesh,int *listv,int ilistv,int *lists,int ilists) {
     pt0 = &mesh->tetra[0];
     memcpy(pt0,pt,sizeof(Tetra));
     pt0->v[i0] = 0;
-    caltmp = orcal(mesh,k);
-    calold = MG_MIN(calold,caltmp);
-    caltmp = orcal(mesh,0);
-    if ( caltmp < EPSD )        return(0);
-    calnew = MG_MIN(calnew,caltmp);
+    if( (&mesh->tetra[k])->qual==-10)
+      (&mesh->tetra[k])->qual=orcal(mesh,k);
+    calold = MG_MIN(calold,(&mesh->tetra[k])->qual);
+    callist[l]=orcal(mesh,0);
+    if ( callist[l] < EPSD )        return(0);
+    calnew = MG_MIN(calnew,callist[l]);
   }
   if ( calold < NULKAL && calnew <= calold )    return(0);
   else if ( calnew < 0.3*calold )        return(0);
@@ -399,19 +406,23 @@ int movbdyregpt(pMesh mesh,int *listv,int ilistv,int *lists,int ilists) {
   n[1] = no[1];
   n[2] = no[2];
 
+  for(l=0; l<ilistv; l++){
+    (&mesh->tetra[listv[l]/4])->qual= callist[l];
+  }
   return(1);
 }
 
 /** Move boundary reference point, whose volumic and surfacic balls are passed */
 int movbdyrefpt(pMesh mesh, int *listv, int ilistv, int *lists, int ilists){
-  pTetra                                        pt,pt0;
-  pPoint                                        p0,p1,p2,ppt0;
-  Tria                                          tt;
-  pxPoint                                       pxp;
-  double                                        step,ll1old,ll2old,o[3],no[3],to[3],calold,calnew,caltmp;
-  int                                                   l,iel,ip0,ipa,ipb,iptmpa,iptmpb,it1,it2,ip1,ip2,ip,ref,nxp;
+  pTetra                pt,pt0;
+  pPoint                p0,p1,p2,ppt0;
+  Tria                  tt;
+  pxPoint               pxp;
+  double                step,ll1old,ll2old,o[3],no[3],to[3];
+  double                calold,calnew,caltmp,callist[ilistv];
+  int                   l,iel,ip0,ipa,ipb,iptmpa,iptmpb,it1,it2,ip1,ip2,ip,ref,nxp;
   unsigned char         i,i0,ie,iface,iface1,iface2,iea,ieb,ie1,ie2;
-  char                                          tag;
+  char                  tag;
 
   step = 0.1;
   ip1 = ip2 = 0;
@@ -565,9 +576,11 @@ int movbdyrefpt(pMesh mesh, int *listv, int ilistv, int *lists, int ilists){
   p1 = &mesh->point[ip1];
   p2 = &mesh->point[ip2];
 
-  ll1old = (p1->c[0] -p0->c[0])* (p1->c[0] -p0->c[0])    + (p1->c[1] -p0->c[1])* (p1->c[1] -p0->c[1]) \
+  ll1old = (p1->c[0] -p0->c[0])* (p1->c[0] -p0->c[0]) \
+    + (p1->c[1] -p0->c[1])* (p1->c[1] -p0->c[1])      \
     + (p1->c[2] -p0->c[2])* (p1->c[2] -p0->c[2]);
-  ll2old = (p2->c[0] -p0->c[0])* (p2->c[0] -p0->c[0])    + (p2->c[1] -p0->c[1])* (p2->c[1] -p0->c[1]) \
+  ll2old = (p2->c[0] -p0->c[0])* (p2->c[0] -p0->c[0]) \
+    + (p2->c[1] -p0->c[1])* (p2->c[1] -p0->c[1])      \
     + (p2->c[2] -p0->c[2])* (p2->c[2] -p0->c[2]);
 
   if ( ll1old < ll2old ) { //move towards p2
@@ -641,11 +654,12 @@ int movbdyrefpt(pMesh mesh, int *listv, int ilistv, int *lists, int ilists){
     pt0 = &mesh->tetra[0];
     memcpy(pt0,pt,sizeof(Tetra));
     pt0->v[i0] = 0;
-    caltmp = orcal(mesh,iel);
-    calold = MG_MIN(calold,caltmp);
-    caltmp = orcal(mesh,0);
-    if ( caltmp < EPSD )        return(0);
-    calnew = MG_MIN(calnew,caltmp);
+    if( (&mesh->tetra[iel])->qual==-10)
+      (&mesh->tetra[iel])->qual=orcal(mesh,iel);
+    calold = MG_MIN(calold,(&mesh->tetra[iel])->qual);
+    callist[l]=orcal(mesh,0);
+    if ( callist[l] < EPSD )        return(0);
+    calnew = MG_MIN(calnew,callist[l]);
   }
   if ( calold < NULKAL && calnew <= calold )    return(0);
   else if ( calnew <= 0.3*calold )      return(0);
@@ -664,6 +678,10 @@ int movbdyrefpt(pMesh mesh, int *listv, int ilistv, int *lists, int ilists){
   pxp->t[1] = to[1];
   pxp->t[2] = to[2];
 
+  for( l=0 ; l<ilistv ; l++ ){
+    (&mesh->tetra[listv[l]/4])->qual = callist[l];
+  }
+
   return(1);
 }
 
@@ -674,7 +692,7 @@ int movbdynompt(pMesh mesh, int *listv, int ilistv, int *lists, int ilists){
   pPoint       p0,p1,p2,ppt0;
   pxPoint      pxp;
   Tria         tt;
-  double       step,ll1old,ll2old,calold,calnew,caltmp;
+  double       step,ll1old,ll2old,calold,calnew,caltmp,callist[ilistv];
   double       o[3],no[3],to[3];
   int          ip0,ip1,ip2,ip,iel,ipa,ipb,l,iptmpa,iptmpb,ref,it1,it2,nxp;
   char         iface,i,i0,iea,ieb,ie,tag,ie1,ie2,iface1,iface2;
@@ -830,9 +848,11 @@ int movbdynompt(pMesh mesh, int *listv, int ilistv, int *lists, int ilists){
   p1 = &mesh->point[ip1];
   p2 = &mesh->point[ip2];
 
-  ll1old = (p1->c[0] -p0->c[0])* (p1->c[0] -p0->c[0])    + (p1->c[1] -p0->c[1])* (p1->c[1] -p0->c[1]) \
+  ll1old = (p1->c[0] -p0->c[0])* (p1->c[0] -p0->c[0]) \
+    + (p1->c[1] -p0->c[1])* (p1->c[1] -p0->c[1])      \
     + (p1->c[2] -p0->c[2])* (p1->c[2] -p0->c[2]);
-  ll2old = (p2->c[0] -p0->c[0])* (p2->c[0] -p0->c[0])    + (p2->c[1] -p0->c[1])* (p2->c[1] -p0->c[1]) \
+  ll2old = (p2->c[0] -p0->c[0])* (p2->c[0] -p0->c[0]) \
+    + (p2->c[1] -p0->c[1])* (p2->c[1] -p0->c[1])      \
     + (p2->c[2] -p0->c[2])* (p2->c[2] -p0->c[2]);
 
   if ( ll1old < ll2old ) { //move towards p2
@@ -908,11 +928,12 @@ int movbdynompt(pMesh mesh, int *listv, int ilistv, int *lists, int ilists){
     pt0 = &mesh->tetra[0];
     memcpy(pt0,pt,sizeof(Tetra));
     pt0->v[i0] = 0;
-    caltmp = orcal(mesh,iel);
-    calold = MG_MIN(calold,caltmp);
-    caltmp = orcal(mesh,0);
-    if ( caltmp < EPSD )        return(0);
-    calnew = MG_MIN(calnew,caltmp);
+    if( (&mesh->tetra[iel])->qual==-10)
+      (&mesh->tetra[iel])->qual=orcal(mesh,iel);
+    calold = MG_MIN(calold, (&mesh->tetra[iel])->qual);
+    callist[l]= orcal(mesh,0);
+    if ( callist[l] < EPSD )        return(0);
+    calnew = MG_MIN(calnew,callist[l]);
   }
   if ( calold < NULKAL && calnew <= calold )    return(0);
   else if ( calnew <= 0.3*calold )      return(0);
@@ -931,19 +952,24 @@ int movbdynompt(pMesh mesh, int *listv, int ilistv, int *lists, int ilists){
   pxp->t[1] = to[1];
   pxp->t[2] = to[2];
 
+  for(l=0; l<ilistv; l++){
+    (&mesh->tetra[listv[l]/4])->qual = callist[l];
+  }
+
   return(1);
 }
 
 /** Move boundary ridge point, whose volumic and surfacic balls are passed */
 int movbdyridpt(pMesh mesh,int *listv,int ilistv,int *lists,int ilists) {
-  pTetra                                        pt,pt0;
-  pPoint                                        p0,p1,p2,ppt0;
-  Tria                                          tt;
-  pxPoint                                       pxp;
-  double                                        step,ll1old,ll2old,o[3],no1[3],no2[3],to[3],calold,calnew,caltmp;
-  int                                                   l,iel,ip0,ipa,ipb,iptmpa,iptmpb,it1,it2,ip1,ip2,ip,ref,nxp;
-  unsigned char         i,i0,ie,iface,iface1,iface2,iea,ieb,ie1,ie2;
-  char                                          tag;
+  pTetra               pt,pt0;
+  pPoint               p0,p1,p2,ppt0;
+  Tria                 tt;
+  pxPoint              pxp;
+  double               step,ll1old,ll2old,o[3],no1[3],no2[3],to[3];
+  double               calold,calnew,caltmp,callist[ilistv];
+  int                  l,iel,ip0,ipa,ipb,iptmpa,iptmpb,it1,it2,ip1,ip2,ip,ref,nxp;
+  unsigned char        i,i0,ie,iface,iface1,iface2,iea,ieb,ie1,ie2;
+  char                 tag;
 
   step = 0.1;
   ip1 = ip2 = 0;
@@ -1099,9 +1125,11 @@ int movbdyridpt(pMesh mesh,int *listv,int ilistv,int *lists,int ilists) {
   p1 = &mesh->point[ip1];
   p2 = &mesh->point[ip2];
 
-  ll1old = (p1->c[0] -p0->c[0])* (p1->c[0] -p0->c[0])    + (p1->c[1] -p0->c[1])* (p1->c[1] -p0->c[1]) \
+  ll1old = (p1->c[0] -p0->c[0])* (p1->c[0] -p0->c[0]) \
+    + (p1->c[1] -p0->c[1])* (p1->c[1] -p0->c[1])      \
     + (p1->c[2] -p0->c[2])* (p1->c[2] -p0->c[2]);
-  ll2old = (p2->c[0] -p0->c[0])* (p2->c[0] -p0->c[0])    + (p2->c[1] -p0->c[1])* (p2->c[1] -p0->c[1]) \
+  ll2old = (p2->c[0] -p0->c[0])* (p2->c[0] -p0->c[0]) \
+    + (p2->c[1] -p0->c[1])* (p2->c[1] -p0->c[1])      \
     + (p2->c[2] -p0->c[2])* (p2->c[2] -p0->c[2]);
 
   if ( ll1old < ll2old ) { //move towards p2
@@ -1180,11 +1208,12 @@ int movbdyridpt(pMesh mesh,int *listv,int ilistv,int *lists,int ilists) {
     pt0 = &mesh->tetra[0];
     memcpy(pt0,pt,sizeof(Tetra));
     pt0->v[i0] = 0;
-    caltmp = orcal(mesh,iel);
-    calold = MG_MIN(calold,caltmp);
-    caltmp = orcal(mesh,0);
-    if ( caltmp < EPSD )        return(0);
-    calnew = MG_MIN(calnew,caltmp);
+    if( (&mesh->tetra[iel])->qual==-10)
+      (&mesh->tetra[iel])->qual=orcal(mesh,iel);
+    calold = MG_MIN(calold,(&mesh->tetra[iel])->qual);
+    callist[l]=orcal(mesh,0);
+    if ( callist[l] < EPSD )        return(0);
+    calnew = MG_MIN(calnew,callist[l]);
   }
   if ( calold < NULKAL && calnew <= calold )    return(0);
   else if ( calnew <= 0.3*calold )      return(0);
@@ -1206,6 +1235,10 @@ int movbdyridpt(pMesh mesh,int *listv,int ilistv,int *lists,int ilists) {
   pxp->t[0] = to[0];
   pxp->t[1] = to[1];
   pxp->t[2] = to[2];
+
+  for(l=0; l<ilistv; l++){
+    (&mesh->tetra[listv[l]/4])->qual = callist[l];
+  }
 
   return(1);
 }

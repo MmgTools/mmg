@@ -858,7 +858,7 @@ static int anatets(pMesh mesh,pSol met,char typchk) {
   }
 
   /** 2. check if split by adjacent; besides, a triangle may have been splitted and not its adjacent
-     (thus, the associated n2 may not exist) : update this normal if need be */
+      (thus, the associated n2 may not exist) : update this normal if need be */
   nc = 0;
   for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];

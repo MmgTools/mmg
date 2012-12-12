@@ -250,8 +250,8 @@ inline int eigensym(double m[3],double lambda[2],double vp[2][2]) {
 }
 
 /** If need be, invert the travelling sense of surfacic ball so that it is travelled in
-   the direct sense with respect to direction n anchored at point ip (ip = global num.):
-   return 2 = orientation reversed, 1 otherwise */
+    the direct sense with respect to direction n anchored at point ip (ip = global num.):
+    return 2 = orientation reversed, 1 otherwise */
 inline int directsurfball(pMesh mesh, int ip, int *list, int ilist, double n[3]){
   int             j,aux,iel;
   double          nt[3],ps;
@@ -274,8 +274,8 @@ inline int directsurfball(pMesh mesh, int ip, int *list, int ilist, double n[3])
 }
 
 /** If need be, reorder the surfacic ball of point ip, so that its first element has
-   edge (p,q) (nump,q = global num) as edge iprv2[ip] of face iface.
-   return 2 = orientation reversed, 1 otherwise */
+    edge (p,q) (nump,q = global num) as edge iprv2[ip] of face iface.
+    return 2 = orientation reversed, 1 otherwise */
 int startedgsurfball(pMesh mesh,int nump,int numq,int *list,int ilist) {
   pTetra          pt;
   int             iel,tmp,l;
@@ -312,7 +312,7 @@ int startedgsurfball(pMesh mesh,int nump,int numq,int *list,int ilist) {
 }
 
 /** Compute point located at parameter value step from point ip0, as well as interpolate
-   of normals, tangent for a RIDGE edge */
+    of normals, tangent for a RIDGE edge */
 inline int BezierRidge(pMesh mesh,int ip0,int ip1,double s,double *o,double *no1,double *no2,double *to){
   pPoint    p0,p1;
   double    ux,uy,uz,n01[3],n02[3],n11[3],n12[3],t0[3],t1[3];
@@ -476,7 +476,7 @@ inline int BezierRidge(pMesh mesh,int ip0,int ip1,double s,double *o,double *no1
 }
 
 /** Compute point located at parameter value step from point ip0, as well as interpolate
-   of normals, tangent for a REF edge */
+    of normals, tangent for a REF edge */
 inline int BezierRef(pMesh mesh,int ip0,int ip1,double s,double *o,double *no,double *to) {
   pPoint          p0,p1;
   double          ux,uy,uz,n0[3],n1[3],t0[3],t1[3];
@@ -616,7 +616,7 @@ inline int BezierRef(pMesh mesh,int ip0,int ip1,double s,double *o,double *no,do
 }
 
 /** Compute point located at parameter value step from point ip0, as well as interpolate
-   of normals, tangent for a NOM edge */
+    of normals, tangent for a NOM edge */
 inline int BezierNom(pMesh mesh,int ip0,int ip1,double s,double *o,double *no,double *to) {
   pPoint      p0,p1;
   double      ux,uy,uz,il,ll,ps,alpha,dd;
@@ -758,7 +758,7 @@ inline int BezierNom(pMesh mesh,int ip0,int ip1,double s,double *o,double *no,do
 }
 
 /** Compute point located at parameter value step from point ip0, as well as interpolate
-   of normals, tangent for a regular edge ; v = ref vector (normal) for choice of normals if need be */
+    of normals, tangent for a regular edge ; v = ref vector (normal) for choice of normals if need be */
 inline int BezierReg(pMesh mesh,int ip0, int ip1, double s, double v[3], double *o, double *no){
   pPoint p0,p1;
   double b0[3],b1[3],bn[3],t0[3],t1[3],np0[3],np1[3],alpha,ux,uy,uz,ps1,ps2,ll,il,dd,*n1,*n2;

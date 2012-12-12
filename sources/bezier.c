@@ -75,9 +75,9 @@ inline double BezierGeod(double c1[3],double c2[3],double t1[3],double t2[3]) {
 }
 
 /** Compute control points associated to the underlying curve to [p0p1]
-   ised = 1 if [p0p1] must be considered as a special edge, 0 otherwise
-   Provide a direction v which will be considered as reference when dealing with
-   choice of normal vectors */
+    ised = 1 if [p0p1] must be considered as a special edge, 0 otherwise
+    Provide a direction v which will be considered as reference when dealing with
+    choice of normal vectors */
 inline int BezierEdge(pMesh mesh,int ip0,int ip1,double b0[3],double b1[3],char ised, double v[3]) {
   pPoint   p0,p1;
   pxPoint  pxp0,pxp1;

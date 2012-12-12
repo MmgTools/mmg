@@ -47,8 +47,8 @@ int chkcol_int(pMesh mesh,pSol met,int k,char iface,char iedg,int *list,char typ
     }
 
     pt0->v[ip] = nq;
-    caltmp = orcal(mesh,iel);
-    calold = MG_MIN(calold,caltmp);
+    if((&mesh->tetra[iel])->qual==-10) (&mesh->tetra[iel])->qual=orcal(mesh,iel);
+    calold = MG_MIN(calold, (&mesh->tetra[iel])->qual);
     caltmp = orcal(mesh,0);
     if ( caltmp < EPSD )  return(0);
     calnew = MG_MIN(calnew,caltmp);
@@ -162,8 +162,8 @@ int chkcol_bdy(pMesh mesh,int k,char iface,char iedg,int *listv) {
     memcpy(pt0,pt,sizeof(Tetra));
     pt0->v[ipp] = numq;
 
-    caltmp = orcal(mesh,iel);
-    calold = MG_MIN(calold,caltmp);
+    if((&mesh->tetra[iel])->qual==-10) (&mesh->tetra[iel])->qual=orcal(mesh,iel);
+    calold = MG_MIN(calold,(&mesh->tetra[iel])->qual);
     caltmp = orcal(mesh,0);
 
     if ( caltmp < EPSD )  return(0);
@@ -451,6 +451,7 @@ int colver(pMesh mesh,int *list,int ilist,char indq) {
         hEdge(&mesh->htab,nq,pt->v[j],ref,tag);
     }
     pt->v[ip] = nq;
+    pt->qual=-10.;
   }
 
   if ( mesh->point[np].tag & MG_BDY )

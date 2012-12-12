@@ -171,6 +171,7 @@ int loadMesh(pMesh mesh) {
   for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
     GmfGetLin(inm,GmfTetrahedra,&pt->v[0],&pt->v[1],&pt->v[2],&pt->v[3],&pt->ref);
+    pt->qual=-10;
     for (i=0; i<4; i++) {
       ppt = &mesh->point[pt->v[i]];
       ppt->tag &= ~MG_NUL;
@@ -252,7 +253,7 @@ int saveMesh(pMesh mesh) {
     mesh->adjt=NULL;
     mesh->tria=NULL;
 
-  /* edges + ridges */
+    /* edges + ridges */
     na = nr = 0;
     for (k=0; k<=mesh->htab.max; k++) {
       ph = &mesh->htab.geom[k];

@@ -3,8 +3,8 @@
 extern Info info;
 
 /** Check whether swap of edge ia in start should be performed, and return 4*k+i =
-   index of point corresponding to the swapped configuration ; shell of edge is
-   built during the process */
+    index of point corresponding to the swapped configuration ; shell of edge is
+    built during the process */
 int chkswpgen(pMesh mesh,int start,int ia,int *ilist,int *list) {
   pTetra    pt,pt0;
   pPoint    p0;
@@ -20,7 +20,9 @@ int chkswpgen(pMesh mesh,int start,int ia,int *ilist,int *list) {
   pt0 = &mesh->tetra[0];
   na  = pt->v[iare[ia][0]];
   nb  = pt->v[iare[ia][1]];
-  calold = orcal(mesh,start);
+  if((&mesh->tetra[start])->qual==-10)
+    (&mesh->tetra[start])->qual=orcal(mesh,start);
+  calold = (&mesh->tetra[start])->qual;
   if ( ALPHAD*calold > 0.6 )  return(0);
 
   /* Prevent swap of a ref or tagged edge */
@@ -43,9 +45,9 @@ int chkswpgen(pMesh mesh,int start,int ia,int *ilist,int *list) {
 
     /* Edge is on a boundary between two different domains */
     if ( pt->ref != refdom )  return(0);
-    caltmp = orcal(mesh,adj);
-    calold = MG_MIN(calold,caltmp);
-
+    if( (&mesh->tetra[adj])->qual ==-10)
+      (&mesh->tetra[adj])->qual=orcal(mesh,adj);
+    calold = MG_MIN(calold, (&mesh->tetra[adj])->qual);
     /* identification of edge number in tetra adj */
     for (i=0; i<6; i++) {
       ipa = iare[i][0];

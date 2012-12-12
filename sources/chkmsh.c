@@ -448,7 +448,7 @@ int cntbdypt(pMesh mesh, int nump){
 }
 
 /** Count the number of tetras that have several boundary faces, as well as the number of internal
-   edges connecting points of the boundary */
+    edges connecting points of the boundary */
 int chkfemtopo(pMesh mesh) {
   pTetra      pt,pt1;
   pxTetra     pxt;

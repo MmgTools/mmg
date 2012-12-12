@@ -91,8 +91,9 @@ void split1(pMesh mesh,pSol met,int k,int vx[6]) {
   char     i,tag,isxt,isxt1;
   unsigned char tau[4],*taued;
 
-  /* create a new tetras */
+  /* create a new tetra */
   pt  = &mesh->tetra[k];
+  pt->qual=-10.;
 #ifdef DEBUG
   lmintmp=0.6;lmaxtmp=1.3;
   for(i=0;i<6;i++)
@@ -243,8 +244,9 @@ int simbulgept(pMesh mesh,int *list,int ret,double o[3]) {
     pt = &mesh->tetra[iel];
     memcpy(pt0,pt,sizeof(Tetra));
     pt0->v[ia] = 0;
-    caltmp = orcal(mesh,iel);
-    calold = MG_MIN(calold,caltmp);
+    if((&mesh->tetra[iel])->qual==-10)
+      (&mesh->tetra[iel])->qual=orcal(mesh,iel);
+    calold = MG_MIN(calold,(&mesh->tetra[iel])->qual);
     caltmp = orcal(mesh,0);
     if ( caltmp < EPSD )  return(0);
     calnew = MG_MIN(calnew,caltmp);
@@ -326,7 +328,7 @@ int split1b(pMesh mesh, pSol mettmp,int *list, int ret, int ip,int cas){
     iel = list[k] / 6;
     ie  = list[k] % 6;
     pt  = &mesh->tetra[iel];
-
+    pt->qual=-10.;
     /* identity : case 0 */
     tau[0] = 0 ; tau[1] = 1 ; tau[2] = 2 ; tau[3] = 3;
     switch(ie) {
@@ -890,6 +892,7 @@ void split2sf(pMesh mesh,pSol met,int k,int vx[6]){
   unsigned char tau[4],*taued;
 
   pt[0] = &mesh->tetra[k];
+  pt[0]->qual=-10.;
 #ifdef DEBUG
   lmintmp=0.6;lmaxtmp=1.3;
   for(i=0;i<6;i++)
@@ -1090,7 +1093,7 @@ void split2(pMesh mesh,pSol met,int k,int vx[6]) {
   unsigned char tau[4],*taued;
 
   pt[0] = &mesh->tetra[k];
-
+  pt[0]->qual=-10.;
 #ifdef DEBUG
   lmintmp=0.6;lmaxtmp=1.3;
   for(i=0;i<6;i++)
@@ -1383,6 +1386,7 @@ void split3(pMesh mesh,pSol met,int k,int vx[6]) {
   pt[0] = &mesh->tetra[k];
   flg   = pt[0]->flag;
   pt[0]->flag  = 0;
+  pt[0]->qual=-10.;
 #ifdef DEBUG
   lmintmp=0.6;lmaxtmp=1.3;
   for(i=0;i<6;i++)
@@ -1563,6 +1567,7 @@ void split3cone(pMesh mesh,pSol met,int k,int vx[6]) {
   pt[0]  = &mesh->tetra[k];
   flg = pt[0]->flag;
   pt[0]->flag  = 0;
+  pt[0]->qual=-10.;
 #ifdef DEBUG
   lmintmp=0.6;lmaxtmp=1.3;
   for(i=0;i<6;i++)
@@ -1853,6 +1858,7 @@ void split3op(pMesh mesh, pSol met, int k, int vx[6]){
   pt[0]  = &mesh->tetra[k];
   flg = pt[0]->flag;
   pt[0]->flag  = 0;
+  pt[0]->qual=-10.;
 #ifdef DEBUG
   lmintmp=0.6;lmaxtmp=1.3;
   for(i=0;i<6;i++)
@@ -2373,6 +2379,7 @@ int split4bar(pMesh mesh, pSol met, int k){
 
   pt[0] = &mesh->tetra[k];
   pt[0]->flag = 0;
+  pt[0]->qual=-10.;
 #ifdef DEBUG
   lmintmp=0.6;lmaxtmp=1.3;
   for(i=0;i<6;i++)
@@ -2542,6 +2549,7 @@ void split4sf(pMesh mesh,pSol met,int k,int vx[6]) {
   pt[0]  = &mesh->tetra[k];
   flg = pt[0]->flag;
   pt[0]->flag  = 0;
+  pt[0]->qual=-10.;
 #ifdef DEBUG
   lmintmp=0.6;lmaxtmp=1.3;
   for(i=0;i<6;i++)
@@ -2819,6 +2827,7 @@ void split4op(pMesh mesh,pSol met,int k,int vx[6]) {
   pt[0]  = &mesh->tetra[k];
   flg = pt[0]->flag;
   pt[0]->flag  = 0;
+  pt[0]->qual=-10.;
 #ifdef DEBUG
   lmintmp=0.6;lmaxtmp=1.3;
   for(i=0;i<6;i++)
@@ -3059,6 +3068,7 @@ void split5(pMesh mesh,pSol met,int k,int vx[6]) {
   pt[0]  = &mesh->tetra[k];
   flg = pt[0]->flag;
   pt[0]->flag  = 0;
+  pt[0]->qual=-10.;
 #ifdef DEBUG
   lmintmp=0.6;lmaxtmp=1.3;
   for(i=0;i<6;i++)
@@ -3313,7 +3323,7 @@ void split6(pMesh mesh,pSol met,int k,int vx[6]) {
 
   pt[0]  = &mesh->tetra[k];
   pt[0]->flag  = 0;
-
+  pt[0]->qual=-10.;
 #ifdef DEBUG
   lmintmp=0.6;lmaxtmp=1.3;
   for(i=0;i<6;i++)

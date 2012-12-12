@@ -221,7 +221,8 @@ int badelt(pMesh mesh,pSol met) {
     for (k=1; k<=mesh->ne; k++) {
       pt = &mesh->tetra[k];
       if ( !MG_EOK(pt) )  continue;
-      kal = ALPHAD * orcal(mesh,k);
+      if(pt->qual==-10) pt->qual=orcal(mesh,k);
+      kal = ALPHAD * pt->qual;
       if ( kal > BADKAL )  continue;
 
       nd++;
@@ -239,7 +240,7 @@ int prilen(pMesh mesh, pSol met) {
   int             k,np,nq,amin,bmin,amax,bmax,ned,hl[9];
   char            ia,i0,i1,ier,i;
   static double   bd[9]= {0.0, 0.3, 0.6, 0.7071, 0.9, 1.3, 1.4142, 2.0, 5.0};
-//{0.0, 0.2, 0.5, 0.7071, 0.9, 1.111, 1.4142, 2.0, 5.0};
+  //{0.0, 0.2, 0.5, 0.7071, 0.9, 1.111, 1.4142, 2.0, 5.0};
 
   memset(hl,0,9*sizeof(int));
   ned = 0;
@@ -391,9 +392,9 @@ void outqua(pMesh mesh,pSol met) {
           rapmax,rapavg / (mesh->ne-nex),rapmin,iel);
 #else
   fprintf(stdout,"     BEST   %e  AVRG.   %e  WRST.   %e (%d)\n => %d %d %d %d\n",
-	  rapmax,rapavg / (mesh->ne-nex),rapmin,iel,
-	  mesh->tetra[iel].v[0],mesh->tetra[iel].v[1],mesh->tetra[iel].v[2],
-	  mesh->tetra[iel].v[3]);
+          rapmax,rapavg / (mesh->ne-nex),rapmin,iel,
+          mesh->tetra[iel].v[0],mesh->tetra[iel].v[1],mesh->tetra[iel].v[2],
+          mesh->tetra[iel].v[3]);
 #endif
   if ( abs(info.imprim) < 5 ){
     if (rapmin == 0){

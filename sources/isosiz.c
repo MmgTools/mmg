@@ -345,8 +345,8 @@ static double defsizreg(pMesh mesh,pSol met,int nump,int *lists,int ilists) {
 }
 
 /** Define isotropic size map at all boundary vertices of the mesh,
-   associated with geometric approx, and prescribe hmax at the internal vertices
-   Field h of Point is used, to store the prescribed size (not inverse, squared,...) */
+    associated with geometric approx, and prescribe hmax at the internal vertices
+    Field h of Point is used, to store the prescribed size (not inverse, squared,...) */
 int defsiz_iso(pMesh mesh,pSol met) {
   pTetra    pt;
   pxTetra   pxt;

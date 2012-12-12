@@ -4,7 +4,7 @@ extern Info info;
 extern char ddb;
 
 /** Check whether edge whose shell is provided should be swapped for
-   geometric approximation purposes (the 2 surface triangles are also provided) */
+    geometric approximation purposes (the 2 surface triangles are also provided) */
 int chkswpbdy(pMesh mesh,int *list,int ilist,int it1,int it2) {
   pTetra   pt,pt0;
   pPoint   p0,p1,ppt0;
@@ -141,8 +141,9 @@ int chkswpbdy(pMesh mesh,int *list,int ilist,int it1,int it2) {
     iel = list[k] / 6;
     pt  = &mesh->tetra[iel];
     memcpy(pt0,pt,sizeof(Tetra));
-    caltmp = orcal(mesh,iel);
-    calold = MG_MIN(calold,caltmp);
+    if((&mesh->tetra[iel])->qual==-10)
+      (&mesh->tetra[iel])->qual=orcal(mesh,iel);
+    calold = MG_MIN(calold,(&mesh->tetra[iel])->qual);
 
     ia1 = ia2 = ip = iq = -1;
     for (j=0; j< 4; j++) {
@@ -179,7 +180,7 @@ int chkswpbdy(pMesh mesh,int *list,int ilist,int it1,int it2) {
 }
 
 /** Swap boundary edge whose shell is provided ; it1 = boundary face
-   carrying the beforehand tested terminal point for collapse */
+    carrying the beforehand tested terminal point for collapse */
 int swpbdy(pMesh mesh,pSol met,int *list,int ret,int it1) {
   pTetra   pt,pt1;
   pPoint   p0,p1;

@@ -192,7 +192,7 @@ static int setdhd(pMesh mesh) {
         mesh->point[pt->v[i1]].tag |= MG_GEO;
         mesh->point[pt->v[i2]].tag |= MG_GEO;
         nr++;
-			}
+      }
       else if ( k < kk ) {
         pt1 = &mesh->tria[kk];
         /* reference curve */
@@ -241,30 +241,30 @@ static int singul(pMesh mesh) {
 
     for (i=0; i<3; i++) {
       ppt = &mesh->point[pt->v[i]];
-			if ( !MG_VOK(ppt) || MG_SIN(ppt->tag) )  continue;
+      if ( !MG_VOK(ppt) || MG_SIN(ppt->tag) )  continue;
       else if ( MG_EDG(ppt->tag) ) {
         ns = bouler(mesh,k,i,list,&ng,&nr);
 
-				if ( !ns )  continue;
+        if ( !ns )  continue;
         if ( (ng+nr) > 2 ) {
           ppt->tag |= MG_CRN + MG_REQ;
           nre++;
-					nc++;
+          nc++;
         }
-				else if ( (ng == 1) && (nr == 1) ) {
-					ppt->tag |= MG_REQ;
-					nre++;
-				}
-			  else if ( ng == 1 && !nr ){
+        else if ( (ng == 1) && (nr == 1) ) {
+          ppt->tag |= MG_REQ;
+          nre++;
+        }
+        else if ( ng == 1 && !nr ){
           ppt->tag |= MG_CRN + MG_REQ;
           nre++;
-					nc++;
-			  }
-			  else if ( nr == 1 && !ng ){
+          nc++;
+        }
+        else if ( nr == 1 && !ng ){
           ppt->tag |= MG_CRN + MG_REQ;
           nre++;
-					nc++;
-			  }
+          nc++;
+        }
         /* check ridge angle */
         else {
           p1 = &mesh->point[list[1]];
@@ -281,7 +281,7 @@ static int singul(pMesh mesh) {
             if ( dd > -info.dhd ) {
               ppt->tag |= MG_CRN;
               nc++;
-						}
+            }
           }
         }
       }

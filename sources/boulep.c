@@ -159,10 +159,10 @@ int bouler(pMesh mesh,int start,int ip,int *list,int *ng,int *nr) {
     i1 = inxt2[i];
     if ( MG_EDG(pt->tag[i1])) {
       i2 = iprv2[i];
-      if ( pt->tag[i1] & MG_GEO ) 
-				*ng = *ng + 1;
-			else
-				*nr = *nr + 1;
+      if ( pt->tag[i1] & MG_GEO )
+        *ng = *ng + 1;
+      else
+        *nr = *nr + 1;
       ns++;
       list[ns] = pt->v[i2];
       if ( ns > LMAX-2 )  return(-ns);
@@ -184,10 +184,10 @@ int bouler(pMesh mesh,int start,int ip,int *list,int *ng,int *nr) {
       i2 = iprv2[i];
       if ( MG_EDG(pt->tag[i2]) ) {
         i1 = inxt2[i];
-	      if ( pt->tag[i2] & MG_GEO )
-					*ng = *ng + 1;
-				else 
-					*nr = *nr + 1;
+        if ( pt->tag[i2] & MG_GEO )
+          *ng = *ng + 1;
+        else
+          *nr = *nr + 1;
         ns++;
         list[ns] = pt->v[i1];
         if ( ns > LMAX-2 )  return(-ns);
@@ -203,8 +203,8 @@ int bouler(pMesh mesh,int start,int ip,int *list,int *ng,int *nr) {
 }
 
 /** Return volumic ball (i.e. filled with tetrahedra) of point ip in tetra start.
-   Results are stored under the form 4*kel + jel , kel = number of the tetra, jel = local
-   index of p within kel */
+    Results are stored under the form 4*kel + jel , kel = number of the tetra, jel = local
+    index of p within kel */
 int boulevolp (pMesh mesh, int start, int ip, int * list){
   pTetra  pt,pt1;
   int    *adja,nump,ilist,base,cur,k,k1;
@@ -248,8 +248,8 @@ int boulevolp (pMesh mesh, int start, int ip, int * list){
 }
 
 /** Define normal and tangent vectors at a non manifold point (ip in start, supported by
-   face iface), enumerating its (outer)surfacic ball ; return sng = whether point is singular
-   or not */
+    face iface), enumerating its (outer)surfacic ball ; return sng = whether point is singular
+    or not */
 int boulenm(pMesh mesh,int start,int ip,int iface,double n[3],double t[3]) {
   pTetra   pt;
   pPoint   p0,p1,ppt;
@@ -396,9 +396,9 @@ int boulenm(pMesh mesh,int start,int ip,int iface,double n[3],double t[3]) {
 }
 
 /** Return volumic ball of a surfacic point p, as well as the part of its surfacic ball
-   supported in the outer boundary starting from tet start, with point ip, and face if in tetra
-   volumic ball ; list[k] = 4*number of tet + index of point
-   surfacic ball : list[k] = 4*number of tet + index of FACE */
+    supported in the outer boundary starting from tet start, with point ip, and face if in tetra
+    volumic ball ; list[k] = 4*number of tet + index of point
+    surfacic ball : list[k] = 4*number of tet + index of FACE */
 int bouleext(pMesh mesh, int start, int ip, int iface, int *listv, int *ilistv, int *lists, int*ilists){
   pTetra pt,pt1;
   int base,nump,k,k1,*adja,piv,na,nb,adj,cur,nvstart,fstart,aux;
@@ -503,9 +503,9 @@ int bouleext(pMesh mesh, int start, int ip, int iface, int *listv, int *ilistv, 
 }
 
 /** Return volumic ball of a SURFACE point p, as well as its surfacic ball, starting from tetra
-   start, with point ip, and face if in tetra
-   volumic ball ; list[k] = 4*number of tet + index of point
-   surfacic ball : list[k] = 4*number of tet + index of FACE */
+    start, with point ip, and face if in tetra
+    volumic ball ; list[k] = 4*number of tet + index of point
+    surfacic ball : list[k] = 4*number of tet + index of FACE */
 int boulesurfvolp(pMesh mesh,int start,int ip,int iface,int *listv,int *ilistv,int *lists,int*ilists) {
   pTetra pt,pt1;
   pxTetra pxt;
@@ -763,7 +763,7 @@ inline int settag(pMesh mesh,int start,int ia,int tag,int edg) {
 }
 
 /** Find all tets sharing edge ia of tetra start
-   return 2*ilist if shell is closed, 2*ilist +1 otherwise */
+    return 2*ilist if shell is closed, 2*ilist +1 otherwise */
 int coquil(pMesh mesh,int start,int ia,int * list) {
   pTetra  pt;
   int     ilist,*adja,piv,adj,na,nb,ipa,ipb;
@@ -926,8 +926,8 @@ int srcbdy(pMesh mesh,int start,int ia) {
 }
 
 /** Find all tets sharing edge ia of tetra start, and stores boundary faces when met
-   it1 & it2 = 6*iel + iface, iel = index of tetra, iface = index of face in tetra
-   return 2*ilist if shell is closed, 2*ilist +1 otherwise */
+    it1 & it2 = 6*iel + iface, iel = index of tetra, iface = index of face in tetra
+    return 2*ilist if shell is closed, 2*ilist +1 otherwise */
 int coquilface(pMesh mesh,int start,int ia,int *list,int *it1,int *it2) {
   pTetra   pt;
   pxTetra  pxt;

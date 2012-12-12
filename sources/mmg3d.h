@@ -135,6 +135,7 @@ typedef struct {
   int      xt;   /**< xt : number of the surfaces xtetra */
   int      flag;
   char     tag;
+  double   qual;
 } Tetra;
 typedef Tetra * pTetra;
 
