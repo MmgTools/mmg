@@ -18,7 +18,7 @@ static double defsizreg(pMesh mesh,pSol met,int nump,int *lists,int ilists) {
   double       ux,uy,uz,det2d,h,isqhmin,isqhmax,ll,lmin,lmax,hnm,s;
   double       *n,*t,r[3][3],lispoi[3*LMAX+1],intm[3],b0[3],b1[3],c[3],tAA[6],tAb[3],d[3];
   double       kappa[2],vp[2][2];
-  int          k,na,nb,ntempa,ntempb,iel,ier,ip0;
+  int          k,na,nb,ntempa,ntempb,iel,ip0;
   char         iface,i,j,i0;
 
   p0 = &mesh->point[nump];
@@ -157,8 +157,10 @@ static double defsizreg(pMesh mesh,pSol met,int nump,int *lists,int ilists) {
 
     tet2tri(mesh,iel,iface,&tt);
 
-    ier = bezierCP(mesh,&tt,&b);
-    assert(ier);
+    if(!bezierCP(mesh,&tt,&b)){
+      printf("%s:%d: Error: function bezierCP return 0\n",__FILE__,__LINE__);
+      exit(EXIT_FAILURE);
+    }
 
     for (i0=0; i0<3; i0++) {
       if ( tt.v[i0] == nump )  break;

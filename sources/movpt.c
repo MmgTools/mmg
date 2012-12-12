@@ -70,7 +70,7 @@ int movbdyregpt(pMesh mesh,int *listv,int ilistv,int *lists,int ilists) {
   Bezier                b;
   double                *n,r[3][3],lispoi[3*LMAX+1],ux,uy,uz,det2d,detloc,oppt[2],step,lambda[3];
   double                ll,m[2],uv[2],o[3],no[3],to[3],calold,calnew,caltmp;
-  int                   ier,k,kel,iel,l,n0,na,nb,ntempa,ntempb,ntempc,nut,nxp;
+  int                   k,kel,iel,l,n0,na,nb,ntempa,ntempb,ntempc,nut,nxp;
   unsigned char         i0,iface,i;
 
   step = 0.1;
@@ -263,8 +263,10 @@ int movbdyregpt(pMesh mesh,int *listv,int ilistv,int *lists,int ilists) {
 
   tet2tri(mesh,iel,iface,&tt);
 
-  ier = bezierCP(mesh,&tt,&b);
-  assert(ier);
+  if(!bezierCP(mesh,&tt,&b)){
+    printf("%s:%d: Error: function bezierCP return 0\n",__FILE__,__LINE__);
+    exit(EXIT_FAILURE);
+  }
 
   /* Now, for Bezier interpolation, one should identify which of i,i1,i2 is 0,1,2
      recall uv[0] = barycentric coord associated to pt->v[1], uv[1] associated to pt->v[2] and
@@ -326,8 +328,10 @@ int movbdyregpt(pMesh mesh,int *listv,int ilistv,int *lists,int ilists) {
       uv[1] = lambda[0];
     }
   }
-  ier = bezierInt(&b,uv,o,no,to);
-  assert(ier);
+  if(!bezierInt(&b,uv,o,no,to)){
+    printf("%s:%d: Error: function bezierInt return 0\n",__FILE__,__LINE__);
+    exit(EXIT_FAILURE);
+  }
 
   /* Test : make sure that geometric approximation has not been degraded too much */
   ppt0 = &mesh->point[0];

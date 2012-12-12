@@ -965,7 +965,7 @@ int ppgdisp(pMesh mesh,double *optpos){
 
 /** Denoise boundary mesh */
 int denoisbdy(pMesh mesh){
-  int       ier,it,maxit;
+  int       it,maxit;
   short     tm;
   double    alpha;
   double    *optpos;
@@ -975,11 +975,15 @@ int denoisbdy(pMesh mesh){
 
   for(it=0; it<maxit; it++){
 
-    ier = lapantilap(mesh,optpos);
-    assert(ier);
+    if(!lapantilap(mesh,optpos)){
+      printf("%s:%d: Error: function lapantilap return 0\n",__FILE__,__LINE__);
+      exit(EXIT_FAILURE);
+    }
 
-    //ier = ppgdisp(mesh,optpos);
-    assert(ier);
+    /*if(!ppgdisp(mesh,optpos)){
+      printf("%s:%d: Error: function ppgdisp return 0\n",__FILE__,__LINE__);
+      exit(EXIT_FAILURE);
+      }*/
 
     tm = dichodisp(mesh,optpos);
     alpha = (double) tm/SHORT_MAX;
