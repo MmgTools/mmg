@@ -123,9 +123,10 @@ static int parsar(int argc,char *argv[],pMesh mesh,pSol met) {
       case 'l':
         if ( !strcmp(argv[i],"-ls") ) {
           info.iso = 1;
-          if ( ++i < argc && isdigit(argv[i][0]) ) {
+					if ( ++i < argc && isdigit(argv[i][0]) ) {
             info.ls = atof(argv[i]);
-          }else{
+          }
+					else if ( i == argc ) {
             fprintf(stderr,"Missing argument option %c%c\n",argv[i-1][1],argv[i-1][2]);
             usage(argv[0]);
           }
