@@ -6,7 +6,7 @@ int movintpt(pMesh mesh,int *list,int ilist) {
   pTetra               pt,pt0;
   pPoint               p0,p1,p2,p3,ppt0;
   double               vol,totvol;
-  double               calold,calnew,callist[ilist],caltmp;
+  double               calold,calnew,callist[ilist];
   int                  k,iel,i0;
 
   pt0    = &mesh->tetra[0];
@@ -76,7 +76,7 @@ int movbdyregpt(pMesh mesh,int *listv,int ilistv,int *lists,int ilists) {
   double                *n,r[3][3],lispoi[3*LMAX+1],ux,uy,uz,det2d,detloc,oppt[2],step,lambda[3];
   double                ll,m[2],uv[2],o[3],no[3],to[3];
   double                calold,calnew,caltmp,callist[ilistv];
-  int                   ier,k,kel,iel,l,n0,na,nb,ntempa,ntempb,ntempc,nut,nxp;
+  int                   k,kel,iel,l,n0,na,nb,ntempa,ntempb,ntempc,nut,nxp;
   unsigned char         i0,iface,i;
 
   step = 0.1;

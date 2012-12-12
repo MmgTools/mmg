@@ -67,7 +67,7 @@ ADD_TEST(NAME LeakCheck_AbnormalEnd3
   COMMAND ${EXEC} -v 5
   ${REG_TESTS_PATH}/LeakCheck_AbnormalEnd3/d.mesh -sol
   ${REG_TESTS_PATH}/LeakCheck_AbnormalEnd3/dsol.sol -ls 2)
-SET(passRegex "## ERROR : A VALID SOLUTION FILE IS NEEDED")
+SET(passRegex "## ERROR: A VALID SOLUTION FILE IS NEEDED")
 SET_PROPERTY(TEST LeakCheck_AbnormalEnd3
   PROPERTY PASS_REGULAR_EXPRESSION "${passRegex}")
 #####
