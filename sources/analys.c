@@ -185,8 +185,14 @@ static int setdhd(pMesh mesh) {
     for (i=0; i<3; i++) {
       kk  = adja[i] / 3;
       ii  = adja[i] % 3;
-      if ( !kk )
+      if ( !kk ) {
         pt->tag[i] |= MG_GEO;
+        i1 = inxt2[i];
+        i2 = inxt2[i1];
+        mesh->point[pt->v[i1]].tag |= MG_GEO;
+        mesh->point[pt->v[i2]].tag |= MG_GEO;
+        nr++;
+			}
       else if ( k < kk ) {
         pt1 = &mesh->tria[kk];
         /* reference curve */
@@ -238,8 +244,8 @@ static int singul(pMesh mesh) {
 			if ( !MG_VOK(ppt) || MG_SIN(ppt->tag) )  continue;
       else if ( MG_EDG(ppt->tag) ) {
         ns = bouler(mesh,k,i,list,&ng,&nr);
-				if ( !ns )  continue;
 
+				if ( !ns )  continue;
         if ( (ng+nr) > 2 ) {
           ppt->tag |= MG_CRN + MG_REQ;
           nre++;

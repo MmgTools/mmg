@@ -1,6 +1,6 @@
 #include "mmg3d.h"
 
-extern char ddb;
+extern Info  info;
 
 /** return average normal of triangles sharing P without crossing ridge */
 int boulen(pMesh mesh,int start,int ip,double *nn) {
@@ -151,7 +151,6 @@ int bouler(pMesh mesh,int start,int ip,int *list,int *ng,int *nr) {
 
   pt  = &mesh->tria[start];
   if ( !MG_EOK(pt) )  return(0);
-
   /* check other triangle vertices */
   k  = start;
   i  = ip;
@@ -160,11 +159,11 @@ int bouler(pMesh mesh,int start,int ip,int *list,int *ng,int *nr) {
     i1 = inxt2[i];
     if ( MG_EDG(pt->tag[i1])) {
       i2 = iprv2[i];
-      ns++;
-      if ( pt->tag[i] & MG_GEO ) 
+      if ( pt->tag[i1] & MG_GEO ) 
 				*ng = *ng + 1;
-			else  
+			else
 				*nr = *nr + 1;
+      ns++;
       list[ns] = pt->v[i2];
       if ( ns > LMAX-2 )  return(-ns);
     }
@@ -185,11 +184,11 @@ int bouler(pMesh mesh,int start,int ip,int *list,int *ng,int *nr) {
       i2 = iprv2[i];
       if ( MG_EDG(pt->tag[i2]) ) {
         i1 = inxt2[i];
-        ns++;
-	      if ( pt->tag[i] & MG_GEO )
+	      if ( pt->tag[i2] & MG_GEO )
 					*ng = *ng + 1;
 				else 
 					*nr = *nr + 1;
+        ns++;
         list[ns] = pt->v[i1];
         if ( ns > LMAX-2 )  return(-ns);
       }
