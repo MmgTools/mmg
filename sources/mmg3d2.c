@@ -250,7 +250,7 @@ static int ismaniball(pMesh mesh,pSol sol,int k,int indp) {
   return(1);
 }
 
-/** Snap values of the level set function very close to 0 to exaclty 0,
+/** Snap values of the level set function very close to 0 to exactly 0,
     and prevent nonmanifold patterns from being generated */
 static int snpval_ls(pMesh mesh,pSol sol,double *tmp) {
   pTetra   pt;
@@ -274,7 +274,7 @@ static int snpval_ls(pMesh mesh,pSol sol,double *tmp) {
     p0 = &mesh->point[k];
     if ( !MG_VOK(p0) ) continue;
     if ( fabs(sol->m[k]) < EPS ) {
-      printf("Snapping value %d ; previous value : %E\n",k,fabs(sol->m[k]));
+      if ( info.ddebug )  fprintf(stdout,"  Snapping value %d ; previous value : %E\n",k,fabs(sol->m[k]));
       tmp[k] = ( fabs(sol->m[k]) < EPSD ) ? (-100.0*EPS) : sol->m[k];
       p0->flag = 1;
       sol->m[k] = 0.0;
@@ -1304,9 +1304,7 @@ int mmg3d2(pMesh mesh,pSol sol) {
     return(0);
   }
 
-  /* Clean memory */
+  /* Clean memory (but not pointer) */
   free(sol->m);
-  sol->m = 0;
-
   return(1);
 }
