@@ -557,7 +557,7 @@ static int anatetv(pMesh mesh,pSol met,char typchk) {
           ip1 = pt->v[idir[i][inxt2[j]]];
           ip2 = pt->v[idir[i][iprv2[j]]];
           ip  = -1;
-          if(!hashEdge(&hash,ip1,ip2,ip)){
+          if ( !hashEdge(&hash,ip1,ip2,ip) ) {
             printf("%s:%d: Error: function hashEdge return 0\n",__FILE__,__LINE__);
             exit(EXIT_FAILURE);
           }

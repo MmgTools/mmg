@@ -382,7 +382,6 @@ int loadMet(pSol met) {
   if ( ptr )  *ptr = '\0';
   strcat(data,".solb");
   if (!(inm = GmfOpenMesh(data,GmfRead,&met->ver,&met->dim)) ) {
-
     ptr  = strstr(data,".sol");
     *ptr = '\0';
     strcat(data,".sol");

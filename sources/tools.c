@@ -926,8 +926,10 @@ int DoSol(pMesh mesh,pSol met,Info* info) {
   pPoint     p1,p2;
   double     ux,uy,uz,dd;
   int        i,k,ia,ib,ipa,ipb;
-  int        mark[mesh->np+1];
-  memset(mark,0,(mesh->np+1)*sizeof(int));
+  int       *mark;
+
+	mark = (int*)calloc(mesh->np+1,sizeof(int));
+	assert(mark);
 
   /* Memory alloc */
   met->np     = mesh->np;
@@ -967,10 +969,13 @@ int DoSol(pMesh mesh,pSol met,Info* info) {
   /* vertex size */
   for (k=1; k<=mesh->np; k++) {
     p1 = &mesh->point[k];
-    if ( !mark[k] )  continue;
-
-    met->m[k] = MG_MIN(info->hmax,MG_MAX(info->hmin,met->m[k] / (double)mark[k]));
-    mark[k] = 0;
+    if ( !mark[k] ) {
+    	met->m[k] = info->hmax;
+      continue;
+	  }
+    else
+			met->m[k] = MG_MIN(info->hmax,MG_MAX(info->hmin,met->m[k] / (double)mark[k]));
   }
+	free(mark);
   return(1);
 }

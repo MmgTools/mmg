@@ -266,7 +266,7 @@ int simbulgept(pMesh mesh,int *list,int ret,double o[3]) {
 
 /** Split edge list[0]%6, whose shell list is passed, introducing point ip
     Beware : shell has to be enumerated in ONLY ONE TRAVEL (always same sense) */
-int split1b(pMesh mesh, pSol mettmp,int *list, int ret, int ip,int cas){
+int split1b(pMesh mesh, pSol mettmp,int *list,int ret,int ip,int cas) {
   pTetra    pt,pt1;
   xTetra    xt,xt1;
   pxTetra   pxt0;
@@ -276,34 +276,36 @@ int split1b(pMesh mesh, pSol mettmp,int *list, int ret, int ip,int cas){
   ilist = ret / 2;
   open  = ret % 2;
 
-  lmintmp=0.6;lmaxtmp=1.3;
-  for(jtmp=0;jtmp<ilist;jtmp++){
-    for(i=0;i<6;i++)
-      {
-        lentmp=lenedg(mesh,mettmp, mesh->tetra[list[jtmp]/6].v[iare[i][0]],
-                      mesh->tetra[list[jtmp]/6].v[iare[i][1]]);
-        if(lentmp<lmintmp) {
-          lmintmp=lentmp;
-        }else if(lentmp>lmaxtmp) {
-          lmaxtmp=lentmp;
+  if ( mettmp->m ) {
+    lmintmp = 0.6;
+	  lmaxtmp = 1.3;
+    for (jtmp=0; jtmp<ilist; jtmp++) {
+      for(i=0;i<6;i++) {
+        lentmp = lenedg(mesh,mettmp, mesh->tetra[list[jtmp]/6].v[iare[i][0]],
+                        mesh->tetra[list[jtmp]/6].v[iare[i][1]]);
+        if ( lentmp < lmintmp) {
+          lmintmp = lentmp;
+        }
+				else if ( lentmp > lmaxtmp) {
+          lmaxtmp = lentmp;
         }
       }
-  }
-
-  //cree-t-on une trop petite arete ? (voir le bug de BUG_Split1b_SpereIso_0.125h_met)
-  if(cas) {
-    //lmintmp=0.6;
-    for(jtmp=0;jtmp<ilist;jtmp++){
-      iel = list[jtmp] / 6;
-      pt = &mesh->tetra[iel];
-      ie  = list[jtmp] % 6;
-      lentmp=lenedg(mesh,mettmp, pt->v[isar[ie][0]],ip);
-      if(lentmp<lmintmp) break;
-      lentmp=lenedg(mesh,mettmp, pt->v[isar[ie][1]],ip);
-      if(lentmp<lmintmp) break;
     }
-    if(jtmp<ilist) return(0);
-  }
+    /* cree-t-on une trop petite arete ? (voir le bug de BUG_Split1b_SpereIso_0.125h_met) */
+    if ( cas ) {
+    //lmintmp=0.6;
+      for (jtmp=0; jtmp<ilist; jtmp++) {
+        iel = list[jtmp] / 6;
+        pt  = &mesh->tetra[iel];
+        ie  = list[jtmp] % 6;
+        lentmp = lenedg(mesh,mettmp, pt->v[isar[ie][0]],ip);
+        if ( lentmp < lmintmp )  break;
+        lentmp = lenedg(mesh,mettmp, pt->v[isar[ie][1]],ip);
+        if ( lentmp < lmintmp )  break;
+      }
+      if ( jtmp < ilist )  return(0);
+    }
+	}
 
   newtet = (int*)calloc(ilist,sizeof(int));
   assert(newtet);

@@ -380,7 +380,7 @@ int defsiz_iso(pMesh mesh,pSol met) {
   }
 
   /* size at regular surface points */
-  for(k=1; k<=mesh->ne; k++){
+  for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
     if ( !MG_EOK(pt) || pt->ref < 0 )   continue;
     else if ( !pt->xt )  continue;
@@ -393,7 +393,7 @@ int defsiz_iso(pMesh mesh,pSol met) {
         ip0 = pt->v[i0];
         p0  = &mesh->point[ip0];
 
-        if( MG_SIN(p0->tag) || MG_EDG(p0->tag) || (p0->tag & MG_NOM) ) continue;
+        if ( MG_SIN(p0->tag) || MG_EDG(p0->tag) || (p0->tag & MG_NOM) ) continue;
         if ( !boulesurfvolp(mesh,k,i0,i,listv,&ilistv,lists,&ilists) )  continue;
 
         n   = &mesh->xpoint[p0->xp].n1[0];

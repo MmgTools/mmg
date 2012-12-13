@@ -351,6 +351,7 @@ int main(int argc,char *argv[]) {
   info.hausd  = 0.01;
   info.ls     = 0.0;
   info.fem    = 0;
+  met.size    = 1;
 
   /* command line */
   if ( !parsar(argc,argv,&mesh,&met) )  return(1);
@@ -369,11 +370,10 @@ int main(int argc,char *argv[]) {
     free(met.m);
     free(met.namein);
     free(met.nameout);
-    met.m=NULL;
-    met.namein=NULL;
-    met.nameout=NULL;
+    met.m      = NULL;
+    met.namein = NULL;
+    met.nameout= NULL;
     memset(&met,0,sizeof(Sol));
-    met.np=0;
   }
   chrono(OFF,&info.ctim[1]);
   printim(info.ctim[1].gdif,stim);
@@ -386,22 +386,19 @@ int main(int argc,char *argv[]) {
   fprintf(stdout,"\n  %s\n   MODULE MMG3D: IMB-LJLL : %s (%s)\n  %s\n",MG_STR,MG_VER,MG_REL,MG_STR);
   if ( info.imprim )   fprintf(stdout,"\n  -- PHASE 1 : ANALYSIS\n");
   if ( !scaleMesh(&mesh,&met) ) RETURN_AND_FREE(&mesh,&met,1);
-  if ( !met.np ) {
-    if ( info.iso ) {
+  if ( info.iso ) {
+    if ( !met.np ) {
       fprintf(stdout,"\n  ## ERROR: A VALID SOLUTION FILE IS NEEDED \n");
       RETURN_AND_FREE(&mesh,&met,1);
     }
-		else {
-      if ( !DoSol(&mesh,&met,&info) ) RETURN_AND_FREE(&mesh,&met,1);
-      setfunc(&mesh,&met);
-    }
-  }
-
-  if( info.iso && !mmg3d2(&mesh,&met) ) RETURN_AND_FREE(&mesh,&met,1);
+		if ( !mmg3d2(&mesh,&met) ) RETURN_AND_FREE(&mesh,&met,1);
+	}
+#ifdef DEBUG
+	if ( !met.np && !DoSol(&mesh,&met,&info) ) RETURN_AND_FREE(&mesh,&met,1);
+#endif
   if ( !analys(&mesh) ) RETURN_AND_FREE(&mesh,&met,1);
 
-  if ( info.imprim > 4 && !info.iso )
-    prilen(&mesh,&met);
+	if ( info.imprim > 4 && !info.iso )  prilen(&mesh,&met);
 
   chrono(OFF,&info.ctim[2]);
   printim(info.ctim[2].gdif,stim);

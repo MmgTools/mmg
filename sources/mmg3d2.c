@@ -1306,5 +1306,7 @@ int mmg3d2(pMesh mesh,pSol sol) {
 
   /* Clean memory (but not pointer) */
   free(sol->m);
+	sol->m  = NULL;
+	sol->np = 0;
   return(1);
 }
