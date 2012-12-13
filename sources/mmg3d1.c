@@ -823,7 +823,7 @@ static int anatets(pMesh mesh,pSol met,char typchk) {
         if ( met->m )
           met->m[ip] = 0.5 * (met->m[ip1]+met->m[ip2]);
         if ( MG_EDG(ptt.tag[j]) || (ptt.tag[j] & MG_NOM) )
-          ppt->ref = ptt.edg[j];
+          ppt->ref = ptt.edg[j] ? ptt.edg[j] : ptt.ref;
         else
           ppt->ref = ptt.ref;
         ppt->tag |= ptt.tag[j];
@@ -1098,7 +1098,7 @@ static int adpspl(pMesh mesh,pSol met) {
         if ( met->m )
           met->m[ip] = 0.5 * (met->m[ip1]+met->m[ip2]);
         //CECILE
-        if(!split1b(mesh,met,list,ilist,ip,1)) {
+        if ( !split1b(mesh,met,list,ilist,ip,1) ) {
           delPt(mesh,ip);
           continue;
         }
@@ -1144,12 +1144,13 @@ static int adpspl(pMesh mesh,pSol met) {
       ip = newPt(mesh,o,MG_NOTAG);
       if ( !ip )  break;
       //CECILE
-      if(met->m)
+      if ( met->m )
         met->m[ip] = 0.5 * (met->m[ip1]+met->m[ip2]);
       //CECILE
-      if(!split1b(mesh,met,list,ilist,ip,1)) {//Et on teste pas du tout les qualités ici ?
+      if ( !split1b(mesh,met,list,ilist,ip,1) ) { //Et on teste pas du tout les qualités ici ?
         delPt(mesh,ip);
-      } else {
+      } 
+			else {
         ppt = &mesh->point[ip];
         met->m[ip] = 0.5 * (met->m[ip1] + met->m[ip2]);
         ns++;

@@ -2384,11 +2384,12 @@ int split4bar(pMesh mesh, pSol met, int k){
   lmintmp=0.6;lmaxtmp=1.3;
   for(i=0;i<6;i++)
     {
-      lentmp=lenedg(mesh,met,pt[0]->v[iare[i][0]],pt[0]->v[iare[i][1]]);
-      if(lentmp<lmintmp) {
-        lmintmp=lentmp;
-      }else if(lentmp>lmaxtmp) {
-        lmaxtmp=lentmp;
+      lentmp = lenedg(mesh,met,pt[0]->v[iare[i][0]],pt[0]->v[iare[i][1]]);
+      if ( lentmp < lmintmp ) {
+        lmintmp = lentmp;
+      }
+			else if ( lentmp > lmaxtmp ) {
+        lmaxtmp = lentmp;
       }
     }
 #endif

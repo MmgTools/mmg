@@ -584,7 +584,7 @@ int hGeom(pMesh mesh) {
           hTag(&mesh->htab,pt->v[i1],pt->v[i2],pt->edg[i],pt->tag[i]);
 
         hGet(&mesh->htab,pt->v[i1],pt->v[i2],&edg,&tag);
-        pt->edg[i] |= edg;
+        pt->edg[i]  = edg;
         pt->tag[i] |= tag;
       }
     }
@@ -635,7 +635,7 @@ int hGeom(pMesh mesh) {
         i1 = inxt2[i];
         i2 = iprv2[i];
         hGet(&mesh->htab,pt->v[i1],pt->v[i2],&edg,&tag);
-        pt->edg[i] |= edg;
+        pt->edg[i]  = edg;
         pt->tag[i] |= tag;
       }
     }
@@ -706,7 +706,7 @@ int bdryTria(pMesh mesh) {
       i1 = inxt2[i];
       i2 = iprv2[i];
       hGet(&mesh->htab,ptt->v[i1],ptt->v[i2],&edg,&tag);
-      ptt->edg[i] |= edg;
+      ptt->edg[i]  = edg;
       ptt->tag[i] |= tag;
     }
   }
