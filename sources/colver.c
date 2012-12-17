@@ -19,7 +19,7 @@ int chkcol_int(pMesh mesh,pSol met,int k,char iface,char iedg,int *list,char typ
   nq  = pt->v[iq];
   ilist = boulevolp(mesh,k,ip,list);
   if ( typchk == 2 && met->m ) {
-    lon = lenedg(mesh,met,ip,iq);
+    lon = lenedg(mesh,met,pt->v[ip],nq);
     lon = MG_MIN(lon,LSHRT);
     lon = MG_MAX(1.0/lon,LLONG);
   }
