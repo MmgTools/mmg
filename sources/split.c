@@ -278,33 +278,35 @@ int split1b(pMesh mesh, pSol met,int *list, int ret, int ip,int cas){
   ilist = ret / 2;
   open  = ret % 2;
 
-  lmin = 0.6;
-  lmax = 1.3;
-  for (j=0; j<ilist; j++) {
-    for(i=0;i<6;i++) {
-      len = lenedg(mesh,met, mesh->tetra[list[j]/6].v[iare[i][0]],
-                   mesh->tetra[list[j]/6].v[iare[i][1]]);
-      if ( len < lmin) {
-        lmin = len;
-      }
-      else if ( len > lmax) {
-        lmax = len;
-      }
-    }
-  }
-  /* cree-t-on une trop petite arete ? (voir le bug de BUG_Split1b_SpereIso_0.125h_met) */
-  if ( cas ) {
-    //lmin=0.6;
+  if(met->m){
+    lmin = 0.6;
+    lmax = 1.3;
     for (j=0; j<ilist; j++) {
-      iel = list[j] / 6;
-      pt  = &mesh->tetra[iel];
-      ie  = list[j] % 6;
-      len = lenedg(mesh,met, pt->v[isar[ie][0]],ip);
-      if ( len < lmin )  break;
-      len = lenedg(mesh,met, pt->v[isar[ie][1]],ip);
-      if ( len < lmin )  break;
+      for(i=0;i<6;i++) {
+        len = lenedg(mesh,met, mesh->tetra[list[j]/6].v[iare[i][0]],
+                     mesh->tetra[list[j]/6].v[iare[i][1]]);
+        if ( len < lmin) {
+          lmin = len;
+        }
+        else if ( len > lmax) {
+          lmax = len;
+        }
+      }
     }
-    if ( j < ilist )  return(0);
+    /* cree-t-on une trop petite arete ? (voir le bug de BUG_Split1b_SpereIso_0.125h_met) */
+    if ( cas ) {
+      //lmin=0.6;
+      for (j=0; j<ilist; j++) {
+        iel = list[j] / 6;
+        pt  = &mesh->tetra[iel];
+        ie  = list[j] % 6;
+        len = lenedg(mesh,met, pt->v[isar[ie][0]],ip);
+        if ( len < lmin )  break;
+        len = lenedg(mesh,met, pt->v[isar[ie][1]],ip);
+        if ( len < lmin )  break;
+      }
+      if ( j < ilist )  return(0);
+    }
   }
 
 
