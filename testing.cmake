@@ -124,6 +124,10 @@ ADD_TEST(NAME LeakCheck_args1
   -in ${REG_TESTS_PATH}/LeakCheck_args1/d.mesh -sol
   ${REG_TESTS_PATH}/LeakCheck_args1/dsol.sol
   -out ${REG_TESTS_PATH}/LeakCheck_args1/dout.mesh)
+#####
+ADD_TEST(NAME LeakCheck_optLevelSet
+  COMMAND ${EXEC} -v 5 -ls 0
+  ${REG_TESTS_PATH}/LeakCheck_optLevelSet/rect03d.o.mesh)
 
 ###############################################################################
 #####
