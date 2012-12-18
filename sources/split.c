@@ -272,7 +272,7 @@ int split1b(pMesh mesh, pSol met,int *list, int ret, int ip,int cas){
   pxTetra   pxt0;
   int       ilist,k,open,iel,jel,*newtet,nump,numq,*adja;
   int       *adjan,nei2,nei3,mel,ref;
-  char      ie,tau[4],isxt,isxt1,i,j,voy,tag,jtmp;
+  char      ie,tau[4],isxt,isxt1,i,j,voy,tag;
   double    lmin,lmax,len;
 
   ilist = ret / 2;

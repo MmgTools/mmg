@@ -398,7 +398,7 @@ int main(int argc,char *argv[]) {
 #endif
   if ( !analys(&mesh) ) RETURN_AND_FREE(&mesh,&met,1);
 
-	if ( info.imprim > 4 && !info.iso )  prilen(&mesh,&met);
+  if ( info.imprim > 4 && !info.iso && met.m ) prilen(&mesh,&met);
 
   chrono(OFF,&info.ctim[2]);
   printim(info.ctim[2].gdif,stim);
