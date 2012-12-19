@@ -310,6 +310,18 @@ ADD_TEST(NAME Various_adpsol_hgrad1_M6Mach_Eps0.0005_hmin0.0001_hmax3
   ${REG_TESTS_PATH}/Various_adpsol_hgrad1_M6Mach_Eps0.0005_hmin0.0001_hmax3/metM6.sol -hausd 0.1 -ar 60 -hgrad 1)
 
 
+# Test the Ls option
+ADD_TEST(NAME OptLs_cube303d_hminMax_hgrad1.2_hausd0.005
+  COMMAND ${EXEC} -ls
+  ${REG_TESTS_PATH}/OptLs_cube303d_hminMax_hgrad1.2_hausd0.005/cube303d.mesh
+  -sol ${REG_TESTS_PATH}/OptLs_cube303d_hminMax_hgrad1.2_hausd0.005/cube303d.sol
+  -hausd 0.005 -nr -hgrad 1.2 -hmin 0.001 -hmax 0.1)
+ADD_TEST(NAME OptLs_temp_hminMax_hgrad1.2_hausd0.1
+  COMMAND ${EXEC} -ls
+  ${REG_TESTS_PATH}/OptLs_temp_hminMax_hgrad1.2_hausd0.1/temp.mesh
+  -sol ${REG_TESTS_PATH}/OptLs_temp_hminMax_hgrad1.2_hausd0.1/temp.sol
+  -hausd 0.1 -nr -hgrad 1.2 -hmin 3 -hmax 4)
+
 
 # Compare with a reference result when we run
 #ADD_TEST(NAME RefCube

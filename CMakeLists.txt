@@ -103,11 +103,22 @@ ENDIF(NOT EXISTS ${MMG_SOURCE_DIR}/compil.date)
 ADD_EXECUTABLE(mmg3d5 ${MMG_SOURCE_DIR}/compil.date ${source_files})
 SET_TARGET_PROPERTIES(mmg3d5 PROPERTIES DEBUG_POSTFIX _debug) # in debug mode we name the executable mmg3d5_debug
 SET_TARGET_PROPERTIES(mmg3d5 PROPERTIES RELEASE_POSTFIX _O3) # in Release mode we name the executable mmg3d5_O3
-SET_TARGET_PROPERTIES(mmg3d5 PROPERTIES MINSIZEREL_POSTFIX _Os) 
-# /!\ ADD_CUSTOM_TARGET don't work with cmake-2.8.4 but is necessary for other versions
-IF ( ${CMAKE_COMMAND} MATCHES 2.8.4 )
+SET_TARGET_PROPERTIES(mmg3d5 PROPERTIES MINSIZEREL_POSTFIX _Os)
+# /!\ ADD_CUSTOM_TARGET don't work with cmake-2.8.4 and 2.8.10.2 but is necessary for other versions
+
+IF ( ${CMAKE_COMMAND} MATCHES 2.8.4  )
+ELSEIF (${CMAKE_COMMAND} VERSION_GREATER 2.8.10.0 )
+  ADD_CUSTOM_TARGET(compil_date DEPENDS ${MMG_SOURCE_DIR}/compil.date)
+  IF (APPLE)
+    EXEC_PROGRAM(uname ARGS -v  OUTPUT_VARIABLE DARWIN_VERSION)
+    STRING(REGEX MATCH "[0-9]+" DARWIN_VERSION ${DARWIN_VERSION})
+    MESSAGE(STATUS "DARWIN_VERSION=${DARWIN_VERSION}")
+    IF (DARWIN_VERSION GREATER 9)
+      MESSAGE(STATUS "Warning: no update for compil.date because cmake-2.8.10.1 and 2.8.10.2 don't work on lion/mountain lion.")
+    ENDIF (DARWIN_VERSION GREATER 9)
+  ENDIF(APPLE)
 ELSE ()
-    ADD_CUSTOM_TARGET(compil_date DEPENDS ${MMG_SOURCE_DIR}/compil.date)
+  ADD_CUSTOM_TARGET(compil_date DEPENDS ${MMG_SOURCE_DIR}/compil.date)
 ENDIF ( ${CMAKE_COMMAND} MATCHES 2.8.4 )
 
 ADD_DEPENDENCIES(mmg3d5 compil_date)
