@@ -2,8 +2,8 @@
 
 extern Info  info;
 extern char  ddb;
-double lmintmp,lmaxtmp,lentmp;
 #ifdef DEBUG
+double lmintmp,lmaxtmp,lentmp;
 extern double      tabtmp[12][7];
 int tabeltmp[4][7],iatmp,ibtmp,ictmp;
 #endif
@@ -353,7 +353,14 @@ int split1b(pMesh mesh, pSol met,int *list, int ret, int ip,int cas){
       break;
     }
     jel = newElt(mesh);
-    assert(jel);
+    if(!jel){
+      fprintf(stdout,"%s:%d: Error: unable to allocate a new element\n"
+              ,__FILE__,__LINE__);
+      for(;k>0;--k){
+        delElt(mesh,newtet[k]);
+      }
+      return(0);
+    }
     pt1 = &mesh->tetra[jel];
     memcpy(pt1,pt,sizeof(Tetra));
 
@@ -466,10 +473,6 @@ int split1b(pMesh mesh, pSol met,int *list, int ret, int ip,int cas){
       adjan = &mesh->adja[4*(mel -1) +1];
       adjan[voy] = 4*jel + tau[0];
     }
-    /*    for(j=0;j<ilist;j++){
-      (&mesh->tetra[list[j]/6])->qual=orcal(mesh,list[j]/6);
-      (&mesh->tetra[newtet[j]])->qual=orcal(mesh,newtet[j]);
-      }*/
     /* Quality update */
     pt->qual=orcal(mesh,iel);
     pt1->qual=orcal(mesh,jel);
@@ -773,10 +776,7 @@ int split1b(pMesh mesh, pSol met,int *list, int ret, int ip,int cas){
     pt->qual=orcal(mesh,iel);
     pt1->qual=orcal(mesh,jel);
   }
-  /*  for(j=0;j<ilist;j++){
-    (&mesh->tetra[list[j]/6])->qual=orcal(mesh,list[j]/6);
-    (&mesh->tetra[abs(newtet[j])])->qual=orcal(mesh,abs(newtet[j]));
-    }*/
+
 #ifdef DEBUG
   tabtmp[0][3]=lmin;     tabtmp[0][4]=lmax;
   tabtmp[0][5]=DBL_MAX;  tabtmp[0][6]=DBL_MIN;
@@ -2479,24 +2479,46 @@ int split4bar(pMesh mesh, pSol met, int k){
   hnew *= 0.25;
 
   ib = newPt(mesh,o,0);
-  assert(ib);
+  if(!ib){
+    fprintf(stdout,"%s:%d: Error: unable to allocate a new point\n"
+            ,__FILE__,__LINE__);
+    return(0);
+  }
   if ( met->m )  met->m[ib] = hnew;
 
   /* create 3 new tetras */
   iel = newElt(mesh);
-  assert(iel);
+  if(!iel){
+    fprintf(stdout,"%s:%d: Error: unable to allocate a new element\n"
+            ,__FILE__,__LINE__);
+    delPt(mesh,ib);
+    return(0);
+  }
   pt[1] = &mesh->tetra[iel];
   pt[1] = memcpy(pt[1],pt[0],sizeof(Tetra));
   newtet[1]=iel;
 
   iel = newElt(mesh);
-  assert(iel);
+  if(!iel){
+    fprintf(stdout,"%s:%d: Error: unable to allocate a new element\n"
+            ,__FILE__,__LINE__);
+    delPt(mesh,ib);
+    delElt(mesh,newtet[1]);
+    return(0);
+  }
   pt[2] = &mesh->tetra[iel];
   pt[2] = memcpy(pt[2],pt[0],sizeof(Tetra));
   newtet[2]=iel;
 
   iel = newElt(mesh);
-  assert(iel);
+  if(!iel){
+    fprintf(stdout,"%s:%d: Error: unable to allocate a new element\n"
+            ,__FILE__,__LINE__);
+    delPt(mesh,ib);
+    delElt(mesh,newtet[1]);
+    delElt(mesh,newtet[2]);
+    return(0);
+  }
   pt[3] = &mesh->tetra[iel];
   pt[3] = memcpy(pt[3],pt[0],sizeof(Tetra));
   newtet[3]=iel;

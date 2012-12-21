@@ -309,7 +309,7 @@ int  scaleMesh(pMesh mesh,pSol met);
 int  unscaleMesh(pMesh mesh,pSol met);
 int  chkswpbdy(pMesh mesh,int *list,int ilist,int it1,int it2);
 int  swpbdy(pMesh mesh,pSol met,int *list,int ret,int it1);
-void swpgen(pMesh mesh,pSol met,int nconf, int ilist, int *list);
+int  swpgen(pMesh mesh,pSol met,int nconf, int ilist, int *list);
 int  chkswpgen(pMesh mesh, int start, int ia, int *ilist, int *list);
 int  srcface(pMesh mesh,int n0,int n1,int n2);
 int  bouleext(pMesh mesh, int start, int ip, int iface, int *listv, int *ilistv, int *lists, int*ilists);

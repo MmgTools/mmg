@@ -227,7 +227,10 @@ int swpbdy(pMesh mesh,pSol met,int *list,int ret,int it1) {
     im = idir[iface1][j];
     if ( pt1->v[im] == nm )  break;
   }
-  if ( pt1->v[im] != nm )  return(0);
+  if ( pt1->v[im] != nm ){
+    delPt(mesh,nm);
+    return(0);
+  }
   ilist = boulevolp(mesh,iel1,im,list);
 
   assert(list[0]/4 == iel1);

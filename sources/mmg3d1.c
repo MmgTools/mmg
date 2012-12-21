@@ -322,7 +322,7 @@ static int swpmsh(pMesh mesh,pSol met) {
           ier = chkswpbdy(mesh,list,ilist,it1,it2);
           if ( ier ) {
             ier = swpbdy(mesh,met,list,ret,it1);
-            ns++;
+            if(ier) ns++;
             break;
           }
         }
@@ -357,7 +357,7 @@ static int swptet(pMesh mesh,pSol met) {
         nconf = chkswpgen(mesh,k,i,&ilist,list);
         if ( nconf ) {
           ns++;
-          swpgen(mesh,met,nconf,ilist,list);
+          if(!swpgen(mesh,met,nconf,ilist,list)) return(-1);
           break;
         }
       }
@@ -537,13 +537,13 @@ static int anatetv(pMesh mesh,pSol met,char typchk) {
   xTetra  *pxt;
   Hash     hash;
   double   ll,o[3],ux,uy,uz;
-  int      vx[6],k,ip,ip1,ip2,nap,ns,ne;
+  int      vx[6],k,ip,ip1,ip2,nap,ns,ne,memlack;
   char     i,j,ia;
 
 
   /** 1. analysis */
   hashNew(&hash,mesh->np,7*mesh->np);
-  ns = nap = 0;
+  memlack = ns = nap = 0;
 
   /* Hash all boundary edges, and put ip = -1 in hash structure */
   for (k=1; k<=mesh->ne; k++) {
@@ -601,6 +601,12 @@ static int anatetv(pMesh mesh,pSol met,char typchk) {
         o[1] = 0.5 * (p1->c[1]+p2->c[1]);
         o[2] = 0.5 * (p1->c[2]+p2->c[2]);
         ip  = newPt(mesh,o,0);
+        if(!ip) {
+          fprintf(stdout,"%s:%d: Error: unable to allocate a new point\n"
+                  ,__FILE__,__LINE__);
+          memlack=1;
+          goto split;
+        }
         if ( met->m )
           met->m[ip] = 0.5 * (met->m[ip1]+met->m[ip2]);
         hashEdge(&hash,ip1,ip2,ip);
@@ -618,6 +624,7 @@ static int anatetv(pMesh mesh,pSol met,char typchk) {
     }
   }
 #endif
+ split:
   ns = 0;
   ne = mesh->ne;
   for (k=1; k<=ne; k++) {
@@ -742,6 +749,7 @@ static int anatetv(pMesh mesh,pSol met,char typchk) {
     printf("on trouve %d split \n",ns);
   }
 #endif
+  if(memlack) return(-1);
   return(nap);
 }
 
@@ -755,13 +763,14 @@ static int anatets(pMesh mesh,pSol met,char typchk) {
   Bezier   pb;
   Hash     hash;
   double   o[3],no[3],to[3],dd,len;
-  int      vx[6],k,ip,ic,it,nap,nc,ni,ne,ns,ip1,ip2,ier;
+  int      vx[6],k,ip,ic,it,nap,nc,ni,ne,npinit,ns,ip1,ip2,ier;
   char     i,j,ia,i1,i2;
   static double uv[3][2] = { {0.5,0.5}, {0.,0.5}, {0.5,0.} };
 
   /** 1. analysis of boundary elements */
   hashNew(&hash,mesh->np,7*mesh->np);
   ns = nap = 0;
+  npinit=mesh->np;
   for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
     if ( !MG_EOK(pt) || MG_SIN(pt->tag) || !pt->xt )  continue;
@@ -815,7 +824,14 @@ static int anatets(pMesh mesh,pSol met,char typchk) {
       ier = bezierInt(&pb,&uv[j][0],o,no,to);
       if ( !ip ) {
         ip = newPt(mesh,o,MG_BDY);
-        assert(ip);
+        if(!ip){
+          fprintf(stdout,"%s:%d: Error: unable to allocate a new point\n"
+                  ,__FILE__,__LINE__);
+          do{
+            delPt(mesh,mesh->np);
+          }while(mesh->np>npinit);
+          return(-1);
+        }
         hashEdge(&hash,ip1,ip2,ip);
         ppt = &mesh->point[ip];
         p1  = &mesh->point[ip1];
@@ -1332,7 +1348,7 @@ static int anatet4(pMesh mesh, pSol met) {
         if ( pxt->ftag[j] & MG_BDY )  nf++;
     }
     if ( nf > 1 ) {
-      split4bar(mesh,met,k);
+      if(!split4bar(mesh,met,k)) return(-1);
       ns++;
     }
     else {
@@ -1342,7 +1358,7 @@ static int anatet4(pMesh mesh, pSol met) {
         if ( ppt->tag & MG_BDY )  nf++;
       }
       if ( nf == 4 ) {
-        split4bar(mesh,met,k);
+        if(!split4bar(mesh,met,k)) return(-1);
         ns++;
       }
     }

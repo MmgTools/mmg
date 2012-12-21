@@ -409,7 +409,16 @@ int main(int argc,char *argv[]) {
   chrono(ON,&info.ctim[3]);
   if ( info.imprim )
     fprintf(stdout,"\n  -- PHASE 2 : %s MESHING\n",met.size < 6 ? "ISOTROPIC" : "ANISOTROPIC");
-  if ( !mmg3d1(&mesh,&met) ) RETURN_AND_FREE(&mesh,&met,1);
+  if ( !mmg3d1(&mesh,&met) ){
+    if ( !(mesh.adja) && !hashTetra(&mesh) ) {
+      fprintf(stdout,"  ## Hashing problem. Unable to save mesh.\n");
+      RETURN_AND_FREE(&mesh,&met,EXIT_FAILURE);
+    }
+    if ( !unscaleMesh(&mesh,&met) )      { RETURN_AND_FREE(&mesh,&met,1);}
+    if ( !saveMesh(&mesh) )              { RETURN_AND_FREE(&mesh,&met,1);}
+    if ( met.m && !saveMet(&mesh,&met) ) { RETURN_AND_FREE(&mesh,&met,1);}
+    RETURN_AND_FREE(&mesh,&met,EXIT_FAILURE);
+  }
 
   chrono(OFF,&info.ctim[3]);
   printim(info.ctim[3].gdif,stim);

@@ -142,7 +142,7 @@ int chkswpgen(pMesh mesh,int start,int ia,int *ilist,int *list) {
 }
 
 /** Perform swap of edge whose shell is passed according to configuration nconf */
-void swpgen(pMesh mesh,pSol met,int nconf,int ilist,int *list) {
+int swpgen(pMesh mesh,pSol met,int nconf,int ilist,int *list) {
   pTetra    pt;
   pPoint    p0,p1;
   int       iel,na,nb,np,nball,ret,start;
@@ -164,7 +164,11 @@ void swpgen(pMesh mesh,pSol met,int nconf,int ilist,int *list) {
   m[2] = 0.5*(p0->c[2] + p1->c[2]);
 
   np  = newPt(mesh,m,0);
-  assert(np);
+  if(!np){
+    fprintf(stdout,"%s:%d: Error: unable to allocate a new point\n"
+            ,__FILE__,__LINE__);
+    return(0);
+  }
   if ( met->m )  met->m[np] = 0.5*(met->m[na]+met->m[nb]);
 
   /** First step : split of edge (na,nb) */
@@ -185,4 +189,5 @@ void swpgen(pMesh mesh,pSol met,int nconf,int ilist,int *list) {
   nball = boulevolp(mesh,start,ip,list);
 
   colver(mesh,list,nball,iq);
+  return(1);
 }
