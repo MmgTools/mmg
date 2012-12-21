@@ -141,9 +141,7 @@ int chkswpbdy(pMesh mesh,int *list,int ilist,int it1,int it2) {
     iel = list[k] / 6;
     pt  = &mesh->tetra[iel];
     memcpy(pt0,pt,sizeof(Tetra));
-    if((&mesh->tetra[iel])->qual==-10)
-      (&mesh->tetra[iel])->qual=orcal(mesh,iel);
-    calold = MG_MIN(calold,(&mesh->tetra[iel])->qual);
+    calold = MG_MIN(calold, pt->qual);
 
     ia1 = ia2 = ip = iq = -1;
     for (j=0; j< 4; j++) {

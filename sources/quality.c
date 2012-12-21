@@ -2,7 +2,6 @@
 
 extern Info  info;
 extern char ddb;
-FILE *tmp;
 inline double lenedg_ani(pMesh mesh,pSol met,int ip1,int ip2) {
   return(0.0);
 }
@@ -221,7 +220,6 @@ int badelt(pMesh mesh,pSol met) {
     for (k=1; k<=mesh->ne; k++) {
       pt = &mesh->tetra[k];
       if ( !MG_EOK(pt) )  continue;
-      if(pt->qual==-10) pt->qual=orcal(mesh,k);
       kal = ALPHAD * pt->qual;
       if ( kal > BADKAL )  continue;
 

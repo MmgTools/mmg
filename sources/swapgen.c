@@ -20,9 +20,7 @@ int chkswpgen(pMesh mesh,int start,int ia,int *ilist,int *list) {
   pt0 = &mesh->tetra[0];
   na  = pt->v[iare[ia][0]];
   nb  = pt->v[iare[ia][1]];
-  if((&mesh->tetra[start])->qual==-10)
-    (&mesh->tetra[start])->qual=orcal(mesh,start);
-  calold = (&mesh->tetra[start])->qual;
+  calold = pt->qual;
   if ( ALPHAD*calold > 0.6 )  return(0);
 
   /* Prevent swap of a ref or tagged edge */
@@ -45,9 +43,7 @@ int chkswpgen(pMesh mesh,int start,int ia,int *ilist,int *list) {
 
     /* Edge is on a boundary between two different domains */
     if ( pt->ref != refdom )  return(0);
-    if( (&mesh->tetra[adj])->qual ==-10)
-      (&mesh->tetra[adj])->qual=orcal(mesh,adj);
-    calold = MG_MIN(calold, (&mesh->tetra[adj])->qual);
+    calold = MG_MIN(calold, pt->qual);
     /* identification of edge number in tetra adj */
     for (i=0; i<6; i++) {
       ipa = iare[i][0];

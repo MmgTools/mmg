@@ -29,9 +29,7 @@ int movintpt(pMesh mesh,int *list,int ilist) {
     ppt0->c[0] += 0.25 * vol*(p0->c[0] + p1->c[0] + p2->c[0] + p3->c[0]);
     ppt0->c[1] += 0.25 * vol*(p0->c[1] + p1->c[1] + p2->c[1] + p3->c[1]);
     ppt0->c[2] += 0.25 * vol*(p0->c[2] + p1->c[2] + p2->c[2] + p3->c[2]);
-    if((&mesh->tetra[iel])->qual==-10)
-      (&mesh->tetra[iel])->qual=orcal(mesh,iel);
-    calold = MG_MIN(calold,(&mesh->tetra[iel])->qual);
+    calold = MG_MIN(calold, pt->qual);
   }
   if ( totvol < EPSD2 )  return(0);
   totvol = 1.0 / totvol;
@@ -387,9 +385,7 @@ int movbdyregpt(pMesh mesh,int *listv,int ilistv,int *lists,int ilists) {
     pt0 = &mesh->tetra[0];
     memcpy(pt0,pt,sizeof(Tetra));
     pt0->v[i0] = 0;
-    if( (&mesh->tetra[k])->qual==-10)
-      (&mesh->tetra[k])->qual=orcal(mesh,k);
-    calold = MG_MIN(calold,(&mesh->tetra[k])->qual);
+    calold = MG_MIN(calold, pt->qual);
     callist[l]=orcal(mesh,0);
     if ( callist[l] < EPSD )        return(0);
     calnew = MG_MIN(calnew,callist[l]);
@@ -654,9 +650,7 @@ int movbdyrefpt(pMesh mesh, int *listv, int ilistv, int *lists, int ilists){
     pt0 = &mesh->tetra[0];
     memcpy(pt0,pt,sizeof(Tetra));
     pt0->v[i0] = 0;
-    if( (&mesh->tetra[iel])->qual==-10)
-      (&mesh->tetra[iel])->qual=orcal(mesh,iel);
-    calold = MG_MIN(calold,(&mesh->tetra[iel])->qual);
+    calold = MG_MIN(calold, pt->qual);
     callist[l]=orcal(mesh,0);
     if ( callist[l] < EPSD )        return(0);
     calnew = MG_MIN(calnew,callist[l]);
@@ -681,7 +675,6 @@ int movbdyrefpt(pMesh mesh, int *listv, int ilistv, int *lists, int ilists){
   for( l=0 ; l<ilistv ; l++ ){
     (&mesh->tetra[listv[l]/4])->qual = callist[l];
   }
-
   return(1);
 }
 
@@ -928,9 +921,7 @@ int movbdynompt(pMesh mesh, int *listv, int ilistv, int *lists, int ilists){
     pt0 = &mesh->tetra[0];
     memcpy(pt0,pt,sizeof(Tetra));
     pt0->v[i0] = 0;
-    if( (&mesh->tetra[iel])->qual==-10)
-      (&mesh->tetra[iel])->qual=orcal(mesh,iel);
-    calold = MG_MIN(calold, (&mesh->tetra[iel])->qual);
+    calold = MG_MIN(calold, pt->qual);
     callist[l]= orcal(mesh,0);
     if ( callist[l] < EPSD )        return(0);
     calnew = MG_MIN(calnew,callist[l]);
@@ -955,7 +946,6 @@ int movbdynompt(pMesh mesh, int *listv, int ilistv, int *lists, int ilists){
   for(l=0; l<ilistv; l++){
     (&mesh->tetra[listv[l]/4])->qual = callist[l];
   }
-
   return(1);
 }
 
@@ -1208,9 +1198,7 @@ int movbdyridpt(pMesh mesh,int *listv,int ilistv,int *lists,int ilists) {
     pt0 = &mesh->tetra[0];
     memcpy(pt0,pt,sizeof(Tetra));
     pt0->v[i0] = 0;
-    if( (&mesh->tetra[iel])->qual==-10)
-      (&mesh->tetra[iel])->qual=orcal(mesh,iel);
-    calold = MG_MIN(calold,(&mesh->tetra[iel])->qual);
+    calold = MG_MIN(calold, pt->qual);
     callist[l]=orcal(mesh,0);
     if ( callist[l] < EPSD )        return(0);
     calnew = MG_MIN(calnew,callist[l]);
@@ -1239,6 +1227,5 @@ int movbdyridpt(pMesh mesh,int *listv,int ilistv,int *lists,int ilists) {
   for(l=0; l<ilistv; l++){
     (&mesh->tetra[listv[l]/4])->qual = callist[l];
   }
-
   return(1);
 }

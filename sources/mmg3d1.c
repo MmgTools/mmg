@@ -1149,7 +1149,7 @@ static int adpspl(pMesh mesh,pSol met) {
       //CECILE
       if ( !split1b(mesh,met,list,ilist,ip,1) ) { //Et on teste pas du tout les qualités ici ?
         delPt(mesh,ip);
-      } 
+      }
 			else {
         ppt = &mesh->point[ip];
         met->m[ip] = 0.5 * (met->m[ip1] + met->m[ip2]);

@@ -113,7 +113,7 @@ int loadMesh(pMesh mesh) {
         if( pa->ref != MG_ISO ) {
           ++mesh->na;
           pa->ref = abs(pa->ref);
-          memcpy(&mesh->edge[mesh->na],&mesh->edge[k],sizeof(Edge));
+          memmove(&mesh->edge[mesh->na],&mesh->edge[k],sizeof(Edge));
           ina[k] = mesh->na;
         }
       }
@@ -171,7 +171,7 @@ int loadMesh(pMesh mesh) {
   for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
     GmfGetLin(inm,GmfTetrahedra,&pt->v[0],&pt->v[1],&pt->v[2],&pt->v[3],&pt->ref);
-    pt->qual=-10;
+    pt->qual=orcal(mesh,k);
     for (i=0; i<4; i++) {
       ppt = &mesh->point[pt->v[i]];
       ppt->tag &= ~MG_NUL;
