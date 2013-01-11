@@ -93,8 +93,8 @@ extern          char idirinv[4][4]; /**< idirinv[i][j] : num of the jth point in
 extern unsigned char iarf[4][3]; /**< iarf[i]: edges of face opposite to vertex i */
 extern unsigned char iarfinv[4][6]; /**< num of the j^th edge in the i^th face */
 extern unsigned char iare[6][2]; /**< vertices of extremities of the edges of the tetra */
-extern unsigned char ifar[6][2]; /**< vertices of extremities of the edges of the tetra in an other ordering */
-extern unsigned char isar[6][2]; /**< vertices of extremities of the edges of the tetra in an other ordering */
+extern unsigned char ifar[6][2]; /**< ifar[i][]: faces sharing the ith edge of the tetra */
+extern unsigned char isar[6][2]; /**< isar[i][]: vertices of extremities of the edge opposite to the ith face */
 extern unsigned char arpt[4][3]; /**< arpt[i]: edges passing through vertex i */
 
 typedef struct {

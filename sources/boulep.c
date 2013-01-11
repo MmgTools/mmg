@@ -1013,7 +1013,11 @@ int coquilface(pMesh mesh,int start,int ia,int *list,int *it1,int *it2) {
   /* At this point, the first travel, in one direction, of the shell is complete. Now, analyze why
      the travel ended. */
   if ( adj == start ) {
-    assert(*it1 && *it2);
+    if( !*it1 || !*it2 ){
+      printf("%s:%d: Error: *it1 or *it2 null:\n",__FILE__,__LINE__);
+      printf(" *it1=%d, *it2=%d and start=%d\n",*it1,*it2,start);
+      return(-1);
+    }
     assert(*it1 != *it2);
     return(2*ilist);
   }

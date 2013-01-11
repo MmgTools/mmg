@@ -359,12 +359,12 @@ int main(int argc,char *argv[]) {
   fprintf(stdout,"\n  -- INPUT DATA\n");
   chrono(ON,&info.ctim[1]);
   /* read mesh file */
-  if ( !loadMesh(&mesh) ) RETURN_AND_FREE(&mesh,&met,1);
+  if ( !loadMesh(&mesh) ) RETURN_AND_FREE(&mesh,&met,EXIT_FAILURE);
   met.npmax = mesh.npmax;
   /* read metric if any */
   ier = loadMet(&met);
   if ( !ier )
-    RETURN_AND_FREE(&mesh,&met,1);
+    RETURN_AND_FREE(&mesh,&met,EXIT_FAILURE);
   else if ( ier > 0 && met.np != mesh.np ) {
     fprintf(stdout,"  ## WARNING: WRONG SOLUTION NUMBER. IGNORED\n");
     free(met.m);
@@ -385,18 +385,18 @@ int main(int argc,char *argv[]) {
   if ( abs(info.imprim) > 0 )  outqua(&mesh,&met);
   fprintf(stdout,"\n  %s\n   MODULE MMG3D: IMB-LJLL : %s (%s)\n  %s\n",MG_STR,MG_VER,MG_REL,MG_STR);
   if ( info.imprim )   fprintf(stdout,"\n  -- PHASE 1 : ANALYSIS\n");
-  if ( !scaleMesh(&mesh,&met) ) RETURN_AND_FREE(&mesh,&met,1);
+  if ( !scaleMesh(&mesh,&met) ) RETURN_AND_FREE(&mesh,&met,EXIT_FAILURE);
   if ( info.iso ) {
     if ( !met.np ) {
       fprintf(stdout,"\n  ## ERROR: A VALID SOLUTION FILE IS NEEDED \n");
-      RETURN_AND_FREE(&mesh,&met,1);
+      RETURN_AND_FREE(&mesh,&met,EXIT_FAILURE);
     }
-		if ( !mmg3d2(&mesh,&met) ) RETURN_AND_FREE(&mesh,&met,1);
+		if ( !mmg3d2(&mesh,&met) ) RETURN_AND_FREE(&mesh,&met,EXIT_FAILURE);
 	}
 #ifdef DEBUG
-	if ( !met.np && !DoSol(&mesh,&met,&info) ) RETURN_AND_FREE(&mesh,&met,1);
+	if ( !met.np && !DoSol(&mesh,&met,&info) ) RETURN_AND_FREE(&mesh,&met,EXIT_FAILURE);
 #endif
-  if ( !analys(&mesh) ) RETURN_AND_FREE(&mesh,&met,1);
+  if ( !analys(&mesh) ) RETURN_AND_FREE(&mesh,&met,EXIT_FAILURE);
 
   if ( info.imprim > 4 && !info.iso && met.m ) prilen(&mesh,&met);
 
@@ -414,9 +414,9 @@ int main(int argc,char *argv[]) {
       fprintf(stdout,"  ## Hashing problem. Unable to save mesh.\n");
       RETURN_AND_FREE(&mesh,&met,EXIT_FAILURE);
     }
-    if ( !unscaleMesh(&mesh,&met) )      { RETURN_AND_FREE(&mesh,&met,1);}
-    if ( !saveMesh(&mesh) )              { RETURN_AND_FREE(&mesh,&met,1);}
-    if ( met.m && !saveMet(&mesh,&met) ) { RETURN_AND_FREE(&mesh,&met,1);}
+    if ( !unscaleMesh(&mesh,&met) )      { RETURN_AND_FREE(&mesh,&met,EXIT_FAILURE);}
+    if ( !saveMesh(&mesh) )              { RETURN_AND_FREE(&mesh,&met,EXIT_FAILURE);}
+    if ( met.m && !saveMet(&mesh,&met) ) { RETURN_AND_FREE(&mesh,&met,EXIT_FAILURE);}
     RETURN_AND_FREE(&mesh,&met,EXIT_FAILURE);
   }
 
@@ -433,12 +433,12 @@ int main(int argc,char *argv[]) {
 
   chrono(ON,&info.ctim[1]);
   if ( info.imprim )  fprintf(stdout,"\n  -- WRITING DATA FILE %s\n",mesh.nameout);
-  if ( !unscaleMesh(&mesh,&met) ) {RETURN_AND_FREE(&mesh,&met,1);}
-  if ( !saveMesh(&mesh) ) {RETURN_AND_FREE(&mesh,&met,1);}
-  if ( !saveMet(&mesh,&met) ) {RETURN_AND_FREE(&mesh,&met,1);}
+  if ( !unscaleMesh(&mesh,&met) ) { RETURN_AND_FREE(&mesh,&met,EXIT_FAILURE);}
+  if ( !saveMesh(&mesh) )         { RETURN_AND_FREE(&mesh,&met,EXIT_FAILURE);}
+  if ( !saveMet(&mesh,&met) )     { RETURN_AND_FREE(&mesh,&met,EXIT_FAILURE);}
   chrono(OFF,&info.ctim[1]);
   if ( info.imprim )  fprintf(stdout,"  -- WRITING COMPLETED\n");
 
   /* free mem */
-  RETURN_AND_FREE(&mesh,&met,0);
+  RETURN_AND_FREE(&mesh,&met,EXIT_SUCCESS);
 }

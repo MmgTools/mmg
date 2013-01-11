@@ -71,9 +71,11 @@ int unscaleMesh(pMesh mesh,pSol met) {
   }
 
   /* unscale sizes */
-  for (k=1; k<=mesh->np; k++) {
-    ppt = &mesh->point[k];
-    if ( MG_VOK(ppt) )	met->m[k] *= dd;
+  if(met->m){
+    for (k=1; k<=mesh->np; k++) {
+      ppt = &mesh->point[k];
+      if ( MG_VOK(ppt) )	met->m[k] *= dd;
+    }
   }
   return(1);
 }

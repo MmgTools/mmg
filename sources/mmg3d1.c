@@ -316,7 +316,7 @@ static int swpmsh(pMesh mesh,pSol met) {
           ia  = iarf[i][j];
           ret = coquilface(mesh,k,ia,list,&it1,&it2);
           ilist = ret / 2;
-
+          if(ret<0) return(-1);
           /* CAUTION: trigger collapse with 2 elements */
           if ( ilist <= 1 )  continue;
           ier = chkswpbdy(mesh,list,ilist,it1,it2);
