@@ -2,7 +2,7 @@
 
 
 /** Move internal point */
-int movintpt(pMesh mesh,int *list,int ilist) {
+int movintpt(pMesh mesh,int *list,int ilist,int improve) {
   pTetra               pt,pt0;
   pPoint               p0,p1,p2,p3,ppt0;
   double               vol,totvol;
@@ -50,6 +50,7 @@ int movintpt(pMesh mesh,int *list,int ilist) {
     calnew = MG_MIN(calnew,callist[k]);
   }
   if ( calold < NULKAL && calnew <= calold )    return(0);
+  else if ( improve && calnew < 0.9 * calold )     return(0);
   else if ( calnew < 0.3 * calold )     return(0);
 
   /* update position */

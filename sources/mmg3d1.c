@@ -378,6 +378,7 @@ static int movtet(pMesh mesh,pSol met,int maxit) {
   pxTetra       pxt;
   double        *n;
   int           i,k,ier,nm,nnm,ns,lists[LMAX+2],listv[LMAX+2],ilists,ilistv,it;
+  int           improve;
   unsigned char j,i0,base;
 
   if ( abs(info.imprim) > 5 || info.ddebug )
@@ -402,7 +403,12 @@ static int movtet(pMesh mesh,pSol met,int maxit) {
           ppt = &mesh->point[pt->v[i0]];
           if ( ppt->flag == base )  continue;
           else if ( MG_SIN(ppt->tag) )  continue;
-
+          if(maxit!=1){
+            ppt->flag=base;
+            improve=1;
+          }else{
+            improve=0;
+          }
           ier = 0;
           if ( ppt->tag & MG_BDY ) {
             pxt = &mesh->xtetra[pt->xt];
@@ -431,11 +437,13 @@ static int movtet(pMesh mesh,pSol met,int maxit) {
           else {
             ilistv = boulevolp(mesh,k,i0,listv);
             if ( !ilistv )  continue;
-            ier = movintpt(mesh,listv,ilistv);
+            ier = movintpt(mesh,listv,ilistv,improve);
           }
           if ( ier ) {
             nm++;
-            ppt->flag = base;
+            if(maxit==1){
+              ppt->flag = base;
+            }
           }
         }
       }
@@ -1166,7 +1174,7 @@ static int adpspl(pMesh mesh,pSol met) {
       if ( !split1b(mesh,met,list,ilist,ip,1) ) { //Et on teste pas du tout les qualités ici ?
         delPt(mesh,ip);
       }
-			else {
+      else {
         ppt = &mesh->point[ip];
         met->m[ip] = 0.5 * (met->m[ip1] + met->m[ip2]);
         ns++;
@@ -1244,11 +1252,12 @@ static int adpcol(pMesh mesh,pSol met) {
 
 /** Analyze tetrahedra and split long / collapse short, according to prescribed metric */
 static int adptet(pMesh mesh,pSol met) {
-  int        ier,it,nnc,nns,nnf,nnm,maxit,nc,ns,nf,nm;
+  int        ier,it,nnc,nns,nnf,nnm,maxit,maxit2,nc,ns,nf,nm;
 
   /* Iterative mesh modifications */
   it = nnc = nns = nnf = nnm = 0;
-  maxit = 5;
+  maxit = 3;
+  maxit2= 1;
 
   do {
 #ifdef DEBUG
@@ -1317,12 +1326,45 @@ static int adptet(pMesh mesh,pSol met) {
     return(0);
   }
 
-  nm = movtet(mesh,met,3);
+  it=0;
+  do{
+   nm = movtet(mesh,met,0);
+   if ( nm < 0 ) {
+     fprintf(stdout,"  ## Unable to improve mesh.\n");
+     return(0);
+   }
+   nnm += nm;
+
+   nf = swpmsh(mesh,met);
+   if ( nf < 0 ) {
+     fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
+     return(0);
+   }
+   nnf += nf;
+
+   nf = swptet(mesh,met);
+   if ( nf < 0 ) {
+     fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
+     return(0);
+   }
+
+   if ( (abs(info.imprim) > 4 || info.ddebug) && nf+nm > 0 ){
+     fprintf(stdout,"                                            ");
+     fprintf(stdout,"%8d swapped, %8d moved\n",nf,nm);
+   }
+  }
+  while(it++<maxit2 && nm+nf>0);
+
+  nm = movtet(mesh,met,0);
   if ( nm < 0 ) {
     fprintf(stdout,"  ## Unable to improve mesh.\n");
     return(0);
   }
   nnm += nm;
+  if ( (abs(info.imprim) > 4 || info.ddebug) && nm > 0 )
+    fprintf(stdout,"                                            ");
+    fprintf(stdout,"                  %8d moved\n",nm);
+
   if ( abs(info.imprim) < 5 && (nnc > 0 || nns > 0) )
     fprintf(stdout,"     %8d splitted, %8d collapsed, %8d swapped, %8d moved, %d iter. \n",nns,nnc,nnf,nnm,it);
 
