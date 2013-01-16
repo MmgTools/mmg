@@ -5,27 +5,22 @@ extern Info info;
 /** Check whether swap of edge ia in start should be performed, and return 4*k+i =
     index of point corresponding to the swapped configuration ; shell of edge is
     built during the process */
-int chkswpgen(pMesh mesh,int start,int ia,int *ilist,int *list) {
+int chkswpgen(pMesh mesh,int start,int ia,int *ilist,int *list,double crit) {
   pTetra    pt,pt0;
   pPoint    p0;
   double    calold,calnew,caltmp;
-  int       na,nb,np,adj,piv,npol,ref,refdom,k,l,iel;
+  int       na,nb,np,adj,piv,npol,refdom,k,l,iel;
   int       *adja,pol[LMAX+2];
-  char      i,ipa,ipb,tag,ip,ier;
+  char      i,ipa,ipb,ip,ier;
 
   pt  = &mesh->tetra[start];
-  if ( !MG_EOK(pt) ) return(0);
   refdom = pt->ref;
 
   pt0 = &mesh->tetra[0];
   na  = pt->v[iare[ia][0]];
   nb  = pt->v[iare[ia][1]];
   calold = pt->qual;
-  if ( ALPHAD*calold > 0.6 )  return(0);
 
-  /* Prevent swap of a ref or tagged edge */
-  hGet(&mesh->htab,na,nb,&ref,&tag);
-  if ( ref || tag )  return(0);
 
   /* Store shell of ia in list, and associated pseudo polygon in pol */
   (*ilist) = 0;
@@ -133,7 +128,7 @@ int chkswpgen(pMesh mesh,int start,int ia,int *ilist,int *list) {
       pt0->v[iare[i][1]] = np;
       caltmp = orcal(mesh,0);
       calnew = MG_MIN(calnew,caltmp);
-      ier = (calnew > 1.1*calold);
+      ier = (calnew > crit*calold);
       if ( !ier )  break;
     }
     if ( ier )  return(pol[k]);

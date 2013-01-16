@@ -207,25 +207,324 @@ inline int nortri(pMesh mesh,pTria pt,double *n) {
   return(1);
 }
 
+/* identify type of element :
+  ityp= 0: 4 faces bonnes          (elt ok)
+        1: 4 faces bonnes, vol nul (sliver) ou "quasi sliver" ie 4 faces ok
+        2: 4 faces ok, vol nul+sommet proche face   (chapeau)
+        3: 3 faces bonnes, 1 obtuse    (aileron)
+        4: 2 faces bonnes, 2 faces aigu => 1 petite arete
+        5: 1 face bonne, 3 petites aretes
+        6: 2 faces grandes aretes, 2 faces petites iaretes
+        7: 4 faces grandes aretes 
+	8: 2 faces obtus, 1 faces aigu et une face OK
+   item: bad entity
+*/
+
+
+/* nb face obtuse :    nb faces aigu : 
+ityp :  0: 0		0
+	1: 0		0
+	2: 0		0
+	3: 1		0
+	4: 0		2
+	5: 0		3
+	6: 2		2
+	7: 0		4
+*/
+/* nb gde arete :    nb petite arete : 
+ityp :  0: 0		0
+	1: 0		0
+	2: 0		0
+	3: 1		0
+	4: 0		1
+	5: 0		3
+	6: 1		1
+	7: 0		2
+*/
+#define EPSVOL 0.001
+#define RAPMAX    0.4//0.3//0.25
+unsigned char inxt[7]    = { 1,2,0,1,2,0,1 };
+
+int typelt(pMesh mesh,int iel,int *item) {
+  pTetra    pt;
+  pPoint    pa,pb,pc,pd;
+  double    abx,aby,abz,acx,acy,acz,adx,ady,adz,v1,v2,v3,vol;
+  double    bcx,bcy,bcz,bdx,bdy,bdz,cdx,cdy,cdz,h[6],volchk,ssmall;
+  double    s[4],dd,rapmin,rapmax,surmin,surmax;
+  int       i,k,ia,ib,ic,id,ityp,isur,isurmax,isurmin,iarmax,iarmin;
+  int       nobtus,naigu,aigu;
+  short     i0,i1,i2;
+
+  double lmoy;
+
+  ityp = 0;
+  pt = &mesh->tetra[iel];
+  if ( !pt->v[0] )  return(-1);
+
+  ia = pt->v[0];
+  ib = pt->v[1];
+  ic = pt->v[2];
+  id = pt->v[3];
+  pa = &mesh->point[ia];
+  pb = &mesh->point[ib];
+  pc = &mesh->point[ic];
+  pd = &mesh->point[id];
+
+  /* volume */
+  abx = pb->c[0] - pa->c[0]; 
+  aby = pb->c[1] - pa->c[1]; 
+  abz = pb->c[2] - pa->c[2]; 
+
+  acx = pc->c[0] - pa->c[0]; 
+  acy = pc->c[1] - pa->c[1]; 
+  acz = pc->c[2] - pa->c[2]; 
+
+  adx = pd->c[0] - pa->c[0]; 
+  ady = pd->c[1] - pa->c[1]; 
+  adz = pd->c[2] - pa->c[2]; 
+
+  v1  = acy*adz - acz*ady;
+  v2  = acz*adx - acx*adz;
+  v3  = acx*ady - acy*adx;
+  vol = abx * v1 + aby * v2 + abz * v3;
+
+  /* max edge */
+  h[0] = abx*abx + aby*aby + abz*abz;
+  h[1] = acx*acx + acy*acy + acz*acz;
+  h[2] = adx*adx + ady*ady + adz*adz;
+
+  bcx = pc->c[0] - pb->c[0];
+  bcy = pc->c[1] - pb->c[1];
+  bcz = pc->c[2] - pb->c[2];
+
+  bdx = pd->c[0] - pb->c[0];
+  bdy = pd->c[1] - pb->c[1];
+  bdz = pd->c[2] - pb->c[2];
+
+  cdx = pd->c[0] - pc->c[0];
+  cdy = pd->c[1] - pc->c[1];
+  cdz = pd->c[2] - pc->c[2];
+
+  h[3] = bcx*bcx + bcy*bcy + bcz*bcz;
+  h[4] = bdx*bdx + bdy*bdy + bdz*bdz;
+  h[5] = cdx*cdx + cdy*cdy + cdz*cdz;
+
+  /* face areas */
+  dd = cdy*bdz - cdz*bdy; 
+  s[0] = dd * dd;
+  dd = cdz*bdx - cdx*bdz;
+  s[0] = s[0] + dd * dd;
+  dd = cdx*bdy - cdy*bdx;
+  s[0] = s[0] + dd * dd;
+  s[0] = sqrt(s[0]);
+
+  s[1] = sqrt(v1*v1 + v2*v2 + v3*v3);
+
+  dd = bdy*adz - bdz*ady;
+  s[2] = dd * dd;
+  dd = bdz*adx - bdx*adz;
+  s[2] = s[2] + dd * dd;
+  dd = bdx*ady - bdy*adx;
+  s[2] = s[2] + dd * dd;
+  s[2] = sqrt(s[2]);
+
+  dd = aby*acz - abz*acy;
+  s[3] = dd * dd;
+  dd = abz*acx - abx*acz;
+  s[3] = s[3] + dd * dd;
+  dd = abx*acy - aby*acx;
+  s[3] = s[3] + dd * dd;
+  s[3] = sqrt(s[3]);
+
+  /* classification */
+  rapmin = h[0];
+  rapmax = h[0];
+  iarmin = 0;
+  iarmax = 0;
+  for (i=1; i<6; i++) {
+    if ( h[i] < rapmin ) {
+      rapmin = h[i];
+      iarmin = i;
+    }
+    else if ( h[i] > rapmax ) {
+      rapmax = h[i];
+      iarmax = i;
+    }
+  }
+  rapmin = sqrt(rapmin);
+  rapmax = sqrt(rapmax);
+  volchk = EPSVOL * rapmin*rapmin*rapmin;
+  //printf("$$$$$$$$$$$$$$$$$$$$$ iel %d %e %e\n",iel,volchk,vol);
+  /* small volume: types 1,2,3,4 */
+  if ( vol < volchk ) {
+    puts("volume nul : type 1,2,3,4");
+    
+    ssmall = 0.4 * (s[0]+s[1]+s[2]+s[3]);
+    isur   = 0;
+    for (i=0; i<4; i++)
+      isur += s[i] > ssmall;
+
+    /* types 2,3 */
+    item[0] = iarmax;
+    item[1] = isar[iarmax][0];    
+    if ( isur == 1 ) {
+      surmin   = s[0];
+      isurmin = 0;
+      surmax   = s[0];
+      isurmax = 0;
+      for (i=1; i<4; i++) {
+        if ( s[i] < surmin ) {
+          surmin  = s[i];
+	  isurmin = i;
+	}  
+        else if ( s[i] > surmax ) {
+	  surmax  = s[i];
+	  isurmax = i;
+	}  
+      }
+      dd = surmin / surmax;
+      if ( dd < RAPMAX ) {
+        item[1] = isar[iarmax][0];
+        return(3);
+      }
+      else {
+        item[0] = isurmax;
+	item[1] = isurmin;
+        return(2);
+      }	
+    }
+
+    /* types 1 */
+    isur = 0;
+    if ( s[0]+s[1] > ssmall )  isur = 1;
+    if ( s[0]+s[2] > ssmall )  isur++;
+    if ( s[0]+s[3] > ssmall )  isur++;
+
+    if ( isur > 2 ) {
+      dd = rapmin / rapmax;
+      item[0] = iarmin;
+      item[1] = idir[iarmin][0];
+      if ( dd < 0.01 )  return(4);
+      if ( s[0]+s[1] > ssmall ) {
+        item[0] = 0;
+        return(1);
+      }
+      if ( s[0]+s[2] > ssmall ) {
+        item[0] = 1;
+        return(1);
+      }
+      if ( s[0]+s[3] > ssmall ) {
+        item[0] = 2;
+        return(1);
+      }
+    }
+    
+//puts("default");
+    item[0] = 0;
+    return(1);
+  }/*end chkvol*/
+
+ dd = rapmin / rapmax;
+ // printf("dd %e %e %e\n",dd,RAPMAX,0.7*RAPMAX);
+  /* types 3,6,7 */
+ if ( dd < RAPMAX ) { /*ie une arete 3 fois plus gde qu'une autre*/
+   lmoy = 0;
+   for (i=0; i<6; i++)  {h[i] = sqrt(h[i]); lmoy+=h[i];}
+   lmoy *= 1./6.;
+    
+    nobtus = 0;
+    naigu = 0;
+    for (k=0; k<4; k++) {
+      aigu = 0;
+      for(i=0 ; i<3 ; i++) {
+	i0 = idir[k][i];
+        i1 = idir[k][inxt[i]];
+        i2 = idir[k][inxt[i+1]];
+	if((h[i0]>h[i1] && h[i0]>h[i2]) && (h[i0]>2.5*h[i1] || h[i0]>2.5*h[i2])) {//obtu ? > /*130*/ 150
+	  //be carefull isocele triangle --> opposite edge only
+	  if(!( fabs(1-h[i0]/h[i1]) < 0.1 || fabs(1-h[i0]/h[i2])< 0.1 ) ) {
+	    if(h[i0] > 0.9659258/*0.9063078*/*(h[i1]+h[i2])) break;
+	  }
+	}
+	  if((h[i0]<h[i1] && h[i0]<h[i2]) && (2.5*h[i0]<h[i1] || 2.5*h[i0]<h[i2])) {//aigu ? <20
+	    if(h[i0] < 0.17*(h[i1]+h[i2])) aigu++;
+	}
+      }
+      if(i<3) nobtus++;
+      else if(aigu) naigu++;
+    }
+    //printf("%d on trouve %d aigu et %d obtu\n",iel,naigu,nobtus);
+    switch(nobtus) {
+    case(3):case(4):
+      return(8);
+    case(2):
+      if(naigu==2) {
+	return(6);
+      } else {
+	return(8);
+      } 
+    case(1):
+      return(3);
+    case(0):
+      if(naigu==4) {
+	return(7);
+      } else if(naigu==3) {
+	return(5);
+      } else if(naigu==2) {
+	return(4);
+      } else {
+	//printf("%d on trouve %d aigu et %d obtu\n",iel,naigu,nobtus);
+	return(9); //toutes les faces sont ok
+      }
+    }
+ }
+
+
+  item[0] = 0;
+  // printf("edge %e %e -- vol %e\n",rapmin,rapmax,vol);
+  //puts("default");
+  return(9);
+}
 
 int badelt(pMesh mesh,pSol met) {
   pTetra   pt;
   double   kal;
-  int      k,it,maxit,nd;
+  int      k,it,maxit,nd,item[2],typ;
+  int ntyp[10];
+  int      list[LMAX+2],i,ilist,nconf,ns;
 
   it = 0;
-  maxit = 1;
+  maxit = 3;
   do {
     nd = 0;
+    ns = 0;
+    for (k=1; k<10; k++) ntyp[k]=0;
     for (k=1; k<=mesh->ne; k++) {
       pt = &mesh->tetra[k];
       if ( !MG_EOK(pt) )  continue;
-      kal = ALPHAD * pt->qual;
-      if ( kal > BADKAL )  continue;
-
+      kal = /*ALPHAD **/ pt->qual;
+      if ( kal > 0.0096225 /*BADKAL/ALPHAD*/ )  continue;
+      //typ =  typelt(mesh,k,item);
+      //ntyp[typ]++;
       nd++;
+      /*treat bad elt*/
+      /*1) try to swp one edge*/
+      for(i=0 ; i<6 ; i++) {
+	nconf = chkswpgen(mesh,k,i,&ilist,list,1.01);
+        if ( nconf ) {
+          ns++;
+          if(!swpgen(mesh,met,nconf,ilist,list)) return(-1);
+          break;
+	}
+      }
     }
-  }
+    /*printf("on trouve %d bad elt\n",nd);
+    for (k=0; k<=9; k++)
+      if ( ntyp[k] )
+        printf("  optim [%d]      = %5d  %6.2f %%\n",k,ntyp[k],100.0*ntyp[k]/nd);
+    */if ( ns > 0 )
+	fprintf(stdout,"     %8d edge swapped\n",ns);
+   }
   while ( ++it < maxit && nd > 0 );
   return(nd);
 }

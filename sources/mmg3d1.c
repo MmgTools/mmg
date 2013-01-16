@@ -339,10 +339,11 @@ static int swpmsh(pMesh mesh,pSol met) {
 }
 
 /** Internal edge flipping */
-static int swptet(pMesh mesh,pSol met) {
+static int swptet(pMesh mesh,pSol met,double crit) {
   pTetra   pt;
   int      list[LMAX+2],ilist,k,it,nconf,maxit,ns,nns;
-  char     i;
+  int      ref;
+  char     i,tag;
 
   maxit = 2;
   it = nns = 0;
@@ -352,9 +353,14 @@ static int swptet(pMesh mesh,pSol met) {
     for (k=1; k<=mesh->ne; k++) {
       pt = &mesh->tetra[k];
       if ( !MG_EOK(pt) )  continue;
-
+      if ( pt->qual > 0.0288675 /*0.6/ALPHAD*/ )  continue;
+ 
       for (i=0; i<6; i++) {
-        nconf = chkswpgen(mesh,k,i,&ilist,list);
+	/* Prevent swap of a ref or tagged edge */
+	hGet(&mesh->htab,pt->v[iare[i][0]],pt->v[iare[i][1]],&ref,&tag);
+	if ( ref || tag ) continue;
+	
+	nconf = chkswpgen(mesh,k,i,&ilist,list,crit);
         if ( nconf ) {
           ns++;
           if(!swpgen(mesh,met,nconf,ilist,list)) return(-1);
@@ -1299,7 +1305,7 @@ static int adptet(pMesh mesh,pSol met) {
     }
     nnf += nf;
 
-    nf = swptet(mesh,met);
+    nf = swptet(mesh,met,1.053);
     if ( nf < 0 ) {
       fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
       return(0);
@@ -1319,15 +1325,17 @@ static int adptet(pMesh mesh,pSol met) {
   }
   while( ++it < maxit && nc+ns > 0 );
 
-  /* badly shaped process */
-  ier = badelt(mesh,met);
-  if ( ier < 0 ) {
-    fprintf(stdout,"  ## Unable to remove bad elements.\n");
-    return(0);
-  }
 
+  /*shape optim*/
   it=0;
   do{
+    /* badly shaped process */
+    /*ier = badelt(mesh,met);
+    if ( ier < 0 ) {
+      fprintf(stdout,"  ## Unable to remove bad elements.\n");
+      return(0);
+      }*/
+
    nm = movtet(mesh,met,0);
    if ( nm < 0 ) {
      fprintf(stdout,"  ## Unable to improve mesh.\n");
@@ -1342,7 +1350,7 @@ static int adptet(pMesh mesh,pSol met) {
    }
    nnf += nf;
 
-   nf = swptet(mesh,met);
+   nf = swptet(mesh,met,1.053);
    if ( nf < 0 ) {
      fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
      return(0);
@@ -1480,7 +1488,7 @@ static int anatet(pMesh mesh,pSol met,char typchk) {
     }
     nnf += nf;
 
-    nf = swptet(mesh,met);
+    nf = swptet(mesh,met,1.1);
 
     if ( nf < 0 ) {
       fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
