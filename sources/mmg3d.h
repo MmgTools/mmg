@@ -73,7 +73,7 @@
 
 #define MG_PLUS    2
 #define MG_MINUS   3
-#define MG_ISO    -1024
+#define MG_ISO    10
 
 #define MG_VOK(ppt)      (ppt && (ppt->tag < MG_NUL)) /**< Vertex OK */
 #define MG_EOK(pt)       (pt && (pt->v[0] > 0))       /**< Element OK */

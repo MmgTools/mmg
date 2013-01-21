@@ -688,10 +688,10 @@ int bdryTria(pMesh mesh) {
         ptt->v[0] = pt->v[idir[i][0]];
         ptt->v[1] = pt->v[idir[i][1]];
         ptt->v[2] = pt->v[idir[i][2]];
-        if ( k < adj && pt->ref != pt1->ref )
-          ptt->ref = info.iso ? MG_ISO : 0;
-        else
+        if ( !adj )
           ptt->ref  = pxt ? pxt->ref[i] : 0;  /* useful only when saving mesh */
+        else
+					ptt->ref = info.iso ? MG_ISO : 0;
       }
     }
   }
