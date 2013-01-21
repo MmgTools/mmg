@@ -217,7 +217,10 @@ int swpbdy(pMesh mesh,pSol met,int *list,int ret,int it1) {
   c[1] = 0.5*( p0->c[1] + p1->c[1]);
   c[2] = 0.5*( p0->c[2] + p1->c[2]);
   nm = newPt(mesh,c,MG_BDY);
-  if ( !nm )  return(0);
+  if ( !nm ) {
+    printf("%s:%d: Warning: unable to allocate a new point\n",__FILE__,__LINE__);
+    return(0);
+  }
   if ( met->m )  met->m[nm] = 0.5 *(met->m[np]+met->m[nq]);
   split1b(mesh,met,list,ret,nm,0);
 
@@ -229,6 +232,7 @@ int swpbdy(pMesh mesh,pSol met,int *list,int ret,int it1) {
   }
   if ( pt1->v[im] != nm ){
     delPt(mesh,nm);
+    printf("%s:%d: Warning pt1->v[im] != nm\n",__FILE__,__LINE__);
     return(0);
   }
   ilist = boulevolp(mesh,iel1,im,list);

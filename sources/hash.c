@@ -936,7 +936,12 @@ int bdryPerm(pMesh mesh) {
         ib = pt->v[idir[i][1]];
         ic = pt->v[idir[i][2]];
         kt = hashGetFace(&hash,ia,ib,ic);
-        assert(kt);
+        if(!kt){
+	      fprintf(stdout,"%s:%d: Error: function hashGetFace return 0\n",__FILE__,__LINE__);
+	      fprintf(stdout," Maybe you have non-boundary triangles.");
+	      fprintf(stdout," Check triangle %d %d %d\n",ia,ib,ic);
+	      exit(EXIT_FAILURE);
+	    }
 
         /* check orientation */
         ptt = &mesh->tria[kt];

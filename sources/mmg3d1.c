@@ -354,13 +354,13 @@ static int swptet(pMesh mesh,pSol met,double crit) {
       pt = &mesh->tetra[k];
       if ( !MG_EOK(pt) )  continue;
       if ( pt->qual > 0.0288675 /*0.6/ALPHAD*/ )  continue;
- 
+
       for (i=0; i<6; i++) {
-	/* Prevent swap of a ref or tagged edge */
-	hGet(&mesh->htab,pt->v[iare[i][0]],pt->v[iare[i][1]],&ref,&tag);
-	if ( ref || tag ) continue;
-	
-	nconf = chkswpgen(mesh,k,i,&ilist,list,crit);
+        /* Prevent swap of a ref or tagged edge */
+        hGet(&mesh->htab,pt->v[iare[i][0]],pt->v[iare[i][1]],&ref,&tag);
+        if ( ref || tag ) continue;
+
+        nconf = chkswpgen(mesh,k,i,&ilist,list,crit);
         if ( nconf ) {
           ns++;
           if(!swpgen(mesh,met,nconf,ilist,list)) return(-1);
@@ -1030,7 +1030,7 @@ static int anatets(pMesh mesh,pSol met,char typchk) {
 }
 
 /** Split edges of length bigger than LOPTL */
-static int adpspl(pMesh mesh,pSol met) {
+static int adpspl(pMesh mesh,pSol met, int* warn) {
   pTetra     pt;
   pxTetra    pxt;
   Tria       ptt;
@@ -1040,6 +1040,7 @@ static int adpspl(pMesh mesh,pSol met) {
   int        k,ip,ip1,ip2,list[LMAX+2],ilist,ns,ref;
   char       imax,tag,j,i,i1,i2,ier,ifa0,ifa1;
 
+  *warn=0;
   ns = 0;
   for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
@@ -1123,7 +1124,10 @@ static int adpspl(pMesh mesh,pSol met) {
           memcpy(o,ro,3*sizeof(double));
         }
         ip = newPt(mesh,o,MG_NOTAG);
-        if ( !ip )  break;
+        if ( !ip ){
+          *warn=1;
+          break;
+        }
         //CECILE
         if ( met->m )
           met->m[ip] = 0.5 * (met->m[ip1]+met->m[ip2]);
@@ -1172,7 +1176,10 @@ static int adpspl(pMesh mesh,pSol met) {
       o[1] = 0.5*(p0->c[1] + p1->c[1]);
       o[2] = 0.5*(p0->c[2] + p1->c[2]);
       ip = newPt(mesh,o,MG_NOTAG);
-      if ( !ip )  break;
+      if ( !ip )  {
+        *warn=1;
+        break;
+      }
       //CECILE
       if ( met->m )
         met->m[ip] = 0.5 * (met->m[ip1]+met->m[ip2]);
@@ -1258,7 +1265,8 @@ static int adpcol(pMesh mesh,pSol met) {
 
 /** Analyze tetrahedra and split long / collapse short, according to prescribed metric */
 static int adptet(pMesh mesh,pSol met) {
-  int        ier,it,nnc,nns,nnf,nnm,maxit,maxit2,nc,ns,nf,nm;
+  int        /*ier,*/it,nnc,nns,nnf,nnm,maxit,maxit2,nc,ns,nf,nm;
+  int          warn;
 
   /* Iterative mesh modifications */
   it = nnc = nns = nnf = nnm = 0;
@@ -1270,7 +1278,7 @@ static int adptet(pMesh mesh,pSol met) {
     tabtmp[0][0]=0;
     tabtmp[0][1]=0;     tabtmp[0][2]=0;
 #endif
-    ns = adpspl(mesh,met);
+    ns = adpspl(mesh,met,&warn);
 
 #ifdef DEBUG
     if(ns){ printf("APS ADPSPL == %d\n",ns);
@@ -1325,6 +1333,12 @@ static int adptet(pMesh mesh,pSol met) {
   }
   while( ++it < maxit && nc+ns > 0 );
 
+  if(warn){
+    fprintf(stdout,"%s:%d: Error:",__FILE__,__LINE__);
+    fprintf(stdout," unable to allocate a new point in last call of adpspl.\n");
+    fprintf(stdout," ## Uncomplete mesh. Exiting\n" );
+    return(0);
+  }
 
   /*shape optim*/
   it=0;
