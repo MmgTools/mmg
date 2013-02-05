@@ -289,9 +289,12 @@ char chkedg(pMesh mesh,Tria *pt) {
       continue;
     }
   }
+
   //CECILE
-  if(pt->ref==1 || pt->ref==2 || pt->ref==3) return(0);
+  //if(pt->ref==1 || pt->ref==2 || pt->ref==3) return(0);
   //END CECILE
+
+
   return(pt->flag);
 }
 
@@ -598,12 +601,13 @@ static int anatetv(pMesh mesh,pSol met,char typchk) {
         ip = hashGet(&hash,ip1,ip2);
       }
       else {
+
 	if (typchk == 1) {
 	  ux = p2->c[0] - p1->c[0];
 	  uy = p2->c[1] - p1->c[1];
 	  uz = p2->c[2] - p1->c[2];
 	  ll = ux*ux + uy*uy + uz*uz;
-	  if ( ll > LLONG*LLONG*info.hmax*info.hmax )
+	  if ( ll > LLONG*LLONG*info.hmax*info.hmax ) 
 	    ip = hashGet(&hash,ip1,ip2);
 	}
         else if ( typchk == 2 ) {
@@ -613,17 +617,24 @@ static int anatetv(pMesh mesh,pSol met,char typchk) {
         }
       }
       if ( ip < 0 ) continue;
+      else if ( !ip ) {
+	/* new midpoint */
+	o[0] = 0.5 * (p1->c[0]+p2->c[0]);
+	o[1] = 0.5 * (p1->c[1]+p2->c[1]);
+	o[2] = 0.5 * (p1->c[2]+p2->c[2]);
+	ip  = newPt(mesh,o,0);
+	if(!ip) {
+	  fprintf(stdout,"%s:%d: Error: unable to allocate a new point\n"
+		  ,__FILE__,__LINE__);
+	  memlack=1;
+	  goto split;
+	}
       
-      /* new midpoint */
-      o[0] = 0.5 * (p1->c[0]+p2->c[0]);
-      o[1] = 0.5 * (p1->c[1]+p2->c[1]);
-      o[2] = 0.5 * (p1->c[2]+p2->c[2]);
-      ip  = newPt(mesh,o,0);
-      if(!ip) {
-	fprintf(stdout,"%s:%d: Error: unable to allocate a new point\n"
-		,__FILE__,__LINE__);
-	memlack=1;
-	goto split;
+	if ( met->m )
+	  met->m[ip] = 0.5 * (met->m[ip1]+met->m[ip2]);
+	hashEdge(&hash,ip1,ip2,ip);
+	MG_SET(pt->flag,i);
+	nap++;
       }
       if ( met->m )
 	met->m[ip] = 0.5 * (met->m[ip1]+met->m[ip2]);
@@ -633,7 +644,7 @@ static int anatetv(pMesh mesh,pSol met,char typchk) {
       
     }
   }
-
+  if(!nap) return(0);
   /** 3. check and split */
 #ifdef DEBUG
   for(k=0;k<12;k++){

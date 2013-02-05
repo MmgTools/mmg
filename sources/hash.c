@@ -8,7 +8,7 @@ extern Info  info;
 extern char  ddb;
 
 /** tetra packing */
-/*static*/ void paktet(pMesh mesh) {
+static void paktet(pMesh mesh) {
   pTetra   pt,pt1;
   int      k;
 
