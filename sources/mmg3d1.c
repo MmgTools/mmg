@@ -636,12 +636,6 @@ static int anatetv(pMesh mesh,pSol met,char typchk) {
 	MG_SET(pt->flag,i);
 	nap++;
       }
-      if ( met->m )
-	met->m[ip] = 0.5 * (met->m[ip1]+met->m[ip2]);
-      hashEdge(&hash,ip1,ip2,ip);
-      MG_SET(pt->flag,i);
-      nap++;
-      
     }
   }
   if(!nap) return(0);
