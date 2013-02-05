@@ -8,7 +8,7 @@ extern Info  info;
 extern char  ddb;
 
 /** tetra packing */
-static void paktet(pMesh mesh) {
+/*static*/ void paktet(pMesh mesh) {
   pTetra   pt,pt1;
   int      k;
 
@@ -44,7 +44,7 @@ int hashTetra(pMesh mesh) {
   if ( abs(info.imprim) > 5 || info.ddebug )
     fprintf(stdout,"  ** SETTING STRUCTURE\n");
 
-  /* packing */
+  /* packing : if not hash does not work */
   paktet(mesh);
 
   /* memory alloc */
@@ -910,7 +910,7 @@ int bdryPerm(pMesh mesh) {
   if ( !mesh->nt )  return(0);
 
   /* store triangles temporarily */
-  hashNew(&hash,0.51*mesh->nt,1.51*mesh->nt);
+  hashNew(&hash,MG_MAX(0.51*mesh->nt,100),MG_MAX(1.51*mesh->nt,300));
   for (k=1; k<=mesh->nt; k++) {
     ptt = &mesh->tria[k];
     if ( !hashFace(&hash,ptt->v[0],ptt->v[1],ptt->v[2],k) )  return(0);

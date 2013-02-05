@@ -222,7 +222,7 @@ char chkedg(pMesh mesh,Tria *pt) {
     uz = p[i2]->c[2] - p[i1]->c[2];
     ll = ux*ux + uy*uy + uz*uz;
     if ( ll < EPSD )  continue;
-    else if ( ll > info.hmax*info.hmax ) {
+    else if ( ll > LLONG*LLONG*info.hmax*info.hmax ) {
       MG_SET(pt->flag,i);
       continue;
     }
@@ -289,6 +289,9 @@ char chkedg(pMesh mesh,Tria *pt) {
       continue;
     }
   }
+  //CECILE
+  if(pt->ref==1 || pt->ref==2 || pt->ref==3) return(0);
+  //END CECILE
   return(pt->flag);
 }
 
@@ -498,7 +501,7 @@ static int coltet(pMesh mesh,pSol met,char typchk) {
           uy = p1->c[1] - p0->c[1];
           uz = p1->c[2] - p0->c[2];
           ll = ux*ux + uy*uy + uz*uz;
-          if ( ll > info.hmin*info.hmin )  continue;
+          if ( ll > LSHRT*LSHRT*info.hmin*info.hmin )  continue;
         }
         else if ( typchk == 2 ) {
           ll = lenedg(mesh,met,pt->v[ip],pt->v[iq]);
@@ -580,7 +583,6 @@ static int anatetv(pMesh mesh,pSol met,char typchk) {
       }
     }
   }
-
   /** 2. Set flags and split internal edges */
   for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
@@ -596,37 +598,39 @@ static int anatetv(pMesh mesh,pSol met,char typchk) {
         ip = hashGet(&hash,ip1,ip2);
       }
       else {
-        ux = p2->c[0] - p1->c[0];
-        uy = p2->c[1] - p1->c[1];
-        uz = p2->c[2] - p1->c[2];
-        ll = ux*ux + uy*uy + uz*uz;
-        if ( ll > info.hmax*info.hmax )
-          ip = hashGet(&hash,ip1,ip2);
-
+	if (typchk == 1) {
+	  ux = p2->c[0] - p1->c[0];
+	  uy = p2->c[1] - p1->c[1];
+	  uz = p2->c[2] - p1->c[2];
+	  ll = ux*ux + uy*uy + uz*uz;
+	  if ( ll > LLONG*LLONG*info.hmax*info.hmax )
+	    ip = hashGet(&hash,ip1,ip2);
+	}
         else if ( typchk == 2 ) {
           ll = lenedg(mesh,met,ip1,ip2);
           if ( ll > LLONG )
             ip = hashGet(&hash,ip1,ip2);
         }
       }
+      if ( ip < 0 ) continue;
+      
       /* new midpoint */
-      if ( ip == 0 ) {
-        o[0] = 0.5 * (p1->c[0]+p2->c[0]);
-        o[1] = 0.5 * (p1->c[1]+p2->c[1]);
-        o[2] = 0.5 * (p1->c[2]+p2->c[2]);
-        ip  = newPt(mesh,o,0);
-        if(!ip) {
-          fprintf(stdout,"%s:%d: Error: unable to allocate a new point\n"
-                  ,__FILE__,__LINE__);
-          memlack=1;
-          goto split;
-        }
-        if ( met->m )
-          met->m[ip] = 0.5 * (met->m[ip1]+met->m[ip2]);
-        hashEdge(&hash,ip1,ip2,ip);
-        MG_SET(pt->flag,i);
-        nap++;
+      o[0] = 0.5 * (p1->c[0]+p2->c[0]);
+      o[1] = 0.5 * (p1->c[1]+p2->c[1]);
+      o[2] = 0.5 * (p1->c[2]+p2->c[2]);
+      ip  = newPt(mesh,o,0);
+      if(!ip) {
+	fprintf(stdout,"%s:%d: Error: unable to allocate a new point\n"
+		,__FILE__,__LINE__);
+	memlack=1;
+	goto split;
       }
+      if ( met->m )
+	met->m[ip] = 0.5 * (met->m[ip1]+met->m[ip2]);
+      hashEdge(&hash,ip1,ip2,ip);
+      MG_SET(pt->flag,i);
+      nap++;
+      
     }
   }
 
@@ -1037,16 +1041,16 @@ static int adpspl(pMesh mesh,pSol met, int* warn) {
   pPoint     p0,p1,ppt;
   pxPoint    pxp;
   double     dd,len,lmax,o[3],to[3],ro[3],no1[3],no2[3],v[3];
-  int        k,ip,ip1,ip2,list[LMAX+2],ilist,ns,ref;
+  int        k,ip,ip1,ip2,list[LMAX+2],ilist,ns,ref,ne;
   char       imax,tag,j,i,i1,i2,ier,ifa0,ifa1;
 
   *warn=0;
   ns = 0;
-  for (k=1; k<=mesh->ne; k++) {
+  ne = mesh->ne;
+  for (k=1; k<=ne; k++) {
     pt = &mesh->tetra[k];
     if ( !MG_EOK(pt) )   continue;
     pxt = pt->xt ? &mesh->xtetra[pt->xt] : 0;
-
     /* find longest edge */
     imax = -1; lmax = 0.0;
     for (i=0; i<6; i++) {
@@ -1059,7 +1063,6 @@ static int adpspl(pMesh mesh,pSol met, int* warn) {
       }
     }
     if ( lmax < LOPTL )  continue;
-
     /* proceed edges according to lengths */
     ifa0 = ifar[imax][0];
     ifa1 = ifar[imax][1];
@@ -1169,7 +1172,7 @@ static int adpspl(pMesh mesh,pSol met, int* warn) {
     }
     /* Case of an internal face */
     else {
-      if ( (p0->tag & MG_BDY) && (p1->tag & MG_BDY) )  break;     // C'est pas plutot continue ici ? On va arreter super vite non ?
+      if ( (p0->tag & MG_BDY) && (p1->tag & MG_BDY) )  continue;     // C'est pas plutot continue ici ? On va arreter super vite non ?
       ilist = coquil(mesh,k,imax,list);
       if ( !ilist )  continue;
       o[0] = 0.5*(p0->c[0] + p1->c[0]);
@@ -1270,7 +1273,7 @@ static int adptet(pMesh mesh,pSol met) {
 
   /* Iterative mesh modifications */
   it = nnc = nns = nnf = nnm = 0;
-  maxit = 3;
+  maxit = 30;
   maxit2= 1;
 
   do {
@@ -1542,10 +1545,10 @@ int mmg3d1(pMesh mesh,pSol met) {
   if ( abs(info.imprim) > 4 || info.ddebug )
     fprintf(stdout,"  ** GEOMETRIC MESH\n");
 
-  if ( !anatet(mesh,met,1) ) {
+   if ( !anatet(mesh,met,1) ) {
     fprintf(stdout,"  ## Unable to split mesh. Exiting.\n");
     return(0);
-  }
+    }
 #ifdef DEBUG
   outqua(mesh,met);
 #endif
