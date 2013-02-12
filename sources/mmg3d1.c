@@ -586,6 +586,7 @@ static int anatetv(pMesh mesh,pSol met,char typchk) {
       }
     }
   }
+
   /** 2. Set flags and split internal edges */
   for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
@@ -601,15 +602,14 @@ static int anatetv(pMesh mesh,pSol met,char typchk) {
         ip = hashGet(&hash,ip1,ip2);
       }
       else {
-
-	if (typchk == 1) {
-	  ux = p2->c[0] - p1->c[0];
-	  uy = p2->c[1] - p1->c[1];
-	  uz = p2->c[2] - p1->c[2];
-	  ll = ux*ux + uy*uy + uz*uz;
-	  if ( ll > LLONG*LLONG*info.hmax*info.hmax ) 
-	    ip = hashGet(&hash,ip1,ip2);
-	}
+        if (typchk == 1) {
+          ux = p2->c[0] - p1->c[0];
+          uy = p2->c[1] - p1->c[1];
+          uz = p2->c[2] - p1->c[2];
+          ll = ux*ux + uy*uy + uz*uz;
+          if ( ll > LLONG*LLONG*info.hmax*info.hmax )
+            ip = hashGet(&hash,ip1,ip2);
+        }
         else if ( typchk == 2 ) {
           ll = lenedg(mesh,met,ip1,ip2);
           if ( ll > LLONG )
@@ -618,23 +618,23 @@ static int anatetv(pMesh mesh,pSol met,char typchk) {
       }
       if ( ip < 0 ) continue;
       else if ( !ip ) {
-	/* new midpoint */
-	o[0] = 0.5 * (p1->c[0]+p2->c[0]);
-	o[1] = 0.5 * (p1->c[1]+p2->c[1]);
-	o[2] = 0.5 * (p1->c[2]+p2->c[2]);
-	ip  = newPt(mesh,o,0);
-	if(!ip) {
-	  fprintf(stdout,"%s:%d: Error: unable to allocate a new point\n"
-		  ,__FILE__,__LINE__);
-	  memlack=1;
-	  goto split;
-	}
-      
-	if ( met->m )
-	  met->m[ip] = 0.5 * (met->m[ip1]+met->m[ip2]);
-	hashEdge(&hash,ip1,ip2,ip);
-	MG_SET(pt->flag,i);
-	nap++;
+        /* new midpoint */
+        o[0] = 0.5 * (p1->c[0]+p2->c[0]);
+        o[1] = 0.5 * (p1->c[1]+p2->c[1]);
+        o[2] = 0.5 * (p1->c[2]+p2->c[2]);
+        ip  = newPt(mesh,o,0);
+        if(!ip) {
+          fprintf(stdout,"%s:%d: Error: unable to allocate a new point\n"
+                  ,__FILE__,__LINE__);
+          memlack=1;
+          goto split;
+        }
+
+        if ( met->m )
+          met->m[ip] = 0.5 * (met->m[ip1]+met->m[ip2]);
+        hashEdge(&hash,ip1,ip2,ip);
+        MG_SET(pt->flag,i);
+        nap++;
       }
     }
   }
@@ -1046,16 +1046,16 @@ static int adpspl(pMesh mesh,pSol met, int* warn) {
   pPoint     p0,p1,ppt;
   pxPoint    pxp;
   double     dd,len,lmax,o[3],to[3],ro[3],no1[3],no2[3],v[3];
-  int        k,ip,ip1,ip2,list[LMAX+2],ilist,ns,ref,ne;
+  int        k,ip,ip1,ip2,list[LMAX+2],ilist,ns,ref;
   char       imax,tag,j,i,i1,i2,ier,ifa0,ifa1;
 
   *warn=0;
   ns = 0;
-  ne = mesh->ne;
-  for (k=1; k<=ne; k++) {
+  for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
     if ( !MG_EOK(pt) )   continue;
     pxt = pt->xt ? &mesh->xtetra[pt->xt] : 0;
+
     /* find longest edge */
     imax = -1; lmax = 0.0;
     for (i=0; i<6; i++) {
@@ -1068,6 +1068,7 @@ static int adpspl(pMesh mesh,pSol met, int* warn) {
       }
     }
     if ( lmax < LOPTL )  continue;
+
     /* proceed edges according to lengths */
     ifa0 = ifar[imax][0];
     ifa1 = ifar[imax][1];
@@ -1177,7 +1178,7 @@ static int adpspl(pMesh mesh,pSol met, int* warn) {
     }
     /* Case of an internal face */
     else {
-      if ( (p0->tag & MG_BDY) && (p1->tag & MG_BDY) )  continue;     // C'est pas plutot continue ici ? On va arreter super vite non ?
+      if ( (p0->tag & MG_BDY) && (p1->tag & MG_BDY) ) continue;
       ilist = coquil(mesh,k,imax,list);
       if ( !ilist )  continue;
       o[0] = 0.5*(p0->c[0] + p1->c[0]);
@@ -1278,7 +1279,7 @@ static int adptet(pMesh mesh,pSol met) {
 
   /* Iterative mesh modifications */
   it = nnc = nns = nnf = nnm = 0;
-  maxit = 30;
+  maxit = 3;
   maxit2= 1;
 
   do {
@@ -1353,35 +1354,35 @@ static int adptet(pMesh mesh,pSol met) {
   do{
     /* badly shaped process */
     /*ier = badelt(mesh,met);
-    if ( ier < 0 ) {
+      if ( ier < 0 ) {
       fprintf(stdout,"  ## Unable to remove bad elements.\n");
       return(0);
       }*/
 
-   nm = movtet(mesh,met,0);
-   if ( nm < 0 ) {
-     fprintf(stdout,"  ## Unable to improve mesh.\n");
-     return(0);
-   }
-   nnm += nm;
+    nm = movtet(mesh,met,0);
+    if ( nm < 0 ) {
+      fprintf(stdout,"  ## Unable to improve mesh.\n");
+      return(0);
+    }
+    nnm += nm;
 
-   nf = swpmsh(mesh,met);
-   if ( nf < 0 ) {
-     fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
-     return(0);
-   }
-   nnf += nf;
+    nf = swpmsh(mesh,met);
+    if ( nf < 0 ) {
+      fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
+      return(0);
+    }
+    nnf += nf;
 
-   nf = swptet(mesh,met,1.053);
-   if ( nf < 0 ) {
-     fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
-     return(0);
-   }
+    nf = swptet(mesh,met,1.053);
+    if ( nf < 0 ) {
+      fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
+      return(0);
+    }
 
-   if ( (abs(info.imprim) > 4 || info.ddebug) && nf+nm > 0 ){
-     fprintf(stdout,"                                            ");
-     fprintf(stdout,"%8d swapped, %8d moved\n",nf,nm);
-   }
+    if ( (abs(info.imprim) > 4 || info.ddebug) && nf+nm > 0 ){
+      fprintf(stdout,"                                            ");
+      fprintf(stdout,"%8d swapped, %8d moved\n",nf,nm);
+    }
   }
   while(it++<maxit2 && nm+nf>0);
 
@@ -1393,7 +1394,7 @@ static int adptet(pMesh mesh,pSol met) {
   nnm += nm;
   if ( (abs(info.imprim) > 4 || info.ddebug) && nm > 0 )
     fprintf(stdout,"                                            ");
-    fprintf(stdout,"                  %8d moved\n",nm);
+  fprintf(stdout,"                  %8d moved\n",nm);
 
   if ( abs(info.imprim) < 5 && (nnc > 0 || nns > 0) )
     fprintf(stdout,"     %8d splitted, %8d collapsed, %8d swapped, %8d moved, %d iter. \n",nns,nnc,nnf,nnm,it);
@@ -1550,10 +1551,10 @@ int mmg3d1(pMesh mesh,pSol met) {
   if ( abs(info.imprim) > 4 || info.ddebug )
     fprintf(stdout,"  ** GEOMETRIC MESH\n");
 
-   if ( !anatet(mesh,met,1) ) {
+  if ( !anatet(mesh,met,1) ) {
     fprintf(stdout,"  ## Unable to split mesh. Exiting.\n");
     return(0);
-    }
+  }
 #ifdef DEBUG
   outqua(mesh,met);
 #endif

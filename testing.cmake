@@ -183,7 +183,7 @@ ADD_TEST(NAME CubeIso_0.25h_met
   ${REG_TESTS_PATH}/CubeIso_0.25h_met/CubeIso0.1.mesh)
 ADD_TEST(NAME CubeIso_0.125h_met
   COMMAND ${EXEC} -v 5
-  ${REG_TESTS_PATH}/CubeIso_0.125h_met/CubeIso0.1.mesh)
+  ${REG_TESTS_PATH}/CubeIso_0.125h_met/CubeIso0.1.mesh -m 500)
 
 #####
 
@@ -253,13 +253,13 @@ ADD_TEST(NAME CubeSkin0.2_Inside0.4
   ${REG_TESTS_PATH}/CubeSkin0.2_Inside0.4/CubeSkin0.2.mesh)
 ADD_TEST(NAME CubeSkin0.0125_Inside0.125
   COMMAND ${EXEC} -v 5
-  ${REG_TESTS_PATH}/CubeSkin0.0125_Inside0.125/CubeSkin0.125.meshb)
+  ${REG_TESTS_PATH}/CubeSkin0.0125_Inside0.125/CubeSkin0.125.meshb -m 400)
 ADD_TEST(NAME CubeSkin0.0125_Inside0.25
   COMMAND ${EXEC} -v 5
-  ${REG_TESTS_PATH}/CubeSkin0.0125_Inside0.25/CubeSkin0.25.meshb)
+  ${REG_TESTS_PATH}/CubeSkin0.0125_Inside0.25/CubeSkin0.25.meshb -m 400)
 ADD_TEST(NAME CubeSkin0.0125_Inside0.5
   COMMAND ${EXEC} -v 5
-  ${REG_TESTS_PATH}/CubeSkin0.0125_Inside0.25/CubeSkin0.25.meshb)
+  ${REG_TESTS_PATH}/CubeSkin0.0125_Inside0.5/CubeSkin0.5.meshb -m 400)
 
 
 # Check results on various meshes
@@ -302,12 +302,12 @@ ADD_TEST(NAME Various_adpsol_hgrad1_M6Mach_Eps0.001_hmin0.001_hmax2
   COMMAND ${EXEC} -v 5
   ${REG_TESTS_PATH}/Various_adpsol_hgrad1_M6Mach_Eps0.001_hmin0.001_hmax2/M6
   -sol ${REG_TESTS_PATH}/Various_adpsol_hgrad1_M6Mach_Eps0.001_hmin0.001_hmax2/metM6.sol
-  -hausd 0.1 -ar 60 -hgrad 1)
+  -hausd 0.1 -ar 60 -hgrad 1 -m 700)
 ADD_TEST(NAME Various_adpsol_hgrad1_M6Mach_Eps0.0005_hmin0.0001_hmax3
   COMMAND ${EXEC} -v 5
   ${REG_TESTS_PATH}/Various_adpsol_hgrad1_M6Mach_Eps0.0005_hmin0.0001_hmax3/M6
   -sol
-  ${REG_TESTS_PATH}/Various_adpsol_hgrad1_M6Mach_Eps0.0005_hmin0.0001_hmax3/metM6.sol -hausd 0.1 -ar 60 -hgrad 1)
+  ${REG_TESTS_PATH}/Various_adpsol_hgrad1_M6Mach_Eps0.0005_hmin0.0001_hmax3/metM6.sol -hausd 0.1 -ar 60 -hgrad 1 -m 700)
 
 
 # Test the Ls option
