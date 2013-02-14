@@ -591,7 +591,8 @@ int hGeom(pMesh mesh) {
   }
   /* else, infer special edges from information carried by triangles */
   else {
-    for (k=1; k<=mesh->nt; k++) {
+		if ( !mesh->adjt && !hashTria(mesh) )  return(0);  
+		for (k=1; k<=mesh->nt; k++) {
       pt   = &mesh->tria[k];
       adja = &mesh->adjt[3*(k-1)+1];
       for (i=0; i<3; i++) {
@@ -936,12 +937,12 @@ int bdryPerm(pMesh mesh) {
         ib = pt->v[idir[i][1]];
         ic = pt->v[idir[i][2]];
         kt = hashGetFace(&hash,ia,ib,ic);
-        if(!kt){
-	      fprintf(stdout,"%s:%d: Error: function hashGetFace return 0\n",__FILE__,__LINE__);
-	      fprintf(stdout," Maybe you have non-boundary triangles.");
-	      fprintf(stdout," Check triangle %d %d %d\n",ia,ib,ic);
-	      exit(EXIT_FAILURE);
-	    }
+        if ( !kt ) {
+	        fprintf(stdout,"%s:%d: Error: function hashGetFace return 0\n",__FILE__,__LINE__);
+	        fprintf(stdout," Maybe you have non-boundary triangles.");
+	        fprintf(stdout," Check triangle %d %d %d\n",ia,ib,ic);
+	        exit(EXIT_FAILURE);
+	      }
 
         /* check orientation */
         ptt = &mesh->tria[kt];

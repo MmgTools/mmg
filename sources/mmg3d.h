@@ -78,7 +78,7 @@
 #define MG_VOK(ppt)      (ppt && (ppt->tag < MG_NUL)) /**< Vertex OK */
 #define MG_EOK(pt)       (pt && (pt->v[0] > 0))       /**< Element OK */
 #define MG_EDG(tag)      ((tag & MG_GEO) || (tag & MG_REF)) /**< Edge or Ridge */
-#define MG_SIN(tag)      ((tag & MG_CRN) || (tag & MG_REQ) || (tag & MG_NOM)) /**< Corner or Required or nonmanifold */
+#define MG_SIN(tag)      ((tag & MG_CRN) || (tag & MG_REQ)) /**< Corner or Required */
 
 #define MG_SET(flag,bit) ((flag) |= (1 << (bit)))  /**< bit number bit is set to 1 */
 #define MG_CLR(flag,bit) ((flag) &= ~(1 << (bit))) /**< bit number bit is set to 0 */

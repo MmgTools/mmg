@@ -170,7 +170,7 @@ char chkedg(pMesh mesh,Tria *pt) {
   pPoint   p[3];
   xPoint  *pxp;
   double   n[3][3],t[3][3],nt[3],*n1,*n2,t1[3],t2[3];
-  double   ps,ps2,ux,uy,uz,ll,il,alpha,dis;
+  double   ps,ps2,ux,uy,uz,ll,il,alpha,dis,hma2;
   int      ia,ib,ic;
   char     i,i1,i2;
 
@@ -181,7 +181,7 @@ char chkedg(pMesh mesh,Tria *pt) {
   p[1] = &mesh->point[ib];
   p[2] = &mesh->point[ic];
   pt->flag = 0;
-
+  hma2 = LLONG*LLONG*info.hmax*info.hmax;
   /* normal recovery */
   for (i=0; i<3; i++) {
     if ( MG_SIN(p[i]->tag) ) {
@@ -222,7 +222,7 @@ char chkedg(pMesh mesh,Tria *pt) {
     uz = p[i2]->c[2] - p[i1]->c[2];
     ll = ux*ux + uy*uy + uz*uz;
     if ( ll < EPSD )  continue;
-    else if ( ll > LLONG*LLONG*info.hmax*info.hmax ) {
+    else if ( ll > hma2 ) {
       MG_SET(pt->flag,i);
       continue;
     }
@@ -289,12 +289,6 @@ char chkedg(pMesh mesh,Tria *pt) {
       continue;
     }
   }
-
-  //CECILE
-  //if(pt->ref==1 || pt->ref==2 || pt->ref==3) return(0);
-  //END CECILE
-
-
   return(pt->flag);
 }
 
@@ -322,13 +316,13 @@ static int swpmsh(pMesh mesh,pSol met) {
           ia  = iarf[i][j];
           ret = coquilface(mesh,k,ia,list,&it1,&it2);
           ilist = ret / 2;
-          if(ret<0) return(-1);
+          if ( ret < 0 )  return(-1);
           /* CAUTION: trigger collapse with 2 elements */
           if ( ilist <= 1 )  continue;
           ier = chkswpbdy(mesh,list,ilist,it1,it2);
           if ( ier ) {
             ier = swpbdy(mesh,met,list,ret,it1);
-            if(ier) ns++;
+            if ( ier )  ns++;
             break;
           }
         }
@@ -415,11 +409,12 @@ static int movtet(pMesh mesh,pSol met,int maxit) {
           ppt = &mesh->point[pt->v[i0]];
           if ( ppt->flag == base )  continue;
           else if ( MG_SIN(ppt->tag) )  continue;
-          if(maxit!=1){
-            ppt->flag=base;
-            improve=1;
-          }else{
-            improve=0;
+          if ( maxit != 1 ) {
+            ppt->flag = base;
+            improve   = 1;
+          }
+					else {
+            improve = 0;
           }
           ier = 0;
           if ( ppt->tag & MG_BDY ) {
@@ -476,11 +471,13 @@ static int coltet(pMesh mesh,pSol met,char typchk) {
   pTetra     pt;
   pxTetra    pxt;
   pPoint     p0,p1;
-  double     ll,ux,uy,uz;
+  double     ll,ux,uy,uz,hmi2;
   int        k,nc,ref,list[LMAX+2],ilist,base,nnm;
   char       i,j,tag,ip,iq,ier,isnm;
 
   nc = nnm = 0;
+	hmi2 = info.hmin*info.hmin;
+
   for (k=1; k<=mesh->ne; k++) {
     base = ++mesh->base;
     pt = &mesh->tetra[k];
@@ -504,7 +501,7 @@ static int coltet(pMesh mesh,pSol met,char typchk) {
           uy = p1->c[1] - p0->c[1];
           uz = p1->c[2] - p0->c[2];
           ll = ux*ux + uy*uy + uz*uz;
-          if ( ll > LSHRT*LSHRT*info.hmin*info.hmin )  continue;
+          if ( ll > hmi2 )  continue;
         }
         else if ( typchk == 2 ) {
           ll = lenedg(mesh,met,pt->v[ip],pt->v[iq]);
@@ -533,12 +530,11 @@ static int coltet(pMesh mesh,pSol met,char typchk) {
         if ( ilist ) {
           ier = colver(mesh,list,ilist,iq);
           if ( ier )  break;
-
         }
       }
       if ( ier ) {
         p1->flag = base;
-        if(isnm) nnm++;
+        if ( isnm )  nnm++;
         nc++;
         break;
       }
@@ -556,14 +552,14 @@ static int anatetv(pMesh mesh,pSol met,char typchk) {
   pPoint   p1,p2;
   xTetra  *pxt;
   Hash     hash;
-  double   ll,o[3],ux,uy,uz;
+  double   ll,o[3],ux,uy,uz,hma2;
   int      vx[6],k,ip,ip1,ip2,nap,ns,ne,memlack;
   char     i,j,ia;
-
 
   /** 1. analysis */
   hashNew(&hash,mesh->np,7*mesh->np);
   memlack = ns = nap = 0;
+  hma2 = LLONG*LLONG*info.hmax*info.hmax;
 
   /* Hash all boundary edges, and put ip = -1 in hash structure */
   for (k=1; k<=mesh->ne; k++) {
@@ -638,7 +634,7 @@ static int anatetv(pMesh mesh,pSol met,char typchk) {
       }
     }
   }
-  if(!nap) return(0);
+  if ( !nap )  return(0);
   /** 3. check and split */
 #ifdef DEBUG
   for(k=0;k<12;k++){
@@ -772,7 +768,7 @@ static int anatetv(pMesh mesh,pSol met,char typchk) {
     printf("on trouve %d split \n",ns);
   }
 #endif
-  if(memlack) return(-1);
+  if(memlack)  return(-1);
   return(nap);
 }
 
@@ -1274,14 +1270,12 @@ static int adpcol(pMesh mesh,pSol met) {
 
 /** Analyze tetrahedra and split long / collapse short, according to prescribed metric */
 static int adptet(pMesh mesh,pSol met) {
-  int        /*ier,*/it,nnc,nns,nnf,nnm,maxit,maxit2,nc,ns,nf,nm;
-  int          warn;
+  int      it,nnc,nns,nnf,nnm,maxit,maxit2,nc,ns,nf,nm;
+  int      warn;
 
   /* Iterative mesh modifications */
   it = nnc = nns = nnf = nnm = 0;
-  maxit = 3;
-  maxit2= 1;
-
+  maxit = 10;
   do {
 #ifdef DEBUG
     tabtmp[0][0]=0;
@@ -1350,8 +1344,9 @@ static int adptet(pMesh mesh,pSol met) {
   }
 
   /*shape optim*/
-  it=0;
-  do{
+  it = 0;
+	maxit = 2;
+  do {
     /* badly shaped process */
     /*ier = badelt(mesh,met);
       if ( ier < 0 ) {
@@ -1384,9 +1379,9 @@ static int adptet(pMesh mesh,pSol met) {
       fprintf(stdout,"%8d swapped, %8d moved\n",nf,nm);
     }
   }
-  while(it++<maxit2 && nm+nf>0);
+  while( ++it < maxit && nm+nf > 0 );
 
-  nm = movtet(mesh,met,0);
+  nm = movtet(mesh,met,3);
   if ( nm < 0 ) {
     fprintf(stdout,"  ## Unable to improve mesh.\n");
     return(0);
@@ -1512,7 +1507,6 @@ static int anatet(pMesh mesh,pSol met,char typchk) {
     nnf += nf;
 
     nf = swptet(mesh,met,1.1);
-
     if ( nf < 0 ) {
       fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
       return(0);

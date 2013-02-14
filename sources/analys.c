@@ -241,7 +241,7 @@ static int singul(pMesh mesh) {
 
     for (i=0; i<3; i++) {
       ppt = &mesh->point[pt->v[i]];
-      if ( !MG_VOK(ppt) || MG_SIN(ppt->tag) )  continue;
+      if ( !MG_VOK(ppt) || MG_SIN(ppt->tag) || ppt->tag & MG_NOM ) continue;
       else if ( MG_EDG(ppt->tag) ) {
         ns = bouler(mesh,k,i,list,&ng,&nr);
 
