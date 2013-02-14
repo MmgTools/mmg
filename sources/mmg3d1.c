@@ -603,7 +603,7 @@ static int anatetv(pMesh mesh,pSol met,char typchk) {
           uy = p2->c[1] - p1->c[1];
           uz = p2->c[2] - p1->c[2];
           ll = ux*ux + uy*uy + uz*uz;
-          if ( ll > LLONG*LLONG*info.hmax*info.hmax )
+          if ( ll > hma2 )
             ip = hashGet(&hash,ip1,ip2);
         }
         else if ( typchk == 2 ) {
@@ -1270,7 +1270,7 @@ static int adpcol(pMesh mesh,pSol met) {
 
 /** Analyze tetrahedra and split long / collapse short, according to prescribed metric */
 static int adptet(pMesh mesh,pSol met) {
-  int      it,nnc,nns,nnf,nnm,maxit,maxit2,nc,ns,nf,nm;
+  int      it,nnc,nns,nnf,nnm,maxit,nc,ns,nf,nm;
   int      warn;
 
   /* Iterative mesh modifications */

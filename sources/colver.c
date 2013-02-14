@@ -18,6 +18,7 @@ int chkcol_int(pMesh mesh,pSol met,int k,char iface,char iedg,int *list,char typ
   pt0 = &mesh->tetra[0];
   nq  = pt->v[iq];
   ilist = boulevolp(mesh,k,ip,list);
+  lon = 1.e20;
   if ( typchk == 2 && met->m ) {
     lon = lenedg(mesh,met,pt->v[ip],nq);
     lon = MG_MIN(lon,LSHRT);
