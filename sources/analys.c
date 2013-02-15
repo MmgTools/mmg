@@ -8,7 +8,7 @@ static int setadj(pMesh mesh){
   pTria   pt,pt1;
   pPoint  ppt;
   int    *adja,*adjb,adji1,adji2,*pile,iad,ipil,ip1,ip2,gen;
-  int     k,kk,iel,jel,nf,np,nr,nt,nre,ncc,ned,nvf,edg;
+  int     k,kk,iel,jel,nf,np,nr,nt,nre,nreq,ncc,ned,nvf,edg;
   char    i,ii,i1,i2,ii1,ii2,voy,tag;
 
   nvf = nf = ncc = ned = 0;
@@ -132,7 +132,7 @@ static int setadj(pMesh mesh){
   }
 
   /* bilan */
-  np = nr = nre = nt = 0;
+  np = nr = nre = nreq = nt = 0;
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
     if ( !MG_EOK(pt) )  continue;
@@ -149,18 +149,21 @@ static int setadj(pMesh mesh){
       if ( !jel || jel > k ) {
         if ( pt->tag[i] & MG_GEO )  nr++;
         if ( pt->tag[i] & MG_REF )  nre++;
+        if ( pt->tag[i] & MG_REQ )  nreq++;
       }
     }
   }
   if ( info.ddebug ) {
     fprintf(stdout,"  a- ridges: %d found.\n",nr);
+    fprintf(stdout,"  a- requir: %d found.\n",nreq);
     fprintf(stdout,"  a- connex: %d connected component(s)\n",ncc);
     fprintf(stdout,"  a- orient: %d flipped\n",nf);
   }
   else if ( abs(info.imprim) > 4 ) {
     gen = (2 - nvf + ned - nt) / 2;
     fprintf(stdout,"     Connected component: %d,  genus: %d,   reoriented: %d\n",ncc,gen,nf);
-    fprintf(stdout,"     Edges: %d,  tagged: %d,  ridges: %d,  refs: %d\n",ned,nr+nre,nr,nre);
+    fprintf(stdout,"     Edges: %d,  tagged: %d,  ridges: %d, required: %d, refs: %d\n",
+            ned,nr+nre+nreq,nr,nreq,nre);
   }
   free(pile);
   pile=NULL;

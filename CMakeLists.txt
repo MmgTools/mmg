@@ -22,10 +22,10 @@ ENDIF()
 IF(CMAKE_COMPILER_IS_GNUCC)
   IF(APPLE)
     # Add flags to the compiler to work on old mac
-    ADD_DEFINITIONS( -mmacosx-version-min=10.4 -arch i386 -arch x86_64)
+    ADD_DEFINITIONS( -mmacosx-version-min=10.4 -arch x86_64)
 
     # To avoid pbs with binary files...
-    SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -arch i386 -arch x86_64")
+    SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -arch x86_64")
     #SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static-libgcc")
     # Determine if the processor supports 64bit execution
     EXECUTE_PROCESS(
@@ -101,6 +101,12 @@ ENDIF(NOT EXISTS ${MMG_SOURCE_DIR}/compil.date)
 
 # Executable and dependencies
 ADD_EXECUTABLE(mmg3d5 ${MMG_SOURCE_DIR}/compil.date ${source_files})
+
+# Uncomment to link with mmg3d4 library
+#FIND_LIBRARY(mmglib mmg3dlib4.0 "${MMG_SOURCE_DIR}/../../mmg3d4/build")
+#TARGET_LINK_LIBRARIES(mmg3d5 ${mmglib})
+# End uncomment
+
 SET_TARGET_PROPERTIES(mmg3d5 PROPERTIES DEBUG_POSTFIX _debug) # in debug mode we name the executable mmg3d5_debug
 SET_TARGET_PROPERTIES(mmg3d5 PROPERTIES RELEASE_POSTFIX _O3) # in Release mode we name the executable mmg3d5_O3
 SET_TARGET_PROPERTIES(mmg3d5 PROPERTIES MINSIZEREL_POSTFIX _Os)

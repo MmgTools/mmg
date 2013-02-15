@@ -369,3 +369,13 @@ ADD_TEST(NAME OptLs_temp_hminMax_hgrad1.2_hausd0.1
 
 
 
+###############################################################################
+#####
+#####         Bug Fix
+#####
+###############################################################################
+#####
+ADD_TEST(NAME BUG_OptLsSingularities
+ COMMAND ${EXEC} -v 5 -ls
+ ${REG_TESTS_PATH}/BUG_OptLsSingularities/test4
+ ${REG_TESTS_PATH}/BUG_OptLsSingularities/test4.o.meshb)

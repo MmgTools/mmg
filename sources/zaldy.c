@@ -19,7 +19,11 @@ int newPt(pMesh mesh,double c[3],char tag) {
   /* point on geometry */
   if ( tag & MG_BDY ) {
     mesh->xp++;
-    assert(mesh->xp < mesh->xpmax);
+    if(mesh->xp >= mesh->xpmax){
+      printf("%s:%d: Error: unable to allocate a new xpoint 0\n",
+             __FILE__,__LINE__);
+      exit(EXIT_FAILURE);
+    }
     ppt->tag = MG_BDY;
     ppt->xp  = mesh->xp;
   }

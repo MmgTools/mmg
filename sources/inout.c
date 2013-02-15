@@ -9,7 +9,7 @@ int loadMesh(pMesh mesh) {
   pEdge        pa;
   pPoint       ppt;
   float        fp1,fp2,fp3;
-  int          i,k,inm,ia,nr,aux,nt,ref,v[3],na,*ina;
+  int          i,k,inm,ia,np,nr,nre,nc,aux,nt,ref,v[3],na,*ina;
   char        *ptr,*name,data[128];
 
   name = mesh->namein;
@@ -61,6 +61,29 @@ int loadMesh(pMesh mesh) {
     }
     ppt->tag  = MG_NUL;
   }
+  /* get required vertices */
+  np = GmfStatKwd(inm,GmfRequiredVertices);
+  if ( np ) {
+    GmfGotoKwd(inm,GmfRequiredVertices);
+    for (k=1; k<=np; k++) {
+      GmfGetLin(inm,GmfRequiredVertices,&i);
+      assert(i <= mesh->np);
+      ppt = &mesh->point[i];
+      ppt->tag |= MG_REQ;
+    }
+  }
+  /* get corners */
+  nc = GmfStatKwd(inm,GmfCorners);
+  if ( nc ) {
+    GmfGotoKwd(inm,GmfCorners);
+    for (k=1; k<=nc; k++) {
+      GmfGetLin(inm,GmfCorners,&i);
+      assert(i <= mesh->np);
+      ppt = &mesh->point[i];
+      ppt->tag |= MG_CRN;
+    }
+  }
+
   /* read mesh triangles */
   if ( mesh->nt ) {
     /* Skip triangles with negative refs */
@@ -68,6 +91,7 @@ int loadMesh(pMesh mesh) {
       GmfGotoKwd(inm,GmfTriangles);
       nt = mesh->nt;
       mesh->nt = 0;
+      ina = (int*)calloc(nt+1,sizeof(int));
       for (k=1; k<=nt; k++) {
         GmfGetLin(inm,GmfTriangles,&v[0],&v[1],&v[2],&ref);
         if( ref >= 0 ) {
@@ -76,6 +100,7 @@ int loadMesh(pMesh mesh) {
           pt1->v[1] = v[1];
           pt1->v[2] = v[2];
           pt1->ref = ref;
+          ina[k]=mesh->nt;
         }
       }
       if( !mesh->nt ){
@@ -91,6 +116,35 @@ int loadMesh(pMesh mesh) {
         pt1 = &mesh->tria[k];
         GmfGetLin(inm,GmfTriangles,&pt1->v[0],&pt1->v[1],&pt1->v[2],&pt1->ref);
       }
+    }
+    /* get required triangles */
+    nt = GmfStatKwd(inm,GmfRequiredTriangles);
+    if ( nt ) {
+      GmfGotoKwd(inm,GmfRequiredTriangles);
+      for (k=1; k<=nt; k++) {
+        GmfGetLin(inm,GmfRequiredTriangles,&i);
+        assert(i <= mesh->nt);
+        if( info.iso ){
+          if( ina[i] == 0 ) continue;
+          else {
+            pt1 = &mesh->tria[ina[i]];
+            pt1->tag[0] |= MG_REQ;
+            pt1->tag[1] |= MG_REQ;
+            pt1->tag[2] |= MG_REQ;
+          }
+        }
+        else{
+          pt1 = &mesh->tria[i];
+          pt1->tag[0] |= MG_REQ;
+          pt1->tag[1] |= MG_REQ;
+          pt1->tag[2] |= MG_REQ;
+        }
+
+      }
+    }
+    if ( info.iso ) {
+      free(ina);
+      ina=NULL;
     }
   }
 
@@ -140,14 +194,14 @@ int loadMesh(pMesh mesh) {
       }
     }
     /* get required edges */
-    nr = GmfStatKwd(inm,GmfRequiredEdges);
-    if ( nr ) {
+    nre = GmfStatKwd(inm,GmfRequiredEdges);
+    if ( nre ) {
       GmfGotoKwd(inm,GmfRequiredEdges);
-      for (k=1; k<=nr; k++) {
+      for (k=1; k<=nre; k++) {
         GmfGetLin(inm,GmfRequiredEdges,&ia);
         assert(ia <= na);
         if( info.iso ){
-          if( ina[ia] == 0) continue;
+          if( ina[ia] == 0 ) continue;
           else {
             pa = &mesh->edge[ina[ia]];
             pa->tag |= MG_REQ;
@@ -195,6 +249,17 @@ int loadMesh(pMesh mesh) {
     if ( mesh->nt )
       fprintf(stdout,"     NUMBER OF TRIANGLES    %8d\n",mesh->nt);
     fprintf(stdout,"     NUMBER OF ELEMENTS     %8d / %8d\n",mesh->ne,mesh->nemax);
+
+    if(np || nre || nt ){
+      fprintf(stdout,"     NUMBER OF REQUIRED ENTITIES: \n");
+      if ( np)
+        fprintf(stdout,"                  VERTICES  %8d \n",np);
+      if ( nre )
+        fprintf(stdout,"                  EDGES     %8d \n",nre);
+      if ( nt )
+        fprintf(stdout,"                  TRIANGLES %8d \n",nt);
+    }
+    if(nc) fprintf(stdout,"     NUMBER OF CORNERS      %8d \n",nc);
   }
   GmfCloseMesh(inm);
   return(1);
