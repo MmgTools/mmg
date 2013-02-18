@@ -87,14 +87,14 @@ int loadMesh(pMesh mesh) {
   /* read mesh triangles */
   if ( mesh->nt ) {
     /* Skip triangles with negative refs */
-    if( info.iso ){
+    if( info.iso ) {
       GmfGotoKwd(inm,GmfTriangles);
       nt = mesh->nt;
       mesh->nt = 0;
       ina = (int*)calloc(nt+1,sizeof(int));
       for (k=1; k<=nt; k++) {
         GmfGetLin(inm,GmfTriangles,&v[0],&v[1],&v[2],&ref);
-        if( ref >= 0 ) {
+        if( abs(ref) != MG_ISO ) {
           pt1 = &mesh->tria[++mesh->nt];
           pt1->v[0] = v[0];
           pt1->v[1] = v[1];
@@ -164,10 +164,10 @@ int loadMesh(pMesh mesh) {
       GmfGetLin(inm,GmfEdges,&pa->a,&pa->b,&pa->ref);
       pa->tag |= MG_REF;
       if ( info.iso ) {
-        if( pa->ref != MG_ISO ) {
+        if( abs(pa->ref) != MG_ISO ) {
           ++mesh->na;
           pa->ref = abs(pa->ref);
-          memmove(&mesh->edge[mesh->na],&mesh->edge[k],sizeof(Edge));
+          memcpy(&mesh->edge[mesh->na],&mesh->edge[k],sizeof(Edge));
           ina[k] = mesh->na;
         }
       }
@@ -181,7 +181,8 @@ int loadMesh(pMesh mesh) {
         GmfGetLin(inm,GmfRidges,&ia);
         assert(ia <= na);
         if( info.iso ){
-          if( ina[ia] == 0) continue;
+          if( ina[ia] == 0 )  
+						continue;
           else {
             pa = &mesh->edge[ina[ia]];
             pa->tag |= MG_GEO;
@@ -216,7 +217,7 @@ int loadMesh(pMesh mesh) {
     }
     if (info.iso ) {
       free(ina);
-      ina=NULL;
+      ina = NULL;
     }
   }
 
@@ -225,13 +226,13 @@ int loadMesh(pMesh mesh) {
   for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
     GmfGetLin(inm,GmfTetrahedra,&pt->v[0],&pt->v[1],&pt->v[2],&pt->v[3],&pt->ref);
-    pt->qual=orcal(mesh,k);
+    pt->qual = orcal(mesh,k);
     for (i=0; i<4; i++) {
       ppt = &mesh->point[pt->v[i]];
       ppt->tag &= ~MG_NUL;
     }
 
-    if (info.iso ) pt->ref = 0;
+    if ( info.iso )  pt->ref = 0;
 
     /* Possibly switch 2 vertices number so that each tet is positively oriented */
     if ( orvol(mesh->point,pt->v) < 0.0 ) {
