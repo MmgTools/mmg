@@ -359,7 +359,7 @@ int split1b(pMesh mesh, pSol met,int *list, int ret, int ip,int cas){
       for(;k>0;--k){
         delElt(mesh,newtet[k]);
       }
-      return(0);
+      return(-1);
     }
     pt1 = &mesh->tetra[jel];
     memcpy(pt1,pt,sizeof(Tetra));

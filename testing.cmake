@@ -3,7 +3,7 @@
 #####         Continuous Integration
 #####
 ###############################################################################
-
+SET(CTEST_TIMEOUT           "7200")
 SET(REG_TESTS_PATH ${CMAKE_SOURCE_DIR}/../RegTests)
 GET_TARGET_PROPERTY(EXEC mmg3d5 LOCATION)
 IF(${CMAKE_BUILD_TYPE} MATCHES "Debug")

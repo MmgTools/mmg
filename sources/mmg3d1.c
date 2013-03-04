@@ -832,23 +832,27 @@ static int anatets(pMesh mesh,pSol met,char typchk) {
     for (j=0; j<3; j++) {
       ia = iarf[i][j];
       if ( !MG_GET(pt->flag,ia) )  continue;
+#ifndef BEFORE
+      if ( pxt->tag[ia] & MG_REQ )  continue;
+#endif
       i1  = iare[ia][0];
       i2  = iare[ia][1];
       ip1 = pt->v[i1];
       ip2 = pt->v[i2];
       ip  = hashGet(&hash,ip1,ip2);
+
       if ( ip > 0 && !(ptt.tag[j] & MG_GEO) )  continue;
 
-      /* new point along edge */
       ier = bezierInt(&pb,&uv[j][0],o,no,to);
+      /* new point along edge */
       if ( !ip ) {
         ip = newPt(mesh,o,MG_BDY);
-        if(!ip){
+        if ( !ip ) {
           fprintf(stdout,"%s:%d: Error: unable to allocate a new point\n"
                   ,__FILE__,__LINE__);
-          do{
+          do {
             delPt(mesh,mesh->np);
-          }while(mesh->np>npinit);
+          } while ( mesh->np>npinit );
           return(-1);
         }
         hashEdge(&hash,ip1,ip2,ip);
@@ -1137,7 +1141,13 @@ static int adpspl(pMesh mesh,pSol met, int* warn) {
         if ( met->m )
           met->m[ip] = 0.5 * (met->m[ip1]+met->m[ip2]);
         //CECILE
-        if ( !split1b(mesh,met,list,ilist,ip,1) ) {
+        ier = split1b(mesh,met,list,ilist,ip,1);
+        if ( ier<0 ) {
+          fprintf(stdout,"%s:%d: Error: unable to split\n"
+                  ,__FILE__,__LINE__);
+          return(-1);
+        }
+        else if ( !ier ) {
           delPt(mesh,ip);
           continue;
         }
@@ -1189,7 +1199,13 @@ static int adpspl(pMesh mesh,pSol met, int* warn) {
       if ( met->m )
         met->m[ip] = 0.5 * (met->m[ip1]+met->m[ip2]);
       //CECILE
-      if ( !split1b(mesh,met,list,ilist,ip,1) ) { //Et on teste pas du tout les qualités ici ?
+      ier = split1b(mesh,met,list,ilist,ip,1);
+      if ( ier<0 ) {
+        fprintf(stdout,"%s:%d: Error: unable to split\n"
+                ,__FILE__,__LINE__);
+        return(-1);
+      }
+      else if ( !ier ) { //Et on teste pas du tout les qualités ici ?
         delPt(mesh,ip);
       }
       else {

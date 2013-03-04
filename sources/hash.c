@@ -822,6 +822,7 @@ static int hashFace(Hash *hash,int ia,int ib,int ic,int k) {
   return(1);
 }
 
+/** return index of triangle ia ib ic */
 static int hashGetFace(Hash *hash,int ia,int ib,int ic) {
   hedge  *ph;
   int     key,mins,maxs,sum;

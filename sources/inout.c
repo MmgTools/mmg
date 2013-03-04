@@ -273,7 +273,7 @@ int saveMesh(pMesh mesh) {
   pTria        ptt;
   xPoint      *pxp;
   hgeom       *ph;
-  int          k,na,nc,np,ne,nn,nr,nre,nt,outm;
+  int          k,na,nc,np,ne,nn,nr,nre,nereq,ntreq,nt,outm;
   char         data[128];
 
   mesh->ver = GmfDouble;
@@ -302,7 +302,8 @@ int saveMesh(pMesh mesh) {
   }
 
   /* boundary mesh */
-  mesh->nt = 0;
+  /* tria + required tria */
+  mesh->nt = ntreq = 0;
   if ( mesh->tria){
     free(mesh->tria);
     mesh->tria=NULL;
@@ -311,21 +312,31 @@ int saveMesh(pMesh mesh) {
     GmfSetKwd(outm,GmfTriangles,mesh->nt);
     for (k=1; k<=mesh->nt; k++) {
       ptt = &mesh->tria[k];
+      if ( ptt->tag[0] & MG_REQ && ptt->tag[1] & MG_REQ && ptt->tag[2] & MG_REQ )  ntreq++;
       GmfSetLin(outm,GmfTriangles,mesh->point[ptt->v[0]].tmp,mesh->point[ptt->v[1]].tmp, \
                 mesh->point[ptt->v[2]].tmp,ptt->ref);
+    }
+    if ( ntreq ) {
+      GmfSetKwd(outm,GmfRequiredTriangles,ntreq);
+      for (k=0; k<=mesh->nt; k++) {
+        ptt = &mesh->tria[k];
+        if ( ptt->tag[0] & MG_REQ && ptt->tag[1] & MG_REQ && ptt->tag[2] & MG_REQ )
+          GmfSetLin(outm,GmfRequiredTriangles,k);
+      }
     }
     free(mesh->adjt);
     free(mesh->tria);
     mesh->adjt=NULL;
     mesh->tria=NULL;
 
-    /* edges + ridges */
-    na = nr = 0;
+    /* edges + ridges + required edges */
+    na = nr = nereq = 0;
     for (k=0; k<=mesh->htab.max; k++) {
       ph = &mesh->htab.geom[k];
       if ( !ph->a )  continue;
       na++;
       if ( ph->tag & MG_GEO )  nr++;
+      if ( ph->tag & MG_REQ )  nereq++;
     }
     if ( na ) {
       GmfSetKwd(outm,GmfEdges,na);
@@ -342,6 +353,16 @@ int saveMesh(pMesh mesh) {
           if ( !ph->a )  continue;
           na++;
           if ( ph->tag & MG_GEO )  GmfSetLin(outm,GmfRidges,na);
+        }
+      }
+      if ( nereq ) {
+        GmfSetKwd(outm,GmfRequiredEdges,nereq);
+        na = 0;
+        for (k=0; k<=mesh->htab.max; k++) {
+          ph = &mesh->htab.geom[k];
+          if ( !ph->a )  continue;
+          na++;
+          if ( ph->tag & MG_REQ )  GmfSetLin(outm,GmfRequiredEdges,na);
         }
       }
     }

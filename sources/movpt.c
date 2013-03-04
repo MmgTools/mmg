@@ -975,7 +975,7 @@ int movbdyridpt(pMesh mesh,int *listv,int ilistv,int *lists,int ilists) {
   /* Travel surfacic ball an recover the two ending points of ridge : two senses must be used
      POSSIBLE OPTIMIZATION HERE : One travel only is needed */
   iel           = lists[0] / 4;
-  iface = lists[0] % 4;
+  iface         = lists[0] % 4;
   pt            = &mesh->tetra[iel];
   ipa           = ipb = 0;
   for (i=0; i<3; i++) {

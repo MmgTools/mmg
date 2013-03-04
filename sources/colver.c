@@ -526,7 +526,7 @@ int chkcol_bdy(pMesh mesh,int k,char iface,char iedg,int *listv) {
     ier = chkmanicoll(mesh,k,iface,iedg,ndepmin,ndepplus,isminp,isplp);
     if ( !ier )  return(0);
   }
-  /* Topological check fur surface ball */
+  /* Topological check for surface ball */
   else {
     ier = topchkcol_bdy(mesh,k,iface,iedg,lists,ilists);
     if ( !ier )  return(0);
