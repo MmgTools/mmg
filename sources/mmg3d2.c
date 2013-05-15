@@ -1274,7 +1274,7 @@ int mmg3d2(pMesh mesh,pSol sol) {
     return(0);
   }
 
-  if ( !bdryPerm(mesh,info.iso) ) {
+  if ( !bdryPerm(mesh) ) {
     fprintf(stdout,"  ## Boundary orientation problem. Exit program.\n");
     return(0);
   }

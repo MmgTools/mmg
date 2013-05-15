@@ -159,12 +159,12 @@ void split1(pMesh mesh,pSol met,int k,int vx[6]) {
 
   if ( pt->xt ) {
     /* Reset edge tag */
-    xt.tag[ taued[3]] = xt.ftag[ tau[3]];
-    xt.tag[ taued[4]] = xt.ftag[ tau[2]];
+    xt.tag [taued[3]] = xt.ftag [tau[3]];
+    xt.tag [taued[4]] = xt.ftag [tau[2]];
     xt1.tag[taued[1]] = xt1.ftag[tau[3]];
     xt1.tag[taued[2]] = xt1.ftag[tau[2]];
-    xt.ref[ tau[0]] = 0;  xt.ftag[ tau[0]] = 0;
-    xt1.ref[tau[1]] = 0;  xt1.ftag[tau[1]] = 0;
+    xt.ref [tau[0]] = 0;  xt.ftag [tau[0]] = 0;  MG_SET( xt.ori, tau[0]);
+    xt1.ref[tau[1]] = 0;  xt1.ftag[tau[1]] = 0;  MG_SET(xt1.ori, tau[1]);
   }
 
   pt->flag = pt1->flag = 0;
@@ -425,12 +425,12 @@ int split1b(pMesh mesh, pSol met,int *list, int ret, int ip,int cas){
     pt->v[tau[1]] = pt1->v[tau[0]] = ip;
     if(pt->xt){
       /* Reset edge tag */
-      xt.tag[ taued[3]] = xt.ftag[ tau[3]];
-      xt.tag[ taued[4]] = xt.ftag[ tau[2]];
+      xt.tag [taued[3]] = xt.ftag [tau[3]];
+      xt.tag [taued[4]] = xt.ftag [tau[2]];
       xt1.tag[taued[1]] = xt1.ftag[tau[3]];
       xt1.tag[taued[2]] = xt1.ftag[tau[2]];
-      xt.ref[tau[0]]   = 0;  xt.ftag[tau[0]]  = 0;
-      xt1.ref[tau[1]]  = 0;  xt1.ftag[tau[1]] = 0;
+      xt.ref [tau[0]]  = 0;  xt.ftag [tau[0]] = 0;  MG_SET( xt.ori, tau[0]);
+      xt1.ref[tau[1]]  = 0;  xt1.ftag[tau[1]] = 0;  MG_SET(xt1.ori, tau[1]);
     }
 
     pt->flag = pt1->flag = 0;
@@ -572,12 +572,12 @@ int split1b(pMesh mesh, pSol met,int *list, int ret, int ip,int cas){
     pt->v[tau[1]] = pt1->v[tau[0]] = ip;
     if(pt->xt){
       /* Reset edge tag */
-      xt.tag[ taued[3]] = xt.ftag[ tau[3]];
-      xt.tag[ taued[4]] = xt.ftag[ tau[2]];
+      xt.tag [taued[3]] = xt.ftag [tau[3]];
+      xt.tag [taued[4]] = xt.ftag [tau[2]];
       xt1.tag[taued[1]] = xt1.ftag[tau[3]];
       xt1.tag[taued[2]] = xt1.ftag[tau[2]];
-      xt.ref[tau[0]]   = 0;  xt.ftag[tau[0]]  = 0;
-      xt1.ref[tau[1]]  = 0;  xt1.ftag[tau[1]] = 0;
+      xt.ref [tau[0]]  = 0;  xt.ftag [tau[0]] = 0;  MG_SET( xt.ori, tau[0]);
+      xt1.ref[tau[1]]  = 0;  xt1.ftag[tau[1]] = 0;  MG_SET(xt1.ori, tau[1]);
     }
 
     pt->flag = pt1->flag = 0;
@@ -1045,7 +1045,7 @@ void split2sf(pMesh mesh,pSol met,int k,int vx[6]){
   xt[0].tag[taued[0]] = xt[0].ftag[tau[2]];
   xt[0].tag[taued[1]] = xt[0].ftag[tau[1]];
   xt[0].tag[taued[3]] = xt[0].ftag[tau[0]];
-  xt[0].ref[tau[3]] = 0;  xt[0].ftag[tau[3]] = 0;
+  xt[0].ref[tau[3]] = 0;  xt[0].ftag[tau[3]] = 0;  MG_SET(xt[0].ori, tau[3]);
 
   if ( imin == tau[1] ) {
     pt[1]->v[tau[2]] = vx[taued[5]];  pt[1]->v[tau[3]] = vx[taued[4]];
@@ -1055,12 +1055,13 @@ void split2sf(pMesh mesh,pSol met,int k,int vx[6]){
     xt[1].tag[taued[2]] = xt[1].ftag[tau[2]];
     xt[1].tag[taued[3]] = xt[1].ftag[tau[0]];
     xt[1].tag[taued[5]] = xt[1].ftag[tau[0]];
-    xt[1].ref[  tau[1]] = 0;  xt[1].ref[  tau[3]] = 0;
-    xt[1].ftag[ tau[1]] = 0;  xt[1].ftag[ tau[3]] = 0;
+    xt[1].ref [tau[1]] = 0;  xt[1].ref [tau[3]] = 0;
+    xt[1].ftag[tau[1]] = 0;  xt[1].ftag[tau[3]] = 0;
+    MG_SET(xt[1].ori, tau[1]);  MG_SET(xt[1].ori, tau[3]);
 
     xt[2].tag[taued[2]] = xt[2].ftag[tau[1]];
     xt[2].tag[taued[4]] = xt[2].ftag[tau[0]];
-    xt[2].ref[ tau[2]]  = 0;  xt[2].ftag[ tau[2]] = 0;
+    xt[2].ref[ tau[2]] = 0;  xt[2].ftag[ tau[2]] = 0;  MG_SET(xt[2].ori, tau[2]);
   }
   else {
     pt[1]->v[tau[3]] = vx[taued[4]];
@@ -1068,14 +1069,15 @@ void split2sf(pMesh mesh,pSol met,int k,int vx[6]){
 
     xt[1].tag[taued[2]] = xt[1].ftag[tau[2]];
     xt[1].tag[taued[5]] = xt[1].ftag[tau[0]];
-    xt[1].ref[  tau[1]] = 0;  xt[1].ftag[ tau[1]] = 0;
+    xt[1].ref[  tau[1]] = 0;  xt[1].ftag[ tau[1]] = 0;  MG_SET(xt[1].ori, tau[1]);
 
     xt[2].tag[taued[0]] = xt[2].ftag[tau[2]];
     xt[2].tag[taued[2]] = xt[2].ftag[tau[1]];
     xt[2].tag[taued[3]] = xt[2].ftag[tau[0]];
     xt[2].tag[taued[4]] = xt[2].ftag[tau[0]];
-    xt[2].ref[  tau[2]] = 0;  xt[2].ref[  tau[3]] = 0;
-    xt[2].ftag[ tau[2]] = 0;  xt[2].ftag[ tau[3]] = 0;
+    xt[2].ref [tau[2]] = 0;  xt[2].ref [tau[3]] = 0;
+    xt[2].ftag[tau[2]] = 0;  xt[2].ftag[tau[3]] = 0;
+    MG_SET(xt[2].ori, tau[2]);  MG_SET(xt[2].ori, tau[3]);
   }
 
   /* Assignation of the xt fields to the appropriate tets */
@@ -1252,17 +1254,21 @@ void split2(pMesh mesh,pSol met,int k,int vx[6]) {
   pt[2]->v[tau[0]] = vx[taued[0]];  pt[2]->v[tau[2]] = vx[taued[5]];
   pt[3]->v[tau[0]] = vx[taued[0]];  pt[3]->v[tau[3]] = vx[taued[5]];
 
-  xt[0].ref[tau[0]]  = 0;  xt[0].ref[tau[3]]  = 0;
+  xt[0].ref [tau[0]] = 0;  xt[0].ref [tau[3]] = 0;
   xt[0].ftag[tau[0]] = 0;  xt[0].ftag[tau[3]] = 0;
+  MG_SET(xt[0].ori, tau[0]);  MG_SET(xt[0].ori, tau[3]);
 
-  xt[1].ref[tau[0]]  = 0;  xt[1].ref[tau[2]]  = 0;
+  xt[1].ref [tau[0]] = 0;  xt[1].ref [tau[2]] = 0;
   xt[1].ftag[tau[0]] = 0;  xt[1].ftag[tau[2]] = 0;
+  MG_SET(xt[1].ori, tau[0]);  MG_SET(xt[1].ori, tau[2]);
 
-  xt[2].ref[tau[1]]  = 0;  xt[2].ref[tau[3]]  = 0;
+  xt[2].ref [tau[1]] = 0;  xt[2].ref [tau[3]] = 0;
   xt[2].ftag[tau[1]] = 0;  xt[2].ftag[tau[3]] = 0;
+  MG_SET(xt[2].ori, tau[1]);  MG_SET(xt[2].ori, tau[3]);
 
-  xt[3].ref[tau[1]]  = 0;  xt[3].ref[tau[2]]  = 0;
+  xt[3].ref [tau[1]] = 0;  xt[3].ref [tau[2]] = 0;
   xt[3].ftag[tau[1]] = 0;  xt[3].ftag[tau[2]] = 0;
+  MG_SET(xt[3].ori, tau[1]);  MG_SET(xt[3].ori, tau[2]);
 
   /* Assignation of the xt fields to the appropriate tets */
   memset(isxt,0,4*sizeof(char));
@@ -1558,17 +1564,17 @@ void split3(pMesh mesh,pSol met,int k,int vx[6]) {
   xt[0].tag[taued[3]] = xt[0].ftag[tau[3]];
   xt[0].tag[taued[4]] = xt[0].ftag[tau[2]];
   xt[0].tag[taued[5]] = xt[0].ftag[tau[1]];
-  xt[0].ref[  tau[0]] = 0;  xt[0].ftag[ tau[0]] = 0;
+  xt[0].ref[  tau[0]] = 0;  xt[0].ftag[ tau[0]] = 0;  MG_SET(xt[0].ori, tau[0]);
 
   xt[1].tag[taued[1]] = xt[1].ftag[tau[3]];
   xt[1].tag[taued[2]] = xt[1].ftag[tau[2]];
   xt[1].tag[taued[5]] = xt[1].ftag[tau[0]];
-  xt[1].ref[  tau[1]] = 0;  xt[1].ftag[ tau[1]] = 0;
+  xt[1].ref[  tau[1]] = 0;  xt[1].ftag[ tau[1]] = 0;  MG_SET(xt[1].ori, tau[1]);
 
   xt[2].tag[taued[0]] = xt[2].ftag[tau[3]];
   xt[2].tag[taued[2]] = xt[2].ftag[tau[1]];
   xt[2].tag[taued[4]] = xt[2].ftag[tau[0]];
-  xt[2].ref[  tau[2]] = 0;  xt[2].ftag[ tau[2]] = 0;
+  xt[2].ref[  tau[2]] = 0;  xt[2].ftag[ tau[2]] = 0;  MG_SET(xt[2].ori, tau[2]);
 
   xt[3].tag[taued[0]] = xt[3].ftag[tau[3]];
   xt[3].tag[taued[1]] = xt[3].ftag[tau[3]];
@@ -1576,8 +1582,9 @@ void split3(pMesh mesh,pSol met,int k,int vx[6]) {
   xt[3].tag[taued[3]] = xt[3].ftag[tau[3]];
   xt[3].tag[taued[4]] = xt[3].ftag[tau[0]];
   xt[3].tag[taued[5]] = xt[3].ftag[tau[1]];
-  xt[3].ref[  tau[0]] = 0;  xt[3].ref[  tau[1]] = 0;  xt[3].ref[  tau[2]] = 0;
-  xt[3].ftag[ tau[0]] = 0;  xt[3].ftag[ tau[1]] = 0;  xt[3].ftag[ tau[2]] = 0;
+  xt[3].ref [tau[0]] = 0;  xt[3].ref [tau[1]] = 0;  xt[3].ref [tau[2]] = 0;
+  xt[3].ftag[tau[0]] = 0;  xt[3].ftag[tau[1]] = 0;  xt[3].ftag[tau[2]] = 0;
+  MG_SET(xt[3].ori, tau[0]);  MG_SET(xt[3].ori, tau[1]);  MG_SET(xt[3].ori, tau[2]);
 
   /* Assignation of the xt fields to the appropriate tets */
   memset(isxt,0,4*sizeof(char));
@@ -1791,8 +1798,9 @@ void split3cone(pMesh mesh,pSol met,int k,int vx[6]) {
   xt[0].tag[taued[3]] = xt[0].ftag[tau[3]];
   xt[0].tag[taued[4]] = xt[0].ftag[tau[2]];
   xt[0].tag[taued[5]] = xt[0].ftag[tau[1]];
-  xt[0].ref[  tau[0]] = 0;
-  xt[0].ftag[ tau[0]] = 0;
+  xt[0].ref [tau[0]] = 0;
+  xt[0].ftag[tau[0]] = 0;
+  MG_SET(xt[0].ori, tau[0]);
 
   if(ia == tau[3]){
     pt[1]->v[tau[0]] = vx[taued[2]] ; pt[1]->v[tau[1]] = vx[taued[0]] ; pt[1]->v[tau[2]] = vx[taued[1]];
@@ -1801,8 +1809,9 @@ void split3cone(pMesh mesh,pSol met,int k,int vx[6]) {
     xt[1].tag[taued[3]] = xt[1].ftag[tau[3]];
     xt[1].tag[taued[4]] = xt[1].ftag[tau[2]];
     xt[1].tag[taued[5]] = xt[1].ftag[tau[1]];
-    xt[1].ref[  tau[0]] = 0;  xt[1].ref[  tau[3]] = 0;
-    xt[1].ftag[ tau[0]] = 0;  xt[1].ftag[ tau[3]] = 0;
+    xt[1].ref [tau[0]] = 0;  xt[1].ref [tau[3]] = 0;
+    xt[1].ftag[tau[0]] = 0;  xt[1].ftag[tau[3]] = 0;
+    MG_SET(xt[1].ori, tau[0]);  MG_SET(xt[1].ori, tau[3]);
 
     if(ib == tau[1]){
       pt[2]->v[tau[0]] = vx[taued[0]] ; pt[2]->v[tau[2]] = vx[taued[1]] ;
@@ -1810,14 +1819,16 @@ void split3cone(pMesh mesh,pSol met,int k,int vx[6]) {
       xt[2].tag[taued[2]] = xt[2].ftag[tau[2]];
       xt[2].tag[taued[3]] = xt[2].ftag[tau[3]];
       xt[2].tag[taued[5]] = xt[2].ftag[tau[1]];
-      xt[2].ref[  tau[0]] = 0;  xt[2].ref[  tau[1]] = 0;
-      xt[2].ftag[ tau[0]] = 0;  xt[2].ftag[ tau[1]] = 0;
+      xt[2].ref [tau[0]] = 0;  xt[2].ref [tau[1]] = 0;
+      xt[2].ftag[tau[0]] = 0;  xt[2].ftag[tau[1]] = 0;
+      MG_SET(xt[2].ori, tau[0]);  MG_SET(xt[2].ori, tau[1]);
 
       pt[3]->v[tau[0]] = vx[taued[1]] ;
       xt[3].tag[taued[0]] = xt[3].ftag[tau[3]];
       xt[3].tag[taued[2]] = xt[3].ftag[tau[1]];
-      xt[3].ref[  tau[2]] = 0;
-      xt[3].ftag[ tau[2]] = 0;
+      xt[3].ref [tau[2]] = 0;
+      xt[3].ftag[tau[2]] = 0;
+      MG_SET(xt[3].ori, tau[2]);
     }
     else{
       assert(ib == tau[2]);
@@ -1827,14 +1838,16 @@ void split3cone(pMesh mesh,pSol met,int k,int vx[6]) {
       xt[2].tag[taued[2]] = xt[2].ftag[tau[1]];
       xt[2].tag[taued[3]] = xt[2].ftag[tau[3]];
       xt[2].tag[taued[4]] = xt[2].ftag[tau[2]];
-      xt[2].ref[  tau[0]] = 0;  xt[2].ref[  tau[2]] = 0;
-      xt[2].ftag[ tau[0]] = 0;  xt[2].ftag[ tau[2]] = 0;
+      xt[2].ref [tau[0]] = 0;  xt[2].ref [tau[2]] = 0;
+      xt[2].ftag[tau[0]] = 0;  xt[2].ftag[tau[2]] = 0;
+      MG_SET(xt[2].ori, tau[0]);  MG_SET(xt[2].ori, tau[2]);
 
       pt[3]->v[tau[0]] = vx[taued[0]] ;
       xt[3].tag[taued[1]] = xt[3].ftag[tau[3]];
       xt[3].tag[taued[2]] = xt[3].ftag[tau[2]];
-      xt[3].ref[  tau[1]] = 0;
-      xt[3].ftag[ tau[1]] = 0;
+      xt[3].ref [tau[1]] = 0;
+      xt[3].ftag[tau[1]] = 0;
+      MG_SET(xt[3].ori, tau[1]);
     }
   }
 
@@ -1845,8 +1858,9 @@ void split3cone(pMesh mesh,pSol met,int k,int vx[6]) {
     xt[1].tag[taued[3]] = xt[1].ftag[tau[3]];
     xt[1].tag[taued[4]] = xt[1].ftag[tau[2]];
     xt[1].tag[taued[5]] = xt[1].ftag[tau[1]];
-    xt[1].ref[  tau[0]] = 0;  xt[1].ref[  tau[2]] = 0;
-    xt[1].ftag[ tau[0]] = 0;  xt[1].ftag[ tau[2]] = 0;
+    xt[1].ref [tau[0]] = 0;  xt[1].ref [tau[2]] = 0;
+    xt[1].ftag[tau[0]] = 0;  xt[1].ftag[tau[2]] = 0;
+    MG_SET(xt[1].ori, tau[0]);  MG_SET(xt[1].ori, tau[2]);
 
     if(ib == tau[3]){
       pt[2]->v[tau[0]] = vx[taued[2]] ; pt[2]->v[tau[1]] = vx[taued[0]] ;
@@ -1854,14 +1868,16 @@ void split3cone(pMesh mesh,pSol met,int k,int vx[6]) {
       xt[2].tag[taued[1]] = xt[2].ftag[tau[1]];
       xt[2].tag[taued[3]] = xt[2].ftag[tau[3]];
       xt[2].tag[taued[4]] = xt[2].ftag[tau[2]];
-      xt[2].ref[  tau[0]] = 0;  xt[2].ref[  tau[3]] = 0;
-      xt[2].ftag[ tau[0]] = 0;  xt[2].ftag[ tau[3]] = 0;
+      xt[2].ref [tau[0]] = 0;  xt[2].ref [tau[3]] = 0;
+      xt[2].ftag[tau[0]] = 0;  xt[2].ftag[tau[3]] = 0;
+      MG_SET(xt[2].ori, tau[0]);  MG_SET(xt[2].ori, tau[3]);
 
       pt[3]->v[tau[0]] = vx[taued[0]] ;
       xt[3].tag[taued[1]] = xt[3].ftag[tau[3]];
       xt[3].tag[taued[2]] = xt[3].ftag[tau[2]];
-      xt[3].ref[  tau[1]] = 0;
-      xt[3].ftag[ tau[1]] = 0;
+      xt[3].ref [tau[1]] = 0;
+      xt[3].ftag[tau[1]] = 0;
+      MG_SET(xt[3].ori, tau[1]);
     }
     else{
       assert(ib == tau[1]);
@@ -1871,14 +1887,16 @@ void split3cone(pMesh mesh,pSol met,int k,int vx[6]) {
       xt[2].tag[taued[2]] = xt[2].ftag[tau[2]];
       xt[2].tag[taued[4]] = xt[2].ftag[tau[2]];
       xt[2].tag[taued[5]] = xt[2].ftag[tau[1]];
-      xt[2].ref[  tau[0]] = 0;  xt[2].ref[  tau[1]] = 0;
-      xt[2].ftag[ tau[0]] = 0;  xt[2].ftag[ tau[1]] = 0;
+      xt[2].ref [tau[0]] = 0;  xt[2].ref [tau[1]] = 0;
+      xt[2].ftag[tau[0]] = 0;  xt[2].ftag[tau[1]] = 0;
+      MG_SET(xt[2].ori, tau[0]);  MG_SET(xt[2].ori, tau[1]);
 
       pt[3]->v[tau[0]] = vx[taued[2]] ;
       xt[3].tag[taued[0]] = xt[3].ftag[tau[2]];
       xt[3].tag[taued[1]] = xt[3].ftag[tau[1]];
-      xt[3].ref[  tau[3]] = 0;
-      xt[3].ftag[ tau[3]] = 0;
+      xt[3].ref [tau[3]] = 0;
+      xt[3].ftag[tau[3]] = 0;
+      MG_SET(xt[3].ori, tau[3]);
     }
   }
   else{
@@ -1890,8 +1908,9 @@ void split3cone(pMesh mesh,pSol met,int k,int vx[6]) {
     xt[1].tag[taued[3]] = xt[1].ftag[tau[3]];
     xt[1].tag[taued[4]] = xt[1].ftag[tau[2]];
     xt[1].tag[taued[5]] = xt[1].ftag[tau[1]];
-    xt[1].ref[  tau[0]] = 0;  xt[1].ref[  tau[1]] = 0;
-    xt[1].ftag[ tau[0]] = 0;  xt[1].ftag[ tau[1]] = 0;
+    xt[1].ref [tau[0]] = 0;  xt[1].ref [tau[1]] = 0;
+    xt[1].ftag[tau[0]] = 0;  xt[1].ftag[tau[1]] = 0;
+    MG_SET(xt[1].ori, tau[0]);  MG_SET(xt[1].ori, tau[1]);
 
     if(ib == tau[2]){
       pt[2]->v[tau[0]] = vx[taued[1]] ; pt[2]->v[tau[3]] = vx[taued[2]] ;
@@ -1899,14 +1918,16 @@ void split3cone(pMesh mesh,pSol met,int k,int vx[6]) {
       xt[2].tag[taued[2]] = xt[2].ftag[tau[1]];
       xt[2].tag[taued[4]] = xt[2].ftag[tau[2]];
       xt[2].tag[taued[5]] = xt[2].ftag[tau[1]];
-      xt[2].ref[  tau[0]] = 0;  xt[2].ref[  tau[2]] = 0;
-      xt[2].ftag[ tau[0]] = 0;  xt[2].ftag[ tau[2]] = 0;
+      xt[2].ref [tau[0]] = 0;  xt[2].ref [tau[2]] = 0;
+      xt[2].ftag[tau[0]] = 0;  xt[2].ftag[tau[2]] = 0;
+      MG_SET(xt[2].ori, tau[0]);  MG_SET(xt[2].ori, tau[2]);
 
       pt[3]->v[tau[0]] = vx[taued[2]] ;
       xt[3].tag[taued[0]] = xt[3].ftag[tau[2]];
       xt[3].tag[taued[1]] = xt[3].ftag[tau[1]];
-      xt[3].ref[  tau[3]] = 0;
-      xt[3].ftag[ tau[3]] = 0;
+      xt[3].ref [tau[3]] = 0;
+      xt[3].ftag[tau[3]] = 0;
+      MG_SET(xt[3].ori, tau[3]);
     }
     else{
       assert(ib == tau[3]);
@@ -1916,14 +1937,16 @@ void split3cone(pMesh mesh,pSol met,int k,int vx[6]) {
       xt[2].tag[taued[1]] = xt[2].ftag[tau[1]];
       xt[2].tag[taued[3]] = xt[2].ftag[tau[3]];
       xt[2].tag[taued[5]] = xt[2].ftag[tau[1]];
-      xt[2].ref[  tau[0]] = 0;  xt[2].ref[  tau[3]] = 0;
-      xt[2].ftag[ tau[0]] = 0;  xt[2].ftag[ tau[3]] = 0;
+      xt[2].ref [tau[0]] = 0;  xt[2].ref [tau[3]] = 0;
+      xt[2].ftag[tau[0]] = 0;  xt[2].ftag[tau[3]] = 0;
+      MG_SET(xt[2].ori, tau[0]);  MG_SET(xt[2].ori, tau[3]);
 
       pt[3]->v[tau[0]] = vx[taued[1]] ;
       xt[3].tag[taued[0]] = xt[3].ftag[tau[3]];
       xt[3].tag[taued[2]] = xt[3].ftag[tau[1]];
-      xt[3].ref[  tau[2]] = 0;
-      xt[3].ftag[ tau[2]] = 0;
+      xt[3].ref [tau[2]] = 0;
+      xt[3].ftag[tau[2]] = 0;
+      MG_SET(xt[3].ori, tau[2]);
     }
   }
 
@@ -2245,88 +2268,106 @@ void split3op(pMesh mesh, pSol met, int k, int vx[6]){
   /* Generic formulation of split of 3 edges in op configuration (edges 0,1,5 splitted) */
   if((imin12 == ip2) && (imin03 == ip0)){
     pt[0]->v[ip0] = vx[ie1] ;  pt[0]->v[ip1] = vx[ie0] ; pt[0]->v[ip3] = vx[ie5] ;
-    xt[0].ref[ip0] = 0 ; xt[0].ref[ip2] = 0 ;
+    xt[0].ref [ip0] = 0 ; xt[0].ref [ip2] = 0 ;
     xt[0].ftag[ip0] = 0 ; xt[0].ftag[ip2] = 0 ;
+    MG_SET(xt[0].ori, ip0); MG_SET(xt[0].ori, ip2);
 
     pt[1]->v[ip0] = vx[ie0] ; pt[1]->v[ip3] = vx[ie5] ;
-    xt[1].ref[ip1] = 0 ; xt[1] .ref[ip2] = 0 ;
+    xt[1].ref [ip1] = 0 ; xt[1] .ref[ip2] = 0 ;
     xt[1].ftag[ip1] = 0 ; xt[1].ftag[ip2] = 0 ;
+    MG_SET(xt[1].ori, ip1); MG_SET(xt[1].ori, ip2);
 
     pt[2]->v[ip0] = vx[ie0] ; pt[2]->v[ip2] = vx[ie5] ;
-    xt[2].ref[ip1] = 0 ; xt[2].ref[ip3] = 0 ;
+    xt[2].ref [ip1] = 0 ; xt[2].ref [ip3] = 0 ;
     xt[2].ftag[ip1] = 0 ; xt[2].ftag[ip3] = 0 ;
+    MG_SET(xt[2].ori, ip1); MG_SET(xt[2].ori, ip3);
 
     pt[3]->v[ip1] = vx[ie0] ; pt[3]->v[ip2] = vx[ie1] ; pt[3]->v[ip3] = vx[ie5] ;
-    xt[3].ref[ip0] = 0 ; xt[3].ref[ip2] = 0 ;
+    xt[3].ref [ip0] = 0 ; xt[3].ref [ip2] = 0 ;
     xt[3].ftag[ip0] = 0 ; xt[3].ftag[ip2] = 0 ;
+    MG_SET(xt[3].ori, ip0); MG_SET(xt[3].ori, ip2);
 
     pt[4]->v[ip1] = vx[ie0] ; pt[4]->v[ip2] = vx[ie5];
-    xt[4].ref[ip0] = 0 ; xt[4].ref[ip3] = 0 ;
+    xt[4].ref [ip0] = 0 ; xt[4].ref [ip3] = 0 ;
     xt[4].ftag[ip0] = 0 ; xt[4].ftag[ip3] = 0 ;
+    MG_SET(xt[4].ori, ip0); MG_SET(xt[4].ori, ip3);
   }
 
   else if((imin12 == ip1) && (imin03 == ip0)){
     pt[0]->v[ip0] = vx[ie1] ; pt[0]->v[ip3] = vx[ie5] ;
-    xt[0].ref[ip2] = 0 ;
+    xt[0].ref[ip2]  = 0 ;
     xt[0].ftag[ip2] = 0 ;
+    MG_SET(xt[0].ori, ip2);
 
     pt[1]->v[ip0] = vx[ie0] ; pt[1]->v[ip2] = vx[ie1] ; pt[1]->v[ip3] = vx[ie5];
-    xt[1].ref[ip0] = 0 ; xt[1].ref[ip1] = 0 ; xt[1].ref[ip2] = 0 ;
+    xt[1].ref [ip0] = 0 ; xt[1].ref [ip1] = 0 ; xt[1].ref [ip2] = 0 ;
     xt[1].ftag[ip0] = 0 ; xt[1].ftag[ip1] = 0 ; xt[1].ftag[ip2] = 0 ;
+    MG_SET(xt[1].ori, ip0); MG_SET(xt[1].ori, ip1); MG_SET(xt[1].ori, ip2);
 
     pt[2]->v[ip0] = vx[ie0] ; pt[2]->v[ip2] = vx[ie5] ;
-    xt[2].ref[ip1] = 0 ; xt[2].ref[ip3] = 0 ;
+    xt[2].ref [ip1] = 0 ; xt[2].ref [ip3] = 0 ;
     xt[2].ftag[ip1] = 0 ; xt[2].ftag[ip3] = 0 ;
+    MG_SET(xt[2].ori, ip1); MG_SET(xt[2].ori, ip3);
 
     pt[3]->v[ip1] = vx[ie0] ; pt[3]->v[ip2] = vx[ie5];
-    xt[3].ref[ip0] = 0 ; xt[3].ref[ip3] = 0 ;
+    xt[3].ref [ip0] = 0 ; xt[3].ref [ip3] = 0 ;
     xt[3].ftag[ip0] = 0 ; xt[3].ftag[ip3] = 0 ;
+    MG_SET(xt[3].ori, ip0); MG_SET(xt[3].ori, ip3);
 
     pt[4]->v[ip1] = vx[ie0] ; pt[4]->v[ip2] = vx[ie1]; pt[4]->v[ip3] = vx[ie5];
-    xt[4].ref[ip0] = 0 ; xt[4].ref[ip2] = 0 ;
+    xt[4].ref [ip0] = 0 ; xt[4].ref [ip2] = 0 ;
     xt[4].ftag[ip0] = 0 ; xt[4].ftag[ip2] = 0 ;
-
+    MG_SET(xt[4].ori, ip0); MG_SET(xt[4].ori, ip2);
   }
 
   else if((imin12 == ip2) && (imin03 == ip3)){
     pt[0]->v[ip1] = vx[ie0] ; pt[0]->v[ip2] = vx[ie1] ;
-    xt[0].ref[ip0] = 0 ;
+    xt[0].ref[ip0]  = 0 ;
     xt[0].ftag[ip0] = 0 ;
+    MG_SET(xt[0].ori, ip0);
 
     pt[1]->v[ip0] = vx[ie1] ; pt[1]->v[ip1] = vx[ie0] ; pt[1]->v[ip2] = vx[ie5];
-    xt[1].ref[ip1] = 0 ; xt[1].ref[ip2] = 0 ;  xt[1].ref[ip3] = 0 ;
+    xt[1].ref [ip1] = 0 ; xt[1].ref [ip2] = 0 ; xt[1].ref [ip3] = 0 ;
     xt[1].ftag[ip1] = 0 ; xt[1].ftag[ip2] = 0 ; xt[1].ftag[ip3] = 0 ;
+    MG_SET(xt[1].ori, ip1); MG_SET(xt[1].ori, ip2); MG_SET(xt[1].ori, ip3);
 
     pt[2]->v[ip0] = vx[ie0] ; pt[2]->v[ip2] = vx[ie5] ;
-    xt[2].ref[ip1] = 0 ; xt[2].ref[ip3] = 0 ;
+    xt[2].ref [ip1] = 0 ; xt[2].ref [ip3] = 0 ;
     xt[2].ftag[ip1] = 0 ; xt[2].ftag[ip3] = 0 ;
+    MG_SET(xt[2].ori, ip1); MG_SET(xt[2].ori, ip3);
 
     pt[3]->v[ip0] = vx[ie1] ; pt[3]->v[ip1] = vx[ie0]; pt[3]->v[ip3] = vx[ie5];
-    xt[3].ref[ip0] = 0 ; xt[3].ref[ip2] = 0 ;
+    xt[3].ref [ip0] = 0 ; xt[3].ref [ip2] = 0 ;
     xt[3].ftag[ip0] = 0 ; xt[3].ftag[ip2] = 0 ;
+    MG_SET(xt[3].ori, ip0); MG_SET(xt[3].ori, ip2);
 
     pt[4]->v[ip0] = vx[ie0] ; pt[4]->v[ip3] = vx[ie5];
-    xt[4].ref[ip1] = 0 ; xt[4].ref[ip2] = 0 ;
+    xt[4].ref [ip1] = 0 ; xt[4].ref [ip2] = 0 ;
     xt[4].ftag[ip1] = 0 ; xt[4].ftag[ip2] = 0 ;
+    MG_SET(xt[4].ori, ip1); MG_SET(xt[4].ori, ip2);
   }
   else{
     assert((imin12 == ip1) && (imin03 == ip3)) ;
 
     pt[0]->v[ip1] = vx[ie0] ; pt[0]->v[ip2] = vx[ie1] ;
-    xt[0].ref[ip0] = 0 ;
+    xt[0].ref [ip0] = 0 ;
     xt[0].ftag[ip0] = 0 ;
+    MG_SET(xt[0].ori, ip0);
 
     pt[1]->v[ip0] = vx[ie1] ; pt[1]->v[ip3] = vx[ie5] ;
-    xt[1].ref[ip2] = 0 ;
+    xt[1].ref [ip2] = 0 ;
     xt[1].ftag[ip2] = 0 ;
+    MG_SET(xt[1].ori, ip2);
 
     pt[2]->v[ip0] = vx[ie0] ; pt[2]->v[ip2] = vx[ie1] ;
-    xt[2].ref[ip0] = 0 ; xt[2].ref[ip1] = 0 ;
+    xt[2].ref [ip0] = 0 ; xt[2].ref [ip1] = 0 ;
     xt[2].ftag[ip0] = 0 ; xt[2].ftag[ip1] = 0 ;
+    MG_SET(xt[2].ori, ip0); MG_SET(xt[2].ori, ip1);
 
     pt[3]->v[ip0] = vx[ie1] ; pt[3]->v[ip2] = vx[ie5] ;
-    xt[3].ref[ip2] = 0 ; xt[3].ref[ip3] = 0 ;
+    xt[3].ref [ip2] = 0 ; xt[3].ref [ip3] = 0 ;
     xt[3].ftag[ip2] = 0 ; xt[3].ftag[ip3] = 0 ;
+    MG_SET(xt[3].ori, ip2); MG_SET(xt[3].ori, ip3);
   }
 
   /* Assignation of the xt fields to the appropriate tets */
@@ -2654,26 +2695,30 @@ int split4bar(pMesh mesh, pSol met, int k){
   xt[0].tag[0]  = 0;
   xt[0].tag[1]  = 0;
   xt[0].tag[2]  = 0;
-  xt[0].ref[1]  = 0;  xt[0].ref[2]  = 0;  xt[0].ref[3]  = 0;
+  xt[0].ref [1] = 0;  xt[0].ref [2] = 0;  xt[0].ref [3] = 0;
   xt[0].ftag[1] = 0;  xt[0].ftag[2] = 0;  xt[0].ftag[3] = 0;
+  MG_SET(xt[0].ori, 1);  MG_SET(xt[0].ori, 2);  MG_SET(xt[0].ori, 3);
 
   xt[1].tag[0]  = 0;
   xt[1].tag[3]  = 0;
   xt[1].tag[4]  = 0;
-  xt[1].ref[0]  = 0;  xt[1].ref[2]  = 0;  xt[1].ref[3]  = 0;
+  xt[1].ref [0] = 0;  xt[1].ref [2] = 0;  xt[1].ref [3] = 0;
   xt[1].ftag[0] = 0;  xt[1].ftag[2] = 0;  xt[1].ftag[3] = 0;
+  MG_SET(xt[1].ori, 0);  MG_SET(xt[1].ori, 2);  MG_SET(xt[1].ori, 3);
 
   xt[2].tag[1]  = 0;
   xt[2].tag[3]  = 0;
   xt[2].tag[5]  = 0;
-  xt[2].ref[0]  = 0;  xt[2].ref[1]  = 0;  xt[2].ref[3]  = 0;
+  xt[2].ref [0] = 0;  xt[2].ref [1] = 0;  xt[2].ref [3] = 0;
   xt[2].ftag[0] = 0;  xt[2].ftag[1] = 0;  xt[2].ftag[3] = 0;
+  MG_SET(xt[2].ori, 0);  MG_SET(xt[2].ori, 1);  MG_SET(xt[2].ori, 3);
 
   xt[3].tag[2]  = 0;
   xt[3].tag[4]  = 0;
   xt[3].tag[5]  = 0;
-  xt[3].ref[0]  = 0;  xt[3].ref[1]  = 0;  xt[3].ref[2]  = 0;
+  xt[3].ref [0] = 0;  xt[3].ref [1] = 0;  xt[3].ref [2] = 0;
   xt[3].ftag[0] = 0;  xt[3].ftag[1] = 0;  xt[3].ftag[2] = 0;
+  MG_SET(xt[3].ori, 0);  MG_SET(xt[3].ori, 1);  MG_SET(xt[3].ori, 2);
 
   /* Assignation of the xt fields to the appropriate tets */
   memset(isxt,0,4*sizeof(char));
@@ -2900,51 +2945,60 @@ void split4sf(pMesh mesh,pSol met,int k,int vx[6]) {
 
   /* Generic formulation of split of 4 edges (with 3 on same face) */
   pt[0]->v[tau[1]] = vx[taued[0]] ;   pt[0]->v[tau[2]] = vx[taued[1]] ;   pt[0]->v[tau[3]] = vx[taued[2]];
-  xt[0].ref[tau[0]] = 0 ;
+  xt[0].ref [tau[0]] = 0 ;
   xt[0].ftag[tau[0]] = 0 ;
+  MG_SET(xt[0].ori, tau[0]);
 
   pt[1]->v[tau[0]] = vx[taued[2]] ; pt[1]->v[tau[1]] = vx[taued[0]] ;
   pt[1]->v[tau[2]] = vx[taued[1]] ; pt[1]->v[tau[3]] = vx[taued[4]] ;
-  xt[1].ref[tau[0]] = 0 ;  xt[1].ref[tau[1]] = 0 ; xt[1].ref[tau[3]] = 0 ;
+  xt[1].ref [tau[0]] = 0 ; xt[1].ref [tau[1]] = 0 ; xt[1].ref [tau[3]] = 0 ;
   xt[1].ftag[tau[0]] = 0 ; xt[1].ftag[tau[1]] = 0 ; xt[1].ftag[tau[3]] = 0 ;
+  MG_SET(xt[1].ori, tau[0]); MG_SET(xt[1].ori, tau[1]); MG_SET(xt[1].ori, tau[3]);
 
   if(imin12 == tau[1]){
     pt[2]->v[tau[0]] = vx[taued[0]] ; pt[2]->v[tau[2]] = vx[taued[1]] ; pt[2]->v[tau[3]] = vx[taued[4]] ;
-    xt[2].ref[tau[0]] = 0 ;   xt[2].ref[tau[1]] = 0 ;
+    xt[2].ref [tau[0]] = 0 ; xt[2].ref [tau[1]] = 0 ;
     xt[2].ftag[tau[0]] = 0 ; xt[2].ftag[tau[1]] = 0 ;
+    MG_SET(xt[2].ori, tau[0]); MG_SET(xt[2].ori, tau[1]);
 
     pt[3]->v[tau[0]] = vx[taued[1]] ; pt[3]->v[tau[3]] = vx[taued[4]] ;
-    xt[3].ref[tau[1]] = 0 ;   xt[3].ref[tau[2]] = 0 ;
+    xt[3].ref [tau[1]] = 0 ; xt[3].ref [tau[2]] = 0 ;
     xt[3].ftag[tau[1]] = 0 ; xt[3].ftag[tau[2]] = 0 ;
-
+    MG_SET(xt[3].ori, tau[1]); MG_SET(xt[3].ori, tau[2]);
   }
   else{
     pt[2]->v[tau[0]] = vx[taued[1]] ; pt[2]->v[tau[1]] = vx[taued[0]] ; pt[2]->v[tau[3]] = vx[taued[4]] ;
-    xt[2].ref[tau[0]] = 0 ;   xt[2].ref[tau[1]] = 0 ; xt[2].ref[tau[2]] = 0 ;
+    xt[2].ref [tau[0]] = 0 ; xt[2].ref [tau[1]] = 0 ; xt[2].ref [tau[2]] = 0 ;
     xt[2].ftag[tau[0]] = 0 ; xt[2].ftag[tau[1]] = 0 ; xt[2].ftag[tau[2]] = 0 ;
+    MG_SET(xt[2].ori, tau[0]); MG_SET(xt[2].ori, tau[1]); MG_SET(xt[2].ori, tau[2]);
 
     pt[3]->v[tau[0]] = vx[taued[0]] ; pt[3]->v[tau[3]] = vx[taued[4]] ;
-    xt[3].ref[tau[1]] = 0 ;
+    xt[3].ref [tau[1]] = 0 ;
     xt[3].ftag[tau[1]] = 0 ;
+    MG_SET(xt[3].ori, tau[1]);
   }
 
   if(imin23 == tau[2]){
     pt[4]->v[tau[0]] = vx[taued[2]] ; pt[4]->v[tau[1]] = vx[taued[1]] ; pt[4]->v[tau[3]] = vx[taued[4]] ;
-    xt[4].ref[tau[0]] = 0 ;   xt[4].ref[tau[1]] = 0 ; xt[4].ref[tau[2]] = 0;
+    xt[4].ref [tau[0]] = 0 ; xt[4].ref [tau[1]] = 0 ; xt[4].ref [tau[2]] = 0;
     xt[4].ftag[tau[0]] = 0 ; xt[4].ftag[tau[1]] = 0 ; xt[4].ftag[tau[2]] = 0;
+    MG_SET(xt[4].ori, tau[0]); MG_SET(xt[4].ori, tau[1]); MG_SET(xt[4].ori, tau[2]);
 
     pt[5]->v[tau[0]] = vx[taued[2]] ; pt[5]->v[tau[1]] = vx[taued[4]] ;
-    xt[5].ref[tau[3]] = 0 ;
+    xt[5].ref [tau[3]] = 0 ;
     xt[5].ftag[tau[3]] = 0 ;
+    MG_SET(xt[5].ori, tau[3]);
   }
   else{
     pt[4]->v[tau[0]] = vx[taued[2]] ; pt[4]->v[tau[1]] = vx[taued[4]] ; pt[4]->v[tau[2]] = vx[taued[1]] ;
-    xt[4].ref[tau[0]] = 0 ;   xt[4].ref[tau[3]] = 0 ;
+    xt[4].ref [tau[0]] = 0 ; xt[4].ref [tau[3]] = 0 ;
     xt[4].ftag[tau[0]] = 0 ; xt[4].ftag[tau[3]] = 0 ;
+    MG_SET(xt[4].ori, tau[0]); MG_SET(xt[4].ori, tau[3]);
 
     pt[5]->v[tau[0]] = vx[taued[1]] ; pt[5]->v[tau[1]] = vx[taued[4]] ;
-    xt[5].ref[tau[2]] = 0 ; xt[5].ref[tau[3]] = 0 ;
+    xt[5].ref [tau[2]] = 0 ; xt[5].ref [tau[3]] = 0 ;
     xt[5].ftag[tau[2]] = 0 ; xt[5].ftag[tau[3]] = 0 ;
+    MG_SET(xt[5].ori, tau[2]); MG_SET(xt[5].ori, tau[3]);
   }
 
   /* Assignation of the xt fields to the appropriate tets */
@@ -3141,56 +3195,68 @@ void split4op(pMesh mesh,pSol met,int k,int vx[6]) {
   /* Generic formulation for split of 4 edges, with no 3 edges lying on the same face */
   if(imin01 == tau[0]){
     pt[0]->v[tau[2]] = vx[taued[3]] ; pt[0]->v[tau[3]] = vx[taued[4]];
-    xt[0].ref[tau[1]] = 0;
+    xt[0].ref [tau[1]] = 0;
     xt[0].ftag[tau[1]] = 0;
+    MG_SET(xt[0].ori, tau[1]);
 
     pt[1]->v[tau[1]] = vx[taued[4]] ; pt[1]->v[tau[2]] = vx[taued[3]] ; pt[1]->v[tau[3]] = vx[taued[2]];
-    xt[1].ref[tau[0]] = 0 ;   xt[1].ref[tau[1]] = 0 ;   xt[1].ref[tau[3]] = 0;
+    xt[1].ref [tau[0]] = 0 ;  xt[1].ref [tau[1]] = 0 ;  xt[1].ref [tau[3]] = 0;
     xt[1].ftag[tau[0]] = 0 ;  xt[1].ftag[tau[1]] = 0 ;  xt[1].ftag[tau[3]] = 0;
+    MG_SET(xt[1].ori, tau[0]);  MG_SET(xt[1].ori, tau[1]);  MG_SET(xt[1].ori, tau[3]);
 
     pt[2]->v[tau[1]] = vx[taued[3]] ; pt[2]->v[tau[2]] = vx[taued[1]] ; pt[2]->v[tau[3]] = vx[taued[2]];
-    xt[2].ref[tau[0]] = 0 ;   xt[2].ref[tau[2]] = 0 ;
+    xt[2].ref [tau[0]] = 0 ;  xt[2].ref [tau[2]] = 0 ;
     xt[2].ftag[tau[0]] = 0 ;  xt[2].ftag[tau[2]] = 0 ;
+    MG_SET(xt[2].ori, tau[0]);  MG_SET(xt[2].ori, tau[2]);
   }
   else{
     pt[0]->v[tau[2]] = vx[taued[1]] ; pt[0]->v[tau[3]] = vx[taued[2]];
-    xt[0].ref[tau[0]] = 0;
+    xt[0].ref [tau[0]] = 0;
     xt[0].ftag[tau[0]] = 0;
+    MG_SET(xt[0].ori, tau[0]);
 
     pt[1]->v[tau[0]] = vx[taued[1]] ; pt[1]->v[tau[2]] = vx[taued[3]] ; pt[1]->v[tau[3]] = vx[taued[2]];
-    xt[1].ref[tau[0]] = 0 ;   xt[1].ref[tau[1]] = 0 ;   xt[1].ref[tau[2]] = 0;
+    xt[1].ref [tau[0]] = 0 ;  xt[1].ref [tau[1]] = 0 ;  xt[1].ref [tau[2]] = 0;
     xt[1].ftag[tau[0]] = 0 ;  xt[1].ftag[tau[1]] = 0 ;  xt[1].ftag[tau[2]] = 0;
+    MG_SET(xt[1].ori, tau[0]);  MG_SET(xt[1].ori, tau[1]);  MG_SET(xt[1].ori, tau[2]);
 
     pt[2]->v[tau[0]] = vx[taued[2]] ; pt[2]->v[tau[2]] = vx[taued[3]] ; pt[2]->v[tau[3]] = vx[taued[4]];
-    xt[2].ref[tau[1]] = 0 ;   xt[2].ref[tau[3]] = 0 ;
+    xt[2].ref [tau[1]] = 0 ;  xt[2].ref [tau[3]] = 0 ;
     xt[2].ftag[tau[1]] = 0 ;  xt[2].ftag[tau[3]] = 0 ;
+    MG_SET(xt[2].ori, tau[1]);  MG_SET(xt[2].ori, tau[3]);
   }
 
   if(imin23 == tau[2]){
     pt[3]->v[tau[0]] = vx[taued[2]] ; pt[3]->v[tau[1]] = vx[taued[4]];
-    xt[3].ref[tau[3]] = 0;
+    xt[3].ref [tau[3]] = 0;
     xt[3].ftag[tau[3]] = 0;
+    MG_SET(xt[3].ori, tau[3]);
 
     pt[4]->v[tau[0]] = vx[taued[2]] ; pt[4]->v[tau[1]] = vx[taued[3]] ; pt[4]->v[tau[3]] = vx[taued[4]];
-    xt[4].ref[tau[1]] = 0 ;   xt[4].ref[tau[2]] = 0 ;   xt[4].ref[tau[3]] = 0;
+    xt[4].ref [tau[1]] = 0 ;  xt[4].ref [tau[2]] = 0 ;  xt[4].ref [tau[3]] = 0;
     xt[4].ftag[tau[1]] = 0 ;  xt[4].ftag[tau[2]] = 0 ;  xt[4].ftag[tau[3]] = 0;
+    MG_SET(xt[4].ori, tau[1]);  MG_SET(xt[4].ori, tau[2]);  MG_SET(xt[4].ori, tau[3]);
 
     pt[5]->v[tau[0]] = vx[taued[1]] ; pt[5]->v[tau[1]] = vx[taued[3]] ; pt[5]->v[tau[3]] = vx[taued[2]];
-    xt[5].ref[tau[0]] = 0 ;   xt[5].ref[tau[2]] = 0 ;
+    xt[5].ref [tau[0]] = 0 ;  xt[5].ref [tau[2]] = 0 ;
     xt[5].ftag[tau[0]] = 0 ;  xt[5].ftag[tau[2]] = 0 ;
+    MG_SET(xt[5].ori, tau[0]);  MG_SET(xt[5].ori, tau[2]);
   }
   else{
     pt[3]->v[tau[0]] = vx[taued[1]] ; pt[3]->v[tau[1]] = vx[taued[3]];
-    xt[3].ref[tau[2]] = 0;
+    xt[3].ref [tau[2]] = 0;
     xt[3].ftag[tau[2]] = 0;
+    MG_SET(xt[3].ori, tau[2]);
 
     pt[4]->v[tau[0]] = vx[taued[2]] ; pt[4]->v[tau[1]] = vx[taued[3]] ; pt[4]->v[tau[2]] = vx[taued[1]];
-    xt[4].ref[tau[0]] = 0 ;   xt[4].ref[tau[2]] = 0 ;   xt[4].ref[tau[3]] = 0;
+    xt[4].ref [tau[0]] = 0 ;  xt[4].ref [tau[2]] = 0 ;  xt[4].ref [tau[3]] = 0;
     xt[4].ftag[tau[0]] = 0 ;  xt[4].ftag[tau[2]] = 0 ;  xt[4].ftag[tau[3]] = 0;
+    MG_SET(xt[4].ori, tau[0]);  MG_SET(xt[4].ori, tau[2]);  MG_SET(xt[4].ori, tau[3]);
 
     pt[5]->v[tau[0]] = vx[taued[2]] ; (pt[5])->v[tau[1]] = vx[taued[4]] ; (pt[5])->v[tau[2]] = vx[taued[3]];
-    xt[5].ref[tau[1]] = 0 ;  xt[5].ref[tau[3]] = 0 ;
+    xt[5].ref [tau[1]] = 0 ; xt[5].ref [tau[3]] = 0 ;
     xt[5].ftag[tau[1]] = 0 ; xt[5].ftag[tau[3]] = 0 ;
+    MG_SET(xt[5].ori, tau[1]); MG_SET(xt[5].ori, tau[3]);
   }
 
   /* Assignation of the xt fields to the appropriate tets */
@@ -3407,49 +3473,59 @@ void split5(pMesh mesh,pSol met,int k,int vx[6]) {
   imin = (pt[0]->v[tau[0]] < pt[0]->v[tau[1]]) ? tau[0] : tau[1];
 
   pt[0]->v[tau[0]] = vx[taued[2]] ;   pt[0]->v[tau[1]] = vx[taued[4]] ;   pt[0]->v[tau[2]] = vx[taued[5]];
-  xt[0].ref[tau[3]] = 0 ;
+  xt[0].ref [tau[3]] = 0 ;
   xt[0].ftag[tau[3]] = 0 ;
+  MG_SET(xt[0].ori, tau[3]);
 
   pt[1]->v[tau[0]] = vx[taued[1]] ; pt[1]->v[tau[1]] = vx[taued[3]] ; pt[1]->v[tau[3]] = vx[taued[5]];
-  xt[1].ref[tau[2]] = 0 ;
+  xt[1].ref [tau[2]] = 0 ;
   xt[1].ftag[tau[2]] = 0 ;
+  MG_SET(xt[1].ori, tau[2]);
 
   pt[2]->v[tau[0]] = vx[taued[2]] ; pt[2]->v[tau[1]] = vx[taued[4]];
   pt[2]->v[tau[2]] = vx[taued[3]] ; pt[2]->v[tau[3]] = vx[taued[5]];
-  xt[2].ref[tau[1]] = 0 ;   xt[2].ref[tau[2]] = 0 ;   xt[2].ref[tau[3]] = 0 ;
+  xt[2].ref [tau[1]] = 0 ;  xt[2].ref [tau[2]] = 0 ;  xt[2].ref [tau[3]] = 0 ;
   xt[2].ftag[tau[1]] = 0 ;  xt[2].ftag[tau[2]] = 0 ;  xt[2].ftag[tau[3]] = 0 ;
+  MG_SET(xt[2].ori, tau[1]);  MG_SET(xt[2].ori, tau[2]);  MG_SET(xt[2].ori, tau[3]);
 
   pt[3]->v[tau[0]] = vx[taued[2]] ; pt[3]->v[tau[1]] = vx[taued[3]];
   pt[3]->v[tau[2]] = vx[taued[1]] ; pt[3]->v[tau[3]] = vx[taued[5]];
-  xt[3].ref[tau[0]] = 0   ; xt[3].ref[tau[2]] = 0   ; xt[3].ref[tau[3]] = 0 ;
-  xt[3].ftag[tau[0]] = 0  ; xt[3].ftag[tau[2]] = 0  ; xt[3].ftag[tau[3]] = 0 ;
+  xt[3].ref [tau[0]] = 0 ;  xt[3].ref [tau[2]] = 0 ;  xt[3].ref [tau[3]] = 0 ;
+  xt[3].ftag[tau[0]] = 0 ;  xt[3].ftag[tau[2]] = 0 ;  xt[3].ftag[tau[3]] = 0 ;
+  MG_SET(xt[3].ori, tau[0]);  MG_SET(xt[3].ori, tau[2]);  MG_SET(xt[3].ori, tau[3]);
 
   if(imin == tau[0]){
     pt[4]->v[tau[2]] = vx[taued[3]] ; pt[4]->v[tau[3]] = vx[taued[4]];
-    xt[4].ref[tau[1]] = 0;
+    xt[4].ref [tau[1]] = 0;
     xt[4].ftag[tau[1]] = 0;
+    MG_SET(xt[4].ori, tau[1]);
 
     pt[5]->v[tau[1]] = vx[taued[4]] ; pt[5]->v[tau[2]] = vx[taued[3]]; pt[5]->v[tau[3]] = vx[taued[2]];
-    xt[5].ref[tau[0]] = 0 ; xt[5].ref[tau[1]] = 0 ; xt[5].ref[tau[3]] = 0 ;
+    xt[5].ref [tau[0]] = 0 ; xt[5].ref [tau[1]] = 0 ; xt[5].ref [tau[3]] = 0 ;
     xt[5].ftag[tau[0]] = 0 ; xt[5].ftag[tau[1]] = 0 ; xt[5].ftag[tau[3]] = 0 ;
+    MG_SET(xt[5].ori, tau[0]); MG_SET(xt[5].ori, tau[1]); MG_SET(xt[5].ori, tau[3]);
 
     pt[6]->v[tau[1]] = vx[taued[3]] ; pt[6]->v[tau[2]] = vx[taued[1]]; pt[6]->v[tau[3]] = vx[taued[2]];
-    xt[6].ref[tau[0]] = 0 ; xt[6].ref[tau[2]] = 0 ;
+    xt[6].ref [tau[0]] = 0 ; xt[6].ref [tau[2]] = 0 ;
     xt[6].ftag[tau[0]] = 0 ; xt[6].ftag[tau[2]] = 0 ;
+    MG_SET(xt[6].ori, tau[0]); MG_SET(xt[6].ori, tau[2]);
 
   }
   else{
     pt[4]->v[tau[2]] = vx[taued[1]] ; pt[4]->v[tau[3]] = vx[taued[2]];
-    xt[4].ref[tau[0]] = 0;
+    xt[4].ref [tau[0]] = 0;
     xt[4].ftag[tau[0]] = 0;
+    MG_SET(xt[4].ori, tau[0]);
 
     pt[5]->v[tau[0]] = vx[taued[2]] ; pt[5]->v[tau[2]] = vx[taued[3]]; pt[5]->v[tau[3]] = vx[taued[4]];
-    xt[5].ref[tau[1]] = 0 ; xt[5].ref[tau[3]] = 0 ;
+    xt[5].ref [tau[1]] = 0 ; xt[5].ref [tau[3]] = 0 ;
     xt[5].ftag[tau[1]] = 0 ; xt[5].ftag[tau[3]] = 0 ;
+    MG_SET(xt[5].ori, tau[1]); MG_SET(xt[5].ori, tau[3]);
 
     pt[6]->v[tau[0]] = vx[taued[1]] ; pt[6]->v[tau[2]] = vx[taued[3]]; pt[6]->v[tau[3]] = vx[taued[2]];
-    xt[6].ref[tau[0]] = 0 ; xt[6].ref[tau[1]] = 0 ;   xt[6].ref[tau[2]] = 0 ;
+    xt[6].ref [tau[0]] = 0 ; xt[6].ref [tau[1]] = 0 ; xt[6].ref [tau[2]] = 0 ;
     xt[6].ftag[tau[0]] = 0 ; xt[6].ftag[tau[1]] = 0 ; xt[6].ftag[tau[2]] = 0 ;
+    MG_SET(xt[6].ori, tau[0]); MG_SET(xt[6].ori, tau[1]); MG_SET(xt[6].ori, tau[2]);
   }
 
   /* Assignation of the xt fields to the appropriate tets */
@@ -3636,7 +3712,7 @@ void split6(pMesh mesh,pSol met,int k,int vx[6]) {
   if(nxt0){
     memcpy(&xt,&xt0,sizeof(xTetra));
 
-    xt.ref[0] = 0;  xt.ftag[0] = 0;
+    xt.ref[0] = 0;  xt.ftag[0] = 0; MG_SET(xt.ori, 0);
     isxt0 = 0;
     for(i=0;i<4;i++){
       if((xt.ref[i]) || xt.ftag[i] ) isxt0 = 1;
@@ -3655,7 +3731,7 @@ void split6(pMesh mesh,pSol met,int k,int vx[6]) {
 
   if(nxt0){
     memcpy(&xt,&xt0,sizeof(xTetra));
-    xt.ref[1] = 0;  xt.ftag[1] = 0;
+    xt.ref[1] = 0;  xt.ftag[1] = 0; MG_SET(xt.ori, 1);
 
     isxt = 0;
 
@@ -3686,8 +3762,7 @@ void split6(pMesh mesh,pSol met,int k,int vx[6]) {
 
   if(nxt0){
     memcpy(&xt,&xt0,sizeof(xTetra));
-    xt.ref[2] = 0;  xt.ftag[2] = 0;
-
+    xt.ref[2] = 0;  xt.ftag[2] = 0;  MG_SET(xt.ori, 2);
     isxt = 0;
 
     for(i=0;i<4;i++){
@@ -3717,7 +3792,7 @@ void split6(pMesh mesh,pSol met,int k,int vx[6]) {
 
   if(nxt0){
     memcpy(&xt,&xt0,sizeof(xTetra));
-    xt.ref[3] = 0;  xt.ftag[3] = 0;
+    xt.ref[3] = 0;  xt.ftag[3] = 0;  MG_SET(xt.ori, 3);
 
     isxt = 0;
 
@@ -3748,8 +3823,9 @@ void split6(pMesh mesh,pSol met,int k,int vx[6]) {
 
   if(nxt0){
     memcpy(&xt,&xt0,sizeof(xTetra));
-    xt.ref[0] = 0 ; xt.ref[1] = 0 ; xt.ref[2] = 0;
+    xt.ref [0] = 0 ; xt.ref [1] = 0 ; xt.ref [2] = 0;
     xt.ftag[0] = 0 ; xt.ftag[1] = 0 ; xt.ftag[2] = 0;
+    MG_SET(xt.ori, 0); MG_SET(xt.ori, 1); MG_SET(xt.ori, 2);
 
     isxt = 0;
 
@@ -3780,8 +3856,9 @@ void split6(pMesh mesh,pSol met,int k,int vx[6]) {
 
   if(nxt0){
     memcpy(&xt,&xt0,sizeof(xTetra));
-    xt.ref[0] = 0 ; xt.ref[1] = 0 ; xt.ref[3] = 0;
+    xt.ref [0] = 0 ; xt.ref [1] = 0 ; xt.ref [3] = 0;
     xt.ftag[0] = 0 ; xt.ftag[1] = 0 ; xt.ftag[3] = 0;
+    MG_SET(xt.ori, 0); MG_SET(xt.ori, 1); MG_SET(xt.ori, 3);
 
     isxt = 0;
 
@@ -3812,8 +3889,9 @@ void split6(pMesh mesh,pSol met,int k,int vx[6]) {
 
   if(nxt0){
     memcpy(&xt,&xt0,sizeof(xTetra));
-    xt.ref[0] = 0 ; xt.ref[2] = 0 ; xt.ref[3] = 0;
+    xt.ref [0] = 0 ; xt.ref [2] = 0 ; xt.ref [3] = 0;
     xt.ftag[0] = 0 ; xt.ftag[2] = 0 ; xt.ftag[3] = 0;
+    MG_SET(xt.ori, 0); MG_SET(xt.ori, 2); MG_SET(xt.ori, 3);
 
     isxt = 0;
 
@@ -3845,8 +3923,9 @@ void split6(pMesh mesh,pSol met,int k,int vx[6]) {
   if(nxt0){
     memcpy(&xt,&xt0,sizeof(xTetra));
 
-    xt.ref[1] = 0 ; xt.ref[2] = 0 ; xt.ref[3] = 0;
+    xt.ref [1] = 0 ; xt.ref [2] = 0 ; xt.ref [3] = 0;
     xt.ftag[1] = 0 ; xt.ftag[2] = 0 ; xt.ftag[3] = 0;
+    MG_SET(xt.ori, 1); MG_SET(xt.ori, 2); MG_SET(xt.ori, 3);
 
     isxt = 0;
 

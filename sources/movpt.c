@@ -68,6 +68,7 @@ int movintpt(pMesh mesh,int *list,int ilist,int improve) {
 /** Move boundary regular point, whose volumic and surfacic balls are passed */
 int movbdyregpt(pMesh mesh,int *listv,int ilistv,int *lists,int ilists) {
   pTetra                pt,pt0;
+  pxTetra               pxt;
   pPoint                p0,p1,p2,ppt0;
   Tria                  tt;
   pxPoint               pxp;
@@ -149,9 +150,9 @@ int movbdyregpt(pMesh mesh,int *listv,int ilistv,int *lists,int ilists) {
   }
 
   /* Finish with point 0 */;
-  k                     = lists[0] / 4;
-  iface = lists[0] % 4;
-  pt            = &mesh->tetra[k];
+  k      = lists[0] / 4;
+  iface  = lists[0] % 4;
+  pt     = &mesh->tetra[k];
   ntempa = ntempb = 0;
   for (i=0; i<3; i++) {
     if ( pt->v[idir[iface][i]] != n0 ) {
@@ -262,13 +263,14 @@ int movbdyregpt(pMesh mesh,int *listv,int ilistv,int *lists,int ilists) {
   lambda[0] = 1.0 - lambda[1] - lambda[2];
 
   /** Step 5 : come back to original problem, and compute patch in triangle iel */
-  iel = lists[kel] / 4;
+  iel    = lists[kel] / 4;
   iface  = lists[kel] % 4;
-  pt    = &mesh->tetra[iel];
+  pt     = &mesh->tetra[iel];
+  pxt    = &mesh->xtetra[pt->xt];
 
   tet2tri(mesh,iel,iface,&tt);
 
-  if(!bezierCP(mesh,&tt,&b)){
+  if(!bezierCP(mesh,&tt,&b,MG_GET(pxt->ori,iface))){
     printf("%s:%d: Error: function bezierCP return 0\n",__FILE__,__LINE__);
     exit(EXIT_FAILURE);
   }
@@ -412,6 +414,7 @@ int movbdyregpt(pMesh mesh,int *listv,int ilistv,int *lists,int ilists) {
 /** Move boundary reference point, whose volumic and surfacic balls are passed */
 int movbdyrefpt(pMesh mesh, int *listv, int ilistv, int *lists, int ilists){
   pTetra                pt,pt0;
+  pxTetra               pxt;
   pPoint                p0,p1,p2,ppt0;
   Tria                  tt;
   pxPoint               pxp;
@@ -623,8 +626,9 @@ int movbdyrefpt(pMesh mesh, int *listv, int ilistv, int *lists, int ilists){
   calold = calnew = DBL_MAX;
   for( l=0 ; l<ilists ; l++ ){
     iel         = lists[l] / 4;
-    iface = lists[l] % 4;
+    iface       = lists[l] % 4;
     pt          = &mesh->tetra[iel];
+    pxt         = &mesh->xtetra[pt->xt];
     tet2tri(mesh,iel,iface,&tt);
     calold = MG_MIN(calold,caltri(mesh,&tt));
     for( i=0 ; i<3 ; i++ )
@@ -634,7 +638,7 @@ int movbdyrefpt(pMesh mesh, int *listv, int ilistv, int *lists, int ilists){
     caltmp = caltri(mesh,&tt);
     if ( caltmp < EPSD )        return(0);
     calnew = MG_MIN(calnew,caltmp);
-    if ( chkedg(mesh,&tt) ) {
+    if ( chkedg(mesh,&tt,MG_GET(pxt->ori,iface)) ) {
       memset(pxp,0,sizeof(xPoint));
     }
   }
@@ -652,7 +656,7 @@ int movbdyrefpt(pMesh mesh, int *listv, int ilistv, int *lists, int ilists){
     memcpy(pt0,pt,sizeof(Tetra));
     pt0->v[i0] = 0;
     calold = MG_MIN(calold, pt->qual);
-    callist[l]=orcal(mesh,0);
+    callist[l] = orcal(mesh,0);
     if ( callist[l] < EPSD )        return(0);
     calnew = MG_MIN(calnew,callist[l]);
   }
@@ -683,6 +687,7 @@ int movbdyrefpt(pMesh mesh, int *listv, int ilistv, int *lists, int ilists){
 /** Move boundary non manifold point, whose volumic and (exterior) surfacic balls are passed */
 int movbdynompt(pMesh mesh, int *listv, int ilistv, int *lists, int ilists){
   pTetra       pt,pt0;
+  pxTetra      pxt;
   pPoint       p0,p1,p2,ppt0;
   pxPoint      pxp;
   Tria         tt;
@@ -892,8 +897,9 @@ int movbdynompt(pMesh mesh, int *listv, int ilistv, int *lists, int ilists){
   calold = calnew = DBL_MAX;
   for( l=0 ; l<ilists ; l++ ){
     iel         = lists[l] / 4;
-    iface = lists[l] % 4;
+    iface       = lists[l] % 4;
     pt          = &mesh->tetra[iel];
+    pxt         = &mesh->xtetra[pt->xt];
     tet2tri(mesh,iel,iface,&tt);
     caltmp = caltri(mesh,&tt);
     calold = MG_MIN(calold,caltmp);
@@ -905,7 +911,7 @@ int movbdynompt(pMesh mesh, int *listv, int ilistv, int *lists, int ilists){
     caltmp = caltri(mesh,&tt);
     if ( caltmp < EPSD )        return(0);
     calnew = MG_MIN(calnew,caltmp);
-    if ( chkedg(mesh,&tt) ) {
+    if ( chkedg(mesh,&tt,MG_GET(pxt->ori,iface)) ) {
       memset(pxp,0,sizeof(xPoint));
     }
   }
@@ -953,6 +959,7 @@ int movbdynompt(pMesh mesh, int *listv, int ilistv, int *lists, int ilists){
 /** Move boundary ridge point, whose volumic and surfacic balls are passed */
 int movbdyridpt(pMesh mesh,int *listv,int ilistv,int *lists,int ilists) {
   pTetra               pt,pt0;
+  pxTetra              pxt;
   pPoint               p0,p1,p2,ppt0;
   Tria                 tt;
   pxPoint              pxp;
@@ -1170,8 +1177,9 @@ int movbdyridpt(pMesh mesh,int *listv,int ilistv,int *lists,int ilists) {
   calold = calnew = DBL_MAX;
   for (l=0; l<ilists; l++) {
     iel         = lists[l] / 4;
-    iface = lists[l] % 4;
-    pt = &mesh->tetra[iel];
+    iface       = lists[l] % 4;
+    pt          = &mesh->tetra[iel];
+    pxt         = &mesh->xtetra[pt->xt];
     tet2tri(mesh,iel,iface,&tt);
     calold = MG_MIN(calold,caltri(mesh,&tt));
     for (i=0; i<3; i++) {
@@ -1182,7 +1190,7 @@ int movbdyridpt(pMesh mesh,int *listv,int ilistv,int *lists,int ilists) {
     caltmp = caltri(mesh,&tt);
     if ( caltmp < EPSD )        return(0);
     calnew = MG_MIN(calnew,caltmp);
-    if ( chkedg(mesh,&tt) ) {            //MAYBE CHECKEDG ASKS STH FOR POINTS !!!!!
+    if ( chkedg(mesh,&tt,MG_GET(pxt->ori,iface)) ) {            //MAYBE CHECKEDG ASKS STH FOR POINTS !!!!!
       memset(pxp,0,sizeof(xPoint));
     }
   }

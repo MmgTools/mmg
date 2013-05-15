@@ -215,31 +215,31 @@ inline int nortri(pMesh mesh,pTria pt,double *n) {
         4: 2 faces bonnes, 2 faces aigu => 1 petite arete
         5: 1 face bonne, 3 petites aretes
         6: 2 faces grandes aretes, 2 faces petites iaretes
-        7: 4 faces grandes aretes 
-	8: 2 faces obtus, 1 faces aigu et une face OK
+        7: 4 faces grandes aretes
+        8: 2 faces obtus, 1 faces aigu et une face OK
    item: bad entity
 */
 
 
-/* nb face obtuse :    nb faces aigu : 
+/* nb face obtuse :    nb faces aigu :
 ityp :  0: 0		0
-	1: 0		0
-	2: 0		0
-	3: 1		0
-	4: 0		2
-	5: 0		3
-	6: 2		2
-	7: 0		4
+        1: 0		0
+        2: 0		0
+        3: 1		0
+        4: 0		2
+        5: 0		3
+        6: 2		2
+        7: 0		4
 */
-/* nb gde arete :    nb petite arete : 
+/* nb gde arete :    nb petite arete :
 ityp :  0: 0		0
-	1: 0		0
-	2: 0		0
-	3: 1		0
-	4: 0		1
-	5: 0		3
-	6: 1		1
-	7: 0		2
+        1: 0		0
+        2: 0		0
+        3: 1		0
+        4: 0		1
+        5: 0		3
+        6: 1		1
+        7: 0		2
 */
 #define EPSVOL 0.001
 #define RAPMAX    0.4//0.3//0.25
@@ -271,17 +271,17 @@ int typelt(pMesh mesh,int iel,int *item) {
   pd = &mesh->point[id];
 
   /* volume */
-  abx = pb->c[0] - pa->c[0]; 
-  aby = pb->c[1] - pa->c[1]; 
-  abz = pb->c[2] - pa->c[2]; 
+  abx = pb->c[0] - pa->c[0];
+  aby = pb->c[1] - pa->c[1];
+  abz = pb->c[2] - pa->c[2];
 
-  acx = pc->c[0] - pa->c[0]; 
-  acy = pc->c[1] - pa->c[1]; 
-  acz = pc->c[2] - pa->c[2]; 
+  acx = pc->c[0] - pa->c[0];
+  acy = pc->c[1] - pa->c[1];
+  acz = pc->c[2] - pa->c[2];
 
-  adx = pd->c[0] - pa->c[0]; 
-  ady = pd->c[1] - pa->c[1]; 
-  adz = pd->c[2] - pa->c[2]; 
+  adx = pd->c[0] - pa->c[0];
+  ady = pd->c[1] - pa->c[1];
+  adz = pd->c[2] - pa->c[2];
 
   v1  = acy*adz - acz*ady;
   v2  = acz*adx - acx*adz;
@@ -310,7 +310,7 @@ int typelt(pMesh mesh,int iel,int *item) {
   h[5] = cdx*cdx + cdy*cdy + cdz*cdz;
 
   /* face areas */
-  dd = cdy*bdz - cdz*bdy; 
+  dd = cdy*bdz - cdz*bdy;
   s[0] = dd * dd;
   dd = cdz*bdx - cdx*bdz;
   s[0] = s[0] + dd * dd;
@@ -358,7 +358,7 @@ int typelt(pMesh mesh,int iel,int *item) {
   /* small volume: types 1,2,3,4 */
   if ( vol < volchk ) {
     puts("volume nul : type 1,2,3,4");
-    
+
     ssmall = 0.4 * (s[0]+s[1]+s[2]+s[3]);
     isur   = 0;
     for (i=0; i<4; i++)
@@ -366,7 +366,7 @@ int typelt(pMesh mesh,int iel,int *item) {
 
     /* types 2,3 */
     item[0] = iarmax;
-    item[1] = isar[iarmax][0];    
+    item[1] = isar[iarmax][0];
     if ( isur == 1 ) {
       surmin   = s[0];
       isurmin = 0;
@@ -375,12 +375,12 @@ int typelt(pMesh mesh,int iel,int *item) {
       for (i=1; i<4; i++) {
         if ( s[i] < surmin ) {
           surmin  = s[i];
-	  isurmin = i;
-	}  
+    isurmin = i;
+  }
         else if ( s[i] > surmax ) {
-	  surmax  = s[i];
-	  isurmax = i;
-	}  
+    surmax  = s[i];
+    isurmax = i;
+  }
       }
       dd = surmin / surmax;
       if ( dd < RAPMAX ) {
@@ -389,9 +389,9 @@ int typelt(pMesh mesh,int iel,int *item) {
       }
       else {
         item[0] = isurmax;
-	item[1] = isurmin;
+  item[1] = isurmin;
         return(2);
-      }	
+      }
     }
 
     /* types 1 */
@@ -418,7 +418,7 @@ int typelt(pMesh mesh,int iel,int *item) {
         return(1);
       }
     }
-    
+
 //puts("default");
     item[0] = 0;
     return(1);
@@ -431,24 +431,24 @@ int typelt(pMesh mesh,int iel,int *item) {
    lmoy = 0;
    for (i=0; i<6; i++)  {h[i] = sqrt(h[i]); lmoy+=h[i];}
    lmoy *= 1./6.;
-    
+
     nobtus = 0;
     naigu = 0;
     for (k=0; k<4; k++) {
       aigu = 0;
       for(i=0 ; i<3 ; i++) {
-	i0 = idir[k][i];
+  i0 = idir[k][i];
         i1 = idir[k][inxt[i]];
         i2 = idir[k][inxt[i+1]];
-	if((h[i0]>h[i1] && h[i0]>h[i2]) && (h[i0]>2.5*h[i1] || h[i0]>2.5*h[i2])) {//obtu ? > /*130*/ 150
-	  //be carefull isocele triangle --> opposite edge only
-	  if(!( fabs(1-h[i0]/h[i1]) < 0.1 || fabs(1-h[i0]/h[i2])< 0.1 ) ) {
-	    if(h[i0] > 0.9659258/*0.9063078*/*(h[i1]+h[i2])) break;
-	  }
-	}
-	  if((h[i0]<h[i1] && h[i0]<h[i2]) && (2.5*h[i0]<h[i1] || 2.5*h[i0]<h[i2])) {//aigu ? <20
-	    if(h[i0] < 0.17*(h[i1]+h[i2])) aigu++;
-	}
+  if((h[i0]>h[i1] && h[i0]>h[i2]) && (h[i0]>2.5*h[i1] || h[i0]>2.5*h[i2])) {//obtu ? > /*130*/ 150
+    //be carefull isocele triangle --> opposite edge only
+    if(!( fabs(1-h[i0]/h[i1]) < 0.1 || fabs(1-h[i0]/h[i2])< 0.1 ) ) {
+      if(h[i0] > 0.9659258/*0.9063078*/*(h[i1]+h[i2])) break;
+    }
+  }
+    if((h[i0]<h[i1] && h[i0]<h[i2]) && (2.5*h[i0]<h[i1] || 2.5*h[i0]<h[i2])) {//aigu ? <20
+      if(h[i0] < 0.17*(h[i1]+h[i2])) aigu++;
+  }
       }
       if(i<3) nobtus++;
       else if(aigu) naigu++;
@@ -459,22 +459,22 @@ int typelt(pMesh mesh,int iel,int *item) {
       return(8);
     case(2):
       if(naigu==2) {
-	return(6);
+  return(6);
       } else {
-	return(8);
+  return(8);
       }
     case(1):
       return(3);
     case(0):
       if(naigu==4) {
-	return(7);
+  return(7);
       } else if(naigu==3) {
-	return(5);
+  return(5);
       } else if(naigu==2) {
-	return(4);
+  return(4);
       } else {
-	//printf("%d on trouve %d aigu et %d obtu\n",iel,naigu,nobtus);
-	return(9); //toutes les faces sont ok
+  //printf("%d on trouve %d aigu et %d obtu\n",iel,naigu,nobtus);
+  return(9); //toutes les faces sont ok
       }
     }
  }
@@ -510,12 +510,12 @@ int badelt(pMesh mesh,pSol met) {
       /*treat bad elt*/
       /*1) try to swp one edge*/
       for(i=0 ; i<6 ; i++) {
-	nconf = chkswpgen(mesh,k,i,&ilist,list,1.01);
+  nconf = chkswpgen(mesh,k,i,&ilist,list,1.01);
         if ( nconf ) {
           ns++;
           if(!swpgen(mesh,met,nconf,ilist,list)) return(-1);
           break;
-	}
+  }
       }
     }
     /*printf("on trouve %d bad elt\n",nd);
@@ -523,7 +523,7 @@ int badelt(pMesh mesh,pSol met) {
       if ( ntyp[k] )
         printf("  optim [%d]      = %5d  %6.2f %%\n",k,ntyp[k],100.0*ntyp[k]/nd);
     */if ( ns > 0 )
-	fprintf(stdout,"     %8d edge swapped\n",ns);
+  fprintf(stdout,"     %8d edge swapped\n",ns);
    }
   while ( ++it < maxit && nd > 0 );
   return(nd);

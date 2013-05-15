@@ -144,6 +144,8 @@ typedef struct {
   int      edg[6]; /**< edg[i] contains the ref of the i^th edge of tet */
   char     ftag[4]; /**< ftag[i] contains the tag associated to the i^th face of tet */
   char     tag[6]; /**< tag[i] contains the tag associated to the i^th edge of tet */
+  char     ori; /**< orientation of tris of the tetra:
+                 * i^th bit of ori is set to 0 when the i^th face is bad orientated */
 } xTetra;
 typedef xTetra * pxTetra;
 
@@ -224,9 +226,9 @@ int  newElt(pMesh mesh);
 void delElt(pMesh mesh,int iel);
 void delPt(pMesh mesh,int ip);
 int  zaldy(pMesh mesh);
-char chkedg(pMesh mesh,pTria pt);
+char chkedg(pMesh mesh,pTria pt,char ori);
 void tet2tri(pMesh mesh,int k,char ie,Tria *ptt);
-int  bezierCP(pMesh mesh,Tria *pt,pBezier pb);
+int  bezierCP(pMesh mesh,Tria *pt,pBezier pb,char ori);
 int  BezierTgt(double c1[3],double c2[3],double n1[3],double n2[3],double t1[3],double t2[3]);
 double BezierGeod(double c1[3], double c2[3], double t1[3], double t2[3]);
 int  bezierInt(pBezier pb,double uv[2],double o[3],double no[3],double to[3]);
@@ -273,7 +275,7 @@ int  hGeom(pMesh mesh);
 int  bdryTria(pMesh );
 int  bdryIso(pMesh );
 int  bdrySet(pMesh );
-int  bdryPerm(pMesh mesh, int iso);
+int  bdryPerm(pMesh );
 int  chkmsh(pMesh,int,int);
 int  chkfemtopo(pMesh mesh);
 int  cntbdypt(pMesh mesh, int nump);

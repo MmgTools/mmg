@@ -235,7 +235,7 @@ inline int BezierEdge(pMesh mesh,int ip0,int ip1,double b0[3],double b1[3],char 
 }
 
 /** return Bezier control points on triangle pt (cf. Vlachos) */
-int bezierCP(pMesh mesh,Tria *pt,pBezier pb) {
+int bezierCP(pMesh mesh,Tria *pt,pBezier pb,char ori) {
   pPoint    p[3];
   xPoint   *pxp;
   double   *n1,*n2,nt[3],t1[3],t2[3],ps,ps2,dd,ux,uy,uz,l,ll,alpha;
@@ -258,9 +258,19 @@ int bezierCP(pMesh mesh,Tria *pt,pBezier pb) {
 
     if ( MG_SIN(p[i]->tag) ) {
       nortri(mesh,pt,pb->n[i]);
+      if ( !ori ) {
+        pb->n[i][0] *= -1.0;
+        pb->n[i][1] *= -1.0;
+        pb->n[i][2] *= -1.0;
+      }
     }
     else if( p[i]->tag & MG_NOM){
       nortri(mesh,pt,pb->n[i]);
+      if ( !ori ) {
+        pb->n[i][0] *= -1.0;
+        pb->n[i][1] *= -1.0;
+        pb->n[i][2] *= -1.0;
+      }
       assert(p[i]->xp);
       pxp = &mesh->xpoint[p[i]->xp];
       memcpy(&pb->t[i],pxp->t,3*sizeof(double));
@@ -270,6 +280,11 @@ int bezierCP(pMesh mesh,Tria *pt,pBezier pb) {
       pxp = &mesh->xpoint[p[i]->xp];
       if ( MG_EDG(p[i]->tag) ) {
         nortri(mesh,pt,nt);
+        if ( !ori ) {
+          nt[0] *= -1.0;
+          nt[1] *= -1.0;
+          nt[2] *= -1.0;
+        }
         ps  = pxp->n1[0]*nt[0] + pxp->n1[1]*nt[1] + pxp->n1[2]*nt[2];
         ps2 = pxp->n2[0]*nt[0] + pxp->n2[1]*nt[1] + pxp->n2[2]*nt[2];
         if ( fabs(ps) > fabs(ps2) )

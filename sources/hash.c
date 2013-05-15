@@ -909,17 +909,28 @@ int bdrySet(pMesh mesh) {
     if ( !MG_EOK(pt) )  continue;
     if ( !pt->xt )  continue;
     pxt = &mesh->xtetra[pt->xt];
+    adja = &mesh->adja[4*(k-1)+1];
     for (i=0; i<4; i++) {
+      adj = adja[i] / 4;
+      pt1 = &mesh->tetra[adj];
+      /* Set flag to know if tetra has the same orientation than the triangle */
+      if ( adj && pt->ref < pt1->ref )  MG_CLR(pxt->ori,i);
+      else  MG_SET(pxt->ori,i);
+      /* Set edge tag */
       if ( pxt->ftag[i] ) {
-        ia = pt->v[idir[i][0]];
-        ib = pt->v[idir[i][1]];
-        ic = pt->v[idir[i][2]];
-        kt = hashGetFace(&hash,ia,ib,ic);
-        ptt = &mesh->tria[kt];
-        for (j=0; j<3; j++) {
-          tag = pxt->ftag[i] | ptt->tag[j];
-          if ( tag )
-            settag(mesh,k,iarf[i][j],tag,ptt->edg[j]);
+        if ( adj && (pt->ref <= pt1->ref || (pt->ref == MG_PLUS)) )  continue;
+        else {
+          MG_SET(pxt->ori,i);
+          ia = pt->v[idir[i][0]];
+          ib = pt->v[idir[i][1]];
+          ic = pt->v[idir[i][2]];
+          kt = hashGetFace(&hash,ia,ib,ic);
+          ptt = &mesh->tria[kt];
+          for (j=0; j<3; j++) {
+            tag = pxt->ftag[i] | ptt->tag[j];
+            if ( tag )
+              settag(mesh,k,iarf[i][j],tag,ptt->edg[j]);
+          }
         }
       }
     }
@@ -930,7 +941,7 @@ int bdrySet(pMesh mesh) {
 }
 
 /** make orientation of triangles compatible with tetra faces */
-int bdryPerm(pMesh mesh,int iso) {
+int bdryPerm(pMesh mesh) {
   pTetra   pt,pt1;
   pTria    ptt;
   pPoint   ppt;
@@ -947,7 +958,7 @@ int bdryPerm(pMesh mesh,int iso) {
     if ( !hashFace(&hash,ptt->v[0],ptt->v[1],ptt->v[2],k) )  return(0);
     for (i=0; i<3; i++) {
       ppt = &mesh->point[ptt->v[i]];
-      if (!iso) ppt->tag |= MG_BDY;
+      if ( !info.iso ) ppt->tag |= MG_BDY;
     }
   }
 
@@ -960,7 +971,7 @@ int bdryPerm(pMesh mesh,int iso) {
     for (i=0; i<4; i++) {
       adj = adja[i] / 4;
       pt1 = &mesh->tetra[adj];
-      if ( adj && (pt->ref == pt1->ref || pt->ref == MG_PLUS) )
+      if ( adj && (pt->ref <= pt1->ref || pt->ref == MG_PLUS) )
         continue;
       else {
         ia = pt->v[idir[i][0]];

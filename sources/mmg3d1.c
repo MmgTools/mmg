@@ -166,7 +166,7 @@ int dichoto1b(pMesh mesh,int *list,int ret,double o[3],double ro[3]) {
 }
 
 /** return edges of (virtual) triangle pt that need to be split w/r Hausdorff criterion */
-char chkedg(pMesh mesh,Tria *pt) {
+char chkedg(pMesh mesh,Tria *pt,char ori) {
   pPoint   p[3];
   xPoint  *pxp;
   double   n[3][3],t[3][3],nt[3],*n1,*n2,t1[3],t2[3];
@@ -186,9 +186,19 @@ char chkedg(pMesh mesh,Tria *pt) {
   for (i=0; i<3; i++) {
     if ( MG_SIN(p[i]->tag) ) {
       nortri(mesh,pt,n[i]);
+      if(!ori) {
+        n[i][0] *= -1.0;
+        n[i][1] *= -1.0;
+        n[i][2] *= -1.0;
+      }
     }
     else if (p[i]->tag & MG_NOM){
       nortri(mesh,pt,n[i]);
+      if(!ori) {
+        n[i][0] *= -1.0;
+        n[i][1] *= -1.0;
+        n[i][2] *= -1.0;
+      }
       assert(p[i]->xp);
       pxp = &mesh->xpoint[p[i]->xp];
       memcpy(&t[i],pxp->t,3*sizeof(double));
@@ -199,6 +209,11 @@ char chkedg(pMesh mesh,Tria *pt) {
       if ( MG_EDG(p[i]->tag) ) {
         memcpy(&t[i],pxp->t,3*sizeof(double));
         nortri(mesh,pt,nt);
+        if(!ori) {
+          nt[0] *= -1.0;
+          nt[1] *= -1.0;
+          nt[2] *= -1.0;
+        }
         ps  = pxp->n1[0]*nt[0] + pxp->n1[1]*nt[1] + pxp->n1[2]*nt[2];
         ps2 = pxp->n2[0]*nt[0] + pxp->n2[1]*nt[1] + pxp->n2[2]*nt[2];
         if ( fabs(ps) > fabs(ps2) )
@@ -415,7 +430,7 @@ static int movtet(pMesh mesh,pSol met,int maxit) {
             ppt->flag = base;
             improve   = 1;
           }
-					else {
+          else {
             improve = 0;
           }
           ier = 0;
@@ -478,7 +493,7 @@ static int coltet(pMesh mesh,pSol met,char typchk) {
   char       i,j,tag,ip,iq,ier,isnm;
 
   nc = nnm = 0;
-	hmi2 = info.hmin*info.hmin;
+  hmi2 = info.hmin*info.hmin;
 
   for (k=1; k<=mesh->ne; k++) {
     base = ++mesh->base;
@@ -812,7 +827,7 @@ static int anatets(pMesh mesh,pSol met,char typchk) {
     /* virtual triangle */
     tet2tri(mesh,k,i,&ptt);
     if ( typchk == 1 ) {
-      if ( !chkedg(mesh,&ptt) )  continue;
+      if ( !chkedg(mesh,&ptt,MG_GET(pxt->ori,i)) )  continue;
       /* put back flag on tetra */
       for (j=0; j<3; j++){
         if ( pxt->tag[iarf[i][j]] & MG_REQ )  continue;
@@ -835,7 +850,7 @@ static int anatets(pMesh mesh,pSol met,char typchk) {
     ns++;
 
     /* geometric support */
-    ier = bezierCP(mesh,&ptt,&pb);
+    ier = bezierCP(mesh,&ptt,&pb,MG_GET(pxt->ori,i));
     assert(ier);
 
     /* scan edges in face to split */
@@ -935,7 +950,8 @@ static int anatets(pMesh mesh,pSol met,char typchk) {
           ppt = &mesh->point[ip];
           assert(ppt->xp);
           pxp = &mesh->xpoint[ppt->xp];
-          ier = bezierCP(mesh,&ptt,&pb);
+          if ( pt->xt )  ier = bezierCP(mesh,&ptt,&pb,MG_GET(pxt->ori,i));
+          else  ier = bezierCP(mesh,&ptt,&pb,1);
           ier = bezierInt(&pb,&uv[j][0],o,no,to);
           memcpy(pxp->n2,no,3*sizeof(double));
         }
@@ -1110,6 +1126,11 @@ static int adpspl(pMesh mesh,pSol met, int* warn) {
         else if ( MG_SIN(p0->tag) && MG_SIN(p1->tag) ) {
           tet2tri(mesh,k,i,&ptt);
           nortri(mesh,&ptt,no1);
+          if ( !MG_GET(pxt->ori,i) ) {
+            no1[0] *= -1.0;
+            no1[1] *= -1.0;
+            no1[2] *= -1.0;
+          }
         }
       }
       else if ( tag & MG_GEO ) {
@@ -1381,7 +1402,7 @@ static int adptet(pMesh mesh,pSol met) {
 
   /*shape optim*/
   it = 0;
-	maxit = 2;
+  maxit = 2;
   do {
     /* badly shaped process */
     /*ier = badelt(mesh,met);

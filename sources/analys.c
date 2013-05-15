@@ -496,7 +496,7 @@ int analys(pMesh mesh) {
       return(0);
     }
   }
-  else if ( !bdryPerm(mesh,info.iso) ) {
+  else if ( !bdryPerm(mesh) ) {
     fprintf(stdout,"  ## Boundary orientation problem. Exit program.\n");
     return(0);
   }

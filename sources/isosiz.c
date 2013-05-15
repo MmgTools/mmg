@@ -12,6 +12,7 @@ extern char   ddb;
 /** Define isotropic size at regular point nump, whose surfacic ball is provided */
 static double defsizreg(pMesh mesh,pSol met,int nump,int *lists,int ilists) {
   pTetra       pt;
+  pxTetra      pxt;
   pPoint       p0,p1;
   Tria         tt;
   Bezier       b;
@@ -157,7 +158,8 @@ static double defsizreg(pMesh mesh,pSol met,int nump,int *lists,int ilists) {
 
     tet2tri(mesh,iel,iface,&tt);
 
-    if(!bezierCP(mesh,&tt,&b)){
+    pxt   = &mesh->xtetra[mesh->tetra[iel].xt];
+    if(!bezierCP(mesh,&tt,&b,MG_GET(pxt->ori,iface))){
       printf("%s:%d: Error: function bezierCP return 0\n",__FILE__,__LINE__);
       exit(EXIT_FAILURE);
     }
