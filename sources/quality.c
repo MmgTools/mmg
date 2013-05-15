@@ -462,7 +462,7 @@ int typelt(pMesh mesh,int iel,int *item) {
 	return(6);
       } else {
 	return(8);
-      } 
+      }
     case(1):
       return(3);
     case(0):

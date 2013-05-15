@@ -591,7 +591,7 @@ int hGeom(pMesh mesh) {
   }
   /* else, infer special edges from information carried by triangles */
   else {
-		if ( !mesh->adjt && !hashTria(mesh) )  return(0);  
+		if ( !mesh->adjt && !hashTria(mesh) )  return(0);
 		for (k=1; k<=mesh->nt; k++) {
       pt   = &mesh->tria[k];
       adja = &mesh->adjt[3*(k-1)+1];
@@ -689,8 +689,15 @@ int bdryTria(pMesh mesh) {
         ptt->v[0] = pt->v[idir[i][0]];
         ptt->v[1] = pt->v[idir[i][1]];
         ptt->v[2] = pt->v[idir[i][2]];
-        if ( !adj )
-          ptt->ref  = pxt ? pxt->ref[i] : 0;  /* useful only when saving mesh */
+        if ( !adj ) {
+          if ( pxt ) {
+            if ( pxt->tag[iarf[i][0]] & MG_REQ ) ptt->tag[0] = MG_REQ;
+            if ( pxt->tag[iarf[i][1]] & MG_REQ ) ptt->tag[1] = MG_REQ;
+            if ( pxt->tag[iarf[i][2]] & MG_REQ ) ptt->tag[2] = MG_REQ;
+            /* useful only when saving mesh */
+            ptt->ref = pxt->ref[i];
+          }
+        }
         else
 					ptt->ref = info.iso ? MG_ISO : 0;
       }
@@ -855,8 +862,8 @@ int bdrySet(pMesh mesh) {
   pTria    ptt;
   pxTetra  pxt;
   Hash     hash;
-  int     *adja,adj,k,kt,ia,ib,ic;
-  char     i;
+  int     *adja,adj,k,kt,ia,ib,ic,j;
+  char     i,tag;
 
   if ( !mesh->nt )  return(1);
 
@@ -892,6 +899,28 @@ int bdrySet(pMesh mesh) {
         pxt = &mesh->xtetra[mesh->xt];
         pxt->ref[i]   = ptt->ref;
         pxt->ftag[i] |= MG_BDY;
+        pxt->ftag[i] |= (ptt->tag[0] & ptt->tag[1] & ptt->tag[2]);
+      }
+    }
+  }
+
+  for (k=1; k<=mesh->ne; k++) {
+    pt = &mesh->tetra[k];
+    if ( !MG_EOK(pt) )  continue;
+    if ( !pt->xt )  continue;
+    pxt = &mesh->xtetra[pt->xt];
+    for (i=0; i<4; i++) {
+      if ( pxt->ftag[i] ) {
+        ia = pt->v[idir[i][0]];
+        ib = pt->v[idir[i][1]];
+        ic = pt->v[idir[i][2]];
+        kt = hashGetFace(&hash,ia,ib,ic);
+        ptt = &mesh->tria[kt];
+        for (j=0; j<3; j++) {
+          tag = pxt->ftag[i] | ptt->tag[j];
+          if ( tag )
+            settag(mesh,k,iarf[i][j],tag,ptt->edg[j]);
+        }
       }
     }
   }
@@ -901,7 +930,7 @@ int bdrySet(pMesh mesh) {
 }
 
 /** make orientation of triangles compatible with tetra faces */
-int bdryPerm(pMesh mesh) {
+int bdryPerm(pMesh mesh,int iso) {
   pTetra   pt,pt1;
   pTria    ptt;
   pPoint   ppt;
@@ -918,7 +947,7 @@ int bdryPerm(pMesh mesh) {
     if ( !hashFace(&hash,ptt->v[0],ptt->v[1],ptt->v[2],k) )  return(0);
     for (i=0; i<3; i++) {
       ppt = &mesh->point[ptt->v[i]];
-      ppt->tag |= MG_BDY;
+      if (!iso) ppt->tag |= MG_BDY;
     }
   }
 

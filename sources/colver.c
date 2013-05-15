@@ -343,7 +343,7 @@ static int topchkcol_bdy(pMesh mesh,int k,int iface,char iedg,int *lists,int ili
 /** Check whether collapse ip -> iq could be performed, ip boundary point ;
  *  'mechanical' tests (positive jacobian) are not performed here ;
  *  iface = boundary face on which lie edge iedg - in local face num.
-   (pq, or ia in local tet notation) */
+ *  (pq, or ia in local tet notation) */
 int chkcol_bdy(pMesh mesh,int k,char iface,char iedg,int *listv) {
   pTetra        pt,pt0;
   pxTetra       pxt;
@@ -542,8 +542,8 @@ int colver(pMesh mesh,int *list,int ilist,char indq) {
   pTetra          pt,pt1;
   pxTetra         pxt,pxt1;
   xTetra          xt,xts;
-  int             iel,jel,pel,qel,k,np,nq,*adja,ref;
-  unsigned char   ip,iq,i,j,voy,voyp,voyq;
+  int             iel,jel,pel,qel,k,np,nq,*adja,ref,p0,p1,up;
+  unsigned char   ip,iq,i,j,voy,voyp,voyq,ia,iav;
   char            tag;
 
   iel = list[0] / 4;
@@ -551,6 +551,15 @@ int colver(pMesh mesh,int *list,int ilist,char indq) {
   pt  = &mesh->tetra[iel];
   np  = pt->v[ip];
   nq  = pt->v[indq];
+  /* flag to know if we need to update tag in xtetra */
+  up = 0;
+  if ( pt->xt ) {
+    if ( mesh->xtetra[pt->xt].tag[iarf[ip][0]] ||
+         mesh->xtetra[pt->xt].tag[iarf[ip][1]] ||
+         mesh->xtetra[pt->xt].tag[iarf[ip][2]] ) {
+      up = 1;
+    }
+  }
 
   /* Mark elements of the shell of edge (pq) */
   for (k=0; k<ilist; k++) {
@@ -642,12 +651,67 @@ int colver(pMesh mesh,int *list,int ilist,char indq) {
 	        pxt1 = &mesh->xtetra[pt1->xt];
 	        pxt1->ref[voyp] = MG_MAX(pxt1->ref[voyp],pxt->ref[ip]);
 	        pxt1->ftag[voyp] = pxt1->ftag[voyp] | pxt->ftag[ip];
+            /* update tags for edges */
+            for ( j=0; j<3; j++ ) {
+              ia = iarf[ip][j];
+              p0 = pt->v[iare[ia][0]];
+              p1 = pt->v[iare[ia][1]];
+
+              for ( i=0; i<3; i++ ) {
+                iav=iarf[voyp][i];
+                if ( p0==nq ) {
+                  if ( ((pt1->v[iare[iav][0]]==np) && (pt1->v[iare[iav][1]]==p1)) ||
+                       ((pt1->v[iare[iav][0]]==p1) && (pt1->v[iare[iav][1]]==np)) )
+                    break;
+                }
+                else if ( p1==nq ) {
+                  if ( ((pt1->v[iare[iav][0]]==np) && (pt1->v[iare[iav][1]]==p0)) ||
+                       ((pt1->v[iare[iav][0]]==p0) && (pt1->v[iare[iav][1]]==np)) )
+                    break;
+                }
+                else {
+                  if ( ((pt1->v[iare[iav][0]]==p0) && (pt1->v[iare[iav][1]]==p1)) ||
+                       ((pt1->v[iare[iav][0]]==p1) && (pt1->v[iare[iav][1]]==p0)) )
+                    break;
+                }
+              }
+              assert(i!=3);
+              pxt1->tag[iav] = pxt1->tag[iav] | pxt->tag[ia];
+            }
 	      }
 	      else {
 	        pxt1 = &xt;
 	        memset(pxt1,0,sizeof(xTetra));
 	        pxt1->ref[voyp] = pxt->ref[ip];
 	        pxt1->ftag[voyp] = pxt->ftag[ip];
+            /* update tags for edges */
+            for ( j=0; j<3; j++ ) {
+              ia = iarf[ip][j];
+              p0 = pt->v[iare[ia][0]];
+              p1 = pt->v[iare[ia][1]];
+              if ( pxt->tag[ia] ) {
+                for ( i=0; i<3; i++ ) {
+                  iav=iarf[voyp][i];
+                  if ( p0==nq ) {
+                    if ( ((pt1->v[iare[iav][0]]==np) && (pt1->v[iare[iav][1]]==p1)) ||
+                         ((pt1->v[iare[iav][0]]==p1) && (pt1->v[iare[iav][1]]==np)) )
+                      break;
+                  }
+                  else if ( p1==nq ) {
+                    if ( ((pt1->v[iare[iav][0]]==np ) && (pt1->v[iare[iav][1]]==p0)) ||
+                         ((pt1->v[iare[iav][0]]==p0) && (pt1->v[iare[iav][1]]==np )) )
+                      break;
+                  }
+                  else {
+                    if ( ((pt1->v[iare[iav][0]]==p0) && (pt1->v[iare[iav][1]]==p1)) ||
+                         ((pt1->v[iare[iav][0]]==p1) && (pt1->v[iare[iav][1]]==p0)) )
+                      break;
+                  }
+                }
+                assert(i!=3);
+                pxt1->tag[iav] = pxt->tag[ia];
+              }
+            }
 	        /* Recover the already used place by pxt */
 	        pt1->xt = pt->xt;
 	        memcpy(pxt,pxt1,sizeof(xTetra));
@@ -670,19 +734,73 @@ int colver(pMesh mesh,int *list,int ilist,char indq) {
 	          pxt1 = &mesh->xtetra[pt1->xt];
 	          pxt1->ref[voyq] = MG_MAX(pxt1->ref[voyq],pxt->ref[iq]);
 	          pxt1->ftag[voyq] = (pxt1->ftag[voyq] | pxt->ftag[iq]);
+              /* update tags for edges */
+              for ( j=0; j<3; j++ ) {
+                ia = iarf[ip][j];
+                p0 = pt->v[iare[ia][0]];
+                p1 = pt->v[iare[ia][1]];
+                for ( i=0; i<3; i++ ) {
+                  iav=iarf[voyq][i];
+                  if ( p0==np ) {
+                    if ( ((pt1->v[iare[iav][0]]==nq) && (pt1->v[iare[iav][1]]==p1)) ||
+                         ((pt1->v[iare[iav][0]]==p1) && (pt1->v[iare[iav][1]]==nq)) )
+                      break;
+                  }
+                  else if ( p1==np ) {
+                    if ( ((pt1->v[iare[iav][0]]==nq ) && (pt1->v[iare[iav][1]]==p0)) ||
+                         ((pt1->v[iare[iav][0]]==p0) && (pt1->v[iare[iav][1]]==nq )) )
+                      break;
+                  }
+                  else {
+                    if ( ((pt1->v[iare[iav][0]]==p0) && (pt1->v[iare[iav][1]]==p1)) ||
+                         ((pt1->v[iare[iav][0]]==p1) && (pt1->v[iare[iav][1]]==p0)) )
+                      break;
+                  }
+                }
+                assert(i!=3);
+                pxt1->tag[iav] = pxt1->tag[iav] | pxt->tag[ia];
+              }
 	        }
 	        else {
 	          pxt1 = &xt;
 	          memset(pxt1,0,sizeof(xTetra));
 	          pxt1->ref[voyq] = pxt->ref[iq];
 	          pxt1->ftag[voyq] = pxt->ftag[iq];
-	          /* Create new field xt */
+              /* update tags for edges */
+              for ( j=0; j<3; j++ ) {
+                ia = iarf[iq][j];
+                p0 = pt->v[iare[ia][0]];
+                p1 = pt->v[iare[ia][1]];
+                if ( pxt->tag[ia] ) {
+                  for ( i=0; i<3; i++ ) {
+                    iav=iarf[voyq][i];
+                    if ( p0==np ) {
+                      if ( ((pt1->v[iare[iav][0]]==nq) && (pt1->v[iare[iav][1]]==p1)) ||
+                           ((pt1->v[iare[iav][0]]==p1) && (pt1->v[iare[iav][1]]==nq)) )
+                        break;
+                    }
+                    else if ( p1==np ) {
+                      if ( ((pt1->v[iare[iav][0]]==nq ) && (pt1->v[iare[iav][1]]==p0)) ||
+                           ((pt1->v[iare[iav][0]]==p0) && (pt1->v[iare[iav][1]]==nq )) )
+                        break;
+                    }
+                    else {
+                      if ( ((pt1->v[iare[iav][0]]==p0) && (pt1->v[iare[iav][1]]==p1)) ||
+                           ((pt1->v[iare[iav][0]]==p1) && (pt1->v[iare[iav][1]]==p0)) )
+                        break;
+                    }
+                  }
+                  assert(i!=3);
+                  pxt1->tag[iav] = pxt->tag[ia];
+                }
+              }
+              /* Create new field xt */
 	          mesh->xt++;
 	          pt1->xt = mesh->xt;
 	          pxt = &mesh->xtetra[pt1->xt];
 	          memcpy(pxt,pxt1,sizeof(xTetra));
-	        }
-	      }
+            }
+          }
 	      else {
 	        /* Only the values corresponding to pt become 0 */
 	        if ( pt1->xt > 0 ) {
@@ -702,12 +820,68 @@ int colver(pMesh mesh,int *list,int ilist,char indq) {
 	        pxt1 = &mesh->xtetra[pt1->xt];
 	        pxt1->ref[voyq] = pxt->ref[iq];
 	        pxt1->ftag[voyq] = pxt->ftag[iq];
+            /* update tags for edges */
+            for ( j=0; j<3; j++ ) {
+              ia = iarf[iq][j];
+              p0 = pt->v[iare[ia][0]];
+              p1 = pt->v[iare[ia][1]];
+              if ( pxt->tag[ia] ) {
+                for ( i=0; i<3; i++ ) {
+                  iav=iarf[voyq][i];
+                  if ( p0==np ) {
+                    if ( ((pt1->v[iare[iav][0]]==nq) && (pt1->v[iare[iav][1]]==p1)) ||
+                         ((pt1->v[iare[iav][0]]==p1) && (pt1->v[iare[iav][1]]==nq)) )
+                      break;
+                  }
+                  else if ( p1==np ) {
+                    if ( ((pt1->v[iare[iav][0]]==nq ) && (pt1->v[iare[iav][1]]==p0)) ||
+                         ((pt1->v[iare[iav][0]]==p0) && (pt1->v[iare[iav][1]]==nq )) )
+                      break;
+                  }
+                  else {
+                    if ( ((pt1->v[iare[iav][0]]==p0) && (pt1->v[iare[iav][1]]==p1)) ||
+                         ((pt1->v[iare[iav][0]]==p1) && (pt1->v[iare[iav][1]]==p0)) )
+                      break;
+                  }
+                }
+                assert(i!=3);
+                pxt1->tag[iav] = pxt->tag[ia];
+              }
+            }
 	      }
-	      else {
+          else {
 	        pxt1 = &xt;
 	        memset(pxt1,0,sizeof(xTetra));
 	        pxt1->ref[voyq] = pxt->ref[iq];
 	        pxt1->ftag[voyq] = pxt->ftag[iq];
+            /* update tags for edges */
+            for ( j=0; j<3; j++ ) {
+              ia = iarf[iq][j];
+              p0 = pt->v[iare[ia][0]];
+              p1 = pt->v[iare[ia][1]];
+              if ( pxt->tag[ia] ) {
+                for ( i=0; i<3; i++ ) {
+                  iav = iarf[voyq][i];
+                  if ( p0==np ) {
+                    if ( ((pt1->v[iare[iav][0]]==nq) && (pt1->v[iare[iav][1]]==p1)) ||
+                         ((pt1->v[iare[iav][0]]==p1) && (pt1->v[iare[iav][1]]==nq)) )
+                      break;
+                  }
+                  else if ( p1==np ) {
+                    if ( ((pt1->v[iare[iav][0]]==nq ) && (pt1->v[iare[iav][1]]==p0)) ||
+                         ((pt1->v[iare[iav][0]]==p0) && (pt1->v[iare[iav][1]]==nq )) )
+                      break;
+                  }
+                  else {
+                    if ( ((pt1->v[iare[iav][0]]==p0) && (pt1->v[iare[iav][1]]==p1)) ||
+                         ((pt1->v[iare[iav][0]]==p1) && (pt1->v[iare[iav][1]]==p0)) )
+                      break;
+                  }
+                }
+                assert(i!=3);
+                pxt1->tag[iav] = pxt->tag[ia];
+              }
+            }
 	        /* Recover the already used place by pxt */
 	        pt1->xt = pt->xt;
 	        memcpy(pxt,pxt1,sizeof(xTetra));
@@ -727,7 +901,20 @@ int colver(pMesh mesh,int *list,int ilist,char indq) {
       if ( j==ip )  continue;
       hPop(&mesh->htab,np,pt->v[j],&ref,&tag);
       if ( tag || ref )
-	      hEdge(&mesh->htab,nq,pt->v[j],ref,tag);
+        hEdge(&mesh->htab,nq,pt->v[j],ref,tag);
+      /* if needed update tetra tag */
+      if ( up && pt->xt ) {
+        if ( hGet(&mesh->htab,nq,pt->v[j],&ref,&tag) && tag ) {
+          for ( ia=0; ia<6; ia++ ) {
+            p0 = pt->v[iare[ia][0]];
+            p1 = pt->v[iare[ia][1]];
+            if ( (p0==np && p1==pt->v[j]) || (p0==pt->v[j] && p1==np) )
+              break;
+          }
+          assert(ia<6);
+          mesh->xtetra[pt->xt].tag[ia] |= tag;
+        }
+      }
     }
     pt->v[ip] = nq;
     pt->qual=orcal(mesh,iel);

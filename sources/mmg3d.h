@@ -273,7 +273,7 @@ int  hGeom(pMesh mesh);
 int  bdryTria(pMesh );
 int  bdryIso(pMesh );
 int  bdrySet(pMesh );
-int  bdryPerm(pMesh );
+int  bdryPerm(pMesh mesh, int iso);
 int  chkmsh(pMesh,int,int);
 int  chkfemtopo(pMesh mesh);
 int  cntbdypt(pMesh mesh, int nump);

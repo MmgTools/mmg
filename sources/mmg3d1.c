@@ -314,6 +314,7 @@ static int swpmsh(pMesh mesh,pSol met) {
         if ( !(pxt->ftag[i] & MG_BDY) ) continue;
         for (j=0; j<3; j++) {
           ia  = iarf[i][j];
+          if ( (pxt->tag[ia] & MG_REQ) ) continue;
           ret = coquilface(mesh,k,ia,list,&it1,&it2);
           ilist = ret / 2;
           if ( ret < 0 )  return(-1);
@@ -405,6 +406,7 @@ static int movtet(pMesh mesh,pSol met,int maxit) {
       /* point j on face i */
       for (i=0; i<4; i++) {
         for (j=0; j<3; j++) {
+          if ( pt->xt && (mesh->xtetra[pt->xt].tag[iarf[i][j]] & MG_REQ) )  continue;
           i0  = idir[i][j];
           ppt = &mesh->point[pt->v[i0]];
           if ( ppt->flag == base )  continue;
@@ -486,6 +488,7 @@ static int coltet(pMesh mesh,pSol met,char typchk) {
     pxt = pt->xt ? &mesh->xtetra[pt->xt] : 0;
     for (i=0; i<4; i++) {
       for (j=0; j<3; j++) {
+        if ( pt->xt && (pxt->tag[iarf[i][j]] & MG_REQ) )  continue;
         ier = 0;
         ip = idir[i][inxt2[j]];
         iq = idir[i][iprv2[j]];
@@ -493,7 +496,7 @@ static int coltet(pMesh mesh,pSol met,char typchk) {
         p0 = &mesh->point[pt->v[ip]];
         p1 = &mesh->point[pt->v[iq]];
         if ( p0->flag == base )  continue;
-        else if ( p0->tag > p1->tag )  continue;
+        else if ( (p0->tag & MG_REQ) || (p0->tag > p1->tag) )  continue;
 
         /* check length */
         if ( typchk == 1 ) {
@@ -594,6 +597,7 @@ static int anatetv(pMesh mesh,pSol met,char typchk) {
       ip2 = pt->v[iare[i][1]];
       p1  = &mesh->point[ip1];
       p2  = &mesh->point[ip2];
+      if ( pt->xt && (mesh->xtetra[pt->xt].tag[i] & MG_REQ) ) continue;
       if ( (p1->tag & MG_BDY) && (p2->tag & MG_BDY) ) {
         ip = hashGet(&hash,ip1,ip2);
       }
@@ -653,6 +657,7 @@ static int anatetv(pMesh mesh,pSol met,char typchk) {
     pt->flag = 0;
     for (ia=0,i=0; i<3; i++) {
       for (j=i+1; j<4; j++,ia++) {
+        if ( pt->xt && (mesh->xtetra[pt->xt].tag[ia] & MG_REQ) ) continue;
         vx[ia] = hashGet(&hash,pt->v[i],pt->v[j]);
         if ( vx[ia] > 0 )  MG_SET(pt->flag,ia);
       }
@@ -798,8 +803,10 @@ static int anatets(pMesh mesh,pSol met,char typchk) {
     pt->flag = 0;
     pxt = &mesh->xtetra[pt->xt];
 
-    for (i=0; i<4; i++)
+    for (i=0; i<4; i++){
+      if ( pxt->ftag[i] & MG_REQ )  continue;
       if ( pxt->ftag[i] & MG_BDY )  break;
+    }
     if ( i == 4 )  continue;
 
     /* virtual triangle */
@@ -807,12 +814,15 @@ static int anatets(pMesh mesh,pSol met,char typchk) {
     if ( typchk == 1 ) {
       if ( !chkedg(mesh,&ptt) )  continue;
       /* put back flag on tetra */
-      for (j=0; j<3; j++)
+      for (j=0; j<3; j++){
+        if ( pxt->tag[iarf[i][j]] & MG_REQ )  continue;
         if ( MG_GET(ptt.flag,j) )  MG_SET(pt->flag,iarf[i][j]);
+      }
     }
     else if ( typchk == 2 ) {
       for (j=0; j<3; j++) {
         ia = iarf[i][j];
+        if ( pxt->tag[ia] & MG_REQ )  continue;
         i1  = iare[ia][0];
         i2  = iare[ia][1];
         ip1 = pt->v[i1];
@@ -832,9 +842,7 @@ static int anatets(pMesh mesh,pSol met,char typchk) {
     for (j=0; j<3; j++) {
       ia = iarf[i][j];
       if ( !MG_GET(pt->flag,ia) )  continue;
-#ifndef BEFORE
       if ( pxt->tag[ia] & MG_REQ )  continue;
-#endif
       i1  = iare[ia][0];
       i2  = iare[ia][1];
       ip1 = pt->v[i1];
@@ -913,8 +921,9 @@ static int anatets(pMesh mesh,pSol met,char typchk) {
 
       for (j=0; j<3; j++) {
         ia  = iarf[i][j];
-        if ( MG_GET(pt->flag,ia) )  continue;
-        else if ( MG_SIN(ptt.tag[j]) )  continue;
+        if ( MG_GET(pt->flag,ia) )                continue;
+        if ( pt->xt && (pxt->tag[ia] & MG_REQ) )  continue;
+        else if ( MG_SIN(ptt.tag[j]) )            continue;
         ip1 = pt->v[iare[ia][0]];
         ip2 = pt->v[iare[ia][1]];
         ip  = hashGet(&hash,ip1,ip2);
@@ -952,6 +961,7 @@ static int anatets(pMesh mesh,pSol met,char typchk) {
       pt->flag = ic = 0;
       for (ia=0,i=0; i<3; i++) {
         for (j=i+1; j<4; j++,ia++) {
+          if ( pt->xt && (mesh->xtetra[pt->xt].tag[ia] & MG_REQ) )  continue;
           vx[ia] = hashGet(&hash,pt->v[i],pt->v[j]);
           if ( vx[ia] > 0 ) {
             MG_SET(pt->flag,ia);
@@ -1059,6 +1069,7 @@ static int adpspl(pMesh mesh,pSol met, int* warn) {
     /* find longest edge */
     imax = -1; lmax = 0.0;
     for (i=0; i<6; i++) {
+      if ( pt->xt && (pxt->tag[i] & MG_REQ) )  continue;
       ip1  = iare[i][0];
       ip2  = iare[i][1];
       len = lenedg(mesh,met,pt->v[ip1],pt->v[ip2]);
@@ -1067,6 +1078,9 @@ static int adpspl(pMesh mesh,pSol met, int* warn) {
         imax = i;
       }
     }
+    if ( imax==-1 )
+      fprintf(stdout,"%s:%d: Warning: all edges of tetra %d are boundary and required\n",
+              __FILE__,__LINE__,k);
     if ( lmax < LOPTL )  continue;
 
     /* proceed edges according to lengths */
@@ -1085,6 +1099,7 @@ static int adpspl(pMesh mesh,pSol met, int* warn) {
     if ( pt->xt && (pxt->ftag[i] & MG_BDY) ) {
       hGet(&mesh->htab,ip1,ip2,&ref,&tag);
       if ( MG_SIN(tag) )  continue;
+      if ( tag & MG_REQ )  continue;
       tag |= MG_BDY;
       ilist = coquil(mesh,k,imax,list);
       if ( !ilist )  continue;
@@ -1238,6 +1253,7 @@ static int adpcol(pMesh mesh,pSol met) {
     /* find shortest edge */
     imin = -1; lmin = DBL_MAX;
     for (i=0; i<6; i++) {
+      if ( pt->xt && (pxt->tag[i] & MG_REQ) )  continue;
       i1  = iare[i][0];
       i2  = iare[i][1];
       len = lenedg(mesh,met,pt->v[i1],pt->v[i2]);
@@ -1246,6 +1262,9 @@ static int adpcol(pMesh mesh,pSol met) {
         imin = i;
       }
     }
+    if ( imin==-1 )
+      fprintf(stdout,"%s:%d: Warning: all edges of tetra %d are boundary and required\n",
+              __FILE__,__LINE__,k);
     if ( lmin > LOPTS )  continue;
 
     ifa0 = ifar[imin][0];
@@ -1265,6 +1284,7 @@ static int adpcol(pMesh mesh,pSol met) {
     if ( pt->xt && (pxt->ftag[i] & MG_BDY) ) {
       hGet(&mesh->htab,ip,iq,&ref,&tag);
       if ( MG_SIN(tag) )  continue;
+      if ( tag & MG_REQ )  continue;
       tag |= MG_BDY;
       if ( p0->tag > tag )   continue;
       if ( ( tag & MG_NOM ) && (mesh->adja[4*(k-1)+1+i]) ) continue;
@@ -1278,8 +1298,8 @@ static int adpcol(pMesh mesh,pSol met) {
     if ( ilist ) {
       ier = colver(mesh,list,ilist,i2);
       nc += ier;
+      }
     }
-  }
 
   return(nc);
 }

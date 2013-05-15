@@ -161,7 +161,7 @@ int bouler(pMesh mesh,int start,int ip,int *list,int *ng,int *nr) {
       i2 = iprv2[i];
       if ( pt->tag[i1] & MG_GEO )
         *ng = *ng + 1;
-      else
+      else if ( pt->tag[i1] & MG_REF )
         *nr = *nr + 1;
       ns++;
       list[ns] = pt->v[i2];
@@ -186,7 +186,7 @@ int bouler(pMesh mesh,int start,int ip,int *list,int *ng,int *nr) {
         i1 = inxt2[i];
         if ( pt->tag[i2] & MG_GEO )
           *ng = *ng + 1;
-        else
+        else if ( pt->tag[i1] & MG_REF )
           *nr = *nr + 1;
         ns++;
         list[ns] = pt->v[i1];
@@ -694,8 +694,8 @@ inline int settag(pMesh mesh,int start,int ia,int tag,int edg) {
 
   if ( pt->xt ) {
     pxt = &mesh->xtetra[pt->xt];
-    pxt->tag[ia] = tag;
-    pxt->edg[ia] = edg;
+    pxt->tag[ia] |= tag;
+    pxt->edg[ia]  = edg;
   }
   while ( adj && (adj != start) ) {
     pt = &mesh->tetra[adj];
@@ -709,8 +709,8 @@ inline int settag(pMesh mesh,int start,int ia,int tag,int edg) {
     assert(i<6);
     if ( pt->xt ) {
       pxt = &mesh->xtetra[pt->xt];
-      pxt->tag[i] = tag;
-      pxt->edg[i] = edg;
+      pxt->tag[i] |= tag;
+      pxt->edg[i]  = edg;
     }
     /* set new triangle for travel */
     adja = &mesh->adja[4*(adj-1)+1];
@@ -745,8 +745,8 @@ inline int settag(pMesh mesh,int start,int ia,int tag,int edg) {
     assert(i<6);
     if ( pt->xt ) {
       pxt = &mesh->xtetra[pt->xt];
-      pxt->tag[i] = tag;
-      pxt->edg[i] = edg;
+      pxt->tag[i] |= tag;
+      pxt->edg[i]  = edg;
     }
     /* set new triangle for travel */
     adja = &mesh->adja[4*(adj-1)+1];

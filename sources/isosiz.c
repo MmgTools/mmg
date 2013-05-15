@@ -23,7 +23,7 @@ static double defsizreg(pMesh mesh,pSol met,int nump,int *lists,int ilists) {
 
   p0 = &mesh->point[nump];
 
-  if ( !p0->xp || MG_EDG(p0->tag) || (p0->tag & MG_NOM) ) {
+  if ( !p0->xp || MG_EDG(p0->tag) || (p0->tag & MG_NOM) || (p0->tag & MG_REQ))  {
     fprintf(stdout,"    ## Func. defsizreg : wrong point qualification : xp ? %d\n",p0->xp);
     return(0);
   }
@@ -520,6 +520,7 @@ int gradsiz_iso(pMesh mesh,pSol met) {
       for (i=0; i<4; i++) {
         for (j=0; j<3; j++) {
           ia  = iarf[i][j];
+          if ( pt->xt && (mesh->xtetra[pt->xt].tag[ia] & MG_REQ) )  continue;
           i0  = iare[ia][0];
           i1  = iare[ia][1];
           ip0 = pt->v[i0];

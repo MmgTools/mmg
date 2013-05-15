@@ -1274,6 +1274,11 @@ int mmg3d2(pMesh mesh,pSol sol) {
     return(0);
   }
 
+  if ( !bdryPerm(mesh,info.iso) ) {
+    fprintf(stdout,"  ## Boundary orientation problem. Exit program.\n");
+    return(0);
+  }
+
   /* build hash table for initial edges */
   if ( !hGeom(mesh) ) {
     fprintf(stdout,"  ## Hashing problem (0). Exit program.\n");

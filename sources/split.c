@@ -158,7 +158,12 @@ void split1(pMesh mesh,pSol met,int k,int vx[6]) {
     pt->v[tau[1]] = pt1->v[tau[0]] = vx[taued[0]];
 
   if ( pt->xt ) {
-    xt.ref[tau[0]]  = 0;  xt.ftag[tau[0]]  = 0;
+    /* Reset edge tag */
+    xt.tag[ taued[3]] = xt.ftag[ tau[3]];
+    xt.tag[ taued[4]] = xt.ftag[ tau[2]];
+    xt1.tag[taued[1]] = xt1.ftag[tau[3]];
+    xt1.tag[taued[2]] = xt1.ftag[tau[2]];
+    xt.ref[ tau[0]] = 0;  xt.ftag[ tau[0]] = 0;
     xt1.ref[tau[1]] = 0;  xt1.ftag[tau[1]] = 0;
   }
 
@@ -272,7 +277,7 @@ int split1b(pMesh mesh, pSol met,int *list, int ret, int ip,int cas){
   pxTetra   pxt0;
   int       ilist,k,open,iel,jel,*newtet,nump,numq,*adja;
   int       *adjan,nei2,nei3,mel,ref;
-  char      ie,tau[4],isxt,isxt1,i,j,voy,tag;
+  char      ie,tau[4],*taued,isxt,isxt1,i,j,voy,tag;
   double    lmin,lmax,len;
 
   ilist = ret / 2;
@@ -392,28 +397,39 @@ int split1b(pMesh mesh, pSol met,int *list, int ret, int ip,int cas){
 
     /* tau = sigma^-1 = permutation that sends the reference config (edge 01 split) to current */
     tau[0] = 0; tau[1] = 1; tau[2] = 2; tau[3] = 3;
+    taued = &permedge[0][0];
     switch(ie){
     case 1:
       tau[0] = 2; tau[1] = 0; tau[2] = 1; tau[3] = 3;
+      taued = &permedge[6][0];
       break;
     case 2:
       tau[0] = 0; tau[1] = 3; tau[2] = 1; tau[3] = 2;
+      taued = &permedge[2][0];
       break;
     case 3:
       tau[0] = 1; tau[1] = 2; tau[2] = 0; tau[3] = 3;
+      taued = &permedge[4][0];
       break;
     case 4:
       tau[0] = 3; tau[1] = 1; tau[2] = 0; tau[3] = 2;
+      taued = &permedge[10][0];
       break;
     case 5:
       tau[0] = 3; tau[1] = 2; tau[2] = 1; tau[3] = 0;
+      taued = &permedge[11][0];
       break;
     }
 
     /* Generic formulation of split of 1 edge */
     pt->v[tau[1]] = pt1->v[tau[0]] = ip;
     if(pt->xt){
-      xt.ref[tau[0]]   = 0 ; xt.ftag[tau[0]]  = 0;
+      /* Reset edge tag */
+      xt.tag[ taued[3]] = xt.ftag[ tau[3]];
+      xt.tag[ taued[4]] = xt.ftag[ tau[2]];
+      xt1.tag[taued[1]] = xt1.ftag[tau[3]];
+      xt1.tag[taued[2]] = xt1.ftag[tau[2]];
+      xt.ref[tau[0]]   = 0;  xt.ftag[tau[0]]  = 0;
       xt1.ref[tau[1]]  = 0;  xt1.ftag[tau[1]] = 0;
     }
 
@@ -528,28 +544,39 @@ int split1b(pMesh mesh, pSol met,int *list, int ret, int ip,int cas){
 
     /* tau = sigma^-1 = permutation that sends the reference config (edge 01 split) to current */
     tau[0] = 0; tau[1] = 1; tau[2] = 2; tau[3] = 3;
+    taued = &permedge[0][0];
     switch(ie){
     case 1:
       tau[0] = 2; tau[1] = 0; tau[2] = 1; tau[3] = 3;
+      taued = &permedge[6][0];
       break;
     case 2:
       tau[0] = 0; tau[1] = 3; tau[2] = 1; tau[3] = 2;
+      taued = &permedge[2][0];
       break;
     case 3:
       tau[0] = 1; tau[1] = 2; tau[2] = 0; tau[3] = 3;
+      taued = &permedge[4][0];
       break;
     case 4:
       tau[0] = 3; tau[1] = 1; tau[2] = 0; tau[3] = 2;
+      taued = &permedge[10][0];
       break;
     case 5:
       tau[0] = 3; tau[1] = 2; tau[2] = 1; tau[3] = 0;
-      break;
+      taued = &permedge[11][0];
+     break;
     }
 
     /* Generic formulation of split of 1 edge */
     pt->v[tau[1]] = pt1->v[tau[0]] = ip;
     if(pt->xt){
-      xt.ref[tau[0]]   = 0 ; xt.ftag[tau[0]]  = 0;
+      /* Reset edge tag */
+      xt.tag[ taued[3]] = xt.ftag[ tau[3]];
+      xt.tag[ taued[4]] = xt.ftag[ tau[2]];
+      xt1.tag[taued[1]] = xt1.ftag[tau[3]];
+      xt1.tag[taued[2]] = xt1.ftag[tau[2]];
+      xt.ref[tau[0]]   = 0;  xt.ftag[tau[0]]  = 0;
       xt1.ref[tau[1]]  = 0;  xt1.ftag[tau[1]] = 0;
     }
 
@@ -1015,23 +1042,40 @@ void split2sf(pMesh mesh,pSol met,int k,int vx[6]){
   /* Generic formulation for the split of 2 edges belonging to a common face */
   imin = (pt[0]->v[tau[1]] < pt[0]->v[tau[2]]) ? tau[1] : tau[2] ;
   pt[0]->v[tau[1]]  = vx[taued[4]] ;  pt[0]->v[tau[2]] = vx[taued[5]];
+  xt[0].tag[taued[0]] = xt[0].ftag[tau[2]];
+  xt[0].tag[taued[1]] = xt[0].ftag[tau[1]];
+  xt[0].tag[taued[3]] = xt[0].ftag[tau[0]];
   xt[0].ref[tau[3]] = 0;  xt[0].ftag[tau[3]] = 0;
 
   if ( imin == tau[1] ) {
     pt[1]->v[tau[2]] = vx[taued[5]];  pt[1]->v[tau[3]] = vx[taued[4]];
     pt[2]->v[tau[3]] = vx[taued[5]];
 
-    xt[1].ref[tau[1]]  = 0;  xt[1].ref[tau[3]]  = 0;
-    xt[1].ftag[tau[1]] = 0;  xt[1].ftag[tau[3]] = 0;
-    xt[2].ref[tau[2]]  = 0;  xt[2].ftag[tau[2]] = 0;
+    xt[1].tag[taued[1]] = xt[1].ftag[tau[1]];
+    xt[1].tag[taued[2]] = xt[1].ftag[tau[2]];
+    xt[1].tag[taued[3]] = xt[1].ftag[tau[0]];
+    xt[1].tag[taued[5]] = xt[1].ftag[tau[0]];
+    xt[1].ref[  tau[1]] = 0;  xt[1].ref[  tau[3]] = 0;
+    xt[1].ftag[ tau[1]] = 0;  xt[1].ftag[ tau[3]] = 0;
+
+    xt[2].tag[taued[2]] = xt[2].ftag[tau[1]];
+    xt[2].tag[taued[4]] = xt[2].ftag[tau[0]];
+    xt[2].ref[ tau[2]]  = 0;  xt[2].ftag[ tau[2]] = 0;
   }
   else {
     pt[1]->v[tau[3]] = vx[taued[4]];
     pt[2]->v[tau[1]] = vx[taued[4]];  pt[2]->v[tau[3]] = vx[taued[5]];
 
-    xt[1].ref[tau[1]]  = 0;  xt[1].ftag[tau[1]] = 0;
-    xt[2].ref[tau[2]]  = 0;  xt[2].ref[tau[3]]  = 0;
-    xt[2].ftag[tau[2]] = 0;  xt[2].ftag[tau[3]] = 0;
+    xt[1].tag[taued[2]] = xt[1].ftag[tau[2]];
+    xt[1].tag[taued[5]] = xt[1].ftag[tau[0]];
+    xt[1].ref[  tau[1]] = 0;  xt[1].ftag[ tau[1]] = 0;
+
+    xt[2].tag[taued[0]] = xt[2].ftag[tau[2]];
+    xt[2].tag[taued[2]] = xt[2].ftag[tau[1]];
+    xt[2].tag[taued[3]] = xt[2].ftag[tau[0]];
+    xt[2].tag[taued[4]] = xt[2].ftag[tau[0]];
+    xt[2].ref[  tau[2]] = 0;  xt[2].ref[  tau[3]] = 0;
+    xt[2].ftag[ tau[2]] = 0;  xt[2].ftag[ tau[3]] = 0;
   }
 
   /* Assignation of the xt fields to the appropriate tets */
@@ -1511,11 +1555,29 @@ void split3(pMesh mesh,pSol met,int k,int vx[6]) {
   pt[2]->v[tau[0]] = vx[taued[1]];  pt[2]->v[tau[1]] = vx[taued[3]];
   pt[3]->v[tau[0]] = vx[taued[0]];  pt[3]->v[tau[1]] = vx[taued[3]];  pt[3]->v[tau[2]] = vx[taued[1]];
 
-  xt[0].ref[tau[0]] = 0;  xt[0].ftag[tau[0]] = 0;
-  xt[1].ref[tau[1]] = 0;  xt[1].ftag[tau[1]] = 0;
-  xt[2].ref[tau[2]] = 0;  xt[2].ftag[tau[2]] = 0;
-  xt[3].ref[tau[0]]  = 0;  xt[3].ref[tau[1]]  = 0;  xt[3].ref[tau[2]]  = 0;
-  xt[3].ftag[tau[0]] = 0;  xt[3].ftag[tau[1]] = 0;  xt[3].ftag[tau[2]] = 0;
+  xt[0].tag[taued[3]] = xt[0].ftag[tau[3]];
+  xt[0].tag[taued[4]] = xt[0].ftag[tau[2]];
+  xt[0].tag[taued[5]] = xt[0].ftag[tau[1]];
+  xt[0].ref[  tau[0]] = 0;  xt[0].ftag[ tau[0]] = 0;
+
+  xt[1].tag[taued[1]] = xt[1].ftag[tau[3]];
+  xt[1].tag[taued[2]] = xt[1].ftag[tau[2]];
+  xt[1].tag[taued[5]] = xt[1].ftag[tau[0]];
+  xt[1].ref[  tau[1]] = 0;  xt[1].ftag[ tau[1]] = 0;
+
+  xt[2].tag[taued[0]] = xt[2].ftag[tau[3]];
+  xt[2].tag[taued[2]] = xt[2].ftag[tau[1]];
+  xt[2].tag[taued[4]] = xt[2].ftag[tau[0]];
+  xt[2].ref[  tau[2]] = 0;  xt[2].ftag[ tau[2]] = 0;
+
+  xt[3].tag[taued[0]] = xt[3].ftag[tau[3]];
+  xt[3].tag[taued[1]] = xt[3].ftag[tau[3]];
+  xt[3].tag[taued[2]] = xt[3].ftag[tau[2]];
+  xt[3].tag[taued[3]] = xt[3].ftag[tau[3]];
+  xt[3].tag[taued[4]] = xt[3].ftag[tau[0]];
+  xt[3].tag[taued[5]] = xt[3].ftag[tau[1]];
+  xt[3].ref[  tau[0]] = 0;  xt[3].ref[  tau[1]] = 0;  xt[3].ref[  tau[2]] = 0;
+  xt[3].ftag[ tau[0]] = 0;  xt[3].ftag[ tau[1]] = 0;  xt[3].ftag[ tau[2]] = 0;
 
   /* Assignation of the xt fields to the appropriate tets */
   memset(isxt,0,4*sizeof(char));
@@ -1726,92 +1788,142 @@ void split3cone(pMesh mesh,pSol met,int k,int vx[6]) {
   }
 
   pt[0]->v[tau[1]] = vx[taued[0]] ; pt[0]->v[tau[2]] = vx[taued[1]] ; pt[0]->v[tau[3]] = vx[taued[2]];
-  xt[0].ref[tau[0]] = 0;
-  xt[0].ftag[tau[0]] = 0;
+  xt[0].tag[taued[3]] = xt[0].ftag[tau[3]];
+  xt[0].tag[taued[4]] = xt[0].ftag[tau[2]];
+  xt[0].tag[taued[5]] = xt[0].ftag[tau[1]];
+  xt[0].ref[  tau[0]] = 0;
+  xt[0].ftag[ tau[0]] = 0;
 
   if(ia == tau[3]){
     pt[1]->v[tau[0]] = vx[taued[2]] ; pt[1]->v[tau[1]] = vx[taued[0]] ; pt[1]->v[tau[2]] = vx[taued[1]];
-    xt[1].ref[tau[0]] = 0 ; xt[1].ref[tau[3]] = 0;
-    xt[1].ftag[tau[0]] = 0 ; xt[1].ftag[tau[3]] = 0;
+    xt[1].tag[taued[0]] = xt[1].ftag[tau[2]];
+    xt[1].tag[taued[1]] = xt[1].ftag[tau[1]];
+    xt[1].tag[taued[3]] = xt[1].ftag[tau[3]];
+    xt[1].tag[taued[4]] = xt[1].ftag[tau[2]];
+    xt[1].tag[taued[5]] = xt[1].ftag[tau[1]];
+    xt[1].ref[  tau[0]] = 0;  xt[1].ref[  tau[3]] = 0;
+    xt[1].ftag[ tau[0]] = 0;  xt[1].ftag[ tau[3]] = 0;
 
     if(ib == tau[1]){
       pt[2]->v[tau[0]] = vx[taued[0]] ; pt[2]->v[tau[2]] = vx[taued[1]] ;
-      xt[2].ref[tau[0]] = 0 ; xt[2].ref[tau[1]] = 0 ;
-      xt[2].ftag[tau[0]] = 0 ; xt[2].ftag[tau[1]] = 0 ;
+      xt[2].tag[taued[1]] = xt[2].ftag[tau[3]];
+      xt[2].tag[taued[2]] = xt[2].ftag[tau[2]];
+      xt[2].tag[taued[3]] = xt[2].ftag[tau[3]];
+      xt[2].tag[taued[5]] = xt[2].ftag[tau[1]];
+      xt[2].ref[  tau[0]] = 0;  xt[2].ref[  tau[1]] = 0;
+      xt[2].ftag[ tau[0]] = 0;  xt[2].ftag[ tau[1]] = 0;
 
       pt[3]->v[tau[0]] = vx[taued[1]] ;
-      xt[3].ref[tau[2]] = 0  ;
-      xt[3].ftag[tau[2]] = 0 ;
-
+      xt[3].tag[taued[0]] = xt[3].ftag[tau[3]];
+      xt[3].tag[taued[2]] = xt[3].ftag[tau[1]];
+      xt[3].ref[  tau[2]] = 0;
+      xt[3].ftag[ tau[2]] = 0;
     }
     else{
       assert(ib == tau[2]);
 
       pt[2]->v[tau[0]] = vx[taued[1]] ; pt[2]->v[tau[1]] = vx[taued[0]] ;
-      xt[2].ref[tau[0]] = 0  ; xt[2].ref[tau[2]] = 0 ;
-      xt[2].ftag[tau[0]] = 0 ; xt[2].ftag[tau[2]] = 0 ;
+      xt[2].tag[taued[0]] = xt[2].ftag[tau[3]];
+      xt[2].tag[taued[2]] = xt[2].ftag[tau[1]];
+      xt[2].tag[taued[3]] = xt[2].ftag[tau[3]];
+      xt[2].tag[taued[4]] = xt[2].ftag[tau[2]];
+      xt[2].ref[  tau[0]] = 0;  xt[2].ref[  tau[2]] = 0;
+      xt[2].ftag[ tau[0]] = 0;  xt[2].ftag[ tau[2]] = 0;
 
       pt[3]->v[tau[0]] = vx[taued[0]] ;
-      xt[3].ref[tau[1]] = 0  ;
-      xt[3].ftag[tau[1]] = 0 ;
+      xt[3].tag[taued[1]] = xt[3].ftag[tau[3]];
+      xt[3].tag[taued[2]] = xt[3].ftag[tau[2]];
+      xt[3].ref[  tau[1]] = 0;
+      xt[3].ftag[ tau[1]] = 0;
     }
   }
 
   else if (ia == tau[2]){
     pt[1]->v[tau[0]] = vx[taued[1]] ; pt[1]->v[tau[1]] = vx[taued[0]] ; pt[1]->v[tau[3]] = vx[taued[2]];
-    xt[1].ref[tau[0]] = 0 ; xt[1].ref[tau[2]] = 0;
-    xt[1].ftag[tau[0]] = 0 ; xt[1].ftag[tau[2]] = 0;
+    xt[1].tag[taued[0]] = xt[1].ftag[tau[3]];
+    xt[1].tag[taued[2]] = xt[1].ftag[tau[1]];
+    xt[1].tag[taued[3]] = xt[1].ftag[tau[3]];
+    xt[1].tag[taued[4]] = xt[1].ftag[tau[2]];
+    xt[1].tag[taued[5]] = xt[1].ftag[tau[1]];
+    xt[1].ref[  tau[0]] = 0;  xt[1].ref[  tau[2]] = 0;
+    xt[1].ftag[ tau[0]] = 0;  xt[1].ftag[ tau[2]] = 0;
 
     if(ib == tau[3]){
       pt[2]->v[tau[0]] = vx[taued[2]] ; pt[2]->v[tau[1]] = vx[taued[0]] ;
-      xt[2].ref[tau[0]] = 0  ; xt[2].ref[tau[3]] = 0 ;
-      xt[2].ftag[tau[0]] = 0 ; xt[2].ftag[tau[3]] = 0 ;
+      xt[2].tag[taued[0]] = xt[2].ftag[tau[2]];
+      xt[2].tag[taued[1]] = xt[2].ftag[tau[1]];
+      xt[2].tag[taued[3]] = xt[2].ftag[tau[3]];
+      xt[2].tag[taued[4]] = xt[2].ftag[tau[2]];
+      xt[2].ref[  tau[0]] = 0;  xt[2].ref[  tau[3]] = 0;
+      xt[2].ftag[ tau[0]] = 0;  xt[2].ftag[ tau[3]] = 0;
 
       pt[3]->v[tau[0]] = vx[taued[0]] ;
-      xt[3].ref[tau[1]] = 0  ;
-      xt[3].ftag[tau[1]] = 0 ;
-
+      xt[3].tag[taued[1]] = xt[3].ftag[tau[3]];
+      xt[3].tag[taued[2]] = xt[3].ftag[tau[2]];
+      xt[3].ref[  tau[1]] = 0;
+      xt[3].ftag[ tau[1]] = 0;
     }
     else{
       assert(ib == tau[1]);
 
       pt[2]->v[tau[0]] = vx[taued[0]] ; pt[2]->v[tau[3]] = vx[taued[2]] ;
-      xt[2].ref[tau[0]] = 0  ; xt[2].ref[tau[1]] = 0 ;
-      xt[2].ftag[tau[0]] = 0 ; xt[2].ftag[tau[1]] = 0 ;
+      xt[2].tag[taued[1]] = xt[2].ftag[tau[3]];
+      xt[2].tag[taued[2]] = xt[2].ftag[tau[2]];
+      xt[2].tag[taued[4]] = xt[2].ftag[tau[2]];
+      xt[2].tag[taued[5]] = xt[2].ftag[tau[1]];
+      xt[2].ref[  tau[0]] = 0;  xt[2].ref[  tau[1]] = 0;
+      xt[2].ftag[ tau[0]] = 0;  xt[2].ftag[ tau[1]] = 0;
 
       pt[3]->v[tau[0]] = vx[taued[2]] ;
-      xt[3].ref[tau[3]] = 0  ;
-      xt[3].ftag[tau[3]] = 0 ;
+      xt[3].tag[taued[0]] = xt[3].ftag[tau[2]];
+      xt[3].tag[taued[1]] = xt[3].ftag[tau[1]];
+      xt[3].ref[  tau[3]] = 0;
+      xt[3].ftag[ tau[3]] = 0;
     }
   }
   else{
     assert(ia == tau[1]);
 
     pt[1]->v[tau[0]] = vx[taued[0]] ; pt[1]->v[tau[2]] = vx[taued[1]] ; pt[1]->v[tau[3]] = vx[taued[2]];
-    xt[1].ref[tau[0]] = 0 ; xt[1].ref[tau[1]] = 0;
-    xt[1].ftag[tau[0]] = 0 ; xt[1].ftag[tau[1]] = 0;
+    xt[1].tag[taued[1]] = xt[1].ftag[tau[3]];
+    xt[1].tag[taued[2]] = xt[1].ftag[tau[2]];
+    xt[1].tag[taued[3]] = xt[1].ftag[tau[3]];
+    xt[1].tag[taued[4]] = xt[1].ftag[tau[2]];
+    xt[1].tag[taued[5]] = xt[1].ftag[tau[1]];
+    xt[1].ref[  tau[0]] = 0;  xt[1].ref[  tau[1]] = 0;
+    xt[1].ftag[ tau[0]] = 0;  xt[1].ftag[ tau[1]] = 0;
 
     if(ib == tau[2]){
       pt[2]->v[tau[0]] = vx[taued[1]] ; pt[2]->v[tau[3]] = vx[taued[2]] ;
-      xt[2].ref[tau[0]] = 0  ; xt[2].ref[tau[2]] = 0 ;
-      xt[2].ftag[tau[0]] = 0 ; xt[2].ftag[tau[2]] = 0 ;
+      xt[2].tag[taued[0]] = xt[2].ftag[tau[3]];
+      xt[2].tag[taued[2]] = xt[2].ftag[tau[1]];
+      xt[2].tag[taued[4]] = xt[2].ftag[tau[2]];
+      xt[2].tag[taued[5]] = xt[2].ftag[tau[1]];
+      xt[2].ref[  tau[0]] = 0;  xt[2].ref[  tau[2]] = 0;
+      xt[2].ftag[ tau[0]] = 0;  xt[2].ftag[ tau[2]] = 0;
 
       pt[3]->v[tau[0]] = vx[taued[2]] ;
-      xt[3].ref[tau[3]] = 0  ;
-      xt[3].ftag[tau[3]] = 0 ;
-
+      xt[3].tag[taued[0]] = xt[3].ftag[tau[2]];
+      xt[3].tag[taued[1]] = xt[3].ftag[tau[1]];
+      xt[3].ref[  tau[3]] = 0;
+      xt[3].ftag[ tau[3]] = 0;
     }
     else{
       assert(ib == tau[3]);
 
       pt[2]->v[tau[0]] = vx[taued[2]] ; pt[2]->v[tau[2]] = vx[taued[1]] ;
-      xt[2].ref[tau[0]] = 0  ;  xt[2].ref[tau[3]] = 0 ;
-      xt[2].ftag[tau[0]] = 0 ;  xt[2].ftag[tau[3]] = 0 ;
+      xt[2].tag[taued[0]] = xt[2].ftag[tau[2]];
+      xt[2].tag[taued[1]] = xt[2].ftag[tau[1]];
+      xt[2].tag[taued[3]] = xt[2].ftag[tau[3]];
+      xt[2].tag[taued[5]] = xt[2].ftag[tau[1]];
+      xt[2].ref[  tau[0]] = 0;  xt[2].ref[  tau[3]] = 0;
+      xt[2].ftag[ tau[0]] = 0;  xt[2].ftag[ tau[3]] = 0;
 
       pt[3]->v[tau[0]] = vx[taued[1]] ;
-      xt[3].ref[tau[2]] = 0  ;
-      xt[3].ftag[tau[2]] = 0 ;
-
+      xt[3].tag[taued[0]] = xt[3].ftag[tau[3]];
+      xt[3].tag[taued[2]] = xt[3].ftag[tau[1]];
+      xt[3].ref[  tau[2]] = 0;
+      xt[3].ftag[ tau[2]] = 0;
     }
   }
 
@@ -2539,15 +2651,27 @@ int split4bar(pMesh mesh, pSol met, int k){
   /* Update vertices and xt fields */
   pt[0]->v[0] = pt[1]->v[1] = pt[2]->v[2] = pt[3]->v[3] = ib;
 
+  xt[0].tag[0]  = 0;
+  xt[0].tag[1]  = 0;
+  xt[0].tag[2]  = 0;
   xt[0].ref[1]  = 0;  xt[0].ref[2]  = 0;  xt[0].ref[3]  = 0;
   xt[0].ftag[1] = 0;  xt[0].ftag[2] = 0;  xt[0].ftag[3] = 0;
 
+  xt[1].tag[0]  = 0;
+  xt[1].tag[3]  = 0;
+  xt[1].tag[4]  = 0;
   xt[1].ref[0]  = 0;  xt[1].ref[2]  = 0;  xt[1].ref[3]  = 0;
   xt[1].ftag[0] = 0;  xt[1].ftag[2] = 0;  xt[1].ftag[3] = 0;
 
+  xt[2].tag[1]  = 0;
+  xt[2].tag[3]  = 0;
+  xt[2].tag[5]  = 0;
   xt[2].ref[0]  = 0;  xt[2].ref[1]  = 0;  xt[2].ref[3]  = 0;
   xt[2].ftag[0] = 0;  xt[2].ftag[1] = 0;  xt[2].ftag[3] = 0;
 
+  xt[3].tag[2]  = 0;
+  xt[3].tag[4]  = 0;
+  xt[3].tag[5]  = 0;
   xt[3].ref[0]  = 0;  xt[3].ref[1]  = 0;  xt[3].ref[2]  = 0;
   xt[3].ftag[0] = 0;  xt[3].ftag[1] = 0;  xt[3].ftag[2] = 0;
 

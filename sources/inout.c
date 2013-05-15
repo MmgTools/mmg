@@ -167,7 +167,7 @@ int loadMesh(pMesh mesh) {
         if( abs(pa->ref) != MG_ISO ) {
           ++mesh->na;
           pa->ref = abs(pa->ref);
-          memcpy(&mesh->edge[mesh->na],&mesh->edge[k],sizeof(Edge));
+          memmove(&mesh->edge[mesh->na],&mesh->edge[k],sizeof(Edge));
           ina[k] = mesh->na;
         }
       }
@@ -181,7 +181,7 @@ int loadMesh(pMesh mesh) {
         GmfGetLin(inm,GmfRidges,&ia);
         assert(ia <= na);
         if( info.iso ){
-          if( ina[ia] == 0 )  
+          if( ina[ia] == 0 )
 						continue;
           else {
             pa = &mesh->edge[ina[ia]];

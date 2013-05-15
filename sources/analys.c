@@ -33,7 +33,7 @@ static int setadj(pMesh mesh){
         ip2 = pt->v[i2];
         if ( !mesh->point[ip1].tmp )  mesh->point[ip1].tmp = ++nvf;
         if ( !mesh->point[ip2].tmp )  mesh->point[ip2].tmp = ++nvf;
-        if ( MG_EDG(pt->tag[i]) ) {
+        if ( MG_EDG(pt->tag[i]) || pt->tag[i] & MG_REQ ) {
           mesh->point[ip1].tag |= pt->tag[i];
           mesh->point[ip2].tag |= pt->tag[i];
         }
@@ -144,7 +144,7 @@ static int setadj(pMesh mesh){
         ppt->tmp = 1;
         np++;
       }
-      if ( !MG_EDG(pt->tag[i]) )  continue;
+      if ( !MG_EDG(pt->tag[i]) && !pt->tag[i] & MG_REQ )  continue;
       jel  = adja[i] / 3;
       if ( !jel || jel > k ) {
         if ( pt->tag[i] & MG_GEO )  nr++;
@@ -496,7 +496,7 @@ int analys(pMesh mesh) {
       return(0);
     }
   }
-  else if ( !bdryPerm(mesh) ) {
+  else if ( !bdryPerm(mesh,info.iso) ) {
     fprintf(stdout,"  ## Boundary orientation problem. Exit program.\n");
     return(0);
   }
