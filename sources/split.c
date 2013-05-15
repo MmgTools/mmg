@@ -272,13 +272,14 @@ int simbulgept(pMesh mesh,int *list,int ret,double o[3]) {
 /** Split edge list[0]%6, whose shell list is passed, introducing point ip
     Beware : shell has to be enumerated in ONLY ONE TRAVEL (always same sense) */
 int split1b(pMesh mesh, pSol met,int *list, int ret, int ip,int cas){
-  pTetra    pt,pt1;
-  xTetra    xt,xt1;
-  pxTetra   pxt0;
-  int       ilist,k,open,iel,jel,*newtet,nump,numq,*adja;
-  int       *adjan,nei2,nei3,mel,ref;
-  char      ie,tau[4],*taued,isxt,isxt1,i,j,voy,tag;
-  double    lmin,lmax,len;
+  pTetra         pt,pt1;
+  xTetra         xt,xt1;
+  pxTetra        pxt0;
+  int            ilist,k,open,iel,jel,*newtet,nump,numq,*adja;
+  int            *adjan,nei2,nei3,mel,ref;
+  char           ie,tau[4],isxt,isxt1,i,j,voy,tag;
+  unsigned char  *taued;
+  double         lmin,lmax,len;
 
   ilist = ret / 2;
   open  = ret % 2;

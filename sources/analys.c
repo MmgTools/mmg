@@ -323,7 +323,7 @@ static int norver(pMesh mesh) {
   }
 
   /* memory to store normals for boundary points */
-  mesh->xpmax  = MG_MAX(1.5*mesh->xp,NPMAX);
+  mesh->xpmax  = MG_MAX(1.5*mesh->xp,mesh->npmax);
   mesh->xpoint = (pxPoint)calloc(mesh->xpmax+1,sizeof(xPoint));
   assert(mesh->xpoint);
 
