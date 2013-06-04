@@ -898,6 +898,10 @@ static int anatets(pMesh mesh,pSol met,char typchk) {
         ppt = &mesh->point[ip];
         assert(ppt->xp);
         pxp = &mesh->xpoint[ppt->xp];
+
+     	dd = no[0]*pxp->n1[0]+no[1]*pxp->n1[1]+no[2]*pxp->n1[2];
+    	if ( dd > 1.0-EPS ) continue; 
+
         memcpy(pxp->n2,no,3*sizeof(double));
         /* a computation of the tangent with respect to these two normals is possible */
         pxp->t[0] = pxp->n1[1]*pxp->n2[2] - pxp->n1[2]*pxp->n2[1];
