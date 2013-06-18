@@ -20,7 +20,7 @@ ENDIF()
 
 # simple test: must already pass
 ADD_TEST(NAME SimpleCube
-  COMMAND ${EXEC} -v 5
+  COMMAND ${EXEC} -v 6 -d
   ${REG_TESTS_PATH}/Cube/cube
   -out ${REG_TESTS_PATH}/Cube/cube.o.meshb)
 
@@ -355,17 +355,30 @@ ADD_TEST(NAME OptLs_cube303d_hminMax_hgrad1.2_hausd0.005
   -hausd 0.005 -nr -hgrad 1.2 -hmin 0.001 -hmax 0.1
   ${REG_TESTS_PATH}/OptLs_cube303d_hminMax_hgrad1.2_hausd0.005/cube303d.o.meshb)
 ADD_TEST(NAME OptLs_temp_hminMax_hgrad1.2_hausd0.1
-  COMMAND ${EXEC} -ls
+  COMMAND ${EXEC} -v 6 -d -ls
   ${REG_TESTS_PATH}/OptLs_temp_hminMax_hgrad1.2_hausd0.1/temp
   -sol ${REG_TESTS_PATH}/OptLs_temp_hminMax_hgrad1.2_hausd0.1/temp.sol
   -hausd 0.1 -nr -hgrad 1.2 -hmin 3 -hmax 4
   ${REG_TESTS_PATH}/OptLs_temp_hminMax_hgrad1.2_hausd0.1/temp.o.meshb)
 
 
+# Test multi-domain remeshing
+ADD_TEST(NAME MultiDom_Cube
+  COMMAND ${EXEC} -v 6 -hmax 0.02 ${REG_TESTS_PATH}/MultiDom_Cube/c)
+
+ADD_TEST(NAME MultiDom_ellipse
+  COMMAND ${EXEC} -v 6 -hausd 0.0003 ${REG_TESTS_PATH}/MultiDom_Ellipse/c.d)
+
+# Non-manifold test case
+ADD_TEST(NAME NM_Cube
+  COMMAND ${EXEC} -v 6 -d -hmax 0.05 ${REG_TESTS_PATH}/NM_Cube/nm)
+
+
 # Compare with a reference result when we run
 #ADD_TEST(NAME RefCube
 #  COMMAND ${EXEC} -v 5
 #  ${REG_TESTS_PATH}/RefCube/cube) marre... a finir
+
 
 
 

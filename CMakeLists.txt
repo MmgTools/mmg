@@ -156,10 +156,8 @@ IF(BUILD_TESTING)
   # TARGET_LINK_LIBRARIES(mmg3d5 ${M_LIB} gcov)
 
   IF (CMAKE_COMPILER_IS_GNUCC)
-    #SET(CMAKE_C_FLAGS "-Wall -fprofile-arcs -ftest-coverage")
-    SET(CMAKE_C_FLAGS "-Wall")
-    #SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fprofile-arcs -ftest-coverage -lgcov")
-    #SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}")
+    SET(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS} -g -Wall -fprofile-arcs -ftest-coverage --coverage")
+    SET(CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS} -g -fprofile-arcs -ftest-coverage --coverage")
   ENDIF(CMAKE_COMPILER_IS_GNUCC)
 
   INCLUDE( ${CMAKE_SOURCE_DIR}/testing.cmake )

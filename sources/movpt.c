@@ -90,10 +90,8 @@ int movbdyregpt(pMesh mesh,int *listv,int ilistv,int *lists,int ilists) {
   pt = &mesh->tetra[k];
   n0 = pt->v[i0];
   p0 = &mesh->point[n0];
-  if ( !p0->xp || MG_EDG(p0->tag) ) {
-    fprintf(stdout,"    ## Func. movbdyregpt: wrong point qualification");
-    return(0);
-  }
+  assert( p0->xp && !MG_EDG(p0->tag) );
+
   n = &(mesh->xpoint[p0->xp].n1[0]);
 
   /** Step 1 : rotation matrix that sends normal n to the third coordinate vector of R^3 */
@@ -430,10 +428,7 @@ int movbdyrefpt(pMesh mesh, int *listv, int ilistv, int *lists, int ilists){
   ip0 = pt->v[listv[0]%4];
   p0    = &mesh->point[ip0];
 
-  if ( !(MG_REF & p0->tag) ) {
-    printf("Func. movbdyrefpt : wrong point qualification\n");
-    return(0);
-  }
+  assert ( MG_REF & p0->tag );
 
   /* Travel surfacic ball and recover the two ending points of ref curve :
      two senses must be used */
@@ -702,10 +697,7 @@ int movbdynompt(pMesh mesh, int *listv, int ilistv, int *lists, int ilists){
   ip0 = pt->v[listv[0]%4];
   p0 = &mesh->point[ip0];
 
-  if(!( p0->tag & MG_NOM )){
-    printf("Func. movbdynompt : wrong qualification\n");
-    return(0);
-  }
+  assert ( p0->tag & MG_NOM );
 
   /* Travel surfacic ball and recover the two ending points of non manifold curve :
      two senses must be used */
@@ -974,10 +966,8 @@ int movbdyridpt(pMesh mesh,int *listv,int ilistv,int *lists,int ilists) {
   pt    = &mesh->tetra[listv[0]/4];
   ip0 = pt->v[listv[0]%4];
   p0    = &mesh->point[ip0];
-  if ( !(MG_GEO & p0->tag) ) {
-    fprintf(stdout,"Func. movbdyridpt : wrong point qualification\n");
-    return(0);
-  }
+
+  assert ( MG_GEO & p0->tag );
 
   /* Travel surfacic ball an recover the two ending points of ridge : two senses must be used
      POSSIBLE OPTIMIZATION HERE : One travel only is needed */

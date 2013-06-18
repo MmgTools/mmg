@@ -483,9 +483,11 @@ int analys(pMesh mesh) {
   }
 
   /* identify surface mesh */
-  if ( !bdryTria(mesh) ) {
+  if ( !mesh->nt ) {
+    if ( !bdryTria(mesh) ) {
       fprintf(stdout,"  ## Boundary problem. Exit program.\n");
       return(0);
+    }
   }
 
   /* compatibility triangle orientation w/r tetras */
