@@ -275,9 +275,9 @@ int split1b(pMesh mesh, pSol met,int *list, int ret, int ip,int cas){
   pTetra         pt,pt1;
   xTetra         xt,xt1;
   pxTetra        pxt0;
-  int            ilist,k,open,iel,jel,*newtet,nump,numq,*adja;
+  int            ilist,k,open,iel,jel,*newtet,nump,numq,*adja,j;
   int            *adjan,nei2,nei3,mel,ref;
-  char           ie,tau[4],isxt,isxt1,i,j,voy,tag;
+  char           ie,tau[4],isxt,isxt1,i,voy,tag;
   unsigned char  *taued;
   double         lmin,lmax,len;
 
