@@ -603,11 +603,8 @@ int boulesurfvolp(pMesh mesh,int start,int ip,int iface,int *listv,int *ilistv,i
       for (j=0; j<4; j++)
         if ( pt1->v[j] == nump )  break;
       assert(j<4);
+
       /* overflow */
-      if ( (*ilistv) > LMAX-3 ) {
-        printf("tet %d; pt %d; face %d; ilistv %d\n",start,ip,iface,(*ilistv));
-        saveMesh(mesh);
-      }
       assert ( (*ilistv) <= LMAX-3 );
       listv[(*ilistv)] = 4*k1+j;
       (*ilistv)++;

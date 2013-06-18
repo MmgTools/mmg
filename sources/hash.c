@@ -650,12 +650,11 @@ int bdryTria(pMesh mesh) {
   pTria     ptt;
   pPoint    ppt;
   pxTetra   pxt;
-  int      *adja,adj,k,edg;
+  int      *adja,adj,k,edg,nttmp;
   char      i,i1,i2,tag;
 
-  if ( mesh->nt )  return(1);
-
   /* step 1: count external faces */
+  nttmp = 0;
   for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
     if ( !MG_EOK(pt) )  continue;
@@ -664,10 +663,17 @@ int bdryTria(pMesh mesh) {
       adj = adja[i] / 4;
       pt1 = &mesh->tetra[adj];
       if ( !adj || (k < adj && pt->ref != pt1->ref) )
-        mesh->nt++;
+        nttmp++;
     }
   }
-  if ( !mesh->nt )  return(1);
+  if ( mesh->nt == nttmp ) return(1);
+  else if ( mesh->nt ){
+    fprintf(stdout,"  ## WARNING: SURFACES TRIANGLES ARE DELETED\n");
+    fprintf(stdout,"              (You have 2 domains but only surfaces triangles)\n");
+    free(mesh->tria);
+    mesh->tria = NULL;
+  }
+  mesh->nt = nttmp;
 
   /* step 2 : create triangles */
   mesh->tria = (pTria)calloc(mesh->nt+1,sizeof(Tria));
@@ -699,7 +705,7 @@ int bdryTria(pMesh mesh) {
           }
         }
         else
-					ptt->ref = info.iso ? MG_ISO : 0;
+	      ptt->ref = info.iso ? MG_ISO : 0;
       }
     }
   }
@@ -915,12 +921,14 @@ int bdrySet(pMesh mesh) {
       pt1 = &mesh->tetra[adj];
       /* Set flag to know if tetra has the same orientation than the triangle */
       if ( adj && pt->ref < pt1->ref )  MG_CLR(pxt->ori,i);
-      else  MG_SET(pxt->ori,i);
+      else MG_SET(pxt->ori,i);
       /* Set edge tag */
       if ( pxt->ftag[i] ) {
-        if ( adj && (pt->ref <= pt1->ref || (pt->ref == MG_PLUS)) )  continue;
+        if ( adj && (pt->ref <= pt1->ref || (pt->ref == MG_PLUS)) ) {
+          continue;
+        }
         else {
-          MG_SET(pxt->ori,i);
+          MG_SET(pxt->ori,i);//ajeter, doublon non?
           ia = pt->v[idir[i][0]];
           ib = pt->v[idir[i][1]];
           ic = pt->v[idir[i][2]];

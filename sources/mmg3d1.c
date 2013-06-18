@@ -899,8 +899,8 @@ static int anatets(pMesh mesh,pSol met,char typchk) {
         assert(ppt->xp);
         pxp = &mesh->xpoint[ppt->xp];
 
-     	dd = no[0]*pxp->n1[0]+no[1]*pxp->n1[1]+no[2]*pxp->n1[2];
-    	if ( dd > 1.0-EPS ) continue; 
+        dd = no[0]*pxp->n1[0]+no[1]*pxp->n1[1]+no[2]*pxp->n1[2];
+        if ( dd > 1.0-EPS ) continue;
 
         memcpy(pxp->n2,no,3*sizeof(double));
         /* a computation of the tangent with respect to these two normals is possible */
@@ -1345,7 +1345,7 @@ static int adptet(pMesh mesh,pSol met) {
     ns = adpspl(mesh,met,&warn);
 
 #ifdef DEBUG
-    if(ns){ printf("APS ADPSPL == %d\n",ns);
+    if ( ns ) { printf("APS ADPSPL == %d\n",ns);
       prilen(mesh,met);
       printf(" histo %5.1f  %5.1f %5.1f\n", tabtmp[0][0],tabtmp[0][1],tabtmp[0][2]);}
 #endif
@@ -1397,7 +1397,7 @@ static int adptet(pMesh mesh,pSol met) {
   }
   while( ++it < maxit && nc+ns > 0 );
 
-  if(warn){
+  if ( warn ) {
     fprintf(stdout,"%s:%d: Error:",__FILE__,__LINE__);
     fprintf(stdout," unable to allocate a new point in last call of adpspl.\n");
     fprintf(stdout," ## Uncomplete mesh. Exiting\n" );
