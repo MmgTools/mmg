@@ -288,16 +288,16 @@ int saveMesh(pMesh mesh) {
   np = nc = na = nr = nre = 0;
   for (k=1; k<=mesh->np; k++) {
     ppt = &mesh->point[k];
-    if ( MG_VOK(ppt) ) {
+    //if ( MG_VOK(ppt) ) {
       ppt->tmp = ++np;
       if ( ppt->tag & MG_CRN )  nc++;
       if ( ppt->tag & MG_REQ )  nre++;
-    }
+      //}
   }
   GmfSetKwd(outm,GmfVertices,np);
   for (k=1; k<=mesh->np; k++) {
     ppt = &mesh->point[k];
-    if ( MG_VOK(ppt) )
+    //if ( MG_VOK(ppt) )
       GmfSetLin(outm,GmfVertices,ppt->c[0],ppt->c[1],ppt->c[2],ppt->ref);
   }
 

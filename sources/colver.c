@@ -823,7 +823,7 @@ int colver(pMesh mesh,int *list,int ilist,char indq) {
             pxt1 = &mesh->xtetra[pt1->xt];
             pxt1->ref[voyq]  = 0;
             pxt1->ftag[voyq] = 0;
-            MG_CLR(pxt1->ori,voyq);
+            MG_SET(pxt1->ori,voyq);
           }
         }
       }
@@ -838,7 +838,8 @@ int colver(pMesh mesh,int *list,int ilist,char indq) {
           pxt1->ref[voyq] = pxt->ref[iq];
           pxt1->ftag[voyq] = pxt->ftag[iq];
 
-          if ( !pxt1->ftag[voyq] && !MG_GET(pxt->ori,iq) )  MG_CLR(pxt1->ori,voyq);
+          //if ( !pxt1->ftag[voyq] && !MG_GET(pxt->ori,iq) )  MG_CLR(pxt1->ori,voyq);
+          MG_SET(pxt1->ori,voyq);
 
           /* update tags for edges */
           for ( j=0; j<3; j++ ) {
@@ -875,7 +876,7 @@ int colver(pMesh mesh,int *list,int ilist,char indq) {
           pxt1->ref[voyq] = pxt->ref[iq];
           pxt1->ftag[voyq] = pxt->ftag[iq];
           pxt1->ori = 15;
-          if ( !MG_GET(pxt->ori,iq) )  MG_CLR(pxt1->ori,voyq);
+          //if ( !MG_GET(pxt->ori,iq) )  MG_CLR(pxt1->ori,voyq);
           /* update tags for edges */
           for ( j=0; j<3; j++ ) {
             ia = iarf[iq][j];
