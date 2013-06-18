@@ -180,7 +180,8 @@ inline int BezierEdge(pMesh mesh,int ip0,int ip1,double b0[3],double b1[3],char 
       else
         memcpy(np1,&(pxp1->n1[0]),3*sizeof(double));
     }
-    if ( ( MG_SIN(p0->tag) || ( p0->tag & MG_NOM )) && ( MG_SIN(p1->tag) || ( p1->tag & MG_NOM ))) {
+    if ( (MG_SIN(p0->tag) || ( p0->tag & MG_NOM )) &&
+	 (MG_SIN(p1->tag) || ( p1->tag & MG_NOM )) ) {
       t0[0] = ux * il;
       t0[1] = uy * il;
       t0[2] = uz * il;
@@ -189,7 +190,8 @@ inline int BezierEdge(pMesh mesh,int ip0,int ip1,double b0[3],double b1[3],char 
       t1[1] = -uy * il;
       t1[2] = -uz * il;
     }
-    else if ( (!MG_SIN(p0->tag)  && !( p0->tag & MG_NOM )) && ( MG_SIN(p1->tag) || ( p1->tag & MG_NOM ))) {
+    else if ( (!MG_SIN(p0->tag) && !( p0->tag & MG_NOM)) &&
+	      ( MG_SIN(p1->tag) ||  ( p1->tag & MG_NOM ))) {
       if ( !BezierTgt(p0->c,p1->c,np0,np0,t0,t1) ) {
         t0[0] = ux * il;
         t0[1] = uy * il;
@@ -199,7 +201,8 @@ inline int BezierEdge(pMesh mesh,int ip0,int ip1,double b0[3],double b1[3],char 
       t1[1] = -uy * il;
       t1[2] = -uz * il;
     }
-    else if ( ( MG_SIN(p0->tag) || ( p0->tag & MG_NOM ) ) && (!MG_SIN(p1->tag) && !( p1->tag & MG_NOM ))) {
+    else if ( ( MG_SIN(p0->tag) || ( p0->tag & MG_NOM ) ) &&
+	      (!MG_SIN(p1->tag) && !( p1->tag & MG_NOM ))) {
       if ( !BezierTgt(p0->c,p1->c,np1,np1,t0,t1) ) {
         t1[0] = - ux * il;
         t1[1] = - uy * il;

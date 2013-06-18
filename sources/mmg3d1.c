@@ -827,6 +827,7 @@ static int anatets(pMesh mesh,pSol met,char typchk) {
     /* virtual triangle */
     tet2tri(mesh,k,i,&ptt);
     if ( typchk == 1 ) {
+      if ( !MG_GET(pxt->ori,i) ) continue;
       if ( !chkedg(mesh,&ptt,MG_GET(pxt->ori,i)) )  continue;
       /* put back flag on tetra */
       for (j=0; j<3; j++){
@@ -957,6 +958,10 @@ static int anatets(pMesh mesh,pSol met,char typchk) {
           if ( pt->xt )  ier = bezierCP(mesh,&ptt,&pb,MG_GET(pxt->ori,i));
           else  ier = bezierCP(mesh,&ptt,&pb,1);
           ier = bezierInt(&pb,&uv[j][0],o,no,to);
+
+          dd = no[0]*pxp->n1[0]+no[1]*pxp->n1[1]+no[2]*pxp->n1[2];
+          if ( dd > 1.0-EPS ) continue;
+
           memcpy(pxp->n2,no,3*sizeof(double));
         }
       }
@@ -1075,7 +1080,7 @@ static int adpspl(pMesh mesh,pSol met, int* warn) {
   Tria       ptt;
   pPoint     p0,p1,ppt;
   pxPoint    pxp;
-  double     dd,len,lmax,o[3],to[3],ro[3],no1[3],no2[3],v[3];
+  double     dd,dd2,len,lmax,o[3],to[3],ro[3],no1[3],no2[3],v[3];
   int        k,ip,ip1,ip2,list[LMAX+2],ilist,ns,ref;
   char       imax,tag,j,i,i1,i2,ier,ifa0,ifa1;
 
@@ -1117,6 +1122,8 @@ static int adpspl(pMesh mesh,pSol met, int* warn) {
 
     /* Case of a boundary face */
     if ( pt->xt && (pxt->ftag[i] & MG_BDY) ) {
+      if ( !(MG_GET(pxt->ori,i)) ) continue;
+
       hGet(&mesh->htab,ip1,ip2,&ref,&tag);
       if ( MG_SIN(tag) )  continue;
       if ( tag & MG_REQ )  continue;
@@ -1157,15 +1164,22 @@ static int adpspl(pMesh mesh,pSol met, int* warn) {
         else if ( tag & MG_REF ) {
           if ( !BezierRef(mesh,ip1,ip2,0.5,o,no1,to) )
             continue;
-          else if ( MG_SIN(p0->tag) && MG_SIN(p1->tag) ) {
-            tet2tri(mesh,k,i,&ptt);
-            nortri(mesh,&ptt,no1);
-          }
         }
         else {
           if ( !norface(mesh,k,i,v) )  continue;
-          else if ( !BezierReg(mesh,ip1,ip2,0.5,v,o,no1) )
-            continue;
+          else {
+            dd  = v[0]*no1[0]+v[1]*no1[1]+v[2]*no1[2];
+            dd2 = v[0]*no2[0]+v[1]*no2[1]+v[2]*no2[2];
+
+            if ( dd>=dd2 ) {
+              if ( !BezierReg(mesh,ip1,ip2,0.5,v,o,no1) )
+                continue;
+            }
+            else {
+              if ( !BezierReg(mesh,ip1,ip2,0.5,v,o,no2) )
+                continue;
+            }
+          }
         }
         ier = simbulgept(mesh,list,ilist,o);
         if ( !ier ) {

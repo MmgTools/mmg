@@ -479,8 +479,8 @@ inline int BezierRidge(pMesh mesh,int ip0,int ip1,double s,double *o,double *no1
     of normals, tangent for a REF edge */
 inline int BezierRef(pMesh mesh,int ip0,int ip1,double s,double *o,double *no,double *to) {
   pPoint          p0,p1;
-  double          ux,uy,uz,n0[3],n1[3],t0[3],t1[3];
-  double          ps,b0[3],b1[3],bn[3],ll,il,dd,alpha;
+  double          ux,uy,uz,n01[3],n02[3],n11[3],n12[3],ntemp[3],t0[3],t1[3];
+  double          ps,b0[3],b1[3],bn[3],ll,il,dd,alpha,ps2;
 
   p0 = &mesh->point[ip0];  /* Ref point, from which step is counted */
   p1 = &mesh->point[ip1];
@@ -548,25 +548,40 @@ inline int BezierRef(pMesh mesh,int ip0,int ip1,double s,double *o,double *no,do
     return(1);
   }
   else if ( MG_SIN(p0->tag) ) {
-    memcpy(n1,&(mesh->xpoint[p1->xp].n1[0]),3*sizeof(double));
-    memcpy(n0,&(mesh->xpoint[p1->xp].n1[0]),3*sizeof(double));
+    memcpy(n11,&(mesh->xpoint[p1->xp].n1[0]),3*sizeof(double));
+    memcpy(n01,&(mesh->xpoint[p1->xp].n1[0]),3*sizeof(double));
+    memcpy(n12,&(mesh->xpoint[p1->xp].n2[0]),3*sizeof(double));
+    memcpy(n02,&(mesh->xpoint[p1->xp].n2[0]),3*sizeof(double));
   }
   else if ( MG_SIN(p1->tag) ) {
-    memcpy(n0,&(mesh->xpoint[p0->xp].n1[0]),3*sizeof(double));
-    memcpy(n1,&(mesh->xpoint[p0->xp].n1[0]),3*sizeof(double));
+    memcpy(n01,&(mesh->xpoint[p0->xp].n1[0]),3*sizeof(double));
+    memcpy(n11,&(mesh->xpoint[p0->xp].n1[0]),3*sizeof(double));
+    memcpy(n02,&(mesh->xpoint[p0->xp].n2[0]),3*sizeof(double));
+    memcpy(n12,&(mesh->xpoint[p0->xp].n2[0]),3*sizeof(double));
   }
   else {
-    memcpy(n0,&(mesh->xpoint[p0->xp].n1[0]),3*sizeof(double));
-    memcpy(n1,&(mesh->xpoint[p1->xp].n1[0]),3*sizeof(double));
+    memcpy(n01,&(mesh->xpoint[p0->xp].n1[0]),3*sizeof(double));
+    memcpy(n11,&(mesh->xpoint[p1->xp].n1[0]),3*sizeof(double));
+    memcpy(n02,&(mesh->xpoint[p0->xp].n2[0]),3*sizeof(double));
+    memcpy(n12,&(mesh->xpoint[p1->xp].n2[0]),3*sizeof(double));
+  }
+
+  /* Switch normals of p1 for pairing */
+  ps  = n01[0] * n11[0] + n01[1] * n11[1] + n01[2] * n11[2];
+  ps2 = n01[0] * n12[0] + n01[1] * n12[1] + n01[2] * n12[2];
+  if ( ps2 > ps ) {
+    memcpy(ntemp,n11,3*sizeof(double));
+    memcpy(n11,n12,3*sizeof(double));
+    memcpy(n12,ntemp,3*sizeof(double));
   }
 
   /* Normal interpolation */
-  ps = ux*(n0[0] + n1[0]) + uy*(n0[1] + n1[1]) + uz*(n0[2] + n1[2]);
+  ps = ux*(n01[0] + n11[0]) + uy*(n01[1] + n11[1]) + uz*(n01[2] + n11[2]);
   ps = 2.0*ps/ll;
 
-  bn[0] = n0[0] + n1[0] -ps*ux;
-  bn[1] = n0[1] + n1[1] -ps*uy;
-  bn[2] = n0[2] + n1[2] -ps*uz;
+  bn[0] = n01[0] + n11[0] -ps*ux;
+  bn[1] = n01[1] + n11[1] -ps*uy;
+  bn[2] = n01[2] + n11[2] -ps*uz;
 
   dd = bn[0]*bn[0] + bn[1]*bn[1] + bn[2]*bn[2];
   if ( dd > EPSD ) {
@@ -575,9 +590,9 @@ inline int BezierRef(pMesh mesh,int ip0,int ip1,double s,double *o,double *no,do
     bn[1] *= dd;
     bn[2] *= dd;
   }
-  no[0] = (1.0-s)*(1.0-s)*n0[0] + 2.0*s*(1.0-s)*bn[0] + s*s*n1[0];
-  no[1] = (1.0-s)*(1.0-s)*n0[1] + 2.0*s*(1.0-s)*bn[1] + s*s*n1[1];
-  no[2] = (1.0-s)*(1.0-s)*n0[2] + 2.0*s*(1.0-s)*bn[2] + s*s*n1[2];
+  no[0] = (1.0-s)*(1.0-s)*n01[0] + 2.0*s*(1.0-s)*bn[0] + s*s*n11[0];
+  no[1] = (1.0-s)*(1.0-s)*n01[1] + 2.0*s*(1.0-s)*bn[1] + s*s*n11[1];
+  no[2] = (1.0-s)*(1.0-s)*n01[2] + 2.0*s*(1.0-s)*bn[2] + s*s*n11[2];
 
   dd = no[0]*no[0] + no[1]*no[1] + no[2]*no[2];
   if ( dd > EPSD2 ) {

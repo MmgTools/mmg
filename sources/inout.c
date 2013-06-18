@@ -149,7 +149,7 @@ int loadMesh(pMesh mesh) {
   }
 
   /* read mesh edges */
-  nr = 0;
+  nr = nre = 0;
   if ( mesh->na ) {
     na = mesh->na;
     if (info.iso ) {
@@ -556,8 +556,8 @@ int loadMet(pSol met) {
 /** write iso or aniso metric */
 int saveMet(pMesh mesh,pSol met) {
   pPoint     ppt;
-  double     dbuf[GmfMaxTyp],tmp;
-  int        k,i,np,outm,nbm,typtab[GmfMaxTyp];
+  double     dbuf[GmfMaxTyp]/*,tmp*/;
+  int        k/*,i*/,np,outm,nbm,typtab[GmfMaxTyp];
   char      *ptr,data[128];
 
   if ( !met->m )  return(-1);
@@ -593,7 +593,7 @@ int saveMet(pMesh mesh,pSol met) {
     }
   }
   /* write anisotropic metric */
-  else {
+  /*else {
     typtab[0] = 3;
     nbm = 1;
     GmfSetKwd(outm,GmfSolAtVertices,np,nbm,typtab);
@@ -607,7 +607,7 @@ int saveMet(pMesh mesh,pSol met) {
         GmfSetLin(outm,GmfSolAtVertices,dbuf);
       }
     }
-  }
+    }*/
   GmfCloseMesh(outm);
   return(1);
 }

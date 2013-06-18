@@ -277,7 +277,7 @@ ADD_TEST(NAME CubeSkin0.2_Inside0.4
   ${REG_TESTS_PATH}/CubeSkin0.2_Inside0.4/CubeSkin0.2.o.meshb)
 ADD_TEST(NAME CubeSkin0.0125_Inside0.125
   COMMAND ${EXEC} -v 5
-  ${REG_TESTS_PATH}/CubeSkin0.0125_Inside0.125/CubeSkin0.125 -m 400
+  ${REG_TESTS_PATH}/CubeSkin0.0125_Inside0.125/CubeSkin0.125 -m 600
   -out ${REG_TESTS_PATH}/CubeSkin0.0125_Inside0.125/CubeSkin0.125.o.meshb)
 ADD_TEST(NAME CubeSkin0.0125_Inside0.25
   COMMAND ${EXEC} -v 5
@@ -364,14 +364,17 @@ ADD_TEST(NAME OptLs_temp_hminMax_hgrad1.2_hausd0.1
 
 # Test multi-domain remeshing
 ADD_TEST(NAME MultiDom_Cube
-  COMMAND ${EXEC} -v 6 -hmax 0.02 ${REG_TESTS_PATH}/MultiDom_Cube/c)
+  COMMAND ${EXEC} -v 6 -hmax 0.02 ${REG_TESTS_PATH}/MultiDom_Cube/c
+  -out ${REG_TESTS_PATH}/MultiDom_Cube/c.o.meshb)
 
 ADD_TEST(NAME MultiDom_ellipse
-  COMMAND ${EXEC} -v 6 -hausd 0.0003 ${REG_TESTS_PATH}/MultiDom_Ellipse/c.d)
+  COMMAND ${EXEC} -v 6 -m 500 -hausd 0.0003 ${REG_TESTS_PATH}/MultiDom_Ellipse/c.d
+  -out ${REG_TESTS_PATH}/MultiDom_Cube/c.d.o.meshb)
 
 # Non-manifold test case
 ADD_TEST(NAME NM_Cube
-  COMMAND ${EXEC} -v 6 -d -hmax 0.05 ${REG_TESTS_PATH}/NM_Cube/nm)
+  COMMAND ${EXEC} -v 6 -d -hmax 0.05 ${REG_TESTS_PATH}/NM_Cube/nm
+  -out ${REG_TESTS_PATH}/MultiDom_Cube/nm.o.meshb)
 
 
 # Compare with a reference result when we run

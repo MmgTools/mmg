@@ -921,7 +921,7 @@ int bdrySet(pMesh mesh) {
       pt1 = &mesh->tetra[adj];
       /* Set flag to know if tetra has the same orientation than the triangle */
       if ( adj && pt->ref < pt1->ref )  MG_CLR(pxt->ori,i);
-      else MG_SET(pxt->ori,i);
+      else  MG_SET(pxt->ori,i);
       /* Set edge tag */
       if ( pxt->ftag[i] ) {
         if ( adj && (pt->ref <= pt1->ref || (pt->ref == MG_PLUS)) ) {
