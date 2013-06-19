@@ -288,16 +288,16 @@ int saveMesh(pMesh mesh) {
   np = nc = na = nr = nre = 0;
   for (k=1; k<=mesh->np; k++) {
     ppt = &mesh->point[k];
-    //if ( MG_VOK(ppt) ) {
+    if ( MG_VOK(ppt) ) {
       ppt->tmp = ++np;
       if ( ppt->tag & MG_CRN )  nc++;
       if ( ppt->tag & MG_REQ )  nre++;
-      //}
+    }
   }
   GmfSetKwd(outm,GmfVertices,np);
   for (k=1; k<=mesh->np; k++) {
     ppt = &mesh->point[k];
-    //if ( MG_VOK(ppt) )
+    if ( MG_VOK(ppt) )
       GmfSetLin(outm,GmfVertices,ppt->c[0],ppt->c[1],ppt->c[2],ppt->ref);
   }
 
@@ -390,12 +390,12 @@ int saveMesh(pMesh mesh) {
   ne = 0;
   for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
-    /*if ( MG_EOK(pt) )*/ ne++;
+    if ( MG_EOK(pt) ) ne++;
   }
   GmfSetKwd(outm,GmfTetrahedra,ne);
   for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
-    /*if ( MG_EOK(pt) )*/ GmfSetLin(outm,GmfTetrahedra,mesh->point[pt->v[0]].tmp,mesh->point[pt->v[1]].tmp, \
+    if ( MG_EOK(pt) ) GmfSetLin(outm,GmfTetrahedra,mesh->point[pt->v[0]].tmp,mesh->point[pt->v[1]].tmp, \
                                 mesh->point[pt->v[2]].tmp,mesh->point[pt->v[3]].tmp,pt->ref);
   }
 
@@ -408,20 +408,6 @@ int saveMesh(pMesh mesh) {
     if ( MG_SIN(ppt->tag) )  continue;
     else if ( MG_VOK(ppt) && (ppt->tag & MG_BDY) && (!(ppt->tag & MG_GEO) || (ppt->tag & MG_NOM))) {
       pxp = &mesh->xpoint[ppt->xp];
-      //ajeter
-      if ( (fabs(pxp->n1[0])>1.-0.001) && (fabs(pxp->n1[1])>0.001 || fabs(pxp->n1[2])>0.001)  ) {
-        printf("pb normale %d asso pt %d\n",k,mesh->point[k].tmp );
-        printf("%e %e %e\n",pxp->n1[0],pxp->n1[1],pxp->n1[2]);
-      }
-      if ( (fabs(pxp->n1[1])>1.-0.001) && (fabs(pxp->n1[0])>0.001 || fabs(pxp->n1[2])>0.001)  ) {
-        printf("pb normale %d asso pt %d\n",k,mesh->point[k].tmp );
-        printf("%e %e %e\n",pxp->n1[0],pxp->n1[1],pxp->n1[2]);
-      }
-      if ( (fabs(pxp->n1[2])>1.-0.001) && (fabs(pxp->n1[1])>0.001 || fabs(pxp->n1[0])>0.001)  ) {
-        printf("pb normale %d asso pt %d\n",k,mesh->point[k].tmp );
-        printf("%e %e %e\n",pxp->n1[0],pxp->n1[1],pxp->n1[2]);
-      }
-
       GmfSetLin(outm,GmfNormals,pxp->n1[0],pxp->n1[1],pxp->n1[2]);
       nn++;
     }
