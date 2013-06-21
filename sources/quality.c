@@ -251,13 +251,11 @@ int typelt(pMesh mesh,int iel,int *item) {
   double    abx,aby,abz,acx,acy,acz,adx,ady,adz,v1,v2,v3,vol;
   double    bcx,bcy,bcz,bdx,bdy,bdz,cdx,cdy,cdz,h[6],volchk,ssmall;
   double    s[4],dd,rapmin,rapmax,surmin,surmax;
-  int       i,k,ia,ib,ic,id,ityp,isur,isurmax,isurmin,iarmax,iarmin;
+  int       i,k,ia,ib,ic,id,isur,isurmax,isurmin,iarmax,iarmin;
   int       nobtus,naigu,aigu;
   short     i0,i1,i2;
-
   double lmoy;
 
-  ityp = 0;
   pt = &mesh->tetra[iel];
   if ( !pt->v[0] )  return(-1);
 
@@ -489,8 +487,8 @@ int typelt(pMesh mesh,int iel,int *item) {
 int badelt(pMesh mesh,pSol met) {
   pTetra   pt;
   double   kal;
-  int      k,it,maxit,nd,item[2],typ;
-  int ntyp[10];
+  int      k,it,maxit,nd/*,item[2],typ*/;
+  /*int      ntyp[10];*/
   int      list[LMAX+2],i,ilist,nconf,ns;
 
   it = 0;
@@ -498,7 +496,7 @@ int badelt(pMesh mesh,pSol met) {
   do {
     nd = 0;
     ns = 0;
-    for (k=1; k<10; k++) ntyp[k]=0;
+    //for (k=1; k<10; k++) ntyp[k]=0;
     for (k=1; k<=mesh->ne; k++) {
       pt = &mesh->tetra[k];
       if ( !MG_EOK(pt) )  continue;

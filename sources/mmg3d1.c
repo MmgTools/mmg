@@ -653,7 +653,12 @@ static int anatetv(pMesh mesh,pSol met,char typchk) {
       }
     }
   }
-  if ( !nap )  return(0);
+  if ( !nap )  {
+    free(hash.item);
+    hash.item=NULL;
+    return(0);
+  }
+
   /** 3. check and split */
 #ifdef DEBUG
   for(k=0;k<12;k++){
@@ -1530,7 +1535,7 @@ static int anatet(pMesh mesh,pSol met,char typchk) {
     /* split tetra with more than 2 bdry faces */
     ier = anatet4(mesh,met);
 #ifdef DEBUG
-    if(ier){ printf("APS ANATET4 == %d\n",ier);
+    if ( ier ) { printf("APS ANATET4 == %d\n",ier);
       prilen(mesh,met);}
 #endif
     if ( ier < 0 )  return(0);
@@ -1539,7 +1544,7 @@ static int anatet(pMesh mesh,pSol met,char typchk) {
     /* analyze surface tetras */
     ier = anatets(mesh,met,typchk);
 #ifdef DEBUG
-    if(ier){ printf("APS ANATETS == %d\n",ier);
+    if ( ier ) { printf("APS ANATETS == %d\n",ier);
       prilen(mesh,met);}
 #endif
     if ( ier < 0 ) {

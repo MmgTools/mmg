@@ -85,6 +85,7 @@ int loadMesh(pMesh mesh) {
   }
 
   /* read mesh triangles */
+  nt = 0;
   if ( mesh->nt ) {
     /* Skip triangles with negative refs */
     if( info.iso ) {
@@ -253,7 +254,7 @@ int loadMesh(pMesh mesh) {
 
     if(np || nre || nt ){
       fprintf(stdout,"     NUMBER OF REQUIRED ENTITIES: \n");
-      if ( np)
+      if ( np )
         fprintf(stdout,"                  VERTICES  %8d \n",np);
       if ( nre )
         fprintf(stdout,"                  EDGES     %8d \n",nre);

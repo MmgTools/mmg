@@ -273,7 +273,13 @@ static void freeAll(pMesh mesh,pSol met){
     free(mesh->tria);
     mesh->tria=NULL;
   }
-  if ( met ->namein ) {
+  if ( mesh->xtetra ) {
+    free(mesh->xtetra);
+    mesh->xtetra=NULL;
+  }
+
+  /* met */
+  if ( met->namein ) {
     free(met->namein);
     met->namein=NULL;
   }
@@ -284,10 +290,6 @@ static void freeAll(pMesh mesh,pSol met){
   if ( !info.iso && met->m ) {
     free(met->m);
     met->m = NULL;
-  }
-  if ( mesh->xtetra ) {
-    free(mesh->xtetra);
-    mesh->xtetra=NULL;
   }
 }
 

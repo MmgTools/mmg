@@ -144,7 +144,7 @@ static int setadj(pMesh mesh){
         ppt->tmp = 1;
         np++;
       }
-      if ( !MG_EDG(pt->tag[i]) && !pt->tag[i] & MG_REQ )  continue;
+      if ( (!MG_EDG(pt->tag[i])) && (!pt->tag[i] & MG_REQ) )  continue;
       jel  = adja[i] / 3;
       if ( !jel || jel > k ) {
         if ( pt->tag[i] & MG_GEO )  nr++;

@@ -566,7 +566,7 @@ int split1b(pMesh mesh, pSol met,int *list, int ret, int ip,int cas){
     case 5:
       tau[0] = 3; tau[1] = 2; tau[2] = 1; tau[3] = 0;
       taued = &permedge[11][0];
-     break;
+      break;
     }
 
     /* Generic formulation of split of 1 edge */
@@ -1319,10 +1319,10 @@ void split2(pMesh mesh,pSol met,int k,int vx[6]) {
     }
   }
   /* Quality update */
-    pt[0]->qual=orcal(mesh,newtet[0]);
-    pt[1]->qual=orcal(mesh,newtet[1]);
-    pt[2]->qual=orcal(mesh,newtet[2]);
-    pt[3]->qual=orcal(mesh,newtet[3]);
+  pt[0]->qual=orcal(mesh,newtet[0]);
+  pt[1]->qual=orcal(mesh,newtet[1]);
+  pt[2]->qual=orcal(mesh,newtet[2]);
+  pt[3]->qual=orcal(mesh,newtet[3]);
 
 #if DEBUG
   tabtmp[2][3]=lmintmp;  tabtmp[2][4]=lmaxtmp;
@@ -2612,7 +2612,7 @@ int split4bar(pMesh mesh, pSol met, int k){
       if ( lentmp < lmintmp ) {
         lmintmp = lentmp;
       }
-			else if ( lentmp > lmaxtmp ) {
+      else if ( lentmp > lmaxtmp ) {
         lmaxtmp = lentmp;
       }
     }
