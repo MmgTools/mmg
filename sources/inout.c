@@ -228,6 +228,7 @@ int loadMesh(pMesh mesh) {
     pt = &mesh->tetra[k];
     GmfGetLin(inm,GmfTetrahedra,&pt->v[0],&pt->v[1],&pt->v[2],&pt->v[3],&pt->ref);
     pt->qual = orcal(mesh,k);
+    pt->mark = 0;
     for (i=0; i<4; i++) {
       ppt = &mesh->point[pt->v[i]];
       ppt->tag &= ~MG_NUL;

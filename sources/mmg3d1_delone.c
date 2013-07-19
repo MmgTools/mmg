@@ -7,29 +7,11 @@ double      tabtmp[12][7];
 #endif
 
 /** set triangle corresponding to face ie of tetra k */
-void tet2tri(pMesh mesh,int k,char ie,Tria *ptt) {
-  pTetra  pt;
-  pxTetra pxt;
-  char    i,i1,i2;
-
-  pt = &mesh->tetra[k];
-  memset(ptt,0,sizeof(Tria));
-  ptt->v[0] = pt->v[idir[ie][0]];
-  ptt->v[1] = pt->v[idir[ie][1]];
-  ptt->v[2] = pt->v[idir[ie][2]];
-  for (i=0; i<3; i++) {
-    i1 = inxt2[i];
-    i2 = iprv2[i];
-    hGet(&mesh->htab,ptt->v[i1],ptt->v[i2],&ptt->edg[i],&ptt->tag[i]);
-  }
-  if ( pt->xt ) {
-    pxt = &mesh->xtetra[pt->xt];
-    ptt->ref = pxt->ref[ie];
-  }
-}
+void tet2tri(pMesh mesh,int k,char ie,Tria *ptt);
 
 /** find acceptable position for splitting */
-static int dichoto(pMesh mesh,pSol met,int k,int *vx) {
+/** find acceptable position for splitting */
+static int dichotocpy(pMesh mesh,pSol met,int k,int *vx) {
   pTetra  pt;
   pPoint  pa,pb,ps;
   double  o[6][3],p[6][3];
@@ -108,207 +90,16 @@ static int dichoto(pMesh mesh,pSol met,int k,int *vx) {
   }
   return(1);
 }
-
 /** Find acceptable position for split1b, passing the shell of considered edge, starting from o */
-int dichoto1b(pMesh mesh,int *list,int ret,double o[3],double ro[3]) {
-  pTetra  pt;
-  pPoint  p0,p1;
-  int     iel,np,nq,it,maxit;
-  double  m[3],c[3],tp,to,op,oo,t;
-  char    ia,ier;
-
-  iel = list[0] / 6;
-  ia  = list[0] % 6;
-  pt  = &mesh->tetra[iel];
-
-  np = pt->v[iare[ia][0]];
-  nq = pt->v[iare[ia][1]];
-  p0 = &mesh->point[np];
-  p1 = &mesh->point[nq];
-
-  /* midpoint along edge */
-  m[0] = 0.5*(p0->c[0] + p1->c[0]);
-  m[1] = 0.5*(p0->c[1] + p1->c[1]);
-  m[2] = 0.5*(p0->c[2] + p1->c[2]);
-
-  maxit = 4;
-  it = 0;
-  ier = 0;
-  tp = oo = 1.0;
-  to = op = 0.0;
-  do {
-    t = 0.5*(to + tp);
-    c[0] = m[0] + t*(o[0]-m[0]);
-    c[1] = m[1] + t*(o[1]-m[1]);
-    c[2] = m[2] + t*(o[2]-m[2]);
-
-    ier = simbulgept(mesh,list,ret,c);
-    if ( ier ) {
-      to = t;
-      oo = to;
-      op = tp;
-    }
-    else
-      tp = t;
-  }
-  while ( ++it < maxit );
-  if ( !ier ) {
-    if ( op > oo )
-      t = 0.5*(op+oo);
-    else
-      t = 0.0;
-  }
-  ro[0] = m[0] + t*(o[0]-m[0]);
-  ro[1] = m[1] + t*(o[1]-m[1]);
-  ro[2] = m[2] + t*(o[2]-m[2]);
-
-  return(1);
-}
+int dichoto1b(pMesh mesh,int *list,int ret,double o[3],double ro[3]);
 
 /** return edges of (virtual) triangle pt that need to be split w/r Hausdorff criterion */
-char chkedg(pMesh mesh,Tria *pt,char ori) {
-  pPoint   p[3];
-  xPoint  *pxp;
-  double   n[3][3],t[3][3],nt[3],*n1,*n2,t1[3],t2[3];
-  double   ps,ps2,ux,uy,uz,ll,il,alpha,dis,hma2;
-  int      ia,ib,ic;
-  char     i,i1,i2;
+char chkedg(pMesh mesh,Tria *pt,char ori);
 
-  ia   = pt->v[0];
-  ib   = pt->v[1];
-  ic   = pt->v[2];
-  p[0] = &mesh->point[ia];
-  p[1] = &mesh->point[ib];
-  p[2] = &mesh->point[ic];
-  pt->flag = 0;
-  hma2 = LLONG*LLONG*info.hmax*info.hmax;
-  /* normal recovery */
-  for (i=0; i<3; i++) {
-    if ( MG_SIN(p[i]->tag) ) {
-      nortri(mesh,pt,n[i]);
-      if(!ori) {
-        n[i][0] *= -1.0;
-        n[i][1] *= -1.0;
-        n[i][2] *= -1.0;
-      }
-    }
-    else if (p[i]->tag & MG_NOM){
-      nortri(mesh,pt,n[i]);
-      if(!ori) {
-        n[i][0] *= -1.0;
-        n[i][1] *= -1.0;
-        n[i][2] *= -1.0;
-      }
-      assert(p[i]->xp);
-      pxp = &mesh->xpoint[p[i]->xp];
-      memcpy(&t[i],pxp->t,3*sizeof(double));
-    }
-    else {
-      assert(p[i]->xp);
-      pxp = &mesh->xpoint[p[i]->xp];
-      if ( MG_EDG(p[i]->tag) ) {
-        memcpy(&t[i],pxp->t,3*sizeof(double));
-        nortri(mesh,pt,nt);
-        if(!ori) {
-          nt[0] *= -1.0;
-          nt[1] *= -1.0;
-          nt[2] *= -1.0;
-        }
-        ps  = pxp->n1[0]*nt[0] + pxp->n1[1]*nt[1] + pxp->n1[2]*nt[2];
-        ps2 = pxp->n2[0]*nt[0] + pxp->n2[1]*nt[1] + pxp->n2[2]*nt[2];
-        if ( fabs(ps) > fabs(ps2) )
-          memcpy(&n[i],pxp->n1,3*sizeof(double));
-        else
-          memcpy(&n[i],pxp->n2,3*sizeof(double));
-      }
-      else
-        memcpy(&n[i],pxp->n1,3*sizeof(double));
-    }
-  }
-
-  /* analyze edges */
-  for (i=0; i<3; i++) {
-    i1 = inxt2[i];
-    i2 = iprv2[i];
-
-    /* check length */
-    ux = p[i2]->c[0] - p[i1]->c[0];
-    uy = p[i2]->c[1] - p[i1]->c[1];
-    uz = p[i2]->c[2] - p[i1]->c[2];
-    ll = ux*ux + uy*uy + uz*uz;
-    if ( ll < EPSD )  continue;
-    else if ( ll > hma2 ) {
-      MG_SET(pt->flag,i);
-      continue;
-    }
-    il = 1.0 / sqrt(ll);
-
-    /* Hausdorff w/r tangent direction */
-    if ( MG_EDG(pt->tag[i]) || ( pt->tag[i] & MG_NOM )) {
-      if ( MG_SIN(p[i1]->tag) ) {
-        t1[0] = il * ux;
-        t1[1] = il * uy;
-        t1[2] = il * uz;
-      }
-      else {
-        memcpy(t1,t[i1],3*sizeof(double));
-        ps = t1[0]*ux + t1[1]*uy + t1[2]*uz;
-        if ( ps < 0.0 ) {
-          t1[0] *= -1.0;
-          t1[1] *= -1.0;
-          t1[2] *= -1.0;
-        }
-      }
-      if ( MG_SIN(p[i2]->tag) ) {
-        t2[0] = -il * ux;
-        t2[1] = -il * uy;
-        t2[2] = -il * uz;
-      }
-      else {
-        memcpy(t2,t[i2],3*sizeof(double));
-        ps = - ( t2[0]*ux + t2[1]*uy + t2[2]*uz );
-        if ( ps < 0.0 ) {
-          t2[0] *= -1.0;
-          t2[1] *= -1.0;
-          t2[2] *= -1.0;
-        }
-      }
-    }
-    else {
-      n1 = n[i1];
-      n2 = n[i2];
-      if ( !BezierTgt(p[i1]->c,p[i2]->c,n1,n2,t1,t2) ) {
-        t1[0] = ux * il;
-        t1[1] = uy * il;
-        t1[2] = uz * il;
-
-        t2[0] = -ux * il;
-        t2[1] = -uy * il;
-        t2[2] = -uz * il;
-      }
-    }
-    alpha = BezierGeod(p[i1]->c,p[i2]->c,t1,t2);
-    ps  = t1[0]*ux + t1[1]*uy + t1[2]*uz;
-    ps *= il;
-    dis = alpha*alpha*fabs(1.0 - ps*ps);
-    if ( dis > info.hausd*info.hausd ) {
-      MG_SET(pt->flag,i);
-      continue;
-    }
-    ps  = -( t2[0]*ux + t2[1]*uy + t2[2]*uz );
-    ps *= il;
-    dis = alpha*alpha*fabs(1.0 - ps*ps);
-
-    if ( dis > info.hausd*info.hausd ) {
-      MG_SET(pt->flag,i);
-      continue;
-    }
-  }
-  return(pt->flag);
-}
 
 /** Search for boundary edges that could be swapped for geometric approximation */
-static int swpmsh(pMesh mesh,pSol met) {
+/** Search for boundary edges that could be swapped for geometric approximation */
+static int swpmshcpy(pMesh mesh,pSol met) {
   pTetra   pt;
   pxTetra  pxt;
   int      k,it,list[LMAX+2],ilist,ret,it1,it2,ns,nns,maxit;
@@ -353,9 +144,8 @@ static int swpmsh(pMesh mesh,pSol met) {
 
   return(nns);
 }
-
 /** Internal edge flipping */
-static int swptet(pMesh mesh,pSol met,double crit) {
+/*static*/ int swptetdel(pMesh mesh,pSol met,double crit) {
   pTetra   pt;
   int      list[LMAX+2],ilist,k,it,nconf,maxit,ns,nns;
   int      ref;
@@ -394,7 +184,7 @@ static int swptet(pMesh mesh,pSol met,double crit) {
 }
 
 /** Analyze tetrahedra and move points so as to make mesh more uniform */
-static int movtet(pMesh mesh,pSol met,int maxit) {
+/*static*/ int movtetdel(pMesh mesh,pSol met,int maxitin) {
   pTetra        pt;
   pPoint        ppt;
   pxTetra       pxt;
@@ -402,7 +192,15 @@ static int movtet(pMesh mesh,pSol met,int maxit) {
   int           i,k,ier,nm,nnm,ns,lists[LMAX+2],listv[LMAX+2],ilists,ilistv,it;
   int           improve;
   unsigned char j,i0,base;
-
+    int internal,maxit;
+    
+    if(maxitin<0) {
+        internal = 0;
+        maxit = abs(maxitin);
+    } else {
+        maxit = maxitin;
+        internal=1;
+    }
   if ( abs(info.imprim) > 5 || info.ddebug )
     fprintf(stdout,"  ** OPTIMIZING MESH\n");
 
@@ -458,7 +256,7 @@ static int movtet(pMesh mesh,pSol met,int maxit) {
               if ( ier )  ns++;
             }
           }
-          else {
+          else if(internal){
             ilistv = boulevolp(mesh,k,i0,listv);
             if ( !ilistv )  continue;
             ier = movintpt(mesh,listv,ilistv,improve);
@@ -484,14 +282,13 @@ static int movtet(pMesh mesh,pSol met,int maxit) {
 }
 
 /** attempt to collapse small edges */
-static int coltet(pMesh mesh,pSol met,char typchk) {
+/*static*/ int coltetdel(pMesh mesh,pSol met,char typchk) {
   pTetra     pt;
   pxTetra    pxt;
   pPoint     p0,p1;
   double     ll,ux,uy,uz,hmi2;
-  int        k,nc,ref,list[LMAX+2],ilist,base,nnm;
-  char       i,j,tag,ip,iq,isnm;
-  int ier;
+	int        k,nc,ref,list[LMAX+2],ilist,base,nnm,ier;
+	char       i,j,tag,ip,iq,isnm;
 
   nc = nnm = 0;
   hmi2 = info.hmin*info.hmin;
@@ -548,11 +345,10 @@ static int coltet(pMesh mesh,pSol met,char typchk) {
 
         if ( ilist ) {
           ier = colver(mesh,list,ilist,iq);
-			if ( ier ) {
-				delPt(mesh,ier);
-				ier = 1;
-				break;
-			}
+					if(ier) {
+						delPt(mesh,ier);
+						break;
+					}
         }
       }
       if ( ier ) {
@@ -570,7 +366,7 @@ static int coltet(pMesh mesh,pSol met,char typchk) {
 }
 
 /** analyze volume tetra and split if needed */
-static int anatetv(pMesh mesh,pSol met,char typchk) {
+/*static*/ int anatetvdel(pMesh mesh,pSol met,char typchk) {
   pTetra   pt;
   pPoint   p1,p2;
   xTetra  *pxt;
@@ -803,7 +599,7 @@ static int anatetv(pMesh mesh,pSol met,char typchk) {
 }
 
 /** analyze tetra and split on geometric criterion */
-static int anatets(pMesh mesh,pSol met,char typchk) {
+/*static*/ int anatetsdel(pMesh mesh,pSol met,char typchk) {
   pTetra   pt;
   pPoint   ppt,p1,p2;
   Tria     ptt;
@@ -1019,7 +815,7 @@ static int anatets(pMesh mesh,pSol met,char typchk) {
       if ( ier )  continue;
 
       nc++;
-      if ( ic == 0 && dichoto(mesh,met,k,vx) ) {
+      if ( ic == 0 && dichotocpy(mesh,met,k,vx) ) {
         for (ia=0; ia<6; ia++)
           if ( vx[ia] > 0 )  mesh->point[vx[ia]].flag++;
       }
@@ -1084,18 +880,21 @@ static int anatets(pMesh mesh,pSol met,char typchk) {
 }
 
 /** Split edges of length bigger than LOPTL */
-static int adpspl(pMesh mesh,pSol met, int* warn) {
+/*static*/ int adpspl_delone(pMesh mesh,pSol met,pBucket bucket, int* warn) {
   pTetra     pt;
   pxTetra    pxt;
   Tria       ptt;
   pPoint     p0,p1,ppt;
   pxPoint    pxp;
   double     dd,dd2,len,lmax,o[3],to[3],ro[3],no1[3],no2[3],v[3];
-  int        k,ip,ip1,ip2,list[LMAX+2],ilist,ns,ref,ier;
-  char       imax,tag,j,i,i1,i2,ifa0,ifa1;
+  int        k,ip,ip1,ip2,list[LMAX+2],ilist,ns,ref;
+	char       imax,tag,j,i,i1,i2,ifa0,ifa1;
+	int        ifilt,lon,ret,ne,ier;
 
   *warn=0;
   ns = 0;
+  ifilt = 0;
+  ne = mesh->ne;
   for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
     if ( !MG_EOK(pt) )   continue;
@@ -1216,6 +1015,8 @@ static int adpspl(pMesh mesh,pSol met, int* warn) {
           continue;
         }
         ns++;
+        addBucket(mesh,bucket,ip);
+
         ppt = &mesh->point[ip];
         if ( MG_EDG(tag) || (tag & MG_NOM) )
           ppt->ref = ref;
@@ -1246,8 +1047,39 @@ static int adpspl(pMesh mesh,pSol met, int* warn) {
           memcpy(pxp->n1,no1,3*sizeof(double));
       }
     }
-    /* Case of an internal face */
+    else if(pt->xt){
+      if ( (p0->tag & MG_BDY) && (p1->tag & MG_BDY) ) continue;
+      ilist = coquil(mesh,k,imax,list);
+      if ( !ilist )  continue;
+      o[0] = 0.5*(p0->c[0] + p1->c[0]);
+      o[1] = 0.5*(p0->c[1] + p1->c[1]);
+      o[2] = 0.5*(p0->c[2] + p1->c[2]);
+      ip = newPt(mesh,o,MG_NOTAG);
+
+      if ( !ip )  {
+          *warn=1;
+          break;
+      }
+      //CECILE
+      if ( met->m )
+          met->m[ip] = 0.5 * (met->m[ip1]+met->m[ip2]);
+      //CECILE
+      ier = split1b(mesh,met,list,ilist,ip,1);
+      if ( ier<0 ) {
+          fprintf(stdout,"%s:%d: Error: unable to split\n"
+                  ,__FILE__,__LINE__);
+          return(-1);
+      }
+      else if ( !ier ) { //Et on teste pas du tout les qualités ici ?
+          delPt(mesh,ip);
+      }
     else {
+          ppt = &mesh->point[ip];
+          met->m[ip] = 0.5 * (met->m[ip1] + met->m[ip2]);
+          ns++;
+      }
+      
+    } else {    /* Case of an internal face */
       if ( (p0->tag & MG_BDY) && (p1->tag & MG_BDY) ) continue;
       ilist = coquil(mesh,k,imax,list);
       if ( !ilist )  continue;
@@ -1262,36 +1094,414 @@ static int adpspl(pMesh mesh,pSol met, int* warn) {
       //CECILE
       if ( met->m )
         met->m[ip] = 0.5 * (met->m[ip1]+met->m[ip2]);
-      //CECILE
-      ier = split1b(mesh,met,list,ilist,ip,1);
-      if ( ier<0 ) {
-        fprintf(stdout,"%s:%d: Error: unable to split\n"
-                ,__FILE__,__LINE__);
-        return(-1);
+			//CECILE			
+    
+      if (!buckin_iso(mesh,met,bucket,ip) ) {
+	delPt(mesh,ip);
+	ifilt++;
+	continue;
       }
-      else if ( !ier ) { //Et on teste pas du tout les qualités ici ?
-        delPt(mesh,ip);
+      lon = cavity(mesh,met,k,ip,list,ilist/2);
+      if ( lon < 1 ) {
+	delPt(mesh,ip);
+	    continue;
+      } else {
+	ret = delone(mesh,met,ip,list,lon);
+
+	if ( ret > 0 ) {
+	  ppt = &mesh->point[ip];
+	  met->m[ip] = 0.5 * (met->m[ip1] + met->m[ip2]);
+	  //chkmsh(mesh,0,0);
+	  addBucket(mesh,bucket,ip);
+	  ns++;
+	  continue;
+	}
+	else if ( ret == 0 ) {
+	  delPt(mesh,ip);
+	  continue;	
+	}
+	else {
+	  delPt(mesh,ip);
+	  continue;
+	}
       }
-      else {
-        ppt = &mesh->point[ip];
-        met->m[ip] = 0.5 * (met->m[ip1] + met->m[ip2]);
-        ns++;
-      }
+      /* ier = split1b(mesh,met,list,ilist,ip,1); */
+      /* if ( ier<0 ) { */
+      /*   fprintf(stdout,"%s:%d: Error: unable to split\n" */
+      /*           ,__FILE__,__LINE__); */
+      /*   return(-1); */
+      /* } */
+      /* else if ( !ier ) { //Et on teste pas du tout les qualités ici ? */
+      /*   delPt(mesh,ip); */
+      /* } */
+      /* else { */
+      /*   ppt = &mesh->point[ip]; */
+      /*   met->m[ip] = 0.5 * (met->m[ip1] + met->m[ip2]); */
+      /*   ns++; */
+      /* } */
     }
   }
 
+  printf("on a filtre %7d\n",ifilt);
   return(ns);
 }
+/** Split edges of length bigger than LOPTL */
+int adpsplcol(pMesh mesh,pSol met,pBucket bucket, int* warn) {
+  pTetra     pt;
+  pxTetra    pxt;
+  Tria       ptt;
+  pPoint     p0,p1,ppt;
+  pxPoint    pxp;
+  double     dd,dd2,len,lmax,o[3],to[3],ro[3],no1[3],no2[3],v[3];
+  int        k,ip,ip1,ip2,list[LMAX+2],ilist,ns,ref;
+  char       imax,tag,j,i,i1,i2,ifa0,ifa1;
+  int        ifilt,lon,ret,ne,ier;
+  double     lmin;
+  int        imin,iq,nc,it,nnc,nns,nnf,nnm,maxit,nf,nm;
 
+  /* Iterative mesh modifications */
+  it = nnc = nns = nnf = nnm = 0;
+  maxit = 10;
+  do {
+    *warn=0;
+    ns = nc = 0;
+    nf = nm = 0;
+    ifilt = 0;
+    ne = mesh->ne;
+    for (k=1; k<=ne; k++) {
+      pt = &mesh->tetra[k];
+      if ( !MG_EOK(pt) )   continue;
+      pxt = pt->xt ? &mesh->xtetra[pt->xt] : 0;
+        
+      /* find longest and shortest edge */
+      imax = -1; lmax = 0.0;
+      imin = -1; lmin = DBL_MAX;
+      for (i=0; i<6; i++) {
+	if ( pt->xt && (pxt->tag[i] & MG_REQ) )  continue;
+	ip1  = iare[i][0];
+	ip2  = iare[i][1];
+	len = lenedg(mesh,met,pt->v[ip1],pt->v[ip2]);
+	if ( len > lmax ) {
+	  lmax = len;
+	  imax = i;
+	}
+	if ( len < lmin ) {
+	  lmin = len;
+	  imin = i;
+	}
+      }
+      if ( imax==-1 )
+	fprintf(stdout,"%s:%d: Warning: all edges of tetra %d are boundary and required\n",
+		__FILE__,__LINE__,k);
+      if ( imin==-1 )
+	fprintf(stdout,"%s:%d: Warning: all edges of tetra %d are boundary and required\n",
+		__FILE__,__LINE__,k);
+        
+      if ( lmax >= LOPTL )  {
+        
+	/* proceed edges according to lengths */
+	ifa0 = ifar[imax][0];
+	ifa1 = ifar[imax][1];
+	i  = (pt->xt && (pxt->ftag[ifa1] & MG_BDY)) ? ifa1 : ifa0;
+	j  = iarfinv[i][imax];
+	i1 = idir[i][inxt2[j]];
+	i2 = idir[i][iprv2[j]];
+	ip1 = pt->v[i1];
+	ip2 = pt->v[i2];
+	p0  = &mesh->point[ip1];
+	p1  = &mesh->point[ip2];
+        
+	/* Case of a boundary face */
+	if ( pt->xt && (pxt->ftag[i] & MG_BDY) ) {
+	  if ( !(MG_GET(pxt->ori,i)) ) continue;
+	  
+	  hGet(&mesh->htab,ip1,ip2,&ref,&tag);
+	  if ( MG_SIN(tag) )  continue;
+	  if ( tag & MG_REQ )  continue;
+	  tag |= MG_BDY;
+	  ilist = coquil(mesh,k,imax,list);
+	  if ( !ilist )  continue;
+            
+	  if ( tag & MG_NOM ){
+	    if( !BezierNom(mesh,ip1,ip2,0.5,o,no1,to) )
+	      continue;
+	    else if ( MG_SIN(p0->tag) && MG_SIN(p1->tag) ) {
+	      tet2tri(mesh,k,i,&ptt);
+	      nortri(mesh,&ptt,no1);
+	      if ( !MG_GET(pxt->ori,i) ) {
+		no1[0] *= -1.0;
+		no1[1] *= -1.0;
+		no1[2] *= -1.0;
+	      }
+	    }
+	  }
+	  else if ( tag & MG_GEO ) {
+	    if ( !BezierRidge(mesh,ip1,ip2,0.5,o,no1,no2,to) )
+	      continue;
+	    if ( MG_SIN(p0->tag) && MG_SIN(p1->tag) ) {
+	      tet2tri(mesh,k,i,&ptt);
+	      nortri(mesh,&ptt,no1);
+	      no2[0] = to[1]*no1[2] - to[2]*no1[1];
+	      no2[1] = to[2]*no1[0] - to[0]*no1[2];
+	      no2[2] = to[0]*no1[1] - to[1]*no1[0];
+	      dd = no2[0]*no2[0] + no2[1]*no2[1] + no2[2]*no2[2];
+	      if ( dd > EPSD2 ) {
+		dd = 1.0 / sqrt(dd);
+		no2[0] *= dd;
+		no2[1] *= dd;
+		no2[2] *= dd;
+	      }
+	    }
+	  }
+	  else if ( tag & MG_REF ) {
+	    if ( !BezierRef(mesh,ip1,ip2,0.5,o,no1,to) )
+	      goto collapse;//continue;
+	  }
+	  else {
+	    //CECILE : je comprend pas pourquoi la normale est mauvaise a la fin
+	    goto collapse;
+	    if ( !norface(mesh,k,i,v) )  goto collapse;//continue;
+	    else {
+	      dd  = v[0]*no1[0]+v[1]*no1[1]+v[2]*no1[2];
+	      dd2 = v[0]*no2[0]+v[1]*no2[1]+v[2]*no2[2];
+              
+	      if ( dd>=dd2 ) {
+		if ( !BezierReg(mesh,ip1,ip2,0.5,v,o,no1) )
+		  goto collapse;//continue;
+	      }
+	      else {
+		if ( !BezierReg(mesh,ip1,ip2,0.5,v,o,no2) )
+		  goto collapse;//continue;
+	      }
+	    }
+	  }
+	  ier = simbulgept(mesh,list,ilist,o);
+	  if ( !ier ) {
+	    printf("on passe la\n");
+	    ier = dichoto1b(mesh,list,ilist,o,ro);
+	    memcpy(o,ro,3*sizeof(double));
+	  }
+	  ip = newPt(mesh,o,MG_NOTAG);
+          
+	  if ( !ip ){
+	    *warn=1;
+	    goto collapse;//break;
+	  }
+	  //CECILE
+	  if ( met->m )
+	    met->m[ip] = 0.5 * (met->m[ip1]+met->m[ip2]);
+	  //CECILE
+	  ier = split1b(mesh,met,list,ilist,ip,1);
+	  if ( ier<0 ) {
+	    fprintf(stdout,"%s:%d: Error: unable to split\n"
+		    ,__FILE__,__LINE__);
+	    return(-1);
+	  }
+	  else if ( !ier ) {
+	    delPt(mesh,ip);
+	    goto collapse;//continue;
+	  } else {
+	    ns++;
+	    addBucket(mesh,bucket,ip);
+            
+	    ppt = &mesh->point[ip];
+	    if ( MG_EDG(tag) || (tag & MG_NOM) )
+	      ppt->ref = ref;
+	    else
+	      ppt->ref = pxt->ref[i];
+	    ppt->tag = tag;
+	    if ( met->m )
+	      met->m[ip] = 0.5 * (met->m[ip1]+met->m[ip2]);
+	    mesh->xp++;
+	    assert(mesh->xp < mesh->xpmax);
+	    ppt->xp = mesh->xp;
+	    pxp = &mesh->xpoint[ppt->xp];
+            
+	    if ( tag & MG_NOM ){
+	      memcpy(pxp->n1,no1,3*sizeof(double));
+	      memcpy(pxp->t,to,3*sizeof(double));
+	    }
+	    else if ( tag & MG_GEO ) {
+	      memcpy(pxp->n1,no1,3*sizeof(double));
+	      memcpy(pxp->n2,no2,3*sizeof(double));
+	      memcpy(pxp->t,to,3*sizeof(double));
+	    }
+	    else if ( tag & MG_REF ) {
+	      memcpy(pxp->n1,no1,3*sizeof(double));
+	      memcpy(pxp->t,to,3*sizeof(double));
+	    }
+	    else
+	      memcpy(pxp->n1,no1,3*sizeof(double));
+	  }
+	  continue;
+	}
+	else if(pt->xt){
+	  if ( (p0->tag & MG_BDY) && (p1->tag & MG_BDY) ) continue;
+	  ilist = coquil(mesh,k,imax,list);
+	  if ( !ilist )  continue;
+	  o[0] = 0.5*(p0->c[0] + p1->c[0]);
+	  o[1] = 0.5*(p0->c[1] + p1->c[1]);
+	  o[2] = 0.5*(p0->c[2] + p1->c[2]);
+	  ip = newPt(mesh,o,MG_NOTAG);
+            
+	  if ( !ip )  {
+	    *warn=1;
+	    goto collapse;//break;
+	  }
+	  //CECILE
+	  if ( met->m )
+	    met->m[ip] = 0.5 * (met->m[ip1]+met->m[ip2]);
+	  //CECILE
+	  ier = split1b(mesh,met,list,ilist,ip,1);
+	  if ( ier<0 ) {
+	    fprintf(stdout,"%s:%d: Error: unable to split\n"
+		    ,__FILE__,__LINE__);
+	    return(-1);
+	  }
+	  else if ( !ier ) { //Et on teste pas du tout les qualités ici ?
+	    delPt(mesh,ip);
+	    goto collapse;//continue;
+	  }
+	  else {
+	    ppt = &mesh->point[ip];
+	    met->m[ip] = 0.5 * (met->m[ip1] + met->m[ip2]);
+	    addBucket(mesh,bucket,ip);
+	    ns++;
+	    continue;
+	  }
+	  printf("on doit pas passer la\n");
+	} else {    /* Case of an internal face */
+	  if ( (p0->tag & MG_BDY) && (p1->tag & MG_BDY) ) continue;
+	  ilist = coquil(mesh,k,imax,list);
+	  if ( !ilist )  continue;
+	  o[0] = 0.5*(p0->c[0] + p1->c[0]);
+	  o[1] = 0.5*(p0->c[1] + p1->c[1]);
+	  o[2] = 0.5*(p0->c[2] + p1->c[2]);
+	  ip = newPt(mesh,o,MG_NOTAG);
+            
+	  if ( !ip )  {
+	    *warn=1;
+	    goto collapse;//break;
+	  }
+	  //CECILE
+	  if ( met->m )
+	    met->m[ip] = 0.5 * (met->m[ip1]+met->m[ip2]);
+	  //CECILE
+	  //LA DELONE
+            
+	  if (!buckin_iso(mesh,met,bucket,ip) ) {
+	    delPt(mesh,ip);
+	    ifilt++;
+	    goto collapse;////continue;
+	  } else {
+            lon = cavity(mesh,met,k,ip,list,ilist/2);
+            if ( lon < 1 ) {
+	      delPt(mesh,ip);
+	      goto collapse;//continue;
+            } else {
+	      ret = delone(mesh,met,ip,list,lon);
+	      if ( ret > 0 ) {
+		ppt = &mesh->point[ip];
+		met->m[ip] = 0.5 * (met->m[ip1] + met->m[ip2]);
+		//chkmsh(mesh,0,0);
+		addBucket(mesh,bucket,ip);
+		ns++;
+		continue;
+	      }
+	      else if ( ret == 0 ) {
+		delPt(mesh,ip);
+		goto collapse;//continue;
+	      }
+	      else {
+		delPt(mesh,ip);
+		goto collapse;//continue;
+	      }
+	      printf("on passe pas la1\n");
+            }
+	      printf("on passe pas la2\n");
+          }
+	      printf("on passe pas la3\n");
+	}
+	printf("on passe pas la3\n");
+      }
+    collapse:
+      if(lmin > LOPTS) continue;
+      ifa0 = ifar[imin][0];
+      ifa1 = ifar[imin][1];
+      i  =  (pt->xt && (pxt->ftag[ifa1] & MG_BDY)) ? ifa1 : ifa0;
+      j  = iarfinv[i][imin];
+      i1 = idir[i][inxt2[j]];
+      i2 = idir[i][iprv2[j]];
+      ip = pt->v[i1];
+      iq = pt->v[i2];
+      p0 = &mesh->point[ip];
+      p1 = &mesh->point[iq];
+        
+      if ( (p0->tag > p1->tag) )  continue;
+        
+      /* Case of a boundary face */
+      ilist = 0;
+      if ( pt->xt && (pxt->ftag[i] & MG_BDY) ) {
+	hGet(&mesh->htab,ip,iq,&ref,&tag);
+	if ( MG_SIN(tag) )  continue;
+	if ( tag & MG_REQ )  continue;
+	tag |= MG_BDY;
+	if ( p0->tag > tag )   continue;
+	if ( ( tag & MG_NOM ) && (mesh->adja[4*(k-1)+1+i]) ) continue;
+	ilist = chkcol_bdy(mesh,k,i,j,list);
+      }
+      /* Case of an internal face */
+      else {
+	if ( p0->tag & MG_BDY )  continue;
+	ilist = chkcol_int(mesh,met,k,i,j,list,2);
+      }
+      if ( ilist ) {
+	ier = colver(mesh,list,ilist,i2);
+	//nc += ier;
+	if(ier) {
+	      
+	  delBucket(mesh,bucket,ier);
+	  delPt(mesh,ier);
+	  nc++;
+	  continue;
+	}
+      }
+    
+    
+              
+        
+    }
+    nf = swpmshcpy(mesh,met);
+	if ( nf < 0 ) {
+		fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
+		return(0);
+	}
+	nnf += nf;
+	nm = movtetdel(mesh,met,-1);
+	if ( nm < 0 ) {
+		fprintf(stdout,"  ## Unable to improve mesh.\n");
+		return(0);
+	}
+	nnm += nm;
+	nnc += nc;
+	nns += ns;
+	if ( 1 || ((abs(info.imprim) > 4 || info.ddebug) && ns+nc > 0) )
+		fprintf(stdout,"     %8d filtered %8d splitted, %8d collapsed, %8d swapped, %8d moved\n",ifilt,ns,nc,nf,nm);
+	if ( ns < 10 && abs(nc-ns) < 3 )  break;
+	 else if ( it > 3 && abs(nc-ns) < 0.3 * MG_MAX(nc,ns) )  break;
+}
+while( ++it < maxit && nc+ns > 0 );
+	
+    return(1);
+}
 /** Collapse edges of length smaller than LOPTS */
-static int adpcol(pMesh mesh,pSol met) {
+/*static*/ int adpcoldel(pMesh mesh,pSol met,pBucket bucket) {
   pTetra     pt;
   pxTetra    pxt;
   pPoint     p0,p1;
   double     len,lmin;
   int        k,ip,iq,list[LMAX+2],ilist,nc,ref;
-  char       imin,tag,j,i,i1,i2,ifa0,ifa1;
-  int        ier;
+  char       imin,tag,j,i,i1,i2,ier,ifa0,ifa1;
 
   nc = 0;
   for (k=1; k<=mesh->ne; k++) {
@@ -1347,30 +1557,143 @@ static int adpcol(pMesh mesh,pSol met) {
     }
     if ( ilist ) {
       ier = colver(mesh,list,ilist,i2);
-		if(ier) {
-			delPt(mesh,ier);
-			nc++;
-		}
+      if(ier) {
+	delBucket(mesh,bucket,ier);
+	delPt(mesh,ier);
+	nc ++;
       }
     }
+  }
 
   return(nc);
 }
+/** Analyze tetrahedra and split long / collapse short, according to prescribed metric */
+/*static*/ int adptet1(pMesh mesh,pSol met,pBucket bucket) {
+	int      it,nnc,nns,nnf,nnm,maxit,nc,ns,nf,nm;
+	int      warn;
+	
+	/*initial swap*/
+	nf = swpmshcpy(mesh,met);
+	if ( nf < 0 ) {
+		fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
+		return(0);
+	}
+	nnf = nf;
+	nf = swptetdel(mesh,met,1.053);
+	if ( nf < 0 ) {
+		fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
+		return(0);
+	}
+	nnf+=nf;
+	fprintf(stdout,"$$$$$$$$$$$$$$$$$$ INITIAL SWAP %7d\n",nnf);
+	
+	/* Iterative mesh modifications */
+
+#ifdef DEBUG
+		tabtmp[0][0]=0;
+		tabtmp[0][1]=0;     tabtmp[0][2]=0;
+#endif
+		ns = adpsplcol(mesh,met,bucket,&warn);
+	
+#ifdef DEBUG
+		if ( ns ) { printf("APS ADPSPLCOL == %d\n",ns);
+			prilen(mesh,met);
+			printf(" histo %5.1f  %5.1f %5.1f\n", tabtmp[0][0],tabtmp[0][1],tabtmp[0][2]);}
+#endif
+		if ( ns < 0 ) {
+			fprintf(stdout,"  ## Unable to complete mesh. Exit program.\n");
+			return(0);
+		}
+		
+		
+	
+	if ( warn ) {
+		fprintf(stdout,"%s:%d: Error:",__FILE__,__LINE__);
+		fprintf(stdout," unable to allocate a new point in last call of adpspl.\n");
+		fprintf(stdout," ## Uncomplete mesh. Exiting\n" );
+		return(0);
+	}
+	
+	/*shape optim*/
+	it = 0;
+	maxit = 2;
+	do {
+		/* badly shaped process */
+		/*ier = badelt(mesh,met);
+		 if ( ier < 0 ) {
+		 fprintf(stdout,"  ## Unable to remove bad elements.\n");
+		 return(0);
+		 }*/
+		
+		nm = movtetdel(mesh,met,0);
+		if ( nm < 0 ) {
+			fprintf(stdout,"  ## Unable to improve mesh.\n");
+			return(0);
+		}
+		nnm += nm;
+		
+		nf = swpmshcpy(mesh,met);
+		if ( nf < 0 ) {
+			fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
+			return(0);
+		}
+		nnf += nf;
+		
+		nf = swptetdel(mesh,met,1.053);
+		if ( nf < 0 ) {
+			fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
+			return(0);
+		}
+		
+		if ( (abs(info.imprim) > 4 || info.ddebug) && nf+nm > 0 ){
+			fprintf(stdout,"                                            ");
+			fprintf(stdout,"%8d swapped, %8d moved\n",nf,nm);
+		}
+	}
+	while( ++it < maxit && nm+nf > 0 );
+	
+	nm = movtetdel(mesh,met,3);
+	if ( nm < 0 ) {
+		fprintf(stdout,"  ## Unable to improve mesh.\n");
+		return(0);
+	}
+	nnm += nm;
+	if ( (abs(info.imprim) > 4 || info.ddebug) && nm > 0 )
+		fprintf(stdout,"                                            ");
+	fprintf(stdout,"                  %8d moved\n",nm);
+		
+	return(1);
+}
 
 /** Analyze tetrahedra and split long / collapse short, according to prescribed metric */
-static int adptet(pMesh mesh,pSol met) {
+/*static*/ int adptetdel(pMesh mesh,pSol met,pBucket bucket) {
   int      it,nnc,nns,nnf,nnm,maxit,nc,ns,nf,nm;
   int      warn;
+  //ATTENTION MARCHE PAS................................
+  nf = swpmshcpy(mesh,met);
+  if ( nf < 0 ) {
+    fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
+    return(0);
+  }
+  nnf = nf;
+	nf = swptetdel(mesh,met,1.053);
+  if ( nf < 0 ) {
+    fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
+    return(0);
+  }
+  nnf+=nf;
+  fprintf(stdout,"INTIA SWAP %7d\n",nnf);
 
   /* Iterative mesh modifications */
   it = nnc = nns = nnf = nnm = 0;
   maxit = 10;
+  nf = nm = 0;
   do {
 #ifdef DEBUG
     tabtmp[0][0]=0;
     tabtmp[0][1]=0;     tabtmp[0][2]=0;
 #endif
-    ns = adpspl(mesh,met,&warn);
+    ns = adpspl_delone(mesh,met,bucket,&warn);
 
 #ifdef DEBUG
     if ( ns ) { printf("APS ADPSPL == %d\n",ns);
@@ -1382,7 +1705,7 @@ static int adptet(pMesh mesh,pSol met) {
       return(0);
     }
 
-    nc = adpcol(mesh,met);
+    nc = adpcoldel(mesh,met,bucket);
 #ifdef DEBUG
     if(nc){ printf("APS ADPCOL == %d\n",nc);
       prilen(mesh,met);}
@@ -1391,37 +1714,25 @@ static int adptet(pMesh mesh,pSol met) {
       fprintf(stdout,"  ## Unable to complete mesh. Exit program.\n");
       return(0);
     }
-
-    nm = movtet(mesh,met,1);
-    if ( nm < 0 ) {
-      fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
-      return(0);
-    }
-
-    nf = swpmsh(mesh,met);
+    nf = swpmshcpy(mesh,met);
     if ( nf < 0 ) {
-      fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
-      return(0);
+          fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
+          return(0);
     }
     nnf += nf;
-
-    nf = swptet(mesh,met,1.053);
-    if ( nf < 0 ) {
-      fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
-      return(0);
+		nm = movtetdel(mesh,met,-1);
+    if ( nm < 0 ) {
+        fprintf(stdout,"  ## Unable to improve mesh.\n");
+        return(0);
     }
-#ifdef DEBUG
-    if(nm+nf){ printf("FIN== %d\n",nm+nf);
-      prilen(mesh,met);}
-#endif
+    nnm += nm;
     nnc += nc;
     nns += ns;
-    nnf += nf;
-    nnm += nm;
     if ( (abs(info.imprim) > 4 || info.ddebug) && ns+nc > 0 )
       fprintf(stdout,"     %8d splitted, %8d collapsed, %8d swapped, %8d moved\n",ns,nc,nf,nm);
-    if ( ns < 10 && abs(nc-ns) < 3 )  break;
-    else if ( it > 3 && abs(nc-ns) < 0.3 * MG_MAX(nc,ns) )  break;
+   // if ( ns < 10 && abs(nc-ns) < 3 )  break;
+   // else if ( it > 3 && abs(nc-ns) < 0.3 * MG_MAX(nc,ns) )  break;
+	  if ( it > 3 && ns < 0  )  break;
   }
   while( ++it < maxit && nc+ns > 0 );
 
@@ -1443,21 +1754,21 @@ static int adptet(pMesh mesh,pSol met) {
       return(0);
       }*/
 
-    nm = movtet(mesh,met,0);
+		nm = movtetdel(mesh,met,0);
     if ( nm < 0 ) {
       fprintf(stdout,"  ## Unable to improve mesh.\n");
       return(0);
     }
     nnm += nm;
 
-    nf = swpmsh(mesh,met);
+    nf = swpmshcpy(mesh,met);
     if ( nf < 0 ) {
       fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
       return(0);
     }
     nnf += nf;
 
-    nf = swptet(mesh,met,1.053);
+		nf = swptetdel(mesh,met,1.053);
     if ( nf < 0 ) {
       fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
       return(0);
@@ -1470,7 +1781,7 @@ static int adptet(pMesh mesh,pSol met) {
   }
   while( ++it < maxit && nm+nf > 0 );
 
-  nm = movtet(mesh,met,3);
+	nm = movtetdel(mesh,met,3);
   if ( nm < 0 ) {
     fprintf(stdout,"  ## Unable to improve mesh.\n");
     return(0);
@@ -1487,7 +1798,7 @@ static int adptet(pMesh mesh,pSol met) {
 }
 
 /** split tetra into 4 when more than 1 boundary face */
-static int anatet4(pMesh mesh, pSol met) {
+/*static*/ int anatet4del(pMesh mesh, pSol met) {
   pTetra      pt;
   pPoint      ppt;
   pxTetra     pxt;
@@ -1527,7 +1838,7 @@ static int anatet4(pMesh mesh, pSol met) {
 
 
 /** analyze tetrahedra and split if needed */
-static int anatet(pMesh mesh,pSol met,char typchk) {
+/*static*/ int anatetdel(pMesh mesh,pSol met,char typchk) {
   int     ier,nc,ns,nf,nnc,nns,nnf,it,maxit;
 
   /* analyze tetras : initial splitting */
@@ -1542,7 +1853,7 @@ static int anatet(pMesh mesh,pSol met,char typchk) {
     prilen(mesh,met);
 #endif
     /* split tetra with more than 2 bdry faces */
-    ier = anatet4(mesh,met);
+		ier = anatet4del(mesh,met);
 #ifdef DEBUG
     if ( ier ) { printf("APS ANATET4 == %d\n",ier);
       prilen(mesh,met);}
@@ -1551,7 +1862,7 @@ static int anatet(pMesh mesh,pSol met,char typchk) {
     ns = ier;
 
     /* analyze surface tetras */
-    ier = anatets(mesh,met,typchk);
+		ier = anatetsdel(mesh,met,typchk);
 #ifdef DEBUG
     if ( ier ) { printf("APS ANATETS == %d\n",ier);
       prilen(mesh,met);}
@@ -1563,7 +1874,7 @@ static int anatet(pMesh mesh,pSol met,char typchk) {
     ns += ier;
 
     /* analyze internal tetras */
-    ier = anatetv(mesh,met,typchk);
+		ier = anatetvdel(mesh,met,typchk);
 #ifdef DEBUG
     if(ier){ printf("APS ANATETV == %d\n",ier);
       prilen(mesh,met);}
@@ -1581,21 +1892,21 @@ static int anatet(pMesh mesh,pSol met,char typchk) {
     if ( typchk == 2 && it == maxit-1 )  info.fem = 1;
 
     /* collapse short edges */
-    nc = coltet(mesh,met,typchk);
+		nc = coltetdel(mesh,met,typchk);
     if ( nc < 0 ) {
       fprintf(stdout,"  ## Unable to collapse mesh. Exiting.\n");
       return(0);
     }
 
     /* attempt to swap */
-    nf = swpmsh(mesh,met);
+    nf = swpmshcpy(mesh,met);
     if ( nf < 0 ) {
       fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
       return(0);
     }
     nnf += nf;
 
-    nf = swptet(mesh,met,1.1);
+		nf = swptetdel(mesh,met,1.1);
     if ( nf < 0 ) {
       fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
       return(0);
@@ -1620,7 +1931,8 @@ static int anatet(pMesh mesh,pSol met,char typchk) {
 }
 
 /** main adaptation routine */
-int mmg3d1(pMesh mesh,pSol met) {
+int mmg3d1_delone(pMesh mesh,pSol met) {
+  pBucket bucket;
 
   if ( abs(info.imprim) > 4 )
     fprintf(stdout,"  ** MESH ANALYSIS\n");
@@ -1634,7 +1946,7 @@ int mmg3d1(pMesh mesh,pSol met) {
   if ( abs(info.imprim) > 4 || info.ddebug )
     fprintf(stdout,"  ** GEOMETRIC MESH\n");
 
-  if ( !anatet(mesh,met,1) ) {
+	if ( !anatetdel(mesh,met,1) ) {
     fprintf(stdout,"  ## Unable to split mesh. Exiting.\n");
     return(0);
   }
@@ -1656,15 +1968,20 @@ int mmg3d1(pMesh mesh,pSol met) {
     return(0);
   }
 
-  if ( !anatet(mesh,met,2) ) {
+	if ( !anatetdel(mesh,met,2) ) {
     fprintf(stdout,"  ## Unable to split mesh. Exiting.\n");
     return(0);
   }
+	
 #ifdef DEBUG
   puts("---------------------------Fin anatet---------------------");
   outqua(mesh,met);
 #endif
-  if ( !adptet(mesh,met) ) {
+  /* CEC : create filter */
+  bucket = newBucket(mesh,64);//M_MAX(mesh->info.bucksiz,BUCKSIZ));
+  if ( !bucket )  return(0);
+
+  if ( !adptet1(mesh,met,bucket) ) {
     fprintf(stdout,"  ## Unable to adapt. Exit program.\n");
     return(0);
   }
@@ -1683,6 +2000,11 @@ int mmg3d1(pMesh mesh,pSol met) {
     fprintf(stdout,"  ## Non orientable implicit surface. Exit program.\n");
     return(0);
   }
+
+  /*free bucket*/
+  free(bucket->head);
+  free(bucket->link);
+  free(bucket);
 
   return(1);
 }

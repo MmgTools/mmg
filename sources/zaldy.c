@@ -58,6 +58,7 @@ int newElt(pMesh mesh) {
   if ( mesh->nenil > mesh->ne )  mesh->ne = mesh->nenil;
   mesh->nenil = mesh->tetra[curiel].v[3];
   mesh->tetra[curiel].v[3] = 0;
+  mesh->tetra[curiel].mark=0;
 
   return(curiel);
 }

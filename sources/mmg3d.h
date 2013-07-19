@@ -105,6 +105,7 @@ typedef struct {
   int      flag; /**< flag to know if we have already treated the point */
   char     tag; /**< contains binary flags :
                    if tag=23=16+4+2+1, then the point is MG_REF, MG_GEO,MG_REQ,MG_BDY */
+    char    tagdel;//tag for delaunay
 } Point;
 typedef Point * pPoint;
 
@@ -131,7 +132,7 @@ typedef Tria * pTria;
 
 typedef struct {
   int      v[4],ref;
-  int      base;
+  int      base,mark; //CECILE rajout mark pour delaunay
   int      xt;   /**< xt : number of the surfaces xtetra */
   int      flag;
   char     tag;
@@ -187,6 +188,7 @@ typedef struct {
   int       ver,dim,type;
   int       npi,nai,nei,np,na,nt,ne,npmax,namax,ntmax,nemax,xpmax,xtmax;
   int       base; /**< used with flag to know if an entity has been treated */
+  int       mark;//CECILE rajout mark pour delaunay
   int       xp,xt; /**< nb of surfaces points/triangles */
   int       npnil,nenil; /**< nb of first unused point/element */
   int      *adja; /**< tab of tetrahedra adjacency : if adjt[4*i+1+j]=4*k+l then
@@ -214,6 +216,18 @@ typedef struct {
 } Sol;
 typedef Sol * pSol;
 
+typedef struct {
+  int     size;
+  int    *head;
+  int    *link;
+} Bucket;
+typedef Bucket * pBucket;
+/* bucket */
+pBucket newBucket(pMesh ,int );
+int     addBucket(pMesh ,pBucket ,int );
+int     delBucket(pMesh ,pBucket ,int );
+void    freeBucket(pBucket );
+int buckin_iso(pMesh mesh,pSol sol,pBucket bucket,int ip);
 /* prototypes */
 void rotmatrix(double n[3],double r[3][3]);
 double det3pt1vec(double c0[3],double c1[3],double c2[3],double v[3]);
@@ -280,6 +294,7 @@ int  chkmsh(pMesh,int,int);
 int  chkfemtopo(pMesh mesh);
 int  cntbdypt(pMesh mesh, int nump);
 int  mmg3d1(pMesh ,pSol );
+int  mmg3d1_delone(pMesh ,pSol );
 int  mmg3d2(pMesh ,pSol );
 int  split1_sim(pMesh mesh,pSol met,int k,int vx[6]);
 void split1(pMesh mesh,pSol met,int k,int vx[6]);
@@ -335,6 +350,10 @@ double surftri(pMesh,int,int);
 double timestepMCF(pMesh,double);
 int bdyMCF(pMesh);
 double volint(pMesh);
+/*Delaunay functions*/
+int delone(pMesh mesh,pSol sol,int ip,int *list,int ilist);
+int cavity(pMesh mesh,pSol sol,int iel,int ip,int *list,int lon);
+int cenrad_iso(pMesh mesh,double *ct,double *c,double *rad);
 
 /* pointers */
 double caltet_ani(pMesh mesh,pSol met,int ia,int ib,int ic,int id);

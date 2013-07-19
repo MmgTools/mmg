@@ -143,7 +143,7 @@ int swpgen(pMesh mesh,pSol met,int nconf,int ilist,int *list) {
   int       iel,na,nb,np,nball,ret,start;
   double    m[3];
   char      ia,ip,iq;
-
+  int ier;
   iel = list[0] / 6;
   ia  = list[0] % 6;
 
@@ -183,6 +183,8 @@ int swpgen(pMesh mesh,pSol met,int nconf,int ilist,int *list) {
   memset(list,0,(LMAX+2)*sizeof(int));
   nball = boulevolp(mesh,start,ip,list);
 
-  colver(mesh,list,nball,iq);
+  ier = colver(mesh,list,nball,iq);
+  if(ier) delPt(mesh,ier);
+	
   return(1);
 }

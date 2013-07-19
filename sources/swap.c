@@ -184,7 +184,8 @@ int swpbdy(pMesh mesh,pSol met,int *list,int ret,int it1) {
   pPoint   p0,p1;
   int      iel,iel1,ilist,np,nq,na,nm;
   double   c[3];
-  char     ia,ier,iface1,j,ipa,im;
+  char     ia,iface1,j,ipa,im;
+	int      ier;
 
   iel = list[0] / 6;
   ia  = list[0] % 6;
@@ -241,6 +242,10 @@ int swpbdy(pMesh mesh,pSol met,int *list,int ret,int it1) {
   assert(pt1->v[ipa] == na);
 
   ier = colver(mesh,list,ilist,ipa);
-
+	if(ier) {
+		delPt(mesh,ier);
+		ier = 1;
+	}
+  
   return(ier);
 }

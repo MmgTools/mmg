@@ -945,7 +945,7 @@ int colver(pMesh mesh,int *list,int ilist,char indq) {
   if ( mesh->point[np].tag & MG_BDY )
     hPop(&mesh->htab,np,nq,&ref,&tag);
 
-  delPt(mesh,np);
+  //delPt(mesh,np);
 
-  return(1);
+  return(np);
 }
