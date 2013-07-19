@@ -1302,7 +1302,7 @@ int adpsplcol(pMesh mesh,pSol met,pBucket bucket, int* warn) {
 	    goto collapse;//continue;
 	  } else {
 	    ns++;
-	    addBucket(mesh,bucket,ip);
+	    //addBucket(mesh,bucket,ip);
             
 	    ppt = &mesh->point[ip];
 	    if ( MG_EDG(tag) || (tag & MG_NOM) )
@@ -1449,22 +1449,32 @@ int adpsplcol(pMesh mesh,pSol met,pBucket bucket, int* warn) {
 	if ( p0->tag > tag )   continue;
 	if ( ( tag & MG_NOM ) && (mesh->adja[4*(k-1)+1+i]) ) continue;
 	ilist = chkcol_bdy(mesh,k,i,j,list);
+	if ( ilist ) {
+	  ier = colver(mesh,list,ilist,i2);
+	  //nc += ier;
+	  if(ier) {    
+	    //delBucket(mesh,bucket,ier);
+	    delPt(mesh,ier);
+	    nc++;
+	    continue;
+	  }
+	}
       }
       /* Case of an internal face */
       else {
 	if ( p0->tag & MG_BDY )  continue;
 	ilist = chkcol_int(mesh,met,k,i,j,list,2);
-      }
-      if ( ilist ) {
-	ier = colver(mesh,list,ilist,i2);
-	//nc += ier;
-	if(ier) {
-	      
-	  delBucket(mesh,bucket,ier);
-	  delPt(mesh,ier);
-	  nc++;
-	  continue;
+	if ( ilist ) {
+	  ier = colver(mesh,list,ilist,i2);
+	  //nc += ier;
+	  if(ier) {    
+	    delBucket(mesh,bucket,ier);
+	    delPt(mesh,ier);
+	    nc++;
+	    continue;
+	  }
 	}
+     
       }
     
     
