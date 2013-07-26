@@ -5,7 +5,9 @@ char  ddb;
 #ifdef DEBUG
 double      tabtmp[12][7];
 #endif
-
+#define LOPTLDEL     1.3//1.41
+#define LOPTSDEL     0.6
+int MMG_npuiss,MMG_nvol,MMG_npres;
 /** set triangle corresponding to face ie of tetra k */
 void tet2tri(pMesh mesh,int k,char ie,Tria *ptt);
 
@@ -1158,10 +1160,11 @@ int adpsplcol(pMesh mesh,pSol met,pBucket bucket, int* warn) {
   int        ifilt,lon,ret,ne,ier;
   double     lmin;
   int        imin,iq,nc,it,nnc,nns,nnf,nnm,maxit,nf,nm;
-
+  int ii,MMG_npd;
   /* Iterative mesh modifications */
   it = nnc = nns = nnf = nnm = 0;
   maxit = 10;
+  MMG_npuiss=MMG_nvol=MMG_npres =MMG_npd=0 ;
   do {
     *warn=0;
     ns = nc = 0;
@@ -1176,28 +1179,31 @@ int adpsplcol(pMesh mesh,pSol met,pBucket bucket, int* warn) {
       /* find longest and shortest edge */
       imax = -1; lmax = 0.0;
       imin = -1; lmin = DBL_MAX;
-      for (i=0; i<6; i++) {
+      for (ii=0; ii<6; ii++) {
 	if ( pt->xt && (pxt->tag[i] & MG_REQ) )  continue;
-	ip1  = iare[i][0];
-	ip2  = iare[i][1];
+	ip1  = iare[ii][0];
+	ip2  = iare[ii][1];
 	len = lenedg(mesh,met,pt->v[ip1],pt->v[ip2]);
-	if ( len > lmax ) {
-	  lmax = len;
-	  imax = i;
-	}
-	if ( len < lmin ) {
-	  lmin = len;
-	  imin = i;
-	}
+      	if ( len > lmax ) {
+      	  lmax = len;
+      	  imax = ii;
+      	}
+      	if ( len < lmin ) {
+      	  lmin = len;
+      	  imin = ii;
+      	}
       }
       if ( imax==-1 )
-	fprintf(stdout,"%s:%d: Warning: all edges of tetra %d are boundary and required\n",
-		__FILE__,__LINE__,k);
+      	fprintf(stdout,"%s:%d: Warning: all edges of tetra %d are boundary and required\n",
+      		__FILE__,__LINE__,k);
       if ( imin==-1 )
-	fprintf(stdout,"%s:%d: Warning: all edges of tetra %d are boundary and required\n",
-		__FILE__,__LINE__,k);
-        
-      if ( lmax >= LOPTL )  {
+      	fprintf(stdout,"%s:%d: Warning: all edges of tetra %d are boundary and required\n",
+      		__FILE__,__LINE__,k);
+	/* imax = ii; */
+	/* lmax = len; */
+	/* imin = ii; */
+	/* lmin = len; */
+      if ( lmax >= LOPTLDEL )  {
         
 	/* proceed edges according to lengths */
 	ifa0 = ifar[imax][0];
@@ -1333,7 +1339,7 @@ int adpsplcol(pMesh mesh,pSol met,pBucket bucket, int* warn) {
 	    else
 	      memcpy(pxp->n1,no1,3*sizeof(double));
 	  }
-	  continue;
+	  continue;//break;//imax continue;
 	}
 	else if(pt->xt){
 	  if ( (p0->tag & MG_BDY) && (p1->tag & MG_BDY) ) continue;
@@ -1367,7 +1373,7 @@ int adpsplcol(pMesh mesh,pSol met,pBucket bucket, int* warn) {
 	    met->m[ip] = 0.5 * (met->m[ip1] + met->m[ip2]);
 	    addBucket(mesh,bucket,ip);
 	    ns++;
-	    continue;
+	    continue;//break;//imax continue;
 	  }
 	  printf("on doit pas passer la\n");
 	} else {    /* Case of an internal face */
@@ -1396,6 +1402,7 @@ int adpsplcol(pMesh mesh,pSol met,pBucket bucket, int* warn) {
 	  } else {
             lon = cavity(mesh,met,k,ip,list,ilist/2);
             if ( lon < 1 ) {
+	      MMG_npd++;
 	      delPt(mesh,ip);
 	      goto collapse;//continue;
             } else {
@@ -1406,13 +1413,15 @@ int adpsplcol(pMesh mesh,pSol met,pBucket bucket, int* warn) {
 		//chkmsh(mesh,0,0);
 		addBucket(mesh,bucket,ip);
 		ns++;
-		continue;
+		continue;//break;//imax continue;
 	      }
 	      else if ( ret == 0 ) {
+		MMG_npd++;
 		delPt(mesh,ip);
 		goto collapse;//continue;
 	      }
 	      else {
+		MMG_npd++;
 		delPt(mesh,ip);
 		goto collapse;//continue;
 	      }
@@ -1425,7 +1434,7 @@ int adpsplcol(pMesh mesh,pSol met,pBucket bucket, int* warn) {
 	printf("on passe pas la3\n");
       }
     collapse:
-      if(lmin > LOPTS) continue;
+      if(lmin > LOPTSDEL) continue;
       ifa0 = ifar[imin][0];
       ifa1 = ifar[imin][1];
       i  =  (pt->xt && (pxt->ftag[ifa1] & MG_BDY)) ? ifa1 : ifa0;
@@ -1456,7 +1465,7 @@ int adpsplcol(pMesh mesh,pSol met,pBucket bucket, int* warn) {
 	    //delBucket(mesh,bucket,ier);
 	    delPt(mesh,ier);
 	    nc++;
-	    continue;
+	    continue;//break;//imax continue;
 	  }
 	}
       }
@@ -1471,22 +1480,43 @@ int adpsplcol(pMesh mesh,pSol met,pBucket bucket, int* warn) {
 	    delBucket(mesh,bucket,ier);
 	    delPt(mesh,ier);
 	    nc++;
-	    continue;
+	    continue;//break;//imax continue;
 	  }
 	}
      
       }
     
-    
-              
-        
+      // }//end for ii      
+
     }
+    /* prilen(mesh,met); */
+    /*     fprintf(stdout,"    REJECTED : %5d\n",MMG_npd); */
+    /* fprintf(stdout,"          VOL      : %6.2f %%    %5d \n", */
+    /*         100*(MMG_nvol/(float) */
+    /*              MMG_npd),MMG_nvol); */
+    /* fprintf(stdout,"          PUISS    : %6.2f %%    %5d \n", */
+    /*         100*(MMG_npuiss/(float) MMG_npd),MMG_npuiss); */
+    /* fprintf(stdout,"         PROCHE    : %6.2f %%    %5d \n", */
+    /*         100*(MMG_npres/(float) MMG_npuiss),MMG_npres); */
+    /* MMG_npd=0; */
+    /* MMG_npuiss=0; */
+    /* MMG_nvol=0; */
+    /* MMG_npres=0; */
     nf = swpmshcpy(mesh,met);
 	if ( nf < 0 ) {
 		fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
 		return(0);
 	}
 	nnf += nf;
+ 	nf = swptetdel(mesh,met,1.053);
+	if ( nf < 0 ) {
+		fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
+		return(0);
+	}
+	nnf+=nf;
+	fprintf(stdout,"$$$$$$$$$$$$$$$$$$ ITER SWAP %7d\n",nnf);
+
+   
 	nm = movtetdel(mesh,met,-1);
 	if ( nm < 0 ) {
 		fprintf(stdout,"  ## Unable to improve mesh.\n");

@@ -1,6 +1,6 @@
 #include "mmg3d.h"
 #define PRECI 1
-#define LFILT    0.6
+#define LFILT    0.7
 
 /* create bucket structure and store initial vertices */
 pBucket newBucket(pMesh mesh,int nmax) {
@@ -23,6 +23,7 @@ pBucket newBucket(pMesh mesh,int nmax) {
   for (k=1; k<=mesh->np; k++) {
     ppt = &mesh->point[k];
     if ( !MG_VOK(ppt) )  continue;
+    if (ppt->tag & MG_BDY) continue;
     ii = MG_MAX(0,(int)(dd * ppt->c[0])-1);
     jj = MG_MAX(0,(int)(dd * ppt->c[1])-1);
     kk = MG_MAX(0,(int)(dd * ppt->c[2])-1);

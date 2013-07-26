@@ -2,12 +2,14 @@
 #include "mmg3d.h"
 
 #define  EPSRAD       1.00005
-#define  EPSCON       5.0e-4//1.e-4//1.0e-3
-#define  VOLMIN       1.e-10//1.0e-15  --> vol negatif qd on rejoue
+//For Various_adpsol_hgrad1_M6Mach_Eps0.001_hmin0.001_hmax2 test case:
+//pbs with EPSCON=5e-4 and VOLMIN=1e-15 (MMG3D does not insert enough vertex...)
+#define  EPSCON       5e-5//5.0e-4//1.e-4//1.0e-3
+#define  VOLMIN       1e-15//1.e-10//1.0e-15  --> vol negatif qd on rejoue
 #define LONMAX     4096
 
 int MMG_cas;
-int MMG_npuiss,MMG_nvol,MMG_npres;
+extern int MMG_npuiss,MMG_nvol,MMG_npres;
 #define KTA     7
 #define KTB    11
 #define KTC    13
@@ -630,7 +632,7 @@ int correction_iso(pMesh mesh,int ip,int *list,int ilist,int nedep) {
     }
   }
   while ( ncor > 0 && lon >= nedep );
-
+  
   return(lon);
 }
 
@@ -828,7 +830,8 @@ int cavity(pMesh mesh,pSol sol,int iel,int ip,int *list,int lon) {
 	list[ilist++] = adj;
       }
     }
-    if ( ilist > LONMAX - 3 )  return(-1);
+    if ( ilist > LONMAX - 3 ) return(-1);
+    
     ++ipil;
   }
   while ( ipil < ilist );
@@ -845,6 +848,5 @@ int cavity(pMesh mesh,pSol sol,int iel,int ip,int *list,int lon) {
     MMG_npuiss++;
     if(MMG_cas>20) MMG_npres++;
   }
-
   return(ilist);
 }
