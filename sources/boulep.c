@@ -256,7 +256,8 @@ int boulenm(pMesh mesh,int start,int ip,int iface,double n[3],double t[3]) {
   double   dd,nt[3],l0,l1;
   int      base,nump,nr,nnm,k,piv,na,nb,adj,nvstart,fstart,aux,ip0,ip1;
   int     *adja;
-  char     iopp,ipiv,i,ipa,ipb,isface,tag;
+  char     iopp,ipiv,indb,inda,i,ipa,ipb,isface,tag;
+  char     indedg[4][4] = { {-1,0,1,2}, {0,-1,3,4}, {1,3,-1,5}, {2,4,5,-1} };
 
   base = ++mesh->base;
   nr  = nnm = 0;
@@ -269,9 +270,9 @@ int boulenm(pMesh mesh,int start,int ip,int iface,double n[3],double t[3]) {
   nump = pt->v[ip];
   k    = start;
 
-  na  = pt->v[ip];
-  nb  = pt->v[idir[iface][inxt2[idirinv[iface][ip]]]];
-  piv = pt->v[idir[iface][iprv2[idirinv[iface][ip]]]];
+  na   = pt->v[ip];
+  nb   = pt->v[idir[iface][inxt2[idirinv[iface][ip]]]];
+  piv  = pt->v[idir[iface][iprv2[idirinv[iface][ip]]]];
 
   iopp   = iface;
   fstart = 4*k+iopp;
@@ -282,8 +283,18 @@ int boulenm(pMesh mesh,int start,int ip,int iface,double n[3],double t[3]) {
       n[1] += nt[1];
       n[2] += nt[2];
     }
-    if ( pt->xt )
-      tag = mesh->xtetra[pt->xt].tag[arpt[ip][inxt2[idirinv[ip][iface]]]];
+
+    if ( pt->xt ) {
+      for ( inda=0; inda<4; inda++ ){
+        if ( pt->v[inda]==na ) break;
+      }
+      for ( indb=0; indb<4; indb++ ){
+        if ( pt->v[indb]==nb ) break;
+      }
+      assert( (inda < 4) && (indb < 4));
+      tag = mesh->xtetra[pt->xt].tag[indedg[inda][indb]];
+    }
+
     else  tag = 0;
 
     if ( MG_EDG(tag) && !(tag & MG_NOM) )
@@ -297,11 +308,11 @@ int boulenm(pMesh mesh,int start,int ip,int iface,double n[3],double t[3]) {
     }
 
     /* A boundary face has been hit : change travel edge */
-    aux = nb;
-    nb = piv;
-    piv = aux;
+    aux     = nb;
+    nb      = piv;
+    piv     = aux;
     nvstart = k;
-    adj = k;
+    adj     = k;
 
     /* Now unfold shell of edge (na,nb) starting from k (included) */
     do {

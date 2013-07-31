@@ -120,7 +120,7 @@ static int setadj(pMesh mesh){
 
     /* find next unmarked triangle */
     ipil = 0;
-    for (kk=1; kk<=mesh->nt; kk++) {    //old kk = k+1 ?
+    for (kk=1; kk<=mesh->nt; kk++) {
       pt = &mesh->tria[kk];
       if ( MG_EOK(pt) && (pt->flag == 0) ) {
         ipil = 1;
@@ -562,6 +562,13 @@ int analys(pMesh mesh) {
     free(mesh->htab.geom);
     mesh->xpoint    = NULL;
     mesh->htab.geom = NULL;
+    return(0);
+  }
+  /* Update edges tags and references for xtetras */
+  if ( !bdryUpdate(mesh) ) {
+    fprintf(stdout,"  ## Boundary problem. Exit program.\n");
+    free(mesh->xpoint);
+    mesh->xpoint = NULL;
     return(0);
   }
 

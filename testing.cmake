@@ -194,7 +194,7 @@ ADD_TEST(NAME CubeIso_0.25h_met
   -out ${REG_TESTS_PATH}/CubeIso_0.25h_met/CubeIso0.1.o.meshb)
 ADD_TEST(NAME CubeIso_0.125h_met
   COMMAND ${EXEC} -v 5
-  ${REG_TESTS_PATH}/CubeIso_0.125h_met/CubeIso0.1 -m 500
+  ${REG_TESTS_PATH}/CubeIso_0.125h_met/CubeIso0.1 -m 600
   -out ${REG_TESTS_PATH}/CubeIso_0.125h_met/CubeIso0.1.o.meshb)
 
 #####
@@ -343,7 +343,7 @@ ADD_TEST(NAME Various_adpsol_hgrad1_M6Mach_Eps0.0005_hmin0.0001_hmax3
   ${REG_TESTS_PATH}/Various_adpsol_hgrad1_M6Mach_Eps0.0005_hmin0.0001_hmax3/M6
   -sol
   ${REG_TESTS_PATH}/Various_adpsol_hgrad1_M6Mach_Eps0.0005_hmin0.0001_hmax3/metM6.sol
-  -hausd 0.1 -ar 60 -hgrad 1 -m 700
+  -hausd 0.1 -ar 60 -hgrad 1 -m 1000
   ${REG_TESTS_PATH}/Various_adpsol_hgrad1_M6Mach_Eps0.0005_hmin0.0001_hmax3/M6.o.meshb)
 
 
@@ -367,8 +367,8 @@ ADD_TEST(NAME MultiDom_Cube
   COMMAND ${EXEC} -v 6 -hmax 0.02 ${REG_TESTS_PATH}/MultiDom_Cube/c
   -out ${REG_TESTS_PATH}/MultiDom_Cube/c.o.meshb)
 
-ADD_TEST(NAME MultiDom_ellipse
-  COMMAND ${EXEC} -v 6 -m 500 -hausd 0.0003 ${REG_TESTS_PATH}/MultiDom_Ellipse/c.d
+ADD_TEST(NAME MultiDom_Ellipse
+  COMMAND ${EXEC} -v 6 -m 700 -hausd 0.0003 ${REG_TESTS_PATH}/MultiDom_Ellipse/c.d
   -out ${REG_TESTS_PATH}/MultiDom_Cube/c.d.o.meshb)
 
 # Non-manifold test case

@@ -1143,7 +1143,6 @@ static int adpspl(pMesh mesh,pSol met, int* warn) {
       ref = pxt->edg[iarf[i][j]];
       tag = pxt->tag[iarf[i][j]];
       if ( MG_SIN(tag) )  continue;
-      if ( tag & MG_REQ )  continue;
       tag |= MG_BDY;
       ilist = coquil(mesh,k,imax,list);
       if ( !ilist )  continue;
@@ -1178,26 +1177,16 @@ static int adpspl(pMesh mesh,pSol met, int* warn) {
             no2[2] *= dd;
           }
         }
-        else if ( tag & MG_REF ) {
-          if ( !BezierRef(mesh,ip1,ip2,0.5,o,no1,to) )
-            continue;
-        }
-        else {
-          if ( !norface(mesh,k,i,v) )  continue;
-          else {
-            dd  = v[0]*no1[0]+v[1]*no1[1]+v[2]*no1[2];
-            dd2 = v[0]*no2[0]+v[1]*no2[1]+v[2]*no2[2];
+      }
+      else if ( tag & MG_REF ) {
+        if ( !BezierRef(mesh,ip1,ip2,0.5,o,no1,to) )
+          continue;
+      }
+      else {
+        if ( !norface(mesh,k,i,v) )  continue;
+        if ( !BezierReg(mesh,ip1,ip2,0.5,v,o,no1) )
+          continue;
 
-            if ( dd>=dd2 ) {
-              if ( !BezierReg(mesh,ip1,ip2,0.5,v,o,no1) )
-                continue;
-            }
-            else {
-              if ( !BezierReg(mesh,ip1,ip2,0.5,v,o,no2) )
-                continue;
-            }
-          }
-        }
         ier = simbulgept(mesh,list,ilist,o);
         if ( !ier ) {
           ier = dichoto1b(mesh,list,ilist,o,ro);
@@ -1354,12 +1343,13 @@ static int adpcol(pMesh mesh,pSol met) {
     }
     if ( ilist ) {
       ier = colver(mesh,list,ilist,i2);
-		if(ier) {
-			delPt(mesh,ier);
-			nc++;
-		}
+
+      if ( ier ) {
+        delPt(mesh,ier);
+        nc++;
       }
     }
+  }
 
   return(nc);
 }
@@ -1377,46 +1367,79 @@ static int adptet(pMesh mesh,pSol met) {
     tabtmp[0][0]=0;
     tabtmp[0][1]=0;     tabtmp[0][2]=0;
 #endif
-    ns = adpspl(mesh,met,&warn);
+    if ( !info.noinsert ) {
+      ns = adpspl(mesh,met,&warn);
 
 #ifdef DEBUG
-    if ( ns ) { printf("APS ADPSPL == %d\n",ns);
-      prilen(mesh,met);
-      printf(" histo %5.1f  %5.1f %5.1f\n", tabtmp[0][0],tabtmp[0][1],tabtmp[0][2]);}
+      if ( ns ) { printf("APS ADPSPL == %d\n",ns);
+        prilen(mesh,met);
+        printf(" histo %5.1f  %5.1f %5.1f\n", tabtmp[0][0],tabtmp[0][1],tabtmp[0][2]);}
 #endif
-    if ( ns < 0 ) {
-      fprintf(stdout,"  ## Unable to complete mesh. Exit program.\n");
-      return(0);
+      if ( ns < 0 ) {
+        fprintf(stdout,"  ## Unable to complete mesh. Exit program.\n");
+        return(0);
+      }
+    }
+    else {
+      ns = 0;
+      warn = 0;
     }
 
-    nc = adpcol(mesh,met);
+#ifdef USE_SCOTCH
+    /*check enough vertex to renum*/
+    if ( info.renum && (it < 4) && (mesh->np/2. > BOXSIZE) ) {
+      /* renumbering begin */
+      if ( info.imprim > 5 )
+        fprintf(stdout,"renumbering");
+      renumbering(BOXSIZE,mesh, met);
+
+      if ( info.imprim > 5) {
+        fprintf(stdout,"  -- PHASE RENUMBERING COMPLETED. \n");
+      }
+
+      if ( info.ddebug )  chkmsh(mesh,1,0);
+      /* renumbering end */
+    }
+#endif
+
+    if ( !info.noinsert ) {
+      nc = adpcol(mesh,met);
 #ifdef DEBUG
-    if(nc){ printf("APS ADPCOL == %d\n",nc);
-      prilen(mesh,met);}
+      if(nc){ printf("APS ADPCOL == %d\n",nc);
+        prilen(mesh,met);}
 #endif
-    if ( nc < 0 ) {
-      fprintf(stdout,"  ## Unable to complete mesh. Exit program.\n");
-      return(0);
+      if ( nc < 0 ) {
+        fprintf(stdout,"  ## Unable to complete mesh. Exit program.\n");
+        return(0);
+      }
     }
+    else  nc = 0;
 
-    nm = movtet(mesh,met,1);
-    if ( nm < 0 ) {
-      fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
-      return(0);
+    if ( !info.nomove ) {
+      nm = movtet(mesh,met,1);
+      if ( nm < 0 ) {
+        fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
+        return(0);
+      }
     }
+    else  nm = 0;
 
-    nf = swpmsh(mesh,met);
-    if ( nf < 0 ) {
-      fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
-      return(0);
-    }
-    nnf += nf;
+    if ( !info.noswap ) {
+      nf = swpmsh(mesh,met);
+      if ( nf < 0 ) {
+        fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
+        return(0);
+      }
+      nnf += nf;
 
-    nf = swptet(mesh,met,1.053);
-    if ( nf < 0 ) {
-      fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
-      return(0);
+      nf = swptet(mesh,met,1.053);
+      if ( nf < 0 ) {
+        fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
+        return(0);
+      }
     }
+    else  nf = 0;
+
 #ifdef DEBUG
     if(nm+nf){ printf("FIN== %d\n",nm+nf);
       prilen(mesh,met);}
@@ -1439,6 +1462,22 @@ static int adptet(pMesh mesh,pSol met) {
     return(0);
   }
 
+#ifdef USE_SCOTCH
+  /*check enough vertex to renum*/
+  if ( info.renum && (mesh->np/2. > BOXSIZE) ) {
+    /* renumbering begin */
+    if ( info.imprim > 5 )
+      fprintf(stdout,"renumbering");
+    renumbering(BOXSIZE,mesh, met);
+
+    if ( info.imprim > 5) {
+      fprintf(stdout,"  -- PHASE RENUMBERING COMPLETED. \n");
+    }
+    if ( info.ddebug )  chkmsh(mesh,1,0);
+    /* renumbering end */
+  }
+#endif
+
   /*shape optim*/
   it = 0;
   maxit = 2;
@@ -1450,25 +1489,31 @@ static int adptet(pMesh mesh,pSol met) {
       return(0);
       }*/
 
-    nm = movtet(mesh,met,0);
-    if ( nm < 0 ) {
-      fprintf(stdout,"  ## Unable to improve mesh.\n");
-      return(0);
+    if ( !info.nomove ) {
+      nm = movtet(mesh,met,0);
+      if ( nm < 0 ) {
+        fprintf(stdout,"  ## Unable to improve mesh.\n");
+        return(0);
+      }
+      nnm += nm;
     }
-    nnm += nm;
+    else  nm = 0;
 
-    nf = swpmsh(mesh,met);
-    if ( nf < 0 ) {
-      fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
-      return(0);
-    }
-    nnf += nf;
+    if ( !info.noswap ) {
+      nf = swpmsh(mesh,met);
+      if ( nf < 0 ) {
+        fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
+        return(0);
+      }
+      nnf += nf;
 
-    nf = swptet(mesh,met,1.053);
-    if ( nf < 0 ) {
-      fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
-      return(0);
+      nf = swptet(mesh,met,1.053);
+      if ( nf < 0 ) {
+        fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
+        return(0);
+      }
     }
+    else  nf = 0;
 
     if ( (abs(info.imprim) > 4 || info.ddebug) && nf+nm > 0 ){
       fprintf(stdout,"                                            ");
@@ -1477,18 +1522,25 @@ static int adptet(pMesh mesh,pSol met) {
   }
   while( ++it < maxit && nm+nf > 0 );
 
-  nm = movtet(mesh,met,3);
-  if ( nm < 0 ) {
-    fprintf(stdout,"  ## Unable to improve mesh.\n");
-    return(0);
+  if ( !info.nomove ) {
+    nm = movtet(mesh,met,3);
+    if ( nm < 0 ) {
+      fprintf(stdout,"  ## Unable to improve mesh.\n");
+      return(0);
+    }
+    nnm += nm;
   }
-  nnm += nm;
-  if ( (abs(info.imprim) > 4 || info.ddebug) && nm > 0 )
+  else  nm = 0;
+
+  if ( (abs(info.imprim) > 4 || info.ddebug) && nm > 0 ){
     fprintf(stdout,"                                            ");
-  fprintf(stdout,"                  %8d moved\n",nm);
+    fprintf(stdout,"                  %8d moved\n",nm);
+  }
+
 
   if ( abs(info.imprim) < 5 && (nnc > 0 || nns > 0) )
-    fprintf(stdout,"     %8d splitted, %8d collapsed, %8d swapped, %8d moved, %d iter. \n",nns,nnc,nnf,nnm,it);
+    fprintf(stdout,"     %8d splitted, %8d collapsed, %8d swapped, %8d moved, %d iter. \n",
+            nns,nnc,nnf,nnm,it);
 
   return(1);
 }
@@ -1548,38 +1600,41 @@ static int anatet(pMesh mesh,pSol met,char typchk) {
     puts("AVT ANATET4");
     prilen(mesh,met);
 #endif
-    /* split tetra with more than 2 bdry faces */
-    ier = anatet4(mesh,met);
+    if ( !info.noinsert ) {
+      /* split tetra with more than 2 bdry faces */
+      ier = anatet4(mesh,met);
 #ifdef DEBUG
-    if ( ier ) { printf("APS ANATET4 == %d\n",ier);
-      prilen(mesh,met);}
+      if ( ier ) { printf("APS ANATET4 == %d\n",ier);
+        prilen(mesh,met);}
 #endif
-    if ( ier < 0 )  return(0);
-    ns = ier;
+      if ( ier < 0 )  return(0);
+      ns = ier;
 
-    /* analyze surface tetras */
-    ier = anatets(mesh,met,typchk);
+      /* analyze surface tetras */
+      ier = anatets(mesh,met,typchk);
 #ifdef DEBUG
-    if ( ier ) { printf("APS ANATETS == %d\n",ier);
-      prilen(mesh,met);}
+      if ( ier ) { printf("APS ANATETS == %d\n",ier);
+        prilen(mesh,met);}
 #endif
-    if ( ier < 0 ) {
-      fprintf(stdout,"  ## Unable to complete surface mesh. Exit program.\n");
-      return(0);
-    }
-    ns += ier;
+      if ( ier < 0 ) {
+        fprintf(stdout,"  ## Unable to complete surface mesh. Exit program.\n");
+        return(0);
+      }
+      ns += ier;
 
-    /* analyze internal tetras */
-    ier = anatetv(mesh,met,typchk);
+      /* analyze internal tetras */
+      ier = anatetv(mesh,met,typchk);
 #ifdef DEBUG
-    if(ier){ printf("APS ANATETV == %d\n",ier);
-      prilen(mesh,met);}
+      if(ier){ printf("APS ANATETV == %d\n",ier);
+        prilen(mesh,met);}
 #endif
-    if ( ier < 0 ) {
-      fprintf(stdout,"  ## Unable to complete volume mesh. Exit program.\n");
-      return(0);
+      if ( ier < 0 ) {
+        fprintf(stdout,"  ## Unable to complete volume mesh. Exit program.\n");
+        return(0);
+      }
+      ns += ier;
     }
-    ns += ier;
+    else  ns = 0;
 
     if ( !hashTetra(mesh) ) {
       fprintf(stdout,"  ## Hashing problem. Exit program.\n");
@@ -1588,25 +1643,31 @@ static int anatet(pMesh mesh,pSol met,char typchk) {
     if ( typchk == 2 && it == maxit-1 )  info.fem = 1;
 
     /* collapse short edges */
-    nc = coltet(mesh,met,typchk);
-    if ( nc < 0 ) {
-      fprintf(stdout,"  ## Unable to collapse mesh. Exiting.\n");
-      return(0);
+    if ( !info.noinsert ) {
+      nc = coltet(mesh,met,typchk);
+      if ( nc < 0 ) {
+        fprintf(stdout,"  ## Unable to collapse mesh. Exiting.\n");
+        return(0);
+      }
     }
+    else  nc = 0;
 
     /* attempt to swap */
-    nf = swpmsh(mesh,met);
-    if ( nf < 0 ) {
-      fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
-      return(0);
-    }
-    nnf += nf;
+    if ( !info.noswap ) {
+      nf = swpmsh(mesh,met);
+      if ( nf < 0 ) {
+        fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
+        return(0);
+      }
+      nnf += nf;
 
-    nf = swptet(mesh,met,1.1);
-    if ( nf < 0 ) {
-      fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
-      return(0);
+      nf = swptet(mesh,met,1.1);
+      if ( nf < 0 ) {
+        fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
+        return(0);
+      }
     }
+    else  nf = 0;
 
     nnc += nc;
     nns += ns;

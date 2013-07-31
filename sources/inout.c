@@ -286,7 +286,7 @@ int saveMesh(pMesh mesh) {
   hNew(&mesh->htab,3*(mesh->xt),9*(mesh->xt));
   for (k=1; k<=mesh->ne; k++) {
     pt   = &mesh->tetra[k];
-    if ( pt->xt ) {
+    if ( MG_EOK(pt) &&  pt->xt ) {
       for (i=0; i<6; i++) {
         if ( mesh->xtetra[pt->xt].edg[i] ||
              ( MG_EDG(mesh->xtetra[pt->xt].tag[i] ) ||

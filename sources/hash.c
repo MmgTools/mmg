@@ -137,8 +137,8 @@ int hashTria(pMesh mesh) {
   pTria     pt,pt1;
   Hash      hash;
   hedge    *ph;
-  int      *adja,k,jel,hmax,dup,nmf,ia,ib;
-  char      i,i1,i2,j,ok;
+  int      *adja,k,jel,lel,hmax,dup,nmf,ia,ib;
+  char      i,i1,i2,j,l,ok;
   unsigned int key;
 
   mesh->adjt = (int*)calloc(3*mesh->nt+5,sizeof(int));
@@ -204,8 +204,18 @@ int hashTria(pMesh mesh) {
           }
           /* non-manifold case */
           else if ( adja[i] != 3*jel+j ) {
+            if ( pt->ref == MG_ISO ) {
+              lel = mesh->adjt[3*(jel-1)+1+j]/3;
+              l   = mesh->adjt[3*(jel-1)+1+j]%3;
+              mesh->adjt[3*(lel-1)+1+l] = 0;
+              adja[i] = 3*jel+j;
+              mesh->adjt[3*(jel-1)+1+j] = 3*k + i;
+              (mesh->tria[lel]).tag[l] |= MG_GEO + MG_NOM;
+            }
+            else {
+              pt1->tag[j] |= MG_GEO + MG_NOM;
+            }
             pt->tag[i] |= MG_GEO + MG_NOM;
-            pt1->tag[j]|= MG_GEO + MG_NOM;
             nmf++;
           }
           ok = 1;
@@ -650,8 +660,8 @@ int bdryTria(pMesh mesh) {
   pTria     ptt;
   pPoint    ppt;
   pxTetra   pxt;
-  int      *adja,adj,k,edg,nttmp;
-  char      i,i1,i2,tag;
+  int      *adja,adj,k,nttmp;
+  char      i;
 
   /* step 1: count external faces */
   nttmp = 0;
@@ -662,7 +672,7 @@ int bdryTria(pMesh mesh) {
     for (i=0; i<4; i++) {
       adj = adja[i] / 4;
       pt1 = &mesh->tetra[adj];
-      if ( !adj || (k < adj && pt->ref != pt1->ref) )
+      if ( !adj || ( pt->ref > pt1->ref) )
         nttmp++;
     }
   }
@@ -693,7 +703,7 @@ int bdryTria(pMesh mesh) {
     for (i=0; i<4; i++) {
       adj = adja[i] / 4;
       pt1 = &mesh->tetra[adj];
-      if ( !adj || (k < adj && pt->ref != pt1->ref) ) {
+      if ( !adj || ( pt->ref > pt1->ref) ) {
         mesh->nt++;
         ptt = &mesh->tria[mesh->nt];
         ptt->v[0] = pt->v[idir[i][0]];
@@ -701,9 +711,9 @@ int bdryTria(pMesh mesh) {
         ptt->v[2] = pt->v[idir[i][2]];
         if ( !adj ) {
           if ( pxt ) {
-            if ( pxt->tag[iarf[i][0]] & MG_REQ ) ptt->tag[0] = MG_REQ;
-            if ( pxt->tag[iarf[i][1]] & MG_REQ ) ptt->tag[1] = MG_REQ;
-            if ( pxt->tag[iarf[i][2]] & MG_REQ ) ptt->tag[2] = MG_REQ;
+            if ( pxt->tag[iarf[i][0]] ) ptt->tag[0] = pxt->tag[iarf[i][0]];
+            if ( pxt->tag[iarf[i][1]] ) ptt->tag[1] = pxt->tag[iarf[i][1]];
+            if ( pxt->tag[iarf[i][2]] ) ptt->tag[2] = pxt->tag[iarf[i][2]];
             /* useful only when saving mesh */
             ptt->ref = pxt->ref[i];
           }
@@ -720,12 +730,6 @@ int bdryTria(pMesh mesh) {
     for (i=0; i<3; i++) {
       ppt = &mesh->point[ptt->v[i]];
       ppt->tag |= MG_BDY;
-
-      i1 = inxt2[i];
-      i2 = iprv2[i];
-      hGet(&mesh->htab,ptt->v[i1],ptt->v[i2],&edg,&tag);
-      ptt->edg[i]  = edg;
-      ptt->tag[i] |= tag;
     }
   }
 
@@ -757,7 +761,7 @@ int bdryIso(pMesh mesh) {
     for (i=0; i<4; i++) {
       adj = adja[i] / 4;
       pt1 = &mesh->tetra[adj];
-      if ( k < adj && pt->ref != pt1->ref )  nt++;
+      if ( pt->ref > pt1->ref )  nt++;
     }
   }
   if ( !nt )  return(1);
@@ -780,7 +784,7 @@ int bdryIso(pMesh mesh) {
     for (i=0; i<4; i++) {
       adj = adja[i] / 4;
       pt1 = &mesh->tetra[adj];
-      if ( k < adj && pt->ref != pt1->ref ) {
+      if ( pt->ref > pt1->ref ) {
         mesh->nt++;
         ptt = &mesh->tria[mesh->nt];
         ptt->v[0] = pt->v[idir[i][0]];
@@ -940,7 +944,6 @@ int bdrySet(pMesh mesh) {
           continue;
         }
         else {
-          MG_SET(pxt->ori,i);//ajeter, doublon non?
           ia = pt->v[idir[i][0]];
           ib = pt->v[idir[i][1]];
           ic = pt->v[idir[i][2]];
@@ -957,6 +960,60 @@ int bdrySet(pMesh mesh) {
   }
   free(hash.item);
   hash.item=NULL;
+  return(1);
+}
+
+/** Update tag and refs of tetra edges  */
+int bdryUpdate(pMesh mesh) {
+  pTetra   pt;
+  pTria    ptt;
+  pxTetra  pxt;
+  Hash     hash;
+  int      k,kt,ia,ib,ic,j;
+  char     i,tag;
+
+  if ( !mesh->nt )  return(1);
+  hashNew(&hash,0.51*mesh->nt,1.51*mesh->nt);
+  for (k=1; k<=mesh->nt; k++) {
+    ptt = &mesh->tria[k];
+    hashFace(&hash,ptt->v[0],ptt->v[1],ptt->v[2],k);
+  }
+
+  for (k=1; k<=mesh->ne; k++) {
+    pt = &mesh->tetra[k];
+    if ( !MG_EOK(pt) )  continue;
+    if ( !pt->xt )  continue;
+    pxt = &mesh->xtetra[pt->xt];
+    for ( j=0; j<6; j++) {
+      pxt->tag[j] = 0;
+      pxt->edg[j] = 0;
+    }
+  }
+
+  for (k=1; k<=mesh->ne; k++) {
+    pt = &mesh->tetra[k];
+    if ( !MG_EOK(pt) )  continue;
+    if ( !pt->xt )  continue;
+    pxt = &mesh->xtetra[pt->xt];
+
+    for (i=0; i<4; i++) {
+      /* Set edge tag */
+      if ( ! MG_GET(pxt->ori,i) ) continue;
+      if ( pxt->ftag[i] ) {
+        ia = pt->v[idir[i][0]];
+        ib = pt->v[idir[i][1]];
+        ic = pt->v[idir[i][2]];
+        kt = hashGetFace(&hash,ia,ib,ic);
+        assert(kt);
+        ptt = &mesh->tria[kt];
+        for ( j=0; j<3; j++ ) {
+          tag = ptt->tag[j];
+          if ( tag || ptt->edg[j] )
+            settag(mesh,k,iarf[i][j],tag,ptt->edg[j]);
+        }
+      }
+    }
+  }
   return(1);
 }
 
@@ -999,11 +1056,11 @@ int bdryPerm(pMesh mesh) {
         ic = pt->v[idir[i][2]];
         kt = hashGetFace(&hash,ia,ib,ic);
         if ( !kt ) {
-	        fprintf(stdout,"%s:%d: Error: function hashGetFace return 0\n",__FILE__,__LINE__);
-	        fprintf(stdout," Maybe you have non-boundary triangles.");
-	        fprintf(stdout," Check triangle %d %d %d\n",ia,ib,ic);
-	        exit(EXIT_FAILURE);
-	      }
+          fprintf(stdout,"%s:%d: Error: function hashGetFace return 0\n",__FILE__,__LINE__);
+          fprintf(stdout," Maybe you have non-boundary triangles.");
+          fprintf(stdout," Check triangle %d %d %d\n",ia,ib,ic);
+          exit(EXIT_FAILURE);
+        }
 
         /* check orientation */
         ptt = &mesh->tria[kt];

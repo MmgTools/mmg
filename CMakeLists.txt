@@ -38,7 +38,7 @@ IF(CMAKE_COMPILER_IS_GNUCC)
     #  ELSEIF(UNIX)# UNIX must be after APPLE becaus APPLE is UNIX too
   ENDIF()
 
-#ELSEIF(CMAKE_COMPILER_IS_INTEL)
+  #ELSEIF(CMAKE_COMPILER_IS_INTEL)
   # Static Link??
   #SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Bstatic") # all is static
 ENDIF()
@@ -48,17 +48,61 @@ ENDIF()
 
 IF(NOT CMAKE_COMPILER_IS_CLANG)
   # Compiler options for profiling... but not possible with clang
-  SET(PROFILING CACHE BOOL "Enable/Disable PROFILING")
+  OPTION ( PROFILING "Enable/Disable PROFILING" OFF )
   IF(PROFILING)
     ADD_DEFINITIONS(-pg)
     SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -pg")
   ENDIF(PROFILING)
 ENDIF(NOT CMAKE_COMPILER_IS_CLANG)
 
+# should we use SCOTCH
+OPTION ( USE_SCOTCH "Use SCOTCH TOOL for renumbering" OFF)
+
+# add SCOTCH library?
+#
+IF ( USE_SCOTCH )
+  # Check for SCOTCH Path
+  IF ( $ENV{SCOTCH_DIR} MATCHES scotch )
+
+    # Check for header file
+    INCLUDE_DIRECTORIES(${SCOTCH_INCLUDE_DIR})
+    FIND_PATH(SCOTCH_INCLUDE_DIR scotch.h
+      HINTS ${SCOTCH_DIR}/include $ENV{SCOTCH_DIR}/include
+      ${SCOTCH_INCLUDE_DIR} $ENV{SCOTCH_INCLUDE_DIR}
+      PATH_SUFFIXES scotch
+      DOC "Directory of SCOTCH Header")
+
+    # Check for scotch
+    FIND_LIBRARY(SCOTCH_LIBRARY
+      NAMES scotch scotch${SCOTCH_LIB_SUFFIX}
+      HINTS ${SCOTCH_DIR}/lib $ENV{SCOTCH_DIR}/lib
+      ${SCOTCH_LIB_DIR} $ENV{SCOTCH_LIB_DIR}
+      DOC "The SCOTCH library"
+      )
+
+    FIND_LIBRARY(SCOTCHERR_LIBRARY
+      NAMES scotcherr scotcherr${SCOTCH_LIB_SUFFIX}
+      HINTS ${SCOTCH_DIR}/lib $ENV{SCOTCH_DIR}/lib
+      ${SCOTCH_LIB_DIR} $ENV{SCOTCH_LIB_DIR}
+      DOC "The SCOTCH-ERROR library"
+      )
+
+    # Set flags for building test program
+    #SET(CMAKE_REQUIRED_INCLUDES ${SCOTCH_INCLUDE_DIR})
+    #SET(CMAKE_REQUIRED_LIBRARIES ${SCOTCH_LIBRARY})
+    #SET(CMAKE_REQUIRED_LIBRARIES ${SCOTCHERR_LIBRARY})
+
+    SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DUSE_SCOTCH")
+
+  ELSE ()
+    MESSAGE("Please set the environment variable SCOTCH_DIR to your SCOTCH directory whose name should contain the \"scotch\" string" )
+  ENDIF()
+
+ENDIF ( USE_SCOTCH )
 
 
-  # Add openMP flags if OpenMP found
-SET(OPENMP CACHE BOOL "Enable/Disable OpenMP")
+# Add openMP flags if OpenMP found
+OPTION ( OPENMP "Enable/Disable OpenMP" OFF )
 IF(OPENMP)
   INCLUDE(FindOpenMP)
   IF(OPENMP_FOUND)
@@ -74,10 +118,10 @@ ENDIF(OPENMP)
 INCLUDE_DIRECTORIES(${MMG_SOURCE_DIR})
 # Source files
 FILE(
-	GLOB
-	source_files
-	${MMG_SOURCE_DIR}/*.c
-)
+  GLOB
+  source_files
+  ${MMG_SOURCE_DIR}/*.c
+  )
 
 #compil.date : if problem with the file creation, see ADD_CUSTOM_TARGET
 IF (NOT EXISTS ${MMG_SOURCE_DIR}/compil.date)
@@ -91,7 +135,7 @@ IF (NOT EXISTS ${MMG_SOURCE_DIR}/compil.date)
     COMMENT "compil.date creation"
     )
 ELSEIF(EXISTS ${MMG_SOURCE_DIR}/compil.date)
- ADD_CUSTOM_COMMAND(
+  ADD_CUSTOM_COMMAND(
     OUTPUT ${MMG_SOURCE_DIR}/compil.date
     COMMAND ${CMAKE_COMMAND} -E echo \"\#define COMPIL \" '\"' `date` '\"' > ${MMG_SOURCE_DIR}/compil.date
     DEPENDS ${source_files}
@@ -131,17 +175,17 @@ ADD_DEPENDENCIES(mmg3d5 compil_date)
 
 # Libraries
 FIND_LIBRARY(M_LIB m)
-TARGET_LINK_LIBRARIES(mmg3d5 ${M_LIB})
+TARGET_LINK_LIBRARIES(mmg3d5 ${M_LIB} ${SCOTCH_LIBRARY} ${SCOTCHERR_LIBRARY})
 
 # Continuous integration
 
-OPTION(BUILD_TESTING "Enable/Disable continuous integration" OFF)
+OPTION ( BUILD_TESTING "Enable/Disable continuous integration" ON )
 IF(BUILD_TESTING)
   # Ignore errors coming from the libmesh5 library
   SET(MEMORYCHECK_SUPPRESSIONS_FILE "${CMAKE_SOURCE_DIR}/libmesh5.supp")
   IF(APPLE)
-     # and errors from the libSystem.B library
-     SET(MEMORYCHECK_SUPPRESSIONS_FILE "${CMAKE_SOURCE_DIR}/libSystem+libmesh5.supp")
+    # and errors from the libSystem.B library
+    SET(MEMORYCHECK_SUPPRESSIONS_FILE "${CMAKE_SOURCE_DIR}/libSystem+libmesh5.supp")
   ENDIF(APPLE)
   # Copy custom file in the good directory
   IF(NOT EXISTS "CTestCustom.cmake")

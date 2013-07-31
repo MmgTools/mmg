@@ -56,6 +56,8 @@
 #define NTMAX   2000000
 #define NEMAX   6000000
 
+#define BOXSIZE 500
+
 #ifndef M_PI
 #define M_PI            3.14159265358979323846   /**< pi   */
 #define M_PI_2          1.57079632679489661923   /**< pi/2 */
@@ -160,8 +162,12 @@ typedef Bezier * pBezier;
 typedef struct {
   double    dhd,hmin,hmax,hgrad,hausd,min[3],max[3],delta,ls;
   int       mem;
-  char      imprim,ddebug,badkal,iso,fem;
-  mytime    ctim[TIMEMAX];
+#ifdef USE_SCOTCH
+  int       renum;
+#endif
+  char          imprim,ddebug,badkal,iso,fem;
+  unsigned char noinsert, noswap, nomove;
+  mytime        ctim[TIMEMAX];
 } Info;
 
 /** used to hash edges */
@@ -289,6 +295,7 @@ int  hGeom(pMesh mesh);
 int  bdryTria(pMesh );
 int  bdryIso(pMesh );
 int  bdrySet(pMesh );
+int  bdryUpdate(pMesh );
 int  bdryPerm(pMesh );
 int  chkmsh(pMesh,int,int);
 int  chkfemtopo(pMesh mesh);
