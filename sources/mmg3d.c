@@ -393,8 +393,8 @@ int main(int argc,char *argv[]) {
       fprintf(stdout,"\n  ## ERROR: A VALID SOLUTION FILE IS NEEDED \n");
       RETURN_AND_FREE(&mesh,&met,EXIT_FAILURE);
     }
-		if ( !mmg3d2(&mesh,&met) ) RETURN_AND_FREE(&mesh,&met,EXIT_FAILURE);
-	}
+    if ( !mmg3d2(&mesh,&met) ) RETURN_AND_FREE(&mesh,&met,EXIT_FAILURE);
+  }
 #ifdef DEBUG
 	if ( !met.np && !DoSol(&mesh,&met,&info) ) RETURN_AND_FREE(&mesh,&met,EXIT_FAILURE);
 #endif

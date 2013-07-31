@@ -591,8 +591,8 @@ int hGeom(pMesh mesh) {
   }
   /* else, infer special edges from information carried by triangles */
   else {
-		if ( !mesh->adjt && !hashTria(mesh) )  return(0);
-		for (k=1; k<=mesh->nt; k++) {
+    if ( !mesh->adjt && !hashTria(mesh) )  return(0);
+    for (k=1; k<=mesh->nt; k++) {
       pt   = &mesh->tria[k];
       adja = &mesh->adjt[3*(k-1)+1];
       for (i=0; i<3; i++) {
@@ -677,7 +677,11 @@ int bdryTria(pMesh mesh) {
 
   /* step 2 : create triangles */
   mesh->tria = (pTria)calloc(mesh->nt+1,sizeof(Tria));
-  assert(mesh->tria);
+  if ( !mesh->tria ) {
+    fprintf(stdout,"  ## Allocation problem (tria), not enough memory.");
+    fprintf(stdout,"  Exit program.\n");
+    return(0);
+  }
 
   mesh->nt = 0;
   for (k=1; k<=mesh->ne; k++) {
@@ -763,7 +767,11 @@ int bdryIso(pMesh mesh) {
     mesh->tria = (pTria)calloc(mesh->nt+nt+1,sizeof(Tria));
   else if ( mesh->nt+nt >= mesh->ntmax )
     mesh->tria = (pTria)realloc(mesh->tria,(mesh->nt+nt+1)*sizeof(Tria));
-  assert(mesh->tria);
+  if ( !mesh->tria ){
+    fprintf(stdout,"  ## Allocation problem (tria), not enough memory.");
+    fprintf(stdout,"  Exit program.\n");
+    return(0);
+  }
 
   for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
@@ -881,7 +889,11 @@ int bdrySet(pMesh mesh) {
   mesh->xt     = 0;
   mesh->xtmax  = mesh->ntmax; //10 * NTMAX;
   mesh->xtetra = (pxTetra)calloc(mesh->xtmax+1,sizeof(xTetra));
-  assert(mesh->xtetra);
+  if( !mesh->xtetra ){
+    fprintf(stdout,"  ## Allocation problem (xtetra), not enough memory.");
+    fprintf(stdout,"  Exit program.\n");
+    return(0);
+  }
 
   /* assign references to tetras faces */
   for (k=1; k<=mesh->ne; k++) {

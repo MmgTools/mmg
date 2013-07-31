@@ -21,7 +21,7 @@ int newPt(pMesh mesh,double c[3],char tag) {
     mesh->xp++;
     if(mesh->xp >= mesh->xpmax){
       printf("%s:%d: Error: unable to allocate a new xpoint 0\n",
-             __FILE__,__LINE__);
+	     __FILE__,__LINE__);
       exit(EXIT_FAILURE);
     }
     ppt->tag = MG_BDY;
@@ -107,16 +107,33 @@ int zaldy(pMesh mesh) {
   }
 
   mesh->point = (pPoint)calloc(mesh->npmax+1,sizeof(Point));
-  assert(mesh->point);
+  if ( !mesh->point ){
+    fprintf(stdout,"  ## Allocation problem (point), not enough memory.");
+    fprintf(stdout,"  Exit program.\n");
+    return(0);
+  }
+
   mesh->tetra = (pTetra)calloc(mesh->nemax+1,sizeof(Tetra));
-  assert(mesh->tetra);
+  if ( !mesh->tetra ){
+    fprintf(stdout,"  ## Allocation problem (tetra), not enough memory.");
+    fprintf(stdout,"  Exit program.\n");
+    return(0);
+  }
   if ( mesh->nt ) {
     mesh->tria = (pTria)calloc(mesh->ntmax+1,sizeof(Tria));
-    assert(mesh->tria);
+    if ( !mesh->tria ){
+      fprintf(stdout,"  ## Allocation problem (tria), not enough memory.");
+      fprintf(stdout,"  Exit program.\n");
+      return(0);
+    }
   }
   if ( mesh->na ) {
     mesh->edge = (pEdge)calloc(mesh->na+1,sizeof(Edge));
-    assert(mesh->edge);
+    if ( !mesh->edge ) {
+      fprintf(stdout,"  ## Allocation problem (edge), not enough memory.");
+      fprintf(stdout,"  Exit program.\n");
+      return(0);
+    }
   }
   /* keep track of empty links */
   mesh->npnil = mesh->np + 1;
