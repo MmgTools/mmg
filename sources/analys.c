@@ -144,7 +144,7 @@ static int setadj(pMesh mesh){
         ppt->tmp = 1;
         np++;
       }
-      if ( (!MG_EDG(pt->tag[i])) && (!pt->tag[i] & MG_REQ) )  continue;
+      if ( ( !MG_EDG(pt->tag[i]) ) && ( !(pt->tag[i] & MG_REQ) ) )  continue;
       jel  = adja[i] / 3;
       if ( !jel || jel > k ) {
         if ( pt->tag[i] & MG_GEO )  nr++;
@@ -569,6 +569,8 @@ int analys(pMesh mesh) {
   nmgeom(mesh);
 
   /* release memory */
+  free(mesh->htab.geom);
+  mesh->htab.geom = NULL;
   free(mesh->tria);
   free(mesh->adjt);
   mesh->adjt = 0;

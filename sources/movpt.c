@@ -418,7 +418,7 @@ int movbdyrefpt(pMesh mesh, int *listv, int ilistv, int *lists, int ilists){
   pxPoint               pxp;
   double                step,ll1old,ll2old,o[3],no[3],to[3];
   double                calold,calnew,caltmp,callist[ilistv];
-  int                   l,iel,ip0,ipa,ipb,iptmpa,iptmpb,it1,it2,ip1,ip2,ip,ref,nxp;
+  int                   l,iel,ip0,ipa,ipb,iptmpa,iptmpb,it1,it2,ip1,ip2,ip,nxp;
   unsigned char         i,i0,ie,iface,iface1,iface2,iea,ieb,ie1,ie2;
   char                  tag;
 
@@ -473,7 +473,8 @@ int movbdyrefpt(pMesh mesh, int *listv, int ilistv, int *lists, int ilists){
       iptmpb = pt->v[iare[ieb][1]];
     }
     if ( (iptmpa == ipa) || (iptmpa == ipb) ) {
-      hGet(&mesh->htab,ip0,iptmpa,&ref,&tag);
+      if ( pt->xt )  tag = mesh->xtetra[pt->xt].tag[iea];
+      else  tag = 0;
       if ( MG_REF & tag ) {
         it1 = iel;
         ip1 = iptmpa;
@@ -483,7 +484,8 @@ int movbdyrefpt(pMesh mesh, int *listv, int ilistv, int *lists, int ilists){
       }
     }
     if ( (iptmpb == ipa) || (iptmpb == ipb) ) {
-      hGet(&mesh->htab,ip0,iptmpb,&ref,&tag);
+      if ( pt->xt )  tag = mesh->xtetra[pt->xt].tag[ieb];
+      else  tag = 0;
       if ( MG_REF & tag ) {
         it1 = iel;
         ip1 = iptmpb;
@@ -538,7 +540,8 @@ int movbdyrefpt(pMesh mesh, int *listv, int ilistv, int *lists, int ilists){
       iptmpb = pt->v[iare[ieb][1]];
     }
     if ( (iptmpa == ipa) || (iptmpa == ipb) ) {
-      hGet(&mesh->htab,ip0,iptmpa,&ref,&tag);
+      if ( pt->xt )  tag = mesh->xtetra[pt->xt].tag[iea];
+      else  tag = 0;
       if ( MG_REF & tag ) {
         it2 = iel;
         ip2 = iptmpa;
@@ -549,7 +552,7 @@ int movbdyrefpt(pMesh mesh, int *listv, int ilistv, int *lists, int ilists){
     }
     if ( (iptmpb == ipa) || (iptmpb == ipb) ) {
       assert(pt->xt);
-      hGet(&mesh->htab,ip0,iptmpb,&ref,&tag);
+      tag = mesh->xtetra[pt->xt].tag[ieb];
       if ( MG_REF & tag ) {
         it2 = iel;
         ip2 = iptmpb;
@@ -688,7 +691,7 @@ int movbdynompt(pMesh mesh, int *listv, int ilistv, int *lists, int ilists){
   Tria         tt;
   double       step,ll1old,ll2old,calold,calnew,caltmp,callist[ilistv];
   double       o[3],no[3],to[3];
-  int          ip0,ip1,ip2,ip,iel,ipa,ipb,l,iptmpa,iptmpb,ref,it1,it2,nxp;
+  int          ip0,ip1,ip2,ip,iel,ipa,ipb,l,iptmpa,iptmpb,it1,it2,nxp;
   char         iface,i,i0,iea,ieb,ie,tag,ie1,ie2,iface1,iface2;
 
   step = 0.1;
@@ -742,7 +745,8 @@ int movbdynompt(pMesh mesh, int *listv, int ilistv, int *lists, int ilists){
       iptmpb = pt->v[iare[ieb][1]];
     }
     if ( (iptmpa == ipa) || (iptmpa == ipb) ) {
-      hGet(&mesh->htab,ip0,iptmpa,&ref,&tag);
+      if ( pt->xt )  tag = mesh->xtetra[pt->xt].tag[iea];
+      else  tag = 0;
       if ( MG_NOM & tag ) {
         it1 = iel;
         ip1 = iptmpa;
@@ -752,7 +756,8 @@ int movbdynompt(pMesh mesh, int *listv, int ilistv, int *lists, int ilists){
       }
     }
     if ( (iptmpb == ipa) || (iptmpb == ipb) ) {
-      hGet(&mesh->htab,ip0,iptmpb,&ref,&tag);
+      if ( pt->xt )  tag = mesh->xtetra[pt->xt].tag[ieb];
+      else  tag = 0;
       if ( MG_NOM & tag ) {
         it1 = iel;
         ip1 = iptmpb;
@@ -807,7 +812,8 @@ int movbdynompt(pMesh mesh, int *listv, int ilistv, int *lists, int ilists){
       iptmpb = pt->v[iare[ieb][1]];
     }
     if ( (iptmpa == ipa) || (iptmpa == ipb) ) {
-      hGet(&mesh->htab,ip0,iptmpa,&ref,&tag);
+      if ( pt->xt )  tag = mesh->xtetra[pt->xt].tag[iea];
+      else  tag = 0;
       if ( MG_NOM & tag ) {
         it2 = iel;
         ip2 = iptmpa;
@@ -818,7 +824,7 @@ int movbdynompt(pMesh mesh, int *listv, int ilistv, int *lists, int ilists){
     }
     if ( (iptmpb == ipa) || (iptmpb == ipb) ) {
       assert(pt->xt);
-      hGet(&mesh->htab,ip0,iptmpb,&ref,&tag);
+      tag = mesh->xtetra[pt->xt].tag[ieb];
       if ( MG_NOM & tag ) {
         it2 = iel;
         ip2 = iptmpb;
@@ -957,7 +963,7 @@ int movbdyridpt(pMesh mesh,int *listv,int ilistv,int *lists,int ilists) {
   pxPoint              pxp;
   double               step,ll1old,ll2old,o[3],no1[3],no2[3],to[3];
   double               calold,calnew,caltmp,callist[ilistv];
-  int                  l,iel,ip0,ipa,ipb,iptmpa,iptmpb,it1,it2,ip1,ip2,ip,ref,nxp;
+  int                  l,iel,ip0,ipa,ipb,iptmpa,iptmpb,it1,it2,ip1,ip2,ip,nxp;
   unsigned char        i,i0,ie,iface,iface1,iface2,iea,ieb,ie1,ie2;
   char                 tag;
 
@@ -1012,7 +1018,8 @@ int movbdyridpt(pMesh mesh,int *listv,int ilistv,int *lists,int ilists) {
       iptmpb = pt->v[iare[ieb][1]];
     }
     if ( (iptmpa == ipa) || (iptmpa == ipb) ) {
-      hGet(&mesh->htab,ip0,iptmpa,&ref,&tag);
+      if ( pt->xt )  tag = mesh->xtetra[pt->xt].tag[iea];
+      else  tag = 0;
       if ( MG_GEO & tag ) {
         it1 = iel;
         ip1 = iptmpa;
@@ -1022,7 +1029,8 @@ int movbdyridpt(pMesh mesh,int *listv,int ilistv,int *lists,int ilists) {
       }
     }
     if ( (iptmpb == ipa) || (iptmpb == ipb) ) {
-      hGet(&mesh->htab,ip0,iptmpb,&ref,&tag);
+      if ( pt->xt )  tag = mesh->xtetra[pt->xt].tag[ieb];
+      else  tag = 0;
       if ( MG_GEO & tag ) {
         it1 = iel;
         ip1 = iptmpb;
@@ -1077,7 +1085,8 @@ int movbdyridpt(pMesh mesh,int *listv,int ilistv,int *lists,int ilists) {
       iptmpb = pt->v[iare[ieb][1]];
     }
     if ( (iptmpa == ipa) || (iptmpa == ipb) ) {
-      hGet(&mesh->htab,ip0,iptmpa,&ref,&tag);
+      if ( pt->xt )  tag = mesh->xtetra[pt->xt].tag[iea];
+      else  tag = 0;
       if ( MG_GEO & tag ) {
         it2 = iel;
         ip2 = iptmpa;
@@ -1087,7 +1096,8 @@ int movbdyridpt(pMesh mesh,int *listv,int ilistv,int *lists,int ilists) {
       }
     }
     if ( (iptmpb == ipa) || (iptmpb == ipb) ) {
-      hGet(&mesh->htab,ip0,iptmpb,&ref,&tag);
+      if ( pt->xt )  tag = mesh->xtetra[pt->xt].tag[ieb];
+      else  tag = 0;
       if ( MG_GEO & tag ) {
         it2 = iel;
         ip2 = iptmpb;

@@ -355,8 +355,8 @@ int defsiz_iso(pMesh mesh,pSol met) {
   pPoint    p0,p1;
   double    hp,v[3],b0[3],b1[3],b0p0[3],b1b0[3],p1b1[3];
   double    secder0[3],secder1[3],kappa,tau[3],gammasec[3],ntau2,intau,ps,lm,*n;
-  int       lists[LMAX+2],listv[LMAX+2],ilists,ilistv,k,ip0,ip1,l,ref;
-  char      i,j,ia,ised,i0,i1,tag;
+  int       lists[LMAX+2],listv[LMAX+2],ilists,ilistv,k,ip0,ip1,l;
+  char      i,j,ia,ised,i0,i1;
 
   if ( abs(info.imprim) > 5 || info.ddebug )
     fprintf(stdout,"  ** Defining map\n");
@@ -427,8 +427,7 @@ int defsiz_iso(pMesh mesh,pSol met) {
         p1  = &mesh->point[ip1];
         if ( !MG_EDG(p0->tag) && !MG_EDG(p1->tag) )  continue;
 
-        hGet(&mesh->htab,pt->v[i0],pt->v[i1],&ref,&tag);
-        ised = MG_EDG(tag) || ( tag & MG_NOM );
+        ised = MG_EDG(pxt->tag[ia]) || ( pxt->tag[ia] & MG_NOM );
 
         BezierEdge(mesh,ip0,ip1,b0,b1,ised,v);
 

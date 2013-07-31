@@ -97,7 +97,8 @@ int zaldy(pMesh mesh) {
   }
   else {
     /* point+tria+tets+adja+sol */
-    bytes = 2*sizeof(Point) + 6*sizeof(Tetra) + 4*sizeof(int);
+    bytes = 2*sizeof(Point) + 6*sizeof(Tetra) + 2*sizeof(xTetra) +
+      4*sizeof(int) + sizeof(Edge);
 
     npask = (double)info.mem / bytes * million;
     mesh->npmax = MG_MAX(1.5*mesh->np,npask);

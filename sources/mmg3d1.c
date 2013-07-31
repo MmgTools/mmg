@@ -10,21 +10,26 @@ double      tabtmp[12][7];
 void tet2tri(pMesh mesh,int k,char ie,Tria *ptt) {
   pTetra  pt;
   pxTetra pxt;
-  char    i,i1,i2;
+  char    i;
 
   pt = &mesh->tetra[k];
   memset(ptt,0,sizeof(Tria));
   ptt->v[0] = pt->v[idir[ie][0]];
   ptt->v[1] = pt->v[idir[ie][1]];
   ptt->v[2] = pt->v[idir[ie][2]];
-  for (i=0; i<3; i++) {
-    i1 = inxt2[i];
-    i2 = iprv2[i];
-    hGet(&mesh->htab,ptt->v[i1],ptt->v[i2],&ptt->edg[i],&ptt->tag[i]);
-  }
   if ( pt->xt ) {
     pxt = &mesh->xtetra[pt->xt];
     ptt->ref = pxt->ref[ie];
+    for (i=0; i<3; i++) {
+      ptt->edg[i] = pxt->edg[iarf[ie][i]];
+      ptt->tag[i] = pxt->tag[iarf[ie][i]];
+    }
+  }
+  else {
+    for (i=0; i<3; i++) {
+      ptt->edg[i] = 0;
+      ptt->tag[i] = 0;
+    }
   }
 }
 
@@ -320,7 +325,7 @@ static int swpmsh(pMesh mesh,pSol met) {
     ns = 0;
     for (k=1; k<=mesh->ne; k++) {
       pt = &mesh->tetra[k];
-      if ( !MG_EOK(pt) || pt->ref < 0 )   continue;
+      if ( (!MG_EOK(pt)) || pt->ref < 0 )   continue;
       else if ( !pt->xt ) continue;
       pxt = &mesh->xtetra[pt->xt];
 
@@ -357,9 +362,9 @@ static int swpmsh(pMesh mesh,pSol met) {
 /** Internal edge flipping */
 static int swptet(pMesh mesh,pSol met,double crit) {
   pTetra   pt;
+  pxTetra  pxt;
   int      list[LMAX+2],ilist,k,it,nconf,maxit,ns,nns;
-  int      ref;
-  char     i,tag;
+  char     i;
 
   maxit = 2;
   it = nns = 0;
@@ -373,8 +378,10 @@ static int swptet(pMesh mesh,pSol met,double crit) {
 
       for (i=0; i<6; i++) {
         /* Prevent swap of a ref or tagged edge */
-        hGet(&mesh->htab,pt->v[iare[i][0]],pt->v[iare[i][1]],&ref,&tag);
-        if ( ref || tag ) continue;
+        if ( pt->xt ) {
+          pxt = &mesh->xtetra[pt->xt];
+          if ( pxt->edg[i] || pxt->tag[i] ) continue;
+        }
 
         nconf = chkswpgen(mesh,k,i,&ilist,list,crit);
         if ( nconf ) {
@@ -489,9 +496,9 @@ static int coltet(pMesh mesh,pSol met,char typchk) {
   pxTetra    pxt;
   pPoint     p0,p1;
   double     ll,ux,uy,uz,hmi2;
-  int        k,nc,ref,list[LMAX+2],ilist,base,nnm;
+  int        k,nc,list[LMAX+2],ilist,base,nnm;
   char       i,j,tag,ip,iq,isnm;
-  int ier;
+  int        ier;
 
   nc = nnm = 0;
   hmi2 = info.hmin*info.hmin;
@@ -529,7 +536,7 @@ static int coltet(pMesh mesh,pSol met,char typchk) {
 
         /* boundary face: collapse ip on iq */
         if ( pt->xt && (pxt->ftag[i] & MG_BDY) ) {
-          hGet(&mesh->htab,pt->v[ip],pt->v[iq],&ref,&tag);
+          tag = pxt->tag[iarf[i][j]];
           tag |= MG_BDY;
 
           isnm = ( tag & MG_NOM );
@@ -1133,8 +1140,8 @@ static int adpspl(pMesh mesh,pSol met, int* warn) {
     /* Case of a boundary face */
     if ( pt->xt && (pxt->ftag[i] & MG_BDY) ) {
       if ( !(MG_GET(pxt->ori,i)) ) continue;
-
-      hGet(&mesh->htab,ip1,ip2,&ref,&tag);
+      ref = pxt->edg[iarf[i][j]];
+      tag = pxt->tag[iarf[i][j]];
       if ( MG_SIN(tag) )  continue;
       if ( tag & MG_REQ )  continue;
       tag |= MG_BDY;
@@ -1289,7 +1296,7 @@ static int adpcol(pMesh mesh,pSol met) {
   pxTetra    pxt;
   pPoint     p0,p1;
   double     len,lmin;
-  int        k,ip,iq,list[LMAX+2],ilist,nc,ref;
+  int        k,ip,iq,list[LMAX+2],ilist,nc;
   char       imin,tag,j,i,i1,i2,ifa0,ifa1;
   int        ier;
 
@@ -1332,7 +1339,7 @@ static int adpcol(pMesh mesh,pSol met) {
     /* Case of a boundary face */
     ilist = 0;
     if ( pt->xt && (pxt->ftag[i] & MG_BDY) ) {
-      hGet(&mesh->htab,ip,iq,&ref,&tag);
+      tag = pxt->tag[iarf[i][j]];
       if ( MG_SIN(tag) )  continue;
       if ( tag & MG_REQ )  continue;
       tag |= MG_BDY;
@@ -1641,6 +1648,7 @@ int mmg3d1(pMesh mesh,pSol met) {
 #ifdef DEBUG
   outqua(mesh,met);
 #endif
+
   /**--- stage 2: computational mesh */
   if ( abs(info.imprim) > 4 || info.ddebug )
     fprintf(stdout,"  ** COMPUTATIONAL MESH\n");

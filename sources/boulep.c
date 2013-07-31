@@ -254,7 +254,7 @@ int boulenm(pMesh mesh,int start,int ip,int iface,double n[3],double t[3]) {
   pTetra   pt;
   pPoint   p0,p1,ppt;
   double   dd,nt[3],l0,l1;
-  int      base,nump,nr,nnm,k,piv,na,nb,adj,nvstart,fstart,aux,ref,ip0,ip1;
+  int      base,nump,nr,nnm,k,piv,na,nb,adj,nvstart,fstart,aux,ip0,ip1;
   int     *adja;
   char     iopp,ipiv,i,ipa,ipb,isface,tag;
 
@@ -282,7 +282,10 @@ int boulenm(pMesh mesh,int start,int ip,int iface,double n[3],double t[3]) {
       n[1] += nt[1];
       n[2] += nt[2];
     }
-    hGet(&mesh->htab,na,nb,&ref,&tag);
+    if ( pt->xt )
+      tag = mesh->xtetra[pt->xt].tag[arpt[ip][inxt2[idirinv[ip][iface]]]];
+    else  tag = 0;
+
     if ( MG_EDG(tag) && !(tag & MG_NOM) )
       nr++;
     else if ( tag & MG_NOM ) {

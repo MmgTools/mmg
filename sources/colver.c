@@ -350,7 +350,7 @@ int chkcol_bdy(pMesh mesh,int k,char iface,char iedg,int *listv) {
   pPoint        p0;
   Tria          tt;
   double        calold,calnew,caltmp,nprvold[3],nprvnew[3],ncurold[3],ncurnew[3],ps,devold,devnew;
-  int           ipp,ilistv,nump,numq,ilists,lists[LMAX+2],l,iel,ref,nbbdy,ndepmin,ndepplus;
+  int           ipp,ilistv,nump,numq,ilists,lists[LMAX+2],l,iel,nbbdy,ndepmin,ndepplus;
   char          iopp,ia,ip,tag,i,iq,i0,i1,ier,isminp,isplp;
 
   pt   = &mesh->tetra[k];
@@ -475,8 +475,8 @@ int chkcol_bdy(pMesh mesh,int k,char iface,char iedg,int *listv) {
       ia = iprv2[ia];         /* edge between l-1 and l, in local num of tria */
       ia = iarf[iopp][ia];    /* edge between l-1 and l in local num of tetra */
 
-      hGet(&mesh->htab,pt->v[iare[ia][0]],pt->v[iare[ia][1]],&ref,&tag);
-      if ( !(tag & MG_GEO) ) {
+      if ( (!pt->xt) || (!(mesh->xtetra[pt->xt].tag[ia] & MG_GEO)) ) {
+
         devold = nprvold[0]*ncurold[0] + nprvold[1]*ncurold[1] + nprvold[2]*ncurold[2];
         devnew = nprvnew[0]*ncurnew[0] + nprvnew[1]*ncurnew[1] + nprvnew[2]*ncurnew[2];
         if ( devold < ANGEDG ) {
@@ -496,7 +496,7 @@ int chkcol_bdy(pMesh mesh,int k,char iface,char iedg,int *listv) {
       /* Index of the third point of the first collapsed triangle */
       i  = inxt2[i];
       ia = inxt2[i];
-      hGet(&mesh->htab,tt.v[i],numq,&ref,&tag);
+      tag = pxt->tag[iarf[iopp][ia]];
       tt.tag[ia] = MG_MAX(tt.tag[ia],tag);
     }
     else if ( l == ilists-2 ) {
@@ -507,7 +507,7 @@ int chkcol_bdy(pMesh mesh,int k,char iface,char iedg,int *listv) {
       /* Index of the third point of the first collapsed triangle */
       i  = iprv2[i];
       ia = iprv2[i];
-      hGet(&mesh->htab,tt.v[i],numq,&ref,&tag);
+      tag = pxt->tag[iarf[iopp][ia]];
       tt.tag[ia] = MG_MAX(tt.tag[ia],tag);
     }
 
@@ -543,25 +543,25 @@ int colver(pMesh mesh,int *list,int ilist,char indq) {
   pTetra          pt,pt1;
   pxTetra         pxt,pxt1;
   xTetra          xt,xts;
-  int             iel,jel,pel,qel,k,np,nq,*adja,ref,p0,p1,up;
+  int             iel,jel,pel,qel,k,np,nq,*adja,p0,p1;
   unsigned char   ip,iq,i,j,voy,voyp,voyq,ia,iav;
-  char            tag;
+  unsigned char   ind[ilist][2];
+  int             p0_c[ilist],p1_c[ilist];
+  char            indar[4][4][2] = {
+    /* indar[ip][iq][0/1]: indices of edges which have iq for extremity but not ip*/
+    { {-1,-1}, { 3, 4}, { 3, 5}, { 4, 5} },
+    { { 1, 2}, {-1,-1}, { 1, 5}, { 2, 5} },
+    { { 0, 2}, { 0, 4}, {-1,-1}, { 2, 4} },
+    { { 0, 1}, { 0, 3}, { 1, 3}, {-1,-1} } };
 
   iel = list[0] / 4;
   ip  = list[0] % 4;
   pt  = &mesh->tetra[iel];
   np  = pt->v[ip];
   nq  = pt->v[indq];
-  /* flag to know if we need to update tag in xtetra */
-  up = 0;
-  if ( pt->xt ) {
-    if ( mesh->xtetra[pt->xt].tag[iarf[ip][0]] ||
-         mesh->xtetra[pt->xt].tag[iarf[ip][1]] ||
-         mesh->xtetra[pt->xt].tag[iarf[ip][2]] ) {
-      up = 1;
-    }
-  }
 
+  memset(p0_c,0,ilist*sizeof(int));
+  memset(p1_c,0,ilist*sizeof(int));
   /* Mark elements of the shell of edge (pq) */
   for (k=0; k<ilist; k++) {
     iel = list[k] / 4;
@@ -571,6 +571,21 @@ int colver(pMesh mesh,int *list,int ilist,char indq) {
     for (j=0; j<3; j++) {
       i = inxt3[i];
       if ( pt->v[i] == nq ) {
+        /* list edges that we need to update */
+        if ( pt->xt ) {
+          pxt = &mesh->xtetra[pt->xt];
+          ip  = list[k]%4;
+          ind[k][0] = indar[ip][i][0];
+          if ( pxt->tag[ind[k][0]] || pxt->edg[ind[k][0]] ) {
+            if ( iare[ind[k][0]][0]==i )  p0_c[k] = pt->v[iare[ind[k][0]][1]];
+            else  p0_c[k] = pt->v[iare[ind[k][0]][0]];
+          }
+          ind[k][1] = indar[ip][i][1];
+          if ( pxt->tag[ind[k][1]] || pxt->edg[ind[k][1]] ) {
+            if ( iare[ind[k][1]][0]==i )  p1_c[k] = pt->v[iare[ind[k][1]][1]];
+            else  p1_c[k] = pt->v[iare[ind[k][1]][0]];
+          }
+        }
         list[k] *= -1;
         break;
       }
@@ -583,6 +598,44 @@ int colver(pMesh mesh,int *list,int ilist,char indq) {
     iel = list[k] / 4;
     ip  = list[k] % 4;
     pt  = &mesh->tetra[iel];
+
+    /* update edges of elements that do not belong to the shell of pq */
+    if ( pt->xt ) {
+      for ( i=0; i<ilist; i++ ) {
+        if ( (list[i]>0) || (!(mesh->tetra[-list[i]/4].xt)) )  continue;
+        pxt  = &mesh->xtetra[pt->xt];
+        pt1  = &mesh->tetra[-list[i]/4];
+        pxt1 = &mesh->xtetra[pt1->xt];
+        if ( p0_c[i] ) {
+          for ( j=0; j<3; j++) {
+            ia = idir[ip][j];
+            if ( pt->v[ia]==p0_c[i] ) {
+              pxt->tag[arpt[ip][j]] |= pxt1->tag[ind[i][0]];
+              if ( !pxt->edg[arpt[ip][j]] )
+                pxt->edg[arpt[ip][j]] = pxt1->edg[ind[i][0]];
+              else if ( pxt1->edg[arpt[ip][j]] )
+                pxt->edg[arpt[ip][j]] =
+                  MG_MAX(pxt->edg[arpt[ip][j]],pxt1->edg[ind[i][0]]);
+              break;
+            }
+          }
+        }
+        if ( p1_c[i] ) {
+          for ( j=0; j<3; j++) {
+            ia = idir[ip][j];
+            if ( pt->v[ia]==p1_c[i] ) {
+              pxt->tag[arpt[ip][j]] |= pxt1->tag[ind[i][1]];
+              if ( !pxt->edg[arpt[ip][j]] )
+                pxt->edg[arpt[ip][j]] = pxt1->edg[ind[i][1]];
+              else if ( pxt1->edg[arpt[ip][j]] )
+                pxt->edg[arpt[ip][j]] =
+                  MG_MAX(pxt->edg[arpt[ip][j]],pxt1->edg[ind[i][1]]);
+              break;
+            }
+          }
+        }
+      }
+    }
     adja = &mesh->adja[4*(iel-1)+1];
     jel  = adja[ip] / 4;
     voy  = adja[ip] % 4;
@@ -631,14 +684,6 @@ int colver(pMesh mesh,int *list,int ilist,char indq) {
     if ( qel ) {
       adja = &mesh->adja[4*(qel-1)+1];
       adja[voyq] = 4*pel+voyp;
-    }
-
-    /* Update references for edges (pa)->(qa) when pqa is a face of the mesh */
-    for (j=0; j<4; j++) {
-      if ( j == ip || j == iq )  continue;
-      hPop(&mesh->htab,np,pt->v[j],&ref,&tag);
-      if ( tag || ref )
-        hEdge(&mesh->htab,nq,pt->v[j],ref,tag);
     }
 
     /* Update references for faces (one in pel) ;
@@ -835,7 +880,7 @@ int colver(pMesh mesh,int *list,int ilist,char indq) {
         pt1 = &mesh->tetra[qel];
         if ( pt1->xt > 0 ) {
           pxt1 = &mesh->xtetra[pt1->xt];
-          pxt1->ref[voyq] = pxt->ref[iq];
+          pxt1->ref[voyq]  = pxt->ref[iq];
           pxt1->ftag[voyq] = pxt->ftag[iq];
 
           MG_SET(pxt1->ori,voyq);
@@ -872,7 +917,7 @@ int colver(pMesh mesh,int *list,int ilist,char indq) {
         else {
           pxt1 = &xt;
           memset(pxt1,0,sizeof(xTetra));
-          pxt1->ref[voyq] = pxt->ref[iq];
+          pxt1->ref[voyq]  = pxt->ref[iq];
           pxt1->ftag[voyq] = pxt->ftag[iq];
           pxt1->ori = 15;
 
@@ -919,31 +964,9 @@ int colver(pMesh mesh,int *list,int ilist,char indq) {
     iel = list[k] / 4;
     ip  = list[k] % 4;
     pt  = &mesh->tetra[iel];
-    for (j=0; j<4; j++) {
-      if ( j==ip )  continue;
-      hPop(&mesh->htab,np,pt->v[j],&ref,&tag);
-      if ( tag || ref )
-        hEdge(&mesh->htab,nq,pt->v[j],ref,tag);
-      /* if needed update tetra tag */
-      if ( up && pt->xt ) {
-        if ( hGet(&mesh->htab,nq,pt->v[j],&ref,&tag) && tag ) {
-          for ( ia=0; ia<6; ia++ ) {
-            p0 = pt->v[iare[ia][0]];
-            p1 = pt->v[iare[ia][1]];
-            if ( (p0==np && p1==pt->v[j]) || (p0==pt->v[j] && p1==np) )
-              break;
-          }
-          assert(ia<6);
-          mesh->xtetra[pt->xt].tag[ia] |= tag;
-        }
-      }
-    }
     pt->v[ip] = nq;
     pt->qual=orcal(mesh,iel);
   }
-
-  if ( mesh->point[np].tag & MG_BDY )
-    hPop(&mesh->htab,np,nq,&ref,&tag);
 
   //delPt(mesh,np);
 

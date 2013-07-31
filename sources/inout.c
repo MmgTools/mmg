@@ -275,8 +275,27 @@ int saveMesh(pMesh mesh) {
   pTria        ptt;
   xPoint      *pxp;
   hgeom       *ph;
-  int          k,na,nc,np,ne,nn,nr,nre,nereq,ntreq,nt,outm;
+  int          k,i,na,nc,np,ne,nn,nr,nre,nereq,ntreq,nt,outm;
   char         data[128];
+
+  /* build hash table for edges */
+  if(mesh->htab.geom){
+    free(mesh->htab.geom);
+    mesh->htab.geom=NULL;
+  }
+  hNew(&mesh->htab,3*(mesh->xt),9*(mesh->xt));
+  for (k=1; k<=mesh->ne; k++) {
+    pt   = &mesh->tetra[k];
+    if ( pt->xt ) {
+      for (i=0; i<6; i++) {
+        if ( mesh->xtetra[pt->xt].edg[i] ||
+             ( MG_EDG(mesh->xtetra[pt->xt].tag[i] ) ||
+               (mesh->xtetra[pt->xt].tag[i] & MG_REQ) ) )
+          hEdge(&mesh->htab,pt->v[iare[i][0]],pt->v[iare[i][1]],
+                mesh->xtetra[pt->xt].edg[i],mesh->xtetra[pt->xt].tag[i]);
+      }
+    }
+  }
 
   mesh->ver = GmfDouble;
   strcpy(data,mesh->nameout);

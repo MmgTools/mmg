@@ -7,11 +7,12 @@ extern char ddb;
     geometric approximation purposes (the 2 surface triangles are also provided) */
 int chkswpbdy(pMesh mesh,int *list,int ilist,int it1,int it2) {
   pTetra   pt,pt0;
+  pxTetra  pxt;
   pPoint   p0,p1,ppt0;
   Tria     tt1,tt2;
   double   b0[3],b1[3],v[3],c[3],ux,uy,uz,ps,disnat,dischg,cal1,cal2,calnat,calchg,calold,calnew,caltmp;
-  int      ref,iel,iel1,iel2,np,nq,na1,na2,k,nminus,nplus;
-  char     tag,ifa1,ifa2,ia,ip,iq,ia1,ia2,j,isshell;
+  int      iel,iel1,iel2,np,nq,na1,na2,k,nminus,nplus;
+  char     ifa1,ifa2,ia,ip,iq,ia1,ia2,j,isshell;
 
   iel = list[0] / 6;
   ia  = list[0] % 6;
@@ -23,8 +24,11 @@ int chkswpbdy(pMesh mesh,int *list,int ilist,int it1,int it2) {
   nq = pt->v[iare[ia][1]];
 
   /* No swap of geometric edge */
-  hGet(&mesh->htab,np,nq,&ref,&tag);
-  if ( (ref > 0) || MG_EDG(tag) || MG_SIN(tag) || (tag & MG_NOM))  return(0);
+  if ( pt->xt ) {
+    pxt = &mesh->xtetra[pt->xt];
+    if ( (pxt->edg[ia]>0) || MG_EDG(pxt->tag[ia]) || MG_SIN(pxt->tag[ia]) ||
+         (pxt->tag[ia] & MG_NOM) )  return(0);
+  }
 
   /* No swap when either internal or external component has only 1 element */
   if ( info.iso ) {

@@ -87,8 +87,8 @@ void split1(pMesh mesh,pSol met,int k,int vx[6]) {
   pTetra   pt,pt1;
   xTetra   xt,xt1;
   pxTetra  pxt0;
-  int      iel,ref;
-  char     i,tag,isxt,isxt1;
+  int      iel;
+  char     i,isxt,isxt1;
   unsigned char tau[4],*taued;
 
   /* create a new tetra */
@@ -148,13 +148,6 @@ void split1(pMesh mesh,pSol met,int k,int vx[6]) {
     break;
   }
   /* delete old edge */
-  if ( hPop(&mesh->htab,pt->v[tau[0]],pt->v[tau[1]],&ref,&tag) ) {
-    /* Generic formulation of split of 1 edge */
-    pt->v[tau[1]] = pt1->v[tau[0]] = vx[taued[0]];
-    hEdge(&mesh->htab,pt->v[tau[0]],pt->v[tau[1]],ref,tag);
-    hEdge(&mesh->htab,pt1->v[tau[0]],pt1->v[tau[1]],ref,tag);
-  }
-  else
     pt->v[tau[1]] = pt1->v[tau[0]] = vx[taued[0]];
 
   if ( pt->xt ) {
@@ -275,9 +268,9 @@ int split1b(pMesh mesh, pSol met,int *list, int ret, int ip,int cas){
   pTetra         pt,pt1;
   xTetra         xt,xt1;
   pxTetra        pxt0;
-  int            ilist,k,open,iel,jel,*newtet,nump,numq,*adja,j;
-  int            *adjan,nei2,nei3,mel,ref;
-  char           ie,tau[4],isxt,isxt1,i,voy,tag;
+  int            ilist,k,open,iel,jel,*newtet,nump,*adja,j;
+  int            *adjan,nei2,nei3,mel;
+  char           ie,tau[4],isxt,isxt1,i,voy;
   unsigned char  *taued;
   double         lmin,lmax,len;
 
@@ -324,14 +317,9 @@ int split1b(pMesh mesh, pSol met,int *list, int ret, int ip,int cas){
   pt  = &mesh->tetra[iel];
 
   nump = pt->v[iare[ie][0]];
-  numq = pt->v[iare[ie][1]];
+  /* numq = pt->v[iare[ie][1]];*/
 
   /* If need be, update edge references */
-  hPop(&mesh->htab,nump,numq,&ref,&tag);
-  if ( ref || tag ) {
-    hEdge(&mesh->htab,nump,ip,ref,tag);
-    hEdge(&mesh->htab,numq,ip,ref,tag);
-  }
 
   /* Fill list newtet[k] = +_created tetra for list[k]/6 : + if kept tetra (= one associated to
      pt->v[tau[0]]) is associated with nump, - if with numq */
@@ -933,9 +921,9 @@ void split2sf(pMesh mesh,pSol met,int k,int vx[6]){
   pTetra        pt[3];
   xTetra        xt[3];
   pxTetra       pxt0;
-  int           iel,i,ref4,ref5;
+  int           iel,i;
   int           newtet[3];
-  char          flg,imin,firstxt,isxt[3],tag4,tag5;
+  char          flg,imin,firstxt,isxt[3];
   unsigned char tau[4],*taued;
 
   pt[0] = &mesh->tetra[k];
@@ -1027,17 +1015,6 @@ void split2sf(pMesh mesh,pSol met,int k,int vx[6]){
     tau[0] = 3 ; tau[1] = 1 ; tau[2] = 0 ; tau[3] = 2;
     taued = &permedge[10][0];
     break;
-  }
-
-  hPop(&mesh->htab,pt[0]->v[tau[1]],pt[0]->v[tau[3]],&ref4,&tag4);
-  if ( ref4 || tag4 ) {
-    hEdge(&mesh->htab,pt[0]->v[tau[1]],vx[taued[4]],ref4,tag4);
-    hEdge(&mesh->htab,pt[0]->v[tau[3]],vx[taued[4]],ref4,tag4);
-  }
-  hPop(&mesh->htab,pt[0]->v[tau[2]],pt[0]->v[tau[3]],&ref5,&tag5);
-  if ( ref5 || tag5 ) {
-    hEdge(&mesh->htab,pt[0]->v[tau[2]],vx[taued[5]],ref5,tag5);
-    hEdge(&mesh->htab,pt[0]->v[tau[3]],vx[taued[5]],ref5,tag5);
   }
 
   /* Generic formulation for the split of 2 edges belonging to a common face */
@@ -1160,9 +1137,9 @@ void split2(pMesh mesh,pSol met,int k,int vx[6]) {
   pTetra   pt[4];
   xTetra   xt[4];
   pxTetra  pxt0;
-  int      i,iel,ref0,ref5;
+  int      i,iel;
   int      newtet[4];
-  char     flg,firstxt,isxt[4],tag0,tag5;
+  char     flg,firstxt,isxt[4];
   unsigned char tau[4],*taued;
 
   pt[0] = &mesh->tetra[k];
@@ -1235,18 +1212,6 @@ void split2(pMesh mesh,pSol met,int k,int vx[6]) {
     tau[0] = 0;  tau[1] = 3;  tau[2] = 1;  tau[3] = 2;
     taued = &permedge[2][0];
     break;
-  }
-
-  hPop(&mesh->htab,pt[0]->v[tau[0]],pt[0]->v[tau[1]],&ref0,&tag0);
-  if( ref0 || tag0 ){
-    hEdge(&mesh->htab,pt[0]->v[tau[0]],vx[taued[0]],ref0,tag0);
-    hEdge(&mesh->htab,pt[0]->v[tau[1]],vx[taued[0]],ref0,tag0);
-  }
-
-  hPop(&mesh->htab,pt[0]->v[tau[2]],pt[0]->v[tau[3]],&ref5,&tag5);
-  if( ref5 || tag5 ){
-    hEdge(&mesh->htab,pt[0]->v[tau[2]],vx[taued[5]],ref5,tag5);
-    hEdge(&mesh->htab,pt[0]->v[tau[3]],vx[taued[5]],ref5,tag5);
   }
 
   /* Generic formulation for the split of 2 opposite edges */
@@ -1465,9 +1430,9 @@ void split3(pMesh mesh,pSol met,int k,int vx[6]) {
   pTetra    pt[4];
   xTetra    xt[4];
   pxTetra   pxt0;
-  int       iel,i,ref0,ref1,ref3;
+  int       iel,i;
   int       newtet[4];
-  char      flg,firstxt,isxt[4],tag0,tag1,tag3;
+  char      flg,firstxt,isxt[4];
   unsigned char tau[4],*taued;
 
   pt[0] = &mesh->tetra[k];
@@ -1538,22 +1503,6 @@ void split3(pMesh mesh,pSol met,int k,int vx[6]) {
     tau[0] = 1 ; tau[1] = 3 ; tau[2] = 2 ; tau[3] = 0;
     taued = &permedge[5][0];
     break;
-  }
-
-  hPop(&mesh->htab,pt[0]->v[tau[0]],pt[0]->v[tau[1]],&ref0,&tag0);
-  if ( ref0 || tag0 ) {
-    hEdge(&mesh->htab,pt[0]->v[tau[0]],vx[taued[0]],ref0,tag0);
-    hEdge(&mesh->htab,pt[0]->v[tau[1]],vx[taued[0]],ref0,tag0);
-  }
-  hPop(&mesh->htab,pt[0]->v[tau[0]],pt[0]->v[tau[2]],&ref1,&tag1);
-  if ( ref1 || tag1 ) {
-    hEdge(&mesh->htab,pt[0]->v[tau[0]],vx[taued[1]],ref1,tag1);
-    hEdge(&mesh->htab,pt[0]->v[tau[2]],vx[taued[1]],ref1,tag1);
-  }
-  hPop(&mesh->htab,pt[0]->v[tau[1]],pt[0]->v[tau[2]],&ref3,&tag3);
-  if ( ref3 || tag3 ) {
-    hEdge(&mesh->htab,pt[0]->v[tau[1]],vx[taued[3]],ref3,tag3);
-    hEdge(&mesh->htab,pt[0]->v[tau[2]],vx[taued[3]],ref3,tag3);
   }
 
   /* Generic formulation of split of 3 edges */
@@ -1674,9 +1623,9 @@ void split3cone(pMesh mesh,pSol met,int k,int vx[6]) {
   pTetra    pt[4];
   xTetra    xt[4];
   pxTetra   pxt0;
-  int       iel,i,ref0,ref1,ref2;
+  int       iel,i;
   int       newtet[4];
-  char      flg,firstxt,isxt[4],ia,ib,tag0,tag1,tag2;//ic;
+  char      flg,firstxt,isxt[4],ia,ib;//ic;
   unsigned char tau[4],*taued;
 
   pt[0]  = &mesh->tetra[k];
@@ -1749,24 +1698,6 @@ void split3cone(pMesh mesh,pSol met,int k,int vx[6]) {
     tau[0] = 3 ; tau[1] = 1 ; tau[2] = 0 ; tau[3] = 2;
     taued = &permedge[10][0];
     break;
-  }
-
-  hPop(&mesh->htab,pt[0]->v[tau[0]],pt[0]->v[tau[1]],&ref0,&tag0);
-  if( ref0 || tag0 ){
-    hEdge(&mesh->htab,pt[0]->v[tau[0]],vx[taued[0]],ref0,tag0);
-    hEdge(&mesh->htab,pt[0]->v[tau[1]],vx[taued[0]],ref0,tag0);
-  }
-
-  hPop(&mesh->htab,pt[0]->v[tau[0]],pt[0]->v[tau[2]],&ref1,&tag1);
-  if( ref1 || tag1 ){
-    hEdge(&mesh->htab,pt[0]->v[tau[0]],vx[taued[1]],ref1,tag1);
-    hEdge(&mesh->htab,pt[0]->v[tau[2]],vx[taued[1]],ref1,tag1);
-  }
-
-  hPop(&mesh->htab,pt[0]->v[tau[0]],pt[0]->v[tau[3]],&ref2,&tag2);
-  if( ref2 || tag2 ){
-    hEdge(&mesh->htab,pt[0]->v[tau[0]],vx[taued[2]],ref2,tag2);
-    hEdge(&mesh->htab,pt[0]->v[tau[3]],vx[taued[2]],ref2,tag2);
   }
 
   /* Generic formulation of split of 3 edges in cone configuration (edges 0,1,2 splitted) */
@@ -2040,8 +1971,8 @@ void split3op(pMesh mesh, pSol met, int k, int vx[6]){
   pTetra        pt[5];
   xTetra        xt[5];
   pxTetra       pxt0;
-  char          flg,tag0,tag1,tag5;
-  int           iel,ref0,ref1,ref5;
+  char          flg;
+  int           iel;
   int           newtet[5];
   unsigned char imin12,imin03,tau[4],*taued,sym[4],symed[6],ip0,ip1,ip2,ip3,ie0,ie1;
   unsigned char ie2,ie3,ie4,ie5,isxt[5],firstxt,i;
@@ -2192,24 +2123,6 @@ void split3op(pMesh mesh, pSol met, int k, int vx[6]){
   assert(vx[ie2] <= 0);
   assert(vx[ie3] <= 0);
   assert(vx[ie4] <= 0);
-
-  hPop(&mesh->htab,pt[0]->v[ip0],pt[0]->v[ip1],&ref0,&tag0);
-  if( ref0 || tag0 ){
-    hEdge(&mesh->htab,pt[0]->v[ip0],vx[ie0],ref0,tag0);
-    hEdge(&mesh->htab,pt[0]->v[ip1],vx[ie0],ref0,tag0);
-  }
-
-  hPop(&mesh->htab,pt[0]->v[ip0],pt[0]->v[ip2],&ref1,&tag1);
-  if( ref1 || tag1 ){
-    hEdge(&mesh->htab,pt[0]->v[ip0],vx[ie1],ref1,tag1);
-    hEdge(&mesh->htab,pt[0]->v[ip2],vx[ie1],ref1,tag1);
-  }
-
-  hPop(&mesh->htab,pt[0]->v[ip2],pt[0]->v[ip3],&ref5,&tag5);
-  if( ref5 || tag5 ){
-    hEdge(&mesh->htab,pt[0]->v[ip2],vx[ie5],ref5,tag5);
-    hEdge(&mesh->htab,pt[0]->v[ip3],vx[ie5],ref5,tag5);
-  }
 
   imin03 = ((pt[0])->v[ip0] < (pt[0])->v[ip3]) ? ip0 : ip3;
   imin12 = ((pt[0])->v[ip1] < (pt[0])->v[ip2]) ? ip1 : ip2;
@@ -2813,9 +2726,9 @@ void split4sf(pMesh mesh,pSol met,int k,int vx[6]) {
   pTetra    pt[6];
   xTetra    xt[6];
   pxTetra   pxt0;
-  int       iel,ref0,ref1,ref2,ref4;
+  int       iel;
   int       newtet[6];
-  char      flg,firstxt,isxt[6],imin12,imin23,j,i,tag0,tag1,tag2,tag4;
+  char      flg,firstxt,isxt[6],imin12,imin23,j,i;
   unsigned char tau[4],*taued;
 
   pt[0]  = &mesh->tetra[k];
@@ -2893,30 +2806,6 @@ void split4sf(pMesh mesh,pSol met,int k,int vx[6]) {
     tau[0] = 2 ; tau[1] = 0 ; tau[2] = 1 ; tau[3] = 3;
     taued = &permedge[6][0];
     break;
-  }
-
-  hPop(&mesh->htab,pt[0]->v[tau[0]],pt[0]->v[tau[1]],&ref0,&tag0);
-  if( ref0 || tag0 ){
-    hEdge(&mesh->htab,pt[0]->v[tau[0]],vx[taued[0]],ref0,tag0);
-    hEdge(&mesh->htab,pt[0]->v[tau[1]],vx[taued[0]],ref0,tag0);
-  }
-
-  hPop(&mesh->htab,pt[0]->v[tau[0]],pt[0]->v[tau[2]],&ref1,&tag1);
-  if( ref1 || tag1 ){
-    hEdge(&mesh->htab,pt[0]->v[tau[0]],vx[taued[1]],ref1,tag1);
-    hEdge(&mesh->htab,pt[0]->v[tau[2]],vx[taued[1]],ref1,tag1);
-  }
-
-  hPop(&mesh->htab,pt[0]->v[tau[0]],pt[0]->v[tau[3]],&ref2,&tag2);
-  if( ref2 || tag2 ){
-    hEdge(&mesh->htab,pt[0]->v[tau[0]],vx[taued[2]],ref2,tag2);
-    hEdge(&mesh->htab,pt[0]->v[tau[3]],vx[taued[2]],ref2,tag2);
-  }
-
-  hPop(&mesh->htab,pt[0]->v[tau[1]],pt[0]->v[tau[3]],&ref4,&tag4);
-  if( ref4 || tag4 ){
-    hEdge(&mesh->htab,pt[0]->v[tau[1]],vx[taued[4]],ref4,tag4);
-    hEdge(&mesh->htab,pt[0]->v[tau[3]],vx[taued[4]],ref4,tag4);
   }
 
   imin23 = ((pt[0])->v[tau[2]] < (pt[0])->v[tau[3]]) ? tau[2] : tau[3];
@@ -3106,9 +2995,9 @@ void split4op(pMesh mesh,pSol met,int k,int vx[6]) {
   pTetra        pt[6];
   xTetra        xt[6];
   pxTetra       pxt0;
-  int           iel,ref1,ref2,ref3,ref4;
+  int           iel;
   int           newtet[6];
-  char          flg,firstxt,isxt[6],i,j,imin01,imin23,tag1,tag2,tag3,tag4;
+  char          flg,firstxt,isxt[6],i,j,imin01,imin23;
   unsigned char tau[4],*taued;
 
   pt[0]  = &mesh->tetra[k];
@@ -3142,30 +3031,6 @@ void split4op(pMesh mesh,pSol met,int k,int vx[6]) {
     tau[0] = 1 ; tau[1] = 2 ; tau[2] = 0 ; tau[3] = 3;
     taued = &permedge[4][0];
     break;
-  }
-
-  hPop(&mesh->htab,pt[0]->v[tau[0]],pt[0]->v[tau[2]],&ref1,&tag1);
-  if( ref1 || tag1 ){
-    hEdge(&mesh->htab,pt[0]->v[tau[0]],vx[taued[1]],ref1,tag1);
-    hEdge(&mesh->htab,pt[0]->v[tau[2]],vx[taued[1]],ref1,tag1);
-  }
-
-  hPop(&mesh->htab,pt[0]->v[tau[0]],pt[0]->v[tau[3]],&ref2,&tag2);
-  if( ref2 || tag2 ){
-    hEdge(&mesh->htab,pt[0]->v[tau[0]],vx[taued[2]],ref2,tag2);
-    hEdge(&mesh->htab,pt[0]->v[tau[3]],vx[taued[2]],ref2,tag2);
-  }
-
-  hPop(&mesh->htab,pt[0]->v[tau[1]],pt[0]->v[tau[2]],&ref3,&tag3);
-  if( ref3 || tag3 ){
-    hEdge(&mesh->htab,pt[0]->v[tau[1]],vx[taued[3]],ref3,tag3);
-    hEdge(&mesh->htab,pt[0]->v[tau[2]],vx[taued[3]],ref3,tag3);
-  }
-
-  hPop(&mesh->htab,pt[0]->v[tau[1]],pt[0]->v[tau[3]],&ref4,&tag4);
-  if( ref4 || tag4 ){
-    hEdge(&mesh->htab,pt[0]->v[tau[1]],vx[taued[4]],ref4,tag4);
-    hEdge(&mesh->htab,pt[0]->v[tau[3]],vx[taued[4]],ref4,tag4);
   }
 
   imin01 = ((pt[0])->v[tau[0]] < (pt[0])->v[tau[1]]) ? tau[0] : tau[1];
@@ -3365,9 +3230,9 @@ void split5(pMesh mesh,pSol met,int k,int vx[6]) {
   pTetra    pt[7];
   xTetra    xt[7];
   pxTetra   pxt0;
-  int       iel,i,j,ref1,ref2,ref3,ref4,ref5;
+  int       iel,i,j;
   int       newtet[7];
-  char      flg,firstxt,isxt[7],imin,tag1,tag2,tag3,tag4,tag5;
+  char      flg,firstxt,isxt[7],imin;
   unsigned char tau[4],*taued;
 
   pt[0]  = &mesh->tetra[k];
@@ -3438,36 +3303,6 @@ void split5(pMesh mesh,pSol met,int k,int vx[6]) {
     tau[0] = 3 ; tau[1] = 2 ; tau[2] = 1 ; tau[3] = 0;
     taued = &permedge[11][0];
     break;
-  }
-
-  hPop(&mesh->htab,pt[0]->v[tau[0]],pt[0]->v[tau[2]],&ref1,&tag1);
-  if( ref1 || tag1 ){
-    hEdge(&mesh->htab,pt[0]->v[tau[0]],vx[taued[1]],ref1,tag1);
-    hEdge(&mesh->htab,pt[0]->v[tau[2]],vx[taued[1]],ref1,tag1);
-  }
-
-  hPop(&mesh->htab,pt[0]->v[tau[0]],pt[0]->v[tau[3]],&ref2,&tag2);
-  if( ref2 || tag2 ){
-    hEdge(&mesh->htab,pt[0]->v[tau[0]],vx[taued[2]],ref2,tag2);
-    hEdge(&mesh->htab,pt[0]->v[tau[3]],vx[taued[2]],ref2,tag2);
-  }
-
-  hPop(&mesh->htab,pt[0]->v[tau[1]],pt[0]->v[tau[2]],&ref3,&tag3);
-  if( ref3 || tag3 ){
-    hEdge(&mesh->htab,pt[0]->v[tau[1]],vx[taued[3]],ref3,tag3);
-    hEdge(&mesh->htab,pt[0]->v[tau[2]],vx[taued[3]],ref3,tag3);
-  }
-
-  hPop(&mesh->htab,pt[0]->v[tau[1]],pt[0]->v[tau[3]],&ref4,&tag4);
-  if( ref4 || tag4 ){
-    hEdge(&mesh->htab,pt[0]->v[tau[1]],vx[taued[4]],ref4,tag4);
-    hEdge(&mesh->htab,pt[0]->v[tau[3]],vx[taued[4]],ref4,tag4);
-  }
-
-  hPop(&mesh->htab,pt[0]->v[tau[2]],pt[0]->v[tau[3]],&ref5,&tag5);
-  if( ref5 || tag5 ){
-    hEdge(&mesh->htab,pt[0]->v[tau[2]],vx[taued[5]],ref5,tag5);
-    hEdge(&mesh->htab,pt[0]->v[tau[3]],vx[taued[5]],ref5,tag5);
   }
 
   /* Generic formulation of split of 5 edges */
@@ -3638,9 +3473,9 @@ void split6(pMesh mesh,pSol met,int k,int vx[6]) {
   pTetra    pt[8];
   xTetra    xt0,xt;
   pxTetra   pxt;
-  int       i,iel,nxt0,ref0,ref1,ref2,ref3,ref4,ref5;
+  int       i,iel,nxt0;
   int       newtet[8];
-  char      isxt0,isxt,tag0,tag1,tag2,tag3,tag4,tag5;
+  char      isxt0,isxt;
 
   pt[0]  = &mesh->tetra[k];
   pt[0]->flag  = 0;
@@ -3669,43 +3504,6 @@ void split6(pMesh mesh,pSol met,int k,int vx[6]) {
     pt[i] = &mesh->tetra[iel];
     pt[i] = memcpy(pt[i],pt[0],sizeof(Tetra));
     newtet[i]=iel;
-  }
-
-  /* Modify edge information */
-  hPop(&mesh->htab,pt[0]->v[0],pt[0]->v[1],&ref0,&tag0);
-  if( ref0 || tag0 ){
-    hEdge(&mesh->htab,pt[0]->v[0],vx[0],ref0,tag0);
-    hEdge(&mesh->htab,pt[0]->v[1],vx[0],ref0,tag0);
-  }
-
-  hPop(&mesh->htab,pt[0]->v[0],pt[0]->v[2],&ref1,&tag1);
-  if( ref1 || tag1 ){
-    hEdge(&mesh->htab,pt[0]->v[0],vx[1],ref1,tag1);
-    hEdge(&mesh->htab,pt[0]->v[2],vx[1],ref1,tag1);
-  }
-
-  hPop(&mesh->htab,pt[0]->v[0],pt[0]->v[3],&ref2,&tag2);
-  if( ref2 || tag2 ){
-    hEdge(&mesh->htab,pt[0]->v[0],vx[2],ref2,tag2);
-    hEdge(&mesh->htab,pt[0]->v[3],vx[2],ref2,tag2);
-  }
-
-  hPop(&mesh->htab,pt[0]->v[1],pt[0]->v[2],&ref3,&tag3);
-  if( ref3 || tag3 ){
-    hEdge(&mesh->htab,pt[0]->v[1],vx[3],ref3,tag3);
-    hEdge(&mesh->htab,pt[0]->v[2],vx[3],ref3,tag3);
-  }
-
-  hPop(&mesh->htab,pt[0]->v[1],pt[0]->v[3],&ref4,&tag4);
-  if( ref4 || tag4 ){
-    hEdge(&mesh->htab,pt[0]->v[1],vx[4],ref4,tag4);
-    hEdge(&mesh->htab,pt[0]->v[3],vx[4],ref4,tag4);
-  }
-
-  hPop(&mesh->htab,pt[0]->v[2],pt[0]->v[3],&ref5,&tag5);
-  if( ref5 || tag5 ){
-    hEdge(&mesh->htab,pt[0]->v[2],vx[5],ref5,tag5);
-    hEdge(&mesh->htab,pt[0]->v[3],vx[5],ref5,tag5);
   }
 
   /* Modify first tetra */
