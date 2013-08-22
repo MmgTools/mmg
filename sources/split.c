@@ -147,8 +147,9 @@ void split1(pMesh mesh,pSol met,int k,int vx[6]) {
     taued = &permedge[11][0];
     break;
   }
-  /* delete old edge */
-    pt->v[tau[1]] = pt1->v[tau[0]] = vx[taued[0]];
+
+  /* Generic formulation of split of 1 edge */
+  pt->v[tau[1]] = pt1->v[tau[0]] = vx[taued[0]];
 
   if ( pt->xt ) {
     /* Reset edge tag */
@@ -317,9 +318,6 @@ int split1b(pMesh mesh, pSol met,int *list, int ret, int ip,int cas){
   pt  = &mesh->tetra[iel];
 
   nump = pt->v[iare[ie][0]];
-  /* numq = pt->v[iare[ie][1]];*/
-
-  /* If need be, update edge references */
 
   /* Fill list newtet[k] = +_created tetra for list[k]/6 : + if kept tetra (= one associated to
      pt->v[tau[0]]) is associated with nump, - if with numq */
@@ -347,10 +345,10 @@ int split1b(pMesh mesh, pSol met,int *list, int ret, int ip,int cas){
       break;
     }
     jel = newElt(mesh);
-    if(!jel){
-      fprintf(stdout,"%s:%d: Error: unable to allocate a new element\n"
-              ,__FILE__,__LINE__);
-      for(;k>0;--k){
+    if ( !jel ) {
+      fprintf(stdout,"  ## Error: unable to allocate a new element.\n");
+      fprintf(stdout,"  ## Check the mesh size or increase the allocated memory with the -m option.\n");
+      for ( ; k>0 ; --k ) {
         delElt(mesh,newtet[k]);
       }
       return(-1);
@@ -2623,8 +2621,8 @@ int split4bar(pMesh mesh, pSol met, int k){
 
   ib = newPt(mesh,o,0);
   if(!ib){
-    fprintf(stdout,"%s:%d: Error: unable to allocate a new point\n"
-            ,__FILE__,__LINE__);
+    fprintf(stdout,"  ## Error: unable to allocate a new point.\n");
+    fprintf(stdout,"  ## Check the mesh size or increase the allocated memory with the -m option.\n");
     return(0);
   }
   if ( met->m )  met->m[ib] = hnew;
@@ -2632,8 +2630,8 @@ int split4bar(pMesh mesh, pSol met, int k){
   /* create 3 new tetras */
   iel = newElt(mesh);
   if(!iel){
-    fprintf(stdout,"%s:%d: Error: unable to allocate a new element\n"
-            ,__FILE__,__LINE__);
+    fprintf(stdout,"  ## Error: unable to allocate a new element.\n");
+    fprintf(stdout,"  ## Check the mesh size or increase the allocated memory with the -m option.\n");
     delPt(mesh,ib);
     return(0);
   }
@@ -2643,8 +2641,8 @@ int split4bar(pMesh mesh, pSol met, int k){
 
   iel = newElt(mesh);
   if(!iel){
-    fprintf(stdout,"%s:%d: Error: unable to allocate a new element\n"
-            ,__FILE__,__LINE__);
+    fprintf(stdout,"  ## Error: unable to allocate a new element.\n");
+    fprintf(stdout,"  ## Check the mesh size or increase the allocated memory with the -m option.\n");
     delPt(mesh,ib);
     delElt(mesh,newtet[1]);
     return(0);
@@ -2655,8 +2653,8 @@ int split4bar(pMesh mesh, pSol met, int k){
 
   iel = newElt(mesh);
   if(!iel){
-    fprintf(stdout,"%s:%d: Error: unable to allocate a new element\n"
-            ,__FILE__,__LINE__);
+    fprintf(stdout,"  ## Error: unable to allocate a new element.\n");
+    fprintf(stdout,"  ## Check the mesh size or increase the allocated memory with the -m option.\n");
     delPt(mesh,ib);
     delElt(mesh,newtet[1]);
     delElt(mesh,newtet[2]);
@@ -3278,7 +3276,7 @@ void split4op(pMesh mesh,pSol met,int k,int vx[6]) {
     xt[4].ftag[ tau[0]] = 0;  xt[4].ftag[ tau[2]] = 0;  xt[4].ftag[tau[3]] = 0;
     MG_SET(xt[4].ori, tau[0]);  MG_SET(xt[4].ori, tau[2]);  MG_SET(xt[4].ori, tau[3]);
 
-    pt[5]->v[tau[0]] = vx[taued[2]] ; (pt[5])->v[tau[1]] = vx[taued[4]] ; (pt[5])->v[tau[2]] = vx[taued[3]];
+    pt[5]->v[tau[0]] = vx[taued[2]] ; pt[5]->v[tau[1]] = vx[taued[4]] ; pt[5]->v[tau[2]] = vx[taued[3]];
     xt[5].tag[taued[0]] = 0;  xt[5].tag[taued[1]] = 0;
     xt[5].tag[taued[3]] = 0;  xt[5].tag[taued[5]] = 0;
     xt[5].edg[taued[0]] = 0;  xt[5].edg[taued[1]] = 0;

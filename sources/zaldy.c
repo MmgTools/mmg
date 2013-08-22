@@ -20,8 +20,9 @@ int newPt(pMesh mesh,double c[3],char tag) {
   if ( tag & MG_BDY ) {
     mesh->xp++;
     if(mesh->xp >= mesh->xpmax){
-      printf("%s:%d: Error: unable to allocate a new xpoint 0\n",
-	     __FILE__,__LINE__);
+      fprintf(stdout,"  ## Allocation problem (xpoint), not enough memory.\n");
+      fprintf(stdout,"  ## Check the mesh size or increase the allocated memory with the -m option.\n");
+      fprintf(stdout,"  Exit program.\n");
       exit(EXIT_FAILURE);
     }
     ppt->tag = MG_BDY;
@@ -108,21 +109,24 @@ int zaldy(pMesh mesh) {
 
   mesh->point = (pPoint)calloc(mesh->npmax+1,sizeof(Point));
   if ( !mesh->point ){
-    fprintf(stdout,"  ## Allocation problem (point), not enough memory.");
+    fprintf(stdout,"  ## Allocation problem (point), not enough memory.\n");
+    fprintf(stdout,"  ## Check the mesh size or increase the allocated memory with the -m option.\n");
     fprintf(stdout,"  Exit program.\n");
     return(0);
   }
 
   mesh->tetra = (pTetra)calloc(mesh->nemax+1,sizeof(Tetra));
   if ( !mesh->tetra ){
-    fprintf(stdout,"  ## Allocation problem (tetra), not enough memory.");
+    fprintf(stdout,"  ## Allocation problem (tetra), not enough memory.\n");
+    fprintf(stdout,"  ## Check the mesh size or increase the allocated memory with the -m option.\n");
     fprintf(stdout,"  Exit program.\n");
     return(0);
   }
   if ( mesh->nt ) {
     mesh->tria = (pTria)calloc(mesh->ntmax+1,sizeof(Tria));
     if ( !mesh->tria ){
-      fprintf(stdout,"  ## Allocation problem (tria), not enough memory.");
+      fprintf(stdout,"  ## Allocation problem (tria), not enough memory.\n");
+      fprintf(stdout,"  ## Check the mesh size or increase the allocated memory with the -m option.\n");
       fprintf(stdout,"  Exit program.\n");
       return(0);
     }
@@ -130,7 +134,8 @@ int zaldy(pMesh mesh) {
   if ( mesh->na ) {
     mesh->edge = (pEdge)calloc(mesh->na+1,sizeof(Edge));
     if ( !mesh->edge ) {
-      fprintf(stdout,"  ## Allocation problem (edge), not enough memory.");
+      fprintf(stdout,"  ## Allocation problem (edge), not enough memory.\n");
+      fprintf(stdout,"  ## Check the mesh size or increase the allocated memory with the -m option.\n");
       fprintf(stdout,"  Exit program.\n");
       return(0);
     }

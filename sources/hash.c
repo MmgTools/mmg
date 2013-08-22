@@ -581,7 +581,7 @@ int hGeom(pMesh mesh) {
     }
     if ( mesh->na )  free(mesh->edge);
     mesh->edge = 0;
-    mesh->na = 0;
+    mesh->na   = 0;
 
     /* now check triangles */
     for (k=1; k<=mesh->nt; k++) {
@@ -611,7 +611,7 @@ int hGeom(pMesh mesh) {
         kk  = adja[i] / 3;
         if ( !kk || pt->tag[i] & MG_NOM )
           mesh->na++;
-        else if ( (k < kk) && pt->edg[i]+pt->tag[i] )  mesh->na++;
+        else if ( (k < kk) && ( pt->edg[i] || pt->tag[i] ) )  mesh->na++;
       }
     }
     mesh->namax = MG_MAX(1.5*mesh->na,NAMAX);
@@ -635,7 +635,7 @@ int hGeom(pMesh mesh) {
             pt->edg[i] = ( info.iso && pt->edg[i] != 0 ) ?  -abs(pt->edg[i]) : MG_ISO;
           hEdge(&mesh->htab,pt->v[i1],pt->v[i2],pt->edg[i],pt->tag[i]);
         }
-        else if ( k < kk && pt->edg[i]+pt->tag[i] )
+        else if ( k < kk && ( pt->edg[i] || pt->tag[i] ) )
           hEdge(&mesh->htab,pt->v[i1],pt->v[i2],pt->edg[i],pt->tag[i]);
       }
     }
@@ -688,7 +688,8 @@ int bdryTria(pMesh mesh) {
   /* step 2 : create triangles */
   mesh->tria = (pTria)calloc(mesh->nt+1,sizeof(Tria));
   if ( !mesh->tria ) {
-    fprintf(stdout,"  ## Allocation problem (tria), not enough memory.");
+    fprintf(stdout,"  ## Allocation problem (tria), not enough memory.\n");
+    fprintf(stdout,"  ## Check the mesh size or increase the allocated memory with the -m option.\n");
     fprintf(stdout,"  Exit program.\n");
     return(0);
   }
@@ -719,7 +720,7 @@ int bdryTria(pMesh mesh) {
           }
         }
         else
-	      ptt->ref = info.iso ? MG_ISO : 0;
+          ptt->ref = info.iso ? MG_ISO : 0;
       }
     }
   }
@@ -772,7 +773,8 @@ int bdryIso(pMesh mesh) {
   else if ( mesh->nt+nt >= mesh->ntmax )
     mesh->tria = (pTria)realloc(mesh->tria,(mesh->nt+nt+1)*sizeof(Tria));
   if ( !mesh->tria ){
-    fprintf(stdout,"  ## Allocation problem (tria), not enough memory.");
+    fprintf(stdout,"  ## Allocation problem (tria), not enough memory.\n");
+    fprintf(stdout,"  ## Check the mesh size or increase the allocated memory with the -m option.\n");
     fprintf(stdout,"  Exit program.\n");
     return(0);
   }
@@ -833,6 +835,8 @@ static int hashFace(Hash *hash,int ia,int ib,int ic,int k) {
     ++hash->nxt;
     if ( hash->nxt == hash->max ) {
       fprintf(stdout,"  ## Memory alloc problem (edge): %d\n",hash->max);
+      fprintf(stdout,"  ## Check the mesh size or increase the allocated memory with the -m option.\n");
+      fprintf(stdout,"  Exit program.\n");
       return(0);
     }
   }
@@ -894,7 +898,8 @@ int bdrySet(pMesh mesh) {
   mesh->xtmax  = mesh->ntmax; //10 * NTMAX;
   mesh->xtetra = (pxTetra)calloc(mesh->xtmax+1,sizeof(xTetra));
   if( !mesh->xtetra ){
-    fprintf(stdout,"  ## Allocation problem (xtetra), not enough memory.");
+    fprintf(stdout,"  ## Allocation problem (xtetra), not enough memory.\n");
+    fprintf(stdout,"  ## Check the mesh size or increase the allocated memory with the -m option.\n");
     fprintf(stdout,"  Exit program.\n");
     return(0);
   }

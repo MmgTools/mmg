@@ -994,3 +994,35 @@ int DoSol(pMesh mesh,pSol met,Info* info) {
 	free(mark);
   return(1);
 }
+
+/** find the element number in packed numerotation */
+inline int indElt(pMesh mesh, int kel) {
+  pTetra pt;
+  int    ne, k;
+
+  ne = 0;
+  for (k=1; k<=mesh->ne; k++) {
+    pt = &mesh->tetra[k];
+    if ( MG_EOK(pt) ) {
+      ne++;
+      if ( k == kel )  return(ne);
+    }
+  }
+  return(0);
+}
+
+/** find the point number in packed numerotation */
+inline int indPt(pMesh mesh, int kp) {
+  pPoint ppt;
+  int    np, k;
+
+  np = 0;
+  for (k=1; k<=mesh->ne; k++) {
+    ppt = &mesh->point[k];
+    if ( MG_VOK(ppt) ) {
+      np++;
+      if ( k == kp )  return(np);
+    }
+  }
+  return(0);
+}

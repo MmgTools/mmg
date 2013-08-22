@@ -144,6 +144,7 @@ int swpgen(pMesh mesh,pSol met,int nconf,int ilist,int *list) {
   double    m[3];
   char      ia,ip,iq;
   int ier;
+
   iel = list[0] / 6;
   ia  = list[0] % 6;
 
@@ -160,8 +161,8 @@ int swpgen(pMesh mesh,pSol met,int nconf,int ilist,int *list) {
 
   np  = newPt(mesh,m,0);
   if(!np){
-    fprintf(stdout,"%s:%d: Error: unable to allocate a new point\n"
-            ,__FILE__,__LINE__);
+    fprintf(stdout,"  ## Error: unable to allocate a new point.\n");
+    fprintf(stdout,"  ## Check the mesh size or increase the allocated memory with the -m option.\n");
     return(0);
   }
   if ( met->m )  met->m[np] = 0.5*(met->m[na]+met->m[nb]);
@@ -185,6 +186,6 @@ int swpgen(pMesh mesh,pSol met,int nconf,int ilist,int *list) {
 
   ier = colver(mesh,list,nball,iq);
   if(ier) delPt(mesh,ier);
-	
+
   return(1);
 }

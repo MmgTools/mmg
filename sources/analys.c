@@ -564,6 +564,7 @@ int analys(pMesh mesh) {
     mesh->htab.geom = NULL;
     return(0);
   }
+
   /* Update edges tags and references for xtetras */
   if ( !bdryUpdate(mesh) ) {
     fprintf(stdout,"  ## Boundary problem. Exit program.\n");

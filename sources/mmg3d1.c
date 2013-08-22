@@ -555,11 +555,12 @@ static int coltet(pMesh mesh,pSol met,char typchk) {
 
         if ( ilist ) {
           ier = colver(mesh,list,ilist,iq);
-			if ( ier ) {
-				delPt(mesh,ier);
-				ier = 1;
-				break;
-			}
+          if ( ier < 0 ) return(-1);
+          else if ( ier ) {
+            delPt(mesh,ier);
+            ier = 1;
+            break;
+          }
         }
       }
       if ( ier ) {
@@ -651,8 +652,8 @@ static int anatetv(pMesh mesh,pSol met,char typchk) {
         o[2] = 0.5 * (p1->c[2]+p2->c[2]);
         ip  = newPt(mesh,o,0);
         if(!ip) {
-          fprintf(stdout,"%s:%d: Error: unable to allocate a new point\n"
-                  ,__FILE__,__LINE__);
+          fprintf(stdout,"  ## Error: unable to allocate a new point\n");
+          fprintf(stdout,"  ## Check the mesh size or increase the allocated memory with the -m option.\n");
           memlack=1;
           goto split;
         }
@@ -889,8 +890,8 @@ static int anatets(pMesh mesh,pSol met,char typchk) {
       if ( !ip ) {
         ip = newPt(mesh,o,MG_BDY);
         if ( !ip ) {
-          fprintf(stdout,"%s:%d: Error: unable to allocate a new point\n"
-                  ,__FILE__,__LINE__);
+          fprintf(stdout,"  ## Error: unable to allocate a new point.\n");
+          fprintf(stdout,"  ## Check the mesh size or increase the allocated memory with the -m option.\n");
           do {
             delPt(mesh,mesh->np);
           } while ( mesh->np>npinit );
@@ -1097,7 +1098,7 @@ static int adpspl(pMesh mesh,pSol met, int* warn) {
   Tria       ptt;
   pPoint     p0,p1,ppt;
   pxPoint    pxp;
-  double     dd,dd2,len,lmax,o[3],to[3],ro[3],no1[3],no2[3],v[3];
+  double     dd,len,lmax,o[3],to[3],ro[3],no1[3],no2[3],v[3];
   int        k,ip,ip1,ip2,list[LMAX+2],ilist,ns,ref,ier;
   char       imax,tag,j,i,i1,i2,ifa0,ifa1;
 
@@ -1121,7 +1122,7 @@ static int adpspl(pMesh mesh,pSol met, int* warn) {
       }
     }
     if ( imax==-1 )
-      fprintf(stdout,"%s:%d: Warning: all edges of tetra %d are boundary and required\n",
+      fprintf(stdout,"%s:%d: Warning: all edges of tetra %d are required or of length null.\n",
               __FILE__,__LINE__,k);
     if ( lmax < LOPTL )  continue;
 
@@ -1343,8 +1344,8 @@ static int adpcol(pMesh mesh,pSol met) {
     }
     if ( ilist ) {
       ier = colver(mesh,list,ilist,i2);
-
-      if ( ier ) {
+      if ( ier < 0 ) return(-1);
+      else if ( ier ) {
         delPt(mesh,ier);
         nc++;
       }
@@ -1456,9 +1457,10 @@ static int adptet(pMesh mesh,pSol met) {
   while( ++it < maxit && nc+ns > 0 );
 
   if ( warn ) {
-    fprintf(stdout,"%s:%d: Error:",__FILE__,__LINE__);
+    fprintf(stdout,"  ## Error:");
     fprintf(stdout," unable to allocate a new point in last call of adpspl.\n");
-    fprintf(stdout," ## Uncomplete mesh. Exiting\n" );
+    fprintf(stdout,"  ## Check the mesh size or increase the allocated memory with the -m option.\n");
+    fprintf(stdout,"  ## Uncomplete mesh. Exiting\n" );
     return(0);
   }
 

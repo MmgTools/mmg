@@ -86,7 +86,7 @@ static int topchkcol_bdy(pMesh mesh,int k,int iface,char iedg,int *lists,int ili
 
   /* Surface ball has been enumerated as f1,...,f2 - f1,f2 = both triangles of surface shell */
   if ( piv0 == numq ) {
-    /*  Point nap, facing the fist vanishing face in surface ball of p */
+    /*  Point nap, facing the first vanishing face in surface ball of p */
     nro = pt->v[idir[iface][iprv2[idirinv[iface][ip]]]];
 
     jel = lists[1] / 4;
@@ -141,7 +141,9 @@ static int topchkcol_bdy(pMesh mesh,int k,int iface,char iedg,int *lists,int ili
 
     naq = piv;
     if ( nap == naq ) {
-      /* printf("On devrait rarement passer ici\n"); */
+      /*printf("%s: %d: On devrait rarement passer ici:",__FILE__,__LINE__);
+        printf(" k=%d (%d in saveMesh), nap=%d (%d in saveMesh)\n",
+        k,indElt(mesh,k),nap,indPt(mesh,nap));*/
       return(0);
     }
 
@@ -207,7 +209,9 @@ static int topchkcol_bdy(pMesh mesh,int k,int iface,char iedg,int *lists,int ili
 
     nbq = piv;
     if ( nbp == nbq ) {
-      /* printf("On devrait rarement passer ici\n"); */
+      /*printf("%s: %d: On devrait rarement passer ici:",__FILE__,__LINE__);
+        printf(" k=%d (%d in saveMesh), nbp=%d (%d in saveMesh)\n",
+        k,indElt(mesh,k),nbp,indPt(mesh,nbp));*/
       return(0);
     }
   }
@@ -266,7 +270,9 @@ static int topchkcol_bdy(pMesh mesh,int k,int iface,char iedg,int *lists,int ili
 
     naq = piv;
     if ( nap == naq ) {
-      /* printf("On devrait rarement passer ici\n"); */
+      /*printf("%s: %d: On devrait rarement passer ici:",__FILE__,__LINE__);
+        printf(" k=%d (%d in saveMesh), nap=%d (%d in saveMesh)\n",
+        k,indElt(mesh,k),nap,indPt(mesh,nap));*/
       return(0);
     }
 
@@ -332,7 +338,9 @@ static int topchkcol_bdy(pMesh mesh,int k,int iface,char iedg,int *lists,int ili
 
     nbq = piv;
     if ( nbp == nbq ) {
-      /* printf("On devrait rarement passer ici\n"); */
+      /*printf("%s: %d: On devrait rarement passer ici:",__FILE__,__LINE__);
+        printf(" k=%d (%d in saveMesh), nap=%d (%d in saveMesh)\n",
+        k,indElt(mesh,k),nap,indPt(mesh,nap));*/
       return(0);
     }
   }
@@ -543,8 +551,8 @@ int colver(pMesh mesh,int *list,int ilist,char indq) {
   pTetra          pt,pt1;
   pxTetra         pxt,pxt1;
   xTetra          xt,xts;
-  int             iel,jel,pel,qel,k,np,nq,*adja,p0,p1;
-  unsigned char   ip,iq,i,j,voy,voyp,voyq,ia,iav;
+  int             i,iel,jel,pel,qel,k,np,nq,*adja,p0,p1;
+  unsigned char   ip,iq,j,voy,voyp,voyq,ia,iav;
   unsigned char   ind[ilist][2];
   int             p0_c[ilist],p1_c[ilist];
   char            indar[4][4][2] = {

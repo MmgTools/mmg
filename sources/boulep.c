@@ -363,7 +363,8 @@ int boulenm(pMesh mesh,int start,int ip,int iface,double n[3],double t[3]) {
     n[1] *= dd;
     n[2] *= dd;
   }
-  assert( ip0 && ip1 && (ip0 != ip1) );
+  assert( ip0 && ip1 );
+  if ( ip0 == ip1 )  return(0);
 
   p0 = &mesh->point[ip0];
   p1 = &mesh->point[ip1];
@@ -940,6 +941,44 @@ int srcbdy(pMesh mesh,int start,int ia) {
   return(0);
 }
 
+/** print an error message if coquilFace detect a boundary topology problem */
+static inline void errorMessage(pMesh mesh, int k1, int k2) {
+  pPoint ppt;
+  pTetra pt;
+  int    np, ne, k, kel1, kel2;
+
+  np = ne = kel1 = kel2 = 0;
+  for (k=1; k<=mesh->np; k++) {
+    ppt = &mesh->point[k];
+    if ( MG_VOK(ppt) )  ppt->tmp = ++np;
+  }
+  for (k=1; k<=mesh->ne; k++) {
+    pt = &mesh->tetra[k];
+    if ( MG_EOK(pt) ) {
+      ne++;
+      if ( k == k1 ) kel1 = ne;
+      if ( k == k2 ) kel2 = ne;
+    }
+  }
+
+  printf("  ## Error: problem in surface remesh process");
+  printf(" (potential creation of a lonely boundary face):\n");
+
+  if ( kel1 != 0 ) {
+    pt = &mesh->tetra[k1];
+    printf("            look at elt %d:",kel1);
+    printf(" %d %d %d %d.\n", mesh->point[pt->v[0]].tmp, mesh->point[pt->v[1]].tmp,
+           mesh->point[pt->v[2]].tmp, mesh->point[pt->v[3]].tmp);
+  } else if ( kel2 != 0 ) {
+    pt = &mesh->tetra[k2];
+    printf("            look at elt %d:",kel2);
+    printf(" %d %d %d %d.\n", mesh->point[pt->v[0]].tmp, mesh->point[pt->v[1]].tmp,
+           mesh->point[pt->v[2]].tmp, mesh->point[pt->v[3]].tmp);
+  }
+  printf("  ##        Try to modify the hausdorff number,");
+  printf(" the maximum mesh size or the value of angle detection.\n");
+}
+
 /** Find all tets sharing edge ia of tetra start, and stores boundary faces when met
     it1 & it2 = 6*iel + iface, iel = index of tetra, iface = index of face in tetra
     return 2*ilist if shell is closed, 2*ilist +1 otherwise */
@@ -949,9 +988,7 @@ int coquilface(pMesh mesh,int start,int ia,int *list,int *it1,int *it2) {
   int     *adja,piv,adj,na,nb,ipa,ipb,ilist,pradj;
   char     i,iface,isbdy;
 
-  if ( start < 1 )  return(0);
   pt = &mesh->tetra[start];
-  if ( !MG_EOK(pt) ) return(0);
 
   na   = pt->v[ iare[ia][0] ];
   nb   = pt->v[ iare[ia][1] ];
@@ -967,12 +1004,10 @@ int coquilface(pMesh mesh,int start,int ia,int *list,int *it1,int *it2) {
   adj = adja[ifar[ia][0]] / 4;
   piv = pt->v[ifar[ia][1]];
 
-  pxt = 0;
-  if ( pt->xt )
-    pxt = &mesh->xtetra[pt->xt];
+  pxt = &mesh->xtetra[pt->xt];
 
   iface = ifar[ia][1];
-  isbdy = pt->xt ? pxt->ftag[iface] : 0;
+  isbdy = pxt->ftag[iface];
   if ( isbdy )
     *it1 = 4*start + iface;
 
@@ -1015,10 +1050,6 @@ int coquilface(pMesh mesh,int start,int ia,int *list,int *it1,int *it2) {
       if ( *it1 == 0 )
         *it1 = 4*pradj+iface;
       else {
-        if ( *it2 != 0 ) {
-          return(0);
-          //saveMesh(mesh);
-        }
         assert( *it2 == 0 );
         *it2 = 4*pradj+iface;
       }
@@ -1028,12 +1059,10 @@ int coquilface(pMesh mesh,int start,int ia,int *list,int *it1,int *it2) {
   /* At this point, the first travel, in one direction, of the shell is complete. Now, analyze why
      the travel ended. */
   if ( adj == start ) {
-    if( !*it1 || !*it2 ){
-      printf("%s:%d: Error: *it1 or *it2 null:\n",__FILE__,__LINE__);
-      printf(" *it1=%d, *it2=%d and start=%d\n",*it1,*it2,start);
+    if ( (!(*it1) || !(*it2)) || ((*it1) == (*it2)) ) {
+      errorMessage(mesh, (*it1)/4, (*it2)/4);
       return(-1);
     }
-    assert(*it1 != *it2);
     return(2*ilist);
   }
 
@@ -1097,7 +1126,10 @@ int coquilface(pMesh mesh,int start,int ia,int *list,int *it1,int *it2) {
   assert(!adj);
   *it2 = 4*pradj + iface;
 
-  assert( *it1 && *it2);
-  assert( *it1 != *it2);
-  return(2*ilist+1);
+  if ( (!(*it1) || !(*it2)) || ((*it1) == (*it2)) ) {
+    errorMessage(mesh, (*it1)/4, (*it2)/4);
+    return(-1);
+  }
+  return ( 2*ilist+1 );
 }
+

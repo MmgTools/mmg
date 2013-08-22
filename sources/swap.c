@@ -53,28 +53,33 @@ int chkswpbdy(pMesh mesh,int *list,int ilist,int it1,int it2) {
   for (ia1=0; ia1<3; ia1++) {
     if ( (tt1.v[ia1] != np) && (tt1.v[ia1] != nq) )  break;
   }
-  assert(ia1 < 3);
+  assert( ia1 < 3 );
+  assert( (tt1.v[inxt2[ia1]] == np && tt1.v[iprv2[ia1]] == nq) ||
+          (tt1.v[inxt2[ia1]] == nq && tt1.v[iprv2[ia1]] == np) );
   na1 = tt1.v[ia1];
-  if ( !((tt1.v[inxt2[ia1]] == np && tt1.v[iprv2[ia1]] == nq)
+  /*if ( !((tt1.v[inxt2[ia1]] == np && tt1.v[iprv2[ia1]] == nq)
          || (tt1.v[inxt2[ia1]] == nq && tt1.v[iprv2[ia1]] == np))) {
     return(0);
-  }
+  } remplace par l'assert: impossible non?*/
 
   for (ia2=0; ia2<3; ia2++) {
     if ( (tt2.v[ia2] != np) && (tt2.v[ia2] != nq) )  break;
   }
-  assert(ia2 < 3);
+
+  assert ( ia2 < 3 );
+  assert ( (tt2.v[inxt2[ia2]] == np && tt2.v[iprv2[ia2]] == nq) ||
+           (tt2.v[inxt2[ia2]] == nq && tt2.v[iprv2[ia2]] == np) );
   na2 = tt2.v[ia2];
-  if ( !((tt2.v[inxt2[ia2]] == np && tt2.v[iprv2[ia2]] == nq)
+  /*if ( !((tt2.v[inxt2[ia2]] == np && tt2.v[iprv2[ia2]] == nq)
          || (tt2.v[inxt2[ia2]] == nq && tt2.v[iprv2[ia2]] == np))) {
     return(0);
-  }
+  } remplace par l'assert: impossible non?*/
 
   /* Check non convexity (temporarily use b0,b1)*/
   norpts(mesh,tt1.v[ia1],tt1.v[inxt2[ia1]],tt2.v[ia2],b0);
   norpts(mesh,tt2.v[ia2],tt2.v[inxt2[ia2]],tt1.v[ia1],b1);
   ps = b0[0]*b1[0] + b0[1]*b1[1] + b0[2]*b1[2];
-  if(ps < ANGEDG) return(0);
+  if ( ps < ANGEDG ) return(0);
 
   /* Compare contributions to Hausdorff distance in both configurations */
   norface(mesh,iel1,ifa1,v);
@@ -223,7 +228,8 @@ int swpbdy(pMesh mesh,pSol met,int *list,int ret,int it1) {
   c[2] = 0.5*( p0->c[2] + p1->c[2]);
   nm = newPt(mesh,c,MG_BDY);
   if ( !nm ) {
-    printf("%s:%d: Warning: unable to allocate a new point\n",__FILE__,__LINE__);
+    fprintf(stdout,"  ## Warning: unable to allocate a new point.\n");
+    fprintf(stdout,"  ## Check the mesh size or increase the allocated memory with the -m option.\n");
     return(0);
   }
   if ( met->m )  met->m[nm] = 0.5 *(met->m[np]+met->m[nq]);
@@ -250,6 +256,6 @@ int swpbdy(pMesh mesh,pSol met,int *list,int ret,int it1) {
 		delPt(mesh,ier);
 		ier = 1;
 	}
-  
+
   return(ier);
 }

@@ -351,12 +351,16 @@ void outqua(pMesh mesh,pSol met);
 int  badelt(pMesh mesh,pSol met);
 int prilen(pMesh mesh,pSol met);
 int DoSol(pMesh mesh,pSol met,Info* info);
+#ifdef USE_SCOTCH
+int renumbering(int vertBoxNbr, pMesh mesh, pSol sol);
+#endif
 
 int meancur(pMesh mesh,int np,double c[3],int ilist,int *list,double h[3]);
 double surftri(pMesh,int,int);
 double timestepMCF(pMesh,double);
 int bdyMCF(pMesh);
 double volint(pMesh);
+
 /*Delaunay functions*/
 int delone(pMesh mesh,pSol sol,int ip,int *list,int ilist);
 int cavity(pMesh mesh,pSol sol,int iel,int ip,int *list,int lon);

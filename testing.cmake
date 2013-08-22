@@ -369,12 +369,12 @@ ADD_TEST(NAME MultiDom_Cube
 
 ADD_TEST(NAME MultiDom_Ellipse
   COMMAND ${EXEC} -v 6 -m 700 -hausd 0.0003 ${REG_TESTS_PATH}/MultiDom_Ellipse/c.d
-  -out ${REG_TESTS_PATH}/MultiDom_Cube/c.d.o.meshb)
+  -out ${REG_TESTS_PATH}/MultiDom_Ellipse/c.d.o.meshb)
 
 # Non-manifold test case
 ADD_TEST(NAME NM_Cube
   COMMAND ${EXEC} -v 6 -d -hmax 0.05 ${REG_TESTS_PATH}/NM_Cube/nm
-  -out ${REG_TESTS_PATH}/MultiDom_Cube/nm.o.meshb)
+  -out ${REG_TESTS_PATH}/NM_Cube/nm.o.meshb)
 
 
 # Compare with a reference result when we run
