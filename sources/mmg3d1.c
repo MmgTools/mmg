@@ -325,7 +325,7 @@ static int swpmsh(pMesh mesh,pSol met) {
     ns = 0;
     for (k=1; k<=mesh->ne; k++) {
       pt = &mesh->tetra[k];
-      if ( (!MG_EOK(pt)) || pt->ref < 0 )   continue;
+      if ( (!MG_EOK(pt)) || pt->ref < 0 /*|| MG_SIN(pt->tag)*/ )   continue;
       else if ( !pt->xt ) continue;
       pxt = &mesh->xtetra[pt->xt];
 
@@ -373,7 +373,7 @@ static int swptet(pMesh mesh,pSol met,double crit) {
     ns = 0;
     for (k=1; k<=mesh->ne; k++) {
       pt = &mesh->tetra[k];
-      if ( !MG_EOK(pt) )  continue;
+      if ( !MG_EOK(pt) || MG_SIN(pt->tag) )  continue;
       if ( pt->qual > 0.0288675 /*0.6/ALPHAD*/ )  continue;
 
       for (i=0; i<6; i++) {
@@ -386,7 +386,7 @@ static int swptet(pMesh mesh,pSol met,double crit) {
         nconf = chkswpgen(mesh,k,i,&ilist,list,crit);
         if ( nconf ) {
           ns++;
-          if(!swpgen(mesh,met,nconf,ilist,list)) return(-1);
+          if ( !swpgen(mesh,met,nconf,ilist,list) ) return(-1);
           break;
         }
       }
@@ -423,7 +423,7 @@ static int movtet(pMesh mesh,pSol met,int maxit) {
     nm = ns = 0;
     for (k=1; k<=mesh->ne; k++) {
       pt = &mesh->tetra[k];
-      if ( !MG_EOK(pt) || pt->ref < 0 )   continue;
+      if ( !MG_EOK(pt) || pt->ref < 0 /*|| MG_SIN(pt->tag)*/ )   continue;
 
       /* point j on face i */
       for (i=0; i<4; i++) {
@@ -592,10 +592,26 @@ static int anatetv(pMesh mesh,pSol met,char typchk) {
   memlack = ns = nap = 0;
   hma2 = LLONG*LLONG*info.hmax*info.hmax;
 
-  /* Hash all boundary edges, and put ip = -1 in hash structure */
+  /* Hash all boundary and required edges, and put ip = -1 in hash structure */
   for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
-    if ( !MG_EOK(pt) || MG_SIN(pt->tag) || !pt->xt )  continue;
+    if ( !MG_EOK(pt) )  continue;
+
+   /* avoid split of edges belonging to a required tet */
+    if ( pt->tag & MG_REQ ) {
+      for (i=0; i<6; i++) {
+        ip1 = pt->v[iare[i][0]];
+        ip2 = pt->v[iare[i][1]];
+        ip  = -1;
+        if ( !hashEdge(&hash,ip1,ip2,ip) ) {
+          printf("%s:%d: Error: function hashEdge return 0\n",__FILE__,__LINE__);
+          exit(EXIT_FAILURE);
+        }
+      }
+      continue;
+    }
+
+    if ( !pt->xt ) continue;
 
     pxt = &mesh->xtetra[pt->xt];
     for (i=0; i<4; i++) {
@@ -617,7 +633,7 @@ static int anatetv(pMesh mesh,pSol met,char typchk) {
   /** 2. Set flags and split internal edges */
   for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
-    if ( !MG_EOK(pt) || MG_SIN(pt->tag) )  continue;
+    if ( !MG_EOK(pt) )  continue;
     pt->flag = 0;
     for (i=0; i<6; i++) {
       ip  = -1;
@@ -1060,7 +1076,7 @@ static int anatets(pMesh mesh,pSol met,char typchk) {
   ne = mesh->ne;
   for (k=1; k<=ne; k++) {
     pt = &mesh->tetra[k];
-    if ( !MG_EOK(pt) || !pt->flag )  continue;
+    if ( !MG_EOK(pt) || !pt->flag /*|| MG_SIN(pt->tag)*/ )  continue;
     memset(vx,0,6*sizeof(int));
     for (ia=0,i=0; i<3; i++) {
       for (j=i+1; j<4; j++,ia++) {
@@ -1108,7 +1124,7 @@ static int adpspl(pMesh mesh,pSol met, int* warn) {
   ns = 0;
   for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
-    if ( !MG_EOK(pt) )   continue;
+    if ( !MG_EOK(pt) || MG_SIN(pt->tag) )   continue;
     pxt = pt->xt ? &mesh->xtetra[pt->xt] : 0;
 
     /* find longest edge */
@@ -1149,6 +1165,7 @@ static int adpspl(pMesh mesh,pSol met, int* warn) {
       tag |= MG_BDY;
       ilist = coquil(mesh,k,imax,list);
       if ( !ilist )  continue;
+      ilist = fabs(ilist);
 
       if ( tag & MG_NOM ){
         if( !BezierNom(mesh,ip1,ip2,0.5,o,no1,to) )
@@ -1255,7 +1272,8 @@ static int adpspl(pMesh mesh,pSol met, int* warn) {
     else {
       if ( (p0->tag & MG_BDY) && (p1->tag & MG_BDY) ) continue;
       ilist = coquil(mesh,k,imax,list);
-      if ( !ilist )  continue;
+      if ( ilist < 0 ) continue;
+      if ( !ilist )    continue;
       o[0] = 0.5*(p0->c[0] + p1->c[0]);
       o[1] = 0.5*(p0->c[1] + p1->c[1]);
       o[2] = 0.5*(p0->c[2] + p1->c[2]);
@@ -1301,7 +1319,7 @@ static int adpcol(pMesh mesh,pSol met) {
   nc = 0;
   for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
-    if ( !MG_EOK(pt) )  continue;
+    if ( !MG_EOK(pt) /*|| MG_SIN(pt->tag)*/ )  continue;
     pxt = pt->xt ? &mesh->xtetra[pt->xt] : 0;
     ier = 0;
 
@@ -1332,7 +1350,7 @@ static int adpcol(pMesh mesh,pSol met) {
     iq = pt->v[i2];
     p0 = &mesh->point[ip];
     p1 = &mesh->point[iq];
-    if ( (p0->tag > p1->tag) )  continue;
+    if ( (p0->tag > p1->tag) || (p0->tag & MG_REQ) )  continue;
 
     /* Case of a boundary face */
     ilist = 0;
@@ -1389,10 +1407,7 @@ static int adptet(pMesh mesh,pSol met) {
         return(0);
       }
     }
-    else {
-      ns = 0;
-      warn = 0;
-    }
+    else  ns = 0;
 
 #ifdef USE_SCOTCH
     /*check enough vertex to renum*/
@@ -1567,7 +1582,7 @@ static int anatet4(pMesh mesh, pSol met) {
   ns = 0;
   for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
-    if ( !MG_EOK(pt) || pt->ref < 0 )   continue;
+    if ( !MG_EOK(pt) || pt->ref < 0 || MG_SIN(pt->tag) )   continue;
     nf = 0;
     if ( pt->xt ) {
       pxt = &mesh->xtetra[pt->xt];
@@ -1575,7 +1590,7 @@ static int anatet4(pMesh mesh, pSol met) {
         if ( pxt->ftag[j] & MG_BDY )  nf++;
     }
     if ( nf > 1 ) {
-      if(!split4bar(mesh,met,k)) return(-1);
+      if ( !split4bar(mesh,met,k) ) return(-1);
       ns++;
     }
     else {
@@ -1585,7 +1600,7 @@ static int anatet4(pMesh mesh, pSol met) {
         if ( ppt->tag & MG_BDY )  nf++;
       }
       if ( nf == 4 ) {
-        if(!split4bar(mesh,met,k)) return(-1);
+        if ( !split4bar(mesh,met,k) ) return(-1);
         ns++;
       }
     }

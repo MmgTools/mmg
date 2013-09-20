@@ -82,7 +82,7 @@ char *GmfKwdFmt[ GmfMaxKwd + 1 ][4] =
         {"Pentahedra", "Pentahedron", "i", "iiiiiii"},
         {"Hexahedra", "Hexahedron", "i", "iiiiiiiii"},
         {"Reserved", "", "", ""},
-        {"Reserved", "", "", ""},
+        {"RequiredTetrahedra", "RequiredTetrahedron", "i", "i"},
         {"Corners", "Corner", "i", "i"},
         {"Ridges", "Ridge", "i", "i"},
         {"RequiredVertices", "RequiredVertex", "i", "i"},

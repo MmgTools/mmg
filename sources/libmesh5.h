@@ -43,7 +43,7 @@ enum GmfKwdCod
     GmfPentahedra, \
     GmfHexahedra, \
     GmfReserved3, \
-    GmfReserved4, \
+    GmfRequiredTetrahedra, \
     GmfCorners, \
     GmfRidges, \
     GmfRequiredVertices, \

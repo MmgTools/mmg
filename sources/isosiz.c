@@ -38,9 +38,9 @@ static double defsizreg(pMesh mesh,pSol met,int nump,int *lists,int ilists) {
 
   /* Step 2 : rotation of the oriented surfacic ball with r : lispoi[k] is the common edge
      between faces lists[k-1] and lists[k] */
-  iel           = lists[0] / 4;
+  iel   = lists[0] / 4;
   iface = lists[0] % 4;
-  pt            = &mesh->tetra[iel];
+  pt    = &mesh->tetra[iel];
   lmin  = MAXLEN;
   lmax  = 0.0;
 
@@ -55,9 +55,9 @@ static double defsizreg(pMesh mesh,pSol met,int nump,int *lists,int ilists) {
   }
 
   for (k=1; k<ilists; k++) {
-    iel         = lists[k] / 4;
+    iel   = lists[k] / 4;
     iface = lists[k] % 4;
-    pt          = &mesh->tetra[iel];
+    pt    = &mesh->tetra[iel];
     ntempa = ntempb = 0;
     for (i=0; i<3; i++) {
       if ( pt->v[idir[iface][i]] != nump ) {
@@ -94,9 +94,9 @@ static double defsizreg(pMesh mesh,pSol met,int nump,int *lists,int ilists) {
   }
 
   /* Finish with point 0 */
-  iel           = lists[0] / 4;
+  iel   = lists[0] / 4;
   iface = lists[0] % 4;
-  pt            = &mesh->tetra[iel];
+  pt    = &mesh->tetra[iel];
   ntempa = ntempb = 0;
   for (i=0; i<3; i++) {
     if ( pt->v[idir[iface][i]] != nump ) {
@@ -159,7 +159,7 @@ static double defsizreg(pMesh mesh,pSol met,int nump,int *lists,int ilists) {
     tet2tri(mesh,iel,iface,&tt);
 
     pxt   = &mesh->xtetra[mesh->tetra[iel].xt];
-    if(!bezierCP(mesh,&tt,&b,MG_GET(pxt->ori,iface))){
+    if ( !bezierCP(mesh,&tt,&b,MG_GET(pxt->ori,iface)) ) {
       printf("%s:%d: Error: function bezierCP return 0\n",__FILE__,__LINE__);
       exit(EXIT_FAILURE);
     }
@@ -384,7 +384,7 @@ int defsiz_iso(pMesh mesh,pSol met) {
   /* size at regular surface points */
   for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
-    if ( !MG_EOK(pt) || pt->ref < 0 )   continue;
+    if ( !MG_EOK(pt) || pt->ref < 0 || MG_SIN(pt->tag) )   continue;
     else if ( !pt->xt )  continue;
     pxt = &mesh->xtetra[pt->xt];
 
@@ -409,7 +409,7 @@ int defsiz_iso(pMesh mesh,pSol met) {
   /* Travel all boundary faces to update size prescription for points on ridges/edges */
   for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
-    if ( !MG_EOK(pt) )  continue;
+    if ( !MG_EOK(pt) || MG_SIN(pt->tag) )  continue;
     else if ( !pt->xt ) continue;
     pxt = &mesh->xtetra[pt->xt];
 
@@ -516,7 +516,7 @@ int gradsiz_iso(pMesh mesh,pSol met) {
     nu = 0;
     for (k=1; k<=mesh->ne; k++) {
       pt = &mesh->tetra[k];
-      if ( !MG_EOK(pt) )  continue;
+      if ( !MG_EOK(pt) || MG_SIN(pt->tag) )  continue;
 
       for (i=0; i<4; i++) {
         for (j=0; j<3; j++) {

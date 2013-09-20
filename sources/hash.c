@@ -974,7 +974,8 @@ int bdrySet(pMesh mesh) {
   return(1);
 }
 
-/** Update tag and refs of tetra edges  */
+/** Update tag and refs of tetra edges.
+    If tetra is required, set the faces/edges to required */
 int bdryUpdate(pMesh mesh) {
   pTetra   pt;
   pTria    ptt;
@@ -993,26 +994,38 @@ int bdryUpdate(pMesh mesh) {
   for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
     if ( !MG_EOK(pt) )  continue;
-    if ( !pt->xt )  continue;
-    pxt = &mesh->xtetra[pt->xt];
-  }
+    if ( pt->tag & MG_REQ ) {
+      mesh->point[mesh->tetra[k].v[0]].tag |= MG_REQ;
+      mesh->point[mesh->tetra[k].v[1]].tag |= MG_REQ;
+      mesh->point[mesh->tetra[k].v[2]].tag |= MG_REQ;
+      mesh->point[mesh->tetra[k].v[3]].tag |= MG_REQ;
+      settag(mesh,k,0,MG_REQ,0);
+      settag(mesh,k,1,MG_REQ,0);
+      settag(mesh,k,2,MG_REQ,0);
+      settag(mesh,k,3,MG_REQ,0);
+      settag(mesh,k,4,MG_REQ,0);
+      settag(mesh,k,5,MG_REQ,0);
+    }
 
-  for (k=1; k<=mesh->ne; k++) {
-    pt = &mesh->tetra[k];
-    if ( !MG_EOK(pt) )  continue;
     if ( !pt->xt )  continue;
     pxt = &mesh->xtetra[pt->xt];
 
     for (i=0; i<4; i++) {
       /* Set edge tag */
       if ( ! MG_GET(pxt->ori,i) ) continue;
-      if ( pxt->ftag[i] ) {
+      if ( pxt->ftag[i] & MG_BDY ) {
         ia = pt->v[idir[i][0]];
         ib = pt->v[idir[i][1]];
         ic = pt->v[idir[i][2]];
         kt = hashGetFace(&hash,ia,ib,ic);
         assert(kt);
         ptt = &mesh->tria[kt];
+        if ( pt->tag & MG_REQ ) {
+          pxt->ftag[i] |= MG_REQ;
+          ptt->tag[0]   = MG_REQ;
+          ptt->tag[1]   = MG_REQ;
+          ptt->tag[2]   = MG_REQ;
+        }
         for ( j=0; j<3; j++ ) {
           tag = ptt->tag[j];
           if ( tag || ptt->edg[j] )

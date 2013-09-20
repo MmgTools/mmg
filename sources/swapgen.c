@@ -35,6 +35,7 @@ int chkswpgen(pMesh mesh,int start,int ia,int *ilist,int *list,double crit) {
 
   while ( adj && adj != start ) {
     pt = &mesh->tetra[adj];
+    if ( pt->tag & MG_REQ ) return(0);
 
     /* Edge is on a boundary between two different domains */
     if ( pt->ref != refdom )  return(0);

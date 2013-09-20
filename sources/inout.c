@@ -9,7 +9,7 @@ int loadMesh(pMesh mesh) {
   pEdge        pa;
   pPoint       ppt;
   float        fp1,fp2,fp3;
-  int          i,k,inm,ia,np,nr,nre,nc,aux,nt,ref,v[3],na,*ina;
+  int          i,k,inm,ia,np,nr,nre,nc,aux,nt,ref,v[3],na,*ina,nereq;
   char        *ptr,*name,data[128];
 
   name = mesh->namein;
@@ -243,6 +243,18 @@ int loadMesh(pMesh mesh) {
       pt->v[3] = aux;
     }
   }
+  /* get required tetrahedra */
+  nereq = GmfStatKwd(inm,GmfRequiredTetrahedra);
+  if ( nereq ) {
+    GmfGotoKwd(inm,GmfRequiredTetrahedra);
+    for (k=1; k<=nereq; k++) {
+      GmfGetLin(inm,GmfRequiredTetrahedra,&i);
+      assert(i <= mesh->ne);
+      pt = &mesh->tetra[i];
+      pt->tag |= MG_REQ;
+    }
+  }
+
 
   /* stats */
   if ( abs(info.imprim) > 4 ) {
@@ -253,16 +265,18 @@ int loadMesh(pMesh mesh) {
       fprintf(stdout,"     NUMBER OF TRIANGLES    %8d\n",mesh->nt);
     fprintf(stdout,"     NUMBER OF ELEMENTS     %8d / %8d\n",mesh->ne,mesh->nemax);
 
-    if(np || nre || nt ){
+    if ( np || nre || nt || nereq ) {
       fprintf(stdout,"     NUMBER OF REQUIRED ENTITIES: \n");
       if ( np )
-        fprintf(stdout,"                  VERTICES  %8d \n",np);
+        fprintf(stdout,"                  VERTICES    %8d \n",np);
       if ( nre )
-        fprintf(stdout,"                  EDGES     %8d \n",nre);
+        fprintf(stdout,"                  EDGES       %8d \n",nre);
       if ( nt )
-        fprintf(stdout,"                  TRIANGLES %8d \n",nt);
+        fprintf(stdout,"                  TRIANGLES   %8d \n",nt);
+      if ( nereq )
+        fprintf(stdout,"                  TETRAHEDRAS %8d \n",nereq);
     }
-    if(nc) fprintf(stdout,"     NUMBER OF CORNERS      %8d \n",nc);
+    if(nc) fprintf(stdout,"     NUMBER OF CORNERS        %8d \n",nc);
   }
   GmfCloseMesh(inm);
   return(1);
@@ -275,7 +289,7 @@ int saveMesh(pMesh mesh) {
   pTria        ptt;
   xPoint      *pxp;
   hgeom       *ph;
-  int          k,i,na,nc,np,ne,nn,nr,nre,nereq,ntreq,nt,outm;
+  int          k,i,na,nc,np,ne,nn,nr,nre,nedreq,ntreq,nt,outm,nereq;
   char         data[128];
 
   /* build hash table for edges */
@@ -351,13 +365,13 @@ int saveMesh(pMesh mesh) {
     mesh->tria=NULL;
 
     /* edges + ridges + required edges */
-    na = nr = nereq = 0;
+    na = nr = nedreq = 0;
     for (k=0; k<=mesh->htab.max; k++) {
       ph = &mesh->htab.geom[k];
       if ( !ph->a )  continue;
       na++;
       if ( ph->tag & MG_GEO )  nr++;
-      if ( ph->tag & MG_REQ )  nereq++;
+      if ( ph->tag & MG_REQ )  nedreq++;
     }
     if ( na ) {
       GmfSetKwd(outm,GmfEdges,na);
@@ -376,8 +390,8 @@ int saveMesh(pMesh mesh) {
           if ( ph->tag & MG_GEO )  GmfSetLin(outm,GmfRidges,na);
         }
       }
-      if ( nereq ) {
-        GmfSetKwd(outm,GmfRequiredEdges,nereq);
+      if ( nedreq ) {
+        GmfSetKwd(outm,GmfRequiredEdges,nedreq);
         na = 0;
         for (k=0; k<=mesh->htab.max; k++) {
           ph = &mesh->htab.geom[k];
@@ -408,17 +422,34 @@ int saveMesh(pMesh mesh) {
   }
 
   /* tetrahedra */
-  ne = 0;
+  ne = nereq = 0;
   for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
-    if ( MG_EOK(pt) ) ne++;
+    if ( !MG_EOK(pt) ) continue;
+    ne++;
+    if ( pt->tag & MG_REQ ){
+      nereq++;
+    }
   }
+
   GmfSetKwd(outm,GmfTetrahedra,ne);
   for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
     if ( MG_EOK(pt) ) GmfSetLin(outm,GmfTetrahedra,mesh->point[pt->v[0]].tmp,mesh->point[pt->v[1]].tmp, \
                                 mesh->point[pt->v[2]].tmp,mesh->point[pt->v[3]].tmp,pt->ref);
   }
+
+  if ( nereq ) {
+    GmfSetKwd(outm,GmfRequiredTetrahedra,nereq);
+    ne = 0;
+    for (k=1; k<=mesh->ne; k++) {
+      pt = &mesh->tetra[k];
+      if ( !MG_EOK(pt) ) continue;
+      ne++;
+      if ( pt->tag & MG_REQ ) GmfSetLin(outm,GmfRequiredTetrahedra,ne);
+    }
+  }
+
 
   /* write normals */
   nn = nt = 0;
@@ -470,7 +501,7 @@ int saveMesh(pMesh mesh) {
       fprintf(stdout,"     NUMBER OF EDGES      %8d   RIDGES  %8d\n",na,nr);
     if ( mesh->nt )
       fprintf(stdout,"     NUMBER OF TRIANGLES  %8d\n",mesh->nt);
-    fprintf(stdout,"     NUMBER OF ELEMENTS   %8d\n",ne);
+    fprintf(stdout,"     NUMBER OF ELEMENTS   %8d\n",mesh->ne);
   }
 
   GmfCloseMesh(outm);

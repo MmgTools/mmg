@@ -625,7 +625,7 @@ int split1b(pMesh mesh, pSol met,int *list, int ret, int ip,int cas){
     /* Adjacency relations through both splitted faces */
     if ( k == 0 ) {
       if ( (list[1] / 6) == (nei2 / 4) ) {
-        if (  MG_SMSGN(newtet[0],newtet[1]) ) {  //new elt of list[0] goes with new elt of list[1]
+        if ( MG_SMSGN(newtet[0],newtet[1]) ) {  //new elt of list[0] goes with new elt of list[1]
           adja[tau[2]] = nei2;
           adjan[tau[2]] = 4*fabs(newtet[1])+(nei2 %4);
         }
@@ -641,7 +641,7 @@ int split1b(pMesh mesh, pSol met,int *list, int ret, int ip,int cas){
 
         else {
           assert((list[ilist-1] / 6) == (nei3 / 4));
-          if (  MG_SMSGN(newtet[0],newtet[ilist-1]) ) {
+          if ( MG_SMSGN(newtet[0],newtet[ilist-1]) ) {
             adja[tau[3]] = nei3;
             adjan[tau[3]] = 4*fabs(newtet[ilist-1])+(nei3 %4);
           }
@@ -654,7 +654,7 @@ int split1b(pMesh mesh, pSol met,int *list, int ret, int ip,int cas){
 
       else {
         assert((list[1] / 6) == (nei3 / 4));
-        if (  MG_SMSGN(newtet[0],newtet[1]) ) {
+        if ( MG_SMSGN(newtet[0],newtet[1]) ) {
           adja[tau[3]] = nei3;
           adjan[tau[3]] = 4*fabs(newtet[1])+(nei3 %4);
         }
@@ -670,7 +670,7 @@ int split1b(pMesh mesh, pSol met,int *list, int ret, int ip,int cas){
 
         else {
           assert((list[ilist-1]) / 6 == (nei2 / 4));
-          if (  MG_SMSGN(newtet[0],newtet[ilist-1]) ) {
+          if ( MG_SMSGN(newtet[0],newtet[ilist-1]) ) {
             adja[tau[2]] = nei2;
             adjan[tau[2]] = 4*fabs(newtet[ilist-1])+(nei2 %4);
           }
@@ -684,7 +684,7 @@ int split1b(pMesh mesh, pSol met,int *list, int ret, int ip,int cas){
 
     else if ( k==ilist-1 ) {
       if ( (list[ilist-2] / 6) == (nei2 / 4) ) {
-        if (  MG_SMSGN(newtet[ilist-1],newtet[ilist-2]) ) {
+        if ( MG_SMSGN(newtet[ilist-1],newtet[ilist-2]) ) {
           adja[tau[2]] = nei2;
           adjan[tau[2]] = 4*fabs(newtet[ilist-2])+(nei2 %4);
         }
@@ -700,7 +700,7 @@ int split1b(pMesh mesh, pSol met,int *list, int ret, int ip,int cas){
 
         else {
           assert((list[0]) / 6 == (nei3 / 4));
-          if (  MG_SMSGN(newtet[ilist-1],newtet[0]) ) {
+          if ( MG_SMSGN(newtet[ilist-1],newtet[0]) ) {
             adja[tau[3]] = nei3;
             adjan[tau[3]] = 4*fabs(newtet[0])+(nei3 %4);
           }
@@ -1696,7 +1696,7 @@ void split3cone(pMesh mesh,pSol met,int k,int vx[6]) {
       lentmp=lenedg(mesh,met,pt[0]->v[iare[i][0]],pt[0]->v[iare[i][1]]);
       if ( lentmp<lmintmp) {
         lmintmp=lentmp;
-      }else if ( lentmp>lmaxtmp) {
+      } else if ( lentmp>lmaxtmp) {
         lmaxtmp=lentmp;
       }
     }
@@ -3462,37 +3462,37 @@ void split4op(pMesh mesh,pSol met,int k,int vx[6]) {
       lentmp=lenedg(mesh,met,pt[0]->v[iare[i][0]],pt[0]->v[iare[i][1]]);
       if ( lentmp<lmintmp) {
         tabtmp[9][1]++;
-      }else if ( lentmp>lmaxtmp) {
+      } else if ( lentmp>lmaxtmp) {
         tabtmp[9][2]++;
       }
       lentmp=lenedg(mesh,met,pt[1]->v[iare[i][0]],pt[1]->v[iare[i][1]]);
       if ( lentmp<lmintmp) {
         tabtmp[9][1]++;
-      }else if ( lentmp>lmaxtmp) {
+      } else if ( lentmp>lmaxtmp) {
         tabtmp[9][2]++;
       }
       lentmp=lenedg(mesh,met,pt[2]->v[iare[i][0]],pt[2]->v[iare[i][1]]);
       if ( lentmp<lmintmp) {
         tabtmp[9][1]++;
-      }else if ( lentmp>lmaxtmp) {
+      } else if ( lentmp>lmaxtmp) {
         tabtmp[9][2]++;
       }
       lentmp=lenedg(mesh,met,pt[3]->v[iare[i][0]],pt[3]->v[iare[i][1]]);
       if ( lentmp<lmintmp) {
         tabtmp[9][1]++;
-      }else if ( lentmp>lmaxtmp) {
+      } else if ( lentmp>lmaxtmp) {
         tabtmp[9][2]++;
       }
       lentmp=lenedg(mesh,met,pt[4]->v[iare[i][0]],pt[4]->v[iare[i][1]]);
       if ( lentmp<lmintmp) {
         tabtmp[9][1]++;
-      }else if ( lentmp>lmaxtmp) {
+      } else if ( lentmp>lmaxtmp) {
         tabtmp[9][2]++;
       }
       lentmp=lenedg(mesh,met,pt[5]->v[iare[i][0]],pt[5]->v[iare[i][1]]);
       if ( lentmp<lmintmp) {
         tabtmp[9][1]++;
-      }else if ( lentmp>lmaxtmp) {
+      } else if ( lentmp>lmaxtmp) {
         tabtmp[9][2]++;
       }
     }
@@ -3752,43 +3752,43 @@ void split5(pMesh mesh,pSol met,int k,int vx[6]) {
       lentmp=lenedg(mesh,met,pt[0]->v[iare[i][0]],pt[0]->v[iare[i][1]]);
       if ( lentmp<lmintmp ) {
         tabtmp[10][1]++;
-      }else if ( lentmp>lmaxtmp ) {
+      } else if ( lentmp>lmaxtmp ) {
         tabtmp[10][2]++;
       }
       lentmp=lenedg(mesh,met,pt[1]->v[iare[i][0]],pt[1]->v[iare[i][1]]);
       if ( lentmp<lmintmp ) {
         tabtmp[10][1]++;
-      }else if ( lentmp>lmaxtmp ) {
+      } else if ( lentmp>lmaxtmp ) {
         tabtmp[10][2]++;
       }
       lentmp=lenedg(mesh,met,pt[2]->v[iare[i][0]],pt[2]->v[iare[i][1]]);
       if ( lentmp<lmintmp ) {
         tabtmp[10][1]++;
-      }else if ( lentmp>lmaxtmp ) {
+      } else if ( lentmp>lmaxtmp ) {
         tabtmp[10][2]++;
       }
       lentmp=lenedg(mesh,met,pt[3]->v[iare[i][0]],pt[3]->v[iare[i][1]]);
       if ( lentmp<lmintmp ) {
         tabtmp[10][1]++;
-      }else if ( lentmp>lmaxtmp ) {
+      } else if ( lentmp>lmaxtmp ) {
         tabtmp[10][2]++;
       }
       lentmp=lenedg(mesh,met,pt[4]->v[iare[i][0]],pt[4]->v[iare[i][1]]);
       if ( lentmp<lmintmp ) {
         tabtmp[10][1]++;
-      }else if ( lentmp>lmaxtmp ) {
+      } else if ( lentmp>lmaxtmp ) {
         tabtmp[10][2]++;
       }
       lentmp=lenedg(mesh,met,pt[5]->v[iare[i][0]],pt[5]->v[iare[i][1]]);
       if ( lentmp<lmintmp ) {
         tabtmp[10][1]++;
-      }else if ( lentmp>lmaxtmp ) {
+      } else if ( lentmp>lmaxtmp ) {
         tabtmp[10][2]++;
       }
       lentmp=lenedg(mesh,met,pt[6]->v[iare[i][0]],pt[6]->v[iare[i][1]]);
       if ( lentmp<lmintmp ) {
         tabtmp[10][1]++;
-      }else if ( lentmp>lmaxtmp ) {
+      } else if ( lentmp>lmaxtmp ) {
         tabtmp[10][2]++;
       }
     }
@@ -3814,7 +3814,7 @@ void split6(pMesh mesh,pSol met,int k,int vx[6]) {
       lentmp=lenedg(mesh,met,pt[0]->v[iare[i][0]],pt[0]->v[iare[i][1]]);
       if ( lentmp<lmintmp ) {
         lmintmp=lentmp;
-      }else if ( lentmp>lmaxtmp ) {
+      } else if ( lentmp>lmaxtmp ) {
         lmaxtmp=lentmp;
       }
     }
@@ -4160,43 +4160,43 @@ void split6(pMesh mesh,pSol met,int k,int vx[6]) {
       lentmp=lenedg(mesh,met,pt[0]->v[iare[i][0]],pt[0]->v[iare[i][1]]);
       if ( lentmp<lmintmp ) {
         tabtmp[11][1]++;
-      }else if ( lentmp>lmaxtmp ) {
+      } else if ( lentmp>lmaxtmp ) {
         tabtmp[11][2]++;
       }
       lentmp=lenedg(mesh,met,pt[1]->v[iare[i][0]],pt[1]->v[iare[i][1]]);
       if ( lentmp<lmintmp ) {
         tabtmp[11][1]++;
-      }else if ( lentmp>lmaxtmp ) {
+      } else if ( lentmp>lmaxtmp ) {
         tabtmp[11][2]++;
       }
       lentmp=lenedg(mesh,met,pt[2]->v[iare[i][0]],pt[2]->v[iare[i][1]]);
       if ( lentmp<lmintmp ) {
         tabtmp[11][1]++;
-      }else if ( lentmp>lmaxtmp ) {
+      } else if ( lentmp>lmaxtmp ) {
         tabtmp[11][2]++;
       }
       lentmp=lenedg(mesh,met,pt[3]->v[iare[i][0]],pt[3]->v[iare[i][1]]);
       if ( lentmp<lmintmp ) {
         tabtmp[11][1]++;
-      }else if ( lentmp>lmaxtmp ) {
+      } else if ( lentmp>lmaxtmp ) {
         tabtmp[11][2]++;
       }
       lentmp=lenedg(mesh,met,pt[4]->v[iare[i][0]],pt[4]->v[iare[i][1]]);
       if ( lentmp<lmintmp ) {
         tabtmp[11][1]++;
-      }else if ( lentmp>lmaxtmp ) {
+      } else if ( lentmp>lmaxtmp ) {
         tabtmp[11][2]++;
       }
       lentmp=lenedg(mesh,met,pt[5]->v[iare[i][0]],pt[5]->v[iare[i][1]]);
       if ( lentmp<lmintmp ) {
         tabtmp[11][1]++;
-      }else if ( lentmp>lmaxtmp ) {
+      } else if ( lentmp>lmaxtmp ) {
         tabtmp[11][2]++;
       }
       lentmp=lenedg(mesh,met,pt[7]->v[iare[i][0]],pt[7]->v[iare[i][1]]);
       if ( lentmp<lmintmp ) {
         tabtmp[11][1]++;
-      }else if ( lentmp>lmaxtmp ) {
+      } else if ( lentmp>lmaxtmp ) {
         tabtmp[11][2]++;
       }
     }

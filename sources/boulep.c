@@ -710,8 +710,11 @@ inline int settag(pMesh mesh,int start,int ia,int tag,int edg) {
 
   if ( pt->xt ) {
     pxt = &mesh->xtetra[pt->xt];
-    pxt->tag[ia] |= tag;
-    pxt->edg[ia]  = edg;
+    if ( (pxt->ftag[ifar[ia][0]] & MG_BDY) ||
+         (pxt->ftag[ifar[ia][1]] & MG_BDY) ) {
+      pxt->tag[ia] |= tag;
+      pxt->edg[ia]  = MG_MAX(pxt->edg[ia],edg);
+    }
   }
   while ( adj && (adj != start) ) {
     pt = &mesh->tetra[adj];
@@ -725,8 +728,11 @@ inline int settag(pMesh mesh,int start,int ia,int tag,int edg) {
     assert(i<6);
     if ( pt->xt ) {
       pxt = &mesh->xtetra[pt->xt];
-      pxt->tag[i] |= tag;
-      pxt->edg[i]  = edg;
+      if ( (pxt->ftag[ifar[i][0]] & MG_BDY) ||
+           (pxt->ftag[ifar[i][1]] & MG_BDY) ) {
+        pxt->tag[i] |= tag;
+        pxt->edg[i]  = MG_MAX(pxt->edg[i],edg);
+      }
     }
     /* set new triangle for travel */
     adja = &mesh->adja[4*(adj-1)+1];
@@ -761,8 +767,11 @@ inline int settag(pMesh mesh,int start,int ia,int tag,int edg) {
     assert(i<6);
     if ( pt->xt ) {
       pxt = &mesh->xtetra[pt->xt];
-      pxt->tag[i] |= tag;
-      pxt->edg[i]  = edg;
+      if ( (pxt->ftag[ifar[i][0]] & MG_BDY) ||
+           (pxt->ftag[ifar[i][1]] & MG_BDY) ) {
+        pxt->tag[i] |= tag;
+        pxt->edg[i]  = MG_MAX(pxt->edg[i],edg);
+      }
     }
     /* set new triangle for travel */
     adja = &mesh->adja[4*(adj-1)+1];
@@ -779,10 +788,11 @@ inline int settag(pMesh mesh,int start,int ia,int tag,int edg) {
 }
 
 /** Find all tets sharing edge ia of tetra start
-    return 2*ilist if shell is closed, 2*ilist +1 otherwise */
+    return 2*ilist if shell is closed, 2*ilist +1 otherwise
+    return a negative number if one of the tet of the shell is required */
 int coquil(pMesh mesh,int start,int ia,int * list) {
   pTetra  pt;
-  int     ilist,*adja,piv,adj,na,nb,ipa,ipb;
+  int     ilist,*adja,piv,adj,na,nb,ipa,ipb,coeff;
   char    i;
 
   if ( start < 1 )  return(0);
@@ -799,8 +809,10 @@ int coquil(pMesh mesh,int start,int ia,int * list) {
   adj = adja[ifar[ia][0]] / 4; // start travelling by face (ia,0)
   piv = pt->v[ifar[ia][1]];
 
+  coeff = 1;
   while ( adj && (adj != start) ) {
     pt = &mesh->tetra[adj];
+    if ( pt->tag & MG_REQ )  coeff = -1;
     /* identification of edge number in tetra adj */
     for (i=0; i<6; i++) {
       ipa = iare[i][0];
@@ -829,7 +841,7 @@ int coquil(pMesh mesh,int start,int ia,int * list) {
 
   /* At this point, the first travel, in one direction, of the shell is complete. Now, analyze why
      the travel ended. */
-  if ( adj == start )  return(2*ilist);
+  if ( adj == start )  return(coeff*2*ilist);
   assert(!adj); // a boundary has been detected
 
   adj = list[ilist-1] / 6;
@@ -854,6 +866,7 @@ int coquil(pMesh mesh,int start,int ia,int * list) {
 
   while ( adj ) {
     pt = &mesh->tetra[adj];
+    if ( pt->tag & MG_REQ )  coeff = -1;
     /* identification of edge number in tetra adj */
     for (i=0; i<6; i++) {
       ipa = iare[i][0];
@@ -879,7 +892,7 @@ int coquil(pMesh mesh,int start,int ia,int * list) {
     }
   }
   assert(!adj);
-  return(2*ilist+1);
+  return( coeff*(2*ilist+1) );
 }
 
 /** Identify whether edge ia in start is a boundary edge by unfolding its shell */

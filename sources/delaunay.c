@@ -752,18 +752,21 @@ int correction_iso(pMesh mesh,int ip,int *list,int ilist,int nedep) {
 /* } */
 
 
+/** Return a negative value for ilist if one of the tet of the cavity is required */
 int cavity(pMesh mesh,pSol sol,int iel,int ip,int *list,int lon) {
   pPoint    ppt;
   pTetra    pt,pt1,ptc;
   double    c[3],crit,dd,eps,ray,ct[12];
   int      *adja,*adjb,k,adj,adi,voy,i,j,ilist,ipil,jel,iadr,base;
   int       vois[4],l;
-  int tref;
+  int       tref,isreq;
 
   if ( lon < 1 )  return(0);
   ppt = &mesh->point[ip];
   if ( ppt->tag & MG_NUL )  return(0);
   base  = ++mesh->mark;
+
+  isreq = 0;
 
   tref = mesh->tetra[list[0]/6].ref;
   for (k=0; k<lon; k++) {
@@ -826,6 +829,7 @@ int cavity(pMesh mesh,pSol sol,int iel,int ip,int *list,int lon) {
       }
       /* store tetra */
       if ( j == 4 ) {
+        if ( pt->tag & MG_REQ ) isreq = 1;
 	pt->mark = base;
 	list[ilist++] = adj;
       }
@@ -842,6 +846,7 @@ int cavity(pMesh mesh,pSol sol,int iel,int ip,int *list,int lon) {
   else
     ilist = correction_iso(mesh,ip,list,ilist,lon);
  
+  if ( isreq ) ilist = -fabs(ilist);
 
   if(MMG_cas==1) MMG_nvol++;
   else if(MMG_cas==2 || MMG_cas>20) {
