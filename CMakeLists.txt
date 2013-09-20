@@ -25,7 +25,7 @@ IF(CMAKE_COMPILER_IS_GNUCC)
     ADD_DEFINITIONS( -mmacosx-version-min=10.4 -arch x86_64)
 
     # To avoid pbs with binary files...
-    SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -arch x86_64")
+    SET(CMAKE_EXE_LINKER_FLAGS "-arch x86_64 ${CMAKE_EXE_LINKER_FLAGS}")
     #SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static-libgcc")
     # Determine if the processor supports 64bit execution
     EXECUTE_PROCESS(
@@ -51,7 +51,7 @@ IF(NOT CMAKE_COMPILER_IS_CLANG)
   OPTION ( PROFILING "Enable/Disable PROFILING" OFF )
   IF(PROFILING)
     ADD_DEFINITIONS(-pg)
-    SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -pg")
+    SET(CMAKE_EXE_LINKER_FLAGS "-pg ${CMAKE_EXE_LINKER_FLAGS}")
   ENDIF(PROFILING)
 ENDIF(NOT CMAKE_COMPILER_IS_CLANG)
 
@@ -92,7 +92,7 @@ IF ( USE_SCOTCH )
     #SET(CMAKE_REQUIRED_LIBRARIES ${SCOTCH_LIBRARY})
     #SET(CMAKE_REQUIRED_LIBRARIES ${SCOTCHERR_LIBRARY})
 
-    SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DUSE_SCOTCH")
+    SET(CMAKE_C_FLAGS "-DUSE_SCOTCH ${CMAKE_C_FLAGS}")
 
   ELSE ()
     MESSAGE("Please set the environment variable SCOTCH_DIR to your SCOTCH directory whose name should contain the \"scotch\" string" )
@@ -200,8 +200,8 @@ IF(BUILD_TESTING)
   # TARGET_LINK_LIBRARIES(mmg3d5 ${M_LIB} gcov)
 
   IF (CMAKE_COMPILER_IS_GNUCC)
-    SET(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS} -g -Wall -fprofile-arcs -ftest-coverage --coverage")
-    SET(CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS} -g -fprofile-arcs -ftest-coverage --coverage")
+    SET(CMAKE_C_FLAGS_DEBUG "-g -Wall -fprofile-arcs -ftest-coverage --coverage ${CMAKE_C_FLAGS}")
+    SET(CMAKE_EXE_LINKER_FLAGS_DEBUG "-g -fprofile-arcs -ftest-coverage --coverage ${CMAKE_EXE_LINKER_FLAGS}")
   ENDIF(CMAKE_COMPILER_IS_GNUCC)
 
   INCLUDE( ${CMAKE_SOURCE_DIR}/testing.cmake )

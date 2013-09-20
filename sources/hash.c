@@ -533,7 +533,8 @@ void hEdge(HGeom *hash,int a,int b,int ref,char tag) {
     hash->nxt = ph->nxt;
     ph->nxt = 0;
     if ( hash->nxt >= hash->max ) {
-      if ( info.ddebug )  fprintf(stdout,"  ## Memory alloc problem (edge): %d\n",hash->max);
+      if ( info.ddebug )
+        fprintf(stdout,"  ## Memory alloc problem (edge): %d\n",hash->max);
       hash->max *= 1.2;
       hash->geom = (hgeom*)realloc(hash->geom,hash->max*sizeof(hgeom));
       assert(hash->geom);
@@ -679,7 +680,8 @@ int bdryTria(pMesh mesh) {
   if ( mesh->nt == nttmp ) return(1);
   else if ( mesh->nt ){
     fprintf(stdout,"  ## WARNING: SURFACES TRIANGLES ARE DELETED\n");
-    fprintf(stdout,"              (You have 2 domains but only surfaces triangles)\n");
+    fprintf(stdout,"              ");
+    fprintf(stdout,"(You have 2 domains but only surfaces triangles)\n");
     free(mesh->tria);
     mesh->tria = NULL;
   }
@@ -689,7 +691,8 @@ int bdryTria(pMesh mesh) {
   mesh->tria = (pTria)calloc(mesh->nt+1,sizeof(Tria));
   if ( !mesh->tria ) {
     fprintf(stdout,"  ## Allocation problem (tria), not enough memory.\n");
-    fprintf(stdout,"  ## Check the mesh size or increase the allocated memory with the -m option.\n");
+    fprintf(stdout,"  ## Check the mesh size or ");
+    fprintf(stdout,"increase the allocated memory with the -m option.\n");
     fprintf(stdout,"  Exit program.\n");
     return(0);
   }
@@ -774,7 +777,8 @@ int bdryIso(pMesh mesh) {
     mesh->tria = (pTria)realloc(mesh->tria,(mesh->nt+nt+1)*sizeof(Tria));
   if ( !mesh->tria ){
     fprintf(stdout,"  ## Allocation problem (tria), not enough memory.\n");
-    fprintf(stdout,"  ## Check the mesh size or increase the allocated memory with the -m option.\n");
+    fprintf(stdout,"  ## Check the mesh size or ");
+    fprintf(stdout,"increase the allocated memory with the -m option.\n");
     fprintf(stdout,"  Exit program.\n");
     return(0);
   }
@@ -835,7 +839,8 @@ static int hashFace(Hash *hash,int ia,int ib,int ic,int k) {
     ++hash->nxt;
     if ( hash->nxt == hash->max ) {
       fprintf(stdout,"  ## Memory alloc problem (edge): %d\n",hash->max);
-      fprintf(stdout,"  ## Check the mesh size or increase the allocated memory with the -m option.\n");
+      fprintf(stdout,"  ## Check the mesh size or ");
+      fprintf(stdout,"increase the allocated memory with the -m option.\n");
       fprintf(stdout,"  Exit program.\n");
       return(0);
     }
@@ -897,9 +902,10 @@ int bdrySet(pMesh mesh) {
   mesh->xt     = 0;
   mesh->xtmax  = mesh->ntmax; //10 * NTMAX;
   mesh->xtetra = (pxTetra)calloc(mesh->xtmax+1,sizeof(xTetra));
-  if( !mesh->xtetra ){
+  if ( !mesh->xtetra ) {
     fprintf(stdout,"  ## Allocation problem (xtetra), not enough memory.\n");
-    fprintf(stdout,"  ## Check the mesh size or increase the allocated memory with the -m option.\n");
+    fprintf(stdout,"  ## Check the mesh size or ");
+    fprintf(stdout,"increase the allocated memory with the -m option.\n");
     fprintf(stdout,"  Exit program.\n");
     return(0);
   }
@@ -989,10 +995,6 @@ int bdryUpdate(pMesh mesh) {
     if ( !MG_EOK(pt) )  continue;
     if ( !pt->xt )  continue;
     pxt = &mesh->xtetra[pt->xt];
-    for ( j=0; j<6; j++) {
-      pxt->tag[j] = 0;
-      pxt->edg[j] = 0;
-    }
   }
 
   for (k=1; k<=mesh->ne; k++) {
@@ -1063,7 +1065,7 @@ int bdryPerm(pMesh mesh) {
         if ( !kt ) {
           fprintf(stdout,"%s:%d: Error: function hashGetFace return 0\n",__FILE__,__LINE__);
           fprintf(stdout," Maybe you have non-boundary triangles.");
-          fprintf(stdout," Check triangle %d %d %d\n",ia,ib,ic);
+          fprintf(stdout," Check triangle of vertices %d %d %d\n",ia,ib,ic);
           exit(EXIT_FAILURE);
         }
 

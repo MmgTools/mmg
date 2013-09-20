@@ -95,13 +95,12 @@ void split1(pMesh mesh,pSol met,int k,int vx[6]) {
   pt  = &mesh->tetra[k];
 #ifdef DEBUG
   lmintmp=0.6;lmaxtmp=1.3;
-  for(i=0;i<6;i++)
-    {
+  for (i=0; i<6; i++) {
       lentmp=lenedg(mesh,met,pt->v[iare[i][0]],pt->v[iare[i][1]]);
-      if(lentmp<lmintmp) {
+      if ( lentmp<lmintmp ) {
         //       tabtmp[0][1]++;
         lmintmp=lentmp;
-      }else if(lentmp>lmaxtmp) {
+      }else if ( lentmp>lmaxtmp ) {
         //tabtmp[0][2]++;
         lmaxtmp=lentmp;
       }
@@ -162,7 +161,7 @@ void split1(pMesh mesh,pSol met,int k,int vx[6]) {
   }
 
   pt->flag = pt1->flag = 0;
-  isxt = 0 ;
+  isxt  = 0 ;
   isxt1 = 0;
   for (i=0; i<4; i++) {
     if ( xt.ref[i]  || xt.ftag[i] )  isxt = 1;
@@ -183,7 +182,13 @@ void split1(pMesh mesh,pSol met,int k,int vx[6]) {
     }
     else if ( isxt && isxt1 ) {
       mesh->xt++;
-      assert(mesh->xt < mesh->xtmax);
+      if ( mesh->xt >= mesh->xtmax ) {
+        fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
+        fprintf(stdout,"  ## Check the mesh size or ");
+        fprintf(stdout,"increase the allocated memory with the -m option.\n");
+        fprintf(stdout,"  Exit program.\n");
+        exit(EXIT_FAILURE);
+      }
       pt1->xt = mesh->xt;
       memcpy(pxt0,&xt,sizeof(xTetra));
       pxt0 = &mesh->xtetra[mesh->xt];
@@ -200,18 +205,17 @@ void split1(pMesh mesh,pSol met,int k,int vx[6]) {
 #ifdef DEBUG
   tabtmp[0][3]=lmintmp;  tabtmp[0][4]=lmaxtmp;
   tabtmp[0][5]=DBL_MAX;  tabtmp[0][6]=DBL_MIN;
-  for(i=0;i<6;i++)
-    {
+  for (i=0; i<6; i++) {
       lentmp=lenedg(mesh,met,pt->v[iare[i][0]],pt->v[iare[i][1]]);
-      if(lentmp<lmintmp) {
+      if ( lentmp<lmintmp ) {
         tabtmp[0][1]++;
-      }else if(lentmp>lmaxtmp) {
+      }else if ( lentmp>lmaxtmp ) {
         tabtmp[0][2]++;
       }
       lentmp=lenedg(mesh,met,pt1->v[iare[i][0]],pt1->v[iare[i][1]]);
-      if(lentmp<lmintmp) {
+      if ( lentmp<lmintmp ) {
         tabtmp[0][1]++;
-      }else if(lentmp>lmaxtmp) {
+      }else if ( lentmp>lmaxtmp ) {
         tabtmp[0][2]++;
       }
     }
@@ -278,11 +282,11 @@ int split1b(pMesh mesh, pSol met,int *list, int ret, int ip,int cas){
   ilist = ret / 2;
   open  = ret % 2;
 
-  if(met->m){
+  if ( cas && met->m ) {
     lmin = 0.6;
     lmax = 1.3;
     for (j=0; j<ilist; j++) {
-      for(i=0;i<6;i++) {
+      for (i=0; i<6; i++) {
         len = lenedg(mesh,met, mesh->tetra[list[j]/6].v[iare[i][0]],
                      mesh->tetra[list[j]/6].v[iare[i][1]]);
         if ( len < lmin) {
@@ -294,19 +298,16 @@ int split1b(pMesh mesh, pSol met,int *list, int ret, int ip,int cas){
       }
     }
     /* cree-t-on une trop petite arete ? (voir le bug de BUG_Split1b_SpereIso_0.125h_met) */
-    if ( cas ) {
-      //lmin=0.6;
-      for (j=0; j<ilist; j++) {
-        iel = list[j] / 6;
-        pt  = &mesh->tetra[iel];
-        ie  = list[j] % 6;
-        len = lenedg(mesh,met, pt->v[isar[ie][0]],ip);
-        if ( len < lmin )  break;
-        len = lenedg(mesh,met, pt->v[isar[ie][1]],ip);
-        if ( len < lmin )  break;
-      }
-      if ( j < ilist )  return(0);
+    for (j=0; j<ilist; j++) {
+      iel = list[j] / 6;
+      pt  = &mesh->tetra[iel];
+      ie  = list[j] % 6;
+      len = lenedg(mesh,met, pt->v[isar[ie][0]],ip);
+      if ( len < lmin )  break;
+      len = lenedg(mesh,met, pt->v[isar[ie][1]],ip);
+      if ( len < lmin )  break;
     }
+    if ( j < ilist )  return(0);
   }
 
 
@@ -347,7 +348,8 @@ int split1b(pMesh mesh, pSol met,int *list, int ret, int ip,int cas){
     jel = newElt(mesh);
     if ( !jel ) {
       fprintf(stdout,"  ## Error: unable to allocate a new element.\n");
-      fprintf(stdout,"  ## Check the mesh size or increase the allocated memory with the -m option.\n");
+      fprintf(stdout,"  ## Check the mesh size or ");
+      fprintf(stdout,"increase the allocated memory with the -m option.\n");
       for ( ; k>0 ; --k ) {
         delElt(mesh,newtet[k]);
       }
@@ -410,7 +412,7 @@ int split1b(pMesh mesh, pSol met,int *list, int ret, int ip,int cas){
 
     /* Generic formulation of split of 1 edge */
     pt->v[tau[1]] = pt1->v[tau[0]] = ip;
-    if(pt->xt){
+    if ( pt->xt ) {
       /* Reset edge tag */
       xt.tag [taued[3]] = 0;  xt.tag [taued[4]] = 0;
       xt1.tag[taued[1]] = 0;  xt1.tag[taued[2]] = 0;
@@ -425,33 +427,38 @@ int split1b(pMesh mesh, pSol met,int *list, int ret, int ip,int cas){
     isxt = 0 ;
     isxt1 = 0;
 
-    for(i=0;i<4;i++){
-      if(xt.ref[i] || xt.ftag[i]) isxt = 1;
-      if(xt1.ref[i] || xt1.ftag[i]) isxt1 = 1;
+    for (i=0; i<4; i++) {
+      if ( xt.ref[i]  || xt.ftag[i] ) isxt = 1;
+      if ( xt1.ref[i] || xt1.ftag[i]) isxt1 = 1;
     }
 
-    if(pt->xt){
-      if((isxt)&&(!isxt1)){
+    if ( pt->xt ) {
+      if ( (isxt) && (!isxt1) ) {
         pt1->xt = 0;
         pxt0 = &mesh->xtetra[pt->xt];
         memcpy(pxt0,&xt,sizeof(xTetra));
       }
-      else if ((!isxt)&&(isxt1)){
+      else if ( (!isxt) && (isxt1) ) {
         pt1->xt = pt->xt;
         pt->xt = 0;
         pxt0 = &mesh->xtetra[pt1->xt];
         memcpy(pxt0,&xt1,sizeof(xTetra));
       }
-      else if (isxt && isxt1){
+      else if ( isxt && isxt1 ) {
         mesh->xt++;
-        assert(mesh->xt < mesh->xtmax);
+        if ( mesh->xt >= mesh->xtmax ) {
+          fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
+          fprintf(stdout,"  ## Check the mesh size or ");
+          fprintf(stdout,"increase the allocated memory with the -m option.\n");
+          return(-1);
+        }
         pt1->xt = mesh->xt;
         pxt0 = &mesh->xtetra[pt->xt];
         memcpy(pxt0,&xt,sizeof(xTetra));
         pxt0 = &mesh->xtetra[pt1->xt];
         memcpy(pxt0,&xt1,sizeof(xTetra));
       }
-      else{
+      else {
         pt->xt = 0;
         pt1->xt = 0;
       }
@@ -472,7 +479,7 @@ int split1b(pMesh mesh, pSol met,int *list, int ret, int ip,int cas){
     adjan[tau[0]] = 4*mel + voy;
     adjan[tau[1]] = 4*iel + tau[0];
 
-    if(mel){
+    if ( mel ) {
       adjan = &mesh->adja[4*(mel -1) +1];
       adjan[voy] = 4*jel + tau[0];
     }
@@ -481,15 +488,14 @@ int split1b(pMesh mesh, pSol met,int *list, int ret, int ip,int cas){
     pt1->qual=orcal(mesh,jel);
 
 #ifdef DEBUG
-    for(j=0;j<ilist;j++){
-      for(i=0;i<6;i++)
-        {
+    for (j=0; j<ilist; j++) {
+      for (i=0; i<6; i++) {
           len=lenedg(mesh,met,
                      mesh->tetra[list[j]/6].v[iare[i][0]],
                      mesh->tetra[list[j]/6].v[iare[i][1]]);
-          if(len<lmin) {
+          if ( len<lmin ) {
             tabtmp[0][1]+=0.5;
-          }else if(len>lmax) {
+          } else if ( len>lmax ) {
             tabtmp[0][2]+=0.5;
           }
         }
@@ -501,17 +507,17 @@ int split1b(pMesh mesh, pSol met,int *list, int ret, int ip,int cas){
     return(1);
   }
 
-  /*if(ddb) printf("le tet 0 : %d son new : %d, le tet 1 %d et son new : %d \n",list[0]/6,newtet[0],list[1]/6,newtet[1]);
+  /*if ( ddb ) printf("le tet 0 : %d son new : %d, le tet 1 %d et son new : %d \n",list[0]/6,newtet[0],list[1]/6,newtet[1]);
 
-    if(ddb){
+    if ( ddb ) {
     printf("Ecrit la coquille de %d %d ouverte ? %d: \n",nump,numq,open);
-    for(k=0;k<ilist;k++){
+    for (k=0; k<ilist; k++) {
     printf("coquille ; %d arete %d et le nouveau %d \n",list[k]/6,list[k]%6,newtet[k]);
     }
     }*/
 
   /* General case : update each element of the shell */
-  for(k=0; k<ilist; k++){
+  for (k=0; k<ilist; k++) {
     iel = list[k] / 6;
     ie  = list[k] % 6;
     pt = &mesh->tetra[iel];
@@ -557,7 +563,7 @@ int split1b(pMesh mesh, pSol met,int *list, int ret, int ip,int cas){
 
     /* Generic formulation of split of 1 edge */
     pt->v[tau[1]] = pt1->v[tau[0]] = ip;
-    if(pt->xt){
+    if ( pt->xt ) {
       /* Reset edge tag */
       xt.tag [taued[3]] = 0;  xt.tag [taued[4]] = 0;
       xt1.tag[taued[1]] = 0;  xt1.tag[taued[2]] = 0;
@@ -572,33 +578,38 @@ int split1b(pMesh mesh, pSol met,int *list, int ret, int ip,int cas){
     isxt = 0 ;
     isxt1 = 0;
 
-    for(i=0;i<4;i++){
-      if(xt.ref[i] || xt.ftag[i]) isxt = 1;
-      if(xt1.ref[i] || xt1.ftag[i]) isxt1 = 1;
+    for (i=0; i<4; i++) {
+      if ( xt.ref[i]  || xt.ftag[i]  ) isxt  = 1;
+      if ( xt1.ref[i] || xt1.ftag[i] ) isxt1 = 1;
     }
 
-    if(pt->xt){
-      if((isxt)&&(!isxt1)){
+    if ( pt->xt ) {
+      if ( (isxt)&&(!isxt1) ) {
         pt1->xt = 0;
         pxt0 = &mesh->xtetra[pt->xt];
         memcpy(pxt0,&xt,sizeof(xTetra));
       }
-      else if ((!isxt)&&(isxt1)){
+      else if ((!isxt)&&(isxt1) ) {
         pt1->xt = pt->xt;
         pt->xt = 0;
         pxt0 = &mesh->xtetra[pt1->xt];
         memcpy(pxt0,&xt1,sizeof(xTetra));
       }
-      else if (isxt && isxt1){
+      else if (isxt && isxt1 ) {
         mesh->xt++;
-        assert(mesh->xt < mesh->xtmax);
+        if ( mesh->xt >= mesh->xtmax ) {
+          fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
+          fprintf(stdout,"  ## Check the mesh size or ");
+          fprintf(stdout,"increase the allocated memory with the -m option.\n");
+          return(-1);
+        }
         pt1->xt = mesh->xt;
         pxt0 = &mesh->xtetra[pt->xt];
         memcpy(pxt0,&xt,sizeof(xTetra));
         pxt0 = &mesh->xtetra[pt1->xt];
         memcpy(pxt0,&xt1,sizeof(xTetra));
       }
-      else{
+      else {
         pt->xt = 0;
         pt1->xt = 0;
       }
@@ -612,58 +623,58 @@ int split1b(pMesh mesh, pSol met,int *list, int ret, int ip,int cas){
     nei3 = adja[tau[3]];
 
     /* Adjacency relations through both splitted faces */
-    if(k == 0){
-      if((list[1] / 6) == (nei2 / 4)){
-        if( MG_SMSGN(newtet[0],newtet[1])){  //new elt of list[0] goes with new elt of list[1]
+    if ( k == 0 ) {
+      if ( (list[1] / 6) == (nei2 / 4) ) {
+        if (  MG_SMSGN(newtet[0],newtet[1]) ) {  //new elt of list[0] goes with new elt of list[1]
           adja[tau[2]] = nei2;
           adjan[tau[2]] = 4*fabs(newtet[1])+(nei2 %4);
         }
-        else{
+        else {
           adja[tau[2]] = 4*fabs(newtet[1])+(nei2 %4);
           adjan[tau[2]] = nei2;
         }
 
-        if(open){
+        if ( open ) {
           adja[tau[3]] = 0;
           adjan[tau[3]] = 0;
         }
 
-        else{
+        else {
           assert((list[ilist-1] / 6) == (nei3 / 4));
-          if( MG_SMSGN(newtet[0],newtet[ilist-1])){
+          if (  MG_SMSGN(newtet[0],newtet[ilist-1]) ) {
             adja[tau[3]] = nei3;
             adjan[tau[3]] = 4*fabs(newtet[ilist-1])+(nei3 %4);
           }
-          else{
+          else {
             adja[tau[3]] = 4*fabs(newtet[ilist-1])+(nei3 %4);
             adjan[tau[3]] = nei3;
           }
         }
       }
 
-      else{
+      else {
         assert((list[1] / 6) == (nei3 / 4));
-        if( MG_SMSGN(newtet[0],newtet[1])){
+        if (  MG_SMSGN(newtet[0],newtet[1]) ) {
           adja[tau[3]] = nei3;
           adjan[tau[3]] = 4*fabs(newtet[1])+(nei3 %4);
         }
-        else{
+        else {
           adja[tau[3]] = 4*fabs(newtet[1])+(nei3 %4);
           adjan[tau[3]] = nei3;
         }
 
-        if(open){
+        if ( open ) {
           adja[tau[2]] = 0;
           adjan[tau[2]] = 0;
         }
 
-        else{
+        else {
           assert((list[ilist-1]) / 6 == (nei2 / 4));
-          if( MG_SMSGN(newtet[0],newtet[ilist-1]) ){
+          if (  MG_SMSGN(newtet[0],newtet[ilist-1]) ) {
             adja[tau[2]] = nei2;
             adjan[tau[2]] = 4*fabs(newtet[ilist-1])+(nei2 %4);
           }
-          else{
+          else {
             adja[tau[2]] = 4*fabs(newtet[ilist-1])+(nei2 %4);
             adjan[tau[2]] = nei2;
           }
@@ -671,58 +682,58 @@ int split1b(pMesh mesh, pSol met,int *list, int ret, int ip,int cas){
       }
     }
 
-    else if(k==ilist-1){
-      if((list[ilist-2] / 6) == (nei2 / 4)){
-        if( MG_SMSGN(newtet[ilist-1],newtet[ilist-2]) ){
+    else if ( k==ilist-1 ) {
+      if ( (list[ilist-2] / 6) == (nei2 / 4) ) {
+        if (  MG_SMSGN(newtet[ilist-1],newtet[ilist-2]) ) {
           adja[tau[2]] = nei2;
           adjan[tau[2]] = 4*fabs(newtet[ilist-2])+(nei2 %4);
         }
-        else{
+        else {
           adja[tau[2]] = 4*fabs(newtet[ilist-2])+(nei2 %4);
           adjan[tau[2]] = nei2;
         }
 
-        if(open){
+        if ( open ) {
           adja[tau[3]] = 0;
           adjan[tau[3]] = 0;
         }
 
-        else{
+        else {
           assert((list[0]) / 6 == (nei3 / 4));
-          if( MG_SMSGN(newtet[ilist-1],newtet[0]) ){
+          if (  MG_SMSGN(newtet[ilist-1],newtet[0]) ) {
             adja[tau[3]] = nei3;
             adjan[tau[3]] = 4*fabs(newtet[0])+(nei3 %4);
           }
-          else{
+          else {
             adja[tau[3]] = 4*fabs(newtet[0])+(nei3 %4);
             adjan[tau[3]] = nei3;
           }
         }
       }
 
-      else{
+      else {
         assert((list[ilist-2] / 6) == (nei3 / 4));
-        if( MG_SMSGN(newtet[ilist-1],newtet[ilist-2]) ){
+        if ( MG_SMSGN(newtet[ilist-1],newtet[ilist-2]) ) {
           adja[tau[3]] = nei3;
           adjan[tau[3]] = 4*fabs(newtet[ilist-2])+(nei3 %4);
         }
-        else{
+        else {
           adja[tau[3]] = 4*fabs(newtet[ilist-2])+(nei3 %4);
           adjan[tau[3]] = nei3;
         }
 
-        if(open){
+        if ( open ) {
           adja[tau[2]] = 0;
           adjan[tau[2]] = 0;
         }
 
-        else{
+        else {
           assert((list[0]) / 6 == (nei2 / 4));
-          if( MG_SMSGN(newtet[ilist-1],newtet[0]) ){
+          if ( MG_SMSGN(newtet[ilist-1],newtet[0]) ) {
             adja[tau[2]] = nei2;
             adjan[tau[2]] = 4*fabs(newtet[0])+(nei2 %4);
           }
-          else{
+          else {
             adja[tau[2]] = 4*fabs(newtet[0])+(nei2 %4);
             adjan[tau[2]] = nei2;
           }
@@ -730,45 +741,45 @@ int split1b(pMesh mesh, pSol met,int *list, int ret, int ip,int cas){
       }
     }
 
-    else{
-      if((list[k-1] / 6) == (nei2 / 4)){
-        if( MG_SMSGN(newtet[k],newtet[k-1]) ){
+    else {
+      if ( (list[k-1] / 6) == (nei2 / 4) ) {
+        if ( MG_SMSGN(newtet[k],newtet[k-1]) ) {
           adja[tau[2]] = nei2;
           adjan[tau[2]] = 4*fabs(newtet[k-1])+(nei2 %4);
         }
-        else{
+        else {
           adja[tau[2]] = 4*fabs(newtet[k-1])+(nei2 %4);
           adjan[tau[2]] = nei2;
         }
 
         assert((list[k+1]) / 6 == (nei3 / 4));
-        if( MG_SMSGN(newtet[k],newtet[k+1]) ){
+        if ( MG_SMSGN(newtet[k],newtet[k+1]) ) {
           adja[tau[3]] = nei3;
           adjan[tau[3]] = 4*fabs(newtet[k+1])+(nei3 %4);
         }
-        else{
+        else {
           adja[tau[3]] = 4*fabs(newtet[k+1])+(nei3 %4);
           adjan[tau[3]] = nei3;
         }
       }
 
-      else{
+      else {
         assert((list[k-1] / 6) == (nei3 / 4));
-        if( MG_SMSGN(newtet[k],newtet[k-1]) ){
+        if ( MG_SMSGN(newtet[k],newtet[k-1]) ) {
           adja[tau[3]] = nei3;
           adjan[tau[3]] = 4*fabs(newtet[k-1])+(nei3 %4);
         }
-        else{
+        else {
           adja[tau[3]] = 4*fabs(newtet[k-1])+(nei3 %4);
           adjan[tau[3]] = nei3;
         }
 
         assert((list[k+1]) / 6 == (nei2 / 4));
-        if( MG_SMSGN(newtet[k],newtet[k+1]) ){
+        if ( MG_SMSGN(newtet[k],newtet[k+1]) ) {
           adja[tau[2]] = nei2;
           adjan[tau[2]] = 4*fabs(newtet[k+1])+(nei2 %4);
         }
-        else{
+        else {
           adja[tau[2]] = 4*fabs(newtet[k+1])+(nei2 %4);
           adjan[tau[2]] = nei2;
         }
@@ -782,7 +793,7 @@ int split1b(pMesh mesh, pSol met,int *list, int ret, int ip,int cas){
     adjan[tau[0]] = 4*mel + voy;
     adjan[tau[1]] = 4*iel + tau[0];
 
-    if(mel){
+    if ( mel ) {
       adjan = &mesh->adja[4*(mel -1) +1];
       adjan[voy] = 4*jel + tau[0];
     }
@@ -794,14 +805,14 @@ int split1b(pMesh mesh, pSol met,int *list, int ret, int ip,int cas){
 #ifdef DEBUG
   tabtmp[0][3]=lmin;     tabtmp[0][4]=lmax;
   tabtmp[0][5]=DBL_MAX;  tabtmp[0][6]=DBL_MIN;
-  for(j=0;j<ilist;j++){
-    for(i=0;i<6;i++){
+  for (j=0; j<ilist; j++) {
+    for (i=0; i<6; i++) {
       len=lenedg(mesh,met,
                  mesh->tetra[list[j]/6].v[iare[i][0]],
                  mesh->tetra[list[j]/6].v[iare[i][1]]);
-      if(len<lmin) {
+      if ( len<lmin ) {
         tabtmp[0][1]+=0.5;
-      }else if(len>lmax) {
+      } else if ( len>lmax ) {
         tabtmp[0][2]+=0.5;
       }
     }
@@ -927,12 +938,11 @@ void split2sf(pMesh mesh,pSol met,int k,int vx[6]){
   pt[0] = &mesh->tetra[k];
 #ifdef DEBUG
   lmintmp=0.6;lmaxtmp=1.3;
-  for(i=0;i<6;i++)
-    {
+  for (i=0; i<6; i++) {
       lentmp=lenedg(mesh,met,pt[0]->v[iare[i][0]],pt[0]->v[iare[i][1]]);
-      if(lentmp<lmintmp) {
+      if ( lentmp<lmintmp ) {
         lmintmp=lentmp;
-      }else if(lentmp>lmaxtmp) {
+      }else if ( lentmp>lmaxtmp ) {
         lmaxtmp=lentmp;
       }
     }
@@ -1070,8 +1080,15 @@ void split2sf(pMesh mesh,pSol met,int k,int vx[6]){
       pt[1]->xt = pt[2]->xt = 0;
       for (i=1; i<3; i++) {
         if ( isxt[i] ) {
-          assert(mesh->xt < mesh->xtmax-1);
-          pt[i]->xt = ++mesh->xt;
+          mesh->xt++;
+          if ( mesh->xt >= mesh->xtmax ) {
+            fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
+            fprintf(stdout,"  ## Check the mesh size or ");
+            fprintf(stdout,"increase the allocated memory with the -m option.\n");
+            fprintf(stdout,"  Exit program.\n");
+            exit(EXIT_FAILURE);
+          }
+          pt[i]->xt = mesh->xt;
           pxt0 = &mesh->xtetra[mesh->xt];
           memcpy(pxt0,&(xt[i]),sizeof(xTetra));
         }
@@ -1089,8 +1106,15 @@ void split2sf(pMesh mesh,pSol met,int k,int vx[6]){
             memcpy(pxt0,&(xt[i]),sizeof(xTetra));
           }
           else {
-            assert(mesh->xt < mesh->xtmax-1);
-            pt[i]->xt = ++mesh->xt;
+            mesh->xt++;
+            if ( mesh->xt >= mesh->xtmax ) {
+              fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
+              fprintf(stdout,"  ## Check the mesh size or ");
+              fprintf(stdout,"increase the allocated memory with the -m option.\n");
+              fprintf(stdout,"  Exit program.\n");
+              exit(EXIT_FAILURE);
+            }
+            pt[i]->xt = mesh->xt;
             pxt0 = &mesh->xtetra[mesh->xt];
             memcpy(pxt0,&xt[i],sizeof(xTetra));
           }
@@ -1106,24 +1130,23 @@ void split2sf(pMesh mesh,pSol met,int k,int vx[6]){
 
 #ifdef DEBUG
   tabtmp[1][3]=lmintmp;  tabtmp[1][4]=lmaxtmp;
-  for(i=0;i<6;i++)
-    {
+  for (i=0; i<6; i++) {
       lentmp=lenedg(mesh,met,pt[0]->v[iare[i][0]],pt[0]->v[iare[i][1]]);
-      if(lentmp<lmintmp) {
+      if ( lentmp<lmintmp ) {
         tabtmp[1][1]++;
-      }else if(lentmp>lmaxtmp) {
+      }else if ( lentmp>lmaxtmp ) {
         tabtmp[1][2]++;
       }
       lentmp=lenedg(mesh,met,pt[1]->v[iare[i][0]],pt[1]->v[iare[i][1]]);
-      if(lentmp<lmintmp) {
+      if ( lentmp<lmintmp ) {
         tabtmp[1][1]++;
-      }else if(lentmp>lmaxtmp) {
+      }else if ( lentmp>lmaxtmp ) {
         tabtmp[1][2]++;
       }
       lentmp=lenedg(mesh,met,pt[2]->v[iare[i][0]],pt[2]->v[iare[i][1]]);
-      if(lentmp<lmintmp) {
+      if ( lentmp<lmintmp ) {
         tabtmp[1][1]++;
-      }else if(lentmp>lmaxtmp) {
+      }else if ( lentmp>lmaxtmp ) {
         tabtmp[1][2]++;
       }
     }
@@ -1143,20 +1166,19 @@ void split2(pMesh mesh,pSol met,int k,int vx[6]) {
   pt[0] = &mesh->tetra[k];
 #ifdef DEBUG
   lmintmp=0.6;lmaxtmp=1.3;
-  for(i=0;i<6;i++)
-    {
+  for (i=0; i<6; i++) {
       lentmp=lenedg(mesh,met,pt[0]->v[iare[i][0]],pt[0]->v[iare[i][1]]);
-      if(lentmp<lmintmp) {
+      if ( lentmp<lmintmp ) {
         lmintmp=lentmp;
-      }else if(lentmp>lmaxtmp) {
+      }else if ( lentmp>lmaxtmp ) {
         lmaxtmp=lentmp;
       }
     }
   iatmp=0;ibtmp=0;
-  for(i=0;i<6;i++){
-    if(iatmp==0 && vx[i]>0){
+  for (i=0; i<6; i++) {
+    if ( iatmp==0 && vx[i]>0 ) {
       iatmp=i;
-    }else if(iatmp>0 && vx[i]>0){
+    }else if ( iatmp>0 && vx[i]>0 ) {
       ibtmp=i;
     }
   }
@@ -1259,8 +1281,15 @@ void split2(pMesh mesh,pSol met,int k,int vx[6]) {
       memcpy(pxt0,&xt[0],sizeof(xTetra));
       for (i=1; i<4; i++) {
         if ( isxt[i] ) {
-          assert(mesh->xt < mesh->xtmax-1);
-          pt[i]->xt = ++mesh->xt;
+          mesh->xt++;
+          if ( mesh->xt >= mesh->xtmax ) {
+            fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
+            fprintf(stdout,"  ## Check the mesh size or ");
+            fprintf(stdout,"increase the allocated memory with the -m option.\n");
+            fprintf(stdout,"  Exit program.\n");
+            exit(EXIT_FAILURE);
+          }
+          pt[i]->xt = mesh->xt;
           pxt0 = &mesh->xtetra[mesh->xt];
           memcpy(pxt0,&xt[i],sizeof(xTetra));
         }
@@ -1280,8 +1309,15 @@ void split2(pMesh mesh,pSol met,int k,int vx[6]) {
             memcpy(pxt0,&xt[i],sizeof(xTetra));
           }
           else {
-            assert(mesh->xt < mesh->xtmax-1);
-            pt[i]->xt = ++mesh->xt;
+            mesh->xt++;
+            if ( mesh->xt >= mesh->xtmax ) {
+              fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
+              fprintf(stdout,"  ## Check the mesh size or ");
+              fprintf(stdout,"increase the allocated memory with the -m option.\n");
+              fprintf(stdout,"  Exit program.\n");
+              exit(EXIT_FAILURE);
+            }
+            pt[i]->xt = mesh->xt;
             pxt0 = &mesh->xtetra[mesh->xt];
             memcpy(pxt0,&xt[i],sizeof(xTetra));
           }
@@ -1301,72 +1337,71 @@ void split2(pMesh mesh,pSol met,int k,int vx[6]) {
 
 #if DEBUG
   tabtmp[2][3]=lmintmp;  tabtmp[2][4]=lmaxtmp;
-  for(i=0;i<6;i++)
-    {
+  for (i=0; i<6; i++) {
       lentmp=lenedg(mesh,met,pt[0]->v[iare[i][0]],pt[0]->v[iare[i][1]]);
-      if(lentmp<lmintmp) {
-        if((pt[0]->v[iare[i][0]]==iatmp && pt[0]->v[iare[i][1]]==ibtmp)||
+      if ( lentmp<lmintmp) {
+        if ( (pt[0]->v[iare[i][0]]==iatmp && pt[0]->v[iare[i][1]]==ibtmp)||
            (pt[0]->v[iare[i][0]]==ibtmp && pt[0]->v[iare[i][1]]==iatmp)) {
           tabtmp[2][1]= tabtmp[2][1]+0.25;
-        }else{
+        }else {
           tabtmp[2][1]= tabtmp[2][1]+0.5;
         }
-      }else if(lentmp>lmaxtmp) {
-        if((pt[0]->v[iare[i][0]]==iatmp && pt[0]->v[iare[i][1]]==ibtmp)||
+      }else if ( lentmp>lmaxtmp) {
+        if ( (pt[0]->v[iare[i][0]]==iatmp && pt[0]->v[iare[i][1]]==ibtmp)||
            (pt[0]->v[iare[i][0]]==ibtmp && pt[0]->v[iare[i][1]]==iatmp)) {
           tabtmp[2][2]= tabtmp[2][2]+0.25;
-        }else{
+        }else {
           tabtmp[2][2]= tabtmp[2][2]+0.5;
         }
       }
       lentmp=lenedg(mesh,met,pt[1]->v[iare[i][0]],pt[1]->v[iare[i][1]]);
-      if(lentmp<lmintmp) {
-        if((pt[1]->v[iare[i][0]]==iatmp && pt[1]->v[iare[i][1]]==ibtmp)||
+      if ( lentmp<lmintmp) {
+        if ( (pt[1]->v[iare[i][0]]==iatmp && pt[1]->v[iare[i][1]]==ibtmp)||
            (pt[1]->v[iare[i][0]]==ibtmp && pt[1]->v[iare[i][1]]==iatmp)) {
           tabtmp[2][1]= tabtmp[2][1]+0.25;
-        }else{
+        }else {
           tabtmp[2][1]= tabtmp[2][1]+0.5;
         }
-      }else if(lentmp>lmaxtmp) {
-        if((pt[1]->v[iare[i][0]]==iatmp && pt[1]->v[iare[i][1]]==ibtmp)||
+      }else if ( lentmp>lmaxtmp) {
+        if ( (pt[1]->v[iare[i][0]]==iatmp && pt[1]->v[iare[i][1]]==ibtmp)||
            (pt[1]->v[iare[i][0]]==ibtmp && pt[1]->v[iare[i][1]]==iatmp)) {
           tabtmp[2][2]= tabtmp[2][2]+0.25;
-        }else{
+        }else {
           tabtmp[2][2]= tabtmp[2][2]+0.5;
         }
 
       }
       lentmp=lenedg(mesh,met,pt[2]->v[iare[i][0]],pt[2]->v[iare[i][1]]);
-      if(lentmp<lmintmp) {
-        if((pt[2]->v[iare[i][0]]==iatmp && pt[2]->v[iare[i][1]]==ibtmp)||
+      if ( lentmp<lmintmp) {
+        if ( (pt[2]->v[iare[i][0]]==iatmp && pt[2]->v[iare[i][1]]==ibtmp)||
            (pt[2]->v[iare[i][0]]==ibtmp && pt[2]->v[iare[i][1]]==iatmp)) {
           tabtmp[2][1]= tabtmp[2][1]+0.25;
-        }else{
+        }else {
           tabtmp[2][1]= tabtmp[2][1]+0.5;
         }
-      }else if(lentmp>lmaxtmp) {
-        if((pt[2]->v[iare[i][0]]==iatmp && pt[2]->v[iare[i][1]]==ibtmp)||
+      }else if ( lentmp>lmaxtmp) {
+        if ( (pt[2]->v[iare[i][0]]==iatmp && pt[2]->v[iare[i][1]]==ibtmp)||
            (pt[2]->v[iare[i][0]]==ibtmp && pt[2]->v[iare[i][1]]==iatmp)) {
           tabtmp[2][2]= tabtmp[2][2]+0.25;
-        }else{
+        }else {
           tabtmp[2][2]= tabtmp[2][2]+0.5;
         }
       }
       lentmp=lenedg(mesh,met,pt[3]->v[iare[i][0]],pt[3]->v[iare[i][1]]);
-      if(lentmp<lmintmp) {
-        if((pt[3]->v[iare[i][0]]==iatmp && pt[3]->v[iare[i][1]]==ibtmp)||
+      if ( lentmp<lmintmp) {
+        if ( (pt[3]->v[iare[i][0]]==iatmp && pt[3]->v[iare[i][1]]==ibtmp)||
            (pt[3]->v[iare[i][0]]==ibtmp && pt[3]->v[iare[i][1]]==iatmp)) {
           tabtmp[2][1]= tabtmp[2][1]+0.25;
-        }else{
+        }else {
           tabtmp[2][1]= tabtmp[2][1]+0.5;
         }
 
         tabtmp[2][1]++;
-      }else if(lentmp>lmaxtmp) {
-        if((pt[3]->v[iare[i][0]]==iatmp && pt[3]->v[iare[i][1]]==ibtmp)||
+      }else if ( lentmp>lmaxtmp) {
+        if ( (pt[3]->v[iare[i][0]]==iatmp && pt[3]->v[iare[i][1]]==ibtmp)||
            (pt[3]->v[iare[i][0]]==ibtmp && pt[3]->v[iare[i][1]]==iatmp)) {
           tabtmp[2][2]= tabtmp[2][2]+0.25;
-        }else{
+        }else {
           tabtmp[2][2]= tabtmp[2][2]+0.5;
         }
       }
@@ -1451,13 +1486,12 @@ void split3(pMesh mesh,pSol met,int k,int vx[6]) {
   newtet[0]=k;
 #ifdef DEBUG
   lmintmp=0.6;lmaxtmp=1.3;
-  for(i=0;i<6;i++)
-    {
+  for (i=0; i<6; i++) {
       lentmp=lenedg(mesh,met,pt[0]->v[iare[i][0]],pt[0]->v[iare[i][1]]);
-      if(lentmp<lmintmp) {
+      if ( lentmp<lmintmp) {
         //       tabtmp[0][1]++;
         lmintmp=lentmp;
-      }else if(lentmp>lmaxtmp) {
+      }else if ( lentmp>lmaxtmp) {
         //tabtmp[0][2]++;
         lmaxtmp=lentmp;
       }
@@ -1561,8 +1595,15 @@ void split3(pMesh mesh,pSol met,int k,int vx[6]) {
       pt[1]->xt = pt[2]->xt = pt[3]->xt = 0;
       for (i=1; i<4; i++) {
         if ( isxt[i] ) {
-          assert(mesh->xt < mesh->xtmax-1);
-          pt[i]->xt = ++mesh->xt;
+          mesh->xt++;
+          if ( mesh->xt >= mesh->xtmax ) {
+            fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
+            fprintf(stdout,"  ## Check the mesh size or ");
+            fprintf(stdout,"increase the allocated memory with the -m option.\n");
+            fprintf(stdout,"  Exit program.\n");
+            exit(EXIT_FAILURE);
+          }
+          pt[i]->xt = mesh->xt;
           pxt0 = &mesh->xtetra[mesh->xt];
           memcpy(pxt0,&xt[i],sizeof(xTetra));
         }
@@ -1580,8 +1621,15 @@ void split3(pMesh mesh,pSol met,int k,int vx[6]) {
             memcpy(pxt0,&xt[i],sizeof(xTetra));
           }
           else {
-            assert(mesh->xt < mesh->xtmax-1);
-            pt[i]->xt = ++mesh->xt;
+            mesh->xt++;
+            if ( mesh->xt >= mesh->xtmax ) {
+              fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
+              fprintf(stdout,"  ## Check the mesh size or ");
+              fprintf(stdout,"increase the allocated memory with the -m option.\n");
+              fprintf(stdout,"  Exit program.\n");
+              exit(EXIT_FAILURE);
+            }
+            pt[i]->xt = mesh->xt;
             pxt0 = &mesh->xtetra[mesh->xt];
             memcpy(pxt0,&(xt[i]),sizeof(xTetra));
           }
@@ -1598,30 +1646,29 @@ void split3(pMesh mesh,pSol met,int k,int vx[6]) {
 
 #ifdef DEBUG
   tabtmp[3][3]=lmintmp;  tabtmp[3][4]=lmaxtmp;
-  for(i=0;i<6;i++)
-    {
+  for (i=0; i<6; i++) {
       lentmp=lenedg(mesh,met,pt[0]->v[iare[i][0]],pt[0]->v[iare[i][1]]);
-      if(lentmp<lmintmp) {
+      if ( lentmp<lmintmp) {
         tabtmp[3][1]++;
-      }else if(lentmp>lmaxtmp) {
+      }else if ( lentmp>lmaxtmp) {
         tabtmp[3][2]++;
       }
       lentmp=lenedg(mesh,met,pt[1]->v[iare[i][0]],pt[1]->v[iare[i][1]]);
-      if(lentmp<lmintmp) {
+      if ( lentmp<lmintmp) {
         tabtmp[3][1]++;
-      }else if(lentmp>lmaxtmp) {
+      }else if ( lentmp>lmaxtmp) {
         tabtmp[3][2]++;
       }
       lentmp=lenedg(mesh,met,pt[2]->v[iare[i][0]],pt[2]->v[iare[i][1]]);
-      if(lentmp<lmintmp) {
+      if ( lentmp<lmintmp) {
         tabtmp[3][1]++;
-      }else if(lentmp>lmaxtmp) {
+      }else if ( lentmp>lmaxtmp) {
         tabtmp[3][2]++;
       }
       lentmp=lenedg(mesh,met,pt[3]->v[iare[i][0]],pt[3]->v[iare[i][1]]);
-      if(lentmp<lmintmp) {
+      if ( lentmp<lmintmp) {
         tabtmp[3][1]++;
-      }else if(lentmp>lmaxtmp) {
+      }else if ( lentmp>lmaxtmp) {
         tabtmp[3][2]++;
       }
     }
@@ -1645,12 +1692,11 @@ void split3cone(pMesh mesh,pSol met,int k,int vx[6]) {
 
 #ifdef DEBUG
   lmintmp=0.6;lmaxtmp=1.3;
-  for(i=0;i<6;i++)
-    {
+  for (i=0; i<6; i++) {
       lentmp=lenedg(mesh,met,pt[0]->v[iare[i][0]],pt[0]->v[iare[i][1]]);
-      if(lentmp<lmintmp) {
+      if ( lentmp<lmintmp) {
         lmintmp=lentmp;
-      }else if(lentmp>lmaxtmp) {
+      }else if ( lentmp>lmaxtmp) {
         lmaxtmp=lentmp;
       }
     }
@@ -1674,14 +1720,14 @@ void split3cone(pMesh mesh,pSol met,int k,int vx[6]) {
   memcpy(pt[3],pt[0],sizeof(Tetra));
   newtet[3]=iel;
 
-  if(pt[0]->xt){
+  if ( pt[0]->xt ) {
     pxt0 = &mesh->xtetra[(pt[0])->xt];
     memcpy(&xt[0],pxt0, sizeof(xTetra));
     memcpy(&xt[1],pxt0, sizeof(xTetra));
     memcpy(&xt[2],pxt0, sizeof(xTetra));
     memcpy(&xt[3],pxt0, sizeof(xTetra));
   }
-  else{
+  else {
     pxt0 = 0;
     memset(&xt[0],0, sizeof(xTetra));
     memset(&xt[1],0, sizeof(xTetra));
@@ -1712,24 +1758,24 @@ void split3cone(pMesh mesh,pSol met,int k,int vx[6]) {
 
   /* Generic formulation of split of 3 edges in cone configuration (edges 0,1,2 splitted) */
   /* Fill ia,ib,ic so that pt->v[ia] < pt->v[ib] < pt->v[ic] */
-  if((pt[0])->v[tau[1]] < (pt[0])->v[tau[2]]){
+  if ( (pt[0])->v[tau[1]] < (pt[0])->v[tau[2]] ) {
     ia = tau[1];
     ib = tau[2];
   }
-  else{
+  else {
     ia = tau[2];
     ib = tau[1];
   }
 
-  if((pt[0])->v[tau[3]] < (pt[0])->v[ia]){
+  if ( (pt[0])->v[tau[3]] < (pt[0])->v[ia] ) {
     ib = ia;
     ia = tau[3];
   }
-  else{
-    if((pt[0])->v[tau[3]] < (pt[0])->v[ib]){
+  else {
+    if ( (pt[0])->v[tau[3]] < (pt[0])->v[ib] ) {
       ib = tau[3];
     }
-    else{
+    else {
     }
   }
 
@@ -1741,7 +1787,7 @@ void split3cone(pMesh mesh,pSol met,int k,int vx[6]) {
   xt[0].ftag[ tau[0]] = 0;
   MG_SET(xt[0].ori, tau[0]);
 
-  if(ia == tau[3]){
+  if ( ia == tau[3] ) {
     pt[1]->v[tau[0]] = vx[taued[2]] ; pt[1]->v[tau[1]] = vx[taued[0]] ; pt[1]->v[tau[2]] = vx[taued[1]];
     xt[1].tag[taued[0]] = 0;  xt[1].tag[taued[1]] = 0;
     xt[1].tag[taued[3]] = 0;  xt[1].tag[taued[4]] = 0;
@@ -1752,7 +1798,7 @@ void split3cone(pMesh mesh,pSol met,int k,int vx[6]) {
     xt[1].ftag[ tau[0]] = 0;  xt[1].ftag[ tau[3]] = 0;
     MG_SET(xt[1].ori, tau[0]);  MG_SET(xt[1].ori, tau[3]);
 
-    if(ib == tau[1]){
+    if ( ib == tau[1] ) {
       pt[2]->v[tau[0]] = vx[taued[0]] ; pt[2]->v[tau[2]] = vx[taued[1]] ;
       xt[2].tag[taued[1]] = 0;  xt[2].tag[taued[2]] = 0;
       xt[2].tag[taued[3]] = 0;  xt[2].tag[taued[5]] = 0;
@@ -1769,7 +1815,7 @@ void split3cone(pMesh mesh,pSol met,int k,int vx[6]) {
       xt[3].ftag[ tau[2]] = 0;
       MG_SET(xt[3].ori, tau[2]);
     }
-    else{
+    else {
       assert(ib == tau[2]);
 
       pt[2]->v[tau[0]] = vx[taued[1]] ; pt[2]->v[tau[1]] = vx[taued[0]] ;
@@ -1790,7 +1836,7 @@ void split3cone(pMesh mesh,pSol met,int k,int vx[6]) {
     }
   }
 
-  else if (ia == tau[2]){
+  else if (ia == tau[2] ) {
     pt[1]->v[tau[0]] = vx[taued[1]] ; pt[1]->v[tau[1]] = vx[taued[0]] ; pt[1]->v[tau[3]] = vx[taued[2]];
     xt[1].tag[taued[0]] = 0;  xt[1].tag[taued[2]] = 0;
     xt[1].tag[taued[3]] = 0;  xt[1].tag[taued[4]] = 0;
@@ -1801,7 +1847,7 @@ void split3cone(pMesh mesh,pSol met,int k,int vx[6]) {
     xt[1].ftag[ tau[0]] = 0;  xt[1].ftag[ tau[2]] = 0;
     MG_SET(xt[1].ori, tau[0]);  MG_SET(xt[1].ori, tau[2]);
 
-    if(ib == tau[3]){
+    if ( ib == tau[3] ) {
       pt[2]->v[tau[0]] = vx[taued[2]] ; pt[2]->v[tau[1]] = vx[taued[0]] ;
       xt[2].tag[taued[0]] = 0;  xt[2].tag[taued[1]] = 0;
       xt[2].tag[taued[3]] = 0;  xt[2].tag[taued[4]] = 0;
@@ -1818,7 +1864,7 @@ void split3cone(pMesh mesh,pSol met,int k,int vx[6]) {
       xt[3].ftag[ tau[1]] = 0;
       MG_SET(xt[3].ori, tau[1]);
     }
-    else{
+    else {
       assert(ib == tau[1]);
 
       pt[2]->v[tau[0]] = vx[taued[0]] ; pt[2]->v[tau[3]] = vx[taued[2]] ;
@@ -1838,7 +1884,7 @@ void split3cone(pMesh mesh,pSol met,int k,int vx[6]) {
       MG_SET(xt[3].ori, tau[3]);
     }
   }
-  else{
+  else {
     assert(ia == tau[1]);
 
     pt[1]->v[tau[0]] = vx[taued[0]] ; pt[1]->v[tau[2]] = vx[taued[1]] ; pt[1]->v[tau[3]] = vx[taued[2]];
@@ -1851,7 +1897,7 @@ void split3cone(pMesh mesh,pSol met,int k,int vx[6]) {
     xt[1].ftag[ tau[0]] = 0;  xt[1].ftag[ tau[1]] = 0;
     MG_SET(xt[1].ori, tau[0]);  MG_SET(xt[1].ori, tau[1]);
 
-    if(ib == tau[2]){
+    if ( ib == tau[2] ) {
       pt[2]->v[tau[0]] = vx[taued[1]] ; pt[2]->v[tau[3]] = vx[taued[2]] ;
       xt[2].tag[taued[0]] = 0;  xt[2].tag[taued[2]] = 0;
       xt[2].tag[taued[4]] = 0;  xt[2].tag[taued[5]] = 0;
@@ -1868,7 +1914,7 @@ void split3cone(pMesh mesh,pSol met,int k,int vx[6]) {
       xt[3].ftag[ tau[3]] = 0;
       MG_SET(xt[3].ori, tau[3]);
     }
-    else{
+    else {
       assert(ib == tau[3]);
 
       pt[2]->v[tau[0]] = vx[taued[2]] ; pt[2]->v[tau[2]] = vx[taued[1]] ;
@@ -1892,41 +1938,53 @@ void split3cone(pMesh mesh,pSol met,int k,int vx[6]) {
   /* Assignation of the xt fields to the appropriate tets */
   isxt[0] = isxt[1] = isxt[2] = isxt[3] = 0;
 
-  for(i=0;i<4;i++){
-    if(xt[0].ref[i] || xt[0].ftag[i] ) isxt[0] = 1;
-    if(xt[1].ref[i] || xt[1].ftag[i] ) isxt[1] = 1;
-    if(xt[2].ref[i] || xt[2].ftag[i] ) isxt[2] = 1;
-    if(xt[3].ref[i] || xt[3].ftag[i] ) isxt[3] = 1;
+  for (i=0; i<4; i++) {
+    if ( xt[0].ref[i] || xt[0].ftag[i] ) isxt[0] = 1;
+    if ( xt[1].ref[i] || xt[1].ftag[i] ) isxt[1] = 1;
+    if ( xt[2].ref[i] || xt[2].ftag[i] ) isxt[2] = 1;
+    if ( xt[3].ref[i] || xt[3].ftag[i] ) isxt[3] = 1;
   }
 
-  if((pt[0])->xt){
-    if(isxt[0]){
+  if ( (pt[0])->xt ) {
+    if ( isxt[0] ) {
       memcpy(pxt0,&xt[0],sizeof(xTetra));
       pt[1]->xt = pt[2]->xt = pt[3]->xt = 0;
-      for(i=1;i<4;i++){
-        if(isxt[i]){
+      for (i=1; i<4; i++) {
+        if ( isxt[i] ) {
           mesh->xt++;
-          assert(mesh->xt < mesh->xtmax);
+          if ( mesh->xt >= mesh->xtmax ) {
+            fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
+            fprintf(stdout,"  ## Check the mesh size or ");
+            fprintf(stdout,"increase the allocated memory with the -m option.\n");
+            fprintf(stdout,"  Exit program.\n");
+            exit(EXIT_FAILURE);
+          }
           pt[i]->xt = mesh->xt;
           pxt0 = &mesh->xtetra[mesh->xt];
           memcpy(pxt0,&xt[i],sizeof(xTetra));
         }
       }
     }
-    else{
+    else {
       firstxt = 1;
       pt[1]->xt = pt[2]->xt = pt[3]->xt = 0;
-      for(i=1;i<4;i++){
-        if(isxt[i]){
-          if(firstxt){
+      for ( i=1; i<4; i++) {
+        if ( isxt[i] ) {
+          if ( firstxt ) {
             firstxt = 0;
             pt[i]->xt = pt[0]->xt;
             pxt0 = &mesh->xtetra[(pt[i])->xt];
             memcpy(pxt0,&xt[i],sizeof(xTetra));
           }
-          else{
+          else {
             mesh->xt++;
-            assert(mesh->xt < mesh->xtmax);
+            if ( mesh->xt >= mesh->xtmax ) {
+              fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
+              fprintf(stdout,"  ## Check the mesh size or ");
+              fprintf(stdout,"increase the allocated memory with the -m option.\n");
+              fprintf(stdout,"  Exit program.\n");
+              exit(EXIT_FAILURE);
+            }
             pt[i]->xt = mesh->xt;
             pxt0 = &mesh->xtetra[mesh->xt];
             memcpy(pxt0,&xt[i],sizeof(xTetra));
@@ -1944,30 +2002,29 @@ void split3cone(pMesh mesh,pSol met,int k,int vx[6]) {
 
 #ifdef DEBUG
   tabtmp[4][3]=lmintmp;  tabtmp[4][4]=lmaxtmp;
-  for(i=0;i<6;i++)
-    {
+  for (i=0; i<6; i++) {
       lentmp=lenedg(mesh,met,pt[0]->v[iare[i][0]],pt[0]->v[iare[i][1]]);
-      if(lentmp<lmintmp) {
+      if ( lentmp<lmintmp) {
         tabtmp[4][1]++;
-      }else if(lentmp>lmaxtmp) {
+      }else if ( lentmp>lmaxtmp) {
         tabtmp[4][2]++;
       }
       lentmp=lenedg(mesh,met,pt[1]->v[iare[i][0]],pt[1]->v[iare[i][1]]);
-      if(lentmp<lmintmp) {
+      if ( lentmp<lmintmp) {
         tabtmp[4][1]++;
-      }else if(lentmp>lmaxtmp) {
+      }else if ( lentmp>lmaxtmp) {
         tabtmp[4][2]++;
       }
       lentmp=lenedg(mesh,met,pt[2]->v[iare[i][0]],pt[2]->v[iare[i][1]]);
-      if(lentmp<lmintmp) {
+      if ( lentmp<lmintmp) {
         tabtmp[4][1]++;
-      }else if(lentmp>lmaxtmp) {
+      }else if ( lentmp>lmaxtmp) {
         tabtmp[4][2]++;
       }
       lentmp=lenedg(mesh,met,pt[3]->v[iare[i][0]],pt[3]->v[iare[i][1]]);
-      if(lentmp<lmintmp) {
+      if ( lentmp<lmintmp) {
         tabtmp[4][1]++;
-      }else if(lentmp>lmaxtmp) {
+      }else if ( lentmp>lmaxtmp) {
         tabtmp[4][2]++;
       }
     }
@@ -1991,12 +2048,11 @@ void split3op(pMesh mesh, pSol met, int k, int vx[6]){
 
 #ifdef DEBUG
   lmintmp=0.6;lmaxtmp=1.3;
-  for(i=0;i<6;i++)
-    {
+  for (i=0; i<6; i++) {
       lentmp=lenedg(mesh,met,pt[0]->v[iare[i][0]],pt[0]->v[iare[i][1]]);
-      if(lentmp<lmintmp) {
+      if ( lentmp<lmintmp) {
         lmintmp=lentmp;
-      }else if(lentmp>lmaxtmp) {
+      }else if ( lentmp>lmaxtmp) {
         lmaxtmp=lentmp;
       }
     }
@@ -2153,14 +2209,14 @@ void split3op(pMesh mesh, pSol met, int k, int vx[6]){
   pt[3] = memcpy(pt[3],pt[0],sizeof(Tetra));
   newtet[3]=iel;
 
-  if((pt[0])->xt){
+  if ( (pt[0])->xt ) {
     pxt0 = &mesh->xtetra[(pt[0])->xt];
     memcpy(&xt[0],pxt0, sizeof(xTetra));
     memcpy(&xt[1],pxt0, sizeof(xTetra));
     memcpy(&xt[2],pxt0, sizeof(xTetra));
     memcpy(&xt[3],pxt0, sizeof(xTetra));
   }
-  else{
+  else {
     pxt0 = 0;
     memset(&xt[0],0, sizeof(xTetra));
     memset(&xt[1],0, sizeof(xTetra));
@@ -2168,238 +2224,250 @@ void split3op(pMesh mesh, pSol met, int k, int vx[6]){
     memset(&xt[3],0, sizeof(xTetra));
   }
 
-  if(!((imin12 == ip1) && (imin03 == ip3))){
+  if ( !((imin12 == ip1) && (imin03 == ip3)) ) {
     iel = newElt(mesh);
     assert(iel);
     pt[4] = &mesh->tetra[iel];
     pt[4] = memcpy(pt[4],pt[0],sizeof(Tetra));
     newtet[4]=iel;
 
-    if(pt[0]->xt){
+    if ( pt[0]->xt ) {
       pxt0 = &mesh->xtetra[(pt[0])->xt];
       memcpy(&xt[4],pxt0, sizeof(xTetra));
     }
 
-    else{
+    else {
       pxt0 = 0;
       memset(&xt[4],0, sizeof(xTetra));
     }
   }
 
   /* Generic formulation of split of 3 edges in op configuration (edges 0,1,5 splitted) */
-  if((imin12 == ip2) && (imin03 == ip0)){
+  if ( (imin12 == ip2) && (imin03 == ip0) ) {
     pt[0]->v[ip0] = vx[ie1] ;  pt[0]->v[ip1] = vx[ie0] ; pt[0]->v[ip3] = vx[ie5] ;
-    xt[0].tag[taued[0]] = 0;  xt[0].tag[taued[2]] = 0;
-    xt[0].tag[taued[3]] = 0;  xt[0].tag[taued[4]] = 0;
-    xt[0].edg[taued[0]] = 0;  xt[0].edg[taued[2]] = 0;
-    xt[0].edg[taued[3]] = 0;  xt[0].edg[taued[4]] = 0;
+    xt[0].tag[ie0] = 0;  xt[0].tag[ie2] = 0;
+    xt[0].tag[ie3] = 0;  xt[0].tag[ie4] = 0;
+    xt[0].edg[ie0] = 0;  xt[0].edg[ie2] = 0;
+    xt[0].edg[ie3] = 0;  xt[0].edg[ie4] = 0;
     xt[0].ref [ip0] = 0 ; xt[0].ref [ip2] = 0 ;
     xt[0].ftag[ip0] = 0 ; xt[0].ftag[ip2] = 0 ;
     MG_SET(xt[0].ori, ip0); MG_SET(xt[0].ori, ip2);
 
     pt[1]->v[ip0] = vx[ie0] ; pt[1]->v[ip3] = vx[ie5] ;
-    xt[1].tag[taued[1]] = 0;  xt[1].tag[taued[2]] = 0;
-    xt[1].tag[taued[4]] = 0;  xt[1].edg[taued[1]] = 0;
-    xt[1].edg[taued[2]] = 0;  xt[1].edg[taued[4]] = 0;
+    xt[1].tag[ie1] = 0;  xt[1].tag[ie2] = 0;
+    xt[1].tag[ie4] = 0;  xt[1].edg[ie1] = 0;
+    xt[1].edg[ie2] = 0;  xt[1].edg[ie4] = 0;
     xt[1].ref [ip1] = 0 ; xt[1] .ref[ip2] = 0 ;
     xt[1].ftag[ip1] = 0 ; xt[1].ftag[ip2] = 0 ;
     MG_SET(xt[1].ori, ip1); MG_SET(xt[1].ori, ip2);
 
     pt[2]->v[ip0] = vx[ie0] ; pt[2]->v[ip2] = vx[ie5] ;
-    xt[2].tag[taued[1]] = 0;  xt[2].tag[taued[2]] = 0;
-    xt[2].tag[taued[3]] = 0;  xt[2].edg[taued[2]] = 0;
-    xt[2].edg[taued[3]] = 0;
+    xt[2].tag[ie1] = 0;  xt[2].tag[ie2] = 0;
+    xt[2].tag[ie3] = 0;  xt[2].edg[ie2] = 0;
+    xt[2].edg[ie3] = 0;
     xt[2].ref [ip1] = 0 ; xt[2].ref [ip3] = 0 ;
     xt[2].ftag[ip1] = 0 ; xt[2].ftag[ip3] = 0 ;
     MG_SET(xt[2].ori, ip1); MG_SET(xt[2].ori, ip3);
 
     pt[3]->v[ip1] = vx[ie0] ; pt[3]->v[ip2] = vx[ie1] ; pt[3]->v[ip3] = vx[ie5] ;
-    xt[3].tag[taued[2]] = 0;  xt[3].tag[taued[3]] = 0;
-    xt[3].tag[taued[4]] = 0;  xt[3].tag[taued[5]] = 0;
-    xt[3].edg[taued[2]] = 0;  xt[3].edg[taued[3]] = 0;
-    xt[3].edg[taued[4]] = 0;  xt[3].edg[taued[5]] = 0;
+    xt[3].tag[ie2] = 0;  xt[3].tag[ie3] = 0;
+    xt[3].tag[ie4] = 0;  xt[3].tag[ie5] = 0;
+    xt[3].edg[ie2] = 0;  xt[3].edg[ie3] = 0;
+    xt[3].edg[ie4] = 0;  xt[3].edg[ie5] = 0;
     xt[3].ref [ip0] = 0 ; xt[3].ref [ip2] = 0 ;
     xt[3].ftag[ip0] = 0 ; xt[3].ftag[ip2] = 0 ;
     MG_SET(xt[3].ori, ip0); MG_SET(xt[3].ori, ip2);
 
     pt[4]->v[ip1] = vx[ie0] ; pt[4]->v[ip2] = vx[ie5];
-    xt[4].tag[taued[1]] = 0;  xt[4].tag[taued[3]] = 0;
-    xt[4].tag[taued[4]] = 0;  xt[4].edg[taued[1]] = 0;
-    xt[4].edg[taued[3]] = 0;  xt[4].edg[taued[4]] = 0;
+    xt[4].tag[ie1] = 0;  xt[4].tag[ie3] = 0;
+    xt[4].tag[ie4] = 0;  xt[4].edg[ie1] = 0;
+    xt[4].edg[ie3] = 0;  xt[4].edg[ie4] = 0;
     xt[4].ref [ip0] = 0 ; xt[4].ref [ip3] = 0 ;
     xt[4].ftag[ip0] = 0 ; xt[4].ftag[ip3] = 0 ;
     MG_SET(xt[4].ori, ip0); MG_SET(xt[4].ori, ip3);
   }
 
-  else if((imin12 == ip1) && (imin03 == ip0)){
+  else if ( (imin12 == ip1) && (imin03 == ip0) ) {
     pt[0]->v[ip0] = vx[ie1] ; pt[0]->v[ip3] = vx[ie5] ;
-    xt[0].tag[taued[0]] = 0;  xt[0].tag[taued[2]] = 0;
-    xt[0].tag[taued[4]] = 0;  xt[0].edg[taued[0]] = 0;
-    xt[0].edg[taued[2]] = 0;  xt[0].edg[taued[4]] = 0;
+    xt[0].tag[ie0] = 0;  xt[0].tag[ie2] = 0;
+    xt[0].tag[ie4] = 0;  xt[0].edg[ie0] = 0;
+    xt[0].edg[ie2] = 0;  xt[0].edg[ie4] = 0;
     xt[0].ref[ip2]  = 0 ;
     xt[0].ftag[ip2] = 0 ;
     MG_SET(xt[0].ori, ip2);
 
     pt[1]->v[ip0] = vx[ie0] ; pt[1]->v[ip2] = vx[ie1] ; pt[1]->v[ip3] = vx[ie5];
-    xt[1].tag[taued[1]] = 0;  xt[1].tag[taued[2]] = 0;
-    xt[1].tag[taued[3]] = 0;  xt[1].tag[taued[4]] = 0;
-    xt[1].tag[taued[5]] = 0;  xt[1].edg[taued[1]] = 0;
-    xt[1].edg[taued[2]] = 0;  xt[1].edg[taued[3]] = 0;
-    xt[1].edg[taued[4]] = 0;  xt[1].edg[taued[5]] = 0;
+    xt[1].tag[ie1] = 0;  xt[1].tag[ie2] = 0;
+    xt[1].tag[ie3] = 0;  xt[1].tag[ie4] = 0;
+    xt[1].tag[ie5] = 0;  xt[1].edg[ie1] = 0;
+    xt[1].edg[ie2] = 0;  xt[1].edg[ie3] = 0;
+    xt[1].edg[ie4] = 0;  xt[1].edg[ie5] = 0;
     xt[1].ref [ip0] = 0 ; xt[1].ref [ip1] = 0 ; xt[1].ref [ip2] = 0 ;
     xt[1].ftag[ip0] = 0 ; xt[1].ftag[ip1] = 0 ; xt[1].ftag[ip2] = 0 ;
     MG_SET(xt[1].ori, ip0); MG_SET(xt[1].ori, ip1); MG_SET(xt[1].ori, ip2);
 
     pt[2]->v[ip0] = vx[ie0] ; pt[2]->v[ip2] = vx[ie5] ;
-    xt[2].tag[taued[1]] = 0;  xt[2].tag[taued[2]] = 0;
-    xt[2].tag[taued[3]] = 0;  xt[2].edg[taued[1]] = 0;
-    xt[2].edg[taued[2]] = 0;  xt[2].edg[taued[3]] = 0;
+    xt[2].tag[ie1] = 0;  xt[2].tag[ie2] = 0;
+    xt[2].tag[ie3] = 0;  xt[2].edg[ie1] = 0;
+    xt[2].edg[ie2] = 0;  xt[2].edg[ie3] = 0;
     xt[2].ref [ip1] = 0 ; xt[2].ref [ip3] = 0 ;
     xt[2].ftag[ip1] = 0 ; xt[2].ftag[ip3] = 0 ;
     MG_SET(xt[2].ori, ip1); MG_SET(xt[2].ori, ip3);
 
     pt[3]->v[ip1] = vx[ie0] ; pt[3]->v[ip2] = vx[ie5];
-    xt[3].tag[taued[1]] = 0;  xt[3].tag[taued[3]] = 0;
-    xt[3].tag[taued[4]] = 0;  xt[3].edg[taued[1]] = 0;
-    xt[3].edg[taued[3]] = 0;  xt[3].edg[taued[4]] = 0;
+    xt[3].tag[ie1] = 0;  xt[3].tag[ie3] = 0;
+    xt[3].tag[ie4] = 0;  xt[3].edg[ie1] = 0;
+    xt[3].edg[ie3] = 0;  xt[3].edg[ie4] = 0;
     xt[3].ref [ip0] = 0 ; xt[3].ref [ip3] = 0 ;
     xt[3].ftag[ip0] = 0 ; xt[3].ftag[ip3] = 0 ;
     MG_SET(xt[3].ori, ip0); MG_SET(xt[3].ori, ip3);
 
     pt[4]->v[ip1] = vx[ie0] ; pt[4]->v[ip2] = vx[ie1]; pt[4]->v[ip3] = vx[ie5];
-    xt[4].tag[taued[2]] = 0;  xt[4].tag[taued[3]] = 0;
-    xt[4].tag[taued[4]] = 0;  xt[4].tag[taued[5]] = 0;
-    xt[4].edg[taued[2]] = 0;  xt[4].edg[taued[3]] = 0;
-    xt[4].edg[taued[4]] = 0;  xt[4].edg[taued[5]] = 0;
+    xt[4].tag[ie2] = 0;  xt[4].tag[ie3] = 0;
+    xt[4].tag[ie4] = 0;  xt[4].tag[ie5] = 0;
+    xt[4].edg[ie2] = 0;  xt[4].edg[ie3] = 0;
+    xt[4].edg[ie4] = 0;  xt[4].edg[ie5] = 0;
     xt[4].ref [ip0] = 0 ; xt[4].ref [ip2] = 0 ;
     xt[4].ftag[ip0] = 0 ; xt[4].ftag[ip2] = 0 ;
     MG_SET(xt[4].ori, ip0); MG_SET(xt[4].ori, ip2);
   }
 
-  else if((imin12 == ip2) && (imin03 == ip3)){
+  else if ( (imin12 == ip2) && (imin03 == ip3) ) {
     pt[0]->v[ip1] = vx[ie0] ; pt[0]->v[ip2] = vx[ie1] ;
-    xt[0].tag[taued[3]] = 0;  xt[0].tag[taued[4]] = 0;
-    xt[0].tag[taued[5]] = 0;  xt[0].edg[taued[3]] = 0;
-    xt[0].edg[taued[4]] = 0;  xt[0].edg[taued[5]] = 0;
+    xt[0].tag[ie3] = 0;  xt[0].tag[ie4] = 0;
+    xt[0].tag[ie5] = 0;  xt[0].edg[ie3] = 0;
+    xt[0].edg[ie4] = 0;  xt[0].edg[ie5] = 0;
     xt[0].ref[ip0]  = 0 ;
     xt[0].ftag[ip0] = 0 ;
     MG_SET(xt[0].ori, ip0);
 
     pt[1]->v[ip0] = vx[ie1] ; pt[1]->v[ip1] = vx[ie0] ; pt[1]->v[ip2] = vx[ie5];
-    xt[1].tag[taued[0]] = 0;  xt[1].tag[taued[1]] = 0;
-    xt[1].tag[taued[2]] = 0;  xt[1].tag[taued[3]] = 0;
-    xt[1].tag[taued[4]] = 0;  xt[1].edg[taued[0]] = 0;
-    xt[1].edg[taued[1]] = 0;  xt[1].edg[taued[2]] = 0;
-    xt[1].edg[taued[3]] = 0;  xt[1].edg[taued[4]] = 0;
+    xt[1].tag[ie0] = 0;  xt[1].tag[ie1] = 0;
+    xt[1].tag[ie2] = 0;  xt[1].tag[ie3] = 0;
+    xt[1].tag[ie4] = 0;  xt[1].edg[ie0] = 0;
+    xt[1].edg[ie1] = 0;  xt[1].edg[ie2] = 0;
+    xt[1].edg[ie3] = 0;  xt[1].edg[ie4] = 0;
     xt[1].ref [ip1] = 0 ; xt[1].ref [ip2] = 0 ; xt[1].ref [ip3] = 0 ;
     xt[1].ftag[ip1] = 0 ; xt[1].ftag[ip2] = 0 ; xt[1].ftag[ip3] = 0 ;
     MG_SET(xt[1].ori, ip1); MG_SET(xt[1].ori, ip2); MG_SET(xt[1].ori, ip3);
 
     pt[2]->v[ip0] = vx[ie0] ; pt[2]->v[ip2] = vx[ie5] ;
-    xt[2].tag[taued[1]] = 0;  xt[2].tag[taued[2]] = 0;
-    xt[2].tag[taued[3]] = 0;  xt[2].edg[taued[1]] = 0;
-    xt[2].edg[taued[2]] = 0;  xt[2].edg[taued[3]] = 0;
+    xt[2].tag[ie1] = 0;  xt[2].tag[ie2] = 0;
+    xt[2].tag[ie3] = 0;  xt[2].edg[ie1] = 0;
+    xt[2].edg[ie2] = 0;  xt[2].edg[ie3] = 0;
     xt[2].ref [ip1] = 0 ; xt[2].ref [ip3] = 0 ;
     xt[2].ftag[ip1] = 0 ; xt[2].ftag[ip3] = 0 ;
     MG_SET(xt[2].ori, ip1); MG_SET(xt[2].ori, ip3);
 
     pt[3]->v[ip0] = vx[ie1] ; pt[3]->v[ip1] = vx[ie0]; pt[3]->v[ip3] = vx[ie5];
-    xt[3].tag[taued[0]] = 0;  xt[3].tag[taued[2]] = 0;
-    xt[3].tag[taued[3]] = 0;  xt[3].tag[taued[4]] = 0;
-    xt[3].edg[taued[0]] = 0;  xt[3].edg[taued[2]] = 0;
-    xt[3].edg[taued[3]] = 0;  xt[3].edg[taued[4]] = 0;
+    xt[3].tag[ie0] = 0;  xt[3].tag[ie2] = 0;
+    xt[3].tag[ie3] = 0;  xt[3].tag[ie4] = 0;
+    xt[3].edg[ie0] = 0;  xt[3].edg[ie2] = 0;
+    xt[3].edg[ie3] = 0;  xt[3].edg[ie4] = 0;
     xt[3].ref [ip0] = 0 ; xt[3].ref [ip2] = 0 ;
     xt[3].ftag[ip0] = 0 ; xt[3].ftag[ip2] = 0 ;
     MG_SET(xt[3].ori, ip0); MG_SET(xt[3].ori, ip2);
 
     pt[4]->v[ip0] = vx[ie0] ; pt[4]->v[ip3] = vx[ie5];
-    xt[4].tag[taued[1]] = 0;  xt[4].tag[taued[2]] = 0;
-    xt[4].tag[taued[4]] = 0;  xt[4].edg[taued[1]] = 0;
-    xt[4].edg[taued[2]] = 0;  xt[4].edg[taued[4]] = 0;
+    xt[4].tag[ie1] = 0;  xt[4].tag[ie2] = 0;
+    xt[4].tag[ie4] = 0;  xt[4].edg[ie1] = 0;
+    xt[4].edg[ie2] = 0;  xt[4].edg[ie4] = 0;
     xt[4].ref [ip1] = 0 ; xt[4].ref [ip2] = 0 ;
     xt[4].ftag[ip1] = 0 ; xt[4].ftag[ip2] = 0 ;
     MG_SET(xt[4].ori, ip1); MG_SET(xt[4].ori, ip2);
   }
-  else{
+  else {
     assert((imin12 == ip1) && (imin03 == ip3)) ;
 
     pt[0]->v[ip1] = vx[ie0] ; pt[0]->v[ip2] = vx[ie1] ;
-    xt[0].tag[taued[3]] = 0;  xt[0].tag[taued[4]] = 0;
-    xt[0].tag[taued[5]] = 0;  xt[0].edg[taued[3]] = 0;
-    xt[0].edg[taued[4]] = 0;  xt[0].edg[taued[5]] = 0;
+    xt[0].tag[ie3] = 0;  xt[0].tag[ie4] = 0;
+    xt[0].tag[ie5] = 0;  xt[0].edg[ie3] = 0;
+    xt[0].edg[ie4] = 0;  xt[0].edg[ie5] = 0;
     xt[0].ref [ip0] = 0 ;
     xt[0].ftag[ip0] = 0 ;
     MG_SET(xt[0].ori, ip0);
 
     pt[1]->v[ip0] = vx[ie1] ; pt[1]->v[ip3] = vx[ie5] ;
-    xt[1].tag[taued[0]] = 0;  xt[1].tag[taued[2]] = 0;
-    xt[1].tag[taued[4]] = 0;  xt[1].edg[taued[0]] = 0;
-    xt[1].edg[taued[2]] = 0;  xt[1].edg[taued[4]] = 0;
+    xt[1].tag[ie0] = 0;  xt[1].tag[ie2] = 0;
+    xt[1].tag[ie4] = 0;  xt[1].edg[ie0] = 0;
+    xt[1].edg[ie2] = 0;  xt[1].edg[ie4] = 0;
     xt[1].ref [ip2] = 0 ;
     xt[1].ftag[ip2] = 0 ;
     MG_SET(xt[1].ori, ip2);
 
     pt[2]->v[ip0] = vx[ie0] ; pt[2]->v[ip2] = vx[ie1] ;
-    xt[2].tag[taued[1]] = 0;  xt[2].tag[taued[2]] = 0;
-    xt[2].tag[taued[3]] = 0;  xt[2].tag[taued[5]] = 0;
-    xt[2].edg[taued[1]] = 0;  xt[2].edg[taued[2]] = 0;
-    xt[2].edg[taued[3]] = 0;  xt[2].edg[taued[5]] = 0;
+    xt[2].tag[ie1] = 0;  xt[2].tag[ie2] = 0;
+    xt[2].tag[ie3] = 0;  xt[2].tag[ie5] = 0;
+    xt[2].edg[ie1] = 0;  xt[2].edg[ie2] = 0;
+    xt[2].edg[ie3] = 0;  xt[2].edg[ie5] = 0;
     xt[2].ref [ip0] = 0 ; xt[2].ref [ip1] = 0 ;
     xt[2].ftag[ip0] = 0 ; xt[2].ftag[ip1] = 0 ;
     MG_SET(xt[2].ori, ip0); MG_SET(xt[2].ori, ip1);
 
     pt[3]->v[ip0] = vx[ie1] ; pt[3]->v[ip2] = vx[ie5] ;
-    xt[3].tag[taued[0]] = 0;  xt[3].tag[taued[1]] = 0;
-    xt[3].tag[taued[2]] = 0;  xt[3].tag[taued[3]] = 0;
-    xt[3].edg[taued[0]] = 0;  xt[3].edg[taued[1]] = 0;
-    xt[3].edg[taued[2]] = 0;  xt[3].edg[taued[3]] = 0;
+    xt[3].tag[ie0] = 0;  xt[3].tag[ie1] = 0;
+    xt[3].tag[ie2] = 0;  xt[3].tag[ie3] = 0;
+    xt[3].edg[ie0] = 0;  xt[3].edg[ie1] = 0;
+    xt[3].edg[ie2] = 0;  xt[3].edg[ie3] = 0;
     xt[3].ref [ip2] = 0 ; xt[3].ref [ip3] = 0 ;
     xt[3].ftag[ip2] = 0 ; xt[3].ftag[ip3] = 0 ;
     MG_SET(xt[3].ori, ip2); MG_SET(xt[3].ori, ip3);
   }
 
   /* Assignation of the xt fields to the appropriate tets */
-  if((imin12 == ip1) && (imin03 == ip3)){
+  if ( (imin12 == ip1) && (imin03 == ip3) ) {
     isxt[0] = isxt[1] = isxt[2] = isxt[3] = 0;
 
-    for(i=0;i<4;i++){
-      if((xt[0]).ref[i] || xt[0].ftag[i] ) isxt[0] = 1;
-      if((xt[1]).ref[i] || xt[1].ftag[i] ) isxt[1] = 1;
-      if((xt[2]).ref[i] || xt[2].ftag[i] ) isxt[2] = 1;
-      if((xt[3]).ref[i] || xt[3].ftag[i] ) isxt[3] = 1;
+    for (i=0; i<4; i++) {
+      if ( (xt[0]).ref[i] || xt[0].ftag[i] ) isxt[0] = 1;
+      if ( (xt[1]).ref[i] || xt[1].ftag[i] ) isxt[1] = 1;
+      if ( (xt[2]).ref[i] || xt[2].ftag[i] ) isxt[2] = 1;
+      if ( (xt[3]).ref[i] || xt[3].ftag[i] ) isxt[3] = 1;
     }
 
-    if(pt[0]->xt){
-      if(isxt[0]){
+    if ( pt[0]->xt ) {
+      if ( isxt[0] ) {
         memcpy(pxt0,&xt[0],sizeof(xTetra));
         pt[1]->xt = pt[2]->xt = pt[3]->xt = 0;
 
-        for(i=1;i<4;i++){
-          if(isxt[i]){
+        for (i=1; i<4; i++) {
+          if ( isxt[i] ) {
             mesh->xt++;
-            assert(mesh->xt < mesh->xtmax);
+            if ( mesh->xt >= mesh->xtmax ) {
+              fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
+              fprintf(stdout,"  ## Check the mesh size or ");
+              fprintf(stdout,"increase the allocated memory with the -m option.\n");
+              fprintf(stdout,"  Exit program.\n");
+              exit(EXIT_FAILURE);
+            }
             pt[i]->xt = mesh->xt;
             pxt0 = &mesh->xtetra[mesh->xt];
             memcpy(pxt0,&xt[i],sizeof(xTetra));
           }
         }
       }
-      else{
+      else {
         firstxt = 1;
         pt[1]->xt = pt[2]->xt = pt[3]->xt = 0;
 
-        for(i=1;i<4;i++){
-          if(isxt[i]){
-            if(firstxt){
+        for (i=1; i<4; i++) {
+          if ( isxt[i] ) {
+            if ( firstxt ) {
               firstxt = 0;
               pt[i]->xt = pt[0]->xt;
               pxt0 = &mesh->xtetra[(pt[i])->xt];
               memcpy(pxt0,&(xt[i]),sizeof(xTetra));
             }
-            else{
+            else {
               mesh->xt++;
-              assert(mesh->xt < mesh->xtmax);
-              pt[i] ->xt = mesh->xt;
+              if ( mesh->xt >= mesh->xtmax ) {
+                fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
+                fprintf(stdout,"  ## Check the mesh size or ");
+                fprintf(stdout,"increase the allocated memory with the -m option.\n");
+                fprintf(stdout,"  Exit program.\n");
+                exit(EXIT_FAILURE);
+              }
+              pt[i]->xt = mesh->xt;
               pxt0 = &mesh->xtetra[mesh->xt];
               memcpy(pxt0,&xt[i],sizeof(xTetra));
             }
@@ -2410,47 +2478,60 @@ void split3op(pMesh mesh, pSol met, int k, int vx[6]){
     }
 
   }
-  else{
+  else {
     isxt[0] = isxt[1] = isxt[2] = isxt[3] = isxt[4] = 0;
 
-    for(i=0;i<4;i++){
-      if((xt[0]).ref[i] || xt[0].ftag[i] ) isxt[0] = 1;
-      if((xt[1]).ref[i] || xt[1].ftag[i] ) isxt[1] = 1;
-      if((xt[2]).ref[i] || xt[2].ftag[i] ) isxt[2] = 1;
-      if((xt[3]).ref[i] || xt[3].ftag[i] ) isxt[3] = 1;
-      if((xt[4]).ref[i] || xt[4].ftag[i] ) isxt[4] = 1;
+    for (i=0; i<4; i++) {
+      if ( (xt[0]).ref[i] || xt[0].ftag[i] ) isxt[0] = 1;
+      if ( (xt[1]).ref[i] || xt[1].ftag[i] ) isxt[1] = 1;
+      if ( (xt[2]).ref[i] || xt[2].ftag[i] ) isxt[2] = 1;
+      if ( (xt[3]).ref[i] || xt[3].ftag[i] ) isxt[3] = 1;
+      if ( (xt[4]).ref[i] || xt[4].ftag[i] ) isxt[4] = 1;
     }
 
-    if(pt[0]->xt){
-      if(isxt[0]){
+
+    if ( pt[0]->xt ) {
+      if ( isxt[0] ) {
         memcpy(pxt0,&(xt[0]),sizeof(xTetra));
         pt[1]->xt = pt[2]->xt = pt[3]->xt = pt[4]->xt = 0;
 
-        for(i=1;i<5;i++){
-          if(isxt[i]){
+        for(i=1; i<5; i++) {
+          if ( isxt[i] ) {
             mesh->xt++;
-            assert(mesh->xt < mesh->xtmax);
+            if ( mesh->xt >= mesh->xtmax ) {
+              fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
+              fprintf(stdout,"  ## Check the mesh size or ");
+              fprintf(stdout,"increase the allocated memory with the -m option.\n");
+              fprintf(stdout,"  Exit program.\n");
+              exit(EXIT_FAILURE);
+            }
             pt[i]->xt = mesh->xt;
             pxt0 = &mesh->xtetra[mesh->xt];
             memcpy(pxt0,&xt[i],sizeof(xTetra));
           }
         }
       }
-      else{
+      else {
         firstxt = 1;
         pt[1]->xt = pt[2]->xt = pt[3]->xt = pt[4]->xt = 0;
 
-        for(i=1; i<5; i++){
-          if( isxt[i] ){
-            if(firstxt){
+        for (i=1; i<5; i++) {
+          if ( isxt[i] ) {
+            if ( firstxt ) {
               firstxt = 0;
               pt[i]->xt = pt[0]->xt;
               pxt0 = &mesh->xtetra[pt[i]->xt];
               memcpy(pxt0,&xt[i],sizeof(xTetra));
             }
-            else{
+            else {
               mesh->xt++;
-              assert(mesh->xt < mesh->xtmax);
+              if ( mesh->xt >= mesh->xtmax ) {
+                fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
+                fprintf(stdout,"  ## Check the mesh size or ");
+                fprintf(stdout,"increase the allocated memory with the -m option.\n");
+                fprintf(stdout,"  Exit program.\n");
+                exit(EXIT_FAILURE);
+              }
               pt[i]->xt = mesh->xt;
               pxt0 = &mesh->xtetra[mesh->xt];
               memcpy(pxt0,&xt[i],sizeof(xTetra));
@@ -2466,109 +2547,108 @@ void split3op(pMesh mesh, pSol met, int k, int vx[6]){
   pt[1]->qual=orcal(mesh,newtet[1]);
   pt[2]->qual=orcal(mesh,newtet[2]);
   pt[3]->qual=orcal(mesh,newtet[3]);
-  if(!((imin12 == ip1) && (imin03 == ip3))){
+  if ( !((imin12 == ip1) && (imin03 == ip3)) ) {
     pt[4]->qual=orcal(mesh,newtet[4]);
   }
 
 #ifdef DEBUG
-  if(!((imin12 == ip1) && (imin03 == ip3))){
+  if ( !((imin12 == ip1) && (imin03 == ip3)) ) {
     tabtmp[5][0]--;
     tabtmp[6][0]++;
   }
   iatmp=vx[ie0];ibtmp=vx[ie1];ictmp=vx[ie5];
 
   tabtmp[5][3]=lmintmp;  tabtmp[5][4]=lmaxtmp;
-  for(i=0;i<6;i++)
-    {
+  for (i=0; i<6; i++) {
       lentmp=lenedg(mesh,met,pt[0]->v[iare[i][0]],pt[0]->v[iare[i][1]]);
-      if(lentmp<lmintmp) {
-        if(pt[0]->v[iare[i][0]]==iatmp ||pt[0]->v[iare[i][1]]==iatmp){
-          if(pt[0]->v[iare[i][0]]==ibtmp || pt[0]->v[iare[i][1]]==ibtmp
-             || pt[0]->v[iare[i][0]]==ictmp || pt[0]->v[iare[i][0]]==ictmp){
+      if ( lentmp<lmintmp) {
+        if ( pt[0]->v[iare[i][0]]==iatmp ||pt[0]->v[iare[i][1]]==iatmp ) {
+          if ( pt[0]->v[iare[i][0]]==ibtmp || pt[0]->v[iare[i][1]]==ibtmp
+             || pt[0]->v[iare[i][0]]==ictmp || pt[0]->v[iare[i][0]]==ictmp ) {
             tabtmp[5][1]=tabtmp[5][1]+1./3.;
-          }else{
+          }else {
             tabtmp[5][1]=tabtmp[5][1]+1./2.;
           }}else tabtmp[5][1]=tabtmp[5][1]+1./2.;
-      }else if(lentmp>lmaxtmp) {
-        if(pt[0]->v[iare[i][0]]==iatmp ||pt[0]->v[iare[i][1]]==iatmp){
-          if(pt[0]->v[iare[i][0]]==ibtmp || pt[0]->v[iare[i][1]]==ibtmp
-             || pt[0]->v[iare[i][0]]==ictmp || pt[0]->v[iare[i][0]]==ictmp){
+      }else if ( lentmp>lmaxtmp) {
+        if ( pt[0]->v[iare[i][0]]==iatmp ||pt[0]->v[iare[i][1]]==iatmp ) {
+          if ( pt[0]->v[iare[i][0]]==ibtmp || pt[0]->v[iare[i][1]]==ibtmp
+             || pt[0]->v[iare[i][0]]==ictmp || pt[0]->v[iare[i][0]]==ictmp ) {
             tabtmp[5][2]=tabtmp[5][2]+1./3.;
-          }else{
+          }else {
             tabtmp[5][2]=tabtmp[5][2]+1./2.;
           }}else tabtmp[5][2]=tabtmp[5][2]+1./2.;
       }
       lentmp=lenedg(mesh,met,pt[1]->v[iare[i][0]],pt[1]->v[iare[i][1]]);
-      if(lentmp<lmintmp) {
-        if(pt[1]->v[iare[i][0]]==iatmp ||pt[1]->v[iare[i][1]]==iatmp){
-          if(pt[1]->v[iare[i][0]]==ibtmp || pt[1]->v[iare[i][1]]==ibtmp
-             || pt[1]->v[iare[i][0]]==ictmp || pt[1]->v[iare[i][0]]==ictmp){
+      if ( lentmp<lmintmp) {
+        if ( pt[1]->v[iare[i][0]]==iatmp ||pt[1]->v[iare[i][1]]==iatmp ) {
+          if ( pt[1]->v[iare[i][0]]==ibtmp || pt[1]->v[iare[i][1]]==ibtmp
+             || pt[1]->v[iare[i][0]]==ictmp || pt[1]->v[iare[i][0]]==ictmp ) {
             tabtmp[5][1]=tabtmp[5][1]+1./3.;
-          }else{
+          }else {
             tabtmp[5][1]=tabtmp[5][1]+1./2.;
           }}else tabtmp[5][1]=tabtmp[5][1]+1./2.;
-      }else if(lentmp>lmaxtmp) {
-        if(pt[1]->v[iare[i][0]]==iatmp ||pt[1]->v[iare[i][1]]==iatmp){
-          if(pt[1]->v[iare[i][0]]==ibtmp || pt[1]->v[iare[i][1]]==ibtmp
-             || pt[1]->v[iare[i][0]]==ictmp || pt[1]->v[iare[i][0]]==ictmp){
+      }else if ( lentmp>lmaxtmp) {
+        if ( pt[1]->v[iare[i][0]]==iatmp ||pt[1]->v[iare[i][1]]==iatmp ) {
+          if ( pt[1]->v[iare[i][0]]==ibtmp || pt[1]->v[iare[i][1]]==ibtmp
+             || pt[1]->v[iare[i][0]]==ictmp || pt[1]->v[iare[i][0]]==ictmp ) {
             tabtmp[5][2]=tabtmp[5][2]+1./3.;
-          }else{
+          }else {
             tabtmp[5][2]=tabtmp[5][2]+1./2.;
           }}else tabtmp[5][2]=tabtmp[5][2]+1./2.;
       }
       lentmp=lenedg(mesh,met,pt[2]->v[iare[i][0]],pt[2]->v[iare[i][1]]);
-      if(lentmp<lmintmp) {
-        if(pt[2]->v[iare[i][0]]==iatmp ||pt[2]->v[iare[i][1]]==iatmp){
-          if(pt[2]->v[iare[i][0]]==ibtmp || pt[2]->v[iare[i][1]]==ibtmp
-             || pt[2]->v[iare[i][0]]==ictmp || pt[2]->v[iare[i][0]]==ictmp){
+      if ( lentmp<lmintmp) {
+        if ( pt[2]->v[iare[i][0]]==iatmp ||pt[2]->v[iare[i][1]]==iatmp ) {
+          if ( pt[2]->v[iare[i][0]]==ibtmp || pt[2]->v[iare[i][1]]==ibtmp
+             || pt[2]->v[iare[i][0]]==ictmp || pt[2]->v[iare[i][0]]==ictmp ) {
             tabtmp[5][1]=tabtmp[5][1]+1./3.;
-          }else{
+          }else {
             tabtmp[5][1]=tabtmp[5][1]+1./2.;
           }}else tabtmp[5][1]=tabtmp[5][1]+1./2.;
-      }else if(lentmp>lmaxtmp) {
-        if(pt[2]->v[iare[i][0]]==iatmp ||pt[2]->v[iare[i][1]]==iatmp){
-          if(pt[2]->v[iare[i][0]]==ibtmp || pt[2]->v[iare[i][1]]==ibtmp
-             || pt[2]->v[iare[i][0]]==ictmp || pt[2]->v[iare[i][0]]==ictmp){
+      }else if ( lentmp>lmaxtmp) {
+        if ( pt[2]->v[iare[i][0]]==iatmp ||pt[2]->v[iare[i][1]]==iatmp ) {
+          if ( pt[2]->v[iare[i][0]]==ibtmp || pt[2]->v[iare[i][1]]==ibtmp
+             || pt[2]->v[iare[i][0]]==ictmp || pt[2]->v[iare[i][0]]==ictmp ) {
             tabtmp[5][2]=tabtmp[5][2]+1./3.;
-          }else{
+          }else {
             tabtmp[5][2]=tabtmp[5][2]+1./2.;
           }}else tabtmp[5][2]=tabtmp[5][2]+1./2.;
       }
       lentmp=lenedg(mesh,met,pt[3]->v[iare[i][0]],pt[3]->v[iare[i][1]]);
-      if(lentmp<lmintmp) {
-        if(pt[3]->v[iare[i][0]]==iatmp ||pt[3]->v[iare[i][1]]==iatmp){
-          if(pt[3]->v[iare[i][0]]==ibtmp || pt[3]->v[iare[i][1]]==ibtmp
-             || pt[3]->v[iare[i][0]]==ictmp || pt[3]->v[iare[i][0]]==ictmp){
+      if ( lentmp<lmintmp) {
+        if ( pt[3]->v[iare[i][0]]==iatmp ||pt[3]->v[iare[i][1]]==iatmp ) {
+          if ( pt[3]->v[iare[i][0]]==ibtmp || pt[3]->v[iare[i][1]]==ibtmp
+             || pt[3]->v[iare[i][0]]==ictmp || pt[3]->v[iare[i][0]]==ictmp ) {
             tabtmp[5][1]=tabtmp[5][1]+1./3.;
-          }else{
+          }else {
             tabtmp[5][1]=tabtmp[5][1]+1./2.;
           }}else tabtmp[5][1]=tabtmp[5][1]+1./2.;
-      }else if(lentmp>lmaxtmp) {
-        if(pt[3]->v[iare[i][0]]==iatmp ||pt[3]->v[iare[i][1]]==iatmp){
-          if(pt[3]->v[iare[i][0]]==ibtmp || pt[3]->v[iare[i][1]]==ibtmp
-             || pt[3]->v[iare[i][0]]==ictmp || pt[3]->v[iare[i][0]]==ictmp){
+      }else if ( lentmp>lmaxtmp) {
+        if ( pt[3]->v[iare[i][0]]==iatmp ||pt[3]->v[iare[i][1]]==iatmp ) {
+          if ( pt[3]->v[iare[i][0]]==ibtmp || pt[3]->v[iare[i][1]]==ibtmp
+             || pt[3]->v[iare[i][0]]==ictmp || pt[3]->v[iare[i][0]]==ictmp ) {
             tabtmp[5][2]=tabtmp[5][2]+1./3.;
-          }else{
+          }else {
             tabtmp[5][2]=tabtmp[5][2]+1./2.;
           }}else tabtmp[5][2]=tabtmp[5][2]+1./2.;
       }
-      if(!((imin12 == ip1) && (imin03 == ip3))){
+      if ( !((imin12 == ip1) && (imin03 == ip3)) ) {
         lentmp=lenedg(mesh,met,pt[4]->v[iare[i][0]],pt[4]->v[iare[i][1]]);
-        if(lentmp<lmintmp) {
-          if(pt[4]->v[iare[i][0]]==iatmp ||pt[4]->v[iare[i][1]]==iatmp){
-            if(pt[4]->v[iare[i][0]]==ibtmp || pt[4]->v[iare[i][1]]==ibtmp
-               || pt[4]->v[iare[i][0]]==ictmp || pt[4]->v[iare[i][0]]==ictmp){
-            }else{
+        if ( lentmp<lmintmp) {
+          if ( pt[4]->v[iare[i][0]]==iatmp ||pt[4]->v[iare[i][1]]==iatmp ) {
+            if ( pt[4]->v[iare[i][0]]==ibtmp || pt[4]->v[iare[i][1]]==ibtmp
+               || pt[4]->v[iare[i][0]]==ictmp || pt[4]->v[iare[i][0]]==ictmp ) {
+            }else {
               // tabtmp[6][1]=tabtmp[5][1]+1./2.;
             }}else {/*tabtmp[6][1]=tabtmp[6][1]+1./2.;*/}
-        }else if(lentmp>lmaxtmp) {
-          if(pt[4]->v[iare[i][0]]==iatmp ||pt[4]->v[iare[i][1]]==iatmp){
-            if(pt[4]->v[iare[i][0]]==ibtmp || pt[4]->v[iare[i][1]]==ibtmp
-               || pt[4]->v[iare[i][0]]==ictmp || pt[4]->v[iare[i][0]]==ictmp){
+        }else if ( lentmp>lmaxtmp) {
+          if ( pt[4]->v[iare[i][0]]==iatmp ||pt[4]->v[iare[i][1]]==iatmp ) {
+            if ( pt[4]->v[iare[i][0]]==ibtmp || pt[4]->v[iare[i][1]]==ibtmp
+               || pt[4]->v[iare[i][0]]==ictmp || pt[4]->v[iare[i][0]]==ictmp ) {
               // tabtmp[6][2]++;
-            }else{
+            }else {
               // tabtmp[6][2]=tabtmp[6][2]+1./2.;
-            }}else{ /*tabtmp[6][2]=tabtmp[6][2]+1./2.;*/}
+            }}else { /*tabtmp[6][2]=tabtmp[6][2]+1./2.;*/}
         }
       }
     }
@@ -2577,7 +2657,7 @@ void split3op(pMesh mesh, pSol met, int k, int vx[6]){
 
 /** Split a tetra in 4 tetras by introducing its barycenter
     FOR NOW : flags, that tell which edge should be split, are not updated (erased) : UPDATE NEEDED ?*/
-int split4bar(pMesh mesh, pSol met, int k){
+int split4bar(pMesh mesh, pSol met, int k) {
   pTetra   pt[4];
   pPoint   ppt;
   xTetra   xt[4];
@@ -2593,8 +2673,7 @@ int split4bar(pMesh mesh, pSol met, int k){
 
 #ifdef DEBUG
   lmintmp=0.6;lmaxtmp=1.3;
-  for(i=0;i<6;i++)
-    {
+  for (i=0; i<6; i++) {
       lentmp = lenedg(mesh,met,pt[0]->v[iare[i][0]],pt[0]->v[iare[i][1]]);
       if ( lentmp < lmintmp ) {
         lmintmp = lentmp;
@@ -2620,18 +2699,20 @@ int split4bar(pMesh mesh, pSol met, int k){
   hnew *= 0.25;
 
   ib = newPt(mesh,o,0);
-  if(!ib){
+  if ( !ib ) {
     fprintf(stdout,"  ## Error: unable to allocate a new point.\n");
-    fprintf(stdout,"  ## Check the mesh size or increase the allocated memory with the -m option.\n");
+    fprintf(stdout,"  ## Check the mesh size or ");
+    fprintf(stdout,"increase the allocated memory with the -m option.\n");
     return(0);
   }
   if ( met->m )  met->m[ib] = hnew;
 
   /* create 3 new tetras */
   iel = newElt(mesh);
-  if(!iel){
+  if ( !iel ) {
     fprintf(stdout,"  ## Error: unable to allocate a new element.\n");
-    fprintf(stdout,"  ## Check the mesh size or increase the allocated memory with the -m option.\n");
+    fprintf(stdout,"  ## Check the mesh size or ");
+    fprintf(stdout,"increase the allocated memory with the -m option.\n");
     delPt(mesh,ib);
     return(0);
   }
@@ -2640,9 +2721,10 @@ int split4bar(pMesh mesh, pSol met, int k){
   newtet[1]=iel;
 
   iel = newElt(mesh);
-  if(!iel){
+  if ( !iel ) {
     fprintf(stdout,"  ## Error: unable to allocate a new element.\n");
-    fprintf(stdout,"  ## Check the mesh size or increase the allocated memory with the -m option.\n");
+    fprintf(stdout,"  ## Check the mesh size or ");
+    fprintf(stdout,"increase the allocated memory with the -m option.\n");
     delPt(mesh,ib);
     delElt(mesh,newtet[1]);
     return(0);
@@ -2652,9 +2734,10 @@ int split4bar(pMesh mesh, pSol met, int k){
   newtet[2]=iel;
 
   iel = newElt(mesh);
-  if(!iel){
+  if ( !iel ) {
     fprintf(stdout,"  ## Error: unable to allocate a new element.\n");
-    fprintf(stdout,"  ## Check the mesh size or increase the allocated memory with the -m option.\n");
+    fprintf(stdout,"  ## Check the mesh size or ");
+    fprintf(stdout,"increase the allocated memory with the -m option.\n");
     delPt(mesh,ib);
     delElt(mesh,newtet[1]);
     delElt(mesh,newtet[2]);
@@ -2722,8 +2805,14 @@ int split4bar(pMesh mesh, pSol met, int k){
       memcpy(pxt0,&xt[0],sizeof(xTetra));
       for (i=1; i<4; i++) {
         if ( isxt[i] ) {
-          assert(mesh->xt < mesh->xtmax-1);
-          pt[i]->xt = ++mesh->xt;
+          mesh->xt++;
+          if ( mesh->xt >= mesh->xtmax ) {
+            fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
+            fprintf(stdout,"  ## Check the mesh size or ");
+            fprintf(stdout,"increase the allocated memory with the -m option.\n");
+            return(0);
+          }
+          pt[i]->xt = mesh->xt;
           pxt0 = &mesh->xtetra[mesh->xt];
           memcpy(pxt0,&xt[i],sizeof(xTetra));
         }
@@ -2743,8 +2832,14 @@ int split4bar(pMesh mesh, pSol met, int k){
             memcpy(pxt0,&xt[i],sizeof(xTetra));
           }
           else {
-            assert(mesh->xt < mesh->xtmax-1);
-            pt[i]->xt = ++mesh->xt;
+            mesh->xt++;
+            if ( mesh->xt >= mesh->xtmax ) {
+              fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
+              fprintf(stdout,"  ## Check the mesh size or ");
+              fprintf(stdout,"increase the allocated memory with the -m option.\n");
+              return(0);
+            }
+            pt[i]->xt = mesh->xt;
             pxt0 = &mesh->xtetra[mesh->xt];
             memcpy(pxt0,&xt[i],sizeof(xTetra));
           }
@@ -2764,30 +2859,29 @@ int split4bar(pMesh mesh, pSol met, int k){
 
 #ifdef DEBUG
   tabtmp[7][3]=lmintmp;  tabtmp[7][4]=lmaxtmp;
-  for(i=0;i<6;i++)
-    {
+  for (i=0; i<6; i++) {
       lentmp=lenedg(mesh,met,pt[0]->v[iare[i][0]],pt[0]->v[iare[i][1]]);
-      if(lentmp<lmintmp) {
+      if ( lentmp<lmintmp) {
         tabtmp[7][1]++;
-      }else if(lentmp>lmaxtmp) {
+      }else if ( lentmp>lmaxtmp) {
         tabtmp[7][2]++;
       }
       lentmp=lenedg(mesh,met,pt[1]->v[iare[i][0]],pt[1]->v[iare[i][1]]);
-      if(lentmp<lmintmp) {
+      if ( lentmp<lmintmp) {
         tabtmp[7][1]++;
-      }else if(lentmp>lmaxtmp) {
+      }else if ( lentmp>lmaxtmp) {
         tabtmp[7][2]++;
       }
       lentmp=lenedg(mesh,met,pt[2]->v[iare[i][0]],pt[2]->v[iare[i][1]]);
-      if(lentmp<lmintmp) {
+      if ( lentmp<lmintmp) {
         tabtmp[7][1]++;
-      }else if(lentmp>lmaxtmp) {
+      }else if ( lentmp>lmaxtmp) {
         tabtmp[7][2]++;
       }
       lentmp=lenedg(mesh,met,pt[3]->v[iare[i][0]],pt[3]->v[iare[i][1]]);
-      if(lentmp<lmintmp) {
+      if ( lentmp<lmintmp) {
         tabtmp[7][1]++;
-      }else if(lentmp>lmaxtmp) {
+      }else if ( lentmp>lmaxtmp) {
         tabtmp[7][2]++;
       }
     }
@@ -2812,12 +2906,11 @@ void split4sf(pMesh mesh,pSol met,int k,int vx[6]) {
 
 #ifdef DEBUG
   lmintmp=0.6;lmaxtmp=1.3;
-  for(i=0;i<6;i++)
-    {
+  for (i=0; i<6; i++) {
       lentmp=lenedg(mesh,met,pt[0]->v[iare[i][0]],pt[0]->v[iare[i][1]]);
-      if(lentmp<lmintmp) {
+      if ( lentmp<lmintmp) {
         lmintmp=lentmp;
-      }else if(lentmp>lmaxtmp) {
+      }else if ( lentmp>lmaxtmp) {
         lmaxtmp=lentmp;
       }
     }
@@ -2886,7 +2979,7 @@ void split4sf(pMesh mesh,pSol met,int k,int vx[6]) {
   imin12 = ((pt[0])->v[tau[1]] < (pt[0])->v[tau[2]]) ? tau[1] : tau[2];
 
   /* create 5 new tetras */
-  for(j=1;j<6;j++){
+  for (j=1; j<6; j++) {
     iel = newElt(mesh);
     assert(iel);
     pt[j] = &mesh->tetra[iel];
@@ -2894,15 +2987,15 @@ void split4sf(pMesh mesh,pSol met,int k,int vx[6]) {
     newtet[j]=iel;
   }
 
-  if((pt[0])->xt){
+  if ( (pt[0])->xt ) {
     pxt0 = &mesh->xtetra[(pt[0])->xt];
-    for(j=0;j<6;j++){
+    for (j=0; j<6; j++) {
       memcpy(&xt[j],pxt0, sizeof(xTetra));
     }
   }
-  else{
+  else {
     pxt0 = 0;
-    for(j=0;j<6;j++){
+    for (j=0; j<6; j++) {
       memset(&xt[j],0, sizeof(xTetra));
     }
   }
@@ -2928,7 +3021,7 @@ void split4sf(pMesh mesh,pSol met,int k,int vx[6]) {
   xt[1].ftag[ tau[0]] = 0 ; xt[1].ftag[ tau[1]] = 0 ; xt[1].ftag[tau[3]] = 0 ;
   MG_SET(xt[1].ori, tau[0]); MG_SET(xt[1].ori, tau[1]); MG_SET(xt[1].ori, tau[3]);
 
-  if(imin12 == tau[1]){
+  if ( imin12 == tau[1] ) {
     pt[2]->v[tau[0]] = vx[taued[0]] ; pt[2]->v[tau[2]] = vx[taued[1]] ; pt[2]->v[tau[3]] = vx[taued[4]] ;
     xt[2].tag[taued[1]] = 0;  xt[2].tag[taued[2]] = 0;
     xt[2].tag[taued[3]] = 0;  xt[2].tag[taued[5]] = 0;
@@ -2946,7 +3039,7 @@ void split4sf(pMesh mesh,pSol met,int k,int vx[6]) {
     xt[3].ftag[ tau[1]] = 0 ; xt[3].ftag[ tau[2]] = 0 ;
     MG_SET(xt[3].ori, tau[1]); MG_SET(xt[3].ori, tau[2]);
   }
-  else{
+  else {
     pt[2]->v[tau[0]] = vx[taued[1]] ; pt[2]->v[tau[1]] = vx[taued[0]] ; pt[2]->v[tau[3]] = vx[taued[4]] ;
     xt[2].tag[taued[0]] = 0;  xt[2].tag[taued[2]] = 0;
     xt[2].tag[taued[3]] = 0;  xt[2].tag[taued[4]] = 0;
@@ -2966,7 +3059,7 @@ void split4sf(pMesh mesh,pSol met,int k,int vx[6]) {
     MG_SET(xt[3].ori, tau[1]);
   }
 
-  if(imin23 == tau[2]){
+  if ( imin23 == tau[2] ) {
     pt[4]->v[tau[0]] = vx[taued[2]] ; pt[4]->v[tau[1]] = vx[taued[1]] ; pt[4]->v[tau[3]] = vx[taued[4]] ;
     xt[4].tag[taued[0]] = 0;  xt[4].tag[taued[1]] = 0;
     xt[4].tag[taued[2]] = 0;  xt[4].tag[taued[4]] = 0;
@@ -2985,7 +3078,7 @@ void split4sf(pMesh mesh,pSol met,int k,int vx[6]) {
     xt[5].ftag[ tau[3]] = 0 ;
     MG_SET(xt[5].ori, tau[3]);
   }
-  else{
+  else {
     pt[4]->v[tau[0]] = vx[taued[2]] ; pt[4]->v[tau[1]] = vx[taued[4]] ; pt[4]->v[tau[2]] = vx[taued[1]] ;
     xt[4].tag[taued[0]] = 0;  xt[4].tag[taued[1]] = 0;
     xt[4].tag[taued[3]] = 0;  xt[4].tag[taued[5]] = 0;
@@ -3005,47 +3098,58 @@ void split4sf(pMesh mesh,pSol met,int k,int vx[6]) {
   }
 
   /* Assignation of the xt fields to the appropriate tets */
-  for(j=0;j<6;j++){
+  for (j=0; j<6;j++) {
     isxt[j] = 0;
   }
 
-
-  for(i=0;i<4;i++){
-    for(j=0;j<6;j++){
-      if((xt[j]).ref[i] || xt[j].ftag[i] ) isxt[j] = 1;
+  for (i=0; i<4; i++) {
+    for (j=0; j<6; j++) {
+      if ( (xt[j]).ref[i] || xt[j].ftag[i] ) isxt[j] = 1;
     }
   }
 
-  if(pt[0]->xt){
-    if(isxt[0]){
+  if ( pt[0]->xt ) {
+    if ( isxt[0] ) {
       memcpy(pxt0,&xt[0],sizeof(xTetra));
       pt[1]->xt = pt[2]->xt = pt[3]->xt = pt[4]->xt = pt[5]->xt = 0;
 
-      for(i=1;i<6;i++){
-        if(isxt[i]){
+      for (i=1; i<6; i++) {
+        if ( isxt[i] ) {
           mesh->xt++;
-          assert(mesh->xt < mesh->xtmax);
+          if ( mesh->xt >= mesh->xtmax ) {
+            fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
+            fprintf(stdout,"  ## Check the mesh size or ");
+            fprintf(stdout,"increase the allocated memory with the -m option.\n");
+            fprintf(stdout,"  Exit program.\n");
+            exit(EXIT_FAILURE);
+          }
           pt[i]->xt = mesh->xt;
           pxt0 = &mesh->xtetra[mesh->xt];
           memcpy(pxt0,&xt[i],sizeof(xTetra));
         }
       }
     }
-    else{
+    else {
       firstxt = 1;
       pt[1]->xt = pt[2]->xt = pt[3]->xt = pt[4]->xt = pt[5]->xt = 0;
 
-      for(i=1;i<6;i++){
-        if(isxt[i]){
-          if(firstxt){
+      for (i=1; i<6; i++) {
+        if ( isxt[i] ) {
+          if ( firstxt ) {
             firstxt = 0;
             pt[i]->xt = pt[0]->xt;
             pxt0 = &mesh->xtetra[(pt[i])->xt];
             memcpy(pxt0,&xt[i],sizeof(xTetra));
           }
-          else{
+          else {
             mesh->xt++;
-            assert(mesh->xt < mesh->xtmax);
+            if ( mesh->xt >= mesh->xtmax ) {
+              fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
+              fprintf(stdout,"  ## Check the mesh size or ");
+              fprintf(stdout,"increase the allocated memory with the -m option.\n");
+              fprintf(stdout,"  Exit program.\n");
+              exit(EXIT_FAILURE);
+            }
             pt[i]->xt = mesh->xt;
             pxt0 = &mesh->xtetra[mesh->xt];
             memcpy(pxt0,&xt[i],sizeof(xTetra));
@@ -3055,48 +3159,47 @@ void split4sf(pMesh mesh,pSol met,int k,int vx[6]) {
       pt[0]->xt = 0;
     }
   }
-  for(i=0;i<6;i++){
+  for (i=0; i<6; i++) {
     pt[i]->qual=orcal(mesh,newtet[i]);
   }
 
 #ifdef DEBUG
   tabtmp[8][3]=lmintmp;  tabtmp[8][4]=lmaxtmp;
-  for(i=0;i<6;i++)
-    {
+  for (i=0; i<6; i++) {
       lentmp=lenedg(mesh,met,pt[0]->v[iare[i][0]],pt[0]->v[iare[i][1]]);
-      if(lentmp<lmintmp) {
+      if ( lentmp<lmintmp ) {
         tabtmp[8][1]++;
-      }else if(lentmp>lmaxtmp) {
+      } else if ( lentmp>lmaxtmp ) {
         tabtmp[8][2]++;
       }
       lentmp=lenedg(mesh,met,pt[1]->v[iare[i][0]],pt[1]->v[iare[i][1]]);
-      if(lentmp<lmintmp) {
+      if ( lentmp<lmintmp ) {
         tabtmp[8][1]++;
-      }else if(lentmp>lmaxtmp) {
+      } else if ( lentmp>lmaxtmp ) {
         tabtmp[8][2]++;
       }
       lentmp=lenedg(mesh,met,pt[2]->v[iare[i][0]],pt[2]->v[iare[i][1]]);
-      if(lentmp<lmintmp) {
+      if ( lentmp<lmintmp ) {
         tabtmp[8][1]++;
-      }else if(lentmp>lmaxtmp) {
+      } else if ( lentmp>lmaxtmp ) {
         tabtmp[8][2]++;
       }
       lentmp=lenedg(mesh,met,pt[3]->v[iare[i][0]],pt[3]->v[iare[i][1]]);
-      if(lentmp<lmintmp) {
+      if ( lentmp<lmintmp ) {
         tabtmp[8][1]++;
-      }else if(lentmp>lmaxtmp) {
+      } else if ( lentmp>lmaxtmp ) {
         tabtmp[8][2]++;
       }
       lentmp=lenedg(mesh,met,pt[4]->v[iare[i][0]],pt[4]->v[iare[i][1]]);
-      if(lentmp<lmintmp) {
+      if ( lentmp<lmintmp ) {
         tabtmp[8][1]++;
-      }else if(lentmp>lmaxtmp) {
+      } else if ( lentmp>lmaxtmp ) {
         tabtmp[8][2]++;
       }
       lentmp=lenedg(mesh,met,pt[5]->v[iare[i][0]],pt[5]->v[iare[i][1]]);
-      if(lentmp<lmintmp) {
+      if ( lentmp<lmintmp) {
         tabtmp[8][1]++;
-      }else if(lentmp>lmaxtmp) {
+      } else if ( lentmp>lmaxtmp ) {
         tabtmp[8][2]++;
       }
     }
@@ -3120,12 +3223,11 @@ void split4op(pMesh mesh,pSol met,int k,int vx[6]) {
 
 #ifdef DEBUG
   lmintmp=0.6;lmaxtmp=1.3;
-  for(i=0;i<6;i++)
-    {
+  for (i=0; i<6; i++) {
       lentmp=lenedg(mesh,met,pt[0]->v[iare[i][0]],pt[0]->v[iare[i][1]]);
-      if(lentmp<lmintmp) {
+      if ( lentmp<lmintmp ) {
         lmintmp=lentmp;
-      }else if(lentmp>lmaxtmp) {
+      }else if ( lentmp>lmaxtmp ) {
         lmaxtmp=lentmp;
       }
     }
@@ -3150,7 +3252,7 @@ void split4op(pMesh mesh,pSol met,int k,int vx[6]) {
   imin23 = ((pt[0])->v[tau[2]] < (pt[0])->v[tau[3]]) ? tau[2] : tau[3];
 
   /* create 5 new tetras */
-  for(j=1;j<6;j++){
+  for (j=1; j<6; j++) {
     iel = newElt(mesh);
     assert(iel);
     pt[j] = &mesh->tetra[iel];
@@ -3158,21 +3260,21 @@ void split4op(pMesh mesh,pSol met,int k,int vx[6]) {
     newtet[j]=iel;
   }
 
-  if((pt[0])->xt){
+  if ( (pt[0])->xt ) {
     pxt0 = &mesh->xtetra[(pt[0])->xt];
-    for(j=0;j<6;j++){
+    for (j=0; j<6; j++) {
       memcpy(&xt[j],pxt0, sizeof(xTetra));
     }
   }
-  else{
+  else {
     pxt0 = 0;
-    for(j=0;j<6;j++){
+    for (j=0; j<6; j++) {
       memset(&xt[j],0, sizeof(xTetra));
     }
   }
 
   /* Generic formulation for split of 4 edges, with no 3 edges lying on the same face */
-  if(imin01 == tau[0]){
+  if ( imin01 == tau[0] ) {
     pt[0]->v[tau[2]] = vx[taued[3]] ; pt[0]->v[tau[3]] = vx[taued[4]];
     xt[0].tag[taued[1]] = 0;  xt[0].tag[taued[5]] = 0;
     xt[0].tag[taued[2]] = 0;  xt[0].edg[taued[1]] = 0;
@@ -3200,7 +3302,7 @@ void split4op(pMesh mesh,pSol met,int k,int vx[6]) {
     xt[2].ftag[ tau[0]] = 0;  xt[2].ftag[ tau[2]] = 0;
     MG_SET(xt[2].ori, tau[0]);  MG_SET(xt[2].ori, tau[2]);
   }
-  else{
+  else {
     pt[0]->v[tau[2]] = vx[taued[1]] ; pt[0]->v[tau[3]] = vx[taued[2]];
     xt[0].tag[taued[3]] = 0;  xt[0].tag[taued[4]] = 0;
     xt[0].tag[taued[5]] = 0;  xt[0].edg[taued[3]] = 0;
@@ -3229,7 +3331,7 @@ void split4op(pMesh mesh,pSol met,int k,int vx[6]) {
     MG_SET(xt[2].ori, tau[1]);  MG_SET(xt[2].ori, tau[3]);
   }
 
-  if(imin23 == tau[2]){
+  if ( imin23 == tau[2] ) {
     pt[3]->v[tau[0]] = vx[taued[2]] ; pt[3]->v[tau[1]] = vx[taued[4]];
     xt[3].tag[taued[0]] = 0;  xt[3].tag[taued[1]] = 0;
     xt[3].tag[taued[3]] = 0;  xt[3].edg[taued[0]] = 0;
@@ -3257,7 +3359,7 @@ void split4op(pMesh mesh,pSol met,int k,int vx[6]) {
     xt[5].ftag[ tau[0]] = 0;  xt[5].ftag[ tau[2]] = 0;
     MG_SET(xt[5].ori, tau[0]);  MG_SET(xt[5].ori, tau[2]);
   }
-  else{
+  else {
     pt[3]->v[tau[0]] = vx[taued[1]] ; pt[3]->v[tau[1]] = vx[taued[3]];
     xt[3].tag[taued[0]] = 0;  xt[3].tag[taued[2]] = 0;
     xt[3].tag[taued[4]] = 0;  xt[3].edg[taued[0]] = 0;
@@ -3287,47 +3389,59 @@ void split4op(pMesh mesh,pSol met,int k,int vx[6]) {
   }
 
   /* Assignation of the xt fields to the appropriate tets */
-  for(j=0;j<6;j++){
+  for (j=0; j<6; j++) {
     isxt[j] = 0;
   }
 
-  for(i=0;i<4;i++){
-    for(j=0;j<6;j++){
-      if((xt[j]).ref[i] || xt[j].ftag[i] ) isxt[j] = 1;
+  for (i=0; i<4; i++) {
+    for(j=0;j<6;j++ ) {
+      if ( (xt[j]).ref[i] || xt[j].ftag[i] ) isxt[j] = 1;
     }
   }
 
   // In this case, at least one of the 4 created tets must have a special field
-  if(pt[0]->xt){
-    if(isxt[0]){
+  if ( pt[0]->xt ) {
+    if ( isxt[0] ) {
       memcpy(pxt0,&xt[0],sizeof(xTetra));
       pt[1]->xt = pt[2]->xt = pt[3]->xt = pt[4]->xt = pt[5]->xt = 0;
 
-      for(i=1;i<6;i++){
-        if(isxt[i]){
+      for (i=1; i<6; i++) {
+        if ( isxt[i] ) {
           mesh->xt++;
-          assert(mesh->xt < mesh->xtmax);
+          if ( mesh->xt >= mesh->xtmax ) {
+            fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
+            fprintf(stdout,"  ## Check the mesh size or ");
+            fprintf(stdout,"increase the allocated memory with the -m option.\n");
+            fprintf(stdout,"  Exit program.\n");
+            exit(EXIT_FAILURE);
+          }
           pt[i]->xt = mesh->xt;
           pxt0 = &mesh->xtetra[mesh->xt];
           memcpy(pxt0,&xt[i],sizeof(xTetra));
         }
       }
     }
-    else{
+    else {
       firstxt = 1;
       pt[1]->xt = pt[2]->xt = pt[3]->xt = pt[4]->xt = pt[5]->xt = 0;
 
-      for(i=1;i<6;i++){
-        if(isxt[i]){
-          if(firstxt){
+      for (i=1; i<6; i++) {
+        if ( isxt[i] ) {
+          if ( firstxt ) {
             firstxt = 0;
             pt[i]->xt = pt[0]->xt;
             pxt0 = &mesh->xtetra[ pt[i]->xt];
             memcpy(pxt0,&xt[i],sizeof(xTetra));
           }
-          else{
+          else {
             mesh->xt++;
-            assert(mesh->xt < mesh->xtmax);
+            if ( mesh->xt >= mesh->xtmax ) {
+              fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
+              fprintf(stdout,"  ## Check the mesh size or ");
+              fprintf(stdout,"increase the allocated memory with the -m option.\n");
+              fprintf(stdout,"  Exit program.\n");
+              exit(EXIT_FAILURE);
+            }
             pt[i]->xt = mesh->xt;
             pxt0 = &mesh->xtetra[mesh->xt];
             memcpy(pxt0,&(xt[i]),sizeof(xTetra));
@@ -3338,48 +3452,47 @@ void split4op(pMesh mesh,pSol met,int k,int vx[6]) {
 
     }
   }
-  for(i=0;i<6;i++){
+  for (i=0; i<6; i++) {
     pt[i]->qual=orcal(mesh,newtet[i]);
   }
 
 #ifdef DEBUG
   tabtmp[9][3]=lmintmp;  tabtmp[9][4]=lmaxtmp;
-  for(i=0;i<6;i++)
-    {
+  for (i=0; i<6; i++) {
       lentmp=lenedg(mesh,met,pt[0]->v[iare[i][0]],pt[0]->v[iare[i][1]]);
-      if(lentmp<lmintmp) {
+      if ( lentmp<lmintmp) {
         tabtmp[9][1]++;
-      }else if(lentmp>lmaxtmp) {
+      }else if ( lentmp>lmaxtmp) {
         tabtmp[9][2]++;
       }
       lentmp=lenedg(mesh,met,pt[1]->v[iare[i][0]],pt[1]->v[iare[i][1]]);
-      if(lentmp<lmintmp) {
+      if ( lentmp<lmintmp) {
         tabtmp[9][1]++;
-      }else if(lentmp>lmaxtmp) {
+      }else if ( lentmp>lmaxtmp) {
         tabtmp[9][2]++;
       }
       lentmp=lenedg(mesh,met,pt[2]->v[iare[i][0]],pt[2]->v[iare[i][1]]);
-      if(lentmp<lmintmp) {
+      if ( lentmp<lmintmp) {
         tabtmp[9][1]++;
-      }else if(lentmp>lmaxtmp) {
+      }else if ( lentmp>lmaxtmp) {
         tabtmp[9][2]++;
       }
       lentmp=lenedg(mesh,met,pt[3]->v[iare[i][0]],pt[3]->v[iare[i][1]]);
-      if(lentmp<lmintmp) {
+      if ( lentmp<lmintmp) {
         tabtmp[9][1]++;
-      }else if(lentmp>lmaxtmp) {
+      }else if ( lentmp>lmaxtmp) {
         tabtmp[9][2]++;
       }
       lentmp=lenedg(mesh,met,pt[4]->v[iare[i][0]],pt[4]->v[iare[i][1]]);
-      if(lentmp<lmintmp) {
+      if ( lentmp<lmintmp) {
         tabtmp[9][1]++;
-      }else if(lentmp>lmaxtmp) {
+      }else if ( lentmp>lmaxtmp) {
         tabtmp[9][2]++;
       }
       lentmp=lenedg(mesh,met,pt[5]->v[iare[i][0]],pt[5]->v[iare[i][1]]);
-      if(lentmp<lmintmp) {
+      if ( lentmp<lmintmp) {
         tabtmp[9][1]++;
-      }else if(lentmp>lmaxtmp) {
+      }else if ( lentmp>lmaxtmp) {
         tabtmp[9][2]++;
       }
     }
@@ -3403,18 +3516,17 @@ void split5(pMesh mesh,pSol met,int k,int vx[6]) {
 
 #ifdef DEBUG
   lmintmp=0.6;lmaxtmp=1.3;
-  for(i=0;i<6;i++)
-    {
+  for (i=0; i<6; i++) {
       lentmp=lenedg(mesh,met,pt[0]->v[iare[i][0]],pt[0]->v[iare[i][1]]);
-      if(lentmp<lmintmp) {
+      if ( lentmp<lmintmp ) {
         lmintmp=lentmp;
-      }else if(lentmp>lmaxtmp) {
+      }else if ( lentmp>lmaxtmp ) {
         lmaxtmp=lentmp;
       }
     }
 #endif
   /* create 6 new tetras */
-  for(i=1;i<7;i++){
+  for (i=1; i<7; i++) {
     iel = newElt(mesh);
     assert(iel);
     pt[i] = &mesh->tetra[iel];
@@ -3422,15 +3534,15 @@ void split5(pMesh mesh,pSol met,int k,int vx[6]) {
     newtet[i]=iel;
   }
 
-  if(pt[0]->xt){
+  if ( pt[0]->xt ) {
     pxt0 = &mesh->xtetra[(pt[0])->xt];
-    for(i=0;i<7;i++){
+    for (i=0; i<7; i++) {
       memcpy(&xt[i],pxt0, sizeof(xTetra));
     }
   }
-  else{
+  else {
     pxt0 = 0;
-    for(i=0;i<7;i++){
+    for (i=0; i<7; i++) {
       memset(&xt[i],0, sizeof(xTetra));
     }
   }
@@ -3509,7 +3621,7 @@ void split5(pMesh mesh,pSol met,int k,int vx[6]) {
   xt[3].ftag[ tau[0]] = 0;  xt[3].ftag[ tau[2]] = 0;  xt[3].ftag[tau[3]] = 0 ;
   MG_SET(xt[3].ori, tau[0]);  MG_SET(xt[3].ori, tau[2]);  MG_SET(xt[3].ori, tau[3]);
 
-  if(imin == tau[0]){
+  if ( imin == tau[0] ) {
     pt[4]->v[tau[2]] = vx[taued[3]] ; pt[4]->v[tau[3]] = vx[taued[4]];
     xt[4].tag[taued[1]] = 0;  xt[4].tag[taued[2]] = 0;
     xt[4].tag[taued[5]] = 0;  xt[4].edg[taued[1]] = 0;
@@ -3538,7 +3650,7 @@ void split5(pMesh mesh,pSol met,int k,int vx[6]) {
     MG_SET(xt[6].ori, tau[0]); MG_SET(xt[6].ori, tau[2]);
 
   }
-  else{
+  else {
     pt[4]->v[tau[2]] = vx[taued[1]] ; pt[4]->v[tau[3]] = vx[taued[2]];
     xt[4].tag[taued[3]] = 0;  xt[4].tag[taued[4]] = 0;
     xt[4].tag[taued[5]] = 0;  xt[4].edg[taued[3]] = 0;
@@ -3568,46 +3680,59 @@ void split5(pMesh mesh,pSol met,int k,int vx[6]) {
   }
 
   /* Assignation of the xt fields to the appropriate tets */
-  for(j=0;j<7;j++){
+  for (j=0; j<7; j++) {
     isxt[j] = 0;
   }
 
-  for(i=0;i<4;i++){
-    for(j=0;j<7;j++){
-      if((xt[j]).ref[i] || xt[j].ftag[i] ) isxt[j] = 1;
+  for (i=0; i<4; i++) {
+    for (j=0; j<7; j++) {
+      if ( (xt[j]).ref[i] || xt[j].ftag[i] ) isxt[j] = 1;
     }
   }
 
-  if(pt[0]->xt){
-    if(isxt[0]){
+
+  if ( pt[0]->xt ) {
+    if ( isxt[0] ) {
       memcpy(pxt0,&xt[0],sizeof(xTetra));
       pt[1]->xt = pt[2]->xt = pt[3]->xt = pt[4]->xt = pt[5]->xt = pt[6]->xt = 0;
 
-      for(i=1;i<7;i++){
-        if(isxt[i]){
+      for (i=1; i<7; i++) {
+        if ( isxt[i] ) {
           mesh->xt++;
-          assert(mesh->xt < mesh->xtmax);
+          if ( mesh->xt >= mesh->xtmax ) {
+            fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
+            fprintf(stdout,"  ## Check the mesh size or ");
+            fprintf(stdout,"increase the allocated memory with the -m option.\n");
+            fprintf(stdout,"  Exit program.\n");
+            exit(EXIT_FAILURE);
+          }
           pt[i]->xt = mesh->xt;
           pxt0 = &mesh->xtetra[mesh->xt];
           memcpy(pxt0,&xt[i],sizeof(xTetra));
         }
       }
     }
-    else{
+    else {
       firstxt = 1;
       pt[1]->xt = pt[2]->xt = pt[3]->xt = pt[4]->xt = pt[5]->xt = pt[6]->xt = 0;
 
-      for(i=1;i<7;i++){
-        if(isxt[i]){
-          if(firstxt){
+      for (i=1; i<7; i++) {
+        if ( isxt[i] ) {
+          if ( firstxt ) {
             firstxt = 0;
             pt[i]->xt = pt[0]->xt;
             pxt0 = &mesh->xtetra[(pt[i])->xt];
             memcpy(pxt0,&xt[i],sizeof(xTetra));
           }
-          else{
+          else {
             mesh->xt++;
-            assert(mesh->xt < mesh->xtmax);
+            if ( mesh->xt >= mesh->xtmax ) {
+              fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
+              fprintf(stdout,"  ## Check the mesh size or ");
+              fprintf(stdout,"increase the allocated memory with the -m option.\n");
+              fprintf(stdout,"  Exit program.\n");
+              exit(EXIT_FAILURE);
+            }
             pt[i]->xt = mesh->xt;
             pxt0 = &mesh->xtetra[mesh->xt];
             memcpy(pxt0,&xt[i],sizeof(xTetra));
@@ -3618,53 +3743,52 @@ void split5(pMesh mesh,pSol met,int k,int vx[6]) {
 
     }
   }
-  for(i=0;i<7;i++){
+  for (i=0; i<7; i++) {
     pt[i]->qual=orcal(mesh,newtet[i]);
   }
 #ifdef DEBUG
   tabtmp[10][3]=lmintmp;  tabtmp[10][4]=lmaxtmp;
-  for(i=0;i<6;i++)
-    {
+  for (i=0; i<6; i++) {
       lentmp=lenedg(mesh,met,pt[0]->v[iare[i][0]],pt[0]->v[iare[i][1]]);
-      if(lentmp<lmintmp) {
+      if ( lentmp<lmintmp ) {
         tabtmp[10][1]++;
-      }else if(lentmp>lmaxtmp) {
+      }else if ( lentmp>lmaxtmp ) {
         tabtmp[10][2]++;
       }
       lentmp=lenedg(mesh,met,pt[1]->v[iare[i][0]],pt[1]->v[iare[i][1]]);
-      if(lentmp<lmintmp) {
+      if ( lentmp<lmintmp ) {
         tabtmp[10][1]++;
-      }else if(lentmp>lmaxtmp) {
+      }else if ( lentmp>lmaxtmp ) {
         tabtmp[10][2]++;
       }
       lentmp=lenedg(mesh,met,pt[2]->v[iare[i][0]],pt[2]->v[iare[i][1]]);
-      if(lentmp<lmintmp) {
+      if ( lentmp<lmintmp ) {
         tabtmp[10][1]++;
-      }else if(lentmp>lmaxtmp) {
+      }else if ( lentmp>lmaxtmp ) {
         tabtmp[10][2]++;
       }
       lentmp=lenedg(mesh,met,pt[3]->v[iare[i][0]],pt[3]->v[iare[i][1]]);
-      if(lentmp<lmintmp) {
+      if ( lentmp<lmintmp ) {
         tabtmp[10][1]++;
-      }else if(lentmp>lmaxtmp) {
+      }else if ( lentmp>lmaxtmp ) {
         tabtmp[10][2]++;
       }
       lentmp=lenedg(mesh,met,pt[4]->v[iare[i][0]],pt[4]->v[iare[i][1]]);
-      if(lentmp<lmintmp) {
+      if ( lentmp<lmintmp ) {
         tabtmp[10][1]++;
-      }else if(lentmp>lmaxtmp) {
+      }else if ( lentmp>lmaxtmp ) {
         tabtmp[10][2]++;
       }
       lentmp=lenedg(mesh,met,pt[5]->v[iare[i][0]],pt[5]->v[iare[i][1]]);
-      if(lentmp<lmintmp) {
+      if ( lentmp<lmintmp ) {
         tabtmp[10][1]++;
-      }else if(lentmp>lmaxtmp) {
+      }else if ( lentmp>lmaxtmp ) {
         tabtmp[10][2]++;
       }
       lentmp=lenedg(mesh,met,pt[6]->v[iare[i][0]],pt[6]->v[iare[i][1]]);
-      if(lentmp<lmintmp) {
+      if ( lentmp<lmintmp ) {
         tabtmp[10][1]++;
-      }else if(lentmp>lmaxtmp) {
+      }else if ( lentmp>lmaxtmp ) {
         tabtmp[10][2]++;
       }
     }
@@ -3686,12 +3810,11 @@ void split6(pMesh mesh,pSol met,int k,int vx[6]) {
 
 #ifdef DEBUG
   lmintmp=0.6;lmaxtmp=1.3;
-  for(i=0;i<6;i++)
-    {
+  for (i=0; i<6; i++) {
       lentmp=lenedg(mesh,met,pt[0]->v[iare[i][0]],pt[0]->v[iare[i][1]]);
-      if(lentmp<lmintmp) {
+      if ( lentmp<lmintmp ) {
         lmintmp=lentmp;
-      }else if(lentmp>lmaxtmp) {
+      }else if ( lentmp>lmaxtmp ) {
         lmaxtmp=lentmp;
       }
     }
@@ -3701,7 +3824,7 @@ void split6(pMesh mesh,pSol met,int k,int vx[6]) {
   memcpy(&xt0,pxt,sizeof(xTetra));
 
   /* create 7 new tetras */
-  for(i=1;i<8;i++){
+  for (i=1; i<8; i++) {
     iel = newElt(mesh);
     assert(iel);
     pt[i] = &mesh->tetra[iel];
@@ -3711,21 +3834,21 @@ void split6(pMesh mesh,pSol met,int k,int vx[6]) {
 
   /* Modify first tetra */
   pt[0]->v[1] = vx[0] ; pt[0]->v[2] = vx[1]; pt[0]->v[3] = vx[2];
-  if(nxt0){
+  if ( nxt0 ) {
     memcpy(&xt,&xt0,sizeof(xTetra));
     xt.tag[3] = 0;  xt.tag[4] = 0;
     xt.tag[5] = 0;  xt.edg[3] = 0;
     xt.edg[4] = 0;  xt.edg[5] = 0;
     xt.ref[0] = 0;  xt.ftag[0] = 0; MG_SET(xt.ori, 0);
     isxt0 = 0;
-    for(i=0;i<4;i++){
-      if((xt.ref[i]) || xt.ftag[i] ) isxt0 = 1;
+    for(i=0;i<4;i++ ) {
+      if ( (xt.ref[i]) || xt.ftag[i] ) isxt0 = 1;
     }
 
-    if(isxt0){
+    if ( isxt0 ) {
       memcpy(pxt,&xt,sizeof(xTetra));
     }
-    else{
+    else {
       pt[0]->xt = 0;
     }
   }
@@ -3733,7 +3856,7 @@ void split6(pMesh mesh,pSol met,int k,int vx[6]) {
   /* Modify second tetra */
   pt[1]->v[0] = vx[0] ; pt[1]->v[2] = vx[3]; pt[1]->v[3] = vx[4];
 
-  if(nxt0){
+  if ( nxt0 ) {
     memcpy(&xt,&xt0,sizeof(xTetra));
     xt.tag[1] = 0;  xt.tag[2] = 0;
     xt.tag[5] = 0;  xt.edg[1] = 0;
@@ -3742,21 +3865,27 @@ void split6(pMesh mesh,pSol met,int k,int vx[6]) {
 
     isxt = 0;
 
-    for(i=0;i<4;i++){
-      if((xt.ref[i]) || xt.ftag[i]) isxt = 1;
+    for (i=0; i<4; i++) {
+      if ( (xt.ref[i]) || xt.ftag[i]) isxt = 1;
     }
 
     pt[1]->xt = 0;
-    if(isxt){
-      if(!isxt0){
+    if ( isxt ) {
+      if ( !isxt0 ) {
         isxt0 = 1;
         pt[1]->xt = nxt0;
         pxt = &mesh->xtetra[pt[1]->xt];
         memcpy(pxt,&xt,sizeof(xTetra));
       }
-      else{
+      else {
         mesh->xt++;
-        assert(mesh->xt < mesh->xtmax);
+        if ( mesh->xt >= mesh->xtmax ) {
+          fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
+          fprintf(stdout,"  ## Check the mesh size or ");
+          fprintf(stdout,"increase the allocated memory with the -m option.\n");
+          fprintf(stdout,"  Exit program.\n");
+          exit(EXIT_FAILURE);
+        }
         pt[1]->xt = mesh->xt;
         pxt = &mesh->xtetra[pt[1]->xt];
         memcpy(pxt,&xt,sizeof(xTetra));
@@ -3767,7 +3896,7 @@ void split6(pMesh mesh,pSol met,int k,int vx[6]) {
   /* Modify 3rd tetra */
   pt[2]->v[0] = vx[1] ; pt[2]->v[1] = vx[3]; pt[2]->v[3] = vx[5];
 
-  if(nxt0){
+  if ( nxt0 ) {
     memcpy(&xt,&xt0,sizeof(xTetra));
     xt.tag[0] = 0;  xt.tag[2] = 0;
     xt.tag[4] = 0;  xt.edg[0] = 0;
@@ -3775,21 +3904,27 @@ void split6(pMesh mesh,pSol met,int k,int vx[6]) {
     xt.ref[2] = 0;  xt.ftag[2] = 0;  MG_SET(xt.ori, 2);
     isxt = 0;
 
-    for(i=0;i<4;i++){
-      if((xt.ref[i]) || xt.ftag[i]) isxt = 1;
+    for (i=0; i<4;i++) {
+      if ( (xt.ref[i]) || xt.ftag[i]) isxt = 1;
     }
 
     pt[2]->xt = 0;
-    if(isxt){
-      if(!isxt0){
+    if ( isxt ) {
+      if ( !isxt0 ) {
         isxt0 = 1;
         pt[2]->xt = nxt0;
         pxt = &mesh->xtetra[pt[2]->xt];
         memcpy(pxt,&xt,sizeof(xTetra));
       }
-      else{
+      else {
         mesh->xt++;
-        assert(mesh->xt < mesh->xtmax);
+        if ( mesh->xt >= mesh->xtmax ) {
+          fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
+          fprintf(stdout,"  ## Check the mesh size or ");
+          fprintf(stdout,"increase the allocated memory with the -m option.\n");
+          fprintf(stdout,"  Exit program.\n");
+          exit(EXIT_FAILURE);
+        }
         pt[2]->xt = mesh->xt;
         pxt = &mesh->xtetra[pt[2]->xt];
         memcpy(pxt,&xt,sizeof(xTetra));
@@ -3800,7 +3935,7 @@ void split6(pMesh mesh,pSol met,int k,int vx[6]) {
   /* Modify 4th tetra */
   pt[3]->v[0] = vx[2] ; pt[3]->v[1] = vx[4]; pt[3]->v[2] = vx[5];
 
-  if(nxt0){
+  if ( nxt0 ) {
     memcpy(&xt,&xt0,sizeof(xTetra));
     xt.tag[0] = 0;  xt.tag[1] = 0;
     xt.tag[3] = 0;  xt.edg[0] = 0;
@@ -3809,21 +3944,27 @@ void split6(pMesh mesh,pSol met,int k,int vx[6]) {
 
     isxt = 0;
 
-    for(i=0;i<4;i++){
-      if((xt.ref[i]) || xt.ftag[i]) isxt = 1;
+    for (i=0; i<4; i++) {
+      if ( (xt.ref[i]) || xt.ftag[i]) isxt = 1;
     }
 
     pt[3]->xt = 0;
-    if(isxt){
-      if(!isxt0){
+    if ( isxt ) {
+      if ( !isxt0 ) {
         isxt0 = 1;
         pt[3]->xt = nxt0;
         pxt = &mesh->xtetra[pt[3]->xt];
         memcpy(pxt,&xt,sizeof(xTetra));
       }
-      else{
+      else {
         mesh->xt++;
-        assert(mesh->xt < mesh->xtmax);
+        if ( mesh->xt >= mesh->xtmax ) {
+          fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
+          fprintf(stdout,"  ## Check the mesh size or ");
+          fprintf(stdout,"increase the allocated memory with the -m option.\n");
+          fprintf(stdout,"  Exit program.\n");
+          exit(EXIT_FAILURE);
+        }
         pt[3]->xt = mesh->xt;
         pxt = &mesh->xtetra[pt[3]->xt];
         memcpy(pxt,&xt,sizeof(xTetra));
@@ -3834,7 +3975,7 @@ void split6(pMesh mesh,pSol met,int k,int vx[6]) {
   /* Modify 5th tetra */
   pt[4]->v[0] = vx[0] ; pt[4]->v[1] = vx[3]; pt[4]->v[2] = vx[1] ; pt[4]->v[3] = vx[2];
 
-  if(nxt0){
+  if ( nxt0 ) {
     memcpy(&xt,&xt0,sizeof(xTetra));
     xt.tag[0] = 0;  xt.tag[1] = 0;
     xt.tag[2] = 0;  xt.tag[3] = 0;
@@ -3848,21 +3989,27 @@ void split6(pMesh mesh,pSol met,int k,int vx[6]) {
 
     isxt = 0;
 
-    for(i=0;i<4;i++){
-      if((xt.ref[i]) || xt.ftag[i]) isxt = 1;
+    for (i=0; i<4; i++) {
+      if ( (xt.ref[i]) || xt.ftag[i]) isxt = 1;
     }
 
     pt[4]->xt = 0;
-    if(isxt){
-      if(!isxt0){
+    if ( isxt ) {
+      if ( !isxt0 ) {
         isxt0 = 1;
         pt[4]->xt = nxt0;
         pxt = &mesh->xtetra[(pt[4])->xt];
         memcpy(pxt,&xt,sizeof(xTetra));
       }
-      else{
+      else {
         mesh->xt++;
-        assert(mesh->xt < mesh->xtmax);
+        if ( mesh->xt >= mesh->xtmax ) {
+          fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
+          fprintf(stdout,"  ## Check the mesh size or ");
+          fprintf(stdout,"increase the allocated memory with the -m option.\n");
+          fprintf(stdout,"  Exit program.\n");
+          exit(EXIT_FAILURE);
+        }
         pt[4]->xt = mesh->xt;
         pxt = &mesh->xtetra[pt[4]->xt];
         memcpy(pxt,&xt,sizeof(xTetra));
@@ -3873,7 +4020,7 @@ void split6(pMesh mesh,pSol met,int k,int vx[6]) {
   /* Modify 6th tetra */
   pt[5]->v[0] = vx[2] ; pt[5]->v[1] = vx[0]; pt[5]->v[2] = vx[3] ; pt[5]->v[3] = vx[4];
 
-  if(nxt0){
+  if ( nxt0 ) {
     memcpy(&xt,&xt0,sizeof(xTetra));
     xt.tag[0] = 0;  xt.tag[1] = 0;
     xt.tag[2] = 0;  xt.tag[3] = 0;
@@ -3887,21 +4034,27 @@ void split6(pMesh mesh,pSol met,int k,int vx[6]) {
 
     isxt = 0;
 
-    for(i=0;i<4;i++){
-      if((xt.ref[i]) || xt.ftag[i]) isxt = 1;
+    for (i=0; i<4; i++) {
+      if ( (xt.ref[i]) || xt.ftag[i]) isxt = 1;
     }
 
     pt[5]->xt = 0;
-    if(isxt){
-      if(!isxt0){
+    if ( isxt ) {
+      if ( !isxt0 ) {
         isxt0 = 1;
         pt[5]->xt = nxt0;
         pxt = &mesh->xtetra[pt[5]->xt];
         memcpy(pxt,&xt,sizeof(xTetra));
       }
-      else{
+      else {
         mesh->xt++;
-        assert(mesh->xt < mesh->xtmax);
+        if ( mesh->xt >= mesh->xtmax ) {
+          fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
+          fprintf(stdout,"  ## Check the mesh size or ");
+          fprintf(stdout,"increase the allocated memory with the -m option.\n");
+          fprintf(stdout,"  Exit program.\n");
+          exit(EXIT_FAILURE);
+        }
         pt[5]->xt = mesh->xt;
         pxt = &mesh->xtetra[pt[5]->xt];
         memcpy(pxt,&xt,sizeof(xTetra));
@@ -3912,7 +4065,7 @@ void split6(pMesh mesh,pSol met,int k,int vx[6]) {
   /* Modify 7th tetra */
   pt[6]->v[0] = vx[2] ; pt[6]->v[1] = vx[3]; pt[6]->v[2] = vx[1] ; pt[6]->v[3] = vx[5];
 
-  if(nxt0){
+  if ( nxt0 ) {
     memcpy(&xt,&xt0,sizeof(xTetra));
     xt.tag[0] = 0;  xt.edg[0] = 0;
     xt.tag[1] = 0;  xt.tag[2] = 0;
@@ -3926,21 +4079,27 @@ void split6(pMesh mesh,pSol met,int k,int vx[6]) {
 
     isxt = 0;
 
-    for(i=0;i<4;i++){
-      if((xt.ref[i]) || xt.ftag[i]) isxt = 1;
+    for (i=0; i<4; i++) {
+      if ( (xt.ref[i]) || xt.ftag[i]) isxt = 1;
     }
 
     pt[6]->xt = 0;
-    if(isxt){
-      if(!isxt0){
+    if ( isxt ) {
+      if ( !isxt0 ) {
         isxt0 = 1;
         pt[6]->xt = nxt0;
         pxt = &mesh->xtetra[pt[6]->xt];
         memcpy(pxt,&xt,sizeof(xTetra));
       }
-      else{
+      else {
         mesh->xt++;
-        assert(mesh->xt < mesh->xtmax);
+        if ( mesh->xt >= mesh->xtmax ) {
+          fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
+          fprintf(stdout,"  ## Check the mesh size or ");
+          fprintf(stdout,"increase the allocated memory with the -m option.\n");
+          fprintf(stdout,"  Exit program.\n");
+          exit(EXIT_FAILURE);
+        }
         pt[6]->xt = mesh->xt;
         pxt = &mesh->xtetra[pt[6]->xt];
         memcpy(pxt,&xt,sizeof(xTetra));
@@ -3951,7 +4110,7 @@ void split6(pMesh mesh,pSol met,int k,int vx[6]) {
   /* Modify last tetra */
   pt[7]->v[0] = vx[2] ; pt[7]->v[1] = vx[3]; pt[7]->v[2] = vx[5] ; pt[7]->v[3] = vx[4];
 
-  if(nxt0){
+  if ( nxt0 ) {
     memcpy(&xt,&xt0,sizeof(xTetra));
     xt.tag[0] = 0;  xt.tag[1] = 0;
     xt.tag[2] = 0;  xt.tag[3] = 0;
@@ -3965,74 +4124,79 @@ void split6(pMesh mesh,pSol met,int k,int vx[6]) {
 
     isxt = 0;
 
-    for(i=0;i<4;i++){
-      if((xt.ref[i]) || xt.ftag[i]) isxt = 1;
+    for (i=0; i<4; i++) {
+      if ( (xt.ref[i]) || xt.ftag[i]) isxt = 1;
     }
 
     pt[7]->xt = 0;
-    if(isxt){
-      if(!isxt0){
+    if ( isxt ) {
+      if ( !isxt0 ) {
         isxt0 = 1;
         pt[7]->xt = nxt0;
         pxt = &mesh->xtetra[pt[7]->xt];
         memcpy(pxt,&xt,sizeof(xTetra));
       }
-      else{
+      else {
         mesh->xt++;
-        assert(mesh->xt < mesh->xtmax);
+        if ( mesh->xt >= mesh->xtmax ) {
+          fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
+          fprintf(stdout,"  ## Check the mesh size or ");
+          fprintf(stdout,"increase the allocated memory with the -m option.\n");
+          fprintf(stdout,"  Exit program.\n");
+          exit(EXIT_FAILURE);
+        }
         pt[7]->xt = mesh->xt;
         pxt = &mesh->xtetra[pt[7]->xt];
         memcpy(pxt,&xt,sizeof(xTetra));
       }
     }
   }
-  for(i=0;i<8;i++){
+  for (i=0; i<8; i++) {
     pt[i]->qual=orcal(mesh,newtet[i]);
   }
 #ifdef DEBUG
   tabtmp[11][3]=lmintmp;  tabtmp[11][4]=lmaxtmp;
-  for(i=0;i<6;i++)
-    {
+  for (i=0; i<6; i++) {
       lentmp=lenedg(mesh,met,pt[0]->v[iare[i][0]],pt[0]->v[iare[i][1]]);
-      if(lentmp<lmintmp) {
+      if ( lentmp<lmintmp ) {
         tabtmp[11][1]++;
-      }else if(lentmp>lmaxtmp) {
+      }else if ( lentmp>lmaxtmp ) {
         tabtmp[11][2]++;
       }
       lentmp=lenedg(mesh,met,pt[1]->v[iare[i][0]],pt[1]->v[iare[i][1]]);
-      if(lentmp<lmintmp) {
+      if ( lentmp<lmintmp ) {
         tabtmp[11][1]++;
-      }else if(lentmp>lmaxtmp) {
+      }else if ( lentmp>lmaxtmp ) {
         tabtmp[11][2]++;
       }
       lentmp=lenedg(mesh,met,pt[2]->v[iare[i][0]],pt[2]->v[iare[i][1]]);
-      if(lentmp<lmintmp) {
+      if ( lentmp<lmintmp ) {
         tabtmp[11][1]++;
-      }else if(lentmp>lmaxtmp) {
+      }else if ( lentmp>lmaxtmp ) {
         tabtmp[11][2]++;
       }
       lentmp=lenedg(mesh,met,pt[3]->v[iare[i][0]],pt[3]->v[iare[i][1]]);
-      if(lentmp<lmintmp) {
+      if ( lentmp<lmintmp ) {
         tabtmp[11][1]++;
-      }else if(lentmp>lmaxtmp) {
+      }else if ( lentmp>lmaxtmp ) {
         tabtmp[11][2]++;
       }
       lentmp=lenedg(mesh,met,pt[4]->v[iare[i][0]],pt[4]->v[iare[i][1]]);
-      if(lentmp<lmintmp) {
+      if ( lentmp<lmintmp ) {
         tabtmp[11][1]++;
-      }else if(lentmp>lmaxtmp) {
+      }else if ( lentmp>lmaxtmp ) {
         tabtmp[11][2]++;
       }
       lentmp=lenedg(mesh,met,pt[5]->v[iare[i][0]],pt[5]->v[iare[i][1]]);
-      if(lentmp<lmintmp) {
+      if ( lentmp<lmintmp ) {
         tabtmp[11][1]++;
-      }else if(lentmp>lmaxtmp) {
+      }else if ( lentmp>lmaxtmp ) {
         tabtmp[11][2]++;
       }
       lentmp=lenedg(mesh,met,pt[7]->v[iare[i][0]],pt[7]->v[iare[i][1]]);
-      if(lentmp<lmintmp) {
+      if ( lentmp<lmintmp ) {
         tabtmp[11][1]++;
-      }else if(lentmp>lmaxtmp) {
+      }else if ( lentmp>lmaxtmp ) {
         tabtmp[11][2]++;
       }
     }

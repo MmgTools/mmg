@@ -506,7 +506,7 @@ static int coltet(pMesh mesh,pSol met,char typchk) {
   for (k=1; k<=mesh->ne; k++) {
     base = ++mesh->base;
     pt = &mesh->tetra[k];
-    if ( !MG_EOK(pt) || MG_SIN(pt->tag))   continue;
+    if ( !MG_EOK(pt) || MG_SIN(pt->tag) )   continue;
 
     pxt = pt->xt ? &mesh->xtetra[pt->xt] : 0;
     for (i=0; i<4; i++) {
@@ -651,9 +651,10 @@ static int anatetv(pMesh mesh,pSol met,char typchk) {
         o[1] = 0.5 * (p1->c[1]+p2->c[1]);
         o[2] = 0.5 * (p1->c[2]+p2->c[2]);
         ip  = newPt(mesh,o,0);
-        if(!ip) {
+        if ( !ip ) {
           fprintf(stdout,"  ## Error: unable to allocate a new point\n");
-          fprintf(stdout,"  ## Check the mesh size or increase the allocated memory with the -m option.\n");
+          fprintf(stdout,"  ## Check the mesh size or ");
+          fprintf(stdout,"increase the allocated memory with the -m option.\n");
           memlack=1;
           goto split;
         }
@@ -891,7 +892,8 @@ static int anatets(pMesh mesh,pSol met,char typchk) {
         ip = newPt(mesh,o,MG_BDY);
         if ( !ip ) {
           fprintf(stdout,"  ## Error: unable to allocate a new point.\n");
-          fprintf(stdout,"  ## Check the mesh size or increase the allocated memory with the -m option.\n");
+          fprintf(stdout,"  ## Check the mesh size or ");
+          fprintf(stdout,"increase the allocated memory with the -m option.\n");
           do {
             delPt(mesh,mesh->np);
           } while ( mesh->np>npinit );
@@ -1222,7 +1224,13 @@ static int adpspl(pMesh mesh,pSol met, int* warn) {
         if ( met->m )
           met->m[ip] = 0.5 * (met->m[ip1]+met->m[ip2]);
         mesh->xp++;
-        assert(mesh->xp < mesh->xpmax);
+        if ( mesh->xp >= mesh->xpmax ) {
+          fprintf(stdout,"  ## Memory problem (xpoint), not enough memory.\n");
+          fprintf(stdout,"  ## Check the mesh size or ");
+          fprintf(stdout,"increase the allocated memory with the -m option.\n");
+          return(-1);
+        }
+
         ppt->xp = mesh->xp;
         pxp = &mesh->xpoint[ppt->xp];
 
@@ -1361,7 +1369,7 @@ static int adptet(pMesh mesh,pSol met) {
   int      warn;
 
   /* Iterative mesh modifications */
-  it = nnc = nns = nnf = nnm = 0;
+  it = nnc = nns = nnf = nnm = warn = 0;
   maxit = 10;
   do {
 #ifdef DEBUG
@@ -1459,7 +1467,8 @@ static int adptet(pMesh mesh,pSol met) {
   if ( warn ) {
     fprintf(stdout,"  ## Error:");
     fprintf(stdout," unable to allocate a new point in last call of adpspl.\n");
-    fprintf(stdout,"  ## Check the mesh size or increase the allocated memory with the -m option.\n");
+    fprintf(stdout,"  ## Check the mesh size or ");
+    fprintf(stdout,"increase the allocated memory with the -m option.\n");
     fprintf(stdout,"  ## Uncomplete mesh. Exiting\n" );
     return(0);
   }

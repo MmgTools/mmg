@@ -229,7 +229,8 @@ int swpbdy(pMesh mesh,pSol met,int *list,int ret,int it1) {
   nm = newPt(mesh,c,MG_BDY);
   if ( !nm ) {
     fprintf(stdout,"  ## Warning: unable to allocate a new point.\n");
-    fprintf(stdout,"  ## Check the mesh size or increase the allocated memory with the -m option.\n");
+    fprintf(stdout,"  ## Check the mesh size or ");
+    fprintf(stdout,"increase the allocated memory with the -m option.\n");
     return(0);
   }
   if ( met->m )  met->m[nm] = 0.5 *(met->m[np]+met->m[nq]);
@@ -252,7 +253,7 @@ int swpbdy(pMesh mesh,pSol met,int *list,int ret,int it1) {
   assert(pt1->v[ipa] == na);
 
   ier = colver(mesh,list,ilist,ipa);
-	if(ier) {
+	if ( ier ) {
 		delPt(mesh,ier);
 		ier = 1;
 	}

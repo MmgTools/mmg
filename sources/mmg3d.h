@@ -305,7 +305,7 @@ int  mmg3d1_delone(pMesh ,pSol );
 int  mmg3d2(pMesh ,pSol );
 int  split1_sim(pMesh mesh,pSol met,int k,int vx[6]);
 void split1(pMesh mesh,pSol met,int k,int vx[6]);
-int split1b(pMesh mesh,pSol met,int *list,int ret,int ip,int cas);
+int  split1b(pMesh mesh,pSol met,int *list,int ret,int ip,int cas);
 int  split2sf_sim(pMesh mesh,pSol met,int k,int vx[6]);
 void split2sf(pMesh mesh,pSol met,int k,int vx[6]);
 void split2(pMesh mesh,pSol met,int k,int vx[6]);

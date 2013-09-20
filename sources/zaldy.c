@@ -21,7 +21,8 @@ int newPt(pMesh mesh,double c[3],char tag) {
     mesh->xp++;
     if(mesh->xp >= mesh->xpmax){
       fprintf(stdout,"  ## Allocation problem (xpoint), not enough memory.\n");
-      fprintf(stdout,"  ## Check the mesh size or increase the allocated memory with the -m option.\n");
+      fprintf(stdout,"  ## Check the mesh size or ");
+      fprintf(stdout,"increase the allocated memory with the -m option.\n");
       fprintf(stdout,"  Exit program.\n");
       exit(EXIT_FAILURE);
     }
@@ -110,7 +111,8 @@ int zaldy(pMesh mesh) {
   mesh->point = (pPoint)calloc(mesh->npmax+1,sizeof(Point));
   if ( !mesh->point ){
     fprintf(stdout,"  ## Allocation problem (point), not enough memory.\n");
-    fprintf(stdout,"  ## Check the mesh size or increase the allocated memory with the -m option.\n");
+    fprintf(stdout,"  ## Check the mesh size or ");
+    fprintf(stdout,"increase the allocated memory with the -m option.\n");
     fprintf(stdout,"  Exit program.\n");
     return(0);
   }
@@ -118,7 +120,8 @@ int zaldy(pMesh mesh) {
   mesh->tetra = (pTetra)calloc(mesh->nemax+1,sizeof(Tetra));
   if ( !mesh->tetra ){
     fprintf(stdout,"  ## Allocation problem (tetra), not enough memory.\n");
-    fprintf(stdout,"  ## Check the mesh size or increase the allocated memory with the -m option.\n");
+    fprintf(stdout,"  ## Check the mesh size or ");
+    fprintf(stdout,"increase the allocated memory with the -m option.\n");
     fprintf(stdout,"  Exit program.\n");
     return(0);
   }
@@ -126,7 +129,8 @@ int zaldy(pMesh mesh) {
     mesh->tria = (pTria)calloc(mesh->ntmax+1,sizeof(Tria));
     if ( !mesh->tria ){
       fprintf(stdout,"  ## Allocation problem (tria), not enough memory.\n");
-      fprintf(stdout,"  ## Check the mesh size or increase the allocated memory with the -m option.\n");
+      fprintf(stdout,"  ## Check the mesh size or ");
+      fprintf(stdout,"increase the allocated memory with the -m option.\n");
       fprintf(stdout,"  Exit program.\n");
       return(0);
     }
@@ -135,7 +139,8 @@ int zaldy(pMesh mesh) {
     mesh->edge = (pEdge)calloc(mesh->na+1,sizeof(Edge));
     if ( !mesh->edge ) {
       fprintf(stdout,"  ## Allocation problem (edge), not enough memory.\n");
-      fprintf(stdout,"  ## Check the mesh size or increase the allocated memory with the -m option.\n");
+      fprintf(stdout,"  ## Check the mesh size or ");
+      fprintf(stdout,"increase the allocated memory with the -m option.\n");
       fprintf(stdout,"  Exit program.\n");
       return(0);
     }

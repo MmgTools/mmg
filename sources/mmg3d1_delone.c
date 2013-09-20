@@ -445,7 +445,8 @@ static int swpmshcpy(pMesh mesh,pSol met) {
         ip  = newPt(mesh,o,0);
         if(!ip) {
           fprintf(stdout,"  ## Error: unable to allocate a new point.\n");
-          fprintf(stdout,"  ## Check the mesh size or increase the allocated memory with the -m option.\n");
+          fprintf(stdout,"  ## Check the mesh size or ");
+          fprintf(stdout,"increase the allocated memory with the -m option.\n");
           memlack=1;
           goto split;
         }
@@ -683,7 +684,8 @@ static int swpmshcpy(pMesh mesh,pSol met) {
         ip = newPt(mesh,o,MG_BDY);
         if ( !ip ) {
           fprintf(stdout,"  ## Error: unable to allocate a new point.\n");
-          fprintf(stdout,"  ## Check the mesh size or increase the allocated memory with the -m option.\n");
+          fprintf(stdout,"  ## Check the mesh size or ");
+          fprintf(stdout,"increase the allocated memory with the -m option.\n");
           do {
             delPt(mesh,mesh->np);
           } while ( mesh->np>npinit );
@@ -1019,7 +1021,12 @@ static int swpmshcpy(pMesh mesh,pSol met) {
         if ( met->m )
           met->m[ip] = 0.5 * (met->m[ip1]+met->m[ip2]);
         mesh->xp++;
-        assert(mesh->xp < mesh->xpmax);
+        if ( mesh->xp >= mesh->xpmax ) {
+          fprintf(stdout,"  ## Memory problem (xpoint), not enough memory.\n");
+          fprintf(stdout,"  ## Check the mesh size or ");
+          fprintf(stdout,"increase the allocated memory with the -m option.\n");
+          return(-1);
+        }
         ppt->xp = mesh->xp;
         pxp = &mesh->xpoint[ppt->xp];
 
@@ -1309,7 +1316,12 @@ int adpsplcol(pMesh mesh,pSol met,pBucket bucket, int* warn) {
             if ( met->m )
               met->m[ip] = 0.5 * (met->m[ip1]+met->m[ip2]);
             mesh->xp++;
-            assert(mesh->xp < mesh->xpmax);
+            if ( mesh->xp >= mesh->xpmax ) {
+              fprintf(stdout,"  ## Memory problem (xpoint), not enough memory.\n");
+              fprintf(stdout,"  ## Check the mesh size or ");
+              fprintf(stdout,"increase the allocated memory with the -m option.\n");
+              return(-1);
+            }
             ppt->xp = mesh->xp;
             pxp = &mesh->xpoint[ppt->xp];
 
@@ -1638,15 +1650,12 @@ int adpsplcol(pMesh mesh,pSol met,pBucket bucket, int* warn) {
   if ( warn ) {
     fprintf(stdout,"  ## Error:");
     fprintf(stdout," unable to allocate a new point in last call of adpspl.\n");
-    fprintf(stdout,"  ## Check the mesh size or increase the allocated memory with the -m option.\n");
+    fprintf(stdout,"  ## Check the mesh size or ");
+    fprintf(stdout,"increase the allocated memory with the -m option.\n");
     fprintf(stdout," ## Uncomplete mesh. Exiting\n" );
     return(0);
   }
 
-  /*shape optim*/
-  it = 0;
-  maxit = 2;
-  do {
 #ifdef USE_SCOTCH
     /*check enough vertex to renum*/
     if ( info.renum  && (mesh->np/2. > BOXSIZE) ) {
@@ -1664,6 +1673,10 @@ int adpsplcol(pMesh mesh,pSol met,pBucket bucket, int* warn) {
     }
 #endif
 
+  /*shape optim*/
+  it = 0;
+  maxit = 2;
+  do {
     /* badly shaped process */
     /*ier = badelt(mesh,met);
       if ( ier < 0 ) {
@@ -1784,7 +1797,8 @@ int adpsplcol(pMesh mesh,pSol met,pBucket bucket, int* warn) {
   if ( warn ) {
     fprintf(stdout,"  ## Error:");
     fprintf(stdout," unable to allocate a new point in last call of adpspl.\n");
-    fprintf(stdout,"  ## Check the mesh size or increase the allocated memory with the -m option.\n");
+    fprintf(stdout,"  ## Check the mesh size or ");
+    fprintf(stdout,"increase the allocated memory with the -m option.\n");
     fprintf(stdout," ## Uncomplete mesh. Exiting\n" );
     return(0);
   }

@@ -865,6 +865,12 @@ int colver(pMesh mesh,int *list,int ilist,char indq) {
             }
             /* Create new field xt */
             mesh->xt++;
+            if ( mesh->xt >= mesh->xtmax ) {
+              fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
+              fprintf(stdout,"  ## Check the mesh size or increase");
+              fprintf(stdout," the allocated memory with the -m option.\n");
+              return(-1);
+            }
             pt1->xt = mesh->xt;
             pxt = &mesh->xtetra[pt1->xt];
             memcpy(pxt,pxt1,sizeof(xTetra));

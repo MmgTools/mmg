@@ -688,12 +688,13 @@ void outqua(pMesh mesh,pSol met) {
 #else
   fprintf(stdout,"     BEST   %e  AVRG.   %e  WRST.   %e (%d)\n => %d %d %d %d\n",
           rapmax,rapavg / (mesh->ne-nex),rapmin,iel,
-          mesh->tetra[iel].v[0],mesh->tetra[iel].v[1],mesh->tetra[iel].v[2],
-          mesh->tetra[iel].v[3]);
+          indPt(mesh,mesh->tetra[iel].v[0]),indPt(mesh,mesh->tetra[iel].v[1]),
+          indPt(mesh,mesh->tetra[iel].v[2]),indPt(mesh,mesh->tetra[iel].v[3]));
 #endif
   if ( abs(info.imprim) < 5 ){
     if (rapmin == 0){
       fprintf(stdout,"  ## WARNING: TOO BAD QUALITY FOR THE WORST ELEMENT\n");
+      saveMesh(mesh);
       exit(EXIT_FAILURE);
     }
     return;
@@ -708,6 +709,7 @@ void outqua(pMesh mesh,pSol met) {
   }
   if (rapmin == 0){
     fprintf(stdout,"  ## WARNING: TOO BAD QUALITY FOR THE WORST ELEMENT\n");
+    saveMesh(mesh);
     exit(EXIT_FAILURE);
   }
 }
