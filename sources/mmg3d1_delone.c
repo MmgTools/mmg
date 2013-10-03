@@ -291,7 +291,7 @@ static int swpmshcpy(pMesh mesh,pSol met) {
   pxTetra    pxt;
   pPoint     p0,p1;
   double     ll,ux,uy,uz,hmi2;
-  int        k,nc,ref,list[LMAX+2],ilist,base,nnm,ier;
+  int        k,nc,list[LMAX+2],ilist,base,nnm,ier;
   char       i,j,tag,ip,iq,isnm;
 
   nc = nnm = 0;
@@ -909,15 +909,15 @@ static int swpmshcpy(pMesh mesh,pSol met) {
   Tria       ptt;
   pPoint     p0,p1,ppt;
   pxPoint    pxp;
-  double     dd,dd2,len,lmax,o[3],to[3],ro[3],no1[3],no2[3],v[3];
+  double     dd,len,lmax,o[3],to[3],ro[3],no1[3],no2[3],v[3];
   int        k,ip,ip1,ip2,list[LMAX+2],ilist,ns,ref;
   char       imax,tag,j,i,i1,i2,ifa0,ifa1;
-  int        ifilt,lon,ret,ne,ier;
+  int        ifilt,lon,ret/*,ne*/,ier;
 
   *warn=0;
   ns = 0;
   ifilt = 0;
-  ne = mesh->ne;
+  /*ne = mesh->ne;*/
   for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
     if ( !MG_EOK(pt) /*|| MG_SIN(pt->tag)*/ )   continue;
@@ -1574,7 +1574,7 @@ int adpsplcol(pMesh mesh,pSol met,pBucket bucket, int* warn) {
   pxTetra    pxt;
   pPoint     p0,p1;
   double     len,lmin;
-  int        k,ip,iq,list[LMAX+2],ilist,nc,ref;
+  int        k,ip,iq,list[LMAX+2],ilist,nc;
   char       imin,tag,j,i,i1,i2,ier,ifa0,ifa1;
 
   nc = 0;
@@ -1644,7 +1644,7 @@ int adpsplcol(pMesh mesh,pSol met,pBucket bucket, int* warn) {
 
 /** Analyze tetrahedra and split long / collapse short, according to prescribed metric */
 /*static*/ int adptet1(pMesh mesh,pSol met,pBucket bucket) {
-  int      it,nnc,nns,nnf,nnm,maxit,nc,ns,nf,nm;
+  int      it,nnf,nnm,maxit,ns,nf,nm;
   int      warn;
 
   /*initial swap*/

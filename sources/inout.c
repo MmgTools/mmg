@@ -292,25 +292,6 @@ int saveMesh(pMesh mesh) {
   int          k,i,na,nc,np,ne,nn,nr,nre,nedreq,ntreq,nt,outm,nereq;
   char         data[128];
 
-  /* build hash table for edges */
-  if(mesh->htab.geom){
-    free(mesh->htab.geom);
-    mesh->htab.geom=NULL;
-  }
-  hNew(&mesh->htab,3*(mesh->xt),9*(mesh->xt));
-  for (k=1; k<=mesh->ne; k++) {
-    pt   = &mesh->tetra[k];
-    if ( MG_EOK(pt) &&  pt->xt ) {
-      for (i=0; i<6; i++) {
-        if ( mesh->xtetra[pt->xt].edg[i] ||
-             ( MG_EDG(mesh->xtetra[pt->xt].tag[i] ) ||
-               (mesh->xtetra[pt->xt].tag[i] & MG_REQ) ) )
-          hEdge(&mesh->htab,pt->v[iare[i][0]],pt->v[iare[i][1]],
-                mesh->xtetra[pt->xt].edg[i],mesh->xtetra[pt->xt].tag[i]);
-      }
-    }
-  }
-
   mesh->ver = GmfDouble;
   strcpy(data,mesh->nameout);
   if ( !(outm = GmfOpenMesh(data,GmfWrite,mesh->ver,mesh->dim)) ) {
@@ -364,6 +345,24 @@ int saveMesh(pMesh mesh) {
     mesh->adjt=NULL;
     mesh->tria=NULL;
 
+    /* build hash table for edges */
+    if ( mesh->htab.geom ) {
+      free(mesh->htab.geom);
+      mesh->htab.geom=NULL;
+    }
+    hNew(&mesh->htab,3*(mesh->xt),9*(mesh->xt));
+    for (k=1; k<=mesh->ne; k++) {
+      pt   = &mesh->tetra[k];
+      if ( MG_EOK(pt) &&  pt->xt ) {
+        for (i=0; i<6; i++) {
+          if ( mesh->xtetra[pt->xt].edg[i] ||
+               ( MG_EDG(mesh->xtetra[pt->xt].tag[i] ) ||
+                 (mesh->xtetra[pt->xt].tag[i] & MG_REQ) ) )
+            hEdge(&mesh->htab,pt->v[iare[i][0]],pt->v[iare[i][1]],
+                  mesh->xtetra[pt->xt].edg[i],mesh->xtetra[pt->xt].tag[i]);
+        }
+      }
+    }
     /* edges + ridges + required edges */
     na = nr = nedreq = 0;
     for (k=0; k<=mesh->htab.max; k++) {
@@ -401,6 +400,8 @@ int saveMesh(pMesh mesh) {
         }
       }
     }
+    free(mesh->htab.geom);
+    mesh->htab.geom = NULL;
   }
 
   /* corners+required */
@@ -455,43 +456,45 @@ int saveMesh(pMesh mesh) {
   nn = nt = 0;
   GmfSetKwd(outm,GmfNormals,mesh->xp);
 
-  for (k=1; k<=mesh->np; k++) {
-    ppt = &mesh->point[k];
-    if ( MG_SIN(ppt->tag) )  continue;
-    else if ( MG_VOK(ppt) && (ppt->tag & MG_BDY) && (!(ppt->tag & MG_GEO) || (ppt->tag & MG_NOM))) {
-      pxp = &mesh->xpoint[ppt->xp];
-      GmfSetLin(outm,GmfNormals,pxp->n1[0],pxp->n1[1],pxp->n1[2]);
-      nn++;
-    }
-    if ( MG_EDG(ppt->tag) ) nt++;
-  }
-  GmfSetKwd(outm,GmfNormalAtVertices,nn);
-  nn = 0;
-
-  for (k=1; k<=mesh->np; k++) {
-    ppt = &mesh->point[k];
-    if ( MG_SIN(ppt->tag) )  continue;
-    else if ( MG_VOK(ppt) && (ppt->tag & MG_BDY) && (!(ppt->tag & MG_GEO) || (ppt->tag & MG_NOM)) )
-      GmfSetLin(outm,GmfNormalAtVertices,ppt->tmp,++nn);
-  }
-
-  if ( nt ) {
-    GmfSetKwd(outm,GmfTangents,nt);
+  if ( mesh->xp ) {
     for (k=1; k<=mesh->np; k++) {
       ppt = &mesh->point[k];
       if ( MG_SIN(ppt->tag) )  continue;
-      else if ( MG_VOK(ppt) && (MG_EDG(ppt->tag) || (ppt->tag & MG_NOM) )) {
+      else if ( MG_VOK(ppt) && (ppt->tag & MG_BDY) && (!(ppt->tag & MG_GEO) || (ppt->tag & MG_NOM))) {
         pxp = &mesh->xpoint[ppt->xp];
-        GmfSetLin(outm,GmfTangents,pxp->t[0],pxp->t[1],pxp->t[2]);
+        GmfSetLin(outm,GmfNormals,pxp->n1[0],pxp->n1[1],pxp->n1[2]);
+        nn++;
       }
+      if ( MG_EDG(ppt->tag) ) nt++;
     }
-    GmfSetKwd(outm,GmfTangentAtVertices,nt);
-    nt = 0;
+    GmfSetKwd(outm,GmfNormalAtVertices,nn);
+    nn = 0;
+
     for (k=1; k<=mesh->np; k++) {
       ppt = &mesh->point[k];
       if ( MG_SIN(ppt->tag) )  continue;
-      else if ( MG_VOK(ppt) && (MG_EDG(ppt->tag) || (ppt->tag & MG_NOM) ) )
-        GmfSetLin(outm,GmfTangentAtVertices,ppt->tmp,++nt);
+      else if ( MG_VOK(ppt) && (ppt->tag & MG_BDY) && (!(ppt->tag & MG_GEO) || (ppt->tag & MG_NOM)) )
+        GmfSetLin(outm,GmfNormalAtVertices,ppt->tmp,++nn);
+    }
+
+    if ( nt ) {
+      GmfSetKwd(outm,GmfTangents,nt);
+      for (k=1; k<=mesh->np; k++) {
+        ppt = &mesh->point[k];
+        if ( MG_SIN(ppt->tag) )  continue;
+        else if ( MG_VOK(ppt) && (MG_EDG(ppt->tag) || (ppt->tag & MG_NOM) )) {
+          pxp = &mesh->xpoint[ppt->xp];
+          GmfSetLin(outm,GmfTangents,pxp->t[0],pxp->t[1],pxp->t[2]);
+        }
+      }
+      GmfSetKwd(outm,GmfTangentAtVertices,nt);
+      nt = 0;
+      for (k=1; k<=mesh->np; k++) {
+        ppt = &mesh->point[k];
+        if ( MG_SIN(ppt->tag) )  continue;
+        else if ( MG_VOK(ppt) && (MG_EDG(ppt->tag) || (ppt->tag & MG_NOM) ) )
+          GmfSetLin(outm,GmfTangentAtVertices,ppt->tmp,++nt);
+      }
     }
   }
 

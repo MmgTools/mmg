@@ -3,7 +3,6 @@
 #define  EPSLOC   1.00005
 #define  IEDG(a,b) (((a) > 0) && ((b) > 0)) ? ((a)+(b)) : (((a)+(b))-(1))
 
-extern Info  info;
 extern char ddb;
 
 void chkvol(pMesh mesh) {

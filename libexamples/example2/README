@@ -1,0 +1,4 @@
+Example of use of libmmg3d5:
+a way to call mmg3d5 in command line
+
+a mesh file and a sol file are given to test the programm

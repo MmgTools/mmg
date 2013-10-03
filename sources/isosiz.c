@@ -136,7 +136,8 @@ static double defsizreg(pMesh mesh,pSol met,int nump,int *lists,int ilists) {
 
   /* At this point, lispoi contains the oriented surface ball of point p0, that has been rotated
      through r, with the convention that triangle l has edges lispoi[l]; lispoi[l+1] */
-  if ( lmax/lmin > 4.0*info.hmax*info.hmax/(info.hmin*info.hmin) )  return(info.hmax);
+  if ( lmax/lmin > 4.0*info.hmax*info.hmax/
+       (info.hmin*info.hmin) )  return(info.hmax);
 
   /* Check all projections over tangent plane. */
   for (k=0; k<ilists-1; k++) {
@@ -558,6 +559,7 @@ int gradsiz_iso(pMesh mesh,pSol met) {
   }
   while( ++it < maxit && nu > 0 );
 
-  if ( abs(info.imprim) > 4 )  fprintf(stdout,"     gradation: %7d updated, %d iter.\n",nup,it);
+  if ( abs(info.imprim) > 4 )
+    fprintf(stdout,"     gradation: %7d updated, %d iter.\n",nup,it);
   return(1);
 }

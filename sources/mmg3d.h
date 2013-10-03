@@ -13,14 +13,15 @@
 #include <float.h>
 #include <math.h>
 
-#include "chrono.h"
-#include "memory.h"
+#include "mmg3d_redefine.h"
+#include "libmmg3d5.h"
 #include "libmesh5.h"
 
 #define MG_VER   "5.2c"
 #define MG_REL   "Jul. 6, 2012"
 #define MG_CPY   "Copyright (c) IMB-LJLL, 2004-"
 #define MG_STR   "&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&"
+
 
 /* Macros */
 #define MG_MAX(a,b) (((a) > (b)) ? (a) : (b))
@@ -99,58 +100,6 @@ extern unsigned char ifar[6][2]; /**< ifar[i][]: faces sharing the ith edge of t
 extern unsigned char isar[6][2]; /**< isar[i][]: vertices of extremities of the edge opposite to the ith edge */
 extern unsigned char arpt[4][3]; /**< arpt[i]: edges passing through vertex i */
 
-typedef struct {
-  double   c[3];
-  int      ref;
-  int      xp; /**< surface point number */
-  int      tmp; /**< tmp: numero of points for the saving (we don't count the unused points)*/
-  int      flag; /**< flag to know if we have already treated the point */
-  char     tag; /**< contains binary flags :
-                   if tag=23=16+4+2+1, then the point is MG_REF, MG_GEO,MG_REQ,MG_BDY */
-    char    tagdel;//tag for delaunay
-} Point;
-typedef Point * pPoint;
-
-typedef struct {
-  double   n1[3],n2[3]; /**< normals at boundary vertex;
-                           n1!=n2 if the vertex belong to a ridge */
-  double   t[3];
-} xPoint;
-typedef xPoint * pxPoint;
-
-typedef struct {
-  int      a,b,ref;
-  char     tag; /**< binary flags */
-} Edge;
-typedef Edge * pEdge;
-
-typedef struct {
-  int      v[3],base,ref;
-  int      edg[3]; /**< edg[i] contains the ref of the i^th edge of triangle */
-  int      flag;
-  char     tag[3]; /**< tag[i] contains the tag associated to th i^th edge of tri */
-} Tria;
-typedef Tria * pTria;
-
-typedef struct {
-  int      v[4],ref;
-  int      base,mark; //CECILE rajout mark pour delaunay
-  int      xt;   /**< xt : number of the surfaces xtetra */
-  int      flag;
-  char     tag;
-  double   qual;
-} Tetra;
-typedef Tetra * pTetra;
-
-typedef struct {
-  int      ref[4]; /**< ref[i] : ref de la face opp au pt i;*/
-  int      edg[6]; /**< edg[i] contains the ref of the i^th edge of tet */
-  char     ftag[4]; /**< ftag[i] contains the tag associated to the i^th face of tet */
-  char     tag[6]; /**< tag[i] contains the tag associated to the i^th edge of tet */
-  char     ori; /**< orientation of tris of the tetra:
-                 * i^th bit of ori is set to 0 when the i^th face is bad orientated */
-} xTetra;
-typedef xTetra * pxTetra;
 
 typedef struct {
   double  b[10][3]; /**< Bezier basis functions */
@@ -159,68 +108,16 @@ typedef struct {
 } Bezier;
 typedef Bezier * pBezier;
 
-typedef struct {
-  double    dhd,hmin,hmax,hgrad,hausd,min[3],max[3],delta,ls;
-  int       mem;
-#ifdef USE_SCOTCH
-  int       renum;
-#endif
-  char          imprim,ddebug,badkal,iso,fem;
-  unsigned char noinsert, noswap, nomove;
-  mytime        ctim[TIMEMAX];
-} Info;
-
 /** used to hash edges */
 typedef struct {
   int   a,b,nxt;
   int   s,k; /** k = point along edge a b */
 } hedge;
+
 typedef struct {
   int     siz,max,nxt;
   hedge  *item;
 } Hash;
-
-/** to store geometric edges */
-typedef struct {
-  int   a,b,ref,nxt;
-  char  tag;
-} hgeom;
-typedef struct {
-  int     siz,max,nxt;
-  hgeom  *geom;
-} HGeom;
-
-typedef struct {
-  int       ver,dim,type;
-  int       npi,nai,nei,np,na,nt,ne,npmax,namax,ntmax,nemax,xpmax,xtmax;
-  int       base; /**< used with flag to know if an entity has been treated */
-  int       mark;//CECILE rajout mark pour delaunay
-  int       xp,xt; /**< nb of surfaces points/triangles */
-  int       npnil,nenil; /**< nb of first unused point/element */
-  int      *adja; /**< tab of tetrahedra adjacency : if adjt[4*i+1+j]=4*k+l then
-                     the i^th and k^th tets are adjacent and share their
-                     faces j and l (resp.) */
-  int      *adjt; /**< tab of triangles adjacency : if adjt[3*i+1+j]=3*k+l then
-                     the i^th and k^th triangles are adjacent and share their
-                     edges j and l (resp.) */
-  char     *namein,*nameout;
-
-  pPoint    point;
-  pxPoint   xpoint;
-  pTetra    tetra;
-  pxTetra   xtetra;
-  pTria     tria;
-  pEdge     edge;
-  HGeom     htab;
-} Mesh;
-typedef Mesh  * pMesh;
-
-typedef struct {
-  int       dim,ver,np,npmax,size,type;
-  double   *m;
-  char     *namein,*nameout;
-} Sol;
-typedef Sol * pSol;
 
 typedef struct {
   int     size;
@@ -228,6 +125,7 @@ typedef struct {
   int    *link;
 } Bucket;
 typedef Bucket * pBucket;
+
 /* bucket */
 pBucket newBucket(pMesh ,int );
 int     addBucket(pMesh ,pBucket ,int );
@@ -246,6 +144,7 @@ int  newElt(pMesh mesh);
 void delElt(pMesh mesh,int iel);
 void delPt(pMesh mesh,int ip);
 int  zaldy(pMesh mesh);
+void freeXTets(pMesh mesh);
 char chkedg(pMesh mesh,pTria pt,char ori);
 void tet2tri(pMesh mesh,int k,char ie,Tria *ptt);
 int  bezierCP(pMesh mesh,Tria *pt,pBezier pb,char ori);
@@ -275,10 +174,6 @@ int  chkcol_bdy(pMesh,int,char,char,int *);
 int  chkmanicoll(pMesh mesh,int k,int iface,int iedg,int ndepmin,int ndepplus,char isminp,char isplp);
 int  chkmani(pMesh mesh);
 int  colver(pMesh,int *,int,char);
-int  loadMesh(pMesh );
-int  saveMesh(pMesh );
-int  loadMet(pSol );
-int  saveMet(pMesh mesh,pSol met);
 int  analys(pMesh mesh);
 int  hashTetra(pMesh mesh);
 int  hashTria(pMesh mesh);

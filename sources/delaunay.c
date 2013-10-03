@@ -86,7 +86,7 @@ int delone(pMesh mesh,pSol sol,int ip,int *list,int ilist) {
   xTetra    xt;
   pxTetra   pxt0;
   int      *adja,*adjb,i,j,k,l,m,iel,jel,old,v[3],iadr,base,size;
-  int       vois[4],ii,kk,iare1,iare2;
+  int       vois[4];/*,ii,kk,iare1,iare2;*/
   short     i1;
   char      alert;
   int tref,isused,jj,ixt;

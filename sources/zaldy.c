@@ -157,3 +157,17 @@ int zaldy(pMesh mesh) {
 
   return(1);
 }
+
+/** free xtetra */
+void freeXTets(pMesh mesh) {
+  pTetra pt;
+  int    k;
+
+  for (k=1; k<=mesh->ne; k++) {
+    pt     = &mesh->tetra[k];
+    pt->xt = 0;
+  }
+  free(mesh->xtetra);
+  mesh->xtetra = 0;
+  mesh->xt = 0;
+}

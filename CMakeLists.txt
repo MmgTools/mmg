@@ -20,6 +20,7 @@ ENDIF()
 
 
 IF(CMAKE_COMPILER_IS_GNUCC)
+  SET(CMAKE_C_FLAGS "-Wno-char-subscripts ${CMAKE_C_FLAGS}")
   IF(APPLE)
     # Add flags to the compiler to work on old mac
     ADD_DEFINITIONS( -mmacosx-version-min=10.4 -arch x86_64)
@@ -54,6 +55,18 @@ IF(NOT CMAKE_COMPILER_IS_CLANG)
     SET(CMAKE_EXE_LINKER_FLAGS "-pg ${CMAKE_EXE_LINKER_FLAGS}")
   ENDIF(PROFILING)
 ENDIF(NOT CMAKE_COMPILER_IS_CLANG)
+
+EXECUTE_PROCESS(COMMAND ctags  -x --c-kinds=fp  ${MMG_SOURCE_DIR}/mmg3d.h
+                OUTPUT_VARIABLE CTAG)
+if ( CTAG )
+  ADD_CUSTOM_COMMAND(OUTPUT ${MMG_SOURCE_DIR}/mmg3d_redefine.h
+    COMMAND ctags -x  --c-kinds=fp ${MMG_SOURCE_DIR}/mmg3d.h|awk '{printf \"\#define %-30s\t _MMG5_%s\\n\", $$1, $$1}' > ${MMG_SOURCE_DIR}/mmg3d_redefine.h
+    COMMAND ctags -x --c-kinds=fp ${MMG_SOURCE_DIR}/libmmg3d5.h|awk '{print $$1}'|sed -e 's/MMG5_//g'|awk '{printf \"\#define %-30s\\t MMG5_%s\\n\", $$1, $$1}' >> ${MMG_SOURCE_DIR}/mmg3d_redefine.h
+    DEPENDS ${MMG_SOURCE_DIR}/mmg3d.h ${MMG_SOURCE_DIR}/libmmg3d5.h
+    COMMENT "update of mmg3d_redefine.h"
+    )
+endif()
+
 
 # should we use SCOTCH
 OPTION ( USE_SCOTCH "Use SCOTCH TOOL for renumbering" OFF)
@@ -93,7 +106,7 @@ IF ( USE_SCOTCH )
     #SET(CMAKE_REQUIRED_LIBRARIES ${SCOTCHERR_LIBRARY})
 
     SET(CMAKE_C_FLAGS "-DUSE_SCOTCH ${CMAKE_C_FLAGS}")
-
+    SET(SCOTCH_LINK_FLAGS "-lpthread")
   ELSE ()
     MESSAGE("Please set the environment variable SCOTCH_DIR to your SCOTCH directory whose name should contain the \"scotch\" string" )
   ENDIF()
@@ -120,7 +133,19 @@ INCLUDE_DIRECTORIES(${MMG_SOURCE_DIR})
 FILE(
   GLOB
   source_files
-  ${MMG_SOURCE_DIR}/*.c
+  ${MMG_SOURCE_DIR}/*.c   ${MMG_SOURCE_DIR}/*.h
+  )
+LIST(REMOVE_ITEM source_files
+  ${MMG_SOURCE_DIR}/mmg3d.c ${MMG_SOURCE_DIR}/libmmg3d5.c )
+FILE(
+  GLOB
+  main_file
+  ${MMG_SOURCE_DIR}/mmg3d.c
+  )
+FILE(
+  GLOB
+  lib_file
+  ${MMG_SOURCE_DIR}/libmmg3d5.c
   )
 
 #compil.date : if problem with the file creation, see ADD_CUSTOM_TARGET
@@ -143,18 +168,62 @@ ELSEIF(EXISTS ${MMG_SOURCE_DIR}/compil.date)
     )
 ENDIF(NOT EXISTS ${MMG_SOURCE_DIR}/compil.date)
 
-# Executable and dependencies
-ADD_EXECUTABLE(mmg3d5 ${MMG_SOURCE_DIR}/compil.date ${source_files})
+# Compile static library
+FIND_LIBRARY(M_LIB m)
 
-# Uncomment to link with mmg3d4 library
-#FIND_LIBRARY(mmglib mmg3dlib4.0 "${MMG_SOURCE_DIR}/../../mmg3d4/build")
-#TARGET_LINK_LIBRARIES(mmg3d5 ${mmglib})
-# End uncomment
+SET(LIBRARY_OUTPUT_PATH ${MMG_SOURCE_DIR}/../lib)
+
+OPTION ( LIBMMG3D5_STATIC "Compile static library" OFF)
+IF ( LIBMMG3D5_STATIC )
+  ADD_LIBRARY(mmg3d5_a  STATIC
+    ${MMG_SOURCE_DIR}/compil.date ${MMG_SOURCE_DIR}/mmg3d_redefine.h
+    ${source_files} ${lib_file} )
+  SET_TARGET_PROPERTIES(mmg3d5_a PROPERTIES OUTPUT_NAME mmg3d5)
+  ADD_DEPENDENCIES(mmg3d5_a compil_date)
+  TARGET_LINK_LIBRARIES(mmg3d5_a ${M_LIB} ${SCOTCH_LIBRARY} ${SCOTCHERR_LIBRARY} ${SCOTCH_LINK_FLAGS})
+  INSTALL(FILES ${MMG_SOURCE_DIR}/libmmg3d5.h DESTINATION ${CMAKE_INSTALL_PREFIX}/include)
+  INSTALL(FILES ${MMG_SOURCE_DIR}/mmg3d_redefine.h DESTINATION ${CMAKE_INSTALL_PREFIX}/include)
+  INSTALL(TARGETS mmg3d5_a ARCHIVE DESTINATION lib/static)
+ENDIF()
+
+
+
+# Compile shared library
+OPTION ( LIBMMG3D5_SHARED "Compile dynamic library" OFF)
+IF ( LIBMMG3D5_SHARED )
+  ADD_LIBRARY(mmg3d5_so SHARED
+    ${MMG_SOURCE_DIR}/compil.date  ${MMG_SOURCE_DIR}/mmg3d_redefine.h
+    ${source_files} ${lib_file})
+  SET_TARGET_PROPERTIES(mmg3d5_so PROPERTIES OUTPUT_NAME mmg3d5)
+  ADD_DEPENDENCIES(mmg3d5_so compil_date)
+  TARGET_LINK_LIBRARIES(mmg3d5_so ${M_LIB} ${SCOTCH_LIBRARY} ${SCOTCHERR_LIBRARY} ${SCOTCH_LINK_FLAGS})
+  INSTALL(FILES ${MMG_SOURCE_DIR}/mmg3d_redefine.h DESTINATION ${CMAKE_INSTALL_PREFIX}/include)
+  INSTALL(TARGETS mmg3d5_so LIBRARY DESTINATION lib)
+ENDIF()
+
+# Compile program to test library
+OPTION ( TEST_LIBMMG3D5 "Compile tests of library" OFF)
+IF ( TEST_LIBMMG3D5 )
+  ADD_EXECUTABLE(libmmg5_example1 ${MMG_SOURCE_DIR}/../libexamples/example1/main.c)
+  ADD_EXECUTABLE(libmmg5_example2  ${MMG_SOURCE_DIR}/../libexamples/example2/mmg3d.c)
+  TARGET_LINK_LIBRARIES(libmmg5_example1 mmg3d5_a)
+  TARGET_LINK_LIBRARIES(libmmg5_example2 mmg3d5_a)
+  INSTALL(TARGETS libmmg5_example1 RUNTIME DESTINATION bin )
+  INSTALL(TARGETS libmmg5_example2 RUNTIME DESTINATION bin )
+ENDIF()
+
+# Executable and dependencies
+ADD_EXECUTABLE(mmg3d5 ${source_files} ${main_file})
+TARGET_LINK_LIBRARIES(mmg3d5 ${M_LIB} ${SCOTCH_LIBRARY} ${SCOTCHERR_LIBRARY} ${SCOTCH_LINK_FLAGS})
+INSTALL(TARGETS mmg3d5 RUNTIME DESTINATION bin)
+
+#INSTALL(TARGETS mmg3d5 RUNTIME DESTINATION bin/$ENV{ARCHI}) don't work but why???
 
 SET_TARGET_PROPERTIES(mmg3d5 PROPERTIES DEBUG_POSTFIX _debug) # in debug mode we name the executable mmg3d5_debug
 SET_TARGET_PROPERTIES(mmg3d5 PROPERTIES RELEASE_POSTFIX _O3) # in Release mode we name the executable mmg3d5_O3
 SET_TARGET_PROPERTIES(mmg3d5 PROPERTIES MINSIZEREL_POSTFIX _Os)
 # /!\ ADD_CUSTOM_TARGET don't work with cmake-2.8.4 and 2.8.10.2 but is necessary for other versions
+
 
 IF ( ${CMAKE_COMMAND} MATCHES 2.8.4  )
 ELSEIF (${CMAKE_COMMAND} VERSION_GREATER 2.8.10.0 )
@@ -172,10 +241,6 @@ ELSE ()
 ENDIF ( ${CMAKE_COMMAND} MATCHES 2.8.4 )
 
 ADD_DEPENDENCIES(mmg3d5 compil_date)
-
-# Libraries
-FIND_LIBRARY(M_LIB m)
-TARGET_LINK_LIBRARIES(mmg3d5 ${M_LIB} ${SCOTCH_LIBRARY} ${SCOTCHERR_LIBRARY})
 
 # Continuous integration
 
@@ -195,9 +260,6 @@ IF(BUILD_TESTING)
 
   ENABLE_TESTING()
   INCLUDE(CTest)
-
-  # Coverage
-  # TARGET_LINK_LIBRARIES(mmg3d5 ${M_LIB} gcov)
 
   IF (CMAKE_COMPILER_IS_GNUCC)
     SET(CMAKE_C_FLAGS_DEBUG "-g -Wall -fprofile-arcs -ftest-coverage --coverage ${CMAKE_C_FLAGS}")
