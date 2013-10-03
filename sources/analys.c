@@ -304,6 +304,15 @@ static int norver(pMesh mesh) {
   double    n[3],dd;
   int      *adja,k,kk,ng,nn,nt,nf;
   char      i,ii,i1;
+  /* recomputation of normals only if mesh->xpoint has been freed */
+  if ( mesh->xpoint ) {
+    if ( abs(info.imprim) > 4 || info.ddebug ) {
+      fprintf(stdout,"  ## Warning: no research of boundary points");
+      fprintf(stdout," and normals of mesh. ");
+      fprintf(stdout,"mesh->xpoint must be freed to enforce analysis.\n");
+    }
+    return(1);
+  }
 
   /* identify boundary points */
   ++mesh->base;
@@ -488,6 +497,7 @@ int analys(pMesh mesh) {
       fprintf(stdout,"  ## Boundary problem. Exit program.\n");
       return(0);
     }
+    freeXTets(mesh);
   }
 
   /* compatibility triangle orientation w/r tetras */

@@ -61,7 +61,9 @@ EXECUTE_PROCESS(COMMAND ctags  -x --c-kinds=fp  ${MMG_SOURCE_DIR}/mmg3d.h
 if ( CTAG )
   ADD_CUSTOM_COMMAND(OUTPUT ${MMG_SOURCE_DIR}/mmg3d_redefine.h
     COMMAND ctags -x  --c-kinds=fp ${MMG_SOURCE_DIR}/mmg3d.h|awk '{printf \"\#define %-30s\t _MMG5_%s\\n\", $$1, $$1}' > ${MMG_SOURCE_DIR}/mmg3d_redefine.h
-    COMMAND ctags -x --c-kinds=fp ${MMG_SOURCE_DIR}/libmmg3d5.h|awk '{print $$1}'|sed -e 's/MMG5_//g'|awk '{printf \"\#define %-30s\\t MMG5_%s\\n\", $$1, $$1}' >> ${MMG_SOURCE_DIR}/mmg3d_redefine.h
+    COMMAND ctags -x --c-kinds=fpst ${MMG_SOURCE_DIR}/libmmg3d5.h|awk '{print $$1}'|sed -e 's/MMG5_//g'|awk '{printf \"\#define %-30s\\t MMG5_%s\\n\", $$1, $$1}' >> ${MMG_SOURCE_DIR}/mmg3d_redefine.h
+    #COMMAND ctags -x --c-kinds=st ${MMG_SOURCE_DIR}/libmmg3d5.h|awk '{print $$1}'|sed -e 's/MMG5_//g'|awk '{printf \"\#define %-30s\\t MMG5_%s\\n\", $$1, $$1}' >> ${MMG_SOURCE_DIR}/mmg3d_redefine.h
+
     DEPENDS ${MMG_SOURCE_DIR}/mmg3d.h ${MMG_SOURCE_DIR}/libmmg3d5.h
     COMMENT "update of mmg3d_redefine.h"
     )
@@ -268,3 +270,38 @@ IF(BUILD_TESTING)
 
   INCLUDE( ${CMAKE_SOURCE_DIR}/testing.cmake )
 ENDIF(BUILD_TESTING)
+
+
+## Create Package
+INCLUDE(InstallRequiredSystemLibraries)
+SET( CPACK_SOURCE_GENERATOR TGZ )
+SET( CPACK_GENERATOR TGZ )
+
+#SET(CPACK_BINARY_CYGWIN "ON") #Only on windows
+#SET(CPACK_BINARY_OSX11 "ON")  #only on Mac
+
+SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "MMG3D: ISOTROPIC TETRAHEDRAL REMESHER")
+SET(CPACK_PACKAGE_VENDOR "Cécile Dobrzynski, Pascal Frey, Charles Dapogny, Algiane Froehly")
+SET(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_SOURCE_DIR}/README.txt")
+SET(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}/Copyright.txt")
+SET(CPACK_PACKAGE_VERSION "5.0.0")
+SET(CPACK_PACKAGE_VERSION_MAJOR "5")
+SET(CPACK_PACKAGE_VERSION_MINOR "0")
+SET(CPACK_PACKAGE_VERSION_PATCH "0")
+SET(CPACK_PACKAGE_INSTALL_DIRECTORY "MMG3D ${CPACK_PACKAGE_VERSION}")
+SET(CPACK_PACKAGE_EXECUTABLES "mmg3d")
+
+
+set(CPACK_STRIP_FILES "libmmg3d5_example*")
+set(CPACK_SOURCES_STRIP_FILES "${CMAKE_SOURCE_DIR}/README_Developper.txt")
+set(CPACK_SOURCES_STRIP_FILES "${CMAKE_SOURCE_DIR}/CMakeFiles/.* ${CPACK_SOURCES_STRIP_FILES}")
+set(CPACK_SOURCES_STRIP_FILES "${CMAKE_SOURCE_DIR}/libmesh5.supp ${CPACK_SOURCES_STRIP_FILES}")
+set(CPACK_SOURCES_STRIP_FILES "${CMAKE_SOURCE_DIR}/libSystem+libmesh5.supp ${CPACK_SOURCES_STRIP_FILES}")
+set(CPACK_SOURCES_STRIP_FILES "${CMAKE_SOURCE_DIR}/archives/.* ${CPACK_SOURCES_STRIP_FILES}")
+set(CPACK_SOURCES_STRIP_FILES "${CMAKE_SOURCE_DIR}/testing.cmake ${CPACK_SOURCES_STRIP_FILES}")
+
+SET( CPACK_SOURCE_STRIP_FILES "${CMAKE_SOURCE_DIR}/.*~" "${CMAKE_SOURCE_DIR}/.*#"  "${CPACK_SOURCES_STRIP_FILES}"  )
+SET( CPACK_SOURCE_STRIP_FILES "${CMAKE_SOURCE_DIR}/build.*"  "${CPACK_SOURCES_STRIP_FILES}"  )
+SET( CPACK_SOURCE_STRIP_FILES "${CMAKE_SOURCE_DIR}/sources/.*"  "${CPACK_SOURCES_STRIP_FILES}"  )
+
+INCLUDE(CPack)

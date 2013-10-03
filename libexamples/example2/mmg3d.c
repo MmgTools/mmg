@@ -51,11 +51,11 @@ static void usage(char *prog) {
   fprintf(stdout,"-rn [n]    Turn on or off the renumbering using SCOTCH (0/1) \n");
 #endif
 
-  exit(MG_LOWFAILURE);
+  exit(MMG5_LOWFAILURE);
 }
 
 
-static int parsar(int argc,char *argv[],pMesh mesh,pSol met) {
+static int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
   int     i;
   char   *ptr;
 
@@ -69,20 +69,20 @@ static int parsar(int argc,char *argv[],pMesh mesh,pSol met) {
 
       case 'a':
         if ( !strcmp(argv[i],"-ar") && ++i < argc )
-          opt_d[dhd] = atof(argv[i]);
+          opt_d[MMG5_dhd] = atof(argv[i]);
         break;
       case 'd':  /* debug */
-        opt_i[debug] = 1;
+        opt_i[MMG5_debug] = 1;
         break;
       case 'h':
         if ( !strcmp(argv[i],"-hmin") && ++i < argc )
-          opt_d[hmin] = atof(argv[i]);
+          opt_d[MMG5_hmin] = atof(argv[i]);
         else if ( !strcmp(argv[i],"-hmax") && ++i < argc )
-          opt_d[hmax] = atof(argv[i]);
+          opt_d[MMG5_hmax] = atof(argv[i]);
         else if ( !strcmp(argv[i],"-hausd") && ++i <= argc )
-          opt_d[hausd] = atof(argv[i]);
+          opt_d[MMG5_hausd] = atof(argv[i]);
         else if ( !strcmp(argv[i],"-hgrad") && ++i <= argc )
-          opt_d[hgrad] = atof(argv[i]);
+          opt_d[MMG5_hgrad] = atof(argv[i]);
         else
           usage(argv[0]);
         break;
@@ -91,7 +91,7 @@ static int parsar(int argc,char *argv[],pMesh mesh,pSol met) {
           if ( ++i < argc && isascii(argv[i][0]) && argv[i][0]!='-') {
             mesh->namein = (char*) calloc(strlen(argv[i])+1,sizeof(char));
             strcpy(mesh->namein,argv[i]);
-            opt_d[imprim] = 5;
+            opt_d[MMG5_imprim] = 5;
           }else{
             fprintf(stderr,"Missing filname for %c%c\n",argv[i-1][1],argv[i-1][2]);
             usage(argv[0]);
@@ -100,9 +100,9 @@ static int parsar(int argc,char *argv[],pMesh mesh,pSol met) {
         break;
       case 'l':
         if ( !strcmp(argv[i],"-ls") ) {
-          opt_i[iso] = 1;
+          opt_i[MMG5_iso] = 1;
           if ( ++i < argc && isdigit(argv[i][0]) ) {
-            opt_d[ls] = atof(argv[i]);
+            opt_d[MMG5_ls] = atof(argv[i]);
           }
           else if ( i == argc ) {
             fprintf(stderr,"Missing argument option %c%c\n",argv[i-1][1],argv[i-1][2]);
@@ -113,7 +113,7 @@ static int parsar(int argc,char *argv[],pMesh mesh,pSol met) {
         break;
       case 'm':  /* memory */
         if ( ++i < argc && isdigit(argv[i][0]) )
-          opt_i[mem] = atoi(argv[i]);
+          opt_i[MMG5_mem] = atoi(argv[i]);
         else {
           fprintf(stderr,"Missing argument option %c\n",argv[i-1][1]);
           usage(argv[0]);
@@ -121,15 +121,15 @@ static int parsar(int argc,char *argv[],pMesh mesh,pSol met) {
         break;
       case 'n':
         if ( !strcmp(argv[i],"-nr") ) {
-          opt_i[angle] =  0;
-          opt_d[  dhd] = -1.0;
+          opt_i[MMG5_angle] =  0;
+          opt_d[  MMG5_dhd] = -1.0;
         }
         else if ( !strcmp(argv[i],"-noswap") )
-          opt_i[noswap] = 1;
+          opt_i[MMG5_noswap] = 1;
         else if( !strcmp(argv[i],"-noinsert") )
-          opt_i[noinsert] = 1;
+          opt_i[MMG5_noinsert] = 1;
         else if( !strcmp(argv[i],"-nomove") )
-          opt_i[nomove] = 1;
+          opt_i[MMG5_nomove] = 1;
         break;
       case 'o':
         if ( !strcmp(argv[i],"-out") ) {
@@ -148,7 +148,7 @@ static int parsar(int argc,char *argv[],pMesh mesh,pSol met) {
         if ( !strcmp(argv[i],"-rn") ) {
           if ( ++i < argc ) {
             if ( isdigit(argv[i][0]) )
-              opt_i[renum] = atoi(argv[i]);
+              opt_i[MMG5_renum] = atoi(argv[i]);
             else {
               fprintf(stderr,"Missing argument option %s\n",argv[i-1]);
               usage(argv[0]);
@@ -176,7 +176,7 @@ static int parsar(int argc,char *argv[],pMesh mesh,pSol met) {
       case 'v':
         if ( ++i < argc ) {
           if ( argv[i][0] == '-' || isdigit(argv[i][0]) )
-            opt_i[imprim] = atoi(argv[i]);
+            opt_i[MMG5_imprim] = atoi(argv[i]);
           else
             i--;
         }
@@ -194,7 +194,7 @@ static int parsar(int argc,char *argv[],pMesh mesh,pSol met) {
       if ( mesh->namein == NULL ) {
         mesh->namein = (char*) calloc(strlen(argv[i])+1,sizeof(char));
         strcpy(mesh->namein,argv[i]);
-        if ( opt_i[imprim] == -99 )  opt_i[imprim] = 5;
+        if ( opt_i[MMG5_imprim] == -99 )  opt_i[MMG5_imprim] = 5;
       }
       else if ( mesh->nameout == NULL ){
         mesh->nameout = (char*) calloc(strlen(argv[i])+1,sizeof(char));
@@ -209,11 +209,11 @@ static int parsar(int argc,char *argv[],pMesh mesh,pSol met) {
   }
 
   /* check file names */
-  if ( opt_i[imprim] == -99 ) {
+  if ( opt_i[MMG5_imprim] == -99 ) {
     fprintf(stdout,"\n  -- PRINT (0 10(advised) -10) ?\n");
     fflush(stdin);
     fscanf(stdin,"%d",&i);
-    opt_i[imprim] = i;
+    opt_i[MMG5_imprim] = i;
   }
 
   if ( mesh->namein == NULL ) {
@@ -253,6 +253,24 @@ static int parsar(int argc,char *argv[],pMesh mesh,pSol met) {
   return(1);
 }
 
+/** Deallocations of names */
+static inline
+void freeName(MMG5_pMesh mesh,MMG5_pSol met) {
+
+  free(mesh->nameout);
+  mesh->nameout = NULL;
+  free(mesh->namein);
+  mesh->namein = NULL;
+  if ( met->namein ) {
+    free(met->namein);
+    met->namein = NULL;
+  }
+  if ( met->nameout ) {
+    free(met->nameout);
+    met->nameout = NULL;
+  }
+}
+
 static inline void endcod() {
   char    stim[32];
 
@@ -261,57 +279,11 @@ static inline void endcod() {
   fprintf(stdout,"\n   MMG3DLIB: ELAPSED TIME  %s\n",stim);
 }
 
-/** Deallocations before return */
-static void freeAll(pMesh mesh,pSol met){
-  free(mesh->point);
-  mesh->point=NULL;
-  free(mesh->tetra);
-  mesh->tetra=NULL;
-  free(mesh->adja);
-  mesh->adja=NULL;
-  free(mesh->nameout);
-  mesh->nameout=NULL;
-  free(mesh->namein);
-  mesh->namein=NULL;
-  if ( mesh->xpoint ) {
-    free(mesh->xpoint);
-    mesh->xpoint=NULL;
-  }
-  if ( mesh->htab.geom ) {
-    free(mesh->htab.geom);
-    mesh->htab.geom=NULL;
-  }
-  if ( mesh->tria ) {
-    free(mesh->tria);
-    mesh->tria=NULL;
-  }
-  if ( mesh->xtetra ) {
-    free(mesh->xtetra);
-    mesh->xtetra=NULL;
-  }
-
-  /* met */
-  if ( met->namein ) {
-    free(met->namein);
-    met->namein=NULL;
-  }
-  if ( met->nameout ) {
-    free(met->nameout);
-    met->nameout=NULL;
-  }
-  if ( !opt_i[iso] && met->m ) {
-    free(met->m);
-    met->m = NULL;
-  }
-  //AJETER?? memset(&met,0,sizeof(Sol));
-}
-
-
 int main(int argc,char *argv[]) {
-  Mesh      mesh;
-  Sol       met;
-  int       ier;
-  char      stim[32];
+  MMG5_Mesh      mesh;
+  MMG5_Sol       met;
+  int            ier;
+  char           stim[32];
 
   atexit(endcod);
 
@@ -319,50 +291,68 @@ int main(int argc,char *argv[]) {
   chrono(ON,&ctim[0]);
 
   /* assign default values */
-  memset(&mesh,0,sizeof(Mesh));
-  memset(&met,0,sizeof(Sol));
+  memset(&mesh,0,sizeof(MMG5_Mesh));
+  memset(&met,0,sizeof(MMG5_Sol));
 
-  mmg3dinit(opt_i,opt_d);
+  MMG5_mmg3dinit(opt_i,opt_d);
 
   /* command line */
   if ( !parsar(argc,argv,&mesh,&met) )  return(1);
 
-  info.iso    = opt_i[iso];
-  info.imprim = opt_i[imprim];
-  info.mem    = opt_i[mem];
+  /* infos needed to call MMG5_loadMesh: info.iso, info.imprim, info.mem */
+  info.iso    = opt_i[MMG5_iso];
+  info.imprim = opt_i[MMG5_imprim];
+  info.mem    = opt_i[MMG5_mem];
 
   /* load data */
   fprintf(stdout,"\n  -- INPUT DATA\n");
   chrono(ON,&ctim[1]);
   /* read mesh file */
-  if ( !loadMesh(&mesh) ) RETURN_AND_FREE(&mesh,&met,MG_STRONGFAILURE);
+  if ( !MMG5_loadMesh(&mesh) ) {
+    MMG5_freeAll(&mesh,&met);
+    freeName(&mesh,&met);
+    return(MMG5_STRONGFAILURE);
+  }
 
   /* read metric if any */
+  /* infos needed to call MMG5_loadMet: met.size, met.npmax */
   met.size = 1;
   met.npmax = mesh.npmax;
-  ier = loadMet(&met);
-  if ( !ier )
-    RETURN_AND_FREE(&mesh,&met,MG_STRONGFAILURE);
+  ier = MMG5_loadMet(&met);
+  if ( !ier ) {
+    MMG5_freeAll(&mesh,&met);
+    freeName(&mesh,&met);
+    return(MMG5_STRONGFAILURE);
+  }
 
   chrono(OFF,&ctim[1]);
   printim(ctim[1].gdif,stim);
   fprintf(stdout,"  -- DATA READING COMPLETED.     %s\n",stim);
 
-  ier = mmg3dlib(opt_i,opt_d,&mesh,&met);
+  ier = MMG5_mmg3dlib(opt_i,opt_d,&mesh,&met);
 
-  if ( ier != MG_STRONGFAILURE ) {
+  if ( ier != MMG5_STRONGFAILURE ) {
     chrono(ON,&ctim[1]);
-    if ( opt_i[imprim] )  fprintf(stdout,"\n  -- WRITING DATA FILE %s\n",mesh.nameout);
-    if ( !unscaleMesh(&mesh,&met) ) { RETURN_AND_FREE(&mesh,&met,EXIT_FAILURE);}
-    if ( !saveMesh(&mesh) )         { RETURN_AND_FREE(&mesh,&met,EXIT_FAILURE);}
-    if ( !saveMet(&mesh,&met) )     { RETURN_AND_FREE(&mesh,&met,EXIT_FAILURE);}
+    if ( opt_i[MMG5_imprim] )  fprintf(stdout,"\n  -- WRITING DATA FILE %s\n",mesh.nameout);
+    if ( !MMG5_saveMesh(&mesh) )         {
+      MMG5_freeAll(&mesh,&met);
+      freeName(&mesh,&met);
+      return(EXIT_FAILURE);
+    }
+    if ( !MMG5_saveMet(&mesh,&met) )     {
+      MMG5_freeAll(&mesh,&met);
+      freeName(&mesh,&met);
+      return(EXIT_FAILURE);
+    }
     chrono(OFF,&ctim[1]);
-    if ( opt_i[imprim] )  fprintf(stdout,"  -- WRITING COMPLETED\n");
+    if ( opt_i[MMG5_imprim] )  fprintf(stdout,"  -- WRITING COMPLETED\n");
   }
 
   /* free mem */
   chrono(OFF,&ctim[0]);
   printim(ctim[0].gdif,stim);
   fprintf(stdout,"\n   MMG3D: ELAPSED TIME  %s\n",stim);
-  RETURN_AND_FREE(&mesh,&met,ier);
+  MMG5_freeAll(&mesh,&met);
+  freeName(&mesh,&met);
+  return(ier);
 }

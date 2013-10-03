@@ -1,8 +1,8 @@
 Example of use of library libmmg3d5:
 
-The mesh and solution are hard coded.
-We remesh two times with a detection of angles of 50.
-Then we save in result0.mesh/sol.
-We remesh a last time with a detection of angles of 40 (so we must enforce re-analysis of mesh).
-We save in result1.mesh/sol
- 
+  The mesh and solution are hard coded.
+
+  First we remesh  with a detection of angles (between normals at 2 adjacent surfaces) smallest than 90 and a maximal size of 0.2.
+
+  Then we remesh again with a maximal size of 0.1 and we save the mesh in result0.mesh/sol.
+

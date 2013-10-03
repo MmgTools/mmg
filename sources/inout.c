@@ -341,9 +341,7 @@ int saveMesh(pMesh mesh) {
       }
     }
     free(mesh->adjt);
-    free(mesh->tria);
     mesh->adjt=NULL;
-    mesh->tria=NULL;
 
     /* build hash table for edges */
     if ( mesh->htab.geom ) {
@@ -400,6 +398,7 @@ int saveMesh(pMesh mesh) {
         }
       }
     }
+    freeXTets(mesh);
     free(mesh->htab.geom);
     mesh->htab.geom = NULL;
   }
@@ -459,8 +458,9 @@ int saveMesh(pMesh mesh) {
   if ( mesh->xp ) {
     for (k=1; k<=mesh->np; k++) {
       ppt = &mesh->point[k];
-      if ( MG_SIN(ppt->tag) )  continue;
-      else if ( MG_VOK(ppt) && (ppt->tag & MG_BDY) && (!(ppt->tag & MG_GEO) || (ppt->tag & MG_NOM))) {
+      if ( !MG_VOK(ppt) || MG_SIN(ppt->tag) )  continue;
+      else if ( (ppt->tag & MG_BDY)
+                && (!(ppt->tag & MG_GEO) || (ppt->tag & MG_NOM)) ) {
         pxp = &mesh->xpoint[ppt->xp];
         GmfSetLin(outm,GmfNormals,pxp->n1[0],pxp->n1[1],pxp->n1[2]);
         nn++;
@@ -472,8 +472,9 @@ int saveMesh(pMesh mesh) {
 
     for (k=1; k<=mesh->np; k++) {
       ppt = &mesh->point[k];
-      if ( MG_SIN(ppt->tag) )  continue;
-      else if ( MG_VOK(ppt) && (ppt->tag & MG_BDY) && (!(ppt->tag & MG_GEO) || (ppt->tag & MG_NOM)) )
+      if ( !MG_VOK(ppt) || MG_SIN(ppt->tag) )  continue;
+      else if ( (ppt->tag & MG_BDY)
+                && (!(ppt->tag & MG_GEO) || (ppt->tag & MG_NOM)) )
         GmfSetLin(outm,GmfNormalAtVertices,ppt->tmp,++nn);
     }
 

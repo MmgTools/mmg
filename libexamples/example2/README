@@ -1,4 +1,5 @@
 Example of use of libmmg3d5:
-a way to call mmg3d5 in command line
+  a way to call mmg3d5 in command line.
 
-a mesh file and a sol file are given to test the programm
+  We provide a mesh and a sol file (SphereIso0.5.mesh/sol) to test the program.
+

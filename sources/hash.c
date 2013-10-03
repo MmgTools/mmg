@@ -40,7 +40,14 @@ int hashTetra(pMesh mesh) {
   unsigned int   key;
 
   /* default */
-  if ( mesh->adja )  return(1);
+  if ( mesh->adja ) {
+    if ( abs(info.imprim) > 4 || info.ddebug ) {
+      fprintf(stdout,"  ## Warning: no re-build of adjacencies of mesh. ");
+      fprintf(stdout,"mesh->adja must be freed to enforce analysis.\n");
+    }
+    return(1);
+  }
+
   if ( abs(info.imprim) > 5 || info.ddebug )
     fprintf(stdout,"  ** SETTING STRUCTURE\n");
 
@@ -572,33 +579,41 @@ int hGeom(pMesh mesh) {
 
   /* if edges exist in mesh, hash special edges from existing field */
   if ( mesh->na ) {
-    mesh->namax = MG_MAX(1.5*mesh->na,NAMAX);
-    hNew(&mesh->htab,mesh->na,3*mesh->namax);
-
-    /* store initial edges */
-    for (k=1; k<=mesh->na; k++) {
-      pa = &mesh->edge[k];
-      hEdge(&mesh->htab,pa->a,pa->b,pa->ref,pa->tag);
-    }
-    if ( mesh->na )  free(mesh->edge);
-    mesh->edge = 0;
-    mesh->na   = 0;
-
-    /* now check triangles */
-    for (k=1; k<=mesh->nt; k++) {
-      pt = &mesh->tria[k];
-      for (i=0; i<3; i++) {
-        i1 = inxt2[i];
-        i2 = iprv2[i];
-        /* transfer non manifold tag to edges */
-        if ( pt->tag[i] & MG_NOM )
-          hTag(&mesh->htab,pt->v[i1],pt->v[i2],pt->edg[i],pt->tag[i]);
-
-        hGet(&mesh->htab,pt->v[i1],pt->v[i2],&edg,&tag);
-        pt->edg[i]  = edg;
-        pt->tag[i] |= tag;
+    if ( mesh->htab.geom ) {
+      if ( abs(info.imprim) > 4 || info.ddebug ) {
+        fprintf(stdout,"  ## Warning: no re-hash of edges of mesh. ");
+        fprintf(stdout,"mesh->htab.geom must be freed to enforce analysis.\n");
       }
     }
+    else {
+      mesh->namax = MG_MAX(1.5*mesh->na,NAMAX);
+      hNew(&mesh->htab,mesh->na,3*mesh->namax);
+
+      /* store initial edges */
+      for (k=1; k<=mesh->na; k++) {
+        pa = &mesh->edge[k];
+        hEdge(&mesh->htab,pa->a,pa->b,pa->ref,pa->tag);
+      }
+
+      /* now check triangles */
+      for (k=1; k<=mesh->nt; k++) {
+        pt = &mesh->tria[k];
+        for (i=0; i<3; i++) {
+          i1 = inxt2[i];
+          i2 = iprv2[i];
+          /* transfer non manifold tag to edges */
+          if ( pt->tag[i] & MG_NOM )
+            hTag(&mesh->htab,pt->v[i1],pt->v[i2],pt->edg[i],pt->tag[i]);
+
+          hGet(&mesh->htab,pt->v[i1],pt->v[i2],&edg,&tag);
+          pt->edg[i]  = edg;
+          pt->tag[i] |= tag;
+        }
+      }
+    }
+    free(mesh->edge);
+    mesh->edge = NULL;
+    mesh->na   = 0;
   }
   /* else, infer special edges from information carried by triangles */
   else {
@@ -679,9 +694,9 @@ int bdryTria(pMesh mesh) {
   }
   if ( mesh->nt == nttmp ) return(1);
   else if ( mesh->nt ){
-    fprintf(stdout,"  ## WARNING: SURFACES TRIANGLES ARE DELETED\n");
+    fprintf(stdout,"  ## WARNING: BOUNDARY TRIANGLES ARE DELETED.\n");
     fprintf(stdout,"              ");
-    fprintf(stdout,"(You have 2 domains but only surfaces triangles)\n");
+    fprintf(stdout,"(You have 2 domains but only boundary triangles).\n");
     free(mesh->tria);
     mesh->tria = NULL;
   }
@@ -737,13 +752,6 @@ int bdryTria(pMesh mesh) {
     }
   }
 
-  for (k=1; k<=mesh->ne; k++) {
-    pt = &mesh->tetra[k];
-    pt->xt = 0;
-  }
-  free(mesh->xtetra);
-  mesh->xtetra = 0;
-  mesh->xt = 0;
   return(1);
 }
 
@@ -894,6 +902,14 @@ int bdrySet(pMesh mesh) {
 
   if ( !mesh->nt )  return(1);
 
+  if ( mesh->xtetra ) {
+    if ( abs(info.imprim) > 4 || info.ddebug ) {
+      fprintf(stdout,"  ## Warning: no re-build of boundary tetras. ");
+      fprintf(stdout,"mesh->xtetra must be freed to enforce analysis.\n");
+    }
+    return(1);
+  }
+
   hashNew(&hash,0.51*mesh->nt,1.51*mesh->nt);
   for (k=1; k<=mesh->nt; k++) {
     ptt = &mesh->tria[k];
@@ -1034,6 +1050,8 @@ int bdryUpdate(pMesh mesh) {
       }
     }
   }
+  free(hash.item);
+  hash.item = NULL;
   return(1);
 }
 
@@ -1076,9 +1094,9 @@ int bdryPerm(pMesh mesh) {
         ic = pt->v[idir[i][2]];
         kt = hashGetFace(&hash,ia,ib,ic);
         if ( !kt ) {
-          fprintf(stdout,"%s:%d: Error: function hashGetFace return 0\n",__FILE__,__LINE__);
+          fprintf(stdout,"%s:%d: Error: function hashGetFace return 0.\n",__FILE__,__LINE__);
           fprintf(stdout," Maybe you have non-boundary triangles.");
-          fprintf(stdout," Check triangle of vertices %d %d %d\n",ia,ib,ic);
+          fprintf(stdout," Check triangle of vertices %d %d %d.\n",ia,ib,ic);
           exit(EXIT_FAILURE);
         }
 
