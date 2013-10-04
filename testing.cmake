@@ -62,7 +62,7 @@ ADD_TEST(NAME SimpleCube
 #SET_PROPERTY(TEST LeakCheck_AbnormalEnd1
 #  PROPERTY PASS_REGULAR_EXPRESSION "${passRegex}")
 #####
-FOREACH(EXEC ${EXECUT} )#${LIBEXEC2})
+FOREACH(EXEC ${EXECUT} ${LIBEXEC2})
   ADD_TEST(NAME LeakCheck_AbnormalEnd2_${EXEC}
     COMMAND ${EXEC} -v 5
     ${REG_TESTS_PATH}/LeakCheck_AbnormalEnd2/d
