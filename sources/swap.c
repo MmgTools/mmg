@@ -26,7 +26,7 @@ int chkswpbdy(pMesh mesh,int *list,int ilist,int it1,int it2) {
   /* No swap of geometric edge */
   if ( pt->xt ) {
     pxt = &mesh->xtetra[pt->xt];
-    if ( (pxt->edg[ia]>0) || MG_EDG(pxt->tag[ia]) || MG_SIN(pxt->tag[ia]) ||
+    if ( (pxt->edg[ia]>0) || MG_EDG(pxt->tag[ia]) || (pxt->tag[ia] & MG_REQ) ||
          (pxt->tag[ia] & MG_NOM) )  return(0);
   }
 

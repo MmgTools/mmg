@@ -112,7 +112,7 @@ static int swpmshcpy(pMesh mesh,pSol met) {
     ns = 0;
     for (k=1; k<=mesh->ne; k++) {
       pt = &mesh->tetra[k];
-      if ( (!MG_EOK(pt)) || pt->ref < 0 /*|| MG_SIN(pt->tag)*/ )   continue;
+      if ( (!MG_EOK(pt)) || pt->ref < 0 /*|| (pt->tag & MG_REQ)*/ )   continue;
       else if ( !pt->xt ) continue;
       pxt = &mesh->xtetra[pt->xt];
 
@@ -160,7 +160,7 @@ static int swpmshcpy(pMesh mesh,pSol met) {
     ns = 0;
     for (k=1; k<=mesh->ne; k++) {
       pt = &mesh->tetra[k];
-      if ( !MG_EOK(pt) || MG_SIN(pt->tag) )  continue;
+      if ( !MG_EOK(pt) || (pt->tag & MG_REQ) )  continue;
       if ( pt->qual > 0.0288675 /*0.6/ALPHAD*/ )  continue;
 
       for (i=0; i<6; i++) {
@@ -218,12 +218,16 @@ static int swpmshcpy(pMesh mesh,pSol met) {
     nm = ns = 0;
     for (k=1; k<=mesh->ne; k++) {
       pt = &mesh->tetra[k];
-      if ( !MG_EOK(pt) || pt->ref < 0 /*|| MG_SIN(pt->tag)*/ )   continue;
+      if ( !MG_EOK(pt) || pt->ref < 0 /*|| (pt->tag & MG_REQ)*/ )   continue;
 
       /* point j on face i */
       for (i=0; i<4; i++) {
         for (j=0; j<3; j++) {
-          if ( pt->xt && (mesh->xtetra[pt->xt].tag[iarf[i][j]] & MG_REQ) )  continue;
+          if ( pt->xt ) {
+            pxt = &mesh->xtetra[pt->xt];
+            if ( pxt->tag[iarf[i][j]] & MG_REQ )  continue;
+          }
+          else  pxt = 0;
           i0  = idir[i][j];
           ppt = &mesh->point[pt->v[i0]];
           if ( ppt->flag == base )  continue;
@@ -237,8 +241,8 @@ static int swpmshcpy(pMesh mesh,pSol met) {
           }
           ier = 0;
           if ( ppt->tag & MG_BDY ) {
-            pxt = &mesh->xtetra[pt->xt];
-            if ( !(MG_BDY & pxt->ftag[i]) )  continue; // Catch a boundary point by a boundary face
+            /* Catch a boundary point by a boundary face */
+            if ( !pt->xt || !(MG_BDY & pxt->ftag[i]) )  continue;
             else if( ppt->tag & MG_NOM ){
               if( mesh->adja[4*(k-1)+1+i] ) continue;
               if( !bouleext(mesh,k,i0,i,listv,&ilistv,lists,&ilists) )  continue;
@@ -291,8 +295,9 @@ static int swpmshcpy(pMesh mesh,pSol met) {
   pxTetra    pxt;
   pPoint     p0,p1;
   double     ll,ux,uy,uz,hmi2;
-  int        k,nc,list[LMAX+2],ilist,base,nnm,ier;
+  int        k,nc,list[LMAX+2],ilist,base,nnm;
   char       i,j,tag,ip,iq,isnm;
+  int        ier;
 
   nc = nnm = 0;
   hmi2 = info.hmin*info.hmin;
@@ -300,7 +305,7 @@ static int swpmshcpy(pMesh mesh,pSol met) {
   for (k=1; k<=mesh->ne; k++) {
     base = ++mesh->base;
     pt = &mesh->tetra[k];
-    if ( !MG_EOK(pt) || MG_SIN(pt->tag) )   continue;
+    if ( !MG_EOK(pt) || (pt->tag & MG_REQ) )   continue;
 
     pxt = pt->xt ? &mesh->xtetra[pt->xt] : 0;
     for (i=0; i<4; i++) {
@@ -337,7 +342,7 @@ static int swpmshcpy(pMesh mesh,pSol met) {
           if ( isnm ) {
             if ( mesh->adja[4*(k-1)+1+i] )  continue;
           }
-          if ( MG_SIN(tag) || p0->tag > tag )  continue;
+          if ( (tag & MG_REQ) || p0->tag > tag )  continue;
           ilist = chkcol_bdy(mesh,k,i,j,list);
         }
         /* internal face */
@@ -349,7 +354,8 @@ static int swpmshcpy(pMesh mesh,pSol met) {
 
         if ( ilist ) {
           ier = colver(mesh,list,ilist,iq);
-          if(ier) {
+          if ( ier < 0 ) return(-1);
+          else if ( ier ) {
             delPt(mesh,ier);
             break;
           }
@@ -426,7 +432,6 @@ static int swpmshcpy(pMesh mesh,pSol met) {
   for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
     if ( !MG_EOK(pt) )  continue;
-
     pt->flag = 0;
     for (i=0; i<6; i++) {
       ip  = -1;
@@ -434,7 +439,11 @@ static int swpmshcpy(pMesh mesh,pSol met) {
       ip2 = pt->v[iare[i][1]];
       p1  = &mesh->point[ip1];
       p2  = &mesh->point[ip2];
-      if ( pt->xt && (mesh->xtetra[pt->xt].tag[i] & MG_REQ) ) continue;
+      if ( pt->xt ) {
+        pxt = &mesh->xtetra[pt->xt];
+        if ( pxt->tag[i] & MG_REQ ) continue;
+      }
+      else  pxt = 0;
       if ( (p1->tag & MG_BDY) && (p2->tag & MG_BDY) ) {
         ip = hashGet(&hash,ip1,ip2);
       }
@@ -495,7 +504,7 @@ static int swpmshcpy(pMesh mesh,pSol met) {
   ne = mesh->ne;
   for (k=1; k<=ne; k++) {
     pt = &mesh->tetra[k];
-    if ( !MG_EOK(pt) || MG_SIN(pt->tag) )  continue;
+    if ( !MG_EOK(pt) || (pt->tag & MG_REQ) )  continue;
     memset(vx,0,6*sizeof(int));
     pt->flag = 0;
     for (ia=0,i=0; i<3; i++) {
@@ -640,7 +649,7 @@ static int swpmshcpy(pMesh mesh,pSol met) {
   npinit=mesh->np;
   for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
-    if ( !MG_EOK(pt) || MG_SIN(pt->tag) || !pt->xt )  continue;
+    if ( !MG_EOK(pt) || (pt->tag & MG_REQ) || !pt->xt )  continue;
 
     /* check boundary face cut w/r Hausdorff or hmax */
     pt->flag = 0;
@@ -758,8 +767,8 @@ static int swpmshcpy(pMesh mesh,pSol met) {
   nc = 0;
   for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
-    if ( !MG_EOK(pt) || MG_SIN(pt->tag) )  continue;
-    pxt = &mesh->xtetra[pt->xt];
+    if ( !MG_EOK(pt) || (pt->tag & MG_REQ) )  continue;
+    pxt = pt->xt ? &mesh->xtetra[pt->xt] : 0;
 
     /* update face-edge flag */
     for (i=0; i<4; i++) {
@@ -772,7 +781,7 @@ static int swpmshcpy(pMesh mesh,pSol met) {
         ia  = iarf[i][j];
         if ( MG_GET(pt->flag,ia) )                continue;
         if ( pt->xt && (pxt->tag[ia] & MG_REQ) )  continue;
-        else if ( MG_SIN(ptt.tag[j]) )            continue;
+        else if ( ptt.tag[j] & MG_REQ )           continue;
         ip1 = pt->v[iare[ia][0]];
         ip2 = pt->v[iare[ia][1]];
         ip  = hashGet(&hash,ip1,ip2);
@@ -810,7 +819,7 @@ static int swpmshcpy(pMesh mesh,pSol met) {
     ni = nc = 0;
     for (k=1; k<=mesh->ne; k++) {
       pt = &mesh->tetra[k];
-      if ( !MG_EOK(pt) || MG_SIN(pt->tag) || !pt->flag )  continue;
+      if ( !MG_EOK(pt) || (pt->tag & MG_REQ) || !pt->flag )  continue;
       memset(vx,0,6*sizeof(int));
       pt->flag = ic = 0;
       for (ia=0,i=0; i<3; i++) {
@@ -869,7 +878,7 @@ static int swpmshcpy(pMesh mesh,pSol met) {
   ne = mesh->ne;
   for (k=1; k<=ne; k++) {
     pt = &mesh->tetra[k];
-    if ( !MG_EOK(pt) || !pt->flag /*|| MG_SIN(pt->tag)*/ )  continue;
+    if ( !MG_EOK(pt) || !pt->flag /*|| (pt->tag & MG_REQ)*/ )  continue;
     memset(vx,0,6*sizeof(int));
     for (ia=0,i=0; i<3; i++) {
       for (j=i+1; j<4; j++,ia++) {
@@ -920,7 +929,7 @@ static int swpmshcpy(pMesh mesh,pSol met) {
   /*ne = mesh->ne;*/
   for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
-    if ( !MG_EOK(pt) /*|| MG_SIN(pt->tag)*/ )   continue;
+    if ( !MG_EOK(pt) /*|| (pt->tag & MG_REQ)*/ )   continue;
     pxt = pt->xt ? &mesh->xtetra[pt->xt] : 0;
 
     /* find longest edge */
@@ -957,7 +966,7 @@ static int swpmshcpy(pMesh mesh,pSol met) {
       if ( !(MG_GET(pxt->ori,i)) ) continue;
       ref = pxt->edg[iarf[i][j]];
       tag = pxt->tag[iarf[i][j]];
-      if ( MG_SIN(tag) )  continue;
+      if ( tag & MG_REQ )  continue;
       tag |= MG_BDY;
       ilist = coquil(mesh,k,imax,list);
       if ( !ilist )  continue;
@@ -1191,7 +1200,7 @@ int adpsplcol(pMesh mesh,pSol met,pBucket bucket, int* warn) {
       ne = mesh->ne;
       for (k=1; k<=ne; k++) {
         pt = &mesh->tetra[k];
-        if ( !MG_EOK(pt)  || MG_SIN(pt->tag) )   continue;
+        if ( !MG_EOK(pt)  || (pt->tag & MG_REQ) )   continue;
         pxt = pt->xt ? &mesh->xtetra[pt->xt] : 0;
 
         /* find longest and shortest edge */
@@ -1240,7 +1249,6 @@ int adpsplcol(pMesh mesh,pSol met,pBucket bucket, int* warn) {
             if ( !(MG_GET(pxt->ori,i)) ) continue;
             ref = pxt->edg[iarf[i][j]];
             tag = pxt->tag[iarf[i][j]];
-            if ( MG_SIN(tag) )  continue;
             if ( tag & MG_REQ )  continue;
             tag |= MG_BDY;
             ilist = coquil(mesh,k,imax,list);
@@ -1301,11 +1309,10 @@ int adpsplcol(pMesh mesh,pSol met,pBucket bucket, int* warn) {
             }
             ier = simbulgept(mesh,list,ilist,o);
             if ( !ier ) {
-              printf("on passe la\n");
               ier = dichoto1b(mesh,list,ilist,o,ro);
               memcpy(o,ro,3*sizeof(double));
             }
-            ip = newPt(mesh,o,MG_NOTAG);
+            ip = newPt(mesh,o,tag);
 
             if ( !ip ){
               *warn=1;
@@ -1336,16 +1343,8 @@ int adpsplcol(pMesh mesh,pSol met,pBucket bucket, int* warn) {
               ppt->tag = tag;
               if ( met->m )
                 met->m[ip] = 0.5 * (met->m[ip1]+met->m[ip2]);
-              mesh->xp++;
-              if ( mesh->xp >= mesh->xpmax ) {
-                fprintf(stdout,"  ## Memory problem (xpoint), not enough memory.\n");
-                fprintf(stdout,"  ## Check the mesh size or ");
-                fprintf(stdout,"increase the allocated memory with the -m option.\n");
-                return(-1);
-              }
-              ppt->xp = mesh->xp;
-              pxp = &mesh->xpoint[ppt->xp];
 
+              pxp = &mesh->xpoint[ppt->xp];
               if ( tag & MG_NOM ){
                 memcpy(pxp->n1,no1,3*sizeof(double));
                 memcpy(pxp->t,to,3*sizeof(double));
@@ -1476,7 +1475,6 @@ int adpsplcol(pMesh mesh,pSol met,pBucket bucket, int* warn) {
         ilist = 0;
         if ( pt->xt && (pxt->ftag[i] & MG_BDY) ) {
           tag = pxt->tag[iarf[i][j]];
-          if ( MG_SIN(tag) )  continue;
           if ( tag & MG_REQ )  continue;
           tag |= MG_BDY;
           if ( p0->tag > tag )   continue;
@@ -1485,7 +1483,8 @@ int adpsplcol(pMesh mesh,pSol met,pBucket bucket, int* warn) {
           if ( ilist ) {
             ier = colver(mesh,list,ilist,i2);
             //nc += ier;
-            if(ier) {
+	    if ( ier < 0 ) return(-1);
+            else if(ier) {
               //delBucket(mesh,bucket,ier);
               delPt(mesh,ier);
               nc++;
@@ -1501,7 +1500,8 @@ int adpsplcol(pMesh mesh,pSol met,pBucket bucket, int* warn) {
             ier = colver(mesh,list,ilist,i2);
             if ( ilist < 0 ) continue;
             //nc += ier;
-            if(ier) {
+	    if ( ier<0 ) return(-1);
+            else if(ier) {
               delBucket(mesh,bucket,ier);
               delPt(mesh,ier);
               nc++;
@@ -1573,12 +1573,13 @@ int adpsplcol(pMesh mesh,pSol met,pBucket bucket, int* warn) {
   pPoint     p0,p1;
   double     len,lmin;
   int        k,ip,iq,list[LMAX+2],ilist,nc;
-  char       imin,tag,j,i,i1,i2,ier,ifa0,ifa1;
+  char       imin,tag,j,i,i1,i2,ifa0,ifa1;
+  int        ier;
 
   nc = 0;
   for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
-    if ( !MG_EOK(pt) /*|| MG_SIN(pt->tag)*/ )  continue;
+    if ( !MG_EOK(pt) /*|| (pt->tag & MG_REQ)*/ )  continue;
     pxt = pt->xt ? &mesh->xtetra[pt->xt] : 0;
     ier = 0;
 
@@ -1615,7 +1616,6 @@ int adpsplcol(pMesh mesh,pSol met,pBucket bucket, int* warn) {
     ilist = 0;
     if ( pt->xt && (pxt->ftag[i] & MG_BDY) ) {
       tag = pxt->tag[iarf[i][j]];
-      if ( MG_SIN(tag) )  continue;
       if ( tag & MG_REQ )  continue;
       tag |= MG_BDY;
       if ( p0->tag > tag )   continue;
@@ -1685,13 +1685,13 @@ int adpsplcol(pMesh mesh,pSol met,pBucket bucket, int* warn) {
     fprintf(stdout," unable to allocate a new point in last call of adpspl.\n");
     fprintf(stdout,"  ## Check the mesh size or ");
     fprintf(stdout,"increase the allocated memory with the -m option.\n");
-    fprintf(stdout," ## Uncomplete mesh. Exiting\n" );
+    fprintf(stdout,"  ## Uncomplete mesh. Exiting\n" );
     return(0);
   }
 
 #ifdef USE_SCOTCH
   /*check enough vertex to renum*/
-  if ( info.renum  && (mesh->np/2. > BOXSIZE) ) {
+  if ( info.renum && (mesh->np/2. > BOXSIZE) ) {
     /* renumbering begin */
     if ( info.imprim > 5 )
       fprintf(stdout,"renumbering");
@@ -1700,7 +1700,6 @@ int adpsplcol(pMesh mesh,pSol met,pBucket bucket, int* warn) {
     if ( info.imprim > 5) {
       fprintf(stdout,"  -- PHASE RENUMBERING COMPLETED. \n");
     }
-
     if ( info.ddebug )  chkmsh(mesh,1,0);
     /* renumbering end */
   }
@@ -1939,7 +1938,7 @@ int adpsplcol(pMesh mesh,pSol met,pBucket bucket, int* warn) {
   ns = 0;
   for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
-    if ( !MG_EOK(pt) || pt->ref < 0 || MG_SIN(pt->tag) )   continue;
+    if ( !MG_EOK(pt) || pt->ref < 0 || (pt->tag & MG_REQ) )   continue;
     nf = 0;
     if ( pt->xt ) {
       pxt = &mesh->xtetra[pt->xt];

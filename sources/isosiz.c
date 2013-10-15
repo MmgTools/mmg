@@ -385,7 +385,7 @@ int defsiz_iso(pMesh mesh,pSol met) {
   /* size at regular surface points */
   for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
-    if ( !MG_EOK(pt) || pt->ref < 0 || MG_SIN(pt->tag) )   continue;
+    if ( !MG_EOK(pt) || pt->ref < 0 || (pt->tag & MG_REQ) )   continue;
     else if ( !pt->xt )  continue;
     pxt = &mesh->xtetra[pt->xt];
 
@@ -410,7 +410,7 @@ int defsiz_iso(pMesh mesh,pSol met) {
   /* Travel all boundary faces to update size prescription for points on ridges/edges */
   for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
-    if ( !MG_EOK(pt) || MG_SIN(pt->tag) )  continue;
+    if ( !MG_EOK(pt) || (pt->tag & MG_REQ) )  continue;
     else if ( !pt->xt ) continue;
     pxt = &mesh->xtetra[pt->xt];
 
@@ -517,7 +517,7 @@ int gradsiz_iso(pMesh mesh,pSol met) {
     nu = 0;
     for (k=1; k<=mesh->ne; k++) {
       pt = &mesh->tetra[k];
-      if ( !MG_EOK(pt) || MG_SIN(pt->tag) )  continue;
+      if ( !MG_EOK(pt) || (pt->tag & MG_REQ) )  continue;
 
       for (i=0; i<4; i++) {
         for (j=0; j<3; j++) {

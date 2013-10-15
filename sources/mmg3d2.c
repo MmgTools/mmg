@@ -462,7 +462,7 @@ static int cuttet_ls(pMesh mesh, pSol sol,double *tmp){
   ns = 0;
   for (k=1; k<=ne; k++) {
     pt = &mesh->tetra[k];
-    if ( !MG_EOK(pt) || MG_SIN(pt->tag) )  continue;
+    if ( !MG_EOK(pt) || (pt->tag & MG_REQ) )  continue;
     pt->flag = 0;
     memset(vx,0,6*sizeof(int));
     for (ia=0; ia<6; ia++) {
@@ -673,7 +673,7 @@ int chkmani(pMesh mesh){
   /** Second test : Check whether configuration is manifold in each ball */
   for(k=1; k<=mesh->ne; k++){
     pt = &mesh->tetra[k];
-    if ( !MG_EOK(pt) || MG_SIN(pt->tag))   continue;
+    if ( !MG_EOK(pt) || (pt->tag & MG_REQ))   continue;
     adja = &mesh->adja[4*(k-1)+1];
 
     for(i=0; i<4; i++){
@@ -714,7 +714,7 @@ int chkmani2(pMesh mesh,pSol sol) {
   /** First test : assure no tetra has its 4 vertices on implicit boundary */
   for(k=1; k<=mesh->ne; k++){
     pt = &mesh->tetra[k];
-    if ( !MG_EOK(pt) || MG_SIN(pt->tag))   continue;
+    if ( !MG_EOK(pt) || (pt->tag & MG_REQ))   continue;
 
     cnt = 0;
     for(j=0; j<4; j++) {
@@ -729,7 +729,7 @@ int chkmani2(pMesh mesh,pSol sol) {
   /** Second test : check whether configuration is manifold in each ball */
   for(k=1; k<=mesh->ne; k++){
     pt = &mesh->tetra[k];
-    if ( !MG_EOK(pt) || MG_SIN(pt->tag))   continue;
+    if ( !MG_EOK(pt) || (pt->tag & MG_REQ))   continue;
     adja = &mesh->adja[4*(k-1)+1];
 
     for(i=0; i<4; i++){
