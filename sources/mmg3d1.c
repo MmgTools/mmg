@@ -886,7 +886,7 @@ static int anatets(pMesh mesh,pSol met,char typchk) {
         ip1 = pt->v[i1];
         ip2 = pt->v[i2];
         len = lenedg(mesh,met,ip1,ip2);
-        if ( len > LOPTL )  MG_SET(pt->flag,ia);
+        if ( len > LLONG )  MG_SET(pt->flag,ia);
       }
     }
     if ( !pt->flag )  continue;
