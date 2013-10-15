@@ -1010,69 +1010,58 @@ static int swpmshcpy(pMesh mesh,pSol met) {
         if ( !norface(mesh,k,i,v) )  continue;
         if ( !BezierReg(mesh,ip1,ip2,0.5,v,o,no1) )
           continue;
-
-        ier = simbulgept(mesh,list,ilist,o);
-        if ( !ier ) {
-          ier = dichoto1b(mesh,list,ilist,o,ro);
-          memcpy(o,ro,3*sizeof(double));
-        }
-        ip = newPt(mesh,o,MG_NOTAG);
-        if ( !ip ){
-          *warn=1;
-          break;
-        }
-        //CECILE
-        if ( met->m )
-          met->m[ip] = 0.5 * (met->m[ip1]+met->m[ip2]);
-        //CECILE
-        ier = split1b(mesh,met,list,ilist,ip,1);
-        if ( ier<0 ) {
-          fprintf(stdout,"%s:%d: Error: unable to split\n"
-                  ,__FILE__,__LINE__);
-          return(-1);
-        }
-        else if ( !ier ) {
-          delPt(mesh,ip);
-          continue;
-        }
-        ns++;
-        addBucket(mesh,bucket,ip);
-
-        ppt = &mesh->point[ip];
-        if ( MG_EDG(tag) || (tag & MG_NOM) )
-          ppt->ref = ref;
-        else
-          ppt->ref = pxt->ref[i];
-        ppt->tag = tag;
-        if ( met->m )
-          met->m[ip] = 0.5 * (met->m[ip1]+met->m[ip2]);
-        mesh->xp++;
-        if ( mesh->xp >= mesh->xpmax ) {
-          fprintf(stdout,"  ## Memory problem (xpoint), not enough memory.\n");
-          fprintf(stdout,"  ## Check the mesh size or ");
-          fprintf(stdout,"increase the allocated memory with the -m option.\n");
-          return(-1);
-        }
-
-        ppt->xp = mesh->xp;
-        pxp = &mesh->xpoint[ppt->xp];
-
-        if ( tag & MG_NOM ){
-          memcpy(pxp->n1,no1,3*sizeof(double));
-          memcpy(pxp->t,to,3*sizeof(double));
-        }
-        else if ( tag & MG_GEO ) {
-          memcpy(pxp->n1,no1,3*sizeof(double));
-          memcpy(pxp->n2,no2,3*sizeof(double));
-          memcpy(pxp->t,to,3*sizeof(double));
-        }
-        else if ( tag & MG_REF ) {
-          memcpy(pxp->n1,no1,3*sizeof(double));
-          memcpy(pxp->t,to,3*sizeof(double));
-        }
-        else
-          memcpy(pxp->n1,no1,3*sizeof(double));
       }
+      ier = simbulgept(mesh,list,ilist,o);
+      if ( !ier ) {
+        ier = dichoto1b(mesh,list,ilist,o,ro);
+        memcpy(o,ro,3*sizeof(double));
+      }
+      ip = newPt(mesh,o,tag);
+      if ( !ip ) {
+        *warn=1;
+        break;
+      }
+      //CECILE
+      if ( met->m )
+        met->m[ip] = 0.5 * (met->m[ip1]+met->m[ip2]);
+      //CECILE
+      ier = split1b(mesh,met,list,ilist,ip,1);
+      if ( ier<0 ) {
+        fprintf(stdout,"%s:%d: Error: unable to split\n"
+                ,__FILE__,__LINE__);
+        return(-1);
+      }
+      else if ( !ier ) {
+        delPt(mesh,ip);
+        continue;
+      }
+      ns++;
+      addBucket(mesh,bucket,ip);
+
+      ppt = &mesh->point[ip];
+      if ( MG_EDG(tag) || (tag & MG_NOM) )
+        ppt->ref = ref;
+      else
+        ppt->ref = pxt->ref[i];
+      if ( met->m )
+        met->m[ip] = 0.5 * (met->m[ip1]+met->m[ip2]);
+
+      pxp = &mesh->xpoint[ppt->xp];
+      if ( tag & MG_NOM ){
+        memcpy(pxp->n1,no1,3*sizeof(double));
+        memcpy(pxp->t,to,3*sizeof(double));
+      }
+      else if ( tag & MG_GEO ) {
+        memcpy(pxp->n1,no1,3*sizeof(double));
+        memcpy(pxp->n2,no2,3*sizeof(double));
+        memcpy(pxp->t,to,3*sizeof(double));
+      }
+      else if ( tag & MG_REF ) {
+        memcpy(pxp->n1,no1,3*sizeof(double));
+        memcpy(pxp->t,to,3*sizeof(double));
+      }
+      else
+        memcpy(pxp->n1,no1,3*sizeof(double));
     }
 
     /* Case of an internal face */
