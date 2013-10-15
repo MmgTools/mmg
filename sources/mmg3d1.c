@@ -1165,7 +1165,6 @@ static int adpspl(pMesh mesh,pSol met, int* warn) {
       tag |= MG_BDY;
       ilist = coquil(mesh,k,imax,list);
       if ( !ilist )  continue;
-      ilist = fabs(ilist);
 
       if ( tag & MG_NOM ){
         if( !BezierNom(mesh,ip1,ip2,0.5,o,no1,to) )
@@ -1212,7 +1211,7 @@ static int adpspl(pMesh mesh,pSol met, int* warn) {
           ier = dichoto1b(mesh,list,ilist,o,ro);
           memcpy(o,ro,3*sizeof(double));
         }
-        ip = newPt(mesh,o,MG_NOTAG);
+        ip = newPt(mesh,o,tag);
         if ( !ip ){
           *warn=1;
           break;
@@ -1240,15 +1239,7 @@ static int adpspl(pMesh mesh,pSol met, int* warn) {
         ppt->tag = tag;
         if ( met->m )
           met->m[ip] = 0.5 * (met->m[ip1]+met->m[ip2]);
-        mesh->xp++;
-        if ( mesh->xp >= mesh->xpmax ) {
-          fprintf(stdout,"  ## Memory problem (xpoint), not enough memory.\n");
-          fprintf(stdout,"  ## Check the mesh size or ");
-          fprintf(stdout,"increase the allocated memory with the -m option.\n");
-          return(-1);
-        }
 
-        ppt->xp = mesh->xp;
         pxp = &mesh->xpoint[ppt->xp];
 
         if ( tag & MG_NOM ){
@@ -1268,12 +1259,12 @@ static int adpspl(pMesh mesh,pSol met, int* warn) {
           memcpy(pxp->n1,no1,3*sizeof(double));
       }
     }
+
     /* Case of an internal face */
     else {
       if ( (p0->tag & MG_BDY) && (p1->tag & MG_BDY) ) continue;
       ilist = coquil(mesh,k,imax,list);
-      if ( ilist < 0 ) continue;
-      if ( !ilist )    continue;
+      if ( !ilist ) continue;
       o[0] = 0.5*(p0->c[0] + p1->c[0]);
       o[1] = 0.5*(p0->c[1] + p1->c[1]);
       o[2] = 0.5*(p0->c[2] + p1->c[2]);

@@ -1065,6 +1065,7 @@ static int swpmshcpy(pMesh mesh,pSol met) {
           memcpy(pxp->n1,no1,3*sizeof(double));
       }
     }
+
     /* Case of an internal face */
     else if(pt->xt){
       if ( (p0->tag & MG_BDY) && (p1->tag & MG_BDY) ) continue;
@@ -1114,7 +1115,7 @@ static int swpmshcpy(pMesh mesh,pSol met) {
         met->m[ip] = 0.5 * (met->m[ip1]+met->m[ip2]);
       //CECILE
 
-      if (!buckin_iso(mesh,met,bucket,ip) ) {
+      if ( !buckin_iso(mesh,met,bucket,ip) ) {
         delPt(mesh,ip);
         ifilt++;
         continue;
@@ -1244,7 +1245,6 @@ int adpsplcol(pMesh mesh,pSol met,pBucket bucket, int* warn) {
             tag |= MG_BDY;
             ilist = coquil(mesh,k,imax,list);
             if ( !ilist )  continue;
-            ilist = fabs(ilist);
 
             if ( tag & MG_NOM ){
               if( !BezierNom(mesh,ip1,ip2,0.5,o,no1,to) )
@@ -1367,7 +1367,6 @@ int adpsplcol(pMesh mesh,pSol met,pBucket bucket, int* warn) {
           else if(pt->xt){
             if ( (p0->tag & MG_BDY) && (p1->tag & MG_BDY) ) continue;
             ilist = coquil(mesh,k,imax,list);
-            if ( ilist < 0 ) continue;
             if ( !ilist )    continue;
             o[0] = 0.5*(p0->c[0] + p1->c[0]);
             o[1] = 0.5*(p0->c[1] + p1->c[1]);
@@ -1404,7 +1403,6 @@ int adpsplcol(pMesh mesh,pSol met,pBucket bucket, int* warn) {
           } else {
             if ( (p0->tag & MG_BDY) && (p1->tag & MG_BDY) ) continue;
             ilist = coquil(mesh,k,imax,list);
-            if ( ilist < 0 ) continue;
             if ( !ilist )    continue;
             o[0] = 0.5*(p0->c[0] + p1->c[0]);
             o[1] = 0.5*(p0->c[1] + p1->c[1]);
@@ -1421,7 +1419,7 @@ int adpsplcol(pMesh mesh,pSol met,pBucket bucket, int* warn) {
             //CECILE
             //LA DELONE
 
-            if (!buckin_iso(mesh,met,bucket,ip) ) {
+            if ( !buckin_iso(mesh,met,bucket,ip) ) {
               delPt(mesh,ip);
               ifilt++;
               goto collapse;////continue;

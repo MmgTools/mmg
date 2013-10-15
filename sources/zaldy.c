@@ -26,9 +26,9 @@ int newPt(pMesh mesh,double c[3],char tag) {
       fprintf(stdout,"  Exit program.\n");
       exit(EXIT_FAILURE);
     }
-    ppt->tag = MG_BDY;
     ppt->xp  = mesh->xp;
   }
+  ppt->tag = tag;
   return(curpt);
 }
 

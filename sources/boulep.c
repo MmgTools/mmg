@@ -697,9 +697,9 @@ inline int settag(pMesh mesh,int start,int ia,int tag,int edg) {
   int           na,nb,*adja,adj,piv;
   unsigned char i,ipa,ipb;
 
-  if ( start < 1 )  return(0);
+  assert( start >= 1 );
   pt = &mesh->tetra[start];
-  if ( !MG_EOK(pt) ) return(0);
+  assert ( MG_EOK(pt) );
 
   na   = pt->v[ iare[ia][0] ];
   nb   = pt->v[ iare[ia][1] ];
@@ -789,15 +789,15 @@ inline int settag(pMesh mesh,int start,int ia,int tag,int edg) {
 
 /** Find all tets sharing edge ia of tetra start
     return 2*ilist if shell is closed, 2*ilist +1 otherwise
-    return a negative number if one of the tet of the shell is required */
+    return 0 if one of the tet of the shell is required */
 int coquil(pMesh mesh,int start,int ia,int * list) {
   pTetra  pt;
-  int     ilist,*adja,piv,adj,na,nb,ipa,ipb,coeff;
+  int     ilist,*adja,piv,adj,na,nb,ipa,ipb;
   char    i;
 
-  if ( start < 1 )  return(0);
+  assert ( start >= 1 );
   pt = &mesh->tetra[start];
-  if ( !MG_EOK(pt) ) return(0);
+  assert ( MG_EOK(pt) );
 
   na   = pt->v[ iare[ia][0] ];
   nb   = pt->v[ iare[ia][1] ];
@@ -809,10 +809,9 @@ int coquil(pMesh mesh,int start,int ia,int * list) {
   adj = adja[ifar[ia][0]] / 4; // start travelling by face (ia,0)
   piv = pt->v[ifar[ia][1]];
 
-  coeff = 1;
   while ( adj && (adj != start) ) {
     pt = &mesh->tetra[adj];
-    if ( pt->tag & MG_REQ )  coeff = -1;
+    if ( pt->tag & MG_REQ )  return(0);
     /* identification of edge number in tetra adj */
     for (i=0; i<6; i++) {
       ipa = iare[i][0];
@@ -841,7 +840,7 @@ int coquil(pMesh mesh,int start,int ia,int * list) {
 
   /* At this point, the first travel, in one direction, of the shell is complete. Now, analyze why
      the travel ended. */
-  if ( adj == start )  return(coeff*2*ilist);
+  if ( adj == start )  return(2*ilist);
   assert(!adj); // a boundary has been detected
 
   adj = list[ilist-1] / 6;
@@ -866,7 +865,7 @@ int coquil(pMesh mesh,int start,int ia,int * list) {
 
   while ( adj ) {
     pt = &mesh->tetra[adj];
-    if ( pt->tag & MG_REQ )  coeff = -1;
+    if ( pt->tag & MG_REQ )  return(0);
     /* identification of edge number in tetra adj */
     for (i=0; i<6; i++) {
       ipa = iare[i][0];
@@ -892,7 +891,7 @@ int coquil(pMesh mesh,int start,int ia,int * list) {
     }
   }
   assert(!adj);
-  return( coeff*(2*ilist+1) );
+  return( 2*ilist+1 );
 }
 
 /** Identify whether edge ia in start is a boundary edge by unfolding its shell */

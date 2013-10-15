@@ -89,7 +89,7 @@ int delone(pMesh mesh,pSol sol,int ip,int *list,int ilist) {
   int       vois[4];/*,ii,kk,iare1,iare2;*/
   short     i1;
   char      alert;
-  int tref,isused,jj,ixt;
+  int tref,isused,ixt;
   Hash hedg;
 
   if ( mesh->ne + 2*ilist > mesh->nemax )  return(0);
@@ -166,39 +166,42 @@ int delone(pMesh mesh,pSol sol,int ip,int *list,int ilist) {
 
       /* external face */
       if ( !jel || (mesh->tetra[jel].mark != base) ) {
-	  iel = newElt(mesh);
-          
-	  if ( iel < 1 )  {printf("pas de voisin!!\n");return(0);}
-	  pt1 = &mesh->tetra[iel];
-	  memcpy(pt1,pt,sizeof(Tetra));
-	  pt1->v[i] = ip;
-	  pt1->qual = orcal(mesh,iel);
-	  pt1->ref = mesh->tetra[old].ref;
-	  if(pt1->qual < 1e-10) {printf("argggg (%d) %d : %e\n",ip,iel,pt1->qual);
-	    printf("pt1 : %d %d %d %d\n",pt1->v[0],pt1->v[1],pt1->v[2],pt1->v[3]);/*exit(0);*/}
-      iadr = (iel-1)*4 + 1;
-	  adjb = &mesh->adja[iadr];
-	  adjb[i] = adja[i];
-         
-	  if(ixt) {
-	  
-	    if(1 || xt.ref[i] || xt.ftag[i]) {
-	  // if(!adja[i] || (mesh->tetra[jel].ref != pt1->ref)) {
-	   /*  if((old==20329) || (iel==20329)) { */
-	   /*  printf("eh eh on en a un!!!"); */
-	   /*  printf("adj of %d : %d %d %d %d\n",old,adja[0],adja[1],adja[2],adja[3]); */
-	   /*  printf("adj of %d : %d %d %d %d\n",iel,adjb[0],adjb[1],adjb[2],adjb[3]); */
-	   /* printf("on traite %d\n",i); */
-	   /*  } */
+	iel = newElt(mesh);
+	
+	if ( iel < 1 )  {printf("pas de voisin!!\n");return(0);}
+	pt1 = &mesh->tetra[iel];
+	memcpy(pt1,pt,sizeof(Tetra));
+	pt1->v[i] = ip;
+	pt1->qual = orcal(mesh,iel);
+	pt1->ref = mesh->tetra[old].ref;
+	if(pt1->qual < 1e-10) {printf("argggg (%d) %d : %e\n",ip,iel,pt1->qual);
+	  printf("pt1 : %d %d %d %d\n",pt1->v[0],pt1->v[1],pt1->v[2],pt1->v[3]);/*exit(0);*/}
+	iadr = (iel-1)*4 + 1;
+	adjb = &mesh->adja[iadr];
+	adjb[i] = adja[i];
+        
+	if(ixt) {
+	  if( xt.ref[i] || xt.ftag[i]) {
+	    // if(!adja[i] || (mesh->tetra[jel].ref != pt1->ref)) {
+	    /*  if((old==20329) || (iel==20329)) { */
+	    /*  printf("eh eh on en a un!!!"); */
+	    /*  printf("adj of %d : %d %d %d %d\n",old,adja[0],adja[1],adja[2],adja[3]); */
+	    /*  printf("adj of %d : %d %d %d %d\n",iel,adjb[0],adjb[1],adjb[2],adjb[3]); */
+	    /* printf("on traite %d\n",i); */
+	    /*  } */
 	    if(!isused) {
 	      pt1->xt = pt->xt;
 	      pt->xt = 0;
 	      pxt0 = &mesh->xtetra[pt1->xt];
+	      memset(pxt0,0,sizeof(MMG5_xTetra));
 	      pxt0->ref[i]   = xt.ref[i] ; pxt0->ftag[i]  = xt.ftag[i];
-	      for(jj=0 ; jj<4 ; jj++) {
-		    if(jj==i) continue;
-		    pxt0->ref[jj]   = 0; pxt0->ftag[jj]  = 0;
-	      }
+	      pxt0->edg[iarf[i][0]] = xt.edg[iarf[i][0]];
+	      pxt0->edg[iarf[i][1]] = xt.edg[iarf[i][1]];
+	      pxt0->edg[iarf[i][2]] = xt.edg[iarf[i][2]];
+	      pxt0->tag[iarf[i][0]] = xt.tag[iarf[i][0]];
+	      pxt0->tag[iarf[i][1]] = xt.tag[iarf[i][1]];
+	      pxt0->tag[iarf[i][2]] = xt.tag[iarf[i][2]];
+	      pxt0->ori = xt.ori;
 	      isused=1;
 	    } else {
 	      mesh->xt++;
@@ -206,10 +209,19 @@ int delone(pMesh mesh,pSol sol,int ip,int *list,int ilist) {
 	      pt1->xt = mesh->xt;
 	      pxt0 = &mesh->xtetra[pt1->xt];
 	      pxt0->ref[i]   = xt.ref[i] ; pxt0->ftag[i]  = xt.ftag[i];
+	      pxt0->edg[iarf[i][0]] = xt.edg[iarf[i][0]];
+	      pxt0->edg[iarf[i][1]] = xt.edg[iarf[i][1]];
+	      pxt0->edg[iarf[i][2]] = xt.edg[iarf[i][2]];
+	      pxt0->tag[iarf[i][0]] = xt.tag[iarf[i][0]];
+	      pxt0->tag[iarf[i][1]] = xt.tag[iarf[i][1]];
+	      pxt0->tag[iarf[i][2]] = xt.tag[iarf[i][2]];
+	      pxt0->ori = xt.ori;
 	    }
 	  }
+	  else {
+	    pt1->xt = 0;
+	  }
 	}
-	assert(!pt->xt);
     
 	if ( jel ) {
 	  iadr = (jel-1)*4 + 1;

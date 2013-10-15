@@ -171,7 +171,8 @@ int swpgen(pMesh mesh,pSol met,int nconf,int ilist,int *list) {
 
   /** First step : split of edge (na,nb) */
   ret = 2*ilist + 0;
-  split1b(mesh,met,list,ret,np,0);
+  ier = split1b(mesh,met,list,ret,np,0);
+  if ( ier<0 )  return(0); 
 
   /** Second step : collapse of np towards enhancing configuration */
   start = nconf / 4;
