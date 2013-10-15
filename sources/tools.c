@@ -491,7 +491,7 @@ inline int BezierRef(pMesh mesh,int ip0,int ip1,double s,double *o,double *no,do
   ll = ux*ux + uy*uy + uz*uz;
   if ( ll < EPSD2 )  return(0);
   il = 1.0 / sqrt(ll);
-  assert((MG_REF & p0->tag) && (MG_REF & p1->tag) );
+  assert( (MG_REF & p0->tag) && (MG_REF & p1->tag) );
 
   /* Coordinates of the new point */
   if ( MG_SIN(p0->tag) ) {

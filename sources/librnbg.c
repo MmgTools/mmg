@@ -1,48 +1,48 @@
 /**
-* Logiciel initial: MMG3D Version 4.0
-* Co-auteurs : Cecile Dobrzynski et Pascal Frey.
-* Propriétaires :IPB - UPMC -INRIA.
-*
-* Copyright © 2004-2005-2006-2007-2008-2009-2010-2011,
-* diffusé sous les termes et conditions de la licence publique générale de GNU
-* Version 3 ou toute version ultérieure.
-*
-* Ce fichier est une partie de MMG3D.
-* MMG3D est un logiciel libre ; vous pouvez le redistribuer et/ou le modifier
-* suivant les termes de la licence publique générale de GNU
-* Version 3 ou toute version ultérieure.
-* MMG3D est distribué dans l'espoir qu'il sera utile, mais SANS
-* AUCUNE GARANTIE ; sans même garantie de valeur marchande.
-* Voir la licence publique générale de GNU pour plus de détails.
-* MMG3D est diffusé en espérant qu’il sera utile,
-* mais SANS AUCUNE GARANTIE, ni explicite ni implicite,
-* y compris les garanties de commercialisation ou
-* d’adaptation dans un but spécifique.
-* Reportez-vous à la licence publique générale de GNU pour plus de détails.
-* Vous devez avoir reçu une copie de la licence publique générale de GNU
-* en même temps que ce document.
-* Si ce n’est pas le cas, aller voir <http://www.gnu.org/licenses/>.**/
+ * Logiciel initial: MMG3D Version 4.0
+ * Co-auteurs : Cecile Dobrzynski et Pascal Frey.
+ * Propriétaires :IPB - UPMC -INRIA.
+ *
+ * Copyright © 2004-2005-2006-2007-2008-2009-2010-2011,
+ * diffusé sous les termes et conditions de la licence publique générale de GNU
+ * Version 3 ou toute version ultérieure.
+ *
+ * Ce fichier est une partie de MMG3D.
+ * MMG3D est un logiciel libre ; vous pouvez le redistribuer et/ou le modifier
+ * suivant les termes de la licence publique générale de GNU
+ * Version 3 ou toute version ultérieure.
+ * MMG3D est distribué dans l'espoir qu'il sera utile, mais SANS
+ * AUCUNE GARANTIE ; sans même garantie de valeur marchande.
+ * Voir la licence publique générale de GNU pour plus de détails.
+ * MMG3D est diffusé en espérant qu’il sera utile,
+ * mais SANS AUCUNE GARANTIE, ni explicite ni implicite,
+ * y compris les garanties de commercialisation ou
+ * d’adaptation dans un but spécifique.
+ * Reportez-vous à la licence publique générale de GNU pour plus de détails.
+ * Vous devez avoir reçu une copie de la licence publique générale de GNU
+ * en même temps que ce document.
+ * Si ce n’est pas le cas, aller voir <http://www.gnu.org/licenses/>.**/
 /**
-* Initial software: MMG3D Version 4.0
-* Co-authors: Cecile Dobrzynski et Pascal Frey.
-* Owners: IPB - UPMC -INRIA.
-*
-* Copyright © 2004-2005-2006-2007-2008-2009-2010-2011,
-* spread under the terms and conditions of the license GNU General Public License
-* as published Version 3, or (at your option) any later version.
-*
-* This file is part of MMG3D
-* MMG3D is free software; you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation; either version 3 of the License, or
-* (at your option) any later version.
-* MMG3D is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
-* You should have received a copy of the GNU General Public License
-* along with MMG3D. If not, see <http://www.gnu.org/licenses/>.
-**/
+ * Initial software: MMG3D Version 4.0
+ * Co-authors: Cecile Dobrzynski et Pascal Frey.
+ * Owners: IPB - UPMC -INRIA.
+ *
+ * Copyright © 2004-2005-2006-2007-2008-2009-2010-2011,
+ * spread under the terms and conditions of the license GNU General Public License
+ * as published Version 3, or (at your option) any later version.
+ *
+ * This file is part of MMG3D
+ * MMG3D is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3 of the License, or
+ * (at your option) any later version.
+ * MMG3D is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * You should have received a copy of the GNU General Public License
+ * along with MMG3D. If not, see <http://www.gnu.org/licenses/>.
+ **/
 /** librnbg
  *
  * Written by Cedric Lachat
@@ -83,7 +83,7 @@ int biPartBoxCompute(SCOTCH_Graph graf, int vertNbr, int boxVertNbr, SCOTCH_Num 
 
   /* Initializing SCOTCH functions */
   CHECK_SCOTCH(SCOTCH_stratInit(&strat), "scotch_stratInit", 0) ;
-  CHECK_SCOTCH(SCOTCH_stratGraphMap(&strat, "r{job=t,map=t,poli=S,sep=m{,vert=80,low=h{pass=10}f{bal=0.005,move=0},asc=b{bnd=f{bal=0.05,move=0},org=f{bal=0.05,move=0}}}|m{type=h,vert=80,low=h{pass=10}f{bal=0.005,move=0},asc=b{bnd=f{bal=0.05,move=0},org=f{bal=0.05,move=0}}}}"), "scotch_stratGraphMap", 0) ;
+  CHECK_SCOTCH(SCOTCH_stratGraphMap(&strat, "r{job=t,map=t,poli=S,sep=m{,vert=80,low=h{pass=10}f{bal=0.005,move=0},asc=b{bnd=f{bal=0.05,move=0},org=f{bal=0.05,move=0}}}|m{,vert=80,low=h{pass=10}f{bal=0.005,move=0},asc=b{bnd=f{bal=0.05,move=0},org=f{bal=0.05,move=0}}}}"), "scotch_stratGraphMap", 0) ;
 
   partTab = (SCOTCH_Num *)calloc(vertNbr, sizeof(SCOTCH_Num));
 
@@ -166,7 +166,7 @@ int kPartBoxCompute(SCOTCH_Graph graf, int vertNbr, int boxVertNbr, SCOTCH_Num *
 
   /* Initializing SCOTCH functions */
   CHECK_SCOTCH(SCOTCH_stratInit(&strat), "scotch_stratInit", 0) ;
-  CHECK_SCOTCH(SCOTCH_archVcmplt(&arch), "scotch_archVcmplt", 0) ;
+  CHECK_SCOTCH(SCOTCH_archCmplt(&arch, boxNbr), "scotch_archVcmplt", 0) ;
 
   sprintf(s, "m{vert=%d,low=r{job=t,map=t,poli=S,sep=m{vert=80,low=h{pass=10}f{bal=0.0005,move=80},asc=f{bal=0.005,move=80}}}}", vertNbr / boxVertNbr);
   CHECK_SCOTCH(SCOTCH_stratGraphMap(&strat, s), "scotch_stratGraphMap", 0) ;
@@ -179,37 +179,10 @@ int kPartBoxCompute(SCOTCH_Graph graf, int vertNbr, int boxVertNbr, SCOTCH_Num *
   CHECK_SCOTCH(SCOTCH_graphMap(&graf, &arch, &strat, sortPartTb), "scotch_graphMap", 0);
 
 
-  // Looking for the max value in sortPartTb and computing sortPartTb as
-  // followed :
-  //  - sortPartTb[2i] is the box value
-  //  - sortPartTb[2i+1] is the vertex number
-  maxVal = sortPartTb[0];
   for (vertIdx = vertNbr - 1 ; vertIdx >= 0 ; vertIdx--) {
     sortPartTb[2*vertIdx] = sortPartTb[vertIdx];
     sortPartTb[2*vertIdx+1] = vertIdx + 1;
-    if (sortPartTb[vertIdx] > maxVal)
-      maxVal = sortPartTb[vertIdx];
   }
-
-  // Determining the log of MaxVal
-  logMaxVal = 0;
-  while ( maxVal > 0) {
-    logMaxVal++;
-    maxVal >>= 1;
-  }
-
-  // Infering the interval in which box values will be
-  InfMaxVal = logMaxVal << logMaxVal;
-  SupMaxVal = (logMaxVal << (logMaxVal + 1)) - 1;
-
-  // Increasing box values until they are in the previous interval
-  for (vertIdx = 0 ; vertIdx < vertNbr ; vertIdx++) {
-    while (!(sortPartTb[2*vertIdx] >= InfMaxVal && sortPartTb[2*vertIdx] <= SupMaxVal)) {
-      sortPartTb[2*vertIdx] <<= 1;
-    }
-  }
-
-
 
   // Sorting the tabular, which contains box values and vertex numbers
   _SCOTCHintSort2asc1(sortPartTb, vertNbr);
@@ -418,16 +391,18 @@ int renumbering(int boxVertNbr, pMesh mesh, pSol sol) {
   else
     mesh->npnil = mesh->np + 1;
 
-  if ( mesh->ne == mesh->nenil )
+  if ( mesh->ne == mesh->nemax )
     mesh->nenil = 0;
   else
     mesh->nenil = mesh->ne + 1;
 
-  for (k=mesh->npnil; k<mesh->npmax-1; k++)
-    mesh->point[k].tmp  = k+1;
+  if ( mesh->npnil )
+    for (k=mesh->npnil; k<mesh->npmax-1; k++)
+      mesh->point[k].tmp  = k+1;
 
-  for (k=mesh->nenil; k<mesh->nemax-1; k++)
-    mesh->tetra[k].v[3] = k+1;
+  if ( mesh->nenil )
+    for (k=mesh->nenil; k<mesh->nemax-1; k++)
+      mesh->tetra[k].v[3] = k+1;
 
   /* Modifying the numbering of the nodes of each tetra */
   for(tetraIdx = 1 ; tetraIdx < mesh->ne + 1 ; tetraIdx++) {

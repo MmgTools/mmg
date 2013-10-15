@@ -579,36 +579,40 @@ int hGeom(pMesh mesh) {
 
   /* if edges exist in mesh, hash special edges from existing field */
   if ( mesh->na ) {
-    if ( mesh->htab.geom ) {
+    if ( !mesh->htab.geom ) {
+      mesh->namax = MG_MAX(1.5*mesh->na,NAMAX);
+      hNew(&mesh->htab,mesh->na,3*mesh->namax);
+    }
+    else {
       if ( abs(info.imprim) > 4 || info.ddebug ) {
         fprintf(stdout,"  ## Warning: no re-hash of edges of mesh. ");
         fprintf(stdout,"mesh->htab.geom must be freed to enforce analysis.\n");
       }
+      free(mesh->edge);
+      mesh->edge = NULL;
+      mesh->na   = 0;
+      return(1);
     }
-    else {
-      mesh->namax = MG_MAX(1.5*mesh->na,NAMAX);
-      hNew(&mesh->htab,mesh->na,3*mesh->namax);
 
-      /* store initial edges */
-      for (k=1; k<=mesh->na; k++) {
-        pa = &mesh->edge[k];
-        hEdge(&mesh->htab,pa->a,pa->b,pa->ref,pa->tag);
-      }
+    /* store initial edges */
+    for (k=1; k<=mesh->na; k++) {
+      pa = &mesh->edge[k];
+      hEdge(&mesh->htab,pa->a,pa->b,pa->ref,pa->tag);
+    }
 
-      /* now check triangles */
-      for (k=1; k<=mesh->nt; k++) {
-        pt = &mesh->tria[k];
-        for (i=0; i<3; i++) {
-          i1 = inxt2[i];
-          i2 = iprv2[i];
-          /* transfer non manifold tag to edges */
-          if ( pt->tag[i] & MG_NOM )
-            hTag(&mesh->htab,pt->v[i1],pt->v[i2],pt->edg[i],pt->tag[i]);
+    /* now check triangles */
+    for (k=1; k<=mesh->nt; k++) {
+      pt = &mesh->tria[k];
+      for (i=0; i<3; i++) {
+        i1 = inxt2[i];
+        i2 = iprv2[i];
+        /* transfer non manifold tag to edges */
+        if ( pt->tag[i] & MG_NOM )
+          hTag(&mesh->htab,pt->v[i1],pt->v[i2],pt->edg[i],pt->tag[i]);
 
-          hGet(&mesh->htab,pt->v[i1],pt->v[i2],&edg,&tag);
-          pt->edg[i]  = edg;
-          pt->tag[i] |= tag;
-        }
+        hGet(&mesh->htab,pt->v[i1],pt->v[i2],&edg,&tag);
+        pt->edg[i]  = edg;
+        pt->tag[i] |= tag;
       }
     }
     free(mesh->edge);
@@ -897,7 +901,7 @@ int bdrySet(pMesh mesh) {
   pTria    ptt;
   pxTetra  pxt;
   Hash     hash;
-  int     *adja,adj,k,kt,ia,ib,ic,j;
+  int      *adja,adj,k,kt,ia,ib,ic,j;
   char     i,tag;
 
   if ( !mesh->nt )  return(1);
