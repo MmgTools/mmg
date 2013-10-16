@@ -38,7 +38,7 @@ static int dichoto(pMesh mesh,pSol met,int k,int *vx) {
   pTetra  pt;
   pPoint  pa,pb,ps;
   double  o[6][3],p[6][3];
-  float   to,tp,t,oo,op;
+  float   to,tp,t;
   int     ia,ib,ier,it,maxit;
   char    i;
 
@@ -63,8 +63,8 @@ static int dichoto(pMesh mesh,pSol met,int k,int *vx) {
   }
   maxit = 4;
   it = 0;
-  tp = oo = 1.0;
-  to = op = 0.0;
+  tp = 1.0;
+  to = 0.0;
   do {
     /* compute new position */
     t = 0.5 * (tp + to);
@@ -87,21 +87,15 @@ static int dichoto(pMesh mesh,pSol met,int k,int *vx) {
       ier = split2sf_sim(mesh,met,k,vx);
       break;
     }
-    if ( ier ) {
+    if ( ier )
       to = t;
-      oo = to;
-      op = tp;
-    }
     else
       tp = t;
   }
   while ( ++it < maxit );
   /* restore coords of last valid pos. */
   if ( !ier ) {
-    if ( op > oo )
-      t = 0.5 * (op + oo);
-    else
-      t = 0.0;
+    t = to;
     for (i=0; i<6; i++) {
       if ( vx[i] > 0 ) {
         ps = &mesh->point[vx[i]];
@@ -119,7 +113,7 @@ int dichoto1b(pMesh mesh,int *list,int ret,double o[3],double ro[3]) {
   pTetra  pt;
   pPoint  p0,p1;
   int     iel,np,nq,it,maxit;
-  double  m[3],c[3],tp,to,op,oo,t;
+  double  m[3],c[3],tp,to,t;
   char    ia,ier;
 
   iel = list[0] / 6;
@@ -137,10 +131,8 @@ int dichoto1b(pMesh mesh,int *list,int ret,double o[3],double ro[3]) {
   m[2] = 0.5*(p0->c[2] + p1->c[2]);
 
   maxit = 4;
-  it = 0;
-  ier = 0;
-  tp = oo = 1.0;
-  to = op = 0.0;
+  it    = 0;
+  ier   = 0;
   do {
     t = 0.5*(to + tp);
     c[0] = m[0] + t*(o[0]-m[0]);
@@ -148,21 +140,13 @@ int dichoto1b(pMesh mesh,int *list,int ret,double o[3],double ro[3]) {
     c[2] = m[2] + t*(o[2]-m[2]);
 
     ier = simbulgept(mesh,list,ret,c);
-    if ( ier ) {
+    if ( ier )
       to = t;
-      oo = to;
-      op = tp;
-    }
     else
       tp = t;
   }
   while ( ++it < maxit );
-  if ( !ier ) {
-    if ( op > oo )
-      t = 0.5*(op+oo);
-    else
-      t = 0.0;
-  }
+  if ( !ier )  t = to;
   ro[0] = m[0] + t*(o[0]-m[0]);
   ro[1] = m[1] + t*(o[1]-m[1]);
   ro[2] = m[2] + t*(o[2]-m[2]);

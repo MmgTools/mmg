@@ -151,7 +151,6 @@ int biPartBoxCompute(SCOTCH_Graph graf, int vertNbr, int boxVertNbr, SCOTCH_Num 
  */
 int kPartBoxCompute(SCOTCH_Graph graf, int vertNbr, int boxVertNbr, SCOTCH_Num *permVrtTab) {
   int boxNbr, vertIdx;
-  SCOTCH_Num logMaxVal, SupMaxVal, InfMaxVal, maxVal;
   char s[200];
   SCOTCH_Num *sortPartTb;
   SCOTCH_Strat strat ;
