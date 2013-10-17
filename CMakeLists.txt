@@ -53,7 +53,7 @@ ENDIF(NOT CMAKE_COMPILER_IS_CLANG)
 EXECUTE_PROCESS(COMMAND ctags  -x --c-kinds=fp  ${MMG_SOURCE_DIR}/mmg3d.h
                 ERROR_QUIET
                 OUTPUT_VARIABLE CTAG)
-if ( CTAG )
+IF ( CTAG )
 # We want to create mmg3d_redefine.h but we don't want it to be removed by make clean so:
 # we use a .dummy output that is created/removed by make/make clean. And the true command create 
 # the wanted file. We can't use ADD_CUSTOM_TARGET 'cause mmg3d_redefine.h would be rebuild each
@@ -65,7 +65,12 @@ if ( CTAG )
     DEPENDS ${MMG_SOURCE_DIR}/mmg3d.h ${MMG_SOURCE_DIR}/libmmg3d5.h
     COMMENT "update of mmg3d_redefine.h"
     )
-endif()
+ELSE ()
+  ADD_CUSTOM_COMMAND(OUTPUT .dummy
+    COMMAND touch .dummy
+    DEPENDS ${MMG_SOURCE_DIR}/mmg3d.h ${MMG_SOURCE_DIR}/libmmg3d5.h
+    )
+ENDIF ()
 
 
 # should we use SCOTCH
