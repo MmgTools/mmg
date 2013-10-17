@@ -133,6 +133,8 @@ int dichoto1b(pMesh mesh,int *list,int ret,double o[3],double ro[3]) {
   maxit = 4;
   it    = 0;
   ier   = 0;
+  tp    = 1.0;
+  to    = 0.0;
   do {
     t = 0.5*(to + tp);
     c[0] = m[0] + t*(o[0]-m[0]);
