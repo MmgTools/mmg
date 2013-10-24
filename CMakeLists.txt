@@ -1,7 +1,5 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8.5)
 PROJECT (MMG3D5)
-# Continuous integration
-ENABLE_TESTING()
 
 # To see flags and options of compilation
 #SET(CMAKE_VERBOSE_MAKEFILE TRUE)
@@ -50,12 +48,17 @@ IF(NOT CMAKE_COMPILER_IS_CLANG)
   ENDIF(PROFILING)
 ENDIF(NOT CMAKE_COMPILER_IS_CLANG)
 
+###############################################################################
+#####
+#####         Redefinitions: mmg3d_redefine.h
+#####
+###############################################################################
 EXECUTE_PROCESS(COMMAND ctags  -x --c-kinds=fp  ${MMG_SOURCE_DIR}/mmg3d.h
-                ERROR_QUIET
-                OUTPUT_VARIABLE CTAG)
+		ERROR_QUIET
+		OUTPUT_VARIABLE CTAG)
 IF ( CTAG )
 # We want to create mmg3d_redefine.h but we don't want it to be removed by make clean so:
-# we use a .dummy output that is created/removed by make/make clean. And the true command create 
+# we use a .dummy output that is created/removed by make/make clean. And the true command create
 # the wanted file. We can't use ADD_CUSTOM_TARGET 'cause mmg3d_redefine.h would be rebuild each
 # time.
   ADD_CUSTOM_COMMAND(OUTPUT .dummy
@@ -72,12 +75,43 @@ ELSE ()
     )
 ENDIF ()
 
+###############################################################################
+#####
+#####         Sources and libraries
+#####
+###############################################################################
 
-# should we use SCOTCH
+# Header files
+INCLUDE_DIRECTORIES(${MMG_SOURCE_DIR})
+# Source files
+FILE(
+  GLOB
+  source_files
+  ${MMG_SOURCE_DIR}/*.c   ${MMG_SOURCE_DIR}/*.h
+  )
+LIST(REMOVE_ITEM source_files
+  ${MMG_SOURCE_DIR}/mmg3d.c ${MMG_SOURCE_DIR}/libmmg3d5.c )
+FILE(
+  GLOB
+  main_file
+  ${MMG_SOURCE_DIR}/mmg3d.c
+  )
+FILE(
+  GLOB
+  lib_file
+  ${MMG_SOURCE_DIR}/libmmg3d5.c
+  )
+
+FIND_LIBRARY(M_LIB m)
+
+
+###############################################################################
+#####
+#####         Scotch
+#####
+###############################################################################
 OPTION ( USE_SCOTCH "Use SCOTCH TOOL for renumbering" OFF)
-
 # add SCOTCH library?
-#
 IF ( USE_SCOTCH )
   # Check for SCOTCH Path
   IF ( $ENV{SCOTCH_DIR} MATCHES scotch )
@@ -119,42 +153,11 @@ IF ( USE_SCOTCH )
 
 ENDIF ( USE_SCOTCH )
 
-
-# Add openMP flags if OpenMP found
-#OPTION ( OPENMP "Enable/Disable OpenMP" OFF )
-#IF(OPENMP)
-#  INCLUDE(FindOpenMP)
-#  IF(OPENMP_FOUND)
-#    SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
-#    SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
-#    MESSAGE(STATUS "OpenMP added: " ${CMAKE_C_FLAGS})
-#  ELSE(OPENMP_FOUND)
-#    MESSAGE(WARNING "OpenMP not found")
-#  ENDIF(OPENMP_FOUND)
-#ENDIF(OPENMP)
-
-# Header files
-INCLUDE_DIRECTORIES(${MMG_SOURCE_DIR})
-# Source files
-FILE(
-  GLOB
-  source_files
-  ${MMG_SOURCE_DIR}/*.c   ${MMG_SOURCE_DIR}/*.h
-  )
-LIST(REMOVE_ITEM source_files
-  ${MMG_SOURCE_DIR}/mmg3d.c ${MMG_SOURCE_DIR}/libmmg3d5.c )
-FILE(
-  GLOB
-  main_file
-  ${MMG_SOURCE_DIR}/mmg3d.c
-  )
-FILE(
-  GLOB
-  lib_file
-  ${MMG_SOURCE_DIR}/libmmg3d5.c
-  )
-
-# Update date of last compilation
+###############################################################################
+#####
+#####         Update date of compilation: compil.date
+#####
+###############################################################################
 ADD_CUSTOM_TARGET( date COMMAND rm -f ${MMG_SOURCE_DIR}/compil.date )
 IF (NOT EXISTS ${MMG_SOURCE_DIR}/compil.date)
   ADD_CUSTOM_COMMAND(
@@ -172,9 +175,11 @@ ELSEIF(EXISTS ${MMG_SOURCE_DIR}/compil.date)
     )
 ENDIF(NOT EXISTS ${MMG_SOURCE_DIR}/compil.date)
 
-# Compile static library
-FIND_LIBRARY(M_LIB m)
-
+###############################################################################
+#####
+#####         Compile mmg3d5 libraries
+#####
+###############################################################################
 SET(LIBRARY_OUTPUT_PATH ${MMG_SOURCE_DIR}/../lib)
 
 OPTION ( LIBMMG3D5_STATIC "Compile static library" OFF)
@@ -203,19 +208,39 @@ ENDIF()
 INSTALL(FILES ${MMG_SOURCE_DIR}/libmmg3d5.h DESTINATION ${CMAKE_INSTALL_PREFIX}/include)
 INSTALL(FILES ${MMG_SOURCE_DIR}/mmg3d_redefine.h DESTINATION ${CMAKE_INSTALL_PREFIX}/include)
 
-# Compile program to test library
+###############################################################################
+#####
+#####         Compile program to test library
+#####
+###############################################################################
 OPTION ( TEST_LIBMMG3D5 "Compile tests of library" OFF)
 IF ( TEST_LIBMMG3D5 )
-  ADD_EXECUTABLE(libmmg5_example1 ${MMG_SOURCE_DIR}/../libexamples/example1/main.c)
-  ADD_EXECUTABLE(libmmg5_example2  ${MMG_SOURCE_DIR}/../libexamples/example2/mmg3d.c)
-  TARGET_LINK_LIBRARIES(libmmg5_example1 mmg3d5_a)
-  TARGET_LINK_LIBRARIES(libmmg5_example2 mmg3d5_a)
-  INSTALL(TARGETS libmmg5_example1 RUNTIME DESTINATION bin )
-  INSTALL(TARGETS libmmg5_example2 RUNTIME DESTINATION bin )
+  IF ( LIBMMG3D5_STATIC )
+    ADD_EXECUTABLE(libmmg5_example1 ${MMG_SOURCE_DIR}/../libexamples/example1/main.c)
+    ADD_EXECUTABLE(libmmg5_example2  ${MMG_SOURCE_DIR}/../libexamples/example2/mmg3d.c)
+    TARGET_LINK_LIBRARIES(libmmg5_example1 mmg3d5_a)
+    TARGET_LINK_LIBRARIES(libmmg5_example2 mmg3d5_a)
+    INSTALL(TARGETS libmmg5_example1 RUNTIME DESTINATION bin )
+    INSTALL(TARGETS libmmg5_example2 RUNTIME DESTINATION bin )
+  ELSEIF ( LIBMMG3D5_SHARED )
+    ADD_EXECUTABLE(libmmg5_example1 ${MMG_SOURCE_DIR}/../libexamples/example1/main.c)
+    ADD_EXECUTABLE(libmmg5_example2  ${MMG_SOURCE_DIR}/../libexamples/example2/mmg3d.c)
+    TARGET_LINK_LIBRARIES(libmmg5_example1 mmg3d5_so)
+    TARGET_LINK_LIBRARIES(libmmg5_example2 mmg3d5_so)
+    INSTALL(TARGETS libmmg5_example1 RUNTIME DESTINATION bin )
+    INSTALL(TARGETS libmmg5_example2 RUNTIME DESTINATION bin )
+  ELSE ()
+    MESSAGE(WARNING "You must activate the compilation of the static or shared mmg3d5 library to compile this tests." )
+  ENDIF ()
+
 ENDIF()
 
-# Executable and dependencies
-ADD_EXECUTABLE(mmg3d5 
+###############################################################################
+#####
+#####         Compile executable
+#####
+###############################################################################
+ADD_EXECUTABLE(mmg3d5
   ${MMG_SOURCE_DIR}/compil.date .dummy  ${MMG_SOURCE_DIR}/mmg3d_redefine.h
   ${source_files} ${main_file})
 ADD_DEPENDENCIES(mmg3d5 date)
@@ -227,7 +252,11 @@ SET_TARGET_PROPERTIES(mmg3d5 PROPERTIES DEBUG_POSTFIX _debug) # in debug mode we
 SET_TARGET_PROPERTIES(mmg3d5 PROPERTIES RELEASE_POSTFIX _O3) # in Release mode we name the executable mmg3d5_O3
 SET_TARGET_PROPERTIES(mmg3d5 PROPERTIES MINSIZEREL_POSTFIX _Os)
 
-# Continuous integration
+###############################################################################
+#####
+#####         Continuous integration
+#####
+###############################################################################
 OPTION ( BUILD_TESTING "Enable/Disable continuous integration" ON )
 IF(BUILD_TESTING)
   # Ignore errors coming from the libmesh5 library
@@ -250,11 +279,41 @@ IF(BUILD_TESTING)
     SET(CMAKE_EXE_LINKER_FLAGS_DEBUG "-g -fprofile-arcs -ftest-coverage --coverage ${CMAKE_EXE_LINKER_FLAGS}")
   ENDIF(CMAKE_COMPILER_IS_GNUCC)
 
+  # Add runtime that we want to test
+  GET_TARGET_PROPERTY(EXECUT mmg3d5 LOCATION)
+  IF(${CMAKE_BUILD_TYPE} MATCHES "Debug")
+    SET(EXECUT ${EXECUT}_debug)
+    SET(BUILDNAME ${BUILDNAME}_debug CACHE STRING "build name variable")
+  ELSEIF(${CMAKE_BUILD_TYPE} MATCHES "Release")
+    SET(EXECUT ${EXECUT}_O3)
+    SET(BUILDNAME ${BUILDNAME}_O3 CACHE STRING "build name variable")
+  ELSEIF(${CMAKE_BUILD_TYPE} MATCHES "Minsizerel")
+    SET(EXECUT ${EXECUT}_Os)
+    SET(BUILDNAME ${BUILDNAME}_Os CACHE STRING "build name variable")
+  ENDIF()
+  SET ( LISTEXEC ${EXECUT} )
+  IF ( TEST_LIBMMG3D5 )
+    IF ( LIBMMG3D5_STATIC OR LIBMMG3D5_SHARED )
+      GET_TARGET_PROPERTY(LIBEXEC1 libmmg5_example1 LOCATION)
+      ADD_TEST(NAME libexample1	COMMAND ${LIBEXEC1})
+
+      GET_TARGET_PROPERTY(LIBEXEC2 libmmg5_example2 LOCATION)
+      SET( LISTEXEC ${LISTEXEC} ${LIBEXEC2} )
+    ENDIF()
+  ENDIF()
+
+  # Add more tests
   INCLUDE( ${CMAKE_SOURCE_DIR}/testing.cmake )
+  IF ( INSER_SINGULARITIES )
+    INCLUDE( ${CMAKE_SOURCE_DIR}/testing_insert_singul.cmake )
+  ENDIF ()
 ENDIF(BUILD_TESTING)
 
-
-## Create Package
+###############################################################################
+#####
+#####         Create Package
+#####
+###############################################################################
 INCLUDE(InstallRequiredSystemLibraries)
 SET( CPACK_SOURCE_GENERATOR TGZ )
 SET( CPACK_GENERATOR TGZ )

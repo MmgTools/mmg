@@ -5,23 +5,6 @@
 ###############################################################################
 SET(CTEST_TIMEOUT           "7200")
 SET(REG_TESTS_PATH ${CMAKE_SOURCE_DIR}/../RegTests)
-GET_TARGET_PROPERTY(LIBEXEC1 libmmg5_example1 LOCATION)
-GET_TARGET_PROPERTY(LIBEXEC2 libmmg5_example2 LOCATION)
-GET_TARGET_PROPERTY(EXECUT mmg3d5 LOCATION)
-IF(${CMAKE_BUILD_TYPE} MATCHES "Debug")
-  SET(EXECUT ${EXECUT}_debug)
-  SET(BUILDNAME ${BUILDNAME}_debug CACHE STRING "build name variable")
-ELSEIF(${CMAKE_BUILD_TYPE} MATCHES "Release")
-  SET(EXECUT ${EXECUT}_O3)
-  SET(BUILDNAME ${BUILDNAME}_O3 CACHE STRING "build name variable")
-ELSEIF(${CMAKE_BUILD_TYPE} MATCHES "Minsizerel")
-  SET(EXECUT ${EXECUT}_Os)
-  SET(BUILDNAME ${BUILDNAME}_Os CACHE STRING "build name variable")
-ENDIF()
-
-# test library
-ADD_TEST(NAME libexample1
-  COMMAND ${LIBEXEC1})
 
 # simple test: must already pass
 ADD_TEST(NAME SimpleCube
@@ -62,7 +45,12 @@ ADD_TEST(NAME SimpleCube
 #SET_PROPERTY(TEST LeakCheck_AbnormalEnd1
 #  PROPERTY PASS_REGULAR_EXPRESSION "${passRegex}")
 #####
-FOREACH(EXEC ${EXECUT} ${LIBEXEC2})
+#SET ( LISTEXEC ${EXECUT} )
+#IF ( FIND_LIBEXEC2 )
+#  SET( LISTEXEC ${LISTEXEC} ${LIBEXEC2} )
+#ENDIF ()
+
+FOREACH(EXEC ${LISTEXEC})
   ADD_TEST(NAME LeakCheck_AbnormalEnd2_${EXEC}
     COMMAND ${EXEC} -v 5
     ${REG_TESTS_PATH}/LeakCheck_AbnormalEnd2/d
@@ -158,7 +146,46 @@ FOREACH(EXEC ${EXECUT} ${LIBEXEC2})
     -in ${REG_TESTS_PATH}/MeshVersionFormatted2/d
     -sol ${REG_TESTS_PATH}/MeshVersionFormatted2/dsol.sol
     -out ${REG_TESTS_PATH}/MeshVersionFormatted2/d.o.meshb)
+
+  ###############################################################################
+  #####
+  #####         Check Boundaries
+  #####
+  ###############################################################################
+  #####
+  ADD_TEST(NAME ChkBdry_optls_temp_${EXEC}
+    COMMAND ${EXEC} -v 5 -ls -hmin 5 -hmax 6
+    -nr -hausd 0.5 -hgrad 1.2
+    -in ${REG_TESTS_PATH}/ChkBdry_optls_temp/temp
+    -sol ${REG_TESTS_PATH}/ChkBdry_optls_temp/temp.sol
+    -out ${REG_TESTS_PATH}/ChkBdry_optls_temp/temp.o.meshb)
+  ####
+  ADD_TEST(NAME ChkBdry_optls_temp2_${EXEC}
+    COMMAND ${EXEC} -v 5 -ls -hmin 5 -hmax 6
+    -nr -hausd 0.5 -hgrad 1.2
+    -in ${REG_TESTS_PATH}/ChkBdry_optls_temp/temp
+    -sol ${REG_TESTS_PATH}/ChkBdry_optls_temp/temp.sol
+    -out ${REG_TESTS_PATH}/ChkBdry_optls_temp/temp.o.meshb)
+  #####
+  ADD_TEST(NAME ChkBdry_cube_${EXEC}
+    COMMAND ${EXEC}
+    ${REG_TESTS_PATH}/ChkBdry_cube/cube)
+  #####
+  ADD_TEST(NAME ChkBdry_multidomCube_${EXEC}
+    COMMAND ${EXEC} -hmax 0.1
+    ${REG_TESTS_PATH}/ChkBdry_multidomCube/c)
+  #####
+  ADD_TEST(NAME ChkBdry_multidomCube2_${EXEC}
+    COMMAND ${EXEC} -hmax 0.1
+    ${REG_TESTS_PATH}/ChkBdry_multidomCube2/c)
+ #####
+  ADD_TEST(NAME ChkBdry_multidomCube3_${EXEC}
+    COMMAND ${EXEC} -hmax 0.1
+    ${REG_TESTS_PATH}/ChkBdry_multidomCube3/c)
 ENDFOREACH(EXEC)
+
+
+
 ###############################################################################
 #####
 #####         Check Results
