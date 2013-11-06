@@ -584,14 +584,20 @@ int hGeom(pMesh mesh) {
       hNew(&mesh->htab,mesh->na,3*mesh->namax);
     }
     else {
-      if ( abs(info.imprim) > 4 || info.ddebug ) {
-        fprintf(stdout,"  ## Warning: no re-hash of edges of mesh. ");
-        fprintf(stdout,"mesh->htab.geom must be freed to enforce analysis.\n");
+#ifdef SINGUL
+      if ( !info.sing ) {
+#endif
+        if ( abs(info.imprim) > 4 || info.ddebug ) {
+          fprintf(stdout,"  ## Warning: no re-hash of edges of mesh. ");
+          fprintf(stdout,"mesh->htab.geom must be freed to enforce analysis.\n");
+        }
+        free(mesh->edge);
+        mesh->edge = NULL;
+        mesh->na   = 0;
+        return(1);
+#ifdef SINGUL
       }
-      free(mesh->edge);
-      mesh->edge = NULL;
-      mesh->na   = 0;
-      return(1);
+#endif
     }
 
     /* store initial edges */
@@ -901,8 +907,12 @@ int bdrySet(pMesh mesh) {
   pTria    ptt;
   pxTetra  pxt;
   Hash     hash;
-  int      *adja,adj,k,kt,ia,ib,ic,j;
+  int      *adja,adj,k,kt,ia,ib,ic,j,na;
   char     i,tag;
+#ifdef SINGUL
+  hgeom    *ph;
+  int      ref;
+#endif
 
   if ( !mesh->nt )  return(1);
 
@@ -919,8 +929,19 @@ int bdrySet(pMesh mesh) {
     ptt = &mesh->tria[k];
     hashFace(&hash,ptt->v[0],ptt->v[1],ptt->v[2],k);
   }
+  na = 0;
+#ifdef SINGUL
+  if ( info.sing ) {
+    for (k=0; k<=mesh->htab.max; k++) {
+      ph = &mesh->htab.geom[k];
+      if ( !ph->a )  continue;
+      na++;
+    }
+  }
+#endif
+
   mesh->xt     = 0;
-  mesh->xtmax  = mesh->ntmax; //10 * NTMAX;
+  mesh->xtmax  = mesh->ntmax + 2*na; //10 * NTMAX;
   mesh->xtetra = (pxTetra)calloc(mesh->xtmax+1,sizeof(xTetra));
   if ( !mesh->xtetra ) {
     fprintf(stdout,"  ## Allocation problem (xtetra), not enough memory.\n");
@@ -956,6 +977,30 @@ int bdrySet(pMesh mesh) {
       }
     }
   }
+
+#ifdef SINGUL
+  /* Add xtetras for singularities */
+  if ( info.sing ) {
+    for (k=0; k<=mesh->ne; k++) {
+      pt = &mesh->tetra[k];
+      if ( !MG_EOK(pt) )  continue;
+      for (i=0; i<6; i++) {
+        ia = iare[i][0];
+        ib = iare[i][1];
+        hGet(&mesh->htab,pt->v[ia],pt->v[ib],&ref,&tag);
+        if ( tag || ref ) {
+          if ( !pt->xt ) {
+            mesh->xt++;
+            pt->xt = mesh->xt;
+          }
+          pxt = &mesh->xtetra[pt->xt];
+          pxt->ref[i]  = ref;
+          pxt->tag[i] |= tag;
+        }
+      }
+    }
+  }
+#endif
 
   for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];

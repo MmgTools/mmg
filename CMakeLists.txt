@@ -77,10 +77,22 @@ ENDIF ()
 
 ###############################################################################
 #####
+#####         Remove compilation of singul.c if not needed
+#####
+###############################################################################
+SET(REMOVE_FILE "${MMG_SOURCE_DIR}/singul.c")
+# Should we add insertion of singularities part
+OPTION ( INSER_SINGULARITIES "Compile the part of code that allow to insert singularties" OFF)
+IF ( INSER_SINGULARITIES )
+    SET(CMAKE_C_FLAGS "-DSINGUL ${CMAKE_C_FLAGS}")
+    SET(REMOVE_FILE "")
+ENDIF()
+
+###############################################################################
+#####
 #####         Sources and libraries
 #####
 ###############################################################################
-
 # Header files
 INCLUDE_DIRECTORIES(${MMG_SOURCE_DIR})
 # Source files
@@ -90,7 +102,7 @@ FILE(
   ${MMG_SOURCE_DIR}/*.c   ${MMG_SOURCE_DIR}/*.h
   )
 LIST(REMOVE_ITEM source_files
-  ${MMG_SOURCE_DIR}/mmg3d.c ${MMG_SOURCE_DIR}/libmmg3d5.c )
+  ${MMG_SOURCE_DIR}/mmg3d.c ${MMG_SOURCE_DIR}/libmmg3d5.c ${REMOVE_FILE})
 FILE(
   GLOB
   main_file
@@ -216,23 +228,30 @@ INSTALL(FILES ${MMG_SOURCE_DIR}/mmg3d_redefine.h DESTINATION ${CMAKE_INSTALL_PRE
 OPTION ( TEST_LIBMMG3D5 "Compile tests of library" OFF)
 IF ( TEST_LIBMMG3D5 )
   IF ( LIBMMG3D5_STATIC )
-    ADD_EXECUTABLE(libmmg5_example1 ${MMG_SOURCE_DIR}/../libexamples/example1/main.c)
+    IF ( INSER_SINGULARITIES AND TEST_LIBMMG3D5 )
+      MESSAGE(WARNING "Test \"libmmg5_example1\" not available with the insertion of singularities flag set to \"ON\"")
+    ELSE()
+      ADD_EXECUTABLE(libmmg5_example1 ${MMG_SOURCE_DIR}/../libexamples/example1/main.c)
+      TARGET_LINK_LIBRARIES(libmmg5_example1 mmg3d5_a)
+      INSTALL(TARGETS libmmg5_example1 RUNTIME DESTINATION bin )
+    ENDIF()
     ADD_EXECUTABLE(libmmg5_example2  ${MMG_SOURCE_DIR}/../libexamples/example2/mmg3d.c)
-    TARGET_LINK_LIBRARIES(libmmg5_example1 mmg3d5_a)
     TARGET_LINK_LIBRARIES(libmmg5_example2 mmg3d5_a)
-    INSTALL(TARGETS libmmg5_example1 RUNTIME DESTINATION bin )
     INSTALL(TARGETS libmmg5_example2 RUNTIME DESTINATION bin )
   ELSEIF ( LIBMMG3D5_SHARED )
-    ADD_EXECUTABLE(libmmg5_example1 ${MMG_SOURCE_DIR}/../libexamples/example1/main.c)
+    IF ( INSER_SINGULARITIES AND TEST_LIBMMG3D5 )
+      MESSAGE(WARNING "Test \"libmmg5_example1\" not available with the insertion of singularities flag set to \"ON\"")
+    ELSE()
+      ADD_EXECUTABLE(libmmg5_example1 ${MMG_SOURCE_DIR}/../libexamples/example1/main.c)
+      TARGET_LINK_LIBRARIES(libmmg5_example1 mmg3d5_so)
+      INSTALL(TARGETS libmmg5_example1 RUNTIME DESTINATION bin )
+    ENDIF()
     ADD_EXECUTABLE(libmmg5_example2  ${MMG_SOURCE_DIR}/../libexamples/example2/mmg3d.c)
-    TARGET_LINK_LIBRARIES(libmmg5_example1 mmg3d5_so)
     TARGET_LINK_LIBRARIES(libmmg5_example2 mmg3d5_so)
-    INSTALL(TARGETS libmmg5_example1 RUNTIME DESTINATION bin )
     INSTALL(TARGETS libmmg5_example2 RUNTIME DESTINATION bin )
   ELSE ()
     MESSAGE(WARNING "You must activate the compilation of the static or shared mmg3d5 library to compile this tests." )
   ENDIF ()
-
 ENDIF()
 
 ###############################################################################

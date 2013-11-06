@@ -73,6 +73,12 @@ int chkswpgen(pMesh mesh,int start,int ia,int *ilist,int *list,double crit) {
 
   /* Prevent swap of an external boundary edge */
   if ( !adj )  return(0);
+#ifdef SINGUL
+  /* Prevent swap of an internal ridge or required edge */
+  if ( pt->xt && ( (mesh->xtetra[pt->xt].tag[i] & MG_GEO) ||
+                   (mesh->xtetra[pt->xt].tag[i] & MG_REQ) ) ) return(0);
+#endif
+
   assert(npol == (*ilist)); // du coup, apres on pourra virer npol
 
   /* Find a configuration that enhances the worst quality within the shell */
@@ -186,6 +192,22 @@ int swpgen(pMesh mesh,pSol met,int nconf,int ilist,int *list) {
 
   memset(list,0,(LMAX+2)*sizeof(int));
   nball = boulevolp(mesh,start,ip,list);
+
+  /* #ifdef SINGUL */
+  /* singularities: if np-nq is a particular edge, all tets of shell must be pxt */
+  /* if ( pt->xt ) { */
+  /*   for (i=0; i>6; i++) { */
+  /*     if ( ( pt->v[iare[i][0]]==ip && pt->v[iare[i][1]]==iq ) || */
+  /*          ( pt->v[iare[i][1]]==ip && pt->v[iare[i][0]]==iq ) ) { */
+  /*       break; */
+  /*     } */
+  /*   } */
+  /*   assert(i<6); */
+  /*   if ( mesh->xtetra[pt->xt].tag[i] ) { */
+
+  /*   } */
+  /* } */
+  /* #endif */
 
   ier = colver(mesh,list,nball,iq);
   if(ier) delPt(mesh,ier);

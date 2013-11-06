@@ -3,8 +3,12 @@
 extern Info  info;
 
 
-int scaleMesh(pMesh mesh,pSol met) {
+int scaleMesh(pMesh mesh,pSol met,pSingul sing) {
   pPoint    ppt;
+#ifdef SINGUL
+  psPoint   ppts;
+  double    deltb,delta[3];
+#endif
   double    dd;
   int       i,k;
 
@@ -52,6 +56,32 @@ int scaleMesh(pMesh mesh,pSol met) {
       met->m[k] *= dd;
   }
 
+#ifdef SINGUL
+  /* 2nd mesh (sing) is quarter sized */
+  /* Get the size of sing in every direction */
+  if ( info.sing && sing->ns ) {
+    deltb = 0.0;
+
+    for (i=0; i<mesh->dim; i++) {
+      delta[i] = fabs(sing->max[i]-sing->min[i]);
+      if ( delta[i] > deltb )  deltb = delta[i];   // deltb = max dimension
+    }
+    if ( deltb < EPSD ) {
+      fprintf(stdout,"  ## Unable to scale mesh\n");
+      return(0);
+    }
+
+    /* centering */
+    dd = 1.0 / deltb;
+    for (k=1; k<=sing->ns; k++) {
+      ppts = &sing->point[k];
+      for (i=0; i<mesh->dim; i++) {
+        ppts->c[i] = SIZE * (dd * (ppts->c[i]-sing->min[i])) +
+          0.5 * (1.0 - SIZE*dd*delta[i]);
+      }
+    }
+  }
+#endif
   return(1);
 }
 

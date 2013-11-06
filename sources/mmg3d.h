@@ -29,11 +29,25 @@
 
 #define MG_SMSGN(a,b)  (((double)(a)*(double)(b) > (0.0)) ? (1) : (0))
 
-#define RETURN_AND_FREE(mesh,met,val)do         \
+#ifdef SINGUL
+#define RETURN_AND_FREE(mesh,met,sing,val)do    \
+    {                                           \
+      freeAll(mesh,met,sing);                   \
+      return(val);                              \
+    }while(0)
+#else
+#define RETURN_AND_FREE(mesh,met,sing,val)do    \
     {                                           \
       freeAll(mesh,met);                        \
       return(val);                              \
     }while(0)
+#endif
+
+#ifdef SINGUL
+#define NO_WARN_ON_SING
+#else
+//#define NO_WARN_ON_SING __attribute__((unused))
+#endif
 
 /* numerical accuracy */
 #define ALPHAD    20.7846096908265    //0.04811252243247      /* 12*sqrt(3) */
@@ -51,6 +65,9 @@
 #define LMAX      10240
 #define BADKAL    0.2
 #define NULKAL    1.e-30
+#ifdef SINGUL
+#define EPS2      1.e-12
+#endif
 
 #define NPMAX   1000000
 #define NAMAX    200000
@@ -125,6 +142,16 @@ typedef struct {
   int    *link;
 } Bucket;
 typedef Bucket * pBucket;
+
+#ifdef SINGUL
+typedef struct {
+  double   c[3],cb[4]; /**< c: coor of entrance/exit point, cb: bary coor of entrance/exit */
+  int      kel,key; /**< kel: elt in which we travel, key: location of entrance or exit */
+  int      np; /**< global indice of entrance point */
+  char     tag; /**< tag of edge */
+
+} Travel;
+#endif
 
 /* bucket */
 pBucket newBucket(pMesh ,int );
@@ -224,7 +251,7 @@ int  movbdyrefpt(pMesh mesh, int *listv, int ilistv, int *lists, int ilists);
 int  movbdynompt(pMesh mesh, int *listv, int ilistv, int *lists, int ilists);
 int  movbdyridpt(pMesh mesh, int *listv, int ilistv, int *lists, int ilists);
 double caltri(pMesh mesh,pTria ptt);
-int  scaleMesh(pMesh mesh,pSol met);
+int  scaleMesh(pMesh mesh,pSol met,pSingul sin);
 int  unscaleMesh(pMesh mesh,pSol met);
 int  chkswpbdy(pMesh mesh,int *list,int ilist,int it1,int it2);
 int  swpbdy(pMesh mesh,pSol met,int *list,int ret,int it1);
@@ -246,8 +273,19 @@ void outqua(pMesh mesh,pSol met);
 int  badelt(pMesh mesh,pSol met);
 int prilen(pMesh mesh,pSol met);
 int DoSol(pMesh mesh,pSol met,Info* info);
+
 #ifdef USE_SCOTCH
 int renumbering(int vertBoxNbr, pMesh mesh, pSol sol);
+#endif
+
+#ifdef SINGUL
+int  inserSingul(pMesh mesh, pSol met, pSingul singul);
+int  creaEdge(pMesh mesh, pSol met, Travel *trav, char tag);
+int  creaPoint(pMesh mesh, pSol met,int iel, double c[3], double cb[4], char tag);
+int  seekEdge(pMesh mesh, pSol met, psPoint ppt0, psPoint ppt1,Travel *trav, int *lastet);
+int  seekPoint(pMesh mesh, psPoint ppt, double cb[4]);
+int  split3cb(pMesh mesh, pSol met, int k, int ifac, double o[3],double cb[4], int *ip);
+int  split4cb(pMesh mesh, pSol met, int k, double o[3], double cb[4],int *ip);
 #endif
 
 int meancur(pMesh mesh,int np,double c[3],int ilist,int *list,double h[3]);

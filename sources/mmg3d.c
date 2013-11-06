@@ -54,6 +54,9 @@ static void usage(char *prog) {
   fprintf(stdout,"-in  file  input triangulation\n");
   fprintf(stdout,"-out file  output triangulation\n");
   fprintf(stdout,"-sol file  load solution file\n");
+#ifdef SINGUL
+  fprintf(stdout,"-sing file load file containing singularities\n");
+#endif
 
   fprintf(stdout,"\n**  Parameters\n");
   fprintf(stdout,"-ar val    angle detection\n");
@@ -74,8 +77,7 @@ static void usage(char *prog) {
   exit(EXIT_FAILURE);
 }
 
-
-static int parsar(int argc,char *argv[],pMesh mesh,pSol met) {
+static int parsar(int argc,char *argv[],pMesh mesh,pSol met,pSingul sing) {
   int     i;
   char   *ptr;
 
@@ -198,6 +200,19 @@ static int parsar(int argc,char *argv[],pMesh mesh,pSol met) {
             fprintf(stderr,"Missing filname for %c%c%c\n",argv[i-1][1],argv[i-1][2],argv[i-1][3]);
             usage(argv[0]);
           }
+#ifdef SINGUL
+        } else if ( !strcmp(argv[i],"-sing") ) {
+          if ( ++i < argc && isascii(argv[i][0]) && argv[i][0]!='-' ) {
+            sing->namein = (char*) calloc(strlen(argv[i])+1,sizeof(char));
+            strcpy(sing->namein,argv[i]);
+            info.sing = 1;
+          }
+	      else {
+            fprintf(stderr,"Missing filname for %c%c%c\n",
+                    argv[i-1][1],argv[i-1][2],argv[i-1][3]);
+            usage(argv[0]);
+          }
+#endif
         }
         break;
       case 'v':
@@ -281,7 +296,11 @@ static int parsar(int argc,char *argv[],pMesh mesh,pSol met) {
 }
 
 /** Deallocations before return */
-void freeAll(pMesh mesh,pSol met){
+void freeAll(pMesh mesh,pSol met
+#ifdef SINGUL
+             ,pSingul singul
+#endif
+             ){
   /* mesh */
   free(mesh->point);
   mesh->point = NULL;
@@ -327,6 +346,23 @@ void freeAll(pMesh mesh,pSol met){
     free(met->m);
     met->m = NULL;
   }
+#ifdef SINGUL
+  /* singul */
+  if ( info.sing ) {
+    if ( singul->namein ) {
+      free(singul->namein);
+      singul->namein=NULL;
+    }
+    if ( singul->point ) {
+      free(singul->point);
+      singul->point=NULL;
+    }
+    if ( singul->edge ) {
+      free(singul->edge);
+      singul->edge=NULL;
+    }
+  }
+#endif
 }
 
 static void endcod() {
@@ -357,6 +393,7 @@ static void setfunc(pMesh mesh,pSol met) {
 int main(int argc,char *argv[]) {
   Mesh      mesh;
   Sol       met;
+  Singul    sing;
   int       ier;
   char      stim[32];
 
@@ -392,23 +429,26 @@ int main(int argc,char *argv[]) {
   info.nomove   = 0;
   info.noinsert = 0;
   info.fem      = 0;
+#ifdef SINGUL
+  info.sing     = 0;
+#endif
 #ifdef USE_SCOTCH
   info.renum    = 1;
 #endif
   met.size      = 1;
 
   /* command line */
-  if ( !parsar(argc,argv,&mesh,&met) )  return(MMG5_STRONGFAILURE);
+  if ( !parsar(argc,argv,&mesh,&met,&sing) )  return(MMG5_STRONGFAILURE);
   /* load data */
   fprintf(stdout,"\n  -- INPUT DATA\n");
   chrono(ON,&info.ctim[1]);
   /* read mesh file */
-  if ( !loadMesh(&mesh) ) RETURN_AND_FREE(&mesh,&met,MMG5_STRONGFAILURE);
+  if ( !loadMesh(&mesh) ) RETURN_AND_FREE(&mesh,&met,&sing,MMG5_STRONGFAILURE);
   met.npmax = mesh.npmax;
   /* read metric if any */
   ier = loadMet(&met);
   if ( !ier )
-    RETURN_AND_FREE(&mesh,&met,MMG5_STRONGFAILURE);
+    RETURN_AND_FREE(&mesh,&met,&sing,MMG5_STRONGFAILURE);
   else if ( ier > 0 && met.np != mesh.np ) {
     fprintf(stdout,"  ## WARNING: WRONG SOLUTION NUMBER. IGNORED\n");
     free(met.m);
@@ -416,8 +456,12 @@ int main(int argc,char *argv[]) {
     met.np = 0;
   } else if ( met.size!=1 ) {
     fprintf(stdout,"  ## ERROR: ANISOTROPIC METRIC NOT IMPLEMENTED.\n");
-    RETURN_AND_FREE(&mesh,&met,MMG5_STRONGFAILURE);
+    RETURN_AND_FREE(&mesh,&met,&sing,MMG5_STRONGFAILURE);
   }
+#ifdef SINGUL
+  if ( info.sing )
+    if ( !loadSingul(&sing) ) RETURN_AND_FREE(&mesh,&met,&sing,MMG5_STRONGFAILURE);
+#endif
 
   chrono(OFF,&info.ctim[1]);
   printim(info.ctim[1].gdif,stim);
@@ -429,18 +473,30 @@ int main(int argc,char *argv[]) {
   if ( abs(info.imprim) > 0 )  outqua(&mesh,&met);
   fprintf(stdout,"\n  %s\n   MODULE MMG3D: IMB-LJLL : %s (%s)\n  %s\n",MG_STR,MG_VER,MG_REL,MG_STR);
   if ( info.imprim )   fprintf(stdout,"\n  -- PHASE 1 : ANALYSIS\n");
-  if ( !scaleMesh(&mesh,&met) ) RETURN_AND_FREE(&mesh,&met,MMG5_STRONGFAILURE);
+  if ( !scaleMesh(&mesh,&met,&sing) ) RETURN_AND_FREE(&mesh,&met,&sing,MMG5_STRONGFAILURE);
   if ( info.iso ) {
     if ( !met.np ) {
       fprintf(stdout,"\n  ## ERROR: A VALID SOLUTION FILE IS NEEDED \n");
-      RETURN_AND_FREE(&mesh,&met,MMG5_STRONGFAILURE);
+      RETURN_AND_FREE(&mesh,&met,&sing,MMG5_STRONGFAILURE);
     }
-    if ( !mmg3d2(&mesh,&met) ) RETURN_AND_FREE(&mesh,&met,MMG5_STRONGFAILURE);
+    if ( !mmg3d2(&mesh,&met) ) RETURN_AND_FREE(&mesh,&met,&sing,MMG5_STRONGFAILURE);
   }
-#ifdef DEBUG
-  if ( !met.np && !DoSol(&mesh,&met,&info) ) RETURN_AND_FREE(&mesh,&met,MMG5_LOWFAILURE);
+
+#ifdef SINGUL
+  if ( info.sing && !inserSingul(&mesh,&met,&sing) )
+    RETURN_AND_FREE(&mesh,&met,&sing,MMG5_STRONGFAILURE);
+  else {
+    chrono(OFF,&info.ctim[2]);
+    printim(info.ctim[2].gdif,stim);
+    fprintf(stdout,"  -- INSERTION OF SINGULARITIES COMPLETED.     %s\n",stim);
+    chrono(ON,&info.ctim[2]);
+  }
 #endif
-  if ( !analys(&mesh) ) RETURN_AND_FREE(&mesh,&met,MMG5_LOWFAILURE);
+
+#ifdef DEBUG
+  if ( !met.np && !DoSol(&mesh,&met,&info) ) RETURN_AND_FREE(&mesh,&met,&sing,MMG5_LOWFAILURE);
+#endif
+  if ( !analys(&mesh) ) RETURN_AND_FREE(&mesh,&met,&sing,MMG5_LOWFAILURE);
 
   if ( info.imprim > 4 && !info.iso && met.m ) prilen(&mesh,&met);
 
@@ -456,15 +512,15 @@ int main(int argc,char *argv[]) {
   if ( !mmg3d1(&mesh,&met) ){
     if ( !(mesh.adja) && !hashTetra(&mesh) ) {
       fprintf(stdout,"  ## Hashing problem. Unable to save mesh.\n");
-      RETURN_AND_FREE(&mesh,&met,MMG5_STRONGFAILURE);
+      RETURN_AND_FREE(&mesh,&met,&sing,MMG5_STRONGFAILURE);
     }
     if ( !unscaleMesh(&mesh,&met) )
-      RETURN_AND_FREE(&mesh,&met,MMG5_STRONGFAILURE);
+      RETURN_AND_FREE(&mesh,&met,&sing,MMG5_STRONGFAILURE);
     if ( !saveMesh(&mesh) )
-      RETURN_AND_FREE(&mesh,&met,MMG5_STRONGFAILURE);
+      RETURN_AND_FREE(&mesh,&met,&sing,MMG5_STRONGFAILURE);
     if ( met.m && !saveMet(&mesh,&met) )
-      RETURN_AND_FREE(&mesh,&met,MMG5_STRONGFAILURE);
-    RETURN_AND_FREE(&mesh,&met,MMG5_LOWFAILURE);
+      RETURN_AND_FREE(&mesh,&met,&sing,MMG5_STRONGFAILURE);
+    RETURN_AND_FREE(&mesh,&met,&sing,MMG5_LOWFAILURE);
   }
 
   chrono(OFF,&info.ctim[3]);
@@ -480,12 +536,15 @@ int main(int argc,char *argv[]) {
 
   chrono(ON,&info.ctim[1]);
   if ( info.imprim )  fprintf(stdout,"\n  -- WRITING DATA FILE %s\n",mesh.nameout);
-  if ( !unscaleMesh(&mesh,&met) ) { RETURN_AND_FREE(&mesh,&met,MMG5_STRONGFAILURE);}
-  if ( !saveMesh(&mesh) )         { RETURN_AND_FREE(&mesh,&met,MMG5_STRONGFAILURE);}
-  if ( !saveMet(&mesh,&met) )     { RETURN_AND_FREE(&mesh,&met,MMG5_STRONGFAILURE);}
+  if ( !unscaleMesh(&mesh,&met) )
+    RETURN_AND_FREE(&mesh,&met,&sing,MMG5_STRONGFAILURE);
+  if ( !saveMesh(&mesh) )
+    RETURN_AND_FREE(&mesh,&met,&sing,MMG5_STRONGFAILURE);
+  if ( !saveMet(&mesh,&met) )
+    RETURN_AND_FREE(&mesh,&met,&sing,MMG5_STRONGFAILURE);
   chrono(OFF,&info.ctim[1]);
   if ( info.imprim )  fprintf(stdout,"  -- WRITING COMPLETED\n");
 
   /* free mem */
-  RETURN_AND_FREE(&mesh,&met,MMG5_SUCCESS);
+  RETURN_AND_FREE(&mesh,&met,&sing,MMG5_SUCCESS);
 }

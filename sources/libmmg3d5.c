@@ -15,7 +15,9 @@
  *    option_i[ MMG5_noinsert] = [1/0]     , avoid/allow point insertion/deletion;
  *    option_i[   MMG5_noswap] = [1/0]     , avoid/allow edge or face flipping;
  *    option_i[   MMG5_nomove] = [1/0]     , avoid/allow point relocation;
- *    option_i[MMG5_renum] = [1/0]     , Turn on/off the renumbering using SCOTCH;
+ *    option_i[    MMG5_renum] = [1/0]     , Turn on/off the renumbering using SCOTCH;
+ *    option_i[    MMG5_sing ] = [1/0]     , Turn on/off the insertion of singularities
+ *                                           (need to compile with -DSINGUL flag);
  *
  *    option_d[  MMG5_dhd] = [val]     , angle detection;
  *    option_d[ MMG5_hmin] = [val]     , minimal mesh size;
@@ -82,7 +84,12 @@ void setfunc(pMesh mesh,pSol met) {
 }
 
 /** Deallocations before return */
-void freeAll(pMesh mesh,pSol met){
+void freeAll(pMesh mesh,pSol met
+#ifdef SINGUL
+             ,pSingul singul
+#endif
+             ){
+
   /* mesh */
   free(mesh->point);
   mesh->point = NULL;
@@ -116,6 +123,19 @@ void freeAll(pMesh mesh,pSol met){
     free(met->m);
     met->m = NULL;
   }
+#ifdef SINGUL
+  /* singul */
+  if ( info.sing ) {
+    if ( singul->point ) {
+      free(singul->point);
+      singul->point=NULL;
+    }
+    if ( singul->edge ) {
+      free(singul->edge);
+      singul->edge=NULL;
+    }
+  }
+#endif
 }
 
 /** Recover mesh data */
@@ -343,7 +363,7 @@ int packMesh(pMesh mesh,pSol met) {
 }
 
 /** Initialization of option tables with default values */
-void mmg3dinit(int opt_i[9],double opt_d[6]) {
+void mmg3dinit(int opt_i[10],double opt_d[6]) {
 
   /* default values for first tab (integer) */
   opt_i[   MMG5_imprim] = -99; /**< [-10..10],Tune level of imprim */
@@ -370,7 +390,7 @@ void mmg3dinit(int opt_i[9],double opt_d[6]) {
 }
 
 /** Store user options in the info structure */
-void stockOption(int opt_i[9],double opt_d[6],pMesh mesh){
+void stockOption(int opt_i[10],double opt_d[6],pMesh mesh){
 
   /* recovering of first option table (integers) */
   info.imprim   = opt_i[MMG5_imprim];
@@ -393,6 +413,11 @@ void stockOption(int opt_i[9],double opt_d[6],pMesh mesh){
 #else
   info.renum    = 0;
 #endif
+#ifdef SINGUL
+  info.sing     = opt_i[MMG5_sing];
+#else
+  info.sing     = 0;
+#endif
 
   /* recovering of second option table (doubles) */
   info.hmin     = opt_d[MMG5_hmin];
@@ -411,8 +436,16 @@ void stockOption(int opt_i[9],double opt_d[6],pMesh mesh){
 
 }
 
-int mmg3dlib(int opt_i[9],double opt_d[6],pMesh mesh,pSol met) {
+int mmg3dlib(int opt_i[10],double opt_d[6],pMesh mesh,pSol met
+#ifdef SINGUL
+             ,pSingul sing
+#endif
+             ) {
+
   char      stim[32];
+#ifndef SINGUL
+  pSingul sing;
+#endif
 
   fprintf(stdout,"  -- MMG3d, Release %s (%s) \n",MG_VER,MG_REL);
   fprintf(stdout,"     %s\n",MG_CPY);
@@ -447,6 +480,10 @@ int mmg3dlib(int opt_i[9],double opt_d[6],pMesh mesh,pSol met) {
     fprintf(stdout,"  ## ERROR: ANISOTROPIC METRIC NOT IMPLEMENTED.\n");
     return(MMG5_STRONGFAILURE);
   }
+#ifdef SINGUL
+  if ( info.sing )
+    if ( !loadSingul(sing) ) return(MMG5_STRONGFAILURE);
+#endif
 
   chrono(OFF,&(info.ctim[1]));
   printim(info.ctim[1].gdif,stim);
@@ -458,7 +495,7 @@ int mmg3dlib(int opt_i[9],double opt_d[6],pMesh mesh,pSol met) {
   if ( abs(info.imprim) > 0 )  outqua(mesh,met);
   fprintf(stdout,"\n  %s\n   MODULE MMG3D: IMB-LJLL : %s (%s)\n  %s\n",MG_STR,MG_VER,MG_REL,MG_STR);
   if ( info.imprim )   fprintf(stdout,"\n  -- PHASE 1 : ANALYSIS\n");
-  if ( !scaleMesh(mesh,met) ) return(MMG5_STRONGFAILURE);
+  if ( !scaleMesh(mesh,met,sing) ) return(MMG5_STRONGFAILURE);
 
   if ( info.iso ) {
     if ( !met->np ) {
@@ -467,14 +504,26 @@ int mmg3dlib(int opt_i[9],double opt_d[6],pMesh mesh,pSol met) {
     }
     if ( !mmg3d2(mesh,met) ) return(MMG5_STRONGFAILURE);
   }
+
+#ifdef SINGUL
+  if ( info.sing && !inserSingul(mesh,met,sing) )
+    return(MMG5_STRONGFAILURE);
+  else {
+    chrono(OFF,&info.ctim[2]);
+    printim(info.ctim[2].gdif,stim);
+    fprintf(stdout,"  -- INSERTION OF SINGULARITIES COMPLETED.     %s\n",stim);
+    chrono(ON,&info.ctim[2]);
+  }
+#endif
+
 #ifdef DEBUG
   if ( !met->np && !DoSol(mesh,met,info) ) {
-    if ( !unscaleMesh(mesh,met) )  return(MMG5_STRONGFAILURE);
+  if ( !unscaleMesh(mesh,met) )  return(MMG5_STRONGFAILURE);
     return(mesh,met,MMG5_LOWFAILURE);
   }
 #endif
   if ( !analys(mesh) ) {
-    if ( !unscaleMesh(mesh,met) )  return(MMG5_STRONGFAILURE);
+  if ( !unscaleMesh(mesh,met) )  return(MMG5_STRONGFAILURE);
     return(MMG5_LOWFAILURE);
   }
 
@@ -512,7 +561,7 @@ int mmg3dlib(int opt_i[9],double opt_d[6],pMesh mesh,pSol met) {
   chrono(ON,&(info.ctim[1]));
   if ( info.imprim )  fprintf(stdout,"\n  -- MESH PACKED UP\n");
   if ( !unscaleMesh(mesh,met) )  return(MMG5_STRONGFAILURE);
-  if ( !packMesh(mesh,met) )     return(MMG5_STRONGFAILURE);
+  if ( !packMesh(mesh,met) )          return(MMG5_STRONGFAILURE);
   met->np = mesh->np;
   chrono(OFF,&(info.ctim[1]));
 

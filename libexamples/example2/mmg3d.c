@@ -34,6 +34,9 @@ static void usage(char *prog) {
   fprintf(stdout,"-in  file  input triangulation\n");
   fprintf(stdout,"-out file  output triangulation\n");
   fprintf(stdout,"-sol file  load solution file\n");
+#ifdef SINGUL
+  fprintf(stdout,"-sing file load file containing singularities\n");
+#endif
 
   fprintf(stdout,"\n**  Parameters\n");
   fprintf(stdout,"-ar val    angle detection\n");
@@ -55,7 +58,7 @@ static void usage(char *prog) {
 }
 
 
-static int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
+static int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,pSingul sing) {
   int     i;
   char   *ptr;
 
@@ -171,6 +174,19 @@ static int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
             fprintf(stderr,"Missing filname for %c%c%c\n",argv[i-1][1],argv[i-1][2],argv[i-1][3]);
             usage(argv[0]);
           }
+#ifdef SINGUL
+        } else if ( !strcmp(argv[i],"-sing") ) {
+          if ( ++i < argc && isascii(argv[i][0]) && argv[i][0]!='-' ) {
+            sing->namein = (char*) calloc(strlen(argv[i])+1,sizeof(char));
+            strcpy(sing->namein,argv[i]);
+            opt_i[MMG5_sing] = 1;
+          }
+          else {
+            fprintf(stderr,"Missing filname for %c%c%c\n",
+                    argv[i-1][1],argv[i-1][2],argv[i-1][3]);
+            usage(argv[0]);
+          }
+#endif
         }
         break;
       case 'v':
@@ -255,7 +271,7 @@ static int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
 
 /** Deallocations of names */
 static inline
-void freeName(MMG5_pMesh mesh,MMG5_pSol met) {
+void freeName(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSingul singul) {
 
   free(mesh->nameout);
   mesh->nameout = NULL;
@@ -269,6 +285,12 @@ void freeName(MMG5_pMesh mesh,MMG5_pSol met) {
     free(met->nameout);
     met->nameout = NULL;
   }
+#ifdef SINGUL
+  if ( info.sing && singul->namein ) {
+    free(singul->namein);
+    singul->namein = NULL;
+  }
+#endif
 }
 
 static inline void endcod() {
@@ -282,6 +304,7 @@ static inline void endcod() {
 int main(int argc,char *argv[]) {
   MMG5_Mesh      mesh;
   MMG5_Sol       met;
+  MMG5_Singul    sing;
   int            ier;
   char           stim[32];
 
@@ -297,7 +320,7 @@ int main(int argc,char *argv[]) {
   MMG5_mmg3dinit(opt_i,opt_d);
 
   /* command line */
-  if ( !parsar(argc,argv,&mesh,&met) )  return(1);
+  if ( !parsar(argc,argv,&mesh,&met,&sing) )  return(1);
 
   /* infos needed to call MMG5_loadMesh: info.iso, info.imprim, info.mem */
   info.iso    = opt_i[MMG5_iso];
@@ -309,8 +332,12 @@ int main(int argc,char *argv[]) {
   chrono(ON,&ctim[1]);
   /* read mesh file */
   if ( !MMG5_loadMesh(&mesh) ) {
-    MMG5_freeAll(&mesh,&met);
-    freeName(&mesh,&met);
+    MMG5_freeAll(&mesh,&met
+#ifdef SINGUL
+                 ,&sing
+#endif
+                 );
+    freeName(&mesh,&met,&sing);
     return(MMG5_STRONGFAILURE);
   }
 
@@ -320,28 +347,53 @@ int main(int argc,char *argv[]) {
   met.npmax = mesh.npmax;
   ier = MMG5_loadMet(&met);
   if ( !ier ) {
-    MMG5_freeAll(&mesh,&met);
-    freeName(&mesh,&met);
+    MMG5_freeAll(&mesh,&met
+#ifdef SINGUL
+                 ,&sing
+#endif
+                 );
+    freeName(&mesh,&met,&sing);
     return(MMG5_STRONGFAILURE);
   }
-
+#ifdef SINGUL
+  if ( info.sing ) {
+    ier = MMG5_loadSingul(&sing);
+    if ( !ier ) {
+      MMG5_freeAll(&mesh,&met,&sing);
+      freeName(&mesh,&met,&sing);
+      return(MMG5_STRONGFAILURE);
+    }
+  }
+#endif
   chrono(OFF,&ctim[1]);
   printim(ctim[1].gdif,stim);
   fprintf(stdout,"  -- DATA READING COMPLETED.     %s\n",stim);
 
-  ier = MMG5_mmg3dlib(opt_i,opt_d,&mesh,&met);
+  ier = MMG5_mmg3dlib(opt_i,opt_d,&mesh,&met
+#ifdef SINGUL
+                      ,&sing
+#endif
+                      );
 
   if ( ier != MMG5_STRONGFAILURE ) {
     chrono(ON,&ctim[1]);
     if ( opt_i[MMG5_imprim] )  fprintf(stdout,"\n  -- WRITING DATA FILE %s\n",mesh.nameout);
     if ( !MMG5_saveMesh(&mesh) )         {
-      MMG5_freeAll(&mesh,&met);
-      freeName(&mesh,&met);
+      MMG5_freeAll(&mesh,&met
+#ifdef SINGUL
+                   ,&sing
+#endif
+                   );
+      freeName(&mesh,&met,&sing);
       return(EXIT_FAILURE);
     }
     if ( !MMG5_saveMet(&mesh,&met) )     {
-      MMG5_freeAll(&mesh,&met);
-      freeName(&mesh,&met);
+      MMG5_freeAll(&mesh,&met
+#ifdef SINGUL
+                   ,&sing
+#endif
+                   );
+      freeName(&mesh,&met,&sing);
       return(EXIT_FAILURE);
     }
     chrono(OFF,&ctim[1]);
@@ -352,7 +404,11 @@ int main(int argc,char *argv[]) {
   chrono(OFF,&ctim[0]);
   printim(ctim[0].gdif,stim);
   fprintf(stdout,"\n   MMG3D: ELAPSED TIME  %s\n",stim);
-  MMG5_freeAll(&mesh,&met);
-  freeName(&mesh,&met);
+  MMG5_freeAll(&mesh,&met
+#ifdef SINGUL
+               ,&sing
+#endif
+               );
+  freeName(&mesh,&met,&sing);
   return(ier);
 }

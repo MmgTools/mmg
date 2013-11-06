@@ -110,7 +110,16 @@ static int ismaniball(pMesh mesh,pSol sol,int k,int indp) {
     cur++;
   }
   /* 0 value has been snapped accidentally */
-  if ( !res )  return(0);
+  if ( !res ) {
+#ifdef SINGUL
+    if ( !(mesh->point[mesh->tetra[k].v[indp]].tag & MG_REF) ) {
+      fprintf(stdout,"Point with value 0 arounded by points of");
+      fprintf(stdout," same sign=:elt %d, indp %d\n",k,indp);
+    }
+#endif
+    return(0);
+  }
+
 
   /* Fill in list bdy, corresponding to the support tetras of the boundary to be created */
   ibdy = 0;

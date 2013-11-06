@@ -9,6 +9,8 @@
                             *   process but we can save a conform mesh */
 #define MMG5_STRONGFAILURE 2 /**< Return value if we fail and the mesh is non-conform */
 
+#define SIZE 0.75 /**< Size of the mesh of singularities inside the main mesh */
+
 enum MMG5_optIntCod
   {
     MMG5_imprim,\
@@ -20,6 +22,7 @@ enum MMG5_optIntCod
     MMG5_noswap,\
     MMG5_nomove,\
     MMG5_renum,\
+    MMG5_sing,\
   };
 enum MMG5_optDblCod
   {
@@ -97,7 +100,7 @@ typedef struct {
 
 typedef struct {
   double        dhd,hmin,hmax,hgrad,hausd,min[3],max[3],delta,ls;
-  int           mem;
+  int           mem,sing;
   int           renum;
   char          imprim,ddebug,badkal,iso,fem;
   unsigned char noinsert, noswap, nomove;
@@ -136,6 +139,23 @@ typedef struct {
 } MMG5_Sol;
 typedef MMG5_Sol * MMG5_pSol;
 
+/* structures only use for insertion of singularities (#ifdef SINGUL) */
+typedef struct {
+  double         c[3],n[3];
+  int            flag,tmp,tet;
+  unsigned char  tag;
+} MMG5_sPoint;
+typedef MMG5_sPoint * MMG5_psPoint; /**< structure to store singular points */
+
+typedef struct {
+  char     *namein; /**< name of mesh */
+  double   min[3],max[3]; /**< min and max of coordinates for rescaling */
+  int      ns,na; /**< singular vertices and singular edges number */
+  MMG5_psPoint  point;
+  MMG5_pEdge    edge;
+} MMG5_Singul; /**< structure to store the singularities of a mesh */
+typedef MMG5_Singul * MMG5_pSingul;
+/* end structures for insertion of singularities */
 
 extern MMG5_Info info;
 
@@ -144,18 +164,30 @@ int  MMG5_loadMesh(MMG5_pMesh );
 int  MMG5_saveMesh(MMG5_pMesh );
 int  MMG5_loadMet(MMG5_pSol );
 int  MMG5_saveMet(MMG5_pMesh mesh,MMG5_pSol met);
+#ifdef SINGUL
+int  MMG5_loadSingul(MMG5_pSingul singul);
+#endif
 
 /** free the pMesh and pSol structures */
+#ifdef SINGUL
+void MMG5_freeAll(MMG5_pMesh,MMG5_pSol,MMG5_pSingul);
+#else
 void MMG5_freeAll(MMG5_pMesh,MMG5_pSol);
+#endif
 
 /** stock the user options (opt_i and opt_d) in the "info" structure */
-void MMG5_stockOption(int opt_i[9],double opt_d[6],MMG5_pMesh mesh);
+void MMG5_stockOption(int opt_i[10],double opt_d[6],MMG5_pMesh mesh);
 
 /** initialize to default values opt_i and opt_d */
-void MMG5_mmg3dinit(int opt_i[9],double opt_d[6]);
+void MMG5_mmg3dinit(int opt_i[10],double opt_d[6]);
 
 
 /** library */
-int  MMG5_mmg3dlib(int opt_i[9],double opt_d[6],MMG5_pMesh mesh,MMG5_pSol sol);
+#ifdef SINGUL
+int  MMG5_mmg3dlib(int opt_i[10],double opt_d[6],MMG5_pMesh mesh,MMG5_pSol sol,
+                   MMG5_pSingul singul);
+#else
+int  MMG5_mmg3dlib(int opt_i[10],double opt_d[6],MMG5_pMesh mesh,MMG5_pSol sol);
+#endif
 
 #endif

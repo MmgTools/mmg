@@ -653,3 +653,223 @@ int saveMet(pMesh mesh,pSol met) {
   GmfCloseMesh(outm);
   return(1);
 }
+
+#ifdef SINGUL
+/** read singul data */
+int loadSingul(pSingul singul) {
+  Mesh         mesh;
+  pEdge        pa,pas;
+  pPoint       ppt;
+  psPoint      ppts;
+  float        fp1,fp2,fp3;
+  int          i,k,inm,nr,nre,nc,npr,na,ns;
+  char         *ptr,data[128],*filein;
+#warning: add computation of normal, good tag on singularities
+  filein = singul->namein;
+  strcpy(data,filein);
+  ptr = strstr(data,".mesh");
+  if ( !ptr ) {
+    strcat(data,".meshb");
+    if( !(inm = GmfOpenMesh(data,GmfRead,&mesh.ver,&mesh.dim)) ) {
+      ptr = strstr(data,".mesh");
+      *ptr = '\0';
+      strcat(data,".mesh");
+      if( !(inm = GmfOpenMesh(data,GmfRead,&mesh.ver,&mesh.dim)) ) {
+        fprintf(stderr,"  ** %s  NOT FOUND.\n",data);
+        return(0);
+      }
+    }
+  }
+  else if( !(inm = GmfOpenMesh(data,GmfRead,&mesh.ver,&mesh.dim)) ) {
+    fprintf(stderr,"  ** %s  NOT FOUND.\n",data);
+    return(0);
+  }
+  fprintf(stdout,"  %%%% %s OPENED\n",data);
+
+  mesh.np = GmfStatKwd(inm,GmfVertices);
+  mesh.nt = GmfStatKwd(inm,GmfTriangles);
+  mesh.na = GmfStatKwd(inm,GmfEdges);
+  if ( !mesh.np ) {
+    fprintf(stdout,"  ** MISSING DATA. Exit program.\n");
+    return(0);
+  }
+
+  /* memory allocation */
+  mesh.point = (pPoint)calloc(mesh.np+1,sizeof(Point));
+  assert(mesh.point);
+  if ( mesh.nt ) {
+    mesh.tria = (pTria)calloc(mesh.nt+1,sizeof(Tria));
+    assert(mesh.tria);
+  }
+  if ( mesh.na ) {
+    mesh.edge = (pEdge)calloc(mesh.na+1,sizeof(Edge));
+    assert(mesh.edge);
+  }
+
+  /* find bounding box */
+  for (i=0; i<mesh.dim; i++) {
+    singul->min[i] =  1.e30;
+    singul->max[i] = -1.e30;
+  }
+
+  /* read mesh vertices */
+  GmfGotoKwd(inm,GmfVertices);
+  for (k=1; k<=mesh.np; k++) {
+    ppt = &mesh.point[k];
+    if (mesh.ver == GmfFloat) {
+      GmfGetLin(inm,GmfVertices,&fp1,&fp2,&fp3,&ppt->ref);
+      ppt->c[0] = fp1;
+      ppt->c[1] = fp2;
+      ppt->c[2] = fp3;
+    } else {
+      GmfGetLin(inm,GmfVertices,&ppt->c[0],&ppt->c[1],&ppt->c[2],&ppt->ref);
+    }
+    for (i=0; i<mesh.dim; i++) {
+      if ( ppt->c[i] > singul->max[i] )  singul->max[i] = ppt->c[i];
+      if ( ppt->c[i] < singul->min[i] )  singul->min[i] = ppt->c[i];
+    }
+    ppt->tag  = MG_REF;
+  }
+
+  /* fill singul */
+  /* get required vertices */
+  npr = GmfStatKwd(inm,GmfRequiredVertices);
+  if ( npr ) {
+    GmfGotoKwd(inm,GmfRequiredVertices);
+    for (k=1; k<=npr; k++) {
+      GmfGetLin(inm,GmfRequiredVertices,&i);
+      assert(i <= mesh.np);
+      ppt = &mesh.point[i];
+      ppt->tag |= MG_REQ;
+    }
+  }
+  /* get corners */
+  nc = GmfStatKwd(inm,GmfCorners);
+  if ( nc ) {
+    GmfGotoKwd(inm,GmfCorners);
+    for (k=1; k<=nc; k++) {
+      GmfGetLin(inm,GmfCorners,&i);
+      assert(i <= mesh.np);
+      ppt = &mesh.point[i];
+      if ( !MG_SIN(ppt->tag) ){
+        npr++;
+      }
+      ppt->tag |= MG_CRN;
+    }
+  }
+
+  /* read mesh edges */
+  if ( mesh.na ) {
+    GmfGotoKwd(inm,GmfEdges);
+
+    for (k=1; k<=mesh.na; k++) {
+      pa = &mesh.edge[k];
+      GmfGetLin(inm,GmfEdges,&pa->a,&pa->b,&pa->ref);
+      pa->tag |= MG_REF;
+    }
+  }
+
+#warning: attention, on ne met pas forcement le bon flag aux points (on suppose que les corners des extremites des aretes sont deja la pe)
+
+  /* get ridges */
+  nr = GmfStatKwd(inm,GmfRidges);
+  if ( nr ) {
+    GmfGotoKwd(inm,GmfRidges);
+    for (k=1; k<=nr; k++) {
+      GmfGetLin(inm,GmfRidges,&i);
+      assert(i <= mesh.na);
+      pa = &mesh.edge[i];
+      pa->tag |= MG_GEO;
+      ppt = &mesh.point[pa->a];
+      if ( !(ppt->tag & MG_GEO) ){
+        ppt->tag |= MG_GEO;
+        if ( !MG_SIN(ppt->tag) )  npr++;
+      }
+      ppt = &mesh.point[pa->b];
+      if ( !(ppt->tag & MG_GEO) ){
+        ppt->tag |= MG_GEO;
+        if ( !MG_SIN(ppt->tag) )  npr++;
+      }
+    }
+  }
+  /* get required edges */
+  nre = GmfStatKwd(inm,GmfRequiredEdges);
+  na  = 0;
+  if ( nre ) {
+    GmfGotoKwd(inm,GmfRequiredEdges);
+    for (k=1; k<=nre; k++) {
+      GmfGetLin(inm,GmfRequiredEdges,&i);
+      assert(i <= mesh.na);
+      pa = &mesh.edge[i];
+      if ( !(pa->tag & MG_GEO) ) na++;
+      pa->tag |= MG_REQ;
+      ppt = &mesh.point[pa->a];
+      if ( !(ppt->tag & MG_REQ) ){
+        ppt->tag |= MG_REQ;
+        if ( !MG_SIN(ppt->tag) )  npr++;
+      }
+      ppt = &mesh.point[pa->b];
+      if ( !(ppt->tag & MG_REQ) ){
+        ppt->tag |= MG_REQ;
+        if ( !MG_SIN(ppt->tag) )  npr++;
+      }
+    }
+  }
+
+  singul->ns = npr;
+  ns = 1;
+  if ( singul->ns ) {
+    singul->point = (psPoint)calloc(singul->ns+1,sizeof(sPoint));
+    for ( k=1; k<=mesh.np; k++ ) {
+      ppt = &mesh.point[k];
+      if ( MG_SIN(ppt->tag) || (ppt->tag & MG_GEO) ) {
+        ppts = &singul->point[ns];
+        ppts->c[0] = ppt->c[0];
+        ppts->c[1] = ppt->c[1];
+        ppts->c[2] = ppt->c[2];
+        ppts->tag  = ppt->tag;
+        ppt->tmp   = ns;
+        ns++;
+      }
+    }
+  }
+
+
+  singul->na = nr+na;
+  na = 1;
+  if ( singul->na ) {
+    singul->edge = (pEdge)calloc(singul->na+1,sizeof(Edge));
+    for ( k=1; k<=mesh.na; k++ ) {
+      pa = &mesh.edge[k];
+      if ( (pa->tag & MG_REQ) || (pa->tag & MG_GEO) ) {
+        pas = &singul->edge[na];
+        pas->a = mesh.point[pa->a].tmp;
+        pas->b = mesh.point[pa->b].tmp;
+        pas->tag  = pa->tag;
+        na++;
+      }
+    }
+  }
+
+  /* stats */
+  if ( singul->ns )
+    fprintf(stdout,"     NUMBER OF REQUIRED VERTICES : %8d \n",singul->ns);
+  if ( singul->na )
+    fprintf(stdout,"     NUMBER OF REQUIRED EDGES    : %8d \n",singul->na);
+
+  GmfCloseMesh(inm);
+
+  /* memory free */
+  free (mesh.point);
+  mesh.point=NULL;
+  if ( mesh.na ) {
+    free(mesh.edge);
+    mesh.edge=NULL;
+  }
+  if ( mesh.nt ) {
+    free(mesh.tria);
+    mesh.tria=NULL;
+  }
+  return(1);
+}
+#endif
