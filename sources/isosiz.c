@@ -161,7 +161,8 @@ static double defsizreg(pMesh mesh,pSol met,int nump,int *lists,int ilists) {
 
     pxt   = &mesh->xtetra[mesh->tetra[iel].xt];
     if ( !bezierCP(mesh,&tt,&b,MG_GET(pxt->ori,iface)) ) {
-      printf("%s:%d: Error: function bezierCP return 0\n",__FILE__,__LINE__);
+      fprintf(stdout,"%s:%d: Error: function bezierCP return 0\n",
+              __FILE__,__LINE__);
       exit(EXIT_FAILURE);
     }
 
@@ -302,7 +303,8 @@ static double defsizreg(pMesh mesh,pSol met,int nump,int *lists,int ilists) {
   /* At this point, intm stands for the integral matrix of Taubin's approach : vp[0] and vp[1]
      are the two pr. directions of curvature, and the two curvatures can be inferred from lambdas*/
   if(!eigensym(intm,kappa,vp)){
-    printf("%s:%d: Error: function eigensym return 0\n",__FILE__,__LINE__);
+    fprintf(stdout,"%s:%d: Error: function eigensym return 0\n",
+            __FILE__,__LINE__);
     exit(EXIT_FAILURE);
   }
 

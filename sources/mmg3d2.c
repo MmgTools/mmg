@@ -637,7 +637,8 @@ int chkmaniball(pMesh mesh, int start, char ip){
     k = list[cur] / 4;
     pt = &mesh->tetra[k];
     if( pt->ref == ref ) {
-      printf("   *** Topological problem : non manifold surface at point %d \n",nump);
+      fprintf(stdout,"   *** Topological problem :");
+      fprintf(stdout,"non manifold surface at point %d \n",nump);
       return(0);
     }
   }
@@ -674,7 +675,7 @@ int chkmani(pMesh mesh){
       }
     }
     if ( cnt == 4 ) {
-      printf("Tetra %d : 4 boundary faces \n",k);
+      fprintf(stdout,"Tetra %d : 4 boundary faces \n",k);
       //return(0);
     }
   }
@@ -695,7 +696,7 @@ int chkmani(pMesh mesh){
         ip = idir[i][j];
 
         if(!chkmaniball(mesh,k,ip)){
-          printf("Non orientable implicit surface : ball of point %d\n",pt->v[ip]);
+          fprintf(stdout,"Non orientable implicit surface : ball of point %d\n",pt->v[ip]);
           saveMesh(mesh);
 
           return(0);
@@ -704,7 +705,7 @@ int chkmani(pMesh mesh){
     }
   }
 
-  printf("  *** Manifold implicit surface.\n");
+  fprintf(stdout,"  *** Manifold implicit surface.\n");
   return(1);
 }
 
@@ -730,7 +731,7 @@ int chkmani2(pMesh mesh,pSol sol) {
       if( sol->m[pt->v[j]] == 0.0 ) cnt++;
     }
     if(cnt == 4) {
-      printf("Problem in tetra %d : 4 vertices on implicit boundary",k);
+      fprintf(stdout,"Problem in tetra %d : 4 vertices on implicit boundary",k);
       exit(EXIT_FAILURE);
     }
   }
@@ -751,13 +752,13 @@ int chkmani2(pMesh mesh,pSol sol) {
         ip = idir[i][j];
 
         if(!chkmaniball(mesh,k,ip)){
-          printf("Non orientable implicit surface : ball of point %d\n",pt->v[ip]);
+          fprintf(stdout,"Non orientable implicit surface : ball of point %d\n",pt->v[ip]);
           exit(EXIT_FAILURE);
         }
       }
     }
   }
-  if ( info.ddebug )  printf("  *** Manifold implicit surface.\n");
+  if ( info.ddebug )  fprintf(stdout,"  *** Manifold implicit surface.\n");
   return(1);
 }
 
@@ -1214,7 +1215,9 @@ int chkmanicoll(pMesh mesh,int k,int iface,int iedg,int ndepmin,int ndepplus,cha
 
         /* Only tets of the shell of (np,nq) can be added, unless future ball is non manifold */
         if ( indq == -1 ) {
-          printf("On devrait passer ici TRES rarement : tetra numero %d =  %d %d %d %d , sa ref = %d\n",jel,pt1->v[0],pt1->v[1],pt1->v[2],pt1->v[3],pt1->ref);
+          fprintf(stdout,"On devrait passer ici TRES rarement : ");
+          fprintf(stdout,"tetra numero %d =  %d %d %d %d , sa ref = %d\n",
+                  jel,pt1->v[0],pt1->v[1],pt1->v[2],pt1->v[3],pt1->ref);
           return(0);
         }
 
@@ -1252,7 +1255,9 @@ int chkmanicoll(pMesh mesh,int k,int iface,int iedg,int ndepmin,int ndepplus,cha
 
         /* Only tets of the shell of (np,nq) can be added, unless future ball is non manifold */
         if ( indp == -1 ) {
-          printf("On devrait passer ici TRES rarement : tetra numero %d =  %d %d %d %d , sa ref = %d\n",jel,pt1->v[0],pt1->v[1],pt1->v[2],pt1->v[3],pt1->ref);
+          fprintf(stdout,"On devrait passer ici TRES rarement : ");
+          fprintf(stdout,"tetra numero %d =  %d %d %d %d , sa ref = %d\n",
+                  jel,pt1->v[0],pt1->v[1],pt1->v[2],pt1->v[3],pt1->ref);
           return(0);
         }
 

@@ -558,7 +558,8 @@ int prilen(pMesh mesh, pSol met) {
       nq = pt->v[i1];
 
       if(!hashEdge(&hash,np,nq,0)){
-        printf("%s:%d: Error: function hashEdge return 0\n",__FILE__,__LINE__);
+        fprintf(stdout,"%s:%d: Error: function hashEdge return 0\n",
+                __FILE__,__LINE__);
         exit(EXIT_FAILURE);
       }
     }

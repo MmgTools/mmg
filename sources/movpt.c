@@ -269,7 +269,8 @@ int movbdyregpt(pMesh mesh,int *listv,int ilistv,int *lists,int ilists) {
   tet2tri(mesh,iel,iface,&tt);
 
   if(!bezierCP(mesh,&tt,&b,MG_GET(pxt->ori,iface))){
-    printf("%s:%d: Error: function bezierCP return 0\n",__FILE__,__LINE__);
+    fprintf(stdout,"%s:%d: Error: function bezierCP return 0\n",
+            __FILE__,__LINE__);
     exit(EXIT_FAILURE);
   }
 
@@ -334,7 +335,8 @@ int movbdyregpt(pMesh mesh,int *listv,int ilistv,int *lists,int ilists) {
     }
   }
   if(!bezierInt(&b,uv,o,no,to)){
-    printf("%s:%d: Error: function bezierInt return 0\n",__FILE__,__LINE__);
+    fprintf(stdout,"%s:%d: Error: function bezierInt return 0\n",
+            __FILE__,__LINE__);
     exit(EXIT_FAILURE);
   }
 

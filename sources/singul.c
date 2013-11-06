@@ -61,7 +61,7 @@ int updatevertex(pMesh mesh, pTetra *ptt, int nsfin, pPoint p[4],
   int i ,ip, vois;
 
   if ( !nsfin ) {
-    printf("%s:%d: Error: no tetra\n",__FILE__,__LINE__);
+    fprintf(stdout,"%s:%d: Error: no tetra\n",__FILE__,__LINE__);
     return(0);
   }
 
@@ -99,7 +99,7 @@ int updateedge(pMesh mesh, pTetra *ptt, int nsfin, pPoint p[4], int ia,
   double cbtmp[4];
 
   if ( !nsfin ) {
-    printf("%s:%d: Error: no tetra\n",__FILE__,__LINE__);
+    fprintf(stdout,"%s:%d: Error: no tetra\n",__FILE__,__LINE__);
     return(0);
   }
 
@@ -147,7 +147,7 @@ int updatefac(pMesh mesh, pTetra *ptt, int nsfin, pPoint p[4],
   double cbtmp[4];
 
   if ( !nsfin ) {
-    printf("%s:%d: Error: no tetra\n",__FILE__,__LINE__);
+    fprintf(stdout,"%s:%d: Error: no tetra\n",__FILE__,__LINE__);
     return(0);
   }
 
@@ -226,7 +226,8 @@ int updateunknown(pMesh mesh, pTetra *ptt, int nsfin, pPoint p[4],
   }
 
   else {
-    printf("%s:%d: Error: unexpected case: %d \n",__FILE__,__LINE__,*key);
+    fprintf(stdout,"%s:%d: Error: unexpected case: %d \n",
+            __FILE__,__LINE__,*key);
     return(0);
   }
 }
@@ -265,7 +266,8 @@ int calcvol(double mat[3][3], double *dd) {
 
   if ( (*dd) > 0.0 ) return(1);
   if ( info.ddebug ) {
-    printf("%s:%d: Error: wrong orientation of element\n",__FILE__,__LINE__);
+    fprintf(stdout,"%s:%d: Error: wrong orientation of element\n",
+            __FILE__,__LINE__);
     exit(1);
   }
   return(0);
@@ -698,18 +700,19 @@ int seekPoint(pMesh mesh, psPoint ppt, double cb[4]) {
 
   do {
     if ( !nsfin ) {
-      printf("%s:%d: Error: no tetra\n",__FILE__,__LINE__);
+      fprintf(stdout,"%s:%d: Error: no tetra\n",__FILE__,__LINE__);
       return(0);
     }
     pt = &mesh->tetra[nsfin];
     if ( !pt->v[0] ) {
-      printf("%s:%d: Error: wrong element\n",__FILE__,__LINE__);
+      fprintf(stdout,"%s:%d: Error: wrong element\n",__FILE__,__LINE__);
       return(0);
     }
     if ( pt->flag == basetet ) {
       nstart  = nstart%(mesh->ne)+1;
       if ( nstart == ppt->tet ) {
-        printf("%s:%d: Error: all elements already checked\n",__FILE__,__LINE__);
+        fprintf(stdout,"%s:%d: Error: all elements already checked\n",
+                __FILE__,__LINE__);
         return(0);
       }
 
@@ -743,7 +746,8 @@ int seekPoint(pMesh mesh, psPoint ppt, double cb[4]) {
     dd =  bx*ux + by*uy + bz*uz;
 
     if ( info.ddebug && dd < 0.0 )
-      printf("%s:%d: Warning: wrong orientation of tetra %d\n",__FILE__,__LINE__,nsfin);
+      fprintf(stdout,"%s:%d: Warning: wrong orientation of tetra %d\n",
+              __FILE__,__LINE__,nsfin);
 
     apx = point[0] - p0->c[0];
     apy = point[1] - p0->c[1];
@@ -803,7 +807,7 @@ int seekPoint(pMesh mesh, psPoint ppt, double cb[4]) {
     dd = vol0+vol1+vol2+vol3;
     if ( dd != 0.0 )  dd = 1.0 / dd;
     else {
-      printf("%s:%d: Error: tetrahedra volume is null\n",
+      fprintf(stdout,"%s:%d: Error: tetrahedra volume is null\n",
              __FILE__,__LINE__);
       return(0);
     }
@@ -845,12 +849,12 @@ int seekEdge(pMesh mesh, pSol met, psPoint ppt0, psPoint ppt1,
     e1[2] = ppt1->c[2];
 
     if ( !seekPoint(mesh,ppt0,cb) ) {
-      printf("%s:%d: Error: point not found %e %e %e\n",
+      fprintf(stdout,"%s:%d: Error: point not found %e %e %e\n",
              __FILE__,__LINE__,e0[0],e0[1],e0[2]);
       return(0);
     }
     if ( !creaPoint(mesh, met, ppt0->tet, ppt0->c, cb, ppt0->tag) ) {
-      printf("%s:%d: Error: unable to create point %e %e %e\n",
+      fprintf(stdout,"%s:%d: Error: unable to create point %e %e %e\n",
              __FILE__,__LINE__,e0[0],e0[1],e0[2]);
       return(0);
     }
@@ -894,12 +898,12 @@ int seekEdge(pMesh mesh, pSol met, psPoint ppt0, psPoint ppt1,
   do {
 
     if ( !pt->v[0] ) {
-      printf("%s:%d: Error: wrong element\n",__FILE__,__LINE__);
+      fprintf(stdout,"%s:%d: Error: wrong element\n",__FILE__,__LINE__);
       return(0);
     }
 
     if ( pt->flag == basetet ) {
-      printf("%s:%d: Error: we pass through an element already seen, tet %d \n",
+      fprintf(stdout,"%s:%d: Error: we pass through an element already seen, tet %d \n",
              __FILE__,__LINE__,nsfin);
       return(0);
     }
@@ -963,11 +967,10 @@ int seekEdge(pMesh mesh, pSol met, psPoint ppt0, psPoint ppt1,
               return(0);
             continue;
           }
-          printf("%s:%d: Warning: tet %d: vol[%d]>0,vol[%d]>0, but vol[%d]<0 \n",
-                 __FILE__,__LINE__,nsfin,i0,i1,i2);
-
-          printf(" adjacent by tri %d marked => ",i2);
-          printf("we travel through the wrong tri %d\n",i0);
+          fprintf(stdout,"%s:%d: Warning: tet %d:",__FILE__,__LINE__,nsfin);
+          fprintf(stdout," vol[%d]>0, vol[%d]>0, but vol[%d]<0 \n",i0,i1,i2);
+          fprintf(stdout," adjacent by tri %d marked => ",i2);
+          fprintf(stdout,"we travel through the wrong tri %d\n",i0);
           nsfin = adj[i0]/4;
 
           /* update of key, cb, pt and p */
@@ -988,10 +991,10 @@ int seekEdge(pMesh mesh, pSol met, psPoint ppt0, psPoint ppt1,
               return(0);
             continue;
           }
-          printf("%s:%d: Warning: tet %d: vol[%d]>0 but vol[%d]<0 \n",
-                 __FILE__,__LINE__,nsfin,i0,i2);
-          printf(" adjacent by tri %d marked => ",i2);
-          printf("we travel through the wrong tri %d\n",i0);
+          fprintf(stdout,"%s:%d: Warning: tet %d:",__FILE__,__LINE__,nsfin);
+          fprintf(stdout," vol[%d]>0 but vol[%d]<0 \n",i0,i2);
+          fprintf(stdout," adjacent by tri %d marked => ",i2);
+          fprintf(stdout,"we travel through the wrong tri %d\n",i0);
           nsfin = adj[i0]/4;
 
           /* update of key, cb, pt and p */
@@ -1003,10 +1006,10 @@ int seekEdge(pMesh mesh, pSol met, psPoint ppt0, psPoint ppt1,
         /* lambda_i1 computation */
         vol[i1] = (mat[0][2]*u[0] + mat[1][2]*u[1] + mat[2][2]*u[2]);
         if ( -EPS2 > vol[i1] ) {
-          printf("%s:%d: Warning: vol[%d]>0,vol[%d]>0, but vol[%d]<0 \n",
-                 __FILE__,__LINE__,i0,i1,i2);
-          printf(" adjacent by tri %d marked => ",i1);
-          printf("we travel through the wrong tri %d\n",i0);
+          fprintf(stdout,"%s:%d: Warning:",__FILE__,__LINE__);
+          fprintf(stdout," vol[%d]>0,vol[%d]>0, but vol[%d]<0 \n",i0,i1,i2);
+          fprintf(stdout," adjacent by tri %d marked => ",i1);
+          fprintf(stdout,"we travel through the wrong tri %d\n",i0);
           nsfin = adj[i0]/4;
 
           /* update of key, cb, pt and p */
@@ -1049,10 +1052,10 @@ int seekEdge(pMesh mesh, pSol met, psPoint ppt0, psPoint ppt1,
             return(0);
           continue;
         }
-        printf("%s:%d: Warning: vol[%d]>0, but vol[%d]<0 \n",
+        fprintf(stdout,"%s:%d: Warning: vol[%d]>0, but vol[%d]<0 \n",
                __FILE__,__LINE__,i1,i2);
-        printf(" adjacent by tri %d marked => ",i2);
-        printf("we travel through the wrong tri %d\n",i1);
+        fprintf(stdout," adjacent by tri %d marked => ",i2);
+        fprintf(stdout,"we travel through the wrong tri %d\n",i1);
         nsfin = adj[i1]/4;
 
         /* update of key, cb, pt and p */
@@ -1065,10 +1068,10 @@ int seekEdge(pMesh mesh, pSol met, psPoint ppt0, psPoint ppt1,
       vol[i0] = (-mat[0][2]*u[0] - mat[1][2]*u[1] - mat[2][2]*u[2]);
 
       if ( -EPS2 > vol[i0] ) {
-        printf("%s:%d: Warning: vol[%d]>0, vol[%d]>0 and vol[%d]<0 \n",
-               __FILE__,__LINE__,i1,i2,i0);
-        printf(" adjacent by tri %d marked => ",i0);
-        printf("we travel through the wrong tri %d\n",i1);
+        fprintf(stdout,"%s:%d: Warning:",__FILE__,__LINE__);
+        fprintf(stdout," vol[%d]>0, vol[%d]>0 and vol[%d]<0 \n",i1,i2,i0);
+        fprintf(stdout," adjacent by tri %d marked => ",i0);
+        fprintf(stdout,"we travel through the wrong tri %d\n",i1);
         nsfin = adj[i1]/4;
 
         /* update of key, cb, pt and p */
@@ -1101,10 +1104,10 @@ int seekEdge(pMesh mesh, pSol met, psPoint ppt0, psPoint ppt1,
       vol[i0] = (mat[0][1]*u[0] + mat[1][1]*u[1] + mat[2][1]*u[2]);
 
       if ( -EPS2 > vol[i0] ) {
-        printf("%s:%d: Warning: vol[%d]>0 but vol[%d]<0 \n",
+        fprintf(stdout,"%s:%d: Warning: vol[%d]>0 but vol[%d]<0 \n",
                __FILE__,__LINE__,i2,i0);
-        printf(" adjacent by tri %d marked => ",i0);
-        printf("we travel through the wrong tri %d\n",i2);
+        fprintf(stdout," adjacent by tri %d marked => ",i0);
+        fprintf(stdout,"we travel through the wrong tri %d\n",i2);
         nsfin = adj[i2]/4;
 
         /* update of key, cb, pt and p */
@@ -1117,10 +1120,10 @@ int seekEdge(pMesh mesh, pSol met, psPoint ppt0, psPoint ppt1,
       vol[i1] = (-mat[0][0]*u[0] - mat[1][0]*u[1] - mat[2][0]*u[2]);
 
       if ( -EPS2 > vol[i1] ) {
-        printf("%s:%d: Warning: vol[%d]>0, vol[%d]>0 but vol[%d]<0 \n",
-               __FILE__,__LINE__,i2,i0,i1);
-        printf(" adjacent by tri %d marked => ",i1);
-        printf("we travel through the wrong tri %d\n",i2);
+        fprintf(stdout,"%s:%d: Warning:",__FILE__,__LINE__);
+        fprintf(stdout," vol[%d]>0, vol[%d]>0 but vol[%d]<0 \n",i2,i0,i1);
+        fprintf(stdout," adjacent by tri %d marked => ",i1);
+        fprintf(stdout,"we travel through the wrong tri %d\n",i2);
         nsfin = adj[i2]/4;
 
         /* update of key, cb, pt and p */
@@ -1138,8 +1141,8 @@ int seekEdge(pMesh mesh, pSol met, psPoint ppt0, psPoint ppt1,
       vol[i0] = (u[0]*ap[0]+u[1]*ap[1]+u[2]*ap[2]);
 
       if ( -EPS2 > vol[i0] ) {
-        printf("%s:%d: Error: Element %d, ",__FILE__,__LINE__,nsfin);
-        printf("sommet %d --> vol %d: no-win situation\n",ind,i0);
+        fprintf(stdout,"%s:%d: Error: Element %d, ",__FILE__,__LINE__,nsfin);
+        fprintf(stdout,"sommet %d --> vol %d: no-win situation\n",ind,i0);
         return(0);
       }
 
@@ -1151,8 +1154,8 @@ int seekEdge(pMesh mesh, pSol met, psPoint ppt0, psPoint ppt1,
       vol[i1] = (mat[0][2]*v[0] + mat[1][2]*v[1] + mat[2][2]*v[2]);
 
       if ( -EPS2 > vol[i1] ) {
-        printf("%s:%d: Error: Element %d, ",__FILE__,__LINE__,nsfin);
-        printf("sommet %d --> vol %d: no-win situation\n",ind,i1);
+        fprintf(stdout,"%s:%d: Error: Element %d, ",__FILE__,__LINE__,nsfin);
+        fprintf(stdout,"sommet %d --> vol %d: no-win situation\n",ind,i1);
         return(0);
       }
 
@@ -1160,8 +1163,8 @@ int seekEdge(pMesh mesh, pSol met, psPoint ppt0, psPoint ppt1,
       vol[i2] = (-mat[0][1]*v[0] - mat[1][1]*v[1] - mat[2][1]*v[2]);
 
       if ( -EPS2 > vol[i2] ) {
-        printf("%s:%d: Error: Element %d, ",__FILE__,__LINE__,nsfin);
-        printf("sommet %d --> vol %d: no-win situation\n",ind,i2);
+        fprintf(stdout,"%s:%d: Error: Element %d, ",__FILE__,__LINE__,nsfin);
+        fprintf(stdout,"sommet %d --> vol %d: no-win situation\n",ind,i2);
         return(0);
       }
     }
@@ -1172,7 +1175,7 @@ int seekEdge(pMesh mesh, pSol met, psPoint ppt0, psPoint ppt1,
 
     dd = vol[i0]+vol[i1]+vol[i2]+vol[is];
     if ( dd == 0.0 ) {
-      printf("%s:%d: Error: tetrahedra volume is null\n",
+      fprintf(stdout,"%s:%d: Error: tetrahedra volume is null\n",
              __FILE__,__LINE__);
       return(0);
     }
@@ -1201,7 +1204,7 @@ int seekEdge(pMesh mesh, pSol met, psPoint ppt0, psPoint ppt1,
         if ( !intersegtri_i0(is, i0, i1, i2, ee, e0, ep, dd, p[is]->c,
                              mat, u, c, cb, &key, trav,
                              &nsfin, adj[ind]/4) ) {
-          printf("%s:%d: Error: We didn't intersect the tri %d\n",
+          fprintf(stdout,"%s:%d: Error: We didn't intersect the tri %d\n",
                  __FILE__,__LINE__,ind);
           return(0);
         }
@@ -1211,7 +1214,7 @@ int seekEdge(pMesh mesh, pSol met, psPoint ppt0, psPoint ppt1,
         if ( !intersegtri_i1(is, i0, i1, i2, ee, e0, ep, dd, p[is]->c,
                              mat, c, cb, &key, trav,
                              &nsfin, adj[ind]/4) ) {
-          printf("%s:%d: Error: We didn't intersect the tri %d\n",
+          fprintf(stdout,"%s:%d: Error: We didn't intersect the tri %d\n",
                  __FILE__,__LINE__,ind);
           return(0);
         }
@@ -1221,26 +1224,26 @@ int seekEdge(pMesh mesh, pSol met, psPoint ppt0, psPoint ppt1,
         if ( !intersegtri_i2(is, i0, i1, i2, ee, e0, ep, dd, p[is]->c,
                              mat, c, cb, &key, trav,
                              &nsfin, adj[ind]/4) ) {
-          printf("%s:%d: Error: We didn't intersect the tri %d\n",
+          fprintf(stdout,"%s:%d: Error: We didn't intersect the tri %d\n",
                  __FILE__,__LINE__,ind);
           return(0);
         }
         break;
       default:
-        printf("%s:%d: Error: unexpected case: %d \n",
+        fprintf(stdout,"%s:%d: Error: unexpected case: %d \n",
                __FILE__,__LINE__,ind);
         return(0);
       }
 
       trav->np = pt->v[ind];
       if ( !creaEdge(mesh,met,trav,trav->tag) ) {
-        printf("%s:%d: Error: not able to create edge\n",__FILE__,__LINE__);
+        fprintf(stdout,"%s:%d: Error: not able to create edge\n",__FILE__,__LINE__);
         return(0);
       }
 
       if ( nsfin && (mesh->tetra[nsfin].flag != basetet) )  return(1);
 
-      printf("%s:%d: Warning: we can't travel through the wanted tri %d\n",
+      fprintf(stdout,"%s:%d: Warning: we can't travel through the wanted tri %d\n",
              __FILE__,__LINE__,ind);
 
       if ( key/11 ) {
@@ -1280,7 +1283,7 @@ int seekEdge(pMesh mesh, pSol met, psPoint ppt0, psPoint ppt1,
           return(1);
         }
       }
-      printf("%s:%d: Error: no-win situation\n",__FILE__,__LINE__);
+      fprintf(stdout,"%s:%d: Error: no-win situation\n",__FILE__,__LINE__);
       return(0);
     }
 
@@ -1306,15 +1309,16 @@ int seekEdge(pMesh mesh, pSol met, psPoint ppt0, psPoint ppt1,
     (*lastet)   = 1;
 
     if ( !creaEdge(mesh,met,trav,trav->tag) ) {
-      printf("%s:%d: Error: not able to create edge\n",__FILE__,__LINE__);
+      fprintf(stdout,"%s:%d: Error: not able to create edge\n",
+              __FILE__,__LINE__);
       return(0);
     }
 
     return(1);
 
   } while( ++it<=mesh->ne );
-  printf("%s:%d: Error: we reach the end of the function, strange... %d %d\n",
-         __FILE__,__LINE__,it,mesh->ne);
+  fprintf(stdout,"%s:%d: Error: we reach the end",__FILE__,__LINE__);
+  fprintf(stdout," of the function, strange... %d %d\n",it,mesh->ne);
   return(0);
 }
 
@@ -1354,7 +1358,7 @@ int inserSingul(pMesh mesh, pSol met, pSingul singul){
     do {
       if ( !seekEdge(mesh,met,&singul->point[k0],&singul->point[k1],
                      &trav,&lastet) ) {
-        printf("%s:%d: Error: edge %d not found in the mesh\n",
+        fprintf(stdout,"%s:%d: Error: edge %d not found in the mesh\n",
                __FILE__,__LINE__,k);
         return(0);
       }
@@ -1365,12 +1369,14 @@ int inserSingul(pMesh mesh, pSol met, pSingul singul){
   for ( k=1; k<=singul->ns; k++) {
     if ( singul->point[k].flag != basept ) {
       if ( !seekPoint(mesh,&singul->point[k],cb) ) {
-        printf("%s:%d: Error: point %d not found in the mesh\n",__FILE__,__LINE__,k);
+        fprintf(stdout,"%s:%d: Error: point %d not found in the mesh\n",
+                __FILE__,__LINE__,k);
         return(0);
       }
       if ( !creaPoint(mesh,met,singul->point[k].tet,singul->point[k].c,
                       cb,singul->point[k].tag) ) {
-        printf("%s:%d: Error: unable to create point %d\n",__FILE__,__LINE__,k);
+        fprintf(stdout,"%s:%d: Error: unable to create point %d\n",
+                __FILE__,__LINE__,k);
         return(0);
       }
     }
@@ -1487,7 +1493,8 @@ int remeshSing(pMesh mesh,pSol met) {
       cb[0] = cb[1] = cb[2] = 1./3.;
       ier = split3cb(mesh,met,k,i,c,cb,&ip);
       if ( ier < 0 ) {
-        fprintf(stdout,"%s:%d: Error: we can't split element %d",__FILE__,__LINE__,k);
+        fprintf(stdout,"%s:%d: Error: we can't split element %d",
+                __FILE__,__LINE__,k);
         fprintf(stdout," whose all vertices are on inserted singularities\n");
         return(0);
       }

@@ -235,7 +235,7 @@ int swpbdy(pMesh mesh,pSol met,int *list,int ret,int it1) {
   }
   if ( met->m )  met->m[nm] = 0.5 *(met->m[np]+met->m[nq]);
   ier = split1b(mesh,met,list,ret,nm,0);
-  if ( ier<0 )  return(0); 
+  if ( ier<0 )  return(0);
 
   /* Collapse m on na after taking (new) ball of m */
   memset(list,0,(LMAX+2)*sizeof(int));
@@ -245,7 +245,7 @@ int swpbdy(pMesh mesh,pSol met,int *list,int ret,int it1) {
   }
   if ( pt1->v[im] != nm ){
     delPt(mesh,nm);
-    printf("%s:%d: Warning pt1->v[im] != nm\n",__FILE__,__LINE__);
+    fprintf(stdout,"%s:%d: Warning pt1->v[im] != nm\n",__FILE__,__LINE__);
     return(0);
   }
   ilist = boulevolp(mesh,iel1,im,list);

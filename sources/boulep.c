@@ -973,22 +973,26 @@ static inline void errorMessage(pMesh mesh, int k1, int k2) {
     }
   }
 
-  printf("  ## Error: problem in surface remesh process");
-  printf(" (potential creation of a lonely boundary face):\n");
+  fprintf(stdout,"  ## Error: problem in surface remesh process");
+  fprintf(stdout," (potential creation of a lonely boundary face):\n");
 
   if ( kel1 != 0 ) {
     pt = &mesh->tetra[k1];
-    printf("            look at elt %d:",kel1);
-    printf(" %d %d %d %d.\n", mesh->point[pt->v[0]].tmp, mesh->point[pt->v[1]].tmp,
-           mesh->point[pt->v[2]].tmp, mesh->point[pt->v[3]].tmp);
+    fprintf(stdout,"            look at elt %d:",kel1);
+    fprintf(stdout," %d %d %d %d.\n", mesh->point[pt->v[0]].tmp,
+           mesh->point[pt->v[1]].tmp,mesh->point[pt->v[2]].tmp,
+           mesh->point[pt->v[3]].tmp);
   } else if ( kel2 != 0 ) {
     pt = &mesh->tetra[k2];
-    printf("            look at elt %d:",kel2);
-    printf(" %d %d %d %d.\n", mesh->point[pt->v[0]].tmp, mesh->point[pt->v[1]].tmp,
-           mesh->point[pt->v[2]].tmp, mesh->point[pt->v[3]].tmp);
+    fprintf(stdout,"            look at elt %d:",kel2);
+    fprintf(stdout," %d %d %d %d.\n", mesh->point[pt->v[0]].tmp,
+           mesh->point[pt->v[1]].tmp,mesh->point[pt->v[2]].tmp,
+           mesh->point[pt->v[3]].tmp);
   }
-  printf("  ##        Try to modify the hausdorff number,");
-  printf(" the maximum mesh size or the value of angle detection.\n");
+  fprintf(stdout,"  ##        Try to modify the hausdorff number,");
+  fprintf(stdout," the maximum mesh size, the value of angle detection.\n");
+  fprintf(stdout," You can also try to run with -noswap option but probably");
+  fprintf(stdout," the final mesh will have poor quality.\n");
 }
 
 /** Find all tets sharing edge ia of tetra start, and stores boundary faces when met
