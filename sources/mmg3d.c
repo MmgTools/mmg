@@ -55,7 +55,7 @@ static void usage(char *prog) {
   fprintf(stdout,"-out file  output triangulation\n");
   fprintf(stdout,"-sol file  load solution file\n");
 #ifdef SINGUL
-  fprintf(stdout,"-sing file load file containing singularities\n");
+  fprintf(stdout,"-sf  file load file containing singularities\n");
 #endif
 
   fprintf(stdout,"\n**  Parameters\n");
@@ -69,9 +69,11 @@ static void usage(char *prog) {
   fprintf(stdout,"-noswap    no edge or face flipping\n");
   fprintf(stdout,"-nomove    no point relocation\n");
   fprintf(stdout,"-noinsert  no point insertion/deletion \n");
-
 #ifdef USE_SCOTCH
   fprintf(stdout,"-rn [n]    Turn on or off the renumbering using SCOTCH (0/1) \n");
+#endif
+#ifdef SINGUL
+  fprintf(stdout,"-sing      Preserve internal singularities\n");
 #endif
 
   exit(EXIT_FAILURE);
@@ -200,20 +202,23 @@ static int parsar(int argc,char *argv[],pMesh mesh,pSol met,pSingul sing) {
             fprintf(stderr,"Missing filname for %c%c%c\n",argv[i-1][1],argv[i-1][2],argv[i-1][3]);
             usage(argv[0]);
           }
+        }
 #ifdef SINGUL
-        } else if ( !strcmp(argv[i],"-sing") ) {
+        else if ( !strcmp(argv[i],"-sf") ) {
           if ( ++i < argc && isascii(argv[i][0]) && argv[i][0]!='-' ) {
             sing->namein = (char*) calloc(strlen(argv[i])+1,sizeof(char));
             strcpy(sing->namein,argv[i]);
             info.sing = 1;
           }
-	      else {
+          else {
             fprintf(stderr,"Missing filname for %c%c%c\n",
                     argv[i-1][1],argv[i-1][2],argv[i-1][3]);
             usage(argv[0]);
           }
-#endif
         }
+        else if ( !strcmp(argv[i],"-sing") )
+          info.sing = 1;
+#endif
         break;
       case 'v':
         if ( ++i < argc ) {
@@ -415,6 +420,9 @@ int main(int argc,char *argv[]) {
   /* assign default values */
   memset(&mesh,0,sizeof(Mesh));
   memset(&met,0,sizeof(Sol));
+#ifdef SINGUL
+  memset(&sing,0,sizeof(Singul));
+#endif
   info.imprim   = -99;
   info.ddebug   = 0;
   info.mem      = -1;
@@ -459,8 +467,19 @@ int main(int argc,char *argv[]) {
     RETURN_AND_FREE(&mesh,&met,&sing,MMG5_STRONGFAILURE);
   }
 #ifdef SINGUL
-  if ( info.sing )
-    if ( !loadSingul(&sing) ) RETURN_AND_FREE(&mesh,&met,&sing,MMG5_STRONGFAILURE);
+  if ( info.sing ) {
+    if ( !info.iso ) {
+      if ( !sing.namein )
+        fprintf(stdout,"  ## WARNING: NO SINGULARITIES PROVIDED.\n");
+      else
+        if ( !loadSingul(&sing) ) RETURN_AND_FREE(&mesh,&met,&sing,MMG5_STRONGFAILURE);
+    }
+    else if ( sing.namein ) {
+      fprintf(stdout,"  ## WARNING: SINGULARITIES MUST BE INSERTED IN");
+      fprintf(stdout," A PRE-REMESHING PROCESS.\n");
+      fprintf(stdout,"              FILE %s IGNORED\n",sing.namein);
+    }
+  }
 #endif
 
   chrono(OFF,&info.ctim[1]);
@@ -483,14 +502,19 @@ int main(int argc,char *argv[]) {
   }
 
 #ifdef SINGUL
-  if ( !met.np && !DoSol(&mesh,&met,&info) ) RETURN_AND_FREE(&mesh,&met,&sing,MMG5_LOWFAILURE);
-  if ( info.sing && !inserSingul(&mesh,&met,&sing) )
-    RETURN_AND_FREE(&mesh,&met,&sing,MMG5_STRONGFAILURE);
-  else {
-    chrono(OFF,&info.ctim[2]);
-    printim(info.ctim[2].gdif,stim);
-    fprintf(stdout,"  -- INSERTION OF SINGULARITIES COMPLETED.     %s\n",stim);
-    chrono(ON,&info.ctim[2]);
+  if ( info.sing ) {
+    if ( !info.iso ) {
+      if ( !met.np && !DoSol(&mesh,&met,&info) )
+        RETURN_AND_FREE(&mesh,&met,&sing,MMG5_LOWFAILURE);
+      if ( !inserSingul(&mesh,&met,&sing) )
+        RETURN_AND_FREE(&mesh,&met,&sing,MMG5_STRONGFAILURE);
+      else {
+        chrono(OFF,&info.ctim[2]);
+        printim(info.ctim[2].gdif,stim);
+        fprintf(stdout,"  -- INSERTION OF SINGULARITIES COMPLETED.     %s\n",stim);
+        chrono(ON,&info.ctim[2]);
+      }
+    }
   }
 #endif
 
@@ -512,9 +536,11 @@ int main(int argc,char *argv[]) {
     fprintf(stdout,"\n  -- PHASE 2 : %s MESHING\n",met.size < 6 ? "ISOTROPIC" : "ANISOTROPIC");
 
 #ifdef SINGUL
-  if ( info.sing && (remeshSing(&mesh,&met)<0) ) {
-    fprintf(stdout,"  ## Collapse of singularities problem.\n");
-    RETURN_AND_FREE(&mesh,&met,&sing,MMG5_STRONGFAILURE);
+  if ( info.sing && (!info.iso) ) {
+    if ( remeshSing(&mesh,&met)<0 ) {
+      fprintf(stdout,"  ## Collapse of singularities problem.\n");
+      RETURN_AND_FREE(&mesh,&met,&sing,MMG5_STRONGFAILURE);
+    }
   }
 #endif
 
