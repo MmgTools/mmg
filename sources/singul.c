@@ -465,17 +465,17 @@ int intersegtri_i2(int is, int i0, int i1, int i2, double ee[3], double e1[3],
 
 /** Create a point singular in tetra iel and if needed split the tetra and its neighbour */
 int creaPoint(pMesh mesh, pSol met, int iel,double c[3], double cb[4], char tag){
-  pTetra ptt;
+  pTetra pt;
   double hnew;
   int    ia,ip,ilist,key,i;
   int    list[LMAX+2];
 
   key=locate(cb);
-  ptt = &mesh->tetra[iel];
+  pt = &mesh->tetra[iel];
 
   if ( key/11 ) {
     /* the point is a vertex of the tet */
-    mesh->point[ptt->v[key%11]].tag |= tag;
+    mesh->point[pt->v[key%11]].tag |= tag;
     return(1);
   }
 

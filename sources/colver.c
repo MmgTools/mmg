@@ -981,8 +981,5 @@ int colver(pMesh mesh,int *list,int ilist,char indq) {
     pt->v[ip] = nq;
     pt->qual=orcal(mesh,iel);
   }
-
-  //delPt(mesh,np);
-
   return(np);
 }

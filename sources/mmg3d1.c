@@ -498,6 +498,10 @@ static int coltet(pMesh mesh,pSol met,char typchk) {
   nc = nnm = 0;
   hmi2 = info.hmin*info.hmin;
 
+  /* init of point flags, otherwise it can be uninitialized */
+  for (k=1; k<=mesh->np; k++)
+    mesh->point[k].flag = 0;
+
   for (k=1; k<=mesh->ne; k++) {
     base = ++mesh->base;
     pt = &mesh->tetra[k];
@@ -1311,7 +1315,7 @@ static int adpspl(pMesh mesh,pSol met, int* warn) {
                 ,__FILE__,__LINE__);
         return(-1);
       }
-      else if ( !ier ) { //Et on teste pas du tout les qualités ici ?
+      else if ( !ier ) {
         delPt(mesh,ip);
       }
       else {

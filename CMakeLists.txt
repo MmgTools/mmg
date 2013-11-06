@@ -197,7 +197,7 @@ SET(LIBRARY_OUTPUT_PATH ${MMG_SOURCE_DIR}/../lib)
 OPTION ( LIBMMG3D5_STATIC "Compile static library" OFF)
 IF ( LIBMMG3D5_STATIC )
   ADD_LIBRARY(mmg3d5_a  STATIC
-    ${MMG_SOURCE_DIR}/compil.date ${MMG_SOURCE_DIR}/mmg3d_redefine.h
+    ${MMG_SOURCE_DIR}/compil.date .dummy ${MMG_SOURCE_DIR}/mmg3d_redefine.h
     ${source_files} ${lib_file} )
   SET_TARGET_PROPERTIES(mmg3d5_a PROPERTIES OUTPUT_NAME mmg3d5)
   ADD_DEPENDENCIES(mmg3d5_a date)
@@ -209,7 +209,7 @@ ENDIF()
 OPTION ( LIBMMG3D5_SHARED "Compile dynamic library" OFF)
 IF ( LIBMMG3D5_SHARED )
   ADD_LIBRARY(mmg3d5_so SHARED
-    ${MMG_SOURCE_DIR}/compil.date ${MMG_SOURCE_DIR}/mmg3d_redefine.h
+    ${MMG_SOURCE_DIR}/compil.date .dummy ${MMG_SOURCE_DIR}/mmg3d_redefine.h
     ${source_files} ${lib_file})
   SET_TARGET_PROPERTIES(mmg3d5_so PROPERTIES OUTPUT_NAME mmg3d5)
   ADD_DEPENDENCIES(mmg3d5_so date)

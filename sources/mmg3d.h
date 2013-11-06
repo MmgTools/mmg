@@ -43,13 +43,6 @@
     }while(0)
 #endif
 
-#warning: a jeter si non utilise
-//#ifdef SINGUL
-//#define NO_WARN_ON_SING
-//#else
-//#define NO_WARN_ON_SING __attribute__((unused))
-//#endif
-
 /* numerical accuracy */
 #define ALPHAD    20.7846096908265    //0.04811252243247      /* 12*sqrt(3) */
 #define LLONG     2.5//2.0   // 1.414213562373
