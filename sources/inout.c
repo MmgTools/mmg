@@ -375,7 +375,13 @@ int saveMesh(pMesh mesh) {
       for (k=0; k<=mesh->htab.max; k++) {
         ph = &mesh->htab.geom[k];
         if ( !ph->a )  continue;
-        GmfSetLin(outm,GmfEdges,mesh->point[ph->a].tmp,mesh->point[ph->b].tmp,ph->ref);
+#ifdef SINGUL
+#warning: ajeter
+        if ( ph->tag & MG_SGL )
+          GmfSetLin(outm,GmfEdges,mesh->point[ph->a].tmp,mesh->point[ph->b].tmp,5);
+        else
+#endif
+          GmfSetLin(outm,GmfEdges,mesh->point[ph->a].tmp,mesh->point[ph->b].tmp,ph->ref);
       }
       if ( nr ) {
         GmfSetKwd(outm,GmfRidges,nr);
@@ -398,7 +404,7 @@ int saveMesh(pMesh mesh) {
         }
       }
     }
-    freeXTets(mesh);
+    //freeXTets(mesh);
     free(mesh->htab.geom);
     mesh->htab.geom = NULL;
   }
