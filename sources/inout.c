@@ -822,7 +822,7 @@ int loadSingul(pSingul singul) {
     singul->point = (psPoint)calloc(singul->ns+1,sizeof(sPoint));
     for ( k=1; k<=mesh.np; k++ ) {
       ppt = &mesh.point[k];
-      if ( MG_SIN(ppt->tag) || (ppt->tag & MG_GEO) ) {
+      if ( (ppt->tag & MG_REQ) || (ppt->tag & MG_GEO) ) {
         ppts = &singul->point[ns];
         ppts->c[0] = ppt->c[0];
         ppts->c[1] = ppt->c[1];

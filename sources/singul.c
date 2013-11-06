@@ -499,6 +499,12 @@ int creaPoint(pMesh mesh, pSol met, int iel,double c[3], double cb[4], char tag)
 
     ia = key-5;
     ilist = coquil(mesh,iel,ia,list);
+    if ( !ilist ) {
+      fprintf(stdout,"  ## Unable to insert singularity: element required.\n");
+      fprintf(stdout,"  ## Delete required elements.\n");
+      fprintf(stdout,"  Exit program.\n");
+      return(0);
+    }
     if ( !split1b(mesh, met, list, ilist, ip, 0) ) return(0);
 
     /* Update of barycentric coordinate in tet list[0]/6 */

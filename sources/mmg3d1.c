@@ -311,6 +311,7 @@ static int swpmsh(pMesh mesh,pSol met) {
     ns = 0;
     for (k=1; k<=mesh->ne; k++) {
       pt = &mesh->tetra[k];
+#warning : c est quoi ce pt->ref < 0????
       if ( (!MG_EOK(pt)) || pt->ref < 0 /*|| (pt->tag & MG_REQ)*/ )   continue;
       else if ( !pt->xt ) continue;
       pxt = &mesh->xtetra[pt->xt];
@@ -1184,6 +1185,7 @@ static int adpspl(pMesh mesh,pSol met, int* warn) {
       ref = pxt->edg[iarf[i][j]];
       tag = pxt->tag[iarf[i][j]];
       if ( tag & MG_REQ )  continue;
+#warning: a retirer si maj des tags des edges dans les split
       tag |= MG_BDY;
       ilist = coquil(mesh,k,imax,list);
       if ( !ilist )  continue;
