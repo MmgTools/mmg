@@ -330,6 +330,51 @@ static int norver(pMesh mesh) {
       }
     }
   }
+#warning ajeter si commente
+/* #ifdef SINGUL */
+/*   if ( info.sing ) { */
+/*     /\* add xpoints for inserted singularities and compute tangeant at points *\/ */
+/* #warning: ne marche pas car un point aura la tangente de plusieurs aretes et d autres n auront rien */
+/*     ++mesh->base; */
+/*     for (k=1; k<=mesh->htab.max; k++) { */
+/*       if ( !(mesh->htab.geom[k].a) )  continue; */
+/*       ppt = &mesh->point[mesh->htab.geom[k].a]; */
+/*       if ( ppt->flag == mesh->base )  continue; */
+/*       if ( MG_SIN(ppt->tag) )         continue; */
+/*       if ( ppt->tag & MG_SGL ) { */
+/*         assert ( ppt->flag != mesh->base-1 ); */
+/*         ++mesh->xp; */
+/*         ppt->flag = mesh->base; */
+/*         ppt->xp = mesh->xp; */
+/*         pxp = &mesh->point[ppt->xp]; */
+/*         pxp->t[0] = ppt->c[0]-mesh->point[mesh->htab.geom[k].b].c[0]; */
+/*         pxp->t[1] = ppt->c[1]-mesh->point[mesh->htab.geom[k].b].c[1]; */
+/*         pxp->t[2] = ppt->c[2]-mesh->point[mesh->htab.geom[k].b].c[2]; */
+/*         dd = pxp->t[0]*pxp->t[0]+pxp->t[1]*pxp->t[1]+pxp->t[2]*pxp->t[2]; */
+/*         pxp->t[0] = pxp->t[0]/dd; */
+/*         pxp->t[1] = pxp->t[1]/dd; */
+/*         pxp->t[2] = pxp->t[2]/dd; */
+/*       } */
+/*       ppt = &mesh->point[mesh->htab.geom[k].b]; */
+/*       if ( ppt->flag == mesh->base )  continue; */
+/*       if ( MG_SIN(ppt->tag) )         continue; */
+/*       if ( ppt->tag & MG_SGL ) { */
+/*         assert ( ppt->flag != mesh->base-1 ); */
+/*         ++mesh->xp; */
+/*         ppt->flag = mesh->base; */
+/*         ppt->xp = mesh->xp; */
+/*         pxp = &mesh->point[ppt->xp]; */
+/*         pxp->t[0] = ppt->c[0]-mesh->point[mesh->htab.geom[k].a].c[0]; */
+/*         pxp->t[1] = ppt->c[1]-mesh->point[mesh->htab.geom[k].a].c[1]; */
+/*         pxp->t[2] = ppt->c[2]-mesh->point[mesh->htab.geom[k].a].c[2]; */
+/*         dd = pxp->t[0]*pxp->t[0]+pxp->t[1]*pxp->t[1]+pxp->t[2]*pxp->t[2]; */
+/*         pxp->t[0] = pxp->t[0]/dd; */
+/*         pxp->t[1] = pxp->t[1]/dd; */
+/*         pxp->t[2] = pxp->t[2]/dd; */
+/*       } */
+/*     } */
+/*   } */
+/* #endif */
 
   /* memory to store normals for boundary points */
   mesh->xpmax  = MG_MAX(1.5*mesh->xp,mesh->npmax);

@@ -87,11 +87,6 @@ int updatevertex(pMesh mesh, pTetra *ptt, int nsfin, pPoint p[4],
   cb[3]    = 0.0;
   cb[vois] = 1.0;
 
-  /* if ( info.ddebug ) { */
-  /*   printf("%s:%d: Update of key %d \n",__FILE__,__LINE__,*key); */
-  /*   printf("%s:%d: Update of cb %e %e %e %e \n",__FILE__,__LINE__, */
-  /*          cb[0],cb[1],cb[2],cb[3]); */
-  /* } */
   return(1);
 }
 
@@ -140,14 +135,7 @@ int updateedge(pMesh mesh, pTetra *ptt, int nsfin, pPoint p[4], int ia,
       break;
     }
   }
-
   assert( i<3 );
-  /* if ( info.ddebug ) { */
-  /*   printf("%s:%d: Update of key %d \n",__FILE__,__LINE__,*key); */
-  /*   printf("%s:%d: Update of cb %e %e %e %e \n",__FILE__,__LINE__, */
-  /*          cb[0],cb[1],cb[2],cb[3]); */
-  /* } */
-
   return(1);
 }
 
@@ -487,7 +475,7 @@ int creaPoint(pMesh mesh, pSol met, int iel,double c[3], double cb[4], char tag)
 
   if ( key/11 ) {
     /* the point is a vertex of the tet */
-    mesh->point[ptt->v[key%11]].tag |= tag | MG_REQ;
+    mesh->point[ptt->v[key%11]].tag |= tag;
     return(1);
   }
 
@@ -500,7 +488,7 @@ int creaPoint(pMesh mesh, pSol met, int iel,double c[3], double cb[4], char tag)
         hnew += met->m[ip]*cb[i];
       }
     }
-    ip = newPt(mesh,c,tag | MG_REQ);
+    ip = newPt(mesh,c,tag );
     if ( !ip ) {
       fprintf(stdout,"  ## Allocation problem (point), not enough memory.\n");
       fprintf(stdout,"  ## Increase the allocated memory with the -m option.\n");
@@ -545,16 +533,15 @@ int creaPoint(pMesh mesh, pSol met, int iel,double c[3], double cb[4], char tag)
 
   /* the point is on a tri */
   if ( key ) {
-    // penser a checker si conflit tri required et split
-    // et a planter si faute mem
+#warning: penser a checker si conflit tri required et split et a planter si faute mem
     if ( !split3cb(mesh, met, iel, key-1, c, cb, &ip) )  return(0);
-    mesh->point[ip].tag |= tag | MG_REQ;
+    mesh->point[ip].tag |= tag;
     return(1);
   }
 
   /* The point is inside the tet */
   if ( !split4cb(mesh, met, iel, c, cb, &ip) )  return(0);
-  mesh->point[ip].tag |= tag | MG_REQ;
+  mesh->point[ip].tag |= tag;
   return(1);
 }
 
@@ -581,19 +568,18 @@ int creaEdge(pMesh mesh, pSol met, Travel *trav, char tag){
   cb[3]  = trav->cb[3];
 
   if ( key/11 ) {
-    /* split on a vertex: nothing to do */
-    //attention: jeter le tag
+    /* split on a vertex */
     ip = pt->v[key%11];
-    mesh->point[ip].tag |= tag + MG_REQ;
+    mesh->point[ip].tag |= tag;
 
     /* Update htab */
-    hEdge(&mesh->htab,trav->np,pt->v[key%11],0,trav->tag | MG_REQ);
+    hEdge(&mesh->htab,trav->np,pt->v[key%11],0,trav->tag);
 
     return(1);
   }
 
   else if ( key/5 ) {
-    /*split on an edge */
+    /* split on an edge */
     hnew = 0.0;
     if ( met->m ) {
       for (i=0; i<4; i++) {
@@ -601,7 +587,7 @@ int creaEdge(pMesh mesh, pSol met, Travel *trav, char tag){
         hnew += met->m[ip]*cb[i];
       }
     }
-    ip = newPt(mesh,c,tag | MG_REQ);
+    ip = newPt(mesh,c,tag);
     if ( !ip ) {
       fprintf(stdout,"  ## Allocation problem (point), not enough memory.\n");
       fprintf(stdout,"  ## Increase the allocated memory with the -m option.\n");
@@ -622,7 +608,7 @@ int creaEdge(pMesh mesh, pSol met, Travel *trav, char tag){
     trav->cb[inxt3[inxt3[i]]] = 0.;
 
     /* Update htab */
-    hEdge(&mesh->htab,trav->np,ip,0,trav->tag | MG_REQ);
+    hEdge(&mesh->htab,trav->np,ip,0,trav->tag);
     return(1);
   }
 
@@ -636,11 +622,10 @@ int creaEdge(pMesh mesh, pSol met, Travel *trav, char tag){
     trav->cb[iprv3[i]] = 0.;
     trav->cb[inxt3[i]] = 0.;
     trav->cb[inxt3[inxt3[i]]] = 0.;
-    //attention: jeter le tag
-    mesh->point[ip].tag |= tag | MG_REQ;
+    mesh->point[ip].tag |= tag;
 
     /* Update htab */
-    hEdge(&mesh->htab,trav->np,ip,0,trav->tag | MG_REQ);
+    hEdge(&mesh->htab,trav->np,ip,0,trav->tag);
     return(1);
   }
 
@@ -651,12 +636,10 @@ int creaEdge(pMesh mesh, pSol met, Travel *trav, char tag){
     /* update barycentric coor of new point in kel */
     trav->cb[1] = trav->cb[2] = trav->cb[3] = 0.;
     trav->cb[0] = 1.;
-
-    //attention: jeter le tag
-    mesh->point[ip].tag |= tag | MG_REQ;
+    mesh->point[ip].tag |= tag;
 
     /* Update htab */
-    hEdge(&mesh->htab,trav->np,ip,0,trav->tag | MG_REQ);
+    hEdge(&mesh->htab,trav->np,ip,0,trav->tag);
     return(1);
   }
   return(0);
@@ -706,9 +689,6 @@ int seekPoint(pMesh mesh, psPoint ppt, double cb[4]) {
       }
 
       nsfin = nstart;
-      /* if ( info.ddebug ) */
-      /*   printf("%s:%d: Warning: we restrart from tetra %d\n",__FILE__,__LINE__,nstart); */
-      /* continue; */
     }
     pt->flag = basetet;
 
@@ -792,8 +772,6 @@ int seekPoint(pMesh mesh, psPoint ppt, double cb[4]) {
       /* All the neighbours of our tet are marked so we restart from another tet */
       nsfin  = nstart%(mesh->ne)+1;
       nstart = nsfin;
-      /* if ( info.ddebug ) printf("%s:%d: Warning: we restart from tet %d\n", */
-      /*                           __FILE__,__LINE__,nstart); */
       continue;
     }
 
@@ -924,8 +902,6 @@ int seekEdge(pMesh mesh, pSol met, psPoint ppt0, psPoint ppt1,
       vol[i0] = (u[0]*ap[0]+u[1]*ap[1]+u[2]*ap[2]);
 
       if ( -EPS2 > vol[i0] ) {
-        /* if ( info.ddebug ) */
-        /*   printf("%s:%d: Warning: wrong elt, vol %d < 0\n",__FILE__,__LINE__,i0); */
         nsfin = adj[i0]/4;
 
         /* update of key, cb, pt and p */
@@ -942,8 +918,6 @@ int seekEdge(pMesh mesh, pSol met, psPoint ppt0, psPoint ppt1,
         vol[i1] = (mat[0][2]*u[0] + mat[1][2]*u[1] + mat[2][2]*u[2]);
 
         if ( -EPS2 > vol[i1] ) {
-          /* if ( info.ddebug ) */
-            /* printf("%s:%d: Warning: wrong elt, vol %d < 0\n",__FILE__,__LINE__,i1); */
           nsfin = adj[i1]/4;
 
           /* update of key, cb, pt and p */
@@ -956,8 +930,6 @@ int seekEdge(pMesh mesh, pSol met, psPoint ppt0, psPoint ppt1,
         vol[i2] = (-mat[0][1]*u[0] - mat[1][1]*u[1] - mat[2][1]*u[2]);
 
         if ( -EPS2 > vol[i2] ) {
-          /* if ( info.ddebug ) */
-          /*   printf("%s:%d: Warning: wrong elt, vol %d < 0\n",__FILE__,__LINE__,i2); */
           if ( adj[i2] && (mesh->tetra[adj[i2]/4].flag != basetet) ) {
             nsfin = adj[i2]/4;
 
@@ -983,8 +955,6 @@ int seekEdge(pMesh mesh, pSol met, psPoint ppt0, psPoint ppt1,
         /* lambda_i2 computation */
         vol[i2] = (-mat[0][1]*u[0] - mat[1][1]*u[1] - mat[2][1]*u[2]);
         if ( -EPS2 > vol[i2] ) {
-          /* if ( info.ddebug ) */
-          /*   printf("%s:%d: Warning: wrong elt, vol %d < 0\n",__FILE__,__LINE__,i2); */
           if ( adj[i2] && (mesh->tetra[adj[i2]/4].flag != basetet) ) {
             nsfin = adj[i2]/4;
 
@@ -1008,8 +978,6 @@ int seekEdge(pMesh mesh, pSol met, psPoint ppt0, psPoint ppt1,
         /* lambda_i1 computation */
         vol[i1] = (mat[0][2]*u[0] + mat[1][2]*u[1] + mat[2][2]*u[2]);
         if ( -EPS2 > vol[i1] ) {
-          /* if ( info.ddebug ) */
-          /*   printf("%s:%d: Warning: wrong elt, vol %d < 0\n",__FILE__,__LINE__,i1); */
           printf("%s:%d: Warning: vol[%d]>0,vol[%d]>0, but vol[%d]<0 \n",
                  __FILE__,__LINE__,i0,i1,i2);
           printf(" adjacent by tri %d marked => ",i1);
@@ -1032,9 +1000,6 @@ int seekEdge(pMesh mesh, pSol met, psPoint ppt0, psPoint ppt1,
       vol[i1]  = (u[0]*ap[0]+u[1]*ap[1]+u[2]*ap[2]);
 
       if ( -EPS2 > vol[i1] ) {
-        /* if ( info.ddebug ) */
-        /*   printf("%s:%d: Warning: wrong elt, vol %d < 0\n",__FILE__,__LINE__,i1); */
-
         nsfin = adj[i1]/4;
 
         /* update of key, cb, pt and p */
@@ -1051,8 +1016,6 @@ int seekEdge(pMesh mesh, pSol met, psPoint ppt0, psPoint ppt1,
       vol[i2] = (mat[0][0]*u[0] + mat[1][0]*u[1] + mat[2][0]*u[2]);
 
       if ( -EPS2 > vol[i2] ) {
-        /* if ( info.ddebug ) */
-        /*   printf("%s:%d: Warning: wrong elt, vol %d < 0\n",__FILE__,__LINE__,i2); */
         if ( adj[i2] && (mesh->tetra[adj[i2]/4].flag != basetet) ) {
           nsfin = adj[i2]/4;
 
@@ -1098,8 +1061,6 @@ int seekEdge(pMesh mesh, pSol met, psPoint ppt0, psPoint ppt1,
       vol[i2]  = (u[0]*ap[0]+u[1]*ap[1]+u[2]*ap[2]);
 
       if ( -EPS2 > vol[i2] ) {
-        /* if ( info.ddebug ) */
-        /*   printf("%s:%d: Warning: wrong elt, vol %d < 0\n",__FILE__,__LINE__,i2); */
         nsfin = adj[i2]/4;
 
         /* update of key, cb, pt and p */
@@ -1401,4 +1362,77 @@ int inserSingul(pMesh mesh, pSol met, pSingul singul){
 
   return(1);
 }
+
+/** collapse of singularities */
+ int coltet_sing(pMesh mesh,pSol met) {
+  pTetra  pt;
+  pxTetra pxt;
+  pPoint  p0,p1;
+  int     k,nc,nnc,list[LMAX+2],ilist,base;
+  int     it,maxit,i,ifac,jseg,ier;
+
+  if ( abs(info.imprim) > 4 )
+    fprintf(stdout,"  ** SINGULARITIES REMESHING\n");
+  nnc = it = 0;
+  maxit = 5;
+  do {
+    nc = 0;
+    for (k=1; k<=mesh->ne; k++) {
+      pt = &mesh->tetra[k];
+      if ( (mesh->point[pt->v[0]].tag & MG_SGL) &&
+           (mesh->point[pt->v[1]].tag & MG_SGL) &&
+           (mesh->point[pt->v[2]].tag & MG_SGL) &&
+           (mesh->point[pt->v[3]].tag & MG_SGL) ) {
+        /* Attempt to swap */
+
+      }
+
+
+      if ( (!MG_EOK(pt)) || (!pt->xt) )  continue;
+      pxt = &mesh->xtetra[pt->xt];
+      for (i=0; i<6; i++) {
+        if ( (!(pxt->tag[i] & MG_GEO)) || (pxt->tag[i] & MG_BDY) )  continue;
+        p0 = &mesh->point[pt->v[iare[i][0]]];
+        p1 = &mesh->point[pt->v[iare[i][1]]];
+
+        if ( !MG_SIN(p0->tag) ) {
+          ifac  = isar[i][0];
+          jseg  = iarfinv[ifac][i];
+          ilist = chkcol_int(mesh,met,k,ifac,jseg,list,2);
+          if ( ilist ) {
+            ier = colver(mesh,list,ilist,iare[i][1]);
+            if ( ier < 0 ) return(-1);
+            else if ( ier ) {
+              delPt(mesh,ier);
+              p1->flag = base;
+              nc++;
+              break;
+            }
+          }
+        }
+        if ( !MG_SIN(p1->tag) ) {
+          ifac  = isar[i][1];
+          jseg  = iarfinv[ifac][i];
+          ilist = chkcol_int(mesh,met,k,ifac,jseg,list,2);
+          if ( ilist ) {
+            ier = colver(mesh,list,ilist,iare[i][0]);
+            if ( ier < 0 ) return(-1);
+            else if ( ier ) {
+              delPt(mesh,ier);
+              p0->flag = base;
+              nc++;
+              break;
+            }
+          }
+        }
+      }
+    }
+    nnc += nc;
+    if ( nc > 0 /*&& (abs(info.imprim) > 5 || info.ddebug)*/ )
+      fprintf(stdout,"     %8d vertices removed\n",nc);
+  }
+  while ( ++it < maxit && nc > 0 );
+  return(nnc);
+ }
+
 #endif

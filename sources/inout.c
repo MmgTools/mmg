@@ -728,7 +728,7 @@ int loadSingul(pSingul singul) {
       if ( ppt->c[i] > singul->max[i] )  singul->max[i] = ppt->c[i];
       if ( ppt->c[i] < singul->min[i] )  singul->min[i] = ppt->c[i];
     }
-    ppt->tag  = MG_REF;
+    ppt->tag  = MG_NOTAG;
   }
 
   /* fill singul */
@@ -765,7 +765,7 @@ int loadSingul(pSingul singul) {
     for (k=1; k<=mesh.na; k++) {
       pa = &mesh.edge[k];
       GmfGetLin(inm,GmfEdges,&pa->a,&pa->b,&pa->ref);
-      pa->tag |= MG_REF;
+      pa->tag = MG_NOTAG;
     }
   }
 
@@ -827,7 +827,7 @@ int loadSingul(pSingul singul) {
         ppts->c[0] = ppt->c[0];
         ppts->c[1] = ppt->c[1];
         ppts->c[2] = ppt->c[2];
-        ppts->tag  = ppt->tag;
+        ppts->tag  = ppt->tag | MG_SGL;
         ppt->tmp   = ns;
         ns++;
       }
@@ -845,7 +845,7 @@ int loadSingul(pSingul singul) {
         pas = &singul->edge[na];
         pas->a = mesh.point[pa->a].tmp;
         pas->b = mesh.point[pa->b].tmp;
-        pas->tag  = pa->tag;
+        pas->tag  = pa->tag | MG_SGL;
         na++;
       }
     }

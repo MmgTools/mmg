@@ -2746,7 +2746,6 @@ void split3op(pMesh mesh, pSol met, int k, int vx[6]){
  *  and barycentric coordinates cb in the face ifac;
  *  Update adjacency relations and return local indice of the new point in k. */
 #warning: jeter ip???
-
 int split3cb(pMesh mesh, pSol met, int k, int ifac, double o[3],
              double cb[4], int *ip ) {
   pTetra        pt[3];

@@ -43,11 +43,12 @@
     }while(0)
 #endif
 
-#ifdef SINGUL
-#define NO_WARN_ON_SING
-#else
+#warning: a jeter si non utilise
+//#ifdef SINGUL
+//#define NO_WARN_ON_SING
+//#else
 //#define NO_WARN_ON_SING __attribute__((unused))
-#endif
+//#endif
 
 /* numerical accuracy */
 #define ALPHAD    20.7846096908265    //0.04811252243247      /* 12*sqrt(3) */
@@ -83,13 +84,16 @@
 
 /* tags */
 #define  MG_NOTAG     (0)
-#define  MG_REF       (1 << 0)        /**< 1 edge reference  */
-#define  MG_GEO       (1 << 1)        /**< 2 geometric ridge */
-#define  MG_REQ       (1 << 2)        /**< 4 required entity */
-#define  MG_NOM       (1 << 3)        /**< 8 non manifold    */
-#define  MG_BDY       (1 << 4)        /**< 16 boundary entity */
-#define  MG_CRN       (1 << 5)        /**< 32 corner         */
-#define  MG_NUL       (1 << 6)        /**< 64 vertex removed */
+#define  MG_REF       (1 << 0)        /**< 1  edge reference  */
+#define  MG_GEO       (1 << 1)        /**< 2  geometric ridge */
+#define  MG_REQ       (1 << 2)        /**< 4  required entity */
+#define  MG_NOM       (1 << 3)        /**< 8  non manifold    */
+#define  MG_BDY       (1 << 4)        /**< 16  boundary entity */
+#define  MG_CRN       (1 << 5)        /**< 32  corner         */
+#define  MG_NUL       (1 << 6)        /**< 64  vertex removed */
+#ifdef SINGUL
+#define  MG_SGL       (1 << 7)        /**< 128 inserted singularity */
+#endif
 
 #define MG_PLUS    2
 #define MG_MINUS   3

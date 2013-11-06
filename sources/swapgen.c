@@ -193,6 +193,7 @@ int swpgen(pMesh mesh,pSol met,int nconf,int ilist,int *list) {
   memset(list,0,(LMAX+2)*sizeof(int));
   nball = boulevolp(mesh,start,ip,list);
 
+#warning a jeter si non utilise
   /* #ifdef SINGUL */
   /* singularities: if np-nq is a particular edge, all tets of shell must be pxt */
   /* if ( pt->xt ) { */

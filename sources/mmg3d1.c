@@ -423,6 +423,10 @@ static int movtet(pMesh mesh,pSol met,int maxit) {
           ppt = &mesh->point[pt->v[i0]];
           if ( ppt->flag == base )  continue;
           else if ( MG_SIN(ppt->tag) )  continue;
+#ifdef SINGUL
+          else if ( info.sing && pt->xt && (pxt->tag[iarf[i][j]] & MG_SGL) )
+            continue;
+#endif
           if ( maxit != 1 ) {
             ppt->flag = base;
             improve   = 1;
@@ -510,6 +514,9 @@ static int coltet(pMesh mesh,pSol met,char typchk) {
         p1 = &mesh->point[pt->v[iq]];
         if ( p0->flag == base )  continue;
         else if ( (p0->tag & MG_REQ) || (p0->tag > p1->tag) )  continue;
+#ifdef SINGUL
+        else if ( info.sing && (p0->tag & MG_SGL) )  continue;
+#endif
 
         /* check length */
         if ( typchk == 1 ) {
@@ -659,7 +666,14 @@ static int anatetv(pMesh mesh,pSol met,char typchk) {
         o[0] = 0.5 * (p1->c[0]+p2->c[0]);
         o[1] = 0.5 * (p1->c[1]+p2->c[1]);
         o[2] = 0.5 * (p1->c[2]+p2->c[2]);
-        ip  = newPt(mesh,o,0);
+#ifdef SINGUL
+        if ( info.sing && pt->xt && (pxt->tag[i] & MG_SGL) ) {
+          ip = newPt(mesh,o,MG_BDY | MG_SGL);
+          mesh->point[ip].tag &= ~MG_BDY;
+        }
+        else
+#endif
+          ip  = newPt(mesh,o,0);
         if ( !ip ) {
           fprintf(stdout,"  ## Error: unable to allocate a new point\n");
           fprintf(stdout,"  ## Check the mesh size or ");
@@ -674,6 +688,14 @@ static int anatetv(pMesh mesh,pSol met,char typchk) {
         MG_SET(pt->flag,i);
         nap++;
       }
+#ifdef SINGUL
+#warning: assert a ajeter
+      /* check that we create a point tag MG_SGL but not MG_BDY */
+      if ( info.sing && pt->xt && (pxt->tag[i] & MG_SGL) ) {
+        assert(mesh->point[ip].tag & MG_SGL);
+        assert( !(mesh->point[ip].tag & MG_BDY) );
+      }
+#endif
     }
   }
   if ( !nap )  {
@@ -977,6 +999,13 @@ static int anatets(pMesh mesh,pSol met,char typchk) {
         ip2 = pt->v[iare[ia][1]];
         ip  = hashGet(&hash,ip1,ip2);
         if ( ip > 0 ) {
+#ifdef SINGUL
+#warning: assert a jeter
+          if ( info.sing && pt->xt && (pxt->tag[j] & MG_SGL) ) {
+            assert(mesh->point[ip].tag & MG_SGL);
+            assert( !(mesh->point[ip].tag & MG_BDY) );
+          }
+#endif
           MG_SET(pt->flag,ia);
           nc++;
           /* ridge on a boundary face */
@@ -1258,7 +1287,14 @@ static int adpspl(pMesh mesh,pSol met, int* warn) {
       o[0] = 0.5*(p0->c[0] + p1->c[0]);
       o[1] = 0.5*(p0->c[1] + p1->c[1]);
       o[2] = 0.5*(p0->c[2] + p1->c[2]);
-      ip = newPt(mesh,o,MG_NOTAG);
+#ifdef SINGUL
+      if ( info.sing && pt->xt && (pxt->tag[j] & MG_SGL) ) {
+        ip = newPt(mesh,o,MG_BDY | MG_SGL);
+        mesh->point[ip].tag &= ~MG_BDY;
+      }
+      else
+#endif
+        ip = newPt(mesh,o,MG_NOTAG);
       if ( !ip )  {
         *warn=1;
         break;
@@ -1333,8 +1369,11 @@ static int adpcol(pMesh mesh,pSol met) {
     p1 = &mesh->point[iq];
     if ( (p0->tag > p1->tag) || (p0->tag & MG_REQ) )  continue;
 #ifdef SINGUL
-    else if ( info.sing && MG_SGL(p0->xp,p0->tag) )
-      /*if ( !MG_SGL(pt->xt,pxt->tag[j]) )*/  continue;
+    else if ( info.sing && (p0->tag & MG_SGL) ) {
+#warning: assert a jeter
+      assert(pt->xt);
+      /*if ( !(pxt->tag[j] & MG_SGL) )*/  continue;
+    }
 #endif
 
     /* Case of a boundary face */
