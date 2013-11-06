@@ -938,10 +938,19 @@ int bdrySet(pMesh mesh) {
       na++;
     }
   }
+  if ( !mesh->nt ) {
+    if ( !na )  return(1);
+    else {
+      fprintf(stdout,"%s:%d: Error: we should not pass in",__FILE__,__LINE__);
+      fprintf(stdout," this routine without triangles and with");
+      fprintf(stdout," singular edges.\n");
+      return(0);
+    }
+  }
 #endif
 
   mesh->xt     = 0;
-  mesh->xtmax  = mesh->ntmax + 2*na; //10 * NTMAX;
+  mesh->xtmax  = mesh->ntmax + 2*na;
   mesh->xtetra = (pxTetra)calloc(mesh->xtmax+1,sizeof(xTetra));
   if ( !mesh->xtetra ) {
     fprintf(stdout,"  ## Allocation problem (xtetra), not enough memory.\n");
@@ -974,6 +983,13 @@ int bdrySet(pMesh mesh) {
         pxt->ref[i]   = ptt->ref;
         pxt->ftag[i] |= MG_BDY;
         pxt->ftag[i] |= (ptt->tag[0] & ptt->tag[1] & ptt->tag[2]);
+#ifdef SINGUL
+        if ( info.sing ) {
+          pxt->tag[iarf[i][0]] |= MG_BDY;
+          pxt->tag[iarf[i][1]] |= MG_BDY;
+          pxt->tag[iarf[i][2]] |= MG_BDY;
+        }
+#endif
       }
     }
   }
