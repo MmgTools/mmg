@@ -40,7 +40,7 @@ int hashTetra(pMesh mesh) {
   unsigned int   key;
 
   /* default */
-  if ( mesh->adja ) {
+  if ( mesh->adja && !info.sing ) {
     if ( abs(info.imprim) > 4 || info.ddebug ) {
       fprintf(stdout,"  ## Warning: no re-build of adjacencies of mesh. ");
       fprintf(stdout,"mesh->adja must be freed to enforce analysis.\n");

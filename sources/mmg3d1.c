@@ -1332,6 +1332,10 @@ static int adpcol(pMesh mesh,pSol met) {
     p0 = &mesh->point[ip];
     p1 = &mesh->point[iq];
     if ( (p0->tag > p1->tag) || (p0->tag & MG_REQ) )  continue;
+#ifdef SINGUL
+    else if ( info.sing && MG_SGL(p0->xp,p0->tag) )
+      /*if ( !MG_SGL(pt->xt,pxt->tag[j]) )*/  continue;
+#endif
 
     /* Case of a boundary face */
     ilist = 0;
