@@ -153,6 +153,12 @@ FOREACH(EXEC ${LISTEXEC})
   #####
   ###############################################################################
   #####
+  ADD_TEST(NAME ChkBdry_optls_test4_${EXEC}
+    COMMAND ${EXEC}
+    -in ${REG_TESTS_PATH}/ChkBdry_optls_test4/test4
+    -sol ${REG_TESTS_PATH}/ChkBdry_optls_test4/test4.sol
+    -out ${REG_TESTS_PATH}/ChkBdry_optls_test4/test4.o.meshb)
+  #####
   ADD_TEST(NAME ChkBdry_optls_temp_${EXEC}
     COMMAND ${EXEC} -v 5 -ls -hmin 5 -hmax 6
     -nr -hausd 0.5 -hgrad 1.2
