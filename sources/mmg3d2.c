@@ -111,13 +111,12 @@ static int ismaniball(pMesh mesh,pSol sol,int k,int indp) {
   }
   /* 0 value has been snapped accidentally */
   if ( !res ) {
-#warning: comprendre ce MG_REF + tester de swapper ... mais ou??
-    // if ( !(mesh->point[mesh->tetra[k].v[indp]].tag & MG_REF) ) {
-      fprintf(stdout,"Point with value 0 arounded by points of");
-      fprintf(stdout," same sign=:elt %d (%d), np %d (%d)\n",
-              k,indElt(mesh,k),np,indPt(mesh,np));
-
-      // }
+#ifdef SINGUL
+#warning: tester swap
+    fprintf(stdout,"Point with value 0 arounded by points of");
+    fprintf(stdout," same sign=:elt %d (%d), np %d (%d)\n",
+	    k,indElt(mesh,k),np,indPt(mesh,np));
+#endif
     return(0);
   }
 
@@ -1294,8 +1293,14 @@ int mmg3d2(pMesh mesh,pSol sol) {
     free(tmp);
     return(0);
   }
-
-  if ( !bdryPerm(mesh) ) {
+  if ( !chkNumberOfTri(mesh) ) {
+    if ( !bdryTria(mesh) ) {
+      fprintf(stdout,"  ## Boundary problem. Exit program.\n");
+      return(0);
+    }
+    freeXTets(mesh);
+  }
+  else if ( !bdryPerm(mesh) ) {
     fprintf(stdout,"  ## Boundary orientation problem. Exit program.\n");
     return(0);
   }

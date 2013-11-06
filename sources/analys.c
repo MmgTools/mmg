@@ -492,7 +492,7 @@ int analys(pMesh mesh) {
   }
 
   /* identify surface mesh */
-  if ( !mesh->nt ) {
+  if ( !chkNumberOfTri(mesh) ) {
     if ( !bdryTria(mesh) ) {
       fprintf(stdout,"  ## Boundary problem. Exit program.\n");
       return(0);

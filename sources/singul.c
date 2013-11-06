@@ -1326,6 +1326,11 @@ int inserSingul(pMesh mesh, pSol met, pSingul singul){
   double  cb[4];
   Travel  trav;
 
+  if ( (!singul->na) && (!singul->ns) ) return(-1);
+
+  if ( abs(info.imprim) > 4 || info.ddebug )
+    fprintf(stdout,"\n  ** INSERTION OF SINGULARITIES\n");
+
   if ( !hashTetra(mesh) ) {
     fprintf(stdout,"  ## Hashing problem (1). Exit program.\n");
     return(0);
@@ -1402,7 +1407,7 @@ int remeshSing(pMesh mesh,pSol met) {
   unsigned char indedg[4] = { 0, 0, 1, 2 };
 
   if ( abs(info.imprim) > 4 )
-    fprintf(stdout,"  ** SINGULARITIES REMESHING\n");
+    fprintf(stdout,"  ** SINGULARITIES PRE-REMESHING\n");
   nnc = it = 0;
   maxit = 5;
   do {
@@ -1472,7 +1477,15 @@ int remeshSing(pMesh mesh,pSol met) {
 
       /* Attempt to swap */
       /* First: split on barycenter of face */
+      // TO END
       for (i=0; i<4; i++) {
+        //for (jseg=0; jseg<4; jseg++ ) {
+        //  if ( pxt->tag[arpt[i][jseg]] & MG_SGL ) {
+        //    if ( pxt->tag[arpt[i][inxt2[jseg]]] & MG_SGL )
+        //
+        //  }
+
+#warning: represent one of multiple possible case : TO END
         if ( (pxt->tag[arpt[i][0]] & MG_SGL) &&
              (pxt->tag[arpt[i][1]] & MG_SGL) &&
              (pxt->tag[arpt[i][2]] & MG_SGL) )

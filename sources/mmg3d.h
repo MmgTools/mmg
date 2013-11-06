@@ -170,6 +170,7 @@ void delPt(pMesh mesh,int ip);
 int  zaldy(pMesh mesh);
 void freeXTets(pMesh mesh);
 char chkedg(pMesh mesh,pTria pt,char ori);
+int  chkNumberOfTri(pMesh mesh);
 void tet2tri(pMesh mesh,int k,char ie,Tria *ptt);
 int  bezierCP(pMesh mesh,Tria *pt,pBezier pb,char ori);
 int  BezierTgt(double c1[3],double c2[3],double n1[3],double n2[3],double t1[3],double t2[3]);

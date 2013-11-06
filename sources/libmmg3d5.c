@@ -443,8 +443,9 @@ int mmg3dlib(int opt_i[10],double opt_d[6],pMesh mesh,pSol met
              ) {
 
   char      stim[32];
+  int       ier;
 #ifndef SINGUL
-  pSingul sing;
+  pSingul   sing;
 #endif
 
   fprintf(stdout,"  -- MMG3d, Release %s (%s) \n",MG_VER,MG_REL);
@@ -481,8 +482,19 @@ int mmg3dlib(int opt_i[10],double opt_d[6],pMesh mesh,pSol met
     return(MMG5_STRONGFAILURE);
   }
 #ifdef SINGUL
-  if ( info.sing )
-    if ( !loadSingul(sing) ) return(MMG5_STRONGFAILURE);
+  if ( info.sing ) {
+    if ( !info.iso ) {
+      if ( !sing->namein )
+        fprintf(stdout,"  ## WARNING: NO SINGULARITIES PROVIDED.\n");
+      else
+        if ( !loadSingul(sing) ) return(MMG5_STRONGFAILURE);
+    }
+    else if ( sing->namein ) {
+      fprintf(stdout,"  ## WARNING: SINGULARITIES MUST BE INSERTED IN");
+      fprintf(stdout," A PRE-REMESHING PROCESS.\n");
+      fprintf(stdout,"              FILE %s IGNORED\n",sing->namein);
+    }
+  }
 #endif
 
   chrono(OFF,&(info.ctim[1]));
@@ -494,9 +506,9 @@ int mmg3dlib(int opt_i[10],double opt_d[6],pMesh mesh,pSol met
   setfunc(mesh,met);
   if ( abs(info.imprim) > 0 )  outqua(mesh,met);
   fprintf(stdout,"\n  %s\n   MODULE MMG3D: IMB-LJLL : %s (%s)\n  %s\n",MG_STR,MG_VER,MG_REL,MG_STR);
-  if ( info.imprim )   fprintf(stdout,"\n  -- PHASE 1 : ANALYSIS\n");
-  if ( !scaleMesh(mesh,met,sing) ) return(MMG5_STRONGFAILURE);
+  if ( info.imprim )  fprintf(stdout,"\n  -- PHASE 1 : ANALYSIS\n");
 
+  if ( !scaleMesh(mesh,met,sing) ) return(MMG5_STRONGFAILURE);
   if ( info.iso ) {
     if ( !met->np ) {
       fprintf(stdout,"\n  ## ERROR: A VALID SOLUTION FILE IS NEEDED \n");
@@ -506,18 +518,24 @@ int mmg3dlib(int opt_i[10],double opt_d[6],pMesh mesh,pSol met
   }
 
 #ifdef SINGUL
-  if ( info.sing && !inserSingul(mesh,met,sing) )
-    return(MMG5_STRONGFAILURE);
-  else {
-    chrono(OFF,&info.ctim[2]);
-    printim(info.ctim[2].gdif,stim);
-    fprintf(stdout,"  -- INSERTION OF SINGULARITIES COMPLETED.     %s\n",stim);
-    chrono(ON,&info.ctim[2]);
+  if ( info.sing ) {
+    if ( !info.iso ) {
+      if ( !met->np && !DoSol(mesh,met,&info) )
+        return(MMG5_LOWFAILURE);
+      if ( !( ier=inserSingul(mesh,met,sing) ) )
+        return(MMG5_STRONGFAILURE);
+      else if (ier > 0 ) {
+        chrono(OFF,&info.ctim[2]);
+        printim(info.ctim[2].gdif,stim);
+        fprintf(stdout,"  -- INSERTION OF SINGULARITIES COMPLETED.     %s\n\n",stim);
+        chrono(ON,&info.ctim[2]);
+      }
+    }
   }
 #endif
 
 #ifdef DEBUG
-  if ( !met->np && !DoSol(mesh,met,info) ) {
+  if ( !met->np && !DoSol(mesh,met,&info) ) {
   if ( !unscaleMesh(mesh,met) )  return(MMG5_STRONGFAILURE);
     return(mesh,met,MMG5_LOWFAILURE);
   }
@@ -538,6 +556,16 @@ int mmg3dlib(int opt_i[10],double opt_d[6],pMesh mesh,pSol met
   chrono(ON,&(info.ctim[3]));
   if ( info.imprim )
     fprintf(stdout,"\n  -- PHASE 2 : %s MESHING\n",met->size < 6 ? "ISOTROPIC" : "ANISOTROPIC");
+
+#ifdef SINGUL
+  if ( info.sing && (!info.iso) ) {
+    if ( remeshSing(mesh,met)<0 ) {
+      fprintf(stdout,"  ## Collapse of singularities problem.\n");
+      return(MMG5_STRONGFAILURE);
+    }
+  }
+#endif
+
   if ( !mmg3d1(mesh,met) ){
     if ( !(mesh->adja) && !hashTetra(mesh) ) {
       fprintf(stdout,"  ## Hashing problem. Invalid mesh.\n");

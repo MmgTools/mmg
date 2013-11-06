@@ -324,6 +324,7 @@ int saveMesh(pMesh mesh) {
     free(mesh->tria);
     mesh->tria=NULL;
   }
+  chkNumberOfTri(mesh);
   if ( bdryTria(mesh) ) {
     GmfSetKwd(outm,GmfTriangles,mesh->nt);
     for (k=1; k<=mesh->nt; k++) {

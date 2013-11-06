@@ -628,6 +628,30 @@ int hGeom(pMesh mesh) {
   /* else, infer special edges from information carried by triangles */
   else {
     if ( !mesh->adjt && !hashTria(mesh) )  return(0);
+#ifdef SINGUL
+    if ( !info.sing || !mesh->htab.geom ) {
+      for (k=1; k<=mesh->nt; k++) {
+        pt   = &mesh->tria[k];
+        adja = &mesh->adjt[3*(k-1)+1];
+        for (i=0; i<3; i++) {
+          i1  = inxt2[i];
+          i2  = iprv2[i];
+          kk  = adja[i] / 3;
+          if ( !kk || pt->tag[i] & MG_NOM )
+            mesh->na++;
+          else if ( (k < kk) && ( pt->edg[i] || pt->tag[i] ) )  mesh->na++;
+        }
+      }
+
+      mesh->namax = MG_MAX(1.5*mesh->na,NAMAX);
+      if(mesh->htab.geom){
+        free(mesh->htab.geom);
+        mesh->htab.geom=NULL;
+      }
+      hNew(&mesh->htab,mesh->na,3*mesh->namax);
+      mesh->na = 0;
+    }
+#else
     for (k=1; k<=mesh->nt; k++) {
       pt   = &mesh->tria[k];
       adja = &mesh->adjt[3*(k-1)+1];
@@ -647,6 +671,7 @@ int hGeom(pMesh mesh) {
     }
     hNew(&mesh->htab,mesh->na,3*mesh->namax);
     mesh->na = 0;
+#endif
 
     /* build hash for edges */
     for (k=1; k<=mesh->nt; k++) {
@@ -680,16 +705,15 @@ int hGeom(pMesh mesh) {
   return(1);
 }
 
-/** identify boundary triangles */
-int bdryTria(pMesh mesh) {
+/** Count the number of faces in mesh and compare this number    *
+ *  to the number of given triangles. Delete the given triangles *
+ *  if they didn't correspond to the founded faces and fill      *
+ *  mesh->nt with the real number of faces.                      *
+ *  Retrun 1 if numbers of given and founded faces correspond.   */
+int chkNumberOfTri(pMesh mesh) {
   pTetra    pt,pt1;
-  pTria     ptt;
-  pPoint    ppt;
-  pxTetra   pxt;
-  int      *adja,adj,k,nttmp;
-  char      i;
+  int      *adja,adj,k,i,nttmp;
 
-  /* step 1: count external faces */
   nttmp = 0;
   for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
@@ -711,8 +735,19 @@ int bdryTria(pMesh mesh) {
     mesh->tria = NULL;
   }
   mesh->nt = nttmp;
+  return(0);
+}
 
-  /* step 2 : create triangles */
+/** identify boundary triangles */
+int bdryTria(pMesh mesh) {
+  pTetra    pt,pt1;
+  pTria     ptt;
+  pPoint    ppt;
+  pxTetra   pxt;
+  int      *adja,adj,k;
+  char      i;
+
+  /* create triangles */
   mesh->tria = (pTria)calloc(mesh->nt+1,sizeof(Tria));
   if ( !mesh->tria ) {
     fprintf(stdout,"  ## Allocation problem (tria), not enough memory.\n");
@@ -732,23 +767,29 @@ int bdryTria(pMesh mesh) {
     for (i=0; i<4; i++) {
       adj = adja[i] / 4;
       pt1 = &mesh->tetra[adj];
-      if ( !adj || ( pt->ref > pt1->ref) ) {
-        mesh->nt++;
-        ptt = &mesh->tria[mesh->nt];
-        ptt->v[0] = pt->v[idir[i][0]];
-        ptt->v[1] = pt->v[idir[i][1]];
-        ptt->v[2] = pt->v[idir[i][2]];
-        if ( !adj ) {
-          if ( pxt ) {
-            if ( pxt->tag[iarf[i][0]] ) ptt->tag[0] = pxt->tag[iarf[i][0]];
-            if ( pxt->tag[iarf[i][1]] ) ptt->tag[1] = pxt->tag[iarf[i][1]];
-            if ( pxt->tag[iarf[i][2]] ) ptt->tag[2] = pxt->tag[iarf[i][2]];
-            /* useful only when saving mesh */
-            ptt->ref = pxt->ref[i];
-          }
+      if ( adj && ( pt->ref <= pt1->ref) )  continue;
+      mesh->nt++;
+      ptt = &mesh->tria[mesh->nt];
+      ptt->v[0] = pt->v[idir[i][0]];
+      ptt->v[1] = pt->v[idir[i][1]];
+      ptt->v[2] = pt->v[idir[i][2]];
+      if ( !adj ) {
+        if ( pxt ) {
+          if ( pxt->tag[iarf[i][0]] )  ptt->tag[0] = pxt->tag[iarf[i][0]];
+          if ( pxt->tag[iarf[i][1]] )  ptt->tag[1] = pxt->tag[iarf[i][1]];
+          if ( pxt->tag[iarf[i][2]] )  ptt->tag[2] = pxt->tag[iarf[i][2]];
+          /* useful only when saving mesh */
+          ptt->ref = pxt->ref[i];
         }
-        else
-          ptt->ref = info.iso ? MG_ISO : 0;
+      }
+      else {
+        if ( pxt ) {
+          if ( pxt->tag[iarf[i][0]] )  ptt->tag[0] = pxt->tag[iarf[i][0]];
+          if ( pxt->tag[iarf[i][1]] )  ptt->tag[1] = pxt->tag[iarf[i][1]];
+          if ( pxt->tag[iarf[i][2]] )  ptt->tag[2] = pxt->tag[iarf[i][2]];
+          /* useful only when saving mesh */
+        }
+        ptt->ref = info.iso ? MG_ISO : 0;
       }
     }
   }
@@ -879,6 +920,7 @@ static int hashGetFace(Hash *hash,int ia,int ib,int ic) {
   hedge  *ph;
   int     key,mins,maxs,sum;
 
+  if ( !hash->item )  return(0);
   mins = MG_MIN(ia,MG_MIN(ib,ic));
   maxs = MG_MAX(ia,MG_MAX(ib,ic));
 
@@ -912,9 +954,11 @@ int bdrySet(pMesh mesh) {
 #ifdef SINGUL
   hgeom    *ph;
   int      ref;
-#endif
 
+  if ( (!info.sing) && (!mesh->nt) )  return(1);
+#else
   if ( !mesh->nt )  return(1);
+#endif
 
   if ( mesh->xtetra ) {
     if ( abs(info.imprim) > 4 || info.ddebug ) {
@@ -1004,14 +1048,20 @@ int bdrySet(pMesh mesh) {
         ia = iare[i][0];
         ib = iare[i][1];
         hGet(&mesh->htab,pt->v[ia],pt->v[ib],&ref,&tag);
-        if ( (tag & MG_SGL) || ref ) {
-          if ( !pt->xt ) {
-            mesh->xt++;
-            pt->xt = mesh->xt;
+        if ( pt->xt )
+          tag |= mesh->xtetra[pt->xt].tag[i];
+        if ( !(tag & MG_BDY) ) {
+          if ( tag || ref ) {
+            if ( !pt->xt ) {
+              mesh->xt++;
+              pt->xt = mesh->xt;
+            }
+            pxt = &mesh->xtetra[pt->xt];
+            pxt->edg[i]  = ref;
+            pxt->tag[i] |= tag | MG_SGL;
+            mesh->point[pt->v[ia]].tag |= MG_SGL;
+            mesh->point[pt->v[ib]].tag |= MG_SGL;
           }
-          pxt = &mesh->xtetra[pt->xt];
-          pxt->edg[i]  = ref;
-          pxt->tag[i] |= tag;
         }
       }
     }
@@ -1129,7 +1179,7 @@ int bdryPerm(pMesh mesh) {
   int     *adja,adj,k,kt,ia,ib,ic,nf;
   char     i;
 
-  if ( !mesh->nt )  return(0);
+  assert(mesh->nt);
 
   /* store triangles temporarily */
   hashNew(&hash,MG_MAX(0.51*mesh->nt,100),MG_MAX(1.51*mesh->nt,300));
@@ -1153,28 +1203,26 @@ int bdryPerm(pMesh mesh) {
       pt1 = &mesh->tetra[adj];
       if ( adj && (pt->ref <= pt1->ref || pt->ref == MG_PLUS) )
         continue;
-      else {
-        ia = pt->v[idir[i][0]];
-        ib = pt->v[idir[i][1]];
-        ic = pt->v[idir[i][2]];
-        kt = hashGetFace(&hash,ia,ib,ic);
-        if ( !kt ) {
-          fprintf(stdout,"%s:%d: Error: function hashGetFace return 0.\n",__FILE__,__LINE__);
-          fprintf(stdout," Maybe you have non-boundary triangles.");
-          fprintf(stdout," Check triangle of vertices %d %d %d.\n",ia,ib,ic);
-          exit(EXIT_FAILURE);
-        }
+      ia = pt->v[idir[i][0]];
+      ib = pt->v[idir[i][1]];
+      ic = pt->v[idir[i][2]];
+      kt = hashGetFace(&hash,ia,ib,ic);
+      if ( !kt ) {
+        fprintf(stdout,"%s:%d: Error: function hashGetFace return 0.\n",__FILE__,__LINE__);
+        fprintf(stdout," Maybe you have non-boundary triangles.");
+        fprintf(stdout," Check triangle of vertices %d %d %d.\n",ia,ib,ic);
+        exit(EXIT_FAILURE);
+      }
 
-        /* check orientation */
-        ptt = &mesh->tria[kt];
-        if ( ptt->v[0] == ia && ptt->v[1] == ib && ptt->v[2] == ic )
-          continue;
-        else {
-          ptt->v[0] = ia;
-          ptt->v[1] = ib;
-          ptt->v[2] = ic;
-          nf++;
-        }
+      /* check orientation */
+      ptt = &mesh->tria[kt];
+      if ( ptt->v[0] == ia && ptt->v[1] == ib && ptt->v[2] == ic )
+        continue;
+      else {
+        ptt->v[0] = ia;
+        ptt->v[1] = ib;
+        ptt->v[2] = ic;
+        nf++;
       }
     }
   }

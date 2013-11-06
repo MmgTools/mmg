@@ -491,7 +491,8 @@ int main(int argc,char *argv[]) {
   setfunc(&mesh,&met);
   if ( abs(info.imprim) > 0 )  outqua(&mesh,&met);
   fprintf(stdout,"\n  %s\n   MODULE MMG3D: IMB-LJLL : %s (%s)\n  %s\n",MG_STR,MG_VER,MG_REL,MG_STR);
-  if ( info.imprim )   fprintf(stdout,"\n  -- PHASE 1 : ANALYSIS\n");
+  if ( info.imprim )  fprintf(stdout,"\n  -- PHASE 1 : ANALYSIS\n");
+
   if ( !scaleMesh(&mesh,&met,&sing) ) RETURN_AND_FREE(&mesh,&met,&sing,MMG5_STRONGFAILURE);
   if ( info.iso ) {
     if ( !met.np ) {
@@ -506,12 +507,12 @@ int main(int argc,char *argv[]) {
     if ( !info.iso ) {
       if ( !met.np && !DoSol(&mesh,&met,&info) )
         RETURN_AND_FREE(&mesh,&met,&sing,MMG5_LOWFAILURE);
-      if ( !inserSingul(&mesh,&met,&sing) )
+      if ( !( ier=inserSingul(&mesh,&met,&sing) ) )
         RETURN_AND_FREE(&mesh,&met,&sing,MMG5_STRONGFAILURE);
-      else {
+      else if (ier > 0 ) {
         chrono(OFF,&info.ctim[2]);
         printim(info.ctim[2].gdif,stim);
-        fprintf(stdout,"  -- INSERTION OF SINGULARITIES COMPLETED.     %s\n",stim);
+        fprintf(stdout,"  -- INSERTION OF SINGULARITIES COMPLETED.     %s\n\n",stim);
         chrono(ON,&info.ctim[2]);
       }
     }
