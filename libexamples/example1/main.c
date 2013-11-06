@@ -15,7 +15,7 @@
 int main(int argc,char *argv[]) {
   MMG5_pMesh      mmgMesh;
   MMG5_pSol       mmgSol;
-  int             opt_i[9],k,ier;
+  int             opt_i[10],k,ier;
   double          opt_d[6];
 
   fprintf(stdout,"  -- TEST MMG3DLIB \n");

@@ -86,6 +86,7 @@ OPTION ( INSER_SINGULARITIES "Compile the part of code that allow to insert sing
 IF ( INSER_SINGULARITIES )
     SET(CMAKE_C_FLAGS "-DSINGUL ${CMAKE_C_FLAGS}")
     SET(REMOVE_FILE "")
+    MESSAGE(STATUS "Compilation with insertion of singularities available")
 ENDIF()
 
 ###############################################################################
@@ -229,7 +230,7 @@ OPTION ( TEST_LIBMMG3D5 "Compile tests of library" OFF)
 IF ( TEST_LIBMMG3D5 )
   IF ( LIBMMG3D5_STATIC )
     IF ( INSER_SINGULARITIES AND TEST_LIBMMG3D5 )
-      MESSAGE(WARNING "Test \"libmmg5_example1\" not available with the insertion of singularities flag set to \"ON\"")
+      MESSAGE(WARNING "Test \"libmmg5_example1\" not available with the flag of insertion of singularities set to \"ON\"")
     ELSE()
       ADD_EXECUTABLE(libmmg5_example1 ${MMG_SOURCE_DIR}/../libexamples/example1/main.c)
       TARGET_LINK_LIBRARIES(libmmg5_example1 mmg3d5_a)
@@ -293,10 +294,10 @@ IF(BUILD_TESTING)
   ENABLE_TESTING()
   INCLUDE(CTest)
 
-  IF (CMAKE_COMPILER_IS_GNUCC)
+  IF ( CMAKE_COMPILER_IS_GNUCC AND NOT APPLE )
     SET(CMAKE_C_FLAGS_DEBUG "-g -Wall -fprofile-arcs -ftest-coverage --coverage ${CMAKE_C_FLAGS}")
     SET(CMAKE_EXE_LINKER_FLAGS_DEBUG "-g -fprofile-arcs -ftest-coverage --coverage ${CMAKE_EXE_LINKER_FLAGS}")
-  ENDIF(CMAKE_COMPILER_IS_GNUCC)
+  ENDIF ( )
 
   # Add runtime that we want to test
   GET_TARGET_PROPERTY(EXECUT mmg3d5 LOCATION)

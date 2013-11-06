@@ -17,8 +17,8 @@
 #include "libmmg3d5.h"
 #include "mmg3d.h"
 
-int       opt_i[9];
-double    opt_d[5];
+int       opt_i[10];
+double    opt_d[6];
 mytime    ctim[TIMEMAX];
 
 static void usage(char *prog) {

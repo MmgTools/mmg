@@ -996,7 +996,7 @@ int DoSol(pMesh mesh,pSol met,Info* info) {
 }
 
 /** find the element number in packed numerotation */
-inline int indElt(pMesh mesh, int kel) {
+int indElt(pMesh mesh, int kel) {
   pTetra pt;
   int    ne, k;
 
@@ -1012,7 +1012,7 @@ inline int indElt(pMesh mesh, int kel) {
 }
 
 /** find the point number in packed numerotation */
-inline int indPt(pMesh mesh, int kp) {
+int indPt(pMesh mesh, int kp) {
   pPoint ppt;
   int    np, k;
 
@@ -1025,4 +1025,59 @@ inline int indPt(pMesh mesh, int kp) {
     }
   }
   return(0);
+}
+
+/** Debug function (not use in clean code): print mesh->tria structure */
+void printTria(pMesh mesh,char* fileName) {
+  pTria ptt;
+  int   k;
+  FILE  *inm;
+
+  inm = fopen(fileName,"w");
+
+  fprintf(inm,"----------> %d TRIANGLES <----------\n",mesh->nt);
+  for(k=1; k<=mesh->nt; k++) {
+    ptt = &mesh->tria[k];
+    fprintf(inm,"num %d -> %d %d %d\n",k,ptt->v[0],ptt->v[1],
+            ptt->v[2]);
+    fprintf(inm,"ref   -> %d\n",ptt->ref);
+    fprintf(inm,"tag   -> %d %d %d\n",ptt->tag[0],ptt->tag[1],ptt->tag[2]);
+    fprintf(inm,"edg   -> %d %d %d\n",ptt->edg[0],ptt->edg[1],ptt->edg[2]);
+    fprintf(inm,"\n");
+  }
+  fprintf(inm,"---------> END TRIANGLES <--------\n");
+  fclose(inm);
+}
+
+/** Debug function (not use in clean code): print mesh->tria structure */
+void printTetra(pMesh mesh,char* fileName) {
+  pTetra  pt;
+  pxTetra pxt;
+  int     k;
+  FILE    *inm;
+
+  inm = fopen(fileName,"w");
+
+  fprintf(inm,"----------> %d TETRAHEDRAS <----------\n",mesh->ne);
+  for(k=1; k<=mesh->ne; k++) {
+    pt = &mesh->tetra[k];
+    fprintf(inm,"num %d -> %d %d %d %d\n",k,pt->v[0],pt->v[1],
+            pt->v[2],pt->v[3]);
+    fprintf(inm,"ref,tag,xt  -> %d %d %d\n",pt->ref,pt->tag,pt->xt);
+    if ( pt->xt ) {
+      pxt = &mesh->xtetra[pt->xt];
+      fprintf(inm,"tag   -> %d %d %d %d %d %d\n",pxt->tag[0],pxt->tag[1],
+              pxt->tag[2],pxt->tag[3],pxt->tag[4],pxt->tag[5]);
+      fprintf(inm,"edg   -> %d %d %d %d %d %d\n",pxt->edg[0],pxt->edg[1],
+              pxt->edg[2],pxt->edg[3],pxt->edg[4],pxt->edg[5]);
+      fprintf(inm,"ftag  -> %d %d %d %d\n",pxt->ftag[0],pxt->ftag[1],
+              pxt->ftag[2],pxt->ftag[3]);
+      fprintf(inm,"ref   -> %d %d %d %d\n",pxt->ref[0],pxt->ref[1],
+              pxt->ref[2],pxt->ref[3]);
+      fprintf(inm,"ori   -> %d \n",pxt->ori);
+    }
+    fprintf(inm,"\n");
+  }
+  fprintf(inm,"---------> END TETRAHEDRAS <--------\n");
+  fclose(inm);
 }

@@ -4,6 +4,8 @@ FILES:
    continuous-run.sh  : check automatically the repository at each commit and run nightlySVN-run.sh
    nighltySVN-run.sh  : check some build (compilation in Release or Minsizerel mod) and memory errors at each commit
 
+   compare_listStruct.pl : script to compare files created by functions printTetra/printTria (mmg3d5)
+
 USAGE:
   Only experimental-run and nightly-run are useful to developper.
   Results of tests are submitted on the local host vulcain so to see it you need to configure

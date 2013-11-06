@@ -270,6 +270,11 @@ void outqua(pMesh mesh,pSol met);
 int  badelt(pMesh mesh,pSol met);
 int prilen(pMesh mesh,pSol met);
 int DoSol(pMesh mesh,pSol met,Info* info);
+/* useful functions to debug */
+int  indElt(pMesh mesh,int kel);
+int  indPt(pMesh mesh,int kp);
+void printTria(pMesh mesh,char* fileName);
+void printTetra(pMesh mesh,char* fileName);
 
 #ifdef USE_SCOTCH
 int renumbering(int vertBoxNbr, pMesh mesh, pSol sol);
