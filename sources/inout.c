@@ -458,11 +458,21 @@ int saveMesh(pMesh mesh) {
   }
 
 
-  /* write normals */
   nn = nt = 0;
-  GmfSetKwd(outm,GmfNormals,mesh->xp);
-
   if ( mesh->xp ) {
+    /* Count tangents and normals */
+    for (k=1; k<=mesh->np; k++) {
+      ppt = &mesh->point[k];
+      if ( !MG_VOK(ppt) || MG_SIN(ppt->tag) )  continue;
+      else if ( (ppt->tag & MG_BDY)
+                && (!(ppt->tag & MG_GEO) || (ppt->tag & MG_NOM)) )
+        nn++;
+      if ( MG_EDG(ppt->tag) || (ppt->tag & MG_NOM) ) nt++;
+    }
+
+    /* write normals */
+    GmfSetKwd(outm,GmfNormals,nn);
+
     for (k=1; k<=mesh->np; k++) {
       ppt = &mesh->point[k];
       if ( !MG_VOK(ppt) || MG_SIN(ppt->tag) )  continue;
@@ -470,13 +480,11 @@ int saveMesh(pMesh mesh) {
                 && (!(ppt->tag & MG_GEO) || (ppt->tag & MG_NOM)) ) {
         pxp = &mesh->xpoint[ppt->xp];
         GmfSetLin(outm,GmfNormals,pxp->n1[0],pxp->n1[1],pxp->n1[2]);
-        nn++;
       }
-      if ( MG_EDG(ppt->tag) ) nt++;
     }
+
     GmfSetKwd(outm,GmfNormalAtVertices,nn);
     nn = 0;
-
     for (k=1; k<=mesh->np; k++) {
       ppt = &mesh->point[k];
       if ( !MG_VOK(ppt) || MG_SIN(ppt->tag) )  continue;
@@ -486,11 +494,12 @@ int saveMesh(pMesh mesh) {
     }
 
     if ( nt ) {
+      /* Write tangents */
       GmfSetKwd(outm,GmfTangents,nt);
       for (k=1; k<=mesh->np; k++) {
         ppt = &mesh->point[k];
-        if ( MG_SIN(ppt->tag) )  continue;
-        else if ( MG_VOK(ppt) && (MG_EDG(ppt->tag) || (ppt->tag & MG_NOM) )) {
+        if ( !MG_VOK(ppt) || MG_SIN(ppt->tag) )  continue;
+        else if ( MG_EDG(ppt->tag) || (ppt->tag & MG_NOM) ) {
           pxp = &mesh->xpoint[ppt->xp];
           GmfSetLin(outm,GmfTangents,pxp->t[0],pxp->t[1],pxp->t[2]);
         }
@@ -499,8 +508,8 @@ int saveMesh(pMesh mesh) {
       nt = 0;
       for (k=1; k<=mesh->np; k++) {
         ppt = &mesh->point[k];
-        if ( MG_SIN(ppt->tag) )  continue;
-        else if ( MG_VOK(ppt) && (MG_EDG(ppt->tag) || (ppt->tag & MG_NOM) ) )
+        if ( !MG_VOK(ppt) || MG_SIN(ppt->tag) )  continue;
+        else if ( MG_EDG(ppt->tag) || (ppt->tag & MG_NOM) )
           GmfSetLin(outm,GmfTangentAtVertices,ppt->tmp,++nt);
       }
     }
