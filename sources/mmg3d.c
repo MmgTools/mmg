@@ -512,28 +512,10 @@ int main(int argc,char *argv[]) {
     fprintf(stdout,"\n  -- PHASE 2 : %s MESHING\n",met.size < 6 ? "ISOTROPIC" : "ANISOTROPIC");
 
 #ifdef SINGUL
-  //ajeter
-   // if ( !unscaleMesh(&mesh,&met) )
-   //   RETURN_AND_FREE(&mesh,&met,&sing,MMG5_STRONGFAILURE);
-   // if ( !saveMesh(&mesh) )
-   //   RETURN_AND_FREE(&mesh,&met,&sing,MMG5_STRONGFAILURE);
-   // if ( met.m && !saveMet(&mesh,&met) )
-   //   RETURN_AND_FREE(&mesh,&met,&sing,MMG5_STRONGFAILURE);
-   // RETURN_AND_FREE(&mesh,&met,&sing,MMG5_LOWFAILURE);
-    //fin ajeter
-  if ( info.sing && (coltet_sing(&mesh,&met)<0) ) {
+  if ( info.sing && (remeshSing(&mesh,&met)<0) ) {
     fprintf(stdout,"  ## Collapse of singularities problem.\n");
     RETURN_AND_FREE(&mesh,&met,&sing,MMG5_STRONGFAILURE);
   }
-  //ajeter
-  if ( !unscaleMesh(&mesh,&met) )
-    RETURN_AND_FREE(&mesh,&met,&sing,MMG5_STRONGFAILURE);
-  if ( !saveMesh(&mesh) )
-    RETURN_AND_FREE(&mesh,&met,&sing,MMG5_STRONGFAILURE);
-  if ( met.m && !saveMet(&mesh,&met) )
-    RETURN_AND_FREE(&mesh,&met,&sing,MMG5_STRONGFAILURE);
-  strcat(mesh.nameout,"FIN.mesh");strcat(met.nameout,"FIN.mesh");
-  //fin ajeter
 #endif
 
   if ( !mmg3d1(&mesh,&met) ){

@@ -102,6 +102,7 @@
 #define outqua                        	 _MMG5_outqua
 #define ppgdisp                       	 _MMG5_ppgdisp
 #define prilen                        	 _MMG5_prilen
+#define remeshSing                    	 _MMG5_remeshSing
 #define renumbering                   	 _MMG5_renumbering
 #define rotmatrix                     	 _MMG5_rotmatrix
 #define scaleMesh                     	 _MMG5_scaleMesh

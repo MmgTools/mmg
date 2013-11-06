@@ -425,6 +425,7 @@ static int movtet(pMesh mesh,pSol met,int maxit) {
           if ( ppt->flag == base )  continue;
           else if ( MG_SIN(ppt->tag) )  continue;
 #ifdef SINGUL
+          else if ( ppt->tag & MG_SGL )  continue;
           else if ( info.sing && pt->xt && (pxt->tag[iarf[i][j]] & MG_SGL) )
             continue;
 #endif
@@ -672,10 +673,8 @@ static int anatetv(pMesh mesh,pSol met,char typchk) {
         o[1] = 0.5 * (p1->c[1]+p2->c[1]);
         o[2] = 0.5 * (p1->c[2]+p2->c[2]);
 #ifdef SINGUL
-        if ( info.sing && pt->xt && (pxt->tag[i] & MG_SGL) ) {
-          ip = newPt(mesh,o,MG_BDY | MG_SGL);
-          mesh->point[ip].tag &= ~MG_BDY;
-        }
+        if ( info.sing && pt->xt && (pxt->tag[i] & MG_SGL) )
+          ip = newPt(mesh,o,MG_SGL);
         else
 #endif
           ip  = newPt(mesh,o,0);
@@ -1006,7 +1005,7 @@ static int anatets(pMesh mesh,pSol met,char typchk) {
         if ( ip > 0 ) {
 #ifdef SINGUL
 #warning: assert a jeter
-          if ( info.sing && pt->xt && (pxt->tag[j] & MG_SGL) ) {
+          if ( info.sing && pt->xt && (pxt->tag[ia] & MG_SGL) ) {
             assert(mesh->point[ip].tag & MG_SGL);
             assert( !(mesh->point[ip].tag & MG_BDY) );
           }
@@ -1294,9 +1293,8 @@ static int adpspl(pMesh mesh,pSol met, int* warn) {
       o[1] = 0.5*(p0->c[1] + p1->c[1]);
       o[2] = 0.5*(p0->c[2] + p1->c[2]);
 #ifdef SINGUL
-      if ( info.sing && pt->xt && (pxt->tag[j] & MG_SGL) ) {
-        ip = newPt(mesh,o,MG_BDY | MG_SGL);
-        mesh->point[ip].tag &= ~MG_BDY;
+      if ( info.sing && pt->xt && (pxt->tag[imax] & MG_SGL) ) {
+        ip = newPt(mesh,o,MG_SGL);
       }
       else
 #endif
@@ -1376,9 +1374,7 @@ static int adpcol(pMesh mesh,pSol met) {
     if ( (p0->tag > p1->tag) || (p0->tag & MG_REQ) )  continue;
 #ifdef SINGUL
     else if ( info.sing && (p0->tag & MG_SGL) ) {
-#warning: assert a jeter
-      assert(pt->xt);
-      /*if ( !(pxt->tag[j] & MG_SGL) )*/  continue;
+      if ( !( pt->xt && (pxt->tag[imin] & MG_SGL) ) )  continue;
     }
 #endif
 

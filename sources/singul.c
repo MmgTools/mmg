@@ -103,7 +103,6 @@ int updateedge(pMesh mesh, pTetra *ptt, int nsfin, pPoint p[4], int ia,
     return(0);
   }
 
-#warning: A optimiser
   ip0 = (*ptt)->v[iare[ia][0]];
   ip1 = (*ptt)->v[iare[ia][1]];
 
@@ -499,7 +498,7 @@ int creaPoint(pMesh mesh, pSol met, int iel,double c[3], double cb[4], char tag)
 
     ia = key-5;
     ilist = coquil(mesh,iel,ia,list);
-    if ( !ilist ) {
+    if ( (pt->tag & MG_REQ) || !ilist ) {
       fprintf(stdout,"  ## Unable to insert singularity: element required.\n");
       fprintf(stdout,"  ## Delete required elements.\n");
       fprintf(stdout,"  Exit program.\n");
@@ -539,8 +538,15 @@ int creaPoint(pMesh mesh, pSol met, int iel,double c[3], double cb[4], char tag)
 
   /* the point is on a tri */
   if ( key ) {
-#warning: penser a checker si conflit tri required et split et a planter si faute mem
-    if ( !split3cb(mesh, met, iel, key-1, c, cb, &ip) )  return(0);
+    if ( (pt->tag & MG_REQ) ||
+         (pt->xt && (mesh->xtetra[pt->xt].ftag[key-1] & MG_REQ) ) ) {
+      fprintf(stdout,"  ## Unable to insert singularity: element or");
+      fprintf(stdout," face required.\n");
+      fprintf(stdout,"  ## Delete required elements.\n");
+      fprintf(stdout,"  Exit program.\n");
+      return(0);
+    }
+    if ( split3cb(mesh, met, iel, key-1, c, cb, &ip)<0 )  return(0);
     mesh->point[ip].tag |= tag;
     return(1);
   }
@@ -560,7 +566,6 @@ int creaEdge(pMesh mesh, pSol met, Travel *trav, char tag){
   int     list[LMAX+2];
   char    majcb[6] = {1,0,3,2,1,2};
 
-#warning: retirer les "attention"
   /* first tet */
   kel    = trav->kel;
   pt     = &mesh->tetra[kel];
@@ -604,6 +609,12 @@ int creaEdge(pMesh mesh, pSol met, Travel *trav, char tag){
 
     ia = key-5;
     ilist = coquil(mesh,kel,ia,list);
+    if ( (pt->tag & MG_REQ) || !ilist ) {
+      fprintf(stdout,"  ## Unable to insert singularity: element required.\n");
+      fprintf(stdout,"  ## Delete required elements.\n");
+      fprintf(stdout,"  Exit program.\n");
+      return(0);
+    }
     if ( !split1b(mesh, met, list, ilist, ip, 0) )  return(0);
 
     /* Update of barycentric coordinate in tet list[0]/6 */
@@ -620,6 +631,14 @@ int creaEdge(pMesh mesh, pSol met, Travel *trav, char tag){
 
   else if ( key ) {
     /* split on a tri */
+    if ( (pt->tag & MG_REQ) ||
+         (pt->xt && (mesh->xtetra[pt->xt].ftag[key-1] & MG_REQ) ) ) {
+      fprintf(stdout,"  ## Unable to insert singularity: element or");
+      fprintf(stdout," face required.\n");
+      fprintf(stdout,"  ## Delete required elements.\n");
+      fprintf(stdout,"  Exit program.\n");
+      return(0);
+    }
     i = split3cb(mesh,met,kel,key-1,c,trav->cb,&ip);
     if ( i < 0 ) return(0);
 
@@ -805,7 +824,7 @@ int seekPoint(pMesh mesh, psPoint ppt, double cb[4]) {
 /** Return the index of element to which belong the point of coordinates point[3] and compute
  *  cb, the barycentric coordinates of the point  */
 int seekEdge(pMesh mesh, pSol met, psPoint ppt0, psPoint ppt1,
-                Travel *trav, int *lastet){
+             Travel *trav, int *lastet){
   pTetra pt;
   pPoint p[4];
   double mat[3][3],u[3],v[3],e0[3],e1[3];
@@ -1214,8 +1233,7 @@ int seekEdge(pMesh mesh, pSol met, psPoint ppt0, psPoint ppt1,
       }
 
       trav->np = pt->v[ind];
-#warning mettre le bon tag
-      if ( !creaEdge(mesh,met,trav,MG_REF) ) {
+      if ( !creaEdge(mesh,met,trav,trav->tag) ) {
         printf("%s:%d: Error: not able to create edge\n",__FILE__,__LINE__);
         return(0);
       }
@@ -1287,7 +1305,7 @@ int seekEdge(pMesh mesh, pSol met, psPoint ppt0, psPoint ppt1,
     ppt1->flag  = basept;
     (*lastet)   = 1;
 
-    if ( !creaEdge(mesh,met,trav,ppt1->tag) ) {
+    if ( !creaEdge(mesh,met,trav,trav->tag) ) {
       printf("%s:%d: Error: not able to create edge\n",__FILE__,__LINE__);
       return(0);
     }
@@ -1335,7 +1353,7 @@ int inserSingul(pMesh mesh, pSol met, pSingul singul){
     trav.tag = singul->edge[k].tag;
     do {
       if ( !seekEdge(mesh,met,&singul->point[k0],&singul->point[k1],
-                    &trav,&lastet) ) {
+                     &trav,&lastet) ) {
         printf("%s:%d: Error: edge %d not found in the mesh\n",
                __FILE__,__LINE__,k);
         return(0);
@@ -1370,12 +1388,14 @@ int inserSingul(pMesh mesh, pSol met, pSingul singul){
 }
 
 /** collapse of singularities */
- int coltet_sing(pMesh mesh,pSol met) {
+int remeshSing(pMesh mesh,pSol met) {
   pTetra  pt;
   pxTetra pxt;
   pPoint  p0,p1;
-  int     k,nc,nnc,list[LMAX+2],ilist,base;
-  int     it,maxit,i,ifac,jseg,ier;
+  double  c[3],cb[3];
+  int     k,nc,nnc,ns,list[LMAX+2],ilist,base;
+  int     it,maxit,i,ifac,ip,jseg,ier;
+  unsigned char indedg[4] = { 0, 0, 1, 2 };
 
   if ( abs(info.imprim) > 4 )
     fprintf(stdout,"  ** SINGULARITIES REMESHING\n");
@@ -1385,17 +1405,10 @@ int inserSingul(pMesh mesh, pSol met, pSingul singul){
     nc = 0;
     for (k=1; k<=mesh->ne; k++) {
       pt = &mesh->tetra[k];
-      if ( (mesh->point[pt->v[0]].tag & MG_SGL) &&
-           (mesh->point[pt->v[1]].tag & MG_SGL) &&
-           (mesh->point[pt->v[2]].tag & MG_SGL) &&
-           (mesh->point[pt->v[3]].tag & MG_SGL) ) {
-        /* Attempt to swap */
-
-      }
-
-
       if ( (!MG_EOK(pt)) || (!pt->xt) )  continue;
       pxt = &mesh->xtetra[pt->xt];
+
+      /* Attempt to collapse */
       for (i=0; i<6; i++) {
         if ( (!(pxt->tag[i] & MG_GEO)) || (pxt->tag[i] & MG_BDY) )  continue;
         p0 = &mesh->point[pt->v[iare[i][0]]];
@@ -1434,11 +1447,70 @@ int inserSingul(pMesh mesh, pSol met, pSingul singul){
       }
     }
     nnc += nc;
-    if ( nc > 0 /*&& (abs(info.imprim) > 5 || info.ddebug)*/ )
+    if ( nc > 0 && (abs(info.imprim) > 5 || info.ddebug) )
       fprintf(stdout,"     %8d vertices removed\n",nc);
   }
   while ( ++it < maxit && nc > 0 );
-  return(nnc);
- }
+
+  /* Check that we don't have a tetra with 4 singular points otherwise
+  ** try to swap or split the tetra. */
+  ns = nc = 0;
+  for (k=1; k<=mesh->ne; k++) {
+    pt = &mesh->tetra[k];
+    if ( (!MG_EOK(pt)) || (!pt->xt) )  continue;
+    pxt = &mesh->xtetra[pt->xt];
+
+    i = ilist = 0;
+    if ( (mesh->point[pt->v[0]].tag & MG_SGL) &&
+         (mesh->point[pt->v[1]].tag & MG_SGL) &&
+         (mesh->point[pt->v[2]].tag & MG_SGL) &&
+         (mesh->point[pt->v[3]].tag & MG_SGL) ) {
+
+      /* Attempt to swap */
+      /* First: split on barycenter of face */
+      for (i=0; i<4; i++) {
+        if ( (pxt->tag[arpt[i][0]] & MG_SGL) &&
+             (pxt->tag[arpt[i][1]] & MG_SGL) &&
+             (pxt->tag[arpt[i][2]] & MG_SGL) )
+            break;
+      }
+      assert(i<4);
+      c[0] = ( mesh->point[pt->v[idir[i][0]]].c[0] +
+               mesh->point[pt->v[idir[i][1]]].c[0] +
+               mesh->point[pt->v[idir[i][2]]].c[0] )/3.;
+      c[1] = ( mesh->point[pt->v[idir[i][0]]].c[1] +
+               mesh->point[pt->v[idir[i][1]]].c[1] +
+               mesh->point[pt->v[idir[i][2]]].c[1] )/3.;
+      c[2] = ( mesh->point[pt->v[idir[i][0]]].c[2] +
+               mesh->point[pt->v[idir[i][1]]].c[2] +
+               mesh->point[pt->v[idir[i][2]]].c[2] )/3.;
+      cb[0] = cb[1] = cb[2] = 1./3.;
+      ier = split3cb(mesh,met,k,i,c,cb,&ip);
+      if ( ier < 0 ) {
+        fprintf(stdout,"%s:%d: Error: we can't split element %d",__FILE__,__LINE__,k);
+        fprintf(stdout," whose all vertices are on inserted singularities\n");
+        return(0);
+      }
+      ns++;
+      /* Second: collapse ip on vertex i */
+      ifac  = isar[indedg[i]][0];
+      jseg  = iarfinv[ifac][indedg[i]];
+      ilist = chkcol_int(mesh,met,k,ifac,jseg,list,2);
+      if ( ilist ) {
+        ier = colver(mesh,list,ilist,iare[i][1]);
+        if ( ier < 0 ) return(-1);
+        else if ( ier ) {
+          delPt(mesh,ier);
+          nc++;
+        }
+      }
+    }
+  }
+  if ( abs(info.imprim) < 5 && (nnc > 0 || (ns+nc) > 0) ) {
+    fprintf(stdout,"     %8d collapsed, %8d corrected ",nnc,ns-nc);
+    fprintf(stdout,"(%8d splitted, %8d swapped)\n",ns,nc);
+  }
+  return(1);
+}
 
 #endif

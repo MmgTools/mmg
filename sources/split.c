@@ -2745,7 +2745,6 @@ void split3op(pMesh mesh, pSol met, int k, int vx[6]){
 /** Split a tetra in 3 tetras by introducing the point of coordinates o
  *  and barycentric coordinates cb in the face ifac;
  *  Update adjacency relations and return local indice of the new point in k. */
-#warning: jeter ip???
 int split3cb(pMesh mesh, pSol met, int k, int ifac, double o[3],
              double cb[4], int *ip ) {
   pTetra        pt[3];
@@ -2776,7 +2775,7 @@ int split3cb(pMesh mesh, pSol met, int k, int ifac, double o[3],
   }
   if ( met->m )  met->m[(*ip)] = hnew;
 
-  /* 1. we split the k^th tetra */
+  /* 1. we split the k^th tetra on face ifac */
   tau[0] = ifac;
   tau[1] = idir[ifac][0];
   tau[2] = idir[ifac][1];

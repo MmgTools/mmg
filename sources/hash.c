@@ -988,13 +988,13 @@ int bdrySet(pMesh mesh) {
         ia = iare[i][0];
         ib = iare[i][1];
         hGet(&mesh->htab,pt->v[ia],pt->v[ib],&ref,&tag);
-        if ( tag || ref ) {
+        if ( (tag & MG_SGL) || ref ) {
           if ( !pt->xt ) {
             mesh->xt++;
             pt->xt = mesh->xt;
           }
           pxt = &mesh->xtetra[pt->xt];
-          pxt->ref[i]  = ref;
+          pxt->edg[i]  = ref;
           pxt->tag[i] |= tag;
         }
       }

@@ -111,12 +111,12 @@ static int ismaniball(pMesh mesh,pSol sol,int k,int indp) {
   }
   /* 0 value has been snapped accidentally */
   if ( !res ) {
-#ifdef SINGUL
+#warning: comprendre ce MG_REF + tester de swapper ... mais ou??
     if ( !(mesh->point[mesh->tetra[k].v[indp]].tag & MG_REF) ) {
       fprintf(stdout,"Point with value 0 arounded by points of");
-      fprintf(stdout," same sign=:elt %d, indp %d\n",k,indp);
+      fprintf(stdout," same sign=:elt %d (%d), indp %d (%d)\n",
+              k,indElt(mesh,k),indp,indPt(mesh,indp));
     }
-#endif
     return(0);
   }
 
