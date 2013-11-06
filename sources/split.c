@@ -2826,23 +2826,23 @@ int split3cb(pMesh mesh, pSol met, int k, int ifac, double o[3],
   /* Update vertices and xt fields */
   pt[0]->v[tau[1]] = pt[1]->v[tau[2]] = pt[2]->v[tau[3]] = (*ip);
 
-  xt[0].tag[taued[0]] = 0;
-  xt[0].tag[taued[3]] = 0;//xt[0].ftag[tau[0]];
-  xt[0].tag[taued[4]] = 0;//xt[0].ftag[tau[0]];
+  xt[0].tag[taued[0]] = 0;  xt[0].edg[taued[0]] = 0;
+  xt[0].tag[taued[3]] = 0;  xt[0].edg[taued[3]] = 0;
+  xt[0].tag[taued[4]] = 0;  xt[0].edg[taued[4]] = 0;
   xt[0].ref  [tau[2]] = 0;  xt[0].ref [tau[3]] = 0;
   xt[0].ftag [tau[2]] = 0;  xt[0].ftag[tau[3]] = 0;
   MG_SET(xt[0].ori, tau[2]);  MG_SET(xt[0].ori, tau[3]);
 
-  xt[1].tag[taued[1]] = 0;
-  xt[1].tag[taued[3]] = 0;//xt[1].ftag[tau[0]];
-  xt[1].tag[taued[5]] = 0;//xt[1].ftag[tau[0]];
+  xt[1].tag[taued[1]] = 0;  xt[1].edg[taued[1]] = 0;
+  xt[1].tag[taued[3]] = 0;  xt[1].edg[taued[3]] = 0;
+  xt[1].tag[taued[5]] = 0;  xt[1].edg[taued[5]] = 0;
   xt[1].ref  [tau[1]] = 0;  xt[1].ref [tau[3]] = 0;
   xt[1].ftag [tau[1]] = 0;  xt[1].ftag[tau[3]] = 0;
   MG_SET(xt[1].ori, tau[1]);  MG_SET(xt[1].ori, tau[3]);
 
-  xt[2].tag[taued[2]] = 0;
-  xt[2].tag[taued[4]] = 0;//xt[2].ftag[tau[0]];
-  xt[2].tag[taued[5]] = 0;//xt[2].ftag[tau[0]];
+  xt[2].tag[taued[2]] = 0;  xt[2].edg[taued[2]] = 0;
+  xt[2].tag[taued[4]] = 0;  xt[2].edg[taued[4]] = 0;
+  xt[2].tag[taued[5]] = 0;  xt[2].edg[taued[5]] = 0;
   xt[2].ref  [tau[1]] = 0;  xt[2].ref [tau[2]] = 0;
   xt[2].ftag [tau[1]] = 0;  xt[2].ftag[tau[2]] = 0;
   MG_SET(xt[2].ori, tau[1]);  MG_SET(xt[2].ori, tau[2]);
@@ -2867,8 +2867,14 @@ int split3cb(pMesh mesh, pSol met, int k, int ifac, double o[3],
       memcpy(pxt0,&xt[0],sizeof(xTetra));
       for (i=1; i<3; i++) {
         if ( isxt[i] ) {
-          assert(mesh->xt < mesh->xtmax-1);
-          pt[i]->xt = ++mesh->xt;
+          mesh->xt++;
+          if ( mesh->xt >= mesh->xtmax ) {
+            fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
+            fprintf(stdout,"  ## Check the mesh size or ");
+            fprintf(stdout,"increase the allocated memory with the -m option.\n");
+            return(0);
+          }
+          pt[i]->xt = mesh->xt;
           pxt0 = &mesh->xtetra[mesh->xt];
           memcpy(pxt0,&xt[i],sizeof(xTetra));
         }
@@ -2888,8 +2894,14 @@ int split3cb(pMesh mesh, pSol met, int k, int ifac, double o[3],
             memcpy(pxt0,&xt[i],sizeof(xTetra));
           }
           else {
-            assert(mesh->xt < mesh->xtmax-1);
-            pt[i]->xt = ++mesh->xt;
+            mesh->xt++;
+            if ( mesh->xt >= mesh->xtmax ) {
+              fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
+              fprintf(stdout,"  ## Check the mesh size or ");
+              fprintf(stdout,"increase the allocated memory with the -m option.\n");
+              return(0);
+            }
+            pt[i]->xt = mesh->xt;
             pxt0 = &mesh->xtetra[mesh->xt];
             memcpy(pxt0,&xt[i],sizeof(xTetra));
           }
@@ -2994,23 +3006,23 @@ int split3cb(pMesh mesh, pSol met, int k, int ifac, double o[3],
   /* Update vertices and xt fields */
   pt[0]->v[tau2[1]] = pt[1]->v[tau2[2]] = pt[2]->v[tau2[3]] = (*ip);
 
-  xt[0].tag[taued[0]]  = 0;
-  xt[0].tag[taued[3]]  = 0;//xt[0].ftag[tau2[0]];
-  xt[0].tag[taued[4]]  = 0;//xt[0].ftag[tau2[0]];
+  xt[0].tag[taued[0]]  = 0;  xt[0].edg[taued[0]] = 0;
+  xt[0].tag[taued[3]]  = 0;  xt[0].edg[taued[3]] = 0;
+  xt[0].tag[taued[4]]  = 0;  xt[0].edg[taued[4]] = 0;
   xt[0].ref  [tau2[2]] = 0;  xt[0].ref [tau2[3]] = 0;
   xt[0].ftag [tau2[2]] = 0;  xt[0].ftag[tau2[3]] = 0;
   MG_SET(xt[0].ori, tau2[2]);  MG_SET(xt[0].ori, tau2[3]);
 
-  xt[1].tag[taued[1]]  = 0;
-  xt[1].tag[taued[3]]  = 0;//xt[1].ftag[tau2[0]];
-  xt[1].tag[taued[5]]  = 0;//xt[1].ftag[tau2[0]];
+  xt[1].tag[taued[1]]  = 0;  xt[1].edg[taued[1]] = 0;
+  xt[1].tag[taued[3]]  = 0;  xt[1].edg[taued[3]] = 0;
+  xt[1].tag[taued[5]]  = 0;  xt[1].edg[taued[5]] = 0;
   xt[1].ref  [tau2[1]] = 0;  xt[1].ref [tau2[3]] = 0;
   xt[1].ftag [tau2[1]] = 0;  xt[1].ftag[tau2[3]] = 0;
   MG_SET(xt[1].ori, tau2[1]);  MG_SET(xt[1].ori, tau2[3]);
 
-  xt[2].tag[taued[2]]  = 0;
-  xt[2].tag[taued[4]]  = 0;//xt[2].ftag[tau2[0]];
-  xt[2].tag[taued[5]]  = 0;//xt[2].ftag[tau2[0]];
+  xt[2].tag[taued[2]]  = 0;  xt[2].edg[taued[2]] = 0;
+  xt[2].tag[taued[4]]  = 0;  xt[2].edg[taued[4]] = 0;
+  xt[2].tag[taued[5]]  = 0;  xt[2].edg[taued[5]] = 0;
   xt[2].ref  [tau2[1]] = 0;  xt[2].ref [tau2[2]] = 0;
   xt[2].ftag [tau2[1]] = 0;  xt[2].ftag[tau2[2]] = 0;
   MG_SET(xt[2].ori, tau2[1]);  MG_SET(xt[2].ori, tau2[2]);
@@ -3385,12 +3397,6 @@ int split4cb(pMesh mesh, pSol met, int k, double o[3], double cb[4], int *ip ) {
   int           i,iel,*adja, adj[4],newtet[4];
   unsigned char isxt[4],firstxt;
 
-  if ( !info.sing ) {
-    fprintf(stdout,"%s:%d: Error: metric not computed.\n"
-            ,__FILE__,__LINE__);
-    return(0);
-  }
-
   pt[0] = &mesh->tetra[k];
   pt[0]->flag = 0;
   newtet[0]=k;
@@ -3464,30 +3470,30 @@ int split4cb(pMesh mesh, pSol met, int k, double o[3], double cb[4], int *ip ) {
   /* Update vertices and xt fields */
   pt[0]->v[0] = pt[1]->v[1] = pt[2]->v[2] = pt[3]->v[3] = (*ip);
 
-  xt[0].tag[0]  = 0;
-  xt[0].tag[1]  = 0;
-  xt[0].tag[2]  = 0;
+  xt[0].tag[0]  = 0;  xt[0].edg[0]  = 0;
+  xt[0].tag[1]  = 0;  xt[0].edg[1]  = 0;
+  xt[0].tag[2]  = 0;  xt[0].edg[2]  = 0;
   xt[0].ref [1] = 0;  xt[0].ref [2] = 0;  xt[0].ref [3] = 0;
   xt[0].ftag[1] = 0;  xt[0].ftag[2] = 0;  xt[0].ftag[3] = 0;
   MG_SET(xt[0].ori, 1);  MG_SET(xt[0].ori, 2);  MG_SET(xt[0].ori, 3);
 
-  xt[1].tag[0]  = 0;
-  xt[1].tag[3]  = 0;
-  xt[1].tag[4]  = 0;
+  xt[1].tag[0]  = 0;  xt[1].edg[0]  = 0;
+  xt[1].tag[3]  = 0;  xt[1].edg[3]  = 0;
+  xt[1].tag[4]  = 0;  xt[1].edg[4]  = 0;
   xt[1].ref [0] = 0;  xt[1].ref [2] = 0;  xt[1].ref [3] = 0;
   xt[1].ftag[0] = 0;  xt[1].ftag[2] = 0;  xt[1].ftag[3] = 0;
   MG_SET(xt[1].ori, 0);  MG_SET(xt[1].ori, 2);  MG_SET(xt[1].ori, 3);
 
-  xt[2].tag[1]  = 0;
-  xt[2].tag[3]  = 0;
-  xt[2].tag[5]  = 0;
+  xt[2].tag[1]  = 0;  xt[2].edg[1]  = 0;
+  xt[2].tag[3]  = 0;  xt[2].edg[3]  = 0;
+  xt[2].tag[5]  = 0;  xt[2].edg[5]  = 0;
   xt[2].ref [0] = 0;  xt[2].ref [1] = 0;  xt[2].ref [3] = 0;
   xt[2].ftag[0] = 0;  xt[2].ftag[1] = 0;  xt[2].ftag[3] = 0;
   MG_SET(xt[2].ori, 0);  MG_SET(xt[2].ori, 1);  MG_SET(xt[2].ori, 3);
 
-  xt[3].tag[2]  = 0;
-  xt[3].tag[4]  = 0;
-  xt[3].tag[5]  = 0;
+  xt[3].tag[2]  = 0;  xt[3].edg[2]  = 0;
+  xt[3].tag[4]  = 0;  xt[3].edg[4]  = 0;
+  xt[3].tag[5]  = 0;  xt[3].edg[5]  = 0;
   xt[3].ref [0] = 0;  xt[3].ref [1] = 0;  xt[3].ref [2] = 0;
   xt[3].ftag[0] = 0;  xt[3].ftag[1] = 0;  xt[3].ftag[2] = 0;
   MG_SET(xt[3].ori, 0);  MG_SET(xt[3].ori, 1);  MG_SET(xt[3].ori, 2);

@@ -285,11 +285,13 @@ int renumbering(int vertBoxNbr, pMesh mesh, pSol sol);
 int  inserSingul(pMesh mesh, pSol met, pSingul singul);
 int  creaEdge(pMesh mesh, pSol met, Travel *trav, char tag);
 int  creaPoint(pMesh mesh, pSol met,int iel, double c[3], double cb[4], char tag);
-int  remeshSing(pMesh mesh,pSol met);
+int  colSing(pMesh mesh,pSol met);
 int  seekEdge(pMesh mesh, pSol met, psPoint ppt0, psPoint ppt1,Travel *trav, int *lastet);
 int  seekPoint(pMesh mesh, psPoint ppt, double cb[4]);
+int  solveUnsignedTet(pMesh mesh,pSol met);
 int  split3cb(pMesh mesh, pSol met, int k, int ifac, double o[3],double cb[4], int *ip);
 int  split4cb(pMesh mesh, pSol met, int k, double o[3], double cb[4],int *ip);
+int  swap23(pMesh mesh,int k, int ip);
 #endif
 
 int meancur(pMesh mesh,int np,double c[3],int ilist,int *list,double h[3]);

@@ -559,9 +559,9 @@ int mmg3dlib(int opt_i[10],double opt_d[6],pMesh mesh,pSol met
 
 #ifdef SINGUL
   if ( info.sing && (!info.iso) ) {
-    if ( remeshSing(mesh,met)<0 ) {
+    if ( colSing(mesh,met)<0 ) {
       fprintf(stdout,"  ## Collapse of singularities problem.\n");
-      return(MMG5_STRONGFAILURE);
+      // return(MMG5_STRONGFAILURE);
     }
   }
 #endif
@@ -574,6 +574,16 @@ int mmg3dlib(int opt_i[10],double opt_d[6],pMesh mesh,pSol met
     if ( !unscaleMesh(mesh,met) )  return(MMG5_STRONGFAILURE);
     return(MMG5_LOWFAILURE);
   }
+
+#ifdef SINGUL
+  if ( info.sing && (!info.iso) ) {
+    if ( !solveUnsignedTet(mesh,met) ) {
+      fprintf(stdout,"  ## Solve of undetermined tetrahedra problem.\n");
+      if ( !unscaleMesh(mesh,met) )  return(MMG5_STRONGFAILURE);
+      return(MMG5_LOWFAILURE);
+    }
+  }
+#endif
 
   chrono(OFF,&(info.ctim[3]));
   printim(info.ctim[3].gdif,stim);

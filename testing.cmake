@@ -194,7 +194,7 @@ FOREACH(EXEC ${LISTEXEC})
     -sing ${REG_TESTS_PATH}/ChkBdry_optSing/cube
     -sol  ${REG_TESTS_PATH}/ChkBdry_optSing/sol.sol
     -sf   ${REG_TESTS_PATH}/ChkBdry_optSing/singularities.mesh
-    -out  ${REG_TESTS_PATH}/ChkBdry_optSing/cube.o.meshb)
+    -out  ${REG_TESTS_PATH}/ChkBdry_optSing/sing.o.meshb)
  #####
   ADD_TEST(NAME ChkBdry_optSing_noInsertFile_${EXEC}
     COMMAND ${EXEC}

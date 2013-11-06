@@ -376,12 +376,6 @@ int saveMesh(pMesh mesh) {
       for (k=0; k<=mesh->htab.max; k++) {
         ph = &mesh->htab.geom[k];
         if ( !ph->a )  continue;
-#ifdef SINGUL
-#warning: ajeter
-        if ( ph->tag & MG_SGL )
-          GmfSetLin(outm,GmfEdges,mesh->point[ph->a].tmp,mesh->point[ph->b].tmp,5);
-        else
-#endif
           GmfSetLin(outm,GmfEdges,mesh->point[ph->a].tmp,mesh->point[ph->b].tmp,ph->ref);
       }
       if ( nr ) {
@@ -671,7 +665,8 @@ int saveMet(pMesh mesh,pSol met) {
 }
 
 #ifdef SINGUL
-/** read singul data */
+/** Read singul data. Here we suppose that the file contains the singularities *
+ *  (corner, required, ridges....) */
 int loadSingul(pSingul singul) {
   Mesh         mesh;
   pEdge        pa,pas;
@@ -783,8 +778,6 @@ int loadSingul(pSingul singul) {
       pa->tag = MG_NOTAG;
     }
   }
-
-#warning: attention, on ne met pas forcement le bon flag aux points (on suppose que les corners des extremites des aretes sont deja la par exemple)
 
   /* get ridges */
   nr = GmfStatKwd(inm,GmfRidges);

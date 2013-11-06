@@ -618,7 +618,9 @@ int hGeom(pMesh mesh) {
 
         hGet(&mesh->htab,pt->v[i1],pt->v[i2],&edg,&tag);
         pt->edg[i]  = edg;
-        pt->tag[i] |= tag;
+        /* Mark edges as boundary edges */
+        pt->tag[i] |= (tag | MG_BDY);
+        hTag(&mesh->htab,pt->v[i1],pt->v[i2],edg,pt->tag[i]);
       }
     }
     free(mesh->edge);

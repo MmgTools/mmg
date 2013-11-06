@@ -538,9 +538,9 @@ int main(int argc,char *argv[]) {
 
 #ifdef SINGUL
   if ( info.sing && (!info.iso) ) {
-    if ( remeshSing(&mesh,&met)<0 ) {
+    if ( colSing(&mesh,&met)<0 ) {
       fprintf(stdout,"  ## Collapse of singularities problem.\n");
-      RETURN_AND_FREE(&mesh,&met,&sing,MMG5_STRONGFAILURE);
+      // RETURN_AND_FREE(&mesh,&met,&sing,MMG5_STRONGFAILURE);
     }
   }
 #endif
@@ -558,6 +558,21 @@ int main(int argc,char *argv[]) {
       RETURN_AND_FREE(&mesh,&met,&sing,MMG5_STRONGFAILURE);
     RETURN_AND_FREE(&mesh,&met,&sing,MMG5_LOWFAILURE);
   }
+
+#ifdef SINGUL
+  if ( info.sing && (!info.iso) ) {
+    if ( !solveUnsignedTet(&mesh,&met) ) {
+      fprintf(stdout,"  ## Solve of undetermined tetrahedra problem.\n");
+      if ( !unscaleMesh(&mesh,&met) )
+        RETURN_AND_FREE(&mesh,&met,&sing,MMG5_STRONGFAILURE);
+      if ( !saveMesh(&mesh) )
+        RETURN_AND_FREE(&mesh,&met,&sing,MMG5_STRONGFAILURE);
+      if ( met.m && !saveMet(&mesh,&met) )
+        RETURN_AND_FREE(&mesh,&met,&sing,MMG5_STRONGFAILURE);
+      RETURN_AND_FREE(&mesh,&met,&sing,MMG5_LOWFAILURE);
+    }
+  }
+#endif
 
   chrono(OFF,&info.ctim[3]);
   printim(info.ctim[3].gdif,stim);

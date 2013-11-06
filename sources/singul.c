@@ -1397,14 +1397,12 @@ int inserSingul(pMesh mesh, pSol met, pSingul singul){
 }
 
 /** collapse of singularities */
-int remeshSing(pMesh mesh,pSol met) {
+int colSing(pMesh mesh,pSol met) {
   pTetra  pt;
   pxTetra pxt;
   pPoint  p0,p1;
-  double  c[3],cb[3];
-  int     k,nc,nnc,ns,list[LMAX+2],ilist,base;
-  int     it,maxit,i,ifac,ip,jseg,ier;
-  unsigned char indedg[4] = { 0, 0, 1, 2 };
+  int     k,nc,nnc,list[LMAX+2],ilist;
+  int     it,maxit,i,ifac,jseg,ier;
 
   if ( abs(info.imprim) > 4 )
     fprintf(stdout,"  ** SINGULARITIES PRE-REMESHING\n");
@@ -1432,7 +1430,6 @@ int remeshSing(pMesh mesh,pSol met) {
             if ( ier < 0 ) return(-1);
             else if ( ier ) {
               delPt(mesh,ier);
-              p1->flag = base;
               nc++;
               break;
             }
@@ -1447,7 +1444,6 @@ int remeshSing(pMesh mesh,pSol met) {
             if ( ier < 0 ) return(-1);
             else if ( ier ) {
               delPt(mesh,ier);
-              p0->flag = base;
               nc++;
               break;
             }
@@ -1460,73 +1456,61 @@ int remeshSing(pMesh mesh,pSol met) {
       fprintf(stdout,"     %8d vertices removed\n",nc);
   }
   while ( ++it < maxit && nc > 0 );
+  return(1);
+}
 
-  /* Check that we don't have a tetra with 4 singular points otherwise
-  ** try to swap or split the tetra. */
-  ns = nc = 0;
+/* Check that we don't have a tetra with 4 singular points otherwise *
+ * try to swap or split the tetra. *
+ * ( warning: here we don't perform quality tests) */
+int solveUnsignedTet(pMesh mesh,pSol met) {
+  pTetra  pt;
+  pxTetra pxt;
+  int     k,nf,ns;
+  int     *adja;
+  int     i,ip;
+
+  if ( abs(info.imprim) > 4 )
+    fprintf(stdout,"  ** SINGULARITIES POST-REMESHING\n");
+
+  ns = nf = 0;
   for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
     if ( (!MG_EOK(pt)) || (!pt->xt) )  continue;
     pxt = &mesh->xtetra[pt->xt];
 
-    i = ilist = 0;
     if ( (mesh->point[pt->v[0]].tag & MG_SGL) &&
          (mesh->point[pt->v[1]].tag & MG_SGL) &&
          (mesh->point[pt->v[2]].tag & MG_SGL) &&
          (mesh->point[pt->v[3]].tag & MG_SGL) ) {
 
-      /* Attempt to swap */
-      /* First: split on barycenter of face */
-      // TO END
+      /* First: attempt to swap (swap 2->3) */
+      adja =  &mesh->adja[4*(k-1)+1];
       for (i=0; i<4; i++) {
-        //for (jseg=0; jseg<4; jseg++ ) {
-        //  if ( pxt->tag[arpt[i][jseg]] & MG_SGL ) {
-        //    if ( pxt->tag[arpt[i][inxt2[jseg]]] & MG_SGL )
-        //
-        //  }
-
-#warning: represent one of multiple possible case : TO END
-        if ( (pxt->tag[arpt[i][0]] & MG_SGL) &&
-             (pxt->tag[arpt[i][1]] & MG_SGL) &&
-             (pxt->tag[arpt[i][2]] & MG_SGL) )
-            break;
-      }
-      assert(i<4);
-      c[0] = ( mesh->point[pt->v[idir[i][0]]].c[0] +
-               mesh->point[pt->v[idir[i][1]]].c[0] +
-               mesh->point[pt->v[idir[i][2]]].c[0] )/3.;
-      c[1] = ( mesh->point[pt->v[idir[i][0]]].c[1] +
-               mesh->point[pt->v[idir[i][1]]].c[1] +
-               mesh->point[pt->v[idir[i][2]]].c[1] )/3.;
-      c[2] = ( mesh->point[pt->v[idir[i][0]]].c[2] +
-               mesh->point[pt->v[idir[i][1]]].c[2] +
-               mesh->point[pt->v[idir[i][2]]].c[2] )/3.;
-      cb[0] = cb[1] = cb[2] = 1./3.;
-      ier = split3cb(mesh,met,k,i,c,cb,&ip);
-      if ( ier < 0 ) {
-        fprintf(stdout,"%s:%d: Error: we can't split element %d",
-                __FILE__,__LINE__,k);
-        fprintf(stdout," whose all vertices are on inserted singularities\n");
-        return(0);
-      }
-      ns++;
-      /* Second: collapse ip on vertex i */
-      ifac  = isar[indedg[i]][0];
-      jseg  = iarfinv[ifac][indedg[i]];
-      ilist = chkcol_int(mesh,met,k,ifac,jseg,list,2);
-      if ( ilist ) {
-        ier = colver(mesh,list,ilist,iare[i][1]);
-        if ( ier < 0 ) return(-1);
-        else if ( ier ) {
-          delPt(mesh,ier);
-          nc++;
+        ip     = mesh->tetra[adja[i]/4].v[adja[i]%4];
+        if ( !(mesh->point[ip].tag & MG_SGL ) && swap23(mesh,k,i) ) {
+          nf++;
+          puts("OKKKKKKK\n");
+          break;
         }
+      }
+
+      /* Second: split on barycenter of tetra */
+      if ( i == 4 ) {
+        /* Swapping is useless so we add a new degree of freedom */
+        if ( !split4bar(mesh,met,k) ) {
+          fprintf(stdout,"%s:%d: Error: we can't split element %d",
+                  __FILE__,__LINE__,k);
+          fprintf(stdout," whose all vertices are on inserted singularities\n");
+          return(0);
+        }
+        ns++;
+        continue;
       }
     }
   }
-  if ( abs(info.imprim) < 5 && (nnc > 0 || (ns+nc) > 0) ) {
-    fprintf(stdout,"     %8d collapsed, %8d corrected ",nnc,ns-nc);
-    fprintf(stdout,"(%8d splitted, %8d swapped)\n",ns,nc);
+  if ( abs(info.imprim) < 5 && (ns+nf) > 0 ) {
+    fprintf(stdout,"     %8d corrected ",ns+nf);
+    fprintf(stdout,"(%8d splitted, %8d swapped)\n",ns,nf);
   }
   return(1);
 }

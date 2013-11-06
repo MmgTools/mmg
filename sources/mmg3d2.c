@@ -112,7 +112,6 @@ static int ismaniball(pMesh mesh,pSol sol,int k,int indp) {
   /* 0 value has been snapped accidentally */
   if ( !res ) {
 #ifdef SINGUL
-#warning: tester swap
     fprintf(stdout,"Point with value 0 arounded by points of");
     fprintf(stdout," same sign=:elt %d (%d), np %d (%d)\n",
 	    k,indElt(mesh,k),np,indPt(mesh,np));
