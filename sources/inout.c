@@ -664,7 +664,6 @@ int loadSingul(pSingul singul) {
   float        fp1,fp2,fp3;
   int          i,k,inm,nr,nre,nc,npr,na,ns;
   char         *ptr,data[128],*filein;
-#warning: add computation of normal, good tag on singularities
   filein = singul->namein;
   strcpy(data,filein);
   ptr = strstr(data,".mesh");
@@ -769,7 +768,7 @@ int loadSingul(pSingul singul) {
     }
   }
 
-#warning: attention, on ne met pas forcement le bon flag aux points (on suppose que les corners des extremites des aretes sont deja la pe)
+#warning: attention, on ne met pas forcement le bon flag aux points (on suppose que les corners des extremites des aretes sont deja la par exemple)
 
   /* get ridges */
   nr = GmfStatKwd(inm,GmfRidges);

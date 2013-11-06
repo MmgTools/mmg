@@ -836,7 +836,6 @@ int seekEdge(pMesh mesh, pSol met, psPoint ppt0, psPoint ppt1,
   double dd,cb[4];
   int    it,is,i0,i1,i2,ind,nsfin,*adj,iadr,key;
 
-#warning ajouter la gestion des frs
   it       = 0;
 
   if ( (*lastet) ) {
@@ -1200,7 +1199,6 @@ int seekEdge(pMesh mesh, pSol met, psPoint ppt0, psPoint ppt1,
         u[0]  = mat[1][1]*mat[2][2] - mat[2][1]*mat[1][2];
         u[1]  = mat[2][1]*mat[0][2] - mat[0][1]*mat[2][2];
         u[2]  = mat[0][1]*mat[1][2] - mat[1][1]*mat[0][2];
-#warning: MAJ du tet et du pspoint
         if ( !intersegtri_i0(is, i0, i1, i2, ee, e0, ep, dd, p[is]->c,
                              mat, u, c, cb, &key, trav,
                              &nsfin, adj[ind]/4) ) {

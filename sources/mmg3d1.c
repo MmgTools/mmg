@@ -311,7 +311,6 @@ static int swpmsh(pMesh mesh,pSol met) {
     ns = 0;
     for (k=1; k<=mesh->ne; k++) {
       pt = &mesh->tetra[k];
-#warning : c est quoi ce pt->ref < 0????
       if ( (!MG_EOK(pt)) || pt->ref < 0 /*|| (pt->tag & MG_REQ)*/ )   continue;
       else if ( !pt->xt ) continue;
       pxt = &mesh->xtetra[pt->xt];
@@ -695,7 +694,6 @@ static int anatetv(pMesh mesh,pSol met,char typchk) {
         nap++;
       }
 #ifdef SINGUL
-#warning: assert a ajeter
       /* check that we create a point tag MG_SGL but not MG_BDY */
       if ( info.sing && pt->xt && (pxt->tag[i] & MG_SGL) ) {
         assert(mesh->point[ip].tag & MG_SGL);
@@ -1006,7 +1004,6 @@ static int anatets(pMesh mesh,pSol met,char typchk) {
         ip  = hashGet(&hash,ip1,ip2);
         if ( ip > 0 ) {
 #ifdef SINGUL
-#warning: assert a jeter
           if ( info.sing && pt->xt && (pxt->tag[ia] & MG_SGL) ) {
             assert(mesh->point[ip].tag & MG_SGL);
             assert( !(mesh->point[ip].tag & MG_BDY) );
@@ -1190,7 +1187,6 @@ static int adpspl(pMesh mesh,pSol met, int* warn) {
       ref = pxt->edg[iarf[i][j]];
       tag = pxt->tag[iarf[i][j]];
       if ( tag & MG_REQ )  continue;
-#warning: a retirer si maj des tags des edges dans les split
       tag |= MG_BDY;
       ilist = coquil(mesh,k,imax,list);
       if ( !ilist )  continue;

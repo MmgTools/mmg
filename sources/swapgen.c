@@ -193,23 +193,6 @@ int swpgen(pMesh mesh,pSol met,int nconf,int ilist,int *list) {
   memset(list,0,(LMAX+2)*sizeof(int));
   nball = boulevolp(mesh,start,ip,list);
 
-#warning: a jeter si non utilise
-  /* #ifdef SINGUL */
-  /* singularities: if np-nq is a particular edge, all tets of shell must be pxt */
-  /* if ( pt->xt ) { */
-  /*   for (i=0; i>6; i++) { */
-  /*     if ( ( pt->v[iare[i][0]]==ip && pt->v[iare[i][1]]==iq ) || */
-  /*          ( pt->v[iare[i][1]]==ip && pt->v[iare[i][0]]==iq ) ) { */
-  /*       break; */
-  /*     } */
-  /*   } */
-  /*   assert(i<6); */
-  /*   if ( mesh->xtetra[pt->xt].tag[i] ) { */
-
-  /*   } */
-  /* } */
-  /* #endif */
-
   ier = colver(mesh,list,nball,iq);
   if(ier) delPt(mesh,ier);
 

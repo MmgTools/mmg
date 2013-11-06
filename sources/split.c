@@ -438,8 +438,8 @@ int split1b(pMesh mesh, pSol met,int *list, int ret, int ip,int cas){
     isxt1 = 0;
 
     for (i=0; i<4; i++) {
-      if ( xt.ref[i]  || xt.ftag[i] ) isxt = 1;
-      if ( xt1.ref[i] || xt1.ftag[i]) isxt1 = 1;
+      if ( xt.ref[i]  || xt.ftag[i] )  isxt = 1;
+      if ( xt1.ref[i] || xt1.ftag[i])  isxt1 = 1;
     }
 #ifdef SINGUL
     if ( info.sing ) {
@@ -597,8 +597,8 @@ int split1b(pMesh mesh, pSol met,int *list, int ret, int ip,int cas){
     isxt1 = 0;
 
     for (i=0; i<4; i++) {
-      if ( xt.ref[i]  || xt.ftag[i]  ) isxt  = 1;
-      if ( xt1.ref[i] || xt1.ftag[i] ) isxt1 = 1;
+      if ( xt.ref[i]  || xt.ftag[i]  )  isxt  = 1;
+      if ( xt1.ref[i] || xt1.ftag[i] )  isxt1 = 1;
     }
 #ifdef SINGUL
     if ( info.sing ) {
@@ -4575,6 +4575,13 @@ void split6(pMesh mesh,pSol met,int k,int vx[6]) {
     for(i=0;i<4;i++ ) {
       if ( (xt.ref[i]) || xt.ftag[i] ) isxt0 = 1;
     }
+#ifdef SINGUL
+    if ( info.sing ) {
+      for (i=0; i<6; i++) {
+        if ( xt.edg[i] || xt.tag[i] ) isxt0 = 1;
+      }
+    }
+#endif
 
     if ( isxt0 ) {
       memcpy(pxt,&xt,sizeof(xTetra));
@@ -4599,6 +4606,13 @@ void split6(pMesh mesh,pSol met,int k,int vx[6]) {
     for (i=0; i<4; i++) {
       if ( (xt.ref[i]) || xt.ftag[i]) isxt = 1;
     }
+#ifdef SINGUL
+    if ( info.sing ) {
+      for (i=0; i<6; i++) {
+        if ( xt.edg[i] || xt.tag[i] ) isxt = 1;
+      }
+    }
+#endif
 
     pt[1]->xt = 0;
     if ( isxt ) {
@@ -4638,6 +4652,13 @@ void split6(pMesh mesh,pSol met,int k,int vx[6]) {
     for (i=0; i<4;i++) {
       if ( (xt.ref[i]) || xt.ftag[i]) isxt = 1;
     }
+#ifdef SINGUL
+    if ( info.sing ) {
+      for (i=0; i<6; i++) {
+        if ( xt.edg[i] || xt.tag[i] ) isxt = 1;
+      }
+    }
+#endif
 
     pt[2]->xt = 0;
     if ( isxt ) {
@@ -4678,6 +4699,13 @@ void split6(pMesh mesh,pSol met,int k,int vx[6]) {
     for (i=0; i<4; i++) {
       if ( (xt.ref[i]) || xt.ftag[i]) isxt = 1;
     }
+#ifdef SINGUL
+    if ( info.sing ) {
+      for (i=0; i<6; i++) {
+        if ( xt.edg[i] || xt.tag[i] ) isxt = 1;
+      }
+    }
+#endif
 
     pt[3]->xt = 0;
     if ( isxt ) {
@@ -4720,9 +4748,7 @@ void split6(pMesh mesh,pSol met,int k,int vx[6]) {
 
     isxt = 0;
 
-    for (i=0; i<4; i++) {
-      if ( (xt.ref[i]) || xt.ftag[i]) isxt = 1;
-    }
+    if ( (xt.ref[3]) || xt.ftag[3]) isxt = 1;
 
     pt[4]->xt = 0;
     if ( isxt ) {
@@ -4765,9 +4791,7 @@ void split6(pMesh mesh,pSol met,int k,int vx[6]) {
 
     isxt = 0;
 
-    for (i=0; i<4; i++) {
-      if ( (xt.ref[i]) || xt.ftag[i]) isxt = 1;
-    }
+    if ( (xt.ref[2]) || xt.ftag[2]) isxt = 1;
 
     pt[5]->xt = 0;
     if ( isxt ) {
@@ -4810,9 +4834,7 @@ void split6(pMesh mesh,pSol met,int k,int vx[6]) {
 
     isxt = 0;
 
-    for (i=0; i<4; i++) {
-      if ( (xt.ref[i]) || xt.ftag[i]) isxt = 1;
-    }
+    if ( (xt.ref[1]) || xt.ftag[1]) isxt = 1;
 
     pt[6]->xt = 0;
     if ( isxt ) {
@@ -4855,9 +4877,7 @@ void split6(pMesh mesh,pSol met,int k,int vx[6]) {
 
     isxt = 0;
 
-    for (i=0; i<4; i++) {
-      if ( (xt.ref[i]) || xt.ftag[i]) isxt = 1;
-    }
+    if ( (xt.ref[0]) || xt.ftag[0]) isxt = 1;
 
     pt[7]->xt = 0;
     if ( isxt ) {
