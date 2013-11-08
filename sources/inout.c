@@ -675,6 +675,7 @@ int loadSingul(pSingul singul) {
   float        fp1,fp2,fp3;
   int          i,k,inm,nr,nre,nc,npr,na,ns;
   char         *ptr,data[128],*filein;
+
   filein = singul->namein;
   strcpy(data,filein);
   ptr = strstr(data,".mesh");

@@ -681,7 +681,7 @@ int seekPoint(pMesh mesh, psPoint ppt, double cb[4]) {
   double   point[3];
   double   bx,by,bz,cx,cy,cz,dx,dy,dz,ux,uy,uz,apx,apy,apz;
   double   vol0,vol1,vol2,vol3,dd;
-  int     *adj,iadr,ref;
+  int     *adj,iadr;
 
   point[0] = ppt->c[0];
   point[1] = ppt->c[1];
@@ -696,7 +696,6 @@ int seekPoint(pMesh mesh, psPoint ppt, double cb[4]) {
     nstart = 1;
   }
   basetet++;
-  ref=1;
 
   do {
     if ( !nsfin ) {
@@ -1464,7 +1463,6 @@ int colSing(pMesh mesh,pSol met) {
  * ( warning: here we don't perform quality tests) */
 int solveUnsignedTet(pMesh mesh,pSol met) {
   pTetra  pt;
-  pxTetra pxt;
   int     k,nf,ns;
   int     *adja;
   int     i,ip;
@@ -1476,7 +1474,6 @@ int solveUnsignedTet(pMesh mesh,pSol met) {
   for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
     if ( (!MG_EOK(pt)) || (!pt->xt) )  continue;
-    pxt = &mesh->xtetra[pt->xt];
 
     if ( (mesh->point[pt->v[0]].tag & MG_SGL) &&
          (mesh->point[pt->v[1]].tag & MG_SGL) &&
@@ -1489,7 +1486,6 @@ int solveUnsignedTet(pMesh mesh,pSol met) {
         ip     = mesh->tetra[adja[i]/4].v[adja[i]%4];
         if ( !(mesh->point[ip].tag & MG_SGL ) && swap23(mesh,k,i) ) {
           nf++;
-          puts("OKKKKKKK\n");
           break;
         }
       }

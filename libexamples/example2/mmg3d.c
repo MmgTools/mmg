@@ -174,8 +174,9 @@ static int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,pSingul si
             fprintf(stderr,"Missing filname for %c%c%c\n",argv[i-1][1],argv[i-1][2],argv[i-1][3]);
             usage(argv[0]);
           }
+        }
 #ifdef SINGUL
-        } else if ( !strcmp(argv[i],"-sing") ) {
+        else if ( !strcmp(argv[i],"-sf") ) {
           if ( ++i < argc && isascii(argv[i][0]) && argv[i][0]!='-' ) {
             sing->namein = (char*) calloc(strlen(argv[i])+1,sizeof(char));
             strcpy(sing->namein,argv[i]);
@@ -186,8 +187,10 @@ static int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,pSingul si
                     argv[i-1][1],argv[i-1][2],argv[i-1][3]);
             usage(argv[0]);
           }
-#endif
         }
+        else if ( !strcmp(argv[i],"-sing") )
+          opt_i[MMG5_sing] = 1;
+#endif
         break;
       case 'v':
         if ( ++i < argc ) {
@@ -316,6 +319,9 @@ int main(int argc,char *argv[]) {
   /* assign default values */
   memset(&mesh,0,sizeof(MMG5_Mesh));
   memset(&met,0,sizeof(MMG5_Sol));
+#ifdef SINGUL
+  memset(&sing,0,sizeof(MMG5_Singul));
+#endif
 
   MMG5_mmg3dinit(opt_i,opt_d);
 
@@ -356,7 +362,7 @@ int main(int argc,char *argv[]) {
     return(MMG5_STRONGFAILURE);
   }
 #ifdef SINGUL
-  if ( info.sing ) {
+  if ( opt_i[MMG5_sing] && sing.namein ) {
     ier = MMG5_loadSingul(&sing);
     if ( !ier ) {
       MMG5_freeAll(&mesh,&met,&sing);

@@ -119,18 +119,18 @@ void freeAll(pMesh mesh,pSol met
   }
 
   /* met */
-  if ( !info.iso && met->m ) {
+  if ( /*!info.iso &&*/ met->m ) {
     free(met->m);
     met->m = NULL;
   }
 #ifdef SINGUL
   /* singul */
   if ( info.sing ) {
-    if ( singul->point ) {
+    if ( singul->ns ) {
       free(singul->point);
       singul->point=NULL;
     }
-    if ( singul->edge ) {
+    if ( singul->na ) {
       free(singul->edge);
       singul->edge=NULL;
     }
@@ -282,6 +282,7 @@ int packMesh(pMesh mesh,pSol met) {
 
   /* rebuild triangles*/
   mesh->nt = 0;
+  chkNumberOfTri(mesh);
   if ( !bdryTria(mesh) ) {
     fprintf(stdout," ## Error: unable to rebuild triangles\n");
     return(0);
@@ -443,9 +444,12 @@ int mmg3dlib(int opt_i[10],double opt_d[6],pMesh mesh,pSol met
              ) {
 
   char      stim[32];
+#ifdef SINGUL
   int       ier;
-#ifndef SINGUL
+#else
+  /* sing is not used but must be declared */
   pSingul   sing;
+  memset(&sing,0,sizeof(Singul));
 #endif
 
   fprintf(stdout,"  -- MMG3d, Release %s (%s) \n",MG_VER,MG_REL);
@@ -486,8 +490,6 @@ int mmg3dlib(int opt_i[10],double opt_d[6],pMesh mesh,pSol met
     if ( !info.iso ) {
       if ( !sing->namein )
         fprintf(stdout,"  ## WARNING: NO SINGULARITIES PROVIDED.\n");
-      else
-        if ( !loadSingul(sing) ) return(MMG5_STRONGFAILURE);
     }
     else if ( sing->namein ) {
       fprintf(stdout,"  ## WARNING: SINGULARITIES MUST BE INSERTED IN");

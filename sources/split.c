@@ -3771,15 +3771,18 @@ void split4sf(pMesh mesh,pSol met,int k,int vx[6]) {
   }
 
   if ( imin23 == tau[2] ) {
-    pt[4]->v[tau[0]] = vx[taued[2]] ; pt[4]->v[tau[1]] = vx[taued[1]] ; pt[4]->v[tau[3]] = vx[taued[4]] ;
-    xt[4].tag[taued[0]] = 0;  xt[4].tag[taued[1]] = 0;
-    xt[4].tag[taued[2]] = 0;  xt[4].tag[taued[4]] = 0;
-    xt[4].tag[taued[5]] = 0;  xt[4].edg[taued[0]] = 0;
-    xt[4].edg[taued[1]] = 0;  xt[4].edg[taued[2]] = 0;
-    xt[4].edg[taued[4]] = 0;  xt[4].edg[taued[5]] = 0;
-    xt[4].ref [ tau[0]] = 0 ; xt[4].ref [ tau[1]] = 0 ; xt[4].ref [tau[2]] = 0;
-    xt[4].ftag[ tau[0]] = 0 ; xt[4].ftag[ tau[1]] = 0 ; xt[4].ftag[tau[2]] = 0;
-    MG_SET(xt[4].ori, tau[0]); MG_SET(xt[4].ori, tau[1]); MG_SET(xt[4].ori, tau[2]);
+    pt[4]->v[tau[0]] = vx[taued[1]] ; pt[4]->v[tau[1]] = vx[taued[4]] ; pt[4]->v[tau[3]] = vx[taued[2]] ;
+    xt[4].tag[taued[0]] = 0;  xt[4].tag[taued[2]] = 0;
+    xt[4].tag[taued[3]] = 0;  xt[4].tag[taued[4]] = 0;
+    xt[4].tag[taued[5]] = 0;
+    xt[4].edg[taued[0]] = 0;  xt[4].edg[taued[2]] = 0;
+    xt[4].edg[taued[3]] = 0;  xt[4].edg[taued[4]] = 0;
+    xt[4].edg[taued[5]] = 0;
+    xt[4].ref [ tau[0]] = 0;  xt[4].ref [ tau[2]] = 0 ;
+    xt[4].ref [ tau[3]] = 0 ;
+    xt[4].ftag[ tau[0]] = 0;  xt[4].ftag[ tau[2]] = 0 ;
+    xt[4].ftag[ tau[3]] = 0 ;
+    MG_SET(xt[4].ori, tau[0]); MG_SET(xt[4].ori, tau[2]); MG_SET(xt[4].ori, tau[3]);
 
     pt[5]->v[tau[0]] = vx[taued[2]] ; pt[5]->v[tau[1]] = vx[taued[4]] ;
     xt[5].tag[taued[0]] = 0;  xt[5].tag[taued[1]] = 0;
@@ -4360,9 +4363,11 @@ void split5(pMesh mesh,pSol met,int k,int vx[6]) {
     MG_SET(xt[4].ori, tau[1]);
 
     pt[5]->v[tau[1]] = vx[taued[4]] ; pt[5]->v[tau[2]] = vx[taued[3]]; pt[5]->v[tau[3]] = vx[taued[2]];
-    xt[5].tag[taued[0]] = 0;  xt[5].tag[taued[3]] = 0;
+    xt[5].tag[taued[0]] = 0;
+    xt[5].tag[taued[1]] = 0;  xt[5].tag[taued[3]] = 0;
     xt[5].tag[taued[4]] = 0;  xt[5].tag[taued[5]] = 0;
-    xt[5].edg[taued[0]] = 0;  xt[5].edg[taued[3]] = 0;
+    xt[5].edg[taued[0]] = 0;
+    xt[5].edg[taued[1]] = 0;  xt[5].edg[taued[3]] = 0;
     xt[5].edg[taued[4]] = 0;  xt[5].edg[taued[5]] = 0;
     xt[5].ref [ tau[0]] = 0;  xt[5].ref [ tau[1]] = 0; xt[5].ref [tau[3]] = 0 ;
     xt[5].ftag[ tau[0]] = 0;  xt[5].ftag[ tau[1]] = 0; xt[5].ftag[tau[3]] = 0 ;

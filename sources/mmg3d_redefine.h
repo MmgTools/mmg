@@ -30,6 +30,7 @@
 #define caltri                        	 _MMG5_caltri
 #define cavity                        	 _MMG5_cavity
 #define cenrad_iso                    	 _MMG5_cenrad_iso
+#define chkNumberOfTri                	 _MMG5_chkNumberOfTri
 #define chkcol_bdy                    	 _MMG5_chkcol_bdy
 #define chkcol_int                    	 _MMG5_chkcol_int
 #define chkedg                        	 _MMG5_chkedg
@@ -41,6 +42,7 @@
 #define chkswpbdy                     	 _MMG5_chkswpbdy
 #define chkswpgen                     	 _MMG5_chkswpgen
 #define cntbdypt                      	 _MMG5_cntbdypt
+#define colSing                       	 _MMG5_colSing
 #define colver                        	 _MMG5_colver
 #define coquil                        	 _MMG5_coquil
 #define coquilface                    	 _MMG5_coquilface
@@ -76,6 +78,8 @@
 #define hashPop                       	 _MMG5_hashPop
 #define hashTetra                     	 _MMG5_hashTetra
 #define hashTria                      	 _MMG5_hashTria
+#define indElt                        	 _MMG5_indElt
+#define indPt                         	 _MMG5_indPt
 #define inserSingul                   	 _MMG5_inserSingul
 #define lapantilap                    	 _MMG5_lapantilap
 #define lenedg_ani                    	 _MMG5_lenedg_ani
@@ -102,7 +106,8 @@
 #define outqua                        	 _MMG5_outqua
 #define ppgdisp                       	 _MMG5_ppgdisp
 #define prilen                        	 _MMG5_prilen
-#define remeshSing                    	 _MMG5_remeshSing
+#define printTetra                    	 _MMG5_printTetra
+#define printTria                     	 _MMG5_printTria
 #define renumbering                   	 _MMG5_renumbering
 #define rotmatrix                     	 _MMG5_rotmatrix
 #define scaleMesh                     	 _MMG5_scaleMesh
@@ -110,6 +115,7 @@
 #define seekPoint                     	 _MMG5_seekPoint
 #define settag                        	 _MMG5_settag
 #define simbulgept                    	 _MMG5_simbulgept
+#define solveUnsignedTet              	 _MMG5_solveUnsignedTet
 #define split1                        	 _MMG5_split1
 #define split1_sim                    	 _MMG5_split1_sim
 #define split1b                       	 _MMG5_split1b
@@ -131,6 +137,7 @@
 #define srcface                       	 _MMG5_srcface
 #define startedgsurfball              	 _MMG5_startedgsurfball
 #define surftri                       	 _MMG5_surftri
+#define swap23                        	 _MMG5_swap23
 #define swpbdy                        	 _MMG5_swpbdy
 #define swpgen                        	 _MMG5_swpgen
 #define sys33sym                      	 _MMG5_sys33sym

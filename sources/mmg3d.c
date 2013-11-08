@@ -347,7 +347,7 @@ void freeAll(pMesh mesh,pSol met
     free(met->nameout);
     met->nameout = NULL;
   }
-  if ( !info.iso && met->m ) {
+  if ( /*!info.iso &&*/ met->m ) {
     free(met->m);
     met->m = NULL;
   }
@@ -358,11 +358,11 @@ void freeAll(pMesh mesh,pSol met
       free(singul->namein);
       singul->namein=NULL;
     }
-    if ( singul->point ) {
+    if ( singul->ns ) {
       free(singul->point);
       singul->point=NULL;
     }
-    if ( singul->edge ) {
+    if ( singul->na ) {
       free(singul->edge);
       singul->edge=NULL;
     }
