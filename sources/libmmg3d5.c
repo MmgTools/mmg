@@ -449,7 +449,9 @@ int mmg3dlib(int opt_i[10],double opt_d[6],pMesh mesh,pSol met
 #else
   /* sing is not used but must be declared */
   pSingul   sing;
-  memset(&sing,0,sizeof(Singul));
+  Singul    singul;
+  sing = &singul;
+  memset(sing,0,sizeof(Singul));
 #endif
 
   fprintf(stdout,"  -- MMG3d, Release %s (%s) \n",MG_VER,MG_REL);

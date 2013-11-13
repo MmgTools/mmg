@@ -203,7 +203,7 @@ int swpgen(pMesh mesh,pSol met,int nconf,int ilist,int *list) {
 /** Perform swap 2->3. Return 0 if the swap lead to an invalid configuration. */
 int swap23(pMesh mesh,int k,int ip) {
   pTetra        pt[3],pt0;
-  xTetra        xt[3];
+  xTetra        xt[3],zerotet;
   pxTetra       pxt0;
   double        qual0,qual1,qual2;
   int           newtet[3],*adja,iq,np,nq,i;
@@ -242,6 +242,9 @@ int swap23(pMesh mesh,int k,int ip) {
   np        = pt[0]->v[ip];
   nq        = pt[1]->v[iq];
 
+  memset(&zerotet,0,sizeof(xTetra));
+  zerotet.ori = 15;
+
   if ( pt[0]->xt ) {
     pxt0 = &mesh->xtetra[pt[0]->xt];
     memcpy(&xt[0],pxt0,sizeof(xTetra));
@@ -254,14 +257,10 @@ int swap23(pMesh mesh,int k,int ip) {
     memset(&xt[2],0,sizeof(xTetra));
   }
 
-  if ( pt[1]->xt ) {
+  if ( pt[1]->xt )
     pxt0 = &mesh->xtetra[pt[1]->xt];
-  }
-  else {
-    pxt0 = &mesh->xtetra[0];
-    memset(pxt0,0,sizeof(xTetra));
-    pxt0->ori = 15;
-  }
+  else
+    pxt0 = &zerotet;
 
   if ( (pt[0]->tag & MG_REQ) || (pt[1]->tag & MG_REQ) ||
        (xt[0].ftag[ip] & MG_REQ) || (pxt0->ftag[iq] & MG_REQ) )
