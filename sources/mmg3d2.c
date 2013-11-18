@@ -44,7 +44,9 @@ static int ismaniball(pMesh mesh,pSol sol,int k,int indp) {
   if ( fabs(sol->m[np]) > EPSD2 )  return(1);
 
   memset(bdy,0,(LMAX+1)*sizeof(int));
+#ifdef SINGUL
  restart:
+#endif
   memset(list,0,(LMAX+1)*sizeof(int));
 
   /* Sign of a starting point in ball of np */
@@ -344,7 +346,7 @@ static int snpval_ls(pMesh mesh,pSol sol,double *tmp) {
 
 /** Proceed to discretization of the implicit function carried by sol into mesh, once values
     of sol have been snapped/checked */
-static int cuttet_ls(pMesh mesh, pSol sol,double *tmp){
+static int cuttet_ls(pMesh mesh, pSol sol/*,double *tmp*/){
   pTetra   pt;
   pPoint   p0,p1;
   Hash     hash;
@@ -485,7 +487,12 @@ static int cuttet_ls(pMesh mesh, pSol sol,double *tmp){
       c[2] = p0->c[2] + s*(p1->c[2]-p0->c[2]);
 
       np = newPt(mesh,c,0);
-      assert(np);
+      if ( !np ) {
+        fprintf(stdout,"  ## Error: unable to allocate a new point\n");
+        fprintf(stdout,"  ## Check the mesh size or ");
+        fprintf(stdout,"increase the allocated memory with the -m option.\n");
+        return(0);
+      }
       sol->m[np] = 0.0;
       hashEdge(&hash,ip0,ip1,np);
     }
@@ -540,7 +547,7 @@ static int cuttet_ls(pMesh mesh, pSol sol,double *tmp){
 #ifdef SINGUL
 /** Check if all singular edges will appear after split on the level-set function *
  *  (the shell of singular edges must have vertices with opposite sign). */
-static int chkedg_ls(pMesh mesh, pSol sol,double *tmp){
+static int chkedg_ls(pMesh mesh, pSol sol){
   pTetra   pt,pt1;
   pxTetra  pxt;
   double   v0,v1,v;
@@ -1505,9 +1512,10 @@ int mmg3d2(pMesh mesh,pSol sol) {
     return(0);
   }
 
+  free(tmp);
+
   if ( !hashTetra(mesh) ) {
     fprintf(stdout,"  ## Hashing problem. Exit program.\n");
-    free(tmp);
     return(0);
   }
   if ( !chkNumberOfTri(mesh) ) {
@@ -1525,29 +1533,25 @@ int mmg3d2(pMesh mesh,pSol sol) {
   /* build hash table for initial edges */
   if ( !hGeom(mesh) ) {
     fprintf(stdout,"  ## Hashing problem (0). Exit program.\n");
-    free(tmp);
     return(0);
   }
 
   if ( !bdrySet(mesh) ) {
     fprintf(stdout,"  ## Problem in setting boundary. Exit program.\n");
-    free(tmp);
     return(0);
   }
 
 #ifdef SINGUL
-  if ( !chkedg_ls(mesh,sol,tmp) ) {
+  if ( !chkedg_ls(mesh,sol) ) {
     fprintf(stdout,"  ## Warning: some singular edges will be lost.\n");
   }
 #endif
 
-  if ( !cuttet_ls(mesh,sol,tmp) ) {
+  if ( !cuttet_ls(mesh,sol/*,tmp*/) ) {
     fprintf(stdout,"  ## Problem in discretizing implicit function. Exit program.\n");
-    free(tmp);
     return(0);
   }
 
-  free(tmp);
   free(mesh->adja);
   free(mesh->tria);
   mesh->adja = 0;

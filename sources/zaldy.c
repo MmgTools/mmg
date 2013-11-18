@@ -23,8 +23,7 @@ int newPt(pMesh mesh,double c[3],char tag) {
       fprintf(stdout,"  ## Allocation problem (xpoint), not enough memory.\n");
       fprintf(stdout,"  ## Check the mesh size or ");
       fprintf(stdout,"increase the allocated memory with the -m option.\n");
-      fprintf(stdout,"  Exit program.\n");
-      exit(EXIT_FAILURE);
+      return(0);
     }
     ppt->xp  = mesh->xp;
   }
@@ -90,7 +89,7 @@ void delElt(pMesh mesh,int iel) {
 /** allocate main structure */
 int zaldy(pMesh mesh) {
   int     million = 1048576L;
-  int     k,npask,bytes;
+  int     k,npask,bytes,ctri;
 
   if ( info.mem < 0 ) {
     mesh->npmax = MG_MAX(1.5*mesh->np,NPMAX);
@@ -98,14 +97,22 @@ int zaldy(pMesh mesh) {
     mesh->nemax = MG_MAX(1.5*mesh->ne,NEMAX);
   }
   else {
-    /* point+tria+tets+adja+sol */
-    bytes = 2*sizeof(Point) + 6*sizeof(Tetra) + 2*sizeof(xTetra) +
-      4*sizeof(int) + sizeof(Edge);
+    if ( info.iso )
+      ctri = 3;
+    else
+      ctri = 2;
+
+    /* Euler-poincare: ne = 6*np; nt = 2*nv; */
+    /* point+tria+tets+adja+adjt+sol */
+    bytes = sizeof(Point) + sizeof(xPoint) +
+      6*sizeof(Tetra) + ctri*sizeof(xTetra) +
+      4*6*sizeof(int) + ctri*3*sizeof(int) +
+      sizeof(Sol);
 
     npask = (double)info.mem / bytes * million;
-    mesh->npmax = MG_MAX(1.5*mesh->np,npask);
-    mesh->ntmax = MG_MAX(1.5*mesh->nt,2*npask);
-    mesh->nemax = MG_MAX(1.5*mesh->ne,6*npask);
+    mesh->npmax = npask;
+    mesh->ntmax = ctri*npask;
+    mesh->nemax = 6*npask;
   }
 
   mesh->point = (pPoint)calloc(mesh->npmax+1,sizeof(Point));
