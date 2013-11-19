@@ -234,7 +234,7 @@ ADD_TEST(NAME CubeIso_0.25h_met
   -out ${REG_TESTS_PATH}/CubeIso_0.25h_met/CubeIso0.1.o.meshb)
 ADD_TEST(NAME CubeIso_0.125h_met
   COMMAND ${EXECUT} -v 5
-  ${REG_TESTS_PATH}/CubeIso_0.125h_met/CubeIso0.1 -m 600
+  ${REG_TESTS_PATH}/CubeIso_0.125h_met/CubeIso0.1 -m 1000
   -out ${REG_TESTS_PATH}/CubeIso_0.125h_met/CubeIso0.1.o.meshb)
 
 #####
@@ -317,15 +317,15 @@ ADD_TEST(NAME CubeSkin0.2_Inside0.4
   ${REG_TESTS_PATH}/CubeSkin0.2_Inside0.4/CubeSkin0.2.o.meshb)
 ADD_TEST(NAME CubeSkin0.0125_Inside0.125
   COMMAND ${EXECUT} -v 5
-  ${REG_TESTS_PATH}/CubeSkin0.0125_Inside0.125/CubeSkin0.125 -m 600
+  ${REG_TESTS_PATH}/CubeSkin0.0125_Inside0.125/CubeSkin0.125 -m 1000
   -out ${REG_TESTS_PATH}/CubeSkin0.0125_Inside0.125/CubeSkin0.125.o.meshb)
 ADD_TEST(NAME CubeSkin0.0125_Inside0.25
   COMMAND ${EXECUT} -v 5
-  ${REG_TESTS_PATH}/CubeSkin0.0125_Inside0.25/CubeSkin0.25 -m 600
+  ${REG_TESTS_PATH}/CubeSkin0.0125_Inside0.25/CubeSkin0.25 -m 1000
   -out ${REG_TESTS_PATH}/CubeSkin0.0125_Inside0.25/CubeSkin0.25.o.meshb)
 ADD_TEST(NAME CubeSkin0.0125_Inside0.5
   COMMAND ${EXECUT} -v 5
-  ${REG_TESTS_PATH}/CubeSkin0.0125_Inside0.5/CubeSkin0.5 -m 600
+  ${REG_TESTS_PATH}/CubeSkin0.0125_Inside0.5/CubeSkin0.5 -m 1000
   ${REG_TESTS_PATH}/CubeSkin0.0125_Inside0.5/CubeSkin0.5.o.meshb)
 
 
@@ -383,7 +383,7 @@ ADD_TEST(NAME Various_adpsol_hgrad1_M6Mach_Eps0.0005_hmin0.0001_hmax3
   ${REG_TESTS_PATH}/Various_adpsol_hgrad1_M6Mach_Eps0.0005_hmin0.0001_hmax3/M6
   -sol
   ${REG_TESTS_PATH}/Various_adpsol_hgrad1_M6Mach_Eps0.0005_hmin0.0001_hmax3/metM6.sol
-  -hausd 0.1 -ar 60 -hgrad 1 -m 1000
+  -hausd 0.1 -ar 60 -hgrad 1 -m 1500
   ${REG_TESTS_PATH}/Various_adpsol_hgrad1_M6Mach_Eps0.0005_hmin0.0001_hmax3/M6.o.meshb)
 
 
@@ -408,7 +408,7 @@ ADD_TEST(NAME MultiDom_Cube
   -out ${REG_TESTS_PATH}/MultiDom_Cube/c.o.meshb)
 
 ADD_TEST(NAME MultiDom_Ellipse
-  COMMAND ${EXECUT} -v 6 -m 700 -hausd 0.0003 ${REG_TESTS_PATH}/MultiDom_Ellipse/c.d
+  COMMAND ${EXECUT} -v 6 -m 1000 -hausd 0.0003 ${REG_TESTS_PATH}/MultiDom_Ellipse/c.d
   -out ${REG_TESTS_PATH}/MultiDom_Ellipse/c.d.o.meshb)
 
 # Non-manifold test case

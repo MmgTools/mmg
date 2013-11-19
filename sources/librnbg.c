@@ -200,9 +200,51 @@ int kPartBoxCompute(SCOTCH_Graph graf, int vertNbr, int boxVertNbr, SCOTCH_Num *
   return 0;
 }
 
+/** Swap two tetras in the table of tetrahedras */
+static inline
+void swapTet(pTetra tetras, int* perm, int ind1, int ind2) {
+  Tetra pttmp;
+  int   tmp;
+
+  /* swap the tetrahedras */
+  memcpy(&pttmp       ,&tetras[ind2],sizeof(Tetra));
+  memcpy(&tetras[ind2],&tetras[ind1],sizeof(Tetra));
+  memcpy(&tetras[ind1],&pttmp       ,sizeof(Tetra));
+
+  /* swap the permutaion table */
+  tmp        = perm[ind2];
+  perm[ind2] = perm[ind1];
+  perm[ind1] = tmp;
+}
+
+/** Swap two points in the table of points and in the sol table */
+static inline
+void swapNod(pPoint points, double* sols, int* perm,
+             int ind1, int ind2, int solsiz) {
+  Point ptttmp;
+  Sol   soltmp;
+  int   tmp,addr2,addr1;
+
+  /* swap the points */
+  memcpy(&ptttmp      ,&points[ind2],sizeof(Point));
+  memcpy(&points[ind2],&points[ind1],sizeof(Point));
+  memcpy(&points[ind1],&ptttmp      ,sizeof(Point));
+
+  /* swap the sols */
+  addr1 = (ind1-1)*solsiz + 1;
+  addr2 = (ind2-1)*solsiz + 1;
+  memcpy(&soltmp     ,&sols[addr2],solsiz*sizeof(double));
+  memcpy(&sols[addr2],&sols[addr1],solsiz*sizeof(double));
+  memcpy(&sols[addr1],&soltmp     ,solsiz*sizeof(double));
+
+  /* swap the permutaion table */
+  tmp        = perm[ind2];
+  perm[ind2] = perm[ind1];
+  perm[ind1] = tmp;
+}
 
 
-/* Function : renumbering
+/** Function : renumbering
  *  it modifies the numbering of each node to prevent from cache missing.
  *
  *  - boxVertNbr : number of vertices by box
@@ -212,17 +254,15 @@ int kPartBoxCompute(SCOTCH_Graph graf, int vertNbr, int boxVertNbr, SCOTCH_Num *
  */
 int renumbering(int boxVertNbr, pMesh mesh, pSol sol) {
   pPoint ppt;
-  pPoint points;
-  pTetra ptet, tetras;
+  pTetra ptet;
   SCOTCH_Num edgeNbr;
   SCOTCH_Num *vertTab, *vendTab, *edgeTab, *permVrtTab;
   SCOTCH_Graph graf ;
   int    vertNbr, nodeGlbIdx, tetraIdx, ballTetIdx;
-  int    i, j, k, addrNew, addrOld;
+  int    i, j, k;
   int    edgeSiz;
   int    *vertOldTab, *permNodTab, nereal, npreal;
   int    *adja,iadr;
-  double *metNew;
 
 
   /* Computing the number of vertices and a contiguous tabular of vertices */
@@ -246,7 +286,6 @@ int renumbering(int boxVertNbr, pMesh mesh, pSol sol) {
     free(vertOldTab);
     return(1);
   }
-
 
   /* Allocating memory to compute adjacency lists */
   vertTab = (SCOTCH_Num *)calloc(vertNbr + 1, sizeof(SCOTCH_Num));
@@ -313,15 +352,8 @@ int renumbering(int boxVertNbr, pMesh mesh, pSol sol) {
   free(vendTab);
   free(edgeTab);
 
-
+  /* Computing the new point list and modifying the adja strcuture */
   permNodTab = (int *)calloc(mesh->np + 1, sizeof(int));
-
-  /* Computing the new point list and modifying the sol structures*/
-  tetras = (pTetra)calloc(mesh->nemax+1,sizeof(Tetra));
-
-  points = (pPoint)calloc(mesh->npmax+1,sizeof(Point));
-
-  metNew = (double*)calloc(sol->npmax+1,sol->size*sizeof(double));
 
   adja   = (int*)calloc(4*mesh->nemax+5,sizeof(int));
   memset(adja, 0, (4*mesh->nemax+5)*sizeof(int) );
@@ -334,9 +366,6 @@ int renumbering(int boxVertNbr, pMesh mesh, pSol sol) {
 
     /* Testing if the tetra exists */
     if (!ptet->v[0]) continue;
-
-    /* Building the new point list */
-    tetras[permVrtTab[vertOldTab[tetraIdx]]] = *ptet;
 
     adja[4*(permVrtTab[vertOldTab[tetraIdx]]-1)+1] =
       4*(permVrtTab[vertOldTab[mesh->adja[4*(tetraIdx-1)+1]/4]])+mesh->adja[4*(tetraIdx-1)+1]%4;
@@ -351,39 +380,45 @@ int renumbering(int boxVertNbr, pMesh mesh, pSol sol) {
 
     for(j = 0 ; j <= 3 ; j++) {
 
-      nodeGlbIdx = mesh->tetra[tetraIdx].v[j];
+      nodeGlbIdx = ptet->v[j];
 
       if ( permNodTab[nodeGlbIdx] ) continue;
 
       ppt = &mesh->point[nodeGlbIdx];
 
-      if (!(ppt->tag & MG_NUL)) {
+      if (!(ppt->tag & MG_NUL))
         /* Building the new point list */
         permNodTab[nodeGlbIdx] = ++npreal;
-
-        points[permNodTab[nodeGlbIdx]] = *ppt;
-
-        /* Building the new sol met */
-        addrOld = (nodeGlbIdx-1)*sol->size + 1;
-        addrNew = (permNodTab[nodeGlbIdx]-1)*sol->size + 1;
-        memcpy(&metNew[addrNew], &sol->m[addrOld], sol->size*sizeof(double));
-      }
     }
   }
-
-  free(mesh->tetra);
-  mesh->tetra = tetras;
-  mesh->ne = nereal;
-
-  free(mesh->point);
-  mesh->point = points;
-  mesh->np    = npreal;
-
-  free(sol->m);
-  sol->m = metNew;
-
   free(mesh->adja);
   mesh->adja = adja;
+
+  /* Create the final permutation table for tetras (stored in vertOldTab) and *
+     modify the numbering of the nodes of each tetra */
+  for( tetraIdx = 1; tetraIdx < mesh->ne + 1; tetraIdx++) {
+    if ( !mesh->tetra[tetraIdx].v[0] )  continue;
+    vertOldTab[tetraIdx] = permVrtTab[vertOldTab[tetraIdx]];
+    for(j = 0 ; j <= 3 ; j++) {
+      mesh->tetra[tetraIdx].v[j] = permNodTab[mesh->tetra[tetraIdx].v[j]];
+    }
+  }
+  free(permVrtTab);
+
+  /* Permute nodes and sol */
+  for (j=1; j<= mesh->np; j++) {
+    while ( permNodTab[j] != j && permNodTab[j] )
+      swapNod(mesh->point,sol->m,permNodTab,j,permNodTab[j],sol->size);
+  }
+
+  /* Permute tetrahedras */
+  for (j=1; j<= mesh->ne; j++) {
+    while ( vertOldTab[j] != j && vertOldTab[j] )
+      swapTet(mesh->tetra,vertOldTab,j,vertOldTab[j]);
+  }
+
+  mesh->ne = nereal;
+  mesh->np = npreal;
 
   if ( mesh->np == mesh->npmax )
     mesh->npnil = 0;
@@ -403,15 +438,6 @@ int renumbering(int boxVertNbr, pMesh mesh, pSol sol) {
     for (k=mesh->nenil; k<mesh->nemax-1; k++)
       mesh->tetra[k].v[3] = k+1;
 
-  /* Modifying the numbering of the nodes of each tetra */
-  for(tetraIdx = 1 ; tetraIdx < mesh->ne + 1 ; tetraIdx++) {
-    if (!mesh->tetra[tetraIdx].v[0]) continue;
-    for(j = 0 ; j <= 3 ; j++) {
-      mesh->tetra[tetraIdx].v[j] = permNodTab[mesh->tetra[tetraIdx].v[j]];
-    }
-  }
-
-  free(permVrtTab);
   free(permNodTab);
   free(vertOldTab);
 
