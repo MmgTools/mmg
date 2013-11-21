@@ -139,7 +139,10 @@ int delone(pMesh mesh,pSol sol,int ip,int *list,int ilist) {
   if ( alert )  {puts("aler");return(-1);}
   /* hash table params */
   if ( size > 3*LONMAX )  return(0);
-  hashNew(&hedg,size,3*size); /*3*size suffit */
+  if ( !hashNew(&hedg,size,3*size) ) { /*3*size suffit */
+    fprintf(stdout,"  ## Unable to complete mesh.\n");
+    return(-1);
+  }
   for (k=0; k<ilist; k++) {
     old  = list[k];
 

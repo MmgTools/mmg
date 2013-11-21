@@ -439,7 +439,7 @@ static int cuttet_ls(pMesh mesh, pSol sol/*,double *tmp*/){
   /* } */
 
   /* Create intersection points at 0 isovalue and set flags to tetras */
-  hashNew(&hash,nb,7*nb);
+  if ( !hashNew(&hash,nb,7*nb) ) return(0);
   for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
     if ( !MG_EOK(pt) )  continue;
@@ -1511,7 +1511,6 @@ int mmg3d2(pMesh mesh,pSol sol) {
     fprintf(stdout,"  ## Problem with implicit function. Exit program.\n");
     return(0);
   }
-
   free(tmp);
 
   if ( !hashTetra(mesh) ) {

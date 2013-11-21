@@ -293,46 +293,47 @@ int packMesh(pMesh mesh,pSol met) {
     free(mesh->htab.geom);
     mesh->htab.geom=NULL;
   }
-  hNew(&mesh->htab,3*(mesh->xt),9*(mesh->xt));
-  for (k=1; k<=mesh->ne; k++) {
-    pt   = &mesh->tetra[k];
-    if ( MG_EOK(pt) &&  pt->xt ) {
-      for (i=0; i<6; i++) {
-        if ( mesh->xtetra[pt->xt].edg[i] ||
-             ( MG_EDG(mesh->xtetra[pt->xt].tag[i] ) ||
-               (mesh->xtetra[pt->xt].tag[i] & MG_REQ) ) )
-          hEdge(&mesh->htab,pt->v[iare[i][0]],pt->v[iare[i][1]],
-                mesh->xtetra[pt->xt].edg[i],mesh->xtetra[pt->xt].tag[i]);
+  mesh->na = 0;
+  if ( hNew(&mesh->htab,mesh->nt,3*(mesh->nt),0) ) {
+    for (k=1; k<=mesh->ne; k++) {
+      pt   = &mesh->tetra[k];
+      if ( MG_EOK(pt) &&  pt->xt ) {
+        for (i=0; i<6; i++) {
+          if ( mesh->xtetra[pt->xt].edg[i] ||
+               ( MG_EDG(mesh->xtetra[pt->xt].tag[i] ) ||
+                 (mesh->xtetra[pt->xt].tag[i] & MG_REQ) ) )
+            hEdge(&mesh->htab,pt->v[iare[i][0]],pt->v[iare[i][1]],
+                  mesh->xtetra[pt->xt].edg[i],mesh->xtetra[pt->xt].tag[i]);
+        }
       }
     }
-  }
 
-  /* edges + ridges + required edges */
-  mesh->na = 0;
-  for (k=0; k<=mesh->htab.max; k++) {
-    ph = &mesh->htab.geom[k];
-    if ( !(ph->a) )  continue;
-    mesh->na++;
-  }
-  if ( mesh->na ) {
-    mesh->edge = (pEdge)calloc(mesh->na+1,sizeof(Edge));
-    if ( !mesh->edge ) {
-      fprintf(stdout,"  ## Allocation problem (edge), not enough memory.\n");
-      fprintf(stdout,"  ## Check the mesh size or increase the allocated memory");
-      fprintf(stdout," with the -m option.\n");
-      fprintf(stdout,"  Exit program.\n");
-      return(0);
-    }
-    mesh->na = 0;
+    /* edges + ridges + required edges */
     for (k=0; k<=mesh->htab.max; k++) {
       ph = &mesh->htab.geom[k];
-      if ( !ph->a )  continue;
+      if ( !(ph->a) )  continue;
       mesh->na++;
-      mesh->edge[mesh->na ].a  = mesh->point[ph->a].tmp;
-      mesh->edge[mesh->na ].b  = mesh->point[ph->b].tmp;
-      mesh->edge[mesh->na].tag = ( ph->tag | MG_REF ) ;
-      mesh->edge[mesh->na].ref = ph->ref;
-      if ( MG_GEO & ph->tag ) nr++;
+    }
+    if ( mesh->na ) {
+      mesh->edge = (pEdge)calloc(mesh->na+1,sizeof(Edge));
+      if ( !mesh->edge ) {
+        fprintf(stdout,"  ## Allocation problem (edge), not enough memory.\n");
+        fprintf(stdout,"  ## Check the mesh size or increase the allocated memory");
+        fprintf(stdout," with the -m option.\n");
+        fprintf(stdout,"  Exit program.\n");
+        return(0);
+      }
+      mesh->na = 0;
+      for (k=0; k<=mesh->htab.max; k++) {
+        ph = &mesh->htab.geom[k];
+        if ( !ph->a )  continue;
+        mesh->na++;
+        mesh->edge[mesh->na ].a  = mesh->point[ph->a].tmp;
+        mesh->edge[mesh->na ].b  = mesh->point[ph->b].tmp;
+        mesh->edge[mesh->na].tag = ( ph->tag | MG_REF ) ;
+        mesh->edge[mesh->na].ref = ph->ref;
+        if ( MG_GEO & ph->tag ) nr++;
+      }
     }
   }
 

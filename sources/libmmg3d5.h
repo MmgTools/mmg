@@ -11,27 +11,27 @@
 
 #define SIZE 0.75 /**< Size of the mesh of singularities inside the main mesh */
 
-enum MMG5_optIntCod
+enum MMG5_optIntCod /**<  Options for mmg3d2 (integers) */
   {
-    MMG5_imprim,\
-    MMG5_mem,\
-    MMG5_debug,\
-    MMG5_angle,\
-    MMG5_iso,\
-    MMG5_noinsert,\
-    MMG5_noswap,\
-    MMG5_nomove,\
-    MMG5_renum,\
-    MMG5_sing,\
+    MMG5_imprim,    /**<  Tune level of verbosity, [-10..10]     */
+    MMG5_mem,       /**<  Set memory size to n Mbytes            */
+    MMG5_debug,     /**<  Turn on debug mode                     */
+    MMG5_angle,     /**<  Turn on angle detection                */
+    MMG5_iso,       /**<  Level-set meshing                      */
+    MMG5_noinsert,  /**<  No point insertion/deletion            */
+    MMG5_noswap,    /**<  No edge or face flipping               */
+    MMG5_nomove,    /**<  No point relocation                    */
+    MMG5_renum,     /**<  Turn on point relocation with Scotch   */
+    MMG5_sing,      /**<  Turn on the insertion of singularities */
   };
-enum MMG5_optDblCod
+enum MMG5_optDblCod /**<  Options for mmg3d2 (double) */
   {
-    MMG5_dhd,
-    MMG5_hmin,
-    MMG5_hmax,
-    MMG5_hausd,
-    MMG5_hgrad,
-    MMG5_ls,
+    MMG5_dhd,       /**<  Value for angle detection  */
+    MMG5_hmin,      /**<  Minimal mesh size          */
+    MMG5_hmax,      /**<  Maximal mesh size          */
+    MMG5_hausd,     /**<  control Hausdorff distance */
+    MMG5_hgrad,     /**<  control gradation          */
+    MMG5_ls,        /**<  Not use for now            */
   };
 
 typedef struct {

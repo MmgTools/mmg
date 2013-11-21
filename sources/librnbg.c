@@ -94,7 +94,7 @@ int biPartBoxCompute(SCOTCH_Graph graf, int vertNbr, int boxVertNbr, SCOTCH_Num 
   partNumTab = (SCOTCH_Num *)calloc(boxNbr, sizeof(SCOTCH_Num));
 
   if (!memset(partNumTab, 0, boxNbr*sizeof(SCOTCH_Num))) {
-    perror("memset");
+    perror("  ## Memory problem: memset");
     return 0;
   }
 
@@ -202,16 +202,45 @@ int kPartBoxCompute(SCOTCH_Graph graf, int vertNbr, int boxVertNbr, SCOTCH_Num *
 
 /** Swap two tetras in the table of tetrahedras */
 static inline
-void swapTet(pTetra tetras, int* perm, int ind1, int ind2) {
+void swapTet(pTetra tetras, int* adja, int* perm, int ind1, int ind2) {
   Tetra pttmp;
-  int   tmp;
+  int   tmp,adjatmp,kadj,ifadj,j;
 
-  /* swap the tetrahedras */
+  /* 1-- swap the adja table */
+  /* First: replace ind2 by ind1 in adjacents tetras of ind2 */
+  for ( j=1; j<5; j++ ) {
+    if ( adja[4*(ind2-1)+j]/4 ) {
+      kadj  = adja[4*(ind2-1)+j]/4;
+      ifadj = adja[4*(ind2-1)+j]%4;
+      adja[4*(kadj-1)+1+ifadj] = 4*ind1 + adja[4*(kadj-1)+1+ifadj]%4;
+    }
+  }
+
+  /* Second: replace ind1 by ind2 in adjacents tetras of ind1*/
+  for ( j=1; j<5; j++ ) {
+    if ( adja[4*(ind1-1)+j]/4 ) {
+      kadj  = adja[4*(ind1-1)+j]/4;
+      ifadj = adja[4*(ind1-1)+j]%4;
+      if ( kadj == ind1 )
+	adja[4*(ind2-1)+1+ifadj] = 4*ind2 + adja[4*(ind2-1)+1+ifadj]%4;
+      else
+	adja[4*(kadj-1)+1+ifadj] = 4*ind2 + adja[4*(kadj-1)+1+ifadj]%4;
+    }
+  }
+
+  /* Third: swap adjacents for ind1 and ind2 */
+  for ( j=1; j<5; j++ ) {
+    adjatmp = adja[4*(ind2-1)+j];
+    adja[4*(ind2-1)+j] = adja[4*(ind1-1)+j];
+    adja[4*(ind1-1)+j] = adjatmp;
+  }
+
+  /* 2-- swap the tetrahedras */
   memcpy(&pttmp       ,&tetras[ind2],sizeof(Tetra));
   memcpy(&tetras[ind2],&tetras[ind1],sizeof(Tetra));
   memcpy(&tetras[ind1],&pttmp       ,sizeof(Tetra));
 
-  /* swap the permutaion table */
+  /* 3-- swap the permutation table */
   tmp        = perm[ind2];
   perm[ind2] = perm[ind1];
   perm[ind1] = tmp;
@@ -270,7 +299,7 @@ int renumbering(int boxVertNbr, pMesh mesh, pSol sol) {
   vertOldTab = (int *)calloc(mesh->ne + 1, sizeof(int));
 
   if (!memset(vertOldTab, 0, sizeof(int)*(mesh->ne+1))) {
-    perror("memset");
+    perror("  ## Memory problem: memset");
     return 1;
   }
 
@@ -291,7 +320,7 @@ int renumbering(int boxVertNbr, pMesh mesh, pSol sol) {
   vertTab = (SCOTCH_Num *)calloc(vertNbr + 1, sizeof(SCOTCH_Num));
 
   if (!memset(vertTab, ~0, sizeof(SCOTCH_Num)*(vertNbr + 1))) {
-    perror("memset");
+    perror("  ## Memory problem: memset");
     return 1;
   }
 
@@ -355,9 +384,6 @@ int renumbering(int boxVertNbr, pMesh mesh, pSol sol) {
   /* Computing the new point list and modifying the adja strcuture */
   permNodTab = (int *)calloc(mesh->np + 1, sizeof(int));
 
-  adja   = (int*)calloc(4*mesh->nemax+5,sizeof(int));
-  memset(adja, 0, (4*mesh->nemax+5)*sizeof(int) );
-
   nereal = 0;
   npreal = 0;
 
@@ -366,15 +392,6 @@ int renumbering(int boxVertNbr, pMesh mesh, pSol sol) {
 
     /* Testing if the tetra exists */
     if (!ptet->v[0]) continue;
-
-    adja[4*(permVrtTab[vertOldTab[tetraIdx]]-1)+1] =
-      4*(permVrtTab[vertOldTab[mesh->adja[4*(tetraIdx-1)+1]/4]])+mesh->adja[4*(tetraIdx-1)+1]%4;
-    adja[4*(permVrtTab[vertOldTab[tetraIdx]]-1)+2] =
-      4*(permVrtTab[vertOldTab[mesh->adja[4*(tetraIdx-1)+2]/4]])+mesh->adja[4*(tetraIdx-1)+2]%4;
-    adja[4*(permVrtTab[vertOldTab[tetraIdx]]-1)+3] =
-      4*(permVrtTab[vertOldTab[mesh->adja[4*(tetraIdx-1)+3]/4]])+mesh->adja[4*(tetraIdx-1)+3]%4;
-    adja[4*(permVrtTab[vertOldTab[tetraIdx]]-1)+4] =
-      4*(permVrtTab[vertOldTab[mesh->adja[4*(tetraIdx-1)+4]/4]])+mesh->adja[4*(tetraIdx-1)+4]%4;
 
     nereal++;
 
@@ -391,8 +408,6 @@ int renumbering(int boxVertNbr, pMesh mesh, pSol sol) {
         permNodTab[nodeGlbIdx] = ++npreal;
     }
   }
-  free(mesh->adja);
-  mesh->adja = adja;
 
   /* Create the final permutation table for tetras (stored in vertOldTab) and *
      modify the numbering of the nodes of each tetra */
@@ -414,7 +429,7 @@ int renumbering(int boxVertNbr, pMesh mesh, pSol sol) {
   /* Permute tetrahedras */
   for (j=1; j<= mesh->ne; j++) {
     while ( vertOldTab[j] != j && vertOldTab[j] )
-      swapTet(mesh->tetra,vertOldTab,j,vertOldTab[j]);
+      swapTet(mesh->tetra,mesh->adja,vertOldTab,j,vertOldTab[j]);
   }
 
   mesh->ne = nereal;

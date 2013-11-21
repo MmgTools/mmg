@@ -386,7 +386,7 @@ static int swpmshcpy(pMesh mesh,pSol met) {
   char     i,j,ia;
 
   /** 1. analysis */
-  hashNew(&hash,mesh->np,7*mesh->np);
+  if ( !hashNew(&hash,mesh->np,7*mesh->np) )  return(-1);
   memlack = ns = nap = 0;
   hma2 = LLONG*LLONG*info.hmax*info.hmax;
 
@@ -401,10 +401,7 @@ static int swpmshcpy(pMesh mesh,pSol met) {
         ip1 = pt->v[iare[i][0]];
         ip2 = pt->v[iare[i][1]];
         ip  = -1;
-        if ( !hashEdge(&hash,ip1,ip2,ip) ) {
-          printf("%s:%d: Error: function hashEdge return 0\n",__FILE__,__LINE__);
-          exit(EXIT_FAILURE);
-        }
+        if ( !hashEdge(&hash,ip1,ip2,ip) ) return(-1);
       }
       continue;
     }
@@ -418,10 +415,7 @@ static int swpmshcpy(pMesh mesh,pSol met) {
           ip1 = pt->v[idir[i][inxt2[j]]];
           ip2 = pt->v[idir[i][iprv2[j]]];
           ip  = -1;
-          if ( !hashEdge(&hash,ip1,ip2,ip) ) {
-            printf("%s:%d: Error: function hashEdge return 0\n",__FILE__,__LINE__);
-            exit(EXIT_FAILURE);
-          }
+          if ( !hashEdge(&hash,ip1,ip2,ip) ) return(-1);
         }
         break;
       }
@@ -479,7 +473,7 @@ static int swpmshcpy(pMesh mesh,pSol met) {
 
         if ( met->m )
           met->m[ip] = 0.5 * (met->m[ip1]+met->m[ip2]);
-        hashEdge(&hash,ip1,ip2,ip);
+        if ( !hashEdge(&hash,ip1,ip2,ip) ) return(-1);
         MG_SET(pt->flag,i);
         nap++;
       }
@@ -644,7 +638,7 @@ static int swpmshcpy(pMesh mesh,pSol met) {
   static double uv[3][2] = { {0.5,0.5}, {0.,0.5}, {0.5,0.} };
 
   /** 1. analysis of boundary elements */
-  hashNew(&hash,mesh->np,7*mesh->np);
+  if ( !hashNew(&hash,mesh->np,7*mesh->np) ) return(-1);
   ns = nap = 0;
   npinit=mesh->np;
   for (k=1; k<=mesh->ne; k++) {
@@ -717,7 +711,7 @@ static int swpmshcpy(pMesh mesh,pSol met) {
           } while ( mesh->np>npinit );
           return(-1);
         }
-        hashEdge(&hash,ip1,ip2,ip);
+        if ( !hashEdge(&hash,ip1,ip2,ip) ) return(-1);
         ppt = &mesh->point[ip];
         p1  = &mesh->point[ip1];
         p2  = &mesh->point[ip2];

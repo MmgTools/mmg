@@ -1,5 +1,5 @@
 /** Authors Cécile Dobrzynski */
-/* Example for using mmg3dlib */
+/** \include Example for using mmg3dlib */
 
 #include <assert.h>
 #include <stdio.h>

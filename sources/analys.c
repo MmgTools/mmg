@@ -13,7 +13,11 @@ static int setadj(pMesh mesh){
 
   nvf = nf = ncc = ned = 0;
   pile = (int*)malloc((mesh->nt+1)*sizeof(int));
-  assert(pile);
+  if ( !pile ) {
+    perror("  ## Memory problem: malloc");
+    exit(EXIT_FAILURE);
+  }
+
   pile[1] = 1;
   ipil    = 1;
   pt = &mesh->tria[1];
@@ -334,7 +338,10 @@ static int norver(pMesh mesh) {
   /* memory to store normals for boundary points */
   mesh->xpmax  = MG_MAX(1.5*mesh->xp,mesh->npmax);
   mesh->xpoint = (pxPoint)calloc(mesh->xpmax+1,sizeof(xPoint));
-  assert(mesh->xpoint);
+  if ( !mesh->xpoint ) {
+    perror("  ## Memory problem: calloc");
+    exit(EXIT_FAILURE);
+  }
 
   /* compute normals + tangents */
   nn = ng = nt = nf = 0;

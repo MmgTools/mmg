@@ -545,7 +545,7 @@ int prilen(pMesh mesh, pSol met) {
   amin = amax = bmin = bmax = 0;
 
   /* Hash all edges in the mesh */
-  hashNew(&hash,mesh->np,7*mesh->np);
+  if ( !hashNew(&hash,mesh->np,7*mesh->np) )  return(0);
 
   for(k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];

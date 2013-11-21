@@ -210,7 +210,7 @@ int  hPop(HGeom *hash,int a,int b,int *ref,char *tag);
 int  hTag(HGeom *hash,int a,int b,int ref,char tag);
 int  hGet(HGeom *hash,int a,int b,int *ref,char *tag);
 void hEdge(HGeom *hash,int a,int b,int ref,char tag);
-void hNew(HGeom *hash,int hsiz,int hmax);
+int  hNew(HGeom *hash,int hsiz,int hmax,int secure);
 int  hGeom(pMesh mesh);
 int  bdryTria(pMesh );
 int  bdryIso(pMesh );

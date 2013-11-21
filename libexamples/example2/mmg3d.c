@@ -1,4 +1,5 @@
-/** mmg3d: 3d mesh adaptation
+/** \include Example for using of mmg3dlib
+ * mmg3d: 3d mesh adaptation
  *
  * Written by Cecile Dobrzynski (IMB), Charles Dapogny and Pascal Frey (LJLL)
  * Copyright (c) 2004- IMB/LJLL.

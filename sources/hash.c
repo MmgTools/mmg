@@ -58,9 +58,15 @@ int hashTetra(pMesh mesh) {
 
   /* memory alloc */
   mesh->adja = (int*)calloc(4*mesh->nemax+5,sizeof(int));
-  assert(mesh->adja);
+  if ( !mesh->adja ) {
+    perror("  ## Memory problem: calloc");
+    exit(EXIT_FAILURE);
+  }
   hcode = (int*)calloc(mesh->ne+5,sizeof(int));
-  assert(hcode);
+  if ( !hcode ) {
+    perror("  ## Memory problem: calloc");
+    exit(EXIT_FAILURE);
+  }
   link  = mesh->adja;
   hsize = mesh->ne;
 
@@ -151,7 +157,10 @@ int hashTria(pMesh mesh) {
   unsigned int key;
 
   mesh->adjt = (int*)calloc(3*mesh->nt+5,sizeof(int));
-  assert(mesh->adjt);
+  if ( !mesh->adjt ) {
+    perror("  ## Memory problem: calloc");
+    exit(EXIT_FAILURE);
+  }
 
   /* adjust hash table params */
   hmax = 3.71*mesh->np;
@@ -159,7 +168,10 @@ int hashTria(pMesh mesh) {
   hash.max  = hmax + 1;
   hash.nxt  = hash.siz;
   hash.item = (hedge*)calloc(hmax+1,sizeof(hedge));
-  assert(hash.item);
+  if ( !hash.item ) {
+    perror("  ## Memory problem: calloc");
+    exit(EXIT_FAILURE);
+  }
 
   for (k=hash.siz; k<hash.max; k++)
     hash.item[k].nxt = k+1;
@@ -303,7 +315,10 @@ int hashEdge(Hash *hash,int a,int b,int k) {
       if ( info.ddebug )  fprintf(stdout,"  ## Memory alloc problem (edge): %d\n",hash->max);
       hash->max *= 1.2;
       hash->item = (hedge*)realloc(hash->item,hash->max*sizeof(hedge));
-      assert(hash->item);
+      if ( !hash->item ) {
+        perror("  ## Memory problem: realloc");
+        return(0);
+      }
       for (j=hash->nxt; j<hash->max; j++)  hash->item[j].nxt = j+1;
     }
     return(1);
@@ -391,7 +406,10 @@ int hashNew(Hash *hash,int hsiz,int hmax) {
 
   /* adjust hash table params */
   hash->item = (hedge*)calloc(hmax+10,sizeof(hedge));
-  assert(hash->item);
+  if ( !hash->item ) {
+    perror("  ## Memory problem: calloc");
+    return(0);
+  }
   hash->siz  = hsiz;
   hash->max  = hmax + 1;
   hash->nxt  = hsiz;
@@ -546,7 +564,10 @@ void hEdge(HGeom *hash,int a,int b,int ref,char tag) {
         fprintf(stdout,"  ## Memory alloc problem (edge): %d\n",hash->max);
       hash->max *= 1.2;
       hash->geom = (hgeom*)realloc(hash->geom,hash->max*sizeof(hgeom));
-      assert(hash->geom);
+      if ( !hash->geom ) {
+        perror("  ## Memory problem: recalloc");
+        exit(EXIT_FAILURE);
+      }
       for (j=hash->nxt; j<hash->max; j++)  hash->geom[j].nxt = j+1;
     }
     return;
@@ -559,18 +580,22 @@ void hEdge(HGeom *hash,int a,int b,int ref,char tag) {
 }
 
 /** to store edge on geometry */
-void hNew(HGeom *hash,int hsiz,int hmax) {
+int hNew(HGeom *hash,int hsiz,int hmax,int secure) {
   int   k;
 
   /* adjust hash table params */
   hash->geom = (hgeom*)calloc(hmax+10,sizeof(hgeom));
-  assert(hash->geom);
+  if ( !hash->geom ) {
+    perror("  ## Memory problem: calloc");
+    if ( !secure )  return(0);
+    else  exit(EXIT_FAILURE);
+  }
   hash->siz  = hsiz;
   hash->max  = hmax + 1;
   hash->nxt  = hsiz;
   for (k=hsiz; k<hash->max; k++)
     hash->geom[k].nxt = k+1;
-  return;
+  return 1;
 }
 
 int hGeom(pMesh mesh) {
@@ -583,7 +608,7 @@ int hGeom(pMesh mesh) {
   if ( mesh->na ) {
     if ( !mesh->htab.geom ) {
       mesh->namax = MG_MAX(1.5*mesh->na,NAMAX);
-      hNew(&mesh->htab,mesh->na,3*mesh->namax);
+      hNew(&mesh->htab,mesh->na,3*mesh->namax,1);
     }
     else {
 #ifdef SINGUL
@@ -652,7 +677,7 @@ int hGeom(pMesh mesh) {
         free(mesh->htab.geom);
         mesh->htab.geom=NULL;
       }
-      hNew(&mesh->htab,mesh->na,3*mesh->namax);
+      hNew(&mesh->htab,mesh->na,3*mesh->namax,1);
       mesh->na = 0;
     }
 #else
@@ -673,7 +698,7 @@ int hGeom(pMesh mesh) {
       free(mesh->htab.geom);
       mesh->htab.geom=NULL;
     }
-    hNew(&mesh->htab,mesh->na,3*mesh->namax);
+    hNew(&mesh->htab,mesh->na,3*mesh->namax,1);
     mesh->na = 0;
 #endif
 
@@ -754,10 +779,7 @@ int bdryTria(pMesh mesh) {
   /* create triangles */
   mesh->tria = (pTria)calloc(mesh->nt+1,sizeof(Tria));
   if ( !mesh->tria ) {
-    fprintf(stdout,"  ## Allocation problem (tria), not enough memory.\n");
-    fprintf(stdout,"  ## Check the mesh size or ");
-    fprintf(stdout,"increase the allocated memory with the -m option.\n");
-    fprintf(stdout,"  Exit program.\n");
+    perror("  ## Memory problem: calloc");
     return(0);
   }
 
@@ -972,7 +994,7 @@ int bdrySet(pMesh mesh) {
     return(1);
   }
 
-  hashNew(&hash,0.51*mesh->nt,1.51*mesh->nt);
+  if ( ! hashNew(&hash,0.51*mesh->nt,1.51*mesh->nt) ) return(0);
   for (k=1; k<=mesh->nt; k++) {
     ptt = &mesh->tria[k];
     hashFace(&hash,ptt->v[0],ptt->v[1],ptt->v[2],k);
@@ -1120,7 +1142,7 @@ int bdryUpdate(pMesh mesh) {
   char     i,tag;
 
   if ( !mesh->nt )  return(1);
-  hashNew(&hash,0.51*mesh->nt,1.51*mesh->nt);
+  if ( !hashNew(&hash,0.51*mesh->nt,1.51*mesh->nt) )  return(0);
   for (k=1; k<=mesh->nt; k++) {
     ptt = &mesh->tria[k];
     hashFace(&hash,ptt->v[0],ptt->v[1],ptt->v[2],k);
@@ -1186,7 +1208,8 @@ int bdryPerm(pMesh mesh) {
   assert(mesh->nt);
 
   /* store triangles temporarily */
-  hashNew(&hash,MG_MAX(0.51*mesh->nt,100),MG_MAX(1.51*mesh->nt,300));
+  if ( !hashNew(&hash,MG_MAX(0.51*mesh->nt,100),MG_MAX(1.51*mesh->nt,300)) )
+    return(0);
   for (k=1; k<=mesh->nt; k++) {
     ptt = &mesh->tria[k];
     if ( !hashFace(&hash,ptt->v[0],ptt->v[1],ptt->v[2],k) )  return(0);

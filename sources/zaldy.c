@@ -97,17 +97,22 @@ int zaldy(pMesh mesh) {
     mesh->nemax = MG_MAX(1.5*mesh->ne,NEMAX);
   }
   else {
-    if ( info.iso )
-      ctri = 3;
+#ifdef SINGUL
+    if ( info.sing )
+      ctri = 4;
     else
       ctri = 2;
+#else
+      ctri = 2;
+#endif
 
-    /* Euler-poincare: ne = 6*np; nt = 2*nv; */
-    /* point+tria+tets+adja+adjt+sol */
+    /* Euler-poincare: ne = 6*np; nt = 2*np; na = np/5 *
+     * point+tria+tets+adja+adjt+sol+item *
+     * warning: we exceed memory in saveMesh when we call hNew */
     bytes = sizeof(Point) + sizeof(xPoint) +
       6*sizeof(Tetra) + ctri*sizeof(xTetra) +
       4*6*sizeof(int) + ctri*3*sizeof(int) +
-      sizeof(Sol);
+      sizeof(Sol)+4*sizeof(hedge);
 
     npask = (double)info.mem / bytes * million;
     mesh->npmax = npask;
@@ -117,39 +122,27 @@ int zaldy(pMesh mesh) {
 
   mesh->point = (pPoint)calloc(mesh->npmax+1,sizeof(Point));
   if ( !mesh->point ){
-    fprintf(stdout,"  ## Allocation problem (point), not enough memory.\n");
-    fprintf(stdout,"  ## Check the mesh size or ");
-    fprintf(stdout,"increase the allocated memory with the -m option.\n");
-    fprintf(stdout,"  Exit program.\n");
-    return(0);
+    perror("  ## Memory problem: calloc");
+    exit(EXIT_FAILURE);
   }
 
   mesh->tetra = (pTetra)calloc(mesh->nemax+1,sizeof(Tetra));
   if ( !mesh->tetra ){
-    fprintf(stdout,"  ## Allocation problem (tetra), not enough memory.\n");
-    fprintf(stdout,"  ## Check the mesh size or ");
-    fprintf(stdout,"increase the allocated memory with the -m option.\n");
-    fprintf(stdout,"  Exit program.\n");
-    return(0);
+    perror("  ## Memory problem: calloc");
+    exit(EXIT_FAILURE);
   }
   if ( mesh->nt ) {
     mesh->tria = (pTria)calloc(mesh->ntmax+1,sizeof(Tria));
     if ( !mesh->tria ){
-      fprintf(stdout,"  ## Allocation problem (tria), not enough memory.\n");
-      fprintf(stdout,"  ## Check the mesh size or ");
-      fprintf(stdout,"increase the allocated memory with the -m option.\n");
-      fprintf(stdout,"  Exit program.\n");
-      return(0);
+      perror("  ## Memory problem: calloc");
+      exit(EXIT_FAILURE);
     }
   }
   if ( mesh->na ) {
     mesh->edge = (pEdge)calloc(mesh->na+1,sizeof(Edge));
     if ( !mesh->edge ) {
-      fprintf(stdout,"  ## Allocation problem (edge), not enough memory.\n");
-      fprintf(stdout,"  ## Check the mesh size or ");
-      fprintf(stdout,"increase the allocated memory with the -m option.\n");
-      fprintf(stdout,"  Exit program.\n");
-      return(0);
+      perror("  ## Memory problem: calloc");
+      exit(EXIT_FAILURE);
     }
   }
   /* keep track of empty links */
