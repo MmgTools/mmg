@@ -57,8 +57,7 @@
 #define CHECK_SCOTCH(t,m,e) if(0!=t){perror(m);exit(e);}
 
 
-
-
+/** Not used */
 /** Internal function : biPartBoxCompute
  * it computes a new numbering of graph vertices, using a bipartitioning.
  *
@@ -136,8 +135,6 @@ int biPartBoxCompute(SCOTCH_Graph graf, int vertNbr, int boxVertNbr, SCOTCH_Num 
 }
 
 
-
-
 /* Internal function : kPartBoxCompute
  * it computes a new numbering of graph vertices, using a k-partitioning.
  * Assuming that baseval of the graph is 1
@@ -172,7 +169,12 @@ int kPartBoxCompute(SCOTCH_Graph graf, int vertNbr, int boxVertNbr, SCOTCH_Num *
 
 
   sortPartTb= (SCOTCH_Num *)calloc(2*vertNbr, sizeof(SCOTCH_Num));
-
+  if ( !sortPartTb ) {
+    perror("  ## Memory problem: calloc");
+    free(sortPartTb);
+    sortPartTb = NULL;
+    return 1;
+  }
 
   /* Partionning the graph */
   CHECK_SCOTCH(SCOTCH_graphMap(&graf, &arch, &strat, sortPartTb), "scotch_graphMap", 0);
@@ -202,38 +204,42 @@ int kPartBoxCompute(SCOTCH_Graph graf, int vertNbr, int boxVertNbr, SCOTCH_Num *
 
 /** Swap two tetras in the table of tetrahedras */
 static inline
-void swapTet(pTetra tetras, int* adja, int* perm, int ind1, int ind2) {
+void swapTet(pTetra tetras/*, int* adja*/, int* perm, int ind1, int ind2) {
   Tetra pttmp;
-  int   tmp,adjatmp,kadj,ifadj,j;
+  int   tmp;
 
-  /* 1-- swap the adja table */
-  /* First: replace ind2 by ind1 in adjacents tetras of ind2 */
-  for ( j=1; j<5; j++ ) {
-    if ( adja[4*(ind2-1)+j]/4 ) {
-      kadj  = adja[4*(ind2-1)+j]/4;
-      ifadj = adja[4*(ind2-1)+j]%4;
-      adja[4*(kadj-1)+1+ifadj] = 4*ind1 + adja[4*(kadj-1)+1+ifadj]%4;
-    }
-  }
+/* Commentated part: swap for adja table if we don't free it in renumbering *
+ * function (faster but need of 4*mesh->nemax*sizeof(int) extra bytes ) */
+  /* int   adjatmp,kadj,ifadj,j; */
 
-  /* Second: replace ind1 by ind2 in adjacents tetras of ind1*/
-  for ( j=1; j<5; j++ ) {
-    if ( adja[4*(ind1-1)+j]/4 ) {
-      kadj  = adja[4*(ind1-1)+j]/4;
-      ifadj = adja[4*(ind1-1)+j]%4;
-      if ( kadj == ind1 )
-	adja[4*(ind2-1)+1+ifadj] = 4*ind2 + adja[4*(ind2-1)+1+ifadj]%4;
-      else
-	adja[4*(kadj-1)+1+ifadj] = 4*ind2 + adja[4*(kadj-1)+1+ifadj]%4;
-    }
-  }
+  /* /\* 1-- swap the adja table *\/ */
+  /* /\* First: replace ind2 by ind1 in adjacents tetras of ind2 *\/ */
+  /* for ( j=1; j<5; j++ ) { */
+  /*   if ( adja[4*(ind2-1)+j]/4 ) { */
+  /*     kadj  = adja[4*(ind2-1)+j]/4; */
+  /*     ifadj = adja[4*(ind2-1)+j]%4; */
+  /*     adja[4*(kadj-1)+1+ifadj] = 4*ind1 + adja[4*(kadj-1)+1+ifadj]%4; */
+  /*   } */
+  /* } */
 
-  /* Third: swap adjacents for ind1 and ind2 */
-  for ( j=1; j<5; j++ ) {
-    adjatmp = adja[4*(ind2-1)+j];
-    adja[4*(ind2-1)+j] = adja[4*(ind1-1)+j];
-    adja[4*(ind1-1)+j] = adjatmp;
-  }
+  /* /\* Second: replace ind1 by ind2 in adjacents tetras of ind1*\/ */
+  /* for ( j=1; j<5; j++ ) { */
+  /*   if ( adja[4*(ind1-1)+j]/4 ) { */
+  /*     kadj  = adja[4*(ind1-1)+j]/4; */
+  /*     ifadj = adja[4*(ind1-1)+j]%4; */
+  /*     if ( kadj == ind1 ) */
+	/*       adja[4*(ind2-1)+1+ifadj] = 4*ind2 + adja[4*(ind2-1)+1+ifadj]%4; */
+  /*     else */
+	/*       adja[4*(kadj-1)+1+ifadj] = 4*ind2 + adja[4*(kadj-1)+1+ifadj]%4; */
+  /*   } */
+  /* } */
+
+  /* /\* Third: swap adjacents for ind1 and ind2 *\/ */
+  /* for ( j=1; j<5; j++ ) { */
+  /*   adjatmp = adja[4*(ind2-1)+j]; */
+  /*   adja[4*(ind2-1)+j] = adja[4*(ind1-1)+j]; */
+  /*   adja[4*(ind1-1)+j] = adjatmp; */
+  /* } */
 
   /* 2-- swap the tetrahedras */
   memcpy(&pttmp       ,&tetras[ind2],sizeof(Tetra));
@@ -285,7 +291,7 @@ int renumbering(int boxVertNbr, pMesh mesh, pSol sol) {
   pPoint ppt;
   pTetra ptet;
   SCOTCH_Num edgeNbr;
-  SCOTCH_Num *vertTab, *vendTab, *edgeTab, *permVrtTab;
+  SCOTCH_Num *vertTab, *edgeTab, *permVrtTab;
   SCOTCH_Graph graf ;
   int    vertNbr, nodeGlbIdx, tetraIdx, ballTetIdx;
   int    i, j, k;
@@ -313,23 +319,32 @@ int renumbering(int boxVertNbr, pMesh mesh, pSol sol) {
   if ( vertNbr/2 < BOXSIZE ) {
     /* not enough tetra to renum */
     free(vertOldTab);
+    vertOldTab = NULL;
     return(1);
   }
 
   /* Allocating memory to compute adjacency lists */
-  vertTab = (SCOTCH_Num *)calloc(vertNbr + 1, sizeof(SCOTCH_Num));
-
-  if (!memset(vertTab, ~0, sizeof(SCOTCH_Num)*(vertNbr + 1))) {
+  vertTab = (SCOTCH_Num *)calloc(vertNbr + 2, sizeof(SCOTCH_Num));
+  if (!memset(vertTab, ~0, sizeof(SCOTCH_Num)*(vertNbr + 2))) {
     perror("  ## Memory problem: memset");
+    free(vertOldTab);
+    vertOldTab = NULL;
+    free(vertTab);
+    vertTab = NULL;
     return 1;
   }
-
-  vendTab = (SCOTCH_Num *)calloc(vertNbr + 1, sizeof(SCOTCH_Num));
 
   edgeNbr = 1;
   edgeSiz = vertNbr*2;
   edgeTab = (SCOTCH_Num *)calloc(edgeSiz, sizeof(SCOTCH_Num));
-
+  if ( !edgeTab ) {
+    perror("  ## Memory problem: calloc");
+    free(vertOldTab);
+    vertOldTab = NULL;
+    free(vertTab);
+    vertTab = NULL;
+    return 1;
+  }
 
 
   /* Computing the adjacency list for each vertex */
@@ -348,41 +363,74 @@ int renumbering(int boxVertNbr, pMesh mesh, pSol sol) {
       /* Testing if one neighbour of tetraIdx has already been added */
       if (vertTab[vertOldTab[tetraIdx]] < 0)
         vertTab[vertOldTab[tetraIdx]] = edgeNbr;
-      vendTab[vertOldTab[tetraIdx]] = edgeNbr+1;
 
       /* Testing if edgeTab memory is enough */
       if (edgeNbr >= edgeSiz) {
         edgeSiz += EDGEGAP;
         edgeTab = (SCOTCH_Num *)realloc(edgeTab, edgeSiz * sizeof(SCOTCH_Num));
+        if ( !edgeTab ) {
+          perror("  ## Memory problem: calloc");
+          free(vertOldTab);
+          vertOldTab = NULL;
+          free(vertTab);
+          vertTab = NULL;
+          return 1;
+        }
       }
 
       edgeTab[edgeNbr++] = vertOldTab[ballTetIdx];
     }
   }
-
+  vertTab[vertNbr+1] = edgeNbr;
   edgeNbr--;
 
+  /* free adjacents to gain memory space */
+  free(mesh->adja);
+  mesh->adja = NULL;
 
   /* Building the graph by calling Scotch functions */
-
   SCOTCH_graphInit(&graf) ;
   CHECK_SCOTCH(SCOTCH_graphBuild(&graf, (SCOTCH_Num) 1, vertNbr, vertTab+1,
-                                 vendTab+1, NULL, NULL, edgeNbr, edgeTab+1, NULL),
+                                 NULL, NULL, NULL, edgeNbr, edgeTab+1, NULL),
                "scotch_graphbuild", 0) ;
   CHECK_SCOTCH(SCOTCH_graphCheck(&graf), "scotch_graphcheck", 0) ;
 
   permVrtTab = (SCOTCH_Num *)calloc(vertNbr + 1, sizeof(SCOTCH_Num));
+  if ( !permVrtTab ) {
+    perror("  ## Memory problem: calloc");
+    free(vertOldTab);
+    vertOldTab = NULL;
+    free(vertTab);
+    vertTab = NULL;
+    free(edgeTab);
+    edgeTab = NULL;
+    if( !hashTetra(mesh,1) ) return(0);
+    return 1;
+  }
 
-  CHECK_SCOTCH(kPartBoxCompute(graf, vertNbr, boxVertNbr, permVrtTab), "boxCompute", 0);
+  CHECK_SCOTCH(kPartBoxCompute(graf, vertNbr, boxVertNbr, permVrtTab),
+               "boxCompute", 0);
 
   SCOTCH_graphExit(&graf) ;
 
-  free(vertTab);
-  free(vendTab);
   free(edgeTab);
+  free(vertTab);
 
   /* Computing the new point list and modifying the adja strcuture */
   permNodTab = (int *)calloc(mesh->np + 1, sizeof(int));
+  if ( !permNodTab ) {
+    perror("  ## Memory problem: calloc");
+    free(vertOldTab);
+    vertOldTab = NULL;
+    free(vertTab);
+    vertTab = NULL;
+    free(edgeTab);
+    edgeTab = NULL;
+    free(permVrtTab);
+    permVrtTab = NULL;
+    if( !hashTetra(mesh,1) ) return(0);
+    return 1;
+  }
 
   nereal = 0;
   npreal = 0;
@@ -403,7 +451,7 @@ int renumbering(int boxVertNbr, pMesh mesh, pSol sol) {
 
       ppt = &mesh->point[nodeGlbIdx];
 
-      if (!(ppt->tag & MG_NUL))
+      if ( !(ppt->tag & MG_NUL) )
         /* Building the new point list */
         permNodTab[nodeGlbIdx] = ++npreal;
     }
@@ -425,12 +473,14 @@ int renumbering(int boxVertNbr, pMesh mesh, pSol sol) {
     while ( permNodTab[j] != j && permNodTab[j] )
       swapNod(mesh->point,sol->m,permNodTab,j,permNodTab[j],sol->size);
   }
+  free(permNodTab);
 
   /* Permute tetrahedras */
   for (j=1; j<= mesh->ne; j++) {
     while ( vertOldTab[j] != j && vertOldTab[j] )
-      swapTet(mesh->tetra,mesh->adja,vertOldTab,j,vertOldTab[j]);
+      swapTet(mesh->tetra/*,mesh->adja*/,vertOldTab,j,vertOldTab[j]);
   }
+  free(vertOldTab);
 
   mesh->ne = nereal;
   mesh->np = npreal;
@@ -453,8 +503,7 @@ int renumbering(int boxVertNbr, pMesh mesh, pSol sol) {
     for (k=mesh->nenil; k<mesh->nemax-1; k++)
       mesh->tetra[k].v[3] = k+1;
 
-  free(permNodTab);
-  free(vertOldTab);
+  if( !hashTetra(mesh,0) ) return(0);
 
   return 1;
 }

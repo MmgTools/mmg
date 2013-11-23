@@ -200,7 +200,7 @@ int  chkmanicoll(pMesh mesh,int k,int iface,int iedg,int ndepmin,int ndepplus,ch
 int  chkmani(pMesh mesh);
 int  colver(pMesh,int *,int,char);
 int  analys(pMesh mesh);
-int  hashTetra(pMesh mesh);
+int  hashTetra(pMesh mesh, int pack);
 int  hashTria(pMesh mesh);
 int  hashEdge(Hash *hash,int a,int b,int k);
 int  hashGet(Hash *hash,int a,int b);

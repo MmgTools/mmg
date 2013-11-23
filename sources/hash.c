@@ -32,7 +32,10 @@ static void paktet(pMesh mesh) {
   }
 }
 
-int hashTetra(pMesh mesh) {
+/** Create table of adjacency. *
+ *  Set pack variable to 0 for a compact mesh and to 1 for *
+ *  a mesh that need to be packed */
+int hashTetra(pMesh mesh, int pack) {
   pTetra    pt,pt1;
   int       k,kk,pp,l,ll,mins,mins1,maxs,maxs1,sum,sum1,iadr;
   int      *hcode,*link,hsize,inival;
@@ -54,7 +57,7 @@ int hashTetra(pMesh mesh) {
     fprintf(stdout,"  ** SETTING STRUCTURE\n");
 
   /* packing : if not hash does not work */
-  paktet(mesh);
+  if ( pack )  paktet(mesh);
 
   /* memory alloc */
   mesh->adja = (int*)calloc(4*mesh->nemax+5,sizeof(int));

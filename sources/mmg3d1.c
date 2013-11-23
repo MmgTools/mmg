@@ -1430,7 +1430,11 @@ static int adptet(pMesh mesh,pSol met) {
       /* renumbering begin */
       if ( info.imprim > 5 )
         fprintf(stdout,"renumbering");
-      renumbering(BOXSIZE,mesh, met);
+      if ( !renumbering(BOXSIZE,mesh, met) ) {
+        fprintf(stdout,"  ## Unable to renumbering mesh. \n");
+        fprintf(stdout,"  ## Try to run without renumbering option (-rn 0)\n");
+        return(0);
+      }
 
       if ( info.imprim > 5) {
         fprintf(stdout,"  -- PHASE RENUMBERING COMPLETED. \n");
@@ -1677,7 +1681,7 @@ static int anatet(pMesh mesh,pSol met,char typchk) {
     }
     else  ns = 0;
 
-    if ( !hashTetra(mesh) ) {
+    if ( !hashTetra(mesh,1) ) {
       fprintf(stdout,"  ## Hashing problem. Exit program.\n");
       return(0);
     }

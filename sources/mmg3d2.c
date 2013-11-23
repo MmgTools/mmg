@@ -295,7 +295,7 @@ static int snpval_ls(pMesh mesh,pSol sol,double *tmp) {
   char     i;
 
   /* create tetra adjacency */
-  if ( !hashTetra(mesh) ) {
+  if ( !hashTetra(mesh,1) ) {
     fprintf(stdout,"  ## Hashing problem (1). Exit program.\n");
     return(0);
   }
@@ -1513,7 +1513,7 @@ int mmg3d2(pMesh mesh,pSol sol) {
   }
   free(tmp);
 
-  if ( !hashTetra(mesh) ) {
+  if ( !hashTetra(mesh,1) ) {
     fprintf(stdout,"  ## Hashing problem. Exit program.\n");
     return(0);
   }

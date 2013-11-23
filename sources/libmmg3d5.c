@@ -572,7 +572,7 @@ int mmg3dlib(int opt_i[10],double opt_d[6],pMesh mesh,pSol met
 #endif
 
   if ( !mmg3d1(mesh,met) ){
-    if ( !(mesh->adja) && !hashTetra(mesh) ) {
+    if ( !(mesh->adja) && !hashTetra(mesh,1) ) {
       fprintf(stdout,"  ## Hashing problem. Invalid mesh.\n");
       return(MMG5_STRONGFAILURE);
     }

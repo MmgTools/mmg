@@ -546,7 +546,7 @@ int main(int argc,char *argv[]) {
 #endif
 
   if ( !mmg3d1(&mesh,&met) ){
-    if ( !(mesh.adja) && !hashTetra(&mesh) ) {
+    if ( !(mesh.adja) && !hashTetra(&mesh,1) ) {
       fprintf(stdout,"  ## Hashing problem. Unable to save mesh.\n");
       RETURN_AND_FREE(&mesh,&met,&sing,MMG5_STRONGFAILURE);
     }

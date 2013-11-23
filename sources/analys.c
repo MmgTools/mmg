@@ -493,7 +493,7 @@ int analys(pMesh mesh) {
     fprintf(stdout,"  ** SURFACE ANALYSIS\n");
 
   /* create tetra adjacency */
-  if ( !hashTetra(mesh) ) {
+  if ( !hashTetra(mesh,1) ) {
     fprintf(stdout,"  ## Hashing problem (1). Exit program.\n");
     return(0);
   }

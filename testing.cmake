@@ -408,7 +408,7 @@ ADD_TEST(NAME MultiDom_Cube
   -out ${REG_TESTS_PATH}/MultiDom_Cube/c.o.meshb)
 
 ADD_TEST(NAME MultiDom_Ellipse
-  COMMAND ${EXECUT} -v 6 -m 1000 -hausd 0.0003 ${REG_TESTS_PATH}/MultiDom_Ellipse/c.d
+  COMMAND ${EXECUT} -v 6 -m 1100 -hausd 0.0003 ${REG_TESTS_PATH}/MultiDom_Ellipse/c.d
   -out ${REG_TESTS_PATH}/MultiDom_Ellipse/c.d.o.meshb)
 
 # Non-manifold test case

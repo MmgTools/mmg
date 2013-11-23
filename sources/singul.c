@@ -1330,7 +1330,7 @@ int inserSingul(pMesh mesh, pSol met, pSingul singul){
   if ( abs(info.imprim) > 4 || info.ddebug )
     fprintf(stdout,"\n  ** INSERTION OF SINGULARITIES\n");
 
-  if ( !hashTetra(mesh) ) {
+  if ( !hashTetra(mesh,1) ) {
     fprintf(stdout,"  ## Hashing problem (1). Exit program.\n");
     return(0);
   }
@@ -1339,7 +1339,8 @@ int inserSingul(pMesh mesh, pSol met, pSingul singul){
   /* if edges exist in mesh, hash special edges from existing field */
   if ( mesh->na || singul->na ) {
     mesh->namax = MG_MAX(1.5*(mesh->na+singul->na),NAMAX);
-    hNew(&mesh->htab,mesh->na+singul->na,3*mesh->namax);
+    if ( !hNew(&mesh->htab,mesh->na+singul->na,3*mesh->namax,1) )
+      return(0);
   }
 
   /* put edge singularities in mesh */
@@ -1392,6 +1393,14 @@ int inserSingul(pMesh mesh, pSol met, pSingul singul){
     mesh->tetra[k].flag = 0;
   }
 
+  if ( singul->ns ) {
+    free(singul->point);
+    singul->point=NULL;
+  }
+  if ( singul->na ) {
+    free(singul->edge);
+    singul->edge=NULL;
+  }
   return(1);
 }
 

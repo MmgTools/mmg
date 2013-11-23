@@ -98,6 +98,11 @@ int zaldy(pMesh mesh) {
   }
   else {
 #ifdef SINGUL
+    /* Remarks:
+     * 1-- in insertion part, we have memory allocated to store *
+     * edges and singular points (in Singul) but we don't need to take this *
+     * into account because xpoints and xtetra are free and need more memory *
+     * 2-- we need more xtetra so we increase the memory to save for triangles */
     if ( info.sing )
       ctri = 4;
     else
@@ -113,6 +118,11 @@ int zaldy(pMesh mesh) {
       6*sizeof(Tetra) + ctri*sizeof(xTetra) +
       4*6*sizeof(int) + ctri*3*sizeof(int) +
       sizeof(Sol)+4*sizeof(hedge);
+#ifdef USE_SCOTCH
+    /* bytes = bytes + vertTab + edgeTab + PermVrtTab *
+     * + vertOldTab + sortPartTab - adja */
+    bytes = bytes + 3*6*sizeof(int);
+#endif
 
     npask = (double)info.mem / bytes * million;
     mesh->npmax = npask;

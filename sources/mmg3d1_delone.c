@@ -2001,7 +2001,7 @@ int adpsplcol(pMesh mesh,pSol met,pBucket bucket, int* warn) {
     }
     else  ns = 0;
 
-    if ( !hashTetra(mesh) ) {
+    if ( !hashTetra(mesh,1) ) {
       fprintf(stdout,"  ## Hashing problem. Exit program.\n");
       return(0);
     }
