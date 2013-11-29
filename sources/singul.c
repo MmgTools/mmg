@@ -500,7 +500,7 @@ int creaPoint(pMesh mesh, pSol met, int iel,double c[3], double cb[4], char tag)
 
     ia = key-5;
     ilist = coquil(mesh,iel,ia,list);
-    if ( (pt->tag & MG_REQ) || !ilist ) {
+    if ( (pt->tag & MG_REQ) || ilist<=0 ) {
       fprintf(stdout,"  ## Unable to insert singularity: element required.\n");
       fprintf(stdout,"  ## Delete required elements.\n");
       fprintf(stdout,"  Exit program.\n");
@@ -611,7 +611,7 @@ int creaEdge(pMesh mesh, pSol met, Travel *trav, char tag){
 
     ia = key-5;
     ilist = coquil(mesh,kel,ia,list);
-    if ( (pt->tag & MG_REQ) || !ilist ) {
+    if ( (pt->tag & MG_REQ) || ilist<=0 ) {
       fprintf(stdout,"  ## Unable to insert singularity: element required.\n");
       fprintf(stdout,"  ## Delete required elements.\n");
       fprintf(stdout,"  Exit program.\n");

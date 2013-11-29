@@ -441,19 +441,34 @@ static int movtet(pMesh mesh,pSol met,int maxit) {
             if ( !pt->xt || !(MG_BDY & pxt->ftag[i]) )  continue;
             else if( ppt->tag & MG_NOM ){
               if( mesh->adja[4*(k-1)+1+i] ) continue;
-              if( !bouleext(mesh,k,i0,i,listv,&ilistv,lists,&ilists) )  continue;
-              ier = movbdynompt(mesh,listv,ilistv,lists,ilists);
+              if( !(ier=bouleext(mesh,k,i0,i,listv,&ilistv,lists,&ilists)) )  continue;
+              else if ( ier>0 )
+                ier = movbdynompt(mesh,listv,ilistv,lists,ilists);
+              else
+                return(-1);
             }
             else if ( ppt->tag & MG_GEO ) {
-              if ( !boulesurfvolp(mesh,k,i0,i,listv,&ilistv,lists,&ilists) )  continue;
-              ier = movbdyridpt(mesh,listv,ilistv,lists,ilists);
+              if ( !(ier=boulesurfvolp(mesh,k,i0,i,listv,&ilistv,lists,&ilists)) )
+                continue;
+              else if ( ier>0 )
+                ier = movbdyridpt(mesh,listv,ilistv,lists,ilists);
+              else
+                return(-1);
             }
             else if ( ppt->tag & MG_REF ) {
-              if ( !boulesurfvolp(mesh,k,i0,i,listv,&ilistv,lists,&ilists) )  continue;
-              ier = movbdyrefpt(mesh,listv,ilistv,lists,ilists);
+              if ( !(ier=boulesurfvolp(mesh,k,i0,i,listv,&ilistv,lists,&ilists)) )
+                continue;
+              else if ( ier>0 )
+                ier = movbdyrefpt(mesh,listv,ilistv,lists,ilists);
+              else
+                return(-1);
             }
             else {
-              if ( !boulesurfvolp(mesh,k,i0,i,listv,&ilistv,lists,&ilists) )  continue;
+              if ( !(ier=boulesurfvolp(mesh,k,i0,i,listv,&ilistv,lists,&ilists)) )
+                continue;
+              else if ( ier<0 )
+                return(-1);
+
               n = &(mesh->xpoint[ppt->xp].n1[0]);
               if ( !directsurfball(mesh, pt->v[i0],lists,ilists,n) )  continue;
               ier = movbdyregpt(mesh,listv,ilistv,lists,ilists);
@@ -555,7 +570,7 @@ static int coltet(pMesh mesh,pSol met,char typchk) {
           ilist = chkcol_int(mesh,met,k,i,j,list,typchk);
         }
 
-        if ( ilist ) {
+        if ( ilist > 0 ) {
           ier = colver(mesh,list,ilist,iq);
           if ( ier < 0 ) return(-1);
           else if ( ier ) {
@@ -563,6 +578,7 @@ static int coltet(pMesh mesh,pSol met,char typchk) {
             break;
           }
         }
+        else if (ilist < 0 ) return(-1);
       }
       if ( ier ) {
         p1->flag = base;
@@ -834,7 +850,7 @@ static int anatetv(pMesh mesh,pSol met,char typchk) {
     printf("on trouve %d split \n",ns);
   }
 #endif
-  if(memlack)  return(-1);
+  if ( memlack )  return(-1);
   return(nap);
 }
 
@@ -1182,7 +1198,8 @@ static int adpspl(pMesh mesh,pSol met, int* warn) {
       tag |= MG_BDY;
       ilist = coquil(mesh,k,imax,list);
       if ( !ilist )  continue;
-
+      else if ( ilist < 0 )
+        return(-1);
       if ( tag & MG_NOM ){
         if( !BezierNom(mesh,ip1,ip2,0.5,o,no1,to) )
           continue;
@@ -1279,6 +1296,7 @@ static int adpspl(pMesh mesh,pSol met, int* warn) {
       if ( (p0->tag & MG_BDY) && (p1->tag & MG_BDY) ) continue;
       ilist = coquil(mesh,k,imax,list);
       if ( !ilist ) continue;
+      else if ( ilist<0 ) return(-1);
       o[0] = 0.5*(p0->c[0] + p1->c[0]);
       o[1] = 0.5*(p0->c[1] + p1->c[1]);
       o[2] = 0.5*(p0->c[2] + p1->c[2]);
@@ -1383,14 +1401,15 @@ static int adpcol(pMesh mesh,pSol met) {
       if ( p0->tag & MG_BDY )  continue;
       ilist = chkcol_int(mesh,met,k,i,j,list,2);
     }
-    if ( ilist ) {
+    if ( ilist > 0 ) {
       ier = colver(mesh,list,ilist,i2);
-      if ( ier < 0 ) return(-1);
+      if ( ier < 0 )  return(-1);
       else if ( ier ) {
         delPt(mesh,ier);
         nc++;
       }
     }
+    else if (ilist < 0 )  return(-1);
   }
 
   return(nc);

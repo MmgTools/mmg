@@ -364,7 +364,13 @@ static int norver(pMesh mesh) {
         }
         else {
           ++mesh->xp;
-          assert(mesh->xp < mesh->xpmax);
+          if(mesh->xp > mesh->xpmax){
+            fprintf(stdout,"  ## Allocation problem (xpoint), not enough memory.\n");
+            fprintf(stdout,"  ## Check the mesh size or ");
+            fprintf(stdout,"increase the allocated memory with the -m option.\n");
+            mesh->xp--;
+            return(0);
+          }
           ppt->xp = mesh->xp;
           pxp = &mesh->xpoint[ppt->xp];
           memcpy(pxp->n1,n,3*sizeof(double));
@@ -381,7 +387,13 @@ static int norver(pMesh mesh) {
         continue;
       }
       ++mesh->xp;
-      assert(mesh->xp < mesh->xpmax);
+      if(mesh->xp > mesh->xpmax){
+        fprintf(stdout,"  ## Allocation problem (xpoint), not enough memory.\n");
+        fprintf(stdout,"  ## Check the mesh size or ");
+        fprintf(stdout,"increase the allocated memory with the -m option.\n");
+        mesh->xp--;
+        return(0);
+      }
       ppt->xp = mesh->xp;
       pxp = &mesh->xpoint[ppt->xp];
       memcpy(pxp->n1,n,3*sizeof(double));
@@ -473,7 +485,13 @@ static void nmgeom(pMesh mesh){
         else {
           if ( !p0->xp ) {
             ++mesh->xp;
-            assert(mesh->xp < mesh->xpmax);
+            if(mesh->xp > mesh->xpmax){
+              fprintf(stdout,"  ## Allocation problem (xpoint), not enough memory.\n");
+              fprintf(stdout,"  ## Check the mesh size or ");
+              fprintf(stdout,"increase the allocated memory with the -m option.\n");
+              mesh->xp--;
+              exit(EXIT_FAILURE);
+            }
             p0->xp = mesh->xp;
           }
           pxp = &mesh->xpoint[p0->xp];

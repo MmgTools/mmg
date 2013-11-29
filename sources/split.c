@@ -192,11 +192,12 @@ void split1(pMesh mesh,pSol met,int k,int vx[6]) {
     }
     else if ( isxt && isxt1 ) {
       mesh->xt++;
-      if ( mesh->xt >= mesh->xtmax ) {
+      if ( mesh->xt > mesh->xtmax ) {
         fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
         fprintf(stdout,"  ## Check the mesh size or ");
         fprintf(stdout,"increase the allocated memory with the -m option.\n");
         fprintf(stdout,"  Exit program.\n");
+        mesh->xt--;
         exit(EXIT_FAILURE);
       }
       pt1->xt = mesh->xt;
@@ -320,9 +321,11 @@ int split1b(pMesh mesh, pSol met,int *list, int ret, int ip,int cas){
     if ( j < ilist )  return(0);
   }
 
-
   newtet = (int*)calloc(ilist,sizeof(int));
-  assert(newtet);
+  if ( !newtet ) {
+    perror("  ## Memory problem: calloc");
+    return(-1);
+  }
 
   iel = list[0] / 6;
   ie  = list[0] % 6;
@@ -464,10 +467,11 @@ int split1b(pMesh mesh, pSol met,int *list, int ret, int ip,int cas){
       }
       else if ( isxt && isxt1 ) {
         mesh->xt++;
-        if ( mesh->xt >= mesh->xtmax ) {
+        if ( mesh->xt > mesh->xtmax ) {
           fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
           fprintf(stdout,"  ## Check the mesh size or ");
           fprintf(stdout,"increase the allocated memory with the -m option.\n");
+          mesh->xt--;
           return(-1);
         }
         pt1->xt = mesh->xt;
@@ -623,10 +627,11 @@ int split1b(pMesh mesh, pSol met,int *list, int ret, int ip,int cas){
       }
       else if (isxt && isxt1 ) {
         mesh->xt++;
-        if ( mesh->xt >= mesh->xtmax ) {
+        if ( mesh->xt > mesh->xtmax ) {
           fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
           fprintf(stdout,"  ## Check the mesh size or ");
           fprintf(stdout,"increase the allocated memory with the -m option.\n");
+          mesh->xt--;
           return(-1);
         }
         pt1->xt = mesh->xt;
@@ -1116,11 +1121,12 @@ void split2sf(pMesh mesh,pSol met,int k,int vx[6]){
       for (i=1; i<3; i++) {
         if ( isxt[i] ) {
           mesh->xt++;
-          if ( mesh->xt >= mesh->xtmax ) {
+          if ( mesh->xt > mesh->xtmax ) {
             fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
             fprintf(stdout,"  ## Check the mesh size or ");
             fprintf(stdout,"increase the allocated memory with the -m option.\n");
             fprintf(stdout,"  Exit program.\n");
+            mesh->xt--;
             exit(EXIT_FAILURE);
           }
           pt[i]->xt = mesh->xt;
@@ -1142,11 +1148,12 @@ void split2sf(pMesh mesh,pSol met,int k,int vx[6]){
           }
           else {
             mesh->xt++;
-            if ( mesh->xt >= mesh->xtmax ) {
+            if ( mesh->xt > mesh->xtmax ) {
               fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
               fprintf(stdout,"  ## Check the mesh size or ");
               fprintf(stdout,"increase the allocated memory with the -m option.\n");
               fprintf(stdout,"  Exit program.\n");
+              mesh->xt--;
               exit(EXIT_FAILURE);
             }
             pt[i]->xt = mesh->xt;
@@ -1328,11 +1335,12 @@ void split2(pMesh mesh,pSol met,int k,int vx[6]) {
       for (i=1; i<4; i++) {
         if ( isxt[i] ) {
           mesh->xt++;
-          if ( mesh->xt >= mesh->xtmax ) {
+          if ( mesh->xt > mesh->xtmax ) {
             fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
             fprintf(stdout,"  ## Check the mesh size or ");
             fprintf(stdout,"increase the allocated memory with the -m option.\n");
             fprintf(stdout,"  Exit program.\n");
+            mesh->xt--;
             exit(EXIT_FAILURE);
           }
           pt[i]->xt = mesh->xt;
@@ -1356,11 +1364,12 @@ void split2(pMesh mesh,pSol met,int k,int vx[6]) {
           }
           else {
             mesh->xt++;
-            if ( mesh->xt >= mesh->xtmax ) {
+            if ( mesh->xt > mesh->xtmax ) {
               fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
               fprintf(stdout,"  ## Check the mesh size or ");
               fprintf(stdout,"increase the allocated memory with the -m option.\n");
               fprintf(stdout,"  Exit program.\n");
+              mesh->xt--;
               exit(EXIT_FAILURE);
             }
             pt[i]->xt = mesh->xt;
@@ -1652,11 +1661,12 @@ void split3(pMesh mesh,pSol met,int k,int vx[6]) {
       for (i=1; i<4; i++) {
         if ( isxt[i] ) {
           mesh->xt++;
-          if ( mesh->xt >= mesh->xtmax ) {
+          if ( mesh->xt > mesh->xtmax ) {
             fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
             fprintf(stdout,"  ## Check the mesh size or ");
             fprintf(stdout,"increase the allocated memory with the -m option.\n");
             fprintf(stdout,"  Exit program.\n");
+            mesh->xt--;
             exit(EXIT_FAILURE);
           }
           pt[i]->xt = mesh->xt;
@@ -1678,11 +1688,12 @@ void split3(pMesh mesh,pSol met,int k,int vx[6]) {
           }
           else {
             mesh->xt++;
-            if ( mesh->xt >= mesh->xtmax ) {
+            if ( mesh->xt > mesh->xtmax ) {
               fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
               fprintf(stdout,"  ## Check the mesh size or ");
               fprintf(stdout,"increase the allocated memory with the -m option.\n");
               fprintf(stdout,"  Exit program.\n");
+              mesh->xt--;
               exit(EXIT_FAILURE);
             }
             pt[i]->xt = mesh->xt;
@@ -2018,11 +2029,12 @@ void split3cone(pMesh mesh,pSol met,int k,int vx[6]) {
       for (i=1; i<4; i++) {
         if ( isxt[i] ) {
           mesh->xt++;
-          if ( mesh->xt >= mesh->xtmax ) {
+          if ( mesh->xt > mesh->xtmax ) {
             fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
             fprintf(stdout,"  ## Check the mesh size or ");
             fprintf(stdout,"increase the allocated memory with the -m option.\n");
             fprintf(stdout,"  Exit program.\n");
+            mesh->xt--;
             exit(EXIT_FAILURE);
           }
           pt[i]->xt = mesh->xt;
@@ -2044,11 +2056,12 @@ void split3cone(pMesh mesh,pSol met,int k,int vx[6]) {
           }
           else {
             mesh->xt++;
-            if ( mesh->xt >= mesh->xtmax ) {
+            if ( mesh->xt > mesh->xtmax ) {
               fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
               fprintf(stdout,"  ## Check the mesh size or ");
               fprintf(stdout,"increase the allocated memory with the -m option.\n");
               fprintf(stdout,"  Exit program.\n");
+              mesh->xt--;
               exit(EXIT_FAILURE);
             }
             pt[i]->xt = mesh->xt;
@@ -2536,11 +2549,12 @@ void split3op(pMesh mesh, pSol met, int k, int vx[6]){
             }
             else {
               mesh->xt++;
-              if ( mesh->xt >= mesh->xtmax ) {
+              if ( mesh->xt > mesh->xtmax ) {
                 fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
                 fprintf(stdout,"  ## Check the mesh size or ");
                 fprintf(stdout,"increase the allocated memory with the -m option.\n");
                 fprintf(stdout,"  Exit program.\n");
+                mesh->xt--;
                 exit(EXIT_FAILURE);
               }
               pt[i]->xt = mesh->xt;
@@ -2584,11 +2598,12 @@ void split3op(pMesh mesh, pSol met, int k, int vx[6]){
         for(i=1; i<5; i++) {
           if ( isxt[i] ) {
             mesh->xt++;
-            if ( mesh->xt >= mesh->xtmax ) {
+            if ( mesh->xt > mesh->xtmax ) {
               fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
               fprintf(stdout,"  ## Check the mesh size or ");
               fprintf(stdout,"increase the allocated memory with the -m option.\n");
               fprintf(stdout,"  Exit program.\n");
+              mesh->xt--;
               exit(EXIT_FAILURE);
             }
             pt[i]->xt = mesh->xt;
@@ -2611,11 +2626,12 @@ void split3op(pMesh mesh, pSol met, int k, int vx[6]){
             }
             else {
               mesh->xt++;
-              if ( mesh->xt >= mesh->xtmax ) {
+              if ( mesh->xt > mesh->xtmax ) {
                 fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
                 fprintf(stdout,"  ## Check the mesh size or ");
                 fprintf(stdout,"increase the allocated memory with the -m option.\n");
                 fprintf(stdout,"  Exit program.\n");
+                mesh->xt--;
                 exit(EXIT_FAILURE);
               }
               pt[i]->xt = mesh->xt;
@@ -2868,11 +2884,12 @@ int split3cb(pMesh mesh, pSol met, int k, int ifac, double o[3],
       for (i=1; i<3; i++) {
         if ( isxt[i] ) {
           mesh->xt++;
-          if ( mesh->xt >= mesh->xtmax ) {
+          if ( mesh->xt > mesh->xtmax ) {
             fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
             fprintf(stdout,"  ## Check the mesh size or ");
             fprintf(stdout,"increase the allocated memory with the -m option.\n");
-            return(0);
+            mesh->xt--;
+            return(-1);
           }
           pt[i]->xt = mesh->xt;
           pxt0 = &mesh->xtetra[mesh->xt];
@@ -2895,11 +2912,12 @@ int split3cb(pMesh mesh, pSol met, int k, int ifac, double o[3],
           }
           else {
             mesh->xt++;
-            if ( mesh->xt >= mesh->xtmax ) {
+            if ( mesh->xt > mesh->xtmax ) {
               fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
               fprintf(stdout,"  ## Check the mesh size or ");
               fprintf(stdout,"increase the allocated memory with the -m option.\n");
-              return(0);
+              mesh->xt--;
+              return(-1);
             }
             pt[i]->xt = mesh->xt;
             pxt0 = &mesh->xtetra[mesh->xt];
@@ -3047,8 +3065,15 @@ int split3cb(pMesh mesh, pSol met, int k, int ifac, double o[3],
       memcpy(pxt0,&xt[0],sizeof(xTetra));
       for (i=1; i<3; i++) {
         if ( isxt[i] ) {
-          assert(mesh->xt < mesh->xtmax-1);
-          pt[i]->xt = ++mesh->xt;
+          mesh->xt++;
+          if ( mesh->xt > mesh->xtmax ) {
+            fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
+            fprintf(stdout,"  ## Check the mesh size or ");
+            fprintf(stdout,"increase the allocated memory with the -m option.\n");
+            mesh->xt--;
+           return(-1);
+          }
+          pt[i]->xt = mesh->xt;
           pxt0 = &mesh->xtetra[mesh->xt];
           memcpy(pxt0,&xt[i],sizeof(xTetra));
         }
@@ -3068,8 +3093,15 @@ int split3cb(pMesh mesh, pSol met, int k, int ifac, double o[3],
             memcpy(pxt0,&xt[i],sizeof(xTetra));
           }
           else {
-            assert(mesh->xt < mesh->xtmax-1);
-            pt[i]->xt = ++mesh->xt;
+            mesh->xt++;
+            if ( mesh->xt > mesh->xtmax ) {
+              fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
+              fprintf(stdout,"  ## Check the mesh size or ");
+              fprintf(stdout,"increase the allocated memory with the -m option.\n");
+              mesh->xt--;
+              return(-1);
+            }
+            pt[i]->xt = mesh->xt;
             pxt0 = &mesh->xtetra[mesh->xt];
             memcpy(pxt0,&xt[i],sizeof(xTetra));
           }
@@ -3302,10 +3334,11 @@ int split4bar(pMesh mesh, pSol met, int k) {
       for (i=1; i<4; i++) {
         if ( isxt[i] ) {
           mesh->xt++;
-          if ( mesh->xt >= mesh->xtmax ) {
+          if ( mesh->xt > mesh->xtmax ) {
             fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
             fprintf(stdout,"  ## Check the mesh size or ");
             fprintf(stdout,"increase the allocated memory with the -m option.\n");
+            mesh->xt--;
             return(0);
           }
           pt[i]->xt = mesh->xt;
@@ -3329,10 +3362,11 @@ int split4bar(pMesh mesh, pSol met, int k) {
           }
           else {
             mesh->xt++;
-            if ( mesh->xt >= mesh->xtmax ) {
+            if ( mesh->xt > mesh->xtmax ) {
               fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
               fprintf(stdout,"  ## Check the mesh size or ");
               fprintf(stdout,"increase the allocated memory with the -m option.\n");
+              mesh->xt--;
               return(0);
             }
             pt[i]->xt = mesh->xt;
@@ -3520,8 +3554,14 @@ int split4cb(pMesh mesh, pSol met, int k, double o[3], double cb[4], int *ip ) {
       memcpy(pxt0,&xt[0],sizeof(xTetra));
       for (i=1; i<4; i++) {
         if ( isxt[i] ) {
-          assert(mesh->xt < mesh->xtmax-1);
-          pt[i]->xt = ++mesh->xt;
+          if ( mesh->xt > mesh->xtmax ) {
+            fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
+            fprintf(stdout,"  ## Check the mesh size or ");
+            fprintf(stdout,"increase the allocated memory with the -m option.\n");
+            mesh->xt--;
+            return(0);
+          }
+          pt[i]->xt = mesh->xt;
           pxt0 = &mesh->xtetra[mesh->xt];
           memcpy(pxt0,&xt[i],sizeof(xTetra));
         }
@@ -3541,8 +3581,14 @@ int split4cb(pMesh mesh, pSol met, int k, double o[3], double cb[4], int *ip ) {
             memcpy(pxt0,&xt[i],sizeof(xTetra));
           }
           else {
-            assert(mesh->xt < mesh->xtmax-1);
-            pt[i]->xt = ++mesh->xt;
+            if ( mesh->xt > mesh->xtmax ) {
+              fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
+              fprintf(stdout,"  ## Check the mesh size or ");
+              fprintf(stdout,"increase the allocated memory with the -m option.\n");
+              mesh->xt--;
+              return(0);
+            }
+            pt[i]->xt = mesh->xt;
             pxt0 = &mesh->xtetra[mesh->xt];
             memcpy(pxt0,&xt[i],sizeof(xTetra));
           }
@@ -3839,11 +3885,12 @@ void split4sf(pMesh mesh,pSol met,int k,int vx[6]) {
       for (i=1; i<6; i++) {
         if ( isxt[i] ) {
           mesh->xt++;
-          if ( mesh->xt >= mesh->xtmax ) {
+          if ( mesh->xt > mesh->xtmax ) {
             fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
             fprintf(stdout,"  ## Check the mesh size or ");
             fprintf(stdout,"increase the allocated memory with the -m option.\n");
             fprintf(stdout,"  Exit program.\n");
+            mesh->xt--;
             exit(EXIT_FAILURE);
           }
           pt[i]->xt = mesh->xt;
@@ -3866,11 +3913,12 @@ void split4sf(pMesh mesh,pSol met,int k,int vx[6]) {
           }
           else {
             mesh->xt++;
-            if ( mesh->xt >= mesh->xtmax ) {
+            if ( mesh->xt > mesh->xtmax ) {
               fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
               fprintf(stdout,"  ## Check the mesh size or ");
               fprintf(stdout,"increase the allocated memory with the -m option.\n");
               fprintf(stdout,"  Exit program.\n");
+              mesh->xt--;
               exit(EXIT_FAILURE);
             }
             pt[i]->xt = mesh->xt;
@@ -4140,11 +4188,12 @@ void split4op(pMesh mesh,pSol met,int k,int vx[6]) {
       for (i=1; i<6; i++) {
         if ( isxt[i] ) {
           mesh->xt++;
-          if ( mesh->xt >= mesh->xtmax ) {
+          if ( mesh->xt > mesh->xtmax ) {
             fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
             fprintf(stdout,"  ## Check the mesh size or ");
             fprintf(stdout,"increase the allocated memory with the -m option.\n");
             fprintf(stdout,"  Exit program.\n");
+            mesh->xt--;
             exit(EXIT_FAILURE);
           }
           pt[i]->xt = mesh->xt;
@@ -4167,11 +4216,12 @@ void split4op(pMesh mesh,pSol met,int k,int vx[6]) {
           }
           else {
             mesh->xt++;
-            if ( mesh->xt >= mesh->xtmax ) {
+            if ( mesh->xt > mesh->xtmax ) {
               fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
               fprintf(stdout,"  ## Check the mesh size or ");
               fprintf(stdout,"increase the allocated memory with the -m option.\n");
               fprintf(stdout,"  Exit program.\n");
+              mesh->xt--;
               exit(EXIT_FAILURE);
             }
             pt[i]->xt = mesh->xt;
@@ -4441,11 +4491,12 @@ void split5(pMesh mesh,pSol met,int k,int vx[6]) {
       for (i=1; i<7; i++) {
         if ( isxt[i] ) {
           mesh->xt++;
-          if ( mesh->xt >= mesh->xtmax ) {
+          if ( mesh->xt > mesh->xtmax ) {
             fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
             fprintf(stdout,"  ## Check the mesh size or ");
             fprintf(stdout,"increase the allocated memory with the -m option.\n");
             fprintf(stdout,"  Exit program.\n");
+            mesh->xt--;
             exit(EXIT_FAILURE);
           }
           pt[i]->xt = mesh->xt;
@@ -4468,11 +4519,12 @@ void split5(pMesh mesh,pSol met,int k,int vx[6]) {
           }
           else {
             mesh->xt++;
-            if ( mesh->xt >= mesh->xtmax ) {
+            if ( mesh->xt > mesh->xtmax ) {
               fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
               fprintf(stdout,"  ## Check the mesh size or ");
               fprintf(stdout,"increase the allocated memory with the -m option.\n");
               fprintf(stdout,"  Exit program.\n");
+              mesh->xt--;
               exit(EXIT_FAILURE);
             }
             pt[i]->xt = mesh->xt;
@@ -4635,11 +4687,12 @@ void split6(pMesh mesh,pSol met,int k,int vx[6]) {
       }
       else {
         mesh->xt++;
-        if ( mesh->xt >= mesh->xtmax ) {
+        if ( mesh->xt > mesh->xtmax ) {
           fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
           fprintf(stdout,"  ## Check the mesh size or ");
           fprintf(stdout,"increase the allocated memory with the -m option.\n");
           fprintf(stdout,"  Exit program.\n");
+          mesh->xt--;
           exit(EXIT_FAILURE);
         }
         pt[1]->xt = mesh->xt;
@@ -4681,11 +4734,12 @@ void split6(pMesh mesh,pSol met,int k,int vx[6]) {
       }
       else {
         mesh->xt++;
-        if ( mesh->xt >= mesh->xtmax ) {
+        if ( mesh->xt > mesh->xtmax ) {
           fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
           fprintf(stdout,"  ## Check the mesh size or ");
           fprintf(stdout,"increase the allocated memory with the -m option.\n");
           fprintf(stdout,"  Exit program.\n");
+          mesh->xt--;
           exit(EXIT_FAILURE);
         }
         pt[2]->xt = mesh->xt;
@@ -4728,11 +4782,12 @@ void split6(pMesh mesh,pSol met,int k,int vx[6]) {
       }
       else {
         mesh->xt++;
-        if ( mesh->xt >= mesh->xtmax ) {
+        if ( mesh->xt > mesh->xtmax ) {
           fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
           fprintf(stdout,"  ## Check the mesh size or ");
           fprintf(stdout,"increase the allocated memory with the -m option.\n");
           fprintf(stdout,"  Exit program.\n");
+          mesh->xt--;
           exit(EXIT_FAILURE);
         }
         pt[3]->xt = mesh->xt;
@@ -4771,11 +4826,12 @@ void split6(pMesh mesh,pSol met,int k,int vx[6]) {
       }
       else {
         mesh->xt++;
-        if ( mesh->xt >= mesh->xtmax ) {
+        if ( mesh->xt > mesh->xtmax ) {
           fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
           fprintf(stdout,"  ## Check the mesh size or ");
           fprintf(stdout,"increase the allocated memory with the -m option.\n");
           fprintf(stdout,"  Exit program.\n");
+          mesh->xt--;
           exit(EXIT_FAILURE);
         }
         pt[4]->xt = mesh->xt;
@@ -4814,11 +4870,12 @@ void split6(pMesh mesh,pSol met,int k,int vx[6]) {
       }
       else {
         mesh->xt++;
-        if ( mesh->xt >= mesh->xtmax ) {
+        if ( mesh->xt > mesh->xtmax ) {
           fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
           fprintf(stdout,"  ## Check the mesh size or ");
           fprintf(stdout,"increase the allocated memory with the -m option.\n");
           fprintf(stdout,"  Exit program.\n");
+          mesh->xt--;
           exit(EXIT_FAILURE);
         }
         pt[5]->xt = mesh->xt;
@@ -4857,11 +4914,12 @@ void split6(pMesh mesh,pSol met,int k,int vx[6]) {
       }
       else {
         mesh->xt++;
-        if ( mesh->xt >= mesh->xtmax ) {
+        if ( mesh->xt > mesh->xtmax ) {
           fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
           fprintf(stdout,"  ## Check the mesh size or ");
           fprintf(stdout,"increase the allocated memory with the -m option.\n");
           fprintf(stdout,"  Exit program.\n");
+          mesh->xt--;
           exit(EXIT_FAILURE);
         }
         pt[6]->xt = mesh->xt;
@@ -4900,11 +4958,12 @@ void split6(pMesh mesh,pSol met,int k,int vx[6]) {
       }
       else {
         mesh->xt++;
-        if ( mesh->xt >= mesh->xtmax ) {
+        if ( mesh->xt > mesh->xtmax ) {
           fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
           fprintf(stdout,"  ## Check the mesh size or ");
           fprintf(stdout,"increase the allocated memory with the -m option.\n");
           fprintf(stdout,"  Exit program.\n");
+          mesh->xt--;
           exit(EXIT_FAILURE);
         }
         pt[7]->xt = mesh->xt;

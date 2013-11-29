@@ -19,10 +19,11 @@ int newPt(pMesh mesh,double c[3],char tag) {
   /* point on geometry */
   if ( tag & MG_BDY ) {
     mesh->xp++;
-    if(mesh->xp >= mesh->xpmax){
+    if(mesh->xp > mesh->xpmax){
       fprintf(stdout,"  ## Allocation problem (xpoint), not enough memory.\n");
       fprintf(stdout,"  ## Check the mesh size or ");
       fprintf(stdout,"increase the allocated memory with the -m option.\n");
+      mesh->xp--;
       return(0);
     }
     ppt->xp  = mesh->xp;

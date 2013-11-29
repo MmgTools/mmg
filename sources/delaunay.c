@@ -208,7 +208,13 @@ int delone(pMesh mesh,pSol sol,int ip,int *list,int ilist) {
 	      isused=1;
 	    } else {
 	      mesh->xt++;
-	      assert(mesh->xt < mesh->xtmax);
+        if ( mesh->xt > mesh->xtmax ) {
+          fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
+          fprintf(stdout,"  ## Check the mesh size or ");
+          fprintf(stdout,"increase the allocated memory with the -m option.\n");
+          mesh->xt--;
+          return(0);
+        }
 	      pt1->xt = mesh->xt;
 	      pxt0 = &mesh->xtetra[pt1->xt];
 	      pxt0->ref[i]   = xt.ref[i] ; pxt0->ftag[i]  = xt.ftag[i];

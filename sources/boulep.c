@@ -438,7 +438,14 @@ int bouleext(pMesh mesh, int start, int ip, int iface, int *listv, int *ilistv, 
     /* A boundary face has been hit : change travel edge */
     lists[(*ilists)] = 4*k+iopp;
     (*ilists)++;
-    assert(*ilists < LMAX);
+    if ( *ilists >= LMAX ) {
+      fprintf(stdout,"  ## Warning: problem in surface remesh process.");
+      fprintf(stdout," Surface ball of point %d contains too many elts.\n",
+              indPt(mesh,nump));
+      fprintf(stdout,"  ##          Try to modify the hausdorff number,");
+      fprintf(stdout," or/and the maximum mesh.\n");
+      return(-1);
+    }
 
     aux = nb;
     nb = piv;
@@ -507,7 +514,14 @@ int bouleext(pMesh mesh, int start, int ip, int iface, int *listv, int *ilistv, 
         if ( pt1->v[j] == nump )  break;
       assert(j<4);
       /* overflow */
-      assert ( (*ilistv) <= LMAX-3 );
+      if ( *ilistv > LMAX-3 ) {
+        fprintf(stdout,"  ## Warning: problem in remesh process.");
+        fprintf(stdout," Volumic ball of point %d contains too many elts.\n",
+                indPt(mesh,nump));
+        fprintf(stdout,"  ##          Try to modify the hausdorff number,");
+        fprintf(stdout," or/and the maximum mesh.\n");
+        return(-1);
+      }
       listv[(*ilistv)] = 4*k1+j;
       (*ilistv)++;
     }
@@ -546,7 +560,14 @@ int boulesurfvolp(pMesh mesh,int start,int ip,int iface,int *listv,int *ilistv,i
     /* A boundary face has been hit : change travel edge */
     lists[(*ilists)] = 4*k+iopp;
     (*ilists)++;
-    assert(*ilists < LMAX);
+    if ( *ilists >= LMAX ) {
+      fprintf(stdout,"  ## Warning: problem in surface remesh process.");
+      fprintf(stdout," Surface ball of point %d contains too many elts.\n",
+              indPt(mesh,nump));
+      fprintf(stdout,"  ##          Try to modify the hausdorff number,");
+      fprintf(stdout," or/and the maximum mesh.\n");
+      return(-1);
+    }
 
     aux = nb;
     nb = piv;
@@ -620,7 +641,14 @@ int boulesurfvolp(pMesh mesh,int start,int ip,int iface,int *listv,int *ilistv,i
       assert(j<4);
 
       /* overflow */
-      assert ( (*ilistv) <= LMAX-3 );
+      if ( *ilistv > LMAX-3 ) {
+        fprintf(stdout,"  ## Warning: problem in remesh process.");
+        fprintf(stdout," Volumic ball of point %d contains too many elts.\n",
+              indPt(mesh,nump));
+        fprintf(stdout,"  ##          Try to modify the hausdorff number,");
+        fprintf(stdout," or/and the maximum mesh.\n");
+        return(-1);
+      }
       listv[(*ilistv)] = 4*k1+j;
       (*ilistv)++;
     }
@@ -823,7 +851,14 @@ int coquil(pMesh mesh,int start,int ia,int * list) {
     list[ilist] = 6*adj +i;
     ilist++;
     /* overflow */
-    assert( ilist <= LMAX-3 );
+    if ( ilist > LMAX-3 ) {
+      fprintf(stdout,"  ## Warning: problem in remesh process.");
+      fprintf(stdout," Coquil of edge %d-%d contains too many elts.\n",
+              indPt(mesh,na),indPt(mesh,nb));
+      fprintf(stdout,"  ##          Try to modify the hausdorff number,");
+      fprintf(stdout," or/and the maximum mesh.\n");
+      return(-1);
+    }
 
     /* set new triangle for travel */
     adja = &mesh->adja[4*(adj-1)+1];
@@ -851,7 +886,14 @@ int coquil(pMesh mesh,int start,int ia,int * list) {
   list[ilist] = 6*adj + i;
   ilist++;
   /* overflow */
-  assert( ilist <= LMAX-3 );
+  if ( ilist > LMAX-3 ) {
+    fprintf(stdout,"  ## Warning: problem in remesh process.");
+    fprintf(stdout," Coquil of edge %d-%d contains too many elts.\n",
+            indPt(mesh,na),indPt(mesh,nb));
+    fprintf(stdout,"  ##          Try to modify the hausdorff number,");
+    fprintf(stdout," or/and the maximum mesh.\n");
+    return(-1);
+  }
 
   adja = &mesh->adja[4*(adj-1)+1];
   if ( pt->v[ ifar[i][0] ] == piv ) {
@@ -877,7 +919,14 @@ int coquil(pMesh mesh,int start,int ia,int * list) {
     list[ilist] = 6*adj +i;
     ilist++;
     /* overflow */
-    assert( ilist <= LMAX-2 );
+    if ( ilist > LMAX-2 ) {
+      fprintf(stdout,"  ## Warning: problem in surface remesh process.");
+      fprintf(stdout," Coquil of edge %d-%d contains too many elts.\n",
+              indPt(mesh,na),indPt(mesh,nb));
+      fprintf(stdout,"  ##          Try to modify the hausdorff number,");
+      fprintf(stdout," or/and the maximum mesh.\n");
+      return(-1);
+    }
 
     /* set new triangle for travel */
     adja = &mesh->adja[4*(adj-1)+1];
@@ -990,7 +1039,7 @@ static inline void errorMessage(pMesh mesh, int k1, int k2) {
            mesh->point[pt->v[3]].tmp);
   }
   fprintf(stdout,"  ##        Try to modify the hausdorff number,");
-  fprintf(stdout," the maximum mesh size, the value of angle detection.\n");
+  fprintf(stdout," the maximum mesh size or/and the value of angle detection.\n");
   fprintf(stdout," You can also try to run with -noswap option but probably");
   fprintf(stdout," the final mesh will have poor quality.\n");
 }
@@ -1044,7 +1093,14 @@ int coquilface(pMesh mesh,int start,int ia,int *list,int *it1,int *it2) {
     list[ilist] = 6*adj +i;
     ilist++;
     /* overflow */
-    assert ( ilist <= LMAX-2 );
+    if ( ilist > LMAX-2 ) {
+      fprintf(stdout,"  ## Warning: problem in surface remesh process.");
+      fprintf(stdout," Coquil of edge %d-%d contains too many elts.\n",
+              indPt(mesh,na),indPt(mesh,nb));
+      fprintf(stdout,"  ##          Try to modify the hausdorff number,");
+      fprintf(stdout," or/and the maximum mesh.\n");
+      return(-1);
+    }
 
     /* set new tetra for travel */
     pradj = adj;
@@ -1091,7 +1147,15 @@ int coquilface(pMesh mesh,int start,int ia,int *list,int *it1,int *it2) {
   /* Start back everything from this tetra adj */
   pradj = adj;
   /* overflow */
-  assert(ilist <= LMAX-2);
+  if ( ilist > LMAX-2 ) {
+    fprintf(stdout,"  ## Warning: problem in surface remesh process.");
+    fprintf(stdout," Coquil of edge %d-%d contains too many elts.\n",
+            indPt(mesh,na),indPt(mesh,nb));
+    fprintf(stdout,"  ##          Try to modify the hausdorff number,");
+    fprintf(stdout," or/and the maximum mesh.\n");
+    return(-1);
+  }
+
   pxt = 0;
   if ( pt->xt )
     pxt = &mesh->xtetra[pt->xt];
@@ -1122,7 +1186,14 @@ int coquilface(pMesh mesh,int start,int ia,int *list,int *it1,int *it2) {
     list[ilist] = 6*adj +i;
     ilist++;
     /* overflow */
-    assert ( ilist <= LMAX-2 );
+    if ( ilist > LMAX-2 ) {
+      fprintf(stdout,"  ## Warning: problem in surface remesh process.");
+      fprintf(stdout," Coquil of edge %d-%d contains too many elts.\n",
+              indPt(mesh,na),indPt(mesh,nb));
+      fprintf(stdout,"  ##          Try to modify the hausdorff number,");
+      fprintf(stdout," or/and the maximum mesh.\n");
+      return(-1);
+    }
 
     /* set new tetra for travel */
     pradj = adj;

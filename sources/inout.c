@@ -101,7 +101,7 @@ int loadMesh(pMesh mesh) {
       mesh->nt = 0;
       ina = (int*)calloc(nt+1,sizeof(int));
       if ( !ina ) {
-        perror("  ## Memory problem: malloc");
+        perror("  ## Memory problem: calloc");
         exit(EXIT_FAILURE);
       }
       for (k=1; k<=nt; k++) {
@@ -167,6 +167,10 @@ int loadMesh(pMesh mesh) {
     if (info.iso ) {
       mesh->na = 0;
       ina = (int*)calloc(na+1,sizeof(int));
+      if ( !ina ) {
+        perror("  ## Memory problem: calloc");
+        exit(EXIT_FAILURE);
+      }
     }
 
     GmfGotoKwd(inm,GmfEdges);
@@ -860,6 +864,10 @@ int loadSingul(pSingul singul) {
   ns = 1;
   if ( singul->ns ) {
     singul->point = (psPoint)calloc(singul->ns+1,sizeof(sPoint));
+    if ( !singul->point ) {
+      perror("  ## Memory problem: calloc");
+      exit(EXIT_FAILURE);
+    }
     for ( k=1; k<=mesh.np; k++ ) {
       ppt = &mesh.point[k];
       if ( (ppt->tag & MG_REQ) || (ppt->tag & MG_GEO) ) {
@@ -879,6 +887,10 @@ int loadSingul(pSingul singul) {
   na = 1;
   if ( singul->na ) {
     singul->edge = (pEdge)calloc(singul->na+1,sizeof(Edge));
+    if ( !singul->edge ) {
+      perror("  ## Memory problem: calloc");
+      exit(EXIT_FAILURE);
+    }
     for ( k=1; k<=mesh.na; k++ ) {
       pa = &mesh.edge[k];
       if ( (pa->tag & MG_REQ) || (pa->tag & MG_GEO) ) {

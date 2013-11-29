@@ -349,9 +349,14 @@ int movbdyregpt(pMesh mesh,int *listv,int ilistv,int *lists,int ilists) {
   ppt0->tag      = p0->tag;
   ppt0->ref      = p0->ref;
 
-  if ( mesh->xp + 1 > mesh->xpmax )      return(0);
 
-  nxp = mesh->xp+1;
+  nxp = mesh->xp + 1;
+  if ( nxp > mesh->xpmax ) {
+    fprintf(stdout,"  ## Warning: lack of memory.\n");
+    fprintf(stdout,"  ## If final mesh has poor quality, increase the ");
+    fprintf(stdout," allocated memory with the -m option.\n");
+    return(0);
+  }
   ppt0->xp = nxp;
   pxp = &mesh->xpoint[nxp];
   memcpy(pxp,&(mesh->xpoint[p0->xp]),sizeof(xPoint));
@@ -607,9 +612,14 @@ int movbdyrefpt(pMesh mesh, int *listv, int ilistv, int *lists, int ilists){
   ppt0->tag      = p0->tag;
   ppt0->ref      = p0->ref;
 
-  if ( mesh->xp >= mesh->xpmax )        return(0);
 
   nxp = mesh->xp + 1;
+  if ( nxp > mesh->xpmax ) {
+    fprintf(stdout,"  ## Warning: lack of memory.\n");
+    fprintf(stdout,"  ## If final mesh has poor quality, increase the ");
+    fprintf(stdout," allocated memory with the -m option.\n");
+    return(0);
+  }
   ppt0->xp = nxp;
   pxp = &mesh->xpoint[nxp];
   memcpy(pxp,&(mesh->xpoint[p0->xp]),sizeof(xPoint));
@@ -878,9 +888,13 @@ int movbdynompt(pMesh mesh, int *listv, int ilistv, int *lists, int ilists){
   ppt0->tag      = p0->tag;
   ppt0->ref      = p0->ref;
 
-  if ( mesh->xp >= mesh->xpmax )        return(0);
-
   nxp = mesh->xp + 1;
+  if ( nxp > mesh->xpmax ) {
+    fprintf(stdout,"  ## Warning: lack of memory.\n");
+    fprintf(stdout,"  ## If final mesh has poor quality, increase the ");
+    fprintf(stdout," allocated memory with the -m option.\n");
+    return(0);
+  }
   ppt0->xp = nxp;
   pxp = &mesh->xpoint[nxp];
   memcpy(pxp,&(mesh->xpoint[p0->xp]),sizeof(xPoint));
@@ -1156,9 +1170,13 @@ int movbdyridpt(pMesh mesh,int *listv,int ilistv,int *lists,int ilists) {
   ppt0->tag      = p0->tag;
   ppt0->ref      = p0->ref;
 
-  if ( mesh->xp >= mesh->xpmax )        return(0);
-
-  nxp = mesh->xp + 1;
+  nxp = mesh->xp+1;
+  if ( nxp > mesh->xpmax ) {
+    fprintf(stdout,"  ## Warning: lack of memory.\n");
+    fprintf(stdout,"  ## If final mesh has poor quality, increase the ");
+    fprintf(stdout," allocated memory with the -m option.\n");
+    return(0);
+  }
   ppt0->xp = nxp;
   pxp = &mesh->xpoint[nxp];
   memcpy(pxp,&(mesh->xpoint[p0->xp]),sizeof(xPoint));

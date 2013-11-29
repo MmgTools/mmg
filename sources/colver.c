@@ -376,10 +376,14 @@ int chkcol_bdy(pMesh mesh,int k,char iface,char iedg,int *listv) {
   isminp  = isplp = 0;
 
   /* collect triangles and tetras around ip */
-  if ( p0->tag & MG_NOM )
-    bouleext(mesh,k,ip,iface,listv,&ilistv,lists,&ilists);
-  else
-    boulesurfvolp(mesh,k,ip,iface,listv,&ilistv,lists,&ilists);
+  if ( p0->tag & MG_NOM ) {
+    if ( bouleext(mesh,k,ip,iface,listv,&ilistv,lists,&ilists) < 0 )
+      return(-1);
+  }
+  else {
+    if ( boulesurfvolp(mesh,k,ip,iface,listv,&ilistv,lists,&ilists) < 0 )
+      return(-1);
+  }
 
   /* prevent collapse in case surface ball has 3 triangles */
   if ( ilists <= 2 )  return(0);  // ATTENTION, Normalement, avec 2 c est bon !
@@ -655,10 +659,11 @@ int colver(pMesh mesh,int *list,int ilist,char indq) {
       else {
         /* we need to create the xtetra */
         mesh->xt++;
-        if ( mesh->xt >= mesh->xtmax ) {
+        if ( mesh->xt > mesh->xtmax ) {
           fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
           fprintf(stdout,"  ## Check the mesh size or increase");
           fprintf(stdout," the allocated memory with the -m option.\n");
+          mesh->xt--;
           return(-1);
         }
         pt->xt = mesh->xt;
@@ -944,10 +949,11 @@ int colver(pMesh mesh,int *list,int ilist,char indq) {
             }
             /* Create new field xt */
             mesh->xt++;
-            if ( mesh->xt >= mesh->xtmax ) {
+            if ( mesh->xt > mesh->xtmax ) {
               fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
               fprintf(stdout,"  ## Check the mesh size or increase");
               fprintf(stdout," the allocated memory with the -m option.\n");
+              mesh->xt--;
               return(-1);
             }
             pt1->xt = mesh->xt;

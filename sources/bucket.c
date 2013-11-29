@@ -11,12 +11,21 @@ pBucket newBucket(pMesh mesh,int nmax) {
 
   /* memory alloc */
   bucket = (Bucket*)malloc(sizeof(Bucket));
-  assert(bucket);
+  if ( !bucket ) {
+    perror("  ## Memory problem: calloc");
+    exit(EXIT_FAILURE);
+  }
   bucket->size = nmax;
   bucket->head = (int*)calloc(nmax*nmax*nmax+1,sizeof(int));
-  assert(bucket->head);
+  if ( !bucket->head ) {
+    perror("  ## Memory problem: calloc");
+    exit(EXIT_FAILURE);
+  }
   bucket->link = (int*)calloc(mesh->npmax+1,sizeof(int));
-  assert(bucket->link);
+  if ( !bucket->link ) {
+    perror("  ## Memory problem: calloc");
+    exit(EXIT_FAILURE);
+  }
 
   /* insert vertices */
   dd = nmax / (double)PRECI;

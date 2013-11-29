@@ -85,16 +85,23 @@ int biPartBoxCompute(SCOTCH_Graph graf, int vertNbr, int boxVertNbr, SCOTCH_Num 
   CHECK_SCOTCH(SCOTCH_stratGraphMap(&strat, "r{job=t,map=t,poli=S,sep=m{,vert=80,low=h{pass=10}f{bal=0.005,move=0},asc=b{bnd=f{bal=0.05,move=0},org=f{bal=0.05,move=0}}}|m{,vert=80,low=h{pass=10}f{bal=0.005,move=0},asc=b{bnd=f{bal=0.05,move=0},org=f{bal=0.05,move=0}}}}"), "scotch_stratGraphMap", 0) ;
 
   partTab = (SCOTCH_Num *)calloc(vertNbr, sizeof(SCOTCH_Num));
-
+  if ( !partTab ) {
+    perror("  ## Memory problem: calloc");
+    return 1;
+  }
 
   /* Partionning the graph */
   CHECK_SCOTCH(SCOTCH_graphPart(&graf, boxNbr, &strat, partTab), "scotch_graphPart", 0);
 
   partNumTab = (SCOTCH_Num *)calloc(boxNbr, sizeof(SCOTCH_Num));
+  if ( !partNumTab ) {
+    perror("  ## Memory problem: calloc");
+    return 1;
+  }
 
   if (!memset(partNumTab, 0, boxNbr*sizeof(SCOTCH_Num))) {
     perror("  ## Memory problem: memset");
-    return 0;
+    return 1;
   }
 
   /* Computing the number of elements of each box */
@@ -104,7 +111,10 @@ int biPartBoxCompute(SCOTCH_Graph graf, int vertNbr, int boxVertNbr, SCOTCH_Num 
 
   /* partition permutation tabular */
   partPrmTab = (SCOTCH_Num *)calloc(vertNbr + 1, sizeof(SCOTCH_Num));
-
+  if ( !partPrmTab ) {
+    perror("  ## Memory problem: calloc");
+    return 1;
+  }
 
   /* Copying the previous tabular in order to have the index of the first
    * element of each box
@@ -303,7 +313,6 @@ int renumbering(int boxVertNbr, pMesh mesh, pSol sol) {
   /* Computing the number of vertices and a contiguous tabular of vertices */
   vertNbr = 0;
   vertOldTab = (int *)calloc(mesh->ne + 1, sizeof(int));
-
   if (!memset(vertOldTab, 0, sizeof(int)*(mesh->ne+1))) {
     perror("  ## Memory problem: memset");
     return 1;

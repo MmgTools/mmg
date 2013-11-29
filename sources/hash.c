@@ -1026,11 +1026,8 @@ int bdrySet(pMesh mesh) {
   mesh->xtmax  = mesh->ntmax + 2*na;
   mesh->xtetra = (pxTetra)calloc(mesh->xtmax+1,sizeof(xTetra));
   if ( !mesh->xtetra ) {
-    fprintf(stdout,"  ## Allocation problem (xtetra), not enough memory.\n");
-    fprintf(stdout,"  ## Check the mesh size or ");
-    fprintf(stdout,"increase the allocated memory with the -m option.\n");
-    fprintf(stdout,"  Exit program.\n");
-    return(0);
+    perror("  ## Memory problem: calloc");
+    exit(EXIT_FAILURE);
   }
 
   /* assign references to tetras faces */
@@ -1049,6 +1046,14 @@ int bdrySet(pMesh mesh) {
         assert(kt);
         if ( !pt->xt ) {
           mesh->xt++;
+          if ( mesh->xt > mesh->xtmax ) {
+            fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
+            fprintf(stdout,"  ## Check the mesh size or ");
+            fprintf(stdout,"increase the allocated memory with the -m option.\n");
+            fprintf(stdout,"  Exit program.\n");
+            mesh->xt--;
+            exit(EXIT_FAILURE);
+          }
           pt->xt = mesh->xt;
         }
         ptt = &mesh->tria[kt];
@@ -1083,6 +1088,14 @@ int bdrySet(pMesh mesh) {
           if ( tag || ref ) {
             if ( !pt->xt ) {
               mesh->xt++;
+              if ( mesh->xt > mesh->xtmax ) {
+                fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
+                fprintf(stdout,"  ## Check the mesh size or ");
+                fprintf(stdout,"increase the allocated memory with the -m option.\n");
+                fprintf(stdout,"  Exit program.\n");
+                mesh->xt--;
+                exit(EXIT_FAILURE);
+              }
               pt->xt = mesh->xt;
             }
             pxt = &mesh->xtetra[pt->xt];

@@ -317,10 +317,7 @@ int packMesh(pMesh mesh,pSol met) {
     if ( mesh->na ) {
       mesh->edge = (pEdge)calloc(mesh->na+1,sizeof(Edge));
       if ( !mesh->edge ) {
-        fprintf(stdout,"  ## Allocation problem (edge), not enough memory.\n");
-        fprintf(stdout,"  ## Check the mesh size or increase the allocated memory");
-        fprintf(stdout," with the -m option.\n");
-        fprintf(stdout,"  Exit program.\n");
+        perror("  ## Memory problem: calloc");
         return(0);
       }
       mesh->na = 0;

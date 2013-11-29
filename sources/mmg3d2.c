@@ -1504,7 +1504,10 @@ int mmg3d2(pMesh mesh,pSol sol) {
     fprintf(stdout,"  ** ISOSURFACE EXTRACTION\n");
 
   tmp = (double*)calloc(mesh->npmax+1,sizeof(double));
-  assert(tmp);
+  if ( !tmp ) {
+    perror("  ## Memory problem: calloc");
+    exit(EXIT_FAILURE);
+  }
 
   /* Snap values of level set function if need be, then discretize it */
   if ( !snpval_ls(mesh,sol,tmp) ) {

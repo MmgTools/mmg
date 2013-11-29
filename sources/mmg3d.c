@@ -123,6 +123,10 @@ static int parsar(int argc,char *argv[],pMesh mesh,pSol met,pSingul sing) {
         if ( !strcmp(argv[i],"-in") ) {
           if ( ++i < argc && isascii(argv[i][0]) && argv[i][0]!='-') {
             mesh->namein = (char*) calloc(strlen(argv[i])+1,sizeof(char));
+            if ( !mesh->namein ) {
+              perror("  ## Memory problem: calloc");
+              exit(EXIT_FAILURE);
+            }
             strcpy(mesh->namein,argv[i]);
             info.imprim = 5;
           }else{
@@ -166,6 +170,10 @@ static int parsar(int argc,char *argv[],pMesh mesh,pSol met,pSingul sing) {
         if ( !strcmp(argv[i],"-out") ) {
           if ( ++i < argc && isascii(argv[i][0])  && argv[i][0]!='-') {
             mesh->nameout = (char*) calloc(strlen(argv[i])+1,sizeof(char));
+            if ( !mesh->nameout ) {
+              perror("  ## Memory problem: calloc");
+              exit(EXIT_FAILURE);
+            }
             strcpy(mesh->nameout,argv[i]);
           }else{
             fprintf(stderr,"Missing filname for %c%c%c\n",
@@ -196,6 +204,10 @@ static int parsar(int argc,char *argv[],pMesh mesh,pSol met,pSingul sing) {
         if ( !strcmp(argv[i],"-sol") ) {
           if ( ++i < argc && isascii(argv[i][0]) && argv[i][0]!='-' ) {
             met->namein = (char*) calloc(strlen(argv[i])+1,sizeof(char));
+            if ( !met->namein ) {
+              perror("  ## Memory problem: calloc");
+              exit(EXIT_FAILURE);
+            }
             strcpy(met->namein,argv[i]);
           }
           else {
@@ -207,6 +219,10 @@ static int parsar(int argc,char *argv[],pMesh mesh,pSol met,pSingul sing) {
         else if ( !strcmp(argv[i],"-sf") ) {
           if ( ++i < argc && isascii(argv[i][0]) && argv[i][0]!='-' ) {
             sing->namein = (char*) calloc(strlen(argv[i])+1,sizeof(char));
+            if ( !sing->namein ) {
+              perror("  ## Memory problem: calloc");
+              exit(EXIT_FAILURE);
+            }
             strcpy(sing->namein,argv[i]);
             info.sing = 1;
           }
@@ -240,11 +256,19 @@ static int parsar(int argc,char *argv[],pMesh mesh,pSol met,pSingul sing) {
     else {
       if ( mesh->namein == NULL ) {
         mesh->namein = (char*) calloc(strlen(argv[i])+1,sizeof(char));
+        if ( !mesh->namein ) {
+          perror("  ## Memory problem: calloc");
+          exit(EXIT_FAILURE);
+        }
         strcpy(mesh->namein,argv[i]);
         if ( info.imprim == -99 )  info.imprim = 5;
       }
       else if ( mesh->nameout == NULL ){
         mesh->nameout = (char*) calloc(strlen(argv[i])+1,sizeof(char));
+        if ( !mesh->nameout ) {
+          perror("  ## Memory problem: calloc");
+          exit(EXIT_FAILURE);
+        }
         strcpy(mesh->nameout,argv[i]);
       }
       else {
@@ -265,14 +289,20 @@ static int parsar(int argc,char *argv[],pMesh mesh,pSol met,pSingul sing) {
 
   if ( mesh->namein == NULL ) {
     mesh->namein = (char *)calloc(128,sizeof(char));
-    assert(mesh->namein);
+    if ( !mesh->namein ) {
+      perror("  ## Memory problem: calloc");
+      exit(EXIT_FAILURE);
+    }
     fprintf(stdout,"  -- INPUT MESH NAME ?\n");
     fflush(stdin);
     fscanf(stdin,"%s",mesh->namein);
   }
   if ( mesh->nameout == NULL ) {
     mesh->nameout = (char *)calloc(128,sizeof(char));
-    assert(mesh->nameout);
+    if ( !mesh->nameout ) {
+      perror("  ## Memory problem: calloc");
+      exit(EXIT_FAILURE);
+    }
     strcpy(mesh->nameout,mesh->namein);
     ptr = strstr(mesh->nameout,".mesh");
     if ( ptr ) *ptr = '\0';
@@ -283,7 +313,10 @@ static int parsar(int argc,char *argv[],pMesh mesh,pSol met,pSingul sing) {
 
   if ( met->namein == NULL ) {
     met->namein = (char *)calloc(128,sizeof(char));
-    assert(met->namein);
+    if ( !met->namein ) {
+      perror("  ## Memory problem: calloc");
+      exit(EXIT_FAILURE);
+    }
     strcpy(met->namein,mesh->namein);
     ptr = strstr(met->namein,".mesh");
     if ( ptr ) *ptr = '\0';
@@ -291,7 +324,10 @@ static int parsar(int argc,char *argv[],pMesh mesh,pSol met,pSingul sing) {
   }
   if ( met->nameout == NULL ) {
     met->nameout = (char *)calloc(128,sizeof(char));
-    assert(met->nameout);
+    if ( !met->nameout ) {
+      perror("  ## Memory problem: calloc");
+      exit(EXIT_FAILURE);
+    }
     strcpy(met->nameout,mesh->nameout);
     ptr = strstr(met->nameout,".mesh");
     if ( ptr ) *ptr = '\0';

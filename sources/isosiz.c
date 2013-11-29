@@ -373,7 +373,11 @@ int defsiz_iso(pMesh mesh,pSol met) {
     met->size  = 1;
     met->dim   = 3;
     met->m = (double*)malloc((mesh->npmax+1)*sizeof(double));
-    assert(met->m);
+    if ( !met->m ) {
+      perror("  ## Memory problem: calloc");
+      exit(EXIT_FAILURE);
+    }
+
     /* init constant size */
     for (k=1; k<=mesh->np; k++)
       met->m[k] = info.hmax;

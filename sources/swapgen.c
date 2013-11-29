@@ -421,10 +421,11 @@ int swap23(pMesh mesh,int k,int ip) {
           memcpy(pxt0,&xt[1],sizeof(xTetra));
           if ( isxt[2] ) {
             mesh->xt++;
-            if ( mesh->xt >= mesh->xtmax ) {
+            if ( mesh->xt > mesh->xtmax ) {
               fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
               fprintf(stdout,"  ## Check the mesh size or ");
               fprintf(stdout,"increase the allocated memory with the -m option.\n");
+              mesh->xt--;
               return(0);
             }
             pt[2]->xt = mesh->xt;
@@ -447,10 +448,11 @@ int swap23(pMesh mesh,int k,int ip) {
         for (i=1; i<3; i++) {
           if ( isxt[i] ) {
             mesh->xt++;
-            if ( mesh->xt >= mesh->xtmax ) {
+            if ( mesh->xt > mesh->xtmax ) {
               fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
               fprintf(stdout,"  ## Check the mesh size or ");
               fprintf(stdout,"increase the allocated memory with the -m option.\n");
+              mesh->xt--;
               return(0);
             }
             pt[i]->xt = mesh->xt;
@@ -488,10 +490,11 @@ int swap23(pMesh mesh,int k,int ip) {
           memcpy(&mesh->xtetra[pt[1]->xt],&xt[1],sizeof(xTetra));
           if ( isxt[2] ) {
             mesh->xt++;
-            if ( mesh->xt >= mesh->xtmax ) {
+            if ( mesh->xt > mesh->xtmax ) {
               fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
               fprintf(stdout,"  ## Check the mesh size or ");
               fprintf(stdout,"increase the allocated memory with the -m option.\n");
+              mesh->xt--;
               return(0);
             }
             pt[2]->xt = mesh->xt;
@@ -518,20 +521,22 @@ int swap23(pMesh mesh,int k,int ip) {
         if ( isxt[1] ) {
           memcpy(&mesh->xtetra[pt[1]->xt],&xt[1],sizeof(xTetra));
           mesh->xt++;
-          if ( mesh->xt >= mesh->xtmax ) {
+          if ( mesh->xt > mesh->xtmax ) {
             fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
             fprintf(stdout,"  ## Check the mesh size or ");
             fprintf(stdout,"increase the allocated memory with the -m option.\n");
+            mesh->xt--;
             return(0);
           }
           pt[0]->xt = mesh->xt;
           memcpy(&mesh->xtetra[pt[0]->xt],&xt[0],sizeof(xTetra));
           if ( isxt[2] ) {
             mesh->xt++;
-            if ( mesh->xt >= mesh->xtmax ) {
+            if ( mesh->xt > mesh->xtmax ) {
               fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
               fprintf(stdout,"  ## Check the mesh size or ");
               fprintf(stdout,"increase the allocated memory with the -m option.\n");
+              mesh->xt--;
               return(0);
             }
             pt[2]->xt = mesh->xt;
@@ -546,10 +551,11 @@ int swap23(pMesh mesh,int k,int ip) {
           memcpy(&mesh->xtetra[pt[0]->xt],&xt[0],sizeof(xTetra));
           if ( isxt[2] ) {
             mesh->xt++;
-            if ( mesh->xt >= mesh->xtmax ) {
+            if ( mesh->xt > mesh->xtmax ) {
               fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
               fprintf(stdout,"  ## Check the mesh size or ");
               fprintf(stdout,"increase the allocated memory with the -m option.\n");
+              mesh->xt--;
               return(0);
             }
             pt[2]->xt = mesh->xt;
@@ -561,10 +567,11 @@ int swap23(pMesh mesh,int k,int ip) {
       }
       else /* !pt[1]->xt */ {
         mesh->xt++;
-        if ( mesh->xt >= mesh->xtmax ) {
+        if ( mesh->xt > mesh->xtmax ) {
           fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
           fprintf(stdout,"  ## Check the mesh size or ");
           fprintf(stdout,"increase the allocated memory with the -m option.\n");
+          mesh->xt--;
           return(0);
         }
         pt[0]->xt = mesh->xt;
@@ -572,10 +579,11 @@ int swap23(pMesh mesh,int k,int ip) {
         for (i=1; i<3; i++) {
           if ( isxt[i] ) {
             mesh->xt++;
-            if ( mesh->xt >= mesh->xtmax ) {
+            if ( mesh->xt > mesh->xtmax ) {
               fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
               fprintf(stdout,"  ## Check the mesh size or ");
               fprintf(stdout,"increase the allocated memory with the -m option.\n");
+              mesh->xt--;
               return(0);
             }
             pt[i]->xt = mesh->xt;
@@ -592,10 +600,11 @@ int swap23(pMesh mesh,int k,int ip) {
           memcpy(&mesh->xtetra[pt[1]->xt],&xt[1],sizeof(xTetra));
           if ( isxt[2] ) {
             mesh->xt++;
-            if ( mesh->xt >= mesh->xtmax ) {
+            if ( mesh->xt > mesh->xtmax ) {
               fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
               fprintf(stdout,"  ## Check the mesh size or ");
               fprintf(stdout,"increase the allocated memory with the -m option.\n");
+              mesh->xt--;
               return(0);
             }
             pt[2]->xt = mesh->xt;
