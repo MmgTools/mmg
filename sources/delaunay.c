@@ -792,8 +792,9 @@ int cavity(pMesh mesh,pSol sol,int iel,int ip,int *list,int lon) {
   tref = mesh->tetra[list[0]/6].ref;
   for (k=0; k<lon; k++) {
     mesh->tetra[list[k]/6].mark = base;
-#warning remove this test
-    if(tref!=mesh->tetra[list[k]/6].ref)
+
+    if ( info.ddebug && tref!=mesh->tetra[list[k]/6].ref)
+      // remove this test
       printf("pbs coquil %d %d tet %d\n",tref,mesh->tetra[list[k]/6].ref,list[k]/6);
   }
   for (k=0; k<lon; k++)

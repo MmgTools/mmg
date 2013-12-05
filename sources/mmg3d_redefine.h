@@ -151,6 +151,7 @@
 #define HGeom                         	 MMG5_HGeom
 #define Info                          	 MMG5_Info
 #define Mesh                          	 MMG5_Mesh
+#define Par                           	 MMG5_Par
 #define Point                         	 MMG5_Point
 #define Singul                        	 MMG5_Singul
 #define Sol                           	 MMG5_Sol
@@ -167,6 +168,7 @@
 #define mmg3dlib                      	 MMG5_mmg3dlib
 #define pEdge                         	 MMG5_pEdge
 #define pMesh                         	 MMG5_pMesh
+#define pPar                          	 MMG5_pPar
 #define pPoint                        	 MMG5_pPoint
 #define pSingul                       	 MMG5_pSingul
 #define pSol                          	 MMG5_pSol

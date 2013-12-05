@@ -35,6 +35,13 @@ enum MMG5_optDblCod /**<  Options for mmg3d2 (double) */
   };
 
 typedef struct {
+  double   hmin,hmax,hausd;
+  int      ref;
+  char     elt;
+} MMG5_Par; /** specific parameters */
+typedef MMG5_Par * MMG5_pPar;
+
+typedef struct {
   double   c[3]; /**< coordinates of point */
   int      ref; /**< ref of point */
   int      xp; /**< surface point number */
@@ -100,11 +107,12 @@ typedef struct {
 
 typedef struct {
   double        dhd,hmin,hmax,hgrad,hausd,min[3],max[3],delta,ls;
-  int           mem,sing;
+  int           mem,sing,npar;
   int           renum;
   char          imprim,ddebug,badkal,iso,fem;
   unsigned char noinsert, noswap, nomove;
   mytime        ctim[TIMEMAX];
+  MMG5_pPar     par;
 } MMG5_Info;
 
 typedef struct {

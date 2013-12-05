@@ -57,10 +57,6 @@ int chkswpbdy(pMesh mesh,int *list,int ilist,int it1,int it2) {
   assert( (tt1.v[inxt2[ia1]] == np && tt1.v[iprv2[ia1]] == nq) ||
           (tt1.v[inxt2[ia1]] == nq && tt1.v[iprv2[ia1]] == np) );
   na1 = tt1.v[ia1];
-  /*if ( !((tt1.v[inxt2[ia1]] == np && tt1.v[iprv2[ia1]] == nq)
-         || (tt1.v[inxt2[ia1]] == nq && tt1.v[iprv2[ia1]] == np))) {
-    return(0);
-  } remplace par l'assert: impossible non?*/
 
   for (ia2=0; ia2<3; ia2++) {
     if ( (tt2.v[ia2] != np) && (tt2.v[ia2] != nq) )  break;
@@ -70,10 +66,6 @@ int chkswpbdy(pMesh mesh,int *list,int ilist,int it1,int it2) {
   assert ( (tt2.v[inxt2[ia2]] == np && tt2.v[iprv2[ia2]] == nq) ||
            (tt2.v[inxt2[ia2]] == nq && tt2.v[iprv2[ia2]] == np) );
   na2 = tt2.v[ia2];
-  /*if ( !((tt2.v[inxt2[ia2]] == np && tt2.v[iprv2[ia2]] == nq)
-         || (tt2.v[inxt2[ia2]] == nq && tt2.v[iprv2[ia2]] == np))) {
-    return(0);
-  } remplace par l'assert: impossible non?*/
 
   /* Check non convexity (temporarily use b0,b1)*/
   norpts(mesh,tt1.v[ia1],tt1.v[inxt2[ia1]],tt2.v[ia2],b0);

@@ -547,7 +547,8 @@ static int cuttet_ls(pMesh mesh, pSol sol/*,double *tmp*/){
 #ifdef SINGUL
 /** Check if all singular edges will appear after split on the level-set function *
  *  (the shell of singular edges must have vertices with opposite sign). */
-static int chkedg_ls(pMesh mesh, pSol sol){
+static inline
+int chkedg_ls(pMesh mesh, pSol sol){
   pTetra   pt,pt1;
   pxTetra  pxt;
   double   v0,v1,v;

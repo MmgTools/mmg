@@ -6,40 +6,7 @@
  */
 #include "compil.date"
 #include "mmg3d.h"
-
-/* global */
-Info   info;
-unsigned char inxt2[3] = {1,2,0};
-unsigned char iprv2[3] = {2,0,1};
-unsigned char idir[4][3] = { {1,2,3}, {0,3,2}, {0,1,3}, {0,2,1} };
-char idirinv[4][4] = {{-1,0,1,2},{0,-1,2,1},{0,1,-1,2},{0,2,1,-1}};
-unsigned char iarf[4][3] = { {5,4,3}, {5,1,2}, {4,2,0}, {3,0,1} };
-unsigned char iarfinv[4][6] = { {-1,-1,-1,2,1,0}, {-1,1,2,-1,-1,0},{2,-1,1,-1,0,-1},{1,2,-1,0,-1,-1}};
-unsigned char inxt3[7] = { 1,2,3,0,1,2,3 };
-unsigned char iprv3[7] = { 3,0,1,2,3,0,1 };
-unsigned char iare[6][2] = { {0,1}, {0,2}, {0,3}, {1,2}, {1,3}, {2,3} };
-unsigned char ifar[6][2] = { {2,3}, {1,3}, {1,2}, {0,3}, {0,2}, {0,1} };
-unsigned char isar[6][2] = { {2,3}, {3,1}, {1,2}, {0,3}, {2,0}, {0,1} };
-unsigned char arpt[4][3] = { {0,1,2}, {0,4,3}, {1,3,5}, {2,5,4} };
-
-static void excfun(int sigid) {
-  fprintf(stdout,"\n Unexpected error:");  fflush(stdout);
-  switch(sigid) {
-  case SIGABRT:
-    fprintf(stdout,"  *** potential lack of memory.\n");  break;
-  case SIGFPE:
-    fprintf(stdout,"  Floating-point exception\n"); break;
-  case SIGILL:
-    fprintf(stdout,"  Illegal instruction\n"); break;
-  case SIGSEGV:
-    fprintf(stdout,"  Segmentation fault\n");  break;
-  case SIGTERM:
-  case SIGINT:
-    fprintf(stdout,"  Program killed\n");  break;
-  }
-  exit(EXIT_FAILURE);
-}
-
+#include "shared_func.h"
 
 static void usage(char *prog) {
   fprintf(stdout,"\nUsage: %s [-v [n]] [opts..] filein [fileout]\n",prog);
@@ -57,6 +24,13 @@ static void usage(char *prog) {
 #ifdef SINGUL
   fprintf(stdout,"-sf  file load file containing singularities\n");
 #endif
+#ifdef USE_SCOTCH
+  fprintf(stdout,"-rn [n]    Turn on or off the renumbering using SCOTCH [1/0] \n");
+#endif
+#ifdef SINGUL
+  fprintf(stdout,"-sing      Preserve internal singularities\n");
+#endif
+
 
   fprintf(stdout,"\n**  Parameters\n");
   fprintf(stdout,"-ar val    angle detection\n");
@@ -69,12 +43,6 @@ static void usage(char *prog) {
   fprintf(stdout,"-noswap    no edge or face flipping\n");
   fprintf(stdout,"-nomove    no point relocation\n");
   fprintf(stdout,"-noinsert  no point insertion/deletion \n");
-#ifdef USE_SCOTCH
-  fprintf(stdout,"-rn [n]    Turn on or off the renumbering using SCOTCH (0/1) \n");
-#endif
-#ifdef SINGUL
-  fprintf(stdout,"-sing      Preserve internal singularities\n");
-#endif
 
   exit(EXIT_FAILURE);
 }
@@ -387,6 +355,13 @@ void freeAll(pMesh mesh,pSol met
     free(met->m);
     met->m = NULL;
   }
+
+  /* info */
+  if ( info.npar && info.par ) {
+    free(info.par);
+    info.par = NULL;
+  }
+
 #ifdef SINGUL
   /* singul */
   if ( info.sing ) {
@@ -414,23 +389,7 @@ static void endcod() {
   fprintf(stdout,"\n   ELAPSED TIME  %s\n",stim);
 }
 
-
-/** set function pointers */
-static void setfunc(pMesh mesh,pSol met) {
-  if ( met->size < 6 ) {
-    caltet = caltet_iso;
-    lenedg = lenedg_iso;
-    defsiz = defsiz_iso;
-    gradsiz = gradsiz_iso;
-  }
-  else {
-    caltet = caltet_ani;
-    lenedg = lenedg_ani;
-    /*defsiz = defsiz_ani;
-      gradsiz = gradsiz_ani;*/
-  }
-}
-
+/** main programm */
 int main(int argc,char *argv[]) {
   Mesh      mesh;
   Sol       met;
@@ -473,6 +432,7 @@ int main(int argc,char *argv[]) {
   info.nomove   = 0;
   info.noinsert = 0;
   info.fem      = 0;
+  info.npar     = 0;
 #ifdef SINGUL
   info.sing     = 0;
 #endif
@@ -483,6 +443,9 @@ int main(int argc,char *argv[]) {
 
   /* command line */
   if ( !parsar(argc,argv,&mesh,&met,&sing) )  return(MMG5_STRONGFAILURE);
+#ifdef USE_SCOTCH
+  warnScotch(info.mem);
+#endif
   /* load data */
   fprintf(stdout,"\n  -- INPUT DATA\n");
   chrono(ON,&info.ctim[1]);
@@ -508,7 +471,8 @@ int main(int argc,char *argv[]) {
       if ( !sing.namein )
         fprintf(stdout,"  ## WARNING: NO SINGULARITIES PROVIDED.\n");
       else
-        if ( !loadSingul(&sing) ) RETURN_AND_FREE(&mesh,&met,&sing,MMG5_STRONGFAILURE);
+        if ( !loadSingul(&sing) )
+          RETURN_AND_FREE(&mesh,&met,&sing,MMG5_STRONGFAILURE);
     }
     else if ( sing.namein ) {
       fprintf(stdout,"  ## WARNING: SINGULARITIES MUST BE INSERTED IN");
@@ -526,16 +490,19 @@ int main(int argc,char *argv[]) {
   chrono(ON,&info.ctim[2]);
   setfunc(&mesh,&met);
   if ( abs(info.imprim) > 0 )  outqua(&mesh,&met);
-  fprintf(stdout,"\n  %s\n   MODULE MMG3D: IMB-LJLL : %s (%s)\n  %s\n",MG_STR,MG_VER,MG_REL,MG_STR);
+  fprintf(stdout,"\n  %s\n   MODULE MMG3D: IMB-LJLL : %s (%s)\n  %s\n",
+          MG_STR,MG_VER,MG_REL,MG_STR);
   if ( info.imprim )  fprintf(stdout,"\n  -- PHASE 1 : ANALYSIS\n");
 
-  if ( !scaleMesh(&mesh,&met,&sing) ) RETURN_AND_FREE(&mesh,&met,&sing,MMG5_STRONGFAILURE);
+  if ( !scaleMesh(&mesh,&met,&sing) )
+    RETURN_AND_FREE(&mesh,&met,&sing,MMG5_STRONGFAILURE);
   if ( info.iso ) {
     if ( !met.np ) {
       fprintf(stdout,"\n  ## ERROR: A VALID SOLUTION FILE IS NEEDED \n");
       RETURN_AND_FREE(&mesh,&met,&sing,MMG5_STRONGFAILURE);
     }
-    if ( !mmg3d2(&mesh,&met) ) RETURN_AND_FREE(&mesh,&met,&sing,MMG5_STRONGFAILURE);
+    if ( !mmg3d2(&mesh,&met) )
+      RETURN_AND_FREE(&mesh,&met,&sing,MMG5_STRONGFAILURE);
   }
 
 #ifdef SINGUL
@@ -556,7 +523,8 @@ int main(int argc,char *argv[]) {
 #endif
 
 #ifdef DEBUG
-  if ( !met.np && !DoSol(&mesh,&met,&info) ) RETURN_AND_FREE(&mesh,&met,&sing,MMG5_LOWFAILURE);
+  if ( !met.np && !DoSol(&mesh,&met,&info) )
+    RETURN_AND_FREE(&mesh,&met,&sing,MMG5_LOWFAILURE);
 #endif
   if ( !analys(&mesh) ) RETURN_AND_FREE(&mesh,&met,&sing,MMG5_LOWFAILURE);
 

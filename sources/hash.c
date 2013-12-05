@@ -864,11 +864,8 @@ int bdryIso(pMesh mesh) {
   else if ( mesh->nt+nt >= mesh->ntmax )
     mesh->tria = (pTria)realloc(mesh->tria,(mesh->nt+nt+1)*sizeof(Tria));
   if ( !mesh->tria ){
-    fprintf(stdout,"  ## Allocation problem (tria), not enough memory.\n");
-    fprintf(stdout,"  ## Check the mesh size or ");
-    fprintf(stdout,"increase the allocated memory with the -m option.\n");
-    fprintf(stdout,"  Exit program.\n");
-    return(0);
+    perror("  ## Memory problem: calloc/realloc");
+    exit(EXIT_FAILURE);
   }
 
   for (k=1; k<=mesh->ne; k++) {

@@ -29,58 +29,85 @@
 
 #include "compil.date"
 #include "mmg3d.h"
+#include "shared_func.h"
 
-/* global */
 /** Warning: if the library is run on multithread, global variables may be overwritten */
-Info info;
 
-unsigned char inxt2[3] = {1,2,0};
-unsigned char iprv2[3] = {2,0,1};
-unsigned char idir[4][3] = { {1,2,3}, {0,3,2}, {0,1,3}, {0,2,1} };
-char idirinv[4][4] = {{-1,0,1,2},{0,-1,2,1},{0,1,-1,2},{0,2,1,-1}};
-unsigned char iarf[4][3] = { {5,4,3}, {5,1,2}, {4,2,0}, {3,0,1} };
-unsigned char iarfinv[4][6] = { {-1,-1,-1,2,1,0}, {-1,1,2,-1,-1,0},{2,-1,1,-1,0,-1},{1,2,-1,0,-1,-1}};
-unsigned char inxt3[7] = { 1,2,3,0,1,2,3 };
-unsigned char iprv3[7] = { 3,0,1,2,3,0,1 };
-unsigned char iare[6][2] = { {0,1}, {0,2}, {0,3}, {1,2}, {1,3}, {2,3} };
-unsigned char ifar[6][2] = { {2,3}, {1,3}, {1,2}, {0,3}, {0,2}, {0,1} };
-unsigned char isar[6][2] = { {2,3}, {3,1}, {1,2}, {0,3}, {2,0}, {0,1} };
-unsigned char arpt[4][3] = { {0,1,2}, {0,4,3}, {1,3,5}, {2,5,4} };
+/** Initialization of option tables with default values */
+void mmg3dinit(int opt_i[10],double opt_d[6]) {
 
+  /* default values for first tab (integer) */
+  opt_i[   MMG5_imprim] = -99; /**< [-10..10],Tune level of imprim */
+  opt_i[      MMG5_mem] = -1;  /**< [n/-1]   ,Set memory size to n Mbytes/keep the default value */
+  opt_i[    MMG5_debug] =  0;  /**< [0/1]    ,Turn on/off debug mode */
+  opt_i[    MMG5_angle] =  1;  /**< [1/0]    ,Turn on/off angle detection */
+  opt_i[      MMG5_iso] =  0;  /**< [0/1]    ,Turn on/off levelset meshing */
+  opt_i[ MMG5_noinsert] =  0;  /**< [0/1]    ,avoid/allow point insertion/deletion */
+  opt_i[   MMG5_noswap] =  0;  /**< [0/1]    ,avoid/allow edge or face flipping */
+  opt_i[   MMG5_nomove] =  0;  /**< [0/1]    ,avoid/allow point relocation */
+#ifdef USE_SCOTCH
+  opt_i[    MMG5_renum] = 1;   /**< [1/0]    , Turn on/off the renumbering using SCOTCH; */
+#else
+  opt_i[    MMG5_renum] = 0;   /**< [1/0]    , Turn on/off the renumbering using SCOTCH; */
+#endif
+#ifdef SINGUL
+  opt_i[   MMG5_singul] =  0;  /**< [0/1]    ,preserve internal singularities */
+#endif
 
-static inline void excfun(int sigid) {
-  fprintf(stdout,"\n Unexpected error:");  fflush(stdout);
-  switch(sigid) {
-  case SIGABRT:
-    fprintf(stdout,"  *** potential lack of memory.\n");  break;
-  case SIGFPE:
-    fprintf(stdout,"  Floating-point exception\n"); break;
-  case SIGILL:
-    fprintf(stdout,"  Illegal instruction\n"); break;
-  case SIGSEGV:
-    fprintf(stdout,"  Segmentation fault\n");  break;
-  case SIGTERM:
-  case SIGINT:
-    fprintf(stdout,"  Program killed\n");  break;
-  }
-  exit(EXIT_FAILURE);
+  /* default values for second tab (double) */
+  opt_d[  MMG5_dhd] = 45;       /**< angle detection; */
+  opt_d[ MMG5_hmin] = 0.0;      /**< minimal mesh size; */
+  opt_d[ MMG5_hmax] = FLT_MAX;  /**< maximal mesh size; */
+  opt_d[MMG5_hausd] = 0.01;     /**< control Hausdorff */
+  opt_d[MMG5_hgrad] = exp(0.1); /**< control gradation; */
+  opt_d[   MMG5_ls] = 0.0;      /**< level set value */
 }
 
-/** set function pointers */
-static inline
-void setfunc(pMesh mesh,pSol met) {
-  if ( met->size < 6 ) {
-    caltet = caltet_iso;
-    lenedg = lenedg_iso;
-    defsiz = defsiz_iso;
-    gradsiz = gradsiz_iso;
-  }
+/** Store user options in the info structure */
+void stockOption(int opt_i[10],double opt_d[6],pMesh mesh){
+
+  /* recovering of first option table (integers) */
+  info.imprim   = opt_i[MMG5_imprim];
+  info.mem      = opt_i[MMG5_mem];
+  info.ddebug   = opt_i[MMG5_debug];
+  if ( !opt_i[MMG5_angle] )
+    info.dhd = -1.0;
   else {
-    caltet = caltet_ani;
-    lenedg = lenedg_ani;
-    /*defsiz = defsiz_ani;
-      gradsiz = gradsiz_ani;*/
+    info.dhd = opt_d[MMG5_dhd];
+    info.dhd = MG_MAX(0.0, MG_MIN(180.0,info.dhd));
+    info.dhd = cos(info.dhd*M_PI/180.0);
   }
+
+  info.iso      = opt_i[MMG5_iso];
+  info.noinsert = opt_i[MMG5_noinsert];
+  info.noswap   = opt_i[MMG5_noswap];
+  info.nomove   = opt_i[MMG5_nomove];
+#ifdef USE_SCOTCH
+  info.renum    = opt_i[MMG5_renum];
+#else
+  info.renum    = 0;
+#endif
+#ifdef SINGUL
+  info.sing     = opt_i[MMG5_sing];
+#else
+  info.sing     = 0;
+#endif
+
+  /* recovering of second option table (doubles) */
+  info.hmin     = opt_d[MMG5_hmin];
+  info.hmax     = opt_d[MMG5_hmax];
+  info.hausd    = opt_d[MMG5_hausd];
+  info.hgrad    = opt_d[MMG5_hgrad];
+  if ( info.hgrad < 0.0 )
+    info.hgrad = -1.0;
+  else
+    info.hgrad = log(info.hgrad);
+
+  info.ls       = opt_d[MMG5_ls];
+
+  /* other options */
+  info.fem      = 0;
+  info.npar     = 0;
 }
 
 /** Deallocations before return */
@@ -89,7 +116,6 @@ void freeAll(pMesh mesh,pSol met
              ,pSingul singul
 #endif
              ){
-
   /* mesh */
   free(mesh->point);
   mesh->point = NULL;
@@ -123,6 +149,13 @@ void freeAll(pMesh mesh,pSol met
     free(met->m);
     met->m = NULL;
   }
+
+  /* info */
+  if ( info.npar && info.par ) {
+    free(info.par);
+    info.par = NULL;
+  }
+
 #ifdef SINGUL
   /* singul */
   if ( info.sing ) {
@@ -361,80 +394,7 @@ int packMesh(pMesh mesh,pSol met) {
   return(1);
 }
 
-/** Initialization of option tables with default values */
-void mmg3dinit(int opt_i[10],double opt_d[6]) {
-
-  /* default values for first tab (integer) */
-  opt_i[   MMG5_imprim] = -99; /**< [-10..10],Tune level of imprim */
-  opt_i[      MMG5_mem] = -1;  /**< [n/-1]   ,Set memory size to n Mbytes/keep the default value */
-  opt_i[    MMG5_debug] =  0;  /**< [1/0]    ,Turn on/off debug mode */
-  opt_i[    MMG5_angle] =  1;  /**< [1/0]    ,Turn on/off angle detection */
-  opt_i[      MMG5_iso] =  0;  /**< [1/0]    ,Turn on/off levelset meshing */
-  opt_i[ MMG5_noinsert] =  0;  /**< [1/0]    ,avoid/allow point insertion/deletion */
-  opt_i[   MMG5_noswap] =  0;  /**< [1/0]    ,avoid/allow edge or face flipping */
-  opt_i[   MMG5_nomove] =  0;  /**< [1/0]    ,avoid/allow point relocation */
-#ifdef USE_SCOTCH
-  opt_i[    MMG5_renum] = 1;   /**< [1/0]    , Turn on/off the renumbering using SCOTCH; */
-#else
-  opt_i[    MMG5_renum] = 0;   /**< [1/0]    , Turn on/off the renumbering using SCOTCH; */
-#endif
-
-  /* default values for second tab (double) */
-  opt_d[  MMG5_dhd] = 45;       /**< angle detection; */
-  opt_d[ MMG5_hmin] = 0.0;      /**< minimal mesh size; */
-  opt_d[ MMG5_hmax] = FLT_MAX;  /**< maximal mesh size; */
-  opt_d[MMG5_hausd] = 0.01;     /**< control Hausdorff */
-  opt_d[MMG5_hgrad] = exp(0.1); /**< control gradation; */
-  opt_d[   MMG5_ls] = 0.0;      /**< level set value */
-}
-
-/** Store user options in the info structure */
-void stockOption(int opt_i[10],double opt_d[6],pMesh mesh){
-
-  /* recovering of first option table (integers) */
-  info.imprim   = opt_i[MMG5_imprim];
-  info.mem      = opt_i[MMG5_mem];
-  info.ddebug   = opt_i[MMG5_debug];
-  if ( !opt_i[MMG5_angle] )
-    info.dhd = -1.0;
-  else {
-    info.dhd = opt_d[MMG5_dhd];
-    info.dhd = MG_MAX(0.0, MG_MIN(180.0,info.dhd));
-    info.dhd = cos(info.dhd*M_PI/180.0);
-  }
-
-  info.iso      = opt_i[MMG5_iso];
-  info.noinsert = opt_i[MMG5_noinsert];
-  info.noswap   = opt_i[MMG5_noswap];
-  info.nomove   = opt_i[MMG5_nomove];
-#ifdef USE_SCOTCH
-  info.renum    = opt_i[MMG5_renum];
-#else
-  info.renum    = 0;
-#endif
-#ifdef SINGUL
-  info.sing     = opt_i[MMG5_sing];
-#else
-  info.sing     = 0;
-#endif
-
-  /* recovering of second option table (doubles) */
-  info.hmin     = opt_d[MMG5_hmin];
-  info.hmax     = opt_d[MMG5_hmax];
-  info.hausd    = opt_d[MMG5_hausd];
-  info.hgrad    = opt_d[MMG5_hgrad];
-  if ( info.hgrad < 0.0 )
-    info.hgrad = -1.0;
-  else
-    info.hgrad = log(info.hgrad);
-
-  info.ls       = opt_d[MMG5_ls];
-
-  /* other options */
-  info.fem      = 0;
-
-}
-
+/** main programm */
 int mmg3dlib(int opt_i[10],double opt_d[6],pMesh mesh,pSol met
 #ifdef SINGUL
              ,pSingul sing
@@ -468,6 +428,9 @@ int mmg3dlib(int opt_i[10],double opt_d[6],pMesh mesh,pSol met
 
   stockOption(opt_i,opt_d,mesh);
 
+#ifdef USE_SCOTCH
+  warnScotch(info.mem);
+#endif
   /* load data */
   fprintf(stdout,"\n  -- MMG3DLIB: INPUT DATA\n");
   chrono(ON,&(info.ctim[1]));

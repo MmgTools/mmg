@@ -644,7 +644,7 @@ int movbdyrefpt(pMesh mesh, int *listv, int ilistv, int *lists, int ilists){
     for( i=0 ; i<3 ; i++ )
       if ( tt.v[i] == ip0 )      break;
     assert(i<3);
-    tt.v[i] = 0;                 /* bug 20/04/2012 */
+    tt.v[i] = 0;
     caltmp = caltri(mesh,&tt);
     if ( caltmp < EPSD )        return(0);
     calnew = MG_MIN(calnew,caltmp);
@@ -885,8 +885,8 @@ int movbdynompt(pMesh mesh, int *listv, int ilistv, int *lists, int ilists){
   ppt0->c[0] = o[0];
   ppt0->c[1] = o[1];
   ppt0->c[2] = o[2];
-  ppt0->tag      = p0->tag;
-  ppt0->ref      = p0->ref;
+  ppt0->tag  = p0->tag;
+  ppt0->ref  = p0->ref;
 
   nxp = mesh->xp + 1;
   if ( nxp > mesh->xpmax ) {
@@ -1206,7 +1206,7 @@ int movbdyridpt(pMesh mesh,int *listv,int ilistv,int *lists,int ilists) {
       if ( tt.v[i] == ip0 )      break;
     }
     assert(i<3);
-    tt.v[i] = 0;                        /* bug 20/04/2012 */
+    tt.v[i] = 0;
     caltmp = caltri(mesh,&tt);
     if ( caltmp < EPSD )        return(0);
     calnew = MG_MIN(calnew,caltmp);
