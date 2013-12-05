@@ -4,7 +4,6 @@
  * Copyright (c) 2004- IMB/LJLL.
  * All rights reserved.
  */
-#include "compil.date"
 #include "mmg3d.h"
 #include "shared_func.h"
 
@@ -399,7 +398,7 @@ int main(int argc,char *argv[]) {
 
   fprintf(stdout,"  -- MMG3d, Release %s (%s) \n",MG_VER,MG_REL);
   fprintf(stdout,"     %s\n",MG_CPY);
-  fprintf(stdout,"    %s\n",COMPIL);
+  fprintf(stdout,"    %s %s\n",__DATE__,__TIME__);
 
   signal(SIGABRT,excfun);
   signal(SIGFPE,excfun);
