@@ -460,6 +460,7 @@ int mmg3dlib(int opt_i[10],double opt_d[6],pMesh mesh,pSol met
     }
   }
 #endif
+  if ( !parsop(mesh,met) )  return(MMG5_LOWFAILURE);
 
   chrono(OFF,&(info.ctim[1]));
   printim(info.ctim[1].gdif,stim);

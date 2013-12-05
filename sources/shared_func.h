@@ -109,14 +109,15 @@ int parsop(pMesh mesh,pSol met) {
         if ( !strcmp(buf,"vertices") || !strcmp(buf,"vertex") )
           par->elt = MMG5_Vertex;
         else if ( !strcmp(buf,"triangles") || !strcmp(buf,"triangle") )
-          par->elt = MMG5_triangle;
-        else if ( !strcmp(buf,"elements") || !strcmp(buf,"element") )
+          par->elt = MMG5_Triangle;
+        else if ( !strcmp(buf,"elements") || !strcmp(buf,"element") ) {
           if ( info.ddebug || info.imprim > 5 ) {
             fprintf(stdout,"  ##Warning: hausdorff distances on elements ignored.\n");
             fprintf(stdout,"  Use \"triangle\" or \"vertex\" keyword to impose a");
             fprintf(stdout," specific hausdorff distance on a boundary reference.\n");
           }
           par->elt = MMG5_Element;
+        }
         else {
           fprintf(stdout,"  %%%% Wrong format: %s\n",buf);
           continue;

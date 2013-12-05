@@ -10,9 +10,11 @@ int chkswpbdy(pMesh mesh,int *list,int ilist,int it1,int it2) {
   pxTetra  pxt;
   pPoint   p0,p1,ppt0;
   Tria     tt1,tt2;
-  double   b0[3],b1[3],v[3],c[3],ux,uy,uz,ps,disnat,dischg,cal1,cal2,calnat,calchg,calold,calnew,caltmp;
+  double   b0[3],b1[3],v[3],c[3],ux,uy,uz,ps,disnat,dischg;
+  double   cal1,cal2,calnat,calchg,calold,calnew,caltmp,hausd;
   int      iel,iel1,iel2,np,nq,na1,na2,k,nminus,nplus;
   char     ifa1,ifa2,ia,ip,iq,ia1,ia2,j,isshell;
+  pPar     par;
 
   iel = list[0] / 6;
   ia  = list[0] % 6;
@@ -78,6 +80,28 @@ int chkswpbdy(pMesh mesh,int *list,int ilist,int it1,int it2) {
 
   p0 = &mesh->point[np];
   p1 = &mesh->point[nq];
+
+  /* local hausdorff for triangles */
+  hausd = -info.hausd;
+  for (k=0; k<info.npar; k++) {
+    par = &info.par[k];
+    if ( (par->elt == MMG5_Triangle) &&
+         ((tt1.ref == par->ref ) || (tt2.ref == par->ref)) ) {
+      if ( hausd < 0 )  hausd = par->hausd;
+      else              hausd = MG_MIN(par->hausd, hausd);
+    }
+  }
+
+  /* local hausdorff for vertices */
+  for (k=0; k<info.npar; k++) {
+    par = &info.par[k];
+    if ( (par->elt == MMG5_Vertex ) &&
+         ((p0->ref == par->ref ) || (p1->ref == par->ref )) ) {
+      if ( hausd < 0 )  hausd = par->hausd;
+      else              hausd = MG_MIN(par->hausd, hausd);
+    }
+  }
+
   ux = p1->c[0] - p0->c[0];
   uy = p1->c[1] - p0->c[1];
   uz = p1->c[2] - p0->c[2];
@@ -94,7 +118,7 @@ int chkswpbdy(pMesh mesh,int *list,int ilist,int it1,int it2) {
   c[2] = b1[2] - (p1->c[2] - ATHIRD*uz);
 
   disnat = MG_MAX(disnat, c[0]*c[0] + c[1]*c[1] + c[2]*c[2]);
-  disnat = MG_MAX(disnat,info.hausd * info.hausd);
+  disnat = MG_MAX(disnat,hausd * hausd);
 
   p0 = &mesh->point[na1];
   p1 = &mesh->point[na2];
@@ -114,7 +138,7 @@ int chkswpbdy(pMesh mesh,int *list,int ilist,int it1,int it2) {
   c[2] = b1[2] - (p1->c[2] - ATHIRD*uz);
 
   dischg = MG_MAX(dischg,c[0]*c[0] + c[1]*c[1] + c[2]*c[2]);
-  dischg = MG_MAX(dischg,info.hausd * info.hausd);
+  dischg = MG_MAX(dischg,hausd * hausd);
 
   if ( dischg > disnat )   return(0);
   cal1 = caltri(mesh,&tt1);
