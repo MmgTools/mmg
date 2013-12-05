@@ -862,8 +862,8 @@ int chkmaniball(pMesh mesh, int start, char ip){
     k = list[cur] / 4;
     pt = &mesh->tetra[k];
     if( pt->ref == ref ) {
-      fprintf(stdout,"   *** Topological problem :");
-      fprintf(stdout,"non manifold surface at point %d \n",nump);
+      fprintf(stdout,"   *** Topological problem:");
+      fprintf(stdout," non manifold surface at point %d \n",nump);
       return(0);
     }
   }
@@ -920,12 +920,8 @@ int chkmani(pMesh mesh){
       for(j=0; j<3; j++){
         ip = idir[i][j];
 
-        if(!chkmaniball(mesh,k,ip)){
-          fprintf(stdout,"Non orientable implicit surface : ball of point %d\n",pt->v[ip]);
-          saveMesh(mesh);
-
+        if(!chkmaniball(mesh,k,ip))
           return(0);
-        }
       }
     }
   }

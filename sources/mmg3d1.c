@@ -161,10 +161,9 @@ char chkedg(pMesh mesh,Tria *pt,char ori) {
   pPoint   p[3];
   xPoint  *pxp;
   double   n[3][3],t[3][3],nt[3],*n1,*n2,t1[3],t2[3];
-  double   ps,ps2,ux,uy,uz,ll,il,alpha,dis,hma2,hausd;
-  int      j,ia,ib,ic;
+  double   ps,ps2,ux,uy,uz,ll,il,alpha,dis,hma2;
+  int      ia,ib,ic;
   char     i,i1,i2;
-  pPar     par;
 
   ia   = pt->v[0];
   ib   = pt->v[1];
@@ -218,14 +217,6 @@ char chkedg(pMesh mesh,Tria *pt,char ori) {
     }
   }
 
-  /* local hausdorff for triangle */
-  hausd = -info.hausd;
-  for (i=0; i<info.npar; i++) {
-    par = &info.par[i];
-    if ( (par->elt == MMG5_Triangle) && (pt->ref == par->ref ) )
-      hausd = par->hausd;
-  }
-
   /* analyze edges */
   for (i=0; i<3; i++) {
     i1 = inxt2[i];
@@ -242,16 +233,6 @@ char chkedg(pMesh mesh,Tria *pt,char ori) {
       continue;
     }
     il = 1.0 / sqrt(ll);
-
-    /* local hausdorff for vertices */
-    for (j=0; j<info.npar; j++) {
-      par = &info.par[j];
-      if ( (par->elt == MMG5_Vertex ) &&
-           ((p[i1]->ref == par->ref ) || (p[i2]->ref == par->ref )) ) {
-        if ( hausd < 0 )  hausd = par->hausd;
-        else              hausd = MG_MIN(par->hausd, hausd);
-      }
-    }
 
     /* Hausdorff w/r tangent direction */
     if ( MG_EDG(pt->tag[i]) || ( pt->tag[i] & MG_NOM )) {
@@ -301,7 +282,7 @@ char chkedg(pMesh mesh,Tria *pt,char ori) {
     ps  = t1[0]*ux + t1[1]*uy + t1[2]*uz;
     ps *= il;
     dis = alpha*alpha*fabs(1.0 - ps*ps);
-    if ( dis > hausd*hausd ) {
+    if ( dis > info.hausd*info.hausd ) {
       MG_SET(pt->flag,i);
       continue;
     }
@@ -309,7 +290,7 @@ char chkedg(pMesh mesh,Tria *pt,char ori) {
     ps *= il;
     dis = alpha*alpha*fabs(1.0 - ps*ps);
 
-    if ( dis > hausd*hausd ) {
+    if ( dis > info.hausd*info.hausd ) {
       MG_SET(pt->flag,i);
       continue;
     }

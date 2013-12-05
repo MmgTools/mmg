@@ -10,7 +10,7 @@ extern char   ddb;
 
 
 /** Define isotropic size at regular point nump, whose surfacic ball is provided */
-static double defsizreg(pMesh mesh,pSol met,int nump,int *lists,int ilists, double hausd) {
+static double defsizreg(pMesh mesh,pSol met,int nump,int *lists,int ilists) {
   pTetra       pt;
   pxTetra      pxt;
   pPoint       p0,p1;
@@ -309,11 +309,11 @@ static double defsizreg(pMesh mesh,pSol met,int nump,int *lists,int ilists, doub
   }
 
   /* h computation : h(x) = sqrt( 9*hausd / (2 * max(kappa1(x),kappa2(x)) ) */
-  kappa[0] = 2.0/9.0 * fabs(kappa[0]) / hausd;
+  kappa[0] = 2.0/9.0 * fabs(kappa[0]) / info.hausd;
   kappa[0] = MG_MIN(kappa[0],isqhmin);
   kappa[0] = MG_MAX(kappa[0],isqhmax);
 
-  kappa[1] = 2.0/9.0 * fabs(kappa[1]) / hausd;
+  kappa[1] = 2.0/9.0 * fabs(kappa[1]) / info.hausd;
   kappa[1] = MG_MIN(kappa[1],isqhmin);
   kappa[1] = MG_MAX(kappa[1],isqhmax);
 
@@ -340,7 +340,7 @@ static double defsizreg(pMesh mesh,pSol met,int nump,int *lists,int ilists, doub
       d[1] =  r[1][0]*c[0] + r[1][1]*c[1] + r[1][2]*c[2];
 
       hnm = intm[0]*d[0]*d[0] + 2.0*intm[1]*d[0]*d[1] + intm[2]*d[1]*d[1];
-      hnm = 2.0/9.0 * fabs(hnm) / hausd;
+      hnm = 2.0/9.0 * fabs(hnm) / info.hausd;
       hnm = MG_MIN(hnm,isqhmin);
       hnm = MG_MAX(hnm,isqhmax);
       hnm = 1.0 / sqrt(hnm);
@@ -357,11 +357,10 @@ int defsiz_iso(pMesh mesh,pSol met) {
   pTetra    pt;
   pxTetra   pxt;
   pPoint    p0,p1;
-  double    hp,v[3],b0[3],b1[3],b0p0[3],b1b0[3],p1b1[3],hausd;
+  double    hp,v[3],b0[3],b1[3],b0p0[3],b1b0[3],p1b1[3];
   double    secder0[3],secder1[3],kappa,tau[3],gammasec[3],ntau2,intau,ps,lm,*n;
   int       lists[LMAX+2],listv[LMAX+2],ilists,ilistv,k,ip0,ip1,l;
   char      i,j,ia,ised,i0,i1;
-  pPar      par;
 
   if ( abs(info.imprim) > 5 || info.ddebug )
     fprintf(stdout,"  ** Defining map\n");
@@ -398,14 +397,6 @@ int defsiz_iso(pMesh mesh,pSol met) {
     pxt = &mesh->xtetra[pt->xt];
     for (i=0; i<4; i++) {
       if ( !(pxt->ftag[i] & MG_BDY) ) continue;
-      /* local hausdorff for triangle */
-      hausd = -info.hausd;
-      for (l=0; l<info.npar; l++) {
-        par = &info.par[l];
-        if ( (par->elt == MMG5_Triangle) && (pxt->ref[i] == par->ref ) )
-          hausd = par->hausd;
-      }
-
       for (j=0; j<3; j++) {
         i0  = idir[i][j];
         ip0 = pt->v[i0];
@@ -414,18 +405,9 @@ int defsiz_iso(pMesh mesh,pSol met) {
         if ( MG_SIN(p0->tag) || MG_EDG(p0->tag) || (p0->tag & MG_NOM) ) continue;
         if ( !boulesurfvolp(mesh,k,i0,i,listv,&ilistv,lists,&ilists) )  continue;
 
-        /* local hausdorff for vertex */
-        for (l=0; l<info.npar; l++) {
-          par = &info.par[l];
-          if ( (par->elt == MMG5_Vertex ) && (p0->ref == par->ref ) ) {
-            if ( hausd < 0 )  hausd = par->hausd;
-            else              hausd = MG_MIN(par->hausd, hausd);
-          }
-        }
-
         n   = &mesh->xpoint[p0->xp].n1[0];
         directsurfball(mesh,ip0,lists,ilists,n);
-        hp  = defsizreg(mesh,met,ip0,lists,ilists,fabs(hausd));
+        hp  = defsizreg(mesh,met,ip0,lists,ilists);
         met->m[ip0] = MG_MIN(met->m[ip0],hp);
       }
     }
@@ -442,14 +424,6 @@ int defsiz_iso(pMesh mesh,pSol met) {
       if ( !(pxt->ftag[i] & MG_BDY) )  continue;
       else if ( !norface(mesh,k,i,v) )  continue;
 
-      /* local hausdorff for triangle */
-      hausd = -info.hausd;
-      for (l=0; l<info.npar; l++) {
-        par = &info.par[l];
-        if ( (par->elt == MMG5_Triangle) && (pxt->ref[i] == par->ref ) )
-          hausd = par->hausd;
-      }
-
       for (j=0; j<3; j++) {
         ia = iarf[i][j];
         i0 = iare[ia][0];
@@ -459,16 +433,6 @@ int defsiz_iso(pMesh mesh,pSol met) {
         p0  = &mesh->point[ip0];
         p1  = &mesh->point[ip1];
         if ( !MG_EDG(p0->tag) && !MG_EDG(p1->tag) )  continue;
-
-        /* local hausdorff for vertex */
-        for (l=0; l<info.npar; l++) {
-          par = &info.par[l];
-          if ( (par->elt == MMG5_Vertex ) &&
-               ((p0->ref == par->ref ) || (p1->ref == par->ref)) ) {
-            if ( hausd < 0 )  hausd = par->hausd;
-            else              hausd = MG_MIN(par->hausd, hausd);
-          }
-        }
 
         ised = MG_EDG(pxt->tag[ia]) || ( pxt->tag[ia] & MG_NOM );
 
@@ -525,7 +489,7 @@ int defsiz_iso(pMesh mesh,pSol met) {
         if ( kappa < EPSD )
           lm = MAXLEN;
         else
-          lm = sqrt(8.0*fabs(hausd) / kappa);
+          lm = sqrt(8.0*info.hausd / kappa);
 
         if ( MG_EDG(p0->tag) && !(p0->tag & MG_NOM) && !MG_SIN(p0->tag) )
           met->m[ip0] = MG_MAX(info.hmin,MG_MIN(met->m[ip0],lm));
@@ -534,45 +498,6 @@ int defsiz_iso(pMesh mesh,pSol met) {
       }
     }
   }
-
-  /* take local hmin/hmax */
-  for (j=0; j<info.npar; j++) {
-    par = &info.par[j];
-    if ( par->elt == MMG5_Vertex ) {
-      for (k=1; k<=mesh->np; k++) {
-        p0 = &mesh->point[k];
-        if ( (!MG_VOK(p0)) || (p0->ref != par->ref) )  continue;
-        met->m[k] = MG_MAX(par->hmin,MG_MIN(met->m[k],par->hmax));
-      }
-    }
-    else if ( par->elt == MMG5_Triangle ) {
-      for (k=1; k<=mesh->ne; k++) {
-        pt = &mesh->tetra[k];
-        if ( (!MG_EOK(pt)) || (!pt->xt) )  continue;
-        pxt = &mesh->xtetra[pt->xt];
-        for (i=0; i<4; i++) {
-          if ( (!(pxt->ftag[i] & MG_BDY)) || pxt->ref[i] != par->ref)  continue;
-          met->m[pt->v[idir[i][0]]] =
-            MG_MAX(par->hmin,MG_MIN(met->m[pt->v[idir[i][0]]],par->hmax));
-          met->m[pt->v[idir[i][1]]] =
-            MG_MAX(par->hmin,MG_MIN(met->m[pt->v[idir[i][1]]],par->hmax));
-          met->m[pt->v[idir[i][2]]] =
-            MG_MAX(par->hmin,MG_MIN(met->m[pt->v[idir[i][2]]],par->hmax));
-        }
-      }
-    }
-    else if ( par->elt == MMG5_Element ) {
-      for (k=1; k<=mesh->ne; k++) {
-        pt = &mesh->tetra[k];
-        if ( (!MG_EOK(pt)) || (pt->ref != par->ref) )  continue;
-        met->m[pt->v[0]] = MG_MAX(par->hmin,MG_MIN(met->m[pt->v[0]],par->hmax));
-        met->m[pt->v[1]] = MG_MAX(par->hmin,MG_MIN(met->m[pt->v[1]],par->hmax));
-        met->m[pt->v[2]] = MG_MAX(par->hmin,MG_MIN(met->m[pt->v[2]],par->hmax));
-        met->m[pt->v[3]] = MG_MAX(par->hmin,MG_MIN(met->m[pt->v[3]],par->hmax));
-      }
-    }
-  }
-
   return(1);
 }
 

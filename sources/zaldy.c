@@ -131,6 +131,13 @@ int zaldy(pMesh mesh) {
     mesh->nemax = 6*npask;
   }
 
+  if ( abs(info.imprim) > 5 || info.ddebug ) {
+    fprintf(stdout,"  ## ASKED MEMORY:\n");
+    fprintf(stdout,"         Max number of vertices     %8d\n",mesh->npmax);
+    fprintf(stdout,"         Max number of triangles     %8d\n",mesh->ntmax);
+    fprintf(stdout,"         Max number of elements     %8d\n",mesh->nemax);
+  }
+
   mesh->point = (pPoint)calloc(mesh->npmax+1,sizeof(Point));
   if ( !mesh->point ){
     perror("  ## Memory problem: calloc");
