@@ -402,7 +402,10 @@ int renumbering(int boxVertNbr, pMesh mesh, pSol sol) {
   CHECK_SCOTCH(SCOTCH_graphBuild(&graf, (SCOTCH_Num) 1, vertNbr, vertTab+1,
                                  NULL, NULL, NULL, edgeNbr, edgeTab+1, NULL),
                "scotch_graphbuild", 0) ;
-  CHECK_SCOTCH(SCOTCH_graphCheck(&graf), "scotch_graphcheck", 0) ;
+#ifndef NDEBUG
+  /* don't check in release mode */
+   CHECK_SCOTCH(SCOTCH_graphCheck(&graf), "scotch_graphcheck", 0);
+#endif
 
   permVrtTab = (SCOTCH_Num *)calloc(vertNbr + 1, sizeof(SCOTCH_Num));
   if ( !permVrtTab ) {
