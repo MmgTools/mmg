@@ -1224,7 +1224,7 @@ int movbdyridpt(pMesh mesh,int *listv,int ilistv,int *lists,int ilists) {
       // passing here)
       memset(pxp,0,sizeof(xPoint));
       return(0);
-     }
+    }
   }
   if ( calold < NULKAL && calnew <= calold )    return(0);
   else if ( calnew <= calold )  return(0);

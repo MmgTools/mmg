@@ -134,7 +134,7 @@ int zaldy(pMesh mesh) {
   if ( abs(info.imprim) > 5 || info.ddebug ) {
     fprintf(stdout,"  ## ASKED MEMORY:\n");
     fprintf(stdout,"         Max number of vertices     %8d\n",mesh->npmax);
-    fprintf(stdout,"         Max number of triangles     %8d\n",mesh->ntmax);
+    fprintf(stdout,"         Max number of triangles    %8d\n",mesh->ntmax);
     fprintf(stdout,"         Max number of elements     %8d\n",mesh->nemax);
   }
 

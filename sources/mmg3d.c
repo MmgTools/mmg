@@ -480,6 +480,8 @@ int main(int argc,char *argv[]) {
     }
   }
 #endif
+  if ( !parsop(&mesh,&met) )
+    RETURN_AND_FREE(&mesh,&met,&sing,MMG5_LOWFAILURE);
 
   chrono(OFF,&info.ctim[1]);
   printim(info.ctim[1].gdif,stim);

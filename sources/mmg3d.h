@@ -22,9 +22,7 @@
 #define MG_CPY   "Copyright (c) IMB-LJLL, 2004-"
 #define MG_STR   "&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&"
 
-#define MMG5_Vertex        1
-#define MMG5_Triangle      2
-#define MMG5_Element       3
+#define MMG5_Triangle      1
 
 /* Macros */
 #define MG_MAX(a,b) (((a) > (b)) ? (a) : (b))

@@ -11,6 +11,7 @@ int scaleMesh(pMesh mesh,pSol met,pSingul sing) {
 #endif
   double    dd;
   int       i,k;
+  pPar      par;
 
   /* compute bounding box */
   for (i=0; i<3; i++) {
@@ -82,6 +83,12 @@ int scaleMesh(pMesh mesh,pSol met,pSingul sing) {
     }
   }
 #endif
+  /* normalize local parameters */
+  for (k=0; k<info.npar; k++) {
+    par = &info.par[k];
+    par->hausd *= dd;
+  }
+
   return(1);
 }
 

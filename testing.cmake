@@ -184,10 +184,18 @@ FOREACH(EXEC ${LISTEXEC})
   ADD_TEST(NAME ChkBdry_multidomCube2_${EXEC}
     COMMAND ${EXEC} -hmax 0.1
     ${REG_TESTS_PATH}/ChkBdry_multidomCube2/c)
- #####
+  #####
   ADD_TEST(NAME ChkBdry_multidomCube3_${EXEC}
     COMMAND ${EXEC} -hmax 0.1
     ${REG_TESTS_PATH}/ChkBdry_multidomCube3/c)
+  #####
+  ADD_TEST(NAME HausdLoc_2Spheres${EXEC}
+    COMMAND ${EXEC}
+    ${REG_TESTS_PATH}/HausdLoc_2Spheres/2spheres
+    ${REG_TESTS_PATH}/HausdLoc_2Spheres/2spheres.o.meshb
+    -hgrad 1.2
+    )
+
 
 ENDFOREACH(EXEC)
 

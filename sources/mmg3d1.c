@@ -161,9 +161,10 @@ char chkedg(pMesh mesh,Tria *pt,char ori) {
   pPoint   p[3];
   xPoint  *pxp;
   double   n[3][3],t[3][3],nt[3],*n1,*n2,t1[3],t2[3];
-  double   ps,ps2,ux,uy,uz,ll,il,alpha,dis,hma2;
+  double   ps,ps2,ux,uy,uz,ll,il,alpha,dis,hma2,hausd;
   int      ia,ib,ic;
   char     i,i1,i2;
+  pPar     par;
 
   ia   = pt->v[0];
   ib   = pt->v[1];
@@ -215,6 +216,14 @@ char chkedg(pMesh mesh,Tria *pt,char ori) {
       else
         memcpy(&n[i],pxp->n1,3*sizeof(double));
     }
+  }
+
+  /* local hausdorff for triangle */
+  hausd = info.hausd;
+  for (i=0; i<info.npar; i++) {
+    par = &info.par[i];
+    if ( (par->elt == MMG5_Triangle) && (pt->ref == par->ref ) )
+      hausd = par->hausd;
   }
 
   /* analyze edges */
@@ -282,7 +291,7 @@ char chkedg(pMesh mesh,Tria *pt,char ori) {
     ps  = t1[0]*ux + t1[1]*uy + t1[2]*uz;
     ps *= il;
     dis = alpha*alpha*fabs(1.0 - ps*ps);
-    if ( dis > info.hausd*info.hausd ) {
+    if ( dis > hausd*hausd ) {
       MG_SET(pt->flag,i);
       continue;
     }
@@ -290,7 +299,7 @@ char chkedg(pMesh mesh,Tria *pt,char ori) {
     ps *= il;
     dis = alpha*alpha*fabs(1.0 - ps*ps);
 
-    if ( dis > info.hausd*info.hausd ) {
+    if ( dis > hausd*hausd ) {
       MG_SET(pt->flag,i);
       continue;
     }

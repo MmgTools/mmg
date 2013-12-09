@@ -77,10 +77,10 @@ int parsop(pMesh mesh,pSol met) {
   strcpy(data,mesh->namein);
   ptr = strstr(data,".mesh");
   if ( ptr )  *ptr = '\0';
-  strcat(data,".mmg3d");
+  strcat(data,".mmg3d5");
   in = fopen(data,"r");
   if ( !in ) {
-    sprintf(data,"%s","DEFAULT.mmg3d");
+    sprintf(data,"%s","DEFAULT.mmg3d5");
     in = fopen(data,"r");
     if ( !in )  return(1);
   }
@@ -106,26 +106,14 @@ int parsop(pMesh mesh,pSol met) {
         par = &info.par[i];
         fscanf(in,"%d %s ",&par->ref,buf);
         for (j=0; j<strlen(buf); j++)  buf[j] = tolower(buf[j]);
-        if ( !strcmp(buf,"vertices") || !strcmp(buf,"vertex") )
-          par->elt = MMG5_Vertex;
-        else if ( !strcmp(buf,"triangles") || !strcmp(buf,"triangle") )
+        if ( !strcmp(buf,"triangles") || !strcmp(buf,"triangle") )
           par->elt = MMG5_Triangle;
-        else if ( !strcmp(buf,"elements") || !strcmp(buf,"element") ) {
-          if ( info.ddebug || info.imprim > 5 ) {
-            fprintf(stdout,"  ##Warning: hausdorff distances on elements ignored.\n");
-            fprintf(stdout,"  Use \"triangle\" or \"vertex\" keyword to impose a");
-            fprintf(stdout," specific hausdorff distance on a boundary reference.\n");
-          }
-          par->elt = MMG5_Element;
-        }
         else {
           fprintf(stdout,"  %%%% Wrong format: %s\n",buf);
           continue;
         }
-        ret = fscanf(in,"%f %f %f",&fp1,&fp2,&fp3);
-        par->hmin  = fp1;
-        par->hmax  = fp2;
-        par->hausd = fp3;
+        ret = fscanf(in,"%f",&fp1);
+        par->hausd = fp1;
       }
     }
   }
