@@ -649,7 +649,11 @@ int movbdyrefpt(pMesh mesh, int *listv, int ilistv, int *lists, int ilists){
     if ( caltmp < EPSD )        return(0);
     calnew = MG_MIN(calnew,caltmp);
     if ( chkedg(mesh,&tt,MG_GET(pxt->ori,iface)) ) {
+      // Algiane: 09/12/2013 commit: we break the hausdorff criteria so we dont want
+      // the point to move? (modification not tested because I could not find a case
+      // passing here)
       memset(pxp,0,sizeof(xPoint));
+      return(0);
     }
   }
   if ( calold < NULKAL && calnew <= calold )    return(0);
@@ -926,7 +930,11 @@ int movbdynompt(pMesh mesh, int *listv, int ilistv, int *lists, int ilists){
     if ( caltmp < EPSD )        return(0);
     calnew = MG_MIN(calnew,caltmp);
     if ( chkedg(mesh,&tt,MG_GET(pxt->ori,iface)) ) {
+      // Algiane: 09/12/2013 commit: we break the hausdorff criteria so we dont want
+      // the point to move? (modification not tested because I could not find a case
+      // passing here)
       memset(pxp,0,sizeof(xPoint));
+      return(0);
     }
   }
   if ( calold < NULKAL && calnew <= calold )    return(0);
@@ -1211,8 +1219,12 @@ int movbdyridpt(pMesh mesh,int *listv,int ilistv,int *lists,int ilists) {
     if ( caltmp < EPSD )        return(0);
     calnew = MG_MIN(calnew,caltmp);
     if ( chkedg(mesh,&tt,MG_GET(pxt->ori,iface)) ) {            //MAYBE CHECKEDG ASKS STH FOR POINTS !!!!!
+      // Algiane: 09/12/2013 commit: we break the hausdorff criteria so we dont want
+      // the point to move? (modification not tested because I could not find a case
+      // passing here)
       memset(pxp,0,sizeof(xPoint));
-    }
+      return(0);
+     }
   }
   if ( calold < NULKAL && calnew <= calold )    return(0);
   else if ( calnew <= calold )  return(0);
