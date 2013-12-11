@@ -338,7 +338,8 @@ static int swpmsh(pMesh mesh,pSol met) {
           ier = chkswpbdy(mesh,list,ilist,it1,it2);
           if ( ier ) {
             ier = swpbdy(mesh,met,list,ret,it1);
-            if ( ier )  ns++;
+            if ( ier > 0 )  ns++;
+            else if ( ier < 0 )  return(-1);
             break;
           }
         }
@@ -358,7 +359,7 @@ static int swpmsh(pMesh mesh,pSol met) {
 static int swptet(pMesh mesh,pSol met,double crit) {
   pTetra   pt;
   pxTetra  pxt;
-  int      list[LMAX+2],ilist,k,it,nconf,maxit,ns,nns;
+  int      list[LMAX+2],ilist,k,it,nconf,maxit,ns,nns,ier;
   char     i;
 
   maxit = 2;
@@ -380,8 +381,9 @@ static int swptet(pMesh mesh,pSol met,double crit) {
 
         nconf = chkswpgen(mesh,k,i,&ilist,list,crit);
         if ( nconf ) {
-          ns++;
-          if ( !swpgen(mesh,met,nconf,ilist,list) ) return(-1);
+          ier = swpgen(mesh,met,nconf,ilist,list);
+          if ( ier > 0 )  ns++;
+          else if ( ier < 0 ) return(-1);
           break;
         }
       }
@@ -1264,9 +1266,8 @@ static int adpspl(pMesh mesh,pSol met, int* warn) {
         met->m[ip] = 0.5 * (met->m[ip1]+met->m[ip2]);
       //CECILE
       ier = split1b(mesh,met,list,ilist,ip,1);
-      if ( ier<0 ) {
-        fprintf(stdout,"%s:%d: Error: unable to split\n"
-                ,__FILE__,__LINE__);
+      if ( ier < 0 ) {
+        fprintf(stdout," ## Error: unable to split.\n");
         return(-1);
       }
       else if ( !ier ) {
@@ -1325,9 +1326,8 @@ static int adpspl(pMesh mesh,pSol met, int* warn) {
         met->m[ip] = 0.5 * (met->m[ip1]+met->m[ip2]);
       //CECILE
       ier = split1b(mesh,met,list,ilist,ip,1);
-      if ( ier<0 ) {
-        fprintf(stdout,"%s:%d: Error: unable to split\n"
-                ,__FILE__,__LINE__);
+      if ( ier < 0 ) {
+        fprintf(stdout,"  ## Error: unable to split.\n");
         return(-1);
       }
       else if ( !ier ) {
@@ -1475,14 +1475,15 @@ static int adptet(pMesh mesh,pSol met) {
 
     if ( !info.noinsert ) {
       nc = adpcol(mesh,met);
-#ifdef DEBUG
-      if(nc){ printf("APS ADPCOL == %d\n",nc);
-        prilen(mesh,met);}
-#endif
       if ( nc < 0 ) {
         fprintf(stdout,"  ## Unable to complete mesh. Exit program.\n");
         return(0);
       }
+#ifdef DEBUG
+      if ( nc ) { printf("APS ADPCOL == %d\n",nc);
+        prilen(mesh,met);
+      }
+#endif
     }
     else  nc = 0;
 

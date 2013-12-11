@@ -130,7 +130,8 @@ static int swpmshcpy(pMesh mesh,pSol met) {
           ier = chkswpbdy(mesh,list,ilist,it1,it2);
           if ( ier ) {
             ier = swpbdy(mesh,met,list,ret,it1);
-            if ( ier )  ns++;
+            if ( ier > 0 )  ns++;
+            else if ( ier < 0 )  return(-1);
             break;
           }
         }
@@ -150,7 +151,7 @@ static int swpmshcpy(pMesh mesh,pSol met) {
 /*static*/ int swptetdel(pMesh mesh,pSol met,double crit) {
   pTetra   pt;
   pxTetra  pxt;
-  int      list[LMAX+2],ilist,k,it,nconf,maxit,ns,nns;
+  int      list[LMAX+2],ilist,k,it,nconf,maxit,ns,nns,ier;
   char     i;
 
   maxit = 2;
@@ -172,8 +173,9 @@ static int swpmshcpy(pMesh mesh,pSol met) {
 
         nconf = chkswpgen(mesh,k,i,&ilist,list,crit);
         if ( nconf ) {
-          ns++;
-          if ( !swpgen(mesh,met,nconf,ilist,list) ) return(-1);
+          ier = swpgen(mesh,met,nconf,ilist,list);
+          if ( ier > 0 )  ns++;
+          else if ( ier < 0 ) return(-1);
           break;
         }
       }
@@ -1036,9 +1038,8 @@ static int swpmshcpy(pMesh mesh,pSol met) {
         met->m[ip] = 0.5 * (met->m[ip1]+met->m[ip2]);
       //CECILE
       ier = split1b(mesh,met,list,ilist,ip,1);
-      if ( ier<0 ) {
-        fprintf(stdout,"%s:%d: Error: unable to split\n"
-                ,__FILE__,__LINE__);
+      if ( ier < 0 ) {
+        fprintf(stdout,"  ## Error: unable to split.\n");
         return(-1);
       }
       else if ( !ier ) {
@@ -1093,9 +1094,8 @@ static int swpmshcpy(pMesh mesh,pSol met) {
         met->m[ip] = 0.5 * (met->m[ip1]+met->m[ip2]);
       //CECILE
       ier = split1b(mesh,met,list,ilist,ip,1);
-      if ( ier<0 ) {
-        fprintf(stdout,"%s:%d: Error: unable to split\n"
-                ,__FILE__,__LINE__);
+      if ( ier < 0 ) {
+        fprintf(stdout,"  ## Error: unable to split.\n");
         return(-1);
       }
       else if ( !ier ) { //Et on teste pas du tout les qualités ici ?
@@ -1324,9 +1324,8 @@ int adpsplcol(pMesh mesh,pSol met,pBucket bucket, int* warn) {
               met->m[ip] = 0.5 * (met->m[ip1]+met->m[ip2]);
             //CECILE
             ier = split1b(mesh,met,list,ilist,ip,1);
-            if ( ier<0 ) {
-              fprintf(stdout,"%s:%d: Error: unable to split\n"
-                      ,__FILE__,__LINE__);
+            if ( ier < 0 ) {
+              fprintf(stdout,"  ## Error: unable to split.\n");
               return(-1);
             }
             else if ( !ier ) {
@@ -1383,9 +1382,8 @@ int adpsplcol(pMesh mesh,pSol met,pBucket bucket, int* warn) {
               met->m[ip] = 0.5 * (met->m[ip1]+met->m[ip2]);
             //CECILE
             ier = split1b(mesh,met,list,ilist,ip,1);
-            if ( ier<0 ) {
-              fprintf(stdout,"%s:%d: Error: unable to split\n"
-                      ,__FILE__,__LINE__);
+            if ( ier < 0 ) {
+              fprintf(stdout,"  ## Error: unable to split.\n");
               return(-1);
             }
             else if ( !ier ) { //Et on teste pas du tout les qualités ici ?
@@ -1483,7 +1481,7 @@ int adpsplcol(pMesh mesh,pSol met,pBucket bucket, int* warn) {
           if ( p0->tag > tag )   continue;
           if ( ( tag & MG_NOM ) && (mesh->adja[4*(k-1)+1+i]) ) continue;
           ilist = chkcol_bdy(mesh,k,i,j,list);
-          if ( ilist >0 ) {
+          if ( ilist > 0 ) {
             ier = colver(mesh,list,ilist,i2);
             //nc += ier;
             if ( ier < 0 ) return(-1);
@@ -1504,7 +1502,7 @@ int adpsplcol(pMesh mesh,pSol met,pBucket bucket, int* warn) {
             ier = colver(mesh,list,ilist,i2);
             if ( ilist < 0 ) continue;
             //nc += ier;
-            if ( ier<0 ) return(-1);
+            if ( ier < 0 ) return(-1);
             else if(ier) {
               delBucket(mesh,bucket,ier);
               delPt(mesh,ier);

@@ -171,14 +171,18 @@ int swpgen(pMesh mesh,pSol met,int nconf,int ilist,int *list) {
     fprintf(stdout,"  ## Error: unable to allocate a new point.\n");
     fprintf(stdout,"  ## Check the mesh size or");
     fprintf(stdout," increase the allocated memory with the -m option.\n");
-    return(0);
+    return(-1);
   }
   if ( met->m )  met->m[np] = 0.5*(met->m[na]+met->m[nb]);
 
   /** First step : split of edge (na,nb) */
   ret = 2*ilist + 0;
   ier = split1b(mesh,met,list,ret,np,0);
-  if ( ier<0 )  return(0);
+  if ( ier < 0 ) {
+    fprintf(stdout,"  ## Warning: unable to swap internal edge.\n");
+    return(-1);
+  }
+  else if ( !ier )  return(0);
 
   /** Second step : collapse of np towards enhancing configuration */
   start = nconf / 4;
@@ -194,7 +198,11 @@ int swpgen(pMesh mesh,pSol met,int nconf,int ilist,int *list) {
   nball = boulevolp(mesh,start,ip,list);
 
   ier = colver(mesh,list,nball,iq);
-  if(ier) delPt(mesh,ier);
+  if ( ier < 0 ) {
+    fprintf(stdout,"  ## Warning: unable to swap internal edge.\n");
+    return(-1);
+  }
+  else if ( ier ) delPt(mesh,ier);
 
   return(1);
 }

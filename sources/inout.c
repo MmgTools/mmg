@@ -274,8 +274,11 @@ int loadMesh(pMesh mesh) {
   /* stats */
   if ( abs(info.imprim) > 4 ) {
     fprintf(stdout,"     NUMBER OF VERTICES     %8d / %8d\n",mesh->np,mesh->npmax);
-    if ( mesh->na )
-      fprintf(stdout,"     NUMBER OF EDGES/RIDGES %8d / %8d\n",mesh->na,nr);
+    if ( mesh->na ) {
+      fprintf(stdout,"     NUMBER OF EDGES        %8d\n",mesh->na);
+      if ( nr )
+        fprintf(stdout,"     NUMBER OF RIDGES        %8d\n",nr);
+        }
     if ( mesh->nt )
       fprintf(stdout,"     NUMBER OF TRIANGLES    %8d\n",mesh->nt);
     fprintf(stdout,"     NUMBER OF ELEMENTS     %8d / %8d\n",mesh->ne,mesh->nemax);

@@ -82,7 +82,11 @@ int biPartBoxCompute(SCOTCH_Graph graf, int vertNbr, int boxVertNbr, SCOTCH_Num 
 
   /* Initializing SCOTCH functions */
   CHECK_SCOTCH(SCOTCH_stratInit(&strat), "scotch_stratInit", 0) ;
+#if SCOTCH_VERSION>=6
   CHECK_SCOTCH(SCOTCH_stratGraphMap(&strat, "r{job=t,map=t,poli=S,sep=m{,vert=80,low=h{pass=10}f{bal=0.005,move=0},asc=b{bnd=f{bal=0.05,move=0},org=f{bal=0.05,move=0}}}|m{,vert=80,low=h{pass=10}f{bal=0.005,move=0},asc=b{bnd=f{bal=0.05,move=0},org=f{bal=0.05,move=0}}}}"), "scotch_stratGraphMap", 0) ;
+#else
+  CHECK_SCOTCH(SCOTCH_stratGraphMap(&strat, "r{job=t,map=t,poli=S,sep=m{type=h,vert=80,low=h{pass=10}f{bal=0.005,move=0},asc=b{bnd=f{bal=0.05,move=0},org=f{bal=0.05,move=0}}}|m{,vert=80,low=h{pass=10}f{bal=0.005,move=0},asc=b{bnd=f{bal=0.05,move=0},org=f{bal=0.05,move=0}}}}"), "scotch_stratGraphMap", 0) ;
+#endif
 
   partTab = (SCOTCH_Num *)calloc(vertNbr, sizeof(SCOTCH_Num));
   if ( !partTab ) {
@@ -158,6 +162,9 @@ int biPartBoxCompute(SCOTCH_Graph graf, int vertNbr, int boxVertNbr, SCOTCH_Num 
  */
 int kPartBoxCompute(SCOTCH_Graph graf, int vertNbr, int boxVertNbr, SCOTCH_Num *permVrtTab) {
   int boxNbr, vertIdx;
+#if SCOTCH_VERSION<6
+  SCOTCH_Num logMaxVal, SupMaxVal, InfMaxVal, maxVal;
+#endif
   char s[200];
   SCOTCH_Num *sortPartTb;
   SCOTCH_Strat strat ;
@@ -172,7 +179,11 @@ int kPartBoxCompute(SCOTCH_Graph graf, int vertNbr, int boxVertNbr, SCOTCH_Num *
 
   /* Initializing SCOTCH functions */
   CHECK_SCOTCH(SCOTCH_stratInit(&strat), "scotch_stratInit", 0) ;
-  CHECK_SCOTCH(SCOTCH_archCmplt(&arch, boxNbr), "scotch_archVcmplt", 0) ;
+#if SCOTCH_VERSION>=6
+  CHECK_SCOTCH(SCOTCH_archCmplt(&arch, boxNbr), "scotch_archCmplt", 0) ;
+#else
+  CHECK_SCOTCH(SCOTCH_archVcmplt(&arch), "scotch_archVcmplt", 0) ;
+#endif
 
   sprintf(s, "m{vert=%d,low=r{job=t,map=t,poli=S,sep=m{vert=80,low=h{pass=10}f{bal=0.0005,move=80},asc=f{bal=0.005,move=80}}}}", vertNbr / boxVertNbr);
   CHECK_SCOTCH(SCOTCH_stratGraphMap(&strat, s), "scotch_stratGraphMap", 0) ;
@@ -190,10 +201,41 @@ int kPartBoxCompute(SCOTCH_Graph graf, int vertNbr, int boxVertNbr, SCOTCH_Num *
   CHECK_SCOTCH(SCOTCH_graphMap(&graf, &arch, &strat, sortPartTb), "scotch_graphMap", 0);
 
 
+#if SCOTCH_VERSION<6
+  // Looking for the max value in sortPartTb and computing sortPartTb as
+  // followed :
+  //  - sortPartTb[2i] is the box value
+  //  - sortPartTb[2i+1] is the vertex number
+  maxVal = sortPartTb[0];
+#endif
   for (vertIdx = vertNbr - 1 ; vertIdx >= 0 ; vertIdx--) {
     sortPartTb[2*vertIdx] = sortPartTb[vertIdx];
     sortPartTb[2*vertIdx+1] = vertIdx + 1;
+#if SCOTCH_VERSION<6
+    if (sortPartTb[vertIdx] > maxVal)
+      maxVal = sortPartTb[vertIdx];
+#endif
   }
+
+#if SCOTCH_VERSION<6
+  // Determining the log of MaxVal
+  logMaxVal = 0;
+  while ( maxVal > 0) {
+    logMaxVal++;
+    maxVal >>= 1;
+  }
+
+  // Infering the interval in which box values will be
+  InfMaxVal = logMaxVal << logMaxVal;
+  SupMaxVal = (logMaxVal << (logMaxVal + 1)) - 1;
+
+  // Increasing box values until they are in the previous interval
+  for (vertIdx = 0 ; vertIdx < vertNbr ; vertIdx++) {
+    while (!(sortPartTb[2*vertIdx] >= InfMaxVal && sortPartTb[2*vertIdx] <= SupMaxVal)) {
+      sortPartTb[2*vertIdx] <<= 1;
+    }
+  }
+#endif
 
   // Sorting the tabular, which contains box values and vertex numbers
   _SCOTCHintSort2asc1(sortPartTb, vertNbr);

@@ -35,7 +35,7 @@ enum MMG5_optDblCod /**<  Options for mmg3d2 (double) */
   };
 
 typedef struct {
-  double   hmin,hmax,hausd;
+  double   hausd;
   int      ref;
   char     elt;
 } MMG5_Par; /** specific parameters */

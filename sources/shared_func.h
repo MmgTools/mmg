@@ -68,7 +68,7 @@ void setfunc(pMesh mesh,pSol met) {
 static inline
 int parsop(pMesh mesh,pSol met) {
   Par        *par;
-  float       fp1,fp2,fp3;
+  float       fp1;
   int         i,j,ret;
   char       *ptr,buf[256],data[256];
   FILE       *in;

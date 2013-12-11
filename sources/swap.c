@@ -236,11 +236,15 @@ int swpbdy(pMesh mesh,pSol met,int *list,int ret,int it1) {
     fprintf(stdout,"  ## Warning: unable to allocate a new point.\n");
     fprintf(stdout,"  ## Check the mesh size or ");
     fprintf(stdout,"increase the allocated memory with the -m option.\n");
-    return(0);
+    return(-1);
   }
   if ( met->m )  met->m[nm] = 0.5 *(met->m[np]+met->m[nq]);
   ier = split1b(mesh,met,list,ret,nm,0);
-  if ( ier<0 )  return(0);
+  if ( ier < 0 ) {
+    fprintf(stdout,"  ## Warning: unable to swap boundary edge.\n");
+    return(-1);
+  }
+  else if ( !ier )  return(0);
 
   /* Collapse m on na after taking (new) ball of m */
   memset(list,0,(LMAX+2)*sizeof(int));
@@ -259,10 +263,14 @@ int swpbdy(pMesh mesh,pSol met,int *list,int ret,int it1) {
   assert(pt1->v[ipa] == na);
 
   ier = colver(mesh,list,ilist,ipa);
-	if ( ier ) {
-		delPt(mesh,ier);
-		ier = 1;
-	}
+  if ( ier < 0 ) {
+    fprintf(stdout,"  ## Warning: unable to swap boundary edge.\n");
+    return(-1);
+  }
+  else if ( ier ) {
+	delPt(mesh,ier);
+	ier = 1;
+  }
 
   return(ier);
 }
