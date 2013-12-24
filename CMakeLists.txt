@@ -115,8 +115,10 @@ FILE(
   ${MMG_SOURCE_DIR}/lib${PROJECT_NAME}.c
   )
 
-FIND_LIBRARY(M_LIB m)
-SET( LIBRARIES ${M_LIB} ${LIBRARIES})
+IF ((NOT WIN32) AND (NOT WIN64))
+  FIND_LIBRARY(M_LIB m)
+  SET( LIBRARIES ${M_LIB} ${LIBRARIES})
+ENDIF()
 
 ###############################################################################
 #####
@@ -348,7 +350,7 @@ SET(CPACK_SOURCE_IGNORE_FILES ";.#$"      ${CPACK_SOURCE_IGNORE_FILES})
 SET(CPACK_SOURCE_IGNORE_FILES ";build*" ${CPACK_SOURCE_IGNORE_FILES}  )
 SET(CPACK_SOURCE_IGNORE_FILES ";Doxygen/html;Doxygen/latex;Doxygen/Doxyfile"  ${CPACK_SOURCE_IGNORE_FILES}  )
 
-IF (WIN32 AND NOT UNIX)
+IF ((WIN32 OR WIN64) AND NOT UNIX)
   # Warning compilation under windows not tested
   #SET(CPACK_PACKAGE_ICON "${CMAKE_SOURCE_DIR}/logo.pdf")
   SET(CPACK_NSIS_INSTALLED_ICON_NAME "bin\\\\${PROJECT_NAME}.exe")

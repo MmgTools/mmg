@@ -14,8 +14,10 @@ int loadMesh(pMesh mesh) {
   strcpy(data,name);
   ptr = strstr(data,".mesh");
   if ( !ptr ) {
+    /* data contains the filename without extension */
     strcat(data,".meshb");
     if( !(inm = GmfOpenMesh(data,GmfRead,&mesh->ver,&mesh->dim)) ) {
+      /* our file is not a .meshb file, try with .mesh ext */
       ptr = strstr(data,".mesh");
       *ptr = '\0';
       strcat(data,".mesh");
@@ -93,7 +95,7 @@ int loadMesh(pMesh mesh) {
   /* read mesh triangles */
   nt = 0;
   if ( mesh->nt ) {
-    /* Skip triangles with negative refs */
+    /* Skip triangles with MG_ISO refs */
     if( mesh->info.iso ) {
       GmfGotoKwd(inm,GmfTriangles);
       nt = mesh->nt;
