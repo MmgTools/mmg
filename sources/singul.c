@@ -1,10 +1,6 @@
 #ifdef SINGUL
 #include "mmg3d.h"
 
-extern Info  info;
-int basetet = 0;
-int basept  = 1;
-
 /** Create a key to know where is the point of barycentric
  *  coordinates cb in the tetra:
  *  key=0 for an inside point,
@@ -264,13 +260,9 @@ int calcvol(double mat[3][3], double *dd) {
     +      mat[1][0]*(mat[2][1]*mat[0][2] - mat[0][1]*mat[2][2])
     +      mat[2][0]*(mat[0][1]*mat[1][2] - mat[1][1]*mat[0][2]);
 
-  if ( (*dd) > 0.0 ) return(1);
-  if ( info.ddebug ) {
-    fprintf(stdout,"%s:%d: Error: wrong orientation of element\n",
-            __FILE__,__LINE__);
-    exit(1);
-  }
-  return(0);
+  assert( (*dd) );
+
+  return(1);
 }
 
 
@@ -586,7 +578,7 @@ int creaEdge(pMesh mesh, pSol met, Travel *trav, char tag){
     mesh->point[ip].tag |= tag;
 
     /* Update htab */
-    hEdge(&mesh->htab,trav->np,pt->v[key%11],0,trav->tag);
+    hEdge(mesh,trav->np,pt->v[key%11],0,trav->tag);
 
     return(1);
   }
@@ -627,7 +619,7 @@ int creaEdge(pMesh mesh, pSol met, Travel *trav, char tag){
     trav->cb[inxt3[inxt3[i]]] = 0.;
 
     /* Update htab */
-    hEdge(&mesh->htab,trav->np,ip,0,trav->tag);
+    hEdge(mesh,trav->np,ip,0,trav->tag);
     return(1);
   }
 
@@ -652,7 +644,7 @@ int creaEdge(pMesh mesh, pSol met, Travel *trav, char tag){
     mesh->point[ip].tag |= tag;
 
     /* Update htab */
-    hEdge(&mesh->htab,trav->np,ip,0,trav->tag);
+    hEdge(mesh,trav->np,ip,0,trav->tag);
     return(1);
   }
 
@@ -666,7 +658,7 @@ int creaEdge(pMesh mesh, pSol met, Travel *trav, char tag){
     mesh->point[ip].tag |= tag;
 
     /* Update htab */
-    hEdge(&mesh->htab,trav->np,ip,0,trav->tag);
+    hEdge(mesh,trav->np,ip,0,trav->tag);
     return(1);
   }
   return(0);
@@ -674,7 +666,7 @@ int creaEdge(pMesh mesh, pSol met, Travel *trav, char tag){
 
 /** Return the index of element to which belong the point of coordinates point[3] and compute
  *  the barycentric coordinates of the point  */
-int seekPoint(pMesh mesh, psPoint ppt, double cb[4]) {
+int seekPoint(pMesh mesh, psPoint ppt, double cb[4], int* basetet, int* basept) {
   int      nsfin,nstart;
   pTetra   pt;
   pPoint   p0,p1,p2,p3;
@@ -695,7 +687,7 @@ int seekPoint(pMesh mesh, psPoint ppt, double cb[4]) {
     nsfin  = 1;
     nstart = 1;
   }
-  basetet++;
+  (*basetet)++;
 
   do {
     if ( !nsfin ) {
@@ -707,7 +699,7 @@ int seekPoint(pMesh mesh, psPoint ppt, double cb[4]) {
       fprintf(stdout,"%s:%d: Error: wrong element\n",__FILE__,__LINE__);
       return(0);
     }
-    if ( pt->flag == basetet ) {
+    if ( pt->flag == (*basetet) ) {
       nstart  = nstart%(mesh->ne)+1;
       if ( nstart == ppt->tet ) {
         fprintf(stdout,"%s:%d: Error: all elements already checked\n",
@@ -717,7 +709,7 @@ int seekPoint(pMesh mesh, psPoint ppt, double cb[4]) {
 
       nsfin = nstart;
     }
-    pt->flag = basetet;
+    pt->flag = (*basetet);
 
     iadr = 4*(nsfin-1)+1;
     adj  = &mesh->adja[iadr];
@@ -744,7 +736,7 @@ int seekPoint(pMesh mesh, psPoint ppt, double cb[4]) {
 
     dd =  bx*ux + by*uy + bz*uz;
 
-    if ( info.ddebug && dd < 0.0 )
+    if ( mesh->info.ddebug && dd < 0.0 )
       fprintf(stdout,"%s:%d: Warning: wrong orientation of tetra %d\n",
               __FILE__,__LINE__,nsfin);
 
@@ -816,7 +808,7 @@ int seekPoint(pMesh mesh, psPoint ppt, double cb[4]) {
     cb[2]     = vol2 * dd;
     cb[3]     = vol3 * dd;
     ppt->tet  = nsfin;
-    ppt->flag = basept;
+    ppt->flag = (*basept);
 
     return(1);
   }while(1);
@@ -827,7 +819,7 @@ int seekPoint(pMesh mesh, psPoint ppt, double cb[4]) {
 /** Return the index of element to which belong the point of coordinates point[3] and compute
  *  cb, the barycentric coordinates of the point  */
 int seekEdge(pMesh mesh, pSol met, psPoint ppt0, psPoint ppt1,
-             Travel *trav, int *lastet){
+             Travel *trav, int *lastet, int *basetet, int *basept){
   pTetra pt;
   pPoint p[4];
   double mat[3][3],u[3],v[3],e0[3],e1[3];
@@ -846,7 +838,7 @@ int seekEdge(pMesh mesh, pSol met, psPoint ppt0, psPoint ppt1,
     e1[1] = ppt1->c[1];
     e1[2] = ppt1->c[2];
 
-    if ( !seekPoint(mesh,ppt0,cb) ) {
+    if ( !seekPoint(mesh,ppt0,cb,basetet,basept) ) {
       fprintf(stdout,"%s:%d: Error: point not found %e %e %e\n",
              __FILE__,__LINE__,e0[0],e0[1],e0[2]);
       return(0);
@@ -881,7 +873,7 @@ int seekEdge(pMesh mesh, pSol met, psPoint ppt0, psPoint ppt1,
   c[1] = e0[1];
   c[2] = e0[2];
 
-  basetet++;
+  (*basetet)++;
 
   ee[0] = e1[0]-e0[0];
   ee[1] = e1[1]-e0[1];
@@ -900,12 +892,12 @@ int seekEdge(pMesh mesh, pSol met, psPoint ppt0, psPoint ppt1,
       return(0);
     }
 
-    if ( pt->flag == basetet ) {
+    if ( pt->flag == (*basetet) ) {
       fprintf(stdout,"%s:%d: Error: we pass through an element already seen, tet %d \n",
              __FILE__,__LINE__,nsfin);
       return(0);
     }
-    pt->flag = basetet;
+    pt->flag = (*basetet);
 
     iadr = 4*(nsfin-1)+1;
     adj  = &mesh->adja[iadr];
@@ -920,7 +912,7 @@ int seekEdge(pMesh mesh, pSol met, psPoint ppt0, psPoint ppt1,
     barycentric(is,i0,i1,i2,p,e1,mat,ap);
     calcvol(mat, &dd);
 
-    if ( adj[i0] && (mesh->tetra[adj[i0]/4].flag != basetet) ) {
+    if ( adj[i0] && (mesh->tetra[adj[i0]/4].flag != (*basetet)) ) {
       /* lambda_i0 computation */
       u[0] = mat[1][1]*mat[2][2] - mat[2][1]*mat[1][2];
       u[1] = mat[2][1]*mat[0][2] - mat[0][1]*mat[2][2];
@@ -940,7 +932,7 @@ int seekEdge(pMesh mesh, pSol met, psPoint ppt0, psPoint ppt1,
       u[0]  = mat[1][0]*ap[2] - mat[2][0]*ap[1];
       u[1]  = mat[2][0]*ap[0] - mat[0][0]*ap[2];
       u[2]  = mat[0][0]*ap[1] - mat[1][0]*ap[0];
-      if ( adj[i1] && (mesh->tetra[adj[i1]/4].flag != basetet) ) {
+      if ( adj[i1] && (mesh->tetra[adj[i1]/4].flag != (*basetet)) ) {
         /* lambda_i1 computation */
         vol[i1] = (mat[0][2]*u[0] + mat[1][2]*u[1] + mat[2][2]*u[2]);
 
@@ -957,7 +949,7 @@ int seekEdge(pMesh mesh, pSol met, psPoint ppt0, psPoint ppt1,
         vol[i2] = (-mat[0][1]*u[0] - mat[1][1]*u[1] - mat[2][1]*u[2]);
 
         if ( -EPS2 > vol[i2] ) {
-          if ( adj[i2] && (mesh->tetra[adj[i2]/4].flag != basetet) ) {
+          if ( adj[i2] && (mesh->tetra[adj[i2]/4].flag != (*basetet)) ) {
             nsfin = adj[i2]/4;
 
             /* update of key, cb, pt and p */
@@ -981,7 +973,7 @@ int seekEdge(pMesh mesh, pSol met, psPoint ppt0, psPoint ppt1,
         /* lambda_i2 computation */
         vol[i2] = (-mat[0][1]*u[0] - mat[1][1]*u[1] - mat[2][1]*u[2]);
         if ( -EPS2 > vol[i2] ) {
-          if ( adj[i2] && (mesh->tetra[adj[i2]/4].flag != basetet) ) {
+          if ( adj[i2] && (mesh->tetra[adj[i2]/4].flag != (*basetet)) ) {
             nsfin = adj[i2]/4;
 
             /* update of key, cb, pt and p */
@@ -1017,7 +1009,7 @@ int seekEdge(pMesh mesh, pSol met, psPoint ppt0, psPoint ppt1,
         }
       }
     }
-    else if ( adj[i1] && (mesh->tetra[adj[i1]/4].flag != basetet) ) {
+    else if ( adj[i1] && (mesh->tetra[adj[i1]/4].flag != (*basetet)) ) {
       /* lambda_i1 computation */
       u[0] = mat[2][0]*mat[1][2] - mat[1][0]*mat[2][2];
       u[1] = mat[0][0]*mat[2][2] - mat[2][0]*mat[0][2];
@@ -1042,7 +1034,7 @@ int seekEdge(pMesh mesh, pSol met, psPoint ppt0, psPoint ppt1,
       vol[i2] = (mat[0][0]*u[0] + mat[1][0]*u[1] + mat[2][0]*u[2]);
 
       if ( -EPS2 > vol[i2] ) {
-        if ( adj[i2] && (mesh->tetra[adj[i2]/4].flag != basetet) ) {
+        if ( adj[i2] && (mesh->tetra[adj[i2]/4].flag != (*basetet)) ) {
           nsfin = adj[i2]/4;
 
           /* update of key, cb, pt and p */
@@ -1078,7 +1070,7 @@ int seekEdge(pMesh mesh, pSol met, psPoint ppt0, psPoint ppt1,
         continue;
       }
     }
-    else if ( adj[i2] && (mesh->tetra[adj[i2]/4].flag != basetet) ) {
+    else if ( adj[i2] && (mesh->tetra[adj[i2]/4].flag != (*basetet)) ) {
       /* lambda_i2 computation */
       u[0] = mat[1][0]*mat[2][1] - mat[2][0]*mat[1][1];
       u[1] = mat[2][0]*mat[0][1] - mat[0][0]*mat[2][1];
@@ -1238,7 +1230,7 @@ int seekEdge(pMesh mesh, pSol met, psPoint ppt0, psPoint ppt1,
         return(0);
       }
 
-      if ( nsfin && (mesh->tetra[nsfin].flag != basetet) )  return(1);
+      if ( nsfin && (mesh->tetra[nsfin].flag != (*basetet)) )  return(1);
 
       fprintf(stdout,"%s:%d: Warning: we can't travel through the wanted tri %d\n",
              __FILE__,__LINE__,ind);
@@ -1249,17 +1241,17 @@ int seekEdge(pMesh mesh, pSol met, psPoint ppt0, psPoint ppt1,
         i1  = inxt3[i0];
         i2  = inxt3[i1];
 
-        if ( adj[i0] && (mesh->tetra[adj[i0]/4].flag != basetet) ) {
+        if ( adj[i0] && (mesh->tetra[adj[i0]/4].flag != (*basetet)) ) {
           nsfin = adj[i0]/4;
 
           return(1);
         }
-        if ( adj[i1] && (mesh->tetra[adj[i1]/4].flag != basetet) ) {
+        if ( adj[i1] && (mesh->tetra[adj[i1]/4].flag != (*basetet)) ) {
           nsfin = adj[i1]/4;
 
           return(1);
         }
-        if ( adj[i2] && (mesh->tetra[adj[i2]/4].flag != basetet) ) {
+        if ( adj[i2] && (mesh->tetra[adj[i2]/4].flag != (*basetet)) ) {
           nsfin = adj[i2]/4;
 
           return(1);
@@ -1269,12 +1261,12 @@ int seekEdge(pMesh mesh, pSol met, psPoint ppt0, psPoint ppt1,
         ind = key-5;
         i0  = ifar[ind][0];
         i1  = ifar[ind][1];
-        if ( adj[i0] && (mesh->tetra[adj[i0]/4].flag != basetet) ) {
+        if ( adj[i0] && (mesh->tetra[adj[i0]/4].flag != (*basetet)) ) {
           nsfin = adj[i0]/4;
 
           return(1);
         }
-        if ( adj[i1] && (mesh->tetra[adj[i1]/4].flag != basetet) ) {
+        if ( adj[i1] && (mesh->tetra[adj[i1]/4].flag != (*basetet)) ) {
           nsfin = adj[i1]/4;
 
           return(1);
@@ -1302,7 +1294,7 @@ int seekEdge(pMesh mesh, pSol met, psPoint ppt0, psPoint ppt1,
     trav->np    = pt->v[ind];
     trav->key   = key;
     ppt1->tet   = nsfin;
-    ppt1->flag  = basept;
+    ppt1->flag  = (*basept);
     (*lastet)   = 1;
 
     if ( !creaEdge(mesh,met,trav,trav->tag) ) {
@@ -1321,13 +1313,13 @@ int seekEdge(pMesh mesh, pSol met, psPoint ppt0, psPoint ppt1,
 
 /** put singularities stored in singul in the mesh */
 int inserSingul(pMesh mesh, pSol met, pSingul singul){
-  int     lastet, k, k0, k1;
+  int     lastet, k, k0, k1, basetet, basept;
   double  cb[4];
   Travel  trav;
 
   if ( (!singul->na) && (!singul->ns) ) return(-1);
 
-  if ( abs(info.imprim) > 4 || info.ddebug )
+  if ( abs(mesh->info.imprim) > 4 || mesh->info.ddebug )
     fprintf(stdout,"\n  ** INSERTION OF SINGULARITIES\n");
 
   if ( !hashTetra(mesh,1) ) {
@@ -1344,6 +1336,8 @@ int inserSingul(pMesh mesh, pSol met, pSingul singul){
   }
 
   /* put edge singularities in mesh */
+  basetet = 0;
+  basept  = 1;
   for ( k=1; k<=singul->na; k++) {
     lastet = 1;
     if ( singul->point[singul->edge[k].a].tet ||
@@ -1360,7 +1354,7 @@ int inserSingul(pMesh mesh, pSol met, pSingul singul){
     trav.tag = singul->edge[k].tag;
     do {
       if ( !seekEdge(mesh,met,&singul->point[k0],&singul->point[k1],
-                     &trav,&lastet) ) {
+                     &trav,&lastet,&basetet,&basept) ) {
         fprintf(stdout,"%s:%d: Error: edge %d not found in the mesh\n",
                __FILE__,__LINE__,k);
         return(0);
@@ -1371,7 +1365,7 @@ int inserSingul(pMesh mesh, pSol met, pSingul singul){
   /* put point singularities in mesh */
   for ( k=1; k<=singul->ns; k++) {
     if ( singul->point[k].flag != basept ) {
-      if ( !seekPoint(mesh,&singul->point[k],cb) ) {
+      if ( !seekPoint(mesh,&singul->point[k],cb,&basetet,&basept) ) {
         fprintf(stdout,"%s:%d: Error: point %d not found in the mesh\n",
                 __FILE__,__LINE__,k);
         return(0);
@@ -1412,7 +1406,7 @@ int colSing(pMesh mesh,pSol met) {
   int     k,nc,nnc,list[LMAX+2],ilist;
   int     it,maxit,i,ifac,jseg,ier;
 
-  if ( abs(info.imprim) > 4 )
+  if ( abs(mesh->info.imprim) > 4 )
     fprintf(stdout,"  ** SINGULARITIES PRE-REMESHING\n");
   nnc = it = 0;
   maxit = 5;
@@ -1460,7 +1454,7 @@ int colSing(pMesh mesh,pSol met) {
       }
     }
     nnc += nc;
-    if ( nc > 0 && (abs(info.imprim) > 5 || info.ddebug) )
+    if ( nc > 0 && (abs(mesh->info.imprim) > 5 || mesh->info.ddebug) )
       fprintf(stdout,"     %8d vertices removed\n",nc);
   }
   while ( ++it < maxit && nc > 0 );
@@ -1476,7 +1470,7 @@ int solveUnsignedTet(pMesh mesh,pSol met) {
   int     *adja;
   int     i,ip;
 
-  if ( abs(info.imprim) > 4 )
+  if ( abs(mesh->info.imprim) > 4 )
     fprintf(stdout,"  ** SINGULARITIES POST-REMESHING\n");
 
   ns = nf = 0;
@@ -1513,7 +1507,7 @@ int solveUnsignedTet(pMesh mesh,pSol met) {
       }
     }
   }
-  if ( abs(info.imprim) < 5 && (ns+nf) > 0 ) {
+  if ( abs(mesh->info.imprim) < 5 && (ns+nf) > 0 ) {
     fprintf(stdout,"     %8d corrected ",ns+nf);
     fprintf(stdout,"(%8d splitted, %8d swapped)\n",ns,nf);
   }

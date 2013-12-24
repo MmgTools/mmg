@@ -1,6 +1,5 @@
 #include "mmg3d.h"
 
-extern Info  info;
 extern char ddb;
 inline double lenedg_ani(pMesh mesh,pSol met,int ip1,int ip2) {
   return(0.0);
@@ -557,7 +556,7 @@ int prilen(pMesh mesh, pSol met) {
       np = pt->v[i0];
       nq = pt->v[i1];
 
-      if(!hashEdge(&hash,np,nq,0)){
+      if(!hashEdge(mesh,&hash,np,nq,0)){
         fprintf(stdout,"%s:%d: Error: function hashEdge return 0\n",
                 __FILE__,__LINE__);
         exit(EXIT_FAILURE);
@@ -626,7 +625,7 @@ int prilen(pMesh mesh, pSol met) {
             bd[2],bd[5],hl[2]+hl[3]+hl[4],100.*(hl[2]+hl[3]+hl[4])/(double)ned);
 
 
-  if ( abs(info.imprim) > 4 ) {
+  if ( abs(mesh->info.imprim) > 4 ) {
     fprintf(stdout,"\n     HISTOGRAMM\n");
     if ( hl[0] )
       fprintf(stdout,"     0.00 < L < 0.30  %8d   %5.2f %%  \n",
@@ -675,7 +674,7 @@ void outqua(pMesh mesh,pSol met) {
       iel    = ok;
     }
     if ( rap > 0.5 )  med++;
-    if ( rap < BADKAL )  info.badkal = 1;
+    if ( rap < BADKAL )  mesh->info.badkal = 1;
     rapavg += rap;
     rapmax  = MG_MAX(rapmax,rap);
     ir = MG_MIN(4,(int)(5.0*rap));
@@ -692,7 +691,7 @@ void outqua(pMesh mesh,pSol met) {
           indPt(mesh,mesh->tetra[iel].v[0]),indPt(mesh,mesh->tetra[iel].v[1]),
           indPt(mesh,mesh->tetra[iel].v[2]),indPt(mesh,mesh->tetra[iel].v[3]));
 #endif
-  if ( abs(info.imprim) < 5 ){
+  if ( abs(mesh->info.imprim) < 5 ){
     if (rapmin == 0){
       fprintf(stdout,"  ## WARNING: TOO BAD QUALITY FOR THE WORST ELEMENT\n");
       saveMesh(mesh);

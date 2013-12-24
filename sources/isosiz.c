@@ -1,6 +1,5 @@
 #include "mmg3d.h"
 
-extern Info   info;
 extern char   ddb;
 
 #define MAXLEN    1.0e9
@@ -28,8 +27,8 @@ static double defsizreg(pMesh mesh,pSol met,int nump,int *lists,int ilists, doub
     fprintf(stdout,"    ## Func. defsizreg : wrong point qualification : xp ? %d\n",p0->xp);
     return(0);
   }
-  isqhmin = 1.0 / (info.hmin*info.hmin);
-  isqhmax = 1.0 / (info.hmax*info.hmax);
+  isqhmin = 1.0 / (mesh->info.hmin*mesh->info.hmin);
+  isqhmax = 1.0 / (mesh->info.hmax*mesh->info.hmax);
 
   n = &mesh->xpoint[p0->xp].n1[0];
 
@@ -136,16 +135,16 @@ static double defsizreg(pMesh mesh,pSol met,int nump,int *lists,int ilists, doub
 
   /* At this point, lispoi contains the oriented surface ball of point p0, that has been rotated
      through r, with the convention that triangle l has edges lispoi[l]; lispoi[l+1] */
-  if ( lmax/lmin > 4.0*info.hmax*info.hmax/
-       (info.hmin*info.hmin) )  return(info.hmax);
+  if ( lmax/lmin > 4.0*mesh->info.hmax*mesh->info.hmax/
+       (mesh->info.hmin*mesh->info.hmin) )  return(mesh->info.hmax);
 
   /* Check all projections over tangent plane. */
   for (k=0; k<ilists-1; k++) {
     det2d = lispoi[3*k+1]*lispoi[3*(k+1)+2] - lispoi[3*k+2]*lispoi[3*(k+1)+1];
-    if ( det2d < 0.0 )  return(info.hmax);
+    if ( det2d < 0.0 )  return(mesh->info.hmax);
   }
   det2d = lispoi[3*(ilists-1)+1]*lispoi[3*0+2] - lispoi[3*(ilists-1)+2]*lispoi[3*0+1];
-  if ( det2d < 0.0 )    return(info.hmax);
+  if ( det2d < 0.0 )    return(mesh->info.hmax);
 
   /* Reconstitution of the curvature tensor at p0 in the tangent plane,
      with a quadric fitting approach */
@@ -294,7 +293,7 @@ static double defsizreg(pMesh mesh,pSol met,int nump,int *lists,int ilists, doub
   }
 
   /* solve now (a b c) = tAA^{-1} * tAb */
-  if ( !sys33sym(tAA,tAb,c) )  return(info.hmax);
+  if ( !sys33sym(tAA,tAb,c) )  return(mesh->info.hmax);
 
   intm[0] = 2.0*c[0];
   intm[1] = c[2];
@@ -363,10 +362,10 @@ int defsiz_iso(pMesh mesh,pSol met) {
   char      i,j,ia,ised,i0,i1;
   pPar      par;
 
-  if ( abs(info.imprim) > 5 || info.ddebug )
+  if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug )
     fprintf(stdout,"  ** Defining map\n");
 
-  if ( info.hmax < 0.0 )  info.hmax = 0.5 * info.delta;
+  if ( mesh->info.hmax < 0.0 )  mesh->info.hmax = 0.5 * mesh->info.delta;
 
   /* alloc structure */
   if ( !met->m ) {
@@ -381,12 +380,12 @@ int defsiz_iso(pMesh mesh,pSol met) {
     }
     /* init constant size */
     for (k=1; k<=mesh->np; k++)
-      met->m[k] = info.hmax;
+      met->m[k] = mesh->info.hmax;
   }
   else {
     /* size truncation */
     for (k=1; k<=mesh->np; k++)
-      met->m[k] = MG_MIN(info.hmax,MG_MAX(info.hmin,met->m[k]));
+      met->m[k] = MG_MIN(mesh->info.hmax,MG_MAX(mesh->info.hmin,met->m[k]));
   }
 
   /* size at regular surface points */
@@ -399,9 +398,9 @@ int defsiz_iso(pMesh mesh,pSol met) {
     for (i=0; i<4; i++) {
       if ( !(pxt->ftag[i] & MG_BDY) ) continue;
       /* local hausdorff for triangle */
-      hausd = info.hausd;
-      for (l=0; l<info.npar; l++) {
-        par = &info.par[l];
+      hausd = mesh->info.hausd;
+      for (l=0; l<mesh->info.npar; l++) {
+        par = &mesh->info.par[l];
         if ( (par->elt == MMG5_Triangle) && (pxt->ref[i] == par->ref ) )
           hausd = par->hausd;
       }
@@ -434,9 +433,9 @@ int defsiz_iso(pMesh mesh,pSol met) {
       else if ( !norface(mesh,k,i,v) )  continue;
 
       /* local hausdorff for triangle */
-      hausd = info.hausd;
-      for (l=0; l<info.npar; l++) {
-        par = &info.par[l];
+      hausd = mesh->info.hausd;
+      for (l=0; l<mesh->info.npar; l++) {
+        par = &mesh->info.par[l];
         if ( (par->elt == MMG5_Triangle) && (pxt->ref[i] == par->ref ) )
           hausd = par->hausd;
       }
@@ -509,9 +508,9 @@ int defsiz_iso(pMesh mesh,pSol met) {
           lm = sqrt(8.0*hausd / kappa);
 
         if ( MG_EDG(p0->tag) && !(p0->tag & MG_NOM) && !MG_SIN(p0->tag) )
-          met->m[ip0] = MG_MAX(info.hmin,MG_MIN(met->m[ip0],lm));
+          met->m[ip0] = MG_MAX(mesh->info.hmin,MG_MIN(met->m[ip0],lm));
         if ( MG_EDG(p1->tag) && !(p1->tag & MG_NOM) && !MG_SIN(p1->tag) )
-          met->m[ip1] = MG_MAX(info.hmin,MG_MIN(met->m[ip1],lm));
+          met->m[ip1] = MG_MAX(mesh->info.hmin,MG_MIN(met->m[ip1],lm));
       }
     }
   }
@@ -526,7 +525,7 @@ int gradsiz_iso(pMesh mesh,pSol met) {
   int       ip0,ip1,it,maxit,nu,nup,k;
   char      i,j,ia,i0,i1;
 
-  if ( abs(info.imprim) > 5 || info.ddebug )
+  if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug )
     fprintf(stdout,"  ** Grading mesh\n");
 
   mesh->base = 0;
@@ -559,7 +558,7 @@ int gradsiz_iso(pMesh mesh,pSol met) {
 
           if ( met->m[ip0] < met->m[ip1] ) {
             if ( met->m[ip0] < EPSD )  continue;
-            hn = met->m[ip0] + info.hgrad*l;
+            hn = met->m[ip0] + mesh->info.hgrad*l;
             if ( met->m[ip1] > hn ) {
               met->m[ip1] = hn;
               p1->flag = mesh->base;
@@ -568,7 +567,7 @@ int gradsiz_iso(pMesh mesh,pSol met) {
           }
           else {
             if ( met->m[ip1] < EPSD )  continue;
-            hn = met->m[ip1] + info.hgrad*l;
+            hn = met->m[ip1] + mesh->info.hgrad*l;
             if ( met->m[ip0] > hn ) {
               met->m[ip0] = hn;
               p0->flag = mesh->base;
@@ -582,7 +581,7 @@ int gradsiz_iso(pMesh mesh,pSol met) {
   }
   while( ++it < maxit && nu > 0 );
 
-  if ( abs(info.imprim) > 4 )
+  if ( abs(mesh->info.imprim) > 4 )
     fprintf(stdout,"     gradation: %7d updated, %d iter.\n",nup,it);
   return(1);
 }

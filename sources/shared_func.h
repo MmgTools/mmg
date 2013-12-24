@@ -1,5 +1,4 @@
 /* global variables */
-Info   info;
 unsigned char inxt2[3] = {1,2,0};
 unsigned char iprv2[3] = {2,0,1};
 unsigned char idir[4][3] = { {1,2,3}, {0,3,2}, {0,1,3}, {0,2,1} };
@@ -18,9 +17,9 @@ unsigned char arpt[4][3] = { {0,1,2}, {0,4,3}, {1,3,5}, {2,5,4} };
 #ifdef USE_SCOTCH
 /** Warn user that we overflow asked memory during scotch call */
 static inline
-void warnScotch(int mem) {
-  if ( info.imprim > 4 || info.ddebug ) {
-    if ( info.mem >= 0 ) {
+void warnScotch(MMG5_pMesh mesh) {
+  if ( mesh->info.imprim > 4 || mesh->info.ddebug ) {
+    if ( mesh->info.mem >= 0 ) {
       fprintf(stdout,"  ## Warning: we will overflow the memory asked with \"-m\"");
       fprintf(stdout," option during Scotch call.\n" );
     }
@@ -98,20 +97,20 @@ void freeCommon(pMesh mesh,pSol met
   }
 
   /* met */
-  if ( /*!info.iso &&*/ met->m ) {
+  if ( /*!mesh->info.iso &&*/ met->m ) {
     free(met->m);
     met->m = NULL;
   }
 
-  /* info */
-  if ( info.npar && info.par ) {
-    free(info.par);
-    info.par = NULL;
+  /* mesh->info */
+  if ( mesh->info.npar && mesh->info.par ) {
+    free(mesh->info.par);
+    mesh->info.par = NULL;
   }
 
 #ifdef SINGUL
   /* singul */
-  if ( info.sing ) {
+  if ( mesh->info.sing ) {
     if ( singul->ns ) {
       free(singul->point);
       singul->point=NULL;

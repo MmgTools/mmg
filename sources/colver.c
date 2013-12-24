@@ -1,6 +1,5 @@
 #include "mmg3d.h"
 
-extern Info  info;
 extern char  ddb;
 
 /** Check whether collapse ip -> iq could be performed, ip internal ;
@@ -35,7 +34,7 @@ int chkcol_int(pMesh mesh,pSol met,int k,char iface,char iedg,int *list,char typ
     memcpy(pt0,pt,sizeof(Tetra));
 
     /* prevent from recreating internal edge between boundaries */
-    if ( info.fem ) {
+    if ( mesh->info.fem ) {
       p0 = &mesh->point[nq];
       if ( p0->tag & MG_BDY ) {
         i = ip;
@@ -439,7 +438,7 @@ int chkcol_bdy(pMesh mesh,int k,char iface,char iedg,int *listv) {
     }
 
     /* Volume test for tetras outside the shell */
-    if ( info.iso ) {
+    if ( mesh->info.iso ) {
       if ( !ndepmin && pt->ref == MG_MINUS )
         ndepmin = iel;
       else if ( !ndepplus && pt->ref == MG_PLUS )
@@ -535,7 +534,7 @@ int chkcol_bdy(pMesh mesh,int k,char iface,char iedg,int *listv) {
   }
 
   /* Ensure collapse does not lead to a non manifold configuration (case of implicit surface)*/
-  if ( info.iso ) {
+  if ( mesh->info.iso ) {
     ier = chkmanicoll(mesh,k,iface,iedg,ndepmin,ndepplus,isminp,isplp);
     if ( !ier )  return(0);
   }
@@ -586,7 +585,7 @@ int colver(pMesh mesh,int *list,int ilist,char indq) {
     i   = list[k] % 4;
     pt  = &mesh->tetra[iel];
 #ifdef SINGUL
-    if ( info.sing )  pt->flag = 0;
+    if ( mesh->info.sing )  pt->flag = 0;
 #endif
 
     for (j=0; j<3; j++) {
@@ -600,7 +599,7 @@ int colver(pMesh mesh,int *list,int ilist,char indq) {
           if ( pxt->tag[ind[k][0]] || pxt->edg[ind[k][0]] ) {
 #ifdef SINGUL
             /* Check if we need to take care about singularities */
-            if ( info.sing && (pxt->tag[ind[k][0]] & MG_SGL) )  warn_sing = 1;
+            if ( mesh->info.sing && (pxt->tag[ind[k][0]] & MG_SGL) )  warn_sing = 1;
 #endif
             if ( iare[ind[k][0]][0]==i )  p0_c[k] = pt->v[iare[ind[k][0]][1]];
             else  p0_c[k] = pt->v[iare[ind[k][0]][0]];
@@ -609,7 +608,7 @@ int colver(pMesh mesh,int *list,int ilist,char indq) {
           if ( pxt->tag[ind[k][1]] || pxt->edg[ind[k][1]] ) {
 #ifdef SINGUL
             /* Check if we need to take care about singularities */
-            if ( info.sing && (pxt->tag[ind[k][1]] & MG_SGL) )
+            if ( mesh->info.sing && (pxt->tag[ind[k][1]] & MG_SGL) )
               warn_sing = 1;
 #endif
             if ( iare[ind[k][1]][0]==i )  p1_c[k] = pt->v[iare[ind[k][1]][1]];
@@ -634,7 +633,7 @@ int colver(pMesh mesh,int *list,int ilist,char indq) {
 #ifndef SINGUL
       continue;
 #else
-      if ( !info.sing || !warn_sing ) continue;
+      if ( !mesh->info.sing || !warn_sing ) continue;
 
       /* we need a xtetra for all singular edges so we may need to create it. */
       /* First: check that xtetra will not be created by adjacency at next step */
@@ -689,7 +688,7 @@ int colver(pMesh mesh,int *list,int ilist,char indq) {
             pxt->tag[arpt[ip][j]] |= pxt1->tag[ind[i][0]];
 #ifdef SINGUL
             /* we need the xtetra? */
-            if ( info.sing && (pxt1->tag[ind[i][0]] & MG_SGL) )  need_xt=1;
+            if ( mesh->info.sing && (pxt1->tag[ind[i][0]] & MG_SGL) )  need_xt=1;
 #endif
             if ( !pxt->edg[arpt[ip][j]] )
               pxt->edg[arpt[ip][j]] = pxt1->edg[ind[i][0]];
@@ -707,7 +706,7 @@ int colver(pMesh mesh,int *list,int ilist,char indq) {
             pxt->tag[arpt[ip][j]] |= pxt1->tag[ind[i][1]];
 #ifdef SINGUL
             /* we need the xtetra? */
-            if ( info.sing && (pxt1->tag[ind[i][1]] & MG_SGL) )  need_xt=1;
+            if ( mesh->info.sing && (pxt1->tag[ind[i][1]] & MG_SGL) )  need_xt=1;
 #endif
             if ( !pxt->edg[arpt[ip][j]] )
               pxt->edg[arpt[ip][j]] = pxt1->edg[ind[i][1]];
@@ -721,7 +720,7 @@ int colver(pMesh mesh,int *list,int ilist,char indq) {
     }
 #ifdef SINGUL
     /* delete useless created xTetra */
-    if ( info.sing && pt->flag && (!need_xt) ) {
+    if ( mesh->info.sing && pt->flag && (!need_xt) ) {
       pt->xt = 0;
       mesh->xt--;
     }

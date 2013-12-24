@@ -1,8 +1,5 @@
 #include "mmg3d.h"
 
-extern Info  info;
-
-
 int scaleMesh(pMesh mesh,pSol met,pSingul sing) {
   pPoint    ppt;
 #ifdef SINGUL
@@ -15,41 +12,41 @@ int scaleMesh(pMesh mesh,pSol met,pSingul sing) {
 
   /* compute bounding box */
   for (i=0; i<3; i++) {
-    info.min[i] =  DBL_MAX;
-    info.max[i] = -DBL_MAX;
+    mesh->info.min[i] =  DBL_MAX;
+    mesh->info.max[i] = -DBL_MAX;
   }
   for (k=1; k<=mesh->np; k++) {
     ppt = &mesh->point[k];
     if ( !MG_VOK(ppt) )  continue;
     for (i=0; i<3; i++) {
-      if ( ppt->c[i] > info.max[i] )  info.max[i] = ppt->c[i];
-      if ( ppt->c[i] < info.min[i] )  info.min[i] = ppt->c[i];
+      if ( ppt->c[i] > mesh->info.max[i] )  mesh->info.max[i] = ppt->c[i];
+      if ( ppt->c[i] < mesh->info.min[i] )  mesh->info.min[i] = ppt->c[i];
     }
   }
-  info.delta = 0.0;
+  mesh->info.delta = 0.0;
   for (i=0; i<3; i++) {
-    dd = info.max[i] - info.min[i];
-    if ( dd > info.delta )  info.delta = dd;
+    dd = mesh->info.max[i] - mesh->info.min[i];
+    if ( dd > mesh->info.delta )  mesh->info.delta = dd;
   }
-  if ( info.delta < EPSD ) {
+  if ( mesh->info.delta < EPSD ) {
     fprintf(stdout,"  ## Unable to scale mesh.\n");
     return(0);
   }
 
   /* normalize coordinates */
-  dd = 1.0 / info.delta;
+  dd = 1.0 / mesh->info.delta;
   for (k=1; k<=mesh->np; k++) {
     ppt = &mesh->point[k];
     if ( !MG_VOK(ppt) )  continue;
-    ppt->c[0] = dd * (ppt->c[0] - info.min[0]);
-    ppt->c[1] = dd * (ppt->c[1] - info.min[1]);
-    ppt->c[2] = dd * (ppt->c[2] - info.min[2]);
+    ppt->c[0] = dd * (ppt->c[0] - mesh->info.min[0]);
+    ppt->c[1] = dd * (ppt->c[1] - mesh->info.min[1]);
+    ppt->c[2] = dd * (ppt->c[2] - mesh->info.min[2]);
   }
 
   /* normalize values */
-  info.hmin  *= dd;
-  info.hmax  *= dd;
-  info.hausd *= dd;
+  mesh->info.hmin  *= dd;
+  mesh->info.hmax  *= dd;
+  mesh->info.hausd *= dd;
 
   /* normalize sizes */
   if ( met->size == 1 && met->m ) {
@@ -60,7 +57,7 @@ int scaleMesh(pMesh mesh,pSol met,pSingul sing) {
 #ifdef SINGUL
   /* 2nd mesh (sing) is quarter sized */
   /* Get the size of sing in every direction */
-  if ( info.sing && sing->ns ) {
+  if ( mesh->info.sing && sing->ns ) {
     deltb = 0.0;
 
     for (i=0; i<mesh->dim; i++) {
@@ -84,8 +81,8 @@ int scaleMesh(pMesh mesh,pSol met,pSingul sing) {
   }
 #endif
   /* normalize local parameters */
-  for (k=0; k<info.npar; k++) {
-    par = &info.par[k];
+  for (k=0; k<mesh->info.npar; k++) {
+    par = &mesh->info.par[k];
     par->hausd *= dd;
   }
 
@@ -98,13 +95,13 @@ int unscaleMesh(pMesh mesh,pSol met) {
   int        k;
 
   /* de-normalize coordinates */
-  dd = info.delta;
+  dd = mesh->info.delta;
   for (k=1; k<=mesh->np; k++) {
     ppt = &mesh->point[k];
     if ( !MG_VOK(ppt) )  continue;
-    ppt->c[0] = ppt->c[0] * dd + info.min[0];
-    ppt->c[1] = ppt->c[1] * dd + info.min[1];
-    ppt->c[2] = ppt->c[2] * dd + info.min[2];
+    ppt->c[0] = ppt->c[0] * dd + mesh->info.min[0];
+    ppt->c[1] = ppt->c[1] * dd + mesh->info.min[1];
+    ppt->c[2] = ppt->c[2] * dd + mesh->info.min[2];
   }
 
   /* unscale sizes */

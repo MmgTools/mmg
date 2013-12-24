@@ -1,6 +1,5 @@
 #include "mmg3d.h"
 
-extern Info  info;
 char  ddb;
 
 #define LOPTLDEL     1.3//1.41
@@ -139,7 +138,7 @@ static int swpmshcpy(pMesh mesh,pSol met) {
     nns += ns;
   }
   while ( ++it < maxit && ns > 0 );
-  if ( (abs(info.imprim) > 5 || info.ddebug) && nns > 0 )
+  if ( (abs(mesh->info.imprim) > 5 || mesh->info.ddebug) && nns > 0 )
     fprintf(stdout,"     %8d edge swapped\n",nns);
 
   return(nns);
@@ -181,7 +180,7 @@ static int swpmshcpy(pMesh mesh,pSol met) {
     nns += ns;
   }
   while ( ++it < maxit && ns > 0 );
-  if ( (abs(info.imprim) > 5 || info.ddebug) && nns > 0 )
+  if ( (abs(mesh->info.imprim) > 5 || mesh->info.ddebug) && nns > 0 )
     fprintf(stdout,"     %8d edge swapped\n",nns);
 
   return(nns);
@@ -205,7 +204,7 @@ static int swpmshcpy(pMesh mesh,pSol met) {
     maxit = maxitin;
     internal=1;
   }
-  if ( abs(info.imprim) > 5 || info.ddebug )
+  if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug )
     fprintf(stdout,"  ** OPTIMIZING MESH\n");
 
   base = 1;
@@ -294,11 +293,11 @@ static int swpmshcpy(pMesh mesh,pSol met) {
       }
     }
     nnm += nm;
-    if ( info.ddebug )  fprintf(stdout,"     %8d moved, %d geometry\n",nm,ns);
+    if ( mesh->info.ddebug )  fprintf(stdout,"     %8d moved, %d geometry\n",nm,ns);
   }
   while( ++it < maxit && nm > 0 );
 
-  if ( (abs(info.imprim) > 5 || info.ddebug) && nnm )
+  if ( (abs(mesh->info.imprim) > 5 || mesh->info.ddebug) && nnm )
     fprintf(stdout,"     %8d vertices moved, %d iter.\n",nnm,it);
 
   return(nnm);
@@ -315,7 +314,7 @@ static int swpmshcpy(pMesh mesh,pSol met) {
   int        ier;
 
   nc = nnm = 0;
-  hmi2 = info.hmin*info.hmin;
+  hmi2 = mesh->info.hmin*mesh->info.hmin;
 
   for (k=1; k<=mesh->ne; k++) {
     base = ++mesh->base;
@@ -385,7 +384,7 @@ static int swpmshcpy(pMesh mesh,pSol met) {
       }
     }
   }
-  if ( nc > 0 && (abs(info.imprim) > 5 || info.ddebug) )
+  if ( nc > 0 && (abs(mesh->info.imprim) > 5 || mesh->info.ddebug) )
     fprintf(stdout,"     %8d vertices removed, %8d non manifold,\n",nc,nnm);
 
   return(nc);
@@ -404,7 +403,7 @@ static int swpmshcpy(pMesh mesh,pSol met) {
   /** 1. analysis */
   if ( !hashNew(&hash,mesh->np,7*mesh->np) )  return(-1);
   memlack = ns = nap = 0;
-  hma2 = LLONG*LLONG*info.hmax*info.hmax;
+  hma2 = LLONG*LLONG*mesh->info.hmax*mesh->info.hmax;
 
   /* Hash all boundary and required edges, and put ip = -1 in hash structure */
   for (k=1; k<=mesh->ne; k++) {
@@ -417,7 +416,7 @@ static int swpmshcpy(pMesh mesh,pSol met) {
         ip1 = pt->v[iare[i][0]];
         ip2 = pt->v[iare[i][1]];
         ip  = -1;
-        if ( !hashEdge(&hash,ip1,ip2,ip) ) return(-1);
+        if ( !hashEdge(mesh,&hash,ip1,ip2,ip) ) return(-1);
       }
       continue;
     }
@@ -431,7 +430,7 @@ static int swpmshcpy(pMesh mesh,pSol met) {
           ip1 = pt->v[idir[i][inxt2[j]]];
           ip2 = pt->v[idir[i][iprv2[j]]];
           ip  = -1;
-          if ( !hashEdge(&hash,ip1,ip2,ip) ) return(-1);
+          if ( !hashEdge(mesh,&hash,ip1,ip2,ip) ) return(-1);
         }
         break;
       }
@@ -489,7 +488,7 @@ static int swpmshcpy(pMesh mesh,pSol met) {
 
         if ( met->m )
           met->m[ip] = 0.5 * (met->m[ip1]+met->m[ip2]);
-        if ( !hashEdge(&hash,ip1,ip2,ip) ) return(-1);
+        if ( !hashEdge(mesh,&hash,ip1,ip2,ip) ) return(-1);
         MG_SET(pt->flag,i);
         nap++;
       }
@@ -617,7 +616,7 @@ static int swpmshcpy(pMesh mesh,pSol met) {
     }
   }
 
-  if ( (info.ddebug || abs(info.imprim) > 5) && ns > 0 )
+  if ( (mesh->info.ddebug || abs(mesh->info.imprim) > 5) && ns > 0 )
     fprintf(stdout,"     %7d splitted\n",nap);
 
   free(hash.item);
@@ -727,7 +726,7 @@ static int swpmshcpy(pMesh mesh,pSol met) {
           } while ( mesh->np>npinit );
           return(-1);
         }
-        if ( !hashEdge(&hash,ip1,ip2,ip) ) return(-1);
+        if ( !hashEdge(mesh,&hash,ip1,ip2,ip) ) return(-1);
         ppt = &mesh->point[ip];
         p1  = &mesh->point[ip1];
         p2  = &mesh->point[ip2];
@@ -815,7 +814,7 @@ static int swpmshcpy(pMesh mesh,pSol met) {
       }
     }
   }
-  if ( info.ddebug && nc ) {
+  if ( mesh->info.ddebug && nc ) {
     fprintf(stdout,"     %d added\n",nc);
     fflush(stdout);
   }
@@ -878,7 +877,7 @@ static int swpmshcpy(pMesh mesh,pSol met) {
     }
   }
   while( nc > 0 && ++it < 20 );
-  if ( info.ddebug && nc ) {
+  if ( mesh->info.ddebug && nc ) {
     fprintf(stdout,"     %d corrected, %d invalid\n",nc,ni);
     fflush(stdout);
   }
@@ -913,7 +912,7 @@ static int swpmshcpy(pMesh mesh,pSol met) {
       break;
     }
   }
-  if ( (info.ddebug || abs(info.imprim) > 5) && ns > 0 )
+  if ( (mesh->info.ddebug || abs(mesh->info.imprim) > 5) && ns > 0 )
     fprintf(stdout,"       %7d elements splitted\n",nap);
 
   free(hash.item);
@@ -1191,7 +1190,7 @@ int adpsplcol(pMesh mesh,pSol met,pBucket bucket, int* warn) {
   maxit = 10;
   MMG_npuiss=MMG_nvol=MMG_npres =MMG_npd=0 ;
   do {
-    if ( !info.noinsert ) {
+    if ( !mesh->info.noinsert ) {
       *warn=0;
       ns = nc = 0;
       nf = nm = 0;
@@ -1514,7 +1513,7 @@ int adpsplcol(pMesh mesh,pSol met,pBucket bucket, int* warn) {
         // }//end for ii
 
       }
-    } /* End conditional loop on info.noinsert */
+    } /* End conditional loop on mesh->info.noinsert */
     else  ns = nc = 0;
 
     /* prilen(mesh,met); */
@@ -1530,7 +1529,7 @@ int adpsplcol(pMesh mesh,pSol met,pBucket bucket, int* warn) {
     /* MMG_npuiss=0; */
     /* MMG_nvol=0; */
     /* MMG_npres=0; */
-    if ( !info.noswap ) {
+    if ( !mesh->info.noswap ) {
       nf = swpmshcpy(mesh,met);
       if ( nf < 0 ) {
         fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
@@ -1547,7 +1546,7 @@ int adpsplcol(pMesh mesh,pSol met,pBucket bucket, int* warn) {
     nnf+=nf;
     fprintf(stdout,"$$$$$$$$$$$$$$$$$$ ITER SWAP %7d\n",nnf);
 
-    if ( !info.nomove ) {
+    if ( !mesh->info.nomove ) {
       nm = movtetdel(mesh,met,-1);
       if ( nm < 0 ) {
         fprintf(stdout,"  ## Unable to improve mesh.\n");
@@ -1558,7 +1557,7 @@ int adpsplcol(pMesh mesh,pSol met,pBucket bucket, int* warn) {
     nnm += nm;
     nnc += nc;
     nns += ns;
-    if ( 1 || ((abs(info.imprim) > 4 || info.ddebug) && ns+nc > 0) )
+    if ( 1 || ((abs(mesh->info.imprim) > 4 || mesh->info.ddebug) && ns+nc > 0) )
       fprintf(stdout,"     %8d filtered %8d splitted, %8d collapsed, %8d swapped, %8d moved\n",ifilt,ns,nc,nf,nm);
     if ( ns < 10 && abs(nc-ns) < 3 )  break;
     else if ( it > 3 && abs(nc-ns) < 0.3 * MG_MAX(nc,ns) )  break;
@@ -1647,7 +1646,7 @@ int adpsplcol(pMesh mesh,pSol met,pBucket bucket, int* warn) {
   int      warn;
 
   /*initial swap*/
-  if ( !info.noswap ) {
+  if ( !mesh->info.noswap ) {
     nf = swpmshcpy(mesh,met);
     if ( nf < 0 ) {
       fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
@@ -1692,16 +1691,16 @@ int adpsplcol(pMesh mesh,pSol met,pBucket bucket, int* warn) {
 
 #ifdef USE_SCOTCH
   /*check enough vertex to renum*/
-  if ( info.renum && (mesh->np/2. > BOXSIZE) ) {
+  if ( mesh->info.renum && (mesh->np/2. > BOXSIZE) ) {
     /* renumbering begin */
-    if ( info.imprim > 5 )
+    if ( mesh->info.imprim > 5 )
       fprintf(stdout,"renumbering");
     renumbering(BOXSIZE,mesh, met);
 
-    if ( info.imprim > 5) {
+    if ( mesh->info.imprim > 5) {
       fprintf(stdout,"  -- PHASE RENUMBERING COMPLETED. \n");
     }
-    if ( info.ddebug )  chkmsh(mesh,1,0);
+    if ( mesh->info.ddebug )  chkmsh(mesh,1,0);
     /* renumbering end */
   }
 #endif
@@ -1716,7 +1715,7 @@ int adpsplcol(pMesh mesh,pSol met,pBucket bucket, int* warn) {
       fprintf(stdout,"  ## Unable to remove bad elements.\n");
       return(0);
       }*/
-    if ( !info.nomove ) {
+    if ( !mesh->info.nomove ) {
       nm = movtetdel(mesh,met,0);
       if ( nm < 0 ) {
         fprintf(stdout,"  ## Unable to improve mesh.\n");
@@ -1726,7 +1725,7 @@ int adpsplcol(pMesh mesh,pSol met,pBucket bucket, int* warn) {
     else  nm = 0;
     nnm += nm;
 
-    if ( !info.noswap ) {
+    if ( !mesh->info.noswap ) {
       nf = swpmshcpy(mesh,met);
       if ( nf < 0 ) {
         fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
@@ -1742,14 +1741,14 @@ int adpsplcol(pMesh mesh,pSol met,pBucket bucket, int* warn) {
     }
     else  nf = 0;
 
-    if ( (abs(info.imprim) > 4 || info.ddebug) && nf+nm > 0 ){
+    if ( (abs(mesh->info.imprim) > 4 || mesh->info.ddebug) && nf+nm > 0 ){
       fprintf(stdout,"                                            ");
       fprintf(stdout,"%8d swapped, %8d moved\n",nf,nm);
     }
   }
   while( ++it < maxit && nm+nf > 0 );
 
-  if ( !info.nomove ) {
+  if ( !mesh->info.nomove ) {
     nm = movtetdel(mesh,met,3);
     if ( nm < 0 ) {
       fprintf(stdout,"  ## Unable to improve mesh.\n");
@@ -1758,7 +1757,7 @@ int adpsplcol(pMesh mesh,pSol met,pBucket bucket, int* warn) {
   }
   else  nm = 0;
   nnm += nm;
-  if ( (abs(info.imprim) > 4 || info.ddebug) && nm > 0 )
+  if ( (abs(mesh->info.imprim) > 4 || mesh->info.ddebug) && nm > 0 )
     fprintf(stdout,"                                            ");
   fprintf(stdout,"                  %8d moved\n",nm);
 
@@ -1771,7 +1770,7 @@ int adpsplcol(pMesh mesh,pSol met,pBucket bucket, int* warn) {
   int      warn;
 
   //ATTENTION MARCHE PAS................................
-  if ( !info.noswap ) {
+  if ( !mesh->info.noswap ) {
     nf = swpmshcpy(mesh,met);
     if ( nf < 0 ) {
       fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
@@ -1797,7 +1796,7 @@ int adpsplcol(pMesh mesh,pSol met,pBucket bucket, int* warn) {
     tabtmp[0][0]=0;
     tabtmp[0][1]=0;     tabtmp[0][2]=0;
 #endif
-    if ( !info.noinsert ) {
+    if ( !mesh->info.noinsert ) {
       ns = adpspl_delone(mesh,met,bucket,&warn);
 
 #ifdef DEBUG
@@ -1822,7 +1821,7 @@ int adpsplcol(pMesh mesh,pSol met,pBucket bucket, int* warn) {
     }
     else  ns = nc = 0;
 
-    if ( !info.noswap ) {
+    if ( !mesh->info.noswap ) {
       nf = swpmshcpy(mesh,met);
       if ( nf < 0 ) {
         fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
@@ -1832,7 +1831,7 @@ int adpsplcol(pMesh mesh,pSol met,pBucket bucket, int* warn) {
     else  nf = 0;
     nnf += nf;
 
-    if ( !info.nomove ) {
+    if ( !mesh->info.nomove ) {
       nm = movtetdel(mesh,met,-1);
       if ( nm < 0 ) {
         fprintf(stdout,"  ## Unable to improve mesh.\n");
@@ -1844,7 +1843,7 @@ int adpsplcol(pMesh mesh,pSol met,pBucket bucket, int* warn) {
     nnm += nm;
     nnc += nc;
     nns += ns;
-    if ( (abs(info.imprim) > 4 || info.ddebug) && ns+nc > 0 )
+    if ( (abs(mesh->info.imprim) > 4 || mesh->info.ddebug) && ns+nc > 0 )
       fprintf(stdout,"     %8d splitted, %8d collapsed, %8d swapped, %8d moved\n",ns,nc,nf,nm);
     // if ( ns < 10 && abs(nc-ns) < 3 )  break;
     // else if ( it > 3 && abs(nc-ns) < 0.3 * MG_MAX(nc,ns) )  break;
@@ -1872,7 +1871,7 @@ int adpsplcol(pMesh mesh,pSol met,pBucket bucket, int* warn) {
       return(0);
       }*/
 
-    if ( !info.nomove ) {
+    if ( !mesh->info.nomove ) {
       nm = movtetdel(mesh,met,0);
       if ( nm < 0 ) {
         fprintf(stdout,"  ## Unable to improve mesh.\n");
@@ -1882,7 +1881,7 @@ int adpsplcol(pMesh mesh,pSol met,pBucket bucket, int* warn) {
     }
     else  nm = 0;
 
-    if ( !info.noswap ) {
+    if ( !mesh->info.noswap ) {
       nf = swpmshcpy(mesh,met);
       if ( nf < 0 ) {
         fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
@@ -1898,14 +1897,14 @@ int adpsplcol(pMesh mesh,pSol met,pBucket bucket, int* warn) {
     }
     else  nf = 0;
 
-    if ( (abs(info.imprim) > 4 || info.ddebug) && nf+nm > 0 ){
+    if ( (abs(mesh->info.imprim) > 4 || mesh->info.ddebug) && nf+nm > 0 ){
       fprintf(stdout,"                                            ");
       fprintf(stdout,"%8d swapped, %8d moved\n",nf,nm);
     }
   }
   while( ++it < maxit && nm+nf > 0 );
 
-  if ( !info.nomove ) {
+  if ( !mesh->info.nomove ) {
     nm = movtetdel(mesh,met,3);
     if ( nm < 0 ) {
       fprintf(stdout,"  ## Unable to improve mesh.\n");
@@ -1915,13 +1914,13 @@ int adpsplcol(pMesh mesh,pSol met,pBucket bucket, int* warn) {
   }
   else  nm = 0;
 
-  if ( (abs(info.imprim) > 4 || info.ddebug) && nm > 0 ){
+  if ( (abs(mesh->info.imprim) > 4 || mesh->info.ddebug) && nm > 0 ){
     fprintf(stdout,"                                            ");
     fprintf(stdout,"                  %8d moved\n",nm);
   }
 
 
-  if ( abs(info.imprim) < 5 && (nnc > 0 || nns > 0) )
+  if ( abs(mesh->info.imprim) < 5 && (nnc > 0 || nns > 0) )
     fprintf(stdout,"     %8d splitted, %8d collapsed, %8d swapped, %8d moved, %d iter. \n",
             nns,nnc,nnf,nnm,it);
 
@@ -1962,7 +1961,7 @@ int adpsplcol(pMesh mesh,pSol met,pBucket bucket, int* warn) {
       }
     }
   }
-  if ( (info.ddebug || abs(info.imprim) > 5) && ns > 0 )
+  if ( (mesh->info.ddebug || abs(mesh->info.imprim) > 5) && ns > 0 )
     fprintf(stdout,"     %7d boundary elements splitted\n",ns);
   return(ns);
 }
@@ -1983,7 +1982,7 @@ int adpsplcol(pMesh mesh,pSol met,pBucket bucket, int* warn) {
     puts("AVT ANATET4");
     prilen(mesh,met);
 #endif
-    if ( !info.noinsert ) {
+    if ( !mesh->info.noinsert ) {
       /* split tetra with more than 2 bdry faces */
       ier = anatet4del(mesh,met);
 #ifdef DEBUG
@@ -2023,10 +2022,10 @@ int adpsplcol(pMesh mesh,pSol met,pBucket bucket, int* warn) {
       fprintf(stdout,"  ## Hashing problem. Exit program.\n");
       return(0);
     }
-    if ( typchk == 2 && it == maxit-1 )  info.fem = 1;
+    if ( typchk == 2 && it == maxit-1 )  mesh->info.fem = 1;
 
     /* collapse short edges */
-    if ( !info.noinsert ) {
+    if ( !mesh->info.noinsert ) {
       nc = coltetdel(mesh,met,typchk);
       if ( nc < 0 ) {
         fprintf(stdout,"  ## Unable to collapse mesh. Exiting.\n");
@@ -2036,7 +2035,7 @@ int adpsplcol(pMesh mesh,pSol met,pBucket bucket, int* warn) {
     else  nc = 0;
 
     /* attempt to swap */
-    if ( !info.noswap ) {
+    if ( !mesh->info.noswap ) {
       nf = swpmshcpy(mesh,met);
       if ( nf < 0 ) {
         fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
@@ -2055,13 +2054,13 @@ int adpsplcol(pMesh mesh,pSol met,pBucket bucket, int* warn) {
     nnc += nc;
     nns += ns;
     nnf += nf;
-    if ( (abs(info.imprim) > 4 || info.ddebug) && ns+nc+nf > 0 )
+    if ( (abs(mesh->info.imprim) > 4 || mesh->info.ddebug) && ns+nc+nf > 0 )
       fprintf(stdout,"     %8d splitted, %8d collapsed, %8d swapped\n",ns,nc,nf);
     if ( it > 3 && abs(nc-ns) < 0.1 * MG_MAX(nc,ns) )  break;
   }
   while ( ++it < maxit && ns+nc+nf > 0 );
 
-  if ( (abs(info.imprim) < 5 || info.ddebug ) && nns+nnc > 0 )
+  if ( (abs(mesh->info.imprim) < 5 || mesh->info.ddebug ) && nns+nnc > 0 )
     fprintf(stdout,"     %8d splitted, %8d collapsed, %8d swapped, %d iter.\n",nns,nnc,nnf,it);
 #ifdef DEBUG
   puts("FIN ANATET");
@@ -2074,16 +2073,16 @@ int adpsplcol(pMesh mesh,pSol met,pBucket bucket, int* warn) {
 int mmg3d1_delone(pMesh mesh,pSol met) {
   pBucket bucket;
 
-  if ( abs(info.imprim) > 4 )
+  if ( abs(mesh->info.imprim) > 4 )
     fprintf(stdout,"  ** MESH ANALYSIS\n");
 
-  if ( info.iso && !chkmani(mesh) ) {
+  if ( mesh->info.iso && !chkmani(mesh) ) {
     fprintf(stdout,"  ## Non orientable implicit surface. Exit program.\n");
     return(0);
   }
 
   /**--- stage 1: geometric mesh */
-  if ( abs(info.imprim) > 4 || info.ddebug )
+  if ( abs(mesh->info.imprim) > 4 || mesh->info.ddebug )
     fprintf(stdout,"  ** GEOMETRIC MESH\n");
 
   if ( !anatetdel(mesh,met,1) ) {
@@ -2095,7 +2094,7 @@ int mmg3d1_delone(pMesh mesh,pSol met) {
 #endif
 
   /**--- stage 2: computational mesh */
-  if ( abs(info.imprim) > 4 || info.ddebug )
+  if ( abs(mesh->info.imprim) > 4 || mesh->info.ddebug )
     fprintf(stdout,"  ** COMPUTATIONAL MESH\n");
 
   /* define metric map */
@@ -2104,7 +2103,7 @@ int mmg3d1_delone(pMesh mesh,pSol met) {
     return(0);
   }
 
-  if ( info.hgrad > 0. && !gradsiz(mesh,met) ) {
+  if ( mesh->info.hgrad > 0. && !gradsiz(mesh,met) ) {
     fprintf(stdout,"  ## Gradation problem. Exit program.\n");
     return(0);
   }
@@ -2119,23 +2118,23 @@ int mmg3d1_delone(pMesh mesh,pSol met) {
 #endif
 #ifdef USE_SCOTCH
     /*check enough vertex to renum*/
-    if ( info.renum  && (mesh->np/2. > BOXSIZE) ) {
+    if ( mesh->info.renum  && (mesh->np/2. > BOXSIZE) ) {
       /* renumbering begin */
-      if ( info.imprim > 5 )
+      if ( mesh->info.imprim > 5 )
         fprintf(stdout,"renumbering");
       renumbering(BOXSIZE,mesh, met);
 
-      if ( info.imprim > 5) {
+      if ( mesh->info.imprim > 5) {
         fprintf(stdout,"  -- PHASE RENUMBERING COMPLETED. \n");
       }
 
-      if ( info.ddebug )  chkmsh(mesh,1,0);
+      if ( mesh->info.ddebug )  chkmsh(mesh,1,0);
       /* renumbering end */
     }
 #endif
 
   /* CEC : create filter */
-  bucket = newBucket(mesh,64);//M_MAX(mesh->info.bucksiz,BUCKSIZ));
+  bucket = newBucket(mesh,64);//M_MAX(mesh->mesh->info.bucksiz,BUCKSIZ));
   if ( !bucket )  return(0);
 
   if ( !adptet1(mesh,met,bucket) ) {
@@ -2153,7 +2152,7 @@ int mmg3d1_delone(pMesh mesh,pSol met) {
     return(0);
   }
 
-  if ( info.iso && !chkmani(mesh) ) {
+  if ( mesh->info.iso && !chkmani(mesh) ) {
     fprintf(stdout,"  ## Non orientable implicit surface. Exit program.\n");
     return(0);
   }

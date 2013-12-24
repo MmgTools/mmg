@@ -1,6 +1,5 @@
 #include "mmg3d.h"
 
-extern Info  info;
 extern char  ddb;
 
 /** solve 3*3 non symmetric system Ar = b */
@@ -310,7 +309,7 @@ static int snpval_ls(pMesh mesh,pSol sol,double *tmp) {
     p0 = &mesh->point[k];
     if ( !MG_VOK(p0) ) continue;
     if ( fabs(sol->m[k]) < EPS ) {
-      if ( info.ddebug )  fprintf(stdout,"  Snapping value %d ; previous value : %E\n",k,fabs(sol->m[k]));
+      if ( mesh->info.ddebug )  fprintf(stdout,"  Snapping value %d ; previous value : %E\n",k,fabs(sol->m[k]));
       tmp[k] = ( fabs(sol->m[k]) < EPSD ) ? (-100.0*EPS) : sol->m[k];
       p0->flag = 1;
       sol->m[k] = 0.0;
@@ -335,7 +334,7 @@ static int snpval_ls(pMesh mesh,pSol sol,double *tmp) {
       }
     }
   }
-  if ( (abs(info.imprim) > 5 || info.ddebug) && ns+nc > 0 )
+  if ( (abs(mesh->info.imprim) > 5 || mesh->info.ddebug) && ns+nc > 0 )
     fprintf(stdout,"     %8d points snapped, %d corrected\n",ns,nc);
 
   /* memory free */
@@ -494,7 +493,7 @@ static int cuttet_ls(pMesh mesh, pSol sol/*,double *tmp*/){
         return(0);
       }
       sol->m[np] = 0.0;
-      hashEdge(&hash,ip0,ip1,np);
+      hashEdge(mesh,&hash,ip0,ip1,np);
     }
   }
 
@@ -537,7 +536,7 @@ static int cuttet_ls(pMesh mesh, pSol sol/*,double *tmp*/){
       break;
     }
   }
-  if ( (info.ddebug || abs(info.imprim) > 5) && ns > 0 )
+  if ( (mesh->info.ddebug || abs(mesh->info.imprim) > 5) && ns > 0 )
     fprintf(stdout,"     %7d splitted\n",ns);
 
   free(hash.item);
@@ -731,7 +730,7 @@ int chkedg_ls(pMesh mesh, pSol sol){
       }
     }
   }
-  if ( (abs(info.imprim) > 4 || info.ddebug) && nf > 0 )
+  if ( (abs(mesh->info.imprim) > 4 || mesh->info.ddebug) && nf > 0 )
     fprintf(stdout,"    %8d problematic edges, %d corrected\n",nf,nc);
   return(1);
 }
@@ -979,7 +978,7 @@ int chkmani2(pMesh mesh,pSol sol) {
       }
     }
   }
-  if ( info.ddebug )  fprintf(stdout,"  *** Manifold implicit surface.\n");
+  if ( mesh->info.ddebug )  fprintf(stdout,"  *** Manifold implicit surface.\n");
   return(1);
 }
 
@@ -1497,7 +1496,7 @@ int chkmanicoll(pMesh mesh,int k,int iface,int iedg,int ndepmin,int ndepplus,cha
 int mmg3d2(pMesh mesh,pSol sol) {
   double   *tmp;
 
-  if ( abs(info.imprim) > 4 )
+  if ( abs(mesh->info.imprim) > 4 )
     fprintf(stdout,"  ** ISOSURFACE EXTRACTION\n");
 
   tmp = (double*)calloc(mesh->npmax+1,sizeof(double));

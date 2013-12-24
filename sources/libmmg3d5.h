@@ -116,7 +116,6 @@ typedef struct {
   int           renum;
   char          imprim,ddebug,badkal,iso,fem;
   unsigned char noinsert, noswap, nomove;
-  mytime        ctim[TIMEMAX];
   MMG5_pPar     par;
 } MMG5_Info;
 
@@ -142,6 +141,7 @@ typedef struct {
   MMG5_pTria     tria;
   MMG5_pEdge     edge;
   MMG5_HGeom     htab;
+  MMG5_Info      info;
 } MMG5_Mesh;
 typedef MMG5_Mesh  * MMG5_pMesh;
 
@@ -169,8 +169,6 @@ typedef struct {
 } MMG5_Singul; /**< structure to store the singularities of a mesh */
 typedef MMG5_Singul * MMG5_pSingul;
 /* end structures for insertion of singularities */
-
-extern MMG5_Info info;
 
 /** input/output functions */
 int  MMG5_loadMesh(MMG5_pMesh );

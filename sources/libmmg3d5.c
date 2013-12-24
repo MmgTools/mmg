@@ -68,7 +68,7 @@ void mmg3dinit(int *opt_i, double *opt_d) {
   opt_i[MMG5_IPARAM_renum]    = 0;   /**< [1/0]    , Turn on/off the renumbering using SCOTCH; */
 #endif
 #ifdef SINGUL
-  opt_i[MMG5_IPARAM_singul]   =  0;  /**< [0/1]    ,preserve internal singularities */
+  opt_i[MMG5_IPARAM_sing]     =  0;  /**< [0/1]    ,preserve internal singularities */
 #endif
 
   /* default values for second tab (double) */
@@ -84,47 +84,47 @@ void mmg3dinit(int *opt_i, double *opt_d) {
 void stockOption(int *opt_i,double *opt_d, pMesh mesh){
 
   /* recovering of first option table (integers) */
-  info.imprim   = opt_i[MMG5_IPARAM_verbose];
-  info.mem      = opt_i[MMG5_IPARAM_mem];
-  info.ddebug   = opt_i[MMG5_IPARAM_debug];
+  mesh->info.imprim   = opt_i[MMG5_IPARAM_verbose];
+  mesh->info.mem      = opt_i[MMG5_IPARAM_mem];
+  mesh->info.ddebug   = opt_i[MMG5_IPARAM_debug];
   if ( !opt_i[MMG5_IPARAM_angle] )
-    info.dhd = -1.0;
+    mesh->info.dhd = -1.0;
   else {
-    info.dhd = opt_d[MMG5_DPARAM_dhd];
-    info.dhd = MG_MAX(0.0, MG_MIN(180.0,info.dhd));
-    info.dhd = cos(info.dhd*M_PI/180.0);
+    mesh->info.dhd = opt_d[MMG5_DPARAM_dhd];
+    mesh->info.dhd = MG_MAX(0.0, MG_MIN(180.0,mesh->info.dhd));
+    mesh->info.dhd = cos(mesh->info.dhd*M_PI/180.0);
   }
 
-  info.iso      = opt_i[MMG5_IPARAM_iso];
-  info.noinsert = opt_i[MMG5_IPARAM_noinsert];
-  info.noswap   = opt_i[MMG5_IPARAM_noswap];
-  info.nomove   = opt_i[MMG5_IPARAM_nomove];
-  info.npar     = opt_i[MMG5_IPARAM_nlocParam];
+  mesh->info.iso      = opt_i[MMG5_IPARAM_iso];
+  mesh->info.noinsert = opt_i[MMG5_IPARAM_noinsert];
+  mesh->info.noswap   = opt_i[MMG5_IPARAM_noswap];
+  mesh->info.nomove   = opt_i[MMG5_IPARAM_nomove];
+  mesh->info.npar     = opt_i[MMG5_IPARAM_nlocParam];
 #ifdef USE_SCOTCH
-  info.renum    = opt_i[MMG5_IPARAM_renum];
+  mesh->info.renum    = opt_i[MMG5_IPARAM_renum];
 #else
-  info.renum    = 0;
+  mesh->info.renum    = 0;
 #endif
 #ifdef SINGUL
-  info.sing     = opt_i[MMG5_IPARAM_sing];
+  mesh->info.sing     = opt_i[MMG5_IPARAM_sing];
 #else
-  info.sing     = 0;
+  mesh->info.sing     = 0;
 #endif
 
   /* recovering of second option table (doubles) */
-  info.hmin     = opt_d[MMG5_DPARAM_hmin];
-  info.hmax     = opt_d[MMG5_DPARAM_hmax];
-  info.hausd    = opt_d[MMG5_DPARAM_hausd];
-  info.hgrad    = opt_d[MMG5_DPARAM_hgrad];
-  if ( info.hgrad < 0.0 )
-    info.hgrad = -1.0;
+  mesh->info.hmin     = opt_d[MMG5_DPARAM_hmin];
+  mesh->info.hmax     = opt_d[MMG5_DPARAM_hmax];
+  mesh->info.hausd    = opt_d[MMG5_DPARAM_hausd];
+  mesh->info.hgrad    = opt_d[MMG5_DPARAM_hgrad];
+  if ( mesh->info.hgrad < 0.0 )
+    mesh->info.hgrad = -1.0;
   else
-    info.hgrad = log(info.hgrad);
+    mesh->info.hgrad = log(mesh->info.hgrad);
 
-  info.ls       = opt_d[MMG5_DPARAM_ls];
+  mesh->info.ls       = opt_d[MMG5_DPARAM_ls];
 
   /* other options */
-  info.fem      = 0;
+  mesh->info.fem      = 0;
 }
 
 /** Deallocations before return */
@@ -184,7 +184,7 @@ int inputdata(pMesh mesh,pSol met) {
   if ( !met ->ver )  met ->ver = 2;
 
   /*  Check mesh data */
-  if ( info.ddebug ) {
+  if ( mesh->info.ddebug ) {
     if ( (!mesh->np) || (!mesh->point) ||
          (!mesh->ne) || (!mesh->tetra) ) {
       fprintf(stdout,"  ** MISSING DATA. Exit program.\n");
@@ -326,7 +326,7 @@ int packMesh(pMesh mesh,pSol met) {
           if ( mesh->xtetra[pt->xt].edg[i] ||
                ( MG_EDG(mesh->xtetra[pt->xt].tag[i] ) ||
                  (mesh->xtetra[pt->xt].tag[i] & MG_REQ) ) )
-            hEdge(&mesh->htab,pt->v[iare[i][0]],pt->v[iare[i][1]],
+            hEdge(mesh,pt->v[iare[i][0]],pt->v[iare[i][1]],
                   mesh->xtetra[pt->xt].edg[i],mesh->xtetra[pt->xt].tag[i]);
         }
       }
@@ -370,11 +370,11 @@ int packMesh(pMesh mesh,pSol met) {
     mesh->tetra[k].v[3] = k+1;
 
   /* to could save the mesh, the adjacency have to be correct */
-  if ( info.ddebug && (!chkmsh(mesh,1,1) ) ) {
+  if ( mesh->info.ddebug && (!chkmsh(mesh,1,1) ) ) {
     fprintf(stdout,"  ##  Problem. Invalid mesh.\n");
     return(0);
   }
-  if ( info.imprim ) {
+  if ( mesh->info.imprim ) {
     fprintf(stdout,"     NUMBER OF VERTICES   %8d   CORNERS %8d\n",mesh->np,nc);
     if ( mesh->na )
       fprintf(stdout,"     NUMBER OF EDGES      %8d   RIDGES  %8d\n",mesh->na,nr);
@@ -386,18 +386,18 @@ int packMesh(pMesh mesh,pSol met) {
 }
 
 /** Store local parameters */
-void Set_LocalParameters(MMG5_Info *info,int type,int ref,double hausd) {
+void Set_LocalParameters(MMG5_pMesh mesh,int type,int ref,double hausd) {
 
-  if ( !info->par && info->npar) {
-    info->par = (MMG5_pPar)calloc(info->npar,sizeof(MMG5_Par));
-    if ( !info->par ) {
+  if ( !mesh->info.par && mesh->info.npar) {
+    mesh->info.par = (MMG5_pPar)calloc(mesh->info.npar,sizeof(MMG5_Par));
+    if ( !mesh->info.par ) {
       perror("  ## Memory problem: calloc");
       exit(EXIT_FAILURE);
     }
-    info->npari = 0;
+    mesh->info.npari = 0;
   }
-  else if ( info->par ) {
-    if ( info->npari == info->npar ) {
+  else if ( mesh->info.par ) {
+    if ( mesh->info.npari == mesh->info.npar ) {
       fprintf(stdout,"  ## Warning: overflow of number of local parmameters,");
       fprintf(stdout," check your number of parameters MMG5_IPARAM_nlocParam.\n");
       fprintf(stdout," Ignored value.\n");
@@ -405,10 +405,10 @@ void Set_LocalParameters(MMG5_Info *info,int type,int ref,double hausd) {
     }
   }
 
-  info->npari++;
-  info->par->elt   = type;
-  info->par->ref   = ref;
-  info->par->hausd = hausd;
+  mesh->info.npari++;
+  mesh->info.par->elt   = type;
+  mesh->info.par->ref   = ref;
+  mesh->info.par->hausd = hausd;
 }
 
 
@@ -418,7 +418,7 @@ int mmg3dlib(int *opt_i,double *opt_d,pMesh mesh,pSol met
              ,pSingul sing
 #endif
              ) {
-
+  mytime    ctim[TIMEMAX];
   char      stim[32];
 #ifdef SINGUL
   int       ier;
@@ -441,17 +441,17 @@ int mmg3dlib(int *opt_i,double *opt_d,pMesh mesh,pSol met
   signal(SIGTERM,excfun);
   signal(SIGINT,excfun);
 
-  tminit(info.ctim,TIMEMAX);
-  chrono(ON,&(info.ctim[0]));
+  tminit(ctim,TIMEMAX);
+  chrono(ON,&(ctim[0]));
 
   stockOption(opt_i,opt_d,mesh);
 
 #ifdef USE_SCOTCH
-  warnScotch(info.mem);
+  warnScotch(mesh);
 #endif
   /* load data */
   fprintf(stdout,"\n  -- MMG3DLIB: INPUT DATA\n");
-  chrono(ON,&(info.ctim[1]));
+  chrono(ON,&(ctim[1]));
   /* input data */
   if ( !inputdata(mesh,met) ) return(MMG5_STRONGFAILURE);
 
@@ -467,8 +467,8 @@ int mmg3dlib(int *opt_i,double *opt_d,pMesh mesh,pSol met
     return(MMG5_STRONGFAILURE);
   }
 #ifdef SINGUL
-  if ( info.sing ) {
-    if ( !info.iso ) {
+  if ( mesh->info.sing ) {
+    if ( !mesh->info.iso ) {
       if ( !sing->namein )
         fprintf(stdout,"  ## WARNING: NO SINGULARITIES PROVIDED.\n");
     }
@@ -480,19 +480,19 @@ int mmg3dlib(int *opt_i,double *opt_d,pMesh mesh,pSol met
   }
 #endif
 
-  chrono(OFF,&(info.ctim[1]));
-  printim(info.ctim[1].gdif,stim);
+  chrono(OFF,&(ctim[1]));
+  printim(ctim[1].gdif,stim);
   fprintf(stdout,"  --  INPUT DATA COMPLETED.     %s\n",stim);
 
   /* analysis */
-  chrono(ON,&(info.ctim[2]));
+  chrono(ON,&(ctim[2]));
   setfunc(mesh,met);
-  if ( abs(info.imprim) > 0 )  outqua(mesh,met);
+  if ( abs(mesh->info.imprim) > 0 )  outqua(mesh,met);
   fprintf(stdout,"\n  %s\n   MODULE MMG3D: IMB-LJLL : %s (%s)\n  %s\n",MG_STR,MG_VER,MG_REL,MG_STR);
-  if ( info.imprim )  fprintf(stdout,"\n  -- PHASE 1 : ANALYSIS\n");
+  if ( mesh->info.imprim )  fprintf(stdout,"\n  -- PHASE 1 : ANALYSIS\n");
 
   if ( !scaleMesh(mesh,met,sing) ) return(MMG5_STRONGFAILURE);
-  if ( info.iso ) {
+  if ( mesh->info.iso ) {
     if ( !met->np ) {
       fprintf(stdout,"\n  ## ERROR: A VALID SOLUTION FILE IS NEEDED \n");
       return(MMG5_STRONGFAILURE);
@@ -501,24 +501,24 @@ int mmg3dlib(int *opt_i,double *opt_d,pMesh mesh,pSol met
   }
 
 #ifdef SINGUL
-  if ( info.sing ) {
-    if ( !info.iso ) {
-      if ( !met->np && !DoSol(mesh,met,&info) )
+  if ( mesh->info.sing ) {
+    if ( !mesh->info.iso ) {
+      if ( !met->np && !DoSol(mesh,met) )
         return(MMG5_LOWFAILURE);
       if ( !( ier=inserSingul(mesh,met,sing) ) )
         return(MMG5_STRONGFAILURE);
       else if (ier > 0 ) {
-        chrono(OFF,&info.ctim[2]);
-        printim(info.ctim[2].gdif,stim);
+        chrono(OFF,&ctim[2]);
+        printim(ctim[2].gdif,stim);
         fprintf(stdout,"  -- INSERTION OF SINGULARITIES COMPLETED.     %s\n\n",stim);
-        chrono(ON,&info.ctim[2]);
+        chrono(ON,&ctim[2]);
       }
     }
   }
 #endif
 
 #ifdef DEBUG
-  if ( !met->np && !DoSol(mesh,met,&info) ) {
+  if ( !met->np && !DoSol(mesh,met,&mesh->info) ) {
   if ( !unscaleMesh(mesh,met) )  return(MMG5_STRONGFAILURE);
     return(mesh,met,MMG5_LOWFAILURE);
   }
@@ -528,20 +528,20 @@ int mmg3dlib(int *opt_i,double *opt_d,pMesh mesh,pSol met
     return(MMG5_LOWFAILURE);
   }
 
-  if ( info.imprim > 4 && !info.iso && met->m ) prilen(mesh,met);
+  if ( mesh->info.imprim > 4 && !mesh->info.iso && met->m ) prilen(mesh,met);
 
-  chrono(OFF,&(info.ctim[2]));
-  printim(info.ctim[2].gdif,stim);
-  if ( info.imprim )
+  chrono(OFF,&(ctim[2]));
+  printim(ctim[2].gdif,stim);
+  if ( mesh->info.imprim )
     fprintf(stdout,"  -- PHASE 1 COMPLETED.     %s\n",stim);
 
   /* mesh adaptation */
-  chrono(ON,&(info.ctim[3]));
-  if ( info.imprim )
+  chrono(ON,&(ctim[3]));
+  if ( mesh->info.imprim )
     fprintf(stdout,"\n  -- PHASE 2 : %s MESHING\n",met->size < 6 ? "ISOTROPIC" : "ANISOTROPIC");
 
 #ifdef SINGUL
-  if ( info.sing && (!info.iso) ) {
+  if ( mesh->info.sing && (!mesh->info.iso) ) {
     if ( colSing(mesh,met)<0 ) {
       fprintf(stdout,"  ## Collapse of singularities problem.\n");
       // return(MMG5_STRONGFAILURE);
@@ -559,7 +559,7 @@ int mmg3dlib(int *opt_i,double *opt_d,pMesh mesh,pSol met
   }
 
 #ifdef SINGUL
-  if ( info.sing && (!info.iso) ) {
+  if ( mesh->info.sing && (!mesh->info.iso) ) {
     if ( !solveUnsignedTet(mesh,met) ) {
       fprintf(stdout,"  ## Solve of undetermined tetrahedra problem.\n");
       if ( !unscaleMesh(mesh,met) )  return(MMG5_STRONGFAILURE);
@@ -568,26 +568,26 @@ int mmg3dlib(int *opt_i,double *opt_d,pMesh mesh,pSol met
   }
 #endif
 
-  chrono(OFF,&(info.ctim[3]));
-  printim(info.ctim[3].gdif,stim);
-  if ( info.imprim )
+  chrono(OFF,&(ctim[3]));
+  printim(ctim[3].gdif,stim);
+  if ( mesh->info.imprim )
     fprintf(stdout,"  -- PHASE 2 COMPLETED.     %s\n",stim);
   fprintf(stdout,"\n  %s\n   END OF MODULE MMG3d: IMB-LJLL \n  %s\n",MG_STR,MG_STR);
 
   /* save file */
   outqua(mesh,met);
-  if ( info.imprim > 4 && !info.iso )
+  if ( mesh->info.imprim > 4 && !mesh->info.iso )
     prilen(mesh,met);
 
-  chrono(ON,&(info.ctim[1]));
-  if ( info.imprim )  fprintf(stdout,"\n  -- MESH PACKED UP\n");
+  chrono(ON,&(ctim[1]));
+  if ( mesh->info.imprim )  fprintf(stdout,"\n  -- MESH PACKED UP\n");
   if ( !unscaleMesh(mesh,met) )  return(MMG5_STRONGFAILURE);
   if ( !packMesh(mesh,met) )          return(MMG5_STRONGFAILURE);
   met->np = mesh->np;
-  chrono(OFF,&(info.ctim[1]));
+  chrono(OFF,&(ctim[1]));
 
-  chrono(OFF,&info.ctim[0]);
-  printim(info.ctim[0].gdif,stim);
+  chrono(OFF,&ctim[0]);
+  printim(ctim[0].gdif,stim);
   fprintf(stdout,"\n   MMG3DLIB: ELAPSED TIME  %s\n",stim);
   return(MMG5_SUCCESS);
 }

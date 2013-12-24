@@ -1,8 +1,5 @@
 #include "mmg3d.h"
 
-extern Info  info;
-
-
 /** topology: set adjacent, detect Moebius, flip faces, count connected comp. */
 static int setadj(pMesh mesh){
   pTria   pt,pt1;
@@ -157,13 +154,13 @@ static int setadj(pMesh mesh){
       }
     }
   }
-  if ( info.ddebug ) {
+  if ( mesh->info.ddebug ) {
     fprintf(stdout,"  a- ridges: %d found.\n",nr);
     fprintf(stdout,"  a- requir: %d found.\n",nreq);
     fprintf(stdout,"  a- connex: %d connected component(s)\n",ncc);
     fprintf(stdout,"  a- orient: %d flipped\n",nf);
   }
-  else if ( abs(info.imprim) > 4 ) {
+  else if ( abs(mesh->info.imprim) > 4 ) {
     gen = (2 - nvf + ned - nt) / 2;
     fprintf(stdout,"     Connected component: %d,  genus: %d,   reoriented: %d\n",ncc,gen,nf);
     fprintf(stdout,"     Edges: %d,  tagged: %d,  ridges: %d, required: %d, refs: %d\n",
@@ -215,7 +212,7 @@ static int setdhd(pMesh mesh) {
         /* check angle w. neighbor */
         nortri(mesh,pt1,n2);
         dhd = n1[0]*n2[0] + n1[1]*n2[1] + n1[2]*n2[2];
-        if ( dhd <= info.dhd ) {
+        if ( dhd <= mesh->info.dhd ) {
           pt->tag[i]   |= MG_GEO;
           pt1->tag[ii] |= MG_GEO;
           i1 = inxt2[i];
@@ -227,7 +224,7 @@ static int setdhd(pMesh mesh) {
       }
     }
   }
-  if ( abs(info.imprim) > 4 && nr > 0 )
+  if ( abs(mesh->info.imprim) > 4 && nr > 0 )
     fprintf(stdout,"     %d ridges, %d edges updated\n",nr,ne);
 
   return(1);
@@ -285,7 +282,7 @@ static int singul(pMesh mesh) {
           dd = (ux*ux + uy*uy + uz*uz) * (vx*vx + vy*vy + vz*vz);
           if ( fabs(dd) > EPSD ) {
             dd = (ux*vx + uy*vy + uz*vz) / sqrt(dd);
-            if ( dd > -info.dhd ) {
+            if ( dd > -mesh->info.dhd ) {
               ppt->tag |= MG_CRN;
               nc++;
             }
@@ -295,7 +292,7 @@ static int singul(pMesh mesh) {
     }
   }
 
-  if ( abs(info.imprim) > 4 && nre > 0 )
+  if ( abs(mesh->info.imprim) > 4 && nre > 0 )
     fprintf(stdout,"     %d corners, %d singular points detected\n",nc,nre);
   return(1);
 }
@@ -310,7 +307,7 @@ static int norver(pMesh mesh) {
   char      i,ii,i1;
   /* recomputation of normals only if mesh->xpoint has been freed */
   if ( mesh->xpoint ) {
-    if ( abs(info.imprim) > 4 || info.ddebug ) {
+    if ( abs(mesh->info.imprim) > 4 || mesh->info.ddebug ) {
       fprintf(stdout,"  ## Warning: no research of boundary points");
       fprintf(stdout," and normals of mesh. ");
       fprintf(stdout,"mesh->xpoint must be freed to enforce analysis.\n");
@@ -444,7 +441,7 @@ static int norver(pMesh mesh) {
       }
     }
   }
-  if ( abs(info.imprim) > 4 && nn+nt > 0 )
+  if ( abs(mesh->info.imprim) > 4 && nn+nt > 0 )
     fprintf(stdout,"     %d normals,  %d tangents updated  (%d failed)\n",nn,nt,nf);
 
   return(1);
@@ -507,7 +504,7 @@ static void nmgeom(pMesh mesh){
 int analys(pMesh mesh) {
 
   /**--- stage 1: data structures for surface */
-  if ( abs(info.imprim) > 4 )
+  if ( abs(mesh->info.imprim) > 4 )
     fprintf(stdout,"  ** SURFACE ANALYSIS\n");
 
   /* create tetra adjacency */
@@ -526,7 +523,7 @@ int analys(pMesh mesh) {
   }
 
   /* compatibility triangle orientation w/r tetras */
-  else if ( info.iso ) {
+  else if ( mesh->info.iso ) {
     if ( !bdryIso(mesh) ) {
       fprintf(stdout,"  ## Failed to extract boundary. Exit program.\n");
       return(0);
@@ -552,7 +549,7 @@ int analys(pMesh mesh) {
   }
 
   /**--- stage 2: surface analysis */
-  if ( abs(info.imprim) > 5  || info.ddebug )
+  if ( abs(mesh->info.imprim) > 5  || mesh->info.ddebug )
     fprintf(stdout,"  ** SETTING TOPOLOGY\n");
 
   /* identify connexity */
@@ -562,7 +559,7 @@ int analys(pMesh mesh) {
   }
 
   /* check for ridges */
-  if ( info.dhd > ANGLIM && !setdhd(mesh) ) {
+  if ( mesh->info.dhd > ANGLIM && !setdhd(mesh) ) {
     fprintf(stdout,"  ## Geometry problem. Exit program.\n");
     return(0);
   }
@@ -573,7 +570,7 @@ int analys(pMesh mesh) {
     return(0);
   }
 
-  if ( abs(info.imprim) > 4 || info.ddebug )
+  if ( abs(mesh->info.imprim) > 4 || mesh->info.ddebug )
     fprintf(stdout,"  ** DEFINING GEOMETRY\n");
 
   /* define (and regularize) normals */

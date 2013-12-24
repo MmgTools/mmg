@@ -1,6 +1,5 @@
 #include "mmg3d.h"
 
-extern Info info;
 extern char ddb;
 
 /** Check whether edge whose shell is provided should be swapped for
@@ -33,7 +32,7 @@ int chkswpbdy(pMesh mesh,int *list,int ilist,int it1,int it2) {
   }
 
   /* No swap when either internal or external component has only 1 element */
-  if ( info.iso ) {
+  if ( mesh->info.iso ) {
     nminus = nplus = 0;
     for (k=0; k<ilist; k++) {
       iel = list[k] / 6;
@@ -82,9 +81,9 @@ int chkswpbdy(pMesh mesh,int *list,int ilist,int it1,int it2) {
   p1 = &mesh->point[nq];
 
   /* local hausdorff for triangles */
-  hausd = info.hausd;
-  for (k=0; k<info.npar; k++) {
-    par = &info.par[k];
+  hausd = mesh->info.hausd;
+  for (k=0; k<mesh->info.npar; k++) {
+    par = &mesh->info.par[k];
     if ( (par->elt == MMG5_Triangle) &&
          ((tt1.ref == par->ref ) || (tt2.ref == par->ref)) ) {
       hausd = par->hausd;

@@ -7,6 +7,8 @@
 #include "mmg3d.h"
 #include "shared_func.h"
 
+mytime         MMG5_ctim[TIMEMAX];
+
 static void usage(char *prog) {
   fprintf(stdout,"\nUsage: %s [-v [n]] [opts..] filein [fileout]\n",prog);
 
@@ -60,28 +62,28 @@ static int parsar(int argc,char *argv[],pMesh mesh,pSol met,pSingul sing) {
 
       case 'a':
         if ( !strcmp(argv[i],"-ar") && ++i < argc ) {
-          info.dhd = atof(argv[i]);
-          info.dhd = MG_MAX(0.0, MG_MIN(180.0,info.dhd));
-          info.dhd = cos(info.dhd*M_PI/180.0);
+          mesh->info.dhd = atof(argv[i]);
+          mesh->info.dhd = MG_MAX(0.0, MG_MIN(180.0,mesh->info.dhd));
+          mesh->info.dhd = cos(mesh->info.dhd*M_PI/180.0);
         }
         break;
       case 'd':  /* debug */
-        info.ddebug = 1;
+        mesh->info.ddebug = 1;
         break;
       case 'h':
         if ( !strcmp(argv[i],"-hmin") && ++i < argc )
-          info.hmin = atof(argv[i]);
+          mesh->info.hmin = atof(argv[i]);
         else if ( !strcmp(argv[i],"-hmax") && ++i < argc )
-          info.hmax = atof(argv[i]);
+          mesh->info.hmax = atof(argv[i]);
         else if ( !strcmp(argv[i],"-hausd") && ++i <= argc ) {
-          info.hausd = atof(argv[i]);
+          mesh->info.hausd = atof(argv[i]);
         }
         else if ( !strcmp(argv[i],"-hgrad") && ++i <= argc ) {
-          info.hgrad = atof(argv[i]);
-          if ( info.hgrad < 0.0 )
-            info.hgrad = -1.0;
+          mesh->info.hgrad = atof(argv[i]);
+          if ( mesh->info.hgrad < 0.0 )
+            mesh->info.hgrad = -1.0;
           else
-            info.hgrad = log(info.hgrad);
+            mesh->info.hgrad = log(mesh->info.hgrad);
         }
         else
           usage(argv[0]);
@@ -95,7 +97,7 @@ static int parsar(int argc,char *argv[],pMesh mesh,pSol met,pSingul sing) {
               exit(EXIT_FAILURE);
             }
             strcpy(mesh->namein,argv[i]);
-            info.imprim = 5;
+            mesh->info.imprim = 5;
           }else{
             fprintf(stderr,"Missing filname for %c%c\n",argv[i-1][1],argv[i-1][2]);
             usage(argv[0]);
@@ -104,9 +106,9 @@ static int parsar(int argc,char *argv[],pMesh mesh,pSol met,pSingul sing) {
         break;
       case 'l':
         if ( !strcmp(argv[i],"-ls") ) {
-          info.iso = 1;
+          mesh->info.iso = 1;
           if ( ++i < argc && isdigit(argv[i][0]) ) {
-            info.ls = atof(argv[i]);
+            mesh->info.ls = atof(argv[i]);
           }
           else if ( i == argc ) {
             fprintf(stderr,"Missing argument option %c%c\n",argv[i-1][1],argv[i-1][2]);
@@ -117,7 +119,7 @@ static int parsar(int argc,char *argv[],pMesh mesh,pSol met,pSingul sing) {
         break;
       case 'm':  /* memory */
         if ( ++i < argc && isdigit(argv[i][0]) )
-          info.mem = atoi(argv[i]);
+          mesh->info.mem = atoi(argv[i]);
         else {
           fprintf(stderr,"Missing argument option %c\n",argv[i-1][1]);
           usage(argv[0]);
@@ -125,13 +127,13 @@ static int parsar(int argc,char *argv[],pMesh mesh,pSol met,pSingul sing) {
         break;
       case 'n':
         if ( !strcmp(argv[i],"-nr") )
-          info.dhd = -1.0;
+          mesh->info.dhd = -1.0;
         else if ( !strcmp(argv[i],"-noswap") )
-          info.noswap = 1;
+          mesh->info.noswap = 1;
         else if( !strcmp(argv[i],"-noinsert") )
-          info.noinsert = 1;
+          mesh->info.noinsert = 1;
         else if( !strcmp(argv[i],"-nomove") )
-          info.nomove = 1;
+          mesh->info.nomove = 1;
         break;
       case 'o':
         if ( !strcmp(argv[i],"-out") ) {
@@ -154,7 +156,7 @@ static int parsar(int argc,char *argv[],pMesh mesh,pSol met,pSingul sing) {
         if ( !strcmp(argv[i],"-rn") ) {
           if ( ++i < argc ) {
             if ( isdigit(argv[i][0]) )
-              info.renum = atoi(argv[i]);
+              mesh->info.renum = atoi(argv[i]);
             else {
               fprintf(stderr,"Missing argument option %s\n",argv[i-1]);
               usage(argv[0]);
@@ -191,7 +193,7 @@ static int parsar(int argc,char *argv[],pMesh mesh,pSol met,pSingul sing) {
               exit(EXIT_FAILURE);
             }
             strcpy(sing->namein,argv[i]);
-            info.sing = 1;
+            mesh->info.sing = 1;
           }
           else {
             fprintf(stderr,"Missing filname for %c%c%c\n",
@@ -200,13 +202,13 @@ static int parsar(int argc,char *argv[],pMesh mesh,pSol met,pSingul sing) {
           }
         }
         else if ( !strcmp(argv[i],"-sing") )
-          info.sing = 1;
+          mesh->info.sing = 1;
 #endif
         break;
       case 'v':
         if ( ++i < argc ) {
           if ( argv[i][0] == '-' || isdigit(argv[i][0]) )
-            info.imprim = atoi(argv[i]);
+            mesh->info.imprim = atoi(argv[i]);
           else
             i--;
         }
@@ -228,7 +230,7 @@ static int parsar(int argc,char *argv[],pMesh mesh,pSol met,pSingul sing) {
           exit(EXIT_FAILURE);
         }
         strcpy(mesh->namein,argv[i]);
-        if ( info.imprim == -99 )  info.imprim = 5;
+        if ( mesh->info.imprim == -99 )  mesh->info.imprim = 5;
       }
       else if ( mesh->nameout == NULL ){
         mesh->nameout = (char*) calloc(strlen(argv[i])+1,sizeof(char));
@@ -247,11 +249,11 @@ static int parsar(int argc,char *argv[],pMesh mesh,pSol met,pSingul sing) {
   }
 
   /* check file names */
-  if ( info.imprim == -99 ) {
+  if ( mesh->info.imprim == -99 ) {
     fprintf(stdout,"\n  -- PRINT (0 10(advised) -10) ?\n");
     fflush(stdin);
     fscanf(stdin,"%d",&i);
-    info.imprim = i;
+    mesh->info.imprim = i;
   }
 
   if ( mesh->namein == NULL ) {
@@ -334,15 +336,15 @@ int parsop(pMesh mesh,pSol met) {
 
     /* check for condition type */
     if ( !strcmp(data,"parameters") ) {
-      fscanf(in,"%d",&info.npar);
-      info.par = (Par*)calloc(info.npar,sizeof(Par));
-      if ( !info.par ) {
+      fscanf(in,"%d",&mesh->info.npar);
+      mesh->info.par = (Par*)calloc(mesh->info.npar,sizeof(Par));
+      if ( !mesh->info.par ) {
         perror("  ## Memory problem: calloc");
         exit(EXIT_FAILURE);
       }
 
-      for (i=0; i<info.npar; i++) {
-        par = &info.par[i];
+      for (i=0; i<mesh->info.npar; i++) {
+        par = &mesh->info.par[i];
         fscanf(in,"%d %s ",&par->ref,buf);
         for (j=0; j<strlen(buf); j++)  buf[j] = tolower(buf[j]);
         if ( !strcmp(buf,"triangles") || !strcmp(buf,"triangle") )
@@ -391,7 +393,7 @@ void freeAll(pMesh mesh,pSol met
 
 #ifdef SINGUL
   /* singul */
-  if ( info.sing ) {
+  if ( mesh->info.sing ) {
     if ( singul->namein ) {
       free(singul->namein);
       singul->namein=NULL;
@@ -403,8 +405,8 @@ void freeAll(pMesh mesh,pSol met
 static void endcod() {
   char    stim[32];
 
-  chrono(OFF,&info.ctim[0]);
-  printim(info.ctim[0].gdif,stim);
+  chrono(OFF,&MMG5_ctim[0]);
+  printim(MMG5_ctim[0].gdif,stim);
   fprintf(stdout,"\n   ELAPSED TIME  %s\n",stim);
 }
 
@@ -428,8 +430,8 @@ int main(int argc,char *argv[]) {
   signal(SIGINT,excfun);
   atexit(endcod);
 
-  tminit(info.ctim,TIMEMAX);
-  chrono(ON,&info.ctim[0]);
+  tminit(MMG5_ctim,TIMEMAX);
+  chrono(ON,&MMG5_ctim[0]);
 
   /* assign default values */
   memset(&mesh,0,sizeof(Mesh));
@@ -437,37 +439,37 @@ int main(int argc,char *argv[]) {
 #ifdef SINGUL
   memset(&sing,0,sizeof(Singul));
 #endif
-  info.imprim   = -99;
-  info.ddebug   = 0;
-  info.mem      = -1;
-  info.iso      = 0;
-  info.dhd      = ANGEDG;
-  info.hmin     = 0.0;
-  info.hmax     = FLT_MAX;
-  info.hgrad    = 0.1;
-  info.hausd    = 0.01;
-  info.ls       = 0.0;
-  info.noswap   = 0;
-  info.nomove   = 0;
-  info.noinsert = 0;
-  info.fem      = 0;
-  info.npar     = 0;
+  mesh.info.imprim   = -99;
+  mesh.info.ddebug   = 0;
+  mesh.info.mem      = -1;
+  mesh.info.iso      = 0;
+  mesh.info.dhd      = ANGEDG;
+  mesh.info.hmin     = 0.0;
+  mesh.info.hmax     = FLT_MAX;
+  mesh.info.hgrad    = 0.1;
+  mesh.info.hausd    = 0.01;
+  mesh.info.ls       = 0.0;
+  mesh.info.noswap   = 0;
+  mesh.info.nomove   = 0;
+  mesh.info.noinsert = 0;
+  mesh.info.fem      = 0;
+  mesh.info.npar     = 0;
 #ifdef SINGUL
-  info.sing     = 0;
+  mesh.info.sing     = 0;
 #endif
 #ifdef USE_SCOTCH
-  info.renum    = 1;
+  mesh.info.renum    = 1;
 #endif
   met.size      = 1;
 
   /* command line */
   if ( !parsar(argc,argv,&mesh,&met,&sing) )  return(MMG5_STRONGFAILURE);
 #ifdef USE_SCOTCH
-  warnScotch(info.mem);
+  warnScotch(&mesh);
 #endif
   /* load data */
   fprintf(stdout,"\n  -- INPUT DATA\n");
-  chrono(ON,&info.ctim[1]);
+  chrono(ON,&MMG5_ctim[1]);
   /* read mesh file */
   if ( !loadMesh(&mesh) ) RETURN_AND_FREE(&mesh,&met,&sing,MMG5_STRONGFAILURE);
   met.npmax = mesh.npmax;
@@ -485,8 +487,8 @@ int main(int argc,char *argv[]) {
     RETURN_AND_FREE(&mesh,&met,&sing,MMG5_STRONGFAILURE);
   }
 #ifdef SINGUL
-  if ( info.sing ) {
-    if ( !info.iso ) {
+  if ( mesh.info.sing ) {
+    if ( !mesh.info.iso ) {
       if ( !sing.namein )
         fprintf(stdout,"  ## WARNING: NO SINGULARITIES PROVIDED.\n");
       else
@@ -503,21 +505,21 @@ int main(int argc,char *argv[]) {
   if ( !parsop(&mesh,&met) )
     RETURN_AND_FREE(&mesh,&met,&sing,MMG5_LOWFAILURE);
 
-  chrono(OFF,&info.ctim[1]);
-  printim(info.ctim[1].gdif,stim);
+  chrono(OFF,&MMG5_ctim[1]);
+  printim(MMG5_ctim[1].gdif,stim);
   fprintf(stdout,"  -- DATA READING COMPLETED.     %s\n",stim);
 
   /* analysis */
-  chrono(ON,&info.ctim[2]);
+  chrono(ON,&MMG5_ctim[2]);
   setfunc(&mesh,&met);
-  if ( abs(info.imprim) > 0 )  outqua(&mesh,&met);
+  if ( abs(mesh.info.imprim) > 0 )  outqua(&mesh,&met);
   fprintf(stdout,"\n  %s\n   MODULE MMG3D: IMB-LJLL : %s (%s)\n  %s\n",
           MG_STR,MG_VER,MG_REL,MG_STR);
-  if ( info.imprim )  fprintf(stdout,"\n  -- PHASE 1 : ANALYSIS\n");
+  if ( mesh.info.imprim )  fprintf(stdout,"\n  -- PHASE 1 : ANALYSIS\n");
 
   if ( !scaleMesh(&mesh,&met,&sing) )
     RETURN_AND_FREE(&mesh,&met,&sing,MMG5_STRONGFAILURE);
-  if ( info.iso ) {
+  if ( mesh.info.iso ) {
     if ( !met.np ) {
       fprintf(stdout,"\n  ## ERROR: A VALID SOLUTION FILE IS NEEDED \n");
       RETURN_AND_FREE(&mesh,&met,&sing,MMG5_STRONGFAILURE);
@@ -527,42 +529,42 @@ int main(int argc,char *argv[]) {
   }
 
 #ifdef SINGUL
-  if ( info.sing ) {
-    if ( !info.iso ) {
-      if ( !met.np && !DoSol(&mesh,&met,&info) )
+  if ( mesh.info.sing ) {
+    if ( !mesh.info.iso ) {
+      if ( !met.np && !DoSol(&mesh,&met) )
         RETURN_AND_FREE(&mesh,&met,&sing,MMG5_LOWFAILURE);
       if ( !( ier=inserSingul(&mesh,&met,&sing) ) )
         RETURN_AND_FREE(&mesh,&met,&sing,MMG5_STRONGFAILURE);
       else if (ier > 0 ) {
-        chrono(OFF,&info.ctim[2]);
-        printim(info.ctim[2].gdif,stim);
+        chrono(OFF,&MMG5_ctim[2]);
+        printim(MMG5_ctim[2].gdif,stim);
         fprintf(stdout,"  -- INSERTION OF SINGULARITIES COMPLETED.     %s\n\n",stim);
-        chrono(ON,&info.ctim[2]);
+        chrono(ON,&MMG5_ctim[2]);
       }
     }
   }
 #endif
 
 #ifdef DEBUG
-  if ( !met.np && !DoSol(&mesh,&met,&info) )
+  if ( !met.np && !DoSol(&mesh,&met,&mesh.info) )
     RETURN_AND_FREE(&mesh,&met,&sing,MMG5_LOWFAILURE);
 #endif
   if ( !analys(&mesh) ) RETURN_AND_FREE(&mesh,&met,&sing,MMG5_LOWFAILURE);
 
-  if ( info.imprim > 4 && !info.iso && met.m ) prilen(&mesh,&met);
+  if ( mesh.info.imprim > 4 && !mesh.info.iso && met.m ) prilen(&mesh,&met);
 
-  chrono(OFF,&info.ctim[2]);
-  printim(info.ctim[2].gdif,stim);
-  if ( info.imprim )
+  chrono(OFF,&MMG5_ctim[2]);
+  printim(MMG5_ctim[2].gdif,stim);
+  if ( mesh.info.imprim )
     fprintf(stdout,"  -- PHASE 1 COMPLETED.     %s\n",stim);
 
   /* mesh adaptation */
-  chrono(ON,&info.ctim[3]);
-  if ( info.imprim )
+  chrono(ON,&MMG5_ctim[3]);
+  if ( mesh.info.imprim )
     fprintf(stdout,"\n  -- PHASE 2 : %s MESHING\n",met.size < 6 ? "ISOTROPIC" : "ANISOTROPIC");
 
 #ifdef SINGUL
-  if ( info.sing && (!info.iso) ) {
+  if ( mesh.info.sing && (!mesh.info.iso) ) {
     if ( colSing(&mesh,&met)<0 ) {
       fprintf(stdout,"  ## Collapse of singularities problem.\n");
       // RETURN_AND_FREE(&mesh,&met,&sing,MMG5_STRONGFAILURE);
@@ -585,7 +587,7 @@ int main(int argc,char *argv[]) {
   }
 
 #ifdef SINGUL
-  if ( info.sing && (!info.iso) ) {
+  if ( mesh.info.sing && (!mesh.info.iso) ) {
     if ( !solveUnsignedTet(&mesh,&met) ) {
       fprintf(stdout,"  ## Solve of undetermined tetrahedra problem.\n");
       if ( !unscaleMesh(&mesh,&met) )
@@ -599,27 +601,27 @@ int main(int argc,char *argv[]) {
   }
 #endif
 
-  chrono(OFF,&info.ctim[3]);
-  printim(info.ctim[3].gdif,stim);
-  if ( info.imprim )
+  chrono(OFF,&MMG5_ctim[3]);
+  printim(MMG5_ctim[3].gdif,stim);
+  if ( mesh.info.imprim )
     fprintf(stdout,"  -- PHASE 2 COMPLETED.     %s\n",stim);
   fprintf(stdout,"\n  %s\n   END OF MODULE MMG3d: IMB-LJLL \n  %s\n",MG_STR,MG_STR);
 
   /* save file */
   outqua(&mesh,&met);
-  if ( info.imprim > 4 && !info.iso )
+  if ( mesh.info.imprim > 4 && !mesh.info.iso )
     prilen(&mesh,&met);
 
-  chrono(ON,&info.ctim[1]);
-  if ( info.imprim )  fprintf(stdout,"\n  -- WRITING DATA FILE %s\n",mesh.nameout);
+  chrono(ON,&MMG5_ctim[1]);
+  if ( mesh.info.imprim )  fprintf(stdout,"\n  -- WRITING DATA FILE %s\n",mesh.nameout);
   if ( !unscaleMesh(&mesh,&met) )
     RETURN_AND_FREE(&mesh,&met,&sing,MMG5_STRONGFAILURE);
   if ( !saveMesh(&mesh) )
     RETURN_AND_FREE(&mesh,&met,&sing,MMG5_STRONGFAILURE);
   if ( !saveMet(&mesh,&met) )
     RETURN_AND_FREE(&mesh,&met,&sing,MMG5_STRONGFAILURE);
-  chrono(OFF,&info.ctim[1]);
-  if ( info.imprim )  fprintf(stdout,"  -- WRITING COMPLETED\n");
+  chrono(OFF,&MMG5_ctim[1]);
+  if ( mesh.info.imprim )  fprintf(stdout,"  -- WRITING COMPLETED\n");
 
   /* free mem */
   RETURN_AND_FREE(&mesh,&met,&sing,MMG5_SUCCESS);

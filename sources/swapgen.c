@@ -1,7 +1,5 @@
 #include "mmg3d.h"
 
-extern Info info;
-
 /** Check whether swap of edge ia in start should be performed, and return 4*k+i =
     index of point corresponding to the swapped configuration ; shell of edge is
     built during the process */
@@ -89,7 +87,7 @@ int chkswpgen(pMesh mesh,int start,int ia,int *ilist,int *list,double crit) {
     calnew = 1.0;
     ier = 1;
 
-    if ( info.fem ) {
+    if ( mesh->info.fem ) {
       p0 = &mesh->point[np];
       if ( p0->tag & MG_BDY ) {
         for (l=0; l<npol;l++) {
@@ -413,7 +411,7 @@ int swap23(pMesh mesh,int k,int ip) {
     if ( xt[1].ref[i] || xt[1].ftag[i] ) isxt[1] = 1;
     if ( xt[2].ref[i] || xt[2].ftag[i] ) isxt[2] = 1;
   }
-  if ( info.sing ) {
+  if ( mesh->info.sing ) {
     for (i=0; i<6; i++) {
       if ( xt[0].edg[i] || xt[0].tag[i] ) isxt[0] = 1;
       if ( xt[1].edg[i] || xt[1].tag[i] ) isxt[1] = 1;

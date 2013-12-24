@@ -1,7 +1,5 @@
 #include "mmg3d.h"
 
-extern Info  info;
-
 /** get new point address */
 int newPt(pMesh mesh,double c[3],char tag) {
   pPoint  ppt;
@@ -92,7 +90,7 @@ int zaldy(pMesh mesh) {
   int     million = 1048576L;
   int     k,npask,bytes,ctri;
 
-  if ( info.mem < 0 ) {
+  if ( mesh->info.mem < 0 ) {
     mesh->npmax = MG_MAX(1.5*mesh->np,NPMAX);
     mesh->ntmax = MG_MAX(1.5*mesh->nt,NTMAX);
     mesh->nemax = MG_MAX(1.5*mesh->ne,NEMAX);
@@ -104,7 +102,7 @@ int zaldy(pMesh mesh) {
      * edges and singular points (in Singul) but we don't need to take this *
      * into account because xpoints and xtetra are free and need more memory *
      * 2-- we need more xtetra so we increase the memory to save for triangles */
-    if ( info.sing )
+    if ( mesh->info.sing )
       ctri = 4;
     else
       ctri = 2;
@@ -125,13 +123,13 @@ int zaldy(pMesh mesh) {
     bytes = bytes + 3*6*sizeof(int);
 #endif
 
-    npask = (double)info.mem / bytes * million;
+    npask = (double)mesh->info.mem / bytes * million;
     mesh->npmax = npask;
     mesh->ntmax = ctri*npask;
     mesh->nemax = 6*npask;
   }
 
-  if ( abs(info.imprim) > 5 || info.ddebug ) {
+  if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug ) {
     fprintf(stdout,"  ## ASKED MEMORY:\n");
     fprintf(stdout,"         Max number of vertices     %8d\n",mesh->npmax);
     fprintf(stdout,"         Max number of triangles    %8d\n",mesh->ntmax);

@@ -4,7 +4,6 @@
 #define KB    11
 #define KC    13
 
-extern Info  info;
 extern char  ddb;
 
 /** tetra packing */
@@ -36,16 +35,16 @@ static void paktet(pMesh mesh) {
  *  Set pack variable to 0 for a compact mesh and to 1 for *
  *  a mesh that need to be packed */
 int hashTetra(pMesh mesh, int pack) {
-  pTetra    pt,pt1;
-  int       k,kk,pp,l,ll,mins,mins1,maxs,maxs1,sum,sum1,iadr;
-  int      *hcode,*link,hsize,inival;
+  pTetra         pt,pt1;
+  int            k,kk,pp,l,ll,mins,mins1,maxs,maxs1,sum,sum1,iadr;
+  int           *hcode,*link,hsize,inival;
   unsigned char  i,ii,i1,i2,i3;
   unsigned int   key;
 
   /* default */
   if ( mesh->adja ) {
-    if( !info.sing ) {
-      if ( abs(info.imprim) > 4 || info.ddebug ) {
+    if( !mesh->info.sing ) {
+      if ( abs(mesh->info.imprim) > 4 || mesh->info.ddebug ) {
         fprintf(stdout,"  ## Warning: no re-build of adjacencies of mesh. ");
         fprintf(stdout,"mesh->adja must be freed to enforce analysis.\n");
       }
@@ -53,7 +52,7 @@ int hashTetra(pMesh mesh, int pack) {
     return(1);
   }
 
-  if ( abs(info.imprim) > 5 || info.ddebug )
+  if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug )
     fprintf(stdout,"  ** SETTING STRUCTURE\n");
 
   /* packing : if not hash does not work */
@@ -74,7 +73,7 @@ int hashTetra(pMesh mesh, int pack) {
   hsize = mesh->ne;
 
   /* init */
-  if ( info.ddebug )  fprintf(stdout,"  h- stage 1: init\n");
+  if ( mesh->info.ddebug )  fprintf(stdout,"  h- stage 1: init\n");
   inival = 2147483647;
   iadr   = 0;
   for (k=0; k<=mesh->ne; k++)
@@ -102,7 +101,7 @@ int hashTetra(pMesh mesh, int pack) {
   }
 
   /* set adjacency */
-  if ( info.ddebug )  fprintf(stdout,"  h- stage 2: adjacencies\n");
+  if ( mesh->info.ddebug )  fprintf(stdout,"  h- stage 2: adjacencies\n");
   for (l=iadr; l>0; l--) {
     if ( link[l] >= 0 )  continue;
 
@@ -179,7 +178,7 @@ int hashTria(pMesh mesh) {
   for (k=hash.siz; k<hash.max; k++)
     hash.item[k].nxt = k+1;
 
-  if ( info.ddebug )  fprintf(stdout,"  h- stage 1: init\n");
+  if ( mesh->info.ddebug )  fprintf(stdout,"  h- stage 1: init\n");
 
   /* hash triangles */
   mesh->base = 1;
@@ -282,17 +281,17 @@ int hashTria(pMesh mesh) {
     }
   }
 
-  if ( abs(info.imprim) > 4 && dup+nmf > 0 ) {
+  if ( abs(mesh->info.imprim) > 4 && dup+nmf > 0 ) {
     fprintf(stdout,"  ## ");  fflush(stdout);
     if ( nmf > 0 )  fprintf(stdout,"[non-manifold model]  ");
     if ( dup > 0 )  fprintf(stdout," %d duplicate removed",dup);
     fprintf(stdout,"\n");
   }
-  if ( info.ddebug )  fprintf(stdout,"  h- completed.\n");
+  if ( mesh->info.ddebug )  fprintf(stdout,"  h- completed.\n");
   return(1);
 }
 
-int hashEdge(Hash *hash,int a,int b,int k) {
+int hashEdge(pMesh mesh,Hash *hash, int a,int b,int k) {
   hedge  *ph;
   int     key,ia,ib,j;
 
@@ -315,7 +314,8 @@ int hashEdge(Hash *hash,int a,int b,int k) {
     hash->nxt = ph->nxt;
     ph->nxt = 0;
     if ( hash->nxt >= hash->max ) {
-      if ( info.ddebug )  fprintf(stdout,"  ## Memory alloc problem (edge): %d\n",hash->max);
+      if ( mesh->info.ddebug )
+        fprintf(stdout,"  ## Memory alloc problem (edge): %d\n",hash->max);
       hash->max *= 1.2;
       hash->item = (hedge*)realloc(hash->item,hash->max*sizeof(hedge));
       if ( !hash->item ) {
@@ -539,39 +539,39 @@ int hGet(HGeom *hash,int a,int b,int *ref,char *tag) {
 }
 
 /** store edge on geometry */
-void hEdge(HGeom *hash,int a,int b,int ref,char tag) {
+void hEdge(pMesh mesh,int a,int b,int ref,char tag) {
   hgeom  *ph;
   int     key,ia,ib,j;
 
-  if ( !hash->siz )  return;
+  if ( !mesh->htab.siz )  return;
   ia  = MG_MIN(a,b);
   ib  = MG_MAX(a,b);
-  key = (KA*ia + KB*ib) % hash->siz;
-  ph  = &hash->geom[key];
+  key = (KA*ia + KB*ib) % mesh->htab.siz;
+  ph  = &mesh->htab.geom[key];
 
   if ( ph->a == ia && ph->b == ib )
     return;
   else if ( ph->a ) {
     while ( ph->nxt ) {
-      ph = &hash->geom[ph->nxt];
+      ph = &mesh->htab.geom[ph->nxt];
       if ( ph->a == ia && ph->b == ib )  return;
     }
-    ph->nxt = hash->nxt;
-    ph      = &hash->geom[hash->nxt];
+    ph->nxt = mesh->htab.nxt;
+    ph      = &mesh->htab.geom[mesh->htab.nxt];
     ph->a   = ia;   ph->b   = ib;
     ph->ref = ref;  ph->tag = tag;
-    hash->nxt = ph->nxt;
+    mesh->htab.nxt = ph->nxt;
     ph->nxt = 0;
-    if ( hash->nxt >= hash->max ) {
-      if ( info.ddebug )
-        fprintf(stdout,"  ## Memory alloc problem (edge): %d\n",hash->max);
-      hash->max *= 1.2;
-      hash->geom = (hgeom*)realloc(hash->geom,hash->max*sizeof(hgeom));
-      if ( !hash->geom ) {
+    if ( mesh->htab.nxt >= mesh->htab.max ) {
+      if ( mesh->info.ddebug )
+        fprintf(stdout,"  ## Memory alloc problem (edge): %d\n",mesh->htab.max);
+      mesh->htab.max *= 1.2;
+      mesh->htab.geom = (hgeom*)realloc(mesh->htab.geom,mesh->htab.max*sizeof(hgeom));
+      if ( !mesh->htab.geom ) {
         perror("  ## Memory problem: recalloc");
         exit(EXIT_FAILURE);
       }
-      for (j=hash->nxt; j<hash->max; j++)  hash->geom[j].nxt = j+1;
+      for (j=mesh->htab.nxt; j<mesh->htab.max; j++)  mesh->htab.geom[j].nxt = j+1;
     }
     return;
   }
@@ -615,9 +615,9 @@ int hGeom(pMesh mesh) {
     }
     else {
 #ifdef SINGUL
-      if ( !info.sing ) {
+      if ( !mesh->info.sing ) {
 #endif
-        if ( abs(info.imprim) > 4 || info.ddebug ) {
+        if ( abs(mesh->info.imprim) > 4 || mesh->info.ddebug ) {
           fprintf(stdout,"  ## Warning: no re-hash of edges of mesh. ");
           fprintf(stdout,"mesh->htab.geom must be freed to enforce analysis.\n");
         }
@@ -633,7 +633,7 @@ int hGeom(pMesh mesh) {
     /* store initial edges */
     for (k=1; k<=mesh->na; k++) {
       pa = &mesh->edge[k];
-      hEdge(&mesh->htab,pa->a,pa->b,pa->ref,pa->tag);
+      hEdge(mesh,pa->a,pa->b,pa->ref,pa->tag);
     }
 
     /* now check triangles */
@@ -661,7 +661,7 @@ int hGeom(pMesh mesh) {
   else {
     if ( !mesh->adjt && !hashTria(mesh) )  return(0);
 #ifdef SINGUL
-    if ( !info.sing || !mesh->htab.geom ) {
+    if ( !mesh->info.sing || !mesh->htab.geom ) {
       for (k=1; k<=mesh->nt; k++) {
         pt   = &mesh->tria[k];
         adja = &mesh->adjt[3*(k-1)+1];
@@ -715,11 +715,11 @@ int hGeom(pMesh mesh) {
         kk  = adja[i] / 3;
         if ( !kk || pt->tag[i] & MG_NOM ) {
           if ( pt->tag[i] & MG_NOM )
-            pt->edg[i] = ( info.iso && pt->edg[i] != 0 ) ?  -abs(pt->edg[i]) : MG_ISO;
-          hEdge(&mesh->htab,pt->v[i1],pt->v[i2],pt->edg[i],pt->tag[i]);
+            pt->edg[i] = ( mesh->info.iso && pt->edg[i] != 0 ) ?  -abs(pt->edg[i]) : MG_ISO;
+          hEdge(mesh,pt->v[i1],pt->v[i2],pt->edg[i],pt->tag[i]);
         }
         else if ( k < kk && ( pt->edg[i] || pt->tag[i] ) )
-          hEdge(&mesh->htab,pt->v[i1],pt->v[i2],pt->edg[i],pt->tag[i]);
+          hEdge(mesh,pt->v[i1],pt->v[i2],pt->edg[i],pt->tag[i]);
       }
     }
     /* now check triangles */
@@ -818,7 +818,7 @@ int bdryTria(pMesh mesh) {
           if ( pxt->tag[iarf[i][2]] )  ptt->tag[2] = pxt->tag[iarf[i][2]];
           /* useful only when saving mesh */
         }
-        ptt->ref = info.iso ? MG_ISO : 0;
+        ptt->ref = mesh->info.iso ? MG_ISO : 0;
       }
     }
   }
@@ -881,7 +881,7 @@ int bdryIso(pMesh mesh) {
         ptt->v[0] = pt->v[idir[i][0]];
         ptt->v[1] = pt->v[idir[i][1]];
         ptt->v[2] = pt->v[idir[i][2]];
-        ptt->ref  = info.iso ? 100 : 0;  /* useful only when saving mesh */
+        ptt->ref  = mesh->info.iso ? 100 : 0;  /* useful only when saving mesh */
       }
     }
   }
@@ -981,13 +981,13 @@ int bdrySet(pMesh mesh) {
   hgeom    *ph;
   int      ref;
 
-  if ( (!info.sing) && (!mesh->nt) )  return(1);
+  if ( (!mesh->info.sing) && (!mesh->nt) )  return(1);
 #else
   if ( !mesh->nt )  return(1);
 #endif
 
   if ( mesh->xtetra ) {
-    if ( abs(info.imprim) > 4 || info.ddebug ) {
+    if ( abs(mesh->info.imprim) > 4 || mesh->info.ddebug ) {
       fprintf(stdout,"  ## Warning: no re-build of boundary tetras. ");
       fprintf(stdout,"mesh->xtetra must be freed to enforce analysis.\n");
     }
@@ -1001,7 +1001,7 @@ int bdrySet(pMesh mesh) {
   }
   na = 0;
 #ifdef SINGUL
-  if ( info.sing ) {
+  if ( mesh->info.sing ) {
     for (k=0; k<=mesh->htab.max; k++) {
       ph = &mesh->htab.geom[k];
       if ( !ph->a )  continue;
@@ -1059,7 +1059,7 @@ int bdrySet(pMesh mesh) {
         pxt->ftag[i] |= MG_BDY;
         pxt->ftag[i] |= (ptt->tag[0] & ptt->tag[1] & ptt->tag[2]);
 #ifdef SINGUL
-        if ( info.sing ) {
+        if ( mesh->info.sing ) {
           pxt->tag[iarf[i][0]] |= MG_BDY;
           pxt->tag[iarf[i][1]] |= MG_BDY;
           pxt->tag[iarf[i][2]] |= MG_BDY;
@@ -1071,7 +1071,7 @@ int bdrySet(pMesh mesh) {
 
 #ifdef SINGUL
   /* Add xtetras for singularities */
-  if ( info.sing ) {
+  if ( mesh->info.sing ) {
     for (k=0; k<=mesh->ne; k++) {
       pt = &mesh->tetra[k];
       if ( !MG_EOK(pt) )  continue;
@@ -1228,7 +1228,7 @@ int bdryPerm(pMesh mesh) {
     if ( !hashFace(&hash,ptt->v[0],ptt->v[1],ptt->v[2],k) )  return(0);
     for (i=0; i<3; i++) {
       ppt = &mesh->point[ptt->v[i]];
-      if ( !info.iso ) ppt->tag |= MG_BDY;
+      if ( !mesh->info.iso ) ppt->tag |= MG_BDY;
     }
   }
 
@@ -1266,7 +1266,7 @@ int bdryPerm(pMesh mesh) {
       }
     }
   }
-  if ( info.ddebug && nf > 0 )
+  if ( mesh->info.ddebug && nf > 0 )
     fprintf(stdout,"  ## %d faces reoriented\n",nf);
 
   free(hash.item);

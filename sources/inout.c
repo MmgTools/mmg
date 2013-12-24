@@ -1,7 +1,5 @@
 #include "mmg3d.h"
 
-extern Info  info;
-
 /** read mesh data */
 int loadMesh(pMesh mesh) {
   pTetra       pt;
@@ -96,7 +94,7 @@ int loadMesh(pMesh mesh) {
   nt = 0;
   if ( mesh->nt ) {
     /* Skip triangles with negative refs */
-    if( info.iso ) {
+    if( mesh->info.iso ) {
       GmfGotoKwd(inm,GmfTriangles);
       nt = mesh->nt;
       mesh->nt = 0;
@@ -137,7 +135,7 @@ int loadMesh(pMesh mesh) {
       for (k=1; k<=nt; k++) {
         GmfGetLin(inm,GmfRequiredTriangles,&i);
         assert(i <= mesh->nt);
-        if( info.iso ){
+        if( mesh->info.iso ){
           if( ina[i] == 0 ) continue;
           else {
             pt1 = &mesh->tria[ina[i]];
@@ -155,7 +153,7 @@ int loadMesh(pMesh mesh) {
 
       }
     }
-    if ( info.iso ) {
+    if ( mesh->info.iso ) {
       free(ina);
       ina=NULL;
     }
@@ -165,7 +163,7 @@ int loadMesh(pMesh mesh) {
   nr = nre = 0;
   if ( mesh->na ) {
     na = mesh->na;
-    if (info.iso ) {
+    if (mesh->info.iso ) {
       mesh->na = 0;
       ina = (int*)calloc(na+1,sizeof(int));
       if ( !ina ) {
@@ -180,7 +178,7 @@ int loadMesh(pMesh mesh) {
       pa = &mesh->edge[k];
       GmfGetLin(inm,GmfEdges,&pa->a,&pa->b,&pa->ref);
       pa->tag |= MG_REF;
-      if ( info.iso ) {
+      if ( mesh->info.iso ) {
         if( abs(pa->ref) != MG_ISO ) {
           ++mesh->na;
           pa->ref = abs(pa->ref);
@@ -197,7 +195,7 @@ int loadMesh(pMesh mesh) {
       for (k=1; k<=nr; k++) {
         GmfGetLin(inm,GmfRidges,&ia);
         assert(ia <= na);
-        if( info.iso ){
+        if( mesh->info.iso ){
           if( ina[ia] == 0 )
 						continue;
           else {
@@ -218,7 +216,7 @@ int loadMesh(pMesh mesh) {
       for (k=1; k<=nre; k++) {
         GmfGetLin(inm,GmfRequiredEdges,&ia);
         assert(ia <= na);
-        if( info.iso ){
+        if( mesh->info.iso ){
           if( ina[ia] == 0 ) continue;
           else {
             pa = &mesh->edge[ina[ia]];
@@ -232,7 +230,7 @@ int loadMesh(pMesh mesh) {
 
       }
     }
-    if (info.iso ) {
+    if (mesh->info.iso ) {
       free(ina);
       ina = NULL;
     }
@@ -250,7 +248,7 @@ int loadMesh(pMesh mesh) {
       ppt->tag &= ~MG_NUL;
     }
 
-    if ( info.iso )  pt->ref = 0;
+    if ( mesh->info.iso )  pt->ref = 0;
 
     /* Possibly switch 2 vertices number so that each tet is positively oriented */
     if ( orvol(mesh->point,pt->v) < 0.0 ) {
@@ -273,7 +271,7 @@ int loadMesh(pMesh mesh) {
 
 
   /* stats */
-  if ( abs(info.imprim) > 4 ) {
+  if ( abs(mesh->info.imprim) > 4 ) {
     fprintf(stdout,"     NUMBER OF VERTICES     %8d / %8d\n",mesh->np,mesh->npmax);
     if ( mesh->na ) {
       fprintf(stdout,"     NUMBER OF EDGES        %8d\n",mesh->na);
@@ -459,7 +457,7 @@ int saveMesh(pMesh mesh) {
             if ( mesh->xtetra[pt->xt].edg[i] ||
                  ( MG_EDG(mesh->xtetra[pt->xt].tag[i] ) ||
                    (mesh->xtetra[pt->xt].tag[i] & MG_REQ) ) )
-              hEdge(&mesh->htab,pt->v[iare[i][0]],pt->v[iare[i][1]],
+              hEdge(mesh,pt->v[iare[i][0]],pt->v[iare[i][1]],
                     mesh->xtetra[pt->xt].edg[i],mesh->xtetra[pt->xt].tag[i]);
           }
         }
@@ -535,7 +533,7 @@ int saveMesh(pMesh mesh) {
     }
   }
 
-  if ( info.imprim ) {
+  if ( mesh->info.imprim ) {
     fprintf(stdout,"     NUMBER OF VERTICES   %8d   CORNERS %8d\n",np,nc+nre);
     if ( na )
       fprintf(stdout,"     NUMBER OF EDGES      %8d   RIDGES  %8d\n",na,nr);
@@ -565,8 +563,7 @@ int loadMet(pSol met) {
     *ptr = '\0';
     strcat(data,".sol");
     if (!(inm = GmfOpenMesh(data,GmfRead,&met->ver,&met->dim)) ) {
-      if ( info.imprim < 0 )
-        fprintf(stderr,"  ** %s  NOT FOUND. USE DEFAULT METRIC.\n",data);
+      fprintf(stderr,"  ** %s  NOT FOUND. USE DEFAULT METRIC.\n",data);
       return(-1);
     }
   }

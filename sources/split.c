@@ -1,6 +1,5 @@
 #include "mmg3d.h"
 
-extern Info  info;
 extern char  ddb;
 
 /** Table that associates to each (even) permutation of the 4 vertices of a tetrahedron
@@ -152,7 +151,7 @@ void split1(pMesh mesh,pSol met,int k,int vx[6]) {
     if ( isxt && isxt1 )  goto nextstep1;
   }
 #ifdef SINGUL
-  if ( info.sing ) {
+  if ( mesh->info.sing ) {
     for (i=0; i<6; i++) {
       if ( xt.edg[i]  || xt.tag[i] )  isxt = 1;
       if ( xt1.edg[i] || xt1.tag[i] ) isxt1 = 1;
@@ -410,7 +409,7 @@ int split1b(pMesh mesh, pSol met,int *list, int ret, int ip,int cas){
       if ( xt1.ref[i] || xt1.ftag[i])  isxt1 = 1;
     }
 #ifdef SINGUL
-    if ( info.sing ) {
+    if ( mesh->info.sing ) {
       for (i=0; i<6; i++) {
         if ( xt.edg[i]  || xt.tag[i]  ) isxt = 1;
         if ( xt1.edg[i] || xt1.tag[i] ) isxt1 = 1;
@@ -546,7 +545,7 @@ int split1b(pMesh mesh, pSol met,int *list, int ret, int ip,int cas){
       if ( xt1.ref[i] || xt1.ftag[i] )  isxt1 = 1;
     }
 #ifdef SINGUL
-    if ( info.sing ) {
+    if ( mesh->info.sing ) {
       for (i=0; i<6; i++) {
         if ( xt.edg[i]  || xt.tag[i]  ) isxt  = 1;
         if ( xt1.edg[i] || xt1.tag[i] ) isxt1 = 1;
@@ -1018,7 +1017,7 @@ void split2sf(pMesh mesh,pSol met,int k,int vx[6]){
     if ( xt[2].ref[i] || xt[2].ftag[i] ) isxt[2] = 1;
   }
 #ifdef SINGUL
-  if ( info.sing ) {
+  if ( mesh->info.sing ) {
     for (i=0; i<6; i++) {
       if ( xt[0].edg[i] || xt[0].tag[i] ) isxt[0] = 1;
       if ( xt[1].edg[i] || xt[1].tag[i] ) isxt[1] = 1;
@@ -1189,7 +1188,7 @@ void split2(pMesh mesh,pSol met,int k,int vx[6]) {
     if ( xt[3].ref[i] || xt[3].ftag[i] )  isxt[3] = 1;
   }
 #ifdef SINGUL
-  if ( info.sing ) {
+  if ( mesh->info.sing ) {
     for (i=0; i<6; i++) {
       if ( xt[0].edg[i] || xt[0].tag[i] ) isxt[0] = 1;
       if ( xt[1].edg[i] || xt[1].tag[i] ) isxt[1] = 1;
@@ -1430,7 +1429,7 @@ void split3(pMesh mesh,pSol met,int k,int vx[6]) {
     if ( xt[3].ref[i] || xt[3].ftag[i] ) isxt[3] = 1;
   }
 #ifdef SINGUL
-  if ( info.sing ) {
+  if ( mesh->info.sing ) {
     for (i=0; i<6; i++) {
       if ( xt[0].edg[i] || xt[0].tag[i] ) isxt[0] = 1;
       if ( xt[1].edg[i] || xt[1].tag[i] ) isxt[1] = 1;
@@ -1758,7 +1757,7 @@ void split3cone(pMesh mesh,pSol met,int k,int vx[6]) {
     if ( xt[3].ref[i] || xt[3].ftag[i] ) isxt[3] = 1;
   }
 #ifdef SINGUL
-  if ( info.sing ) {
+  if ( mesh->info.sing ) {
     for (i=0; i<6; i++) {
       if ( xt[0].edg[i] || xt[0].tag[i] ) isxt[0] = 1;
       if ( xt[1].edg[i] || xt[1].tag[i] ) isxt[1] = 1;
@@ -2209,7 +2208,7 @@ void split3op(pMesh mesh, pSol met, int k, int vx[6]){
       if ( (xt[3]).ref[i] || xt[3].ftag[i] ) isxt[3] = 1;
     }
 #ifdef SINGUL
-    if ( info.sing ) {
+    if ( mesh->info.sing ) {
       for (i=0; i<6; i++) {
         if ( xt[0].edg[i] || xt[0].tag[i] ) isxt[0] = 1;
         if ( xt[1].edg[i] || xt[1].tag[i] ) isxt[1] = 1;
@@ -2284,7 +2283,7 @@ void split3op(pMesh mesh, pSol met, int k, int vx[6]){
       if ( (xt[4]).ref[i] || xt[4].ftag[i] ) isxt[4] = 1;
     }
 #ifdef SINGUL
-    if ( info.sing ) {
+    if ( mesh->info.sing ) {
       for (i=0; i<6; i++) {
         if ( xt[0].edg[i] || xt[0].tag[i] ) isxt[0] = 1;
         if ( xt[1].edg[i] || xt[1].tag[i] ) isxt[1] = 1;
@@ -2473,7 +2472,7 @@ int split3cb(pMesh mesh, pSol met, int k, int ifac, double o[3],
     if ( xt[1].ref[i] || xt[1].ftag[i] ) isxt[1] = 1;
     if ( xt[2].ref[i] || xt[2].ftag[i] ) isxt[2] = 1;
   }
-  if ( info.sing ) {
+  if ( mesh->info.sing ) {
     for (i=0; i<6; i++) {
       if ( xt[0].edg[i] || xt[0].tag[i] ) isxt[0] = 1;
       if ( xt[1].edg[i] || xt[1].tag[i] ) isxt[1] = 1;
@@ -2655,7 +2654,7 @@ int split3cb(pMesh mesh, pSol met, int k, int ifac, double o[3],
     if ( xt[1].ref[i] || xt[1].ftag[i] ) isxt[1] = 1;
     if ( xt[2].ref[i] || xt[2].ftag[i] ) isxt[2] = 1;
   }
-  if ( info.sing ) {
+  if ( mesh->info.sing ) {
     for (i=0; i<6; i++) {
       if ( xt[0].edg[i] || xt[0].tag[i] ) isxt[0] = 1;
       if ( xt[1].edg[i] || xt[1].tag[i] ) isxt[1] = 1;
@@ -2909,7 +2908,7 @@ int split4bar(pMesh mesh, pSol met, int k) {
     if ( xt[3].ref[i] || xt[3].ftag[i] ) isxt[3] = 1;
   }
 #ifdef SINGUL
-  if ( info.sing ) {
+  if ( mesh->info.sing ) {
     for (i=0; i<6; i++) {
       if ( xt[0].edg[i] || xt[0].tag[i] ) isxt[0] = 1;
       if ( xt[1].edg[i] || xt[1].tag[i] ) isxt[1] = 1;
@@ -3102,7 +3101,7 @@ int split4cb(pMesh mesh, pSol met, int k, double o[3], double cb[4], int *ip ) {
     if ( xt[2].ref[i] || xt[2].ftag[i] ) isxt[2] = 1;
     if ( xt[3].ref[i] || xt[3].ftag[i] ) isxt[3] = 1;
   }
-  if ( info.sing ) {
+  if ( mesh->info.sing ) {
     for (i=0; i<6; i++) {
       if ( xt[0].edg[i] || xt[0].tag[i] ) isxt[0] = 1;
       if ( xt[1].edg[i] || xt[1].tag[i] ) isxt[1] = 1;
@@ -3419,7 +3418,7 @@ void split4sf(pMesh mesh,pSol met,int k,int vx[6]) {
     }
   }
 #ifdef SINGUL
-  if ( info.sing ) {
+  if ( mesh->info.sing ) {
     for (i=0; i<6; i++) {
       for (j=0; j<6; j++) {
         if ( xt[j].edg[i] || xt[j].tag[i] ) isxt[j] = 1;
@@ -3668,7 +3667,7 @@ void split4op(pMesh mesh,pSol met,int k,int vx[6]) {
     }
   }
 #ifdef SINGUL
-  if ( info.sing ) {
+  if ( mesh->info.sing ) {
     for (i=0; i<6; i++) {
       for (j=0; j<6; j++) {
         if ( xt[j].edg[i] || xt[j].tag[i] ) isxt[j] = 1;
@@ -3919,7 +3918,7 @@ void split5(pMesh mesh,pSol met,int k,int vx[6]) {
     }
   }
 #ifdef SINGUL
-  if ( info.sing ) {
+  if ( mesh->info.sing ) {
     for (i=0; i<6; i++) {
       for (j=0; j<7; j++) {
         if ( xt[j].edg[i] || xt[j].tag[i] ) isxt[j] = 1;
@@ -4026,7 +4025,7 @@ void split6(pMesh mesh,pSol met,int k,int vx[6]) {
       if ( (xt.ref[i]) || xt.ftag[i] ) isxt0 = 1;
     }
 #ifdef SINGUL
-    if ( info.sing ) {
+    if ( mesh->info.sing ) {
       for (i=0; i<6; i++) {
         if ( xt.edg[i] || xt.tag[i] ) isxt0 = 1;
       }
@@ -4057,7 +4056,7 @@ void split6(pMesh mesh,pSol met,int k,int vx[6]) {
       if ( (xt.ref[i]) || xt.ftag[i]) isxt = 1;
     }
 #ifdef SINGUL
-    if ( info.sing ) {
+    if ( mesh->info.sing ) {
       for (i=0; i<6; i++) {
         if ( xt.edg[i] || xt.tag[i] ) isxt = 1;
       }
@@ -4104,7 +4103,7 @@ void split6(pMesh mesh,pSol met,int k,int vx[6]) {
       if ( (xt.ref[i]) || xt.ftag[i]) isxt = 1;
     }
 #ifdef SINGUL
-    if ( info.sing ) {
+    if ( mesh->info.sing ) {
       for (i=0; i<6; i++) {
         if ( xt.edg[i] || xt.tag[i] ) isxt = 1;
       }
@@ -4152,7 +4151,7 @@ void split6(pMesh mesh,pSol met,int k,int vx[6]) {
       if ( (xt.ref[i]) || xt.ftag[i]) isxt = 1;
     }
 #ifdef SINGUL
-    if ( info.sing ) {
+    if ( mesh->info.sing ) {
       for (i=0; i<6; i++) {
         if ( xt.edg[i] || xt.tag[i] ) isxt = 1;
       }
