@@ -21,6 +21,8 @@
 #include <stdarg.h>
 #include <string.h>
 #include <float.h>
+#include <stdint.h>
+#include <limits.h>
 #include <math.h>
 #include <ctype.h>
 #include "libmesh5.h"
@@ -32,9 +34,9 @@
 
 typedef struct
 {
-  int typ, SolSiz, NmbLin, NmbTyp, TypTab[ GmfMaxTyp ];
-  long pos;
-  char fmt[ GmfMaxTyp ];
+  int    typ, SolSiz, NmbLin, NmbTyp, TypTab[ GmfMaxTyp ];
+  long   pos;
+  char   fmt[ GmfMaxTyp ];
 }KwdSct;
 
 typedef struct
@@ -1376,11 +1378,15 @@ static void ScaBlk(GmfMshSct *msh, unsigned char *blk, int siz)
 
 static long GetPos(GmfMshSct *msh)
 {
-  int IntVal;
-  long pos;
+  int      IntVal;
+  int64_t  pos;
 
-  if(msh->ver >= 3)
+  if(msh->ver >= 3) {
     ScaDblWrd(msh, (unsigned char*)&pos);
+    if ( LONG_MAX < pos || LONG_MIN > pos ) {
+      fprintf(stderr," Error: integer cast overflow\n");
+    }
+  }
   else
     {
       ScaWrd(msh, (unsigned char*)&IntVal);
