@@ -34,7 +34,7 @@ int loadMesh(pMesh mesh) {
   fprintf(stdout,"  %%%% %s OPENED\n",data);
 
   mesh->npi = GmfStatKwd(inm,GmfVertices);
-  mesh->nt  = GmfStatKwd(inm,GmfTriangles);
+  mesh->nti = GmfStatKwd(inm,GmfTriangles);
   mesh->nei = GmfStatKwd(inm,GmfTetrahedra);
   mesh->nai = GmfStatKwd(inm,GmfEdges);
   if ( !mesh->npi || !mesh->nei ) {
@@ -43,6 +43,7 @@ int loadMesh(pMesh mesh) {
   }
   /* memory allocation */
   mesh->np = mesh->npi;
+  mesh->nt = mesh->nti;
   mesh->ne = mesh->nei;
   mesh->na = mesh->nai;
   if ( !zaldy(mesh) )  return(0);
@@ -416,7 +417,7 @@ int saveMesh(pMesh mesh) {
   /* boundary mesh */
   /* tria + required tria */
   mesh->nt = ntreq = 0;
-  if ( mesh->tria){
+  if ( mesh->tria ){
     free(mesh->tria);
     mesh->tria=NULL;
   }

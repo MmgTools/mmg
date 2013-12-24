@@ -22,8 +22,6 @@
 #define MG_CPY   "Copyright (c) IMB-LJLL, 2004-"
 #define MG_STR   "&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&"
 
-#define MMG5_Triangle      1
-
 /* Macros */
 #define MG_MAX(a,b) (((a) > (b)) ? (a) : (b))
 #define MG_MIN(a,b) (((a) < (b)) ? (a) : (b))

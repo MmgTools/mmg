@@ -303,43 +303,81 @@ static int parsar(int argc,char *argv[],pMesh mesh,pSol met,pSingul sing) {
   return(1);
 }
 
+/** Read parammeter file */
+static inline
+int parsop(pMesh mesh,pSol met) {
+  Par        *par;
+  float       fp1;
+  int         i,j,ret;
+  char       *ptr,buf[256],data[256];
+  FILE       *in;
+
+  /* check for parameter file */
+  strcpy(data,mesh->namein);
+  ptr = strstr(data,".mesh");
+  if ( ptr )  *ptr = '\0';
+  strcat(data,".mmg3d5");
+  in = fopen(data,"r");
+  if ( !in ) {
+    sprintf(data,"%s","DEFAULT.mmg3d5");
+    in = fopen(data,"r");
+    if ( !in )  return(1);
+  }
+  fprintf(stdout,"  %%%% %s OPENED\n",data);
+
+  /* read parameters */
+  while ( !feof(in) ) {
+    /* scan line */
+    ret = fscanf(in,"%s",data);
+    if ( !ret || feof(in) )  break;
+    for (i=0; i<strlen(data); i++) data[i] = tolower(data[i]);
+
+    /* check for condition type */
+    if ( !strcmp(data,"parameters") ) {
+      fscanf(in,"%d",&info.npar);
+      info.par = (Par*)calloc(info.npar,sizeof(Par));
+      if ( !info.par ) {
+        perror("  ## Memory problem: calloc");
+        exit(EXIT_FAILURE);
+      }
+
+      for (i=0; i<info.npar; i++) {
+        par = &info.par[i];
+        fscanf(in,"%d %s ",&par->ref,buf);
+        for (j=0; j<strlen(buf); j++)  buf[j] = tolower(buf[j]);
+        if ( !strcmp(buf,"triangles") || !strcmp(buf,"triangle") )
+          par->elt = MMG5_Triangle;
+        else {
+          fprintf(stdout,"  %%%% Wrong format: %s\n",buf);
+          continue;
+        }
+        ret = fscanf(in,"%f",&fp1);
+        par->hausd = fp1;
+      }
+    }
+  }
+  fclose(in);
+  return(1);
+}
+
 /** Deallocations before return */
 void freeAll(pMesh mesh,pSol met
 #ifdef SINGUL
              ,pSingul singul
 #endif
              ){
+
+#ifdef SINGUL
+  freeCommon(mesh,met,singul);
+#else
+  freeCommon(mesh,met);
+#endif
+
   /* mesh */
-  free(mesh->point);
-  mesh->point = NULL;
-  free(mesh->tetra);
-  mesh->tetra = NULL;
-  free(mesh->adja);
-  mesh->adja = NULL;
   free(mesh->nameout);
   mesh->nameout = NULL;
   free(mesh->namein);
   mesh->namein = NULL;
-  if ( mesh->xpoint ) {
-    free(mesh->xpoint);
-    mesh->xpoint = NULL;
-  }
-  if ( mesh->htab.geom ) {
-    free(mesh->htab.geom);
-    mesh->htab.geom = NULL;
-  }
-  if ( mesh->tria ) {
-    free(mesh->tria);
-    mesh->tria = NULL;
-  }
-  if ( mesh->edge ) {
-    free(mesh->edge);
-    mesh->edge = NULL;
-  }
-  if ( mesh->xtetra ) {
-    free(mesh->xtetra);
-    mesh->xtetra = NULL;
-  }
 
   /* met */
   if ( met->namein ) {
@@ -350,16 +388,6 @@ void freeAll(pMesh mesh,pSol met
     free(met->nameout);
     met->nameout = NULL;
   }
-  if ( /*!info.iso &&*/ met->m ) {
-    free(met->m);
-    met->m = NULL;
-  }
-
-  /* info */
-  if ( info.npar && info.par ) {
-    free(info.par);
-    info.par = NULL;
-  }
 
 #ifdef SINGUL
   /* singul */
@@ -368,15 +396,7 @@ void freeAll(pMesh mesh,pSol met
       free(singul->namein);
       singul->namein=NULL;
     }
-    if ( singul->ns ) {
-      free(singul->point);
-      singul->point=NULL;
-    }
-    if ( singul->na ) {
-      free(singul->edge);
-      singul->edge=NULL;
-    }
-  }
+   }
 #endif
 }
 

@@ -15,13 +15,17 @@
 int main(int argc,char *argv[]) {
   MMG5_pMesh      mmgMesh;
   MMG5_pSol       mmgSol;
-  int             opt_i[10],k,ier;
-  double          opt_d[6];
+  int             *opt_i,k,ier;
+  double          *opt_d;
 
   fprintf(stdout,"  -- TEST MMG3DLIB \n");
 
+#warning: creer une fonction allouant le maillage, la sol, singul, initialisant npar a 0, par a null...
   mmgMesh = (MMG5_pMesh)calloc(1,sizeof(MMG5_Mesh));
-  assert(mmgMesh);
+  if ( !mmgMesh ) {
+    perror("  ## Memory problem: calloc");
+    exit(EXIT_FAILURE);
+  }
 
   /* allocation */
   mmgMesh->np     = 12;
@@ -34,11 +38,20 @@ int main(int argc,char *argv[]) {
   mmgMesh->nemax  = 3000000;
 
   mmgMesh->point = (MMG5_pPoint)calloc(mmgMesh->npmax+1,sizeof(MMG5_Point));
-  assert(mmgMesh->point);
+  if ( !mmgMesh->point ) {
+    perror("  ## Memory problem: calloc");
+    exit(EXIT_FAILURE);
+  }
   mmgMesh->tetra = (MMG5_pTetra)calloc(mmgMesh->nemax+1,sizeof(MMG5_Tetra));
-  assert(mmgMesh->tetra);
+  if ( !mmgMesh->tetra ) {
+    perror("  ## Memory problem: calloc");
+    exit(EXIT_FAILURE);
+  }
   mmgMesh->tria  = (MMG5_pTria)calloc(mmgMesh->ntmax+1,sizeof(MMG5_Tria));
-  assert(mmgMesh->tria);
+  if ( !mmgMesh->tria ) {
+    perror("  ## Memory problem: calloc");
+    exit(EXIT_FAILURE);
+  }
 
   /*coordinates vertices*/
   mmgMesh->point[1].c[0]  = 0.;  mmgMesh->point[1].c[1]  = 0;
@@ -165,25 +178,41 @@ int main(int argc,char *argv[]) {
 
   /*metric*/
   mmgSol           = (MMG5_pSol)calloc(1,sizeof(MMG5_Sol));
-  assert(mmgSol);
+  if ( !mmgSol ) {
+    perror("  ## Memory problem: calloc");
+    exit(EXIT_FAILURE);
+  }
+
   mmgSol->size = 1;
 
   /*scalaire size*/
   mmgSol->np = mmgMesh->np;
   mmgSol->npmax = mmgMesh->npmax;
   mmgSol->m    = (double*)calloc(mmgSol->npmax+1,mmgSol->size*sizeof(double));
-  assert(mmgSol->m);
+  if ( !mmgSol->m ) {
+    perror("  ## Memory problem: calloc");
+    exit(EXIT_FAILURE);
+  }
+
   for(k=1 ; k<=mmgMesh->np ; k++) {
     mmgSol->m[k] = 0.5;
   }
 
   MMG5_mmg3dinit(opt_i, opt_d);
 
-  /** first wave of refinment with a detection of angles (between normals */
-  /*  at 2 adjacent surfaces) smallest than 90 and a maximal size of 0.2 */
-  opt_i[MMG5_imprim]   = 5;
-  opt_d[MMG5_dhd]      = 90;
-  opt_d[MMG5_hmax]     = 0.2;
+  /** first wave of refinment with a detection of angles (between normals
+   *  at 2 adjacent surfaces) smallest than 90 and a maximal size of 0.2 */
+  opt_i[MMG5_IPARAM_verbose]  = 5;
+  opt_d[MMG5_DPARAM_dhd]      = 90;
+  opt_d[MMG5_DPARAM_hmax]     = 0.2;
+
+  /** use local hausdorff numbers on ref 2 (hausd = 0.001) and 0 (hausd = 0.005) */
+  //opt_i[MMG5_IPARAM_nlocParam]= 2;
+
+  /* for each local parameter: give type and reference of the element on which you
+     will apply a particular hausdorff number and hausdorff number to apply */
+  //MMG5_Set_LocalParameters(MMG5_Info,MMG5_Triangle,2,0.001);
+
 
   mmgMesh->nameout = "result0.mesh";
   mmgSol->nameout = "result0.sol";
@@ -197,7 +226,7 @@ int main(int argc,char *argv[]) {
 
 
   /** Second wave of refinment with a smallest maximal size */
-  opt_d[MMG5_hmax]  = 0.1;
+  opt_d[MMG5_DPARAM_hmax]  = 0.1;
 
   ier = MMG5_mmg3dlib(opt_i,opt_d,mmgMesh,mmgSol);
   if ( ier == MMG5_STRONGFAILURE ) {
@@ -214,8 +243,6 @@ int main(int argc,char *argv[]) {
 
   /* free mem */
   MMG5_freeAll(mmgMesh,mmgSol);
-  free(mmgSol);
-  free(mmgMesh);
 
   return(ier);
 }

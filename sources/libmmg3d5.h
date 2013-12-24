@@ -11,27 +11,32 @@
 
 #define SIZE 0.75 /**< Size of the mesh of singularities inside the main mesh */
 
+#define MMG5_Triangle      1
+
 enum MMG5_optIntCod /**<  Options for mmg3d2 (integers) */
   {
-    MMG5_imprim,    /**<  Tune level of verbosity, [-10..10]     */
-    MMG5_mem,       /**<  Set memory size to n Mbytes            */
-    MMG5_debug,     /**<  Turn on debug mode                     */
-    MMG5_angle,     /**<  Turn on angle detection                */
-    MMG5_iso,       /**<  Level-set meshing                      */
-    MMG5_noinsert,  /**<  No point insertion/deletion            */
-    MMG5_noswap,    /**<  No edge or face flipping               */
-    MMG5_nomove,    /**<  No point relocation                    */
-    MMG5_renum,     /**<  Turn on point relocation with Scotch   */
-    MMG5_sing,      /**<  Turn on the insertion of singularities */
+    MMG5_IPARAM_verbose,          /**<  Tune level of verbosity, [-10..10]     */
+    MMG5_IPARAM_mem,              /**<  Set memory size to n Mbytes            */
+    MMG5_IPARAM_debug,            /**<  Turn on debug mode                     */
+    MMG5_IPARAM_angle,            /**<  Turn on angle detection                */
+    MMG5_IPARAM_iso,              /**<  Level-set meshing                      */
+    MMG5_IPARAM_noinsert,         /**<  No point insertion/deletion            */
+    MMG5_IPARAM_noswap,           /**<  No edge or face flipping               */
+    MMG5_IPARAM_nomove,           /**<  No point relocation                    */
+    MMG5_IPARAM_nlocParam,        /**<  Number of local parameters             */
+    MMG5_IPARAM_renum,            /**<  Turn on point relocation with Scotch   */
+    MMG5_IPARAM_sing,             /**<  Turn on the insertion of singularities */
+    MMG5_IPARAM_size,             /**<  Size of table of integer parameters    */
   };
 enum MMG5_optDblCod /**<  Options for mmg3d2 (double) */
   {
-    MMG5_dhd,       /**<  Value for angle detection  */
-    MMG5_hmin,      /**<  Minimal mesh size          */
-    MMG5_hmax,      /**<  Maximal mesh size          */
-    MMG5_hausd,     /**<  control Hausdorff distance */
-    MMG5_hgrad,     /**<  control gradation          */
-    MMG5_ls,        /**<  Not use for now            */
+    MMG5_DPARAM_dhd,                /**<  Value for angle detection          */
+    MMG5_DPARAM_hmin,               /**<  Minimal mesh size                  */
+    MMG5_DPARAM_hmax,               /**<  Maximal mesh size                  */
+    MMG5_DPARAM_hausd,              /**<  control Hausdorff distance         */
+    MMG5_DPARAM_hgrad,              /**<  control gradation                  */
+    MMG5_DPARAM_ls,                 /**<  Not use for now                    */
+    MMG5_DPARAM_size,               /**<  Size of table of double parameters */
   };
 
 typedef struct {
@@ -107,7 +112,7 @@ typedef struct {
 
 typedef struct {
   double        dhd,hmin,hmax,hgrad,hausd,min[3],max[3],delta,ls;
-  int           mem,sing,npar;
+  int           mem,sing,npar,npari;
   int           renum;
   char          imprim,ddebug,badkal,iso,fem;
   unsigned char noinsert, noswap, nomove;
@@ -117,7 +122,7 @@ typedef struct {
 
 typedef struct {
   int       ver,dim,type;
-  int       npi,nai,nei,np,na,nt,ne,npmax,namax,ntmax,nemax,xpmax,xtmax;
+  int       npi,nti,nai,nei,np,na,nt,ne,npmax,namax,ntmax,nemax,xpmax,xtmax;
   int       base; /**< used with flag to know if an entity has been treated */
   int       mark;//CECILE rajout mark pour delaunay
   int       xp,xt; /**< nb of surfaces points/triangles */
@@ -184,18 +189,18 @@ void MMG5_freeAll(MMG5_pMesh,MMG5_pSol);
 #endif
 
 /** stock the user options (opt_i and opt_d) in the "info" structure */
-void MMG5_stockOption(int opt_i[10],double opt_d[6],MMG5_pMesh mesh);
+void MMG5_stockOption(int *opt_i,double *opt_d,MMG5_pMesh mesh);
 
 /** initialize to default values opt_i and opt_d */
-void MMG5_mmg3dinit(int opt_i[10],double opt_d[6]);
+void MMG5_mmg3dinit(int *opt_i,double *opt_d);
 
 
 /** library */
 #ifdef SINGUL
-int  MMG5_mmg3dlib(int opt_i[10],double opt_d[6],MMG5_pMesh mesh,MMG5_pSol sol,
+int  MMG5_mmg3dlib(int* opt_i,double* opt_d,MMG5_pMesh mesh,MMG5_pSol sol,
                    MMG5_pSingul singul);
 #else
-int  MMG5_mmg3dlib(int opt_i[10],double opt_d[6],MMG5_pMesh mesh,MMG5_pSol sol);
+int  MMG5_mmg3dlib(int* opt_i,double* opt_d,MMG5_pMesh mesh,MMG5_pSol sol);
 #endif
 
 #endif

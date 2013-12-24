@@ -2,9 +2,7 @@
 
 extern Info  info;
 char  ddb;
-#ifdef DEBUG
-double      tabtmp[12][7];
-#endif
+
 #define LOPTLDEL     1.3//1.41
 #define LOPTSDEL     0.6
 int MMG_npuiss,MMG_nvol,MMG_npres;

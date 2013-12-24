@@ -64,59 +64,62 @@ void setfunc(pMesh mesh,pSol met) {
   }
 }
 
-/** Read parammeter file */
+
+/** Common deallocations before return */
 static inline
-int parsop(pMesh mesh,pSol met) {
-  Par        *par;
-  float       fp1;
-  int         i,j,ret;
-  char       *ptr,buf[256],data[256];
-  FILE       *in;
-
-  /* check for parameter file */
-  strcpy(data,mesh->namein);
-  ptr = strstr(data,".mesh");
-  if ( ptr )  *ptr = '\0';
-  strcat(data,".mmg3d5");
-  in = fopen(data,"r");
-  if ( !in ) {
-    sprintf(data,"%s","DEFAULT.mmg3d5");
-    in = fopen(data,"r");
-    if ( !in )  return(1);
+void freeCommon(pMesh mesh,pSol met
+#ifdef SINGUL
+             ,pSingul singul
+#endif
+             ){
+  /* mesh */
+  free(mesh->point);
+  mesh->point = NULL;
+  free(mesh->tetra);
+  mesh->tetra = NULL;
+  free(mesh->adja);
+  mesh->adja = NULL;
+  if ( mesh->xpoint ) {
+    free(mesh->xpoint);
+    mesh->xpoint = NULL;
   }
-  fprintf(stdout,"  %%%% %s OPENED\n",data);
+  if ( mesh->htab.geom ) {
+    free(mesh->htab.geom);
+    mesh->htab.geom = NULL;
+  }
 
-  /* read parameters */
-  while ( !feof(in) ) {
-    /* scan line */
-    ret = fscanf(in,"%s",data);
-    if ( !ret || feof(in) )  break;
-    for (i=0; i<strlen(data); i++) data[i] = tolower(data[i]);
+  if ( mesh->tria ) {
+    free(mesh->tria);
+    mesh->tria = NULL;
+  }
+  if ( mesh->xtetra ) {
+    free(mesh->xtetra);
+    mesh->xtetra = NULL;
+  }
 
-    /* check for condition type */
-    if ( !strcmp(data,"parameters") ) {
-      fscanf(in,"%d",&info.npar);
-      info.par = (Par*)calloc(info.npar,sizeof(Par));
-      if ( !info.par ) {
-        perror("  ## Memory problem: calloc");
-        exit(EXIT_FAILURE);
-      }
+  /* met */
+  if ( /*!info.iso &&*/ met->m ) {
+    free(met->m);
+    met->m = NULL;
+  }
 
-      for (i=0; i<info.npar; i++) {
-        par = &info.par[i];
-        fscanf(in,"%d %s ",&par->ref,buf);
-        for (j=0; j<strlen(buf); j++)  buf[j] = tolower(buf[j]);
-        if ( !strcmp(buf,"triangles") || !strcmp(buf,"triangle") )
-          par->elt = MMG5_Triangle;
-        else {
-          fprintf(stdout,"  %%%% Wrong format: %s\n",buf);
-          continue;
-        }
-        ret = fscanf(in,"%f",&fp1);
-        par->hausd = fp1;
-      }
+  /* info */
+  if ( info.npar && info.par ) {
+    free(info.par);
+    info.par = NULL;
+  }
+
+#ifdef SINGUL
+  /* singul */
+  if ( info.sing ) {
+    if ( singul->ns ) {
+      free(singul->point);
+      singul->point=NULL;
+    }
+    if ( singul->na ) {
+      free(singul->edge);
+      singul->edge=NULL;
     }
   }
-  fclose(in);
-  return(1);
+#endif
 }
