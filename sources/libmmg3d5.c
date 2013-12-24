@@ -6,126 +6,31 @@
  *
  * mmg3dlib(int *options_i,double *options_d ): to use mmg3d via a library
  *
- * option_i:
- *    option_i[MMG5_IPARAM_verbose]  = [-10..10] , Tune level of verbosity;
- *    option_i[MMG5_IPARAM_mem]      = [n/-1]    , Set memory size to n Mbytes/keep the default value;
- *    option_i[MMG5_IPARAM_debug]    = [1/0]     , Turn on/off debug mode;
- *    option_i[MMG5_IPARAM_angle]    = [1/0]     , Turn on/off angle detection;
- *    option_i[MMG5_IPARAM_iso]      = [1/0]     , Turn on/off levelset meshing;
- *    option_i[MMG5_IPARAM_noinsert] = [1/0]     , avoid/allow point insertion/deletion;
- *    option_i[MMG5_IPARAM_noswap]   = [1/0]     , avoid/allow edge or face flipping;
- *    option_i[MMG5_IPARAM_nomove]   = [1/0]     , avoid/allow point relocation;
- *    option_i[MMG5_IPARAM_nlocParam]= [n]       , number of local parameters;
- *    option_i[MMG5_IPARAM_renum]    = [1/0]     , Turn on/off the renumbering using SCOTCH;
- *    option_i[MMG5_IPARAM_sing]     = [1/0]     , Turn on/off the insertion of singularities
- *                                           (need to compile with -DSINGUL flag);
- *
- *    option_d[MMG5_DPARAM_dhd]   = [val]     , angle detection;
- *    option_d[MMG5_DPARAM_hmin]  = [val]     , minimal mesh size;
- *    option_d[MMG5_DPARAM_hmax]  = [val]     , maximal mesh size;
- *    option_d[MMG5_DPARAM_hausd] = [val]     , control Hausdorff distance;
- *    option_d[MMG5_DPARAM_hgrad] = [val]     , control gradation;
- *    option_d[MMG5_DPARAM_ls]    = [val]     , level set value;
+ * Integers parameters:
+ *    MMG5_IPARAM_verbose           = [-10..10] , Tune level of verbosity;
+ *    MMG5_IPARAM_mem               = [n/-1]    , Set memory size to n Mbytes/keep the default value;
+ *    MMG5_IPARAM_debug             = [1/0]     , Turn on/off debug mode;
+ *    MMG5_IPARAM_angle             = [1/0]     , Turn on/off angle detection;
+ *    MMG5_IPARAM_iso               = [1/0]     , Turn on/off levelset meshing;
+ *    MMG5_IPARAM_noinsert          = [1/0]     , avoid/allow point insertion/deletion;
+ *    MMG5_IPARAM_noswap            = [1/0]     , avoid/allow edge or face flipping;
+ *    MMG5_IPARAM_nomove            = [1/0]     , avoid/allow point relocation;
+ *    MMG5_IPARAM_numberOflocalParam= [n]       , number of local parameters;
+ *    MMG5_IPARAM_renum             = [1/0]     , Turn on/off the renumbering using SCOTCH;
+ *    MMG5_IPARAM_sing              = [1/0]     , Turn on/off the insertion of singularities
+ *                                        (need to compile with -DSINGUL flag);
+ * Doble parameters:
+ *    MMG5_DPARAM_dhd   = [val]     , angle detection;
+ *    MMG5_DPARAM_hmin  = [val]     , minimal mesh size;
+ *    MMG5_DPARAM_hmax  = [val]     , maximal mesh size;
+ *    MMG5_DPARAM_hausd = [val]     , control Hausdorff distance;
+ *    MMG5_DPARAM_hgrad = [val]     , control gradation;
+ *    MMG5_DPARAM_ls    = [val]     , level set value;
  **/
 
 #include "mmg3d.h"
 #include "shared_func.h"
 
-/** Warning: if the library is run on multithread, global variables may be overwritten */
-
-/** Initialization of parameters tables with default values */
-void mmg3dinit(int *opt_i, double *opt_d) {
-
-  /* Allocations of parameter tables */
-  if ( !opt_i ) {
-    opt_i = (int*)malloc(MMG5_IPARAM_size*sizeof(int));
-    if ( !opt_i ) {
-      perror("  ## Memory problem: malloc");
-      exit(EXIT_FAILURE);
-    }
-  }
-  if ( !opt_d ) {
-    opt_d = (double*)malloc( ((int)MMG5_DPARAM_size) *sizeof(double));
-    if ( !opt_d ) {
-      perror("  ## Memory problem: malloc");
-      exit(EXIT_FAILURE);
-    }
-  }
-
-  /* default values for first tab (integer) */
-  opt_i[MMG5_IPARAM_verbose]  = -99; /**< [-10..10],Tune level of imprim */
-  opt_i[MMG5_IPARAM_mem]      = -1;  /**< [n/-1]   ,Set memory size to n Mbytes/keep the default value */
-  opt_i[MMG5_IPARAM_debug]    =  0;  /**< [0/1]    ,Turn on/off debug mode */
-  opt_i[MMG5_IPARAM_angle]    =  1;  /**< [1/0]    ,Turn on/off angle detection */
-  opt_i[MMG5_IPARAM_iso]      =  0;  /**< [0/1]    ,Turn on/off levelset meshing */
-  opt_i[MMG5_IPARAM_noinsert] =  0;  /**< [0/1]    ,avoid/allow point insertion/deletion */
-  opt_i[MMG5_IPARAM_noswap]   =  0;  /**< [0/1]    ,avoid/allow edge or face flipping */
-  opt_i[MMG5_IPARAM_nomove]   =  0;  /**< [0/1]    ,avoid/allow point relocation */
-  opt_i[MMG5_IPARAM_nlocParam]=  0;  /**< [n]      ,number of local parameters */
-#ifdef USE_SCOTCH
-  opt_i[MMG5_IPARAM_renum]    = 1;   /**< [1/0]    , Turn on/off the renumbering using SCOTCH; */
-#else
-  opt_i[MMG5_IPARAM_renum]    = 0;   /**< [1/0]    , Turn on/off the renumbering using SCOTCH; */
-#endif
-#ifdef SINGUL
-  opt_i[MMG5_IPARAM_sing]     =  0;  /**< [0/1]    ,preserve internal singularities */
-#endif
-
-  /* default values for second tab (double) */
-  opt_d[MMG5_DPARAM_dhd]   = 45;       /**< angle detection; */
-  opt_d[MMG5_DPARAM_hmin]  = 0.0;      /**< minimal mesh size; */
-  opt_d[MMG5_DPARAM_hmax]  = FLT_MAX;  /**< maximal mesh size; */
-  opt_d[MMG5_DPARAM_hausd] = 0.01;     /**< control Hausdorff */
-  opt_d[MMG5_DPARAM_hgrad] = exp(0.1); /**< control gradation; */
-  opt_d[MMG5_DPARAM_ls]    = 0.0;      /**< level set value */
-}
-
-/** Store user options in the info structure */
-void stockOption(int *opt_i,double *opt_d, pMesh mesh){
-
-  /* recovering of first option table (integers) */
-  mesh->info.imprim   = opt_i[MMG5_IPARAM_verbose];
-  mesh->info.mem      = opt_i[MMG5_IPARAM_mem];
-  mesh->info.ddebug   = opt_i[MMG5_IPARAM_debug];
-  if ( !opt_i[MMG5_IPARAM_angle] )
-    mesh->info.dhd = -1.0;
-  else {
-    mesh->info.dhd = opt_d[MMG5_DPARAM_dhd];
-    mesh->info.dhd = MG_MAX(0.0, MG_MIN(180.0,mesh->info.dhd));
-    mesh->info.dhd = cos(mesh->info.dhd*M_PI/180.0);
-  }
-
-  mesh->info.iso      = opt_i[MMG5_IPARAM_iso];
-  mesh->info.noinsert = opt_i[MMG5_IPARAM_noinsert];
-  mesh->info.noswap   = opt_i[MMG5_IPARAM_noswap];
-  mesh->info.nomove   = opt_i[MMG5_IPARAM_nomove];
-  mesh->info.npar     = opt_i[MMG5_IPARAM_nlocParam];
-#ifdef USE_SCOTCH
-  mesh->info.renum    = opt_i[MMG5_IPARAM_renum];
-#else
-  mesh->info.renum    = 0;
-#endif
-#ifdef SINGUL
-  mesh->info.sing     = opt_i[MMG5_IPARAM_sing];
-#else
-  mesh->info.sing     = 0;
-#endif
-
-  /* recovering of second option table (doubles) */
-  mesh->info.hmin     = opt_d[MMG5_DPARAM_hmin];
-  mesh->info.hmax     = opt_d[MMG5_DPARAM_hmax];
-  mesh->info.hausd    = opt_d[MMG5_DPARAM_hausd];
-  mesh->info.hgrad    = opt_d[MMG5_DPARAM_hgrad];
-  if ( mesh->info.hgrad < 0.0 )
-    mesh->info.hgrad = -1.0;
-  else
-    mesh->info.hgrad = log(mesh->info.hgrad);
-
-  mesh->info.ls       = opt_d[MMG5_DPARAM_ls];
-
-  /* other options */
-  mesh->info.fem      = 0;
-}
 
 /** Deallocations before return */
 void freeAll(pMesh mesh,pSol met
@@ -154,14 +59,6 @@ void freeAll(pMesh mesh,pSol met
 #endif
 }
 
-/** Free table of parameters */
-void freeParam(int* opt_i, double *opt_d) {
-  free(opt_i);
-  opt_i = NULL;
-  free(opt_d);
-  opt_d = NULL;
-}
-
 /** Recover mesh data */
 static inline
 int inputdata(pMesh mesh,pSol met) {
@@ -183,15 +80,7 @@ int inputdata(pMesh mesh,pSol met) {
   if ( !mesh->ver )  mesh->ver = 2;
   if ( !met ->ver )  met ->ver = 2;
 
-  /*  Check mesh data */
-  if ( mesh->info.ddebug ) {
-    if ( (!mesh->np) || (!mesh->point) ||
-         (!mesh->ne) || (!mesh->tetra) ) {
-      fprintf(stdout,"  ** MISSING DATA. Exit program.\n");
-      return(0);
-    }
-  }
-  mesh->base = mesh->mark = 0;
+   mesh->base = mesh->mark = 0;
 
   mesh->npi   = mesh->np;
   mesh->nei   = mesh->ne;
@@ -385,35 +274,8 @@ int packMesh(pMesh mesh,pSol met) {
   return(1);
 }
 
-/** Store local parameters */
-void Set_LocalParameters(MMG5_pMesh mesh,int type,int ref,double hausd) {
-
-  if ( !mesh->info.par && mesh->info.npar) {
-    mesh->info.par = (MMG5_pPar)calloc(mesh->info.npar,sizeof(MMG5_Par));
-    if ( !mesh->info.par ) {
-      perror("  ## Memory problem: calloc");
-      exit(EXIT_FAILURE);
-    }
-    mesh->info.npari = 0;
-  }
-  else if ( mesh->info.par ) {
-    if ( mesh->info.npari == mesh->info.npar ) {
-      fprintf(stdout,"  ## Warning: overflow of number of local parmameters,");
-      fprintf(stdout," check your number of parameters MMG5_IPARAM_nlocParam.\n");
-      fprintf(stdout," Ignored value.\n");
-      return;
-    }
-  }
-
-  mesh->info.npari++;
-  mesh->info.par->elt   = type;
-  mesh->info.par->ref   = ref;
-  mesh->info.par->hausd = hausd;
-}
-
-
 /** main programm */
-int mmg3dlib(int *opt_i,double *opt_d,pMesh mesh,pSol met
+int mmg3dlib(pMesh mesh,pSol met
 #ifdef SINGUL
              ,pSingul sing
 #endif
@@ -443,8 +305,6 @@ int mmg3dlib(int *opt_i,double *opt_d,pMesh mesh,pSol met
 
   tminit(ctim,TIMEMAX);
   chrono(ON,&(ctim[0]));
-
-  stockOption(opt_i,opt_d,mesh);
 
 #ifdef USE_SCOTCH
   warnScotch(mesh);
@@ -519,7 +379,7 @@ int mmg3dlib(int *opt_i,double *opt_d,pMesh mesh,pSol met
 
 #ifdef DEBUG
   if ( !met->np && !DoSol(mesh,met,&mesh->info) ) {
-  if ( !unscaleMesh(mesh,met) )  return(MMG5_STRONGFAILURE);
+    if ( !unscaleMesh(mesh,met) )  return(MMG5_STRONGFAILURE);
     return(mesh,met,MMG5_LOWFAILURE);
   }
 #endif

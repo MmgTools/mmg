@@ -20,204 +20,122 @@ int main(int argc,char *argv[]) {
 
   fprintf(stdout,"  -- TEST MMG3DLIB \n");
 
-#warning: creer une fonction allouant le maillage, la sol, singul, initialisant npar a 0, par a null...
-  mmgMesh = (MMG5_pMesh)calloc(1,sizeof(MMG5_Mesh));
-  if ( !mmgMesh ) {
-    perror("  ## Memory problem: calloc");
-    exit(EXIT_FAILURE);
-  }
+  /** Step 1: Initialisation of mesh and sol structures */
+  /* args of InitMesh: mesh=&mmgMesh, sol=&mmgSol, input mesh name, input sol name,
+   output mesh name */
+  MMG5_Init_mesh(&mmgMesh,&mmgSol);
 
-  /* allocation */
-  mmgMesh->np     = 12;
-  mmgMesh->nt     = 0;
-  mmgMesh->ne     = 12;
+  /** Step 2: Build mesh in MMG5 format */
+  /** Two solutions: just use the MMG5_loadMesh function that will read a .mesh(b)
+     file formatted or manually set your mesh using the MMG5_Set* functions */
 
+  /** Manually set of the mesh */
+  /** a) give the size of the mesh: 12 vertices, 12 tetra, 20 triangles, 0 edges */
+  if ( !MMG5_Set_meshSize(mmgMesh,12,12,20,0) )  exit(EXIT_FAILURE);
 
-  mmgMesh->npmax  = 500000;
-  mmgMesh->ntmax  = 1000000;
-  mmgMesh->nemax  = 3000000;
+  /** b) give the vertices: for each vertex, give the coordinates and the reference of vertex */
+  if ( !MMG5_Set_vertex(mmgMesh,0  ,0  ,0  ,0) )  exit(EXIT_FAILURE);
+  if ( !MMG5_Set_vertex(mmgMesh,0.5,0  ,0  ,0) )  exit(EXIT_FAILURE);
+  if ( !MMG5_Set_vertex(mmgMesh,0.5,0  ,1  ,0) )  exit(EXIT_FAILURE);
+  if ( !MMG5_Set_vertex(mmgMesh,0  ,0  ,1  ,0) )  exit(EXIT_FAILURE);
+  if ( !MMG5_Set_vertex(mmgMesh,0  ,1  ,0  ,0) )  exit(EXIT_FAILURE);
+  if ( !MMG5_Set_vertex(mmgMesh,0.5,1  ,0  ,0) )  exit(EXIT_FAILURE);
+  if ( !MMG5_Set_vertex(mmgMesh,0.5,1  ,1  ,0) )  exit(EXIT_FAILURE);
+  if ( !MMG5_Set_vertex(mmgMesh,0  ,1  ,1  ,0) )  exit(EXIT_FAILURE);
+  if ( !MMG5_Set_vertex(mmgMesh,1  ,0  ,0  ,0) )  exit(EXIT_FAILURE);
+  if ( !MMG5_Set_vertex(mmgMesh,1  ,1  ,0  ,0) )  exit(EXIT_FAILURE);
+  if ( !MMG5_Set_vertex(mmgMesh,1  ,0  ,1  ,0) )  exit(EXIT_FAILURE);
+  if ( !MMG5_Set_vertex(mmgMesh,1  ,1  ,1  ,0) )  exit(EXIT_FAILURE);
 
-  mmgMesh->point = (MMG5_pPoint)calloc(mmgMesh->npmax+1,sizeof(MMG5_Point));
-  if ( !mmgMesh->point ) {
-    perror("  ## Memory problem: calloc");
-    exit(EXIT_FAILURE);
-  }
-  mmgMesh->tetra = (MMG5_pTetra)calloc(mmgMesh->nemax+1,sizeof(MMG5_Tetra));
-  if ( !mmgMesh->tetra ) {
-    perror("  ## Memory problem: calloc");
-    exit(EXIT_FAILURE);
-  }
-  mmgMesh->tria  = (MMG5_pTria)calloc(mmgMesh->ntmax+1,sizeof(MMG5_Tria));
-  if ( !mmgMesh->tria ) {
-    perror("  ## Memory problem: calloc");
-    exit(EXIT_FAILURE);
-  }
-
-  /*coordinates vertices*/
-  mmgMesh->point[1].c[0]  = 0.;  mmgMesh->point[1].c[1]  = 0;
-  mmgMesh->point[1].c[2]  = 0;
-  mmgMesh->point[2].c[0]  = 0.5; mmgMesh->point[2].c[1]  = 0;
-  mmgMesh->point[2].c[2]  = 0;
-  mmgMesh->point[3].c[0]  = 0.5; mmgMesh->point[3].c[1]  = 0;
-  mmgMesh->point[3].c[2]  = 1;
-  mmgMesh->point[4].c[0]  = 0;   mmgMesh->point[4].c[1]  = 0;
-  mmgMesh->point[4].c[2]  = 1;
-  mmgMesh->point[5].c[0]  = 0;   mmgMesh->point[5].c[1]  = 1;
-  mmgMesh->point[5].c[2]  = 0;
-  mmgMesh->point[6].c[0]  = 0.5; mmgMesh->point[6].c[1]  = 1;
-  mmgMesh->point[6].c[2]  = 0;
-  mmgMesh->point[7].c[0]  = 0.5; mmgMesh->point[7].c[1]  = 1;
-  mmgMesh->point[7].c[2]  = 1;
-  mmgMesh->point[8].c[0]  = 0;   mmgMesh->point[8].c[1]  = 1;
-  mmgMesh->point[8].c[2]  = 1;
-  mmgMesh->point[9].c[0]  = 1;   mmgMesh->point[9].c[1]  = 0;
-  mmgMesh->point[9].c[2]  = 0;
-  mmgMesh->point[10].c[0] = 1;   mmgMesh->point[10].c[1] = 1;
-  mmgMesh->point[10].c[2] = 0;
-  mmgMesh->point[11].c[0] = 1;   mmgMesh->point[11].c[1] = 0;
-  mmgMesh->point[11].c[2] = 1;
-  mmgMesh->point[12].c[0] = 1;   mmgMesh->point[12].c[1] = 1;
-  mmgMesh->point[12].c[2] = 1;
-
-  mmgMesh->point[1].ref  = 0;
-  mmgMesh->point[2].ref  = 0;
-  mmgMesh->point[3].ref  = 0;
-  mmgMesh->point[4].ref  = 0;
-  mmgMesh->point[5].ref  = 0;
-  mmgMesh->point[6].ref  = 0;
-  mmgMesh->point[7].ref  = 0;
-  mmgMesh->point[8].ref  = 0;
-  mmgMesh->point[9].ref  = 0;
-  mmgMesh->point[10].ref = 0;
-  mmgMesh->point[11].ref = 0;
-  mmgMesh->point[12].ref = 0;
-
-  /* tria */
-  /* not mandatory */
-  mmgMesh->nt = 20;
-  mmgMesh->tria[ 1].v[0] =  1; mmgMesh->tria[ 1].v[1] = 4;
-  mmgMesh->tria[ 1].v[2] =  8; mmgMesh->tria[ 1].ref  = 2;
-  mmgMesh->tria[ 2].v[0] =  1; mmgMesh->tria[ 2].v[1] = 2;
-  mmgMesh->tria[ 2].v[2] =  4; mmgMesh->tria[ 2].ref  = 2;
-  mmgMesh->tria[ 3].v[0] =  8; mmgMesh->tria[ 3].v[1] = 3;
-  mmgMesh->tria[ 3].v[2] =  7; mmgMesh->tria[ 3].ref  = 0;
-  mmgMesh->tria[ 4].v[0] =  5; mmgMesh->tria[ 4].v[1] = 8;
-  mmgMesh->tria[ 4].v[2] =  6; mmgMesh->tria[ 4].ref  = 0;
-  mmgMesh->tria[ 5].v[0] =  5; mmgMesh->tria[ 5].v[1] = 6;
-  mmgMesh->tria[ 5].v[2] =  2; mmgMesh->tria[ 5].ref  = 0;
-  mmgMesh->tria[ 6].v[0] =  5; mmgMesh->tria[ 6].v[1] = 2;
-  mmgMesh->tria[ 6].v[2] =  1; mmgMesh->tria[ 6].ref  = 1;
-  mmgMesh->tria[ 7].v[0] =  5; mmgMesh->tria[ 7].v[1] = 1;
-  mmgMesh->tria[ 7].v[2] =  8; mmgMesh->tria[ 7].ref  = 0;
-  mmgMesh->tria[ 8].v[0] =  7; mmgMesh->tria[ 8].v[1] = 6;
-  mmgMesh->tria[ 8].v[2] =  8; mmgMesh->tria[ 8].ref  = 0;
-  mmgMesh->tria[ 9].v[0] =  4; mmgMesh->tria[ 9].v[1] = 3;
-  mmgMesh->tria[ 9].v[2] =  8; mmgMesh->tria[ 9].ref  = 0;
-  mmgMesh->tria[10].v[0] =  2; mmgMesh->tria[10].v[1] = 3;
-  mmgMesh->tria[10].v[2] =  4; mmgMesh->tria[10].ref  = 0;
-  mmgMesh->tria[11].v[0] =  9; mmgMesh->tria[11].v[1] = 3;
-  mmgMesh->tria[11].v[2] =  2; mmgMesh->tria[11].ref  = 0;
-  mmgMesh->tria[12].v[0] = 11; mmgMesh->tria[12].v[1] = 9;
-  mmgMesh->tria[12].v[2] = 12; mmgMesh->tria[12].ref  = 0;
-  mmgMesh->tria[13].v[0] =  7; mmgMesh->tria[13].v[1] = 11;
-  mmgMesh->tria[13].v[2] = 12; mmgMesh->tria[13].ref  = 0;
-  mmgMesh->tria[14].v[0] =  6; mmgMesh->tria[14].v[1] = 7;
-  mmgMesh->tria[14].v[2] = 10; mmgMesh->tria[14].ref  = 0;
-  mmgMesh->tria[15].v[0] =  6; mmgMesh->tria[15].v[1] = 10;
-  mmgMesh->tria[15].v[2] =  9; mmgMesh->tria[15].ref  = 0;
-  mmgMesh->tria[16].v[0] =  6; mmgMesh->tria[16].v[1] = 9;
-  mmgMesh->tria[16].v[2] =  2; mmgMesh->tria[16].ref  = 0;
-  mmgMesh->tria[17].v[0] = 12; mmgMesh->tria[17].v[1] = 10;
-  mmgMesh->tria[17].v[2] =  7; mmgMesh->tria[17].ref  = 0;
-  mmgMesh->tria[18].v[0] = 12; mmgMesh->tria[18].v[1] = 9;
-  mmgMesh->tria[18].v[2] = 10; mmgMesh->tria[18].ref  = 0;
-  mmgMesh->tria[19].v[0] =  3; mmgMesh->tria[19].v[1] = 11;
-  mmgMesh->tria[19].v[2] =  7; mmgMesh->tria[19].ref  = 0;
-  mmgMesh->tria[20].v[0] =  9; mmgMesh->tria[20].v[1] = 11;
-  mmgMesh->tria[20].v[2] =  3; mmgMesh->tria[20].ref  = 0;
-
-  /* tetra*/
+  /** c) give the tetrahedras: for each tetrahedra,
+      give the vertices index and the reference of the tetra */
   /* warning: here we suppose that tetras are positively oriented */
-  mmgMesh->tetra[1].v[0]  = 1;  mmgMesh->tetra[1].v[1]  = 4;
-  mmgMesh->tetra[1].v[2]  = 2;  mmgMesh->tetra[1].v[3]  = 8;
-  mmgMesh->tetra[2].v[0]  = 8;  mmgMesh->tetra[2].v[1]  = 3;
-  mmgMesh->tetra[2].v[2]  = 2;  mmgMesh->tetra[2].v[3]  = 7;
-  mmgMesh->tetra[3].v[0]  = 5;  mmgMesh->tetra[3].v[1]  = 2;
-  mmgMesh->tetra[3].v[2]  = 6;  mmgMesh->tetra[3].v[3]  = 8;
-  mmgMesh->tetra[4].v[0]  = 5;  mmgMesh->tetra[4].v[1]  = 8;
-  mmgMesh->tetra[4].v[2]  = 1;  mmgMesh->tetra[4].v[3]  = 2;
-  mmgMesh->tetra[5].v[0]  = 7;  mmgMesh->tetra[5].v[1]  = 2;
-  mmgMesh->tetra[5].v[2]  = 8;  mmgMesh->tetra[5].v[3]  = 6;
-  mmgMesh->tetra[6].v[0]  = 2;  mmgMesh->tetra[6].v[1]  = 4;
-  mmgMesh->tetra[6].v[2]  = 3;  mmgMesh->tetra[6].v[3]  = 8;
-  mmgMesh->tetra[7].v[0]  = 9;  mmgMesh->tetra[7].v[1]  = 2;
-  mmgMesh->tetra[7].v[2]  = 3;  mmgMesh->tetra[7].v[3]  = 7;
-  mmgMesh->tetra[8].v[0]  = 7;  mmgMesh->tetra[8].v[1]  = 11;
-  mmgMesh->tetra[8].v[2]  = 9;  mmgMesh->tetra[8].v[3]  = 12;
-  mmgMesh->tetra[9].v[0]  = 6;  mmgMesh->tetra[9].v[1]  = 9;
-  mmgMesh->tetra[9].v[2]  = 10; mmgMesh->tetra[9].v[3]  = 7;
-  mmgMesh->tetra[10].v[0] = 6;  mmgMesh->tetra[10].v[1] = 7;
-  mmgMesh->tetra[10].v[2] = 2;  mmgMesh->tetra[10].v[3] = 9;
-  mmgMesh->tetra[11].v[0] = 12; mmgMesh->tetra[11].v[1] = 9;
-  mmgMesh->tetra[11].v[2] = 7;  mmgMesh->tetra[11].v[3] = 10;
-  mmgMesh->tetra[12].v[0] = 9;  mmgMesh->tetra[12].v[1] = 3;
-  mmgMesh->tetra[12].v[2] = 11; mmgMesh->tetra[12].v[3] = 7;
+  if ( !MMG5_Set_tetrahedra(mmgMesh,  1,  4,  2,  8,0) )  exit(EXIT_FAILURE);
+  if ( !MMG5_Set_tetrahedra(mmgMesh,  8,  3,  2,  7,0) )  exit(EXIT_FAILURE);
+  if ( !MMG5_Set_tetrahedra(mmgMesh,  5,  2,  6,  8,0) )  exit(EXIT_FAILURE);
+  if ( !MMG5_Set_tetrahedra(mmgMesh,  5,  8,  1,  2,0) )  exit(EXIT_FAILURE);
+  if ( !MMG5_Set_tetrahedra(mmgMesh,  7,  2,  8,  6,0) )  exit(EXIT_FAILURE);
+  if ( !MMG5_Set_tetrahedra(mmgMesh,  2,  4,  3,  8,0) )  exit(EXIT_FAILURE);
+  if ( !MMG5_Set_tetrahedra(mmgMesh,  9,  2,  3,  7,0) )  exit(EXIT_FAILURE);
+  if ( !MMG5_Set_tetrahedra(mmgMesh,  7, 11,  9, 12,0) )  exit(EXIT_FAILURE);
+  if ( !MMG5_Set_tetrahedra(mmgMesh,  6,  9, 10,  7,0) )  exit(EXIT_FAILURE);
+  if ( !MMG5_Set_tetrahedra(mmgMesh,  6,  7,  2,  9,0) )  exit(EXIT_FAILURE);
+  if ( !MMG5_Set_tetrahedra(mmgMesh, 12,  9,  7, 10,0) )  exit(EXIT_FAILURE);
+  if ( !MMG5_Set_tetrahedra(mmgMesh,  9,  3, 11,  7,0) )  exit(EXIT_FAILURE);
 
-  mmgMesh->tetra[1].ref  = 0;
-  mmgMesh->tetra[2].ref  = 0;
-  mmgMesh->tetra[3].ref  = 0;
-  mmgMesh->tetra[4].ref  = 0;
-  mmgMesh->tetra[5].ref  = 0;
-  mmgMesh->tetra[6].ref  = 0;
-  mmgMesh->tetra[7].ref  = 0;
-  mmgMesh->tetra[8].ref  = 0;
-  mmgMesh->tetra[9].ref  = 0;
-  mmgMesh->tetra[10].ref = 0;
-  mmgMesh->tetra[11].ref = 0;
-  mmgMesh->tetra[12].ref = 0;
+  /** d) give the triangles (not mandatory): for each triangle,
+      give the vertices index and the reference of the triangle */
+  if ( !MMG5_Set_triangle(mmgMesh,  1,  4,  8, 2) )  exit(EXIT_FAILURE);
+  if ( !MMG5_Set_triangle(mmgMesh,  1,  2,  4, 2) )  exit(EXIT_FAILURE);
+  if ( !MMG5_Set_triangle(mmgMesh,  8,  3,  7, 0) )  exit(EXIT_FAILURE);
+  if ( !MMG5_Set_triangle(mmgMesh,  5,  8,  6, 0) )  exit(EXIT_FAILURE);
+  if ( !MMG5_Set_triangle(mmgMesh,  5,  6,  2, 0) )  exit(EXIT_FAILURE);
+  if ( !MMG5_Set_triangle(mmgMesh,  5,  2,  1, 1) )  exit(EXIT_FAILURE);
+  if ( !MMG5_Set_triangle(mmgMesh,  5,  1,  8, 0) )  exit(EXIT_FAILURE);
+  if ( !MMG5_Set_triangle(mmgMesh,  7,  6,  8, 0) )  exit(EXIT_FAILURE);
+  if ( !MMG5_Set_triangle(mmgMesh,  4,  3,  8, 0) )  exit(EXIT_FAILURE);
+  if ( !MMG5_Set_triangle(mmgMesh,  2,  3,  4, 0) )  exit(EXIT_FAILURE);
+  if ( !MMG5_Set_triangle(mmgMesh,  9,  3,  2, 0) )  exit(EXIT_FAILURE);
+  if ( !MMG5_Set_triangle(mmgMesh, 11,  9, 12, 0) )  exit(EXIT_FAILURE);
+  if ( !MMG5_Set_triangle(mmgMesh,  7, 11, 12, 0) )  exit(EXIT_FAILURE);
+  if ( !MMG5_Set_triangle(mmgMesh,  6,  7, 10, 0) )  exit(EXIT_FAILURE);
+  if ( !MMG5_Set_triangle(mmgMesh,  6, 10,  9, 0) )  exit(EXIT_FAILURE);
+  if ( !MMG5_Set_triangle(mmgMesh,  6,  9,  2, 0) )  exit(EXIT_FAILURE);
+  if ( !MMG5_Set_triangle(mmgMesh, 12, 10,  7, 0) )  exit(EXIT_FAILURE);
+  if ( !MMG5_Set_triangle(mmgMesh, 12,  9, 10, 0) )  exit(EXIT_FAILURE);
+  if ( !MMG5_Set_triangle(mmgMesh,  3, 11,  7, 0) )  exit(EXIT_FAILURE);
+  if ( !MMG5_Set_triangle(mmgMesh,  9, 11,  3, 0) )  exit(EXIT_FAILURE);
 
-  /*metric*/
-  mmgSol           = (MMG5_pSol)calloc(1,sizeof(MMG5_Sol));
-  if ( !mmgSol ) {
-    perror("  ## Memory problem: calloc");
+
+  /** Step 3: Build sol in MMG5 format */
+  /** Two solutions: just use the MMG5_loadMet function that will read a .sol(b)
+      file formatted or manually set your sol using the MMG5_Set* functions */
+
+  /** Manually set of the sol */
+  /** a) give info for the sol structure: sol applied on vertex entities,
+       number of vertices=12, the sol is scalar*/
+  if ( !MMG5_Set_solSize(mmgMesh,mmgSol,MMG5_Vertex,12,MMG5_Scalar) )
     exit(EXIT_FAILURE);
+
+  /** b) give solutions values */
+  for(k=1 ; k<=12 ; k++) {
+    if ( !MMG5_Set_scalarSol(mmgSol,0.5) ) exit(EXIT_FAILURE);
   }
 
-  mmgSol->size = 1;
+  /** Step 4 (not mandatory): check if the number of given entities match with mesh size */
+  if ( !MMG5_Chk_meshData(mmgMesh,mmgSol) ) exit(EXIT_FAILURE);
 
-  /*scalaire size*/
-  mmgSol->np = mmgMesh->np;
-  mmgSol->npmax = mmgMesh->npmax;
-  mmgSol->m    = (double*)calloc(mmgSol->npmax+1,mmgSol->size*sizeof(double));
-  if ( !mmgSol->m ) {
-    perror("  ## Memory problem: calloc");
-    exit(EXIT_FAILURE);
-  }
+  /** Step 5 (not mandatory): set your global parameters using the MMG5_Set_iparameters and
+   MMG5_Set_dparameters function (resp. for integer parameters and double param)*/
 
-  for(k=1 ; k<=mmgMesh->np ; k++) {
-    mmgSol->m[k] = 0.5;
-  }
-
-  MMG5_mmg3dinit(opt_i, opt_d);
-
-  /** first wave of refinment with a detection of angles (between normals
+  /* first wave of refinment with a detection of angles (between normals
    *  at 2 adjacent surfaces) smallest than 90 and a maximal size of 0.2 */
-  opt_i[MMG5_IPARAM_verbose]  = 5;
-  opt_d[MMG5_DPARAM_dhd]      = 90;
-  opt_d[MMG5_DPARAM_hmax]     = 0.2;
+  if ( !MMG5_Set_iparameters(mmgMesh,MMG5_IPARAM_verbose, 5) )
+    exit(EXIT_FAILURE);
+  if ( !MMG5_Set_dparameters(mmgMesh,MMG5_DPARAM_angleDetection,90) )
+    exit(EXIT_FAILURE);
+  if ( !MMG5_Set_dparameters(mmgMesh,MMG5_DPARAM_hmax,0.2) )
+    exit(EXIT_FAILURE);
 
-  /** use local hausdorff numbers on ref 2 (hausd = 0.001) and 0 (hausd = 0.005) */
-  //opt_i[MMG5_IPARAM_nlocParam]= 2;
+  /** Step 6 (not mandatory): set your local parameters */
+  /* use 2 local hausdorff numbers on ref 2 (hausd = 0.001) and 0 (hausd = 0.005) */
+  if ( !MMG5_Set_iparameters(mmgMesh,MMG5_IPARAM_numberOfLocalParam,2) )
+    exit(EXIT_FAILURE);
 
-  /* for each local parameter: give type and reference of the element on which you
-     will apply a particular hausdorff number and hausdorff number to apply */
-  //MMG5_Set_LocalParameters(MMG5_Info,MMG5_Triangle,2,0.001);
+  /** for each local parameter: give the type and reference of the element on which you
+      will apply a particular hausdorff number and the hausdorff number to apply */
+  if ( !MMG5_Set_localParameters(mmgMesh,MMG5_Triangle,2,0.001) )
+    exit(EXIT_FAILURE);
+  if ( !MMG5_Set_localParameters(mmgMesh,MMG5_Triangle,0,0.005) )
+    exit(EXIT_FAILURE);
 
+  if ( !MMG5_Set_outputMeshName(mmgMesh,"result0.mesh") )
+    exit(EXIT_FAILURE);
+  if ( !MMG5_Set_outputSolName(mmgMesh,mmgSol,"result0.sol") )
+    exit(EXIT_FAILURE);
 
-  mmgMesh->nameout = "result0.mesh";
-  mmgSol->nameout = "result0.sol";
-
-  ier = MMG5_mmg3dlib(opt_i,opt_d,mmgMesh,mmgSol);
+  /** Step 7: library call */
+  ier = MMG5_mmg3dlib(mmgMesh,mmgSol);
   if ( ier == MMG5_STRONGFAILURE ) {
     fprintf(stdout,"BAD ENDING OF MMG3DLIB: UNABLE TO SAVE MESH\n");
     return(ier);
@@ -225,23 +143,32 @@ int main(int argc,char *argv[]) {
     fprintf(stdout,"BAD ENDING OF MMG3DLIB\n");
 
 
-  /** Second wave of refinment with a smallest maximal size */
-  opt_d[MMG5_DPARAM_hmax]  = 0.1;
+  /* Second wave of refinment with a smallest maximal size and with a different
+     first local parameter */
+   if ( !MMG5_Set_dparameters(mmgMesh,MMG5_DPARAM_hmax,0.1) )
+     exit(EXIT_FAILURE);
+  if ( !MMG5_Set_localParameters(mmgMesh,MMG5_Triangle,0,0.01) )
+    exit(EXIT_FAILURE);
 
-  ier = MMG5_mmg3dlib(opt_i,opt_d,mmgMesh,mmgSol);
+  ier = MMG5_mmg3dlib(mmgMesh,mmgSol);
   if ( ier == MMG5_STRONGFAILURE ) {
     fprintf(stdout,"BAD ENDING OF MMG3DLIB: UNABLE TO SAVE MESH\n");
     return(ier);
   } else if ( ier == MMG5_LOWFAILURE )
     fprintf(stdout,"BAD ENDING OF MMG3DLIB\n");
 
-  /*save result*/
+  /** Step 8: get results */
+  /** Two solutions: just use the MMG5_saveMesh/MMG5_saveMet functions
+      that will write .mesh(b)/.sol formatted files or manually get your mesh/sol
+      using the MMG5_getMesh/MMG5_getSol functions */
+
+  /* Automatically save the mesh */
   MMG5_saveMesh(mmgMesh);
 
-  /*save metric*/
+  /* Automatically save the solution */
   MMG5_saveMet(mmgMesh,mmgSol);
 
-  /* free mem */
+  /* Step 9: free the MMG3D5 structures */
   MMG5_freeAll(mmgMesh,mmgSol);
 
   return(ier);

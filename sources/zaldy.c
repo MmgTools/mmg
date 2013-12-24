@@ -84,11 +84,10 @@ void delElt(pMesh mesh,int iel) {
   }
 }
 
-
-/** allocate main structure */
-int zaldy(pMesh mesh) {
+/** memory repartition for the -m option */
+void memRepartition(pMesh mesh) {
   int     million = 1048576L;
-  int     k,npask,bytes,ctri;
+  int     npask,bytes,ctri;
 
   if ( mesh->info.mem < 0 ) {
     mesh->npmax = MG_MAX(1.5*mesh->np,NPMAX);
@@ -128,6 +127,14 @@ int zaldy(pMesh mesh) {
     mesh->ntmax = ctri*npask;
     mesh->nemax = 6*npask;
   }
+  return;
+}
+
+/** allocate main structure */
+int zaldy(pMesh mesh) {
+  int     k;
+
+  memRepartition(mesh);
 
   if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug ) {
     fprintf(stdout,"  ## ASKED MEMORY:\n");
@@ -161,6 +168,7 @@ int zaldy(pMesh mesh) {
       exit(EXIT_FAILURE);
     }
   }
+
   /* keep track of empty links */
   mesh->npnil = mesh->np + 1;
   mesh->nenil = mesh->ne + 1;

@@ -439,27 +439,9 @@ int main(int argc,char *argv[]) {
 #ifdef SINGUL
   memset(&sing,0,sizeof(Singul));
 #endif
-  mesh.info.imprim   = -99;
-  mesh.info.ddebug   = 0;
-  mesh.info.mem      = -1;
-  mesh.info.iso      = 0;
-  mesh.info.dhd      = ANGEDG;
-  mesh.info.hmin     = 0.0;
-  mesh.info.hmax     = FLT_MAX;
-  mesh.info.hgrad    = 0.1;
-  mesh.info.hausd    = 0.01;
-  mesh.info.ls       = 0.0;
-  mesh.info.noswap   = 0;
-  mesh.info.nomove   = 0;
-  mesh.info.noinsert = 0;
-  mesh.info.fem      = 0;
-  mesh.info.npar     = 0;
-#ifdef SINGUL
-  mesh.info.sing     = 0;
-#endif
-#ifdef USE_SCOTCH
-  mesh.info.renum    = 1;
-#endif
+
+  Init_parameters(&mesh);
+
   met.size      = 1;
 
   /* command line */

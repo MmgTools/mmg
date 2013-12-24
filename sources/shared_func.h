@@ -110,15 +110,13 @@ void freeCommon(pMesh mesh,pSol met
 
 #ifdef SINGUL
   /* singul */
-  if ( mesh->info.sing ) {
-    if ( singul->ns ) {
-      free(singul->point);
-      singul->point=NULL;
-    }
-    if ( singul->na ) {
-      free(singul->edge);
-      singul->edge=NULL;
-    }
+  if ( singul->ns ) {
+    free(singul->point);
+    singul->point=NULL;
+  }
+  if ( singul->na ) {
+    free(singul->edge);
+    singul->edge=NULL;
   }
 #endif
 }

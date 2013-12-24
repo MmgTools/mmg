@@ -91,8 +91,8 @@
 #define MG_MINUS   3
 #define MG_ISO    10
 
-#define MG_VOK(ppt)      (ppt && (ppt->tag < MG_NUL)) /**< Vertex OK */
-#define MG_EOK(pt)       (pt && (pt->v[0] > 0))       /**< Element OK */
+#define MG_VOK(ppt)      (ppt && ((ppt)->tag < MG_NUL)) /**< Vertex OK */
+#define MG_EOK(pt)       (pt && ((pt)->v[0] > 0))       /**< Element OK */
 #define MG_EDG(tag)      ((tag & MG_GEO) || (tag & MG_REF)) /**< Edge or Ridge */
 #define MG_SIN(tag)      ((tag & MG_CRN) || (tag & MG_REQ)) /**< Corner or Required */
 
@@ -219,6 +219,7 @@ int  bdryPerm(pMesh );
 int  chkmsh(pMesh,int,int);
 int  chkfemtopo(pMesh mesh);
 int  cntbdypt(pMesh mesh, int nump);
+void memRepartition(pMesh mesh);
 int  mmg3d1(pMesh ,pSol );
 int  mmg3d1_delone(pMesh ,pSol );
 int  mmg3d2(pMesh ,pSol );
