@@ -156,6 +156,12 @@
 #define Chk_meshData                  	 MMG5_Chk_meshData
 #define Chk_meshData                  	 MMG5_Chk_meshData
 #define Edge                          	 MMG5_Edge
+#define Free_all                      	 MMG5_Free_all
+#define Free_all                      	 MMG5_Free_all
+#define Free_names                    	 MMG5_Free_names
+#define Free_names                    	 MMG5_Free_names
+#define Free_structures               	 MMG5_Free_structures
+#define Free_structures               	 MMG5_Free_structures
 #define HGeom                         	 MMG5_HGeom
 #define Info                          	 MMG5_Info
 #define Init_mesh                     	 MMG5_Init_mesh
@@ -168,6 +174,7 @@
 #define Set_dparameters               	 MMG5_Set_dparameters
 #define Set_edges                     	 MMG5_Set_edges
 #define Set_inputMeshName             	 MMG5_Set_inputMeshName
+#define Set_inputSingulName           	 MMG5_Set_inputSingulName
 #define Set_inputSolName              	 MMG5_Set_inputSolName
 #define Set_iparameters               	 MMG5_Set_iparameters
 #define Set_localParameters           	 MMG5_Set_localParameters
@@ -195,8 +202,6 @@
 #define Sol                           	 MMG5_Sol
 #define Tetra                         	 MMG5_Tetra
 #define Tria                          	 MMG5_Tria
-#define freeAll                       	 MMG5_freeAll
-#define freeAll                       	 MMG5_freeAll
 #define hgeom                         	 MMG5_hgeom
 #define loadMesh                      	 MMG5_loadMesh
 #define loadMet                       	 MMG5_loadMet

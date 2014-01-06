@@ -144,7 +144,7 @@ int main(int argc,char *argv[]) {
 
 
   /* Second wave of refinment with a smallest maximal size and with a different
-     first local parameter */
+     second local parameter */
    if ( !MMG5_Set_dparameters(mmgMesh,MMG5_DPARAM_hmax,0.1) )
      exit(EXIT_FAILURE);
   if ( !MMG5_Set_localParameters(mmgMesh,MMG5_Triangle,0,0.01) )
@@ -169,7 +169,7 @@ int main(int argc,char *argv[]) {
   MMG5_saveMet(mmgMesh,mmgSol);
 
   /* Step 9: free the MMG3D5 structures */
-  MMG5_freeAll(mmgMesh,mmgSol);
+  MMG5_Free_all(mmgMesh,mmgSol);
 
   return(ier);
 }

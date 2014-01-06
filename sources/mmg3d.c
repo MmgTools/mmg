@@ -363,43 +363,18 @@ int parsop(pMesh mesh,pSol met) {
 }
 
 /** Deallocations before return */
-void freeAll(pMesh mesh,pSol met
+void Free_all(pMesh mesh,pSol met
 #ifdef SINGUL
              ,pSingul singul
 #endif
              ){
 
 #ifdef SINGUL
-  freeCommon(mesh,met,singul);
+  Free_structures(mesh,met,singul);
 #else
-  freeCommon(mesh,met);
+  Free_structures(mesh,met);
 #endif
 
-  /* mesh */
-  free(mesh->nameout);
-  mesh->nameout = NULL;
-  free(mesh->namein);
-  mesh->namein = NULL;
-
-  /* met */
-  if ( met->namein ) {
-    free(met->namein);
-    met->namein = NULL;
-  }
-  if ( met->nameout ) {
-    free(met->nameout);
-    met->nameout = NULL;
-  }
-
-#ifdef SINGUL
-  /* singul */
-  if ( mesh->info.sing ) {
-    if ( singul->namein ) {
-      free(singul->namein);
-      singul->namein=NULL;
-    }
-   }
-#endif
 }
 
 static void endcod() {

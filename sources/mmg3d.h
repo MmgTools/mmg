@@ -31,13 +31,13 @@
 #ifdef SINGUL
 #define RETURN_AND_FREE(mesh,met,sing,val)do    \
     {                                           \
-      freeAll(mesh,met,sing);                   \
+      Free_all(mesh,met,sing);                   \
       return(val);                              \
     }while(0)
 #else
 #define RETURN_AND_FREE(mesh,met,sing,val)do    \
     {                                           \
-      freeAll(mesh,met);                        \
+      Free_all(mesh,met);                        \
       return(val);                              \
     }while(0)
 #endif

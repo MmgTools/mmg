@@ -5,15 +5,15 @@
  * Copyright (c) 2004- IMB/LJLL.
  * All rights reserved.
  */
-#include <assert.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <limits.h>
-#include <string.h>
-#include <signal.h>
-#include <ctype.h>
-#include <float.h>
-#include <math.h>
+/* #include <assert.h> */
+/* #include <stdlib.h> */
+/* #include <stdio.h> */
+/* #include <limits.h> */
+/* #include <string.h> */
+/* #include <signal.h> */
+/* #include <ctype.h> */
+/* #include <float.h> */
+/* #include <math.h> */
 
 #include "libmmg3d5.h"
 #include "mmg3d.h"
@@ -34,7 +34,13 @@ static void usage(char *prog) {
   fprintf(stdout,"-out file  output triangulation\n");
   fprintf(stdout,"-sol file  load solution file\n");
 #ifdef SINGUL
-  fprintf(stdout,"-sing file load file containing singularities\n");
+  fprintf(stdout,"-sf  file load file containing singularities\n");
+#endif
+#ifdef USE_SCOTCH
+  fprintf(stdout,"-rn [n]    Turn on or off the renumbering using SCOTCH [1/0] \n");
+#endif
+#ifdef SINGUL
+  fprintf(stdout,"-sing      Preserve internal singularities\n");
 #endif
 
   fprintf(stdout,"\n**  Parameters\n");
@@ -48,10 +54,6 @@ static void usage(char *prog) {
   fprintf(stdout,"-noswap    no edge or face flipping\n");
   fprintf(stdout,"-nomove    no point relocation\n");
   fprintf(stdout,"-noinsert  no point insertion/deletion \n");
-
-#ifdef USE_SCOTCH
-  fprintf(stdout,"-rn [n]    Turn on or off the renumbering using SCOTCH (0/1) \n");
-#endif
 
   exit(MMG5_LOWFAILURE);
 }
@@ -242,6 +244,7 @@ static int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,pSingul si
       }
     }
     else {
+      printf("blll %s\n",argv[i]);
       if ( mesh->namein == NULL ) {
         if ( !MMG5_Set_inputMeshName(mesh,argv[i]) )
           exit(EXIT_FAILURE);
@@ -255,6 +258,7 @@ static int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,pSingul si
           exit(EXIT_FAILURE);
       }
       else {
+        printf("ah?? %s %s\n",mesh->namein,mesh->nameout );
         fprintf(stdout,"Argument %s ignored\n",argv[i]);
         usage(argv[0]);
       }
@@ -399,6 +403,12 @@ int main(int argc,char *argv[]) {
 #else
   MMG5_Init_mesh(&mesh,&met,&sing);
 #endif
+  /* reset default values for file names */
+#ifndef SINGUL
+  MMG5_Free_names(mesh,met);
+#else
+  MMG5_Free_names(mesh,met,sing);
+#endif
 
   /* command line */
   if ( !parsar(argc,argv,mesh,met,sing) )  return(1);
@@ -408,7 +418,7 @@ int main(int argc,char *argv[]) {
   chrono(ON,&ctim[1]);
   /* read mesh file */
   if ( !MMG5_loadMesh(mesh) ) {
-    MMG5_freeAll(mesh,met
+    MMG5_Free_all(mesh,met
 #ifdef SINGUL
                  ,sing
 #endif
@@ -420,7 +430,7 @@ int main(int argc,char *argv[]) {
   /* read metric if any */
   ier = MMG5_loadMet(met);
   if ( !ier ) {
-    MMG5_freeAll(mesh,met
+    MMG5_Free_all(mesh,met
 #ifdef SINGUL
                  ,sing
 #endif
@@ -429,10 +439,10 @@ int main(int argc,char *argv[]) {
     return(MMG5_STRONGFAILURE);
   }
 #ifdef SINGUL
-  if ( mesh->info.sing && sing.namein ) {
+  if ( mesh->info.sing && sing->namein ) {
     ier = MMG5_loadSingul(sing);
     if ( !ier ) {
-      MMG5_freeAll(mesh,met,sing);
+      MMG5_Free_all(mesh,met,sing);
       freeName(mesh,met,sing);
       return(MMG5_STRONGFAILURE);
     }
@@ -456,7 +466,7 @@ int main(int argc,char *argv[]) {
     if ( mesh->info.imprim )
       fprintf(stdout,"\n  -- WRITING DATA FILE %s\n",mesh->nameout);
     if ( !MMG5_saveMesh(mesh) )         {
-      MMG5_freeAll(mesh,met
+      MMG5_Free_all(mesh,met
 #ifdef SINGUL
                    ,sing
 #endif
@@ -465,7 +475,7 @@ int main(int argc,char *argv[]) {
       return(EXIT_FAILURE);
     }
     if ( !MMG5_saveMet(mesh,met) )     {
-      MMG5_freeAll(mesh,met
+      MMG5_Free_all(mesh,met
 #ifdef SINGUL
                    ,sing
 #endif
@@ -482,7 +492,7 @@ int main(int argc,char *argv[]) {
   chrono(OFF,&ctim[0]);
   printim(ctim[0].gdif,stim);
   fprintf(stdout,"\n   MMG3D: ELAPSED TIME  %s\n",stim);
-  MMG5_freeAll(mesh,met
+  MMG5_Free_all(mesh,met
 #ifdef SINGUL
                ,sing
 #endif

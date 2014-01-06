@@ -186,7 +186,7 @@ typedef MMG5_Singul * MMG5_pSingul;
 #ifndef SINGUL
 void  MMG5_Init_mesh(MMG5_pMesh *mesh, MMG5_pSol *sol);
 #else
-void  MMG5_Init_mesh(MMG5_pMesh *mesh, MMG5_pSol *sol, MMG5_pSingul sing);
+void  MMG5_Init_mesh(MMG5_pMesh *mesh, MMG5_pSol *sol, MMG5_pSingul *sing);
 #endif
 void  MMG5_Init_parameters(MMG5_pMesh mesh);
 
@@ -196,7 +196,7 @@ int  MMG5_Set_inputSolName(MMG5_pMesh mesh,MMG5_pSol sol, char* solin);
 int  MMG5_Set_outputMeshName(MMG5_pMesh mesh, char* meshout);
 int  MMG5_Set_outputSolName(MMG5_pMesh mesh,MMG5_pSol sol, char* solout);
 #ifdef SINGUL
-int  MMG5_Set_inputSingulName(MMG5_pMesh mesh,MMG5_pSingul sing, char* singin)
+int  MMG5_Set_inputSingulName(MMG5_pMesh mesh,MMG5_pSingul sing, char* singin);
 #endif
 
 /* init structure sizes */
@@ -260,12 +260,26 @@ int  MMG5_saveMet(MMG5_pMesh mesh, MMG5_pSol met);
 int  MMG5_loadSingul(MMG5_pSingul singul);
 #endif
 
-/** free the pMesh and pSol structures */
+/** deallocations */
 #ifdef SINGUL
-void MMG5_freeAll(MMG5_pMesh, MMG5_pSol, MMG5_pSingul);
+void MMG5_Free_all(MMG5_pMesh, MMG5_pSol, MMG5_pSingul);
 #else
-void MMG5_freeAll(MMG5_pMesh, MMG5_pSol);
+void MMG5_Free_all(MMG5_pMesh, MMG5_pSol);
 #endif
+
+#ifdef SINGUL
+void MMG5_Free_structures(MMG5_pMesh, MMG5_pSol, MMG5_pSingul);
+#else
+void MMG5_Free_structures(MMG5_pMesh, MMG5_pSol);
+#endif
+
+#ifdef SINGUL
+void MMG5_Free_names(MMG5_pMesh, MMG5_pSol, MMG5_pSingul);
+#else
+void MMG5_Free_names(MMG5_pMesh, MMG5_pSol);
+#endif
+
+
 
 /** library */
 #ifdef SINGUL
