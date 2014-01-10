@@ -1,33 +1,33 @@
 /**
  * Logiciel initial: MMG3D Version 4.0
  * Co-auteurs : Cecile Dobrzynski et Pascal Frey.
- * Propriétaires :IPB - UPMC -INRIA.
+ * Proprietaires :IPB - UPMC -INRIA.
  *
- * Copyright © 2004-2005-2006-2007-2008-2009-2010-2011,
- * diffusé sous les termes et conditions de la licence publique générale de GNU
- * Version 3 ou toute version ultérieure.
+ * Copyright \copyright 2004-2005-2006-2007-2008-2009-2010-2011,
+ * diffuse sous les termes et conditions de la licence publique generale de GNU
+ * Version 3 ou toute version ulterieure.
  *
  * Ce fichier est une partie de MMG3D.
  * MMG3D est un logiciel libre ; vous pouvez le redistribuer et/ou le modifier
- * suivant les termes de la licence publique générale de GNU
- * Version 3 ou toute version ultérieure.
- * MMG3D est distribué dans l'espoir qu'il sera utile, mais SANS
- * AUCUNE GARANTIE ; sans même garantie de valeur marchande.
- * Voir la licence publique générale de GNU pour plus de détails.
- * MMG3D est diffusé en espérant qu’il sera utile,
+ * suivant les termes de la licence publique generale de GNU
+ * Version 3 ou toute version ulterieure.
+ * MMG3D est distribue dans l espoir qu il sera utile, mais SANS
+ * AUCUNE GARANTIE ; sans meme garantie de valeur marchande.
+ * Voir la licence publique generale de GNU pour plus de details.
+ * MMG3D est diffuse en esperant qu il sera utile,
  * mais SANS AUCUNE GARANTIE, ni explicite ni implicite,
  * y compris les garanties de commercialisation ou
- * d’adaptation dans un but spécifique.
- * Reportez-vous à la licence publique générale de GNU pour plus de détails.
- * Vous devez avoir reçu une copie de la licence publique générale de GNU
- * en même temps que ce document.
- * Si ce n’est pas le cas, aller voir <http://www.gnu.org/licenses/>.**/
+ * d adaptation dans un but specifique.
+ * Reportez-vous a la licence publique generale de GNU pour plus de details.
+ * Vous devez avoir re\c{c}u une copie de la licence publique generale de GNU
+ * en meme temps que ce document.
+ * Si ce n est pas le cas, aller voir <http://www.gnu.org/licenses/>.**/
 /**
  * Initial software: MMG3D Version 4.0
  * Co-authors: Cecile Dobrzynski et Pascal Frey.
  * Owners: IPB - UPMC -INRIA.
  *
- * Copyright © 2004-2005-2006-2007-2008-2009-2010-2011,
+ * Copyright \copyright 2004-2005-2006-2007-2008-2009-2010-2011,
  * spread under the terms and conditions of the license GNU General Public License
  * as published Version 3, or (at your option) any later version.
  *
