@@ -1,5 +1,5 @@
-/** Authors Cécile Dobrzynski */
-/** \include Example for using mmg3dlib */
+/** Authors Cécile Dobrzynski, Charles Dapogny, Pascal Frey and Algiane Froehly */
+/** \include Example for using mmg3dlib (moving from Mmg3d4 to Mmg3d5 library)*/
 
 #include <assert.h>
 #include <stdio.h>
@@ -15,125 +15,85 @@
 int main(int argc,char *argv[]) {
   MMG5_pMesh      mmgMesh;
   MMG5_pSol       mmgSol;
-  int             k,ier;
+  int             ier,k;
 
   fprintf(stdout,"  -- TEST MMG3DLIB \n");
 
-  /** Step 1: Initialisation of mesh and sol structures */
+  /** ------------------------------ STEP   I -------------------------- */
+  /** 1) Initialisation of mesh and sol structures */
   /* args of InitMesh: mesh=&mmgMesh, sol=&mmgSol, input mesh name, input sol name,
-   output mesh name */
+     output mesh name */
+  mmgMesh = NULL;
+  mmgSol  = NULL;
   MMG5_Init_mesh(&mmgMesh,&mmgSol);
 
-  /** Step 2: Build mesh in MMG5 format */
+  /** 2) Build mesh in MMG5 format */
   /** Two solutions: just use the MMG5_loadMesh function that will read a .mesh(b)
-     file formatted or manually set your mesh using the MMG5_Set* functions */
+      file formatted or manually set your mesh using the MMG5_Set* functions */
 
   /** Manually set of the mesh */
   /** a) give the size of the mesh: 12 vertices, 12 tetra, 20 triangles, 0 edges */
   if ( !MMG5_Set_meshSize(mmgMesh,12,12,20,0) )  exit(EXIT_FAILURE);
 
-  /** b) give the vertices: for each vertex, give the coordinates and the reference of vertex */
-  if ( !MMG5_Set_vertex(mmgMesh,0  ,0  ,0  ,0) )  exit(EXIT_FAILURE);
-  if ( !MMG5_Set_vertex(mmgMesh,0.5,0  ,0  ,0) )  exit(EXIT_FAILURE);
-  if ( !MMG5_Set_vertex(mmgMesh,0.5,0  ,1  ,0) )  exit(EXIT_FAILURE);
-  if ( !MMG5_Set_vertex(mmgMesh,0  ,0  ,1  ,0) )  exit(EXIT_FAILURE);
-  if ( !MMG5_Set_vertex(mmgMesh,0  ,1  ,0  ,0) )  exit(EXIT_FAILURE);
-  if ( !MMG5_Set_vertex(mmgMesh,0.5,1  ,0  ,0) )  exit(EXIT_FAILURE);
-  if ( !MMG5_Set_vertex(mmgMesh,0.5,1  ,1  ,0) )  exit(EXIT_FAILURE);
-  if ( !MMG5_Set_vertex(mmgMesh,0  ,1  ,1  ,0) )  exit(EXIT_FAILURE);
-  if ( !MMG5_Set_vertex(mmgMesh,1  ,0  ,0  ,0) )  exit(EXIT_FAILURE);
-  if ( !MMG5_Set_vertex(mmgMesh,1  ,1  ,0  ,0) )  exit(EXIT_FAILURE);
-  if ( !MMG5_Set_vertex(mmgMesh,1  ,0  ,1  ,0) )  exit(EXIT_FAILURE);
-  if ( !MMG5_Set_vertex(mmgMesh,1  ,1  ,1  ,0) )  exit(EXIT_FAILURE);
+  /** b) give the vertices: for each vertex, give the coordinates, the reference
+      and the position in mesh of the vertex */
+  mmgMesh->point[1].c[0]  = 0.;  mmgMesh->point[1].c[1]  = 0.; mmgMesh->point[1].c[2]  = 0.; mmgMesh->point[1].ref  = 0;
+  /* or with the api function :
+     if ( !MMG5_Set_vertex(mmgMesh,0  ,0  ,0  ,0,  1) )  exit(EXIT_FAILURE); */
+  mmgMesh->point[2].c[0]  = 0.5; mmgMesh->point[2].c[1]  = 0;  mmgMesh->point[2].c[2]  = 0;  mmgMesh->point[2].ref  = 0;
+  mmgMesh->point[3].c[0]  = 0.5; mmgMesh->point[3].c[1]  = 0;  mmgMesh->point[3].c[2]  = 1;  mmgMesh->point[3].ref  = 0;
+  mmgMesh->point[4].c[0]  = 0;   mmgMesh->point[4].c[1]  = 0;  mmgMesh->point[4].c[2]  = 1;  mmgMesh->point[4].ref  = 0;
+  mmgMesh->point[5].c[0]  = 0;   mmgMesh->point[5].c[1]  = 1;  mmgMesh->point[5].c[2]  = 0;  mmgMesh->point[5].ref  = 0;
+  mmgMesh->point[6].c[0]  = 0.5; mmgMesh->point[6].c[1]  = 1;  mmgMesh->point[6].c[2]  = 0;  mmgMesh->point[6].ref  = 0;
+  mmgMesh->point[7].c[0]  = 0.5; mmgMesh->point[7].c[1]  = 1;  mmgMesh->point[7].c[2]  = 1;  mmgMesh->point[7].ref  = 0;
+  mmgMesh->point[8].c[0]  = 0;   mmgMesh->point[8].c[1]  = 1;  mmgMesh->point[8].c[2]  = 1;  mmgMesh->point[8].ref  = 0;
+  mmgMesh->point[9].c[0]  = 1;   mmgMesh->point[9].c[1]  = 0;  mmgMesh->point[9].c[2]  = 0;  mmgMesh->point[9].ref  = 0;
+  mmgMesh->point[10].c[0] = 1;   mmgMesh->point[10].c[1] = 1;  mmgMesh->point[10].c[2] = 0;  mmgMesh->point[10].ref = 0;
+  mmgMesh->point[11].c[0] = 1;   mmgMesh->point[11].c[1] = 0;  mmgMesh->point[11].c[2] = 1;  mmgMesh->point[11].ref = 0;
+  mmgMesh->point[12].c[0] = 1;   mmgMesh->point[12].c[1] = 1;  mmgMesh->point[12].c[2] = 1;  mmgMesh->point[12].ref = 0;
 
-  /** c) give the tetrahedras: for each tetrahedra,
-      give the vertices index and the reference of the tetra */
-  /* warning: here we suppose that tetras are positively oriented */
-  if ( !MMG5_Set_tetrahedra(mmgMesh,  1,  4,  2,  8,0) )  exit(EXIT_FAILURE);
-  if ( !MMG5_Set_tetrahedra(mmgMesh,  8,  3,  2,  7,0) )  exit(EXIT_FAILURE);
-  if ( !MMG5_Set_tetrahedra(mmgMesh,  5,  2,  6,  8,0) )  exit(EXIT_FAILURE);
-  if ( !MMG5_Set_tetrahedra(mmgMesh,  5,  8,  1,  2,0) )  exit(EXIT_FAILURE);
-  if ( !MMG5_Set_tetrahedra(mmgMesh,  7,  2,  8,  6,0) )  exit(EXIT_FAILURE);
-  if ( !MMG5_Set_tetrahedra(mmgMesh,  2,  4,  3,  8,0) )  exit(EXIT_FAILURE);
-  if ( !MMG5_Set_tetrahedra(mmgMesh,  9,  2,  3,  7,0) )  exit(EXIT_FAILURE);
-  if ( !MMG5_Set_tetrahedra(mmgMesh,  7, 11,  9, 12,0) )  exit(EXIT_FAILURE);
-  if ( !MMG5_Set_tetrahedra(mmgMesh,  6,  9, 10,  7,0) )  exit(EXIT_FAILURE);
-  if ( !MMG5_Set_tetrahedra(mmgMesh,  6,  7,  2,  9,0) )  exit(EXIT_FAILURE);
-  if ( !MMG5_Set_tetrahedra(mmgMesh, 12,  9,  7, 10,0) )  exit(EXIT_FAILURE);
-  if ( !MMG5_Set_tetrahedra(mmgMesh,  9,  3, 11,  7,0) )  exit(EXIT_FAILURE);
+  /*tetra*/
+  mmgMesh->tetra[1].v[0]  = 1;  mmgMesh->tetra[1].v[1]  = 2;  mmgMesh->tetra[1].v[2]  = 4;  mmgMesh->tetra[1].v[3]  = 8;  mmgMesh->tetra[1].ref  = 1;
+  /* or with the api function :
+     if ( !MMG5_Set_tetrahedra(mmgMesh,1 ,2 ,4 ,8, 1) )  exit(EXIT_FAILURE); */
+  mmgMesh->tetra[2].v[0]  = 8;  mmgMesh->tetra[2].v[1]  = 3;  mmgMesh->tetra[2].v[2]  = 2;  mmgMesh->tetra[2].v[3]  = 7;  mmgMesh->tetra[2].ref  = 1;
+  mmgMesh->tetra[3].v[0]  = 2;  mmgMesh->tetra[3].v[1]  = 5;  mmgMesh->tetra[3].v[2]  = 6;  mmgMesh->tetra[3].v[3]  = 8;  mmgMesh->tetra[3].ref  = 1;
+  mmgMesh->tetra[4].v[0]  = 8;  mmgMesh->tetra[4].v[1]  = 5;  mmgMesh->tetra[4].v[2]  = 1;  mmgMesh->tetra[4].v[3]  = 2;  mmgMesh->tetra[4].ref  = 1;
+  mmgMesh->tetra[5].v[0]  = 2;  mmgMesh->tetra[5].v[1]  = 7;  mmgMesh->tetra[5].v[2]  = 8;  mmgMesh->tetra[5].v[3]  = 6;  mmgMesh->tetra[5].ref  = 1;
+  mmgMesh->tetra[6].v[0]  = 2;  mmgMesh->tetra[6].v[1]  = 4;  mmgMesh->tetra[6].v[2]  = 3;  mmgMesh->tetra[6].v[3]  = 8;  mmgMesh->tetra[6].ref  = 1;
+  mmgMesh->tetra[7].v[0]  = 2;  mmgMesh->tetra[7].v[1]  = 9;  mmgMesh->tetra[7].v[2]  = 3;  mmgMesh->tetra[7].v[3]  = 7;  mmgMesh->tetra[7].ref  = 2;
+  mmgMesh->tetra[8].v[0]  = 7;  mmgMesh->tetra[8].v[1]  = 11; mmgMesh->tetra[8].v[2]  = 9;  mmgMesh->tetra[8].v[3]  = 12; mmgMesh->tetra[8].ref  = 2;
+  mmgMesh->tetra[9].v[0]  = 9;  mmgMesh->tetra[9].v[1]  = 6;  mmgMesh->tetra[9].v[2]  = 10; mmgMesh->tetra[9].v[3]  = 7;  mmgMesh->tetra[9].ref  = 2;
+  mmgMesh->tetra[10].v[0] = 7;  mmgMesh->tetra[10].v[1] = 6;  mmgMesh->tetra[10].v[2] = 2;  mmgMesh->tetra[10].v[3] = 9;  mmgMesh->tetra[10].ref = 2;
+  mmgMesh->tetra[11].v[0] = 9;  mmgMesh->tetra[11].v[1] = 12; mmgMesh->tetra[11].v[2] = 7;  mmgMesh->tetra[11].v[3] = 10; mmgMesh->tetra[11].ref = 2;
+  mmgMesh->tetra[12].v[0] = 9;  mmgMesh->tetra[12].v[1] = 3;  mmgMesh->tetra[12].v[2] = 11; mmgMesh->tetra[12].v[3] = 7;  mmgMesh->tetra[12].ref = 2;
 
-  /** d) give the triangles (not mandatory): for each triangle,
-      give the vertices index and the reference of the triangle */
-  if ( !MMG5_Set_triangle(mmgMesh,  1,  4,  8, 2) )  exit(EXIT_FAILURE);
-  if ( !MMG5_Set_triangle(mmgMesh,  1,  2,  4, 2) )  exit(EXIT_FAILURE);
-  if ( !MMG5_Set_triangle(mmgMesh,  8,  3,  7, 0) )  exit(EXIT_FAILURE);
-  if ( !MMG5_Set_triangle(mmgMesh,  5,  8,  6, 0) )  exit(EXIT_FAILURE);
-  if ( !MMG5_Set_triangle(mmgMesh,  5,  6,  2, 0) )  exit(EXIT_FAILURE);
-  if ( !MMG5_Set_triangle(mmgMesh,  5,  2,  1, 1) )  exit(EXIT_FAILURE);
-  if ( !MMG5_Set_triangle(mmgMesh,  5,  1,  8, 0) )  exit(EXIT_FAILURE);
-  if ( !MMG5_Set_triangle(mmgMesh,  7,  6,  8, 0) )  exit(EXIT_FAILURE);
-  if ( !MMG5_Set_triangle(mmgMesh,  4,  3,  8, 0) )  exit(EXIT_FAILURE);
-  if ( !MMG5_Set_triangle(mmgMesh,  2,  3,  4, 0) )  exit(EXIT_FAILURE);
-  if ( !MMG5_Set_triangle(mmgMesh,  9,  3,  2, 0) )  exit(EXIT_FAILURE);
-  if ( !MMG5_Set_triangle(mmgMesh, 11,  9, 12, 0) )  exit(EXIT_FAILURE);
-  if ( !MMG5_Set_triangle(mmgMesh,  7, 11, 12, 0) )  exit(EXIT_FAILURE);
-  if ( !MMG5_Set_triangle(mmgMesh,  6,  7, 10, 0) )  exit(EXIT_FAILURE);
-  if ( !MMG5_Set_triangle(mmgMesh,  6, 10,  9, 0) )  exit(EXIT_FAILURE);
-  if ( !MMG5_Set_triangle(mmgMesh,  6,  9,  2, 0) )  exit(EXIT_FAILURE);
-  if ( !MMG5_Set_triangle(mmgMesh, 12, 10,  7, 0) )  exit(EXIT_FAILURE);
-  if ( !MMG5_Set_triangle(mmgMesh, 12,  9, 10, 0) )  exit(EXIT_FAILURE);
-  if ( !MMG5_Set_triangle(mmgMesh,  3, 11,  7, 0) )  exit(EXIT_FAILURE);
-  if ( !MMG5_Set_triangle(mmgMesh,  9, 11,  3, 0) )  exit(EXIT_FAILURE);
-
-
-  /** Step 3: Build sol in MMG5 format */
+  /** 3) Build sol in MMG5 format */
   /** Two solutions: just use the MMG5_loadMet function that will read a .sol(b)
       file formatted or manually set your sol using the MMG5_Set* functions */
 
   /** Manually set of the sol */
   /** a) give info for the sol structure: sol applied on vertex entities,
-       number of vertices=12, the sol is scalar*/
+      number of vertices=12, the sol is scalar*/
   if ( !MMG5_Set_solSize(mmgMesh,mmgSol,MMG5_Vertex,12,MMG5_Scalar) )
     exit(EXIT_FAILURE);
 
-  /** b) give solutions values */
+  /** b) give solutions values and positions */
   for(k=1 ; k<=12 ; k++) {
-    if ( !MMG5_Set_scalarSol(mmgSol,0.5) ) exit(EXIT_FAILURE);
+    mmgSol->m[k] = 0.5;
+    /* or with the api function :
+       if ( !MMG5_Set_scalarSol(mmgSol,0.5,k) ) exit(EXIT_FAILURE); */
   }
+  /** 4) If you don't use the API functions, you MUST call
+      the MMG5_Set_handGivenMesh() function. Don't call it if you use
+      the API functions */
+  MMG5_Set_handGivenMesh(mmgMesh);
 
-  /** Step 4 (not mandatory): check if the number of given entities match with mesh size */
+  /** 5) (not mandatory): check if the number of given entities match with mesh size */
   if ( !MMG5_Chk_meshData(mmgMesh,mmgSol) ) exit(EXIT_FAILURE);
 
-  /** Step 5 (not mandatory): set your global parameters using the MMG5_Set_iparameters and
-   MMG5_Set_dparameters function (resp. for integer parameters and double param)*/
-
-  /* first wave of refinment with a detection of angles (between normals
-   *  at 2 adjacent surfaces) smallest than 90 and a maximal size of 0.2 */
-  if ( !MMG5_Set_iparameters(mmgMesh,MMG5_IPARAM_verbose, 5) )
-    exit(EXIT_FAILURE);
-  if ( !MMG5_Set_dparameters(mmgMesh,MMG5_DPARAM_angleDetection,90) )
-    exit(EXIT_FAILURE);
-  if ( !MMG5_Set_dparameters(mmgMesh,MMG5_DPARAM_hmax,0.2) )
-    exit(EXIT_FAILURE);
-
-  /** Step 6 (not mandatory): set your local parameters */
-  /* use 2 local hausdorff numbers on ref 2 (hausd = 0.001) and 0 (hausd = 0.005) */
-  if ( !MMG5_Set_iparameters(mmgMesh,MMG5_IPARAM_numberOfLocalParam,2) )
-    exit(EXIT_FAILURE);
-
-  /** for each local parameter: give the type and reference of the element on which you
-      will apply a particular hausdorff number and the hausdorff number to apply */
-  if ( !MMG5_Set_localParameters(mmgMesh,MMG5_Triangle,2,0.001) )
-    exit(EXIT_FAILURE);
-  if ( !MMG5_Set_localParameters(mmgMesh,MMG5_Triangle,0,0.005) )
-    exit(EXIT_FAILURE);
-
-  if ( !MMG5_Set_outputMeshName(mmgMesh,"result0.mesh") )
-    exit(EXIT_FAILURE);
-  if ( !MMG5_Set_outputSolName(mmgMesh,mmgSol,"result0.sol") )
-    exit(EXIT_FAILURE);
-
-  /** Step 7: library call */
+  /** ------------------------------ STEP  II -------------------------- */
+  /** library call */
   ier = MMG5_mmg3dlib(mmgMesh,mmgSol);
   if ( ier == MMG5_STRONGFAILURE ) {
     fprintf(stdout,"BAD ENDING OF MMG3DLIB: UNABLE TO SAVE MESH\n");
@@ -142,32 +102,27 @@ int main(int argc,char *argv[]) {
     fprintf(stdout,"BAD ENDING OF MMG3DLIB\n");
 
 
-  /* Second wave of refinment with a smallest maximal size and with a different
-     second local parameter */
-   if ( !MMG5_Set_dparameters(mmgMesh,MMG5_DPARAM_hmax,0.1) )
-     exit(EXIT_FAILURE);
-  if ( !MMG5_Set_localParameters(mmgMesh,MMG5_Triangle,0,0.01) )
-    exit(EXIT_FAILURE);
-
-  ier = MMG5_mmg3dlib(mmgMesh,mmgSol);
-  if ( ier == MMG5_STRONGFAILURE ) {
-    fprintf(stdout,"BAD ENDING OF MMG3DLIB: UNABLE TO SAVE MESH\n");
-    return(ier);
-  } else if ( ier == MMG5_LOWFAILURE )
-    fprintf(stdout,"BAD ENDING OF MMG3DLIB\n");
-
-  /** Step 8: get results */
+  /** ------------------------------ STEP III -------------------------- */
+  /** get results */
   /** Two solutions: just use the MMG5_saveMesh/MMG5_saveMet functions
       that will write .mesh(b)/.sol formatted files or manually get your mesh/sol
       using the MMG5_getMesh/MMG5_getSol functions */
 
-  /* Automatically save the mesh */
+  /** 1) Automatically save the mesh */
+  /** a)  (not mandatory): give the ouptut mesh name using MMG5_Set_outputMeshName
+      (by default, the mesh is saved in the "mesh.o.mesh" file */
+  MMG5_Set_outputMeshName(mmgMesh,"result0.mesh");
+  /** b) function calling */
   MMG5_saveMesh(mmgMesh);
 
-  /* Automatically save the solution */
+  /** 2) Automatically save the solution */
+  /** a)  (not mandatory): give the ouptut sol name using MMG5_Set_outputSolName
+      (by default, the mesh is saved in the "mesh.o.sol" file */
+  MMG5_Set_outputSolName(mmgMesh,mmgSol,"result0.sol");
+  /** b) function calling */
   MMG5_saveMet(mmgMesh,mmgSol);
 
-  /* Step 9: free the MMG3D5 structures */
+  /** 3) Free the MMG3D5 structures */
   MMG5_Free_all(mmgMesh,mmgSol);
 
   return(ier);

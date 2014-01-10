@@ -254,6 +254,8 @@ int loadMesh(pMesh mesh) {
 
     /* Possibly switch 2 vertices number so that each tet is positively oriented */
     if ( orvol(mesh->point,pt->v) < 0.0 ) {
+      /* mesh->xt temporary used to count reoriented tetra */
+      mesh->xt++;
       aux = pt->v[2];
       pt->v[2] = pt->v[3];
       pt->v[3] = aux;
@@ -548,8 +550,146 @@ int saveMesh(pMesh mesh) {
   return(1);
 }
 
+/** Save mesh data without adja and xtetra tables (for library version) */
+int saveLibraryMesh(pMesh mesh) {
+  pPoint       ppt;
+  pTetra       pt;
+  pTria        ptt;
+  int          k,nc,np,ne,nr,nre,nedreq,ntreq,outm,nereq;
+  char         data[128];
+
+  mesh->ver = GmfDouble;
+  strcpy(data,mesh->nameout);
+  if ( !(outm = GmfOpenMesh(data,GmfWrite,mesh->ver,mesh->dim)) ) {
+    fprintf(stderr,"  ** UNABLE TO OPEN %s\n",data);
+    return(0);
+  }
+  fprintf(stdout,"  %%%% %s OPENED\n",data);
+
+  /* vertices */
+  np = nc = nre = 0;
+  for (k=1; k<=mesh->np; k++) {
+    ppt = &mesh->point[k];
+    if ( MG_VOK(ppt) ) {
+      ppt->tmp = ++np;
+      if ( ppt->tag & MG_CRN )  nc++;
+      if ( ppt->tag & MG_REQ )  nre++;
+    }
+  }
+  GmfSetKwd(outm,GmfVertices,np);
+  for (k=1; k<=mesh->np; k++) {
+    ppt = &mesh->point[k];
+    if ( MG_VOK(ppt) )
+      GmfSetLin(outm,GmfVertices,ppt->c[0],ppt->c[1],ppt->c[2],ppt->ref);
+  }
+
+  /* corners+required */
+  if ( nc ) {
+    GmfSetKwd(outm,GmfCorners,nc);
+    for (k=1; k<=mesh->np; k++) {
+      ppt = &mesh->point[k];
+      if ( MG_VOK(ppt) && ppt->tag & MG_CRN )
+        GmfSetLin(outm,GmfCorners,ppt->tmp);
+    }
+  }
+  if ( nre ) {
+    GmfSetKwd(outm,GmfRequiredVertices,nre);
+    for (k=1; k<=mesh->np; k++) {
+      ppt = &mesh->point[k];
+      if ( MG_VOK(ppt) && ppt->tag & MG_REQ )
+        GmfSetLin(outm,GmfRequiredVertices,ppt->tmp);
+    }
+  }
+
+  /* boundary mesh */
+  /* tria + required tria */
+  ntreq = 0;
+  if ( mesh->nt ) {
+    GmfSetKwd(outm,GmfTriangles,mesh->nt);
+    for (k=1; k<=mesh->nt; k++) {
+      ptt = &mesh->tria[k];
+      if ( ptt->tag[0] & MG_REQ && ptt->tag[1] & MG_REQ && ptt->tag[2] & MG_REQ )  ntreq++;
+      GmfSetLin(outm,GmfTriangles,mesh->point[ptt->v[0]].tmp,mesh->point[ptt->v[1]].tmp, \
+                mesh->point[ptt->v[2]].tmp,ptt->ref);
+    }
+    if ( ntreq ) {
+      GmfSetKwd(outm,GmfRequiredTriangles,ntreq);
+      for (k=0; k<=mesh->nt; k++) {
+        ptt = &mesh->tria[k];
+        if ( ptt->tag[0] & MG_REQ && ptt->tag[1] & MG_REQ && ptt->tag[2] & MG_REQ )
+          GmfSetLin(outm,GmfRequiredTriangles,k);
+      }
+    }
+  }
+
+  nr = nedreq = 0;
+  if ( mesh->na ) {
+    GmfSetKwd(outm,GmfEdges,mesh->na);
+    for (k=1; k<=mesh->na; k++) {
+      GmfSetLin(outm,GmfEdges,mesh->point[mesh->edge[k].a].tmp,
+                mesh->point[mesh->edge[k].b].tmp,mesh->edge[k].ref);
+      if ( mesh->edge[k].tag & MG_GEO ) nr++;
+      if ( mesh->edge[k].tag & MG_REQ ) nedreq++;
+    }
+
+    if ( nr ) {
+      GmfSetKwd(outm,GmfRidges,nr);
+      for (k=1; k<=mesh->na; k++) {
+        if ( mesh->edge[k].tag & MG_GEO )  GmfSetLin(outm,GmfRidges,k);
+      }
+    }
+    if ( nedreq ) {
+      GmfSetKwd(outm,GmfRequiredEdges,nedreq);
+      for (k=1; k<=mesh->na; k++) {
+        if (  mesh->edge[k].tag & MG_REQ )  GmfSetLin(outm,GmfRequiredEdges,k);
+      }
+    }
+  }
+
+  /* tetrahedra */
+  ne = nereq = 0;
+  for (k=1; k<=mesh->ne; k++) {
+    pt = &mesh->tetra[k];
+    if ( !MG_EOK(pt) ) continue;
+    ne++;
+    if ( pt->tag & MG_REQ ){
+      nereq++;
+    }
+  }
+
+  GmfSetKwd(outm,GmfTetrahedra,ne);
+  for (k=1; k<=mesh->ne; k++) {
+    pt = &mesh->tetra[k];
+    if ( MG_EOK(pt) ) GmfSetLin(outm,GmfTetrahedra,mesh->point[pt->v[0]].tmp,mesh->point[pt->v[1]].tmp, \
+                                mesh->point[pt->v[2]].tmp,mesh->point[pt->v[3]].tmp,pt->ref);
+  }
+
+  if ( nereq ) {
+    GmfSetKwd(outm,GmfRequiredTetrahedra,nereq);
+    ne = 0;
+    for (k=1; k<=mesh->ne; k++) {
+      pt = &mesh->tetra[k];
+      if ( !MG_EOK(pt) ) continue;
+      ne++;
+      if ( pt->tag & MG_REQ ) GmfSetLin(outm,GmfRequiredTetrahedra,ne);
+    }
+  }
+
+  if ( mesh->info.imprim ) {
+    fprintf(stdout,"     NUMBER OF VERTICES   %8d   CORNERS %8d\n",np,nc+nre);
+    if ( mesh->na )
+      fprintf(stdout,"     NUMBER OF EDGES      %8d   RIDGES  %8d\n",mesh->na,nr);
+    if ( mesh->nt )
+      fprintf(stdout,"     NUMBER OF TRIANGLES  %8d\n",mesh->nt);
+    fprintf(stdout,"     NUMBER OF ELEMENTS   %8d\n",mesh->ne);
+  }
+
+  GmfCloseMesh(outm);
+  return(1);
+}
+
 /** load metric field */
-int loadMet(pSol met) {
+int loadMet(pMesh mesh,pSol met) {
   double       dbuf[GmfMaxTyp];
   float        fbuf[GmfMaxTyp];
   int          k,inm,typtab[GmfMaxTyp];
@@ -583,7 +723,11 @@ int loadMet(pSol met) {
     return(-1);
   }
 
+  met->npi = met->np;
+
   /* mem alloc */
+  if ( met->m )  free(met->m);
+  met->npmax = mesh->npmax;
   met->m = (double*)calloc(met->size*met->npmax+1,sizeof(double));
   if ( !met->m ) {
     perror("  ## Memory problem: calloc");
@@ -628,7 +772,7 @@ int loadMet(pSol met) {
     }
     }
     }*/
-
+  met->npi = met->np;
   GmfCloseMesh(inm);
   return(1);
 }

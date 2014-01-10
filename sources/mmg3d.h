@@ -31,13 +31,13 @@
 #ifdef SINGUL
 #define RETURN_AND_FREE(mesh,met,sing,val)do    \
     {                                           \
-      Free_all(mesh,met,sing);                   \
+      Free_all(mesh,met,sing);                  \
       return(val);                              \
     }while(0)
 #else
 #define RETURN_AND_FREE(mesh,met,sing,val)do    \
     {                                           \
-      Free_all(mesh,met);                        \
+      Free_all(mesh,met);                       \
       return(val);                              \
     }while(0)
 #endif
@@ -276,6 +276,8 @@ int  indElt(pMesh mesh,int kel);
 int  indPt(pMesh mesh,int kp);
 void printTria(pMesh mesh,char* fileName);
 void printTetra(pMesh mesh,char* fileName);
+int  saveMesh(MMG5_pMesh );
+int  saveLibraryMesh(MMG5_pMesh );
 
 #ifdef USE_SCOTCH
 int renumbering(int vertBoxNbr, pMesh mesh, pSol sol);
@@ -301,7 +303,7 @@ double timestepMCF(pMesh,double);
 int bdyMCF(pMesh);
 double volint(pMesh);
 
-/*Delaunay functions*/
+/* Delaunay functions*/
 int delone(pMesh mesh,pSol sol,int ip,int *list,int ilist);
 int cavity(pMesh mesh,pSol sol,int iel,int ip,int *list,int lon);
 int cenrad_iso(pMesh mesh,double *ct,double *c,double *rad);

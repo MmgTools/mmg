@@ -1,10 +1,10 @@
-Example of use of library libmmg3d5:
+Example to move from Mmg3d4 library to Mmg3d5 library:
+   main.cold correspond to a Mmg3d4 library call
+   main.c is the same code but with a call to Mmg3d5 library
 
-  The mesh and solution are hard coded.
+Remark: you will find the same example (with additionnal boundary triangles) in the example0 directory
 
-  First we remesh  with a detection of angles (between normals at 2 adjacent surfaces) smallest than 90, a maximal size of 0.2 and local hausdorff number on references 2 and 0.
 
-  Then we remesh again with a maximal size of 0.1 and a different hausdorff number for reference 0.
 
-  We save the mesh in result0.mesh/sol.
+
 

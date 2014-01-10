@@ -377,6 +377,12 @@ void Free_all(pMesh mesh,pSol met
 
 }
 
+/** set pointer for MMG5_saveMesh function */
+static inline
+void Set_saveFunc(pMesh mesh) {
+  MMG5_saveMesh = saveMesh;
+}
+
 static void endcod() {
   char    stim[32];
 
@@ -424,14 +430,16 @@ int main(int argc,char *argv[]) {
 #ifdef USE_SCOTCH
   warnScotch(&mesh);
 #endif
+
   /* load data */
   fprintf(stdout,"\n  -- INPUT DATA\n");
   chrono(ON,&MMG5_ctim[1]);
+  warnOrientation(&mesh);
   /* read mesh file */
   if ( !loadMesh(&mesh) ) RETURN_AND_FREE(&mesh,&met,&sing,MMG5_STRONGFAILURE);
-  met.npmax = mesh.npmax;
+
   /* read metric if any */
-  ier = loadMet(&met);
+  ier = loadMet(&mesh,&met);
   if ( !ier )
     RETURN_AND_FREE(&mesh,&met,&sing,MMG5_STRONGFAILURE);
   else if ( ier > 0 && met.np != mesh.np ) {
@@ -469,6 +477,7 @@ int main(int argc,char *argv[]) {
   /* analysis */
   chrono(ON,&MMG5_ctim[2]);
   setfunc(&mesh,&met);
+  Set_saveFunc(&mesh);
   if ( abs(mesh.info.imprim) > 0 )  outqua(&mesh,&met);
   fprintf(stdout,"\n  %s\n   MODULE MMG3D: IMB-LJLL : %s (%s)\n  %s\n",
           MG_STR,MG_VER,MG_REL,MG_STR);

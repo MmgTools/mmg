@@ -111,6 +111,8 @@
 #define printTria                     	 _MMG5_printTria
 #define renumbering                   	 _MMG5_renumbering
 #define rotmatrix                     	 _MMG5_rotmatrix
+#define saveLibraryMesh               	 _MMG5_saveLibraryMesh
+#define saveMesh                      	 _MMG5_saveMesh
 #define scaleMesh                     	 _MMG5_scaleMesh
 #define seekEdge                      	 _MMG5_seekEdge
 #define seekPoint                     	 _MMG5_seekPoint
@@ -148,12 +150,6 @@
 #define unscaleMesh                   	 _MMG5_unscaleMesh
 #define volint                        	 _MMG5_volint
 #define zaldy                         	 _MMG5_zaldy
-#define Get_edge                      	 MMG5_Get_edge
-#define Get_meshSize                  	 MMG5_Get_meshSize
-#define Get_tetrahedra                	 MMG5_Get_tetrahedra
-#define Get_triangle                  	 MMG5_Get_triangle
-#define Get_vertex                    	 MMG5_Get_vertex
-#define Chk_meshData                  	 MMG5_Chk_meshData
 #define Chk_meshData                  	 MMG5_Chk_meshData
 #define Edge                          	 MMG5_Edge
 #define Free_all                      	 MMG5_Free_all
@@ -162,6 +158,13 @@
 #define Free_names                    	 MMG5_Free_names
 #define Free_structures               	 MMG5_Free_structures
 #define Free_structures               	 MMG5_Free_structures
+#define Get_edge                      	 MMG5_Get_edge
+#define Get_meshSize                  	 MMG5_Get_meshSize
+#define Get_scalarSol                 	 MMG5_Get_scalarSol
+#define Get_solSize                   	 MMG5_Get_solSize
+#define Get_tetrahedra                	 MMG5_Get_tetrahedra
+#define Get_triangle                  	 MMG5_Get_triangle
+#define Get_vertex                    	 MMG5_Get_vertex
 #define HGeom                         	 MMG5_HGeom
 #define Info                          	 MMG5_Info
 #define Init_mesh                     	 MMG5_Init_mesh
@@ -173,6 +176,8 @@
 #define Set_corner                    	 MMG5_Set_corner
 #define Set_dparameters               	 MMG5_Set_dparameters
 #define Set_edges                     	 MMG5_Set_edges
+#define Set_handGivenMesh             	 MMG5_Set_handGivenMesh
+#define Set_handGivenMesh             	 MMG5_Set_handGivenMesh
 #define Set_inputMeshName             	 MMG5_Set_inputMeshName
 #define Set_inputSingulName           	 MMG5_Set_inputSingulName
 #define Set_inputSolName              	 MMG5_Set_inputSolName
@@ -220,7 +225,6 @@
 #define pxPoint                       	 MMG5_pxPoint
 #define pxTetra                       	 MMG5_pxTetra
 #define sPoint                        	 MMG5_sPoint
-#define saveMesh                      	 MMG5_saveMesh
 #define saveMet                       	 MMG5_saveMet
 #define xPoint                        	 MMG5_xPoint
 #define xTetra                        	 MMG5_xTetra

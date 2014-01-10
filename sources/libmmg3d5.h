@@ -6,7 +6,7 @@
 /* Return Values */
 #define MMG5_SUCCESS       0 /**< Return value for success */
 #define MMG5_LOWFAILURE    1 /**< Return value if we have problem in the remesh
-				process but we can save a conform mesh */
+                                process but we can save a conform mesh */
 #define MMG5_STRONGFAILURE 2 /**< Return value if we fail and the mesh is non-conform */
 
 #define SIZE 0.75 /**< Size of the mesh of singularities inside the main mesh */
@@ -27,26 +27,25 @@ enum MMG5_entities /**< entities of MMG5 */
 
 enum MMG5_Param /**<  Options for mmg3d2 (integers) */
   {
-    MMG5_IPARAM_verbose,           /**<  Tune level of verbosity, [-10..10]     */
-    MMG5_IPARAM_mem,               /**<  Set memory size to n Mbytes            */
-    MMG5_IPARAM_debug,             /**<  Turn on debug mode                     */
-    MMG5_IPARAM_angle,             /**<  Turn on angle detection                */
-    MMG5_IPARAM_iso,               /**<  Level-set meshing                      */
-    MMG5_IPARAM_noinsert,          /**<  No point insertion/deletion            */
-    MMG5_IPARAM_noswap,            /**<  No edge or face flipping               */
-    MMG5_IPARAM_nomove,            /**<  No point relocation                    */
-    MMG5_IPARAM_numberOfLocalParam,/**<  Number of local parameters             */
-    MMG5_IPARAM_renum,             /**<  Turn on point relocation with Scotch   */
-    MMG5_IPARAM_sing,              /**<  Turn on the insertion of singularities */
-    MMG5_DPARAM_angleDetection,    /**<  Value for angle detection              */
-    MMG5_DPARAM_hmin,              /**<  Minimal mesh size                      */
-    MMG5_DPARAM_hmax,              /**<  Maximal mesh size                      */
-    MMG5_DPARAM_hausd,             /**<  control Hausdorff distance             */
-    MMG5_DPARAM_hgrad,             /**<  control gradation                      */
-    MMG5_DPARAM_ls,                /**<  Value of level-set                     */
-    // MMG5_LOCPARAM_ref,             /**<  Reference on wich impose a local param */
-    // MMG5_LOCPARAM_hausd,           /**<  Local hausdorff to impose              */
-    MMG5_PARAM_size,               /**<  Size of table of double parameters     */
+    MMG5_IPARAM_verbose,           /**<  Tune level of verbosity, [-10..10]         */
+    MMG5_IPARAM_mem,               /**<  Set memory size to n Mbytes                */
+    MMG5_IPARAM_debug,             /**<  Turn on debug mode                         */
+    MMG5_IPARAM_angle,             /**<  Turn on angle detection                    */
+    MMG5_IPARAM_iso,               /**<  Level-set meshing                          */
+    MMG5_IPARAM_noinsert,          /**<  No point insertion/deletion                */
+    MMG5_IPARAM_noswap,            /**<  No edge or face flipping                   */
+    MMG5_IPARAM_nomove,            /**<  No point relocation                        */
+    MMG5_IPARAM_numberOfLocalParam,/**<  Number of local parameters                 */
+    MMG5_IPARAM_renum,             /**<  Turn on point relocation with Scotch       */
+    MMG5_IPARAM_sing,              /**<  Turn on the insertion of singularities     */
+    MMG5_DPARAM_angleDetection,    /**<  Value for angle detection                  */
+    MMG5_DPARAM_hmin,              /**<  Minimal mesh size                          */
+    MMG5_DPARAM_hmax,              /**<  Maximal mesh size                          */
+    MMG5_DPARAM_hausd,             /**<  control global Hausdorff distance          */
+    /*                                   (on all the boundary surfaces of the mesh) */
+    MMG5_DPARAM_hgrad,             /**<  control gradation                          */
+    MMG5_DPARAM_ls,                /**<  Value of level-set (not use for now)       */
+    MMG5_PARAM_size,               /**<  Size of table of double parameters         */
   };
 
 typedef struct {
@@ -173,7 +172,7 @@ typedef MMG5_sPoint * MMG5_psPoint; /**< structure to store singular points */
 typedef struct {
   char     *namein; /**< name of mesh */
   double   min[3],max[3]; /**< min and max of coordinates for rescaling */
-  int      ns,nsi,na,nai; /**< singular vertices and singular edges number */
+  int      ns,na; /**< singular vertices and singular edges number */
   MMG5_psPoint  point;
   MMG5_pEdge    edge;
 } MMG5_Singul; /**< structure to store the singularities of a mesh */
@@ -207,54 +206,60 @@ int  MMG5_Set_singulSize(MMG5_pSingul sing, int np, int na);
 #endif
 
 /* init structure datas */
-int  MMG5_Set_vertex(MMG5_pMesh mesh, double c0, double c1, double c2, int ref);
-int  MMG5_Set_tetrahedra(MMG5_pMesh mesh, int v0, int v1, int v2, int v3, int ref);
-int  MMG5_Set_triangle(MMG5_pMesh mesh, int v0, int v1, int v2, int ref);
-int  MMG5_Set_edges(MMG5_pMesh mesh, int v0, int v1, int ref);
-int  MMG5_Set_corner(MMG5_pMesh mesh, int k);
-int  MMG5_Set_requiredVertex(MMG5_pMesh mesh, int k);
-int  MMG5_Set_requiredTetrahedra(MMG5_pMesh mesh, int k);
-int  MMG5_Set_requiredTriangle(MMG5_pMesh mesh, int k);
-int  MMG5_Set_ridge(MMG5_pMesh mesh, int k);
-int  MMG5_Set_requiredEdge(MMG5_pMesh mesh, int k);
-int  MMG5_Set_scalarSol(MMG5_pSol met, double s);
-#ifdef SINGUL
-int  MMG5_Set_singulVertex(MMG5_pSingul sing, double c0, double c1, double c2, int typ);
-int  MMG5_Set_singulEdge(MMG5_pSingul sing, int v0, int v1, int ref);
-int  MMG5_Set_singulCorner(MMG5_pSingul sing, int k);
-int  MMG5_Set_singulRequiredVertex(MMG5_pSingul sing, int k);
-int  MMG5_Set_singulRidge(MMG5_pSingul sing, int k);
-int  MMG5_Set_singulRequiredEdge(MMG5_pSingul sing, int k);
+int  MMG5_Set_vertex(MMG5_pMesh mesh, double c0, double c1,
+                     double c2, int ref,int pos);
+int  MMG5_Set_tetrahedra(MMG5_pMesh mesh, int v0, int v1,
+                         int v2, int v3, int ref, int pos);
+int  MMG5_Set_triangle(MMG5_pMesh mesh, int v0, int v1,
+                       int v2, int ref,int pos);
+int  MMG5_Set_edges(MMG5_pMesh mesh, int v0, int v1, int ref,int pos);
+int  MMG5_Set_corner(MMG5_pMesh mesh, int pos);
+int  MMG5_Set_requiredVertex(MMG5_pMesh mesh, int pos);
+int  MMG5_Set_requiredTetrahedra(MMG5_pMesh mesh, int pos);
+int  MMG5_Set_requiredTriangle(MMG5_pMesh mesh, int pos);
+int  MMG5_Set_ridge(MMG5_pMesh mesh, int pos);
+int  MMG5_Set_requiredEdge(MMG5_pMesh mesh, int pos);
+int  MMG5_Set_scalarSol(MMG5_pSol met, double s,int pos);
+#ifndef SINGUL
+void MMG5_Set_handGivenMesh(MMG5_pMesh mesh);
+#else
+int  MMG5_Set_singulVertex(MMG5_pSingul sing, double c0,
+                           double c1, double c2, int typ,int pos);
+int  MMG5_Set_singulEdge(MMG5_pSingul sing, int v0, int v1, int ref,int pos);
+int  MMG5_Set_singulCorner(MMG5_pSingul sing, int pos);
+int  MMG5_Set_singulRequiredVertex(MMG5_pSingul sing, int pos);
+int  MMG5_Set_singulRidge(MMG5_pSingul sing, int pos);
+int  MMG5_Set_singulRequiredEdge(MMG5_pSingul sing, int pos);
+void MMG5_Set_handGivenMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSingul sing);
 #endif
+
 
 /* check init */
-#ifndef SINGUL
-int MMG5_Chk_meshData(MMG5_pMesh mesh, MMG5_pSol sol);
-#else
-int MMG5_Chk_meshData(MMG5_pMesh mesh, MMG5_pSol sol, MMG5_pSingul sing);
-#endif
+int MMG5_Chk_meshData(MMG5_pMesh mesh, MMG5_pSol met);
 
 /** functions to set parameters */
-int  MMG5_Set_iparameters(MMG5_pMesh mesh, int iparam, int val);
-int  MMG5_Set_dparameters(MMG5_pMesh mesh, int dparam, double val);
-int  MMG5_Set_localParameters(MMG5_pMesh mesh, int typ, int ref, double val);
+int  MMG5_Set_iparameters(MMG5_pMesh mesh,MMG5_pSol sol, int iparam, int val);
+int  MMG5_Set_dparameters(MMG5_pMesh mesh,MMG5_pSol sol, int dparam, double val);
+int  MMG5_Set_localParameters(MMG5_pMesh mesh, MMG5_pSol sol, int typ, int ref, double val);
 
 /** recover datas */
-int Get_meshSize(MMG5_pMesh mesh, MMG5_pSol sol, int* np, int* ne, int* nt, int* na);
-int Get_vertex(MMG5_pMesh mesh, double* c0, double* c1, double* c2, int* ref,
-               int* isCorner, int* isRequired);
-int Get_tetrahedra(MMG5_pMesh mesh, int* v0, int* v1, int* v2, int* v3, int* ref,
-                   int* isRequired);
-int Get_triangle(MMG5_pMesh mesh, int* v0, int* v1, int* v2, int* ref,
-                 int* isRequired);
-int Get_edge(MMG5_pMesh mesh, int* e0, int* e1, int* ref,
-             int* isRidge, int* isRequired);
-
+int  MMG5_Get_meshSize(MMG5_pMesh mesh, int* np, int* ne, int* nt, int* na);
+int  MMG5_Get_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int* typEntity, int* np,
+                      int* typSol);
+int  MMG5_Get_vertex(MMG5_pMesh mesh, double* c0, double* c1, double* c2, int* ref,
+                     int* isCorner, int* isRequired);
+int  MMG5_Get_tetrahedra(MMG5_pMesh mesh, int* v0, int* v1, int* v2, int* v3,
+                         int* ref, int* isRequired);
+int  MMG5_Get_triangle(MMG5_pMesh mesh, int* v0, int* v1, int* v2, int* ref,
+                       int* isRequired);
+int  MMG5_Get_edge(MMG5_pMesh mesh, int* e0, int* e1, int* ref,
+                   int* isRidge, int* isRequired);
+int  MMG5_Get_scalarSol(MMG5_pSol met, double* s);
 
 /** input/output functions */
 int  MMG5_loadMesh(MMG5_pMesh );
-int  MMG5_saveMesh(MMG5_pMesh );
-int  MMG5_loadMet(MMG5_pSol );
+int  (*MMG5_saveMesh)(MMG5_pMesh );
+int  MMG5_loadMet(MMG5_pMesh,MMG5_pSol );
 int  MMG5_saveMet(MMG5_pMesh mesh, MMG5_pSol met);
 #ifdef SINGUL
 int  MMG5_loadSingul(MMG5_pSingul singul);

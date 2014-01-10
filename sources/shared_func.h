@@ -27,6 +27,22 @@ void warnScotch(MMG5_pMesh mesh) {
 }
 #endif
 
+/** Warn user that some tetra of the mesh have been reoriented */
+static inline
+void warnOrientation(MMG5_pMesh mesh) {
+  if ( mesh->xt ) {
+    if ( mesh->xt != mesh->ne ) {
+      fprintf(stdout,"  ## Warning: %d tetra on %d reoriented.\n",
+              mesh->xt,mesh->ne);
+      fprintf(stdout,"  Your mesh may be non-conform.\n");
+    }
+    else {
+      fprintf(stdout,"  ## Warning: all tetra reoriented.\n");
+    }
+  }
+  mesh->xt = 0;
+}
+
 static inline
 void excfun(int sigid) {
   fprintf(stdout,"\n Unexpected error:");  fflush(stdout);

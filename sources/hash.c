@@ -761,8 +761,8 @@ int chkNumberOfTri(pMesh mesh) {
   if ( mesh->nt == nttmp ) return(1);
   else if ( mesh->nt ){
     fprintf(stdout,"  ## WARNING: BOUNDARY TRIANGLES ARE DELETED.\n");
-    fprintf(stdout,"              ");
-    fprintf(stdout,"(You have 2 domains but only boundary triangles).\n");
+    fprintf(stdout,"  Not enough triangles for geometry (maybe");
+    fprintf(stdout," you have 2 domains but only boundary triangles).\n");
     free(mesh->tria);
     mesh->tria = NULL;
   }

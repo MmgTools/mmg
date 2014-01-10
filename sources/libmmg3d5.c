@@ -1,35 +1,44 @@
  /**
  *
- * Written by Cecile Dobrzynski (IMB), Charles Dapogny and Pascal Frey (LJLL)
+ * Written by Cecile Dobrzynski (IMB), Charles Dapogny,
+ * Pascal Frey (LJLL) and Algiane Froehly
  * Copyright (c) 2004- IMB/LJLL.
  * All rights reserved.
  *
- * mmg3dlib(int *options_i,double *options_d ): to use mmg3d via a library
+ * MMG5_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met [,MMG5_pSingul singul] ):
+ *    to use mmg3d via a library
  *
  * Integers parameters:
- *    MMG5_IPARAM_verbose           = [-10..10] , Tune level of verbosity;
- *    MMG5_IPARAM_mem               = [n/-1]    , Set memory size to n Mbytes/keep the default value;
- *    MMG5_IPARAM_debug             = [1/0]     , Turn on/off debug mode;
- *    MMG5_IPARAM_angle             = [1/0]     , Turn on/off angle detection;
- *    MMG5_IPARAM_iso               = [1/0]     , Turn on/off levelset meshing;
- *    MMG5_IPARAM_noinsert          = [1/0]     , avoid/allow point insertion/deletion;
- *    MMG5_IPARAM_noswap            = [1/0]     , avoid/allow edge or face flipping;
- *    MMG5_IPARAM_nomove            = [1/0]     , avoid/allow point relocation;
- *    MMG5_IPARAM_numberOflocalParam= [n]       , number of local parameters;
- *    MMG5_IPARAM_renum             = [1/0]     , Turn on/off the renumbering using SCOTCH;
- *    MMG5_IPARAM_sing              = [1/0]     , Turn on/off the insertion of singularities
+ *    MMG5_IPARAM_verbose            = [-10..10] , Tune level of verbosity;
+ *    MMG5_IPARAM_mem                = [n/-1]    , Set memory size to n Mbytes/keep the default value;
+ *    MMG5_IPARAM_debug              = [1/0]     , Turn on/off debug mode;
+ *    MMG5_IPARAM_angle              = [1/0]     , Turn on/off angle detection;
+ *    MMG5_IPARAM_iso                = [1/0]     , Turn on/off levelset meshing;
+ *    MMG5_IPARAM_noinsert           = [1/0]     , avoid/allow point insertion/deletion;
+ *    MMG5_IPARAM_noswap             = [1/0]     , avoid/allow edge or face flipping;
+ *    MMG5_IPARAM_nomove             = [1/0]     , avoid/allow point relocation;
+ *    MMG5_IPARAM_numberOflocalParam = [n]       , number of local parameters;
+ *    MMG5_IPARAM_renum              = [1/0]     , Turn on/off the renumbering using SCOTCH;
+ *    MMG5_IPARAM_sing               = [1/0]     , Turn on/off the insertion of singularities
  *                                        (need to compile with -DSINGUL flag);
- * Doble parameters:
+ * Double parameters:
  *    MMG5_DPARAM_dhd   = [val]     , angle detection;
  *    MMG5_DPARAM_hmin  = [val]     , minimal mesh size;
  *    MMG5_DPARAM_hmax  = [val]     , maximal mesh size;
- *    MMG5_DPARAM_hausd = [val]     , control Hausdorff distance;
+ *    MMG5_DPARAM_hausd = [val]     , control global Hausdorff distance
+ *                                    (on all the boundary surfaces of the mesh);
  *    MMG5_DPARAM_hgrad = [val]     , control gradation;
  *    MMG5_DPARAM_ls    = [val]     , level set value;
  **/
 
 #include "mmg3d.h"
 #include "shared_func.h"
+
+#define RETURN_AND_PACK(mesh,met,val)do    \
+    {                                           \
+      packMesh(mesh,met);                       \
+      return(val);                              \
+    }while(0)
 
 /** Deallocations before return */
 void Free_all(pMesh mesh,pSol met
@@ -58,59 +67,43 @@ void Free_all(pMesh mesh,pSol met
 #endif
 }
 
-/** Recover mesh data */
+/** set pointer for MMG5_saveMesh function */
 static inline
-int inputdata(pMesh mesh,pSol met) {
-  pPoint  ppt;
-  int	  	k,i;
-
-  /* Fill dimension and version data if needed */
-  if ( !mesh->dim )  mesh->dim = 3;
-  else if ( mesh->dim != 3 ) {
-      fprintf(stdout,"  ** 3 DIMENSIONAL MESH NEEDED. Exit program.\n");
-      return(0);
-  }
-
-  if ( !met->dim )  met->dim = 3;
-  else if ( met->dim != 3 ) {
-      fprintf(stdout,"  ** WRONG DIMENSION FOR METRIC. Exit program.\n");
-      return(0);
-  }
-  if ( !mesh->ver )  mesh->ver = 2;
-  if ( !met ->ver )  met ->ver = 2;
-
-   mesh->base = mesh->mark = 0;
-
-  mesh->npi   = mesh->np;
-  mesh->nei   = mesh->ne;
-  mesh->nai   = mesh->na;
-
-  /* keep track of empty links */
-  mesh->npnil = mesh->np + 1;
-  mesh->nenil = mesh->ne + 1;
-  for (k=mesh->npnil; k<mesh->npmax-1; k++) {
-    mesh->point[k].tmp  = k+1;
-  }
-  for (k=mesh->nenil; k<mesh->nemax-1; k++) {
-    mesh->tetra[k].v[3] = k+1;
-  }
-
-  /* tag points*/
-  for (k=1; k<=mesh->np; k++) {
-    ppt = &mesh->point[k];
-    ppt->tag  = MG_NUL;
-    ppt->flag = 0;
-  }
-  for (k=1; k<=mesh->ne; k++) {
-    for (i=0; i<4; i++) {
-      ppt = &mesh->point[mesh->tetra[k].v[i]];
-      ppt->tag &= ~MG_NUL;
-    }
-  }
-
-  return(1);
+void Set_saveFunc(pMesh mesh) {
+  MMG5_saveMesh = saveLibraryMesh;
 }
 
+/** Free adja, xtetra and xpoint tables */
+static inline
+void Free_topoTables(pMesh mesh) {
+  int k;
+
+  mesh->xp = 0;
+  mesh->xt = 0;
+  if ( mesh->adja ) {
+    free(mesh->adja);
+    mesh->adja = NULL;
+  }
+  if ( mesh->xtetra ) {
+    free(mesh->xtetra);
+    mesh->xtetra = NULL;
+  }
+  for(k=1; k <=mesh->ne; k++) {
+    mesh->tetra[k].xt = 0;
+  }
+  if ( mesh->xpoint ) {
+    free(mesh->xpoint);
+    mesh->xpoint = NULL;
+  }
+  for(k=1; k <=mesh->np; k++) {
+    mesh->point[k].xp = 0;
+  }
+
+  return;
+}
+
+/** pack the sparse mesh and create triangles and edges before getting
+    out of library */
 static inline
 int packMesh(pMesh mesh,pSol met) {
   pTetra	pt,ptnew;
@@ -206,6 +199,8 @@ int packMesh(pMesh mesh,pSol met) {
     mesh->htab.geom=NULL;
   }
   mesh->na = 0;
+  /* in the wost case (all edges are marked), we will have around 1 edge per *
+   * triangle (we count edges only one time) */
   if ( hNew(&mesh->htab,mesh->nt,3*(mesh->nt),0) ) {
     for (k=1; k<=mesh->ne; k++) {
       pt   = &mesh->tetra[k];
@@ -244,17 +239,19 @@ int packMesh(pMesh mesh,pSol met) {
         if ( MG_GEO & ph->tag ) nr++;
       }
     }
+    free(mesh->htab.geom);
+    mesh->htab.geom = NULL;
   }
 
   for(k=1 ; k<=mesh->np ; k++)
     mesh->point[k].tmp = 0;
 
   mesh->npnil = mesh->np + 1;
-  for (k=mesh->npnil; k<mesh->npmax-1; k++)
+  for(k=mesh->npnil; k<mesh->npmax-1; k++)
     mesh->point[k].tmp  = k+1;
 
   mesh->nenil = mesh->ne + 1;
-  for (k=mesh->nenil; k<mesh->nemax-1; k++)
+  for(k=mesh->nenil; k<mesh->nemax-1; k++)
     mesh->tetra[k].v[3] = k+1;
 
   /* to could save the mesh, the adjacency have to be correct */
@@ -262,6 +259,9 @@ int packMesh(pMesh mesh,pSol met) {
     fprintf(stdout,"  ##  Problem. Invalid mesh.\n");
     return(0);
   }
+
+  Free_topoTables(mesh);
+
   if ( mesh->info.imprim ) {
     fprintf(stdout,"     NUMBER OF VERTICES   %8d   CORNERS %8d\n",mesh->np,nc);
     if ( mesh->na )
@@ -308,13 +308,12 @@ int mmg3dlib(pMesh mesh,pSol met
 #ifdef USE_SCOTCH
   warnScotch(mesh);
 #endif
-  /* load data */
-  fprintf(stdout,"\n  -- MMG3DLIB: INPUT DATA\n");
-  chrono(ON,&(ctim[1]));
-  /* input data */
-  if ( !inputdata(mesh,met) ) return(MMG5_STRONGFAILURE);
 
-  met->npmax = mesh->npmax;
+  fprintf(stdout,"\n  -- MMG3DLIB: INPUT DATA\n");
+  /* load data */
+  chrono(ON,&(ctim[1]));
+  warnOrientation(mesh);
+
   if ( met->np && (met->np != mesh->np) ) {
     fprintf(stdout,"  ## WARNING: WRONG SOLUTION NUMBER. IGNORED\n");
     free(met->m);
@@ -346,6 +345,7 @@ int mmg3dlib(pMesh mesh,pSol met
   /* analysis */
   chrono(ON,&(ctim[2]));
   setfunc(mesh,met);
+  Set_saveFunc(mesh);
   if ( abs(mesh->info.imprim) > 0 )  outqua(mesh,met);
   fprintf(stdout,"\n  %s\n   MODULE MMG3D: IMB-LJLL : %s (%s)\n  %s\n",MG_STR,MG_VER,MG_REL,MG_STR);
   if ( mesh->info.imprim )  fprintf(stdout,"\n  -- PHASE 1 : ANALYSIS\n");
@@ -363,7 +363,7 @@ int mmg3dlib(pMesh mesh,pSol met
   if ( mesh->info.sing ) {
     if ( !mesh->info.iso ) {
       if ( !met->np && !DoSol(mesh,met) )
-        return(MMG5_LOWFAILURE);
+        RETURN_AND_PACK(mesh,met,MMG5_LOWFAILURE);
       if ( !( ier=inserSingul(mesh,met,sing) ) )
         return(MMG5_STRONGFAILURE);
       else if (ier > 0 ) {
@@ -379,12 +379,12 @@ int mmg3dlib(pMesh mesh,pSol met
 #ifdef DEBUG
   if ( !met->np && !DoSol(mesh,met,&mesh->info) ) {
     if ( !unscaleMesh(mesh,met) )  return(MMG5_STRONGFAILURE);
-    return(mesh,met,MMG5_LOWFAILURE);
+    RETURN_AND_PACK(mesh,met,MMG5_LOWFAILURE);
   }
 #endif
   if ( !analys(mesh) ) {
   if ( !unscaleMesh(mesh,met) )  return(MMG5_STRONGFAILURE);
-    return(MMG5_LOWFAILURE);
+  RETURN_AND_PACK(mesh,met,MMG5_LOWFAILURE);
   }
 
   if ( mesh->info.imprim > 4 && !mesh->info.iso && met->m ) prilen(mesh,met);
@@ -414,7 +414,7 @@ int mmg3dlib(pMesh mesh,pSol met
       return(MMG5_STRONGFAILURE);
     }
     if ( !unscaleMesh(mesh,met) )  return(MMG5_STRONGFAILURE);
-    return(MMG5_LOWFAILURE);
+    RETURN_AND_PACK(mesh,met,MMG5_LOWFAILURE);
   }
 
 #ifdef SINGUL
@@ -422,7 +422,7 @@ int mmg3dlib(pMesh mesh,pSol met
     if ( !solveUnsignedTet(mesh,met) ) {
       fprintf(stdout,"  ## Solve of undetermined tetrahedra problem.\n");
       if ( !unscaleMesh(mesh,met) )  return(MMG5_STRONGFAILURE);
-      return(MMG5_LOWFAILURE);
+      RETURN_AND_PACK(mesh,met,MMG5_LOWFAILURE);
     }
   }
 #endif
@@ -441,8 +441,7 @@ int mmg3dlib(pMesh mesh,pSol met
   chrono(ON,&(ctim[1]));
   if ( mesh->info.imprim )  fprintf(stdout,"\n  -- MESH PACKED UP\n");
   if ( !unscaleMesh(mesh,met) )  return(MMG5_STRONGFAILURE);
-  if ( !packMesh(mesh,met) )          return(MMG5_STRONGFAILURE);
-  met->np = mesh->np;
+  if ( !packMesh(mesh,met) )     return(MMG5_STRONGFAILURE);
   chrono(OFF,&(ctim[1]));
 
   chrono(OFF,&ctim[0]);

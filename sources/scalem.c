@@ -93,6 +93,7 @@ int unscaleMesh(pMesh mesh,pSol met) {
   pPoint     ppt;
   double     dd;
   int        k;
+  pPar       par;
 
   /* de-normalize coordinates */
   dd = mesh->info.delta;
@@ -111,5 +112,17 @@ int unscaleMesh(pMesh mesh,pSol met) {
       if ( MG_VOK(ppt) )	met->m[k] *= dd;
     }
   }
+
+  /* unscale paramter values */
+  mesh->info.hmin  *= dd;
+  mesh->info.hmax  *= dd;
+  mesh->info.hausd *= dd;
+
+  /* normalize local parameters */
+  for (k=0; k<mesh->info.npar; k++) {
+    par = &mesh->info.par[k];
+    par->hausd *= dd;
+  }
+
   return(1);
 }
