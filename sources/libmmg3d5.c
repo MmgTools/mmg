@@ -31,7 +31,6 @@
 #include "mmg3d.h"
 #include "shared_func.h"
 
-
 /** Deallocations before return */
 void Free_all(pMesh mesh,pSol met
 #ifdef SINGUL

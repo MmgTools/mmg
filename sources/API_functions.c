@@ -155,7 +155,7 @@ int Set_inputMeshName(MMG5_pMesh mesh, char* meshin) {
 
 /** Set the name of input sol */
 int Set_inputSolName(MMG5_pMesh mesh,MMG5_pSol sol, char* solin) {
-  char *ptr, *ptr2;
+  char *ptr;
 
   if ( sol->namein ) {
     free ( sol->namein );
@@ -1153,7 +1153,6 @@ int Chk_meshData(MMG5_pMesh mesh,MMG5_pSol met
 static inline
 int reallocMemory(MMG5_pMesh mesh) {
   int    k,old_ntmax, old_npmax, old_nemax;
-  void   *ptmp;
   pPoint point;
   pTetra tetra;
   pTria  tria;

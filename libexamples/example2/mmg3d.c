@@ -5,20 +5,28 @@
  * Copyright (c) 2004- IMB/LJLL.
  * All rights reserved.
  */
-/* #include <assert.h> */
-/* #include <stdlib.h> */
-/* #include <stdio.h> */
-/* #include <limits.h> */
-/* #include <string.h> */
-/* #include <signal.h> */
-/* #include <ctype.h> */
-/* #include <float.h> */
-/* #include <math.h> */
+#include <stdio.h>
+#include <stdlib.h>
+#include <memory.h>
+#include <ctype.h>
 
 #include "libmmg3d5.h"
-#include "mmg3d.h"
 
 mytime    ctim[TIMEMAX];
+
+#ifdef SINGUL
+#define RETURN_AND_FREE(mesh,met,sing,val)do    \
+    {                                                 \
+      MMG5_Free_all(mesh,met,sing);                   \
+      return(val);                                    \
+    }while(0)
+#else
+#define RETURN_AND_FREE(mesh,met,sing,val)do    \
+    {                                                 \
+      MMG5_Free_all(mesh,met);                        \
+      return(val);                                    \
+    }while(0)
+#endif
 
 static void usage(char *prog) {
   fprintf(stdout,"\nUsage: %s [-v [n]] [opts..] filein [fileout]\n",prog);
@@ -59,9 +67,9 @@ static void usage(char *prog) {
 }
 
 
-static int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,pSingul sing) {
+static int parsar(int argc,char *argv[],MMG5_pMesh mesh,
+                  MMG5_pSol met,MMG5_pSingul sing) {
   int     i;
-  char   *ptr;
 
   i = 1;
   while ( i < argc ) {
@@ -304,7 +312,7 @@ static int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,pSingul si
 
 /** Read parammeter file */
 static inline
-int parsop(pMesh mesh,pSol met) {
+int parsop(MMG5_pMesh mesh,MMG5_pSol met) {
   float       fp1;
   int         ref,i,j,ret,npar;
   char       *ptr,buf[256],data[256];
@@ -400,6 +408,7 @@ int main(int argc,char *argv[]) {
   /* assign default values */
 #ifndef SINGUL
   MMG5_Init_mesh(&mesh,&met);
+  memset(&sing,0,sizeof(MMG5_Singul));
 #else
   MMG5_Init_mesh(&mesh,&met,&sing);
 #endif
