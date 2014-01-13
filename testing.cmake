@@ -193,7 +193,7 @@ FOREACH(EXEC ${LISTEXEC})
     COMMAND ${EXEC}
     ${REG_TESTS_PATH}/HausdLoc_2Spheres/2spheres
     ${REG_TESTS_PATH}/HausdLoc_2Spheres/2spheres.o.meshb
-    -hgrad 1.2
+    -hgrad 2
     )
 
 

@@ -45,7 +45,7 @@
  **/
 /** librnbg
  *
- * Written by Cedric Lachat
+ * Written by Cedric Lachat and Algiane Froehly
  **/
 #ifdef USE_SCOTCH
 

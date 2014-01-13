@@ -16,8 +16,23 @@ int main(int argc,char *argv[]) {
   MMG5_pMesh      mmgMesh;
   MMG5_pSol       mmgSol;
   int             k,ier;
+  char            *pwd,*inname,*outname;
 
   fprintf(stdout,"  -- TEST MMG3DLIB \n");
+
+  /* Name and path of the mesh files */
+  pwd = getenv("PWD");
+  inname = (char *) calloc(strlen(pwd) + 34, sizeof(char));
+  if ( inname == NULL ) {
+    perror("  ## Memory problem: calloc");
+    exit(EXIT_FAILURE);
+  }
+  outname = (char *) calloc(strlen(pwd) + 43, sizeof(char));
+  if ( outname == NULL ) {
+    perror("  ## Memory problem: calloc");
+    exit(EXIT_FAILURE);
+  }
+  sprintf(inname, "%s%s%s", pwd, "/../libexamples/example2/", "2spheres");
 
   /** 1) Initialisation of mesh and sol structures */
   /* args of InitMesh: mesh=&mmgMesh, sol=&mmgSol, input mesh name, input sol name,
@@ -33,8 +48,7 @@ int main(int argc,char *argv[]) {
   /** with MMG5_loadMesh function */
   /** a) (not mandatory): give the mesh name
      (by default, the "mesh.mesh" file is oppened)*/
-  if ( !MMG5_Set_inputMeshName(mmgMesh,
-                               "../../mmg3dp/trunk/mmg3d5/libexamples/example2/2spheres.mesh") )
+  if ( !MMG5_Set_inputMeshName(mmgMesh,inname) )
     exit(EXIT_FAILURE);
   /** b) function calling */
   if ( !MMG5_loadMesh(mmgMesh) )  exit(EXIT_FAILURE);
@@ -46,8 +60,7 @@ int main(int argc,char *argv[]) {
   /** With MMG5_loadMet function */
   /** a) (not mandatory): give the sol name
      (by default, the "mesh.sol" file is oppened)*/
-  if ( !MMG5_Set_inputSolName(mmgMesh,mmgSol,
-                              "../../mmg3dp/trunk/mmg3d5/libexamples/example2/2spheres.sol") )
+  if ( !MMG5_Set_inputSolName(mmgMesh,mmgSol,inname) )
     exit(EXIT_FAILURE);
   /** b) function calling */
   if ( !MMG5_loadMet(mmgMesh,mmgSol) )
@@ -96,15 +109,14 @@ int main(int argc,char *argv[]) {
     fprintf(stdout,"BAD ENDING OF MMG3DLIB\n");
 
   /* (Not mandatory) Automatically save the mesh */
-  if ( !MMG5_Set_outputMeshName(mmgMesh,
-                                "../../mmg3dp/trunk/mmg3d5/libexamples/example2/2spheres_1.o.mesh") )
+  sprintf(outname, "%s%s%s", pwd, "/../libexamples/example2/", "2spheres_1.o.mesh");
+  if ( !MMG5_Set_outputMeshName(mmgMesh,outname) )
     exit(EXIT_FAILURE);
 
   MMG5_saveMesh(mmgMesh);
 
   /* (Not mandatory) Automatically save the solution */
-  if ( !MMG5_Set_outputSolName(mmgMesh,mmgSol,
-                               "../../mmg3dp/trunk/mmg3d5/libexamples/example2/2spheres_1.o.sol") )
+  if ( !MMG5_Set_outputSolName(mmgMesh,mmgSol,outname) )
     exit(EXIT_FAILURE);
 
   MMG5_saveMet(mmgMesh,mmgSol);
@@ -171,19 +183,25 @@ int main(int argc,char *argv[]) {
 
 
   /* 7) Automatically save the mesh */
-  if ( !MMG5_Set_outputMeshName(mmgMesh,"2spheres_2.o.mesh") )
+  sprintf(outname, "%s%s%s", pwd, "/../libexamples/example2/", "2spheres_2.o.mesh");
+  if ( !MMG5_Set_outputMeshName(mmgMesh,outname) )
     exit(EXIT_FAILURE);
 
   MMG5_saveMesh(mmgMesh);
 
   /* 8) Automatically save the solution */
-  if ( !MMG5_Set_outputSolName(mmgMesh,mmgSol,"2spheres_2.o.sol") )
+  if ( !MMG5_Set_outputSolName(mmgMesh,mmgSol,outname) )
     exit(EXIT_FAILURE);
 
   MMG5_saveMet(mmgMesh,mmgSol);
 
   /* 9) free the MMG3D5 structures */
   MMG5_Free_all(mmgMesh,mmgSol);
+
+  free(inname);
+  inname = NULL;
+  free(outname);
+  outname = NULL;
 
   return(ier);
 }

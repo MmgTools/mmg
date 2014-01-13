@@ -16,8 +16,18 @@ int main(int argc,char *argv[]) {
   MMG5_pMesh      mmgMesh;
   MMG5_pSol       mmgSol;
   int             ier;
+  char            *pwd,*filename;
 
   fprintf(stdout,"  -- TEST MMG3DLIB \n");
+
+  /* Name and path of the mesh file */
+  pwd = getenv("PWD");
+  filename = (char *) calloc(strlen(pwd) + 42, sizeof(char));
+  if ( filename == NULL ) {
+    perror("  ## Memory problem: calloc");
+    exit(EXIT_FAILURE);
+  }
+  sprintf(filename, "%s%s%s", pwd, "/../libexamples/example0/example0_a/", "cube");
 
   /** ------------------------------ STEP   I -------------------------- */
   /** 1) Initialisation of mesh and sol structures */
@@ -34,8 +44,7 @@ int main(int argc,char *argv[]) {
   /** with MMG5_loadMesh function */
   /** a) (not mandatory): give the mesh name
      (by default, the "mesh.mesh" file is oppened)*/
-  if ( !MMG5_Set_inputMeshName(mmgMesh,
-                               "../../mmg3dp/trunk/mmg3d5/libexamples/example0/example0_a/cube.mesh") )
+  if ( !MMG5_Set_inputMeshName(mmgMesh,filename) )
     exit(EXIT_FAILURE);
   /** b) function calling */
   if ( !MMG5_loadMesh(mmgMesh) )  exit(EXIT_FAILURE);
@@ -47,8 +56,7 @@ int main(int argc,char *argv[]) {
   /** With MMG5_loadMet function */
   /** a) (not mandatory): give the sol name
      (by default, the "mesh.sol" file is oppened)*/
-  if ( !MMG5_Set_inputSolName(mmgMesh,mmgSol,
-                              "../../mmg3dp/trunk/mmg3d5/libexamples/example0/example0_a/cube.sol") )
+  if ( !MMG5_Set_inputSolName(mmgMesh,mmgSol,filename) )
     exit(EXIT_FAILURE);
   /** b) function calling */
   if ( !MMG5_loadMet(mmgMesh,mmgSol) )
@@ -89,6 +97,9 @@ int main(int argc,char *argv[]) {
 
   /** 3) Free the MMG3D5 structures */
   MMG5_Free_all(mmgMesh,mmgSol);
+
+  free(filename);
+  filename = NULL;
 
   return(ier);
 }
