@@ -508,8 +508,10 @@ int Get_meshSize(MMG5_pMesh mesh, int* np, int* ne, int* nt, int* na) {
 
   *np = mesh->np;
   *ne = mesh->ne;
-  *nt = mesh->nt;
-  *na = mesh->na;
+  if ( nt != NULL )
+    *nt = mesh->nt;
+  if ( na != NULL )
+    *na = mesh->na;
 
   mesh->npi = 0;
   mesh->nei = 0;
@@ -571,16 +573,22 @@ int Get_vertex(MMG5_pMesh mesh, double* c0, double* c1, double* c2, int* ref,
   *c0  = mesh->point[mesh->npi].c[0];
   *c1  = mesh->point[mesh->npi].c[1];
   *c2  = mesh->point[mesh->npi].c[2];
-  *ref = mesh->point[mesh->npi].ref;
-  if ( mesh->point[mesh->npi].tag & MG_CRN )
-    *isCorner = 1;
-  else
-    *isCorner = 0;
+  if ( *ref != NULL )
+    *ref = mesh->point[mesh->npi].ref;
 
-  if ( mesh->point[mesh->npi].tag & MG_REQ )
-    *isRequired = 1;
-  else
-    *isRequired = 0;
+  if ( *isCorner != NULL ) { 
+    if ( mesh->point[mesh->npi].tag & MG_CRN )
+      *isCorner = 1;
+    else
+      *isCorner = 0;
+  }
+
+  if ( *isRequired != NULL ) {
+    if ( mesh->point[mesh->npi].tag & MG_REQ )
+      *isRequired = 1;
+    else
+      *isRequired = 0;
+  }
 
   return(1);
 }
@@ -672,12 +680,16 @@ int Get_tetrahedra(MMG5_pMesh mesh, int* v0, int* v1, int* v2, int* v3,
   *v1  = mesh->tetra[mesh->nei].v[1];
   *v2  = mesh->tetra[mesh->nei].v[2];
   *v3  = mesh->tetra[mesh->nei].v[3];
-  *ref = mesh->tetra[mesh->nei].ref;
+  if ( *ref != NULL ) {
+    *ref = mesh->tetra[mesh->nei].ref;
+  }
 
-  if ( mesh->tetra[mesh->nei].tag & MG_REQ )
-    *isRequired = 1;
-  else
-    *isRequired = 0;
+  if ( *isRequired != NULL ) {
+    if ( mesh->tetra[mesh->nei].tag & MG_REQ )
+      *isRequired = 1;
+    else
+      *isRequired = 0;
+  }
 
   return(1);
 }
@@ -734,13 +746,16 @@ int Get_triangle(MMG5_pMesh mesh, int* v0, int* v1, int* v2, int* ref
   *v0  = ptt->v[0];
   *v1  = ptt->v[1];
   *v2  = ptt->v[2];
-  *ref = ptt->ref;
+  if ( *ref != NULL )
+    *ref = ptt->ref;
 
-  if ( (ptt->tag[0] & MG_REQ) && (ptt->tag[1] & MG_REQ) &&
-       (ptt->tag[2] & MG_REQ) )
-    *isRequired = 1;
-  else
-    *isRequired = 0;
+  if ( *isRequired != NULL ) {
+    if ( (ptt->tag[0] & MG_REQ) && (ptt->tag[1] & MG_REQ) &&
+	 (ptt->tag[2] & MG_REQ) )
+      *isRequired = 1;
+    else
+      *isRequired = 0;
+  }
 
   return(1);
 }
@@ -791,17 +806,22 @@ int Get_edge(MMG5_pMesh mesh, int* e0, int* e1, int* ref
 
   *e0  = mesh->edge[mesh->nai].a;
   *e1  = mesh->edge[mesh->nai].b;
-  *ref = mesh->edge[mesh->nai].ref;
+  if ( *ref!=NULL )
+    *ref = mesh->edge[mesh->nai].ref;
 
-  if ( mesh->edge[mesh->nai].tag & MG_GEO )
-    *isRidge = 1;
-  else
-    *isRidge = 0;
+  if ( *isRidge != NULL ) {
+    if ( mesh->edge[mesh->nai].tag & MG_GEO )
+      *isRidge = 1;
+    else
+      *isRidge = 0;
+  }
 
-  if ( mesh->edge[mesh->nai].tag & MG_REQ )
-    *isRequired = 1;
-  else
-    *isRequired = 0;
+  if ( *isRequired != NULL ) {
+    if ( mesh->edge[mesh->nai].tag & MG_REQ )
+      *isRequired = 1;
+    else
+      *isRequired = 0;
+  }
 
   return(1);
 }
