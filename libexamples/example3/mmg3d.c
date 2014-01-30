@@ -384,7 +384,7 @@ int main(int argc,char *argv[]) {
   mesh = NULL;
   met  = NULL;
   sing = NULL;
-
+#ifndef SINGUL
 #ifndef SINGUL
   MMG5_Init_mesh(&mesh,&met);
   //  memset(&sing,0,sizeof(MMG5_Singul));

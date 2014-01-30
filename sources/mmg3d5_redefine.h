@@ -150,6 +150,8 @@
 #define unscaleMesh                   	 _MMG5_unscaleMesh
 #define volint                        	 _MMG5_volint
 #define zaldy                         	 _MMG5_zaldy
+#define Alloc_mesh                    	 MMG5_Alloc_mesh
+#define Alloc_mesh                    	 MMG5_Alloc_mesh
 #define Chk_meshData                  	 MMG5_Chk_meshData
 #define Edge                          	 MMG5_Edge
 #define Free_all                      	 MMG5_Free_all
@@ -158,6 +160,7 @@
 #define Free_names                    	 MMG5_Free_names
 #define Free_structures               	 MMG5_Free_structures
 #define Free_structures               	 MMG5_Free_structures
+#define Get_adjaTet                   	 MMG5_Get_adjaTet
 #define Get_edge                      	 MMG5_Get_edge
 #define Get_meshSize                  	 MMG5_Get_meshSize
 #define Get_scalarSol                 	 MMG5_Get_scalarSol
@@ -170,6 +173,8 @@
 #define Init_mesh                     	 MMG5_Init_mesh
 #define Init_mesh                     	 MMG5_Init_mesh
 #define Init_parameters               	 MMG5_Init_parameters
+#define Init_woalloc_mesh             	 MMG5_Init_woalloc_mesh
+#define Init_woalloc_mesh             	 MMG5_Init_woalloc_mesh
 #define Mesh                          	 MMG5_Mesh
 #define Par                           	 MMG5_Par
 #define Point                         	 MMG5_Point

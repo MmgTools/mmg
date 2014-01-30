@@ -67,13 +67,13 @@ static inline
 void setfunc(pMesh mesh,pSol met) {
   if ( met->size < 6 ) {
     caltet = caltet_iso;
-    lenedg = lenedg_iso;
+    MMG5_lenedg = lenedg_iso;
     defsiz = defsiz_iso;
     gradsiz = gradsiz_iso;
   }
   else {
     caltet = caltet_ani;
-    lenedg = lenedg_ani;
+    MMG5_lenedg = lenedg_ani;
     /*defsiz = defsiz_ani;
       gradsiz = gradsiz_ani;*/
   }

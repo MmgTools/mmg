@@ -38,7 +38,9 @@ int loadMesh(pMesh mesh) {
   mesh->nei = GmfStatKwd(inm,GmfTetrahedra);
   mesh->nai = GmfStatKwd(inm,GmfEdges);
   if ( !mesh->npi || !mesh->nei ) {
-    fprintf(stdout,"  ** MISSING DATA. Exit program.\n");
+    fprintf(stdout,"  ** MISSING DATA.\n");
+    fprintf(stdout," Check that your mesh contains points and tetrahedra.\n");
+    fprintf(stdout," Exit program.\n");
     return(0);
   }
   /* memory allocation */
@@ -714,7 +716,7 @@ int loadMet(pMesh mesh,pSol met) {
   /* read solution or metric */
   met->np = GmfStatKwd(inm,GmfSolAtVertices,&met->type,&met->size,typtab);
   if ( !met->np ) {
-    fprintf(stdout,"  ** MISSING DATA.\n");
+    fprintf(stdout,"  ** MISSING DATA. No solution.\n");
     return(1);
   }
   if ( (met->type != 1) || (typtab[0] != 1 && typtab[0] != 3) ) {
@@ -873,7 +875,9 @@ int loadSingul(pSingul singul) {
   mesh.nt = GmfStatKwd(inm,GmfTriangles);
   mesh.na = GmfStatKwd(inm,GmfEdges);
   if ( !mesh.np ) {
-    fprintf(stdout,"  ** MISSING DATA. Exit program.\n");
+    fprintf(stdout,"  ** MISSING DATA.\n");
+    fprintf(stdout," Check that your mesh contains points.\n");
+    fprintf(stdout," Exit program.\n");
     return(0);
   }
 

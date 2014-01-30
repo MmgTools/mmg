@@ -293,4 +293,18 @@ int  MMG5_mmg3dlib(MMG5_pMesh mesh, MMG5_pSol sol, MMG5_pSingul singul);
 int  MMG5_mmg3dlib(MMG5_pMesh mesh, MMG5_pSol sol);
 #endif
 
+/** for PAMPA library */
+/** Init */
+#ifndef SINGUL
+void  MMG5_Alloc_mesh(MMG5_pMesh *mesh, MMG5_pSol *sol);
+void  MMG5_Init_woalloc_mesh(MMG5_pMesh mesh, MMG5_pSol sol);
+#else
+void  MMG5_Alloc_mesh(MMG5_pMesh *mesh, MMG5_pSol *sol, MMG5_pSingul *sing);
+void  MMG5_Init_woalloc_mesh(MMG5_pMesh mesh, MMG5_pSol sol, MMG5_pSingul sing);
+#endif
+
+/** Utils */
+double (*MMG5_lenedg)(pMesh ,pSol ,int ,int );
+int    MMG5_Get_adjaTet(pMesh,int kel, int*, int*, int*, int*);
+
 #endif

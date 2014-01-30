@@ -579,7 +579,7 @@ int prilen(pMesh mesh, pSol met) {
       ier = hashPop(&hash,np,nq);
       if( ier ) {
         ned ++;
-        len = lenedg(mesh,met,np,nq);
+        len = MMG5_lenedg(mesh,met,np,nq);
         avlen += len;
 
         if( len < lmin ) {

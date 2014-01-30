@@ -77,6 +77,11 @@ static int parsar(int argc,char *argv[],pMesh mesh,pSol met,pSingul sing) {
           mesh->info.hmax = atof(argv[i]);
         else if ( !strcmp(argv[i],"-hausd") && ++i <= argc ) {
           mesh->info.hausd = atof(argv[i]);
+	  if ( mesh->info.hausd <=0 ) {
+	    fprintf(stdout,"  ## Warning: hausdorff number must be strictly positive.\n");
+	    fprintf(stdout,"  Reset to default value.\n");
+	    mesh->info.hausd = 0.01;
+	  }
         }
         else if ( !strcmp(argv[i],"-hgrad") && ++i <= argc ) {
           mesh->info.hgrad = atof(argv[i]);
@@ -118,8 +123,14 @@ static int parsar(int argc,char *argv[],pMesh mesh,pSol met,pSingul sing) {
         }
         break;
       case 'm':  /* memory */
-        if ( ++i < argc && isdigit(argv[i][0]) )
-          mesh->info.mem = atoi(argv[i]);
+        if ( ++i < argc && isdigit(argv[i][0]) ) {
+	  if ( atoi(argv[i]) <= 0 ) {
+	    fprintf(stdout,"  ## Warning: maximal memory authorized must be strictly positive.\n");
+	    fprintf(stdout,"  Reset to default value.\n");
+	  }
+	  else
+	    mesh->info.mem = atoi(argv[i]);
+	}
         else {
           fprintf(stderr,"Missing argument option %c\n",argv[i-1][1]);
           usage(argv[0]);

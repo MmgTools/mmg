@@ -343,7 +343,7 @@ static int swpmshcpy(pMesh mesh,pSol met) {
           if ( ll > hmi2 )  continue;
         }
         else if ( typchk == 2 ) {
-          ll = lenedg(mesh,met,pt->v[ip],pt->v[iq]);
+          ll = MMG5_lenedg(mesh,met,pt->v[ip],pt->v[iq]);
           if ( ll > LSHRT )  continue;
         }
 
@@ -466,7 +466,7 @@ static int swpmshcpy(pMesh mesh,pSol met) {
             ip = hashGet(&hash,ip1,ip2);
         }
         else if ( typchk == 2 ) {
-          ll = lenedg(mesh,met,ip1,ip2);
+          ll = MMG5_lenedg(mesh,met,ip1,ip2);
           if ( ll > LLONG )
             ip = hashGet(&hash,ip1,ip2);
         }
@@ -689,7 +689,7 @@ static int swpmshcpy(pMesh mesh,pSol met) {
         i2  = iare[ia][1];
         ip1 = pt->v[i1];
         ip2 = pt->v[i2];
-        len = lenedg(mesh,met,ip1,ip2);
+        len = MMG5_lenedg(mesh,met,ip1,ip2);
         if ( len > LLONG )  MG_SET(pt->flag,ia);
       }
     }
@@ -947,7 +947,7 @@ static int swpmshcpy(pMesh mesh,pSol met) {
       if ( pt->xt && (pxt->tag[i] & MG_REQ) )  continue;
       ip1  = iare[i][0];
       ip2  = iare[i][1];
-      len = lenedg(mesh,met,pt->v[ip1],pt->v[ip2]);
+      len = MMG5_lenedg(mesh,met,pt->v[ip1],pt->v[ip2]);
       if ( len > lmax ) {
         lmax = len;
         imax = i;
@@ -1208,7 +1208,7 @@ int adpsplcol(pMesh mesh,pSol met,pBucket bucket, int* warn) {
           if ( pt->xt && (pxt->tag[i] & MG_REQ) )  continue;
           ip1  = iare[ii][0];
           ip2  = iare[ii][1];
-          len = lenedg(mesh,met,pt->v[ip1],pt->v[ip2]);
+          len = MMG5_lenedg(mesh,met,pt->v[ip1],pt->v[ip2]);
           if ( len > lmax ) {
             lmax = len;
             imax = ii;
@@ -1589,7 +1589,7 @@ int adpsplcol(pMesh mesh,pSol met,pBucket bucket, int* warn) {
       if ( pt->xt && (pxt->tag[i] & MG_REQ) )  continue;
       i1  = iare[i][0];
       i2  = iare[i][1];
-      len = lenedg(mesh,met,pt->v[i1],pt->v[i2]);
+      len = MMG5_lenedg(mesh,met,pt->v[i1],pt->v[i2]);
       if ( len < lmin ) {
         lmin = len;
         imin = i;

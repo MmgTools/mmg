@@ -319,7 +319,6 @@ int    gradsiz_iso(pMesh ,pSol );
 int    gradsiz_ani(pMesh ,pSol );
 
 double (*caltet)(pMesh mesh,pSol met,int ia,int ib,int ic,int id);
-double (*lenedg)(pMesh ,pSol ,int ,int );
 int    (*defsiz)(pMesh ,pSol );
 int    (*gradsiz)(pMesh ,pSol );
 

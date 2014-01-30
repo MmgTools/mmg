@@ -37,6 +37,28 @@ void Init_mesh(MMG5_pMesh *mesh, MMG5_pSol *sol
 #endif
               ) {
 
+#ifndef SINGUL
+  /* allocations */
+  Alloc_mesh(mesh,sol);
+  /* initialisations */
+  Init_woalloc_mesh(*mesh,*sol);
+#else
+  Alloc_mesh(mesh,sol,sing);
+  /* initialisations */
+  Init_woalloc_mesh(*mesh,*sol,*sing);
+#endif
+
+  return;
+}
+
+
+/** Allocate the mesh and sol structures */
+void Alloc_mesh(MMG5_pMesh *mesh, MMG5_pSol *sol
+#ifdef SINGUL
+		, MMG5_pSingul *sing
+#endif
+		) {
+  
   /* mesh allocation */
   if ( *mesh ) {
     free(*mesh);
@@ -71,24 +93,33 @@ void Init_mesh(MMG5_pMesh *mesh, MMG5_pSol *sol
     exit(EXIT_FAILURE);
   }
 #endif
+  return;
+}
 
-  (*mesh)->dim = 3;
-  (*mesh)->ver = 2;
-  (*sol)->dim  = 3;
-  (*sol)->ver  = 2;
-  (*sol)->size = 1;
+/** Initialization of mesh and sol structures */
+void Init_woalloc_mesh(MMG5_pMesh mesh, MMG5_pSol sol
+#ifdef SINGUL
+              , MMG5_pSingul *sing
+#endif
+              ) {
 
-  MMG5_Init_parameters(*mesh);
+  (mesh)->dim = 3;
+  (mesh)->ver = 2;
+  (sol)->dim  = 3;
+  (sol)->ver  = 2;
+  (sol)->size = 1;
+
+  MMG5_Init_parameters(mesh);
 
   /* file name initialisations */
-  MMG5_Set_inputMeshName(*mesh,"");
-  MMG5_Set_outputMeshName(*mesh,"");
+  MMG5_Set_inputMeshName(mesh,"");
+  MMG5_Set_outputMeshName(mesh,"");
 
-  MMG5_Set_inputSolName(*mesh,*sol,"");
-  MMG5_Set_outputSolName(*mesh,*sol,"");
+  MMG5_Set_inputSolName(mesh,sol,"");
+  MMG5_Set_outputSolName(mesh,sol,"");
 
 #ifdef SINGUL
-  MMG5_Set_inputSingulName(*mesh,*sing,"");
+  MMG5_Set_inputSingulName(mesh,sing,"");
 #endif
 
   return;
@@ -573,17 +604,17 @@ int Get_vertex(MMG5_pMesh mesh, double* c0, double* c1, double* c2, int* ref,
   *c0  = mesh->point[mesh->npi].c[0];
   *c1  = mesh->point[mesh->npi].c[1];
   *c2  = mesh->point[mesh->npi].c[2];
-  if ( *ref != NULL )
+  if ( ref != NULL )
     *ref = mesh->point[mesh->npi].ref;
 
-  if ( *isCorner != NULL ) { 
+  if ( isCorner != NULL ) { 
     if ( mesh->point[mesh->npi].tag & MG_CRN )
       *isCorner = 1;
     else
       *isCorner = 0;
   }
 
-  if ( *isRequired != NULL ) {
+  if ( isRequired != NULL ) {
     if ( mesh->point[mesh->npi].tag & MG_REQ )
       *isRequired = 1;
     else
@@ -680,11 +711,11 @@ int Get_tetrahedra(MMG5_pMesh mesh, int* v0, int* v1, int* v2, int* v3,
   *v1  = mesh->tetra[mesh->nei].v[1];
   *v2  = mesh->tetra[mesh->nei].v[2];
   *v3  = mesh->tetra[mesh->nei].v[3];
-  if ( *ref != NULL ) {
+  if ( ref != NULL ) {
     *ref = mesh->tetra[mesh->nei].ref;
   }
 
-  if ( *isRequired != NULL ) {
+  if ( isRequired != NULL ) {
     if ( mesh->tetra[mesh->nei].tag & MG_REQ )
       *isRequired = 1;
     else
@@ -746,10 +777,10 @@ int Get_triangle(MMG5_pMesh mesh, int* v0, int* v1, int* v2, int* ref
   *v0  = ptt->v[0];
   *v1  = ptt->v[1];
   *v2  = ptt->v[2];
-  if ( *ref != NULL )
+  if ( ref != NULL )
     *ref = ptt->ref;
 
-  if ( *isRequired != NULL ) {
+  if ( isRequired != NULL ) {
     if ( (ptt->tag[0] & MG_REQ) && (ptt->tag[1] & MG_REQ) &&
 	 (ptt->tag[2] & MG_REQ) )
       *isRequired = 1;
@@ -806,17 +837,17 @@ int Get_edge(MMG5_pMesh mesh, int* e0, int* e1, int* ref
 
   *e0  = mesh->edge[mesh->nai].a;
   *e1  = mesh->edge[mesh->nai].b;
-  if ( *ref!=NULL )
+  if ( ref!=NULL )
     *ref = mesh->edge[mesh->nai].ref;
 
-  if ( *isRidge != NULL ) {
+  if ( isRidge != NULL ) {
     if ( mesh->edge[mesh->nai].tag & MG_GEO )
       *isRidge = 1;
     else
       *isRidge = 0;
   }
 
-  if ( *isRequired != NULL ) {
+  if ( isRequired != NULL ) {
     if ( mesh->edge[mesh->nai].tag & MG_REQ )
       *isRequired = 1;
     else
@@ -1056,7 +1087,9 @@ int Chk_meshData(MMG5_pMesh mesh,MMG5_pSol met) {
   if ( mesh->info.ddebug ) {
     if ( (!mesh->np) || (!mesh->point) ||
          (!mesh->ne) || (!mesh->tetra) ) {
-      fprintf(stdout,"  ** MISSING DATA. Exit program.\n");
+      fprintf(stdout,"  ** MISSING DATA.\n");
+      fprintf(stdout," Check that your mesh contains points and tetrahedra.\n");
+      fprintf(stdout," Exit program.\n");
       return(0);
     }
   }
@@ -1257,7 +1290,12 @@ int Set_iparameters(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
     mesh->info.imprim   = val;
     break;
   case MMG5_IPARAM_mem :
-    mesh->info.mem      = val;
+    if ( val <= 0 ) {
+      fprintf(stdout,"  ## Warning: maximal memory authorized must be strictly positive.\n");
+      fprintf(stdout,"  Reset to default value.\n");
+    }
+    else
+      mesh->info.mem      = val;
     if ( !reallocMemory(mesh,sol) )  exit(EXIT_FAILURE);
     break;
   case MMG5_IPARAM_debug :
@@ -1370,7 +1408,12 @@ int Set_dparameters(MMG5_pMesh mesh, MMG5_pSol sol, int dparam, double val){
       mesh->info.hgrad = log(mesh->info.hgrad);
     break;
   case MMG5_DPARAM_hausd :
-    mesh->info.hausd    = val;
+    if ( val <=0 ) {
+      fprintf(stdout,"  ## Warning: hausdorff number must be strictly positive.\n");
+      fprintf(stdout,"  Reset to default value.\n");
+    }
+    else
+      mesh->info.hausd    = val;
     break;
   case MMG5_DPARAM_ls :
     mesh->info.ls       = val;
@@ -1531,4 +1574,20 @@ void Free_structures(pMesh mesh,pSol met
     singul->edge=NULL;
   }
 #endif
+}
+
+/** Return the index of the 4 adjacent elements of tetra kel.
+    vi = 0 if the i th face has no adjacent (boundary face)  */
+int Get_adjaTet(pMesh mesh, int kel, int *v0, int *v1, int *v2, int *v3) {
+
+  if ( ! mesh->adja ) {
+    return(0);
+  }
+
+  (*v0) = mesh->adja[4*(kel-1)+1]/4;
+  (*v1) = mesh->adja[4*(kel-1)+2]/4;
+  (*v2) = mesh->adja[4*(kel-1)+3]/4;
+  (*v3) = mesh->adja[4*(kel-1)+4]/4;
+
+  return(1);
 }
