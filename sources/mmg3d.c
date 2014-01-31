@@ -50,7 +50,7 @@ static void usage(char *prog) {
 
 static int parsar(int argc,char *argv[],pMesh mesh,pSol met,pSingul sing) {
   int     i;
-  char   *ptr;
+  char   *ptr, namein[128];
 
   i = 1;
   while ( i < argc ) {
@@ -96,11 +96,10 @@ static int parsar(int argc,char *argv[],pMesh mesh,pSol met,pSingul sing) {
       case 'i':
         if ( !strcmp(argv[i],"-in") ) {
           if ( ++i < argc && isascii(argv[i][0]) && argv[i][0]!='-') {
-            mesh->namein = (char*) calloc(strlen(argv[i])+1,sizeof(char));
-            if ( !mesh->namein ) {
-              perror("  ## Memory problem: calloc");
-              exit(EXIT_FAILURE);
-            }
+            ADD_MEM(mesh,(strlen(argv[i])+1)*sizeof(char),"input mesh name",
+                    printf("  Exit program.\n");
+                    exit(EXIT_FAILURE));
+            SAFE_CALLOC(mesh->namein,strlen(argv[i])+1,char);
             strcpy(mesh->namein,argv[i]);
             mesh->info.imprim = 5;
           }else{
@@ -149,11 +148,10 @@ static int parsar(int argc,char *argv[],pMesh mesh,pSol met,pSingul sing) {
       case 'o':
         if ( !strcmp(argv[i],"-out") ) {
           if ( ++i < argc && isascii(argv[i][0])  && argv[i][0]!='-') {
-            mesh->nameout = (char*) calloc(strlen(argv[i])+1,sizeof(char));
-            if ( !mesh->nameout ) {
-              perror("  ## Memory problem: calloc");
-              exit(EXIT_FAILURE);
-            }
+            ADD_MEM(mesh,(strlen(argv[i])+1)*sizeof(char),"output mesh name",
+                    printf("  Exit program.\n");
+                    exit(EXIT_FAILURE));
+            SAFE_CALLOC(mesh->nameout,strlen(argv[i])+1,char);
             strcpy(mesh->nameout,argv[i]);
           }else{
             fprintf(stderr,"Missing filname for %c%c%c\n",
@@ -183,11 +181,10 @@ static int parsar(int argc,char *argv[],pMesh mesh,pSol met,pSingul sing) {
       case 's':
         if ( !strcmp(argv[i],"-sol") ) {
           if ( ++i < argc && isascii(argv[i][0]) && argv[i][0]!='-' ) {
-            met->namein = (char*) calloc(strlen(argv[i])+1,sizeof(char));
-            if ( !met->namein ) {
-              perror("  ## Memory problem: calloc");
-              exit(EXIT_FAILURE);
-            }
+            ADD_MEM(mesh,(strlen(argv[i])+1)*sizeof(char),"input sol name",
+                    printf("  Exit program.\n");
+                    exit(EXIT_FAILURE));
+            SAFE_CALLOC(met->namein,strlen(argv[i])+1,char);
             strcpy(met->namein,argv[i]);
           }
           else {
@@ -198,11 +195,11 @@ static int parsar(int argc,char *argv[],pMesh mesh,pSol met,pSingul sing) {
 #ifdef SINGUL
         else if ( !strcmp(argv[i],"-sf") ) {
           if ( ++i < argc && isascii(argv[i][0]) && argv[i][0]!='-' ) {
-            sing->namein = (char*) calloc(strlen(argv[i])+1,sizeof(char));
-            if ( !sing->namein ) {
-              perror("  ## Memory problem: calloc");
-              exit(EXIT_FAILURE);
-            }
+            ADD_MEM(mesh,(strlen(argv[i])+1)*sizeof(char),
+                    "input singularities file name",
+                    printf("  Exit program.\n");
+                    exit(EXIT_FAILURE));
+            SAFE_CALLOC(sing->namein,strlen(argv[i])+1,char);
             strcpy(sing->namein,argv[i]);
             mesh->info.sing = 1;
           }
@@ -235,20 +232,20 @@ static int parsar(int argc,char *argv[],pMesh mesh,pSol met,pSingul sing) {
     }
     else {
       if ( mesh->namein == NULL ) {
-        mesh->namein = (char*) calloc(strlen(argv[i])+1,sizeof(char));
-        if ( !mesh->namein ) {
-          perror("  ## Memory problem: calloc");
-          exit(EXIT_FAILURE);
-        }
+        ADD_MEM(mesh,(strlen(argv[i])+1)*sizeof(char),
+                "input mesh name",
+                printf("  Exit program.\n");
+                exit(EXIT_FAILURE));
+        SAFE_CALLOC(mesh->namein,strlen(argv[i])+1,char);
         strcpy(mesh->namein,argv[i]);
         if ( mesh->info.imprim == -99 )  mesh->info.imprim = 5;
       }
       else if ( mesh->nameout == NULL ){
-        mesh->nameout = (char*) calloc(strlen(argv[i])+1,sizeof(char));
-        if ( !mesh->nameout ) {
-          perror("  ## Memory problem: calloc");
-          exit(EXIT_FAILURE);
-        }
+        ADD_MEM(mesh,(strlen(argv[i])+1)*sizeof(char),
+                "output mesh name",
+                printf("  Exit program.\n");
+                exit(EXIT_FAILURE));
+        SAFE_CALLOC(mesh->nameout,strlen(argv[i])+1,char);
         strcpy(mesh->nameout,argv[i]);
       }
       else {
@@ -268,50 +265,62 @@ static int parsar(int argc,char *argv[],pMesh mesh,pSol met,pSingul sing) {
   }
 
   if ( mesh->namein == NULL ) {
-    mesh->namein = (char *)calloc(128,sizeof(char));
-    if ( !mesh->namein ) {
-      perror("  ## Memory problem: calloc");
-      exit(EXIT_FAILURE);
-    }
     fprintf(stdout,"  -- INPUT MESH NAME ?\n");
     fflush(stdin);
-    fscanf(stdin,"%s",mesh->namein);
+    fscanf(stdin,"%s",namein);
+    ADD_MEM(mesh,(strlen(namein)+1)*sizeof(char),"input mesh name",
+            printf("  Exit program.\n");
+            exit(EXIT_FAILURE));
+    SAFE_CALLOC(mesh->namein,strlen(namein)+1,char);
+    strcpy(mesh->namein,namein);
   }
   if ( mesh->nameout == NULL ) {
-    mesh->nameout = (char *)calloc(128,sizeof(char));
-    if ( !mesh->nameout ) {
-      perror("  ## Memory problem: calloc");
-      exit(EXIT_FAILURE);
-    }
+    ADD_MEM(mesh,(strlen(mesh->namein)+3)*sizeof(char),"output mesh name",
+            printf("  Exit program.\n");
+            exit(EXIT_FAILURE));
+    SAFE_CALLOC(mesh->nameout,strlen(mesh->namein)+3,char);
     strcpy(mesh->nameout,mesh->namein);
     ptr = strstr(mesh->nameout,".mesh");
-    if ( ptr ) *ptr = '\0';
-    strcat(mesh->nameout,".o.mesh");
-    ptr = strstr(mesh->nameout,".meshb");
+    if ( ptr ) {
+      *ptr = '\0';
+      strcat(mesh->nameout,".o.mesh");
+    }
+    else
+      strcat(mesh->nameout,".o");
+    ptr = strstr(mesh->namein,".meshb");
     if ( ptr )  strcat(mesh->nameout,"b");
   }
 
   if ( met->namein == NULL ) {
-    met->namein = (char *)calloc(128,sizeof(char));
-    if ( !met->namein ) {
-      perror("  ## Memory problem: calloc");
-      exit(EXIT_FAILURE);
-    }
+    ptr = strstr(mesh->namein,".mesh");
+    if ( ptr )
+      SAFE_CALLOC(met->namein,(strlen(mesh->namein)+1),char);
+    else
+      SAFE_CALLOC(met->namein,(strlen(mesh->namein)+5),char);
+
     strcpy(met->namein,mesh->namein);
     ptr = strstr(met->namein,".mesh");
     if ( ptr ) *ptr = '\0';
     strcat(met->namein,".sol");
+    ADD_MEM(mesh,(strlen(met->namein)+1)*sizeof(char),"input sol name",
+            printf("  Exit program.\n");
+            exit(EXIT_FAILURE));
+    SAFE_REALLOC(met->namein,(strlen(met->namein)+1),char);
   }
   if ( met->nameout == NULL ) {
-    met->nameout = (char *)calloc(128,sizeof(char));
-    if ( !met->nameout ) {
-      perror("  ## Memory problem: calloc");
-      exit(EXIT_FAILURE);
-    }
+    ptr = strstr(mesh->nameout,".mesh");
+    if ( ptr )
+      SAFE_CALLOC(met->nameout,strlen(mesh->nameout)+1,char);
+    else
+      SAFE_CALLOC(met->nameout,strlen(mesh->nameout)+5,char);
     strcpy(met->nameout,mesh->nameout);
     ptr = strstr(met->nameout,".mesh");
     if ( ptr ) *ptr = '\0';
     strcat(met->nameout,".sol");
+    ADD_MEM(mesh,(strlen(met->nameout)+1)*sizeof(char),"output sol name",
+            printf("  Exit program.\n");
+            exit(EXIT_FAILURE));
+    SAFE_REALLOC(met->nameout,(strlen(met->nameout)+1),char);
   }
   return(1);
 }
@@ -348,11 +357,10 @@ int parsop(pMesh mesh,pSol met) {
     /* check for condition type */
     if ( !strcmp(data,"parameters") ) {
       fscanf(in,"%d",&mesh->info.npar);
-      mesh->info.par = (Par*)calloc(mesh->info.npar,sizeof(Par));
-      if ( !mesh->info.par ) {
-        perror("  ## Memory problem: calloc");
-        exit(EXIT_FAILURE);
-      }
+      ADD_MEM(mesh,mesh->info.npar*sizeof(Par),"parameters",
+              printf("  Exit program.\n");
+              exit(EXIT_FAILURE));
+      SAFE_CALLOC(mesh->info.par,mesh->info.npar,Par);
 
       for (i=0; i<mesh->info.npar; i++) {
         par = &mesh->info.par[i];
@@ -455,8 +463,7 @@ int main(int argc,char *argv[]) {
     RETURN_AND_FREE(&mesh,&met,&sing,MMG5_STRONGFAILURE);
   else if ( ier > 0 && met.np != mesh.np ) {
     fprintf(stdout,"  ## WARNING: WRONG SOLUTION NUMBER. IGNORED\n");
-    free(met.m);
-    met.m  = NULL;
+    DEL_MEM(&mesh,met.m,(met.size*met.npmax+1)*sizeof(double));
     met.np = 0;
   } else if ( met.size!=1 ) {
     fprintf(stdout,"  ## ERROR: ANISOTROPIC METRIC NOT IMPLEMENTED.\n");
@@ -468,7 +475,7 @@ int main(int argc,char *argv[]) {
       if ( !sing.namein )
         fprintf(stdout,"  ## WARNING: NO SINGULARITIES PROVIDED.\n");
       else
-        if ( !loadSingul(&sing) )
+        if ( !loadSingul(&mesh,&sing) )
           RETURN_AND_FREE(&mesh,&met,&sing,MMG5_STRONGFAILURE);
     }
     else if ( sing.namein ) {
@@ -489,6 +496,7 @@ int main(int argc,char *argv[]) {
   chrono(ON,&MMG5_ctim[2]);
   setfunc(&mesh,&met);
   Set_saveFunc(&mesh);
+
   if ( abs(mesh.info.imprim) > 0 )  outqua(&mesh,&met);
   fprintf(stdout,"\n  %s\n   MODULE MMG3D: IMB-LJLL : %s (%s)\n  %s\n",
           MG_STR,MG_VER,MG_REL,MG_STR);
@@ -526,6 +534,7 @@ int main(int argc,char *argv[]) {
   if ( !met.np && !DoSol(&mesh,&met,&mesh.info) )
     RETURN_AND_FREE(&mesh,&met,&sing,MMG5_LOWFAILURE);
 #endif
+
   if ( !analys(&mesh) ) RETURN_AND_FREE(&mesh,&met,&sing,MMG5_LOWFAILURE);
 
   if ( mesh.info.imprim > 4 && !mesh.info.iso && met.m ) prilen(&mesh,&met);
@@ -586,6 +595,7 @@ int main(int argc,char *argv[]) {
 
   /* save file */
   outqua(&mesh,&met);
+
   if ( mesh.info.imprim > 4 && !mesh.info.iso )
     prilen(&mesh,&met);
 
@@ -593,8 +603,10 @@ int main(int argc,char *argv[]) {
   if ( mesh.info.imprim )  fprintf(stdout,"\n  -- WRITING DATA FILE %s\n",mesh.nameout);
   if ( !unscaleMesh(&mesh,&met) )
     RETURN_AND_FREE(&mesh,&met,&sing,MMG5_STRONGFAILURE);
+
   if ( !saveMesh(&mesh) )
     RETURN_AND_FREE(&mesh,&met,&sing,MMG5_STRONGFAILURE);
+
   if ( !saveMet(&mesh,&met) )
     RETURN_AND_FREE(&mesh,&met,&sing,MMG5_STRONGFAILURE);
   chrono(OFF,&MMG5_ctim[1]);

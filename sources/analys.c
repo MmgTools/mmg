@@ -9,11 +9,7 @@ static int setadj(pMesh mesh){
   char    i,ii,i1,i2,ii1,ii2,voy,tag;
 
   nvf = nf = ncc = ned = 0;
-  pile = (int*)malloc((mesh->nt+1)*sizeof(int));
-  if ( !pile ) {
-    perror("  ## Memory problem: malloc");
-    exit(EXIT_FAILURE);
-  }
+  SAFE_MALLOC(pile,mesh->nt+1,int);
 
   pile[1] = 1;
   ipil    = 1;
@@ -166,8 +162,7 @@ static int setadj(pMesh mesh){
     fprintf(stdout,"     Edges: %d,  tagged: %d,  ridges: %d, required: %d, refs: %d\n",
             ned,nr+nre+nreq,nr,nreq,nre);
   }
-  free(pile);
-  pile=NULL;
+  SAFE_FREE(pile);
   return(1);
 }
 
@@ -334,11 +329,9 @@ static int norver(pMesh mesh) {
 
   /* memory to store normals for boundary points */
   mesh->xpmax  = MG_MAX(1.5*mesh->xp,mesh->npmax);
-  mesh->xpoint = (pxPoint)calloc(mesh->xpmax+1,sizeof(xPoint));
-  if ( !mesh->xpoint ) {
-    perror("  ## Memory problem: calloc");
-    exit(EXIT_FAILURE);
-  }
+
+  ADD_MEM(mesh,(mesh->xpmax+1)*sizeof(xPoint),"boundary points",return(0));
+  SAFE_CALLOC(mesh->xpoint,mesh->xpmax+1,xPoint);
 
   /* compute normals + tangents */
   nn = ng = nt = nf = 0;
@@ -362,11 +355,10 @@ static int norver(pMesh mesh) {
         else {
           ++mesh->xp;
           if(mesh->xp > mesh->xpmax){
-            fprintf(stdout,"  ## Allocation problem (xpoint), not enough memory.\n");
-            fprintf(stdout,"  ## Check the mesh size or ");
-            fprintf(stdout,"increase the allocated memory with the -m option.\n");
-            mesh->xp--;
-            return(0);
+            TAB_RECALLOC(mesh,mesh->xpoint,mesh->xpmax,0.2,xPoint,
+                         "larger xpoint table",
+                         mesh->xp--;
+                         return(0));
           }
           ppt->xp = mesh->xp;
           pxp = &mesh->xpoint[ppt->xp];
@@ -385,11 +377,10 @@ static int norver(pMesh mesh) {
       }
       ++mesh->xp;
       if(mesh->xp > mesh->xpmax){
-        fprintf(stdout,"  ## Allocation problem (xpoint), not enough memory.\n");
-        fprintf(stdout,"  ## Check the mesh size or ");
-        fprintf(stdout,"increase the allocated memory with the -m option.\n");
-        mesh->xp--;
-        return(0);
+        TAB_RECALLOC(mesh,mesh->xpoint,mesh->xpmax,0.2,xPoint,
+                     "larger xpoint table",
+                     mesh->xp--;
+                     return(0));
       }
       ppt->xp = mesh->xp;
       pxp = &mesh->xpoint[ppt->xp];
@@ -483,11 +474,11 @@ static void nmgeom(pMesh mesh){
           if ( !p0->xp ) {
             ++mesh->xp;
             if(mesh->xp > mesh->xpmax){
-              fprintf(stdout,"  ## Allocation problem (xpoint), not enough memory.\n");
-              fprintf(stdout,"  ## Check the mesh size or ");
-              fprintf(stdout,"increase the allocated memory with the -m option.\n");
-              mesh->xp--;
-              exit(EXIT_FAILURE);
+              TAB_RECALLOC(mesh,mesh->xpoint,mesh->xpmax,0.2,xPoint,
+                           "larger xpoint table",
+                           mesh->xp--;
+                           printf("  Exit program.\n");
+                           exit(EXIT_FAILURE));
             }
             p0->xp = mesh->xp;
           }
@@ -543,8 +534,7 @@ int analys(pMesh mesh) {
   /* build hash table for geometric edges */
   if ( !hGeom(mesh) ) {
     fprintf(stdout,"  ## Hashing problem (0). Exit program.\n");
-    free(mesh->htab.geom);
-    mesh->htab.geom = NULL;
+    DEL_MEM(mesh,mesh->htab.geom,(mesh->htab.max+1)*sizeof(hgeom));
     return(0);
   }
 
@@ -582,26 +572,22 @@ int analys(pMesh mesh) {
   /* set bdry entities to tetra */
   if ( !bdrySet(mesh) ) {
     fprintf(stdout,"  ## Boundary problem. Exit program.\n");
-    free(mesh->xpoint);
-    mesh->xpoint = NULL;
+    DEL_MEM(mesh,mesh->xpoint,(mesh->xpmax+1)*sizeof(xPoint));
     return(0);
   }
 
   /* build hash table for geometric edges */
   if ( !mesh->na && !hGeom(mesh) ) {
     fprintf(stdout,"  ## Hashing problem (0). Exit program.\n");
-    free(mesh->xpoint);
-    free(mesh->htab.geom);
-    mesh->xpoint    = NULL;
-    mesh->htab.geom = NULL;
+    DEL_MEM(mesh,mesh->xpoint,(mesh->xpmax+1)*sizeof(xPoint));
+    DEL_MEM(mesh,mesh->htab.geom,(mesh->htab.max+1)*sizeof(hgeom));
     return(0);
   }
 
   /* Update edges tags and references for xtetras */
   if ( !bdryUpdate(mesh) ) {
     fprintf(stdout,"  ## Boundary problem. Exit program.\n");
-    free(mesh->xpoint);
-    mesh->xpoint = NULL;
+    DEL_MEM(mesh,mesh->xpoint,(mesh->xpmax+1)*sizeof(xPoint));
     return(0);
   }
 
@@ -609,13 +595,9 @@ int analys(pMesh mesh) {
   nmgeom(mesh);
 
   /* release memory */
-  free(mesh->htab.geom);
-  mesh->htab.geom = NULL;
-  free(mesh->tria);
-  free(mesh->adjt);
-  mesh->adjt = 0;
-  mesh->tria = 0;
-  mesh->nt   = 0;
+  DEL_MEM(mesh,mesh->htab.geom,(mesh->htab.max+1)*sizeof(hgeom));
+  DEL_MEM(mesh,mesh->adjt,(3*mesh->nt+4)*sizeof(int));
+  DEL_MEM(mesh,mesh->tria,(mesh->nt+1)*sizeof(Tria));
 
   return(1);
 }

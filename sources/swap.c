@@ -232,13 +232,19 @@ int swpbdy(pMesh mesh,pSol met,int *list,int ret,int it1) {
   c[2] = 0.5*( p0->c[2] + p1->c[2]);
   nm = newPt(mesh,c,MG_BDY);
   if ( !nm ) {
-    fprintf(stdout,"  ## Warning: unable to allocate a new point.\n");
-    fprintf(stdout,"  ## Check the mesh size or ");
-    fprintf(stdout,"increase the allocated memory with the -m option.\n");
-    return(-1);
+    POINT_REALLOC(mesh,met,nm,0.5,
+                  printf("  ## Error: unable to allocate a new point\n");
+                  printf("  ## Check the mesh size or increase");
+                  printf(" the allocated memory with the -m option.\n");
+                  return(-1)
+                  ,c,MG_BDY);
   }
   if ( met->m )  met->m[nm] = 0.5 *(met->m[np]+met->m[nq]);
   ier = split1b(mesh,met,list,ret,nm,0);
+  /* pointer adress may change if we need to realloc memory during split */
+  pt  = &mesh->tetra[iel];
+  pt1 = &mesh->tetra[iel1];
+
   if ( ier < 0 ) {
     fprintf(stdout,"  ## Warning: unable to swap boundary edge.\n");
     return(-1);
@@ -267,8 +273,8 @@ int swpbdy(pMesh mesh,pSol met,int *list,int ret,int it1) {
     return(-1);
   }
   else if ( ier ) {
-	delPt(mesh,ier);
-	ier = 1;
+    delPt(mesh,ier);
+    ier = 1;
   }
 
   return(ier);

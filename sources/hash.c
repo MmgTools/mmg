@@ -59,16 +59,12 @@ int hashTetra(pMesh mesh, int pack) {
   if ( pack )  paktet(mesh);
 
   /* memory alloc */
-  mesh->adja = (int*)calloc(4*mesh->nemax+5,sizeof(int));
-  if ( !mesh->adja ) {
-    perror("  ## Memory problem: calloc");
-    exit(EXIT_FAILURE);
-  }
-  hcode = (int*)calloc(mesh->ne+5,sizeof(int));
-  if ( !hcode ) {
-    perror("  ## Memory problem: calloc");
-    exit(EXIT_FAILURE);
-  }
+  ADD_MEM(mesh,(4*mesh->nemax+5)*sizeof(int),"adjacency table",
+          printf("  Exit program.\n");
+          exit(EXIT_FAILURE));
+  SAFE_CALLOC(mesh->adja,4*mesh->nemax+5,int);
+  SAFE_CALLOC(hcode,mesh->ne+5,int);
+
   link  = mesh->adja;
   hsize = mesh->ne;
 
@@ -144,8 +140,7 @@ int hashTetra(pMesh mesh, int pack) {
       ll = -link[ll];
     }
   }
-  free(hcode);
-  hcode=NULL;
+  SAFE_FREE(hcode);
   return(1);
 }
 
@@ -158,22 +153,16 @@ int hashTria(pMesh mesh) {
   char      i,i1,i2,j,l,ok;
   unsigned int key;
 
-  mesh->adjt = (int*)calloc(3*mesh->nt+5,sizeof(int));
-  if ( !mesh->adjt ) {
-    perror("  ## Memory problem: calloc");
-    exit(EXIT_FAILURE);
-  }
+  ADD_MEM(mesh,(3*mesh->nt+4)*sizeof(int),"surfacic adjacency table",return(0));
+  SAFE_CALLOC(mesh->adjt,3*mesh->nt+4,int);
 
   /* adjust hash table params */
   hmax = 3.71*mesh->np;
   hash.siz  = mesh->np;
   hash.max  = hmax + 1;
   hash.nxt  = hash.siz;
-  hash.item = (hedge*)calloc(hmax+1,sizeof(hedge));
-  if ( !hash.item ) {
-    perror("  ## Memory problem: calloc");
-    exit(EXIT_FAILURE);
-  }
+  ADD_MEM(mesh,(hash.max+1)*sizeof(hedge),"hash table",return(0));
+  SAFE_CALLOC(hash.item,hash.max+1,hedge);
 
   for (k=hash.siz; k<hash.max; k++)
     hash.item[k].nxt = k+1;
@@ -267,8 +256,7 @@ int hashTria(pMesh mesh) {
       }
     }
   }
-  free(hash.item);
-  hash.item = NULL;
+  DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(hedge));
 
   /* set tag */
   for (k=1; k<=mesh->nt; k++) {
@@ -307,21 +295,16 @@ int hashEdge(pMesh mesh,Hash *hash, int a,int b,int k) {
       ph = &hash->item[ph->nxt];
       if ( ph->a == ia && ph->b == ib )  return(1);
     }
-    ph->nxt = hash->nxt;
-    ph      = &hash->item[hash->nxt];
-    ph->a   = ia;  ph->b   = ib;
-    ph->k   = k;
+    ph->nxt   = hash->nxt;
+    ph        = &hash->item[hash->nxt];
+    ph->a     = ia;  ph->b   = ib;
+    ph->k     = k;
     hash->nxt = ph->nxt;
-    ph->nxt = 0;
+    ph->nxt   = 0;
     if ( hash->nxt >= hash->max ) {
       if ( mesh->info.ddebug )
         fprintf(stdout,"  ## Memory alloc problem (edge): %d\n",hash->max);
-      hash->max *= 1.2;
-      hash->item = (hedge*)realloc(hash->item,hash->max*sizeof(hedge));
-      if ( !hash->item ) {
-        perror("  ## Memory problem: realloc");
-        return(0);
-      }
+      TAB_RECALLOC(mesh,hash->item,hash->max,0.2,hedge,"edge",return(0));
       for (j=hash->nxt; j<hash->max; j++)  hash->item[j].nxt = j+1;
     }
     return(1);
@@ -404,15 +387,14 @@ int hashPop(Hash *hash,int a,int b) {
 }
 
 /** used to hash edges or faces */
-int hashNew(Hash *hash,int hsiz,int hmax) {
+int hashNew(pMesh mesh,Hash *hash,int hsiz,int hmax) {
   int   k;
 
   /* adjust hash table params */
-  hash->item = (hedge*)calloc(hmax+10,sizeof(hedge));
-  if ( !hash->item ) {
-    perror("  ## Memory problem: calloc");
-    return(0);
-  }
+  ADD_MEM(mesh,(hmax+2)*sizeof(hedge),"hash table",
+          return(0));
+  SAFE_CALLOC(hash->item,hmax+2,hedge);
+
   hash->siz  = hsiz;
   hash->max  = hmax + 1;
   hash->nxt  = hsiz;
@@ -565,12 +547,10 @@ void hEdge(pMesh mesh,int a,int b,int ref,char tag) {
     if ( mesh->htab.nxt >= mesh->htab.max ) {
       if ( mesh->info.ddebug )
         fprintf(stdout,"  ## Memory alloc problem (edge): %d\n",mesh->htab.max);
-      mesh->htab.max *= 1.2;
-      mesh->htab.geom = (hgeom*)realloc(mesh->htab.geom,mesh->htab.max*sizeof(hgeom));
-      if ( !mesh->htab.geom ) {
-        perror("  ## Memory problem: recalloc");
-        exit(EXIT_FAILURE);
-      }
+      TAB_RECALLOC(mesh,mesh->htab.geom,mesh->htab.max,0.2,hgeom,
+                   "larger htab table",
+                   printf("  Exit program.\n");
+                   exit(EXIT_FAILURE));
       for (j=mesh->htab.nxt; j<mesh->htab.max; j++)  mesh->htab.geom[j].nxt = j+1;
     }
     return;
@@ -587,7 +567,7 @@ int hNew(HGeom *hash,int hsiz,int hmax,int secure) {
   int   k;
 
   /* adjust hash table params */
-  hash->geom = (hgeom*)calloc(hmax+10,sizeof(hgeom));
+  hash->geom = (hgeom*)calloc(hmax+2,sizeof(hgeom));
   if ( !hash->geom ) {
     perror("  ## Memory problem: calloc");
     if ( !secure )  return(0);
@@ -611,6 +591,7 @@ int hGeom(pMesh mesh) {
   if ( mesh->na ) {
     if ( !mesh->htab.geom ) {
       mesh->namax = MG_MAX(1.5*mesh->na,NAMAX);
+      ADD_MEM(mesh,(3*mesh->namax+2)*sizeof(hgeom),"htab",return(0));
       hNew(&mesh->htab,mesh->na,3*mesh->namax,1);
     }
     else {
@@ -621,8 +602,7 @@ int hGeom(pMesh mesh) {
           fprintf(stdout,"  ## Warning: no re-hash of edges of mesh. ");
           fprintf(stdout,"mesh->htab.geom must be freed to enforce analysis.\n");
         }
-        free(mesh->edge);
-        mesh->edge = NULL;
+        DEL_MEM(mesh,mesh->edge,(mesh->na+1)*sizeof(Edge));
         mesh->na   = 0;
         return(1);
 #ifdef SINGUL
@@ -653,8 +633,7 @@ int hGeom(pMesh mesh) {
         hTag(&mesh->htab,pt->v[i1],pt->v[i2],edg,pt->tag[i]);
       }
     }
-    free(mesh->edge);
-    mesh->edge = NULL;
+    DEL_MEM(mesh,mesh->edge,(mesh->na+1)*sizeof(Edge));
     mesh->na   = 0;
   }
   /* else, infer special edges from information carried by triangles */
@@ -675,11 +654,11 @@ int hGeom(pMesh mesh) {
         }
       }
 
+      if ( mesh->htab.geom )
+        DEL_MEM(mesh,mesh->htab.geom,(mesh->htab.max+1)*sizeof(hgeom));
+
       mesh->namax = MG_MAX(1.5*mesh->na,NAMAX);
-      if(mesh->htab.geom){
-        free(mesh->htab.geom);
-        mesh->htab.geom=NULL;
-      }
+      ADD_MEM(mesh,(3*mesh->namax+2)*sizeof(hgeom),"htab",return(0));
       hNew(&mesh->htab,mesh->na,3*mesh->namax,1);
       mesh->na = 0;
     }
@@ -696,11 +675,12 @@ int hGeom(pMesh mesh) {
         else if ( (k < kk) && ( pt->edg[i] || pt->tag[i] ) )  mesh->na++;
       }
     }
+
+    if ( mesh->htab.geom )
+      DEL_MEM(mesh,mesh->htab.geom,(mesh->htab.max+1)*sizeof(hgeom));
+
     mesh->namax = MG_MAX(1.5*mesh->na,NAMAX);
-    if(mesh->htab.geom){
-      free(mesh->htab.geom);
-      mesh->htab.geom=NULL;
-    }
+    ADD_MEM(mesh,(3*mesh->namax+2)*sizeof(hgeom),"htab",return(0));
     hNew(&mesh->htab,mesh->na,3*mesh->namax,1);
     mesh->na = 0;
 #endif
@@ -760,11 +740,12 @@ int chkNumberOfTri(pMesh mesh) {
   }
   if ( mesh->nt == nttmp ) return(1);
   else if ( mesh->nt ){
-    fprintf(stdout,"  ## WARNING: BOUNDARY TRIANGLES ARE DELETED.\n");
-    fprintf(stdout,"  Not enough triangles for geometry (maybe");
-    fprintf(stdout," you have 2 domains but only boundary triangles).\n");
-    free(mesh->tria);
-    mesh->tria = NULL;
+    if ( !mesh->info.iso && (mesh->info.imprim > 4 || mesh->info.ddebug) ) {
+      fprintf(stdout,"  ## WARNING: INITIAL TRIANGLES ARE DELETED.\n");
+      fprintf(stdout,"  Not enough or too much triangles for geometry (maybe");
+      fprintf(stdout," you have 2 domains but only boundary/interface triangles).\n");
+    }
+    DEL_MEM(mesh,mesh->tria,(mesh->nt+1)*sizeof(Tria));
   }
   mesh->nt = nttmp;
   return(0);
@@ -780,11 +761,8 @@ int bdryTria(pMesh mesh) {
   char      i;
 
   /* create triangles */
-  mesh->tria = (pTria)calloc(mesh->nt+1,sizeof(Tria));
-  if ( !mesh->tria ) {
-    perror("  ## Memory problem: calloc");
-    return(0);
-  }
+  ADD_MEM(mesh,(mesh->nt+1)*sizeof(Tria),"triangles",return(0));
+  SAFE_CALLOC(mesh->tria,mesh->nt+1,Tria);
 
   mesh->nt = 0;
   for (k=1; k<=mesh->ne; k++) {
@@ -836,15 +814,16 @@ int bdryTria(pMesh mesh) {
 }
 
 /** identify boundary triangles for implicit surface */
+/* On ne passe jamais ici non? (pour y passer, il faudrait que l'on ait lu les
+   triangles de peau et les triangles ISO or on zappe ces derniers dans loadMesh) */
 int bdryIso(pMesh mesh) {
   pTetra    pt,pt1;
   pTria     ptt;
   pPoint    ppt;
   int      *adja,adj,k,nt;
-  char      i,alloc;
+  char      i;
 
-  alloc = mesh->nt == 0;
-  /* step 1: count external faces */
+  /* step 1: count interface faces */
   nt = 0;
   for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
@@ -852,21 +831,18 @@ int bdryIso(pMesh mesh) {
     adja = &mesh->adja[4*(k-1)+1];
     for (i=0; i<4; i++) {
       adj = adja[i] / 4;
-      pt1 = &mesh->tetra[adj];
-      if ( pt->ref > pt1->ref )  nt++;
+      if ( adj ) {
+        pt1 = &mesh->tetra[adj];
+        if ( pt->ref > pt1->ref )  nt++;
+      }
     }
   }
   if ( !nt )  return(1);
 
   /* step 2 : create triangles */
-  if ( alloc )
-    mesh->tria = (pTria)calloc(mesh->nt+nt+1,sizeof(Tria));
-  else if ( mesh->nt+nt >= mesh->ntmax )
-    mesh->tria = (pTria)realloc(mesh->tria,(mesh->nt+nt+1)*sizeof(Tria));
-  if ( !mesh->tria ){
-    perror("  ## Memory problem: calloc/realloc");
-    exit(EXIT_FAILURE);
-  }
+  ADD_MEM(mesh,nt*sizeof(Tria),"triangles",return(0));
+  if ( mesh->ntmax < (mesh->nt+nt ) )  mesh->ntmax = mesh->nt+nt;
+  SAFE_RECALLOC(mesh->tria,mesh->nt+1,(mesh->nt+nt+1),Tria);
 
   for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
@@ -874,14 +850,16 @@ int bdryIso(pMesh mesh) {
     adja = &mesh->adja[4*(k-1)+1];
     for (i=0; i<4; i++) {
       adj = adja[i] / 4;
-      pt1 = &mesh->tetra[adj];
-      if ( pt->ref > pt1->ref ) {
-        mesh->nt++;
-        ptt = &mesh->tria[mesh->nt];
-        ptt->v[0] = pt->v[idir[i][0]];
-        ptt->v[1] = pt->v[idir[i][1]];
-        ptt->v[2] = pt->v[idir[i][2]];
-        ptt->ref  = mesh->info.iso ? 100 : 0;  /* useful only when saving mesh */
+      if ( adj ) {
+        pt1 = &mesh->tetra[adj];
+        if ( pt->ref > pt1->ref ) {
+          mesh->nt++;
+          ptt = &mesh->tria[mesh->nt];
+          ptt->v[0] = pt->v[idir[i][0]];
+          ptt->v[1] = pt->v[idir[i][1]];
+          ptt->v[2] = pt->v[idir[i][2]];
+          ptt->ref  = mesh->info.iso ? 100 : 0;  /* useful only when saving mesh */
+        }
       }
     }
   }
@@ -898,9 +876,9 @@ int bdryIso(pMesh mesh) {
   return(1);
 }
 
-static int hashFace(Hash *hash,int ia,int ib,int ic,int k) {
+static int hashFace(pMesh mesh,Hash *hash,int ia,int ib,int ic,int k) {
   hedge     *ph;
-  int        key,mins,maxs,sum;
+  int        key,mins,maxs,sum,j;
 
   mins = MG_MIN(ia,MG_MIN(ib,ic));
   maxs = MG_MAX(ia,MG_MAX(ib,ic));
@@ -921,14 +899,18 @@ static int hashFace(Hash *hash,int ia,int ib,int ic,int k) {
     }
     ph->nxt = hash->nxt;
     ph      = &hash->item[hash->nxt];
-    ++hash->nxt;
-    if ( hash->nxt == hash->max ) {
-      fprintf(stdout,"  ## Memory alloc problem (edge): %d\n",hash->max);
-      fprintf(stdout,"  ## Check the mesh size or ");
-      fprintf(stdout,"increase the allocated memory with the -m option.\n");
-      fprintf(stdout,"  Exit program.\n");
-      return(0);
+    ph->a   = mins;
+    ph->b   = maxs;
+    ph->s   = sum;
+    ph->k   = k;
+    hash->nxt = ph->nxt;
+    ph->nxt = 0;
+
+    if ( hash->nxt >= hash->max ) {
+      TAB_RECALLOC(mesh,hash->item,hash->max,0.2,hedge,"face",return(0));
+      for (j=hash->nxt; j<hash->max; j++)  hash->item[j].nxt = j+1;
     }
+    return(1);
   }
 
   /* insert new face */
@@ -994,10 +976,10 @@ int bdrySet(pMesh mesh) {
     return(1);
   }
 
-  if ( ! hashNew(&hash,0.51*mesh->nt,1.51*mesh->nt) ) return(0);
+  if ( ! hashNew(mesh,&hash,0.51*mesh->nt,1.51*mesh->nt) ) return(0);
   for (k=1; k<=mesh->nt; k++) {
     ptt = &mesh->tria[k];
-    hashFace(&hash,ptt->v[0],ptt->v[1],ptt->v[2],k);
+    hashFace(mesh,&hash,ptt->v[0],ptt->v[1],ptt->v[2],k);
   }
   na = 0;
 #ifdef SINGUL
@@ -1021,11 +1003,11 @@ int bdrySet(pMesh mesh) {
 
   mesh->xt     = 0;
   mesh->xtmax  = mesh->ntmax + 2*na;
-  mesh->xtetra = (pxTetra)calloc(mesh->xtmax+1,sizeof(xTetra));
-  if ( !mesh->xtetra ) {
-    perror("  ## Memory problem: calloc");
-    exit(EXIT_FAILURE);
-  }
+
+  ADD_MEM(mesh,(mesh->xtmax+1)*sizeof(xTetra),"boundary tetrahedra",
+          printf("  Exit program.\n");
+          exit(EXIT_FAILURE));
+  SAFE_CALLOC(mesh->xtetra,mesh->xtmax+1,xTetra);
 
   /* assign references to tetras faces */
   for (k=1; k<=mesh->ne; k++) {
@@ -1044,12 +1026,11 @@ int bdrySet(pMesh mesh) {
         if ( !pt->xt ) {
           mesh->xt++;
           if ( mesh->xt > mesh->xtmax ) {
-            fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
-            fprintf(stdout,"  ## Check the mesh size or ");
-            fprintf(stdout,"increase the allocated memory with the -m option.\n");
-            fprintf(stdout,"  Exit program.\n");
-            mesh->xt--;
-            exit(EXIT_FAILURE);
+            TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,xTetra,
+                         "larger xtetra table",
+                         mesh->xt--;
+                         printf("  Exit program.\n");
+                         exit(EXIT_FAILURE));
           }
           pt->xt = mesh->xt;
         }
@@ -1086,12 +1067,11 @@ int bdrySet(pMesh mesh) {
             if ( !pt->xt ) {
               mesh->xt++;
               if ( mesh->xt > mesh->xtmax ) {
-                fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
-                fprintf(stdout,"  ## Check the mesh size or ");
-                fprintf(stdout,"increase the allocated memory with the -m option.\n");
-                fprintf(stdout,"  Exit program.\n");
-                mesh->xt--;
-                exit(EXIT_FAILURE);
+                TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,xTetra,
+                             "larger xtetra table",
+                             mesh->xt--;
+                             printf("  Exit program.\n");
+                             exit(EXIT_FAILURE));
               }
               pt->xt = mesh->xt;
             }
@@ -1139,8 +1119,7 @@ int bdrySet(pMesh mesh) {
       }
     }
   }
-  free(hash.item);
-  hash.item=NULL;
+  DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(hedge));
   return(1);
 }
 
@@ -1155,10 +1134,10 @@ int bdryUpdate(pMesh mesh) {
   char     i,tag;
 
   if ( !mesh->nt )  return(1);
-  if ( !hashNew(&hash,0.51*mesh->nt,1.51*mesh->nt) )  return(0);
+  if ( !hashNew(mesh,&hash,0.51*mesh->nt,1.51*mesh->nt) )  return(0);
   for (k=1; k<=mesh->nt; k++) {
     ptt = &mesh->tria[k];
-    hashFace(&hash,ptt->v[0],ptt->v[1],ptt->v[2],k);
+    hashFace(mesh,&hash,ptt->v[0],ptt->v[1],ptt->v[2],k);
   }
 
   for (k=1; k<=mesh->ne; k++) {
@@ -1204,8 +1183,7 @@ int bdryUpdate(pMesh mesh) {
       }
     }
   }
-  free(hash.item);
-  hash.item = NULL;
+  DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(hedge));
   return(1);
 }
 
@@ -1221,11 +1199,11 @@ int bdryPerm(pMesh mesh) {
   assert(mesh->nt);
 
   /* store triangles temporarily */
-  if ( !hashNew(&hash,MG_MAX(0.51*mesh->nt,100),MG_MAX(1.51*mesh->nt,300)) )
+  if ( !hashNew(mesh,&hash,MG_MAX(0.51*mesh->nt,100),MG_MAX(1.51*mesh->nt,300)) )
     return(0);
   for (k=1; k<=mesh->nt; k++) {
     ptt = &mesh->tria[k];
-    if ( !hashFace(&hash,ptt->v[0],ptt->v[1],ptt->v[2],k) )  return(0);
+    if ( !hashFace(mesh,&hash,ptt->v[0],ptt->v[1],ptt->v[2],k) )  return(0);
     for (i=0; i<3; i++) {
       ppt = &mesh->point[ptt->v[i]];
       if ( !mesh->info.iso ) ppt->tag |= MG_BDY;
@@ -1269,7 +1247,6 @@ int bdryPerm(pMesh mesh) {
   if ( mesh->info.ddebug && nf > 0 )
     fprintf(stdout,"  ## %d faces reoriented\n",nf);
 
-  free(hash.item);
-  hash.item=NULL;
+  DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(hedge));
   return(1);
 }

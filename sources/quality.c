@@ -507,12 +507,12 @@ int badelt(pMesh mesh,pSol met) {
       /*treat bad elt*/
       /*1) try to swp one edge*/
       for(i=0 ; i<6 ; i++) {
-  nconf = chkswpgen(mesh,k,i,&ilist,list,1.01);
+        nconf = chkswpgen(mesh,k,i,&ilist,list,1.01);
         if ( nconf ) {
           ns++;
           if(!swpgen(mesh,met,nconf,ilist,list)) return(-1);
           break;
-  }
+        }
       }
     }
     /*printf("on trouve %d bad elt\n",nd);
@@ -544,7 +544,7 @@ int prilen(pMesh mesh, pSol met) {
   amin = amax = bmin = bmax = 0;
 
   /* Hash all edges in the mesh */
-  if ( !hashNew(&hash,mesh->np,7*mesh->np) )  return(0);
+  if ( !hashNew(mesh,&hash,mesh->np,7*mesh->np) )  return(0);
 
   for(k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
@@ -642,8 +642,7 @@ int prilen(pMesh mesh, pSol met) {
     }
   }
 
-  free(hash.item);
-  hash.item=NULL;
+  DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(hedge));
   return(1);
 }
 

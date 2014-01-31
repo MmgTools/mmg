@@ -483,10 +483,13 @@ int creaPoint(pMesh mesh, pSol met, int iel,double c[3], double cb[4], char tag)
     }
     ip = newPt(mesh,c,tag );
     if ( !ip ) {
-      fprintf(stdout,"  ## Allocation problem (point), not enough memory.\n");
-      fprintf(stdout,"  ## Increase the allocated memory with the -m option.\n");
-      fprintf(stdout,"  Exit program.\n");
-      return(0);
+      POINT_REALLOC(mesh,met,ip,0.2,
+                    printf("  ## Error: unable to allocate a new point\n");
+                    printf("  ## Check the mesh size or increase");
+                    printf(" the allocated memory with the -m option.\n");
+                    fprintf(stdout,"  Exit program.\n");
+                    return(0)
+                    ,c,tag);
     }
     if ( met->m )  met->m[ip] = hnew;
 
@@ -594,10 +597,13 @@ int creaEdge(pMesh mesh, pSol met, Travel *trav, char tag){
     }
     ip = newPt(mesh,c,tag);
     if ( !ip ) {
-      fprintf(stdout,"  ## Allocation problem (point), not enough memory.\n");
-      fprintf(stdout,"  ## Increase the allocated memory with the -m option.\n");
-      fprintf(stdout,"  Exit program.\n");
-      return(0);
+      POINT_REALLOC(mesh,met,ip,0.2,
+                    printf("  ## Error: unable to allocate a new point\n");
+                    printf("  ## Check the mesh size or increase");
+                    printf(" the allocated memory with the -m option.\n");
+                    fprintf(stdout,"  Exit program.\n");
+                    return(0)
+                    ,c,tag);
     }
     if ( met->m )  met->m[ip] = hnew;
 
@@ -1229,6 +1235,12 @@ int seekEdge(pMesh mesh, pSol met, psPoint ppt0, psPoint ppt1,
         fprintf(stdout,"%s:%d: Error: not able to create edge\n",__FILE__,__LINE__);
         return(0);
       }
+      /* pointer adress may change if reallocation in creaEdge */
+      p[0] = &mesh->point[pt->v[0]];
+      p[1] = &mesh->point[pt->v[1]];
+      p[2] = &mesh->point[pt->v[2]];
+      p[3] = &mesh->point[pt->v[3]];
+
 
       if ( nsfin && (mesh->tetra[nsfin].flag != (*basetet)) )  return(1);
 
@@ -1331,6 +1343,7 @@ int inserSingul(pMesh mesh, pSol met, pSingul singul){
   /* if edges exist in mesh, hash special edges from existing field */
   if ( mesh->na || singul->na ) {
     mesh->namax = MG_MAX(1.5*(mesh->na+singul->na),NAMAX);
+    ADD_MEM(mesh,(3*mesh->namax+2)*sizeof(hgeom),"htab",return(0));
     if ( !hNew(&mesh->htab,mesh->na+singul->na,3*mesh->namax,1) )
       return(0);
   }
@@ -1387,14 +1400,12 @@ int inserSingul(pMesh mesh, pSol met, pSingul singul){
     mesh->tetra[k].flag = 0;
   }
 
-  if ( singul->ns ) {
-    free(singul->point);
-    singul->point=NULL;
-  }
-  if ( singul->na ) {
-    free(singul->edge);
-    singul->edge=NULL;
-  }
+  if ( singul->point )
+    DEL_MEM(mesh,singul->point,(singul->ns+1)*sizeof(sPoint));
+
+  if ( singul->edge )
+    DEL_MEM(mesh,singul->edge,(singul->na+1)*sizeof(Edge));
+
   return(1);
 }
 

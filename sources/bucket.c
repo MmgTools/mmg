@@ -10,22 +10,13 @@ pBucket newBucket(pMesh mesh,int nmax) {
   int           k,ic,ii,jj,kk;
 
   /* memory alloc */
-  bucket = (Bucket*)malloc(sizeof(Bucket));
-  if ( !bucket ) {
-    perror("  ## Memory problem: calloc");
-    exit(EXIT_FAILURE);
-  }
+  ADD_MEM(mesh,sizeof(Bucket),"bucket",return(NULL));
+  SAFE_MALLOC(bucket,1,Bucket);
   bucket->size = nmax;
-  bucket->head = (int*)calloc(nmax*nmax*nmax+1,sizeof(int));
-  if ( !bucket->head ) {
-    perror("  ## Memory problem: calloc");
-    exit(EXIT_FAILURE);
-  }
-  bucket->link = (int*)calloc(mesh->npmax+1,sizeof(int));
-  if ( !bucket->link ) {
-    perror("  ## Memory problem: calloc");
-    exit(EXIT_FAILURE);
-  }
+  ADD_MEM(mesh,(nmax*nmax*nmax+1)*sizeof(int),"bucket->head",return(NULL));
+  SAFE_CALLOC(bucket->head,nmax*nmax*nmax+1,int);
+  ADD_MEM(mesh,(mesh->npmax+1)*sizeof(int),"bucket->link",return(NULL));
+  SAFE_CALLOC(bucket->link,mesh->npmax+1,int);
 
   /* insert vertices */
   dd = nmax / (double)PRECI;
@@ -47,13 +38,6 @@ pBucket newBucket(pMesh mesh,int nmax) {
   }
 
   return(bucket);
-}
-
-
-void freeBucket(pBucket bucket) {
-  free(bucket->head);
-  free(bucket->link);
-  free(bucket);
 }
 
 

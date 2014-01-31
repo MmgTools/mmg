@@ -87,6 +87,8 @@ static int dichoto(pMesh mesh,pSol met,int k,int *vx) {
       to = t;
     else
       tp = t;
+    /* if we realloc mem in the split function, pt is not valid anymore */
+    pt = &mesh->tetra[k];
   }
   while ( ++it < maxit );
   /* restore coords of last valid pos. */
@@ -612,7 +614,7 @@ static int anatetv(pMesh mesh,pSol met,char typchk) {
   char     i,j,ia;
 
   /** 1. analysis */
-  if ( !hashNew(&hash,mesh->np,7*mesh->np) )  return(-1);
+  if ( !hashNew(mesh,&hash,mesh->np,7*mesh->np) )  return(-1);
   memlack = ns = nap = 0;
   hma2 = LLONG*LLONG*mesh->info.hmax*mesh->info.hmax;
 
@@ -695,11 +697,27 @@ static int anatetv(pMesh mesh,pSol met,char typchk) {
 #endif
           ip  = newPt(mesh,o,0);
         if ( !ip ) {
-          fprintf(stdout,"  ## Error: unable to allocate a new point\n");
-          fprintf(stdout,"  ## Check the mesh size or ");
-          fprintf(stdout,"increase the allocated memory with the -m option.\n");
-          memlack=1;
-          goto split;
+          /* reallocation of point table */
+#ifdef SINGUL
+          if ( mesh->info.sing && pt->xt && (pxt->tag[i] & MG_SGL) )
+            POINT_REALLOC(mesh,met,ip,0.5,
+                          printf("  ## Error: unable to allocate a new point\n");
+                          printf("  ## Check the mesh size or increase");
+                          printf(" the allocated memory with the -m option.\n");
+                          memlack=1;
+                          goto split
+                          ,o,MG_SGL);
+          else
+#endif
+            POINT_REALLOC(mesh,met,ip,0.5,
+                          printf("  ## Error: unable to allocate a new point\n");
+                          printf("  ## Check the mesh size or increase");
+                          printf(" the allocated memory with the -m option.\n");
+                          memlack=1;
+                          goto split
+                          ,o,0);
+          p1  = &mesh->point[ip1];
+          p2  = &mesh->point[ip2];
         }
 
         if ( met->m )
@@ -718,8 +736,7 @@ static int anatetv(pMesh mesh,pSol met,char typchk) {
     }
   }
   if ( !nap )  {
-    free(hash.item);
-    hash.item=NULL;
+    DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(hedge));
     return(0);
   }
 
@@ -799,8 +816,7 @@ static int anatetv(pMesh mesh,pSol met,char typchk) {
   if ( (mesh->info.ddebug || abs(mesh->info.imprim) > 5) && ns > 0 )
     fprintf(stdout,"     %7d splitted\n",nap);
 
-  free(hash.item);
-  hash.item=NULL;
+  DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(hedge));
   if ( memlack )  return(-1);
   return(nap);
 }
@@ -820,7 +836,7 @@ static int anatets(pMesh mesh,pSol met,char typchk) {
   static double uv[3][2] = { {0.5,0.5}, {0.,0.5}, {0.5,0.} };
 
   /** 1. analysis of boundary elements */
-  if ( !hashNew(&hash,mesh->np,7*mesh->np) ) return(-1);
+  if ( !hashNew(mesh,&hash,mesh->np,7*mesh->np) ) return(-1);
   ns = nap = 0;
   npinit=mesh->np;
   for (k=1; k<=mesh->ne; k++) {
@@ -885,13 +901,16 @@ static int anatets(pMesh mesh,pSol met,char typchk) {
       if ( !ip ) {
         ip = newPt(mesh,o,MG_BDY);
         if ( !ip ) {
-          fprintf(stdout,"  ## Error: unable to allocate a new point.\n");
-          fprintf(stdout,"  ## Check the mesh size or ");
-          fprintf(stdout,"increase the allocated memory with the -m option.\n");
-          do {
-            delPt(mesh,mesh->np);
-          } while ( mesh->np>npinit );
-          return(-1);
+          /* reallocation of point table */
+          POINT_REALLOC(mesh,met,ip,0.5,
+                        printf("  ## Error: unable to allocate a new point.\n");
+                        printf("  ## Check the mesh size or increase ");
+                        printf("the allocated memory with the -m option.\n");
+                        do {
+                          delPt(mesh,mesh->np);
+                        } while ( mesh->np>npinit );
+                        return(-1)
+                        ,o,MG_BDY);
         }
         if ( !hashEdge(mesh,&hash,ip1,ip2,ip) )  return(-1);
         ppt = &mesh->point[ip];
@@ -933,8 +952,7 @@ static int anatets(pMesh mesh,pSol met,char typchk) {
     }
   }
   if ( !ns ) {
-    free(hash.item);
-    hash.item=NULL;
+    DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(hedge));
     return(ns);
   }
 
@@ -1088,8 +1106,7 @@ static int anatets(pMesh mesh,pSol met,char typchk) {
   if ( (mesh->info.ddebug || abs(mesh->info.imprim) > 5) && ns > 0 )
     fprintf(stdout,"       %7d elements splitted\n",nap);
 
-  free(hash.item);
-  hash.item=NULL;
+  DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(hedge));
   return(nap);
 }
 
@@ -1198,14 +1215,21 @@ static int adpspl(pMesh mesh,pSol met, int* warn) {
       }
       ip = newPt(mesh,o,tag);
       if ( !ip ) {
-        *warn=1;
-        break;
+        /* reallocation of point table */
+        POINT_REALLOC(mesh,met,ip,0.2,
+                      *warn=1;
+                      break
+                      ,o,tag);
       }
       //CECILE
       if ( met->m )
         met->m[ip] = 0.5 * (met->m[ip1]+met->m[ip2]);
       //CECILE
       ier = split1b(mesh,met,list,ilist,ip,1);
+      /* if we realloc memory in split1b pt and pxt pointers are not valid */
+      pt = &mesh->tetra[k];
+      pxt = pt->xt ? &mesh->xtetra[pt->xt] : 0;
+
       if ( ier < 0 ) {
         fprintf(stdout," ## Error: unable to split.\n");
         return(-1);
@@ -1258,8 +1282,11 @@ static int adpspl(pMesh mesh,pSol met, int* warn) {
 #endif
         ip = newPt(mesh,o,MG_NOTAG);
       if ( !ip )  {
-        *warn=1;
-        break;
+        /* reallocation of point table */
+        POINT_REALLOC(mesh,met,ip,0.2,
+                      *warn=1;
+                      break
+                      ,o,MG_NOTAG);
       }
       //CECILE
       if ( met->m )
@@ -1594,8 +1621,7 @@ static int anatet(pMesh mesh,pSol met,char typchk) {
   maxit = 5;
   do {
     /* memory free */
-    free(mesh->adja);
-    mesh->adja = 0;
+    DEL_MEM(mesh,mesh->adja,(4*mesh->nemax+5)*sizeof(int));
     if ( !mesh->info.noinsert ) {
 
       /* split tetra with more than 2 bdry faces */

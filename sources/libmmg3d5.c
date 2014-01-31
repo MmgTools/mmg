@@ -46,25 +46,18 @@ void Free_all(pMesh mesh,pSol met
              ,pSingul singul
 #endif
              ){
+
 #ifdef SINGUL
   Free_structures(mesh,met,singul);
 #else
   Free_structures(mesh,met);
 #endif
 
-  /* mesh */
-  if ( mesh->edge ) {
-    free(mesh->edge);
-    mesh->edge = NULL;
-  }
-  free(mesh);
-  mesh = NULL;
-  free(met);
-  met = NULL;
 #ifdef SINGUL
-  free(singul);
-  singul = NULL;
+  SAFE_FREE(singul);
 #endif
+  SAFE_FREE(met);
+  SAFE_FREE(mesh);
 }
 
 /** set pointer for MMG5_saveMesh function */
@@ -79,22 +72,13 @@ void Free_topoTables(pMesh mesh) {
   int k;
 
   mesh->xp = 0;
-  mesh->xt = 0;
-  if ( mesh->adja ) {
-    free(mesh->adja);
-    mesh->adja = NULL;
-  }
-  if ( mesh->xtetra ) {
-    free(mesh->xtetra);
-    mesh->xtetra = NULL;
-  }
-  for(k=1; k <=mesh->ne; k++) {
-    mesh->tetra[k].xt = 0;
-  }
-  if ( mesh->xpoint ) {
-    free(mesh->xpoint);
-    mesh->xpoint = NULL;
-  }
+  if ( mesh->adja )
+    DEL_MEM(mesh,mesh->adja,(4*mesh->nemax+5)*sizeof(int));
+
+  freeXTets(mesh);
+
+  if ( mesh->xpoint )
+    DEL_MEM(mesh,mesh->xpoint,(mesh->xpmax+1)*sizeof(xPoint));
   for(k=1; k <=mesh->np; k++) {
     mesh->point[k].xp = 0;
   }
@@ -156,15 +140,17 @@ int packMesh(pMesh mesh,pSol met) {
 
   /* compact metric */
   nbl = 1;
-  for (k=1; k<=mesh->np; k++) {
-    ppt = &mesh->point[k];
-    if ( !MG_VOK(ppt) )  continue;
-    imet    = (k-1) * met->size + 1;
-    imetnew = (nbl-1) * met->size + 1;
+  if ( met->m ) {
+    for (k=1; k<=mesh->np; k++) {
+      ppt = &mesh->point[k];
+      if ( !MG_VOK(ppt) )  continue;
+      imet    = (k-1) * met->size + 1;
+      imetnew = (nbl-1) * met->size + 1;
 
-    for (i=0; i<met->size; i++)
-      met->m[imetnew + i] = met->m[imet + i];
-    ++nbl;
+      for (i=0; i<met->size; i++)
+        met->m[imetnew + i] = met->m[imet + i];
+      ++nbl;
+    }
   }
 
   /*compact vertices*/
@@ -194,14 +180,19 @@ int packMesh(pMesh mesh,pSol met) {
   }
 
   /* build hash table for edges */
-  if ( mesh->htab.geom ) {
-    free(mesh->htab.geom);
-    mesh->htab.geom=NULL;
-  }
+  if ( mesh->htab.geom )
+    DEL_MEM(mesh,mesh->htab.geom,(mesh->htab.max+1)*sizeof(hgeom));
+
   mesh->na = 0;
   /* in the wost case (all edges are marked), we will have around 1 edge per *
    * triangle (we count edges only one time) */
-  if ( hNew(&mesh->htab,mesh->nt,3*(mesh->nt),0) ) {
+  mesh->memCur += (long long)((3*mesh->nt+2)*sizeof(hgeom));
+  if ( (mesh->memCur) > (mesh->memMax) ) {
+    mesh->memCur -= (long long)((3*mesh->nt+2)*sizeof(hgeom));
+    fprintf(stdout,"  ## Warning:");
+    fprintf(stdout," unable to allocate htab.\n");
+  }
+  else if ( hNew(&mesh->htab,mesh->nt,3*(mesh->nt),0) ) {
     for (k=1; k<=mesh->ne; k++) {
       pt   = &mesh->tetra[k];
       if ( MG_EOK(pt) &&  pt->xt ) {
@@ -222,11 +213,9 @@ int packMesh(pMesh mesh,pSol met) {
       mesh->na++;
     }
     if ( mesh->na ) {
-      mesh->edge = (pEdge)calloc(mesh->na+1,sizeof(Edge));
-      if ( !mesh->edge ) {
-        perror("  ## Memory problem: calloc");
-        return(0);
-      }
+      ADD_MEM(mesh,(mesh->na+1)*sizeof(Edge),"edges",);
+      SAFE_CALLOC(mesh->edge,mesh->na+1,Edge);
+
       mesh->na = 0;
       for (k=0; k<=mesh->htab.max; k++) {
         ph = &mesh->htab.geom[k];
@@ -239,9 +228,10 @@ int packMesh(pMesh mesh,pSol met) {
         if ( MG_GEO & ph->tag ) nr++;
       }
     }
-    free(mesh->htab.geom);
-    mesh->htab.geom = NULL;
+    DEL_MEM(mesh,mesh->htab.geom,(mesh->htab.max+1)*sizeof(hgeom));
   }
+  else
+    mesh->memCur -= (long long)((3*mesh->nt+2)*sizeof(hgeom));
 
   for(k=1 ; k<=mesh->np ; k++)
     mesh->point[k].tmp = 0;
@@ -316,8 +306,7 @@ int mmg3dlib(pMesh mesh,pSol met
 
   if ( met->np && (met->np != mesh->np) ) {
     fprintf(stdout,"  ## WARNING: WRONG SOLUTION NUMBER. IGNORED\n");
-    free(met->m);
-    met->m   = NULL;
+    DEL_MEM(mesh,met->m,(met->size*met->npmax+1)*sizeof(double));
     met->np = 0;
   }
   else if ( met->size!=1 ) {

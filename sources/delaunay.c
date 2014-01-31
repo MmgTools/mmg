@@ -46,29 +46,36 @@ int hashEdgeDelone(pMesh mesh,Hash *hash,int iel,int i,int *v) {
       adja[j] = iel*4 + i;
       return(1);
     }
-    else
+    else {
       while ( ha->nxt && ha->nxt < hash->max ) {
-	ha = &hash->item[ha->nxt];
-	if ( ha->a == mins && ha->b == maxs ) {
-	  iadr = (iel-1)*4 + 1;
-	  adja = &mesh->adja[iadr];
-	  adja[i] = ha->k;
+        ha = &hash->item[ha->nxt];
+        if ( ha->a == mins && ha->b == maxs ) {
+          iadr = (iel-1)*4 + 1;
+          adja = &mesh->adja[iadr];
+          adja[i] = ha->k;
 
-	  jel  = ha->k >> 2;
-	  j    = ha->k % 4;
-	  iadr = (jel-1)*4 + 1;
-	  adja = &mesh->adja[iadr];
-	  adja[j] = iel*4 + i;
-	  return(1);
-	}
+          jel  = ha->k >> 2;
+          j    = ha->k % 4;
+          iadr = (jel-1)*4 + 1;
+          adja = &mesh->adja[iadr];
+          adja[j] = iel*4 + i;
+          return(1);
+        }
       }
-    ha->nxt = hash->nxt;
-    ha      = &hash->item[hash->nxt];
-    ++hash->nxt;
-    if ( hash->nxt == hash->max ) {
-      fprintf(stdout,"  ## Memory alloc problem (edge): %d\n",hash->max);
-      return(0);
     }
+    ha->nxt   = hash->nxt;
+    ha        = &hash->item[hash->nxt];
+    ha->a     = mins;
+    ha->b     = maxs;
+    ha->k     = iel*4 + i;
+    hash->nxt = ha->nxt;
+    ha->nxt   = 0;
+
+    if ( hash->nxt >= hash->max ) {
+      TAB_RECALLOC(mesh,hash->item,hash->max,0.2,hedge,"face",return(0));
+      for (j=hash->nxt; j<hash->max; j++)  hash->item[j].nxt = j+1;
+    }
+    return(1);
   }
 
   /* insert */
@@ -108,12 +115,12 @@ int delone(pMesh mesh,pSol sol,int ip,int *list,int ilist) {
     for (i=0; i<4; i++) {
       jel = vois[i];
       if ( !jel || mesh->tetra[jel].mark != base ) {
-	for (j=0; j<3; j++) {
-	  i1  = idir[i][j];
-	  ppt = &mesh->point[ pt1->v[i1] ];
-	  ppt->tagdel |= MG_NOM;
-	}
-	size++;
+        for (j=0; j<3; j++) {
+          i1  = idir[i][j];
+          ppt = &mesh->point[ pt1->v[i1] ];
+          ppt->tagdel |= MG_NOM;
+        }
+        size++;
       }
     }
   }
@@ -139,7 +146,7 @@ int delone(pMesh mesh,pSol sol,int ip,int *list,int ilist) {
   if ( alert )  {puts("aler");return(-1);}
   /* hash table params */
   if ( size > 3*LONMAX )  return(0);
-  if ( !hashNew(&hedg,size,3*size) ) { /*3*size suffit */
+  if ( !hashNew(mesh,&hedg,size,3*size) ) { /*3*size suffit */
     fprintf(stdout,"  ## Unable to complete mesh.\n");
     return(-1);
   }
@@ -169,87 +176,87 @@ int delone(pMesh mesh,pSol sol,int ip,int *list,int ilist) {
 
       /* external face */
       if ( !jel || (mesh->tetra[jel].mark != base) ) {
-	iel = newElt(mesh);
+        iel = newElt(mesh);
 	
-	if ( iel < 1 )  {printf("pas de voisin!!\n");return(0);}
-	pt1 = &mesh->tetra[iel];
-	memcpy(pt1,pt,sizeof(Tetra));
-	pt1->v[i] = ip;
-	pt1->qual = orcal(mesh,iel);
-	pt1->ref = mesh->tetra[old].ref;
-	if(pt1->qual < 1e-10) {printf("argggg (%d) %d : %e\n",ip,iel,pt1->qual);
-	  printf("pt1 : %d %d %d %d\n",pt1->v[0],pt1->v[1],pt1->v[2],pt1->v[3]);/*exit(0);*/}
-	iadr = (iel-1)*4 + 1;
-	adjb = &mesh->adja[iadr];
-	adjb[i] = adja[i];
+        if ( iel < 1 )  {printf("pas de voisin!!\n");return(0);}
+        pt1 = &mesh->tetra[iel];
+        memcpy(pt1,pt,sizeof(Tetra));
+        pt1->v[i] = ip;
+        pt1->qual = orcal(mesh,iel);
+        pt1->ref = mesh->tetra[old].ref;
+        if(pt1->qual < 1e-10) {printf("argggg (%d) %d : %e\n",ip,iel,pt1->qual);
+          printf("pt1 : %d %d %d %d\n",pt1->v[0],pt1->v[1],pt1->v[2],pt1->v[3]);/*exit(0);*/}
+        iadr = (iel-1)*4 + 1;
+        adjb = &mesh->adja[iadr];
+        adjb[i] = adja[i];
         
-	if(ixt) {
-	  if( xt.ref[i] || xt.ftag[i]) {
-	    // if(!adja[i] || (mesh->tetra[jel].ref != pt1->ref)) {
-	    /*  if((old==20329) || (iel==20329)) { */
-	    /*  printf("eh eh on en a un!!!"); */
-	    /*  printf("adj of %d : %d %d %d %d\n",old,adja[0],adja[1],adja[2],adja[3]); */
-	    /*  printf("adj of %d : %d %d %d %d\n",iel,adjb[0],adjb[1],adjb[2],adjb[3]); */
-	    /* printf("on traite %d\n",i); */
-	    /*  } */
-	    if(!isused) {
-	      pt1->xt = pt->xt;
-	      pt->xt = 0;
-	      pxt0 = &mesh->xtetra[pt1->xt];
-	      memset(pxt0,0,sizeof(MMG5_xTetra));
-	      pxt0->ref[i]   = xt.ref[i] ; pxt0->ftag[i]  = xt.ftag[i];
-	      pxt0->edg[iarf[i][0]] = xt.edg[iarf[i][0]];
-	      pxt0->edg[iarf[i][1]] = xt.edg[iarf[i][1]];
-	      pxt0->edg[iarf[i][2]] = xt.edg[iarf[i][2]];
-	      pxt0->tag[iarf[i][0]] = xt.tag[iarf[i][0]];
-	      pxt0->tag[iarf[i][1]] = xt.tag[iarf[i][1]];
-	      pxt0->tag[iarf[i][2]] = xt.tag[iarf[i][2]];
-	      pxt0->ori = xt.ori;
-	      isused=1;
-	    } else {
-	      mesh->xt++;
-        if ( mesh->xt > mesh->xtmax ) {
-          fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
-          fprintf(stdout,"  ## Check the mesh size or ");
-          fprintf(stdout,"increase the allocated memory with the -m option.\n");
-          mesh->xt--;
-          return(0);
+        if(ixt) {
+          if( xt.ref[i] || xt.ftag[i]) {
+            // if(!adja[i] || (mesh->tetra[jel].ref != pt1->ref)) {
+            /*  if((old==20329) || (iel==20329)) { */
+            /*  printf("eh eh on en a un!!!"); */
+            /*  printf("adj of %d : %d %d %d %d\n",old,adja[0],adja[1],adja[2],adja[3]); */
+            /*  printf("adj of %d : %d %d %d %d\n",iel,adjb[0],adjb[1],adjb[2],adjb[3]); */
+            /* printf("on traite %d\n",i); */
+            /*  } */
+            if(!isused) {
+              pt1->xt = pt->xt;
+              pt->xt = 0;
+              pxt0 = &mesh->xtetra[pt1->xt];
+              memset(pxt0,0,sizeof(MMG5_xTetra));
+              pxt0->ref[i]   = xt.ref[i] ; pxt0->ftag[i]  = xt.ftag[i];
+              pxt0->edg[iarf[i][0]] = xt.edg[iarf[i][0]];
+              pxt0->edg[iarf[i][1]] = xt.edg[iarf[i][1]];
+              pxt0->edg[iarf[i][2]] = xt.edg[iarf[i][2]];
+              pxt0->tag[iarf[i][0]] = xt.tag[iarf[i][0]];
+              pxt0->tag[iarf[i][1]] = xt.tag[iarf[i][1]];
+              pxt0->tag[iarf[i][2]] = xt.tag[iarf[i][2]];
+              pxt0->ori = xt.ori;
+              isused=1;
+            } else {
+              mesh->xt++;
+              if ( mesh->xt > mesh->xtmax ) {
+                TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,xTetra,
+                             "larger xtetra table",
+                             mesh->xt--;
+                             printf("  Exit program.\n");
+                             exit(EXIT_FAILURE));
+              }
+              pt1->xt = mesh->xt;
+              pxt0 = &mesh->xtetra[pt1->xt];
+              pxt0->ref[i]   = xt.ref[i] ; pxt0->ftag[i]  = xt.ftag[i];
+              pxt0->edg[iarf[i][0]] = xt.edg[iarf[i][0]];
+              pxt0->edg[iarf[i][1]] = xt.edg[iarf[i][1]];
+              pxt0->edg[iarf[i][2]] = xt.edg[iarf[i][2]];
+              pxt0->tag[iarf[i][0]] = xt.tag[iarf[i][0]];
+              pxt0->tag[iarf[i][1]] = xt.tag[iarf[i][1]];
+              pxt0->tag[iarf[i][2]] = xt.tag[iarf[i][2]];
+              pxt0->ori = xt.ori;
+            }
+          }
+          else {
+            pt1->xt = 0;
+          }
         }
-	      pt1->xt = mesh->xt;
-	      pxt0 = &mesh->xtetra[pt1->xt];
-	      pxt0->ref[i]   = xt.ref[i] ; pxt0->ftag[i]  = xt.ftag[i];
-	      pxt0->edg[iarf[i][0]] = xt.edg[iarf[i][0]];
-	      pxt0->edg[iarf[i][1]] = xt.edg[iarf[i][1]];
-	      pxt0->edg[iarf[i][2]] = xt.edg[iarf[i][2]];
-	      pxt0->tag[iarf[i][0]] = xt.tag[iarf[i][0]];
-	      pxt0->tag[iarf[i][1]] = xt.tag[iarf[i][1]];
-	      pxt0->tag[iarf[i][2]] = xt.tag[iarf[i][2]];
-	      pxt0->ori = xt.ori;
-	    }
-	  }
-	  else {
-	    pt1->xt = 0;
-	  }
-	}
-    
-	if ( jel ) {
-	  iadr = (jel-1)*4 + 1;
-	  adjb = &mesh->adja[iadr];
-	  adjb[j] = iel*4 + i;
-	}
 
-	/* internal faces (p1,p2,ip) */
-	for (j=0; j<4; j++) {
-	  if ( j != i ) {
-	    m = 0;
-	    for (l=0; l<3; l++)
-	      if ( pt1->v[ idir[j][l] ] != ip ) {
-		v[m] = pt1->v[ idir[j][l] ];
-		m++;
-	      }
-	    hashEdgeDelone(mesh,&hedg,iel,j,v);
-	  }
-	}
+        if ( jel ) {
+          iadr = (jel-1)*4 + 1;
+          adjb = &mesh->adja[iadr];
+          adjb[j] = iel*4 + i;
+        }
+
+        /* internal faces (p1,p2,ip) */
+        for (j=0; j<4; j++) {
+          if ( j != i ) {
+            m = 0;
+            for (l=0; l<3; l++)
+              if ( pt1->v[ idir[j][l] ] != ip ) {
+                v[m] = pt1->v[ idir[j][l] ];
+                m++;
+              }
+            hashEdgeDelone(mesh,&hedg,iel,j,v);
+          }
+        }
       }
     }
   }
@@ -264,6 +271,7 @@ int delone(pMesh mesh,pSol sol,int ip,int *list,int ilist) {
 
   //ppt = &mesh->point[ip];
   //  ppt->flag = mesh->flag;
+  DEL_MEM(mesh,hedg.item,(hedg.max+1)*sizeof(hedge));
   return(1);
 }
 
@@ -602,54 +610,54 @@ int correction_iso(pMesh mesh,int ip,int *list,int ilist,int nedep) {
       pt   = &mesh->tetra[iel];
       MMG_cas=0;
       for (i=0; i<4; i++) {
-	adj = vois[i];
-	MMG_cas = 0;
-	if ( adj && mesh->tetra[adj].mark == base )  continue;
+        adj = vois[i];
+        MMG_cas = 0;
+        if ( adj && mesh->tetra[adj].mark == base )  continue;
 
-	ib = pt->v[ idir[i][0] ];
-	ic = pt->v[ idir[i][1] ];
-	id = pt->v[ idir[i][2] ];
+        ib = pt->v[ idir[i][0] ];
+        ic = pt->v[ idir[i][1] ];
+        id = pt->v[ idir[i][2] ];
 
-	p1 = &mesh->point[ib];
-	p2 = &mesh->point[ic];
-	p3 = &mesh->point[id];
+        p1 = &mesh->point[ib];
+        p2 = &mesh->point[ic];
+        p3 = &mesh->point[id];
 
-	ux = p2->c[0] - p1->c[0];
-	uy = p2->c[1] - p1->c[1];
-	uz = p2->c[2] - p1->c[2];
+        ux = p2->c[0] - p1->c[0];
+        uy = p2->c[1] - p1->c[1];
+        uz = p2->c[2] - p1->c[2];
 
-	vx = p3->c[0] - p1->c[0];
-	vy = p3->c[1] - p1->c[1];
-	vz = p3->c[2] - p1->c[2];
+        vx = p3->c[0] - p1->c[0];
+        vy = p3->c[1] - p1->c[1];
+        vz = p3->c[2] - p1->c[2];
 
-	/* volume PABC */
-	v1 = uz*vy - uy*vz;
-	v2 = ux*vz - uz*vx;
-	v3 = uy*vx - ux*vy;
-	dd = v1*(ppt->c[0]-p1->c[0]) + v2*(ppt->c[1]-p1->c[1]) \
-	  + v3*(ppt->c[2]-p1->c[2]);
-	MMG_cas=1;
-	//printf("on trouve vol %e <? %e\n",dd,VOLMIN);
-	if ( dd < VOLMIN )  break;
+        /* volume PABC */
+        v1 = uz*vy - uy*vz;
+        v2 = ux*vz - uz*vx;
+        v3 = uy*vx - ux*vy;
+        dd = v1*(ppt->c[0]-p1->c[0]) + v2*(ppt->c[1]-p1->c[1]) \
+          + v3*(ppt->c[2]-p1->c[2]);
+        MMG_cas=1;
+        //printf("on trouve vol %e <? %e\n",dd,VOLMIN);
+        if ( dd < VOLMIN )  break;
 
-	/* point close to face */
-	nn = (v1*v1 + v2*v2 + v3*v3);
-	MMG_cas=2;
-	//printf("on trouve close ? %e %e\n",dd*dd,nn*eps2);
-	if ( dd*dd < nn * eps2 )  break;
-	MMG_cas=0;
+        /* point close to face */
+        nn = (v1*v1 + v2*v2 + v3*v3);
+        MMG_cas=2;
+        //printf("on trouve close ? %e %e\n",dd*dd,nn*eps2);
+        if ( dd*dd < nn * eps2 )  break;
+        MMG_cas=0;
       }
       if ( i < 4 ) {
-	if ( ipil <= nedep )  {/*printf("on veut tout retirer ? %d %d\n",ipil,nedep);*/return(0);   }
-	/* remove iel from list */
-	pt->mark = base-1;
-	list[ipil] = list[--lon];
+        if ( ipil <= nedep )  {/*printf("on veut tout retirer ? %d %d\n",ipil,nedep);*/return(0);   }
+        /* remove iel from list */
+        pt->mark = base-1;
+        list[ipil] = list[--lon];
 
-	ncor = 1;
-	break;
+        ncor = 1;
+        break;
       }
       else
-	ipil--;
+        ipil--;
     }
   }
   while ( ncor > 0 && lon >= nedep );
@@ -824,7 +832,7 @@ int cavity(pMesh mesh,pSol sol,int iel,int ip,int *list,int lon) {
       if ( pt->mark == base || pt->ref != ptc->ref )  continue;
 
       for (j=0,l=0; j<4; j++,l+=3) {
-	memcpy(&ct[l],mesh->point[pt->v[j]].c,3*sizeof(double));
+        memcpy(&ct[l],mesh->point[pt->v[j]].c,3*sizeof(double));
       }
 
       if ( !cenrad_iso(mesh,ct,c,&ray) )  continue;
@@ -832,8 +840,8 @@ int cavity(pMesh mesh,pSol sol,int iel,int ip,int *list,int lon) {
 
       /* Delaunay criterion */
       dd = (ppt->c[0] - c[0]) * (ppt->c[0] - c[0]) \
-	+ (ppt->c[1] - c[1]) * (ppt->c[1] - c[1]) \
-	+ (ppt->c[2] - c[2]) * (ppt->c[2] - c[2]);
+        + (ppt->c[1] - c[1]) * (ppt->c[1] - c[1]) \
+        + (ppt->c[2] - c[2]) * (ppt->c[2] - c[2]);
       if ( dd > crit )  continue;
 
       /* lost face(s) */
@@ -841,19 +849,19 @@ int cavity(pMesh mesh,pSol sol,int iel,int ip,int *list,int lon) {
       adjb = &mesh->adja[iadr];
 
       for (j=0; j<4; j++) {
-	if ( j == voy )  continue;
-	adi = adjb[j] >> 2;
-	if ( !adi )  continue;
-	pt1 = &mesh->tetra[adi];
-	if ( pt1->mark == base && adi != jel ) {
-	  if ( !adi || pt1->ref != mesh->tetra[adi].ref )  break;
-	}
+        if ( j == voy )  continue;
+        adi = adjb[j] >> 2;
+        if ( !adi )  continue;
+        pt1 = &mesh->tetra[adi];
+        if ( pt1->mark == base && adi != jel ) {
+          if ( !adi || pt1->ref != mesh->tetra[adi].ref )  break;
+        }
       }
       /* store tetra */
       if ( j == 4 ) {
         if ( pt->tag & MG_REQ ) isreq = 1;
-	pt->mark = base;
-	list[ilist++] = adj;
+        pt->mark = base;
+        list[ilist++] = adj;
       }
     }
     if ( ilist > LONMAX - 3 ) return(-1);

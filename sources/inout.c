@@ -25,6 +25,20 @@ int loadMesh(pMesh mesh) {
         fprintf(stderr,"  ** %s  NOT FOUND.\n",data);
         return(0);
       }
+      else if ( !strstr(mesh->nameout,".mesh") ) {
+        ADD_MEM(mesh,5*sizeof(char),"output file name",
+                printf("  Exit program.\n");
+                exit(EXIT_FAILURE));
+        SAFE_REALLOC(mesh->nameout,strlen(mesh->nameout)+6,char);
+        strcat(mesh->nameout,".mesh");
+      }
+    }
+    else if ( !strstr(mesh->nameout,".mesh") ) {
+      ADD_MEM(mesh,6*sizeof(char),"input file name",
+              printf("  Exit program.\n");
+              exit(EXIT_FAILURE));
+      SAFE_REALLOC(mesh->nameout,strlen(mesh->nameout)+7,char);
+      strcat(mesh->nameout,".meshb");
     }
   }
   else if( !(inm = GmfOpenMesh(data,GmfRead,&mesh->ver,&mesh->dim)) ) {
@@ -50,13 +64,6 @@ int loadMesh(pMesh mesh) {
   mesh->na = mesh->nai;
   if ( !zaldy(mesh) )  return(0);
 
-  if ( (mesh->np > mesh->npmax) || (mesh->nt > mesh->ntmax) ||
-       (mesh->ne > mesh->nemax) ) {
-    fprintf(stdout,"  ## Error: lack of memory\n");
-    fprintf(stdout,"  ## Increase the allocated ");
-    fprintf(stdout,"memory with the -m option.\n");
-    return(0);
-  }
   /* read mesh vertices */
   GmfGotoKwd(inm,GmfVertices);
   for (k=1; k<=mesh->np; k++) {
@@ -71,6 +78,7 @@ int loadMesh(pMesh mesh) {
     }
     ppt->tag  = MG_NUL;
   }
+
   /* get required vertices */
   np = GmfStatKwd(inm,GmfRequiredVertices);
   if ( np ) {
@@ -102,11 +110,8 @@ int loadMesh(pMesh mesh) {
       GmfGotoKwd(inm,GmfTriangles);
       nt = mesh->nt;
       mesh->nt = 0;
-      ina = (int*)calloc(nt+1,sizeof(int));
-      if ( !ina ) {
-        perror("  ## Memory problem: calloc");
-        exit(EXIT_FAILURE);
-      }
+      SAFE_CALLOC(ina,nt+1,int);
+
       for (k=1; k<=nt; k++) {
         GmfGetLin(inm,GmfTriangles,&v[0],&v[1],&v[2],&ref);
         if( abs(ref) != MG_ISO ) {
@@ -118,12 +123,15 @@ int loadMesh(pMesh mesh) {
           ina[k]=mesh->nt;
         }
       }
-      if( !mesh->nt ){
-        free(mesh->tria);
-        mesh->tria=NULL;
+      if( !mesh->nt )
+        DEL_MEM(mesh,mesh->tria,(mesh->nt+1)*sizeof(Tria));
+
+      else if ( mesh->nt < nt ) {
+        ADD_MEM(mesh,(mesh->nt+1)*sizeof(Tria),"triangles",
+                printf("  Exit program.\n");
+                exit(EXIT_FAILURE));
+        SAFE_RECALLOC(mesh->tria,nt+1,(mesh->nt+1),Tria);
       }
-      else if ( mesh->nt < nt )
-        mesh->tria = (pTria)realloc(mesh->tria,(mesh->nt+1)*sizeof(Tria));
     }
     else {
       GmfGotoKwd(inm,GmfTriangles);
@@ -132,6 +140,7 @@ int loadMesh(pMesh mesh) {
         GmfGetLin(inm,GmfTriangles,&pt1->v[0],&pt1->v[1],&pt1->v[2],&pt1->ref);
       }
     }
+
     /* get required triangles */
     nt = GmfStatKwd(inm,GmfRequiredTriangles);
     if ( nt ) {
@@ -157,10 +166,8 @@ int loadMesh(pMesh mesh) {
 
       }
     }
-    if ( mesh->info.iso ) {
-      free(ina);
-      ina=NULL;
-    }
+    if ( mesh->info.iso )
+      SAFE_FREE(ina);
   }
 
   /* read mesh edges */
@@ -169,11 +176,7 @@ int loadMesh(pMesh mesh) {
     na = mesh->na;
     if (mesh->info.iso ) {
       mesh->na = 0;
-      ina = (int*)calloc(na+1,sizeof(int));
-      if ( !ina ) {
-        perror("  ## Memory problem: calloc");
-        exit(EXIT_FAILURE);
-      }
+      SAFE_CALLOC(ina,na+1,int);
     }
 
     GmfGotoKwd(inm,GmfEdges);
@@ -234,10 +237,8 @@ int loadMesh(pMesh mesh) {
 
       }
     }
-    if (mesh->info.iso ) {
-      free(ina);
-      ina = NULL;
-    }
+    if (mesh->info.iso )
+      SAFE_FREE(ina);
   }
 
   /* read mesh tetrahedra */
@@ -246,7 +247,6 @@ int loadMesh(pMesh mesh) {
     pt = &mesh->tetra[k];
     GmfGetLin(inm,GmfTetrahedra,&pt->v[0],&pt->v[1],&pt->v[2],&pt->v[3],&pt->ref);
     pt->qual = orcal(mesh,k);
-    pt->mark = 0;
     for (i=0; i<4; i++) {
       ppt = &mesh->point[pt->v[i]];
       ppt->tag &= ~MG_NUL;
@@ -278,15 +278,15 @@ int loadMesh(pMesh mesh) {
 
   /* stats */
   if ( abs(mesh->info.imprim) > 4 ) {
-    fprintf(stdout,"     NUMBER OF VERTICES     %8d / %8d\n",mesh->np,mesh->npmax);
+    fprintf(stdout,"     NUMBER OF VERTICES     %8d\n",mesh->np);
     if ( mesh->na ) {
       fprintf(stdout,"     NUMBER OF EDGES        %8d\n",mesh->na);
       if ( nr )
-        fprintf(stdout,"     NUMBER OF RIDGES        %8d\n",nr);
+        fprintf(stdout,"     NUMBER OF RIDGES       %8d\n",nr);
         }
     if ( mesh->nt )
       fprintf(stdout,"     NUMBER OF TRIANGLES    %8d\n",mesh->nt);
-    fprintf(stdout,"     NUMBER OF ELEMENTS     %8d / %8d\n",mesh->ne,mesh->nemax);
+    fprintf(stdout,"     NUMBER OF ELEMENTS     %8d\n",mesh->ne);
 
     if ( np || nre || nt || nereq ) {
       fprintf(stdout,"     NUMBER OF REQUIRED ENTITIES: \n");
@@ -414,17 +414,15 @@ int saveMesh(pMesh mesh) {
       }
     }
   }
-  free(mesh->xpoint);
-  mesh->xpoint = NULL;
+  DEL_MEM(mesh,mesh->xpoint,(mesh->xpmax+1)*sizeof(xPoint));
   mesh->xp = 0;
 
   /* boundary mesh */
   /* tria + required tria */
   mesh->nt = ntreq = 0;
-  if ( mesh->tria ){
-    free(mesh->tria);
-    mesh->tria=NULL;
-  }
+  if ( mesh->tria )
+    DEL_MEM(mesh,mesh->tria,(mesh->nt+1)*sizeof(Tria));
+
   chkNumberOfTri(mesh);
   if ( bdryTria(mesh) ) {
     GmfSetKwd(outm,GmfTriangles,mesh->nt);
@@ -442,20 +440,26 @@ int saveMesh(pMesh mesh) {
           GmfSetLin(outm,GmfRequiredTriangles,k);
       }
     }
-    free(mesh->adjt);
-    mesh->adjt=NULL;
-    free(mesh->adja);
-    mesh->adja = NULL;
+    /* Release memory before htab allocation */
+    if ( mesh->adjt )
+      DEL_MEM(mesh,mesh->adjt,(3*mesh->nt+4)*sizeof(int));
+    if ( mesh->adja )
+      DEL_MEM(mesh,mesh->adja,(4*mesh->nemax+5)*sizeof(int));
 
     /* build hash table for edges */
-    if ( mesh->htab.geom ) {
-      free(mesh->htab.geom);
-      mesh->htab.geom=NULL;
-    }
+    if ( mesh->htab.geom )
+      DEL_MEM(mesh,mesh->htab.geom,(mesh->htab.max+1)*sizeof(hgeom));
+
     /* in the wost case (all edges are marked), we will have around 1 edge per *
      * triangle (we count edges only one time) */
     na = nr = nedreq = 0;
-    if ( hNew(&mesh->htab,mesh->nt,3*(mesh->nt),0) ) {
+    mesh->memCur += (long long)((3*mesh->nt+2)*sizeof(hgeom));
+    if ( (mesh->memCur) > (mesh->memMax) ) {
+      mesh->memCur -= (long long)((3*mesh->nt+2)*sizeof(hgeom));
+      fprintf(stdout,"  ## Warning:");
+      fprintf(stdout," unable to allocate htab.\n");
+    }
+    else if ( hNew(&mesh->htab,mesh->nt,3*(mesh->nt),0) ) {
       for (k=1; k<=mesh->ne; k++) {
         pt   = &mesh->tetra[k];
         if ( MG_EOK(pt) &&  pt->xt ) {
@@ -505,9 +509,10 @@ int saveMesh(pMesh mesh) {
         }
       }
       //freeXTets(mesh);
-      free(mesh->htab.geom);
-      mesh->htab.geom = NULL;
+      DEL_MEM(mesh,mesh->htab.geom,(mesh->htab.max+1)*sizeof(hgeom));
     }
+    else
+      mesh->memCur -= (long long)((3*mesh->nt+2)*sizeof(hgeom));
   }
 
   /* tetrahedra */
@@ -699,7 +704,7 @@ int loadMet(pMesh mesh,pSol met) {
 
   if ( !met->namein )  return(0);
   strcpy(data,met->namein);
-  ptr = strstr(data,".mesh");
+  ptr = strstr(data,".sol");
   if ( ptr )  *ptr = '\0';
   strcat(data,".solb");
   if (!(inm = GmfOpenMesh(data,GmfRead,&met->ver,&met->dim)) ) {
@@ -728,13 +733,13 @@ int loadMet(pMesh mesh,pSol met) {
   met->npi = met->np;
 
   /* mem alloc */
-  if ( met->m )  free(met->m);
+  if ( met->m )  DEL_MEM(mesh,met->m,(met->size*met->npmax+1)*sizeof(double));
   met->npmax = mesh->npmax;
-  met->m = (double*)calloc(met->size*met->npmax+1,sizeof(double));
-  if ( !met->m ) {
-    perror("  ## Memory problem: calloc");
-    exit(EXIT_FAILURE);
-  }
+
+  ADD_MEM(mesh,(met->size*met->npmax+1)*sizeof(double),"initial solution",
+          printf("  Exit program.\n");
+          exit(EXIT_FAILURE));
+  SAFE_CALLOC(met->m,met->size*met->npmax+1,double);
 
   /* read mesh solutions */
   GmfGotoKwd(inm,GmfSolAtVertices);
@@ -841,8 +846,8 @@ int saveMet(pMesh mesh,pSol met) {
 #ifdef SINGUL
 /** Read singul data. Here we suppose that the file contains the singularities *
  *  (corner, required, ridges....) */
-int loadSingul(pSingul singul) {
-  Mesh         mesh;
+int loadSingul(pMesh mesh,pSingul singul) {
+  Mesh         sing_mesh;
   pEdge        pa,pas;
   pPoint       ppt;
   psPoint      ppts;
@@ -855,26 +860,26 @@ int loadSingul(pSingul singul) {
   ptr = strstr(data,".mesh");
   if ( !ptr ) {
     strcat(data,".meshb");
-    if( !(inm = GmfOpenMesh(data,GmfRead,&mesh.ver,&mesh.dim)) ) {
+    if( !(inm = GmfOpenMesh(data,GmfRead,&sing_mesh.ver,&sing_mesh.dim)) ) {
       ptr = strstr(data,".mesh");
       *ptr = '\0';
       strcat(data,".mesh");
-      if( !(inm = GmfOpenMesh(data,GmfRead,&mesh.ver,&mesh.dim)) ) {
+      if( !(inm = GmfOpenMesh(data,GmfRead,&sing_mesh.ver,&sing_mesh.dim)) ) {
         fprintf(stderr,"  ** %s  NOT FOUND.\n",data);
         return(0);
       }
     }
   }
-  else if( !(inm = GmfOpenMesh(data,GmfRead,&mesh.ver,&mesh.dim)) ) {
+  else if( !(inm = GmfOpenMesh(data,GmfRead,&sing_mesh.ver,&sing_mesh.dim)) ) {
     fprintf(stderr,"  ** %s  NOT FOUND.\n",data);
     return(0);
   }
   fprintf(stdout,"  %%%% %s OPENED\n",data);
 
-  mesh.np = GmfStatKwd(inm,GmfVertices);
-  mesh.nt = GmfStatKwd(inm,GmfTriangles);
-  mesh.na = GmfStatKwd(inm,GmfEdges);
-  if ( !mesh.np ) {
+  sing_mesh.np = GmfStatKwd(inm,GmfVertices);
+  sing_mesh.nt = GmfStatKwd(inm,GmfTriangles);
+  sing_mesh.na = GmfStatKwd(inm,GmfEdges);
+  if ( !sing_mesh.np ) {
     fprintf(stdout,"  ** MISSING DATA.\n");
     fprintf(stdout," Check that your mesh contains points.\n");
     fprintf(stdout," Exit program.\n");
@@ -882,38 +887,35 @@ int loadSingul(pSingul singul) {
   }
 
   /* memory allocation */
-  mesh.point = (pPoint)calloc(mesh.np+1,sizeof(Point));
-  if ( !mesh.point ) {
-    perror("  ## Memory problem: calloc");
-    exit(EXIT_FAILURE);
-  }
+  ADD_MEM(mesh,(sing_mesh.np+1)*sizeof(Point),"points of singularities mesh",
+          printf("  Exit program.\n");
+          exit(EXIT_FAILURE));
+  SAFE_CALLOC(sing_mesh.point,sing_mesh.np+1,Point);
 
-  if ( mesh.nt ) {
-    mesh.tria = (pTria)calloc(mesh.nt+1,sizeof(Tria));
-    if ( !mesh.tria ) {
-      perror("  ## Memory problem: calloc");
-      exit(EXIT_FAILURE);
-    }
+  if ( sing_mesh.nt ) {
+    ADD_MEM(mesh,(sing_mesh.nt+1)*sizeof(Tria),"triangles of singularities mesh",
+            printf("  Exit program.\n");
+            exit(EXIT_FAILURE));
+    SAFE_CALLOC(sing_mesh.tria,sing_mesh.nt+1,Tria);
   }
-  if ( mesh.na ) {
-    mesh.edge = (pEdge)calloc(mesh.na+1,sizeof(Edge));
-    if ( !mesh.edge ) {
-      perror("  ## Memory problem: calloc");
-      exit(EXIT_FAILURE);
-    }
+  if ( sing_mesh.na ) {
+    ADD_MEM(mesh,(sing_mesh.na+1)*sizeof(Edge),"edges of singularities mesh",
+            printf("  Exit program.\n");
+            exit(EXIT_FAILURE));
+    SAFE_CALLOC(sing_mesh.edge,sing_mesh.na+1,Edge);
   }
 
   /* find bounding box */
-  for (i=0; i<mesh.dim; i++) {
+  for (i=0; i<sing_mesh.dim; i++) {
     singul->min[i] =  1.e30;
     singul->max[i] = -1.e30;
   }
 
   /* read mesh vertices */
   GmfGotoKwd(inm,GmfVertices);
-  for (k=1; k<=mesh.np; k++) {
-    ppt = &mesh.point[k];
-    if (mesh.ver == GmfFloat) {
+  for (k=1; k<=sing_mesh.np; k++) {
+    ppt = &sing_mesh.point[k];
+    if (sing_mesh.ver == GmfFloat) {
       GmfGetLin(inm,GmfVertices,&fp1,&fp2,&fp3,&ppt->ref);
       ppt->c[0] = fp1;
       ppt->c[1] = fp2;
@@ -921,7 +923,7 @@ int loadSingul(pSingul singul) {
     } else {
       GmfGetLin(inm,GmfVertices,&ppt->c[0],&ppt->c[1],&ppt->c[2],&ppt->ref);
     }
-    for (i=0; i<mesh.dim; i++) {
+    for (i=0; i<sing_mesh.dim; i++) {
       if ( ppt->c[i] > singul->max[i] )  singul->max[i] = ppt->c[i];
       if ( ppt->c[i] < singul->min[i] )  singul->min[i] = ppt->c[i];
     }
@@ -935,8 +937,8 @@ int loadSingul(pSingul singul) {
     GmfGotoKwd(inm,GmfRequiredVertices);
     for (k=1; k<=npr; k++) {
       GmfGetLin(inm,GmfRequiredVertices,&i);
-      assert(i <= mesh.np);
-      ppt = &mesh.point[i];
+      assert(i <= sing_mesh.np);
+      ppt = &sing_mesh.point[i];
       ppt->tag |= MG_REQ;
     }
   }
@@ -946,8 +948,8 @@ int loadSingul(pSingul singul) {
     GmfGotoKwd(inm,GmfCorners);
     for (k=1; k<=nc; k++) {
       GmfGetLin(inm,GmfCorners,&i);
-      assert(i <= mesh.np);
-      ppt = &mesh.point[i];
+      assert(i <= sing_mesh.np);
+      ppt = &sing_mesh.point[i];
       if ( !MG_SIN(ppt->tag) ){
         npr++;
       }
@@ -956,11 +958,11 @@ int loadSingul(pSingul singul) {
   }
 
   /* read mesh edges */
-  if ( mesh.na ) {
+  if ( sing_mesh.na ) {
     GmfGotoKwd(inm,GmfEdges);
 
-    for (k=1; k<=mesh.na; k++) {
-      pa = &mesh.edge[k];
+    for (k=1; k<=sing_mesh.na; k++) {
+      pa = &sing_mesh.edge[k];
       GmfGetLin(inm,GmfEdges,&pa->a,&pa->b,&pa->ref);
       pa->tag = MG_NOTAG;
     }
@@ -972,15 +974,15 @@ int loadSingul(pSingul singul) {
     GmfGotoKwd(inm,GmfRidges);
     for (k=1; k<=nr; k++) {
       GmfGetLin(inm,GmfRidges,&i);
-      assert(i <= mesh.na);
-      pa = &mesh.edge[i];
+      assert(i <= sing_mesh.na);
+      pa = &sing_mesh.edge[i];
       pa->tag |= MG_GEO;
-      ppt = &mesh.point[pa->a];
+      ppt = &sing_mesh.point[pa->a];
       if ( !(ppt->tag & MG_GEO) ){
         ppt->tag |= MG_GEO;
         if ( !MG_SIN(ppt->tag) )  npr++;
       }
-      ppt = &mesh.point[pa->b];
+      ppt = &sing_mesh.point[pa->b];
       if ( !(ppt->tag & MG_GEO) ){
         ppt->tag |= MG_GEO;
         if ( !MG_SIN(ppt->tag) )  npr++;
@@ -994,16 +996,16 @@ int loadSingul(pSingul singul) {
     GmfGotoKwd(inm,GmfRequiredEdges);
     for (k=1; k<=nre; k++) {
       GmfGetLin(inm,GmfRequiredEdges,&i);
-      assert(i <= mesh.na);
-      pa = &mesh.edge[i];
+      assert(i <= sing_mesh.na);
+      pa = &sing_mesh.edge[i];
       if ( !(pa->tag & MG_GEO) ) na++;
       pa->tag |= MG_REQ;
-      ppt = &mesh.point[pa->a];
+      ppt = &sing_mesh.point[pa->a];
       if ( !(ppt->tag & MG_REQ) ){
         ppt->tag |= MG_REQ;
         if ( !MG_SIN(ppt->tag) )  npr++;
       }
-      ppt = &mesh.point[pa->b];
+      ppt = &sing_mesh.point[pa->b];
       if ( !(ppt->tag & MG_REQ) ){
         ppt->tag |= MG_REQ;
         if ( !MG_SIN(ppt->tag) )  npr++;
@@ -1014,13 +1016,12 @@ int loadSingul(pSingul singul) {
   singul->ns = npr;
   ns = 1;
   if ( singul->ns ) {
-    singul->point = (psPoint)calloc(singul->ns+1,sizeof(sPoint));
-    if ( !singul->point ) {
-      perror("  ## Memory problem: calloc");
-      exit(EXIT_FAILURE);
-    }
-    for ( k=1; k<=mesh.np; k++ ) {
-      ppt = &mesh.point[k];
+    ADD_MEM(mesh,(singul->ns+1)*sizeof(sPoint),"vertex singularities",
+            printf("  Exit program.\n");
+            exit(EXIT_FAILURE));
+    SAFE_CALLOC(singul->point,singul->ns+1,sPoint);
+    for ( k=1; k<=sing_mesh.np; k++ ) {
+      ppt = &sing_mesh.point[k];
       if ( (ppt->tag & MG_REQ) || (ppt->tag & MG_GEO) ) {
         ppts = &singul->point[ns];
         ppts->c[0] = ppt->c[0];
@@ -1037,17 +1038,17 @@ int loadSingul(pSingul singul) {
   singul->na = nr+na;
   na = 1;
   if ( singul->na ) {
-    singul->edge = (pEdge)calloc(singul->na+1,sizeof(Edge));
-    if ( !singul->edge ) {
-      perror("  ## Memory problem: calloc");
-      exit(EXIT_FAILURE);
-    }
-    for ( k=1; k<=mesh.na; k++ ) {
-      pa = &mesh.edge[k];
+    ADD_MEM(mesh,(singul->na+1)*sizeof(Edge),"edge singularities",
+            printf("  Exit program.\n");
+            exit(EXIT_FAILURE));
+    SAFE_CALLOC(singul->edge,singul->na+1,Edge);
+
+    for ( k=1; k<=sing_mesh.na; k++ ) {
+      pa = &sing_mesh.edge[k];
       if ( (pa->tag & MG_REQ) || (pa->tag & MG_GEO) ) {
         pas = &singul->edge[na];
-        pas->a = mesh.point[pa->a].tmp;
-        pas->b = mesh.point[pa->b].tmp;
+        pas->a = sing_mesh.point[pa->a].tmp;
+        pas->b = sing_mesh.point[pa->b].tmp;
         pas->tag  = pa->tag | MG_SGL;
         na++;
       }
@@ -1063,15 +1064,12 @@ int loadSingul(pSingul singul) {
   GmfCloseMesh(inm);
 
   /* memory free */
-  free (mesh.point);
-  mesh.point=NULL;
-  if ( mesh.na ) {
-    free(mesh.edge);
-    mesh.edge=NULL;
+  DEL_MEM(mesh,sing_mesh.point,(sing_mesh.np+1)*sizeof(Point));
+  if ( sing_mesh.na ) {
+    DEL_MEM(mesh,sing_mesh.edge,(sing_mesh.na+1)*sizeof(Edge));
   }
-  if ( mesh.nt ) {
-    free(mesh.tria);
-    mesh.tria=NULL;
+  if ( sing_mesh.nt ) {
+    DEL_MEM(mesh,sing_mesh.tria,(sing_mesh.nt+1)*sizeof(Tria));
   }
   return(1);
 }

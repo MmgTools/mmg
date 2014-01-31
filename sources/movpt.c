@@ -352,10 +352,10 @@ int movbdyregpt(pMesh mesh,int *listv,int ilistv,int *lists,int ilists) {
 
   nxp = mesh->xp + 1;
   if ( nxp > mesh->xpmax ) {
-    fprintf(stdout,"  ## Warning: lack of memory.\n");
-    fprintf(stdout,"  ## If final mesh has poor quality, increase the ");
-    fprintf(stdout," allocated memory with the -m option.\n");
-    return(0);
+    TAB_RECALLOC(mesh,mesh->xpoint,mesh->xpmax,0.2,xPoint,
+                 "larger xpoint table",
+                 return(0));
+    n = &(mesh->xpoint[p0->xp].n1[0]);
   }
   ppt0->xp = nxp;
   pxp = &mesh->xpoint[nxp];
@@ -609,16 +609,15 @@ int movbdyrefpt(pMesh mesh, int *listv, int ilistv, int *lists, int ilists){
   ppt0->c[0] = o[0];
   ppt0->c[1] = o[1];
   ppt0->c[2] = o[2];
-  ppt0->tag      = p0->tag;
-  ppt0->ref      = p0->ref;
+  ppt0->tag  = p0->tag;
+  ppt0->ref  = p0->ref;
 
 
   nxp = mesh->xp + 1;
   if ( nxp > mesh->xpmax ) {
-    fprintf(stdout,"  ## Warning: lack of memory.\n");
-    fprintf(stdout,"  ## If final mesh has poor quality, increase the ");
-    fprintf(stdout," allocated memory with the -m option.\n");
-    return(0);
+    TAB_RECALLOC(mesh,mesh->xpoint,mesh->xpmax,0.2,xPoint,
+                 "larger xpoint table",
+                 return(0));
   }
   ppt0->xp = nxp;
   pxp = &mesh->xpoint[nxp];
@@ -894,10 +893,9 @@ int movbdynompt(pMesh mesh, int *listv, int ilistv, int *lists, int ilists){
 
   nxp = mesh->xp + 1;
   if ( nxp > mesh->xpmax ) {
-    fprintf(stdout,"  ## Warning: lack of memory.\n");
-    fprintf(stdout,"  ## If final mesh has poor quality, increase the ");
-    fprintf(stdout," allocated memory with the -m option.\n");
-    return(0);
+    TAB_RECALLOC(mesh,mesh->xpoint,mesh->xpmax,0.2,xPoint,
+                 "larger xpoint table",
+                 return(0));
   }
   ppt0->xp = nxp;
   pxp = &mesh->xpoint[nxp];
@@ -1180,10 +1178,9 @@ int movbdyridpt(pMesh mesh,int *listv,int ilistv,int *lists,int ilists) {
 
   nxp = mesh->xp+1;
   if ( nxp > mesh->xpmax ) {
-    fprintf(stdout,"  ## Warning: lack of memory.\n");
-    fprintf(stdout,"  ## If final mesh has poor quality, increase the ");
-    fprintf(stdout," allocated memory with the -m option.\n");
-    return(0);
+    TAB_RECALLOC(mesh,mesh->xpoint,mesh->xpmax,0.2,xPoint,
+                 "larger xpoint table",
+                 return(0));
   }
   ppt0->xp = nxp;
   pxp = &mesh->xpoint[nxp];

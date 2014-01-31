@@ -68,7 +68,7 @@
  *
  *  returning 0 if OK, 1 else
  **/
-int biPartBoxCompute(SCOTCH_Graph graf, int vertNbr, int boxVertNbr, SCOTCH_Num *permVrtTab) {
+int biPartBoxCompute(SCOTCH_Graph graf, int vertNbr, int boxVertNbr, SCOTCH_Num *permVrtTab,MMG5_pMesh mesh) {
   int boxNbr, vertIdx, boxIdx;
   SCOTCH_Num tmp, tmp2, *partTab, *partNumTab, *partPrmTab;
   SCOTCH_Strat strat ;
@@ -88,20 +88,14 @@ int biPartBoxCompute(SCOTCH_Graph graf, int vertNbr, int boxVertNbr, SCOTCH_Num 
   CHECK_SCOTCH(SCOTCH_stratGraphMap(&strat, "r{job=t,map=t,poli=S,sep=m{type=h,vert=80,low=h{pass=10}f{bal=0.005,move=0},asc=b{bnd=f{bal=0.05,move=0},org=f{bal=0.05,move=0}}}|m{,vert=80,low=h{pass=10}f{bal=0.005,move=0},asc=b{bnd=f{bal=0.05,move=0},org=f{bal=0.05,move=0}}}}"), "scotch_stratGraphMap", 0) ;
 #endif
 
-  partTab = (SCOTCH_Num *)calloc(vertNbr, sizeof(SCOTCH_Num));
-  if ( !partTab ) {
-    perror("  ## Memory problem: calloc");
-    return 1;
-  }
+  ADD_MEM(mesh,vertNbr*sizeof(SCOTCH_Num),"partTab",return(1));
+  SAFE_CALLOC(partTab,vertNbr,SCOTCH_Num);
 
   /* Partionning the graph */
   CHECK_SCOTCH(SCOTCH_graphPart(&graf, boxNbr, &strat, partTab), "scotch_graphPart", 0);
 
-  partNumTab = (SCOTCH_Num *)calloc(boxNbr, sizeof(SCOTCH_Num));
-  if ( !partNumTab ) {
-    perror("  ## Memory problem: calloc");
-    return 1;
-  }
+  ADD_MEM(mesh,boxNbr*sizeof(SCOTCH_Num),"partNumTab",return(1));
+  SAFE_CALLOC(partNumTab,boxNbr,SCOTCH_Num);
 
   if (!memset(partNumTab, 0, boxNbr*sizeof(SCOTCH_Num))) {
     perror("  ## Memory problem: memset");
@@ -114,11 +108,8 @@ int biPartBoxCompute(SCOTCH_Graph graf, int vertNbr, int boxVertNbr, SCOTCH_Num 
 
 
   /* partition permutation tabular */
-  partPrmTab = (SCOTCH_Num *)calloc(vertNbr + 1, sizeof(SCOTCH_Num));
-  if ( !partPrmTab ) {
-    perror("  ## Memory problem: calloc");
-    return 1;
-  }
+  ADD_MEM(mesh,(vertNbr+1)*sizeof(SCOTCH_Num),"partPrmTab",return(1));
+  SAFE_CALLOC(partPrmTab,vertNbr+1,SCOTCH_Num);
 
   /* Copying the previous tabular in order to have the index of the first
    * element of each box
@@ -140,9 +131,9 @@ int biPartBoxCompute(SCOTCH_Graph graf, int vertNbr, int boxVertNbr, SCOTCH_Num 
   for (vertIdx = 0; vertIdx < vertNbr ; vertIdx++)
     permVrtTab[partPrmTab[vertIdx] + 1] = vertIdx + 1;
 
-  free(partTab);
-  free(partNumTab);
-  free(partPrmTab);
+  DEL_MEM(mesh,partTab,vertNbr*sizeof(SCOTCH_Num));
+  DEL_MEM(mesh,partNumTab,boxNbr*sizeof(SCOTCH_Num));
+  DEL_MEM(mesh,partPrmTab,(vertNbr+1)*sizeof(SCOTCH_Num));
 
   SCOTCH_stratExit(&strat) ;
   return 0;
@@ -160,7 +151,8 @@ int biPartBoxCompute(SCOTCH_Graph graf, int vertNbr, int boxVertNbr, SCOTCH_Num 
  *
  *  returning 0 if OK, 1 else
  */
-int kPartBoxCompute(SCOTCH_Graph graf, int vertNbr, int boxVertNbr, SCOTCH_Num *permVrtTab) {
+int kPartBoxCompute(SCOTCH_Graph graf, int vertNbr, int boxVertNbr,
+                    SCOTCH_Num *permVrtTab,MMG5_pMesh mesh) {
   int boxNbr, vertIdx;
 #if SCOTCH_VERSION<6
   SCOTCH_Num logMaxVal, SupMaxVal, InfMaxVal, maxVal;
@@ -187,14 +179,8 @@ int kPartBoxCompute(SCOTCH_Graph graf, int vertNbr, int boxVertNbr, SCOTCH_Num *
   sprintf(s, "m{vert=%d,low=r{job=t,map=t,poli=S,sep=m{vert=80,low=h{pass=10}f{bal=0.0005,move=80},asc=f{bal=0.005,move=80}}}}", vertNbr / boxVertNbr);
   CHECK_SCOTCH(SCOTCH_stratGraphMap(&strat, s), "scotch_stratGraphMap", 0) ;
 
-
-  sortPartTb= (SCOTCH_Num *)calloc(2*vertNbr, sizeof(SCOTCH_Num));
-  if ( !sortPartTb ) {
-    perror("  ## Memory problem: calloc");
-    free(sortPartTb);
-    sortPartTb = NULL;
-    return 1;
-  }
+  ADD_MEM(mesh,2*vertNbr*sizeof(SCOTCH_Num),"sortPartTb",return(1));
+  SAFE_CALLOC(sortPartTb,2*vertNbr,SCOTCH_Num);
 
   /* Partionning the graph */
   CHECK_SCOTCH(SCOTCH_graphMap(&graf, &arch, &strat, sortPartTb), "scotch_graphMap", 0);
@@ -248,7 +234,7 @@ int kPartBoxCompute(SCOTCH_Graph graf, int vertNbr, int boxVertNbr, SCOTCH_Num *
   SCOTCH_stratExit(&strat) ;
   SCOTCH_archExit(&arch) ;
 
-  free(sortPartTb);
+  DEL_MEM(mesh,sortPartTb,2*vertNbr*sizeof(SCOTCH_Num));
 
   return 0;
 }
@@ -353,11 +339,9 @@ int renumbering(int boxVertNbr, pMesh mesh, pSol sol) {
 
   /* Computing the number of vertices and a contiguous tabular of vertices */
   vertNbr = 0;
-  vertOldTab = (int *)calloc(mesh->ne + 1, sizeof(int));
-  if (!memset(vertOldTab, 0, sizeof(int)*(mesh->ne+1))) {
-    perror("  ## Memory problem: memset");
-    return 1;
-  }
+
+  ADD_MEM(mesh,(mesh->ne+1)*sizeof(int),"vertOldTab",return(1));
+  SAFE_CALLOC(vertOldTab,mesh->ne+1,int);
 
   for(tetraIdx = 1 ; tetraIdx < mesh->ne + 1 ; tetraIdx++) {
 
@@ -368,33 +352,34 @@ int renumbering(int boxVertNbr, pMesh mesh, pSol sol) {
 
   if ( vertNbr/2 < BOXSIZE ) {
     /* not enough tetra to renum */
-    free(vertOldTab);
-    vertOldTab = NULL;
+    DEL_MEM(mesh,vertOldTab,(mesh->ne+1)*sizeof(int));
     return(1);
   }
 
   /* Allocating memory to compute adjacency lists */
-  vertTab = (SCOTCH_Num *)calloc(vertNbr + 2, sizeof(SCOTCH_Num));
+  ADD_MEM(mesh,(vertNbr+2)*sizeof(SCOTCH_Num),"vertTab",
+          DEL_MEM(mesh,vertOldTab,(mesh->ne+1)*sizeof(int));
+          return(1));
+  SAFE_CALLOC(vertTab,vertNbr+2,SCOTCH_Num);
+
   if (!memset(vertTab, ~0, sizeof(SCOTCH_Num)*(vertNbr + 2))) {
     perror("  ## Memory problem: memset");
-    free(vertOldTab);
-    vertOldTab = NULL;
-    free(vertTab);
-    vertTab = NULL;
+    DEL_MEM(mesh,vertOldTab,(mesh->ne+1)*sizeof(int));
+    DEL_MEM(mesh,vertTab,(vertNbr+2)*sizeof(SCOTCH_Num));
     return 1;
   }
 
   edgeNbr = 1;
+#warning changer ca avec la formule d Euler poincare et regarder le EDGEGAP (voir 2spheres)
+#warning attention on veut 2 fois le nombre d aretes (symetrie) et le nombre de point n est pas le vrai si on n a pas compacte le maillage
+  // edgeSiz = 20*mesh->np; (2*(12*np (faces)-2*np (faces de bord)))
   edgeSiz = vertNbr*2;
-  edgeTab = (SCOTCH_Num *)calloc(edgeSiz, sizeof(SCOTCH_Num));
-  if ( !edgeTab ) {
-    perror("  ## Memory problem: calloc");
-    free(vertOldTab);
-    vertOldTab = NULL;
-    free(vertTab);
-    vertTab = NULL;
-    return 1;
-  }
+
+  ADD_MEM(mesh,edgeSiz*sizeof(SCOTCH_Num),"edgeTab",
+          DEL_MEM(mesh,vertOldTab,(mesh->ne+1)*sizeof(int));
+          DEL_MEM(mesh,vertTab,(vertNbr+2)*sizeof(SCOTCH_Num));
+          return(1));
+  SAFE_CALLOC(edgeTab,edgeSiz,SCOTCH_Num);
 
 
   /* Computing the adjacency list for each vertex */
@@ -417,15 +402,11 @@ int renumbering(int boxVertNbr, pMesh mesh, pSol sol) {
       /* Testing if edgeTab memory is enough */
       if (edgeNbr >= edgeSiz) {
         edgeSiz += EDGEGAP;
-        edgeTab = (SCOTCH_Num *)realloc(edgeTab, edgeSiz * sizeof(SCOTCH_Num));
-        if ( !edgeTab ) {
-          perror("  ## Memory problem: calloc");
-          free(vertOldTab);
-          vertOldTab = NULL;
-          free(vertTab);
-          vertTab = NULL;
-          return 1;
-        }
+        ADD_MEM(mesh,EDGEGAP*sizeof(SCOTCH_Num),"edgeTab",
+                DEL_MEM(mesh,vertOldTab,(mesh->ne+1)*sizeof(int));
+                DEL_MEM(mesh,vertTab,(vertNbr+2)*sizeof(SCOTCH_Num));
+                return(1));
+        SAFE_REALLOC(edgeTab,edgeSiz,SCOTCH_Num);
       }
 
       edgeTab[edgeNbr++] = vertOldTab[ballTetIdx];
@@ -435,8 +416,7 @@ int renumbering(int boxVertNbr, pMesh mesh, pSol sol) {
   edgeNbr--;
 
   /* free adjacents to gain memory space */
-  free(mesh->adja);
-  mesh->adja = NULL;
+  DEL_MEM(mesh,mesh->adja,(4*mesh->nemax+5)*sizeof(int));
 
   /* Building the graph by calling Scotch functions */
   SCOTCH_graphInit(&graf) ;
@@ -445,45 +425,34 @@ int renumbering(int boxVertNbr, pMesh mesh, pSol sol) {
                "scotch_graphbuild", 0) ;
 #ifndef NDEBUG
   /* don't check in release mode */
-   CHECK_SCOTCH(SCOTCH_graphCheck(&graf), "scotch_graphcheck", 0);
+  CHECK_SCOTCH(SCOTCH_graphCheck(&graf), "scotch_graphcheck", 0);
 #endif
 
-  permVrtTab = (SCOTCH_Num *)calloc(vertNbr + 1, sizeof(SCOTCH_Num));
-  if ( !permVrtTab ) {
-    perror("  ## Memory problem: calloc");
-    free(vertOldTab);
-    vertOldTab = NULL;
-    free(vertTab);
-    vertTab = NULL;
-    free(edgeTab);
-    edgeTab = NULL;
-    if( !hashTetra(mesh,1) ) return(0);
-    return 1;
-  }
+  ADD_MEM(mesh,(vertNbr+1)*sizeof(SCOTCH_Num),"permVrtTab",
+          DEL_MEM(mesh,vertOldTab,(mesh->ne+1)*sizeof(int));
+          DEL_MEM(mesh,vertTab,(vertNbr+2)*sizeof(SCOTCH_Num));
+          DEL_MEM(mesh,edgeTab,edgeSiz*sizeof(SCOTCH_Num));
+          if( !hashTetra(mesh,1) ) return(0);
+          return(1));
+  SAFE_CALLOC(permVrtTab,vertNbr+1,SCOTCH_Num);
 
-  CHECK_SCOTCH(kPartBoxCompute(graf, vertNbr, boxVertNbr, permVrtTab),
+  CHECK_SCOTCH(kPartBoxCompute(graf, vertNbr, boxVertNbr, permVrtTab, mesh),
                "boxCompute", 0);
 
   SCOTCH_graphExit(&graf) ;
 
-  free(edgeTab);
-  free(vertTab);
+  DEL_MEM(mesh,edgeTab,edgeSiz*sizeof(SCOTCH_Num));
+  DEL_MEM(mesh,vertTab,(vertNbr+2)*sizeof(SCOTCH_Num));
 
   /* Computing the new point list and modifying the adja strcuture */
-  permNodTab = (int *)calloc(mesh->np + 1, sizeof(int));
-  if ( !permNodTab ) {
-    perror("  ## Memory problem: calloc");
-    free(vertOldTab);
-    vertOldTab = NULL;
-    free(vertTab);
-    vertTab = NULL;
-    free(edgeTab);
-    edgeTab = NULL;
-    free(permVrtTab);
-    permVrtTab = NULL;
-    if( !hashTetra(mesh,1) ) return(0);
-    return 1;
-  }
+  ADD_MEM(mesh,(mesh->np+1)*sizeof(int),"permNodTab",
+          DEL_MEM(mesh,vertOldTab,(mesh->ne+1)*sizeof(int));
+          DEL_MEM(mesh,vertTab,(vertNbr+2)*sizeof(SCOTCH_Num));
+          DEL_MEM(mesh,permVrtTab,(vertNbr+1)*sizeof(SCOTCH_Num));
+          DEL_MEM(mesh,edgeTab,edgeSiz*sizeof(SCOTCH_Num));
+          if( !hashTetra(mesh,1) ) return(0);
+          return(1));
+  SAFE_CALLOC(permNodTab,mesh->np+1,int);
 
   nereal = 0;
   npreal = 0;
@@ -519,21 +488,21 @@ int renumbering(int boxVertNbr, pMesh mesh, pSol sol) {
       mesh->tetra[tetraIdx].v[j] = permNodTab[mesh->tetra[tetraIdx].v[j]];
     }
   }
-  free(permVrtTab);
+  DEL_MEM(mesh,permVrtTab,(vertNbr+1)*sizeof(SCOTCH_Num));
 
   /* Permute nodes and sol */
   for (j=1; j<= mesh->np; j++) {
     while ( permNodTab[j] != j && permNodTab[j] )
       swapNod(mesh->point,sol->m,permNodTab,j,permNodTab[j],sol->size);
   }
-  free(permNodTab);
+  DEL_MEM(mesh,permNodTab,(mesh->np+1)*sizeof(int));
 
   /* Permute tetrahedras */
   for (j=1; j<= mesh->ne; j++) {
     while ( vertOldTab[j] != j && vertOldTab[j] )
       swapTet(mesh->tetra/*,mesh->adja*/,vertOldTab,j,vertOldTab[j]);
   }
-  free(vertOldTab);
+  DEL_MEM(mesh,vertOldTab,(mesh->ne+1)*sizeof(int));
 
   mesh->ne = nereal;
   mesh->np = npreal;

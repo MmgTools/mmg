@@ -61,7 +61,6 @@
 #define dichoto1b                     	 _MMG5_dichoto1b
 #define directsurfball                	 _MMG5_directsurfball
 #define eigensym                      	 _MMG5_eigensym
-#define freeBucket                    	 _MMG5_freeBucket
 #define freeXTets                     	 _MMG5_freeXTets
 #define gettag                        	 _MMG5_gettag
 #define gradsiz_ani                   	 _MMG5_gradsiz_ani
@@ -85,7 +84,8 @@
 #define lenedg_ani                    	 _MMG5_lenedg_ani
 #define lenedg_iso                    	 _MMG5_lenedg_iso
 #define meancur                       	 _MMG5_meancur
-#define memRepartition                	 _MMG5_memRepartition
+#define memOption                     	 _MMG5_memOption
+#define memSize                       	 _MMG5_memSize
 #define mmg3d1                        	 _MMG5_mmg3d1
 #define mmg3d1_delone                 	 _MMG5_mmg3d1_delone
 #define mmg3d2                        	 _MMG5_mmg3d2
@@ -170,6 +170,8 @@
 #define Get_vertex                    	 MMG5_Get_vertex
 #define HGeom                         	 MMG5_HGeom
 #define Info                          	 MMG5_Info
+#define Init_fileNames                	 MMG5_Init_fileNames
+#define Init_fileNames                	 MMG5_Init_fileNames
 #define Init_mesh                     	 MMG5_Init_mesh
 #define Init_mesh                     	 MMG5_Init_mesh
 #define Init_parameters               	 MMG5_Init_parameters

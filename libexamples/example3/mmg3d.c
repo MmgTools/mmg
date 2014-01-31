@@ -70,6 +70,7 @@ static void usage(char *prog) {
 static int parsar(int argc,char *argv[],MMG5_pMesh mesh,
                   MMG5_pSol met,MMG5_pSingul sing) {
   int     i;
+  char    namein[128];
 
   i = 1;
   while ( i < argc ) {
@@ -283,16 +284,13 @@ static int parsar(int argc,char *argv[],MMG5_pMesh mesh,
   }
 
   if ( mesh->namein == NULL ) {
-    mesh->namein = (char *)calloc(128,sizeof(char));
-    if ( !mesh->namein ) {
-      perror("  ## Memory problem: calloc");
-      exit(EXIT_FAILURE);
-    }
-
     fprintf(stdout,"  -- INPUT MESH NAME ?\n");
     fflush(stdin);
-    fscanf(stdin,"%s",mesh->namein);
+    fscanf(stdin,"%s",namein);
+    if ( !MMG5_Set_inputMeshName(mesh,namein) )
+      exit(EXIT_FAILURE);
   }
+
   if ( mesh->nameout == NULL ) {
     if ( !MMG5_Set_outputMeshName(mesh,"") )
       exit(EXIT_FAILURE);
@@ -434,7 +432,7 @@ int main(int argc,char *argv[]) {
   }
 #ifdef SINGUL
   if ( mesh->info.sing && sing->namein ) {
-    ier = MMG5_loadSingul(sing);
+    ier = MMG5_loadSingul(mesh,sing);
     if ( !ier ) {
       MMG5_Free_all(mesh,met,sing);
       return(MMG5_STRONGFAILURE);

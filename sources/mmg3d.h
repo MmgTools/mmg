@@ -12,6 +12,11 @@
 #include <ctype.h>
 #include <float.h>
 #include <math.h>
+#if (defined(__APPLE__) && defined(__MACH__))
+#include <sys/sysctl.h>
+#elif defined(__unix__) || defined(__unix) || defined(unix)
+#include <unistd.h>
+#endif
 
 #include "mmg3d5_redefine.h"
 #include "libmmg3d5.h"
@@ -28,6 +33,7 @@
 
 #define MG_SMSGN(a,b)  (((double)(a)*(double)(b) > (0.0)) ? (1) : (0))
 
+/** Free allocated pointers of mesh and sol structure and return value val */
 #ifdef SINGUL
 #define RETURN_AND_FREE(mesh,met,sing,val)do    \
     {                                           \
@@ -42,7 +48,175 @@
     }while(0)
 #endif
 
-/* numerical accuracy */
+/** Check if used memory overflow maximal authorized memory.
+    Execute the command law if lack of memory. */
+#define CHK_MEM(mesh,size,string,law) do                                \
+    {                                                                   \
+      if ( ((mesh)->memCur) > ((mesh)->memMax) ||                       \
+           ((mesh)->memCur < 0 )) {                                     \
+        fprintf(stdout,"  ## Error:");                                  \
+        fprintf(stdout," unable to allocate %s.\n",string);             \
+        fprintf(stdout,"  ## Check the mesh size or ");                 \
+        fprintf(stdout,"increase the allocated memory with the -m option.\n"); \
+        (mesh)->memCur -= (long long)(size);                            \
+        law;                                                            \
+      }                                                                 \
+    }while(0)
+
+/** Free pointer ptr of mesh structure and compute the new used memory.
+    size is the size of the pointer */
+#define DEL_MEM(mesh,ptr,size) do               \
+    {                                           \
+      (mesh)->memCur -= (long long)(size);      \
+      free(ptr);                                \
+      ptr = NULL;                               \
+    }while(0)
+
+/** Increment memory counter memCur and check if we don't overflow
+    the maximum authorizied memory memMax. */
+#define ADD_MEM(mesh,size,message,law) do       \
+    {                                           \
+      (mesh)->memCur += (long long)(size);      \
+      CHK_MEM(mesh,size,message,law);           \
+    }while(0)
+
+/** Safe deallocation */
+#define SAFE_FREE(ptr) do                       \
+    {                                           \
+      free(ptr);                                \
+      ptr = NULL;                               \
+    }while(0)
+
+
+/** Safe allocation with calloc */
+#define SAFE_CALLOC(ptr,size,type) do             \
+    {                                             \
+      ptr = (type *)calloc((size),sizeof(type));  \
+      if ( !ptr ) {                               \
+        perror("  ## Memory problem: calloc");    \
+        exit(EXIT_FAILURE);                       \
+      }                                           \
+    }while(0)
+
+/** Safe allocation with malloc */
+#define SAFE_MALLOC(ptr,size,type) do             \
+    {                                             \
+      ptr = (type *)malloc((size)*sizeof(type));  \
+      if ( !ptr ) {                               \
+        perror("  ## Memory problem: malloc");    \
+        exit(EXIT_FAILURE);                       \
+      }                                           \
+    }while(0)
+
+/** Safe reallocation */
+#define SAFE_REALLOC(ptr,size,type) do                  \
+    {                                                   \
+      type* tmp;                                        \
+      tmp = (type *)realloc((ptr),(size)*sizeof(type)); \
+      if ( !tmp ) {                                     \
+        SAFE_FREE(ptr);                                 \
+        perror(" ## Memory problem: realloc");          \
+        exit(EXIT_FAILURE);                             \
+      }                                                 \
+      (ptr) = tmp;                                      \
+    }while(0)
+
+/** safe reallocation with memset at 0 for the new values of tab */
+#define SAFE_RECALLOC(ptr,prevSize,newSize,type) do         \
+    {                                                       \
+      type* tmp;                                            \
+      int k;                                                \
+                                                            \
+      tmp = (type *)realloc((ptr),(newSize)*sizeof(type));  \
+      if ( !tmp ) {                                         \
+        SAFE_FREE(ptr);                                     \
+        perror(" ## Memory problem: realloc");              \
+        exit(EXIT_FAILURE);                                 \
+      }                                                     \
+      (ptr) = tmp;                                          \
+      for ( k=prevSize; k<newSize; k++) {                   \
+        memset(&ptr[k],0,sizeof(type));                     \
+      }                                                     \
+    }while(0)
+
+/** Reallocation of ptr of type type at size (initSize+wantedGap*initSize)
+    if possible or at maximum available size if not. Execute the command law
+    if reallocation failed. Memset to 0 for the new values of table. */
+#define TAB_RECALLOC(mesh,ptr,initSize,wantedGap,type,message,law) do \
+    {                                                                 \
+      int gap;                                                        \
+                                                                      \
+      if ( (mesh->memMax-mesh->memCur) <                              \
+           (long long) (wantedGap*initSize*sizeof(type)) ) {          \
+        gap = (int)(mesh->memMax-mesh->memCur)/sizeof(type);          \
+        printf("ajeter: passage dans 1\n");                           \
+      }                                                               \
+      else                                                            \
+        gap = wantedGap*initSize;                                     \
+                                                                      \
+      ADD_MEM(mesh,gap*sizeof(type),message,law);                     \
+      SAFE_RECALLOC((ptr),initSize+1,initSize+gap+1,type);            \
+      initSize = initSize+gap;                                        \
+                                                                      \
+      fprintf(stdout,"  ## Warning: %s reallocation.\n",              \
+              message);                                               \
+    }while(0);
+/*      if ( mesh->info.imprim > 4 || info.ddebug )             \*/
+
+
+/** Reallocation of point table and sol table and creation
+    of point ip with coordinates o and tag tag*/
+#define POINT_REALLOC(mesh,sol,ip,wantedGap,law,o,tag ) do              \
+                                                                     {  \
+                                                                       int klink; \
+                                                                        \
+                                                                       TAB_RECALLOC(mesh,mesh->point,mesh->npmax,wantedGap,Point, \
+                                                                                    "larger point table",law); \
+                                                                        \
+                                                                       mesh->npnil = mesh->np+1; \
+                                                                       for (klink=mesh->npnil; klink<mesh->npmax-1; klink++) \
+                                                                         mesh->point[klink].tmp  = klink+1; \
+                                                                        \
+                                                                       /* solution */ \
+                                                                       if ( sol->m ) { \
+                                                                         ADD_MEM(mesh,(mesh->npmax-sol->npmax)*sizeof(double), \
+                                                                                 "larger solution",law); \
+                                                                         SAFE_REALLOC(sol->m,mesh->npmax+1,double); \
+                                                                       } \
+                                                                       sol->npmax = mesh->npmax; \
+                                                                        \
+                                                                       /* We try again to add the point */ \
+                                                                       ip = newPt(mesh,o,tag); \
+                                                                       if ( !ip ) {law;} \
+                                                                     }while(0)
+
+          /** Reallocation of tetra table and creation
+              of tetra jel */
+#define TETRA_REALLOC(mesh,jel,wantedGap,law ) do                       \
+                                                                     {  \
+                                                                       int klink,oldSiz; \
+                                                                        \
+                                                                       oldSiz = mesh->nemax; \
+                                                                       TAB_RECALLOC(mesh,mesh->tetra,mesh->nemax,wantedGap,Tetra, \
+                                                                                    "larger tetra table",law); \
+                                                                        \
+                                                                       mesh->nenil = mesh->ne+1; \
+                                                                       for (klink=mesh->nenil; klink<mesh->nemax-1; klink++) \
+                                                                         mesh->tetra[klink].v[3]  = klink+1; \
+                                                                        \
+                                                                       if ( mesh->adja ) { \
+                                                                         /* adja table */ \
+                                                                         ADD_MEM(mesh,4*(mesh->nemax-oldSiz)*sizeof(int), \
+                                                                                 "larger adja table",law); \
+                                                                         SAFE_RECALLOC(mesh->adja,4*mesh->ne+5,4*mesh->nemax+5,int); \
+                                                                       } \
+                                                                        \
+                                                                       /* We try again to add the point */ \
+                                                                       jel = newElt(mesh); \
+                                                                       if ( !jel ) {law;} \
+                                                                     }while(0)
+
+          /* numerical accuracy */
 #define ALPHAD    20.7846096908265    //0.04811252243247      /* 12*sqrt(3) */
 #define LLONG     2.5//2.0   // 1.414213562373
 #define LSHRT     0.3  // 0.707106781186
@@ -62,11 +236,12 @@
 #define EPS2      1.e-12
 #endif
 
-#define NPMAX   1000000
-#define NAMAX    200000
-#define NTMAX   2000000
-#define NEMAX   6000000
+#define NPMAX  1000000
+#define NAMAX   200000
+#define NTMAX  2000000
+#define NEMAX  6000000
 
+#define MEMMAX  800
 #define BOXSIZE 500
 
 #ifndef M_PI
@@ -74,7 +249,7 @@
 #define M_PI_2          1.57079632679489661923   /**< pi/2 */
 #endif
 
-/* tags */
+          /* tags */
 #define  MG_NOTAG     (0)
 #define  MG_REF       (1 << 0)        /**< 1  edge reference  */
 #define  MG_GEO       (1 << 1)        /**< 2  geometric ridge */
@@ -153,7 +328,6 @@ typedef struct {
 pBucket newBucket(pMesh ,int );
 int     addBucket(pMesh ,pBucket ,int );
 int     delBucket(pMesh ,pBucket ,int );
-void    freeBucket(pBucket );
 int buckin_iso(pMesh mesh,pSol sol,pBucket bucket,int ip);
 /* prototypes */
 void rotmatrix(double n[3],double r[3][3]);
@@ -204,7 +378,7 @@ int  hashTria(pMesh mesh);
 int  hashEdge(pMesh mesh,Hash *hash,int a,int b,int k);
 int  hashGet(Hash *hash,int a,int b);
 int  hashPop(Hash *hash,int a,int b);
-int  hashNew(Hash *hash,int hsiz,int hmax);
+int  hashNew(pMesh mesh, Hash *hash,int hsiz,int hmax);
 int  hPop(HGeom *hash,int a,int b,int *ref,char *tag);
 int  hTag(HGeom *hash,int a,int b,int ref,char tag);
 int  hGet(HGeom *hash,int a,int b,int *ref,char *tag);
@@ -219,7 +393,8 @@ int  bdryPerm(pMesh );
 int  chkmsh(pMesh,int,int);
 int  chkfemtopo(pMesh mesh);
 int  cntbdypt(pMesh mesh, int nump);
-void memRepartition(pMesh mesh);
+long long memSize(void);
+void memOption(pMesh mesh);
 int  mmg3d1(pMesh ,pSol );
 int  mmg3d1_delone(pMesh ,pSol );
 int  mmg3d2(pMesh ,pSol );

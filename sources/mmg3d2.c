@@ -338,8 +338,7 @@ static int snpval_ls(pMesh mesh,pSol sol,double *tmp) {
     fprintf(stdout,"     %8d points snapped, %d corrected\n",ns,nc);
 
   /* memory free */
-  free(mesh->adja);
-  mesh->adja = 0;
+  DEL_MEM(mesh,mesh->adja,(4*mesh->nemax+5)*sizeof(int));
   return(1);
 }
 
@@ -438,7 +437,7 @@ static int cuttet_ls(pMesh mesh, pSol sol/*,double *tmp*/){
   /* } */
 
   /* Create intersection points at 0 isovalue and set flags to tetras */
-  if ( !hashNew(&hash,nb,7*nb) ) return(0);
+  if ( !hashNew(mesh,&hash,nb,7*nb) ) return(0);
   for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
     if ( !MG_EOK(pt) )  continue;
@@ -487,10 +486,12 @@ static int cuttet_ls(pMesh mesh, pSol sol/*,double *tmp*/){
 
       np = newPt(mesh,c,0);
       if ( !np ) {
-        fprintf(stdout,"  ## Error: unable to allocate a new point\n");
-        fprintf(stdout,"  ## Check the mesh size or ");
-        fprintf(stdout,"increase the allocated memory with the -m option.\n");
-        return(0);
+        POINT_REALLOC(mesh,sol,np,0.2,
+                      printf("  ## Error: unable to allocate a new point\n");
+                      printf("  ## Check the mesh size or increase");
+                      printf(" the allocated memory with the -m option.\n");
+                      return(0)
+                      ,c,0);
       }
       sol->m[np] = 0.0;
       hashEdge(mesh,&hash,ip0,ip1,np);
@@ -539,7 +540,7 @@ static int cuttet_ls(pMesh mesh, pSol sol/*,double *tmp*/){
   if ( (mesh->info.ddebug || abs(mesh->info.imprim) > 5) && ns > 0 )
     fprintf(stdout,"     %7d splitted\n",ns);
 
-  free(hash.item);
+  DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(hedge));
   return(ns);
 }
 
@@ -577,7 +578,7 @@ int chkedg_ls(pMesh mesh, pSol sol){
         } else {
           fprintf(stdout,"  *** Problem in function chkedg_ls :");
           fprintf(stdout," tetra %d : 4 null values",k);
-          exit(EXIT_FAILURE);
+          return(0);
         }
         na   = pt->v[ iare[ia][0] ];
         nb   = pt->v[ iare[ia][1] ];
@@ -1499,18 +1500,17 @@ int mmg3d2(pMesh mesh,pSol sol) {
   if ( abs(mesh->info.imprim) > 4 )
     fprintf(stdout,"  ** ISOSURFACE EXTRACTION\n");
 
-  tmp = (double*)calloc(mesh->npmax+1,sizeof(double));
-  if ( !tmp ) {
-    perror("  ## Memory problem: calloc");
-    exit(EXIT_FAILURE);
-  }
+  ADD_MEM(mesh,(mesh->npmax+1)*sizeof(double),"temporary table",
+          printf("  Exit program.\n");
+          exit(EXIT_FAILURE));
+  SAFE_CALLOC(tmp,mesh->npmax+1,double);
 
   /* Snap values of level set function if need be, then discretize it */
   if ( !snpval_ls(mesh,sol,tmp) ) {
     fprintf(stdout,"  ## Problem with implicit function. Exit program.\n");
     return(0);
   }
-  free(tmp);
+  DEL_MEM(mesh,tmp,(mesh->npmax+1)*sizeof(double));
 
   if ( !hashTetra(mesh,1) ) {
     fprintf(stdout,"  ## Hashing problem. Exit program.\n");
@@ -1550,10 +1550,8 @@ int mmg3d2(pMesh mesh,pSol sol) {
     return(0);
   }
 
-  free(mesh->adja);
-  free(mesh->tria);
-  mesh->adja = 0;
-  mesh->tria = 0;
+  DEL_MEM(mesh,mesh->adja,(4*mesh->nemax+5)*sizeof(int));
+  DEL_MEM(mesh,mesh->tria,(mesh->nt+1)*sizeof(Tria));
   mesh->nt = 0;
 
   if ( !setref_ls(mesh,sol) ) {
@@ -1562,8 +1560,7 @@ int mmg3d2(pMesh mesh,pSol sol) {
   }
 
   /* Clean memory (but not pointer) */
-  free(sol->m);
-  sol->m  = NULL;
+  DEL_MEM(mesh,sol->m,(sol->size*sol->npmax+1)*sizeof(double));
   sol->np = 0;
 
   return(1);

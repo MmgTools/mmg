@@ -60,38 +60,18 @@ void Alloc_mesh(MMG5_pMesh *mesh, MMG5_pSol *sol
 		) {
   
   /* mesh allocation */
-  if ( *mesh ) {
-    free(*mesh);
-    *mesh = NULL;
-  }
-  *mesh = (MMG5_pMesh)calloc(1,sizeof(MMG5_Mesh));
-  if ( !*mesh ) {
-    perror("  ## Memory problem: calloc");
-    exit(EXIT_FAILURE);
-  }
+  if ( *mesh )  SAFE_FREE(*mesh);
+  SAFE_CALLOC(*mesh,1,MMG5_Mesh);
 
   /* sol allocation */
-  if ( *sol ) {
-    free(*sol);
-    *sol = NULL;
-  }
-  *sol           = (MMG5_pSol)calloc(1,sizeof(MMG5_Sol));
-  if ( !*sol ) {
-    perror("  ## Memory problem: calloc");
-    exit(EXIT_FAILURE);
-  }
+  if ( *sol )  DEL_MEM(*mesh,*sol,sizeof(MMG5_Sol));
+  SAFE_CALLOC(*sol,1,MMG5_Sol);
 
 #ifdef SINGUL
   /* singul allocation */
-  if ( *sing ) {
-    free(*sing);
-    *sing = NULL;
-  }
-  *sing          = (MMG5_pSingul)calloc(1,sizeof(MMG5_Singul));
-  if ( !*sing ) {
-    perror("  ## Memory problem: calloc");
-    exit(EXIT_FAILURE);
-  }
+  if ( *sing )  DEL_MEM(*mesh,*sing,sizeof(MMG5_Singul));
+  SAFE_CALLOC(*sing,1,MMG5_Singul);
+
 #endif
   return;
 }
@@ -109,17 +89,14 @@ void Init_woalloc_mesh(MMG5_pMesh mesh, MMG5_pSol sol
   (sol)->ver  = 2;
   (sol)->size = 1;
 
+  /* Default parameters values */
   MMG5_Init_parameters(mesh);
 
-  /* file name initialisations */
-  MMG5_Set_inputMeshName(mesh,"");
-  MMG5_Set_outputMeshName(mesh,"");
-
-  MMG5_Set_inputSolName(mesh,sol,"");
-  MMG5_Set_outputSolName(mesh,sol,"");
-
-#ifdef SINGUL
-  MMG5_Set_inputSingulName(mesh,sing,"");
+  /* Default vaules for file names */
+#ifndef SINGUL
+  MMG5_Init_fileNames(mesh,sol);
+#else
+  MMG5_Init_fileNames(mesh,sol,sing);
 #endif
 
   return;
@@ -151,29 +128,56 @@ void Init_parameters(pMesh mesh) {
   mesh->info.hausd    = 0.01;     /**< control Hausdorff */
   mesh->info.hgrad    = 0.1;      /**< control gradation; */
   mesh->info.ls       = 0.0;      /**< level set value */
+
+  /* initial value for memMax */
+  mesh->memMax = memSize();
+  if ( mesh->memMax )
+  /* maximal memory = 80% of total physical memory */
+    mesh->memMax = mesh->memMax*80/100;
+  else {
+    /* default value = 800 Mo */
+    printf("  Maximum memory set to default value: %d Mo.\n",MEMMAX);
+    mesh->memMax = MEMMAX << 20;
+  }
 }
+
+/** default values for file names */
+void Init_fileNames(pMesh mesh,pSol sol
+#ifdef SINGUL
+                    ,pSingul sing
+#endif
+                    ) {
+  MMG5_Set_inputMeshName(mesh,"");
+  MMG5_Set_outputMeshName(mesh,"");
+
+  MMG5_Set_inputSolName(mesh,sol,"");
+  MMG5_Set_outputSolName(mesh,sol,"");
+
+#ifdef SINGUL
+  MMG5_Set_inputSingulName(mesh,sing,"");
+#endif
+  return;
+}
+
 
 /** Set the name of input mesh */
 int Set_inputMeshName(MMG5_pMesh mesh, char* meshin) {
 
-  if ( mesh->namein ) {
-    free ( mesh->namein );
-    mesh->namein = NULL;
-  }
+  if ( mesh->namein )
+    DEL_MEM(mesh,mesh->namein,(strlen(mesh->namein)+1)*sizeof(char));
+
   if ( strlen(meshin) ) {
-    mesh->namein = (char *)calloc(strlen(meshin)+1,sizeof(char));
-    if ( !mesh->namein ) {
-      perror("  ## Memory problem: calloc");
-      exit(EXIT_FAILURE);
-    }
+    ADD_MEM(mesh,(strlen(meshin)+1)*sizeof(char),"input mesh name",
+            printf("  Exit program.\n");
+            exit(EXIT_FAILURE));
+    SAFE_CALLOC(mesh->namein,strlen(meshin)+1,char);
     strcpy(mesh->namein,meshin);
   }
   else {
-    mesh->namein = (char *)calloc(128,sizeof(char));
-    if ( !mesh->namein ) {
-      perror("  ## Memory problem: calloc");
-      exit(EXIT_FAILURE);
-    }
+    ADD_MEM(mesh,10*sizeof(char),"input mesh name",
+            printf("  Exit program.\n");
+            exit(EXIT_FAILURE));
+    SAFE_CALLOC(mesh->namein,10,char);
     strcpy(mesh->namein,"mesh.mesh");
     if ( (mesh->info.imprim > 5) || mesh->info.ddebug ) {
       fprintf(stdout,"  ## Warning: no name given for input mesh.\n");
@@ -188,38 +192,34 @@ int Set_inputMeshName(MMG5_pMesh mesh, char* meshin) {
 int Set_inputSolName(MMG5_pMesh mesh,MMG5_pSol sol, char* solin) {
   char *ptr;
 
-  if ( sol->namein ) {
-    free ( sol->namein );
-    sol->namein = NULL;
-  }
+  if ( sol->namein )
+    DEL_MEM(mesh,sol->namein,(strlen(sol->namein)+1)*sizeof(char));
   if ( strlen(solin) ) {
-    sol->namein = (char *)calloc(strlen(solin)+1,sizeof(char));
-    if ( !sol->namein ) {
-      perror("  ## Memory problem: calloc");
-      exit(EXIT_FAILURE);
-    }
+    ADD_MEM(mesh,(strlen(solin)+1)*sizeof(char),"input sol name",
+            printf("  Exit program.\n");
+            exit(EXIT_FAILURE));
+    SAFE_CALLOC(sol->namein,strlen(solin)+1,char);
     strcpy(sol->namein,solin);
   }
   else {
     if ( strlen(mesh->namein) ) {
-      sol->namein = (char *)calloc( strlen(mesh->namein)+1,sizeof(char));
-      if ( !sol->namein ) {
-        perror("  ## Memory problem: calloc");
-        exit(EXIT_FAILURE);
-      }
+      SAFE_CALLOC(sol->namein,strlen(mesh->namein)+1,char);
       strcpy(sol->namein,mesh->namein);
-
       ptr = strstr(sol->namein,".mesh");
-      if ( ptr )
+      if ( ptr ) {
         /* the sol file is renamed with the meshfile without extension */
         *ptr = '\0';
+        SAFE_REALLOC(sol->namein,(strlen(sol->namein)+1),char);
+      }
+      ADD_MEM(mesh,(strlen(sol->namein)+1)*sizeof(char),"input sol name",
+              printf("  Exit program.\n");
+              exit(EXIT_FAILURE));
     }
     else {
-      sol->namein = (char *)calloc(128,sizeof(char));
-      if ( !sol->namein ) {
-        perror("  ## Memory problem: calloc");
-        exit(EXIT_FAILURE);
-      }
+      ADD_MEM(mesh,9*sizeof(char),"input sol name",
+              printf("  Exit program.\n");
+              exit(EXIT_FAILURE));
+      SAFE_CALLOC(sol->namein,9,char);
       strcpy(sol->namein,"mesh.sol");
     }
   }
@@ -228,53 +228,45 @@ int Set_inputSolName(MMG5_pMesh mesh,MMG5_pSol sol, char* solin) {
 
 /** Set the name of output mesh */
 int Set_outputMeshName(MMG5_pMesh mesh, char* meshout) {
-  char *ptr,*ptr2;
+  char *ptr;
 
-  if ( mesh->nameout ) {
-    free ( mesh->nameout );
-    mesh->nameout = NULL;
-  }
+  if ( mesh->nameout )
+    DEL_MEM(mesh,mesh->nameout,(strlen(mesh->nameout)+1)*sizeof(char));
+
   if ( strlen(meshout) ) {
-    mesh->nameout = (char *)calloc(strlen(meshout)+1,sizeof(char));
-    if ( !mesh->nameout ) {
-      perror("  ## Memory problem: calloc");
-      exit(EXIT_FAILURE);
-    }
+    ADD_MEM(mesh,(strlen(meshout)+1)*sizeof(char),"output mesh name",
+            printf("  Exit program.\n");
+            exit(EXIT_FAILURE));
+    SAFE_CALLOC(mesh->nameout,strlen(meshout)+1,char);
     strcpy(mesh->nameout,meshout);
   }
   else {
     if ( strlen(mesh->namein) ) {
-      mesh->nameout = (char *)calloc( strlen(mesh->namein)+8,sizeof(char));
-      if ( !mesh->nameout ) {
-        perror("  ## Memory problem: calloc");
-        exit(EXIT_FAILURE);
-      }
+      ADD_MEM(mesh,(strlen(mesh->namein)+3)*sizeof(char),"output mesh name",
+              printf("  Exit program.\n");
+              exit(EXIT_FAILURE));
+      SAFE_CALLOC(mesh->nameout,strlen(mesh->namein)+3,char);
       strcpy(mesh->nameout,mesh->namein);
       ptr = strstr(mesh->nameout,".mesh");
       if ( !ptr ) {
         /* filename without extension */
-        strcat(mesh->nameout,".o.mesh");
+        strcat(mesh->nameout,".o");
       }
       else {
-        ptr2 = strstr(mesh->nameout,".meshb");
-        if ( ptr2 ) {
-          /* filename with .meshb extention */
-          *ptr2 = '\0';
-          strcat(mesh->nameout,".o.meshb");
-        }
-        else {
-          /* filename with .mesh extention */
-          *ptr = '\0';
-          strcat(mesh->nameout,".o.mesh");
-        }
+        *ptr = '\0';
+        strcat(mesh->nameout,".o.mesh");
+      }
+      ptr = strstr(mesh->namein,".meshb");
+      if ( ptr ) {
+        /* filename with .meshb extention */
+        strcat(mesh->nameout,"b");
       }
     }
     else {
-      mesh->nameout = (char *)calloc(128,sizeof(char));
-      if ( !mesh->nameout ) {
-        perror("  ## Memory problem: calloc");
-        exit(EXIT_FAILURE);
-      }
+      ADD_MEM(mesh,7*sizeof(char),"output mesh name",
+              printf("  Exit program.\n");
+              exit(EXIT_FAILURE));
+      SAFE_CALLOC(mesh->nameout,7,char);
       if ( (mesh->info.imprim > 5) || mesh->info.ddebug ) {
         fprintf(stdout,"  ## Warning: no name given for output mesh.\n");
         fprintf(stdout,"     Use of default value \"mesh.o.mesh\".\n");
@@ -289,31 +281,33 @@ int Set_outputMeshName(MMG5_pMesh mesh, char* meshout) {
 int Set_outputSolName(MMG5_pMesh mesh,MMG5_pSol sol, char* solout) {
   char *ptr;
 
-  if ( sol->nameout ) {
-    free ( sol->nameout );
-    sol->nameout = NULL;
-  }
+  if ( sol->nameout )
+    DEL_MEM(mesh,sol->nameout,(strlen(sol->nameout)+1)*sizeof(char));
+
   if ( strlen(solout) ) {
-    sol->nameout = (char *)calloc(strlen(solout)+1,sizeof(char));
-    if ( !sol->nameout ) {
-      perror("  ## Memory problem: calloc");
-      exit(EXIT_FAILURE);
-    }
+    ADD_MEM(mesh,(strlen(solout)+1)*sizeof(char),"output sol name",
+            printf("  Exit program.\n");
+            exit(EXIT_FAILURE));
+    SAFE_CALLOC(sol->nameout,strlen(solout)+1,char);
     strcpy(sol->nameout,solout);
   }
   else {
     if ( strlen(mesh->nameout) ) {
-      sol->nameout = (char *)calloc( strlen(mesh->nameout)+1,sizeof(char));
-      if ( !sol->nameout ) {
-        perror("  ## Memory problem: calloc");
-        exit(EXIT_FAILURE);
-      }
+      ptr = strstr(mesh->nameout,".mesh");
+      if ( ptr )
+        SAFE_CALLOC(sol->nameout,strlen(mesh->nameout)+1,char);
+      else
+        SAFE_CALLOC(sol->nameout,strlen(mesh->nameout)+5,char);
       strcpy(sol->nameout,mesh->nameout);
-
       ptr = strstr(sol->nameout,".mesh");
       if ( ptr )
         /* the sol file is renamed with the meshfile without extension */
         *ptr = '\0';
+      strcat(sol->nameout,".sol");
+      ADD_MEM(mesh,(strlen(sol->nameout)+1)*sizeof(char),"output sol name",
+              printf("  Exit program.\n");
+              exit(EXIT_FAILURE));
+      SAFE_REALLOC(sol->nameout,(strlen(sol->nameout)+1),char);
     }
     else {
       fprintf(stdout,"  ## Error: no name for output mesh. please, use");
@@ -328,24 +322,22 @@ int Set_outputSolName(MMG5_pMesh mesh,MMG5_pSol sol, char* solout) {
 /** Set the name of input singularities file */
 int Set_inputSingulName(MMG5_pMesh mesh,MMG5_pSingul sing, char* singin) {
 
-  if ( sing->namein ) {
-    free ( sing->namein );
-    sing->namein = NULL;
-  }
+  if ( sing->namein )
+    DEL_MEM(mesh,sing->namein,(strlen(sing->namein)+1)*sizeof(char));
+
   if ( strlen(singin) ) {
-    sing->namein = (char *)calloc(strlen(singin)+1,sizeof(char));
-    if ( !sing->namein ) {
-      perror("  ## Memory problem: calloc");
-      exit(EXIT_FAILURE);
-    }
+    ADD_MEM(mesh,(strlen(singin)+1)*sizeof(char),
+            "input singularities file name",
+            printf("  Exit program.\n");
+            exit(EXIT_FAILURE));
+    SAFE_CALLOC(sing->namein,strlen(singin)+1,char);
     strcpy(sing->namein,singin);
   }
   else {
-    sing->namein = (char *)calloc(128,sizeof(char));
-    if ( !sing->namein ) {
-      perror("  ## Memory problem: calloc");
-      exit(EXIT_FAILURE);
-    }
+    ADD_MEM(mesh,19*sizeof(char),"input singularities file name",
+            printf("  Exit program.\n");
+            exit(EXIT_FAILURE));
+    SAFE_CALLOC(sing->namein,19,char);
     strcpy(sing->namein,"singularities.mesh");
     if ( (mesh->info.imprim > 5) || mesh->info.ddebug ) {
       fprintf(stdout,"  ## Warning: no name given for input singularities.\n");
@@ -374,19 +366,17 @@ int Set_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int typEntity, int np, int typSo
   else sol->size = 1;
 
   sol->dim = 3;
-  sol->npmax = mesh->npmax;
   if ( np ) {
     sol->np  = np;
     sol->npi = np;
-    if ( sol->m ) {
-      free(sol->m);
-      sol->m = NULL;
-    }
-    sol->m    = (double*)calloc(sol->npmax+1,sol->size*sizeof(double));
-    if ( !sol->m ) {
-      perror("  ## Memory problem: calloc");
-      exit(EXIT_FAILURE);
-    }
+    if ( sol->m )
+      DEL_MEM(mesh,sol->m,(sol->size*sol->npmax+1)*sizeof(double));
+
+    sol->npmax = mesh->npmax;
+    ADD_MEM(mesh,(sol->size*sol->npmax+1)*sizeof(double),"initial solution",
+            printf("  Exit program.\n");
+            exit(EXIT_FAILURE));
+    SAFE_CALLOC(sol->m,(sol->npmax*sol->size+1),double);
   }
   return(1);
 }
@@ -410,53 +400,40 @@ int Set_meshSize(MMG5_pMesh mesh, int np, int ne, int nt, int na) {
   mesh->nti = mesh->nt;
   mesh->nai = mesh->na;
 
+  if ( mesh->point )
+    DEL_MEM(mesh,mesh->point,(mesh->npmax+1)*sizeof(Point));
+
   mesh->npmax = MG_MAX(1.5*mesh->np,NPMAX);
-  mesh->ntmax = MG_MAX(1.5*mesh->nt,NTMAX);
+  ADD_MEM(mesh,(mesh->npmax+1)*sizeof(Point),"initial vertices",
+          printf("  Exit program.\n");
+          exit(EXIT_FAILURE));
+  SAFE_CALLOC(mesh->point,mesh->npmax+1,Point);
+
+  if ( mesh->tetra )
+    DEL_MEM(mesh,mesh->tetra,(mesh->nemax+1)*sizeof(Tetra));
+
   mesh->nemax = MG_MAX(1.5*mesh->ne,NEMAX);
-  mesh->namax = mesh->na;
+  ADD_MEM(mesh,(mesh->nemax+1)*sizeof(Tetra),"initial tetrahedra",
+          printf("  Exit program.\n");
+          exit(EXIT_FAILURE));
+  SAFE_CALLOC(mesh->tetra,mesh->nemax+1,Tetra);
 
-  if ( mesh->point ) {
-    free(mesh->point);
-    mesh->point = NULL;
-  }
-  mesh->point = (MMG5_pPoint)calloc(mesh->npmax+1,sizeof(Point));
-  if ( !mesh->point ) {
-    perror("  ## Memory problem: calloc");
-    exit(EXIT_FAILURE);
-  }
+  if ( mesh->tria )
+    DEL_MEM(mesh,mesh->tria,(mesh->nt+1)*sizeof(Tria));
 
-  if ( mesh->tetra ) {
-    free(mesh->tetra);
-    mesh->tetra = NULL;
-  }
-  mesh->tetra = (MMG5_pTetra)calloc(mesh->nemax+1,sizeof(Tetra));
-  if ( !mesh->tetra ) {
-    perror("  ## Memory problem: calloc");
-    exit(EXIT_FAILURE);
-  }
-
-  if ( mesh->tria ) {
-    free(mesh->tria);
-    mesh->tria = NULL;
-  }
+  mesh->ntmax = MG_MAX(1.5*mesh->nt,NTMAX);
   if ( mesh->nt ) {
-    mesh->tria  = (MMG5_pTria)calloc(mesh->ntmax+1,sizeof(Tria));
-    if ( !mesh->tria ) {
-      perror("  ## Memory problem: calloc");
-      exit(EXIT_FAILURE);
-    }
+    ADD_MEM(mesh,(mesh->nt+1)*sizeof(Tria),"initial triangles",return(0));
+    SAFE_CALLOC(mesh->tria,mesh->nt+1,Tria);
   }
 
-  if ( mesh->edge ) {
-    free(mesh->edge);
-    mesh->edge = NULL;
-  }
+  if ( mesh->edge )
+    DEL_MEM(mesh,mesh->edge,(mesh->na+1)*sizeof(Edge));
+
+  mesh->namax = mesh->na;
   if ( mesh->na ) {
-    mesh->edge  = (MMG5_pEdge)calloc(mesh->namax+1,sizeof(Edge));
-    if ( !mesh->edge ) {
-      perror("  ## Memory problem: calloc");
-      exit(EXIT_FAILURE);
-    }
+    ADD_MEM(mesh,(mesh->na+1)*sizeof(Edge),"initial edges",return(0));
+    SAFE_CALLOC(mesh->edge,(mesh->na+1),Edge);
   }
 
   /* keep track of empty links */
@@ -471,13 +448,13 @@ int Set_meshSize(MMG5_pMesh mesh, int np, int ne, int nt, int na) {
 
   /* stats */
   if ( abs(mesh->info.imprim) > 4 ) {
-    fprintf(stdout,"     NUMBER OF VERTICES     %8d / %8d\n",mesh->np,mesh->npmax);
+    fprintf(stdout,"     NUMBER OF VERTICES     %8d\n",mesh->np);
     if ( mesh->na ) {
       fprintf(stdout,"     NUMBER OF EDGES        %8d\n",mesh->na);
     }
     if ( mesh->nt )
       fprintf(stdout,"     NUMBER OF TRIANGLES    %8d\n",mesh->nt);
-    fprintf(stdout,"     NUMBER OF ELEMENTS     %8d / %8d\n",mesh->ne,mesh->nemax);
+    fprintf(stdout,"     NUMBER OF ELEMENTS     %8d\n",mesh->ne);
   }
   return(1);
 }
@@ -485,7 +462,7 @@ int Set_meshSize(MMG5_pMesh mesh, int np, int ne, int nt, int na) {
 #ifdef SINGUL
 /** Set the number of singular vertices and edges and allocate
     the associated tables. */
-int Set_singulSize(MMG5_pSingul sing, int np, int na) {
+int Set_singulSize(MMG5_pMesh mesh,MMG5_pSingul sing, int np, int na) {
 
   if ( sing->point || sing->edge )
     fprintf(stdout,"  ## Warning: new singularites\n");
@@ -494,27 +471,23 @@ int Set_singulSize(MMG5_pSingul sing, int np, int na) {
   sing->na = na;
 
   if ( sing->ns ) {
-    if ( sing->point ) {
-      free(sing->point);
-      sing->point = NULL;
-    }
-    sing->point  = (MMG5_psPoint)calloc(sing->ns+1,sizeof(sPoint));
-    if ( !sing->point ) {
-      perror("  ## Memory problem: calloc");
-      exit(EXIT_FAILURE);
-    }
+    if ( sing->point )
+      DEL_MEM(mesh,sing->point,(sing->ns+1)*sizeof(sPoint));
+
+    ADD_MEM(mesh,(sing->ns+1)*sizeof(sPoint),"vertex singularities",
+            printf("  Exit program.\n");
+            exit(EXIT_FAILURE));
+    SAFE_CALLOC(sing->point,sing->ns+1,sPoint);
   }
 
   if ( sing->na ) {
-    if ( sing->edge ) {
-      free(sing->edge);
-      sing->edge = NULL;
-    }
-    sing->edge  = (MMG5_pEdge)calloc(sing->na+1,sizeof(Edge));
-    if ( !sing->edge ) {
-      perror("  ## Memory problem: calloc");
-      exit(EXIT_FAILURE);
-    }
+    if ( sing->edge )
+      DEL_MEM(mesh,sing->edge,(sing->na+1)*sizeof(Edge));
+
+    ADD_MEM(mesh,(sing->na+1)*sizeof(Edge),"edge singularities",
+            printf("  Exit program.\n");
+            exit(EXIT_FAILURE));
+    SAFE_CALLOC(sing->edge,sing->na+1,Edge);
   }
   return(1);
 }
@@ -691,6 +664,8 @@ int Set_tetrahedra(MMG5_pMesh mesh, int v0, int v1, int v2, int v3, int ref, int
     mesh->xt++;
   }
 
+  pt->qual = orcal(mesh,pos);
+
   return(1);
 }
 
@@ -818,6 +793,7 @@ int Set_edges(MMG5_pMesh mesh, int v0, int v1, int ref, int pos) {
   mesh->edge[pos].a = v0;
   mesh->edge[pos].b = v1;
   mesh->edge[pos].ref  = ref;
+  mesh->edge[pos].tag |= MG_REF;
 
   return(1);
 }
@@ -1108,90 +1084,6 @@ int Chk_meshData(MMG5_pMesh mesh,MMG5_pSol met) {
   return(1);
 }
 
-/** realloc memory to satisfy the info.mem option */
-static inline
-int reallocMemory(MMG5_pMesh mesh,MMG5_pSol sol) {
-  int    k,old_ntmax, old_npmax, old_nemax;
-  pPoint point;
-  pTetra tetra;
-  pTria  tria;
-  double *m;
-
-  old_npmax = mesh->npmax;
-  old_ntmax = mesh->ntmax;
-  old_nemax = mesh->nemax;
-
-  memRepartition(mesh);
-
-  if ( (mesh->npmax != old_npmax) && (mesh->npmax > mesh->np) ) {
-    point = (pPoint)realloc(mesh->point,(mesh->npmax+1)*sizeof(Point));
-    if ( !point ){
-      perror("  ## Memory problem: realloc");
-      free(mesh->point);
-      exit(EXIT_FAILURE);
-    }
-    mesh->point = point;
-
-    /* keep track of empty links */
-    if ( old_npmax < mesh->npmax ) {
-      for (k=old_npmax; k<mesh->npmax-1; k++)
-        mesh->point[k].tmp  = k+1;
-    }
-    else
-      mesh->point[mesh->npmax].tmp  = 0;
-
-    sol->npmax = mesh->npmax;
-    m = (double*)realloc(sol->m,(sol->npmax+1)*sol->size*sizeof(double));
-    if ( !m ){
-      perror("  ## Memory problem: realloc");
-      free(sol->m);
-      exit(EXIT_FAILURE);
-    }
-    sol->m = m;
-  }
-
-  if ( (mesh->nemax != old_nemax) && (mesh->nemax > mesh->ne) ) {
-    tetra = (pTetra)realloc(mesh->tetra,(mesh->nemax+1)*sizeof(Tetra));
-    if ( !tetra ){
-      free(mesh->tetra);
-      perror("  ## Memory problem: realloc");
-      exit(EXIT_FAILURE);
-    }
-    mesh->tetra = tetra;
-
-    /* keep track of empty links */
-    if ( old_nemax < mesh->nemax ) {
-      for (k=old_nemax; k<mesh->nemax-1; k++)
-        mesh->tetra[k].v[3] = k+1;
-    }
-    else
-      mesh->tetra[mesh->nemax].v[3] = 0;
-  }
-
-  if ( (mesh->ntmax != old_ntmax) && (mesh->ntmax > mesh->nt) ) {
-    if ( mesh->nt ) {
-      tria = (pTria)realloc(mesh->tria,(mesh->ntmax+1)*sizeof(Tria));
-      if ( !mesh->tria ){
-        free(mesh->tria);
-        perror("  ## Memory problem: realloc");
-        exit(EXIT_FAILURE);
-      }
-      mesh->tria = tria;
-    }
-  }
-  /* stats */
-  if ( abs(mesh->info.imprim) > 4 ) {
-    fprintf(stdout,"\n     NUMBER OF VERTICES     %8d / %8d\n",mesh->np,mesh->npmax);
-    if ( mesh->na ) {
-      fprintf(stdout,"     NUMBER OF EDGES        %8d\n",mesh->na);
-    }
-    if ( mesh->nt )
-      fprintf(stdout,"     NUMBER OF TRIANGLES    %8d\n",mesh->nt);
-    fprintf(stdout,"     NUMBER OF ELEMENTS     %8d / %8d\n",mesh->ne,mesh->nemax);
-  }
-  return(1);
-}
-
 /** skip the MG_ISO references in an input mesh */
 static inline
 int skipIso(MMG5_pMesh mesh) {
@@ -1219,20 +1111,13 @@ int skipIso(MMG5_pMesh mesh) {
   } while( ++k <= mesh->nti );
 
   if ( mesh->nti < mesh->nt ) {
-    mesh->nt = mesh->nti;
-    if( !mesh->nt ){
-      free(mesh->tria);
-      mesh->tria=NULL;
-    }
+    if( !mesh->nti )
+      DEL_MEM(mesh,mesh->tria,(mesh->nt+1)*sizeof(Tria));
     else {
-      ptt = (pTria)realloc(mesh->tria,(mesh->nt+1)*sizeof(Tria));
-      if ( !ptt ) {
-        free(mesh->tria);
-        perror("  ## Memory problem: realloc");
-        exit(EXIT_FAILURE);
-      }
-      mesh->tria = ptt;
+      ADD_MEM(mesh,mesh->nti-mesh->nt,"triangles",return(0));
+      SAFE_RECALLOC(mesh->tria,mesh->nt+1,(mesh->nti+1),Tria);
     }
+    mesh->nt = mesh->nti;
   }
 
   /* Skip edges with MG_ISO refs */
@@ -1257,20 +1142,13 @@ int skipIso(MMG5_pMesh mesh) {
   } while( ++k <= mesh->nai );
 
   if ( mesh->nai < mesh->na ) {
-    mesh->na = mesh->nai;
-    if( !mesh->na ){
-      free(mesh->edge);
-      mesh->edge=NULL;
-    }
+    if( !mesh->nai )
+      DEL_MEM(mesh,mesh->edge,(mesh->nai+1)*sizeof(Edge));
     else {
-      pa = (pEdge)realloc(mesh->edge,(mesh->na+1)*sizeof(Edge));
-      if ( !pa ) {
-        free(mesh->edge);
-        perror("  ## Memory problem: realloc");
-        exit(EXIT_FAILURE);
-      }
-      mesh->edge = pa;
+      ADD_MEM(mesh,mesh->nai-mesh->na,"Edges",return(0));
+      SAFE_RECALLOC(mesh->edge,mesh->na+1,(mesh->nai+1),Edge);
     }
+    mesh->na = mesh->nai;
   }
 
   /* delete tetrahedra references */
@@ -1296,25 +1174,19 @@ int Set_iparameters(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
     }
     else
       mesh->info.mem      = val;
-    if ( !reallocMemory(mesh,sol) )  exit(EXIT_FAILURE);
+    memOption(mesh);
     break;
   case MMG5_IPARAM_debug :
     mesh->info.ddebug   = val;
     break;
   case MMG5_IPARAM_angle :
     /* free table that may contains old ridges */
-    if ( mesh->htab.geom ) {
-      free(mesh->htab.geom);
-      mesh->htab.geom = NULL;
-    }
-    if ( mesh->xpoint ) {
-      free(mesh->xpoint);
-      mesh->xpoint = NULL;
-    }
-    if ( mesh->xtetra ) {
-      free(mesh->xtetra);
-      mesh->xtetra = NULL;
-    }
+    if ( mesh->htab.geom )
+      DEL_MEM(mesh,mesh->htab.geom,(mesh->htab.max+1)*sizeof(hgeom));
+    if ( mesh->xpoint )
+      DEL_MEM(mesh,mesh->xpoint,(mesh->xpmax+1)*sizeof(xPoint));
+    if ( mesh->xtetra )
+      DEL_MEM(mesh,mesh->xtetra,(mesh->xtmax+1)*sizeof(xTetra));
     if ( !val )
       mesh->info.dhd    = -1.;
     else {
@@ -1339,19 +1211,18 @@ int Set_iparameters(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
     mesh->info.nomove   = val;
     break;
   case MMG5_IPARAM_numberOfLocalParam :
-    mesh->info.npar     = val;
-    mesh->info.npari = 0;
     if ( mesh->info.par ) {
-      free(mesh->info.par);
-      mesh->info.par   = NULL;
+      DEL_MEM(mesh,mesh->info.par,mesh->info.npar*sizeof(Par));
       if ( (mesh->info.imprim > 5) || mesh->info.ddebug )
         fprintf(stdout,"  ## Warning: new local parameter values\n");
     }
-    mesh->info.par = (pPar)calloc(mesh->info.npar,sizeof(Par));
-    if ( !mesh->info.par ) {
-      perror("  ## Memory problem: calloc");
-      exit(EXIT_FAILURE);
-    }
+    mesh->info.npar  = val;
+    mesh->info.npari = 0;
+    ADD_MEM(mesh,mesh->info.npar*sizeof(Par),"parameters",
+            printf("  Exit program.\n");
+            exit(EXIT_FAILURE));
+    SAFE_CALLOC(mesh->info.par,mesh->info.npar,Par);
+
     for (k=0; k<mesh->info.npar; k++) {
       mesh->info.par[k].elt   = MMG5_Noentity;
       mesh->info.par[k].ref   = INT_MAX;
@@ -1384,12 +1255,6 @@ int Set_dparameters(MMG5_pMesh mesh, MMG5_pSol sol, int dparam, double val){
   switch ( dparam ) {
     /* double parameters */
   case MMG5_DPARAM_angleDetection :
-    /* free table that may contains old ridges */
-    if ( mesh->xpoint ) {
-      free(mesh->xpoint);
-      mesh->xpoint = NULL;
-    }
-
     mesh->info.dhd = val;
     mesh->info.dhd = MG_MAX(0.0, MG_MIN(180.0,mesh->info.dhd));
     mesh->info.dhd = cos(mesh->info.dhd*M_PI/180.0);
@@ -1484,32 +1349,26 @@ void Free_names(pMesh mesh,pSol met
                ){
   /* mesh */
   if ( mesh->nameout ) {
-    free(mesh->nameout);
-    mesh->nameout = NULL;
+    DEL_MEM(mesh,mesh->nameout,(strlen(mesh->nameout)+1)*sizeof(char));
   }
+
   if ( mesh->namein ) {
-    free(mesh->namein);
-    mesh->namein = NULL;
+    DEL_MEM(mesh,mesh->namein,(strlen(mesh->namein)+1)*sizeof(char));
   }
 
   /* met */
   if ( met->namein ) {
-    free(met->namein);
-    met->namein = NULL;
-  }
-  if ( met->nameout ) {
-    free(met->nameout);
-    met->nameout = NULL;
+    DEL_MEM(mesh,met->namein,(strlen(met->namein)+1)*sizeof(char));
   }
 
+  if ( met->nameout ) {
+    DEL_MEM(mesh,met->nameout,(strlen(met->nameout)+1)*sizeof(char));
+  }
 #ifdef SINGUL
   /* singul */
-  if ( mesh->info.sing ) {
-    if ( singul->namein ) {
-      free(singul->namein);
-      singul->namein=NULL;
-    }
-   }
+  if ( singul->namein ) {
+    DEL_MEM(mesh,singul->namein,(strlen(singul->namein)+1)*sizeof(char));
+  }
 #endif
 }
 
@@ -1527,53 +1386,48 @@ void Free_structures(pMesh mesh,pSol met
 #endif
 
   /* mesh */
-  free(mesh->point);
-  mesh->point = NULL;
-  free(mesh->tetra);
-  mesh->tetra = NULL;
-  free(mesh->adja);
-  mesh->adja = NULL;
-  if ( mesh->xpoint ) {
-    free(mesh->xpoint);
-    mesh->xpoint = NULL;
-  }
-  if ( mesh->htab.geom ) {
-    free(mesh->htab.geom);
-    mesh->htab.geom = NULL;
-  }
+  if ( mesh->point )
+    DEL_MEM(mesh,mesh->point,(mesh->npmax+1)*sizeof(Point));
 
-  if ( mesh->tria ) {
-    free(mesh->tria);
-    mesh->tria = NULL;
-  }
-  if ( mesh->xtetra ) {
-    free(mesh->xtetra);
-    mesh->xtetra = NULL;
-  }
+  if ( mesh->tetra )
+    DEL_MEM(mesh,mesh->tetra,(mesh->nemax+1)*sizeof(Tetra));
+
+  if ( mesh->edge )
+    DEL_MEM(mesh,mesh->edge,(mesh->na+1)*sizeof(Edge));
+
+  if ( mesh->adja )
+    DEL_MEM(mesh,mesh->adja,(4*mesh->nemax+5)*sizeof(int));
+
+  if ( mesh->xpoint )
+    DEL_MEM(mesh,mesh->xpoint,(mesh->xpmax+1)*sizeof(xPoint));
+
+  if ( mesh->htab.geom )
+    DEL_MEM(mesh,mesh->htab.geom,(mesh->htab.max+1)*sizeof(hgeom));
+
+  if ( mesh->tria )
+    DEL_MEM(mesh,mesh->tria,(mesh->nt+1)*sizeof(Tria));
+
+  if ( mesh->xtetra )
+    DEL_MEM(mesh,mesh->xtetra,(mesh->xtmax+1)*sizeof(xTetra));
 
   /* met */
-  if ( /*!mesh->info.iso &&*/ met->m ) {
-    free(met->m);
-    met->m = NULL;
-  }
+  if ( /*!mesh->info.iso &&*/ met->m )
+    DEL_MEM(mesh,met->m,(met->size*met->npmax+1)*sizeof(double));
 
   /* mesh->info */
-  if ( mesh->info.npar && mesh->info.par ) {
-    free(mesh->info.par);
-    mesh->info.par = NULL;
-  }
+  if ( mesh->info.npar && mesh->info.par )
+    DEL_MEM(mesh,mesh->info.par,mesh->info.npar*sizeof(Par));
 
 #ifdef SINGUL
   /* singul */
-  if ( singul->ns ) {
-    free(singul->point);
-    singul->point=NULL;
-  }
-  if ( singul->na ) {
-    free(singul->edge);
-    singul->edge=NULL;
-  }
+  if ( singul->point )
+    DEL_MEM(mesh,singul->point,(singul->ns+1)*sizeof(sPoint));
+  if ( singul->edge )
+    DEL_MEM(mesh,singul->edge,(singul->na+1)*sizeof(Edge));
 #endif
+
+  if ( abs(mesh->info.imprim)>4 || mesh->info.ddebug )
+    printf("  MEMORY USED AT END (bytes) %lld\n",mesh->memCur);
 }
 
 /** Return the index of the 4 adjacent elements of tetra kel.

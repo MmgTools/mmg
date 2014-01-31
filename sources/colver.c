@@ -659,11 +659,9 @@ int colver(pMesh mesh,int *list,int ilist,char indq) {
         /* we need to create the xtetra */
         mesh->xt++;
         if ( mesh->xt > mesh->xtmax ) {
-          fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
-          fprintf(stdout,"  ## Check the mesh size or increase");
-          fprintf(stdout," the allocated memory with the -m option.\n");
-          mesh->xt--;
-          return(-1);
+          TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,xTetra,"larger xtetra table",
+                       mesh->xt--;
+                       return(-1));
         }
         pt->xt = mesh->xt;
         memset(&mesh->xtetra[pt->xt],0,sizeof(xTetra));
@@ -949,11 +947,10 @@ int colver(pMesh mesh,int *list,int ilist,char indq) {
             /* Create new field xt */
             mesh->xt++;
             if ( mesh->xt > mesh->xtmax ) {
-              fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
-              fprintf(stdout,"  ## Check the mesh size or increase");
-              fprintf(stdout," the allocated memory with the -m option.\n");
-              mesh->xt--;
-              return(-1);
+              TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,xTetra,
+                           "larger xtetra table",
+                           mesh->xt--;
+                           return(-1));
             }
             pt1->xt = mesh->xt;
             pxt = &mesh->xtetra[pt1->xt];

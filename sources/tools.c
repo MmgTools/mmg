@@ -943,11 +943,7 @@ int DoSol(pMesh mesh,pSol met) {
   int        i,k,ia,ib,ipa,ipb;
   int       *mark;
 
-	mark = (int*)calloc(mesh->np+1,sizeof(int));
-  if ( !mark ) {
-    perror("  ## Memory problem: calloc");
-    exit(EXIT_FAILURE);
-  }
+	SAFE_CALLOC(mark,mesh->np+1,int);
 
   /* Memory alloc */
   met->np     = mesh->np;
@@ -955,11 +951,8 @@ int DoSol(pMesh mesh,pSol met) {
   met->size   = 1;
   met->dim    = mesh->dim;
 
-  met->m = (double*)calloc(met->npmax+1,met->size*sizeof(double));
-  if ( !met->m ) {
-    perror("  ## Memory problem: calloc");
-    exit(EXIT_FAILURE);
-  }
+  ADD_MEM(mesh,(met->npmax*met->size+1)*sizeof(double),"solution",return(0));
+  SAFE_CALLOC(met->m,met->npmax*met->size+1,double);
 
   /* internal edges */
   for (k=1; k<=mesh->ne; k++) {
@@ -997,7 +990,7 @@ int DoSol(pMesh mesh,pSol met) {
     else
 			met->m[k] = MG_MIN(mesh->info.hmax,MG_MAX(mesh->info.hmin,met->m[k] / (double)mark[k]));
   }
-	free(mark);
+	SAFE_FREE(mark);
   return(1);
 }
 

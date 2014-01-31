@@ -10,7 +10,6 @@ int newPt(pMesh mesh,double c[3],char tag) {
   if ( mesh->npnil > mesh->np )  mesh->np = mesh->npnil;
   ppt   = &mesh->point[curpt];
   memcpy(ppt->c,c,3*sizeof(double));
-  ppt->tag   &= ~MG_NUL;
   mesh->npnil = ppt->tmp;
   ppt->tmp    = 0;
 
@@ -18,11 +17,10 @@ int newPt(pMesh mesh,double c[3],char tag) {
   if ( tag & MG_BDY ) {
     mesh->xp++;
     if(mesh->xp > mesh->xpmax){
-      fprintf(stdout,"  ## Allocation problem (xpoint), not enough memory.\n");
-      fprintf(stdout,"  ## Check the mesh size or ");
-      fprintf(stdout,"increase the allocated memory with the -m option.\n");
-      mesh->xp--;
-      return(0);
+      /* reallocation of xpoint table */
+      TAB_RECALLOC(mesh,mesh->xpoint,mesh->xpmax,0.2,xPoint,
+                   "larger xpoint table",
+                   return(0));
     }
     ppt->xp  = mesh->xp;
   }
@@ -84,17 +82,58 @@ void delElt(pMesh mesh,int iel) {
   }
 }
 
+long long memSize (void) {
+  long long mem;
+
+#if (defined(__APPLE__) && defined(__MACH__))
+  size_t size;
+
+  size = sizeof(mem);
+  if ( sysctlbyname("hw.memsize",&mem,&size,NULL,0) == -1)
+    return(0);
+
+#elif defined(__unix__) || defined(__unix) || defined(unix)
+  mem = sysconf(_SC_PHYS_PAGES)*sysconf(_SC_PAGESIZE);
+#else
+  printf("  ## WARNING: UNKNOWN SYSTEM, RECOVER OF MAXIMAL MEMORY NOT AVAILABLE.\n");
+  return(0);
+#endif
+
+  return(mem);
+}
 /** memory repartition for the -m option */
-void memRepartition(pMesh mesh) {
-  int     million = 1048576L;
-  int     npask,bytes,ctri;
+void memOption(pMesh mesh) {
+  long long  million = 1048576L;
+  int        ctri,npask,bytes;
+
+  mesh->memMax = memSize();
+
+#warning: verifier qu on ne veut pas un plus petit tab (1.5*mesh->np).
+  mesh->npmax = MG_MAX(1.5*mesh->np,NPMAX);
+  mesh->nemax = MG_MAX(1.5*mesh->ne,NEMAX);
+  mesh->ntmax = MG_MAX(1.5*mesh->nt,NTMAX);
 
   if ( mesh->info.mem < 0 ) {
-    mesh->npmax = MG_MAX(1.5*mesh->np,NPMAX);
-    mesh->ntmax = MG_MAX(1.5*mesh->nt,NTMAX);
-    mesh->nemax = MG_MAX(1.5*mesh->ne,NEMAX);
+    if ( mesh->memMax )
+    /* maximal memory = 80% of total physical memory */
+      mesh->memMax = mesh->memMax*80/100;
+    else {
+      /* default value = 800 Mo */
+      printf("  Maximum memory set to default value: %d Mo.\n",MEMMAX);
+      mesh->memMax = MEMMAX*million;
+    }
   }
   else {
+    /* memory asked by user if possible, otherwise total physical memory */
+    if ( (long long)mesh->info.mem*million > mesh->memMax && mesh->memMax ) {
+      fprintf(stdout,"  ## Warning: asking for %d Mo of memory ",mesh->info.mem);
+      fprintf(stdout,"when only %lld available.\n",mesh->memMax/million);
+    }
+    else {
+      mesh->memMax= (long long)(mesh->info.mem)*million;
+    }
+
+    /* if asked memory is lower than default NPMAX/NEMAX/NTMAX we take lower values */
 #ifdef SINGUL
     /* Remarks:
      * 1-- in insertion part, we have memory allocated to store *
@@ -122,11 +161,16 @@ void memRepartition(pMesh mesh) {
     bytes = bytes + 3*6*sizeof(int);
 #endif
 
-    npask = (double)mesh->info.mem / bytes * million;
-    mesh->npmax = npask;
-    mesh->ntmax = ctri*npask;
-    mesh->nemax = 6*npask;
+    npask = (double)mesh->info.mem / bytes * (int)million;
+    mesh->npmax = MG_MIN(npask,mesh->npmax);
+    mesh->ntmax = MG_MIN(ctri*npask,mesh->ntmax);
+    mesh->nemax = MG_MIN(6*npask,mesh->nemax);
   }
+
+  if ( abs(mesh->info.imprim) > 4 || mesh->info.ddebug )
+    fprintf(stdout,"  MAXIMUM MEMORY AUTHORIZED (Mo)    %lld\n",
+            mesh->memMax/million);
+
   return;
 }
 
@@ -134,39 +178,26 @@ void memRepartition(pMesh mesh) {
 int zaldy(pMesh mesh) {
   int     k;
 
-  memRepartition(mesh);
+  memOption(mesh);
 
-  if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug ) {
-    fprintf(stdout,"  ASKED MEMORY:\n");
-    fprintf(stdout,"         Max number of vertices     %8d\n",mesh->npmax);
-    fprintf(stdout,"         Max number of triangles    %8d\n",mesh->ntmax);
-    fprintf(stdout,"         Max number of elements     %8d\n",mesh->nemax);
-  }
+  ADD_MEM(mesh,(mesh->npmax+1)*sizeof(Point),"initial vertices",
+          printf("  Exit program.\n");
+          exit(EXIT_FAILURE));
+  SAFE_CALLOC(mesh->point,mesh->npmax+1,Point);
 
-  mesh->point = (pPoint)calloc(mesh->npmax+1,sizeof(Point));
-  if ( !mesh->point ){
-    perror("  ## Memory problem: calloc");
-    exit(EXIT_FAILURE);
-  }
+  ADD_MEM(mesh,(mesh->nemax+1)*sizeof(Tetra),"initial tetrahedra",
+          printf("  Exit program.\n");
+          exit(EXIT_FAILURE));
+  SAFE_CALLOC(mesh->tetra,mesh->nemax+1,Tetra);
 
-  mesh->tetra = (pTetra)calloc(mesh->nemax+1,sizeof(Tetra));
-  if ( !mesh->tetra ){
-    perror("  ## Memory problem: calloc");
-    exit(EXIT_FAILURE);
-  }
   if ( mesh->nt ) {
-    mesh->tria = (pTria)calloc(mesh->ntmax+1,sizeof(Tria));
-    if ( !mesh->tria ){
-      perror("  ## Memory problem: calloc");
-      exit(EXIT_FAILURE);
-    }
+    ADD_MEM(mesh,(mesh->nt+1)*sizeof(Tria),"initial triangles",return(0));
+    SAFE_CALLOC(mesh->tria,mesh->nt+1,Tria);
+    memset(&mesh->tria[0],0,sizeof(Tria));
   }
   if ( mesh->na ) {
-    mesh->edge = (pEdge)calloc(mesh->na+1,sizeof(Edge));
-    if ( !mesh->edge ) {
-      perror("  ## Memory problem: calloc");
-      exit(EXIT_FAILURE);
-    }
+    ADD_MEM(mesh,(mesh->na+1)*sizeof(Edge),"initial edges",return(0));
+    SAFE_CALLOC(mesh->edge,(mesh->na+1),Edge);
   }
 
   /* keep track of empty links */
@@ -191,7 +222,7 @@ void freeXTets(pMesh mesh) {
     pt     = &mesh->tetra[k];
     pt->xt = 0;
   }
-  free(mesh->xtetra);
-  mesh->xtetra = 0;
+  if ( mesh->xtetra )
+    DEL_MEM(mesh,mesh->xtetra,(mesh->xtmax+1)*sizeof(xTetra));
   mesh->xt = 0;
 }

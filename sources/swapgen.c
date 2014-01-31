@@ -166,16 +166,21 @@ int swpgen(pMesh mesh,pSol met,int nconf,int ilist,int *list) {
 
   np  = newPt(mesh,m,0);
   if(!np){
-    fprintf(stdout,"  ## Error: unable to allocate a new point.\n");
-    fprintf(stdout,"  ## Check the mesh size or");
-    fprintf(stdout," increase the allocated memory with the -m option.\n");
-    return(-1);
+    POINT_REALLOC(mesh,met,np,0.2,
+                  printf("  ## Error: unable to allocate a new point\n");
+                  printf("  ## Check the mesh size or increase");
+                  printf(" the allocated memory with the -m option.\n");
+                  return(-1)
+                  ,m,0);
   }
   if ( met->m )  met->m[np] = 0.5*(met->m[na]+met->m[nb]);
 
   /** First step : split of edge (na,nb) */
   ret = 2*ilist + 0;
   ier = split1b(mesh,met,list,ret,np,0);
+  /* pointer adress may change if we need to realloc memory during split */
+  pt = &mesh->tetra[iel];
+
   if ( ier < 0 ) {
     fprintf(stdout,"  ## Warning: unable to swap internal edge.\n");
     return(-1);
@@ -404,7 +409,7 @@ int swap23(pMesh mesh,int k,int ip) {
   if ( MG_GET(pxt0->ori, tau2[2]) )  MG_SET(xt[2].ori, tau1[0]);
   else  MG_CLR(xt[2].ori, tau1[0]);
 
-  /* Assignation of the xt fnewtet[2]ds to the appropriate tets */
+  /* Assignation of the xt newtet[2] to the appropriate tets */
   memset(isxt,0,3*sizeof(char));
   for (i=0; i<4; i++) {
     if ( xt[0].ref[i] || xt[0].ftag[i] ) isxt[0] = 1;
@@ -428,11 +433,11 @@ int swap23(pMesh mesh,int k,int ip) {
           if ( isxt[2] ) {
             mesh->xt++;
             if ( mesh->xt > mesh->xtmax ) {
-              fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
-              fprintf(stdout,"  ## Check the mesh size or ");
-              fprintf(stdout,"increase the allocated memory with the -m option.\n");
-              mesh->xt--;
-              return(0);
+              /* realloc of xtetras table */
+              TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,xTetra,
+                           "larger xtetra table",
+                           mesh->xt--;
+                           return(0));
             }
             pt[2]->xt = mesh->xt;
             memcpy(&mesh->xtetra[pt[2]->xt],&xt[2],sizeof(xTetra));
@@ -455,11 +460,11 @@ int swap23(pMesh mesh,int k,int ip) {
           if ( isxt[i] ) {
             mesh->xt++;
             if ( mesh->xt > mesh->xtmax ) {
-              fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
-              fprintf(stdout,"  ## Check the mesh size or ");
-              fprintf(stdout,"increase the allocated memory with the -m option.\n");
-              mesh->xt--;
-              return(0);
+              /* realloc of xtetras table */
+              TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,xTetra,
+                           "larger xtetra table",
+                           mesh->xt--;
+                           return(0));
             }
             pt[i]->xt = mesh->xt;
             memcpy(&mesh->xtetra[pt[i]->xt],&xt[i],sizeof(xTetra));
@@ -497,11 +502,11 @@ int swap23(pMesh mesh,int k,int ip) {
           if ( isxt[2] ) {
             mesh->xt++;
             if ( mesh->xt > mesh->xtmax ) {
-              fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
-              fprintf(stdout,"  ## Check the mesh size or ");
-              fprintf(stdout,"increase the allocated memory with the -m option.\n");
-              mesh->xt--;
-              return(0);
+              /* realloc of xtetras table */
+              TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,xTetra,
+                           "larger xtetra table",
+                           mesh->xt--;
+                           return(0));
             }
             pt[2]->xt = mesh->xt;
             memcpy(&mesh->xtetra[pt[2]->xt],&xt[2],sizeof(xTetra));
@@ -528,22 +533,22 @@ int swap23(pMesh mesh,int k,int ip) {
           memcpy(&mesh->xtetra[pt[1]->xt],&xt[1],sizeof(xTetra));
           mesh->xt++;
           if ( mesh->xt > mesh->xtmax ) {
-            fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
-            fprintf(stdout,"  ## Check the mesh size or ");
-            fprintf(stdout,"increase the allocated memory with the -m option.\n");
-            mesh->xt--;
-            return(0);
+            /* realloc of xtetras table */
+            TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,xTetra,
+                         "larger xtetra table",
+                         mesh->xt--;
+                         return(0));
           }
           pt[0]->xt = mesh->xt;
           memcpy(&mesh->xtetra[pt[0]->xt],&xt[0],sizeof(xTetra));
           if ( isxt[2] ) {
             mesh->xt++;
             if ( mesh->xt > mesh->xtmax ) {
-              fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
-              fprintf(stdout,"  ## Check the mesh size or ");
-              fprintf(stdout,"increase the allocated memory with the -m option.\n");
-              mesh->xt--;
-              return(0);
+              /* realloc of xtetras table */
+              TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,xTetra,
+                           "larger xtetra table",
+                           mesh->xt--;
+                           return(0));
             }
             pt[2]->xt = mesh->xt;
             memcpy(&mesh->xtetra[pt[2]->xt],&xt[2],sizeof(xTetra));
@@ -558,11 +563,11 @@ int swap23(pMesh mesh,int k,int ip) {
           if ( isxt[2] ) {
             mesh->xt++;
             if ( mesh->xt > mesh->xtmax ) {
-              fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
-              fprintf(stdout,"  ## Check the mesh size or ");
-              fprintf(stdout,"increase the allocated memory with the -m option.\n");
-              mesh->xt--;
-              return(0);
+              /* realloc of xtetras table */
+              TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,xTetra,
+                           "larger xtetra table",
+                           mesh->xt--;
+                           return(0));
             }
             pt[2]->xt = mesh->xt;
             memcpy(&mesh->xtetra[pt[2]->xt],&xt[2],sizeof(xTetra));
@@ -574,11 +579,11 @@ int swap23(pMesh mesh,int k,int ip) {
       else /* !pt[1]->xt */ {
         mesh->xt++;
         if ( mesh->xt > mesh->xtmax ) {
-          fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
-          fprintf(stdout,"  ## Check the mesh size or ");
-          fprintf(stdout,"increase the allocated memory with the -m option.\n");
-          mesh->xt--;
-          return(0);
+          /* realloc of xtetras table */
+          TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,xTetra,
+                       "larger xtetra table",
+                       mesh->xt--;
+                       return(0));
         }
         pt[0]->xt = mesh->xt;
         memcpy(&mesh->xtetra[pt[0]->xt],&xt[0],sizeof(xTetra));
@@ -586,11 +591,11 @@ int swap23(pMesh mesh,int k,int ip) {
           if ( isxt[i] ) {
             mesh->xt++;
             if ( mesh->xt > mesh->xtmax ) {
-              fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
-              fprintf(stdout,"  ## Check the mesh size or ");
-              fprintf(stdout,"increase the allocated memory with the -m option.\n");
-              mesh->xt--;
-              return(0);
+              /* realloc of xtetras table */
+              TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,xTetra,
+                           "larger xtetra table",
+                           mesh->xt--;
+                           return(0));
             }
             pt[i]->xt = mesh->xt;
             memcpy(&mesh->xtetra[pt[i]->xt],&xt[i],sizeof(xTetra));
@@ -607,11 +612,11 @@ int swap23(pMesh mesh,int k,int ip) {
           if ( isxt[2] ) {
             mesh->xt++;
             if ( mesh->xt > mesh->xtmax ) {
-              fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
-              fprintf(stdout,"  ## Check the mesh size or ");
-              fprintf(stdout,"increase the allocated memory with the -m option.\n");
-              mesh->xt--;
-              return(0);
+              /* realloc of xtetras table */
+              TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,xTetra,
+                           "larger xtetra table",
+                           mesh->xt--;
+                           return(0));
             }
             pt[2]->xt = mesh->xt;
             memcpy(&mesh->xtetra[pt[2]->xt],&xt[2],sizeof(xTetra));

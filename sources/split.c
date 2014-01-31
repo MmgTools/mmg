@@ -89,7 +89,16 @@ void split1(pMesh mesh,pSol met,int k,int vx[6]) {
   /* create a new tetra */
   pt  = &mesh->tetra[k];
   iel = newElt(mesh);
-  assert(iel);
+  if ( !iel ) {
+    TETRA_REALLOC(mesh,iel,0.5,
+                  printf("  ## Error: unable to allocate a new element.\n");
+                  printf("  ## Check the mesh size or ");
+                  printf("increase the allocated memory with the -m option.\n");
+                  printf("  Exit program.\n");
+                  exit(EXIT_FAILURE));
+    pt = &mesh->tetra[k];
+  }
+
   pt1 = &mesh->tetra[iel];
   pt1 = memcpy(pt1,pt,sizeof(Tetra));
   pxt0 = 0;
@@ -175,12 +184,13 @@ void split1(pMesh mesh,pSol met,int k,int vx[6]) {
     else if ( isxt && isxt1 ) {
       mesh->xt++;
       if ( mesh->xt > mesh->xtmax ) {
-        fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
-        fprintf(stdout,"  ## Check the mesh size or ");
-        fprintf(stdout,"increase the allocated memory with the -m option.\n");
-        fprintf(stdout,"  Exit program.\n");
-        mesh->xt--;
-        exit(EXIT_FAILURE);
+        /* realloc of xtetras table */
+        TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,xTetra,
+                     "larger xtetra table",
+                     mesh->xt--;
+                     printf("  Exit program.\n");
+                     exit(EXIT_FAILURE));
+        pxt0 = &mesh->xtetra[pt->xt];
       }
       pt1->xt = mesh->xt;
       memcpy(pxt0,&xt,sizeof(xTetra));
@@ -285,11 +295,7 @@ int split1b(pMesh mesh, pSol met,int *list, int ret, int ip,int cas){
     if ( j < ilist )  return(0);
   }
 
-  newtet = (int*)calloc(ilist,sizeof(int));
-  if ( !newtet ) {
-    perror("  ## Memory problem: calloc");
-    return(-1);
-  }
+  SAFE_CALLOC(newtet,ilist,int);
 
   iel = list[0] / 6;
   ie  = list[0] % 6;
@@ -324,13 +330,15 @@ int split1b(pMesh mesh, pSol met,int *list, int ret, int ip,int cas){
     }
     jel = newElt(mesh);
     if ( !jel ) {
-      fprintf(stdout,"  ## Error: unable to allocate a new element.\n");
-      fprintf(stdout,"  ## Check the mesh size or ");
-      fprintf(stdout,"increase the allocated memory with the -m option.\n");
-      for ( ; k>0 ; --k ) {
-        delElt(mesh,newtet[k]);
-      }
-      return(-1);
+      TETRA_REALLOC(mesh,jel,0.2,
+                    printf("  ## Error: unable to allocate a new element.\n");
+                    printf("  ## Check the mesh size or ");
+                    printf("increase the allocated memory with the -m option.\n");
+                    for ( ; k>0 ; --k ) {
+                      delElt(mesh,newtet[k]);
+                    }
+                    return(-1));
+      pt  = &mesh->tetra[iel];
     }
     pt1 = &mesh->tetra[jel];
     memcpy(pt1,pt,sizeof(Tetra));
@@ -432,11 +440,11 @@ int split1b(pMesh mesh, pSol met,int *list, int ret, int ip,int cas){
       else if ( isxt && isxt1 ) {
         mesh->xt++;
         if ( mesh->xt > mesh->xtmax ) {
-          fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
-          fprintf(stdout,"  ## Check the mesh size or ");
-          fprintf(stdout,"increase the allocated memory with the -m option.\n");
-          mesh->xt--;
-          return(-1);
+          /* realloc of xtetras table */
+          TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,xTetra,
+                       "larger xtetra table",
+                       mesh->xt--;
+                       return(-1));
         }
         pt1->xt = mesh->xt;
         pxt0 = &mesh->xtetra[pt->xt];
@@ -473,8 +481,7 @@ int split1b(pMesh mesh, pSol met,int *list, int ret, int ip,int cas){
     pt->qual=orcal(mesh,iel);
     pt1->qual=orcal(mesh,jel);
 
-    free(newtet);
-    newtet=NULL;
+    SAFE_FREE(newtet);
     return(1);
   }
 
@@ -568,11 +575,11 @@ int split1b(pMesh mesh, pSol met,int *list, int ret, int ip,int cas){
       else if (isxt && isxt1 ) {
         mesh->xt++;
         if ( mesh->xt > mesh->xtmax ) {
-          fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
-          fprintf(stdout,"  ## Check the mesh size or ");
-          fprintf(stdout,"increase the allocated memory with the -m option.\n");
-          mesh->xt--;
-          return(-1);
+          /* realloc of xtetras table */
+          TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,xTetra,
+                       "larger xtetra table",
+                       mesh->xt--;
+                       return(-1));
         }
         pt1->xt = mesh->xt;
         pxt0 = &mesh->xtetra[pt->xt];
@@ -773,8 +780,7 @@ int split1b(pMesh mesh, pSol met,int *list, int ret, int ip,int cas){
     pt1->qual=orcal(mesh,jel);
   }
 
-  free(newtet);
-  newtet=NULL;
+  SAFE_FREE(newtet);
   return(1);
 }
 
@@ -895,13 +901,30 @@ void split2sf(pMesh mesh,pSol met,int k,int vx[6]){
   newtet[0]=k;
 
   iel = newElt(mesh);
-  assert(iel);
+  if ( !iel ) {
+    TETRA_REALLOC(mesh,iel,0.5,
+                  printf("  ## Error: unable to allocate a new element.\n");
+                  printf("  ## Check the mesh size or ");
+                  printf("increase the allocated memory with the -m option.\n");
+                  printf("  Exit program.\n");
+                  exit(EXIT_FAILURE));
+    pt[0] = &mesh->tetra[newtet[0]];
+  }
   pt[1] = &mesh->tetra[iel];
   memcpy(pt[1],pt[0],sizeof(Tetra));
   newtet[1]=iel;
 
   iel = newElt(mesh);
-  assert(iel);
+  if ( !iel ) {
+    TETRA_REALLOC(mesh,iel,0.5,
+                  printf("  ## Error: unable to allocate a new element.\n");
+                  printf("  ## Check the mesh size or ");
+                  printf("increase the allocated memory with the -m option.\n");
+                  printf("  Exit program.\n");
+                  exit(EXIT_FAILURE));
+    pt[0] = &mesh->tetra[newtet[0]];
+    pt[1] = &mesh->tetra[newtet[1]];
+  }
   pt[2] = &mesh->tetra[iel];
   memcpy(pt[2],pt[0],sizeof(Tetra));
   newtet[2]=iel;
@@ -1034,12 +1057,12 @@ void split2sf(pMesh mesh,pSol met,int k,int vx[6]){
         if ( isxt[i] ) {
           mesh->xt++;
           if ( mesh->xt > mesh->xtmax ) {
-            fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
-            fprintf(stdout,"  ## Check the mesh size or ");
-            fprintf(stdout,"increase the allocated memory with the -m option.\n");
-            fprintf(stdout,"  Exit program.\n");
-            mesh->xt--;
-            exit(EXIT_FAILURE);
+            /* realloc of xtetras table */
+            TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,xTetra,
+                         "larger xtetra table",
+                         mesh->xt--;
+                         printf("  Exit program.\n");
+                         exit(EXIT_FAILURE));
           }
           pt[i]->xt = mesh->xt;
           pxt0 = &mesh->xtetra[mesh->xt];
@@ -1061,12 +1084,12 @@ void split2sf(pMesh mesh,pSol met,int k,int vx[6]){
           else {
             mesh->xt++;
             if ( mesh->xt > mesh->xtmax ) {
-              fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
-              fprintf(stdout,"  ## Check the mesh size or ");
-              fprintf(stdout,"increase the allocated memory with the -m option.\n");
-              fprintf(stdout,"  Exit program.\n");
-              mesh->xt--;
-              exit(EXIT_FAILURE);
+              /* realloc of xtetras table */
+              TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,xTetra,
+                           "larger xtetra table",
+                           mesh->xt--;
+                           printf("  Exit program.\n");
+                           exit(EXIT_FAILURE));
             }
             pt[i]->xt = mesh->xt;
             pxt0 = &mesh->xtetra[mesh->xt];
@@ -1100,19 +1123,46 @@ void split2(pMesh mesh,pSol met,int k,int vx[6]) {
   newtet[0]=k;
 
   iel = newElt(mesh);
-  assert(iel);
+  if ( !iel ) {
+    TETRA_REALLOC(mesh,iel,0.5,
+                  printf("  ## Error: unable to allocate a new element.\n");
+                  printf("  ## Check the mesh size or ");
+                  printf("increase the allocated memory with the -m option.\n");
+                  printf("  Exit program.\n");
+                  exit(EXIT_FAILURE));
+    pt[0] = &mesh->tetra[newtet[0]];
+  }
   pt[1] = &mesh->tetra[iel];
   memcpy(pt[1],pt[0],sizeof(Tetra));
   newtet[1]=iel;
 
   iel = newElt(mesh);
-  assert(iel);
+  if ( !iel ) {
+    TETRA_REALLOC(mesh,iel,0.5,
+                  printf("  ## Error: unable to allocate a new element.\n");
+                  printf("  ## Check the mesh size or ");
+                  printf("increase the allocated memory with the -m option.\n");
+                  printf("  Exit program.\n");
+                  exit(EXIT_FAILURE));
+    pt[0] = &mesh->tetra[newtet[0]];
+    pt[1] = &mesh->tetra[newtet[1]];
+  }
   pt[2] = &mesh->tetra[iel];
   memcpy(pt[2],pt[0],sizeof(Tetra));
   newtet[2]=iel;
 
   iel = newElt(mesh);
-  assert(iel);
+  if ( !iel ) {
+    TETRA_REALLOC(mesh,iel,0.5,
+                  printf("  ## Error: unable to allocate a new element.\n");
+                  printf("  ## Check the mesh size or ");
+                  printf("increase the allocated memory with the -m option.\n");
+                  printf("  Exit program.\n");
+                  exit(EXIT_FAILURE));
+    pt[0] = &mesh->tetra[newtet[0]];
+    pt[1] = &mesh->tetra[newtet[1]];
+    pt[2] = &mesh->tetra[newtet[2]];
+  }
   pt[3] = &mesh->tetra[iel];
   memcpy(pt[3],pt[0],sizeof(Tetra));
   newtet[3]=iel;
@@ -1205,12 +1255,12 @@ void split2(pMesh mesh,pSol met,int k,int vx[6]) {
         if ( isxt[i] ) {
           mesh->xt++;
           if ( mesh->xt > mesh->xtmax ) {
-            fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
-            fprintf(stdout,"  ## Check the mesh size or ");
-            fprintf(stdout,"increase the allocated memory with the -m option.\n");
-            fprintf(stdout,"  Exit program.\n");
-            mesh->xt--;
-            exit(EXIT_FAILURE);
+            /* realloc of xtetras table */
+            TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,xTetra,
+                         "larger xtetra table",
+                         mesh->xt--;
+                         printf("  Exit program.\n");
+                         exit(EXIT_FAILURE));
           }
           pt[i]->xt = mesh->xt;
           pxt0 = &mesh->xtetra[mesh->xt];
@@ -1234,12 +1284,12 @@ void split2(pMesh mesh,pSol met,int k,int vx[6]) {
           else {
             mesh->xt++;
             if ( mesh->xt > mesh->xtmax ) {
-              fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
-              fprintf(stdout,"  ## Check the mesh size or ");
-              fprintf(stdout,"increase the allocated memory with the -m option.\n");
-              fprintf(stdout,"  Exit program.\n");
-              mesh->xt--;
-              exit(EXIT_FAILURE);
+              /* realloc of xtetras table */
+              TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,xTetra,
+                           "larger xtetra table",
+                           mesh->xt--;
+                           printf("  Exit program.\n");
+                           exit(EXIT_FAILURE));
             }
             pt[i]->xt = mesh->xt;
             pxt0 = &mesh->xtetra[mesh->xt];
@@ -1339,19 +1389,46 @@ void split3(pMesh mesh,pSol met,int k,int vx[6]) {
 
   /* create 3 new tetras */
   iel = newElt(mesh);
-  assert(iel);
+  if ( !iel ) {
+    TETRA_REALLOC(mesh,iel,0.5,
+                  printf("  ## Error: unable to allocate a new element.\n");
+                  printf("  ## Check the mesh size or ");
+                  printf("increase the allocated memory with the -m option.\n");
+                  printf("  Exit program.\n");
+                  exit(EXIT_FAILURE));
+    pt[0] = &mesh->tetra[newtet[0]];
+  }
   pt[1] = &mesh->tetra[iel];
   pt[1] = memcpy(pt[1],pt[0],sizeof(Tetra));
   newtet[1]=iel;
 
   iel = newElt(mesh);
-  assert(iel);
+  if ( !iel ) {
+    TETRA_REALLOC(mesh,iel,0.5,
+                  printf("  ## Error: unable to allocate a new element.\n");
+                  printf("  ## Check the mesh size or ");
+                  printf("increase the allocated memory with the -m option.\n");
+                  printf("  Exit program.\n");
+                  exit(EXIT_FAILURE));
+    pt[0] = &mesh->tetra[newtet[0]];
+    pt[1] = &mesh->tetra[newtet[1]];
+  }
   pt[2] = &mesh->tetra[iel];
   pt[2] = memcpy(pt[2],pt[0],sizeof(Tetra));
   newtet[2]=iel;
 
   iel = newElt(mesh);
-  assert(iel);
+  if ( !iel ) {
+    TETRA_REALLOC(mesh,iel,0.5,
+                  printf("  ## Error: unable to allocate a new element.\n");
+                  printf("  ## Check the mesh size or ");
+                  printf("increase the allocated memory with the -m option.\n");
+                  printf("  Exit program.\n");
+                  exit(EXIT_FAILURE));
+    pt[0] = &mesh->tetra[newtet[0]];
+    pt[1] = &mesh->tetra[newtet[1]];
+    pt[2] = &mesh->tetra[newtet[2]];
+  }
   pt[3] = &mesh->tetra[iel];
   pt[3] = memcpy(pt[3],pt[0],sizeof(Tetra));
   newtet[3]=iel;
@@ -1447,12 +1524,12 @@ void split3(pMesh mesh,pSol met,int k,int vx[6]) {
         if ( isxt[i] ) {
           mesh->xt++;
           if ( mesh->xt > mesh->xtmax ) {
-            fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
-            fprintf(stdout,"  ## Check the mesh size or ");
-            fprintf(stdout,"increase the allocated memory with the -m option.\n");
-            fprintf(stdout,"  Exit program.\n");
-            mesh->xt--;
-            exit(EXIT_FAILURE);
+            /* realloc of xtetras table */
+            TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,xTetra,
+                         "larger xtetra table",
+                         mesh->xt--;
+                         printf("  Exit program.\n");
+                         exit(EXIT_FAILURE));
           }
           pt[i]->xt = mesh->xt;
           pxt0 = &mesh->xtetra[mesh->xt];
@@ -1474,12 +1551,12 @@ void split3(pMesh mesh,pSol met,int k,int vx[6]) {
           else {
             mesh->xt++;
             if ( mesh->xt > mesh->xtmax ) {
-              fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
-              fprintf(stdout,"  ## Check the mesh size or ");
-              fprintf(stdout,"increase the allocated memory with the -m option.\n");
-              fprintf(stdout,"  Exit program.\n");
-              mesh->xt--;
-              exit(EXIT_FAILURE);
+              /* realloc of xtetras table */
+              TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,xTetra,
+                           "larger xtetra table",
+                           mesh->xt--;
+                           printf("  Exit program.\n");
+                           exit(EXIT_FAILURE));
             }
             pt[i]->xt = mesh->xt;
             pxt0 = &mesh->xtetra[mesh->xt];
@@ -1515,19 +1592,46 @@ void split3cone(pMesh mesh,pSol met,int k,int vx[6]) {
 
   /* create 3 new tetras */
   iel = newElt(mesh);
-  assert(iel);
+  if ( !iel ) {
+    TETRA_REALLOC(mesh,iel,0.5,
+                  printf("  ## Error: unable to allocate a new element.\n");
+                  printf("  ## Check the mesh size or ");
+                  printf("increase the allocated memory with the -m option.\n");
+                  printf("  Exit program.\n");
+                  exit(EXIT_FAILURE));
+    pt[0] = &mesh->tetra[newtet[0]];
+  }
   pt[1] = &mesh->tetra[iel];
   memcpy(pt[1],pt[0],sizeof(Tetra));
   newtet[1]=iel;
 
   iel = newElt(mesh);
-  assert(iel);
+  if ( !iel ) {
+    TETRA_REALLOC(mesh,iel,0.5,
+                  printf("  ## Error: unable to allocate a new element.\n");
+                  printf("  ## Check the mesh size or ");
+                  printf("increase the allocated memory with the -m option.\n");
+                  printf("  Exit program.\n");
+                  exit(EXIT_FAILURE));
+    pt[0] = &mesh->tetra[newtet[0]];
+    pt[1] = &mesh->tetra[newtet[1]];
+  }
   pt[2] = &mesh->tetra[iel];
   memcpy(pt[2],pt[0],sizeof(Tetra));
   newtet[2]=iel;
 
   iel = newElt(mesh);
-  assert(iel);
+  if ( !iel ) {
+    TETRA_REALLOC(mesh,iel,0.5,
+                  printf("  ## Error: unable to allocate a new element.\n");
+                  printf("  ## Check the mesh size or ");
+                  printf("increase the allocated memory with the -m option.\n");
+                  printf("  Exit program.\n");
+                  exit(EXIT_FAILURE));
+    pt[0] = &mesh->tetra[newtet[0]];
+    pt[1] = &mesh->tetra[newtet[1]];
+    pt[2] = &mesh->tetra[newtet[2]];
+  }
   pt[3] = &mesh->tetra[iel];
   memcpy(pt[3],pt[0],sizeof(Tetra));
   newtet[3]=iel;
@@ -1775,12 +1879,12 @@ void split3cone(pMesh mesh,pSol met,int k,int vx[6]) {
         if ( isxt[i] ) {
           mesh->xt++;
           if ( mesh->xt > mesh->xtmax ) {
-            fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
-            fprintf(stdout,"  ## Check the mesh size or ");
-            fprintf(stdout,"increase the allocated memory with the -m option.\n");
-            fprintf(stdout,"  Exit program.\n");
-            mesh->xt--;
-            exit(EXIT_FAILURE);
+            /* realloc of xtetras table */
+            TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,xTetra,
+                         "larger xtetra table",
+                         mesh->xt--;
+                         printf("  Exit program.\n");
+                         exit(EXIT_FAILURE));
           }
           pt[i]->xt = mesh->xt;
           pxt0 = &mesh->xtetra[mesh->xt];
@@ -1802,12 +1906,12 @@ void split3cone(pMesh mesh,pSol met,int k,int vx[6]) {
           else {
             mesh->xt++;
             if ( mesh->xt > mesh->xtmax ) {
-              fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
-              fprintf(stdout,"  ## Check the mesh size or ");
-              fprintf(stdout,"increase the allocated memory with the -m option.\n");
-              fprintf(stdout,"  Exit program.\n");
-              mesh->xt--;
-              exit(EXIT_FAILURE);
+              /* realloc of xtetras table */
+              TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,xTetra,
+                           "larger xtetra table",
+                           mesh->xt--;
+                           printf("  Exit program.\n");
+                           exit(EXIT_FAILURE));
             }
             pt[i]->xt = mesh->xt;
             pxt0 = &mesh->xtetra[mesh->xt];
@@ -1975,19 +2079,47 @@ void split3op(pMesh mesh, pSol met, int k, int vx[6]){
 
   /* Create new elements according to the current configuration */
   iel = newElt(mesh);
-  assert(iel);
+  if ( !iel ) {
+    TETRA_REALLOC(mesh,iel,0.5,
+                  printf("  ## Error: unable to allocate a new element.\n");
+                  printf("  ## Check the mesh size or ");
+                  printf("increase the allocated memory with the -m option.\n");
+                  printf("  Exit program.\n");
+                  exit(EXIT_FAILURE));
+    pt[0] = &mesh->tetra[newtet[0]];
+  }
+
   pt[1] = &mesh->tetra[iel];
   pt[1] = memcpy(pt[1],pt[0],sizeof(Tetra));
   newtet[1]=iel;
 
   iel = newElt(mesh);
-  assert(iel);
+  if ( !iel ) {
+    TETRA_REALLOC(mesh,iel,0.5,
+                  printf("  ## Error: unable to allocate a new element.\n");
+                  printf("  ## Check the mesh size or ");
+                  printf("increase the allocated memory with the -m option.\n");
+                  printf("  Exit program.\n");
+                  exit(EXIT_FAILURE));
+    pt[0] = &mesh->tetra[newtet[0]];
+    pt[1] = &mesh->tetra[newtet[1]];
+  }
   pt[2] = &mesh->tetra[iel];
   pt[2] = memcpy(pt[2],pt[0],sizeof(Tetra));
   newtet[2]=iel;
 
   iel = newElt(mesh);
-  assert(iel);
+  if ( !iel ) {
+    TETRA_REALLOC(mesh,iel,0.5,
+                  printf("  ## Error: unable to allocate a new element.\n");
+                  printf("  ## Check the mesh size or ");
+                  printf("increase the allocated memory with the -m option.\n");
+                  printf("  Exit program.\n");
+                  exit(EXIT_FAILURE));
+    pt[0] = &mesh->tetra[newtet[0]];
+    pt[1] = &mesh->tetra[newtet[1]];
+    pt[2] = &mesh->tetra[newtet[2]];
+  }
   pt[3] = &mesh->tetra[iel];
   pt[3] = memcpy(pt[3],pt[0],sizeof(Tetra));
   newtet[3]=iel;
@@ -2009,7 +2141,18 @@ void split3op(pMesh mesh, pSol met, int k, int vx[6]){
 
   if ( !((imin12 == ip1) && (imin03 == ip3)) ) {
     iel = newElt(mesh);
-    assert(iel);
+    if ( !iel ) {
+      TETRA_REALLOC(mesh,iel,0.5,
+                    printf("  ## Error: unable to allocate a new element.\n");
+                    printf("  ## Check the mesh size or ");
+                    printf("increase the allocated memory with the -m option.\n");
+                    printf("  Exit program.\n");
+                    exit(EXIT_FAILURE));
+      pt[0] = &mesh->tetra[newtet[0]];
+      pt[1] = &mesh->tetra[newtet[1]];
+      pt[2] = &mesh->tetra[newtet[2]];
+      pt[3] = &mesh->tetra[newtet[3]];
+    }
     pt[4] = &mesh->tetra[iel];
     pt[4] = memcpy(pt[4],pt[0],sizeof(Tetra));
     newtet[4]=iel;
@@ -2227,11 +2370,12 @@ void split3op(pMesh mesh, pSol met, int k, int vx[6]){
           if ( isxt[i] ) {
             mesh->xt++;
             if ( mesh->xt >= mesh->xtmax ) {
-              fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
-              fprintf(stdout,"  ## Check the mesh size or ");
-              fprintf(stdout,"increase the allocated memory with the -m option.\n");
-              fprintf(stdout,"  Exit program.\n");
-              exit(EXIT_FAILURE);
+              /* realloc of xtetras table */
+              TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,xTetra,
+                           "larger xtetra table",
+                           mesh->xt--;
+                           printf("  Exit program.\n");
+                           exit(EXIT_FAILURE));
             }
             pt[i]->xt = mesh->xt;
             pxt0 = &mesh->xtetra[mesh->xt];
@@ -2254,12 +2398,12 @@ void split3op(pMesh mesh, pSol met, int k, int vx[6]){
             else {
               mesh->xt++;
               if ( mesh->xt > mesh->xtmax ) {
-                fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
-                fprintf(stdout,"  ## Check the mesh size or ");
-                fprintf(stdout,"increase the allocated memory with the -m option.\n");
-                fprintf(stdout,"  Exit program.\n");
-                mesh->xt--;
-                exit(EXIT_FAILURE);
+                /* realloc of xtetras table */
+                TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,xTetra,
+                             "larger xtetra table",
+                             mesh->xt--;
+                             printf("  Exit program.\n");
+                             exit(EXIT_FAILURE));
               }
               pt[i]->xt = mesh->xt;
               pxt0 = &mesh->xtetra[mesh->xt];
@@ -2303,12 +2447,12 @@ void split3op(pMesh mesh, pSol met, int k, int vx[6]){
           if ( isxt[i] ) {
             mesh->xt++;
             if ( mesh->xt > mesh->xtmax ) {
-              fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
-              fprintf(stdout,"  ## Check the mesh size or ");
-              fprintf(stdout,"increase the allocated memory with the -m option.\n");
-              fprintf(stdout,"  Exit program.\n");
-              mesh->xt--;
-              exit(EXIT_FAILURE);
+              /* realloc of xtetras table */
+              TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,xTetra,
+                           "larger xtetra table",
+                           mesh->xt--;
+                           printf("  Exit program.\n");
+                           exit(EXIT_FAILURE));
             }
             pt[i]->xt = mesh->xt;
             pxt0 = &mesh->xtetra[mesh->xt];
@@ -2331,12 +2475,12 @@ void split3op(pMesh mesh, pSol met, int k, int vx[6]){
             else {
               mesh->xt++;
               if ( mesh->xt > mesh->xtmax ) {
-                fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
-                fprintf(stdout,"  ## Check the mesh size or ");
-                fprintf(stdout,"increase the allocated memory with the -m option.\n");
-                fprintf(stdout,"  Exit program.\n");
-                mesh->xt--;
-                exit(EXIT_FAILURE);
+                /* realloc of xtetras table */
+                TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,xTetra,
+                             "larger xtetra table",
+                             mesh->xt--;
+                             printf("  Exit program.\n");
+                             exit(EXIT_FAILURE));
               }
               pt[i]->xt = mesh->xt;
               pxt0 = &mesh->xtetra[mesh->xt];
@@ -2387,9 +2531,12 @@ int split3cb(pMesh mesh, pSol met, int k, int ifac, double o[3],
 
   (*ip) = newPt(mesh,o,MG_NOTAG);
   if ( !(*ip) ) {
-    fprintf(stdout,"%s:%d: Error: unable to allocate a new point\n"
-            ,__FILE__,__LINE__);
-    return(-1);
+    POINT_REALLOC(mesh,met,*ip,0.2,
+                  printf("  ## Error: unable to allocate a new point\n");
+                  printf("  ## Check the mesh size or increase");
+                  printf(" the allocated memory with the -m option.\n");
+                  return(-1)
+                  ,o,MG_NOTAG);
   }
   if ( met->m )  met->m[(*ip)] = hnew;
 
@@ -2407,10 +2554,13 @@ int split3cb(pMesh mesh, pSol met, int k, int ifac, double o[3],
   /* create 2 new tetras */
   iel = newElt(mesh);
   if ( !iel ) {
-    fprintf(stdout,"%s:%d: Error: unable to allocate a new element\n"
-            ,__FILE__,__LINE__);
-    delPt(mesh,(*ip));
-    return(-1);
+    TETRA_REALLOC(mesh,iel,0.2,
+                  printf("  ## Error: unable to allocate a new element.\n");
+                  printf("  ## Check the mesh size or ");
+                  printf("increase the allocated memory with the -m option.\n");
+                  delPt(mesh,(*ip));
+                  return(-1));
+    pt[0] = &mesh->tetra[newtet[0]];
   }
   pt[1] = &mesh->tetra[iel];
   pt[1] = memcpy(pt[1],pt[0],sizeof(Tetra));
@@ -2418,11 +2568,15 @@ int split3cb(pMesh mesh, pSol met, int k, int ifac, double o[3],
 
   iel = newElt(mesh);
   if ( !iel ) {
-    fprintf(stdout,"%s:%d: Error: unable to allocate a new element\n"
-            ,__FILE__,__LINE__);
-    delPt(mesh,(*ip));
-    delElt(mesh,newtet[1]);
-    return(-1);
+    TETRA_REALLOC(mesh,iel,0.2,
+                  printf("  ## Error: unable to allocate a new element.\n");
+                  printf("  ## Check the mesh size or ");
+                  printf("increase the allocated memory with the -m option.\n");
+                  delPt(mesh,(*ip));
+                  delElt(mesh,newtet[1]);
+                  return(-1));
+    pt[0] = &mesh->tetra[newtet[0]];
+    pt[1] = &mesh->tetra[newtet[1]];
   }
   pt[2] = &mesh->tetra[iel];
   pt[2] = memcpy(pt[2],pt[0],sizeof(Tetra));
@@ -2487,11 +2641,11 @@ int split3cb(pMesh mesh, pSol met, int k, int ifac, double o[3],
         if ( isxt[i] ) {
           mesh->xt++;
           if ( mesh->xt > mesh->xtmax ) {
-            fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
-            fprintf(stdout,"  ## Check the mesh size or ");
-            fprintf(stdout,"increase the allocated memory with the -m option.\n");
-            mesh->xt--;
-            return(-1);
+            /* realloc of xtetras table */
+            TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,xTetra,
+                         "larger xtetra table",
+                         mesh->xt--;
+                         return(-1));
           }
           pt[i]->xt = mesh->xt;
           pxt0 = &mesh->xtetra[mesh->xt];
@@ -2515,11 +2669,11 @@ int split3cb(pMesh mesh, pSol met, int k, int ifac, double o[3],
           else {
             mesh->xt++;
             if ( mesh->xt > mesh->xtmax ) {
-              fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
-              fprintf(stdout,"  ## Check the mesh size or ");
-              fprintf(stdout,"increase the allocated memory with the -m option.\n");
-              mesh->xt--;
-              return(-1);
+              /* realloc of xtetras table */
+              TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,xTetra,
+                           "larger xtetra table",
+                           mesh->xt--;
+                           return(-1));
             }
             pt[i]->xt = mesh->xt;
             pxt0 = &mesh->xtetra[mesh->xt];
@@ -2589,10 +2743,13 @@ int split3cb(pMesh mesh, pSol met, int k, int ifac, double o[3],
   /* create 2 new tetras */
   iel = newElt(mesh);
   if ( !iel ) {
-    fprintf(stdout,"%s:%d: Error: unable to allocate a new element\n"
-            ,__FILE__,__LINE__);
-    delPt(mesh,(*ip));
-    return(-1);
+    TETRA_REALLOC(mesh,iel,0.2,
+                  printf("  ## Error: unable to allocate a new element.\n");
+                  printf("  ## Check the mesh size or ");
+                  printf("increase the allocated memory with the -m option.\n");
+                  delPt(mesh,(*ip));
+                  return(-1));
+    pt[0] = &mesh->tetra[newtet2[0]];
   }
   pt[1] = &mesh->tetra[iel];
   pt[1] = memcpy(pt[1],pt[0],sizeof(Tetra));
@@ -2600,11 +2757,15 @@ int split3cb(pMesh mesh, pSol met, int k, int ifac, double o[3],
 
   iel = newElt(mesh);
   if ( !iel ) {
-    fprintf(stdout,"%s:%d: Error: unable to allocate a new element\n"
-            ,__FILE__,__LINE__);
-    delPt(mesh,(*ip));
-    delElt(mesh,newtet[1]);
-    return(-1);
+    TETRA_REALLOC(mesh,iel,0.2,
+                  printf("  ## Error: unable to allocate a new element.\n");
+                  printf("  ## Check the mesh size or ");
+                  printf("increase the allocated memory with the -m option.\n");
+                  delPt(mesh,(*ip));
+                  delElt(mesh,newtet[1]);
+                  return(-1));
+    pt[0] = &mesh->tetra[newtet2[0]];
+    pt[1] = &mesh->tetra[newtet2[1]];
   }
   pt[2] = &mesh->tetra[iel];
   pt[2] = memcpy(pt[2],pt[0],sizeof(Tetra));
@@ -2669,11 +2830,11 @@ int split3cb(pMesh mesh, pSol met, int k, int ifac, double o[3],
         if ( isxt[i] ) {
           mesh->xt++;
           if ( mesh->xt > mesh->xtmax ) {
-            fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
-            fprintf(stdout,"  ## Check the mesh size or ");
-            fprintf(stdout,"increase the allocated memory with the -m option.\n");
-            mesh->xt--;
-           return(-1);
+            /* realloc of xtetras table */
+            TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,xTetra,
+                         "larger xtetra table",
+                         mesh->xt--;
+                         return(-1));
           }
           pt[i]->xt = mesh->xt;
           pxt0 = &mesh->xtetra[mesh->xt];
@@ -2697,11 +2858,11 @@ int split3cb(pMesh mesh, pSol met, int k, int ifac, double o[3],
           else {
             mesh->xt++;
             if ( mesh->xt > mesh->xtmax ) {
-              fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
-              fprintf(stdout,"  ## Check the mesh size or ");
-              fprintf(stdout,"increase the allocated memory with the -m option.\n");
-              mesh->xt--;
-              return(-1);
+              /* realloc of xtetras table */
+              TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,xTetra,
+                           "larger xtetra table",
+                           mesh->xt--;
+                           return(-1));
             }
             pt[i]->xt = mesh->xt;
             pxt0 = &mesh->xtetra[mesh->xt];
@@ -2808,21 +2969,25 @@ int split4bar(pMesh mesh, pSol met, int k) {
 
   ib = newPt(mesh,o,0);
   if ( !ib ) {
-    fprintf(stdout,"  ## Error: unable to allocate a new point.\n");
-    fprintf(stdout,"  ## Check the mesh size or ");
-    fprintf(stdout,"increase the allocated memory with the -m option.\n");
-    return(0);
+    POINT_REALLOC(mesh,met,ib,0.2,
+                  printf("  ## Error: unable to allocate a new point\n");
+                  printf("  ## Check the mesh size or increase");
+                  printf(" the allocated memory with the -m option.\n");
+                  return(0)
+                  ,o,0);
   }
   if ( met->m )  met->m[ib] = hnew;
 
   /* create 3 new tetras */
   iel = newElt(mesh);
   if ( !iel ) {
-    fprintf(stdout,"  ## Error: unable to allocate a new element.\n");
-    fprintf(stdout,"  ## Check the mesh size or ");
-    fprintf(stdout,"increase the allocated memory with the -m option.\n");
-    delPt(mesh,ib);
-    return(0);
+    TETRA_REALLOC(mesh,iel,0.2,
+                  printf("  ## Error: unable to allocate a new element.\n");
+                  printf("  ## Check the mesh size or ");
+                  printf("increase the allocated memory with the -m option.\n");
+                  delPt(mesh,ib);
+                  return(0));
+    pt[0] = &mesh->tetra[newtet[0]];
   }
   pt[1] = &mesh->tetra[iel];
   pt[1] = memcpy(pt[1],pt[0],sizeof(Tetra));
@@ -2830,12 +2995,15 @@ int split4bar(pMesh mesh, pSol met, int k) {
 
   iel = newElt(mesh);
   if ( !iel ) {
-    fprintf(stdout,"  ## Error: unable to allocate a new element.\n");
-    fprintf(stdout,"  ## Check the mesh size or ");
-    fprintf(stdout,"increase the allocated memory with the -m option.\n");
-    delPt(mesh,ib);
-    delElt(mesh,newtet[1]);
-    return(0);
+    TETRA_REALLOC(mesh,iel,0.2,
+                  printf("  ## Error: unable to allocate a new element.\n");
+                  printf("  ## Check the mesh size or ");
+                  printf("increase the allocated memory with the -m option.\n");
+                  delPt(mesh,ib);
+                  delElt(mesh,newtet[1]);
+                  return(0));
+    pt[0] = &mesh->tetra[newtet[0]];
+    pt[1] = &mesh->tetra[newtet[1]];
   }
   pt[2] = &mesh->tetra[iel];
   pt[2] = memcpy(pt[2],pt[0],sizeof(Tetra));
@@ -2843,13 +3011,17 @@ int split4bar(pMesh mesh, pSol met, int k) {
 
   iel = newElt(mesh);
   if ( !iel ) {
-    fprintf(stdout,"  ## Error: unable to allocate a new element.\n");
-    fprintf(stdout,"  ## Check the mesh size or ");
-    fprintf(stdout,"increase the allocated memory with the -m option.\n");
-    delPt(mesh,ib);
-    delElt(mesh,newtet[1]);
-    delElt(mesh,newtet[2]);
-    return(0);
+    TETRA_REALLOC(mesh,iel,0.2,
+                  printf("  ## Error: unable to allocate a new element.\n");
+                  printf("  ## Check the mesh size or ");
+                  printf("increase the allocated memory with the -m option.\n");
+                  delPt(mesh,ib);
+                  delElt(mesh,newtet[1]);
+                  delElt(mesh,newtet[2]);
+                  return(0));
+    pt[0] = &mesh->tetra[newtet[0]];
+    pt[1] = &mesh->tetra[newtet[1]];
+    pt[2] = &mesh->tetra[newtet[2]];
   }
   pt[3] = &mesh->tetra[iel];
   pt[3] = memcpy(pt[3],pt[0],sizeof(Tetra));
@@ -2925,11 +3097,11 @@ int split4bar(pMesh mesh, pSol met, int k) {
         if ( isxt[i] ) {
           mesh->xt++;
           if ( mesh->xt > mesh->xtmax ) {
-            fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
-            fprintf(stdout,"  ## Check the mesh size or ");
-            fprintf(stdout,"increase the allocated memory with the -m option.\n");
-            mesh->xt--;
-            return(0);
+            /* realloc of xtetras table */
+            TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,xTetra,
+                         "larger xtetra table",
+                         mesh->xt--;
+                         return(0));
           }
           pt[i]->xt = mesh->xt;
           pxt0 = &mesh->xtetra[mesh->xt];
@@ -2953,11 +3125,11 @@ int split4bar(pMesh mesh, pSol met, int k) {
           else {
             mesh->xt++;
             if ( mesh->xt > mesh->xtmax ) {
-              fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
-              fprintf(stdout,"  ## Check the mesh size or ");
-              fprintf(stdout,"increase the allocated memory with the -m option.\n");
-              mesh->xt--;
-              return(0);
+              /* realloc of xtetras table */
+              TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,xTetra,
+                           "larger xtetra table",
+                           mesh->xt--;
+                           return(0));
             }
             pt[i]->xt = mesh->xt;
             pxt0 = &mesh->xtetra[mesh->xt];
@@ -3015,10 +3187,13 @@ int split4cb(pMesh mesh, pSol met, int k, double o[3], double cb[4], int *ip ) {
   /* create 3 new tetras */
   iel = newElt(mesh);
   if ( !iel ) {
-    fprintf(stdout,"%s:%d: Error: unable to allocate a new element\n"
-            ,__FILE__,__LINE__);
-    delPt(mesh,(*ip));
-    return(0);
+    TETRA_REALLOC(mesh,iel,0.2,
+                  printf("  ## Error: unable to allocate a new element.\n");
+                  printf("  ## Check the mesh size or ");
+                  printf("increase the allocated memory with the -m option.\n");
+                  delPt(mesh,(*ip));
+                  return(0));
+    pt[0] = &mesh->tetra[newtet[0]];
   }
   pt[1] = &mesh->tetra[iel];
   pt[1] = memcpy(pt[1],pt[0],sizeof(Tetra));
@@ -3026,11 +3201,15 @@ int split4cb(pMesh mesh, pSol met, int k, double o[3], double cb[4], int *ip ) {
 
   iel = newElt(mesh);
   if ( !iel ) {
-    fprintf(stdout,"%s:%d: Error: unable to allocate a new element\n"
-            ,__FILE__,__LINE__);
-    delPt(mesh,(*ip));
-    delElt(mesh,newtet[1]);
-    return(0);
+    TETRA_REALLOC(mesh,iel,0.2,
+                  printf("  ## Error: unable to allocate a new element.\n");
+                  printf("  ## Check the mesh size or ");
+                  printf("increase the allocated memory with the -m option.\n");
+                  delPt(mesh,(*ip));
+                  delElt(mesh,newtet[1]);
+                  return(0));
+    pt[0] = &mesh->tetra[newtet[0]];
+    pt[1] = &mesh->tetra[newtet[1]];
   }
   pt[2] = &mesh->tetra[iel];
   pt[2] = memcpy(pt[2],pt[0],sizeof(Tetra));
@@ -3038,12 +3217,17 @@ int split4cb(pMesh mesh, pSol met, int k, double o[3], double cb[4], int *ip ) {
 
   iel = newElt(mesh);
   if ( !iel ) {
-    fprintf(stdout,"%s:%d: Error: unable to allocate a new element\n"
-            ,__FILE__,__LINE__);
-    delPt(mesh,(*ip));
-    delElt(mesh,newtet[1]);
-    delElt(mesh,newtet[2]);
-    return(0);
+    TETRA_REALLOC(mesh,iel,0.2,
+                  printf("  ## Error: unable to allocate a new element.\n");
+                  printf("  ## Check the mesh size or ");
+                  printf("increase the allocated memory with the -m option.\n");
+                  delPt(mesh,(*ip));
+                  delElt(mesh,newtet[1]);
+                  delElt(mesh,newtet[2]);
+                  return(0));
+    pt[0] = &mesh->tetra[newtet[0]];
+    pt[1] = &mesh->tetra[newtet[1]];
+    pt[2] = &mesh->tetra[newtet[2]];
   }
   pt[3] = &mesh->tetra[iel];
   pt[3] = memcpy(pt[3],pt[0],sizeof(Tetra));
@@ -3116,11 +3300,12 @@ int split4cb(pMesh mesh, pSol met, int k, double o[3], double cb[4], int *ip ) {
       for (i=1; i<4; i++) {
         if ( isxt[i] ) {
           if ( mesh->xt > mesh->xtmax ) {
-            fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
-            fprintf(stdout,"  ## Check the mesh size or ");
-            fprintf(stdout,"increase the allocated memory with the -m option.\n");
-            mesh->xt--;
-            return(0);
+            /* realloc of xtetras table */
+            TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,xTetra,
+                         "larger xtetra table",
+                         mesh->xt--;
+                         printf("  Exit program.\n");
+                         return(0));
           }
           pt[i]->xt = mesh->xt;
           pxt0 = &mesh->xtetra[mesh->xt];
@@ -3143,11 +3328,11 @@ int split4cb(pMesh mesh, pSol met, int k, double o[3], double cb[4], int *ip ) {
           }
           else {
             if ( mesh->xt > mesh->xtmax ) {
-              fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
-              fprintf(stdout,"  ## Check the mesh size or ");
-              fprintf(stdout,"increase the allocated memory with the -m option.\n");
-              mesh->xt--;
-              return(0);
+              /* realloc of xtetras table */
+              TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,xTetra,
+                           "larger xtetra table",
+                           mesh->xt--;
+                           return(0));
             }
             pt[i]->xt = mesh->xt;
             pxt0 = &mesh->xtetra[mesh->xt];
@@ -3288,7 +3473,16 @@ void split4sf(pMesh mesh,pSol met,int k,int vx[6]) {
   /* create 5 new tetras */
   for (j=1; j<6; j++) {
     iel = newElt(mesh);
-    assert(iel);
+    if ( !iel ) {
+      TETRA_REALLOC(mesh,iel,0.5,
+                    printf("  ## Error: unable to allocate a new element.\n");
+                    printf("  ## Check the mesh size or ");
+                    printf("increase the allocated memory with the -m option.\n");
+                    printf("  Exit program.\n");
+                    exit(EXIT_FAILURE));
+      for ( i=0; i<j; i++)
+        pt[i] = &mesh->tetra[newtet[i]];
+    }
     pt[j] = &mesh->tetra[iel];
     pt[j] = memcpy(pt[j],pt[0],sizeof(Tetra));
     newtet[j]=iel;
@@ -3436,12 +3630,12 @@ void split4sf(pMesh mesh,pSol met,int k,int vx[6]) {
         if ( isxt[i] ) {
           mesh->xt++;
           if ( mesh->xt > mesh->xtmax ) {
-            fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
-            fprintf(stdout,"  ## Check the mesh size or ");
-            fprintf(stdout,"increase the allocated memory with the -m option.\n");
-            fprintf(stdout,"  Exit program.\n");
-            mesh->xt--;
-            exit(EXIT_FAILURE);
+            /* realloc of xtetras table */
+            TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,xTetra,
+                         "larger xtetra table",
+                         mesh->xt--;
+                         printf("  Exit program.\n");
+                         exit(EXIT_FAILURE));
           }
           pt[i]->xt = mesh->xt;
           pxt0 = &mesh->xtetra[mesh->xt];
@@ -3464,12 +3658,12 @@ void split4sf(pMesh mesh,pSol met,int k,int vx[6]) {
           else {
             mesh->xt++;
             if ( mesh->xt > mesh->xtmax ) {
-              fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
-              fprintf(stdout,"  ## Check the mesh size or ");
-              fprintf(stdout,"increase the allocated memory with the -m option.\n");
-              fprintf(stdout,"  Exit program.\n");
-              mesh->xt--;
-              exit(EXIT_FAILURE);
+              /* realloc of xtetras table */
+              TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,xTetra,
+                           "larger xtetra table",
+                           mesh->xt--;
+                           printf("  Exit program.\n");
+                           exit(EXIT_FAILURE));
             }
             pt[i]->xt = mesh->xt;
             pxt0 = &mesh->xtetra[mesh->xt];
@@ -3522,7 +3716,16 @@ void split4op(pMesh mesh,pSol met,int k,int vx[6]) {
   /* create 5 new tetras */
   for (j=1; j<6; j++) {
     iel = newElt(mesh);
-    assert(iel);
+    if ( !iel ) {
+      TETRA_REALLOC(mesh,iel,0.5,
+                    printf("  ## Error: unable to allocate a new element.\n");
+                    printf("  ## Check the mesh size or ");
+                    printf("increase the allocated memory with the -m option.\n");
+                    printf("  Exit program.\n");
+                    exit(EXIT_FAILURE));
+      for ( i=0; i<j; i++)
+        pt[i] = &mesh->tetra[newtet[i]];
+    }
     pt[j] = &mesh->tetra[iel];
     pt[j] = memcpy(pt[j],pt[0],sizeof(Tetra));
     newtet[j]=iel;
@@ -3686,12 +3889,12 @@ void split4op(pMesh mesh,pSol met,int k,int vx[6]) {
         if ( isxt[i] ) {
           mesh->xt++;
           if ( mesh->xt > mesh->xtmax ) {
-            fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
-            fprintf(stdout,"  ## Check the mesh size or ");
-            fprintf(stdout,"increase the allocated memory with the -m option.\n");
-            fprintf(stdout,"  Exit program.\n");
-            mesh->xt--;
-            exit(EXIT_FAILURE);
+            /* realloc of xtetras table */
+            TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,xTetra,
+                         "larger xtetra table",
+                         mesh->xt--;
+                         printf("  Exit program.\n");
+                         exit(EXIT_FAILURE));
           }
           pt[i]->xt = mesh->xt;
           pxt0 = &mesh->xtetra[mesh->xt];
@@ -3714,12 +3917,12 @@ void split4op(pMesh mesh,pSol met,int k,int vx[6]) {
           else {
             mesh->xt++;
             if ( mesh->xt > mesh->xtmax ) {
-              fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
-              fprintf(stdout,"  ## Check the mesh size or ");
-              fprintf(stdout,"increase the allocated memory with the -m option.\n");
-              fprintf(stdout,"  Exit program.\n");
-              mesh->xt--;
-              exit(EXIT_FAILURE);
+              /* realloc of xtetras table */
+              TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,xTetra,
+                           "larger xtetra table",
+                           mesh->xt--;
+                           printf("  Exit program.\n");
+                           exit(EXIT_FAILURE));
             }
             pt[i]->xt = mesh->xt;
             pxt0 = &mesh->xtetra[mesh->xt];
@@ -3754,7 +3957,16 @@ void split5(pMesh mesh,pSol met,int k,int vx[6]) {
   /* create 6 new tetras */
   for (i=1; i<7; i++) {
     iel = newElt(mesh);
-    assert(iel);
+    if ( !iel ) {
+      TETRA_REALLOC(mesh,iel,0.5,
+                    printf("  ## Error: unable to allocate a new element.\n");
+                    printf("  ## Check the mesh size or ");
+                    printf("increase the allocated memory with the -m option.\n");
+                    printf("  Exit program.\n");
+                    exit(EXIT_FAILURE));
+      for ( j=0; j<i; j++)
+        pt[j] = &mesh->tetra[newtet[j]];
+    }
     pt[i] = &mesh->tetra[iel];
     pt[i] = memcpy(pt[i],pt[0],sizeof(Tetra));
     newtet[i]=iel;
@@ -3936,12 +4148,12 @@ void split5(pMesh mesh,pSol met,int k,int vx[6]) {
         if ( isxt[i] ) {
           mesh->xt++;
           if ( mesh->xt > mesh->xtmax ) {
-            fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
-            fprintf(stdout,"  ## Check the mesh size or ");
-            fprintf(stdout,"increase the allocated memory with the -m option.\n");
-            fprintf(stdout,"  Exit program.\n");
-            mesh->xt--;
-            exit(EXIT_FAILURE);
+            /* realloc of xtetras table */
+            TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,xTetra,
+                         "larger xtetra table",
+                         mesh->xt--;
+                         printf("  Exit program.\n");
+                         exit(EXIT_FAILURE));
           }
           pt[i]->xt = mesh->xt;
           pxt0 = &mesh->xtetra[mesh->xt];
@@ -3964,12 +4176,12 @@ void split5(pMesh mesh,pSol met,int k,int vx[6]) {
           else {
             mesh->xt++;
             if ( mesh->xt > mesh->xtmax ) {
-              fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
-              fprintf(stdout,"  ## Check the mesh size or ");
-              fprintf(stdout,"increase the allocated memory with the -m option.\n");
-              fprintf(stdout,"  Exit program.\n");
-              mesh->xt--;
-              exit(EXIT_FAILURE);
+              /* realloc of xtetras table */
+              TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,xTetra,
+                           "larger xtetra table",
+                           mesh->xt--;
+                           printf("  Exit program.\n");
+                           exit(EXIT_FAILURE));
             }
             pt[i]->xt = mesh->xt;
             pxt0 = &mesh->xtetra[mesh->xt];
@@ -3991,7 +4203,7 @@ void split6(pMesh mesh,pSol met,int k,int vx[6]) {
   pTetra    pt[8];
   xTetra    xt0,xt;
   pxTetra   pxt;
-  int       i,iel,nxt0;
+  int       i,j,iel,nxt0;
   int       newtet[8];
   char      isxt0,isxt;
 
@@ -4006,7 +4218,16 @@ void split6(pMesh mesh,pSol met,int k,int vx[6]) {
   /* create 7 new tetras */
   for (i=1; i<8; i++) {
     iel = newElt(mesh);
-    assert(iel);
+    if ( !iel ) {
+      TETRA_REALLOC(mesh,iel,0.5,
+                    printf("  ## Error: unable to allocate a new element.\n");
+                    printf("  ## Check the mesh size or ");
+                    printf("increase the allocated memory with the -m option.\n");
+                    printf("  Exit program.\n");
+                    exit(EXIT_FAILURE));
+      for ( j=0; j<i; j++ )
+        pt[j] = &mesh->tetra[newtet[j]];
+    }
     pt[i] = &mesh->tetra[iel];
     pt[i] = memcpy(pt[i],pt[0],sizeof(Tetra));
     newtet[i]=iel;
@@ -4074,12 +4295,12 @@ void split6(pMesh mesh,pSol met,int k,int vx[6]) {
       else {
         mesh->xt++;
         if ( mesh->xt > mesh->xtmax ) {
-          fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
-          fprintf(stdout,"  ## Check the mesh size or ");
-          fprintf(stdout,"increase the allocated memory with the -m option.\n");
-          fprintf(stdout,"  Exit program.\n");
-          mesh->xt--;
-          exit(EXIT_FAILURE);
+          /* realloc of xtetras table */
+          TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,xTetra,
+                       "larger xtetra table",
+                       mesh->xt--;
+                       printf("  Exit program.\n");
+                       exit(EXIT_FAILURE));
         }
         pt[1]->xt = mesh->xt;
         pxt = &mesh->xtetra[pt[1]->xt];
@@ -4121,12 +4342,12 @@ void split6(pMesh mesh,pSol met,int k,int vx[6]) {
       else {
         mesh->xt++;
         if ( mesh->xt > mesh->xtmax ) {
-          fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
-          fprintf(stdout,"  ## Check the mesh size or ");
-          fprintf(stdout,"increase the allocated memory with the -m option.\n");
-          fprintf(stdout,"  Exit program.\n");
-          mesh->xt--;
-          exit(EXIT_FAILURE);
+          /* realloc of xtetras table */
+          TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,xTetra,
+                       "larger xtetra table",
+                       mesh->xt--;
+                       printf("  Exit program.\n");
+                       exit(EXIT_FAILURE));
         }
         pt[2]->xt = mesh->xt;
         pxt = &mesh->xtetra[pt[2]->xt];
@@ -4169,12 +4390,12 @@ void split6(pMesh mesh,pSol met,int k,int vx[6]) {
       else {
         mesh->xt++;
         if ( mesh->xt > mesh->xtmax ) {
-          fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
-          fprintf(stdout,"  ## Check the mesh size or ");
-          fprintf(stdout,"increase the allocated memory with the -m option.\n");
-          fprintf(stdout,"  Exit program.\n");
-          mesh->xt--;
-          exit(EXIT_FAILURE);
+          /* realloc of xtetras table */
+          TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,xTetra,
+                       "larger xtetra table",
+                       mesh->xt--;
+                       printf("  Exit program.\n");
+                       exit(EXIT_FAILURE));
         }
         pt[3]->xt = mesh->xt;
         pxt = &mesh->xtetra[pt[3]->xt];
@@ -4213,12 +4434,12 @@ void split6(pMesh mesh,pSol met,int k,int vx[6]) {
       else {
         mesh->xt++;
         if ( mesh->xt > mesh->xtmax ) {
-          fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
-          fprintf(stdout,"  ## Check the mesh size or ");
-          fprintf(stdout,"increase the allocated memory with the -m option.\n");
-          fprintf(stdout,"  Exit program.\n");
-          mesh->xt--;
-          exit(EXIT_FAILURE);
+          /* realloc of xtetras table */
+          TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,xTetra,
+                       "larger xtetra table",
+                       mesh->xt--;
+                       printf("  Exit program.\n");
+                       exit(EXIT_FAILURE));
         }
         pt[4]->xt = mesh->xt;
         pxt = &mesh->xtetra[pt[4]->xt];
@@ -4257,12 +4478,12 @@ void split6(pMesh mesh,pSol met,int k,int vx[6]) {
       else {
         mesh->xt++;
         if ( mesh->xt > mesh->xtmax ) {
-          fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
-          fprintf(stdout,"  ## Check the mesh size or ");
-          fprintf(stdout,"increase the allocated memory with the -m option.\n");
-          fprintf(stdout,"  Exit program.\n");
-          mesh->xt--;
-          exit(EXIT_FAILURE);
+          /* realloc of xtetras table */
+          TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,xTetra,
+                       "larger xtetra table",
+                       mesh->xt--;
+                       printf("  Exit program.\n");
+                       exit(EXIT_FAILURE));
         }
         pt[5]->xt = mesh->xt;
         pxt = &mesh->xtetra[pt[5]->xt];
@@ -4301,12 +4522,12 @@ void split6(pMesh mesh,pSol met,int k,int vx[6]) {
       else {
         mesh->xt++;
         if ( mesh->xt > mesh->xtmax ) {
-          fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
-          fprintf(stdout,"  ## Check the mesh size or ");
-          fprintf(stdout,"increase the allocated memory with the -m option.\n");
-          fprintf(stdout,"  Exit program.\n");
-          mesh->xt--;
-          exit(EXIT_FAILURE);
+          /* realloc of xtetras table */
+          TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,xTetra,
+                       "larger xtetra table",
+                       mesh->xt--;
+                       printf("  Exit program.\n");
+                       exit(EXIT_FAILURE));
         }
         pt[6]->xt = mesh->xt;
         pxt = &mesh->xtetra[pt[6]->xt];
@@ -4345,12 +4566,12 @@ void split6(pMesh mesh,pSol met,int k,int vx[6]) {
       else {
         mesh->xt++;
         if ( mesh->xt > mesh->xtmax ) {
-          fprintf(stdout,"  ## Memory problem (xtetra), not enough memory.\n");
-          fprintf(stdout,"  ## Check the mesh size or ");
-          fprintf(stdout,"increase the allocated memory with the -m option.\n");
-          fprintf(stdout,"  Exit program.\n");
-          mesh->xt--;
-          exit(EXIT_FAILURE);
+          /* realloc of xtetras table */
+          TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,xTetra,
+                       "larger xtetra table",
+                       mesh->xt--;
+                       printf("  Exit program.\n");
+                       exit(EXIT_FAILURE));
         }
         pt[7]->xt = mesh->xt;
         pxt = &mesh->xtetra[pt[7]->xt];

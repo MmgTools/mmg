@@ -130,6 +130,8 @@ typedef struct {
 
 typedef struct {
   int       ver,dim,type;
+  long long memMax; /**< maximum memory available */
+  long long memCur; /**< current memory used */
   int       npi,nti,nai,nei,np,na,nt,ne,npmax,namax,ntmax,nemax,xpmax,xtmax;
   int       base; /**< used with flag to know if an entity has been treated */
   int       mark;//CECILE rajout mark pour delaunay
@@ -172,7 +174,7 @@ typedef MMG5_sPoint * MMG5_psPoint; /**< structure to store singular points */
 typedef struct {
   char     *namein; /**< name of mesh */
   double   min[3],max[3]; /**< min and max of coordinates for rescaling */
-  int      ns,na; /**< singular vertices and singular edges number */
+  int      nsi,ns,na; /**< singular vertices and singular edges number */
   MMG5_psPoint  point;
   MMG5_pEdge    edge;
 } MMG5_Singul; /**< structure to store the singularities of a mesh */
@@ -184,8 +186,10 @@ typedef MMG5_Singul * MMG5_pSingul;
 /* init structures */
 #ifndef SINGUL
 void  MMG5_Init_mesh(MMG5_pMesh *mesh, MMG5_pSol *sol);
+void  MMG5_Init_fileNames(MMG5_pMesh mesh, MMG5_pSol sol);
 #else
 void  MMG5_Init_mesh(MMG5_pMesh *mesh, MMG5_pSol *sol, MMG5_pSingul *sing);
+void  MMG5_Init_fileNames(MMG5_pMesh mesh, MMG5_pSol sol, MMG5_pSingul sing);
 #endif
 void  MMG5_Init_parameters(MMG5_pMesh mesh);
 
@@ -202,7 +206,7 @@ int  MMG5_Set_inputSingulName(MMG5_pMesh mesh,MMG5_pSingul sing, char* singin);
 int  MMG5_Set_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int typEntity, int np, int typSol);
 int  MMG5_Set_meshSize(MMG5_pMesh mesh, int np, int ne, int nt, int na);
 #ifdef SINGUL
-int  MMG5_Set_singulSize(MMG5_pSingul sing, int np, int na);
+int  MMG5_Set_singulSize(MMG5_pMesh mesh,MMG5_pSingul sing, int np, int na);
 #endif
 
 /* init structure datas */
@@ -230,7 +234,7 @@ int  MMG5_Set_singulCorner(MMG5_pSingul sing, int pos);
 int  MMG5_Set_singulRequiredVertex(MMG5_pSingul sing, int pos);
 int  MMG5_Set_singulRidge(MMG5_pSingul sing, int pos);
 int  MMG5_Set_singulRequiredEdge(MMG5_pSingul sing, int pos);
-void MMG5_Set_handGivenMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSingul sing);
+void MMG5_Set_handGivenMesh(MMG5_pMesh mesh);
 #endif
 
 
@@ -262,7 +266,7 @@ int  (*MMG5_saveMesh)(MMG5_pMesh );
 int  MMG5_loadMet(MMG5_pMesh,MMG5_pSol );
 int  MMG5_saveMet(MMG5_pMesh mesh, MMG5_pSol met);
 #ifdef SINGUL
-int  MMG5_loadSingul(MMG5_pSingul singul);
+int  MMG5_loadSingul(MMG5_pMesh,MMG5_pSingul singul);
 #endif
 
 /** deallocations */

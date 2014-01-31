@@ -329,11 +329,11 @@ ADD_TEST(NAME CubeSkin0.0125_Inside0.125
   -out ${REG_TESTS_PATH}/CubeSkin0.0125_Inside0.125/CubeSkin0.125.o.meshb)
 ADD_TEST(NAME CubeSkin0.0125_Inside0.25
   COMMAND ${EXECUT} -v 5
-  ${REG_TESTS_PATH}/CubeSkin0.0125_Inside0.25/CubeSkin0.25 -m 1000
+  ${REG_TESTS_PATH}/CubeSkin0.0125_Inside0.25/CubeSkin0.25 -m 1500
   -out ${REG_TESTS_PATH}/CubeSkin0.0125_Inside0.25/CubeSkin0.25.o.meshb)
 ADD_TEST(NAME CubeSkin0.0125_Inside0.5
   COMMAND ${EXECUT} -v 5
-  ${REG_TESTS_PATH}/CubeSkin0.0125_Inside0.5/CubeSkin0.5 -m 1000
+  ${REG_TESTS_PATH}/CubeSkin0.0125_Inside0.5/CubeSkin0.5 -m 1500
   ${REG_TESTS_PATH}/CubeSkin0.0125_Inside0.5/CubeSkin0.5.o.meshb)
 
 

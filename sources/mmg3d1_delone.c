@@ -69,6 +69,8 @@ static int dichotocpy(pMesh mesh,pSol met,int k,int *vx) {
     }
     else
       tp = t;
+    /* if we realloc mem in the split function, pt is not valid anymore */
+    pt = &mesh->tetra[k];
   }
   while ( ++it < maxit );
   /* restore coords of last valid pos. */
@@ -401,7 +403,7 @@ static int swpmshcpy(pMesh mesh,pSol met) {
   char     i,j,ia;
 
   /** 1. analysis */
-  if ( !hashNew(&hash,mesh->np,7*mesh->np) )  return(-1);
+  if ( !hashNew(mesh,&hash,mesh->np,7*mesh->np) )  return(-1);
   memlack = ns = nap = 0;
   hma2 = LLONG*LLONG*mesh->info.hmax*mesh->info.hmax;
 
@@ -479,11 +481,16 @@ static int swpmshcpy(pMesh mesh,pSol met) {
         o[2] = 0.5 * (p1->c[2]+p2->c[2]);
         ip  = newPt(mesh,o,0);
         if ( !ip ) {
-          fprintf(stdout,"  ## Error: unable to allocate a new point\n");
-          fprintf(stdout,"  ## Check the mesh size or ");
-          fprintf(stdout,"increase the allocated memory with the -m option.\n");
-          memlack=1;
-          goto split;
+          /* reallocation of point table */
+          POINT_REALLOC(mesh,met,ip,0.5,
+                        printf("  ## Error: unable to allocate a new point\n");
+                        printf("  ## Check the mesh size or increase");
+                        printf(" the allocated memory with the -m option.\n");
+                        memlack=1;
+                        goto split
+                        ,o,0);
+          p1  = &mesh->point[ip1];
+          p2  = &mesh->point[ip2];
         }
 
         if ( met->m )
@@ -495,8 +502,7 @@ static int swpmshcpy(pMesh mesh,pSol met) {
     }
   }
   if ( !nap )  {
-    free(hash.item);
-    hash.item=NULL;
+    DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(hedge));
     return(0);
   }
 
@@ -619,8 +625,7 @@ static int swpmshcpy(pMesh mesh,pSol met) {
   if ( (mesh->info.ddebug || abs(mesh->info.imprim) > 5) && ns > 0 )
     fprintf(stdout,"     %7d splitted\n",nap);
 
-  free(hash.item);
-  hash.item=NULL;
+  DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(hedge));
 #ifdef DEBUG
   if(ns) {
     printf("RESULTATS ns %d\n",ns);
@@ -653,7 +658,7 @@ static int swpmshcpy(pMesh mesh,pSol met) {
   static double uv[3][2] = { {0.5,0.5}, {0.,0.5}, {0.5,0.} };
 
   /** 1. analysis of boundary elements */
-  if ( !hashNew(&hash,mesh->np,7*mesh->np) ) return(-1);
+  if ( !hashNew(mesh,&hash,mesh->np,7*mesh->np) ) return(-1);
   ns = nap = 0;
   npinit=mesh->np;
   for (k=1; k<=mesh->ne; k++) {
@@ -718,13 +723,16 @@ static int swpmshcpy(pMesh mesh,pSol met) {
       if ( !ip ) {
         ip = newPt(mesh,o,MG_BDY);
         if ( !ip ) {
-          fprintf(stdout,"  ## Error: unable to allocate a new point.\n");
-          fprintf(stdout,"  ## Check the mesh size or ");
-          fprintf(stdout,"increase the allocated memory with the -m option.\n");
-          do {
-            delPt(mesh,mesh->np);
-          } while ( mesh->np>npinit );
-          return(-1);
+          /* reallocation of point table */
+          POINT_REALLOC(mesh,met,ip,0.5,
+                        printf("  ## Error: unable to allocate a new point.\n");
+                        printf("  ## Check the mesh size or increase ");
+                        printf("the allocated memory with the -m option.\n");
+                        do {
+                          delPt(mesh,mesh->np);
+                        } while ( mesh->np>npinit );
+                        return(-1)
+                        ,o,MG_BDY);
         }
         if ( !hashEdge(mesh,&hash,ip1,ip2,ip) ) return(-1);
         ppt = &mesh->point[ip];
@@ -766,8 +774,7 @@ static int swpmshcpy(pMesh mesh,pSol met) {
     }
   }
   if ( !ns ) {
-    free(hash.item);
-    hash.item=NULL;
+    DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(hedge));
     return(ns);
   }
 
@@ -915,8 +922,7 @@ static int swpmshcpy(pMesh mesh,pSol met) {
   if ( (mesh->info.ddebug || abs(mesh->info.imprim) > 5) && ns > 0 )
     fprintf(stdout,"       %7d elements splitted\n",nap);
 
-  free(hash.item);
-  hash.item=NULL;
+  DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(hedge));
   return(nap);
 }
 
@@ -1027,14 +1033,21 @@ static int swpmshcpy(pMesh mesh,pSol met) {
       }
       ip = newPt(mesh,o,tag);
       if ( !ip ) {
-        *warn=1;
-        break;
+        /* reallocation of point table */
+        POINT_REALLOC(mesh,met,ip,0.2,
+                      *warn=1;
+                      break
+                      ,o,tag);
       }
       //CECILE
       if ( met->m )
         met->m[ip] = 0.5 * (met->m[ip1]+met->m[ip2]);
       //CECILE
       ier = split1b(mesh,met,list,ilist,ip,1);
+      /* if we realloc memory in split1b pt and pxt pointers are not valid */
+      pt = &mesh->tetra[k];
+      pxt = pt->xt ? &mesh->xtetra[pt->xt] : 0;
+
       if ( ier < 0 ) {
         fprintf(stdout,"  ## Error: unable to split.\n");
         return(-1);
@@ -1083,8 +1096,11 @@ static int swpmshcpy(pMesh mesh,pSol met) {
       o[2] = 0.5*(p0->c[2] + p1->c[2]);
       ip = newPt(mesh,o,MG_NOTAG);
       if ( !ip )  {
-        *warn=1;
-        break;
+        /* reallocation of point table */
+        POINT_REALLOC(mesh,met,ip,0.2,
+                      *warn=1;
+                      break
+                      ,o,MG_NOTAG);
       }
       //CECILE
       if ( met->m )
@@ -1114,8 +1130,11 @@ static int swpmshcpy(pMesh mesh,pSol met) {
       o[2] = 0.5*(p0->c[2] + p1->c[2]);
       ip = newPt(mesh,o,MG_NOTAG);
       if ( !ip )  {
-        *warn=1;
-        break;
+        /* reallocation of point table */
+        POINT_REALLOC(mesh,met,ip,0.2,
+                      *warn=1;
+                      break
+                      ,o,MG_NOTAG);
       }
       //CECILE
       if ( met->m )
@@ -1313,14 +1332,21 @@ int adpsplcol(pMesh mesh,pSol met,pBucket bucket, int* warn) {
             ip = newPt(mesh,o,tag);
 
             if ( !ip ){
-              *warn=1;
-              goto collapse;//break;
+              /* reallocation of point table */
+              POINT_REALLOC(mesh,met,ip,0.2,
+                            *warn=1;
+                            goto collapse//break
+                            ,o,tag);
             }
             //CECILE
             if ( met->m )
               met->m[ip] = 0.5 * (met->m[ip1]+met->m[ip2]);
             //CECILE
             ier = split1b(mesh,met,list,ilist,ip,1);
+            /* if we realloc memory in split1b pt and pxt pointers are not valid */
+            pt = &mesh->tetra[k];
+            pxt = pt->xt ? &mesh->xtetra[pt->xt] : 0;
+
             if ( ier < 0 ) {
               fprintf(stdout,"  ## Error: unable to split.\n");
               return(-1);
@@ -1371,8 +1397,11 @@ int adpsplcol(pMesh mesh,pSol met,pBucket bucket, int* warn) {
             ip = newPt(mesh,o,MG_NOTAG);
 
             if ( !ip )  {
-              *warn=1;
-              goto collapse;//break;
+              /* reallocation of point table */
+              POINT_REALLOC(mesh,met,ip,0.2,
+                            *warn=1;
+                            goto collapse//break
+                            ,o,MG_NOTAG);
             }
             //CECILE
             if ( met->m )
@@ -1407,8 +1436,11 @@ int adpsplcol(pMesh mesh,pSol met,pBucket bucket, int* warn) {
             ip = newPt(mesh,o,MG_NOTAG);
 
             if ( !ip )  {
-              *warn=1;
-              goto collapse;//break;
+              /* reallocation of point table */
+              POINT_REALLOC(mesh,met,ip,0.2,
+                            *warn=1;
+                            goto collapse//break
+                            ,o,MG_NOTAG);
             }
             //CECILE
             if ( met->m )
@@ -1976,8 +2008,7 @@ int adpsplcol(pMesh mesh,pSol met,pBucket bucket, int* warn) {
   maxit = 5;
   do {
     /* memory free */
-    free(mesh->adja);
-    mesh->adja = 0;
+    DEL_MEM(mesh,mesh->adja,(4*mesh->nemax+5)*sizeof(int));
 #ifdef DEBUG
     puts("AVT ANATET4");
     prilen(mesh,met);
@@ -2158,9 +2189,9 @@ int mmg3d1_delone(pMesh mesh,pSol met) {
   }
 
   /*free bucket*/
-  free(bucket->head);
-  free(bucket->link);
-  free(bucket);
+  DEL_MEM(mesh,bucket->head,(bucket->size*bucket->size*bucket->size+1)*sizeof(int));
+  DEL_MEM(mesh,bucket->link,(mesh->npmax+1)*sizeof(int));
+  DEL_MEM(mesh,bucket,sizeof(Bucket));
 
   return(1);
 }
