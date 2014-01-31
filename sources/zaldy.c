@@ -108,7 +108,6 @@ void memOption(pMesh mesh) {
 
   mesh->memMax = memSize();
 
-#warning: verifier qu on ne veut pas un plus petit tab (1.5*mesh->np).
   mesh->npmax = MG_MAX(1.5*mesh->np,NPMAX);
   mesh->nemax = MG_MAX(1.5*mesh->ne,NEMAX);
   mesh->ntmax = MG_MAX(1.5*mesh->nt,NTMAX);

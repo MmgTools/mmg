@@ -1426,7 +1426,7 @@ void Free_structures(pMesh mesh,pSol met
     DEL_MEM(mesh,singul->edge,(singul->na+1)*sizeof(Edge));
 #endif
 
-  if ( abs(mesh->info.imprim)>4 || mesh->info.ddebug )
+  if ( mesh->info.imprim>4 || mesh->info.ddebug )
     printf("  MEMORY USED AT END (bytes) %lld\n",mesh->memCur);
 }
 

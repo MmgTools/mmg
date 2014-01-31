@@ -370,10 +370,9 @@ int renumbering(int boxVertNbr, pMesh mesh, pSol sol) {
   }
 
   edgeNbr = 1;
-#warning changer ca avec la formule d Euler poincare et regarder le EDGEGAP (voir 2spheres)
-#warning attention on veut 2 fois le nombre d aretes (symetrie) et le nombre de point n est pas le vrai si on n a pas compacte le maillage
-  // edgeSiz = 20*mesh->np; (2*(12*np (faces)-2*np (faces de bord)))
-  edgeSiz = vertNbr*2;
+  /* Euler-Poincare formulae edgeSiz = 20*mesh->np~4*mesh->ne;
+     (2*(12*mesh->np (triangles)-2*mesh->np (boundary triangles))) */
+  edgeSiz = vertNbr*4;
 
   ADD_MEM(mesh,edgeSiz*sizeof(SCOTCH_Num),"edgeTab",
           DEL_MEM(mesh,vertOldTab,(mesh->ne+1)*sizeof(int));
@@ -401,11 +400,11 @@ int renumbering(int boxVertNbr, pMesh mesh, pSol sol) {
 
       /* Testing if edgeTab memory is enough */
       if (edgeNbr >= edgeSiz) {
-        edgeSiz += EDGEGAP;
-        ADD_MEM(mesh,EDGEGAP*sizeof(SCOTCH_Num),"edgeTab",
+        ADD_MEM(mesh,0.2*sizeof(SCOTCH_Num),"edgeTab",
                 DEL_MEM(mesh,vertOldTab,(mesh->ne+1)*sizeof(int));
                 DEL_MEM(mesh,vertTab,(vertNbr+2)*sizeof(SCOTCH_Num));
                 return(1));
+        edgeSiz *= 1.2;
         SAFE_REALLOC(edgeTab,edgeSiz,SCOTCH_Num);
       }
 

@@ -149,7 +149,6 @@
       if ( (mesh->memMax-mesh->memCur) <                              \
            (long long) (wantedGap*initSize*sizeof(type)) ) {          \
         gap = (int)(mesh->memMax-mesh->memCur)/sizeof(type);          \
-        printf("ajeter: passage dans 1\n");                           \
       }                                                               \
       else                                                            \
         gap = wantedGap*initSize;                                     \
@@ -158,10 +157,11 @@
       SAFE_RECALLOC((ptr),initSize+1,initSize+gap+1,type);            \
       initSize = initSize+gap;                                        \
                                                                       \
-      fprintf(stdout,"  ## Warning: %s reallocation.\n",              \
-              message);                                               \
+      if ( abs(mesh->info.imprim) > 4 || mesh->info.ddebug )          \
+      fprintf(stdout,                                                 \
+              "  ## Warning: %s:%d: %s reallocation (gap %d).\n",     \
+              __FILE__,__LINE__,message,gap);                         \
     }while(0);
-/*      if ( mesh->info.imprim > 4 || info.ddebug )             \*/
 
 
 /** Reallocation of point table and sol table and creation

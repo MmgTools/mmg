@@ -308,7 +308,7 @@ void  MMG5_Init_woalloc_mesh(MMG5_pMesh mesh, MMG5_pSol sol, MMG5_pSingul sing);
 #endif
 
 /** Utils */
-double (*MMG5_lenedg)(pMesh ,pSol ,int ,int );
-int    MMG5_Get_adjaTet(pMesh,int kel, int*, int*, int*, int*);
+double (*MMG5_lenedg)(MMG5_pMesh mesh,MMG5_pSol sol ,int ,int );
+int    MMG5_Get_adjaTet(MMG5_pMesh mesh,int kel, int*, int*, int*, int*);
 
 #endif

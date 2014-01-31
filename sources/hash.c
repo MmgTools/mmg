@@ -744,6 +744,7 @@ int chkNumberOfTri(pMesh mesh) {
       fprintf(stdout,"  ## WARNING: INITIAL TRIANGLES ARE DELETED.\n");
       fprintf(stdout,"  Not enough or too much triangles for geometry (maybe");
       fprintf(stdout," you have 2 domains but only boundary/interface triangles).\n");
+      fprintf(stdout," %d given triangles and %d counted triangles.\n",mesh->nt,nttmp);
     }
     DEL_MEM(mesh,mesh->tria,(mesh->nt+1)*sizeof(Tria));
   }

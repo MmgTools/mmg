@@ -55,7 +55,6 @@
 #include <scotch.h>
 
 #define HASHPRIME 37
-#define EDGEGAP 100
 
 typedef struct MeshGraphHash_ {
   int vertNum;
