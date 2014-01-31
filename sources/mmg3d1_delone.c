@@ -482,7 +482,7 @@ static int swpmshcpy(pMesh mesh,pSol met) {
         ip  = newPt(mesh,o,0);
         if ( !ip ) {
           /* reallocation of point table */
-          POINT_REALLOC(mesh,met,ip,0.5,
+          POINT_REALLOC(mesh,met,ip,mesh->gap,
                         printf("  ## Error: unable to allocate a new point\n");
                         printf("  ## Check the mesh size or increase");
                         printf(" the allocated memory with the -m option.\n");
@@ -724,7 +724,7 @@ static int swpmshcpy(pMesh mesh,pSol met) {
         ip = newPt(mesh,o,MG_BDY);
         if ( !ip ) {
           /* reallocation of point table */
-          POINT_REALLOC(mesh,met,ip,0.5,
+          POINT_REALLOC(mesh,met,ip,mesh->gap,
                         printf("  ## Error: unable to allocate a new point.\n");
                         printf("  ## Check the mesh size or increase ");
                         printf("the allocated memory with the -m option.\n");
@@ -1034,7 +1034,7 @@ static int swpmshcpy(pMesh mesh,pSol met) {
       ip = newPt(mesh,o,tag);
       if ( !ip ) {
         /* reallocation of point table */
-        POINT_REALLOC(mesh,met,ip,0.2,
+        POINT_REALLOC(mesh,met,ip,mesh->gap,
                       *warn=1;
                       break
                       ,o,tag);
@@ -1097,7 +1097,7 @@ static int swpmshcpy(pMesh mesh,pSol met) {
       ip = newPt(mesh,o,MG_NOTAG);
       if ( !ip )  {
         /* reallocation of point table */
-        POINT_REALLOC(mesh,met,ip,0.2,
+        POINT_REALLOC(mesh,met,ip,mesh->gap,
                       *warn=1;
                       break
                       ,o,MG_NOTAG);
@@ -1131,7 +1131,7 @@ static int swpmshcpy(pMesh mesh,pSol met) {
       ip = newPt(mesh,o,MG_NOTAG);
       if ( !ip )  {
         /* reallocation of point table */
-        POINT_REALLOC(mesh,met,ip,0.2,
+        POINT_REALLOC(mesh,met,ip,mesh->gap,
                       *warn=1;
                       break
                       ,o,MG_NOTAG);
@@ -1207,6 +1207,7 @@ int adpsplcol(pMesh mesh,pSol met,pBucket bucket, int* warn) {
   /* Iterative mesh modifications */
   it = nnc = nns = nnf = nnm = 0;
   maxit = 10;
+  mesh->gap = 0.5;
   MMG_npuiss=MMG_nvol=MMG_npres =MMG_npd=0 ;
   do {
     if ( !mesh->info.noinsert ) {
@@ -1333,7 +1334,7 @@ int adpsplcol(pMesh mesh,pSol met,pBucket bucket, int* warn) {
 
             if ( !ip ){
               /* reallocation of point table */
-              POINT_REALLOC(mesh,met,ip,0.2,
+              POINT_REALLOC(mesh,met,ip,mesh->gap,
                             *warn=1;
                             goto collapse//break
                             ,o,tag);
@@ -1398,7 +1399,7 @@ int adpsplcol(pMesh mesh,pSol met,pBucket bucket, int* warn) {
 
             if ( !ip )  {
               /* reallocation of point table */
-              POINT_REALLOC(mesh,met,ip,0.2,
+              POINT_REALLOC(mesh,met,ip,mesh->gap,
                             *warn=1;
                             goto collapse//break
                             ,o,MG_NOTAG);
@@ -1437,7 +1438,7 @@ int adpsplcol(pMesh mesh,pSol met,pBucket bucket, int* warn) {
 
             if ( !ip )  {
               /* reallocation of point table */
-              POINT_REALLOC(mesh,met,ip,0.2,
+              POINT_REALLOC(mesh,met,ip,mesh->gap,
                             *warn=1;
                             goto collapse//break
                             ,o,MG_NOTAG);
@@ -1589,6 +1590,11 @@ int adpsplcol(pMesh mesh,pSol met,pBucket bucket, int* warn) {
     nnm += nm;
     nnc += nc;
     nns += ns;
+
+    /* decrease size of gap for reallocation */
+    mesh->gap -= 0.05;
+    assert ( mesh->gap > 1 );
+
     if ( 1 || ((abs(mesh->info.imprim) > 4 || mesh->info.ddebug) && ns+nc > 0) )
       fprintf(stdout,"     %8d filtered %8d splitted, %8d collapsed, %8d swapped, %8d moved\n",ifilt,ns,nc,nf,nm);
     if ( ns < 10 && abs(nc-ns) < 3 )  break;
@@ -2006,6 +2012,7 @@ int adpsplcol(pMesh mesh,pSol met,pBucket bucket, int* warn) {
   /* analyze tetras : initial splitting */
   nns = nnc = nnf = it = 0;
   maxit = 5;
+  mesh->gap = 0.5;
   do {
     /* memory free */
     DEL_MEM(mesh,mesh->adja,(4*mesh->nemax+5)*sizeof(int));

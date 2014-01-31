@@ -114,8 +114,8 @@ void memOption(pMesh mesh) {
 
   if ( mesh->info.mem < 0 ) {
     if ( mesh->memMax )
-    /* maximal memory = 80% of total physical memory */
-      mesh->memMax = mesh->memMax*80/100;
+    /* maximal memory = 50% of total physical memory */
+      mesh->memMax = mesh->memMax*50/100;
     else {
       /* default value = 800 Mo */
       printf("  Maximum memory set to default value: %d Mo.\n",MEMMAX);

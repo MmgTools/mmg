@@ -8,6 +8,7 @@
 #define DoSol                         	 _MMG5_DoSol
 #define addBucket                     	 _MMG5_addBucket
 #define analys                        	 _MMG5_analys
+#define arpt                          	 _MMG5_arpt
 #define badelt                        	 _MMG5_badelt
 #define bdryIso                       	 _MMG5_bdryIso
 #define bdryPerm                      	 _MMG5_bdryPerm
@@ -77,9 +78,20 @@
 #define hashPop                       	 _MMG5_hashPop
 #define hashTetra                     	 _MMG5_hashTetra
 #define hashTria                      	 _MMG5_hashTria
+#define iare                          	 _MMG5_iare
+#define iarf                          	 _MMG5_iarf
+#define iarfinv                       	 _MMG5_iarfinv
+#define idir                          	 _MMG5_idir
+#define idirinv                       	 _MMG5_idirinv
+#define ifar                          	 _MMG5_ifar
 #define indElt                        	 _MMG5_indElt
 #define indPt                         	 _MMG5_indPt
 #define inserSingul                   	 _MMG5_inserSingul
+#define inxt2                         	 _MMG5_inxt2
+#define inxt3                         	 _MMG5_inxt3
+#define iprv2                         	 _MMG5_iprv2
+#define iprv3                         	 _MMG5_iprv3
+#define isar                          	 _MMG5_isar
 #define lapantilap                    	 _MMG5_lapantilap
 #define lenedg_ani                    	 _MMG5_lenedg_ani
 #define lenedg_iso                    	 _MMG5_lenedg_iso
@@ -150,8 +162,6 @@
 #define unscaleMesh                   	 _MMG5_unscaleMesh
 #define volint                        	 _MMG5_volint
 #define zaldy                         	 _MMG5_zaldy
-#define Alloc_mesh                    	 MMG5_Alloc_mesh
-#define Alloc_mesh                    	 MMG5_Alloc_mesh
 #define Chk_meshData                  	 MMG5_Chk_meshData
 #define Edge                          	 MMG5_Edge
 #define Free_all                      	 MMG5_Free_all
@@ -175,8 +185,6 @@
 #define Init_mesh                     	 MMG5_Init_mesh
 #define Init_mesh                     	 MMG5_Init_mesh
 #define Init_parameters               	 MMG5_Init_parameters
-#define Init_woalloc_mesh             	 MMG5_Init_woalloc_mesh
-#define Init_woalloc_mesh             	 MMG5_Init_woalloc_mesh
 #define Mesh                          	 MMG5_Mesh
 #define Par                           	 MMG5_Par
 #define Point                         	 MMG5_Point

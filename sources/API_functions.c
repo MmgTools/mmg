@@ -30,35 +30,15 @@
 
 #include "mmg3d.h"
 
-/** Allocate the mesh and sol structures and initialize it to default values */
-void Init_mesh(MMG5_pMesh *mesh, MMG5_pSol *sol
-#ifdef SINGUL
-              , MMG5_pSingul *sing
-#endif
-              ) {
-
-#ifndef SINGUL
-  /* allocations */
-  Alloc_mesh(mesh,sol);
-  /* initialisations */
-  Init_woalloc_mesh(*mesh,*sol);
-#else
-  Alloc_mesh(mesh,sol,sing);
-  /* initialisations */
-  Init_woalloc_mesh(*mesh,*sol,*sing);
-#endif
-
-  return;
-}
-
 
 /** Allocate the mesh and sol structures */
+static inline
 void Alloc_mesh(MMG5_pMesh *mesh, MMG5_pSol *sol
 #ifdef SINGUL
 		, MMG5_pSingul *sing
 #endif
 		) {
-  
+
   /* mesh allocation */
   if ( *mesh )  SAFE_FREE(*mesh);
   SAFE_CALLOC(*mesh,1,MMG5_Mesh);
@@ -77,6 +57,7 @@ void Alloc_mesh(MMG5_pMesh *mesh, MMG5_pSol *sol
 }
 
 /** Initialization of mesh and sol structures */
+static inline
 void Init_woalloc_mesh(MMG5_pMesh mesh, MMG5_pSol sol
 #ifdef SINGUL
               , MMG5_pSingul *sing
@@ -97,6 +78,27 @@ void Init_woalloc_mesh(MMG5_pMesh mesh, MMG5_pSol sol
   MMG5_Init_fileNames(mesh,sol);
 #else
   MMG5_Init_fileNames(mesh,sol,sing);
+#endif
+
+  return;
+}
+
+/** Allocate the mesh and sol structures and initialize it to default values */
+void Init_mesh(MMG5_pMesh *mesh, MMG5_pSol *sol
+#ifdef SINGUL
+              , MMG5_pSingul *sing
+#endif
+              ) {
+
+#ifndef SINGUL
+  /* allocations */
+  Alloc_mesh(mesh,sol);
+  /* initialisations */
+  Init_woalloc_mesh(*mesh,*sol);
+#else
+  Alloc_mesh(mesh,sol,sing);
+  /* initialisations */
+  Init_woalloc_mesh(*mesh,*sol,*sing);
 #endif
 
   return;
@@ -129,11 +131,12 @@ void Init_parameters(pMesh mesh) {
   mesh->info.hgrad    = 0.1;      /**< control gradation; */
   mesh->info.ls       = 0.0;      /**< level set value */
 
-  /* initial value for memMax */
+  /* initial value for memMax and gap */
+  mesh->gap = 0.2;
   mesh->memMax = memSize();
   if ( mesh->memMax )
-  /* maximal memory = 80% of total physical memory */
-    mesh->memMax = mesh->memMax*80/100;
+  /* maximal memory = 50% of total physical memory */
+    mesh->memMax = mesh->memMax*50/100;
   else {
     /* default value = 800 Mo */
     printf("  Maximum memory set to default value: %d Mo.\n",MEMMAX);

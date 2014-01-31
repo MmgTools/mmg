@@ -167,54 +167,54 @@
 /** Reallocation of point table and sol table and creation
     of point ip with coordinates o and tag tag*/
 #define POINT_REALLOC(mesh,sol,ip,wantedGap,law,o,tag ) do              \
-                                                                     {  \
-                                                                       int klink; \
+    {                                                                   \
+      int klink;                                                        \
                                                                         \
-                                                                       TAB_RECALLOC(mesh,mesh->point,mesh->npmax,wantedGap,Point, \
-                                                                                    "larger point table",law); \
+      TAB_RECALLOC(mesh,mesh->point,mesh->npmax,wantedGap,Point,        \
+                   "larger point table",law);                           \
                                                                         \
-                                                                       mesh->npnil = mesh->np+1; \
-                                                                       for (klink=mesh->npnil; klink<mesh->npmax-1; klink++) \
-                                                                         mesh->point[klink].tmp  = klink+1; \
+      mesh->npnil = mesh->np+1;                                         \
+      for (klink=mesh->npnil; klink<mesh->npmax-1; klink++)             \
+        mesh->point[klink].tmp  = klink+1;                              \
                                                                         \
-                                                                       /* solution */ \
-                                                                       if ( sol->m ) { \
-                                                                         ADD_MEM(mesh,(mesh->npmax-sol->npmax)*sizeof(double), \
-                                                                                 "larger solution",law); \
-                                                                         SAFE_REALLOC(sol->m,mesh->npmax+1,double); \
-                                                                       } \
-                                                                       sol->npmax = mesh->npmax; \
+      /* solution */                                                    \
+      if ( sol->m ) {                                                   \
+        ADD_MEM(mesh,(mesh->npmax-sol->npmax)*sizeof(double),           \
+                "larger solution",law);                                 \
+        SAFE_REALLOC(sol->m,mesh->npmax+1,double);                      \
+      }                                                                 \
+      sol->npmax = mesh->npmax;                                         \
                                                                         \
-                                                                       /* We try again to add the point */ \
-                                                                       ip = newPt(mesh,o,tag); \
-                                                                       if ( !ip ) {law;} \
-                                                                     }while(0)
+      /* We try again to add the point */                               \
+      ip = newPt(mesh,o,tag);                                           \
+      if ( !ip ) {law;}                                                 \
+    }while(0)
 
-          /** Reallocation of tetra table and creation
-              of tetra jel */
+/** Reallocation of tetra table and creation
+    of tetra jel */
 #define TETRA_REALLOC(mesh,jel,wantedGap,law ) do                       \
-                                                                     {  \
-                                                                       int klink,oldSiz; \
+    {                                                                   \
+      int klink,oldSiz;                                                 \
                                                                         \
-                                                                       oldSiz = mesh->nemax; \
-                                                                       TAB_RECALLOC(mesh,mesh->tetra,mesh->nemax,wantedGap,Tetra, \
-                                                                                    "larger tetra table",law); \
+      oldSiz = mesh->nemax;                                             \
+      TAB_RECALLOC(mesh,mesh->tetra,mesh->nemax,wantedGap,Tetra,        \
+                   "larger tetra table",law);                           \
                                                                         \
-                                                                       mesh->nenil = mesh->ne+1; \
-                                                                       for (klink=mesh->nenil; klink<mesh->nemax-1; klink++) \
-                                                                         mesh->tetra[klink].v[3]  = klink+1; \
+      mesh->nenil = mesh->ne+1;                                         \
+      for (klink=mesh->nenil; klink<mesh->nemax-1; klink++)             \
+        mesh->tetra[klink].v[3]  = klink+1;                             \
                                                                         \
-                                                                       if ( mesh->adja ) { \
-                                                                         /* adja table */ \
-                                                                         ADD_MEM(mesh,4*(mesh->nemax-oldSiz)*sizeof(int), \
-                                                                                 "larger adja table",law); \
-                                                                         SAFE_RECALLOC(mesh->adja,4*mesh->ne+5,4*mesh->nemax+5,int); \
-                                                                       } \
+      if ( mesh->adja ) {                                               \
+        /* adja table */                                                \
+        ADD_MEM(mesh,4*(mesh->nemax-oldSiz)*sizeof(int),                \
+                "larger adja table",law);                               \
+        SAFE_RECALLOC(mesh->adja,4*mesh->ne+5,4*mesh->nemax+5,int);     \
+      }                                                                 \
                                                                         \
-                                                                       /* We try again to add the point */ \
-                                                                       jel = newElt(mesh); \
-                                                                       if ( !jel ) {law;} \
-                                                                     }while(0)
+      /* We try again to add the point */                               \
+      jel = newElt(mesh);                                               \
+      if ( !jel ) {law;}                                                \
+    }while(0)
 
           /* numerical accuracy */
 #define ALPHAD    20.7846096908265    //0.04811252243247      /* 12*sqrt(3) */

@@ -166,7 +166,7 @@ int swpgen(pMesh mesh,pSol met,int nconf,int ilist,int *list) {
 
   np  = newPt(mesh,m,0);
   if(!np){
-    POINT_REALLOC(mesh,met,np,0.2,
+    POINT_REALLOC(mesh,met,np,mesh->gap,
                   printf("  ## Error: unable to allocate a new point\n");
                   printf("  ## Check the mesh size or increase");
                   printf(" the allocated memory with the -m option.\n");

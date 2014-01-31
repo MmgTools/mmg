@@ -7,7 +7,7 @@ Example of advanced use of library libmmg3d5:
 
   We save results in 2spheres_1.o.mesh/sol
 
-  Second we remesh in normal mode, with more memory and lower verbosity.
+  Second we remesh in normal mode, with specified memory and lower verbosity.
   In addition to previous parameters, we ask that all boundary triangles of ref 36 respect a hasdorff number of 0.01 and all boundary triangles of ref 38 a hasdorff number of 1.
    The local hausdorff number on ref 38 has no effects because it is higher than the previous value (without local value, we apply global hausdorff (0.1)) and this value is now contained in the metric.
 

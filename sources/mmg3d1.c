@@ -700,7 +700,7 @@ static int anatetv(pMesh mesh,pSol met,char typchk) {
           /* reallocation of point table */
 #ifdef SINGUL
           if ( mesh->info.sing && pt->xt && (pxt->tag[i] & MG_SGL) )
-            POINT_REALLOC(mesh,met,ip,0.5,
+            POINT_REALLOC(mesh,met,ip,mesh->gap,
                           printf("  ## Error: unable to allocate a new point\n");
                           printf("  ## Check the mesh size or increase");
                           printf(" the allocated memory with the -m option.\n");
@@ -709,7 +709,7 @@ static int anatetv(pMesh mesh,pSol met,char typchk) {
                           ,o,MG_SGL);
           else
 #endif
-            POINT_REALLOC(mesh,met,ip,0.5,
+            POINT_REALLOC(mesh,met,ip,mesh->gap,
                           printf("  ## Error: unable to allocate a new point\n");
                           printf("  ## Check the mesh size or increase");
                           printf(" the allocated memory with the -m option.\n");
@@ -902,7 +902,7 @@ static int anatets(pMesh mesh,pSol met,char typchk) {
         ip = newPt(mesh,o,MG_BDY);
         if ( !ip ) {
           /* reallocation of point table */
-          POINT_REALLOC(mesh,met,ip,0.5,
+          POINT_REALLOC(mesh,met,ip,mesh->gap,
                         printf("  ## Error: unable to allocate a new point.\n");
                         printf("  ## Check the mesh size or increase ");
                         printf("the allocated memory with the -m option.\n");
@@ -1216,7 +1216,7 @@ static int adpspl(pMesh mesh,pSol met, int* warn) {
       ip = newPt(mesh,o,tag);
       if ( !ip ) {
         /* reallocation of point table */
-        POINT_REALLOC(mesh,met,ip,0.2,
+        POINT_REALLOC(mesh,met,ip,mesh->gap,
                       *warn=1;
                       break
                       ,o,tag);
@@ -1283,7 +1283,7 @@ static int adpspl(pMesh mesh,pSol met, int* warn) {
         ip = newPt(mesh,o,MG_NOTAG);
       if ( !ip )  {
         /* reallocation of point table */
-        POINT_REALLOC(mesh,met,ip,0.2,
+        POINT_REALLOC(mesh,met,ip,mesh->gap,
                       *warn=1;
                       break
                       ,o,MG_NOTAG);
@@ -1399,6 +1399,7 @@ static int adptet(pMesh mesh,pSol met) {
   /* Iterative mesh modifications */
   it = nnc = nns = nnf = nnm = warn = 0;
   maxit = 10;
+  mesh->gap = 0.5;
   do {
     if ( !mesh->info.noinsert ) {
       ns = adpspl(mesh,met,&warn);
@@ -1473,6 +1474,10 @@ static int adptet(pMesh mesh,pSol met) {
     nns += ns;
     nnf += nf;
     nnm += nm;
+    /* decrease size of gap for reallocation */
+    mesh->gap -= 0.05;
+    assert ( mesh->gap > 1 );
+
     if ( (abs(mesh->info.imprim) > 4 || mesh->info.ddebug) && ns+nc > 0 )
       fprintf(stdout,"     %8d splitted, %8d collapsed, %8d swapped, %8d moved\n",ns,nc,nf,nm);
     if ( ns < 10 && abs(nc-ns) < 3 )  break;
@@ -1619,6 +1624,7 @@ static int anatet(pMesh mesh,pSol met,char typchk) {
   /* analyze tetras : initial splitting */
   nns = nnc = nnf = it = 0;
   maxit = 5;
+  mesh->gap = 0.5;
   do {
     /* memory free */
     DEL_MEM(mesh,mesh->adja,(4*mesh->nemax+5)*sizeof(int));

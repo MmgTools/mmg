@@ -80,7 +80,7 @@ int main(int argc,char *argv[]) {
   if ( !MMG5_Set_iparameters(mmgMesh,mmgSol,MMG5_IPARAM_debug, 1) )
     exit(EXIT_FAILURE);
 
-  /* memory size (default value = 800) */
+  /* maximal memory size (default value = 50/100*ram) */
   if ( !MMG5_Set_iparameters(mmgMesh,mmgSol,MMG5_IPARAM_mem, 600) )
     exit(EXIT_FAILURE);
 

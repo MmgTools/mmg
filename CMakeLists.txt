@@ -53,7 +53,7 @@ ENDIF(NOT CMAKE_COMPILER_IS_CLANG)
 #####         Redefinitions: mmg3d5_redefine.h
 #####
 ###############################################################################
-EXECUTE_PROCESS(COMMAND ctags  -x --c-kinds=fp  ${MMG_SOURCE_DIR}/mmg3d.h
+EXECUTE_PROCESS(COMMAND ctags  -x --c-kinds=fpx  ${MMG_SOURCE_DIR}/mmg3d.h
   ERROR_QUIET
   OUTPUT_VARIABLE CTAG)
 IF ( CTAG )
@@ -63,7 +63,7 @@ IF ( CTAG )
   # time.
   ADD_CUSTOM_COMMAND(OUTPUT .dummy
     COMMAND touch .dummy
-    COMMAND ctags -x  --c-kinds=fp ${MMG_SOURCE_DIR}/mmg3d.h|awk '{printf \"\#define %-30s\t _MMG5_%s\\n\", $$1, $$1}' > ${MMG_SOURCE_DIR}/${PROJECT_NAME}_redefine.h
+    COMMAND ctags -x  --c-kinds=fpx ${MMG_SOURCE_DIR}/mmg3d.h|awk '{printf \"\#define %-30s\t _MMG5_%s\\n\", $$1, $$1}' > ${MMG_SOURCE_DIR}/${PROJECT_NAME}_redefine.h
     COMMAND ctags -x --c-kinds=fpst ${MMG_SOURCE_DIR}/lib${PROJECT_NAME}.h|awk '{print $$1}'|sed -e 's/MMG5_//g'|awk '{printf \"\#define %-30s\\t MMG5_%s\\n\", $$1, $$1}' >> ${MMG_SOURCE_DIR}/${PROJECT_NAME}_redefine.h
     DEPENDS ${MMG_SOURCE_DIR}/mmg3d.h ${MMG_SOURCE_DIR}/lib${PROJECT_NAME}.h
     COMMENT "update of ${PROJECT_NAME}_redefine.h"
