@@ -236,12 +236,12 @@
 #define EPS2      1.e-12
 #endif
 
-#define NPMAX  1000000
-#define NAMAX   200000
-#define NTMAX  2000000
-#define NEMAX  6000000
+#define NPMAX  1000000 //200000
+#define NAMAX   200000 //40000
+#define NTMAX  2000000 //400000
+#define NEMAX  6000000 //1200000
 
-#define MEMMAX  800
+#define MEMMAX  800 //160
 #define BOXSIZE 500
 
 #ifndef M_PI

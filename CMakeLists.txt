@@ -269,6 +269,9 @@ SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES MINSIZEREL_POSTFIX _Os)
 ###############################################################################
 OPTION ( BUILD_TESTING "Enable/Disable continuous integration" ON )
 IF(BUILD_TESTING)
+  # Run some tests twice with the output of the previous test as input
+  OPTION ( RUN_AGAIN "Enable/Disable second run of some tests" ON )
+
   # Ignore errors coming from the libmesh5 library
   SET(MEMORYCHECK_SUPPRESSIONS_FILE "${CMAKE_SOURCE_DIR}/libmesh5.supp")
   IF(APPLE)
@@ -325,6 +328,9 @@ IF(BUILD_TESTING)
   IF ( INSER_SINGULARITIES )
     INCLUDE( ${CMAKE_SOURCE_DIR}/testing_insert_singul.cmake )
   ENDIF ()
+  IF ( RUN_AGAIN )
+    INCLUDE( ${CMAKE_SOURCE_DIR}/testing_rerun.cmake )
+  ENDIF()
 ENDIF(BUILD_TESTING)
 
 ###############################################################################

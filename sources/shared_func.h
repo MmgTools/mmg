@@ -12,7 +12,7 @@ unsigned char ifar[6][2] = { {2,3}, {1,3}, {1,2}, {0,3}, {0,2}, {0,1} };
 unsigned char isar[6][2] = { {2,3}, {3,1}, {1,2}, {0,3}, {2,0}, {0,1} };
 unsigned char arpt[4][3] = { {0,1,2}, {0,4,3}, {1,3,5}, {2,5,4} };
 
-/* shared functions */
+/* functions shared by executable and library versions of MMG3D5 */
 
 #ifdef USE_SCOTCH
 /** Warn user that we overflow asked memory during scotch call */

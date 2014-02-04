@@ -236,6 +236,9 @@
 #define pSol                          	 MMG5_pSol
 #define pTetra                        	 MMG5_pTetra
 #define pTria                         	 MMG5_pTria
+#define parsar                        	 MMG5_parsar
+#define parsar                        	 MMG5_parsar
+#define parsop                        	 MMG5_parsop
 #define psPoint                       	 MMG5_psPoint
 #define pxPoint                       	 MMG5_pxPoint
 #define pxTetra                       	 MMG5_pxTetra

@@ -299,9 +299,17 @@ int  MMG5_mmg3dlib(MMG5_pMesh mesh, MMG5_pSol sol);
 #endif
 
 /** for PAMPA library */
+/** Options */
+#ifdef SINGUL
+int MMG5_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSingul sing);
+#else
+int MMG5_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met);
+#endif
+int MMG5_parsop(MMG5_pMesh mesh,MMG5_pSol met);
 
 /** Utils */
 double (*MMG5_lenedg)(MMG5_pMesh mesh,MMG5_pSol sol ,int ,int );
 int    MMG5_Get_adjaTet(MMG5_pMesh mesh,int kel, int*, int*, int*, int*);
+
 
 #endif

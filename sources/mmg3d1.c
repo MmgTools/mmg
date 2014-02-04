@@ -1395,11 +1395,12 @@ static int adpcol(pMesh mesh,pSol met) {
 static int adptet(pMesh mesh,pSol met) {
   int      it,nnc,nns,nnf,nnm,maxit,nc,ns,nf,nm;
   int      warn;
+  double   maxgap;
 
   /* Iterative mesh modifications */
   it = nnc = nns = nnf = nnm = warn = 0;
   maxit = 10;
-  mesh->gap = 0.5;
+  mesh->gap = maxgap = 0.5;
   do {
     if ( !mesh->info.noinsert ) {
       ns = adpspl(mesh,met,&warn);
@@ -1475,8 +1476,8 @@ static int adptet(pMesh mesh,pSol met) {
     nnf += nf;
     nnm += nm;
     /* decrease size of gap for reallocation */
-    mesh->gap -= 0.05;
-    assert ( mesh->gap > 1 );
+    mesh->gap -= maxgap/(double)maxit;
+    assert ( mesh->gap > 0 );
 
     if ( (abs(mesh->info.imprim) > 4 || mesh->info.ddebug) && ns+nc > 0 )
       fprintf(stdout,"     %8d splitted, %8d collapsed, %8d swapped, %8d moved\n",ns,nc,nf,nm);
