@@ -306,6 +306,7 @@ int MMG5_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSingul
 int MMG5_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met);
 #endif
 int MMG5_parsop(MMG5_pMesh mesh,MMG5_pSol met);
+void MMG5_usage(char *prog);
 
 /** Utils */
 double (*MMG5_lenedg)(MMG5_pMesh mesh,MMG5_pSol sol ,int ,int );

@@ -244,5 +244,6 @@
 #define pxTetra                       	 MMG5_pxTetra
 #define sPoint                        	 MMG5_sPoint
 #define saveMet                       	 MMG5_saveMet
+#define usage                         	 MMG5_usage
 #define xPoint                        	 MMG5_xPoint
 #define xTetra                        	 MMG5_xTetra

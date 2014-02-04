@@ -1450,7 +1450,7 @@ int Get_adjaTet(pMesh mesh, int kel, int *v0, int *v1, int *v2, int *v3) {
 }
 
 /** help for mmg3d5 options */
-static void usage(char *prog) {
+void usage(char *prog) {
   fprintf(stdout,"\nUsage: %s [-v [n]] [opts..] filein [fileout]\n",prog);
 
   fprintf(stdout,"\n** Generic options :\n");
