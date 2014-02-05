@@ -1,6 +1,6 @@
 #include "mmg3d.h"
 #define PRECI 1
-#define LFILT    0.7
+#define LFILT    0.2//0.7
 
 /* create bucket structure and store initial vertices */
 pBucket newBucket(pMesh mesh,int nmax) {

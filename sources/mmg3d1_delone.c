@@ -2,7 +2,7 @@
 
 char  ddb;
 
-#define LOPTLDEL     1.3//1.41
+#define LOPTLDEL     1.41//1.41
 #define LOPTSDEL     0.6
 int MMG_npuiss,MMG_nvol,MMG_npres;
 /** set triangle corresponding to face ie of tetra k */
@@ -152,16 +152,19 @@ static int swpmshcpy(pMesh mesh,pSol met) {
   pxTetra  pxt;
   int      list[LMAX+2],ilist,k,it,nconf,maxit,ns,nns,ier;
   char     i;
+  double critloc;
 
   maxit = 2;
   it = nns = 0;
-
+  critloc = crit;
   do {
     ns = 0;
     for (k=1; k<=mesh->ne; k++) {
       pt = &mesh->tetra[k];
       if ( !MG_EOK(pt) || (pt->tag & MG_REQ) )  continue;
       if ( pt->qual > 0.0288675 /*0.6/ALPHAD*/ )  continue;
+      //if ( pt->qual < 0.009) critloc = 1.01;
+      //else critloc = crit;
 
       for (i=0; i<6; i++) {
         /* Prevent swap of a ref or tagged edge */
@@ -170,7 +173,7 @@ static int swpmshcpy(pMesh mesh,pSol met) {
           if ( pxt->edg[i] || pxt->tag[i] ) continue;
         }
 
-        nconf = chkswpgen(mesh,k,i,&ilist,list,crit);
+        nconf = chkswpgen(mesh,k,i,&ilist,list,critloc);
         if ( nconf ) {
           ier = swpgen(mesh,met,nconf,ilist,list);
           if ( ier > 0 )  ns++;
@@ -1219,6 +1222,8 @@ int adpsplcol(pMesh mesh,pSol met,pBucket bucket, int* warn) {
       for (k=1; k<=ne; k++) {
         pt = &mesh->tetra[k];
         if ( !MG_EOK(pt)  || (pt->tag & MG_REQ) )   continue;
+	if(it>1)
+	  if(pt->qual > 0.038/*0.0288675*/ /*0.6/ALPHAD*/) continue;
         pxt = pt->xt ? &mesh->xtetra[pt->xt] : 0;
 
         /* find longest and shortest edge */
@@ -1249,7 +1254,6 @@ int adpsplcol(pMesh mesh,pSol met,pBucket bucket, int* warn) {
         /* imin = ii; */
         /* lmin = len; */
         if ( lmax >= LOPTLDEL )  {
-
           /* proceed edges according to lengths */
           ifa0 = ifar[imax][0];
           ifa1 = ifar[imax][1];
@@ -1309,21 +1313,10 @@ int adpsplcol(pMesh mesh,pSol met,pBucket bucket, int* warn) {
             }
             else {
               //CECILE : je comprend pas pourquoi la normale est mauvaise a la fin
-              goto collapse;
+              //goto collapse;
               if ( !norface(mesh,k,i,v) )  goto collapse;//continue;
-              else {
-                dd  = v[0]*no1[0]+v[1]*no1[1]+v[2]*no1[2];
-                dd2 = v[0]*no2[0]+v[1]*no2[1]+v[2]*no2[2];
+	      if ( !BezierReg(mesh,ip1,ip2,0.5,v,o,no1) ) goto collapse;
 
-                if ( dd>=dd2 ) {
-                  if ( !BezierReg(mesh,ip1,ip2,0.5,v,o,no1) )
-                    goto collapse;//continue;
-                }
-                else {
-                  if ( !BezierReg(mesh,ip1,ip2,0.5,v,o,no2) )
-                    goto collapse;//continue;
-                }
-              }
             }
             ier = simbulgept(mesh,list,ilist,o);
             if ( !ier ) {
@@ -1569,7 +1562,11 @@ int adpsplcol(pMesh mesh,pSol met,pBucket bucket, int* warn) {
         return(0);
       }
       nnf += nf;
-      nf = swptetdel(mesh,met,1.053);
+      if(it==3 || it==7/*&& it==1 || it==3 || it==5 || it > 8*/) {
+	nf += swptetdel(mesh,met,1.053);
+      } else {
+	nf += 0;	
+      }
       if ( nf < 0 ) {
         fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
         return(0);
@@ -1577,7 +1574,8 @@ int adpsplcol(pMesh mesh,pSol met,pBucket bucket, int* warn) {
     }
     else  nf = 0;
     nnf+=nf;
-    fprintf(stdout,"$$$$$$$$$$$$$$$$$$ ITER SWAP %7d\n",nnf);
+   
+    //fprintf(stdout,"$$$$$$$$$$$$$$$$$$ ITER SWAP %7d\n",nnf);
 
     if ( !mesh->info.nomove ) {
       nm = movtetdel(mesh,met,-1);
@@ -1678,6 +1676,75 @@ int adpsplcol(pMesh mesh,pSol met,pBucket bucket, int* warn) {
   return(nc);
 }
 
+int optet(pMesh mesh, pSol met) {
+  int it,nnm,nnf,maxit,nm,ier,nf;
+  double declic;
+
+  /*shape optim*/
+  it = nnm = nnf = 0;
+  maxit = 4;
+  declic = 1.053;
+  do {
+    /* badly shaped process */
+    if ( !mesh->info.noswap ) {
+      nf = swpmshcpy(mesh,met);
+      if ( nf < 0 ) {
+        fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
+        return(0);
+      }
+      nnf += nf;
+
+      nf = swptetdel(mesh,met,declic);
+      if ( nf < 0 ) {
+        fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
+        return(0);
+      }
+    }
+    else  nf = 0;
+
+    if ( !mesh->info.nomove ) {
+      nm = movtetdel(mesh,met,0);
+      if ( nm < 0 ) {
+        fprintf(stdout,"  ## Unable to improve mesh.\n");
+        return(0);
+      }
+    }
+    else  nm = 0;
+    nnm += nm;
+
+    /* ier = badelt(mesh,met);
+    if ( ier < 0 ) {
+      fprintf(stdout,"  ## Unable to remove bad elements.\n");
+      return(0);
+      }*/
+
+
+
+
+
+    if ( (abs(mesh->info.imprim) > 4 || mesh->info.ddebug) && nf+nm > 0 ){
+      fprintf(stdout,"                                            ");
+      fprintf(stdout,"%8d swapped, %8d moved\n",nf,nm);
+    }
+  }
+  while( ++it < maxit && nm+nf > 0 );
+
+  if ( !mesh->info.nomove ) {
+    nm = movtetdel(mesh,met,3);
+    if ( nm < 0 ) {
+      fprintf(stdout,"  ## Unable to improve mesh.\n");
+      return(0);
+    }
+  }
+  else  nm = 0;
+  nnm += nm;
+  if ( (abs(mesh->info.imprim) > 4 || mesh->info.ddebug) && nm > 0 )
+    fprintf(stdout,"                                            ");
+  fprintf(stdout,"                  %8d moved\n",nm);
+
+  return(1);
+}
+
 /** Analyze tetrahedra and split long / collapse short, according to prescribed metric */
 /*static*/ int adptet1(pMesh mesh,pSol met,pBucket bucket) {
   int      it,nnf,nnm,maxit,ns,nf,nm;
@@ -1743,61 +1810,7 @@ int adpsplcol(pMesh mesh,pSol met,pBucket bucket, int* warn) {
   }
 #endif
 
-  /*shape optim*/
-  it = nnm = nnf = 0;
-  maxit = 2;
-  do {
-    /* badly shaped process */
-    /*ier = badelt(mesh,met);
-      if ( ier < 0 ) {
-      fprintf(stdout,"  ## Unable to remove bad elements.\n");
-      return(0);
-      }*/
-    if ( !mesh->info.nomove ) {
-      nm = movtetdel(mesh,met,0);
-      if ( nm < 0 ) {
-        fprintf(stdout,"  ## Unable to improve mesh.\n");
-        return(0);
-      }
-    }
-    else  nm = 0;
-    nnm += nm;
-
-    if ( !mesh->info.noswap ) {
-      nf = swpmshcpy(mesh,met);
-      if ( nf < 0 ) {
-        fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
-        return(0);
-      }
-      nnf += nf;
-
-      nf = swptetdel(mesh,met,1.053);
-      if ( nf < 0 ) {
-        fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
-        return(0);
-      }
-    }
-    else  nf = 0;
-
-    if ( (abs(mesh->info.imprim) > 4 || mesh->info.ddebug) && nf+nm > 0 ){
-      fprintf(stdout,"                                            ");
-      fprintf(stdout,"%8d swapped, %8d moved\n",nf,nm);
-    }
-  }
-  while( ++it < maxit && nm+nf > 0 );
-
-  if ( !mesh->info.nomove ) {
-    nm = movtetdel(mesh,met,3);
-    if ( nm < 0 ) {
-      fprintf(stdout,"  ## Unable to improve mesh.\n");
-      return(0);
-    }
-  }
-  else  nm = 0;
-  nnm += nm;
-  if ( (abs(mesh->info.imprim) > 4 || mesh->info.ddebug) && nm > 0 )
-    fprintf(stdout,"                                            ");
-  fprintf(stdout,"                  %8d moved\n",nm);
+  if(!optet(mesh,met)) return(0);
 
   return(1);
 }
@@ -2043,7 +2056,7 @@ int adpsplcol(pMesh mesh,pSol met,pBucket bucket, int* warn) {
       ns += ier;
 
       /* analyze internal tetras */
-      ier = anatetvdel(mesh,met,typchk);
+      ier = 0;//anatetvdel(mesh,met,typchk);
 #ifdef DEBUG
       if(ier){ printf("APS ANATETV == %d\n",ier);
         prilen(mesh,met);}
@@ -2145,11 +2158,11 @@ int mmg3d1_delone(pMesh mesh,pSol met) {
     fprintf(stdout,"  ## Gradation problem. Exit program.\n");
     return(0);
   }
-
   if ( !anatetdel(mesh,met,2) ) {
     fprintf(stdout,"  ## Unable to split mesh. Exiting.\n");
     return(0);
   }
+
 #ifdef DEBUG
   puts("---------------------------Fin anatet---------------------");
   outqua(mesh,met);

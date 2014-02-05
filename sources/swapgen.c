@@ -67,6 +67,9 @@ int chkswpgen(pMesh mesh,int start,int ia,int *ilist,int *list,double crit) {
       piv = pt->v[ ifar[i][0] ];
     }
   }
+  //CECILE : je vois pas pourquoi ca ameliore de faire ce test
+  //plus rapide mais du coup on elimine des swap...
+  //4/01/14 commentaire
   if ( calold*ALPHAD > 0.5 )  return(0);
 
   /* Prevent swap of an external boundary edge */
