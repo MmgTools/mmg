@@ -112,7 +112,7 @@ void memOption(pMesh mesh) {
   mesh->nemax = MG_MAX(1.5*mesh->ne,NEMAX);
   mesh->ntmax = MG_MAX(1.5*mesh->nt,NTMAX);
 
-  if ( mesh->info.mem < 0 ) {
+  if ( mesh->info.mem <= 0 ) {
     if ( mesh->memMax )
     /* maximal memory = 50% of total physical memory */
       mesh->memMax = mesh->memMax*50/100;

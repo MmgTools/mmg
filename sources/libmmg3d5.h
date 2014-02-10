@@ -311,6 +311,7 @@ void MMG5_usage(char *prog);
 /** Utils */
 double (*MMG5_lenedg)(MMG5_pMesh mesh,MMG5_pSol sol ,int ,int );
 int    MMG5_Get_adjaTet(MMG5_pMesh mesh,int kel, int*, int*, int*, int*);
-
+void   MMG5_stockOptions(MMG5_pMesh mesh, MMG5_Info *info);
+void   MMG5_destockOptions(MMG5_pMesh mesh, MMG5_Info *info);
 
 #endif

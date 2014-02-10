@@ -303,11 +303,13 @@ void swapNod(pPoint points, double* sols, int* perm,
   memcpy(&points[ind1],&ptttmp      ,sizeof(Point));
 
   /* swap the sols */
-  addr1 = (ind1-1)*solsiz + 1;
-  addr2 = (ind2-1)*solsiz + 1;
-  memcpy(&soltmp     ,&sols[addr2],solsiz*sizeof(double));
-  memcpy(&sols[addr2],&sols[addr1],solsiz*sizeof(double));
-  memcpy(&sols[addr1],&soltmp     ,solsiz*sizeof(double));
+  if ( sols ) {
+    addr1 = (ind1-1)*solsiz + 1;
+    addr2 = (ind2-1)*solsiz + 1;
+    memcpy(&soltmp     ,&sols[addr2],solsiz*sizeof(double));
+    memcpy(&sols[addr2],&sols[addr1],solsiz*sizeof(double));
+    memcpy(&sols[addr1],&soltmp     ,solsiz*sizeof(double));
+  }
 
   /* swap the permutaion table */
   tmp        = perm[ind2];

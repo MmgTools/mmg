@@ -35,9 +35,9 @@
 static inline
 void Alloc_mesh(MMG5_pMesh *mesh, MMG5_pSol *sol
 #ifdef SINGUL
-		, MMG5_pSingul *sing
+    , MMG5_pSingul *sing
 #endif
-		) {
+    ) {
 
   /* mesh allocation */
   if ( *mesh )  SAFE_FREE(*mesh);
@@ -583,7 +583,7 @@ int Get_vertex(MMG5_pMesh mesh, double* c0, double* c1, double* c2, int* ref,
   if ( ref != NULL )
     *ref = mesh->point[mesh->npi].ref;
 
-  if ( isCorner != NULL ) { 
+  if ( isCorner != NULL ) {
     if ( mesh->point[mesh->npi].tag & MG_CRN )
       *isCorner = 1;
     else
@@ -760,7 +760,7 @@ int Get_triangle(MMG5_pMesh mesh, int* v0, int* v1, int* v2, int* ref
 
   if ( isRequired != NULL ) {
     if ( (ptt->tag[0] & MG_REQ) && (ptt->tag[1] & MG_REQ) &&
-	 (ptt->tag[2] & MG_REQ) )
+   (ptt->tag[2] & MG_REQ) )
       *isRequired = 1;
     else
       *isRequired = 0;
@@ -1782,3 +1782,109 @@ int parsop(MMG5_pMesh mesh,MMG5_pSol met) {
   fclose(in);
   return(1);
 }
+
+/** Store the info structure in mesh */
+void stockOptions(MMG5_pMesh mesh, MMG5_Info *info) {
+
+  memcpy(&mesh->info,info,sizeof(MMG5_Info));
+  return;
+}
+
+/** Recover the info structure stored in mesh */
+void destockOptions(MMG5_pMesh mesh, MMG5_Info *info) {
+
+  memcpy(info,&mesh->info,sizeof(MMG5_Info));
+  return;
+}
+
+///** Search elements which are not correct (quality or edge length) */
+//int mmg3dcheck(MMG5_pMesh mesh,MMG5_pSol sol, double rapmax,
+//#ifdef SINGUL
+//               MMG5_pSingul sing,
+//#endif
+//               double lmin, double lmax, int *eltab) {
+//  int     alert;
+//
+//  mytime    ctim[TIMEMAX];
+//  char      stim[32];
+//#ifdef SINGUL
+//  int       ier;
+//#else
+//  /* sing is not used but must be declared */
+//  pSingul   sing;
+//  Singul    singul;
+//  sing = &singul;
+//  memset(sing,0,sizeof(Singul));
+//#endif
+//
+//  fprintf(stdout,"  -- MMG3d, Release %s (%s) \n",MG_VER,MG_REL);
+//  fprintf(stdout,"     %s\n",MG_CPY);
+//  fprintf(stdout,"    %s %s\n",__DATE__,__TIME__);
+//
+//  signal(SIGABRT,excfun);
+//  signal(SIGFPE,excfun);
+//  signal(SIGILL,excfun);
+//  signal(SIGSEGV,excfun);
+//  signal(SIGTERM,excfun);
+//  signal(SIGINT,excfun);
+//
+//  tminit(ctim,TIMEMAX);
+//  chrono(ON,&(ctim[0]));
+//
+//#ifdef USE_SCOTCH
+//  warnScotch(mesh);
+//#endif
+//
+//  fprintf(stdout,"\n  -- MMG3DLIB: INPUT DATA\n");
+//  /* load data */
+//  chrono(ON,&(ctim[1]));
+//  warnOrientation(mesh);
+//
+//  if ( met->np && (met->np != mesh->np) ) {
+//    fprintf(stdout,"  ## WARNING: WRONG SOLUTION NUMBER. IGNORED\n");
+//    DEL_MEM(mesh,met->m,(met->size*met->npmax+1)*sizeof(double));
+//    met->np = 0;
+//  }
+//  else if ( met->size!=1 ) {
+//    fprintf(stdout,"  ## ERROR: ANISOTROPIC METRIC NOT IMPLEMENTED.\n");
+//    return(MMG5_STRONGFAILURE);
+//  }
+//#ifdef SINGUL
+//  if ( mesh->info.sing ) {
+//    if ( !mesh->info.iso ) {
+//      if ( !sing->namein )
+//        fprintf(stdout,"  ## WARNING: NO SINGULARITIES PROVIDED.\n");
+//    }
+//    else if ( sing->namein ) {
+//      fprintf(stdout,"  ## WARNING: SINGULARITIES MUST BE INSERTED IN");
+//      fprintf(stdout," A PRE-REMESHING PROCESS.\n");
+//      fprintf(stdout,"              FILE %s IGNORED\n",sing->namein);
+//    }
+//  }
+//#endif
+//
+//  chrono(OFF,&(ctim[1]));
+//  printim(ctim[1].gdif,stim);
+//  fprintf(stdout,"  --  INPUT DATA COMPLETED.     %s\n",stim);
+//
+//  /* analysis */
+//  chrono(ON,&(ctim[2]));
+//  setfunc(mesh,met);
+//  Set_saveFunc(mesh);
+//  if ( abs(mesh->info.imprim) > 0 )  outqua(mesh,met);
+//  fprintf(stdout,"\n  %s\n   MODULE MMG3D: IMB-LJLL : %s (%s)\n  %s\n",MG_STR,MG_VER,MG_REL,MG_STR);
+//  if ( mesh->info.imprim )  fprintf(stdout,"\n  -- PHASE 1 : ANALYSIS\n");
+//
+//  if ( !scaleMesh(mesh,met,sing) ) return(MMG5_STRONGFAILURE);
+//  if ( mesh->info.iso ) {
+//    if ( !met->np ) {
+//      fprintf(stdout,"\n  ## ERROR: A VALID SOLUTION FILE IS NEEDED \n");
+//      return(MMG5_STRONGFAILURE);
+//    }
+//    if ( !mmg3d2(mesh,met) ) return(MMG5_STRONGFAILURE);
+//  }
+//
+//  MMG_searchqua(mesh,sol,rapmax,eltab);
+//  MMG_searchlen(mesh,sol,lmin,lmax,eltab);
+//  return(alert);
+//}

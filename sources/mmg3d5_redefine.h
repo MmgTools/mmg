@@ -222,6 +222,7 @@
 #define Sol                           	 MMG5_Sol
 #define Tetra                         	 MMG5_Tetra
 #define Tria                          	 MMG5_Tria
+#define destockOptions                	 MMG5_destockOptions
 #define hgeom                         	 MMG5_hgeom
 #define loadMesh                      	 MMG5_loadMesh
 #define loadMet                       	 MMG5_loadMet
@@ -244,6 +245,7 @@
 #define pxTetra                       	 MMG5_pxTetra
 #define sPoint                        	 MMG5_sPoint
 #define saveMet                       	 MMG5_saveMet
+#define stockOptions                  	 MMG5_stockOptions
 #define usage                         	 MMG5_usage
 #define xPoint                        	 MMG5_xPoint
 #define xTetra                        	 MMG5_xTetra
