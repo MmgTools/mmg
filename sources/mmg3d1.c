@@ -1413,10 +1413,10 @@ static int adptet(pMesh mesh,pSol met) {
 
 #ifdef USE_SCOTCH
     /*check enough vertex to renum*/
-    if ( mesh->info.renum && (it < 4) && (mesh->np/2. > BOXSIZE) ) {
+    if ( mesh->info.renum && (it == 1) && (mesh->np/2. > BOXSIZE) && mesh->np>100000 ) {
       /* renumbering begin */
       if ( mesh->info.imprim > 5 )
-        fprintf(stdout,"renumbering");
+        fprintf(stdout,"  -- RENUMBERING. \n");
       if ( !renumbering(BOXSIZE,mesh, met) ) {
         fprintf(stdout,"  ## Unable to renumbering mesh. \n");
         fprintf(stdout,"  ## Try to run without renumbering option (-rn 0)\n");
@@ -1497,10 +1497,10 @@ static int adptet(pMesh mesh,pSol met) {
 
 #ifdef USE_SCOTCH
   /*check enough vertex to renum*/
-  if ( mesh->info.renum && (mesh->np/2. > BOXSIZE) ) {
+  if ( mesh->info.renum && (mesh->np/2. > BOXSIZE) && mesh->np>100000 ) {
     /* renumbering begin */
     if ( mesh->info.imprim > 5 )
-      fprintf(stdout,"renumbering");
+      fprintf(stdout,"  -- RENUMBERING. \n");
     renumbering(BOXSIZE,mesh, met);
 
     if ( mesh->info.imprim > 5) {

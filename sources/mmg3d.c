@@ -181,6 +181,27 @@ int main(int argc,char *argv[]) {
   if ( mesh.info.imprim )
     fprintf(stdout,"\n  -- PHASE 2 : %s MESHING\n",met.size < 6 ? "ISOTROPIC" : "ANISOTROPIC");
 
+#ifdef USE_SCOTCH
+    /*check enough vertex to renum*/
+    if ( mesh.info.renum && (mesh.np/2. > BOXSIZE) && mesh.np>100000 ) {
+      /* renumbering begin */
+      if ( mesh.info.imprim > 5 )
+        fprintf(stdout,"  -- RENUMBERING. \n");
+      if ( !renumbering(BOXSIZE,&mesh, &met) ) {
+        fprintf(stdout,"  ## Unable to renumbering mesh. \n");
+        fprintf(stdout,"  ## Try to run without renumbering option (-rn 0)\n");
+        return(0);
+      }
+
+      if ( mesh.info.imprim > 5) {
+        fprintf(stdout,"  -- PHASE RENUMBERING COMPLETED. \n");
+      }
+
+      if ( mesh.info.ddebug )  chkmsh(&mesh,1,0);
+      /* renumbering end */
+    }
+#endif
+
 #ifdef SINGUL
   if ( mesh.info.sing && (!mesh.info.iso) ) {
     if ( colSing(&mesh,&met)<0 ) {
