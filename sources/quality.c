@@ -625,8 +625,8 @@ int prilen(pMesh mesh, pSol met) {
             bd[2],bd[5],hl[2]+hl[3]+hl[4],100.*(hl[2]+hl[3]+hl[4])/(double)ned);
 
 
-  if ( abs(mesh->info.imprim) > 4 ) {
-    fprintf(stdout,"\n     HISTOGRAMM\n");
+  if ( abs(mesh->info.imprim) > 3 ) {
+    fprintf(stdout,"\n     HISTOGRAMM:\n");
     if ( hl[0] )
       fprintf(stdout,"     0.00 < L < 0.30  %8d   %5.2f %%  \n",
               hl[0],100.*(hl[0]/(float)ned));
@@ -649,12 +649,12 @@ int prilen(pMesh mesh, pSol met) {
 /** print mesh quality histo */
 void outqua(pMesh mesh,pSol met) {
   pTetra    pt;
-  double   rap,rapmin,rapmax,rapavg,med;
+  double   rap,rapmin,rapmax,rapavg,med,good;
   int      i,k,iel,ok,ir,imax,nex,his[5];
 
   rapmin  = 2.0;
   rapmax  = 0.0;
-  rapavg  = med = 0.0;
+  rapavg  = med = good = 0.0;
   iel     = 0;
 
   for (k=0; k<5; k++)  his[k] = 0;
@@ -673,6 +673,7 @@ void outqua(pMesh mesh,pSol met) {
       iel    = ok;
     }
     if ( rap > 0.5 )  med++;
+    if ( rap > 0.12 ) good++;
     if ( rap < BADKAL )  mesh->info.badkal = 1;
     rapavg += rap;
     rapmax  = MG_MAX(rapmax,rap);
@@ -690,7 +691,7 @@ void outqua(pMesh mesh,pSol met) {
           indPt(mesh,mesh->tetra[iel].v[0]),indPt(mesh,mesh->tetra[iel].v[1]),
           indPt(mesh,mesh->tetra[iel].v[2]),indPt(mesh,mesh->tetra[iel].v[3]));
 #endif
-  if ( abs(mesh->info.imprim) < 5 ){
+  if ( abs(mesh->info.imprim) < 4 ){
     if (rapmin == 0){
       fprintf(stdout,"  ## WARNING: TOO BAD QUALITY FOR THE WORST ELEMENT\n");
       saveMesh(mesh);
@@ -700,11 +701,15 @@ void outqua(pMesh mesh,pSol met) {
   }
 
   /* print histo */
-  fprintf(stdout,"     HISTOGRAMM:  %6.2f %% > 0.5\n",100.0*(med/(float)(mesh->ne-nex)));
-  imax = MG_MIN(4,(int)(5.*rapmax));
-  for (i=imax; i>=(int)(5*rapmin); i--) {
-    fprintf(stdout,"     %5.1f < Q < %5.1f   %7d   %6.2f %%\n",
-            i/5.,i/5.+0.2,his[i],100.*(his[i]/(float)(mesh->ne-nex)));
+  fprintf(stdout,"     HISTOGRAMM:");
+  fprintf(stdout,"  %6.2f %% > 0.12\n",100.0*(good/(float)(mesh->ne-nex)));
+  if ( abs(mesh->info.imprim) > 4 ) {
+    fprintf(stdout,"                  %6.2f %% >  0.5\n",100.0*( med/(float)(mesh->ne-nex)));
+    imax = MG_MIN(4,(int)(5.*rapmax));
+    for (i=imax; i>=(int)(5*rapmin); i--) {
+      fprintf(stdout,"     %5.1f < Q < %5.1f   %7d   %6.2f %%\n",
+              i/5.,i/5.+0.2,his[i],100.*(his[i]/(float)(mesh->ne-nex)));
+    }
   }
   if (rapmin == 0){
     fprintf(stdout,"  ## WARNING: TOO BAD QUALITY FOR THE WORST ELEMENT\n");

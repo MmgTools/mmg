@@ -579,7 +579,7 @@ int gradsiz_iso(pMesh mesh,pSol met) {
   }
   while( ++it < maxit && nu > 0 );
 
-  if ( abs(mesh->info.imprim) > 4 )
+  if ( abs(mesh->info.imprim) > 3 )
     fprintf(stdout,"     gradation: %7d updated, %d iter.\n",nup,it);
   return(1);
 }

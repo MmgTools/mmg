@@ -731,7 +731,7 @@ int chkedg_ls(pMesh mesh, pSol sol){
       }
     }
   }
-  if ( (abs(mesh->info.imprim) > 4 || mesh->info.ddebug) && nf > 0 )
+  if ( (abs(mesh->info.imprim) > 3 || mesh->info.ddebug) && nf > 0 )
     fprintf(stdout,"    %8d problematic edges, %d corrected\n",nf,nc);
   return(1);
 }
@@ -1497,7 +1497,7 @@ int chkmanicoll(pMesh mesh,int k,int iface,int iedg,int ndepmin,int ndepplus,cha
 int mmg3d2(pMesh mesh,pSol sol) {
   double   *tmp;
 
-  if ( abs(mesh->info.imprim) > 4 )
+  if ( abs(mesh->info.imprim) > 3 )
     fprintf(stdout,"  ** ISOSURFACE EXTRACTION\n");
 
   ADD_MEM(mesh,(mesh->npmax+1)*sizeof(double),"temporary table",

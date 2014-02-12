@@ -1331,7 +1331,7 @@ int inserSingul(pMesh mesh, pSol met, pSingul singul){
 
   if ( (!singul->na) && (!singul->ns) ) return(-1);
 
-  if ( abs(mesh->info.imprim) > 4 || mesh->info.ddebug )
+  if ( abs(mesh->info.imprim) > 3 || mesh->info.ddebug )
     fprintf(stdout,"\n  ** INSERTION OF SINGULARITIES\n");
 
   if ( !hashTetra(mesh,1) ) {
@@ -1417,7 +1417,7 @@ int colSing(pMesh mesh,pSol met) {
   int     k,nc,nnc,list[LMAX+2],ilist;
   int     it,maxit,i,ifac,jseg,ier;
 
-  if ( abs(mesh->info.imprim) > 4 )
+  if ( abs(mesh->info.imprim) > 3 )
     fprintf(stdout,"  ** SINGULARITIES PRE-REMESHING\n");
   nnc = it = 0;
   maxit = 5;
@@ -1481,7 +1481,7 @@ int solveUnsignedTet(pMesh mesh,pSol met) {
   int     *adja;
   int     i,ip;
 
-  if ( abs(mesh->info.imprim) > 4 )
+  if ( abs(mesh->info.imprim) > 3 )
     fprintf(stdout,"  ** SINGULARITIES POST-REMESHING\n");
 
   ns = nf = 0;

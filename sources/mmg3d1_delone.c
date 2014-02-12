@@ -1593,7 +1593,7 @@ int adpsplcol(pMesh mesh,pSol met,pBucket bucket, int* warn) {
     mesh->gap -= 0.05;
     assert ( mesh->gap > 1 );
 
-    if ( 1 || ((abs(mesh->info.imprim) > 4 || mesh->info.ddebug) && ns+nc > 0) )
+    if ( 1 || ((abs(mesh->info.imprim) > 3 || mesh->info.ddebug) && ns+nc > 0) )
       fprintf(stdout,"     %8d filtered %8d splitted, %8d collapsed, %8d swapped, %8d moved\n",ifilt,ns,nc,nf,nm);
     if ( ns < 10 && abs(nc-ns) < 3 )  break;
     else if ( it > 3 && abs(nc-ns) < 0.3 * MG_MAX(nc,ns) )  break;
@@ -1722,7 +1722,7 @@ int optet(pMesh mesh, pSol met) {
 
 
 
-    if ( (abs(mesh->info.imprim) > 4 || mesh->info.ddebug) && nf+nm > 0 ){
+    if ( (abs(mesh->info.imprim) > 3 || mesh->info.ddebug) && nf+nm > 0 ){
       fprintf(stdout,"                                            ");
       fprintf(stdout,"%8d swapped, %8d moved\n",nf,nm);
     }
@@ -1738,7 +1738,7 @@ int optet(pMesh mesh, pSol met) {
   }
   else  nm = 0;
   nnm += nm;
-  if ( (abs(mesh->info.imprim) > 4 || mesh->info.ddebug) && nm > 0 )
+  if ( (abs(mesh->info.imprim) > 3 || mesh->info.ddebug) && nm > 0 )
     fprintf(stdout,"                                            ");
   fprintf(stdout,"                  %8d moved\n",nm);
 
@@ -1894,7 +1894,7 @@ int optet(pMesh mesh, pSol met) {
     nnm += nm;
     nnc += nc;
     nns += ns;
-    if ( (abs(mesh->info.imprim) > 4 || mesh->info.ddebug) && ns+nc > 0 )
+    if ( (abs(mesh->info.imprim) > 3 || mesh->info.ddebug) && ns+nc > 0 )
       fprintf(stdout,"     %8d splitted, %8d collapsed, %8d swapped, %8d moved\n",ns,nc,nf,nm);
     // if ( ns < 10 && abs(nc-ns) < 3 )  break;
     // else if ( it > 3 && abs(nc-ns) < 0.3 * MG_MAX(nc,ns) )  break;
@@ -1948,7 +1948,7 @@ int optet(pMesh mesh, pSol met) {
     }
     else  nf = 0;
 
-    if ( (abs(mesh->info.imprim) > 4 || mesh->info.ddebug) && nf+nm > 0 ){
+    if ( (abs(mesh->info.imprim) > 3 || mesh->info.ddebug) && nf+nm > 0 ){
       fprintf(stdout,"                                            ");
       fprintf(stdout,"%8d swapped, %8d moved\n",nf,nm);
     }
@@ -1965,13 +1965,13 @@ int optet(pMesh mesh, pSol met) {
   }
   else  nm = 0;
 
-  if ( (abs(mesh->info.imprim) > 4 || mesh->info.ddebug) && nm > 0 ){
+  if ( (abs(mesh->info.imprim) > 3 || mesh->info.ddebug) && nm > 0 ){
     fprintf(stdout,"                                            ");
     fprintf(stdout,"                  %8d moved\n",nm);
   }
 
 
-  if ( abs(mesh->info.imprim) < 5 && (nnc > 0 || nns > 0) )
+  if ( abs(mesh->info.imprim) < 4 && (nnc > 0 || nns > 0) )
     fprintf(stdout,"     %8d splitted, %8d collapsed, %8d swapped, %8d moved, %d iter. \n",
             nns,nnc,nnf,nnm,it);
 
@@ -2105,13 +2105,13 @@ int optet(pMesh mesh, pSol met) {
     nnc += nc;
     nns += ns;
     nnf += nf;
-    if ( (abs(mesh->info.imprim) > 4 || mesh->info.ddebug) && ns+nc+nf > 0 )
+    if ( (abs(mesh->info.imprim) > 3 || mesh->info.ddebug) && ns+nc+nf > 0 )
       fprintf(stdout,"     %8d splitted, %8d collapsed, %8d swapped\n",ns,nc,nf);
     if ( it > 3 && abs(nc-ns) < 0.1 * MG_MAX(nc,ns) )  break;
   }
   while ( ++it < maxit && ns+nc+nf > 0 );
 
-  if ( (abs(mesh->info.imprim) < 5 || mesh->info.ddebug ) && nns+nnc > 0 )
+  if ( (abs(mesh->info.imprim) < 4 || mesh->info.ddebug ) && nns+nnc > 0 )
     fprintf(stdout,"     %8d splitted, %8d collapsed, %8d swapped, %d iter.\n",nns,nnc,nnf,it);
 #ifdef DEBUG
   puts("FIN ANATET");
@@ -2124,7 +2124,7 @@ int optet(pMesh mesh, pSol met) {
 int mmg3d1_delone(pMesh mesh,pSol met) {
   pBucket bucket;
 
-  if ( abs(mesh->info.imprim) > 4 )
+  if ( abs(mesh->info.imprim) > 3 )
     fprintf(stdout,"  ** MESH ANALYSIS\n");
 
   if ( mesh->info.iso && !chkmani(mesh) ) {
@@ -2133,7 +2133,7 @@ int mmg3d1_delone(pMesh mesh,pSol met) {
   }
 
   /**--- stage 1: geometric mesh */
-  if ( abs(mesh->info.imprim) > 4 || mesh->info.ddebug )
+  if ( abs(mesh->info.imprim) > 3 || mesh->info.ddebug )
     fprintf(stdout,"  ** GEOMETRIC MESH\n");
 
   if ( !anatetdel(mesh,met,1) ) {
@@ -2145,7 +2145,7 @@ int mmg3d1_delone(pMesh mesh,pSol met) {
 #endif
 
   /**--- stage 2: computational mesh */
-  if ( abs(mesh->info.imprim) > 4 || mesh->info.ddebug )
+  if ( abs(mesh->info.imprim) > 3 || mesh->info.ddebug )
     fprintf(stdout,"  ** COMPUTATIONAL MESH\n");
 
   /* define metric map */

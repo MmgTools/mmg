@@ -169,7 +169,7 @@ int main(int argc,char *argv[]) {
 
   if ( !analys(&mesh) ) RETURN_AND_FREE(&mesh,&met,&sing,MMG5_LOWFAILURE);
 
-  if ( mesh.info.imprim > 4 && !mesh.info.iso && met.m ) prilen(&mesh,&met);
+  if ( mesh.info.imprim > 3 && !mesh.info.iso && met.m ) prilen(&mesh,&met);
 
   chrono(OFF,&MMG5_ctim[2]);
   printim(MMG5_ctim[2].gdif,stim);
@@ -228,7 +228,7 @@ int main(int argc,char *argv[]) {
   /* save file */
   outqua(&mesh,&met);
 
-  if ( mesh.info.imprim > 4 && !mesh.info.iso )
+  if ( mesh.info.imprim > 3 && !mesh.info.iso )
     prilen(&mesh,&met);
 
   chrono(ON,&MMG5_ctim[1]);

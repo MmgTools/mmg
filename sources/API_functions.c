@@ -108,7 +108,7 @@ void Init_mesh(MMG5_pMesh *mesh, MMG5_pSol *sol
 void Init_parameters(pMesh mesh) {
 
   /* default values for integers */
-  mesh->info.imprim   =  5; /**< [-10..10],Tune level of imprim */
+  mesh->info.imprim   =  4; /**< [-10..10],Tune level of imprim */
   mesh->info.mem      = -1;  /**< [n/-1]   ,Set memory size to n Mbytes/keep the default value */
   mesh->info.ddebug   =  0;  /**< [0/1]    ,Turn on/off debug mode */
   mesh->info.iso      =  0;  /**< [0/1]    ,Turn on/off levelset meshing */
@@ -450,7 +450,7 @@ int Set_meshSize(MMG5_pMesh mesh, int np, int ne, int nt, int na) {
   }
 
   /* stats */
-  if ( abs(mesh->info.imprim) > 4 ) {
+  if ( abs(mesh->info.imprim) > 3 ) {
     fprintf(stdout,"     NUMBER OF VERTICES     %8d\n",mesh->np);
     if ( mesh->na ) {
       fprintf(stdout,"     NUMBER OF EDGES        %8d\n",mesh->na);

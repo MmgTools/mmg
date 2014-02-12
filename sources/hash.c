@@ -44,7 +44,7 @@ int hashTetra(pMesh mesh, int pack) {
   /* default */
   if ( mesh->adja ) {
     if( !mesh->info.sing ) {
-      if ( abs(mesh->info.imprim) > 4 || mesh->info.ddebug ) {
+      if ( abs(mesh->info.imprim) > 3 || mesh->info.ddebug ) {
         fprintf(stdout,"  ## Warning: no re-build of adjacencies of mesh. ");
         fprintf(stdout,"mesh->adja must be freed to enforce analysis.\n");
       }
@@ -269,7 +269,7 @@ int hashTria(pMesh mesh) {
     }
   }
 
-  if ( abs(mesh->info.imprim) > 4 && dup+nmf > 0 ) {
+  if ( abs(mesh->info.imprim) > 3 && dup+nmf > 0 ) {
     fprintf(stdout,"  ## ");  fflush(stdout);
     if ( nmf > 0 )  fprintf(stdout,"[non-manifold model]  ");
     if ( dup > 0 )  fprintf(stdout," %d duplicate removed",dup);
@@ -598,7 +598,7 @@ int hGeom(pMesh mesh) {
 #ifdef SINGUL
       if ( !mesh->info.sing ) {
 #endif
-        if ( abs(mesh->info.imprim) > 4 || mesh->info.ddebug ) {
+        if ( abs(mesh->info.imprim) > 3 || mesh->info.ddebug ) {
           fprintf(stdout,"  ## Warning: no re-hash of edges of mesh. ");
           fprintf(stdout,"mesh->htab.geom must be freed to enforce analysis.\n");
         }
@@ -740,7 +740,7 @@ int chkNumberOfTri(pMesh mesh) {
   }
   if ( mesh->nt == nttmp ) return(1);
   else if ( mesh->nt ){
-    if ( !mesh->info.iso && (mesh->info.imprim > 4 || mesh->info.ddebug) ) {
+    if ( !mesh->info.iso && (mesh->info.imprim > 3 || mesh->info.ddebug) ) {
       fprintf(stdout,"  ## WARNING: INITIAL TRIANGLES ARE DELETED.\n");
       fprintf(stdout,"  Not enough or too much triangles for geometry (maybe");
       fprintf(stdout," you have 2 domains but only boundary/interface triangles).\n");
@@ -970,7 +970,7 @@ int bdrySet(pMesh mesh) {
 #endif
 
   if ( mesh->xtetra ) {
-    if ( abs(mesh->info.imprim) > 4 || mesh->info.ddebug ) {
+    if ( abs(mesh->info.imprim) > 3 || mesh->info.ddebug ) {
       fprintf(stdout,"  ## Warning: no re-build of boundary tetras. ");
       fprintf(stdout,"mesh->xtetra must be freed to enforce analysis.\n");
     }

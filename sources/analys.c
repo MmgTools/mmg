@@ -156,7 +156,7 @@ static int setadj(pMesh mesh){
     fprintf(stdout,"  a- connex: %d connected component(s)\n",ncc);
     fprintf(stdout,"  a- orient: %d flipped\n",nf);
   }
-  else if ( abs(mesh->info.imprim) > 4 ) {
+  else if ( abs(mesh->info.imprim) > 3 ) {
     gen = (2 - nvf + ned - nt) / 2;
     fprintf(stdout,"     Connected component: %d,  genus: %d,   reoriented: %d\n",ncc,gen,nf);
     fprintf(stdout,"     Edges: %d,  tagged: %d,  ridges: %d, required: %d, refs: %d\n",
@@ -219,7 +219,7 @@ static int setdhd(pMesh mesh) {
       }
     }
   }
-  if ( abs(mesh->info.imprim) > 4 && nr > 0 )
+  if ( abs(mesh->info.imprim) > 3 && nr > 0 )
     fprintf(stdout,"     %d ridges, %d edges updated\n",nr,ne);
 
   return(1);
@@ -287,7 +287,7 @@ static int singul(pMesh mesh) {
     }
   }
 
-  if ( abs(mesh->info.imprim) > 4 && nre > 0 )
+  if ( abs(mesh->info.imprim) > 3 && nre > 0 )
     fprintf(stdout,"     %d corners, %d singular points detected\n",nc,nre);
   return(1);
 }
@@ -302,7 +302,7 @@ static int norver(pMesh mesh) {
   char      i,ii,i1;
   /* recomputation of normals only if mesh->xpoint has been freed */
   if ( mesh->xpoint ) {
-    if ( abs(mesh->info.imprim) > 4 || mesh->info.ddebug ) {
+    if ( abs(mesh->info.imprim) > 3 || mesh->info.ddebug ) {
       fprintf(stdout,"  ## Warning: no research of boundary points");
       fprintf(stdout," and normals of mesh. ");
       fprintf(stdout,"mesh->xpoint must be freed to enforce analysis.\n");
@@ -432,7 +432,7 @@ static int norver(pMesh mesh) {
       }
     }
   }
-  if ( abs(mesh->info.imprim) > 4 && nn+nt > 0 )
+  if ( abs(mesh->info.imprim) > 3 && nn+nt > 0 )
     fprintf(stdout,"     %d normals,  %d tangents updated  (%d failed)\n",nn,nt,nf);
 
   return(1);
@@ -495,7 +495,7 @@ static void nmgeom(pMesh mesh){
 int analys(pMesh mesh) {
 
   /**--- stage 1: data structures for surface */
-  if ( abs(mesh->info.imprim) > 4 )
+  if ( abs(mesh->info.imprim) > 3 )
     fprintf(stdout,"  ** SURFACE ANALYSIS\n");
 
   /* create tetra adjacency */
@@ -560,7 +560,7 @@ int analys(pMesh mesh) {
     return(0);
   }
 
-  if ( abs(mesh->info.imprim) > 4 || mesh->info.ddebug )
+  if ( abs(mesh->info.imprim) > 3 || mesh->info.ddebug )
     fprintf(stdout,"  ** DEFINING GEOMETRY\n");
 
   /* define (and regularize) normals */

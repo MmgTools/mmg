@@ -1479,7 +1479,7 @@ static int adptet(pMesh mesh,pSol met) {
     mesh->gap -= maxgap/(double)maxit;
     assert ( mesh->gap > 0 );
 
-    if ( (abs(mesh->info.imprim) > 4 || mesh->info.ddebug) && ns+nc > 0 )
+    if ( (abs(mesh->info.imprim) > 3 || mesh->info.ddebug) && ns+nc > 0 )
       fprintf(stdout,"     %8d splitted, %8d collapsed, %8d swapped, %8d moved\n",ns,nc,nf,nm);
     if ( ns < 10 && abs(nc-ns) < 3 )  break;
     else if ( it > 3 && abs(nc-ns) < 0.3 * MG_MAX(nc,ns) )  break;
@@ -1548,7 +1548,7 @@ static int adptet(pMesh mesh,pSol met) {
     }
     else  nf = 0;
 
-    if ( (abs(mesh->info.imprim) > 4 || mesh->info.ddebug) && nf+nm > 0 ){
+    if ( (abs(mesh->info.imprim) > 3 || mesh->info.ddebug) && nf+nm > 0 ){
       fprintf(stdout,"                                            ");
       fprintf(stdout,"%8d swapped, %8d moved\n",nf,nm);
     }
@@ -1565,13 +1565,13 @@ static int adptet(pMesh mesh,pSol met) {
   }
   else  nm = 0;
 
-  if ( (abs(mesh->info.imprim) > 4 || mesh->info.ddebug) && nm > 0 ){
+  if ( (abs(mesh->info.imprim) > 3 || mesh->info.ddebug) && nm > 0 ){
     fprintf(stdout,"                                            ");
     fprintf(stdout,"                  %8d moved\n",nm);
   }
 
 
-  if ( abs(mesh->info.imprim) < 5 && (nnc > 0 || nns > 0) )
+  if ( abs(mesh->info.imprim) < 4 && (nnc > 0 || nns > 0) )
     fprintf(stdout,"     %8d splitted, %8d collapsed, %8d swapped, %8d moved, %d iter. \n",
             nns,nnc,nnf,nnm,it);
 
@@ -1691,14 +1691,35 @@ static int anatet(pMesh mesh,pSol met,char typchk) {
     nnc += nc;
     nns += ns;
     nnf += nf;
-    if ( (abs(mesh->info.imprim) > 4 || mesh->info.ddebug) && ns+nc+nf > 0 )
+    if ( (abs(mesh->info.imprim) > 3 || mesh->info.ddebug) && ns+nc+nf > 0 )
       fprintf(stdout,"     %8d splitted, %8d collapsed, %8d swapped\n",ns,nc,nf);
     if ( it > 3 && abs(nc-ns) < 0.1 * MG_MAX(nc,ns) )  break;
   }
   while ( ++it < maxit && ns+nc+nf > 0 );
 
-  if ( (abs(mesh->info.imprim) < 5 || mesh->info.ddebug ) && nns+nnc > 0 )
+  if ( (abs(mesh->info.imprim) < 4 || mesh->info.ddebug ) && nns+nnc > 0 )
     fprintf(stdout,"     %8d splitted, %8d collapsed, %8d swapped, %d iter.\n",nns,nnc,nnf,it);
+
+#ifdef USE_SCOTCH
+    /*check enough vertex to renum*/
+    if ( mesh->info.renum && (mesh->np/2. > BOXSIZE) && mesh->np>100000 ) {
+      /* renumbering begin */
+      if ( mesh->info.imprim > 5 )
+        fprintf(stdout,"  -- RENUMBERING. \n");
+      if ( !renumbering(BOXSIZE,mesh, met) ) {
+        fprintf(stdout,"  ## Unable to renumbering mesh. \n");
+        fprintf(stdout,"  ## Try to run without renumbering option (-rn 0)\n");
+        return(0);
+      }
+
+      if ( mesh->info.imprim > 5) {
+        fprintf(stdout,"  -- PHASE RENUMBERING COMPLETED. \n");
+      }
+
+      if ( mesh->info.ddebug )  chkmsh(mesh,1,0);
+      /* renumbering end */
+    }
+#endif
 
   return(1);
 }
@@ -1706,7 +1727,7 @@ static int anatet(pMesh mesh,pSol met,char typchk) {
 /** main adaptation routine */
 int mmg3d1(pMesh mesh,pSol met) {
 
-  if ( abs(mesh->info.imprim) > 4 )
+  if ( abs(mesh->info.imprim) > 3 )
     fprintf(stdout,"  ** MESH ANALYSIS\n");
 
   if ( mesh->info.iso && !chkmani(mesh) ) {
@@ -1715,7 +1736,7 @@ int mmg3d1(pMesh mesh,pSol met) {
   }
 
   /**--- stage 1: geometric mesh */
-  if ( abs(mesh->info.imprim) > 4 || mesh->info.ddebug )
+  if ( abs(mesh->info.imprim) > 3 || mesh->info.ddebug )
     fprintf(stdout,"  ** GEOMETRIC MESH\n");
 
   if ( !anatet(mesh,met,1) ) {
@@ -1724,7 +1745,7 @@ int mmg3d1(pMesh mesh,pSol met) {
   }
 
   /**--- stage 2: computational mesh */
-  if ( abs(mesh->info.imprim) > 4 || mesh->info.ddebug )
+  if ( abs(mesh->info.imprim) > 3 || mesh->info.ddebug )
     fprintf(stdout,"  ** COMPUTATIONAL MESH\n");
 
   /* define metric map */

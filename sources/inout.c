@@ -277,7 +277,7 @@ int loadMesh(pMesh mesh) {
 
 
   /* stats */
-  if ( abs(mesh->info.imprim) > 4 ) {
+  if ( abs(mesh->info.imprim) > 3 ) {
     fprintf(stdout,"     NUMBER OF VERTICES     %8d\n",mesh->np);
     if ( mesh->na ) {
       fprintf(stdout,"     NUMBER OF EDGES        %8d\n",mesh->na);
