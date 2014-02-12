@@ -1,6 +1,7 @@
 #include "mmg3d.h"
 
 extern char ddb;
+
 inline double lenedg_ani(pMesh mesh,pSol met,int ip1,int ip2) {
   return(0.0);
 }
@@ -579,7 +580,7 @@ int prilen(pMesh mesh, pSol met) {
       ier = hashPop(&hash,np,nq);
       if( ier ) {
         ned ++;
-        len = MMG5_lenedg(mesh,met,np,nq);
+        len = lenedg(mesh,met,np,nq);
         avlen += len;
 
         if( len < lmin ) {

@@ -19,7 +19,7 @@ int chkcol_int(pMesh mesh,pSol met,int k,char iface,char iedg,int *list,char typ
   ilist = boulevolp(mesh,k,ip,list);
   lon = 1.e20;
   if ( typchk == 2 && met->m ) {
-    lon = MMG5_lenedg(mesh,met,pt->v[ip],nq);
+    lon = lenedg(mesh,met,pt->v[ip],nq);
     lon = MG_MIN(lon,LSHRT);
     lon = MG_MAX(1.0/lon,LLONG);
   }
@@ -54,7 +54,7 @@ int chkcol_int(pMesh mesh,pSol met,int k,char iface,char iedg,int *list,char typ
     /* check length */
     if ( typchk == 2 && met->m ) {
       for (jj=0; jj<6; jj++) {
-        if ( MMG5_lenedg(mesh,met,pt0->v[iare[jj][0]],pt0->v[iare[jj][1]]) > lon )  return(0);
+        if ( lenedg(mesh,met,pt0->v[iare[jj][0]],pt0->v[iare[jj][1]]) > lon )  return(0);
       }
     }
   }

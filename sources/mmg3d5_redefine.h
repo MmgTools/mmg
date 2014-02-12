@@ -93,6 +93,8 @@
 #define iprv3                         	 _MMG5_iprv3
 #define isar                          	 _MMG5_isar
 #define lapantilap                    	 _MMG5_lapantilap
+#define lenedgCoor_ani                	 _MMG5_lenedgCoor_ani
+#define lenedgCoor_iso                	 _MMG5_lenedgCoor_iso
 #define lenedg_ani                    	 _MMG5_lenedg_ani
 #define lenedg_iso                    	 _MMG5_lenedg_iso
 #define meancur                       	 _MMG5_meancur
@@ -227,6 +229,7 @@
 #define loadMesh                      	 MMG5_loadMesh
 #define loadMet                       	 MMG5_loadMet
 #define loadSingul                    	 MMG5_loadSingul
+#define mmg3dcheck                    	 MMG5_mmg3dcheck
 #define mmg3dlib                      	 MMG5_mmg3dlib
 #define mmg3dlib                      	 MMG5_mmg3dlib
 #define pEdge                         	 MMG5_pEdge
@@ -245,7 +248,10 @@
 #define pxTetra                       	 MMG5_pxTetra
 #define sPoint                        	 MMG5_sPoint
 #define saveMet                       	 MMG5_saveMet
+#define searchlen                     	 MMG5_searchlen
+#define searchqua                     	 MMG5_searchqua
 #define stockOptions                  	 MMG5_stockOptions
 #define usage                         	 MMG5_usage
 #define xPoint                        	 MMG5_xPoint
 #define xTetra                        	 MMG5_xTetra
+#define mmg3dcheck                    	 MMG5_mmg3dcheck

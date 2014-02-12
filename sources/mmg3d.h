@@ -488,6 +488,8 @@ double caltet_ani(pMesh mesh,pSol met,int ia,int ib,int ic,int id);
 double caltet_iso(pMesh mesh,pSol met,int ia,int ib,int ic,int id);
 double lenedg_ani(pMesh ,pSol ,int ,int );
 double lenedg_iso(pMesh ,pSol ,int ,int );
+double lenedgCoor_ani(double*, double*, double*, double*);
+double lenedgCoor_iso(double*, double*, double*, double*);
 int    defsiz_iso(pMesh,pSol );
 int    defsiz_ani(pMesh ,pSol );
 int    gradsiz_iso(pMesh ,pSol );
@@ -495,6 +497,7 @@ int    gradsiz_ani(pMesh ,pSol );
 
 double (*caltet)(pMesh mesh,pSol met,int ia,int ib,int ic,int id);
 int    (*defsiz)(pMesh ,pSol );
+double (*lenedg)(MMG5_pMesh mesh,MMG5_pSol sol ,int ,int );
 int    (*gradsiz)(pMesh ,pSol );
 
 #endif

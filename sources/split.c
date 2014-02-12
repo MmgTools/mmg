@@ -272,7 +272,7 @@ int split1b(pMesh mesh, pSol met,int *list, int ret, int ip,int cas){
     lmax = 1.3;
     for (j=0; j<ilist; j++) {
       for (i=0; i<6; i++) {
-        len = MMG5_lenedg(mesh,met, mesh->tetra[list[j]/6].v[iare[i][0]],
+        len = lenedg(mesh,met, mesh->tetra[list[j]/6].v[iare[i][0]],
                      mesh->tetra[list[j]/6].v[iare[i][1]]);
         if ( len < lmin) {
           lmin = len;
@@ -287,9 +287,9 @@ int split1b(pMesh mesh, pSol met,int *list, int ret, int ip,int cas){
       iel = list[j] / 6;
       pt  = &mesh->tetra[iel];
       ie  = list[j] % 6;
-      len = MMG5_lenedg(mesh,met, pt->v[isar[ie][0]],ip);
+      len = lenedg(mesh,met, pt->v[isar[ie][0]],ip);
       if ( len < lmin )  break;
-      len = MMG5_lenedg(mesh,met, pt->v[isar[ie][1]],ip);
+      len = lenedg(mesh,met, pt->v[isar[ie][1]],ip);
       if ( len < lmin )  break;
     }
     if ( j < ilist )  return(0);

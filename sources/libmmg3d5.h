@@ -299,19 +299,30 @@ int  MMG5_mmg3dlib(MMG5_pMesh mesh, MMG5_pSol sol);
 #endif
 
 /** for PAMPA library */
-/** Options */
+/** Options management */
 #ifdef SINGUL
-int MMG5_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSingul sing);
+int  MMG5_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSingul sing);
 #else
-int MMG5_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met);
+int  MMG5_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met);
 #endif
-int MMG5_parsop(MMG5_pMesh mesh,MMG5_pSol met);
-void MMG5_usage(char *prog);
+int  MMG5_parsop(MMG5_pMesh mesh,MMG5_pSol met);
+void  MMG5_usage(char *prog);
+void  MMG5_stockOptions(MMG5_pMesh mesh, MMG5_Info *info);
+void  MMG5_destockOptions(MMG5_pMesh mesh, MMG5_Info *info);
+
+/** Checks */
+#ifdef SINGUL
+int  MMG5_mmg3dcheck(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSingul sing,
+                     double critmin, double lmin, double lmax, int *eltab);
+#else
+int mmg3dcheck(MMG5_pMesh mesh,MMG5_pSol sol,
+               double critmin, double lmin, double lmax, int *eltab);
+#endif
+void  MMG5_searchqua(MMG5_pMesh mesh, MMG5_pSol met, double critmin, int *eltab);
+int  MMG5_searchlen(MMG5_pMesh mesh, MMG5_pSol met, double lmin, double lmax, int *eltab);
 
 /** Utils */
-double (*MMG5_lenedg)(MMG5_pMesh mesh,MMG5_pSol sol ,int ,int );
 int    MMG5_Get_adjaTet(MMG5_pMesh mesh,int kel, int*, int*, int*, int*);
-void   MMG5_stockOptions(MMG5_pMesh mesh, MMG5_Info *info);
-void   MMG5_destockOptions(MMG5_pMesh mesh, MMG5_Info *info);
+double (*MMG5_lenedgCoor)(double *ca,double *cb,double *sa,double *sb);
 
 #endif
