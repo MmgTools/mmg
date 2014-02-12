@@ -1,4 +1,5 @@
 FILES:
+   rafIter.sh         : to run iterative refinement on an analytic solution given by putmet
    experimental-run.sh: run a panel of tests in experimental mode (-h for help)
    nightly-run.sh     : run all tests during night (must be used with crontab or another task scheduler). ctest is run in verbose mode and the output is available in build/ctest$DATE.log.
    continuous-run.sh  : check automatically the repository at each commit and run nightlySVN-run.sh
