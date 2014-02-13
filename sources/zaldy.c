@@ -93,7 +93,8 @@ long long memSize (void) {
     return(0);
 
 #elif defined(__unix__) || defined(__unix) || defined(unix)
-  mem = sysconf(_SC_PHYS_PAGES)*sysconf(_SC_PAGESIZE);
+  mem = ((long long)sysconf(_SC_PHYS_PAGES))*
+    ((long long)sysconf(_SC_PAGESIZE));
 #else
   printf("  ## WARNING: UNKNOWN SYSTEM, RECOVER OF MAXIMAL MEMORY NOT AVAILABLE.\n");
   return(0);
