@@ -156,6 +156,8 @@
 #define surftri                       	 _MMG5_surftri
 #define swap23                        	 _MMG5_swap23
 #define swpbdy                        	 _MMG5_swpbdy
+#define swpbdy                        	 _MMG5_swpbdy
+#define swpgen                        	 _MMG5_swpgen
 #define swpgen                        	 _MMG5_swpgen
 #define sys33sym                      	 _MMG5_sys33sym
 #define tet2tri                       	 _MMG5_tet2tri

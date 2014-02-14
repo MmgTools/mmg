@@ -39,7 +39,9 @@ static inline void endcod() {
 int main(int argc,char *argv[]) {
   MMG5_pMesh      mesh;
   MMG5_pSol       met;
+#ifdef SINGUL
   MMG5_pSingul    sing;
+#endif
   int             ier;
   char            stim[32];
 
@@ -51,11 +53,9 @@ int main(int argc,char *argv[]) {
   /* assign default values */
   mesh = NULL;
   met  = NULL;
-  sing = NULL;
 
 #ifndef SINGUL
   MMG5_Init_mesh(&mesh,&met);
-  //  memset(&sing,0,sizeof(MMG5_Singul));
 #else
   MMG5_Init_mesh(&mesh,&met,&sing);
 #endif

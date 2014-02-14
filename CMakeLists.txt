@@ -20,6 +20,10 @@ ENDIF()
 IF(CMAKE_COMPILER_IS_GNUCC)
   SET(CMAKE_C_FLAGS "-Wno-char-subscripts ${CMAKE_C_FLAGS}")
   IF(APPLE)
+    # Hide some options
+    MARK_AS_ADVANCED(CMAKE_OSX_ARCHITECTURES
+      CMAKE_OSX_DEPLOYMENT_TARGET
+      CMAKE_OSX_SYSROOT)
     # Add flags to the compiler to work on old mac
     ADD_DEFINITIONS( -mmacosx-version-min=10.4 -arch x86_64)
 
@@ -74,6 +78,22 @@ ELSE ()
     DEPENDS ${MMG_SOURCE_DIR}/mmg3d.h ${MMG_SOURCE_DIR}/lib${PROJECT_NAME}.h
     )
 ENDIF ()
+
+###############################################################################
+#####
+#####         Choose type of insertion: delaunay kernel or patterns
+#####
+###############################################################################
+# Should we use patterns for insertion istead of delaunay kernel
+OPTION ( PATTERN
+  "If ON, insertion by patterns, otherwise insertion by delaunay kernel"
+  ON)
+IF ( NOT PATTERN )
+  SET(CMAKE_C_FLAGS "-DPATTERN ${CMAKE_C_FLAGS}")
+  MESSAGE(STATUS "Vertex insertion by delaunay kernel")
+ENDIF()
+# Remove the next line to have this option visible in basic cmake mode
+MARK_AS_ADVANCED(PATTERN)
 
 ###############################################################################
 #####

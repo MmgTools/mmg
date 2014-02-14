@@ -192,7 +192,11 @@ int chkswpbdy(pMesh mesh,int *list,int ilist,int it1,int it2) {
 
 /** Swap boundary edge whose shell is provided ; it1 = boundary face
     carrying the beforehand tested terminal point for collapse */
-int swpbdy(pMesh mesh,pSol met,int *list,int ret,int it1) {
+int swpbdy(pMesh mesh,pSol met,int *list,int ret,int it1
+#ifndef PATTERN
+           ,pBucket bucket
+#endif
+           ) {
   pTetra   pt,pt1;
   pPoint   p0,p1;
   int      iel,iel1,ilist,np,nq,na,nm;
@@ -232,12 +236,31 @@ int swpbdy(pMesh mesh,pSol met,int *list,int ret,int it1) {
   c[2] = 0.5*( p0->c[2] + p1->c[2]);
   nm = newPt(mesh,c,MG_BDY);
   if ( !nm ) {
+#ifdef PATTERN
     POINT_REALLOC(mesh,met,nm,mesh->gap,
                   printf("  ## Error: unable to allocate a new point\n");
                   printf("  ## Check the mesh size or increase");
                   printf(" the allocated memory with the -m option.\n");
                   return(-1)
                   ,c,MG_BDY);
+#else
+    if ( bucket ) {
+      POINT_AND_BUCKET_REALLOC(mesh,met,nm,mesh->gap,
+                               printf("  ## Error: unable to allocate a new point\n");
+                               printf("  ## Check the mesh size or increase");
+                               printf(" the allocated memory with the -m option.\n");
+                               return(-1)
+                               ,c,MG_BDY);
+    }
+    else{
+      POINT_REALLOC(mesh,met,np,mesh->gap,
+                    printf("  ## Error: unable to allocate a new point\n");
+                    printf("  ## Check the mesh size or increase");
+                    printf(" the allocated memory with the -m option.\n");
+                    return(-1)
+                    ,c,MG_BDY);
+    }
+#endif
   }
   if ( met->m )  met->m[nm] = 0.5 *(met->m[np]+met->m[nq]);
   ier = split1b(mesh,met,list,ret,nm,0);

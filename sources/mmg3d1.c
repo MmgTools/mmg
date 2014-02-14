@@ -335,7 +335,12 @@ static int swpmsh(pMesh mesh,pSol met) {
           if ( ilist <= 1 )  continue;
           ier = chkswpbdy(mesh,list,ilist,it1,it2);
           if ( ier ) {
+#ifdef PATTERN
             ier = swpbdy(mesh,met,list,ret,it1);
+#else
+            printf("ERROR: function not available in pattern mode. Exiting\n");
+            exit(EXIT_FAILURE);
+#endif
             if ( ier > 0 )  ns++;
             else if ( ier < 0 )  return(-1);
             break;
@@ -379,7 +384,12 @@ static int swptet(pMesh mesh,pSol met,double crit) {
 
         nconf = chkswpgen(mesh,k,i,&ilist,list,crit);
         if ( nconf ) {
+#ifdef PATTERN
           ier = swpgen(mesh,met,nconf,ilist,list);
+#else
+          printf("ERROR: function not available in pattern mode. Exiting\n");
+          exit(EXIT_FAILURE);
+#endif
           if ( ier > 0 )  ns++;
           else if ( ier < 0 ) return(-1);
           break;
@@ -1476,8 +1486,10 @@ static int adptet(pMesh mesh,pSol met) {
     nnf += nf;
     nnm += nm;
     /* decrease size of gap for reallocation */
-    mesh->gap -= maxgap/(double)maxit;
-    assert ( mesh->gap > 0 );
+    if ( mesh->gap > maxgap/(double)maxit )
+      mesh->gap -= maxgap/(double)maxit;
+    else
+      mesh->gap -= mesh->gap/(double)maxit;
 
     if ( (abs(mesh->info.imprim) > 3 || mesh->info.ddebug) && ns+nc > 0 )
       fprintf(stdout,"     %8d splitted, %8d collapsed, %8d swapped, %8d moved\n",ns,nc,nf,nm);

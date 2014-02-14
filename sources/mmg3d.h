@@ -190,6 +190,51 @@
       if ( !ip ) {law;}                                                 \
     }while(0)
 
+#ifndef PATTERN
+/** Reallocation of point table, sol table and bucket table and creation
+    of point ip with coordinates o and tag tag*/
+#define POINT_AND_BUCKET_REALLOC(mesh,sol,ip,wantedGap,law,o,tag ) do   \
+    {                                                                   \
+      int klink,gap;                                                    \
+                                                                        \
+      if ( (mesh->memMax-mesh->memCur) <                                \
+           (long long) (wantedGap*mesh->npmax*                          \
+                        (sizeof(Point)+sizeof(int))) ) {                \
+        gap = (int)(mesh->memMax-mesh->memCur)/                         \
+          (sizeof(Point)+sizeof(int));                                  \
+      }                                                                 \
+      else                                                              \
+        gap = wantedGap*mesh->npmax;                                    \
+                                                                        \
+      ADD_MEM(mesh,gap*(sizeof(Point)+sizeof(int)),\
+              "point and bucket",law);                                  \
+      SAFE_RECALLOC(mesh->point,mesh->npmax+1,mesh->npmax+gap+1,Point); \
+      SAFE_RECALLOC(bucket->link,mesh->npmax+1,mesh->npmax+gap+1,int);  \
+      mesh->npmax = mesh->npmax+gap;                                    \
+                                                                        \
+      if ( abs(mesh->info.imprim) > 4 || mesh->info.ddebug )            \
+        fprintf(stdout,                                                 \
+                "  ## Warning: %s:%d: point and bucket reallocation (gap %d).\n", \
+                __FILE__,__LINE__,gap);                                 \
+                                                                        \
+      mesh->npnil = mesh->np+1;                                         \
+      for (klink=mesh->npnil; klink<mesh->npmax-1; klink++)             \
+        mesh->point[klink].tmp  = klink+1;                              \
+                                                                        \
+      /* solution */                                                    \
+      if ( sol->m ) {                                                   \
+        ADD_MEM(mesh,(mesh->npmax-sol->npmax)*sizeof(double),           \
+                "larger solution",law);                                 \
+        SAFE_REALLOC(sol->m,mesh->npmax+1,double);                      \
+      }                                                                 \
+      sol->npmax = mesh->npmax;                                         \
+                                                                        \
+      /* We try again to add the point */                               \
+      ip = newPt(mesh,o,tag);                                           \
+      if ( !ip ) {law;}                                                 \
+    }while(0)
+#endif
+
 /** Reallocation of tetra table and creation
     of tetra jel */
 #define TETRA_REALLOC(mesh,jel,wantedGap,law ) do                       \
@@ -427,8 +472,13 @@ double caltri(pMesh mesh,pTria ptt);
 int  scaleMesh(pMesh mesh,pSol met,pSingul sin);
 int  unscaleMesh(pMesh mesh,pSol met);
 int  chkswpbdy(pMesh mesh,int *list,int ilist,int it1,int it2);
+#ifdef PATTERN
 int  swpbdy(pMesh mesh,pSol met,int *list,int ret,int it1);
 int  swpgen(pMesh mesh,pSol met,int nconf, int ilist, int *list);
+#else
+int  swpbdy(pMesh mesh,pSol met,int *list,int ret,int it1,pBucket bucket);
+int  swpgen(pMesh mesh,pSol met,int nconf, int ilist, int *list,pBucket bucket);
+#endif
 int  chkswpgen(pMesh mesh, int start, int ia, int *ilist, int *list,double crit);
 int  srcface(pMesh mesh,int n0,int n1,int n2);
 int  bouleext(pMesh mesh, int start, int ip, int iface, int *listv, int *ilistv, int *lists, int*ilists);

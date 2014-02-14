@@ -211,7 +211,13 @@ int main(int argc,char *argv[]) {
   }
 #endif
 
-  if ( !mmg3d1(&mesh,&met) ){
+  if (
+#ifdef PATTERN
+      mmg3d1(&mesh,&met)
+#else
+      !mmg3d1_delone(&mesh,&met)
+#endif
+      ){
     if ( !(mesh.adja) && !hashTetra(&mesh,1) ) {
       fprintf(stdout,"  ## Hashing problem. Unable to save mesh.\n");
       RETURN_AND_FREE(&mesh,&met,&sing,MMG5_STRONGFAILURE);

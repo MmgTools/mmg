@@ -511,7 +511,11 @@ int badelt(pMesh mesh,pSol met) {
         nconf = chkswpgen(mesh,k,i,&ilist,list,1.01);
         if ( nconf ) {
           ns++;
+#ifdef PATTERN
           if(!swpgen(mesh,met,nconf,ilist,list)) return(-1);
+#else
+          if(!swpgen(mesh,met,nconf,ilist,list,NULL)) return(-1);
+#endif
           break;
         }
       }

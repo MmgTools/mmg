@@ -99,7 +99,7 @@ char chkedg(pMesh mesh,Tria *pt,char ori);
 
 
 /** Search for boundary edges that could be swapped for geometric approximation */
-static int swpmshcpy(pMesh mesh,pSol met) {
+static int swpmshcpy(pMesh mesh,pSol met,pBucket bucket) {
   pTetra   pt;
   pxTetra  pxt;
   int      k,it,list[LMAX+2],ilist,ret,it1,it2,ns,nns,maxit;
@@ -128,7 +128,12 @@ static int swpmshcpy(pMesh mesh,pSol met) {
           if ( ilist <= 1 )  continue;
           ier = chkswpbdy(mesh,list,ilist,it1,it2);
           if ( ier ) {
-            ier = swpbdy(mesh,met,list,ret,it1);
+#ifdef PATTERN
+            printf("ERROR: function not available in delaunay mode. Exiting\n");
+            exit(EXIT_FAILURE);
+#else
+            ier = swpbdy(mesh,met,list,ret,it1,bucket);
+#endif
             if ( ier > 0 )  ns++;
             else if ( ier < 0 )  return(-1);
             break;
@@ -147,7 +152,7 @@ static int swpmshcpy(pMesh mesh,pSol met) {
 }
 
 /** Internal edge flipping */
-/*static*/ int swptetdel(pMesh mesh,pSol met,double crit) {
+/*static*/ int swptetdel(pMesh mesh,pSol met,double crit,pBucket bucket) {
   pTetra   pt;
   pxTetra  pxt;
   int      list[LMAX+2],ilist,k,it,nconf,maxit,ns,nns,ier;
@@ -175,7 +180,12 @@ static int swpmshcpy(pMesh mesh,pSol met) {
 
         nconf = chkswpgen(mesh,k,i,&ilist,list,critloc);
         if ( nconf ) {
-          ier = swpgen(mesh,met,nconf,ilist,list);
+#ifdef PATTERN
+          printf("ERROR: function not available in delaunay mode. Exiting\n");
+          exit(EXIT_FAILURE);
+#else
+          ier = swpgen(mesh,met,nconf,ilist,list,bucket);
+#endif
           if ( ier > 0 )  ns++;
           else if ( ier < 0 ) return(-1);
           break;
@@ -1200,17 +1210,19 @@ int adpsplcol(pMesh mesh,pSol met,pBucket bucket, int* warn) {
   Tria       ptt;
   pPoint     p0,p1,ppt;
   pxPoint    pxp;
-  double     dd,dd2,len,lmax,o[3],to[3],ro[3],no1[3],no2[3],v[3];
+  double     dd,len,lmax,o[3],to[3],ro[3],no1[3],no2[3],v[3];
   int        k,ip,ip1,ip2,list[LMAX+2],ilist,ns,ref;
   char       imax,tag,j,i,i1,i2,ifa0,ifa1;
   int        ifilt,lon,ret,ne,ier;
   double     lmin;
   int        imin,iq,nc,it,nnc,nns,nnf,nnm,maxit,nf,nm;
-  int ii,MMG_npd;
+  int        ii,MMG_npd;
+  double     maxgap;
+
   /* Iterative mesh modifications */
   it = nnc = nns = nnf = nnm = 0;
   maxit = 10;
-  mesh->gap = 0.5;
+  mesh->gap = maxgap = 0.5;
   MMG_npuiss=MMG_nvol=MMG_npres =MMG_npd=0 ;
   do {
     if ( !mesh->info.noinsert ) {
@@ -1230,7 +1242,7 @@ int adpsplcol(pMesh mesh,pSol met,pBucket bucket, int* warn) {
         imax = -1; lmax = 0.0;
         imin = -1; lmin = DBL_MAX;
         for (ii=0; ii<6; ii++) {
-          if ( pt->xt && (pxt->tag[i] & MG_REQ) )  continue;
+          if ( pt->xt && (pxt->tag[ii] & MG_REQ) )  continue;
           ip1  = iare[ii][0];
           ip2  = iare[ii][1];
           len = lenedg(mesh,met,pt->v[ip1],pt->v[ip2]);
@@ -1327,10 +1339,15 @@ int adpsplcol(pMesh mesh,pSol met,pBucket bucket, int* warn) {
 
             if ( !ip ){
               /* reallocation of point table */
-              POINT_REALLOC(mesh,met,ip,mesh->gap,
-                            *warn=1;
-                            goto collapse//break
-                            ,o,tag);
+#ifndef PATTERN
+              POINT_AND_BUCKET_REALLOC(mesh,met,ip,mesh->gap,
+                                       *warn=1;
+                                       goto collapse//break
+                                       ,o,tag);
+#else
+              printf("ERROR: function not available in delaunay mode. Exiting\n");
+              exit(EXIT_FAILURE);
+#endif
             }
             //CECILE
             if ( met->m )
@@ -1392,10 +1409,15 @@ int adpsplcol(pMesh mesh,pSol met,pBucket bucket, int* warn) {
 
             if ( !ip )  {
               /* reallocation of point table */
-              POINT_REALLOC(mesh,met,ip,mesh->gap,
-                            *warn=1;
-                            goto collapse//break
-                            ,o,MG_NOTAG);
+#ifndef PATTERN
+              POINT_AND_BUCKET_REALLOC(mesh,met,ip,mesh->gap,
+                                       *warn=1;
+                                       goto collapse//break
+                                       ,o,MG_NOTAG);
+#else
+              printf("ERROR: function not available in delaunay mode. Exiting\n");
+              exit(EXIT_FAILURE);
+#endif
             }
             //CECILE
             if ( met->m )
@@ -1431,10 +1453,14 @@ int adpsplcol(pMesh mesh,pSol met,pBucket bucket, int* warn) {
 
             if ( !ip )  {
               /* reallocation of point table */
+              /*POINT_AND_BUCKET_REALLOC(mesh,met,ip,mesh->gap,
+                                       *warn=1;
+                                       goto collapse//break
+                                       ,o,MG_NOTAG);*/
               POINT_REALLOC(mesh,met,ip,mesh->gap,
-                            *warn=1;
-                            goto collapse//break
-                            ,o,MG_NOTAG);
+                                       *warn=1;
+                                       goto collapse//break
+                                       ,o,MG_NOTAG);
             }
             //CECILE
             if ( met->m )
@@ -1556,14 +1582,14 @@ int adpsplcol(pMesh mesh,pSol met,pBucket bucket, int* warn) {
     /* MMG_nvol=0; */
     /* MMG_npres=0; */
     if ( !mesh->info.noswap ) {
-      nf = swpmshcpy(mesh,met);
+      nf = swpmshcpy(mesh,met,bucket);
       if ( nf < 0 ) {
         fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
         return(0);
       }
       nnf += nf;
       if(it==3 || it==7/*&& it==1 || it==3 || it==5 || it > 8*/) {
-	nf += swptetdel(mesh,met,1.053);
+        nf += swptetdel(mesh,met,1.053,bucket);
       } else {
 	nf += 0;	
       }
@@ -1590,8 +1616,10 @@ int adpsplcol(pMesh mesh,pSol met,pBucket bucket, int* warn) {
     nns += ns;
 
     /* decrease size of gap for reallocation */
-    mesh->gap -= 0.05;
-    assert ( mesh->gap > 1 );
+    if ( mesh->gap > maxgap/(double)maxit )
+      mesh->gap -= maxgap/(double)maxit;
+    else
+      mesh->gap -= mesh->gap/(double)maxit;
 
     if ( 1 || ((abs(mesh->info.imprim) > 3 || mesh->info.ddebug) && ns+nc > 0) )
       fprintf(stdout,"     %8d filtered %8d splitted, %8d collapsed, %8d swapped, %8d moved\n",ifilt,ns,nc,nf,nm);
@@ -1676,8 +1704,8 @@ int adpsplcol(pMesh mesh,pSol met,pBucket bucket, int* warn) {
   return(nc);
 }
 
-int optet(pMesh mesh, pSol met) {
-  int it,nnm,nnf,maxit,nm,ier,nf;
+int optet(pMesh mesh, pSol met,pBucket bucket) {
+  int it,nnm,nnf,maxit,nm,nf;
   double declic;
 
   /*shape optim*/
@@ -1687,14 +1715,14 @@ int optet(pMesh mesh, pSol met) {
   do {
     /* badly shaped process */
     if ( !mesh->info.noswap ) {
-      nf = swpmshcpy(mesh,met);
+      nf = swpmshcpy(mesh,met,bucket);
       if ( nf < 0 ) {
         fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
         return(0);
       }
       nnf += nf;
 
-      nf = swptetdel(mesh,met,declic);
+      nf = swptetdel(mesh,met,declic,bucket);
       if ( nf < 0 ) {
         fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
         return(0);
@@ -1747,18 +1775,18 @@ int optet(pMesh mesh, pSol met) {
 
 /** Analyze tetrahedra and split long / collapse short, according to prescribed metric */
 /*static*/ int adptet1(pMesh mesh,pSol met,pBucket bucket) {
-  int      it,nnf,nnm,maxit,ns,nf,nm;
+  int      nnf,maxit,ns,nf;
   int      warn;
 
   /*initial swap*/
   if ( !mesh->info.noswap ) {
-    nf = swpmshcpy(mesh,met);
+    nf = swpmshcpy(mesh,met,bucket);
     if ( nf < 0 ) {
       fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
       return(0);
     }
     nnf = nf;
-    nf = swptetdel(mesh,met,1.053);
+    nf = swptetdel(mesh,met,1.053,bucket);
     if ( nf < 0 ) {
       fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
       return(0);
@@ -1810,7 +1838,7 @@ int optet(pMesh mesh, pSol met) {
   }
 #endif
 
-  if(!optet(mesh,met)) return(0);
+  if(!optet(mesh,met,bucket)) return(0);
 
   return(1);
 }
@@ -1822,13 +1850,13 @@ int optet(pMesh mesh, pSol met) {
 
   //ATTENTION MARCHE PAS................................
   if ( !mesh->info.noswap ) {
-    nf = swpmshcpy(mesh,met);
+    nf = swpmshcpy(mesh,met,bucket);
     if ( nf < 0 ) {
       fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
       return(0);
     }
     nnf = nf;
-    nf = swptetdel(mesh,met,1.053);
+    nf = swptetdel(mesh,met,1.053,bucket);
     if ( nf < 0 ) {
       fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
       return(0);
@@ -1873,7 +1901,7 @@ int optet(pMesh mesh, pSol met) {
     else  ns = nc = 0;
 
     if ( !mesh->info.noswap ) {
-      nf = swpmshcpy(mesh,met);
+      nf = swpmshcpy(mesh,met,bucket);
       if ( nf < 0 ) {
         fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
         return(0);
@@ -1933,14 +1961,14 @@ int optet(pMesh mesh, pSol met) {
     else  nm = 0;
 
     if ( !mesh->info.noswap ) {
-      nf = swpmshcpy(mesh,met);
+      nf = swpmshcpy(mesh,met,bucket);
       if ( nf < 0 ) {
         fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
         return(0);
       }
       nnf += nf;
 
-      nf = swptetdel(mesh,met,1.053);
+      nf = swptetdel(mesh,met,1.053,bucket);
       if ( nf < 0 ) {
         fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
         return(0);
@@ -2087,14 +2115,14 @@ int optet(pMesh mesh, pSol met) {
 
     /* attempt to swap */
     if ( !mesh->info.noswap ) {
-      nf = swpmshcpy(mesh,met);
+      nf = swpmshcpy(mesh,met,NULL);
       if ( nf < 0 ) {
         fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
         return(0);
       }
       nnf += nf;
 
-      nf = swptetdel(mesh,met,1.1);
+      nf = swptetdel(mesh,met,1.1,NULL);
       if ( nf < 0 ) {
         fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
         return(0);
