@@ -533,6 +533,23 @@ int delone(pMesh mesh,pSol sol,int ip,int *list,int ilist);
 int cavity(pMesh mesh,pSol sol,int iel,int ip,int *list,int lon);
 int cenrad_iso(pMesh mesh,double *ct,double *c,double *rad);
 
+/*mmg3d1.c*/
+void tet2tri(pMesh mesh,int k,char ie,Tria *ptt);
+int dichoto(pMesh mesh,pSol met,int k,int *vx);
+/** Find acceptable position for split1b, passing the shell of considered edge, starting from o */
+int dichoto1b(pMesh mesh,int *list,int ret,double o[3],double ro[3]);
+/** return edges of (virtual) triangle pt that need to be split w/r Hausdorff criterion */
+char chkedg(pMesh mesh,Tria *pt,char ori);
+int swpmsh(pMesh mesh,pSol met
+#ifndef PATTERN
+	   ,pBucket bucket
+#endif
+);
+int anatet(pMesh mesh,pSol met,char typchk) ;
+int anatet4(pMesh mesh, pSol met);
+int anatets(pMesh mesh,pSol met,char typchk);
+int coltet(pMesh mesh,pSol met,char typchk) ;
+
 /* pointers */
 double caltet_ani(pMesh mesh,pSol met,int ia,int ib,int ic,int id);
 double caltet_iso(pMesh mesh,pSol met,int ia,int ib,int ic,int id);

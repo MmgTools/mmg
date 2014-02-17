@@ -30,7 +30,7 @@ void tet2tri(pMesh mesh,int k,char ie,Tria *ptt) {
 }
 
 /** find acceptable position for splitting */
-static int dichoto(pMesh mesh,pSol met,int k,int *vx) {
+int dichoto(pMesh mesh,pSol met,int k,int *vx) {
   pTetra  pt;
   pPoint  pa,pb,ps;
   double  o[6][3],p[6][3];
@@ -306,7 +306,11 @@ char chkedg(pMesh mesh,Tria *pt,char ori) {
 }
 
 /** Search for boundary edges that could be swapped for geometric approximation */
-static int swpmsh(pMesh mesh,pSol met) {
+/*static*/ int swpmsh(pMesh mesh,pSol met
+#ifndef PATTERN
+		      ,pBucket bucket
+#endif
+		      ) {
   pTetra   pt;
   pxTetra  pxt;
   int      k,it,list[LMAX+2],ilist,ret,it1,it2,ns,nns,maxit;
@@ -338,8 +342,7 @@ static int swpmsh(pMesh mesh,pSol met) {
 #ifdef PATTERN
             ier = swpbdy(mesh,met,list,ret,it1);
 #else
-            printf("ERROR: function not available in pattern mode. Exiting\n");
-            exit(EXIT_FAILURE);
+            ier = swpbdy(mesh,met,list,ret,it1,bucket);
 #endif
             if ( ier > 0 )  ns++;
             else if ( ier < 0 )  return(-1);
@@ -387,7 +390,7 @@ static int swptet(pMesh mesh,pSol met,double crit) {
 #ifdef PATTERN
           ier = swpgen(mesh,met,nconf,ilist,list);
 #else
-          printf("ERROR: function not available in pattern mode. Exiting\n");
+          printf("ERROR: function not available in delaunay mode. Exiting\n");
           exit(EXIT_FAILURE);
 #endif
           if ( ier > 0 )  ns++;
@@ -520,7 +523,7 @@ static int movtet(pMesh mesh,pSol met,int maxit) {
 }
 
 /** attempt to collapse small edges */
-static int coltet(pMesh mesh,pSol met,char typchk) {
+/*static*/ int coltet(pMesh mesh,pSol met,char typchk) {
   pTetra     pt;
   pxTetra    pxt;
   pPoint     p0,p1;
@@ -832,7 +835,7 @@ static int anatetv(pMesh mesh,pSol met,char typchk) {
 }
 
 /** analyze tetra and split on geometric criterion */
-static int anatets(pMesh mesh,pSol met,char typchk) {
+/*static*/ int anatets(pMesh mesh,pSol met,char typchk) {
   pTetra   pt;
   pPoint   ppt,p1,p2;
   Tria     ptt;
@@ -1466,7 +1469,9 @@ static int adptet(pMesh mesh,pSol met) {
     else  nm = 0;
 
     if ( !mesh->info.noswap ) {
+#ifdef PATTERN
       nf = swpmsh(mesh,met);
+#endif
       if ( nf < 0 ) {
         fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
         return(0);
@@ -1545,7 +1550,9 @@ static int adptet(pMesh mesh,pSol met) {
     else  nm = 0;
 
     if ( !mesh->info.noswap ) {
+#ifdef PATTERN
       nf = swpmsh(mesh,met);
+#endif
       if ( nf < 0 ) {
         fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
         return(0);
@@ -1591,7 +1598,7 @@ static int adptet(pMesh mesh,pSol met) {
 }
 
 /** split tetra into 4 when more than 1 boundary face */
-static int anatet4(pMesh mesh, pSol met) {
+/*static*/ int anatet4(pMesh mesh, pSol met) {
   pTetra      pt;
   pPoint      ppt;
   pxTetra     pxt;
@@ -1631,7 +1638,7 @@ static int anatet4(pMesh mesh, pSol met) {
 
 
 /** analyze tetrahedra and split if needed */
-static int anatet(pMesh mesh,pSol met,char typchk) {
+/*static*/ int anatet(pMesh mesh,pSol met,char typchk) {
   int     ier,nc,ns,nf,nnc,nns,nnf,it,maxit;
 
   /* analyze tetras : initial splitting */
@@ -1685,7 +1692,9 @@ static int anatet(pMesh mesh,pSol met,char typchk) {
 
     /* attempt to swap */
     if ( !mesh->info.noswap ) {
+#ifdef PATTERN
       nf = swpmsh(mesh,met);
+#endif
       if ( nf < 0 ) {
         fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
         return(0);
