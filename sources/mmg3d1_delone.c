@@ -1453,14 +1453,15 @@ int adpsplcol(pMesh mesh,pSol met,pBucket bucket, int* warn) {
 
             if ( !ip )  {
               /* reallocation of point table */
-              /*POINT_AND_BUCKET_REALLOC(mesh,met,ip,mesh->gap,
-                                       *warn=1;
-                                       goto collapse//break
-                                       ,o,MG_NOTAG);*/
-              POINT_REALLOC(mesh,met,ip,mesh->gap,
+#ifndef PATTERN
+              POINT_AND_BUCKET_REALLOC(mesh,met,ip,mesh->gap,
                                        *warn=1;
                                        goto collapse//break
                                        ,o,MG_NOTAG);
+#else
+              printf("ERROR: function not available in delaunay mode. Exiting\n");
+              exit(EXIT_FAILURE);
+#endif
             }
             //CECILE
             if ( met->m )

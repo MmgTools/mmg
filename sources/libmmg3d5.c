@@ -418,7 +418,13 @@ int mmg3dlib(pMesh mesh,pSol met
   }
 #endif
 
-  if ( !mmg3d1(mesh,met) ){
+  if (
+#ifdef PATTERN
+      !mmg3d1(mesh,met)
+#else
+      !mmg3d1_delone(mesh,met)
+#endif
+      ){
     if ( !(mesh->adja) && !hashTetra(mesh,1) ) {
       fprintf(stdout,"  ## Hashing problem. Invalid mesh.\n");
       return(MMG5_STRONGFAILURE);
