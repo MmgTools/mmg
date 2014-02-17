@@ -100,7 +100,9 @@ void usage(char *prog) {
   fprintf(stdout,"-noswap    no edge or face flipping\n");
   fprintf(stdout,"-nomove    no point relocation\n");
   fprintf(stdout,"-noinsert  no point insertion/deletion \n");
-
+#ifndef PATTERN
+  fprintf(stdout,"-bucket val Specify the size of bucket per dimension \n");
+#endif
   exit(EXIT_FAILURE);
 }
 
@@ -127,6 +129,15 @@ int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met
                                      atof(argv[i])) )
             exit(EXIT_FAILURE);
         break;
+#ifndef PATTERN
+      case 'b':
+        if ( !strcmp(argv[i],"-bucket") && ++i < argc )
+          if ( !MMG5_Set_iparameters(mesh,met,MMG5_IPARAM_bucket,
+                                     atoi(argv[i])) )
+            exit(EXIT_FAILURE);
+        break;
+	
+#endif
       case 'd':  /* debug */
         if ( !MMG5_Set_iparameters(mesh,met,MMG5_IPARAM_debug,1) )
           exit(EXIT_FAILURE);

@@ -1616,10 +1616,12 @@ int adpsplcol(pMesh mesh,pSol met,pBucket bucket, int* warn) {
     nns += ns;
 
     /* decrease size of gap for reallocation */
+
     if ( mesh->gap > maxgap/(double)maxit )
       mesh->gap -= maxgap/(double)maxit;
     else
       mesh->gap -= mesh->gap/(double)maxit;
+
 
     if ( 1 || ((abs(mesh->info.imprim) > 3 || mesh->info.ddebug) && ns+nc > 0) )
       fprintf(stdout,"     %8d filtered %8d splitted, %8d collapsed, %8d swapped, %8d moved\n",ifilt,ns,nc,nf,nm);

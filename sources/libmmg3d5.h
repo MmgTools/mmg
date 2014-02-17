@@ -38,6 +38,7 @@ enum MMG5_Param /**<  Options for mmg3d2 (integers) */
     MMG5_IPARAM_numberOfLocalParam,/**<  Number of local parameters                 */
     MMG5_IPARAM_renum,             /**<  Turn on point relocation with Scotch       */
     MMG5_IPARAM_sing,              /**<  Turn on the insertion of singularities     */
+    MMG5_IPARAM_bucket,            /**<  Specify the size of the bucket per dimension (DELAUNAY)     */
     MMG5_DPARAM_angleDetection,    /**<  Value for angle detection                  */
     MMG5_DPARAM_hmin,              /**<  Minimal mesh size                          */
     MMG5_DPARAM_hmax,              /**<  Maximal mesh size                          */
@@ -125,6 +126,9 @@ typedef struct {
   int           renum;
   char          imprim,ddebug,badkal,iso,fem;
   unsigned char noinsert, noswap, nomove;
+#ifndef PATTERN
+  int           bucket;
+#endif
   MMG5_pPar     par;
 } MMG5_Info;
 

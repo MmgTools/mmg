@@ -18,6 +18,8 @@
  *    MMG5_IPARAM_renum             = [1/0]     , Turn on/off the renumbering using SCOTCH;
  *    MMG5_IPARAM_sing              = [1/0]     , Turn on/off the insertion of singularities
  *                                        (need to compile with -DSINGUL flag);
+ *    MMG5_IPARAM_bucket            = [val]     , Specify the size of the bucket per dimension (Delaunay)
+ *                                        (need to compile with PATTERN=NO);
  * Double parameters:
  *    MMG5_DPARAM_angleDetection   = [val]     , angle detection;
  *    MMG5_DPARAM_hmin             = [val]     , minimal mesh size;
@@ -142,6 +144,10 @@ void Init_parameters(pMesh mesh) {
     printf("  Maximum memory set to default value: %d Mo.\n",MEMMAX);
     mesh->memMax = MEMMAX << 20;
   }
+
+#ifndef PATTERN
+  mesh->info.bucket = 64;
+#endif
 }
 
 /** default values for file names */
@@ -1178,6 +1184,9 @@ int Set_iparameters(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
     else
       mesh->info.mem      = val;
     memOption(mesh);
+    break;
+  case MMG5_IPARAM_bucket :
+    mesh->info.bucket   = val;
     break;
   case MMG5_IPARAM_debug :
     mesh->info.ddebug   = val;
