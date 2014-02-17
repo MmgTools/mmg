@@ -2215,7 +2215,7 @@ int mmg3d1_delone(pMesh mesh,pSol met) {
 #endif
 
   /* CEC : create filter */
-  bucket = newBucket(mesh,64);//M_MAX(mesh->mesh->info.bucksiz,BUCKSIZ));
+  bucket = newBucket(mesh,mesh->info.bucket);//M_MAX(mesh->mesh->info.bucksiz,BUCKSIZ));
   if ( !bucket )  return(0);
 
   if ( !adptet1(mesh,met,bucket) ) {

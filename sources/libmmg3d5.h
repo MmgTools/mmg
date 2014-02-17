@@ -126,9 +126,7 @@ typedef struct {
   int           renum;
   char          imprim,ddebug,badkal,iso,fem;
   unsigned char noinsert, noswap, nomove;
-#ifndef PATTERN
   int           bucket;
-#endif
   MMG5_pPar     par;
 } MMG5_Info;
 

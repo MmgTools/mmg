@@ -1185,9 +1185,11 @@ int Set_iparameters(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
       mesh->info.mem      = val;
     memOption(mesh);
     break;
+#ifndef PATTERN
   case MMG5_IPARAM_bucket :
     mesh->info.bucket   = val;
     break;
+#endif
   case MMG5_IPARAM_debug :
     mesh->info.ddebug   = val;
     break;

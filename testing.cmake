@@ -380,6 +380,7 @@ ADD_TEST(NAME Various_refunref_Santa_met0.05_hausd0.0001_ar90
   ${REG_TESTS_PATH}/Various_refunref_Santa_met0.05_hausd0.0001_ar90/santa.o.meshb)
 
 # 4: Refinment on a solution
+IF ( PATTERN )
 ADD_TEST(NAME Various_adpsol_hgrad1_M6Mach_Eps0.001_hmin0.001_hmax2
   COMMAND ${EXECUT} -v 5
   ${REG_TESTS_PATH}/Various_adpsol_hgrad1_M6Mach_Eps0.001_hmin0.001_hmax2/M6
@@ -393,7 +394,21 @@ ADD_TEST(NAME Various_adpsol_hgrad1_M6Mach_Eps0.0005_hmin0.0001_hmax3
   ${REG_TESTS_PATH}/Various_adpsol_hgrad1_M6Mach_Eps0.0005_hmin0.0001_hmax3/metM6.sol
   -hausd 0.1 -ar 60 -hgrad 1
   ${REG_TESTS_PATH}/Various_adpsol_hgrad1_M6Mach_Eps0.0005_hmin0.0001_hmax3/M6.o.meshb)
-
+ELSE ()
+ADD_TEST(NAME Various_adpsol_hgrad1_M6Mach_Eps0.001_hmin0.001_hmax2
+  COMMAND ${EXECUT} -v 5
+  ${REG_TESTS_PATH}/Various_adpsol_hgrad1_M6Mach_Eps0.001_hmin0.001_hmax2/M6
+  -sol ${REG_TESTS_PATH}/Various_adpsol_hgrad1_M6Mach_Eps0.001_hmin0.001_hmax2/metM6.sol
+  -hausd 0.1 -ar 60 -hgrad 1 -bucket 800
+  ${REG_TESTS_PATH}/Various_adpsol_hgrad1_M6Mach_Eps0.001_hmin0.001_hmax2/M6.o.meshb)
+ADD_TEST(NAME Various_adpsol_hgrad1_M6Mach_Eps0.0005_hmin0.0001_hmax3
+  COMMAND ${EXECUT} -v 5
+  ${REG_TESTS_PATH}/Various_adpsol_hgrad1_M6Mach_Eps0.0005_hmin0.0001_hmax3/M6
+  -sol
+  ${REG_TESTS_PATH}/Various_adpsol_hgrad1_M6Mach_Eps0.0005_hmin0.0001_hmax3/metM6.sol
+  -hausd 0.1 -ar 60 -hgrad 1 -bucket 800
+  ${REG_TESTS_PATH}/Various_adpsol_hgrad1_M6Mach_Eps0.0005_hmin0.0001_hmax3/M6.o.meshb)
+ENDIF()
 
 # Test the Ls option
 ADD_TEST(NAME OptLs_cube303d_hminMax_hgrad1.2_hausd0.005

@@ -89,8 +89,9 @@ OPTION ( PATTERN
   "If ON, insertion by patterns, otherwise insertion by delaunay kernel"
   ON)
 IF ( NOT PATTERN )
-  SET(CMAKE_C_FLAGS "-DPATTERN ${CMAKE_C_FLAGS}")
   MESSAGE(STATUS "Vertex insertion by delaunay kernel")
+ELSE()
+  SET(CMAKE_C_FLAGS "-DPATTERN ${CMAKE_C_FLAGS}")
 ENDIF()
 # Remove the next line to have this option visible in basic cmake mode
 MARK_AS_ADVANCED(PATTERN)
