@@ -8,6 +8,9 @@
 #define DoSol                         	 _MMG5_DoSol
 #define addBucket                     	 _MMG5_addBucket
 #define analys                        	 _MMG5_analys
+#define anatet                        	 _MMG5_anatet
+#define anatet4                       	 _MMG5_anatet4
+#define anatets                       	 _MMG5_anatets
 #define arpt                          	 _MMG5_arpt
 #define badelt                        	 _MMG5_badelt
 #define bdryIso                       	 _MMG5_bdryIso
@@ -35,6 +38,7 @@
 #define chkcol_bdy                    	 _MMG5_chkcol_bdy
 #define chkcol_int                    	 _MMG5_chkcol_int
 #define chkedg                        	 _MMG5_chkedg
+#define chkedg                        	 _MMG5_chkedg
 #define chkfemtopo                    	 _MMG5_chkfemtopo
 #define chkmani                       	 _MMG5_chkmani
 #define chkmanicoll                   	 _MMG5_chkmanicoll
@@ -44,6 +48,7 @@
 #define chkswpgen                     	 _MMG5_chkswpgen
 #define cntbdypt                      	 _MMG5_cntbdypt
 #define colSing                       	 _MMG5_colSing
+#define coltet                        	 _MMG5_coltet
 #define colver                        	 _MMG5_colver
 #define coquil                        	 _MMG5_coquil
 #define coquilface                    	 _MMG5_coquilface
@@ -59,6 +64,8 @@
 #define det3pt1vec                    	 _MMG5_det3pt1vec
 #define det4pt                        	 _MMG5_det4pt
 #define dichodisp                     	 _MMG5_dichodisp
+#define dichoto                       	 _MMG5_dichoto
+#define dichoto1b                     	 _MMG5_dichoto1b
 #define dichoto1b                     	 _MMG5_dichoto1b
 #define directsurfball                	 _MMG5_directsurfball
 #define eigensym                      	 _MMG5_eigensym
@@ -159,7 +166,9 @@
 #define swpbdy                        	 _MMG5_swpbdy
 #define swpgen                        	 _MMG5_swpgen
 #define swpgen                        	 _MMG5_swpgen
+#define swpmsh                        	 _MMG5_swpmsh
 #define sys33sym                      	 _MMG5_sys33sym
+#define tet2tri                       	 _MMG5_tet2tri
 #define tet2tri                       	 _MMG5_tet2tri
 #define timestepMCF                   	 _MMG5_timestepMCF
 #define trydisp                       	 _MMG5_trydisp

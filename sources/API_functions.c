@@ -62,7 +62,7 @@ void Alloc_mesh(MMG5_pMesh *mesh, MMG5_pSol *sol
 static inline
 void Init_woalloc_mesh(MMG5_pMesh mesh, MMG5_pSol sol
 #ifdef SINGUL
-              , MMG5_pSingul *sing
+              , MMG5_pSingul sing
 #endif
               ) {
 

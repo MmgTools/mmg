@@ -104,6 +104,9 @@ MARK_AS_ADVANCED(PATTERN)
 SET(REMOVE_FILE "${MMG_SOURCE_DIR}/singul.c")
 # Should we add insertion of singularities part
 OPTION ( INSER_SINGULARITIES "Compile the part of code that allow to insert singularties" OFF)
+# Remove the next line to have this option visible in basic cmake mode
+MARK_AS_ADVANCED(INSER_SINGULARITIES)
+
 IF ( INSER_SINGULARITIES )
   SET(CMAKE_C_FLAGS "-DSINGUL ${CMAKE_C_FLAGS}")
   SET(REMOVE_FILE "")
@@ -245,17 +248,17 @@ IF ( TEST_LIBMMG3D5 )
       MESSAGE(WARNING "\"libmmg5_example2\" is the only library test available with the flag of insertion of singularities set to \"ON\"")
     ELSE()
       ADD_EXECUTABLE(libmmg5_example0_a ${MMG_SOURCE_DIR}/../libexamples/example0/example0_a/main.c)
-      TARGET_LINK_LIBRARIES(libmmg5_example0_a ${PROJECT_NAME}_a)
+      TARGET_LINK_LIBRARIES(libmmg5_example0_a ${PROJECT_NAME}_so)
       INSTALL(TARGETS libmmg5_example0_a RUNTIME DESTINATION bin )
 
       ADD_EXECUTABLE(libmmg5_example0_b ${MMG_SOURCE_DIR}/../libexamples/example0/example0_b/main.c)
-      TARGET_LINK_LIBRARIES(libmmg5_example0_b ${PROJECT_NAME}_a)
+      TARGET_LINK_LIBRARIES(libmmg5_example0_b ${PROJECT_NAME}_so)
       INSTALL(TARGETS libmmg5_example0_b RUNTIME DESTINATION bin )
 
       ADD_EXECUTABLE(libmmg5_example1 ${MMG_SOURCE_DIR}/../libexamples/example1/main.c)
       TARGET_LINK_LIBRARIES(libmmg5_example1 ${PROJECT_NAME}_so)
       INSTALL(TARGETS libmmg5_example1 RUNTIME DESTINATION bin )
-      ADD_EXECUTABLE(libmmg5_example2  ${MMG_SOURCE_DIR}/../libexamples/example2/mmg3d.c)
+      ADD_EXECUTABLE(libmmg5_example2  ${MMG_SOURCE_DIR}/../libexamples/example2/main.c)
       TARGET_LINK_LIBRARIES(libmmg5_example2 ${PROJECT_NAME}_so)
       INSTALL(TARGETS libmmg5_example2 RUNTIME DESTINATION bin )
     ENDIF()
@@ -292,6 +295,7 @@ OPTION ( BUILD_TESTING "Enable/Disable continuous integration" ON )
 IF(BUILD_TESTING)
   # Run some tests twice with the output of the previous test as input
   OPTION ( RUN_AGAIN "Enable/Disable second run of some tests" ON )
+  MARK_AS_ADVANCED(RUN_AGAIN)
 
   # Ignore errors coming from the libmesh5 library
   SET(MEMORYCHECK_SUPPRESSIONS_FILE "${CMAKE_SOURCE_DIR}/libmesh5.supp")

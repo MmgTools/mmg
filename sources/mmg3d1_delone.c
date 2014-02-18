@@ -214,8 +214,8 @@ int adpsplcol(pMesh mesh,pSol met,pBucket bucket, int* warn) {
       for (k=1; k<=ne; k++) {
         pt = &mesh->tetra[k];
         if ( !MG_EOK(pt)  || (pt->tag & MG_REQ) )   continue;
-	if(it>1)
-	  if(pt->qual > 0.038/*0.0288675*/ /*0.6/ALPHAD*/) continue;
+  if(it>1)
+    if(pt->qual > 0.038/*0.0288675*/ /*0.6/ALPHAD*/) continue;
         pxt = pt->xt ? &mesh->xtetra[pt->xt] : 0;
 
         /* find longest and shortest edge */
@@ -307,7 +307,7 @@ int adpsplcol(pMesh mesh,pSol met,pBucket bucket, int* warn) {
               //CECILE : je comprend pas pourquoi la normale est mauvaise a la fin
               //goto collapse;
               if ( !norface(mesh,k,i,v) )  goto collapse;//continue;
-	      if ( !BezierReg(mesh,ip1,ip2,0.5,v,o,no1) ) goto collapse;
+        if ( !BezierReg(mesh,ip1,ip2,0.5,v,o,no1) ) goto collapse;
 
             }
             ier = simbulgept(mesh,list,ilist,o);
@@ -379,8 +379,8 @@ int adpsplcol(pMesh mesh,pSol met,pBucket bucket, int* warn) {
           }
           else if(pt->xt){
             if ( (p0->tag & MG_BDY) && (p1->tag & MG_BDY) ) {
-	      continue;
-	    }
+        continue;
+      }
             ilist = coquil(mesh,k,imax,list);
             if ( !ilist )    continue;
             else if ( ilist<0 ) return(-1);
@@ -424,36 +424,36 @@ int adpsplcol(pMesh mesh,pSol met,pBucket bucket, int* warn) {
             printf("on doit pas passer la\n");
             /* Case of an internal face */
           } else {
-	    /*TEST POUR LES ARETES AYANT DEUX POINTS DE PEAU...*/
+      /*TEST POUR LES ARETES AYANT DEUX POINTS DE PEAU...*/
  /*            if ( (p0->tag & MG_BDY) && (p1->tag & MG_BDY) ) { */
-/* 	      //tente le swap si arete pas frontiere */
-/* 	      ilist = 0; */
-/* 	      critloc = 1.053; */
-/* 	      nconf = chkswpgen(mesh,k,imax,&ilist,list,critloc); */
-/* 	      if ( nconf ) { */
+/*        //tente le swap si arete pas frontiere */
+/*        ilist = 0; */
+/*        critloc = 1.053; */
+/*        nconf = chkswpgen(mesh,k,imax,&ilist,list,critloc); */
+/*        if ( nconf ) { */
 /* #ifdef PATTERN */
-/* 		printf("ERROR: function not available in pattern mode. Exiting\n"); */
-/* 		exit(EXIT_FAILURE); */
+/*    printf("ERROR: function not available in pattern mode. Exiting\n"); */
+/*    exit(EXIT_FAILURE); */
 /* #else */
-/* 		ier = swpgen(mesh,met,nconf,ilist,list,bucket); */
+/*    ier = swpgen(mesh,met,nconf,ilist,list,bucket); */
 /* #endif */
-/* 		if ( ier > 0 )  { */
-/* 		  //printf("on a swappe"); */
-/* 		  continue; */
-/* 		} */
-/* 		else if ( ier < 0 ) { */
-/* 		  //printf("pas swap"); */
-/* 		  goto collapse; */
-/* 		} */
-/* 	      } else { */
-/* 		goto collapse; */
-/* 	      } */
-/* 	    } */
+/*    if ( ier > 0 )  { */
+/*      //printf("on a swappe"); */
+/*      continue; */
+/*    } */
+/*    else if ( ier < 0 ) { */
+/*      //printf("pas swap"); */
+/*      goto collapse; */
+/*    } */
+/*        } else { */
+/*    goto collapse; */
+/*        } */
+/*      } */
 /*FIN DU TEST*/
             ilist = coquil(mesh,k,imax,list);
             if ( !ilist )    continue;
             else if ( ilist<0 ) return(-1);
-	    else if(ilist%2) goto collapse; //bdry edge
+      else if(ilist%2) goto collapse; //bdry edge
             o[0] = 0.5*(p0->c[0] + p1->c[0]);
             o[1] = 0.5*(p0->c[1] + p1->c[1]);
             o[2] = 0.5*(p0->c[2] + p1->c[2]);
@@ -591,7 +591,11 @@ int adpsplcol(pMesh mesh,pSol met,pBucket bucket, int* warn) {
     /* MMG_nvol=0; */
     /* MMG_npres=0; */
     if ( !mesh->info.noswap ) {
-      nf = swpmsh(mesh,met,bucket);
+      nf = swpmsh(mesh,met
+#ifndef PATTERN
+                  ,bucket
+#endif
+                  );
       if ( nf < 0 ) {
         fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
         return(0);
@@ -600,7 +604,7 @@ int adpsplcol(pMesh mesh,pSol met,pBucket bucket, int* warn) {
       if(it==3 || it==7/*&& it==1 || it==3 || it==5 || it > 8*/) {
         nf += swptetdel(mesh,met,1.053,bucket);
       } else {
-	nf += 0;	
+        nf += 0;
       }
       if ( nf < 0 ) {
         fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
@@ -609,7 +613,7 @@ int adpsplcol(pMesh mesh,pSol met,pBucket bucket, int* warn) {
     }
     else  nf = 0;
     nnf+=nf;
-   
+
     //fprintf(stdout,"$$$$$$$$$$$$$$$$$$ ITER SWAP %7d\n",nnf);
 
     if ( !mesh->info.nomove ) {
@@ -653,7 +657,11 @@ int optet(pMesh mesh, pSol met,pBucket bucket) {
   do {
     /* badly shaped process */
     if ( !mesh->info.noswap ) {
-      nf = swpmsh(mesh,met,bucket);
+      nf = swpmsh(mesh,met
+#ifndef PATTERN
+                  ,bucket
+#endif
+                  );
       if ( nf < 0 ) {
         fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
         return(0);
@@ -718,7 +726,11 @@ int optet(pMesh mesh, pSol met,pBucket bucket) {
 
   /*initial swap*/
   if ( !mesh->info.noswap ) {
-    nf = swpmsh(mesh,met,bucket);
+    nf = swpmsh(mesh,met
+#ifndef PATTERN
+                ,bucket
+#endif
+                );
     if ( nf < 0 ) {
       fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
       return(0);
@@ -853,7 +865,11 @@ int optet(pMesh mesh, pSol met,pBucket bucket) {
 
     /* attempt to swap */
     if ( !mesh->info.noswap ) {
-      nf = swpmsh(mesh,met,NULL);
+      nf = swpmsh(mesh,met
+#ifndef PATTERN
+                  ,NULL
+#endif
+                  );
       if ( nf < 0 ) {
         fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
         return(0);
