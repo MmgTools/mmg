@@ -190,7 +190,7 @@ FOREACH(EXEC ${LISTEXEC})
     ${REG_TESTS_PATH}/ChkBdry_multidomCube3/c)
   #####
   ADD_TEST(NAME HausdLoc_2Spheres${EXEC}
-    COMMAND ${EXEC}
+    COMMAND ${EXEC} -hgrad 1.3
     ${REG_TESTS_PATH}/HausdLoc_2Spheres/2spheres
     ${REG_TESTS_PATH}/HausdLoc_2Spheres/2spheres.o.meshb
     -hgrad 2
