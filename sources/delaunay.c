@@ -801,9 +801,10 @@ int cavity(pMesh mesh,pSol sol,int iel,int ip,int *list,int lon) {
   for (k=0; k<lon; k++) {
     mesh->tetra[list[k]/6].mark = base;
 
-    if ( mesh->info.ddebug && tref!=mesh->tetra[list[k]/6].ref)
-      // remove this test
-      printf("pbs coquil %d %d tet %d\n",tref,mesh->tetra[list[k]/6].ref,list[k]/6);
+    if (tref!=mesh->tetra[list[k]/6].ref) {
+      //printf("pbs coquil %d %d tet %d\n",tref,mesh->tetra[list[k]/6].ref,list[k]/6);
+      return(0);
+    }
   }
   for (k=0; k<lon; k++)
     list[k] = list[k] / 6;
@@ -854,7 +855,7 @@ int cavity(pMesh mesh,pSol sol,int iel,int ip,int *list,int lon) {
         if ( !adi )  continue;
         pt1 = &mesh->tetra[adi];
         if ( pt1->mark == base && adi != jel ) {
-          if ( !adi || pt1->ref != mesh->tetra[adi].ref )  break;
+          if ( !adi || pt1->ref != tref )  break;
         }
       }
       /* store tetra */
