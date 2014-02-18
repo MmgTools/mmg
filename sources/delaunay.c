@@ -4,7 +4,7 @@
 #define  EPSRAD       1.00005
 //For Various_adpsol_hgrad1_M6Mach_Eps0.001_hmin0.001_hmax2 test case:
 //pbs with EPSCON=5e-4 and VOLMIN=1e-15 (MMG3D does not insert enough vertex...)
-#define  EPSCON       5e-5//5.0e-4//1.e-4//1.0e-3
+#define  EPSCON       1e-5//5.0e-4//1.e-4//1.0e-3
 #define  VOLMIN       1e-15//1.e-10//1.0e-15  --> vol negatif qd on rejoue
 #define LONMAX     4096
 
