@@ -390,8 +390,7 @@ static int swptet(pMesh mesh,pSol met,double crit) {
 #ifdef PATTERN
           ier = swpgen(mesh,met,nconf,ilist,list);
 #else
-          printf("ERROR: function not available in delaunay mode. Exiting\n");
-          exit(EXIT_FAILURE);
+          ier = swpgen(mesh,met,nconf,ilist,list,NULL);
 #endif
           if ( ier > 0 )  ns++;
           else if ( ier < 0 ) return(-1);
@@ -1468,6 +1467,8 @@ static int adptet(pMesh mesh,pSol met) {
     if ( !mesh->info.noswap ) {
 #ifdef PATTERN
       nf = swpmsh(mesh,met);
+#else
+      nf = swpmsh(mesh,met,NULL);
 #endif
       if ( nf < 0 ) {
         fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
@@ -1548,6 +1549,8 @@ static int adptet(pMesh mesh,pSol met) {
     if ( !mesh->info.noswap ) {
 #ifdef PATTERN
       nf = swpmsh(mesh,met);
+#else
+      nf = swpmsh(mesh,met,NULL);
 #endif
       if ( nf < 0 ) {
         fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
