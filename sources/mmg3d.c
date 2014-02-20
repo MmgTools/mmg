@@ -25,7 +25,6 @@ void Free_all(pMesh mesh,pSol met
 }
 
 /** set pointer for MMG5_saveMesh function */
-static inline
 void Set_saveFunc(pMesh mesh) {
   MMG5_saveMesh = saveMesh;
 }
@@ -211,14 +210,9 @@ int main(int argc,char *argv[]) {
   }
 #endif
 
-  if (
-#ifdef PATTERN
-      !mmg3d1(&mesh,&met)
-#else
-      !mmg3d1_delone(&mesh,&met)
-#endif
-      ){
 
+#ifdef PATTERN
+  if ( !mmg3d1(&mesh,&met) ) {
     if ( !(mesh.adja) && !hashTetra(&mesh,1) ) {
       fprintf(stdout,"  ## Hashing problem. Unable to save mesh.\n");
       RETURN_AND_FREE(&mesh,&met,&sing,MMG5_STRONGFAILURE);
@@ -231,6 +225,40 @@ int main(int argc,char *argv[]) {
       RETURN_AND_FREE(&mesh,&met,&sing,MMG5_STRONGFAILURE);
     RETURN_AND_FREE(&mesh,&met,&sing,MMG5_LOWFAILURE);
   }
+#else
+  /* Pattern in iso mode, delauney otherwise */
+  if ( !mesh->info.iso ) {
+    if( !mmg3d1_delone(&mesh,&met) ) {
+      if ( !(mesh.adja) && !hashTetra(&mesh,1) ) {
+        fprintf(stdout,"  ## Hashing problem. Unable to save mesh.\n");
+        RETURN_AND_FREE(&mesh,&met,&sing,MMG5_STRONGFAILURE);
+      }
+      if ( !unscaleMesh(&mesh,&met) )
+        RETURN_AND_FREE(&mesh,&met,&sing,MMG5_STRONGFAILURE);
+      if ( !saveMesh(&mesh) )
+        RETURN_AND_FREE(&mesh,&met,&sing,MMG5_STRONGFAILURE);
+      if ( met.m && !saveMet(&mesh,&met) )
+        RETURN_AND_FREE(&mesh,&met,&sing,MMG5_STRONGFAILURE);
+      RETURN_AND_FREE(&mesh,&met,&sing,MMG5_LOWFAILURE);
+    }
+  }
+  else {
+    if( !mmg3d1(&mesh,&met) ) {
+      if ( !(mesh.adja) && !hashTetra(&mesh,1) ) {
+        fprintf(stdout,"  ## Hashing problem. Unable to save mesh.\n");
+        RETURN_AND_FREE(&mesh,&met,&sing,MMG5_STRONGFAILURE);
+      }
+      if ( !unscaleMesh(&mesh,&met) )
+        RETURN_AND_FREE(&mesh,&met,&sing,MMG5_STRONGFAILURE);
+      if ( !saveMesh(&mesh) )
+        RETURN_AND_FREE(&mesh,&met,&sing,MMG5_STRONGFAILURE);
+      if ( met.m && !saveMet(&mesh,&met) )
+        RETURN_AND_FREE(&mesh,&met,&sing,MMG5_STRONGFAILURE);
+      RETURN_AND_FREE(&mesh,&met,&sing,MMG5_LOWFAILURE);
+    }
+  }
+#endif
+
 
 #ifdef SINGUL
   if ( mesh.info.sing && (!mesh.info.iso) ) {

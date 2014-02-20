@@ -219,6 +219,7 @@
 #define Set_requiredTriangle          	 MMG5_Set_requiredTriangle
 #define Set_requiredVertex            	 MMG5_Set_requiredVertex
 #define Set_ridge                     	 MMG5_Set_ridge
+#define Set_saveFunc                  	 MMG5_Set_saveFunc
 #define Set_scalarSol                 	 MMG5_Set_scalarSol
 #define Set_singulCorner              	 MMG5_Set_singulCorner
 #define Set_singulEdge                	 MMG5_Set_singulEdge
@@ -261,8 +262,10 @@
 #define saveMet                       	 MMG5_saveMet
 #define searchlen                     	 MMG5_searchlen
 #define searchqua                     	 MMG5_searchqua
+#define setfunc                       	 MMG5_setfunc
 #define stockOptions                  	 MMG5_stockOptions
 #define usage                         	 MMG5_usage
 #define xPoint                        	 MMG5_xPoint
 #define xTetra                        	 MMG5_xTetra
 #define mmg3dcheck                    	 MMG5_mmg3dcheck
+#define pampa_setfunc                 	 MMG5_pampa_setfunc

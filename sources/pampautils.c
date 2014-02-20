@@ -39,12 +39,12 @@ void pampa_excfun(int sigid) {
 }
 
 /** set function pointers */
-static inline
 void pampa_setfunc(pMesh mesh,pSol met) {
   if ( met->size < 6 )
     MMG5_lenedgCoor = lenedgCoor_iso;
   else
     MMG5_lenedgCoor = lenedgCoor_ani;
+  MMG5_hashTetra = hashTetra;
 }
 /* END COPY */
 

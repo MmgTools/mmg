@@ -61,7 +61,6 @@ void Free_all(pMesh mesh,pSol met
 }
 
 /** set pointer for MMG5_saveMesh function */
-static inline
 void Set_saveFunc(pMesh mesh) {
   MMG5_saveMesh = saveLibraryMesh;
 }
@@ -418,13 +417,9 @@ int mmg3dlib(pMesh mesh,pSol met
   }
 #endif
 
-  if (
+
 #ifdef PATTERN
-      !mmg3d1(mesh,met)
-#else
-      !mmg3d1_delone(mesh,met)
-#endif
-      ){
+  if ( !mmg3d1(mesh,met) ) {
     if ( !(mesh->adja) && !hashTetra(mesh,1) ) {
       fprintf(stdout,"  ## Hashing problem. Invalid mesh.\n");
       return(MMG5_STRONGFAILURE);
@@ -432,6 +427,30 @@ int mmg3dlib(pMesh mesh,pSol met
     if ( !unscaleMesh(mesh,met) )  return(MMG5_STRONGFAILURE);
     RETURN_AND_PACK(mesh,met,MMG5_LOWFAILURE);
   }
+#else
+  /** Patterns in iso mode, delauney otherwise */
+  if ( !mesh->info.iso ) {
+    if ( !mmg3d1_delone(mesh,met) ) {
+      if ( !(mesh->adja) && !hashTetra(mesh,1) ) {
+        fprintf(stdout,"  ## Hashing problem. Invalid mesh.\n");
+        return(MMG5_STRONGFAILURE);
+      }
+      if ( !unscaleMesh(mesh,met) )  return(MMG5_STRONGFAILURE);
+      RETURN_AND_PACK(mesh,met,MMG5_LOWFAILURE);
+    }
+  }
+  else {
+    if ( !mmg3d1(mesh,met) ) {
+      if ( !(mesh->adja) && !hashTetra(mesh,1) ) {
+        fprintf(stdout,"  ## Hashing problem. Invalid mesh.\n");
+        return(MMG5_STRONGFAILURE);
+      }
+      if ( !unscaleMesh(mesh,met) )  return(MMG5_STRONGFAILURE);
+      RETURN_AND_PACK(mesh,met,MMG5_LOWFAILURE);
+    }
+  }
+
+#endif
 
 #ifdef SINGUL
   if ( mesh->info.sing && (!mesh->info.iso) ) {

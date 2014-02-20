@@ -303,28 +303,48 @@ int  MMG5_mmg3dlib(MMG5_pMesh mesh, MMG5_pSol sol);
 /** for PAMPA library */
 /** Options management */
 #ifdef SINGUL
+/** get command line options */
 int  MMG5_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSingul sing);
 #else
 int  MMG5_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met);
 #endif
+/** read the local parameters in DEFAULT.mmg3d5 file */
 int  MMG5_parsop(MMG5_pMesh mesh,MMG5_pSol met);
+/** print help */
 void  MMG5_usage(char *prog);
+/** put info structure in mesh structure */
 void  MMG5_stockOptions(MMG5_pMesh mesh, MMG5_Info *info);
+/** get info structure from mesh structure */
 void  MMG5_destockOptions(MMG5_pMesh mesh, MMG5_Info *info);
 
 /** Checks */
 #ifdef SINGUL
+/** list elements with too bad quality or too bad edge length */
 int  MMG5_mmg3dcheck(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSingul sing,
                      double critmin, double lmin, double lmax, int *eltab);
 #else
 int mmg3dcheck(MMG5_pMesh mesh,MMG5_pSol sol,
                double critmin, double lmin, double lmax, int *eltab);
 #endif
+/** list elements with bad quality */
 void  MMG5_searchqua(MMG5_pMesh mesh, MMG5_pSol met, double critmin, int *eltab);
+/** list element with bad edge length */
 int  MMG5_searchlen(MMG5_pMesh mesh, MMG5_pSol met, double lmin, double lmax, int *eltab);
 
 /** Utils */
+/** Get the four adjacent of a tetra kel */
 int    MMG5_Get_adjaTet(MMG5_pMesh mesh,int kel, int*, int*, int*, int*);
+/** Compute len edge from edge coordinates */
 double (*MMG5_lenedgCoor)(double *ca,double *cb,double *sa,double *sb);
+/** Create adjacency table */
+int  (*MMG5_hashTetra)(MMG5_pMesh mesh, int pack);
+
+/** To associate function pointers without calling MMG5_mmg3dlib */
+/** Set MMG5_saveMesh */
+void  MMG5_Set_saveFunc(MMG5_pMesh mesh);
+/** Set caltet, lenedg, defsiz, gradsiz */
+void  MMG5_setfunc(MMG5_pMesh,MMG5_pSol);
+/** Set MMG5_lenedgCoor and MMG5_hashTetra */
+void  pampa_setfunc(MMG5_pMesh mesh,MMG5_pSol met);
 
 #endif

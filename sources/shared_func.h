@@ -63,7 +63,6 @@ void excfun(int sigid) {
 }
 
 /** set function pointers */
-static inline
 void setfunc(pMesh mesh,pSol met) {
   if ( met->size < 6 ) {
     caltet = caltet_iso;
