@@ -193,15 +193,15 @@ static inline int boucle_for(pMesh mesh, pSol met,pBucket bucket,int ne,int* ifi
   double     lmin;
   int        imin,iq,nnc,nns,nnf,nnm;
   int        ii,MMG_npd;
-  double     maxgap;
+  double     maxgap,lmaxtet,lmintet;
   int nconf,imaxtet,imintet;
   double critloc;
 
   for (k=1; k<=ne; k++) {
     pt = &mesh->tetra[k];
     if ( !MG_EOK(pt)  || (pt->tag & MG_REQ) )   continue;
-    if(it>1)
-      if(pt->qual > 0.038/*0.0288675*/ /*0.6/ALPHAD*/) continue;
+    //  if(it>1)
+    //if(pt->qual > 0.038/*0.0288675*/ /*0.6/ALPHAD*/) continue;
     pxt = pt->xt ? &mesh->xtetra[pt->xt] : 0;
 
 
@@ -503,68 +503,72 @@ static inline int boucle_for(pMesh mesh, pSol met,pBucket bucket,int ne,int* ifi
       printf("on passe pas la3\n");
     }
   collapse:
-    if(lmin > LOPTSDEL) continue;
-    ifa0 = ifar[imin][0];
-    ifa1 = ifar[imin][1];
-    i  =  (pt->xt && (pxt->ftag[ifa1] & MG_BDY)) ? ifa1 : ifa0;
-    j  = iarfinv[i][imin];
-    i1 = idir[i][inxt2[j]];
-    i2 = idir[i][iprv2[j]];
-    ip = pt->v[i1];
-    iq = pt->v[i2];
-    p0 = &mesh->point[ip];
-    p1 = &mesh->point[iq];
+    if(lmin <= LOPTSDEL) {// continue;
+      ifa0 = ifar[imin][0];
+      ifa1 = ifar[imin][1];
+      i  =  (pt->xt && (pxt->ftag[ifa1] & MG_BDY)) ? ifa1 : ifa0;
+      j  = iarfinv[i][imin];
+      i1 = idir[i][inxt2[j]];
+      i2 = idir[i][iprv2[j]];
+      ip = pt->v[i1];
+      iq = pt->v[i2];
+      p0 = &mesh->point[ip];
+      p1 = &mesh->point[iq];
 
-    if ( (p0->tag > p1->tag) || (p0->tag & MG_REQ) )  continue;
+      if ( (p0->tag > p1->tag) || (p0->tag & MG_REQ) )  continue;
 
-    /* Case of a boundary face */
-    ilist = 0;
-    if ( pt->xt && (pxt->ftag[i] & MG_BDY) ) {
-      tag = pxt->tag[iarf[i][j]];
-      if ( tag & MG_REQ )  continue;
-      tag |= MG_BDY;
-      if ( p0->tag > tag )   continue;
-      if ( ( tag & MG_NOM ) && (mesh->adja[4*(k-1)+1+i]) ) continue;
-      ilist = chkcol_bdy(mesh,k,i,j,list);
-      if ( ilist > 0 ) {
-	ier = colver(mesh,list,ilist,i2);
-	//nc += ier;
-	if ( ier < 0 ) return(-1);
-	else if(ier) {
-	  //delBucket(mesh,bucket,ier);
-	  delPt(mesh,ier);
-	  (*nc)++;
-	  continue;//break;//imax continue;
+      /* Case of a boundary face */
+      ilist = 0;
+      if ( pt->xt && (pxt->ftag[i] & MG_BDY) ) {
+	tag = pxt->tag[iarf[i][j]];
+	if ( tag & MG_REQ )  continue;
+	tag |= MG_BDY;
+	if ( p0->tag > tag )   continue;
+	if ( ( tag & MG_NOM ) && (mesh->adja[4*(k-1)+1+i]) ) continue;
+	ilist = chkcol_bdy(mesh,k,i,j,list);
+	if ( ilist > 0 ) {
+	  ier = colver(mesh,list,ilist,i2);
+	  //nc += ier;
+	  if ( ier < 0 ) return(-1);
+	  else if(ier) {
+	    //delBucket(mesh,bucket,ier);
+	    delPt(mesh,ier);
+	    (*nc)++;
+	    continue;//break;//imax continue;
+	  }
 	}
+	else if (ilist < 0 )  return(-1);
       }
-      else if (ilist < 0 )  return(-1);
-    }
-    /* Case of an internal face */
-    else {
-      if ( p0->tag & MG_BDY )  continue;
-      ilist = chkcol_int(mesh,met,k,i,j,list,2);
-      if ( ilist > 0 ) {
-	ier = colver(mesh,list,ilist,i2);
-	if ( ilist < 0 ) continue;
-	//nc += ier;
-	if ( ier < 0 ) return(-1);
-	else if(ier) {
-	  delBucket(mesh,bucket,ier);
-	  delPt(mesh,ier);
-	  (*nc)++;
-	  continue;//break;//imax continue;
+      /* Case of an internal face */
+      else {
+	if ( p0->tag & MG_BDY )  continue;
+	ilist = chkcol_int(mesh,met,k,i,j,list,2);
+	if ( ilist > 0 ) {
+	  ier = colver(mesh,list,ilist,i2);
+	  if ( ilist < 0 ) continue;
+	  //nc += ier;
+	  if ( ier < 0 ) return(-1);
+	  else if(ier) {
+	    delBucket(mesh,bucket,ier);
+	    delPt(mesh,ier);
+	    (*nc)++;
+	    continue;//break;//imax continue;
+	  }
 	}
+	else if (ilist < 0 )  return(-1);
       }
-      else if (ilist < 0 )  return(-1);
-    }
 
-    // }//end for ii
+      // }//end for ii
+    } //end if lmin < LOPTSDEL
     /*2) longest and shortest edges are stucked => try another edges*/
     imaxtet = imax;
     imintet = imin;
+    lmaxtet = lmax;
+    lmintet = lmin;
     for (ii=0; ii<6; ii++) {
       if ( pt->xt && (pxt->tag[ii] & MG_REQ) )  continue;
-      //if ( (ii==imaxtet) || (ii==imintet) ) continue;
+      if ( (ii==imintet) && (lmintet < LOPTSDEL)) continue;
+      if ( (ii==imaxtet) && (lmaxtet > LOPTLDEL) ) continue;
 
       ip1  = iare[ii][0];
       ip2  = iare[ii][1];
@@ -966,7 +970,7 @@ int adpsplcol(pMesh mesh,pSol met,pBucket bucket, int* warn) {
         return(0);
       }
       nnf += nf;
-      if(it==3 || it==7/*&& it==1 || it==3 || it==5 || it > 8*/) {
+      if(it==2 || it==7/*&& it==1 || it==3 || it==5 || it > 8*/) {
         nf += swptetdel(mesh,met,1.053,bucket);
       } else {
         nf += 0;
@@ -1005,6 +1009,29 @@ int adpsplcol(pMesh mesh,pSol met,pBucket bucket, int* warn) {
       fprintf(stdout,"     %8d filtered %8d splitted, %8d collapsed, %8d swapped, %8d moved\n",ifilt,ns,nc,nf,nm);
     if ( ns < 10 && abs(nc-ns) < 3 )  break;
     else if ( it > 3 && abs(nc-ns) < 0.3 * MG_MAX(nc,ns) )  break;
+#ifdef USE_SCOTCH
+    /*check enough vertex to renum*/
+    if ( mesh->info.renum && (mesh->np/2. > BOXSIZE) ) {
+      /* renumbering begin */
+      if ( mesh->info.imprim > 5 )
+	fprintf(stdout,"renumbering");
+      renumbering(BOXSIZE,mesh, met);
+
+      if ( mesh->info.imprim > 5) {
+	fprintf(stdout,"  -- PHASE RENUMBERING COMPLETED. \n");
+      }
+      if ( mesh->info.ddebug )  chkmsh(mesh,1,0);
+      /* renumbering end */
+    }
+    /*free bucket*/
+    DEL_MEM(mesh,bucket->head,(bucket->size*bucket->size*bucket->size+1)*sizeof(int));
+    DEL_MEM(mesh,bucket->link,(mesh->npmax+1)*sizeof(int));
+    DEL_MEM(mesh,bucket,sizeof(Bucket));
+    
+    bucket = newBucket(mesh,mesh->info.bucket);//M_MAX(mesh->mesh->info.bucksiz,BUCKSIZ));
+    if ( !bucket )  return(0);
+    
+#endif
   }
   while( ++it < maxit && nc+ns > 0 );
 
