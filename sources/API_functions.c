@@ -519,8 +519,10 @@ int Get_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int* typEntity, int* np, int* ty
 /** Get the number of vertices, tetrahedra, triangles and edges of the mesh. */
 int Get_meshSize(MMG5_pMesh mesh, int* np, int* ne, int* nt, int* na) {
 
-  *np = mesh->np;
-  *ne = mesh->ne;
+  if ( np != NULL )
+    *np = mesh->np;
+  if ( ne != NULL )
+    *ne = mesh->ne;
   if ( nt != NULL )
     *nt = mesh->nt;
   if ( na != NULL )
