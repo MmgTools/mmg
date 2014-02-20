@@ -970,7 +970,7 @@ int adpsplcol(pMesh mesh,pSol met,pBucket bucket, int* warn) {
         return(0);
       }
       nnf += nf;
-      if(it==2 || it==7/*&& it==1 || it==3 || it==5 || it > 8*/) {
+      if(it==2 || it==6/*&& it==1 || it==3 || it==5 || it > 8*/) {
         nf += swptetdel(mesh,met,1.053,bucket);
       } else {
         nf += 0;
@@ -1023,6 +1023,11 @@ int adpsplcol(pMesh mesh,pSol met,pBucket bucket, int* warn) {
       if ( mesh->info.ddebug )  chkmsh(mesh,1,0);
       /* renumbering end */
     }
+#else
+    free(mesh->adja);
+    mesh->adja=NULL;
+    hashTetra(mesh,1);
+#endif
     /*free bucket*/
     DEL_MEM(mesh,bucket->head,(bucket->size*bucket->size*bucket->size+1)*sizeof(int));
     DEL_MEM(mesh,bucket->link,(mesh->npmax+1)*sizeof(int));
@@ -1030,8 +1035,7 @@ int adpsplcol(pMesh mesh,pSol met,pBucket bucket, int* warn) {
     
     bucket = newBucket(mesh,mesh->info.bucket);//M_MAX(mesh->mesh->info.bucksiz,BUCKSIZ));
     if ( !bucket )  return(0);
-    
-#endif
+
   }
   while( ++it < maxit && nc+ns > 0 );
 
