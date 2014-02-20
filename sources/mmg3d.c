@@ -227,7 +227,7 @@ int main(int argc,char *argv[]) {
   }
 #else
   /* Pattern in iso mode, delauney otherwise */
-  if ( !mesh->info.iso ) {
+  if ( !mesh.info.iso ) {
     if( !mmg3d1_delone(&mesh,&met) ) {
       if ( !(mesh.adja) && !hashTetra(&mesh,1) ) {
         fprintf(stdout,"  ## Hashing problem. Unable to save mesh.\n");

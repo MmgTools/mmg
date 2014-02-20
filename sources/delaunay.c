@@ -143,7 +143,7 @@ int delone(pMesh mesh,pSol sol,int ip,int *list,int ilist) {
       ppt->tagdel &= ~MG_NOM;
     }
   }
-  if ( alert )  {puts("aler");return(-1);}
+  if ( alert )  {return(-1);}
   /* hash table params */
   if ( size > 3*LONMAX )  return(0);
   if ( !hashNew(mesh,&hedg,size,3*size) ) { /*3*size suffit */
