@@ -715,8 +715,7 @@ static int anatetv(pMesh mesh,pSol met,char typchk) {
           if ( mesh->info.sing && pt->xt && (pxt->tag[i] & MG_SGL) )
             POINT_REALLOC(mesh,met,ip,mesh->gap,
                           printf("  ## Error: unable to allocate a new point\n");
-                          printf("  ## Check the mesh size or increase");
-                          printf(" the allocated memory with the -m option.\n");
+                          INCREASE_MEM_MESSAGE();
                           memlack=1;
                           goto split
                           ,o,MG_SGL);
@@ -724,8 +723,7 @@ static int anatetv(pMesh mesh,pSol met,char typchk) {
 #endif
             POINT_REALLOC(mesh,met,ip,mesh->gap,
                           printf("  ## Error: unable to allocate a new point\n");
-                          printf("  ## Check the mesh size or increase");
-                          printf(" the allocated memory with the -m option.\n");
+                          INCREASE_MEM_MESSAGE();
                           memlack=1;
                           goto split
                           ,o,0);
@@ -917,8 +915,7 @@ static int anatetv(pMesh mesh,pSol met,char typchk) {
           /* reallocation of point table */
           POINT_REALLOC(mesh,met,ip,mesh->gap,
                         printf("  ## Error: unable to allocate a new point.\n");
-                        printf("  ## Check the mesh size or increase ");
-                        printf("the allocated memory with the -m option.\n");
+                        INCREASE_MEM_MESSAGE();
                         do {
                           delPt(mesh,mesh->np);
                         } while ( mesh->np>npinit );
@@ -1506,8 +1503,7 @@ static int adptet(pMesh mesh,pSol met) {
   if ( warn ) {
     fprintf(stdout,"  ## Error:");
     fprintf(stdout," unable to allocate a new point in last call of adpspl.\n");
-    fprintf(stdout,"  ## Check the mesh size or ");
-    fprintf(stdout,"increase the allocated memory with the -m option.\n");
+    INCREASE_MEM_MESSAGE();
     fprintf(stdout,"  ## Uncomplete mesh. Exiting\n" );
     return(0);
   }

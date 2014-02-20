@@ -175,25 +175,22 @@ int swpgen(pMesh mesh,pSol met,int nconf,int ilist,int *list
   if(!np){
 #ifdef PATTERN
     POINT_REALLOC(mesh,met,np,mesh->gap,
-                             printf("  ## Error: unable to allocate a new point\n");
-                             printf("  ## Check the mesh size or increase");
-                             printf(" the allocated memory with the -m option.\n");
-                             return(-1)
-                             ,m,0);
+                  printf("  ## Error: unable to allocate a new point\n");
+                  INCREASE_MEM_MESSAGE();
+                  return(-1)
+                  ,m,0);
 #else
     if ( bucket ) {
       POINT_AND_BUCKET_REALLOC(mesh,met,np,mesh->gap,
                                printf("  ## Error: unable to allocate a new point\n");
-                               printf("  ## Check the mesh size or increase");
-                               printf(" the allocated memory with the -m option.\n");
+                               INCREASE_MEM_MESSAGE();
                                return(-1)
                                ,m,0);
     }
     else {
       POINT_REALLOC(mesh,met,np,mesh->gap,
                     printf("  ## Error: unable to allocate a new point\n");
-                    printf("  ## Check the mesh size or increase");
-                    printf(" the allocated memory with the -m option.\n");
+                    INCREASE_MEM_MESSAGE();
                     return(-1)
                     ,m,0);
     }

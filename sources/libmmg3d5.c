@@ -10,7 +10,7 @@
  *
  * Integers parameters:
  *    MMG5_IPARAM_verbose            = [-10..10] , Tune level of verbosity;
- *    MMG5_IPARAM_mem                = [n/-1]    , Set memory size to n Mbytes/keep the default value;
+ *    MMG5_IPARAM_mem                = [n/-1]    , Set maximal memory size to n Mbytes/keep the default value;
  *    MMG5_IPARAM_debug              = [1/0]     , Turn on/off debug mode;
  *    MMG5_IPARAM_angle              = [1/0]     , Turn on/off angle detection;
  *    MMG5_IPARAM_iso                = [1/0]     , Turn on/off levelset meshing;
@@ -283,7 +283,7 @@ int mmg3dlib(pMesh mesh,pSol met
 
   fprintf(stdout,"  -- MMG3d, Release %s (%s) \n",MG_VER,MG_REL);
   fprintf(stdout,"     %s\n",MG_CPY);
-  fprintf(stdout,"    %s %s\n",__DATE__,__TIME__);
+  fprintf(stdout,"     %s %s\n",__DATE__,__TIME__);
 
   signal(SIGABRT,excfun);
   signal(SIGFPE,excfun);

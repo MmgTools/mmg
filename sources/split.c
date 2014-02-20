@@ -92,8 +92,7 @@ void split1(pMesh mesh,pSol met,int k,int vx[6]) {
   if ( !iel ) {
     TETRA_REALLOC(mesh,iel,mesh->gap,
                   printf("  ## Error: unable to allocate a new element.\n");
-                  printf("  ## Check the mesh size or ");
-                  printf("increase the allocated memory with the -m option.\n");
+                  INCREASE_MEM_MESSAGE();
                   printf("  Exit program.\n");
                   exit(EXIT_FAILURE));
     pt = &mesh->tetra[k];
@@ -332,8 +331,7 @@ int split1b(pMesh mesh, pSol met,int *list, int ret, int ip,int cas){
     if ( !jel ) {
       TETRA_REALLOC(mesh,jel,mesh->gap,
                     printf("  ## Error: unable to allocate a new element.\n");
-                    printf("  ## Check the mesh size or ");
-                    printf("increase the allocated memory with the -m option.\n");
+                    INCREASE_MEM_MESSAGE();
                     for ( ; k>0 ; --k ) {
                       delElt(mesh,newtet[k]);
                     }
@@ -904,8 +902,7 @@ void split2sf(pMesh mesh,pSol met,int k,int vx[6]){
   if ( !iel ) {
     TETRA_REALLOC(mesh,iel,mesh->gap,
                   printf("  ## Error: unable to allocate a new element.\n");
-                  printf("  ## Check the mesh size or ");
-                  printf("increase the allocated memory with the -m option.\n");
+                  INCREASE_MEM_MESSAGE();
                   printf("  Exit program.\n");
                   exit(EXIT_FAILURE));
     pt[0] = &mesh->tetra[newtet[0]];
@@ -918,8 +915,7 @@ void split2sf(pMesh mesh,pSol met,int k,int vx[6]){
   if ( !iel ) {
     TETRA_REALLOC(mesh,iel,mesh->gap,
                   printf("  ## Error: unable to allocate a new element.\n");
-                  printf("  ## Check the mesh size or ");
-                  printf("increase the allocated memory with the -m option.\n");
+                  INCREASE_MEM_MESSAGE();
                   printf("  Exit program.\n");
                   exit(EXIT_FAILURE));
     pt[0] = &mesh->tetra[newtet[0]];
@@ -1126,8 +1122,7 @@ void split2(pMesh mesh,pSol met,int k,int vx[6]) {
   if ( !iel ) {
     TETRA_REALLOC(mesh,iel,mesh->gap,
                   printf("  ## Error: unable to allocate a new element.\n");
-                  printf("  ## Check the mesh size or ");
-                  printf("increase the allocated memory with the -m option.\n");
+                  INCREASE_MEM_MESSAGE();
                   printf("  Exit program.\n");
                   exit(EXIT_FAILURE));
     pt[0] = &mesh->tetra[newtet[0]];
@@ -1140,8 +1135,7 @@ void split2(pMesh mesh,pSol met,int k,int vx[6]) {
   if ( !iel ) {
     TETRA_REALLOC(mesh,iel,mesh->gap,
                   printf("  ## Error: unable to allocate a new element.\n");
-                  printf("  ## Check the mesh size or ");
-                  printf("increase the allocated memory with the -m option.\n");
+                  INCREASE_MEM_MESSAGE();
                   printf("  Exit program.\n");
                   exit(EXIT_FAILURE));
     pt[0] = &mesh->tetra[newtet[0]];
@@ -1155,8 +1149,7 @@ void split2(pMesh mesh,pSol met,int k,int vx[6]) {
   if ( !iel ) {
     TETRA_REALLOC(mesh,iel,mesh->gap,
                   printf("  ## Error: unable to allocate a new element.\n");
-                  printf("  ## Check the mesh size or ");
-                  printf("increase the allocated memory with the -m option.\n");
+                  INCREASE_MEM_MESSAGE();
                   printf("  Exit program.\n");
                   exit(EXIT_FAILURE));
     pt[0] = &mesh->tetra[newtet[0]];
@@ -1392,8 +1385,7 @@ void split3(pMesh mesh,pSol met,int k,int vx[6]) {
   if ( !iel ) {
     TETRA_REALLOC(mesh,iel,mesh->gap,
                   printf("  ## Error: unable to allocate a new element.\n");
-                  printf("  ## Check the mesh size or ");
-                  printf("increase the allocated memory with the -m option.\n");
+                  INCREASE_MEM_MESSAGE();
                   printf("  Exit program.\n");
                   exit(EXIT_FAILURE));
     pt[0] = &mesh->tetra[newtet[0]];
@@ -1406,8 +1398,7 @@ void split3(pMesh mesh,pSol met,int k,int vx[6]) {
   if ( !iel ) {
     TETRA_REALLOC(mesh,iel,mesh->gap,
                   printf("  ## Error: unable to allocate a new element.\n");
-                  printf("  ## Check the mesh size or ");
-                  printf("increase the allocated memory with the -m option.\n");
+                  INCREASE_MEM_MESSAGE();
                   printf("  Exit program.\n");
                   exit(EXIT_FAILURE));
     pt[0] = &mesh->tetra[newtet[0]];
@@ -1421,8 +1412,7 @@ void split3(pMesh mesh,pSol met,int k,int vx[6]) {
   if ( !iel ) {
     TETRA_REALLOC(mesh,iel,mesh->gap,
                   printf("  ## Error: unable to allocate a new element.\n");
-                  printf("  ## Check the mesh size or ");
-                  printf("increase the allocated memory with the -m option.\n");
+                  INCREASE_MEM_MESSAGE();
                   printf("  Exit program.\n");
                   exit(EXIT_FAILURE));
     pt[0] = &mesh->tetra[newtet[0]];
@@ -1595,8 +1585,7 @@ void split3cone(pMesh mesh,pSol met,int k,int vx[6]) {
   if ( !iel ) {
     TETRA_REALLOC(mesh,iel,mesh->gap,
                   printf("  ## Error: unable to allocate a new element.\n");
-                  printf("  ## Check the mesh size or ");
-                  printf("increase the allocated memory with the -m option.\n");
+                  INCREASE_MEM_MESSAGE();
                   printf("  Exit program.\n");
                   exit(EXIT_FAILURE));
     pt[0] = &mesh->tetra[newtet[0]];
@@ -1609,8 +1598,7 @@ void split3cone(pMesh mesh,pSol met,int k,int vx[6]) {
   if ( !iel ) {
     TETRA_REALLOC(mesh,iel,mesh->gap,
                   printf("  ## Error: unable to allocate a new element.\n");
-                  printf("  ## Check the mesh size or ");
-                  printf("increase the allocated memory with the -m option.\n");
+                  INCREASE_MEM_MESSAGE();
                   printf("  Exit program.\n");
                   exit(EXIT_FAILURE));
     pt[0] = &mesh->tetra[newtet[0]];
@@ -1624,8 +1612,7 @@ void split3cone(pMesh mesh,pSol met,int k,int vx[6]) {
   if ( !iel ) {
     TETRA_REALLOC(mesh,iel,mesh->gap,
                   printf("  ## Error: unable to allocate a new element.\n");
-                  printf("  ## Check the mesh size or ");
-                  printf("increase the allocated memory with the -m option.\n");
+                  INCREASE_MEM_MESSAGE();
                   printf("  Exit program.\n");
                   exit(EXIT_FAILURE));
     pt[0] = &mesh->tetra[newtet[0]];
@@ -2082,8 +2069,7 @@ void split3op(pMesh mesh, pSol met, int k, int vx[6]){
   if ( !iel ) {
     TETRA_REALLOC(mesh,iel,mesh->gap,
                   printf("  ## Error: unable to allocate a new element.\n");
-                  printf("  ## Check the mesh size or ");
-                  printf("increase the allocated memory with the -m option.\n");
+                  INCREASE_MEM_MESSAGE();
                   printf("  Exit program.\n");
                   exit(EXIT_FAILURE));
     pt[0] = &mesh->tetra[newtet[0]];
@@ -2097,8 +2083,7 @@ void split3op(pMesh mesh, pSol met, int k, int vx[6]){
   if ( !iel ) {
     TETRA_REALLOC(mesh,iel,mesh->gap,
                   printf("  ## Error: unable to allocate a new element.\n");
-                  printf("  ## Check the mesh size or ");
-                  printf("increase the allocated memory with the -m option.\n");
+                  INCREASE_MEM_MESSAGE();
                   printf("  Exit program.\n");
                   exit(EXIT_FAILURE));
     pt[0] = &mesh->tetra[newtet[0]];
@@ -2112,8 +2097,7 @@ void split3op(pMesh mesh, pSol met, int k, int vx[6]){
   if ( !iel ) {
     TETRA_REALLOC(mesh,iel,mesh->gap,
                   printf("  ## Error: unable to allocate a new element.\n");
-                  printf("  ## Check the mesh size or ");
-                  printf("increase the allocated memory with the -m option.\n");
+                  INCREASE_MEM_MESSAGE();
                   printf("  Exit program.\n");
                   exit(EXIT_FAILURE));
     pt[0] = &mesh->tetra[newtet[0]];
@@ -2144,8 +2128,7 @@ void split3op(pMesh mesh, pSol met, int k, int vx[6]){
     if ( !iel ) {
       TETRA_REALLOC(mesh,iel,mesh->gap,
                     printf("  ## Error: unable to allocate a new element.\n");
-                    printf("  ## Check the mesh size or ");
-                    printf("increase the allocated memory with the -m option.\n");
+                    INCREASE_MEM_MESSAGE();
                     printf("  Exit program.\n");
                     exit(EXIT_FAILURE));
       pt[0] = &mesh->tetra[newtet[0]];
@@ -2533,8 +2516,7 @@ int split3cb(pMesh mesh, pSol met, int k, int ifac, double o[3],
   if ( !(*ip) ) {
     POINT_REALLOC(mesh,met,*ip,mesh->gap,
                   printf("  ## Error: unable to allocate a new point\n");
-                  printf("  ## Check the mesh size or increase");
-                  printf(" the allocated memory with the -m option.\n");
+                  INCREASE_MEM_MESSAGE();
                   return(-1)
                   ,o,MG_NOTAG);
   }
@@ -2556,8 +2538,7 @@ int split3cb(pMesh mesh, pSol met, int k, int ifac, double o[3],
   if ( !iel ) {
     TETRA_REALLOC(mesh,iel,mesh->gap,
                   printf("  ## Error: unable to allocate a new element.\n");
-                  printf("  ## Check the mesh size or ");
-                  printf("increase the allocated memory with the -m option.\n");
+                  INCREASE_MEM_MESSAGE();
                   delPt(mesh,(*ip));
                   return(-1));
     pt[0] = &mesh->tetra[newtet[0]];
@@ -2570,8 +2551,7 @@ int split3cb(pMesh mesh, pSol met, int k, int ifac, double o[3],
   if ( !iel ) {
     TETRA_REALLOC(mesh,iel,mesh->gap,
                   printf("  ## Error: unable to allocate a new element.\n");
-                  printf("  ## Check the mesh size or ");
-                  printf("increase the allocated memory with the -m option.\n");
+                  INCREASE_MEM_MESSAGE();
                   delPt(mesh,(*ip));
                   delElt(mesh,newtet[1]);
                   return(-1));
@@ -2745,8 +2725,7 @@ int split3cb(pMesh mesh, pSol met, int k, int ifac, double o[3],
   if ( !iel ) {
     TETRA_REALLOC(mesh,iel,mesh->gap,
                   printf("  ## Error: unable to allocate a new element.\n");
-                  printf("  ## Check the mesh size or ");
-                  printf("increase the allocated memory with the -m option.\n");
+                  INCREASE_MEM_MESSAGE();
                   delPt(mesh,(*ip));
                   return(-1));
     pt[0] = &mesh->tetra[newtet2[0]];
@@ -2759,8 +2738,7 @@ int split3cb(pMesh mesh, pSol met, int k, int ifac, double o[3],
   if ( !iel ) {
     TETRA_REALLOC(mesh,iel,mesh->gap,
                   printf("  ## Error: unable to allocate a new element.\n");
-                  printf("  ## Check the mesh size or ");
-                  printf("increase the allocated memory with the -m option.\n");
+                  INCREASE_MEM_MESSAGE();
                   delPt(mesh,(*ip));
                   delElt(mesh,newtet[1]);
                   return(-1));
@@ -2971,8 +2949,7 @@ int split4bar(pMesh mesh, pSol met, int k) {
   if ( !ib ) {
     POINT_REALLOC(mesh,met,ib,mesh->gap,
                   printf("  ## Error: unable to allocate a new point\n");
-                  printf("  ## Check the mesh size or increase");
-                  printf(" the allocated memory with the -m option.\n");
+                  INCREASE_MEM_MESSAGE();
                   return(0)
                   ,o,0);
   }
@@ -2983,8 +2960,7 @@ int split4bar(pMesh mesh, pSol met, int k) {
   if ( !iel ) {
     TETRA_REALLOC(mesh,iel,mesh->gap,
                   printf("  ## Error: unable to allocate a new element.\n");
-                  printf("  ## Check the mesh size or ");
-                  printf("increase the allocated memory with the -m option.\n");
+                  INCREASE_MEM_MESSAGE();
                   delPt(mesh,ib);
                   return(0));
     pt[0] = &mesh->tetra[newtet[0]];
@@ -2997,8 +2973,7 @@ int split4bar(pMesh mesh, pSol met, int k) {
   if ( !iel ) {
     TETRA_REALLOC(mesh,iel,mesh->gap,
                   printf("  ## Error: unable to allocate a new element.\n");
-                  printf("  ## Check the mesh size or ");
-                  printf("increase the allocated memory with the -m option.\n");
+                  INCREASE_MEM_MESSAGE();
                   delPt(mesh,ib);
                   delElt(mesh,newtet[1]);
                   return(0));
@@ -3013,8 +2988,7 @@ int split4bar(pMesh mesh, pSol met, int k) {
   if ( !iel ) {
     TETRA_REALLOC(mesh,iel,mesh->gap,
                   printf("  ## Error: unable to allocate a new element.\n");
-                  printf("  ## Check the mesh size or ");
-                  printf("increase the allocated memory with the -m option.\n");
+                  INCREASE_MEM_MESSAGE();
                   delPt(mesh,ib);
                   delElt(mesh,newtet[1]);
                   delElt(mesh,newtet[2]);
@@ -3189,8 +3163,7 @@ int split4cb(pMesh mesh, pSol met, int k, double o[3], double cb[4], int *ip ) {
   if ( !iel ) {
     TETRA_REALLOC(mesh,iel,mesh->gap,
                   printf("  ## Error: unable to allocate a new element.\n");
-                  printf("  ## Check the mesh size or ");
-                  printf("increase the allocated memory with the -m option.\n");
+                  INCREASE_MEM_MESSAGE();
                   delPt(mesh,(*ip));
                   return(0));
     pt[0] = &mesh->tetra[newtet[0]];
@@ -3203,8 +3176,7 @@ int split4cb(pMesh mesh, pSol met, int k, double o[3], double cb[4], int *ip ) {
   if ( !iel ) {
     TETRA_REALLOC(mesh,iel,mesh->gap,
                   printf("  ## Error: unable to allocate a new element.\n");
-                  printf("  ## Check the mesh size or ");
-                  printf("increase the allocated memory with the -m option.\n");
+                  INCREASE_MEM_MESSAGE();
                   delPt(mesh,(*ip));
                   delElt(mesh,newtet[1]);
                   return(0));
@@ -3219,8 +3191,7 @@ int split4cb(pMesh mesh, pSol met, int k, double o[3], double cb[4], int *ip ) {
   if ( !iel ) {
     TETRA_REALLOC(mesh,iel,mesh->gap,
                   printf("  ## Error: unable to allocate a new element.\n");
-                  printf("  ## Check the mesh size or ");
-                  printf("increase the allocated memory with the -m option.\n");
+                  INCREASE_MEM_MESSAGE();
                   delPt(mesh,(*ip));
                   delElt(mesh,newtet[1]);
                   delElt(mesh,newtet[2]);
@@ -3476,8 +3447,7 @@ void split4sf(pMesh mesh,pSol met,int k,int vx[6]) {
     if ( !iel ) {
       TETRA_REALLOC(mesh,iel,mesh->gap,
                     printf("  ## Error: unable to allocate a new element.\n");
-                    printf("  ## Check the mesh size or ");
-                    printf("increase the allocated memory with the -m option.\n");
+                    INCREASE_MEM_MESSAGE();
                     printf("  Exit program.\n");
                     exit(EXIT_FAILURE));
       for ( i=0; i<j; i++)
@@ -3719,8 +3689,7 @@ void split4op(pMesh mesh,pSol met,int k,int vx[6]) {
     if ( !iel ) {
       TETRA_REALLOC(mesh,iel,mesh->gap,
                     printf("  ## Error: unable to allocate a new element.\n");
-                    printf("  ## Check the mesh size or ");
-                    printf("increase the allocated memory with the -m option.\n");
+                    INCREASE_MEM_MESSAGE();
                     printf("  Exit program.\n");
                     exit(EXIT_FAILURE));
       for ( i=0; i<j; i++)
@@ -3960,8 +3929,7 @@ void split5(pMesh mesh,pSol met,int k,int vx[6]) {
     if ( !iel ) {
       TETRA_REALLOC(mesh,iel,mesh->gap,
                     printf("  ## Error: unable to allocate a new element.\n");
-                    printf("  ## Check the mesh size or ");
-                    printf("increase the allocated memory with the -m option.\n");
+                    INCREASE_MEM_MESSAGE();
                     printf("  Exit program.\n");
                     exit(EXIT_FAILURE));
       for ( j=0; j<i; j++)
@@ -4221,8 +4189,7 @@ void split6(pMesh mesh,pSol met,int k,int vx[6]) {
     if ( !iel ) {
       TETRA_REALLOC(mesh,iel,mesh->gap,
                     printf("  ## Error: unable to allocate a new element.\n");
-                    printf("  ## Check the mesh size or ");
-                    printf("increase the allocated memory with the -m option.\n");
+                    INCREASE_MEM_MESSAGE();
                     printf("  Exit program.\n");
                     exit(EXIT_FAILURE));
       for ( j=0; j<i; j++ )

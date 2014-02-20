@@ -192,19 +192,35 @@ ADD_TEST(NAME Various_refunref_Santa_met0.05_hausd0.0001_ar90_2
   ${REG_TESTS_PATH}/Various_refunref_Santa_met0.05_hausd0.0001_ar90/santa.o.o.meshb)
 
 # 4: Refinment on a solution
-ADD_TEST(NAME Various_adpsol_hgrad1_M6Mach_Eps0.001_hmin0.001_hmax2_2
-  COMMAND ${EXECUT} -v 5
-  ${REG_TESTS_PATH}/Various_adpsol_hgrad1_M6Mach_Eps0.001_hmin0.001_hmax2/M6.o
-  -sol ${REG_TESTS_PATH}/Various_adpsol_hgrad1_M6Mach_Eps0.001_hmin0.001_hmax2/M6.o.sol
-  -hausd 0.1 -ar 60 -hgrad 1
-  ${REG_TESTS_PATH}/Various_adpsol_hgrad1_M6Mach_Eps0.001_hmin0.001_hmax2/M6.o.o.meshb)
-ADD_TEST(NAME Various_adpsol_hgrad1_M6Mach_Eps0.0005_hmin0.0001_hmax3_2
-  COMMAND ${EXECUT} -v 5
-  ${REG_TESTS_PATH}/Various_adpsol_hgrad1_M6Mach_Eps0.0005_hmin0.0001_hmax3/M6.o
-  -sol
-  ${REG_TESTS_PATH}/Various_adpsol_hgrad1_M6Mach_Eps0.0005_hmin0.0001_hmax3/M6.o.sol
-  -hausd 0.1 -ar 60 -hgrad 1
-  ${REG_TESTS_PATH}/Various_adpsol_hgrad1_M6Mach_Eps0.0005_hmin0.0001_hmax3/M6.o.o.meshb)
+IF ( PATTERN )
+  ADD_TEST(NAME Various_adpsol_hgrad1_M6Mach_Eps0.001_hmin0.001_hmax2_2
+    COMMAND ${EXECUT} -v 5
+    ${REG_TESTS_PATH}/Various_adpsol_hgrad1_M6Mach_Eps0.001_hmin0.001_hmax2/M6.o
+    -sol ${REG_TESTS_PATH}/Various_adpsol_hgrad1_M6Mach_Eps0.001_hmin0.001_hmax2/M6.o.sol
+    -hausd 0.1 -ar 60 -hgrad 1
+    ${REG_TESTS_PATH}/Various_adpsol_hgrad1_M6Mach_Eps0.001_hmin0.001_hmax2/M6.o.o.meshb)
+  ADD_TEST(NAME Various_adpsol_hgrad1_M6Mach_Eps0.0005_hmin0.0001_hmax3_2
+    COMMAND ${EXECUT} -v 5
+    ${REG_TESTS_PATH}/Various_adpsol_hgrad1_M6Mach_Eps0.0005_hmin0.0001_hmax3/M6.o
+    -sol
+    ${REG_TESTS_PATH}/Various_adpsol_hgrad1_M6Mach_Eps0.0005_hmin0.0001_hmax3/M6.o.sol
+    -hausd 0.1 -ar 60 -hgrad 1
+    ${REG_TESTS_PATH}/Various_adpsol_hgrad1_M6Mach_Eps0.0005_hmin0.0001_hmax3/M6.o.o.meshb)
+ELSE ()
+  ADD_TEST(NAME Various_adpsol_hgrad1_M6Mach_Eps0.001_hmin0.001_hmax2_2
+    COMMAND ${EXECUT} -v 5
+    ${REG_TESTS_PATH}/Various_adpsol_hgrad1_M6Mach_Eps0.001_hmin0.001_hmax2/M6.o
+    -sol ${REG_TESTS_PATH}/Various_adpsol_hgrad1_M6Mach_Eps0.001_hmin0.001_hmax2/M6.o.sol
+    -hausd 0.1 -ar 60 -hgrad 1 -bucket 800
+    ${REG_TESTS_PATH}/Various_adpsol_hgrad1_M6Mach_Eps0.001_hmin0.001_hmax2/M6.o.o.meshb)
+  ADD_TEST(NAME Various_adpsol_hgrad1_M6Mach_Eps0.0005_hmin0.0001_hmax3_2
+    COMMAND ${EXECUT} -v 5
+    ${REG_TESTS_PATH}/Various_adpsol_hgrad1_M6Mach_Eps0.0005_hmin0.0001_hmax3/M6.o
+    -sol
+    ${REG_TESTS_PATH}/Various_adpsol_hgrad1_M6Mach_Eps0.0005_hmin0.0001_hmax3/M6.o.sol
+    -hausd 0.1 -ar 60 -hgrad 1 -bucket 800
+    ${REG_TESTS_PATH}/Various_adpsol_hgrad1_M6Mach_Eps0.0005_hmin0.0001_hmax3/M6.o.o.meshb)
+ENDIF ()
 
 # Test multi-domain remeshing
 ADD_TEST(NAME MultiDom_Cube2

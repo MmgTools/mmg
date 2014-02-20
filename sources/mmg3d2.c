@@ -488,8 +488,7 @@ static int cuttet_ls(pMesh mesh, pSol sol/*,double *tmp*/){
       if ( !np ) {
         POINT_REALLOC(mesh,sol,np,0.2,
                       printf("  ## Error: unable to allocate a new point\n");
-                      printf("  ## Check the mesh size or increase");
-                      printf(" the allocated memory with the -m option.\n");
+                      INCREASE_MEM_MESSAGE();
                       return(0)
                       ,c,0);
       }

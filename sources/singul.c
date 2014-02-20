@@ -485,8 +485,7 @@ int creaPoint(pMesh mesh, pSol met, int iel,double c[3], double cb[4], char tag)
     if ( !ip ) {
       POINT_REALLOC(mesh,met,ip,0.2,
                     printf("  ## Error: unable to allocate a new point\n");
-                    printf("  ## Check the mesh size or increase");
-                    printf(" the allocated memory with the -m option.\n");
+                    INCREASE_MEM_MESSAGE();
                     fprintf(stdout,"  Exit program.\n");
                     return(0)
                     ,c,tag);
@@ -599,8 +598,7 @@ int creaEdge(pMesh mesh, pSol met, Travel *trav, char tag){
     if ( !ip ) {
       POINT_REALLOC(mesh,met,ip,0.2,
                     printf("  ## Error: unable to allocate a new point\n");
-                    printf("  ## Check the mesh size or increase");
-                    printf(" the allocated memory with the -m option.\n");
+                    INCREASE_MEM_MESSAGE();
                     fprintf(stdout,"  Exit program.\n");
                     return(0)
                     ,c,tag);

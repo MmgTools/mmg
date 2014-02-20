@@ -71,7 +71,7 @@ void usage(char *prog) {
   fprintf(stdout,"\n** Generic options :\n");
   fprintf(stdout,"-h      Print this message\n");
   fprintf(stdout,"-v [n]  Tune level of verbosity, [-10..10]\n");
-  fprintf(stdout,"-m [n]  Set memory size to n Mbytes\n");
+  fprintf(stdout,"-m [n]  Set maximal memory size to n Mbytes\n");
   fprintf(stdout,"-d      Turn on debug mode\n");
 
   fprintf(stdout,"\n**  File specifications\n");
@@ -90,16 +90,16 @@ void usage(char *prog) {
 
 
   fprintf(stdout,"\n**  Parameters\n");
-  fprintf(stdout,"-ar val    angle detection\n");
-  fprintf(stdout,"-nr        no angle detection\n");
-  fprintf(stdout,"-hmin val  minimal mesh size\n");
-  fprintf(stdout,"-hmax val  maximal mesh size\n");
-  fprintf(stdout,"-hausd val control Hausdorff distance\n");
-  fprintf(stdout,"-hgrad val control gradation\n");
-  fprintf(stdout,"-ls        levelset meshing \n");
-  fprintf(stdout,"-noswap    no edge or face flipping\n");
-  fprintf(stdout,"-nomove    no point relocation\n");
-  fprintf(stdout,"-noinsert  no point insertion/deletion \n");
+  fprintf(stdout,"-ar     val  angle detection\n");
+  fprintf(stdout,"-nr          no angle detection\n");
+  fprintf(stdout,"-hmin   val  minimal mesh size\n");
+  fprintf(stdout,"-hmax   val  maximal mesh size\n");
+  fprintf(stdout,"-hausd  val  control Hausdorff distance\n");
+  fprintf(stdout,"-hgrad  val  control gradation\n");
+  fprintf(stdout,"-ls          levelset meshing \n");
+  fprintf(stdout,"-noswap      no edge or face flipping\n");
+  fprintf(stdout,"-nomove      no point relocation\n");
+  fprintf(stdout,"-noinsert    no point insertion/deletion \n");
 #ifndef PATTERN
   fprintf(stdout,"-bucket val Specify the size of bucket per dimension \n");
 #endif
@@ -136,7 +136,6 @@ int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met
                                      atoi(argv[i])) )
             exit(EXIT_FAILURE);
         break;
-	
 #endif
       case 'd':  /* debug */
         if ( !MMG5_Set_iparameters(mesh,met,MMG5_IPARAM_debug,1) )

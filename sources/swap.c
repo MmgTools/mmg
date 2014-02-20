@@ -239,24 +239,21 @@ int swpbdy(pMesh mesh,pSol met,int *list,int ret,int it1
 #ifdef PATTERN
     POINT_REALLOC(mesh,met,nm,mesh->gap,
                   printf("  ## Error: unable to allocate a new point\n");
-                  printf("  ## Check the mesh size or increase");
-                  printf(" the allocated memory with the -m option.\n");
+                  INCREASE_MEM_MESSAGE();
                   return(-1)
                   ,c,MG_BDY);
 #else
     if ( bucket ) {
       POINT_AND_BUCKET_REALLOC(mesh,met,nm,mesh->gap,
                                printf("  ## Error: unable to allocate a new point\n");
-                               printf("  ## Check the mesh size or increase");
-                               printf(" the allocated memory with the -m option.\n");
+                               INCREASE_MEM_MESSAGE();
                                return(-1)
                                ,c,MG_BDY);
     }
     else{
       POINT_REALLOC(mesh,met,np,mesh->gap,
                     printf("  ## Error: unable to allocate a new point\n");
-                    printf("  ## Check the mesh size or increase");
-                    printf(" the allocated memory with the -m option.\n");
+                    INCREASE_MEM_MESSAGE();
                     return(-1)
                     ,c,MG_BDY);
     }

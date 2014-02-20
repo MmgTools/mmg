@@ -7,7 +7,7 @@
  *
  * Integers parameters:
  *    MMG5_IPARAM_verbose           = [-10..10] , Tune level of verbosity;
- *    MMG5_IPARAM_mem               = [n/-1]    , Set memory size to n Mbytes/keep the default value;
+ *    MMG5_IPARAM_mem               = [n/-1]    , Set maximal memory size to n Mbytes/keep the default value;
  *    MMG5_IPARAM_debug             = [1/0]     , Turn on/off debug mode;
  *    MMG5_IPARAM_angle             = [1/0]     , Turn on/off angle detection;
  *    MMG5_IPARAM_iso               = [1/0]     , Turn on/off levelset meshing;
@@ -547,8 +547,7 @@ int Set_vertex(MMG5_pMesh mesh, double c0, double c1, double c2, int ref, int po
   if ( pos > mesh->npmax ) {
     fprintf(stdout,"  ## Error: unable to allocate a new point.\n");
     fprintf(stdout,"    max number of points: %d\n",mesh->npmax);
-    fprintf(stdout,"  ## Check the mesh size or ");
-    fprintf(stdout,"increase the allocated memory with the -m option.\n");
+    INCREASE_MEM_MESSAGE();
     return(0);
   }
 
@@ -623,8 +622,7 @@ int Set_tetrahedra(MMG5_pMesh mesh, int v0, int v1, int v2, int v3, int ref, int
   if ( pos > mesh->nemax ) {
     fprintf(stdout,"  ## Error: unable to allocate a new element.\n");
     fprintf(stdout,"    max number of element: %d\n",mesh->nemax);
-    fprintf(stdout,"  ## Check the mesh size or ");
-    fprintf(stdout,"increase the allocated memory with the -m option.\n");
+    INCREASE_MEM_MESSAGE();
     return(0);
   }
 
@@ -722,8 +720,7 @@ int Set_triangle(MMG5_pMesh mesh, int v0, int v1, int v2, int ref,int pos) {
   if ( pos > mesh->ntmax ) {
     fprintf(stdout,"  ## Error: unable to allocate a new triangle.\n");
     fprintf(stdout,"    max number of triangle: %d\n",mesh->ntmax);
-    fprintf(stdout,"  ## Check the mesh size or ");
-    fprintf(stdout,"increase the allocated memory with the -m option.\n");
+    INCREASE_MEM_MESSAGE();
     return(0);
   }
 
@@ -787,8 +784,7 @@ int Set_edges(MMG5_pMesh mesh, int v0, int v1, int ref, int pos) {
   if ( pos > mesh->namax ) {
     fprintf(stdout,"  ## Error: unable to allocate a new edge.\n");
     fprintf(stdout,"    max number of edge: %d\n",mesh->namax);
-    fprintf(stdout,"  ## Check the mesh size or ");
-    fprintf(stdout,"increase the allocated memory with the -m option.\n");
+    INCREASE_MEM_MESSAGE();
     return(0);
   }
   if ( pos > mesh->na ) {

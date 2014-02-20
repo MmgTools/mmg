@@ -705,12 +705,21 @@ int loadMet(pMesh mesh,pSol met) {
   if ( !met->namein )  return(0);
   strcpy(data,met->namein);
   ptr = strstr(data,".sol");
-  if ( ptr )  *ptr = '\0';
-  strcat(data,".solb");
-  if (!(inm = GmfOpenMesh(data,GmfRead,&met->ver,&met->dim)) ) {
-    ptr  = strstr(data,".sol");
-    *ptr = '\0';
-    strcat(data,".sol");
+  if ( !ptr ) {
+    /* data contains the filename without extension */
+    strcat(data,".solb");
+    if (!(inm = GmfOpenMesh(data,GmfRead,&met->ver,&met->dim)) ) {
+      /* our file is not a .solb file, try with .sol ext */
+      ptr  = strstr(data,".sol");
+      *ptr = '\0';
+      strcat(data,".sol");
+      if (!(inm = GmfOpenMesh(data,GmfRead,&met->ver,&met->dim)) ) {
+        fprintf(stderr,"  ** %s  NOT FOUND. USE DEFAULT METRIC.\n",data);
+        return(-1);
+      }
+    }
+  }
+  else {
     if (!(inm = GmfOpenMesh(data,GmfRead,&met->ver,&met->dim)) ) {
       fprintf(stderr,"  ** %s  NOT FOUND. USE DEFAULT METRIC.\n",data);
       return(-1);

@@ -48,6 +48,13 @@
     }while(0)
 #endif
 
+/** Error message when lack of memory */
+#define INCREASE_MEM_MESSAGE() do                         \
+    {                                                     \
+  printf("  ## Check the mesh size or increase maximal"); \
+  printf(" authorized memory with the -m option.\n");     \
+    } while(0)
+
 /** Check if used memory overflow maximal authorized memory.
     Execute the command law if lack of memory. */
 #define CHK_MEM(mesh,size,string,law) do                                \
@@ -501,8 +508,8 @@ int  indElt(pMesh mesh,int kel);
 int  indPt(pMesh mesh,int kp);
 void printTria(pMesh mesh,char* fileName);
 void printTetra(pMesh mesh,char* fileName);
-int  saveMesh(MMG5_pMesh );
-int  saveLibraryMesh(MMG5_pMesh );
+int  saveMesh(pMesh mesh);
+int  saveLibraryMesh(pMesh mesh);
 
 #ifdef USE_SCOTCH
 int renumbering(int vertBoxNbr, pMesh mesh, pSol sol);
