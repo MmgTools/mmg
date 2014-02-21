@@ -89,7 +89,7 @@ int MMG_npuiss,MMG_nvol,MMG_npres;
     nm = ns = 0;
     for (k=1; k<=mesh->ne; k++) {
       pt = &mesh->tetra[k];
-      if ( !MG_EOK(pt) || pt->ref < 0 /*|| (pt->tag & MG_REQ)*/ )   continue;
+      if ( !MG_EOK(pt) || pt->ref < 0 || (pt->tag & MG_REQ) )   continue;
 
       /* point j on face i */
       for (i=0; i<4; i++) {
@@ -204,7 +204,6 @@ static inline int boucle_for(pMesh mesh, pSol met,pBucket bucket,int ne,int* ifi
     //if(pt->qual > 0.038/*0.0288675*/ /*0.6/ALPHAD*/) continue;
     pxt = pt->xt ? &mesh->xtetra[pt->xt] : 0;
 
-
     /* 1) find longest and shortest edge  and try to manage it*/
     imax = -1; lmax = 0.0;
     imin = -1; lmin = DBL_MAX;
@@ -307,10 +306,12 @@ static inline int boucle_for(pMesh mesh, pSol met,pBucket bucket,int ne,int* ifi
 	if ( !ip ){
 	  /* reallocation of point table */
 #ifndef PATTERN
+
 	  POINT_AND_BUCKET_REALLOC(mesh,met,ip,mesh->gap,
 				   *warn=1;
 				   goto collapse//break
 				   ,o,tag);
+
 #else
 	  printf("ERROR: function not available in delaunay mode. Exiting\n");
 	  exit(EXIT_FAILURE);
@@ -453,6 +454,7 @@ static inline int boucle_for(pMesh mesh, pSol met,pBucket bucket,int ne,int* ifi
 				   *warn=1;
 				   goto collapse//break
 				   ,o,MG_NOTAG);
+
 #else
 	  printf("ERROR: function not available in delaunay mode. Exiting\n");
 	  exit(EXIT_FAILURE);
@@ -795,6 +797,7 @@ static inline int boucle_for(pMesh mesh, pSol met,pBucket bucket,int ne,int* ifi
 	  if ( !ip )  {
 	    /* reallocation of point table */
 #ifndef PATTERN
+
 	    POINT_AND_BUCKET_REALLOC(mesh,met,ip,mesh->gap,
 				     *warn=1;
 				     goto collapse2//break
@@ -809,7 +812,7 @@ static inline int boucle_for(pMesh mesh, pSol met,pBucket bucket,int ne,int* ifi
 	    met->m[ip] = 0.5 * (met->m[ip1]+met->m[ip2]);
 	  //CECILE
 	  //LA DELONE
-	  if ( /*lmax>4 &&*/ /*it &&*/ !buckin_iso(mesh,met,bucket,ip) ) {
+	  if ( /*lmax>4 &&*/ /*it &&*/  !buckin_iso(mesh,met,bucket,ip) ) {
 	    delPt(mesh,ip);
 	    (*ifilt)++;
 	    goto collapse2;////continue;
@@ -944,7 +947,7 @@ int adpsplcol(pMesh mesh,pSol met,pBucket bucket, int* warn) {
       ne = mesh->ne;
       if(boucle_for(mesh,met,bucket,ne,&ifilt,&ns,&nc,warn,it)<0) exit(EXIT_FAILURE);
     } /* End conditional loop on mesh->info.noinsert */
-    else  ns = nc = 0;
+    else  ns = nc = ifilt = 0;
 
     /* prilen(mesh,met); */
     /*     fprintf(stdout,"    REJECTED : %5d\n",MMG_npd); */

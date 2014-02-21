@@ -98,8 +98,8 @@ int delone(pMesh mesh,pSol sol,int ip,int *list,int ilist) {
   char      alert;
   int tref,isused,ixt;
   Hash hedg;
-
-  if ( mesh->ne + 2*ilist > mesh->nemax )  return(0);
+  //obsolete avec la realloc
+  // if ( mesh->ne + 2*ilist > mesh->nemax )  {printf("on passe ici boum\n");return(0);}
   base = mesh->mark;
   /* external faces */
   size = 0;
@@ -178,8 +178,16 @@ int delone(pMesh mesh,pSol sol,int ip,int *list,int ilist) {
       if ( !jel || (mesh->tetra[jel].mark != base) ) {
         iel = newElt(mesh);
 	
-        if ( iel < 1 )  {printf("pas de voisin!!\n");return(0);}
-        pt1 = &mesh->tetra[iel];
+	if ( !iel ) {
+	  TETRA_REALLOC(mesh,iel,mesh->gap,
+			printf("  ## Warning: unable to allocate a new element.\n");
+			return(0));
+	  pt   = &mesh->tetra[old];
+	  if(pt->xt) 
+	    pxt0 = &mesh->xtetra[pt->xt];
+	  adja = &mesh->adja[iadr];
+	}        
+	pt1 = &mesh->tetra[iel];
         memcpy(pt1,pt,sizeof(Tetra));
         pt1->v[i] = ip;
         pt1->qual = orcal(mesh,iel);
@@ -647,7 +655,7 @@ int correction_iso(pMesh mesh,int ip,int *list,int ilist,int nedep) {
         if ( dd*dd < nn * eps2 )  break;
         MMG_cas=0;
       }
-      if ( i < 4 ) {
+      if ( i < 4 ||  pt->tag & MG_REQ ) {
         if ( ipil <= nedep )  {/*printf("on veut tout retirer ? %d %d\n",ipil,nedep);*/return(0);   }
         /* remove iel from list */
         pt->mark = base-1;
@@ -860,7 +868,7 @@ int cavity(pMesh mesh,pSol sol,int iel,int ip,int *list,int lon) {
       }
       /* store tetra */
       if ( j == 4 ) {
-        if ( pt->tag & MG_REQ ) isreq = 1;
+	 if ( pt->tag & MG_REQ ) isreq = 1;
         pt->mark = base;
         list[ilist++] = adj;
       }
@@ -871,11 +879,10 @@ int cavity(pMesh mesh,pSol sol,int iel,int ip,int *list,int lon) {
   }
   while ( ipil < ilist );
 
-  /* global overflow */
-  if ( mesh->ne + 2*ilist >= mesh->nemax )
-    ilist = -ilist;
-  else
-    ilist = correction_iso(mesh,ip,list,ilist,lon);
+  /* global overflow: obsolete avec la reallocation */
+  //if ( mesh->ne + 2*ilist >= mesh->nemax ) {
+
+  ilist = correction_iso(mesh,ip,list,ilist,lon);
  
   if ( isreq ) ilist = -fabs(ilist);
 
