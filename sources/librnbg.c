@@ -407,7 +407,7 @@ int renumbering(int boxVertNbr, pMesh mesh, pSol sol) {
                 DEL_MEM(mesh,vertTab,(vertNbr+2)*sizeof(SCOTCH_Num));
                 return(1));
         edgeSiz *= 1.2;
-        SAFE_REALLOC(edgeTab,edgeSiz,SCOTCH_Num);
+        SAFE_REALLOC(edgeTab,edgeSiz,SCOTCH_Num,"scotch table");
       }
 
       edgeTab[edgeNbr++] = vertOldTab[ballTetIdx];

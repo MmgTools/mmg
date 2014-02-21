@@ -216,7 +216,7 @@ int hashTria(pMesh mesh) {
           }
           /* non-manifold case */
           else if ( adja[i] != 3*jel+j ) {
-            if ( pt->ref == MG_ISO ) {
+            if ( (pt->ref == MG_ISO) || (pt->ref < 0) ) {
               lel = mesh->adjt[3*(jel-1)+1+j]/3;
               l   = mesh->adjt[3*(jel-1)+1+j]%3;
               mesh->adjt[3*(lel-1)+1+l] = 0;
@@ -843,7 +843,7 @@ int bdryIso(pMesh mesh) {
   /* step 2 : create triangles */
   ADD_MEM(mesh,nt*sizeof(Tria),"triangles",return(0));
   if ( mesh->ntmax < (mesh->nt+nt ) )  mesh->ntmax = mesh->nt+nt;
-  SAFE_RECALLOC(mesh->tria,mesh->nt+1,(mesh->nt+nt+1),Tria);
+  SAFE_RECALLOC(mesh->tria,mesh->nt+1,(mesh->nt+nt+1),Tria,"triangles");
 
   for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];

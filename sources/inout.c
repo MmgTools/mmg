@@ -29,7 +29,7 @@ int loadMesh(pMesh mesh) {
         ADD_MEM(mesh,5*sizeof(char),"output file name",
                 printf("  Exit program.\n");
                 exit(EXIT_FAILURE));
-        SAFE_REALLOC(mesh->nameout,strlen(mesh->nameout)+6,char);
+        SAFE_REALLOC(mesh->nameout,strlen(mesh->nameout)+6,char,"output mesh name");
         strcat(mesh->nameout,".mesh");
       }
     }
@@ -37,7 +37,7 @@ int loadMesh(pMesh mesh) {
       ADD_MEM(mesh,6*sizeof(char),"input file name",
               printf("  Exit program.\n");
               exit(EXIT_FAILURE));
-      SAFE_REALLOC(mesh->nameout,strlen(mesh->nameout)+7,char);
+      SAFE_REALLOC(mesh->nameout,strlen(mesh->nameout)+7,char,"input file name");
       strcat(mesh->nameout,".meshb");
     }
   }
@@ -130,7 +130,7 @@ int loadMesh(pMesh mesh) {
         ADD_MEM(mesh,(mesh->nt+1)*sizeof(Tria),"triangles",
                 printf("  Exit program.\n");
                 exit(EXIT_FAILURE));
-        SAFE_RECALLOC(mesh->tria,nt+1,(mesh->nt+1),Tria);
+        SAFE_RECALLOC(mesh->tria,nt+1,(mesh->nt+1),Tria,"triangles");
       }
     }
     else {
@@ -337,7 +337,7 @@ int saveMesh(pMesh mesh) {
   for (k=1; k<=mesh->np; k++) {
     ppt = &mesh->point[k];
     if ( MG_VOK(ppt) )
-      GmfSetLin(outm,GmfVertices,ppt->c[0],ppt->c[1],ppt->c[2],ppt->ref);
+      GmfSetLin(outm,GmfVertices,ppt->c[0],ppt->c[1],ppt->c[2],abs(ppt->ref));
   }
 
   /* corners+required */

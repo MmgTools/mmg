@@ -218,7 +218,7 @@ int Set_inputSolName(MMG5_pMesh mesh,MMG5_pSol sol, char* solin) {
       if ( ptr ) {
         /* the sol file is renamed with the meshfile without extension */
         *ptr = '\0';
-        SAFE_REALLOC(sol->namein,(strlen(sol->namein)+1),char);
+        SAFE_REALLOC(sol->namein,(strlen(sol->namein)+1),char,"input sol name");
       }
       ADD_MEM(mesh,(strlen(sol->namein)+1)*sizeof(char),"input sol name",
               printf("  Exit program.\n");
@@ -316,7 +316,7 @@ int Set_outputSolName(MMG5_pMesh mesh,MMG5_pSol sol, char* solout) {
       ADD_MEM(mesh,(strlen(sol->nameout)+1)*sizeof(char),"output sol name",
               printf("  Exit program.\n");
               exit(EXIT_FAILURE));
-      SAFE_REALLOC(sol->nameout,(strlen(sol->nameout)+1),char);
+      SAFE_REALLOC(sol->nameout,(strlen(sol->nameout)+1),char,"output sol name");
     }
     else {
       fprintf(stdout,"  ## Error: no name for output mesh. please, use");
@@ -1122,7 +1122,7 @@ int skipIso(MMG5_pMesh mesh) {
       DEL_MEM(mesh,mesh->tria,(mesh->nt+1)*sizeof(Tria));
     else {
       ADD_MEM(mesh,mesh->nti-mesh->nt,"triangles",return(0));
-      SAFE_RECALLOC(mesh->tria,mesh->nt+1,(mesh->nti+1),Tria);
+      SAFE_RECALLOC(mesh->tria,mesh->nt+1,(mesh->nti+1),Tria,"triangles");
     }
     mesh->nt = mesh->nti;
   }
@@ -1153,7 +1153,7 @@ int skipIso(MMG5_pMesh mesh) {
       DEL_MEM(mesh,mesh->edge,(mesh->nai+1)*sizeof(Edge));
     else {
       ADD_MEM(mesh,mesh->nai-mesh->na,"Edges",return(0));
-      SAFE_RECALLOC(mesh->edge,mesh->na+1,(mesh->nai+1),Edge);
+      SAFE_RECALLOC(mesh->edge,mesh->na+1,(mesh->nai+1),Edge,"edges");
     }
     mesh->na = mesh->nai;
   }

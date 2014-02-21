@@ -1166,7 +1166,7 @@ int optet(pMesh mesh, pSol met,pBucket bucket) {
     fprintf(stdout,"  ## Error:");
     fprintf(stdout," unable to allocate a new point in last call of adpspl.\n");
     fprintf(stdout,"  ## Check the mesh size or ");
-    fprintf(stdout,"increase the allocated memory with the -m option.\n");
+    fprintf(stdout,"increase the maximal authorized memory with the -m option.\n");
     fprintf(stdout,"  ## Uncomplete mesh. Exiting\n" );
     return(0);
   }

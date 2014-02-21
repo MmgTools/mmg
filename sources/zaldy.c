@@ -171,6 +171,12 @@ void memOption(pMesh mesh) {
     fprintf(stdout,"  MAXIMUM MEMORY AUTHORIZED (Mo)    %lld\n",
             mesh->memMax/million);
 
+  if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug ) {
+    fprintf(stdout,"  NPMAX    %d\n",mesh->npmax);
+    fprintf(stdout,"  NTMAX    %d\n",mesh->ntmax);
+    fprintf(stdout,"  NEMAX    %d\n",mesh->nemax);
+  }
+
   return;
 }
 
