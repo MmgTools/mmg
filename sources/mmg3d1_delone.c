@@ -1012,33 +1012,6 @@ int adpsplcol(pMesh mesh,pSol met,pBucket bucket, int* warn) {
       fprintf(stdout,"     %8d filtered %8d splitted, %8d collapsed, %8d swapped, %8d moved\n",ifilt,ns,nc,nf,nm);
     if ( ns < 10 && abs(nc-ns) < 3 )  break;
     else if ( it > 3 && abs(nc-ns) < 0.3 * MG_MAX(nc,ns) )  break;
-#ifdef USE_SCOTCH
-    /*check enough vertex to renum*/
-    if ( mesh->info.renum && (mesh->np/2. > BOXSIZE) ) {
-      /* renumbering begin */
-      if ( mesh->info.imprim > 5 )
-	fprintf(stdout,"renumbering");
-      renumbering(BOXSIZE,mesh, met);
-
-      if ( mesh->info.imprim > 5) {
-	fprintf(stdout,"  -- PHASE RENUMBERING COMPLETED. \n");
-      }
-      if ( mesh->info.ddebug )  chkmsh(mesh,1,0);
-      /* renumbering end */
-    }
-#else
-    free(mesh->adja);
-    mesh->adja=NULL;
-    hashTetra(mesh,1);
-#endif
-    /*free bucket*/
-    DEL_MEM(mesh,bucket->head,(bucket->size*bucket->size*bucket->size+1)*sizeof(int));
-    DEL_MEM(mesh,bucket->link,(mesh->npmax+1)*sizeof(int));
-    DEL_MEM(mesh,bucket,sizeof(Bucket));
-    
-    bucket = newBucket(mesh,mesh->info.bucket);//M_MAX(mesh->mesh->info.bucksiz,BUCKSIZ));
-    if ( !bucket )  return(0);
-
   }
   while( ++it < maxit && nc+ns > 0 );
 
