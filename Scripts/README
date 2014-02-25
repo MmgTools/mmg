@@ -1,18 +1,32 @@
 FILES:
+   compare_listStruct.pl : script to compare files created by functions printTetra/printTria (mmg3d5)
+
    rafIter.sh         : to run iterative refinement on an analytic solution given by putmet
+
    experimental-run.sh: run a panel of tests in experimental mode (-h for help)
    nightly-run.sh     : run all tests during night (must be used with crontab or another task scheduler). ctest is run in verbose mode and the output is available in build/ctest$DATE.log.
    continuous-run.sh  : check automatically the repository at each commit and run nightlySVN-run.sh
    nighltySVN-run.sh  : check some build (compilation in Release or Minsizerel mod) and memory errors at each commit
 
-   compare_listStruct.pl : script to compare files created by functions printTetra/printTria (mmg3d5)
+   putmet-Darwin-x86_64/putmet-Debian-x86_64: putmet for mac/linux
+   scripts_plafrim_mmg.tgz: scripts to run tests on plafrim
 
 USAGE:
   Only experimental-run and nightly-run are useful to developper.
   Results of tests are submitted on the local host vulcain so to see it you need to configure
   your ssh (.ssh/config) to have acces on vulcain. Then:
      you must forward the port 2000:
-	$ssh -L 2000:localhost:80 vulcain
+	$ssh -L 2000:localhost:80 vulcain sleep 120
+     or if you need to use access:
+        $ssh -f -L 2000:vulcain.bordeaux.inria.fr:80 acces.bordeaux.inria.fr sleep 120	       (forward port 2000 during 2 min)
      and go to http://localhost:2000/CDash/user.php
 
-   experimental-run.sh forward automatically the port 2000 during 2h.
+     note that experimental-run.sh forward automatically the port 2000
+
+ COMMON ERRORS:
+    port forwarding die before submit=> go to the build directory of your tests and manually forward the port and submit the tests:
+      $ssh -L 2000:localhost:80 vulcain sleep 120 
+      $ctest -D ExperimentalSubmit
+
+    ctest submit success but is not available in the dashboard=> go to the buid directory of your tests, then in Testings directory, then in the directory of your tests (20140205 for a test run the 5th february 2014). Manually submit using Curl:
+     $curl -T Test.xml http://localhost:2000/CDash/submit.php\?project\=Mmg3d5
