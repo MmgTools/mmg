@@ -1369,12 +1369,14 @@ void Free_names(pMesh mesh,pSol met
   }
 
   /* met */
-  if ( met->namein ) {
-    DEL_MEM(mesh,met->namein,(strlen(met->namein)+1)*sizeof(char));
-  }
+  if ( met ) {
+    if ( met->namein ) {
+      DEL_MEM(mesh,met->namein,(strlen(met->namein)+1)*sizeof(char));
+    }
 
-  if ( met->nameout ) {
-    DEL_MEM(mesh,met->nameout,(strlen(met->nameout)+1)*sizeof(char));
+    if ( met->nameout ) {
+      DEL_MEM(mesh,met->nameout,(strlen(met->nameout)+1)*sizeof(char));
+    }
   }
 #ifdef SINGUL
   /* singul */
@@ -1423,7 +1425,7 @@ void Free_structures(pMesh mesh,pSol met
     DEL_MEM(mesh,mesh->xtetra,(mesh->xtmax+1)*sizeof(xTetra));
 
   /* met */
-  if ( /*!mesh->info.iso &&*/ met->m )
+  if ( /*!mesh->info.iso &&*/ met && met->m )
     DEL_MEM(mesh,met->m,(met->size*met->npmax+1)*sizeof(double));
 
   /* mesh->info */

@@ -323,8 +323,8 @@ void  MMG5_destockOptions(MMG5_pMesh mesh, MMG5_Info *info);
 int  MMG5_mmg3dcheck(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSingul sing,
                      double critmin, double lmin, double lmax, int *eltab);
 #else
-int mmg3dcheck(MMG5_pMesh mesh,MMG5_pSol sol,
-               double critmin, double lmin, double lmax, int *eltab);
+int MMG5_mmg3dcheck(MMG5_pMesh mesh,MMG5_pSol sol,
+                    double critmin, double lmin, double lmax, int *eltab);
 #endif
 /** list elements with bad quality */
 void  MMG5_searchqua(MMG5_pMesh mesh, MMG5_pSol met, double critmin, int *eltab);
@@ -345,6 +345,6 @@ void  MMG5_Set_saveFunc(MMG5_pMesh mesh);
 /** Set caltet, lenedg, defsiz, gradsiz */
 void  MMG5_setfunc(MMG5_pMesh,MMG5_pSol);
 /** Set MMG5_lenedgCoor and MMG5_hashTetra */
-void  pampa_setfunc(MMG5_pMesh mesh,MMG5_pSol met);
+void  MMG5_pampa_setfunc(MMG5_pMesh mesh,MMG5_pSol met);
 
 #endif

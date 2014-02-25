@@ -242,6 +242,7 @@
 #define loadMet                       	 MMG5_loadMet
 #define loadSingul                    	 MMG5_loadSingul
 #define mmg3dcheck                    	 MMG5_mmg3dcheck
+#define mmg3dcheck                    	 MMG5_mmg3dcheck
 #define mmg3dlib                      	 MMG5_mmg3dlib
 #define mmg3dlib                      	 MMG5_mmg3dlib
 #define pEdge                         	 MMG5_pEdge
@@ -252,6 +253,7 @@
 #define pSol                          	 MMG5_pSol
 #define pTetra                        	 MMG5_pTetra
 #define pTria                         	 MMG5_pTria
+#define pampa_setfunc                 	 MMG5_pampa_setfunc
 #define parsar                        	 MMG5_parsar
 #define parsar                        	 MMG5_parsar
 #define parsop                        	 MMG5_parsop
@@ -267,5 +269,3 @@
 #define usage                         	 MMG5_usage
 #define xPoint                        	 MMG5_xPoint
 #define xTetra                        	 MMG5_xTetra
-#define mmg3dcheck                    	 MMG5_mmg3dcheck
-#define pampa_setfunc                 	 MMG5_pampa_setfunc

@@ -45,6 +45,7 @@ void pampa_setfunc(pMesh mesh,pSol met) {
   else
     MMG5_lenedgCoor = lenedgCoor_ani;
   MMG5_hashTetra = hashTetra;
+  MMG5_saveMesh = saveLibraryMesh;
 }
 /* END COPY */
 
@@ -53,7 +54,8 @@ void pampa_setfunc(pMesh mesh,pSol met) {
 int Get_adjaTet(pMesh mesh, int kel, int *v0, int *v1, int *v2, int *v3) {
 
   if ( ! mesh->adja ) {
-    return(0);
+    if (! hashTetra(mesh, 0))
+      return(0);
   }
 
   (*v0) = mesh->adja[4*(kel-1)+1]/4;
