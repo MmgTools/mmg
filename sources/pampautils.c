@@ -83,13 +83,6 @@ void usage(char *prog) {
 #ifdef SINGUL
   fprintf(stdout,"-sf  file load file containing singularities\n");
 #endif
-#ifdef USE_SCOTCH
-  fprintf(stdout,"-rn [n]    Turn on or off the renumbering using SCOTCH [1/0] \n");
-#endif
-#ifdef SINGUL
-  fprintf(stdout,"-sing      Preserve internal singularities\n");
-#endif
-
 
   fprintf(stdout,"\n**  Parameters\n");
   fprintf(stdout,"-ar     val  angle detection\n");
@@ -103,7 +96,13 @@ void usage(char *prog) {
   fprintf(stdout,"-nomove      no point relocation\n");
   fprintf(stdout,"-noinsert    no point insertion/deletion \n");
 #ifndef PATTERN
-  fprintf(stdout,"-bucket val Specify the size of bucket per dimension \n");
+  fprintf(stdout,"-bucket val  Specify the size of bucket per dimension \n");
+#endif
+#ifdef USE_SCOTCH
+  fprintf(stdout,"-rn [n]      Turn on or off the renumbering using SCOTCH [1/0] \n");
+#endif
+#ifdef SINGUL
+  fprintf(stdout,"-sing        Preserve internal singularities\n");
 #endif
   exit(EXIT_FAILURE);
 }
