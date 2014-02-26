@@ -88,7 +88,7 @@ int main(int argc,char *argv[]) {
   if ( !MMG5_Set_dparameters(mmgMesh,mmgSol,MMG5_DPARAM_hmax,40) )
     exit(EXIT_FAILURE);
 
-  /* Minimal mesh size (default FLT_MIN)*/
+  /* Minimal mesh size (default 0)*/
   if ( !MMG5_Set_dparameters(mmgMesh,mmgSol,MMG5_DPARAM_hmin,0.001) )
     exit(EXIT_FAILURE);
 
@@ -126,7 +126,7 @@ int main(int argc,char *argv[]) {
   /* We add different local hausdorff numbers on boundary componants (this
      local values are used instead of the global hausdorff number) */
 
-  /* verbosity (default value = 5)*/
+  /* verbosity (default value = 4)*/
   if ( !MMG5_Set_iparameters(mmgMesh,mmgSol,MMG5_IPARAM_verbose, 4) )
     exit(EXIT_FAILURE);
 
