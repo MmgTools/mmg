@@ -720,7 +720,6 @@ int loadMet(pMesh mesh,pSol met) {
     }
   }
   else {
-    printf("DATA4 %s\n",data);
     if (!(inm = GmfOpenMesh(data,GmfRead,&met->ver,&met->dim)) ) {
       fprintf(stderr,"  ** %s  NOT FOUND. USE DEFAULT METRIC.\n",data);
       return(-1);
