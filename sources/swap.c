@@ -32,6 +32,7 @@ int chkswpbdy(pMesh mesh,int *list,int ilist,int it1,int it2) {
   }
 
   /* No swap when either internal or external component has only 1 element */
+  //Algiane: pourquoi on ne check pas ca en multi-domaines?
   if ( mesh->info.iso ) {
     nminus = nplus = 0;
     for (k=0; k<ilist; k++) {

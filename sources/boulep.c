@@ -1122,7 +1122,12 @@ int coquilface(pMesh mesh,int start,int ia,int *list,int *it1,int *it2) {
       if ( *it1 == 0 )
         *it1 = 4*pradj+iface;
       else {
-        assert( *it2 == 0 );
+        if ( *it2 ) {
+          // Algiane: (assert commente) si on a 3 tetras de refs differentes dans la coquille??
+          printf("  ## Warning: you have more than 2 boundaries the shell of your edge.\n");
+          printf("  problem may occur during remesh process.\n");
+        }
+        //assert( *it2 == 0 );
         *it2 = 4*pradj+iface;
       }
     }
