@@ -102,6 +102,7 @@ int packMesh(pMesh mesh,pSol met) {
     if ( !MG_VOK(ppt) )  continue;
     ppt->tmp = ++np;
     if ( ppt->tag & MG_CRN )  nc++;
+    ppt->ref = abs(ppt->ref);
   }
 
   /* compact tetrahedra */
