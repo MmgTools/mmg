@@ -498,6 +498,7 @@ int  bouleext(pMesh mesh, int start, int ip, int iface, int *listv, int *ilistv,
 int chkptonbdy(pMesh,int);
 int norpts(pMesh,int,int,int,double *);
 double orcal_poi(double a[3],double b[3],double c[3],double d[3]);
+int countelt(pMesh mesh,pSol sol, double *weightelt, int *npcible);
 int trydisp(pMesh,double *,short);
 int dichodisp(pMesh,double *);
 int lapantilap(pMesh,double *);

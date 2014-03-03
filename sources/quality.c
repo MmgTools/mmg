@@ -722,3 +722,185 @@ void outqua(pMesh mesh,pSol met) {
     exit(EXIT_FAILURE);
   }
 }
+
+/*approximation of the final number of vertex*/
+int countelt(pMesh mesh,pSol sol, double *weightelt, int *npcible) {
+  pTetra pt;
+  double *ca,*cb,*ma,*mb,len;
+  int    k,ia,ipa,ipb,iad,lon,l,nptot,iadr;
+  int    *pdel,lenint,loc,nedel,longen;
+  int    npbdry,isbdry;
+  double   dned,dnface,dnint,dnins;
+  double   dnpdel,dnadd,leninv,dnaddloc,dnpdelloc;
+  int   list[LMAX];
+
+  pdel = (int*) calloc(mesh->np,sizeof(int));
+  nptot = mesh->np;
+  npbdry = 0;
+
+  //substraction of the half of the number of bdry vertex to avoid the surestimation due of the interface
+  for (k=1; k<=mesh->np; k++) {
+    if(mesh->point[k].tag & MG_BDY) npbdry++;
+  }
+  nptot -= 0.5*npbdry;
+
+  dnadd = dnpdel = 0;
+
+  for (k=1; k<=mesh->ne; k++) {
+    pt = &mesh->tetra[k];
+    if ( !pt->v[0] )  continue;
+
+    if(weightelt)
+      weightelt[k] = 0;
+    nedel = 0;
+
+    for (ia=0; ia<6; ia++) {
+      //lon = MMG_coquil(mesh,k,ia,&list);
+      longen = coquil(mesh,k,ia,list);
+      lon = longen/2;
+      isbdry = longen%2;
+      if(!lon) continue;
+      /* if ( isbdry )  { */
+      /* 	assert(longen%2); */
+      /* 	//printf("coquil %d\n",longen/2); */
+      /* 	continue; */
+      /* } */
+      //assert(!(longen%2));
+      for (l=1; l<lon; l++)
+	if ( list[l] < 6*k )  break;
+
+      if ( l < lon )  {
+	loc = 1;
+	//continue;
+      } else {
+	loc = 0;
+      } 
+
+      dnaddloc = 0;
+      dnpdelloc = 0;
+      
+      ipa = iare[ia][0];
+      ipb = iare[ia][1];
+      /* ca  = &mesh->point[pt->v[ipa]].c[0]; */
+      /* cb  = &mesh->point[pt->v[ipb]].c[0]; */
+
+      /* iadr = (pt->v[ipa]-1)*1 + 1; */
+      /* ma   = &sol->met[iadr]; */
+      /* iadr = (pt->v[ipb]-1)*1 + 1; */
+      /* mb   = &sol->met[iadr]; */
+      //if(sol->offset==6)
+      //	len = MMG_long_ani_init(ca,cb,ma,mb);
+      //else
+	len = lenedg(mesh,sol,pt->v[ipa],pt->v[ipb]);
+
+      if(len > 3) {
+	lenint = ((int) len); 
+	if(fabs(lenint -len) > 0.5) lenint++;
+	lenint++;
+	//nb de point a inserer sur l'arete
+	dned = lenint - 2;
+	//nb de point a l'interieur de la face si toutes les aretes sont coupees le meme nb de fois
+	dnface = (lenint+1)*lenint / 2. - 3 - 3*dned;
+	//nb de point a l'interieur du tetra si toutes les aretes sont coupees le meme nb de fois
+	dnint = (lenint+2)*(lenint+1)*lenint / 6. - 4 - 4*dnface - 6*dned;
+	//nb de point a inserer pour cette arete de ce tetra : on divise par lon
+	dnins = dned*(1./lon) + (dnface/3. + dnint/6.);//(dnface/12. + dnint/6.);
+	if(!isbdry) {
+	  //nb points sur l'arete + lon*(1/3 nb point sur la face + 1/6 nb de point interne)
+	  dnaddloc = dned + lon*(dnface/3. + dnint/6.);
+	} else {
+	  dnaddloc = 0.5*(dned + lon*(dnface/3. + dnint/6.));
+	}
+	if(!loc) {
+	  dnadd += dnaddloc;
+	}
+      } else if(len > 2.8) {
+	if(!isbdry) {
+	  dnaddloc = 2.;
+	} else {
+	  dnaddloc = 1;
+	}
+	if(!loc){
+	  if(!isbdry) {
+	    dnadd += 2.;
+	  } else {
+	    dnadd++;
+	  }
+	}
+	dnins = 2;
+      } else if(len > 1.7) {
+	if(!loc) {
+	  if(!isbdry) dnadd += 1.;
+	}
+	dnins = 1;
+      } else if(len < 0.6) {
+	nedel = 1;
+	
+	leninv = 1./len;
+	if(pt->v[ipa]<pt->v[ipb]) {
+	  if(!pdel[pt->v[ipa]]) {
+	    if(!isbdry) {
+	      dnpdelloc = (leninv - 1.)/leninv;
+	    } else {
+	      dnpdelloc = 0.5*(leninv - 1.)/leninv;
+	    }
+	    if(!loc) {
+	      dnpdel+=dnpdelloc;
+	      pdel[pt->v[ipa]]=1;
+	    }
+	  } else if(!pdel[pt->v[ipb]]) {
+	    if(!isbdry) {
+	      dnpdelloc = (leninv - 1.)/leninv;
+	    } else {
+	      dnpdelloc = 0.5*(leninv - 1.)/leninv;
+	    }
+	    if(!loc) {
+	      dnpdel +=dnpdelloc;
+	      pdel[pt->v[ipb]]=1;
+	    }	  
+	  }
+	} else {
+	  if(!pdel[pt->v[ipb]]) {
+	    if(!isbdry) {
+	      dnpdelloc = (leninv - 1.)/leninv;
+	    } else {
+	      dnpdelloc = 0.5*(leninv - 1.)/leninv;
+	    }
+	    if(!loc) {
+	      dnpdel+=dnpdelloc;
+	      pdel[pt->v[ipb]]=1;
+	    }
+	  } else if(!pdel[pt->v[ipa]]) {
+	    if(!isbdry) {
+	      dnpdelloc = (leninv - 1.)/leninv;
+	    } else {
+	      dnpdelloc = 0.5*(leninv - 1.)/leninv;
+	    }
+	    if(!loc) {
+	      dnpdel+=dnpdelloc;
+	      pdel[pt->v[ipa]]=1;
+	    }
+	  }
+	}
+	//ndel++;
+      }
+      
+      //pour cette arete de ce tetra :
+      //PHASE 1 = dnaddloc + nedel (on compte un si arete trop petite)
+      //PHASE 2 = dnaddloc
+      if(weightelt)
+	weightelt[k] += 1./lon*(2*dnaddloc);//1./lon*(2*dnaddloc + dnpdelloc);
+
+    }/*for ia*/
+    if(weightelt)
+	weightelt[k] += nedel;
+ 
+  } /*For k*/
+
+
+  nptot += (int) dnadd - (int) dnpdel;
+  *npcible = nptot;
+  fprintf(stdout,"ESTIMATION OF THE FINAL NUMBER OF NODES : %8d  ADD %f  DEL %f\n",nptot,dnadd,dnpdel);
+
+  return(1);
+}
