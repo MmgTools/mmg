@@ -124,6 +124,7 @@
 #define nsort                         	 _MMG5_nsort
 #define orcal                         	 _MMG5_orcal
 #define orcal_poi                     	 _MMG5_orcal_poi
+#define countelt                         _MMG5_countelt
 #define orvol                         	 _MMG5_orvol
 #define outqua                        	 _MMG5_outqua
 #define ppgdisp                       	 _MMG5_ppgdisp

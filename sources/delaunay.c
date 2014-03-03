@@ -93,7 +93,7 @@ int delone(pMesh mesh,pSol sol,int ip,int *list,int ilist) {
   xTetra    xt;
   pxTetra   pxt0;
   int      *adja,*adjb,i,j,k,l,m,iel,jel,old,v[3],iadr,base,size;
-  int       vois[4];/*,ii,kk,iare1,iare2;*/
+  int       vois[4],iadrold;/*,ii,kk,iare1,iare2;*/
   short     i1;
   char      alert;
   int tref,isused,ixt;
@@ -153,8 +153,8 @@ int delone(pMesh mesh,pSol sol,int ip,int *list,int ilist) {
   for (k=0; k<ilist; k++) {
     old  = list[k];
 
-    iadr = (old-1)*4 + 1;
-    adja = &mesh->adja[iadr];
+    iadrold = (old-1)*4 + 1;
+    adja = &mesh->adja[iadrold];
     vois[0]  = adja[0];
     vois[1]  = adja[1];
     vois[2]  = adja[2];
@@ -179,13 +179,14 @@ int delone(pMesh mesh,pSol sol,int ip,int *list,int ilist) {
         iel = newElt(mesh);
 	
 	if ( !iel ) {
+
 	  TETRA_REALLOC(mesh,iel,mesh->gap,
 			printf("  ## Warning: unable to allocate a new element.\n");
 			return(0));
 	  pt   = &mesh->tetra[old];
 	  if(pt->xt) 
 	    pxt0 = &mesh->xtetra[pt->xt];
-	  adja = &mesh->adja[iadr];
+	  adja = &mesh->adja[iadrold];
 	}        
 	pt1 = &mesh->tetra[iel];
         memcpy(pt1,pt,sizeof(Tetra));
