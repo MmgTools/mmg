@@ -96,7 +96,7 @@ int delone(pMesh mesh,pSol sol,int ip,int *list,int ilist) {
   int       vois[4],iadrold;/*,ii,kk,iare1,iare2;*/
   short     i1;
   char      alert;
-  int tref,isused,ixt;
+  int tref,isused,ixt,ielnum[3*LONMAX+1],ll;
   Hash hedg;
   //obsolete avec la realloc
   // if ( mesh->ne + 2*ilist > mesh->nemax )  {printf("on passe ici boum\n");return(0);}
@@ -143,13 +143,32 @@ int delone(pMesh mesh,pSol sol,int ip,int *list,int ilist) {
       ppt->tagdel &= ~MG_NOM;
     }
   }
-  if ( alert )  {return(-1);}
+  if ( alert )  {return(0);}
   /* hash table params */
   if ( size > 3*LONMAX )  return(0);
   if ( !hashNew(mesh,&hedg,size,3*size) ) { /*3*size suffit */
     fprintf(stdout,"  ## Unable to complete mesh.\n");
     return(-1);
   }
+
+  /*tetra allocation : we create "size" tetra*/
+  ielnum[0] = size; 
+  for (k=1 ; k<=size ; k++) {
+    ielnum[k] = newElt(mesh);
+	
+    if ( !ielnum[k] ) {
+      TETRA_REALLOC(mesh,ielnum[k],mesh->gap,
+		    printf("  ## Warning: unable to allocate a new element but the mesh will be valid.\n");
+		    for(ll=1 ; ll<k ; ll++) {
+		      mesh->tetra[ielnum[ll]].v[0] = 1;
+		      delElt(mesh,ielnum[ll]);
+		    }
+		    return(-1);
+		    );
+    }
+  }
+  
+  size = 1;
   for (k=0; k<ilist; k++) {
     old  = list[k];
 
@@ -176,18 +195,9 @@ int delone(pMesh mesh,pSol sol,int ip,int *list,int ilist) {
 
       /* external face */
       if ( !jel || (mesh->tetra[jel].mark != base) ) {
-        iel = newElt(mesh);
+        iel = ielnum[size++];
+	assert(iel);
 	
-	if ( !iel ) {
-
-	  TETRA_REALLOC(mesh,iel,mesh->gap,
-			printf("  ## Warning: unable to allocate a new element.\n");
-			return(0));
-	  pt   = &mesh->tetra[old];
-	  if(pt->xt) 
-	    pxt0 = &mesh->xtetra[pt->xt];
-	  adja = &mesh->adja[iadrold];
-	}        
 	pt1 = &mesh->tetra[iel];
         memcpy(pt1,pt,sizeof(Tetra));
         pt1->v[i] = ip;
