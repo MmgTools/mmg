@@ -172,6 +172,7 @@ char chkedg(pMesh mesh,Tria *pt,char ori) {
   p[2] = &mesh->point[ic];
   pt->flag = 0;
   hma2 = LLONG*LLONG*mesh->info.hmax*mesh->info.hmax;
+  
   /* normal recovery */
   for (i=0; i<3; i++) {
     if ( MG_SIN(p[i]->tag) ) {
@@ -322,7 +323,7 @@ char chkedg(pMesh mesh,Tria *pt,char ori) {
     ns = 0;
     for (k=1; k<=mesh->ne; k++) {
       pt = &mesh->tetra[k];
-      if ( (!MG_EOK(pt)) || pt->ref < 0 /*|| (pt->tag & MG_REQ)*/ )   continue;
+      if ( (!MG_EOK(pt)) || pt->ref < 0 || (pt->tag & MG_REQ) )   continue;
       else if ( !pt->xt ) continue;
       pxt = &mesh->xtetra[pt->xt];
 
@@ -430,7 +431,7 @@ static int movtet(pMesh mesh,pSol met,int maxit) {
     nm = ns = 0;
     for (k=1; k<=mesh->ne; k++) {
       pt = &mesh->tetra[k];
-      if ( !MG_EOK(pt) || pt->ref < 0 /*|| (pt->tag & MG_REQ)*/ )   continue;
+      if ( !MG_EOK(pt) || pt->ref < 0 || (pt->tag & MG_REQ) )   continue;
 
       /* point j on face i */
       for (i=0; i<4; i++) {
@@ -1087,7 +1088,7 @@ static int anatetv(pMesh mesh,pSol met,char typchk) {
   ne = mesh->ne;
   for (k=1; k<=ne; k++) {
     pt = &mesh->tetra[k];
-    if ( !MG_EOK(pt) || !pt->flag /*|| (pt->tag & MG_REQ)*/ )  continue;
+    if ( !MG_EOK(pt) || !pt->flag || (pt->tag & MG_REQ) )  continue;
     memset(vx,0,6*sizeof(int));
     for (ia=0,i=0; i<3; i++) {
       for (j=i+1; j<4; j++,ia++) {
@@ -1333,7 +1334,7 @@ static int adpcol(pMesh mesh,pSol met) {
   nc = 0;
   for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
-    if ( !MG_EOK(pt) /*|| (pt->tag & MG_REQ)*/ )  continue;
+    if ( !MG_EOK(pt) || (pt->tag & MG_REQ) )  continue;
     pxt = pt->xt ? &mesh->xtetra[pt->xt] : 0;
     ier = 0;
 
@@ -1662,7 +1663,6 @@ static int adptet(pMesh mesh,pSol met) {
         return(0);
       }
       ns += ier;
-
       /* analyze internal tetras */
       ier = anatetv(mesh,met,typchk);
       if ( ier < 0 ) {
@@ -1783,6 +1783,7 @@ int mmg3d1(pMesh mesh,pSol met) {
     fprintf(stdout,"  ## Unable to split mesh. Exiting.\n");
     return(0);
   }
+
 #ifdef DEBUG
   puts("---------------------------Fin anatet---------------------");
   outqua(mesh,met);
