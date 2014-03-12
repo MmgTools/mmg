@@ -791,12 +791,13 @@ int countelt(pMesh mesh,pSol sol, double *weightelt, int *npcible) {
       //if(sol->offset==6)
       //	len = MMG_long_ani_init(ca,cb,ma,mb);
       //else
-	len = lenedg(mesh,sol,pt->v[ipa],pt->v[ipb]);
-
+      len = lenedg(mesh,sol,pt->v[ipa],pt->v[ipb]);
       if(len > 3) {
+	loc = 0;
+
 	lenint = ((int) len); 
 	if(fabs(lenint -len) > 0.5) lenint++;
-	lenint++;
+	lenint++; 
 	//nb de point a inserer sur l'arete
 	dned = lenint - 2;
 	//nb de point a l'interieur de la face si toutes les aretes sont coupees le meme nb de fois
@@ -811,8 +812,12 @@ int countelt(pMesh mesh,pSol sol, double *weightelt, int *npcible) {
 	} else {
 	  dnaddloc = 0.5*(dned + lon*(dnface/3. + dnint/6.));
 	}
+	dnaddloc *= 1./lon;
 	if(!loc) {
-	  dnadd += dnaddloc;
+	  if(ALPHAD * pt->qual > 0.1) /**/
+	    dnadd += dnaddloc;
+	  else
+	    dnadd += dned / lon ;
 	}
       } else if(len > 2.8) {
 	if(!isbdry) {
