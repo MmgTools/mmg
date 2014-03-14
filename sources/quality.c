@@ -894,7 +894,7 @@ int countelt(pMesh mesh,pSol sol, double *weightelt, int *npcible) {
       //PHASE 1 = dnaddloc + nedel (on compte un si arete trop petite)
       //PHASE 2 = dnaddloc
       if(weightelt)
-	weightelt[k] += 1./lon*(2*dnaddloc);//1./lon*(2*dnaddloc + dnpdelloc);
+	weightelt[k] += (2*dnaddloc);//1./lon*(2*dnaddloc + dnpdelloc);
 
     }/*for ia*/
     if(weightelt)
