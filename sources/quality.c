@@ -907,5 +907,6 @@ int countelt(pMesh mesh,pSol sol, double *weightelt, int *npcible) {
   *npcible = nptot;
   fprintf(stdout,"ESTIMATION OF THE FINAL NUMBER OF NODES : %8d  ADD %f  DEL %f\n",nptot,dnadd,dnpdel);
 
+  free(pdel);
   return(1);
 }
