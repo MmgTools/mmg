@@ -730,13 +730,17 @@ int countelt(pMesh mesh,pSol sol, double *weightelt, int *npcible) {
   int    k,ia,ipa,ipb,iad,lon,l,nptot,iadr;
   int    *pdel,lenint,loc,nedel,longen;
   int    npbdry,isbdry;
-  double   dned,dnface,dnint,dnins;
+  double   dned,dnface,dnint,dnins,w;
   double   dnpdel,dnadd,leninv,dnaddloc,dnpdelloc;
-  int   list[LMAX];
+  int   list[LMAX],ddebug;
+  FILE *inm;
 
   pdel = (int*) calloc(mesh->np+1,sizeof(int));
   nptot = mesh->np;
   npbdry = 0;
+  //svg des poids
+  inm = fopen("poid.sol","w");
+  fprintf(inm,"MeshVersionFormatted 2\n Dimension 3 \n SolAtTetrahedra \n %d\n 1 1 \n",mesh->ne);
 
   //substraction of the half of the number of bdry vertex to avoid the surestimation due of the interface
   for (k=1; k<=mesh->np; k++) {
@@ -749,8 +753,12 @@ int countelt(pMesh mesh,pSol sol, double *weightelt, int *npcible) {
   for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
     if ( !pt->v[0] )  continue;
+    if(k==250343) ddebug = 1;
+    else ddebug = 0;
 
-    if(weightelt)
+    if(ddebug) printf("on traite %d %e\n",k,ALPHAD*pt->qual);
+    w = 0;
+    if(weightelt) 
       weightelt[k] = 0;
     nedel = 0;
 
@@ -792,6 +800,7 @@ int countelt(pMesh mesh,pSol sol, double *weightelt, int *npcible) {
       //	len = MMG_long_ani_init(ca,cb,ma,mb);
       //else
       len = lenedg(mesh,sol,pt->v[ipa],pt->v[ipb]);
+      if(ddebug) printf("len %e\n",len);
       if(len > 3) {
 	loc = 0;
 
@@ -834,6 +843,8 @@ int countelt(pMesh mesh,pSol sol, double *weightelt, int *npcible) {
 	}
 	dnins = 2;
       } else if(len > 1.7) {
+	if(!isbdry)
+	  dnaddloc = 1;
 	if(!loc) {
 	  if(!isbdry) dnadd += 1.;
 	}
@@ -893,13 +904,20 @@ int countelt(pMesh mesh,pSol sol, double *weightelt, int *npcible) {
       //pour cette arete de ce tetra :
       //PHASE 1 = dnaddloc + nedel (on compte un si arete trop petite)
       //PHASE 2 = dnaddloc
-      if(weightelt)
-	weightelt[k] += (2*dnaddloc);//1./lon*(2*dnaddloc + dnpdelloc);
+      if(ddebug) printf("on ajoute %e\n",dnaddloc);
+      w += (2*dnaddloc);//1./lon*(2*dnaddloc + dnpdelloc);
 
     }/*for ia*/
-    if(weightelt)
-	weightelt[k] += nedel;
+    if(ddebug) printf("on soustrait %d\n",nedel);
+	  
+    w += nedel;
  
+    //si l'elt ne doit pas etre ni splitte ni collapse est ce qu'on le compte ???
+    //if(w==0) w+=1;
+
+    fprintf(inm,"%e\n",w);
+    if(weightelt)
+      weightelt[k] = w;
   } /*For k*/
 
 
@@ -908,5 +926,7 @@ int countelt(pMesh mesh,pSol sol, double *weightelt, int *npcible) {
   fprintf(stdout,"ESTIMATION OF THE FINAL NUMBER OF NODES : %8d  ADD %f  DEL %f\n",nptot,dnadd,dnpdel);
 
   free(pdel);
+
+  fclose(inm);
   return(1);
 }
