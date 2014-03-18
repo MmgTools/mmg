@@ -456,7 +456,7 @@ int Set_meshSize(MMG5_pMesh mesh, int np, int ne, int nt, int na) {
   }
 
   /* stats */
-  if ( abs(mesh->info.imprim) > 3 ) {
+  if ( abs(mesh->info.imprim) > 6 ) {
     fprintf(stdout,"     NUMBER OF VERTICES     %8d\n",mesh->np);
     if ( mesh->na ) {
       fprintf(stdout,"     NUMBER OF EDGES        %8d\n",mesh->na);
@@ -1441,6 +1441,6 @@ void Free_structures(pMesh mesh,pSol met
     DEL_MEM(mesh,singul->edge,(singul->na+1)*sizeof(Edge));
 #endif
 
-  if ( mesh->info.imprim>4 || mesh->info.ddebug )
+  if ( mesh->info.imprim>6 || mesh->info.ddebug )
     printf("  MEMORY USED AT END (bytes) %lld\n",mesh->memCur);
 }

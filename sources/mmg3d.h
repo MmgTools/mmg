@@ -126,7 +126,7 @@
         exit(EXIT_FAILURE);                                       \
       }                                                           \
                                                                   \
-      if ( abs(mesh->info.imprim) /*> 4*/ || mesh->info.ddebug )  \
+      if ( abs(mesh->info.imprim) > 6 || mesh->info.ddebug )  \
         fprintf(stdout,                                           \
                 "  ## Warning: %s:%d: %s reallocation.\n",        \
                 __FILE__,__LINE__,message);                       \
@@ -148,7 +148,7 @@
         exit(EXIT_FAILURE);                                       \
       }                                                           \
                                                                   \
-      if ( abs(mesh->info.imprim) /*> 4*/ || mesh->info.ddebug )  \
+      if ( abs(mesh->info.imprim) > 6 || mesh->info.ddebug )  \
         fprintf(stdout,                                           \
                 "  ## Warning: %s:%d: %s reallocation.\n",        \
                 __FILE__,__LINE__,message);                       \
