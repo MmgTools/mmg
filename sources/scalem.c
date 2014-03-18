@@ -22,6 +22,7 @@ int scaleMesh(pMesh mesh,pSol met,pSingul sing) {
       if ( ppt->c[i] > mesh->info.max[i] )  mesh->info.max[i] = ppt->c[i];
       if ( ppt->c[i] < mesh->info.min[i] )  mesh->info.min[i] = ppt->c[i];
     }
+    ppt->tmp = 0;
   }
   mesh->info.delta = 0.0;
   for (i=0; i<3; i++) {

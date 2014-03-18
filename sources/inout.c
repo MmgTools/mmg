@@ -77,6 +77,7 @@ int loadMesh(pMesh mesh) {
       GmfGetLin(inm,GmfVertices,&ppt->c[0],&ppt->c[1],&ppt->c[2],&ppt->ref);
     }
     ppt->tag  = MG_NUL;
+    ppt->tmp  = 0;
   }
 
   /* get required vertices */

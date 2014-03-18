@@ -567,6 +567,7 @@ int Set_vertex(MMG5_pMesh mesh, double c0, double c1, double c2, int ref, int po
   mesh->point[pos].ref  = ref;
   mesh->point[pos].tag  = MG_NUL;
   mesh->point[pos].flag = 0;
+  mesh->point[pos].tmp = 0;
 
   return(1);
 }

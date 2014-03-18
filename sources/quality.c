@@ -734,7 +734,7 @@ int countelt(pMesh mesh,pSol sol, double *weightelt, int *npcible) {
   double   dnpdel,dnadd,leninv,dnaddloc,dnpdelloc;
   int   list[LMAX];
 
-  pdel = (int*) calloc(mesh->np,sizeof(int));
+  pdel = (int*) calloc(mesh->np+1,sizeof(int));
   nptot = mesh->np;
   npbdry = 0;
 
