@@ -526,7 +526,6 @@ int gradsiz_iso(pMesh mesh,pSol met) {
   if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug )
     fprintf(stdout,"  ** Grading mesh\n");
 
-  mesh->base = 0;
   for (k=1; k<=mesh->np; k++)
     mesh->point[k].flag = mesh->base;
 
