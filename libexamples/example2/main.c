@@ -1,4 +1,4 @@
-/** Authors Cécile Dobrzynski, Charles Dapogny, Pascal Frey and Algiane Froehly */
+/** Authors Cecile Dobrzynski, Charles Dapogny, Pascal Frey and Algiane Froehly */
 /** \include Example for using mmg3dlib (advanced used) */
 
 #include <assert.h>
@@ -147,10 +147,11 @@ int main(int argc,char *argv[]) {
       without local hausdorff number */
 
   /* Be careful if you change the hausdorff number (or gradation value)
-     between 2 run: the information of the previous hausdorff number (resp. gradation)
-     is contained in the metric computed during the previous run.
-     Then, you can not grow up the hausdorff value (resp. gradation) without resetting
-     this metric (but you can decrease this value). */
+     between 2 run: the information of the previous hausdorff number
+     (resp. gradation) is contained in the metric computed during
+     the previous run.
+     Then, you can not grow up the hausdorff value (resp. gradation) without
+     resetting this metric (but you can decrease this value). */
 
   if ( !MMG5_Set_localParameters(mmgMesh,mmgSol,MMG5_Triangle,36,0.01) )
     exit(EXIT_FAILURE);

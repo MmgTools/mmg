@@ -1,4 +1,4 @@
-/** Authors Cécile Dobrzynski, Charles Dapogny, Pascal Frey and Algiane Froehly */
+/** Authors Cecile Dobrzynski, Charles Dapogny, Pascal Frey and Algiane Froehly */
 /** \include Example for using mmg3dlib (basic use) */
 
 #include <assert.h>

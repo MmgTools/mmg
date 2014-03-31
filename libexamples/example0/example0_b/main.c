@@ -1,4 +1,4 @@
-/** Authors Cécile Dobrzynski, Charles Dapogny, Pascal Frey and Algiane Froehly */
+/** Authors Cecile Dobrzynski, Charles Dapogny, Pascal Frey and Algiane Froehly */
 /** \include Example for using mmg3dlib (basic use) */
 
 #include <assert.h>
@@ -239,8 +239,8 @@ int main(int argc,char *argv[]) {
   free(ridge);
   ridge    = NULL;
 
-  /** 2) Manually get the solution (in this example we show how to save the solution
-      in the mesh.o.sol file) */
+  /** 2) Manually get the solution (in this example we show how to save the
+      solution in the mesh.o.sol file) */
   if( !(inm = fopen("mesh.o.sol","w")) ) {
     fprintf(stderr,"  ** UNABLE TO OPEN mesh.o.sol FILE.\n");
     exit(EXIT_FAILURE);
@@ -248,8 +248,8 @@ int main(int argc,char *argv[]) {
   fprintf(inm,"MeshVersionFormatted 2\n");
   fprintf(inm,"\nDimension 3\n");
 
-  /** a) get the size of the sol: type of entity (SolAtVertices,...), number of sol,
-      type of solution (scalar, tensor...) */
+  /** a) get the size of the sol: type of entity (SolAtVertices,...),
+      number of sol, type of solution (scalar, tensor...) */
   if ( !MMG5_Get_solSize(mmgMesh,mmgSol,&typEntity,&np,&typSol) )
     exit(EXIT_FAILURE);
 
