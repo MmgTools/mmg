@@ -730,9 +730,9 @@ int countelt(pMesh mesh,pSol sol, double *weightelt, int *npcible) {
   int    k,ia,ipa,ipb,iad,lon,l,nptot,iadr;
   int    *pdel,lenint,loc,nedel,longen;
   int    npbdry,isbdry;
-  double   dned,dnface,dnint,dnins,w;
+  double   dned,dnface,dnint,dnins,w,lenavg,lent[6];
   double   dnpdel,dnadd,leninv,dnaddloc,dnpdelloc;
-  int   list[LMAX],ddebug;
+  int   list[LMAX],ddebug,ib;
   FILE *inm;
 
   pdel = (int*) calloc(mesh->np+1,sizeof(int));
@@ -746,17 +746,28 @@ int countelt(pMesh mesh,pSol sol, double *weightelt, int *npcible) {
   for (k=1; k<=mesh->np; k++) {
     if(mesh->point[k].tag & MG_BDY) npbdry++;
   }
-  nptot -= 0.5*npbdry;
+  //nptot -= 0.5*npbdry;
 
   dnadd = dnpdel = 0;
 
   for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
     if ( !pt->v[0] )  continue;
-    if(k==250343) ddebug = 1;
+    if(0 && k==250343) ddebug = 1;
     else ddebug = 0;
 
     if(ddebug) printf("on traite %d %e\n",k,ALPHAD*pt->qual);
+
+    /*longueur moyenne*/
+    lenavg = 0;
+    for(ib=0 ; ib<6 ; ib++) {
+      ipa = iare[ib][0];
+      ipb = iare[ib][1];
+      lent[ib] = lenedg(mesh,sol,pt->v[ipa],pt->v[ipb]);
+      lenavg+=lent[ib];
+    }
+    lenavg /= 6.;
+
     w = 0;
     if(weightelt) 
       weightelt[k] = 0;
@@ -766,7 +777,7 @@ int countelt(pMesh mesh,pSol sol, double *weightelt, int *npcible) {
       //lon = MMG_coquil(mesh,k,ia,&list);
       longen = coquil(mesh,k,ia,list);
       lon = longen/2;
-      isbdry = longen%2;
+      isbdry = 0;//longen%2;
       if(!lon) continue;
       /* if ( isbdry )  { */
       /* 	assert(longen%2); */
@@ -787,46 +798,51 @@ int countelt(pMesh mesh,pSol sol, double *weightelt, int *npcible) {
       dnaddloc = 0;
       dnpdelloc = 0;
       
-      ipa = iare[ia][0];
-      ipb = iare[ia][1];
-      /* ca  = &mesh->point[pt->v[ipa]].c[0]; */
-      /* cb  = &mesh->point[pt->v[ipb]].c[0]; */
-
-      /* iadr = (pt->v[ipa]-1)*1 + 1; */
-      /* ma   = &sol->met[iadr]; */
-      /* iadr = (pt->v[ipb]-1)*1 + 1; */
-      /* mb   = &sol->met[iadr]; */
-      //if(sol->offset==6)
-      //	len = MMG_long_ani_init(ca,cb,ma,mb);
-      //else
-      len = lenedg(mesh,sol,pt->v[ipa],pt->v[ipb]);
+      len = lent[ia];
+      
       if(ddebug) printf("len %e\n",len);
       if(len > 3) {
 	loc = 0;
-
+	len = lenavg;
 	lenint = ((int) len); 
 	if(fabs(lenint -len) > 0.5) lenint++;
-	lenint++; 
-	//nb de point a inserer sur l'arete
-	dned = lenint - 2;
+	//POURQUOI SURESTIMER ???lenint++; 
+	//nb de point a inserer sur l'arete : longueur - 1
+	dned = lenint - 1;
 	//nb de point a l'interieur de la face si toutes les aretes sont coupees le meme nb de fois
-	dnface = (lenint+1)*lenint / 2. - 3 - 3*dned;
+	dnface = (lenint+2)*(lenint+1) / 2. - 3 - 3*dned;
 	//nb de point a l'interieur du tetra si toutes les aretes sont coupees le meme nb de fois
-	dnint = (lenint+2)*(lenint+1)*lenint / 6. - 4 - 4*dnface - 6*dned;
+	dnint = (lenint+3)*(lenint+2)*(lenint+1) / 6. - 4 - 4*dnface - 6*dned;
 	//nb de point a inserer pour cette arete de ce tetra : on divise par lon
 	dnins = dned*(1./lon) + (dnface/3. + dnint/6.);//(dnface/12. + dnint/6.);
 	if(!isbdry) {
-	  //nb points sur l'arete + lon*(1/3 nb point sur la face + 1/6 nb de point interne)
-	  dnaddloc = dned + lon*(dnface/3. + dnint/6.);
+	  //nb points sur l'arete + 
+	  //lon*(2/3 nb point sur la face (ie 1/3 de face et 2 faces adj a l'arete) + 1/6 nb de point interne)
+	  dnaddloc = dned + lon*(2*dnface/3. + dnint/6.);
 	} else {
-	  dnaddloc = 0.5*(dned + lon*(dnface/3. + dnint/6.));
+	  dnaddloc = 0.5*(dned + lon*(2*dnface/3. + dnint/6.));
 	}
 	dnaddloc *= 1./lon;
 	if(!loc) {
-	  if(ALPHAD * pt->qual > 0.1) /**/
-	    dnadd += dnaddloc;
+          if(ALPHAD * pt->qual < 2) /*on ne compte les points internes que pour les (tres) bons tetras*/
+            dnaddloc = dnaddloc;
+          else if(ALPHAD * pt->qual < 5) 
+	    dnaddloc = dned / lon + 2*dnface/3.;
 	  else
-	    dnadd += dned / lon ;
+            dnaddloc = dned / lon ;
+	  //rajout de 30% parce que 1) on vise des longueurs de 0.7 et 
+	  //2) on ne tient pas compte du fait qu'on divise tjs par 2 dans la generation
+	  if( (ALPHAD*pt->qual > 50) )
+	    dnaddloc = 0;
+	  else  if((ALPHAD*pt->qual > 10) )
+	    dnaddloc =  0.2*dnaddloc; //CEDRIC : essayer 0.3 0.4
+	  else if((len > 10) && (ALPHAD*pt->qual < 1.5) ) //on sous-estime uniquement pour les tres bons
+	    dnaddloc = dnaddloc*0.3 + dnaddloc; //CEDRIC : essayer 0.3 ?
+	  else if(len < 6 && len>3) //CEDRIC : essayer len < 3,4, 6,7 mais aussi en commentant le test sur len puis pour la qual > 3, 5,8
+	    dnaddloc = 0.7*dnaddloc; //CEDRIC : essayer 0.9 0.7 0.6
+
+
+	    dnadd += dnaddloc;
 	}
       } else if(len > 2.8) {
 	if(!isbdry) {
@@ -842,7 +858,7 @@ int countelt(pMesh mesh,pSol sol, double *weightelt, int *npcible) {
 	  }
 	}
 	dnins = 2;
-      } else if(len > 1.7) {
+      } else if(len > 1.41) {
 	if(!isbdry)
 	  dnaddloc = 1;
 	if(!loc) {
@@ -910,14 +926,14 @@ int countelt(pMesh mesh,pSol sol, double *weightelt, int *npcible) {
     }/*for ia*/
     if(ddebug) printf("on soustrait %d\n",nedel);
 	  
-    w += nedel;
+    w += 0.5*nedel;
  
     //si l'elt ne doit pas etre ni splitte ni collapse est ce qu'on le compte ???
     //if(w==0) w+=1;
 
     fprintf(inm,"%e\n",w);
     if(weightelt)
-      weightelt[k] = w;
+      weightelt[k] = 10*w;
   } /*For k*/
 
 
