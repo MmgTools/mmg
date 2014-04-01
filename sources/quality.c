@@ -739,13 +739,13 @@ int countelt(pMesh mesh,pSol sol, double *weightelt, int *npcible) {
   nptot = mesh->np;
   npbdry = 0;
   //svg des poids
-  inm = fopen("poid.sol","w");
-  fprintf(inm,"MeshVersionFormatted 2\n Dimension 3 \n SolAtTetrahedra \n %d\n 1 1 \n",mesh->ne);
+  //inm = fopen("poid.sol","w");
+  //fprintf(inm,"MeshVersionFormatted 2\n Dimension 3 \n SolAtTetrahedra \n %d\n 1 1 \n",mesh->ne);
 
   //substraction of the half of the number of bdry vertex to avoid the surestimation due of the interface
-  for (k=1; k<=mesh->np; k++) {
-    if(mesh->point[k].tag & MG_BDY) npbdry++;
-  }
+  //for (k=1; k<=mesh->np; k++) {
+  //  if(mesh->point[k].tag & MG_BDY) npbdry++;
+  //}
   //nptot -= 0.5*npbdry;
 
   dnadd = dnpdel = 0;
@@ -824,19 +824,19 @@ int countelt(pMesh mesh,pSol sol, double *weightelt, int *npcible) {
 	}
 	dnaddloc *= 1./lon;
 	if(!loc) {
-          if(ALPHAD * pt->qual < 2) /*on ne compte les points internes que pour les (tres) bons tetras*/
+          if(ALPHAD * pt->qual >= 0.5) /*on ne compte les points internes que pour les (tres) bons tetras*/
             dnaddloc = dnaddloc;
-          else if(ALPHAD * pt->qual < 5) 
+          else if(ALPHAD * pt->qual >= 1./5.) 
 	    dnaddloc = dned / lon + 2*dnface/3.;
 	  else
             dnaddloc = dned / lon ;
 	  //rajout de 30% parce que 1) on vise des longueurs de 0.7 et 
 	  //2) on ne tient pas compte du fait qu'on divise tjs par 2 dans la generation
-	  if( (ALPHAD*pt->qual > 50) )
+	  if( (ALPHAD*pt->qual <= 1./50.) )
 	    dnaddloc = 0;
-	  else  if((ALPHAD*pt->qual > 10) )
+	  else  if((ALPHAD*pt->qual <= 1./10.) )
 	    dnaddloc =  0.2*dnaddloc; //CEDRIC : essayer 0.3 0.4
-	  else if((len > 10) && (ALPHAD*pt->qual < 1.5) ) //on sous-estime uniquement pour les tres bons
+	  else if((len > 10) && (ALPHAD*pt->qual >= 1./1.5) ) //on sous-estime uniquement pour les tres bons
 	    dnaddloc = dnaddloc*0.3 + dnaddloc; //CEDRIC : essayer 0.3 ?
 	  else if(len < 6 && len>3) //CEDRIC : essayer len < 3,4, 6,7 mais aussi en commentant le test sur len puis pour la qual > 3, 5,8
 	    dnaddloc = 0.7*dnaddloc; //CEDRIC : essayer 0.9 0.7 0.6
@@ -931,7 +931,7 @@ int countelt(pMesh mesh,pSol sol, double *weightelt, int *npcible) {
     //si l'elt ne doit pas etre ni splitte ni collapse est ce qu'on le compte ???
     //if(w==0) w+=1;
 
-    fprintf(inm,"%e\n",w);
+    //fprintf(inm,"%e\n",w);
     if(weightelt)
       weightelt[k] = 10*w;
   } /*For k*/
@@ -943,6 +943,6 @@ int countelt(pMesh mesh,pSol sol, double *weightelt, int *npcible) {
 
   free(pdel);
 
-  fclose(inm);
+  //fclose(inm);
   return(1);
 }
