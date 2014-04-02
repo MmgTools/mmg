@@ -724,19 +724,20 @@ void outqua(pMesh mesh,pSol met) {
 }
 
 /*approximation of the final number of vertex*/
-int countelt(pMesh mesh,pSol sol, double *weightelt, int *npcible) {
+int countelt(pMesh mesh,pSol sol, double *weightelt, long *npcible) {
   pTetra pt;
   double *ca,*cb,*ma,*mb,len;
-  int    k,ia,ipa,ipb,iad,lon,l,nptot,iadr;
+  int    k,ia,ipa,ipb,iad,lon,l,iadr;
   int    *pdel,lenint,loc,nedel,longen;
   int    npbdry,isbdry;
   double   dned,dnface,dnint,dnins,w,lenavg,lent[6];
   double   dnpdel,dnadd,leninv,dnaddloc,dnpdelloc;
   int   list[LMAX],ddebug,ib;
+  long  nptot;
   FILE *inm;
 
   pdel = (int*) calloc(mesh->np+1,sizeof(int));
-  nptot = mesh->np;
+  nptot = (long) mesh->np;
   npbdry = 0;
   //svg des poids
   //inm = fopen("poid.sol","w");
@@ -937,9 +938,9 @@ int countelt(pMesh mesh,pSol sol, double *weightelt, int *npcible) {
   } /*For k*/
 
 
-  nptot += (int) dnadd - (int) dnpdel;
+  nptot += (long) dnadd - (long) dnpdel;
   *npcible = nptot;
-  fprintf(stdout,"ESTIMATION OF THE FINAL NUMBER OF NODES : %8d  ADD %f  DEL %f\n",nptot,dnadd,dnpdel);
+  fprintf(stdout,"ESTIMATION OF THE FINAL NUMBER OF NODES : %ld  ADD %f  DEL %f\n",nptot,dnadd,dnpdel);
 
   free(pdel);
 
