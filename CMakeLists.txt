@@ -81,6 +81,21 @@ ENDIF ()
 
 ###############################################################################
 #####
+#####         Fortran header: libmmg3d5f.h
+#####
+###############################################################################
+ADD_EXECUTABLE(genheader ${CMAKE_SOURCE_DIR}/Scripts/genheader.c)
+
+ADD_CUSTOM_COMMAND(OUTPUT ${MMG_SOURCE_DIR}/libmmg3d5f.h
+  COMMAND genheader ${MMG_SOURCE_DIR}/libmmg3d5f.h ${MMG_SOURCE_DIR}/libmmg3d5.h ${CMAKE_SOURCE_DIR}/Scripts/genfort.pl 
+  WORKING_DIRECTORY ${CMAKE_BUILD_DIR}
+  DEPENDS genheader
+  COMMENT "Generating Fortran header"
+  )
+
+
+###############################################################################
+#####
 #####         Choose type of insertion: delaunay kernel or patterns
 #####
 ###############################################################################
@@ -120,6 +135,7 @@ ENDIF()
 ###############################################################################
 # Header files
 INCLUDE_DIRECTORIES(${MMG_SOURCE_DIR})
+
 # Source files
 FILE(
   GLOB
@@ -127,7 +143,10 @@ FILE(
   ${MMG_SOURCE_DIR}/*.c   ${MMG_SOURCE_DIR}/*.h
   )
 LIST(REMOVE_ITEM source_files
-  ${MMG_SOURCE_DIR}/mmg3d.c ${MMG_SOURCE_DIR}/lib${PROJECT_NAME}.c ${REMOVE_FILE})
+  ${MMG_SOURCE_DIR}/mmg3d.c
+  ${MMG_SOURCE_DIR}/lib${PROJECT_NAME}.c
+  ${MMG_SOURCE_DIR}/lib${PROJECT_NAME}f.c
+  ${REMOVE_FILE})
 FILE(
   GLOB
   main_file
@@ -137,6 +156,7 @@ FILE(
   GLOB
   lib_file
   ${MMG_SOURCE_DIR}/lib${PROJECT_NAME}.c
+  ${MMG_SOURCE_DIR}/lib${PROJECT_NAME}f.c
   )
 
 IF ((NOT WIN32) AND (NOT WIN64))
@@ -188,9 +208,11 @@ OPTION ( LIBMMG3D5_STATIC "Compile static library" ON)
 IF ( LIBMMG3D5_STATIC )
   ADD_LIBRARY(${PROJECT_NAME}_a  STATIC
     .dummy ${MMG_SOURCE_DIR}/${PROJECT_NAME}_redefine.h
+    ${MMG_SOURCE_DIR}/lib${PROJECT_NAME}f.h
     ${source_files} ${lib_file} )
   SET_TARGET_PROPERTIES(${PROJECT_NAME}_a PROPERTIES OUTPUT_NAME ${PROJECT_NAME})
   TARGET_LINK_LIBRARIES(${PROJECT_NAME}_a ${LIBRARIES})
+  INSTALL(FILES ${MMG_SOURCE_DIR}/lib${PROJECT_NAME}f.h DESTINATION include)
   INSTALL(FILES ${MMG_SOURCE_DIR}/lib${PROJECT_NAME}.h DESTINATION include)
   INSTALL(FILES ${MMG_SOURCE_DIR}/chrono.h DESTINATION include)
   INSTALL(TARGETS ${PROJECT_NAME}_a
@@ -203,9 +225,11 @@ OPTION ( LIBMMG3D5_SHARED "Compile dynamic library" OFF)
 IF ( LIBMMG3D5_SHARED )
   ADD_LIBRARY(${PROJECT_NAME}_so SHARED
     .dummy ${MMG_SOURCE_DIR}/${PROJECT_NAME}_redefine.h
+    ${MMG_SOURCE_DIR}/lib${PROJECT_NAME}f.h
     ${source_files} ${lib_file})
   SET_TARGET_PROPERTIES(${PROJECT_NAME}_so PROPERTIES OUTPUT_NAME ${PROJECT_NAME})
   TARGET_LINK_LIBRARIES(${PROJECT_NAME}_so ${LIBRARIES})
+  INSTALL(FILES ${MMG_SOURCE_DIR}/lib${PROJECT_NAME}f.h DESTINATION include)
   INSTALL(FILES ${MMG_SOURCE_DIR}/lib${PROJECT_NAME}.h DESTINATION include)
   INSTALL(FILES ${MMG_SOURCE_DIR}/chrono.h DESTINATION include)
   INSTALL(TARGETS ${PROJECT_NAME}_so
@@ -238,6 +262,15 @@ IF ( TEST_LIBMMG3D5 )
       ADD_EXECUTABLE(libmmg5_example2 ${MMG_SOURCE_DIR}/../libexamples/example2/main.c)
       TARGET_LINK_LIBRARIES(libmmg5_example2 ${PROJECT_NAME}_a)
       INSTALL(TARGETS libmmg5_example2 RUNTIME DESTINATION bin )
+
+      ENABLE_LANGUAGE (Fortran)	     
+      ADD_EXECUTABLE(libmmg5_fortran_a ${MMG_SOURCE_DIR}/../libexamples/example0_fortran/example0_a/main.F90)
+      TARGET_LINK_LIBRARIES(libmmg5_fortran_a ${PROJECT_NAME}_a)
+      INSTALL(TARGETS libmmg5_fortran_a RUNTIME DESTINATION bin )
+      ADD_EXECUTABLE(libmmg5_fortran_b ${MMG_SOURCE_DIR}/../libexamples/example0_fortran/example0_b/main.F90)
+      TARGET_LINK_LIBRARIES(libmmg5_fortran_b ${PROJECT_NAME}_a)
+      INSTALL(TARGETS libmmg5_fortran_b RUNTIME DESTINATION bin )
+
 
     ENDIF()
     ADD_EXECUTABLE(libmmg5_example3  ${MMG_SOURCE_DIR}/../libexamples/example3/mmg3d.c)
@@ -277,6 +310,7 @@ ENDIF()
 ###############################################################################
 ADD_EXECUTABLE(${PROJECT_NAME}
   .dummy  ${MMG_SOURCE_DIR}/${PROJECT_NAME}_redefine.h
+  ${MMG_SOURCE_DIR}/lib${PROJECT_NAME}f.h
   ${source_files} ${main_file})
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${LIBRARIES})
 INSTALL(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin)
@@ -404,7 +438,14 @@ SET(CPACK_IGNORE_FILES ";.\\\\\\\\.#;/\\\\\\\\.svn;.~;.#" ${CPACK_IGNORE_FILES})
 SET(CPACK_IGNORE_FILES ";libmmg5.*" ${CPACK_IGNORE_FILES})
 
 SET(CPACK_SOURCE_IGNORE_FILES ";.\\\\\\\\.#;/\\\\\\\\.svn;.~;.#" ${CPACK_SOURCE_IGNORE_FILES})
-SET(CPACK_SOURCE_IGNORE_FILES ";lib/;bin;archives;def" ${CPACK_SOURCE_IGNORE_FILES})
+SET(CPACK_SOURCE_IGNORE_FILES ";lib/;bin;archives;def;Doc/Bilan_singularites" ${CPACK_SOURCE_IGNORE_FILES})
+SET(CPACK_SOURCE_IGNORE_FILES ";Doc/Guide/bibliography" ${CPACK_SOURCE_IGNORE_FILES})
+SET(CPACK_SOURCE_IGNORE_FILES ";Doc/Guide/figures" ${CPACK_SOURCE_IGNORE_FILES})
+SET(CPACK_SOURCE_IGNORE_FILES ";Doc/Guide/Makefile" ${CPACK_SOURCE_IGNORE_FILES})
+SET(CPACK_SOURCE_IGNORE_FILES ";Doc/Guide/.*sty" ${CPACK_SOURCE_IGNORE_FILES})
+SET(CPACK_SOURCE_IGNORE_FILES ";Doc/Guide/.*tex" ${CPACK_SOURCE_IGNORE_FILES})
+SET(CPACK_SOURCE_IGNORE_FILES ";Doc/Guide/.*png" ${CPACK_SOURCE_IGNORE_FILES})
+SET(CPACK_SOURCE_IGNORE_FILES ";Doc/Guide/.*eps" ${CPACK_SOURCE_IGNORE_FILES})
 SET(CPACK_SOURCE_IGNORE_FILES ";emacs-format-file" ${CPACK_SOURCE_IGNORE_FILES})
 SET(CPACK_SOURCE_IGNORE_FILES ";libexamples/example0/example0_a/mesh.o.*" ${CPACK_SOURCE_IGNORE_FILES})
 SET(CPACK_SOURCE_IGNORE_FILES ";libexamples/example0/example0_b/mesh.o.*" ${CPACK_SOURCE_IGNORE_FILES})

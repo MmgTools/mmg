@@ -4,28 +4,34 @@
 #include "chrono.h"
 
 /* Return Values */
-#define MMG5_SUCCESS       0 /**< Return value for success */
-#define MMG5_LOWFAILURE    1 /**< Return value if we have problem in the remesh
-                                process but we can save a conform mesh */
-#define MMG5_STRONGFAILURE 2 /**< Return value if we fail and the mesh is non-conform */
+/**< Return value for success */
+#define MMG5_SUCCESS       0
+/**< Return value if we have problem in the remesh process but we can save a conform mesh */
+#define MMG5_LOWFAILURE    1
+/**< Return value if we fail and the mesh is non-conform */                                
+#define MMG5_STRONGFAILURE 2
+/**< Size of the mesh of singularities inside the main mesh */
+#define SIZE 0.75
 
-#define SIZE 0.75 /**< Size of the mesh of singularities inside the main mesh */
+/**< type of solutions */
+enum MMG5_type
+  {
+    MMG5_Notype,
+    MMG5_Scalar,
+    MMG5_Vector,
+    MMG5_Tensor
+  };
 
-enum MMG5_type /**< type of solutions */
-{
-  MMG5_Notype,
-  MMG5_Scalar,
-  MMG5_Vector,
-  MMG5_Tensor
-};
-enum MMG5_entities /**< entities of MMG5 */
+/**< entities of MMG5 */
+enum MMG5_entities
   {
     MMG5_Noentity,
     MMG5_Vertex,
     MMG5_Triangle
   };
 
-enum MMG5_Param /**<  Options for mmg3d2 (integers) */
+/**<  Options for mmg3d5 (integers) */
+enum MMG5_Param
   {
     MMG5_IPARAM_verbose,           /**<  Tune level of verbosity, [-10..10]         */
     MMG5_IPARAM_mem,               /**<  Set memory size to n Mbytes                */
@@ -42,8 +48,7 @@ enum MMG5_Param /**<  Options for mmg3d2 (integers) */
     MMG5_DPARAM_angleDetection,    /**<  Value for angle detection                  */
     MMG5_DPARAM_hmin,              /**<  Minimal mesh size                          */
     MMG5_DPARAM_hmax,              /**<  Maximal mesh size                          */
-    MMG5_DPARAM_hausd,             /**<  control global Hausdorff distance          */
-    /*                                   (on all the boundary surfaces of the mesh) */
+    MMG5_DPARAM_hausd,             /**<  control global Hausdorff distance (on all the boundary surfaces of the mesh) */
     MMG5_DPARAM_hgrad,             /**<  control gradation                          */
     MMG5_DPARAM_ls,                /**<  Value of level-set (not use for now)       */
     MMG5_PARAM_size,               /**<  Size of table of double parameters         */
@@ -115,6 +120,7 @@ typedef struct {
   int   a,b,ref,nxt;
   char  tag;
 } MMG5_hgeom;
+
 typedef struct {
   int         siz,max,nxt;
   MMG5_hgeom  *geom;

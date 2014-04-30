@@ -172,8 +172,9 @@ void Init_fileNames(pMesh mesh,pSol sol
 /** Set the name of input mesh */
 int Set_inputMeshName(MMG5_pMesh mesh, char* meshin) {
 
-  if ( mesh->namein )
+  if ( mesh->namein ){
     DEL_MEM(mesh,mesh->namein,(strlen(mesh->namein)+1)*sizeof(char));
+  }
 
   if ( strlen(meshin) ) {
     ADD_MEM(mesh,(strlen(meshin)+1)*sizeof(char),"input mesh name",
@@ -193,7 +194,6 @@ int Set_inputMeshName(MMG5_pMesh mesh, char* meshin) {
       fprintf(stdout,"     Use of default value \"mesh.mesh\".\n");
     }
   }
-
   return(1);
 }
 
@@ -651,7 +651,7 @@ int Set_tetrahedra(MMG5_pMesh mesh, int v0, int v1, int v2, int v3, int ref, int
 
   vol = orvol(mesh->point,pt->v);
   if ( vol == 0.0 ) {
-    fprintf(stdout,"  ## Error: tetrahedra volume is null.\n");
+    fprintf(stdout,"  ## Error: tetrahedra %d has volume null.\n",pos);
     for ( ip=0; ip<4; ip++ ) {
       ppt = &mesh->point[pt->v[ip]];
       for ( j=0; j<3; j++ ) {
