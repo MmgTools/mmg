@@ -240,7 +240,7 @@ int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met
         if ( !strcmp(argv[i],"-rn") ) {
           if ( ++i < argc ) {
             if ( isdigit(argv[i][0]) ) {
-              if ( !MMG5_Set_iparameters(mesh,met,MMG5_IPARAM_renum,1) )
+              if ( !MMG5_Set_iparameters(mesh,met,MMG5_IPARAM_renum,atoi(argv[i])) )
                 exit(EXIT_FAILURE);
             }
             else {
