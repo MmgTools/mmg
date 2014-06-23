@@ -1,6 +1,5 @@
 #include "mmgs.h"
 #include <math.h>
-#include "compil.date"
 
 /* globals */
 Info   info;
@@ -11,17 +10,17 @@ unsigned char iprv[3] = {2,0,1};
 static void excfun(int sigid) {
   fprintf(stdout,"\n Unexpected error:");  fflush(stdout);
   switch(sigid) {
-    case SIGABRT:
-      fprintf(stdout,"  Abnormal stop\n");  break;
-    case SIGFPE:
-      fprintf(stdout,"  Floating-point exception\n"); break;
-    case SIGILL:
-      fprintf(stdout,"  Illegal instruction\n"); break;
-    case SIGSEGV:
-      fprintf(stdout,"  Segmentation fault\n");  break;
-    case SIGTERM:
-    case SIGINT:
-      fprintf(stdout,"  Program killed\n");  break;
+  case SIGABRT:
+    fprintf(stdout,"  Abnormal stop\n");  break;
+  case SIGFPE:
+    fprintf(stdout,"  Floating-point exception\n"); break;
+  case SIGILL:
+    fprintf(stdout,"  Illegal instruction\n"); break;
+  case SIGSEGV:
+    fprintf(stdout,"  Segmentation fault\n");  break;
+  case SIGTERM:
+  case SIGINT:
+    fprintf(stdout,"  Program killed\n");  break;
   }
   exit(1);
 }
@@ -32,24 +31,24 @@ static void usage(char *name) {
   fprintf(stdout,"\n** Generic options :\n");
   fprintf(stdout,"-h      Print this message\n");
   fprintf(stdout,"-v [n]  Turn on numerical information, [-10..10]\n");
-	fprintf(stdout,"-d      Debbuging info.\n");
+  fprintf(stdout,"-d      Debbuging info.\n");
 
-	fprintf(stdout,"\n**  File specifications\n");
-	fprintf(stdout,"-in  file  input triangulation\n");
-	fprintf(stdout,"-out file  output triangulation\n");
-	fprintf(stdout,"-met file  load metric field\n");
-	fprintf(stdout,"-sol file  load solution file\n");
+  fprintf(stdout,"\n**  File specifications\n");
+  fprintf(stdout,"-in  file  input triangulation\n");
+  fprintf(stdout,"-out file  output triangulation\n");
+  fprintf(stdout,"-met file  load metric field\n");
+  fprintf(stdout,"-sol file  load solution file\n");
 
-	fprintf(stdout,"\n**  Parameters\n");
-	fprintf(stdout,"-ar val    angle detection\n");
+  fprintf(stdout,"\n**  Parameters\n");
+  fprintf(stdout,"-ar val    angle detection\n");
   fprintf(stdout,"-no        no mesh optimisation\n");
   fprintf(stdout,"-nr        no angle detection\n");
-	fprintf(stdout,"-nreg      nornal regul.\n");
-	fprintf(stdout,"-hmin val  minimal mesh size\n");
-	fprintf(stdout,"-hmax val  maximal mesh size\n");
-	fprintf(stdout,"-hausd val control Hausdorff distance\n");
-	fprintf(stdout,"-hgrad val control gradation\n");
-	fprintf(stdout,"-A         enable anisotropy\n");
+  fprintf(stdout,"-nreg      nornal regul.\n");
+  fprintf(stdout,"-hmin val  minimal mesh size\n");
+  fprintf(stdout,"-hmax val  maximal mesh size\n");
+  fprintf(stdout,"-hausd val control Hausdorff distance\n");
+  fprintf(stdout,"-hgrad val control gradation\n");
+  fprintf(stdout,"-A         enable anisotropy\n");
 
   exit(1);
 }
@@ -64,103 +63,103 @@ static int parsar(int argc,char *argv[],pMesh mesh,pSol met) {
     if ( *argv[i] == '-' ) {
       switch(argv[i][1]) {
       case '?':
-        usage(argv[0]);
-        break;
+	usage(argv[0]);
+	break;
       case 'a': /* ridge angle */
-        if ( !strcmp(argv[i],"-ar") && ++i < argc ) {
-					info.dhd = atof(argv[i]);
-					info.dhd = MS_MAX(0.0, MS_MIN(180.0,info.dhd));
-					info.dhd = cos(info.dhd*M_PI/180.0);
-				}
-			  break;
-			case 'A': /* anisotropy */
-			  met->size = 6;
-			  break;
+	if ( !strcmp(argv[i],"-ar") && ++i < argc ) {
+	  info.dhd = atof(argv[i]);
+	  info.dhd = MS_MAX(0.0, MS_MIN(180.0,info.dhd));
+	  info.dhd = cos(info.dhd*M_PI/180.0);
+	}
+	break;
+      case 'A': /* anisotropy */
+	met->size = 6;
+	break;
       case 'h':
-        if ( !strcmp(argv[i],"-hmin") && ++i < argc )
-					info.hmin = atof(argv[i]);
-			  else if ( !strcmp(argv[i],"-hmax") && ++i < argc )
-					info.hmax = atof(argv[i]);
-        else if ( !strcmp(argv[i],"-hausd") && ++i <= argc ) {
-	        info.hausd = atof(argv[i]);
-	      }
-        else if ( !strcmp(argv[i],"-hgrad") && ++i <= argc ) {
-	        info.hgrad = atof(argv[i]);
-					if ( info.hgrad < 0.0 )  
-					  info.hgrad = -1.0;
-					else
-						info.hgrad = log(info.hgrad);
-	      }
-				else
-					usage(argv[0]);
-				break;
+	if ( !strcmp(argv[i],"-hmin") && ++i < argc )
+	  info.hmin = atof(argv[i]);
+	else if ( !strcmp(argv[i],"-hmax") && ++i < argc )
+	  info.hmax = atof(argv[i]);
+	else if ( !strcmp(argv[i],"-hausd") && ++i <= argc ) {
+	  info.hausd = atof(argv[i]);
+	}
+	else if ( !strcmp(argv[i],"-hgrad") && ++i <= argc ) {
+	  info.hgrad = atof(argv[i]);
+	  if ( info.hgrad < 0.0 )
+	    info.hgrad = -1.0;
+	  else
+	    info.hgrad = log(info.hgrad);
+	}
+	else
+	  usage(argv[0]);
+	break;
       case 'd':
-        info.ddebug = 1;
-        break;
+	info.ddebug = 1;
+	break;
       case 'i':
-        if ( !strcmp(argv[i],"-in") ) {
-          ++i;
-          mesh->namein = argv[i];
-          info.imprim = 5;
-        }
-        break;
+	if ( !strcmp(argv[i],"-in") ) {
+	  ++i;
+	  mesh->namein = argv[i];
+	  info.imprim = 5;
+	}
+	break;
       case 'm':
-        if ( !strcmp(argv[i],"-met") ) {
-          ++i;
-          met->namein = argv[i];
-					info.imprim = 5;
-				}
-				else if ( !strcmp(argv[i],"-m") ) {
-					++i;
-					info.mem = atoi(argv[i]);
-				}
-			  break;
+	if ( !strcmp(argv[i],"-met") ) {
+	  ++i;
+	  met->namein = argv[i];
+	  info.imprim = 5;
+	}
+	else if ( !strcmp(argv[i],"-m") ) {
+	  ++i;
+	  info.mem = atoi(argv[i]);
+	}
+	break;
       case 'n':
-        if ( !strcmp(argv[i],"-nr") )
-          info.dhd = -1.0;
-        else if ( !strcmp(argv[i],"-nreg") )
-					info.nreg = 1;
-			  else if ( !strcmp(argv[i],"-no") )
-          info.opt = 0;
-        break;
+	if ( !strcmp(argv[i],"-nr") )
+	  info.dhd = -1.0;
+	else if ( !strcmp(argv[i],"-nreg") )
+	  info.nreg = 1;
+	else if ( !strcmp(argv[i],"-no") )
+	  info.opt = 0;
+	break;
       case 'o':
-        if ( !strcmp(argv[i],"-out") ) {
-          ++i;
-          mesh->nameout = argv[i];
-        }
-        break;
+	if ( !strcmp(argv[i],"-out") ) {
+	  ++i;
+	  mesh->nameout = argv[i];
+	}
+	break;
       case 'v':
-        if ( ++i < argc ) {
-          if ( argv[i][0] == '-' || isdigit(argv[i][0]) )
-            info.imprim = atoi(argv[i]);
-          else 
-            i--;
-        }
-        else {
-          fprintf(stderr,"Missing argument option %c\n",argv[i-1][1]);
-          usage(argv[0]);
-        }
-        break;
-    
+	if ( ++i < argc ) {
+	  if ( argv[i][0] == '-' || isdigit(argv[i][0]) )
+	    info.imprim = atoi(argv[i]);
+	  else
+	    i--;
+	}
+	else {
+	  fprintf(stderr,"Missing argument option %c\n",argv[i-1][1]);
+	  usage(argv[0]);
+	}
+	break;
+
       default:
-        fprintf(stderr,"Unrecognized option %s\n",argv[i]);
-        usage(argv[0]);
+	fprintf(stderr,"Unrecognized option %s\n",argv[i]);
+	usage(argv[0]);
       }
     }
     else {
       if ( mesh->namein == NULL ) {
-        mesh->namein = argv[i];
-        if ( info.imprim == -99 )  info.imprim = 5;
+	mesh->namein = argv[i];
+	if ( info.imprim == -99 )  info.imprim = 5;
       }
       else if ( mesh->nameout == NULL )
-        mesh->nameout = argv[i];
+	mesh->nameout = argv[i];
       else if ( met->namein == NULL )
-        met->namein = argv[i];
+	met->namein = argv[i];
       else if ( met->nameout == NULL )
-        met->nameout = argv[i];
+	met->nameout = argv[i];
       else {
-        fprintf(stderr,"Argument %s ignored\n",argv[i]);
-        usage(argv[0]);
+	fprintf(stderr,"Argument %s ignored\n",argv[i]);
+	usage(argv[0]);
       }
     }
     i++;
@@ -173,7 +172,7 @@ static int parsar(int argc,char *argv[],pMesh mesh,pSol met) {
     fscanf(stdin,"%d",&i);
     info.imprim = i;
   }
-  
+
   if ( mesh->namein == NULL ) {
     mesh->namein = (char *)calloc(128,sizeof(char));
     assert(mesh->namein);
@@ -243,23 +242,23 @@ static int parsop(pMesh mesh,pSol met) {
     /* check for condition type */
     if ( !strcmp(data,"parameters") ) {
       fscanf(in,"%d",&info.npar);
-			info.par = (Par*)calloc(info.npar,sizeof(Par));
-			assert(info.par);
+      info.par = (Par*)calloc(info.npar,sizeof(Par));
+      assert(info.par);
 
       for (i=0; i<info.npar; i++) {
-        par = &info.par[i];
-        fscanf(in,"%d %s ",&par->ref,buf);
-        for (j=0; j<strlen(buf); j++)  buf[j] = tolower(buf[j]);
-        if ( !strcmp(buf,"vertices") || !strcmp(buf,"vertex") )          par->elt = MS_Ver;
-        else if ( !strcmp(buf,"triangles") || !strcmp(buf,"triangle") )  par->elt = MS_Tri;
-        else {
-          fprintf(stdout,"  %%%% Wrong format: %s\n",buf);
-          continue;
-        }
-        ret = fscanf(in,"%f %f",&fp1,&fp2);
-        par->hmin  = fp1;
-        par->hmax  = fp2;
-				par->hausd = info.hausd;
+	par = &info.par[i];
+	fscanf(in,"%d %s ",&par->ref,buf);
+	for (j=0; j<strlen(buf); j++)  buf[j] = tolower(buf[j]);
+	if ( !strcmp(buf,"vertices") || !strcmp(buf,"vertex") )          par->elt = MS_Ver;
+	else if ( !strcmp(buf,"triangles") || !strcmp(buf,"triangle") )  par->elt = MS_Tri;
+	else {
+	  fprintf(stdout,"  %%%% Wrong format: %s\n",buf);
+	  continue;
+	}
+	ret = fscanf(in,"%f %f",&fp1,&fp2);
+	par->hmin  = fp1;
+	par->hmax  = fp2;
+	par->hausd = info.hausd;
       }
     }
   }
@@ -268,10 +267,10 @@ static int parsop(pMesh mesh,pSol met) {
 }
 
 static void endcod() {
-	char   stim[32];
+  char   stim[32];
 
   chrono(OFF,&info.ctim[0]);
-	printim(info.ctim[0].gdif,stim);
+  printim(info.ctim[0].gdif,stim);
   fprintf(stdout,"\n   ELAPSED TIME  %s\n",stim);
 }
 
@@ -279,33 +278,33 @@ static void endcod() {
 static void setfunc(pMesh mesh,pSol met) {
   if ( met->size < 6 ) {
     calelt  = calelt_iso;
-		defsiz  = defsiz_iso;
-		gradsiz = gradsiz_iso;
+    defsiz  = defsiz_iso;
+    gradsiz = gradsiz_iso;
     lenedg  = lenedg_iso;
-		intmet  = intmet_iso;
-		movintpt= movintpt_iso;
-		movridpt= movridpt_iso;
+    intmet  = intmet_iso;
+    movintpt= movintpt_iso;
+    movridpt= movridpt_iso;
   }
   else {
     calelt  = calelt_ani;
-		defsiz  = defsiz_ani;
-		gradsiz = gradsiz_ani;
+    defsiz  = defsiz_ani;
+    gradsiz = gradsiz_ani;
     lenedg  = lenedg_ani;
-		intmet  = intmet_ani;
-		movintpt= movintpt_ani;
-		movridpt= movridpt_ani;
+    intmet  = intmet_ani;
+    movintpt= movintpt_ani;
+    movridpt= movridpt_ani;
   }
 }
 
 int main(int argc,char *argv[]) {
   Mesh     mesh;
   Sol      met;
-	int      ier;
-	char     stim[32];
+  int      ier;
+  char     stim[32];
 
   fprintf(stdout,"  -- MMGS, Release %s (%s) \n",MS_VER,MS_REL);
   fprintf(stdout,"     %s\n",MS_CPY);
-  fprintf(stdout,"    %s\n",COMPIL);
+  fprintf(stdout,"     %s %s\n",__DATE__,__TIME__);
 
   /* trap exceptions */
   signal(SIGABRT,excfun);
@@ -325,15 +324,15 @@ int main(int argc,char *argv[]) {
   info.imprim = -99;
   info.ddebug = 0;
   info.mem    = -1;
-	info.dhd    = ANGEDG;
-	info.hmin   = 0.0;
-	info.hmax   = FLT_MAX;
-	info.hausd  = 0.01;
-	info.hgrad  = 0.1;
-	info.badkal = 0;
-	info.nreg   = 0;
-	info.opt    = 1;
-	info.mani   = 1;
+  info.dhd    = ANGEDG;
+  info.hmin   = 0.0;
+  info.hmax   = FLT_MAX;
+  info.hausd  = 0.01;
+  info.hgrad  = 0.1;
+  info.badkal = 0;
+  info.nreg   = 0;
+  info.opt    = 1;
+  info.mani   = 1;
   met.size    = 1;
 
   /* command line */
@@ -343,20 +342,20 @@ int main(int argc,char *argv[]) {
   fprintf(stdout,"\n  -- INPUT DATA\n");
   chrono(ON,&info.ctim[1]);
   if ( !loadMesh(&mesh) )  return(1);
-	met.npmax = mesh.npmax;
+  met.npmax = mesh.npmax;
   met.dim   = 3;
-	ier = loadMet(&met);
-	if ( !ier )
-	  return(1);
+  ier = loadMet(&met);
+  if ( !ier )
+    return(1);
   else if ( ier > 0 && met.np != mesh.np ) {
     fprintf(stdout,"  ## WARNING: WRONG SOLUTION NUMBER. IGNORED\n");
-	  free(met.m);
-	  memset(&met,0,sizeof(Sol));
-	}
+    free(met.m);
+    memset(&met,0,sizeof(Sol));
+  }
   if ( !parsop(&mesh,&met) )     return(1);
   if ( !scaleMesh(&mesh,&met) )  return(1);
   chrono(OFF,&info.ctim[1]);
-	printim(info.ctim[1].gdif,stim);
+  printim(info.ctim[1].gdif,stim);
   fprintf(stdout,"  -- DATA READING COMPLETED.     %s\n",stim);
 
   /* analysis */
@@ -368,17 +367,17 @@ int main(int argc,char *argv[]) {
   if ( !analys(&mesh) )  return(1);
   chrono(OFF,&info.ctim[2]);
   if ( info.imprim ) {
-		printim(info.ctim[2].gdif,stim);
+    printim(info.ctim[2].gdif,stim);
     fprintf(stdout,"  -- PHASE 1 COMPLETED.     %s\n",stim);
   }
   /* solve */
   chrono(ON,&info.ctim[3]);
-  if ( info.imprim )   
+  if ( info.imprim )
     fprintf(stdout,"\n  -- PHASE 2 : %s MESHING\n",met.size < 6 ? "ISOTROPIC" : "ANISOTROPIC");
   if ( !mmgs1(&mesh,&met) )  return(1);
   chrono(OFF,&info.ctim[3]);
   if ( info.imprim ) {
-		printim(info.ctim[3].gdif,stim);
+    printim(info.ctim[3].gdif,stim);
     fprintf(stdout,"  -- PHASE 2 COMPLETED.     %s\n",stim);
   }
   fprintf(stdout,"\n  %s\n   END OF MODULE MMGS-LJLL \n  %s\n",MS_STR,MS_STR);
@@ -389,7 +388,7 @@ int main(int argc,char *argv[]) {
   if ( info.imprim )  fprintf(stdout,"\n  -- WRITING DATA FILE %s\n",mesh.nameout);
   if ( !unscaleMesh(&mesh,&met) )  return(1);
   if ( !saveMesh(&mesh) )      return(1);
-	if ( !saveMet(&mesh,&met) )  return(1);
+  if ( !saveMet(&mesh,&met) )  return(1);
   chrono(OFF,&info.ctim[1]);
   if ( info.imprim )  fprintf(stdout,"  -- WRITING COMPLETED\n");
 
@@ -397,9 +396,8 @@ int main(int argc,char *argv[]) {
   free(mesh.point);
   free(mesh.tria);
   free(mesh.adja);
-	if ( met.m )  free(met.m);
-	if ( info.par )  free(info.par);
+  if ( met.m )  free(met.m);
+  if ( info.par )  free(info.par);
 
   return(0);
 }
-

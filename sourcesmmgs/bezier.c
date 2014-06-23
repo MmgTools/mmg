@@ -130,15 +130,11 @@ int bezierCP(pMesh mesh,int iel,pBezier pb) {
   }
   
   for (i=0; i<3; i++) {
-    pb->b[9][0] += (0.25*(pb->b[2*i+3][0]+pb->b[2*i+4][0]));
-    pb->b[9][1] += (0.25*(pb->b[2*i+3][1]+pb->b[2*i+4][1]));
-    pb->b[9][2] += (0.25*(pb->b[2*i+3][2]+pb->b[2*i+4][2]));
+    pb->b[9][0] += 0.25 * (pb->b[2*i+3][0] + pb->b[2*i+4][0]);
+    pb->b[9][1] += 0.25 * (pb->b[2*i+3][1] + pb->b[2*i+4][1]);
+    pb->b[9][2] += 0.25 * (pb->b[2*i+3][2] + pb->b[2*i+4][2]);
   }
 
-  //printf("Coefficient 1 : %f %f %f \n",pb->b[0][0],pb->b[0][1],pb->b[0][2]);
-  //printf("Coefficient 2 : %f %f %f \n",pb->b[1][0],pb->b[1][1],pb->b[1][2]);
-  //printf("Coefficient 3 : %f %f %f \n",pb->b[2][0],pb->b[2][1],pb->b[2][2]);
-  //printf("Coefficient central : %f %f %f \n",pb->b[9][0],pb->b[9][1],pb->b[9][2]);
   return(1);
 }
 
@@ -148,6 +144,7 @@ int bezierInt(pBezier pb,double uv[2],double o[3],double no[3],double to[3]) {
   double    dd,u,v,w,ps,ux,uy,uz;
   char      i;
 
+  memset(to,0,3*sizeof(double));
   u = uv[0];
   v = uv[1];
   w = 1 - u - v;
