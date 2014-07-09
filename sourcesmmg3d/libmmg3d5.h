@@ -319,7 +319,7 @@ int  MMG5_parsop(MMG5_pMesh mesh,MMG5_pSol met);
 /** print help */
 void  MMG5_usage(char *prog);
 /** put info structure in mesh structure */
-void  MMG5_stockOptions(MMG5_pMesh mesh, MMG5_Info *info);
+int  MMG5_stockOptions(MMG5_pMesh mesh, MMG5_Info *info);
 /** get info structure from mesh structure */
 void  MMG5_destockOptions(MMG5_pMesh mesh, MMG5_Info *info);
 

@@ -105,7 +105,7 @@ long long memSize (void) {
 /** memory repartition for the -m option */
 void memOption(pMesh mesh) {
   long long  million = 1048576L;
-  int        ctri,npask,bytes;
+  int        ctri,npask,bytes,memtmp;
 
   mesh->memMax = memSize();
 
@@ -161,10 +161,28 @@ void memOption(pMesh mesh) {
     bytes = bytes + 3*6*sizeof(int);
 #endif
 
-    npask = (double)mesh->info.mem / bytes * (int)million;
+    /*init allocation need 38Mo*/
+    npask = (double)(mesh->info.mem-38) / bytes * (int)million;
     mesh->npmax = MG_MIN(npask,mesh->npmax);
     mesh->ntmax = MG_MIN(ctri*npask,mesh->ntmax);
     mesh->nemax = MG_MIN(6*npask,mesh->nemax);
+    /*check if the memory asked is enough to load the mesh*/
+    if(mesh->np && 
+       (mesh->npmax < mesh->np || mesh->ntmax < mesh->nt || mesh->nemax < mesh->ne)) {
+      memtmp = mesh->np * bytes /(int)million + 38;
+      memtmp = MG_MAX(memtmp, mesh->nt * bytes /(ctri* (int)million) + 38);
+      memtmp = MG_MAX(memtmp, mesh->ne * bytes /(6*(int)million) + 38);
+      mesh->memMax = (long long) memtmp+1;
+      fprintf(stdout,"  ## ERROR: asking for %d Mo of memory ",mesh->info.mem);
+      fprintf(stdout,"is not enough to load mesh. You need to ask %d Mo minimum\n",
+	      memtmp+1);
+    }
+    if(mesh->info.mem < 39) {
+      mesh->memMax = (long long) 39;
+      fprintf(stdout,"  ## ERROR: asking for %d Mo of memory ",mesh->info.mem);
+      fprintf(stdout,"is not enough to load mesh. You need to ask %d Mo minimum\n",
+	      39);
+    }
   }
 
   if ( abs(mesh->info.imprim) > 4 || mesh->info.ddebug )

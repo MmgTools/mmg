@@ -63,7 +63,10 @@ int loadMesh(pMesh mesh) {
   mesh->ne = mesh->nei;
   mesh->na = mesh->nai;
   if ( !zaldy(mesh) )  return(0);
-
+  if (mesh->npmax < mesh->np || mesh->ntmax < mesh->nt || mesh->nemax < mesh->ne) {
+    return(0);
+  }
+ 
   /* read mesh vertices */
   GmfGotoKwd(inm,GmfVertices);
   for (k=1; k<=mesh->np; k++) {

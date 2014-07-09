@@ -411,33 +411,43 @@ int Set_meshSize(MMG5_pMesh mesh, int np, int ne, int nt, int na) {
 
   if ( mesh->point )
     DEL_MEM(mesh,mesh->point,(mesh->npmax+1)*sizeof(Point));
+  if ( mesh->tetra )
+    DEL_MEM(mesh,mesh->tetra,(mesh->nemax+1)*sizeof(Tetra));
+  if ( mesh->tria )
+    DEL_MEM(mesh,mesh->tria,(mesh->nt+1)*sizeof(Tria));
+  if ( mesh->edge )
+    DEL_MEM(mesh,mesh->edge,(mesh->na+1)*sizeof(Edge));
 
-  mesh->npmax = MG_MAX(1.5*mesh->np,NPMAX);
+  /*tester si -m definie : renvoie 0 si pas ok et met la taille min dans info.mem */
+  if( mesh->info.mem > 0) {
+    if((mesh->npmax < mesh->np || mesh->ntmax < mesh->nt || mesh->nemax < mesh->ne)) {
+      memOption(mesh);
+      return(0);
+    } else if(mesh->info.mem < 39)
+      return(0);
+  } else {
+    mesh->npmax = MG_MAX(1.5*mesh->np,NPMAX);
+    mesh->nemax = MG_MAX(1.5*mesh->ne,NEMAX);
+    mesh->ntmax = MG_MAX(1.5*mesh->nt,NTMAX);
+
+  }
   ADD_MEM(mesh,(mesh->npmax+1)*sizeof(Point),"initial vertices",
           printf("  Exit program.\n");
           exit(EXIT_FAILURE));
   SAFE_CALLOC(mesh->point,mesh->npmax+1,Point);
 
-  if ( mesh->tetra )
-    DEL_MEM(mesh,mesh->tetra,(mesh->nemax+1)*sizeof(Tetra));
 
-  mesh->nemax = MG_MAX(1.5*mesh->ne,NEMAX);
   ADD_MEM(mesh,(mesh->nemax+1)*sizeof(Tetra),"initial tetrahedra",
           printf("  Exit program.\n");
           exit(EXIT_FAILURE));
   SAFE_CALLOC(mesh->tetra,mesh->nemax+1,Tetra);
 
-  if ( mesh->tria )
-    DEL_MEM(mesh,mesh->tria,(mesh->nt+1)*sizeof(Tria));
 
-  mesh->ntmax = MG_MAX(1.5*mesh->nt,NTMAX);
   if ( mesh->nt ) {
     ADD_MEM(mesh,(mesh->nt+1)*sizeof(Tria),"initial triangles",return(0));
     SAFE_CALLOC(mesh->tria,mesh->nt+1,Tria);
   }
 
-  if ( mesh->edge )
-    DEL_MEM(mesh,mesh->edge,(mesh->na+1)*sizeof(Edge));
 
   mesh->namax = mesh->na;
   if ( mesh->na ) {
@@ -1183,6 +1193,10 @@ int Set_iparameters(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
     else
       mesh->info.mem      = val;
     memOption(mesh);
+    if(mesh->np && (mesh->npmax < mesh->np || mesh->ntmax < mesh->nt || mesh->nemax < mesh->ne)) {
+      return(0);
+    } else if(mesh->info.mem < 39)
+      return(0);
     break;
 #ifndef PATTERN
   case MMG5_IPARAM_bucket :

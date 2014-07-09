@@ -409,10 +409,17 @@ int parsop(MMG5_pMesh mesh,MMG5_pSol met) {
 }
 
 /** Store the info structure in mesh */
-void stockOptions(MMG5_pMesh mesh, MMG5_Info *info) {
+int stockOptions(MMG5_pMesh mesh, MMG5_Info *info) {
 
   memcpy(&mesh->info,info,sizeof(MMG5_Info));
-  return;
+  memOption(mesh);
+  if( mesh->info.mem > 0) {
+    if((mesh->npmax < mesh->np || mesh->ntmax < mesh->nt || mesh->nemax < mesh->ne)) {
+      return(0);
+    } else if(mesh->info.mem < 39)
+      return(0);
+  }  
+  return(1);
 }
 
 /** Recover the info structure stored in mesh */
