@@ -333,7 +333,7 @@ int split1b(pMesh mesh, pSol met,int *list, int ret, int ip,int cas){
                     printf("  ## Error: unable to allocate a new element.\n");
                     INCREASE_MEM_MESSAGE();
 		    k--;
-                    for ( ; k>0 ; --k ) {
+                    for ( ; k>=0 ; --k ) {
 			delElt(mesh,abs(newtet[k]));
                     }
                     return(-1));
