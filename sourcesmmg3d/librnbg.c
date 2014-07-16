@@ -357,7 +357,6 @@ int renumbering(int boxVertNbr, pMesh mesh, pSol sol) {
     DEL_MEM(mesh,vertOldTab,(mesh->ne+1)*sizeof(int));
     return(1);
   }
-
   /* Allocating memory to compute adjacency lists */
   ADD_MEM(mesh,(vertNbr+2)*sizeof(SCOTCH_Num),"vertTab",
           DEL_MEM(mesh,vertOldTab,(mesh->ne+1)*sizeof(int));
@@ -415,6 +414,41 @@ int renumbering(int boxVertNbr, pMesh mesh, pSol sol) {
   }
   vertTab[vertNbr+1] = edgeNbr;
   edgeNbr--;
+  /*check if some tetra are alone*/
+   for(tetraIdx = 1 ; tetraIdx < mesh->ne + 1 ; tetraIdx++) {
+
+    /* Testing if the tetra exists */
+    if (!mesh->tetra[tetraIdx].v[0]) continue;
+    if (vertTab[vertOldTab[tetraIdx]] < 0) {
+      if(vertOldTab[tetraIdx] == vertNbr) {
+	 fprintf(stdout,"WARNING graph problem, no renum\n");
+	 DEL_MEM(mesh,edgeTab,edgeSiz*sizeof(SCOTCH_Num));
+	 DEL_MEM(mesh,vertTab,(vertNbr+2)*sizeof(SCOTCH_Num));
+	 return(0);
+      }
+      if(vertTab[vertOldTab[tetraIdx] + 1] > 0) 
+	vertTab[vertOldTab[tetraIdx]] = vertTab[vertOldTab[tetraIdx] + 1];
+      else {
+	if(vertOldTab[tetraIdx]+1 == vertNbr) {
+	 fprintf(stdout,"WARNING graph problem, no renum\n");
+	 DEL_MEM(mesh,edgeTab,edgeSiz*sizeof(SCOTCH_Num));
+	 DEL_MEM(mesh,vertTab,(vertNbr+2)*sizeof(SCOTCH_Num));	
+	 return(0);
+      }
+	i = 1;
+	do  {
+	  i++;
+	} while((vertTab[vertOldTab[tetraIdx] + i] < 0) && ((vertOldTab[tetraIdx] + i) < vertNbr));
+	if(vertOldTab[tetraIdx] + i == vertNbr) {
+	  fprintf(stdout,"WARNING graph problem, no renum\n");
+	  DEL_MEM(mesh,edgeTab,edgeSiz*sizeof(SCOTCH_Num));
+	  DEL_MEM(mesh,vertTab,(vertNbr+2)*sizeof(SCOTCH_Num));
+	  return(0);
+	}
+	vertTab[vertOldTab[tetraIdx]] = vertTab[vertOldTab[tetraIdx] + i];
+      }
+    }
+   }
 
   /* free adjacents to gain memory space */
   DEL_MEM(mesh,mesh->adja,(4*mesh->nemax+5)*sizeof(int));
