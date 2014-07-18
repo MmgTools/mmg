@@ -184,7 +184,7 @@ int Set_inputMeshName(MMG5_pMesh mesh, char* meshin) {
     strcpy(mesh->namein,meshin);
   }
   else {
-    ADD_MEM(mesh,10*sizeof(char),"input mesh name",
+      ADD_MEM(mesh,10*sizeof(char),"input mesh name",
             printf("  Exit program.\n");
             exit(EXIT_FAILURE));
     SAFE_CALLOC(mesh->namein,10,char);
@@ -422,9 +422,21 @@ int Set_meshSize(MMG5_pMesh mesh, int np, int ne, int nt, int na) {
   if( mesh->info.mem > 0) {
     if((mesh->npmax < mesh->np || mesh->ntmax < mesh->nt || mesh->nemax < mesh->ne)) {
       memOption(mesh);
+ //     printf("pas de pbs ? %d %d %d %d %d %d -- %d\n",mesh->npmax,mesh->np,
+//	     mesh->ntmax,mesh->nt,mesh->nemax,mesh->ne,mesh->info.mem);
+      if((mesh->npmax < mesh->np || mesh->ntmax < mesh->nt 
+	  || mesh->nemax < mesh->ne)) {
+	fprintf(stdout,"mem insuffisante np : %d %d nt : %d %d ne :%d %d\n"
+		,mesh->npmax,mesh->np,
+		mesh->ntmax,mesh->nt,mesh->nemax,mesh->ne);
+	return(0);
+      }
+      else
+	return(1);
+    } else if(mesh->info.mem < 39) {
+      printf("mem insuffisante %d\n",mesh->info.mem);
       return(0);
-    } else if(mesh->info.mem < 39)
-      return(0);
+    }
   } else {
     mesh->npmax = MG_MAX(1.5*mesh->np,NPMAX);
     mesh->nemax = MG_MAX(1.5*mesh->ne,NEMAX);
