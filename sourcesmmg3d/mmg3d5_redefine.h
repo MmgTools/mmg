@@ -52,6 +52,7 @@
 #define colver                        	 _MMG5_colver
 #define coquil                        	 _MMG5_coquil
 #define coquilface                    	 _MMG5_coquilface
+#define countelt                      	 _MMG5_countelt
 #define creaEdge                      	 _MMG5_creaEdge
 #define creaPoint                     	 _MMG5_creaPoint
 #define defsiz_ani                    	 _MMG5_defsiz_ani
@@ -124,7 +125,6 @@
 #define nsort                         	 _MMG5_nsort
 #define orcal                         	 _MMG5_orcal
 #define orcal_poi                     	 _MMG5_orcal_poi
-#define countelt                         _MMG5_countelt
 #define orvol                         	 _MMG5_orvol
 #define outqua                        	 _MMG5_outqua
 #define ppgdisp                       	 _MMG5_ppgdisp
