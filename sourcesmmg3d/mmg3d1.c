@@ -546,9 +546,9 @@ static int movtet(pMesh mesh,pSol met,int maxit) {
 
     pxt = pt->xt ? &mesh->xtetra[pt->xt] : 0;
     for (i=0; i<4; i++) {
+      ier = 0;
       for (j=0; j<3; j++) {
         if ( pt->xt && (pxt->tag[iarf[i][j]] & MG_REQ) )  continue;
-        ier = 0;
         ip = idir[i][inxt2[j]];
         iq = idir[i][iprv2[j]];
 
