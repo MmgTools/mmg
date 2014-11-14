@@ -458,3 +458,9 @@ ADD_TEST(NAME BUG_OptLsSingularities
  COMMAND ${EXECUT} -v 5 -ls
  ${REG_TESTS_PATH}/BUG_OptLsSingularities/test4
  ${REG_TESTS_PATH}/BUG_OptLsSingularities/test4.o.meshb)
+
+ADD_TEST(NAME TestDoSol_1
+ COMMAND ${EXECUT} -v 5 -hgrad -1 -hausd 1 -m 100
+ ${REG_TESTS_PATH}/TestDoSol_1/66_shaver3.mesh
+ ${REG_TESTS_PATH}/TestDoSol_1/66_shaver3.o.meshb)
+
