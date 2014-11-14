@@ -161,10 +161,8 @@ int main(int argc,char *argv[]) {
   }
 #endif
 
-#ifdef DEBUG
-  if ( !met.np && !DoSol(&mesh,&met,&mesh.info) )
+  if ( !mesh.info.iso && !met.np && !DoSol(&mesh,&met) )
     RETURN_AND_FREE(&mesh,&met,&sing,MMG5_LOWFAILURE);
-#endif
 
   if ( !analys(&mesh) ) RETURN_AND_FREE(&mesh,&met,&sing,MMG5_LOWFAILURE);
 
