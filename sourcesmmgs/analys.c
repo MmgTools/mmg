@@ -528,7 +528,12 @@ static int norver(pMesh mesh) {
   }
 
   /* memory to store normals on both sides of ridges */
-  if ( ng ) {
+  if(!ng) {
+    mesh->ngmax = NGMAX;
+    mesh->geom  = (pGeom)calloc(mesh->ngmax+1,sizeof(Geom));
+    assert(mesh->geom);
+
+  } else if ( ng ) {
     mesh->ngmax = MS_MAX(1.5*ng,NGMAX);
     mesh->geom  = (pGeom)calloc(mesh->ngmax+1,sizeof(Geom));
     assert(mesh->geom);

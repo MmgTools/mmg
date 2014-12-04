@@ -59,7 +59,7 @@ int chkcol_int(pMesh mesh,pSol met,int k,char iface,char iedg,int *list,char typ
     }
   }
   if ( calold < NULKAL && calnew <= calold )  return(0);
-  else if ( calnew < 0.3*calold )  return(0);
+  else if ( calnew < NULKAL || calnew < 0.3*calold )  return(0);
 
   return(ilist);
 }
@@ -455,7 +455,7 @@ int chkcol_bdy(pMesh mesh,int k,char iface,char iedg,int *listv) {
     calnew = MG_MIN(calnew,caltmp);
   }
   if ( calold < NULKAL && calnew <= calold )  return(0);
-  else if ( calnew < 0.3*calold )  return(0);
+  else if ( calnew < NULKAL || calnew < 0.3*calold )  return(0);
 
   /* analyze surfacic ball of p */
   for (l=1; l<ilists-1; l++) {

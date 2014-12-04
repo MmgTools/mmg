@@ -173,6 +173,10 @@ char chkedg(pMesh mesh,Tria *pt,char ori) {
   pt->flag = 0;
   hma2 = LLONG*LLONG*mesh->info.hmax*mesh->info.hmax;
   
+ /* for (i=0; i<3; i++) { */
+ /*   for (i1=0; i1<3; i1++)  */
+ /*     t[i][i1] = 10000000; */
+ /* } */
   /* normal recovery */
   for (i=0; i<3; i++) {
     if ( MG_SIN(p[i]->tag) ) {
@@ -250,6 +254,12 @@ char chkedg(pMesh mesh,Tria *pt,char ori) {
         t1[2] = il * uz;
       }
       else {
+	if(!((p[i1]->tag & MG_NOM) ||  MG_EDG(p[i1]->tag) ) ) {
+	  // 	if(t[i1][0] > 10) {
+	  fprintf(stdout,"warning geometrical problem %d -- %d %d -- %e\n",p[i1]->tag,
+		  MG_SIN(p[i1]->tag ),p[i1]->tag & MG_NOM,t[i1][0]);
+	    return(0);
+	  }
         memcpy(t1,t[i1],3*sizeof(double));
         ps = t1[0]*ux + t1[1]*uy + t1[2]*uz;
         if ( ps < 0.0 ) {
@@ -264,6 +274,10 @@ char chkedg(pMesh mesh,Tria *pt,char ori) {
         t2[2] = -il * uz;
       }
       else {
+  	if(!((p[i2]->tag & MG_NOM) || MG_EDG(p[i2]->tag) ) ) {
+	    fprintf(stdout,"2. warning geometrical problem\n");
+	    return(0);
+	  }
         memcpy(t2,t[i2],3*sizeof(double));
         ps = - ( t2[0]*ux + t2[1]*uy + t2[2]*uz );
         if ( ps < 0.0 ) {
@@ -1693,6 +1707,8 @@ static int adptet(pMesh mesh,pSol met) {
     if ( !mesh->info.noswap ) {
 #ifdef PATTERN
       nf = swpmsh(mesh,met);
+#else
+      nf = swpmsh(mesh,met,NULL);
 #endif
       if ( nf < 0 ) {
         fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");

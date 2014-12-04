@@ -15,7 +15,6 @@
 #include "chrono.h"
 #include "eigenv.h"
 #include "memory.h"
-#include "libmesh5.h"
 
 #define MS_VER   "2.0a"
 #define MS_REL   "Sept. 11, 2012"

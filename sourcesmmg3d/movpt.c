@@ -50,6 +50,7 @@ int movintpt(pMesh mesh,int *list,int ilist,int improve) {
     calnew = MG_MIN(calnew,callist[k]);
   }
   if ( calold < NULKAL && calnew <= calold )    return(0);
+  else if (calnew < NULKAL) return(0);
   else if ( improve && calnew < 0.9 * calold )     return(0);
   else if ( calnew < 0.3 * calold )     return(0);
 
@@ -381,6 +382,7 @@ int movbdyregpt(pMesh mesh,int *listv,int ilistv,int *lists,int ilists) {
     calnew = MG_MIN(calnew,caltmp);
   }
   if ( calold < NULKAL && calnew <= calold )    return(0);
+  else if (calnew < NULKAL) return(0);
   else if ( calnew < 0.3*calold )        return(0);
   memset(pxp,0,sizeof(xPoint));
 
@@ -399,6 +401,7 @@ int movbdyregpt(pMesh mesh,int *listv,int ilistv,int *lists,int ilists) {
     calnew = MG_MIN(calnew,callist[l]);
   }
   if ( calold < NULKAL && calnew <= calold )    return(0);
+  else if (calnew < NULKAL) return(0);
   else if ( calnew < 0.3*calold )        return(0);
 
   /* When all tests have been carried out, update coordinates and normals */
@@ -674,6 +677,7 @@ int movbdyrefpt(pMesh mesh, int *listv, int ilistv, int *lists, int ilists){
     calnew = MG_MIN(calnew,callist[l]);
   }
   if ( calold < NULKAL && calnew <= calold )    return(0);
+  else if (calnew < NULKAL) return(0);
   else if ( calnew <= 0.3*calold )      return(0);
 
   /* Update coordinates, normals, for new point */
@@ -954,6 +958,7 @@ int movbdynompt(pMesh mesh, int *listv, int ilistv, int *lists, int ilists){
     calnew = MG_MIN(calnew,callist[l]);
   }
   if ( calold < NULKAL && calnew <= calold )    return(0);
+  else if (calnew < NULKAL) return(0);
   else if ( calnew <= 0.3*calold )      return(0);
 
   /* Update coordinates, normals, for new point */
@@ -1242,6 +1247,7 @@ int movbdyridpt(pMesh mesh,int *listv,int ilistv,int *lists,int ilists) {
     calnew = MG_MIN(calnew,callist[l]);
   }
   if ( calold < NULKAL && calnew <= calold )    return(0);
+  else if (calnew < NULKAL) return(0);
   else if ( calnew <= 0.3*calold )      return(0);
 
   /* Update coordinates, normals, for new point */
