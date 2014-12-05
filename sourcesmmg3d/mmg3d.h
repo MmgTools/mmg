@@ -20,7 +20,6 @@
 
 #include "mmg3d5_redefine.h"
 #include "libmmg3d5.h"
-#include "libmesh5.h"
 
 #define MG_VER   "5.2c"
 #define MG_REL   "Jul. 6, 2012"

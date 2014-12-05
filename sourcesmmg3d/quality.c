@@ -672,6 +672,9 @@ void outqua(pMesh mesh,pSol met) {
       continue;
     }
     ok++;
+    if ( orvol(mesh->point,pt->v) < 0.0 ) {
+      fprintf(stdout,"dans quality vol negatif\n");
+ }
     rap = ALPHAD * caltet(mesh,met,pt->v[0],pt->v[1],pt->v[2],pt->v[3]);
     if ( rap < rapmin ) {
       rapmin = rap;

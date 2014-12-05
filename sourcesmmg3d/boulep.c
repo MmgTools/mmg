@@ -1031,9 +1031,11 @@ static inline void errorMessage(pMesh mesh, int k1, int k2) {
     fprintf(stdout," %d %d %d %d.\n", mesh->point[pt->v[0]].tmp,
            mesh->point[pt->v[1]].tmp,mesh->point[pt->v[2]].tmp,
            mesh->point[pt->v[3]].tmp);
+    fprintf(stdout,"adj %d %d %d %d\n",(&mesh->adja[3*(kel1-1)+1])[0],(&mesh->adja[3*(kel1-1)+1])[1],(&mesh->adja[3*(kel1-1)+1])[2],(&mesh->adja[3*(kel1-1)+1])[3]);
+    fprintf(stdout,"req %d %d %d %d\n",mesh->point[pt->v[0]].tag & MG_REQ,mesh->point[pt->v[1]].tag & MG_REQ,mesh->point[pt->v[2]].tag & MG_REQ,mesh->point[pt->v[3]].tag & MG_REQ);
   } else if ( kel2 != 0 ) {
-    pt = &mesh->tetra[k2];
     fprintf(stdout,"            look at elt %d:",kel2);
+    mesh->tetra[kel2].ref=5;
     fprintf(stdout," %d %d %d %d.\n", mesh->point[pt->v[0]].tmp,
            mesh->point[pt->v[1]].tmp,mesh->point[pt->v[2]].tmp,
            mesh->point[pt->v[3]].tmp);

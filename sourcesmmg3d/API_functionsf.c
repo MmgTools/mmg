@@ -395,7 +395,7 @@ FORTRAN_NAME(MMG5_SET_SINGULREQUIREDVERTEX,mmg5_set_singulrequiredvertex,
 FORTRAN_NAME(MMG5_SET_SINGULRIDGE,mmg5_set_singulridge,
 	     (MMG5_pSingul *sing, int *k, int* retval),
 	     (sing,k,retval)) {
-  *retval =  Set_singulRidge(sing,*k);
+  *retval =  Set_singulRidge(*sing,*k);
   return;
 }
 
