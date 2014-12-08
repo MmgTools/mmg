@@ -36,7 +36,7 @@
 
 #define RETURN_AND_PACK(mesh,met,val)do    \
     {                                           \
-      packMesh(mesh,met);                       \
+      packMesh(mesh,met);                        \
       return(val);                              \
     }while(0)
 
@@ -372,8 +372,8 @@ int mmg3dlib(pMesh mesh,pSol met
   }
 #endif
   if ( !analys(mesh) ) {
-  if ( !unscaleMesh(mesh,met) )  return(MMG5_STRONGFAILURE);
-  RETURN_AND_PACK(mesh,met,MMG5_LOWFAILURE);
+    if ( !unscaleMesh(mesh,met) )  return(MMG5_STRONGFAILURE);
+    RETURN_AND_PACK(mesh,met,MMG5_LOWFAILURE);
   }
 
   if ( mesh->info.imprim > 4 && !mesh->info.iso && met->m ) prilen(mesh,met);
@@ -397,7 +397,8 @@ int mmg3dlib(pMesh mesh,pSol met
       if ( !renumbering(BOXSIZE,mesh, met) ) {
         fprintf(stdout,"  ## Unable to renumbering mesh. \n");
         fprintf(stdout,"  ## Try to run without renumbering option (-rn 0)\n");
-        return(0);
+       if ( !unscaleMesh(mesh,met) )  return(MMG5_STRONGFAILURE);
+       RETURN_AND_PACK(mesh,met,MMG5_LOWFAILURE);
       }
 
       if ( mesh->info.imprim > 5) {
