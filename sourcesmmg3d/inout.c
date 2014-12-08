@@ -1835,7 +1835,7 @@ int saveMet(pMesh mesh,pSol met) {
       ppt = &mesh->point[k];
       if ( MG_VOK(ppt) ) {
 	if(!bin) {
-	  fprintf(inm,"%.15lg ",met->m[k]);
+	  fprintf(inm,"%.15lg \n ",met->m[k]);
 	} else {
 	  fwrite((unsigned char*)&met->m[k],sd,1,inm);
 	}
