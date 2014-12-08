@@ -1416,11 +1416,11 @@ int saveLibraryMesh(pMesh mesh) {
     if(!bin) {
       strcpy(&chaine[0],"\n\nEdges\n");
       fprintf(inm,"%s",chaine);
-      fprintf(inm,"%d\n",na);
+      fprintf(inm,"%d\n",mesh->na);
     } else {
       binch = 5; //Edges
       fwrite(&binch,sw,1,inm);
-      bpos += 12 + 3*4*na;//Pos
+      bpos += 12 + 3*4*mesh->na;//Pos
       fwrite(&bpos,sw,1,inm);
       fwrite(&na,sw,1,inm);
     }   
