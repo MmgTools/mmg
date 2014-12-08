@@ -589,6 +589,7 @@ int searchlen(MMG5_pMesh mesh, MMG5_pSol met, double lmin, double lmax, int *elt
       }
     }
   }
+  DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(hedge));
   return(1);
 }
 
