@@ -570,7 +570,7 @@ int loadMesh(pMesh mesh) {
 	  if(iswp) ia=swapbin(ia);
 	}
 	if(ia>na) {
-	  fprintf(stdout,"   Warning Required Edges number %8d IGNORED\n",i);
+	  fprintf(stdout,"   Warning Required Edges number %8d/%8d IGNORED\n",ia,na);
 	  continue;
 	}
         if( mesh->info.iso ){
@@ -1451,8 +1451,8 @@ int saveLibraryMesh(pMesh mesh) {
       }
       na = 0;
       for (k=1; k<=mesh->na; k++) {
-        if ( mesh->edge[k].tag & MG_GEO ) {
-	  na++;
+	na++;
+	if ( mesh->edge[k].tag & MG_GEO ) {
 	  if(!bin) {
 	    fprintf(inm,"%d \n",na);
 	  } else {
@@ -1473,9 +1473,10 @@ int saveLibraryMesh(pMesh mesh) {
 	fwrite(&bpos,sw,1,inm);
 	fwrite(&nedreq,sw,1,inm);
       }
+      na = 0;
       for (k=1; k<=mesh->na; k++) {
+	na++;
         if (  mesh->edge[k].tag & MG_REQ ) {
-	  na++;
 	  if(!bin) {
 	    fprintf(inm,"%d \n",na);
 	  } else {
