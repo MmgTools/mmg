@@ -579,7 +579,7 @@ int saveMesh(pMesh mesh) {
   edge = 0;
   mesh->ver = 2;
   strcpy(data,mesh->nameout);
-
+  bin=0;
   ptr = strstr(data,".mesh");
   if ( !ptr ) {
     strcat(data,".meshb");
