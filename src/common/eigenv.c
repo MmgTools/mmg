@@ -1,48 +1,39 @@
+/* =============================================================================
+**  This file is part of the MMG3D 5 software package for the tetrahedral
+**  mesh modification.
+**  Copyright (c) 2014 Inria / Université de Bordeaux, IMB / UPMC, LJLL.
+**
+**  MMG3D 5 is free software: you can redistribute it and/or modify it
+**  under the terms of the GNU Lesser General Public License as published
+**  by the Free Software Foundation, either version 3 of the License, or
+**  (at your option) any later version.
+**
+**  MMG3D 5 is distributed in the hope that it will be useful, but WITHOUT
+**  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+**  FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
+**  License for more details.
+**
+**  You should have received a copy of the GNU Lesser General Public
+**  License and of the GNU General Public License along with MMG3D 5 (in
+**  files COPYING.LESSER and COPYING). If not, see
+**  <http://www.gnu.org/licenses/>. Please read their terms carefully and
+**  use this copy of the MMG3D 5 distribution only if you accept them.
+** =============================================================================
+*/
+
 /**
- * Logiciel initial: MMG3D Version 4.0
- * Co-auteurs : Cecile Dobrzynski et Pascal Frey.
- * Proprietaires :IPB - UPMC -INRIA.
+ * \file eigenv.c
+ * \brief Find eigenvalues and eigenvectors of matrix.
+ * \author Cécile Dobrzynski
+ * \author Pascal Frey
+ * \version 5
+ * \copyright GNU Lesser General Public License.
  *
- * Copyright \copyright 2004-2005-2006-2007-2008-2009-2010-2011,
- * diffuse sous les termes et conditions de la licence publique generale de GNU
- * Version 3 ou toute version ulterieure.
+ * Find eigenvalues and eigenvectors of 2x2 or 3x3 symetric definite
+ * positive matrix.
  *
- * Ce fichier est une partie de MMG3D.
- * MMG3D est un logiciel libre ; vous pouvez le redistribuer et/ou le modifier
- * suivant les termes de la licence publique generale de GNU
- * Version 3 ou toute version ulterieure.
- * MMG3D est distribue dans l espoir qu il sera utile, mais SANS
- * AUCUNE GARANTIE ; sans meme garantie de valeur marchande.
- * Voir la licence publique generale de GNU pour plus de details.
- * MMG3D est diffuse en esperant qu il sera utile,
- * mais SANS AUCUNE GARANTIE, ni explicite ni implicite,
- * y compris les garanties de commercialisation ou
- * d adaptation dans un but specifique.
- * Reportez-vous a la licence publique generale de GNU pour plus de details.
- * Vous devez avoir re\c{c}u une copie de la licence publique generale de GNU
- * en meme temps que ce document.
- * Si ce n est pas le cas, aller voir <http://www.gnu.org/licenses/>.**/
-/**
- * Initial software: MMG3D Version 4.0
- * Co-authors: Cecile Dobrzynski et Pascal Frey.
- * Owners: IPB - UPMC -INRIA.
- *
- * Copyright \copyright 2004-2005-2006-2007-2008-2009-2010-2011,
- * spread under the terms and conditions of the license GNU General Public License
- * as published Version 3, or (at your option) any later version.
- *
- * This file is part of MMG3D
- * MMG3D is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 3 of the License, or
- * (at your option) any later version.
- * MMG3D is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- * You should have received a copy of the GNU General Public License
- * along with MMG3D. If not, see <http://www.gnu.org/licenses/>.
- **/
+ */
+
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
@@ -55,21 +46,37 @@
 #define  EPSX2          2.e-06
 #define  MAXTOU         50
 
-/* check if numbers are equal */
+/**
+   \def egal(x,y)
+   Check if numbers \a x and \a y are equal.
+*/
 #define egal(x,y)   (                                                   \
-		     (  ((x) == 0.0f) ? (fabs(y) < EPS) :               \
-			( ((y) == 0.0f) ? (fabs(x) < EPS) :             \
-			  (fabs((x)-(y)) / (fabs(x) + fabs(y)) < EPSX2) )  ) )
+                     (  ((x) == 0.0f) ? (fabs(y) < EPS) :               \
+                        ( ((y) == 0.0f) ? (fabs(x) < EPS) :             \
+                          (fabs((x)-(y)) / (fabs(x) + fabs(y)) < EPSX2) )  ) )
 
-
+/**
+ * \brief Identity matrix.
+ */
 static double Id[3][3] = {
   {1.0, 0.0, 0.0},
   {0.0, 1.0, 0.0},
   {0.0, 0.0, 1.0} };
 
 
-/* find root(s) of polynomial:  P(x)= x^3+bx^2+cx+d
-   return 1: 3 roots,  2: 2 roots,  3: 1 root */
+/**
+ * \fn static int newton3(double p[4],double x[3])
+ * \brief Find root(s) of a polynomial of degree 3.
+ * \param p[4] polynomial coefficients (b=p[2], c=p[1], d=p[0]).
+ * \param x[3] root(s) of polynomial.
+ * \return 0 if no roots.
+ * \return 1 for 3 roots.
+ * \return 2 for 2 roots.
+ * \return 3 for 1 root.
+ *
+ * Find root(s) of a polynomial of degree 3: \f$P(x) = x^3+bx^2+cx+d\f$.
+ *
+ */
 static int newton3(double p[4],double x[3]) {
   double     b,c,d,da,db,dc,epsd;
   double     delta,fx,dfx,dxx;
@@ -77,6 +84,13 @@ static int newton3(double p[4],double x[3]) {
   int        it,n;
 
   /* coeffs polynomial, a=1 */
+  if ( p[4] != 1. ) {
+    fprintf(stderr,"  ## Error: bad use of newton3 function, polynomial"
+            " must be of type P(x) = x^3+bx^2+cx+d. \n",fx);
+    fprintf(stderr,"  ## Exiting.\n");
+    exit(EXIT_FAILURE);
+  }
+
   b = p[2];
   c = p[1];
   d = p[0];
@@ -112,9 +126,9 @@ static int newton3(double p[4],double x[3]) {
       fx = d + x[2]*(c+x[2]*(b+x[2]));
       if ( fabs(fx) > EPSD2 ) {
 #ifdef DEBUG
-	fprintf(stderr,"  ## ERR 9100, newton3: fx= %E\n",fx);
+        fprintf(stderr,"  ## ERR 9100, newton3: fx= %E\n",fx);
 #endif
-	return(0);
+        return(0);
       }
       return(n);
     }
@@ -128,9 +142,9 @@ static int newton3(double p[4],double x[3]) {
       fx = d + x[2]*(c+x[2]*(b+x[2]));
       if ( fabs(fx) > EPSD2 ) {
 #ifdef DEBUG
-	fprintf(stderr,"  ## ERR 9100, newton3: fx= %E\n",fx);
+        fprintf(stderr,"  ## ERR 9100, newton3: fx= %E\n",fx);
 #endif
-	return(0);
+        return(0);
       }
       return(n);
     }
@@ -180,8 +194,8 @@ static int newton3(double p[4],double x[3]) {
     if ( dxx < 1.0e-10 ) {
       x[0] = x2;
       if ( fabs(fx) > EPSD2 ) {
-	fprintf(stderr,"  ## ERR 9102, newton3, no root found (fx %E).\n",fx);
-	return(0);
+        fprintf(stderr,"  ## ERR 9102, newton3, no root found (fx %E).\n",fx);
+        return(0);
       }
       break;
     }
@@ -232,9 +246,15 @@ static int newton3(double p[4],double x[3]) {
 }
 
 
-/* find eigenvalues and vectors of a 3x3 symmetric definite
- * positive matrix
- * return order of eigenvalues (1,2,3) or 0 if failed */
+/**
+ * \fn int eigenv(int symmat,double *mat,double lambda[3],double v[3][3])
+ * \brief Find eigenvalues and vectors of a 3x3 matrix.
+ * \param symmat 0 if matrix is not symetric, 1 otherwise.
+ * \param *mat matrix.
+ * \param lambda[3] eigenvalues.
+ * \param v[3][3] eigenvectors.
+ * \return order of eigenvalues (1,2,3) or 0 if failed.
+ */
 int eigenv(int symmat,double *mat,double lambda[3],double v[3][3]) {
   double    a11,a12,a13,a21,a22,a23,a31,a32,a33;
   double    aa,bb,cc,dd,ee,ii,vx1[3],vx2[3],vx3[3],dd1,dd2,dd3;
@@ -379,32 +399,32 @@ int eigenv(int symmat,double *mat,double lambda[3],double v[3][3]) {
 
       /* find vector of max norm */
       if ( dd1 > dd2 ) {
-	if ( dd1 > dd3 ) {
-	  dd1 = 1.0 / sqrt(dd1);
-	  v[k][0] = vx1[0] * dd1;
-	  v[k][1] = vx1[1] * dd1;
-	  v[k][2] = vx1[2] * dd1;
-	}
-	else {
-	  dd3 = 1.0 / sqrt(dd3);
-	  v[k][0] = vx3[0] * dd3;
-	  v[k][1] = vx3[1] * dd3;
-	  v[k][2] = vx3[2] * dd3;
-	}
+        if ( dd1 > dd3 ) {
+          dd1 = 1.0 / sqrt(dd1);
+          v[k][0] = vx1[0] * dd1;
+          v[k][1] = vx1[1] * dd1;
+          v[k][2] = vx1[2] * dd1;
+        }
+        else {
+          dd3 = 1.0 / sqrt(dd3);
+          v[k][0] = vx3[0] * dd3;
+          v[k][1] = vx3[1] * dd3;
+          v[k][2] = vx3[2] * dd3;
+        }
       }
       else {
-	if ( dd2 > dd3 ) {
-	  dd2 = 1.0 / sqrt(dd2);
-	  v[k][0] = vx2[0] * dd2;
-	  v[k][1] = vx2[1] * dd2;
-	  v[k][2] = vx2[2] * dd2;
-	}
-	else {
-	  dd3 = 1.0 / sqrt(dd3);
-	  v[k][0] = vx3[0] * dd3;
-	  v[k][1] = vx3[1] * dd3;
-	  v[k][2] = vx3[2] * dd3;
-	}
+        if ( dd2 > dd3 ) {
+          dd2 = 1.0 / sqrt(dd2);
+          v[k][0] = vx2[0] * dd2;
+          v[k][1] = vx2[1] * dd2;
+          v[k][2] = vx2[2] * dd2;
+        }
+        else {
+          dd3 = 1.0 / sqrt(dd3);
+          v[k][0] = vx3[0] * dd3;
+          v[k][1] = vx3[1] * dd3;
+          v[k][2] = vx3[2] * dd3;
+        }
       }
     }
   }
@@ -434,30 +454,30 @@ int eigenv(int symmat,double *mat,double lambda[3],double v[3][3]) {
     /* find vector of max norm */
     if ( dd1 > dd2 ) {
       if ( dd1 > dd3 ) {
-	dd1 = 1.0 / sqrt(dd1);
-	v[2][0] = vx1[0] * dd1;
-	v[2][1] = vx1[1] * dd1;
-	v[2][2] = vx1[2] * dd1;
+        dd1 = 1.0 / sqrt(dd1);
+        v[2][0] = vx1[0] * dd1;
+        v[2][1] = vx1[1] * dd1;
+        v[2][2] = vx1[2] * dd1;
       }
       else {
-	dd3 = 1.0 / sqrt(dd3);
-	v[2][0] = vx3[0] * dd3;
-	v[2][1] = vx3[1] * dd3;
-	v[2][2] = vx3[2] * dd3;
+        dd3 = 1.0 / sqrt(dd3);
+        v[2][0] = vx3[0] * dd3;
+        v[2][1] = vx3[1] * dd3;
+        v[2][2] = vx3[2] * dd3;
       }
     }
     else {
       if ( dd2 > dd3 ) {
-	dd2 = 1.0 / sqrt(dd2);
-	v[2][0] = vx2[0] * dd2;
-	v[2][1] = vx2[1] * dd2;
-	v[2][2] = vx2[2] * dd2;
+        dd2 = 1.0 / sqrt(dd2);
+        v[2][0] = vx2[0] * dd2;
+        v[2][1] = vx2[1] * dd2;
+        v[2][2] = vx2[2] * dd2;
       }
       else {
-	dd3 = 1.0 / sqrt(dd3);
-	v[2][0] = vx3[0] * dd3;
-	v[2][1] = vx3[1] * dd3;
-	v[2][2] = vx3[2] * dd3;
+        dd3 = 1.0 / sqrt(dd3);
+        v[2][0] = vx3[0] * dd3;
+        v[2][1] = vx3[1] * dd3;
+        v[2][2] = vx3[2] * dd3;
       }
     }
 
@@ -552,8 +572,14 @@ int eigenv(int symmat,double *mat,double lambda[3],double v[3][3]) {
   return(n);
 }
 
-
-/* eigen value + vector extraction */
+/**
+ * \fn int eigen2(double *mm,double *lambda,double vp[2][2])
+ * \brief Find eigenvalues and vectors of a 2x2 matrix.
+ * \param symmat 0 if matrix is not symetric, 1 otherwise.
+ * \param *lambda eigenvalues.
+ * \param vp[2][2] eigenvectors.
+ * \return 1.
+ */
 int eigen2(double *mm,double *lambda,double vp[2][2]) {
   double   m[3],dd,a1,xn,ddeltb,rr1,rr2,ux,uy;
 

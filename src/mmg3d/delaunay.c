@@ -476,6 +476,7 @@ int delone(pMesh mesh,pSol sol,int ip,int *list,int ilist) {
 /*   double        *ma,*mb,*mc,*md,mm[6],h1,h2,h3; */
 /*   int           *adja,i,j,ipil,iel,lon,iadr,adj,ib,ic,id,base,ncor; */
 /*   int           vois[4]; */
+/*   int           order; */
 
 /*   ppt  = &mesh->point[ip]; */
 /*   if ( ppt->tag & M_UNUSED )  return(ilist); */
@@ -562,7 +563,9 @@ int delone(pMesh mesh,pSol sol,int ip,int *list,int ilist) {
 /* 	  + 2.0*(mm[1]*v1*v2 + mm[2]*v1*v3 + mm[4]*v2*v3); */
 /* 	/\*if ( det*dd*dd*dd*dd*dd*dd < nn * nn * nn * eps2 * eps2 * eps2 )  break;*\/ */
 /* 	/\*\//prendre le min des valeurs propres */
-/* 	  eigenv(1,mm,lambda,vv); */
+/* 	  order = eigenv(1,mm,lambda,vv); */
+/*    if ( !order ) return(0); */
+
 /* 	  det = max(lambda[0],max(lambda[1],lambda[2])); */
 /* 	  if ( det*dd*dd < nn * eps2 )  break; */
 /* 	*\//\*if ( pow(det,1./3.)*dd*dd < nn * eps2 )  break;*\/ */
