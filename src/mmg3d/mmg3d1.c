@@ -21,11 +21,30 @@
 ** =============================================================================
 */
 
+/**
+ * \file mmg3d1.c
+ * \brief Perform mesh adaptation.
+ * \author Charles Dapogny
+ * \author Cécile Dobrzynski
+ * \author Pascal Frey
+ * \author Algiane Froehly
+ * \version 5
+ * \copyright GNU Lesser General Public License.
+
+ */
 #include "mmg3d.h"
 
 char  ddb;
 
-/** set triangle corresponding to face ie of tetra k */
+/**
+ * \param mesh pointer to the mesh structure.
+ * \param k tetraedron index.
+ * \param ie face index of tetraedron.
+ * \param *ptt pointer to the output triangle.
+ *
+ * Set triangle corresponding to face ie of tetra k.
+ *
+ */
 void tet2tri(pMesh mesh,int k,char ie,Tria *ptt) {
   pTetra  pt;
   pxTetra pxt;
@@ -52,7 +71,16 @@ void tet2tri(pMesh mesh,int k,char ie,Tria *ptt) {
   }
 }
 
-/** find acceptable position for splitting */
+/**
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
+ * \param k tetraedron index.
+ * \param *vx pointer to table of edges to split.
+ * \return 1.
+ *
+ * Find acceptable position for splitting.
+ *
+ */
 int dichoto(pMesh mesh,pSol met,int k,int *vx) {
   pTetra  pt;
   pPoint  pa,pb,ps;
@@ -129,7 +157,18 @@ int dichoto(pMesh mesh,pSol met,int k,int *vx) {
   return(1);
 }
 
-/** Find acceptable position for split1b, passing the shell of considered edge, starting from o */
+/**
+ * \param mesh pointer to the mesh structure.
+ * \param *list pointer to the shell of edge.
+ * \param ret double of the number of tetraedra in the shell.
+ * \param o[3] initial guess for coordinates of new point.
+ * \param ro[3] output coordinates for the new point.
+ * \return 1.
+ *
+ * Find acceptable position for split1b, passing the shell of
+ * considered edge, starting from o point.
+ *
+ */
 int dichoto1b(pMesh mesh,int *list,int ret,double o[3],double ro[3]) {
   pTetra  pt;
   pPoint  p0,p1;
@@ -177,7 +216,17 @@ int dichoto1b(pMesh mesh,int *list,int ret,double o[3],double ro[3]) {
   return(1);
 }
 
-/** return edges of (virtual) triangle pt that need to be split w/r Hausdorff criterion */
+/**
+ * \param mesh pointer to the mesh structure.
+ * \param *pt pointer to the triangle.
+ * \param ori orientation of the triangle (1 for direct orientation, 0 otherwise).
+ * \return 0 if error.
+ * \return edges of the triangle pt that need to be split.
+ *
+ * Find edges of (virtual) triangle pt that need to be split with
+ * respect to the Hausdorff criterion.
+ *
+ */
 char chkedg(pMesh mesh,Tria *pt,char ori) {
   pPoint   p[3];
   xPoint  *pxp;
@@ -195,11 +244,11 @@ char chkedg(pMesh mesh,Tria *pt,char ori) {
   p[2] = &mesh->point[ic];
   pt->flag = 0;
   hma2 = LLONG*LLONG*mesh->info.hmax*mesh->info.hmax;
-  
- /* for (i=0; i<3; i++) { */
- /*   for (i1=0; i1<3; i1++)  */
- /*     t[i][i1] = 10000000; */
- /* } */
+
+  /* for (i=0; i<3; i++) { */
+  /*   for (i1=0; i1<3; i1++)  */
+  /*     t[i][i1] = 10000000; */
+  /* } */
   /* normal recovery */
   for (i=0; i<3; i++) {
     if ( MG_SIN(p[i]->tag) ) {
@@ -277,12 +326,12 @@ char chkedg(pMesh mesh,Tria *pt,char ori) {
         t1[2] = il * uz;
       }
       else {
-	if(!((p[i1]->tag & MG_NOM) ||  MG_EDG(p[i1]->tag) ) ) {
-	  // 	if(t[i1][0] > 10) {
-	  fprintf(stdout,"warning geometrical problem %d -- %d %d -- %e\n",p[i1]->tag,
-		  MG_SIN(p[i1]->tag ),p[i1]->tag & MG_NOM,t[i1][0]);
-	    return(0);
-	  }
+        if(!((p[i1]->tag & MG_NOM) ||  MG_EDG(p[i1]->tag) ) ) {
+          // 	if(t[i1][0] > 10) {
+          fprintf(stdout,"warning geometrical problem %d -- %d %d -- %e\n",p[i1]->tag,
+                  MG_SIN(p[i1]->tag ),p[i1]->tag & MG_NOM,t[i1][0]);
+          return(0);
+        }
         memcpy(t1,t[i1],3*sizeof(double));
         ps = t1[0]*ux + t1[1]*uy + t1[2]*uz;
         if ( ps < 0.0 ) {
@@ -297,10 +346,10 @@ char chkedg(pMesh mesh,Tria *pt,char ori) {
         t2[2] = -il * uz;
       }
       else {
-  	if(!((p[i2]->tag & MG_NOM) || MG_EDG(p[i2]->tag) ) ) {
-	    fprintf(stdout,"2. warning geometrical problem\n");
-	    return(0);
-	  }
+        if(!((p[i2]->tag & MG_NOM) || MG_EDG(p[i2]->tag) ) ) {
+          fprintf(stdout,"2. warning geometrical problem\n");
+          return(0);
+        }
         memcpy(t2,t[i2],3*sizeof(double));
         ps = - ( t2[0]*ux + t2[1]*uy + t2[2]*uz );
         if ( ps < 0.0 ) {
@@ -343,12 +392,22 @@ char chkedg(pMesh mesh,Tria *pt,char ori) {
   return(pt->flag);
 }
 
-/** Search for boundary edges that could be swapped for geometric approximation */
+/**
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
+ * \param bucket pointer to the bucket structure (only for delaunay).
+ * \return -1 if failed.
+ * \return swap number.
+ *
+ * Search for boundary edges that could be swapped for geometric
+ * approximation.
+ *
+ */
 /*static*/ int swpmsh(pMesh mesh,pSol met
 #ifndef PATTERN
-		      ,pBucket bucket
+                      ,pBucket bucket
 #endif
-		      ) {
+                      ) {
   pTetra   pt;
   pxTetra  pxt;
   int      k,it,list[LMAX+2],ilist,ret,it1,it2,ns,nns,maxit;
@@ -399,7 +458,14 @@ char chkedg(pMesh mesh,Tria *pt,char ori) {
   return(nns);
 }
 
-/** Internal edge flipping */
+/**
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
+ * \param crit coefficient of quality improvment.
+ *
+ * Internal edge flipping.
+ *
+ */
 static int swptet(pMesh mesh,pSol met,double crit) {
   pTetra   pt;
   pxTetra  pxt;
@@ -445,7 +511,16 @@ static int swptet(pMesh mesh,pSol met,double crit) {
   return(nns);
 }
 
-/** Analyze tetrahedra and move points so as to make mesh more uniform */
+/**
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
+ * \param maxit maximum number of iteration.
+ * \return -1 if failed.
+ * \return number of moved points.
+ *
+ * Analyze tetrahedra and move points so as to make mesh more uniform.
+ *
+ */
 static int movtet(pMesh mesh,pSol met,int maxit) {
   pTetra        pt;
   pPoint        ppt;
@@ -559,7 +634,16 @@ static int movtet(pMesh mesh,pSol met,int maxit) {
   return(nnm);
 }
 
-/** attempt to collapse small edges */
+/**
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
+ * \param typchk type of checking permformed for edge length (hmin or LSHORT criterion).
+ * \return -1 if failed.
+ * \return number of collapsed points.
+ *
+ * Attempt to collapse small edges.
+ *
+ */
 /*static*/ int coltet(pMesh mesh,pSol met,char typchk) {
   pTetra     pt;
   pxTetra    pxt;
@@ -653,7 +737,16 @@ static int movtet(pMesh mesh,pSol met,int maxit) {
   return(nc);
 }
 
-/** analyze volume tetra and split if needed */
+/**
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
+ * \param typchk type of checking permformed for edge length (hmax or LLONG criterion).
+ * \return -1 if failed.
+ * \return number of new points.
+ *
+ * Analyze volume tetra and split if needed.
+ *
+ */
 static int anatetv(pMesh mesh,pSol met,char typchk) {
   pTetra   pt;
   pPoint   p1,p2;
@@ -673,7 +766,7 @@ static int anatetv(pMesh mesh,pSol met,char typchk) {
     pt = &mesh->tetra[k];
     if ( !MG_EOK(pt) )  continue;
 
-   /* avoid split of edges belonging to a required tet */
+    /* avoid split of edges belonging to a required tet */
     if ( pt->tag & MG_REQ ) {
       for (i=0; i<6; i++) {
         ip1 = pt->v[iare[i][0]];
@@ -869,7 +962,16 @@ static int anatetv(pMesh mesh,pSol met,char typchk) {
   return(nap);
 }
 
-/** analyze tetra and split on geometric criterion */
+/**
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
+ * \param typchk type of checking permformed for edge length (hmax or LLONG criterion).
+ * \return -1 if failed.
+ * \return number of new points.
+ *
+ * Analyze tetra and split on geometric criterion.
+ *
+ */
 /*static*/ int anatets(pMesh mesh,pSol met,char typchk) {
   pTetra   pt;
   pPoint   ppt,p1,p2;
@@ -1157,7 +1259,16 @@ static int anatetv(pMesh mesh,pSol met,char typchk) {
   return(nap);
 }
 
-/** Split edges of length bigger than LOPTL */
+/**
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
+ * \param *warn \a warn is set to 1 if we don't have enough memory to complete mesh.
+ * \return -1 if failed.
+ * \return number of new points.
+ *
+ * Split edges of length bigger than LOPTL.
+ *
+ */
 static int adpspl(pMesh mesh,pSol met, int* warn) {
   pTetra     pt;
   pxTetra    pxt;
@@ -1358,7 +1469,15 @@ static int adpspl(pMesh mesh,pSol met, int* warn) {
   return(ns);
 }
 
-/** Collapse edges of length smaller than LOPTS */
+/**
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
+ * \return -1 if failed.
+ * \return number of deleted points.
+ *
+ * Collapse edges of length smaller than LOPTS.
+ *
+ */
 static int adpcol(pMesh mesh,pSol met) {
   pTetra     pt;
   pxTetra    pxt;
@@ -1438,7 +1557,15 @@ static int adpcol(pMesh mesh,pSol met) {
   return(nc);
 }
 
-/** Analyze tetrahedra and split long / collapse short, according to prescribed metric */
+/**
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
+ * \return 0 if failed, 1 otherwise.
+ *
+ * Analyze tetrahedra and split long or collapse short edges according to
+ * prescribed metric.
+ *
+ */
 static int adptet(pMesh mesh,pSol met) {
   int      it,nnc,nns,nnf,nnm,maxit,nc,ns,nf,nm;
   int      warn;
@@ -1634,7 +1761,15 @@ static int adptet(pMesh mesh,pSol met) {
   return(1);
 }
 
-/** split tetra into 4 when more than 1 boundary face */
+/**
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
+ * \return -1 if failed.
+ * \return number of new points.
+ *
+ * Split tetra into 4 when more than 1 boundary face.
+ *
+ */
 /*static*/ int anatet4(pMesh mesh, pSol met) {
   pTetra      pt;
   pPoint      ppt;
@@ -1674,7 +1809,16 @@ static int adptet(pMesh mesh,pSol met) {
 }
 
 
-/** analyze tetrahedra and split if needed */
+/**
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
+ * \param typchk type of checking for edges length.
+ * \return 0 if failed.
+ * \return number of new points.
+ *
+ * Analyze tetrahedra and split if needed.
+ *
+ */
 /*static*/ int anatet(pMesh mesh,pSol met,char typchk) {
   int     ier,nc,ns,nf,nnc,nns,nnf,it,maxit;
 
@@ -1760,30 +1904,37 @@ static int adptet(pMesh mesh,pSol met) {
     fprintf(stdout,"     %8d splitted, %8d collapsed, %8d swapped, %d iter.\n",nns,nnc,nnf,it);
 
 #ifdef USE_SCOTCH
-    /*check enough vertex to renum*/
-    if ( mesh->info.renum && (mesh->np/2. > BOXSIZE) && mesh->np>100000 ) {
-      /* renumbering begin */
-      if ( mesh->info.imprim > 5 )
-        fprintf(stdout,"  -- RENUMBERING. \n");
-      if ( !renumbering(BOXSIZE,mesh, met) ) {
-        fprintf(stdout,"  ## Unable to renumbering mesh. \n");
-        fprintf(stdout,"  ## Try to run without renumbering option (-rn 0)\n");
-        return(0);
-      }
-
-      if ( mesh->info.imprim > 5) {
-        fprintf(stdout,"  -- PHASE RENUMBERING COMPLETED. \n");
-      }
-
-      if ( mesh->info.ddebug )  chkmsh(mesh,1,0);
-      /* renumbering end */
+  /*check enough vertex to renum*/
+  if ( mesh->info.renum && (mesh->np/2. > BOXSIZE) && mesh->np>100000 ) {
+    /* renumbering begin */
+    if ( mesh->info.imprim > 5 )
+      fprintf(stdout,"  -- RENUMBERING. \n");
+    if ( !renumbering(BOXSIZE,mesh, met) ) {
+      fprintf(stdout,"  ## Unable to renumbering mesh. \n");
+      fprintf(stdout,"  ## Try to run without renumbering option (-rn 0)\n");
+      return(0);
     }
+
+    if ( mesh->info.imprim > 5) {
+      fprintf(stdout,"  -- PHASE RENUMBERING COMPLETED. \n");
+    }
+
+    if ( mesh->info.ddebug )  chkmsh(mesh,1,0);
+    /* renumbering end */
+  }
 #endif
 
   return(1);
 }
 
-/** main adaptation routine */
+/**
+ * \param mesh pointer to the mesh structure.
+ * \param met pointer to the metric structure.
+ * \return 0 if failed, 1 if success.
+ *
+ * Main adaptation routine.
+ *
+ */
 int mmg3d1(pMesh mesh,pSol met) {
 
   if ( abs(mesh->info.imprim) > 3 )

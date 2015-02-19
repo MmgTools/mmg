@@ -44,7 +44,7 @@
  * \brief Function to measure time.
  * \param cmode macro that allow to reset (RESET), start (ON) or stop (OFF)
  * the chrono.
- * \param *ptt mytime object that store the chronograph informations.
+ * \param *ptt pointer to mytime object that store the chronograph informations.
  */
 void  chrono(int cmode,mytime *ptt) {
 
@@ -111,7 +111,7 @@ void  tminit(mytime *t,int maxtim) {
  * \fn void  printim(double elps,char *stim)
  * \brief Print real time.
  * \param elps elapsed time in seconds.
- * \param *stim string containg the elapsed time at .h.m.s format.
+ * \param *stim pointer to string containg the elapsed time at .h.m.s format.
  */
 void printim(double elps,char *stim) {
   int    hh,mm,ss;

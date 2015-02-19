@@ -250,7 +250,7 @@ static int newton3(double p[4],double x[3]) {
  * \fn int eigenv(int symmat,double *mat,double lambda[3],double v[3][3])
  * \brief Find eigenvalues and vectors of a 3x3 matrix.
  * \param symmat 0 if matrix is not symetric, 1 otherwise.
- * \param *mat matrix.
+ * \param *mat pointer to the matrix.
  * \param lambda[3] eigenvalues.
  * \param v[3][3] eigenvectors.
  * \return order of eigenvalues (1,2,3) or 0 if failed.
@@ -575,8 +575,8 @@ int eigenv(int symmat,double *mat,double lambda[3],double v[3][3]) {
 /**
  * \fn int eigen2(double *mm,double *lambda,double vp[2][2])
  * \brief Find eigenvalues and vectors of a 2x2 matrix.
- * \param symmat 0 if matrix is not symetric, 1 otherwise.
- * \param *lambda eigenvalues.
+ * \param *mm pointer to the matrix.
+ * \param *lambda pointer to the output eigenvalues.
  * \param vp[2][2] eigenvectors.
  * \return 1.
  */
