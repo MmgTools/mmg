@@ -21,15 +21,31 @@
 ** =============================================================================
 */
 
-/* simulation of a chronograph
- * modified (08/2010) for // usage */
+/**
+ * \file chrono.c
+ * \brief Simulation of a chronograph.
+ * \author Cécile Dobrzynski
+ * \author Pascal Frey
+ * \version 5
+ * \date  08 2010
+ * \copyright GNU Lesser General Public License.
+ *
+ * Simulation of a chronograph. Allow parallel usage.
+ *
+ */
 
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include "chrono.h"
 
-
+/**
+ * \fn void  chrono(int cmode,mytime *ptt)
+ * \brief Function to measure time.
+ * \param cmode macro that allow to reset (RESET), start (ON) or stop (OFF)
+ * the chrono.
+ * \param *ptt mytime object that store the chronograph informations.
+ */
 void  chrono(int cmode,mytime *ptt) {
 
   if ( cmode == RESET ) {
@@ -71,7 +87,12 @@ void  chrono(int cmode,mytime *ptt) {
 }
 
 
-/** initialize time table */
+/**
+ * \fn void  tminit(mytime *t,int maxtim)
+ * \brief Initialize mytime object.
+ * \param *t mytime object to store the chronograph infos.
+ * \param maxtim integer sepcifying the maximum number of times stored.
+ */
 void  tminit(mytime *t,int maxtim) {
   mytime  *ptt;
   int      k;
@@ -86,7 +107,12 @@ void  tminit(mytime *t,int maxtim) {
 }
 
 
-/** print real time */
+/**
+ * \fn void  printim(double elps,char *stim)
+ * \brief Print real time.
+ * \param elps elapsed time in seconds.
+ * \param *stim string containg the elapsed time at .h.m.s format.
+ */
 void printim(double elps,char *stim) {
   int    hh,mm,ss;
 

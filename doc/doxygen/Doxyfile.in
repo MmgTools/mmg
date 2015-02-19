@@ -734,7 +734,7 @@ WARN_LOGFILE           =
 # spaces.
 # Note: If this tag is empty the current directory is searched.
 
-INPUT = @CMAKE_CURRENT_SOURCE_DIR@/sources/
+INPUT = @CMAKE_CURRENT_SOURCE_DIR@/src/
 
 # This tag can be used to specify the character encoding of the source files
 # that doxygen parses. Internally doxygen uses the UTF-8 encoding. Doxygen uses
@@ -743,7 +743,7 @@ INPUT = @CMAKE_CURRENT_SOURCE_DIR@/sources/
 # possible encodings.
 # The default value is: UTF-8.
 
-INPUT_ENCODING         = ISO-8859-1
+INPUT_ENCODING         = UTF-8
 
 # If the value of the INPUT tag contains directories, you can use the
 # FILE_PATTERNS tag to specify one or more wildcard patterns (like *.cpp and

@@ -38,6 +38,13 @@
 #define  BIG1     1e-6
 #define  TIMEMAX  12
 
+/**
+ * \struct mytime
+ * \brief Chrono object.
+ *
+ * mytime allow storage of chronograph informations.
+ *
+ */
 typedef struct mytime {
   double  gini,gend,gdif,uini,uend,udif,sini,send,sdif;
   struct  timeval rutim;
