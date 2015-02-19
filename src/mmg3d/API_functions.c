@@ -169,7 +169,7 @@ void Init_parameters(pMesh mesh) {
   mesh->info.sing     =  0;  /* [0/1]    ,preserve internal singularities */
 
   /* default values for doubles */
-  /** MMG5_DPARAM_hausd = \a ANGEDG */
+  /** MMG5_DPARAM_hausd = \ref ANGEDG */
   mesh->info.dhd      = ANGEDG;   /* angle detection; */
   /** MMG5_DPARAM_hmin = 0.0 */
   mesh->info.hmin     = 0.0;      /* minimal mesh size; */
@@ -1259,7 +1259,7 @@ int Get_scalarSol(MMG5_pSol met, double* s) {
  *
  * Set singular point of coordinates \a c0, \a c1, \a c2 at position
  * \a pos in the singularities structure (only for insertion of
- * singularities mode: SINGUL preprocessor flag).
+ * singularities mode: \a SINGUL preprocessor flag).
  *
  */
 int Set_singulVertex(MMG5_pSingul sing, double c0, double c1,

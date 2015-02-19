@@ -86,9 +86,9 @@ static void endcod() {
 /**
  * \param argc number of command line arguments.
  * \param argv command line arguments.
- * \return \a MMG5_SUCCESS if success.
- * \return \a MMG5_LOWFAILURE if failed but a conform mesh is saved.
- * \return \a MMG5_STRONGFAILURE if failed and we can't save the mesh.
+ * \return \ref MMG5_SUCCESS if success.
+ * \return \ref MMG5_LOWFAILURE if failed but a conform mesh is saved.
+ * \return \ref MMG5_STRONGFAILURE if failed and we can't save the mesh.
  *
  * Main program for MMG3D executable: perform mesh adaptation.
  *

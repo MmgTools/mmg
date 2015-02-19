@@ -33,7 +33,7 @@
 
 #include "mmg3d.h"
 /**
- * \param mesh Pointer to the mesh structure.
+ * \param mesh Pointer toward the mesh structure.
  * \param *ct coordinates of vertices of the element.
  * \param *c center of circumscribing circle to the element.
  * \param *rad radius of circumscribing circle to the element.

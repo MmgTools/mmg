@@ -37,7 +37,7 @@
 
 
 !  /**
-!  * \file libmmg3d5.h
+!  * \file mmg3d/libmmg3d5.h
 !  * \brief C API for MMG3D library.
 !  * \author Algiane Froehly (Inria / IMB, Université de Bordeaux)
 !  * \version 5
@@ -244,7 +244,7 @@
 !   int      ref; /*!< Reference of the tetrahedron */
 !   int      base;
 !   int      mark; /*!< Used for delaunay */
-!   int      xt; /*!< Index of the surface \a MMG5_xTetra associated to
+!   int      xt; /*!< Index of the surface \ref MMG5_xTetra associated to
 !                   the tetrahedron*/
 !   int      flag;
 !   char     tag;
@@ -333,14 +333,14 @@
 !   char     *namein; /*!< Input mesh name */
 !   char     *nameout; /*!< Output mesh name */
 
-!   MMG5_pPoint    point; /*!< Pointer to the MMG5_Point structure */
-!   MMG5_pxPoint   xpoint; /*!< Pointer to the MMG5_xPoint structure */
-!   MMG5_pTetra    tetra; /*!< Pointer to the MMG5_Tetra structure */
-!   MMG5_pxTetra   xtetra; /*!< Pointer to the MMG5_xTetra structure */
-!   MMG5_pTria     tria; /*!< Pointer to the MMG5_Tria structure */
-!   MMG5_pEdge     edge; /*!< Pointer to the MMG5_Edge structure */
-!   MMG5_HGeom     htab; /*!< MMG5_HGeom structure */
-!   MMG5_Info      info; /*!< MMG5_Info structure */
+!   MMG5_pPoint    point; /*!< Pointer toward the \ref MMG5_Point structure */
+!   MMG5_pxPoint   xpoint; /*!< Pointer toward the \ref MMG5_xPoint structure */
+!   MMG5_pTetra    tetra; /*!< Pointer toward the \ref MMG5_Tetra structure */
+!   MMG5_pxTetra   xtetra; /*!< Pointer toward the \ref MMG5_xTetra structure */
+!   MMG5_pTria     tria; /*!< Pointer toward the \ref MMG5_Tria structure */
+!   MMG5_pEdge     edge; /*!< Pointer toward the \ref MMG5_Edge structure */
+!   MMG5_HGeom     htab; /*!< \ref MMG5_HGeom structure */
+!   MMG5_Info      info; /*!< \ref MMG5_Info structure */
 ! } MMG5_Mesh;
 ! typedef MMG5_Mesh  * MMG5_pMesh;
 
@@ -394,8 +394,8 @@
 !   int      nsi;
 !   int      ns; /*!< Number of singular vertices */
 !   int      na; /*!< Number of singular edges */
-!   MMG5_psPoint  point; /*!< Pointer to MMG5_sPoint structure */
-!   MMG5_pEdge    edge; /*!< Pointer to MMG5_Edge structure */
+!   MMG5_psPoint  point; /*!< Pointer toward \ref MMG5_sPoint structure */
+!   MMG5_pEdge    edge; /*!< Pointer toward \ref MMG5_Edge structure */
 ! } MMG5_Singul;
 ! typedef MMG5_Singul * MMG5_pSingul;
 
@@ -741,7 +741,7 @@
 
 ! int  MMG5_Set_singulCorner(MMG5_pSingul sing, int pos);
 ! /**
-!  * \param sing pointer toward the sing structure (only for insertion of singularities mode).
+!  * \param sing pointer toward the sing structure.
 !  * \param k vertex index.
 !  * \return 1.
 !  *

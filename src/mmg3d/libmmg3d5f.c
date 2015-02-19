@@ -67,7 +67,7 @@
   void nu pl
 
 /**
- * See \a MMG5_Free_all function in \ref mmg3d/libmmg3d5.h file.
+ * See \ref MMG5_Free_all function in \ref mmg3d/libmmg3d5.h file.
  */
 FORTRAN_NAME(MMG5_FREE_ALL,mmg5_free_all,(MMG5_pMesh *mesh,MMG5_pSol *met
 #ifdef SINGUL
@@ -88,7 +88,7 @@ FORTRAN_NAME(MMG5_FREE_ALL,mmg5_free_all,(MMG5_pMesh *mesh,MMG5_pSol *met
 }
 
 /**
- * See \a MMG5_saveMesh function in \ref mmg3d/libmmg3d5.h file.
+ * See \ref MMG5_saveMesh function in \ref mmg3d/libmmg3d5.h file.
  */
 FORTRAN_NAME(MMG5_SAVEMESH,mmg5_savemesh,(MMG5_pMesh *mesh, int* retval),
              (mesh,retval)){
@@ -97,7 +97,7 @@ FORTRAN_NAME(MMG5_SAVEMESH,mmg5_savemesh,(MMG5_pMesh *mesh, int* retval),
 }
 
 /**
- * See \a MMG5_mmg3dlib function in \ref mmg3d/libmmg3d5.h file.
+ * See \ref MMG5_mmg3dlib function in \ref mmg3d/libmmg3d5.h file.
  */
 FORTRAN_NAME(MMG5_MMG3DLIB,mmg5_mmg3dlib,(MMG5_pMesh *mesh,MMG5_pSol *met
 #ifdef SINGUL

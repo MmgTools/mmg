@@ -112,10 +112,11 @@ IF ( BUILD_MMG3D OR BUILD_MMG )
     ERROR_QUIET
     OUTPUT_VARIABLE CTAG)
   IF ( CTAG )
-    # We want to create mmg3d5_redefine.h but we don't want it to be removed by make clean so:
-    # we use a .dummy output that is created/removed by make/make clean. And the true command create
-    # the wanted file. We can't use ADD_CUSTOM_TARGET 'cause mmg3d5_redefine.h would be rebuild each
-    # time.
+    # We want to create mmg3d5_redefine.h but we don't want it to be
+    # removed by make clean so: we use a .dummy output that is
+    # created/removed by make/make clean. And the true command create
+    # the wanted file. We can't use ADD_CUSTOM_TARGET 'cause
+    # mmg3d5_redefine.h would be rebuild each time.
     ADD_CUSTOM_COMMAND(OUTPUT .dummy
       COMMAND touch .dummy
       COMMAND ctags -x  --c-kinds=fpx ${MMG_SOURCE_DIR}/mmg3d.h|awk '{printf \"\#define %-30s\t _MMG5_%s\\n\", $$1, $$1}' > ${MMG_SOURCE_DIR}/${PROJECT_NAME}_redefine.h
@@ -483,13 +484,33 @@ ENDIF()
 ###############################################################################
 FIND_PACKAGE(Doxygen)
 IF(DOXYGEN_FOUND)
-  CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/Doxyfile.in ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/Doxyfile @ONLY)
+  # MMGS Documentation
+  CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmgs/Doxyfile.in ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmgs/Doxyfile @ONLY)
+  ADD_CUSTOM_TARGET(mmgs_doc
+    COMMAND ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmgs/Doxyfile
+    # COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmgs/latex make
+    # COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmgs/latex/refman.pdf ${CMAKE_CURRENT_SOURCE_DIR}
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmgs
+    COMMENT "Generating MMGS API documentation with Doxygen.
+    Open up the doc/mmgs/html/index.html file to see it." VERBATIM
+    )
+  # MMG3D Documentation
+  CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmg3d/Doxyfile.in ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmg3d/Doxyfile @ONLY)
+  ADD_CUSTOM_TARGET(mmg3d_doc
+    COMMAND ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmg3d/Doxyfile
+    # COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmg3d/latex make
+    # COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmg3d/latex/refman.pdf ${CMAKE_CURRENT_SOURCE_DIR}
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmg3d
+    COMMENT "Generating MMG3D API documentation with Doxygen.
+     Open up the doc/mmg3d/html/index.html file to see it" VERBATIM
+    )
+  # MMGS and MMG3D Documentation
   ADD_CUSTOM_TARGET(doc
-    COMMAND ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/Doxyfile
-    COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/latex make
-    # COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/latex/refman.pdf ${CMAKE_CURRENT_SOURCE_DIR}
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen
-    COMMENT "Generating API documentation with Doxygen" VERBATIM
+  DEPENDS mmgs_doc mmg3d_doc
+  COMMENT "Generating MMGS and MMG3D API documentation with Doxygen.
+    To see the MMGS documentation, open up the doc/mmgs/html/index.html file.
+    To see the MMGS documentation, open up the doc/mmg3d/html/index.html file."
+    VERBATIM
     )
 ENDIF(DOXYGEN_FOUND)
 

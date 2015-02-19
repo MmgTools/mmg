@@ -200,7 +200,7 @@ typedef struct {
   int      ref; /*!< Reference of the tetrahedron */
   int      base;
   int      mark; /*!< Used for delaunay */
-  int      xt; /*!< Index of the surface \a MMG5_xTetra associated to
+  int      xt; /*!< Index of the surface \ref MMG5_xTetra associated to
                   the tetrahedron*/
   int      flag;
   char     tag;
@@ -285,14 +285,14 @@ typedef struct {
   char     *namein; /*!< Input mesh name */
   char     *nameout; /*!< Output mesh name */
 
-  MMG5_pPoint    point; /*!< Pointer to the MMG5_Point structure */
-  MMG5_pxPoint   xpoint; /*!< Pointer to the MMG5_xPoint structure */
-  MMG5_pTetra    tetra; /*!< Pointer to the MMG5_Tetra structure */
-  MMG5_pxTetra   xtetra; /*!< Pointer to the MMG5_xTetra structure */
-  MMG5_pTria     tria; /*!< Pointer to the MMG5_Tria structure */
-  MMG5_pEdge     edge; /*!< Pointer to the MMG5_Edge structure */
-  MMG5_HGeom     htab; /*!< MMG5_HGeom structure */
-  MMG5_Info      info; /*!< MMG5_Info structure */
+  MMG5_pPoint    point; /*!< Pointer toward the \ref MMG5_Point structure */
+  MMG5_pxPoint   xpoint; /*!< Pointer toward the \ref MMG5_xPoint structure */
+  MMG5_pTetra    tetra; /*!< Pointer toward the \ref MMG5_Tetra structure */
+  MMG5_pxTetra   xtetra; /*!< Pointer toward the \ref MMG5_xTetra structure */
+  MMG5_pTria     tria; /*!< Pointer toward the \ref MMG5_Tria structure */
+  MMG5_pEdge     edge; /*!< Pointer toward the \ref MMG5_Edge structure */
+  MMG5_HGeom     htab; /*!< \ref MMG5_HGeom structure */
+  MMG5_Info      info; /*!< \ref MMG5_Info structure */
 } MMG5_Mesh;
 typedef MMG5_Mesh  * MMG5_pMesh;
 
@@ -343,8 +343,8 @@ typedef struct {
   int      nsi;
   int      ns; /*!< Number of singular vertices */
   int      na; /*!< Number of singular edges */
-  MMG5_psPoint  point; /*!< Pointer to MMG5_sPoint structure */
-  MMG5_pEdge    edge; /*!< Pointer to MMG5_Edge structure */
+  MMG5_psPoint  point; /*!< Pointer toward \ref MMG5_sPoint structure */
+  MMG5_pEdge    edge; /*!< Pointer toward \ref MMG5_Edge structure */
 } MMG5_Singul;
 typedef MMG5_Singul * MMG5_pSingul;
 
@@ -970,8 +970,11 @@ void MMG5_Free_names(MMG5_pMesh, MMG5_pSol);
  * \param met pointer toward the sol structure.
  * \param sing pointer toward the sing structure (only for insertion of
  * singularities mode).
+ * \return \ref MMG5_SUCCESS if success.
+ * \return \ref MMG5_LOWFAILURE if failed but a conform mesh is saved.
+ * \return \ref MMG5_STRONGFAILURE if failed and we can't save the mesh.
  *
- * Main program for the library .
+ * Main program for the library.
  *
  */
 int  MMG5_mmg3dlib(MMG5_pMesh mesh, MMG5_pSol sol, MMG5_pSingul singul);
@@ -979,8 +982,11 @@ int  MMG5_mmg3dlib(MMG5_pMesh mesh, MMG5_pSol sol, MMG5_pSingul singul);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the sol structure.
+ * \return \ref MMG5_SUCCESS if success.
+ * \return \ref MMG5_LOWFAILURE if failed but a conform mesh is saved.
+ * \return \ref MMG5_STRONGFAILURE if failed and we can't save the mesh.
  *
- * Main program for the library .
+ * Main program for the library.
  *
  */
 int  MMG5_mmg3dlib(MMG5_pMesh mesh, MMG5_pSol sol);
