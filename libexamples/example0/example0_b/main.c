@@ -84,18 +84,18 @@ int main(int argc,char *argv[]) {
 
   /** c) give the tetrahedras: for each tetrahedra,
       give the vertices index, the reference and the position of the tetra */
-  if ( !MMG5_Set_tetrahedra(mmgMesh,  1,  4,  2,  8,1, 1) )  exit(EXIT_FAILURE);
-  if ( !MMG5_Set_tetrahedra(mmgMesh,  8,  3,  2,  7,1, 2) )  exit(EXIT_FAILURE);
-  if ( !MMG5_Set_tetrahedra(mmgMesh,  5,  2,  6,  8,1, 3) )  exit(EXIT_FAILURE);
-  if ( !MMG5_Set_tetrahedra(mmgMesh,  5,  8,  1,  2,1, 4) )  exit(EXIT_FAILURE);
-  if ( !MMG5_Set_tetrahedra(mmgMesh,  7,  2,  8,  6,1, 5) )  exit(EXIT_FAILURE);
-  if ( !MMG5_Set_tetrahedra(mmgMesh,  2,  4,  3,  8,1, 6) )  exit(EXIT_FAILURE);
-  if ( !MMG5_Set_tetrahedra(mmgMesh,  9,  2,  3,  7,2, 7) )  exit(EXIT_FAILURE);
-  if ( !MMG5_Set_tetrahedra(mmgMesh,  7, 11,  9, 12,2, 8) )  exit(EXIT_FAILURE);
-  if ( !MMG5_Set_tetrahedra(mmgMesh,  6,  9, 10,  7,2, 9) )  exit(EXIT_FAILURE);
-  if ( !MMG5_Set_tetrahedra(mmgMesh,  6,  7,  2,  9,2,10) )  exit(EXIT_FAILURE);
-  if ( !MMG5_Set_tetrahedra(mmgMesh, 12,  9,  7, 10,2,11) )  exit(EXIT_FAILURE);
-  if ( !MMG5_Set_tetrahedra(mmgMesh,  9,  3, 11,  7,2,12) )  exit(EXIT_FAILURE);
+  if ( !MMG5_Set_tetrahedron(mmgMesh,  1,  4,  2,  8,1, 1) )  exit(EXIT_FAILURE);
+  if ( !MMG5_Set_tetrahedron(mmgMesh,  8,  3,  2,  7,1, 2) )  exit(EXIT_FAILURE);
+  if ( !MMG5_Set_tetrahedron(mmgMesh,  5,  2,  6,  8,1, 3) )  exit(EXIT_FAILURE);
+  if ( !MMG5_Set_tetrahedron(mmgMesh,  5,  8,  1,  2,1, 4) )  exit(EXIT_FAILURE);
+  if ( !MMG5_Set_tetrahedron(mmgMesh,  7,  2,  8,  6,1, 5) )  exit(EXIT_FAILURE);
+  if ( !MMG5_Set_tetrahedron(mmgMesh,  2,  4,  3,  8,1, 6) )  exit(EXIT_FAILURE);
+  if ( !MMG5_Set_tetrahedron(mmgMesh,  9,  2,  3,  7,2, 7) )  exit(EXIT_FAILURE);
+  if ( !MMG5_Set_tetrahedron(mmgMesh,  7, 11,  9, 12,2, 8) )  exit(EXIT_FAILURE);
+  if ( !MMG5_Set_tetrahedron(mmgMesh,  6,  9, 10,  7,2, 9) )  exit(EXIT_FAILURE);
+  if ( !MMG5_Set_tetrahedron(mmgMesh,  6,  7,  2,  9,2,10) )  exit(EXIT_FAILURE);
+  if ( !MMG5_Set_tetrahedron(mmgMesh, 12,  9,  7, 10,2,11) )  exit(EXIT_FAILURE);
+  if ( !MMG5_Set_tetrahedron(mmgMesh,  9,  3, 11,  7,2,12) )  exit(EXIT_FAILURE);
 
   /** d) give the triangles (not mandatory): for each triangle,
       give the vertices index, the reference and the position of the triangle */
@@ -244,8 +244,8 @@ int main(int argc,char *argv[]) {
   fprintf(inm,"\nTetrahedra\n%d\n",ne);
   for(k=1; k<=ne; k++) {
     /** c) Tetra recovering */
-    if ( !MMG5_Get_tetrahedra(mmgMesh,&(Tetra[0]),&(Tetra[1]),&(Tetra[2]),&(Tetra[3]),
-                              &ref,&(required[k])) )  exit(EXIT_FAILURE);
+    if ( !MMG5_Get_tetrahedron(mmgMesh,&(Tetra[0]),&(Tetra[1]),&(Tetra[2]),&(Tetra[3]),
+                               &ref,&(required[k])) )  exit(EXIT_FAILURE);
     fprintf(inm,"%d %d %d %d %d \n",Tetra[0],Tetra[1],Tetra[2],Tetra[3],ref);
     if ( required[k] )  nreq++;
   }

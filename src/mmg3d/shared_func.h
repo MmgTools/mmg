@@ -21,6 +21,18 @@
 ** =============================================================================
 */
 
+/**
+ * \file mmg3d/shared_func.h
+ * \brief Common functions between MMG3D5 library and executable.
+ * \author Charles Dapogny (LJLL, UPMC)
+ * \author Cécile Dobrzynski (Inria / IMB, Université de Bordeaux)
+ * \author Pascal Frey (LJLL, UPMC)
+ * \author Algiane Froehly (Inria / IMB, Université de Bordeaux)
+ * \version 5
+ * \copyright GNU Lesser General Public License.
+ * \todo Doxygen documentation
+ */
+
 /* global variables */
 unsigned char inxt2[3] = {1,2,0};
 unsigned char iprv2[3] = {2,0,1};
@@ -50,7 +62,12 @@ void warnScotch(MMG5_pMesh mesh) {
 }
 #endif
 
-/** Warn user that some tetra of the mesh have been reoriented */
+/**
+ * \param mesh pointer toward the mesh structure.
+ *
+ * Warn user that some tetrahedra of the mesh have been reoriented.
+ *
+ */
 static inline
 void warnOrientation(MMG5_pMesh mesh) {
   if ( mesh->xt ) {
@@ -66,6 +83,12 @@ void warnOrientation(MMG5_pMesh mesh) {
   mesh->xt = 0;
 }
 
+/**
+ * \param sigid signal number.
+ *
+ * Signal handling: specify error messages depending from catched signal.
+ *
+ */
 static inline
 void excfun(int sigid) {
   fprintf(stdout,"\n Unexpected error:");  fflush(stdout);
@@ -85,7 +108,13 @@ void excfun(int sigid) {
   exit(EXIT_FAILURE);
 }
 
-/** set function pointers */
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the sol structure.
+ *
+ * Set function pointers.
+ *
+ */
 void setfunc(pMesh mesh,pSol met) {
   if ( met->size < 6 ) {
     caltet = caltet_iso;

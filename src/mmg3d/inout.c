@@ -21,6 +21,18 @@
 ** =============================================================================
 */
 
+/**
+ * \file mmg3d/inout.c
+ * \brief Input / Output Functions.
+ * \author Charles Dapogny (LJLL, UPMC)
+ * \author Cécile Dobrzynski (Inria / IMB, Université de Bordeaux)
+ * \author Pascal Frey (LJLL, UPMC)
+ * \author Algiane Froehly (Inria / IMB, Université de Bordeaux)
+ * \version 5
+ * \copyright GNU Lesser General Public License.
+ * \todo doxygen documentation.
+ */
+
 #include "mmg3d.h"
 
 
@@ -76,9 +88,15 @@ double swapd(double sbin)
   //printf("CONVERTION DOUBLE\n");
   return(out);
 }
-/** read mesh data */
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \return 0 if failed, 1 otherwise.
+ *
+ * Read mesh data.
+ *
+ */
 int loadMesh(pMesh mesh) {
-  FILE*            inm;
+  FILE*       inm;
   pTetra      pt;
   pTria       pt1;
   pEdge       pa;
@@ -90,7 +108,7 @@ int loadMesh(pMesh mesh) {
   int         *ina,v[3],ref,nt,na,nr,ia,aux;
   float            fc;
   char        *ptr,*name,data[128],chaine[128];
-  
+
   posnp = posnt = posne = posncor = 0;
   posnpreq = posntreq = posnereq = posned = posnedreq = posnr = 0;
   netmp = ncor = ned = npreq = ntreq = nereq = nedreq = nr = 0;
@@ -114,23 +132,23 @@ int loadMesh(pMesh mesh) {
         return(0);
       }
       else {
-	if ( !strstr(mesh->nameout,".mesh") ) {
-	  ADD_MEM(mesh,5*sizeof(char),"output file name",
-		  printf("  Exit program.\n");
-		  exit(EXIT_FAILURE));
-	  SAFE_REALLOC(mesh->nameout,strlen(mesh->nameout)+6,char,"output mesh name");
-	  strcat(mesh->nameout,".mesh");
-	}
+        if ( !strstr(mesh->nameout,".mesh") ) {
+          ADD_MEM(mesh,5*sizeof(char),"output file name",
+                  printf("  Exit program.\n");
+                  exit(EXIT_FAILURE));
+          SAFE_REALLOC(mesh->nameout,strlen(mesh->nameout)+6,char,"output mesh name");
+          strcat(mesh->nameout,".mesh");
+        }
       }
     }
     else {
       bin = 1;
       if ( !strstr(mesh->nameout,".mesh") ) {
-	ADD_MEM(mesh,6*sizeof(char),"input file name",
-		printf("  Exit program.\n");
-		exit(EXIT_FAILURE));
-	SAFE_REALLOC(mesh->nameout,strlen(mesh->nameout)+7,char,"input file name");
-	strcat(mesh->nameout,".meshb");
+        ADD_MEM(mesh,6*sizeof(char),"input file name",
+                printf("  Exit program.\n");
+                exit(EXIT_FAILURE));
+        SAFE_REALLOC(mesh->nameout,strlen(mesh->nameout)+7,char,"input file name");
+        strcat(mesh->nameout,".meshb");
       }
     }
   }
@@ -138,76 +156,76 @@ int loadMesh(pMesh mesh) {
     ptr = strstr(data,".meshb");
     if( !ptr ) {
       if( !(inm = fopen(data,"r")) ) {
-	fprintf(stderr,"  ** %s  NOT FOUND.\n",data);
-	return(0);
+        fprintf(stderr,"  ** %s  NOT FOUND.\n",data);
+        return(0);
       }
     } else {
       bin = 1;
       if( !(inm = fopen(data,"rb")) ) {
-	fprintf(stderr,"  ** %s  NOT FOUND.\n",data);
-	return(0);
+        fprintf(stderr,"  ** %s  NOT FOUND.\n",data);
+        return(0);
       }
     }
   }
   fprintf(stdout,"  %%%% %s OPENED\n",data);
 
- if (!bin) {
+  if (!bin) {
     strcpy(chaine,"D");
     while(fscanf(inm,"%s",&chaine[0])!=EOF && strncmp(chaine,"End",strlen("End")) ) {
       if(!strncmp(chaine,"MeshVersionFormatted",strlen("MeshVersionFormatted"))) {
-	fscanf(inm,"%d",&mesh->ver);
-	continue;
+        fscanf(inm,"%d",&mesh->ver);
+        continue;
       } else if(!strncmp(chaine,"Dimension",strlen("Dimension"))) {
-	fscanf(inm,"%d",&mesh->dim);
-	if(mesh->dim!=3) {
-	  fprintf(stdout,"BAD DIMENSION : %d\n",mesh->dim);
-	  return(0);
-	}
-	continue;
+        fscanf(inm,"%d",&mesh->dim);
+        if(mesh->dim!=3) {
+          fprintf(stdout,"BAD DIMENSION : %d\n",mesh->dim);
+          return(0);
+        }
+        continue;
       } else if(!strncmp(chaine,"Vertices",strlen("Vertices"))) {
-	fscanf(inm,"%d",&mesh->npi);
-	posnp = ftell(inm);
-	continue;
+        fscanf(inm,"%d",&mesh->npi);
+        posnp = ftell(inm);
+        continue;
       } else if(!strncmp(chaine,"RequiredVertices",strlen("RequiredVertices"))) {
-	fscanf(inm,"%d",&npreq);
-	posnpreq = ftell(inm);
-	continue;
+        fscanf(inm,"%d",&npreq);
+        posnpreq = ftell(inm);
+        continue;
       } else if(!strncmp(chaine,"Triangles",strlen("Triangles"))) {
-	fscanf(inm,"%d",&mesh->nti);
-	posnt = ftell(inm);
-	continue;
+        fscanf(inm,"%d",&mesh->nti);
+        posnt = ftell(inm);
+        continue;
       } else if(!strncmp(chaine,"RequiredTriangles",strlen("RequiredTriangles"))) {
-	fscanf(inm,"%d",&ntreq);
-	posntreq = ftell(inm);
-	continue;
+        fscanf(inm,"%d",&ntreq);
+        posntreq = ftell(inm);
+        continue;
       } else if(!strncmp(chaine,"Tetrahedra",strlen("Tetrahedra"))) {
-	fscanf(inm,"%d",&mesh->nei);
-	netmp = mesh->ne;
-	posne = ftell(inm);
-	continue;
+        fscanf(inm,"%d",&mesh->nei);
+        netmp = mesh->ne;
+        posne = ftell(inm);
+        continue;
       } else if(!strncmp(chaine,"RequiredTetrahedra",strlen("RequiredTetrahedra"))) {
-	fscanf(inm,"%d",&nereq);
-	posnereq = ftell(inm);
-	continue;
+        fscanf(inm,"%d",&nereq);
+        posnereq = ftell(inm);
+        continue;
       } else if(!strncmp(chaine,"Corners",strlen("Corners"))) {
-	fscanf(inm,"%d",&ncor);
-	posncor = ftell(inm);
-	continue;
+        fscanf(inm,"%d",&ncor);
+        posncor = ftell(inm);
+        continue;
       } else if(!strncmp(chaine,"Edges",strlen("Edges"))) {
-	fscanf(inm,"%d",&mesh->nai);
-	posned = ftell(inm);
-	continue;
+        fscanf(inm,"%d",&mesh->nai);
+        posned = ftell(inm);
+        continue;
       } else if(!strncmp(chaine,"RequiredEdges",strlen("RequiredEdges"))) {
-	fscanf(inm,"%d",&nedreq);
-	posnedreq = ftell(inm);
-	continue;
+        fscanf(inm,"%d",&nedreq);
+        posnedreq = ftell(inm);
+        continue;
       } else if(!strncmp(chaine,"Ridges",strlen("Ridges"))) {
-	fscanf(inm,"%d",&nr);
-	posnr = ftell(inm);
-	continue;
+        fscanf(inm,"%d",&nr);
+        posnr = ftell(inm);
+        continue;
       }
     }
- } else { //binary file
+  } else { //binary file
     bdim = 0;
     fread(&mesh->ver,sw,1,inm);
     iswp=0;
@@ -222,118 +240,118 @@ int loadMesh(pMesh mesh) {
       if(iswp) binch=swapbin(binch);
       if(binch==54) break;
       if(!bdim && binch==3) {  //Dimension
-	fread(&bdim,sw,1,inm);  //NulPos=>20
-	if(iswp) bdim=swapbin(bdim);
-	fread(&bdim,sw,1,inm);
-	if(iswp) bdim=swapbin(bdim);
-	mesh->dim = bdim;
-	if(bdim!=3) {
-	  fprintf(stdout,"BAD SOL DIMENSION : %d\n",mesh->dim);
-	  exit(0);
-	  return(1);
-	}
-	continue;
+        fread(&bdim,sw,1,inm);  //NulPos=>20
+        if(iswp) bdim=swapbin(bdim);
+        fread(&bdim,sw,1,inm);
+        if(iswp) bdim=swapbin(bdim);
+        mesh->dim = bdim;
+        if(bdim!=3) {
+          fprintf(stdout,"BAD SOL DIMENSION : %d\n",mesh->dim);
+          exit(0);
+          return(1);
+        }
+        continue;
       } else if(!mesh->npi && binch==4) {  //Vertices
-	fread(&bpos,sw,1,inm); //NulPos
-	if(iswp) bpos=swapbin(bpos);
-	fread(&mesh->npi,sw,1,inm);
-	if(iswp) mesh->npi=swapbin(mesh->npi);
-	posnp = ftell(inm);
-	rewind(inm);
-	fseek(inm,bpos,SEEK_SET);
-	continue;
+        fread(&bpos,sw,1,inm); //NulPos
+        if(iswp) bpos=swapbin(bpos);
+        fread(&mesh->npi,sw,1,inm);
+        if(iswp) mesh->npi=swapbin(mesh->npi);
+        posnp = ftell(inm);
+        rewind(inm);
+        fseek(inm,bpos,SEEK_SET);
+        continue;
       } else if(binch==15) {  //RequiredVertices
-	fread(&bpos,sw,1,inm); //NulPos
-	if(iswp) bpos=swapbin(bpos);
-	fread(&npreq,sw,1,inm);
-	if(iswp) npreq=swapbin(npreq);
-	posnpreq = ftell(inm);
-	rewind(inm);
-	fseek(inm,bpos,SEEK_SET);
-	continue;
+        fread(&bpos,sw,1,inm); //NulPos
+        if(iswp) bpos=swapbin(bpos);
+        fread(&npreq,sw,1,inm);
+        if(iswp) npreq=swapbin(npreq);
+        posnpreq = ftell(inm);
+        rewind(inm);
+        fseek(inm,bpos,SEEK_SET);
+        continue;
       } else if(!mesh->nti && binch==6) {//Triangles
-	fread(&bpos,sw,1,inm); //NulPos
-	if(iswp) bpos=swapbin(bpos);
-	fread(&mesh->nti,sw,1,inm);
-	if(iswp) mesh->nti=swapbin(mesh->nti);
-	posnt = ftell(inm);
-	rewind(inm);
-	fseek(inm,bpos,SEEK_SET);
-	continue;
+        fread(&bpos,sw,1,inm); //NulPos
+        if(iswp) bpos=swapbin(bpos);
+        fread(&mesh->nti,sw,1,inm);
+        if(iswp) mesh->nti=swapbin(mesh->nti);
+        posnt = ftell(inm);
+        rewind(inm);
+        fseek(inm,bpos,SEEK_SET);
+        continue;
       } else if(binch==17) {  //RequiredTriangles
-	fread(&bpos,sw,1,inm); //NulPos
-	if(iswp) bpos=swapbin(bpos);
-	fread(&ntreq,sw,1,inm);
-	if(iswp) ntreq=swapbin(ntreq);
-	posntreq = ftell(inm);
-	rewind(inm);
-	fseek(inm,bpos,SEEK_SET);
-	continue;
+        fread(&bpos,sw,1,inm); //NulPos
+        if(iswp) bpos=swapbin(bpos);
+        fread(&ntreq,sw,1,inm);
+        if(iswp) ntreq=swapbin(ntreq);
+        posntreq = ftell(inm);
+        rewind(inm);
+        fseek(inm,bpos,SEEK_SET);
+        continue;
       } else if(!mesh->nei && binch==8) {//Tetra
-	fread(&bpos,sw,1,inm); //NulPos
-	if(iswp) bpos=swapbin(bpos);
-	fread(&mesh->nei,sw,1,inm);
-	if(iswp) mesh->nei=swapbin(mesh->nei);
-	netmp = mesh->nei;
-	posne = ftell(inm);
-	rewind(inm);
-	fseek(inm,bpos,SEEK_SET);
-	continue;
+        fread(&bpos,sw,1,inm); //NulPos
+        if(iswp) bpos=swapbin(bpos);
+        fread(&mesh->nei,sw,1,inm);
+        if(iswp) mesh->nei=swapbin(mesh->nei);
+        netmp = mesh->nei;
+        posne = ftell(inm);
+        rewind(inm);
+        fseek(inm,bpos,SEEK_SET);
+        continue;
       } else if(binch==12) {  //RequiredTetra
-	fread(&bpos,sw,1,inm); //NulPos
-	if(iswp) bpos=swapbin(bpos);
-	fread(&nereq,sw,1,inm);
-	if(iswp) nereq=swapbin(nereq);
-	posnereq = ftell(inm);
-	rewind(inm);
-	fseek(inm,bpos,SEEK_SET);
-	continue;
+        fread(&bpos,sw,1,inm); //NulPos
+        if(iswp) bpos=swapbin(bpos);
+        fread(&nereq,sw,1,inm);
+        if(iswp) nereq=swapbin(nereq);
+        posnereq = ftell(inm);
+        rewind(inm);
+        fseek(inm,bpos,SEEK_SET);
+        continue;
       } else if(!ncor && binch==13) { //Corners
-	fread(&bpos,sw,1,inm); //NulPos
-	if(iswp) bpos=swapbin(bpos);
-	fread(&ncor,sw,1,inm);
-	if(iswp) ncor=swapbin(ncor);
-	posncor = ftell(inm);
-	rewind(inm);
-	fseek(inm,bpos,SEEK_SET);
-	continue;
+        fread(&bpos,sw,1,inm); //NulPos
+        if(iswp) bpos=swapbin(bpos);
+        fread(&ncor,sw,1,inm);
+        if(iswp) ncor=swapbin(ncor);
+        posncor = ftell(inm);
+        rewind(inm);
+        fseek(inm,bpos,SEEK_SET);
+        continue;
       } else if(!mesh->nai && binch==5) { //Edges
-	fread(&bpos,sw,1,inm); //NulPos
-	if(iswp) bpos=swapbin(bpos);
-	fread(&mesh->nai,sw,1,inm);
-	if(iswp) mesh->nai=swapbin(mesh->nai);
-	posned = ftell(inm);
-	rewind(inm);
-	fseek(inm,bpos,SEEK_SET);
-	continue;
+        fread(&bpos,sw,1,inm); //NulPos
+        if(iswp) bpos=swapbin(bpos);
+        fread(&mesh->nai,sw,1,inm);
+        if(iswp) mesh->nai=swapbin(mesh->nai);
+        posned = ftell(inm);
+        rewind(inm);
+        fseek(inm,bpos,SEEK_SET);
+        continue;
       } else if(binch==16) {  //RequiredEdges
-	fread(&bpos,sw,1,inm); //NulPos
-	if(iswp) bpos=swapbin(bpos);
-	fread(&nedreq,sw,1,inm);
-	if(iswp) nedreq=swapbin(nedreq);
-	posnedreq = ftell(inm);
-	rewind(inm);
-	fseek(inm,bpos,SEEK_SET);
-	continue;
+        fread(&bpos,sw,1,inm); //NulPos
+        if(iswp) bpos=swapbin(bpos);
+        fread(&nedreq,sw,1,inm);
+        if(iswp) nedreq=swapbin(nedreq);
+        posnedreq = ftell(inm);
+        rewind(inm);
+        fseek(inm,bpos,SEEK_SET);
+        continue;
       }  else if(binch==14) {  //Ridges
-	fread(&bpos,sw,1,inm); //NulPos
-	if(iswp) bpos=swapbin(bpos);
-	fread(&nr,sw,1,inm);
-	if(iswp) nr=swapbin(nr);
-	posnr = ftell(inm);
-	rewind(inm);
-	fseek(inm,bpos,SEEK_SET);
-	continue;
+        fread(&bpos,sw,1,inm); //NulPos
+        if(iswp) bpos=swapbin(bpos);
+        fread(&nr,sw,1,inm);
+        if(iswp) nr=swapbin(nr);
+        posnr = ftell(inm);
+        rewind(inm);
+        fseek(inm,bpos,SEEK_SET);
+        continue;
       } else {
-	//printf("on traite ? %d\n",binch);
-	fread(&bpos,sw,1,inm); //NulPos
-	if(iswp) bpos=swapbin(bpos);
-	//printf("on avance... Nulpos %d\n",bpos);
-	rewind(inm);
-	fseek(inm,bpos,SEEK_SET);
+        //printf("on traite ? %d\n",binch);
+        fread(&bpos,sw,1,inm); //NulPos
+        if(iswp) bpos=swapbin(bpos);
+        //printf("on avance... Nulpos %d\n",bpos);
+        rewind(inm);
+        fseek(inm,bpos,SEEK_SET);
       }
     }
- }
+  }
 
   if ( !mesh->npi || !mesh->nei ) {
     fprintf(stdout,"  ** MISSING DATA.\n");
@@ -350,80 +368,80 @@ int loadMesh(pMesh mesh) {
   if (mesh->npmax < mesh->np || mesh->ntmax < mesh->nt || mesh->nemax < mesh->ne) {
     return(0);
   }
- 
+
   rewind(inm);
   fseek(inm,posnp,SEEK_SET);
   for (k=1; k<=mesh->np; k++) {
     ppt = &mesh->point[k];
     if (mesh->ver < 2) { /*float*/
       if (!bin) {
-	for (i=0 ; i<3 ; i++) {
-	  fscanf(inm,"%f",&fc);
-	  ppt->c[i] = (double) fc;
-	}
-	fscanf(inm,"%d",&ppt->ref);
+        for (i=0 ; i<3 ; i++) {
+          fscanf(inm,"%f",&fc);
+          ppt->c[i] = (double) fc;
+        }
+        fscanf(inm,"%d",&ppt->ref);
       } else {
-	for (i=0 ; i<3 ; i++) {
-	  fread(&fc,sw,1,inm);
-	  if(iswp) fc=swapf(fc);
-	  ppt->c[i] = (double) fc;
-	}
-	fread(&ppt->ref,sw,1,inm);
-	if(iswp) ppt->ref=swapbin(ppt->ref);
+        for (i=0 ; i<3 ; i++) {
+          fread(&fc,sw,1,inm);
+          if(iswp) fc=swapf(fc);
+          ppt->c[i] = (double) fc;
+        }
+        fread(&ppt->ref,sw,1,inm);
+        if(iswp) ppt->ref=swapbin(ppt->ref);
       }
     } else {
       if (!bin)
-	fscanf(inm,"%lf %lf %lf %d",&ppt->c[0],&ppt->c[1],&ppt->c[2],&ppt->ref);
+        fscanf(inm,"%lf %lf %lf %d",&ppt->c[0],&ppt->c[1],&ppt->c[2],&ppt->ref);
       else {
-	for (i=0 ; i<3 ; i++) {
-	  fread(&ppt->c[i],sd,1,inm);
-	  if(iswp) ppt->c[i]=swapd(ppt->c[i]);
-	}
-	fread(&ppt->ref,sw,1,inm);
-	if(iswp) ppt->ref=swapbin(ppt->ref);
+        for (i=0 ; i<3 ; i++) {
+          fread(&ppt->c[i],sd,1,inm);
+          if(iswp) ppt->c[i]=swapd(ppt->c[i]);
+        }
+        fread(&ppt->ref,sw,1,inm);
+        if(iswp) ppt->ref=swapbin(ppt->ref);
       }
     }
-    ppt->tag  = MG_NUL; 
-    ppt->tmp  = 0; 
+    ppt->tag  = MG_NUL;
+    ppt->tmp  = 0;
   }
   /* get required vertices */
   if(npreq) {
     rewind(inm);
     fseek(inm,posnpreq,SEEK_SET);
     for (k=1; k<=npreq; k++) {
-      if(!bin) 
-	fscanf(inm,"%d",&i);
+      if(!bin)
+        fscanf(inm,"%d",&i);
       else {
-	fread(&i,sw,1,inm);
-	if(iswp) i=swapbin(i);
+        fread(&i,sw,1,inm);
+        if(iswp) i=swapbin(i);
       }
       if(i>mesh->np) {
-	fprintf(stdout,"   Warning Required Vertices number %8d IGNORED\n",i);
+        fprintf(stdout,"   Warning Required Vertices number %8d IGNORED\n",i);
       } else {
-	ppt = &mesh->point[i]; 
-	ppt->tag |= MG_REQ; 
+        ppt = &mesh->point[i];
+        ppt->tag |= MG_REQ;
       }
     }
   }
 
   /* get corners */
   if(ncor) {
-   rewind(inm);
-   fseek(inm,posncor,SEEK_SET);
-   for (k=1; k<=ncor; k++) {
-      if(!bin) 
-	fscanf(inm,"%d",&i);
+    rewind(inm);
+    fseek(inm,posncor,SEEK_SET);
+    for (k=1; k<=ncor; k++) {
+      if(!bin)
+        fscanf(inm,"%d",&i);
       else {
-	fread(&i,sw,1,inm);
-	if(iswp) i=swapbin(i);
+        fread(&i,sw,1,inm);
+        if(iswp) i=swapbin(i);
       }
       if(i>mesh->np) {
-	fprintf(stdout,"   Warning Corner number %8d IGNORED\n",i);
+        fprintf(stdout,"   Warning Corner number %8d IGNORED\n",i);
       } else {
-	ppt = &mesh->point[i]; 
-	ppt->tag |= MG_CRN; 
+        ppt = &mesh->point[i];
+        ppt->tag |= MG_CRN;
       }
-    } 
+    }
   }
 
   /* read mesh triangles */
@@ -438,16 +456,16 @@ int loadMesh(pMesh mesh) {
       SAFE_CALLOC(ina,nt+1,int);
 
       for (k=1; k<=nt; k++) {
-	if (!bin)
-	  fscanf(inm,"%d %d %d %d",&v[0],&v[1],&v[2],&ref);
-	else {
-	  for (i=0 ; i<3 ; i++) {
-	    fread(&v[i],sw,1,inm);
-	    if(iswp) v[i]=swapbin(v[i]);
-	  }
-	  fread(&ref,sw,1,inm);
-	  if(iswp) ref=swapbin(ref);
-	}
+        if (!bin)
+          fscanf(inm,"%d %d %d %d",&v[0],&v[1],&v[2],&ref);
+        else {
+          for (i=0 ; i<3 ; i++) {
+            fread(&v[i],sw,1,inm);
+            if(iswp) v[i]=swapbin(v[i]);
+          }
+          fread(&ref,sw,1,inm);
+          if(iswp) ref=swapbin(ref);
+        }
         if( abs(ref) != MG_ISO ) {
           pt1 = &mesh->tria[++mesh->nt];
           pt1->v[0] = v[0];
@@ -459,7 +477,7 @@ int loadMesh(pMesh mesh) {
       }
       if( !mesh->nt )
         DEL_MEM(mesh,mesh->tria,(mesh->nt+1)*sizeof(Tria));
-      
+
       else if ( mesh->nt < nt ) {
         ADD_MEM(mesh,(mesh->nt+1)*sizeof(Tria),"triangles",
                 printf("  Exit program.\n");
@@ -470,16 +488,16 @@ int loadMesh(pMesh mesh) {
     else {
       for (k=1; k<=mesh->nt; k++) {
         pt1 = &mesh->tria[k];
-	if (!bin)
-	  fscanf(inm,"%d %d %d %d",&pt1->v[0],&pt1->v[1],&pt1->v[2],&pt1->ref);
-	else {
-	  for (i=0 ; i<3 ; i++) {
-	    fread(&pt1->v[i],sw,1,inm);
-	    if(iswp) pt1->v[i]=swapbin(pt1->v[i]);
-	  }
-	  fread(&pt1->ref,sw,1,inm);
-	  if(iswp) pt1->ref=swapbin(pt1->ref);
-	}      
+        if (!bin)
+          fscanf(inm,"%d %d %d %d",&pt1->v[0],&pt1->v[1],&pt1->v[2],&pt1->ref);
+        else {
+          for (i=0 ; i<3 ; i++) {
+            fread(&pt1->v[i],sw,1,inm);
+            if(iswp) pt1->v[i]=swapbin(pt1->v[i]);
+          }
+          fread(&pt1->ref,sw,1,inm);
+          if(iswp) pt1->ref=swapbin(pt1->ref);
+        }
       }
     }
     /* get required triangles */
@@ -487,31 +505,31 @@ int loadMesh(pMesh mesh) {
       rewind(inm);
       fseek(inm,posntreq,SEEK_SET);
       for (k=1; k<=ntreq; k++) {
-	if(!bin) 
-	  fscanf(inm,"%d",&i);
-	else {
-	  fread(&i,sw,1,inm);
-	  if(iswp) i=swapbin(i);
-	}
-	if(i>mesh->nt) {
-	  fprintf(stdout,"   Warning Required Triangles number %8d IGNORED\n",i);
-	} else {
-	  if( mesh->info.iso ){ 
-	    if( ina[i] == 0 ) continue;
-	    else {
-	      pt1 = &mesh->tria[ina[i]];
-	      pt1->tag[0] |= MG_REQ;
-	      pt1->tag[1] |= MG_REQ;
-	      pt1->tag[2] |= MG_REQ;
-	    }
-	  }
-	  else{
-	    pt1 = &mesh->tria[i];
-	    pt1->tag[0] |= MG_REQ;
-	    pt1->tag[1] |= MG_REQ;
-	    pt1->tag[2] |= MG_REQ;
-	  }
-	}
+        if(!bin)
+          fscanf(inm,"%d",&i);
+        else {
+          fread(&i,sw,1,inm);
+          if(iswp) i=swapbin(i);
+        }
+        if(i>mesh->nt) {
+          fprintf(stdout,"   Warning Required Triangles number %8d IGNORED\n",i);
+        } else {
+          if( mesh->info.iso ){
+            if( ina[i] == 0 ) continue;
+            else {
+              pt1 = &mesh->tria[ina[i]];
+              pt1->tag[0] |= MG_REQ;
+              pt1->tag[1] |= MG_REQ;
+              pt1->tag[2] |= MG_REQ;
+            }
+          }
+          else{
+            pt1 = &mesh->tria[i];
+            pt1->tag[0] |= MG_REQ;
+            pt1->tag[1] |= MG_REQ;
+            pt1->tag[2] |= MG_REQ;
+          }
+        }
       }
     }
     if ( mesh->info.iso )
@@ -532,14 +550,14 @@ int loadMesh(pMesh mesh) {
     for (k=1; k<=na; k++) {
       pa = &mesh->edge[k];
       if (!bin)
-	fscanf(inm,"%d %d %d",&pa->a,&pa->b,&pa->ref);
+        fscanf(inm,"%d %d %d",&pa->a,&pa->b,&pa->ref);
       else {
-	fread(&pa->a,sw,1,inm);
-	if(iswp) pa->a=swapbin(pa->a);
-	fread(&pa->b,sw,1,inm);
-	if(iswp) pa->b=swapbin(pa->b);
-	fread(&pa->ref,sw,1,inm);
-	if(iswp) pa->ref=swapbin(pa->ref);
+        fread(&pa->a,sw,1,inm);
+        if(iswp) pa->a=swapbin(pa->a);
+        fread(&pa->b,sw,1,inm);
+        if(iswp) pa->b=swapbin(pa->b);
+        fread(&pa->ref,sw,1,inm);
+        if(iswp) pa->ref=swapbin(pa->ref);
       }
       pa->tag |= MG_REF;
       if ( mesh->info.iso ) {
@@ -557,19 +575,19 @@ int loadMesh(pMesh mesh) {
       rewind(inm);
       fseek(inm,posnr,SEEK_SET);
       for (k=1; k<=nr; k++) {
-        if(!bin) 
-	  fscanf(inm,"%d",&ia);
-	else {
-	  fread(&ia,sw,1,inm);
-	  if(iswp) ia=swapbin(ia);
-	}
-	if(ia>na) {
-	  fprintf(stdout,"   Warning Ridge number %8d IGNORED\n",i);
-	  continue;
-	}
+        if(!bin)
+          fscanf(inm,"%d",&ia);
+        else {
+          fread(&ia,sw,1,inm);
+          if(iswp) ia=swapbin(ia);
+        }
+        if(ia>na) {
+          fprintf(stdout,"   Warning Ridge number %8d IGNORED\n",i);
+          continue;
+        }
         if( mesh->info.iso ){
           if( ina[ia] == 0 )
-	    continue;
+            continue;
           else {
             pa = &mesh->edge[ina[ia]];
             pa->tag |= MG_GEO;
@@ -584,18 +602,18 @@ int loadMesh(pMesh mesh) {
     /* get required edges */
     if ( nedreq ) {
       rewind(inm);
-      fseek(inm,posnedreq,SEEK_SET);   
+      fseek(inm,posnedreq,SEEK_SET);
       for (k=1; k<=nedreq; k++) {
-        if(!bin) 
-	  fscanf(inm,"%d",&ia);
-	else {
-	  fread(&ia,sw,1,inm);
-	  if(iswp) ia=swapbin(ia);
-	}
-	if(ia>na) {
-	  fprintf(stdout,"   Warning Required Edges number %8d/%8d IGNORED\n",ia,na);
-	  continue;
-	}
+        if(!bin)
+          fscanf(inm,"%d",&ia);
+        else {
+          fread(&ia,sw,1,inm);
+          if(iswp) ia=swapbin(ia);
+        }
+        if(ia>na) {
+          fprintf(stdout,"   Warning Required Edges number %8d/%8d IGNORED\n",ia,na);
+          continue;
+        }
         if( mesh->info.iso ){
           if( ina[ia] == 0 ) continue;
           else {
@@ -624,13 +642,13 @@ int loadMesh(pMesh mesh) {
       fscanf(inm,"%d %d %d %d %d",&pt->v[0],&pt->v[1],&pt->v[2],&pt->v[3],&ref);
     else {
       for (i=0 ; i<4 ; i++) {
-	fread(&pt->v[i],sw,1,inm);
-	if(iswp) pt->v[i]=swapbin(pt->v[i]);
+        fread(&pt->v[i],sw,1,inm);
+        if(iswp) pt->v[i]=swapbin(pt->v[i]);
       }
       fread(&ref,sw,1,inm);
       if(iswp) ref=swapbin(ref);
     }
-    pt->ref  = ref;//0;//ref ;   
+    pt->ref  = ref;//0;//ref ;
     pt->qual = orcal(mesh,k);
     for (i=0; i<4; i++) {
       ppt = &mesh->point[pt->v[i]];
@@ -656,17 +674,17 @@ int loadMesh(pMesh mesh) {
   /* get required tetrahedra */
   if(nereq) {
     rewind(inm);
-    fseek(inm,posnereq,SEEK_SET);   
+    fseek(inm,posnereq,SEEK_SET);
     for (k=1; k<=nereq; k++) {
-      if(!bin) 
-	fscanf(inm,"%d",&i);
+      if(!bin)
+        fscanf(inm,"%d",&i);
       else {
-	fread(&i,sw,1,inm);
-	if(iswp) i=swapbin(i);
+        fread(&i,sw,1,inm);
+        if(iswp) i=swapbin(i);
       }
       if(i>mesh->ne) {
-	fprintf(stdout,"   Warning Required Tetra number %8d IGNORED\n",i);
-	continue;
+        fprintf(stdout,"   Warning Required Tetra number %8d IGNORED\n",i);
+        continue;
       }
       pt = &mesh->tetra[i];
       pt->tag |= MG_REQ;
@@ -681,7 +699,7 @@ int loadMesh(pMesh mesh) {
       fprintf(stdout,"     NUMBER OF EDGES        %8d\n",mesh->na);
       if ( nr )
         fprintf(stdout,"     NUMBER OF RIDGES       %8d\n",nr);
-        }
+    }
     if ( mesh->nt )
       fprintf(stdout,"     NUMBER OF TRIANGLES    %8d\n",mesh->nt);
     fprintf(stdout,"     NUMBER OF ELEMENTS     %8d\n",mesh->ne);
@@ -703,7 +721,13 @@ int loadMesh(pMesh mesh) {
   return(1);
 }
 
-/** Save mesh data */
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \return 0 if failed, 1 otherwise.
+ *
+ * Save mesh data.
+ *
+ */
 int saveMesh(pMesh mesh) {
   FILE*        inm;
   pPoint       ppt;
@@ -726,8 +750,8 @@ int saveMesh(pMesh mesh) {
       *ptr = '\0';
       strcat(data,".mesh");
       if( !(inm = fopen(data,"w")) ) {
-	fprintf(stderr,"  ** UNABLE TO OPEN %s.\n",data);
-	return(0);
+        fprintf(stderr,"  ** UNABLE TO OPEN %s.\n",data);
+        return(0);
       }
     } else {
       bin = 1;
@@ -788,13 +812,13 @@ int saveMesh(pMesh mesh) {
     ppt = &mesh->point[k];
     if ( MG_VOK(ppt) ) {
       if(!bin) {
-	fprintf(inm,"%.15lg %.15lg %.15lg %d\n",ppt->c[0],ppt->c[1],ppt->c[2],abs(ppt->ref));
+        fprintf(inm,"%.15lg %.15lg %.15lg %d\n",ppt->c[0],ppt->c[1],ppt->c[2],abs(ppt->ref));
       } else {
-	fwrite((unsigned char*)&ppt->c[0],sd,1,inm);
-	fwrite((unsigned char*)&ppt->c[1],sd,1,inm);
-	fwrite((unsigned char*)&ppt->c[2],sd,1,inm);
-	ppt->ref = abs(ppt->ref);
-	fwrite((unsigned char*)&ppt->ref,sw,1,inm);
+        fwrite((unsigned char*)&ppt->c[0],sd,1,inm);
+        fwrite((unsigned char*)&ppt->c[1],sd,1,inm);
+        fwrite((unsigned char*)&ppt->c[2],sd,1,inm);
+        ppt->ref = abs(ppt->ref);
+        fwrite((unsigned char*)&ppt->ref,sw,1,inm);
       }
     }
   }
@@ -816,11 +840,11 @@ int saveMesh(pMesh mesh) {
     for (k=1; k<=mesh->np; k++) {
       ppt = &mesh->point[k];
       if ( MG_VOK(ppt) && ppt->tag & MG_CRN ) {
-  	if(!bin) {
-  	  fprintf(inm,"%d \n",ppt->tmp);
-  	} else {
-  	  fwrite(&ppt->tmp,sw,1,inm);
-  	}
+        if(!bin) {
+          fprintf(inm,"%d \n",ppt->tmp);
+        } else {
+          fwrite(&ppt->tmp,sw,1,inm);
+        }
       }
     }
   }
@@ -839,11 +863,11 @@ int saveMesh(pMesh mesh) {
     for (k=1; k<=mesh->np; k++) {
       ppt = &mesh->point[k];
       if ( MG_VOK(ppt) && ppt->tag & MG_REQ ) {
-  	if(!bin) {
-  	  fprintf(inm,"%d \n",ppt->tmp);
-  	} else {
-  	  fwrite(&ppt->tmp,sw,1,inm);
-  	}
+        if(!bin) {
+          fprintf(inm,"%d \n",ppt->tmp);
+        } else {
+          fwrite(&ppt->tmp,sw,1,inm);
+        }
       }
     }
   }
@@ -879,13 +903,13 @@ int saveMesh(pMesh mesh) {
       else if ( (ppt->tag & MG_BDY)
                 && (!(ppt->tag & MG_GEO) || (ppt->tag & MG_NOM)) ) {
         pxp = &mesh->xpoint[ppt->xp];
-  	if(!bin) {
-  	  fprintf(inm,"%.15lg %.15lg %.15lg \n",pxp->n1[0],pxp->n1[1],pxp->n1[2]);
-  	} else {
-  	  fwrite((unsigned char*)&pxp->n1[0],sd,1,inm);
-  	  fwrite((unsigned char*)&pxp->n1[1],sd,1,inm);
-  	  fwrite((unsigned char*)&pxp->n1[2],sd,1,inm);
-  	}
+        if(!bin) {
+          fprintf(inm,"%.15lg %.15lg %.15lg \n",pxp->n1[0],pxp->n1[1],pxp->n1[2]);
+        } else {
+          fwrite((unsigned char*)&pxp->n1[0],sd,1,inm);
+          fwrite((unsigned char*)&pxp->n1[1],sd,1,inm);
+          fwrite((unsigned char*)&pxp->n1[2],sd,1,inm);
+        }
       }
     }
 
@@ -906,72 +930,72 @@ int saveMesh(pMesh mesh) {
       if ( !MG_VOK(ppt) || MG_SIN(ppt->tag) )  continue;
       else if ( (ppt->tag & MG_BDY)
                 && (!(ppt->tag & MG_GEO) || (ppt->tag & MG_NOM)) ) {
-    	if(!bin) {
-    	  fprintf(inm,"%d %d\n",ppt->tmp,++nn);
-    	} else {
-    	  fwrite(&ppt->tmp,sw,1,inm);
-    	  ++nn;
-    	  fwrite(&nn,sw,1,inm);
-    	}
+        if(!bin) {
+          fprintf(inm,"%d %d\n",ppt->tmp,++nn);
+        } else {
+          fwrite(&ppt->tmp,sw,1,inm);
+          ++nn;
+          fwrite(&nn,sw,1,inm);
+        }
       }
     }
 
     if ( nt ) {
       /* Write tangents */
       if(!bin) {
-    	strcpy(&chaine[0],"\n\nTangents\n");
-    	fprintf(inm,"%s",chaine);
-    	fprintf(inm,"%d\n",nt);
+        strcpy(&chaine[0],"\n\nTangents\n");
+        fprintf(inm,"%s",chaine);
+        fprintf(inm,"%d\n",nt);
       } else {
-    	binch = 59; //tangent
-    	fwrite(&binch,sw,1,inm);
-    	bpos += 12+(3*mesh->ver)*4*nt; //Pos
-    	fwrite(&bpos,sw,1,inm);
-    	fwrite(&nt,sw,1,inm);
+        binch = 59; //tangent
+        fwrite(&binch,sw,1,inm);
+        bpos += 12+(3*mesh->ver)*4*nt; //Pos
+        fwrite(&bpos,sw,1,inm);
+        fwrite(&nt,sw,1,inm);
       }
 
       for (k=1; k<=mesh->np; k++) {
-    	ppt = &mesh->point[k];
-    	if ( !MG_VOK(ppt) || MG_SIN(ppt->tag) )  continue;
-    	else if ( MG_EDG(ppt->tag) || (ppt->tag & MG_NOM) ) {
-    	  pxp = &mesh->xpoint[ppt->xp];
-    	  if(!bin) {
-    	    fprintf(inm,"%.15lg %.15lg %.15lg \n",pxp->t[0],pxp->t[1],pxp->t[2]);
-    	  } else {
-    	    fwrite((unsigned char*)&pxp->t[0],sd,1,inm);
-    	    fwrite((unsigned char*)&pxp->t[1],sd,1,inm);
-    	    fwrite((unsigned char*)&pxp->t[2],sd,1,inm);
-    	  }
-    	}
+        ppt = &mesh->point[k];
+        if ( !MG_VOK(ppt) || MG_SIN(ppt->tag) )  continue;
+        else if ( MG_EDG(ppt->tag) || (ppt->tag & MG_NOM) ) {
+          pxp = &mesh->xpoint[ppt->xp];
+          if(!bin) {
+            fprintf(inm,"%.15lg %.15lg %.15lg \n",pxp->t[0],pxp->t[1],pxp->t[2]);
+          } else {
+            fwrite((unsigned char*)&pxp->t[0],sd,1,inm);
+            fwrite((unsigned char*)&pxp->t[1],sd,1,inm);
+            fwrite((unsigned char*)&pxp->t[2],sd,1,inm);
+          }
+        }
       }
-    
+
 
       if(!bin) {
-    	strcpy(&chaine[0],"\n\nTangentAtVertices\n");
-    	fprintf(inm,"%s",chaine);
-    	fprintf(inm,"%d\n",nt);
+        strcpy(&chaine[0],"\n\nTangentAtVertices\n");
+        fprintf(inm,"%s",chaine);
+        fprintf(inm,"%d\n",nt);
       } else {
-    	binch = 61; //tangentatvertices
-    	fwrite(&binch,sw,1,inm);
-    	bpos += 12 + 2*4*nt;//Pos
-    	fwrite(&bpos,sw,1,inm);
-    	fwrite(&nt,sw,1,inm);
+        binch = 61; //tangentatvertices
+        fwrite(&binch,sw,1,inm);
+        bpos += 12 + 2*4*nt;//Pos
+        fwrite(&bpos,sw,1,inm);
+        fwrite(&nt,sw,1,inm);
       }
       nt = 0;
       for (k=1; k<=mesh->np; k++) {
-    	ppt = &mesh->point[k];
-    	if ( !MG_VOK(ppt) || MG_SIN(ppt->tag) )  continue;
-    	else if ( MG_EDG(ppt->tag) || (ppt->tag & MG_NOM) ) {
-    	  if(!bin) {
-    	    fprintf(inm,"%d %d\n",ppt->tmp,++nn);
-    	  } else {
-    	    fwrite(&ppt->tmp,sw,1,inm);
-    	    ++nn;
-    	    fwrite(&(nn),sw,1,inm);
-    	  }
-    	}
+        ppt = &mesh->point[k];
+        if ( !MG_VOK(ppt) || MG_SIN(ppt->tag) )  continue;
+        else if ( MG_EDG(ppt->tag) || (ppt->tag & MG_NOM) ) {
+          if(!bin) {
+            fprintf(inm,"%d %d\n",ppt->tmp,++nn);
+          } else {
+            fwrite(&ppt->tmp,sw,1,inm);
+            ++nn;
+            fwrite(&(nn),sw,1,inm);
+          }
+        }
       }
-    } 
+    }
   }
   DEL_MEM(mesh,mesh->xpoint,(mesh->xpmax+1)*sizeof(xPoint));
   mesh->xp = 0;
@@ -999,45 +1023,45 @@ int saveMesh(pMesh mesh) {
       ptt = &mesh->tria[k];
       if ( ptt->tag[0] & MG_REQ && ptt->tag[1] & MG_REQ && ptt->tag[2] & MG_REQ )  ntreq++;
       if(!bin) {
-  	fprintf(inm,"%d %d %d %d\n",mesh->point[ptt->v[0]].tmp,mesh->point[ptt->v[1]].tmp
-  		,mesh->point[ptt->v[2]].tmp,ptt->ref);
+        fprintf(inm,"%d %d %d %d\n",mesh->point[ptt->v[0]].tmp,mesh->point[ptt->v[1]].tmp
+                ,mesh->point[ptt->v[2]].tmp,ptt->ref);
       } else {
-  	fwrite(&mesh->point[ptt->v[0]].tmp,sw,1,inm);
-  	fwrite(&mesh->point[ptt->v[1]].tmp,sw,1,inm);
-  	fwrite(&mesh->point[ptt->v[2]].tmp,sw,1,inm);
-  	fwrite(&ptt->ref,sw,1,inm);
+        fwrite(&mesh->point[ptt->v[0]].tmp,sw,1,inm);
+        fwrite(&mesh->point[ptt->v[1]].tmp,sw,1,inm);
+        fwrite(&mesh->point[ptt->v[2]].tmp,sw,1,inm);
+        fwrite(&ptt->ref,sw,1,inm);
       }
     }
     if ( ntreq ) {
       if(!bin) {
-  	strcpy(&chaine[0],"\n\nRequiredTriangles\n");
-  	fprintf(inm,"%s",chaine);
-  	fprintf(inm,"%d \n",ntreq);
+        strcpy(&chaine[0],"\n\nRequiredTriangles\n");
+        fprintf(inm,"%s",chaine);
+        fprintf(inm,"%d \n",ntreq);
       } else {
-  	binch = 17; //ReqTriangles
-  	fwrite(&binch,sw,1,inm);
-  	bpos += 12+4*ntreq; //Pos
-  	fwrite(&bpos,sw,1,inm);
-  	fwrite(&ntreq,sw,1,inm);
+        binch = 17; //ReqTriangles
+        fwrite(&binch,sw,1,inm);
+        bpos += 12+4*ntreq; //Pos
+        fwrite(&bpos,sw,1,inm);
+        fwrite(&ntreq,sw,1,inm);
       }
       for (k=0; k<=mesh->nt; k++) {
-  	ptt = &mesh->tria[k];
-  	if ( ptt->tag[0] & MG_REQ && ptt->tag[1] & MG_REQ && ptt->tag[2] & MG_REQ ) {
-  	  if(!bin) {
-  	    fprintf(inm,"%d \n",k);
-  	  } else {
-  	    fwrite(&k,sw,1,inm);
-  	  }
-  	}
+        ptt = &mesh->tria[k];
+        if ( ptt->tag[0] & MG_REQ && ptt->tag[1] & MG_REQ && ptt->tag[2] & MG_REQ ) {
+          if(!bin) {
+            fprintf(inm,"%d \n",k);
+          } else {
+            fwrite(&k,sw,1,inm);
+          }
+        }
       }
     }
-    
+
     /* Release memory before htab allocation */
     if ( mesh->adjt )
       DEL_MEM(mesh,mesh->adjt,(3*mesh->nt+4)*sizeof(int));
     if ( mesh->adja )
       DEL_MEM(mesh,mesh->adja,(4*mesh->nemax+5)*sizeof(int));
-    
+
     /* build hash table for edges */
     if ( mesh->htab.geom )
       DEL_MEM(mesh,mesh->htab.geom,(mesh->htab.max+1)*sizeof(hgeom));
@@ -1073,78 +1097,78 @@ int saveMesh(pMesh mesh) {
         if ( ph->tag & MG_REQ )  nedreq++;
       }
       if ( na ) {
-  	if(!bin) {
-  	  strcpy(&chaine[0],"\n\nEdges\n");
-  	  fprintf(inm,"%s",chaine);
-  	  fprintf(inm,"%d\n",na);
-  	} else {
-  	  binch = 5; //Edges
-  	  fwrite(&binch,sw,1,inm);
-  	  bpos += 12 + 3*4*na;//Pos
-  	  fwrite(&bpos,sw,1,inm);
-  	  fwrite(&na,sw,1,inm);
-  	}
+        if(!bin) {
+          strcpy(&chaine[0],"\n\nEdges\n");
+          fprintf(inm,"%s",chaine);
+          fprintf(inm,"%d\n",na);
+        } else {
+          binch = 5; //Edges
+          fwrite(&binch,sw,1,inm);
+          bpos += 12 + 3*4*na;//Pos
+          fwrite(&bpos,sw,1,inm);
+          fwrite(&na,sw,1,inm);
+        }
         for (k=0; k<=mesh->htab.max; k++) {
           ph = &mesh->htab.geom[k];
           if ( !ph->a )  continue;
-  	  if(!bin) {
-  	    fprintf(inm,"%d %d %d \n",mesh->point[ph->a].tmp,mesh->point[ph->b].tmp,ph->ref);
-  	  } else {
-  	    fwrite(&mesh->point[ph->a].tmp,sw,1,inm);
-  	    fwrite(&mesh->point[ph->b].tmp,sw,1,inm);
-  	    fwrite(&ph->ref,sw,1,inm);
-  	  }
+          if(!bin) {
+            fprintf(inm,"%d %d %d \n",mesh->point[ph->a].tmp,mesh->point[ph->b].tmp,ph->ref);
+          } else {
+            fwrite(&mesh->point[ph->a].tmp,sw,1,inm);
+            fwrite(&mesh->point[ph->b].tmp,sw,1,inm);
+            fwrite(&ph->ref,sw,1,inm);
+          }
         }
         if ( nr ) {
-  	  if(!bin) {
-  	    strcpy(&chaine[0],"\n\nRidges\n");
-  	    fprintf(inm,"%s",chaine);
-  	    fprintf(inm,"%d\n",nr);
-  	  } else {
-  	    binch = 14; //Ridges
-  	    fwrite(&binch,sw,1,inm);
-  	    bpos += 12 + 4*nr;//Pos
-  	    fwrite(&bpos,sw,1,inm);
-  	    fwrite(&nr,sw,1,inm);
-  	  }
-  	  na = 0;
+          if(!bin) {
+            strcpy(&chaine[0],"\n\nRidges\n");
+            fprintf(inm,"%s",chaine);
+            fprintf(inm,"%d\n",nr);
+          } else {
+            binch = 14; //Ridges
+            fwrite(&binch,sw,1,inm);
+            bpos += 12 + 4*nr;//Pos
+            fwrite(&bpos,sw,1,inm);
+            fwrite(&nr,sw,1,inm);
+          }
+          na = 0;
           for (k=0; k<=mesh->htab.max; k++) {
             ph = &mesh->htab.geom[k];
             if ( !ph->a )  continue;
             na++;
             if ( ph->tag & MG_GEO )  {
-  	      if(!bin) {
-  		fprintf(inm,"%d \n",na);
-  	      } else {
-  		fwrite(&na,sw,1,inm);
-  	      }
-  	    }
+              if(!bin) {
+                fprintf(inm,"%d \n",na);
+              } else {
+                fwrite(&na,sw,1,inm);
+              }
+            }
           }
         }
         if ( nedreq ) {
-  	  if(!bin) {
-  	    strcpy(&chaine[0],"\n\nRequiredEdges\n");
-  	    fprintf(inm,"%s",chaine);
-  	    fprintf(inm,"%d\n",nedreq);
-  	  } else {
-  	    binch = 16; //RequiredEdges
-  	    fwrite(&binch,sw,1,inm);
-  	    bpos += 12 + 4*nedreq;//Pos
-  	    fwrite(&bpos,sw,1,inm);
-  	    fwrite(&nedreq,sw,1,inm);
-  	  }
+          if(!bin) {
+            strcpy(&chaine[0],"\n\nRequiredEdges\n");
+            fprintf(inm,"%s",chaine);
+            fprintf(inm,"%d\n",nedreq);
+          } else {
+            binch = 16; //RequiredEdges
+            fwrite(&binch,sw,1,inm);
+            bpos += 12 + 4*nedreq;//Pos
+            fwrite(&bpos,sw,1,inm);
+            fwrite(&nedreq,sw,1,inm);
+          }
           na = 0;
           for (k=0; k<=mesh->htab.max; k++) {
             ph = &mesh->htab.geom[k];
             if ( !ph->a )  continue;
             na++;
             if ( ph->tag & MG_REQ )  {
-  	      if(!bin) {
-  		fprintf(inm,"%d \n",na);
-  	      } else {
-  		fwrite(&na,sw,1,inm);
-  	      }
-  	    }
+              if(!bin) {
+                fprintf(inm,"%d \n",na);
+              } else {
+                fwrite(&na,sw,1,inm);
+              }
+            }
           }
         }
       }
@@ -1181,14 +1205,14 @@ int saveMesh(pMesh mesh) {
     pt = &mesh->tetra[k];
     if ( MG_EOK(pt) ) {
       if(!bin) {
-  	fprintf(inm,"%d %d %d %d %d\n",mesh->point[pt->v[0]].tmp,mesh->point[pt->v[1]].tmp
-  		,mesh->point[pt->v[2]].tmp,mesh->point[pt->v[3]].tmp,pt->ref);
+        fprintf(inm,"%d %d %d %d %d\n",mesh->point[pt->v[0]].tmp,mesh->point[pt->v[1]].tmp
+                ,mesh->point[pt->v[2]].tmp,mesh->point[pt->v[3]].tmp,pt->ref);
       } else {
-  	fwrite(&mesh->point[pt->v[0]].tmp,sw,1,inm);
-  	fwrite(&mesh->point[pt->v[1]].tmp,sw,1,inm);
-  	fwrite(&mesh->point[pt->v[2]].tmp,sw,1,inm);
-  	fwrite(&mesh->point[pt->v[3]].tmp,sw,1,inm);
-  	fwrite(&pt->ref,sw,1,inm);
+        fwrite(&mesh->point[pt->v[0]].tmp,sw,1,inm);
+        fwrite(&mesh->point[pt->v[1]].tmp,sw,1,inm);
+        fwrite(&mesh->point[pt->v[2]].tmp,sw,1,inm);
+        fwrite(&mesh->point[pt->v[3]].tmp,sw,1,inm);
+        fwrite(&pt->ref,sw,1,inm);
       }
     }
   }
@@ -1211,11 +1235,11 @@ int saveMesh(pMesh mesh) {
       if ( !MG_EOK(pt) ) continue;
       ne++;
       if ( pt->tag & MG_REQ ) {
-  	if(!bin) {
-  	  fprintf(inm,"%d \n",ne);
-  	} else {
-  	  fwrite(&ne,sw,1,inm);
-  	}
+        if(!bin) {
+          fprintf(inm,"%d \n",ne);
+        } else {
+          fwrite(&ne,sw,1,inm);
+        }
       }
     }
   }
@@ -1241,7 +1265,13 @@ int saveMesh(pMesh mesh) {
   return(1);
 }
 
-/** Save mesh data without adja and xtetra tables (for library version) */
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \return 0 if failed, 1 otherwise.
+ *
+ * Save mesh data without adjacency and xtetra tables (for library version).
+ *
+ */
 int saveLibraryMesh(pMesh mesh) {
   FILE        *inm;
   pPoint       ppt;
@@ -1251,7 +1281,7 @@ int saveLibraryMesh(pMesh mesh) {
   int          bin,binch,bpos,na;
   char         data[128],chaine[128],*ptr;
 
- mesh->ver = 2;
+  mesh->ver = 2;
   bin = 0;
   strcpy(data,mesh->nameout);
   ptr = strstr(data,".mesh");
@@ -1262,8 +1292,8 @@ int saveLibraryMesh(pMesh mesh) {
       *ptr = '\0';
       strcat(data,".mesh");
       if( !(inm = fopen(data,"w")) ) {
-	fprintf(stderr,"  ** UNABLE TO OPEN %s.\n",data);
-	return(0);
+        fprintf(stderr,"  ** UNABLE TO OPEN %s.\n",data);
+        return(0);
       }
     } else {
       bin = 1;
@@ -1307,7 +1337,7 @@ int saveLibraryMesh(pMesh mesh) {
       if ( ppt->tag & MG_REQ )  nre++;
     }
   }
- if(!bin) {
+  if(!bin) {
     strcpy(&chaine[0],"\n\nVertices\n");
     fprintf(inm,"%s",chaine);
     fprintf(inm,"%d\n",np);
@@ -1322,13 +1352,13 @@ int saveLibraryMesh(pMesh mesh) {
     ppt = &mesh->point[k];
     if ( MG_VOK(ppt) ) {
       if(!bin) {
-	fprintf(inm,"%.15lg %.15lg %.15lg %d\n",ppt->c[0],ppt->c[1],ppt->c[2],abs(ppt->ref));
+        fprintf(inm,"%.15lg %.15lg %.15lg %d\n",ppt->c[0],ppt->c[1],ppt->c[2],abs(ppt->ref));
       } else {
-	fwrite((unsigned char*)&ppt->c[0],sd,1,inm);
-	fwrite((unsigned char*)&ppt->c[1],sd,1,inm);
-	fwrite((unsigned char*)&ppt->c[2],sd,1,inm);
-	ppt->ref = abs(ppt->ref);
-	fwrite((unsigned char*)&ppt->ref,sw,1,inm);
+        fwrite((unsigned char*)&ppt->c[0],sd,1,inm);
+        fwrite((unsigned char*)&ppt->c[1],sd,1,inm);
+        fwrite((unsigned char*)&ppt->c[2],sd,1,inm);
+        ppt->ref = abs(ppt->ref);
+        fwrite((unsigned char*)&ppt->ref,sw,1,inm);
       }
     }
   }
@@ -1350,11 +1380,11 @@ int saveLibraryMesh(pMesh mesh) {
     for (k=1; k<=mesh->np; k++) {
       ppt = &mesh->point[k];
       if ( MG_VOK(ppt) && ppt->tag & MG_CRN ) {
-  	if(!bin) {
-  	  fprintf(inm,"%d \n",ppt->tmp);
-  	} else {
-  	  fwrite(&ppt->tmp,sw,1,inm);
-  	}
+        if(!bin) {
+          fprintf(inm,"%d \n",ppt->tmp);
+        } else {
+          fwrite(&ppt->tmp,sw,1,inm);
+        }
       }
     }
   }
@@ -1373,11 +1403,11 @@ int saveLibraryMesh(pMesh mesh) {
     for (k=1; k<=mesh->np; k++) {
       ppt = &mesh->point[k];
       if ( MG_VOK(ppt) && ppt->tag & MG_REQ ) {
-  	if(!bin) {
-  	  fprintf(inm,"%d \n",ppt->tmp);
-  	} else {
-  	  fwrite(&ppt->tmp,sw,1,inm);
-  	}
+        if(!bin) {
+          fprintf(inm,"%d \n",ppt->tmp);
+        } else {
+          fwrite(&ppt->tmp,sw,1,inm);
+        }
       }
     }
   }
@@ -1400,36 +1430,36 @@ int saveLibraryMesh(pMesh mesh) {
       ptt = &mesh->tria[k];
       if ( ptt->tag[0] & MG_REQ && ptt->tag[1] & MG_REQ && ptt->tag[2] & MG_REQ )  ntreq++;
       if(!bin) {
-  	fprintf(inm,"%d %d %d %d\n",mesh->point[ptt->v[0]].tmp,mesh->point[ptt->v[1]].tmp
-  		,mesh->point[ptt->v[2]].tmp,ptt->ref);
+        fprintf(inm,"%d %d %d %d\n",mesh->point[ptt->v[0]].tmp,mesh->point[ptt->v[1]].tmp
+                ,mesh->point[ptt->v[2]].tmp,ptt->ref);
       } else {
-  	fwrite(&mesh->point[ptt->v[0]].tmp,sw,1,inm);
-  	fwrite(&mesh->point[ptt->v[1]].tmp,sw,1,inm);
-  	fwrite(&mesh->point[ptt->v[2]].tmp,sw,1,inm);
-  	fwrite(&ptt->ref,sw,1,inm);
-      }   
+        fwrite(&mesh->point[ptt->v[0]].tmp,sw,1,inm);
+        fwrite(&mesh->point[ptt->v[1]].tmp,sw,1,inm);
+        fwrite(&mesh->point[ptt->v[2]].tmp,sw,1,inm);
+        fwrite(&ptt->ref,sw,1,inm);
+      }
     }
     if ( ntreq ) {
       if(!bin) {
-  	strcpy(&chaine[0],"\n\nRequiredTriangles\n");
-  	fprintf(inm,"%s",chaine);
-  	fprintf(inm,"%d \n",ntreq);
+        strcpy(&chaine[0],"\n\nRequiredTriangles\n");
+        fprintf(inm,"%s",chaine);
+        fprintf(inm,"%d \n",ntreq);
       } else {
-  	binch = 17; //ReqTriangles
-  	fwrite(&binch,sw,1,inm);
-  	bpos += 12+4*ntreq; //Pos
-  	fwrite(&bpos,sw,1,inm);
-  	fwrite(&ntreq,sw,1,inm);
+        binch = 17; //ReqTriangles
+        fwrite(&binch,sw,1,inm);
+        bpos += 12+4*ntreq; //Pos
+        fwrite(&bpos,sw,1,inm);
+        fwrite(&ntreq,sw,1,inm);
       }
       for (k=0; k<=mesh->nt; k++) {
-  	ptt = &mesh->tria[k];
-  	if ( ptt->tag[0] & MG_REQ && ptt->tag[1] & MG_REQ && ptt->tag[2] & MG_REQ ) {
-  	  if(!bin) {
-  	    fprintf(inm,"%d \n",k);
-  	  } else {
-  	    fwrite(&k,sw,1,inm);
-  	  }
-  	}
+        ptt = &mesh->tria[k];
+        if ( ptt->tag[0] & MG_REQ && ptt->tag[1] & MG_REQ && ptt->tag[2] & MG_REQ ) {
+          if(!bin) {
+            fprintf(inm,"%d \n",k);
+          } else {
+            fwrite(&k,sw,1,inm);
+          }
+        }
       }
     }
   }
@@ -1446,15 +1476,15 @@ int saveLibraryMesh(pMesh mesh) {
       bpos += 12 + 3*4*mesh->na;//Pos
       fwrite(&bpos,sw,1,inm);
       fwrite(&na,sw,1,inm);
-    }   
+    }
     for (k=1; k<=mesh->na; k++) {
       if(!bin) {
-	fprintf(inm,"%d %d %d \n",mesh->point[mesh->edge[k].a].tmp,
+        fprintf(inm,"%d %d %d \n",mesh->point[mesh->edge[k].a].tmp,
                 mesh->point[mesh->edge[k].b].tmp,mesh->edge[k].ref);
       } else {
-	fwrite(&mesh->point[mesh->edge[k].a].tmp,sw,1,inm);
-	fwrite(&mesh->point[mesh->edge[k].b].tmp,sw,1,inm);
-	fwrite(&mesh->edge[k].ref,sw,1,inm);
+        fwrite(&mesh->point[mesh->edge[k].a].tmp,sw,1,inm);
+        fwrite(&mesh->point[mesh->edge[k].b].tmp,sw,1,inm);
+        fwrite(&mesh->edge[k].ref,sw,1,inm);
       }
       if ( mesh->edge[k].tag & MG_GEO ) nr++;
       if ( mesh->edge[k].tag & MG_REQ ) nedreq++;
@@ -1462,50 +1492,50 @@ int saveLibraryMesh(pMesh mesh) {
 
     if ( nr ) {
       if(!bin) {
-	strcpy(&chaine[0],"\n\nRidges\n");
-	fprintf(inm,"%s",chaine);
-	fprintf(inm,"%d\n",nr);
+        strcpy(&chaine[0],"\n\nRidges\n");
+        fprintf(inm,"%s",chaine);
+        fprintf(inm,"%d\n",nr);
       } else {
-	binch = 14; //Ridges
-	fwrite(&binch,sw,1,inm);
-	bpos += 12 + 4*nr;//Pos
-	fwrite(&bpos,sw,1,inm);
-	fwrite(&nr,sw,1,inm);
+        binch = 14; //Ridges
+        fwrite(&binch,sw,1,inm);
+        bpos += 12 + 4*nr;//Pos
+        fwrite(&bpos,sw,1,inm);
+        fwrite(&nr,sw,1,inm);
       }
       na = 0;
       for (k=1; k<=mesh->na; k++) {
-	na++;
-	if ( mesh->edge[k].tag & MG_GEO ) {
-	  if(!bin) {
-	    fprintf(inm,"%d \n",na);
-	  } else {
-	    fwrite(&na,sw,1,inm);
-	  }
-	}
+        na++;
+        if ( mesh->edge[k].tag & MG_GEO ) {
+          if(!bin) {
+            fprintf(inm,"%d \n",na);
+          } else {
+            fwrite(&na,sw,1,inm);
+          }
+        }
       }
     }
     if ( nedreq ) {
       if(!bin) {
-	strcpy(&chaine[0],"\n\nRequiredEdges\n");
-	fprintf(inm,"%s",chaine);
-	fprintf(inm,"%d\n",nedreq);
+        strcpy(&chaine[0],"\n\nRequiredEdges\n");
+        fprintf(inm,"%s",chaine);
+        fprintf(inm,"%d\n",nedreq);
       } else {
-	binch = 16; //RequiredEdges
-	fwrite(&binch,sw,1,inm);
-	bpos += 12 + 4*nedreq;//Pos
-	fwrite(&bpos,sw,1,inm);
-	fwrite(&nedreq,sw,1,inm);
+        binch = 16; //RequiredEdges
+        fwrite(&binch,sw,1,inm);
+        bpos += 12 + 4*nedreq;//Pos
+        fwrite(&bpos,sw,1,inm);
+        fwrite(&nedreq,sw,1,inm);
       }
       na = 0;
       for (k=1; k<=mesh->na; k++) {
-	na++;
+        na++;
         if (  mesh->edge[k].tag & MG_REQ ) {
-	  if(!bin) {
-	    fprintf(inm,"%d \n",na);
-	  } else {
-	    fwrite(&na,sw,1,inm);
-	  }
-	}
+          if(!bin) {
+            fprintf(inm,"%d \n",na);
+          } else {
+            fwrite(&na,sw,1,inm);
+          }
+        }
       }
     }
   }
@@ -1521,7 +1551,7 @@ int saveLibraryMesh(pMesh mesh) {
     }
   }
 
- if(!bin) {
+  if(!bin) {
     strcpy(&chaine[0],"\n\nTetrahedra\n");
     fprintf(inm,"%s",chaine);
     fprintf(inm,"%d\n",ne);
@@ -1536,20 +1566,20 @@ int saveLibraryMesh(pMesh mesh) {
     pt = &mesh->tetra[k];
     if ( MG_EOK(pt) ) {
       if(!bin) {
-  	fprintf(inm,"%d %d %d %d %d\n",mesh->point[pt->v[0]].tmp,mesh->point[pt->v[1]].tmp
-  		,mesh->point[pt->v[2]].tmp,mesh->point[pt->v[3]].tmp,pt->ref);
+        fprintf(inm,"%d %d %d %d %d\n",mesh->point[pt->v[0]].tmp,mesh->point[pt->v[1]].tmp
+                ,mesh->point[pt->v[2]].tmp,mesh->point[pt->v[3]].tmp,pt->ref);
       } else {
-  	fwrite(&mesh->point[pt->v[0]].tmp,sw,1,inm);
-  	fwrite(&mesh->point[pt->v[1]].tmp,sw,1,inm);
-  	fwrite(&mesh->point[pt->v[2]].tmp,sw,1,inm);
-  	fwrite(&mesh->point[pt->v[3]].tmp,sw,1,inm);
-  	fwrite(&pt->ref,sw,1,inm);
+        fwrite(&mesh->point[pt->v[0]].tmp,sw,1,inm);
+        fwrite(&mesh->point[pt->v[1]].tmp,sw,1,inm);
+        fwrite(&mesh->point[pt->v[2]].tmp,sw,1,inm);
+        fwrite(&mesh->point[pt->v[3]].tmp,sw,1,inm);
+        fwrite(&pt->ref,sw,1,inm);
       }
     }
   }
 
   if ( nereq ) {
-   if(!bin) {
+    if(!bin) {
       strcpy(&chaine[0],"\n\nRequiredTetrahedra\n");
       fprintf(inm,"%s",chaine);
       fprintf(inm,"%d\n",nereq);
@@ -1566,11 +1596,11 @@ int saveLibraryMesh(pMesh mesh) {
       if ( !MG_EOK(pt) ) continue;
       ne++;
       if ( pt->tag & MG_REQ ) {
-  	if(!bin) {
-  	  fprintf(inm,"%d \n",ne);
-  	} else {
-  	  fwrite(&ne,sw,1,inm);
-  	}
+        if(!bin) {
+          fprintf(inm,"%d \n",ne);
+        } else {
+          fwrite(&ne,sw,1,inm);
+        }
       }
     }
   }
@@ -1595,7 +1625,14 @@ int saveLibraryMesh(pMesh mesh) {
   return(1);
 }
 
-/** load metric field */
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the sol structure.
+ * \return 0 if failed, 1 otherwise.
+ *
+ * Load metric field.
+ *
+ */
 int loadMet(pMesh mesh,pSol met) {
   FILE       *inm;
   float       fbuf[6];
@@ -1638,26 +1675,26 @@ int loadMet(pMesh mesh,pSol met) {
 
 
   /* read solution or metric */
- if(!bin) {
+  if(!bin) {
     strcpy(chaine,"DDD");
     while(fscanf(inm,"%s",&chaine[0])!=EOF && strncmp(chaine,"End",strlen("End")) ) {
       if(!strncmp(chaine,"Dimension",strlen("Dimension"))) {
-	fscanf(inm,"%d",&met->dim);
-	if(met->dim!=3) {
-	  fprintf(stdout,"BAD SOL DIMENSION : %d\n",dim);
-	  return(1);
-	}
-	continue;
+        fscanf(inm,"%d",&met->dim);
+        if(met->dim!=3) {
+          fprintf(stdout,"BAD SOL DIMENSION : %d\n",dim);
+          return(1);
+        }
+        continue;
       } else if(!strncmp(chaine,"SolAtVertices",strlen("SolAtVertices"))) {
-	fscanf(inm,"%d",&met->np);
-	fscanf(inm,"%d",&met->type);
-	if(met->type!=1) {
-	  fprintf(stdout,"SEVERAL SOLUTION => IGNORED : %d\n",met->type);
-	  return(1);
-	}
-	fscanf(inm,"%d",&met->size);
-	posnp = ftell(inm);
-	break;
+        fscanf(inm,"%d",&met->np);
+        fscanf(inm,"%d",&met->type);
+        if(met->type!=1) {
+          fprintf(stdout,"SEVERAL SOLUTION => IGNORED : %d\n",met->type);
+          return(1);
+        }
+        fscanf(inm,"%d",&met->size);
+        posnp = ftell(inm);
+        break;
       }
     }
   } else {
@@ -1673,43 +1710,43 @@ int loadMet(pMesh mesh,pSol met) {
       if(iswp) binch=swapbin(binch);
       if(binch==54) break;
       if(binch==3) {  //Dimension
-	fread(&bdim,sw,1,inm);  //NulPos=>20
-	if(iswp) bdim=swapbin(bdim);
-	fread(&met->dim,sw,1,inm);
-	if(iswp) met->dim=swapbin(met->dim);
-	if(met->dim!=3) {
-	  fprintf(stdout,"BAD SOL DIMENSION : %d\n",met->dim);
-	  exit(0);
-	  return(1);
-	}
-	continue;
+        fread(&bdim,sw,1,inm);  //NulPos=>20
+        if(iswp) bdim=swapbin(bdim);
+        fread(&met->dim,sw,1,inm);
+        if(iswp) met->dim=swapbin(met->dim);
+        if(met->dim!=3) {
+          fprintf(stdout,"BAD SOL DIMENSION : %d\n",met->dim);
+          exit(0);
+          return(1);
+        }
+        continue;
       } else if(binch==62) {  //SolAtVertices
-	fread(&binch,sw,1,inm); //NulPos
-	if(iswp) binch=swapbin(binch);
-	fread(&met->np,sw,1,inm);
-	if(iswp) met->np=swapbin(met->np);
-	fread(&met->type,sw,1,inm); //nb sol
-	if(iswp) met->type=swapbin(met->type);
-	if(met->type!=1) {
-	  fprintf(stdout,"SEVERAL SOLUTION => IGNORED : %d\n",met->type);
-	  return(1);
-	}
-	fread(&met->size,sw,1,inm); //typsol
-	if(iswp) met->size=swapbin(met->size);
-	posnp = ftell(inm);
-	break;
+        fread(&binch,sw,1,inm); //NulPos
+        if(iswp) binch=swapbin(binch);
+        fread(&met->np,sw,1,inm);
+        if(iswp) met->np=swapbin(met->np);
+        fread(&met->type,sw,1,inm); //nb sol
+        if(iswp) met->type=swapbin(met->type);
+        if(met->type!=1) {
+          fprintf(stdout,"SEVERAL SOLUTION => IGNORED : %d\n",met->type);
+          return(1);
+        }
+        fread(&met->size,sw,1,inm); //typsol
+        if(iswp) met->size=swapbin(met->size);
+        posnp = ftell(inm);
+        break;
       } else {
-	fread(&bpos,sw,1,inm); //Pos
-	if(iswp) bpos=swapbin(bpos);
-	rewind(inm);
-	fseek(inm,bpos,SEEK_SET);
+        fread(&bpos,sw,1,inm); //Pos
+        if(iswp) bpos=swapbin(bpos);
+        rewind(inm);
+        fseek(inm,bpos,SEEK_SET);
       }
     }
 
   }
   if ( !met->np ) {
     fprintf(stdout,"  ** MISSING DATA. No solution.\n");
-    return(1); 
+    return(1);
   }
   if(met->size!=1) {
     fprintf(stdout,"  ** DATA ANISO IGNORED %d \n",met->size);
@@ -1717,7 +1754,7 @@ int loadMet(pMesh mesh,pSol met) {
     return(-1);
   }
 
- 
+
   met->npi = met->np;
 
   /* mem alloc */
@@ -1732,28 +1769,28 @@ int loadMet(pMesh mesh,pSol met) {
   /* read mesh solutions */
   rewind(inm);
   fseek(inm,posnp,SEEK_SET);
- 
+
   /* isotropic metric */
   if ( met->size == 1 ) {
     if ( met->ver == 1 ) {
       for (k=1; k<=met->np; k++) {
- 	if(!bin){
-	  fscanf(inm,"%f",&fbuf[0]);
-	} else {
-	  fread(&fbuf[0],sw,1,inm);
-	  if(iswp) fbuf[0]=swapf(fbuf[0]);
-	}
+        if(!bin){
+          fscanf(inm,"%f",&fbuf[0]);
+        } else {
+          fread(&fbuf[0],sw,1,inm);
+          if(iswp) fbuf[0]=swapf(fbuf[0]);
+        }
         met->m[k] = fbuf[0];
       }
     }
     else {
       for (k=1; k<=met->np; k++) {
         if(!bin){
-	  fscanf(inm,"%lf",&dbuf[0]);
-	} else {
-	  fread(&dbuf[0],sd,1,inm);
-	  if(iswp) dbuf[0]=swapd(dbuf[0]);
-	}
+          fscanf(inm,"%lf",&dbuf[0]);
+        } else {
+          fread(&dbuf[0],sd,1,inm);
+          if(iswp) dbuf[0]=swapd(dbuf[0]);
+        }
         met->m[k] = dbuf[0];
       }
     }
@@ -1784,7 +1821,14 @@ int loadMet(pMesh mesh,pSol met) {
   return(1);
 }
 
-/** write iso or aniso metric */
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the sol structure.
+ * \return 0 if failed, 1 otherwise.
+ *
+ * Write isotropic or anisotropic metric.
+ *
+ */
 int saveMet(pMesh mesh,pSol met) {
   FILE*        inm;
   pPoint     ppt;
@@ -1804,7 +1848,7 @@ int saveMet(pMesh mesh,pSol met) {
     return(0);
   }
   fprintf(stdout,"  %%%% %s OPENED\n",data);
- /*entete fichier*/
+  /*entete fichier*/
   if(!bin) {
     strcpy(&chaine[0],"MeshVersionFormatted 2\n");
     fprintf(inm,"%s",chaine);
@@ -1829,14 +1873,14 @@ int saveMet(pMesh mesh,pSol met) {
     ppt = &mesh->point[k];
     if ( MG_VOK(ppt) )  np++;
   }
-  
+
   if(met->size==1) {
     typ = 1;
   } else {
     typ = 3;
   }
 
- if(!bin) {
+  if(!bin) {
     strcpy(&chaine[0],"\n\nSolAtVertices\n");
     fprintf(inm,"%s",chaine);
     fprintf(inm,"%d\n",np);
@@ -1855,14 +1899,14 @@ int saveMet(pMesh mesh,pSol met) {
 
   /* write isotropic metric */
   if ( met->size == 1 ) {
-     for (k=1; k<=mesh->np; k++) {
+    for (k=1; k<=mesh->np; k++) {
       ppt = &mesh->point[k];
       if ( MG_VOK(ppt) ) {
-	if(!bin) {
-	  fprintf(inm,"%.15lg \n ",met->m[k]);
-	} else {
-	  fwrite((unsigned char*)&met->m[k],sd,1,inm);
-	}
+        if(!bin) {
+          fprintf(inm,"%.15lg \n ",met->m[k]);
+        } else {
+          fwrite((unsigned char*)&met->m[k],sd,1,inm);
+        }
       }
     }
   }
@@ -1872,14 +1916,14 @@ int saveMet(pMesh mesh,pSol met) {
     nbm = 1;
     GmfSetKwd(outm,GmfSolAtVertices,np,nbm,typtab);
     for (k=1; k<=mesh->np; k++) {
-      ppt = &mesh->point[k];
-      if ( MG_VOK(ppt) ) {
-        for (i=0; i<met->size; i++)  dbuf[i] = met->m[met->size*(k)+1+i];
-        tmp = dbuf[2];
-        dbuf[2] = dbuf[3];
-        dbuf[3] = tmp;
-        GmfSetLin(outm,GmfSolAtVertices,dbuf);
-      }
+    ppt = &mesh->point[k];
+    if ( MG_VOK(ppt) ) {
+    for (i=0; i<met->size; i++)  dbuf[i] = met->m[met->size*(k)+1+i];
+    tmp = dbuf[2];
+    dbuf[2] = dbuf[3];
+    dbuf[3] = tmp;
+    GmfSetLin(outm,GmfSolAtVertices,dbuf);
+    }
     }
     }*/
   /*fin fichier*/
@@ -1895,8 +1939,15 @@ int saveMet(pMesh mesh,pSol met) {
 }
 
 #ifdef SINGUL
-/** Read singul data. Here we suppose that the file contains the singularities *
- *  (corner, required, ridges....) */
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param singul pointer toward the singul structure.
+ * \return 0 if failed, 1 otherwise
+ *
+ * Read singul data. Here we suppose that the file contains the
+ * singularities (corner, required, ridges....)
+ *
+ */
 int loadSingul(pMesh mesh,pSingul singul) {
   FILE        *inm;
   Mesh         sing_mesh;
@@ -1940,42 +1991,42 @@ int loadSingul(pMesh mesh,pSingul singul) {
   fprintf(stdout,"  %%%% %s OPENED\n",data);
 
 
- if (!bin) {
+  if (!bin) {
     strcpy(chaine,"D");
     while(fscanf(inm,"%s",&chaine[0])!=EOF && strncmp(chaine,"End",strlen("End")) ) {
       if(!strncmp(chaine,"MeshVersionFormatted",strlen("MeshVersionFormatted"))) {
-	fscanf(inm,"%d",&sing_mesh.ver);
-	continue;
+        fscanf(inm,"%d",&sing_mesh.ver);
+        continue;
       } else if(!strncmp(chaine,"Dimension",strlen("Dimension"))) {
-	fscanf(inm,"%d",&sing_mesh.dim);
-	if(sing_mesh.dim!=3) {
-	  fprintf(stdout,"BAD DIMENSION : %d\n",sing_mesh.dim);
-	  return(0);
-	}
-	continue;
+        fscanf(inm,"%d",&sing_mesh.dim);
+        if(sing_mesh.dim!=3) {
+          fprintf(stdout,"BAD DIMENSION : %d\n",sing_mesh.dim);
+          return(0);
+        }
+        continue;
       } else if(!strncmp(chaine,"Vertices",strlen("Vertices"))) {
-	fscanf(inm,"%d",&sing_mesh.np);
-	posnp = ftell(inm);
-	continue;
+        fscanf(inm,"%d",&sing_mesh.np);
+        posnp = ftell(inm);
+        continue;
       } else if(!strncmp(chaine,"RequiredVertices",strlen("RequiredVertices"))) {
-	fscanf(inm,"%d",&npreq);
-	posnpreq = ftell(inm);
-	continue;
+        fscanf(inm,"%d",&npreq);
+        posnpreq = ftell(inm);
+        continue;
       } else if(!strncmp(chaine,"Corners",strlen("Corners"))) {
-	fscanf(inm,"%d",&ncor);
-	posncor = ftell(inm);
-	continue;
+        fscanf(inm,"%d",&ncor);
+        posncor = ftell(inm);
+        continue;
       } else if(!strncmp(chaine,"RequiredEdges",strlen("RequiredEdges"))) {
-	fscanf(inm,"%d",&nedreq);
-	posnedreq = ftell(inm);
-	continue;
+        fscanf(inm,"%d",&nedreq);
+        posnedreq = ftell(inm);
+        continue;
       } else if(!strncmp(chaine,"Ridges",strlen("Ridges"))) {
-	fscanf(inm,"%d",&nr);
-	posnr = ftell(inm);
-	continue;
+        fscanf(inm,"%d",&nr);
+        posnr = ftell(inm);
+        continue;
       }
     }
- } else { //binary file
+  } else { //binary file
     bdim = 0;
     fread(&sing_mesh.ver,sw,1,inm);
     iswp=0;
@@ -1990,72 +2041,72 @@ int loadSingul(pMesh mesh,pSingul singul) {
       if(iswp) binch=swapbin(binch);
       if(binch==54) break;
       if(!bdim && binch==3) {  //Dimension
-	fread(&bdim,sw,1,inm);  //NulPos=>20
-	if(iswp) bdim=swapbin(bdim);
-	fread(&bdim,sw,1,inm);
-	if(iswp) bdim=swapbin(bdim);
-	sing_mesh.dim = bdim;
-	if(bdim!=3) {
-	  fprintf(stdout,"BAD SOL DIMENSION : %d\n",sing_mesh.dim);
-	  exit(0);
-	  return(1);
-	}
-	continue;
+        fread(&bdim,sw,1,inm);  //NulPos=>20
+        if(iswp) bdim=swapbin(bdim);
+        fread(&bdim,sw,1,inm);
+        if(iswp) bdim=swapbin(bdim);
+        sing_mesh.dim = bdim;
+        if(bdim!=3) {
+          fprintf(stdout,"BAD SOL DIMENSION : %d\n",sing_mesh.dim);
+          exit(0);
+          return(1);
+        }
+        continue;
       } else if(!mesh->npi && binch==4) {  //Vertices
-	fread(&bpos,sw,1,inm); //NulPos
-	if(iswp) bpos=swapbin(bpos);
-	fread(&sing_mesh.np,sw,1,inm);
-	if(iswp) sing_mesh.np=swapbin(sing_mesh.np);
-	posnp = ftell(inm);
-	rewind(inm);
-	fseek(inm,bpos,SEEK_SET);
-	continue;
+        fread(&bpos,sw,1,inm); //NulPos
+        if(iswp) bpos=swapbin(bpos);
+        fread(&sing_mesh.np,sw,1,inm);
+        if(iswp) sing_mesh.np=swapbin(sing_mesh.np);
+        posnp = ftell(inm);
+        rewind(inm);
+        fseek(inm,bpos,SEEK_SET);
+        continue;
       } else if(binch==15) {  //RequiredVertices
-	fread(&bpos,sw,1,inm); //NulPos
-	if(iswp) bpos=swapbin(bpos);
-	fread(&npreq,sw,1,inm);
-	if(iswp) npreq=swapbin(npreq);
-	posnpreq = ftell(inm);
-	rewind(inm);
-	fseek(inm,bpos,SEEK_SET);
-	continue;
+        fread(&bpos,sw,1,inm); //NulPos
+        if(iswp) bpos=swapbin(bpos);
+        fread(&npreq,sw,1,inm);
+        if(iswp) npreq=swapbin(npreq);
+        posnpreq = ftell(inm);
+        rewind(inm);
+        fseek(inm,bpos,SEEK_SET);
+        continue;
       } else if(!ncor && binch==13) { //Corners
-	fread(&bpos,sw,1,inm); //NulPos
-	if(iswp) bpos=swapbin(bpos);
-	fread(&ncor,sw,1,inm);
-	if(iswp) ncor=swapbin(ncor);
-	posncor = ftell(inm);
-	rewind(inm);
-	fseek(inm,bpos,SEEK_SET);
-	continue;
+        fread(&bpos,sw,1,inm); //NulPos
+        if(iswp) bpos=swapbin(bpos);
+        fread(&ncor,sw,1,inm);
+        if(iswp) ncor=swapbin(ncor);
+        posncor = ftell(inm);
+        rewind(inm);
+        fseek(inm,bpos,SEEK_SET);
+        continue;
       } else if(!sing_mesh.na && binch==5) { //Edges
-	fread(&bpos,sw,1,inm); //NulPos
-	if(iswp) bpos=swapbin(bpos);
-	fread(&sing_mesh.na,sw,1,inm);
-	if(iswp) sing_mesh.na=swapbin(sing_mesh.na);
-	posned = ftell(inm);
-	rewind(inm);
-	fseek(inm,bpos,SEEK_SET);
-	continue;
+        fread(&bpos,sw,1,inm); //NulPos
+        if(iswp) bpos=swapbin(bpos);
+        fread(&sing_mesh.na,sw,1,inm);
+        if(iswp) sing_mesh.na=swapbin(sing_mesh.na);
+        posned = ftell(inm);
+        rewind(inm);
+        fseek(inm,bpos,SEEK_SET);
+        continue;
       } else if(binch==16) {  //RequiredEdges
-	fread(&bpos,sw,1,inm); //NulPos
-	if(iswp) bpos=swapbin(bpos);
-	fread(&nedreq,sw,1,inm);
-	if(iswp) nedreq=swapbin(nedreq);
-	posnedreq = ftell(inm);
-	rewind(inm);
-	fseek(inm,bpos,SEEK_SET);
-	continue;
+        fread(&bpos,sw,1,inm); //NulPos
+        if(iswp) bpos=swapbin(bpos);
+        fread(&nedreq,sw,1,inm);
+        if(iswp) nedreq=swapbin(nedreq);
+        posnedreq = ftell(inm);
+        rewind(inm);
+        fseek(inm,bpos,SEEK_SET);
+        continue;
       } else {
-	//printf("on traite ? %d\n",binch);
-	fread(&bpos,sw,1,inm); //NulPos
-	if(iswp) bpos=swapbin(bpos);
-	//printf("on avance... Nulpos %d\n",bpos);
-	rewind(inm);
-	fseek(inm,bpos,SEEK_SET);
-      } 
+        //printf("on traite ? %d\n",binch);
+        fread(&bpos,sw,1,inm); //NulPos
+        if(iswp) bpos=swapbin(bpos);
+        //printf("on avance... Nulpos %d\n",bpos);
+        rewind(inm);
+        fseek(inm,bpos,SEEK_SET);
+      }
     }
- }
+  }
   if ( !sing_mesh.np ) {
     fprintf(stdout,"  ** MISSING DATA.\n");
     fprintf(stdout," Check that your mesh contains points.\n");
@@ -2074,7 +2125,7 @@ int loadSingul(pMesh mesh,pSingul singul) {
             printf("  Exit program.\n");
             exit(EXIT_FAILURE));
     SAFE_CALLOC(sing_mesh.tria,sing_mesh.nt+1,Tria);
-   }
+  }
   if ( sing_mesh.na ) {
     ADD_MEM(mesh,(sing_mesh.na+1)*sizeof(Edge),"edges of singularities mesh",
             printf("  Exit program.\n");
@@ -2095,40 +2146,40 @@ int loadSingul(pMesh mesh,pSingul singul) {
     ppt = &sing_mesh.point[k];
     if (sing_mesh.ver < 2) { /*float*/
       if (!bin) {
-	for (i=0 ; i<3 ; i++) {
-	  fscanf(inm,"%f",&fc);
-	  ppt->c[i] = (double) fc;
-	}
-	fscanf(inm,"%d",&ppt->ref);
+        for (i=0 ; i<3 ; i++) {
+          fscanf(inm,"%f",&fc);
+          ppt->c[i] = (double) fc;
+        }
+        fscanf(inm,"%d",&ppt->ref);
       } else {
-	for (i=0 ; i<3 ; i++) {
-	  fread(&fc,sw,1,inm);
-	  if(iswp) fc=swapf(fc);
-	  ppt->c[i] = (double) fc;
-	}
-	fread(&ppt->ref,sw,1,inm);
-	if(iswp) ppt->ref=swapbin(ppt->ref);
+        for (i=0 ; i<3 ; i++) {
+          fread(&fc,sw,1,inm);
+          if(iswp) fc=swapf(fc);
+          ppt->c[i] = (double) fc;
+        }
+        fread(&ppt->ref,sw,1,inm);
+        if(iswp) ppt->ref=swapbin(ppt->ref);
       }
     } else {
       if (!bin)
-	fscanf(inm,"%lf %lf %lf %d",&ppt->c[0],&ppt->c[1],&ppt->c[2],&ppt->ref);
+        fscanf(inm,"%lf %lf %lf %d",&ppt->c[0],&ppt->c[1],&ppt->c[2],&ppt->ref);
       else {
-	for (i=0 ; i<3 ; i++) {
-	  fread(&ppt->c[i],sd,1,inm);
-	  if(iswp) ppt->c[i]=swapd(ppt->c[i]);
-	}
-	fread(&ppt->ref,sw,1,inm);
-	if(iswp) ppt->ref=swapbin(ppt->ref);
+        for (i=0 ; i<3 ; i++) {
+          fread(&ppt->c[i],sd,1,inm);
+          if(iswp) ppt->c[i]=swapd(ppt->c[i]);
+        }
+        fread(&ppt->ref,sw,1,inm);
+        if(iswp) ppt->ref=swapbin(ppt->ref);
       }
     }
-    for (i=0; i<sing_mesh.dim; i++) { 
+    for (i=0; i<sing_mesh.dim; i++) {
       if ( ppt->c[i] > singul->max[i] )  singul->max[i] = ppt->c[i];
       if ( ppt->c[i] < singul->min[i] )  singul->min[i] = ppt->c[i];
     }
     ppt->tag  = MG_NOTAG;
   }
- 
- 
+
+
 
   /* /\* fill singul *\/ */
   /* /\* get required vertices *\/ */
@@ -2165,14 +2216,14 @@ int loadSingul(pMesh mesh,pSingul singul) {
     for (k=1; k<=sing_mesh.na; k++) {
       pa = &sing_mesh.edge[k];
       if (!bin)
-	fscanf(inm,"%d %d %d",&pa->a,&pa->b,&pa->ref);
+        fscanf(inm,"%d %d %d",&pa->a,&pa->b,&pa->ref);
       else {
-	fread(&pa->a,sw,1,inm);
-	if(iswp) pa->a=swapbin(pa->a);
-	fread(&pa->b,sw,1,inm);
-	if(iswp) pa->b=swapbin(pa->b);
-	fread(&pa->ref,sw,1,inm);
-	if(iswp) pa->ref=swapbin(pa->ref);
+        fread(&pa->a,sw,1,inm);
+        if(iswp) pa->a=swapbin(pa->a);
+        fread(&pa->b,sw,1,inm);
+        if(iswp) pa->b=swapbin(pa->b);
+        fread(&pa->ref,sw,1,inm);
+        if(iswp) pa->ref=swapbin(pa->ref);
       }
       pa->tag = MG_NOTAG;
     }
@@ -2182,15 +2233,15 @@ int loadSingul(pMesh mesh,pSingul singul) {
     rewind(inm);
     fseek(inm,posnr,SEEK_SET);
     for (k=1; k<=nr; k++) {
-      if(!bin) 
-	fscanf(inm,"%d",&i);
+      if(!bin)
+        fscanf(inm,"%d",&i);
       else {
-	fread(&i,sw,1,inm);
-	if(iswp) i=swapbin(i);
-      }   
+        fread(&i,sw,1,inm);
+        if(iswp) i=swapbin(i);
+      }
       if(i>sing_mesh.na) {
-	fprintf(stdout,"   Warning Ridge number %8d IGNORED\n",i);
-	continue;
+        fprintf(stdout,"   Warning Ridge number %8d IGNORED\n",i);
+        continue;
       }
       pa = &sing_mesh.edge[i];
       pa->tag |= MG_GEO;
@@ -2206,22 +2257,22 @@ int loadSingul(pMesh mesh,pSingul singul) {
       }
     }
   }
-  
+
   /* get required edges */
   na  = 0;
   if ( nedreq ) {
     rewind(inm);
-    fseek(inm,posnedreq,SEEK_SET);   
+    fseek(inm,posnedreq,SEEK_SET);
     for (k=1; k<=nedreq; k++) {
-      if(!bin) 
-	fscanf(inm,"%d",&i);
+      if(!bin)
+        fscanf(inm,"%d",&i);
       else {
-	fread(&i,sw,1,inm);
-	if(iswp) i=swapbin(i);
+        fread(&i,sw,1,inm);
+        if(iswp) i=swapbin(i);
       }
       if(i>sing_mesh.na) {
-	fprintf(stdout,"   Warning Required Edges number %8d IGNORED\n",i);
-	continue;
+        fprintf(stdout,"   Warning Required Edges number %8d IGNORED\n",i);
+        continue;
       }
       pa = &sing_mesh.edge[i];
       if ( !(pa->tag & MG_GEO) ) na++;

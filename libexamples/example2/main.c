@@ -93,34 +93,34 @@ int main(int argc,char *argv[]) {
   if ( !MMG5_Chk_meshData(mmgMesh,mmgSol) ) exit(EXIT_FAILURE);
 
   /** 5) (not mandatory): set your global parameters using the
-      MMG5_Set_iparameters and MMG5_Set_dparameters function
+      MMG5_Set_iparameter and MMG5_Set_dparameter function
       (resp. for integer parameters and double param)*/
 
 
   /**------------------- First wave of refinment---------------------*/
 
   /* debug mode ON (default value = OFF) */
-  if ( !MMG5_Set_iparameters(mmgMesh,mmgSol,MMG5_IPARAM_debug, 1) )
+  if ( !MMG5_Set_iparameter(mmgMesh,mmgSol,MMG5_IPARAM_debug, 1) )
     exit(EXIT_FAILURE);
 
   /* maximal memory size (default value = 50/100*ram) */
-  if ( !MMG5_Set_iparameters(mmgMesh,mmgSol,MMG5_IPARAM_mem, 600) )
+  if ( !MMG5_Set_iparameter(mmgMesh,mmgSol,MMG5_IPARAM_mem, 600) )
     exit(EXIT_FAILURE);
 
   /* Maximal mesh size (default FLT_MAX)*/
-  if ( !MMG5_Set_dparameters(mmgMesh,mmgSol,MMG5_DPARAM_hmax,40) )
+  if ( !MMG5_Set_dparameter(mmgMesh,mmgSol,MMG5_DPARAM_hmax,40) )
     exit(EXIT_FAILURE);
 
   /* Minimal mesh size (default 0)*/
-  if ( !MMG5_Set_dparameters(mmgMesh,mmgSol,MMG5_DPARAM_hmin,0.001) )
+  if ( !MMG5_Set_dparameter(mmgMesh,mmgSol,MMG5_DPARAM_hmin,0.001) )
     exit(EXIT_FAILURE);
 
   /* Global hausdorff value (default value = 0.01) applied on the whole boundary */
-  if ( !MMG5_Set_dparameters(mmgMesh,mmgSol,MMG5_DPARAM_hausd, 0.1) )
+  if ( !MMG5_Set_dparameter(mmgMesh,mmgSol,MMG5_DPARAM_hausd, 0.1) )
     exit(EXIT_FAILURE);
 
   /* Gradation control (default value 1.105) */
-  if ( !MMG5_Set_dparameters(mmgMesh,mmgSol,MMG5_DPARAM_hgrad, 2) )
+  if ( !MMG5_Set_dparameter(mmgMesh,mmgSol,MMG5_DPARAM_hgrad, 2) )
     exit(EXIT_FAILURE);
 
   /** library call */
@@ -150,18 +150,18 @@ int main(int argc,char *argv[]) {
      local values are used instead of the global hausdorff number) */
 
   /* verbosity (default value = 4)*/
-  if ( !MMG5_Set_iparameters(mmgMesh,mmgSol,MMG5_IPARAM_verbose, 4) )
+  if ( !MMG5_Set_iparameter(mmgMesh,mmgSol,MMG5_IPARAM_verbose, 4) )
     exit(EXIT_FAILURE);
 
-  if ( !MMG5_Set_iparameters(mmgMesh,mmgSol,MMG5_IPARAM_mem, 1000) )
+  if ( !MMG5_Set_iparameter(mmgMesh,mmgSol,MMG5_IPARAM_mem, 1000) )
     exit(EXIT_FAILURE);
-  if ( !MMG5_Set_iparameters(mmgMesh,mmgSol,MMG5_IPARAM_debug, 0) )
+  if ( !MMG5_Set_iparameter(mmgMesh,mmgSol,MMG5_IPARAM_debug, 0) )
     exit(EXIT_FAILURE);
 
 
   /** 6) (not mandatory): set your local parameters */
   /* use 2 local hausdorff numbers on ref 36 (hausd = 0.01) and 38 (hausd = 1) */
-  if ( !MMG5_Set_iparameters(mmgMesh,mmgSol,MMG5_IPARAM_numberOfLocalParam,2) )
+  if ( !MMG5_Set_iparameter(mmgMesh,mmgSol,MMG5_IPARAM_numberOfLocalParam,2) )
     exit(EXIT_FAILURE);
 
   /** for each local parameter: give the type and reference of the element on which
@@ -176,9 +176,9 @@ int main(int argc,char *argv[]) {
      Then, you can not grow up the hausdorff value (resp. gradation) without
      resetting this metric (but you can decrease this value). */
 
-  if ( !MMG5_Set_localParameters(mmgMesh,mmgSol,MMG5_Triangle,36,0.01) )
+  if ( !MMG5_Set_localParameter(mmgMesh,mmgSol,MMG5_Triangle,36,0.01) )
     exit(EXIT_FAILURE);
-  if ( !MMG5_Set_localParameters(mmgMesh,mmgSol,MMG5_Triangle,38,1) )
+  if ( !MMG5_Set_localParameter(mmgMesh,mmgSol,MMG5_Triangle,38,1) )
     exit(EXIT_FAILURE);
 
   /** library call */

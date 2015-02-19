@@ -107,11 +107,6 @@ sub printTab # ($chaine, $tabcount, $comm)
             # Fortran comment
             $chaine =~ s/\/\*/\! \/\*/g;
         }
-#        if ($chaine =~ /^\*\*(.*)/)
-#        {
-#            # Fortran comment
-#            $chaine =~ s/\*\*/\! \*\*/g;
-#        }
     }
     print $chaine;
 }
@@ -261,6 +256,11 @@ sub Convert {
             {
                 $startcom = 0;
                 $chaine = sprintf("! %s\n", $line);
+                printTab($chaine, $tabcount, 1);
+            }
+            elsif($line =~ /^\ \*/ )
+            {
+                $chaine = sprintf("! %s", $line);
                 printTab($chaine, $tabcount, 1);
             }
             elsif($line =~ /^\*\*/ )

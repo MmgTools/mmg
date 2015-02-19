@@ -21,10 +21,17 @@
 ** =============================================================================
 */
 
-/** librnbg
- *
- * Written by Cedric Lachat and Algiane Froehly
- **/
+/**
+ * \file mmg3d/librnbg.c
+ * \brief Functions for scotch renumerotation.
+ * \author Algiane Froehly (Inria / IMB, Université de Bordeaux)
+ * \author Cedric Lachat (Inria / Labri, Université de Bordeaux)
+ * \version 5
+ * \date 2013
+ * \copyright GNU Lesser General Public License.
+ * \todo Doxygen documentation.
+ */
+
 #include "mmg3d.h"
 
 #ifdef USE_SCOTCH
@@ -223,8 +230,8 @@ void swapTet(pTetra tetras/*, int* adja*/, int* perm, int ind1, int ind2) {
   Tetra pttmp;
   int   tmp;
 
-/* Commentated part: swap for adja table if we don't free it in renumbering *
- * function (faster but need of 4*mesh->nemax*sizeof(int) extra bytes ) */
+  /* Commentated part: swap for adja table if we don't free it in renumbering *
+   * function (faster but need of 4*mesh->nemax*sizeof(int) extra bytes ) */
   /* int   adjatmp,kadj,ifadj,j; */
 
   /* /\* 1-- swap the adja table *\/ */
@@ -243,9 +250,9 @@ void swapTet(pTetra tetras/*, int* adja*/, int* perm, int ind1, int ind2) {
   /*     kadj  = adja[4*(ind1-1)+j]/4; */
   /*     ifadj = adja[4*(ind1-1)+j]%4; */
   /*     if ( kadj == ind1 ) */
-	/*       adja[4*(ind2-1)+1+ifadj] = 4*ind2 + adja[4*(ind2-1)+1+ifadj]%4; */
+  /*       adja[4*(ind2-1)+1+ifadj] = 4*ind2 + adja[4*(ind2-1)+1+ifadj]%4; */
   /*     else */
-	/*       adja[4*(kadj-1)+1+ifadj] = 4*ind2 + adja[4*(kadj-1)+1+ifadj]%4; */
+  /*       adja[4*(kadj-1)+1+ifadj] = 4*ind2 + adja[4*(kadj-1)+1+ifadj]%4; */
   /*   } */
   /* } */
 
@@ -393,40 +400,40 @@ int renumbering(int boxVertNbr, pMesh mesh, pSol sol) {
   vertTab[vertNbr+1] = edgeNbr;
   edgeNbr--;
   /*check if some tetra are alone*/
-   for(tetraIdx = 1 ; tetraIdx < mesh->ne + 1 ; tetraIdx++) {
+  for(tetraIdx = 1 ; tetraIdx < mesh->ne + 1 ; tetraIdx++) {
 
     /* Testing if the tetra exists */
     if (!mesh->tetra[tetraIdx].v[0]) continue;
     if (vertTab[vertOldTab[tetraIdx]] < 0) {
       if(vertOldTab[tetraIdx] == vertNbr) {
-	 fprintf(stdout,"WARNING graph problem, no renum\n");
-	 DEL_MEM(mesh,edgeTab,edgeSiz*sizeof(SCOTCH_Num));
-	 DEL_MEM(mesh,vertTab,(vertNbr+2)*sizeof(SCOTCH_Num));
-	 return(0);
+        fprintf(stdout,"WARNING graph problem, no renum\n");
+        DEL_MEM(mesh,edgeTab,edgeSiz*sizeof(SCOTCH_Num));
+        DEL_MEM(mesh,vertTab,(vertNbr+2)*sizeof(SCOTCH_Num));
+        return(0);
       }
-      if(vertTab[vertOldTab[tetraIdx] + 1] > 0) 
-	vertTab[vertOldTab[tetraIdx]] = vertTab[vertOldTab[tetraIdx] + 1];
+      if(vertTab[vertOldTab[tetraIdx] + 1] > 0)
+        vertTab[vertOldTab[tetraIdx]] = vertTab[vertOldTab[tetraIdx] + 1];
       else {
-	if(vertOldTab[tetraIdx]+1 == vertNbr) {
-	 fprintf(stdout,"WARNING graph problem, no renum\n");
-	 DEL_MEM(mesh,edgeTab,edgeSiz*sizeof(SCOTCH_Num));
-	 DEL_MEM(mesh,vertTab,(vertNbr+2)*sizeof(SCOTCH_Num));	
-	 return(0);
-      }
-	i = 1;
-	do  {
-	  i++;
-	} while((vertTab[vertOldTab[tetraIdx] + i] < 0) && ((vertOldTab[tetraIdx] + i) < vertNbr));
-	if(vertOldTab[tetraIdx] + i == vertNbr) {
-	  fprintf(stdout,"WARNING graph problem, no renum\n");
-	  DEL_MEM(mesh,edgeTab,edgeSiz*sizeof(SCOTCH_Num));
-	  DEL_MEM(mesh,vertTab,(vertNbr+2)*sizeof(SCOTCH_Num));
-	  return(0);
-	}
-	vertTab[vertOldTab[tetraIdx]] = vertTab[vertOldTab[tetraIdx] + i];
+        if(vertOldTab[tetraIdx]+1 == vertNbr) {
+          fprintf(stdout,"WARNING graph problem, no renum\n");
+          DEL_MEM(mesh,edgeTab,edgeSiz*sizeof(SCOTCH_Num));
+          DEL_MEM(mesh,vertTab,(vertNbr+2)*sizeof(SCOTCH_Num));
+          return(0);
+        }
+        i = 1;
+        do  {
+          i++;
+        } while((vertTab[vertOldTab[tetraIdx] + i] < 0) && ((vertOldTab[tetraIdx] + i) < vertNbr));
+        if(vertOldTab[tetraIdx] + i == vertNbr) {
+          fprintf(stdout,"WARNING graph problem, no renum\n");
+          DEL_MEM(mesh,edgeTab,edgeSiz*sizeof(SCOTCH_Num));
+          DEL_MEM(mesh,vertTab,(vertNbr+2)*sizeof(SCOTCH_Num));
+          return(0);
+        }
+        vertTab[vertOldTab[tetraIdx]] = vertTab[vertOldTab[tetraIdx] + i];
       }
     }
-   }
+  }
 
   /* free adjacents to gain memory space */
   DEL_MEM(mesh,mesh->adja,(4*mesh->nemax+5)*sizeof(int));

@@ -21,6 +21,17 @@
 ** =============================================================================
 */
 
+/**
+ * \file mmg3d/bucket.c
+ * \brief Functions for bucket computations in Delaunay mode.
+ * \author Cécile Dobrzynski (Inria / IMB, Université de Bordeaux)
+ * \author Pascal Frey (LJLL, UPMC)
+ * \version 5
+ * \copyright GNU Lesser General Public License.
+ * \remark Delaunay mode only (\a PATTERN flag set to \a OFF).
+ * \todo doxygen documentation.
+ */
+
 #include "mmg3d.h"
 #define PRECI 1
 #define LFILT    0.2//0.7

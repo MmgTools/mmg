@@ -22,10 +22,10 @@
 */
 
 /**
- * \file eigenv.c
+ * \file common/eigenv.c
  * \brief Find eigenvalues and eigenvectors of matrix.
- * \author Cécile Dobrzynski
- * \author Pascal Frey
+ * \author Cécile Dobrzynski (Inria / IMB, Université de Bordeaux)
+ * \author Pascal Frey (LJLL, UPMC)
  * \version 5
  * \copyright GNU Lesser General Public License.
  *
@@ -47,9 +47,9 @@
 #define  MAXTOU         50
 
 /**
-   \def egal(x,y)
-   Check if numbers \a x and \a y are equal.
-*/
+ * \def egal(x,y)
+ * Check if numbers \a x and \a y are equal.
+ */
 #define egal(x,y)   (                                                   \
                      (  ((x) == 0.0f) ? (fabs(y) < EPS) :               \
                         ( ((y) == 0.0f) ? (fabs(x) < EPS) :             \
@@ -86,9 +86,9 @@ static int newton3(double p[4],double x[3]) {
   /* coeffs polynomial, a=1 */
   if ( p[4] != 1. ) {
     fprintf(stderr,"  ## Error: bad use of newton3 function, polynomial"
-            " must be of type P(x) = x^3+bx^2+cx+d. \n",fx);
+            " must be of type P(x) = x^3+bx^2+cx+d. \n");
     fprintf(stderr,"  ## Exiting.\n");
-    exit(EXIT_FAILURE);
+    return(0);
   }
 
   b = p[2];
@@ -250,7 +250,7 @@ static int newton3(double p[4],double x[3]) {
  * \fn int eigenv(int symmat,double *mat,double lambda[3],double v[3][3])
  * \brief Find eigenvalues and vectors of a 3x3 matrix.
  * \param symmat 0 if matrix is not symetric, 1 otherwise.
- * \param *mat pointer to the matrix.
+ * \param *mat pointer toward the matrix.
  * \param lambda[3] eigenvalues.
  * \param v[3][3] eigenvectors.
  * \return order of eigenvalues (1,2,3) or 0 if failed.
@@ -575,8 +575,8 @@ int eigenv(int symmat,double *mat,double lambda[3],double v[3][3]) {
 /**
  * \fn int eigen2(double *mm,double *lambda,double vp[2][2])
  * \brief Find eigenvalues and vectors of a 2x2 matrix.
- * \param *mm pointer to the matrix.
- * \param *lambda pointer to the output eigenvalues.
+ * \param *mm pointer toward the matrix.
+ * \param *lambda pointer toward the output eigenvalues.
  * \param vp[2][2] eigenvectors.
  * \return 1.
  */

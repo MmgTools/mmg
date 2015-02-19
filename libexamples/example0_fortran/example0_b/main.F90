@@ -70,29 +70,29 @@ PROGRAM main
 
   !> c) give the tetrahedras: for each tetrahedra,
   !!    give the vertices index, the reference and the position of the tetra
-  CALL MMG5_Set_tetrahedra(mmgMesh,  1,  4,  2,  8,1, 1,ier)
+  CALL MMG5_Set_tetrahedron(mmgMesh,  1,  4,  2,  8,1, 1,ier)
   IF ( ier == 0 ) CALL EXIT(103)
-  CALL MMG5_Set_tetrahedra(mmgMesh,  8,  3,  2,  7,1, 2,ier)
+  CALL MMG5_Set_tetrahedron(mmgMesh,  8,  3,  2,  7,1, 2,ier)
   IF ( ier == 0 ) CALL EXIT(103)
-  CALL MMG5_Set_tetrahedra(mmgMesh,  5,  2,  6,  8,1, 3,ier)
+  CALL MMG5_Set_tetrahedron(mmgMesh,  5,  2,  6,  8,1, 3,ier)
   IF ( ier == 0 ) CALL EXIT(103)
-  CALL MMG5_Set_tetrahedra(mmgMesh,  5,  8,  1,  2,1, 4,ier)
+  CALL MMG5_Set_tetrahedron(mmgMesh,  5,  8,  1,  2,1, 4,ier)
   IF ( ier == 0 ) CALL EXIT(103)
-  CALL MMG5_Set_tetrahedra(mmgMesh,  7,  2,  8,  6,1, 5,ier)
+  CALL MMG5_Set_tetrahedron(mmgMesh,  7,  2,  8,  6,1, 5,ier)
   IF ( ier == 0 ) CALL EXIT(103)
-  CALL MMG5_Set_tetrahedra(mmgMesh,  2,  4,  3,  8,1, 6,ier)
+  CALL MMG5_Set_tetrahedron(mmgMesh,  2,  4,  3,  8,1, 6,ier)
   IF ( ier == 0 ) CALL EXIT(103)
-  CALL MMG5_Set_tetrahedra(mmgMesh,  9,  2,  3,  7,2, 7,ier)
+  CALL MMG5_Set_tetrahedron(mmgMesh,  9,  2,  3,  7,2, 7,ier)
   IF ( ier == 0 ) CALL EXIT(103)
-  CALL MMG5_Set_tetrahedra(mmgMesh,  7, 11,  9, 12,2, 8,ier)
+  CALL MMG5_Set_tetrahedron(mmgMesh,  7, 11,  9, 12,2, 8,ier)
   IF ( ier == 0 ) CALL EXIT(103)
-  CALL MMG5_Set_tetrahedra(mmgMesh,  6,  9, 10,  7,2, 9,ier)
+  CALL MMG5_Set_tetrahedron(mmgMesh,  6,  9, 10,  7,2, 9,ier)
   IF ( ier == 0 ) CALL EXIT(103)
-  CALL MMG5_Set_tetrahedra(mmgMesh,  6,  7,  2,  9,2,10,ier)
+  CALL MMG5_Set_tetrahedron(mmgMesh,  6,  7,  2,  9,2,10,ier)
   IF ( ier == 0 ) CALL EXIT(103)
-  CALL MMG5_Set_tetrahedra(mmgMesh, 12,  9,  7, 10,2,11,ier)
+  CALL MMG5_Set_tetrahedron(mmgMesh, 12,  9,  7, 10,2,11,ier)
   IF ( ier == 0 ) CALL EXIT(103)
-  CALL MMG5_Set_tetrahedra(mmgMesh,  9,  3, 11,  7,2,12,ier)
+  CALL MMG5_Set_tetrahedron(mmgMesh,  9,  3, 11,  7,2,12,ier)
   IF ( ier == 0 ) CALL EXIT(103)
 
   !> d) give the triangles (not mandatory): for each triangle,
@@ -255,7 +255,7 @@ PROGRAM main
   DO k=1,na
      !> e) Edges recovering
      CALL MMG5_Get_edge(mmgMesh,Edge(1),Edge(2),ref,ridge(k),required(k),ier)
-     IF ( ier == 0 ) CALL EXIT(111) 
+     IF ( ier == 0 ) CALL EXIT(111)
      WRITE(inm,*),Edge(1),Edge(2),ref
      IF ( ridge(k)/=0 )     nr = nr+1
      IF ( required(k)/=0 )  nreq = nreq+1
@@ -281,7 +281,7 @@ PROGRAM main
   WRITE(inm,*),ne
   DO k=1,ne
     !> c) Tetra recovering
-     CALL MMG5_Get_tetrahedra(mmgMesh,Tetra(1),Tetra(2),Tetra(3),Tetra(4),&
+     CALL MMG5_Get_tetrahedron(mmgMesh,Tetra(1),Tetra(2),Tetra(3),Tetra(4),&
           ref,required(k),ier)
     IF ( ier == 0 ) CALL EXIT(112)
     WRITE(inm,*),Tetra(1),Tetra(2),Tetra(3),Tetra(4),ref

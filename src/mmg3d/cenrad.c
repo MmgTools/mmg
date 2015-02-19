@@ -21,16 +21,27 @@
 ** =============================================================================
 */
 
-//
-//  cenrad.c
-//  MMG3D5delone
-//
-//  Created by Dobrzynski on 08/07/13.
-//  Copyright (c) 2013 Dobrzynski. All rights reserved.
-//
+/**
+ * \file mmg3d/cenrad.c
+ * \brief Compute radius and center of circumscribing circle to the element.
+ * \author Cécile Dobrzynski (Inria / IMB, Université de Bordeaux)
+ * \date 2013
+ * \version 5
+ * \copyright GNU Lesser General Public License.
+ * \remark Delaunay mode only (\a PATTERN flag set to \a OFF).
+ */
 
 #include "mmg3d.h"
-/* compute circumradius and center */
+/**
+ * \param mesh Pointer to the mesh structure.
+ * \param *ct coordinates of vertices of the element.
+ * \param *c center of circumscribing circle to the element.
+ * \param *rad radius of circumscribing circle to the element.
+ * \return 0 if failed, 1 otherwise.
+ *
+ * Compute radius and center of circumscribing circle to the element.
+ *
+ */
 int cenrad_iso(pMesh mesh,double *ct,double *c,double *rad) {
     double      dd,ux,uy,uz,n1[3],n2[3],n3[3],*c1,*c2,*c3,*c4,pl1,pl2,pl3;
     double      cc1,cc2,cc3;

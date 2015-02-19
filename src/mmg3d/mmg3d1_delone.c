@@ -21,6 +21,18 @@
 ** =============================================================================
 */
 
+/**
+ * \file mmg3d/mmg3d1_delone.c
+ * \brief Perform volume and surface mesh adaptation in delaunay mode.
+ * \author Cécile Dobrzynski (Inria / IMB, Université de Bordeaux)
+ * \version 5
+ * \copyright GNU Lesser General Public License.
+ * \todo Doxygen documentation
+ *
+ * Perform volume and surface mesh adaptation in delaunay mode (\a
+ * PATTERN preprocessor flag set to OFF).
+ *
+ */
 #include "mmg3d.h"
 
 char  ddb;
@@ -28,8 +40,6 @@ char  ddb;
 #define LOPTLDEL     1.41//1.41
 #define LOPTSDEL     0.6
 int MMG_npuiss,MMG_nvol,MMG_npres;
-
-
 
 /** Internal edge flipping */
 /*static*/ int swptetdel(pMesh mesh,pSol met,double crit,pBucket bucket) {

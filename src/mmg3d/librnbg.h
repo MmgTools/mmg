@@ -21,10 +21,6 @@
 ** =============================================================================
 */
 
-/** librnbg
- *
- * Written by Cedric Lachat and Algiane Froehly
- **/
 #ifdef USE_SCOTCH
 
 #ifndef __RENUM__

@@ -22,25 +22,29 @@
 */
 
 /**
- * \file mmg3d1.c
- * \brief Perform mesh adaptation.
- * \author Charles Dapogny
- * \author Cécile Dobrzynski
- * \author Pascal Frey
- * \author Algiane Froehly
+ * \file mmg3d/mmg3d1.c
+ * \brief Perform volume and surface mesh adaptation with pattern splitting.
+ * \author Charles Dapogny (LJLL, UPMC)
+ * \author Cécile Dobrzynski (Inria / IMB, Université de Bordeaux)
+ * \author Pascal Frey (LJLL, UPMC)
+ * \author Algiane Froehly (Inria / IMB, Université de Bordeaux)
  * \version 5
  * \copyright GNU Lesser General Public License.
-
+ *
+ * Perform volume and surface mesh adaptation with pattern splitting
+ * (\a PATTERN preprocessor flag set to ON).
+ *
  */
+
 #include "mmg3d.h"
 
 char  ddb;
 
 /**
- * \param mesh pointer to the mesh structure.
- * \param k tetraedron index.
- * \param ie face index of tetraedron.
- * \param *ptt pointer to the output triangle.
+ * \param mesh pointer toward the mesh structure.
+ * \param k tetrahedron index.
+ * \param ie face index of tetrahedron.
+ * \param *ptt pointer toward the output triangle.
  *
  * Set triangle corresponding to face ie of tetra k.
  *
@@ -72,10 +76,10 @@ void tet2tri(pMesh mesh,int k,char ie,Tria *ptt) {
 }
 
 /**
- * \param mesh pointer to the mesh structure.
- * \param met pointer to the metric structure.
- * \param k tetraedron index.
- * \param *vx pointer to table of edges to split.
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param k tetrahedron index.
+ * \param *vx pointer toward table of edges to split.
  * \return 1.
  *
  * Find acceptable position for splitting.
@@ -158,9 +162,9 @@ int dichoto(pMesh mesh,pSol met,int k,int *vx) {
 }
 
 /**
- * \param mesh pointer to the mesh structure.
- * \param *list pointer to the shell of edge.
- * \param ret double of the number of tetraedra in the shell.
+ * \param mesh pointer toward the mesh structure.
+ * \param *list pointer toward the shell of edge.
+ * \param ret double of the number of tetrahedra in the shell.
  * \param o[3] initial guess for coordinates of new point.
  * \param ro[3] output coordinates for the new point.
  * \return 1.
@@ -217,8 +221,8 @@ int dichoto1b(pMesh mesh,int *list,int ret,double o[3],double ro[3]) {
 }
 
 /**
- * \param mesh pointer to the mesh structure.
- * \param *pt pointer to the triangle.
+ * \param mesh pointer toward the mesh structure.
+ * \param *pt pointer toward the triangle.
  * \param ori orientation of the triangle (1 for direct orientation, 0 otherwise).
  * \return 0 if error.
  * \return edges of the triangle pt that need to be split.
@@ -393,9 +397,9 @@ char chkedg(pMesh mesh,Tria *pt,char ori) {
 }
 
 /**
- * \param mesh pointer to the mesh structure.
- * \param met pointer to the metric structure.
- * \param bucket pointer to the bucket structure (only for delaunay).
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param bucket pointer toward the bucket structure (only for delaunay).
  * \return -1 if failed.
  * \return swap number.
  *
@@ -459,8 +463,8 @@ char chkedg(pMesh mesh,Tria *pt,char ori) {
 }
 
 /**
- * \param mesh pointer to the mesh structure.
- * \param met pointer to the metric structure.
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
  * \param crit coefficient of quality improvment.
  *
  * Internal edge flipping.
@@ -512,8 +516,8 @@ static int swptet(pMesh mesh,pSol met,double crit) {
 }
 
 /**
- * \param mesh pointer to the mesh structure.
- * \param met pointer to the metric structure.
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
  * \param maxit maximum number of iteration.
  * \return -1 if failed.
  * \return number of moved points.
@@ -635,8 +639,8 @@ static int movtet(pMesh mesh,pSol met,int maxit) {
 }
 
 /**
- * \param mesh pointer to the mesh structure.
- * \param met pointer to the metric structure.
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
  * \param typchk type of checking permformed for edge length (hmin or LSHORT criterion).
  * \return -1 if failed.
  * \return number of collapsed points.
@@ -738,8 +742,8 @@ static int movtet(pMesh mesh,pSol met,int maxit) {
 }
 
 /**
- * \param mesh pointer to the mesh structure.
- * \param met pointer to the metric structure.
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
  * \param typchk type of checking permformed for edge length (hmax or LLONG criterion).
  * \return -1 if failed.
  * \return number of new points.
@@ -963,8 +967,8 @@ static int anatetv(pMesh mesh,pSol met,char typchk) {
 }
 
 /**
- * \param mesh pointer to the mesh structure.
- * \param met pointer to the metric structure.
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
  * \param typchk type of checking permformed for edge length (hmax or LLONG criterion).
  * \return -1 if failed.
  * \return number of new points.
@@ -1260,8 +1264,8 @@ static int anatetv(pMesh mesh,pSol met,char typchk) {
 }
 
 /**
- * \param mesh pointer to the mesh structure.
- * \param met pointer to the metric structure.
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
  * \param *warn \a warn is set to 1 if we don't have enough memory to complete mesh.
  * \return -1 if failed.
  * \return number of new points.
@@ -1470,8 +1474,8 @@ static int adpspl(pMesh mesh,pSol met, int* warn) {
 }
 
 /**
- * \param mesh pointer to the mesh structure.
- * \param met pointer to the metric structure.
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
  * \return -1 if failed.
  * \return number of deleted points.
  *
@@ -1558,8 +1562,8 @@ static int adpcol(pMesh mesh,pSol met) {
 }
 
 /**
- * \param mesh pointer to the mesh structure.
- * \param met pointer to the metric structure.
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
  * \return 0 if failed, 1 otherwise.
  *
  * Analyze tetrahedra and split long or collapse short edges according to
@@ -1762,8 +1766,8 @@ static int adptet(pMesh mesh,pSol met) {
 }
 
 /**
- * \param mesh pointer to the mesh structure.
- * \param met pointer to the metric structure.
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
  * \return -1 if failed.
  * \return number of new points.
  *
@@ -1810,8 +1814,8 @@ static int adptet(pMesh mesh,pSol met) {
 
 
 /**
- * \param mesh pointer to the mesh structure.
- * \param met pointer to the metric structure.
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
  * \param typchk type of checking for edges length.
  * \return 0 if failed.
  * \return number of new points.
@@ -1928,8 +1932,8 @@ static int adptet(pMesh mesh,pSol met) {
 }
 
 /**
- * \param mesh pointer to the mesh structure.
- * \param met pointer to the metric structure.
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
  * \return 0 if failed, 1 if success.
  *
  * Main adaptation routine.

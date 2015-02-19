@@ -21,12 +21,28 @@
 ** =============================================================================
 */
 
-/** functions for the pampa library */
+/**
+ * \file mmg3d/pampautils.c
+ * \brief API functions only usefull for the PaMPA library.
+ * \author Algiane Froehly (Inria / IMB, Université de Bordeaux)
+ * \version 5
+ * \date 01 2014
+ * \copyright GNU Lesser General Public License.
+ * \warning Some functions are copying from \ref mmg3d/shared_func.c.
+ **/
+
 #include "mmg3d.h"
 
 /* COPY OF PART OF shared_func.c */
 
-/** Warn user that some tetra of the mesh have been reoriented */
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \warning Copy of the \ref warnOrientation function of the
+ * \ref mmg3d/shared_func.h file.
+ *
+ * Warn user that some tetrahedra of the mesh have been reoriented.
+ *
+ */
 static inline
 void pampa_warnOrientation(MMG5_pMesh mesh) {
   if ( mesh->xt ) {
@@ -42,6 +58,14 @@ void pampa_warnOrientation(MMG5_pMesh mesh) {
   mesh->xt = 0;
 }
 
+/**
+ * \param sigid signal number.
+ * \warning Copy of the \a excfun function of the \ref mmg3d/shared_func.h
+ * file.
+ *
+ * Signal handling: specify error messages depending from catched signal.
+ *
+ */
 static inline
 void pampa_excfun(int sigid) {
   fprintf(stdout,"\n Unexpected error:");  fflush(stdout);
@@ -61,7 +85,15 @@ void pampa_excfun(int sigid) {
   exit(EXIT_FAILURE);
 }
 
-/** set function pointers */
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the sol structure.
+ * \warning Copy of the \a setfunc function of the \ref mmg3d/shared_func.h
+ * file.
+ *
+ * Set function pointers for lenedgeCoor, hashTetra and saveMesh.
+ *
+ */
 void pampa_setfunc(pMesh mesh,pSol met) {
   if ( met->size < 6 )
     MMG5_lenedgCoor = lenedgCoor_iso;
@@ -72,8 +104,25 @@ void pampa_setfunc(pMesh mesh,pSol met) {
 }
 /* END COPY */
 
-/** Return the index of the 4 adjacent elements of tetra kel.
-    vi = 0 if the i th face has no adjacent (boundary face)  */
+/**
+ * \brief Return adjacent elements of a tetrahedron.
+ * \param mesh pointer toward the mesh structure.
+ * \param kel tetrahedron index.
+ * \param *v0 pointer toward the index of the adjacent element of \a kel through
+ * its face number 0.
+ * \param *v1 pointer toward the index of the adjacent element of \a kel through
+ * its face number 1.
+ * \param *v2 pointer toward the index of the adjacent element of \a kel through
+ * its face number 2.
+ * \param *v3 pointer toward the index of the adjacent element of \a kel through
+ * its face number 3.
+ * \return 1.
+ *
+ * Find the indices of the 4 adjacent elements of tetrahedron \a
+ * kel. \f$v_i = 0\f$ if the \f$i^{th}\f$ face has no adjacent element
+ * (so we are on a boundary face).
+ *
+ */
 int Get_adjaTet(pMesh mesh, int kel, int *v0, int *v1, int *v2, int *v3) {
 
   if ( ! mesh->adja ) {
@@ -89,7 +138,12 @@ int Get_adjaTet(pMesh mesh, int kel, int *v0, int *v1, int *v2, int *v3) {
   return(1);
 }
 
-/** help for mmg3d5 options */
+/**
+ * \param *prog pointer toward the program name.
+ *
+ * Print help for mmg3d5 options.
+ *
+ */
 void usage(char *prog) {
   fprintf(stdout,"\nUsage: %s [-v [n]] [opts..] filein [fileout]\n",prog);
 
@@ -130,7 +184,18 @@ void usage(char *prog) {
   exit(EXIT_FAILURE);
 }
 
-/** Store command line arguments */
+/**
+ * \param argc number of command line arguments.
+ * \param argv command line arguments.
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the sol structure.
+ * \param sing pointer toward the sing structure (only for insertion of
+ * singularities mode).
+ * \return 1.
+ *
+ * Store command line arguments.
+ *
+ */
 int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met
 #ifdef SINGUL
            ,MMG5_pSingul sing
@@ -149,41 +214,41 @@ int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met
 
       case 'a':
         if ( !strcmp(argv[i],"-ar") && ++i < argc )
-          if ( !MMG5_Set_dparameters(mesh,met,MMG5_DPARAM_angleDetection,
-                                     atof(argv[i])) )
+          if ( !MMG5_Set_dparameter(mesh,met,MMG5_DPARAM_angleDetection,
+                                    atof(argv[i])) )
             exit(EXIT_FAILURE);
         break;
 #ifndef PATTERN
       case 'b':
         if ( !strcmp(argv[i],"-bucket") && ++i < argc )
-          if ( !MMG5_Set_iparameters(mesh,met,MMG5_IPARAM_bucket,
-                                     atoi(argv[i])) )
+          if ( !MMG5_Set_iparameter(mesh,met,MMG5_IPARAM_bucket,
+                                    atoi(argv[i])) )
             exit(EXIT_FAILURE);
         break;
 #endif
       case 'd':  /* debug */
-        if ( !MMG5_Set_iparameters(mesh,met,MMG5_IPARAM_debug,1) )
+        if ( !MMG5_Set_iparameter(mesh,met,MMG5_IPARAM_debug,1) )
           exit(EXIT_FAILURE);
         break;
       case 'h':
         if ( !strcmp(argv[i],"-hmin") && ++i < argc ) {
-          if ( !MMG5_Set_dparameters(mesh,met,MMG5_DPARAM_hmin,
-                                     atof(argv[i])) )
+          if ( !MMG5_Set_dparameter(mesh,met,MMG5_DPARAM_hmin,
+                                    atof(argv[i])) )
             exit(EXIT_FAILURE);
         }
         else if ( !strcmp(argv[i],"-hmax") && ++i < argc ) {
-          if ( !MMG5_Set_dparameters(mesh,met,MMG5_DPARAM_hmax,
-                                     atof(argv[i])) )
+          if ( !MMG5_Set_dparameter(mesh,met,MMG5_DPARAM_hmax,
+                                    atof(argv[i])) )
             exit(EXIT_FAILURE);
         }
         else if ( !strcmp(argv[i],"-hausd") && ++i <= argc ) {
-          if ( !MMG5_Set_dparameters(mesh,met,MMG5_DPARAM_hausd,
-                                     atof(argv[i])) )
+          if ( !MMG5_Set_dparameter(mesh,met,MMG5_DPARAM_hausd,
+                                    atof(argv[i])) )
             exit(EXIT_FAILURE);
         }
         else if ( !strcmp(argv[i],"-hgrad") && ++i <= argc ) {
-          if ( !MMG5_Set_dparameters(mesh,met,MMG5_DPARAM_hgrad,
-                                     atof(argv[i])) )
+          if ( !MMG5_Set_dparameter(mesh,met,MMG5_DPARAM_hgrad,
+                                    atof(argv[i])) )
             exit(EXIT_FAILURE);
         }
         else
@@ -195,7 +260,7 @@ int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met
             if ( !MMG5_Set_inputMeshName(mesh, argv[i]) )
               exit(EXIT_FAILURE);
 
-            if ( !MMG5_Set_iparameters(mesh,met,MMG5_IPARAM_verbose,5) )
+            if ( !MMG5_Set_iparameter(mesh,met,MMG5_IPARAM_verbose,5) )
               exit(EXIT_FAILURE);
           }else{
             fprintf(stderr,"Missing filname for %c%c\n",argv[i-1][1],argv[i-1][2]);
@@ -205,10 +270,10 @@ int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met
         break;
       case 'l':
         if ( !strcmp(argv[i],"-ls") ) {
-          if ( !MMG5_Set_iparameters(mesh,met,MMG5_IPARAM_iso,1) )
+          if ( !MMG5_Set_iparameter(mesh,met,MMG5_IPARAM_iso,1) )
             exit(EXIT_FAILURE);
           if ( ++i < argc && isdigit(argv[i][0]) ) {
-            if ( !MMG5_Set_dparameters(mesh,met,MMG5_DPARAM_ls,atof(argv[i])) )
+            if ( !MMG5_Set_dparameter(mesh,met,MMG5_DPARAM_ls,atof(argv[i])) )
               exit(EXIT_FAILURE);
           }
           else if ( i == argc ) {
@@ -220,7 +285,7 @@ int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met
         break;
       case 'm':  /* memory */
         if ( ++i < argc && isdigit(argv[i][0]) ) {
-          if ( !MMG5_Set_iparameters(mesh,met,MMG5_IPARAM_mem,atoi(argv[i])) )
+          if ( !MMG5_Set_iparameter(mesh,met,MMG5_IPARAM_mem,atoi(argv[i])) )
             exit(EXIT_FAILURE);
         }
         else {
@@ -230,19 +295,19 @@ int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met
         break;
       case 'n':
         if ( !strcmp(argv[i],"-nr") ) {
-          if ( !MMG5_Set_iparameters(mesh,met,MMG5_IPARAM_angle,0) )
+          if ( !MMG5_Set_iparameter(mesh,met,MMG5_IPARAM_angle,0) )
             exit(EXIT_FAILURE);
         }
         else if ( !strcmp(argv[i],"-noswap") ) {
-          if ( !MMG5_Set_iparameters(mesh,met,MMG5_IPARAM_noswap,1) )
+          if ( !MMG5_Set_iparameter(mesh,met,MMG5_IPARAM_noswap,1) )
             exit(EXIT_FAILURE);
         }
         else if( !strcmp(argv[i],"-noinsert") ) {
-          if ( !MMG5_Set_iparameters(mesh,met,MMG5_IPARAM_noinsert,1) )
+          if ( !MMG5_Set_iparameter(mesh,met,MMG5_IPARAM_noinsert,1) )
             exit(EXIT_FAILURE);
         }
         else if( !strcmp(argv[i],"-nomove") ) {
-          if ( !MMG5_Set_iparameters(mesh,met,MMG5_IPARAM_nomove,1) )
+          if ( !MMG5_Set_iparameter(mesh,met,MMG5_IPARAM_nomove,1) )
             exit(EXIT_FAILURE);
         }
         break;
@@ -263,7 +328,7 @@ int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met
         if ( !strcmp(argv[i],"-rn") ) {
           if ( ++i < argc ) {
             if ( isdigit(argv[i][0]) ) {
-              if ( !MMG5_Set_iparameters(mesh,met,MMG5_IPARAM_renum,atoi(argv[i])) )
+              if ( !MMG5_Set_iparameter(mesh,met,MMG5_IPARAM_renum,atoi(argv[i])) )
                 exit(EXIT_FAILURE);
             }
             else {
@@ -294,7 +359,7 @@ int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met
           if ( ++i < argc && isascii(argv[i][0]) && argv[i][0]!='-' ) {
             if ( !MMG5_Set_inputSingulName(mesh,sing,argv[i]) )
               exit(EXIT_FAILURE);
-            if ( !MMG5_Set_iparameters(mesh,met,MMG5_IPARAM_sing,1) )
+            if ( !MMG5_Set_iparameter(mesh,met,MMG5_IPARAM_sing,1) )
               exit(EXIT_FAILURE);
           }
           else {
@@ -304,14 +369,14 @@ int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met
           }
         }
         else if ( !strcmp(argv[i],"-sing") )
-          if ( !MMG5_Set_iparameters(mesh,met,MMG5_IPARAM_sing,1) )
+          if ( !MMG5_Set_iparameter(mesh,met,MMG5_IPARAM_sing,1) )
             exit(EXIT_FAILURE);
 #endif
         break;
       case 'v':
         if ( ++i < argc ) {
           if ( argv[i][0] == '-' || isdigit(argv[i][0]) ) {
-            if ( !MMG5_Set_iparameters(mesh,met,MMG5_IPARAM_verbose,atoi(argv[i])) )
+            if ( !MMG5_Set_iparameter(mesh,met,MMG5_IPARAM_verbose,atoi(argv[i])) )
               exit(EXIT_FAILURE);
           }
           else
@@ -332,7 +397,7 @@ int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met
         if ( !MMG5_Set_inputMeshName(mesh,argv[i]) )
           exit(EXIT_FAILURE);
         if ( mesh->info.imprim == -99 ) {
-          if ( !MMG5_Set_iparameters(mesh,met,MMG5_IPARAM_verbose,5) )
+          if ( !MMG5_Set_iparameter(mesh,met,MMG5_IPARAM_verbose,5) )
               exit(EXIT_FAILURE);
         }
       }
@@ -353,7 +418,7 @@ int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met
     fprintf(stdout,"\n  -- PRINT (0 10(advised) -10) ?\n");
     fflush(stdin);
     fscanf(stdin,"%d",&i);
-    if ( !MMG5_Set_iparameters(mesh,met,MMG5_IPARAM_verbose,i) )
+    if ( !MMG5_Set_iparameter(mesh,met,MMG5_IPARAM_verbose,i) )
       exit(EXIT_FAILURE);
   }
 
@@ -381,7 +446,16 @@ int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met
   return(1);
 }
 
-/** Read local parameters file */
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the sol structure.
+ * \return 1.
+ *
+ * Read local parameters file. This file must have the same name as
+ * the mesh with the \a .mmg3d5 extension or must be named \a
+ * DEFAULT.mmg3d5.
+ *
+ */
 int parsop(MMG5_pMesh mesh,MMG5_pSol met) {
   float       fp1;
   int         ref,i,j,ret,npar;
@@ -411,7 +485,7 @@ int parsop(MMG5_pMesh mesh,MMG5_pSol met) {
     /* check for condition type */
     if ( !strcmp(data,"parameters") ) {
       fscanf(in,"%d",&npar);
-      if ( !MMG5_Set_iparameters(mesh,met,MMG5_IPARAM_numberOfLocalParam,npar) )
+      if ( !MMG5_Set_iparameter(mesh,met,MMG5_IPARAM_numberOfLocalParam,npar) )
         exit(EXIT_FAILURE);
 
       for (i=0; i<mesh->info.npar; i++) {
@@ -422,7 +496,7 @@ int parsop(MMG5_pMesh mesh,MMG5_pSol met) {
           continue;
         }
         ret = fscanf(in,"%f",&fp1);
-        if ( !MMG5_Set_localParameters(mesh,met,MMG5_Triangle,ref,fp1) )
+        if ( !MMG5_Set_localParameter(mesh,met,MMG5_Triangle,ref,fp1) )
           exit(EXIT_FAILURE);
       }
     }
@@ -431,7 +505,14 @@ int parsop(MMG5_pMesh mesh,MMG5_pSol met) {
   return(1);
 }
 
-/** Store the info structure in mesh */
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param *info pointer toward the info structure.
+ * \return 1.
+ *
+ * Store the info structure in the mesh structure.
+ *
+ */
 int stockOptions(MMG5_pMesh mesh, MMG5_Info *info) {
 
   memcpy(&mesh->info,info,sizeof(MMG5_Info));
@@ -441,18 +522,36 @@ int stockOptions(MMG5_pMesh mesh, MMG5_Info *info) {
       return(0);
     } else if(mesh->info.mem < 39)
       return(0);
-  }  
+  }
   return(1);
 }
 
-/** Recover the info structure stored in mesh */
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param *info pointer toward the info structure.
+ *
+ * Recover the info structure stored in the mesh structure.
+ *
+ */
 void destockOptions(MMG5_pMesh mesh, MMG5_Info *info) {
 
   memcpy(info,&mesh->info,sizeof(MMG5_Info));
   return;
 }
 
-/** Search elements which are not correct (quality or edge length) */
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the sol structure.
+ * \param sing pointer toward the sing structure (only for insertion of
+ * singularities mode).
+ * \param critmin minimum quality for elements.
+ * \param lmin minimum edge length.
+ * \param lmax maximum ede length.
+ * \param *eltab pointer toward the table of invalid elements.
+ *
+ * Search invalid elements (in term of quality or edge length).
+ *
+ */
 int mmg3dcheck(MMG5_pMesh mesh,MMG5_pSol met,
 #ifdef SINGUL
                MMG5_pSingul sing,
@@ -538,8 +637,16 @@ int mmg3dcheck(MMG5_pMesh mesh,MMG5_pSol met,
   return(MMG5_SUCCESS);
 }
 
-/** Store in eltab elements which have worse quality than critmin,
- * eltab is allocated and could contain mesh->ne elements */
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the sol structure.
+ * \param critmin minimum quality for elements.
+ * \param *eltab pointer toward the table of invalid elements.
+ *
+ * Store elements which have worse quality than \a critmin in \a eltab,
+ * \a eltab is allocated and could contain \a mesh->ne elements.
+ *
+ */
 void searchqua(MMG5_pMesh mesh,MMG5_pSol met,double critmin, int *eltab) {
   pTetra   pt;
   double   rap;
@@ -559,8 +666,18 @@ void searchqua(MMG5_pMesh mesh,MMG5_pSol met,double critmin, int *eltab) {
   return;
 }
 
-/** Store in eltab elements which have edge lengths shorter than lmin or longer than
- * lmax, eltab is allocated and could contain mesh->ne elements */
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the sol structure.
+ * \param lmin minimum edge length.
+ * \param lmax maximum ede length.
+ * \param *eltab table of invalid elements.
+ *
+ * Store in \a eltab elements which have edge lengths shorter than \a lmin
+ * or longer than \a lmax, \a eltab is allocated and could contain \a mesh->ne
+ * elements.
+ *
+ */
 int searchlen(MMG5_pMesh mesh, MMG5_pSol met, double lmin, double lmax, int *eltab) {
   pTetra          pt;
   Hash            hash;
@@ -616,8 +733,19 @@ int searchlen(MMG5_pMesh mesh, MMG5_pSol met, double lmin, double lmax, int *elt
   return(1);
 }
 
-/** Compute length of edge [ca,cb] (with ca and cb coordinates of edge extremities)
-    according to the size prescription */
+/**
+ * \brief Compute edge length from edge's coordinates.
+ * \param *ca pointer toward the coordinates of the first edge's extremity.
+ * \param *cb pointer toward the coordinates of the second edge's extremity.
+ * \param *ma pointer toward the metric associated to the first edge's extremity.
+ * \param *mb pointer toward the metric associated to the second edge's extremity.
+ * \return edge length.
+ *
+ * Compute length of edge \f$[ca,cb]\f$ (with \a ca and \a cb
+ * coordinates of edge extremities) according to the isotropic size
+ * prescription.
+ *
+ */
 inline double lenedgCoor_iso(double *ca,double *cb,double *ma,double *mb) {
   double   h1,h2,l,r,len;
 
@@ -632,6 +760,19 @@ inline double lenedgCoor_iso(double *ca,double *cb,double *ma,double *mb) {
   return(len);
 }
 
+/**
+ * \brief Compute edge length from edge's coordinates.
+ * \param *ca pointer toward the coordinates of the first edge's extremity.
+ * \param *cb pointer toward the coordinates of the second edge's extremity.
+ * \param *ma pointer toward the metric associated to the first edge's extremity.
+ * \param *mb pointer toward the metric associated to the second edge's extremity.
+ * \return edge length.
+ *
+ * Compute length of edge \f$[ca,cb]\f$ (with \a ca and \a cb
+ * coordinates of edge extremities) according to the anisotropic size
+ * prescription.
+ *
+ */
 inline double lenedgCoor_ani(double *ca,double *cb,double *sa,double *sb) {
   return(0.0);
 }

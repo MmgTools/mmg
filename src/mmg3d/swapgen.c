@@ -21,6 +21,18 @@
 ** =============================================================================
 */
 
+/**
+ * \file mmg3d/swapgen.c
+ * \brief Functions for swapping process inside the mesh.
+ * \author Charles Dapogny (LJLL, UPMC)
+ * \author Cécile Dobrzynski (Inria / IMB, Université de Bordeaux)
+ * \author Pascal Frey (LJLL, UPMC)
+ * \author Algiane Froehly (Inria / IMB, Université de Bordeaux)
+ * \version 5
+ * \copyright GNU Lesser General Public License.
+ * \todo Doxygen documentation
+ */
+
 #include "mmg3d.h"
 
 /** Check whether swap of edge ia in start should be performed, and return 4*k+i =

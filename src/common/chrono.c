@@ -22,10 +22,10 @@
 */
 
 /**
- * \file chrono.c
+ * \file common/chrono.c
  * \brief Simulation of a chronograph.
- * \author Cécile Dobrzynski
- * \author Pascal Frey
+ * \author Cécile Dobrzynski (Inria / IMB, Université de Bordeaux)
+ * \author Pascal Frey (LJLL, UPMC)
  * \version 5
  * \date  08 2010
  * \copyright GNU Lesser General Public License.
@@ -44,7 +44,7 @@
  * \brief Function to measure time.
  * \param cmode macro that allow to reset (RESET), start (ON) or stop (OFF)
  * the chrono.
- * \param *ptt pointer to mytime object that store the chronograph informations.
+ * \param *ptt pointer toward mytime object that store the chronograph informations.
  */
 void  chrono(int cmode,mytime *ptt) {
 
@@ -111,7 +111,7 @@ void  tminit(mytime *t,int maxtim) {
  * \fn void  printim(double elps,char *stim)
  * \brief Print real time.
  * \param elps elapsed time in seconds.
- * \param *stim pointer to string containg the elapsed time at .h.m.s format.
+ * \param *stim pointer toward string containg the elapsed time at .h.m.s format.
  */
 void printim(double elps,char *stim) {
   int    hh,mm,ss;

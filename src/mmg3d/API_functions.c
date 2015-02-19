@@ -22,41 +22,32 @@
 */
 
  /**
+ * \file mmg3d/API_functions.c
+ * \brief C API functions definitions for MMG3D library.
+ * \author Algiane Froehly (Inria / IMB, Université de Bordeaux)
+ * \version 5
+ * \date 01 2014
+ * \copyright GNU Lesser General Public License.
  *
- * Written by Cecile Dobrzynski (IMB), Charles Dapogny,
- * Pascal Frey (LJLL) and Algiane Froehly
- * Copyright (c) 2004- IMB/LJLL.
- * All rights reserved.
+ * \note This file contains some internal functions for the API, see
+ * the \ref mmg3d/libmmg3d5.h header file for the documentation of all
+ * the usefull user's API functions.
  *
- * Integers parameters:
- *    MMG5_IPARAM_verbose           = [-10..10] , Tune level of verbosity;
- *    MMG5_IPARAM_mem               = [n/-1]    , Set maximal memory size to n Mbytes/keep the default value;
- *    MMG5_IPARAM_debug             = [1/0]     , Turn on/off debug mode;
- *    MMG5_IPARAM_angle             = [1/0]     , Turn on/off angle detection;
- *    MMG5_IPARAM_iso               = [1/0]     , Turn on/off levelset meshing;
- *    MMG5_IPARAM_noinsert          = [1/0]     , avoid/allow point insertion/deletion;
- *    MMG5_IPARAM_noswap            = [1/0]     , avoid/allow edge or face flipping;
- *    MMG5_IPARAM_nomove            = [1/0]     , avoid/allow point relocation;
- *    MMG5_IPARAM_numberOflocalParam= [n]       , number of local parameters;
- *    MMG5_IPARAM_renum             = [1/0]     , Turn on/off the renumbering using SCOTCH;
- *    MMG5_IPARAM_sing              = [1/0]     , Turn on/off the insertion of singularities
- *                                        (need to compile with -DSINGUL flag);
- *    MMG5_IPARAM_bucket            = [val]     , Specify the size of the bucket per dimension (Delaunay)
- *                                        (need to compile with PATTERN=NO);
- * Double parameters:
- *    MMG5_DPARAM_angleDetection   = [val]     , angle detection;
- *    MMG5_DPARAM_hmin             = [val]     , minimal mesh size;
- *    MMG5_DPARAM_hmax             = [val]     , maximal mesh size;
- *    MMG5_DPARAM_hausd = [val]     , control global Hausdorff distance
- *                                    (on all the boundary surfaces of the mesh);
- *    MMG5_DPARAM_hgrad            = [val]     , control gradation;
- *    MMG5_DPARAM_ls               = [val]     , level set value;
- **/
+ * C API for MMG3D library. All functions are automatically prefixed
+ * by the \a MMG5_ prefix.
+ *
+ */
 
 #include "mmg3d.h"
 
-
-/** Allocate the mesh and sol structures */
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param sol pointer toward the sol structure.
+ * \param sing pointer toward the sing structure (only for insertion of singularities mode).
+ *
+ * Allocate the mesh and solutions structures at \a MMG3D format.
+ *
+ */
 static inline
 void Alloc_mesh(MMG5_pMesh *mesh, MMG5_pSol *sol
 #ifdef SINGUL
@@ -81,7 +72,15 @@ void Alloc_mesh(MMG5_pMesh *mesh, MMG5_pSol *sol
   return;
 }
 
-/** Initialization of mesh and sol structures */
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param sol pointer toward the sol structure.
+ * \param sing pointer toward the sing structure (only for insertion of singularities mode).
+ *
+ * Initialization of mesh and solution structures to their default
+ * values (default names, versions, dimensions...).
+ *
+ */
 static inline
 void Init_woalloc_mesh(MMG5_pMesh mesh, MMG5_pSol sol
 #ifdef SINGUL
@@ -108,7 +107,15 @@ void Init_woalloc_mesh(MMG5_pMesh mesh, MMG5_pSol sol
   return;
 }
 
-/** Allocate the mesh and sol structures and initialize it to default values */
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param sol pointer toward the sol structure.
+ * \param sing pointer toward the sing structure (only for insertion of singularities mode).
+ *
+ * Allocate the mesh and solution structures and initialize it to
+ * their default values.
+ *
+ */
 void Init_mesh(MMG5_pMesh *mesh, MMG5_pSol *sol
 #ifdef SINGUL
               , MMG5_pSingul *sing
@@ -129,32 +136,50 @@ void Init_mesh(MMG5_pMesh *mesh, MMG5_pSol *sol
   return;
 }
 
-/** Initialization of parameters stored in the Info structure */
+/**
+ * \param mesh pointer toward the mesh structure.
+ *
+ * Initialization of the input parameters (stored in the Info structure).
+ *
+ */
 void Init_parameters(pMesh mesh) {
 
   /* default values for integers */
-  mesh->info.imprim   =  4; /**< [-10..10],Tune level of imprim */
-  mesh->info.mem      = -1;  /**< [n/-1]   ,Set memory size to n Mbytes/keep the default value */
-  mesh->info.ddebug   =  0;  /**< [0/1]    ,Turn on/off debug mode */
-  mesh->info.iso      =  0;  /**< [0/1]    ,Turn on/off levelset meshing */
-  mesh->info.noinsert =  0;  /**< [0/1]    ,avoid/allow point insertion/deletion */
-  mesh->info.noswap   =  0;  /**< [0/1]    ,avoid/allow edge or face flipping */
-  mesh->info.nomove   =  0;  /**< [0/1]    ,avoid/allow point relocation */
-  mesh->info.npar     =  0;  /**< [n]      ,number of local parameters */
+  /** MMG5_IPARAM_verbose = 4 */
+  mesh->info.imprim   =  4;  /* [-10..10],Tune level of imprim */
+  /** MMG5_IPARAM_mem = -1 */
+  mesh->info.mem      = -1;  /* [n/-1]   ,Set memory size to n Mbytes/keep the default value */
+  /** MMG5_IPARAM_debug = 0 */
+  mesh->info.ddebug   =  0;  /* [0/1]    ,Turn on/off debug mode */
+  /** MMG5_IPARAM_iso = 0 */
+  mesh->info.iso      =  0;  /* [0/1]    ,Turn on/off levelset meshing */
+  /** MMG5_IPARAM_noinsert = 0 */
+  mesh->info.noinsert =  0;  /* [0/1]    ,avoid/allow point insertion/deletion */
+  /** MMG5_IPARAM_noswap = 0 */
+  mesh->info.noswap   =  0;  /* [0/1]    ,avoid/allow edge or face flipping */
+  /** MMG5_IPARAM_nomove = 0 */
+  mesh->info.nomove   =  0;  /* [0/1]    ,avoid/allow point relocation */
+  /** MMG5_IPARAM_npar = 0 */
+  mesh->info.npar     =  0;  /* [n]      ,number of local parameters */
 #ifdef USE_SCOTCH
-  mesh->info.renum    = 1;   /**< [1/0]    , Turn on/off the renumbering using SCOTCH; */
+  mesh->info.renum    = 1;   /* [1/0]    , Turn on/off the renumbering using SCOTCH; */
 #else
-  mesh->info.renum    = 0;   /**< [1/0]    , Turn on/off the renumbering using SCOTCH; */
+  mesh->info.renum    = 0;   /* [1/0]    , Turn on/off the renumbering using SCOTCH; */
 #endif
-  mesh->info.sing     =  0;  /**< [0/1]    ,preserve internal singularities */
+  mesh->info.sing     =  0;  /* [0/1]    ,preserve internal singularities */
 
   /* default values for doubles */
-  mesh->info.dhd      = ANGEDG;   /**< angle detection; */
-  mesh->info.hmin     = 0.0;      /**< minimal mesh size; */
-  mesh->info.hmax     = FLT_MAX;  /**< maximal mesh size; */
-  mesh->info.hausd    = 0.01;     /**< control Hausdorff */
-  mesh->info.hgrad    = 0.1;      /**< control gradation; */
-  mesh->info.ls       = 0.0;      /**< level set value */
+  /** MMG5_DPARAM_hausd = \a ANGEDG */
+  mesh->info.dhd      = ANGEDG;   /* angle detection; */
+  /** MMG5_DPARAM_hmin = 0.0 */
+  mesh->info.hmin     = 0.0;      /* minimal mesh size; */
+  /** MMG5_DPARAM_hmin = \f$ \infty \f$ */
+  mesh->info.hmax     = FLT_MAX;  /* maximal mesh size; */
+  /** MMG5_DPARAM_hausd = 0.01 */
+  mesh->info.hausd    = 0.01;     /* control Hausdorff */
+  /** MMG5_DPARAM_hausd = 0.1 */
+  mesh->info.hgrad    = 0.1;      /* control gradation; */
+  mesh->info.ls       = 0.0;      /* level set value */
 
   /* initial value for memMax and gap */
   mesh->gap = 0.2;
@@ -169,11 +194,19 @@ void Init_parameters(pMesh mesh) {
   }
 
 #ifndef PATTERN
+  /** MMG5_IPARAM_bucket = 64 */
   mesh->info.bucket = 64;
 #endif
 }
 
-/** default values for file names */
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param sol pointer toward the sol structure.
+ * \param sing pointer toward the sing structure (only for insertion of singularities mode).
+ *
+ * Initialize file names to their default values.
+ *
+ */
 void Init_fileNames(pMesh mesh,pSol sol
 #ifdef SINGUL
                     ,pSingul sing
@@ -192,7 +225,14 @@ void Init_fileNames(pMesh mesh,pSol sol
 }
 
 
-/** Set the name of input mesh */
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param meshin input mesh name.
+ * \return 1.
+ *
+ * Set the name of input mesh.
+ *
+ */
 int Set_inputMeshName(MMG5_pMesh mesh, char* meshin) {
 
   if ( mesh->namein ){
@@ -220,7 +260,15 @@ int Set_inputMeshName(MMG5_pMesh mesh, char* meshin) {
   return(1);
 }
 
-/** Set the name of input sol */
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param sol pointer toward the sol structure.
+ * \param solin name of the input solution file.
+ * \return 1.
+ *
+ * Set the name of input solution file.
+ *
+ */
 int Set_inputSolName(MMG5_pMesh mesh,MMG5_pSol sol, char* solin) {
   char *ptr;
 
@@ -258,7 +306,14 @@ int Set_inputSolName(MMG5_pMesh mesh,MMG5_pSol sol, char* solin) {
   return(1);
 }
 
-/** Set the name of output mesh */
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param meshout name of the output mesh file.
+ * \return 1.
+ *
+ * Set the name of output mesh file.
+ *
+ */
 int Set_outputMeshName(MMG5_pMesh mesh, char* meshout) {
   char *ptr;
 
@@ -309,7 +364,15 @@ int Set_outputMeshName(MMG5_pMesh mesh, char* meshout) {
   return(1);
 }
 
-/** Set the name of output sol */
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param sol pointer toward the sol structure.
+ * \param solout name of the output solution file.
+ * \return 0 if failed, 1 otherwise.
+ *
+ *  Set the name of output solution file.
+ *
+ */
 int Set_outputSolName(MMG5_pMesh mesh,MMG5_pSol sol, char* solout) {
   char *ptr;
 
@@ -351,7 +414,16 @@ int Set_outputSolName(MMG5_pMesh mesh,MMG5_pSol sol, char* solout) {
 }
 
 #ifdef SINGUL
-/** Set the name of input singularities file */
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param sing pointer toward the sing structure.
+ * \param singin name for the input singularies file.
+ * \return 1.
+ *
+ * Set the name of input singularities file (only for insertion of
+ * singularities mode).
+ *
+ */
 int Set_inputSingulName(MMG5_pMesh mesh,MMG5_pSingul sing, char* singin) {
 
   if ( sing->namein )
@@ -381,7 +453,17 @@ int Set_inputSingulName(MMG5_pMesh mesh,MMG5_pSingul sing, char* singin) {
 #endif
 
 
-/** Set the solution number, dimension and type */
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param sol pointer toward the sol structure.
+ * \param typEntity type of solutions entities (vertices, triangles...).
+ * \param np number of solutions.
+ * \param typSol type of solution (scalar, vectorial...).
+ * \return 0 if failed, 1 otherwise.
+ *
+ * Set the solution number, dimension and type.
+ *
+ */
 int Set_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int typEntity, int np, int typSol) {
 
   if ( ( (mesh->info.imprim > 5) || mesh->info.ddebug ) && sol->m )
@@ -413,9 +495,19 @@ int Set_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int typEntity, int np, int typSo
   return(1);
 }
 
-/** Set the number of vertices, tetrahedra, triangles and edges of the mesh
-    and allocate the associated tables. If call twice, reset the whole mesh to
-    realloc it at the new size */
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param np number of vertices.
+ * \param ne number of elements (tetrahedra).
+ * \param nt number of triangles.
+ * \param na number of edges.
+ * \return 0 if failed, 1 otherwise.
+ *
+ * Set the number of vertices, tetrahedra, triangles and edges of the
+ * mesh and allocate the associated tables. If call twice, reset the
+ * whole mesh to realloc it at the new size
+ *
+ */
 int Set_meshSize(MMG5_pMesh mesh, int np, int ne, int nt, int na) {
   int k;
 
@@ -514,8 +606,18 @@ int Set_meshSize(MMG5_pMesh mesh, int np, int ne, int nt, int na) {
 }
 
 #ifdef SINGUL
-/** Set the number of singular vertices and edges and allocate
-    the associated tables. */
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param sing pointer toward the sing structure.
+ * \param np number of singular vertices.
+ * \param na number of singular edges.
+ * \return 1.
+ *
+ * Set the number of singular vertices and edges and allocate the
+ * associated tables (only for insertion of singularities mode: \a
+ * SINGUL preprocessor flag).
+ *
+ */
 int Set_singulSize(MMG5_pMesh mesh,MMG5_pSingul sing, int np, int na) {
 
   if ( sing->point || sing->edge )
@@ -547,7 +649,17 @@ int Set_singulSize(MMG5_pMesh mesh,MMG5_pSingul sing, int np, int na) {
 }
 #endif
 
-/** Get the solution number, dimension and type */
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param sol pointer toward the sol structure.
+ * \param *typEntity pointer toward the type of entities to which solutions are applied.
+ * \param *np pointer toward the number of solutions.
+ * \param *typSol pointer toward the type of the solutions (scalar, vectorial...)
+ * \return 1.
+ *
+ * Get the solution number, dimension and type.
+ *
+ */
 int Get_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int* typEntity, int* np, int* typSol) {
 
   *typEntity = MMG5_Vertex;
@@ -561,7 +673,17 @@ int Get_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int* typEntity, int* np, int* ty
   return(1);
 }
 
-/** Get the number of vertices, tetrahedra, triangles and edges of the mesh. */
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param *np pointer toward the number of vertices.
+ * \param *ne pointer toward the number of elements (tetrahedra).
+ * \param *nt pointer toward the number of triangles.
+ * \param *na pointer toward the number of edges.
+ * \return 1.
+ *
+ * Get the number of vertices, tetrahedra, triangles and edges of the mesh.
+ *
+ */
 int Get_meshSize(MMG5_pMesh mesh, int* np, int* ne, int* nt, int* na) {
 
   if ( np != NULL )
@@ -581,8 +703,19 @@ int Get_meshSize(MMG5_pMesh mesh, int* np, int* ne, int* nt, int* na) {
   return(1);
 }
 
-/** Set vertex of coordinates c0,c1,c2 and reference ref at position pos
-    in mesh structure */
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param c0 coordinate of the point along the first dimension.
+ * \param c1 coordinate of the point along the second dimension.
+ * \param c2 coordinate of the point along the third dimension.
+ * \param ref point reference.
+ * \param pos position of the point in the mesh.
+ * \return 1.
+ *
+ * Set vertex of coordinates \a c0, \a c1,\a c2 and reference \a ref
+ * at position \a pos in mesh structure
+ *
+ */
 int Set_vertex(MMG5_pMesh mesh, double c0, double c1, double c2, int ref, int pos) {
 
   if ( !mesh->np ) {
@@ -617,7 +750,20 @@ int Set_vertex(MMG5_pMesh mesh, double c0, double c1, double c2, int ref, int po
   return(1);
 }
 
-/** Get coordinates c0,c1,c2 and reference ref of next vertex of mesh  */
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param *c0 pointer toward the coordinate of the point along the first dimension.
+ * \param *c1 pointer toward the coordinate of the point along the second dimension.
+ * \param *c2 pointer toward the coordinate of the point along the third dimension.
+ * \param *ref poiter to the point reference.
+ * \param *isCorner pointer toward the flag saying if point is corner.
+ * \param *isCorner pointer toward the flag saying if point is required.
+ * \return 1.
+ *
+ * Get coordinates \a c0, \a c1,\a c2 and reference \a ref of next
+ * vertex of mesh.
+ *
+ */
 int Get_vertex(MMG5_pMesh mesh, double* c0, double* c1, double* c2, int* ref,
                int* isCorner, int* isRequired) {
 
@@ -653,9 +799,21 @@ int Get_vertex(MMG5_pMesh mesh, double* c0, double* c1, double* c2, int* ref,
   return(1);
 }
 
-/** Set tetrahedra of vertices v0,v1,v2,v3 and reference ref at position pos
-    in mesh structure */
-int Set_tetrahedra(MMG5_pMesh mesh, int v0, int v1, int v2, int v3, int ref, int pos) {
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param v0 first vertex of tetrahedron.
+ * \param v1 second vertex of tetrahedron.
+ * \param v2 third vertex of tetrahedron.
+ * \param v3 fourth vertex of tetrahedron.
+ * \param ref tetrahedron reference.
+ * \param pos tetrahedron position in the mesh.
+ * \return 0 if failed, 1 otherwise.
+ *
+ * Set tetrahedra of vertices \a v0, \a v1,\a v2,\a v3 and reference
+ * \a ref at position \a pos in mesh structure.
+ *
+ */
+int Set_tetrahedron(MMG5_pMesh mesh, int v0, int v1, int v2, int v3, int ref, int pos) {
   pTetra pt;
   pPoint ppt;
   double aux, vol;
@@ -675,10 +833,10 @@ int Set_tetrahedra(MMG5_pMesh mesh, int v0, int v1, int v2, int v3, int ref, int
   }
 
   if ( pos > mesh->ne ) {
-    fprintf(stdout,"  ## Error: attempt to set new tetrahedra at position %d.",pos);
-    fprintf(stdout," Overflow of the given number of tetrahedra: %d\n",mesh->ne);
+    fprintf(stdout,"  ## Error: attempt to set new tetrahedron at position %d.",pos);
+    fprintf(stdout," Overflow of the given number of tetrahedron: %d\n",mesh->ne);
     fprintf(stdout,"  ## Check the mesh size, its compactness or the position");
-    fprintf(stdout," of the tetrahedra.\n");
+    fprintf(stdout," of the tetrahedron.\n");
     return(0);
   }
 
@@ -696,18 +854,18 @@ int Set_tetrahedra(MMG5_pMesh mesh, int v0, int v1, int v2, int v3, int ref, int
 
   vol = orvol(mesh->point,pt->v);
   if ( vol == 0.0 ) {
-    fprintf(stdout,"  ## Error: tetrahedra %d has volume null.\n",pos);
+    fprintf(stdout,"  ## Error: tetrahedron %d has volume null.\n",pos);
     for ( ip=0; ip<4; ip++ ) {
       ppt = &mesh->point[pt->v[ip]];
       for ( j=0; j<3; j++ ) {
         if ( fabs(ppt->c[j])>0. ) {
-          fprintf(stdout," Check that you don't have a sliver tetrahedra.\n");
+          fprintf(stdout," Check that you don't have a sliver tetrahedron.\n");
           return(0);
         }
       }
     }
     fprintf(stdout,"  All vertices have zero coordinates.");
-    fprintf(stdout," Check that you have set the vertices before the tetrahedras.\n");
+    fprintf(stdout," Check that you have set the vertices before the tetrahedra.\n");
     return(0);
   }
   else if ( vol < 0.0 ) {
@@ -724,15 +882,28 @@ int Set_tetrahedra(MMG5_pMesh mesh, int v0, int v1, int v2, int v3, int ref, int
   return(1);
 }
 
-/** Get vertices v0,v1,v2,v3 and reference ref of next tetra of mesh  */
-int Get_tetrahedra(MMG5_pMesh mesh, int* v0, int* v1, int* v2, int* v3,
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param *v0 pointer toward the first vertex of tetrahedron.
+ * \param *v1 pointer toward the second vertex of tetrahedron.
+ * \param *v2 pointer toward the third vertex of tetrahedron.
+ * \param *v3 pointer toward the fourth vertex of tetrahedron.
+ * \param *ref pointer toward the tetrahedron reference.
+ * \param *isRequired pointer toward the flag saying if tetrahedron is required.
+ * \return 0 if failed, 1 otherwise.
+ *
+ * Get vertices \a v0, \a v1, \a v2, \a v3 and reference \a ref of
+ * next tetra of mesh.
+ *
+ */
+int Get_tetrahedron(MMG5_pMesh mesh, int* v0, int* v1, int* v2, int* v3,
                    int* ref, int* isRequired) {
 
   mesh->nei++;
 
   if ( mesh->nei > mesh->ne ) {
     fprintf(stdout,"  ## Error: unable to get tetra.\n");
-    fprintf(stdout,"    The number of call of MMG5_Get_tetrahedra function");
+    fprintf(stdout,"    The number of call of MMG5_Get_tetrahedron function");
     fprintf(stdout," can not exceed the number of tetra: %d\n ",mesh->ne);
     return(0);
   }
@@ -755,8 +926,19 @@ int Get_tetrahedra(MMG5_pMesh mesh, int* v0, int* v1, int* v2, int* v3,
   return(1);
 }
 
-/** Set triangle of vertices v0,v1,v2 and reference ref at position pos
-    in mesh structure */
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param v0 first vertex of triangle.
+ * \param v1 second vertex of triangle.
+ * \param v2 third vertex of triangle.
+ * \param ref triangle reference.
+ * \param pos triangle position in the mesh.
+ * \return 0 if failed, 1 otherwise.
+ *
+ * Set triangle of vertices \a v0, \a v1, \a v2 and reference \a ref
+ * at position \a pos in mesh structure.
+ *
+ */
 int Set_triangle(MMG5_pMesh mesh, int v0, int v1, int v2, int ref,int pos) {
 
   if ( !mesh->nt ) {
@@ -788,7 +970,19 @@ int Set_triangle(MMG5_pMesh mesh, int v0, int v1, int v2, int ref,int pos) {
   return(1);
 }
 
-/** Get vertices v0,v1,v2 and reference ref of next triangle of mesh  */
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param *v0 pointer toward the first vertex of triangle.
+ * \param *v1 pointer toward the second vertex of triangle.
+ * \param *v2 pointer toward the third vertex of triangle.
+ * \param *ref pointer toward the triangle reference.
+ * \param *isRequired pointer toward the flag saying if triangle is required.
+ * \return 0 if failed, 1 otherwise.
+ *
+ * Get vertices \a v0,\a v1,\a v2 and reference \a ref of next
+ * triangle of mesh.
+ *
+ */
 int Get_triangle(MMG5_pMesh mesh, int* v0, int* v1, int* v2, int* ref
                  ,int* isRequired) {
   pTria  ptt;
@@ -820,9 +1014,19 @@ int Get_triangle(MMG5_pMesh mesh, int* v0, int* v1, int* v2, int* ref
   return(1);
 }
 
-/** Set edges of extremities v0,v1 and reference ref at position pos
-    in mesh structure */
-int Set_edges(MMG5_pMesh mesh, int v0, int v1, int ref, int pos) {
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param v0 first extremity of the edge.
+ * \param v1 second extremity of the edge.
+ * \param ref edge reference.
+ * \param pos edge position in the mesh.
+ * \return 0 if failed, 1 otherwise.
+ *
+ * Set edge of extremities \a v0, \a v1 and reference \a ref at
+ * position \a pos in mesh structure
+ *
+ */
+int Set_edge(MMG5_pMesh mesh, int v0, int v1, int ref, int pos) {
 
   if ( !mesh->na ) {
    fprintf(stdout,"  ## Error: You must set the number of edges with the");
@@ -851,7 +1055,18 @@ int Set_edges(MMG5_pMesh mesh, int v0, int v1, int ref, int pos) {
   return(1);
 }
 
-/** Get extremities e0,e1 and reference ref of next edge of mesh  */
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param *e0 pointer toward the first extremity of the edge.
+ * \param *e1 pointer toward the second  extremity of the edge.
+ * \param *ref pointer toward the edge reference.
+ * \param *isRidge pointer toward the flag saying if the edge is ridge.
+ * \param *isRequired pointer toward the flag saying if the edge is required.
+ * \return 0 if failed, 1 otherwise.
+ *
+ * Get extremities \a e0, \a e1 and reference \a ref of next edge of mesh.
+ *
+ */
 int Get_edge(MMG5_pMesh mesh, int* e0, int* e1, int* ref
              ,int* isRidge, int* isRequired) {
 
@@ -886,28 +1101,56 @@ int Get_edge(MMG5_pMesh mesh, int* e0, int* e1, int* ref
   return(1);
 }
 
-/** Set corner at point k  */
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param k vertex index.
+ * \return 1.
+ *
+ * Set corner at point \a k.
+ *
+ */
 int Set_corner(MMG5_pMesh mesh, int k) {
   assert ( k <= mesh->np );
   mesh->point[k].tag |= MG_CRN;
   return(1);
 }
 
-/** Set point k as required  */
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param k vertex index.
+ * \return 1.
+ *
+ * Set point \a k as required.
+ *
+ */
 int Set_requiredVertex(MMG5_pMesh mesh, int k) {
   assert ( k <= mesh->np );
   mesh->point[k].tag |= MG_REQ;
   return(1);
 }
 
-/** Set element k as required  */
-int Set_requiredTetrahedra(MMG5_pMesh mesh, int k) {
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param k element index.
+ * \return 1.
+ *
+ * Set element \a k as required.
+ *
+ */
+int Set_requiredTetrahedron(MMG5_pMesh mesh, int k) {
   assert ( k <= mesh->ne );
   mesh->tetra[k].tag |= MG_REQ;
   return(1);
 }
 
-/** Set triangle k as required  */
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param k triangle index.
+ * \return 1.
+ *
+ * Set triangle \a k as required.
+ *
+ */
 int Set_requiredTriangle(MMG5_pMesh mesh, int k) {
   assert ( k <= mesh->nt );
   mesh->tria[k].tag[0] |= MG_REQ;
@@ -916,21 +1159,43 @@ int Set_requiredTriangle(MMG5_pMesh mesh, int k) {
   return(1);
 }
 
-/** Set ridge at edge k  */
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param k edge index.
+ * \return 1.
+ *
+ * Set ridge at edge \a k.
+ *
+ */
 int Set_ridge(MMG5_pMesh mesh, int k) {
   assert ( k <= mesh->na );
   mesh->edge[k].tag |= MG_GEO;
   return(1);
 }
 
-/** Set edge k as required  */
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param k edge index.
+ * \return 1.
+ *
+ * Set edge \a k as required.
+ *
+ */
 int Set_requiredEdge(MMG5_pMesh mesh, int k) {
   assert ( k <= mesh->na );
   mesh->edge[k].tag |= MG_REQ;
   return(1);
 }
 
-/** Set scalar value s at position pos in solution structure */
+/**
+ * \param met pointer toward the sol structure.
+ * \param s solution scalar value.
+ * \param pos position of the solution in the mesh.
+ * \return 0 if failed, 1 otherwise.
+ *
+ * Set scalar value \a s at position \a pos in solution structure
+ *
+ */
 int Set_scalarSol(MMG5_pSol met, double s, int pos) {
 
   if ( !met->np ) {
@@ -958,7 +1223,14 @@ int Set_scalarSol(MMG5_pSol met, double s, int pos) {
   return(1);
 }
 
-/** Get solution s of next vertex of mesh  */
+/**
+ * \param met pointer toward the sol structure.
+ * \param *s pointer toward the scalar solution value.
+ * \return 0 if failed, 1 otherwise.
+ *
+ * Get solution \a s of next vertex of mesh.
+ *
+ */
 int Get_scalarSol(MMG5_pSol met, double* s) {
 
   met->npi++;
@@ -976,8 +1248,20 @@ int Get_scalarSol(MMG5_pSol met, double* s) {
 }
 
 #ifdef SINGUL
-/** Set singular point of coordinates c0,c1,c2 at position pos
-    in the singularities structure */
+/**
+ * \param sing pointer toward the sing structure.
+ * \param c0 coordinate of the point along the first dimension.
+ * \param c1 coordinate of the point along the second dimension.
+ * \param c2 coordinate of the point along the third dimension.
+ * \param typ unused parameter.
+ * \param pos position of the point in the mesh.
+ * \return 0 if failed, 1 otherwise.
+ *
+ * Set singular point of coordinates \a c0, \a c1, \a c2 at position
+ * \a pos in the singularities structure (only for insertion of
+ * singularities mode: SINGUL preprocessor flag).
+ *
+ */
 int Set_singulVertex(MMG5_pSingul sing, double c0, double c1,
                      double c2, int typ, int pos) {
 
@@ -1008,9 +1292,19 @@ int Set_singulVertex(MMG5_pSingul sing, double c0, double c1,
   return(1);
 }
 
-
-/** Set singular edge of extremities v0,v1 and reference ref
-    at position pos in the singularities structure */
+/**
+ * \param sing pointer toward the sing structure.
+ * \param v0 first extremity of the edge.
+ * \param v1 second extremity of the edge.
+ * \param ref edge reference.
+ * \param pos edge position in the mesh.
+ * \return 0 if failed, 1 otherwise.
+ *
+ * Set singular edge of extremities \a v0,\a v1 and reference \a ref at
+ * position \a pos in the singularities structure (only for insertion of
+ * singularities mode: \a SINGUL preprocessor flag).
+ *
+ */
 int Set_singulEdge(MMG5_pSingul sing, int v0, int v1, int ref, int pos) {
 
   if ( !sing->na ) {
@@ -1045,28 +1339,60 @@ int Set_singulEdge(MMG5_pSingul sing, int v0, int v1, int ref, int pos) {
   return(1);
 }
 
-/** Set corner at singular vertex k  */
+/**
+ * \param sing pointer toward the sing structure.
+ * \param k vertex index.
+ * \return 1.
+ *
+ * Set corner at singular vertex \a k (only for insertion of
+ * singularities mode: \a SINGUL preprocessor flag).
+ *
+ */
 int Set_singulCorner(MMG5_pSingul sing, int k) {
   assert ( k <= sing->ns );
   sing->point[k].tag |= MG_CRN;
   return(1);
 }
 
-/** Set required vertex at singular vertex k  */
+/**
+ * \param sing pointer toward the sing structure (only for insertion of singularities mode).
+ * \param k vertex index.
+ * \return 1.
+ *
+ * Set required vertex at singular vertex \a k (only for insertion of
+ * singularities mode: \a SINGUL preprocessor flag).
+ *
+ */
 int Set_singulRequiredVertex(MMG5_pSingul sing, int k) {
   assert ( k <= sing->ns );
   sing->point[k].tag |= MG_REQ;
   return(1);
 }
 
-/** Set required edge at singular edge k  */
+/**
+ * \param sing pointer toward the sing structure.
+ * \param k vertex index.
+ * \return 1.
+ *
+ * Set ridge at singular edge \a k (only for insertion of
+ * singularities mode: \a SINGUL preprocessor flag).
+ *
+ */
 int Set_singulRidge(MMG5_pSingul sing, int k) {
   assert ( k <= sing->na );
   sing->edge[k].tag |= MG_GEO;
   return(1);
 }
 
-/** Set required edge at singular edge k  */
+/**
+ * \param sing pointer toward the sing structure.
+ * \param k vertex index.
+ * \return 1.
+ *
+ * Set required edge at singular edge \a k (only for insertion of
+ * singularities mode: \a SINGUL preprocessor flag).
+ *
+ */
 int Set_singulRequiredEdge(MMG5_pSingul sing, int k) {
   assert ( k <= sing->na );
   sing->edge[k].tag |= MG_REQ;
@@ -1074,8 +1400,13 @@ int Set_singulRequiredEdge(MMG5_pSingul sing, int k) {
 }
 #endif
 
-/** To mark as ended a mesh given without using the API functions
-    (for example, mesh given by mesh->point[i] = 0 ...)*/
+/**
+ * \param mesh pointer toward the mesh structure.
+ *
+ * To mark as ended a mesh given without using the API functions
+ * (for example, mesh given by mesh->point[i] = 0 ...). Not recommanded.
+ *
+ */
 void Set_handGivenMesh(MMG5_pMesh mesh) {
   int k, aux;
 
@@ -1092,8 +1423,15 @@ void Set_handGivenMesh(MMG5_pMesh mesh) {
   return;
 }
 
-/** Check if the number of given entities match with mesh and sol size (not mandatory)
-    and check mesh datas  */
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param sol pointer toward the sol structure.
+ * \return 0 if failed, 1 otherwise.
+ *
+ * Check if the number of given entities match with mesh and sol size
+ * (not mandatory) and check mesh datas.
+ *
+ */
 int Chk_meshData(MMG5_pMesh mesh,MMG5_pSol met) {
 
   if ( (mesh->npi != mesh->np) || (mesh->nei != mesh->ne) ) {
@@ -1137,7 +1475,13 @@ int Chk_meshData(MMG5_pMesh mesh,MMG5_pSol met) {
   return(1);
 }
 
-/** skip the MG_ISO references in an input mesh */
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \return 0 if failed, 1 otherwise.
+ *
+ * Skip the \a MG_ISO references in an input mesh.
+ *
+ */
 static inline
 int skipIso(MMG5_pMesh mesh) {
   pTria  ptt,ptt1;
@@ -1211,8 +1555,17 @@ int skipIso(MMG5_pMesh mesh) {
   return(1);
 }
 
-/** Set integer parameter iparam at value val */
-int Set_iparameters(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param sol pointer toward the sol structure.
+ * \param iparam integer parameter to set (see \a MMG5_Param structure).
+ * \param val value for the parameter.
+ * \return 0 if failed, 1 otherwise.
+ *
+ * Set integer parameter \a iparam at value \a val.
+ *
+ */
+int Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
   int k;
 
   switch ( iparam ) {
@@ -1311,8 +1664,17 @@ int Set_iparameters(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
   return(1);
 }
 
-/** Set double parameter dparam at value val */
-int Set_dparameters(MMG5_pMesh mesh, MMG5_pSol sol, int dparam, double val){
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param sol pointer toward the sol structure.
+ * \param dparam double parameter to set (see \a MMG5_Param structure).
+ * \val value of the parameter.
+ * \return 0 if failed, 1 otherwise.
+ *
+ * Set double parameter \a dparam at value \a val.
+ *
+ */
+int Set_dparameter(MMG5_pMesh mesh, MMG5_pSol sol, int dparam, double val){
 
   switch ( dparam ) {
     /* double parameters */
@@ -1352,9 +1714,19 @@ int Set_dparameters(MMG5_pMesh mesh, MMG5_pSol sol, int dparam, double val){
   return(1);
 }
 
-/** Set local parameters: set the hausdorff value at val for all elements
-    of type typ and reference ref  */
-int Set_localParameters(MMG5_pMesh mesh,MMG5_pSol sol, int typ, int ref, double val){
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param sol pointer toward the sol structure.
+ * \param typ type of entity (triangle, edge,...).
+ * \param ref reference of the entity.
+ * \param val value of the Hausdorff number.
+ * \return 0 if failed, 1 otherwise.
+ *
+ * Set local parameters: set the hausdorff value at \a val for all
+ * elements of type \a typ and reference \a ref.
+ *
+ */
+int Set_localParameter(MMG5_pMesh mesh,MMG5_pSol sol, int typ, int ref, double val){
   int k;
 
   if ( !mesh->info.npar ) {
@@ -1403,7 +1775,14 @@ int Set_localParameters(MMG5_pMesh mesh,MMG5_pSol sol, int typ, int ref, double 
 }
 
 
-/** File names deallocations before return */
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the sol structure.
+ * \param sing pointer toward the sing structure (only for insertion of singularities mode).
+ *
+ * File name deallocations before return.
+ *
+ */
 void Free_names(pMesh mesh,pSol met
 #ifdef SINGUL
                ,pSingul singul
@@ -1436,7 +1815,14 @@ void Free_names(pMesh mesh,pSol met
 #endif
 }
 
-/** Structure deallocations before return */
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the sol structure.
+ * \param sing pointer toward the sing structure (only for insertion of singularities mode).
+ *
+ * Structure deallocations before return.
+ *
+ */
 void Free_structures(pMesh mesh,pSol met
 #ifdef SINGUL
              ,pSingul singul

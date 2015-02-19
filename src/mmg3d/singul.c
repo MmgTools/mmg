@@ -21,6 +21,18 @@
 ** =============================================================================
 */
 
+/**
+ * \file mmg3d/singul.c
+ * \brief Functions to insert given singularities in a mesh.
+ * \author Algiane Froehly (Inria / IMB, Université de Bordeaux)
+ * \version 5
+ * \copyright GNU Lesser General Public License.
+ * \todo Doxygen documentation
+ * \note This file is only included in insertion of singularities
+ * mode: \a SINGUL preprocessor flag)
+ *
+ */
+
 #ifdef SINGUL
 #include "mmg3d.h"
 

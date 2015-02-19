@@ -22,48 +22,43 @@
 */
 
  /**
+ * \file mmg3d/libmmg3d5.c
+ * \brief Private API functions for MMG3D library.
+ * \author Charles Dapogny (LJLL, UPMC)
+ * \author Cécile Dobrzynski (Inria / IMB, Université de Bordeaux)
+ * \author Pascal Frey (LJLL, UPMC)
+ * \author Algiane Froehly (Inria / IMB, Université de Bordeaux)
+ * \version 5
+ * \date 01 2014
+ * \copyright GNU Lesser General Public License.
+ * \todo documentation doxygen
  *
- * Written by Cecile Dobrzynski (IMB), Charles Dapogny,
- * Pascal Frey (LJLL) and Algiane Froehly
- * Copyright (c) 2004- IMB/LJLL.
- * All rights reserved.
+ * Private API functions for MMG3D library: incompatible functions
+ * with the main binary.
  *
- * MMG5_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met [,MMG5_pSingul singul] ):
- *    to use mmg3d via a library
- *
- * Integers parameters:
- *    MMG5_IPARAM_verbose            = [-10..10] , Tune level of verbosity;
- *    MMG5_IPARAM_mem                = [n/-1]    , Set maximal memory size to n Mbytes/keep the default value;
- *    MMG5_IPARAM_debug              = [1/0]     , Turn on/off debug mode;
- *    MMG5_IPARAM_angle              = [1/0]     , Turn on/off angle detection;
- *    MMG5_IPARAM_iso                = [1/0]     , Turn on/off levelset meshing;
- *    MMG5_IPARAM_noinsert           = [1/0]     , avoid/allow point insertion/deletion;
- *    MMG5_IPARAM_noswap             = [1/0]     , avoid/allow edge or face flipping;
- *    MMG5_IPARAM_nomove             = [1/0]     , avoid/allow point relocation;
- *    MMG5_IPARAM_numberOflocalParam = [n]       , number of local parameters;
- *    MMG5_IPARAM_renum              = [1/0]     , Turn on/off the renumbering using SCOTCH;
- *    MMG5_IPARAM_sing               = [1/0]     , Turn on/off the insertion of singularities
- *                                        (need to compile with -DSINGUL flag);
- * Double parameters:
- *    MMG5_DPARAM_dhd   = [val]     , angle detection;
- *    MMG5_DPARAM_hmin  = [val]     , minimal mesh size;
- *    MMG5_DPARAM_hmax  = [val]     , maximal mesh size;
- *    MMG5_DPARAM_hausd = [val]     , control global Hausdorff distance
- *                                    (on all the boundary surfaces of the mesh);
- *    MMG5_DPARAM_hgrad = [val]     , control gradation;
- *    MMG5_DPARAM_ls    = [val]     , level set value;
- **/
+ */
 
 #include "mmg3d.h"
 #include "shared_func.h"
 
-#define RETURN_AND_PACK(mesh,met,val)do    \
-    {                                           \
+/**
+ * Pack the mesh \a mesh and its associated metric \a met and return \a val.
+ */
+#define RETURN_AND_PACK(mesh,met,val)do          \
+    {                                            \
       packMesh(mesh,met);                        \
-      return(val);                              \
+      return(val);                               \
     }while(0)
 
-/** Deallocations before return */
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the sol structure.
+ * \param sing pointer toward the sing structure (only for insertion of
+ * singularities mode).
+ *
+ * Deallocations before return.
+ *
+ */
 void Free_all(pMesh mesh,pSol met
 #ifdef SINGUL
              ,pSingul singul
@@ -83,7 +78,12 @@ void Free_all(pMesh mesh,pSol met
   SAFE_FREE(mesh);
 }
 
-/** set pointer for MMG5_saveMesh function */
+/**
+ * \param mesh pointer toward the mesh structure (unused).
+ *
+ * Set pointer for MMG5_saveMesh function.
+ *
+ */
 void Set_saveFunc(pMesh mesh) {
   MMG5_saveMesh = saveLibraryMesh;
 }
@@ -112,8 +112,8 @@ void Free_topoTables(pMesh mesh) {
     out of library */
 static inline
 int packMesh(pMesh mesh,pSol met) {
-  pTetra	pt,ptnew;
-  pPoint	ppt,pptnew;
+  pTetra   pt,ptnew;
+  pPoint   ppt,pptnew;
   hgeom   *ph;
   int     np,nc,nr, k,ne,nbl,imet,imetnew,i;
   int     iadr,iadrnew,iadrv,*adjav,*adja,*adjanew,voy;
@@ -286,7 +286,18 @@ int packMesh(pMesh mesh,pSol met) {
   return(1);
 }
 
-/** main programm */
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the sol structure.
+ * \param sing pointer toward the sing structure (only for insertion of
+ * singularities mode).
+ * \return \a MMG5_SUCCESS if success.
+ * \return \a MMG5_LOWFAILURE if failed but a conform mesh is saved.
+ * \return \a MMG5_STRONGFAILURE if failed and we can't save the mesh.
+ *
+ * Main program for the library .
+ *
+ */
 int mmg3dlib(pMesh mesh,pSol met
 #ifdef SINGUL
              ,pSingul sing

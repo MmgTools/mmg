@@ -21,6 +21,18 @@
 ** =============================================================================
 */
 
+/**
+ * \file mmg3d/hash.c
+ * \brief Functions for hash tables management and tetrahedra packing.
+ * \author Charles Dapogny (LJLL, UPMC)
+ * \author Cécile Dobrzynski (Inria / IMB, Université de Bordeaux)
+ * \author Pascal Frey (LJLL, UPMC)
+ * \author Algiane Froehly (Inria / IMB, Université de Bordeaux)
+ * \version 5
+ * \copyright GNU Lesser General Public License.
+ * \todo doxygen documentation.
+ */
+
 #include "mmg3d.h"
 
 #define KA     7
@@ -54,9 +66,15 @@ static void paktet(pMesh mesh) {
   }
 }
 
-/** Create table of adjacency. *
- *  Set pack variable to 0 for a compact mesh and to 1 for *
- *  a mesh that need to be packed */
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param pack we pack the mesh at function begining if \f$pack=1\f$.
+ * \return 0 if failed, 1 otherwise.
+ *
+ * Create table of adjacency. Set pack variable to 0 for a compact
+ * mesh and to 1 for a mesh that need to be packed.
+ *
+ */
 int hashTetra(pMesh mesh, int pack) {
   pTetra         pt,pt1;
   int            k,kk,pp,l,ll,mins,mins1,maxs,maxs1,sum,sum1,iadr;

@@ -21,6 +21,17 @@
 ** =============================================================================
 */
 
+/**
+ * \file mmgs/mmgs1.c
+ * \brief Perform surface mesh adaptation.
+ * \author Charles Dapogny (LJLL, UPMC)
+ * \author Cécile Dobrzynski (Inria / IMB, Université de Bordeaux)
+ * \author Pascal Frey (LJLL, UPMC)
+ * \author Algiane Froehly (Inria / IMB, Université de Bordeaux)
+ * \version 5
+ * \copyright GNU Lesser General Public License.
+ */
+
 #include "mmgs.h"
 
 extern Info info;

@@ -21,9 +21,25 @@
 ** =============================================================================
 */
 
+/**
+ * \file mmg3d/analys.c
+ * \brief Mesh analysis.
+ * \author Charles Dapogny (LJLL, UPMC)
+ * \author Cécile Dobrzynski (Inria / IMB, Université de Bordeaux)
+ * \author Pascal Frey (LJLL, UPMC)
+ * \author Algiane Froehly (Inria / IMB, Université de Bordeaux)
+ * \version 5
+ * \copyright GNU Lesser General Public License.
+ * \todo doxygen documentation.
+ */
+
 #include "mmg3d.h"
 
-/** topology: set adjacent, detect Moebius, flip faces, count connected comp. */
+/**
+ *
+ * topology: set adjacent, detect Moebius, flip faces, count connected comp.
+ *
+ */
 static int setadj(pMesh mesh){
   pTria   pt,pt1;
   pPoint  ppt;
