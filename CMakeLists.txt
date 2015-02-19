@@ -1,3 +1,25 @@
+## =============================================================================
+##  This file is part of the MMG3D 5 software package for the tetrahedral
+##  mesh modification.
+##  Copyright (c) 2014 Inria / Université de Bordeaux, IMB / UPMC, LJLL.
+##
+##  MMG3D 5 is free software: you can redistribute it and/or modify it
+##  under the terms of the GNU Lesser General Public License as published
+##  by the Free Software Foundation, either version 3 of the License, or
+##  (at your option) any later version.
+##
+##  MMG3D 5 is distributed in the hope that it will be useful, but WITHOUT
+##  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+##  FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
+##  License for more details.
+##
+##  You should have received a copy of the GNU Lesser General Public
+##  License and of the GNU General Public License along with MMG3D 5 (in
+##  files COPYING.LESSER and COPYING). If not, see
+##  <http://www.gnu.org/licenses/>. Please read their terms carefully and
+##  use this copy of the MMG3D 5 distribution only if you accept them.
+## =============================================================================
+
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8.5)
 PROJECT (mmg3d5)
 
@@ -61,17 +83,17 @@ ENDIF(NOT CMAKE_COMPILER_IS_CLANG)
 #####         Choose executable target to compile
 #####
 ###############################################################################
-SET ( BUILD "MMG3D" CACHE STRING 
+SET ( BUILD "MMG3D" CACHE STRING
   "\"MMG3D\", \"MMGS\" or \"MMG\" to compile both MMGS and MMG3D" )
 
 IF ( BUILD MATCHES "MMGS" )
   SET(BUILD_MMG        OFF )
   SET(BUILD_MMG3D      OFF )
   SET(BUILD_MMGS       ON  )
-ELSEIF ( BUILD MATCHES "MMG3D" ) 
+ELSEIF ( BUILD MATCHES "MMG3D" )
   SET(BUILD_MMG3D      ON  )
   SET(BUILD_MMGS       OFF )
-  SET(BUILD_MMG        OFF )       
+  SET(BUILD_MMG        OFF )
 ELSEIF ( BUILD MATCHES "MMG" )
   SET(BUILD_MMG        ON  )
   SET(BUILD_MMGS       OFF )
@@ -113,10 +135,10 @@ IF ( BUILD_MMG3D OR BUILD_MMG )
   #####         Fortran header: libmmg3d5f.h
   #####
   ###############################################################################
-  ADD_EXECUTABLE(genheader ${CMAKE_SOURCE_DIR}/Scripts/genheader.c)
+  ADD_EXECUTABLE(genheader ${CMAKE_SOURCE_DIR}/scripts/genheader.c)
 
   ADD_CUSTOM_COMMAND(OUTPUT ${MMG_SOURCE_DIR}/libmmg3d5f.h
-    COMMAND genheader ${MMG_SOURCE_DIR}/libmmg3d5f.h ${MMG_SOURCE_DIR}/libmmg3d5.h ${CMAKE_SOURCE_DIR}/Scripts/genfort.pl 
+    COMMAND genheader ${MMG_SOURCE_DIR}/libmmg3d5f.h ${MMG_SOURCE_DIR}/libmmg3d5.h ${CMAKE_SOURCE_DIR}/scripts/genfort.pl
     WORKING_DIRECTORY ${CMAKE_BUILD_DIR}
     DEPENDS genheader
     COMMENT "Generating Fortran header"
@@ -210,7 +232,7 @@ IF ( BUILD_MMG3D OR BUILD_MMG )
   ###############################################################################
   # add SCOTCH library?
   SET(SCOTCH_DIR "" CACHE PATH "Installation directory for scotch")
-  INCLUDE(FindScotch.cmake)
+  INCLUDE(cmake/modules/FindScotch.cmake)
 
   IF(SCOTCH_FOUND)
     OPTION ( USE_SCOTCH "Use SCOTCH TOOL for renumbering" ON)
@@ -302,7 +324,7 @@ IF ( BUILD_MMG3D OR BUILD_MMG )
 	TARGET_LINK_LIBRARIES(libmmg5_example2 ${PROJECT_NAME}_a)
 	INSTALL(TARGETS libmmg5_example2 RUNTIME DESTINATION bin )
 
-	ENABLE_LANGUAGE (Fortran)	     
+	ENABLE_LANGUAGE (Fortran)
 	ADD_EXECUTABLE(libmmg5_fortran_a ${MMG_SOURCE_DIR}/../libexamples/example0_fortran/example0_a/main.F90)
 	TARGET_LINK_LIBRARIES(libmmg5_fortran_a ${PROJECT_NAME}_a)
 	INSTALL(TARGETS libmmg5_fortran_a RUNTIME DESTINATION bin )
@@ -390,15 +412,15 @@ IF ( BUILD_MMG3D OR BUILD_MMG )
     MARK_AS_ADVANCED(RUN_AGAIN)
 
     # Ignore errors coming from the libmesh5 library
-    SET(MEMORYCHECK_SUPPRESSIONS_FILE "${CMAKE_SOURCE_DIR}/libmesh5.supp")
+    SET(MEMORYCHECK_SUPPRESSIONS_FILE "${CMAKE_SOURCE_DIR}/cmake/supp/libmesh5.supp")
     IF(APPLE)
       # and errors from the libSystem.B library
-      SET(MEMORYCHECK_SUPPRESSIONS_FILE "${CMAKE_SOURCE_DIR}/libSystem+libmesh5.supp")
+      SET(MEMORYCHECK_SUPPRESSIONS_FILE "${CMAKE_SOURCE_DIR}/cmake/supp/libSystem+libmesh5.supp")
     ENDIF(APPLE)
     # Copy custom file in the good directory
     IF(NOT EXISTS "CTestCustom.cmake")
       EXECUTE_PROCESS(
-	COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/CTestCustom.cmake ./CTestCustom.cmake)
+	COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/cmake/config/CTestCustom.cmake ./CTestCustom.cmake)
     ENDIF(NOT EXISTS "CTestCustom.cmake")
 
     ENABLE_TESTING()
@@ -441,12 +463,12 @@ IF ( BUILD_MMG3D OR BUILD_MMG )
     ENDIF()
 
     # Add more tests
-    INCLUDE( ${CMAKE_SOURCE_DIR}/testing.cmake )
+    INCLUDE( ${CMAKE_SOURCE_DIR}/cmake/testing/testing.cmake )
     IF ( INSER_SINGULARITIES )
-      INCLUDE( ${CMAKE_SOURCE_DIR}/testing_insert_singul.cmake )
+      INCLUDE( ${CMAKE_SOURCE_DIR}/cmake/testing/testing_insert_singul.cmake )
     ENDIF ()
     IF ( RUN_AGAIN )
-      INCLUDE( ${CMAKE_SOURCE_DIR}/testing_rerun.cmake )
+      INCLUDE( ${CMAKE_SOURCE_DIR}/cmake/testing/testing_rerun.cmake )
     ENDIF()
   ENDIF(BUILD_TESTING)
 ENDIF()
@@ -458,12 +480,12 @@ ENDIF()
 ###############################################################################
 FIND_PACKAGE(Doxygen)
 IF(DOXYGEN_FOUND)
-  CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/Doxygen/Doxyfile.in ${CMAKE_CURRENT_SOURCE_DIR}/Doxygen/Doxyfile @ONLY)
+  CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/doxygen/Doxyfile.in ${CMAKE_CURRENT_SOURCE_DIR}/doxygen/Doxyfile @ONLY)
   ADD_CUSTOM_TARGET(doc
-    COMMAND ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/Doxygen/Doxyfile
-    COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_CURRENT_SOURCE_DIR}/Doxygen/latex make
-    # COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/Doxygen/latex/refman.pdf ${CMAKE_CURRENT_SOURCE_DIR}
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/Doxygen
+    COMMAND ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/doxygen/Doxyfile
+    COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_CURRENT_SOURCE_DIR}/doxygen/latex make
+    # COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/doxygen/latex/refman.pdf ${CMAKE_CURRENT_SOURCE_DIR}
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/doxygen
     COMMENT "Generating API documentation with Doxygen" VERBATIM
     )
 ENDIF(DOXYGEN_FOUND)
@@ -483,7 +505,7 @@ SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "MMG3D/MMGS: ISOTROPIC TETRAHEDRAL REMESHE
 SET(CPACK_PACKAGE_VENDOR "Cécile Dobrzynski, Pascal Frey, Charles Dapogny, Algiane Froehly")
 SET(CPACK_PACKAGE_CONTACT "cecile.dobrzynski@inria.fr")
 SET(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_SOURCE_DIR}/README.txt")
-SET(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}/Copyright.txt")
+SET(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}/LICENSE")
 SET(CPACK_PACKAGE_VERSION "5.0.0")
 SET(CPACK_PACKAGE_VERSION_MAJOR "5")
 SET(CPACK_PACKAGE_VERSION_MINOR "0")
@@ -497,29 +519,29 @@ SET(CPACK_IGNORE_FILES ";.\\\\\\\\.#;/\\\\\\\\.svn;.~;.#" ${CPACK_IGNORE_FILES})
 SET(CPACK_IGNORE_FILES ";libmmg5.*" ${CPACK_IGNORE_FILES})
 
 SET(CPACK_SOURCE_IGNORE_FILES ";.\\\\\\\\.#;/\\\\\\\\.svn;.~;.#" ${CPACK_SOURCE_IGNORE_FILES})
-SET(CPACK_SOURCE_IGNORE_FILES ";lib/;bin;archives;def;Doc/Bilan_singularites" ${CPACK_SOURCE_IGNORE_FILES})
-SET(CPACK_SOURCE_IGNORE_FILES ";Doc/Guide/bibliography" ${CPACK_SOURCE_IGNORE_FILES})
-SET(CPACK_SOURCE_IGNORE_FILES ";Doc/Guide/figures" ${CPACK_SOURCE_IGNORE_FILES})
-SET(CPACK_SOURCE_IGNORE_FILES ";Doc/Guide/Makefile" ${CPACK_SOURCE_IGNORE_FILES})
-SET(CPACK_SOURCE_IGNORE_FILES ";Doc/Guide/.*sty" ${CPACK_SOURCE_IGNORE_FILES})
-SET(CPACK_SOURCE_IGNORE_FILES ";Doc/Guide/.*tex" ${CPACK_SOURCE_IGNORE_FILES})
-SET(CPACK_SOURCE_IGNORE_FILES ";Doc/Guide/.*png" ${CPACK_SOURCE_IGNORE_FILES})
-SET(CPACK_SOURCE_IGNORE_FILES ";Doc/Guide/.*eps" ${CPACK_SOURCE_IGNORE_FILES})
+SET(CPACK_SOURCE_IGNORE_FILES ";lib/;bin;archives;def;doc/Bilan_singularites" ${CPACK_SOURCE_IGNORE_FILES})
+SET(CPACK_SOURCE_IGNORE_FILES ";doc/guide/bibliography" ${CPACK_SOURCE_IGNORE_FILES})
+SET(CPACK_SOURCE_IGNORE_FILES ";doc/guide/figures" ${CPACK_SOURCE_IGNORE_FILES})
+SET(CPACK_SOURCE_IGNORE_FILES ";doc/guide/Makefile" ${CPACK_SOURCE_IGNORE_FILES})
+SET(CPACK_SOURCE_IGNORE_FILES ";doc/guide/.*sty" ${CPACK_SOURCE_IGNORE_FILES})
+SET(CPACK_SOURCE_IGNORE_FILES ";doc/guide/.*tex" ${CPACK_SOURCE_IGNORE_FILES})
+SET(CPACK_SOURCE_IGNORE_FILES ";doc/guide/.*png" ${CPACK_SOURCE_IGNORE_FILES})
+SET(CPACK_SOURCE_IGNORE_FILES ";doc/guide/.*eps" ${CPACK_SOURCE_IGNORE_FILES})
 SET(CPACK_SOURCE_IGNORE_FILES ";emacs-format-file" ${CPACK_SOURCE_IGNORE_FILES})
 SET(CPACK_SOURCE_IGNORE_FILES ";libexamples/example0/example0_a/mesh.o.*" ${CPACK_SOURCE_IGNORE_FILES})
 SET(CPACK_SOURCE_IGNORE_FILES ";libexamples/example0/example0_b/mesh.o.*" ${CPACK_SOURCE_IGNORE_FILES})
 SET(CPACK_SOURCE_IGNORE_FILES ";libexamples/example1/result0.*" ${CPACK_SOURCE_IGNORE_FILES})
 SET(CPACK_SOURCE_IGNORE_FILES ";libexamples/example2/result1.*" ${CPACK_SOURCE_IGNORE_FILES})
 SET(CPACK_SOURCE_IGNORE_FILES ";libexamples/example3/SphereIso.*" ${CPACK_SOURCE_IGNORE_FILES})
-SET(CPACK_SOURCE_IGNORE_FILES ";Scripts" ${CPACK_SOURCE_IGNORE_FILES})
+SET(CPACK_SOURCE_IGNORE_FILES ";scripts" ${CPACK_SOURCE_IGNORE_FILES})
 SET(CPACK_SOURCE_IGNORE_FILES ";README_developper.txt" ${CPACK_SOURCE_IGNORE_FILES})
 SET(CPACK_SOURCE_IGNORE_FILES ";CMakeFiles" ${CPACK_SOURCE_IGNORE_FILES})
-SET(CPACK_SOURCE_IGNORE_FILES ";libmesh5.supp" ${CPACK_SOURCE_IGNORE_FILES})
-SET(CPACK_SOURCE_IGNORE_FILES ";libSystem+libmesh5.supp" ${CPACK_SOURCE_IGNORE_FILES})
-SET(CPACK_SOURCE_IGNORE_FILES ";testing.cmake" ${CPACK_SOURCE_IGNORE_FILES})
+SET(CPACK_SOURCE_IGNORE_FILES ";cmake/supp/libmesh5.supp" ${CPACK_SOURCE_IGNORE_FILES})
+SET(CPACK_SOURCE_IGNORE_FILES ";cmake/supp/libSystem+libmesh5.supp" ${CPACK_SOURCE_IGNORE_FILES})
+SET(CPACK_SOURCE_IGNORE_FILES ";cmake/testing/testing.cmake" ${CPACK_SOURCE_IGNORE_FILES})
 SET(CPACK_SOURCE_IGNORE_FILES ";.#$"      ${CPACK_SOURCE_IGNORE_FILES})
 SET(CPACK_SOURCE_IGNORE_FILES ";build*" ${CPACK_SOURCE_IGNORE_FILES}  )
-SET(CPACK_SOURCE_IGNORE_FILES ";Doxygen/html;Doxygen/latex;Doxygen/Doxyfile"  ${CPACK_SOURCE_IGNORE_FILES}  )
+SET(CPACK_SOURCE_IGNORE_FILES ";doxygen/html;doxygen/latex;doxygen/Doxyfile"  ${CPACK_SOURCE_IGNORE_FILES}  )
 
 IF ((WIN32 OR WIN64) AND NOT UNIX)
   # Warning compilation under windows not tested
