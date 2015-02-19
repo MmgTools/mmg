@@ -1074,8 +1074,11 @@
 !  * \param met pointer toward the sol structure.
 !  * \param sing pointer toward the sing structure (only for insertion of
 !  * singularities mode).
+!  * \return \ref MMG5_SUCCESS if success.
+!  * \return \ref MMG5_LOWFAILURE if failed but a conform mesh is saved.
+!  * \return \ref MMG5_STRONGFAILURE if failed and we can't save the mesh.
 !  *
-!  * Main program for the library .
+!  * Main program for the library.
 !  *
 !  */
 
@@ -1084,8 +1087,11 @@
 ! /**
 !  * \param mesh pointer toward the mesh structure.
 !  * \param met pointer toward the sol structure.
+!  * \return \ref MMG5_SUCCESS if success.
+!  * \return \ref MMG5_LOWFAILURE if failed but a conform mesh is saved.
+!  * \return \ref MMG5_STRONGFAILURE if failed and we can't save the mesh.
 !  *
-!  * Main program for the library .
+!  * Main program for the library.
 !  *
 !  */
 

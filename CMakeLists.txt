@@ -153,7 +153,7 @@ IF ( BUILD_MMG3D OR BUILD_MMG )
   # Should we use patterns for insertion istead of delaunay kernel
   OPTION ( PATTERN
     "If ON, insertion by patterns, otherwise insertion by delaunay kernel"
-    ON)
+    OFF)
   IF ( NOT PATTERN )
     MESSAGE(STATUS "Vertex insertion by delaunay kernel")
   ELSE()
