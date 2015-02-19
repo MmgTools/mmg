@@ -168,6 +168,13 @@
       if ( (mesh->memMax-mesh->memCur) <                              \
            (long long) (wantedGap*initSize*sizeof(type)) ) {          \
         gap = (int)(mesh->memMax-mesh->memCur)/sizeof(type);          \
+	if(gap<1) {                                                   \
+	  fprintf(stdout,"  ## Error:");                              \
+	  fprintf(stdout," unable to allocate %s.\n",message);	      \
+	  fprintf(stdout,"  ## Check the mesh size or ");	      \
+	  fprintf(stdout,"increase maximal authorized memory with the -m option.\n"); \
+	  law;							      \
+	}							      \
       }                                                               \
       else                                                            \
         gap = wantedGap*initSize;                                     \
@@ -216,6 +223,13 @@
                         (sizeof(Point)+sizeof(int))) ) {              \
         gap = (int)(mesh->memMax-mesh->memCur)/                       \
           (sizeof(Point)+sizeof(int));                                \
+	if(gap < 1) {                                                 \
+	  fprintf(stdout,"  ## Error:");                              \
+	  fprintf(stdout," unable to allocate %s.\n","larger point/bucket table");	      \
+	  fprintf(stdout,"  ## Check the mesh size or ");	      \
+	  fprintf(stdout,"increase maximal authorized memory with the -m option.\n"); \
+	  law;							      \
+	}                                                             \
       }                                                               \
       else                                                            \
         gap = (int)(wantedGap*mesh->npmax);                           \

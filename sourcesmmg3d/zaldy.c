@@ -13,6 +13,9 @@ int newPt(pMesh mesh,double c[3],char tag) {
   mesh->npnil = ppt->tmp;
   ppt->tmp    = 0;
 
+  ppt->ref = 0;
+  ppt->xp = 0;
+  ppt->flag = 0;
   /* point on geometry */
   if ( tag & MG_BDY ) {
     mesh->xp++;
@@ -24,7 +27,10 @@ int newPt(pMesh mesh,double c[3],char tag) {
     }
     ppt->xp  = mesh->xp;
   }
+  assert(tag < 127);
+  assert(tag >= 0);
   ppt->tag = tag;
+  ppt->tagdel = 0;
   return(curpt);
 }
 
