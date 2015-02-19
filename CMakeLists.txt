@@ -480,12 +480,12 @@ ENDIF()
 ###############################################################################
 FIND_PACKAGE(Doxygen)
 IF(DOXYGEN_FOUND)
-  CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/doxygen/Doxyfile.in ${CMAKE_CURRENT_SOURCE_DIR}/doxygen/Doxyfile @ONLY)
+  CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/Doxyfile.in ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/Doxyfile @ONLY)
   ADD_CUSTOM_TARGET(doc
-    COMMAND ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/doxygen/Doxyfile
-    COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_CURRENT_SOURCE_DIR}/doxygen/latex make
-    # COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/doxygen/latex/refman.pdf ${CMAKE_CURRENT_SOURCE_DIR}
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/doxygen
+    COMMAND ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/Doxyfile
+    COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/latex make
+    # COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/latex/refman.pdf ${CMAKE_CURRENT_SOURCE_DIR}
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen
     COMMENT "Generating API documentation with Doxygen" VERBATIM
     )
 ENDIF(DOXYGEN_FOUND)
@@ -541,7 +541,7 @@ SET(CPACK_SOURCE_IGNORE_FILES ";cmake/supp/libSystem+libmesh5.supp" ${CPACK_SOUR
 SET(CPACK_SOURCE_IGNORE_FILES ";cmake/testing/testing.cmake" ${CPACK_SOURCE_IGNORE_FILES})
 SET(CPACK_SOURCE_IGNORE_FILES ";.#$"      ${CPACK_SOURCE_IGNORE_FILES})
 SET(CPACK_SOURCE_IGNORE_FILES ";build*" ${CPACK_SOURCE_IGNORE_FILES}  )
-SET(CPACK_SOURCE_IGNORE_FILES ";doxygen/html;doxygen/latex;doxygen/Doxyfile"  ${CPACK_SOURCE_IGNORE_FILES}  )
+SET(CPACK_SOURCE_IGNORE_FILES ";doc/doxygen/html;doc/doxygen/latex;doc/doxygen/Doxyfile"  ${CPACK_SOURCE_IGNORE_FILES}  )
 
 IF ((WIN32 OR WIN64) AND NOT UNIX)
   # Warning compilation under windows not tested
