@@ -1,7 +1,7 @@
 ## =============================================================================
 ##  This file is part of the MMG3D 5 software package for the tetrahedral
 ##  mesh modification.
-##  Copyright (c) 2014 Inria / Université de Bordeaux, IMB / UPMC, LJLL.
+##  Copyright (c) Inria - IMB (Université de Bordeaux) - LJLL (UPMC), 2004- .
 ##
 ##  MMG3D 5 is free software: you can redistribute it and/or modify it
 ##  under the terms of the GNU Lesser General Public License as published
@@ -22,6 +22,29 @@
 
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8.5)
 PROJECT (mmg3d5)
+
+###############################################################################
+#####
+#####         Release version and date
+#####
+###############################################################################
+SET (CMAKE_RELEASE_VERSION_MAJOR "5")
+SET (CMAKE_RELEASE_VERSION_MINOR "0")
+SET (CMAKE_RELEASE_VERSION_PATCH "0")
+SET (CMAKE_RELEASE_DATE "Jul. 6, 2012")
+
+SET (CMAKE_RELEASE_VERSION "${CMAKE_RELEASE_VERSION_MAJOR}.\
+${CMAKE_RELEASE_VERSION_MINOR}.${CMAKE_RELEASE_VERSION_PATCH}")
+
+# Create mmg3d.h file with the good release infos.
+CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/src/mmg3d/mmg3d.h.in
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/mmg3d/mmg3d.h @ONLY)
+
+###############################################################################
+#####
+#####         Main CMake compilation variables
+#####
+###############################################################################
 
 # To see flags and options of compilation
 #SET(CMAKE_VERBOSE_MAKEFILE TRUE)
@@ -103,6 +126,7 @@ ELSE ( )
 ENDIF()
 
 IF ( BUILD_MMG3D OR BUILD_MMG )
+
   ###############################################################################
   #####
   #####         Redefinitions: mmg3d5_redefine.h
@@ -556,10 +580,10 @@ SET(CPACK_PACKAGE_VENDOR "Cécile Dobrzynski, Pascal Frey, Charles Dapogny, Algi
 SET(CPACK_PACKAGE_CONTACT "cecile.dobrzynski@inria.fr")
 SET(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_SOURCE_DIR}/README.txt")
 SET(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}/LICENSE")
-SET(CPACK_PACKAGE_VERSION "5.0.0")
-SET(CPACK_PACKAGE_VERSION_MAJOR "5")
-SET(CPACK_PACKAGE_VERSION_MINOR "0")
-SET(CPACK_PACKAGE_VERSION_PATCH "0")
+SET(CPACK_PACKAGE_VERSION ${CMAKE_RELEASE_VERSION})
+SET(CPACK_PACKAGE_VERSION_MAJOR ${CMAKE_RELEASE_VERSION_MAJOR})
+SET(CPACK_PACKAGE_VERSION_MINOR ${CMAKE_RELEASE_VERSION_MINOR})
+SET(CPACK_PACKAGE_VERSION_PATCH ${CMAKE_RELEASE_VERSION_PATCH})
 SET(CPACK_PACKAGE_INSTALL_DIRECTORY "${PROJECT_NAME}-${CPACK_PACKAGE_VERSION}")
 SET(CPACK_PACKAGE_FILE_NAME ${CPACK_PACKAGE_INSTALL_DIRECTORY}-${CMAKE_SYSTEM})
 SET(CPACK_PACKAGE_EXECUTABLES "${PROJECT_NAME}")
@@ -568,6 +592,7 @@ SET(CPACK_OUTPUT_FILE_PREFIX "../archives")
 SET(CPACK_IGNORE_FILES ";.\\\\\\\\.#;/\\\\\\\\.svn;.~;.#;.-e;.DS_Store" ${CPACK_IGNORE_FILES})
 SET(CPACK_IGNORE_FILES ";libmmg5.*" ${CPACK_IGNORE_FILES})
 
+SET(CPACK_SOURCE_IGNORE_FILES ";src/mmg3d/mmg3d.h$" ${CPACK_SOURCE_IGNORE_FILE})
 SET(CPACK_SOURCE_IGNORE_FILES ";.\\\\\\\\.#;/\\\\\\\\.svn;.~;.#;.-e;.DS_Store" ${CPACK_SOURCE_IGNORE_FILES})
 SET(CPACK_SOURCE_IGNORE_FILES ";lib/;bin;archives;def;doc/latex/Bilan_singularites" ${CPACK_SOURCE_IGNORE_FILES})
 SET(CPACK_SOURCE_IGNORE_FILES ";doc/latex/Guide/bibliography" ${CPACK_SOURCE_IGNORE_FILES})

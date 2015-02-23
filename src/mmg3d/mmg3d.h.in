@@ -44,9 +44,9 @@
 #include "mmg3d5_redefine.h"
 #include "libmmg3d5.h"
 
-#define MG_VER   "5.0.0"" c"
-#define MG_REL   "Jul. 6, 2012"
-#define MG_CPY   "Copyright (c) IMB-LJLL, 2012-"
+#define MG_VER   "@CMAKE_RELEASE_VERSION@"" c"
+#define MG_REL   "@CMAKE_RELEASE_DATE@"
+#define MG_CPY   "Copyright (c) IMB-LJLL, 2004-"
 #define MG_STR   "&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&"
 
 /* Macros */

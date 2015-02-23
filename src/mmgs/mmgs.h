@@ -1,7 +1,7 @@
 /* =============================================================================
 **  This file is part of the MMG3D 5 software package for the tetrahedral
 **  mesh modification.
-**  Copyright (c) 2014 Inria / Université de Bordeaux, IMB / UPMC, LJLL.
+**  Copyright (c) Inria - IMB (Université de Bordeaux) - LJLL (UPMC), 2004- .
 **
 **  MMG3D 5 is free software: you can redistribute it and/or modify it
 **  under the terms of the GNU Lesser General Public License as published
@@ -39,7 +39,7 @@
 #include "eigenv.h"
 #include "memory.h"
 
-#define MS_VER   "2.0a"
+#define MS_VER   "2.0 a"
 #define MS_REL   "Sept. 11, 2012"
 #define MS_CPY   "Copyright (c) LJLL, 2009-"
 #define MS_STR   "&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&"
