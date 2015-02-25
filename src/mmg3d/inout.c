@@ -88,6 +88,7 @@ double swapd(double sbin)
   //printf("CONVERTION DOUBLE\n");
   return(out);
 }
+
 /**
  * \param mesh pointer toward the mesh structure.
  * \return 0 if failed, 1 otherwise.
@@ -416,7 +417,7 @@ int loadMesh(pMesh mesh) {
         if(iswp) i=swapbin(i);
       }
       if(i>mesh->np) {
-        fprintf(stdout,"   Warning Required Vertices number %8d IGNORED\n",i);
+        fprintf(stdout,"   Warning: Required Vertices number %8d IGNORED\n",i);
       } else {
         ppt = &mesh->point[i];
         ppt->tag |= MG_REQ;
@@ -436,7 +437,7 @@ int loadMesh(pMesh mesh) {
         if(iswp) i=swapbin(i);
       }
       if(i>mesh->np) {
-        fprintf(stdout,"   Warning Corner number %8d IGNORED\n",i);
+        fprintf(stdout,"   Warning: Corner number %8d IGNORED\n",i);
       } else {
         ppt = &mesh->point[i];
         ppt->tag |= MG_CRN;
@@ -511,8 +512,8 @@ int loadMesh(pMesh mesh) {
           fread(&i,sw,1,inm);
           if(iswp) i=swapbin(i);
         }
-        if(i>mesh->nt) {
-          fprintf(stdout,"   Warning Required Triangles number %8d IGNORED\n",i);
+        if ( i>mesh->nt ) {
+          fprintf(stdout,"   Warning: Required Triangles number %8d IGNORED\n",i);
         } else {
           if( mesh->info.iso ){
             if( ina[i] == 0 ) continue;
@@ -671,6 +672,7 @@ int loadMesh(pMesh mesh) {
     fprintf(stdout,"         BAD ORIENTATION : vol < 0 -- %8d tetra reoriented\n",mesh->xt);
     fprintf(stdout,"     $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ \n\n");
   }
+  mesh->xt = 0;
   /* get required tetrahedra */
   if(nereq) {
     rewind(inm);
@@ -2240,7 +2242,7 @@ int loadSingul(pMesh mesh,pSingul singul) {
         if(iswp) i=swapbin(i);
       }
       if(i>sing_mesh.na) {
-        fprintf(stdout,"   Warning Ridge number %8d IGNORED\n",i);
+        fprintf(stdout,"   Warning: Ridge number %8d IGNORED\n",i);
         continue;
       }
       pa = &sing_mesh.edge[i];
@@ -2271,7 +2273,7 @@ int loadSingul(pMesh mesh,pSingul singul) {
         if(iswp) i=swapbin(i);
       }
       if(i>sing_mesh.na) {
-        fprintf(stdout,"   Warning Required Edges number %8d IGNORED\n",i);
+        fprintf(stdout,"   Warning: Required Edges number %8d IGNORED\n",i);
         continue;
       }
       pa = &sing_mesh.edge[i];

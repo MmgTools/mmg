@@ -553,12 +553,6 @@ int analys(pMesh mesh) {
   }
 
   /* compatibility triangle orientation w/r tetras */
-  else if ( mesh->info.iso ) {
-    if ( !bdryIso(mesh) ) {
-      fprintf(stdout,"  ## Failed to extract boundary. Exit program.\n");
-      return(0);
-    }
-  }
   else if ( !bdryPerm(mesh) ) {
     fprintf(stdout,"  ## Boundary orientation problem. Exit program.\n");
     return(0);

@@ -169,11 +169,11 @@ void Init_parameters(pMesh mesh) {
   mesh->info.sing     =  0;  /* [0/1]    ,preserve internal singularities */
 
   /* default values for doubles */
-  /** MMG5_DPARAM_hausd = \ref ANGEDG */
+  /** MMG5_DPARAM_angleDetection = \ref ANGEDG */
   mesh->info.dhd      = ANGEDG;   /* angle detection; */
   /** MMG5_DPARAM_hmin = 0.0 */
   mesh->info.hmin     = 0.0;      /* minimal mesh size; */
-  /** MMG5_DPARAM_hmin = \f$ \infty \f$ */
+  /** MMG5_DPARAM_hmax = \f$ \infty \f$ */
   mesh->info.hmax     = FLT_MAX;  /* maximal mesh size; */
   /** MMG5_DPARAM_hausd = 0.01 */
   mesh->info.hausd    = 0.01;     /* control Hausdorff */

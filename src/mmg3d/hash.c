@@ -41,7 +41,12 @@
 
 extern char  ddb;
 
-/** tetra packing */
+/**
+ * \param mesh pointer toward the mesh structure.
+ *
+ * tetra packing.
+ *
+ */
 static void paktet(pMesh mesh) {
   pTetra   pt,pt1;
   int      k;
@@ -758,11 +763,20 @@ int hGeom(pMesh mesh) {
   return(1);
 }
 
-/** Count the number of faces in mesh and compare this number    *
- *  to the number of given triangles. Delete the given triangles *
- *  if they didn't correspond to the founded faces and fill      *
- *  mesh->nt with the real number of faces.                      *
- *  Retrun 1 if numbers of given and founded faces correspond.   */
+/**
+ * \brief Check the matching between actual and given number of faces in the
+ * mesh.
+ * \param mesh pointer toward the mesh structure.
+ * \return 1 if the number of counted faces match the number of given one,
+ * 0 otherwise.
+ *
+ * Check the matching between actual and given number of faces in the
+ * mesh: Count the number of faces in mesh and compare this number to
+ * the number of given triangles. Delete the given triangles if they
+ * didn't correspond to the founded faces and fill mesh->nt with the
+ * real number of faces.
+ *
+ */
 int chkNumberOfTri(pMesh mesh) {
   pTetra    pt,pt1;
   int      *adja,adj,k,i,nttmp;
@@ -793,7 +807,13 @@ int chkNumberOfTri(pMesh mesh) {
   return(0);
 }
 
-/** identify boundary triangles */
+/**
+ * \param mesh pointer to the mesh structure.
+ * \return 0 if failed, 1 otherwise.
+ *
+ * Identify boundary triangles.
+ *
+ */
 int bdryTria(pMesh mesh) {
   pTetra    pt,pt1;
   pTria     ptt;
@@ -839,69 +859,6 @@ int bdryTria(pMesh mesh) {
           /* useful only when saving mesh */
         }
         ptt->ref = mesh->info.iso ? MG_ISO : 0;
-      }
-    }
-  }
-
-  /* set point tag */
-  for (k=1; k<=mesh->nt; k++) {
-    ptt = &mesh->tria[k];
-    for (i=0; i<3; i++) {
-      ppt = &mesh->point[ptt->v[i]];
-      ppt->tag |= MG_BDY;
-    }
-  }
-
-  return(1);
-}
-
-/** identify boundary triangles for implicit surface */
-/* On ne passe jamais ici non? (pour y passer, il faudrait que l'on ait lu les
-   triangles de peau et les triangles ISO or on zappe ces derniers dans loadMesh) */
-int bdryIso(pMesh mesh) {
-  pTetra    pt,pt1;
-  pTria     ptt;
-  pPoint    ppt;
-  int      *adja,adj,k,nt;
-  char      i;
-
-  /* step 1: count interface faces */
-  nt = 0;
-  for (k=1; k<=mesh->ne; k++) {
-    pt = &mesh->tetra[k];
-    if ( !MG_EOK(pt) )  continue;
-    adja = &mesh->adja[4*(k-1)+1];
-    for (i=0; i<4; i++) {
-      adj = adja[i] / 4;
-      if ( adj ) {
-        pt1 = &mesh->tetra[adj];
-        if ( pt->ref > pt1->ref )  nt++;
-      }
-    }
-  }
-  if ( !nt )  return(1);
-
-  /* step 2 : create triangles */
-  ADD_MEM(mesh,nt*sizeof(Tria),"triangles",return(0));
-  if ( mesh->ntmax < (mesh->nt+nt ) )  mesh->ntmax = mesh->nt+nt;
-  SAFE_RECALLOC(mesh->tria,mesh->nt+1,(mesh->nt+nt+1),Tria,"triangles");
-
-  for (k=1; k<=mesh->ne; k++) {
-    pt = &mesh->tetra[k];
-    if ( !MG_EOK(pt) )  continue;
-    adja = &mesh->adja[4*(k-1)+1];
-    for (i=0; i<4; i++) {
-      adj = adja[i] / 4;
-      if ( adj ) {
-        pt1 = &mesh->tetra[adj];
-        if ( pt->ref > pt1->ref ) {
-          mesh->nt++;
-          ptt = &mesh->tria[mesh->nt];
-          ptt->v[0] = pt->v[idir[i][0]];
-          ptt->v[1] = pt->v[idir[i][1]];
-          ptt->v[2] = pt->v[idir[i][2]];
-          ptt->ref  = mesh->info.iso ? 100 : 0;  /* useful only when saving mesh */
-        }
       }
     }
   }

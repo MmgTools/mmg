@@ -164,7 +164,7 @@ IF ( BUILD_MMG3D OR BUILD_MMG )
   ADD_CUSTOM_COMMAND(OUTPUT ${MMG_SOURCE_DIR}/libmmg3d5f.h
     COMMAND genheader ${MMG_SOURCE_DIR}/libmmg3d5f.h ${MMG_SOURCE_DIR}/libmmg3d5.h ${CMAKE_SOURCE_DIR}/scripts/genfort.pl
     WORKING_DIRECTORY ${CMAKE_BUILD_DIR}
-    DEPENDS genheader
+    DEPENDS genheader ${MMG_SOURCE_DIR}/libmmg3d5.h ${CMAKE_SOURCE_DIR}/scripts/genfort.pl
     COMMENT "Generating Fortran header"
     )
 
