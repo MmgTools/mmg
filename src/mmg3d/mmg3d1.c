@@ -332,8 +332,7 @@ char chkedg(pMesh mesh,Tria *pt,char ori) {
       else {
         if(!((p[i1]->tag & MG_NOM) ||  MG_EDG(p[i1]->tag) ) ) {
           // 	if(t[i1][0] > 10) {
-          fprintf(stdout,"warning geometrical problem %d -- %d %d -- %e\n",p[i1]->tag,
-                  MG_SIN(p[i1]->tag ),p[i1]->tag & MG_NOM,t[i1][0]);
+          fprintf(stdout,"2. warning geometrical problem\n");
           return(0);
         }
         memcpy(t1,t[i1],3*sizeof(double));
