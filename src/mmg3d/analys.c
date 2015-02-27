@@ -367,7 +367,7 @@ static int norver(pMesh mesh) {
   }
 
   /* memory to store normals for boundary points */
-  mesh->xpmax  = MG_MAX(1.5*mesh->xp,mesh->npmax);
+  mesh->xpmax  = MG_MAX( (long long)(1.5*mesh->xp),mesh->npmax);
 
   ADD_MEM(mesh,(mesh->xpmax+1)*sizeof(xPoint),"boundary points",return(0));
   SAFE_CALLOC(mesh->xpoint,mesh->xpmax+1,xPoint);

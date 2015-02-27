@@ -1595,6 +1595,7 @@ static int adptet(pMesh mesh,pSol met) {
       /* renumbering begin */
       if ( mesh->info.imprim > 5 )
         fprintf(stdout,"  -- RENUMBERING. \n");
+
       if ( !renumbering(BOXSIZE,mesh, met) ) {
         fprintf(stdout,"  ## Unable to renumbering mesh. \n");
         fprintf(stdout,"  ## Try to run without renumbering option (-rn 0)\n");
@@ -1684,11 +1685,17 @@ static int adptet(pMesh mesh,pSol met) {
     /* renumbering begin */
     if ( mesh->info.imprim > 5 )
       fprintf(stdout,"  -- RENUMBERING. \n");
-    renumbering(BOXSIZE,mesh, met);
+
+    if ( !renumbering(BOXSIZE,mesh, met) ) {
+      fprintf(stdout,"  ## Unable to renumbering mesh. \n");
+      fprintf(stdout,"  ## Try to run without renumbering option (-rn 0)\n");
+      return(0);
+    }
 
     if ( mesh->info.imprim > 5) {
       fprintf(stdout,"  -- PHASE RENUMBERING COMPLETED. \n");
     }
+
     if ( mesh->info.ddebug )  chkmsh(mesh,1,0);
     /* renumbering end */
   }
@@ -1833,6 +1840,7 @@ static int adptet(pMesh mesh,pSol met) {
   do {
     /* memory free */
     DEL_MEM(mesh,mesh->adja,(4*mesh->nemax+5)*sizeof(int));
+
     if ( !mesh->info.noinsert ) {
 
       /* split tetra with more than 2 bdry faces */
@@ -1876,11 +1884,11 @@ static int adptet(pMesh mesh,pSol met) {
 
     /* attempt to swap */
     if ( !mesh->info.noswap ) {
-#ifdef PATTERN
-      nf = swpmsh(mesh,met);
-#else
-      nf = swpmsh(mesh,met,NULL);
+      nf = swpmsh(mesh,met
+#ifndef PATTERN
+                  ,NULL
 #endif
+                  );
       if ( nf < 0 ) {
         fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
         return(0);
@@ -1913,6 +1921,7 @@ static int adptet(pMesh mesh,pSol met) {
     /* renumbering begin */
     if ( mesh->info.imprim > 5 )
       fprintf(stdout,"  -- RENUMBERING. \n");
+
     if ( !renumbering(BOXSIZE,mesh, met) ) {
       fprintf(stdout,"  ## Unable to renumbering mesh. \n");
       fprintf(stdout,"  ## Try to run without renumbering option (-rn 0)\n");

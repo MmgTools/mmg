@@ -70,7 +70,6 @@ MARK_AS_ADVANCED(CMAKE_OSX_ARCHITECTURES
 
 IF(CMAKE_COMPILER_IS_GNUCC)
   SET(CMAKE_C_FLAGS "-Wno-char-subscripts ${CMAKE_C_FLAGS}")
-  # !!!!!!!! WARNING : IF ( APPLE ) DON'T WORK
   IF(APPLE)
     # Add flags to the compiler to work on old mac
     ADD_DEFINITIONS( -mmacosx-version-min=10.4 -arch x86_64)
@@ -478,9 +477,18 @@ IF ( BUILD_MMG3D OR BUILD_MMG )
     ENABLE_TESTING()
     INCLUDE(CTest)
 
-    IF ( CMAKE_COMPILER_IS_GNUCC AND NOT APPLE )
-      SET(CMAKE_C_FLAGS_DEBUG "-g -Wall -fprofile-arcs -ftest-coverage --coverage ${CMAKE_C_FLAGS}")
-      SET(CMAKE_EXE_LINKER_FLAGS_DEBUG "-g -fprofile-arcs -ftest-coverage --coverage ${CMAKE_EXE_LINKER_FLAGS}")
+    IF ( NOT APPLE)
+      # Add coverage flags
+      SET(CMAKE_C_FLAGS_DEBUG " -fprofile-arcs -ftest-coverage --coverage ${CMAKE_C_FLAGS}")
+      SET(CMAKE_EXE_LINKER_FLAGS_DEBUG " -fprofile-arcs -ftest-coverage --coverage ${CMAKE_EXE_LINKER_FLAGS}")
+    ENDIF()
+
+    IF ( CMAKE_COMPILER_IS_GNUCC )
+      SET(CMAKE_C_FLAGS_DEBUG "-g -Weverything ${CMAKE_C_FLAGS}")
+      SET(CMAKE_EXE_LINKER_FLAGS_DEBUG "-g ${CMAKE_EXE_LINKER_FLAGS}")
+    ELSEIF( CMAKE_COMPILER_IS_CLANG )
+      SET(CMAKE_C_FLAGS_DEBUG "-g -Weverything -Wno-sign-conversion -Wno-char-subscripts -Wno-padded ${CMAKE_C_FLAGS}")
+      SET(CMAKE_EXE_LINKER_FLAGS_DEBUG "-g ${CMAKE_EXE_LINKER_FLAGS}")
     ENDIF ( )
 
     # Add runtime that we want to test

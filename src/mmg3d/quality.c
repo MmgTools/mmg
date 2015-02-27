@@ -243,38 +243,38 @@ inline int nortri(pMesh mesh,pTria pt,double *n) {
 }
 
 /* identify type of element :
-  ityp= 0: 4 faces bonnes          (elt ok)
-        1: 4 faces bonnes, vol nul (sliver) ou "quasi sliver" ie 4 faces ok
-        2: 4 faces ok, vol nul+sommet proche face   (chapeau)
-        3: 3 faces bonnes, 1 obtuse    (aileron)
-        4: 2 faces bonnes, 2 faces aigu => 1 petite arete
-        5: 1 face bonne, 3 petites aretes
-        6: 2 faces grandes aretes, 2 faces petites iaretes
-        7: 4 faces grandes aretes
-        8: 2 faces obtus, 1 faces aigu et une face OK
+   ityp= 0: 4 faces bonnes          (elt ok)
+   1: 4 faces bonnes, vol nul (sliver) ou "quasi sliver" ie 4 faces ok
+   2: 4 faces ok, vol nul+sommet proche face   (chapeau)
+   3: 3 faces bonnes, 1 obtuse    (aileron)
+   4: 2 faces bonnes, 2 faces aigu => 1 petite arete
+   5: 1 face bonne, 3 petites aretes
+   6: 2 faces grandes aretes, 2 faces petites iaretes
+   7: 4 faces grandes aretes
+   8: 2 faces obtus, 1 faces aigu et une face OK
    item: bad entity
 */
 
 
 /* nb face obtuse :    nb faces aigu :
-ityp :  0: 0		0
-        1: 0		0
-        2: 0		0
-        3: 1		0
-        4: 0		2
-        5: 0		3
-        6: 2		2
-        7: 0		4
+   ityp :  0: 0        0
+   1: 0        0
+   2: 0        0
+   3: 1        0
+   4: 0        2
+   5: 0        3
+   6: 2        2
+   7: 0        4
 */
 /* nb gde arete :    nb petite arete :
-ityp :  0: 0		0
-        1: 0		0
-        2: 0		0
-        3: 1		0
-        4: 0		1
-        5: 0		3
-        6: 1		1
-        7: 0		2
+   ityp :  0: 0        0
+   1: 0        0
+   2: 0        0
+   3: 1        0
+   4: 0        1
+   5: 0        3
+   6: 1        1
+   7: 0        2
 */
 #define EPSVOL 0.001
 #define RAPMAX    0.4//0.3//0.25
@@ -408,12 +408,12 @@ int typelt(pMesh mesh,int iel,int *item) {
       for (i=1; i<4; i++) {
         if ( s[i] < surmin ) {
           surmin  = s[i];
-    isurmin = i;
-  }
+          isurmin = i;
+        }
         else if ( s[i] > surmax ) {
-    surmax  = s[i];
-    isurmax = i;
-  }
+          surmax  = s[i];
+          isurmax = i;
+        }
       }
       dd = surmin / surmax;
       if ( dd < RAPMAX ) {
@@ -422,7 +422,7 @@ int typelt(pMesh mesh,int iel,int *item) {
       }
       else {
         item[0] = isurmax;
-  item[1] = isurmin;
+        item[1] = isurmin;
         return(2);
       }
     }
@@ -452,36 +452,36 @@ int typelt(pMesh mesh,int iel,int *item) {
       }
     }
 
-//puts("default");
+    //puts("default");
     item[0] = 0;
     return(1);
   }/*end chkvol*/
 
- dd = rapmin / rapmax;
- // printf("dd %e %e %e\n",dd,RAPMAX,0.7*RAPMAX);
+  dd = rapmin / rapmax;
+  // printf("dd %e %e %e\n",dd,RAPMAX,0.7*RAPMAX);
   /* types 3,6,7 */
- if ( dd < RAPMAX ) { /*ie une arete 3 fois plus gde qu'une autre*/
-   lmoy = 0;
-   for (i=0; i<6; i++)  {h[i] = sqrt(h[i]); lmoy+=h[i];}
-   lmoy *= 1./6.;
+  if ( dd < RAPMAX ) { /*ie une arete 3 fois plus gde qu'une autre*/
+    lmoy = 0;
+    for (i=0; i<6; i++)  {h[i] = sqrt(h[i]); lmoy+=h[i];}
+    lmoy *= 1./6.;
 
     nobtus = 0;
     naigu = 0;
     for (k=0; k<4; k++) {
       aigu = 0;
       for(i=0 ; i<3 ; i++) {
-  i0 = idir[k][i];
+        i0 = idir[k][i];
         i1 = idir[k][inxt[i]];
         i2 = idir[k][inxt[i+1]];
-  if((h[i0]>h[i1] && h[i0]>h[i2]) && (h[i0]>2.5*h[i1] || h[i0]>2.5*h[i2])) {//obtu ? > /*130*/ 150
-    //be carefull isocele triangle --> opposite edge only
-    if(!( fabs(1-h[i0]/h[i1]) < 0.1 || fabs(1-h[i0]/h[i2])< 0.1 ) ) {
-      if(h[i0] > 0.9659258/*0.9063078*/*(h[i1]+h[i2])) break;
-    }
-  }
-    if((h[i0]<h[i1] && h[i0]<h[i2]) && (2.5*h[i0]<h[i1] || 2.5*h[i0]<h[i2])) {//aigu ? <20
-      if(h[i0] < 0.17*(h[i1]+h[i2])) aigu++;
-  }
+        if((h[i0]>h[i1] && h[i0]>h[i2]) && (h[i0]>2.5*h[i1] || h[i0]>2.5*h[i2])) {//obtu ? > /*130*/ 150
+          //be carefull isocele triangle --> opposite edge only
+          if(!( fabs(1-h[i0]/h[i1]) < 0.1 || fabs(1-h[i0]/h[i2])< 0.1 ) ) {
+            if(h[i0] > 0.9659258/*0.9063078*/*(h[i1]+h[i2])) break;
+          }
+        }
+        if((h[i0]<h[i1] && h[i0]<h[i2]) && (2.5*h[i0]<h[i1] || 2.5*h[i0]<h[i2])) {//aigu ? <20
+          if(h[i0] < 0.17*(h[i1]+h[i2])) aigu++;
+        }
       }
       if(i<3) nobtus++;
       else if(aigu) naigu++;
@@ -492,25 +492,25 @@ int typelt(pMesh mesh,int iel,int *item) {
       return(8);
     case(2):
       if(naigu==2) {
-  return(6);
+        return(6);
       } else {
-  return(8);
+        return(8);
       }
     case(1):
       return(3);
     case(0):
       if(naigu==4) {
-  return(7);
+        return(7);
       } else if(naigu==3) {
-  return(5);
+        return(5);
       } else if(naigu==2) {
-  return(4);
+        return(4);
       } else {
-  //printf("%d on trouve %d aigu et %d obtu\n",iel,naigu,nobtus);
-  return(9); //toutes les faces sont ok
+        //printf("%d on trouve %d aigu et %d obtu\n",iel,naigu,nobtus);
+        return(9); //toutes les faces sont ok
       }
     }
- }
+  }
 
 
   item[0] = 0;
@@ -556,12 +556,12 @@ int badelt(pMesh mesh,pSol met) {
       }
     }
     /*printf("on trouve %d bad elt\n",nd);
-    for (k=0; k<=9; k++)
+      for (k=0; k<=9; k++)
       if ( ntyp[k] )
-        printf("  optim [%d]      = %5d  %6.2f %%\n",k,ntyp[k],100.0*ntyp[k]/nd);
+      printf("  optim [%d]      = %5d  %6.2f %%\n",k,ntyp[k],100.0*ntyp[k]/nd);
     */if ( ns > 0 )
-  fprintf(stdout,"     %8d edge swapped\n",ns);
-   }
+      fprintf(stdout,"     %8d edge swapped\n",ns);
+  }
   while ( ++it < maxit && nd > 0 );
   return(nd);
 }
@@ -709,7 +709,7 @@ void outqua(pMesh mesh,pSol met) {
     ok++;
     if ( orvol(mesh->point,pt->v) < 0.0 ) {
       fprintf(stdout,"dans quality vol negatif\n");
- }
+    }
     rap = ALPHAD * caltet(mesh,met,pt->v[0],pt->v[1],pt->v[2],pt->v[3]);
     if ( rap < rapmin ) {
       rapmin = rap;
@@ -761,31 +761,33 @@ void outqua(pMesh mesh,pSol met) {
   }
 }
 
-/*approximation of the final number of vertex*/
+/** approximation of the final number of vertex */
 int countelt(pMesh mesh,pSol sol, double *weightelt, long *npcible) {
   pTetra pt;
-  double *ca,*cb,*ma,*mb,len;
-  int    k,ia,ipa,ipb,iad,lon,l,iadr;
+  double  len;
+  int    k,ia,ipa,ipb,lon,l;
+  //int   npbdry;
   int    *pdel,lenint,loc,nedel,longen;
-  int    npbdry,isbdry;
-  double   dned,dnface,dnint,dnins,w,lenavg,lent[6];
+  int      isbdry;
+  double   dned,dnface,dnint/*,dnins*/,w,lenavg,lent[6];
   double   dnpdel,dnadd,leninv,dnaddloc,dnpdelloc;
   int   list[LMAX],ddebug,ib;
-  long  nptot;
-  FILE *inm;
+  long  nptot,i;
+  //FILE *inm;
 
   pdel = (int*) calloc(mesh->np+1,sizeof(int));
   nptot = (long) mesh->np;
-  npbdry = 0;
-  //svg des poids
-  //inm = fopen("poid.sol","w");
-  //fprintf(inm,"MeshVersionFormatted 2\n Dimension 3 \n SolAtTetrahedra \n %d\n 1 1 \n",mesh->ne);
 
-  //substraction of the half of the number of bdry vertex to avoid the surestimation due of the interface
-  //for (k=1; k<=mesh->np; k++) {
-  //  if(mesh->point[k].tag & MG_BDY) npbdry++;
-  //}
-  //nptot -= 0.5*npbdry;
+  // svg des poids
+  // npbdry = 0;
+  // inm = fopen("poid.sol","w");
+  // fprintf(inm,"MeshVersionFormatted 2\n Dimension 3 \n SolAtTetrahedra \n %d\n 1 1 \n",mesh->ne);
+
+  // substraction of the half of the number of bdry vertex to avoid the surestimation due of the interface
+  // for (k=1; k<=mesh->np; k++) {
+  //   if(mesh->point[k].tag & MG_BDY) npbdry++;
+  // }
+  // nptot -= 0.5*npbdry;
 
   dnadd = dnpdel = 0;
 
@@ -808,7 +810,7 @@ int countelt(pMesh mesh,pSol sol, double *weightelt, long *npcible) {
     lenavg /= 6.;
 
     w = 0;
-    if(weightelt) 
+    if(weightelt)
       weightelt[k] = 0;
     nedel = 0;
 
@@ -819,143 +821,143 @@ int countelt(pMesh mesh,pSol sol, double *weightelt, long *npcible) {
       isbdry = 0;//longen%2;
       if(!lon) continue;
       /* if ( isbdry )  { */
-      /* 	assert(longen%2); */
-      /* 	//printf("coquil %d\n",longen/2); */
-      /* 	continue; */
+      /*    assert(longen%2); */
+      /*    //printf("coquil %d\n",longen/2); */
+      /*    continue; */
       /* } */
       //assert(!(longen%2));
       for (l=1; l<lon; l++)
-	if ( list[l] < 6*k )  break;
+        if ( list[l] < 6*k )  break;
 
       if ( l < lon )  {
-	loc = 1;
-	//continue;
+        loc = 1;
+        //continue;
       } else {
-	loc = 0;
-      } 
+        loc = 0;
+      }
 
       dnaddloc = 0;
       dnpdelloc = 0;
-      
+
       len = lent[ia];
-      
+
       if(ddebug) printf("len %e\n",len);
       if(len > 3) {
-	loc = 0;
-	len = lenavg;
-	lenint = ((int) len); 
-	if(fabs(lenint -len) > 0.5) lenint++;
-	//POURQUOI SURESTIMER ???lenint++; 
-	//nb de point a inserer sur l'arete : longueur - 1
-	dned = lenint - 1;
-	//nb de point a l'interieur de la face si toutes les aretes sont coupees le meme nb de fois
-	dnface = (lenint+2)*(lenint+1) / 2. - 3 - 3*dned;
-	//nb de point a l'interieur du tetra si toutes les aretes sont coupees le meme nb de fois
-	dnint = (lenint+3)*(lenint+2)*(lenint+1) / 6. - 4 - 4*dnface - 6*dned;
-	//nb de point a inserer pour cette arete de ce tetra : on divise par lon
-	dnins = dned*(1./lon) + (dnface/3. + dnint/6.);//(dnface/12. + dnint/6.);
-	if(!isbdry) {
-	  //nb points sur l'arete + 
-	  //lon*(2/3 nb point sur la face (ie 1/3 de face et 2 faces adj a l'arete) + 1/6 nb de point interne)
-	  dnaddloc = dned + lon*(2*dnface/3. + dnint/6.);
-	} else {
-	  dnaddloc = 0.5*(dned + lon*(2*dnface/3. + dnint/6.));
-	}
-	dnaddloc *= 1./lon;
-	if(!loc) {
+        loc = 0;
+        len = lenavg;
+        lenint = ((int) len);
+        if(fabs(lenint -len) > 0.5) lenint++;
+        //POURQUOI SURESTIMER ???lenint++;
+        //nb de point a inserer sur l'arete : longueur - 1
+        dned = lenint - 1;
+        //nb de point a l'interieur de la face si toutes les aretes sont coupees le meme nb de fois
+        dnface = (lenint+2)*(lenint+1) / 2. - 3 - 3*dned;
+        //nb de point a l'interieur du tetra si toutes les aretes sont coupees le meme nb de fois
+        dnint = (lenint+3)*(lenint+2)*(lenint+1) / 6. - 4 - 4*dnface - 6*dned;
+        //nb de point a inserer pour cette arete de ce tetra : on divise par lon
+        // dnins = dned*(1./lon) + (dnface/3. + dnint/6.);//(dnface/12. + dnint/6.);
+        if(!isbdry) {
+          //nb points sur l'arete +
+          //lon*(2/3 nb point sur la face (ie 1/3 de face et 2 faces adj a l'arete) + 1/6 nb de point interne)
+          dnaddloc = dned + lon*(2*dnface/3. + dnint/6.);
+        } else {
+          dnaddloc = 0.5*(dned + lon*(2*dnface/3. + dnint/6.));
+        }
+        dnaddloc *= 1./lon;
+        if(!loc) {
           if(ALPHAD * pt->qual >= 0.5) /*on ne compte les points internes que pour les (tres) bons tetras*/
             dnaddloc = dnaddloc;
-          else if(ALPHAD * pt->qual >= 1./5.) 
-	    dnaddloc = dned / lon + 2*dnface/3.;
-	  else
+          else if(ALPHAD * pt->qual >= 1./5.)
+            dnaddloc = dned / lon + 2*dnface/3.;
+          else
             dnaddloc = dned / lon ;
-	  //rajout de 30% parce que 1) on vise des longueurs de 0.7 et 
-	  //2) on ne tient pas compte du fait qu'on divise tjs par 2 dans la generation
-	  if( (ALPHAD*pt->qual <= 1./50.) )
-	    dnaddloc = 0;
-	  else  if((ALPHAD*pt->qual <= 1./10.) )
-	    dnaddloc =  0.2*dnaddloc; //CEDRIC : essayer 0.3 0.4
-	  else if((len > 10) && (ALPHAD*pt->qual >= 1./1.5) ) //on sous-estime uniquement pour les tres bons
-	    dnaddloc = dnaddloc*0.3 + dnaddloc; //CEDRIC : essayer 0.3 ?
-	  else if(len < 6 && len>3) //CEDRIC : essayer len < 3,4, 6,7 mais aussi en commentant le test sur len puis pour la qual > 3, 5,8
-	    dnaddloc = 0.7*dnaddloc; //CEDRIC : essayer 0.9 0.7 0.6
+          //rajout de 30% parce que 1) on vise des longueurs de 0.7 et
+          //2) on ne tient pas compte du fait qu'on divise tjs par 2 dans la generation
+          if( (ALPHAD*pt->qual <= 1./50.) )
+            dnaddloc = 0;
+          else  if((ALPHAD*pt->qual <= 1./10.) )
+            dnaddloc =  0.2*dnaddloc; //CEDRIC : essayer 0.3 0.4
+          else if((len > 10) && (ALPHAD*pt->qual >= 1./1.5) ) //on sous-estime uniquement pour les tres bons
+            dnaddloc = dnaddloc*0.3 + dnaddloc; //CEDRIC : essayer 0.3 ?
+          else if(len < 6 && len>3) //CEDRIC : essayer len < 3,4, 6,7 mais aussi en commentant le test sur len puis pour la qual > 3, 5,8
+            dnaddloc = 0.7*dnaddloc; //CEDRIC : essayer 0.9 0.7 0.6
 
 
-	    dnadd += dnaddloc;
-	}
+          dnadd += dnaddloc;
+        }
       } else if(len > 2.8) {
-	if(!isbdry) {
-	  dnaddloc = 2.;
-	} else {
-	  dnaddloc = 1;
-	}
-	if(!loc){
-	  if(!isbdry) {
-	    dnadd += 2.;
-	  } else {
-	    dnadd++;
-	  }
-	}
-	dnins = 2;
+        if(!isbdry) {
+          dnaddloc = 2.;
+        } else {
+          dnaddloc = 1;
+        }
+        if(!loc){
+          if(!isbdry) {
+            dnadd += 2.;
+          } else {
+            dnadd++;
+          }
+        }
+        // dnins = 2;
       } else if(len > 1.41) {
-	if(!isbdry)
-	  dnaddloc = 1;
-	if(!loc) {
-	  if(!isbdry) dnadd += 1.;
-	}
-	dnins = 1;
+        if(!isbdry)
+          dnaddloc = 1;
+        if(!loc) {
+          if(!isbdry) dnadd += 1.;
+        }
+        // dnins = 1;
       } else if(len < 0.6) {
-	nedel = 1;
-	
-	leninv = 1./len;
-	if(pt->v[ipa]<pt->v[ipb]) {
-	  if(!pdel[pt->v[ipa]]) {
-	    if(!isbdry) {
-	      dnpdelloc = (leninv - 1.)/leninv;
-	    } else {
-	      dnpdelloc = 0.5*(leninv - 1.)/leninv;
-	    }
-	    if(!loc) {
-	      dnpdel+=dnpdelloc;
-	      pdel[pt->v[ipa]]=1;
-	    }
-	  } else if(!pdel[pt->v[ipb]]) {
-	    if(!isbdry) {
-	      dnpdelloc = (leninv - 1.)/leninv;
-	    } else {
-	      dnpdelloc = 0.5*(leninv - 1.)/leninv;
-	    }
-	    if(!loc) {
-	      dnpdel +=dnpdelloc;
-	      pdel[pt->v[ipb]]=1;
-	    }	  
-	  }
-	} else {
-	  if(!pdel[pt->v[ipb]]) {
-	    if(!isbdry) {
-	      dnpdelloc = (leninv - 1.)/leninv;
-	    } else {
-	      dnpdelloc = 0.5*(leninv - 1.)/leninv;
-	    }
-	    if(!loc) {
-	      dnpdel+=dnpdelloc;
-	      pdel[pt->v[ipb]]=1;
-	    }
-	  } else if(!pdel[pt->v[ipa]]) {
-	    if(!isbdry) {
-	      dnpdelloc = (leninv - 1.)/leninv;
-	    } else {
-	      dnpdelloc = 0.5*(leninv - 1.)/leninv;
-	    }
-	    if(!loc) {
-	      dnpdel+=dnpdelloc;
-	      pdel[pt->v[ipa]]=1;
-	    }
-	  }
-	}
-	//ndel++;
+        nedel = 1;
+
+        leninv = 1./len;
+        if(pt->v[ipa]<pt->v[ipb]) {
+          if(!pdel[pt->v[ipa]]) {
+            if(!isbdry) {
+              dnpdelloc = (leninv - 1.)/leninv;
+            } else {
+              dnpdelloc = 0.5*(leninv - 1.)/leninv;
+            }
+            if(!loc) {
+              dnpdel+=dnpdelloc;
+              pdel[pt->v[ipa]]=1;
+            }
+          } else if(!pdel[pt->v[ipb]]) {
+            if(!isbdry) {
+              dnpdelloc = (leninv - 1.)/leninv;
+            } else {
+              dnpdelloc = 0.5*(leninv - 1.)/leninv;
+            }
+            if(!loc) {
+              dnpdel +=dnpdelloc;
+              pdel[pt->v[ipb]]=1;
+            }
+          }
+        } else {
+          if(!pdel[pt->v[ipb]]) {
+            if(!isbdry) {
+              dnpdelloc = (leninv - 1.)/leninv;
+            } else {
+              dnpdelloc = 0.5*(leninv - 1.)/leninv;
+            }
+            if(!loc) {
+              dnpdel+=dnpdelloc;
+              pdel[pt->v[ipb]]=1;
+            }
+          } else if(!pdel[pt->v[ipa]]) {
+            if(!isbdry) {
+              dnpdelloc = (leninv - 1.)/leninv;
+            } else {
+              dnpdelloc = 0.5*(leninv - 1.)/leninv;
+            }
+            if(!loc) {
+              dnpdel+=dnpdelloc;
+              pdel[pt->v[ipa]]=1;
+            }
+          }
+        }
+        //ndel++;
       }
-      
+
       //pour cette arete de ce tetra :
       //PHASE 1 = dnaddloc + nedel (on compte un si arete trop petite)
       //PHASE 2 = dnaddloc
@@ -964,9 +966,9 @@ int countelt(pMesh mesh,pSol sol, double *weightelt, long *npcible) {
 
     }/*for ia*/
     if(ddebug) printf("on soustrait %d\n",nedel);
-	  
+
     w += 0.5*nedel;
- 
+
     //si l'elt ne doit pas etre ni splitte ni collapse est ce qu'on le compte ???
     //if(w==0) w+=1;
 

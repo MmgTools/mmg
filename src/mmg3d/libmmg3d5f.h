@@ -417,7 +417,6 @@
 ! /**
 !  * \param mesh pointer toward the mesh structure.
 !  * \param sol pointer toward the sol structure.
-!  * \param sing pointer toward the sing structure (only for insertion of
 !  * singularities mode).
 !  *
 !  * Initialize file names to their default values.
@@ -627,57 +626,57 @@
 ! int  MMG5_Set_edge(MMG5_pMesh mesh, int v0, int v1, int ref,int pos);
 ! /**
 !  * \param mesh pointer toward the mesh structure.
-!  * \param k vertex index.
+!  * \param pos vertex index.
 !  * \return 1.
 !  *
-!  * Set corner at point \a k.
+!  * Set corner at point \a pos.
 !  *
 !  */
 
 ! int  MMG5_Set_corner(MMG5_pMesh mesh, int pos);
 ! /**
 !  * \param mesh pointer toward the mesh structure.
-!  * \param k vertex index.
+!  * \param pos vertex index.
 !  * \return 1.
 !  *
-!  * Set point \a k as required.
+!  * Set point \a pos as required.
 !  *
 !  */
 
 ! int  MMG5_Set_requiredVertex(MMG5_pMesh mesh, int pos);
 ! /**
 !  * \param mesh pointer toward the mesh structure.
-!  * \param k element index.
+!  * \param pos element index.
 !  * \return 1.
 !  *
-!  * Set element \a k as required.
+!  * Set element \a pos as required.
 !  *
 !  */
 
 ! int  MMG5_Set_requiredTetrahedron(MMG5_pMesh mesh, int pos);
 ! /**
 !  * \param mesh pointer toward the mesh structure.
-!  * \param k triangle index.
+!  * \param pos triangle index.
 !  * \return 1.
 !  *
-!  * Set triangle \a k as required.
+!  * Set triangle \a pos as required.
 !  *
 !  */
 
 ! int  MMG5_Set_requiredTriangle(MMG5_pMesh mesh, int pos);
 ! /**
 !  * \param mesh pointer toward the mesh structure.
-!  * \param k edge index.
+!  * \param pos edge index.
 !  * \return 1.
 !  *
-!  * Set ridge at edge \a k.
+!  * Set ridge at edge \a pos.
 !  *
 !  */
 
 ! int  MMG5_Set_ridge(MMG5_pMesh mesh, int pos);
 ! /**
 !  * \param mesh pointer toward the mesh structure.
-!  * \param k edge index.
+!  * \param pos edge index.
 !  * \return 1.
 !  *
 !  * Set edge \a k as required.
@@ -787,7 +786,7 @@
 ! /* check init */
 ! /**
 !  * \param mesh pointer toward the mesh structure.
-!  * \param sol pointer toward the sol structure.
+!  * \param met pointer toward the sol structure.
 !  * \return 0 if failed, 1 otherwise.
 !  *
 !  * Check if the number of given entities match with mesh and sol size
@@ -840,10 +839,10 @@
 ! /** recover datas */
 ! /**
 !  * \param mesh pointer toward the mesh structure.
-!  * \param *np pointer toward the number of vertices.
-!  * \param *ne pointer toward the number of elements (tetrahedra).
-!  * \param *nt pointer toward the number of triangles.
-!  * \param *na pointer toward the number of edges.
+!  * \param np pointer toward the number of vertices.
+!  * \param ne pointer toward the number of elements (tetrahedra).
+!  * \param nt pointer toward the number of triangles.
+!  * \param na pointer toward the number of edges.
 !  * \return 1.
 !  *
 !  * Get the number of vertices, tetrahedra, triangles and edges of the mesh.
@@ -854,9 +853,9 @@
 ! /**
 !  * \param mesh pointer toward the mesh structure.
 !  * \param sol pointer toward the sol structure.
-!  * \param *typEntity pointer toward the type of entities to which solutions are applied.
-!  * \param *np pointer toward the number of solutions.
-!  * \param *typSol pointer toward the type of the solutions (scalar, vectorial...)
+!  * \param typEntity pointer toward the type of entities to which solutions are applied.
+!  * \param np pointer toward the number of solutions.
+!  * \param typSol pointer toward the type of the solutions (scalar, vectorial...)
 !  * \return 1.
 !  *
 !  * Get the solution number, dimension and type.
@@ -867,12 +866,12 @@
 !                       int* typSol);
 ! /**
 !  * \param mesh pointer toward the mesh structure.
-!  * \param *c0 pointer toward the coordinate of the point along the first dimension.
-!  * \param *c1 pointer toward the coordinate of the point along the second dimension.
-!  * \param *c2 pointer toward the coordinate of the point along the third dimension.
-!  * \param *ref poiter to the point reference.
-!  * \param *isCorner pointer toward the flag saying if point is corner.
-!  * \param *isCorner pointer toward the flag saying if point is required.
+!  * \param c0 pointer toward the coordinate of the point along the first dimension.
+!  * \param c1 pointer toward the coordinate of the point along the second dimension.
+!  * \param c2 pointer toward the coordinate of the point along the third dimension.
+!  * \param ref pointer to the point reference.
+!  * \param isCorner pointer toward the flag saying if point is corner.
+!  * \param isRequired pointer toward the flag saying if point is required.
 !  * \return 1.
 !  *
 !  * Get coordinates \a c0, \a c1,\a c2 and reference \a ref of next
@@ -884,12 +883,12 @@
 !                      int* isCorner, int* isRequired);
 ! /**
 !  * \param mesh pointer toward the mesh structure.
-!  * \param *v0 pointer toward the first vertex of tetrahedron.
-!  * \param *v1 pointer toward the second vertex of tetrahedron.
-!  * \param *v2 pointer toward the third vertex of tetrahedron.
-!  * \param *v3 pointer toward the fourth vertex of tetrahedron.
-!  * \param *ref pointer toward the tetrahedron reference.
-!  * \param *isRequired pointer toward the flag saying if tetrahedron is required.
+!  * \param v0 pointer toward the first vertex of tetrahedron.
+!  * \param v1 pointer toward the second vertex of tetrahedron.
+!  * \param v2 pointer toward the third vertex of tetrahedron.
+!  * \param v3 pointer toward the fourth vertex of tetrahedron.
+!  * \param ref pointer toward the tetrahedron reference.
+!  * \param isRequired pointer toward the flag saying if tetrahedron is required.
 !  * \return 0 if failed, 1 otherwise.
 !  *
 !  * Get vertices \a v0, \a v1, \a v2, \a v3 and reference \a ref of
@@ -901,11 +900,11 @@
 !                           int* ref, int* isRequired);
 ! /**
 !  * \param mesh pointer toward the mesh structure.
-!  * \param *v0 pointer toward the first vertex of triangle.
-!  * \param *v1 pointer toward the second vertex of triangle.
-!  * \param *v2 pointer toward the third vertex of triangle.
-!  * \param *ref pointer toward the triangle reference.
-!  * \param *isRequired pointer toward the flag saying if triangle is required.
+!  * \param v0 pointer toward the first vertex of triangle.
+!  * \param v1 pointer toward the second vertex of triangle.
+!  * \param v2 pointer toward the third vertex of triangle.
+!  * \param ref pointer toward the triangle reference.
+!  * \param isRequired pointer toward the flag saying if triangle is required.
 !  * \return 0 if failed, 1 otherwise.
 !  *
 !  * Get vertices \a v0,\a v1,\a v2 and reference \a ref of next
@@ -917,11 +916,11 @@
 !                        int* isRequired);
 ! /**
 !  * \param mesh pointer toward the mesh structure.
-!  * \param *e0 pointer toward the first extremity of the edge.
-!  * \param *e1 pointer toward the second  extremity of the edge.
-!  * \param *ref pointer toward the edge reference.
-!  * \param *isRidge pointer toward the flag saying if the edge is ridge.
-!  * \param *isRequired pointer toward the flag saying if the edge is required.
+!  * \param e0 pointer toward the first extremity of the edge.
+!  * \param e1 pointer toward the second  extremity of the edge.
+!  * \param ref pointer toward the edge reference.
+!  * \param isRidge pointer toward the flag saying if the edge is ridge.
+!  * \param isRequired pointer toward the flag saying if the edge is required.
 !  * \return 0 if failed, 1 otherwise.
 !  *
 !  * Get extremities \a e0, \a e1 and reference \a ref of next edge of mesh.
@@ -932,7 +931,7 @@
 !                    int* isRidge, int* isRequired);
 ! /**
 !  * \param met pointer toward the sol structure.
-!  * \param *s pointer toward the scalar solution value.
+!  * \param s pointer toward the scalar solution value.
 !  * \return 0 if failed, 1 otherwise.
 !  *
 !  * Get solution \a s of next vertex of mesh.
@@ -950,7 +949,7 @@
 !  *
 !  */
 
-! int  MMG5_loadMesh(MMG5_pMesh );
+! int  MMG5_loadMesh(MMG5_pMesh mesh);
 ! /**
 !  * \param mesh pointer toward the mesh structure.
 !  * \return 0 if failed, 1 otherwise.
@@ -959,7 +958,7 @@
 !  *
 !  */
 
-! int  (*MMG5_saveMesh)(MMG5_pMesh );
+! int  (*MMG5_saveMesh)(MMG5_pMesh mesh);
 ! /**
 !  * \param mesh pointer toward the mesh structure.
 !  * \param met pointer toward the sol structure.
@@ -969,7 +968,7 @@
 !  *
 !  */
 
-! int  MMG5_loadMet(MMG5_pMesh,MMG5_pSol );
+! int  MMG5_loadMet(MMG5_pMesh mesh,MMG5_pSol met);
 ! /**
 !  * \param mesh pointer toward the mesh structure.
 !  * \param met pointer toward the sol structure.
@@ -991,7 +990,7 @@
 !  *
 !  */
 
-! int  MMG5_loadSingul(MMG5_pMesh,MMG5_pSingul singul);
+! int  MMG5_loadSingul(MMG5_pMesh mesh,MMG5_pSingul singul);
 ! #endif
 
 ! /** deallocations */
@@ -1006,7 +1005,7 @@
 !  *
 !  */
 
-! void MMG5_Free_all(MMG5_pMesh, MMG5_pSol, MMG5_pSingul);
+! void MMG5_Free_all(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pSingul sing);
 ! #else
 ! /**
 !  * \param mesh pointer toward the mesh structure.
@@ -1016,7 +1015,7 @@
 !  *
 !  */
 
-! void MMG5_Free_all(MMG5_pMesh, MMG5_pSol);
+! void MMG5_Free_all(MMG5_pMesh mesh, MMG5_pSol met);
 ! #endif
 
 ! #ifdef SINGUL
@@ -1029,7 +1028,7 @@
 !  *
 !  */
 
-! void MMG5_Free_structures(MMG5_pMesh, MMG5_pSol, MMG5_pSingul);
+! void MMG5_Free_structures(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pSingul sing);
 ! #else
 ! /**
 !  * \param mesh pointer toward the mesh structure.
@@ -1039,7 +1038,7 @@
 !  *
 !  */
 
-! void MMG5_Free_structures(MMG5_pMesh, MMG5_pSol);
+! void MMG5_Free_structures(MMG5_pMesh mesh, MMG5_pSol met);
 ! #endif
 
 ! #ifdef SINGUL
@@ -1053,7 +1052,7 @@
 !  *
 !  */
 
-! void MMG5_Free_names(MMG5_pMesh, MMG5_pSol, MMG5_pSingul);
+! void MMG5_Free_names(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pSingul sing);
 ! #else
 ! /**
 !  * \param mesh pointer toward the mesh structure.
@@ -1063,7 +1062,7 @@
 !  *
 !  */
 
-! void MMG5_Free_names(MMG5_pMesh, MMG5_pSol);
+! void MMG5_Free_names(MMG5_pMesh mesh, MMG5_pSol met);
 ! #endif
 
 
@@ -1071,12 +1070,12 @@
 ! #ifdef SINGUL
 ! /**
 !  * \param mesh pointer toward the mesh structure.
-!  * \param met pointer toward the sol structure.
+!  * \param sol pointer toward the sol structure.
 !  * \param sing pointer toward the sing structure (only for insertion of
 !  * singularities mode).
-!  * \return \ref MMG5_SUCCESS if success.
-!  * \return \ref MMG5_LOWFAILURE if failed but a conform mesh is saved.
-!  * \return \ref MMG5_STRONGFAILURE if failed and we can't save the mesh.
+!  * \return Return \ref MMG5_SUCCESS if success,
+!  * \ref MMG5_LOWFAILURE if fail but a conform mesh is saved or
+!  * \ref MMG5_STRONGFAILURE if fail and we can't save the mesh.
 !  *
 !  * Main program for the library.
 !  *
@@ -1086,10 +1085,10 @@
 ! #else
 ! /**
 !  * \param mesh pointer toward the mesh structure.
-!  * \param met pointer toward the sol structure.
-!  * \return \ref MMG5_SUCCESS if success.
-!  * \return \ref MMG5_LOWFAILURE if failed but a conform mesh is saved.
-!  * \return \ref MMG5_STRONGFAILURE if failed and we can't save the mesh.
+!  * \param sol pointer toward the sol structure.
+!  * \return Return \ref MMG5_SUCCESS if success,
+!  * \ref MMG5_LOWFAILURE if fail but a conform mesh is saved or
+!  * \ref MMG5_STRONGFAILURE if fail and we can't save the mesh.
 !  *
 !  * Main program for the library.
 !  *
@@ -1145,7 +1144,7 @@
 
 ! int  MMG5_parsop(MMG5_pMesh mesh,MMG5_pSol met);
 ! /**
-!  * \param *prog pointer toward the program name.
+!  * \param prog pointer toward the program name.
 !  * \note Developped for the PaMPA library interface.
 !  *
 !  * Print help for mmg3d5 options.
@@ -1155,7 +1154,7 @@
 ! void  MMG5_usage(char *prog);
 ! /**
 !  * \param mesh pointer toward the mesh structure.
-!  * \param *info pointer toward the info structure.
+!  * \param info pointer toward the info structure.
 !  * \return 1.
 !  * \note Developped for the PaMPA library interface.
 !  *
@@ -1166,7 +1165,7 @@
 ! int  MMG5_stockOptions(MMG5_pMesh mesh, MMG5_Info *info);
 ! /**
 !  * \param mesh pointer toward the mesh structure.
-!  * \param *info pointer toward the info structure.
+!  * \param info pointer toward the info structure.
 !  * \note Developped for the PaMPA library interface.
 !  *
 !  * Recover the info structure stored in the mesh structure.
@@ -1185,7 +1184,7 @@
 !  * \param critmin minimum quality for elements.
 !  * \param lmin minimum edge length.
 !  * \param lmax maximum ede length.
-!  * \param *eltab table of invalid elements.
+!  * \param eltab table of invalid elements.
 !  * \note Developped for the PaMPA library interface.
 !  *
 !  * Search invalid elements (in term of quality or edge length).
@@ -1197,11 +1196,11 @@
 ! #else
 ! /**
 !  * \param mesh pointer toward the mesh structure.
-!  * \param met pointer toward the sol structure.
+!  * \param sol pointer toward the sol structure.
 !  * \param critmin minimum quality for elements.
 !  * \param lmin minimum edge length.
 !  * \param lmax maximum ede length.
-!  * \param *eltab table of invalid elements.
+!  * \param eltab table of invalid elements.
 !  * \note Developped for the PaMPA library interface.
 !  *
 !  * Search invalid elements (in term of quality or edge length).
@@ -1215,7 +1214,7 @@
 !  * \param mesh pointer toward the mesh structure.
 !  * \param met pointer toward the sol structure.
 !  * \param critmin minimum quality for elements.
-!  * \param *eltab pointer toward the table of invalid elements.
+!  * \param eltab pointer toward the table of invalid elements.
 !  * \note Developped for the PaMPA library interface.
 !  *
 !  * Store elements which have worse quality than \a critmin in \a eltab,
@@ -1229,7 +1228,7 @@
 !  * \param met pointer toward the sol structure.
 !  * \param lmin minimum edge length.
 !  * \param lmax maximum ede length.
-!  * \param *eltab table of invalid elements.
+!  * \param eltab table of invalid elements.
 !  * \note Developped for the PaMPA library interface.
 !  *
 !  * Store in \a eltab elements which have edge lengths shorter than \a lmin
@@ -1245,13 +1244,13 @@
 !  * \brief Return adjacent elements of a tetrahedron.
 !  * \param mesh pointer toward the mesh structure.
 !  * \param kel tetrahedron index.
-!  * \param *v0 pointer toward the index of the adjacent element of \a kel through
+!  * \param v0 pointer toward the index of the adjacent element of \a kel through
 !  * its face number 0.
-!  * \param *v1 pointer toward the index of the adjacent element of \a kel through
+!  * \param v1 pointer toward the index of the adjacent element of \a kel through
 !  * its face number 1.
-!  * \param *v2 pointer toward the index of the adjacent element of \a kel through
+!  * \param v2 pointer toward the index of the adjacent element of \a kel through
 !  * its face number 2.
-!  * \param *v3 pointer toward the index of the adjacent element of \a kel through
+!  * \param v3 pointer toward the index of the adjacent element of \a kel through
 !  * its face number 3.
 !  * \return 1.
 !  * \note Developped for the PaMPA library interface.
@@ -1262,12 +1261,12 @@
 !  *
 !  */
 
-! int    MMG5_Get_adjaTet(MMG5_pMesh mesh,int kel, int*, int*, int*, int*);
+! int MMG5_Get_adjaTet(MMG5_pMesh mesh,int kel, int* v0, int* v1, int* v2, int* v3);
 ! /**
-!  * \param *ca pointer toward the coordinates of the first edge's extremity.
-!  * \param *cb pointer toward the coordinates of the second edge's extremity.
-!  * \param *ma pointer toward the metric associated to the first edge's extremity.
-!  * \param *mb pointer toward the metric associated to the second edge's extremity.
+!  * \param ca pointer toward the coordinates of the first edge's extremity.
+!  * \param cb pointer toward the coordinates of the second edge's extremity.
+!  * \param ma pointer toward the metric associated to the first edge's extremity.
+!  * \param mb pointer toward the metric associated to the second edge's extremity.
 !  * \return edge length.
 !  * \note Developped for the PaMPA library interface.
 !  *
@@ -1309,7 +1308,7 @@
 !  *
 !  */
 
-! void  MMG5_setfunc(MMG5_pMesh,MMG5_pSol);
+! void  MMG5_setfunc(MMG5_pMesh mesh,MMG5_pSol met);
 ! /**
 !  * \param mesh pointer toward the mesh structure (unused).
 !  * \param met pointer toward the sol structure (unused).

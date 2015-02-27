@@ -39,7 +39,7 @@
 #define sw 4
 #define sd 8
 
-int swapbin(int sbin)
+static int swapbin(int sbin)
 {
   int inv;
   char *p_in = (char *) &sbin;
@@ -62,7 +62,7 @@ int swapbin(int sbin)
     return ((int)c1 << 24) + ((int)c2 << 16) + ((int)c3 << 8) + c4;   */
 
 }
-float swapf(float sbin)
+static float swapf(float sbin)
 {
   float out;
   char *p_in = (char *) &sbin;
@@ -74,7 +74,7 @@ float swapf(float sbin)
 
   return(out);
 }
-double swapd(double sbin)
+static double swapd(double sbin)
 {
   float out;
   char *p_in = (char *) &sbin;
@@ -102,7 +102,7 @@ int loadMesh(pMesh mesh) {
   pTria       pt1;
   pEdge       pa;
   pPoint      ppt;
-  int         posnp,posnt,posne,posned,posncor,posnpreq,posntreq,posnereq,posnedreq,netmp;
+  int         posnp,posnt,posne,posned,posncor,posnpreq,posntreq,posnereq,posnedreq;
   int         posnr;
   int         npreq,ntreq,nereq,nedreq,ncor,ned,bin,iswp;
   int         binch,bdim,bpos,i,k;
@@ -112,9 +112,10 @@ int loadMesh(pMesh mesh) {
 
   posnp = posnt = posne = posncor = 0;
   posnpreq = posntreq = posnereq = posned = posnedreq = posnr = 0;
-  netmp = ncor = ned = npreq = ntreq = nereq = nedreq = nr = 0;
+  ncor = ned = npreq = ntreq = nereq = nedreq = nr = 0;
   bin = 0;
   iswp = 0;
+  ina = NULL;
   mesh->np = mesh->nt = mesh->ne = 0;
 
   name = mesh->namein;
@@ -201,7 +202,6 @@ int loadMesh(pMesh mesh) {
         continue;
       } else if(!strncmp(chaine,"Tetrahedra",strlen("Tetrahedra"))) {
         fscanf(inm,"%d",&mesh->nei);
-        netmp = mesh->ne;
         posne = ftell(inm);
         continue;
       } else if(!strncmp(chaine,"RequiredTetrahedra",strlen("RequiredTetrahedra"))) {
@@ -248,8 +248,8 @@ int loadMesh(pMesh mesh) {
         mesh->dim = bdim;
         if(bdim!=3) {
           fprintf(stdout,"BAD SOL DIMENSION : %d\n",mesh->dim);
-          exit(0);
-          return(1);
+          fprintf(stdout," Exit program.\n");
+          return(0);
         }
         continue;
       } else if(!mesh->npi && binch==4) {  //Vertices
@@ -293,7 +293,6 @@ int loadMesh(pMesh mesh) {
         if(iswp) bpos=swapbin(bpos);
         fread(&mesh->nei,sw,1,inm);
         if(iswp) mesh->nei=swapbin(mesh->nei);
-        netmp = mesh->nei;
         posne = ftell(inm);
         rewind(inm);
         fseek(inm,bpos,SEEK_SET);
@@ -583,7 +582,7 @@ int loadMesh(pMesh mesh) {
           if(iswp) ia=swapbin(ia);
         }
         if(ia>na) {
-          fprintf(stdout,"   Warning Ridge number %8d IGNORED\n",i);
+          fprintf(stdout,"   Warning Ridge number %8d IGNORED\n",ia);
           continue;
         }
         if( mesh->info.iso ){
@@ -770,6 +769,7 @@ int saveMesh(pMesh mesh) {
   fprintf(stdout,"  %%%% %s OPENED\n",data);
 
   /*entete fichier*/
+  binch=0; bpos=10;
   if(!bin) {
     strcpy(&chaine[0],"MeshVersionFormatted 2\n");
     fprintf(inm,"%s",chaine);
@@ -1638,11 +1638,12 @@ int saveLibraryMesh(pMesh mesh) {
 int loadMet(pMesh mesh,pSol met) {
   FILE       *inm;
   float       fbuf[6];
-  double      tmp,dbuf[6];
+  double      dbuf[6];
   int         binch,bdim,iswp;
-  int         k,i,isol,type,bin,dim,btyp,bpos;
+  int         k,bin,bpos;
   long        posnp;
   char        *ptr,data[128],chaine[128];
+  //  int         i;
 
   if ( !met->namein )  return(0);
   posnp = 0;
@@ -1683,7 +1684,7 @@ int loadMet(pMesh mesh,pSol met) {
       if(!strncmp(chaine,"Dimension",strlen("Dimension"))) {
         fscanf(inm,"%d",&met->dim);
         if(met->dim!=3) {
-          fprintf(stdout,"BAD SOL DIMENSION : %d\n",dim);
+          fprintf(stdout,"BAD SOL DIMENSION : %d\n",met->dim);
           return(1);
         }
         continue;
@@ -1718,8 +1719,8 @@ int loadMet(pMesh mesh,pSol met) {
         if(iswp) met->dim=swapbin(met->dim);
         if(met->dim!=3) {
           fprintf(stdout,"BAD SOL DIMENSION : %d\n",met->dim);
-          exit(0);
-          return(1);
+          printf("  Exit program.\n");
+          return(-1);
         }
         continue;
       } else if(binch==62) {  //SolAtVertices
@@ -1833,7 +1834,7 @@ int loadMet(pMesh mesh,pSol met) {
  */
 int saveMet(pMesh mesh,pSol met) {
   FILE*        inm;
-  pPoint     ppt;
+  pPoint       ppt;
   char        *ptr,data[128],chaine[128];
   int          binch,bpos,bin,np,k,typ;
 
@@ -1850,7 +1851,9 @@ int saveMet(pMesh mesh,pSol met) {
     return(0);
   }
   fprintf(stdout,"  %%%% %s OPENED\n",data);
+
   /*entete fichier*/
+  binch=bpos=0;
   if(!bin) {
     strcpy(&chaine[0],"MeshVersionFormatted 2\n");
     fprintf(inm,"%s",chaine);

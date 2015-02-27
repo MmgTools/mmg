@@ -957,7 +957,13 @@ static int hashGetFace(Hash *hash,int ia,int ib,int ic) {
   return(0);
 }
 
-/** if triangles, set ref to tetra faces and edges */
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \return 0 if failed, 1 if success.
+ *
+ * Set the triangles references to the tetrahedra faces and edges.
+ *
+ */
 int bdrySet(pMesh mesh) {
   pTetra   pt,pt1;
   pTria    ptt;

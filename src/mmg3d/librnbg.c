@@ -224,7 +224,16 @@ int kPartBoxCompute(SCOTCH_Graph graf, int vertNbr, int boxVertNbr,
   return 0;
 }
 
-/** Swap two tetras in the table of tetrahedras */
+/**
+ * \param tetras pointer toward a table containing the tetra structures.
+ * \param *perm pointer toward the permutation table (to perform in place
+ * permutations).
+ * \param ind1 index of the first tetra to swap.
+ * \param ind2 index of the second tetra to swap.
+ *
+ * Swap two tetras in the table of tetrahedras.
+ *
+ */
 static inline
 void swapTet(pTetra tetras/*, int* adja*/, int* perm, int ind1, int ind2) {
   Tetra pttmp;
@@ -274,7 +283,18 @@ void swapTet(pTetra tetras/*, int* adja*/, int* perm, int ind1, int ind2) {
   perm[ind1] = tmp;
 }
 
-/** Swap two points in the table of points and in the sol table */
+/**
+ * \param points pointer toward a table containing the point structures.
+ * \param sols pointer toward a table containing the solution structures.
+ * \param *perm pointer toward the permutation table (to perform in place
+ * permutations).
+ * \param ind1 index of the first tetra to swap.
+ * \param ind2 index of the second tetra to swap.
+ * \param solsize size of the solution.
+ *
+ * Swap two nodes in the table of vertices.
+ *
+ */
 static inline
 void swapNod(pPoint points, double* sols, int* perm,
              int ind1, int ind2, int solsiz) {
@@ -303,13 +323,15 @@ void swapNod(pPoint points, double* sols, int* perm,
 }
 
 
-/** Function : renumbering
- *  it modifies the numbering of each node to prevent from cache missing.
+/**
+ * \param boxVertNbr number of vertices by box.
+ * \param pointer toward the mesh structure.
+ * \return 0 if the renumbering fail and we can't rebuild tetrahedra hashtable.
+ * \return 1 if the renumbering fail but we can rebuild tetrahedra hashtable or
+ * if the renumbering success.
  *
- *  - boxVertNbr : number of vertices by box
- *  - mesh : the input mesh which is modified
+ * Modifies the node indicies to prevent from cache missing.
  *
- *  returning 0 if OK, 1 else
  */
 int renumbering(int boxVertNbr, pMesh mesh, pSol sol) {
   pPoint ppt;
@@ -399,7 +421,7 @@ int renumbering(int boxVertNbr, pMesh mesh, pSol sol) {
   }
   vertTab[vertNbr+1] = edgeNbr;
   edgeNbr--;
-  /*check if some tetra are alone*/
+  /* Check if some tetras are alone */
   for(tetraIdx = 1 ; tetraIdx < mesh->ne + 1 ; tetraIdx++) {
 
     /* Testing if the tetra exists */
@@ -409,7 +431,7 @@ int renumbering(int boxVertNbr, pMesh mesh, pSol sol) {
         fprintf(stdout,"WARNING graph problem, no renum\n");
         DEL_MEM(mesh,edgeTab,edgeSiz*sizeof(SCOTCH_Num));
         DEL_MEM(mesh,vertTab,(vertNbr+2)*sizeof(SCOTCH_Num));
-        return(0);
+        return(1);
       }
       if(vertTab[vertOldTab[tetraIdx] + 1] > 0)
         vertTab[vertOldTab[tetraIdx]] = vertTab[vertOldTab[tetraIdx] + 1];
@@ -418,7 +440,7 @@ int renumbering(int boxVertNbr, pMesh mesh, pSol sol) {
           fprintf(stdout,"WARNING graph problem, no renum\n");
           DEL_MEM(mesh,edgeTab,edgeSiz*sizeof(SCOTCH_Num));
           DEL_MEM(mesh,vertTab,(vertNbr+2)*sizeof(SCOTCH_Num));
-          return(0);
+          return(1);
         }
         i = 1;
         do  {
@@ -428,7 +450,7 @@ int renumbering(int boxVertNbr, pMesh mesh, pSol sol) {
           fprintf(stdout,"WARNING graph problem, no renum\n");
           DEL_MEM(mesh,edgeTab,edgeSiz*sizeof(SCOTCH_Num));
           DEL_MEM(mesh,vertTab,(vertNbr+2)*sizeof(SCOTCH_Num));
-          return(0);
+          return(1);
         }
         vertTab[vertOldTab[tetraIdx]] = vertTab[vertOldTab[tetraIdx] + i];
       }
@@ -499,7 +521,7 @@ int renumbering(int boxVertNbr, pMesh mesh, pSol sol) {
     }
   }
 
-  /* Create the final permutation table for tetras (stored in vertOldTab) and *
+  /* Create the final permutation table for tetras (stored in vertOldTab) and
      modify the numbering of the nodes of each tetra */
   for( tetraIdx = 1; tetraIdx < mesh->ne + 1; tetraIdx++) {
     if ( !mesh->tetra[tetraIdx].v[0] )  continue;
