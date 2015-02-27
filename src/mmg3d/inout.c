@@ -1477,7 +1477,7 @@ int saveLibraryMesh(pMesh mesh) {
       fwrite(&binch,sw,1,inm);
       bpos += 12 + 3*4*mesh->na;//Pos
       fwrite(&bpos,sw,1,inm);
-      fwrite(&na,sw,1,inm);
+      fwrite(&mesh->na,sw,1,inm);
     }
     for (k=1; k<=mesh->na; k++) {
       if(!bin) {
