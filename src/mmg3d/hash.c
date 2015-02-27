@@ -627,6 +627,13 @@ int hNew(HGeom *hash,int hsiz,int hmax,int secure) {
   return 1;
 }
 
+/**
+ * \param mesh pointer toward he mesh structure.
+ * \return 0 if failed, 1 otherwise
+ *
+ * Build hashtable for initial mesh edges.
+ *
+ */
 int hGeom(pMesh mesh) {
   pTria   pt;
   pEdge   pa;
@@ -1186,7 +1193,13 @@ int bdryUpdate(pMesh mesh) {
   return(1);
 }
 
-/** make orientation of triangles compatible with tetra faces */
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \return 0 if failed, 1 otherwise.
+ *
+ * Make orientation of triangles compatible with tetra faces.
+ *
+ */
 int bdryPerm(pMesh mesh) {
   pTetra   pt,pt1;
   pTria    ptt;

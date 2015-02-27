@@ -205,7 +205,7 @@ int MMG_npuiss,MMG_nvol,MMG_npres;
     nnm += nm;
     if ( mesh->info.ddebug )  fprintf(stdout,"     %8d moved, %d geometry\n",nm,ns);
 
-    outqua(mesh,met);
+    // outqua(mesh,met);
   }
   while( ++it < maxit && nm > 0 );
 
@@ -1183,7 +1183,7 @@ int optet(pMesh mesh, pSol met,pBucket bucket) {
     nnf+=nf;
   } else  nnf = nf = 0;
   fprintf(stdout,"$$$$$$$$$$$$$$$$$$ INITIAL SWAP %7d\n",nnf);
-  outqua(mesh,met);
+  //outqua(mesh,met);
 
   /* Iterative mesh modifications */
   warn = 0;
@@ -1226,7 +1226,7 @@ int optet(pMesh mesh, pSol met,pBucket bucket) {
     /* renumbering end */
   }
 #endif
-  outqua(mesh,met);
+  //outqua(mesh,met);
 
   if(!optet(mesh,met,bucket)) return(0);
 
@@ -1362,7 +1362,6 @@ int mmg3d1_delone(pMesh mesh,pSol met) {
     fprintf(stdout,"  ## Unable to split mesh. Exiting.\n");
     return(0);
   }
-  outqua(mesh,met);
 
 #ifdef DEBUG
   outqua(mesh,met);
@@ -1386,7 +1385,6 @@ int mmg3d1_delone(pMesh mesh,pSol met) {
     fprintf(stdout,"  ## Unable to split mesh. Exiting.\n");
     return(0);
   }
-  outqua(mesh,met);
 
 #ifdef DEBUG
   puts("---------------------------Fin anatet---------------------");
@@ -1417,7 +1415,6 @@ int mmg3d1_delone(pMesh mesh,pSol met) {
     fprintf(stdout,"  ## Unable to adapt. Exit program.\n");
     return(0);
   }
-  outqua(mesh,met);
 
 #ifdef DEBUG
   puts("---------------------Fin adptet-----------------");
