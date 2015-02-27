@@ -278,7 +278,12 @@ int zaldy(pMesh mesh) {
   return(1);
 }
 
-/** free xtetra */
+/**
+ * \param mesh pointer toward the mesh structure.
+ *
+ * Free xtetra structure.
+ *
+ */
 void freeXTets(pMesh mesh) {
   pTetra pt;
   int    k;
