@@ -108,9 +108,9 @@ void Init_woalloc_mesh(MMG5_pMesh mesh, MMG5_pSol sol
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the sol structure.
- * \param sing pointer toward the sing structure (only for insertion of singularities mode).
+ * \param mesh pointer toward a pointer toward the mesh structure.
+ * \param sol pointer toward a pointer toward the sol structure.
+ * \param sing pointer toward a pointer toward the sing structure (only for insertion of singularities mode).
  *
  * Allocate the mesh and solution structures and initialize it to
  * their default values.
@@ -537,17 +537,17 @@ int Set_meshSize(MMG5_pMesh mesh, int np, int ne, int nt, int na) {
   if( mesh->info.mem > 0) {
     if((mesh->npmax < mesh->np || mesh->ntmax < mesh->nt || mesh->nemax < mesh->ne)) {
       memOption(mesh);
- //     printf("pas de pbs ? %d %d %d %d %d %d -- %d\n",mesh->npmax,mesh->np,
-//	     mesh->ntmax,mesh->nt,mesh->nemax,mesh->ne,mesh->info.mem);
-      if((mesh->npmax < mesh->np || mesh->ntmax < mesh->nt 
-	  || mesh->nemax < mesh->ne)) {
-	fprintf(stdout,"mem insuffisante np : %d %d nt : %d %d ne :%d %d\n"
-		,mesh->npmax,mesh->np,
-		mesh->ntmax,mesh->nt,mesh->nemax,mesh->ne);
-	return(0);
+      //     printf("pas de pbs ? %d %d %d %d %d %d -- %d\n",mesh->npmax,mesh->np,
+      //     mesh->ntmax,mesh->nt,mesh->nemax,mesh->ne,mesh->info.mem);
+      if((mesh->npmax < mesh->np || mesh->ntmax < mesh->nt
+          || mesh->nemax < mesh->ne)) {
+        fprintf(stdout,"mem insuffisante np : %d %d nt : %d %d ne :%d %d\n"
+                ,mesh->npmax,mesh->np,
+                mesh->ntmax,mesh->nt,mesh->nemax,mesh->ne);
+        return(0);
       }
       else
-	return(1);
+        return(1);
     } else if(mesh->info.mem < 39) {
       printf("mem insuffisante %d\n",mesh->info.mem);
       return(0);
@@ -652,9 +652,9 @@ int Set_singulSize(MMG5_pMesh mesh,MMG5_pSingul sing, int np, int na) {
 /**
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the sol structure.
- * \param *typEntity pointer toward the type of entities to which solutions are applied.
- * \param *np pointer toward the number of solutions.
- * \param *typSol pointer toward the type of the solutions (scalar, vectorial...)
+ * \param typEntity pointer toward the type of entities to which solutions are applied.
+ * \param np pointer toward the number of solutions.
+ * \param typSol pointer toward the type of the solutions (scalar, vectorial...)
  * \return 1.
  *
  * Get the solution number, dimension and type.
@@ -675,10 +675,10 @@ int Get_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int* typEntity, int* np, int* ty
 
 /**
  * \param mesh pointer toward the mesh structure.
- * \param *np pointer toward the number of vertices.
- * \param *ne pointer toward the number of elements (tetrahedra).
- * \param *nt pointer toward the number of triangles.
- * \param *na pointer toward the number of edges.
+ * \param np pointer toward the number of vertices.
+ * \param ne pointer toward the number of elements (tetrahedra).
+ * \param nt pointer toward the number of triangles.
+ * \param na pointer toward the number of edges.
  * \return 1.
  *
  * Get the number of vertices, tetrahedra, triangles and edges of the mesh.
@@ -752,12 +752,12 @@ int Set_vertex(MMG5_pMesh mesh, double c0, double c1, double c2, int ref, int po
 
 /**
  * \param mesh pointer toward the mesh structure.
- * \param *c0 pointer toward the coordinate of the point along the first dimension.
- * \param *c1 pointer toward the coordinate of the point along the second dimension.
- * \param *c2 pointer toward the coordinate of the point along the third dimension.
- * \param *ref poiter to the point reference.
- * \param *isCorner pointer toward the flag saying if point is corner.
- * \param *isCorner pointer toward the flag saying if point is required.
+ * \param c0 pointer toward the coordinate of the point along the first dimension.
+ * \param c1 pointer toward the coordinate of the point along the second dimension.
+ * \param c2 pointer toward the coordinate of the point along the third dimension.
+ * \param ref poiter to the point reference.
+ * \param isCorner pointer toward the flag saying if point is corner.
+ * \param isCorner pointer toward the flag saying if point is required.
  * \return 1.
  *
  * Get coordinates \a c0, \a c1,\a c2 and reference \a ref of next
@@ -884,12 +884,12 @@ int Set_tetrahedron(MMG5_pMesh mesh, int v0, int v1, int v2, int v3, int ref, in
 
 /**
  * \param mesh pointer toward the mesh structure.
- * \param *v0 pointer toward the first vertex of tetrahedron.
- * \param *v1 pointer toward the second vertex of tetrahedron.
- * \param *v2 pointer toward the third vertex of tetrahedron.
- * \param *v3 pointer toward the fourth vertex of tetrahedron.
- * \param *ref pointer toward the tetrahedron reference.
- * \param *isRequired pointer toward the flag saying if tetrahedron is required.
+ * \param v0 pointer toward the first vertex of tetrahedron.
+ * \param v1 pointer toward the second vertex of tetrahedron.
+ * \param v2 pointer toward the third vertex of tetrahedron.
+ * \param v3 pointer toward the fourth vertex of tetrahedron.
+ * \param ref pointer toward the tetrahedron reference.
+ * \param isRequired pointer toward the flag saying if tetrahedron is required.
  * \return 0 if failed, 1 otherwise.
  *
  * Get vertices \a v0, \a v1, \a v2, \a v3 and reference \a ref of
@@ -972,11 +972,11 @@ int Set_triangle(MMG5_pMesh mesh, int v0, int v1, int v2, int ref,int pos) {
 
 /**
  * \param mesh pointer toward the mesh structure.
- * \param *v0 pointer toward the first vertex of triangle.
- * \param *v1 pointer toward the second vertex of triangle.
- * \param *v2 pointer toward the third vertex of triangle.
- * \param *ref pointer toward the triangle reference.
- * \param *isRequired pointer toward the flag saying if triangle is required.
+ * \param v0 pointer toward the first vertex of triangle.
+ * \param v1 pointer toward the second vertex of triangle.
+ * \param v2 pointer toward the third vertex of triangle.
+ * \param ref pointer toward the triangle reference.
+ * \param isRequired pointer toward the flag saying if triangle is required.
  * \return 0 if failed, 1 otherwise.
  *
  * Get vertices \a v0,\a v1,\a v2 and reference \a ref of next
@@ -1057,11 +1057,11 @@ int Set_edge(MMG5_pMesh mesh, int v0, int v1, int ref, int pos) {
 
 /**
  * \param mesh pointer toward the mesh structure.
- * \param *e0 pointer toward the first extremity of the edge.
- * \param *e1 pointer toward the second  extremity of the edge.
- * \param *ref pointer toward the edge reference.
- * \param *isRidge pointer toward the flag saying if the edge is ridge.
- * \param *isRequired pointer toward the flag saying if the edge is required.
+ * \param e0 pointer toward the first extremity of the edge.
+ * \param e1 pointer toward the second  extremity of the edge.
+ * \param ref pointer toward the edge reference.
+ * \param isRidge pointer toward the flag saying if the edge is ridge.
+ * \param isRequired pointer toward the flag saying if the edge is required.
  * \return 0 if failed, 1 otherwise.
  *
  * Get extremities \a e0, \a e1 and reference \a ref of next edge of mesh.
@@ -1225,7 +1225,7 @@ int Set_scalarSol(MMG5_pSol met, double s, int pos) {
 
 /**
  * \param met pointer toward the sol structure.
- * \param *s pointer toward the scalar solution value.
+ * \param s pointer toward the scalar solution value.
  * \return 0 if failed, 1 otherwise.
  *
  * Get solution \a s of next vertex of mesh.

@@ -108,8 +108,14 @@ void Free_topoTables(pMesh mesh) {
   return;
 }
 
-/** pack the sparse mesh and create triangles and edges before getting
-    out of library */
+/**
+ * \param mesh pointer toward the mesh structure (unused).
+ * \param met pointer toward the solution (metric) structure.
+ *
+ * Pack the sparse mesh and create triangles and edges before getting
+ * out of library
+ *
+ */
 static inline
 int packMesh(pMesh mesh,pSol met) {
   pTetra   pt,ptnew;
@@ -291,9 +297,9 @@ int packMesh(pMesh mesh,pSol met) {
  * \param met pointer toward the sol structure.
  * \param sing pointer toward the sing structure (only for insertion of
  * singularities mode).
- * \return \ref MMG5_SUCCESS if success.
- * \return \ref MMG5_LOWFAILURE if failed but a conform mesh is saved.
- * \return \ref MMG5_STRONGFAILURE if failed and we can't save the mesh.
+ * \return Return \ref MMG5_SUCCESS if success.
+ * \return Return \ref MMG5_LOWFAILURE if failed but a conform mesh is saved.
+ * \return Return \ref MMG5_STRONGFAILURE if failed and we can't save the mesh.
  *
  * Main program for the library .
  *

@@ -237,12 +237,13 @@ int MMG_npuiss,MMG_nvol,MMG_npres,MMG_npd;
  * \param bucket pointer toward the bucket structure.
  * \param ne number of elements.
  * \param ifilt pointer to store the number of vertices filtered by the bucket.
- * \param *ns pointer to store the number of vertices insertions.
- * \param *nc pointer to store the number of collapse.
- * \param *warn pointer to store a flag that warn the user in case of
+ * \param ns pointer to store the number of vertices insertions.
+ * \param nc pointer to store the number of collapse.
+ * \param warn pointer to store a flag that warn the user in case of
  * reallocation difficulty.
  * \param it iteration index.
- * \return 0 if failed, 1 otherwise.
+ * \return -1 if fail and we don't save the mesh, 0 if fail but we try to save
+ * the mesh, 1 otherwise.
  *
  * \ref adpsplcol loop: split edges longer than \ref LOPTLDEL and
  * collapse edges shorter than \ref LOPTSDEL.
@@ -990,10 +991,8 @@ static inline int boucle_for(pMesh mesh, pSol met,pBucket bucket,int ne,
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
  * \param bucket pointer toward the bucket structure.
- * \return -1 if fail and the mesh is not conform.
- * \return  0 if fail but the mesh is conform so we can try to continue to work
- * or at least we can save it.
- * \return  1 if success.
+ * \return -1 if fail and we dont try to end the remesh process,
+ * 0 if fail but we try to end the remesh process and 1 if success.
  *
  * Split edges longer than \ref LOPTLDEL and collapse edges shorter
  * than \ref LOPTSDEL.
@@ -1241,9 +1240,11 @@ int optet(pMesh mesh, pSol met,pBucket bucket) {
 #endif
   ns = adpsplcol(mesh,met,bucket,&warn);
 #ifdef DEBUG
-  if ( ns ) { printf("APS ADPSPLCOL == %d\n",ns);
+  if ( ns ) {
+    printf("APS ADPSPLCOL == %d\n",ns);
     prilen(mesh,met);
-    printf(" histo %5.1f  %5.1f %5.1f\n", tabtmp[0][0],tabtmp[0][1],tabtmp[0][2]);}
+    printf(" histo %5.1f  %5.1f %5.1f\n", tabtmp[0][0],tabtmp[0][1],tabtmp[0][2]);
+  }
 #endif
   if ( ns < 0 ) {
     fprintf(stdout,"  ## Unable to complete mesh. Exit program.\n");
