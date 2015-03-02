@@ -484,7 +484,7 @@ IF ( BUILD_MMG3D OR BUILD_MMG )
     ENDIF()
 
     IF ( CMAKE_COMPILER_IS_GNUCC )
-      SET(CMAKE_C_FLAGS_DEBUG "-g -Weverything ${CMAKE_C_FLAGS}")
+      SET(CMAKE_C_FLAGS_DEBUG "-g -Wall ${CMAKE_C_FLAGS}")
       SET(CMAKE_EXE_LINKER_FLAGS_DEBUG "-g ${CMAKE_EXE_LINKER_FLAGS}")
     ELSEIF( CMAKE_COMPILER_IS_CLANG )
       SET(CMAKE_C_FLAGS_DEBUG "-g -Weverything -Wno-sign-conversion -Wno-char-subscripts -Wno-padded ${CMAKE_C_FLAGS}")
