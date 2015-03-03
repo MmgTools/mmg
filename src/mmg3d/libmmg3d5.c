@@ -85,7 +85,7 @@ void Free_all(pMesh mesh,pSol met
  *
  */
 void Set_saveFunc(pMesh mesh) {
-  MMG5_saveMesh = saveLibraryMesh;
+  MMG5_saveMesh = _MMG5_saveLibraryMesh;
 }
 
 /** Free adja, xtetra and xpoint tables */

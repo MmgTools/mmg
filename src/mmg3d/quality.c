@@ -737,7 +737,7 @@ void outqua(pMesh mesh,pSol met) {
   if ( abs(mesh->info.imprim) < 4 ){
     if (rapmin == 0){
       fprintf(stdout,"  ## WARNING: TOO BAD QUALITY FOR THE WORST ELEMENT\n");
-      saveMesh(mesh);
+      MMG5_saveMesh(mesh);
       exit(EXIT_FAILURE);
     }
     return;
@@ -756,7 +756,7 @@ void outqua(pMesh mesh,pSol met) {
   }
   if (rapmin == 0){
     fprintf(stdout,"  ## WARNING: TOO BAD QUALITY FOR THE WORST ELEMENT\n");
-    saveMesh(mesh);
+    MMG5_saveMesh(mesh);
     exit(EXIT_FAILURE);
   }
 }

@@ -6,6 +6,8 @@
 #define BezierRidge                   	 _MMG5_BezierRidge
 #define BezierTgt                     	 _MMG5_BezierTgt
 #define DoSol                         	 _MMG5_DoSol
+#define _MMG5_saveAllMesh             	 _MMG5__MMG5_saveAllMesh
+#define _MMG5_saveLibraryMesh         	 _MMG5__MMG5_saveLibraryMesh
 #define addBucket                     	 _MMG5_addBucket
 #define analys                        	 _MMG5_analys
 #define anatet                        	 _MMG5_anatet
@@ -133,8 +135,6 @@
 #define printTria                     	 _MMG5_printTria
 #define renumbering                   	 _MMG5_renumbering
 #define rotmatrix                     	 _MMG5_rotmatrix
-#define saveLibraryMesh               	 _MMG5_saveLibraryMesh
-#define saveMesh                      	 _MMG5_saveMesh
 #define scaleMesh                     	 _MMG5_scaleMesh
 #define seekEdge                      	 _MMG5_seekEdge
 #define seekPoint                     	 _MMG5_seekPoint

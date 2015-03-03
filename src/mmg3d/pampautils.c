@@ -100,7 +100,7 @@ void pampa_setfunc(pMesh mesh,pSol met) {
   else
     MMG5_lenedgCoor = lenedgCoor_ani;
   MMG5_hashTetra = hashTetra;
-  MMG5_saveMesh = saveLibraryMesh;
+  MMG5_saveMesh = _MMG5_saveLibraryMesh;
 }
 /* END COPY */
 

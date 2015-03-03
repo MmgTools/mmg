@@ -67,7 +67,7 @@ void Free_all(pMesh mesh,pSol met
  *
  */
 void Set_saveFunc(pMesh mesh) {
-  MMG5_saveMesh = saveMesh;
+  MMG5_saveMesh = _MMG5_saveAllMesh;
 }
 
 /**
@@ -272,7 +272,7 @@ int main(int argc,char *argv[]) {
     }
     if ( !unscaleMesh(&mesh,&met) )
       RETURN_AND_FREE(&mesh,&met,&sing,MMG5_STRONGFAILURE);
-    if ( !saveMesh(&mesh) )
+    if ( !MMG5_saveMesh(&mesh) )
       RETURN_AND_FREE(&mesh,&met,&sing,MMG5_STRONGFAILURE);
     if ( met.m && !saveMet(&mesh,&met) )
       RETURN_AND_FREE(&mesh,&met,&sing,MMG5_STRONGFAILURE);
@@ -288,7 +288,7 @@ int main(int argc,char *argv[]) {
       }
       if ( !unscaleMesh(&mesh,&met) )
         RETURN_AND_FREE(&mesh,&met,&sing,MMG5_STRONGFAILURE);
-      if ( !saveMesh(&mesh) )
+      if ( !MMG5_saveMesh(&mesh) )
         RETURN_AND_FREE(&mesh,&met,&sing,MMG5_STRONGFAILURE);
       if ( met.m && !saveMet(&mesh,&met) )
         RETURN_AND_FREE(&mesh,&met,&sing,MMG5_STRONGFAILURE);
@@ -303,7 +303,7 @@ int main(int argc,char *argv[]) {
       }
       if ( !unscaleMesh(&mesh,&met) )
         RETURN_AND_FREE(&mesh,&met,&sing,MMG5_STRONGFAILURE);
-      if ( !saveMesh(&mesh) )
+      if ( !MMG5_saveMesh(&mesh) )
         RETURN_AND_FREE(&mesh,&met,&sing,MMG5_STRONGFAILURE);
       if ( met.m && !saveMet(&mesh,&met) )
         RETURN_AND_FREE(&mesh,&met,&sing,MMG5_STRONGFAILURE);
@@ -319,7 +319,7 @@ int main(int argc,char *argv[]) {
       fprintf(stdout,"  ## Solve of undetermined tetrahedra problem.\n");
       if ( !unscaleMesh(&mesh,&met) )
         RETURN_AND_FREE(&mesh,&met,&sing,MMG5_STRONGFAILURE);
-      if ( !saveMesh(&mesh) )
+      if ( !MMG5_saveMesh(&mesh) )
         RETURN_AND_FREE(&mesh,&met,&sing,MMG5_STRONGFAILURE);
       if ( met.m && !saveMet(&mesh,&met) )
         RETURN_AND_FREE(&mesh,&met,&sing,MMG5_STRONGFAILURE);
@@ -345,7 +345,7 @@ int main(int argc,char *argv[]) {
   if ( !unscaleMesh(&mesh,&met) )
     RETURN_AND_FREE(&mesh,&met,&sing,MMG5_STRONGFAILURE);
 
-  if ( !saveMesh(&mesh) )
+  if ( !MMG5_saveMesh(&mesh) )
     RETURN_AND_FREE(&mesh,&met,&sing,MMG5_STRONGFAILURE);
 
   if ( !saveMet(&mesh,&met) )

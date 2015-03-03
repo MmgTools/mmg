@@ -551,8 +551,8 @@ int  indElt(pMesh mesh,int kel);
 int  indPt(pMesh mesh,int kp);
 void printTria(pMesh mesh,char* fileName);
 void printTetra(pMesh mesh,char* fileName);
-int  saveMesh(pMesh mesh);
-int  saveLibraryMesh(pMesh mesh);
+int  _MMG5_saveAllMesh(pMesh mesh);
+int  _MMG5_saveLibraryMesh(pMesh mesh);
 
 #ifdef USE_SCOTCH
 int renumbering(int vertBoxNbr, pMesh mesh, pSol sol);

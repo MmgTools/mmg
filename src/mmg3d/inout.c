@@ -96,12 +96,12 @@ static double swapd(double sbin)
  * Read mesh data.
  *
  */
-int loadMesh(pMesh mesh) {
+int MMG5_loadMesh(MMG5_pMesh mesh) {
   FILE*       inm;
-  pTetra      pt;
-  pTria       pt1;
-  pEdge       pa;
-  pPoint      ppt;
+  MMG5_pTetra pt;
+  MMG5_pTria  pt1;
+  MMG5_pEdge  pa;
+  MMG5_pPoint ppt;
   int         posnp,posnt,posne,posned,posncor,posnpreq,posntreq,posnereq,posnedreq;
   int         posnr;
   int         npreq,ntreq,nereq,nedreq,ncor,ned,bin,iswp;
@@ -725,17 +725,18 @@ int loadMesh(pMesh mesh) {
 /**
  * \param mesh pointer toward the mesh structure.
  * \return 0 if failed, 1 otherwise.
+ * \remark Function call through the function pointer \ref MMG5_saveMesh.
  *
  * Save mesh data.
  *
  */
-int saveMesh(pMesh mesh) {
+int _MMG5_saveAllMesh(MMG5_pMesh mesh) {
   FILE*        inm;
-  pPoint       ppt;
-  pTetra       pt;
-  pTria        ptt;
-  xPoint      *pxp;
-  hgeom       *ph;
+  MMG5_pPoint  ppt;
+  MMG5_pTetra  pt;
+  MMG5_pTria   ptt;
+  MMG5_xPoint *pxp;
+  MMG5_hgeom  *ph;
   int          k,i,na,nc,np,ne,nn,nr,nre,nedreq,ntreq,nt,nereq;
   int          bin,binch,bpos;
   char         data[128],chaine[128],*ptr;
@@ -1270,15 +1271,16 @@ int saveMesh(pMesh mesh) {
 /**
  * \param mesh pointer toward the mesh structure.
  * \return 0 if failed, 1 otherwise.
+ * \remark Function call through the function pointer \ref MMG5_saveMesh.
  *
  * Save mesh data without adjacency and xtetra tables (for library version).
  *
  */
-int saveLibraryMesh(pMesh mesh) {
+int _MMG5_saveLibraryMesh(MMG5_pMesh mesh) {
   FILE        *inm;
-  pPoint       ppt;
-  pTetra       pt;
-  pTria        ptt;
+  MMG5_pPoint  ppt;
+  MMG5_pTetra  pt;
+  MMG5_pTria   ptt;
   int          k,nc,np,ne,nr,nre,nedreq,ntreq,nereq;
   int          bin,binch,bpos,na;
   char         data[128],chaine[128],*ptr;
@@ -1635,7 +1637,7 @@ int saveLibraryMesh(pMesh mesh) {
  * Load metric field.
  *
  */
-int loadMet(pMesh mesh,pSol met) {
+int MMG5_loadMet(MMG5_pMesh mesh,MMG5_pSol met) {
   FILE       *inm;
   float       fbuf[6];
   double      dbuf[6];
@@ -1832,9 +1834,9 @@ int loadMet(pMesh mesh,pSol met) {
  * Write isotropic or anisotropic metric.
  *
  */
-int saveMet(pMesh mesh,pSol met) {
+int MMG5_saveMet(MMG5_pMesh mesh,MMG5_pSol met) {
   FILE*        inm;
-  pPoint       ppt;
+  MMG5_pPoint  ppt;
   char        *ptr,data[128],chaine[128];
   int          binch,bpos,bin,np,k,typ;
 
@@ -1953,12 +1955,12 @@ int saveMet(pMesh mesh,pSol met) {
  * singularities (corner, required, ridges....)
  *
  */
-int loadSingul(pMesh mesh,pSingul singul) {
+int MMG5_loadSingul(MMG5_pMesh mesh,MMG5_pSingul singul) {
   FILE        *inm;
-  Mesh         sing_mesh;
-  pEdge        pa,pas;
-  pPoint       ppt;
-  psPoint      ppts;
+  MMG5_Mesh    sing_mesh;
+  MMG5_pEdge   pa,pas;
+  MMG5_pPoint  ppt;
+  MMG5_psPoint ppts;
   float        fc;
   int          i,k,nc,npr,na,ns,bin;
   int          posnp,posned,posncor,posnpreq,posnedreq,posnr;

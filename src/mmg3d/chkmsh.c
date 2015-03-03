@@ -163,14 +163,14 @@ int chkmsh(pMesh mesh,int severe,int base) {
       if(!adja[i]){
         if(!pt->xt){
           printf("Tetra %d : boundary face not tagged : %d \n",k,i);
-          saveMesh(mesh);
+          MMG5_saveMesh(mesh);
           exit(EXIT_FAILURE);
         }
         else{
           pxt = &mesh->xtetra[pt->xt];
           if(!(pxt->ftag[i] & MG_BDY)){
             printf("Tetra %d : boundary face not tagged : %d \n",k,i);
-            saveMesh(mesh);
+            MMG5_saveMesh(mesh);
             exit(EXIT_FAILURE);
           }
         }
@@ -193,14 +193,14 @@ int chkmsh(pMesh mesh,int severe,int base) {
       if(pt->ref != pt1->ref){
         if(!pt->xt){
           printf("Tetra %d face %d : common face is a limit of two subdomains and has not xt : %d %d %d  \n",k,i,pt->v[idir[i][0]],pt->v[idir[i][1]],pt->v[idir[i][2]]);
-          saveMesh(mesh);
+          MMG5_saveMesh(mesh);
           exit(EXIT_FAILURE);
         }
         else{
           pxt = &mesh->xtetra[pt->xt];
           if(!(pxt->ftag[i] & MG_BDY)){
             printf("Tetra %d %d : common face is a limit of two subdomains and is not tagged %d %d %d -->%d\n",k,i,pt->v[idir[i][0]],pt->v[idir[i][1]],pt->v[idir[i][2]], pxt->ftag[i]);
-            saveMesh(mesh);
+            MMG5_saveMesh(mesh);
             exit(EXIT_FAILURE);
           }
         }
@@ -223,7 +223,7 @@ int chkmsh(pMesh mesh,int severe,int base) {
     continue;
 
     if(!(pxt->tag[ia] & MG_REF)){
-    saveMesh(mesh);
+    MMG5_saveMesh(mesh);
     exit(EXIT_FAILURE);
     }
     }
@@ -312,7 +312,7 @@ int chkmsh(pMesh mesh,int severe,int base) {
     printf("Unconsistent tag of edge : tetra %d %d pour le point %d\n",iel,ielprv,nump);
     printf("tags : %d %d \n",tag0,tag1);
 
-    saveMesh(mesh);
+    MMG5_saveMesh(mesh);
     exit(EXIT_FAILURE);
     }
 
@@ -322,7 +322,7 @@ int chkmsh(pMesh mesh,int severe,int base) {
     if(tag0 != tag2){
     printf("Unconsistent tag of edge : tetra %d %d pour le point %d\n",iel,ielnxt,nump);
     printf("tags : %d %d \n",tag0,tag2);
-    saveMesh(mesh);
+    MMG5_saveMesh(mesh);
     exit(EXIT_FAILURE);
     }
     }
