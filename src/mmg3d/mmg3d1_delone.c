@@ -563,6 +563,7 @@ static inline int boucle_for(pMesh mesh, pSol met,pBucket bucket,int ne,
               goto collapse;//continue;
             }
             else { /*allocation problem ==> saveMesh*/
+	      delPt(mesh,ip);
               return(0);
               /* MMG_npd++; */
               /* delPt(mesh,ip); */
@@ -815,6 +816,7 @@ static inline int boucle_for(pMesh mesh, pSol met,pBucket bucket,int ne,
           ier = split1b(mesh,met,list,ilist,ip,1);
           if ( ier < 0 ) {
             fprintf(stdout,"  ## Error: unable to split.\n");
+	    delPt(mesh,ip);
             return(-1);
           }
           else if ( !ier ) { //Et on teste pas du tout les qualités ici ?
