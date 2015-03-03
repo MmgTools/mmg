@@ -37,7 +37,7 @@ SET (CMAKE_RELEASE_VERSION "${CMAKE_RELEASE_VERSION_MAJOR}.${CMAKE_RELEASE_VERSI
 
 # Create mmg3d.h file with the good release infos.
 CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/src/mmg3d/mmg3d.h.in
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/mmg3d/mmg3d.h @ONLY)
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/mmg3d/mmg3d.h @ONLY)
 
 ###############################################################################
 #####
@@ -56,47 +56,47 @@ SET(COMMON_SOURCE_DIR ${CMAKE_SOURCE_DIR}/src/common)
 
 # Find "exotic" compilers
 IF (${CMAKE_C_COMPILER} MATCHES Clang OR ${CMAKE_C_COMPILER} MATCHES clang)
-  # using clang
-  SET(CMAKE_COMPILER_IS_CLANG TRUE)
+    # using clang
+    SET(CMAKE_COMPILER_IS_CLANG TRUE)
 ELSEIF(${CMAKE_C_COMPILER} MATCHES Icc OR ${CMAKE_C_COMPILER} MATCHES icc)
-  # using icc
-  SET(CMAKE_COMPILER_IS_INTEL TRUE)
+    # using icc
+    SET(CMAKE_COMPILER_IS_INTEL TRUE)
 ENDIF()
 
 # Hide some options
 MARK_AS_ADVANCED(CMAKE_OSX_ARCHITECTURES
-  CMAKE_OSX_DEPLOYMENT_TARGET
-  CMAKE_OSX_SYSROOT)
+    CMAKE_OSX_DEPLOYMENT_TARGET
+    CMAKE_OSX_SYSROOT)
 
 IF(CMAKE_COMPILER_IS_GNUCC)
-  SET(CMAKE_C_FLAGS "-Wno-char-subscripts ${CMAKE_C_FLAGS}")
-  IF(APPLE)
-    # Add flags to the compiler to work on old mac
-    ADD_DEFINITIONS( -mmacosx-version-min=10.4 -arch x86_64)
+    SET(CMAKE_C_FLAGS "-Wno-char-subscripts ${CMAKE_C_FLAGS}")
+    IF(APPLE)
+        # Add flags to the compiler to work on old mac
+        ADD_DEFINITIONS( -mmacosx-version-min=10.4 -arch x86_64)
 
-    # To avoid pbs with binary files...
-    SET(CMAKE_EXE_LINKER_FLAGS "-arch x86_64 ${CMAKE_EXE_LINKER_FLAGS}")
+        # To avoid pbs with binary files...
+        SET(CMAKE_EXE_LINKER_FLAGS "-arch x86_64 ${CMAKE_EXE_LINKER_FLAGS}")
 
-    # Determine if the processor supports 64bit execution
-    EXECUTE_PROCESS(
-      COMMAND sysctl hw.cpu64bit_capable
-      ERROR_QUIET
-      OUTPUT_VARIABLE 64_CMD
-      OUTPUT_STRIP_TRAILING_WHITESPACE
-      )
-    STRING(REGEX REPLACE "^hw.cpu64bit_capable: (.*)" "\\1" 64_BIT "${64_CMD}")
-    #  ELSEIF(UNIX)# UNIX must be after APPLE becaus APPLE is UNIX too
-  ENDIF()
+        # Determine if the processor supports 64bit execution
+        EXECUTE_PROCESS(
+            COMMAND sysctl hw.cpu64bit_capable
+            ERROR_QUIET
+            OUTPUT_VARIABLE 64_CMD
+            OUTPUT_STRIP_TRAILING_WHITESPACE
+            )
+        STRING(REGEX REPLACE "^hw.cpu64bit_capable: (.*)" "\\1" 64_BIT "${64_CMD}")
+        #  ELSEIF(UNIX)# UNIX must be after APPLE becaus APPLE is UNIX too
+    ENDIF()
 ENDIF()
 
 
 IF(NOT CMAKE_COMPILER_IS_CLANG)
-  # Compiler options for profiling... but not possible with clang
-  OPTION ( PROFILING "Enable/Disable PROFILING" OFF )
-  IF(PROFILING)
-    ADD_DEFINITIONS(-pg)
-    SET(CMAKE_EXE_LINKER_FLAGS "-pg ${CMAKE_EXE_LINKER_FLAGS}")
-  ENDIF(PROFILING)
+    # Compiler options for profiling... but not possible with clang
+    OPTION ( PROFILING "Enable/Disable PROFILING" OFF )
+    IF(PROFILING)
+        ADD_DEFINITIONS(-pg)
+        SET(CMAKE_EXE_LINKER_FLAGS "-pg ${CMAKE_EXE_LINKER_FLAGS}")
+    ENDIF(PROFILING)
 ENDIF(NOT CMAKE_COMPILER_IS_CLANG)
 
 ###############################################################################
@@ -105,101 +105,101 @@ ENDIF(NOT CMAKE_COMPILER_IS_CLANG)
 #####
 ###############################################################################
 SET ( BUILD "MMG3D" CACHE STRING
-  "\"MMG3D\", \"MMGS\" or \"MMG\" to compile both MMGS and MMG3D" )
+    "\"MMG3D\", \"MMGS\" or \"MMG\" to compile both MMGS and MMG3D" )
 
 IF ( BUILD MATCHES "MMGS" )
-  SET(BUILD_MMG        OFF )
-  SET(BUILD_MMG3D      OFF )
-  SET(BUILD_MMGS       ON  )
+    SET(BUILD_MMG        OFF )
+    SET(BUILD_MMG3D      OFF )
+    SET(BUILD_MMGS       ON  )
 ELSEIF ( BUILD MATCHES "MMG3D" )
-  SET(BUILD_MMG3D      ON  )
-  SET(BUILD_MMGS       OFF )
-  SET(BUILD_MMG        OFF )
+    SET(BUILD_MMG3D      ON  )
+    SET(BUILD_MMGS       OFF )
+    SET(BUILD_MMG        OFF )
 ELSEIF ( BUILD MATCHES "MMG" )
-  SET(BUILD_MMG        ON  )
-  SET(BUILD_MMGS       OFF )
-  SET(BUILD_MMG3D      OFF )
+    SET(BUILD_MMG        ON  )
+    SET(BUILD_MMGS       OFF )
+    SET(BUILD_MMG3D      OFF )
 ELSE ( )
-  MESSAGE (WARNING "Nothing to build")
+    MESSAGE (WARNING "Nothing to build")
 ENDIF()
 
 IF ( BUILD_MMG3D OR BUILD_MMG )
 
-  ###############################################################################
-  #####
-  #####         Redefinitions: mmg3d5_redefine.h
-  #####
-  ###############################################################################
-  EXECUTE_PROCESS(COMMAND ctags  -x --c-kinds=fpx  ${MMG_SOURCE_DIR}/mmg3d.h
-    ERROR_QUIET
-    OUTPUT_VARIABLE CTAG)
-  IF ( CTAG )
-    # We want to create mmg3d5_redefine.h but we don't want it to be
-    # removed by make clean so: we use a .dummy output that is
-    # created/removed by make/make clean. And the true command create
-    # the wanted file. We can't use ADD_CUSTOM_TARGET 'cause
-    # mmg3d5_redefine.h would be rebuild each time.
-    ADD_CUSTOM_COMMAND(OUTPUT .dummy
-      COMMAND touch .dummy
-      COMMAND ctags -x  --c-kinds=fpx ${MMG_SOURCE_DIR}/mmg3d.h|awk '{printf \"\#define %-30s\t _MMG5_%s\\n\", $$1, $$1}' > ${MMG_SOURCE_DIR}/${PROJECT_NAME}_redefine.h
-      COMMAND ctags -x --c-kinds=fpst ${MMG_SOURCE_DIR}/lib${PROJECT_NAME}.h|awk '{print $$1}'|sed -e 's/MMG5_//g'|awk '{printf \"\#define %-30s\\t MMG5_%s\\n\", $$1, $$1}' >> ${MMG_SOURCE_DIR}/${PROJECT_NAME}_redefine.h
-      DEPENDS ${MMG_SOURCE_DIR}/mmg3d.h ${MMG_SOURCE_DIR}/lib${PROJECT_NAME}.h
-      COMMENT "update of ${PROJECT_NAME}_redefine.h"
-      )
-  ELSE ()
-    ADD_CUSTOM_COMMAND(OUTPUT .dummy
-      COMMAND touch .dummy
-      DEPENDS ${MMG_SOURCE_DIR}/mmg3d.h ${MMG_SOURCE_DIR}/lib${PROJECT_NAME}.h
-      )
-  ENDIF ()
+    ###############################################################################
+    #####
+    #####         Redefinitions: mmg3d5_redefine.h
+    #####
+    ###############################################################################
+    EXECUTE_PROCESS(COMMAND ctags  -x --c-kinds=fpx  ${MMG_SOURCE_DIR}/mmg3d.h
+        ERROR_QUIET
+        OUTPUT_VARIABLE CTAG)
+    IF ( CTAG )
+        # We want to create mmg3d5_redefine.h but we don't want it to be
+        # removed by make clean so: we use a .dummy output that is
+        # created/removed by make/make clean. And the true command create
+        # the wanted file. We can't use ADD_CUSTOM_TARGET 'cause
+        # mmg3d5_redefine.h would be rebuild each time.
+        ADD_CUSTOM_COMMAND(OUTPUT .dummy
+            COMMAND touch .dummy
+            COMMAND ctags -x  --c-kinds=fpx ${MMG_SOURCE_DIR}/mmg3d.h|awk '{printf \"\#define %-30s\t _MMG5_%s\\n\", $$1, $$1}' > ${MMG_SOURCE_DIR}/${PROJECT_NAME}_redefine.h
+            COMMAND ctags -x --c-kinds=fpst ${MMG_SOURCE_DIR}/lib${PROJECT_NAME}.h|awk '{print $$1}'|sed -e 's/MMG5_//g'|awk '{printf \"\#define %-30s\\t MMG5_%s\\n\", $$1, $$1}' >> ${MMG_SOURCE_DIR}/${PROJECT_NAME}_redefine.h
+            DEPENDS ${MMG_SOURCE_DIR}/mmg3d.h ${MMG_SOURCE_DIR}/lib${PROJECT_NAME}.h
+            COMMENT "update of ${PROJECT_NAME}_redefine.h"
+            )
+    ELSE ()
+        ADD_CUSTOM_COMMAND(OUTPUT .dummy
+            COMMAND touch .dummy
+            DEPENDS ${MMG_SOURCE_DIR}/mmg3d.h ${MMG_SOURCE_DIR}/lib${PROJECT_NAME}.h
+            )
+    ENDIF ()
 
-  ###############################################################################
-  #####
-  #####         Fortran header: libmmg3d5f.h
-  #####
-  ###############################################################################
-  ADD_EXECUTABLE(genheader ${CMAKE_SOURCE_DIR}/scripts/genheader.c)
+    ###############################################################################
+    #####
+    #####         Fortran header: libmmg3d5f.h
+    #####
+    ###############################################################################
+    ADD_EXECUTABLE(genheader ${CMAKE_SOURCE_DIR}/scripts/genheader.c)
 
-  ADD_CUSTOM_COMMAND(OUTPUT ${MMG_SOURCE_DIR}/libmmg3d5f.h
-    COMMAND genheader ${MMG_SOURCE_DIR}/libmmg3d5f.h ${MMG_SOURCE_DIR}/libmmg3d5.h ${CMAKE_SOURCE_DIR}/scripts/genfort.pl
-    WORKING_DIRECTORY ${CMAKE_BUILD_DIR}
-    DEPENDS genheader ${MMG_SOURCE_DIR}/libmmg3d5.h ${CMAKE_SOURCE_DIR}/scripts/genfort.pl
-    COMMENT "Generating Fortran header"
-    )
+    ADD_CUSTOM_COMMAND(OUTPUT ${MMG_SOURCE_DIR}/libmmg3d5f.h
+        COMMAND genheader ${MMG_SOURCE_DIR}/libmmg3d5f.h ${MMG_SOURCE_DIR}/libmmg3d5.h ${CMAKE_SOURCE_DIR}/scripts/genfort.pl
+        WORKING_DIRECTORY ${CMAKE_BUILD_DIR}
+        DEPENDS genheader ${MMG_SOURCE_DIR}/libmmg3d5.h ${CMAKE_SOURCE_DIR}/scripts/genfort.pl
+        COMMENT "Generating Fortran header"
+        )
 
-  ###############################################################################
-  #####
-  #####         Choose type of insertion: delaunay kernel or patterns
-  #####
-  ###############################################################################
-  # Should we use patterns for insertion istead of delaunay kernel
-  OPTION ( PATTERN
-    "If ON, insertion by patterns, otherwise insertion by delaunay kernel"
-    OFF)
-  IF ( NOT PATTERN )
-    MESSAGE(STATUS "Vertex insertion by delaunay kernel")
-  ELSE()
-    SET(CMAKE_C_FLAGS "-DPATTERN ${CMAKE_C_FLAGS}")
-  ENDIF()
-  # Remove the next line to have this option visible in basic cmake mode
-  MARK_AS_ADVANCED(PATTERN)
+    ###############################################################################
+    #####
+    #####         Choose type of insertion: delaunay kernel or patterns
+    #####
+    ###############################################################################
+    # Should we use patterns for insertion istead of delaunay kernel
+    OPTION ( PATTERN
+        "If ON, insertion by patterns, otherwise insertion by delaunay kernel"
+        OFF)
+    IF ( NOT PATTERN )
+        MESSAGE(STATUS "Vertex insertion by delaunay kernel")
+    ELSE()
+        SET(CMAKE_C_FLAGS "-DPATTERN ${CMAKE_C_FLAGS}")
+    ENDIF()
+    # Remove the next line to have this option visible in basic cmake mode
+    MARK_AS_ADVANCED(PATTERN)
 
-  ###############################################################################
-  #####
-  #####         Remove compilation of singul.c if not needed
-  #####
-  ###############################################################################
-  SET(REMOVE_FILE "${MMG_SOURCE_DIR}/singul.c")
-  # Should we add insertion of singularities part
-  OPTION ( INSER_SINGULARITIES "Compile the part of code that allow to insert singularties" OFF)
-  # Remove the next line to have this option visible in basic cmake mode
-  MARK_AS_ADVANCED(INSER_SINGULARITIES)
+    ###############################################################################
+    #####
+    #####         Remove compilation of singul.c if not needed
+    #####
+    ###############################################################################
+    SET(REMOVE_FILE "${MMG_SOURCE_DIR}/singul.c")
+    # Should we add insertion of singularities part
+    OPTION ( INSER_SINGULARITIES "Compile the part of code that allow to insert singularties" OFF)
+    # Remove the next line to have this option visible in basic cmake mode
+    MARK_AS_ADVANCED(INSER_SINGULARITIES)
 
-  IF ( INSER_SINGULARITIES )
-    SET(CMAKE_C_FLAGS "-DSINGUL ${CMAKE_C_FLAGS}")
-    SET(REMOVE_FILE "")
-    MESSAGE(STATUS "Compilation with insertion of singularities available")
-  ENDIF()
+    IF ( INSER_SINGULARITIES )
+        SET(CMAKE_C_FLAGS "-DSINGUL ${CMAKE_C_FLAGS}")
+        SET(REMOVE_FILE "")
+        MESSAGE(STATUS "Compilation with insertion of singularities available")
+    ENDIF()
 ENDIF()
 
 ###############################################################################
@@ -212,223 +212,223 @@ INCLUDE_DIRECTORIES(${MMG_SOURCE_DIR})
 
 # Source files
 FILE(
-  GLOB
-  source_files
-  ${MMG_SOURCE_DIR}/*.c   ${MMG_SOURCE_DIR}/*.h
-  ${COMMON_SOURCE_DIR}/*.c ${COMMON_SOURCE_DIR}/*.h
-  )
+    GLOB
+    source_files
+    ${MMG_SOURCE_DIR}/*.c   ${MMG_SOURCE_DIR}/*.h
+    ${COMMON_SOURCE_DIR}/*.c ${COMMON_SOURCE_DIR}/*.h
+    )
 LIST(REMOVE_ITEM source_files
-  ${MMG_SOURCE_DIR}/mmg3d.c
-  ${MMG_SOURCE_DIR}/lib${PROJECT_NAME}.c
-  ${MMG_SOURCE_DIR}/lib${PROJECT_NAME}f.c
-  ${REMOVE_FILE})
+    ${MMG_SOURCE_DIR}/mmg3d.c
+    ${MMG_SOURCE_DIR}/lib${PROJECT_NAME}.c
+    ${MMG_SOURCE_DIR}/lib${PROJECT_NAME}f.c
+    ${REMOVE_FILE})
 FILE(
-  GLOB
-  main_file
-  ${MMG_SOURCE_DIR}/mmg3d.c
-  )
+    GLOB
+    main_file
+    ${MMG_SOURCE_DIR}/mmg3d.c
+    )
 FILE(
-  GLOB
-  lib_file
-  ${MMG_SOURCE_DIR}/lib${PROJECT_NAME}.c
-  ${MMG_SOURCE_DIR}/lib${PROJECT_NAME}f.c
-  )
+    GLOB
+    lib_file
+    ${MMG_SOURCE_DIR}/lib${PROJECT_NAME}.c
+    ${MMG_SOURCE_DIR}/lib${PROJECT_NAME}f.c
+    )
 FILE(
-  GLOB
-  sourcemmgs_files
-  ${MMGS_SOURCE_DIR}/*.c   ${MMGS_SOURCE_DIR}/*.h
-  ${COMMON_SOURCE_DIR}/*.c ${COMMON_SOURCE_DIR}/*.h
-  )
+    GLOB
+    sourcemmgs_files
+    ${MMGS_SOURCE_DIR}/*.c   ${MMGS_SOURCE_DIR}/*.h
+    ${COMMON_SOURCE_DIR}/*.c ${COMMON_SOURCE_DIR}/*.h
+    )
 
 INCLUDE_DIRECTORIES(${COMMON_SOURCE_DIR})
 
 IF ((NOT WIN32) AND (NOT WIN64))
-  FIND_LIBRARY(M_LIB m)
-  SET( LIBRARIES ${M_LIB} ${LIBRARIES})
+    FIND_LIBRARY(M_LIB m)
+    SET( LIBRARIES ${M_LIB} ${LIBRARIES})
 ENDIF()
 
 IF ( BUILD_MMG3D OR BUILD_MMG )
-  ###############################################################################
-  #####
-  #####         Scotch
-  #####
-  ###############################################################################
-  # add SCOTCH library?
-  SET(SCOTCH_DIR "" CACHE PATH "Installation directory for scotch")
-  INCLUDE(cmake/modules/FindScotch.cmake)
+    ###############################################################################
+    #####
+    #####         Scotch
+    #####
+    ###############################################################################
+    # add SCOTCH library?
+    SET(SCOTCH_DIR "" CACHE PATH "Installation directory for scotch")
+    INCLUDE(cmake/modules/FindScotch.cmake)
 
-  IF(SCOTCH_FOUND)
-    OPTION ( USE_SCOTCH "Use SCOTCH TOOL for renumbering" ON)
-    IF( USE_SCOTCH )
-      # Set flags for building test program
-      INCLUDE_DIRECTORIES(${SCOTCH_INCLUDE_DIR})
+    IF(SCOTCH_FOUND)
+        OPTION ( USE_SCOTCH "Use SCOTCH TOOL for renumbering" ON)
+        IF( USE_SCOTCH )
+            # Set flags for building test program
+            INCLUDE_DIRECTORIES(${SCOTCH_INCLUDE_DIR})
 
-      SET(CMAKE_REQUIRED_INCLUDES ${SCOTCH_INCLUDE_DIR})
-      SET(CMAKE_REQUIRED_LIBRARIES ${SCOTCH_LIBRARY})
-      SET(CMAKE_REQUIRED_LIBRARIES ${SCOTCHERR_LIBRARY})
+            SET(CMAKE_REQUIRED_INCLUDES ${SCOTCH_INCLUDE_DIR})
+            SET(CMAKE_REQUIRED_LIBRARIES ${SCOTCH_LIBRARY})
+            SET(CMAKE_REQUIRED_LIBRARIES ${SCOTCHERR_LIBRARY})
 
-      SET(CMAKE_C_FLAGS "-DUSE_SCOTCH ${CMAKE_C_FLAGS}")
-      SET(SCOTCH_LINK_FLAGS "-lpthread")
-      MESSAGE(STATUS "Compilation with scotch: ${SCOTCH_DIR}$ENV{SCOTCH_DIR}")
-      SET( LIBRARIES ${SCOTCH_LINK_FLAGS} ${LIBRARIES})
-      SET( LIBRARIES ${SCOTCHERR_LIBRARY} ${LIBRARIES})
-      SET( LIBRARIES ${SCOTCH_LIBRARY} ${LIBRARIES})
-    ENDIF()
-  ELSE ( )
-    MESSAGE ( WARNING "Scotch library not found:
+            SET(CMAKE_C_FLAGS "-DUSE_SCOTCH ${CMAKE_C_FLAGS}")
+            SET(SCOTCH_LINK_FLAGS "-lpthread")
+            MESSAGE(STATUS "Compilation with scotch: ${SCOTCH_DIR}$ENV{SCOTCH_DIR}")
+            SET( LIBRARIES ${SCOTCH_LINK_FLAGS} ${LIBRARIES})
+            SET( LIBRARIES ${SCOTCHERR_LIBRARY} ${LIBRARIES})
+            SET( LIBRARIES ${SCOTCH_LIBRARY} ${LIBRARIES})
+        ENDIF()
+    ELSE ( )
+        MESSAGE ( WARNING "Scotch library not found:
  Using scotch reduce the execution time of mmg3d (see https://gforge.inria.fr/frs/?group_id=248 to download it).
  If you have already installed Scotch and want to use it, please set the CMake variable or environment variable SCOTCH_DIR to your scotch directory.")
-    OPTION ( USE_SCOTCH "Use SCOTCH TOOL for renumbering" OFF)
-  ENDIF ( )
+        OPTION ( USE_SCOTCH "Use SCOTCH TOOL for renumbering" OFF)
+    ENDIF ( )
 
-  ###############################################################################
-  #####
-  #####    Set the full RPATH to find libraries independently from LD_LIBRARY_PATH
-  #####
-  ###############################################################################
-  SET(CMAKE_MACOSX_RPATH TRUE)
+    ###############################################################################
+    #####
+    #####    Set the full RPATH to find libraries independently from LD_LIBRARY_PATH
+    #####
+    ###############################################################################
+    SET(CMAKE_MACOSX_RPATH TRUE)
 
-  # use, i.e. don't skip the full RPATH for the build tree
-  SET(CMAKE_SKIP_BUILD_RPATH  FALSE)
+    # use, i.e. don't skip the full RPATH for the build tree
+    SET(CMAKE_SKIP_BUILD_RPATH  FALSE)
 
-  # when building, don't use the install RPATH already
-  # (but later on when installing)
-  SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
+    # when building, don't use the install RPATH already
+    # (but later on when installing)
+    SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
 
-  SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
-
-  # add the automatically determined parts of the RPATH
-  # which point to directories outside the build tree to the install RPATH
-  SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
-
-  # the RPATH to be used when installing, but only if it's not a system directory
-  LIST(FIND CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES "${CMAKE_INSTALL_PREFIX}/lib" isSystemDir)
-  IF("${isSystemDir}" STREQUAL "-1")
     SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
-  ENDIF("${isSystemDir}" STREQUAL "-1")
 
-  ###############################################################################
-  #####
-  #####         Compile mmg3d5 libraries
-  #####
-  ###############################################################################
-  SET(LIBRARY_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/lib)
+    # add the automatically determined parts of the RPATH
+    # which point to directories outside the build tree to the install RPATH
+    SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
-  OPTION ( LIBMMG3D5_STATIC "Compile static library" ON)
-  IF ( LIBMMG3D5_STATIC )
-    ADD_LIBRARY(${PROJECT_NAME}_a  STATIC
-      .dummy ${MMG_SOURCE_DIR}/${PROJECT_NAME}_redefine.h
-      ${MMG_SOURCE_DIR}/lib${PROJECT_NAME}f.h
-      ${source_files} ${lib_file} )
-    SET_TARGET_PROPERTIES(${PROJECT_NAME}_a PROPERTIES OUTPUT_NAME ${PROJECT_NAME})
-    TARGET_LINK_LIBRARIES(${PROJECT_NAME}_a ${LIBRARIES})
-    INSTALL(FILES ${MMG_SOURCE_DIR}/lib${PROJECT_NAME}f.h DESTINATION include)
-    INSTALL(FILES ${MMG_SOURCE_DIR}/lib${PROJECT_NAME}.h DESTINATION include)
-    INSTALL(FILES ${COMMON_SOURCE_DIR}/chrono.h DESTINATION include)
-    INSTALL(TARGETS ${PROJECT_NAME}_a
-      ARCHIVE DESTINATION lib
-      LIBRARY DESTINATION lib)
-  ENDIF()
+    # the RPATH to be used when installing, but only if it's not a system directory
+    LIST(FIND CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES "${CMAKE_INSTALL_PREFIX}/lib" isSystemDir)
+    IF("${isSystemDir}" STREQUAL "-1")
+        SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+    ENDIF("${isSystemDir}" STREQUAL "-1")
 
-  # Compile shared library
-  OPTION ( LIBMMG3D5_SHARED "Compile dynamic library" OFF)
-  IF ( LIBMMG3D5_SHARED )
-    ADD_LIBRARY(${PROJECT_NAME}_so SHARED
-      .dummy ${MMG_SOURCE_DIR}/${PROJECT_NAME}_redefine.h
-      ${MMG_SOURCE_DIR}/lib${PROJECT_NAME}f.h
-      ${source_files} ${lib_file})
-    SET_TARGET_PROPERTIES(${PROJECT_NAME}_so PROPERTIES OUTPUT_NAME ${PROJECT_NAME})
-    TARGET_LINK_LIBRARIES(${PROJECT_NAME}_so ${LIBRARIES})
-    INSTALL(FILES ${MMG_SOURCE_DIR}/lib${PROJECT_NAME}f.h DESTINATION include)
-    INSTALL(FILES ${MMG_SOURCE_DIR}/lib${PROJECT_NAME}.h DESTINATION include)
-    INSTALL(FILES ${COMMON_SOURCE_DIR}/chrono.h DESTINATION include)
-    INSTALL(TARGETS ${PROJECT_NAME}_so
-      ARCHIVE DESTINATION
-      LIBRARY DESTINATION lib)
-  ENDIF()
+    ###############################################################################
+    #####
+    #####         Compile mmg3d5 libraries
+    #####
+    ###############################################################################
+    SET(LIBRARY_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/lib)
 
-  ###############################################################################
-  #####
-  #####         Compile program to test library
-  #####
-  ###############################################################################
-  OPTION ( TEST_LIBMMG3D5 "Compile tests of library" OFF)
-  IF ( TEST_LIBMMG3D5 )
+    OPTION ( LIBMMG3D5_STATIC "Compile static library" ON)
     IF ( LIBMMG3D5_STATIC )
-      IF ( INSER_SINGULARITIES AND TEST_LIBMMG3D5 )
-        MESSAGE(WARNING "\"libmmg5_example3\" is the only library test available with the flag of insertion of singularities set to \"ON\"")
-      ELSE()
-        ADD_EXECUTABLE(libmmg5_example0_a ${CMAKE_SOURCE_DIR}/libexamples/example0/example0_a/main.c)
-        TARGET_LINK_LIBRARIES(libmmg5_example0_a ${PROJECT_NAME}_a)
-        INSTALL(TARGETS libmmg5_example0_a RUNTIME DESTINATION bin )
+        ADD_LIBRARY(${PROJECT_NAME}_a  STATIC
+            .dummy ${MMG_SOURCE_DIR}/${PROJECT_NAME}_redefine.h
+            ${MMG_SOURCE_DIR}/lib${PROJECT_NAME}f.h
+            ${source_files} ${lib_file} )
+        SET_TARGET_PROPERTIES(${PROJECT_NAME}_a PROPERTIES OUTPUT_NAME ${PROJECT_NAME})
+        TARGET_LINK_LIBRARIES(${PROJECT_NAME}_a ${LIBRARIES})
+        INSTALL(FILES ${MMG_SOURCE_DIR}/lib${PROJECT_NAME}f.h DESTINATION include)
+        INSTALL(FILES ${MMG_SOURCE_DIR}/lib${PROJECT_NAME}.h DESTINATION include)
+        INSTALL(FILES ${COMMON_SOURCE_DIR}/chrono.h DESTINATION include)
+        INSTALL(TARGETS ${PROJECT_NAME}_a
+            ARCHIVE DESTINATION lib
+            LIBRARY DESTINATION lib)
+    ENDIF()
 
-        ADD_EXECUTABLE(libmmg5_example0_b ${CMAKE_SOURCE_DIR}/libexamples/example0/example0_b/main.c)
-        TARGET_LINK_LIBRARIES(libmmg5_example0_b ${PROJECT_NAME}_a)
-        INSTALL(TARGETS libmmg5_example0_b RUNTIME DESTINATION bin )
+    # Compile shared library
+    OPTION ( LIBMMG3D5_SHARED "Compile dynamic library" OFF)
+    IF ( LIBMMG3D5_SHARED )
+        ADD_LIBRARY(${PROJECT_NAME}_so SHARED
+            .dummy ${MMG_SOURCE_DIR}/${PROJECT_NAME}_redefine.h
+            ${MMG_SOURCE_DIR}/lib${PROJECT_NAME}f.h
+            ${source_files} ${lib_file})
+        SET_TARGET_PROPERTIES(${PROJECT_NAME}_so PROPERTIES OUTPUT_NAME ${PROJECT_NAME})
+        TARGET_LINK_LIBRARIES(${PROJECT_NAME}_so ${LIBRARIES})
+        INSTALL(FILES ${MMG_SOURCE_DIR}/lib${PROJECT_NAME}f.h DESTINATION include)
+        INSTALL(FILES ${MMG_SOURCE_DIR}/lib${PROJECT_NAME}.h DESTINATION include)
+        INSTALL(FILES ${COMMON_SOURCE_DIR}/chrono.h DESTINATION include)
+        INSTALL(TARGETS ${PROJECT_NAME}_so
+            ARCHIVE DESTINATION
+            LIBRARY DESTINATION lib)
+    ENDIF()
 
-        ADD_EXECUTABLE(libmmg5_example1 ${CMAKE_SOURCE_DIR}/libexamples/example1/main.c)
-        TARGET_LINK_LIBRARIES(libmmg5_example1 ${PROJECT_NAME}_a)
-        INSTALL(TARGETS libmmg5_example1 RUNTIME DESTINATION bin )
-        ADD_EXECUTABLE(libmmg5_example2 ${CMAKE_SOURCE_DIR}/libexamples/example2/main.c)
-        TARGET_LINK_LIBRARIES(libmmg5_example2 ${PROJECT_NAME}_a)
-        INSTALL(TARGETS libmmg5_example2 RUNTIME DESTINATION bin )
+    ###############################################################################
+    #####
+    #####         Compile program to test library
+    #####
+    ###############################################################################
+    OPTION ( TEST_LIBMMG3D5 "Compile tests of library" OFF)
+    IF ( TEST_LIBMMG3D5 )
+        IF ( LIBMMG3D5_STATIC )
+            IF ( INSER_SINGULARITIES AND TEST_LIBMMG3D5 )
+                MESSAGE(WARNING "\"libmmg5_example3\" is the only library test available with the flag of insertion of singularities set to \"ON\"")
+            ELSE()
+                ADD_EXECUTABLE(libmmg5_example0_a ${CMAKE_SOURCE_DIR}/libexamples/example0/example0_a/main.c)
+                TARGET_LINK_LIBRARIES(libmmg5_example0_a ${PROJECT_NAME}_a)
+                INSTALL(TARGETS libmmg5_example0_a RUNTIME DESTINATION bin )
 
-        ENABLE_LANGUAGE (Fortran)
-        ADD_EXECUTABLE(libmmg5_fortran_a ${CMAKE_SOURCE_DIR}/libexamples/example0_fortran/example0_a/main.F90)
-        TARGET_LINK_LIBRARIES(libmmg5_fortran_a ${PROJECT_NAME}_a)
-        INSTALL(TARGETS libmmg5_fortran_a RUNTIME DESTINATION bin )
-        ADD_EXECUTABLE(libmmg5_fortran_b ${CMAKE_SOURCE_DIR}/libexamples/example0_fortran/example0_b/main.F90)
-        TARGET_LINK_LIBRARIES(libmmg5_fortran_b ${PROJECT_NAME}_a)
-        INSTALL(TARGETS libmmg5_fortran_b RUNTIME DESTINATION bin )
+                ADD_EXECUTABLE(libmmg5_example0_b ${CMAKE_SOURCE_DIR}/libexamples/example0/example0_b/main.c)
+                TARGET_LINK_LIBRARIES(libmmg5_example0_b ${PROJECT_NAME}_a)
+                INSTALL(TARGETS libmmg5_example0_b RUNTIME DESTINATION bin )
 
+                ADD_EXECUTABLE(libmmg5_example1 ${CMAKE_SOURCE_DIR}/libexamples/example1/main.c)
+                TARGET_LINK_LIBRARIES(libmmg5_example1 ${PROJECT_NAME}_a)
+                INSTALL(TARGETS libmmg5_example1 RUNTIME DESTINATION bin )
+                ADD_EXECUTABLE(libmmg5_example2 ${CMAKE_SOURCE_DIR}/libexamples/example2/main.c)
+                TARGET_LINK_LIBRARIES(libmmg5_example2 ${PROJECT_NAME}_a)
+                INSTALL(TARGETS libmmg5_example2 RUNTIME DESTINATION bin )
 
-      ENDIF()
-      ADD_EXECUTABLE(libmmg5_example3  ${CMAKE_SOURCE_DIR}/libexamples/example3/mmg3d.c)
-      TARGET_LINK_LIBRARIES(libmmg5_example3 ${PROJECT_NAME}_a)
-      INSTALL(TARGETS libmmg5_example3 RUNTIME DESTINATION bin )
-    ELSEIF ( LIBMMG3D5_SHARED )
-      IF ( INSER_SINGULARITIES AND TEST_LIBMMG3D5 )
-        MESSAGE(WARNING "\"libmmg5_example2\" is the only library test available with the flag of insertion of singularities set to \"ON\"")
-      ELSE()
-        ADD_EXECUTABLE(libmmg5_example0_a ${CMAKE_SOURCE_DIR}/libexamples/example0/example0_a/main.c)
-        TARGET_LINK_LIBRARIES(libmmg5_example0_a ${PROJECT_NAME}_so)
-        INSTALL(TARGETS libmmg5_example0_a RUNTIME DESTINATION bin )
-
-        ADD_EXECUTABLE(libmmg5_example0_b ${CMAKE_SOURCE_DIR}/libexamples/example0/example0_b/main.c)
-        TARGET_LINK_LIBRARIES(libmmg5_example0_b ${PROJECT_NAME}_so)
-        INSTALL(TARGETS libmmg5_example0_b RUNTIME DESTINATION bin )
-
-        ADD_EXECUTABLE(libmmg5_example1 ${CMAKE_SOURCE_DIR}/libexamples/example1/main.c)
-        TARGET_LINK_LIBRARIES(libmmg5_example1 ${PROJECT_NAME}_so)
-        INSTALL(TARGETS libmmg5_example1 RUNTIME DESTINATION bin )
-        ADD_EXECUTABLE(libmmg5_example2  ${CMAKE_SOURCE_DIR}/libexamples/example2/main.c)
-        TARGET_LINK_LIBRARIES(libmmg5_example2 ${PROJECT_NAME}_so)
-        INSTALL(TARGETS libmmg5_example2 RUNTIME DESTINATION bin )
-      ENDIF()
-      ADD_EXECUTABLE(libmmg5_example3  ${CMAKE_SOURCE_DIR}/libexamples/example3/mmg3d.c)
-      TARGET_LINK_LIBRARIES(libmmg5_example3 ${PROJECT_NAME}_so)
-      INSTALL(TARGETS libmmg5_example3 RUNTIME DESTINATION bin )
-    ELSE ()
-      MESSAGE(WARNING "You must activate the compilation of the static or shared ${PROJECT_NAME} library to compile this tests." )
-    ENDIF ()
-  ENDIF()
-
-  ###############################################################################
-  #####
-  #####         Compile MMG3D5 executable
-  #####
-  ###############################################################################
-  ADD_EXECUTABLE(${PROJECT_NAME}
-    .dummy  ${MMG_SOURCE_DIR}/${PROJECT_NAME}_redefine.h
-    ${MMG_SOURCE_DIR}/lib${PROJECT_NAME}f.h
-    ${source_files} ${main_file})
-  TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${LIBRARIES})
-  INSTALL(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin)
+                ENABLE_LANGUAGE (Fortran)
+                ADD_EXECUTABLE(libmmg5_fortran_a ${CMAKE_SOURCE_DIR}/libexamples/example0_fortran/example0_a/main.F90)
+                TARGET_LINK_LIBRARIES(libmmg5_fortran_a ${PROJECT_NAME}_a)
+                INSTALL(TARGETS libmmg5_fortran_a RUNTIME DESTINATION bin )
+                ADD_EXECUTABLE(libmmg5_fortran_b ${CMAKE_SOURCE_DIR}/libexamples/example0_fortran/example0_b/main.F90)
+                TARGET_LINK_LIBRARIES(libmmg5_fortran_b ${PROJECT_NAME}_a)
+                INSTALL(TARGETS libmmg5_fortran_b RUNTIME DESTINATION bin )
 
 
-  SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES DEBUG_POSTFIX _debug) # in debug mode we name the executable mmg3d5_debug
-  SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES RELEASE_POSTFIX _O3) # in Release mode we name the executable mmg3d5_O3
-  SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES MINSIZEREL_POSTFIX _Os)
+            ENDIF()
+            ADD_EXECUTABLE(libmmg5_example3  ${CMAKE_SOURCE_DIR}/libexamples/example3/mmg3d.c)
+            TARGET_LINK_LIBRARIES(libmmg5_example3 ${PROJECT_NAME}_a)
+            INSTALL(TARGETS libmmg5_example3 RUNTIME DESTINATION bin )
+        ELSEIF ( LIBMMG3D5_SHARED )
+            IF ( INSER_SINGULARITIES AND TEST_LIBMMG3D5 )
+                MESSAGE(WARNING "\"libmmg5_example2\" is the only library test available with the flag of insertion of singularities set to \"ON\"")
+            ELSE()
+                ADD_EXECUTABLE(libmmg5_example0_a ${CMAKE_SOURCE_DIR}/libexamples/example0/example0_a/main.c)
+                TARGET_LINK_LIBRARIES(libmmg5_example0_a ${PROJECT_NAME}_so)
+                INSTALL(TARGETS libmmg5_example0_a RUNTIME DESTINATION bin )
+
+                ADD_EXECUTABLE(libmmg5_example0_b ${CMAKE_SOURCE_DIR}/libexamples/example0/example0_b/main.c)
+                TARGET_LINK_LIBRARIES(libmmg5_example0_b ${PROJECT_NAME}_so)
+                INSTALL(TARGETS libmmg5_example0_b RUNTIME DESTINATION bin )
+
+                ADD_EXECUTABLE(libmmg5_example1 ${CMAKE_SOURCE_DIR}/libexamples/example1/main.c)
+                TARGET_LINK_LIBRARIES(libmmg5_example1 ${PROJECT_NAME}_so)
+                INSTALL(TARGETS libmmg5_example1 RUNTIME DESTINATION bin )
+                ADD_EXECUTABLE(libmmg5_example2  ${CMAKE_SOURCE_DIR}/libexamples/example2/main.c)
+                TARGET_LINK_LIBRARIES(libmmg5_example2 ${PROJECT_NAME}_so)
+                INSTALL(TARGETS libmmg5_example2 RUNTIME DESTINATION bin )
+            ENDIF()
+            ADD_EXECUTABLE(libmmg5_example3  ${CMAKE_SOURCE_DIR}/libexamples/example3/mmg3d.c)
+            TARGET_LINK_LIBRARIES(libmmg5_example3 ${PROJECT_NAME}_so)
+            INSTALL(TARGETS libmmg5_example3 RUNTIME DESTINATION bin )
+        ELSE ()
+            MESSAGE(WARNING "You must activate the compilation of the static or shared ${PROJECT_NAME} library to compile this tests." )
+        ENDIF ()
+    ENDIF()
+
+    ###############################################################################
+    #####
+    #####         Compile MMG3D5 executable
+    #####
+    ###############################################################################
+    ADD_EXECUTABLE(${PROJECT_NAME}
+        .dummy  ${MMG_SOURCE_DIR}/${PROJECT_NAME}_redefine.h
+        ${MMG_SOURCE_DIR}/lib${PROJECT_NAME}f.h
+        ${source_files} ${main_file})
+    TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${LIBRARIES})
+    INSTALL(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin)
+
+
+    SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES DEBUG_POSTFIX _debug) # in debug mode we name the executable mmg3d5_debug
+    SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES RELEASE_POSTFIX _O3) # in Release mode we name the executable mmg3d5_O3
+    SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES MINSIZEREL_POSTFIX _Os)
 
 ENDIF()
 
@@ -438,14 +438,14 @@ ENDIF()
 #####
 ###############################################################################
 IF ( BUILD_MMGS OR BUILD_MMG )
-  ADD_EXECUTABLE(mmgs    ${sourcemmgs_files} )
-  TARGET_LINK_LIBRARIES(mmgs ${LIBRARIES})
-  INSTALL(TARGETS mmgs RUNTIME DESTINATION bin)
+    ADD_EXECUTABLE(mmgs    ${sourcemmgs_files} )
+    TARGET_LINK_LIBRARIES(mmgs ${LIBRARIES})
+    INSTALL(TARGETS mmgs RUNTIME DESTINATION bin)
 
 
-  SET_TARGET_PROPERTIES(mmgs PROPERTIES DEBUG_POSTFIX _debug) # in debug mode we name the executable mmgs_debug
-  SET_TARGET_PROPERTIES(mmgs PROPERTIES RELEASE_POSTFIX _O3) # in Release mode we name the executable mmgs_O3
-  SET_TARGET_PROPERTIES(mmgs PROPERTIES MINSIZEREL_POSTFIX _Os)
+    SET_TARGET_PROPERTIES(mmgs PROPERTIES DEBUG_POSTFIX _debug) # in debug mode we name the executable mmgs_debug
+    SET_TARGET_PROPERTIES(mmgs PROPERTIES RELEASE_POSTFIX _O3) # in Release mode we name the executable mmgs_O3
+    SET_TARGET_PROPERTIES(mmgs PROPERTIES MINSIZEREL_POSTFIX _Os)
 ENDIF()
 
 ###############################################################################
@@ -454,86 +454,85 @@ ENDIF()
 #####
 ###############################################################################
 IF ( BUILD_MMG3D OR BUILD_MMG )
-  OPTION ( BUILD_TESTING "Enable/Disable continuous integration" ON )
-  IF(BUILD_TESTING)
-    # Run some tests twice with the output of the previous test as input
-    OPTION ( RUN_AGAIN "Enable/Disable second run of some tests" ON )
-    MARK_AS_ADVANCED(RUN_AGAIN)
+    OPTION ( BUILD_TESTING "Enable/Disable continuous integration" ON )
+    IF(BUILD_TESTING)
+        # Run some tests twice with the output of the previous test as input
+        OPTION ( RUN_AGAIN "Enable/Disable second run of some tests" ON )
+        MARK_AS_ADVANCED(RUN_AGAIN)
 
-    # Remove the --show-reachable=yes option from the default valgrind command
-    set(VALGRIND_COMMAND_OPTIONS "-q --tool=memcheck --leak-check=yes --workaround-gcc296-bugs=yes --num-callers=100")
-    # Ignore errors coming from the libmesh5 library
-    SET(MEMORYCHECK_SUPPRESSIONS_FILE "${CMAKE_SOURCE_DIR}/cmake/supp/libmesh5.supp")
-    IF(APPLE)
-      # and errors from the libSystem.B library
-      SET(MEMORYCHECK_SUPPRESSIONS_FILE "${CMAKE_SOURCE_DIR}/cmake/supp/libSystem+libmesh5.supp")
-    ENDIF(APPLE)
-    # Copy custom file in the good directory
-    IF(NOT EXISTS "CTestCustom.cmake")
-      EXECUTE_PROCESS(
-        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/cmake/config/CTestCustom.cmake ./CTestCustom.cmake)
-    ENDIF(NOT EXISTS "CTestCustom.cmake")
+        # Remove the --show-reachable=yes option from the default valgrind command
+        set(VALGRIND_COMMAND_OPTIONS "-q --tool=memcheck --leak-check=yes --workaround-gcc296-bugs=yes --num-callers=100")
+        # Ignore errors coming from the libmesh5 library
+        IF(APPLE)
+            # and errors from the libSystem.B library
+            SET(MEMORYCHECK_SUPPRESSIONS_FILE "${CMAKE_SOURCE_DIR}/cmake/supp/libSystem.supp")
+        ENDIF(APPLE)
+        # Copy custom file in the good directory
+        IF(NOT EXISTS "CTestCustom.cmake")
+            EXECUTE_PROCESS(
+                COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/cmake/config/CTestCustom.cmake ./CTestCustom.cmake)
+        ENDIF(NOT EXISTS "CTestCustom.cmake")
 
-    ENABLE_TESTING()
-    INCLUDE(CTest)
+        ENABLE_TESTING()
+        INCLUDE(CTest)
 
-    IF ( NOT APPLE)
-      # Add coverage flags
-      SET(CMAKE_C_FLAGS_DEBUG " -fprofile-arcs -ftest-coverage --coverage ${CMAKE_C_FLAGS}")
-      SET(CMAKE_EXE_LINKER_FLAGS_DEBUG " -fprofile-arcs -ftest-coverage --coverage ${CMAKE_EXE_LINKER_FLAGS}")
-    ENDIF()
-
-    IF ( CMAKE_COMPILER_IS_GNUCC )
-      SET(CMAKE_C_FLAGS_DEBUG "-g -Wall ${CMAKE_C_FLAGS}")
-      SET(CMAKE_EXE_LINKER_FLAGS_DEBUG "-g ${CMAKE_EXE_LINKER_FLAGS}")
-    ELSEIF( CMAKE_COMPILER_IS_CLANG )
-      SET(CMAKE_C_FLAGS_DEBUG "-g -Weverything -Wno-sign-conversion -Wno-char-subscripts -Wno-padded ${CMAKE_C_FLAGS}")
-      SET(CMAKE_EXE_LINKER_FLAGS_DEBUG "-g ${CMAKE_EXE_LINKER_FLAGS}")
-    ENDIF ( )
-
-    # Add runtime that we want to test
-    IF(${CMAKE_BUILD_TYPE} MATCHES "Debug")
-      SET(EXECUT ${EXECUTABLE_OUTPUT_PATH}/${PROJECT_NAME}_debug)
-      SET(BUILDNAME ${BUILDNAME}_debug CACHE STRING "build name variable")
-    ELSEIF(${CMAKE_BUILD_TYPE} MATCHES "Release")
-      SET(EXECUT ${EXECUTABLE_OUTPUT_PATH}/${PROJECT_NAME}_O3)
-      SET(BUILDNAME ${BUILDNAME}_O3 CACHE STRING "build name variable")
-    ELSEIF(${CMAKE_BUILD_TYPE} MATCHES "Minsizerel")
-      SET(EXECUT ${EXECUTABLE_OUTPUT_PATH}/${PROJECT_NAME}_Os)
-      SET(BUILDNAME ${BUILDNAME}_Os CACHE STRING "build name variable")
-    ELSE()
-      SET(EXECUT ${EXECUTABLE_OUTPUT_PATH}/${PROJECT_NAME})
-      SET(BUILDNAME ${BUILDNAME} CACHE STRING "build name variable")
-    ENDIF()
-
-    SET ( LISTEXEC ${EXECUT} )
-    IF ( TEST_LIBMMG3D5 )
-      IF ( LIBMMG3D5_STATIC OR LIBMMG3D5_SHARED )
-        SET(LIBEXEC0_a ${EXECUTABLE_OUTPUT_PATH}/libmmg5_example0_a)
-        SET(LIBEXEC0_b ${EXECUTABLE_OUTPUT_PATH}/libmmg5_example0_b)
-        SET(LIBEXEC1   ${EXECUTABLE_OUTPUT_PATH}/libmmg5_example1)
-        SET(LIBEXEC2   ${EXECUTABLE_OUTPUT_PATH}/libmmg5_example2)
-
-        IF ( NOT INSER_SINGULARITIES )
-          ADD_TEST(NAME libexample0_a COMMAND ${LIBEXEC0_a})
-          ADD_TEST(NAME libexample0_b COMMAND ${LIBEXEC0_b})
-          ADD_TEST(NAME libexample1   COMMAND ${LIBEXEC1})
-          ADD_TEST(NAME libexample2   COMMAND ${LIBEXEC2})
+        IF ( NOT APPLE)
+            # Add coverage flags
+            SET(CMAKE_C_FLAGS_DEBUG " -fprofile-arcs -ftest-coverage --coverage ${CMAKE_C_FLAGS}")
+            SET(CMAKE_EXE_LINKER_FLAGS_DEBUG " -fprofile-arcs -ftest-coverage --coverage ${CMAKE_EXE_LINKER_FLAGS}")
         ENDIF()
-        SET(LIBEXEC3 ${EXECUTABLE_OUTPUT_PATH}/libmmg5_example3)
-        SET( LISTEXEC ${LISTEXEC} ${LIBEXEC3} )
-      ENDIF()
-    ENDIF()
 
-    # Add more tests
-    INCLUDE( ${CMAKE_SOURCE_DIR}/cmake/testing/testing.cmake )
-    IF ( INSER_SINGULARITIES )
-      INCLUDE( ${CMAKE_SOURCE_DIR}/cmake/testing/testing_insert_singul.cmake )
-    ENDIF ()
-    IF ( RUN_AGAIN )
-      INCLUDE( ${CMAKE_SOURCE_DIR}/cmake/testing/testing_rerun.cmake )
-    ENDIF()
-  ENDIF(BUILD_TESTING)
+        IF ( CMAKE_COMPILER_IS_GNUCC )
+            SET(CMAKE_C_FLAGS_DEBUG "-g -Wall ${CMAKE_C_FLAGS}")
+            SET(CMAKE_EXE_LINKER_FLAGS_DEBUG "-g ${CMAKE_EXE_LINKER_FLAGS}")
+        ELSEIF( CMAKE_COMPILER_IS_CLANG )
+            SET(CMAKE_C_FLAGS_DEBUG "-g -Weverything -Wno-sign-conversion -Wno-char-subscripts -Wno-padded ${CMAKE_C_FLAGS}")
+            SET(CMAKE_EXE_LINKER_FLAGS_DEBUG "-g ${CMAKE_EXE_LINKER_FLAGS}")
+        ENDIF ( )
+
+        # Add runtime that we want to test
+        IF(${CMAKE_BUILD_TYPE} MATCHES "Debug")
+            SET(EXECUT ${EXECUTABLE_OUTPUT_PATH}/${PROJECT_NAME}_debug)
+            SET(BUILDNAME ${BUILDNAME}_debug CACHE STRING "build name variable")
+        ELSEIF(${CMAKE_BUILD_TYPE} MATCHES "Release")
+            SET(EXECUT ${EXECUTABLE_OUTPUT_PATH}/${PROJECT_NAME}_O3)
+            SET(BUILDNAME ${BUILDNAME}_O3 CACHE STRING "build name variable")
+        ELSEIF(${CMAKE_BUILD_TYPE} MATCHES "Minsizerel")
+            SET(EXECUT ${EXECUTABLE_OUTPUT_PATH}/${PROJECT_NAME}_Os)
+            SET(BUILDNAME ${BUILDNAME}_Os CACHE STRING "build name variable")
+        ELSE()
+            SET(EXECUT ${EXECUTABLE_OUTPUT_PATH}/${PROJECT_NAME})
+            SET(BUILDNAME ${BUILDNAME} CACHE STRING "build name variable")
+        ENDIF()
+
+        SET ( LISTEXEC ${EXECUT} )
+        IF ( TEST_LIBMMG3D5 )
+            IF ( LIBMMG3D5_STATIC OR LIBMMG3D5_SHARED )
+                SET(LIBEXEC0_a ${EXECUTABLE_OUTPUT_PATH}/libmmg5_example0_a)
+                SET(LIBEXEC0_b ${EXECUTABLE_OUTPUT_PATH}/libmmg5_example0_b)
+                SET(LIBEXEC1   ${EXECUTABLE_OUTPUT_PATH}/libmmg5_example1)
+                SET(LIBEXEC2   ${EXECUTABLE_OUTPUT_PATH}/libmmg5_example2)
+
+                IF ( NOT INSER_SINGULARITIES )
+                    ADD_TEST(NAME libexample0_a COMMAND ${LIBEXEC0_a})
+                    ADD_TEST(NAME libexample0_b COMMAND ${LIBEXEC0_b})
+                    ADD_TEST(NAME libexample1   COMMAND ${LIBEXEC1})
+                    ADD_TEST(NAME libexample2   COMMAND ${LIBEXEC2})
+                ENDIF()
+                SET(LIBEXEC3 ${EXECUTABLE_OUTPUT_PATH}/libmmg5_example3)
+                SET( LISTEXEC ${LISTEXEC} ${LIBEXEC3} )
+            ENDIF()
+        ENDIF()
+
+        # Add more tests
+        INCLUDE( ${CMAKE_SOURCE_DIR}/cmake/testing/testing.cmake )
+        IF ( INSER_SINGULARITIES )
+            INCLUDE( ${CMAKE_SOURCE_DIR}/cmake/testing/testing_insert_singul.cmake )
+        ENDIF ()
+        IF ( RUN_AGAIN )
+            INCLUDE( ${CMAKE_SOURCE_DIR}/cmake/testing/testing_rerun.cmake )
+        ENDIF()
+    ENDIF(BUILD_TESTING)
 ENDIF()
 
 ###############################################################################
@@ -543,34 +542,34 @@ ENDIF()
 ###############################################################################
 FIND_PACKAGE(Doxygen)
 IF(DOXYGEN_FOUND)
-  # MMGS Documentation
-  CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmgs/Doxyfile.in ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmgs/Doxyfile @ONLY)
-  ADD_CUSTOM_TARGET(mmgs_doc
-    COMMAND ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmgs/Doxyfile
-    # COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmgs/latex make
-    # COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmgs/latex/refman.pdf ${CMAKE_CURRENT_SOURCE_DIR}
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmgs
-    COMMENT "Generating MMGS API documentation with Doxygen.
+    # MMGS Documentation
+    CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmgs/Doxyfile.in ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmgs/Doxyfile @ONLY)
+    ADD_CUSTOM_TARGET(mmgs_doc
+        COMMAND ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmgs/Doxyfile
+        # COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmgs/latex make
+        # COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmgs/latex/refman.pdf ${CMAKE_CURRENT_SOURCE_DIR}
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmgs
+        COMMENT "Generating MMGS API documentation with Doxygen.
     Open up the doc/mmgs/html/index.html file to see it." VERBATIM
-    )
-  # MMG3D Documentation
-  CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmg3d/Doxyfile.in ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmg3d/Doxyfile @ONLY)
-  ADD_CUSTOM_TARGET(mmg3d_doc
-    COMMAND ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmg3d/Doxyfile
-    # COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmg3d/latex make
-    # COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmg3d/latex/refman.pdf ${CMAKE_CURRENT_SOURCE_DIR}
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmg3d
-    COMMENT "Generating MMG3D API documentation with Doxygen.
+        )
+    # MMG3D Documentation
+    CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmg3d/Doxyfile.in ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmg3d/Doxyfile @ONLY)
+    ADD_CUSTOM_TARGET(mmg3d_doc
+        COMMAND ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmg3d/Doxyfile
+        # COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmg3d/latex make
+        # COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmg3d/latex/refman.pdf ${CMAKE_CURRENT_SOURCE_DIR}
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmg3d
+        COMMENT "Generating MMG3D API documentation with Doxygen.
      Open up the doc/mmg3d/html/index.html file to see it" VERBATIM
-    )
-  # MMGS and MMG3D Documentation
-  ADD_CUSTOM_TARGET(doc
-    DEPENDS mmgs_doc mmg3d_doc
-    COMMENT "Generating MMGS and MMG3D API documentation with Doxygen.
+        )
+    # MMGS and MMG3D Documentation
+    ADD_CUSTOM_TARGET(doc
+        DEPENDS mmgs_doc mmg3d_doc
+        COMMENT "Generating MMGS and MMG3D API documentation with Doxygen.
     To see the MMGS documentation, open up the doc/mmgs/html/index.html file.
     To see the MMGS documentation, open up the doc/mmg3d/html/index.html file."
-    VERBATIM
-    )
+        VERBATIM
+        )
 ENDIF(DOXYGEN_FOUND)
 
 ###############################################################################
@@ -627,26 +626,25 @@ SET(CPACK_SOURCE_IGNORE_FILES ";libexamples/example3/SphereIso.*" ${CPACK_SOURCE
 SET(CPACK_SOURCE_IGNORE_FILES ";scripts" ${CPACK_SOURCE_IGNORE_FILES})
 SET(CPACK_SOURCE_IGNORE_FILES ";README_developper.txt" ${CPACK_SOURCE_IGNORE_FILES})
 SET(CPACK_SOURCE_IGNORE_FILES ";CMakeFiles" ${CPACK_SOURCE_IGNORE_FILES})
-SET(CPACK_SOURCE_IGNORE_FILES ";cmake/supp/libmesh5.supp" ${CPACK_SOURCE_IGNORE_FILES})
-SET(CPACK_SOURCE_IGNORE_FILES ";cmake/supp/libSystem+libmesh5.supp" ${CPACK_SOURCE_IGNORE_FILES})
+SET(CPACK_SOURCE_IGNORE_FILES ";cmake/supp/libSystem.supp" ${CPACK_SOURCE_IGNORE_FILES})
 SET(CPACK_SOURCE_IGNORE_FILES ";cmake/testing/testing.cmake" ${CPACK_SOURCE_IGNORE_FILES})
 SET(CPACK_SOURCE_IGNORE_FILES ";.#$"      ${CPACK_SOURCE_IGNORE_FILES})
 SET(CPACK_SOURCE_IGNORE_FILES ";build*" ${CPACK_SOURCE_IGNORE_FILES}  )
 SET(CPACK_SOURCE_IGNORE_FILES ";doc/doxygen/.*/html;doc/doxygen/mmgs/latex;doc/doxygen/.*/Doxyfile$"  ${CPACK_SOURCE_IGNORE_FILES}  )
 
 IF ((WIN32 OR WIN64) AND NOT UNIX)
-  # Warning compilation under windows not tested
-  #SET(CPACK_PACKAGE_ICON "${CMAKE_SOURCE_DIR}/logo.pdf")
-  SET(CPACK_NSIS_INSTALLED_ICON_NAME "bin\\\\${PROJECT_NAME}.exe")
-  SET(CPACK_NSIS_DISPLAY_NAME "${CPACK_PACKAGE_INSTALL_DIRECTORY} MMG3D: ISOTROPIC TETRAHEDRAL REMESHER")
-  SET(CPACK_NSIS_HELP_LINK "http:\\\\\\\\www.math.u-bordeaux1.fr/~dobrzyns/.../mmg3d.php‎")
-  SET(CPACK_NSIS_URL_INFO_ABOUT "http:\\\\\\\\www.math.u-bordeaux1.fr/~dobrzyns/.../mmg3d.php‎")
-  SET(CPACK_NSIS_CONTACT ${CPACK_PACKAGE_CONTACT})
-  SET(CPACK_NSIS_MODIFY_PATH ON) # Choice to add prog dir to the system PATH
-  SET(CPACK_PACKAGING_INSTALL_PREFIX  "${PROJECT_NAME}" CACHE PATH "Where you want to install your package")
-  MARK_AS_ADVANCED(CPACK_PACKAGING_INSTALL_PREFIX)
+    # Warning compilation under windows not tested
+    #SET(CPACK_PACKAGE_ICON "${CMAKE_SOURCE_DIR}/logo.pdf")
+    SET(CPACK_NSIS_INSTALLED_ICON_NAME "bin\\\\${PROJECT_NAME}.exe")
+    SET(CPACK_NSIS_DISPLAY_NAME "${CPACK_PACKAGE_INSTALL_DIRECTORY} MMG3D: ISOTROPIC TETRAHEDRAL REMESHER")
+    SET(CPACK_NSIS_HELP_LINK "http:\\\\\\\\www.math.u-bordeaux1.fr/~dobrzyns/.../mmg3d.php‎")
+    SET(CPACK_NSIS_URL_INFO_ABOUT "http:\\\\\\\\www.math.u-bordeaux1.fr/~dobrzyns/.../mmg3d.php‎")
+    SET(CPACK_NSIS_CONTACT ${CPACK_PACKAGE_CONTACT})
+    SET(CPACK_NSIS_MODIFY_PATH ON) # Choice to add prog dir to the system PATH
+    SET(CPACK_PACKAGING_INSTALL_PREFIX  "${PROJECT_NAME}" CACHE PATH "Where you want to install your package")
+    MARK_AS_ADVANCED(CPACK_PACKAGING_INSTALL_PREFIX)
 ELSEIF (APPLE )
-  SET(CPACK_BINARY_OSX11 "ON")
+    SET(CPACK_BINARY_OSX11 "ON")
 ELSEIF ( UNIX )
 ENDIF()
 

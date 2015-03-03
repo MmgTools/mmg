@@ -1,10 +1,4 @@
 {
-   <libmesh5_free_msh>
-   Memcheck:Leak
-   fun:calloc
-   fun:GmfOpenMesh
- }
-{
    <Balloc_D2A>
    Memcheck:Leak
    fun:malloc
