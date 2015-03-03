@@ -465,13 +465,11 @@ IF ( BUILD_MMG3D OR BUILD_MMG )
         # Ignore errors coming from the libmesh5 library
         IF(APPLE)
             # and errors from the libSystem.B library
-            SET(MEMORYCHECK_SUPPRESSIONS_FILE "${CMAKE_SOURCE_DIR}/cmake/supp/libSystem.supp")
+            SET(MEMORYCHECK_SUPPRESSIONS_FILE "${CMAKE_SOURCE_DIR}/cmake/Supp/libSystem.supp")
         ENDIF(APPLE)
-        # Copy custom file in the good directory
-        IF(NOT EXISTS "CTestCustom.cmake")
-            EXECUTE_PROCESS(
-                COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/cmake/config/CTestCustom.cmake ./CTestCustom.cmake)
-        ENDIF(NOT EXISTS "CTestCustom.cmake")
+        # Copy config file and custom file in the good directories
+        CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/cmake/config/CTestConfig.cmake ${CMAKE_SOURCE_DIR}/CTestConfig.cmake)
+        CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/cmake/config/CTestCustom.cmake ./CTestCustom.cmake)
 
         ENABLE_TESTING()
         INCLUDE(CTest)
