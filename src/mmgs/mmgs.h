@@ -92,89 +92,89 @@
 #define MS_SIN(tag)      ((tag & MS_CRN) || (tag & MS_REQ) || (tag & MS_NOM))
 
 #define MS_SET(flag,bit) ((flag) |= (1 << (bit)))
-#define MS_CLR(flag,bit) ((flag) &= ~(1 << (bit)))  
+#define MS_CLR(flag,bit) ((flag) &= ~(1 << (bit)))
 #define MS_GET(flag,bit) ((flag) & (1 << (bit)))
 
 #define MS_Ver       1
-#define MS_Tri       2	
+#define MS_Tri       2
 
 extern unsigned char inxt[3];
 extern unsigned char iprv[3];
 
 
 typedef struct {
-  double  c[3],n[3];
-  int     ref,ig,s,tmp;
-  unsigned char tag,flag;
+    double  c[3],n[3];
+    int     ref,ig,s,tmp;
+    unsigned char tag,flag;
 } Point;
 typedef Point * pPoint;
 
 typedef struct {
-  double  b[10][3],n[6][3],t[6][3];
-  pPoint  p[3];
+    double  b[10][3],n[6][3],t[6][3];
+    pPoint  p[3];
 } Bezier;
 typedef Bezier * pBezier;
 
 typedef struct {
-	int   a,b,ref;
-	unsigned char  tag;
+    int   a,b,ref;
+    unsigned char  tag;
 } Edge;
 typedef Edge *  pEdge;
 
 typedef struct {
-  int     v[3],edg[3],ref,cc,base;
-  char    tag[3],flag;
+    int     v[3],edg[3],ref,cc,base;
+    char    tag[3],flag;
 } Tria;
 typedef Tria * pTria;
 
 typedef struct {
-	double   n1[3],n2[3];
+    double   n1[3],n2[3];
 } Geom;
 typedef Geom * pGeom;
 
 /* specific parameters */
 typedef struct {
-	double   hmin,hmax,hausd;
-  int      ref;
-  char     elt;
+    double   hmin,hmax,hausd;
+    int      ref;
+    char     elt;
 } Par;
 typedef Par * pPar;
 
 typedef struct {
-  double    dhd,hmin,hmax,hausd,hgrad,min[3],max[3],delta;
-  int       ncc,npar,mem;
-  char      imprim,ddebug,badkal,nreg,opt,mani;
-  mytime    ctim[TIMEMAX];
-	pPar      par;
+    double    dhd,hmin,hmax,hausd,hgrad,min[3],max[3],delta;
+    int       ncc,npar,mem;
+    char      imprim,ddebug,badkal,nreg,opt,mani;
+    mytime    ctim[TIMEMAX];
+    pPar      par;
 } Info;
 
 typedef struct {
-  int       ver,dim,type,base;
-  int       npi,nti,np,na,ng,nt,nc1,ngmax,npmax,ntmax,npnil,ntnil;
-  int      *adja;
-  char     *namein,*nameout;
+    int       ver,dim,type,base;
+    int       npi,nti,np,na,ng,nt,nc1,ngmax,npmax,ntmax,npnil,ntnil;
+    int      *adja;
+    char     *namein,*nameout;
 
-  pPoint    point;
-  pTria     tria;
-	pEdge     edge;
-	pGeom     geom;
+    pPoint    point;
+    pTria     tria;
+    pEdge     edge;
+    pGeom     geom;
 } Mesh;
 typedef Mesh  * pMesh;
 
 typedef struct {
-  int       dim,ver,np,npmax,size;
-  double   *m;
-  char     *namein,*nameout;
+    int       dim,ver,np,npmax,size;
+    double   *m;
+    char     *namein,*nameout;
 } Sol;
 typedef Sol * pSol;
 
 typedef struct {
-  int   a,b,k,nxt;
+    int   a,b,k,nxt;
 } hedge;
 
 typedef struct {
-  int     siz,max,nxt;
-  hedge  *item;
+    int     siz,max,nxt;
+    hedge  *item;
 } Hash;
 
 
@@ -188,7 +188,7 @@ int  assignEdge(pMesh mesh);
 int  scaleMesh(pMesh mesh,pSol met);
 int  unscaleMesh(pMesh mesh,pSol met);
 int  analys(pMesh mesh);
-int  nortri(pMesh ,pTria ,double *n); 
+int  nortri(pMesh ,pTria ,double *n);
 int  norpts(pPoint ,pPoint ,pPoint ,double *);
 void outqua(pMesh ,pSol );
 int  hashTria(pMesh );
@@ -210,7 +210,7 @@ int  newElt(pMesh mesh);
 void delElt(pMesh mesh,int iel);
 int  chkedg(pMesh ,int );
 int  bezierCP(pMesh ,int ,pBezier );
-int  bezierInt(pBezier ,double *,double *,double *,double *); 
+int  bezierInt(pBezier ,double *,double *,double *,double *);
 void bezierEdge(pMesh mesh,int i0,int i1,double b0[3],double b1[3],char isrid,double v[3]);
 int  split1(pMesh mesh,pSol met,int k,int i,int *vx);
 int  split2(pMesh mesh,pSol met,int k,int *vx);

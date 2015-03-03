@@ -45,13 +45,3 @@
 (global-whitespace-mode t)
 
 (customize-variable (quote tab-stop-list))
-
-;;; http://www.cslab.pepperdine.edu/warford/BatchIndentationEmacs.html
-(defun indent-file-when-save ()
-  "Format the whole buffer."
-;;;   (c-set-style "stroustrup")
-  (untabify (point-min) (point-max))
-  (indent-region (point-min) (point-max) nil)
-  (whitespace-cleanup)
-  (save-buffer)
-  )

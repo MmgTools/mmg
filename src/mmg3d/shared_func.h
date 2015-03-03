@@ -53,12 +53,12 @@ unsigned char arpt[4][3] = { {0,1,2}, {0,4,3}, {1,3,5}, {2,5,4} };
 /** Warn user that we overflow asked memory during scotch call */
 static inline
 void warnScotch(MMG5_pMesh mesh) {
-  if ( mesh->info.imprim > 4 || mesh->info.ddebug ) {
-    if ( mesh->info.mem >= 0 ) {
-      fprintf(stdout,"  ## Warning: we will overflow the memory asked with \"-m\"");
-      fprintf(stdout," option during Scotch call.\n" );
+    if ( mesh->info.imprim > 4 || mesh->info.ddebug ) {
+        if ( mesh->info.mem >= 0 ) {
+            fprintf(stdout,"  ## Warning: we will overflow the memory asked with \"-m\"");
+            fprintf(stdout," option during Scotch call.\n" );
+        }
     }
-  }
 }
 #endif
 
@@ -70,17 +70,17 @@ void warnScotch(MMG5_pMesh mesh) {
  */
 static inline
 void warnOrientation(MMG5_pMesh mesh) {
-  if ( mesh->xt ) {
-    if ( mesh->xt != mesh->ne ) {
-      fprintf(stdout,"  ## Warning: %d tetra on %d reoriented.\n",
-              mesh->xt,mesh->ne);
-      fprintf(stdout,"  Your mesh may be non-conform.\n");
+    if ( mesh->xt ) {
+        if ( mesh->xt != mesh->ne ) {
+            fprintf(stdout,"  ## Warning: %d tetra on %d reoriented.\n",
+                    mesh->xt,mesh->ne);
+            fprintf(stdout,"  Your mesh may be non-conform.\n");
+        }
+        else {
+            fprintf(stdout,"  ## Warning: all tetra reoriented.\n");
+        }
     }
-    else {
-      fprintf(stdout,"  ## Warning: all tetra reoriented.\n");
-    }
-  }
-  mesh->xt = 0;
+    mesh->xt = 0;
 }
 
 /**
@@ -91,21 +91,21 @@ void warnOrientation(MMG5_pMesh mesh) {
  */
 static inline
 void excfun(int sigid) {
-  fprintf(stdout,"\n Unexpected error:");  fflush(stdout);
-  switch(sigid) {
-  case SIGABRT:
-    fprintf(stdout,"  *** potential lack of memory.\n");  break;
-  case SIGFPE:
-    fprintf(stdout,"  Floating-point exception\n"); break;
-  case SIGILL:
-    fprintf(stdout,"  Illegal instruction\n"); break;
-  case SIGSEGV:
-    fprintf(stdout,"  Segmentation fault\n");  break;
-  case SIGTERM:
-  case SIGINT:
-    fprintf(stdout,"  Program killed\n");  break;
-  }
-  exit(EXIT_FAILURE);
+    fprintf(stdout,"\n Unexpected error:");  fflush(stdout);
+    switch(sigid) {
+    case SIGABRT:
+        fprintf(stdout,"  *** potential lack of memory.\n");  break;
+    case SIGFPE:
+        fprintf(stdout,"  Floating-point exception\n"); break;
+    case SIGILL:
+        fprintf(stdout,"  Illegal instruction\n"); break;
+    case SIGSEGV:
+        fprintf(stdout,"  Segmentation fault\n");  break;
+    case SIGTERM:
+    case SIGINT:
+        fprintf(stdout,"  Program killed\n");  break;
+    }
+    exit(EXIT_FAILURE);
 }
 
 /**
@@ -116,16 +116,16 @@ void excfun(int sigid) {
  *
  */
 void setfunc(pMesh mesh,pSol met) {
-  if ( met->size < 6 ) {
-    caltet = caltet_iso;
-    lenedg = lenedg_iso;
-    defsiz = defsiz_iso;
-    gradsiz = gradsiz_iso;
-  }
-  else {
-    caltet = caltet_ani;
-    lenedg = lenedg_ani;
-    /*defsiz = defsiz_ani;
-      gradsiz = gradsiz_ani;*/
-  }
+    if ( met->size < 6 ) {
+        caltet = caltet_iso;
+        lenedg = lenedg_iso;
+        defsiz = defsiz_iso;
+        gradsiz = gradsiz_iso;
+    }
+    else {
+        caltet = caltet_ani;
+        lenedg = lenedg_ani;
+        /*defsiz = defsiz_ani;
+          gradsiz = gradsiz_ani;*/
+    }
 }
