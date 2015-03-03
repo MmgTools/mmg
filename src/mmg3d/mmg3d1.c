@@ -1063,6 +1063,10 @@ static int anatetv(pMesh mesh,pSol met,char typchk) {
                         } while ( mesh->np>npinit );
                         return(-1)
                         ,o,MG_BDY);
+          // Now pb->p contain a wrong memory address.
+          pb.p[0] = &mesh->point[ptt.v[0]];
+          pb.p[1] = &mesh->point[ptt.v[1]];
+          pb.p[2] = &mesh->point[ptt.v[2]];
         }
         if ( !hashEdge(mesh,&hash,ip1,ip2,ip) )  return(-1);
         ppt = &mesh->point[ip];

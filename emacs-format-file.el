@@ -29,7 +29,7 @@
 (setq-default indent-tabs-mode nil)
 
 ;; for cmake
-(eval-after-load "cmake-mode"       ; <-- "cmake-mode", not 'abcd-mode
+(eval-after-load "cmake-mode"
   '(progn
      (require 'cmake-mode)
      (setq auto-mode-alist

@@ -37,7 +37,19 @@
 
 extern char ddb;
 
-/** Compute tangent to geometric support curve passing through c1,c2, with normals n1,n2*/
+/**
+ * \param c1 coordinates of the first point of the curve.
+ * \param c2 coordinates of the second point of the curve.
+ * \param n1 normal at the first point of the curve.
+ * \param n2 normal at the second point of the curve.
+ * \param t1 computed normal at the first point of the curve.
+ * \param t2 computed normal at the second point of the curve.
+ * \return 0 if failed, 1 otherwise.
+ *
+ * Compute tangent to geometric support curve passing through c1,c2,
+ * with normals n1,n2
+ *
+ */
 inline int BezierTgt(double c1[3],double c2[3],double n1[3],double n2[3],double t1[3],double t2[3]) {
   double ux,uy,uz,b[3],n[3],dd;
 
@@ -84,7 +96,17 @@ inline int BezierTgt(double c1[3],double c2[3],double n1[3],double n2[3],double 
   return(1);
 }
 
-/** Compute value of the parameter that makes the underlying Bezier curve with 'constant speed'*/
+/**
+ * \param c1 coordinates of the first point of the curve.
+ * \param c2 coordinates of the second point of the curve.
+ * \param t1 normal at the first point of the curve.
+ * \param t2 normal at the second point of the curve.
+ * \return The parameter value.
+ *
+ * Compute value of the parameter that makes the underlying Bezier
+ * curve with 'constant speed'
+ *
+ */
 inline double BezierGeod(double c1[3],double c2[3],double t1[3],double t2[3]) {
   double alpha,t[3],ll,ps,nt2,ux,uy,uz;
 
@@ -109,10 +131,21 @@ inline double BezierGeod(double c1[3],double c2[3],double t1[3],double t2[3]) {
   return(ATHIRD*sqrt(ll));
 }
 
-/** Compute control points associated to the underlying curve to [p0p1]
-    ised = 1 if [p0p1] must be considered as a special edge, 0 otherwise
-    Provide a direction v which will be considered as reference when dealing with
-    choice of normal vectors */
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param ip0 index of the first point of the curve.
+ * \param ip1 index of the second point of the curve.
+ * \param b0 the first computed extrapolated control point.
+ * \param b1 the second computed extrapolated control point.
+ * \param ised flag for special edge.
+ * \param v direction for normal vectors.
+ *
+ * Compute control points associated to the underlying curve to
+ * \f$[p0;p1]\f$. \a ised = 1 if \f$[p0;p1]\f must be considered as a
+ * special edge. Provide a direction \a v which will be considered as
+ * reference when dealing with choice of normal vectors.
+ *
+ */
 inline int BezierEdge(pMesh mesh,int ip0,int ip1,double b0[3],double b1[3],char ised, double v[3]) {
   pPoint   p0,p1;
   pxPoint  pxp0,pxp1;
@@ -272,7 +305,16 @@ inline int BezierEdge(pMesh mesh,int ip0,int ip1,double b0[3],double b1[3],char 
   return(1);
 }
 
-/** return Bezier control points on triangle pt (cf. Vlachos) */
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param pt pointer toward the triangle structure.
+ * \param pb pointer toward the computed Bezier structure.
+ * \param ori triangle orientation.
+ * \return 1.
+ *
+ * Compute Bezier control points on triangle \a pt (cf. Vlachos)
+ *
+ */
 int bezierCP(pMesh mesh,Tria *pt,pBezier pb,char ori) {
   pPoint    p[3];
   xPoint   *pxp;
@@ -487,7 +529,17 @@ int bezierCP(pMesh mesh,Tria *pt,pBezier pb,char ori) {
   return(1);
 }
 
-/** return point o at (u,v) in Bezier patch and normal */
+/**
+ * \param pb pointer toward the Bezier structure.
+ * \param uv coordinates of the point in the parametric space.
+ * \param o computed coordinates of the point in the real space.
+ * \param no computed normal.
+ * \param to computed tangent.
+ * \return 1.
+ *
+ * Compute \a o, \a no and \a to at \f$(u,v)\f$ in Bezier patch.
+ *
+ */
 int bezierInt(pBezier pb,double uv[2],double o[3],double no[3],double to[3]) {
   double    dd,u,v,w,ps,ux,uy,uz;
   char      i;
