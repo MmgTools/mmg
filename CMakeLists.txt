@@ -476,16 +476,16 @@ IF ( BUILD_MMG3D OR BUILD_MMG )
 
         IF ( NOT APPLE)
             # Add coverage flags
-            SET(CMAKE_C_FLAGS_DEBUG " -fprofile-arcs -ftest-coverage --coverage ${CMAKE_C_FLAGS}")
-            SET(CMAKE_EXE_LINKER_FLAGS_DEBUG " -fprofile-arcs -ftest-coverage --coverage ${CMAKE_EXE_LINKER_FLAGS}")
+            SET(CMAKE_C_FLAGS_DEBUG " -fprofile-arcs -ftest-coverage --coverage ${CMAKE_C_FLAGS_DEBUG}")
+            SET(CMAKE_EXE_LINKER_FLAGS_DEBUG " -fprofile-arcs -ftest-coverage --coverage ${CMAKE_EXE_LINKER_FLAGS_DEBUG}")
         ENDIF()
 
         IF ( CMAKE_COMPILER_IS_GNUCC )
-            SET(CMAKE_C_FLAGS_DEBUG "-g -Wall ${CMAKE_C_FLAGS}")
-            SET(CMAKE_EXE_LINKER_FLAGS_DEBUG "-g ${CMAKE_EXE_LINKER_FLAGS}")
+            SET(CMAKE_C_FLAGS_DEBUG "-g -Wall ${CMAKE_C_FLAGS_DEBUG}")
+            SET(CMAKE_EXE_LINKER_FLAGS_DEBUG "-g ${CMAKE_EXE_LINKER_FLAGS_DEBUG}")
         ELSEIF( CMAKE_COMPILER_IS_CLANG )
-            SET(CMAKE_C_FLAGS_DEBUG "-g -Weverything -Wno-sign-conversion -Wno-char-subscripts -Wno-padded ${CMAKE_C_FLAGS}")
-            SET(CMAKE_EXE_LINKER_FLAGS_DEBUG "-g ${CMAKE_EXE_LINKER_FLAGS}")
+            SET(CMAKE_C_FLAGS_DEBUG "-g -Weverything -Wno-sign-conversion -Wno-char-subscripts -Wno-padded ${CMAKE_C_FLAGS_DEBUG}")
+            SET(CMAKE_EXE_LINKER_FLAGS_DEBUG "-g ${CMAKE_EXE_LINKER_FLAGS_DEBUG}")
         ENDIF ( )
 
         # Add runtime that we want to test
