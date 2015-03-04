@@ -1,11 +1,11 @@
-;;; File: emacs-format-file
+ ;;; File: emacs-format-file
 
 ;; Put the following into your ~/.emacs:
 ;;(load-file "PATH_TO_FILE/emacs-format-file.el")
 ;;(eval-after-load "emacs-format-file"
 ;;  '(progn
 ;;     (require 'emacs-format-file)
-;;     (add-hook 'emacs-lisp-mode-hook 'indent-file-when-save)
+;;     (add-hook 'before-save-hook 'indent-file-when-save)
 ;;    ))
 
 
@@ -44,4 +44,13 @@
 (setq whitespace-style '(face empty tabs lines-tail trailing))
 (global-whitespace-mode t)
 
-(customize-variable (quote tab-stop-list))
+;; (customize-variable (quote tab-stop-list))
+
+;;; http://www.cslab.pepperdine.edu/warford/BatchIndentationEmacs.html
+(defun indent-file-when-save ()
+  "Format the whole buffer."
+  (interactive)
+  (untabify (point-min) (point-max))
+  (indent-region (point-min) (point-max) nil)
+  (whitespace-cleanup)
+  )
