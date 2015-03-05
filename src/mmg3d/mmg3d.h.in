@@ -234,7 +234,6 @@
         if ( !ip ) {law;}                                               \
     }while(0)
 
-#ifndef PATTERN
 /** Reallocation of point table, sol table and bucket table and creation
     of point ip with coordinates o and tag tag*/
 #define POINT_AND_BUCKET_REALLOC(mesh,sol,ip,wantedGap,law,o,tag ) do   \
@@ -281,7 +280,6 @@
         ip = newPt(mesh,o,tag);                                         \
         if ( !ip ) {law;}                                               \
     }while(0)
-#endif
 
 /** Reallocation of tetra table and creation
     of tetra jel */
@@ -521,13 +519,8 @@ double caltri(pMesh mesh,pTria ptt);
 int  scaleMesh(pMesh mesh,pSol met,pSingul sin);
 int  unscaleMesh(pMesh mesh,pSol met);
 int  chkswpbdy(pMesh mesh,int *list,int ilist,int it1,int it2);
-#ifdef PATTERN
-int  swpbdy(pMesh mesh,pSol met,int *list,int ret,int it1);
-int  swpgen(pMesh mesh,pSol met,int nconf, int ilist, int *list);
-#else
 int  swpbdy(pMesh mesh,pSol met,int *list,int ret,int it1,pBucket bucket);
 int  swpgen(pMesh mesh,pSol met,int nconf, int ilist, int *list,pBucket bucket);
-#endif
 int  chkswpgen(pMesh mesh, int start, int ia, int *ilist, int *list,double crit);
 int  srcface(pMesh mesh,int n0,int n1,int n2);
 int  bouleext(pMesh mesh, int start, int ip, int iface, int *listv, int *ilistv, int *lists, int*ilists);
@@ -590,11 +583,7 @@ int dichoto(pMesh mesh,pSol met,int k,int *vx);
 int dichoto1b(pMesh mesh,int *list,int ret,double o[3],double ro[3]);
 /** return edges of (virtual) triangle pt that need to be split w/r Hausdorff criterion */
 char chkedg(pMesh mesh,Tria *pt,char ori);
-int swpmsh(pMesh mesh,pSol met
-#ifndef PATTERN
-           ,pBucket bucket
-#endif
-    );
+int swpmsh(pMesh mesh,pSol met,pBucket bucket);
 int anatet(pMesh mesh,pSol met,char typchk) ;
 int anatet4(pMesh mesh, pSol met);
 int anatets(pMesh mesh,pSol met,char typchk);

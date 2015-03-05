@@ -933,11 +933,7 @@ int adpsplcol(pMesh mesh,pSol met,pBucket bucket, int* warn) {
         else  ns = nc = ifilt = 0;
 
         if ( !mesh->info.noswap ) {
-            nf = swpmsh(mesh,met
-#ifndef PATTERN
-                        ,bucket
-#endif
-                );
+            nf = swpmsh(mesh,met,bucket);
             if ( nf < 0 ) {
                 fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
                 return(0);
@@ -1007,11 +1003,7 @@ int optet(pMesh mesh, pSol met,pBucket bucket) {
     do {
         /* badly shaped process */
         if ( !mesh->info.noswap ) {
-            nf = swpmsh(mesh,met
-#ifndef PATTERN
-                        ,bucket
-#endif
-                );
+            nf = swpmsh(mesh,met,bucket);
             if ( nf < 0 ) {
                 fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
                 return(0);
@@ -1081,11 +1073,7 @@ int optet(pMesh mesh, pSol met,pBucket bucket) {
 
     /*initial swap*/
     if ( !mesh->info.noswap ) {
-        nf = swpmsh(mesh,met
-#ifndef PATTERN
-                    ,bucket
-#endif
-            );
+        nf = swpmsh(mesh,met,bucket);
         if ( nf < 0 ) {
             fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
             return(0);
@@ -1218,11 +1206,7 @@ int optet(pMesh mesh, pSol met,pBucket bucket) {
 
         /* attempt to swap */
         if ( !mesh->info.noswap ) {
-            nf = swpmsh(mesh,met
-#ifndef PATTERN
-                        ,NULL
-#endif
-                );
+            nf = swpmsh(mesh,met,NULL);
             if ( nf < 0 ) {
                 fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
                 return(0);

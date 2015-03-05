@@ -179,6 +179,7 @@ IF ( BUILD_MMG3D OR BUILD_MMG )
     IF ( NOT PATTERN )
         MESSAGE(STATUS "Vertex insertion by delaunay kernel")
     ELSE()
+        MESSAGE(STATUS "Vertex insertion by patterns")
         SET(CMAKE_C_FLAGS "-DPATTERN ${CMAKE_C_FLAGS}")
     ENDIF()
     # Remove the next line to have this option visible in basic cmake mode

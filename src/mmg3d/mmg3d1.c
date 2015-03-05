@@ -406,11 +406,7 @@ char chkedg(pMesh mesh,Tria *pt,char ori) {
  * approximation.
  *
  */
-/*static*/ int swpmsh(pMesh mesh,pSol met
-#ifndef PATTERN
-                      ,pBucket bucket
-#endif
-    ) {
+/*static*/ int swpmsh(pMesh mesh,pSol met,pBucket bucket) {
     pTetra   pt;
     pxTetra  pxt;
     int      k,it,list[LMAX+2],ilist,ret,it1,it2,ns,nns,maxit;
@@ -439,11 +435,7 @@ char chkedg(pMesh mesh,Tria *pt,char ori) {
                     if ( ilist <= 1 )  continue;
                     ier = chkswpbdy(mesh,list,ilist,it1,it2);
                     if ( ier ) {
-#ifdef PATTERN
-                        ier = swpbdy(mesh,met,list,ret,it1);
-#else
                         ier = swpbdy(mesh,met,list,ret,it1,bucket);
-#endif
                         if ( ier > 0 )  ns++;
                         else if ( ier < 0 )  return(-1);
                         break;
@@ -494,11 +486,7 @@ static int swptet(pMesh mesh,pSol met,double crit) {
 
                 nconf = chkswpgen(mesh,k,i,&ilist,list,crit);
                 if ( nconf ) {
-#ifdef PATTERN
-                    ier = swpgen(mesh,met,nconf,ilist,list);
-#else
                     ier = swpgen(mesh,met,nconf,ilist,list,NULL);
-#endif
                     if ( ier > 0 )  ns++;
                     else if ( ier < 0 ) return(-1);
                     break;
@@ -1638,11 +1626,7 @@ static int adptet(pMesh mesh,pSol met) {
         else  nm = 0;
 
         if ( !mesh->info.noswap ) {
-#ifdef PATTERN
-            nf = swpmsh(mesh,met);
-#else
             nf = swpmsh(mesh,met,NULL);
-#endif
             if ( nf < 0 ) {
                 fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
                 return(0);
@@ -1726,11 +1710,7 @@ static int adptet(pMesh mesh,pSol met) {
         else  nm = 0;
 
         if ( !mesh->info.noswap ) {
-#ifdef PATTERN
-            nf = swpmsh(mesh,met);
-#else
             nf = swpmsh(mesh,met,NULL);
-#endif
             if ( nf < 0 ) {
                 fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
                 return(0);
@@ -1887,11 +1867,7 @@ static int adptet(pMesh mesh,pSol met) {
 
         /* attempt to swap */
         if ( !mesh->info.noswap ) {
-            nf = swpmsh(mesh,met
-#ifndef PATTERN
-                        ,NULL
-#endif
-                );
+            nf = swpmsh(mesh,met,NULL);
             if ( nf < 0 ) {
                 fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
                 return(0);

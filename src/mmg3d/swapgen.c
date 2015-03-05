@@ -30,14 +30,25 @@
  * \author Algiane Froehly (Inria / IMB, Université de Bordeaux)
  * \version 5
  * \copyright GNU Lesser General Public License.
- * \todo Doxygen documentation
  */
 
 #include "mmg3d.h"
 
-/** Check whether swap of edge ia in start should be performed, and return 4*k+i =
-    index of point corresponding to the swapped configuration ; shell of edge is
-    built during the process */
+/**
+ * \param mesh pointer toward the mesh structure
+ * \param start tetrahedra in which the swap should be performed
+ * \param ia edge that we want to swap
+ * \param ilist pointer to store the size of the shell of the edge
+ * \param list pointer to store the shell of the edge
+ * \param crit improvment coefficient
+ * \return 0 if fail, the index of point corresponding to the swapped
+ * configuration otherwise (\f$4*k+i\f$).
+ *
+ * Check whether swap of edge \a ia in \a start should be performed, and
+ * return \f$4*k+i\f$ the index of point corresponding to the swapped
+ * configuration. The shell of edge is built during the process.
+ *
+ */
 int chkswpgen(pMesh mesh,int start,int ia,int *ilist,int *list,double crit) {
     pTetra    pt,pt0;
     pPoint    p0;
@@ -179,12 +190,21 @@ int chkswpgen(pMesh mesh,int start,int ia,int *ilist,int *list,double crit) {
     return(0);
 }
 
-/** Perform swap of edge whose shell is passed according to configuration nconf */
-int swpgen(pMesh mesh,pSol met,int nconf,int ilist,int *list
-#ifndef PATTERN
-           ,pBucket bucket
-#endif
-    ) {
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the sol structure.
+ * \param nconf configuration.
+ * \param ilist number of tetrahedra in the shell of the edge that we want
+ *  to swap.
+ * \param list pointer toward the shell of the edge that we want to swap.
+ * \param bucket pointer toward the bucket structure in Delaunay mode,
+ * NULL pointer in pattern mode.
+ * \return -1 if lack of memory, 0 if fail to swap, 1 otherwise.
+ *
+ * Perform swap of edge whose shell is passed according to configuration nconf.
+ *
+ */
+int swpgen(pMesh mesh,pSol met,int nconf,int ilist,int *list,pBucket bucket) {
     pTetra    pt;
     pPoint    p0,p1;
     int       iel,na,nb,np,nball,ret,start;
@@ -208,13 +228,6 @@ int swpgen(pMesh mesh,pSol met,int nconf,int ilist,int *list
 
     np  = newPt(mesh,m,0);
     if(!np){
-#ifdef PATTERN
-        POINT_REALLOC(mesh,met,np,mesh->gap,
-                      printf("  ## Error: unable to allocate a new point\n");
-                      INCREASE_MEM_MESSAGE();
-                      return(-1)
-                      ,m,0);
-#else
         if ( bucket ) {
             POINT_AND_BUCKET_REALLOC(mesh,met,np,mesh->gap,
                                      printf("  ## Error: unable to allocate a new point\n");
@@ -229,7 +242,6 @@ int swpgen(pMesh mesh,pSol met,int nconf,int ilist,int *list
                           return(-1)
                           ,m,0);
         }
-#endif
     }
     if ( met->m )  met->m[np] = 0.5*(met->m[na]+met->m[nb]);
 
@@ -269,7 +281,14 @@ int swpgen(pMesh mesh,pSol met,int nconf,int ilist,int *list
 }
 
 #ifdef SINGUL
-/** Perform swap 2->3. Return 0 if the swap lead to an invalid configuration. */
+/**
+ * \param mesh pointer toward the mesh structure
+ * \param k index of the tetrahedron in which perform the swap
+ * \param ip index of point to perform the swap
+ *
+ * Perform swap 2->3. Return 0 if the swap lead to an invalid configuration.
+ *
+ */
 int swap23(pMesh mesh,int k,int ip) {
     pTetra        pt[3],pt0;
     xTetra        xt[3],zerotet;
