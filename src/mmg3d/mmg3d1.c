@@ -457,11 +457,13 @@ char chkedg(pMesh mesh,Tria *pt,char ori) {
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
  * \param crit coefficient of quality improvment.
+ * \param bucket pointer toward the bucket structure in delaunay mode and
+ * toward the \a NULL pointer otherwise
  *
  * Internal edge flipping.
  *
  */
-static int swptet(pMesh mesh,pSol met,double crit) {
+int swptet(pMesh mesh,pSol met,double crit,pBucket bucket) {
     pTetra   pt;
     pxTetra  pxt;
     int      list[LMAX+2],ilist,k,it,nconf,maxit,ns,nns,ier;
@@ -486,7 +488,7 @@ static int swptet(pMesh mesh,pSol met,double crit) {
 
                 nconf = chkswpgen(mesh,k,i,&ilist,list,crit);
                 if ( nconf ) {
-                    ier = swpgen(mesh,met,nconf,ilist,list,NULL);
+                    ier = swpgen(mesh,met,nconf,ilist,list,bucket);
                     if ( ier > 0 )  ns++;
                     else if ( ier < 0 ) return(-1);
                     break;
@@ -505,14 +507,14 @@ static int swptet(pMesh mesh,pSol met,double crit) {
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
- * \param maxit maximum number of iteration.
- * \return -1 if failed.
- * \return number of moved points.
+ * \param maxitin maximum number of iteration.
+ * \return -1 if failed, number of moved points otherwise.
  *
  * Analyze tetrahedra and move points so as to make mesh more uniform.
+ * In delaunay mode, a negative maxitin means that we don't move internal nodes.
  *
  */
-static int movtet(pMesh mesh,pSol met,int maxit) {
+int movtet(pMesh mesh,pSol met,int maxitin) {
     pTetra        pt;
     pPoint        ppt;
     pxTetra       pxt;
@@ -520,6 +522,15 @@ static int movtet(pMesh mesh,pSol met,int maxit) {
     int           i,k,ier,nm,nnm,ns,lists[LMAX+2],listv[LMAX+2],ilists,ilistv,it;
     int           improve;
     unsigned char j,i0,base;
+    int           internal,maxit;
+
+    if ( maxitin<0 ) {
+        internal = 0;
+        maxit = abs(maxitin);
+    } else {
+        internal=1;
+        maxit = maxitin;
+    }
 
     if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug )
         fprintf(stdout,"  ** OPTIMIZING MESH\n");
@@ -600,7 +611,7 @@ static int movtet(pMesh mesh,pSol met,int maxit) {
                             if ( ier )  ns++;
                         }
                     }
-                    else {
+                    else if ( internal ) {
                         ilistv = boulevolp(mesh,k,i0,listv);
                         if ( !ilistv )  continue;
                         ier = movintpt(mesh,listv,ilistv,improve);
@@ -1633,7 +1644,7 @@ static int adptet(pMesh mesh,pSol met) {
             }
             nnf += nf;
 
-            nf = swptet(mesh,met,1.053);
+            nf = swptet(mesh,met,1.053,NULL);
             if ( nf < 0 ) {
                 fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
                 return(0);
@@ -1717,7 +1728,7 @@ static int adptet(pMesh mesh,pSol met) {
             }
             nnf += nf;
 
-            nf = swptet(mesh,met,1.053);
+            nf = swptet(mesh,met,1.053,NULL);
             if ( nf < 0 ) {
                 fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
                 return(0);
@@ -1874,7 +1885,7 @@ static int adptet(pMesh mesh,pSol met) {
             }
             nnf += nf;
 
-            nf = swptet(mesh,met,1.1);
+            nf = swptet(mesh,met,1.1,NULL);
             if ( nf < 0 ) {
                 fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
                 return(0);

@@ -42,185 +42,6 @@ char  ddb;
 
 int MMG_npuiss,MMG_nvol,MMG_npres,MMG_npd;
 
-/**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
- * \param crit coefficient of quality improvment.
- *
- * Internal edge flipping.
- *
- */
-/*static*/ int swptetdel(pMesh mesh,pSol met,double crit,pBucket bucket) {
-    pTetra   pt;
-    pxTetra  pxt;
-    int      list[LMAX+2],ilist,k,it,nconf,maxit,ns,nns,ier;
-    char     i;
-
-    maxit = 2;
-    it = nns = 0;
-
-    do {
-        ns = 0;
-        for (k=1; k<=mesh->ne; k++) {
-            pt = &mesh->tetra[k];
-            if ( !MG_EOK(pt) || (pt->tag & MG_REQ) )  continue;
-            if ( pt->qual > 0.0288675 /*0.6/ALPHAD*/ )  continue;
-
-            for (i=0; i<6; i++) {
-                /* Prevent swap of a ref or tagged edge */
-                if ( pt->xt ) {
-                    pxt = &mesh->xtetra[pt->xt];
-                    if ( pxt->edg[i] || pxt->tag[i] ) continue;
-                }
-
-                nconf = chkswpgen(mesh,k,i,&ilist,list,crit);
-                if ( nconf ) {
-                    ier = swpgen(mesh,met,nconf,ilist,list,bucket);
-                    if ( ier > 0 )  ns++;
-                    else if ( ier < 0 ) return(-1);
-                    break;
-                }
-            }
-        }
-        nns += ns;
-    }
-    while ( ++it < maxit && ns > 0 );
-    if ( (abs(mesh->info.imprim) > 5 || mesh->info.ddebug) && nns > 0 )
-        fprintf(stdout,"     %8d edge swapped\n",nns);
-
-    return(nns);
-}
-
-/**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
- * \param maxit maximum number of iteration.
- * \return -1 if failed.
- * \return number of moved points.
- *
- * Analyze tetrahedra and move points so as to make mesh more uniform.
- *
- */
-/*static*/ int movtetdel(pMesh mesh,pSol met,int maxitin) {
-    pTetra        pt;
-    pPoint        ppt;
-    pxTetra       pxt;
-    double        *n;
-    int           i,k,ier,nm,nnm,ns,lists[LMAX+2],listv[LMAX+2],ilists,ilistv,it;
-    int           improve;
-    unsigned char j,i0,base;
-    int internal,maxit;
-
-    if(maxitin<0) {
-        internal = 0;
-        maxit = abs(maxitin);
-    } else {
-        maxit = maxitin;
-        internal=1;
-    }
-    if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug )
-        fprintf(stdout,"  ** OPTIMIZING MESH\n");
-
-    base = 1;
-    for (k=1; k<=mesh->np; k++)
-        mesh->point[k].flag = base;
-
-    it = nnm = 0;
-    do {
-        base++;
-        nm = ns = 0;
-        for (k=1; k<=mesh->ne; k++) {
-            pt = &mesh->tetra[k];
-            if ( !MG_EOK(pt) || pt->ref < 0 || (pt->tag & MG_REQ) )   continue;
-
-            /* point j on face i */
-            for (i=0; i<4; i++) {
-                for (j=0; j<3; j++) {
-                    if ( pt->xt ) {
-                        pxt = &mesh->xtetra[pt->xt];
-                        if ( pxt->tag[iarf[i][j]] & MG_REQ )  continue;
-                    }
-                    else  pxt = 0;
-                    i0  = idir[i][j];
-                    ppt = &mesh->point[pt->v[i0]];
-                    if ( ppt->flag == base )  continue;
-                    else if ( MG_SIN(ppt->tag) )  continue;
-#ifdef SINGUL
-                    else if ( ppt->tag & MG_SGL )  continue;
-                    else if ( mesh->info.sing && pt->xt && (pxt->tag[iarf[i][j]] & MG_SGL) )
-                        continue;
-#endif
-                    if ( maxit != 1 ) {
-                        ppt->flag = base;
-                        improve   = 1;
-                    }
-                    else {
-                        improve = 0;
-                    }
-                    ier = 0;
-                    if ( ppt->tag & MG_BDY ) {
-                        /* Catch a boundary point by a boundary face */
-                        if ( !pt->xt || !(MG_BDY & pxt->ftag[i]) )  continue;
-                        else if( ppt->tag & MG_NOM ){
-                            if( mesh->adja[4*(k-1)+1+i] ) continue;
-                            if( !(ier=bouleext(mesh,k,i0,i,listv,&ilistv,lists,&ilists)) )
-                                continue;
-                            else if ( ier>0 )
-                                ier = movbdynompt(mesh,listv,ilistv,lists,ilists);
-                            else  return(-1);
-                        }
-                        else if ( ppt->tag & MG_GEO ) {
-                            if ( !(ier=boulesurfvolp(mesh,k,i0,i,listv,&ilistv,lists,&ilists)) )
-                                continue;
-                            else if ( ier>0)
-                                ier = movbdyridpt(mesh,listv,ilistv,lists,ilists);
-                            else
-                                return(-1);
-                        }
-                        else if ( ppt->tag & MG_REF ) {
-                            if ( !(ier=boulesurfvolp(mesh,k,i0,i,listv,&ilistv,lists,&ilists)) )
-                                continue;
-                            else if ( ier>0 )
-                                ier = movbdyrefpt(mesh,listv,ilistv,lists,ilists);
-                            else
-                                return(-1);
-                        }
-                        else {
-                            if ( !(ier=boulesurfvolp(mesh,k,i0,i,listv,&ilistv,lists,&ilists)) )
-                                continue;
-                            else if ( ier<0 )
-                                return(-1);
-
-                            n = &(mesh->xpoint[ppt->xp].n1[0]);
-                            if ( !directsurfball(mesh, pt->v[i0],lists,ilists,n) )  continue;
-                            ier = movbdyregpt(mesh,listv,ilistv,lists,ilists);
-                            if ( ier )  ns++;
-                        }
-                    }
-                    else if(internal){
-                        ilistv = boulevolp(mesh,k,i0,listv);
-                        if ( !ilistv )  continue;
-                        ier = movintpt(mesh,listv,ilistv,improve);
-                    }
-                    if ( ier ) {
-                        nm++;
-                        if(maxit==1){
-                            ppt->flag = base;
-                        }
-                    }
-                }
-            }
-        }
-        nnm += nm;
-        if ( mesh->info.ddebug )  fprintf(stdout,"     %8d moved, %d geometry\n",nm,ns);
-    }
-    while( ++it < maxit && nm > 0 );
-
-    if ( (abs(mesh->info.imprim) > 5 || mesh->info.ddebug) && nnm )
-        fprintf(stdout,"     %8d vertices moved, %d iter.\n",nnm,it);
-
-    return(nnm);
-}
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -940,7 +761,7 @@ int adpsplcol(pMesh mesh,pSol met,pBucket bucket, int* warn) {
             }
             nnf += nf;
             if(it==2 || it==6/*&& it==1 || it==3 || it==5 || it > 8*/) {
-                nf += swptetdel(mesh,met,1.053,bucket);
+                nf += swptet(mesh,met,1.053,bucket);
             } else {
                 nf += 0;
             }
@@ -953,7 +774,7 @@ int adpsplcol(pMesh mesh,pSol met,pBucket bucket, int* warn) {
         nnf+=nf;
 
         if ( !mesh->info.nomove ) {
-            nm = movtetdel(mesh,met,-1);
+            nm = movtet(mesh,met,-1);
             if ( nm < 0 ) {
                 fprintf(stdout,"  ## Unable to improve mesh.\n");
                 return(0);
@@ -986,7 +807,7 @@ int adpsplcol(pMesh mesh,pSol met,pBucket bucket, int* warn) {
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
- * \param bucket pointer toward the bucket structure
+ * \param bucket pointer toward the bucket structure.
  * \return 0 if failed, 1 otherwise.
  *
  * Mesh optimization using egde swapping and point relocation.
@@ -1010,7 +831,7 @@ int optet(pMesh mesh, pSol met,pBucket bucket) {
             }
             nnf += nf;
 
-            nf = swptetdel(mesh,met,declic,bucket);
+            nf = swptet(mesh,met,declic,bucket);
             if ( nf < 0 ) {
                 fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
                 return(0);
@@ -1019,7 +840,7 @@ int optet(pMesh mesh, pSol met,pBucket bucket) {
         else  nf = 0;
 
         if ( !mesh->info.nomove ) {
-            nm = movtetdel(mesh,met,0);
+            nm = movtet(mesh,met,0);
             if ( nm < 0 ) {
                 fprintf(stdout,"  ## Unable to improve mesh.\n");
                 return(0);
@@ -1042,7 +863,7 @@ int optet(pMesh mesh, pSol met,pBucket bucket) {
     while( ++it < maxit && nm+nf > 0 );
 
     if ( !mesh->info.nomove ) {
-        nm = movtetdel(mesh,met,3);
+        nm = movtet(mesh,met,3);
         if ( nm < 0 ) {
             fprintf(stdout,"  ## Unable to improve mesh.\n");
             return(0);
@@ -1079,7 +900,7 @@ int optet(pMesh mesh, pSol met,pBucket bucket) {
             return(0);
         }
         nnf = nf;
-        nf = swptetdel(mesh,met,1.053,bucket);
+        nf = swptet(mesh,met,1.053,bucket);
         if ( nf < 0 ) {
             fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
             return(0);
@@ -1213,7 +1034,7 @@ int optet(pMesh mesh, pSol met,pBucket bucket) {
             }
             nnf += nf;
 
-            nf = swptetdel(mesh,met,1.1,NULL);
+            nf = swptet(mesh,met,1.1,NULL);
             if ( nf < 0 ) {
                 fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
                 return(0);

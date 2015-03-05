@@ -118,6 +118,7 @@
 #define movbdyregpt                   	 _MMG5_movbdyregpt
 #define movbdyridpt                   	 _MMG5_movbdyridpt
 #define movintpt                      	 _MMG5_movintpt
+#define movtet                        	 _MMG5_movtet
 #define newBucket                     	 _MMG5_newBucket
 #define newElt                        	 _MMG5_newElt
 #define newPt                         	 _MMG5_newPt
@@ -166,6 +167,7 @@
 #define swpbdy                        	 _MMG5_swpbdy
 #define swpgen                        	 _MMG5_swpgen
 #define swpmsh                        	 _MMG5_swpmsh
+#define swptet                        	 _MMG5_swptet
 #define sys33sym                      	 _MMG5_sys33sym
 #define tet2tri                       	 _MMG5_tet2tri
 #define tet2tri                       	 _MMG5_tet2tri

@@ -588,6 +588,8 @@ int anatet(pMesh mesh,pSol met,char typchk) ;
 int anatet4(pMesh mesh, pSol met);
 int anatets(pMesh mesh,pSol met,char typchk);
 int coltet(pMesh mesh,pSol met,char typchk) ;
+int swptet(pMesh mesh,pSol met,double crit,pBucket bucket);
+int movtet(pMesh mesh,pSol met,int maxitin);
 
 /* pointers */
 double caltet_ani(pMesh mesh,pSol met,int ia,int ib,int ic,int id);
