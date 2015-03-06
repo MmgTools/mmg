@@ -1818,13 +1818,14 @@ static int adptet(pMesh mesh,pSol met) {
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
  * \param typchk type of checking for edges length.
- * \return 0 if failed.
- * \return number of new points.
+ * \param paternMode flag to say if we perform vertex insertion by patterns
+ * or by delaunay kernel.
+ * \return 0 if fail, number of new points otherwise.
  *
  * Analyze tetrahedra and split if needed.
  *
  */
-/*static*/ int anatet(pMesh mesh,pSol met,char typchk) {
+/*static*/ int anatet(pMesh mesh,pSol met,char typchk, int patternMode) {
     int     ier,nc,ns,nf,nnc,nns,nnf,it,maxit;
 
     /* analyze tetras : initial splitting */
@@ -1850,13 +1851,15 @@ static int adptet(pMesh mesh,pSol met) {
                 return(0);
             }
             ns += ier;
-            /* analyze internal tetras */
-            ier = anatetv(mesh,met,typchk);
-            if ( ier < 0 ) {
-                fprintf(stdout,"  ## Unable to complete volume mesh. Exit program.\n");
-                return(0);
+            if ( patternMode ) {
+                /* analyze internal tetras */
+                ier = anatetv(mesh,met,typchk);
+                if ( ier < 0 ) {
+                    fprintf(stdout,"  ## Unable to complete volume mesh. Exit program.\n");
+                    return(0);
+                }
+                ns += ier;
             }
-            ns += ier;
         }
         else  ns = 0;
 
@@ -1906,24 +1909,26 @@ static int adptet(pMesh mesh,pSol met) {
         fprintf(stdout,"     %8d splitted, %8d collapsed, %8d swapped, %d iter.\n",nns,nnc,nnf,it);
 
 #ifdef USE_SCOTCH
-    /*check enough vertex to renum*/
-    if ( mesh->info.renum && (mesh->np/2. > BOXSIZE) && mesh->np>100000 ) {
-        /* renumbering begin */
-        if ( mesh->info.imprim > 5 )
-            fprintf(stdout,"  -- RENUMBERING. \n");
+    if ( patternMode ) {
+        /*check enough vertex to renum*/
+        if ( mesh->info.renum && (mesh->np/2. > BOXSIZE) && mesh->np>100000 ) {
+            /* renumbering begin */
+            if ( mesh->info.imprim > 5 )
+                fprintf(stdout,"  -- RENUMBERING. \n");
 
-        if ( !renumbering(BOXSIZE,mesh, met) ) {
-            fprintf(stdout,"  ## Unable to renumbering mesh. \n");
-            fprintf(stdout,"  ## Try to run without renumbering option (-rn 0)\n");
-            return(0);
+            if ( !renumbering(BOXSIZE,mesh, met) ) {
+                fprintf(stdout,"  ## Unable to renumbering mesh. \n");
+                fprintf(stdout,"  ## Try to run without renumbering option (-rn 0)\n");
+                return(0);
+            }
+
+            if ( mesh->info.imprim > 5) {
+                fprintf(stdout,"  -- PHASE RENUMBERING COMPLETED. \n");
+            }
+
+            if ( mesh->info.ddebug )  chkmsh(mesh,1,0);
+            /* renumbering end */
         }
-
-        if ( mesh->info.imprim > 5) {
-            fprintf(stdout,"  -- PHASE RENUMBERING COMPLETED. \n");
-        }
-
-        if ( mesh->info.ddebug )  chkmsh(mesh,1,0);
-        /* renumbering end */
     }
 #endif
 
@@ -1952,7 +1957,7 @@ int mmg3d1(pMesh mesh,pSol met) {
     if ( abs(mesh->info.imprim) > 3 || mesh->info.ddebug )
         fprintf(stdout,"  ** GEOMETRIC MESH\n");
 
-    if ( !anatet(mesh,met,1) ) {
+    if ( !anatet(mesh,met,1,1) ) {
         fprintf(stdout,"  ## Unable to split mesh. Exiting.\n");
         return(0);
     }
@@ -1972,7 +1977,7 @@ int mmg3d1(pMesh mesh,pSol met) {
         return(0);
     }
 
-    if ( !anatet(mesh,met,2) ) {
+    if ( !anatet(mesh,met,2,1) ) {
         fprintf(stdout,"  ## Unable to split mesh. Exiting.\n");
         return(0);
     }

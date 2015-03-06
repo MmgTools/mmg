@@ -367,7 +367,7 @@
 #define MG_CLR(flag,bit) ((flag) &= ~(1 << (bit))) /**< bit number bit is set to 0 */
 #define MG_GET(flag,bit) ((flag) & (1 << (bit)))   /**< return bit number bit value */
 
-    extern unsigned char inxt2[3];   /**< next vertex of triangle: {1,2,0} */
+extern unsigned char inxt2[3];   /**< next vertex of triangle: {1,2,0} */
 extern unsigned char iprv2[3];   /**< previous vertex of triangle: {2,0,1} */
 extern unsigned char inxt3[7];   /**< next vertex of tetra: {1,2,3,0,1,2,3} */
 extern unsigned char iprv3[7];   /**< previous vertex of tetra: {3,0,1,2,3,0,1} */
@@ -584,7 +584,7 @@ int dichoto1b(pMesh mesh,int *list,int ret,double o[3],double ro[3]);
 /** return edges of (virtual) triangle pt that need to be split w/r Hausdorff criterion */
 char chkedg(pMesh mesh,Tria *pt,char ori);
 int swpmsh(pMesh mesh,pSol met,pBucket bucket);
-int anatet(pMesh mesh,pSol met,char typchk) ;
+int anatet(pMesh mesh,pSol met,char typchk, int patternMode) ;
 int anatet4(pMesh mesh, pSol met);
 int anatets(pMesh mesh,pSol met,char typchk);
 int coltet(pMesh mesh,pSol met,char typchk) ;

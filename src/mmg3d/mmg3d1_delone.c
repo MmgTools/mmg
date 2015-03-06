@@ -813,7 +813,7 @@ int adpsplcol(pMesh mesh,pSol met,pBucket bucket, int* warn) {
  * Mesh optimization using egde swapping and point relocation.
  *
  */
-int optet(pMesh mesh, pSol met,pBucket bucket) {
+static int optet(pMesh mesh, pSol met,pBucket bucket) {
     int it,nnm,nnf,maxit,nm,nf;
     double declic;
 
@@ -888,7 +888,7 @@ int optet(pMesh mesh, pSol met,pBucket bucket) {
  * prescribed metric.
  *
  */
-/*static*/ int adptet1(pMesh mesh,pSol met,pBucket bucket) {
+static int adptet_delone(pMesh mesh,pSol met,pBucket bucket) {
     int      nnf,ns,nf;
     int      warn;
 
@@ -960,109 +960,6 @@ int optet(pMesh mesh, pSol met,pBucket bucket) {
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
- * \param typchk type of checking for edges length.
- * \return 0 if failed.
- * \return number of new points.
- *
- * Analyze tetrahedra and split if needed.
- *
- */
-/*static*/ int anatetdel(pMesh mesh,pSol met,char typchk) {
-    int     ier,nc,ns,nf,nnc,nns,nnf,it,maxit;
-
-    /* analyze tetras : initial splitting */
-    nns = nnc = nnf = it = 0;
-    maxit = 5;
-    mesh->gap = 0.5;
-    do {
-        /* memory free */
-        DEL_MEM(mesh,mesh->adja,(4*mesh->nemax+5)*sizeof(int));
-#ifdef DEBUG
-        puts("AVT ANATET4");
-        prilen(mesh,met);
-#endif
-
-        if ( !mesh->info.noinsert ) {
-
-            /* split tetra with more than 2 bdry faces */
-            ier = anatet4(mesh,met);
-#ifdef DEBUG
-            if ( ier ) { printf("APS ANATET4 == %d\n",ier);
-                prilen(mesh,met);}
-#endif
-            if ( ier < 0 )  return(0);
-            ns = ier;
-
-            /* analyze surface tetras */
-            ier = anatets(mesh,met,typchk);
-#ifdef DEBUG
-            if ( ier ) { printf("APS ANATETS == %d\n",ier);
-                prilen(mesh,met);}
-#endif
-
-            if ( ier < 0 ) {
-                fprintf(stdout,"  ## Unable to complete surface mesh. Exit program.\n");
-                return(0);
-            }
-            ns += ier;
-
-        }
-        else  ns = 0;
-
-        if ( !hashTetra(mesh,1) ) {
-            fprintf(stdout,"  ## Hashing problem. Exit program.\n");
-            return(0);
-        }
-        if ( typchk == 2 && it == maxit-1 )  mesh->info.fem = 1;
-
-        /* collapse short edges */
-        if ( !mesh->info.noinsert ) {
-            nc = coltet(mesh,met,typchk);
-            if ( nc < 0 ) {
-                fprintf(stdout,"  ## Unable to collapse mesh. Exiting.\n");
-                return(0);
-            }
-        }
-        else  nc = 0;
-
-        /* attempt to swap */
-        if ( !mesh->info.noswap ) {
-            nf = swpmsh(mesh,met,NULL);
-            if ( nf < 0 ) {
-                fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
-                return(0);
-            }
-            nnf += nf;
-
-            nf = swptet(mesh,met,1.1,NULL);
-            if ( nf < 0 ) {
-                fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
-                return(0);
-            }
-        }
-        else  nf = 0;
-
-        nnc += nc;
-        nns += ns;
-        nnf += nf;
-        if ( (abs(mesh->info.imprim) > 3 || mesh->info.ddebug) && ns+nc+nf > 0 )
-            fprintf(stdout,"     %8d splitted, %8d collapsed, %8d swapped\n",ns,nc,nf);
-        if ( it > 3 && abs(nc-ns) < 0.1 * MG_MAX(nc,ns) )  break;
-    }
-    while ( ++it < maxit && ns+nc+nf > 0 );
-
-    if ( (abs(mesh->info.imprim) < 4 || mesh->info.ddebug ) && nns+nnc > 0 )
-        fprintf(stdout,"     %8d splitted, %8d collapsed, %8d swapped, %d iter.\n",nns,nnc,nnf,it);
-#ifdef DEBUG
-    puts("FIN ANATET");
-    prilen(mesh,met);
-#endif
-    return(1);
-}
-
-/**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
  * \return 0 if failed, 1 if success.
  *
  * Main adaptation routine.
@@ -1083,7 +980,7 @@ int mmg3d1_delone(pMesh mesh,pSol met) {
     if ( abs(mesh->info.imprim) > 3 || mesh->info.ddebug )
         fprintf(stdout,"  ** GEOMETRIC MESH\n");
 
-    if ( !anatetdel(mesh,met,1) ) {
+    if ( !anatet(mesh,met,1,0) ) {
         fprintf(stdout,"  ## Unable to split mesh. Exiting.\n");
         return(0);
     }
@@ -1106,7 +1003,7 @@ int mmg3d1_delone(pMesh mesh,pSol met) {
         fprintf(stdout,"  ## Gradation problem. Exit program.\n");
         return(0);
     }
-    if ( !anatetdel(mesh,met,2) ) {
+    if ( !anatet(mesh,met,2,0) ) {
         fprintf(stdout,"  ## Unable to split mesh. Exiting.\n");
         return(0);
     }
@@ -1142,7 +1039,7 @@ int mmg3d1_delone(pMesh mesh,pSol met) {
     bucket = newBucket(mesh,mesh->info.bucket); //M_MAX(mesh->mesh->info.bucksiz,BUCKSIZ));
     if ( !bucket )  return(0);
 
-    if ( !adptet1(mesh,met,bucket) ) {
+    if ( !adptet_delone(mesh,met,bucket) ) {
         fprintf(stdout,"  ## Unable to adapt. Exit program.\n");
         return(0);
     }
