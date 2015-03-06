@@ -475,6 +475,9 @@ IF ( BUILD_MMG3D OR BUILD_MMG )
         ENABLE_TESTING()
         INCLUDE(CTest)
 
+        # Max time for test case
+        SET(DART_TESTING_TIMEOUT 2000)
+
         IF ( NOT APPLE)
             # Add coverage flags
             SET(CMAKE_C_FLAGS_DEBUG " -fprofile-arcs -ftest-coverage --coverage ${CMAKE_C_FLAGS_DEBUG}")
