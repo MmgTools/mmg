@@ -1908,30 +1908,6 @@ static int adptet(pMesh mesh,pSol met) {
     if ( (abs(mesh->info.imprim) < 4 || mesh->info.ddebug ) && nns+nnc > 0 )
         fprintf(stdout,"     %8d splitted, %8d collapsed, %8d swapped, %d iter.\n",nns,nnc,nnf,it);
 
-#ifdef USE_SCOTCH
-    if ( patternMode ) {
-        /*check enough vertex to renum*/
-        if ( mesh->info.renum && (mesh->np/2. > BOXSIZE) && mesh->np>100000 ) {
-            /* renumbering begin */
-            if ( mesh->info.imprim > 5 )
-                fprintf(stdout,"  -- RENUMBERING. \n");
-
-            if ( !renumbering(BOXSIZE,mesh, met) ) {
-                fprintf(stdout,"  ## Unable to renumbering mesh. \n");
-                fprintf(stdout,"  ## Try to run without renumbering option (-rn 0)\n");
-                return(0);
-            }
-
-            if ( mesh->info.imprim > 5) {
-                fprintf(stdout,"  -- PHASE RENUMBERING COMPLETED. \n");
-            }
-
-            if ( mesh->info.ddebug )  chkmsh(mesh,1,0);
-            /* renumbering end */
-        }
-    }
-#endif
-
     return(1);
 }
 
@@ -1961,6 +1937,27 @@ int mmg3d1(pMesh mesh,pSol met) {
         fprintf(stdout,"  ## Unable to split mesh. Exiting.\n");
         return(0);
     }
+#ifdef USE_SCOTCH
+    /*check enough vertex to renum*/
+    if ( mesh->info.renum && (mesh->np/2. > BOXSIZE) && mesh->np>100000 ) {
+        /* renumbering begin */
+        if ( mesh->info.imprim > 5 )
+            fprintf(stdout,"  -- RENUMBERING. \n");
+
+        if ( !renumbering(BOXSIZE,mesh, met) ) {
+            fprintf(stdout,"  ## Unable to renumbering mesh. \n");
+            fprintf(stdout,"  ## Try to run without renumbering option (-rn 0)\n");
+            return(0);
+        }
+
+        if ( mesh->info.imprim > 5) {
+            fprintf(stdout,"  -- PHASE RENUMBERING COMPLETED. \n");
+        }
+
+        if ( mesh->info.ddebug )  chkmsh(mesh,1,0);
+        /* renumbering end */
+    }
+#endif
 
     /**--- stage 2: computational mesh */
     if ( abs(mesh->info.imprim) > 3 || mesh->info.ddebug )
@@ -1981,7 +1978,27 @@ int mmg3d1(pMesh mesh,pSol met) {
         fprintf(stdout,"  ## Unable to split mesh. Exiting.\n");
         return(0);
     }
+#ifdef USE_SCOTCH
+    /*check enough vertex to renum*/
+    if ( mesh->info.renum && (mesh->np/2. > BOXSIZE) && mesh->np>100000 ) {
+        /* renumbering begin */
+        if ( mesh->info.imprim > 5 )
+            fprintf(stdout,"  -- RENUMBERING. \n");
 
+        if ( !renumbering(BOXSIZE,mesh, met) ) {
+            fprintf(stdout,"  ## Unable to renumbering mesh. \n");
+            fprintf(stdout,"  ## Try to run without renumbering option (-rn 0)\n");
+            return(0);
+        }
+
+        if ( mesh->info.imprim > 5) {
+            fprintf(stdout,"  -- PHASE RENUMBERING COMPLETED. \n");
+        }
+
+        if ( mesh->info.ddebug )  chkmsh(mesh,1,0);
+        /* renumbering end */
+    }
+#endif
 #ifdef DEBUG
     puts("---------------------------Fin anatet---------------------");
     outqua(mesh,met);
