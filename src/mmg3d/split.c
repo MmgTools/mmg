@@ -1968,6 +1968,9 @@ void split3op(pMesh mesh, pSol met, int k, int vx[6]){
     pt[0]->flag  = 0;
     newtet[0]=k;
 
+    // To avoid warning about potentially uninitialized value for newtet[4]
+    newtet[4] = 0;
+
     /* Set permutation /symmetry of vertices : generic case : 35 */
     tau[0] = 0 ; tau[1] = 1 ; tau[2] = 2 ; tau[3] = 3;
     taued = &permedge[0][0];
@@ -4416,7 +4419,7 @@ void split6(pMesh mesh,pSol met,int k,int vx[6]) {
         xt.tag[2] = 0;  xt.tag[3] = 0;
         xt.edg[0] = 0;  xt.edg[1] = 0;
         xt.edg[2] = 0;  xt.edg[3] = 0;
-        xt.tag[4] = 0;	xt.edg[4] = 0;
+        xt.tag[4] = 0;  xt.edg[4] = 0;
         xt.tag[5] = 0;  xt.edg[5] = 0;
         xt.ref [0] = 0 ; xt.ref [1] = 0 ; xt.ref [2] = 0;
         xt.ftag[0] = 0 ; xt.ftag[1] = 0 ; xt.ftag[2] = 0;

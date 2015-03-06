@@ -120,6 +120,7 @@ int hashEdgeDelone(pMesh mesh,Hash *hash,int iel,int i,int *v) {
 
     return(1);
 }
+
 /* cavity -> ball */
 int delone(pMesh mesh,pSol sol,int ip,int *list,int ilist) {
     pPoint    ppt;
@@ -130,8 +131,9 @@ int delone(pMesh mesh,pSol sol,int ip,int *list,int ilist) {
     int       vois[4],iadrold;/*,ii,kk,iare1,iare2;*/
     short     i1;
     char      alert;
-    int tref,isused,ixt,ielnum[3*LONMAX+1],ll;
-    Hash hedg;
+    int       tref,isused=0,ixt,ielnum[3*LONMAX+1],ll;
+    Hash      hedg;
+
     //obsolete avec la realloc
     // if ( mesh->ne + 2*ilist > mesh->nemax )  {printf("on passe ici boum\n");return(0);}
     base = mesh->mark;

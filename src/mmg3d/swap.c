@@ -251,10 +251,13 @@ int chkswpbdy(pMesh mesh,int *list,int ilist,int it1,int it2) {
 int swpbdy(pMesh mesh,pSol met,int *list,int ret,int it1,pBucket bucket) {
     pTetra   pt,pt1;
     pPoint   p0,p1;
-    int      iel,iel1,ilist,np,nq,na,nm;
+    int      iel,iel1,ilist,np,nq,nm;
     double   c[3];
     char     ia,iface1,j,ipa,im;
     int      ier;
+#ifndef NDEBUG
+    int      na;
+#endif
 
     iel = list[0] / 6;
     ia  = list[0] % 6;
@@ -262,7 +265,9 @@ int swpbdy(pMesh mesh,pSol met,int *list,int ret,int it1,pBucket bucket) {
 
     np = pt->v[iare[ia][0]];
     nq = pt->v[iare[ia][1]];
+#ifndef NDEBUG
     na = 0;
+#endif
 
     p0 = &mesh->point[np];
     p1 = &mesh->point[nq];
@@ -276,7 +281,9 @@ int swpbdy(pMesh mesh,pSol met,int *list,int ret,int it1,pBucket bucket) {
     for (j=0; j<3;j++) {
         ipa = idir[iface1][j];
         if ( (pt1->v[ipa] != np)&&(pt1->v[ipa] != nq) ) {
+#ifndef NDEBUG
             na = pt1->v[ipa];
+#endif
             break;
         }
     }

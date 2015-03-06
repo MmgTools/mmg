@@ -261,6 +261,11 @@ int eigenv(int symmat,double *mat,double lambda[3],double v[3][3]) {
     double    maxd,maxm,valm,p[4],w1[3],w2[3],w3[3];
     int       k,n;
 
+    /* Initialization to avoid warning about potentially uninitialized value */
+    for ( k=0; k<4; ++k ) {
+        p[k] = 0;
+    }
+
     /* default */
     memcpy(v,Id,9*sizeof(double));
     if ( symmat ) {

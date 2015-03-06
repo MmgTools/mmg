@@ -42,18 +42,24 @@ extern char ddb;
 
 void chkvol(pMesh mesh) {
     pTetra    pt;
-    int       k,ier;
+    int       k;
+#ifdef DEBUG
+    int       ier=1;
+#endif
 
-    ier = 1;
     for (k=1; k<=mesh->ne; k++) {
         pt = &mesh->tetra[k];
         if ( !MG_EOK(pt) )  continue;
         if ( orvol(mesh->point,pt->v) < NULKAL ) {
             printf("  tetra %d  volume %e\n",k,orvol(mesh->point,pt->v));
+#ifdef DEBUG
             ier = 0;
+#endif
         }
     }
+#ifdef DEBUG
     assert(ier);
+#endif
 }
 
 int chkmshsurf(pMesh mesh){
