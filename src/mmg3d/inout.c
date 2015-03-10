@@ -135,10 +135,10 @@ int MMG5_loadMesh(MMG5_pMesh mesh) {
             }
             else {
                 if ( !strstr(mesh->nameout,".mesh") ) {
-                    ADD_MEM(mesh,5*sizeof(char),"output file name",
+                    _MMG5_ADD_MEM(mesh,5*sizeof(char),"output file name",
                             printf("  Exit program.\n");
                             exit(EXIT_FAILURE));
-                    SAFE_REALLOC(mesh->nameout,strlen(mesh->nameout)+6,char,"output mesh name");
+                    _MMG5_SAFE_REALLOC(mesh->nameout,strlen(mesh->nameout)+6,char,"output mesh name");
                     strcat(mesh->nameout,".mesh");
                 }
             }
@@ -146,10 +146,10 @@ int MMG5_loadMesh(MMG5_pMesh mesh) {
         else {
             bin = 1;
             if ( !strstr(mesh->nameout,".mesh") ) {
-                ADD_MEM(mesh,6*sizeof(char),"input file name",
+                _MMG5_ADD_MEM(mesh,6*sizeof(char),"input file name",
                         printf("  Exit program.\n");
                         exit(EXIT_FAILURE));
-                SAFE_REALLOC(mesh->nameout,strlen(mesh->nameout)+7,char,"input file name");
+                _MMG5_SAFE_REALLOC(mesh->nameout,strlen(mesh->nameout)+7,char,"input file name");
                 strcat(mesh->nameout,".meshb");
             }
         }
@@ -453,7 +453,7 @@ int MMG5_loadMesh(MMG5_pMesh mesh) {
         if( mesh->info.iso ) {
             nt = mesh->nt;
             mesh->nt = 0;
-            SAFE_CALLOC(ina,nt+1,int);
+            _MMG5_SAFE_CALLOC(ina,nt+1,int);
 
             for (k=1; k<=nt; k++) {
                 if (!bin)
@@ -476,13 +476,13 @@ int MMG5_loadMesh(MMG5_pMesh mesh) {
                 }
             }
             if( !mesh->nt )
-                DEL_MEM(mesh,mesh->tria,(mesh->nt+1)*sizeof(Tria));
+                _MMG5_DEL_MEM(mesh,mesh->tria,(mesh->nt+1)*sizeof(Tria));
 
             else if ( mesh->nt < nt ) {
-                ADD_MEM(mesh,(mesh->nt+1)*sizeof(Tria),"triangles",
+                _MMG5_ADD_MEM(mesh,(mesh->nt+1)*sizeof(Tria),"triangles",
                         printf("  Exit program.\n");
                         exit(EXIT_FAILURE));
-                SAFE_RECALLOC(mesh->tria,nt+1,(mesh->nt+1),Tria,"triangles");
+                _MMG5_SAFE_RECALLOC(mesh->tria,nt+1,(mesh->nt+1),Tria,"triangles");
             }
         }
         else {
@@ -533,7 +533,7 @@ int MMG5_loadMesh(MMG5_pMesh mesh) {
             }
         }
         if ( mesh->info.iso )
-            SAFE_FREE(ina);
+            _MMG5_SAFE_FREE(ina);
     } //end if mesh->Nt
 
     /* read mesh edges */
@@ -541,7 +541,7 @@ int MMG5_loadMesh(MMG5_pMesh mesh) {
         na = mesh->na;
         if (mesh->info.iso ) {
             mesh->na = 0;
-            SAFE_CALLOC(ina,na+1,int);
+            _MMG5_SAFE_CALLOC(ina,na+1,int);
         }
 
         rewind(inm);
@@ -629,7 +629,7 @@ int MMG5_loadMesh(MMG5_pMesh mesh) {
             }
         }
         if (mesh->info.iso )
-            SAFE_FREE(ina);
+            _MMG5_SAFE_FREE(ina);
     }
 
     /* read mesh tetrahedra */
@@ -1000,17 +1000,17 @@ int _MMG5_saveAllMesh(MMG5_pMesh mesh) {
             }
         }
     }
-    DEL_MEM(mesh,mesh->xpoint,(mesh->xpmax+1)*sizeof(xPoint));
+    _MMG5_DEL_MEM(mesh,mesh->xpoint,(mesh->xpmax+1)*sizeof(MMG5_xPoint));
     mesh->xp = 0;
 
     /* boundary mesh */
     /* tria + required tria */
     mesh->nt = ntreq = 0;
     if ( mesh->tria )
-        DEL_MEM(mesh,mesh->tria,(mesh->nt+1)*sizeof(Tria));
+        _MMG5_DEL_MEM(mesh,mesh->tria,(mesh->nt+1)*sizeof(Tria));
 
-    chkNumberOfTri(mesh);
-    if ( bdryTria(mesh) ) {
+    _MMG5_chkNumberOfTri(mesh);
+    if ( _MMG5_bdryTria(mesh) ) {
         if(!bin) {
             strcpy(&chaine[0],"\n\nTriangles\n");
             fprintf(inm,"%s",chaine);
@@ -1061,13 +1061,13 @@ int _MMG5_saveAllMesh(MMG5_pMesh mesh) {
 
         /* Release memory before htab allocation */
         if ( mesh->adjt )
-            DEL_MEM(mesh,mesh->adjt,(3*mesh->nt+4)*sizeof(int));
+            _MMG5_DEL_MEM(mesh,mesh->adjt,(3*mesh->nt+4)*sizeof(int));
         if ( mesh->adja )
-            DEL_MEM(mesh,mesh->adja,(4*mesh->nemax+5)*sizeof(int));
+            _MMG5_DEL_MEM(mesh,mesh->adja,(4*mesh->nemax+5)*sizeof(int));
 
         /* build hash table for edges */
         if ( mesh->htab.geom )
-            DEL_MEM(mesh,mesh->htab.geom,(mesh->htab.max+1)*sizeof(hgeom));
+            _MMG5_DEL_MEM(mesh,mesh->htab.geom,(mesh->htab.max+1)*sizeof(hgeom));
 
         /* in the wost case (all edges are marked), we will have around 1 edge per *
          * triangle (we count edges only one time) */
@@ -1086,7 +1086,7 @@ int _MMG5_saveAllMesh(MMG5_pMesh mesh) {
                         if ( mesh->xtetra[pt->xt].edg[i] ||
                              ( MG_EDG(mesh->xtetra[pt->xt].tag[i] ) ||
                                (mesh->xtetra[pt->xt].tag[i] & MG_REQ) ) )
-                            hEdge(mesh,pt->v[iare[i][0]],pt->v[iare[i][1]],
+                            hEdge(mesh,pt->v[_MMG5_iare[i][0]],pt->v[_MMG5_iare[i][1]],
                                   mesh->xtetra[pt->xt].edg[i],mesh->xtetra[pt->xt].tag[i]);
                     }
                 }
@@ -1176,7 +1176,7 @@ int _MMG5_saveAllMesh(MMG5_pMesh mesh) {
                 }
             }
             //freeXTets(mesh);
-            DEL_MEM(mesh,mesh->htab.geom,(mesh->htab.max+1)*sizeof(hgeom));
+            _MMG5_DEL_MEM(mesh,mesh->htab.geom,(mesh->htab.max+1)*sizeof(hgeom));
         }
         else
             mesh->memCur -= (long long)((3*mesh->nt+2)*sizeof(hgeom));
@@ -1763,13 +1763,13 @@ int MMG5_loadMet(MMG5_pMesh mesh,MMG5_pSol met) {
     met->npi = met->np;
 
     /* mem alloc */
-    if ( met->m )  DEL_MEM(mesh,met->m,(met->size*met->npmax+1)*sizeof(double));
+    if ( met->m )  _MMG5_DEL_MEM(mesh,met->m,(met->size*met->npmax+1)*sizeof(double));
     met->npmax = mesh->npmax;
 
-    ADD_MEM(mesh,(met->size*met->npmax+1)*sizeof(double),"initial solution",
+    _MMG5_ADD_MEM(mesh,(met->size*met->npmax+1)*sizeof(double),"initial solution",
             printf("  Exit program.\n");
             exit(EXIT_FAILURE));
-    SAFE_CALLOC(met->m,met->size*met->npmax+1,double);
+    _MMG5_SAFE_CALLOC(met->m,met->size*met->npmax+1,double);
 
     /* read mesh solutions */
     rewind(inm);
@@ -2122,22 +2122,22 @@ int MMG5_loadSingul(MMG5_pMesh mesh,MMG5_pSingul singul) {
     }
 
     /* memory allocation */
-    ADD_MEM(mesh,(sing_mesh.np+1)*sizeof(Point),"points of singularities mesh",
+    _MMG5_ADD_MEM(mesh,(sing_mesh.np+1)*sizeof(Point),"points of singularities mesh",
             printf("  Exit program.\n");
             exit(EXIT_FAILURE));
-    SAFE_CALLOC(sing_mesh.point,sing_mesh.np+1,Point);
+    _MMG5_SAFE_CALLOC(sing_mesh.point,sing_mesh.np+1,Point);
 
     if ( sing_mesh.nt ) {
-        ADD_MEM(mesh,(sing_mesh.nt+1)*sizeof(Tria),"triangles of singularities mesh",
+        _MMG5_ADD_MEM(mesh,(sing_mesh.nt+1)*sizeof(Tria),"triangles of singularities mesh",
                 printf("  Exit program.\n");
                 exit(EXIT_FAILURE));
-        SAFE_CALLOC(sing_mesh.tria,sing_mesh.nt+1,Tria);
+        _MMG5_SAFE_CALLOC(sing_mesh.tria,sing_mesh.nt+1,Tria);
     }
     if ( sing_mesh.na ) {
-        ADD_MEM(mesh,(sing_mesh.na+1)*sizeof(Edge),"edges of singularities mesh",
+        _MMG5_ADD_MEM(mesh,(sing_mesh.na+1)*sizeof(Edge),"edges of singularities mesh",
                 printf("  Exit program.\n");
                 exit(EXIT_FAILURE));
-        SAFE_CALLOC(sing_mesh.edge,sing_mesh.na+1,Edge);
+        _MMG5_SAFE_CALLOC(sing_mesh.edge,sing_mesh.na+1,Edge);
     }
 
     /* find bounding box */
@@ -2300,10 +2300,10 @@ int MMG5_loadSingul(MMG5_pMesh mesh,MMG5_pSingul singul) {
     singul->ns = npr;
     ns = 1;
     if ( singul->ns ) {
-        ADD_MEM(mesh,(singul->ns+1)*sizeof(sPoint),"vertex singularities",
+        _MMG5_ADD_MEM(mesh,(singul->ns+1)*sizeof(sPoint),"vertex singularities",
                 printf("  Exit program.\n");
                 exit(EXIT_FAILURE));
-        SAFE_CALLOC(singul->point,singul->ns+1,sPoint);
+        _MMG5_SAFE_CALLOC(singul->point,singul->ns+1,sPoint);
         for ( k=1; k<=sing_mesh.np; k++ ) {
             ppt = &sing_mesh.point[k];
             if ( (ppt->tag & MG_REQ) || (ppt->tag & MG_GEO) ) {
@@ -2322,10 +2322,10 @@ int MMG5_loadSingul(MMG5_pMesh mesh,MMG5_pSingul singul) {
     singul->na = nr+na;
     na = 1;
     if ( singul->na ) {
-        ADD_MEM(mesh,(singul->na+1)*sizeof(Edge),"edge singularities",
+        _MMG5_ADD_MEM(mesh,(singul->na+1)*sizeof(Edge),"edge singularities",
                 printf("  Exit program.\n");
                 exit(EXIT_FAILURE));
-        SAFE_CALLOC(singul->edge,singul->na+1,Edge);
+        _MMG5_SAFE_CALLOC(singul->edge,singul->na+1,Edge);
 
         for ( k=1; k<=sing_mesh.na; k++ ) {
             pa = &sing_mesh.edge[k];
@@ -2348,12 +2348,12 @@ int MMG5_loadSingul(MMG5_pMesh mesh,MMG5_pSingul singul) {
     fclose(inm);
 
     /* memory free */
-    DEL_MEM(mesh,sing_mesh.point,(sing_mesh.np+1)*sizeof(Point));
+    _MMG5_DEL_MEM(mesh,sing_mesh.point,(sing_mesh.np+1)*sizeof(Point));
     if ( sing_mesh.na ) {
-        DEL_MEM(mesh,sing_mesh.edge,(sing_mesh.na+1)*sizeof(Edge));
+        _MMG5_DEL_MEM(mesh,sing_mesh.edge,(sing_mesh.na+1)*sizeof(Edge));
     }
     if ( sing_mesh.nt ) {
-        DEL_MEM(mesh,sing_mesh.tria,(sing_mesh.nt+1)*sizeof(Tria));
+        _MMG5_DEL_MEM(mesh,sing_mesh.tria,(sing_mesh.nt+1)*sizeof(Tria));
     }
     return(1);
 }

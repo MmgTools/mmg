@@ -35,10 +35,10 @@
 #include "eigenv.h"
 #include "mmg3d.h"
 
-#define  EPSRAD       1.00005
+#define  _MMG5_EPSRAD       1.00005
 //For Various_adpsol_hgrad1_M6Mach_Eps0.001_hmin0.001_hmax2 test case:
-//pbs with EPSCON=5e-4 and VOLMIN=1e-15 (MMG3D does not insert enough vertex...)
-#define  EPSCON       1e-5//5.0e-4//1.e-4//1.0e-3
+//pbs with _MMG5_EPSCON=5e-4 and VOLMIN=1e-15 (MMG3D does not insert enough vertex...)
+#define  _MMG5_EPSCON       1e-5//5.0e-4//1.e-4//1.0e-3
 #define  VOLMIN       1e-15//1.e-10//1.0e-15  --> vol negatif qd on rejoue
 #define LONMAX     4096
 
@@ -49,9 +49,9 @@ extern int MMG_npuiss,MMG_nvol,MMG_npres;
 #define KTC    13
 
 /* hash mesh edge v[0],v[1] (face i of iel) */
-int hashEdgeDelone(pMesh mesh,Hash *hash,int iel,int i,int *v) {
-    int       *adja,iadr,jel,j,key,mins,maxs;
-    hedge     *ha;
+int hashEdgeDelone(MMG5_pMesh mesh,_MMG5_Hash *hash,int iel,int i,int *v) {
+    int             *adja,iadr,jel,j,key,mins,maxs;
+    _MMG5_hedge     *ha;
 
     /* compute key */
     if ( v[0] < v[1] ) {
@@ -106,7 +106,7 @@ int hashEdgeDelone(pMesh mesh,Hash *hash,int iel,int i,int *v) {
         ha->nxt   = 0;
 
         if ( hash->nxt >= hash->max ) {
-            TAB_RECALLOC(mesh,hash->item,hash->max,0.2,hedge,"face",return(0));
+            _MMG5_TAB_RECALLOC(mesh,hash->item,hash->max,0.2,_MMG5_hedge,"face",return(0));
             for (j=hash->nxt; j<hash->max; j++)  hash->item[j].nxt = j+1;
         }
         return(1);
@@ -122,17 +122,17 @@ int hashEdgeDelone(pMesh mesh,Hash *hash,int iel,int i,int *v) {
 }
 
 /* cavity -> ball */
-int delone(pMesh mesh,pSol sol,int ip,int *list,int ilist) {
-    pPoint    ppt;
-    pTetra    pt,pt1;
-    xTetra    xt;
-    pxTetra   pxt0;
-    int      *adja,*adjb,i,j,k,l,m,iel,jel,old,v[3],iadr,base,size;
-    int       vois[4],iadrold;/*,ii,kk,iare1,iare2;*/
-    short     i1;
-    char      alert;
-    int       tref,isused=0,ixt,ielnum[3*LONMAX+1],ll;
-    Hash      hedg;
+int delone(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist) {
+    MMG5_pPoint ppt;
+    MMG5_pTetra      pt,pt1;
+    MMG5_xTetra           xt;
+    MMG5_pxTetra          pxt0;
+    int             *adja,*adjb,i,j,k,l,m,iel,jel,old,v[3],iadr,base,size;
+    int              vois[4],iadrold;/*,ii,kk,_MMG5_iare1,_MMG5_iare2;*/
+    short            i1;
+    char             alert;
+    int              tref,isused=0,ixt,ielnum[3*LONMAX+1],ll;
+    _MMG5_Hash       hedg;
 
     //obsolete avec la realloc
     // if ( mesh->ne + 2*ilist > mesh->nemax )  {printf("on passe ici boum\n");return(0);}
@@ -152,7 +152,7 @@ int delone(pMesh mesh,pSol sol,int ip,int *list,int ilist) {
             jel = vois[i];
             if ( !jel || mesh->tetra[jel].mark != base ) {
                 for (j=0; j<3; j++) {
-                    i1  = idir[i][j];
+                    i1  = _MMG5_idir[i][j];
                     ppt = &mesh->point[ pt1->v[i1] ];
                     ppt->tagdel |= MG_NOM;
                 }
@@ -193,7 +193,7 @@ int delone(pMesh mesh,pSol sol,int ip,int *list,int ilist) {
         ielnum[k] = newElt(mesh);
 
         if ( !ielnum[k] ) {
-            TETRA_REALLOC(mesh,ielnum[k],mesh->gap,
+            _MMG5_TETRA_REALLOC(mesh,ielnum[k],mesh->gap,
                           printf("  ## Warning: unable to allocate a new element but the mesh will be valid.\n");
                           for(ll=1 ; ll<k ; ll++) {
                               mesh->tetra[ielnum[ll]].v[0] = 1;
@@ -218,7 +218,7 @@ int delone(pMesh mesh,pSol sol,int ip,int *list,int ilist) {
         pt   = &mesh->tetra[old];
         if(pt->xt) {
             pxt0 = &mesh->xtetra[pt->xt];
-            memcpy(&xt,pxt0,sizeof(xTetra));
+            memcpy(&xt,pxt0,sizeof(MMG5_xTetra));
             isused=0;
             ixt = 1;
         } else {
@@ -260,18 +260,18 @@ int delone(pMesh mesh,pSol sol,int ip,int *list,int ilist) {
                             pxt0 = &mesh->xtetra[pt1->xt];
                             memset(pxt0,0,sizeof(MMG5_xTetra));
                             pxt0->ref[i]   = xt.ref[i] ; pxt0->ftag[i]  = xt.ftag[i];
-                            pxt0->edg[iarf[i][0]] = xt.edg[iarf[i][0]];
-                            pxt0->edg[iarf[i][1]] = xt.edg[iarf[i][1]];
-                            pxt0->edg[iarf[i][2]] = xt.edg[iarf[i][2]];
-                            pxt0->tag[iarf[i][0]] = xt.tag[iarf[i][0]];
-                            pxt0->tag[iarf[i][1]] = xt.tag[iarf[i][1]];
-                            pxt0->tag[iarf[i][2]] = xt.tag[iarf[i][2]];
+                            pxt0->edg[_MMG5_iarf[i][0]] = xt.edg[_MMG5_iarf[i][0]];
+                            pxt0->edg[_MMG5_iarf[i][1]] = xt.edg[_MMG5_iarf[i][1]];
+                            pxt0->edg[_MMG5_iarf[i][2]] = xt.edg[_MMG5_iarf[i][2]];
+                            pxt0->tag[_MMG5_iarf[i][0]] = xt.tag[_MMG5_iarf[i][0]];
+                            pxt0->tag[_MMG5_iarf[i][1]] = xt.tag[_MMG5_iarf[i][1]];
+                            pxt0->tag[_MMG5_iarf[i][2]] = xt.tag[_MMG5_iarf[i][2]];
                             pxt0->ori = xt.ori;
                             isused=1;
                         } else {
                             mesh->xt++;
                             if ( mesh->xt > mesh->xtmax ) {
-                                TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,xTetra,
+                                _MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
                                              "larger xtetra table",
                                              mesh->xt--;
                                              printf("  Exit program.\n");
@@ -280,12 +280,12 @@ int delone(pMesh mesh,pSol sol,int ip,int *list,int ilist) {
                             pt1->xt = mesh->xt;
                             pxt0 = &mesh->xtetra[pt1->xt];
                             pxt0->ref[i]   = xt.ref[i] ; pxt0->ftag[i]  = xt.ftag[i];
-                            pxt0->edg[iarf[i][0]] = xt.edg[iarf[i][0]];
-                            pxt0->edg[iarf[i][1]] = xt.edg[iarf[i][1]];
-                            pxt0->edg[iarf[i][2]] = xt.edg[iarf[i][2]];
-                            pxt0->tag[iarf[i][0]] = xt.tag[iarf[i][0]];
-                            pxt0->tag[iarf[i][1]] = xt.tag[iarf[i][1]];
-                            pxt0->tag[iarf[i][2]] = xt.tag[iarf[i][2]];
+                            pxt0->edg[_MMG5_iarf[i][0]] = xt.edg[_MMG5_iarf[i][0]];
+                            pxt0->edg[_MMG5_iarf[i][1]] = xt.edg[_MMG5_iarf[i][1]];
+                            pxt0->edg[_MMG5_iarf[i][2]] = xt.edg[_MMG5_iarf[i][2]];
+                            pxt0->tag[_MMG5_iarf[i][0]] = xt.tag[_MMG5_iarf[i][0]];
+                            pxt0->tag[_MMG5_iarf[i][1]] = xt.tag[_MMG5_iarf[i][1]];
+                            pxt0->tag[_MMG5_iarf[i][2]] = xt.tag[_MMG5_iarf[i][2]];
                             pxt0->ori = xt.ori;
                         }
                     }
@@ -305,8 +305,8 @@ int delone(pMesh mesh,pSol sol,int ip,int *list,int ilist) {
                     if ( j != i ) {
                         m = 0;
                         for (l=0; l<3; l++)
-                            if ( pt1->v[ idir[j][l] ] != ip ) {
-                                v[m] = pt1->v[ idir[j][l] ];
+                            if ( pt1->v[ _MMG5_idir[j][l] ] != ip ) {
+                                v[m] = pt1->v[ _MMG5_idir[j][l] ];
                                 m++;
                             }
                         hashEdgeDelone(mesh,&hedg,iel,j,v);
@@ -326,17 +326,17 @@ int delone(pMesh mesh,pSol sol,int ip,int *list,int ilist) {
 
     //ppt = &mesh->point[ip];
     //  ppt->flag = mesh->flag;
-    DEL_MEM(mesh,hedg.item,(hedg.max+1)*sizeof(hedge));
+    _MMG5_DEL_MEM(mesh,hedg.item,(hedg.max+1)*sizeof(_MMG5_hedge));
     return(1);
 }
 
 
 /* /\* clone of delone *\/ */
-/* int MMG_delons(pMesh mesh,pSol sol,pQueuenew queue,int ip,pList list,int ilist,double declic) { */
-/*   pPoint    ppt; */
-/*   pTetra    pt,pt1; */
+/* int MMG_delons(MMG5_pMesh mesh,MMG5_pSol sol,pQueuenew queue,int ip,pList list,int ilist,double declic) { */
+/*   MMG5_pPoint    ppt; */
+/*   MMG5_pTetra    pt,pt1; */
 /*   int      *adja,*adjb,i,j,k,l,m,iel,jel,old,v[3],iadr,base,size; */
-/*   int       vois[4],ii,kk,iare1,iare2,tref; */
+/*   int       vois[4],ii,kk,_MMG5_iare1,_MMG5_iare2,tref; */
 /*   short     i1; */
 /*   char      alert; */
 
@@ -354,7 +354,7 @@ int delone(pMesh mesh,pSol sol,int ip,int *list,int ilist) {
 /*       jel = adja[i] >> 2; */
 /*       if ( !jel || mesh->tetra[jel].mark != base ) { */
 /*      for (j=0; j<3; j++) { */
-/*        i1  = MMG_idir[i][j]; */
+/*        i1  = _MMG5_idir[i][j]; */
 /*        ppt = &mesh->point[ pt1->v[i1] ]; */
 /*        ppt->tag |= M_CAVITY; */
 /*      } */
@@ -389,7 +389,7 @@ int delone(pMesh mesh,pSol sol,int ip,int *list,int ilist) {
 /*   list->hedg.size  = size; */
 /*   list->hedg.nhmax = 3*size+1; */
 /*   list->hedg.hnxt  = size; */
-/*   memset(list->hedg.item,0,list->hedg.nhmax*sizeof(hedge)); */
+/*   memset(list->hedg.item,0,list->hedg.nhmax*sizeof(_MMG5_hedge)); */
 /*   for (k=size; k<list->hedg.nhmax; k++) */
 /*     list->hedg.item[k].nxt = k+1; */
 
@@ -425,13 +425,13 @@ int delone(pMesh mesh,pSol sol,int ip,int *list,int ilist) {
 /*      for(ii=0 ; ii<6 ; ii++) */
 /*        pt1->bdryinfo[ii] = 0; */
 /*      for(ii=0 ; ii<3 ; ii++) { */
-/*        if(!pt->bdryinfo[MMG_iarf[i][ii]]) continue; */
-/*        iare1 = pt->v[MMG_iare[MMG_iarf[i][ii]][0]]; */
-/*        iare2 = pt->v[MMG_iare[MMG_iarf[i][ii]][1]]; */
+/*        if(!pt->bdryinfo[_MMG5_iarf[i][ii]]) continue; */
+/*        _MMG5_iare1 = pt->v[_MMG5_iare[_MMG5_iarf[i][ii]][0]]; */
+/*        _MMG5_iare2 = pt->v[_MMG5_iare[_MMG5_iarf[i][ii]][1]]; */
 /*        for(kk=0 ; kk<3 ; kk++) { */
-/*          if(((iare1==pt->v[MMG_iare[MMG_iarf[i][kk]][0]]) && (iare2==pt->v[MMG_iare[MMG_iarf[i][kk]][1]])) */
-/*             || ((iare2==pt->v[MMG_iare[MMG_iarf[i][kk]][0]]) && (iare1==pt->v[MMG_iare[MMG_iarf[i][kk]][1]])) ) { */
-/*            pt1->bdryinfo[MMG_iarf[i][kk]] = pt->bdryinfo[MMG_iarf[i][ii]]; */
+/*          if(((_MMG5_iare1==pt->v[_MMG5_iare[_MMG5_iarf[i][kk]][0]]) && (_MMG5_iare2==pt->v[_MMG5_iare[_MMG5_iarf[i][kk]][1]])) */
+/*             || ((_MMG5_iare2==pt->v[_MMG5_iare[_MMG5_iarf[i][kk]][0]]) && (_MMG5_iare1==pt->v[_MMG5_iare[_MMG5_iarf[i][kk]][1]])) ) { */
+/*            pt1->bdryinfo[_MMG5_iarf[i][kk]] = pt->bdryinfo[_MMG5_iarf[i][ii]]; */
 /*            break; */
 /*          } */
 /*        } */
@@ -457,11 +457,11 @@ int delone(pMesh mesh,pSol sol,int ip,int *list,int ilist) {
 /*        if ( j != i ) { */
 /*          m = 0; */
 /*          for (l=0; l<3; l++) */
-/*            if ( pt1->v[ MMG_idir[j][l] ] != ip ) { */
-/*              v[m] = pt1->v[ MMG_idir[j][l] ]; */
+/*            if ( pt1->v[ _MMG5_idir[j][l] ] != ip ) { */
+/*              v[m] = pt1->v[ _MMG5_idir[j][l] ]; */
 /*              m++; */
 /*            } */
-/*          MMG_hashEdge(mesh,&list->hedg,iel,j,v); */
+/*          _MMG5_hashEdge(mesh,&list->hedg,iel,j,v); */
 /*        } */
 /*      } */
 /*       } */
@@ -482,9 +482,9 @@ int delone(pMesh mesh,pSol sol,int ip,int *list,int ilist) {
 
 
 /* /\* cavity correction for quality *\/ */
-/* int MMG_correction_ani(pMesh mesh,pSol sol,int ip,pList list,int ilist,int nedep) { */
-/*   pPoint        ppt,p1,p2,p3; */
-/*   pTetra        pt; */
+/* int MMG_correction_ani(MMG5_pMesh mesh,MMG5_pSol sol,int ip,pList list,int ilist,int nedep) { */
+/*   MMG5_pPoint        ppt,p1,p2,p3; */
+/*   MMG5_pTetra        pt; */
 /*   double        dd,det,nn,eps,eps2,ux,uy,uz,vx,vy,vz,v1,v2,v3; */
 /*   double        *ma,*mb,*mc,*md,mm[6],h1,h2,h3; */
 /*   int           *adja,i,j,ipil,iel,lon,iadr,adj,ib,ic,id,base,ncor; */
@@ -495,7 +495,7 @@ int delone(pMesh mesh,pSol sol,int ip,int *list,int ilist) {
 /*   if ( ppt->tag & M_UNUSED )  return(ilist); */
 /*   base = mesh->mark; */
 /*   lon  = ilist; */
-/*   eps  = EPSCON; */
+/*   eps  = _MMG5_EPSCON; */
 /*   eps2 = eps*eps; */
 
 /*   /\* average metric *\/ */
@@ -523,9 +523,9 @@ int delone(pMesh mesh,pSol sol,int ip,int *list,int ilist) {
 /*      MMG_cas = 0; */
 /*      if ( adj && mesh->tetra[adj].mark == base)  continue; */
 
-/*      ib = pt->v[ MMG_idir[i][0] ]; */
-/*      ic = pt->v[ MMG_idir[i][1] ]; */
-/*      id = pt->v[ MMG_idir[i][2] ]; */
+/*      ib = pt->v[ _MMG5_idir[i][0] ]; */
+/*      ic = pt->v[ _MMG5_idir[i][1] ]; */
+/*      id = pt->v[ _MMG5_idir[i][2] ]; */
 
 /*      p1 = &mesh->point[ib]; */
 /*      p2 = &mesh->point[ic]; */
@@ -567,7 +567,7 @@ int delone(pMesh mesh,pSol sol,int ip,int *list,int ilist) {
 /*      det = mm[0] * ( mm[3]*mm[5] - mm[4]*mm[4]) \ */
 /*        - mm[1] * ( mm[1]*mm[5] - mm[2]*mm[4]) \ */
 /*        + mm[2] * ( mm[1]*mm[4] - mm[2]*mm[3]); */
-/*      if ( det < EPSOK )  break; */
+/*      if ( det < _MMG5_EPSOK )  break; */
 
 /*      /\* point close to face *\/ */
 /*      /\*nn = (v1*v1 + v2*v2 + v3*v3);*\/ */
@@ -640,18 +640,18 @@ int delone(pMesh mesh,pSol sol,int ip,int *list,int ilist) {
 
 
 /* cavity correction for quality */
-int correction_iso(pMesh mesh,int ip,int *list,int ilist,int nedep) {
-    pPoint   ppt,p1,p2,p3;
-    pTetra   pt;
-    double   dd,nn,eps,eps2,ux,uy,uz,vx,vy,vz,v1,v2,v3;
-    int     *adja,i,ipil,iel,lon,iadr,adj,ib,ic,id,base,ncor;
-    int      vois[4];
+int correction_iso(MMG5_pMesh mesh,int ip,int *list,int ilist,int nedep) {
+    MMG5_pPoint ppt,p1,p2,p3;
+    MMG5_pTetra      pt;
+    double           dd,nn,eps,eps2,ux,uy,uz,vx,vy,vz,v1,v2,v3;
+    int             *adja,i,ipil,iel,lon,iadr,adj,ib,ic,id,base,ncor;
+    int              vois[4];
 
     ppt  = &mesh->point[ip];
     if ( ppt->tag & MG_NUL )  return(ilist);
     base = mesh->mark;
     lon  = ilist;
-    eps  = EPSCON;
+    eps  = _MMG5_EPSCON;
     eps2 = eps*eps;
     do {
         ipil = lon-1;
@@ -672,9 +672,9 @@ int correction_iso(pMesh mesh,int ip,int *list,int ilist,int nedep) {
                 MMG_cas = 0;
                 if ( adj && mesh->tetra[adj].mark == base )  continue;
 
-                ib = pt->v[ idir[i][0] ];
-                ic = pt->v[ idir[i][1] ];
-                id = pt->v[ idir[i][2] ];
+                ib = pt->v[ _MMG5_idir[i][0] ];
+                ic = pt->v[ _MMG5_idir[i][1] ];
+                id = pt->v[ _MMG5_idir[i][2] ];
 
                 p1 = &mesh->point[ib];
                 p2 = &mesh->point[ic];
@@ -725,9 +725,9 @@ int correction_iso(pMesh mesh,int ip,int *list,int ilist,int nedep) {
 
 
 /* /\* mark elements in cavity *\/ */
-/* int MMG_cavity_ani(pMesh mesh,pSol sol,int iel,int ip,pList list,int lon) { */
-/*   pPoint    ppt; */
-/*   pTetra    pt,pt1,ptc; */
+/* int MMG_cavity_ani(MMG5_pMesh mesh,MMG5_pSol sol,int iel,int ip,pList list,int lon) { */
+/*   MMG5_pPoint    ppt; */
+/*   MMG5_pTetra    pt,pt1,ptc; */
 /*   double    c[3],eps,dd,ray,ux,uy,uz,crit; */
 /*   double    *mj,*mp,ct[12]; */
 /*   int       *adja,*adjb,k,adj,adi,voy,i,j,ia,ilist,ipil,jel,iadr,base; */
@@ -742,7 +742,7 @@ int correction_iso(pMesh mesh,int ip,int *list,int ilist,int nedep) {
 
 /*   /\* grow cavity by adjacency *\/ */
 /*   base  = mesh->mark; */
-/*   eps   = EPSRAD * EPSRAD; */
+/*   eps   = _MMG5_EPSRAD * _MMG5_EPSRAD; */
 /*   ilist = lon; */
 /*   ipil  = 1; */
 /*   iadr  = (ip-1)*sol->offset + 1; */
@@ -795,7 +795,7 @@ int correction_iso(pMesh mesh,int ip,int *list,int ilist,int nedep) {
 /*        + 2.0*(mj[1]*ux*uy + mj[2]*ux*uz + mj[4]*uy*uz); */
 /*      crit += sqrt(dd/ray); */
 /*       } */
-/*       crit *= EPSRAD; */
+/*       crit *= _MMG5_EPSRAD; */
 /*       if ( crit > 5.0 ) continue; */
 
 /*       /\* lost face(s) *\/ */
@@ -840,13 +840,13 @@ int correction_iso(pMesh mesh,int ip,int *list,int ilist,int nedep) {
 
 
 /** Return a negative value for ilist if one of the tet of the cavity is required */
-int cavity(pMesh mesh,pSol sol,int iel,int ip,int *list,int lon) {
-    pPoint    ppt;
-    pTetra    pt,pt1,ptc;
-    double    c[3],crit,dd,eps,ray,ct[12];
-    int      *adja,*adjb,k,adj,adi,voy,i,j,ilist,ipil,jel,iadr,base;
-    int       vois[4],l;
-    int       tref,isreq;
+int cavity(MMG5_pMesh mesh,MMG5_pSol sol,int iel,int ip,int *list,int lon) {
+    MMG5_pPoint ppt;
+    MMG5_pTetra      pt,pt1,ptc;
+    double           c[3],crit,dd,eps,ray,ct[12];
+    int             *adja,*adjb,k,adj,adi,voy,i,j,ilist,ipil,jel,iadr,base;
+    int              vois[4],l;
+    int              tref,isreq;
 
     if ( lon < 1 )  return(0);
     ppt = &mesh->point[ip];
@@ -868,7 +868,7 @@ int cavity(pMesh mesh,pSol sol,int iel,int ip,int *list,int lon) {
         list[k] = list[k] / 6;
 
     /* grow cavity by adjacency */
-    eps   = EPSRAD*EPSRAD;
+    eps   = _MMG5_EPSRAD*_MMG5_EPSRAD;
     ilist = lon;
     ipil  = 0;
 

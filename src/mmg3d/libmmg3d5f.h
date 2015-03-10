@@ -82,7 +82,7 @@
 !  *
 !  */
 
-#define SIZE 0.75
+#define MMG5_SIZE 0.75
 
 ! /**
 !  * \enum MMG5_type

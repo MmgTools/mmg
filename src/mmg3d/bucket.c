@@ -37,20 +37,20 @@
 #define LFILT    0.2//0.7
 
 /* create bucket structure and store initial vertices */
-pBucket newBucket(pMesh mesh,int nmax) {
-    pPoint        ppt;
-    pBucket       bucket;
+_MMG5_pBucket newBucket(MMG5_pMesh mesh,int nmax) {
+    MMG5_pPoint        ppt;
+    _MMG5_pBucket       bucket;
     double        dd;
     int           k,ic,ii,jj,kk;
 
     /* memory alloc */
-    ADD_MEM(mesh,sizeof(Bucket),"bucket",return(NULL));
-    SAFE_MALLOC(bucket,1,Bucket);
+    _MMG5_ADD_MEM(mesh,sizeof(_MMG5_Bucket),"bucket",return(NULL));
+    _MMG5_SAFE_MALLOC(bucket,1,_MMG5_Bucket);
     bucket->size = nmax;
-    ADD_MEM(mesh,(nmax*nmax*nmax+1)*sizeof(int),"bucket->head",return(NULL));
-    SAFE_CALLOC(bucket->head,nmax*nmax*nmax+1,int);
-    ADD_MEM(mesh,(mesh->npmax+1)*sizeof(int),"bucket->link",return(NULL));
-    SAFE_CALLOC(bucket->link,mesh->npmax+1,int);
+    _MMG5_ADD_MEM(mesh,(nmax*nmax*nmax+1)*sizeof(int),"bucket->head",return(NULL));
+    _MMG5_SAFE_CALLOC(bucket->head,nmax*nmax*nmax+1,int);
+    _MMG5_ADD_MEM(mesh,(mesh->npmax+1)*sizeof(int),"bucket->link",return(NULL));
+    _MMG5_SAFE_CALLOC(bucket->link,mesh->npmax+1,int);
 
     /* insert vertices */
     dd = nmax / (double)PRECI;
@@ -76,8 +76,8 @@ pBucket newBucket(pMesh mesh,int nmax) {
 
 
 /* check and eventually insert vertex */
-int buckin_ani(pMesh mesh,pSol sol,pBucket bucket,int ip) {
-    pPoint        ppt,pp1;
+int buckin_ani(MMG5_pMesh mesh,MMG5_pSol sol,_MMG5_pBucket bucket,int ip) {
+    MMG5_pPoint        ppt,pp1;
     double        dd,d2,det,ux,uy,uz,dmi,m1,m2,m3,dx,dy,dz;
     double        *ma,*mb;
     int           i,j,k,ii,jj,kk,ic,icc,siz,ip1;
@@ -205,8 +205,8 @@ int buckin_ani(pMesh mesh,pSol sol,pBucket bucket,int ip) {
 }
 
 
-int buckin_iso(pMesh mesh,pSol sol,pBucket bucket,int ip) {
-    pPoint        ppt,pp1;
+int buckin_iso(MMG5_pMesh mesh,MMG5_pSol sol,_MMG5_pBucket bucket,int ip) {
+    MMG5_pPoint        ppt,pp1;
     double        dd,d2,ux,uy,uz,hpi,hp1,hp2;
     int           i,j,k,ii,jj,kk,ic,icc,siz,ip1;
     int           imin,imax,jmin,jmax,kmin,kmax;
@@ -304,8 +304,8 @@ int buckin_iso(pMesh mesh,pSol sol,pBucket bucket,int ip) {
 }
 
 
-int addBucket(pMesh mesh,pBucket bucket,int ip) {
-    pPoint        ppt;
+int addBucket(MMG5_pMesh mesh,_MMG5_pBucket bucket,int ip) {
+    MMG5_pPoint        ppt;
     double        dd;
     int           ic,ii,jj,kk,siz;
 
@@ -334,8 +334,8 @@ int addBucket(pMesh mesh,pBucket bucket,int ip) {
 }
 
 
-int delBucket(pMesh mesh,pBucket bucket,int ip) {
-    pPoint        ppt;
+int delBucket(MMG5_pMesh mesh,_MMG5_pBucket bucket,int ip) {
+    MMG5_pPoint        ppt;
     double        dd;
     int           ic,ii,jj,kk,siz,ip1;
 

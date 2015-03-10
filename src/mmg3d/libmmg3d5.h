@@ -64,7 +64,7 @@
  * Size of the mesh of singularities inside the main mesh (SINGUL mode only).
  *
  */
-#define SIZE 0.75
+#define MMG5_SIZE 0.75
 
 /**
  * \enum MMG5_type

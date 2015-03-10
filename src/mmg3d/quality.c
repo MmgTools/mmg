@@ -37,13 +37,13 @@
 
 extern char ddb;
 
-inline double lenedg_ani(pMesh mesh,pSol met,int ip1,int ip2) {
+inline double lenedg_ani(MMG5_pMesh mesh,MMG5_pSol met,int ip1,int ip2) {
     return(0.0);
 }
 
 /** Compute length of edge [ip1,ip2] according to the size prescription */
-inline double lenedg_iso(pMesh mesh,pSol met,int ip1,int ip2) {
-    pPoint   p1,p2;
+inline double lenedg_iso(MMG5_pMesh mesh,MMG5_pSol met,int ip1,int ip2) {
+    MMG5_pPoint   p1,p2;
     double   h1,h2,l,r,len;
 
     p1 = &mesh->point[ip1];
@@ -54,14 +54,14 @@ inline double lenedg_iso(pMesh mesh,pSol met,int ip1,int ip2) {
         + (p2->c[2]-p1->c[2])*(p2->c[2]-p1->c[2]);
     l = sqrt(l);
     r = h2 / h1 - 1.0;
-    len = fabs(r) < EPS ? l / h1 : l / (h2-h1) * log(r+1.0);
+    len = fabs(r) < _MMG5_EPS ? l / h1 : l / (h2-h1) * log(r+1.0);
 
     return(len);
 }
 
 
 /** Return quality of surface triangle */
-inline double caltri(pMesh mesh,pTria ptt) {
+inline double caltri(MMG5_pMesh mesh,MMG5_pTria ptt) {
     double   *a,*b,*c,cal,abx,aby,abz,acx,acy,acz,bcx,bcy,bcz,rap;
 
     a = &mesh->point[ptt->v[0]].c[0];
@@ -82,20 +82,20 @@ inline double caltri(pMesh mesh,pTria ptt) {
     cal  = (aby*acz - abz*acy) * (aby*acz - abz*acy);
     cal += (abz*acx - abx*acz) * (abz*acx - abx*acz);
     cal += (abx*acy - aby*acx) * (abx*acy - aby*acx);
-    if ( cal < EPSD2 )  return(0.0);
+    if ( cal < _MMG5_EPSD2 )  return(0.0);
 
     /* qual = 2.*surf / length */
     rap  = abx*abx + aby*aby + abz*abz;
     rap += acx*acx + acy*acy + acz*acz;
     rap += bcx*bcx + bcy*bcy + bcz*bcz;
-    if ( rap < EPSD2 )  return(0.0);
+    if ( rap < _MMG5_EPSD2 )  return(0.0);
 
     return(sqrt(cal) / rap);
 }
 
 /** compute tetra oriented quality of iel (return 0.0 when element is inverted) */
-inline double orcal(pMesh mesh,int iel) {
-    pTetra     pt;
+inline double orcal(MMG5_pMesh mesh,int iel) {
+    MMG5_pTetra     pt;
     double     abx,aby,abz,acx,acy,acz,adx,ady,adz,bcx,bcy,bcz,bdx,bdy,bdz,cdx,cdy,cdz;
     double     vol,v1,v2,v3,rap;
     double     *a,*b,*c,*d;
@@ -127,7 +127,7 @@ inline double orcal(pMesh mesh,int iel) {
     v3  = acx*ady - acy*adx;
     vol = abx * v1 + aby * v2 + abz * v3;
 
-    if ( vol < EPSD2 )  return(0.0);
+    if ( vol < _MMG5_EPSD2 )  return(0.0);
 
     bcx = c[0] - b[0];
     bcy = c[1] - b[1];
@@ -143,7 +143,7 @@ inline double orcal(pMesh mesh,int iel) {
     cdy = d[1] - c[1];
     cdz = d[2] - c[2];
     rap += cdx*cdx + cdy*cdy + cdz*cdz;
-    if ( rap < EPSD2 )  return(0.0);
+    if ( rap < _MMG5_EPSD2 )  return(0.0);
 
     /* quality = vol / len^3/2 */
     rap = rap * sqrt(rap);
@@ -153,7 +153,7 @@ inline double orcal(pMesh mesh,int iel) {
 
 
 /** compute tetra quality iso */
-inline double caltet_iso(pMesh mesh,pSol met,int ia,int ib,int ic,int id) {
+inline double caltet_iso(MMG5_pMesh mesh,MMG5_pSol met,int ia,int ib,int ic,int id) {
     double     abx,aby,abz,acx,acy,acz,adx,ady,adz,bcx,bcy,bcz,bdx,bdy,bdz,cdx,cdy,cdz;
     double     vol,v1,v2,v3,rap;
     double    *a,*b,*c,*d;
@@ -183,7 +183,7 @@ inline double caltet_iso(pMesh mesh,pSol met,int ia,int ib,int ic,int id) {
     v2  = acz*adx - acx*adz;
     v3  = acx*ady - acy*adx;
     vol = abx * v1 + aby * v2 + abz * v3;
-    if ( vol < EPSD2 )  return(0.0);
+    if ( vol < _MMG5_EPSD2 )  return(0.0);
 
     bcx = c[0] - b[0];
     bcy = c[1] - b[1];
@@ -199,7 +199,7 @@ inline double caltet_iso(pMesh mesh,pSol met,int ia,int ib,int ic,int id) {
     cdy = d[1] - c[1];
     cdz = d[2] - c[2];
     rap += cdx*cdx + cdy*cdy + cdz*cdz;
-    if ( rap < EPSD2 )  return(0.0);
+    if ( rap < _MMG5_EPSD2 )  return(0.0);
 
     /* quality = vol / len^3/2 */
     rap = rap * sqrt(rap);
@@ -207,13 +207,13 @@ inline double caltet_iso(pMesh mesh,pSol met,int ia,int ib,int ic,int id) {
 }
 
 
-inline double caltet_ani(pMesh mesh,pSol met,int ia,int ib,int ic,int id) {
+inline double caltet_ani(MMG5_pMesh mesh,MMG5_pSol met,int ia,int ib,int ic,int id) {
     return(0.0);
 }
 
 
 /** compute face normal */
-inline int nortri(pMesh mesh,pTria pt,double *n) {
+inline int nortri(MMG5_pMesh mesh,MMG5_pTria pt,double *n) {
     double   *a,*b,*c,dd,abx,aby,abz,acx,acy,acz,det;
 
     a = mesh->point[pt->v[0]].c;
@@ -233,7 +233,7 @@ inline int nortri(pMesh mesh,pTria pt,double *n) {
     n[1] = abz*acx - abx*acz;
     n[2] = abx*acy - aby*acx;
     det  = n[0]*n[0] + n[1]*n[1] + n[2]*n[2];
-    if ( det < EPSD2 )  return(0);
+    if ( det < _MMG5_EPSD2 )  return(0);
 
     dd = 1.0 / sqrt(det);
     n[0] *= dd;
@@ -249,7 +249,7 @@ inline int nortri(pMesh mesh,pTria pt,double *n) {
    3: 3 faces bonnes, 1 obtuse    (aileron)
    4: 2 faces bonnes, 2 faces aigu => 1 petite arete
    5: 1 face bonne, 3 petites aretes
-   6: 2 faces grandes aretes, 2 faces petites iaretes
+   6: 2 faces grandes aretes, 2 faces petites _MMG5_iaretes
    7: 4 faces grandes aretes
    8: 2 faces obtus, 1 faces aigu et une face OK
    item: bad entity
@@ -276,13 +276,13 @@ inline int nortri(pMesh mesh,pTria pt,double *n) {
    6: 1        1
    7: 0        2
 */
-#define EPSVOL 0.001
+#define _MMG5_EPSVOL 0.001
 #define RAPMAX    0.4//0.3//0.25
 unsigned char inxt[7]    = { 1,2,0,1,2,0,1 };
 
-int typelt(pMesh mesh,int iel,int *item) {
-    pTetra    pt;
-    pPoint    pa,pb,pc,pd;
+int typelt(MMG5_pMesh mesh,int iel,int *item) {
+    MMG5_pTetra    pt;
+    MMG5_pPoint    pa,pb,pc,pd;
     double    abx,aby,abz,acx,acy,acz,adx,ady,adz,v1,v2,v3,vol;
     double    bcx,bcy,bcz,bdx,bdy,bdz,cdx,cdy,cdz,h[6],volchk,ssmall;
     double    s[4],dd,rapmin,rapmax,surmin,surmax;
@@ -386,7 +386,7 @@ int typelt(pMesh mesh,int iel,int *item) {
     }
     rapmin = sqrt(rapmin);
     rapmax = sqrt(rapmax);
-    volchk = EPSVOL * rapmin*rapmin*rapmin;
+    volchk = _MMG5_EPSVOL * rapmin*rapmin*rapmin;
     //printf("$$$$$$$$$$$$$$$$$$$$$ iel %d %e %e\n",iel,volchk,vol);
     /* small volume: types 1,2,3,4 */
     if ( vol < volchk ) {
@@ -399,7 +399,7 @@ int typelt(pMesh mesh,int iel,int *item) {
 
         /* types 2,3 */
         item[0] = iarmax;
-        item[1] = isar[iarmax][0];
+        item[1] = _MMG5_isar[iarmax][0];
         if ( isur == 1 ) {
             surmin   = s[0];
             isurmin = 0;
@@ -417,7 +417,7 @@ int typelt(pMesh mesh,int iel,int *item) {
             }
             dd = surmin / surmax;
             if ( dd < RAPMAX ) {
-                item[1] = isar[iarmax][0];
+                item[1] = _MMG5_isar[iarmax][0];
                 return(3);
             }
             else {
@@ -436,7 +436,7 @@ int typelt(pMesh mesh,int iel,int *item) {
         if ( isur > 2 ) {
             dd = rapmin / rapmax;
             item[0] = iarmin;
-            item[1] = idir[iarmin][0];
+            item[1] = _MMG5_idir[iarmin][0];
             if ( dd < 0.01 )  return(4);
             if ( s[0]+s[1] > ssmall ) {
                 item[0] = 0;
@@ -470,9 +470,9 @@ int typelt(pMesh mesh,int iel,int *item) {
         for (k=0; k<4; k++) {
             aigu = 0;
             for(i=0 ; i<3 ; i++) {
-                i0 = idir[k][i];
-                i1 = idir[k][inxt[i]];
-                i2 = idir[k][inxt[i+1]];
+                i0 = _MMG5_idir[k][i];
+                i1 = _MMG5_idir[k][inxt[i]];
+                i2 = _MMG5_idir[k][inxt[i+1]];
                 if((h[i0]>h[i1] && h[i0]>h[i2]) && (h[i0]>2.5*h[i1] || h[i0]>2.5*h[i2])) {//obtu ? > /*130*/ 150
                     //be carefull isocele triangle --> opposite edge only
                     if(!( fabs(1-h[i0]/h[i1]) < 0.1 || fabs(1-h[i0]/h[i2])< 0.1 ) ) {
@@ -519,12 +519,12 @@ int typelt(pMesh mesh,int iel,int *item) {
     return(9);
 }
 
-int badelt(pMesh mesh,pSol met) {
-    pTetra   pt;
+int badelt(MMG5_pMesh mesh,MMG5_pSol met) {
+    MMG5_pTetra   pt;
     double   kal;
     int      k,it,maxit,nd/*,item[2],typ*/;
     /*int      ntyp[10];*/
-    int      list[LMAX+2],i,ilist,nconf,ns;
+    int      list[_MMG5_LMAX+2],i,ilist,nconf,ns;
 
     it = 0;
     maxit = 3;
@@ -535,8 +535,8 @@ int badelt(pMesh mesh,pSol met) {
         for (k=1; k<=mesh->ne; k++) {
             pt = &mesh->tetra[k];
             if ( !MG_EOK(pt) )  continue;
-            kal = /*ALPHAD **/ pt->qual;
-            if ( kal > 0.0096225 /*BADKAL/ALPHAD*/ )  continue;
+            kal = /*_MMG5_ALPHAD **/ pt->qual;
+            if ( kal > 0.0096225 /*_MMG5_BADKAL/_MMG5_ALPHAD*/ )  continue;
             //typ =  typelt(mesh,k,item);
             //ntyp[typ]++;
             nd++;
@@ -563,9 +563,9 @@ int badelt(pMesh mesh,pSol met) {
 }
 
 /** Compute sizes of edges of the mesh, and displays histo */
-int prilen(pMesh mesh, pSol met) {
-    pTetra          pt;
-    Hash            hash;
+int prilen(MMG5_pMesh mesh, MMG5_pSol met) {
+    MMG5_pTetra          pt;
+    _MMG5_Hash           hash;
     double          len,avlen,dned,lmin,lmax;
     int             k,np,nq,amin,bmin,amax,bmax,ned,hl[9];
     char            ia,i0,i1,ier,i;
@@ -587,8 +587,8 @@ int prilen(pMesh mesh, pSol met) {
         if ( !MG_EOK(pt) ) continue;
 
         for(ia=0; ia<6; ia++) {
-            i0 = iare[ia][0];
-            i1 = iare[ia][1];
+            i0 = _MMG5_iare[ia][0];
+            i1 = _MMG5_iare[ia][1];
             np = pt->v[i0];
             nq = pt->v[i1];
 
@@ -606,8 +606,8 @@ int prilen(pMesh mesh, pSol met) {
         if ( !MG_EOK(pt) ) continue;
 
         for(ia=0; ia<6; ia++) {
-            i0 = iare[ia][0];
-            i1 = iare[ia][1];
+            i0 = _MMG5_iare[ia][0];
+            i1 = _MMG5_iare[ia][1];
             np = pt->v[i0];
             nq = pt->v[i1];
 
@@ -678,13 +678,13 @@ int prilen(pMesh mesh, pSol met) {
         }
     }
 
-    DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(hedge));
+    _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
     return(1);
 }
 
 /** print mesh quality histo */
-void outqua(pMesh mesh,pSol met) {
-    pTetra    pt;
+void outqua(MMG5_pMesh mesh,MMG5_pSol met) {
+    MMG5_pTetra    pt;
     double   rap,rapmin,rapmax,rapavg,med,good;
     int      i,k,iel,ok,ir,imax,nex,his[5];
 
@@ -706,14 +706,14 @@ void outqua(pMesh mesh,pSol met) {
         if ( orvol(mesh->point,pt->v) < 0.0 ) {
             fprintf(stdout,"dans quality vol negatif\n");
         }
-        rap = ALPHAD * caltet(mesh,met,pt->v[0],pt->v[1],pt->v[2],pt->v[3]);
+        rap = _MMG5_ALPHAD * caltet(mesh,met,pt->v[0],pt->v[1],pt->v[2],pt->v[3]);
         if ( rap < rapmin ) {
             rapmin = rap;
             iel    = ok;
         }
         if ( rap > 0.5 )  med++;
         if ( rap > 0.12 ) good++;
-        if ( rap < BADKAL )  mesh->info.badkal = 1;
+        if ( rap < _MMG5_BADKAL )  mesh->info.badkal = 1;
         rapavg += rap;
         rapmax  = MG_MAX(rapmax,rap);
         ir = MG_MIN(4,(int)(5.0*rap));
@@ -758,8 +758,8 @@ void outqua(pMesh mesh,pSol met) {
 }
 
 /** approximation of the final number of vertex */
-int countelt(pMesh mesh,pSol sol, double *weightelt, long *npcible) {
-    pTetra pt;
+int countelt(MMG5_pMesh mesh,MMG5_pSol sol, double *weightelt, long *npcible) {
+    MMG5_pTetra pt;
     double  len;
     int    k,ia,ipa,ipb,lon,l;
     //int   npbdry;
@@ -767,7 +767,7 @@ int countelt(pMesh mesh,pSol sol, double *weightelt, long *npcible) {
     int      isbdry;
     double   dned,dnface,dnint/*,dnins*/,w,lenavg,lent[6];
     double   dnpdel,dnadd,leninv,dnaddloc,dnpdelloc;
-    int   list[LMAX],ddebug,ib;
+    int   list[_MMG5_LMAX],ddebug,ib;
     long  nptot;
     //FILE *inm;
 
@@ -793,13 +793,13 @@ int countelt(pMesh mesh,pSol sol, double *weightelt, long *npcible) {
         if(0 && k==250343) ddebug = 1;
         else ddebug = 0;
 
-        if(ddebug) printf("on traite %d %e\n",k,ALPHAD*pt->qual);
+        if(ddebug) printf("on traite %d %e\n",k,_MMG5_ALPHAD*pt->qual);
 
         /*longueur moyenne*/
         lenavg = 0;
         for(ib=0 ; ib<6 ; ib++) {
-            ipa = iare[ib][0];
-            ipb = iare[ib][1];
+            ipa = _MMG5_iare[ib][0];
+            ipb = _MMG5_iare[ib][1];
             lent[ib] = lenedg(mesh,sol,pt->v[ipa],pt->v[ipb]);
             lenavg+=lent[ib];
         }
@@ -861,19 +861,19 @@ int countelt(pMesh mesh,pSol sol, double *weightelt, long *npcible) {
                 }
                 dnaddloc *= 1./lon;
                 if(!loc) {
-                    if(ALPHAD * pt->qual >= 0.5) /*on ne compte les points internes que pour les (tres) bons tetras*/
+                    if(_MMG5_ALPHAD * pt->qual >= 0.5) /*on ne compte les points internes que pour les (tres) bons tetras*/
                         dnaddloc = dnaddloc;
-                    else if(ALPHAD * pt->qual >= 1./5.)
+                    else if(_MMG5_ALPHAD * pt->qual >= 1./5.)
                         dnaddloc = dned / lon + 2*dnface/3.;
                     else
                         dnaddloc = dned / lon ;
                     //rajout de 30% parce que 1) on vise des longueurs de 0.7 et
                     //2) on ne tient pas compte du fait qu'on divise tjs par 2 dans la generation
-                    if( (ALPHAD*pt->qual <= 1./50.) )
+                    if( (_MMG5_ALPHAD*pt->qual <= 1./50.) )
                         dnaddloc = 0;
-                    else  if((ALPHAD*pt->qual <= 1./10.) )
+                    else  if((_MMG5_ALPHAD*pt->qual <= 1./10.) )
                         dnaddloc =  0.2*dnaddloc; //CEDRIC : essayer 0.3 0.4
-                    else if((len > 10) && (ALPHAD*pt->qual >= 1./1.5) ) //on sous-estime uniquement pour les tres bons
+                    else if((len > 10) && (_MMG5_ALPHAD*pt->qual >= 1./1.5) ) //on sous-estime uniquement pour les tres bons
                         dnaddloc = dnaddloc*0.3 + dnaddloc; //CEDRIC : essayer 0.3 ?
                     else if(len < 6 && len>3) //CEDRIC : essayer len < 3,4, 6,7 mais aussi en commentant le test sur len puis pour la qual > 3, 5,8
                         dnaddloc = 0.7*dnaddloc; //CEDRIC : essayer 0.9 0.7 0.6
@@ -976,7 +976,7 @@ int countelt(pMesh mesh,pSol sol, double *weightelt, long *npcible) {
 
     nptot += (long) dnadd - (long) dnpdel;
     *npcible = nptot;
-    fprintf(stdout,"ESTIMATION OF THE FINAL NUMBER OF NODES : %ld  ADD %f  DEL %f\n",nptot,dnadd,dnpdel);
+    fprintf(stdout,"ESTIMATION OF THE FINAL NUMBER OF NODES : %ld  _MMG5_ADD %f  _MMG5_DEL %f\n",nptot,dnadd,dnpdel);
 
     free(pdel);
 

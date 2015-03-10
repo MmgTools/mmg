@@ -35,13 +35,13 @@
 
 #include "mmg3d.h"
 
-#define  EPSLOC   1.00005
+#define  _MMG5_EPSLOC   1.00005
 #define  IEDG(a,b) (((a) > 0) && ((b) > 0)) ? ((a)+(b)) : (((a)+(b))-(1))
 
 extern char ddb;
 
-void chkvol(pMesh mesh) {
-    pTetra    pt;
+void chkvol(MMG5_pMesh mesh) {
+    MMG5_pTetra    pt;
     int       k;
 #ifdef DEBUG
     int       ier=1;
@@ -50,7 +50,7 @@ void chkvol(pMesh mesh) {
     for (k=1; k<=mesh->ne; k++) {
         pt = &mesh->tetra[k];
         if ( !MG_EOK(pt) )  continue;
-        if ( orvol(mesh->point,pt->v) < NULKAL ) {
+        if ( orvol(mesh->point,pt->v) < _MMG5_NULKAL ) {
             printf("  tetra %d  volume %e\n",k,orvol(mesh->point,pt->v));
 #ifdef DEBUG
             ier = 0;
@@ -62,8 +62,8 @@ void chkvol(pMesh mesh) {
 #endif
 }
 
-int chkmshsurf(pMesh mesh){
-    pTria      pt;
+int chkmshsurf(MMG5_pMesh mesh){
+    MMG5_pTria      pt;
     int        k,k1;
     int        *adja,*adja1;
     char       i,voy;
@@ -88,16 +88,16 @@ int chkmshsurf(pMesh mesh){
     return(1);
 }
 
-int chkmsh(pMesh mesh,int severe,int base) {
-    pTetra    pt,pt1,pt2;
-    pxTetra   pxt;
+int chkmsh(MMG5_pMesh mesh,int severe,int base) {
+    MMG5_pTetra    pt,pt1,pt2;
+    MMG5_pxTetra   pxt;
     int       *adja,*adja1,adj,adj1,k,i,iadr;
     int       iel,a0,a1,a2,b0,b1,b2;
     unsigned char voy,voy1;
     /* commentated part variables
-       pTetra        pt0;
-       pxTetra       pxt0,pxt1,pxt2;
-       int           ilists,ilistv,lists[LMAX+2],listv[LMAX+2];
+       MMG5_pTetra        pt0;
+       MMG5_xTetra       pxt0,pxt1,pxt2;
+       int           ilists,ilistv,lists[_MMG5_LMAX+2],listv[_MMG5_LMAX+2];
        int           ielprv,ielnxt,l,nump,np,nq;
        unsigned char j,iface,ifaceprv,ifacenxt,indp,indpprv,indpnxt,tag0,tag1,tag2,ia;
     */
@@ -140,13 +140,13 @@ int chkmsh(pMesh mesh,int severe,int base) {
                 exit(EXIT_FAILURE);
             }
 
-            a0 = pt1->v[idir[i][0]];
-            a1 = pt1->v[idir[i][1]];
-            a2 = pt1->v[idir[i][2]];
+            a0 = pt1->v[_MMG5_idir[i][0]];
+            a1 = pt1->v[_MMG5_idir[i][1]];
+            a2 = pt1->v[_MMG5_idir[i][2]];
 
-            b0 = pt2->v[idir[voy][0]];
-            b1 = pt2->v[idir[voy][1]];
-            b2 = pt2->v[idir[voy][2]];
+            b0 = pt2->v[_MMG5_idir[voy][0]];
+            b1 = pt2->v[_MMG5_idir[voy][1]];
+            b2 = pt2->v[_MMG5_idir[voy][2]];
 
             if(!(((a0 == b0)&&(a1 == b1)&&(a2 ==b2))||((a0 == b0)&&(a1 == b2)&&(a2 ==b1))\
                  || ((a0 == b1)&&(a1 == b0)&&(a2 ==b2)) || ((a0 == b1)&&(a1 == b2)&&(a2 ==b0))\
@@ -198,14 +198,14 @@ int chkmsh(pMesh mesh,int severe,int base) {
 
             if(pt->ref != pt1->ref){
                 if(!pt->xt){
-                    printf("Tetra %d face %d : common face is a limit of two subdomains and has not xt : %d %d %d  \n",k,i,pt->v[idir[i][0]],pt->v[idir[i][1]],pt->v[idir[i][2]]);
+                    printf("Tetra %d face %d : common face is a limit of two subdomains and has not xt : %d %d %d  \n",k,i,pt->v[_MMG5_idir[i][0]],pt->v[_MMG5_idir[i][1]],pt->v[_MMG5_idir[i][2]]);
                     MMG5_saveMesh(mesh);
                     exit(EXIT_FAILURE);
                 }
                 else{
                     pxt = &mesh->xtetra[pt->xt];
                     if(!(pxt->ftag[i] & MG_BDY)){
-                        printf("Tetra %d %d : common face is a limit of two subdomains and is not tagged %d %d %d -->%d\n",k,i,pt->v[idir[i][0]],pt->v[idir[i][1]],pt->v[idir[i][2]], pxt->ftag[i]);
+                        printf("Tetra %d %d : common face is a limit of two subdomains and is not tagged %d %d %d -->%d\n",k,i,pt->v[_MMG5_idir[i][0]],pt->v[_MMG5_idir[i][1]],pt->v[_MMG5_idir[i][2]], pxt->ftag[i]);
                         MMG5_saveMesh(mesh);
                         exit(EXIT_FAILURE);
                     }
@@ -222,8 +222,8 @@ int chkmsh(pMesh mesh,int severe,int base) {
       pxt = &mesh->xtetra[pt->xt];
 
       for(ia = 0;ia<6;ia++){
-      np = pt->v[iare[ia][0]];
-      nq = pt->v[iare[ia][1]];
+      np = pt->v[_MMG5_iare[ia][0]];
+      nq = pt->v[_MMG5_iare[ia][1]];
 
       if(!(((np == 6)&&(nq == 3204))||((nq == 6)&&(np == 3204))))
       continue;
@@ -247,7 +247,7 @@ int chkmsh(pMesh mesh,int severe,int base) {
       if(!(pxt->ftag[i] & MG_BDY)) continue;
 
       for(j=0;j<3;j++){
-      ip = idir[i][j];
+      ip = _MMG5_idir[i][j];
       nump = pt->v[ip];
 
       if(!boulesurfvolp(mesh,k,ip,i,listv,&ilistv,lists,&ilists)){
@@ -286,21 +286,21 @@ int chkmsh(pMesh mesh,int severe,int base) {
       pxt2 = &mesh->xtetra[pt2->xt];
 
       for(indp = 0;indp<3;indp++){
-      if(pt0->v[idir[iface][indp]] == nump){
+      if(pt0->v[_MMG5_idir[iface][indp]] == nump){
       break;
       }
       }
       assert(indp < 3);
 
       for(indpprv = 0;indpprv<3;indpprv++){
-      if(pt1->v[idir[ifaceprv][indpprv]] == nump){
+      if(pt1->v[_MMG5_idir[ifaceprv][indpprv]] == nump){
       break;
       }
       }
       assert(indpprv < 3);
 
       for(indpnxt = 0;indpnxt<3;indpnxt++){
-      if(pt2->v[idir[ifacenxt][indpnxt]] == nump){
+      if(pt2->v[_MMG5_idir[ifacenxt][indpnxt]] == nump){
       break;
       }
       }
@@ -311,8 +311,8 @@ int chkmsh(pMesh mesh,int severe,int base) {
       assert(pxt2->ftag[ifacenxt] & MG_BDY);*/
 
     /* Cannot rely on tag boundary of edges */
-    /*tag0 = (pxt0->tag[iarf[iface][iprv2[indp]]]) & (~MG_BDY);
-      tag1 = (pxt1->tag[iarf[ifaceprv][inxt2[indpprv]]]) & (~MG_BDY);
+    /*tag0 = (pxt0->tag[_MMG5_iarf[iface][_MMG5_iprv2[indp]]]) & (~MG_BDY);
+      tag1 = (pxt1->tag[_MMG5_iarf[ifaceprv][inxt2[indpprv]]]) & (~MG_BDY);
 
       if(tag0 != tag1){
       printf("Unconsistent tag of edge : tetra %d %d pour le point %d\n",iel,ielprv,nump);
@@ -322,8 +322,8 @@ int chkmsh(pMesh mesh,int severe,int base) {
       exit(EXIT_FAILURE);
       }
 
-      tag0 = (pxt0->tag[iarf[iface][inxt2[indp]]]) & (~MG_BDY);
-      tag2 = (pxt2->tag[iarf[ifacenxt][iprv2[indpnxt]]]) & (~MG_BDY);
+      tag0 = (pxt0->tag[_MMG5_iarf[iface][inxt2[indp]]]) & (~MG_BDY);
+      tag2 = (pxt2->tag[_MMG5_iarf[ifacenxt][_MMG5_iprv2[indpnxt]]]) & (~MG_BDY);
 
       if(tag0 != tag2){
       printf("Unconsistent tag of edge : tetra %d %d pour le point %d\n",iel,ielnxt,nump);
@@ -356,7 +356,7 @@ int chkmsh(pMesh mesh,int severe,int base) {
       dd = (ppt->c[0] - c[0]) * (ppt->c[0] - c[0]) \
       + (ppt->c[1] - c[1]) * (ppt->c[1] - c[1]) \
       + (ppt->c[2] - c[2]) * (ppt->c[2] - c[2]);
-      if ( EPSLOC*EPSLOC*dd < ray ) {
+      if ( _MMG5_EPSLOC*_MMG5_EPSLOC*dd < ray ) {
       fprintf(stdout,"  ## Non-Delaunay mesh:  %.14f < %.14f\n",dd,ray);
       exit(EXIT_FAILURE);
       }
@@ -418,10 +418,10 @@ int chkmsh(pMesh mesh,int severe,int base) {
 }
 
 /** Search boundary faces containing point np */
-int chkptonbdy(pMesh mesh,int np){
-    pTetra      pt;
-    pxTetra     pxt;
-    pPoint      p0;
+int chkptonbdy(MMG5_pMesh mesh,int np){
+    MMG5_pTetra      pt;
+    MMG5_pxTetra     pxt;
+    MMG5_pPoint      p0;
     int         k;
     char        i,j,ip;
 
@@ -437,7 +437,7 @@ int chkptonbdy(pMesh mesh,int np){
         for(i=0; i<4; i++){
             if(!(pxt->ftag[i] & MG_BDY)) continue;
             for(j=0; j<3; j++){
-                ip = idir[i][j];
+                ip = _MMG5_idir[i][j];
                 if(pt->v[ip] == np) printf("Le pt : %d sur la face %d du tetra %d : %d %d %d %d \n",pt->v[ip],i,k,pt->v[0],pt->v[1],pt->v[2],pt->v[3]);
                 p0 = &mesh->point[pt->v[ip]];
                 p0->flag = 1;
@@ -460,9 +460,9 @@ int chkptonbdy(pMesh mesh,int np){
 }
 
 /** Count how many boundary faces share point nump */
-int cntbdypt(pMesh mesh, int nump){
-    pTetra pt;
-    pxTetra pxt;
+int cntbdypt(MMG5_pMesh mesh, int nump){
+    MMG5_pTetra  pt;
+    MMG5_pxTetra pxt;
     int k,nf;
     char i,j,ip;
 
@@ -476,9 +476,9 @@ int cntbdypt(pMesh mesh, int nump){
         for(i=0; i<4; i++){
             if(!(pxt->ftag[i] & MG_BDY)) continue;
             for(j=0; j<3; j++){
-                ip = idir[i][j];
+                ip = _MMG5_idir[i][j];
                 if(pt->v[ip] == nump){
-                    printf("La face : %d %d %d \n dans le tetra : %d %d %d %d \n",pt->v[idir[i][0]],pt->v[idir[i][1]],pt->v[idir[i][2]],pt->v[0],pt->v[1],pt->v[2],pt->v[3]);
+                    printf("La face : %d %d %d \n dans le tetra : %d %d %d %d \n",pt->v[_MMG5_idir[i][0]],pt->v[_MMG5_idir[i][1]],pt->v[_MMG5_idir[i][2]],pt->v[0],pt->v[1],pt->v[2],pt->v[3]);
                     nf++;
                 }
             }
@@ -489,11 +489,11 @@ int cntbdypt(pMesh mesh, int nump){
 
 /** Count the number of tetras that have several boundary faces, as well as the number of internal
     edges connecting points of the boundary */
-int chkfemtopo(pMesh mesh) {
-    pTetra      pt,pt1;
-    pxTetra     pxt;
-    pPoint      p0,p1;
-    int         k,nf,ntet,ned,np,ischk,ilist,list[LMAX+2],l,np1,npchk,iel;
+int chkfemtopo(MMG5_pMesh mesh) {
+    MMG5_pTetra      pt,pt1;
+    MMG5_pxTetra     pxt;
+    MMG5_pPoint      p0,p1;
+    int         k,nf,ntet,ned,np,ischk,ilist,list[_MMG5_LMAX+2],l,np1,npchk,iel;
     char        i0,j,i,i1,ia;
 
     ntet = ned = 0;
@@ -537,7 +537,7 @@ int chkfemtopo(pMesh mesh) {
 
                 pt1 = &mesh->tetra[iel];
                 for (j=0; j<3; j++) {
-                    i1  = inxt3[i1];
+                    i1  = _MMG5_inxt3[i1];
                     np1 = pt1->v[i1];
                     if ( np1 < np )  continue;
                     p1 = &mesh->point[np1];
@@ -559,9 +559,9 @@ int chkfemtopo(pMesh mesh) {
 }
 
 /** Search face n0,n1,n2 in mesh, and get the support tetras, with the corresponding refs */
-int srcface(pMesh mesh,int n0,int n1,int n2) {
-    pTetra    pt;
-    pxTetra   pxt;
+int srcface(MMG5_pMesh mesh,int n0,int n1,int n2) {
+    MMG5_pTetra    pt;
+    MMG5_pxTetra   pxt;
     int       k,ip0,ip1,ip2,minn,maxn,sn,mins,maxs,sum,ref;
     char      i,tag;
 
@@ -576,9 +576,9 @@ int srcface(pMesh mesh,int n0,int n1,int n2) {
 
         if( pt->xt ) pxt = &mesh->xtetra[pt->xt];
         for(i=0; i<4; i++) {
-            ip0 = pt->v[idir[i][0]];
-            ip1 = pt->v[idir[i][1]];
-            ip2 = pt->v[idir[i][2]];
+            ip0 = pt->v[_MMG5_idir[i][0]];
+            ip1 = pt->v[_MMG5_idir[i][1]];
+            ip2 = pt->v[_MMG5_idir[i][2]];
 
             mins = MG_MIN(ip0,MG_MIN(ip1,ip2));
             maxs = MG_MAX(ip0,MG_MAX(ip1,ip2));

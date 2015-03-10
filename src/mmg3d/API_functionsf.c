@@ -86,7 +86,7 @@ FORTRAN_NAME(MMG5_INIT_MESH, mmg5_init_mesh,(MMG5_pMesh *mesh, MMG5_pSol *sol
 /**
  * See \ref MMG5_Init_parameters function in \ref mmg3d/libmmg3d5.h file.
  */
-FORTRAN_NAME(MMG5_INIT_PARAMETERS,mmg5_init_parameters,(pMesh *mesh),(mesh)) {
+FORTRAN_NAME(MMG5_INIT_PARAMETERS,mmg5_init_parameters,(MMG5_pMesh *mesh),(mesh)) {
     Init_parameters(*mesh);
     return;
 }
@@ -94,9 +94,9 @@ FORTRAN_NAME(MMG5_INIT_PARAMETERS,mmg5_init_parameters,(pMesh *mesh),(mesh)) {
 /**
  * See \ref MMG5_Init_fileNames function in \ref mmg3d/libmmg3d5.h file.
  */
-FORTRAN_NAME(INIT_FILENAMES,init_filenames,(pMesh *mesh,pSol *sol
+FORTRAN_NAME(INIT_FILENAMES,init_filenames,(MMG5_pMesh *mesh,MMG5_pSol *sol
 #ifdef SINGUL
-                                            ,pSingul *sing
+                                            ,MMG5_pSingul *sing
 #endif
                  ),(mesh,sol
 #ifdef SINGUL
@@ -123,7 +123,7 @@ FORTRAN_NAME(MMG5_SET_INPUTMESHNAME, mmg5_set_inputmeshname,
     strncpy(tmp,meshin,*strlen);
     tmp[*strlen] = '\0';
     *retval = Set_inputMeshName(*mesh,tmp);
-    SAFE_FREE(tmp);
+    _MMG5_SAFE_FREE(tmp);
 
     return;
 }
@@ -141,7 +141,7 @@ FORTRAN_NAME(MMG5_SET_INPUTSOLNAME, mmg5_set_inputsolname,
     strncpy(tmp,solin,*strlen);
     tmp[*strlen] = '\0';
     *retval = Set_inputSolName(*mesh,*sol,tmp);
-    SAFE_FREE(tmp);
+    _MMG5_SAFE_FREE(tmp);
 
     return;
 }
@@ -158,7 +158,7 @@ FORTRAN_NAME(MMG5_SET_OUTPUTMESHNAME,mmg5_set_outputmeshname,
     strncpy(tmp,meshout,*strlen);
     tmp[*strlen] = '\0';
     *retval = Set_outputMeshName(*mesh, tmp);
-    SAFE_FREE(tmp);
+    _MMG5_SAFE_FREE(tmp);
 
     return;
 }
@@ -175,7 +175,7 @@ FORTRAN_NAME(MMG5_SET_OUTPUTSOLNAME,mmg5_set_outputsolname,
     strncpy(tmp,solout,*strlen);
     tmp[*strlen] = '\0';
     *retval = Set_outputSolName(*mesh,*sol,tmp);
-    SAFE_FREE(tmp);
+    _MMG5_SAFE_FREE(tmp);
 
     return;
 }
@@ -193,7 +193,7 @@ FORTRAN_NAME(MMG5_SET_INPUTSINGULNAME,mmg5_set_inputsingulname,
     strncpy(tmp,singin,*strlen);
     tmp[*strlen] = '\0';
     *retval = Set_inputSingulName(*mesh,*sing,tmp);
-    SAFE_FREE(tmp);
+    _MMG5_SAFE_FREE(tmp);
 
     return;
 }
@@ -537,7 +537,7 @@ FORTRAN_NAME(MMG5_SET_LOCALPARAMETER,mmg5_set_localparameter,
 /**
  * See \ref MMG5_Free_names function in \ref mmg3d/libmmg3d5.h file.
  */
-FORTRAN_NAME(MMG5_FREE_NAMES,mmg5_free_names,(pMesh *mesh,pSol *met
+FORTRAN_NAME(MMG5_FREE_NAMES,mmg5_free_names,(MMG5_pMesh *mesh,MMG5_pSol *met
 #ifdef SINGUL
                                               ,pSingul *singul
 #endif
@@ -557,7 +557,7 @@ FORTRAN_NAME(MMG5_FREE_NAMES,mmg5_free_names,(pMesh *mesh,pSol *met
 /**
  * See \ref MMG5_Free_structures function in \ref mmg3d/libmmg3d5.h file.
  */
-FORTRAN_NAME(MMG5_FREE_STRUCTURES,mmg5_free_structures,(pMesh *mesh,pSol *met
+FORTRAN_NAME(MMG5_FREE_STRUCTURES,mmg5_free_structures,(MMG5_pMesh *mesh,MMG5_pSol *met
 #ifdef SINGUL
                                                         ,pSingul *singul
 #endif
@@ -577,7 +577,7 @@ FORTRAN_NAME(MMG5_FREE_STRUCTURES,mmg5_free_structures,(pMesh *mesh,pSol *met
 /**
  * See \ref MMG5_loadMesh function in \ref mmg3d/libmmg3d5.h file.
  */
-FORTRAN_NAME(MMG5_LOADMESH,mmg5_loadmesh,(pMesh *mesh,int* retval),(mesh, retval)){
+FORTRAN_NAME(MMG5_LOADMESH,mmg5_loadmesh,(MMG5_pMesh *mesh,int* retval),(mesh, retval)){
 
     *retval = loadMesh(*mesh);
 
@@ -587,7 +587,7 @@ FORTRAN_NAME(MMG5_LOADMESH,mmg5_loadmesh,(pMesh *mesh,int* retval),(mesh, retval
 /**
  * See \ref MMG5_loadMet function in \ref mmg3d/libmmg3d5.h file.
  */
-FORTRAN_NAME(MMG5_LOADMET,mmg5_loadmet,(pMesh *mesh,pSol *met,int* retval),(mesh,met,retval)){
+FORTRAN_NAME(MMG5_LOADMET,mmg5_loadmet,(MMG5_pMesh *mesh,MMG5_pSol *met,int* retval),(mesh,met,retval)){
 
     *retval = loadMet(*mesh,*met);
 
@@ -597,7 +597,7 @@ FORTRAN_NAME(MMG5_LOADMET,mmg5_loadmet,(pMesh *mesh,pSol *met,int* retval),(mesh
 /**
  * See \ref MMG5_saveMet function in \ref mmg3d/libmmg3d5.h file.
  */
-FORTRAN_NAME(MMG5_SAVEMET,mmg5_savemet,(pMesh *mesh,pSol *met,int* retval),(mesh,met,retval)){
+FORTRAN_NAME(MMG5_SAVEMET,mmg5_savemet,(MMG5_pMesh *mesh,MMG5_pSol *met,int* retval),(mesh,met,retval)){
 
     *retval = saveMet(*mesh,*met);
 

@@ -49,24 +49,24 @@
  *
  */
 static inline
-void Alloc_mesh(MMG5_pMesh *mesh, MMG5_pSol *sol
+void MMG5_Alloc_mesh(MMG5_pMesh *mesh, MMG5_pSol *sol
 #ifdef SINGUL
                 , MMG5_pSingul *sing
 #endif
     ) {
 
     /* mesh allocation */
-    if ( *mesh )  SAFE_FREE(*mesh);
-    SAFE_CALLOC(*mesh,1,MMG5_Mesh);
+    if ( *mesh )  _MMG5_SAFE_FREE(*mesh);
+    _MMG5_SAFE_CALLOC(*mesh,1,MMG5_Mesh);
 
     /* sol allocation */
-    if ( *sol )  DEL_MEM(*mesh,*sol,sizeof(MMG5_Sol));
-    SAFE_CALLOC(*sol,1,MMG5_Sol);
+    if ( *sol )  _MMG5_DEL_MEM(*mesh,*sol,sizeof(MMG5_Sol));
+    _MMG5_SAFE_CALLOC(*sol,1,MMG5_Sol);
 
 #ifdef SINGUL
     /* singul allocation */
-    if ( *sing )  DEL_MEM(*mesh,*sing,sizeof(MMG5_Singul));
-    SAFE_CALLOC(*sing,1,MMG5_Singul);
+    if ( *sing )  _MMG5_DEL_MEM(*mesh,*sing,sizeof(MMG5_Singul));
+    _MMG5_SAFE_CALLOC(*sing,1,MMG5_Singul);
 
 #endif
     return;
@@ -82,7 +82,7 @@ void Alloc_mesh(MMG5_pMesh *mesh, MMG5_pSol *sol
  *
  */
 static inline
-void Init_woalloc_mesh(MMG5_pMesh mesh, MMG5_pSol sol
+void MMG5_Init_woalloc_mesh(MMG5_pMesh mesh, MMG5_pSol sol
 #ifdef SINGUL
                        , MMG5_pSingul sing
 #endif
@@ -116,7 +116,7 @@ void Init_woalloc_mesh(MMG5_pMesh mesh, MMG5_pSol sol
  * their default values.
  *
  */
-void Init_mesh(MMG5_pMesh *mesh, MMG5_pSol *sol
+void MMG5_Init_mesh(MMG5_pMesh *mesh, MMG5_pSol *sol
 #ifdef SINGUL
                , MMG5_pSingul *sing
 #endif
@@ -124,13 +124,13 @@ void Init_mesh(MMG5_pMesh *mesh, MMG5_pSol *sol
 
 #ifndef SINGUL
     /* allocations */
-    Alloc_mesh(mesh,sol);
+    MMG5_Alloc_mesh(mesh,sol);
     /* initialisations */
-    Init_woalloc_mesh(*mesh,*sol);
+    MMG5_Init_woalloc_mesh(*mesh,*sol);
 #else
-    Alloc_mesh(mesh,sol,sing);
+    MMG5_Alloc_mesh(mesh,sol,sing);
     /* initialisations */
-    Init_woalloc_mesh(*mesh,*sol,*sing);
+    MMG5_Init_woalloc_mesh(*mesh,*sol,*sing);
 #endif
 
     return;
@@ -142,7 +142,7 @@ void Init_mesh(MMG5_pMesh *mesh, MMG5_pSol *sol
  * Initialization of the input parameters (stored in the Info structure).
  *
  */
-void Init_parameters(pMesh mesh) {
+void MMG5_Init_parameters(MMG5_pMesh mesh) {
 
     /* default values for integers */
     /** MMG5_IPARAM_verbose = 4 */
@@ -169,8 +169,8 @@ void Init_parameters(pMesh mesh) {
     mesh->info.sing     =  0;  /* [0/1]    ,preserve internal singularities */
 
     /* default values for doubles */
-    /** MMG5_DPARAM_angleDetection = \ref ANGEDG */
-    mesh->info.dhd      = ANGEDG;   /* angle detection; */
+    /** MMG5_DPARAM_angleDetection = \ref _MMG5_ANGEDG */
+    mesh->info.dhd      = _MMG5_ANGEDG;   /* angle detection; */
     /** MMG5_DPARAM_hmin = 0.0 */
     mesh->info.hmin     = 0.0;      /* minimal mesh size; */
     /** MMG5_DPARAM_hmax = \f$ \infty \f$ */
@@ -189,8 +189,8 @@ void Init_parameters(pMesh mesh) {
         mesh->memMax = mesh->memMax*50/100;
     else {
         /* default value = 800 Mo */
-        printf("  Maximum memory set to default value: %d Mo.\n",MEMMAX);
-        mesh->memMax = MEMMAX << 20;
+        printf("  Maximum memory set to default value: %d Mo.\n",_MMG5_MEMMAX);
+        mesh->memMax = _MMG5_MEMMAX << 20;
     }
 
 #ifndef PATTERN
@@ -207,7 +207,7 @@ void Init_parameters(pMesh mesh) {
  * Initialize file names to their default values.
  *
  */
-void Init_fileNames(pMesh mesh,pSol sol
+void MMG5_Init_fileNames(MMG5_pMesh mesh,MMG5_pSol sol
 #ifdef SINGUL
                     ,pSingul sing
 #endif
@@ -233,24 +233,24 @@ void Init_fileNames(pMesh mesh,pSol sol
  * Set the name of input mesh.
  *
  */
-int Set_inputMeshName(MMG5_pMesh mesh, char* meshin) {
+int MMG5_Set_inputMeshName(MMG5_pMesh mesh, char* meshin) {
 
     if ( mesh->namein ){
-        DEL_MEM(mesh,mesh->namein,(strlen(mesh->namein)+1)*sizeof(char));
+        _MMG5_DEL_MEM(mesh,mesh->namein,(strlen(mesh->namein)+1)*sizeof(char));
     }
 
     if ( strlen(meshin) ) {
-        ADD_MEM(mesh,(strlen(meshin)+1)*sizeof(char),"input mesh name",
+        _MMG5_ADD_MEM(mesh,(strlen(meshin)+1)*sizeof(char),"input mesh name",
                 printf("  Exit program.\n");
                 exit(EXIT_FAILURE));
-        SAFE_CALLOC(mesh->namein,strlen(meshin)+1,char);
+        _MMG5_SAFE_CALLOC(mesh->namein,strlen(meshin)+1,char);
         strcpy(mesh->namein,meshin);
     }
     else {
-        ADD_MEM(mesh,10*sizeof(char),"input mesh name",
+        _MMG5_ADD_MEM(mesh,10*sizeof(char),"input mesh name",
                 printf("  Exit program.\n");
                 exit(EXIT_FAILURE));
-        SAFE_CALLOC(mesh->namein,10,char);
+        _MMG5_SAFE_CALLOC(mesh->namein,10,char);
         strcpy(mesh->namein,"mesh.mesh");
         if ( (mesh->info.imprim > 5) || mesh->info.ddebug ) {
             fprintf(stdout,"  ## Warning: no name given for input mesh.\n");
@@ -269,37 +269,37 @@ int Set_inputMeshName(MMG5_pMesh mesh, char* meshin) {
  * Set the name of input solution file.
  *
  */
-int Set_inputSolName(MMG5_pMesh mesh,MMG5_pSol sol, char* solin) {
+int MMG5_Set_inputSolName(MMG5_pMesh mesh,MMG5_pSol sol, char* solin) {
     char *ptr;
 
     if ( sol->namein )
-        DEL_MEM(mesh,sol->namein,(strlen(sol->namein)+1)*sizeof(char));
+        _MMG5_DEL_MEM(mesh,sol->namein,(strlen(sol->namein)+1)*sizeof(char));
     if ( strlen(solin) ) {
-        ADD_MEM(mesh,(strlen(solin)+1)*sizeof(char),"input sol name",
+        _MMG5_ADD_MEM(mesh,(strlen(solin)+1)*sizeof(char),"input sol name",
                 printf("  Exit program.\n");
                 exit(EXIT_FAILURE));
-        SAFE_CALLOC(sol->namein,strlen(solin)+1,char);
+        _MMG5_SAFE_CALLOC(sol->namein,strlen(solin)+1,char);
         strcpy(sol->namein,solin);
     }
     else {
         if ( strlen(mesh->namein) ) {
-            SAFE_CALLOC(sol->namein,strlen(mesh->namein)+1,char);
+            _MMG5_SAFE_CALLOC(sol->namein,strlen(mesh->namein)+1,char);
             strcpy(sol->namein,mesh->namein);
             ptr = strstr(sol->namein,".mesh");
             if ( ptr ) {
                 /* the sol file is renamed with the meshfile without extension */
                 *ptr = '\0';
-                SAFE_REALLOC(sol->namein,(strlen(sol->namein)+1),char,"input sol name");
+                _MMG5_SAFE_REALLOC(sol->namein,(strlen(sol->namein)+1),char,"input sol name");
             }
-            ADD_MEM(mesh,(strlen(sol->namein)+1)*sizeof(char),"input sol name",
+            _MMG5_ADD_MEM(mesh,(strlen(sol->namein)+1)*sizeof(char),"input sol name",
                     printf("  Exit program.\n");
                     exit(EXIT_FAILURE));
         }
         else {
-            ADD_MEM(mesh,9*sizeof(char),"input sol name",
+            _MMG5_ADD_MEM(mesh,9*sizeof(char),"input sol name",
                     printf("  Exit program.\n");
                     exit(EXIT_FAILURE));
-            SAFE_CALLOC(sol->namein,9,char);
+            _MMG5_SAFE_CALLOC(sol->namein,9,char);
             strcpy(sol->namein,"mesh.sol");
         }
     }
@@ -314,25 +314,25 @@ int Set_inputSolName(MMG5_pMesh mesh,MMG5_pSol sol, char* solin) {
  * Set the name of output mesh file.
  *
  */
-int Set_outputMeshName(MMG5_pMesh mesh, char* meshout) {
+int MMG5_Set_outputMeshName(MMG5_pMesh mesh, char* meshout) {
     char *ptr;
 
     if ( mesh->nameout )
-        DEL_MEM(mesh,mesh->nameout,(strlen(mesh->nameout)+1)*sizeof(char));
+        _MMG5_DEL_MEM(mesh,mesh->nameout,(strlen(mesh->nameout)+1)*sizeof(char));
 
     if ( strlen(meshout) ) {
-        ADD_MEM(mesh,(strlen(meshout)+1)*sizeof(char),"output mesh name",
+        _MMG5_ADD_MEM(mesh,(strlen(meshout)+1)*sizeof(char),"output mesh name",
                 printf("  Exit program.\n");
                 exit(EXIT_FAILURE));
-        SAFE_CALLOC(mesh->nameout,strlen(meshout)+1,char);
+        _MMG5_SAFE_CALLOC(mesh->nameout,strlen(meshout)+1,char);
         strcpy(mesh->nameout,meshout);
     }
     else {
         if ( strlen(mesh->namein) ) {
-            ADD_MEM(mesh,(strlen(mesh->namein)+3)*sizeof(char),"output mesh name",
+            _MMG5_ADD_MEM(mesh,(strlen(mesh->namein)+3)*sizeof(char),"output mesh name",
                     printf("  Exit program.\n");
                     exit(EXIT_FAILURE));
-            SAFE_CALLOC(mesh->nameout,strlen(mesh->namein)+3,char);
+            _MMG5_SAFE_CALLOC(mesh->nameout,strlen(mesh->namein)+3,char);
             strcpy(mesh->nameout,mesh->namein);
             ptr = strstr(mesh->nameout,".mesh");
             if ( !ptr ) {
@@ -350,10 +350,10 @@ int Set_outputMeshName(MMG5_pMesh mesh, char* meshout) {
             }
         }
         else {
-            ADD_MEM(mesh,7*sizeof(char),"output mesh name",
+            _MMG5_ADD_MEM(mesh,7*sizeof(char),"output mesh name",
                     printf("  Exit program.\n");
                     exit(EXIT_FAILURE));
-            SAFE_CALLOC(mesh->nameout,7,char);
+            _MMG5_SAFE_CALLOC(mesh->nameout,7,char);
             if ( (mesh->info.imprim > 5) || mesh->info.ddebug ) {
                 fprintf(stdout,"  ## Warning: no name given for output mesh.\n");
                 fprintf(stdout,"     Use of default value \"mesh.o.mesh\".\n");
@@ -373,36 +373,36 @@ int Set_outputMeshName(MMG5_pMesh mesh, char* meshout) {
  *  Set the name of output solution file.
  *
  */
-int Set_outputSolName(MMG5_pMesh mesh,MMG5_pSol sol, char* solout) {
+int MMG5_Set_outputSolName(MMG5_pMesh mesh,MMG5_pSol sol, char* solout) {
     char *ptr;
 
     if ( sol->nameout )
-        DEL_MEM(mesh,sol->nameout,(strlen(sol->nameout)+1)*sizeof(char));
+        _MMG5_DEL_MEM(mesh,sol->nameout,(strlen(sol->nameout)+1)*sizeof(char));
 
     if ( strlen(solout) ) {
-        ADD_MEM(mesh,(strlen(solout)+1)*sizeof(char),"output sol name",
+        _MMG5_ADD_MEM(mesh,(strlen(solout)+1)*sizeof(char),"output sol name",
                 printf("  Exit program.\n");
                 exit(EXIT_FAILURE));
-        SAFE_CALLOC(sol->nameout,strlen(solout)+1,char);
+        _MMG5_SAFE_CALLOC(sol->nameout,strlen(solout)+1,char);
         strcpy(sol->nameout,solout);
     }
     else {
         if ( strlen(mesh->nameout) ) {
             ptr = strstr(mesh->nameout,".mesh");
             if ( ptr )
-                SAFE_CALLOC(sol->nameout,strlen(mesh->nameout)+1,char);
+                _MMG5_SAFE_CALLOC(sol->nameout,strlen(mesh->nameout)+1,char);
             else
-                SAFE_CALLOC(sol->nameout,strlen(mesh->nameout)+5,char);
+                _MMG5_SAFE_CALLOC(sol->nameout,strlen(mesh->nameout)+5,char);
             strcpy(sol->nameout,mesh->nameout);
             ptr = strstr(sol->nameout,".mesh");
             if ( ptr )
                 /* the sol file is renamed with the meshfile without extension */
                 *ptr = '\0';
             strcat(sol->nameout,".sol");
-            ADD_MEM(mesh,(strlen(sol->nameout)+1)*sizeof(char),"output sol name",
+            _MMG5_ADD_MEM(mesh,(strlen(sol->nameout)+1)*sizeof(char),"output sol name",
                     printf("  Exit program.\n");
                     exit(EXIT_FAILURE));
-            SAFE_REALLOC(sol->nameout,(strlen(sol->nameout)+1),char,"output sol name");
+            _MMG5_SAFE_REALLOC(sol->nameout,(strlen(sol->nameout)+1),char,"output sol name");
         }
         else {
             fprintf(stdout,"  ## Error: no name for output mesh. please, use");
@@ -424,24 +424,24 @@ int Set_outputSolName(MMG5_pMesh mesh,MMG5_pSol sol, char* solout) {
  * singularities mode).
  *
  */
-int Set_inputSingulName(MMG5_pMesh mesh,MMG5_pSingul sing, char* singin) {
+int MMG5_Set_inputSingulName(MMG5_pMesh mesh,MMG5_pSingul sing, char* singin) {
 
     if ( sing->namein )
-        DEL_MEM(mesh,sing->namein,(strlen(sing->namein)+1)*sizeof(char));
+        _MMG5_DEL_MEM(mesh,sing->namein,(strlen(sing->namein)+1)*sizeof(char));
 
     if ( strlen(singin) ) {
-        ADD_MEM(mesh,(strlen(singin)+1)*sizeof(char),
+        _MMG5_ADD_MEM(mesh,(strlen(singin)+1)*sizeof(char),
                 "input singularities file name",
                 printf("  Exit program.\n");
                 exit(EXIT_FAILURE));
-        SAFE_CALLOC(sing->namein,strlen(singin)+1,char);
+        _MMG5_SAFE_CALLOC(sing->namein,strlen(singin)+1,char);
         strcpy(sing->namein,singin);
     }
     else {
-        ADD_MEM(mesh,19*sizeof(char),"input singularities file name",
+        _MMG5_ADD_MEM(mesh,19*sizeof(char),"input singularities file name",
                 printf("  Exit program.\n");
                 exit(EXIT_FAILURE));
-        SAFE_CALLOC(sing->namein,19,char);
+        _MMG5_SAFE_CALLOC(sing->namein,19,char);
         strcpy(sing->namein,"singularities.mesh");
         if ( (mesh->info.imprim > 5) || mesh->info.ddebug ) {
             fprintf(stdout,"  ## Warning: no name given for input singularities.\n");
@@ -464,7 +464,7 @@ int Set_inputSingulName(MMG5_pMesh mesh,MMG5_pSingul sing, char* singin) {
  * Set the solution number, dimension and type.
  *
  */
-int Set_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int typEntity, int np, int typSol) {
+int MMG5_Set_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int typEntity, int np, int typSol) {
 
     if ( ( (mesh->info.imprim > 5) || mesh->info.ddebug ) && sol->m )
         fprintf(stdout,"  ## Warning: new solution\n");
@@ -484,13 +484,13 @@ int Set_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int typEntity, int np, int typSo
         sol->np  = np;
         sol->npi = np;
         if ( sol->m )
-            DEL_MEM(mesh,sol->m,(sol->size*sol->npmax+1)*sizeof(double));
+            _MMG5_DEL_MEM(mesh,sol->m,(sol->size*sol->npmax+1)*sizeof(double));
 
         sol->npmax = mesh->npmax;
-        ADD_MEM(mesh,(sol->size*sol->npmax+1)*sizeof(double),"initial solution",
+        _MMG5_ADD_MEM(mesh,(sol->size*sol->npmax+1)*sizeof(double),"initial solution",
                 printf("  Exit program.\n");
                 exit(EXIT_FAILURE));
-        SAFE_CALLOC(sol->m,(sol->npmax*sol->size+1),double);
+        _MMG5_SAFE_CALLOC(sol->m,(sol->npmax*sol->size+1),double);
     }
     return(1);
 }
@@ -508,7 +508,7 @@ int Set_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int typEntity, int np, int typSo
  * whole mesh to realloc it at the new size
  *
  */
-int Set_meshSize(MMG5_pMesh mesh, int np, int ne, int nt, int na) {
+int MMG5_Set_meshSize(MMG5_pMesh mesh, int np, int ne, int nt, int na) {
     int k;
 
     if ( ( (mesh->info.imprim > 5) || mesh->info.ddebug ) &&
@@ -525,13 +525,13 @@ int Set_meshSize(MMG5_pMesh mesh, int np, int ne, int nt, int na) {
     mesh->nai = mesh->na;
 
     if ( mesh->point )
-        DEL_MEM(mesh,mesh->point,(mesh->npmax+1)*sizeof(Point));
+        _MMG5_DEL_MEM(mesh,mesh->point,(mesh->npmax+1)*sizeof(Point));
     if ( mesh->tetra )
-        DEL_MEM(mesh,mesh->tetra,(mesh->nemax+1)*sizeof(Tetra));
+        _MMG5_DEL_MEM(mesh,mesh->tetra,(mesh->nemax+1)*sizeof(Tetra));
     if ( mesh->tria )
-        DEL_MEM(mesh,mesh->tria,(mesh->nt+1)*sizeof(Tria));
+        _MMG5_DEL_MEM(mesh,mesh->tria,(mesh->nt+1)*sizeof(Tria));
     if ( mesh->edge )
-        DEL_MEM(mesh,mesh->edge,(mesh->na+1)*sizeof(Edge));
+        _MMG5_DEL_MEM(mesh,mesh->edge,(mesh->na+1)*sizeof(Edge));
 
     /*tester si -m definie : renvoie 0 si pas ok et met la taille min dans info.mem */
     if( mesh->info.mem > 0) {
@@ -553,33 +553,33 @@ int Set_meshSize(MMG5_pMesh mesh, int np, int ne, int nt, int na) {
             return(0);
         }
     } else {
-        mesh->npmax = MG_MAX(1.5*mesh->np,NPMAX);
-        mesh->nemax = MG_MAX(1.5*mesh->ne,NEMAX);
-        mesh->ntmax = MG_MAX(1.5*mesh->nt,NTMAX);
+        mesh->npmax = MG_MAX(1.5*mesh->np,_MMG5_NPMAX);
+        mesh->nemax = MG_MAX(1.5*mesh->ne,_MMG5_NEMAX);
+        mesh->ntmax = MG_MAX(1.5*mesh->nt,_MMG5_NTMAX);
 
     }
-    ADD_MEM(mesh,(mesh->npmax+1)*sizeof(Point),"initial vertices",
+    _MMG5_ADD_MEM(mesh,(mesh->npmax+1)*sizeof(Point),"initial vertices",
             printf("  Exit program.\n");
             exit(EXIT_FAILURE));
-    SAFE_CALLOC(mesh->point,mesh->npmax+1,Point);
+    _MMG5_SAFE_CALLOC(mesh->point,mesh->npmax+1,Point);
 
 
-    ADD_MEM(mesh,(mesh->nemax+1)*sizeof(Tetra),"initial tetrahedra",
+    _MMG5_ADD_MEM(mesh,(mesh->nemax+1)*sizeof(Tetra),"initial tetrahedra",
             printf("  Exit program.\n");
             exit(EXIT_FAILURE));
-    SAFE_CALLOC(mesh->tetra,mesh->nemax+1,Tetra);
+    _MMG5_SAFE_CALLOC(mesh->tetra,mesh->nemax+1,Tetra);
 
 
     if ( mesh->nt ) {
-        ADD_MEM(mesh,(mesh->nt+1)*sizeof(Tria),"initial triangles",return(0));
-        SAFE_CALLOC(mesh->tria,mesh->nt+1,Tria);
+        _MMG5_ADD_MEM(mesh,(mesh->nt+1)*sizeof(Tria),"initial triangles",return(0));
+        _MMG5_SAFE_CALLOC(mesh->tria,mesh->nt+1,Tria);
     }
 
 
     mesh->namax = mesh->na;
     if ( mesh->na ) {
-        ADD_MEM(mesh,(mesh->na+1)*sizeof(Edge),"initial edges",return(0));
-        SAFE_CALLOC(mesh->edge,(mesh->na+1),Edge);
+        _MMG5_ADD_MEM(mesh,(mesh->na+1)*sizeof(Edge),"initial edges",return(0));
+        _MMG5_SAFE_CALLOC(mesh->edge,(mesh->na+1),Edge);
     }
 
     /* keep track of empty links */
@@ -618,7 +618,7 @@ int Set_meshSize(MMG5_pMesh mesh, int np, int ne, int nt, int na) {
  * SINGUL preprocessor flag).
  *
  */
-int Set_singulSize(MMG5_pMesh mesh,MMG5_pSingul sing, int np, int na) {
+int MMG5_Set_singulSize(MMG5_pMesh mesh,MMG5_pSingul sing, int np, int na) {
 
     if ( sing->point || sing->edge )
         fprintf(stdout,"  ## Warning: new singularites\n");
@@ -628,22 +628,22 @@ int Set_singulSize(MMG5_pMesh mesh,MMG5_pSingul sing, int np, int na) {
 
     if ( sing->ns ) {
         if ( sing->point )
-            DEL_MEM(mesh,sing->point,(sing->ns+1)*sizeof(sPoint));
+            _MMG5_DEL_MEM(mesh,sing->point,(sing->ns+1)*sizeof(sPoint));
 
-        ADD_MEM(mesh,(sing->ns+1)*sizeof(sPoint),"vertex singularities",
+        _MMG5_ADD_MEM(mesh,(sing->ns+1)*sizeof(sPoint),"vertex singularities",
                 printf("  Exit program.\n");
                 exit(EXIT_FAILURE));
-        SAFE_CALLOC(sing->point,sing->ns+1,sPoint);
+        _MMG5_SAFE_CALLOC(sing->point,sing->ns+1,sPoint);
     }
 
     if ( sing->na ) {
         if ( sing->edge )
-            DEL_MEM(mesh,sing->edge,(sing->na+1)*sizeof(Edge));
+            _MMG5_DEL_MEM(mesh,sing->edge,(sing->na+1)*sizeof(Edge));
 
-        ADD_MEM(mesh,(sing->na+1)*sizeof(Edge),"edge singularities",
+        _MMG5_ADD_MEM(mesh,(sing->na+1)*sizeof(Edge),"edge singularities",
                 printf("  Exit program.\n");
                 exit(EXIT_FAILURE));
-        SAFE_CALLOC(sing->edge,sing->na+1,Edge);
+        _MMG5_SAFE_CALLOC(sing->edge,sing->na+1,Edge);
     }
     return(1);
 }
@@ -660,7 +660,7 @@ int Set_singulSize(MMG5_pMesh mesh,MMG5_pSingul sing, int np, int na) {
  * Get the solution number, dimension and type.
  *
  */
-int Get_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int* typEntity, int* np, int* typSol) {
+int MMG5_Get_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int* typEntity, int* np, int* typSol) {
 
     *typEntity = MMG5_Vertex;
     *typSol    = sol->size;
@@ -684,7 +684,7 @@ int Get_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int* typEntity, int* np, int* ty
  * Get the number of vertices, tetrahedra, triangles and edges of the mesh.
  *
  */
-int Get_meshSize(MMG5_pMesh mesh, int* np, int* ne, int* nt, int* na) {
+int MMG5_Get_meshSize(MMG5_pMesh mesh, int* np, int* ne, int* nt, int* na) {
 
     if ( np != NULL )
         *np = mesh->np;
@@ -716,7 +716,7 @@ int Get_meshSize(MMG5_pMesh mesh, int* np, int* ne, int* nt, int* na) {
  * at position \a pos in mesh structure
  *
  */
-int Set_vertex(MMG5_pMesh mesh, double c0, double c1, double c2, int ref, int pos) {
+int MMG5_Set_vertex(MMG5_pMesh mesh, double c0, double c1, double c2, int ref, int pos) {
 
     if ( !mesh->np ) {
         fprintf(stdout,"  ## Error: You must set the number of points with the");
@@ -727,7 +727,7 @@ int Set_vertex(MMG5_pMesh mesh, double c0, double c1, double c2, int ref, int po
     if ( pos > mesh->npmax ) {
         fprintf(stdout,"  ## Error: unable to allocate a new point.\n");
         fprintf(stdout,"    max number of points: %d\n",mesh->npmax);
-        INCREASE_MEM_MESSAGE();
+        _MMG5_INCREASE_MEM_MESSAGE();
         return(0);
     }
 
@@ -764,7 +764,7 @@ int Set_vertex(MMG5_pMesh mesh, double c0, double c1, double c2, int ref, int po
  * vertex of mesh.
  *
  */
-int Get_vertex(MMG5_pMesh mesh, double* c0, double* c1, double* c2, int* ref,
+int MMG5_Get_vertex(MMG5_pMesh mesh, double* c0, double* c1, double* c2, int* ref,
                int* isCorner, int* isRequired) {
 
     mesh->npi++;
@@ -813,9 +813,9 @@ int Get_vertex(MMG5_pMesh mesh, double* c0, double* c1, double* c2, int* ref,
  * \a ref at position \a pos in mesh structure.
  *
  */
-int Set_tetrahedron(MMG5_pMesh mesh, int v0, int v1, int v2, int v3, int ref, int pos) {
-    pTetra pt;
-    pPoint ppt;
+int MMG5_Set_tetrahedron(MMG5_pMesh mesh, int v0, int v1, int v2, int v3, int ref, int pos) {
+    MMG5_pTetra pt;
+    MMG5_pPoint ppt;
     double aux, vol;
     int    j, ip;
 
@@ -828,7 +828,7 @@ int Set_tetrahedron(MMG5_pMesh mesh, int v0, int v1, int v2, int v3, int ref, in
     if ( pos > mesh->nemax ) {
         fprintf(stdout,"  ## Error: unable to allocate a new element.\n");
         fprintf(stdout,"    max number of element: %d\n",mesh->nemax);
-        INCREASE_MEM_MESSAGE();
+        _MMG5_INCREASE_MEM_MESSAGE();
         return(0);
     }
 
@@ -896,7 +896,7 @@ int Set_tetrahedron(MMG5_pMesh mesh, int v0, int v1, int v2, int v3, int ref, in
  * next tetra of mesh.
  *
  */
-int Get_tetrahedron(MMG5_pMesh mesh, int* v0, int* v1, int* v2, int* v3,
+int MMG5_Get_tetrahedron(MMG5_pMesh mesh, int* v0, int* v1, int* v2, int* v3,
                     int* ref, int* isRequired) {
 
     mesh->nei++;
@@ -939,7 +939,7 @@ int Get_tetrahedron(MMG5_pMesh mesh, int* v0, int* v1, int* v2, int* v3,
  * at position \a pos in mesh structure.
  *
  */
-int Set_triangle(MMG5_pMesh mesh, int v0, int v1, int v2, int ref,int pos) {
+int MMG5_Set_triangle(MMG5_pMesh mesh, int v0, int v1, int v2, int ref,int pos) {
 
     if ( !mesh->nt ) {
         fprintf(stdout,"  ## Error: You must set the number of triangles with the");
@@ -950,7 +950,7 @@ int Set_triangle(MMG5_pMesh mesh, int v0, int v1, int v2, int ref,int pos) {
     if ( pos > mesh->ntmax ) {
         fprintf(stdout,"  ## Error: unable to allocate a new triangle.\n");
         fprintf(stdout,"    max number of triangle: %d\n",mesh->ntmax);
-        INCREASE_MEM_MESSAGE();
+        _MMG5_INCREASE_MEM_MESSAGE();
         return(0);
     }
 
@@ -983,9 +983,9 @@ int Set_triangle(MMG5_pMesh mesh, int v0, int v1, int v2, int ref,int pos) {
  * triangle of mesh.
  *
  */
-int Get_triangle(MMG5_pMesh mesh, int* v0, int* v1, int* v2, int* ref
+int MMG5_Get_triangle(MMG5_pMesh mesh, int* v0, int* v1, int* v2, int* ref
                  ,int* isRequired) {
-    pTria  ptt;
+    MMG5_pTria  ptt;
 
     mesh->nti++;
 
@@ -1026,7 +1026,7 @@ int Get_triangle(MMG5_pMesh mesh, int* v0, int* v1, int* v2, int* ref
  * position \a pos in mesh structure
  *
  */
-int Set_edge(MMG5_pMesh mesh, int v0, int v1, int ref, int pos) {
+int MMG5_Set_edge(MMG5_pMesh mesh, int v0, int v1, int ref, int pos) {
 
     if ( !mesh->na ) {
         fprintf(stdout,"  ## Error: You must set the number of edges with the");
@@ -1036,7 +1036,7 @@ int Set_edge(MMG5_pMesh mesh, int v0, int v1, int ref, int pos) {
     if ( pos > mesh->namax ) {
         fprintf(stdout,"  ## Error: unable to allocate a new edge.\n");
         fprintf(stdout,"    max number of edge: %d\n",mesh->namax);
-        INCREASE_MEM_MESSAGE();
+        _MMG5_INCREASE_MEM_MESSAGE();
         return(0);
     }
     if ( pos > mesh->na ) {
@@ -1067,7 +1067,7 @@ int Set_edge(MMG5_pMesh mesh, int v0, int v1, int ref, int pos) {
  * Get extremities \a e0, \a e1 and reference \a ref of next edge of mesh.
  *
  */
-int Get_edge(MMG5_pMesh mesh, int* e0, int* e1, int* ref
+int MMG5_Get_edge(MMG5_pMesh mesh, int* e0, int* e1, int* ref
              ,int* isRidge, int* isRequired) {
 
     mesh->nai++;
@@ -1109,7 +1109,7 @@ int Get_edge(MMG5_pMesh mesh, int* e0, int* e1, int* ref
  * Set corner at point \a k.
  *
  */
-int Set_corner(MMG5_pMesh mesh, int k) {
+int MMG5_Set_corner(MMG5_pMesh mesh, int k) {
     assert ( k <= mesh->np );
     mesh->point[k].tag |= MG_CRN;
     return(1);
@@ -1123,7 +1123,7 @@ int Set_corner(MMG5_pMesh mesh, int k) {
  * Set point \a k as required.
  *
  */
-int Set_requiredVertex(MMG5_pMesh mesh, int k) {
+int MMG5_Set_requiredVertex(MMG5_pMesh mesh, int k) {
     assert ( k <= mesh->np );
     mesh->point[k].tag |= MG_REQ;
     return(1);
@@ -1137,7 +1137,7 @@ int Set_requiredVertex(MMG5_pMesh mesh, int k) {
  * Set element \a k as required.
  *
  */
-int Set_requiredTetrahedron(MMG5_pMesh mesh, int k) {
+int MMG5_Set_requiredTetrahedron(MMG5_pMesh mesh, int k) {
     assert ( k <= mesh->ne );
     mesh->tetra[k].tag |= MG_REQ;
     return(1);
@@ -1151,7 +1151,7 @@ int Set_requiredTetrahedron(MMG5_pMesh mesh, int k) {
  * Set triangle \a k as required.
  *
  */
-int Set_requiredTriangle(MMG5_pMesh mesh, int k) {
+int MMG5_Set_requiredTriangle(MMG5_pMesh mesh, int k) {
     assert ( k <= mesh->nt );
     mesh->tria[k].tag[0] |= MG_REQ;
     mesh->tria[k].tag[1] |= MG_REQ;
@@ -1167,7 +1167,7 @@ int Set_requiredTriangle(MMG5_pMesh mesh, int k) {
  * Set ridge at edge \a k.
  *
  */
-int Set_ridge(MMG5_pMesh mesh, int k) {
+int MMG5_Set_ridge(MMG5_pMesh mesh, int k) {
     assert ( k <= mesh->na );
     mesh->edge[k].tag |= MG_GEO;
     return(1);
@@ -1181,7 +1181,7 @@ int Set_ridge(MMG5_pMesh mesh, int k) {
  * Set edge \a k as required.
  *
  */
-int Set_requiredEdge(MMG5_pMesh mesh, int k) {
+int MMG5_Set_requiredEdge(MMG5_pMesh mesh, int k) {
     assert ( k <= mesh->na );
     mesh->edge[k].tag |= MG_REQ;
     return(1);
@@ -1196,7 +1196,7 @@ int Set_requiredEdge(MMG5_pMesh mesh, int k) {
  * Set scalar value \a s at position \a pos in solution structure
  *
  */
-int Set_scalarSol(MMG5_pSol met, double s, int pos) {
+int MMG5_Set_scalarSol(MMG5_pSol met, double s, int pos) {
 
     if ( !met->np ) {
         fprintf(stdout,"  ## Error: You must set the number of solution with the");
@@ -1231,7 +1231,7 @@ int Set_scalarSol(MMG5_pSol met, double s, int pos) {
  * Get solution \a s of next vertex of mesh.
  *
  */
-int Get_scalarSol(MMG5_pSol met, double* s) {
+int MMG5_Get_scalarSol(MMG5_pSol met, double* s) {
 
     met->npi++;
 
@@ -1262,7 +1262,7 @@ int Get_scalarSol(MMG5_pSol met, double* s) {
  * singularities mode: \a SINGUL preprocessor flag).
  *
  */
-int Set_singulVertex(MMG5_pSingul sing, double c0, double c1,
+int MMG5_Set_singulVertex(MMG5_pSingul sing, double c0, double c1,
                      double c2, int typ, int pos) {
 
     if ( !sing->ns ) {
@@ -1305,7 +1305,7 @@ int Set_singulVertex(MMG5_pSingul sing, double c0, double c1,
  * singularities mode: \a SINGUL preprocessor flag).
  *
  */
-int Set_singulEdge(MMG5_pSingul sing, int v0, int v1, int ref, int pos) {
+int MMG5_Set_singulEdge(MMG5_pSingul sing, int v0, int v1, int ref, int pos) {
 
     if ( !sing->na ) {
         fprintf(stdout,"  ## Error: You must set the number of singular edges with the");
@@ -1348,7 +1348,7 @@ int Set_singulEdge(MMG5_pSingul sing, int v0, int v1, int ref, int pos) {
  * singularities mode: \a SINGUL preprocessor flag).
  *
  */
-int Set_singulCorner(MMG5_pSingul sing, int k) {
+int MMG5_Set_singulCorner(MMG5_pSingul sing, int k) {
     assert ( k <= sing->ns );
     sing->point[k].tag |= MG_CRN;
     return(1);
@@ -1363,7 +1363,7 @@ int Set_singulCorner(MMG5_pSingul sing, int k) {
  * singularities mode: \a SINGUL preprocessor flag).
  *
  */
-int Set_singulRequiredVertex(MMG5_pSingul sing, int k) {
+int MMG5_Set_singulRequiredVertex(MMG5_pSingul sing, int k) {
     assert ( k <= sing->ns );
     sing->point[k].tag |= MG_REQ;
     return(1);
@@ -1378,7 +1378,7 @@ int Set_singulRequiredVertex(MMG5_pSingul sing, int k) {
  * singularities mode: \a SINGUL preprocessor flag).
  *
  */
-int Set_singulRidge(MMG5_pSingul sing, int k) {
+int MMG5_Set_singulRidge(MMG5_pSingul sing, int k) {
     assert ( k <= sing->na );
     sing->edge[k].tag |= MG_GEO;
     return(1);
@@ -1393,7 +1393,7 @@ int Set_singulRidge(MMG5_pSingul sing, int k) {
  * singularities mode: \a SINGUL preprocessor flag).
  *
  */
-int Set_singulRequiredEdge(MMG5_pSingul sing, int k) {
+int MMG5_Set_singulRequiredEdge(MMG5_pSingul sing, int k) {
     assert ( k <= sing->na );
     sing->edge[k].tag |= MG_REQ;
     return(1);
@@ -1407,7 +1407,7 @@ int Set_singulRequiredEdge(MMG5_pSingul sing, int k) {
  * (for example, mesh given by mesh->point[i] = 0 ...). Not recommanded.
  *
  */
-void Set_handGivenMesh(MMG5_pMesh mesh) {
+void MMG5_Set_handGivenMesh(MMG5_pMesh mesh) {
     int k, aux;
 
     /* Possibly switch 2 vertices number so that each tet is positively oriented */
@@ -1432,7 +1432,7 @@ void Set_handGivenMesh(MMG5_pMesh mesh) {
  * (not mandatory) and check mesh datas.
  *
  */
-int Chk_meshData(MMG5_pMesh mesh,MMG5_pSol met) {
+int MMG5_Chk_meshData(MMG5_pMesh mesh,MMG5_pSol met) {
 
     if ( (mesh->npi != mesh->np) || (mesh->nei != mesh->ne) ) {
         fprintf(stdout,"  ## Error: if you don't use the MMG5_loadMesh function,");
@@ -1483,8 +1483,8 @@ int Chk_meshData(MMG5_pMesh mesh,MMG5_pSol met) {
  *
  */
 static inline
-int skipIso(MMG5_pMesh mesh) {
-    pTria  ptt,ptt1;
+int MMG5_skipIso(MMG5_pMesh mesh) {
+    MMG5_pTria  ptt,ptt1;
     pEdge  pa,pa1;
     int    k;
 
@@ -1509,10 +1509,10 @@ int skipIso(MMG5_pMesh mesh) {
 
     if ( mesh->nti < mesh->nt ) {
         if( !mesh->nti )
-            DEL_MEM(mesh,mesh->tria,(mesh->nt+1)*sizeof(Tria));
+            _MMG5_DEL_MEM(mesh,mesh->tria,(mesh->nt+1)*sizeof(Tria));
         else {
-            ADD_MEM(mesh,mesh->nti-mesh->nt,"triangles",return(0));
-            SAFE_RECALLOC(mesh->tria,mesh->nt+1,(mesh->nti+1),Tria,"triangles");
+            _MMG5_ADD_MEM(mesh,mesh->nti-mesh->nt,"triangles",return(0));
+            _MMG5_SAFE_RECALLOC(mesh->tria,mesh->nt+1,(mesh->nti+1),Tria,"triangles");
         }
         mesh->nt = mesh->nti;
     }
@@ -1540,10 +1540,10 @@ int skipIso(MMG5_pMesh mesh) {
 
     if ( mesh->nai < mesh->na ) {
         if( !mesh->nai )
-            DEL_MEM(mesh,mesh->edge,(mesh->nai+1)*sizeof(Edge));
+            _MMG5_DEL_MEM(mesh,mesh->edge,(mesh->nai+1)*sizeof(Edge));
         else {
-            ADD_MEM(mesh,mesh->nai-mesh->na,"Edges",return(0));
-            SAFE_RECALLOC(mesh->edge,mesh->na+1,(mesh->nai+1),Edge,"edges");
+            _MMG5_ADD_MEM(mesh,mesh->nai-mesh->na,"Edges",return(0));
+            _MMG5_SAFE_RECALLOC(mesh->edge,mesh->na+1,(mesh->nai+1),Edge,"edges");
         }
         mesh->na = mesh->nai;
     }
@@ -1565,7 +1565,7 @@ int skipIso(MMG5_pMesh mesh) {
  * Set integer parameter \a iparam at value \a val.
  *
  */
-int Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
+int MMG5_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
     int k;
 
     switch ( iparam ) {
@@ -1597,23 +1597,23 @@ int Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
     case MMG5_IPARAM_angle :
         /* free table that may contains old ridges */
         if ( mesh->htab.geom )
-            DEL_MEM(mesh,mesh->htab.geom,(mesh->htab.max+1)*sizeof(hgeom));
+            _MMG5_DEL_MEM(mesh,mesh->htab.geom,(mesh->htab.max+1)*sizeof(hgeom));
         if ( mesh->xpoint )
-            DEL_MEM(mesh,mesh->xpoint,(mesh->xpmax+1)*sizeof(xPoint));
+            _MMG5_DEL_MEM(mesh,mesh->xpoint,(mesh->xpmax+1)*sizeof(MMG5_xPoint));
         if ( mesh->xtetra )
-            DEL_MEM(mesh,mesh->xtetra,(mesh->xtmax+1)*sizeof(xTetra));
+            _MMG5_DEL_MEM(mesh,mesh->xtetra,(mesh->xtmax+1)*sizeof(MMG5_xTetra));
         if ( !val )
             mesh->info.dhd    = -1.;
         else {
             if ( (mesh->info.imprim > 5) || mesh->info.ddebug )
                 fprintf(stdout,"  ## Warning: angle detection parameter set to default value\n");
-            mesh->info.dhd    = ANGEDG;
+            mesh->info.dhd    = _MMG5_ANGEDG;
         }
         break;
     case MMG5_IPARAM_iso :
         mesh->info.iso      = val;
         if ( mesh->info.iso )
-            if ( mesh->nt && !skipIso(mesh) )
+            if ( mesh->nt && !MMG5_skipIso(mesh) )
                 exit(EXIT_FAILURE);
         break;
     case MMG5_IPARAM_noinsert :
@@ -1627,16 +1627,16 @@ int Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
         break;
     case MMG5_IPARAM_numberOfLocalParam :
         if ( mesh->info.par ) {
-            DEL_MEM(mesh,mesh->info.par,mesh->info.npar*sizeof(Par));
+            _MMG5_DEL_MEM(mesh,mesh->info.par,mesh->info.npar*sizeof(Par));
             if ( (mesh->info.imprim > 5) || mesh->info.ddebug )
                 fprintf(stdout,"  ## Warning: new local parameter values\n");
         }
         mesh->info.npar  = val;
         mesh->info.npari = 0;
-        ADD_MEM(mesh,mesh->info.npar*sizeof(Par),"parameters",
+        _MMG5_ADD_MEM(mesh,mesh->info.npar*sizeof(Par),"parameters",
                 printf("  Exit program.\n");
                 exit(EXIT_FAILURE));
-        SAFE_CALLOC(mesh->info.par,mesh->info.npar,Par);
+        _MMG5_SAFE_CALLOC(mesh->info.par,mesh->info.npar,Par);
 
         for (k=0; k<mesh->info.npar; k++) {
             mesh->info.par[k].elt   = MMG5_Noentity;
@@ -1674,7 +1674,7 @@ int Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
  * Set double parameter \a dparam at value \a val.
  *
  */
-int Set_dparameter(MMG5_pMesh mesh, MMG5_pSol sol, int dparam, double val){
+int MMG5_Set_dparameter(MMG5_pMesh mesh, MMG5_pSol sol, int dparam, double val){
 
     switch ( dparam ) {
         /* double parameters */
@@ -1726,7 +1726,7 @@ int Set_dparameter(MMG5_pMesh mesh, MMG5_pSol sol, int dparam, double val){
  * elements of type \a typ and reference \a ref.
  *
  */
-int Set_localParameter(MMG5_pMesh mesh,MMG5_pSol sol, int typ, int ref, double val){
+int MMG5_Set_localParameter(MMG5_pMesh mesh,MMG5_pSol sol, int typ, int ref, double val){
     int k;
 
     if ( !mesh->info.npar ) {
@@ -1783,34 +1783,34 @@ int Set_localParameter(MMG5_pMesh mesh,MMG5_pSol sol, int typ, int ref, double v
  * File name deallocations before return.
  *
  */
-void Free_names(pMesh mesh,pSol met
+void MMG5_Free_names(MMG5_pMesh mesh,MMG5_pSol met
 #ifdef SINGUL
                 ,pSingul singul
 #endif
     ){
     /* mesh */
     if ( mesh->nameout ) {
-        DEL_MEM(mesh,mesh->nameout,(strlen(mesh->nameout)+1)*sizeof(char));
+        _MMG5_DEL_MEM(mesh,mesh->nameout,(strlen(mesh->nameout)+1)*sizeof(char));
     }
 
     if ( mesh->namein ) {
-        DEL_MEM(mesh,mesh->namein,(strlen(mesh->namein)+1)*sizeof(char));
+        _MMG5_DEL_MEM(mesh,mesh->namein,(strlen(mesh->namein)+1)*sizeof(char));
     }
 
     /* met */
     if ( met ) {
         if ( met->namein ) {
-            DEL_MEM(mesh,met->namein,(strlen(met->namein)+1)*sizeof(char));
+            _MMG5_DEL_MEM(mesh,met->namein,(strlen(met->namein)+1)*sizeof(char));
         }
 
         if ( met->nameout ) {
-            DEL_MEM(mesh,met->nameout,(strlen(met->nameout)+1)*sizeof(char));
+            _MMG5_DEL_MEM(mesh,met->nameout,(strlen(met->nameout)+1)*sizeof(char));
         }
     }
 #ifdef SINGUL
     /* singul */
     if ( singul->namein ) {
-        DEL_MEM(mesh,singul->namein,(strlen(singul->namein)+1)*sizeof(char));
+        _MMG5_DEL_MEM(mesh,singul->namein,(strlen(singul->namein)+1)*sizeof(char));
     }
 #endif
 }
@@ -1823,7 +1823,7 @@ void Free_names(pMesh mesh,pSol met
  * Structure deallocations before return.
  *
  */
-void Free_structures(pMesh mesh,pSol met
+void MMG5_Free_structures(MMG5_pMesh mesh,MMG5_pSol met
 #ifdef SINGUL
                      ,pSingul singul
 #endif
@@ -1837,43 +1837,43 @@ void Free_structures(pMesh mesh,pSol met
 
     /* mesh */
     if ( mesh->point )
-        DEL_MEM(mesh,mesh->point,(mesh->npmax+1)*sizeof(Point));
+        _MMG5_DEL_MEM(mesh,mesh->point,(mesh->npmax+1)*sizeof(Point));
 
     if ( mesh->tetra )
-        DEL_MEM(mesh,mesh->tetra,(mesh->nemax+1)*sizeof(Tetra));
+        _MMG5_DEL_MEM(mesh,mesh->tetra,(mesh->nemax+1)*sizeof(Tetra));
 
     if ( mesh->edge )
-        DEL_MEM(mesh,mesh->edge,(mesh->na+1)*sizeof(Edge));
+        _MMG5_DEL_MEM(mesh,mesh->edge,(mesh->na+1)*sizeof(Edge));
 
     if ( mesh->adja )
-        DEL_MEM(mesh,mesh->adja,(4*mesh->nemax+5)*sizeof(int));
+        _MMG5_DEL_MEM(mesh,mesh->adja,(4*mesh->nemax+5)*sizeof(int));
 
     if ( mesh->xpoint )
-        DEL_MEM(mesh,mesh->xpoint,(mesh->xpmax+1)*sizeof(xPoint));
+        _MMG5_DEL_MEM(mesh,mesh->xpoint,(mesh->xpmax+1)*sizeof(MMG5_xPoint));
 
     if ( mesh->htab.geom )
-        DEL_MEM(mesh,mesh->htab.geom,(mesh->htab.max+1)*sizeof(hgeom));
+        _MMG5_DEL_MEM(mesh,mesh->htab.geom,(mesh->htab.max+1)*sizeof(hgeom));
 
     if ( mesh->tria )
-        DEL_MEM(mesh,mesh->tria,(mesh->nt+1)*sizeof(Tria));
+        _MMG5_DEL_MEM(mesh,mesh->tria,(mesh->nt+1)*sizeof(Tria));
 
     if ( mesh->xtetra )
-        DEL_MEM(mesh,mesh->xtetra,(mesh->xtmax+1)*sizeof(xTetra));
+        _MMG5_DEL_MEM(mesh,mesh->xtetra,(mesh->xtmax+1)*sizeof(MMG5_xTetra));
 
     /* met */
     if ( /*!mesh->info.iso &&*/ met && met->m )
-        DEL_MEM(mesh,met->m,(met->size*met->npmax+1)*sizeof(double));
+        _MMG5_DEL_MEM(mesh,met->m,(met->size*met->npmax+1)*sizeof(double));
 
     /* mesh->info */
     if ( mesh->info.npar && mesh->info.par )
-        DEL_MEM(mesh,mesh->info.par,mesh->info.npar*sizeof(Par));
+        _MMG5_DEL_MEM(mesh,mesh->info.par,mesh->info.npar*sizeof(Par));
 
 #ifdef SINGUL
     /* singul */
     if ( singul->point )
-        DEL_MEM(mesh,singul->point,(singul->ns+1)*sizeof(sPoint));
+        _MMG5_DEL_MEM(mesh,singul->point,(singul->ns+1)*sizeof(sPoint));
     if ( singul->edge )
-        DEL_MEM(mesh,singul->edge,(singul->na+1)*sizeof(Edge));
+        _MMG5_DEL_MEM(mesh,singul->edge,(singul->na+1)*sizeof(Edge));
 #endif
 
     if ( mesh->info.imprim>6 || mesh->info.ddebug )

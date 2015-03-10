@@ -91,15 +91,15 @@ void pampa_excfun(int sigid) {
  * \warning Copy of the \a setfunc function of the \ref mmg3d/shared_func.h
  * file.
  *
- * Set function pointers for lenedgeCoor, hashTetra and saveMesh.
+ * Set function pointers for lenedgeCoor, _MMG5_hashTetra and saveMesh.
  *
  */
-void pampa_setfunc(pMesh mesh,pSol met) {
+void pampa_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
     if ( met->size < 6 )
         MMG5_lenedgCoor = lenedgCoor_iso;
     else
         MMG5_lenedgCoor = lenedgCoor_ani;
-    MMG5_hashTetra = hashTetra;
+    MMG5_hashTetra = _MMG5_hashTetra;
     MMG5_saveMesh = _MMG5_saveLibraryMesh;
 }
 /* END COPY */
@@ -123,10 +123,10 @@ void pampa_setfunc(pMesh mesh,pSol met) {
  * (so we are on a boundary face).
  *
  */
-int Get_adjaTet(pMesh mesh, int kel, int *v0, int *v1, int *v2, int *v3) {
+int Get_adjaTet(MMG5_pMesh mesh, int kel, int *v0, int *v1, int *v2, int *v3) {
 
     if ( ! mesh->adja ) {
-        if (! hashTetra(mesh, 0))
+        if (! _MMG5_hashTetra(mesh, 0))
             return(0);
     }
 
@@ -590,7 +590,7 @@ int mmg3dcheck(MMG5_pMesh mesh,MMG5_pSol met,
 
     if ( met->np && (met->np != mesh->np) ) {
         fprintf(stdout,"  ## WARNING: WRONG SOLUTION NUMBER. IGNORED\n");
-        DEL_MEM(mesh,met->m,(met->size*met->npmax+1)*sizeof(double));
+        _MMG5_DEL_MEM(mesh,met->m,(met->size*met->npmax+1)*sizeof(double));
         met->np = 0;
     }
     else if ( met->size!=1 ) {
@@ -626,7 +626,7 @@ int mmg3dcheck(MMG5_pMesh mesh,MMG5_pSol met,
             fprintf(stdout,"\n  ## ERROR: A VALID SOLUTION FILE IS NEEDED \n");
             return(MMG5_STRONGFAILURE);
         }
-        if ( !mmg3d2(mesh,met) ) return(MMG5_STRONGFAILURE);
+        if ( !_MMG5_mmg3d2(mesh,met) ) return(MMG5_STRONGFAILURE);
     }
 
     MMG5_searchqua(mesh,met,critmin,eltab);
@@ -648,7 +648,7 @@ int mmg3dcheck(MMG5_pMesh mesh,MMG5_pSol met,
  *
  */
 void searchqua(MMG5_pMesh mesh,MMG5_pSol met,double critmin, int *eltab) {
-    pTetra   pt;
+    MMG5_pTetra   pt;
     double   rap;
     int      k;
 
@@ -658,7 +658,7 @@ void searchqua(MMG5_pMesh mesh,MMG5_pSol met,double critmin, int *eltab) {
         if( !MG_EOK(pt) )
             continue;
 
-        rap = ALPHAD * caltet(mesh,met,pt->v[0],pt->v[1],pt->v[2],pt->v[3]);
+        rap = _MMG5_ALPHAD * caltet(mesh,met,pt->v[0],pt->v[1],pt->v[2],pt->v[3]);
         if ( rap == 0.0 || rap < critmin ) {
             eltab[k] = 1;
         }
@@ -679,8 +679,8 @@ void searchqua(MMG5_pMesh mesh,MMG5_pSol met,double critmin, int *eltab) {
  *
  */
 int searchlen(MMG5_pMesh mesh, MMG5_pSol met, double lmin, double lmax, int *eltab) {
-    pTetra          pt;
-    Hash            hash;
+    MMG5_pTetra          pt;
+    _MMG5_Hash           hash;
     double          len;
     int             k,np,nq;
     char            ia,i0,i1,ier;
@@ -693,8 +693,8 @@ int searchlen(MMG5_pMesh mesh, MMG5_pSol met, double lmin, double lmax, int *elt
         if ( !MG_EOK(pt) ) continue;
 
         for(ia=0; ia<6; ia++) {
-            i0 = iare[ia][0];
-            i1 = iare[ia][1];
+            i0 = _MMG5_iare[ia][0];
+            i1 = _MMG5_iare[ia][1];
             np = pt->v[i0];
             nq = pt->v[i1];
 
@@ -712,8 +712,8 @@ int searchlen(MMG5_pMesh mesh, MMG5_pSol met, double lmin, double lmax, int *elt
         if ( !MG_EOK(pt) ) continue;
 
         for(ia=0; ia<6; ia++) {
-            i0 = iare[ia][0];
-            i1 = iare[ia][1];
+            i0 = _MMG5_iare[ia][0];
+            i1 = _MMG5_iare[ia][1];
             np = pt->v[i0];
             nq = pt->v[i1];
 
@@ -729,7 +729,7 @@ int searchlen(MMG5_pMesh mesh, MMG5_pSol met, double lmin, double lmax, int *elt
             }
         }
     }
-    DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(hedge));
+    _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
     return(1);
 }
 
@@ -755,7 +755,7 @@ inline double lenedgCoor_iso(double *ca,double *cb,double *ma,double *mb) {
         + (cb[2]-ca[2])*(cb[2]-ca[2]);
     l = sqrt(l);
     r = h2 / h1 - 1.0;
-    len = fabs(r) < EPS ? l / h1 : l / (h2-h1) * log(r+1.0);
+    len = fabs(r) < _MMG5_EPS ? l / h1 : l / (h2-h1) * log(r+1.0);
 
     return(len);
 }

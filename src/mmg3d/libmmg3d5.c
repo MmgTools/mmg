@@ -44,7 +44,7 @@
 /**
  * Pack the mesh \a mesh and its associated metric \a met and return \a val.
  */
-#define RETURN_AND_PACK(mesh,met,val)do         \
+#define _MMG5_RETURN_AND_PACK(mesh,met,val)do         \
     {                                           \
         packMesh(mesh,met);                     \
         return(val);                            \
@@ -59,7 +59,7 @@
  * Deallocations before return.
  *
  */
-void Free_all(pMesh mesh,pSol met
+void Free_all(MMG5_pMesh mesh,MMG5_pSol met
 #ifdef SINGUL
               ,pSingul singul
 #endif
@@ -72,10 +72,10 @@ void Free_all(pMesh mesh,pSol met
 #endif
 
 #ifdef SINGUL
-    SAFE_FREE(singul);
+    _MMG5_SAFE_FREE(singul);
 #endif
-    SAFE_FREE(met);
-    SAFE_FREE(mesh);
+    _MMG5_SAFE_FREE(met);
+    _MMG5_SAFE_FREE(mesh);
 }
 
 /**
@@ -84,23 +84,23 @@ void Free_all(pMesh mesh,pSol met
  * Set pointer for MMG5_saveMesh function.
  *
  */
-void Set_saveFunc(pMesh mesh) {
+void Set_saveFunc(MMG5_pMesh mesh) {
     MMG5_saveMesh = _MMG5_saveLibraryMesh;
 }
 
 /** Free adja, xtetra and xpoint tables */
 static inline
-void Free_topoTables(pMesh mesh) {
+void Free_topoTables(MMG5_pMesh mesh) {
     int k;
 
     mesh->xp = 0;
     if ( mesh->adja )
-        DEL_MEM(mesh,mesh->adja,(4*mesh->nemax+5)*sizeof(int));
+        _MMG5_DEL_MEM(mesh,mesh->adja,(4*mesh->nemax+5)*sizeof(int));
 
     freeXTets(mesh);
 
     if ( mesh->xpoint )
-        DEL_MEM(mesh,mesh->xpoint,(mesh->xpmax+1)*sizeof(xPoint));
+        _MMG5_DEL_MEM(mesh,mesh->xpoint,(mesh->xpmax+1)*sizeof(MMG5_xPoint));
     for(k=1; k <=mesh->np; k++) {
         mesh->point[k].xp = 0;
     }
@@ -117,9 +117,9 @@ void Free_topoTables(pMesh mesh) {
  *
  */
 static inline
-int packMesh(pMesh mesh,pSol met) {
-    pTetra   pt,ptnew;
-    pPoint   ppt,pptnew;
+int packMesh(MMG5_pMesh mesh,MMG5_pSol met) {
+    MMG5_pTetra   pt,ptnew;
+    MMG5_pPoint   ppt,pptnew;
     hgeom   *ph;
     int     np,nc,nr, k,ne,nbl,imet,imetnew,i;
     int     iadr,iadrnew,iadrv,*adjav,*adja,*adjanew,voy;
@@ -202,15 +202,15 @@ int packMesh(pMesh mesh,pSol met) {
 
     /* rebuild triangles*/
     mesh->nt = 0;
-    chkNumberOfTri(mesh);
-    if ( !bdryTria(mesh) ) {
+    _MMG5_chkNumberOfTri(mesh);
+    if ( !_MMG5_bdryTria(mesh) ) {
         fprintf(stdout," ## Error: unable to rebuild triangles\n");
         return(0);
     }
 
     /* build hash table for edges */
     if ( mesh->htab.geom )
-        DEL_MEM(mesh,mesh->htab.geom,(mesh->htab.max+1)*sizeof(hgeom));
+        _MMG5_DEL_MEM(mesh,mesh->htab.geom,(mesh->htab.max+1)*sizeof(hgeom));
 
     mesh->na = 0;
     /* in the wost case (all edges are marked), we will have around 1 edge per *
@@ -229,7 +229,7 @@ int packMesh(pMesh mesh,pSol met) {
                     if ( mesh->xtetra[pt->xt].edg[i] ||
                          ( MG_EDG(mesh->xtetra[pt->xt].tag[i] ) ||
                            (mesh->xtetra[pt->xt].tag[i] & MG_REQ) ) )
-                        hEdge(mesh,pt->v[iare[i][0]],pt->v[iare[i][1]],
+                        hEdge(mesh,pt->v[_MMG5_iare[i][0]],pt->v[_MMG5_iare[i][1]],
                               mesh->xtetra[pt->xt].edg[i],mesh->xtetra[pt->xt].tag[i]);
                 }
             }
@@ -242,8 +242,8 @@ int packMesh(pMesh mesh,pSol met) {
             mesh->na++;
         }
         if ( mesh->na ) {
-            ADD_MEM(mesh,(mesh->na+1)*sizeof(Edge),"edges",);
-            SAFE_CALLOC(mesh->edge,mesh->na+1,Edge);
+            _MMG5_ADD_MEM(mesh,(mesh->na+1)*sizeof(Edge),"edges",);
+            _MMG5_SAFE_CALLOC(mesh->edge,mesh->na+1,Edge);
 
             mesh->na = 0;
             for (k=0; k<=mesh->htab.max; k++) {
@@ -257,7 +257,7 @@ int packMesh(pMesh mesh,pSol met) {
                 if ( MG_GEO & ph->tag ) nr++;
             }
         }
-        DEL_MEM(mesh,mesh->htab.geom,(mesh->htab.max+1)*sizeof(hgeom));
+        _MMG5_DEL_MEM(mesh,mesh->htab.geom,(mesh->htab.max+1)*sizeof(hgeom));
     }
     else
         mesh->memCur -= (long long)((3*mesh->nt+2)*sizeof(hgeom));
@@ -304,7 +304,7 @@ int packMesh(pMesh mesh,pSol met) {
  * Main program for the library .
  *
  */
-int mmg3dlib(pMesh mesh,pSol met
+int mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met
 #ifdef SINGUL
              ,pSingul sing
 #endif
@@ -346,7 +346,7 @@ int mmg3dlib(pMesh mesh,pSol met
 
     if ( met->np && (met->np != mesh->np) ) {
         fprintf(stdout,"  ## WARNING: WRONG SOLUTION NUMBER. IGNORED\n");
-        DEL_MEM(mesh,met->m,(met->size*met->npmax+1)*sizeof(double));
+        _MMG5_DEL_MEM(mesh,met->m,(met->size*met->npmax+1)*sizeof(double));
         met->np = 0;
     }
     else if ( met->size!=1 ) {
@@ -385,14 +385,14 @@ int mmg3dlib(pMesh mesh,pSol met
             fprintf(stdout,"\n  ## ERROR: A VALID SOLUTION FILE IS NEEDED \n");
             return(MMG5_STRONGFAILURE);
         }
-        if ( !mmg3d2(mesh,met) ) return(MMG5_STRONGFAILURE);
+        if ( !_MMG5_mmg3d2(mesh,met) ) return(MMG5_STRONGFAILURE);
     }
 
 #ifdef SINGUL
     if ( mesh->info.sing ) {
         if ( !mesh->info.iso ) {
             if ( !met->np && !DoSol(mesh,met) )
-                RETURN_AND_PACK(mesh,met,MMG5_LOWFAILURE);
+                _MMG5_RETURN_AND_PACK(mesh,met,MMG5_LOWFAILURE);
             if ( !( ier=inserSingul(mesh,met,sing) ) )
                 return(MMG5_STRONGFAILURE);
             else if (ier > 0 ) {
@@ -408,12 +408,12 @@ int mmg3dlib(pMesh mesh,pSol met
 #ifdef DEBUG
     if ( !met->np && !DoSol(mesh,met,&mesh->info) ) {
         if ( !unscaleMesh(mesh,met) )  return(MMG5_STRONGFAILURE);
-        RETURN_AND_PACK(mesh,met,MMG5_LOWFAILURE);
+        _MMG5_RETURN_AND_PACK(mesh,met,MMG5_LOWFAILURE);
     }
 #endif
-    if ( !analys(mesh) ) {
+    if ( !_MMG5_analys(mesh) ) {
         if ( !unscaleMesh(mesh,met) )  return(MMG5_STRONGFAILURE);
-        RETURN_AND_PACK(mesh,met,MMG5_LOWFAILURE);
+        _MMG5_RETURN_AND_PACK(mesh,met,MMG5_LOWFAILURE);
     }
 
     if ( mesh->info.imprim > 4 && !mesh->info.iso && met->m ) prilen(mesh,met);
@@ -428,27 +428,12 @@ int mmg3dlib(pMesh mesh,pSol met
     if ( mesh->info.imprim )
         fprintf(stdout,"\n  -- PHASE 2 : %s MESHING\n",met->size < 6 ? "ISOTROPIC" : "ANISOTROPIC");
 
-#ifdef USE_SCOTCH
-    /*check enough vertex to renum*/
-    if ( mesh->info.renum && (mesh->np/2. > BOXSIZE) && mesh->np>100000 ) {
-        /* renumbering begin */
-        if ( mesh->info.imprim > 5 )
-            fprintf(stdout,"  -- RENUMBERING. \n");
-        if ( !renumbering(BOXSIZE,mesh, met) ) {
-            fprintf(stdout,"  ## Unable to renumbering mesh. \n");
-            fprintf(stdout,"  ## Try to run without renumbering option (-rn 0)\n");
-            if ( !unscaleMesh(mesh,met) )  return(MMG5_STRONGFAILURE);
-            RETURN_AND_PACK(mesh,met,MMG5_LOWFAILURE);
-        }
-
-        if ( mesh->info.imprim > 5) {
-            fprintf(stdout,"  -- PHASE RENUMBERING COMPLETED. \n");
-        }
-
-        if ( mesh->info.ddebug )  chkmsh(mesh,1,0);
-        /* renumbering end */
+    /* renumerotation if available */
+    if ( !_MMG5_scotchCall(mesh,met) )
+    {
+        if ( !unscaleMesh(mesh,met) )  return(MMG5_STRONGFAILURE);
+        _MMG5_RETURN_AND_PACK(mesh,met,MMG5_LOWFAILURE);
     }
-#endif
 
 #ifdef SINGUL
     if ( mesh->info.sing && (!mesh->info.iso) ) {
@@ -461,34 +446,34 @@ int mmg3dlib(pMesh mesh,pSol met
 
 
 #ifdef PATTERN
-    if ( !mmg3d1(mesh,met) ) {
-        if ( !(mesh->adja) && !hashTetra(mesh,1) ) {
+    if ( !_MMG5_mmg3d1(mesh,met) ) {
+        if ( !(mesh->adja) && !_MMG5_hashTetra(mesh,1) ) {
             fprintf(stdout,"  ## Hashing problem. Invalid mesh.\n");
             return(MMG5_STRONGFAILURE);
         }
         if ( !unscaleMesh(mesh,met) )  return(MMG5_STRONGFAILURE);
-        RETURN_AND_PACK(mesh,met,MMG5_LOWFAILURE);
+        _MMG5_RETURN_AND_PACK(mesh,met,MMG5_LOWFAILURE);
     }
 #else
     /** Patterns in iso mode, delauney otherwise */
     if ( !mesh->info.iso ) {
-        if ( !mmg3d1_delone(mesh,met) ) {
-            if ( !(mesh->adja) && !hashTetra(mesh,1) ) {
+        if ( !_MMG5_mmg3d1_delone(mesh,met) ) {
+            if ( !(mesh->adja) && !_MMG5_hashTetra(mesh,1) ) {
                 fprintf(stdout,"  ## Hashing problem. Invalid mesh.\n");
                 return(MMG5_STRONGFAILURE);
             }
             if ( !unscaleMesh(mesh,met) )  return(MMG5_STRONGFAILURE);
-            RETURN_AND_PACK(mesh,met,MMG5_LOWFAILURE);
+            _MMG5_RETURN_AND_PACK(mesh,met,MMG5_LOWFAILURE);
         }
     }
     else {
-        if ( !mmg3d1(mesh,met) ) {
-            if ( !(mesh->adja) && !hashTetra(mesh,1) ) {
+        if ( !_MMG5_mmg3d1(mesh,met) ) {
+            if ( !(mesh->adja) && !_MMG5_hashTetra(mesh,1) ) {
                 fprintf(stdout,"  ## Hashing problem. Invalid mesh.\n");
                 return(MMG5_STRONGFAILURE);
             }
             if ( !unscaleMesh(mesh,met) )  return(MMG5_STRONGFAILURE);
-            RETURN_AND_PACK(mesh,met,MMG5_LOWFAILURE);
+            _MMG5_RETURN_AND_PACK(mesh,met,MMG5_LOWFAILURE);
         }
     }
 
@@ -499,7 +484,7 @@ int mmg3dlib(pMesh mesh,pSol met
         if ( !solveUnsignedTet(mesh,met) ) {
             fprintf(stdout,"  ## Solve of undetermined tetrahedra problem.\n");
             if ( !unscaleMesh(mesh,met) )  return(MMG5_STRONGFAILURE);
-            RETURN_AND_PACK(mesh,met,MMG5_LOWFAILURE);
+            _MMG5_RETURN_AND_PACK(mesh,met,MMG5_LOWFAILURE);
         }
     }
 #endif

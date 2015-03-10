@@ -49,20 +49,20 @@
  * configuration. The shell of edge is built during the process.
  *
  */
-int chkswpgen(pMesh mesh,int start,int ia,int *ilist,int *list,double crit) {
-    pTetra    pt,pt0;
-    pPoint    p0;
+int chkswpgen(MMG5_pMesh mesh,int start,int ia,int *ilist,int *list,double crit) {
+    MMG5_pTetra    pt,pt0;
+    MMG5_pPoint    p0;
     double    calold,calnew,caltmp;
     int       na,nb,np,adj,piv,npol,refdom,k,l,iel;
-    int       *adja,pol[LMAX+2];
+    int       *adja,pol[_MMG5_LMAX+2];
     char      i,ipa,ipb,ip,ier;
 
     pt  = &mesh->tetra[start];
     refdom = pt->ref;
 
     pt0 = &mesh->tetra[0];
-    na  = pt->v[iare[ia][0]];
-    nb  = pt->v[iare[ia][1]];
+    na  = pt->v[_MMG5_iare[ia][0]];
+    nb  = pt->v[_MMG5_iare[ia][1]];
     calold = pt->qual;
 
 
@@ -72,9 +72,9 @@ int chkswpgen(pMesh mesh,int start,int ia,int *ilist,int *list,double crit) {
     list[(*ilist)] = 6*start+ia;
     (*ilist)++;
     adja = &mesh->adja[4*(start-1)+1];
-    adj  = adja[ifar[ia][0]] / 4;      // start travelling by face (ia,0)
-    piv  = pt->v[ifar[ia][1]];
-    pol[npol] = 4*start + ifar[ia][1];
+    adj  = adja[_MMG5_ifar[ia][0]] / 4;      // start travelling by face (ia,0)
+    piv  = pt->v[_MMG5_ifar[ia][1]];
+    pol[npol] = 4*start + _MMG5_ifar[ia][1];
     npol++;
 
     while ( adj && adj != start ) {
@@ -86,8 +86,8 @@ int chkswpgen(pMesh mesh,int start,int ia,int *ilist,int *list,double crit) {
         calold = MG_MIN(calold, pt->qual);
         /* identification of edge number in tetra adj */
         for (i=0; i<6; i++) {
-            ipa = iare[i][0];
-            ipb = iare[i][1];
+            ipa = _MMG5_iare[i][0];
+            ipb = _MMG5_iare[i][1];
             if ( (pt->v[ipa] == na && pt->v[ipb] == nb) ||
                  (pt->v[ipa] == nb && pt->v[ipb] == na))  break;
         }
@@ -95,28 +95,28 @@ int chkswpgen(pMesh mesh,int start,int ia,int *ilist,int *list,double crit) {
         list[(*ilist)] = 6*adj +i;
         (*ilist)++;
         /* overflow */
-        if ( (*ilist) > LMAX-3 )  return(0);
+        if ( (*ilist) > _MMG5_LMAX-3 )  return(0);
 
         /* set new triangle for travel */
         adja = &mesh->adja[4*(adj-1)+1];
-        if ( pt->v[ ifar[i][0] ] == piv ) {
-            pol[npol] = 4*adj + ifar[i][1];
+        if ( pt->v[ _MMG5_ifar[i][0] ] == piv ) {
+            pol[npol] = 4*adj + _MMG5_ifar[i][1];
             npol++;
-            adj = adja[ ifar[i][0] ] / 4;
-            piv = pt->v[ ifar[i][1] ];
+            adj = adja[ _MMG5_ifar[i][0] ] / 4;
+            piv = pt->v[ _MMG5_ifar[i][1] ];
         }
         else {
-            assert(pt->v[ ifar[i][1] ] == piv);
-            pol[npol] = 4*adj + ifar[i][0];
+            assert(pt->v[ _MMG5_ifar[i][1] ] == piv);
+            pol[npol] = 4*adj + _MMG5_ifar[i][0];
             npol++;
-            adj = adja[ ifar[i][1] ] /4;
-            piv = pt->v[ ifar[i][0] ];
+            adj = adja[ _MMG5_ifar[i][1] ] /4;
+            piv = pt->v[ _MMG5_ifar[i][0] ];
         }
     }
     //CECILE : je vois pas pourquoi ca ameliore de faire ce test
     //plus rapide mais du coup on elimine des swap...
     //4/01/14 commentaire
-    //if ( calold*ALPHAD > 0.5 )  return(0);
+    //if ( calold*_MMG5_ALPHAD > 0.5 )  return(0);
 
     /* Prevent swap of an external boundary edge */
     if ( !adj )  return(0);
@@ -174,12 +174,12 @@ int chkswpgen(pMesh mesh,int start,int ia,int *ilist,int *list,double crit) {
 
             /* First tetra obtained from iel */
             memcpy(pt0,pt,sizeof(Tetra));
-            pt0->v[iare[i][0]] = np;
+            pt0->v[_MMG5_iare[i][0]] = np;
             caltmp = orcal(mesh,0);
             calnew = MG_MIN(calnew,caltmp);
             /* Second tetra obtained from iel */
             memcpy(pt0,pt,sizeof(Tetra));
-            pt0->v[iare[i][1]] = np;
+            pt0->v[_MMG5_iare[i][1]] = np;
             caltmp = orcal(mesh,0);
             calnew = MG_MIN(calnew,caltmp);
             ier = (calnew > crit*calold);
@@ -204,9 +204,9 @@ int chkswpgen(pMesh mesh,int start,int ia,int *ilist,int *list,double crit) {
  * Perform swap of edge whose shell is passed according to configuration nconf.
  *
  */
-int swpgen(pMesh mesh,pSol met,int nconf,int ilist,int *list,pBucket bucket) {
-    pTetra    pt;
-    pPoint    p0,p1;
+int swpgen(MMG5_pMesh mesh,MMG5_pSol met,int nconf,int ilist,int *list,_MMG5_pBucket bucket) {
+    MMG5_pTetra    pt;
+    MMG5_pPoint    p0,p1;
     int       iel,na,nb,np,nball,ret,start;
     double    m[3];
     char      ia,ip,iq;
@@ -216,8 +216,8 @@ int swpgen(pMesh mesh,pSol met,int nconf,int ilist,int *list,pBucket bucket) {
     ia  = list[0] % 6;
 
     pt = &mesh->tetra[iel];
-    na = pt->v[iare[ia][0]];
-    nb = pt->v[iare[ia][1]];
+    na = pt->v[_MMG5_iare[ia][0]];
+    nb = pt->v[_MMG5_iare[ia][1]];
     p0 = &mesh->point[na];
     p1 = &mesh->point[nb];
 
@@ -229,16 +229,16 @@ int swpgen(pMesh mesh,pSol met,int nconf,int ilist,int *list,pBucket bucket) {
     np  = newPt(mesh,m,0);
     if(!np){
         if ( bucket ) {
-            POINT_AND_BUCKET_REALLOC(mesh,met,np,mesh->gap,
+            _MMG5_POINT_AND_BUCKET_REALLOC(mesh,met,np,mesh->gap,
                                      printf("  ## Error: unable to allocate a new point\n");
-                                     INCREASE_MEM_MESSAGE();
+                                     _MMG5_INCREASE_MEM_MESSAGE();
                                      return(-1)
                                      ,m,0);
         }
         else {
-            POINT_REALLOC(mesh,met,np,mesh->gap,
+            _MMG5_POINT_REALLOC(mesh,met,np,mesh->gap,
                           printf("  ## Error: unable to allocate a new point\n");
-                          INCREASE_MEM_MESSAGE();
+                          _MMG5_INCREASE_MEM_MESSAGE();
                           return(-1)
                           ,m,0);
         }
@@ -267,7 +267,7 @@ int swpgen(pMesh mesh,pSol met,int nconf,int ilist,int *list,pBucket bucket) {
     }
     assert(ip<4);
 
-    memset(list,0,(LMAX+2)*sizeof(int));
+    memset(list,0,(_MMG5_LMAX+2)*sizeof(int));
     nball = boulevolp(mesh,start,ip,list);
 
     ier = colver(mesh,list,nball,iq);
@@ -289,10 +289,10 @@ int swpgen(pMesh mesh,pSol met,int nconf,int ilist,int *list,pBucket bucket) {
  * Perform swap 2->3. Return 0 if the swap lead to an invalid configuration.
  *
  */
-int swap23(pMesh mesh,int k,int ip) {
-    pTetra        pt[3],pt0;
-    xTetra        xt[3],zerotet;
-    pxTetra       pxt0;
+int swap23(MMG5_pMesh mesh,int k,int ip) {
+    MMG5_pTetra        pt[3],pt0;
+    MMG5_xTetra        xt[3],zerotet;
+    MMG5_pxTetra       pxt0;
     double        qual0,qual1,qual2;
     int           newtet[3],*adja,iq,np,nq,i;
     unsigned char tau1[4],tau2[4],*taued1,*taued2,isxt[3];
@@ -330,19 +330,19 @@ int swap23(pMesh mesh,int k,int ip) {
     np        = pt[0]->v[ip];
     nq        = pt[1]->v[iq];
 
-    memset(&zerotet,0,sizeof(xTetra));
+    memset(&zerotet,0,sizeof(MMG5_xTetra));
     zerotet.ori = 15;
 
     if ( pt[0]->xt ) {
         pxt0 = &mesh->xtetra[pt[0]->xt];
-        memcpy(&xt[0],pxt0,sizeof(xTetra));
-        memcpy(&xt[1],pxt0,sizeof(xTetra));
-        memcpy(&xt[2],pxt0,sizeof(xTetra));
+        memcpy(&xt[0],pxt0,sizeof(MMG5_xTetra));
+        memcpy(&xt[1],pxt0,sizeof(MMG5_xTetra));
+        memcpy(&xt[2],pxt0,sizeof(MMG5_xTetra));
     }
     else {
-        memset(&xt[0],0,sizeof(xTetra));
-        memset(&xt[1],0,sizeof(xTetra));
-        memset(&xt[2],0,sizeof(xTetra));
+        memset(&xt[0],0,sizeof(MMG5_xTetra));
+        memset(&xt[1],0,sizeof(MMG5_xTetra));
+        memset(&xt[2],0,sizeof(MMG5_xTetra));
     }
 
     if ( pt[1]->xt )
@@ -369,9 +369,9 @@ int swap23(pMesh mesh,int k,int ip) {
 
 
     tau1[0] = ip;
-    tau1[1] = idir[ip][0];
-    tau1[2] = idir[ip][1];
-    tau1[3] = idir[ip][2];
+    tau1[1] = _MMG5_idir[ip][0];
+    tau1[2] = _MMG5_idir[ip][1];
+    tau1[3] = _MMG5_idir[ip][2];
     taued1  = &permedg[3*ip][0];
 
     /* Check if the first new tetra is valid */
@@ -380,42 +380,42 @@ int swap23(pMesh mesh,int k,int ip) {
     pt0->v[tau1[2]] = pt[0]->v[tau1[2]];
     pt0->v[tau1[3]] = pt[0]->v[tau1[3]];
     qual0 = orcal(mesh,0);
-    if ( qual0 < NULKAL )  return(0);
+    if ( qual0 < _MMG5_NULKAL )  return(0);
 
     /* Check if the second new tetra is valid */
     pt0->v[tau1[1]] = pt[0]->v[tau1[1]];
     pt0->v[tau1[2]] = nq;
     qual1 = orcal(mesh,0);
-    if ( qual1 < NULKAL )  return(0);
+    if ( qual1 < _MMG5_NULKAL )  return(0);
 
     /* Check if the third new tetra is valid */
     pt0->v[tau1[2]] = pt[0]->v[tau1[2]];
     pt0->v[tau1[3]] = nq;
     qual2 = orcal(mesh,0);
-    if ( qual2 < NULKAL )  return(0);
+    if ( qual2 < _MMG5_NULKAL )  return(0);
 
     /* All the new tetras are valid, we can swap */
     /* Update vertices and xt fields */
     memcpy(pt0,pt[0],sizeof(Tetra));
-    if ( pt[1]->v[idir[iq][0]] ==  pt0->v[tau1[1]] ) {
+    if ( pt[1]->v[_MMG5_idir[iq][0]] ==  pt0->v[tau1[1]] ) {
         tau2[0] = iq;
-        tau2[1] = idir[iq][0];
-        tau2[2] = idir[iq][1];
-        tau2[3] = idir[iq][2];
+        tau2[1] = _MMG5_idir[iq][0];
+        tau2[2] = _MMG5_idir[iq][1];
+        tau2[3] = _MMG5_idir[iq][2];
         taued2  = &permedg[3*iq][0];
     }
-    else if ( pt[1]->v[idir[iq][0]] == pt0->v[tau1[2]] ) {
+    else if ( pt[1]->v[_MMG5_idir[iq][0]] == pt0->v[tau1[2]] ) {
         tau2[0] = iq;
-        tau2[1] = idir[iq][1];
-        tau2[2] = idir[iq][2];
-        tau2[3] = idir[iq][0];
+        tau2[1] = _MMG5_idir[iq][1];
+        tau2[2] = _MMG5_idir[iq][2];
+        tau2[3] = _MMG5_idir[iq][0];
         taued2  = &permedg[3*iq+1][0];
     }
-    else if ( pt[1]->v[idir[iq][0]] == pt0->v[tau1[3]] ) {
+    else if ( pt[1]->v[_MMG5_idir[iq][0]] == pt0->v[tau1[3]] ) {
         tau2[0] = iq;
-        tau2[1] = idir[iq][2];
-        tau2[2] = idir[iq][0];
-        tau2[3] = idir[iq][1];
+        tau2[1] = _MMG5_idir[iq][2];
+        tau2[2] = _MMG5_idir[iq][0];
+        tau2[3] = _MMG5_idir[iq][1];
         taued2  = &permedg[3*iq+2][0];
     }
     else {
@@ -503,21 +503,21 @@ int swap23(pMesh mesh,int k,int ip) {
 
     if ( pt[0]->xt ) {
         if ( isxt[0] ) {
-            memcpy(&mesh->xtetra[pt[0]->xt],&xt[0],sizeof(xTetra));
+            memcpy(&mesh->xtetra[pt[0]->xt],&xt[0],sizeof(MMG5_xTetra));
             if ( pt[1]->xt ) {
                 if ( isxt[1] ) {
-                    memcpy(pxt0,&xt[1],sizeof(xTetra));
+                    memcpy(pxt0,&xt[1],sizeof(MMG5_xTetra));
                     if ( isxt[2] ) {
                         mesh->xt++;
                         if ( mesh->xt > mesh->xtmax ) {
                             /* realloc of xtetras table */
-                            TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,xTetra,
+                            _MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
                                          "larger xtetra table",
                                          mesh->xt--;
                                          return(0));
                         }
                         pt[2]->xt = mesh->xt;
-                        memcpy(&mesh->xtetra[pt[2]->xt],&xt[2],sizeof(xTetra));
+                        memcpy(&mesh->xtetra[pt[2]->xt],&xt[2],sizeof(MMG5_xTetra));
                     }
                     else /* !isxt[2] */
                         pt[2]->xt = 0;
@@ -525,7 +525,7 @@ int swap23(pMesh mesh,int k,int ip) {
                 else /* !isxt[1] */ {
                     if ( isxt[2] ) {
                         pt[2]->xt = pt[1]->xt;
-                        memcpy(&mesh->xtetra[pt[2]->xt],&xt[2],sizeof(xTetra));
+                        memcpy(&mesh->xtetra[pt[2]->xt],&xt[2],sizeof(MMG5_xTetra));
                     }
                     else /* !isxt[2] */
                         pt[2]->xt = 0;
@@ -538,13 +538,13 @@ int swap23(pMesh mesh,int k,int ip) {
                         mesh->xt++;
                         if ( mesh->xt > mesh->xtmax ) {
                             /* realloc of xtetras table */
-                            TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,xTetra,
+                            _MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
                                          "larger xtetra table",
                                          mesh->xt--;
                                          return(0));
                         }
                         pt[i]->xt = mesh->xt;
-                        memcpy(&mesh->xtetra[pt[i]->xt],&xt[i],sizeof(xTetra));
+                        memcpy(&mesh->xtetra[pt[i]->xt],&xt[i],sizeof(MMG5_xTetra));
                     }
                     else /* !isxt[i] */
                         pt[i]->xt = 0;
@@ -554,10 +554,10 @@ int swap23(pMesh mesh,int k,int ip) {
         else /* !isxt[0] */ {
             if ( pt[1]->xt ) {
                 if ( isxt[1] ) {
-                    memcpy(&mesh->xtetra[pt[1]->xt],&xt[1],sizeof(xTetra));
+                    memcpy(&mesh->xtetra[pt[1]->xt],&xt[1],sizeof(MMG5_xTetra));
                     if ( isxt[2] ) {
                         pt[2]->xt = pt[0]->xt;
-                        memcpy(&mesh->xtetra[pt[2]->xt],&xt[2],sizeof(xTetra));
+                        memcpy(&mesh->xtetra[pt[2]->xt],&xt[2],sizeof(MMG5_xTetra));
                     }
                     else /* !isxt[2] */
                         pt[2]->xt = 0;
@@ -565,7 +565,7 @@ int swap23(pMesh mesh,int k,int ip) {
                 else /* !isxt[1] */{
                     if ( isxt[2] ) {
                         pt[2]->xt = pt[0]->xt;
-                        memcpy(&mesh->xtetra[pt[2]->xt],&xt[2],sizeof(xTetra));
+                        memcpy(&mesh->xtetra[pt[2]->xt],&xt[2],sizeof(MMG5_xTetra));
                     }
                     else /* !isxt[2] */
                         pt[2]->xt = 0;
@@ -575,18 +575,18 @@ int swap23(pMesh mesh,int k,int ip) {
             else /* !pt[1]->xt */ {
                 if ( isxt[1] ) {
                     pt[1]->xt = pt[0]->xt;
-                    memcpy(&mesh->xtetra[pt[1]->xt],&xt[1],sizeof(xTetra));
+                    memcpy(&mesh->xtetra[pt[1]->xt],&xt[1],sizeof(MMG5_xTetra));
                     if ( isxt[2] ) {
                         mesh->xt++;
                         if ( mesh->xt > mesh->xtmax ) {
                             /* realloc of xtetras table */
-                            TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,xTetra,
+                            _MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
                                          "larger xtetra table",
                                          mesh->xt--;
                                          return(0));
                         }
                         pt[2]->xt = mesh->xt;
-                        memcpy(&mesh->xtetra[pt[2]->xt],&xt[2],sizeof(xTetra));
+                        memcpy(&mesh->xtetra[pt[2]->xt],&xt[2],sizeof(MMG5_xTetra));
                     }
                     else /* !isxt[2] */
                         pt[2]->xt = 0;
@@ -594,7 +594,7 @@ int swap23(pMesh mesh,int k,int ip) {
                 else /* !isxt[1] */ {
                     if ( isxt[2] ) {
                         pt[2]->xt = pt[0]->xt;
-                        memcpy(&mesh->xtetra[pt[2]->xt],&xt[2],sizeof(xTetra));
+                        memcpy(&mesh->xtetra[pt[2]->xt],&xt[2],sizeof(MMG5_xTetra));
                     }
                     else
                         pt[2]->xt = 0;
@@ -607,28 +607,28 @@ int swap23(pMesh mesh,int k,int ip) {
         if ( isxt[0] ) {
             if ( pt[1]->xt ) {
                 if ( isxt[1] ) {
-                    memcpy(&mesh->xtetra[pt[1]->xt],&xt[1],sizeof(xTetra));
+                    memcpy(&mesh->xtetra[pt[1]->xt],&xt[1],sizeof(MMG5_xTetra));
                     mesh->xt++;
                     if ( mesh->xt > mesh->xtmax ) {
                         /* realloc of xtetras table */
-                        TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,xTetra,
+                        _MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
                                      "larger xtetra table",
                                      mesh->xt--;
                                      return(0));
                     }
                     pt[0]->xt = mesh->xt;
-                    memcpy(&mesh->xtetra[pt[0]->xt],&xt[0],sizeof(xTetra));
+                    memcpy(&mesh->xtetra[pt[0]->xt],&xt[0],sizeof(MMG5_xTetra));
                     if ( isxt[2] ) {
                         mesh->xt++;
                         if ( mesh->xt > mesh->xtmax ) {
                             /* realloc of xtetras table */
-                            TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,xTetra,
+                            _MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
                                          "larger xtetra table",
                                          mesh->xt--;
                                          return(0));
                         }
                         pt[2]->xt = mesh->xt;
-                        memcpy(&mesh->xtetra[pt[2]->xt],&xt[2],sizeof(xTetra));
+                        memcpy(&mesh->xtetra[pt[2]->xt],&xt[2],sizeof(MMG5_xTetra));
                     }
                     else /* !isxt[2] */
                         pt[2]->xt = 0;
@@ -636,18 +636,18 @@ int swap23(pMesh mesh,int k,int ip) {
                 else /* !isxt[1] */ {
                     pt[0]->xt = pt[1]->xt;
                     pt[1]->xt = 0;
-                    memcpy(&mesh->xtetra[pt[0]->xt],&xt[0],sizeof(xTetra));
+                    memcpy(&mesh->xtetra[pt[0]->xt],&xt[0],sizeof(MMG5_xTetra));
                     if ( isxt[2] ) {
                         mesh->xt++;
                         if ( mesh->xt > mesh->xtmax ) {
                             /* realloc of xtetras table */
-                            TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,xTetra,
+                            _MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
                                          "larger xtetra table",
                                          mesh->xt--;
                                          return(0));
                         }
                         pt[2]->xt = mesh->xt;
-                        memcpy(&mesh->xtetra[pt[2]->xt],&xt[2],sizeof(xTetra));
+                        memcpy(&mesh->xtetra[pt[2]->xt],&xt[2],sizeof(MMG5_xTetra));
                     }
                     else /* !isxt[2] */
                         pt[2]->xt = 0;
@@ -657,25 +657,25 @@ int swap23(pMesh mesh,int k,int ip) {
                 mesh->xt++;
                 if ( mesh->xt > mesh->xtmax ) {
                     /* realloc of xtetras table */
-                    TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,xTetra,
+                    _MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
                                  "larger xtetra table",
                                  mesh->xt--;
                                  return(0));
                 }
                 pt[0]->xt = mesh->xt;
-                memcpy(&mesh->xtetra[pt[0]->xt],&xt[0],sizeof(xTetra));
+                memcpy(&mesh->xtetra[pt[0]->xt],&xt[0],sizeof(MMG5_xTetra));
                 for (i=1; i<3; i++) {
                     if ( isxt[i] ) {
                         mesh->xt++;
                         if ( mesh->xt > mesh->xtmax ) {
                             /* realloc of xtetras table */
-                            TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,xTetra,
+                            _MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
                                          "larger xtetra table",
                                          mesh->xt--;
                                          return(0));
                         }
                         pt[i]->xt = mesh->xt;
-                        memcpy(&mesh->xtetra[pt[i]->xt],&xt[i],sizeof(xTetra));
+                        memcpy(&mesh->xtetra[pt[i]->xt],&xt[i],sizeof(MMG5_xTetra));
                     }
                     else /* !isxt[i] */
                         pt[i]->xt = 0;
@@ -685,18 +685,18 @@ int swap23(pMesh mesh,int k,int ip) {
         else /* !isxt[0] */ {
             if ( pt[1]->xt ) {
                 if ( isxt[1] ) {
-                    memcpy(&mesh->xtetra[pt[1]->xt],&xt[1],sizeof(xTetra));
+                    memcpy(&mesh->xtetra[pt[1]->xt],&xt[1],sizeof(MMG5_xTetra));
                     if ( isxt[2] ) {
                         mesh->xt++;
                         if ( mesh->xt > mesh->xtmax ) {
                             /* realloc of xtetras table */
-                            TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,xTetra,
+                            _MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
                                          "larger xtetra table",
                                          mesh->xt--;
                                          return(0));
                         }
                         pt[2]->xt = mesh->xt;
-                        memcpy(&mesh->xtetra[pt[2]->xt],&xt[2],sizeof(xTetra));
+                        memcpy(&mesh->xtetra[pt[2]->xt],&xt[2],sizeof(MMG5_xTetra));
                     }
                     else /* !isxt[2] */
                         pt[2]->xt = 0;
@@ -704,7 +704,7 @@ int swap23(pMesh mesh,int k,int ip) {
                 else /* !isxt[1] */ {
                     if ( isxt[2] ) {
                         pt[2]->xt = pt[1]->xt;
-                        memcpy(&mesh->xtetra[pt[2]->xt],&xt[2],sizeof(xTetra));
+                        memcpy(&mesh->xtetra[pt[2]->xt],&xt[2],sizeof(MMG5_xTetra));
                     }
                     else /* !isxt[2] */
                         pt[1]->xt = 0;

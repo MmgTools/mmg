@@ -38,8 +38,8 @@
 extern Info  info;
 
 /** return average normal of triangles sharing P without crossing ridge */
-int boulen(pMesh mesh,int start,int ip,double *nn) {
-    pTria    pt;
+int boulen(MMG5_pMesh mesh,int start,int ip,double *nn) {
+    MMG5_pTria    pt;
     double   n[3],dd;
     int     *adja,k;
     char     i,i1,i2;
@@ -51,7 +51,7 @@ int boulen(pMesh mesh,int start,int ip,double *nn) {
     /* store neighbors */
     k  = start;
     i  = ip;
-    i1 = inxt2[i];
+    i1 = _MMG5_inxt2[i];
     do {
         pt = &mesh->tria[k];
         nortri(mesh,pt,n);
@@ -64,14 +64,14 @@ int boulen(pMesh mesh,int start,int ip,double *nn) {
         adja = &mesh->adjt[3*(k-1)+1];
         k  = adja[i1] / 3;
         i2 = adja[i1] % 3;
-        i1 = iprv2[i2];
+        i1 = _MMG5_iprv2[i2];
     }
     while ( k && k != start );
 
     if ( k == 0 ) {
         k  = start;
         i  = ip;
-        i2 = iprv2[i];
+        i2 = _MMG5_iprv2[i];
         pt = &mesh->tria[k];
         do {
             if ( pt->tag[i2] & MG_GEO )  break;
@@ -80,7 +80,7 @@ int boulen(pMesh mesh,int start,int ip,double *nn) {
             k  = adja[i2] / 3;
             if ( k == 0 )  break;
             i1 = adja[i2] % 3;
-            i2 = inxt2[i1];
+            i2 = _MMG5_inxt2[i1];
             pt = &mesh->tria[k];
 
             nortri(mesh,pt,n);
@@ -92,7 +92,7 @@ int boulen(pMesh mesh,int start,int ip,double *nn) {
 
     /* normalize */
     dd = nn[0]*nn[0] + nn[1]*nn[1] + nn[2]*nn[2];
-    if ( dd > EPSD2 ) {
+    if ( dd > _MMG5_EPSD2 ) {
         dd = 1.0 / sqrt(dd);
         nn[0] *= dd;
         nn[1] *= dd;
@@ -105,9 +105,9 @@ int boulen(pMesh mesh,int start,int ip,double *nn) {
 
 
 /** return tangent to curve at ip */
-int boulec(pMesh mesh,int start,int ip,double *tt) {
-    pTria    pt;
-    pPoint   p0,p1,p2;
+int boulec(MMG5_pMesh mesh,int start,int ip,double *tt) {
+    MMG5_pTria    pt;
+    MMG5_pPoint   p0,p1,p2;
     double   dd;
     int     *adja,k;
     char     i,i1,i2;
@@ -120,8 +120,8 @@ int boulec(pMesh mesh,int start,int ip,double *tt) {
     /* check other triangle vertices */
     k  = start;
     i  = ip;
-    i1 = inxt2[i];
-    i2 = iprv2[i];
+    i1 = _MMG5_inxt2[i];
+    i2 = _MMG5_iprv2[i];
     p1 = p2 = 0;
     do {
         pt = &mesh->tria[k];
@@ -133,7 +133,7 @@ int boulec(pMesh mesh,int start,int ip,double *tt) {
         adja = &mesh->adjt[3*(k-1)+1];
         k  = adja[i1] / 3;
         i2 = adja[i1] % 3;
-        i1 = iprv2[i2];
+        i1 = _MMG5_iprv2[i2];
     }
     while ( k && k != start );
 
@@ -141,8 +141,8 @@ int boulec(pMesh mesh,int start,int ip,double *tt) {
     if ( k == 0 ) {
         k  = start;
         i  = ip;
-        i1 = inxt2[i];
-        i2 = iprv2[i];
+        i1 = _MMG5_inxt2[i];
+        i2 = _MMG5_iprv2[i];
         do {
             pt = &mesh->tria[k];
             if ( MG_EDG(pt->tag[i2]) ) {
@@ -152,7 +152,7 @@ int boulec(pMesh mesh,int start,int ip,double *tt) {
             adja = &mesh->adjt[3*(k-1)+1];
             k  = adja[i2] / 3;
             i1 = adja[i2] % 3;
-            i2 = inxt2[i1];
+            i2 = _MMG5_inxt2[i1];
         }
         while ( k );
     }
@@ -167,7 +167,7 @@ int boulec(pMesh mesh,int start,int ip,double *tt) {
     tt[1] = p2->c[1] - p1->c[1];
     tt[2] = p2->c[2] - p1->c[2];
     dd = tt[0]*tt[0] + tt[1]*tt[1] + tt[2]*tt[2];
-    if ( dd > EPSD2 ) {
+    if ( dd > _MMG5_EPSD2 ) {
         dd = 1.0 / sqrt(dd);
         tt[0] *= dd;
         tt[1] *= dd;
@@ -179,8 +179,8 @@ int boulec(pMesh mesh,int start,int ip,double *tt) {
 
 
 /** store edges and return number (ref+geo) incident to ip */
-int bouler(pMesh mesh,int start,int ip,int *list,int *ng,int *nr) {
-    pTria    pt;
+int bouler(MMG5_pMesh mesh,int start,int ip,int *list,int *ng,int *nr) {
+    MMG5_pTria    pt;
     int     *adja,k,ns;
     char     i,i1,i2;
 
@@ -191,21 +191,21 @@ int bouler(pMesh mesh,int start,int ip,int *list,int *ng,int *nr) {
     i  = ip;
     *ng = *nr = ns = 0;
     do {
-        i1 = inxt2[i];
+        i1 = _MMG5_inxt2[i];
         if ( MG_EDG(pt->tag[i1])) {
-            i2 = iprv2[i];
+            i2 = _MMG5_iprv2[i];
             if ( pt->tag[i1] & MG_GEO )
                 *ng = *ng + 1;
             else if ( pt->tag[i1] & MG_REF )
                 *nr = *nr + 1;
             ns++;
             list[ns] = pt->v[i2];
-            if ( ns > LMAX-2 )  return(-ns);
+            if ( ns > _MMG5_LMAX-2 )  return(-ns);
         }
         adja = &mesh->adjt[3*(k-1)+1];
         k  = adja[i1] / 3;
         i  = adja[i1] % 3;
-        i  = inxt2[i];
+        i  = _MMG5_inxt2[i];
         pt = &mesh->tria[k];
     }
     while ( k && k != start );
@@ -216,21 +216,21 @@ int bouler(pMesh mesh,int start,int ip,int *list,int *ng,int *nr) {
         i = ip;
         do {
             pt = &mesh->tria[k];
-            i2 = iprv2[i];
+            i2 = _MMG5_iprv2[i];
             if ( MG_EDG(pt->tag[i2]) ) {
-                i1 = inxt2[i];
+                i1 = _MMG5_inxt2[i];
                 if ( pt->tag[i2] & MG_GEO )
                     *ng = *ng + 1;
                 else if ( pt->tag[i1] & MG_REF )
                     *nr = *nr + 1;
                 ns++;
                 list[ns] = pt->v[i1];
-                if ( ns > LMAX-2 )  return(-ns);
+                if ( ns > _MMG5_LMAX-2 )  return(-ns);
             }
             adja = &mesh->adjt[3*(k-1)+1];
             k = adja[i2] / 3;
             i = adja[i2] % 3;
-            i = iprv2[i];
+            i = _MMG5_iprv2[i];
         }
         while ( k && k != start );
     }
@@ -240,8 +240,8 @@ int bouler(pMesh mesh,int start,int ip,int *list,int *ng,int *nr) {
 /** Return volumic ball (i.e. filled with tetrahedra) of point ip in tetra start.
     Results are stored under the form 4*kel + jel , kel = number of the tetra, jel = local
     index of p within kel */
-int boulevolp (pMesh mesh, int start, int ip, int * list){
-    pTetra  pt,pt1;
+int boulevolp (MMG5_pMesh mesh, int start, int ip, int * list){
+    MMG5_pTetra  pt,pt1;
     int    *adja,nump,ilist,base,cur,k,k1;
     char    j,l,i;
 
@@ -263,7 +263,7 @@ int boulevolp (pMesh mesh, int start, int ip, int * list){
         adja = &mesh->adja[4*(k-1)+1];
 
         for (l=0; l<3; l++) {
-            i  = inxt3[i];
+            i  = _MMG5_inxt3[i];
             k1 = adja[i] / 4;
             if ( !k1 )  continue;
             pt1 = &mesh->tetra[k1];
@@ -273,7 +273,7 @@ int boulevolp (pMesh mesh, int start, int ip, int * list){
                 if ( pt1->v[j] == nump )  break;
             assert(j<4);
             /* overflow */
-            if ( ilist > LMAX-3 )  return(0);
+            if ( ilist > _MMG5_LMAX-3 )  return(0);
             list[ilist] = 4*k1+j;
             ilist++;
         }
@@ -285,9 +285,9 @@ int boulevolp (pMesh mesh, int start, int ip, int * list){
 /** Define normal and tangent vectors at a non manifold point (ip in start, supported by
     face iface), enumerating its (outer)surfacic ball ; return sng = whether point is singular
     or not */
-int boulenm(pMesh mesh,int start,int ip,int iface,double n[3],double t[3]) {
-    pTetra   pt;
-    pPoint   p0,p1,ppt;
+int boulenm(MMG5_pMesh mesh,int start,int ip,int iface,double n[3],double t[3]) {
+    MMG5_pTetra   pt;
+    MMG5_pPoint   p0,p1,ppt;
     double   dd,nt[3],l0,l1;
     int      base,nump,nr,nnm,k,piv,na,nb,adj,nvstart,fstart,aux,ip0,ip1;
     int     *adja;
@@ -306,8 +306,8 @@ int boulenm(pMesh mesh,int start,int ip,int iface,double n[3],double t[3]) {
     k    = start;
 
     na   = pt->v[ip];
-    nb   = pt->v[idir[iface][inxt2[idirinv[iface][ip]]]];
-    piv  = pt->v[idir[iface][iprv2[idirinv[iface][ip]]]];
+    nb   = pt->v[_MMG5_idir[iface][_MMG5_inxt2[_MMG5_idirinv[iface][ip]]]];
+    piv  = pt->v[_MMG5_idir[iface][_MMG5_iprv2[_MMG5_idirinv[iface][ip]]]];
 
     iopp   = iface;
     fstart = 4*k+iopp;
@@ -363,24 +363,24 @@ int boulenm(pMesh mesh,int start,int ip,int iface,double n[3],double t[3]) {
 
             /* identification of edge number in tetra k */
             for (i=0; i<6; i++) {
-                ipa = iare[i][0];
-                ipb = iare[i][1];
+                ipa = _MMG5_iare[i][0];
+                ipb = _MMG5_iare[i][1];
                 if ( (pt->v[ipa] == na && pt->v[ipb] == nb) ||
                      (pt->v[ipa] == nb && pt->v[ipb] == na))  break;
             }
             assert(i<6);
 
             /* set sense of travel */
-            if ( pt->v[ ifar[i][0] ] == piv ) {
-                adj = adja[ ifar[i][0] ] / 4;
-                ipiv = ifar[i][1];
-                iopp = ifar[i][0];
+            if ( pt->v[ _MMG5_ifar[i][0] ] == piv ) {
+                adj = adja[ _MMG5_ifar[i][0] ] / 4;
+                ipiv = _MMG5_ifar[i][1];
+                iopp = _MMG5_ifar[i][0];
                 piv = pt->v[ipiv];
             }
             else {
-                adj = adja[ ifar[i][1] ] / 4;
-                ipiv = ifar[i][0];
-                iopp = ifar[i][1];
+                adj = adja[ _MMG5_ifar[i][1] ] / 4;
+                ipiv = _MMG5_ifar[i][0];
+                iopp = _MMG5_ifar[i][1];
                 piv = pt->v[ipiv];
             }
             isface = (adja[iopp] == 0);
@@ -392,7 +392,7 @@ int boulenm(pMesh mesh,int start,int ip,int iface,double n[3],double t[3]) {
     if ( (nr > 0 && nnm > 0) || nnm != 2 )  return(0);
 
     dd = n[0]*n[0] + n[1]*n[1] + n[2]*n[2];
-    if ( dd > EPSD2 ) {
+    if ( dd > _MMG5_EPSD2 ) {
         dd = 1.0 / sqrt(dd);
         n[0] *= dd;
         n[1] *= dd;
@@ -412,7 +412,7 @@ int boulenm(pMesh mesh,int start,int ip,int iface,double n[3],double t[3]) {
     l0 = sqrt(l0);
     l1 = sqrt(l1);
 
-    if ( (l0 < EPSD2) || (l1 < EPSD2) ) {
+    if ( (l0 < _MMG5_EPSD2) || (l1 < _MMG5_EPSD2) ) {
         t[0] = p1->c[0] - p0->c[0];
         t[1] = p1->c[1] - p0->c[1];
         t[2] = p1->c[2] - p0->c[2];
@@ -435,7 +435,7 @@ int boulenm(pMesh mesh,int start,int ip,int iface,double n[3],double t[3]) {
     t[2] -= dd*n[2];
 
     dd = t[0]*t[0] + t[1]*t[1] + t[2]*t[2];
-    if ( dd > EPSD2 ) {
+    if ( dd > _MMG5_EPSD2 ) {
         dd = 1.0 / sqrt(dd);
         t[0] *= dd;
         t[1] *= dd;
@@ -449,8 +449,8 @@ int boulenm(pMesh mesh,int start,int ip,int iface,double n[3],double t[3]) {
     supported in the outer boundary starting from tet start, with point ip, and face if in tetra
     volumic ball ; list[k] = 4*number of tet + index of point
     surfacic ball : list[k] = 4*number of tet + index of FACE */
-int bouleext(pMesh mesh, int start, int ip, int iface, int *listv, int *ilistv, int *lists, int*ilists){
-    pTetra pt,pt1;
+int bouleext(MMG5_pMesh mesh, int start, int ip, int iface, int *listv, int *ilistv, int *lists, int*ilists){
+    MMG5_pTetra pt,pt1;
     int base,nump,k,k1,*adja,piv,na,nb,adj,cur,nvstart,fstart,aux;
     char iopp,ipiv,i,j,l,ipa,ipb,isface;
 
@@ -463,8 +463,8 @@ int bouleext(pMesh mesh, int start, int ip, int iface, int *listv, int *ilistv, 
     k = start;
 
     na = pt->v[ip];
-    nb = pt->v[idir[iface][inxt2[idirinv[iface][ip]]]];
-    piv = pt->v[idir[iface][iprv2[idirinv[iface][ip]]]];
+    nb = pt->v[_MMG5_idir[iface][_MMG5_inxt2[_MMG5_idirinv[iface][ip]]]];
+    piv = pt->v[_MMG5_idir[iface][_MMG5_iprv2[_MMG5_idirinv[iface][ip]]]];
 
     iopp = iface;
     fstart = 4*k+iopp;
@@ -473,7 +473,7 @@ int bouleext(pMesh mesh, int start, int ip, int iface, int *listv, int *ilistv, 
         /* A boundary face has been hit : change travel edge */
         lists[(*ilists)] = 4*k+iopp;
         (*ilists)++;
-        if ( *ilists >= LMAX ) {
+        if ( *ilists >= _MMG5_LMAX ) {
             fprintf(stdout,"  ## Warning: problem in surface remesh process.");
             fprintf(stdout," Surface ball of point %d contains too many elts.\n",
                     indPt(mesh,nump));
@@ -504,24 +504,24 @@ int bouleext(pMesh mesh, int start, int ip, int iface, int *listv, int *ilistv, 
 
             /* identification of edge number in tetra k */
             for (i=0; i<6; i++) {
-                ipa = iare[i][0];
-                ipb = iare[i][1];
+                ipa = _MMG5_iare[i][0];
+                ipb = _MMG5_iare[i][1];
                 if ( (pt->v[ipa] == na && pt->v[ipb] == nb) ||
                      (pt->v[ipa] == nb && pt->v[ipb] == na))  break;
             }
             assert(i<6);
 
             /* set sense of travel */
-            if ( pt->v[ ifar[i][0] ] == piv ) {
-                adj = adja[ ifar[i][0] ] / 4;
-                ipiv = ifar[i][1];
-                iopp = ifar[i][0];
+            if ( pt->v[ _MMG5_ifar[i][0] ] == piv ) {
+                adj = adja[ _MMG5_ifar[i][0] ] / 4;
+                ipiv = _MMG5_ifar[i][1];
+                iopp = _MMG5_ifar[i][0];
                 piv = pt->v[ipiv];
             }
             else {
-                adj = adja[ ifar[i][1] ] / 4;
-                ipiv = ifar[i][0];
-                iopp = ifar[i][1];
+                adj = adja[ _MMG5_ifar[i][1] ] / 4;
+                ipiv = _MMG5_ifar[i][0];
+                iopp = _MMG5_ifar[i][1];
                 piv = pt->v[ipiv];
             }
             isface = (adja[iopp] == 0);
@@ -538,7 +538,7 @@ int bouleext(pMesh mesh, int start, int ip, int iface, int *listv, int *ilistv, 
         adja = &mesh->adja[4*(k-1)+1];
 
         for (l=0; l<3; l++) {
-            i  = inxt3[i];
+            i  = _MMG5_inxt3[i];
             k1 = adja[i]/4;
             if ( !k1 )  continue;
             pt1 = &mesh->tetra[k1];
@@ -549,7 +549,7 @@ int bouleext(pMesh mesh, int start, int ip, int iface, int *listv, int *ilistv, 
                 if ( pt1->v[j] == nump )  break;
             assert(j<4);
             /* overflow */
-            if ( *ilistv > LMAX-3 ) {
+            if ( *ilistv > _MMG5_LMAX-3 ) {
                 fprintf(stdout,"  ## Warning: problem in remesh process.");
                 fprintf(stdout," Volumic ball of point %d contains too many elts.\n",
                         indPt(mesh,nump));
@@ -570,9 +570,9 @@ int bouleext(pMesh mesh, int start, int ip, int iface, int *listv, int *ilistv, 
     start, with point ip, and face if in tetra
     volumic ball ; list[k] = 4*number of tet + index of point
     surfacic ball : list[k] = 4*number of tet + index of FACE */
-int boulesurfvolp(pMesh mesh,int start,int ip,int iface,int *listv,int *ilistv,int *lists,int*ilists) {
-    pTetra pt,pt1;
-    pxTetra pxt;
+int boulesurfvolp(MMG5_pMesh mesh,int start,int ip,int iface,int *listv,int *ilistv,int *lists,int*ilists) {
+    MMG5_pTetra  pt,pt1;
+    MMG5_pxTetra pxt;
     int base,nump,k,k1,*adja,piv,na,nb,adj,cur,nvstart,fstart,aux;
     char iopp,ipiv,i,j,l,ipa,ipb,isface;
 
@@ -585,8 +585,8 @@ int boulesurfvolp(pMesh mesh,int start,int ip,int iface,int *listv,int *ilistv,i
     k = start;
 
     na = pt->v[ip];
-    nb = pt->v[idir[iface][inxt2[idirinv[iface][ip]]]];
-    piv = pt->v[idir[iface][iprv2[idirinv[iface][ip]]]];
+    nb = pt->v[_MMG5_idir[iface][_MMG5_inxt2[_MMG5_idirinv[iface][ip]]]];
+    piv = pt->v[_MMG5_idir[iface][_MMG5_iprv2[_MMG5_idirinv[iface][ip]]]];
 
     iopp = iface;
     fstart = 4*k+iopp;
@@ -595,7 +595,7 @@ int boulesurfvolp(pMesh mesh,int start,int ip,int iface,int *listv,int *ilistv,i
         /* A boundary face has been hit : change travel edge */
         lists[(*ilists)] = 4*k+iopp;
         (*ilists)++;
-        if ( *ilists >= LMAX ) {
+        if ( *ilists >= _MMG5_LMAX ) {
             fprintf(stdout,"  ## Warning: problem in surface remesh process.");
             fprintf(stdout," Surface ball of point %d contains too many elts.\n",
                     indPt(mesh,nump));
@@ -626,24 +626,24 @@ int boulesurfvolp(pMesh mesh,int start,int ip,int iface,int *listv,int *ilistv,i
 
             /* identification of edge number in tetra k */
             for (i=0; i<6; i++) {
-                ipa = iare[i][0];
-                ipb = iare[i][1];
+                ipa = _MMG5_iare[i][0];
+                ipb = _MMG5_iare[i][1];
                 if ( (pt->v[ipa] == na && pt->v[ipb] == nb) ||
                      (pt->v[ipa] == nb && pt->v[ipb] == na))  break;
             }
             assert(i<6);
 
             /* set sense of travel */
-            if ( pt->v[ ifar[i][0] ] == piv ) {
-                adj = adja[ ifar[i][0] ] / 4;
-                ipiv = ifar[i][1];
-                iopp = ifar[i][0];
+            if ( pt->v[ _MMG5_ifar[i][0] ] == piv ) {
+                adj = adja[ _MMG5_ifar[i][0] ] / 4;
+                ipiv = _MMG5_ifar[i][1];
+                iopp = _MMG5_ifar[i][0];
                 piv = pt->v[ipiv];
             }
             else {
-                adj = adja[ ifar[i][1] ] / 4;
-                ipiv = ifar[i][0];
-                iopp = ifar[i][1];
+                adj = adja[ _MMG5_ifar[i][1] ] / 4;
+                ipiv = _MMG5_ifar[i][0];
+                iopp = _MMG5_ifar[i][1];
                 piv = pt->v[ipiv];
             }
             isface = 0;
@@ -664,7 +664,7 @@ int boulesurfvolp(pMesh mesh,int start,int ip,int iface,int *listv,int *ilistv,i
         adja = &mesh->adja[4*(k-1)+1];
 
         for (l=0; l<3; l++) {
-            i  = inxt3[i];
+            i  = _MMG5_inxt3[i];
             k1 = adja[i]/4;
             if ( !k1 )  continue;
             pt1 = &mesh->tetra[k1];
@@ -676,7 +676,7 @@ int boulesurfvolp(pMesh mesh,int start,int ip,int iface,int *listv,int *ilistv,i
             assert(j<4);
 
             /* overflow */
-            if ( *ilistv > LMAX-3 ) {
+            if ( *ilistv > _MMG5_LMAX-3 ) {
                 fprintf(stdout,"  ## Warning: problem in remesh process.");
                 fprintf(stdout," Volumic ball of point %d contains too many elts.\n",
                         indPt(mesh,nump));
@@ -694,9 +694,9 @@ int boulesurfvolp(pMesh mesh,int start,int ip,int iface,int *listv,int *ilistv,i
 }
 
 /** Get tag of edge ia in tetra start by travelling its shell until meeting a boundary face */
-inline int gettag(pMesh mesh,int start,int ia,int *tag,int *edg) {
-    pTetra        pt;
-    pxTetra       pxt;
+inline int gettag(MMG5_pMesh mesh,int start,int ia,int *tag,int *edg) {
+    MMG5_pTetra        pt;
+    MMG5_pxTetra       pxt;
     int           na,nb,*adja,adj,piv;
     unsigned char i,ipa,ipb;
 
@@ -704,16 +704,16 @@ inline int gettag(pMesh mesh,int start,int ia,int *tag,int *edg) {
     pt = &mesh->tetra[start];
     if ( !MG_EOK(pt) ) return(0);
 
-    na   = pt->v[ iare[ia][0] ];
-    nb   = pt->v[ iare[ia][1] ];
+    na   = pt->v[ _MMG5_iare[ia][0] ];
+    nb   = pt->v[ _MMG5_iare[ia][1] ];
 
     adja = &mesh->adja[4*(start-1)+1];
-    adj = adja[ifar[ia][0]] / 4;
-    piv = pt->v[ifar[ia][1]];
+    adj = adja[_MMG5_ifar[ia][0]] / 4;
+    piv = pt->v[_MMG5_ifar[ia][1]];
 
     if ( pt->xt ) {
         pxt = &mesh->xtetra[pt->xt];
-        if ( (pxt->ftag[ifar[ia][0]] & MG_BDY) || (pxt->ftag[ifar[ia][1]] & MG_BDY) ) {
+        if ( (pxt->ftag[_MMG5_ifar[ia][0]] & MG_BDY) || (pxt->ftag[_MMG5_ifar[ia][1]] & MG_BDY) ) {
             *tag = pxt->tag[ia];
             *edg = pxt->edg[ia];
             return(1);
@@ -724,15 +724,15 @@ inline int gettag(pMesh mesh,int start,int ia,int *tag,int *edg) {
         pt = &mesh->tetra[adj];
         /* identification of edge number in tetra adj */
         for (i=0; i<6; i++) {
-            ipa = iare[i][0];
-            ipb = iare[i][1];
+            ipa = _MMG5_iare[i][0];
+            ipb = _MMG5_iare[i][1];
             if ( (pt->v[ipa] == na && pt->v[ipb] == nb) ||
                  (pt->v[ipa] == nb && pt->v[ipb] == na))  break;
         }
         assert(i<6);
         if ( pt->xt ) {
             pxt = &mesh->xtetra[pt->xt];
-            if ( (pxt->ftag[ifar[i][0]] & MG_BDY) || (pxt->ftag[ifar[i][1]] & MG_BDY) ) {
+            if ( (pxt->ftag[_MMG5_ifar[i][0]] & MG_BDY) || (pxt->ftag[_MMG5_ifar[i][1]] & MG_BDY) ) {
                 *tag = pxt->tag[i];
                 *edg = pxt->edg[i];
                 return(1);
@@ -741,22 +741,22 @@ inline int gettag(pMesh mesh,int start,int ia,int *tag,int *edg) {
 
         /* set new triangle for travel */
         adja = &mesh->adja[4*(adj-1)+1];
-        if ( pt->v[ ifar[i][0] ] == piv ) {
-            adj = adja[ ifar[i][0] ] / 4;
-            piv = pt->v[ ifar[i][1] ];
+        if ( pt->v[ _MMG5_ifar[i][0] ] == piv ) {
+            adj = adja[ _MMG5_ifar[i][0] ] / 4;
+            piv = pt->v[ _MMG5_ifar[i][1] ];
         }
         else {
-            adj = adja[ ifar[i][1] ] /4;
-            piv = pt->v[ ifar[i][0] ];
+            adj = adja[ _MMG5_ifar[i][1] ] /4;
+            piv = pt->v[ _MMG5_ifar[i][0] ];
         }
     }
     return(0);
 }
 
 /** Set tag and edg of edge ia (if need be) in tetra start by travelling its shell */
-inline int settag(pMesh mesh,int start,int ia,int tag,int edg) {
-    pTetra        pt;
-    pxTetra       pxt;
+inline int settag(MMG5_pMesh mesh,int start,int ia,int tag,int edg) {
+    MMG5_pTetra        pt;
+    MMG5_pxTetra       pxt;
     int           na,nb,*adja,adj,piv;
     unsigned char i,ipa,ipb;
 
@@ -764,17 +764,17 @@ inline int settag(pMesh mesh,int start,int ia,int tag,int edg) {
     pt = &mesh->tetra[start];
     assert ( MG_EOK(pt) );
 
-    na   = pt->v[ iare[ia][0] ];
-    nb   = pt->v[ iare[ia][1] ];
+    na   = pt->v[ _MMG5_iare[ia][0] ];
+    nb   = pt->v[ _MMG5_iare[ia][1] ];
 
     adja = &mesh->adja[4*(start-1)+1];
-    adj = adja[ifar[ia][0]] / 4;
-    piv = pt->v[ifar[ia][1]];
+    adj = adja[_MMG5_ifar[ia][0]] / 4;
+    piv = pt->v[_MMG5_ifar[ia][1]];
 
     if ( pt->xt ) {
         pxt = &mesh->xtetra[pt->xt];
-        if ( (pxt->ftag[ifar[ia][0]] & MG_BDY) ||
-             (pxt->ftag[ifar[ia][1]] & MG_BDY) ) {
+        if ( (pxt->ftag[_MMG5_ifar[ia][0]] & MG_BDY) ||
+             (pxt->ftag[_MMG5_ifar[ia][1]] & MG_BDY) ) {
             pxt->tag[ia] |= tag;
             pxt->edg[ia]  = MG_MAX(pxt->edg[ia],edg);
         }
@@ -783,29 +783,29 @@ inline int settag(pMesh mesh,int start,int ia,int tag,int edg) {
         pt = &mesh->tetra[adj];
         /* identification of edge number in tetra adj */
         for (i=0; i<6; i++) {
-            ipa = iare[i][0];
-            ipb = iare[i][1];
+            ipa = _MMG5_iare[i][0];
+            ipb = _MMG5_iare[i][1];
             if ( (pt->v[ipa] == na && pt->v[ipb] == nb) ||
                  (pt->v[ipa] == nb && pt->v[ipb] == na))  break;
         }
         assert(i<6);
         if ( pt->xt ) {
             pxt = &mesh->xtetra[pt->xt];
-            if ( (pxt->ftag[ifar[i][0]] & MG_BDY) ||
-                 (pxt->ftag[ifar[i][1]] & MG_BDY) ) {
+            if ( (pxt->ftag[_MMG5_ifar[i][0]] & MG_BDY) ||
+                 (pxt->ftag[_MMG5_ifar[i][1]] & MG_BDY) ) {
                 pxt->tag[i] |= tag;
                 pxt->edg[i]  = MG_MAX(pxt->edg[i],edg);
             }
         }
         /* set new triangle for travel */
         adja = &mesh->adja[4*(adj-1)+1];
-        if ( pt->v[ ifar[i][0] ] == piv ) {
-            adj = adja[ ifar[i][0] ] / 4;
-            piv = pt->v[ ifar[i][1] ];
+        if ( pt->v[ _MMG5_ifar[i][0] ] == piv ) {
+            adj = adja[ _MMG5_ifar[i][0] ] / 4;
+            piv = pt->v[ _MMG5_ifar[i][1] ];
         }
         else {
-            adj = adja[ ifar[i][1] ] /4;
-            piv = pt->v[ ifar[i][0] ];
+            adj = adja[ _MMG5_ifar[i][1] ] /4;
+            piv = pt->v[ _MMG5_ifar[i][0] ];
         }
     }
 
@@ -815,36 +815,36 @@ inline int settag(pMesh mesh,int start,int ia,int tag,int edg) {
 
     pt = &mesh->tetra[start];
     adja = &mesh->adja[4*(start-1)+1];
-    adj = adja[ifar[ia][1]] / 4;
-    piv = pt->v[ifar[ia][0]];
+    adj = adja[_MMG5_ifar[ia][1]] / 4;
+    piv = pt->v[_MMG5_ifar[ia][0]];
 
     while ( adj && (adj != start) ) {
         pt = &mesh->tetra[adj];
         /* identification of edge number in tetra adj */
         for (i=0; i<6; i++) {
-            ipa = iare[i][0];
-            ipb = iare[i][1];
+            ipa = _MMG5_iare[i][0];
+            ipb = _MMG5_iare[i][1];
             if ( (pt->v[ipa] == na && pt->v[ipb] == nb) ||
                  (pt->v[ipa] == nb && pt->v[ipb] == na))  break;
         }
         assert(i<6);
         if ( pt->xt ) {
             pxt = &mesh->xtetra[pt->xt];
-            if ( (pxt->ftag[ifar[i][0]] & MG_BDY) ||
-                 (pxt->ftag[ifar[i][1]] & MG_BDY) ) {
+            if ( (pxt->ftag[_MMG5_ifar[i][0]] & MG_BDY) ||
+                 (pxt->ftag[_MMG5_ifar[i][1]] & MG_BDY) ) {
                 pxt->tag[i] |= tag;
                 pxt->edg[i]  = MG_MAX(pxt->edg[i],edg);
             }
         }
         /* set new triangle for travel */
         adja = &mesh->adja[4*(adj-1)+1];
-        if ( pt->v[ ifar[i][0] ] == piv ) {
-            adj = adja[ ifar[i][0] ] / 4;
-            piv = pt->v[ ifar[i][1] ];
+        if ( pt->v[ _MMG5_ifar[i][0] ] == piv ) {
+            adj = adja[ _MMG5_ifar[i][0] ] / 4;
+            piv = pt->v[ _MMG5_ifar[i][1] ];
         }
         else {
-            adj = adja[ ifar[i][1] ] /4;
-            piv = pt->v[ ifar[i][0] ];
+            adj = adja[ _MMG5_ifar[i][1] ] /4;
+            piv = pt->v[ _MMG5_ifar[i][0] ];
         }
     }
     return(1);
@@ -853,8 +853,8 @@ inline int settag(pMesh mesh,int start,int ia,int tag,int edg) {
 /** Find all tets sharing edge ia of tetra start
     return 2*ilist if shell is closed, 2*ilist +1 otherwise
     return 0 if one of the tet of the shell is required */
-int coquil(pMesh mesh,int start,int ia,int * list) {
-    pTetra  pt;
+int coquil(MMG5_pMesh mesh,int start,int ia,int * list) {
+    MMG5_pTetra  pt;
     int     ilist,*adja,piv,adj,na,nb,ipa,ipb;
     char    i;
 
@@ -862,23 +862,23 @@ int coquil(pMesh mesh,int start,int ia,int * list) {
     pt = &mesh->tetra[start];
     assert ( MG_EOK(pt) );
 
-    na   = pt->v[ iare[ia][0] ];
-    nb   = pt->v[ iare[ia][1] ];
+    na   = pt->v[ _MMG5_iare[ia][0] ];
+    nb   = pt->v[ _MMG5_iare[ia][1] ];
     ilist = 0;
     list[ilist] = 6*start+ia;
     ilist++;
 
     adja = &mesh->adja[4*(start-1)+1];
-    adj = adja[ifar[ia][0]] / 4; // start travelling by face (ia,0)
-    piv = pt->v[ifar[ia][1]];
+    adj = adja[_MMG5_ifar[ia][0]] / 4; // start travelling by face (ia,0)
+    piv = pt->v[_MMG5_ifar[ia][1]];
 
     while ( adj && (adj != start) ) {
         pt = &mesh->tetra[adj];
         if ( pt->tag & MG_REQ )  return(0);
         /* identification of edge number in tetra adj */
         for (i=0; i<6; i++) {
-            ipa = iare[i][0];
-            ipb = iare[i][1];
+            ipa = _MMG5_iare[i][0];
+            ipb = _MMG5_iare[i][1];
             if ( (pt->v[ipa] == na && pt->v[ipb] == nb) ||
                  (pt->v[ipa] == nb && pt->v[ipb] == na))  break;
         }
@@ -886,7 +886,7 @@ int coquil(pMesh mesh,int start,int ia,int * list) {
         list[ilist] = 6*adj +i;
         ilist++;
         /* overflow */
-        if ( ilist > LMAX-3 ) {
+        if ( ilist > _MMG5_LMAX-3 ) {
             fprintf(stdout,"  ## Warning: problem in remesh process.");
             fprintf(stdout," Coquil of edge %d-%d contains too many elts.\n",
                     indPt(mesh,na),indPt(mesh,nb));
@@ -897,14 +897,14 @@ int coquil(pMesh mesh,int start,int ia,int * list) {
 
         /* set new triangle for travel */
         adja = &mesh->adja[4*(adj-1)+1];
-        if ( pt->v[ ifar[i][0] ] == piv ) {
-            adj = adja[ ifar[i][0] ] / 4;
-            piv = pt->v[ ifar[i][1] ];
+        if ( pt->v[ _MMG5_ifar[i][0] ] == piv ) {
+            adj = adja[ _MMG5_ifar[i][0] ] / 4;
+            piv = pt->v[ _MMG5_ifar[i][1] ];
         }
         else {
-            assert(pt->v[ ifar[i][1] ] == piv );
-            adj = adja[ ifar[i][1] ] /4;
-            piv = pt->v[ ifar[i][0] ];
+            assert(pt->v[ _MMG5_ifar[i][1] ] == piv );
+            adj = adja[ _MMG5_ifar[i][1] ] /4;
+            piv = pt->v[ _MMG5_ifar[i][0] ];
         }
     }
 
@@ -921,7 +921,7 @@ int coquil(pMesh mesh,int start,int ia,int * list) {
     list[ilist] = 6*adj + i;
     ilist++;
     /* overflow */
-    if ( ilist > LMAX-3 ) {
+    if ( ilist > _MMG5_LMAX-3 ) {
         fprintf(stdout,"  ## Warning: problem in remesh process.");
         fprintf(stdout," Coquil of edge %d-%d contains too many elts.\n",
                 indPt(mesh,na),indPt(mesh,nb));
@@ -931,13 +931,13 @@ int coquil(pMesh mesh,int start,int ia,int * list) {
     }
 
     adja = &mesh->adja[4*(adj-1)+1];
-    if ( pt->v[ ifar[i][0] ] == piv ) {
-        adj = adja[ ifar[i][0] ] / 4;
-        piv = pt->v[ ifar[i][1] ];
+    if ( pt->v[ _MMG5_ifar[i][0] ] == piv ) {
+        adj = adja[ _MMG5_ifar[i][0] ] / 4;
+        piv = pt->v[ _MMG5_ifar[i][1] ];
     }
     else {
-        adj = adja[ ifar[i][1] ] /4;
-        piv = pt->v[ ifar[i][0] ];
+        adj = adja[ _MMG5_ifar[i][1] ] /4;
+        piv = pt->v[ _MMG5_ifar[i][0] ];
     }
 
     while ( adj ) {
@@ -945,8 +945,8 @@ int coquil(pMesh mesh,int start,int ia,int * list) {
         if ( pt->tag & MG_REQ )  return(0);
         /* identification of edge number in tetra adj */
         for (i=0; i<6; i++) {
-            ipa = iare[i][0];
-            ipb = iare[i][1];
+            ipa = _MMG5_iare[i][0];
+            ipb = _MMG5_iare[i][1];
             if ( (pt->v[ipa] == na && pt->v[ipb] == nb) ||
                  (pt->v[ipa] == nb && pt->v[ipb] == na))  break;
         }
@@ -954,7 +954,7 @@ int coquil(pMesh mesh,int start,int ia,int * list) {
         list[ilist] = 6*adj +i;
         ilist++;
         /* overflow */
-        if ( ilist > LMAX-2 ) {
+        if ( ilist > _MMG5_LMAX-2 ) {
             fprintf(stdout,"  ## Warning: problem in surface remesh process.");
             fprintf(stdout," Coquil of edge %d-%d contains too many elts.\n",
                     indPt(mesh,na),indPt(mesh,nb));
@@ -965,13 +965,13 @@ int coquil(pMesh mesh,int start,int ia,int * list) {
 
         /* set new triangle for travel */
         adja = &mesh->adja[4*(adj-1)+1];
-        if ( pt->v[ ifar[i][0] ] == piv ) {
-            adj = adja[ ifar[i][0] ] / 4;
-            piv = pt->v[ ifar[i][1] ];
+        if ( pt->v[ _MMG5_ifar[i][0] ] == piv ) {
+            adj = adja[ _MMG5_ifar[i][0] ] / 4;
+            piv = pt->v[ _MMG5_ifar[i][1] ];
         }
         else {
-            adj = adja[ ifar[i][1] ] /4;
-            piv = pt->v[ ifar[i][0] ];
+            adj = adja[ _MMG5_ifar[i][1] ] /4;
+            piv = pt->v[ _MMG5_ifar[i][0] ];
         }
     }
     assert(!adj);
@@ -979,18 +979,18 @@ int coquil(pMesh mesh,int start,int ia,int * list) {
 }
 
 /** Identify whether edge ia in start is a boundary edge by unfolding its shell */
-int srcbdy(pMesh mesh,int start,int ia) {
-    pTetra      pt;
-    pxTetra     pxt;
+int srcbdy(MMG5_pMesh mesh,int start,int ia) {
+    MMG5_pTetra      pt;
+    MMG5_pxTetra     pxt;
     int         na,nb,adj,piv,*adja;
     char        ipa,ipb,iadj,i;
 
     pt = &mesh->tetra[start];
-    na = pt->v[iare[ia][0]];
-    nb = pt->v[iare[ia][1]];
+    na = pt->v[_MMG5_iare[ia][0]];
+    nb = pt->v[_MMG5_iare[ia][1]];
 
     adja = &mesh->adja[4*(start-1)+1];
-    iadj = ifar[ia][0];
+    iadj = _MMG5_ifar[ia][0];
 
     if(pt->xt){
         pxt = &mesh->xtetra[pt->xt];
@@ -999,15 +999,15 @@ int srcbdy(pMesh mesh,int start,int ia) {
     }
 
     adj = adja[iadj] / 4;
-    piv = pt->v[ifar[ia][1]];
+    piv = pt->v[_MMG5_ifar[ia][1]];
 
     while( adj && ( adj != start ) ) {
         pt = &mesh->tetra[adj];
 
         /* identification of edge number in tetra adj */
         for(i=0; i<6; i++) {
-            ipa = iare[i][0];
-            ipb = iare[i][1];
+            ipa = _MMG5_iare[i][0];
+            ipb = _MMG5_iare[i][1];
             if( ( pt->v[ipa] == na && pt->v[ipb] == nb ) || ( pt->v[ipa] == nb && pt->v[ipb] == na ))
                 break;
 
@@ -1016,15 +1016,15 @@ int srcbdy(pMesh mesh,int start,int ia) {
 
         /* set new triangle for travel */
         adja = &mesh->adja[4*(adj-1)+1];
-        if ( pt->v[ ifar[i][0] ] == piv ) {
-            iadj = ifar[i][0];
+        if ( pt->v[ _MMG5_ifar[i][0] ] == piv ) {
+            iadj = _MMG5_ifar[i][0];
             adj = adja[ iadj ] / 4;
-            piv = pt->v[ ifar[i][1] ];
+            piv = pt->v[ _MMG5_ifar[i][1] ];
         }
         else {
-            iadj = ifar[i][1];
+            iadj = _MMG5_ifar[i][1];
             adj = adja[ iadj ] /4;
-            piv = pt->v[ ifar[i][0] ];
+            piv = pt->v[ _MMG5_ifar[i][0] ];
         }
 
         if(pt->xt){
@@ -1038,9 +1038,9 @@ int srcbdy(pMesh mesh,int start,int ia) {
 }
 
 /** print an error message if coquilFace detect a boundary topology problem */
-static inline void errorMessage(pMesh mesh, int k1, int k2) {
-    pPoint ppt;
-    pTetra pt;
+static inline void errorMessage(MMG5_pMesh mesh, int k1, int k2) {
+    MMG5_pPoint ppt;
+    MMG5_pTetra pt;
     int    np, ne, k, kel1, kel2;
 
     np = ne = kel1 = kel2 = 0;
@@ -1084,16 +1084,16 @@ static inline void errorMessage(pMesh mesh, int k1, int k2) {
 /** Find all tets sharing edge ia of tetra start, and stores boundary faces when met
     it1 & it2 = 6*iel + iface, iel = index of tetra, iface = index of face in tetra
     return 2*ilist if shell is closed, 2*ilist +1 otherwise */
-int coquilface(pMesh mesh,int start,int ia,int *list,int *it1,int *it2) {
-    pTetra   pt;
-    pxTetra  pxt;
+int coquilface(MMG5_pMesh mesh,int start,int ia,int *list,int *it1,int *it2) {
+    MMG5_pTetra   pt;
+    MMG5_pxTetra  pxt;
     int     *adja,piv,adj,na,nb,ipa,ipb,ilist,pradj;
     char     i,iface,isbdy;
 
     pt = &mesh->tetra[start];
 
-    na   = pt->v[ iare[ia][0] ];
-    nb   = pt->v[ iare[ia][1] ];
+    na   = pt->v[ _MMG5_iare[ia][0] ];
+    nb   = pt->v[ _MMG5_iare[ia][1] ];
 
     ilist = 0;
     list[ilist] = 6*start+ia;
@@ -1103,12 +1103,12 @@ int coquilface(pMesh mesh,int start,int ia,int *list,int *it1,int *it2) {
     *it2 = 0;
 
     adja = &mesh->adja[4*(start-1)+1];
-    adj = adja[ifar[ia][0]] / 4;
-    piv = pt->v[ifar[ia][1]];
+    adj = adja[_MMG5_ifar[ia][0]] / 4;
+    piv = pt->v[_MMG5_ifar[ia][1]];
 
     pxt = &mesh->xtetra[pt->xt];
 
-    iface = ifar[ia][1];
+    iface = _MMG5_ifar[ia][1];
     isbdy = pxt->ftag[iface];
     if ( isbdy )
         *it1 = 4*start + iface;
@@ -1121,8 +1121,8 @@ int coquilface(pMesh mesh,int start,int ia,int *list,int *it1,int *it2) {
 
         /* identification of edge number in tetra adj */
         for (i=0; i<6; i++) {
-            ipa = iare[i][0];
-            ipb = iare[i][1];
+            ipa = _MMG5_iare[i][0];
+            ipb = _MMG5_iare[i][1];
             if ( (pt->v[ipa] == na && pt->v[ipb] == nb) ||
                  (pt->v[ipa] == nb && pt->v[ipb] == na))  break;
         }
@@ -1130,7 +1130,7 @@ int coquilface(pMesh mesh,int start,int ia,int *list,int *it1,int *it2) {
         list[ilist] = 6*adj +i;
         ilist++;
         /* overflow */
-        if ( ilist > LMAX-2 ) {
+        if ( ilist > _MMG5_LMAX-2 ) {
             fprintf(stdout,"  ## Warning: problem in surface remesh process.");
             fprintf(stdout," Coquil of edge %d-%d contains too many elts.\n",
                     indPt(mesh,na),indPt(mesh,nb));
@@ -1142,16 +1142,16 @@ int coquilface(pMesh mesh,int start,int ia,int *list,int *it1,int *it2) {
         /* set new tetra for travel */
         pradj = adj;
         adja = &mesh->adja[4*(adj-1)+1];
-        if ( pt->v[ ifar[i][0] ] == piv ) {
-            adj = adja[ ifar[i][0] ] / 4;
-            piv = pt->v[ ifar[i][1] ];
-            iface = ifar[i][1];
+        if ( pt->v[ _MMG5_ifar[i][0] ] == piv ) {
+            adj = adja[ _MMG5_ifar[i][0] ] / 4;
+            piv = pt->v[ _MMG5_ifar[i][1] ];
+            iface = _MMG5_ifar[i][1];
         }
         else {
-            assert(pt->v[ ifar[i][1] ] == piv );
-            adj = adja[ ifar[i][1] ] /4;
-            piv = pt->v[ ifar[i][0] ];
-            iface = ifar[i][0];
+            assert(pt->v[ _MMG5_ifar[i][1] ] == piv );
+            adj = adja[ _MMG5_ifar[i][1] ] /4;
+            piv = pt->v[ _MMG5_ifar[i][0] ];
+            iface = _MMG5_ifar[i][0];
         }
         isbdy = pt->xt ? pxt->ftag[iface] : 0;
 
@@ -1189,7 +1189,7 @@ int coquilface(pMesh mesh,int start,int ia,int *list,int *it1,int *it2) {
     /* Start back everything from this tetra adj */
     pradj = adj;
     /* overflow */
-    if ( ilist > LMAX-2 ) {
+    if ( ilist > _MMG5_LMAX-2 ) {
         fprintf(stdout,"  ## Warning: problem in surface remesh process.");
         fprintf(stdout," Coquil of edge %d-%d contains too many elts.\n",
                 indPt(mesh,na),indPt(mesh,nb));
@@ -1203,11 +1203,11 @@ int coquilface(pMesh mesh,int start,int ia,int *list,int *it1,int *it2) {
         pxt = &mesh->xtetra[pt->xt];
 
     adja = &mesh->adja[4*(adj-1)+1];
-    if ( pt->v[ ifar[i][0] ] == piv ) {
-        iface = ifar[i][1];
+    if ( pt->v[ _MMG5_ifar[i][0] ] == piv ) {
+        iface = _MMG5_ifar[i][1];
     }
     else {
-        iface = ifar[i][0];
+        iface = _MMG5_ifar[i][0];
     }
     isbdy = pt->xt ? pxt->ftag[iface] : 0;
     if ( isbdy ) {
@@ -1219,8 +1219,8 @@ int coquilface(pMesh mesh,int start,int ia,int *list,int *it1,int *it2) {
 
         /* identification of edge number in tetra adj */
         for (i=0; i<6; i++) {
-            ipa = iare[i][0];
-            ipb = iare[i][1];
+            ipa = _MMG5_iare[i][0];
+            ipb = _MMG5_iare[i][1];
             if ( (pt->v[ipa] == na && pt->v[ipb] == nb) ||
                  (pt->v[ipa] == nb && pt->v[ipb] == na) )  break;
         }
@@ -1228,7 +1228,7 @@ int coquilface(pMesh mesh,int start,int ia,int *list,int *it1,int *it2) {
         list[ilist] = 6*adj +i;
         ilist++;
         /* overflow */
-        if ( ilist > LMAX-2 ) {
+        if ( ilist > _MMG5_LMAX-2 ) {
             fprintf(stdout,"  ## Warning: problem in surface remesh process.");
             fprintf(stdout," Coquil of edge %d-%d contains too many elts.\n",
                     indPt(mesh,na),indPt(mesh,nb));
@@ -1240,15 +1240,15 @@ int coquilface(pMesh mesh,int start,int ia,int *list,int *it1,int *it2) {
         /* set new tetra for travel */
         pradj = adj;
         adja = &mesh->adja[4*(adj-1)+1];
-        if ( pt->v[ ifar[i][0] ] == piv ) {
-            adj = adja[ ifar[i][0] ] / 4;
-            piv = pt->v[ ifar[i][1] ];
-            iface = ifar[i][0];
+        if ( pt->v[ _MMG5_ifar[i][0] ] == piv ) {
+            adj = adja[ _MMG5_ifar[i][0] ] / 4;
+            piv = pt->v[ _MMG5_ifar[i][1] ];
+            iface = _MMG5_ifar[i][0];
         }
         else {
-            adj = adja[ ifar[i][1] ] /4;
-            piv = pt->v[ ifar[i][0] ];
-            iface = ifar[i][1];
+            adj = adja[ _MMG5_ifar[i][1] ] /4;
+            piv = pt->v[ _MMG5_ifar[i][0] ];
+            iface = _MMG5_ifar[i][1];
         }
     }
 

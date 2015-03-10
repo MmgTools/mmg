@@ -39,11 +39,11 @@
 #include <math.h>
 
 /* seeking 1.e-05 accuracy */
-#define  EPSD           1.e-15
-#define  EPSD2          1.e-10
-#define  EPS6           5.e-06
-#define  EPS            1.e-06
-#define  EPSX2          2.e-06
+#define  _MG_EPSD           1.e-15
+#define  _MG_EPSD2          1.e-10
+#define  _MG_EPS6           5.e-06
+#define  _MG_EPS            1.e-06
+#define  _MG_EPSX2          2.e-06
 #define  MAXTOU         50
 
 /**
@@ -51,9 +51,9 @@
  * Check if numbers \a x and \a y are equal.
  */
 #define egal(x,y)   (                                                   \
-        (  ((x) == 0.0f) ? (fabs(y) < EPS) :                            \
-           ( ((y) == 0.0f) ? (fabs(x) < EPS) :                          \
-             (fabs((x)-(y)) / (fabs(x) + fabs(y)) < EPSX2) )  ) )
+        (  ((x) == 0.0f) ? (fabs(y) < _MG_EPS) :                            \
+           ( ((y) == 0.0f) ? (fabs(x) < _MG_EPS) :                          \
+             (fabs((x)-(y)) / (fabs(x) + fabs(y)) < _MG_EPSX2) )  ) )
 
 /**
  * \brief Identity matrix.
@@ -102,7 +102,7 @@ static int newton3(double p[4],double x[3]) {
 
     /* solve 2nd order eqn */
     delta = db*db - 4.0*da*c;
-    epsd  = db*db*EPSD2;
+    epsd  = db*db*_MG_EPSD2;
 
     /* inflexion (f'(x)=0, x=-b/2a) */
     x1 = -db / 6.0f;
@@ -116,7 +116,7 @@ static int newton3(double p[4],double x[3]) {
         fdx0 = d + dx0*(c+dx0*(b+dx0));
         fdx1 = d + dx1*(c+dx1*(b+dx1));
 
-        if ( fabs(fdx0) < EPSD ) {
+        if ( fabs(fdx0) < _MG_EPSD ) {
             /* dx0: double root, compute single root */
             n = 2;
             x[0] = dx0;
@@ -124,7 +124,7 @@ static int newton3(double p[4],double x[3]) {
             x[2] = -b - 2.0*dx0;
             /* check if P(x) = 0 */
             fx = d + x[2]*(c+x[2]*(b+x[2]));
-            if ( fabs(fx) > EPSD2 ) {
+            if ( fabs(fx) > _MG_EPSD2 ) {
 #ifdef DEBUG
                 fprintf(stderr,"  ## ERR 9100, newton3: fx= %E\n",fx);
 #endif
@@ -132,7 +132,7 @@ static int newton3(double p[4],double x[3]) {
             }
             return(n);
         }
-        else if ( fabs(fdx1) < EPSD ) {
+        else if ( fabs(fdx1) < _MG_EPSD ) {
             /* dx1: double root, compute single root */
             n = 2;
             x[0] = dx1;
@@ -140,7 +140,7 @@ static int newton3(double p[4],double x[3]) {
             x[2] = -b - 2.0*dx1;
             /* check if P(x) = 0 */
             fx = d + x[2]*(c+x[2]*(b+x[2]));
-            if ( fabs(fx) > EPSD2 ) {
+            if ( fabs(fx) > _MG_EPSD2 ) {
 #ifdef DEBUG
                 fprintf(stderr,"  ## ERR 9100, newton3: fx= %E\n",fx);
 #endif
@@ -158,7 +158,7 @@ static int newton3(double p[4],double x[3]) {
         x[2] = x1;
         /* check if P(x) = 0 */
         fx = d + x[0]*(c+x[0]*(b+x[0]));
-        if ( fabs(fx) > EPSD2 ) {
+        if ( fabs(fx) > _MG_EPSD2 ) {
 #ifdef DEBUG
             fprintf(stderr,"  ## ERR 9100, newton3: fx= %E\n",fx);
 #endif
@@ -183,7 +183,7 @@ static int newton3(double p[4],double x[3]) {
     do {
         x2 = x1 - fx / dfx;
         fx = d + x2*(c+x2*(b+x2));
-        if ( fabs(fx) < EPSD ) {
+        if ( fabs(fx) < _MG_EPSD ) {
             x[0] = x2;
             break;
         }
@@ -193,7 +193,7 @@ static int newton3(double p[4],double x[3]) {
         dxx = fabs((x2-x1) / x2);
         if ( dxx < 1.0e-10 ) {
             x[0] = x2;
-            if ( fabs(fx) > EPSD2 ) {
+            if ( fabs(fx) > _MG_EPSD2 ) {
                 fprintf(stderr,"  ## ERR 9102, newton3, no root found (fx %E).\n",fx);
                 return(0);
             }
@@ -207,7 +207,7 @@ static int newton3(double p[4],double x[3]) {
     if ( it == MAXTOU ) {
         x[0] = x1;
         fx   = d + x1*(c+(x1*(b+x1)));
-        if ( fabs(fx) > EPSD2 ) {
+        if ( fabs(fx) > _MG_EPSD2 ) {
             fprintf(stderr,"  ## ERR 9102, newton3, no root found (fx %E).\n",fx);
             return(0);
         }
@@ -231,12 +231,12 @@ static int newton3(double p[4],double x[3]) {
 #ifdef DEBUG
     /* check for root accuracy */
     fx = d + x[1]*(c+x[1]*(b+x[1]));
-    if ( fabs(fx) > EPSD2 ) {
+    if ( fabs(fx) > _MG_EPSD2 ) {
         fprintf(stderr,"  ## ERR 9104, newton3: fx= %E  x= %E\n",fx,x[1]);
         return(0);
     }
     fx = d + x[2]*(c+x[2]*(b+x[2]));
-    if ( fabs(fx) > EPSD2 ) {
+    if ( fabs(fx) > _MG_EPSD2 ) {
         fprintf(stderr,"  ## ERR 9104, newton3: fx= %E  x= %E\n",fx,x[2]);
         return(0);
     }
@@ -274,7 +274,7 @@ int eigenv(int symmat,double *mat,double lambda[3],double v[3][3]) {
             if ( valm > maxm )  maxm = valm;
         }
         /* single float accuracy */
-        if ( maxm < EPS6 )  return(1);
+        if ( maxm < _MG_EPS6 )  return(1);
 
         /* normalize matrix */
         dd  = 1.0 / maxm;
@@ -291,7 +291,7 @@ int eigenv(int symmat,double *mat,double lambda[3],double v[3][3]) {
         if ( valm > maxd )  maxd = valm;
         valm = fabs(a23);
         if ( valm > maxd )  maxd = valm;
-        if ( maxd < EPSD )  return(1);
+        if ( maxd < _MG_EPSD )  return(1);
 
         a21  = a12;
         a31  = a13;
@@ -318,7 +318,7 @@ int eigenv(int symmat,double *mat,double lambda[3],double v[3][3]) {
             valm = fabs(mat[k]);
             if ( valm > maxm )  maxm = valm;
         }
-        if ( maxm < EPS6 )  return(1);
+        if ( maxm < _MG_EPS6 )  return(1);
 
         /* normalize matrix */
         dd  = 1.0 / maxm;
@@ -344,7 +344,7 @@ int eigenv(int symmat,double *mat,double lambda[3],double v[3][3]) {
         if ( valm > maxd )  maxd = valm;
         valm = fabs(a32);
         if ( valm > maxd )  maxd = valm;
-        if ( maxd < EPSD )  return(1);
+        if ( maxd < _MG_EPSD )  return(1);
 
         /* build characteristic polynomial
            P(X) = X^3 - trace X^2 + (somme des mineurs)X - det = 0 */
@@ -592,7 +592,7 @@ int eigen2(double *mm,double *lambda,double vp[2][2]) {
     xn = fabs(m[0]);
     if ( fabs(m[1]) > xn )  xn = fabs(m[1]);
     if ( fabs(m[2]) > xn )  xn = fabs(m[2]);
-    if ( xn < EPSD2 ) {
+    if ( xn < _MG_EPSD2 ) {
         lambda[0] = lambda[1] = 0.0;
         vp[0][0] = 1.0;
         vp[0][1] = 0.0;
@@ -621,7 +621,7 @@ int eigen2(double *mm,double *lambda,double vp[2][2]) {
     }
     ddeltb = sqrt(ddeltb);
 
-    if ( fabs(a1) < EPS ) {
+    if ( fabs(a1) < _MG_EPS ) {
         rr1 = 0.5 * sqrt(ddeltb);
         rr2 = -rr1;
     }
@@ -645,7 +645,7 @@ vect:
 
     /* eigenvectors */
     a1 = m[0] - rr1;
-    if ( fabs(a1)+fabs(m[1]) < EPS ) {
+    if ( fabs(a1)+fabs(m[1]) < _MG_EPS ) {
         if (fabs(lambda[1]) < fabs(lambda[0]) ) {
             ux = 1.0;
             uy = 0.0;

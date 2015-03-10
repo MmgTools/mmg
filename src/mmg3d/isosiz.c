@@ -44,14 +44,14 @@ extern char   ddb;
 
 
 /** Define isotropic size at regular point nump, whose surfacic ball is provided */
-static double defsizreg(pMesh mesh,pSol met,int nump,int *lists,int ilists, double hausd) {
-    pTetra       pt;
-    pxTetra      pxt;
-    pPoint       p0,p1;
+static double defsizreg(MMG5_pMesh mesh,MMG5_pSol met,int nump,int *lists,int ilists, double hausd) {
+    MMG5_pTetra       pt;
+    MMG5_pxTetra      pxt;
+    MMG5_pPoint       p0,p1;
     Tria         tt;
-    Bezier       b;
+    _MMG5_Bezier       b;
     double       ux,uy,uz,det2d,h,isqhmin,isqhmax,ll,lmin,lmax,hnm,s;
-    double       *n,*t,r[3][3],lispoi[3*LMAX+1],intm[3],b0[3],b1[3],c[3],tAA[6],tAb[3],d[3];
+    double       *n,*t,r[3][3],lispoi[3*_MMG5_LMAX+1],intm[3],b0[3],b1[3],c[3],tAA[6],tAb[3],d[3];
     double       kappa[2],vp[2][2];
     int          k,na,nb,ntempa,ntempb,iel,ip0;
     char         iface,i,j,i0;
@@ -80,11 +80,11 @@ static double defsizreg(pMesh mesh,pSol met,int nump,int *lists,int ilists, doub
 
     na = nb = 0;
     for (i=0; i<3; i++) {
-        if ( pt->v[idir[iface][i]] != nump ) {
+        if ( pt->v[_MMG5_idir[iface][i]] != nump ) {
             if ( !na )
-                na = pt->v[idir[iface][i]];
+                na = pt->v[_MMG5_idir[iface][i]];
             else
-                nb = pt->v[idir[iface][i]];
+                nb = pt->v[_MMG5_idir[iface][i]];
         }
     }
 
@@ -94,11 +94,11 @@ static double defsizreg(pMesh mesh,pSol met,int nump,int *lists,int ilists, doub
         pt    = &mesh->tetra[iel];
         ntempa = ntempb = 0;
         for (i=0; i<3; i++) {
-            if ( pt->v[idir[iface][i]] != nump ) {
+            if ( pt->v[_MMG5_idir[iface][i]] != nump ) {
                 if ( !ntempa )
-                    ntempa = pt->v[idir[iface][i]];
+                    ntempa = pt->v[_MMG5_idir[iface][i]];
                 else
-                    ntempb = pt->v[idir[iface][i]];
+                    ntempb = pt->v[_MMG5_idir[iface][i]];
             }
         }
         if ( ntempa == na )
@@ -133,11 +133,11 @@ static double defsizreg(pMesh mesh,pSol met,int nump,int *lists,int ilists, doub
     pt    = &mesh->tetra[iel];
     ntempa = ntempb = 0;
     for (i=0; i<3; i++) {
-        if ( pt->v[idir[iface][i]] != nump ) {
+        if ( pt->v[_MMG5_idir[iface][i]] != nump ) {
             if ( !ntempa )
-                ntempa = pt->v[idir[iface][i]];
+                ntempa = pt->v[_MMG5_idir[iface][i]];
             else
-                ntempb = pt->v[idir[iface][i]];
+                ntempb = pt->v[_MMG5_idir[iface][i]];
         }
     }
     if ( ntempa == na )
@@ -362,7 +362,7 @@ static double defsizreg(pMesh mesh,pSol met,int nump,int *lists,int ilists, doub
         iface = lists[k] % 4;
 
         for (j=0; j<3; j++) {
-            i0  = idir[iface][j];
+            i0  = _MMG5_idir[iface][j];
             ip0 = pt->v[i0];
             p1  = &mesh->point[ip0];
             if( !(p1->tag & MG_NOM) || MG_SIN(p1->tag) ) continue;
@@ -387,13 +387,13 @@ static double defsizreg(pMesh mesh,pSol met,int nump,int *lists,int ilists, doub
 /** Define isotropic size map at all boundary vertices of the mesh,
     associated with geometric approx, and prescribe hmax at the internal vertices
     Field h of Point is used, to store the prescribed size (not inverse, squared,...) */
-int defsiz_iso(pMesh mesh,pSol met) {
-    pTetra    pt;
-    pxTetra   pxt;
-    pPoint    p0,p1;
+int defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
+    MMG5_pTetra    pt;
+    MMG5_pxTetra   pxt;
+    MMG5_pPoint    p0,p1;
     double    hp,v[3],b0[3],b1[3],b0p0[3],b1b0[3],p1b1[3],hausd;
     double    secder0[3],secder1[3],kappa,tau[3],gammasec[3],ntau2,intau,ps,lm,*n;
-    int       lists[LMAX+2],listv[LMAX+2],ilists,ilistv,k,ip0,ip1,l;
+    int       lists[_MMG5_LMAX+2],listv[_MMG5_LMAX+2],ilists,ilistv,k,ip0,ip1,l;
     char      i,j,ia,ised,i0,i1;
     pPar      par;
 
@@ -408,8 +408,8 @@ int defsiz_iso(pMesh mesh,pSol met) {
         met->npmax = mesh->npmax;
         met->size  = 1;
         met->dim   = 3;
-        ADD_MEM(mesh,(met->npmax+1)*sizeof(double),"solution",return(0));
-        SAFE_MALLOC(met->m,(mesh->npmax+1),double);
+        _MMG5_ADD_MEM(mesh,(met->npmax+1)*sizeof(double),"solution",return(0));
+        _MMG5_SAFE_MALLOC(met->m,(mesh->npmax+1),double);
 
         /* init constant size */
         for (k=1; k<=mesh->np; k++)
@@ -439,7 +439,7 @@ int defsiz_iso(pMesh mesh,pSol met) {
             }
 
             for (j=0; j<3; j++) {
-                i0  = idir[i][j];
+                i0  = _MMG5_idir[i][j];
                 ip0 = pt->v[i0];
                 p0  = &mesh->point[ip0];
 
@@ -474,9 +474,9 @@ int defsiz_iso(pMesh mesh,pSol met) {
             }
 
             for (j=0; j<3; j++) {
-                ia = iarf[i][j];
-                i0 = iare[ia][0];
-                i1 = iare[ia][1];
+                ia = _MMG5_iarf[i][j];
+                i0 = _MMG5_iare[ia][0];
+                i1 = _MMG5_iare[ia][1];
                 ip0 = pt->v[i0];
                 ip1 = pt->v[i1];
                 p0  = &mesh->point[ip0];
@@ -485,7 +485,7 @@ int defsiz_iso(pMesh mesh,pSol met) {
 
                 ised = MG_EDG(pxt->tag[ia]) || ( pxt->tag[ia] & MG_NOM );
 
-                BezierEdge(mesh,ip0,ip1,b0,b1,ised,v);
+                _MMG5_BezierEdge(mesh,ip0,ip1,b0,b1,ised,v);
 
                 b0p0[0] = b0[0] - p0->c[0];
                 b0p0[1] = b0[1] - p0->c[1];
@@ -509,19 +509,19 @@ int defsiz_iso(pMesh mesh,pSol met) {
 
                 kappa = 0.0;
                 for (l=0; l<4; l++) {
-                    tau[0] = 3.0*(1.0-ATHIRD*l)*(1.0-ATHIRD*l)*b0p0[0] + 6.0*ATHIRD*l*(1.0-ATHIRD*l)*b1b0[0]\
-                        + 3.0*ATHIRD*l*ATHIRD*l*p1b1[0];
-                    tau[1] = 3.0*(1.0-ATHIRD*l)*(1.0-ATHIRD*l)*b0p0[1] + 6.0*ATHIRD*l*(1.0-ATHIRD*l)*b1b0[1]\
-                        + 3.0*ATHIRD*l*ATHIRD*l*p1b1[1];
-                    tau[2] = 3.0*(1.0-ATHIRD*l)*(1.0-ATHIRD*l)*b0p0[2] + 6.0*ATHIRD*l*(1.0-ATHIRD*l)*b1b0[2]\
-                        + 3.0*ATHIRD*l*ATHIRD*l*p1b1[2];
+                    tau[0] = 3.0*(1.0-_MMG5_ATHIRD*l)*(1.0-_MMG5_ATHIRD*l)*b0p0[0] + 6.0*_MMG5_ATHIRD*l*(1.0-_MMG5_ATHIRD*l)*b1b0[0]\
+                        + 3.0*_MMG5_ATHIRD*l*_MMG5_ATHIRD*l*p1b1[0];
+                    tau[1] = 3.0*(1.0-_MMG5_ATHIRD*l)*(1.0-_MMG5_ATHIRD*l)*b0p0[1] + 6.0*_MMG5_ATHIRD*l*(1.0-_MMG5_ATHIRD*l)*b1b0[1]\
+                        + 3.0*_MMG5_ATHIRD*l*_MMG5_ATHIRD*l*p1b1[1];
+                    tau[2] = 3.0*(1.0-_MMG5_ATHIRD*l)*(1.0-_MMG5_ATHIRD*l)*b0p0[2] + 6.0*_MMG5_ATHIRD*l*(1.0-_MMG5_ATHIRD*l)*b1b0[2]\
+                        + 3.0*_MMG5_ATHIRD*l*_MMG5_ATHIRD*l*p1b1[2];
 
-                    gammasec[0] = 6.0*((1.0-ATHIRD*l)*secder0[0] + ATHIRD*l*secder1[0]);
-                    gammasec[1] = 6.0*((1.0-ATHIRD*l)*secder0[1] + ATHIRD*l*secder1[1]);
-                    gammasec[2] = 6.0*((1.0-ATHIRD*l)*secder0[2] + ATHIRD*l*secder1[2]);
+                    gammasec[0] = 6.0*((1.0-_MMG5_ATHIRD*l)*secder0[0] + _MMG5_ATHIRD*l*secder1[0]);
+                    gammasec[1] = 6.0*((1.0-_MMG5_ATHIRD*l)*secder0[1] + _MMG5_ATHIRD*l*secder1[1]);
+                    gammasec[2] = 6.0*((1.0-_MMG5_ATHIRD*l)*secder0[2] + _MMG5_ATHIRD*l*secder1[2]);
 
                     ntau2 = tau[0]*tau[0] + tau[1]*tau[1] + tau[2]*tau[2];
-                    if ( ntau2 < EPSD )  continue;
+                    if ( ntau2 < _MMG5_EPSD )  continue;
                     intau = 1.0/sqrt(ntau2);
                     ntau2 = 1.0/ntau2;
                     tau[0] *= intau;
@@ -535,7 +535,7 @@ int defsiz_iso(pMesh mesh,pSol met) {
                     kappa = MG_MAX(kappa,gammasec[0]*gammasec[0] + gammasec[1]*gammasec[1] + gammasec[2]*gammasec[2] );
                 }
                 kappa = sqrt(kappa);
-                if ( kappa < EPSD )
+                if ( kappa < _MMG5_EPSD )
                     lm = MAXLEN;
                 else
                     lm = sqrt(8.0*hausd / kappa);
@@ -551,9 +551,9 @@ int defsiz_iso(pMesh mesh,pSol met) {
 }
 
 /** Enforce mesh gradation by truncating size map */
-int gradsiz_iso(pMesh mesh,pSol met) {
-    pTetra    pt;
-    pPoint    p0,p1;
+int gradsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
+    MMG5_pTetra    pt;
+    MMG5_pPoint    p0,p1;
     double    l,hn;
     int       ip0,ip1,it,maxit,nu,nup,k;
     char      i,j,ia,i0,i1;
@@ -575,9 +575,9 @@ int gradsiz_iso(pMesh mesh,pSol met) {
 
             for (i=0; i<4; i++) {
                 for (j=0; j<3; j++) {
-                    ia  = iarf[i][j];
-                    i0  = iare[ia][0];
-                    i1  = iare[ia][1];
+                    ia  = _MMG5_iarf[i][j];
+                    i0  = _MMG5_iare[ia][0];
+                    i1  = _MMG5_iare[ia][1];
                     ip0 = pt->v[i0];
                     ip1 = pt->v[i1];
                     p0  = &mesh->point[ip0];
@@ -589,7 +589,7 @@ int gradsiz_iso(pMesh mesh,pSol met) {
                     l = sqrt(l);
 
                     if ( met->m[ip0] < met->m[ip1] ) {
-                        if ( met->m[ip0] < EPSD )  continue;
+                        if ( met->m[ip0] < _MMG5_EPSD )  continue;
                         hn = met->m[ip0] + mesh->info.hgrad*l;
                         if ( met->m[ip1] > hn ) {
                             met->m[ip1] = hn;
@@ -598,7 +598,7 @@ int gradsiz_iso(pMesh mesh,pSol met) {
                         }
                     }
                     else {
-                        if ( met->m[ip1] < EPSD )  continue;
+                        if ( met->m[ip1] < _MMG5_EPSD )  continue;
                         hn = met->m[ip1] + mesh->info.hgrad*l;
                         if ( met->m[ip0] > hn ) {
                             met->m[ip0] = hn;

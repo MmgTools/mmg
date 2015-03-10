@@ -60,8 +60,8 @@ unsigned char permedge[12][6] = {
     {5,1,3,2,4,0}, {2,5,4,1,0,3}, {4,2,5,0,3,1}, {5,4,2,3,1,0} };
 
 /** simulate split 1 edge of tetra : return 0 if split leads to invalid situation, else 1 */
-int split1_sim(pMesh mesh,pSol met,int k,int vx[6]) {
-    pTetra   pt,pt0;
+int split1_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
+    MMG5_pTetra   pt,pt0;
     double   vold,vnew;
     unsigned char tau[4],*taued;
 
@@ -100,23 +100,23 @@ int split1_sim(pMesh mesh,pSol met,int k,int vx[6]) {
     memcpy(pt0,pt,sizeof(Tetra));
     pt0->v[tau[1]] = vx[taued[0]];
     vnew = orvol(mesh->point,pt0->v);
-    if ( vnew < EPSD2 )  return(0);
-    else if ( vold > NULKAL && vnew < NULKAL )  return(0);
+    if ( vnew < _MMG5_EPSD2 )  return(0);
+    else if ( vold > _MMG5_NULKAL && vnew < _MMG5_NULKAL )  return(0);
 
     memcpy(pt0,pt,sizeof(Tetra));
     pt0->v[tau[0]] = vx[taued[0]];
     vnew = orvol(mesh->point,pt0->v);
-    if ( vnew < EPSD2 )  return(0);
-    else if ( vold > NULKAL && vnew < NULKAL )  return(0);
+    if ( vnew < _MMG5_EPSD2 )  return(0);
+    else if ( vold > _MMG5_NULKAL && vnew < _MMG5_NULKAL )  return(0);
 
     return(1);
 }
 
 /** split 1 edge of tetra */
-void split1(pMesh mesh,pSol met,int k,int vx[6]) {
-    pTetra   pt,pt1;
-    xTetra   xt,xt1;
-    pxTetra  pxt0;
+void split1(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
+    MMG5_pTetra   pt,pt1;
+    MMG5_xTetra   xt,xt1;
+    MMG5_pxTetra  pxt0;
     int      iel;
     char     i,isxt,isxt1;
     unsigned char tau[4],*taued;
@@ -125,9 +125,9 @@ void split1(pMesh mesh,pSol met,int k,int vx[6]) {
     pt  = &mesh->tetra[k];
     iel = newElt(mesh);
     if ( !iel ) {
-        TETRA_REALLOC(mesh,iel,mesh->gap,
+        _MMG5_TETRA_REALLOC(mesh,iel,mesh->gap,
                       printf("  ## Error: unable to allocate a new element.\n");
-                      INCREASE_MEM_MESSAGE();
+                      _MMG5_INCREASE_MEM_MESSAGE();
                       printf("  Exit program.\n");
                       exit(EXIT_FAILURE));
         pt = &mesh->tetra[k];
@@ -138,12 +138,12 @@ void split1(pMesh mesh,pSol met,int k,int vx[6]) {
     pxt0 = 0;
     if ( pt->xt ) {
         pxt0 = &mesh->xtetra[pt->xt];
-        memcpy(&xt,pxt0,sizeof(xTetra));
-        memcpy(&xt1,pxt0,sizeof(xTetra));
+        memcpy(&xt,pxt0,sizeof(MMG5_xTetra));
+        memcpy(&xt1,pxt0,sizeof(MMG5_xTetra));
     }
     else {
-        memset(&xt,0,sizeof(xTetra));
-        memset(&xt1,0,sizeof(xTetra));
+        memset(&xt,0,sizeof(MMG5_xTetra));
+        memset(&xt1,0,sizeof(MMG5_xTetra));
     }
 
     /* default is case 1 */
@@ -207,19 +207,19 @@ nextstep1:
     if ( pt->xt ) {
         if ( isxt && !isxt1 ) {
             pt1->xt = 0;
-            memcpy(pxt0,&xt,sizeof(xTetra));
+            memcpy(pxt0,&xt,sizeof(MMG5_xTetra));
         }
         else if ( !isxt && isxt1 ) {
             pt1->xt = pt->xt;
             pt->xt  = 0;
             pxt0 = &mesh->xtetra[pt1->xt];
-            memcpy(pxt0,&xt1,sizeof(xTetra));
+            memcpy(pxt0,&xt1,sizeof(MMG5_xTetra));
         }
         else if ( isxt && isxt1 ) {
             mesh->xt++;
             if ( mesh->xt > mesh->xtmax ) {
                 /* realloc of xtetras table */
-                TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,xTetra,
+                _MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
                              "larger xtetra table",
                              mesh->xt--;
                              printf("  Exit program.\n");
@@ -227,9 +227,9 @@ nextstep1:
                 pxt0 = &mesh->xtetra[pt->xt];
             }
             pt1->xt = mesh->xt;
-            memcpy(pxt0,&xt,sizeof(xTetra));
+            memcpy(pxt0,&xt,sizeof(MMG5_xTetra));
             pxt0 = &mesh->xtetra[mesh->xt];
-            memcpy(pxt0,&xt1,sizeof(xTetra));
+            memcpy(pxt0,&xt1,sizeof(MMG5_xTetra));
         }
         else {
             pt->xt = 0;
@@ -244,9 +244,9 @@ nextstep1:
 /** Simulate at the same time creation and bulging of one point, with new position o,
     to be inserted at an edge, whose shell is passed :
     return 0 if final position is invalid, 1 if all checks are ok */
-int simbulgept(pMesh mesh,int *list,int ret,double o[3]) {
-    pTetra    pt,pt0;
-    pPoint    ppt0;
+int simbulgept(MMG5_pMesh mesh,int *list,int ret,double o[3]) {
+    MMG5_pTetra    pt,pt0;
+    MMG5_pPoint    ppt0;
     double    calold,calnew,caltmp;
     int       k,iel,ilist;
     char      ie,ia,ib;
@@ -262,24 +262,24 @@ int simbulgept(pMesh mesh,int *list,int ret,double o[3]) {
     for (k=0; k<ilist; k++) {
         iel = list[k] / 6;
         ie  = list[k] % 6;
-        ia = iare[ie][0];
-        ib = iare[ie][1];
+        ia = _MMG5_iare[ie][0];
+        ib = _MMG5_iare[ie][1];
 
         pt = &mesh->tetra[iel];
         memcpy(pt0,pt,sizeof(Tetra));
         pt0->v[ia] = 0;
         calold = MG_MIN(calold,pt->qual);
         caltmp = orcal(mesh,0);
-        if ( caltmp < EPSD )  return(0);
+        if ( caltmp < _MMG5_EPSD )  return(0);
         calnew = MG_MIN(calnew,caltmp);
 
         memcpy(pt0,pt,sizeof(Tetra));
         pt0->v[ib] = 0;
         caltmp = orcal(mesh,0);
-        if ( caltmp < EPSD )  return(0);
+        if ( caltmp < _MMG5_EPSD )  return(0);
         calnew = MG_MIN(calnew,caltmp);
     }
-    /*if ( calold < NULKAL && calnew <= calold )  return(0);
+    /*if ( calold < _MMG5_NULKAL && calnew <= calold )  return(0);
       else if ( calnew < 0.3*calold )  return(0);*/
 
 
@@ -288,10 +288,10 @@ int simbulgept(pMesh mesh,int *list,int ret,double o[3]) {
 
 /** Split edge list[0]%6, whose shell list is passed, introducing point ip
     Beware : shell has to be enumerated in ONLY ONE TRAVEL (always same sense) */
-int split1b(pMesh mesh, pSol met,int *list, int ret, int ip,int cas){
-    pTetra         pt,pt1;
-    xTetra         xt,xt1;
-    pxTetra        pxt0;
+int split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,int cas){
+    MMG5_pTetra         pt,pt1;
+    MMG5_xTetra         xt,xt1;
+    MMG5_pxTetra        pxt0;
     int            ilist,k,open,iel,jel,*newtet,nump,*adja,j;
     int            *adjan,nei2,nei3,mel;
     char           ie,tau[4],isxt,isxt1,i,voy;
@@ -306,8 +306,8 @@ int split1b(pMesh mesh, pSol met,int *list, int ret, int ip,int cas){
         lmax = 1.3;
         for (j=0; j<ilist; j++) {
             for (i=0; i<6; i++) {
-                len = lenedg(mesh,met, mesh->tetra[list[j]/6].v[iare[i][0]],
-                             mesh->tetra[list[j]/6].v[iare[i][1]]);
+                len = lenedg(mesh,met, mesh->tetra[list[j]/6].v[_MMG5_iare[i][0]],
+                             mesh->tetra[list[j]/6].v[_MMG5_iare[i][1]]);
                 if ( len < lmin) {
                     lmin = len;
                 }
@@ -321,21 +321,21 @@ int split1b(pMesh mesh, pSol met,int *list, int ret, int ip,int cas){
             iel = list[j] / 6;
             pt  = &mesh->tetra[iel];
             ie  = list[j] % 6;
-            len = lenedg(mesh,met, pt->v[isar[ie][0]],ip);
+            len = lenedg(mesh,met, pt->v[_MMG5_isar[ie][0]],ip);
             if ( len < lmin )  break;
-            len = lenedg(mesh,met, pt->v[isar[ie][1]],ip);
+            len = lenedg(mesh,met, pt->v[_MMG5_isar[ie][1]],ip);
             if ( len < lmin )  break;
         }
         if ( j < ilist )  return(0);
     }
 
-    SAFE_CALLOC(newtet,ilist,int);
+    _MMG5_SAFE_CALLOC(newtet,ilist,int);
 
     iel = list[0] / 6;
     ie  = list[0] % 6;
     pt  = &mesh->tetra[iel];
 
-    nump = pt->v[iare[ie][0]];
+    nump = pt->v[_MMG5_iare[ie][0]];
 
     /* Fill list newtet[k] = +_created tetra for list[k]/6 : + if kept tetra (= one associated to
        pt->v[tau[0]]) is associated with nump, - if with numq */
@@ -364,9 +364,9 @@ int split1b(pMesh mesh, pSol met,int *list, int ret, int ip,int cas){
         }
         jel = newElt(mesh);
         if ( !jel ) {
-            TETRA_REALLOC(mesh,jel,mesh->gap,
+            _MMG5_TETRA_REALLOC(mesh,jel,mesh->gap,
                           printf("  ## Error: unable to allocate a new element.\n");
-                          INCREASE_MEM_MESSAGE();
+                          _MMG5_INCREASE_MEM_MESSAGE();
                           k--;
                           for ( ; k>=0 ; --k ) {
                               delElt(mesh,abs(newtet[k]));
@@ -395,12 +395,12 @@ int split1b(pMesh mesh, pSol met,int *list, int ret, int ip,int cas){
         pxt0 = 0;
         if ( pt->xt ) {
             pxt0 = &mesh->xtetra[pt->xt];
-            memcpy(&xt,pxt0,sizeof(xTetra));
-            memcpy(&xt1,pxt0,sizeof(xTetra));
+            memcpy(&xt,pxt0,sizeof(MMG5_xTetra));
+            memcpy(&xt1,pxt0,sizeof(MMG5_xTetra));
         }
         else {
-            memset(&xt,0, sizeof(xTetra));
-            memset(&xt1,0, sizeof(xTetra));
+            memset(&xt,0, sizeof(MMG5_xTetra));
+            memset(&xt1,0, sizeof(MMG5_xTetra));
         }
 
         /* tau = sigma^-1 = permutation that sends the reference config (edge 01 split) to current */
@@ -463,28 +463,28 @@ int split1b(pMesh mesh, pSol met,int *list, int ret, int ip,int cas){
             if ( (isxt) && (!isxt1) ) {
                 pt1->xt = 0;
                 pxt0 = &mesh->xtetra[pt->xt];
-                memcpy(pxt0,&xt,sizeof(xTetra));
+                memcpy(pxt0,&xt,sizeof(MMG5_xTetra));
             }
             else if ( (!isxt) && (isxt1) ) {
                 pt1->xt = pt->xt;
                 pt->xt = 0;
                 pxt0 = &mesh->xtetra[pt1->xt];
-                memcpy(pxt0,&xt1,sizeof(xTetra));
+                memcpy(pxt0,&xt1,sizeof(MMG5_xTetra));
             }
             else if ( isxt && isxt1 ) {
                 mesh->xt++;
                 if ( mesh->xt > mesh->xtmax ) {
                     /* realloc of xtetras table */
-                    TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,xTetra,
+                    _MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
                                  "larger xtetra table",
                                  mesh->xt--;
                                  return(-1));
                 }
                 pt1->xt = mesh->xt;
                 pxt0 = &mesh->xtetra[pt->xt];
-                memcpy(pxt0,&xt,sizeof(xTetra));
+                memcpy(pxt0,&xt,sizeof(MMG5_xTetra));
                 pxt0 = &mesh->xtetra[pt1->xt];
-                memcpy(pxt0,&xt1,sizeof(xTetra));
+                memcpy(pxt0,&xt1,sizeof(MMG5_xTetra));
             }
             else {
                 pt->xt = 0;
@@ -515,7 +515,7 @@ int split1b(pMesh mesh, pSol met,int *list, int ret, int ip,int cas){
         pt->qual=orcal(mesh,iel);
         pt1->qual=orcal(mesh,jel);
 
-        SAFE_FREE(newtet);
+        _MMG5_SAFE_FREE(newtet);
         return(1);
     }
 
@@ -530,12 +530,12 @@ int split1b(pMesh mesh, pSol met,int *list, int ret, int ip,int cas){
         pxt0 = 0;
         if ( pt->xt ) {
             pxt0 = &mesh->xtetra[pt->xt];
-            memcpy(&xt,pxt0,sizeof(xTetra));
-            memcpy(&xt1,pxt0,sizeof(xTetra));
+            memcpy(&xt,pxt0,sizeof(MMG5_xTetra));
+            memcpy(&xt1,pxt0,sizeof(MMG5_xTetra));
         }
         else {
-            memset(&xt,0, sizeof(xTetra));
-            memset(&xt1,0, sizeof(xTetra));
+            memset(&xt,0, sizeof(MMG5_xTetra));
+            memset(&xt1,0, sizeof(MMG5_xTetra));
         }
 
         /* tau = sigma^-1 = permutation that sends the reference config (edge 01 split) to current */
@@ -598,28 +598,28 @@ int split1b(pMesh mesh, pSol met,int *list, int ret, int ip,int cas){
             if ( (isxt)&&(!isxt1) ) {
                 pt1->xt = 0;
                 pxt0 = &mesh->xtetra[pt->xt];
-                memcpy(pxt0,&xt,sizeof(xTetra));
+                memcpy(pxt0,&xt,sizeof(MMG5_xTetra));
             }
             else if ((!isxt)&&(isxt1) ) {
                 pt1->xt = pt->xt;
                 pt->xt = 0;
                 pxt0 = &mesh->xtetra[pt1->xt];
-                memcpy(pxt0,&xt1,sizeof(xTetra));
+                memcpy(pxt0,&xt1,sizeof(MMG5_xTetra));
             }
             else if (isxt && isxt1 ) {
                 mesh->xt++;
                 if ( mesh->xt > mesh->xtmax ) {
                     /* realloc of xtetras table */
-                    TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,xTetra,
+                    _MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
                                  "larger xtetra table",
                                  mesh->xt--;
                                  return(-1));
                 }
                 pt1->xt = mesh->xt;
                 pxt0 = &mesh->xtetra[pt->xt];
-                memcpy(pxt0,&xt,sizeof(xTetra));
+                memcpy(pxt0,&xt,sizeof(MMG5_xTetra));
                 pxt0 = &mesh->xtetra[pt1->xt];
-                memcpy(pxt0,&xt1,sizeof(xTetra));
+                memcpy(pxt0,&xt1,sizeof(MMG5_xTetra));
             }
             else {
                 pt->xt = 0;
@@ -814,13 +814,13 @@ int split1b(pMesh mesh, pSol met,int *list, int ret, int ip,int cas){
         pt1->qual=orcal(mesh,jel);
     }
 
-    SAFE_FREE(newtet);
+    _MMG5_SAFE_FREE(newtet);
     return(1);
 }
 
 /** Simulate split of two edges that belong to a common face */
-int split2sf_sim(pMesh mesh,pSol met,int k,int vx[6]){
-    pTetra        pt,pt0;
+int split2sf_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]){
+    MMG5_pTetra        pt,pt0;
     double   vold,vnew;
     unsigned char tau[4],*taued,imin;
 
@@ -885,45 +885,45 @@ int split2sf_sim(pMesh mesh,pSol met,int k,int vx[6]){
     pt0->v[tau[1]] = vx[taued[4]];
     pt0->v[tau[2]] = vx[taued[5]];
     vnew = orvol(mesh->point,pt0->v);
-    if ( vnew < EPSD2 )  return(0);
-    else if ( vold > NULKAL && vnew < NULKAL )  return(0);
+    if ( vnew < _MMG5_EPSD2 )  return(0);
+    else if ( vold > _MMG5_NULKAL && vnew < _MMG5_NULKAL )  return(0);
 
     if ( imin == tau[1] ) {
         memcpy(pt0,pt,sizeof(Tetra));
         pt0->v[tau[2]] = vx[taued[5]];
         pt0->v[tau[3]] = vx[taued[4]];
         vnew = orvol(mesh->point,pt0->v);
-        if ( vnew < EPSD2 )  return(0);
-        else if ( vold > NULKAL && vnew < NULKAL )  return(0);
+        if ( vnew < _MMG5_EPSD2 )  return(0);
+        else if ( vold > _MMG5_NULKAL && vnew < _MMG5_NULKAL )  return(0);
 
         memcpy(pt0,pt,sizeof(Tetra));
         pt0->v[tau[3]] = vx[taued[5]];
         vnew = orvol(mesh->point,pt0->v);
-        if ( vnew < EPSD2 )  return(0);
-        else if ( vold > NULKAL && vnew < NULKAL )  return(0);
+        if ( vnew < _MMG5_EPSD2 )  return(0);
+        else if ( vold > _MMG5_NULKAL && vnew < _MMG5_NULKAL )  return(0);
     }
     else {
         memcpy(pt0,pt,sizeof(Tetra));
         pt0->v[tau[3]] = vx[taued[4]];
         vnew = orvol(mesh->point,pt0->v);
-        if ( vnew < EPSD2 )  return(0);
-        else if ( vold > NULKAL && vnew < NULKAL )  return(0);
+        if ( vnew < _MMG5_EPSD2 )  return(0);
+        else if ( vold > _MMG5_NULKAL && vnew < _MMG5_NULKAL )  return(0);
 
         memcpy(pt0,pt,sizeof(Tetra));
         pt0->v[tau[1]] = vx[taued[4]];
         pt0->v[tau[3]] = vx[taued[5]];
         vnew = orvol(mesh->point,pt0->v);
-        if ( vnew < EPSD2 )  return(0);
-        else if ( vold > NULKAL && vnew < NULKAL )  return(0);
+        if ( vnew < _MMG5_EPSD2 )  return(0);
+        else if ( vold > _MMG5_NULKAL && vnew < _MMG5_NULKAL )  return(0);
     }
     return(1);
 }
 
 /** Split of two edges that belong to a common face : 1 tetra becomes 3 */
-void split2sf(pMesh mesh,pSol met,int k,int vx[6]){
-    pTetra        pt[3];
-    xTetra        xt[3];
-    pxTetra       pxt0;
+void split2sf(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]){
+    MMG5_pTetra        pt[3];
+    MMG5_xTetra        xt[3];
+    MMG5_pxTetra       pxt0;
     int           iel,i;
     int           newtet[3];
     char          flg,imin,firstxt,isxt[3];
@@ -936,9 +936,9 @@ void split2sf(pMesh mesh,pSol met,int k,int vx[6]){
 
     iel = newElt(mesh);
     if ( !iel ) {
-        TETRA_REALLOC(mesh,iel,mesh->gap,
+        _MMG5_TETRA_REALLOC(mesh,iel,mesh->gap,
                       printf("  ## Error: unable to allocate a new element.\n");
-                      INCREASE_MEM_MESSAGE();
+                      _MMG5_INCREASE_MEM_MESSAGE();
                       printf("  Exit program.\n");
                       exit(EXIT_FAILURE));
         pt[0] = &mesh->tetra[newtet[0]];
@@ -949,9 +949,9 @@ void split2sf(pMesh mesh,pSol met,int k,int vx[6]){
 
     iel = newElt(mesh);
     if ( !iel ) {
-        TETRA_REALLOC(mesh,iel,mesh->gap,
+        _MMG5_TETRA_REALLOC(mesh,iel,mesh->gap,
                       printf("  ## Error: unable to allocate a new element.\n");
-                      INCREASE_MEM_MESSAGE();
+                      _MMG5_INCREASE_MEM_MESSAGE();
                       printf("  Exit program.\n");
                       exit(EXIT_FAILURE));
         pt[0] = &mesh->tetra[newtet[0]];
@@ -963,15 +963,15 @@ void split2sf(pMesh mesh,pSol met,int k,int vx[6]){
 
     if ( pt[0]->xt ) {
         pxt0 = &mesh->xtetra[(pt[0])->xt];
-        memcpy(&xt[0],pxt0,sizeof(xTetra));
-        memcpy(&xt[1],pxt0,sizeof(xTetra));
-        memcpy(&xt[2],pxt0,sizeof(xTetra));
+        memcpy(&xt[0],pxt0,sizeof(MMG5_xTetra));
+        memcpy(&xt[1],pxt0,sizeof(MMG5_xTetra));
+        memcpy(&xt[2],pxt0,sizeof(MMG5_xTetra));
     }
     else {
         pxt0 = 0;
-        memset(&xt[0],0,sizeof(xTetra));
-        memset(&xt[1],0,sizeof(xTetra));
-        memset(&xt[2],0,sizeof(xTetra));
+        memset(&xt[0],0,sizeof(MMG5_xTetra));
+        memset(&xt[1],0,sizeof(MMG5_xTetra));
+        memset(&xt[2],0,sizeof(MMG5_xTetra));
     }
     /* identity is case 48 */
     tau[0] = 0 ; tau[1] = 1 ; tau[2] = 2 ; tau[3] = 3;
@@ -1083,14 +1083,14 @@ void split2sf(pMesh mesh,pSol met,int k,int vx[6]){
 
     if ( pt[0]->xt ) {
         if ( isxt[0] ) {
-            memcpy(pxt0,&xt[0],sizeof(xTetra));
+            memcpy(pxt0,&xt[0],sizeof(MMG5_xTetra));
             pt[1]->xt = pt[2]->xt = 0;
             for (i=1; i<3; i++) {
                 if ( isxt[i] ) {
                     mesh->xt++;
                     if ( mesh->xt > mesh->xtmax ) {
                         /* realloc of xtetras table */
-                        TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,xTetra,
+                        _MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
                                      "larger xtetra table",
                                      mesh->xt--;
                                      printf("  Exit program.\n");
@@ -1098,7 +1098,7 @@ void split2sf(pMesh mesh,pSol met,int k,int vx[6]){
                     }
                     pt[i]->xt = mesh->xt;
                     pxt0 = &mesh->xtetra[mesh->xt];
-                    memcpy(pxt0,&(xt[i]),sizeof(xTetra));
+                    memcpy(pxt0,&(xt[i]),sizeof(MMG5_xTetra));
                 }
             }
         }
@@ -1111,13 +1111,13 @@ void split2sf(pMesh mesh,pSol met,int k,int vx[6]){
                         firstxt = 0;
                         pt[i]->xt = pt[0]->xt;
                         pxt0 = &mesh->xtetra[pt[i]->xt];
-                        memcpy(pxt0,&(xt[i]),sizeof(xTetra));
+                        memcpy(pxt0,&(xt[i]),sizeof(MMG5_xTetra));
                     }
                     else {
                         mesh->xt++;
                         if ( mesh->xt > mesh->xtmax ) {
                             /* realloc of xtetras table */
-                            TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,xTetra,
+                            _MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
                                          "larger xtetra table",
                                          mesh->xt--;
                                          printf("  Exit program.\n");
@@ -1125,7 +1125,7 @@ void split2sf(pMesh mesh,pSol met,int k,int vx[6]){
                         }
                         pt[i]->xt = mesh->xt;
                         pxt0 = &mesh->xtetra[mesh->xt];
-                        memcpy(pxt0,&xt[i],sizeof(xTetra));
+                        memcpy(pxt0,&xt[i],sizeof(MMG5_xTetra));
                     }
                 }
             }
@@ -1140,10 +1140,10 @@ void split2sf(pMesh mesh,pSol met,int k,int vx[6]){
 }
 
 /** Split of two OPPOSITE edges */
-void split2(pMesh mesh,pSol met,int k,int vx[6]) {
-    pTetra   pt[4];
-    xTetra   xt[4];
-    pxTetra  pxt0;
+void split2(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
+    MMG5_pTetra   pt[4];
+    MMG5_xTetra   xt[4];
+    MMG5_pxTetra  pxt0;
     int      i,iel;
     int      newtet[4];
     char     flg,firstxt,isxt[4];
@@ -1156,9 +1156,9 @@ void split2(pMesh mesh,pSol met,int k,int vx[6]) {
 
     iel = newElt(mesh);
     if ( !iel ) {
-        TETRA_REALLOC(mesh,iel,mesh->gap,
+        _MMG5_TETRA_REALLOC(mesh,iel,mesh->gap,
                       printf("  ## Error: unable to allocate a new element.\n");
-                      INCREASE_MEM_MESSAGE();
+                      _MMG5_INCREASE_MEM_MESSAGE();
                       printf("  Exit program.\n");
                       exit(EXIT_FAILURE));
         pt[0] = &mesh->tetra[newtet[0]];
@@ -1169,9 +1169,9 @@ void split2(pMesh mesh,pSol met,int k,int vx[6]) {
 
     iel = newElt(mesh);
     if ( !iel ) {
-        TETRA_REALLOC(mesh,iel,mesh->gap,
+        _MMG5_TETRA_REALLOC(mesh,iel,mesh->gap,
                       printf("  ## Error: unable to allocate a new element.\n");
-                      INCREASE_MEM_MESSAGE();
+                      _MMG5_INCREASE_MEM_MESSAGE();
                       printf("  Exit program.\n");
                       exit(EXIT_FAILURE));
         pt[0] = &mesh->tetra[newtet[0]];
@@ -1183,9 +1183,9 @@ void split2(pMesh mesh,pSol met,int k,int vx[6]) {
 
     iel = newElt(mesh);
     if ( !iel ) {
-        TETRA_REALLOC(mesh,iel,mesh->gap,
+        _MMG5_TETRA_REALLOC(mesh,iel,mesh->gap,
                       printf("  ## Error: unable to allocate a new element.\n");
-                      INCREASE_MEM_MESSAGE();
+                      _MMG5_INCREASE_MEM_MESSAGE();
                       printf("  Exit program.\n");
                       exit(EXIT_FAILURE));
         pt[0] = &mesh->tetra[newtet[0]];
@@ -1199,16 +1199,16 @@ void split2(pMesh mesh,pSol met,int k,int vx[6]) {
     pxt0 = 0;
     if ( pt[0]->xt) {
         pxt0 = &mesh->xtetra[(pt[0])->xt];
-        memcpy(&xt[0],pxt0,sizeof(xTetra));
-        memcpy(&xt[1],pxt0,sizeof(xTetra));
-        memcpy(&xt[2],pxt0,sizeof(xTetra));
-        memcpy(&xt[3],pxt0,sizeof(xTetra));
+        memcpy(&xt[0],pxt0,sizeof(MMG5_xTetra));
+        memcpy(&xt[1],pxt0,sizeof(MMG5_xTetra));
+        memcpy(&xt[2],pxt0,sizeof(MMG5_xTetra));
+        memcpy(&xt[3],pxt0,sizeof(MMG5_xTetra));
     }
     else {
-        memset(&xt[0],0,sizeof(xTetra));
-        memset(&xt[1],0,sizeof(xTetra));
-        memset(&xt[2],0,sizeof(xTetra));
-        memset(&xt[3],0,sizeof(xTetra));
+        memset(&xt[0],0,sizeof(MMG5_xTetra));
+        memset(&xt[1],0,sizeof(MMG5_xTetra));
+        memset(&xt[2],0,sizeof(MMG5_xTetra));
+        memset(&xt[3],0,sizeof(MMG5_xTetra));
     }
     /* identity : case 33 */
     tau[0] = 0;  tau[1] = 1;  tau[2] = 2;  tau[3] = 3;
@@ -1279,13 +1279,13 @@ void split2(pMesh mesh,pSol met,int k,int vx[6]) {
 
     if ( pt[0]->xt) {
         if ( isxt[0] ) {
-            memcpy(pxt0,&xt[0],sizeof(xTetra));
+            memcpy(pxt0,&xt[0],sizeof(MMG5_xTetra));
             for (i=1; i<4; i++) {
                 if ( isxt[i] ) {
                     mesh->xt++;
                     if ( mesh->xt > mesh->xtmax ) {
                         /* realloc of xtetras table */
-                        TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,xTetra,
+                        _MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
                                      "larger xtetra table",
                                      mesh->xt--;
                                      printf("  Exit program.\n");
@@ -1293,7 +1293,7 @@ void split2(pMesh mesh,pSol met,int k,int vx[6]) {
                     }
                     pt[i]->xt = mesh->xt;
                     pxt0 = &mesh->xtetra[mesh->xt];
-                    memcpy(pxt0,&xt[i],sizeof(xTetra));
+                    memcpy(pxt0,&xt[i],sizeof(MMG5_xTetra));
                 }
                 else {
                     pt[i]->xt = 0;
@@ -1308,13 +1308,13 @@ void split2(pMesh mesh,pSol met,int k,int vx[6]) {
                         firstxt = 0;
                         pt[i]->xt = pt[0]->xt;
                         pxt0 = &mesh->xtetra[pt[i]->xt];
-                        memcpy(pxt0,&xt[i],sizeof(xTetra));
+                        memcpy(pxt0,&xt[i],sizeof(MMG5_xTetra));
                     }
                     else {
                         mesh->xt++;
                         if ( mesh->xt > mesh->xtmax ) {
                             /* realloc of xtetras table */
-                            TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,xTetra,
+                            _MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
                                          "larger xtetra table",
                                          mesh->xt--;
                                          printf("  Exit program.\n");
@@ -1322,7 +1322,7 @@ void split2(pMesh mesh,pSol met,int k,int vx[6]) {
                         }
                         pt[i]->xt = mesh->xt;
                         pxt0 = &mesh->xtetra[mesh->xt];
-                        memcpy(pxt0,&xt[i],sizeof(xTetra));
+                        memcpy(pxt0,&xt[i],sizeof(MMG5_xTetra));
                     }
                 }
                 else {
@@ -1341,8 +1341,8 @@ void split2(pMesh mesh,pSol met,int k,int vx[6]) {
 }
 
 /** Simulate split of 1 face (3 edges) */
-int split3_sim(pMesh mesh,pSol met,int k,int vx[6]) {
-    pTetra    pt,pt0;
+int split3_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
+    MMG5_pTetra    pt,pt0;
     double    vold,vnew;
     unsigned char tau[4],*taued;
 
@@ -1373,39 +1373,39 @@ int split3_sim(pMesh mesh,pSol met,int k,int vx[6]) {
     pt0->v[tau[1]] = vx[taued[0]];
     pt0->v[tau[2]] = vx[taued[1]];
     vnew = orvol(mesh->point,pt0->v);
-    if ( vnew < EPSD2 )  return(0);
-    else if ( vold > NULKAL && vnew < NULKAL )  return(0);
+    if ( vnew < _MMG5_EPSD2 )  return(0);
+    else if ( vold > _MMG5_NULKAL && vnew < _MMG5_NULKAL )  return(0);
 
     memcpy(pt0,pt,sizeof(Tetra));
     pt0->v[tau[0]] = vx[taued[0]];
     pt0->v[tau[2]] = vx[taued[3]];
     vnew = orvol(mesh->point,pt0->v);
-    if ( vnew < EPSD2 )  return(0);
-    else if ( vold > NULKAL && vnew < NULKAL )  return(0);
+    if ( vnew < _MMG5_EPSD2 )  return(0);
+    else if ( vold > _MMG5_NULKAL && vnew < _MMG5_NULKAL )  return(0);
 
     memcpy(pt0,pt,sizeof(Tetra));
     pt0->v[tau[0]] = vx[taued[1]];
     pt0->v[tau[1]] = vx[taued[3]];
     vnew = orvol(mesh->point,pt0->v);
-    if ( vnew < EPSD2 )  return(0);
-    else if ( vold > NULKAL && vnew < NULKAL )  return(0);
+    if ( vnew < _MMG5_EPSD2 )  return(0);
+    else if ( vold > _MMG5_NULKAL && vnew < _MMG5_NULKAL )  return(0);
 
     memcpy(pt0,pt,sizeof(Tetra));
     pt0->v[tau[0]] = vx[taued[0]];
     pt0->v[tau[1]] = vx[taued[3]];
     pt0->v[tau[2]] = vx[taued[1]];
     vnew = orvol(mesh->point,pt0->v);
-    if ( vnew < EPSD2 )  return(0);
-    else if ( vold > NULKAL && vnew < NULKAL )  return(0);
+    if ( vnew < _MMG5_EPSD2 )  return(0);
+    else if ( vold > _MMG5_NULKAL && vnew < _MMG5_NULKAL )  return(0);
 
     return(1);
 }
 
 /** 1 face (3 edges) subdivided */
-void split3(pMesh mesh,pSol met,int k,int vx[6]) {
-    pTetra    pt[4];
-    xTetra    xt[4];
-    pxTetra   pxt0;
+void split3(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
+    MMG5_pTetra    pt[4];
+    MMG5_xTetra    xt[4];
+    MMG5_pxTetra   pxt0;
     int       iel,i;
     int       newtet[4];
     char      flg,firstxt,isxt[4];
@@ -1419,9 +1419,9 @@ void split3(pMesh mesh,pSol met,int k,int vx[6]) {
     /* create 3 new tetras */
     iel = newElt(mesh);
     if ( !iel ) {
-        TETRA_REALLOC(mesh,iel,mesh->gap,
+        _MMG5_TETRA_REALLOC(mesh,iel,mesh->gap,
                       printf("  ## Error: unable to allocate a new element.\n");
-                      INCREASE_MEM_MESSAGE();
+                      _MMG5_INCREASE_MEM_MESSAGE();
                       printf("  Exit program.\n");
                       exit(EXIT_FAILURE));
         pt[0] = &mesh->tetra[newtet[0]];
@@ -1432,9 +1432,9 @@ void split3(pMesh mesh,pSol met,int k,int vx[6]) {
 
     iel = newElt(mesh);
     if ( !iel ) {
-        TETRA_REALLOC(mesh,iel,mesh->gap,
+        _MMG5_TETRA_REALLOC(mesh,iel,mesh->gap,
                       printf("  ## Error: unable to allocate a new element.\n");
-                      INCREASE_MEM_MESSAGE();
+                      _MMG5_INCREASE_MEM_MESSAGE();
                       printf("  Exit program.\n");
                       exit(EXIT_FAILURE));
         pt[0] = &mesh->tetra[newtet[0]];
@@ -1446,9 +1446,9 @@ void split3(pMesh mesh,pSol met,int k,int vx[6]) {
 
     iel = newElt(mesh);
     if ( !iel ) {
-        TETRA_REALLOC(mesh,iel,mesh->gap,
+        _MMG5_TETRA_REALLOC(mesh,iel,mesh->gap,
                       printf("  ## Error: unable to allocate a new element.\n");
-                      INCREASE_MEM_MESSAGE();
+                      _MMG5_INCREASE_MEM_MESSAGE();
                       printf("  Exit program.\n");
                       exit(EXIT_FAILURE));
         pt[0] = &mesh->tetra[newtet[0]];
@@ -1462,16 +1462,16 @@ void split3(pMesh mesh,pSol met,int k,int vx[6]) {
     pxt0 = 0;
     if ( pt[0]->xt ) {
         pxt0 = &mesh->xtetra[(pt[0])->xt];
-        memcpy(&xt[0],pxt0, sizeof(xTetra));
-        memcpy(&xt[1],pxt0, sizeof(xTetra));
-        memcpy(&xt[2],pxt0, sizeof(xTetra));
-        memcpy(&xt[3],pxt0, sizeof(xTetra));
+        memcpy(&xt[0],pxt0, sizeof(MMG5_xTetra));
+        memcpy(&xt[1],pxt0, sizeof(MMG5_xTetra));
+        memcpy(&xt[2],pxt0, sizeof(MMG5_xTetra));
+        memcpy(&xt[3],pxt0, sizeof(MMG5_xTetra));
     }
     else {
-        memset(&xt[0],0, sizeof(xTetra));
-        memset(&xt[1],0, sizeof(xTetra));
-        memset(&xt[2],0, sizeof(xTetra));
-        memset(&xt[3],0, sizeof(xTetra));
+        memset(&xt[0],0, sizeof(MMG5_xTetra));
+        memset(&xt[1],0, sizeof(MMG5_xTetra));
+        memset(&xt[2],0, sizeof(MMG5_xTetra));
+        memset(&xt[3],0, sizeof(MMG5_xTetra));
     }
 
     /* update vertices, case 11 is default */
@@ -1544,14 +1544,14 @@ void split3(pMesh mesh,pSol met,int k,int vx[6]) {
 
     if ( pt[0]->xt ) {
         if ( isxt[0] ) {
-            memcpy(pxt0,&xt[0],sizeof(xTetra));
+            memcpy(pxt0,&xt[0],sizeof(MMG5_xTetra));
             pt[1]->xt = pt[2]->xt = pt[3]->xt = 0;
             for (i=1; i<4; i++) {
                 if ( isxt[i] ) {
                     mesh->xt++;
                     if ( mesh->xt > mesh->xtmax ) {
                         /* realloc of xtetras table */
-                        TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,xTetra,
+                        _MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
                                      "larger xtetra table",
                                      mesh->xt--;
                                      printf("  Exit program.\n");
@@ -1559,7 +1559,7 @@ void split3(pMesh mesh,pSol met,int k,int vx[6]) {
                     }
                     pt[i]->xt = mesh->xt;
                     pxt0 = &mesh->xtetra[mesh->xt];
-                    memcpy(pxt0,&xt[i],sizeof(xTetra));
+                    memcpy(pxt0,&xt[i],sizeof(MMG5_xTetra));
                 }
             }
         }
@@ -1572,13 +1572,13 @@ void split3(pMesh mesh,pSol met,int k,int vx[6]) {
                         firstxt = 0;
                         pt[i]->xt = pt[0]->xt;
                         pxt0 = &mesh->xtetra[(pt[i])->xt];
-                        memcpy(pxt0,&xt[i],sizeof(xTetra));
+                        memcpy(pxt0,&xt[i],sizeof(MMG5_xTetra));
                     }
                     else {
                         mesh->xt++;
                         if ( mesh->xt > mesh->xtmax ) {
                             /* realloc of xtetras table */
-                            TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,xTetra,
+                            _MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
                                          "larger xtetra table",
                                          mesh->xt--;
                                          printf("  Exit program.\n");
@@ -1586,7 +1586,7 @@ void split3(pMesh mesh,pSol met,int k,int vx[6]) {
                         }
                         pt[i]->xt = mesh->xt;
                         pxt0 = &mesh->xtetra[mesh->xt];
-                        memcpy(pxt0,&(xt[i]),sizeof(xTetra));
+                        memcpy(pxt0,&(xt[i]),sizeof(MMG5_xTetra));
                     }
                 }
             }
@@ -1602,10 +1602,10 @@ void split3(pMesh mesh,pSol met,int k,int vx[6]) {
 }
 
 /** Split 3 edge in cone configuration */
-void split3cone(pMesh mesh,pSol met,int k,int vx[6]) {
-    pTetra    pt[4];
-    xTetra    xt[4];
-    pxTetra   pxt0;
+void split3cone(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
+    MMG5_pTetra    pt[4];
+    MMG5_xTetra    xt[4];
+    MMG5_pxTetra   pxt0;
     int       iel,i;
     int       newtet[4];
     char      flg,firstxt,isxt[4],ia,ib;
@@ -1619,9 +1619,9 @@ void split3cone(pMesh mesh,pSol met,int k,int vx[6]) {
     /* create 3 new tetras */
     iel = newElt(mesh);
     if ( !iel ) {
-        TETRA_REALLOC(mesh,iel,mesh->gap,
+        _MMG5_TETRA_REALLOC(mesh,iel,mesh->gap,
                       printf("  ## Error: unable to allocate a new element.\n");
-                      INCREASE_MEM_MESSAGE();
+                      _MMG5_INCREASE_MEM_MESSAGE();
                       printf("  Exit program.\n");
                       exit(EXIT_FAILURE));
         pt[0] = &mesh->tetra[newtet[0]];
@@ -1632,9 +1632,9 @@ void split3cone(pMesh mesh,pSol met,int k,int vx[6]) {
 
     iel = newElt(mesh);
     if ( !iel ) {
-        TETRA_REALLOC(mesh,iel,mesh->gap,
+        _MMG5_TETRA_REALLOC(mesh,iel,mesh->gap,
                       printf("  ## Error: unable to allocate a new element.\n");
-                      INCREASE_MEM_MESSAGE();
+                      _MMG5_INCREASE_MEM_MESSAGE();
                       printf("  Exit program.\n");
                       exit(EXIT_FAILURE));
         pt[0] = &mesh->tetra[newtet[0]];
@@ -1646,9 +1646,9 @@ void split3cone(pMesh mesh,pSol met,int k,int vx[6]) {
 
     iel = newElt(mesh);
     if ( !iel ) {
-        TETRA_REALLOC(mesh,iel,mesh->gap,
+        _MMG5_TETRA_REALLOC(mesh,iel,mesh->gap,
                       printf("  ## Error: unable to allocate a new element.\n");
-                      INCREASE_MEM_MESSAGE();
+                      _MMG5_INCREASE_MEM_MESSAGE();
                       printf("  Exit program.\n");
                       exit(EXIT_FAILURE));
         pt[0] = &mesh->tetra[newtet[0]];
@@ -1661,17 +1661,17 @@ void split3cone(pMesh mesh,pSol met,int k,int vx[6]) {
 
     if ( pt[0]->xt ) {
         pxt0 = &mesh->xtetra[(pt[0])->xt];
-        memcpy(&xt[0],pxt0, sizeof(xTetra));
-        memcpy(&xt[1],pxt0, sizeof(xTetra));
-        memcpy(&xt[2],pxt0, sizeof(xTetra));
-        memcpy(&xt[3],pxt0, sizeof(xTetra));
+        memcpy(&xt[0],pxt0, sizeof(MMG5_xTetra));
+        memcpy(&xt[1],pxt0, sizeof(MMG5_xTetra));
+        memcpy(&xt[2],pxt0, sizeof(MMG5_xTetra));
+        memcpy(&xt[3],pxt0, sizeof(MMG5_xTetra));
     }
     else {
         pxt0 = 0;
-        memset(&xt[0],0, sizeof(xTetra));
-        memset(&xt[1],0, sizeof(xTetra));
-        memset(&xt[2],0, sizeof(xTetra));
-        memset(&xt[3],0, sizeof(xTetra));
+        memset(&xt[0],0, sizeof(MMG5_xTetra));
+        memset(&xt[1],0, sizeof(MMG5_xTetra));
+        memset(&xt[2],0, sizeof(MMG5_xTetra));
+        memset(&xt[3],0, sizeof(MMG5_xTetra));
     }
 
     /* Set permutation of vertices : reference configuration is 7 */
@@ -1896,14 +1896,14 @@ void split3cone(pMesh mesh,pSol met,int k,int vx[6]) {
 
     if ( (pt[0])->xt ) {
         if ( isxt[0] ) {
-            memcpy(pxt0,&xt[0],sizeof(xTetra));
+            memcpy(pxt0,&xt[0],sizeof(MMG5_xTetra));
             pt[1]->xt = pt[2]->xt = pt[3]->xt = 0;
             for (i=1; i<4; i++) {
                 if ( isxt[i] ) {
                     mesh->xt++;
                     if ( mesh->xt > mesh->xtmax ) {
                         /* realloc of xtetras table */
-                        TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,xTetra,
+                        _MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
                                      "larger xtetra table",
                                      mesh->xt--;
                                      printf("  Exit program.\n");
@@ -1911,7 +1911,7 @@ void split3cone(pMesh mesh,pSol met,int k,int vx[6]) {
                     }
                     pt[i]->xt = mesh->xt;
                     pxt0 = &mesh->xtetra[mesh->xt];
-                    memcpy(pxt0,&xt[i],sizeof(xTetra));
+                    memcpy(pxt0,&xt[i],sizeof(MMG5_xTetra));
                 }
             }
         }
@@ -1924,13 +1924,13 @@ void split3cone(pMesh mesh,pSol met,int k,int vx[6]) {
                         firstxt = 0;
                         pt[i]->xt = pt[0]->xt;
                         pxt0 = &mesh->xtetra[(pt[i])->xt];
-                        memcpy(pxt0,&xt[i],sizeof(xTetra));
+                        memcpy(pxt0,&xt[i],sizeof(MMG5_xTetra));
                     }
                     else {
                         mesh->xt++;
                         if ( mesh->xt > mesh->xtmax ) {
                             /* realloc of xtetras table */
-                            TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,xTetra,
+                            _MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
                                          "larger xtetra table",
                                          mesh->xt--;
                                          printf("  Exit program.\n");
@@ -1938,7 +1938,7 @@ void split3cone(pMesh mesh,pSol met,int k,int vx[6]) {
                         }
                         pt[i]->xt = mesh->xt;
                         pxt0 = &mesh->xtetra[mesh->xt];
-                        memcpy(pxt0,&xt[i],sizeof(xTetra));
+                        memcpy(pxt0,&xt[i],sizeof(MMG5_xTetra));
                     }
                 }
             }
@@ -1953,10 +1953,10 @@ void split3cone(pMesh mesh,pSol met,int k,int vx[6]) {
 
 }
 
-void split3op(pMesh mesh, pSol met, int k, int vx[6]){
-    pTetra        pt[5];
-    xTetra        xt[5];
-    pxTetra       pxt0;
+void split3op(MMG5_pMesh mesh, MMG5_pSol met, int k, int vx[6]){
+    MMG5_pTetra        pt[5];
+    MMG5_xTetra        xt[5];
+    MMG5_pxTetra       pxt0;
     char          flg;
     int           iel;
     int           newtet[5];
@@ -2106,9 +2106,9 @@ void split3op(pMesh mesh, pSol met, int k, int vx[6]){
     /* Create new elements according to the current configuration */
     iel = newElt(mesh);
     if ( !iel ) {
-        TETRA_REALLOC(mesh,iel,mesh->gap,
+        _MMG5_TETRA_REALLOC(mesh,iel,mesh->gap,
                       printf("  ## Error: unable to allocate a new element.\n");
-                      INCREASE_MEM_MESSAGE();
+                      _MMG5_INCREASE_MEM_MESSAGE();
                       printf("  Exit program.\n");
                       exit(EXIT_FAILURE));
         pt[0] = &mesh->tetra[newtet[0]];
@@ -2120,9 +2120,9 @@ void split3op(pMesh mesh, pSol met, int k, int vx[6]){
 
     iel = newElt(mesh);
     if ( !iel ) {
-        TETRA_REALLOC(mesh,iel,mesh->gap,
+        _MMG5_TETRA_REALLOC(mesh,iel,mesh->gap,
                       printf("  ## Error: unable to allocate a new element.\n");
-                      INCREASE_MEM_MESSAGE();
+                      _MMG5_INCREASE_MEM_MESSAGE();
                       printf("  Exit program.\n");
                       exit(EXIT_FAILURE));
         pt[0] = &mesh->tetra[newtet[0]];
@@ -2134,9 +2134,9 @@ void split3op(pMesh mesh, pSol met, int k, int vx[6]){
 
     iel = newElt(mesh);
     if ( !iel ) {
-        TETRA_REALLOC(mesh,iel,mesh->gap,
+        _MMG5_TETRA_REALLOC(mesh,iel,mesh->gap,
                       printf("  ## Error: unable to allocate a new element.\n");
-                      INCREASE_MEM_MESSAGE();
+                      _MMG5_INCREASE_MEM_MESSAGE();
                       printf("  Exit program.\n");
                       exit(EXIT_FAILURE));
         pt[0] = &mesh->tetra[newtet[0]];
@@ -2149,25 +2149,25 @@ void split3op(pMesh mesh, pSol met, int k, int vx[6]){
 
     if ( (pt[0])->xt ) {
         pxt0 = &mesh->xtetra[(pt[0])->xt];
-        memcpy(&xt[0],pxt0, sizeof(xTetra));
-        memcpy(&xt[1],pxt0, sizeof(xTetra));
-        memcpy(&xt[2],pxt0, sizeof(xTetra));
-        memcpy(&xt[3],pxt0, sizeof(xTetra));
+        memcpy(&xt[0],pxt0, sizeof(MMG5_xTetra));
+        memcpy(&xt[1],pxt0, sizeof(MMG5_xTetra));
+        memcpy(&xt[2],pxt0, sizeof(MMG5_xTetra));
+        memcpy(&xt[3],pxt0, sizeof(MMG5_xTetra));
     }
     else {
         pxt0 = 0;
-        memset(&xt[0],0, sizeof(xTetra));
-        memset(&xt[1],0, sizeof(xTetra));
-        memset(&xt[2],0, sizeof(xTetra));
-        memset(&xt[3],0, sizeof(xTetra));
+        memset(&xt[0],0, sizeof(MMG5_xTetra));
+        memset(&xt[1],0, sizeof(MMG5_xTetra));
+        memset(&xt[2],0, sizeof(MMG5_xTetra));
+        memset(&xt[3],0, sizeof(MMG5_xTetra));
     }
 
     if ( !((imin12 == ip1) && (imin03 == ip3)) ) {
         iel = newElt(mesh);
         if ( !iel ) {
-            TETRA_REALLOC(mesh,iel,mesh->gap,
+            _MMG5_TETRA_REALLOC(mesh,iel,mesh->gap,
                           printf("  ## Error: unable to allocate a new element.\n");
-                          INCREASE_MEM_MESSAGE();
+                          _MMG5_INCREASE_MEM_MESSAGE();
                           printf("  Exit program.\n");
                           exit(EXIT_FAILURE));
             pt[0] = &mesh->tetra[newtet[0]];
@@ -2181,12 +2181,12 @@ void split3op(pMesh mesh, pSol met, int k, int vx[6]){
 
         if ( pt[0]->xt ) {
             pxt0 = &mesh->xtetra[(pt[0])->xt];
-            memcpy(&xt[4],pxt0, sizeof(xTetra));
+            memcpy(&xt[4],pxt0, sizeof(MMG5_xTetra));
         }
 
         else {
             pxt0 = 0;
-            memset(&xt[4],0, sizeof(xTetra));
+            memset(&xt[4],0, sizeof(MMG5_xTetra));
         }
     }
 
@@ -2385,7 +2385,7 @@ void split3op(pMesh mesh, pSol met, int k, int vx[6]){
 
         if ( pt[0]->xt ) {
             if ( isxt[0] ) {
-                memcpy(pxt0,&xt[0],sizeof(xTetra));
+                memcpy(pxt0,&xt[0],sizeof(MMG5_xTetra));
                 pt[1]->xt = pt[2]->xt = pt[3]->xt = 0;
 
                 for (i=1; i<4; i++) {
@@ -2393,7 +2393,7 @@ void split3op(pMesh mesh, pSol met, int k, int vx[6]){
                         mesh->xt++;
                         if ( mesh->xt >= mesh->xtmax ) {
                             /* realloc of xtetras table */
-                            TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,xTetra,
+                            _MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
                                          "larger xtetra table",
                                          mesh->xt--;
                                          printf("  Exit program.\n");
@@ -2401,7 +2401,7 @@ void split3op(pMesh mesh, pSol met, int k, int vx[6]){
                         }
                         pt[i]->xt = mesh->xt;
                         pxt0 = &mesh->xtetra[mesh->xt];
-                        memcpy(pxt0,&xt[i],sizeof(xTetra));
+                        memcpy(pxt0,&xt[i],sizeof(MMG5_xTetra));
                     }
                 }
             }
@@ -2415,13 +2415,13 @@ void split3op(pMesh mesh, pSol met, int k, int vx[6]){
                             firstxt = 0;
                             pt[i]->xt = pt[0]->xt;
                             pxt0 = &mesh->xtetra[(pt[i])->xt];
-                            memcpy(pxt0,&(xt[i]),sizeof(xTetra));
+                            memcpy(pxt0,&(xt[i]),sizeof(MMG5_xTetra));
                         }
                         else {
                             mesh->xt++;
                             if ( mesh->xt > mesh->xtmax ) {
                                 /* realloc of xtetras table */
-                                TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,xTetra,
+                                _MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
                                              "larger xtetra table",
                                              mesh->xt--;
                                              printf("  Exit program.\n");
@@ -2429,7 +2429,7 @@ void split3op(pMesh mesh, pSol met, int k, int vx[6]){
                             }
                             pt[i]->xt = mesh->xt;
                             pxt0 = &mesh->xtetra[mesh->xt];
-                            memcpy(pxt0,&xt[i],sizeof(xTetra));
+                            memcpy(pxt0,&xt[i],sizeof(MMG5_xTetra));
                         }
                     }
                 }
@@ -2462,7 +2462,7 @@ void split3op(pMesh mesh, pSol met, int k, int vx[6]){
 
         if ( pt[0]->xt ) {
             if ( isxt[0] ) {
-                memcpy(pxt0,&(xt[0]),sizeof(xTetra));
+                memcpy(pxt0,&(xt[0]),sizeof(MMG5_xTetra));
                 pt[1]->xt = pt[2]->xt = pt[3]->xt = pt[4]->xt = 0;
 
                 for(i=1; i<5; i++) {
@@ -2470,7 +2470,7 @@ void split3op(pMesh mesh, pSol met, int k, int vx[6]){
                         mesh->xt++;
                         if ( mesh->xt > mesh->xtmax ) {
                             /* realloc of xtetras table */
-                            TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,xTetra,
+                            _MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
                                          "larger xtetra table",
                                          mesh->xt--;
                                          printf("  Exit program.\n");
@@ -2478,7 +2478,7 @@ void split3op(pMesh mesh, pSol met, int k, int vx[6]){
                         }
                         pt[i]->xt = mesh->xt;
                         pxt0 = &mesh->xtetra[mesh->xt];
-                        memcpy(pxt0,&xt[i],sizeof(xTetra));
+                        memcpy(pxt0,&xt[i],sizeof(MMG5_xTetra));
                     }
                 }
             }
@@ -2492,13 +2492,13 @@ void split3op(pMesh mesh, pSol met, int k, int vx[6]){
                             firstxt = 0;
                             pt[i]->xt = pt[0]->xt;
                             pxt0 = &mesh->xtetra[pt[i]->xt];
-                            memcpy(pxt0,&xt[i],sizeof(xTetra));
+                            memcpy(pxt0,&xt[i],sizeof(MMG5_xTetra));
                         }
                         else {
                             mesh->xt++;
                             if ( mesh->xt > mesh->xtmax ) {
                                 /* realloc of xtetras table */
-                                TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,xTetra,
+                                _MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
                                              "larger xtetra table",
                                              mesh->xt--;
                                              printf("  Exit program.\n");
@@ -2506,7 +2506,7 @@ void split3op(pMesh mesh, pSol met, int k, int vx[6]){
                             }
                             pt[i]->xt = mesh->xt;
                             pxt0 = &mesh->xtetra[mesh->xt];
-                            memcpy(pxt0,&xt[i],sizeof(xTetra));
+                            memcpy(pxt0,&xt[i],sizeof(MMG5_xTetra));
                         }
                     }
                 }
@@ -2529,11 +2529,11 @@ void split3op(pMesh mesh, pSol met, int k, int vx[6]){
 /** Split a tetra in 3 tetras by introducing the point of coordinates o
  *  and barycentric coordinates cb in the face ifac;
  *  Update adjacency relations and return local indice of the new point in k. */
-int split3cb(pMesh mesh, pSol met, int k, int ifac, double o[3],
+int split3cb(MMG5_pMesh mesh, MMG5_pSol met, int k, int ifac, double o[3],
              double cb[4], int *ip ) {
-    pTetra        pt[3];
-    xTetra        xt[3];
-    pxTetra       pxt0;
+    MMG5_pTetra        pt[3];
+    MMG5_xTetra        xt[3];
+    MMG5_pxTetra       pxt0;
     double        hnew;
     int           ip0,ip1,ip2,iq0,iq1,iq2,i,iel,ifac2;
     int           newtet[3],newtet2[3],*adja, adj[4];
@@ -2546,16 +2546,16 @@ int split3cb(pMesh mesh, pSol met, int k, int ifac, double o[3],
     hnew = 0.0;
     if ( met->m ) {
         for ( i=0; i<3; i++) {
-            (*ip)    = pt[0]->v[idir[ifac][i]];
-            hnew += met->m[(*ip)]*cb[idir[ifac][i]];
+            (*ip)    = pt[0]->v[_MMG5_idir[ifac][i]];
+            hnew += met->m[(*ip)]*cb[_MMG5_idir[ifac][i]];
         }
     }
 
     (*ip) = newPt(mesh,o,MG_NOTAG);
     if ( !(*ip) ) {
-        POINT_REALLOC(mesh,met,*ip,mesh->gap,
+        _MMG5_POINT_REALLOC(mesh,met,*ip,mesh->gap,
                       printf("  ## Error: unable to allocate a new point\n");
-                      INCREASE_MEM_MESSAGE();
+                      _MMG5_INCREASE_MEM_MESSAGE();
                       return(-1)
                       ,o,MG_NOTAG);
     }
@@ -2563,9 +2563,9 @@ int split3cb(pMesh mesh, pSol met, int k, int ifac, double o[3],
 
     /* 1. we split the k^th tetra on face ifac */
     tau[0] = ifac;
-    tau[1] = idir[ifac][0];
-    tau[2] = idir[ifac][1];
-    tau[3] = idir[ifac][2];
+    tau[1] = _MMG5_idir[ifac][0];
+    tau[2] = _MMG5_idir[ifac][1];
+    tau[3] = _MMG5_idir[ifac][2];
     taued = &permedge[ifac*3][0];
 
     ip0 = pt[0]->v[tau[1]];
@@ -2575,9 +2575,9 @@ int split3cb(pMesh mesh, pSol met, int k, int ifac, double o[3],
     /* create 2 new tetras */
     iel = newElt(mesh);
     if ( !iel ) {
-        TETRA_REALLOC(mesh,iel,mesh->gap,
+        _MMG5_TETRA_REALLOC(mesh,iel,mesh->gap,
                       printf("  ## Error: unable to allocate a new element.\n");
-                      INCREASE_MEM_MESSAGE();
+                      _MMG5_INCREASE_MEM_MESSAGE();
                       delPt(mesh,(*ip));
                       return(-1));
         pt[0] = &mesh->tetra[newtet[0]];
@@ -2588,9 +2588,9 @@ int split3cb(pMesh mesh, pSol met, int k, int ifac, double o[3],
 
     iel = newElt(mesh);
     if ( !iel ) {
-        TETRA_REALLOC(mesh,iel,mesh->gap,
+        _MMG5_TETRA_REALLOC(mesh,iel,mesh->gap,
                       printf("  ## Error: unable to allocate a new element.\n");
-                      INCREASE_MEM_MESSAGE();
+                      _MMG5_INCREASE_MEM_MESSAGE();
                       delPt(mesh,(*ip));
                       delElt(mesh,newtet[1]);
                       return(-1));
@@ -2603,15 +2603,15 @@ int split3cb(pMesh mesh, pSol met, int k, int ifac, double o[3],
 
     if ( pt[0]->xt ) {
         pxt0 = &mesh->xtetra[pt[0]->xt];
-        memcpy(&xt[0],pxt0,sizeof(xTetra));
-        memcpy(&xt[1],pxt0,sizeof(xTetra));
-        memcpy(&xt[2],pxt0,sizeof(xTetra));
+        memcpy(&xt[0],pxt0,sizeof(MMG5_xTetra));
+        memcpy(&xt[1],pxt0,sizeof(MMG5_xTetra));
+        memcpy(&xt[2],pxt0,sizeof(MMG5_xTetra));
     }
     else {
         pxt0 = 0;
-        memset(&xt[0],0,sizeof(xTetra));
-        memset(&xt[1],0,sizeof(xTetra));
-        memset(&xt[2],0,sizeof(xTetra));
+        memset(&xt[0],0,sizeof(MMG5_xTetra));
+        memset(&xt[1],0,sizeof(MMG5_xTetra));
+        memset(&xt[2],0,sizeof(MMG5_xTetra));
     }
 
     /* Update vertices and xt fields */
@@ -2655,20 +2655,20 @@ int split3cb(pMesh mesh, pSol met, int k, int ifac, double o[3],
 
     if ( pt[0]->xt ) {
         if ( isxt[0] ) {
-            memcpy(pxt0,&xt[0],sizeof(xTetra));
+            memcpy(pxt0,&xt[0],sizeof(MMG5_xTetra));
             for (i=1; i<3; i++) {
                 if ( isxt[i] ) {
                     mesh->xt++;
                     if ( mesh->xt > mesh->xtmax ) {
                         /* realloc of xtetras table */
-                        TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,xTetra,
+                        _MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
                                      "larger xtetra table",
                                      mesh->xt--;
                                      return(-1));
                     }
                     pt[i]->xt = mesh->xt;
                     pxt0 = &mesh->xtetra[mesh->xt];
-                    memcpy(pxt0,&xt[i],sizeof(xTetra));
+                    memcpy(pxt0,&xt[i],sizeof(MMG5_xTetra));
                 }
                 else {
                     pt[i]->xt = 0;
@@ -2683,20 +2683,20 @@ int split3cb(pMesh mesh, pSol met, int k, int ifac, double o[3],
                         firstxt = 0;
                         pt[i]->xt = pt[0]->xt;
                         pxt0 = &mesh->xtetra[(pt[i])->xt];
-                        memcpy(pxt0,&xt[i],sizeof(xTetra));
+                        memcpy(pxt0,&xt[i],sizeof(MMG5_xTetra));
                     }
                     else {
                         mesh->xt++;
                         if ( mesh->xt > mesh->xtmax ) {
                             /* realloc of xtetras table */
-                            TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,xTetra,
+                            _MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
                                          "larger xtetra table",
                                          mesh->xt--;
                                          return(-1));
                         }
                         pt[i]->xt = mesh->xt;
                         pxt0 = &mesh->xtetra[mesh->xt];
-                        memcpy(pxt0,&xt[i],sizeof(xTetra));
+                        memcpy(pxt0,&xt[i],sizeof(MMG5_xTetra));
                     }
                 }
                 else {
@@ -2750,9 +2750,9 @@ int split3cb(pMesh mesh, pSol met, int k, int ifac, double o[3],
     pt[0]->flag = 0;
 
     tau2[0] = ifac2;
-    tau2[1] = idir[ifac2][0];
-    tau2[2] = idir[ifac2][1];
-    tau2[3] = idir[ifac2][2];
+    tau2[1] = _MMG5_idir[ifac2][0];
+    tau2[2] = _MMG5_idir[ifac2][1];
+    tau2[3] = _MMG5_idir[ifac2][2];
     taued = &permedge[ifac2*3][0];
 
     iq0 = pt[0]->v[tau2[1]];
@@ -2762,9 +2762,9 @@ int split3cb(pMesh mesh, pSol met, int k, int ifac, double o[3],
     /* create 2 new tetras */
     iel = newElt(mesh);
     if ( !iel ) {
-        TETRA_REALLOC(mesh,iel,mesh->gap,
+        _MMG5_TETRA_REALLOC(mesh,iel,mesh->gap,
                       printf("  ## Error: unable to allocate a new element.\n");
-                      INCREASE_MEM_MESSAGE();
+                      _MMG5_INCREASE_MEM_MESSAGE();
                       delPt(mesh,(*ip));
                       return(-1));
         pt[0] = &mesh->tetra[newtet2[0]];
@@ -2775,9 +2775,9 @@ int split3cb(pMesh mesh, pSol met, int k, int ifac, double o[3],
 
     iel = newElt(mesh);
     if ( !iel ) {
-        TETRA_REALLOC(mesh,iel,mesh->gap,
+        _MMG5_TETRA_REALLOC(mesh,iel,mesh->gap,
                       printf("  ## Error: unable to allocate a new element.\n");
-                      INCREASE_MEM_MESSAGE();
+                      _MMG5_INCREASE_MEM_MESSAGE();
                       delPt(mesh,(*ip));
                       delElt(mesh,newtet[1]);
                       return(-1));
@@ -2790,15 +2790,15 @@ int split3cb(pMesh mesh, pSol met, int k, int ifac, double o[3],
 
     if ( pt[0]->xt ) {
         pxt0 = &mesh->xtetra[pt[0]->xt];
-        memcpy(&xt[0],pxt0,sizeof(xTetra));
-        memcpy(&xt[1],pxt0,sizeof(xTetra));
-        memcpy(&xt[2],pxt0,sizeof(xTetra));
+        memcpy(&xt[0],pxt0,sizeof(MMG5_xTetra));
+        memcpy(&xt[1],pxt0,sizeof(MMG5_xTetra));
+        memcpy(&xt[2],pxt0,sizeof(MMG5_xTetra));
     }
     else {
         pxt0 = 0;
-        memset(&xt[0],0,sizeof(xTetra));
-        memset(&xt[1],0,sizeof(xTetra));
-        memset(&xt[2],0,sizeof(xTetra));
+        memset(&xt[0],0,sizeof(MMG5_xTetra));
+        memset(&xt[1],0,sizeof(MMG5_xTetra));
+        memset(&xt[2],0,sizeof(MMG5_xTetra));
     }
 
     /* Update vertices and xt fields */
@@ -2842,20 +2842,20 @@ int split3cb(pMesh mesh, pSol met, int k, int ifac, double o[3],
 
     if ( pt[0]->xt ) {
         if ( isxt[0] ) {
-            memcpy(pxt0,&xt[0],sizeof(xTetra));
+            memcpy(pxt0,&xt[0],sizeof(MMG5_xTetra));
             for (i=1; i<3; i++) {
                 if ( isxt[i] ) {
                     mesh->xt++;
                     if ( mesh->xt > mesh->xtmax ) {
                         /* realloc of xtetras table */
-                        TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,xTetra,
+                        _MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
                                      "larger xtetra table",
                                      mesh->xt--;
                                      return(-1));
                     }
                     pt[i]->xt = mesh->xt;
                     pxt0 = &mesh->xtetra[mesh->xt];
-                    memcpy(pxt0,&xt[i],sizeof(xTetra));
+                    memcpy(pxt0,&xt[i],sizeof(MMG5_xTetra));
                 }
                 else {
                     pt[i]->xt = 0;
@@ -2870,20 +2870,20 @@ int split3cb(pMesh mesh, pSol met, int k, int ifac, double o[3],
                         firstxt = 0;
                         pt[i]->xt = pt[0]->xt;
                         pxt0 = &mesh->xtetra[(pt[i])->xt];
-                        memcpy(pxt0,&xt[i],sizeof(xTetra));
+                        memcpy(pxt0,&xt[i],sizeof(MMG5_xTetra));
                     }
                     else {
                         mesh->xt++;
                         if ( mesh->xt > mesh->xtmax ) {
                             /* realloc of xtetras table */
-                            TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,xTetra,
+                            _MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
                                          "larger xtetra table",
                                          mesh->xt--;
                                          return(-1));
                         }
                         pt[i]->xt = mesh->xt;
                         pxt0 = &mesh->xtetra[mesh->xt];
-                        memcpy(pxt0,&xt[i],sizeof(xTetra));
+                        memcpy(pxt0,&xt[i],sizeof(MMG5_xTetra));
                     }
                 }
                 else {
@@ -2955,11 +2955,11 @@ int split3cb(pMesh mesh, pSol met, int k, int ifac, double o[3],
 
 /** Split a tetra in 4 tetras by introducing its barycenter
     FOR NOW : flags, that tell which edge should be split, are not updated (erased) : UPDATE NEEDED ?*/
-int split4bar(pMesh mesh, pSol met, int k) {
-    pTetra   pt[4];
-    pPoint   ppt;
-    xTetra   xt[4];
-    pxTetra  pxt0;
+int split4bar(MMG5_pMesh mesh, MMG5_pSol met, int k) {
+    MMG5_pTetra   pt[4];
+    MMG5_pPoint   ppt;
+    MMG5_xTetra   xt[4];
+    MMG5_pxTetra  pxt0;
     double   o[3],hnew;
     int      i,ib,iel;
     int      newtet[4];
@@ -2986,9 +2986,9 @@ int split4bar(pMesh mesh, pSol met, int k) {
 
     ib = newPt(mesh,o,0);
     if ( !ib ) {
-        POINT_REALLOC(mesh,met,ib,mesh->gap,
+        _MMG5_POINT_REALLOC(mesh,met,ib,mesh->gap,
                       printf("  ## Error: unable to allocate a new point\n");
-                      INCREASE_MEM_MESSAGE();
+                      _MMG5_INCREASE_MEM_MESSAGE();
                       return(0)
                       ,o,0);
     }
@@ -2997,9 +2997,9 @@ int split4bar(pMesh mesh, pSol met, int k) {
     /* create 3 new tetras */
     iel = newElt(mesh);
     if ( !iel ) {
-        TETRA_REALLOC(mesh,iel,mesh->gap,
+        _MMG5_TETRA_REALLOC(mesh,iel,mesh->gap,
                       printf("  ## Error: unable to allocate a new element.\n");
-                      INCREASE_MEM_MESSAGE();
+                      _MMG5_INCREASE_MEM_MESSAGE();
                       delPt(mesh,ib);
                       return(0));
         pt[0] = &mesh->tetra[newtet[0]];
@@ -3010,9 +3010,9 @@ int split4bar(pMesh mesh, pSol met, int k) {
 
     iel = newElt(mesh);
     if ( !iel ) {
-        TETRA_REALLOC(mesh,iel,mesh->gap,
+        _MMG5_TETRA_REALLOC(mesh,iel,mesh->gap,
                       printf("  ## Error: unable to allocate a new element.\n");
-                      INCREASE_MEM_MESSAGE();
+                      _MMG5_INCREASE_MEM_MESSAGE();
                       delPt(mesh,ib);
                       delElt(mesh,newtet[1]);
                       return(0));
@@ -3025,9 +3025,9 @@ int split4bar(pMesh mesh, pSol met, int k) {
 
     iel = newElt(mesh);
     if ( !iel ) {
-        TETRA_REALLOC(mesh,iel,mesh->gap,
+        _MMG5_TETRA_REALLOC(mesh,iel,mesh->gap,
                       printf("  ## Error: unable to allocate a new element.\n");
-                      INCREASE_MEM_MESSAGE();
+                      _MMG5_INCREASE_MEM_MESSAGE();
                       delPt(mesh,ib);
                       delElt(mesh,newtet[1]);
                       delElt(mesh,newtet[2]);
@@ -3040,17 +3040,17 @@ int split4bar(pMesh mesh, pSol met, int k) {
     pt[3] = memcpy(pt[3],pt[0],sizeof(Tetra));
     newtet[3]=iel;
 
-    memset(&xt[0],0, sizeof(xTetra));
-    memset(&xt[1],0, sizeof(xTetra));
-    memset(&xt[2],0, sizeof(xTetra));
-    memset(&xt[3],0, sizeof(xTetra));
+    memset(&xt[0],0, sizeof(MMG5_xTetra));
+    memset(&xt[1],0, sizeof(MMG5_xTetra));
+    memset(&xt[2],0, sizeof(MMG5_xTetra));
+    memset(&xt[3],0, sizeof(MMG5_xTetra));
     pxt0 = 0;
     if ( pt[0]->xt ) {
         pxt0 = &mesh->xtetra[pt[0]->xt];
-        memcpy(&xt[0],pxt0,sizeof(xTetra));
-        memcpy(&xt[1],pxt0,sizeof(xTetra));
-        memcpy(&xt[2],pxt0,sizeof(xTetra));
-        memcpy(&xt[3],pxt0,sizeof(xTetra));
+        memcpy(&xt[0],pxt0,sizeof(MMG5_xTetra));
+        memcpy(&xt[1],pxt0,sizeof(MMG5_xTetra));
+        memcpy(&xt[2],pxt0,sizeof(MMG5_xTetra));
+        memcpy(&xt[3],pxt0,sizeof(MMG5_xTetra));
     }
 
     /* Update vertices and xt fields */
@@ -3105,20 +3105,20 @@ int split4bar(pMesh mesh, pSol met, int k) {
 
     if ( pt[0]->xt ) {
         if ( isxt[0] ) {
-            memcpy(pxt0,&xt[0],sizeof(xTetra));
+            memcpy(pxt0,&xt[0],sizeof(MMG5_xTetra));
             for (i=1; i<4; i++) {
                 if ( isxt[i] ) {
                     mesh->xt++;
                     if ( mesh->xt > mesh->xtmax ) {
                         /* realloc of xtetras table */
-                        TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,xTetra,
+                        _MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
                                      "larger xtetra table",
                                      mesh->xt--;
                                      return(0));
                     }
                     pt[i]->xt = mesh->xt;
                     pxt0 = &mesh->xtetra[mesh->xt];
-                    memcpy(pxt0,&xt[i],sizeof(xTetra));
+                    memcpy(pxt0,&xt[i],sizeof(MMG5_xTetra));
                 }
                 else {
                     pt[i]->xt = 0;
@@ -3133,20 +3133,20 @@ int split4bar(pMesh mesh, pSol met, int k) {
                         firstxt = 0;
                         pt[i]->xt = pt[0]->xt;
                         pxt0 = &mesh->xtetra[(pt[i])->xt];
-                        memcpy(pxt0,&xt[i],sizeof(xTetra));
+                        memcpy(pxt0,&xt[i],sizeof(MMG5_xTetra));
                     }
                     else {
                         mesh->xt++;
                         if ( mesh->xt > mesh->xtmax ) {
                             /* realloc of xtetras table */
-                            TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,xTetra,
+                            _MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
                                          "larger xtetra table",
                                          mesh->xt--;
                                          return(0));
                         }
                         pt[i]->xt = mesh->xt;
                         pxt0 = &mesh->xtetra[mesh->xt];
-                        memcpy(pxt0,&xt[i],sizeof(xTetra));
+                        memcpy(pxt0,&xt[i],sizeof(MMG5_xTetra));
                     }
                 }
                 else {
@@ -3169,10 +3169,10 @@ int split4bar(pMesh mesh, pSol met, int k) {
 /** Split a tetra in 4 tetras by introducing a point o whose barycentric coordinates cb
  *  are known.
  *  Update adjacency relations */
-int split4cb(pMesh mesh, pSol met, int k, double o[3], double cb[4], int *ip ) {
-    pTetra        pt[4];
-    xTetra        xt[4];
-    pxTetra       pxt0;
+int split4cb(MMG5_pMesh mesh, MMG5_pSol met, int k, double o[3], double cb[4], int *ip ) {
+    MMG5_pTetra        pt[4];
+    MMG5_xTetra        xt[4];
+    MMG5_pxTetra       pxt0;
     double        hnew;
     int           i,iel,*adja, adj[4],newtet[4];
     unsigned char isxt[4],firstxt;
@@ -3200,9 +3200,9 @@ int split4cb(pMesh mesh, pSol met, int k, double o[3], double cb[4], int *ip ) {
     /* create 3 new tetras */
     iel = newElt(mesh);
     if ( !iel ) {
-        TETRA_REALLOC(mesh,iel,mesh->gap,
+        _MMG5_TETRA_REALLOC(mesh,iel,mesh->gap,
                       printf("  ## Error: unable to allocate a new element.\n");
-                      INCREASE_MEM_MESSAGE();
+                      _MMG5_INCREASE_MEM_MESSAGE();
                       delPt(mesh,(*ip));
                       return(0));
         pt[0] = &mesh->tetra[newtet[0]];
@@ -3213,9 +3213,9 @@ int split4cb(pMesh mesh, pSol met, int k, double o[3], double cb[4], int *ip ) {
 
     iel = newElt(mesh);
     if ( !iel ) {
-        TETRA_REALLOC(mesh,iel,mesh->gap,
+        _MMG5_TETRA_REALLOC(mesh,iel,mesh->gap,
                       printf("  ## Error: unable to allocate a new element.\n");
-                      INCREASE_MEM_MESSAGE();
+                      _MMG5_INCREASE_MEM_MESSAGE();
                       delPt(mesh,(*ip));
                       delElt(mesh,newtet[1]);
                       return(0));
@@ -3228,9 +3228,9 @@ int split4cb(pMesh mesh, pSol met, int k, double o[3], double cb[4], int *ip ) {
 
     iel = newElt(mesh);
     if ( !iel ) {
-        TETRA_REALLOC(mesh,iel,mesh->gap,
+        _MMG5_TETRA_REALLOC(mesh,iel,mesh->gap,
                       printf("  ## Error: unable to allocate a new element.\n");
-                      INCREASE_MEM_MESSAGE();
+                      _MMG5_INCREASE_MEM_MESSAGE();
                       delPt(mesh,(*ip));
                       delElt(mesh,newtet[1]);
                       delElt(mesh,newtet[2]);
@@ -3243,17 +3243,17 @@ int split4cb(pMesh mesh, pSol met, int k, double o[3], double cb[4], int *ip ) {
     pt[3] = memcpy(pt[3],pt[0],sizeof(Tetra));
     newtet[3]=iel;
 
-    memset(&xt[0],0, sizeof(xTetra));
-    memset(&xt[1],0, sizeof(xTetra));
-    memset(&xt[2],0, sizeof(xTetra));
-    memset(&xt[3],0, sizeof(xTetra));
+    memset(&xt[0],0, sizeof(MMG5_xTetra));
+    memset(&xt[1],0, sizeof(MMG5_xTetra));
+    memset(&xt[2],0, sizeof(MMG5_xTetra));
+    memset(&xt[3],0, sizeof(MMG5_xTetra));
     pxt0 = 0;
     if ( pt[0]->xt ) {
         pxt0 = &mesh->xtetra[pt[0]->xt];
-        memcpy(&xt[0],pxt0,sizeof(xTetra));
-        memcpy(&xt[1],pxt0,sizeof(xTetra));
-        memcpy(&xt[2],pxt0,sizeof(xTetra));
-        memcpy(&xt[3],pxt0,sizeof(xTetra));
+        memcpy(&xt[0],pxt0,sizeof(MMG5_xTetra));
+        memcpy(&xt[1],pxt0,sizeof(MMG5_xTetra));
+        memcpy(&xt[2],pxt0,sizeof(MMG5_xTetra));
+        memcpy(&xt[3],pxt0,sizeof(MMG5_xTetra));
     }
 
     /* Update vertices and xt fields */
@@ -3306,12 +3306,12 @@ int split4cb(pMesh mesh, pSol met, int k, double o[3], double cb[4], int *ip ) {
 
     if ( pt[0]->xt ) {
         if ( isxt[0] ) {
-            memcpy(pxt0,&xt[0],sizeof(xTetra));
+            memcpy(pxt0,&xt[0],sizeof(MMG5_xTetra));
             for (i=1; i<4; i++) {
                 if ( isxt[i] ) {
                     if ( mesh->xt > mesh->xtmax ) {
                         /* realloc of xtetras table */
-                        TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,xTetra,
+                        _MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
                                      "larger xtetra table",
                                      mesh->xt--;
                                      printf("  Exit program.\n");
@@ -3319,7 +3319,7 @@ int split4cb(pMesh mesh, pSol met, int k, double o[3], double cb[4], int *ip ) {
                     }
                     pt[i]->xt = mesh->xt;
                     pxt0 = &mesh->xtetra[mesh->xt];
-                    memcpy(pxt0,&xt[i],sizeof(xTetra));
+                    memcpy(pxt0,&xt[i],sizeof(MMG5_xTetra));
                 }
                 else {
                     pt[i]->xt = 0;
@@ -3334,19 +3334,19 @@ int split4cb(pMesh mesh, pSol met, int k, double o[3], double cb[4], int *ip ) {
                         firstxt = 0;
                         pt[i]->xt = pt[0]->xt;
                         pxt0 = &mesh->xtetra[(pt[i])->xt];
-                        memcpy(pxt0,&xt[i],sizeof(xTetra));
+                        memcpy(pxt0,&xt[i],sizeof(MMG5_xTetra));
                     }
                     else {
                         if ( mesh->xt > mesh->xtmax ) {
                             /* realloc of xtetras table */
-                            TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,xTetra,
+                            _MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
                                          "larger xtetra table",
                                          mesh->xt--;
                                          return(0));
                         }
                         pt[i]->xt = mesh->xt;
                         pxt0 = &mesh->xtetra[mesh->xt];
-                        memcpy(pxt0,&xt[i],sizeof(xTetra));
+                        memcpy(pxt0,&xt[i],sizeof(MMG5_xTetra));
                     }
                 }
                 else {
@@ -3403,10 +3403,10 @@ int split4cb(pMesh mesh, pSol met, int k, double o[3], double cb[4], int *ip ) {
 #endif
 
 /** Split 4 edges in a configuration when 3 lie on the same face */
-void split4sf(pMesh mesh,pSol met,int k,int vx[6]) {
-    pTetra    pt[6];
-    xTetra    xt[6];
-    pxTetra   pxt0;
+void split4sf(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
+    MMG5_pTetra    pt[6];
+    MMG5_xTetra    xt[6];
+    MMG5_pxTetra   pxt0;
     int       iel;
     int       newtet[6];
     char      flg,firstxt,isxt[6],imin12,imin23,j,i;
@@ -3484,9 +3484,9 @@ void split4sf(pMesh mesh,pSol met,int k,int vx[6]) {
     for (j=1; j<6; j++) {
         iel = newElt(mesh);
         if ( !iel ) {
-            TETRA_REALLOC(mesh,iel,mesh->gap,
+            _MMG5_TETRA_REALLOC(mesh,iel,mesh->gap,
                           printf("  ## Error: unable to allocate a new element.\n");
-                          INCREASE_MEM_MESSAGE();
+                          _MMG5_INCREASE_MEM_MESSAGE();
                           printf("  Exit program.\n");
                           exit(EXIT_FAILURE));
             for ( i=0; i<j; i++)
@@ -3500,13 +3500,13 @@ void split4sf(pMesh mesh,pSol met,int k,int vx[6]) {
     if ( (pt[0])->xt ) {
         pxt0 = &mesh->xtetra[(pt[0])->xt];
         for (j=0; j<6; j++) {
-            memcpy(&xt[j],pxt0, sizeof(xTetra));
+            memcpy(&xt[j],pxt0, sizeof(MMG5_xTetra));
         }
     }
     else {
         pxt0 = 0;
         for (j=0; j<6; j++) {
-            memset(&xt[j],0, sizeof(xTetra));
+            memset(&xt[j],0, sizeof(MMG5_xTetra));
         }
     }
 
@@ -3632,7 +3632,7 @@ void split4sf(pMesh mesh,pSol met,int k,int vx[6]) {
 
     if ( pt[0]->xt ) {
         if ( isxt[0] ) {
-            memcpy(pxt0,&xt[0],sizeof(xTetra));
+            memcpy(pxt0,&xt[0],sizeof(MMG5_xTetra));
             pt[1]->xt = pt[2]->xt = pt[3]->xt = pt[4]->xt = pt[5]->xt = 0;
 
             for (i=1; i<6; i++) {
@@ -3640,7 +3640,7 @@ void split4sf(pMesh mesh,pSol met,int k,int vx[6]) {
                     mesh->xt++;
                     if ( mesh->xt > mesh->xtmax ) {
                         /* realloc of xtetras table */
-                        TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,xTetra,
+                        _MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
                                      "larger xtetra table",
                                      mesh->xt--;
                                      printf("  Exit program.\n");
@@ -3648,7 +3648,7 @@ void split4sf(pMesh mesh,pSol met,int k,int vx[6]) {
                     }
                     pt[i]->xt = mesh->xt;
                     pxt0 = &mesh->xtetra[mesh->xt];
-                    memcpy(pxt0,&xt[i],sizeof(xTetra));
+                    memcpy(pxt0,&xt[i],sizeof(MMG5_xTetra));
                 }
             }
         }
@@ -3662,13 +3662,13 @@ void split4sf(pMesh mesh,pSol met,int k,int vx[6]) {
                         firstxt = 0;
                         pt[i]->xt = pt[0]->xt;
                         pxt0 = &mesh->xtetra[(pt[i])->xt];
-                        memcpy(pxt0,&xt[i],sizeof(xTetra));
+                        memcpy(pxt0,&xt[i],sizeof(MMG5_xTetra));
                     }
                     else {
                         mesh->xt++;
                         if ( mesh->xt > mesh->xtmax ) {
                             /* realloc of xtetras table */
-                            TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,xTetra,
+                            _MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
                                          "larger xtetra table",
                                          mesh->xt--;
                                          printf("  Exit program.\n");
@@ -3676,7 +3676,7 @@ void split4sf(pMesh mesh,pSol met,int k,int vx[6]) {
                         }
                         pt[i]->xt = mesh->xt;
                         pxt0 = &mesh->xtetra[mesh->xt];
-                        memcpy(pxt0,&xt[i],sizeof(xTetra));
+                        memcpy(pxt0,&xt[i],sizeof(MMG5_xTetra));
                     }
                 }
             }
@@ -3689,10 +3689,10 @@ void split4sf(pMesh mesh,pSol met,int k,int vx[6]) {
 }
 
 /** Split 4 edges in a configuration when no 3 edges lie on the same face */
-void split4op(pMesh mesh,pSol met,int k,int vx[6]) {
-    pTetra        pt[6];
-    xTetra        xt[6];
-    pxTetra       pxt0;
+void split4op(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
+    MMG5_pTetra        pt[6];
+    MMG5_xTetra        xt[6];
+    MMG5_pxTetra       pxt0;
     int           iel;
     int           newtet[6];
     char          flg,firstxt,isxt[6],i,j,imin01,imin23;
@@ -3726,9 +3726,9 @@ void split4op(pMesh mesh,pSol met,int k,int vx[6]) {
     for (j=1; j<6; j++) {
         iel = newElt(mesh);
         if ( !iel ) {
-            TETRA_REALLOC(mesh,iel,mesh->gap,
+            _MMG5_TETRA_REALLOC(mesh,iel,mesh->gap,
                           printf("  ## Error: unable to allocate a new element.\n");
-                          INCREASE_MEM_MESSAGE();
+                          _MMG5_INCREASE_MEM_MESSAGE();
                           printf("  Exit program.\n");
                           exit(EXIT_FAILURE));
             for ( i=0; i<j; i++)
@@ -3742,13 +3742,13 @@ void split4op(pMesh mesh,pSol met,int k,int vx[6]) {
     if ( (pt[0])->xt ) {
         pxt0 = &mesh->xtetra[(pt[0])->xt];
         for (j=0; j<6; j++) {
-            memcpy(&xt[j],pxt0, sizeof(xTetra));
+            memcpy(&xt[j],pxt0, sizeof(MMG5_xTetra));
         }
     }
     else {
         pxt0 = 0;
         for (j=0; j<6; j++) {
-            memset(&xt[j],0, sizeof(xTetra));
+            memset(&xt[j],0, sizeof(MMG5_xTetra));
         }
     }
 
@@ -3890,7 +3890,7 @@ void split4op(pMesh mesh,pSol met,int k,int vx[6]) {
     // In this case, at least one of the 4 created tets must have a special field
     if ( pt[0]->xt ) {
         if ( isxt[0] ) {
-            memcpy(pxt0,&xt[0],sizeof(xTetra));
+            memcpy(pxt0,&xt[0],sizeof(MMG5_xTetra));
             pt[1]->xt = pt[2]->xt = pt[3]->xt = pt[4]->xt = pt[5]->xt = 0;
 
             for (i=1; i<6; i++) {
@@ -3898,7 +3898,7 @@ void split4op(pMesh mesh,pSol met,int k,int vx[6]) {
                     mesh->xt++;
                     if ( mesh->xt > mesh->xtmax ) {
                         /* realloc of xtetras table */
-                        TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,xTetra,
+                        _MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
                                      "larger xtetra table",
                                      mesh->xt--;
                                      printf("  Exit program.\n");
@@ -3906,7 +3906,7 @@ void split4op(pMesh mesh,pSol met,int k,int vx[6]) {
                     }
                     pt[i]->xt = mesh->xt;
                     pxt0 = &mesh->xtetra[mesh->xt];
-                    memcpy(pxt0,&xt[i],sizeof(xTetra));
+                    memcpy(pxt0,&xt[i],sizeof(MMG5_xTetra));
                 }
             }
         }
@@ -3920,13 +3920,13 @@ void split4op(pMesh mesh,pSol met,int k,int vx[6]) {
                         firstxt = 0;
                         pt[i]->xt = pt[0]->xt;
                         pxt0 = &mesh->xtetra[ pt[i]->xt];
-                        memcpy(pxt0,&xt[i],sizeof(xTetra));
+                        memcpy(pxt0,&xt[i],sizeof(MMG5_xTetra));
                     }
                     else {
                         mesh->xt++;
                         if ( mesh->xt > mesh->xtmax ) {
                             /* realloc of xtetras table */
-                            TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,xTetra,
+                            _MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
                                          "larger xtetra table",
                                          mesh->xt--;
                                          printf("  Exit program.\n");
@@ -3934,7 +3934,7 @@ void split4op(pMesh mesh,pSol met,int k,int vx[6]) {
                         }
                         pt[i]->xt = mesh->xt;
                         pxt0 = &mesh->xtetra[mesh->xt];
-                        memcpy(pxt0,&(xt[i]),sizeof(xTetra));
+                        memcpy(pxt0,&(xt[i]),sizeof(MMG5_xTetra));
                     }
                 }
             }
@@ -3948,10 +3948,10 @@ void split4op(pMesh mesh,pSol met,int k,int vx[6]) {
 }
 
 /** Split 5 edges */
-void split5(pMesh mesh,pSol met,int k,int vx[6]) {
-    pTetra    pt[7];
-    xTetra    xt[7];
-    pxTetra   pxt0;
+void split5(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
+    MMG5_pTetra    pt[7];
+    MMG5_xTetra    xt[7];
+    MMG5_pxTetra   pxt0;
     int       iel,i,j;
     int       newtet[7];
     char      flg,firstxt,isxt[7],imin;
@@ -3966,9 +3966,9 @@ void split5(pMesh mesh,pSol met,int k,int vx[6]) {
     for (i=1; i<7; i++) {
         iel = newElt(mesh);
         if ( !iel ) {
-            TETRA_REALLOC(mesh,iel,mesh->gap,
+            _MMG5_TETRA_REALLOC(mesh,iel,mesh->gap,
                           printf("  ## Error: unable to allocate a new element.\n");
-                          INCREASE_MEM_MESSAGE();
+                          _MMG5_INCREASE_MEM_MESSAGE();
                           printf("  Exit program.\n");
                           exit(EXIT_FAILURE));
             for ( j=0; j<i; j++)
@@ -3982,13 +3982,13 @@ void split5(pMesh mesh,pSol met,int k,int vx[6]) {
     if ( pt[0]->xt ) {
         pxt0 = &mesh->xtetra[(pt[0])->xt];
         for (i=0; i<7; i++) {
-            memcpy(&xt[i],pxt0, sizeof(xTetra));
+            memcpy(&xt[i],pxt0, sizeof(MMG5_xTetra));
         }
     }
     else {
         pxt0 = 0;
         for (i=0; i<7; i++) {
-            memset(&xt[i],0, sizeof(xTetra));
+            memset(&xt[i],0, sizeof(MMG5_xTetra));
         }
     }
 
@@ -4148,7 +4148,7 @@ void split5(pMesh mesh,pSol met,int k,int vx[6]) {
 
     if ( pt[0]->xt ) {
         if ( isxt[0] ) {
-            memcpy(pxt0,&xt[0],sizeof(xTetra));
+            memcpy(pxt0,&xt[0],sizeof(MMG5_xTetra));
             pt[1]->xt = pt[2]->xt = pt[3]->xt = pt[4]->xt = pt[5]->xt = pt[6]->xt = 0;
 
             for (i=1; i<7; i++) {
@@ -4156,7 +4156,7 @@ void split5(pMesh mesh,pSol met,int k,int vx[6]) {
                     mesh->xt++;
                     if ( mesh->xt > mesh->xtmax ) {
                         /* realloc of xtetras table */
-                        TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,xTetra,
+                        _MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
                                      "larger xtetra table",
                                      mesh->xt--;
                                      printf("  Exit program.\n");
@@ -4164,7 +4164,7 @@ void split5(pMesh mesh,pSol met,int k,int vx[6]) {
                     }
                     pt[i]->xt = mesh->xt;
                     pxt0 = &mesh->xtetra[mesh->xt];
-                    memcpy(pxt0,&xt[i],sizeof(xTetra));
+                    memcpy(pxt0,&xt[i],sizeof(MMG5_xTetra));
                 }
             }
         }
@@ -4178,13 +4178,13 @@ void split5(pMesh mesh,pSol met,int k,int vx[6]) {
                         firstxt = 0;
                         pt[i]->xt = pt[0]->xt;
                         pxt0 = &mesh->xtetra[(pt[i])->xt];
-                        memcpy(pxt0,&xt[i],sizeof(xTetra));
+                        memcpy(pxt0,&xt[i],sizeof(MMG5_xTetra));
                     }
                     else {
                         mesh->xt++;
                         if ( mesh->xt > mesh->xtmax ) {
                             /* realloc of xtetras table */
-                            TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,xTetra,
+                            _MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
                                          "larger xtetra table",
                                          mesh->xt--;
                                          printf("  Exit program.\n");
@@ -4192,7 +4192,7 @@ void split5(pMesh mesh,pSol met,int k,int vx[6]) {
                         }
                         pt[i]->xt = mesh->xt;
                         pxt0 = &mesh->xtetra[mesh->xt];
-                        memcpy(pxt0,&xt[i],sizeof(xTetra));
+                        memcpy(pxt0,&xt[i],sizeof(MMG5_xTetra));
                     }
                 }
             }
@@ -4206,10 +4206,10 @@ void split5(pMesh mesh,pSol met,int k,int vx[6]) {
 }
 
 /** split all faces (6 edges) */
-void split6(pMesh mesh,pSol met,int k,int vx[6]) {
-    pTetra    pt[8];
-    xTetra    xt0,xt;
-    pxTetra   pxt;
+void split6(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
+    MMG5_pTetra    pt[8];
+    MMG5_xTetra    xt0,xt;
+    MMG5_pxTetra   pxt;
     int       i,j,iel,nxt0;
     int       newtet[8];
     char      isxt0,isxt;
@@ -4220,15 +4220,15 @@ void split6(pMesh mesh,pSol met,int k,int vx[6]) {
 
     nxt0 = pt[0]->xt;
     pxt = &mesh->xtetra[nxt0];
-    memcpy(&xt0,pxt,sizeof(xTetra));
+    memcpy(&xt0,pxt,sizeof(MMG5_xTetra));
 
     /* create 7 new tetras */
     for (i=1; i<8; i++) {
         iel = newElt(mesh);
         if ( !iel ) {
-            TETRA_REALLOC(mesh,iel,mesh->gap,
+            _MMG5_TETRA_REALLOC(mesh,iel,mesh->gap,
                           printf("  ## Error: unable to allocate a new element.\n");
-                          INCREASE_MEM_MESSAGE();
+                          _MMG5_INCREASE_MEM_MESSAGE();
                           printf("  Exit program.\n");
                           exit(EXIT_FAILURE));
             for ( j=0; j<i; j++ )
@@ -4242,7 +4242,7 @@ void split6(pMesh mesh,pSol met,int k,int vx[6]) {
     /* Modify first tetra */
     pt[0]->v[1] = vx[0] ; pt[0]->v[2] = vx[1]; pt[0]->v[3] = vx[2];
     if ( nxt0 ) {
-        memcpy(&xt,&xt0,sizeof(xTetra));
+        memcpy(&xt,&xt0,sizeof(MMG5_xTetra));
         xt.tag[3] = 0;  xt.tag[4] = 0;
         xt.tag[5] = 0;  xt.edg[3] = 0;
         xt.edg[4] = 0;  xt.edg[5] = 0;
@@ -4260,7 +4260,7 @@ void split6(pMesh mesh,pSol met,int k,int vx[6]) {
 #endif
 
         if ( isxt0 ) {
-            memcpy(pxt,&xt,sizeof(xTetra));
+            memcpy(pxt,&xt,sizeof(MMG5_xTetra));
         }
         else {
             pt[0]->xt = 0;
@@ -4271,7 +4271,7 @@ void split6(pMesh mesh,pSol met,int k,int vx[6]) {
     pt[1]->v[0] = vx[0] ; pt[1]->v[2] = vx[3]; pt[1]->v[3] = vx[4];
 
     if ( nxt0 ) {
-        memcpy(&xt,&xt0,sizeof(xTetra));
+        memcpy(&xt,&xt0,sizeof(MMG5_xTetra));
         xt.tag[1] = 0;  xt.tag[2] = 0;
         xt.tag[5] = 0;  xt.edg[1] = 0;
         xt.edg[2] = 0;  xt.edg[5] = 0;
@@ -4296,13 +4296,13 @@ void split6(pMesh mesh,pSol met,int k,int vx[6]) {
                 isxt0 = 1;
                 pt[1]->xt = nxt0;
                 pxt = &mesh->xtetra[pt[1]->xt];
-                memcpy(pxt,&xt,sizeof(xTetra));
+                memcpy(pxt,&xt,sizeof(MMG5_xTetra));
             }
             else {
                 mesh->xt++;
                 if ( mesh->xt > mesh->xtmax ) {
                     /* realloc of xtetras table */
-                    TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,xTetra,
+                    _MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
                                  "larger xtetra table",
                                  mesh->xt--;
                                  printf("  Exit program.\n");
@@ -4310,7 +4310,7 @@ void split6(pMesh mesh,pSol met,int k,int vx[6]) {
                 }
                 pt[1]->xt = mesh->xt;
                 pxt = &mesh->xtetra[pt[1]->xt];
-                memcpy(pxt,&xt,sizeof(xTetra));
+                memcpy(pxt,&xt,sizeof(MMG5_xTetra));
             }
         }
     }
@@ -4319,7 +4319,7 @@ void split6(pMesh mesh,pSol met,int k,int vx[6]) {
     pt[2]->v[0] = vx[1] ; pt[2]->v[1] = vx[3]; pt[2]->v[3] = vx[5];
 
     if ( nxt0 ) {
-        memcpy(&xt,&xt0,sizeof(xTetra));
+        memcpy(&xt,&xt0,sizeof(MMG5_xTetra));
         xt.tag[0] = 0;  xt.tag[2] = 0;
         xt.tag[4] = 0;  xt.edg[0] = 0;
         xt.edg[2] = 0;  xt.edg[4] = 0;
@@ -4343,13 +4343,13 @@ void split6(pMesh mesh,pSol met,int k,int vx[6]) {
                 isxt0 = 1;
                 pt[2]->xt = nxt0;
                 pxt = &mesh->xtetra[pt[2]->xt];
-                memcpy(pxt,&xt,sizeof(xTetra));
+                memcpy(pxt,&xt,sizeof(MMG5_xTetra));
             }
             else {
                 mesh->xt++;
                 if ( mesh->xt > mesh->xtmax ) {
                     /* realloc of xtetras table */
-                    TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,xTetra,
+                    _MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
                                  "larger xtetra table",
                                  mesh->xt--;
                                  printf("  Exit program.\n");
@@ -4357,7 +4357,7 @@ void split6(pMesh mesh,pSol met,int k,int vx[6]) {
                 }
                 pt[2]->xt = mesh->xt;
                 pxt = &mesh->xtetra[pt[2]->xt];
-                memcpy(pxt,&xt,sizeof(xTetra));
+                memcpy(pxt,&xt,sizeof(MMG5_xTetra));
             }
         }
     }
@@ -4366,7 +4366,7 @@ void split6(pMesh mesh,pSol met,int k,int vx[6]) {
     pt[3]->v[0] = vx[2] ; pt[3]->v[1] = vx[4]; pt[3]->v[2] = vx[5];
 
     if ( nxt0 ) {
-        memcpy(&xt,&xt0,sizeof(xTetra));
+        memcpy(&xt,&xt0,sizeof(MMG5_xTetra));
         xt.tag[0] = 0;  xt.tag[1] = 0;
         xt.tag[3] = 0;  xt.edg[0] = 0;
         xt.edg[1] = 0;  xt.edg[3] = 0;
@@ -4391,13 +4391,13 @@ void split6(pMesh mesh,pSol met,int k,int vx[6]) {
                 isxt0 = 1;
                 pt[3]->xt = nxt0;
                 pxt = &mesh->xtetra[pt[3]->xt];
-                memcpy(pxt,&xt,sizeof(xTetra));
+                memcpy(pxt,&xt,sizeof(MMG5_xTetra));
             }
             else {
                 mesh->xt++;
                 if ( mesh->xt > mesh->xtmax ) {
                     /* realloc of xtetras table */
-                    TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,xTetra,
+                    _MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
                                  "larger xtetra table",
                                  mesh->xt--;
                                  printf("  Exit program.\n");
@@ -4405,7 +4405,7 @@ void split6(pMesh mesh,pSol met,int k,int vx[6]) {
                 }
                 pt[3]->xt = mesh->xt;
                 pxt = &mesh->xtetra[pt[3]->xt];
-                memcpy(pxt,&xt,sizeof(xTetra));
+                memcpy(pxt,&xt,sizeof(MMG5_xTetra));
             }
         }
     }
@@ -4414,7 +4414,7 @@ void split6(pMesh mesh,pSol met,int k,int vx[6]) {
     pt[4]->v[0] = vx[0] ; pt[4]->v[1] = vx[3]; pt[4]->v[2] = vx[1] ; pt[4]->v[3] = vx[2];
 
     if ( nxt0 ) {
-        memcpy(&xt,&xt0,sizeof(xTetra));
+        memcpy(&xt,&xt0,sizeof(MMG5_xTetra));
         xt.tag[0] = 0;  xt.tag[1] = 0;
         xt.tag[2] = 0;  xt.tag[3] = 0;
         xt.edg[0] = 0;  xt.edg[1] = 0;
@@ -4435,13 +4435,13 @@ void split6(pMesh mesh,pSol met,int k,int vx[6]) {
                 isxt0 = 1;
                 pt[4]->xt = nxt0;
                 pxt = &mesh->xtetra[(pt[4])->xt];
-                memcpy(pxt,&xt,sizeof(xTetra));
+                memcpy(pxt,&xt,sizeof(MMG5_xTetra));
             }
             else {
                 mesh->xt++;
                 if ( mesh->xt > mesh->xtmax ) {
                     /* realloc of xtetras table */
-                    TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,xTetra,
+                    _MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
                                  "larger xtetra table",
                                  mesh->xt--;
                                  printf("  Exit program.\n");
@@ -4449,7 +4449,7 @@ void split6(pMesh mesh,pSol met,int k,int vx[6]) {
                 }
                 pt[4]->xt = mesh->xt;
                 pxt = &mesh->xtetra[pt[4]->xt];
-                memcpy(pxt,&xt,sizeof(xTetra));
+                memcpy(pxt,&xt,sizeof(MMG5_xTetra));
             }
         }
     }
@@ -4458,7 +4458,7 @@ void split6(pMesh mesh,pSol met,int k,int vx[6]) {
     pt[5]->v[0] = vx[2] ; pt[5]->v[1] = vx[0]; pt[5]->v[2] = vx[3] ; pt[5]->v[3] = vx[4];
 
     if ( nxt0 ) {
-        memcpy(&xt,&xt0,sizeof(xTetra));
+        memcpy(&xt,&xt0,sizeof(MMG5_xTetra));
         xt.tag[0] = 0;  xt.tag[1] = 0;
         xt.tag[2] = 0;  xt.tag[3] = 0;
         xt.tag[4] = 0;  xt.tag[5] = 0;
@@ -4479,13 +4479,13 @@ void split6(pMesh mesh,pSol met,int k,int vx[6]) {
                 isxt0 = 1;
                 pt[5]->xt = nxt0;
                 pxt = &mesh->xtetra[pt[5]->xt];
-                memcpy(pxt,&xt,sizeof(xTetra));
+                memcpy(pxt,&xt,sizeof(MMG5_xTetra));
             }
             else {
                 mesh->xt++;
                 if ( mesh->xt > mesh->xtmax ) {
                     /* realloc of xtetras table */
-                    TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,xTetra,
+                    _MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
                                  "larger xtetra table",
                                  mesh->xt--;
                                  printf("  Exit program.\n");
@@ -4493,7 +4493,7 @@ void split6(pMesh mesh,pSol met,int k,int vx[6]) {
                 }
                 pt[5]->xt = mesh->xt;
                 pxt = &mesh->xtetra[pt[5]->xt];
-                memcpy(pxt,&xt,sizeof(xTetra));
+                memcpy(pxt,&xt,sizeof(MMG5_xTetra));
             }
         }
     }
@@ -4502,7 +4502,7 @@ void split6(pMesh mesh,pSol met,int k,int vx[6]) {
     pt[6]->v[0] = vx[2] ; pt[6]->v[1] = vx[3]; pt[6]->v[2] = vx[1] ; pt[6]->v[3] = vx[5];
 
     if ( nxt0 ) {
-        memcpy(&xt,&xt0,sizeof(xTetra));
+        memcpy(&xt,&xt0,sizeof(MMG5_xTetra));
         xt.tag[0] = 0;  xt.edg[0] = 0;
         xt.tag[1] = 0;  xt.tag[2] = 0;
         xt.tag[3] = 0;  xt.tag[4] = 0;
@@ -4523,13 +4523,13 @@ void split6(pMesh mesh,pSol met,int k,int vx[6]) {
                 isxt0 = 1;
                 pt[6]->xt = nxt0;
                 pxt = &mesh->xtetra[pt[6]->xt];
-                memcpy(pxt,&xt,sizeof(xTetra));
+                memcpy(pxt,&xt,sizeof(MMG5_xTetra));
             }
             else {
                 mesh->xt++;
                 if ( mesh->xt > mesh->xtmax ) {
                     /* realloc of xtetras table */
-                    TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,xTetra,
+                    _MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
                                  "larger xtetra table",
                                  mesh->xt--;
                                  printf("  Exit program.\n");
@@ -4537,7 +4537,7 @@ void split6(pMesh mesh,pSol met,int k,int vx[6]) {
                 }
                 pt[6]->xt = mesh->xt;
                 pxt = &mesh->xtetra[pt[6]->xt];
-                memcpy(pxt,&xt,sizeof(xTetra));
+                memcpy(pxt,&xt,sizeof(MMG5_xTetra));
             }
         }
     }
@@ -4546,7 +4546,7 @@ void split6(pMesh mesh,pSol met,int k,int vx[6]) {
     pt[7]->v[0] = vx[2] ; pt[7]->v[1] = vx[3]; pt[7]->v[2] = vx[5] ; pt[7]->v[3] = vx[4];
 
     if ( nxt0 ) {
-        memcpy(&xt,&xt0,sizeof(xTetra));
+        memcpy(&xt,&xt0,sizeof(MMG5_xTetra));
         xt.tag[0] = 0;  xt.tag[1] = 0;
         xt.tag[2] = 0;  xt.tag[3] = 0;
         xt.tag[4] = 0;  xt.tag[5] = 0;
@@ -4567,13 +4567,13 @@ void split6(pMesh mesh,pSol met,int k,int vx[6]) {
                 isxt0 = 1;
                 pt[7]->xt = nxt0;
                 pxt = &mesh->xtetra[pt[7]->xt];
-                memcpy(pxt,&xt,sizeof(xTetra));
+                memcpy(pxt,&xt,sizeof(MMG5_xTetra));
             }
             else {
                 mesh->xt++;
                 if ( mesh->xt > mesh->xtmax ) {
                     /* realloc of xtetras table */
-                    TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,xTetra,
+                    _MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
                                  "larger xtetra table",
                                  mesh->xt--;
                                  printf("  Exit program.\n");
@@ -4581,7 +4581,7 @@ void split6(pMesh mesh,pSol met,int k,int vx[6]) {
                 }
                 pt[7]->xt = mesh->xt;
                 pxt = &mesh->xtetra[pt[7]->xt];
-                memcpy(pxt,&xt,sizeof(xTetra));
+                memcpy(pxt,&xt,sizeof(MMG5_xTetra));
             }
         }
     }

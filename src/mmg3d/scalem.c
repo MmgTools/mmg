@@ -35,10 +35,10 @@
 
 #include "mmg3d.h"
 
-int scaleMesh(pMesh mesh,pSol met,pSingul sing) {
-  pPoint    ppt;
+int scaleMesh(MMG5_pMesh mesh,MMG5_pSol met,pSingul sing) {
+  MMG5_pPoint    ppt;
 #ifdef SINGUL
-  psPoint   ppts;
+  MMG5_psPoint   ppts;
   double    deltb,delta[3];
 #endif
   double    dd;
@@ -64,7 +64,7 @@ int scaleMesh(pMesh mesh,pSol met,pSingul sing) {
     dd = mesh->info.max[i] - mesh->info.min[i];
     if ( dd > mesh->info.delta )  mesh->info.delta = dd;
   }
-  if ( mesh->info.delta < EPSD ) {
+  if ( mesh->info.delta < _MMG5_EPSD ) {
     fprintf(stdout,"  ## Unable to scale mesh.\n");
     return(0);
   }
@@ -100,7 +100,7 @@ int scaleMesh(pMesh mesh,pSol met,pSingul sing) {
       delta[i] = fabs(sing->max[i]-sing->min[i]);
       if ( delta[i] > deltb )  deltb = delta[i];   // deltb = max dimension
     }
-    if ( deltb < EPSD ) {
+    if ( deltb < _MMG5_EPSD ) {
       fprintf(stdout,"  ## Unable to scale mesh\n");
       return(0);
     }
@@ -110,8 +110,8 @@ int scaleMesh(pMesh mesh,pSol met,pSingul sing) {
     for (k=1; k<=sing->ns; k++) {
       ppts = &sing->point[k];
       for (i=0; i<mesh->dim; i++) {
-        ppts->c[i] = SIZE * (dd * (ppts->c[i]-sing->min[i])) +
-          0.5 * (1.0 - SIZE*dd*delta[i]);
+        ppts->c[i] = MMG5_SIZE * (dd * (ppts->c[i]-sing->min[i])) +
+          0.5 * (1.0 - MMG5_SIZE*dd*delta[i]);
       }
     }
   }
@@ -125,8 +125,8 @@ int scaleMesh(pMesh mesh,pSol met,pSingul sing) {
   return(1);
 }
 
-int unscaleMesh(pMesh mesh,pSol met) {
-  pPoint     ppt;
+int unscaleMesh(MMG5_pMesh mesh,MMG5_pSol met) {
+  MMG5_pPoint     ppt;
   double     dd;
   int        k;
   pPar       par;

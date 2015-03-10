@@ -57,21 +57,21 @@
 
 /** Free allocated pointers of mesh and sol structure and return value val */
 #ifdef SINGUL
-#define RETURN_AND_FREE(mesh,met,sing,val)do    \
-    {                                           \
-        Free_all(mesh,met,sing);                \
-        return(val);                            \
+#define _MMG5_RETURN_AND_FREE(mesh,met,sing,val)do  \
+    {                                               \
+        MMG5_Free_all(mesh,met,sing);               \
+        return(val);                                \
     }while(0)
 #else
-#define RETURN_AND_FREE(mesh,met,sing,val)do    \
-    {                                           \
-        Free_all(mesh,met);                     \
-        return(val);                            \
+#define _MMG5_RETURN_AND_FREE(mesh,met,sing,val)do  \
+    {                                               \
+        MMG5_Free_all(mesh,met);                    \
+        return(val);                                \
     }while(0)
 #endif
 
 /** Error message when lack of memory */
-#define INCREASE_MEM_MESSAGE() do                               \
+#define _MMG5_INCREASE_MEM_MESSAGE() do                         \
     {                                                           \
         printf("  ## Check the mesh size or increase maximal"); \
         printf(" authorized memory with the -m option.\n");     \
@@ -79,7 +79,7 @@
 
 /** Check if used memory overflow maximal authorized memory.
     Execute the command law if lack of memory. */
-#define CHK_MEM(mesh,size,string,law) do                                \
+#define _MMG5_CHK_MEM(mesh,size,string,law) do                          \
     {                                                                   \
         if ( ((mesh)->memCur) > ((mesh)->memMax) ||                     \
              ((mesh)->memCur < 0 )) {                                   \
@@ -94,7 +94,7 @@
 
 /** Free pointer ptr of mesh structure and compute the new used memory.
     size is the size of the pointer */
-#define DEL_MEM(mesh,ptr,size) do               \
+#define _MMG5_DEL_MEM(mesh,ptr,size) do         \
     {                                           \
         (mesh)->memCur -= (long long)(size);    \
         free(ptr);                              \
@@ -103,14 +103,14 @@
 
 /** Increment memory counter memCur and check if we don't overflow
     the maximum authorizied memory memMax. */
-#define ADD_MEM(mesh,size,message,law) do       \
+#define _MMG5_ADD_MEM(mesh,size,message,law) do \
     {                                           \
         (mesh)->memCur += (long long)(size);    \
-        CHK_MEM(mesh,size,message,law);         \
+        _MMG5_CHK_MEM(mesh,size,message,law);   \
     }while(0)
 
 /** Safe deallocation */
-#define SAFE_FREE(ptr) do                       \
+#define _MMG5_SAFE_FREE(ptr) do                 \
     {                                           \
         free(ptr);                              \
         ptr = NULL;                             \
@@ -118,7 +118,7 @@
 
 
 /** Safe allocation with calloc */
-#define SAFE_CALLOC(ptr,size,type) do                   \
+#define _MMG5_SAFE_CALLOC(ptr,size,type) do             \
     {                                                   \
         ptr = (type *)calloc((size),sizeof(type));      \
         if ( !ptr ) {                                   \
@@ -128,7 +128,7 @@
     }while(0)
 
 /** Safe allocation with malloc */
-#define SAFE_MALLOC(ptr,size,type) do                   \
+#define _MMG5_SAFE_MALLOC(ptr,size,type) do             \
     {                                                   \
         ptr = (type *)malloc((size)*sizeof(type));      \
         if ( !ptr ) {                                   \
@@ -138,12 +138,12 @@
     }while(0)
 
 /** Safe reallocation */
-#define SAFE_REALLOC(ptr,size,type,message) do                  \
+#define _MMG5_SAFE_REALLOC(ptr,size,type,message) do            \
     {                                                           \
         type* tmp;                                              \
         tmp = (type *)realloc((ptr),(size)*sizeof(type));       \
         if ( !tmp ) {                                           \
-            SAFE_FREE(ptr);                                     \
+            _MMG5_SAFE_FREE(ptr);                               \
             perror(" ## Memory problem: realloc");              \
             exit(EXIT_FAILURE);                                 \
         }                                                       \
@@ -158,33 +158,33 @@
     }while(0)
 
 /** safe reallocation with memset at 0 for the new values of tab */
-#define SAFE_RECALLOC(ptr,prevSize,newSize,type,message) do     \
-    {                                                           \
-        type* tmp;                                              \
-        int k;                                                  \
-                                                                \
-        tmp = (type *)realloc((ptr),(newSize)*sizeof(type));    \
-        if ( !tmp ) {                                           \
-            SAFE_FREE(ptr);                                     \
-            perror(" ## Memory problem: realloc");              \
-            exit(EXIT_FAILURE);                                 \
-        }                                                       \
-                                                                \
-        if ( abs(mesh->info.imprim) > 6 || mesh->info.ddebug )  \
-            fprintf(stdout,                                     \
-                    "  ## Warning: %s:%d: %s reallocation.\n",  \
-                    __FILE__,__LINE__,message);                 \
-                                                                \
-        (ptr) = tmp;                                            \
-        for ( k=prevSize; k<newSize; k++) {                     \
-            memset(&ptr[k],0,sizeof(type));                     \
-        }                                                       \
+#define _MMG5_SAFE_RECALLOC(ptr,prevSize,newSize,type,message) do   \
+    {                                                               \
+        type* tmp;                                                  \
+        int k;                                                      \
+                                                                    \
+        tmp = (type *)realloc((ptr),(newSize)*sizeof(type));        \
+        if ( !tmp ) {                                               \
+            _MMG5_SAFE_FREE(ptr);                                   \
+            perror(" ## Memory problem: realloc");                  \
+            exit(EXIT_FAILURE);                                     \
+        }                                                           \
+                                                                    \
+        if ( abs(mesh->info.imprim) > 6 || mesh->info.ddebug )      \
+            fprintf(stdout,                                         \
+                    "  ## Warning: %s:%d: %s reallocation.\n",      \
+                    __FILE__,__LINE__,message);                     \
+                                                                    \
+        (ptr) = tmp;                                                \
+        for ( k=prevSize; k<newSize; k++) {                         \
+            memset(&ptr[k],0,sizeof(type));                         \
+        }                                                           \
     }while(0)
 
 /** Reallocation of ptr of type type at size (initSize+wantedGap*initSize)
     if possible or at maximum available size if not. Execute the command law
     if reallocation failed. Memset to 0 for the new values of table. */
-#define TAB_RECALLOC(mesh,ptr,initSize,wantedGap,type,message,law) do   \
+#define _MMG5_TAB_RECALLOC(mesh,ptr,initSize,wantedGap,type,message,law) do \
     {                                                                   \
         int gap;                                                        \
                                                                         \
@@ -202,19 +202,19 @@
         else                                                            \
             gap = wantedGap*initSize;                                   \
                                                                         \
-        ADD_MEM(mesh,gap*sizeof(type),message,law);                     \
-        SAFE_RECALLOC((ptr),initSize+1,initSize+gap+1,type,message);    \
+        _MMG5_ADD_MEM(mesh,gap*sizeof(type),message,law);               \
+        _MMG5_SAFE_RECALLOC((ptr),initSize+1,initSize+gap+1,type,message); \
         initSize = initSize+gap;                                        \
     }while(0);
 
 
 /** Reallocation of point table and sol table and creation
     of point ip with coordinates o and tag tag*/
-#define POINT_REALLOC(mesh,sol,ip,wantedGap,law,o,tag ) do              \
+#define _MMG5_POINT_REALLOC(mesh,sol,ip,wantedGap,law,o,tag ) do        \
     {                                                                   \
         int klink;                                                      \
                                                                         \
-        TAB_RECALLOC(mesh,mesh->point,mesh->npmax,wantedGap,Point,      \
+        _MMG5_TAB_RECALLOC(mesh,mesh->point,mesh->npmax,wantedGap,Point, \
                      "larger point table",law);                         \
                                                                         \
         mesh->npnil = mesh->np+1;                                       \
@@ -223,9 +223,9 @@
                                                                         \
         /* solution */                                                  \
         if ( sol->m ) {                                                 \
-            ADD_MEM(mesh,(mesh->npmax-sol->npmax)*sizeof(double),       \
+            _MMG5_ADD_MEM(mesh,(mesh->npmax-sol->npmax)*sizeof(double), \
                     "larger solution",law);                             \
-            SAFE_REALLOC(sol->m,mesh->npmax+1,double,"larger solution"); \
+            _MMG5_SAFE_REALLOC(sol->m,mesh->npmax+1,double,"larger solution"); \
         }                                                               \
         sol->npmax = mesh->npmax;                                       \
                                                                         \
@@ -236,7 +236,7 @@
 
 /** Reallocation of point table, sol table and bucket table and creation
     of point ip with coordinates o and tag tag*/
-#define POINT_AND_BUCKET_REALLOC(mesh,sol,ip,wantedGap,law,o,tag ) do   \
+#define _MMG5_POINT_AND_BUCKET_REALLOC(mesh,sol,ip,wantedGap,law,o,tag ) do \
     {                                                                   \
         int klink,gap;                                                  \
                                                                         \
@@ -256,11 +256,11 @@
         else                                                            \
             gap = (int)(wantedGap*mesh->npmax);                         \
                                                                         \
-        ADD_MEM(mesh,gap*(sizeof(Point)+sizeof(int)),                   \
+        _MMG5_ADD_MEM(mesh,gap*(sizeof(Point)+sizeof(int)),             \
                 "point and bucket",law);                                \
-        SAFE_RECALLOC(mesh->point,mesh->npmax+1,                        \
+        _MMG5_SAFE_RECALLOC(mesh->point,mesh->npmax+1,                  \
                       mesh->npmax+gap+1,Point,"larger point table");    \
-        SAFE_RECALLOC(bucket->link,mesh->npmax+1,                       \
+        _MMG5_SAFE_RECALLOC(bucket->link,mesh->npmax+1,                 \
                       mesh->npmax+gap+1,int,"larger bucket table");     \
         mesh->npmax = mesh->npmax+gap;                                  \
                                                                         \
@@ -270,9 +270,9 @@
                                                                         \
         /* solution */                                                  \
         if ( sol->m ) {                                                 \
-            ADD_MEM(mesh,(mesh->npmax-sol->npmax)*sizeof(double),       \
+            _MMG5_ADD_MEM(mesh,(mesh->npmax-sol->npmax)*sizeof(double), \
                     "larger solution",law);                             \
-            SAFE_REALLOC(sol->m,mesh->npmax+1,double,"larger solution"); \
+            _MMG5_SAFE_REALLOC(sol->m,mesh->npmax+1,double,"larger solution"); \
         }                                                               \
         sol->npmax = mesh->npmax;                                       \
                                                                         \
@@ -283,12 +283,12 @@
 
 /** Reallocation of tetra table and creation
     of tetra jel */
-#define TETRA_REALLOC(mesh,jel,wantedGap,law ) do                       \
+#define _MMG5_TETRA_REALLOC(mesh,jel,wantedGap,law ) do                 \
     {                                                                   \
         int klink,oldSiz;                                               \
                                                                         \
         oldSiz = mesh->nemax;                                           \
-        TAB_RECALLOC(mesh,mesh->tetra,mesh->nemax,wantedGap,Tetra,      \
+        _MMG5_TAB_RECALLOC(mesh,mesh->tetra,mesh->nemax,wantedGap,Tetra, \
                      "larger tetra table",law);                         \
                                                                         \
         mesh->nenil = mesh->ne+1;                                       \
@@ -297,10 +297,10 @@
                                                                         \
         if ( mesh->adja ) {                                             \
             /* adja table */                                            \
-            ADD_MEM(mesh,4*(mesh->nemax-oldSiz)*sizeof(int),            \
-                    "larger adja table",law);                           \
-            SAFE_RECALLOC(mesh->adja,4*mesh->ne+5,4*mesh->nemax+5,int   \
-                          ,"larger adja table");                        \
+            _MMG5_ADD_MEM(mesh,4*(mesh->nemax-oldSiz)*sizeof(int),      \
+                          "larger adja table",law);                     \
+            _MMG5_SAFE_RECALLOC(mesh->adja,4*mesh->ne+5,4*mesh->nemax+5,int \
+                                ,"larger adja table");                  \
         }                                                               \
                                                                         \
         /* We try again to add the point */                             \
@@ -309,32 +309,32 @@
     }while(0)
 
 /* numerical accuracy */
-#define ALPHAD    20.7846096908265    //0.04811252243247      /* 12*sqrt(3) */
-#define LLONG     2.5//2.0   // 1.414213562373
-#define LSHRT     0.3  // 0.707106781186
-#define LOPTL     1.3
-#define LOPTS     0.6
-#define ANGEDG    0.707106781186548   /*0.573576436351046 */
-#define ANGLIM   -0.999999
-#define SQR32     0.866025403784
-#define ATHIRD    0.333333333333
-#define EPSD      1.e-30
-#define EPSD2     1.0e-200
-#define EPS       1.e-06
-#define LMAX      10240
-#define BADKAL    0.2
-#define NULKAL    1.e-30
+#define _MMG5_ALPHAD    20.7846096908265    //0.04811252243247      /* 12*sqrt(3) */
+#define _MMG5_LLONG     2.5//2.0   // 1.414213562373
+#define _MMG5_LSHRT     0.3  // 0.707106781186
+#define _MMG5_LOPTL     1.3
+#define _MMG5_LOPTS     0.6
+#define _MMG5_ANGEDG    0.707106781186548   /*0.573576436351046 */
+#define _MMG5_ANGLIM   -0.999999
+#define _MMG5_SQR32     0.866025403784
+#define _MMG5_ATHIRD    0.333333333333
+#define _MMG5_EPSD      1.e-30
+#define _MMG5_EPSD2     1.0e-200
+#define _MMG5_EPS       1.e-06
+#define _MMG5_LMAX      10240
+#define _MMG5_BADKAL    0.2
+#define _MMG5_NULKAL    1.e-30
 #ifdef SINGUL
-#define EPS2      1.e-12
+#define _MMG5_EPS2      1.e-12
 #endif
 
-#define NPMAX  1000000 //200000
-#define NAMAX   200000 //40000
-#define NTMAX  2000000 //400000
-#define NEMAX  6000000 //1200000
+#define _MMG5_NPMAX  1000000 //200000
+#define _MMG5_NAMAX   200000 //40000
+#define _MMG5_NTMAX  2000000 //400000
+#define _MMG5_NEMAX  6000000 //1200000
 
-#define MEMMAX  800 //160
-#define BOXSIZE 500
+#define _MMG5_MEMMAX  800 //160
+#define _MMG5_BOXSIZE 500
 
 #ifndef M_PI
 #define M_PI            3.14159265358979323846   /**< pi   */
@@ -367,44 +367,44 @@
 #define MG_CLR(flag,bit) ((flag) &= ~(1 << (bit))) /**< bit number bit is set to 0 */
 #define MG_GET(flag,bit) ((flag) & (1 << (bit)))   /**< return bit number bit value */
 
-extern unsigned char inxt2[3];   /**< next vertex of triangle: {1,2,0} */
-extern unsigned char iprv2[3];   /**< previous vertex of triangle: {2,0,1} */
-extern unsigned char inxt3[7];   /**< next vertex of tetra: {1,2,3,0,1,2,3} */
-extern unsigned char iprv3[7];   /**< previous vertex of tetra: {3,0,1,2,3,0,1} */
-extern unsigned char idir[4][3]; /**< idir[i] : vertices of face opposite to vertex i */
-extern          char idirinv[4][4]; /**< idirinv[i][j] : num of the jth point in the ith face */
-extern unsigned char iarf[4][3]; /**< iarf[i]: edges of face opposite to vertex i */
-extern unsigned char iarfinv[4][6]; /**< num of the j^th edge in the i^th face */
-extern unsigned char iare[6][2]; /**< vertices of extremities of the edges of the tetra */
-extern unsigned char ifar[6][2]; /**< ifar[i][]: faces sharing the ith edge of the tetra */
-extern unsigned char isar[6][2]; /**< isar[i][]: vertices of extremities of the edge opposite to the ith edge */
-extern unsigned char arpt[4][3]; /**< arpt[i]: edges passing through vertex i */
+extern unsigned char _MMG5_inxt2[3];   /**< next vertex of triangle: {1,2,0} */
+extern unsigned char _MMG5_iprv2[3];   /**< previous vertex of triangle: {2,0,1} */
+extern unsigned char _MMG5_inxt3[7];   /**< next vertex of tetra: {1,2,3,0,1,2,3} */
+extern unsigned char _MMG5_iprv3[7];   /**< previous vertex of tetra: {3,0,1,2,3,0,1} */
+extern unsigned char _MMG5_idir[4][3]; /**< idir[i] : vertices of face opposite to vertex i */
+extern          char _MMG5_idirinv[4][4]; /**< idirinv[i][j] : num of the jth point in the ith face */
+extern unsigned char _MMG5_iarf[4][3]; /**< iarf[i]: edges of face opposite to vertex i */
+extern unsigned char _MMG5_iarfinv[4][6]; /**< num of the j^th edge in the i^th face */
+extern unsigned char _MMG5_iare[6][2]; /**< vertices of extremities of the edges of the tetra */
+extern unsigned char _MMG5_ifar[6][2]; /**< ifar[i][]: faces sharing the ith edge of the tetra */
+extern unsigned char _MMG5_isar[6][2]; /**< isar[i][]: vertices of extremities of the edge opposite to the ith edge */
+extern unsigned char _MMG5_arpt[4][3]; /**< arpt[i]: edges passing through vertex i */
 
 
 typedef struct {
     double  b[10][3]; /**< Bezier basis functions */
     double  n[6][3],t[6][3]; /**< normals and tangents at points */
     pPoint  p[3];
-} Bezier;
-typedef Bezier * pBezier;
+} _MMG5_Bezier;
+typedef _MMG5_Bezier * _MMG5_pBezier;
 
 /** used to hash edges */
 typedef struct {
     int   a,b,nxt;
     int   s,k; /** k = point along edge a b */
-} hedge;
+} _MMG5_hedge;
 
 typedef struct {
     int     siz,max,nxt;
-    hedge  *item;
-} Hash;
+    _MMG5_hedge  *item;
+} _MMG5_Hash;
 
 typedef struct {
     int     size;
     int    *head;
     int    *link;
-} Bucket;
-typedef Bucket * pBucket;
+} _MMG5_Bucket;
+typedef _MMG5_Bucket * _MMG5_pBucket;
 
 #ifdef SINGUL
 typedef struct {
@@ -413,199 +413,197 @@ typedef struct {
     int      np; /**< global indice of entrance point */
     char     tag; /**< tag of edge */
 
-} Travel;
+} _MMG5_Travel;
 #endif
 
 /* bucket */
-pBucket newBucket(pMesh ,int );
-int     addBucket(pMesh ,pBucket ,int );
-int     delBucket(pMesh ,pBucket ,int );
-int buckin_iso(pMesh mesh,pSol sol,pBucket bucket,int ip);
+_MMG5_pBucket newBucket(MMG5_pMesh ,int );
+int     addBucket(MMG5_pMesh ,_MMG5_pBucket ,int );
+int     delBucket(MMG5_pMesh ,_MMG5_pBucket ,int );
+int buckin_iso(MMG5_pMesh mesh,MMG5_pSol sol,_MMG5_pBucket bucket,int ip);
 /* prototypes */
 void rotmatrix(double n[3],double r[3][3]);
 double det3pt1vec(double c0[3],double c1[3],double c2[3],double v[3]);
 double det4pt(double c0[3],double c1[3],double c2[3],double c3[3]);
 double orvol(pPoint point,int *v);
-int directsurfball(pMesh mesh, int ip, int *list, int ilist, double n[3]);
+int directsurfball(MMG5_pMesh mesh, int ip, int *list, int ilist, double n[3]);
 
-int  newPt(pMesh mesh,double c[3],char tag);
-int  newElt(pMesh mesh);
-void delElt(pMesh mesh,int iel);
-void delPt(pMesh mesh,int ip);
-int  zaldy(pMesh mesh);
-void freeXTets(pMesh mesh);
-char chkedg(pMesh mesh,pTria pt,char ori);
-int  chkNumberOfTri(pMesh mesh);
-void tet2tri(pMesh mesh,int k,char ie,Tria *ptt);
-int  bezierCP(pMesh mesh,Tria *pt,pBezier pb,char ori);
+int  newPt(MMG5_pMesh mesh,double c[3],char tag);
+int  newElt(MMG5_pMesh mesh);
+void delElt(MMG5_pMesh mesh,int iel);
+void delPt(MMG5_pMesh mesh,int ip);
+int  zaldy(MMG5_pMesh mesh);
+void freeXTets(MMG5_pMesh mesh);
+char _MMG5_chkedg(MMG5_pMesh mesh,MMG5_pTria pt,char ori);
+int  chkNumberOfTri(MMG5_pMesh mesh);
+void _MMG5_tet2tri(MMG5_pMesh mesh,int k,char ie,Tria *ptt);
+int  bezierCP(MMG5_pMesh mesh,Tria *pt,_MMG5_pBezier pb,char ori);
 int  BezierTgt(double c1[3],double c2[3],double n1[3],double n2[3],double t1[3],double t2[3]);
 double BezierGeod(double c1[3], double c2[3], double t1[3], double t2[3]);
-int  bezierInt(pBezier pb,double uv[2],double o[3],double no[3],double to[3]);
-int  BezierReg(pMesh mesh,int ip0, int ip1, double s, double v[3], double *o, double *no);
-int  BezierRef(pMesh mesh,int ip0, int ip1, double s, double *o, double *no, double *to);
-int  BezierEdge(pMesh mesh,int ip0, int ip1, double b0[3], double b1[3],char isrid, double v[3]);
-int  BezierRidge(pMesh mesh,int ip0, int ip1, double s, double *o, double *no1, double *no2, double *to);
-int  BezierNom(pMesh mesh,int ip0,int ip1,double s,double *o,double *no,double *to);
-int  norface(pMesh mesh ,int k, int iface, double v[3]);
-int  boulen(pMesh mesh,int start,int ip,double *nn);
-int  bouler(pMesh mesh,int start,int ip,int *list,int *ng,int *nr);
-int  boulenm(pMesh mesh, int start, int ip, int iface, double n[3],double t[3]);
-int  boulec(pMesh mesh,int start,int ip,double *tt);
-int  boulevolp(pMesh mesh, int start, int ip, int * list);
-int  boulesurfvolp(pMesh mesh,int start,int ip,int iface,int *listv,int *ilistv,int *lists,int*ilists);
-int  startedgsurfball(pMesh mesh,int nump,int numq,int *list,int ilist);
-int  srcbdy(pMesh mesh,int start,int ia);
-int  coquil(pMesh mesh, int start, int ia, int * list);
-int  coquilface(pMesh mesh, int start, int ia, int * list, int * it1, int *it2);
-int  gettag(pMesh,int,int,int *,int *);
-int  settag(pMesh,int,int,int,int);
-int  chkcol_int(pMesh ,pSol met,int,char,char,int *,char typchk);
-int  chkcol_bdy(pMesh,int,char,char,int *);
-int  chkmanicoll(pMesh mesh,int k,int iface,int iedg,int ndepmin,int ndepplus,char isminp,char isplp);
-int  chkmani(pMesh mesh);
-int  colver(pMesh,int *,int,char);
-int  analys(pMesh mesh);
-int  hashTetra(pMesh mesh, int pack);
-int  hashTria(pMesh mesh);
-int  hashEdge(pMesh mesh,Hash *hash,int a,int b,int k);
-int  hashGet(Hash *hash,int a,int b);
-int  hashPop(Hash *hash,int a,int b);
-int  hashNew(pMesh mesh, Hash *hash,int hsiz,int hmax);
+int  bezierInt(_MMG5_pBezier pb,double uv[2],double o[3],double no[3],double to[3]);
+int  BezierReg(MMG5_pMesh mesh,int ip0, int ip1, double s, double v[3], double *o, double *no);
+int  BezierRef(MMG5_pMesh mesh,int ip0, int ip1, double s, double *o, double *no, double *to);
+int  BezierEdge(MMG5_pMesh mesh,int ip0, int ip1, double b0[3], double b1[3],char isrid, double v[3]);
+int  BezierRidge(MMG5_pMesh mesh,int ip0, int ip1, double s, double *o, double *no1, double *no2, double *to);
+int  BezierNom(MMG5_pMesh mesh,int ip0,int ip1,double s,double *o,double *no,double *to);
+int  norface(MMG5_pMesh mesh ,int k, int iface, double v[3]);
+int  boulen(MMG5_pMesh mesh,int start,int ip,double *nn);
+int  bouler(MMG5_pMesh mesh,int start,int ip,int *list,int *ng,int *nr);
+int  boulenm(MMG5_pMesh mesh, int start, int ip, int iface, double n[3],double t[3]);
+int  boulec(MMG5_pMesh mesh,int start,int ip,double *tt);
+int  boulevolp(MMG5_pMesh mesh, int start, int ip, int * list);
+int  boulesurfvolp(MMG5_pMesh mesh,int start,int ip,int iface,int *listv,int *ilistv,int *lists,int*ilists);
+int  startedgsurfball(MMG5_pMesh mesh,int nump,int numq,int *list,int ilist);
+int  srcbdy(MMG5_pMesh mesh,int start,int ia);
+int  coquil(MMG5_pMesh mesh, int start, int ia, int * list);
+int  coquilface(MMG5_pMesh mesh, int start, int ia, int * list, int * it1, int *it2);
+int  gettag(MMG5_pMesh,int,int,int *,int *);
+int  settag(MMG5_pMesh,int,int,int,int);
+int  chkcol_int(MMG5_pMesh ,MMG5_pSol met,int,char,char,int *,char typchk);
+int  chkcol_bdy(MMG5_pMesh,int,char,char,int *);
+int  chkmanicoll(MMG5_pMesh mesh,int k,int iface,int iedg,int ndepmin,int ndepplus,char isminp,char isplp);
+int  chkmani(MMG5_pMesh mesh);
+int  colver(MMG5_pMesh,int *,int,char);
+int  analys(MMG5_pMesh mesh);
+int  hashTetra(MMG5_pMesh mesh, int pack);
+int  hashTria(MMG5_pMesh mesh);
+int  hashEdge(MMG5_pMesh mesh,_MMG5_Hash *hash,int a,int b,int k);
+int  hashGet(_MMG5_Hash *hash,int a,int b);
+int  hashPop(_MMG5_Hash *hash,int a,int b);
+int  hashNew(MMG5_pMesh mesh, _MMG5_Hash *hash,int hsiz,int hmax);
 int  hPop(HGeom *hash,int a,int b,int *ref,char *tag);
 int  hTag(HGeom *hash,int a,int b,int ref,char tag);
 int  hGet(HGeom *hash,int a,int b,int *ref,char *tag);
-void hEdge(pMesh mesh,int a,int b,int ref,char tag);
+void hEdge(MMG5_pMesh mesh,int a,int b,int ref,char tag);
 int  hNew(HGeom *hash,int hsiz,int hmax,int secure);
-int  hGeom(pMesh mesh);
-int  bdryTria(pMesh );
-int  bdryIso(pMesh );
-int  bdrySet(pMesh );
-int  bdryUpdate(pMesh );
-int  bdryPerm(pMesh );
-int  chkmsh(pMesh,int,int);
-int  chkfemtopo(pMesh mesh);
-int  cntbdypt(pMesh mesh, int nump);
+int  hGeom(MMG5_pMesh mesh);
+int  bdryTria(MMG5_pMesh );
+int  bdryIso(MMG5_pMesh );
+int  bdrySet(MMG5_pMesh );
+int  bdryUpdate(MMG5_pMesh );
+int  bdryPerm(MMG5_pMesh );
+int  chkmsh(MMG5_pMesh,int,int);
+int  chkfemtopo(MMG5_pMesh mesh);
+int  cntbdypt(MMG5_pMesh mesh, int nump);
 long long memSize(void);
-void memOption(pMesh mesh);
-int  mmg3d1(pMesh ,pSol );
-int  mmg3d1_delone(pMesh ,pSol );
-int  mmg3d2(pMesh ,pSol );
-int  split1_sim(pMesh mesh,pSol met,int k,int vx[6]);
-void split1(pMesh mesh,pSol met,int k,int vx[6]);
-int  split1b(pMesh mesh,pSol met,int *list,int ret,int ip,int cas);
-int  split2sf_sim(pMesh mesh,pSol met,int k,int vx[6]);
-void split2sf(pMesh mesh,pSol met,int k,int vx[6]);
-void split2(pMesh mesh,pSol met,int k,int vx[6]);
-int  split3_sim(pMesh mesh,pSol met,int k,int vx[6]);
-void split3(pMesh mesh,pSol met,int k,int vx[6]);
-void split3cone(pMesh mesh,pSol met,int k,int vx[6]);
-void split3op(pMesh mesh, pSol met, int k, int vx[6]);
-void split4sf(pMesh mesh,pSol met,int k,int vx[6]);
-void split4op(pMesh mesh,pSol met,int k,int vx[6]);
-void split5(pMesh mesh,pSol met,int k,int vx[6]);
-void split6(pMesh mesh,pSol met,int k,int vx[6]);
-int  split4bar(pMesh mesh,pSol met,int k);
-int  simbulgept(pMesh mesh, int *list, int ilist, double o[3]);
-int  dichoto1b(pMesh mesh,int *list,int ret,double o[3],double ro[3]);
+void memOption(MMG5_pMesh mesh);
+int  _MMG5_mmg3d1(MMG5_pMesh ,MMG5_pSol );
+int  _MMG5_mmg3d1_delone(MMG5_pMesh ,MMG5_pSol );
+int  _MMG5_mmg3d2(MMG5_pMesh ,MMG5_pSol );
+int  split1_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]);
+void split1(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]);
+int  split1b(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int ip,int cas);
+int  split2sf_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]);
+void split2sf(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]);
+void split2(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]);
+int  split3_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]);
+void split3(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]);
+void split3cone(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]);
+void split3op(MMG5_pMesh mesh, MMG5_pSol met, int k, int vx[6]);
+void split4sf(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]);
+void split4op(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]);
+void split5(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]);
+void split6(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]);
+int  split4bar(MMG5_pMesh mesh,MMG5_pSol met,int k);
+int  simbulgept(MMG5_pMesh mesh, int *list, int ilist, double o[3]);
+int  dichoto1b(MMG5_pMesh mesh,int *list,int ret,double o[3],double ro[3]);
 void nsort(int ,double *,char *);
-int  nortri(pMesh mesh,pTria pt,double *n);
-double orcal(pMesh mesh,int iel);
-int  movintpt(pMesh mesh, int *list, int ilist, int improve);
-int  movbdyregpt(pMesh mesh, int *listv, int ilistv, int *lists, int ilists);
-int  movbdyrefpt(pMesh mesh, int *listv, int ilistv, int *lists, int ilists);
-int  movbdynompt(pMesh mesh, int *listv, int ilistv, int *lists, int ilists);
-int  movbdyridpt(pMesh mesh, int *listv, int ilistv, int *lists, int ilists);
-double caltri(pMesh mesh,pTria ptt);
-int  scaleMesh(pMesh mesh,pSol met,pSingul sin);
-int  unscaleMesh(pMesh mesh,pSol met);
-int  chkswpbdy(pMesh mesh,int *list,int ilist,int it1,int it2);
-int  swpbdy(pMesh mesh,pSol met,int *list,int ret,int it1,pBucket bucket);
-int  swpgen(pMesh mesh,pSol met,int nconf, int ilist, int *list,pBucket bucket);
-int  chkswpgen(pMesh mesh, int start, int ia, int *ilist, int *list,double crit);
-int  srcface(pMesh mesh,int n0,int n1,int n2);
-int  bouleext(pMesh mesh, int start, int ip, int iface, int *listv, int *ilistv, int *lists, int*ilists);
-int chkptonbdy(pMesh,int);
-int norpts(pMesh,int,int,int,double *);
+int  nortri(MMG5_pMesh mesh,MMG5_pTria pt,double *n);
+double orcal(MMG5_pMesh mesh,int iel);
+int  movintpt(MMG5_pMesh mesh, int *list, int ilist, int improve);
+int  movbdyregpt(MMG5_pMesh mesh, int *listv, int ilistv, int *lists, int ilists);
+int  movbdyrefpt(MMG5_pMesh mesh, int *listv, int ilistv, int *lists, int ilists);
+int  movbdynompt(MMG5_pMesh mesh, int *listv, int ilistv, int *lists, int ilists);
+int  movbdyridpt(MMG5_pMesh mesh, int *listv, int ilistv, int *lists, int ilists);
+double caltri(MMG5_pMesh mesh,MMG5_pTria ptt);
+int  scaleMesh(MMG5_pMesh mesh,MMG5_pSol met,pSingul sin);
+int  unscaleMesh(MMG5_pMesh mesh,MMG5_pSol met);
+int  chkswpbdy(MMG5_pMesh mesh,int *list,int ilist,int it1,int it2);
+int  swpbdy(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int it1,_MMG5_pBucket bucket);
+int  swpgen(MMG5_pMesh mesh,MMG5_pSol met,int nconf, int ilist, int *list,_MMG5_pBucket bucket);
+int  chkswpgen(MMG5_pMesh mesh, int start, int ia, int *ilist, int *list,double crit);
+int  srcface(MMG5_pMesh mesh,int n0,int n1,int n2);
+int  bouleext(MMG5_pMesh mesh, int start, int ip, int iface, int *listv, int *ilistv, int *lists, int*ilists);
+int chkptonbdy(MMG5_pMesh,int);
+int norpts(MMG5_pMesh,int,int,int,double *);
 double orcal_poi(double a[3],double b[3],double c[3],double d[3]);
-int countelt(pMesh mesh,pSol sol, double *weightelt, long *npcible);
-int trydisp(pMesh,double *,short);
-int dichodisp(pMesh,double *);
-int lapantilap(pMesh,double *);
-int ppgdisp(pMesh,double *);
-int denoisbdy(pMesh);
+int countelt(MMG5_pMesh mesh,MMG5_pSol sol, double *weightelt, long *npcible);
+int trydisp(MMG5_pMesh,double *,short);
+int dichodisp(MMG5_pMesh,double *);
+int lapantilap(MMG5_pMesh,double *);
+int ppgdisp(MMG5_pMesh,double *);
+int denoisbdy(MMG5_pMesh);
 int eigensym(double m[3],double lambda[2],double vp[2][2]);
 int sys33sym(double a[6], double b[3], double r[3]);
-void outqua(pMesh mesh,pSol met);
-int  badelt(pMesh mesh,pSol met);
-int prilen(pMesh mesh,pSol met);
-int DoSol(pMesh mesh,pSol met);
+void outqua(MMG5_pMesh mesh,MMG5_pSol met);
+int  badelt(MMG5_pMesh mesh,MMG5_pSol met);
+int prilen(MMG5_pMesh mesh,MMG5_pSol met);
+int DoSol(MMG5_pMesh mesh,MMG5_pSol met);
 /* useful functions to debug */
-int  indElt(pMesh mesh,int kel);
-int  indPt(pMesh mesh,int kp);
-void printTria(pMesh mesh,char* fileName);
-void printTetra(pMesh mesh,char* fileName);
-int  _MMG5_saveAllMesh(pMesh mesh);
-int  _MMG5_saveLibraryMesh(pMesh mesh);
+int  indElt(MMG5_pMesh mesh,int kel);
+int  indPt(MMG5_pMesh mesh,int kp);
+void printTria(MMG5_pMesh mesh,char* fileName);
+void printTetra(MMG5_pMesh mesh,char* fileName);
+int  _MMG5_saveAllMesh(MMG5_pMesh mesh);
+int  _MMG5_saveLibraryMesh(MMG5_pMesh mesh);
 
 #ifdef USE_SCOTCH
-int renumbering(int vertBoxNbr, pMesh mesh, pSol sol);
+int _MMG5_renumbering(int vertBoxNbr, MMG5_pMesh mesh, MMG5_pSol sol);
 #endif
+int _MMG5_scotchCall(MMG5_pMesh mesh, MMG5_pSol sol);
 
 #ifdef SINGUL
-int  inserSingul(pMesh mesh, pSol met, pSingul singul);
-int  creaEdge(pMesh mesh, pSol met, Travel *trav, char tag);
-int  creaPoint(pMesh mesh, pSol met,int iel, double c[3], double cb[4], char tag);
-int  colSing(pMesh mesh,pSol met);
-int  seekEdge(pMesh mesh, pSol met, psPoint ppt0, psPoint ppt1,
-              Travel *trav, int *lastet,int*,int*);
-int  seekPoint(pMesh mesh, psPoint ppt, double cb[4],int*,int*);
-int  solveUnsignedTet(pMesh mesh,pSol met);
-int  split3cb(pMesh mesh, pSol met, int k, int ifac, double o[3],double cb[4], int *ip);
-int  split4cb(pMesh mesh, pSol met, int k, double o[3], double cb[4],int *ip);
-int  swap23(pMesh mesh,int k, int ip);
+int  inserSingul(MMG5_pMesh mesh, MMG5_pSol met, pSingul singul);
+int  creaEdge(MMG5_pMesh mesh, MMG5_pSol met, _MMG5_Travel *trav, char tag);
+int  creaPoint(MMG5_pMesh mesh, MMG5_pSol met,int iel, double c[3], double cb[4], char tag);
+int  colSing(MMG5_pMesh mesh,MMG5_pSol met);
+int  seekEdge(MMG5_pMesh mesh, MMG5_pSol met, psPoint ppt0, psPoint ppt1,
+              _MMG5_Travel *trav, int *lastet,int*,int*);
+int  seekPoint(MMG5_pMesh mesh, psPoint ppt, double cb[4],int*,int*);
+int  solveUnsignedTet(MMG5_pMesh mesh,MMG5_pSol met);
+int  split3cb(MMG5_pMesh mesh, MMG5_pSol met, int k, int ifac, double o[3],double cb[4], int *ip);
+int  split4cb(MMG5_pMesh mesh, MMG5_pSol met, int k, double o[3], double cb[4],int *ip);
+int  swap23(MMG5_pMesh mesh,int k, int ip);
 #endif
 
-int meancur(pMesh mesh,int np,double c[3],int ilist,int *list,double h[3]);
-double surftri(pMesh,int,int);
-double timestepMCF(pMesh,double);
-int bdyMCF(pMesh);
-double volint(pMesh);
+int meancur(MMG5_pMesh mesh,int np,double c[3],int ilist,int *list,double h[3]);
+double surftri(MMG5_pMesh,int,int);
+double timestepMCF(MMG5_pMesh,double);
+int bdyMCF(MMG5_pMesh);
+double volint(MMG5_pMesh);
 
 /* Delaunay functions*/
-int delone(pMesh mesh,pSol sol,int ip,int *list,int ilist);
-int cavity(pMesh mesh,pSol sol,int iel,int ip,int *list,int lon);
-int cenrad_iso(pMesh mesh,double *ct,double *c,double *rad);
+int delone(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist);
+int cavity(MMG5_pMesh mesh,MMG5_pSol sol,int iel,int ip,int *list,int lon);
+int cenrad_iso(MMG5_pMesh mesh,double *ct,double *c,double *rad);
 
 /*mmg3d1.c*/
-void tet2tri(pMesh mesh,int k,char ie,Tria *ptt);
-int dichoto(pMesh mesh,pSol met,int k,int *vx);
+void tet2tri(MMG5_pMesh mesh,int k,char ie,Tria *ptt);
+int dichoto(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx);
 /** Find acceptable position for split1b, passing the shell of considered edge, starting from o */
-int dichoto1b(pMesh mesh,int *list,int ret,double o[3],double ro[3]);
+int dichoto1b(MMG5_pMesh mesh,int *list,int ret,double o[3],double ro[3]);
 /** return edges of (virtual) triangle pt that need to be split w/r Hausdorff criterion */
-char chkedg(pMesh mesh,Tria *pt,char ori);
-int swpmsh(pMesh mesh,pSol met,pBucket bucket);
-int anatet(pMesh mesh,pSol met,char typchk, int patternMode) ;
-int anatet4(pMesh mesh, pSol met);
-int anatets(pMesh mesh,pSol met,char typchk);
-int coltet(pMesh mesh,pSol met,char typchk) ;
-int swptet(pMesh mesh,pSol met,double crit,pBucket bucket);
-int movtet(pMesh mesh,pSol met,int maxitin);
+char chkedg(MMG5_pMesh mesh,Tria *pt,char ori);
+int anatet(MMG5_pMesh mesh,MMG5_pSol met,char typchk, int patternMode) ;
+int movtet(MMG5_pMesh mesh,MMG5_pSol met,int maxitin);
+int swpmsh(MMG5_pMesh mesh,MMG5_pSol met,_MMG5_pBucket bucket);
+int swptet(MMG5_pMesh mesh,MMG5_pSol met,double crit,_MMG5_pBucket bucket);
 
 /* pointers */
-double caltet_ani(pMesh mesh,pSol met,int ia,int ib,int ic,int id);
-double caltet_iso(pMesh mesh,pSol met,int ia,int ib,int ic,int id);
-double lenedg_ani(pMesh ,pSol ,int ,int );
-double lenedg_iso(pMesh ,pSol ,int ,int );
+double caltet_ani(MMG5_pMesh mesh,MMG5_pSol met,int ia,int ib,int ic,int id);
+double caltet_iso(MMG5_pMesh mesh,MMG5_pSol met,int ia,int ib,int ic,int id);
+double lenedg_ani(MMG5_pMesh ,MMG5_pSol ,int ,int );
+double lenedg_iso(MMG5_pMesh ,MMG5_pSol ,int ,int );
 double lenedgCoor_ani(double*, double*, double*, double*);
 double lenedgCoor_iso(double*, double*, double*, double*);
-int    defsiz_iso(pMesh,pSol );
-int    defsiz_ani(pMesh ,pSol );
-int    gradsiz_iso(pMesh ,pSol );
-int    gradsiz_ani(pMesh ,pSol );
+int    defsiz_iso(MMG5_pMesh,MMG5_pSol );
+int    defsiz_ani(MMG5_pMesh ,MMG5_pSol );
+int    gradsiz_iso(MMG5_pMesh ,MMG5_pSol );
+int    gradsiz_ani(MMG5_pMesh ,MMG5_pSol );
 
-double (*caltet)(pMesh mesh,pSol met,int ia,int ib,int ic,int id);
-int    (*defsiz)(pMesh ,pSol );
+double (*caltet)(MMG5_pMesh mesh,MMG5_pSol met,int ia,int ib,int ic,int id);
+int    (*defsiz)(MMG5_pMesh ,MMG5_pSol );
 double (*lenedg)(MMG5_pMesh mesh,MMG5_pSol sol ,int ,int );
-int    (*gradsiz)(pMesh ,pSol );
+int    (*gradsiz)(MMG5_pMesh ,MMG5_pSol );
 
 #endif

@@ -37,9 +37,9 @@
 
 
 /** Move internal point */
-int movintpt(pMesh mesh,int *list,int ilist,int improve) {
-    pTetra               pt,pt0;
-    pPoint               p0,p1,p2,p3,ppt0;
+int movintpt(MMG5_pMesh mesh,int *list,int ilist,int improve) {
+    MMG5_pTetra               pt,pt0;
+    MMG5_pPoint               p0,p1,p2,p3,ppt0;
     double               vol,totvol;
     double               calold,calnew,callist[ilist];
     int                  k,iel,i0;
@@ -66,7 +66,7 @@ int movintpt(pMesh mesh,int *list,int ilist,int improve) {
         ppt0->c[2] += 0.25 * vol*(p0->c[2] + p1->c[2] + p2->c[2] + p3->c[2]);
         calold = MG_MIN(calold, pt->qual);
     }
-    if ( totvol < EPSD2 )  return(0);
+    if ( totvol < _MMG5_EPSD2 )  return(0);
     totvol = 1.0 / totvol;
     ppt0->c[0] *= totvol;
     ppt0->c[1] *= totvol;
@@ -81,11 +81,11 @@ int movintpt(pMesh mesh,int *list,int ilist,int improve) {
         memcpy(pt0,pt,sizeof(Tetra));
         pt0->v[i0] = 0;
         callist[k] = orcal(mesh,0);
-        if ( callist[k] < EPSD2 )        return(0);
+        if ( callist[k] < _MMG5_EPSD2 )        return(0);
         calnew = MG_MIN(calnew,callist[k]);
     }
-    if ( calold < NULKAL && calnew <= calold )    return(0);
-    else if (calnew < NULKAL) return(0);
+    if ( calold < _MMG5_NULKAL && calnew <= calold )    return(0);
+    else if (calnew < _MMG5_NULKAL) return(0);
     else if ( improve && calnew < 0.9 * calold )     return(0);
     else if ( calnew < 0.3 * calold )     return(0);
 
@@ -102,14 +102,14 @@ int movintpt(pMesh mesh,int *list,int ilist,int improve) {
 }
 
 /** Move boundary regular point, whose volumic and surfacic balls are passed */
-int movbdyregpt(pMesh mesh,int *listv,int ilistv,int *lists,int ilists) {
-    pTetra                pt,pt0;
-    pxTetra               pxt;
-    pPoint                p0,p1,p2,ppt0;
-    Tria                  tt;
-    pxPoint               pxp;
-    Bezier                b;
-    double                *n,r[3][3],lispoi[3*LMAX+1],ux,uy,uz,det2d,detloc,oppt[2],step,lambda[3];
+int movbdyregpt(MMG5_pMesh mesh,int *listv,int ilistv,int *lists,int ilists) {
+    MMG5_pTetra                pt,pt0;
+    MMG5_pxTetra               pxt;
+    MMG5_pPoint                p0,p1,p2,ppt0;
+    MMG5_Tria                  tt;
+    MMG5_pxPoint               pxp;
+    _MMG5_Bezier                b;
+    double                *n,r[3][3],lispoi[3*_MMG5_LMAX+1],ux,uy,uz,det2d,detloc,oppt[2],step,lambda[3];
     double                ll,m[2],uv[2],o[3],no[3],to[3];
     double                calold,calnew,caltmp,callist[ilistv];
     int                   k,kel,iel,l,n0,na,nb,ntempa,ntempb,ntempc,nut,nxp;
@@ -140,11 +140,11 @@ int movbdyregpt(pMesh mesh,int *listv,int ilistv,int *lists,int ilists) {
     pt            = &mesh->tetra[k];
     na = nb = 0;
     for (i=0; i<3; i++) {
-        if ( pt->v[idir[iface][i]] != n0 ) {
+        if ( pt->v[_MMG5_idir[iface][i]] != n0 ) {
             if ( !na )
-                na = pt->v[idir[iface][i]];
+                na = pt->v[_MMG5_idir[iface][i]];
             else
-                nb = pt->v[idir[iface][i]];
+                nb = pt->v[_MMG5_idir[iface][i]];
         }
     }
 
@@ -154,11 +154,11 @@ int movbdyregpt(pMesh mesh,int *listv,int ilistv,int *lists,int ilists) {
         pt          = &mesh->tetra[k];
         ntempa = ntempb = 0;
         for (i=0; i<3; i++) {
-            if ( pt->v[idir[iface][i]] != n0 ) {
+            if ( pt->v[_MMG5_idir[iface][i]] != n0 ) {
                 if ( !ntempa )
-                    ntempa = pt->v[idir[iface][i]];
+                    ntempa = pt->v[_MMG5_idir[iface][i]];
                 else
-                    ntempb = pt->v[idir[iface][i]];
+                    ntempb = pt->v[_MMG5_idir[iface][i]];
             }
         }
         if ( ntempa == na )
@@ -189,11 +189,11 @@ int movbdyregpt(pMesh mesh,int *listv,int ilistv,int *lists,int ilists) {
     pt     = &mesh->tetra[k];
     ntempa = ntempb = 0;
     for (i=0; i<3; i++) {
-        if ( pt->v[idir[iface][i]] != n0 ) {
+        if ( pt->v[_MMG5_idir[iface][i]] != n0 ) {
             if ( !ntempa )
-                ntempa = pt->v[idir[iface][i]];
+                ntempa = pt->v[_MMG5_idir[iface][i]];
             else
-                ntempb = pt->v[idir[iface][i]];
+                ntempb = pt->v[_MMG5_idir[iface][i]];
         }
     }
     if ( ntempa == na )
@@ -239,10 +239,10 @@ int movbdyregpt(pMesh mesh,int *listv,int ilistv,int *lists,int ilists) {
         ux = lispoi[3*(k+1)+1] - lispoi[3*k+1];
         uy = lispoi[3*(k+1)+2] - lispoi[3*k+2];
         ll = ux*ux + uy*uy;
-        if ( ll < EPSD )    continue;
+        if ( ll < _MMG5_EPSD )    continue;
         nut++;
-        oppt[0] += (m[0]-SQR32*uy);
-        oppt[1] += (m[1]+SQR32*ux);
+        oppt[0] += (m[0]-_MMG5_SQR32*uy);
+        oppt[1] += (m[1]+_MMG5_SQR32*ux);
     }
     oppt[0] *= (1.0 / nut);
     oppt[1] *= (1.0 / nut);
@@ -274,7 +274,7 @@ int movbdyregpt(pMesh mesh,int *listv,int ilistv,int *lists,int ilists) {
     /* Sizing of time step : make sure point does not go out corresponding triangle. */
     det2d = -oppt[1]*(lispoi[3*(kel+1)+1] - lispoi[3*(kel)+1]) + \
         oppt[0]*(lispoi[3*(kel+1)+2] - lispoi[3*(kel)+2]);
-    if ( fabs(det2d) < EPSD ) return(0);
+    if ( fabs(det2d) < _MMG5_EPSD ) return(0);
 
     det2d = 1.0 / det2d;
     step *= det2d;
@@ -288,7 +288,7 @@ int movbdyregpt(pMesh mesh,int *listv,int ilistv,int *lists,int ilists) {
 
     /* Computation of the barycentric coordinates of the new point in the corresponding triangle. */
     det2d = lispoi[3*kel+1]*lispoi[3*(kel+1)+2] - lispoi[3*kel+2]*lispoi[3*(kel+1)+1];
-    if ( det2d < EPSD )    return(0);
+    if ( det2d < _MMG5_EPSD )    return(0);
     det2d = 1.0 / det2d;
     lambda[1] = lispoi[3*(kel+1)+2]*oppt[0] - lispoi[3*(kel+1)+1]*oppt[1];
     lambda[2] = -lispoi[3*(kel)+2]*oppt[0] + lispoi[3*(kel)+1]*oppt[1];
@@ -328,9 +328,9 @@ int movbdyregpt(pMesh mesh,int *listv,int ilistv,int *lists,int ilists) {
     detloc = det3pt1vec(p0->c,p1->c,p2->c,n);
 
     /* ntempa = point to which is associated 1 -uv[0] - uv[1], ntempb = uv[0], ntempc = uv[1] */
-    ntempa = pt->v[idir[iface][0]];
-    ntempb = pt->v[idir[iface][1]];
-    ntempc = pt->v[idir[iface][2]];
+    ntempa = pt->v[_MMG5_idir[iface][0]];
+    ntempb = pt->v[_MMG5_idir[iface][1]];
+    ntempc = pt->v[_MMG5_idir[iface][2]];
 
     /* na = lispoi[kel] -> lambda[1], nb = lispoi[kel+1] -> lambda[2] */
     if ( detloc > 0.0 ) {
@@ -388,14 +388,14 @@ int movbdyregpt(pMesh mesh,int *listv,int ilistv,int *lists,int ilists) {
 
     nxp = mesh->xp + 1;
     if ( nxp > mesh->xpmax ) {
-        TAB_RECALLOC(mesh,mesh->xpoint,mesh->xpmax,0.2,xPoint,
+        _MMG5_TAB_RECALLOC(mesh,mesh->xpoint,mesh->xpmax,0.2,MMG5_xPoint,
                      "larger xpoint table",
                      return(0));
         n = &(mesh->xpoint[p0->xp].n1[0]);
     }
     ppt0->xp = nxp;
     pxp = &mesh->xpoint[nxp];
-    memcpy(pxp,&(mesh->xpoint[p0->xp]),sizeof(xPoint));
+    memcpy(pxp,&(mesh->xpoint[p0->xp]),sizeof(MMG5_xPoint));
     pxp->n1[0] = no[0];
     pxp->n1[1] = no[1];
     pxp->n1[2] = no[2];
@@ -413,13 +413,13 @@ int movbdyregpt(pMesh mesh,int *listv,int ilistv,int *lists,int ilists) {
         assert(i<3);
         tt.v[i] = 0;
         caltmp = caltri(mesh,&tt);
-        if ( caltmp < EPSD )        return(0.0);
+        if ( caltmp < _MMG5_EPSD )        return(0.0);
         calnew = MG_MIN(calnew,caltmp);
     }
-    if ( calold < NULKAL && calnew <= calold )    return(0);
-    else if (calnew < NULKAL) return(0);
+    if ( calold < _MMG5_NULKAL && calnew <= calold )    return(0);
+    else if (calnew < _MMG5_NULKAL) return(0);
     else if ( calnew < 0.3*calold )        return(0);
-    memset(pxp,0,sizeof(xPoint));
+    memset(pxp,0,sizeof(MMG5_xPoint));
 
     /* Test : check whether all volumes remain positive with new position of the point */
     calold = calnew = DBL_MAX;
@@ -432,11 +432,11 @@ int movbdyregpt(pMesh mesh,int *listv,int ilistv,int *lists,int ilists) {
         pt0->v[i0] = 0;
         calold = MG_MIN(calold, pt->qual);
         callist[l]=orcal(mesh,0);
-        if ( callist[l] < EPSD )        return(0);
+        if ( callist[l] < _MMG5_EPSD )        return(0);
         calnew = MG_MIN(calnew,callist[l]);
     }
-    if ( calold < NULKAL && calnew <= calold )    return(0);
-    else if (calnew < NULKAL) return(0);
+    if ( calold < _MMG5_NULKAL && calnew <= calold )    return(0);
+    else if (calnew < _MMG5_NULKAL) return(0);
     else if ( calnew < 0.3*calold )        return(0);
 
     /* When all tests have been carried out, update coordinates and normals */
@@ -455,12 +455,12 @@ int movbdyregpt(pMesh mesh,int *listv,int ilistv,int *lists,int ilists) {
 }
 
 /** Move boundary reference point, whose volumic and surfacic balls are passed */
-int movbdyrefpt(pMesh mesh, int *listv, int ilistv, int *lists, int ilists){
-    pTetra                pt,pt0;
-    pxTetra               pxt;
-    pPoint                p0,p1,p2,ppt0;
-    Tria                  tt;
-    pxPoint               pxp;
+int movbdyrefpt(MMG5_pMesh mesh, int *listv, int ilistv, int *lists, int ilists){
+    MMG5_pTetra                pt,pt0;
+    MMG5_pxTetra               pxt;
+    MMG5_pPoint                p0,p1,p2,ppt0;
+    MMG5_Tria                  tt;
+    MMG5_pxPoint               pxp;
     double                step,ll1old,ll2old,o[3],no[3],to[3];
     double                calold,calnew,caltmp,callist[ilistv];
     int                   l,iel,ip0,ipa,ipb,iptmpa,iptmpb,it1,it2,ip1,ip2,ip,nxp;
@@ -482,11 +482,11 @@ int movbdyrefpt(pMesh mesh, int *listv, int ilistv, int *lists, int ilists){
     pt = &mesh->tetra[iel];
     ipa = ipb = 0;
     for (i=0; i<3; i++) {
-        if ( pt->v[idir[iface][i]] != ip0 ) {
+        if ( pt->v[_MMG5_idir[iface][i]] != ip0 ) {
             if ( !ipa )
-                ipa = pt->v[idir[iface][i]];
+                ipa = pt->v[_MMG5_idir[iface][i]];
             else
-                ipb = pt->v[idir[iface][i]];
+                ipb = pt->v[_MMG5_idir[iface][i]];
         }
     }
     assert(ipa && ipb);
@@ -497,25 +497,25 @@ int movbdyrefpt(pMesh mesh, int *listv, int ilistv, int *lists, int ilists){
         pt = &mesh->tetra[iel];
         iea = ieb = 0;
         for (i=0; i<3; i++) {
-            ie = iarf[iface][i]; //edge i on face iface
-            if ( (pt->v[iare[ie][0]] == ip0) || (pt->v[iare[ie][1]] == ip0) ) {
+            ie = _MMG5_iarf[iface][i]; //edge i on face iface
+            if ( (pt->v[_MMG5_iare[ie][0]] == ip0) || (pt->v[_MMG5_iare[ie][1]] == ip0) ) {
                 if ( !iea )
                     iea = ie;
                 else
                     ieb = ie;
             }
         }
-        if ( pt->v[iare[iea][0]] != ip0 )
-            iptmpa = pt->v[iare[iea][0]];
+        if ( pt->v[_MMG5_iare[iea][0]] != ip0 )
+            iptmpa = pt->v[_MMG5_iare[iea][0]];
         else {
-            assert(pt->v[iare[iea][1]] != ip0);
-            iptmpa = pt->v[iare[iea][1]];
+            assert(pt->v[_MMG5_iare[iea][1]] != ip0);
+            iptmpa = pt->v[_MMG5_iare[iea][1]];
         }
-        if ( pt->v[iare[ieb][0]] != ip0 )
-            iptmpb = pt->v[iare[ieb][0]];
+        if ( pt->v[_MMG5_iare[ieb][0]] != ip0 )
+            iptmpb = pt->v[_MMG5_iare[ieb][0]];
         else {
-            assert(pt->v[iare[ieb][1]] != ip0);
-            iptmpb = pt->v[iare[ieb][1]];
+            assert(pt->v[_MMG5_iare[ieb][1]] != ip0);
+            iptmpb = pt->v[_MMG5_iare[ieb][1]];
         }
         if ( (iptmpa == ipa) || (iptmpa == ipb) ) {
             if ( pt->xt )  tag = mesh->xtetra[pt->xt].tag[iea];
@@ -549,11 +549,11 @@ int movbdyrefpt(pMesh mesh, int *listv, int ilistv, int *lists, int ilists){
     pt = &mesh->tetra[iel];
     ipa = ipb = 0;
     for (i=0; i<3; i++) {
-        if ( pt->v[idir[iface][i]] != ip0 ) {
+        if ( pt->v[_MMG5_idir[iface][i]] != ip0 ) {
             if ( !ipa )
-                ipa = pt->v[idir[iface][i]];
+                ipa = pt->v[_MMG5_idir[iface][i]];
             else
-                ipb = pt->v[idir[iface][i]];
+                ipb = pt->v[_MMG5_idir[iface][i]];
         }
     }
     assert(ipa && ipb);
@@ -564,25 +564,25 @@ int movbdyrefpt(pMesh mesh, int *listv, int ilistv, int *lists, int ilists){
         pt          = &mesh->tetra[iel];
         iea         = ieb = 0;
         for (i=0; i<3; i++) {
-            ie = iarf[iface][i]; //edge i on face iface
-            if ( (pt->v[iare[ie][0]] == ip0) || (pt->v[iare[ie][1]] == ip0) ) {
+            ie = _MMG5_iarf[iface][i]; //edge i on face iface
+            if ( (pt->v[_MMG5_iare[ie][0]] == ip0) || (pt->v[_MMG5_iare[ie][1]] == ip0) ) {
                 if ( !iea )
                     iea = ie;
                 else
                     ieb = ie;
             }
         }
-        if ( pt->v[iare[iea][0]] != ip0 )
-            iptmpa = pt->v[iare[iea][0]];
+        if ( pt->v[_MMG5_iare[iea][0]] != ip0 )
+            iptmpa = pt->v[_MMG5_iare[iea][0]];
         else {
-            assert(pt->v[iare[iea][1]] != ip0);
-            iptmpa = pt->v[iare[iea][1]];
+            assert(pt->v[_MMG5_iare[iea][1]] != ip0);
+            iptmpa = pt->v[_MMG5_iare[iea][1]];
         }
-        if ( pt->v[iare[ieb][0]] != ip0 )
-            iptmpb = pt->v[iare[ieb][0]];
+        if ( pt->v[_MMG5_iare[ieb][0]] != ip0 )
+            iptmpb = pt->v[_MMG5_iare[ieb][0]];
         else {
-            assert(pt->v[iare[ieb][1]] != ip0);
-            iptmpb = pt->v[iare[ieb][1]];
+            assert(pt->v[_MMG5_iare[ieb][1]] != ip0);
+            iptmpb = pt->v[_MMG5_iare[ieb][1]];
         }
         if ( (iptmpa == ipa) || (iptmpa == ipb) ) {
             if ( pt->xt )  tag = mesh->xtetra[pt->xt].tag[iea];
@@ -653,13 +653,13 @@ int movbdyrefpt(pMesh mesh, int *listv, int ilistv, int *lists, int ilists){
 
     nxp = mesh->xp + 1;
     if ( nxp > mesh->xpmax ) {
-        TAB_RECALLOC(mesh,mesh->xpoint,mesh->xpmax,0.2,xPoint,
+        _MMG5_TAB_RECALLOC(mesh,mesh->xpoint,mesh->xpmax,0.2,MMG5_xPoint,
                      "larger xpoint table",
                      return(0));
     }
     ppt0->xp = nxp;
     pxp = &mesh->xpoint[nxp];
-    memcpy(pxp,&(mesh->xpoint[p0->xp]),sizeof(xPoint));
+    memcpy(pxp,&(mesh->xpoint[p0->xp]),sizeof(MMG5_xPoint));
 
     pxp->t[0] = to[0];
     pxp->t[1] = to[1];
@@ -683,19 +683,19 @@ int movbdyrefpt(pMesh mesh, int *listv, int ilistv, int *lists, int ilists){
         assert(i<3);
         tt.v[i] = 0;
         caltmp = caltri(mesh,&tt);
-        if ( caltmp < EPSD )        return(0);
+        if ( caltmp < _MMG5_EPSD )        return(0);
         calnew = MG_MIN(calnew,caltmp);
         if ( chkedg(mesh,&tt,MG_GET(pxt->ori,iface)) ) {
             // Algiane: 09/12/2013 commit: we break the hausdorff criteria so we dont want
             // the point to move? (modification not tested because I could not find a case
             // passing here)
-            memset(pxp,0,sizeof(xPoint));
+            memset(pxp,0,sizeof(MMG5_xPoint));
             return(0);
         }
     }
-    if ( calold < NULKAL && calnew <= calold )    return(0);
+    if ( calold < _MMG5_NULKAL && calnew <= calold )    return(0);
     else if ( calnew < calold )    return(0);
-    memset(pxp,0,sizeof(xPoint));
+    memset(pxp,0,sizeof(MMG5_xPoint));
 
     /* Test : check whether all volumes remain positive with new position of the point */
     calold = calnew = DBL_MAX;
@@ -708,11 +708,11 @@ int movbdyrefpt(pMesh mesh, int *listv, int ilistv, int *lists, int ilists){
         pt0->v[i0] = 0;
         calold = MG_MIN(calold, pt->qual);
         callist[l] = orcal(mesh,0);
-        if ( callist[l] < EPSD )        return(0);
+        if ( callist[l] < _MMG5_EPSD )        return(0);
         calnew = MG_MIN(calnew,callist[l]);
     }
-    if ( calold < NULKAL && calnew <= calold )    return(0);
-    else if (calnew < NULKAL) return(0);
+    if ( calold < _MMG5_NULKAL && calnew <= calold )    return(0);
+    else if (calnew < _MMG5_NULKAL) return(0);
     else if ( calnew <= 0.3*calold )      return(0);
 
     /* Update coordinates, normals, for new point */
@@ -737,12 +737,12 @@ int movbdyrefpt(pMesh mesh, int *listv, int ilistv, int *lists, int ilists){
 
 
 /** Move boundary non manifold point, whose volumic and (exterior) surfacic balls are passed */
-int movbdynompt(pMesh mesh, int *listv, int ilistv, int *lists, int ilists){
-    pTetra       pt,pt0;
-    pxTetra      pxt;
-    pPoint       p0,p1,p2,ppt0;
-    pxPoint      pxp;
-    Tria         tt;
+int movbdynompt(MMG5_pMesh mesh, int *listv, int ilistv, int *lists, int ilists){
+    MMG5_pTetra       pt,pt0;
+    MMG5_pxTetra      pxt;
+    MMG5_pPoint       p0,p1,p2,ppt0;
+    MMG5_pxPoint      pxp;
+    MMG5_Tria         tt;
     double       step,ll1old,ll2old,calold,calnew,caltmp,callist[ilistv];
     double       o[3],no[3],to[3];
     int          ip0,ip1,ip2,ip,iel,ipa,ipb,l,iptmpa,iptmpb,it1,it2,nxp;
@@ -763,11 +763,11 @@ int movbdynompt(pMesh mesh, int *listv, int ilistv, int *lists, int ilists){
     pt = &mesh->tetra[iel];
     ipa = ipb = 0;
     for (i=0; i<3; i++) {
-        if ( pt->v[idir[iface][i]] != ip0 ) {
+        if ( pt->v[_MMG5_idir[iface][i]] != ip0 ) {
             if ( !ipa )
-                ipa = pt->v[idir[iface][i]];
+                ipa = pt->v[_MMG5_idir[iface][i]];
             else
-                ipb = pt->v[idir[iface][i]];
+                ipb = pt->v[_MMG5_idir[iface][i]];
         }
     }
     assert(ipa && ipb);
@@ -778,25 +778,25 @@ int movbdynompt(pMesh mesh, int *listv, int ilistv, int *lists, int ilists){
         pt = &mesh->tetra[iel];
         iea = ieb = 0;
         for (i=0; i<3; i++) {
-            ie = iarf[iface][i]; //edge i on face iface
-            if ( (pt->v[iare[ie][0]] == ip0) || (pt->v[iare[ie][1]] == ip0) ) {
+            ie = _MMG5_iarf[iface][i]; //edge i on face iface
+            if ( (pt->v[_MMG5_iare[ie][0]] == ip0) || (pt->v[_MMG5_iare[ie][1]] == ip0) ) {
                 if ( !iea )
                     iea = ie;
                 else
                     ieb = ie;
             }
         }
-        if ( pt->v[iare[iea][0]] != ip0 )
-            iptmpa = pt->v[iare[iea][0]];
+        if ( pt->v[_MMG5_iare[iea][0]] != ip0 )
+            iptmpa = pt->v[_MMG5_iare[iea][0]];
         else {
-            assert(pt->v[iare[iea][1]] != ip0);
-            iptmpa = pt->v[iare[iea][1]];
+            assert(pt->v[_MMG5_iare[iea][1]] != ip0);
+            iptmpa = pt->v[_MMG5_iare[iea][1]];
         }
-        if ( pt->v[iare[ieb][0]] != ip0 )
-            iptmpb = pt->v[iare[ieb][0]];
+        if ( pt->v[_MMG5_iare[ieb][0]] != ip0 )
+            iptmpb = pt->v[_MMG5_iare[ieb][0]];
         else {
-            assert(pt->v[iare[ieb][1]] != ip0);
-            iptmpb = pt->v[iare[ieb][1]];
+            assert(pt->v[_MMG5_iare[ieb][1]] != ip0);
+            iptmpb = pt->v[_MMG5_iare[ieb][1]];
         }
         if ( (iptmpa == ipa) || (iptmpa == ipb) ) {
             if ( pt->xt )  tag = mesh->xtetra[pt->xt].tag[iea];
@@ -830,11 +830,11 @@ int movbdynompt(pMesh mesh, int *listv, int ilistv, int *lists, int ilists){
     pt = &mesh->tetra[iel];
     ipa = ipb = 0;
     for (i=0; i<3; i++) {
-        if ( pt->v[idir[iface][i]] != ip0 ) {
+        if ( pt->v[_MMG5_idir[iface][i]] != ip0 ) {
             if ( !ipa )
-                ipa = pt->v[idir[iface][i]];
+                ipa = pt->v[_MMG5_idir[iface][i]];
             else
-                ipb = pt->v[idir[iface][i]];
+                ipb = pt->v[_MMG5_idir[iface][i]];
         }
     }
     assert(ipa && ipb);
@@ -845,25 +845,25 @@ int movbdynompt(pMesh mesh, int *listv, int ilistv, int *lists, int ilists){
         pt          = &mesh->tetra[iel];
         iea         = ieb = 0;
         for (i=0; i<3; i++) {
-            ie = iarf[iface][i]; //edge i on face iface
-            if ( (pt->v[iare[ie][0]] == ip0) || (pt->v[iare[ie][1]] == ip0) ) {
+            ie = _MMG5_iarf[iface][i]; //edge i on face iface
+            if ( (pt->v[_MMG5_iare[ie][0]] == ip0) || (pt->v[_MMG5_iare[ie][1]] == ip0) ) {
                 if ( !iea )
                     iea = ie;
                 else
                     ieb = ie;
             }
         }
-        if ( pt->v[iare[iea][0]] != ip0 )
-            iptmpa = pt->v[iare[iea][0]];
+        if ( pt->v[_MMG5_iare[iea][0]] != ip0 )
+            iptmpa = pt->v[_MMG5_iare[iea][0]];
         else {
-            assert(pt->v[iare[iea][1]] != ip0);
-            iptmpa = pt->v[iare[iea][1]];
+            assert(pt->v[_MMG5_iare[iea][1]] != ip0);
+            iptmpa = pt->v[_MMG5_iare[iea][1]];
         }
-        if ( pt->v[iare[ieb][0]] != ip0 )
-            iptmpb = pt->v[iare[ieb][0]];
+        if ( pt->v[_MMG5_iare[ieb][0]] != ip0 )
+            iptmpb = pt->v[_MMG5_iare[ieb][0]];
         else {
-            assert(pt->v[iare[ieb][1]] != ip0);
-            iptmpb = pt->v[iare[ieb][1]];
+            assert(pt->v[_MMG5_iare[ieb][1]] != ip0);
+            iptmpb = pt->v[_MMG5_iare[ieb][1]];
         }
         if ( (iptmpa == ipa) || (iptmpa == ipb) ) {
             if ( pt->xt )  tag = mesh->xtetra[pt->xt].tag[iea];
@@ -932,13 +932,13 @@ int movbdynompt(pMesh mesh, int *listv, int ilistv, int *lists, int ilists){
 
     nxp = mesh->xp + 1;
     if ( nxp > mesh->xpmax ) {
-        TAB_RECALLOC(mesh,mesh->xpoint,mesh->xpmax,0.2,xPoint,
+        _MMG5_TAB_RECALLOC(mesh,mesh->xpoint,mesh->xpmax,0.2,MMG5_xPoint,
                      "larger xpoint table",
                      return(0));
     }
     ppt0->xp = nxp;
     pxp = &mesh->xpoint[nxp];
-    memcpy(pxp,&(mesh->xpoint[p0->xp]),sizeof(xPoint));
+    memcpy(pxp,&(mesh->xpoint[p0->xp]),sizeof(MMG5_xPoint));
 
     pxp->t[0] = to[0];
     pxp->t[1] = to[1];
@@ -964,19 +964,19 @@ int movbdynompt(pMesh mesh, int *listv, int ilistv, int *lists, int ilists){
 
         tt.v[i] = 0;
         caltmp = caltri(mesh,&tt);
-        if ( caltmp < EPSD )        return(0);
+        if ( caltmp < _MMG5_EPSD )        return(0);
         calnew = MG_MIN(calnew,caltmp);
         if ( chkedg(mesh,&tt,MG_GET(pxt->ori,iface)) ) {
             // Algiane: 09/12/2013 commit: we break the hausdorff criteria so we dont want
             // the point to move? (modification not tested because I could not find a case
             // passing here)
-            memset(pxp,0,sizeof(xPoint));
+            memset(pxp,0,sizeof(MMG5_xPoint));
             return(0);
         }
     }
-    if ( calold < NULKAL && calnew <= calold )    return(0);
+    if ( calold < _MMG5_NULKAL && calnew <= calold )    return(0);
     else if ( calnew < calold )    return(0);
-    memset(pxp,0,sizeof(xPoint));
+    memset(pxp,0,sizeof(MMG5_xPoint));
 
     /* Test : check whether all volumes remain positive with new position of the point */
     calold = calnew = DBL_MAX;
@@ -989,11 +989,11 @@ int movbdynompt(pMesh mesh, int *listv, int ilistv, int *lists, int ilists){
         pt0->v[i0] = 0;
         calold = MG_MIN(calold, pt->qual);
         callist[l]= orcal(mesh,0);
-        if ( callist[l] < EPSD )        return(0);
+        if ( callist[l] < _MMG5_EPSD )        return(0);
         calnew = MG_MIN(calnew,callist[l]);
     }
-    if ( calold < NULKAL && calnew <= calold )    return(0);
-    else if (calnew < NULKAL) return(0);
+    if ( calold < _MMG5_NULKAL && calnew <= calold )    return(0);
+    else if (calnew < _MMG5_NULKAL) return(0);
     else if ( calnew <= 0.3*calold )      return(0);
 
     /* Update coordinates, normals, for new point */
@@ -1017,12 +1017,12 @@ int movbdynompt(pMesh mesh, int *listv, int ilistv, int *lists, int ilists){
 }
 
 /** Move boundary ridge point, whose volumic and surfacic balls are passed */
-int movbdyridpt(pMesh mesh,int *listv,int ilistv,int *lists,int ilists) {
-    pTetra               pt,pt0;
-    pxTetra              pxt;
-    pPoint               p0,p1,p2,ppt0;
-    Tria                 tt;
-    pxPoint              pxp;
+int movbdyridpt(MMG5_pMesh mesh,int *listv,int ilistv,int *lists,int ilists) {
+    MMG5_pTetra               pt,pt0;
+    MMG5_pxTetra              pxt;
+    MMG5_pPoint               p0,p1,p2,ppt0;
+    MMG5_Tria                 tt;
+    MMG5_pxPoint              pxp;
     double               step,ll1old,ll2old,o[3],no1[3],no2[3],to[3];
     double               calold,calnew,caltmp,callist[ilistv];
     int                  l,iel,ip0,ipa,ipb,iptmpa,iptmpb,it1,it2,ip1,ip2,ip,nxp;
@@ -1044,11 +1044,11 @@ int movbdyridpt(pMesh mesh,int *listv,int ilistv,int *lists,int ilists) {
     pt            = &mesh->tetra[iel];
     ipa           = ipb = 0;
     for (i=0; i<3; i++) {
-        if ( pt->v[idir[iface][i]] != ip0 ) {
+        if ( pt->v[_MMG5_idir[iface][i]] != ip0 ) {
             if ( !ipa )
-                ipa = pt->v[idir[iface][i]];
+                ipa = pt->v[_MMG5_idir[iface][i]];
             else
-                ipb = pt->v[idir[iface][i]];
+                ipb = pt->v[_MMG5_idir[iface][i]];
         }
     }
     assert(ipa && ipb);
@@ -1059,25 +1059,25 @@ int movbdyridpt(pMesh mesh,int *listv,int ilistv,int *lists,int ilists) {
         pt  = &mesh->tetra[iel];
         iea = ieb = 0;
         for (i=0; i<3; i++) {
-            ie = iarf[iface][i]; //edge i on face iface
-            if ( (pt->v[iare[ie][0]] == ip0) || (pt->v[iare[ie][1]] == ip0) ) {
+            ie = _MMG5_iarf[iface][i]; //edge i on face iface
+            if ( (pt->v[_MMG5_iare[ie][0]] == ip0) || (pt->v[_MMG5_iare[ie][1]] == ip0) ) {
                 if ( !iea )
                     iea = ie;
                 else
                     ieb = ie;
             }
         }
-        if ( pt->v[iare[iea][0]] != ip0 )
-            iptmpa = pt->v[iare[iea][0]];
+        if ( pt->v[_MMG5_iare[iea][0]] != ip0 )
+            iptmpa = pt->v[_MMG5_iare[iea][0]];
         else {
-            assert(pt->v[iare[iea][1]] != ip0);
-            iptmpa = pt->v[iare[iea][1]];
+            assert(pt->v[_MMG5_iare[iea][1]] != ip0);
+            iptmpa = pt->v[_MMG5_iare[iea][1]];
         }
-        if ( pt->v[iare[ieb][0]] != ip0 )
-            iptmpb = pt->v[iare[ieb][0]];
+        if ( pt->v[_MMG5_iare[ieb][0]] != ip0 )
+            iptmpb = pt->v[_MMG5_iare[ieb][0]];
         else {
-            assert(pt->v[iare[ieb][1]] != ip0);
-            iptmpb = pt->v[iare[ieb][1]];
+            assert(pt->v[_MMG5_iare[ieb][1]] != ip0);
+            iptmpb = pt->v[_MMG5_iare[ieb][1]];
         }
         if ( (iptmpa == ipa) || (iptmpa == ipb) ) {
             if ( pt->xt )  tag = mesh->xtetra[pt->xt].tag[iea];
@@ -1111,11 +1111,11 @@ int movbdyridpt(pMesh mesh,int *listv,int ilistv,int *lists,int ilists) {
     pt    = &mesh->tetra[iel];
     ipa = ipb = 0;
     for (i=0; i<3; i++) {
-        if ( pt->v[idir[iface][i]] != ip0 ) {
+        if ( pt->v[_MMG5_idir[iface][i]] != ip0 ) {
             if ( !ipa )
-                ipa = pt->v[idir[iface][i]];
+                ipa = pt->v[_MMG5_idir[iface][i]];
             else
-                ipb = pt->v[idir[iface][i]];
+                ipb = pt->v[_MMG5_idir[iface][i]];
         }
     }
     assert(ipa && ipb);
@@ -1126,25 +1126,25 @@ int movbdyridpt(pMesh mesh,int *listv,int ilistv,int *lists,int ilists) {
         pt  = &mesh->tetra[iel];
         iea = ieb = 0;
         for (i=0; i<3; i++) {
-            ie = iarf[iface][i]; //edge i on face iface
-            if ( (pt->v[iare[ie][0]] == ip0) || (pt->v[iare[ie][1]] == ip0) ) {
+            ie = _MMG5_iarf[iface][i]; //edge i on face iface
+            if ( (pt->v[_MMG5_iare[ie][0]] == ip0) || (pt->v[_MMG5_iare[ie][1]] == ip0) ) {
                 if ( !iea )
                     iea = ie;
                 else
                     ieb = ie;
             }
         }
-        if ( pt->v[iare[iea][0]] != ip0 )
-            iptmpa = pt->v[iare[iea][0]];
+        if ( pt->v[_MMG5_iare[iea][0]] != ip0 )
+            iptmpa = pt->v[_MMG5_iare[iea][0]];
         else {
-            assert(pt->v[iare[iea][1]] != ip0);
-            iptmpa = pt->v[iare[iea][1]];
+            assert(pt->v[_MMG5_iare[iea][1]] != ip0);
+            iptmpa = pt->v[_MMG5_iare[iea][1]];
         }
-        if ( pt->v[iare[ieb][0]] != ip0 )
-            iptmpb = pt->v[iare[ieb][0]];
+        if ( pt->v[_MMG5_iare[ieb][0]] != ip0 )
+            iptmpb = pt->v[_MMG5_iare[ieb][0]];
         else {
-            assert(pt->v[iare[ieb][1]] != ip0);
-            iptmpb = pt->v[iare[ieb][1]];
+            assert(pt->v[_MMG5_iare[ieb][1]] != ip0);
+            iptmpb = pt->v[_MMG5_iare[ieb][1]];
         }
         if ( (iptmpa == ipa) || (iptmpa == ipb) ) {
             if ( pt->xt )  tag = mesh->xtetra[pt->xt].tag[iea];
@@ -1218,13 +1218,13 @@ int movbdyridpt(pMesh mesh,int *listv,int ilistv,int *lists,int ilists) {
 
     nxp = mesh->xp+1;
     if ( nxp > mesh->xpmax ) {
-        TAB_RECALLOC(mesh,mesh->xpoint,mesh->xpmax,0.2,xPoint,
+        _MMG5_TAB_RECALLOC(mesh,mesh->xpoint,mesh->xpmax,0.2,MMG5_xPoint,
                      "larger xpoint table",
                      return(0));
     }
     ppt0->xp = nxp;
     pxp = &mesh->xpoint[nxp];
-    memcpy(pxp,&(mesh->xpoint[p0->xp]),sizeof(xPoint));
+    memcpy(pxp,&(mesh->xpoint[p0->xp]),sizeof(MMG5_xPoint));
 
     pxp->t[0] = to[0];
     pxp->t[1] = to[1];
@@ -1253,19 +1253,19 @@ int movbdyridpt(pMesh mesh,int *listv,int ilistv,int *lists,int ilists) {
         assert(i<3);
         tt.v[i] = 0;
         caltmp = caltri(mesh,&tt);
-        if ( caltmp < EPSD )        return(0);
+        if ( caltmp < _MMG5_EPSD )        return(0);
         calnew = MG_MIN(calnew,caltmp);
-        if ( chkedg(mesh,&tt,MG_GET(pxt->ori,iface)) ) {            //MAYBE CHECKEDG ASKS STH FOR POINTS !!!!!
+        if ( chkedg(mesh,&tt,MG_GET(pxt->ori,iface)) ) {            //MAYBE CHECKEDG ASKS STH FOR _MMG5_POINTS !!!!!
             // Algiane: 09/12/2013 commit: we break the hausdorff criteria so we dont want
             // the point to move? (modification not tested because I could not find a case
             // passing here)
-            memset(pxp,0,sizeof(xPoint));
+            memset(pxp,0,sizeof(MMG5_xPoint));
             return(0);
         }
     }
-    if ( calold < NULKAL && calnew <= calold )    return(0);
+    if ( calold < _MMG5_NULKAL && calnew <= calold )    return(0);
     else if ( calnew <= calold )  return(0);
-    memset(pxp,0,sizeof(xPoint));
+    memset(pxp,0,sizeof(MMG5_xPoint));
 
     /* Test : check whether all volumes remain positive with new position of the point */
     calold = calnew = DBL_MAX;
@@ -1278,11 +1278,11 @@ int movbdyridpt(pMesh mesh,int *listv,int ilistv,int *lists,int ilists) {
         pt0->v[i0] = 0;
         calold = MG_MIN(calold, pt->qual);
         callist[l]=orcal(mesh,0);
-        if ( callist[l] < EPSD )        return(0);
+        if ( callist[l] < _MMG5_EPSD )        return(0);
         calnew = MG_MIN(calnew,callist[l]);
     }
-    if ( calold < NULKAL && calnew <= calold )    return(0);
-    else if (calnew < NULKAL) return(0);
+    if ( calold < _MMG5_NULKAL && calnew <= calold )    return(0);
+    else if (calnew < _MMG5_NULKAL) return(0);
     else if ( calnew <= 0.3*calold )      return(0);
 
     /* Update coordinates, normals, for new point */
