@@ -220,7 +220,7 @@ static int _MMG5_setdhd(MMG5_pMesh mesh) {
         if ( !MG_EOK(pt) )  continue;
 
         /* triangle normal */
-        nortri(mesh,pt,n1);
+        _MMG5_nortri(mesh,pt,n1);
         adja = &mesh->adjt[3*(k-1)+1];
         for (i=0; i<3; i++) {
             kk  = adja[i] / 3;
@@ -246,7 +246,7 @@ static int _MMG5_setdhd(MMG5_pMesh mesh) {
                     ne++;
                 }
                 /* check angle w. neighbor */
-                nortri(mesh,pt1,n2);
+                _MMG5_nortri(mesh,pt1,n2);
                 dhd = n1[0]*n2[0] + n1[1]*n2[1] + n1[2]*n2[2];
                 if ( dhd <= mesh->info.dhd ) {
                     pt->tag[i]   |= MG_GEO;
@@ -551,7 +551,7 @@ int _MMG5_analys(MMG5_pMesh mesh) {
             fprintf(stdout,"  ## Boundary problem. Exit program.\n");
             return(0);
         }
-        freeXTets(mesh);
+        _MMG5_freeXTets(mesh);
     }
 
     /* compatibility triangle orientation w/r tetras */
@@ -569,7 +569,7 @@ int _MMG5_analys(MMG5_pMesh mesh) {
     /* build hash table for geometric edges */
     if ( !_MMG5_hGeom(mesh) ) {
         fprintf(stdout,"  ## Hashing problem (0). Exit program.\n");
-        _MMG5_DEL_MEM(mesh,mesh->htab.geom,(mesh->htab.max+1)*sizeof(hgeom));
+        _MMG5_DEL_MEM(mesh,mesh->htab.geom,(mesh->htab.max+1)*sizeof(MMG5_hgeom));
         return(0);
     }
 
@@ -591,7 +591,7 @@ int _MMG5_analys(MMG5_pMesh mesh) {
 
     /* identify singularities */
     if ( !_MMG5_singul(mesh) ) {
-        fprintf(stdout,"  ## Singularity problem. Exit program.\n");
+        fprintf(stdout,"  ## MMG5_Singularity problem. Exit program.\n");
         return(0);
     }
 
@@ -615,7 +615,7 @@ int _MMG5_analys(MMG5_pMesh mesh) {
     if ( !mesh->na && !_MMG5_hGeom(mesh) ) {
         fprintf(stdout,"  ## Hashing problem (0). Exit program.\n");
         _MMG5_DEL_MEM(mesh,mesh->xpoint,(mesh->xpmax+1)*sizeof(MMG5_xPoint));
-        _MMG5_DEL_MEM(mesh,mesh->htab.geom,(mesh->htab.max+1)*sizeof(hgeom));
+        _MMG5_DEL_MEM(mesh,mesh->htab.geom,(mesh->htab.max+1)*sizeof(MMG5_hgeom));
         return(0);
     }
 
@@ -630,9 +630,9 @@ int _MMG5_analys(MMG5_pMesh mesh) {
     _MMG5_nmgeom(mesh);
 
     /* release memory */
-    _MMG5_DEL_MEM(mesh,mesh->htab.geom,(mesh->htab.max+1)*sizeof(hgeom));
+    _MMG5_DEL_MEM(mesh,mesh->htab.geom,(mesh->htab.max+1)*sizeof(MMG5_hgeom));
     _MMG5_DEL_MEM(mesh,mesh->adjt,(3*mesh->nt+4)*sizeof(int));
-    _MMG5_DEL_MEM(mesh,mesh->tria,(mesh->nt+1)*sizeof(Tria));
+    _MMG5_DEL_MEM(mesh,mesh->tria,(mesh->nt+1)*sizeof(MMG5_Tria));
 
     return(1);
 }

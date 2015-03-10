@@ -37,12 +37,12 @@
 
 extern char ddb;
 
-inline double lenedg_ani(MMG5_pMesh mesh,MMG5_pSol met,int ip1,int ip2) {
+inline double _MMG5_lenedg_ani(MMG5_pMesh mesh,MMG5_pSol met,int ip1,int ip2) {
     return(0.0);
 }
 
 /** Compute length of edge [ip1,ip2] according to the size prescription */
-inline double lenedg_iso(MMG5_pMesh mesh,MMG5_pSol met,int ip1,int ip2) {
+inline double _MMG5_lenedg_iso(MMG5_pMesh mesh,MMG5_pSol met,int ip1,int ip2) {
     MMG5_pPoint   p1,p2;
     double   h1,h2,l,r,len;
 
@@ -61,7 +61,7 @@ inline double lenedg_iso(MMG5_pMesh mesh,MMG5_pSol met,int ip1,int ip2) {
 
 
 /** Return quality of surface triangle */
-inline double caltri(MMG5_pMesh mesh,MMG5_pTria ptt) {
+inline double _MMG5_caltri(MMG5_pMesh mesh,MMG5_pTria ptt) {
     double   *a,*b,*c,cal,abx,aby,abz,acx,acy,acz,bcx,bcy,bcz,rap;
 
     a = &mesh->point[ptt->v[0]].c[0];
@@ -94,7 +94,7 @@ inline double caltri(MMG5_pMesh mesh,MMG5_pTria ptt) {
 }
 
 /** compute tetra oriented quality of iel (return 0.0 when element is inverted) */
-inline double orcal(MMG5_pMesh mesh,int iel) {
+inline double _MMG5_orcal(MMG5_pMesh mesh,int iel) {
     MMG5_pTetra     pt;
     double     abx,aby,abz,acx,acy,acz,adx,ady,adz,bcx,bcy,bcz,bdx,bdy,bdz,cdx,cdy,cdz;
     double     vol,v1,v2,v3,rap;
@@ -153,7 +153,7 @@ inline double orcal(MMG5_pMesh mesh,int iel) {
 
 
 /** compute tetra quality iso */
-inline double caltet_iso(MMG5_pMesh mesh,MMG5_pSol met,int ia,int ib,int ic,int id) {
+inline double _MMG5_caltet_iso(MMG5_pMesh mesh,MMG5_pSol met,int ia,int ib,int ic,int id) {
     double     abx,aby,abz,acx,acy,acz,adx,ady,adz,bcx,bcy,bcz,bdx,bdy,bdz,cdx,cdy,cdz;
     double     vol,v1,v2,v3,rap;
     double    *a,*b,*c,*d;
@@ -207,13 +207,13 @@ inline double caltet_iso(MMG5_pMesh mesh,MMG5_pSol met,int ia,int ib,int ic,int 
 }
 
 
-inline double caltet_ani(MMG5_pMesh mesh,MMG5_pSol met,int ia,int ib,int ic,int id) {
+inline double _MMG5_caltet_ani(MMG5_pMesh mesh,MMG5_pSol met,int ia,int ib,int ic,int id) {
     return(0.0);
 }
 
 
 /** compute face normal */
-inline int nortri(MMG5_pMesh mesh,MMG5_pTria pt,double *n) {
+inline int _MMG5_nortri(MMG5_pMesh mesh,MMG5_pTria pt,double *n) {
     double   *a,*b,*c,dd,abx,aby,abz,acx,acy,acz,det;
 
     a = mesh->point[pt->v[0]].c;
@@ -280,7 +280,10 @@ inline int nortri(MMG5_pMesh mesh,MMG5_pTria pt,double *n) {
 #define RAPMAX    0.4//0.3//0.25
 unsigned char inxt[7]    = { 1,2,0,1,2,0,1 };
 
-int typelt(MMG5_pMesh mesh,int iel,int *item) {
+/**
+ * \warning Not used.
+ */
+int _MMG5_typelt(MMG5_pMesh mesh,int iel,int *item) {
     MMG5_pTetra    pt;
     MMG5_pPoint    pa,pb,pc,pd;
     double    abx,aby,abz,acx,acy,acz,adx,ady,adz,v1,v2,v3,vol;
@@ -519,7 +522,10 @@ int typelt(MMG5_pMesh mesh,int iel,int *item) {
     return(9);
 }
 
-int badelt(MMG5_pMesh mesh,MMG5_pSol met) {
+/**
+ * \warning Not used.
+ */
+int _MMG5_badelt(MMG5_pMesh mesh,MMG5_pSol met) {
     MMG5_pTetra   pt;
     double   kal;
     int      k,it,maxit,nd/*,item[2],typ*/;
@@ -537,16 +543,16 @@ int badelt(MMG5_pMesh mesh,MMG5_pSol met) {
             if ( !MG_EOK(pt) )  continue;
             kal = /*_MMG5_ALPHAD **/ pt->qual;
             if ( kal > 0.0096225 /*_MMG5_BADKAL/_MMG5_ALPHAD*/ )  continue;
-            //typ =  typelt(mesh,k,item);
+            //typ =  _MMG5_typelt(mesh,k,item);
             //ntyp[typ]++;
             nd++;
             /*treat bad elt*/
             /*1) try to swp one edge*/
             for(i=0 ; i<6 ; i++) {
-                nconf = chkswpgen(mesh,k,i,&ilist,list,1.01);
+                nconf = _MMG5_chkswpgen(mesh,k,i,&ilist,list,1.01);
                 if ( nconf ) {
                     ns++;
-                    if(!swpgen(mesh,met,nconf,ilist,list,NULL)) return(-1);
+                    if(!_MMG5_swpgen(mesh,met,nconf,ilist,list,NULL)) return(-1);
                     break;
                 }
             }
@@ -563,7 +569,7 @@ int badelt(MMG5_pMesh mesh,MMG5_pSol met) {
 }
 
 /** Compute sizes of edges of the mesh, and displays histo */
-int prilen(MMG5_pMesh mesh, MMG5_pSol met) {
+int _MMG5_prilen(MMG5_pMesh mesh, MMG5_pSol met) {
     MMG5_pTetra          pt;
     _MMG5_Hash           hash;
     double          len,avlen,dned,lmin,lmax;
@@ -615,7 +621,7 @@ int prilen(MMG5_pMesh mesh, MMG5_pSol met) {
             ier = _MMG5_hashPop(&hash,np,nq);
             if( ier ) {
                 ned ++;
-                len = lenedg(mesh,met,np,nq);
+                len = _MMG5_lenedg(mesh,met,np,nq);
                 avlen += len;
 
                 if( len < lmin ) {
@@ -683,7 +689,7 @@ int prilen(MMG5_pMesh mesh, MMG5_pSol met) {
 }
 
 /** print mesh quality histo */
-void outqua(MMG5_pMesh mesh,MMG5_pSol met) {
+void _MMG5_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
     MMG5_pTetra    pt;
     double   rap,rapmin,rapmax,rapavg,med,good;
     int      i,k,iel,ok,ir,imax,nex,his[5];
@@ -703,10 +709,11 @@ void outqua(MMG5_pMesh mesh,MMG5_pSol met) {
             continue;
         }
         ok++;
-        if ( orvol(mesh->point,pt->v) < 0.0 ) {
+        if ( _MMG5_orvol(mesh->point,pt->v) < 0.0 ) {
             fprintf(stdout,"dans quality vol negatif\n");
         }
-        rap = _MMG5_ALPHAD * caltet(mesh,met,pt->v[0],pt->v[1],pt->v[2],pt->v[3]);
+        rap = _MMG5_ALPHAD *
+            _MMG5_caltet(mesh,met,pt->v[0],pt->v[1],pt->v[2],pt->v[3]);
         if ( rap < rapmin ) {
             rapmin = rap;
             iel    = ok;
@@ -727,8 +734,8 @@ void outqua(MMG5_pMesh mesh,MMG5_pSol met) {
 #else
     fprintf(stdout,"     BEST   %e  AVRG.   %e  WRST.   %e (%d)\n => %d %d %d %d\n",
             rapmax,rapavg / (mesh->ne-nex),rapmin,iel,
-            indPt(mesh,mesh->tetra[iel].v[0]),indPt(mesh,mesh->tetra[iel].v[1]),
-            indPt(mesh,mesh->tetra[iel].v[2]),indPt(mesh,mesh->tetra[iel].v[3]));
+            _MMG5_indPt(mesh,mesh->tetra[iel].v[0]),_MMG5_indPt(mesh,mesh->tetra[iel].v[1]),
+            _MMG5_indPt(mesh,mesh->tetra[iel].v[2]),_MMG5_indPt(mesh,mesh->tetra[iel].v[3]));
 #endif
     if ( abs(mesh->info.imprim) < 4 ){
         if (rapmin == 0){
@@ -757,8 +764,13 @@ void outqua(MMG5_pMesh mesh,MMG5_pSol met) {
     }
 }
 
-/** approximation of the final number of vertex */
-int countelt(MMG5_pMesh mesh,MMG5_pSol sol, double *weightelt, long *npcible) {
+/**
+ *
+ * Approximation of the final number of vertex.
+ *
+ * \warning Not used.
+ */
+int _MMG5_countelt(MMG5_pMesh mesh,MMG5_pSol sol, double *weightelt, long *npcible) {
     MMG5_pTetra pt;
     double  len;
     int    k,ia,ipa,ipb,lon,l;
@@ -800,7 +812,7 @@ int countelt(MMG5_pMesh mesh,MMG5_pSol sol, double *weightelt, long *npcible) {
         for(ib=0 ; ib<6 ; ib++) {
             ipa = _MMG5_iare[ib][0];
             ipb = _MMG5_iare[ib][1];
-            lent[ib] = lenedg(mesh,sol,pt->v[ipa],pt->v[ipb]);
+            lent[ib] = _MMG5_lenedg(mesh,sol,pt->v[ipa],pt->v[ipb]);
             lenavg+=lent[ib];
         }
         lenavg /= 6.;

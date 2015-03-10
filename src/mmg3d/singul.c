@@ -43,7 +43,7 @@
  *  key=5,6,7,8,9,10 if the point is on edge 0,1,2,3,4,5 (resp.),
  *  key=11,12,13,14 if the point is on vertex 0,1,2,3 (resp.).*/
 static inline
-int locate(double cb[4]) {
+int _MMG5_locate(double cb[4]) {
     int i, j, key;
 
     /* the point must be in the tet */
@@ -87,7 +87,7 @@ int locate(double cb[4]) {
 /** update cb, key, ptt and p values for the next visited tet
     when we travel through a vertex is using the tri ifac */
 static inline
-int updatevertex(MMG5_pMesh mesh, MMG5_pTetra *ptt, int nsfin, MMG5_pPoint p[4],
+int _MMG5_updatevertex(MMG5_pMesh mesh, MMG5_pTetra *ptt, int nsfin, MMG5_pPoint p[4],
                  int is, int ifac, double cb[4], int *key) {
     int i ,ip, vois;
 
@@ -124,7 +124,7 @@ int updatevertex(MMG5_pMesh mesh, MMG5_pTetra *ptt, int nsfin, MMG5_pPoint p[4],
 /** update cb, key, ptt and p values for the next visited tet
     when we travel through an edge ia using the tri ifac */
 static inline
-int updateedge(MMG5_pMesh mesh, MMG5_pTetra *ptt, int nsfin, MMG5_pPoint p[4], int ia,
+int _MMG5_updateedge(MMG5_pMesh mesh, MMG5_pTetra *ptt, int nsfin, MMG5_pPoint p[4], int ia,
                int ifac, double cb[4], int *key) {
     int    i, ip0, ip1, ja;
     double cbtmp[4];
@@ -172,7 +172,7 @@ int updateedge(MMG5_pMesh mesh, MMG5_pTetra *ptt, int nsfin, MMG5_pPoint p[4], i
 /** update cb, key, ptt and p values for the next visited tet
     when we travel through a tri ifac whose vertices are i0, i1 and i2 */
 static inline
-int updatefac(MMG5_pMesh mesh, MMG5_pTetra *ptt, int nsfin, MMG5_pPoint p[4],
+int _MMG5_updatefac(MMG5_pMesh mesh, MMG5_pTetra *ptt, int nsfin, MMG5_pPoint p[4],
               int i0, int i1, int i2, int ifac, double cb[4], int *key) {
     int    i,ip0,ip1,ip2;
     double cbtmp[4];
@@ -231,27 +231,27 @@ int updatefac(MMG5_pMesh mesh, MMG5_pTetra *ptt, int nsfin, MMG5_pPoint p[4],
     when we don't know where we travel (vertex, edge, tri...)
     except that we come from the previous tet by tri ifac */
 static inline
-int updateunknown(MMG5_pMesh mesh, MMG5_pTetra *ptt, int nsfin, MMG5_pPoint p[4],
+int _MMG5_updateunknown(MMG5_pMesh mesh, MMG5_pTetra *ptt, int nsfin, MMG5_pPoint p[4],
                   int ifac, double cb[4], int *key) {
     int loc;
 
     if ( (*key)/11 ) {
         loc = (*key)%11;
-        if ( !updatevertex(mesh, ptt, nsfin, p, loc, ifac, cb, key) )
+        if ( !_MMG5_updatevertex(mesh, ptt, nsfin, p, loc, ifac, cb, key) )
             return(0);
         return(1);
     }
 
     else if ( (*key)/5 ) {
         loc = (*key)-5;
-        if ( !updateedge(mesh, ptt, nsfin, p, loc, ifac, cb, key) )
+        if ( !_MMG5_updateedge(mesh, ptt, nsfin, p, loc, ifac, cb, key) )
             return(0);
         return(1);
     }
 
     else if ( *key ) {
         loc  = (*key)-1;
-        if ( !updatefac(mesh, ptt, nsfin, p, _MMG5_idir[loc][0], _MMG5_idir[loc][1],
+        if ( !_MMG5_updatefac(mesh, ptt, nsfin, p, _MMG5_idir[loc][0], _MMG5_idir[loc][1],
                         _MMG5_idir[loc][2], ifac, cb, key) )  return(0);
         return(1);
     }
@@ -265,8 +265,8 @@ int updateunknown(MMG5_pMesh mesh, MMG5_pTetra *ptt, int nsfin, MMG5_pPoint p[4]
 
 /** fill mat and ap */
 static inline
-int barycentric(int is, int i0, int i1, int i2, MMG5_pPoint p[4], double e2[3],
-                double mat[3][3], double ap[3]) {
+int _MMG5_barycentric(int is, int i0, int i1, int i2, MMG5_pPoint p[4], double e2[3],
+                      double mat[3][3], double ap[3]) {
 
     /* barycentric */
     mat[0][0]  = p[i0]->c[0] - p[is]->c[0];
@@ -288,7 +288,7 @@ int barycentric(int is, int i0, int i1, int i2, MMG5_pPoint p[4], double e2[3],
 
 /** compute and check the volume of the tet */
 static inline
-int calcvol(double mat[3][3], double *dd) {
+int _MMG5_calcvol(double mat[3][3], double *dd) {
 
     /* test volume */
     (*dd) =  mat[0][0]*(mat[1][1]*mat[2][2] - mat[2][1]*mat[1][2])
@@ -304,10 +304,10 @@ int calcvol(double mat[3][3], double *dd) {
 
 /** Compute the intersection point between tri i0 and seg e1-e2 */
 static inline
-int intersegtri_i0(int is, int i0, int i1, int i2, double ee[3], double e1[3],
+int _MMG5_intersegtri_i0(int is, int i0, int i1, int i2, double ee[3], double e1[3],
                    double ep[3], double dd, double pis[3], double mat[3][3],
                    double u[3], double c[3], double cb[4],
-                   int *key, Travel *travcell, int* nsfin, int adji0) {
+                   int *key, _MMG5_Travel *travcell, int* nsfin, int adji0) {
 
     double t, cp[3], v[3], vol[4];
 
@@ -342,7 +342,7 @@ int intersegtri_i0(int is, int i0, int i1, int i2, double ee[3], double e1[3],
                 cb[is] = vol[is] * dd;
                 cb[i1] = vol[i1] * dd;
                 cb[i2] = vol[i2] * dd;
-                (*key) = locate(cb);
+                (*key) = _MMG5_locate(cb);
                 travcell->cb[0] = cb[0];
                 travcell->cb[1] = cb[1];
                 travcell->cb[2] = cb[2];
@@ -362,10 +362,10 @@ int intersegtri_i0(int is, int i0, int i1, int i2, double ee[3], double e1[3],
 
 /** Compute the intersection point between tri i1 and seg e1-e2 */
 static inline
-int intersegtri_i1(int is, int i0, int i1, int i2, double ee[3], double e1[3],
+int _MMG5_intersegtri_i1(int is, int i0, int i1, int i2, double ee[3], double e1[3],
                    double ep[3], double dd, double pis[3], double mat[3][3],
                    double c[3], double cb[4], int *key,
-                   Travel *travcell, int* nsfin, int adji1) {
+                   _MMG5_Travel *travcell, int* nsfin, int adji1) {
 
     double t, cp[3], v[3], vol[4];
 
@@ -407,7 +407,7 @@ int intersegtri_i1(int is, int i0, int i1, int i2, double ee[3], double e1[3],
                 cb[i0] = vol[i0] * dd;
                 cb[is] = vol[is] * dd;
                 cb[i2] = vol[i2] * dd;
-                (*key) = locate(cb);
+                (*key) = _MMG5_locate(cb);
                 travcell->cb[0] = cb[0];
                 travcell->cb[1] = cb[1];
                 travcell->cb[2] = cb[2];
@@ -427,10 +427,10 @@ int intersegtri_i1(int is, int i0, int i1, int i2, double ee[3], double e1[3],
 
 /** Compute the intersection point between tri i2 and seg e1-e2 */
 static inline
-int intersegtri_i2(int is, int i0, int i1, int i2, double ee[3], double e1[3],
+int _MMG5_intersegtri_i2(int is, int i0, int i1, int i2, double ee[3], double e1[3],
                    double ep[3], double dd, double pis[3], double mat[3][3],
                    double c[3], double cb[4], int *key,
-                   Travel *travcell, int* nsfin, int adji2) {
+                   _MMG5_Travel *travcell, int* nsfin, int adji2) {
 
     double t, cp[3], v[3], vol[4];
 
@@ -472,7 +472,7 @@ int intersegtri_i2(int is, int i0, int i1, int i2, double ee[3], double e1[3],
                 cb[i0] = vol[i0] * dd;
                 cb[i1] = vol[i1] * dd;
                 cb[is] = vol[is] * dd;
-                (*key) = locate(cb);
+                (*key) = _MMG5_locate(cb);
                 travcell->cb[0] = cb[0];
                 travcell->cb[1] = cb[1];
                 travcell->cb[2] = cb[2];
@@ -492,13 +492,13 @@ int intersegtri_i2(int is, int i0, int i1, int i2, double ee[3], double e1[3],
 
 
 /** Create a point singular in tetra iel and if needed split the tetra and its neighbour */
-int creaPoint(MMG5_pMesh mesh, MMG5_pSol met, int iel,double c[3], double cb[4], char tag){
+int _MMG5_creaPoint(MMG5_pMesh mesh, MMG5_pSol met, int iel,double c[3], double cb[4], char tag){
     MMG5_pTetra pt;
     double hnew;
     int    ia,ip,ilist,key,i;
     int    list[_MMG5_LMAX+2];
 
-    key=locate(cb);
+    key=_MMG5_locate(cb);
     pt = &mesh->tetra[iel];
 
     if ( key/11 ) {
@@ -516,7 +516,7 @@ int creaPoint(MMG5_pMesh mesh, MMG5_pSol met, int iel,double c[3], double cb[4],
                 hnew += met->m[ip]*cb[i];
             }
         }
-        ip = newPt(mesh,c,tag );
+        ip = _MMG5_newPt(mesh,c,tag );
         if ( !ip ) {
             _MMG5_POINT_REALLOC(mesh,met,ip,0.2,
                           printf("  ## Error: unable to allocate a new point\n");
@@ -535,7 +535,7 @@ int creaPoint(MMG5_pMesh mesh, MMG5_pSol met, int iel,double c[3], double cb[4],
             fprintf(stdout,"  Exit program.\n");
             return(0);
         }
-        if ( !split1b(mesh, met, list, ilist, ip, 0) ) return(0);
+        if ( !_MMG5_split1b(mesh, met, list, ilist, ip, 0) ) return(0);
 
         /* Update of barycentric coordinate in tet list[0]/6 */
         switch(list[0]%6){
@@ -577,20 +577,20 @@ int creaPoint(MMG5_pMesh mesh, MMG5_pSol met, int iel,double c[3], double cb[4],
             fprintf(stdout,"  Exit program.\n");
             return(0);
         }
-        if ( split3cb(mesh, met, iel, key-1, c, cb, &ip)<0 )  return(0);
+        if ( _MMG5_split3cb(mesh, met, iel, key-1, c, cb, &ip)<0 )  return(0);
         mesh->point[ip].tag |= tag;
         return(1);
     }
 
     /* The point is inside the tet */
-    if ( !split4cb(mesh, met, iel, c, cb, &ip) )  return(0);
+    if ( !_MMG5_split4cb(mesh, met, iel, c, cb, &ip) )  return(0);
     mesh->point[ip].tag |= tag;
     return(1);
 }
 
 
 /** Create a required or ridge edge in tetras of list travel */
-int creaEdge(MMG5_pMesh mesh, MMG5_pSol met, Travel *trav, char tag){
+int _MMG5_creaEdge(MMG5_pMesh mesh, MMG5_pSol met, _MMG5_Travel *trav, char tag){
     MMG5_pTetra  pt;
     double  c[3],cb[4],hnew;
     int     ia,ip,ilist,key,kel,i;
@@ -629,7 +629,7 @@ int creaEdge(MMG5_pMesh mesh, MMG5_pSol met, Travel *trav, char tag){
                 hnew += met->m[ip]*cb[i];
             }
         }
-        ip = newPt(mesh,c,tag);
+        ip = _MMG5_newPt(mesh,c,tag);
         if ( !ip ) {
             _MMG5_POINT_REALLOC(mesh,met,ip,0.2,
                           printf("  ## Error: unable to allocate a new point\n");
@@ -648,12 +648,12 @@ int creaEdge(MMG5_pMesh mesh, MMG5_pSol met, Travel *trav, char tag){
             fprintf(stdout,"  Exit program.\n");
             return(0);
         }
-        if ( !split1b(mesh, met, list, ilist, ip, 0) )  return(0);
+        if ( !_MMG5_split1b(mesh, met, list, ilist, ip, 0) )  return(0);
 
         /* Update of barycentric coordinate in tet list[0]/6 */
         i = majcb[list[0]%6];
         trav->cb[i] = 1.;
-        trav->cb[iprv3[i]] = 0.;
+        trav->cb[_MMG5_iprv3[i]] = 0.;
         trav->cb[_MMG5_inxt3[i]] = 0.;
         trav->cb[_MMG5_inxt3[_MMG5_inxt3[i]]] = 0.;
 
@@ -672,12 +672,12 @@ int creaEdge(MMG5_pMesh mesh, MMG5_pSol met, Travel *trav, char tag){
             fprintf(stdout,"  Exit program.\n");
             return(0);
         }
-        i = split3cb(mesh,met,kel,key-1,c,trav->cb,&ip);
+        i = _MMG5_split3cb(mesh,met,kel,key-1,c,trav->cb,&ip);
         if ( i < 0 ) return(0);
 
         /* update barycentric coor of new point in kel */
         trav->cb[i] = 1.;
-        trav->cb[iprv3[i]] = 0.;
+        trav->cb[_MMG5_iprv3[i]] = 0.;
         trav->cb[_MMG5_inxt3[i]] = 0.;
         trav->cb[_MMG5_inxt3[_MMG5_inxt3[i]]] = 0.;
         mesh->point[ip].tag |= tag;
@@ -689,7 +689,7 @@ int creaEdge(MMG5_pMesh mesh, MMG5_pSol met, Travel *trav, char tag){
 
     else {
         /* split inside the tet */
-        if ( !split4cb(mesh, met, kel, c,trav->cb,&ip) )  return(0);
+        if ( !_MMG5_split4cb(mesh, met, kel, c,trav->cb,&ip) )  return(0);
 
         /* update barycentric coor of new point in kel */
         trav->cb[1] = trav->cb[2] = trav->cb[3] = 0.;
@@ -705,7 +705,7 @@ int creaEdge(MMG5_pMesh mesh, MMG5_pSol met, Travel *trav, char tag){
 
 /** Return the index of element to which belong the point of coordinates point[3] and compute
  *  the barycentric coordinates of the point  */
-int seekPoint(MMG5_pMesh mesh, MMG5_psPoint ppt, double cb[4], int* basetet, int* basept) {
+int _MMG5_seekPoint(MMG5_pMesh mesh, MMG5_psPoint ppt, double cb[4], int* basetet, int* basept) {
     int      nsfin,nstart;
     MMG5_pTetra   pt;
     MMG5_pPoint   p0,p1,p2,p3;
@@ -857,8 +857,8 @@ int seekPoint(MMG5_pMesh mesh, MMG5_psPoint ppt, double cb[4], int* basetet, int
 
 /** Return the index of element to which belong the point of coordinates point[3] and compute
  *  cb, the barycentric coordinates of the point  */
-int seekEdge(MMG5_pMesh mesh, MMG5_pSol met, MMG5_psPoint ppt0, MMG5_psPoint ppt1,
-             Travel *trav, int *lastet, int *basetet, int *basept){
+int _MMG5_seekEdge(MMG5_pMesh mesh, MMG5_pSol met, MMG5_psPoint ppt0, MMG5_psPoint ppt1,
+             _MMG5_Travel *trav, int *lastet, int *basetet, int *basept){
     MMG5_pTetra pt;
     MMG5_pPoint p[4];
     double mat[3][3],u[3],v[3],e0[3],e1[3];
@@ -877,18 +877,18 @@ int seekEdge(MMG5_pMesh mesh, MMG5_pSol met, MMG5_psPoint ppt0, MMG5_psPoint ppt
         e1[1] = ppt1->c[1];
         e1[2] = ppt1->c[2];
 
-        if ( !seekPoint(mesh,ppt0,cb,basetet,basept) ) {
+        if ( !_MMG5_seekPoint(mesh,ppt0,cb,basetet,basept) ) {
             fprintf(stdout,"%s:%d: Error: point not found %e %e %e\n",
                     __FILE__,__LINE__,e0[0],e0[1],e0[2]);
             return(0);
         }
-        if ( !creaPoint(mesh, met, ppt0->tet, ppt0->c, cb, ppt0->tag) ) {
+        if ( !_MMG5_creaPoint(mesh, met, ppt0->tet, ppt0->c, cb, ppt0->tag) ) {
             fprintf(stdout,"%s:%d: Error: unable to create point %e %e %e\n",
                     __FILE__,__LINE__,e0[0],e0[1],e0[2]);
             return(0);
         }
         nsfin = ppt0->tet;
-        key   = locate(cb);
+        key   = _MMG5_locate(cb);
 
     }
     else {
@@ -906,7 +906,7 @@ int seekEdge(MMG5_pMesh mesh, MMG5_pSol met, MMG5_psPoint ppt0, MMG5_psPoint ppt
         e1[2] = ppt1->c[2];
 
         nsfin = trav->kel;
-        key   = locate(cb);
+        key   = _MMG5_locate(cb);
     }
     c[0] = e0[0];
     c[1] = e0[1];
@@ -948,8 +948,8 @@ int seekEdge(MMG5_pMesh mesh, MMG5_pSol met, MMG5_psPoint ppt0, MMG5_psPoint ppt
         i1  = _MMG5_idir[is][1];
         i2  = _MMG5_idir[is][2];
 
-        barycentric(is,i0,i1,i2,p,e1,mat,ap);
-        calcvol(mat, &dd);
+        _MMG5_barycentric(is,i0,i1,i2,p,e1,mat,ap);
+        _MMG5_calcvol(mat, &dd);
 
         if ( adj[i0] && (mesh->tetra[adj[i0]/4].flag != (*basetet)) ) {
             /* lambda_i0 computation */
@@ -963,7 +963,7 @@ int seekEdge(MMG5_pMesh mesh, MMG5_pSol met, MMG5_psPoint ppt0, MMG5_psPoint ppt
                 nsfin = adj[i0]/4;
 
                 /* update of key, cb, pt and p */
-                if ( !updatevertex(mesh, &pt, nsfin, p, is, adj[i0]%4, cb, &key) )
+                if ( !_MMG5_updatevertex(mesh, &pt, nsfin, p, is, adj[i0]%4, cb, &key) )
                     return(0);
                 continue;
             }
@@ -979,7 +979,7 @@ int seekEdge(MMG5_pMesh mesh, MMG5_pSol met, MMG5_psPoint ppt0, MMG5_psPoint ppt
                     nsfin = adj[i1]/4;
 
                     /* update of key, cb, pt and p */
-                    if ( !updatevertex(mesh, &pt, nsfin, p, is, adj[i1]%4, cb, &key) )
+                    if ( !_MMG5_updatevertex(mesh, &pt, nsfin, p, is, adj[i1]%4, cb, &key) )
                         return(0);
                     continue;
                 }
@@ -992,7 +992,7 @@ int seekEdge(MMG5_pMesh mesh, MMG5_pSol met, MMG5_psPoint ppt0, MMG5_psPoint ppt
                         nsfin = adj[i2]/4;
 
                         /* update of key, cb, pt and p */
-                        if ( !updatevertex(mesh, &pt, nsfin, p, is, adj[i2]%4, cb, &key) )
+                        if ( !_MMG5_updatevertex(mesh, &pt, nsfin, p, is, adj[i2]%4, cb, &key) )
                             return(0);
                         continue;
                     }
@@ -1003,7 +1003,7 @@ int seekEdge(MMG5_pMesh mesh, MMG5_pSol met, MMG5_psPoint ppt0, MMG5_psPoint ppt
                     nsfin = adj[i0]/4;
 
                     /* update of key, cb, pt and p */
-                    if ( !updatevertex(mesh, &pt, nsfin, p, is, adj[i0]%4, cb, &key) )
+                    if ( !_MMG5_updatevertex(mesh, &pt, nsfin, p, is, adj[i0]%4, cb, &key) )
                         return(0);
                     continue;
                 }
@@ -1016,7 +1016,7 @@ int seekEdge(MMG5_pMesh mesh, MMG5_pSol met, MMG5_psPoint ppt0, MMG5_psPoint ppt
                         nsfin = adj[i2]/4;
 
                         /* update of key, cb, pt and p */
-                        if ( !updatevertex(mesh, &pt, nsfin, p, is, adj[i2]%4, cb, &key) )
+                        if ( !_MMG5_updatevertex(mesh, &pt, nsfin, p, is, adj[i2]%4, cb, &key) )
                             return(0);
                         continue;
                     }
@@ -1027,7 +1027,7 @@ int seekEdge(MMG5_pMesh mesh, MMG5_pSol met, MMG5_psPoint ppt0, MMG5_psPoint ppt
                     nsfin = adj[i0]/4;
 
                     /* update of key, cb, pt and p */
-                    if ( !updatevertex(mesh, &pt, nsfin, p, is, adj[i0]%4, cb, &key) )
+                    if ( !_MMG5_updatevertex(mesh, &pt, nsfin, p, is, adj[i0]%4, cb, &key) )
                         return(0);
                     continue;
                 }
@@ -1042,7 +1042,7 @@ int seekEdge(MMG5_pMesh mesh, MMG5_pSol met, MMG5_psPoint ppt0, MMG5_psPoint ppt
                     nsfin = adj[i0]/4;
 
                     /* update of key, cb, pt and p */
-                    if ( !updatevertex(mesh, &pt, nsfin, p, is, adj[i0]%4, cb, &key) )
+                    if ( !_MMG5_updatevertex(mesh, &pt, nsfin, p, is, adj[i0]%4, cb, &key) )
                         return(0);
                     continue;
                 }
@@ -1060,7 +1060,7 @@ int seekEdge(MMG5_pMesh mesh, MMG5_pSol met, MMG5_psPoint ppt0, MMG5_psPoint ppt
                 nsfin = adj[i1]/4;
 
                 /* update of key, cb, pt and p */
-                if ( !updatevertex(mesh, &pt, nsfin, p, is, adj[i1]%4, cb, &key) )
+                if ( !_MMG5_updatevertex(mesh, &pt, nsfin, p, is, adj[i1]%4, cb, &key) )
                     return(0);
                 continue;
             }
@@ -1077,7 +1077,7 @@ int seekEdge(MMG5_pMesh mesh, MMG5_pSol met, MMG5_psPoint ppt0, MMG5_psPoint ppt
                     nsfin = adj[i2]/4;
 
                     /* update of key, cb, pt and p */
-                    if ( !updatevertex(mesh, &pt, nsfin, p, is, adj[i2]%4, cb, &key) )
+                    if ( !_MMG5_updatevertex(mesh, &pt, nsfin, p, is, adj[i2]%4, cb, &key) )
                         return(0);
                     continue;
                 }
@@ -1088,7 +1088,7 @@ int seekEdge(MMG5_pMesh mesh, MMG5_pSol met, MMG5_psPoint ppt0, MMG5_psPoint ppt
                 nsfin = adj[i1]/4;
 
                 /* update of key, cb, pt and p */
-                if ( !updatevertex(mesh, &pt, nsfin, p, is, adj[i1]%4, cb, &key) )
+                if ( !_MMG5_updatevertex(mesh, &pt, nsfin, p, is, adj[i1]%4, cb, &key) )
                     return(0);
                 continue;
             }
@@ -1104,7 +1104,7 @@ int seekEdge(MMG5_pMesh mesh, MMG5_pSol met, MMG5_psPoint ppt0, MMG5_psPoint ppt
                 nsfin = adj[i1]/4;
 
                 /* update of key, cb, pt and p */
-                if ( !updatevertex(mesh, &pt, nsfin, p, is, adj[i1]%4, cb, &key) )
+                if ( !_MMG5_updatevertex(mesh, &pt, nsfin, p, is, adj[i1]%4, cb, &key) )
                     return(0);
                 continue;
             }
@@ -1121,7 +1121,7 @@ int seekEdge(MMG5_pMesh mesh, MMG5_pSol met, MMG5_psPoint ppt0, MMG5_psPoint ppt
                 nsfin = adj[i2]/4;
 
                 /* update of key, cb, pt and p */
-                if ( !updatevertex(mesh, &pt, nsfin, p, is, adj[i2]%4, cb, &key) )
+                if ( !_MMG5_updatevertex(mesh, &pt, nsfin, p, is, adj[i2]%4, cb, &key) )
                     return(0);
                 continue;
             }
@@ -1140,7 +1140,7 @@ int seekEdge(MMG5_pMesh mesh, MMG5_pSol met, MMG5_psPoint ppt0, MMG5_psPoint ppt
                 nsfin = adj[i2]/4;
 
                 /* update of key, cb, pt and p */
-                if ( !updatevertex(mesh, &pt, nsfin, p, is, adj[i2]%4, cb, &key) )
+                if ( !_MMG5_updatevertex(mesh, &pt, nsfin, p, is, adj[i2]%4, cb, &key) )
                     return(0);
                 continue;
             }
@@ -1156,7 +1156,7 @@ int seekEdge(MMG5_pMesh mesh, MMG5_pSol met, MMG5_psPoint ppt0, MMG5_psPoint ppt
                 nsfin = adj[i2]/4;
 
                 /* update of key, cb, pt and p */
-                if ( !updatevertex(mesh, &pt, nsfin, p, is, adj[i2]%4, cb, &key) )
+                if ( !_MMG5_updatevertex(mesh, &pt, nsfin, p, is, adj[i2]%4, cb, &key) )
                     return(0);
                 continue;
             }
@@ -1218,7 +1218,7 @@ int seekEdge(MMG5_pMesh mesh, MMG5_pSol met, MMG5_psPoint ppt0, MMG5_psPoint ppt
             i1 = _MMG5_idir[is][1];
             i2 = _MMG5_idir[is][2];
 
-            barycentric(is,i0,i1,i2,p,e0,mat,ep);
+            _MMG5_barycentric(is,i0,i1,i2,p,e0,mat,ep);
 
             ep[0] = e0[0]-p[is]->c[0];
             ep[1] = e0[1]-p[is]->c[1];
@@ -1229,7 +1229,7 @@ int seekEdge(MMG5_pMesh mesh, MMG5_pSol met, MMG5_psPoint ppt0, MMG5_psPoint ppt
                 u[0]  = mat[1][1]*mat[2][2] - mat[2][1]*mat[1][2];
                 u[1]  = mat[2][1]*mat[0][2] - mat[0][1]*mat[2][2];
                 u[2]  = mat[0][1]*mat[1][2] - mat[1][1]*mat[0][2];
-                if ( !intersegtri_i0(is, i0, i1, i2, ee, e0, ep, dd, p[is]->c,
+                if ( !_MMG5_intersegtri_i0(is, i0, i1, i2, ee, e0, ep, dd, p[is]->c,
                                      mat, u, c, cb, &key, trav,
                                      &nsfin, adj[ind]/4) ) {
                     fprintf(stdout,"%s:%d: Error: We didn't intersect the tri %d\n",
@@ -1239,7 +1239,7 @@ int seekEdge(MMG5_pMesh mesh, MMG5_pSol met, MMG5_psPoint ppt0, MMG5_psPoint ppt
                 break;
             case(1):
             case(2):
-                if ( !intersegtri_i1(is, i0, i1, i2, ee, e0, ep, dd, p[is]->c,
+                if ( !_MMG5_intersegtri_i1(is, i0, i1, i2, ee, e0, ep, dd, p[is]->c,
                                      mat, c, cb, &key, trav,
                                      &nsfin, adj[ind]/4) ) {
                     fprintf(stdout,"%s:%d: Error: We didn't intersect the tri %d\n",
@@ -1249,7 +1249,7 @@ int seekEdge(MMG5_pMesh mesh, MMG5_pSol met, MMG5_psPoint ppt0, MMG5_psPoint ppt
                 break;
 
             case(3):
-                if ( !intersegtri_i2(is, i0, i1, i2, ee, e0, ep, dd, p[is]->c,
+                if ( !_MMG5_intersegtri_i2(is, i0, i1, i2, ee, e0, ep, dd, p[is]->c,
                                      mat, c, cb, &key, trav,
                                      &nsfin, adj[ind]/4) ) {
                     fprintf(stdout,"%s:%d: Error: We didn't intersect the tri %d\n",
@@ -1264,7 +1264,7 @@ int seekEdge(MMG5_pMesh mesh, MMG5_pSol met, MMG5_psPoint ppt0, MMG5_psPoint ppt
             }
 
             trav->np = pt->v[ind];
-            if ( !creaEdge(mesh,met,trav,trav->tag) ) {
+            if ( !_MMG5_creaEdge(mesh,met,trav,trav->tag) ) {
                 fprintf(stdout,"%s:%d: Error: not able to create edge\n",__FILE__,__LINE__);
                 return(0);
             }
@@ -1328,7 +1328,7 @@ int seekEdge(MMG5_pMesh mesh, MMG5_pSol met, MMG5_psPoint ppt0, MMG5_psPoint ppt
         cb[i0]      = vol[i0] * dd;
         cb[i1]      = vol[i1] * dd;
         cb[i2]      = vol[i2] * dd;
-        key         = locate(cb);
+        key         = _MMG5_locate(cb);
         trav->cb[0] = cb[0];
         trav->cb[1] = cb[1];
         trav->cb[2] = cb[2];
@@ -1342,7 +1342,7 @@ int seekEdge(MMG5_pMesh mesh, MMG5_pSol met, MMG5_psPoint ppt0, MMG5_psPoint ppt
         ppt1->flag  = (*basept);
         (*lastet)   = 1;
 
-        if ( !creaEdge(mesh,met,trav,trav->tag) ) {
+        if ( !_MMG5_creaEdge(mesh,met,trav,trav->tag) ) {
             fprintf(stdout,"%s:%d: Error: not able to create edge\n",
                     __FILE__,__LINE__);
             return(0);
@@ -1357,10 +1357,10 @@ int seekEdge(MMG5_pMesh mesh, MMG5_pSol met, MMG5_psPoint ppt0, MMG5_psPoint ppt
 }
 
 /** put singularities stored in singul in the mesh */
-int inserSingul(MMG5_pMesh mesh, MMG5_pSol met, pSingul singul){
+int _MMG5_inserSingul(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pSingul singul){
     int     lastet, k, k0, k1, basetet, basept;
     double  cb[4];
-    Travel  trav;
+    _MMG5_Travel  trav;
 
     if ( (!singul->na) && (!singul->ns) ) return(-1);
 
@@ -1376,8 +1376,8 @@ int inserSingul(MMG5_pMesh mesh, MMG5_pSol met, pSingul singul){
     /* if edges exist in mesh, hash special edges from existing field */
     if ( mesh->na || singul->na ) {
         mesh->namax = MG_MAX(1.5*(mesh->na+singul->na),_MMG5_NAMAX);
-        _MMG5_ADD_MEM(mesh,(3*mesh->namax+2)*sizeof(hgeom),"htab",return(0));
-        if ( !hNew(&mesh->htab,mesh->na+singul->na,3*mesh->namax,1) )
+        _MMG5_ADD_MEM(mesh,(3*mesh->namax+2)*sizeof(MMG5_hgeom),"htab",return(0));
+        if ( !_MMG5_hNew(&mesh->htab,mesh->na+singul->na,3*mesh->namax,1) )
             return(0);
     }
 
@@ -1399,7 +1399,7 @@ int inserSingul(MMG5_pMesh mesh, MMG5_pSol met, pSingul singul){
 
         trav.tag = singul->edge[k].tag;
         do {
-            if ( !seekEdge(mesh,met,&singul->point[k0],&singul->point[k1],
+            if ( !_MMG5_seekEdge(mesh,met,&singul->point[k0],&singul->point[k1],
                            &trav,&lastet,&basetet,&basept) ) {
                 fprintf(stdout,"%s:%d: Error: edge %d not found in the mesh\n",
                         __FILE__,__LINE__,k);
@@ -1411,12 +1411,12 @@ int inserSingul(MMG5_pMesh mesh, MMG5_pSol met, pSingul singul){
     /* put point singularities in mesh */
     for ( k=1; k<=singul->ns; k++) {
         if ( singul->point[k].flag != basept ) {
-            if ( !seekPoint(mesh,&singul->point[k],cb,&basetet,&basept) ) {
+            if ( !_MMG5_seekPoint(mesh,&singul->point[k],cb,&basetet,&basept) ) {
                 fprintf(stdout,"%s:%d: Error: point %d not found in the mesh\n",
                         __FILE__,__LINE__,k);
                 return(0);
             }
-            if ( !creaPoint(mesh,met,singul->point[k].tet,singul->point[k].c,
+            if ( !_MMG5_creaPoint(mesh,met,singul->point[k].tet,singul->point[k].c,
                             cb,singul->point[k].tag) ) {
                 fprintf(stdout,"%s:%d: Error: unable to create point %d\n",
                         __FILE__,__LINE__,k);
@@ -1434,18 +1434,18 @@ int inserSingul(MMG5_pMesh mesh, MMG5_pSol met, pSingul singul){
     }
 
     if ( singul->point )
-        _MMG5_DEL_MEM(mesh,singul->point,(singul->ns+1)*sizeof(sPoint));
+        _MMG5_DEL_MEM(mesh,singul->point,(singul->ns+1)*sizeof(MMG5_sPoint));
 
     if ( singul->edge )
-        _MMG5_DEL_MEM(mesh,singul->edge,(singul->na+1)*sizeof(Edge));
+        _MMG5_DEL_MEM(mesh,singul->edge,(singul->na+1)*sizeof(MMG5_Edge));
 
     return(1);
 }
 
 /** collapse of singularities */
-int colSing(MMG5_pMesh mesh,MMG5_pSol met) {
+int _MMG5_colSing(MMG5_pMesh mesh,MMG5_pSol met) {
     MMG5_pTetra  pt;
-    MMG5_xTetra pxt;
+    MMG5_pxTetra pxt;
     MMG5_pPoint  p0,p1;
     int     k,nc,nnc,list[_MMG5_LMAX+2],ilist;
     int     it,maxit,i,ifac,jseg,ier;
@@ -1475,7 +1475,7 @@ int colSing(MMG5_pMesh mesh,MMG5_pSol met) {
                         ier = _MMG5_colver(mesh,list,ilist,_MMG5_iare[i][1]);
                         if ( ier < 0 ) return(-1);
                         else if ( ier ) {
-                            delPt(mesh,ier);
+                            _MMG5_delPt(mesh,ier);
                             nc++;
                             break;
                         }
@@ -1489,7 +1489,7 @@ int colSing(MMG5_pMesh mesh,MMG5_pSol met) {
                         ier = _MMG5_colver(mesh,list,ilist,_MMG5_iare[i][0]);
                         if ( ier < 0 ) return(-1);
                         else if ( ier ) {
-                            delPt(mesh,ier);
+                            _MMG5_delPt(mesh,ier);
                             nc++;
                             break;
                         }
@@ -1508,7 +1508,7 @@ int colSing(MMG5_pMesh mesh,MMG5_pSol met) {
 /* Check that we don't have a tetra with 4 singular points otherwise *
  * try to swap or split the tetra. *
  * ( warning: here we don't perform quality tests) */
-int solveUnsignedTet(MMG5_pMesh mesh,MMG5_pSol met) {
+int _MMG5_solveUnsignedTet(MMG5_pMesh mesh,MMG5_pSol met) {
     MMG5_pTetra  pt;
     int     k,nf,ns;
     int     *adja;
@@ -1531,7 +1531,7 @@ int solveUnsignedTet(MMG5_pMesh mesh,MMG5_pSol met) {
             adja =  &mesh->adja[4*(k-1)+1];
             for (i=0; i<4; i++) {
                 ip     = mesh->tetra[adja[i]/4].v[adja[i]%4];
-                if ( !(mesh->point[ip].tag & MG_SGL ) && swap23(mesh,k,i) ) {
+                if ( !(mesh->point[ip].tag & MG_SGL ) && _MMG5_swap23(mesh,k,i) ) {
                     nf++;
                     break;
                 }
@@ -1540,7 +1540,7 @@ int solveUnsignedTet(MMG5_pMesh mesh,MMG5_pSol met) {
             /* Second: split on barycenter of tetra */
             if ( i == 4 ) {
                 /* Swapping is useless so we add a new degree of freedom */
-                if ( !split4bar(mesh,met,k) ) {
+                if ( !_MMG5_split4bar(mesh,met,k) ) {
                     fprintf(stdout,"%s:%d: Error: we can't split element %d",
                             __FILE__,__LINE__,k);
                     fprintf(stdout," whose all vertices are on inserted singularities\n");

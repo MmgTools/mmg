@@ -93,7 +93,7 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
             if ( pt->xt && (pxt->tag[ii] & MG_REQ) )  continue;
             ip1  = _MMG5_iare[ii][0];
             ip2  = _MMG5_iare[ii][1];
-            len = lenedg(mesh,met,pt->v[ip1],pt->v[ip2]);
+            len = _MMG5_lenedg(mesh,met,pt->v[ip1],pt->v[ip2]);
             if ( len > lmax ) {
                 lmax = len;
                 imax = ii;
@@ -134,11 +134,11 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
                 if ( !ilist )  continue;
                 else if ( ilist<0 ) return(-1);
                 if ( tag & MG_NOM ){
-                    if( !BezierNom(mesh,ip1,ip2,0.5,o,no1,to) )
+                    if( !_MMG5_BezierNom(mesh,ip1,ip2,0.5,o,no1,to) )
                         continue;
                     else if ( MG_SIN(p0->tag) && MG_SIN(p1->tag) ) {
                         _MMG5_tet2tri(mesh,k,i,&ptt);
-                        nortri(mesh,&ptt,no1);
+                        _MMG5_nortri(mesh,&ptt,no1);
                         if ( !MG_GET(pxt->ori,i) ) {
                             no1[0] *= -1.0;
                             no1[1] *= -1.0;
@@ -147,11 +147,11 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
                     }
                 }
                 else if ( tag & MG_GEO ) {
-                    if ( !BezierRidge(mesh,ip1,ip2,0.5,o,no1,no2,to) )
+                    if ( !_MMG5_BezierRidge(mesh,ip1,ip2,0.5,o,no1,no2,to) )
                         continue;
                     if ( MG_SIN(p0->tag) && MG_SIN(p1->tag) ) {
                         _MMG5_tet2tri(mesh,k,i,&ptt);
-                        nortri(mesh,&ptt,no1);
+                        _MMG5_nortri(mesh,&ptt,no1);
                         no2[0] = to[1]*no1[2] - to[2]*no1[1];
                         no2[1] = to[2]*no1[0] - to[0]*no1[2];
                         no2[2] = to[0]*no1[1] - to[1]*no1[0];
@@ -165,20 +165,20 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
                     }
                 }
                 else if ( tag & MG_REF ) {
-                    if ( !BezierRef(mesh,ip1,ip2,0.5,o,no1,to) )
+                    if ( !_MMG5_BezierRef(mesh,ip1,ip2,0.5,o,no1,to) )
                         goto collapse;
                 }
                 else {
-                    if ( !norface(mesh,k,i,v) )  goto collapse;
-                    if ( !BezierReg(mesh,ip1,ip2,0.5,v,o,no1) ) goto collapse;
+                    if ( !_MMG5_norface(mesh,k,i,v) )  goto collapse;
+                    if ( !_MMG5_BezierReg(mesh,ip1,ip2,0.5,v,o,no1) ) goto collapse;
 
                 }
-                ier = simbulgept(mesh,list,ilist,o);
+                ier = _MMG5_simbulgept(mesh,list,ilist,o);
                 if ( !ier ) {
                     ier = _MMG5_dichoto1b(mesh,list,ilist,o,ro);
                     memcpy(o,ro,3*sizeof(double));
                 }
-                ip = newPt(mesh,o,tag);
+                ip = _MMG5_newPt(mesh,o,tag);
 
                 if ( !ip ) {
                     /* reallocation of point table */
@@ -197,19 +197,19 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
                 if ( met->m )
                     met->m[ip] = 0.5 * (met->m[ip1]+met->m[ip2]);
 
-                ier = split1b(mesh,met,list,ilist,ip,1);
+                ier = _MMG5_split1b(mesh,met,list,ilist,ip,1);
 
-                /* if we realloc memory in split1b pt and pxt pointers are not valid */
+                /* if we realloc memory in _MMG5_split1b pt and pxt pointers are not valid */
                 pt = &mesh->tetra[k];
                 pxt = pt->xt ? &mesh->xtetra[pt->xt] : 0;
 
                 if ( ier < 0 ) {
                     fprintf(stdout,"  ## Error: unable to split.\n");
-                    delPt(mesh,ip);
+                    _MMG5_delPt(mesh,ip);
                     return(-1);
                 }
                 else if ( !ier ) {
-                    delPt(mesh,ip);
+                    _MMG5_delPt(mesh,ip);
                     goto collapse;
                 } else {
                     (*ns)++;
@@ -252,7 +252,7 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
                 o[0] = 0.5*(p0->c[0] + p1->c[0]);
                 o[1] = 0.5*(p0->c[1] + p1->c[1]);
                 o[2] = 0.5*(p0->c[2] + p1->c[2]);
-                ip = newPt(mesh,o,MG_NOTAG);
+                ip = _MMG5_newPt(mesh,o,MG_NOTAG);
 
                 if ( !ip )  {
                     /* reallocation of point table */
@@ -272,14 +272,14 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
                 if ( met->m )
                     met->m[ip] = 0.5 * (met->m[ip1]+met->m[ip2]);
 
-                ier = split1b(mesh,met,list,ilist,ip,1);
+                ier = _MMG5_split1b(mesh,met,list,ilist,ip,1);
                 if ( ier < 0 ) {
                     fprintf(stdout,"  ## Error: unable to split.\n");
-                    delPt(mesh,ip);
+                    _MMG5_delPt(mesh,ip);
                     return(-1);
                 }
                 else if ( !ier ) {
-                    delPt(mesh,ip);
+                    _MMG5_delPt(mesh,ip);
                     goto collapse;
                 }
                 else {
@@ -299,7 +299,7 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
                 o[0] = 0.5*(p0->c[0] + p1->c[0]);
                 o[1] = 0.5*(p0->c[1] + p1->c[1]);
                 o[2] = 0.5*(p0->c[2] + p1->c[2]);
-                ip = newPt(mesh,o,MG_NOTAG);
+                ip = _MMG5_newPt(mesh,o,MG_NOTAG);
 
                 if ( !ip )  {
                     /* reallocation of point table */
@@ -320,14 +320,14 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
 
                 /* Delaunay */
                 if ( !_MMG5_buckin_iso(mesh,met,bucket,ip) ) {
-                    delPt(mesh,ip);
+                    _MMG5_delPt(mesh,ip);
                     (*ifilt)++;
                     goto collapse;
                 } else {
                     lon = _MMG5_cavity(mesh,met,k,ip,list,ilist/2);
                     if ( lon < 1 ) {
                         MMG_npd++;
-                        delPt(mesh,ip);
+                        _MMG5_delPt(mesh,ip);
                         goto collapse;
                     } else {
                         ret = _MMG5_delone(mesh,met,ip,list,lon);
@@ -341,11 +341,11 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
                         }
                         else if ( ret == 0 ) {
                             MMG_npd++;
-                            delPt(mesh,ip);
+                            _MMG5_delPt(mesh,ip);
                             goto collapse;//continue;
                         }
                         else { /*allocation problem ==> saveMesh*/
-                            delPt(mesh,ip);
+                            _MMG5_delPt(mesh,ip);
                             return(0);
                         }
                     }
@@ -381,7 +381,7 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
 
                     if ( ier < 0 ) return(-1);
                     else if(ier) {
-                        delPt(mesh,ier);
+                        _MMG5_delPt(mesh,ier);
                         (*nc)++;
                         continue;
                     }
@@ -398,7 +398,7 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
                     if ( ier < 0 ) return(-1);
                     else if(ier) {
                         _MMG5_delBucket(mesh,bucket,ier);
-                        delPt(mesh,ier);
+                        _MMG5_delPt(mesh,ier);
                         (*nc)++;
                         continue;
                     }
@@ -419,7 +419,7 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
 
             ip1  = _MMG5_iare[ii][0];
             ip2  = _MMG5_iare[ii][1];
-            len = lenedg(mesh,met,pt->v[ip1],pt->v[ip2]);
+            len = _MMG5_lenedg(mesh,met,pt->v[ip1],pt->v[ip2]);
 
             imax = ii;
             lmax = len;
@@ -449,11 +449,11 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
                     if ( !ilist )  continue;
                     else if ( ilist<0 ) return(-1);
                     if ( tag & MG_NOM ){
-                        if( !BezierNom(mesh,ip1,ip2,0.5,o,no1,to) )
+                        if( !_MMG5_BezierNom(mesh,ip1,ip2,0.5,o,no1,to) )
                             continue;
                         else if ( MG_SIN(p0->tag) && MG_SIN(p1->tag) ) {
                             _MMG5_tet2tri(mesh,k,i,&ptt);
-                            nortri(mesh,&ptt,no1);
+                            _MMG5_nortri(mesh,&ptt,no1);
                             if ( !MG_GET(pxt->ori,i) ) {
                                 no1[0] *= -1.0;
                                 no1[1] *= -1.0;
@@ -462,11 +462,11 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
                         }
                     }
                     else if ( tag & MG_GEO ) {
-                        if ( !BezierRidge(mesh,ip1,ip2,0.5,o,no1,no2,to) )
+                        if ( !_MMG5_BezierRidge(mesh,ip1,ip2,0.5,o,no1,no2,to) )
                             continue;
                         if ( MG_SIN(p0->tag) && MG_SIN(p1->tag) ) {
                             _MMG5_tet2tri(mesh,k,i,&ptt);
-                            nortri(mesh,&ptt,no1);
+                            _MMG5_nortri(mesh,&ptt,no1);
                             no2[0] = to[1]*no1[2] - to[2]*no1[1];
                             no2[1] = to[2]*no1[0] - to[0]*no1[2];
                             no2[2] = to[0]*no1[1] - to[1]*no1[0];
@@ -480,20 +480,20 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
                         }
                     }
                     else if ( tag & MG_REF ) {
-                        if ( !BezierRef(mesh,ip1,ip2,0.5,o,no1,to) )
+                        if ( !_MMG5_BezierRef(mesh,ip1,ip2,0.5,o,no1,to) )
                             goto collapse2;
                     }
                     else {
-                        if ( !norface(mesh,k,i,v) )  goto collapse2;
-                        if ( !BezierReg(mesh,ip1,ip2,0.5,v,o,no1) ) goto collapse2;
+                        if ( !_MMG5_norface(mesh,k,i,v) )  goto collapse2;
+                        if ( !_MMG5_BezierReg(mesh,ip1,ip2,0.5,v,o,no1) ) goto collapse2;
 
                     }
-                    ier = simbulgept(mesh,list,ilist,o);
+                    ier = _MMG5_simbulgept(mesh,list,ilist,o);
                     if ( !ier ) {
                         ier = _MMG5_dichoto1b(mesh,list,ilist,o,ro);
                         memcpy(o,ro,3*sizeof(double));
                     }
-                    ip = newPt(mesh,o,tag);
+                    ip = _MMG5_newPt(mesh,o,tag);
 
                     if ( !ip ){
                         /* reallocation of point table */
@@ -512,8 +512,8 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
                     if ( met->m )
                         met->m[ip] = 0.5 * (met->m[ip1]+met->m[ip2]);
 
-                    ier = split1b(mesh,met,list,ilist,ip,1);
-                    /* if we realloc memory in split1b pt and pxt pointers are not valid */
+                    ier = _MMG5_split1b(mesh,met,list,ilist,ip,1);
+                    /* if we realloc memory in _MMG5_split1b pt and pxt pointers are not valid */
                     pt = &mesh->tetra[k];
                     pxt = pt->xt ? &mesh->xtetra[pt->xt] : 0;
 
@@ -522,7 +522,7 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
                         return(-1);
                     }
                     else if ( !ier ) {
-                        delPt(mesh,ip);
+                        _MMG5_delPt(mesh,ip);
                         goto collapse2;//continue;
                     } else {
                         (*ns)++;
@@ -566,7 +566,7 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
                     o[0] = 0.5*(p0->c[0] + p1->c[0]);
                     o[1] = 0.5*(p0->c[1] + p1->c[1]);
                     o[2] = 0.5*(p0->c[2] + p1->c[2]);
-                    ip = newPt(mesh,o,MG_NOTAG);
+                    ip = _MMG5_newPt(mesh,o,MG_NOTAG);
 
                     if ( !ip )  {
                         /* reallocation of point table */
@@ -585,14 +585,14 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
                     if ( met->m )
                         met->m[ip] = 0.5 * (met->m[ip1]+met->m[ip2]);
 
-                    ier = split1b(mesh,met,list,ilist,ip,1);
+                    ier = _MMG5_split1b(mesh,met,list,ilist,ip,1);
                     if ( ier < 0 ) {
                         fprintf(stdout,"  ## Error: unable to split.\n");
-                        delPt(mesh,ip);
+                        _MMG5_delPt(mesh,ip);
                         return(-1);
                     }
                     else if ( !ier ) {
-                        delPt(mesh,ip);
+                        _MMG5_delPt(mesh,ip);
                         goto collapse2;
                     }
                     else {
@@ -612,7 +612,7 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
                     o[0] = 0.5*(p0->c[0] + p1->c[0]);
                     o[1] = 0.5*(p0->c[1] + p1->c[1]);
                     o[2] = 0.5*(p0->c[2] + p1->c[2]);
-                    ip = newPt(mesh,o,MG_NOTAG);
+                    ip = _MMG5_newPt(mesh,o,MG_NOTAG);
 
                     if ( !ip )  {
                         /* reallocation of point table */
@@ -631,14 +631,14 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
                         met->m[ip] = 0.5 * (met->m[ip1]+met->m[ip2]);
 
                     if ( /*lmax>4 &&*/ /*it &&*/  !_MMG5_buckin_iso(mesh,met,bucket,ip) ) {
-                        delPt(mesh,ip);
+                        _MMG5_delPt(mesh,ip);
                         (*ifilt)++;
                         goto collapse2;
                     } else {
                         lon = _MMG5_cavity(mesh,met,k,ip,list,ilist/2);
                         if ( lon < 1 ) {
                             MMG_npd++;
-                            delPt(mesh,ip);
+                            _MMG5_delPt(mesh,ip);
                             goto collapse2;
                         } else {
                             ret = _MMG5_delone(mesh,met,ip,list,lon);
@@ -652,11 +652,11 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
                             }
                             else if ( ret == 0 ) {
                                 MMG_npd++;
-                                delPt(mesh,ip);
+                                _MMG5_delPt(mesh,ip);
                                 goto collapse2;//continue;
                             }
                             else { /*allocation problem ==> savemesh*/
-                                delPt(mesh,ip);
+                                _MMG5_delPt(mesh,ip);
                                 return(0);
                             }
                         }
@@ -691,7 +691,7 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
                     ier = _MMG5_colver(mesh,list,ilist,i2);
                     if ( ier < 0 ) return(-1);
                     else if(ier) {
-                        delPt(mesh,ier);
+                        _MMG5_delPt(mesh,ier);
                         (*nc)++;
                         break;
                     }
@@ -708,7 +708,7 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
                     if ( ier < 0 ) return(-1);
                     else if(ier) {
                         _MMG5_delBucket(mesh,bucket,ier);
-                        delPt(mesh,ier);
+                        _MMG5_delPt(mesh,ier);
                         (*nc)++;
                         break;
                     }
@@ -777,7 +777,7 @@ _MMG5_adpsplcol(MMG5_pMesh mesh,MMG5_pSol met,_MMG5_pBucket bucket, int* warn) {
         nnf+=nf;
 
         if ( !mesh->info.nomove ) {
-            nm = movtet(mesh,met,-1);
+            nm = _MMG5_movtet(mesh,met,-1);
             if ( nm < 0 ) {
                 fprintf(stdout,"  ## Unable to improve mesh.\n");
                 return(0);
@@ -844,7 +844,7 @@ _MMG5_optet(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket) {
         else  nf = 0;
 
         if ( !mesh->info.nomove ) {
-            nm = movtet(mesh,met,0);
+            nm = _MMG5_movtet(mesh,met,0);
             if ( nm < 0 ) {
                 fprintf(stdout,"  ## Unable to improve mesh.\n");
                 return(0);
@@ -853,7 +853,7 @@ _MMG5_optet(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket) {
         else  nm = 0;
         nnm += nm;
 
-        /* ier = badelt(mesh,met);
+        /* ier = _MMG5_badelt(mesh,met);
            if ( ier < 0 ) {
            fprintf(stdout,"  ## Unable to remove bad elements.\n");
            return(0);
@@ -867,7 +867,7 @@ _MMG5_optet(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket) {
     while( ++it < maxit && nm+nf > 0 );
 
     if ( !mesh->info.nomove ) {
-        nm = movtet(mesh,met,3);
+        nm = _MMG5_movtet(mesh,met,3);
         if ( nm < 0 ) {
             fprintf(stdout,"  ## Unable to improve mesh.\n");
             return(0);
@@ -915,7 +915,7 @@ _MMG5_adptet_delone(MMG5_pMesh mesh,MMG5_pSol met,_MMG5_pBucket bucket) {
 
 #ifdef DEBUG
     fprintf(stdout,"$$$$$$$$$$$$$$$$$$ INITIAL SWAP %7d\n",nnf);
-    outqua(mesh,met);
+    _MMG5_outqua(mesh,met);
 #endif
 
     /* Iterative mesh modifications */
@@ -960,7 +960,7 @@ int _MMG5_mmg3d1_delone(MMG5_pMesh mesh,MMG5_pSol met) {
     if ( abs(mesh->info.imprim) > 3 )
         fprintf(stdout,"  ** MESH ANALYSIS\n");
 
-    if ( mesh->info.iso && !chkmani(mesh) ) {
+    if ( mesh->info.iso && !_MMG5_chkmani(mesh) ) {
         fprintf(stdout,"  ## Non orientable implicit surface. Exit program.\n");
         return(0);
     }
@@ -969,13 +969,13 @@ int _MMG5_mmg3d1_delone(MMG5_pMesh mesh,MMG5_pSol met) {
     if ( abs(mesh->info.imprim) > 3 || mesh->info.ddebug )
         fprintf(stdout,"  ** GEOMETRIC MESH\n");
 
-    if ( !anatet(mesh,met,1,0) ) {
+    if ( !_MMG5_anatet(mesh,met,1,0) ) {
         fprintf(stdout,"  ## Unable to split mesh. Exiting.\n");
         return(0);
     }
 
 #ifdef DEBUG
-    outqua(mesh,met);
+    _MMG5_outqua(mesh,met);
 #endif
 
     /**--- stage 2: computational mesh */
@@ -992,14 +992,14 @@ int _MMG5_mmg3d1_delone(MMG5_pMesh mesh,MMG5_pSol met) {
         fprintf(stdout,"  ## Gradation problem. Exit program.\n");
         return(0);
     }
-    if ( !anatet(mesh,met,2,0) ) {
+    if ( !_MMG5_anatet(mesh,met,2,0) ) {
         fprintf(stdout,"  ## Unable to split mesh. Exiting.\n");
         return(0);
     }
 
 #ifdef DEBUG
     puts("---------------------------Fin anatet---------------------");
-    outqua(mesh,met);
+    _MMG5_outqua(mesh,met);
 #endif
 
     /* renumerotation if available */
@@ -1017,7 +1017,7 @@ int _MMG5_mmg3d1_delone(MMG5_pMesh mesh,MMG5_pSol met) {
 
 #ifdef DEBUG
     puts("---------------------Fin adptet-----------------");
-    outqua(mesh,met);
+    _MMG5_outqua(mesh,met);
 #endif
     /* in test phase: check if no element with 2 bdry faces */
     if ( !_MMG5_chkfemtopo(mesh) ) {
@@ -1025,7 +1025,7 @@ int _MMG5_mmg3d1_delone(MMG5_pMesh mesh,MMG5_pSol met) {
         return(0);
     }
 
-    if ( mesh->info.iso && !chkmani(mesh) ) {
+    if ( mesh->info.iso && !_MMG5_chkmani(mesh) ) {
         fprintf(stdout,"  ## Non orientable implicit surface. Exit program.\n");
         return(0);
     }

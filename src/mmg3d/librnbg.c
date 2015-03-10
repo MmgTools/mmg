@@ -55,7 +55,7 @@
  * \warning Not used.
  **/
 static inline
-int biPartBoxCompute(SCOTCH_Graph graf, int vertNbr, int boxVertNbr, SCOTCH_Num *permVrtTab,MMG5_pMesh mesh) {
+int _MMG5_biPartBoxCompute(SCOTCH_Graph graf, int vertNbr, int boxVertNbr, SCOTCH_Num *permVrtTab,MMG5_pMesh mesh) {
     int boxNbr, vertIdx, boxIdx;
     SCOTCH_Num tmp, tmp2, *partTab, *partNumTab, *partPrmTab;
     SCOTCH_Strat strat ;
@@ -139,8 +139,8 @@ int biPartBoxCompute(SCOTCH_Graph graf, int vertNbr, int boxVertNbr, SCOTCH_Num 
  *
  **/
 static inline
-int kPartBoxCompute(SCOTCH_Graph graf, int vertNbr, int boxVertNbr,
-                                  SCOTCH_Num *permVrtTab,MMG5_pMesh mesh) {
+int _MMG5_kPartBoxCompute(SCOTCH_Graph graf, int vertNbr, int boxVertNbr,
+                          SCOTCH_Num *permVrtTab,MMG5_pMesh mesh) {
     int boxNbr, vertIdx;
 #if SCOTCH_VERSION<6
     SCOTCH_Num logMaxVal, SupMaxVal, InfMaxVal, maxVal;
@@ -238,7 +238,7 @@ int kPartBoxCompute(SCOTCH_Graph graf, int vertNbr, int boxVertNbr,
  *
  */
 static inline
-void swapTet(MMG5_pTetra tetras/*, int* adja*/, int* perm, int ind1, int ind2) {
+void _MMG5_swapTet(MMG5_pTetra tetras/*, int* adja*/, int* perm, int ind1, int ind2) {
     MMG5_Tetra pttmp;
     int        tmp;
 
@@ -276,9 +276,9 @@ void swapTet(MMG5_pTetra tetras/*, int* adja*/, int* perm, int ind1, int ind2) {
     /* } */
 
     /* 2-- swap the tetrahedras */
-    memcpy(&pttmp       ,&tetras[ind2],sizeof(Tetra));
-    memcpy(&tetras[ind2],&tetras[ind1],sizeof(Tetra));
-    memcpy(&tetras[ind1],&pttmp       ,sizeof(Tetra));
+    memcpy(&pttmp       ,&tetras[ind2],sizeof(MMG5_Tetra));
+    memcpy(&tetras[ind2],&tetras[ind1],sizeof(MMG5_Tetra));
+    memcpy(&tetras[ind1],&pttmp       ,sizeof(MMG5_Tetra));
 
     /* 3-- swap the permutation table */
     tmp        = perm[ind2];
@@ -299,16 +299,16 @@ void swapTet(MMG5_pTetra tetras/*, int* adja*/, int* perm, int ind1, int ind2) {
  *
  */
 static inline
-void swapNod(MMG5_pPoint points, double* sols, int* perm,
+void _MMG5_swapNod(MMG5_pPoint points, double* sols, int* perm,
              int ind1, int ind2, int solsiz) {
     MMG5_Point ptttmp;
     MMG5_Sol   soltmp;
     int        tmp,addr2,addr1;
 
     /* swap the points */
-    memcpy(&ptttmp      ,&points[ind2],sizeof(Point));
-    memcpy(&points[ind2],&points[ind1],sizeof(Point));
-    memcpy(&points[ind1],&ptttmp      ,sizeof(Point));
+    memcpy(&ptttmp      ,&points[ind2],sizeof(MMG5_Point));
+    memcpy(&points[ind2],&points[ind1],sizeof(MMG5_Point));
+    memcpy(&points[ind1],&ptttmp      ,sizeof(MMG5_Point));
 
     /* swap the sols */
     if ( sols ) {
@@ -482,7 +482,7 @@ int _MMG5_renumbering(int boxVertNbr, MMG5_pMesh mesh, MMG5_pSol sol) {
             return(1));
     _MMG5_SAFE_CALLOC(permVrtTab,vertNbr+1,SCOTCH_Num);
 
-    CHECK_SCOTCH(kPartBoxCompute(graf, vertNbr, boxVertNbr, permVrtTab, mesh),
+    CHECK_SCOTCH(_MMG5_kPartBoxCompute(graf, vertNbr, boxVertNbr, permVrtTab, mesh),
                  "boxCompute", 0);
 
     SCOTCH_graphExit(&graf) ;
@@ -539,14 +539,14 @@ int _MMG5_renumbering(int boxVertNbr, MMG5_pMesh mesh, MMG5_pSol sol) {
     /* Permute nodes and sol */
     for (j=1; j<= mesh->np; j++) {
         while ( permNodTab[j] != j && permNodTab[j] )
-            swapNod(mesh->point,sol->m,permNodTab,j,permNodTab[j],sol->size);
+            _MMG5_swapNod(mesh->point,sol->m,permNodTab,j,permNodTab[j],sol->size);
     }
     _MMG5_DEL_MEM(mesh,permNodTab,(mesh->np+1)*sizeof(int));
 
     /* Permute tetrahedras */
     for (j=1; j<= mesh->ne; j++) {
         while ( vertOldTab[j] != j && vertOldTab[j] )
-            swapTet(mesh->tetra/*,mesh->adja*/,vertOldTab,j,vertOldTab[j]);
+            _MMG5_swapTet(mesh->tetra/*,mesh->adja*/,vertOldTab,j,vertOldTab[j]);
     }
     _MMG5_DEL_MEM(mesh,vertOldTab,(mesh->ne+1)*sizeof(int));
 

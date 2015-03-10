@@ -190,16 +190,16 @@ int _MMG5_delone(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist) {
     /*tetra allocation : we create "size" tetra*/
     ielnum[0] = size;
     for (k=1 ; k<=size ; k++) {
-        ielnum[k] = newElt(mesh);
+        ielnum[k] = _MMG5_newElt(mesh);
 
         if ( !ielnum[k] ) {
             _MMG5_TETRA_REALLOC(mesh,ielnum[k],mesh->gap,
-                          printf("  ## Warning: unable to allocate a new element but the mesh will be valid.\n");
-                          for(ll=1 ; ll<k ; ll++) {
-                              mesh->tetra[ielnum[ll]].v[0] = 1;
-                              delElt(mesh,ielnum[ll]);
-                          }
-                          return(-1);
+                                printf("  ## Warning: unable to allocate a new element but the mesh will be valid.\n");
+                                for(ll=1 ; ll<k ; ll++) {
+                                    mesh->tetra[ielnum[ll]].v[0] = 1;
+                                    _MMG5_delElt(mesh,ielnum[ll]);
+                                }
+                                return(-1);
                 );
         }
     }
@@ -235,9 +235,9 @@ int _MMG5_delone(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist) {
                 assert(iel);
 
                 pt1 = &mesh->tetra[iel];
-                memcpy(pt1,pt,sizeof(Tetra));
+                memcpy(pt1,pt,sizeof(MMG5_Tetra));
                 pt1->v[i] = ip;
-                pt1->qual = orcal(mesh,iel);
+                pt1->qual = _MMG5_orcal(mesh,iel);
                 pt1->ref = mesh->tetra[old].ref;
                 if(pt1->qual < 1e-10) {printf("argggg (%d) %d : %e\n",ip,iel,pt1->qual);
                     printf("pt1 : %d %d %d %d\n",pt1->v[0],pt1->v[1],pt1->v[2],pt1->v[3]);/*exit(0);*/}
@@ -321,7 +321,7 @@ int _MMG5_delone(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist) {
     for (k=0; k<ilist; k++) {
         if(tref!=mesh->tetra[list[k]].ref)
             printf("arg ref ???? %d %d\n",tref,mesh->tetra[list[k]].ref);
-        delElt(mesh,list[k]);
+        _MMG5_delElt(mesh,list[k]);
     }
 
     //ppt = &mesh->point[ip];

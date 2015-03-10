@@ -55,7 +55,7 @@ int _MMG5_chkcol_int(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
     ilist = _MMG5_boulevolp(mesh,k,ip,list);
     lon = 1.e20;
     if ( typchk == 2 && met->m ) {
-        lon = lenedg(mesh,met,pt->v[ip],nq);
+        lon = _MMG5_lenedg(mesh,met,pt->v[ip],nq);
         lon = MG_MIN(lon,_MMG5_LSHRT);
         lon = MG_MAX(1.0/lon,_MMG5_LLONG);
     }
@@ -67,7 +67,7 @@ int _MMG5_chkcol_int(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
         /* exclude elements from shell */
         for (jj=0; jj<4; jj++)  if ( pt->v[jj] == nq )  break;
         if ( jj < 4 )  continue;
-        memcpy(pt0,pt,sizeof(Tetra));
+        memcpy(pt0,pt,sizeof(MMG5_Tetra));
 
         /* prevent from recreating internal edge between boundaries */
         if ( mesh->info.fem ) {
@@ -84,13 +84,14 @@ int _MMG5_chkcol_int(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
 
         pt0->v[ip] = nq;
         calold = MG_MIN(calold,pt->qual);
-        caltmp = orcal(mesh,0);
+        caltmp = _MMG5_orcal(mesh,0);
         if ( caltmp < _MMG5_EPSD )  return(0);
         calnew = MG_MIN(calnew,caltmp);
         /* check length */
         if ( typchk == 2 && met->m ) {
             for (jj=0; jj<6; jj++) {
-                if ( lenedg(mesh,met,pt0->v[_MMG5_iare[jj][0]],pt0->v[_MMG5_iare[jj][1]]) > lon )  return(0);
+                if ( _MMG5_lenedg(mesh,met,pt0->v[_MMG5_iare[jj][0]],
+                                  pt0->v[_MMG5_iare[jj][1]]) > lon )  return(0);
             }
         }
     }
@@ -179,7 +180,7 @@ _MMG5_topchkcol_bdy(MMG5_pMesh mesh,int k,int iface,char iedg,int *lists,int ili
         if ( nap == naq ) {
             /*printf("%s: %d: On devrait rarement passer ici:",__FILE__,__LINE__);
               printf(" k=%d (%d in saveMesh), nap=%d (%d in saveMesh)\n",
-              k,indElt(mesh,k),nap,indPt(mesh,nap));*/
+              k,_MMG5_indElt(mesh,k),nap,_MMG5_indPt(mesh,nap));*/
             return(0);
         }
 
@@ -247,7 +248,7 @@ _MMG5_topchkcol_bdy(MMG5_pMesh mesh,int k,int iface,char iedg,int *lists,int ili
         if ( nbp == nbq ) {
             /*printf("%s: %d: On devrait rarement passer ici:",__FILE__,__LINE__);
               printf(" k=%d (%d in saveMesh), nbp=%d (%d in saveMesh)\n",
-              k,indElt(mesh,k),nbp,indPt(mesh,nbp));*/
+              k,_MMG5_indElt(mesh,k),nbp,_MMG5_indPt(mesh,nbp));*/
             return(0);
         }
     }
@@ -308,7 +309,7 @@ _MMG5_topchkcol_bdy(MMG5_pMesh mesh,int k,int iface,char iedg,int *lists,int ili
         if ( nap == naq ) {
             /*printf("%s: %d: On devrait rarement passer ici:",__FILE__,__LINE__);
               printf(" k=%d (%d in saveMesh), nap=%d (%d in saveMesh)\n",
-              k,indElt(mesh,k),nap,indPt(mesh,nap));*/
+              k,_MMG5_indElt(mesh,k),nap,_MMG5_indPt(mesh,nap));*/
             return(0);
         }
 
@@ -376,7 +377,7 @@ _MMG5_topchkcol_bdy(MMG5_pMesh mesh,int k,int iface,char iedg,int *lists,int ili
         if ( nbp == nbq ) {
             /*printf("%s: %d: On devrait rarement passer ici:",__FILE__,__LINE__);
               printf(" k=%d (%d in saveMesh), nap=%d (%d in saveMesh)\n",
-              k,indElt(mesh,k),nap,indPt(mesh,nap));*/
+              k,_MMG5_indElt(mesh,k),nap,_MMG5_indPt(mesh,nap));*/
             return(0);
         }
     }
@@ -392,7 +393,7 @@ int _MMG5_chkcol_bdy(MMG5_pMesh mesh,int k,char iface,char iedg,int *listv) {
     MMG5_pTetra        pt,pt0;
     MMG5_pxTetra       pxt;
     MMG5_pPoint        p0;
-    Tria          tt;
+    MMG5_Tria          tt;
     double        calold,calnew,caltmp,nprvold[3],nprvnew[3],ncurold[3],ncurnew[3],ps,devold,devnew;
     int           ipp,ilistv,nump,numq,ilists,lists[_MMG5_LMAX+2],l,iel,nbbdy,ndepmin,ndepplus;
     char          iopp,ia,ip,tag,i,iq,i0,i1,ier,isminp,isplp;
@@ -425,7 +426,7 @@ int _MMG5_chkcol_bdy(MMG5_pMesh mesh,int k,char iface,char iedg,int *listv) {
     if ( ilists <= 2 )  return(0);  // ATTENTION, Normalement, avec 2 c est bon !
 
     /* Surfacic ball is enumerated with first tet having (pq) as edge n° _MMG5_iprv2[ip] on face iopp */
-    startedgsurfball(mesh,nump,numq,lists,ilists);
+    _MMG5_startedgsurfball(mesh,nump,numq,lists,ilists);
 
     /* check tetra quality */
     calold = calnew = DBL_MAX;
@@ -482,11 +483,11 @@ int _MMG5_chkcol_bdy(MMG5_pMesh mesh,int k,char iface,char iedg,int *listv) {
                 ndepplus = iel;
         }
 
-        memcpy(pt0,pt,sizeof(Tetra));
+        memcpy(pt0,pt,sizeof(MMG5_Tetra));
         pt0->v[ipp] = numq;
 
         calold = MG_MIN(calold, pt->qual);
-        caltmp = orcal(mesh,0);
+        caltmp = _MMG5_orcal(mesh,0);
 
         if ( caltmp < _MMG5_EPSD )  return(0);
         calnew = MG_MIN(calnew,caltmp);
@@ -507,11 +508,11 @@ int _MMG5_chkcol_bdy(MMG5_pMesh mesh,int k,char iface,char iedg,int *listv) {
             if ( pt->v[ip] == nump )  break;
         assert(ip<4);
 
-        memcpy(pt0,pt,sizeof(Tetra));
+        memcpy(pt0,pt,sizeof(MMG5_Tetra));
         pt0->v[ip] = numq;
 
-        if ( !norface(mesh,iel,iopp,ncurold) )  return(0);
-        if ( !norface(mesh,0,iopp,ncurnew) )    return(0);
+        if ( !_MMG5_norface(mesh,iel,iopp,ncurold) )  return(0);
+        if ( !_MMG5_norface(mesh,0,iopp,ncurnew) )    return(0);
 
         /* check normal flipping */
         ps = ncurold[0]*ncurnew[0] + ncurold[1]*ncurnew[1] + ncurold[2]*ncurnew[2];
@@ -535,7 +536,7 @@ int _MMG5_chkcol_bdy(MMG5_pMesh mesh,int k,char iface,char iedg,int *listv) {
         }
 
         /* check Hausdorff distance to geometric support */
-        tet2tri(mesh,iel,iopp,&tt);
+        _MMG5_tet2tri(mesh,iel,iopp,&tt);
         if ( l == 1 ) {
             for (i=0; i<3; i++) {
                 if ( tt.v[i] == nump )  break;
@@ -572,7 +573,7 @@ int _MMG5_chkcol_bdy(MMG5_pMesh mesh,int k,char iface,char iedg,int *listv) {
 
     /* Ensure collapse does not lead to a non manifold configuration (case of implicit surface)*/
     if ( mesh->info.iso ) {
-        ier = chkmanicoll(mesh,k,iface,iedg,ndepmin,ndepplus,isminp,isplp);
+        ier = _MMG5_chkmanicoll(mesh,k,iface,iedg,ndepmin,ndepplus,isminp,isplp);
         if ( !ier )  return(0);
     }
     /* Topological check for surface ball */
@@ -1087,7 +1088,7 @@ int _MMG5_colver(MMG5_pMesh mesh,int *list,int ilist,char indq) {
                 }
             }
         }
-        delElt(mesh,iel);
+        _MMG5_delElt(mesh,iel);
     }
 
     /* Update vertices coordinates for elements that do not belong to the shell of (pq) */
@@ -1097,7 +1098,7 @@ int _MMG5_colver(MMG5_pMesh mesh,int *list,int ilist,char indq) {
         ip  = list[k] % 4;
         pt  = &mesh->tetra[iel];
         pt->v[ip] = nq;
-        pt->qual=orcal(mesh,iel);
+        pt->qual=_MMG5_orcal(mesh,iel);
     }
     return(np);
 }

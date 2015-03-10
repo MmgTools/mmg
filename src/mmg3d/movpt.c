@@ -37,7 +37,7 @@
 
 
 /** Move internal point */
-int movintpt(MMG5_pMesh mesh,int *list,int ilist,int improve) {
+int _MMG5_movintpt(MMG5_pMesh mesh,int *list,int ilist,int improve) {
     MMG5_pTetra               pt,pt0;
     MMG5_pPoint               p0,p1,p2,p3,ppt0;
     double               vol,totvol;
@@ -58,7 +58,7 @@ int movintpt(MMG5_pMesh mesh,int *list,int ilist,int improve) {
         p1 = &mesh->point[pt->v[1]];
         p2 = &mesh->point[pt->v[2]];
         p3 = &mesh->point[pt->v[3]];
-        vol= det4pt(p0->c,p1->c,p2->c,p3->c);
+        vol= _MMG5_det4pt(p0->c,p1->c,p2->c,p3->c);
         totvol += vol;
         /* barycenter */
         ppt0->c[0] += 0.25 * vol*(p0->c[0] + p1->c[0] + p2->c[0] + p3->c[0]);
@@ -78,9 +78,9 @@ int movintpt(MMG5_pMesh mesh,int *list,int ilist,int improve) {
         iel = list[k] / 4;
         i0  = list[k] % 4;
         pt  = &mesh->tetra[iel];
-        memcpy(pt0,pt,sizeof(Tetra));
+        memcpy(pt0,pt,sizeof(MMG5_Tetra));
         pt0->v[i0] = 0;
-        callist[k] = orcal(mesh,0);
+        callist[k] = _MMG5_orcal(mesh,0);
         if ( callist[k] < _MMG5_EPSD2 )        return(0);
         calnew = MG_MIN(calnew,callist[k]);
     }
@@ -102,7 +102,7 @@ int movintpt(MMG5_pMesh mesh,int *list,int ilist,int improve) {
 }
 
 /** Move boundary regular point, whose volumic and surfacic balls are passed */
-int movbdyregpt(MMG5_pMesh mesh,int *listv,int ilistv,int *lists,int ilists) {
+int _MMG5_movbdyregpt(MMG5_pMesh mesh,int *listv,int ilistv,int *lists,int ilists) {
     MMG5_pTetra                pt,pt0;
     MMG5_pxTetra               pxt;
     MMG5_pPoint                p0,p1,p2,ppt0;
@@ -131,7 +131,7 @@ int movbdyregpt(MMG5_pMesh mesh,int *listv,int ilistv,int *lists,int ilists) {
     n = &(mesh->xpoint[p0->xp].n1[0]);
 
     /** Step 1 : rotation matrix that sends normal n to the third coordinate vector of R^3 */
-    rotmatrix(n,r);
+    _MMG5_rotmatrix(n,r);
 
     /** Step 2 : rotation of the oriented surfacic ball with r : lispoi[k] is the common edge
         between faces lists[k-1] and lists[k] */
@@ -302,7 +302,7 @@ int movbdyregpt(MMG5_pMesh mesh,int *listv,int ilistv,int *lists,int ilists) {
     pt     = &mesh->tetra[iel];
     pxt    = &mesh->xtetra[pt->xt];
 
-    tet2tri(mesh,iel,iface,&tt);
+    _MMG5_tet2tri(mesh,iel,iface,&tt);
 
     if(!_MMG5_bezierCP(mesh,&tt,&b,MG_GET(pxt->ori,iface))){
         fprintf(stdout,"%s:%d: Error: function _MMG5_bezierCP return 0\n",
@@ -325,7 +325,7 @@ int movbdyregpt(MMG5_pMesh mesh,int *listv,int ilistv,int *lists,int ilists) {
     }
     p1 = &mesh->point[na];
     p2 = &mesh->point[nb];
-    detloc = det3pt1vec(p0->c,p1->c,p2->c,n);
+    detloc = _MMG5_det3pt1vec(p0->c,p1->c,p2->c,n);
 
     /* ntempa = point to which is associated 1 -uv[0] - uv[1], ntempb = uv[0], ntempc = uv[1] */
     ntempa = pt->v[_MMG5_idir[iface][0]];
@@ -406,13 +406,13 @@ int movbdyregpt(MMG5_pMesh mesh,int *listv,int ilistv,int *lists,int ilists) {
         k                   = lists[l] / 4;
         iface = lists[l] % 4;
         pt          = &mesh->tetra[k];
-        tet2tri(mesh,k,iface,&tt);
-        calold = MG_MIN(calold,caltri(mesh,&tt));
+        _MMG5_tet2tri(mesh,k,iface,&tt);
+        calold = MG_MIN(calold,_MMG5_caltri(mesh,&tt));
         for( i=0 ; i<3 ; i++ )
             if ( tt.v[i] == n0 )      break;
         assert(i<3);
         tt.v[i] = 0;
-        caltmp = caltri(mesh,&tt);
+        caltmp = _MMG5_caltri(mesh,&tt);
         if ( caltmp < _MMG5_EPSD )        return(0.0);
         calnew = MG_MIN(calnew,caltmp);
     }
@@ -428,10 +428,10 @@ int movbdyregpt(MMG5_pMesh mesh,int *listv,int ilistv,int *lists,int ilists) {
         i0 = listv[l] % 4;
         pt = &mesh->tetra[k];
         pt0 = &mesh->tetra[0];
-        memcpy(pt0,pt,sizeof(Tetra));
+        memcpy(pt0,pt,sizeof(MMG5_Tetra));
         pt0->v[i0] = 0;
         calold = MG_MIN(calold, pt->qual);
-        callist[l]=orcal(mesh,0);
+        callist[l]=_MMG5_orcal(mesh,0);
         if ( callist[l] < _MMG5_EPSD )        return(0);
         calnew = MG_MIN(calnew,callist[l]);
     }
@@ -455,7 +455,7 @@ int movbdyregpt(MMG5_pMesh mesh,int *listv,int ilistv,int *lists,int ilists) {
 }
 
 /** Move boundary reference point, whose volumic and surfacic balls are passed */
-int movbdyrefpt(MMG5_pMesh mesh, int *listv, int ilistv, int *lists, int ilists){
+int _MMG5_movbdyrefpt(MMG5_pMesh mesh, int *listv, int ilistv, int *lists, int ilists){
     MMG5_pTetra                pt,pt0;
     MMG5_pxTetra               pxt;
     MMG5_pPoint                p0,p1,p2,ppt0;
@@ -640,7 +640,7 @@ int movbdyrefpt(MMG5_pMesh mesh, int *listv, int ilistv, int *lists, int ilists)
     }
 
     /* Compute support of the associated edge, and features of the new position */
-    if ( !(BezierRef(mesh,ip0,ip,step,o,no,to)) )  return(0);
+    if ( !(_MMG5_BezierRef(mesh,ip0,ip,step,o,no,to)) )  return(0);
 
     /* Test : make sure that geometric approximation has not been degraded too much */
     ppt0 = &mesh->point[0];
@@ -676,16 +676,16 @@ int movbdyrefpt(MMG5_pMesh mesh, int *listv, int ilistv, int *lists, int ilists)
         iface       = lists[l] % 4;
         pt          = &mesh->tetra[iel];
         pxt         = &mesh->xtetra[pt->xt];
-        tet2tri(mesh,iel,iface,&tt);
-        calold = MG_MIN(calold,caltri(mesh,&tt));
+        _MMG5_tet2tri(mesh,iel,iface,&tt);
+        calold = MG_MIN(calold,_MMG5_caltri(mesh,&tt));
         for( i=0 ; i<3 ; i++ )
             if ( tt.v[i] == ip0 )      break;
         assert(i<3);
         tt.v[i] = 0;
-        caltmp = caltri(mesh,&tt);
+        caltmp = _MMG5_caltri(mesh,&tt);
         if ( caltmp < _MMG5_EPSD )        return(0);
         calnew = MG_MIN(calnew,caltmp);
-        if ( chkedg(mesh,&tt,MG_GET(pxt->ori,iface)) ) {
+        if ( _MMG5_chkedg(mesh,&tt,MG_GET(pxt->ori,iface)) ) {
             // Algiane: 09/12/2013 commit: we break the hausdorff criteria so we dont want
             // the point to move? (modification not tested because I could not find a case
             // passing here)
@@ -704,10 +704,10 @@ int movbdyrefpt(MMG5_pMesh mesh, int *listv, int ilistv, int *lists, int ilists)
         i0  = listv[l] % 4;
         pt  = &mesh->tetra[iel];
         pt0 = &mesh->tetra[0];
-        memcpy(pt0,pt,sizeof(Tetra));
+        memcpy(pt0,pt,sizeof(MMG5_Tetra));
         pt0->v[i0] = 0;
         calold = MG_MIN(calold, pt->qual);
-        callist[l] = orcal(mesh,0);
+        callist[l] = _MMG5_orcal(mesh,0);
         if ( callist[l] < _MMG5_EPSD )        return(0);
         calnew = MG_MIN(calnew,callist[l]);
     }
@@ -737,7 +737,7 @@ int movbdyrefpt(MMG5_pMesh mesh, int *listv, int ilistv, int *lists, int ilists)
 
 
 /** Move boundary non manifold point, whose volumic and (exterior) surfacic balls are passed */
-int movbdynompt(MMG5_pMesh mesh, int *listv, int ilistv, int *lists, int ilists){
+int _MMG5_movbdynompt(MMG5_pMesh mesh, int *listv, int ilistv, int *lists, int ilists){
     MMG5_pTetra       pt,pt0;
     MMG5_pxTetra      pxt;
     MMG5_pPoint       p0,p1,p2,ppt0;
@@ -920,7 +920,7 @@ int movbdynompt(MMG5_pMesh mesh, int *listv, int ilistv, int *lists, int ilists)
     }
 
     /* Compute support of the associated edge, and features of the new position */
-    if ( !(BezierNom(mesh,ip0,ip,step,o,no,to)) )  return(0);
+    if ( !(_MMG5_BezierNom(mesh,ip0,ip,step,o,no,to)) )  return(0);
 
     /* Test : make sure that geometric approximation has not been degraded too much */
     ppt0 = &mesh->point[0];
@@ -955,18 +955,18 @@ int movbdynompt(MMG5_pMesh mesh, int *listv, int ilistv, int *lists, int ilists)
         iface       = lists[l] % 4;
         pt          = &mesh->tetra[iel];
         pxt         = &mesh->xtetra[pt->xt];
-        tet2tri(mesh,iel,iface,&tt);
-        caltmp = caltri(mesh,&tt);
+        _MMG5_tet2tri(mesh,iel,iface,&tt);
+        caltmp = _MMG5_caltri(mesh,&tt);
         calold = MG_MIN(calold,caltmp);
         for( i=0 ; i<3 ; i++ )
             if ( tt.v[i] == ip0 )      break;
         assert(i<3);
 
         tt.v[i] = 0;
-        caltmp = caltri(mesh,&tt);
+        caltmp = _MMG5_caltri(mesh,&tt);
         if ( caltmp < _MMG5_EPSD )        return(0);
         calnew = MG_MIN(calnew,caltmp);
-        if ( chkedg(mesh,&tt,MG_GET(pxt->ori,iface)) ) {
+        if ( _MMG5_chkedg(mesh,&tt,MG_GET(pxt->ori,iface)) ) {
             // Algiane: 09/12/2013 commit: we break the hausdorff criteria so we dont want
             // the point to move? (modification not tested because I could not find a case
             // passing here)
@@ -985,10 +985,10 @@ int movbdynompt(MMG5_pMesh mesh, int *listv, int ilistv, int *lists, int ilists)
         i0  = listv[l] % 4;
         pt  = &mesh->tetra[iel];
         pt0 = &mesh->tetra[0];
-        memcpy(pt0,pt,sizeof(Tetra));
+        memcpy(pt0,pt,sizeof(MMG5_Tetra));
         pt0->v[i0] = 0;
         calold = MG_MIN(calold, pt->qual);
-        callist[l]= orcal(mesh,0);
+        callist[l]= _MMG5_orcal(mesh,0);
         if ( callist[l] < _MMG5_EPSD )        return(0);
         calnew = MG_MIN(calnew,callist[l]);
     }
@@ -1017,7 +1017,7 @@ int movbdynompt(MMG5_pMesh mesh, int *listv, int ilistv, int *lists, int ilists)
 }
 
 /** Move boundary ridge point, whose volumic and surfacic balls are passed */
-int movbdyridpt(MMG5_pMesh mesh,int *listv,int ilistv,int *lists,int ilists) {
+int _MMG5_movbdyridpt(MMG5_pMesh mesh,int *listv,int ilistv,int *lists,int ilists) {
     MMG5_pTetra               pt,pt0;
     MMG5_pxTetra              pxt;
     MMG5_pPoint               p0,p1,p2,ppt0;
@@ -1206,7 +1206,7 @@ int movbdyridpt(MMG5_pMesh mesh,int *listv,int ilistv,int *lists,int ilists) {
     }
 
     /* Compute support of the associated edge, and features of the new position */
-    if ( !(BezierRidge(mesh,ip0,ip,step,o,no1,no2,to)) )  return(0);
+    if ( !(_MMG5_BezierRidge(mesh,ip0,ip,step,o,no1,no2,to)) )  return(0);
 
     /* Test : make sure that geometric approximation has not been degraded too much */
     ppt0 = &mesh->point[0];
@@ -1245,17 +1245,17 @@ int movbdyridpt(MMG5_pMesh mesh,int *listv,int ilistv,int *lists,int ilists) {
         iface       = lists[l] % 4;
         pt          = &mesh->tetra[iel];
         pxt         = &mesh->xtetra[pt->xt];
-        tet2tri(mesh,iel,iface,&tt);
-        calold = MG_MIN(calold,caltri(mesh,&tt));
+        _MMG5_tet2tri(mesh,iel,iface,&tt);
+        calold = MG_MIN(calold,_MMG5_caltri(mesh,&tt));
         for (i=0; i<3; i++) {
             if ( tt.v[i] == ip0 )      break;
         }
         assert(i<3);
         tt.v[i] = 0;
-        caltmp = caltri(mesh,&tt);
+        caltmp = _MMG5_caltri(mesh,&tt);
         if ( caltmp < _MMG5_EPSD )        return(0);
         calnew = MG_MIN(calnew,caltmp);
-        if ( chkedg(mesh,&tt,MG_GET(pxt->ori,iface)) ) {            //MAYBE CHECKEDG ASKS STH FOR _MMG5_POINTS !!!!!
+        if ( _MMG5_chkedg(mesh,&tt,MG_GET(pxt->ori,iface)) ) {            //MAYBE CHECKEDG ASKS STH FOR _MMG5_POINTS !!!!!
             // Algiane: 09/12/2013 commit: we break the hausdorff criteria so we dont want
             // the point to move? (modification not tested because I could not find a case
             // passing here)
@@ -1274,10 +1274,10 @@ int movbdyridpt(MMG5_pMesh mesh,int *listv,int ilistv,int *lists,int ilists) {
         i0  = listv[l] % 4;
         pt  = &mesh->tetra[iel];
         pt0 = &mesh->tetra[0];
-        memcpy(pt0,pt,sizeof(Tetra));
+        memcpy(pt0,pt,sizeof(MMG5_Tetra));
         pt0->v[i0] = 0;
         calold = MG_MIN(calold, pt->qual);
-        callist[l]=orcal(mesh,0);
+        callist[l]=_MMG5_orcal(mesh,0);
         if ( callist[l] < _MMG5_EPSD )        return(0);
         calnew = MG_MIN(calnew,callist[l]);
     }

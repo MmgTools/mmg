@@ -49,16 +49,16 @@ extern char ddb;
  * provided).
  *
  */
-int chkswpbdy(MMG5_pMesh mesh,int *list,int ilist,int it1,int it2) {
+int _MMG5_chkswpbdy(MMG5_pMesh mesh,int *list,int ilist,int it1,int it2) {
     MMG5_pTetra   pt,pt0;
     MMG5_pxTetra  pxt;
     MMG5_pPoint   p0,p1,ppt0;
-    Tria     tt1,tt2;
+    MMG5_Tria     tt1,tt2;
     double   b0[3],b1[3],v[3],c[3],ux,uy,uz,ps,disnat,dischg;
     double   cal1,cal2,calnat,calchg,calold,calnew,caltmp,hausd;
     int      iel,iel1,iel2,np,nq,na1,na2,k,nminus,nplus;
     char     ifa1,ifa2,ia,ip,iq,ia1,ia2,j,isshell;
-    pPar     par;
+    MMG5_pPar     par;
 
     iel = list[0] / 6;
     ia  = list[0] % 6;
@@ -94,8 +94,8 @@ int chkswpbdy(MMG5_pMesh mesh,int *list,int ilist,int it1,int it2) {
     ifa1 = it1 % 4;
     iel2 = it2 / 4;
     ifa2 = it2 % 4;
-    tet2tri(mesh,iel1,ifa1,&tt1);
-    tet2tri(mesh,iel2,ifa2,&tt2);
+    _MMG5_tet2tri(mesh,iel1,ifa1,&tt1);
+    _MMG5_tet2tri(mesh,iel2,ifa2,&tt2);
 
     for (ia1=0; ia1<3; ia1++) {
         if ( (tt1.v[ia1] != np) && (tt1.v[ia1] != nq) )  break;
@@ -115,13 +115,13 @@ int chkswpbdy(MMG5_pMesh mesh,int *list,int ilist,int it1,int it2) {
     na2 = tt2.v[ia2];
 
     /* Check non convexity (temporarily use b0,b1)*/
-    norpts(mesh,tt1.v[ia1],tt1.v[_MMG5_inxt2[ia1]],tt2.v[ia2],b0);
-    norpts(mesh,tt2.v[ia2],tt2.v[_MMG5_inxt2[ia2]],tt1.v[ia1],b1);
+    _MMG5_norpts(mesh,tt1.v[ia1],tt1.v[_MMG5_inxt2[ia1]],tt2.v[ia2],b0);
+    _MMG5_norpts(mesh,tt2.v[ia2],tt2.v[_MMG5_inxt2[ia2]],tt1.v[ia1],b1);
     ps = b0[0]*b1[0] + b0[1]*b1[1] + b0[2]*b1[2];
     if ( ps < _MMG5_ANGEDG ) return(0);
 
     /* Compare contributions to Hausdorff distance in both configurations */
-    norface(mesh,iel1,ifa1,v);
+    _MMG5_norface(mesh,iel1,ifa1,v);
 
     p0 = &mesh->point[np];
     p1 = &mesh->point[nq];
@@ -175,15 +175,15 @@ int chkswpbdy(MMG5_pMesh mesh,int *list,int ilist,int it1,int it2) {
     dischg = MG_MAX(dischg,hausd * hausd);
 
     if ( dischg > disnat )   return(0);
-    cal1 = caltri(mesh,&tt1);
-    cal2 = caltri(mesh,&tt2);
+    cal1 = _MMG5_caltri(mesh,&tt1);
+    cal2 = _MMG5_caltri(mesh,&tt2);
     calnat = MG_MIN(cal1,cal2);
     for (j=0; j<3; j++) {
         if ( tt1.v[j] == nq )  tt1.v[j] = na2;
         if ( tt2.v[j] == np )  tt2.v[j] = na1;
     }
-    cal1 = caltri(mesh,&tt1);
-    cal2 = caltri(mesh,&tt2);
+    cal1 = _MMG5_caltri(mesh,&tt1);
+    cal2 = _MMG5_caltri(mesh,&tt2);
     calchg = MG_MIN(cal1,cal2);
     if ( calchg < 1.01 * calnat )  return(0);
 
@@ -199,7 +199,7 @@ int chkswpbdy(MMG5_pMesh mesh,int *list,int ilist,int it1,int it2) {
     for (k=0; k<ilist; k++) {
         iel = list[k] / 6;
         pt  = &mesh->tetra[iel];
-        memcpy(pt0,pt,sizeof(Tetra));
+        memcpy(pt0,pt,sizeof(MMG5_Tetra));
         calold = MG_MIN(calold, pt->qual);
 
         ia1 = ia2 = ip = iq = -1;
@@ -214,19 +214,19 @@ int chkswpbdy(MMG5_pMesh mesh,int *list,int ilist,int it1,int it2) {
 
         /* 2 elts resulting from split and collapse */
         pt0->v[ip] = 0;
-        if ( orcal(mesh,0) < _MMG5_NULKAL )  return(0);
+        if ( _MMG5_orcal(mesh,0) < _MMG5_NULKAL )  return(0);
         if ( !isshell ) {
             pt0->v[ip] = na1;
-            caltmp = orcal(mesh,0);
+            caltmp = _MMG5_orcal(mesh,0);
             calnew = MG_MIN(calnew,caltmp);
         }
-        memcpy(pt0,pt,sizeof(Tetra));
+        memcpy(pt0,pt,sizeof(MMG5_Tetra));
         pt0->v[iq] = 0;
-        if ( orcal(mesh,0) < _MMG5_NULKAL )  return(0);
+        if ( _MMG5_orcal(mesh,0) < _MMG5_NULKAL )  return(0);
 
         if ( !isshell ) {
             pt0->v[iq] = na1;
-            caltmp = orcal(mesh,0);
+            caltmp = _MMG5_orcal(mesh,0);
             calnew = MG_MIN(calnew,caltmp);
         }
     }
@@ -248,7 +248,7 @@ int chkswpbdy(MMG5_pMesh mesh,int *list,int ilist,int it1,int it2) {
  * Swap boundary edge whose shell is provided.
  *
  */
-int swpbdy(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int it1,_MMG5_pBucket bucket) {
+int _MMG5_swpbdy(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int it1,_MMG5_pBucket bucket) {
     MMG5_pTetra   pt,pt1;
     MMG5_pPoint   p0,p1;
     int      iel,iel1,ilist,np,nq,nm;
@@ -273,7 +273,7 @@ int swpbdy(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int it1,_MMG5_pBucket
     p1 = &mesh->point[nq];
 
     /* search for na = the point on quadrangle surfacic configuration on which collapse
-       validity has been checked in chkswpbdy */
+       validity has been checked in _MMG5_chkswpbdy */
     iel1 = it1 / 4;
     iface1 = it1 % 4;
     pt1 = &mesh->tetra[iel1];
@@ -293,7 +293,7 @@ int swpbdy(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int it1,_MMG5_pBucket
     c[0] = 0.5*( p0->c[0] + p1->c[0]);
     c[1] = 0.5*( p0->c[1] + p1->c[1]);
     c[2] = 0.5*( p0->c[2] + p1->c[2]);
-    nm = newPt(mesh,c,MG_BDY);
+    nm = _MMG5_newPt(mesh,c,MG_BDY);
     if ( !nm ) {
         if ( bucket ) {
             _MMG5_POINT_AND_BUCKET_REALLOC(mesh,met,nm,mesh->gap,
@@ -311,7 +311,7 @@ int swpbdy(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int it1,_MMG5_pBucket
         }
     }
     if ( met->m )  met->m[nm] = 0.5 *(met->m[np]+met->m[nq]);
-    ier = split1b(mesh,met,list,ret,nm,0);
+    ier = _MMG5_split1b(mesh,met,list,ret,nm,0);
     /* pointer adress may change if we need to realloc memory during split */
     pt  = &mesh->tetra[iel];
     pt1 = &mesh->tetra[iel1];
@@ -329,7 +329,7 @@ int swpbdy(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int it1,_MMG5_pBucket
         if ( pt1->v[im] == nm )  break;
     }
     if ( pt1->v[im] != nm ){
-        delPt(mesh,nm);
+        _MMG5_delPt(mesh,nm);
         fprintf(stdout,"%s:%d: Warning pt1->v[im] != nm\n",__FILE__,__LINE__);
         return(0);
     }
@@ -344,7 +344,7 @@ int swpbdy(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int it1,_MMG5_pBucket
         return(-1);
     }
     else if ( ier ) {
-        delPt(mesh,ier);
+        _MMG5_delPt(mesh,ier);
         ier = 1;
     }
 

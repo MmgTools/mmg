@@ -127,34 +127,6 @@ IF ( BUILD_MMG3D OR BUILD_MMG )
 
     ###############################################################################
     #####
-    #####         Redefinitions: mmg3d5_redefine.h
-    #####
-    ###############################################################################
-    EXECUTE_PROCESS(COMMAND ctags  -x --c-kinds=fpx  ${MMG_SOURCE_DIR}/mmg3d.h
-        ERROR_QUIET
-        OUTPUT_VARIABLE CTAG)
-    IF ( CTAG )
-        # We want to create mmg3d5_redefine.h but we don't want it to be
-        # removed by make clean so: we use a .dummy output that is
-        # created/removed by make/make clean. And the true command create
-        # the wanted file. We can't use ADD_CUSTOM_TARGET 'cause
-        # mmg3d5_redefine.h would be rebuild each time.
-        ADD_CUSTOM_COMMAND(OUTPUT .dummy
-            COMMAND touch .dummy
-            COMMAND ctags -x  --c-kinds=fpx ${MMG_SOURCE_DIR}/mmg3d.h|awk '{printf \"\#define %-30s\t _MMG5_%s\\n\", $$1, $$1}' > ${MMG_SOURCE_DIR}/${PROJECT_NAME}_redefine.h
-            COMMAND ctags -x --c-kinds=fpst ${MMG_SOURCE_DIR}/lib${PROJECT_NAME}.h|awk '{print $$1}'|sed -e 's/MMG5_//g'|awk '{printf \"\#define %-30s\\t MMG5_%s\\n\", $$1, $$1}' >> ${MMG_SOURCE_DIR}/${PROJECT_NAME}_redefine.h
-            DEPENDS ${MMG_SOURCE_DIR}/mmg3d.h ${MMG_SOURCE_DIR}/lib${PROJECT_NAME}.h
-            COMMENT "update of ${PROJECT_NAME}_redefine.h"
-            )
-    ELSE ()
-        ADD_CUSTOM_COMMAND(OUTPUT .dummy
-            COMMAND touch .dummy
-            DEPENDS ${MMG_SOURCE_DIR}/mmg3d.h ${MMG_SOURCE_DIR}/lib${PROJECT_NAME}.h
-            )
-    ENDIF ()
-
-    ###############################################################################
-    #####
     #####         Fortran header: libmmg3d5f.h
     #####
     ###############################################################################
@@ -318,7 +290,6 @@ IF ( BUILD_MMG3D OR BUILD_MMG )
     OPTION ( LIBMMG3D5_STATIC "Compile static library" ON)
     IF ( LIBMMG3D5_STATIC )
         ADD_LIBRARY(${PROJECT_NAME}_a  STATIC
-            .dummy ${MMG_SOURCE_DIR}/${PROJECT_NAME}_redefine.h
             ${MMG_SOURCE_DIR}/lib${PROJECT_NAME}f.h
             ${source_files} ${lib_file} )
         SET_TARGET_PROPERTIES(${PROJECT_NAME}_a PROPERTIES OUTPUT_NAME ${PROJECT_NAME})
@@ -335,7 +306,6 @@ IF ( BUILD_MMG3D OR BUILD_MMG )
     OPTION ( LIBMMG3D5_SHARED "Compile dynamic library" OFF)
     IF ( LIBMMG3D5_SHARED )
         ADD_LIBRARY(${PROJECT_NAME}_so SHARED
-            .dummy ${MMG_SOURCE_DIR}/${PROJECT_NAME}_redefine.h
             ${MMG_SOURCE_DIR}/lib${PROJECT_NAME}f.h
             ${source_files} ${lib_file})
         SET_TARGET_PROPERTIES(${PROJECT_NAME}_so PROPERTIES OUTPUT_NAME ${PROJECT_NAME})
@@ -420,7 +390,7 @@ IF ( BUILD_MMG3D OR BUILD_MMG )
     #####
     ###############################################################################
     ADD_EXECUTABLE(${PROJECT_NAME}
-        .dummy  ${MMG_SOURCE_DIR}/${PROJECT_NAME}_redefine.h
+#        .dummy  ${MMG_SOURCE_DIR}/${PROJECT_NAME}_redefine.h
         ${MMG_SOURCE_DIR}/lib${PROJECT_NAME}f.h
         ${source_files} ${main_file})
     TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${LIBRARIES})

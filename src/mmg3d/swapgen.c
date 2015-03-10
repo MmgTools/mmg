@@ -49,7 +49,7 @@
  * configuration. The shell of edge is built during the process.
  *
  */
-int chkswpgen(MMG5_pMesh mesh,int start,int ia,int *ilist,int *list,double crit) {
+int _MMG5_chkswpgen(MMG5_pMesh mesh,int start,int ia,int *ilist,int *list,double crit) {
     MMG5_pTetra    pt,pt0;
     MMG5_pPoint    p0;
     double    calold,calnew,caltmp;
@@ -173,14 +173,14 @@ int chkswpgen(MMG5_pMesh mesh,int start,int ia,int *ilist,int *list,double crit)
             pt  = &mesh->tetra[iel];
 
             /* First tetra obtained from iel */
-            memcpy(pt0,pt,sizeof(Tetra));
+            memcpy(pt0,pt,sizeof(MMG5_Tetra));
             pt0->v[_MMG5_iare[i][0]] = np;
-            caltmp = orcal(mesh,0);
+            caltmp = _MMG5_orcal(mesh,0);
             calnew = MG_MIN(calnew,caltmp);
             /* Second tetra obtained from iel */
-            memcpy(pt0,pt,sizeof(Tetra));
+            memcpy(pt0,pt,sizeof(MMG5_Tetra));
             pt0->v[_MMG5_iare[i][1]] = np;
-            caltmp = orcal(mesh,0);
+            caltmp = _MMG5_orcal(mesh,0);
             calnew = MG_MIN(calnew,caltmp);
             ier = (calnew > crit*calold);
             if ( !ier )  break;
@@ -204,7 +204,7 @@ int chkswpgen(MMG5_pMesh mesh,int start,int ia,int *ilist,int *list,double crit)
  * Perform swap of edge whose shell is passed according to configuration nconf.
  *
  */
-int swpgen(MMG5_pMesh mesh,MMG5_pSol met,int nconf,int ilist,int *list,_MMG5_pBucket bucket) {
+int _MMG5_swpgen(MMG5_pMesh mesh,MMG5_pSol met,int nconf,int ilist,int *list,_MMG5_pBucket bucket) {
     MMG5_pTetra    pt;
     MMG5_pPoint    p0,p1;
     int       iel,na,nb,np,nball,ret,start;
@@ -226,7 +226,7 @@ int swpgen(MMG5_pMesh mesh,MMG5_pSol met,int nconf,int ilist,int *list,_MMG5_pBu
     m[1] = 0.5*(p0->c[1] + p1->c[1]);
     m[2] = 0.5*(p0->c[2] + p1->c[2]);
 
-    np  = newPt(mesh,m,0);
+    np  = _MMG5_newPt(mesh,m,0);
     if(!np){
         if ( bucket ) {
             _MMG5_POINT_AND_BUCKET_REALLOC(mesh,met,np,mesh->gap,
@@ -247,7 +247,7 @@ int swpgen(MMG5_pMesh mesh,MMG5_pSol met,int nconf,int ilist,int *list,_MMG5_pBu
 
     /** First step : split of edge (na,nb) */
     ret = 2*ilist + 0;
-    ier = split1b(mesh,met,list,ret,np,0);
+    ier = _MMG5_split1b(mesh,met,list,ret,np,0);
     /* pointer adress may change if we need to realloc memory during split */
     pt = &mesh->tetra[iel];
 
@@ -275,7 +275,7 @@ int swpgen(MMG5_pMesh mesh,MMG5_pSol met,int nconf,int ilist,int *list,_MMG5_pBu
         fprintf(stdout,"  ## Warning: unable to swap internal edge.\n");
         return(-1);
     }
-    else if ( ier ) delPt(mesh,ier);
+    else if ( ier ) _MMG5_delPt(mesh,ier);
 
     return(1);
 }
@@ -289,7 +289,7 @@ int swpgen(MMG5_pMesh mesh,MMG5_pSol met,int nconf,int ilist,int *list,_MMG5_pBu
  * Perform swap 2->3. Return 0 if the swap lead to an invalid configuration.
  *
  */
-int swap23(MMG5_pMesh mesh,int k,int ip) {
+int _MMG5_swap23(MMG5_pMesh mesh,int k,int ip) {
     MMG5_pTetra        pt[3],pt0;
     MMG5_xTetra        xt[3],zerotet;
     MMG5_pxTetra       pxt0;
@@ -379,24 +379,24 @@ int swap23(MMG5_pMesh mesh,int k,int ip) {
     pt0->v[tau1[1]] = nq;
     pt0->v[tau1[2]] = pt[0]->v[tau1[2]];
     pt0->v[tau1[3]] = pt[0]->v[tau1[3]];
-    qual0 = orcal(mesh,0);
+    qual0 = _MMG5_orcal(mesh,0);
     if ( qual0 < _MMG5_NULKAL )  return(0);
 
     /* Check if the second new tetra is valid */
     pt0->v[tau1[1]] = pt[0]->v[tau1[1]];
     pt0->v[tau1[2]] = nq;
-    qual1 = orcal(mesh,0);
+    qual1 = _MMG5_orcal(mesh,0);
     if ( qual1 < _MMG5_NULKAL )  return(0);
 
     /* Check if the third new tetra is valid */
     pt0->v[tau1[2]] = pt[0]->v[tau1[2]];
     pt0->v[tau1[3]] = nq;
-    qual2 = orcal(mesh,0);
+    qual2 = _MMG5_orcal(mesh,0);
     if ( qual2 < _MMG5_NULKAL )  return(0);
 
     /* All the new tetras are valid, we can swap */
     /* Update vertices and xt fields */
-    memcpy(pt0,pt[0],sizeof(Tetra));
+    memcpy(pt0,pt[0],sizeof(MMG5_Tetra));
     if ( pt[1]->v[_MMG5_idir[iq][0]] ==  pt0->v[tau1[1]] ) {
         tau2[0] = iq;
         tau2[1] = _MMG5_idir[iq][0];
@@ -461,7 +461,7 @@ int swap23(MMG5_pMesh mesh,int k,int ip) {
 
 
     /* Third tet */
-    newtet[2] =  newElt(mesh);
+    newtet[2] =  _MMG5_newElt(mesh);
     if ( !newtet[2] ) {
         fprintf(stdout,"%s:%d: Error: unable to allocate a new element\n"
                 ,__FILE__,__LINE__);

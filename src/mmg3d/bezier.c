@@ -317,7 +317,7 @@ _MMG5_BezierEdge(MMG5_pMesh mesh,int ip0,int ip1,double b0[3],double b1[3],char 
  * Compute Bezier control points on triangle \a pt (cf. Vlachos)
  *
  */
-int _MMG5_bezierCP(MMG5_pMesh mesh,Tria *pt,_MMG5_pBezier pb,char ori) {
+int _MMG5_bezierCP(MMG5_pMesh mesh,MMG5_Tria *pt,_MMG5_pBezier pb,char ori) {
     MMG5_pPoint    p[3];
     MMG5_xPoint   *pxp;
     double   *n1,*n2,nt[3],t1[3],t2[3],ps,ps2,dd,ux,uy,uz,l,ll,alpha;
@@ -339,7 +339,7 @@ int _MMG5_bezierCP(MMG5_pMesh mesh,Tria *pt,_MMG5_pBezier pb,char ori) {
         pb->p[i] = p[i];
 
         if ( MG_SIN(p[i]->tag) ) {
-            nortri(mesh,pt,pb->n[i]);
+            _MMG5_nortri(mesh,pt,pb->n[i]);
             if ( !ori ) {
                 pb->n[i][0] *= -1.0;
                 pb->n[i][1] *= -1.0;
@@ -347,7 +347,7 @@ int _MMG5_bezierCP(MMG5_pMesh mesh,Tria *pt,_MMG5_pBezier pb,char ori) {
             }
         }
         else if( p[i]->tag & MG_NOM){
-            nortri(mesh,pt,pb->n[i]);
+            _MMG5_nortri(mesh,pt,pb->n[i]);
             if ( !ori ) {
                 pb->n[i][0] *= -1.0;
                 pb->n[i][1] *= -1.0;
@@ -361,7 +361,7 @@ int _MMG5_bezierCP(MMG5_pMesh mesh,Tria *pt,_MMG5_pBezier pb,char ori) {
             assert(p[i]->xp);
             pxp = &mesh->xpoint[p[i]->xp];
             if ( MG_EDG(p[i]->tag) ) {
-                nortri(mesh,pt,nt);
+                _MMG5_nortri(mesh,pt,nt);
                 if ( !ori ) {
                     nt[0] *= -1.0;
                     nt[1] *= -1.0;

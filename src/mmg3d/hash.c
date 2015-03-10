@@ -58,8 +58,8 @@ _MMG5_paktet(MMG5_pMesh mesh) {
     if ( !MG_EOK(pt) ) {
       pt1 = &mesh->tetra[mesh->ne];
       assert(MG_EOK(pt1));
-      memcpy(pt,pt1,sizeof(Tetra));
-      delElt(mesh,mesh->ne);
+      memcpy(pt,pt1,sizeof(MMG5_Tetra));
+      _MMG5_delElt(mesh,mesh->ne);
     }
   }
   while ( ++k < mesh->ne );
@@ -452,8 +452,8 @@ int _MMG5_hashNew(MMG5_pMesh mesh,_MMG5_Hash *hash,int hsiz,int hmax) {
 }
 
 /** set tag to edge on geometry */
-int _MMG5_hTag(HGeom *hash,int a,int b,int ref,char tag) {
-  hgeom  *ph;
+int _MMG5_hTag(MMG5_HGeom *hash,int a,int b,int ref,char tag) {
+  MMG5_hgeom  *ph;
   int     key,ia,ib;
 
   ia  = MG_MIN(a,b);
@@ -480,8 +480,8 @@ int _MMG5_hTag(HGeom *hash,int a,int b,int ref,char tag) {
 }
 
 /** remove edge from hash table */
-int _MMG5_hPop(HGeom *hash,int a,int b,int *ref,char *tag) {
-  hgeom  *ph,*php;
+int _MMG5_hPop(MMG5_HGeom *hash,int a,int b,int *ref,char *tag) {
+  MMG5_hgeom  *ph,*php;
   int     key,ia,ib,iph,iphp;
 
   *ref = 0;
@@ -498,14 +498,14 @@ int _MMG5_hPop(HGeom *hash,int a,int b,int *ref,char *tag) {
     *ref = ph->ref;
     *tag = ph->tag;
     if ( !ph->nxt ) {
-      memset(ph,0,sizeof(hgeom));
+      memset(ph,0,sizeof(MMG5_hgeom));
     }
     else {
       iph = ph->nxt;
       php = ph;
       ph  = &hash->geom[ph->nxt];
-      memcpy(php,ph,sizeof(hgeom));
-      memset(ph,0,sizeof(hgeom));
+      memcpy(php,ph,sizeof(MMG5_hgeom));
+      memset(ph,0,sizeof(MMG5_hgeom));
       ph->nxt   = hash->nxt;
       hash->nxt = iph;
     }
@@ -518,7 +518,7 @@ int _MMG5_hPop(HGeom *hash,int a,int b,int *ref,char *tag) {
       *ref = ph->ref;
       *tag = ph->tag;
       if ( !ph->nxt ) {
-        memset(ph,0,sizeof(hgeom));
+        memset(ph,0,sizeof(MMG5_hgeom));
         ph->nxt   = hash->nxt;
         hash->nxt = php->nxt;
         php->nxt  = 0;
@@ -527,7 +527,7 @@ int _MMG5_hPop(HGeom *hash,int a,int b,int *ref,char *tag) {
         iph  = ph->nxt;
         iphp = php->nxt;
         php->nxt = iph;
-        memset(ph,0,sizeof(hgeom));
+        memset(ph,0,sizeof(MMG5_hgeom));
         ph->nxt   = hash->nxt;
         hash->nxt = iphp;
       }
@@ -538,8 +538,8 @@ int _MMG5_hPop(HGeom *hash,int a,int b,int *ref,char *tag) {
 }
 
 /** get ref and tag to edge on geometry */
-int _MMG5_hGet(HGeom *hash,int a,int b,int *ref,char *tag) {
-  hgeom  *ph;
+int _MMG5_hGet(MMG5_HGeom *hash,int a,int b,int *ref,char *tag) {
+  MMG5_hgeom  *ph;
   int     key,ia,ib;
 
   *tag = 0;
@@ -569,7 +569,7 @@ int _MMG5_hGet(HGeom *hash,int a,int b,int *ref,char *tag) {
 
 /** store edge on geometry */
 void _MMG5_hEdge(MMG5_pMesh mesh,int a,int b,int ref,char tag) {
-  hgeom  *ph;
+  MMG5_hgeom  *ph;
   int     key,ia,ib,j;
 
   if ( !mesh->htab.siz )  return;
@@ -594,7 +594,7 @@ void _MMG5_hEdge(MMG5_pMesh mesh,int a,int b,int ref,char tag) {
     if ( mesh->htab.nxt >= mesh->htab.max ) {
       if ( mesh->info.ddebug )
         fprintf(stdout,"  ## Memory alloc problem (edge): %d\n",mesh->htab.max);
-      _MMG5_TAB_RECALLOC(mesh,mesh->htab.geom,mesh->htab.max,0.2,hgeom,
+      _MMG5_TAB_RECALLOC(mesh,mesh->htab.geom,mesh->htab.max,0.2,MMG5_hgeom,
                    "larger htab table",
                    printf("  Exit program.\n");
                    exit(EXIT_FAILURE));
@@ -610,11 +610,11 @@ void _MMG5_hEdge(MMG5_pMesh mesh,int a,int b,int ref,char tag) {
 }
 
 /** to store edge on geometry */
-int _MMG5_hNew(HGeom *hash,int hsiz,int hmax,int secure) {
+int _MMG5_hNew(MMG5_HGeom *hash,int hsiz,int hmax,int secure) {
   int   k;
 
   /* adjust hash table params */
-  hash->geom = (hgeom*)calloc(hmax+2,sizeof(hgeom));
+  hash->geom = (MMG5_hgeom*)calloc(hmax+2,sizeof(MMG5_hgeom));
   if ( !hash->geom ) {
     perror("  ## Memory problem: calloc");
     if ( !secure )  return(0);
@@ -645,7 +645,7 @@ int _MMG5_hGeom(MMG5_pMesh mesh) {
   if ( mesh->na ) {
     if ( !mesh->htab.geom ) {
       mesh->namax = MG_MAX(1.5*mesh->na,_MMG5_NAMAX);
-      _MMG5_ADD_MEM(mesh,(3*mesh->namax+2)*sizeof(hgeom),"htab",return(0));
+      _MMG5_ADD_MEM(mesh,(3*mesh->namax+2)*sizeof(MMG5_hgeom),"htab",return(0));
       _MMG5_hNew(&mesh->htab,mesh->na,3*mesh->namax,1);
     }
     else {
@@ -656,7 +656,7 @@ int _MMG5_hGeom(MMG5_pMesh mesh) {
           fprintf(stdout,"  ## Warning: no re-hash of edges of mesh. ");
           fprintf(stdout,"mesh->htab.geom must be freed to enforce analysis.\n");
         }
-        _MMG5_DEL_MEM(mesh,mesh->edge,(mesh->na+1)*sizeof(Edge));
+        _MMG5_DEL_MEM(mesh,mesh->edge,(mesh->na+1)*sizeof(MMG5_Edge));
         mesh->na   = 0;
         return(1);
 #ifdef SINGUL
@@ -687,7 +687,7 @@ int _MMG5_hGeom(MMG5_pMesh mesh) {
         _MMG5_hTag(&mesh->htab,pt->v[i1],pt->v[i2],edg,pt->tag[i]);
       }
     }
-    _MMG5_DEL_MEM(mesh,mesh->edge,(mesh->na+1)*sizeof(Edge));
+    _MMG5_DEL_MEM(mesh,mesh->edge,(mesh->na+1)*sizeof(MMG5_Edge));
     mesh->na   = 0;
   }
   /* else, infer special edges from information carried by triangles */
@@ -709,10 +709,10 @@ int _MMG5_hGeom(MMG5_pMesh mesh) {
       }
 
       if ( mesh->htab.geom )
-        _MMG5_DEL_MEM(mesh,mesh->htab.geom,(mesh->htab.max+1)*sizeof(hgeom));
+        _MMG5_DEL_MEM(mesh,mesh->htab.geom,(mesh->htab.max+1)*sizeof(MMG5_hgeom));
 
       mesh->namax = MG_MAX(1.5*mesh->na,_MMG5_NAMAX);
-      _MMG5_ADD_MEM(mesh,(3*mesh->namax+2)*sizeof(hgeom),"htab",return(0));
+      _MMG5_ADD_MEM(mesh,(3*mesh->namax+2)*sizeof(MMG5_hgeom),"htab",return(0));
       _MMG5_hNew(&mesh->htab,mesh->na,3*mesh->namax,1);
       mesh->na = 0;
     }
@@ -731,10 +731,10 @@ int _MMG5_hGeom(MMG5_pMesh mesh) {
     }
 
     if ( mesh->htab.geom )
-      _MMG5_DEL_MEM(mesh,mesh->htab.geom,(mesh->htab.max+1)*sizeof(hgeom));
+      _MMG5_DEL_MEM(mesh,mesh->htab.geom,(mesh->htab.max+1)*sizeof(MMG5_hgeom));
 
     mesh->namax = MG_MAX(1.5*mesh->na,_MMG5_NAMAX);
-    _MMG5_ADD_MEM(mesh,(3*mesh->namax+2)*sizeof(hgeom),"htab",return(0));
+    _MMG5_ADD_MEM(mesh,(3*mesh->namax+2)*sizeof(MMG5_hgeom),"htab",return(0));
     _MMG5_hNew(&mesh->htab,mesh->na,3*mesh->namax,1);
     mesh->na = 0;
 #endif
@@ -809,7 +809,7 @@ int _MMG5_chkNumberOfTri(MMG5_pMesh mesh) {
       fprintf(stdout," you have 2 domains but only boundary/interface triangles).\n");
       fprintf(stdout," %d given triangles and %d counted triangles.\n",mesh->nt,nttmp);
     }
-    _MMG5_DEL_MEM(mesh,mesh->tria,(mesh->nt+1)*sizeof(Tria));
+    _MMG5_DEL_MEM(mesh,mesh->tria,(mesh->nt+1)*sizeof(MMG5_Tria));
   }
   mesh->nt = nttmp;
   return(0);
@@ -831,8 +831,8 @@ int _MMG5_bdryTria(MMG5_pMesh mesh) {
   char      i;
 
   /* create triangles */
-  _MMG5_ADD_MEM(mesh,(mesh->nt+1)*sizeof(Tria),"triangles",return(0));
-  _MMG5_SAFE_CALLOC(mesh->tria,mesh->nt+1,Tria);
+  _MMG5_ADD_MEM(mesh,(mesh->nt+1)*sizeof(MMG5_Tria),"triangles",return(0));
+  _MMG5_SAFE_CALLOC(mesh->tria,mesh->nt+1,MMG5_Tria);
 
   mesh->nt = 0;
   for (k=1; k<=mesh->ne; k++) {
@@ -973,7 +973,7 @@ int _MMG5_bdrySet(MMG5_pMesh mesh) {
   int      *adja,adj,k,kt,ia,ib,ic,j,na;
   char     i,tag;
 #ifdef SINGUL
-  hgeom    *ph;
+  MMG5_hgeom    *ph;
   int      ref;
 
   if ( (!mesh->info.sing) && (!mesh->nt) )  return(1);

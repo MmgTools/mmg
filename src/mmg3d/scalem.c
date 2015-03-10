@@ -35,7 +35,7 @@
 
 #include "mmg3d.h"
 
-int scaleMesh(MMG5_pMesh mesh,MMG5_pSol met,pSingul sing) {
+int _MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSingul sing) {
   MMG5_pPoint    ppt;
 #ifdef SINGUL
   MMG5_psPoint   ppts;
@@ -43,7 +43,7 @@ int scaleMesh(MMG5_pMesh mesh,MMG5_pSol met,pSingul sing) {
 #endif
   double    dd;
   int       i,k;
-  pPar      par;
+  MMG5_pPar      par;
 
   /* compute bounding box */
   for (i=0; i<3; i++) {
@@ -125,11 +125,11 @@ int scaleMesh(MMG5_pMesh mesh,MMG5_pSol met,pSingul sing) {
   return(1);
 }
 
-int unscaleMesh(MMG5_pMesh mesh,MMG5_pSol met) {
+int _MMG5_unscaleMesh(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pPoint     ppt;
   double     dd;
   int        k;
-  pPar       par;
+  MMG5_pPar       par;
 
   /* de-normalize coordinates */
   dd = mesh->info.delta;

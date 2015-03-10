@@ -50,7 +50,7 @@ _MMG5_defsizreg(MMG5_pMesh mesh,MMG5_pSol met,int nump,int *lists,
     MMG5_pTetra       pt;
     MMG5_pxTetra      pxt;
     MMG5_pPoint       p0,p1;
-    Tria         tt;
+    MMG5_Tria         tt;
     _MMG5_Bezier       b;
     double       ux,uy,uz,det2d,h,isqhmin,isqhmax,ll,lmin,lmax,hnm,s;
     double       *n,*t,r[3][3],lispoi[3*_MMG5_LMAX+1],intm[3],b0[3],b1[3],c[3],tAA[6],tAb[3],d[3];
@@ -70,7 +70,7 @@ _MMG5_defsizreg(MMG5_pMesh mesh,MMG5_pSol met,int nump,int *lists,
     n = &mesh->xpoint[p0->xp].n1[0];
 
     /* Step 1 : rotation matrix that sends normal n to the third coordinate vector of R^3 */
-    rotmatrix(n,r);
+    _MMG5_rotmatrix(n,r);
 
     /* Step 2 : rotation of the oriented surfacic ball with r : lispoi[k] is the common edge
        between faces lists[k-1] and lists[k] */
@@ -193,7 +193,7 @@ _MMG5_defsizreg(MMG5_pMesh mesh,MMG5_pSol met,int nump,int *lists,
         iel   = lists[k] / 4;
         iface = lists[k] % 4;
 
-        tet2tri(mesh,iel,iface,&tt);
+        _MMG5_tet2tri(mesh,iel,iface,&tt);
 
         pxt   = &mesh->xtetra[mesh->tetra[iel].xt];
         if ( !_MMG5_bezierCP(mesh,&tt,&b,MG_GET(pxt->ori,iface)) ) {
@@ -330,7 +330,7 @@ _MMG5_defsizreg(MMG5_pMesh mesh,MMG5_pSol met,int nump,int *lists,
     }
 
     /* solve now (a b c) = tAA^{-1} * tAb */
-    if ( !sys33sym(tAA,tAb,c) )  return(mesh->info.hmax);
+    if ( !_MMG5_sys33sym(tAA,tAb,c) )  return(mesh->info.hmax);
 
     intm[0] = 2.0*c[0];
     intm[1] = c[2];
@@ -338,8 +338,8 @@ _MMG5_defsizreg(MMG5_pMesh mesh,MMG5_pSol met,int nump,int *lists,
 
     /* At this point, intm stands for the integral matrix of Taubin's approach : vp[0] and vp[1]
        are the two pr. directions of curvature, and the two curvatures can be inferred from lambdas*/
-    if( !eigensym(intm,kappa,vp) ){
-        fprintf(stdout,"%s:%d: Error: function eigensym return 0\n",
+    if( !_MMG5_eigensym(intm,kappa,vp) ){
+        fprintf(stdout,"%s:%d: Error: function _MMG5_eigensym return 0\n",
                 __FILE__,__LINE__);
         exit(EXIT_FAILURE);
     }
@@ -397,7 +397,7 @@ int _MMG5_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
     double    secder0[3],secder1[3],kappa,tau[3],gammasec[3],ntau2,intau,ps,lm,*n;
     int       lists[_MMG5_LMAX+2],listv[_MMG5_LMAX+2],ilists,ilistv,k,ip0,ip1,l;
     char      i,j,ia,ised,i0,i1;
-    pPar      par;
+    MMG5_pPar      par;
 
     if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug )
         fprintf(stdout,"  ** Defining map\n");
@@ -449,7 +449,7 @@ int _MMG5_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
                 if ( !_MMG5_boulesurfvolp(mesh,k,i0,i,listv,&ilistv,lists,&ilists) )  continue;
 
                 n   = &mesh->xpoint[p0->xp].n1[0];
-                directsurfball(mesh,ip0,lists,ilists,n);
+                _MMG5_directsurfball(mesh,ip0,lists,ilists,n);
                 hp  = _MMG5_defsizreg(mesh,met,ip0,lists,ilists,hausd);
                 met->m[ip0] = MG_MIN(met->m[ip0],hp);
             }
@@ -465,7 +465,7 @@ int _MMG5_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
 
         for (i=0; i<4; i++) {
             if ( !(pxt->ftag[i] & MG_BDY) )  continue;
-            else if ( !norface(mesh,k,i,v) )  continue;
+            else if ( !_MMG5_norface(mesh,k,i,v) )  continue;
 
             /* local hausdorff for triangle */
             hausd = mesh->info.hausd;

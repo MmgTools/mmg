@@ -54,8 +54,8 @@ void _MMG5_chkvol(MMG5_pMesh mesh) {
     for (k=1; k<=mesh->ne; k++) {
         pt = &mesh->tetra[k];
         if ( !MG_EOK(pt) )  continue;
-        if ( orvol(mesh->point,pt->v) < _MMG5_NULKAL ) {
-            printf("  tetra %d  volume %e\n",k,orvol(mesh->point,pt->v));
+        if ( _MMG5_orvol(mesh->point,pt->v) < _MMG5_NULKAL ) {
+            printf("  tetra %d  volume %e\n",k,_MMG5_orvol(mesh->point,pt->v));
 #ifdef DEBUG
             ier = 0;
 #endif

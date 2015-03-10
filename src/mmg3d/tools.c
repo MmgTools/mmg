@@ -38,7 +38,7 @@
 extern char ddb;
 
 /** naive (increasing) sorting algorithm, for very small tabs ; permutation is stored in perm */
-inline void nsort(int n,double *val,char *perm){
+inline void _MMG5_nsort(int n,double *val,char *perm){
     int   i,j,aux;
 
     for (i=0; i<n; i++)  perm[i] = i;
@@ -55,7 +55,7 @@ inline void nsort(int n,double *val,char *perm){
 }
 
 /** Compute rotation matrix that sends vector n to the third vector of canonical basis */
-inline void rotmatrix(double n[3],double r[3][3]) {
+inline void _MMG5_rotmatrix(double n[3],double r[3][3]) {
     double   aa,bb,ab,ll,l,cosalpha,sinalpha;
 
     aa = n[0]*n[0];
@@ -93,7 +93,7 @@ inline void rotmatrix(double n[3],double r[3][3]) {
 }
 
 /** Compute 3 * 3 determinant : det(c1-c0,c2-c0,v) */
-inline double det3pt1vec(double c0[3],double c1[3],double c2[3],double v[3]) {
+inline double _MMG5_det3pt1vec(double c0[3],double c1[3],double c2[3],double v[3]) {
     double m00,m10,m20,m01,m11,m21,det;
 
     m00 = c1[0] - c0[0] ; m01 = c2[0] - c0[0];
@@ -105,7 +105,7 @@ inline double det3pt1vec(double c0[3],double c1[3],double c2[3],double v[3]) {
 }
 
 /** Compute 3 * 3 determinant : det(c1-c0,c2-c0,c3-c0) */
-inline double det4pt(double c0[3],double c1[3],double c2[3],double c3[3]) {
+inline double _MMG5_det4pt(double c0[3],double c1[3],double c2[3],double c3[3]) {
     double m00,m10,m20,m01,m11,m21,m02,m12,m22,det;
 
     m00 = c1[0] - c0[0] ; m01 = c2[0] - c0[0]; m02 = c3[0] - c0[0];
@@ -117,7 +117,7 @@ inline double det4pt(double c0[3],double c1[3],double c2[3],double c3[3]) {
 }
 
 /** Compute oriented volume of a tetrahedron */
-inline double orvol(MMG5_pPoint point,int *v) {
+inline double _MMG5_orvol(MMG5_pPoint point,int *v) {
     MMG5_pPoint  p0,p1,p2,p3;
 
     p0 = &point[v[0]];
@@ -125,11 +125,11 @@ inline double orvol(MMG5_pPoint point,int *v) {
     p2 = &point[v[2]];
     p3 = &point[v[3]];
 
-    return(det4pt(p0->c,p1->c,p2->c,p3->c));
+    return(_MMG5_det4pt(p0->c,p1->c,p2->c,p3->c));
 }
 
 /** Compute normal to face iface of tetra k, exterior to tetra k */
-inline int norface(MMG5_pMesh mesh,int k,int iface,double n[3]) {
+inline int _MMG5_norface(MMG5_pMesh mesh,int k,int iface,double n[3]) {
     MMG5_pTetra     pt;
     MMG5_pPoint     p0,p1,p2;
     double     ux,uy,uz,vx,vy,vz,norm;
@@ -161,7 +161,7 @@ inline int norface(MMG5_pMesh mesh,int k,int iface,double n[3]) {
 }
 
 /** compute face normal */
-inline int norpts(MMG5_pMesh mesh,int ip1,int ip2, int ip3,double *n) {
+inline int _MMG5_norpts(MMG5_pMesh mesh,int ip1,int ip2, int ip3,double *n) {
     MMG5_pPoint   p1,p2,p3;
     double   dd,abx,aby,abz,acx,acy,acz,det;
 
@@ -195,7 +195,7 @@ inline int norpts(MMG5_pMesh mesh,int ip1,int ip2, int ip3,double *n) {
 
 
 /** Solve 3*3 symmetric system A*r = b */
-inline int sys33sym(double a[6], double b[3], double r[3]){
+inline int _MMG5_sys33sym(double a[6], double b[3], double r[3]){
     double ia[6],as[6],det,m;
     int    i;
 
@@ -243,7 +243,7 @@ inline int sys33sym(double a[6], double b[3], double r[3]){
 }
 
 /** Compute eigenelements of a SYMMETRIC matrix m. Eigenvectors are orthogonal. Return order */
-inline int eigensym(double m[3],double lambda[2],double vp[2][2]) {
+inline int _MMG5_eigensym(double m[3],double lambda[2],double vp[2][2]) {
     double   sqDelta,dd,trm,vnorm;
 
     dd  = m[0]-m[2];
@@ -287,7 +287,7 @@ inline int eigensym(double m[3],double lambda[2],double vp[2][2]) {
 /** If need be, invert the travelling sense of surfacic ball so that it is travelled in
     the direct sense with respect to direction n anchored at point ip (ip = global num.):
     return 2 = orientation reversed, 1 otherwise */
-inline int directsurfball(MMG5_pMesh mesh, int ip, int *list, int ilist, double n[3]){
+inline int _MMG5_directsurfball(MMG5_pMesh mesh, int ip, int *list, int ilist, double n[3]){
     int             j,aux,iel;
     double          nt[3],ps;
     unsigned char   iface;
@@ -295,7 +295,7 @@ inline int directsurfball(MMG5_pMesh mesh, int ip, int *list, int ilist, double 
     iel   = list[0] / 4;
     iface = list[0] % 4;
 
-    norface(mesh,iel,iface,nt);
+    _MMG5_norface(mesh,iel,iface,nt);
     ps = nt[0]*n[0] +  nt[1]*n[1] +  nt[2]*n[2];
     if ( ps > 0.0 )  return(1);
 
@@ -311,7 +311,7 @@ inline int directsurfball(MMG5_pMesh mesh, int ip, int *list, int ilist, double 
 /** If need be, reorder the surfacic ball of point ip, so that its first element has
     edge (p,q) (nump,q = global num) as edge _MMG5_iprv2[ip] of face iface.
     return 2 = orientation reversed, 1 otherwise */
-int startedgsurfball(MMG5_pMesh mesh,int nump,int numq,int *list,int ilist) {
+int _MMG5_startedgsurfball(MMG5_pMesh mesh,int nump,int numq,int *list,int ilist) {
     MMG5_pTetra          pt;
     int             iel,tmp,l;
     unsigned char   iface,ip,ipt;
@@ -348,7 +348,7 @@ int startedgsurfball(MMG5_pMesh mesh,int nump,int numq,int *list,int ilist) {
 
 /** Compute point located at parameter value step from point ip0, as well as interpolate
     of normals, tangent for a RIDGE edge */
-inline int BezierRidge(MMG5_pMesh mesh,int ip0,int ip1,double s,double *o,double *no1,double *no2,double *to){
+inline int _MMG5_BezierRidge(MMG5_pMesh mesh,int ip0,int ip1,double s,double *o,double *no1,double *no2,double *to){
     MMG5_pPoint    p0,p1;
     double    ux,uy,uz,n01[3],n02[3],n11[3],n12[3],t0[3],t1[3];
     double    ps,ps2,b0[3],b1[3],bn[3],ll,il,ntemp[3],dd,alpha;
@@ -512,7 +512,7 @@ inline int BezierRidge(MMG5_pMesh mesh,int ip0,int ip1,double s,double *o,double
 
 /** Compute point located at parameter value step from point ip0, as well as interpolate
     of normals, tangent for a REF edge */
-inline int BezierRef(MMG5_pMesh mesh,int ip0,int ip1,double s,double *o,double *no,double *to) {
+inline int _MMG5_BezierRef(MMG5_pMesh mesh,int ip0,int ip1,double s,double *o,double *no,double *to) {
     MMG5_pPoint          p0,p1;
     double          ux,uy,uz,n01[3],n02[3],n11[3],n12[3],ntemp[3],t0[3],t1[3];
     double          ps,b0[3],b1[3],bn[3],ll,il,dd,alpha,ps2;
@@ -667,7 +667,7 @@ inline int BezierRef(MMG5_pMesh mesh,int ip0,int ip1,double s,double *o,double *
 
 /** Compute point located at parameter value step from point ip0, as well as interpolate
     of normals, tangent for a NOM edge */
-inline int BezierNom(MMG5_pMesh mesh,int ip0,int ip1,double s,double *o,double *no,double *to) {
+inline int _MMG5_BezierNom(MMG5_pMesh mesh,int ip0,int ip1,double s,double *o,double *no,double *to) {
     MMG5_pPoint      p0,p1;
     double      ux,uy,uz,il,ll,ps,alpha,dd;
     double      t0[3],t1[3],b0[3],b1[3],n0[3],n1[3],bn[3];
@@ -809,7 +809,7 @@ inline int BezierNom(MMG5_pMesh mesh,int ip0,int ip1,double s,double *o,double *
 
 /** Compute point located at parameter value step from point ip0, as well as interpolate
     of normals, tangent for a regular edge ; v = ref vector (normal) for choice of normals if need be */
-inline int BezierReg(MMG5_pMesh mesh,int ip0, int ip1, double s, double v[3], double *o, double *no){
+inline int _MMG5_BezierReg(MMG5_pMesh mesh,int ip0, int ip1, double s, double v[3], double *o, double *no){
     MMG5_pPoint p0,p1;
     double b0[3],b1[3],bn[3],t0[3],t1[3],np0[3],np1[3],alpha,ux,uy,uz,ps1,ps2,ll,il,dd,*n1,*n2;
 
@@ -971,7 +971,7 @@ inline int BezierReg(MMG5_pMesh mesh,int ip0, int ip1, double s, double v[3], do
 }
 
 /** compute iso size map */
-int DoSol(MMG5_pMesh mesh,MMG5_pSol met) {
+int _MMG5_DoSol(MMG5_pMesh mesh,MMG5_pSol met) {
     MMG5_pTetra     pt;
     MMG5_pPoint     p1,p2;
     double     ux,uy,uz,dd;
@@ -1030,7 +1030,7 @@ int DoSol(MMG5_pMesh mesh,MMG5_pSol met) {
 }
 
 /** find the element number in packed numerotation */
-int indElt(MMG5_pMesh mesh, int kel) {
+int _MMG5_indElt(MMG5_pMesh mesh, int kel) {
     MMG5_pTetra pt;
     int    ne, k;
 
@@ -1046,7 +1046,7 @@ int indElt(MMG5_pMesh mesh, int kel) {
 }
 
 /** find the point number in packed numerotation */
-int indPt(MMG5_pMesh mesh, int kp) {
+int _MMG5_indPt(MMG5_pMesh mesh, int kp) {
     MMG5_pPoint ppt;
     int    np, k;
 
@@ -1062,7 +1062,7 @@ int indPt(MMG5_pMesh mesh, int kp) {
 }
 
 /** Debug function (not use in clean code): print mesh->tria structure */
-void printTria(MMG5_pMesh mesh,char* fileName) {
+void _MMG5_printTria(MMG5_pMesh mesh,char* fileName) {
     MMG5_pTria ptt;
     int   k;
     FILE  *inm;
@@ -1084,7 +1084,7 @@ void printTria(MMG5_pMesh mesh,char* fileName) {
 }
 
 /** Debug function (not use in clean code): print mesh->tria structure */
-void printTetra(MMG5_pMesh mesh,char* fileName) {
+void _MMG5_printTetra(MMG5_pMesh mesh,char* fileName) {
     MMG5_pTetra  pt;
     MMG5_pxTetra pxt;
     int     k;
