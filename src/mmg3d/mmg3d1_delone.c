@@ -932,25 +932,9 @@ static int adptet_delone(pMesh mesh,pSol met,pBucket bucket) {
         return(0);
     }
 
-#ifdef USE_SCOTCH
-    /*check enough vertex to renum*/
-    if ( mesh->info.renum && (mesh->np/2. > BOXSIZE) ) {
-        /* renumbering begin */
-        if ( mesh->info.imprim > 5 )
-            fprintf(stdout,"  -- RENUMBERING. \n");
-        if ( !renumbering(BOXSIZE,mesh, met) ) {
-            fprintf(stdout,"  ## Unable to renumbering mesh. \n");
-            fprintf(stdout,"  ## Try to run without renumbering option (-rn 0)\n");
-            return(0);
-        }
-
-        if ( mesh->info.imprim > 5) {
-            fprintf(stdout,"  -- PHASE RENUMBERING COMPLETED. \n");
-        }
-        if ( mesh->info.ddebug )  chkmsh(mesh,1,0);
-        /* renumbering end */
-    }
-#endif
+    /* renumbering if available */
+    if ( !_MMG5_scotchCall(mesh,met) )
+        return(0);
 
     if(!optet(mesh,met,bucket)) return(0);
 
@@ -1013,27 +997,9 @@ int mmg3d1_delone(pMesh mesh,pSol met) {
     outqua(mesh,met);
 #endif
 
-#ifdef USE_SCOTCH
-    /*check enough vertex to renum*/
-    if ( mesh->info.renum  && (mesh->np/2. > BOXSIZE) ) {
-        /* renumbering begin */
-        if ( mesh->info.imprim > 5 )
-            fprintf(stdout,"  -- RENUMBERING. \n");
-
-        if ( !renumbering(BOXSIZE,mesh, met) ) {
-            fprintf(stdout,"  ## Unable to renumbering mesh. \n");
-            fprintf(stdout,"  ## Try to run without renumbering option (-rn 0)\n");
-            return(0);
-        }
-
-        if ( mesh->info.imprim > 5) {
-            fprintf(stdout,"  -- PHASE RENUMBERING COMPLETED. \n");
-        }
-
-        if ( mesh->info.ddebug )  chkmsh(mesh,1,0);
-        /* renumbering end */
-    }
-#endif
+    /* renumbering if available */
+    if ( !_MMG5_scotchCall(mesh,met) )
+        return(0);
 
     /* CEC : create filter */
     bucket = newBucket(mesh,mesh->info.bucket); //M_MAX(mesh->mesh->info.bucksiz,BUCKSIZ));

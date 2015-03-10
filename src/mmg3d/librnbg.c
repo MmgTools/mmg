@@ -29,7 +29,6 @@
  * \version 5
  * \date 2013
  * \copyright GNU Lesser General Public License.
- * \todo Doxygen documentation.
  */
 
 #include "mmg3d.h"
@@ -42,16 +41,17 @@
 #define CHECK_SCOTCH(t,m,e) if(0!=t){perror(m);exit(e);}
 
 
-/** Not used */
-/** Internal function : biPartBoxCompute
- * it computes a new numbering of graph vertices, using a bipartitioning.
+/**
+ * \param graf the input graph structure.
+ * \param vertNbr the number of vertices.
+ * \param boxVertNbr the number of vertices of each box.
+ * \param permVrtTab the new numbering.
+ * \return 0 if ok, 1 otherwise.
  *
- *  - graf : the input graph
- *  - vertNbr : the number of vertices
- *  - boxVertNbr : the number of vertices of each box
- *  - permVrtTab : the new numbering
+ * Internal function that computes a new numbering of graph vertices using a
+ * bipartitioning.
  *
- *  returning 0 if OK, 1 else
+ * \warning Not used.
  **/
 int biPartBoxCompute(SCOTCH_Graph graf, int vertNbr, int boxVertNbr, SCOTCH_Num *permVrtTab,MMG5_pMesh mesh) {
     int boxNbr, vertIdx, boxIdx;
@@ -124,18 +124,17 @@ int biPartBoxCompute(SCOTCH_Graph graf, int vertNbr, int boxVertNbr, SCOTCH_Num 
     return 0;
 }
 
-
-/* Internal function : kPartBoxCompute
- * it computes a new numbering of graph vertices, using a k-partitioning.
- * Assuming that baseval of the graph is 1
+/**
+ * \param graf the input graph structure.
+ * \param vertNbr the number of vertices.
+ * \param boxVertNbr the number of vertices of each box.
+ * \param permVrtTab the new numbering.
+ * \return 0 if ok, 1 otherwise.
  *
- *  - graf : the input graph
- *  - vertNbr : the number of vertices
- *  - boxVertNbr : the number of vertices of each box
- *  - permVrtTab : the new numbering
+ * Internal function that computes a new numbering of graph vertices using a
+ * k-partitioning and assuming that baseval of the graph is 1.
  *
- *  returning 0 if OK, 1 else
- */
+ **/
 int kPartBoxCompute(SCOTCH_Graph graf, int vertNbr, int boxVertNbr,
                     SCOTCH_Num *permVrtTab,MMG5_pMesh mesh) {
     int boxNbr, vertIdx;
@@ -326,8 +325,8 @@ void swapNod(pPoint points, double* sols, int* perm,
 /**
  * \param boxVertNbr number of vertices by box.
  * \param pointer toward the mesh structure.
- * \return 0 if the renumbering fail and we can't rebuild tetrahedra hashtable.
- * \return 1 if the renumbering fail but we can rebuild tetrahedra hashtable or
+ * \return 0 if the renumbering fail and we can't rebuild tetrahedra hashtable,
+ * 1 if the renumbering fail but we can rebuild tetrahedra hashtable or
  * if the renumbering success.
  *
  * Modifies the node indicies to prevent from cache missing.
@@ -571,4 +570,38 @@ int renumbering(int boxVertNbr, pMesh mesh, pSol sol) {
 
     return 1;
 }
+#endif
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the solution structure.
+ *
+ * Call scotch renumbering.
+ *
+ **/
+int _MMG5_scotchCall(MMG5_pMesh mesh, MMG5_pMet met)
+{
+#ifdef USE_SCOTCH
+    /*check enough vertex to renum*/
+    if ( mesh->info.renum && (mesh->np/2. > BOXSIZE) && mesh->np>100000 ) {
+        /* renumbering begin */
+        if ( mesh->info.imprim > 5 )
+            fprintf(stdout,"  -- RENUMBERING. \n");
+
+        if ( !renumbering(BOXSIZE,mesh, met) ) {
+            fprintf(stdout,"  ## Unable to renumbering mesh. \n");
+            fprintf(stdout,"  ## Try to run without renumbering option (-rn 0)\n");
+            return(0);
+        }
+
+        if ( mesh->info.imprim > 5) {
+            fprintf(stdout,"  -- PHASE RENUMBERING COMPLETED. \n");
+        }
+
+        if ( mesh->info.ddebug )  chkmsh(mesh,1,0);
+        /* renumbering end */
+        return(1);
+    }
+#else
+        return(1);
 #endif

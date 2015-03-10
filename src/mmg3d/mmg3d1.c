@@ -1591,27 +1591,9 @@ static int adptet(pMesh mesh,pSol met) {
         }
         else  ns = 0;
 
-#ifdef USE_SCOTCH
-        /*check enough vertex to renum*/
-        if ( mesh->info.renum && (it == 1) && (mesh->np/2. > BOXSIZE) && mesh->np>100000 ) {
-            /* renumbering begin */
-            if ( mesh->info.imprim > 5 )
-                fprintf(stdout,"  -- RENUMBERING. \n");
-
-            if ( !renumbering(BOXSIZE,mesh, met) ) {
-                fprintf(stdout,"  ## Unable to renumbering mesh. \n");
-                fprintf(stdout,"  ## Try to run without renumbering option (-rn 0)\n");
-                return(0);
-            }
-
-            if ( mesh->info.imprim > 5) {
-                fprintf(stdout,"  -- PHASE RENUMBERING COMPLETED. \n");
-            }
-
-            if ( mesh->info.ddebug )  chkmsh(mesh,1,0);
-            /* renumbering end */
-        }
-#endif
+        /* renumbering if available and needed */
+        if ( it==1 && !_MMG5_scotchCall(mesh,met) )
+            return(0);
 
         if ( !mesh->info.noinsert ) {
             nc = adpcol(mesh,met);
@@ -1677,27 +1659,9 @@ static int adptet(pMesh mesh,pSol met) {
         return(0);
     }
 
-#ifdef USE_SCOTCH
-    /*check enough vertex to renum*/
-    if ( mesh->info.renum && (mesh->np/2. > BOXSIZE) && mesh->np>100000 ) {
-        /* renumbering begin */
-        if ( mesh->info.imprim > 5 )
-            fprintf(stdout,"  -- RENUMBERING. \n");
-
-        if ( !renumbering(BOXSIZE,mesh, met) ) {
-            fprintf(stdout,"  ## Unable to renumbering mesh. \n");
-            fprintf(stdout,"  ## Try to run without renumbering option (-rn 0)\n");
-            return(0);
-        }
-
-        if ( mesh->info.imprim > 5) {
-            fprintf(stdout,"  -- PHASE RENUMBERING COMPLETED. \n");
-        }
-
-        if ( mesh->info.ddebug )  chkmsh(mesh,1,0);
-        /* renumbering end */
-    }
-#endif
+    /* renumbering if available */
+    if ( !_MMG5_scotchCall(mesh,met)
+         return(0);
 
     /*shape optim*/
     it = 0;
@@ -1937,29 +1901,12 @@ int mmg3d1(pMesh mesh,pSol met) {
         fprintf(stdout,"  ## Unable to split mesh. Exiting.\n");
         return(0);
     }
-#ifdef USE_SCOTCH
-    /*check enough vertex to renum*/
-    if ( mesh->info.renum && (mesh->np/2. > BOXSIZE) && mesh->np>100000 ) {
-        /* renumbering begin */
-        if ( mesh->info.imprim > 5 )
-            fprintf(stdout,"  -- RENUMBERING. \n");
 
-        if ( !renumbering(BOXSIZE,mesh, met) ) {
-            fprintf(stdout,"  ## Unable to renumbering mesh. \n");
-            fprintf(stdout,"  ## Try to run without renumbering option (-rn 0)\n");
-            return(0);
-        }
+    /* renumbering if available */
+    if ( !_MMG5_scotchCall(mesh,met) )
+        return(0);
 
-        if ( mesh->info.imprim > 5) {
-            fprintf(stdout,"  -- PHASE RENUMBERING COMPLETED. \n");
-        }
-
-        if ( mesh->info.ddebug )  chkmsh(mesh,1,0);
-        /* renumbering end */
-    }
-#endif
-
-    /**--- stage 2: computational mesh */
+    /**--- Stage 2: computational mesh */
     if ( abs(mesh->info.imprim) > 3 || mesh->info.ddebug )
         fprintf(stdout,"  ** COMPUTATIONAL MESH\n");
 
@@ -1978,27 +1925,11 @@ int mmg3d1(pMesh mesh,pSol met) {
         fprintf(stdout,"  ## Unable to split mesh. Exiting.\n");
         return(0);
     }
-#ifdef USE_SCOTCH
-    /*check enough vertex to renum*/
-    if ( mesh->info.renum && (mesh->np/2. > BOXSIZE) && mesh->np>100000 ) {
-        /* renumbering begin */
-        if ( mesh->info.imprim > 5 )
-            fprintf(stdout,"  -- RENUMBERING. \n");
 
-        if ( !renumbering(BOXSIZE,mesh, met) ) {
-            fprintf(stdout,"  ## Unable to renumbering mesh. \n");
-            fprintf(stdout,"  ## Try to run without renumbering option (-rn 0)\n");
-            return(0);
-        }
+    /* renumbering if available */
+    if ( !_MMG5_scotchCall(mesh,met) )
+        return(0);
 
-        if ( mesh->info.imprim > 5) {
-            fprintf(stdout,"  -- PHASE RENUMBERING COMPLETED. \n");
-        }
-
-        if ( mesh->info.ddebug )  chkmsh(mesh,1,0);
-        /* renumbering end */
-    }
-#endif
 #ifdef DEBUG
     puts("---------------------------Fin anatet---------------------");
     outqua(mesh,met);
