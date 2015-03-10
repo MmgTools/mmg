@@ -84,7 +84,7 @@ static int newton3(double p[4],double x[3]) {
     int        it,n;
 
     /* coeffs polynomial, a=1 */
-    if ( p[4] != 1. ) {
+    if ( p[3] != 1. ) {
         fprintf(stderr,"  ## Error: bad use of newton3 function, polynomial"
                 " must be of type P(x) = x^3+bx^2+cx+d. \n");
         fprintf(stderr,"  ## Exiting.\n");
@@ -260,11 +260,6 @@ int eigenv(int symmat,double *mat,double lambda[3],double v[3][3]) {
     double    aa,bb,cc,dd,ee,ii,vx1[3],vx2[3],vx3[3],dd1,dd2,dd3;
     double    maxd,maxm,valm,p[4],w1[3],w2[3],w3[3];
     int       k,n;
-
-    /* Initialization to avoid warning about potentially uninitialized value */
-    for ( k=0; k<4; ++k ) {
-        p[k] = 0;
-    }
 
     /* default */
     memcpy(v,Id,9*sizeof(double));
