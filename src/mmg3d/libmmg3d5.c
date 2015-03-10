@@ -221,7 +221,7 @@ int packMesh(MMG5_pMesh mesh,MMG5_pSol met) {
         fprintf(stdout,"  ## Warning:");
         fprintf(stdout," unable to allocate htab.\n");
     }
-    else if ( hNew(&mesh->htab,mesh->nt,3*(mesh->nt),0) ) {
+    else if ( _MMG5_hNew(&mesh->htab,mesh->nt,3*(mesh->nt),0) ) {
         for (k=1; k<=mesh->ne; k++) {
             pt   = &mesh->tetra[k];
             if ( MG_EOK(pt) &&  pt->xt ) {
@@ -229,7 +229,7 @@ int packMesh(MMG5_pMesh mesh,MMG5_pSol met) {
                     if ( mesh->xtetra[pt->xt].edg[i] ||
                          ( MG_EDG(mesh->xtetra[pt->xt].tag[i] ) ||
                            (mesh->xtetra[pt->xt].tag[i] & MG_REQ) ) )
-                        hEdge(mesh,pt->v[_MMG5_iare[i][0]],pt->v[_MMG5_iare[i][1]],
+                        _MMG5_hEdge(mesh,pt->v[_MMG5_iare[i][0]],pt->v[_MMG5_iare[i][1]],
                               mesh->xtetra[pt->xt].edg[i],mesh->xtetra[pt->xt].tag[i]);
                 }
             }
@@ -274,7 +274,7 @@ int packMesh(MMG5_pMesh mesh,MMG5_pSol met) {
         mesh->tetra[k].v[3] = k+1;
 
     /* to could save the mesh, the adjacency have to be correct */
-    if ( mesh->info.ddebug && (!chkmsh(mesh,1,1) ) ) {
+    if ( mesh->info.ddebug && (!_MMG5_chkmsh(mesh,1,1) ) ) {
         fprintf(stdout,"  ##  Problem. Invalid mesh.\n");
         return(0);
     }

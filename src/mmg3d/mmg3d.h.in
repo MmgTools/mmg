@@ -457,7 +457,6 @@ int  startedgsurfball(MMG5_pMesh mesh,int nump,int numq,int *list,int ilist);
 int  srcbdy(MMG5_pMesh mesh,int start,int ia);
 int  coquil(MMG5_pMesh mesh, int start, int ia, int * list);
 int  coquilface(MMG5_pMesh mesh, int start, int ia, int * list, int * it1, int *it2);
-int  gettag(MMG5_pMesh,int,int,int *,int *);
 int  settag(MMG5_pMesh,int,int,int,int);
 int  chkcol_int(MMG5_pMesh ,MMG5_pSol met,int,char,char,int *,char typchk);
 int  chkcol_bdy(MMG5_pMesh,int,char,char,int *);
@@ -602,8 +601,8 @@ int    gradsiz_iso(MMG5_pMesh ,MMG5_pSol );
 int    gradsiz_ani(MMG5_pMesh ,MMG5_pSol );
 
 double (*caltet)(MMG5_pMesh mesh,MMG5_pSol met,int ia,int ib,int ic,int id);
-int    (*defsiz)(MMG5_pMesh ,MMG5_pSol );
+int    (*_MMG5_defsiz)(MMG5_pMesh ,MMG5_pSol );
 double (*lenedg)(MMG5_pMesh mesh,MMG5_pSol sol ,int ,int );
-int    (*gradsiz)(MMG5_pMesh ,MMG5_pSol );
+int    (*_MMG5_gradsiz)(MMG5_pMesh ,MMG5_pSol );
 
 #endif

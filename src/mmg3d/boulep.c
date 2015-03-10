@@ -38,7 +38,7 @@
 extern Info  info;
 
 /** return average normal of triangles sharing P without crossing ridge */
-int boulen(MMG5_pMesh mesh,int start,int ip,double *nn) {
+int _MMG5_boulen(MMG5_pMesh mesh,int start,int ip,double *nn) {
     MMG5_pTria    pt;
     double   n[3],dd;
     int     *adja,k;
@@ -105,7 +105,7 @@ int boulen(MMG5_pMesh mesh,int start,int ip,double *nn) {
 
 
 /** return tangent to curve at ip */
-int boulec(MMG5_pMesh mesh,int start,int ip,double *tt) {
+int _MMG5_boulec(MMG5_pMesh mesh,int start,int ip,double *tt) {
     MMG5_pTria    pt;
     MMG5_pPoint   p0,p1,p2;
     double   dd;
@@ -179,7 +179,7 @@ int boulec(MMG5_pMesh mesh,int start,int ip,double *tt) {
 
 
 /** store edges and return number (ref+geo) incident to ip */
-int bouler(MMG5_pMesh mesh,int start,int ip,int *list,int *ng,int *nr) {
+int _MMG5_bouler(MMG5_pMesh mesh,int start,int ip,int *list,int *ng,int *nr) {
     MMG5_pTria    pt;
     int     *adja,k,ns;
     char     i,i1,i2;
@@ -240,7 +240,7 @@ int bouler(MMG5_pMesh mesh,int start,int ip,int *list,int *ng,int *nr) {
 /** Return volumic ball (i.e. filled with tetrahedra) of point ip in tetra start.
     Results are stored under the form 4*kel + jel , kel = number of the tetra, jel = local
     index of p within kel */
-int boulevolp (MMG5_pMesh mesh, int start, int ip, int * list){
+int _MMG5_boulevolp (MMG5_pMesh mesh, int start, int ip, int * list){
     MMG5_pTetra  pt,pt1;
     int    *adja,nump,ilist,base,cur,k,k1;
     char    j,l,i;
@@ -285,7 +285,8 @@ int boulevolp (MMG5_pMesh mesh, int start, int ip, int * list){
 /** Define normal and tangent vectors at a non manifold point (ip in start, supported by
     face iface), enumerating its (outer)surfacic ball ; return sng = whether point is singular
     or not */
-int boulenm(MMG5_pMesh mesh,int start,int ip,int iface,double n[3],double t[3]) {
+int _MMG5_boulenm(MMG5_pMesh mesh,int start,int ip,int iface,
+                  double n[3],double t[3]) {
     MMG5_pTetra   pt;
     MMG5_pPoint   p0,p1,ppt;
     double   dd,nt[3],l0,l1;
@@ -449,7 +450,7 @@ int boulenm(MMG5_pMesh mesh,int start,int ip,int iface,double n[3],double t[3]) 
     supported in the outer boundary starting from tet start, with point ip, and face if in tetra
     volumic ball ; list[k] = 4*number of tet + index of point
     surfacic ball : list[k] = 4*number of tet + index of FACE */
-int bouleext(MMG5_pMesh mesh, int start, int ip, int iface, int *listv, int *ilistv, int *lists, int*ilists){
+int _MMG5_bouleext(MMG5_pMesh mesh, int start, int ip, int iface, int *listv, int *ilistv, int *lists, int*ilists){
     MMG5_pTetra pt,pt1;
     int base,nump,k,k1,*adja,piv,na,nb,adj,cur,nvstart,fstart,aux;
     char iopp,ipiv,i,j,l,ipa,ipb,isface;
@@ -570,7 +571,8 @@ int bouleext(MMG5_pMesh mesh, int start, int ip, int iface, int *listv, int *ili
     start, with point ip, and face if in tetra
     volumic ball ; list[k] = 4*number of tet + index of point
     surfacic ball : list[k] = 4*number of tet + index of FACE */
-int boulesurfvolp(MMG5_pMesh mesh,int start,int ip,int iface,int *listv,int *ilistv,int *lists,int*ilists) {
+int _MMG5_boulesurfvolp(MMG5_pMesh mesh,int start,int ip,int iface,
+                        int *listv,int *ilistv,int *lists,int*ilists) {
     MMG5_pTetra  pt,pt1;
     MMG5_pxTetra pxt;
     int base,nump,k,k1,*adja,piv,na,nb,adj,cur,nvstart,fstart,aux;
@@ -694,7 +696,8 @@ int boulesurfvolp(MMG5_pMesh mesh,int start,int ip,int iface,int *listv,int *ili
 }
 
 /** Get tag of edge ia in tetra start by travelling its shell until meeting a boundary face */
-inline int gettag(MMG5_pMesh mesh,int start,int ia,int *tag,int *edg) {
+static inline int
+_MMG5_gettag(MMG5_pMesh mesh,int start,int ia,int *tag,int *edg) {
     MMG5_pTetra        pt;
     MMG5_pxTetra       pxt;
     int           na,nb,*adja,adj,piv;
@@ -754,7 +757,8 @@ inline int gettag(MMG5_pMesh mesh,int start,int ia,int *tag,int *edg) {
 }
 
 /** Set tag and edg of edge ia (if need be) in tetra start by travelling its shell */
-inline int settag(MMG5_pMesh mesh,int start,int ia,int tag,int edg) {
+inline int
+_MMG5_settag(MMG5_pMesh mesh,int start,int ia,int tag,int edg) {
     MMG5_pTetra        pt;
     MMG5_pxTetra       pxt;
     int           na,nb,*adja,adj,piv;
@@ -853,7 +857,7 @@ inline int settag(MMG5_pMesh mesh,int start,int ia,int tag,int edg) {
 /** Find all tets sharing edge ia of tetra start
     return 2*ilist if shell is closed, 2*ilist +1 otherwise
     return 0 if one of the tet of the shell is required */
-int coquil(MMG5_pMesh mesh,int start,int ia,int * list) {
+int _MMG5_coquil(MMG5_pMesh mesh,int start,int ia,int * list) {
     MMG5_pTetra  pt;
     int     ilist,*adja,piv,adj,na,nb,ipa,ipb;
     char    i;
@@ -908,8 +912,8 @@ int coquil(MMG5_pMesh mesh,int start,int ia,int * list) {
         }
     }
 
-    /* At this point, the first travel, in one direction, of the shell is complete. Now, analyze why
-       the travel ended. */
+    /* At this point, the first travel, in one direction, of the shell is
+       complete. Now, analyze why the travel ended. */
     if ( adj == start )  return(2*ilist);
     assert(!adj); // a boundary has been detected
 
@@ -979,7 +983,7 @@ int coquil(MMG5_pMesh mesh,int start,int ia,int * list) {
 }
 
 /** Identify whether edge ia in start is a boundary edge by unfolding its shell */
-int srcbdy(MMG5_pMesh mesh,int start,int ia) {
+int _MMG5_srcbdy(MMG5_pMesh mesh,int start,int ia) {
     MMG5_pTetra      pt;
     MMG5_pxTetra     pxt;
     int         na,nb,adj,piv,*adja;
@@ -1008,7 +1012,8 @@ int srcbdy(MMG5_pMesh mesh,int start,int ia) {
         for(i=0; i<6; i++) {
             ipa = _MMG5_iare[i][0];
             ipb = _MMG5_iare[i][1];
-            if( ( pt->v[ipa] == na && pt->v[ipb] == nb ) || ( pt->v[ipa] == nb && pt->v[ipb] == na ))
+            if( ( pt->v[ipa] == na && pt->v[ipb] == nb ) ||
+                ( pt->v[ipa] == nb && pt->v[ipb] == na ))
                 break;
 
         }
@@ -1037,8 +1042,9 @@ int srcbdy(MMG5_pMesh mesh,int start,int ia) {
     return(0);
 }
 
-/** print an error message if coquilFace detect a boundary topology problem */
-static inline void errorMessage(MMG5_pMesh mesh, int k1, int k2) {
+/** print an error message if _MMG5_coquilFace detect a boundary topology problem */
+static inline void
+_MMG5_errorMessage(MMG5_pMesh mesh, int k1, int k2) {
     MMG5_pPoint ppt;
     MMG5_pTetra pt;
     int    np, ne, k, kel1, kel2;
@@ -1066,8 +1072,12 @@ static inline void errorMessage(MMG5_pMesh mesh, int k1, int k2) {
         fprintf(stdout," %d %d %d %d.\n", mesh->point[pt->v[0]].tmp,
                 mesh->point[pt->v[1]].tmp,mesh->point[pt->v[2]].tmp,
                 mesh->point[pt->v[3]].tmp);
-        fprintf(stdout,"adj %d %d %d %d\n",(&mesh->adja[3*(kel1-1)+1])[0],(&mesh->adja[3*(kel1-1)+1])[1],(&mesh->adja[3*(kel1-1)+1])[2],(&mesh->adja[3*(kel1-1)+1])[3]);
-        fprintf(stdout,"req %d %d %d %d\n",mesh->point[pt->v[0]].tag & MG_REQ,mesh->point[pt->v[1]].tag & MG_REQ,mesh->point[pt->v[2]].tag & MG_REQ,mesh->point[pt->v[3]].tag & MG_REQ);
+        fprintf(stdout,"adj %d %d %d %d\n",(&mesh->adja[3*(kel1-1)+1])[0],
+                (&mesh->adja[3*(kel1-1)+1])[1],(&mesh->adja[3*(kel1-1)+1])[2],
+                (&mesh->adja[3*(kel1-1)+1])[3]);
+        fprintf(stdout,"req %d %d %d %d\n",mesh->point[pt->v[0]].tag & MG_REQ,
+                mesh->point[pt->v[1]].tag & MG_REQ,
+                mesh->point[pt->v[2]].tag & MG_REQ,mesh->point[pt->v[3]].tag & MG_REQ);
     } else if ( kel2 != 0 ) {
         fprintf(stdout,"            look at elt %d:",kel2);
         mesh->tetra[kel2].ref=5;
@@ -1084,7 +1094,7 @@ static inline void errorMessage(MMG5_pMesh mesh, int k1, int k2) {
 /** Find all tets sharing edge ia of tetra start, and stores boundary faces when met
     it1 & it2 = 6*iel + iface, iel = index of tetra, iface = index of face in tetra
     return 2*ilist if shell is closed, 2*ilist +1 otherwise */
-int coquilface(MMG5_pMesh mesh,int start,int ia,int *list,int *it1,int *it2) {
+int _MMG5_coquilface(MMG5_pMesh mesh,int start,int ia,int *list,int *it1,int *it2) {
     MMG5_pTetra   pt;
     MMG5_pxTetra  pxt;
     int     *adja,piv,adj,na,nb,ipa,ipb,ilist,pradj;
@@ -1160,7 +1170,7 @@ int coquilface(MMG5_pMesh mesh,int start,int ia,int *list,int *it1,int *it2) {
                 *it1 = 4*pradj+iface;
             else {
                 if ( *it2 ) {
-                    // Algiane: (assert commente) si on a 3 tetras de refs differentes dans la coquille??
+                    // Algiane: (assert commente) si on a 3 tetras de refs differentes dans la _MMG5_coquille??
                     printf("  ## Warning: you have more than 2 boundaries in the shell of your edge.\n");
                     printf("  Problem may occur during remesh process.\n");
                 }
@@ -1174,7 +1184,7 @@ int coquilface(MMG5_pMesh mesh,int start,int ia,int *list,int *it1,int *it2) {
        the travel ended. */
     if ( adj == start ) {
         if ( (!(*it1) || !(*it2)) || ((*it1) == (*it2)) ) {
-            errorMessage(mesh, (*it1)/4, (*it2)/4);
+            _MMG5_errorMessage(mesh, (*it1)/4, (*it2)/4);
             return(-1);
         }
         return(2*ilist);
@@ -1256,7 +1266,7 @@ int coquilface(MMG5_pMesh mesh,int start,int ia,int *list,int *it1,int *it2) {
     *it2 = 4*pradj + iface;
 
     if ( (!(*it1) || !(*it2)) || ((*it1) == (*it2)) ) {
-        errorMessage(mesh, (*it1)/4, (*it2)/4);
+        _MMG5_errorMessage(mesh, (*it1)/4, (*it2)/4);
         return(-1);
     }
     return ( 2*ilist+1 );

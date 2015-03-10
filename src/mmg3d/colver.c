@@ -39,7 +39,8 @@ extern char  ddb;
 
 /** Check whether collapse ip -> iq could be performed, ip internal ;
  *  'mechanical' tests (positive jacobian) are not performed here */
-int chkcol_int(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,char iedg,int *list,char typchk) {
+int _MMG5_chkcol_int(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
+                     char iedg,int *list,char typchk) {
     MMG5_pTetra   pt,pt0;
     MMG5_pPoint   p0;
     double   calold,calnew,caltmp,lon;
@@ -51,7 +52,7 @@ int chkcol_int(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,char iedg,int *lis
     pt  = &mesh->tetra[k];
     pt0 = &mesh->tetra[0];
     nq  = pt->v[iq];
-    ilist = boulevolp(mesh,k,ip,list);
+    ilist = _MMG5_boulevolp(mesh,k,ip,list);
     lon = 1.e20;
     if ( typchk == 2 && met->m ) {
         lon = lenedg(mesh,met,pt->v[ip],nq);
@@ -102,7 +103,8 @@ int chkcol_int(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,char iedg,int *lis
 /** Topological check on the surface ball of np and nq in collapsing np->nq ;
  *  iface = boundary face on which lie edge iedg - in local face num.
  *  (pq, or ia in local tet notation) */
-static int topchkcol_bdy(MMG5_pMesh mesh,int k,int iface,char iedg,int *lists,int ilists) {
+static int
+_MMG5_topchkcol_bdy(MMG5_pMesh mesh,int k,int iface,char iedg,int *lists,int ilists) {
     MMG5_pTetra   pt;
     MMG5_pxTetra  pxt;
     int      nump,numq,piv0,piv,iel,jel,nap,nbp,naq,nbq,nro,adj,*adja;
@@ -386,7 +388,7 @@ static int topchkcol_bdy(MMG5_pMesh mesh,int k,int iface,char iedg,int *lists,in
  *  'mechanical' tests (positive jacobian) are not performed here ;
  *  iface = boundary face on which lie edge iedg - in local face num.
  *  (pq, or ia in local tet notation) */
-int chkcol_bdy(MMG5_pMesh mesh,int k,char iface,char iedg,int *listv) {
+int _MMG5_chkcol_bdy(MMG5_pMesh mesh,int k,char iface,char iedg,int *listv) {
     MMG5_pTetra        pt,pt0;
     MMG5_pxTetra       pxt;
     MMG5_pPoint        p0;
@@ -411,11 +413,11 @@ int chkcol_bdy(MMG5_pMesh mesh,int k,char iface,char iedg,int *listv) {
 
     /* collect triangles and tetras around ip */
     if ( p0->tag & MG_NOM ) {
-        if ( bouleext(mesh,k,ip,iface,listv,&ilistv,lists,&ilists) < 0 )
+        if ( _MMG5_bouleext(mesh,k,ip,iface,listv,&ilistv,lists,&ilists) < 0 )
             return(-1);
     }
     else {
-        if ( boulesurfvolp(mesh,k,ip,iface,listv,&ilistv,lists,&ilists) < 0 )
+        if ( _MMG5_boulesurfvolp(mesh,k,ip,iface,listv,&ilistv,lists,&ilists) < 0 )
             return(-1);
     }
 
@@ -575,7 +577,7 @@ int chkcol_bdy(MMG5_pMesh mesh,int k,char iface,char iedg,int *listv) {
     }
     /* Topological check for surface ball */
     else {
-        ier = topchkcol_bdy(mesh,k,iface,iedg,lists,ilists);
+        ier = _MMG5_topchkcol_bdy(mesh,k,iface,iedg,lists,ilists);
         if ( !ier )  return(0);
     }
 
@@ -585,7 +587,7 @@ int chkcol_bdy(MMG5_pMesh mesh,int k,char iface,char iedg,int *listv) {
 /** Collapse vertex p = list[0]%4 of tetra list[0]/4 over vertex indq of tetra list[0]/4.
  *  Only physical tests (positive jacobian) are done (i.e. approximation of the surface,
  *  etc... must be performed outside). */
-int colver(MMG5_pMesh mesh,int *list,int ilist,char indq) {
+int _MMG5_colver(MMG5_pMesh mesh,int *list,int ilist,char indq) {
     MMG5_pTetra          pt,pt1;
     MMG5_pxTetra         pxt,pxt1;
     MMG5_xTetra          xt,xts;

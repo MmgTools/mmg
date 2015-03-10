@@ -191,7 +191,7 @@ void memOption(MMG5_pMesh mesh) {
 
         /* Euler-poincare: ne = 6*np; nt = 2*np; na = np/5 *
          * point+tria+tets+adja+adjt+sol+item *
-         * warning: we exceed memory in saveMesh when we call hNew */
+         * warning: we exceed memory in saveMesh when we call _MMG5_hNew */
         bytes = sizeof(Point) + sizeof(MMG5_xPoint) +
             6*sizeof(Tetra) + ctri*sizeof(MMG5_xTetra) +
             4*6*sizeof(int) + ctri*3*sizeof(int) +

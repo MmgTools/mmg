@@ -528,7 +528,7 @@ int creaPoint(MMG5_pMesh mesh, MMG5_pSol met, int iel,double c[3], double cb[4],
         if ( met->m )  met->m[ip] = hnew;
 
         ia = key-5;
-        ilist = coquil(mesh,iel,ia,list);
+        ilist = _MMG5_coquil(mesh,iel,ia,list);
         if ( (pt->tag & MG_REQ) || ilist<=0 ) {
             fprintf(stdout,"  ## Unable to insert singularity: element required.\n");
             fprintf(stdout,"  ## Delete required elements.\n");
@@ -615,7 +615,7 @@ int creaEdge(MMG5_pMesh mesh, MMG5_pSol met, Travel *trav, char tag){
         mesh->point[ip].tag |= tag;
 
         /* Update htab */
-        hEdge(mesh,trav->np,pt->v[key%11],0,trav->tag);
+        _MMG5_hEdge(mesh,trav->np,pt->v[key%11],0,trav->tag);
 
         return(1);
     }
@@ -641,7 +641,7 @@ int creaEdge(MMG5_pMesh mesh, MMG5_pSol met, Travel *trav, char tag){
         if ( met->m )  met->m[ip] = hnew;
 
         ia = key-5;
-        ilist = coquil(mesh,kel,ia,list);
+        ilist = _MMG5_coquil(mesh,kel,ia,list);
         if ( (pt->tag & MG_REQ) || ilist<=0 ) {
             fprintf(stdout,"  ## Unable to insert singularity: element required.\n");
             fprintf(stdout,"  ## Delete required elements.\n");
@@ -658,7 +658,7 @@ int creaEdge(MMG5_pMesh mesh, MMG5_pSol met, Travel *trav, char tag){
         trav->cb[_MMG5_inxt3[_MMG5_inxt3[i]]] = 0.;
 
         /* Update htab */
-        hEdge(mesh,trav->np,ip,0,trav->tag);
+        _MMG5_hEdge(mesh,trav->np,ip,0,trav->tag);
         return(1);
     }
 
@@ -683,7 +683,7 @@ int creaEdge(MMG5_pMesh mesh, MMG5_pSol met, Travel *trav, char tag){
         mesh->point[ip].tag |= tag;
 
         /* Update htab */
-        hEdge(mesh,trav->np,ip,0,trav->tag);
+        _MMG5_hEdge(mesh,trav->np,ip,0,trav->tag);
         return(1);
     }
 
@@ -697,7 +697,7 @@ int creaEdge(MMG5_pMesh mesh, MMG5_pSol met, Travel *trav, char tag){
         mesh->point[ip].tag |= tag;
 
         /* Update htab */
-        hEdge(mesh,trav->np,ip,0,trav->tag);
+        _MMG5_hEdge(mesh,trav->np,ip,0,trav->tag);
         return(1);
     }
     return(0);
@@ -1470,9 +1470,9 @@ int colSing(MMG5_pMesh mesh,MMG5_pSol met) {
                 if ( !MG_SIN(p0->tag) ) {
                     ifac  = _MMG5_isar[i][0];
                     jseg  = _MMG5_iarfinv[ifac][i];
-                    ilist = chkcol_int(mesh,met,k,ifac,jseg,list,2);
+                    ilist = _MMG5_chkcol_int(mesh,met,k,ifac,jseg,list,2);
                     if ( ilist ) {
-                        ier = colver(mesh,list,ilist,_MMG5_iare[i][1]);
+                        ier = _MMG5_colver(mesh,list,ilist,_MMG5_iare[i][1]);
                         if ( ier < 0 ) return(-1);
                         else if ( ier ) {
                             delPt(mesh,ier);
@@ -1484,9 +1484,9 @@ int colSing(MMG5_pMesh mesh,MMG5_pSol met) {
                 if ( !MG_SIN(p1->tag) ) {
                     ifac  = _MMG5_isar[i][1];
                     jseg  = _MMG5_iarfinv[ifac][i];
-                    ilist = chkcol_int(mesh,met,k,ifac,jseg,list,2);
+                    ilist = _MMG5_chkcol_int(mesh,met,k,ifac,jseg,list,2);
                     if ( ilist ) {
-                        ier = colver(mesh,list,ilist,_MMG5_iare[i][0]);
+                        ier = _MMG5_colver(mesh,list,ilist,_MMG5_iare[i][0]);
                         if ( ier < 0 ) return(-1);
                         else if ( ier ) {
                             delPt(mesh,ier);

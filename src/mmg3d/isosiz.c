@@ -44,7 +44,9 @@ extern char   ddb;
 
 
 /** Define isotropic size at regular point nump, whose surfacic ball is provided */
-static double defsizreg(MMG5_pMesh mesh,MMG5_pSol met,int nump,int *lists,int ilists, double hausd) {
+static double
+_MMG5_defsizreg(MMG5_pMesh mesh,MMG5_pSol met,int nump,int *lists,
+          int ilists, double hausd) {
     MMG5_pTetra       pt;
     MMG5_pxTetra      pxt;
     MMG5_pPoint       p0,p1;
@@ -59,7 +61,7 @@ static double defsizreg(MMG5_pMesh mesh,MMG5_pSol met,int nump,int *lists,int il
     p0 = &mesh->point[nump];
 
     if ( !p0->xp || MG_EDG(p0->tag) || (p0->tag & MG_NOM) || (p0->tag & MG_REQ))  {
-        fprintf(stdout,"    ## Func. defsizreg : wrong point qualification : xp ? %d\n",p0->xp);
+        fprintf(stdout,"    ## Func. _MMG5_defsizreg : wrong point qualification : xp ? %d\n",p0->xp);
         return(0);
     }
     isqhmin = 1.0 / (mesh->info.hmin*mesh->info.hmin);
@@ -194,8 +196,8 @@ static double defsizreg(MMG5_pMesh mesh,MMG5_pSol met,int nump,int *lists,int il
         tet2tri(mesh,iel,iface,&tt);
 
         pxt   = &mesh->xtetra[mesh->tetra[iel].xt];
-        if ( !bezierCP(mesh,&tt,&b,MG_GET(pxt->ori,iface)) ) {
-            fprintf(stdout,"%s:%d: Error: function bezierCP return 0\n",
+        if ( !_MMG5_bezierCP(mesh,&tt,&b,MG_GET(pxt->ori,iface)) ) {
+            fprintf(stdout,"%s:%d: Error: function _MMG5_bezierCP return 0\n",
                     __FILE__,__LINE__);
             exit(EXIT_FAILURE);
         }
@@ -387,7 +389,7 @@ static double defsizreg(MMG5_pMesh mesh,MMG5_pSol met,int nump,int *lists,int il
 /** Define isotropic size map at all boundary vertices of the mesh,
     associated with geometric approx, and prescribe hmax at the internal vertices
     Field h of Point is used, to store the prescribed size (not inverse, squared,...) */
-int defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
+int _MMG5_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
     MMG5_pTetra    pt;
     MMG5_pxTetra   pxt;
     MMG5_pPoint    p0,p1;
@@ -444,11 +446,11 @@ int defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
                 p0  = &mesh->point[ip0];
 
                 if ( MG_SIN(p0->tag) || MG_EDG(p0->tag) || (p0->tag & MG_NOM) ) continue;
-                if ( !boulesurfvolp(mesh,k,i0,i,listv,&ilistv,lists,&ilists) )  continue;
+                if ( !_MMG5_boulesurfvolp(mesh,k,i0,i,listv,&ilistv,lists,&ilists) )  continue;
 
                 n   = &mesh->xpoint[p0->xp].n1[0];
                 directsurfball(mesh,ip0,lists,ilists,n);
-                hp  = defsizreg(mesh,met,ip0,lists,ilists,hausd);
+                hp  = _MMG5_defsizreg(mesh,met,ip0,lists,ilists,hausd);
                 met->m[ip0] = MG_MIN(met->m[ip0],hp);
             }
         }
@@ -551,7 +553,7 @@ int defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
 }
 
 /** Enforce mesh gradation by truncating size map */
-int gradsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
+int _MMG5_gradsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
     MMG5_pTetra    pt;
     MMG5_pPoint    p0,p1;
     double    l,hn;

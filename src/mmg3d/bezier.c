@@ -49,7 +49,8 @@ extern char ddb;
  * with normals n1,n2
  *
  */
-inline int BezierTgt(double c1[3],double c2[3],double n1[3],double n2[3],double t1[3],double t2[3]) {
+inline int
+_MMG5_BezierTgt(double c1[3],double c2[3],double n1[3],double n2[3],double t1[3],double t2[3]) {
     double ux,uy,uz,b[3],n[3],dd;
 
     ux = c2[0] - c1[0];
@@ -106,7 +107,8 @@ inline int BezierTgt(double c1[3],double c2[3],double n1[3],double n2[3],double 
  * curve with 'constant speed'
  *
  */
-inline double BezierGeod(double c1[3],double c2[3],double t1[3],double t2[3]) {
+inline double
+_MMG5_BezierGeod(double c1[3],double c2[3],double t1[3],double t2[3]) {
     double alpha,t[3],ll,ps,nt2,ux,uy,uz;
 
     ux = c2[0] - c1[0];
@@ -145,7 +147,8 @@ inline double BezierGeod(double c1[3],double c2[3],double t1[3],double t2[3]) {
  * reference when dealing with choice of normal vectors.
  *
  */
-inline int BezierEdge(MMG5_pMesh mesh,int ip0,int ip1,double b0[3],double b1[3],char ised, double v[3]) {
+inline int
+_MMG5_BezierEdge(MMG5_pMesh mesh,int ip0,int ip1,double b0[3],double b1[3],char ised, double v[3]) {
     MMG5_pPoint   p0,p1;
     MMG5_pxPoint  pxp0,pxp1;
     double   ux,uy,uz,ps,ps1,ps2,*n1,*n2,np0[3],np1[3],t0[3],t1[3],il,ll,alpha;
@@ -259,7 +262,7 @@ inline int BezierEdge(MMG5_pMesh mesh,int ip0,int ip1,double b0[3],double b1[3],
         }
         else if ( (!MG_SIN(p0->tag) && !( p0->tag & MG_NOM)) &&
                   ( MG_SIN(p1->tag) ||  ( p1->tag & MG_NOM ))) {
-            if ( !BezierTgt(p0->c,p1->c,np0,np0,t0,t1) ) {
+            if ( !_MMG5_BezierTgt(p0->c,p1->c,np0,np0,t0,t1) ) {
                 t0[0] = ux * il;
                 t0[1] = uy * il;
                 t0[2] = uz * il;
@@ -270,7 +273,7 @@ inline int BezierEdge(MMG5_pMesh mesh,int ip0,int ip1,double b0[3],double b1[3],
         }
         else if ( ( MG_SIN(p0->tag) || ( p0->tag & MG_NOM ) ) &&
                   (!MG_SIN(p1->tag) && !( p1->tag & MG_NOM ))) {
-            if ( !BezierTgt(p0->c,p1->c,np1,np1,t0,t1) ) {
+            if ( !_MMG5_BezierTgt(p0->c,p1->c,np1,np1,t0,t1) ) {
                 t1[0] = - ux * il;
                 t1[1] = - uy * il;
                 t1[2] = - uz * il;
@@ -280,7 +283,7 @@ inline int BezierEdge(MMG5_pMesh mesh,int ip0,int ip1,double b0[3],double b1[3],
             t0[2] = uz * il;
         }
         else {
-            if ( !BezierTgt(p0->c,p1->c,np0,np1,t0,t1) ) {
+            if ( !_MMG5_BezierTgt(p0->c,p1->c,np0,np1,t0,t1) ) {
                 t0[0] = ux * il;
                 t0[1] = uy * il;
                 t0[2] = uz * il;
@@ -292,7 +295,7 @@ inline int BezierEdge(MMG5_pMesh mesh,int ip0,int ip1,double b0[3],double b1[3],
         }
     }
 
-    alpha = BezierGeod(p0->c,p1->c,t0,t1);
+    alpha = _MMG5_BezierGeod(p0->c,p1->c,t0,t1);
     b0[0] = p0->c[0] + alpha * t0[0];
     b0[1] = p0->c[1] + alpha * t0[1];
     b0[2] = p0->c[2] + alpha * t0[2];
@@ -314,7 +317,7 @@ inline int BezierEdge(MMG5_pMesh mesh,int ip0,int ip1,double b0[3],double b1[3],
  * Compute Bezier control points on triangle \a pt (cf. Vlachos)
  *
  */
-int bezierCP(MMG5_pMesh mesh,Tria *pt,_MMG5_pBezier pb,char ori) {
+int _MMG5_bezierCP(MMG5_pMesh mesh,Tria *pt,_MMG5_pBezier pb,char ori) {
     MMG5_pPoint    p[3];
     MMG5_xPoint   *pxp;
     double   *n1,*n2,nt[3],t1[3],t2[3],ps,ps2,dd,ux,uy,uz,l,ll,alpha;
@@ -476,7 +479,7 @@ int bezierCP(MMG5_pMesh mesh,Tria *pt,_MMG5_pBezier pb,char ori) {
         }
 
         else { /* internal edge */
-            if ( !BezierTgt(p[i1]->c,p[i2]->c,n1,n2,t1,t2) ) {
+            if ( !_MMG5_BezierTgt(p[i1]->c,p[i2]->c,n1,n2,t1,t2) ) {
                 t1[0] = ux / l;
                 t1[1] = uy / l;
                 t1[2] = uz / l;
@@ -487,7 +490,7 @@ int bezierCP(MMG5_pMesh mesh,Tria *pt,_MMG5_pBezier pb,char ori) {
             }
         }
 
-        alpha = BezierGeod(p[i1]->c,p[i2]->c,t1,t2);
+        alpha = _MMG5_BezierGeod(p[i1]->c,p[i2]->c,t1,t2);
 
         pb->b[2*i+3][0] = p[i1]->c[0] + alpha * t1[0];
         pb->b[2*i+3][1] = p[i1]->c[1] + alpha * t1[1];
@@ -539,7 +542,7 @@ int bezierCP(MMG5_pMesh mesh,Tria *pt,_MMG5_pBezier pb,char ori) {
  * Compute \a o, \a no and \a to at \f$(u,v)\f$ in Bezier patch.
  *
  */
-int bezierInt(_MMG5_pBezier pb,double uv[2],double o[3],double no[3],double to[3]) {
+int _MMG5_bezierInt(_MMG5_pBezier pb,double uv[2],double o[3],double no[3],double to[3]) {
     double    dd,u,v,w,ps,ux,uy,uz;
     char      i;
 

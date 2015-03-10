@@ -365,7 +365,7 @@ char _MMG5_chkedg(MMG5_pMesh mesh,MMG5_Tria *pt,char ori) {
         else {
             n1 = n[i1];
             n2 = n[i2];
-            if ( !BezierTgt(p[i1]->c,p[i2]->c,n1,n2,t1,t2) ) {
+            if ( !_MMG5_BezierTgt(p[i1]->c,p[i2]->c,n1,n2,t1,t2) ) {
                 t1[0] = ux * il;
                 t1[1] = uy * il;
                 t1[2] = uz * il;
@@ -375,7 +375,7 @@ char _MMG5_chkedg(MMG5_pMesh mesh,MMG5_Tria *pt,char ori) {
                 t2[2] = -uz * il;
             }
         }
-        alpha = BezierGeod(p[i1]->c,p[i2]->c,t1,t2);
+        alpha = _MMG5_BezierGeod(p[i1]->c,p[i2]->c,t1,t2);
         ps  = t1[0]*ux + t1[1]*uy + t1[2]*uz;
         ps *= il;
         dis = alpha*alpha*fabs(1.0 - ps*ps);
@@ -428,7 +428,7 @@ int _MMG5_swpmsh(MMG5_pMesh mesh,MMG5_pSol met,_MMG5_pBucket bucket) {
                 for (j=0; j<3; j++) {
                     ia  = _MMG5_iarf[i][j];
                     if ( (pxt->tag[ia] & MG_REQ) ) continue;
-                    ret = coquilface(mesh,k,ia,list,&it1,&it2);
+                    ret = _MMG5_coquilface(mesh,k,ia,list,&it1,&it2);
                     ilist = ret / 2;
                     if ( ret < 0 )  return(-1);
                     /* CAUTION: trigger collapse with 2 elements */
@@ -577,14 +577,14 @@ int _MMG5_movtet(MMG5_pMesh mesh,MMG5_pSol met,int maxitin) {
                         if ( !pt->xt || !(MG_BDY & pxt->ftag[i]) )  continue;
                         else if( ppt->tag & MG_NOM ){
                             if( mesh->adja[4*(k-1)+1+i] ) continue;
-                            if( !(ier=bouleext(mesh,k,i0,i,listv,&ilistv,lists,&ilists)) )  continue;
+                            if( !(ier=_MMG5_bouleext(mesh,k,i0,i,listv,&ilistv,lists,&ilists)) )  continue;
                             else if ( ier>0 )
                                 ier = movbdynompt(mesh,listv,ilistv,lists,ilists);
                             else
                                 return(-1);
                         }
                         else if ( ppt->tag & MG_GEO ) {
-                            if ( !(ier=boulesurfvolp(mesh,k,i0,i,listv,&ilistv,lists,&ilists)) )
+                            if ( !(ier=_MMG5_boulesurfvolp(mesh,k,i0,i,listv,&ilistv,lists,&ilists)) )
                                 continue;
                             else if ( ier>0 )
                                 ier = movbdyridpt(mesh,listv,ilistv,lists,ilists);
@@ -592,7 +592,7 @@ int _MMG5_movtet(MMG5_pMesh mesh,MMG5_pSol met,int maxitin) {
                                 return(-1);
                         }
                         else if ( ppt->tag & MG_REF ) {
-                            if ( !(ier=boulesurfvolp(mesh,k,i0,i,listv,&ilistv,lists,&ilists)) )
+                            if ( !(ier=_MMG5_boulesurfvolp(mesh,k,i0,i,listv,&ilistv,lists,&ilists)) )
                                 continue;
                             else if ( ier>0 )
                                 ier = movbdyrefpt(mesh,listv,ilistv,lists,ilists);
@@ -600,7 +600,7 @@ int _MMG5_movtet(MMG5_pMesh mesh,MMG5_pSol met,int maxitin) {
                                 return(-1);
                         }
                         else {
-                            if ( !(ier=boulesurfvolp(mesh,k,i0,i,listv,&ilistv,lists,&ilists)) )
+                            if ( !(ier=_MMG5_boulesurfvolp(mesh,k,i0,i,listv,&ilistv,lists,&ilists)) )
                                 continue;
                             else if ( ier<0 )
                                 return(-1);
@@ -612,7 +612,7 @@ int _MMG5_movtet(MMG5_pMesh mesh,MMG5_pSol met,int maxitin) {
                         }
                     }
                     else if ( internal ) {
-                        ilistv = boulevolp(mesh,k,i0,listv);
+                        ilistv = _MMG5_boulevolp(mesh,k,i0,listv);
                         if ( !ilistv )  continue;
                         ier = movintpt(mesh,listv,ilistv,improve);
                     }
@@ -706,17 +706,17 @@ static int _MMG5_coltet(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
                         if ( mesh->adja[4*(k-1)+1+i] )  continue;
                     }
                     if ( (tag & MG_REQ) || p0->tag > tag )  continue;
-                    ilist = chkcol_bdy(mesh,k,i,j,list);
+                    ilist = _MMG5_chkcol_bdy(mesh,k,i,j,list);
                 }
                 /* internal face */
                 else {
                     isnm = 0;
                     if ( p0->tag & MG_BDY )  continue;
-                    ilist = chkcol_int(mesh,met,k,i,j,list,typchk);
+                    ilist = _MMG5_chkcol_int(mesh,met,k,i,j,list,typchk);
                 }
 
                 if ( ilist > 0 ) {
-                    ier = colver(mesh,list,ilist,iq);
+                    ier = _MMG5_colver(mesh,list,ilist,iq);
                     if ( ier < 0 ) return(-1);
                     else if ( ier ) {
                         delPt(mesh,ier);
@@ -760,7 +760,7 @@ _MMG5_anatetv(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
     char     i,j,ia;
 
     /** 1. analysis */
-    if ( !hashNew(mesh,&hash,mesh->np,7*mesh->np) )  return(-1);
+    if ( !_MMG5_hashNew(mesh,&hash,mesh->np,7*mesh->np) )  return(-1);
     memlack = ns = nap = 0;
     hma2 = _MMG5_LLONG*_MMG5_LLONG*mesh->info.hmax*mesh->info.hmax;
 
@@ -775,7 +775,7 @@ _MMG5_anatetv(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
                 ip1 = pt->v[_MMG5_iare[i][0]];
                 ip2 = pt->v[_MMG5_iare[i][1]];
                 ip  = -1;
-                if ( !hashEdge(mesh,&hash,ip1,ip2,ip) )  return(-1);
+                if ( !_MMG5_hashEdge(mesh,&hash,ip1,ip2,ip) )  return(-1);
             }
             continue;
         }
@@ -789,7 +789,7 @@ _MMG5_anatetv(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
                     ip1 = pt->v[_MMG5_idir[i][_MMG5_inxt2[j]]];
                     ip2 = pt->v[_MMG5_idir[i][_MMG5_iprv2[j]]];
                     ip  = -1;
-                    if ( !hashEdge(mesh,&hash,ip1,ip2,ip) )  return(-1);
+                    if ( !_MMG5_hashEdge(mesh,&hash,ip1,ip2,ip) )  return(-1);
                 }
                 break;
             }
@@ -813,7 +813,7 @@ _MMG5_anatetv(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
             }
             else  pxt = 0;
             if ( (p1->tag & MG_BDY) && (p2->tag & MG_BDY) ) {
-                ip = hashGet(&hash,ip1,ip2);
+                ip = _MMG5_hashGet(&hash,ip1,ip2);
             }
             else {
                 if (typchk == 1) {
@@ -822,12 +822,12 @@ _MMG5_anatetv(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
                     uz = p2->c[2] - p1->c[2];
                     ll = ux*ux + uy*uy + uz*uz;
                     if ( ll > hma2 )
-                        ip = hashGet(&hash,ip1,ip2);
+                        ip = _MMG5_hashGet(&hash,ip1,ip2);
                 }
                 else if ( typchk == 2 ) {
                     ll = lenedg(mesh,met,ip1,ip2);
                     if ( ll > _MMG5_LLONG )
-                        ip = hashGet(&hash,ip1,ip2);
+                        ip = _MMG5_hashGet(&hash,ip1,ip2);
                 }
             }
             if ( ip < 0 ) continue;
@@ -866,7 +866,7 @@ _MMG5_anatetv(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
 
                 if ( met->m )
                     met->m[ip] = 0.5 * (met->m[ip1]+met->m[ip2]);
-                if ( !hashEdge(mesh,&hash,ip1,ip2,ip) )  return(-1);
+                if ( !_MMG5_hashEdge(mesh,&hash,ip1,ip2,ip) )  return(-1);
                 MG_SET(pt->flag,i);
                 nap++;
             }
@@ -896,7 +896,7 @@ split:
         for (ia=0,i=0; i<3; i++) {
             for (j=i+1; j<4; j++,ia++) {
                 if ( pt->xt && (mesh->xtetra[pt->xt].tag[ia] & MG_REQ) ) continue;
-                vx[ia] = hashGet(&hash,pt->v[i],pt->v[j]);
+                vx[ia] = _MMG5_hashGet(&hash,pt->v[i],pt->v[j]);
                 if ( vx[ia] > 0 )  MG_SET(pt->flag,ia);
             }
         }
@@ -990,7 +990,7 @@ _MMG5_anatets(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
     static double uv[3][2] = { {0.5,0.5}, {0.,0.5}, {0.5,0.} };
 
     /** 1. analysis of boundary elements */
-    if ( !hashNew(mesh,&hash,mesh->np,7*mesh->np) ) return(-1);
+    if ( !_MMG5_hashNew(mesh,&hash,mesh->np,7*mesh->np) ) return(-1);
     ns = nap = 0;
     npinit=mesh->np;
     for (k=1; k<=mesh->ne; k++) {
@@ -1034,7 +1034,7 @@ _MMG5_anatets(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
         ns++;
 
         /* geometric support */
-        ier = bezierCP(mesh,&ptt,&pb,MG_GET(pxt->ori,i));
+        ier = _MMG5_bezierCP(mesh,&ptt,&pb,MG_GET(pxt->ori,i));
         assert(ier);
 
         /* scan edges in face to split */
@@ -1046,11 +1046,11 @@ _MMG5_anatets(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
             i2  = _MMG5_iare[ia][1];
             ip1 = pt->v[i1];
             ip2 = pt->v[i2];
-            ip  = hashGet(&hash,ip1,ip2);
+            ip  = _MMG5_hashGet(&hash,ip1,ip2);
 
             if ( ip > 0 && !(ptt.tag[j] & MG_GEO) )  continue;
 
-            ier = bezierInt(&pb,&uv[j][0],o,no,to);
+            ier = _MMG5_bezierInt(&pb,&uv[j][0],o,no,to);
             /* new point along edge */
             if ( !ip ) {
                 ip = newPt(mesh,o,MG_BDY);
@@ -1069,7 +1069,7 @@ _MMG5_anatets(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
                     pb.p[1] = &mesh->point[ptt.v[1]];
                     pb.p[2] = &mesh->point[ptt.v[2]];
                 }
-                if ( !hashEdge(mesh,&hash,ip1,ip2,ip) )  return(-1);
+                if ( !_MMG5_hashEdge(mesh,&hash,ip1,ip2,ip) )  return(-1);
                 ppt = &mesh->point[ip];
                 p1  = &mesh->point[ip1];
                 p2  = &mesh->point[ip2];
@@ -1135,7 +1135,7 @@ _MMG5_anatets(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
                 else if ( ptt.tag[j] & MG_REQ )           continue;
                 ip1 = pt->v[_MMG5_iare[ia][0]];
                 ip2 = pt->v[_MMG5_iare[ia][1]];
-                ip  = hashGet(&hash,ip1,ip2);
+                ip  = _MMG5_hashGet(&hash,ip1,ip2);
                 if ( ip > 0 ) {
 #ifdef SINGUL
                     if ( mesh->info.sing && pt->xt && (pxt->tag[ia] & MG_SGL) ) {
@@ -1150,9 +1150,9 @@ _MMG5_anatets(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
                     ppt = &mesh->point[ip];
                     assert(ppt->xp);
                     pxp = &mesh->xpoint[ppt->xp];
-                    if ( pt->xt )  ier = bezierCP(mesh,&ptt,&pb,MG_GET(pxt->ori,i));
-                    else  ier = bezierCP(mesh,&ptt,&pb,1);
-                    ier = bezierInt(&pb,&uv[j][0],o,no,to);
+                    if ( pt->xt )  ier = _MMG5_bezierCP(mesh,&ptt,&pb,MG_GET(pxt->ori,i));
+                    else  ier = _MMG5_bezierCP(mesh,&ptt,&pb,1);
+                    ier = _MMG5_bezierInt(&pb,&uv[j][0],o,no,to);
 
                     dd = no[0]*pxp->n1[0]+no[1]*pxp->n1[1]+no[2]*pxp->n1[2];
                     if ( dd > 1.0-_MMG5_EPS ) continue;
@@ -1182,7 +1182,7 @@ _MMG5_anatets(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
             for (ia=0,i=0; i<3; i++) {
                 for (j=i+1; j<4; j++,ia++) {
                     if ( pt->xt && (mesh->xtetra[pt->xt].tag[ia] & MG_REQ) )  continue;
-                    vx[ia] = hashGet(&hash,pt->v[i],pt->v[j]);
+                    vx[ia] = _MMG5_hashGet(&hash,pt->v[i],pt->v[j]);
                     if ( vx[ia] > 0 ) {
                         MG_SET(pt->flag,ia);
                         if ( mesh->point[vx[ia]].flag > 2 )  ic = 1;
@@ -1240,7 +1240,7 @@ _MMG5_anatets(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
         for (ia=0,i=0; i<3; i++) {
             for (j=i+1; j<4; j++,ia++) {
                 if ( MG_GET(pt->flag,ia) )  {
-                    vx[ia] = hashGet(&hash,pt->v[i],pt->v[j]);
+                    vx[ia] = _MMG5_hashGet(&hash,pt->v[i],pt->v[j]);
                     assert(vx[ia]);
                 }
             }
@@ -1330,7 +1330,7 @@ static int _MMG5_adpspl(MMG5_pMesh mesh,MMG5_pSol met, int* warn) {
             tag = pxt->tag[_MMG5_iarf[i][j]];
             if ( tag & MG_REQ )  continue;
             tag |= MG_BDY;
-            ilist = coquil(mesh,k,imax,list);
+            ilist = _MMG5_coquil(mesh,k,imax,list);
             if ( !ilist )  continue;
             else if ( ilist < 0 )
                 return(-1);
@@ -1434,7 +1434,7 @@ static int _MMG5_adpspl(MMG5_pMesh mesh,MMG5_pSol met, int* warn) {
         /* Case of an internal face */
         else {
             if ( (p0->tag & MG_BDY) && (p1->tag & MG_BDY) ) continue;
-            ilist = coquil(mesh,k,imax,list);
+            ilist = _MMG5_coquil(mesh,k,imax,list);
             if ( !ilist ) continue;
             else if ( ilist<0 ) return(-1);
             o[0] = 0.5*(p0->c[0] + p1->c[0]);
@@ -1544,15 +1544,15 @@ static int _MMG5_adpcol(MMG5_pMesh mesh,MMG5_pSol met) {
             tag |= MG_BDY;
             if ( p0->tag > tag )   continue;
             if ( ( tag & MG_NOM ) && (mesh->adja[4*(k-1)+1+i]) ) continue;
-            ilist = chkcol_bdy(mesh,k,i,j,list);
+            ilist = _MMG5_chkcol_bdy(mesh,k,i,j,list);
         }
         /* Case of an internal face */
         else {
             if ( p0->tag & MG_BDY )  continue;
-            ilist = chkcol_int(mesh,met,k,i,j,list,2);
+            ilist = _MMG5_chkcol_int(mesh,met,k,i,j,list,2);
         }
         if ( ilist > 0 ) {
-            ier = colver(mesh,list,ilist,i2);
+            ier = _MMG5_colver(mesh,list,ilist,i2);
             if ( ier < 0 )  return(-1);
             else if ( ier ) {
                 delPt(mesh,ier);
@@ -1914,12 +1914,12 @@ int _MMG5_mmg3d1(MMG5_pMesh mesh,MMG5_pSol met) {
         fprintf(stdout,"  ** COMPUTATIONAL MESH\n");
 
     /* define metric map */
-    if ( !defsiz(mesh,met) ) {
+    if ( !_MMG5_defsiz(mesh,met) ) {
         fprintf(stdout,"  ## Metric undefined. Exit program.\n");
         return(0);
     }
 
-    if ( mesh->info.hgrad > 0. && !gradsiz(mesh,met) ) {
+    if ( mesh->info.hgrad > 0. && !_MMG5_gradsiz(mesh,met) ) {
         fprintf(stdout,"  ## Gradation problem. Exit program.\n");
         return(0);
     }
@@ -1947,7 +1947,7 @@ int _MMG5_mmg3d1(MMG5_pMesh mesh,MMG5_pSol met) {
     outqua(mesh,met);
 #endif
     /* in test phase: check if no element with 2 bdry faces */
-    if ( !chkfemtopo(mesh) ) {
+    if ( !_MMG5_chkfemtopo(mesh) ) {
         fprintf(stdout,"  ## Topology of mesh unsuited for fem computations. Exit program.\n");
         return(0);
     }

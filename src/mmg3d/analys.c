@@ -283,7 +283,7 @@ static int _MMG5_singul(MMG5_pMesh mesh) {
             ppt = &mesh->point[pt->v[i]];
             if ( !MG_VOK(ppt) || MG_SIN(ppt->tag) || ppt->tag & MG_NOM ) continue;
             else if ( MG_EDG(ppt->tag) ) {
-                ns = bouler(mesh,k,i,list,&ng,&nr);
+                ns = _MMG5_bouler(mesh,k,i,list,&ng,&nr);
 
                 if ( !ns )  continue;
                 if ( (ng+nr) > 2 ) {
@@ -389,7 +389,7 @@ static int _MMG5_norver(MMG5_pMesh mesh) {
 
             /* C1 point */
             if ( !MG_EDG(ppt->tag) ) {
-                if ( !boulen(mesh,k,i,n) ) {
+                if ( !_MMG5_boulen(mesh,k,i,n) ) {
                     ++nf;
                     continue;
                 }
@@ -412,7 +412,7 @@ static int _MMG5_norver(MMG5_pMesh mesh) {
             /* along ridge-curve */
             i1  = _MMG5_inxt2[i];
             if ( !MG_EDG(pt->tag[i1]) )  continue;
-            else if ( !boulen(mesh,k,i,n) ) {
+            else if ( !_MMG5_boulen(mesh,k,i,n) ) {
                 ++nf;
                 continue;
             }
@@ -431,7 +431,7 @@ static int _MMG5_norver(MMG5_pMesh mesh) {
                 kk = adja[i1] / 3;
                 ii = adja[i1] % 3;
                 ii = _MMG5_inxt2[ii];
-                if ( !boulen(mesh,kk,ii,n) ) {
+                if ( !_MMG5_boulen(mesh,kk,ii,n) ) {
                     ++nf;
                     continue;
                 }
@@ -456,7 +456,7 @@ static int _MMG5_norver(MMG5_pMesh mesh) {
             /* compute tgte */
             ppt->flag = mesh->base;
             ++nt;
-            if ( !boulec(mesh,k,i,pxp->t) ) {
+            if ( !_MMG5_boulec(mesh,k,i,pxp->t) ) {
                 ++nf;
                 continue;
             }
@@ -502,7 +502,7 @@ static void _MMG5_nmgeom(MMG5_pMesh mesh){
                 else if ( !(p0->tag & MG_NOM) )  continue;
 
                 p0->flag = base;
-                ier = boulenm(mesh,k,ip,i,n,t);
+                ier = _MMG5_boulenm(mesh,k,ip,i,n,t);
 
                 if ( !ier ) {
                     p0->tag |= MG_REQ;

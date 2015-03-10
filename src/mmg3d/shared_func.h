@@ -119,8 +119,8 @@ void setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
     if ( met->size < 6 ) {
         caltet = caltet_iso;
         lenedg = lenedg_iso;
-        defsiz = defsiz_iso;
-        gradsiz = gradsiz_iso;
+        _MMG5_defsiz  = _MMG5_defsiz_iso;
+        _MMG5_gradsiz = _MMG5_gradsiz_iso;
     }
     else {
         caltet = caltet_ani;

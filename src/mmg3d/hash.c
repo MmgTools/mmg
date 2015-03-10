@@ -47,7 +47,8 @@ extern char  ddb;
  * tetra packing.
  *
  */
-static void paktet(MMG5_pMesh mesh) {
+static void
+_MMG5_paktet(MMG5_pMesh mesh) {
   MMG5_pTetra   pt,pt1;
   int      k;
 
@@ -102,7 +103,7 @@ int _MMG5_hashTetra(MMG5_pMesh mesh, int pack) {
     fprintf(stdout,"  ** SETTING STRUCTURE\n");
 
   /* packing : if not hash does not work */
-  if ( pack )  paktet(mesh);
+  if ( pack )  _MMG5_paktet(mesh);
 
   /* memory alloc */
   _MMG5_ADD_MEM(mesh,(4*mesh->nemax+5)*sizeof(int),"adjacency table",
@@ -325,7 +326,7 @@ int _MMG5_hashTria(MMG5_pMesh mesh) {
   return(1);
 }
 
-int hashEdge(MMG5_pMesh mesh,_MMG5_Hash *hash, int a,int b,int k) {
+int _MMG5_hashEdge(MMG5_pMesh mesh,_MMG5_Hash *hash, int a,int b,int k) {
   _MMG5_hedge  *ph;
   int          key,ia,ib,j;
 
@@ -363,7 +364,7 @@ int hashEdge(MMG5_pMesh mesh,_MMG5_Hash *hash, int a,int b,int k) {
 }
 
 /** return index of point stored along (ia,ib) */
-int hashGet(_MMG5_Hash *hash,int a,int b) {
+int _MMG5_hashGet(_MMG5_Hash *hash,int a,int b) {
   _MMG5_hedge  *ph;
   int          key,ia,ib;
 
@@ -382,7 +383,7 @@ int hashGet(_MMG5_Hash *hash,int a,int b) {
 }
 
 /** remove edge from hash table */
-int hashPop(_MMG5_Hash *hash,int a,int b) {
+int _MMG5_hashPop(_MMG5_Hash *hash,int a,int b) {
   _MMG5_hedge  *ph,*php;
   int          key,ia,ib,iph,iphp;
 
@@ -433,7 +434,7 @@ int hashPop(_MMG5_Hash *hash,int a,int b) {
 }
 
 /** used to hash edges or faces */
-int hashNew(MMG5_pMesh mesh,_MMG5_Hash *hash,int hsiz,int hmax) {
+int _MMG5_hashNew(MMG5_pMesh mesh,_MMG5_Hash *hash,int hsiz,int hmax) {
   int   k;
 
   /* adjust hash table params */
@@ -451,7 +452,7 @@ int hashNew(MMG5_pMesh mesh,_MMG5_Hash *hash,int hsiz,int hmax) {
 }
 
 /** set tag to edge on geometry */
-int hTag(HGeom *hash,int a,int b,int ref,char tag) {
+int _MMG5_hTag(HGeom *hash,int a,int b,int ref,char tag) {
   hgeom  *ph;
   int     key,ia,ib;
 
@@ -479,7 +480,7 @@ int hTag(HGeom *hash,int a,int b,int ref,char tag) {
 }
 
 /** remove edge from hash table */
-int hPop(HGeom *hash,int a,int b,int *ref,char *tag) {
+int _MMG5_hPop(HGeom *hash,int a,int b,int *ref,char *tag) {
   hgeom  *ph,*php;
   int     key,ia,ib,iph,iphp;
 
@@ -537,7 +538,7 @@ int hPop(HGeom *hash,int a,int b,int *ref,char *tag) {
 }
 
 /** get ref and tag to edge on geometry */
-int hGet(HGeom *hash,int a,int b,int *ref,char *tag) {
+int _MMG5_hGet(HGeom *hash,int a,int b,int *ref,char *tag) {
   hgeom  *ph;
   int     key,ia,ib;
 
@@ -567,7 +568,7 @@ int hGet(HGeom *hash,int a,int b,int *ref,char *tag) {
 }
 
 /** store edge on geometry */
-void hEdge(MMG5_pMesh mesh,int a,int b,int ref,char tag) {
+void _MMG5_hEdge(MMG5_pMesh mesh,int a,int b,int ref,char tag) {
   hgeom  *ph;
   int     key,ia,ib,j;
 
@@ -609,7 +610,7 @@ void hEdge(MMG5_pMesh mesh,int a,int b,int ref,char tag) {
 }
 
 /** to store edge on geometry */
-int hNew(HGeom *hash,int hsiz,int hmax,int secure) {
+int _MMG5_hNew(HGeom *hash,int hsiz,int hmax,int secure) {
   int   k;
 
   /* adjust hash table params */
@@ -645,7 +646,7 @@ int _MMG5_hGeom(MMG5_pMesh mesh) {
     if ( !mesh->htab.geom ) {
       mesh->namax = MG_MAX(1.5*mesh->na,_MMG5_NAMAX);
       _MMG5_ADD_MEM(mesh,(3*mesh->namax+2)*sizeof(hgeom),"htab",return(0));
-      hNew(&mesh->htab,mesh->na,3*mesh->namax,1);
+      _MMG5_hNew(&mesh->htab,mesh->na,3*mesh->namax,1);
     }
     else {
 #ifdef SINGUL
@@ -666,7 +667,7 @@ int _MMG5_hGeom(MMG5_pMesh mesh) {
     /* store initial edges */
     for (k=1; k<=mesh->na; k++) {
       pa = &mesh->edge[k];
-      hEdge(mesh,pa->a,pa->b,pa->ref,pa->tag);
+      _MMG5_hEdge(mesh,pa->a,pa->b,pa->ref,pa->tag);
     }
 
     /* now check triangles */
@@ -677,13 +678,13 @@ int _MMG5_hGeom(MMG5_pMesh mesh) {
         i2 = _MMG5_iprv2[i];
         /* transfer non manifold tag to edges */
         if ( pt->tag[i] & MG_NOM )
-          hTag(&mesh->htab,pt->v[i1],pt->v[i2],pt->edg[i],pt->tag[i]);
+          _MMG5_hTag(&mesh->htab,pt->v[i1],pt->v[i2],pt->edg[i],pt->tag[i]);
 
-        hGet(&mesh->htab,pt->v[i1],pt->v[i2],&edg,&tag);
+        _MMG5_hGet(&mesh->htab,pt->v[i1],pt->v[i2],&edg,&tag);
         pt->edg[i]  = edg;
         /* Mark edges as boundary edges */
         pt->tag[i] |= (tag | MG_BDY);
-        hTag(&mesh->htab,pt->v[i1],pt->v[i2],edg,pt->tag[i]);
+        _MMG5_hTag(&mesh->htab,pt->v[i1],pt->v[i2],edg,pt->tag[i]);
       }
     }
     _MMG5_DEL_MEM(mesh,mesh->edge,(mesh->na+1)*sizeof(Edge));
@@ -712,7 +713,7 @@ int _MMG5_hGeom(MMG5_pMesh mesh) {
 
       mesh->namax = MG_MAX(1.5*mesh->na,_MMG5_NAMAX);
       _MMG5_ADD_MEM(mesh,(3*mesh->namax+2)*sizeof(hgeom),"htab",return(0));
-      hNew(&mesh->htab,mesh->na,3*mesh->namax,1);
+      _MMG5_hNew(&mesh->htab,mesh->na,3*mesh->namax,1);
       mesh->na = 0;
     }
 #else
@@ -734,7 +735,7 @@ int _MMG5_hGeom(MMG5_pMesh mesh) {
 
     mesh->namax = MG_MAX(1.5*mesh->na,_MMG5_NAMAX);
     _MMG5_ADD_MEM(mesh,(3*mesh->namax+2)*sizeof(hgeom),"htab",return(0));
-    hNew(&mesh->htab,mesh->na,3*mesh->namax,1);
+    _MMG5_hNew(&mesh->htab,mesh->na,3*mesh->namax,1);
     mesh->na = 0;
 #endif
 
@@ -749,10 +750,10 @@ int _MMG5_hGeom(MMG5_pMesh mesh) {
         if ( !kk || pt->tag[i] & MG_NOM ) {
           if ( pt->tag[i] & MG_NOM )
             pt->edg[i] = ( mesh->info.iso && pt->edg[i] != 0 ) ?  -abs(pt->edg[i]) : MG_ISO;
-          hEdge(mesh,pt->v[i1],pt->v[i2],pt->edg[i],pt->tag[i]);
+          _MMG5_hEdge(mesh,pt->v[i1],pt->v[i2],pt->edg[i],pt->tag[i]);
         }
         else if ( k < kk && ( pt->edg[i] || pt->tag[i] ) )
-          hEdge(mesh,pt->v[i1],pt->v[i2],pt->edg[i],pt->tag[i]);
+          _MMG5_hEdge(mesh,pt->v[i1],pt->v[i2],pt->edg[i],pt->tag[i]);
       }
     }
     /* now check triangles */
@@ -761,7 +762,7 @@ int _MMG5_hGeom(MMG5_pMesh mesh) {
       for (i=0; i<3; i++) {
         i1 = _MMG5_inxt2[i];
         i2 = _MMG5_iprv2[i];
-        hGet(&mesh->htab,pt->v[i1],pt->v[i2],&edg,&tag);
+        _MMG5_hGet(&mesh->htab,pt->v[i1],pt->v[i2],&edg,&tag);
         pt->edg[i]  = edg;
         pt->tag[i] |= tag;
       }
@@ -882,7 +883,7 @@ int _MMG5_bdryTria(MMG5_pMesh mesh) {
   return(1);
 }
 
-static int hashFace(MMG5_pMesh mesh,_MMG5_Hash *hash,int ia,int ib,int ic,int k) {
+static int _MMG5_hashFace(MMG5_pMesh mesh,_MMG5_Hash *hash,int ia,int ib,int ic,int k) {
   _MMG5_hedge     *ph;
   int        key,mins,maxs,sum,j;
 
@@ -930,7 +931,7 @@ static int hashFace(MMG5_pMesh mesh,_MMG5_Hash *hash,int ia,int ib,int ic,int k)
 }
 
 /** return index of triangle ia ib ic */
-static int hashGetFace(_MMG5_Hash *hash,int ia,int ib,int ic) {
+static int _MMG5_hashGetFace(_MMG5_Hash *hash,int ia,int ib,int ic) {
   _MMG5_hedge  *ph;
   int     key,mins,maxs,sum;
 
@@ -988,10 +989,10 @@ int _MMG5_bdrySet(MMG5_pMesh mesh) {
     return(1);
   }
 
-  if ( ! hashNew(mesh,&hash,0.51*mesh->nt,1.51*mesh->nt) ) return(0);
+  if ( ! _MMG5_hashNew(mesh,&hash,0.51*mesh->nt,1.51*mesh->nt) ) return(0);
   for (k=1; k<=mesh->nt; k++) {
     ptt = &mesh->tria[k];
-    hashFace(mesh,&hash,ptt->v[0],ptt->v[1],ptt->v[2],k);
+    _MMG5_hashFace(mesh,&hash,ptt->v[0],ptt->v[1],ptt->v[2],k);
   }
   na = 0;
 #ifdef SINGUL
@@ -1033,7 +1034,7 @@ int _MMG5_bdrySet(MMG5_pMesh mesh) {
         ia = pt->v[_MMG5_idir[i][0]];
         ib = pt->v[_MMG5_idir[i][1]];
         ic = pt->v[_MMG5_idir[i][2]];
-        kt = hashGetFace(&hash,ia,ib,ic);
+        kt = _MMG5_hashGetFace(&hash,ia,ib,ic);
         assert(kt);
         if ( !pt->xt ) {
           mesh->xt++;
@@ -1071,7 +1072,7 @@ int _MMG5_bdrySet(MMG5_pMesh mesh) {
       for (i=0; i<6; i++) {
         ia = _MMG5_iare[i][0];
         ib = _MMG5_iare[i][1];
-        hGet(&mesh->htab,pt->v[ia],pt->v[ib],&ref,&tag);
+        _MMG5_hGet(&mesh->htab,pt->v[ia],pt->v[ib],&ref,&tag);
         if ( pt->xt )
           tag |= mesh->xtetra[pt->xt].tag[i];
         if ( !(tag & MG_BDY) ) {
@@ -1120,12 +1121,12 @@ int _MMG5_bdrySet(MMG5_pMesh mesh) {
           ia = pt->v[_MMG5_idir[i][0]];
           ib = pt->v[_MMG5_idir[i][1]];
           ic = pt->v[_MMG5_idir[i][2]];
-          kt = hashGetFace(&hash,ia,ib,ic);
+          kt = _MMG5_hashGetFace(&hash,ia,ib,ic);
           ptt = &mesh->tria[kt];
           for (j=0; j<3; j++) {
             tag = pxt->ftag[i] | ptt->tag[j];
             if ( tag )
-              settag(mesh,k,_MMG5_iarf[i][j],tag,ptt->edg[j]);
+              _MMG5_settag(mesh,k,_MMG5_iarf[i][j],tag,ptt->edg[j]);
           }
         }
       }
@@ -1146,10 +1147,10 @@ int _MMG5_bdryUpdate(MMG5_pMesh mesh) {
   char     i,tag;
 
   if ( !mesh->nt )  return(1);
-  if ( !hashNew(mesh,&hash,0.51*mesh->nt,1.51*mesh->nt) )  return(0);
+  if ( !_MMG5_hashNew(mesh,&hash,0.51*mesh->nt,1.51*mesh->nt) )  return(0);
   for (k=1; k<=mesh->nt; k++) {
     ptt = &mesh->tria[k];
-    hashFace(mesh,&hash,ptt->v[0],ptt->v[1],ptt->v[2],k);
+    _MMG5_hashFace(mesh,&hash,ptt->v[0],ptt->v[1],ptt->v[2],k);
   }
 
   for (k=1; k<=mesh->ne; k++) {
@@ -1160,12 +1161,12 @@ int _MMG5_bdryUpdate(MMG5_pMesh mesh) {
       mesh->point[mesh->tetra[k].v[1]].tag |= MG_REQ;
       mesh->point[mesh->tetra[k].v[2]].tag |= MG_REQ;
       mesh->point[mesh->tetra[k].v[3]].tag |= MG_REQ;
-      settag(mesh,k,0,MG_REQ,0);
-      settag(mesh,k,1,MG_REQ,0);
-      settag(mesh,k,2,MG_REQ,0);
-      settag(mesh,k,3,MG_REQ,0);
-      settag(mesh,k,4,MG_REQ,0);
-      settag(mesh,k,5,MG_REQ,0);
+      _MMG5_settag(mesh,k,0,MG_REQ,0);
+      _MMG5_settag(mesh,k,1,MG_REQ,0);
+      _MMG5_settag(mesh,k,2,MG_REQ,0);
+      _MMG5_settag(mesh,k,3,MG_REQ,0);
+      _MMG5_settag(mesh,k,4,MG_REQ,0);
+      _MMG5_settag(mesh,k,5,MG_REQ,0);
     }
 
     if ( !pt->xt )  continue;
@@ -1178,7 +1179,7 @@ int _MMG5_bdryUpdate(MMG5_pMesh mesh) {
         ia = pt->v[_MMG5_idir[i][0]];
         ib = pt->v[_MMG5_idir[i][1]];
         ic = pt->v[_MMG5_idir[i][2]];
-        kt = hashGetFace(&hash,ia,ib,ic);
+        kt = _MMG5_hashGetFace(&hash,ia,ib,ic);
         assert(kt);
         ptt = &mesh->tria[kt];
         if ( pt->tag & MG_REQ ) {
@@ -1190,7 +1191,7 @@ int _MMG5_bdryUpdate(MMG5_pMesh mesh) {
         for ( j=0; j<3; j++ ) {
           tag = ptt->tag[j];
           if ( tag || ptt->edg[j] )
-            settag(mesh,k,_MMG5_iarf[i][j],tag,ptt->edg[j]);
+            _MMG5_settag(mesh,k,_MMG5_iarf[i][j],tag,ptt->edg[j]);
         }
       }
     }
@@ -1217,11 +1218,11 @@ int _MMG5_bdryPerm(MMG5_pMesh mesh) {
   assert(mesh->nt);
 
   /* store triangles temporarily */
-  if ( !hashNew(mesh,&hash,MG_MAX(0.51*mesh->nt,100),MG_MAX(1.51*mesh->nt,300)) )
+  if ( !_MMG5_hashNew(mesh,&hash,MG_MAX(0.51*mesh->nt,100),MG_MAX(1.51*mesh->nt,300)) )
     return(0);
   for (k=1; k<=mesh->nt; k++) {
     ptt = &mesh->tria[k];
-    if ( !hashFace(mesh,&hash,ptt->v[0],ptt->v[1],ptt->v[2],k) )  return(0);
+    if ( !_MMG5_hashFace(mesh,&hash,ptt->v[0],ptt->v[1],ptt->v[2],k) )  return(0);
     for (i=0; i<3; i++) {
       ppt = &mesh->point[ptt->v[i]];
       if ( !mesh->info.iso ) ppt->tag |= MG_BDY;
@@ -1242,9 +1243,9 @@ int _MMG5_bdryPerm(MMG5_pMesh mesh) {
       ia = pt->v[_MMG5_idir[i][0]];
       ib = pt->v[_MMG5_idir[i][1]];
       ic = pt->v[_MMG5_idir[i][2]];
-      kt = hashGetFace(&hash,ia,ib,ic);
+      kt = _MMG5_hashGetFace(&hash,ia,ib,ic);
       if ( !kt ) {
-        fprintf(stdout,"%s:%d: Error: function hashGetFace return 0.\n",__FILE__,__LINE__);
+        fprintf(stdout,"%s:%d: Error: function _MMG5_hashGetFace return 0.\n",__FILE__,__LINE__);
         fprintf(stdout," Maybe you have non-boundary triangles.");
         fprintf(stdout," Check triangle of vertices %d %d %d.\n",ia,ib,ic);
         exit(EXIT_FAILURE);

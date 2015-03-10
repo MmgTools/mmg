@@ -268,9 +268,9 @@ int swpgen(MMG5_pMesh mesh,MMG5_pSol met,int nconf,int ilist,int *list,_MMG5_pBu
     assert(ip<4);
 
     memset(list,0,(_MMG5_LMAX+2)*sizeof(int));
-    nball = boulevolp(mesh,start,ip,list);
+    nball = _MMG5_boulevolp(mesh,start,ip,list);
 
-    ier = colver(mesh,list,nball,iq);
+    ier = _MMG5_colver(mesh,list,nball,iq);
     if ( ier < 0 ) {
         fprintf(stdout,"  ## Warning: unable to swap internal edge.\n");
         return(-1);

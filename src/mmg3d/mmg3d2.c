@@ -472,7 +472,7 @@ static int cuttet_ls(MMG5_pMesh mesh, MMG5_pSol sol/*,double *tmp*/){
     /* } */
 
     /* Create intersection points at 0 isovalue and set flags to tetras */
-    if ( !hashNew(mesh,&hash,nb,7*nb) ) return(0);
+    if ( !_MMG5_hashNew(mesh,&hash,nb,7*nb) ) return(0);
     for (k=1; k<=mesh->ne; k++) {
         pt = &mesh->tetra[k];
         if ( !MG_EOK(pt) )  continue;
@@ -480,7 +480,7 @@ static int cuttet_ls(MMG5_pMesh mesh, MMG5_pSol sol/*,double *tmp*/){
         for (ia=0; ia<6; ia++) {
             ip0 = pt->v[_MMG5_iare[ia][0]];
             ip1 = pt->v[_MMG5_iare[ia][1]];
-            np  = hashGet(&hash,ip0,ip1);
+            np  = _MMG5_hashGet(&hash,ip0,ip1);
             if ( np )  continue;
 
             p0 = &mesh->point[ip0];
@@ -528,7 +528,7 @@ static int cuttet_ls(MMG5_pMesh mesh, MMG5_pSol sol/*,double *tmp*/){
                               ,c,0);
             }
             sol->m[np] = 0.0;
-            hashEdge(mesh,&hash,ip0,ip1,np);
+            _MMG5_hashEdge(mesh,&hash,ip0,ip1,np);
         }
     }
 
@@ -541,7 +541,7 @@ static int cuttet_ls(MMG5_pMesh mesh, MMG5_pSol sol/*,double *tmp*/){
         pt->flag = 0;
         memset(vx,0,6*sizeof(int));
         for (ia=0; ia<6; ia++) {
-            vx[ia] = hashGet(&hash,pt->v[_MMG5_iare[ia][0]],pt->v[_MMG5_iare[ia][1]]);
+            vx[ia] = _MMG5_hashGet(&hash,pt->v[_MMG5_iare[ia][0]],pt->v[_MMG5_iare[ia][1]]);
             if ( vx[ia] )  MG_SET(pt->flag,ia);
         }
         switch (pt->flag) {

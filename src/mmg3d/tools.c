@@ -393,7 +393,7 @@ inline int BezierRidge(MMG5_pMesh mesh,int ip0,int ip1,double s,double *o,double
             t1[2] *= -1.0;
         }
     }
-    alpha = BezierGeod(p0->c,p1->c,t0,t1);
+    alpha = _MMG5_BezierGeod(p0->c,p1->c,t0,t1);
 
     b0[0] = p0->c[0] + alpha * t0[0];
     b0[1] = p0->c[1] + alpha * t0[1];
@@ -558,7 +558,7 @@ inline int BezierRef(MMG5_pMesh mesh,int ip0,int ip1,double s,double *o,double *
         }
     }
 
-    alpha = BezierGeod(p0->c,p1->c,t0,t1);
+    alpha = _MMG5_BezierGeod(p0->c,p1->c,t0,t1);
 
     b0[0] = p0->c[0] + alpha * t0[0];
     b0[1] = p0->c[1] + alpha * t0[1];
@@ -715,7 +715,7 @@ inline int BezierNom(MMG5_pMesh mesh,int ip0,int ip1,double s,double *o,double *
         }
     }
 
-    alpha = BezierGeod(p0->c,p1->c,t0,t1);
+    alpha = _MMG5_BezierGeod(p0->c,p1->c,t0,t1);
 
     b0[0] = p0->c[0] + alpha * t0[0];
     b0[1] = p0->c[1] + alpha * t0[1];
@@ -938,7 +938,7 @@ inline int BezierReg(MMG5_pMesh mesh,int ip0, int ip1, double s, double v[3], do
     }
 
     /* vertex position interpolation */
-    if(!BezierTgt(p0->c,p1->c,np0,np1,t0,t1)){
+    if(!_MMG5_BezierTgt(p0->c,p1->c,np0,np1,t0,t1)){
         t0[0] = ux * il;
         t0[1] = uy * il;
         t0[2] = uz * il;
@@ -948,7 +948,7 @@ inline int BezierReg(MMG5_pMesh mesh,int ip0, int ip1, double s, double v[3], do
         t1[2] = - uz * il;
     }
 
-    alpha = BezierGeod(p0->c,p1->c,t0,t1);
+    alpha = _MMG5_BezierGeod(p0->c,p1->c,t0,t1);
 
     b0[0] = p0->c[0] + alpha * t0[0];
     b0[1] = p0->c[1] + alpha * t0[1];

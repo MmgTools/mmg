@@ -686,7 +686,7 @@ int searchlen(MMG5_pMesh mesh, MMG5_pSol met, double lmin, double lmax, int *elt
     char            ia,i0,i1,ier;
 
     /* Hash all edges in the mesh */
-    if ( !hashNew(mesh,&hash,mesh->np,7*mesh->np) )  return(0);
+    if ( !_MMG5_hashNew(mesh,&hash,mesh->np,7*mesh->np) )  return(0);
 
     for(k=1; k<=mesh->ne; k++) {
         pt = &mesh->tetra[k];
@@ -698,8 +698,8 @@ int searchlen(MMG5_pMesh mesh, MMG5_pSol met, double lmin, double lmax, int *elt
             np = pt->v[i0];
             nq = pt->v[i1];
 
-            if(!hashEdge(mesh,&hash,np,nq,0)){
-                fprintf(stdout,"%s:%d: Error: function hashEdge return 0\n",
+            if(!_MMG5_hashEdge(mesh,&hash,np,nq,0)){
+                fprintf(stdout,"%s:%d: Error: function _MMG5_hashEdge return 0\n",
                         __FILE__,__LINE__);
                 exit(EXIT_FAILURE);
             }
@@ -718,7 +718,7 @@ int searchlen(MMG5_pMesh mesh, MMG5_pSol met, double lmin, double lmax, int *elt
             nq = pt->v[i1];
 
             /* Remove edge from hash ; ier = 1 if edge has been found */
-            ier = hashPop(&hash,np,nq);
+            ier = _MMG5_hashPop(&hash,np,nq);
             if( ier ) {
                 len = lenedg(mesh,met,np,nq);
 

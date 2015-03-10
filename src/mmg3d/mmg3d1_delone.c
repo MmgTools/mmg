@@ -130,7 +130,7 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
                 tag = pxt->tag[_MMG5_iarf[i][j]];
                 if ( tag & MG_REQ )  continue;
                 tag |= MG_BDY;
-                ilist = coquil(mesh,k,imax,list);
+                ilist = _MMG5_coquil(mesh,k,imax,list);
                 if ( !ilist )  continue;
                 else if ( ilist<0 ) return(-1);
                 if ( tag & MG_NOM ){
@@ -246,7 +246,7 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
                 if ( (p0->tag & MG_BDY) && (p1->tag & MG_BDY) ) {
                     continue;
                 }
-                ilist = coquil(mesh,k,imax,list);
+                ilist = _MMG5_coquil(mesh,k,imax,list);
                 if ( !ilist )    continue;
                 else if ( ilist<0 ) return(-1);
                 o[0] = 0.5*(p0->c[0] + p1->c[0]);
@@ -285,14 +285,14 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
                 else {
                     ppt = &mesh->point[ip];
                     met->m[ip] = 0.5 * (met->m[ip1] + met->m[ip2]);
-                    addBucket(mesh,bucket,ip);
+                    _MMG5_addBucket(mesh,bucket,ip);
                     (*ns)++;
                     continue;
                 }
 
                 /* Case of an internal face */
             } else {
-                ilist = coquil(mesh,k,imax,list);
+                ilist = _MMG5_coquil(mesh,k,imax,list);
                 if ( !ilist )    continue;
                 else if ( ilist<0 ) return(-1);
                 else if(ilist%2) goto collapse; //bdry edge
@@ -319,23 +319,23 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
                     met->m[ip] = 0.5 * (met->m[ip1]+met->m[ip2]);
 
                 /* Delaunay */
-                if ( !buckin_iso(mesh,met,bucket,ip) ) {
+                if ( !_MMG5_buckin_iso(mesh,met,bucket,ip) ) {
                     delPt(mesh,ip);
                     (*ifilt)++;
                     goto collapse;
                 } else {
-                    lon = cavity(mesh,met,k,ip,list,ilist/2);
+                    lon = _MMG5_cavity(mesh,met,k,ip,list,ilist/2);
                     if ( lon < 1 ) {
                         MMG_npd++;
                         delPt(mesh,ip);
                         goto collapse;
                     } else {
-                        ret = delone(mesh,met,ip,list,lon);
+                        ret = _MMG5_delone(mesh,met,ip,list,lon);
                         if ( ret > 0 ) {
                             ppt = &mesh->point[ip];
                             met->m[ip] = 0.5 * (met->m[ip1] + met->m[ip2]);
 
-                            addBucket(mesh,bucket,ip);
+                            _MMG5_addBucket(mesh,bucket,ip);
                             (*ns)++;
                             continue;
                         }
@@ -375,9 +375,9 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
                 tag |= MG_BDY;
                 if ( p0->tag > tag )   continue;
                 if ( ( tag & MG_NOM ) && (mesh->adja[4*(k-1)+1+i]) ) continue;
-                ilist = chkcol_bdy(mesh,k,i,j,list);
+                ilist = _MMG5_chkcol_bdy(mesh,k,i,j,list);
                 if ( ilist > 0 ) {
-                    ier = colver(mesh,list,ilist,i2);
+                    ier = _MMG5_colver(mesh,list,ilist,i2);
 
                     if ( ier < 0 ) return(-1);
                     else if(ier) {
@@ -391,13 +391,13 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
             /* Case of an internal face */
             else {
                 if ( p0->tag & MG_BDY )  continue;
-                ilist = chkcol_int(mesh,met,k,i,j,list,2);
+                ilist = _MMG5_chkcol_int(mesh,met,k,i,j,list,2);
                 if ( ilist > 0 ) {
-                    ier = colver(mesh,list,ilist,i2);
+                    ier = _MMG5_colver(mesh,list,ilist,i2);
                     if ( ilist < 0 ) continue;
                     if ( ier < 0 ) return(-1);
                     else if(ier) {
-                        delBucket(mesh,bucket,ier);
+                        _MMG5_delBucket(mesh,bucket,ier);
                         delPt(mesh,ier);
                         (*nc)++;
                         continue;
@@ -445,7 +445,7 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
                     tag = pxt->tag[_MMG5_iarf[i][j]];
                     if ( tag & MG_REQ )  continue;
                     tag |= MG_BDY;
-                    ilist = coquil(mesh,k,imax,list);
+                    ilist = _MMG5_coquil(mesh,k,imax,list);
                     if ( !ilist )  continue;
                     else if ( ilist<0 ) return(-1);
                     if ( tag & MG_NOM ){
@@ -526,7 +526,7 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
                         goto collapse2;//continue;
                     } else {
                         (*ns)++;
-                        //addBucket(mesh,bucket,ip);
+                        //_MMG5_addBucket(mesh,bucket,ip);
 
                         ppt = &mesh->point[ip];
                         if ( MG_EDG(tag) || (tag & MG_NOM) )
@@ -560,7 +560,7 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
                     if ( (p0->tag & MG_BDY) && (p1->tag & MG_BDY) ) {
                         continue;
                     }
-                    ilist = coquil(mesh,k,imax,list);
+                    ilist = _MMG5_coquil(mesh,k,imax,list);
                     if ( !ilist )    continue;
                     else if ( ilist<0 ) return(-1);
                     o[0] = 0.5*(p0->c[0] + p1->c[0]);
@@ -598,14 +598,14 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
                     else {
                         ppt = &mesh->point[ip];
                         met->m[ip] = 0.5 * (met->m[ip1] + met->m[ip2]);
-                        addBucket(mesh,bucket,ip);
+                        _MMG5_addBucket(mesh,bucket,ip);
                         (*ns)++;
                         break;//imax continue;
                     }
                     printf("on doit pas passer la\n");
                     /* Case of an internal face */
                 } else {
-                    ilist = coquil(mesh,k,imax,list);
+                    ilist = _MMG5_coquil(mesh,k,imax,list);
                     if ( !ilist )    continue;
                     else if ( ilist<0 ) return(-1);
                     else if(ilist%2) goto collapse2; //bdry edge
@@ -630,23 +630,23 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
                     if ( met->m )
                         met->m[ip] = 0.5 * (met->m[ip1]+met->m[ip2]);
 
-                    if ( /*lmax>4 &&*/ /*it &&*/  !buckin_iso(mesh,met,bucket,ip) ) {
+                    if ( /*lmax>4 &&*/ /*it &&*/  !_MMG5_buckin_iso(mesh,met,bucket,ip) ) {
                         delPt(mesh,ip);
                         (*ifilt)++;
                         goto collapse2;
                     } else {
-                        lon = cavity(mesh,met,k,ip,list,ilist/2);
+                        lon = _MMG5_cavity(mesh,met,k,ip,list,ilist/2);
                         if ( lon < 1 ) {
                             MMG_npd++;
                             delPt(mesh,ip);
                             goto collapse2;
                         } else {
-                            ret = delone(mesh,met,ip,list,lon);
+                            ret = _MMG5_delone(mesh,met,ip,list,lon);
                             if ( ret > 0 ) {
                                 ppt = &mesh->point[ip];
                                 met->m[ip] = 0.5 * (met->m[ip1] + met->m[ip2]);
 
-                                addBucket(mesh,bucket,ip);
+                                _MMG5_addBucket(mesh,bucket,ip);
                                 (*ns)++;
                                 break;//imax continue;
                             }
@@ -686,9 +686,9 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
                 tag |= MG_BDY;
                 if ( p0->tag > tag )   continue;
                 if ( ( tag & MG_NOM ) && (mesh->adja[4*(k-1)+1+i]) ) continue;
-                ilist = chkcol_bdy(mesh,k,i,j,list);
+                ilist = _MMG5_chkcol_bdy(mesh,k,i,j,list);
                 if ( ilist > 0 ) {
-                    ier = colver(mesh,list,ilist,i2);
+                    ier = _MMG5_colver(mesh,list,ilist,i2);
                     if ( ier < 0 ) return(-1);
                     else if(ier) {
                         delPt(mesh,ier);
@@ -701,13 +701,13 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
             /* Case of an internal face */
             else {
                 if ( p0->tag & MG_BDY )  continue;
-                ilist = chkcol_int(mesh,met,k,i,j,list,2);
+                ilist = _MMG5_chkcol_int(mesh,met,k,i,j,list,2);
                 if ( ilist > 0 ) {
-                    ier = colver(mesh,list,ilist,i2);
+                    ier = _MMG5_colver(mesh,list,ilist,i2);
                     if ( ilist < 0 ) continue;
                     if ( ier < 0 ) return(-1);
                     else if(ier) {
-                        delBucket(mesh,bucket,ier);
+                        _MMG5_delBucket(mesh,bucket,ier);
                         delPt(mesh,ier);
                         (*nc)++;
                         break;
@@ -983,12 +983,12 @@ int _MMG5_mmg3d1_delone(MMG5_pMesh mesh,MMG5_pSol met) {
         fprintf(stdout,"  ** COMPUTATIONAL MESH\n");
 
     /* define metric map */
-    if ( !defsiz(mesh,met) ) {
+    if ( !_MMG5_defsiz(mesh,met) ) {
         fprintf(stdout,"  ## Metric undefined. Exit program.\n");
         return(0);
     }
 
-    if ( mesh->info.hgrad > 0. && !gradsiz(mesh,met) ) {
+    if ( mesh->info.hgrad > 0. && !_MMG5_gradsiz(mesh,met) ) {
         fprintf(stdout,"  ## Gradation problem. Exit program.\n");
         return(0);
     }
@@ -1007,7 +1007,7 @@ int _MMG5_mmg3d1_delone(MMG5_pMesh mesh,MMG5_pSol met) {
         return(0);
 
     /* CEC : create filter */
-    bucket = newBucket(mesh,mesh->info.bucket); //M_MAX(mesh->mesh->info.bucksiz,BUCKSIZ));
+    bucket = _MMG5_newBucket(mesh,mesh->info.bucket); //M_MAX(mesh->mesh->info.bucksiz,BUCKSIZ));
     if ( !bucket )  return(0);
 
     if ( !_MMG5_adptet_delone(mesh,met,bucket) ) {
@@ -1020,7 +1020,7 @@ int _MMG5_mmg3d1_delone(MMG5_pMesh mesh,MMG5_pSol met) {
     outqua(mesh,met);
 #endif
     /* in test phase: check if no element with 2 bdry faces */
-    if ( !chkfemtopo(mesh) ) {
+    if ( !_MMG5_chkfemtopo(mesh) ) {
         fprintf(stdout,"  ## Topology of mesh unsuited for fem computations. Exit program.\n");
         return(0);
     }

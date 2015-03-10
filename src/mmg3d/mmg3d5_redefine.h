@@ -87,7 +87,6 @@
 #define directsurfball                	 _MMG5_directsurfball
 #define eigensym                      	 _MMG5_eigensym
 #define freeXTets                     	 _MMG5_freeXTets
-#define gettag                        	 _MMG5_gettag
 #define gradsiz_ani                   	 _MMG5_gradsiz_ani
 #define gradsiz_iso                   	 _MMG5_gradsiz_iso
 #define hEdge                         	 _MMG5_hEdge

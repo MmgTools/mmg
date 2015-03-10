@@ -40,7 +40,11 @@
 
 extern char ddb;
 
-void chkvol(MMG5_pMesh mesh) {
+/**
+ *
+ * \warning Not used.
+ */
+void _MMG5_chkvol(MMG5_pMesh mesh) {
     MMG5_pTetra    pt;
     int       k;
 #ifdef DEBUG
@@ -62,7 +66,11 @@ void chkvol(MMG5_pMesh mesh) {
 #endif
 }
 
-int chkmshsurf(MMG5_pMesh mesh){
+/**
+ *
+ * \warning Not used.
+ */
+int _MMG5_chkmshsurf(MMG5_pMesh mesh){
     MMG5_pTria      pt;
     int        k,k1;
     int        *adja,*adja1;
@@ -88,7 +96,7 @@ int chkmshsurf(MMG5_pMesh mesh){
     return(1);
 }
 
-int chkmsh(MMG5_pMesh mesh,int severe,int base) {
+int _MMG5_chkmsh(MMG5_pMesh mesh,int severe,int base) {
     MMG5_pTetra    pt,pt1,pt2;
     MMG5_pxTetra   pxt;
     int       *adja,*adja1,adj,adj1,k,i,iadr;
@@ -250,8 +258,8 @@ int chkmsh(MMG5_pMesh mesh,int severe,int base) {
       ip = _MMG5_idir[i][j];
       nump = pt->v[ip];
 
-      if(!boulesurfvolp(mesh,k,ip,i,listv,&ilistv,lists,&ilists)){
-      printf("%s:%d: Error: function boulesurfvolp return 0\n",__FILE__,__LINE__)
+      if(!_MMG5_boulesurfvolp(mesh,k,ip,i,listv,&ilistv,lists,&ilists)){
+      printf("%s:%d: Error: function _MMG5_boulesurfvolp return 0\n",__FILE__,__LINE__)
       exit(EXIT_FAILURE);
       }
 
@@ -417,8 +425,12 @@ int chkmsh(MMG5_pMesh mesh,int severe,int base) {
     return(1);
 }
 
-/** Search boundary faces containing point np */
-int chkptonbdy(MMG5_pMesh mesh,int np){
+/**
+ * Search boundary faces containing point np.
+ *
+ * \warning Not used.
+ **/
+int _MMG5_chkptonbdy(MMG5_pMesh mesh,int np){
     MMG5_pTetra      pt;
     MMG5_pxTetra     pxt;
     MMG5_pPoint      p0;
@@ -459,8 +471,13 @@ int chkptonbdy(MMG5_pMesh mesh,int np){
     return(1);
 }
 
-/** Count how many boundary faces share point nump */
-int cntbdypt(MMG5_pMesh mesh, int nump){
+/**
+ *
+ * Count how many boundary faces share point nump.
+ *
+ * \warning Not used.
+ */
+int _MMG5_cntbdypt(MMG5_pMesh mesh, int nump){
     MMG5_pTetra  pt;
     MMG5_pxTetra pxt;
     int k,nf;
@@ -489,7 +506,7 @@ int cntbdypt(MMG5_pMesh mesh, int nump){
 
 /** Count the number of tetras that have several boundary faces, as well as the number of internal
     edges connecting points of the boundary */
-int chkfemtopo(MMG5_pMesh mesh) {
+int _MMG5_chkfemtopo(MMG5_pMesh mesh) {
     MMG5_pTetra      pt,pt1;
     MMG5_pxTetra     pxt;
     MMG5_pPoint      p0,p1;
@@ -529,7 +546,7 @@ int chkfemtopo(MMG5_pMesh mesh) {
             if ( ischk )  continue;
             p0->flag += 1;
 
-            ilist = boulevolp(mesh,k,i,list);
+            ilist = _MMG5_boulevolp(mesh,k,i,list);
             for (l=0; l<ilist; l++) {
                 iel = list[l] / 4;
                 i0  = list[l] % 4;
@@ -549,7 +566,7 @@ int chkfemtopo(MMG5_pMesh mesh) {
 
                     ia = IEDG(i0,i1);
                     p1->flag = 2*np + ischk;
-                    if ( !srcbdy(mesh,iel,ia) )  ned++;
+                    if ( !_MMG5_srcbdy(mesh,iel,ia) )  ned++;
                 }
             }
         }
@@ -558,7 +575,13 @@ int chkfemtopo(MMG5_pMesh mesh) {
     return(1);
 }
 
-/** Search face n0,n1,n2 in mesh, and get the support tetras, with the corresponding refs */
+/**
+ *
+ * Search face n0,n1,n2 in mesh, and get the support tetras, with the
+ * corresponding refs.
+ *
+ * \warning Not used.
+ */
 int srcface(MMG5_pMesh mesh,int n0,int n1,int n2) {
     MMG5_pTetra    pt;
     MMG5_pxTetra   pxt;

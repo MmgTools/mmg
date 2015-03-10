@@ -140,7 +140,7 @@ int chkswpbdy(MMG5_pMesh mesh,int *list,int ilist,int it1,int it2) {
     uy = p1->c[1] - p0->c[1];
     uz = p1->c[2] - p0->c[2];
 
-    BezierEdge(mesh,np,nq,b0,b1,0,v);
+    _MMG5_BezierEdge(mesh,np,nq,b0,b1,0,v);
     c[0] = b0[0] - (p0->c[0] + _MMG5_ATHIRD*ux);
     c[1] = b0[1] - (p0->c[1] + _MMG5_ATHIRD*uy);
     c[2] = b0[2] - (p0->c[2] + _MMG5_ATHIRD*uz);
@@ -160,7 +160,7 @@ int chkswpbdy(MMG5_pMesh mesh,int *list,int ilist,int it1,int it2) {
     uy = p1->c[1] - p0->c[1];
     uz = p1->c[2] - p0->c[2];
 
-    BezierEdge(mesh,na1,na2,b0,b1,0,v);
+    _MMG5_BezierEdge(mesh,na1,na2,b0,b1,0,v);
     c[0] = b0[0] - (p0->c[0] + _MMG5_ATHIRD*ux);
     c[1] = b0[1] - (p0->c[1] + _MMG5_ATHIRD*uy);
     c[2] = b0[2] - (p0->c[2] + _MMG5_ATHIRD*uz);
@@ -333,12 +333,12 @@ int swpbdy(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int it1,_MMG5_pBucket
         fprintf(stdout,"%s:%d: Warning pt1->v[im] != nm\n",__FILE__,__LINE__);
         return(0);
     }
-    ilist = boulevolp(mesh,iel1,im,list);
+    ilist = _MMG5_boulevolp(mesh,iel1,im,list);
 
     assert(list[0]/4 == iel1);
     assert(pt1->v[ipa] == na);
 
-    ier = colver(mesh,list,ilist,ipa);
+    ier = _MMG5_colver(mesh,list,ilist,ipa);
     if ( ier < 0 ) {
         fprintf(stdout,"  ## Warning: unable to swap boundary edge.\n");
         return(-1);
