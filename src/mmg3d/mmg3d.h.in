@@ -486,7 +486,7 @@ int  _MMG5_chkfemtopo(MMG5_pMesh mesh);
 int  _MMG5_cntbdypt(MMG5_pMesh mesh, int nump);
 long long _MMG5_memSize(void);
 void _MMG5_memOption(MMG5_pMesh mesh);
-int  _MMG5_mmg3d1(MMG5_pMesh ,MMG5_pSol );
+int  _MMG5_mmg3d1_pattern(MMG5_pMesh ,MMG5_pSol );
 int  _MMG5_mmg3d1_delone(MMG5_pMesh ,MMG5_pSol );
 int  _MMG5_mmg3d2(MMG5_pMesh ,MMG5_pSol );
 int  _MMG5_split1_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]);

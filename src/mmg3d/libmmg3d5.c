@@ -446,7 +446,7 @@ int MMG5_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met
 
 
 #ifdef PATTERN
-    if ( !_MMG5_mmg3d1(mesh,met) ) {
+    if ( !_MMG5_mmg3d1_pattern(mesh,met) ) {
         if ( !(mesh->adja) && !_MMG5_hashTetra(mesh,1) ) {
             fprintf(stdout,"  ## Hashing problem. Invalid mesh.\n");
             return(MMG5_STRONGFAILURE);
@@ -467,7 +467,7 @@ int MMG5_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met
         }
     }
     else {
-        if ( !_MMG5_mmg3d1(mesh,met) ) {
+        if ( !_MMG5_mmg3d1_pattern(mesh,met) ) {
             if ( !(mesh->adja) && !_MMG5_hashTetra(mesh,1) ) {
                 fprintf(stdout,"  ## Hashing problem. Invalid mesh.\n");
                 return(MMG5_STRONGFAILURE);

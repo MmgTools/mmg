@@ -249,7 +249,7 @@ int main(int argc,char *argv[]) {
 
 
 #ifdef PATTERN
-    if ( !_MMG5_mmg3d1(&mesh,&met) ) {
+    if ( !_MMG5_mmg3d1_pattern(&mesh,&met) ) {
         if ( !(mesh.adja) && !_MMG5_hashTetra(&mesh,1) ) {
             fprintf(stdout,"  ## Hashing problem. Unable to save mesh.\n");
             _MMG5_RETURN_AND_FREE(&mesh,&met,&sing,MMG5_STRONGFAILURE);
@@ -280,7 +280,7 @@ int main(int argc,char *argv[]) {
         }
     }
     else {
-        if( !_MMG5_mmg3d1(&mesh,&met) ) {
+        if( !_MMG5_mmg3d1_pattern(&mesh,&met) ) {
             if ( !(mesh.adja) && !_MMG5_hashTetra(&mesh,1) ) {
                 fprintf(stdout,"  ## Hashing problem. Unable to save mesh.\n");
                 _MMG5_RETURN_AND_FREE(&mesh,&met,&sing,MMG5_STRONGFAILURE);
