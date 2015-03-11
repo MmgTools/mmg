@@ -559,11 +559,7 @@ int _MMG5_movtet(MMG5_pMesh mesh,MMG5_pSol met,int maxitin) {
                     ppt = &mesh->point[pt->v[i0]];
                     if ( ppt->flag == base )  continue;
                     else if ( MG_SIN(ppt->tag) )  continue;
-#ifdef SINGUL
-                    else if ( ppt->tag & MG_SGL )  continue;
-                    else if ( mesh->info.sing && pt->xt && (pxt->tag[_MMG5_iarf[i][j]] & MG_SGL) )
-                        continue;
-#endif
+
                     if ( maxit != 1 ) {
                         ppt->flag = base;
                         improve   = 1;
@@ -679,9 +675,6 @@ static int _MMG5_coltet(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
                 p1 = &mesh->point[pt->v[iq]];
                 if ( p0->flag == base )  continue;
                 else if ( (p0->tag & MG_REQ) || (p0->tag > p1->tag) )  continue;
-#ifdef SINGUL
-                else if ( mesh->info.sing && (p0->tag & MG_SGL) )  continue;
-#endif
 
                 /* check length */
                 if ( typchk == 1 ) {
@@ -836,30 +829,17 @@ _MMG5_anatetv(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
                 o[0] = 0.5 * (p1->c[0]+p2->c[0]);
                 o[1] = 0.5 * (p1->c[1]+p2->c[1]);
                 o[2] = 0.5 * (p1->c[2]+p2->c[2]);
-#ifdef SINGUL
-                if ( mesh->info.sing && pt->xt && (pxt->tag[i] & MG_SGL) )
-                    ip = _MMG5_newPt(mesh,o,MG_SGL);
-                else
-#endif
-                    ip  = _MMG5_newPt(mesh,o,0);
+
+                ip  = _MMG5_newPt(mesh,o,0);
                 if ( !ip ) {
                     /* reallocation of point table */
-#ifdef SINGUL
-                    if ( mesh->info.sing && pt->xt && (pxt->tag[i] & MG_SGL) )
-                        _MMG5_POINT_REALLOC(mesh,met,ip,mesh->gap,
-                                      printf("  ## Error: unable to allocate a new point\n");
-                                      _MMG5_INCREASE_MEM_MESSAGE();
-                                      memlack=1;
-                                      goto split
-                                      ,o,MG_SGL);
-                    else
-#endif
-                        _MMG5_POINT_REALLOC(mesh,met,ip,mesh->gap,
-                                      printf("  ## Error: unable to allocate a new point\n");
-                                      _MMG5_INCREASE_MEM_MESSAGE();
-                                      memlack=1;
-                                      goto split
-                                      ,o,0);
+
+                    _MMG5_POINT_REALLOC(mesh,met,ip,mesh->gap,
+                                        printf("  ## Error: unable to allocate a new point\n");
+                                        _MMG5_INCREASE_MEM_MESSAGE();
+                                        memlack=1;
+                                        goto split
+                                        ,o,0);
                     p1  = &mesh->point[ip1];
                     p2  = &mesh->point[ip2];
                 }
@@ -870,13 +850,6 @@ _MMG5_anatetv(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
                 MG_SET(pt->flag,i);
                 nap++;
             }
-#ifdef SINGUL
-            /* check that we create a point tag MG_SGL but not MG_BDY */
-            if ( mesh->info.sing && pt->xt && (pxt->tag[i] & MG_SGL) ) {
-                assert(mesh->point[ip].tag & MG_SGL);
-                assert( !(mesh->point[ip].tag & MG_BDY) );
-            }
-#endif
         }
     }
     if ( !nap )  {
@@ -1137,12 +1110,7 @@ _MMG5_anatets(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
                 ip2 = pt->v[_MMG5_iare[ia][1]];
                 ip  = _MMG5_hashGet(&hash,ip1,ip2);
                 if ( ip > 0 ) {
-#ifdef SINGUL
-                    if ( mesh->info.sing && pt->xt && (pxt->tag[ia] & MG_SGL) ) {
-                        assert(mesh->point[ip].tag & MG_SGL);
-                        assert( !(mesh->point[ip].tag & MG_BDY) );
-                    }
-#endif
+
                     MG_SET(pt->flag,ia);
                     nc++;
                     /* ridge on a boundary face */

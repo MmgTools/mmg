@@ -53,27 +53,15 @@
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the sol structure.
- * \param sing pointer toward the sing structure (only for insertion of
- * singularities mode).
  *
  * Deallocations before return.
  *
  */
 void MMG5_Free_all(MMG5_pMesh mesh,MMG5_pSol met
-#ifdef SINGUL
-                   ,MMG5_pSingul singul
-#endif
     ){
 
-#ifdef SINGUL
-    MMG5_Free_structures(mesh,met,singul);
-#else
     MMG5_Free_structures(mesh,met);
-#endif
 
-#ifdef SINGUL
-    _MMG5_SAFE_FREE(singul);
-#endif
     _MMG5_SAFE_FREE(met);
     _MMG5_SAFE_FREE(mesh);
 }
@@ -295,8 +283,6 @@ int MMG5_packMesh(MMG5_pMesh mesh,MMG5_pSol met) {
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the sol structure.
- * \param sing pointer toward the sing structure (only for insertion of
- * singularities mode).
  * \return Return \ref MMG5_SUCCESS if success.
  * \return Return \ref MMG5_LOWFAILURE if failed but a conform mesh is saved.
  * \return Return \ref MMG5_STRONGFAILURE if failed and we can't save the mesh.
@@ -305,21 +291,9 @@ int MMG5_packMesh(MMG5_pMesh mesh,MMG5_pSol met) {
  *
  */
 int MMG5_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met
-#ifdef SINGUL
-                  ,MMG5_pSingul sing
-#endif
     ) {
     mytime    ctim[TIMEMAX];
     char      stim[32];
-#ifdef SINGUL
-    int       ier;
-#else
-    /* sing is not used but must be declared */
-    MMG5_pSingul   sing;
-    MMG5_Singul    singul;
-    sing = &singul;
-    memset(sing,0,sizeof(MMG5_Singul));
-#endif
 
     fprintf(stdout,"  -- MMG3d, Release %s (%s) \n",MG_VER,MG_REL);
     fprintf(stdout,"     %s\n",MG_CPY);
@@ -353,19 +327,6 @@ int MMG5_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met
         fprintf(stdout,"  ## ERROR: ANISOTROPIC METRIC NOT IMPLEMENTED.\n");
         return(MMG5_STRONGFAILURE);
     }
-#ifdef SINGUL
-    if ( mesh->info.sing ) {
-        if ( !mesh->info.iso ) {
-            if ( !sing->namein )
-                fprintf(stdout,"  ## WARNING: NO SINGULARITIES PROVIDED.\n");
-        }
-        else if ( sing->namein ) {
-            fprintf(stdout,"  ## WARNING: SINGULARITIES MUST BE INSERTED IN");
-            fprintf(stdout," A PRE-REMESHING PROCESS.\n");
-            fprintf(stdout,"              FILE %s IGNORED\n",sing->namein);
-        }
-    }
-#endif
 
     chrono(OFF,&(ctim[1]));
     printim(ctim[1].gdif,stim);
@@ -379,7 +340,7 @@ int MMG5_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met
     fprintf(stdout,"\n  %s\n   MODULE MMG3D: IMB-LJLL : %s (%s)\n  %s\n",MG_STR,MG_VER,MG_REL,MG_STR);
     if ( mesh->info.imprim )  fprintf(stdout,"\n  -- PHASE 1 : ANALYSIS\n");
 
-    if ( !_MMG5_scaleMesh(mesh,met,sing) ) return(MMG5_STRONGFAILURE);
+    if ( !_MMG5_scaleMesh(mesh,met) ) return(MMG5_STRONGFAILURE);
     if ( mesh->info.iso ) {
         if ( !met->np ) {
             fprintf(stdout,"\n  ## ERROR: A VALID SOLUTION FILE IS NEEDED \n");
@@ -387,23 +348,6 @@ int MMG5_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met
         }
         if ( !_MMG5_mmg3d2(mesh,met) ) return(MMG5_STRONGFAILURE);
     }
-
-#ifdef SINGUL
-    if ( mesh->info.sing ) {
-        if ( !mesh->info.iso ) {
-            if ( !met->np && !_MMG5_DoSol(mesh,met) )
-                _MMG5_RETURN_AND_PACK(mesh,met,MMG5_LOWFAILURE);
-            if ( !( ier=_MMG5_inserSingul(mesh,met,sing) ) )
-                return(MMG5_STRONGFAILURE);
-            else if (ier > 0 ) {
-                chrono(OFF,&ctim[2]);
-                printim(ctim[2].gdif,stim);
-                fprintf(stdout,"  -- INSERTION OF SINGULARITIES COMPLETED.     %s\n\n",stim);
-                chrono(ON,&ctim[2]);
-            }
-        }
-    }
-#endif
 
 #ifdef DEBUG
     if ( !met->np && !_MMG5_DoSol(mesh,met,&mesh->info) ) {
@@ -434,15 +378,6 @@ int MMG5_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met
         if ( !_MMG5_unscaleMesh(mesh,met) )  return(MMG5_STRONGFAILURE);
         _MMG5_RETURN_AND_PACK(mesh,met,MMG5_LOWFAILURE);
     }
-
-#ifdef SINGUL
-    if ( mesh->info.sing && (!mesh->info.iso) ) {
-        if ( _MMG5_colSing(mesh,met)<0 ) {
-            fprintf(stdout,"  ## Collapse of singularities problem.\n");
-            // return(MMG5_STRONGFAILURE);
-        }
-    }
-#endif
 
 
 #ifdef PATTERN
@@ -477,16 +412,6 @@ int MMG5_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met
         }
     }
 
-#endif
-
-#ifdef SINGUL
-    if ( mesh->info.sing && (!mesh->info.iso) ) {
-        if ( !_MMG5_solveUnsignedTet(mesh,met) ) {
-            fprintf(stdout,"  ## Solve of undetermined tetrahedra problem.\n");
-            if ( !_MMG5_unscaleMesh(mesh,met) )  return(MMG5_STRONGFAILURE);
-            _MMG5_RETURN_AND_PACK(mesh,met,MMG5_LOWFAILURE);
-        }
-    }
 #endif
 
     chrono(OFF,&(ctim[3]));

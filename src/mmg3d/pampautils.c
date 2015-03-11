@@ -157,9 +157,6 @@ void _MMG5_usage(char *prog) {
     fprintf(stdout,"-in  file  input triangulation\n");
     fprintf(stdout,"-out file  output triangulation\n");
     fprintf(stdout,"-sol file  load solution file\n");
-#ifdef SINGUL
-    fprintf(stdout,"-sf  file load file containing singularities\n");
-#endif
 
     fprintf(stdout,"\n**  Parameters\n");
     fprintf(stdout,"-ar     val  angle detection\n");
@@ -178,9 +175,6 @@ void _MMG5_usage(char *prog) {
 #ifdef USE_SCOTCH
     fprintf(stdout,"-rn [n]      Turn on or off the renumbering using SCOTCH [1/0] \n");
 #endif
-#ifdef SINGUL
-    fprintf(stdout,"-sing        Preserve internal singularities\n");
-#endif
     exit(EXIT_FAILURE);
 }
 
@@ -189,17 +183,12 @@ void _MMG5_usage(char *prog) {
  * \param argv command line arguments.
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the sol structure.
- * \param sing pointer toward the sing structure (only for insertion of
- * singularities mode).
  * \return 1.
  *
  * Store command line arguments.
  *
  */
 int MMG5_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met
-#ifdef SINGUL
-           ,MMG5_pSingul sing
-#endif
     ) {
     int     i;
     char    namein[128];
@@ -354,24 +343,6 @@ int MMG5_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met
                         _MMG5_usage(argv[0]);
                     }
                 }
-#ifdef SINGUL
-                else if ( !strcmp(argv[i],"-sf") ) {
-                    if ( ++i < argc && isascii(argv[i][0]) && argv[i][0]!='-' ) {
-                        if ( !MMG5_Set_inputSingulName(mesh,sing,argv[i]) )
-                            exit(EXIT_FAILURE);
-                        if ( !MMG5_Set_iparameter(mesh,met,MMG5_IPARAM_sing,1) )
-                            exit(EXIT_FAILURE);
-                    }
-                    else {
-                        fprintf(stderr,"Missing filname for %c%c%c\n",
-                                argv[i-1][1],argv[i-1][2],argv[i-1][3]);
-                        _MMG5_usage(argv[0]);
-                    }
-                }
-                else if ( !strcmp(argv[i],"-sing") )
-                    if ( !MMG5_Set_iparameter(mesh,met,MMG5_IPARAM_sing,1) )
-                        exit(EXIT_FAILURE);
-#endif
                 break;
             case 'v':
                 if ( ++i < argc ) {
@@ -542,8 +513,6 @@ void _MMG5_destockOptions(MMG5_pMesh mesh, MMG5_Info *info) {
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the sol structure.
- * \param sing pointer toward the sing structure (only for insertion of
- * singularities mode).
  * \param critmin minimum quality for elements.
  * \param lmin minimum edge length.
  * \param lmax maximum ede length.
@@ -553,21 +522,11 @@ void _MMG5_destockOptions(MMG5_pMesh mesh, MMG5_Info *info) {
  *
  */
 int MMG5_mmg3dcheck(MMG5_pMesh mesh,MMG5_pSol met,
-#ifdef SINGUL
-               MMG5_pSingul sing,
-#endif
-               double critmin, double lmin, double lmax, int *eltab) {
+                    double critmin, double lmin, double lmax, int *eltab) {
 
     mytime    ctim[TIMEMAX];
     char      stim[32];
     int       ier;
-#ifndef SINGUL
-    /* sing is not used but must be declared */
-    MMG5_pSingul   sing;
-    MMG5_Singul    singul;
-    sing = &singul;
-    memset(sing,0,sizeof(MMG5_Singul));
-#endif
 
     fprintf(stdout,"  -- MMG3d, Release %s (%s) \n",MG_VER,MG_REL);
     fprintf(stdout,"     %s\n",MG_CPY);
@@ -597,19 +556,6 @@ int MMG5_mmg3dcheck(MMG5_pMesh mesh,MMG5_pSol met,
         fprintf(stdout,"  ## ERROR: ANISOTROPIC METRIC NOT IMPLEMENTED.\n");
         return(MMG5_STRONGFAILURE);
     }
-#ifdef SINGUL
-    if ( mesh->info.sing ) {
-        if ( !mesh->info.iso ) {
-            if ( !sing->namein )
-                fprintf(stdout,"  ## WARNING: NO SINGULARITIES PROVIDED.\n");
-        }
-        else if ( sing->namein ) {
-            fprintf(stdout,"  ## WARNING: SINGULARITIES MUST BE INSERTED IN");
-            fprintf(stdout," A PRE-REMESHING PROCESS.\n");
-            fprintf(stdout,"              FILE %s IGNORED\n",sing->namein);
-        }
-    }
-#endif
 
     chrono(OFF,&(ctim[1]));
     printim(ctim[1].gdif,stim);
@@ -620,7 +566,7 @@ int MMG5_mmg3dcheck(MMG5_pMesh mesh,MMG5_pSol met,
     MMG5_pampa_setfunc(mesh,met);
     fprintf(stdout,"\n  %s\n   MODULE MMG3D: IMB-LJLL : %s (%s)\n  %s\n",MG_STR,MG_VER,MG_REL,MG_STR);
 
-    if ( !_MMG5_scaleMesh(mesh,met,sing) ) return(MMG5_STRONGFAILURE);
+    if ( !_MMG5_scaleMesh(mesh,met) ) return(MMG5_STRONGFAILURE);
     if ( mesh->info.iso ) {
         if ( !met->np ) {
             fprintf(stdout,"\n  ## ERROR: A VALID SOLUTION FILE IS NEEDED \n");

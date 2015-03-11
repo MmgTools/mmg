@@ -35,12 +35,8 @@
 
 #include "mmg3d.h"
 
-int _MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSingul sing) {
+int _MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pPoint    ppt;
-#ifdef SINGUL
-  MMG5_psPoint   ppts;
-  double    deltb,delta[3];
-#endif
   double    dd;
   int       i,k;
   MMG5_pPar      par;
@@ -90,32 +86,6 @@ int _MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSingul sing) {
       met->m[k] *= dd;
   }
 
-#ifdef SINGUL
-  /* 2nd mesh (sing) is quarter sized */
-  /* Get the size of sing in every direction */
-  if ( mesh->info.sing && sing->ns ) {
-    deltb = 0.0;
-
-    for (i=0; i<mesh->dim; i++) {
-      delta[i] = fabs(sing->max[i]-sing->min[i]);
-      if ( delta[i] > deltb )  deltb = delta[i];   // deltb = max dimension
-    }
-    if ( deltb < _MMG5_EPSD ) {
-      fprintf(stdout,"  ## Unable to scale mesh\n");
-      return(0);
-    }
-
-    /* centering */
-    dd = 1.0 / deltb;
-    for (k=1; k<=sing->ns; k++) {
-      ppts = &sing->point[k];
-      for (i=0; i<mesh->dim; i++) {
-        ppts->c[i] = MMG5_SIZE * (dd * (ppts->c[i]-sing->min[i])) +
-          0.5 * (1.0 - MMG5_SIZE*dd*delta[i]);
-      }
-    }
-  }
-#endif
   /* normalize local parameters */
   for (k=0; k<mesh->info.npar; k++) {
     par = &mesh->info.par[k];

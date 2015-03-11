@@ -43,16 +43,12 @@
 /**
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the sol structure.
- * \param sing pointer toward the sing structure (only for insertion of singularities mode).
  *
  * Allocate the mesh and solutions structures at \a MMG3D format.
  *
  */
 static inline
 void MMG5_Alloc_mesh(MMG5_pMesh *mesh, MMG5_pSol *sol
-#ifdef SINGUL
-                , MMG5_pSingul *sing
-#endif
     ) {
 
     /* mesh allocation */
@@ -63,12 +59,6 @@ void MMG5_Alloc_mesh(MMG5_pMesh *mesh, MMG5_pSol *sol
     if ( *sol )  _MMG5_DEL_MEM(*mesh,*sol,sizeof(MMG5_Sol));
     _MMG5_SAFE_CALLOC(*sol,1,MMG5_Sol);
 
-#ifdef SINGUL
-    /* singul allocation */
-    if ( *sing )  _MMG5_DEL_MEM(*mesh,*sing,sizeof(MMG5_Singul));
-    _MMG5_SAFE_CALLOC(*sing,1,MMG5_Singul);
-
-#endif
     return;
 }
 
@@ -83,9 +73,6 @@ void MMG5_Alloc_mesh(MMG5_pMesh *mesh, MMG5_pSol *sol
  */
 static inline
 void MMG5_Init_woalloc_mesh(MMG5_pMesh mesh, MMG5_pSol sol
-#ifdef SINGUL
-                       , MMG5_pSingul sing
-#endif
     ) {
 
     (mesh)->dim = 3;
@@ -98,11 +85,7 @@ void MMG5_Init_woalloc_mesh(MMG5_pMesh mesh, MMG5_pSol sol
     MMG5_Init_parameters(mesh);
 
     /* Default vaules for file names */
-#ifndef SINGUL
     MMG5_Init_fileNames(mesh,sol);
-#else
-    MMG5_Init_fileNames(mesh,sol,sing);
-#endif
 
     return;
 }
@@ -117,21 +100,12 @@ void MMG5_Init_woalloc_mesh(MMG5_pMesh mesh, MMG5_pSol sol
  *
  */
 void MMG5_Init_mesh(MMG5_pMesh *mesh, MMG5_pSol *sol
-#ifdef SINGUL
-               , MMG5_pSingul *sing
-#endif
     ) {
 
-#ifndef SINGUL
     /* allocations */
     MMG5_Alloc_mesh(mesh,sol);
     /* initialisations */
     MMG5_Init_woalloc_mesh(*mesh,*sol);
-#else
-    MMG5_Alloc_mesh(mesh,sol,sing);
-    /* initialisations */
-    MMG5_Init_woalloc_mesh(*mesh,*sol,*sing);
-#endif
 
     return;
 }
@@ -166,7 +140,6 @@ void MMG5_Init_parameters(MMG5_pMesh mesh) {
 #else
     mesh->info.renum    = 0;   /* [1/0]    , Turn on/off the renumbering using SCOTCH; */
 #endif
-    mesh->info.sing     =  0;  /* [0/1]    ,preserve internal singularities */
 
     /* default values for doubles */
     /** MMG5_DPARAM_angleDetection = \ref _MMG5_ANGEDG */
@@ -202,15 +175,11 @@ void MMG5_Init_parameters(MMG5_pMesh mesh) {
 /**
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the sol structure.
- * \param sing pointer toward the sing structure (only for insertion of singularities mode).
  *
  * Initialize file names to their default values.
  *
  */
 void MMG5_Init_fileNames(MMG5_pMesh mesh,MMG5_pSol sol
-#ifdef SINGUL
-                    ,MMG5_pSingul sing
-#endif
     ) {
     MMG5_Set_inputMeshName(mesh,"");
     MMG5_Set_outputMeshName(mesh,"");
@@ -218,9 +187,6 @@ void MMG5_Init_fileNames(MMG5_pMesh mesh,MMG5_pSol sol
     MMG5_Set_inputSolName(mesh,sol,"");
     MMG5_Set_outputSolName(mesh,sol,"");
 
-#ifdef SINGUL
-    MMG5_Set_inputSingulName(mesh,sing,"");
-#endif
     return;
 }
 
@@ -413,45 +379,6 @@ int MMG5_Set_outputSolName(MMG5_pMesh mesh,MMG5_pSol sol, char* solout) {
     return(1);
 }
 
-#ifdef SINGUL
-/**
- * \param mesh pointer toward the mesh structure.
- * \param sing pointer toward the sing structure.
- * \param singin name for the input singularies file.
- * \return 1.
- *
- * Set the name of input singularities file (only for insertion of
- * singularities mode).
- *
- */
-int MMG5_Set_inputSingulName(MMG5_pMesh mesh,MMG5_pSingul sing, char* singin) {
-
-    if ( sing->namein )
-        _MMG5_DEL_MEM(mesh,sing->namein,(strlen(sing->namein)+1)*sizeof(char));
-
-    if ( strlen(singin) ) {
-        _MMG5_ADD_MEM(mesh,(strlen(singin)+1)*sizeof(char),
-                "input singularities file name",
-                printf("  Exit program.\n");
-                exit(EXIT_FAILURE));
-        _MMG5_SAFE_CALLOC(sing->namein,strlen(singin)+1,char);
-        strcpy(sing->namein,singin);
-    }
-    else {
-        _MMG5_ADD_MEM(mesh,19*sizeof(char),"input singularities file name",
-                printf("  Exit program.\n");
-                exit(EXIT_FAILURE));
-        _MMG5_SAFE_CALLOC(sing->namein,19,char);
-        strcpy(sing->namein,"singularities.mesh");
-        if ( (mesh->info.imprim > 5) || mesh->info.ddebug ) {
-            fprintf(stdout,"  ## Warning: no name given for input singularities.\n");
-            fprintf(stdout,"     Use of default value \"singularities.mesh\".\n");
-        }
-    }
-    return(1);
-}
-#endif
-
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -605,49 +532,6 @@ int MMG5_Set_meshSize(MMG5_pMesh mesh, int np, int ne, int nt, int na) {
     return(1);
 }
 
-#ifdef SINGUL
-/**
- * \param mesh pointer toward the mesh structure.
- * \param sing pointer toward the sing structure.
- * \param np number of singular vertices.
- * \param na number of singular edges.
- * \return 1.
- *
- * Set the number of singular vertices and edges and allocate the
- * associated tables (only for insertion of singularities mode: \a
- * SINGUL preprocessor flag).
- *
- */
-int MMG5_Set_singulSize(MMG5_pMesh mesh,MMG5_pSingul sing, int np, int na) {
-
-    if ( sing->point || sing->edge )
-        fprintf(stdout,"  ## Warning: new singularites\n");
-
-    sing->ns = np;
-    sing->na = na;
-
-    if ( sing->ns ) {
-        if ( sing->point )
-            _MMG5_DEL_MEM(mesh,sing->point,(sing->ns+1)*sizeof(MMG5_sPoint));
-
-        _MMG5_ADD_MEM(mesh,(sing->ns+1)*sizeof(MMG5_sPoint),"vertex singularities",
-                printf("  Exit program.\n");
-                exit(EXIT_FAILURE));
-        _MMG5_SAFE_CALLOC(sing->point,sing->ns+1,MMG5_sPoint);
-    }
-
-    if ( sing->na ) {
-        if ( sing->edge )
-            _MMG5_DEL_MEM(mesh,sing->edge,(sing->na+1)*sizeof(MMG5_Edge));
-
-        _MMG5_ADD_MEM(mesh,(sing->na+1)*sizeof(MMG5_Edge),"edge singularities",
-                printf("  Exit program.\n");
-                exit(EXIT_FAILURE));
-        _MMG5_SAFE_CALLOC(sing->edge,sing->na+1,MMG5_Edge);
-    }
-    return(1);
-}
-#endif
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -1247,158 +1131,6 @@ int MMG5_Get_scalarSol(MMG5_pSol met, double* s) {
     return(1);
 }
 
-#ifdef SINGUL
-/**
- * \param sing pointer toward the sing structure.
- * \param c0 coordinate of the point along the first dimension.
- * \param c1 coordinate of the point along the second dimension.
- * \param c2 coordinate of the point along the third dimension.
- * \param typ unused parameter.
- * \param pos position of the point in the mesh.
- * \return 0 if failed, 1 otherwise.
- *
- * Set singular point of coordinates \a c0, \a c1, \a c2 at position
- * \a pos in the singularities structure (only for insertion of
- * singularities mode: \a SINGUL preprocessor flag).
- *
- */
-int MMG5_Set_singulVertex(MMG5_pSingul sing, double c0, double c1,
-                     double c2, int typ, int pos) {
-
-    if ( !sing->ns ) {
-        fprintf(stdout,"  ## Error: You must set the number of singular vertex with the");
-        fprintf(stdout," MMG5_Set_singulSize function before setting values");
-        fprintf(stdout," in singularities structure. \n");
-        return(0);
-    }
-    if ( sing->nsi >= sing->ns ) {
-        fprintf(stdout,"  ## Error: unable to set a new singularity.\n");
-        fprintf(stdout,"    max number of singular vertices: %d\n",sing->ns);
-        return(0);
-    }
-    if ( pos > sing->ns ) {
-        fprintf(stdout,"  ## Error: attempt to set new singular");
-        fprintf(stdout," vertex at position %d.",pos);
-        fprintf(stdout," Overflow of the given number of sigular vertices: %d\n",sing->ns);
-        fprintf(stdout,"  ## Check the singular mesh size, its compactness");
-        fprintf(stdout," or the position of the singular vertex.\n");
-        return(0);
-    }
-
-    sing->nsi++;
-    sing->point[pos].c[0] = c0;
-    sing->point[pos].c[1] = c1;
-    sing->point[pos].c[2] = c2;
-    return(1);
-}
-
-/**
- * \param sing pointer toward the sing structure.
- * \param v0 first extremity of the edge.
- * \param v1 second extremity of the edge.
- * \param ref edge reference.
- * \param pos edge position in the mesh.
- * \return 0 if failed, 1 otherwise.
- *
- * Set singular edge of extremities \a v0,\a v1 and reference \a ref at
- * position \a pos in the singularities structure (only for insertion of
- * singularities mode: \a SINGUL preprocessor flag).
- *
- */
-int MMG5_Set_singulEdge(MMG5_pSingul sing, int v0, int v1, int ref, int pos) {
-
-    if ( !sing->na ) {
-        fprintf(stdout,"  ## Error: You must set the number of singular edges with the");
-        fprintf(stdout," MMG5_Set_singulSize function before setting values");
-        fprintf(stdout," in singularities structure \n");
-        return(0);
-    }
-    if ( pos >= sing->na ) {
-        fprintf(stdout,"  ## Error: unable to set a new singularity.\n");
-        fprintf(stdout,"    max number of singular edges: %d\n",sing->na);
-        return(0);
-    }
-    if ( (v0 > sing->ns)||(v1 > sing->ns) ) {
-        fprintf(stdout,"  ## Error: edge extremity overflow number ov vertices.\n");
-        fprintf(stdout,"    max number of singular vertices: %d\n",sing->ns);
-        fprintf(stdout,"  ## Tou must insert all singular vertices before edges\n");
-        return(0);
-    }
-    if ( pos > sing->na ) {
-        fprintf(stdout,"  ## Error: attempt to set new singular");
-        fprintf(stdout," edge at position %d.",pos);
-        fprintf(stdout," Overflow of the given number of singular edges: %d\n",sing->na);
-        fprintf(stdout,"  ## Check the singular mesh size, its compactness");
-        fprintf(stdout," or the position of the edge.\n");
-        return(0);
-    }
-
-    sing->edge[pos].a   = v0;
-    sing->edge[pos].b   = v1;
-    sing->edge[pos].ref = ref;
-    return(1);
-}
-
-/**
- * \param sing pointer toward the sing structure.
- * \param k vertex index.
- * \return 1.
- *
- * Set corner at singular vertex \a k (only for insertion of
- * singularities mode: \a SINGUL preprocessor flag).
- *
- */
-int MMG5_Set_singulCorner(MMG5_pSingul sing, int k) {
-    assert ( k <= sing->ns );
-    sing->point[k].tag |= MG_CRN;
-    return(1);
-}
-
-/**
- * \param sing pointer toward the sing structure (only for insertion of singularities mode).
- * \param k vertex index.
- * \return 1.
- *
- * Set required vertex at singular vertex \a k (only for insertion of
- * singularities mode: \a SINGUL preprocessor flag).
- *
- */
-int MMG5_Set_singulRequiredVertex(MMG5_pSingul sing, int k) {
-    assert ( k <= sing->ns );
-    sing->point[k].tag |= MG_REQ;
-    return(1);
-}
-
-/**
- * \param sing pointer toward the sing structure.
- * \param k vertex index.
- * \return 1.
- *
- * Set ridge at singular edge \a k (only for insertion of
- * singularities mode: \a SINGUL preprocessor flag).
- *
- */
-int MMG5_Set_singulRidge(MMG5_pSingul sing, int k) {
-    assert ( k <= sing->na );
-    sing->edge[k].tag |= MG_GEO;
-    return(1);
-}
-
-/**
- * \param sing pointer toward the sing structure.
- * \param k vertex index.
- * \return 1.
- *
- * Set required edge at singular edge \a k (only for insertion of
- * singularities mode: \a SINGUL preprocessor flag).
- *
- */
-int MMG5_Set_singulRequiredEdge(MMG5_pSingul sing, int k) {
-    assert ( k <= sing->na );
-    sing->edge[k].tag |= MG_REQ;
-    return(1);
-}
-#endif
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -1650,11 +1382,6 @@ int MMG5_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
         mesh->info.renum    = val;
         break;
 #endif
-#ifdef SINGUL
-    case MMG5_IPARAM_sing :
-        mesh->info.sing     = val;
-        break;
-#endif
     default :
         fprintf(stdout,"  ## Error: unknown type of parameter\n");
         return(0);
@@ -1778,15 +1505,11 @@ int MMG5_Set_localParameter(MMG5_pMesh mesh,MMG5_pSol sol, int typ, int ref, dou
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the sol structure.
- * \param sing pointer toward the sing structure (only for insertion of singularities mode).
  *
  * File name deallocations before return.
  *
  */
 void MMG5_Free_names(MMG5_pMesh mesh,MMG5_pSol met
-#ifdef SINGUL
-                     ,MMG5_pSingul singul
-#endif
     ){
     /* mesh */
     if ( mesh->nameout ) {
@@ -1807,33 +1530,19 @@ void MMG5_Free_names(MMG5_pMesh mesh,MMG5_pSol met
             _MMG5_DEL_MEM(mesh,met->nameout,(strlen(met->nameout)+1)*sizeof(char));
         }
     }
-#ifdef SINGUL
-    /* singul */
-    if ( singul->namein ) {
-        _MMG5_DEL_MEM(mesh,singul->namein,(strlen(singul->namein)+1)*sizeof(char));
-    }
-#endif
 }
 
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the sol structure.
- * \param sing pointer toward the sing structure (only for insertion of singularities mode).
  *
  * Structure deallocations before return.
  *
  */
 void MMG5_Free_structures(MMG5_pMesh mesh,MMG5_pSol met
-#ifdef SINGUL
-                          ,MMG5_pSingul singul
-#endif
     ){
 
-#ifdef SINGUL
-    MMG5_Free_names(mesh,met,singul);
-#else
     MMG5_Free_names(mesh,met);
-#endif
 
     /* mesh */
     if ( mesh->point )
@@ -1867,14 +1576,6 @@ void MMG5_Free_structures(MMG5_pMesh mesh,MMG5_pSol met
     /* mesh->info */
     if ( mesh->info.npar && mesh->info.par )
         _MMG5_DEL_MEM(mesh,mesh->info.par,mesh->info.npar*sizeof(MMG5_Par));
-
-#ifdef SINGUL
-    /* singul */
-    if ( singul->point )
-        _MMG5_DEL_MEM(mesh,singul->point,(singul->ns+1)*sizeof(MMG5_sPoint));
-    if ( singul->edge )
-        _MMG5_DEL_MEM(mesh,singul->edge,(singul->na+1)*sizeof(MMG5_Edge));
-#endif
 
     if ( mesh->info.imprim>6 || mesh->info.ddebug )
         printf("  MEMORY USED AT END (bytes) %lld\n",mesh->memCur);

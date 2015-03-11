@@ -85,9 +85,7 @@ _MMG5_ismaniball(MMG5_pMesh mesh,MMG5_pSol sol,int k,int indp) {
     if ( fabs(sol->m[np]) > _MMG5_EPSD2 )  return(1);
 
     memset(bdy,0,(_MMG5_LMAX+1)*sizeof(int));
-#ifdef SINGUL
-restart:
-#endif
+
     memset(list,0,(_MMG5_LMAX+1)*sizeof(int));
 
     /* Sign of a starting point in ball of np */
@@ -156,35 +154,6 @@ restart:
     }
     /* 0 value has been snapped accidentally */
     if ( !res ) {
-#ifdef SINGUL
-        fprintf(stdout,"%s:%d: Warning:\n",__FILE__,__LINE__);
-        fprintf(stdout,"Point with value 0 arounded by points of");
-        fprintf(stdout," same sign: elt %d (%d), pt %d (%d)\n",
-                k,_MMG5_indElt(mesh,k),np,_MMG5_indPt(mesh,np));
-        /* Try to find a tetrahedra to swap */
-        for(l=0; l<ilist; l++) {
-            iel  = list[l] / 4;
-            i    = list[l] % 4;
-            pt   = &mesh->tetra[iel];
-            adja = &mesh->adja[4*(iel-1)+1];
-            jel  = adja[i]/4;
-            if ( !jel )  continue;
-            j    = adja[i]%4;
-            pt1  = &mesh->tetra[jel];
-            v1   = sol->m[pt1->v[j]];
-            if ( ( v1 != 0.0 ) && !MG_SMSGN(v,v1) ) {
-                if ( _MMG5_swap23(mesh,iel,i) ) {
-                    if ( l==0 ) {
-                        for (indp=0; indp<4; indp++ ) {
-                            if ( pt->v[indp] == np ) break;
-                        }
-                        assert(indp<4);
-                    }
-                    goto restart;
-                }
-            }
-        }
-#endif
         return(0);
     }
 
@@ -585,198 +554,6 @@ static int _MMG5_cuttet_ls(MMG5_pMesh mesh, MMG5_pSol sol/*,double *tmp*/){
     return(ns);
 }
 
-#ifdef SINGUL
-/** Check if all singular edges will appear after split on the level-set function *
- *  (the shell of singular edges must have vertices with opposite sign). */
-static inline
-int _MMG5_chkedg_ls(MMG5_pMesh mesh, MMG5_pSol sol){
-    MMG5_pTetra   pt,pt1;
-    MMG5_pxTetra  pxt;
-    double   v0,v1,v;
-    int      k,l,iel,i,ia,piv,ipa,ipb,na,nb,ilist;
-    int      *adja,adj,list[_MMG5_LMAX+2],nf,nc;
-
-    nf = nc = 0;
-    for (k=1; k<=mesh->ne; k++) {
-        pt = &mesh->tetra[k];
-        if ( (!MG_EOK(pt)) || (!pt->xt) ) continue;
-        pxt = &mesh->xtetra[pt->xt];
-
-        for (ia=0; ia<6; ia++) {
-        nextEdg:
-            if ( pxt->tag[ia] & MG_SGL ) {
-
-                /* Sign of a starting point in coquil of i */
-                v0 = sol->m[pt->v[_MMG5_ifar[ia][0]]];
-                v1 = sol->m[pt->v[_MMG5_ifar[ia][1]]];
-                if ( v0 != 0.0 ) {
-                    if ( v1 != 0.0 && !MG_SMSGN(v0,v1) ) continue;
-                    v  = v0;
-                }
-                else if ( v1 != 0.0 ) {
-                    if ( v1 != 0.0 && !MG_SMSGN(v0,v1) ) continue;
-                    v = v1;
-                } else {
-                    fprintf(stdout,"  *** Problem in function _MMG5_chkedg_ls :");
-                    fprintf(stdout," tetra %d : 4 null values",k);
-                    return(0);
-                }
-                na   = pt->v[ _MMG5_iare[ia][0] ];
-                nb   = pt->v[ _MMG5_iare[ia][1] ];
-                memset(list,0,(_MMG5_LMAX+2)*sizeof(int));
-                ilist = 0;
-                list[ilist] = 6*k+ia;
-                ilist++;
-
-                /* travel list and pile up, by adjacency, faces of coquil of edge ia
-                   while they have at least a vertex with same sign as v */
-                adja = &mesh->adja[4*(k-1)+1];
-                adj  = adja[_MMG5_ifar[ia][0]] / 4; // start travelling by face (ia,0)
-                piv  = pt->v[_MMG5_ifar[ia][1]];
-
-                while ( adj && (adj != k) ) {
-                    pt1 = &mesh->tetra[adj];
-                    /* identification of edge number in tetra adj */
-                    for (i=0; i<6; i++) {
-                        ipa = _MMG5_iare[i][0];
-                        ipb = _MMG5_iare[i][1];
-                        if ( (pt1->v[ipa] == na && pt1->v[ipb] == nb) ||
-                             (pt1->v[ipa] == nb && pt1->v[ipb] == na))  break;
-                    }
-                    assert(i<6);
-                    v0 = sol->m[pt1->v[_MMG5_ifar[ia][0]]];
-                    v1 = sol->m[pt1->v[_MMG5_ifar[ia][1]]];
-                    if ( ( ( v0 != 0.0 ) && !MG_SMSGN(v,v0) ) ||
-                         ( ( v1 != 0.0 ) && !MG_SMSGN(v,v1) ) ) {
-                        ++ia;
-                        goto nextEdg;
-                    }
-
-                    list[ilist] = 6*adj +i;
-                    ilist++;
-                    /* overflow */
-                    assert( ilist <= _MMG5_LMAX-3 );
-
-                    /* set new triangle for travel */
-                    adja = &mesh->adja[4*(adj-1)+1];
-                    if ( pt1->v[ _MMG5_ifar[i][0] ] == piv ) {
-                        adj = adja[ _MMG5_ifar[i][0] ] / 4;
-                        piv = pt1->v[ _MMG5_ifar[i][1] ];
-                    }
-                    else {
-                        assert(pt1->v[ _MMG5_ifar[i][1] ] == piv );
-                        adj = adja[ _MMG5_ifar[i][1] ] /4;
-                        piv = pt1->v[ _MMG5_ifar[i][0] ];
-                    }
-                }
-
-                /* At this point, the first travel, in one direction, *
-                 * of the shell is complete. Now, analyze why the travel ended. */
-                if ( adj != k ) {
-                    /* Theoretically, singular edges are far enough to domain boundaries so *
-                     * we hope to have only closed shell and this conditional loop *
-                     * is useless. */
-
-                    assert( !adj );
-                    adj = list[ilist-1] / 6;
-                    i   = list[ilist-1] % 6;
-                    ilist = 0;
-
-                    /* Start back everything from this tetra adj */
-                    list[ilist] = 6*adj + i;
-                    ilist++;
-                    /* overflow */
-                    assert( ilist <= _MMG5_LMAX-3 );
-
-                    adja = &mesh->adja[4*(adj-1)+1];
-                    if ( pt1->v[ _MMG5_ifar[i][0] ] == piv ) {
-                        adj = adja[ _MMG5_ifar[i][0] ] / 4;
-                        piv = pt1->v[ _MMG5_ifar[i][1] ];
-                    }
-                    else {
-                        adj = adja[ _MMG5_ifar[i][1] ] /4;
-                        piv = pt1->v[ _MMG5_ifar[i][0] ];
-                    }
-                    while ( adj ) {
-                        pt1 = &mesh->tetra[adj];
-                        if ( pt1->tag & MG_REQ )  return(0);
-                        /* identification of edge number in tetra adj */
-                        for (i=0; i<6; i++) {
-                            ipa = _MMG5_iare[i][0];
-                            ipb = _MMG5_iare[i][1];
-                            if ( (pt1->v[ipa] == na && pt1->v[ipb] == nb) ||
-                                 (pt1->v[ipa] == nb && pt1->v[ipb] == na))  break;
-                        }
-                        assert(i<6);
-                        v1 = sol->m[pt1->v[_MMG5_ifar[ia][1]]];
-                        if ( ( ( v0 != 0.0 ) && !MG_SMSGN(v,v0) ) ||
-                             ( ( v1 != 0.0 ) && !MG_SMSGN(v,v1) ) ) {
-                            ++ia;
-                            goto nextEdg;
-                        }
-                        list[ilist] = 6*adj +i;
-                        ilist++;
-                        /* overflow */
-                        assert( ilist <= _MMG5_LMAX-2 );
-
-                        /* set new triangle for travel */
-                        adja = &mesh->adja[4*(adj-1)+1];
-                        if ( pt1->v[ _MMG5_ifar[i][0] ] == piv ) {
-                            adj = adja[ _MMG5_ifar[i][0] ] / 4;
-                            piv = pt1->v[ _MMG5_ifar[i][1] ];
-                        }
-                        else {
-                            adj = adja[ _MMG5_ifar[i][1] ] /4;
-                            piv = pt1->v[ _MMG5_ifar[i][0] ];
-                        }
-                    }
-                    assert(!adj);
-                }
-
-                /* shell is complete and we have'nt found a vertex with different sign
-                 * for the level-set function. */
-                nf++;
-                fprintf(stdout,"%s:%d: Warning:\n",__FILE__,__LINE__);
-                fprintf(stdout,"Singular edge arounded by elements of");
-                fprintf(stdout," same sign: elt %d (%d), edge %d--%d (%d--%d)\n",
-                        k, _MMG5_indElt(mesh,k),na,nb,_MMG5_indPt(mesh,na),_MMG5_indPt(mesh,nb));
-                for(l=0; l<ilist; l++) {
-                    iel  = list[l] / 6;
-                    i    = list[l] % 6;
-                    adja = &mesh->adja[4*(iel-1)+1];
-                    adj  = adja[ _MMG5_iare[i][0] ]/4;
-                    if ( adj ) {
-                        piv  = adja[ _MMG5_iare[i][0] ]%4;
-                        pt1  = &mesh->tetra[adj];
-                        v1   = sol->m[pt1->v[piv]];
-                        if ( ( v1 != 0.0 ) && !MG_SMSGN(v,v1) ) {
-                            if ( _MMG5_swap23(mesh,iel,_MMG5_iare[i][0]) ) {
-                                nc++;
-                                break;
-                            }
-                        }
-                    }
-                    adj  = adja[ _MMG5_iare[i][1] ]/4;
-                    if ( adj ) {
-                        piv  = adja[ _MMG5_iare[i][1] ]%4;
-                        pt1  = &mesh->tetra[adj];
-                        v1   = sol->m[pt1->v[piv]];
-                        if ( ( v1 != 0.0 ) && !MG_SMSGN(v,v1) ) {
-                            if ( _MMG5_swap23(mesh,iel,_MMG5_iare[i][1]) ) {
-                                nc++;
-                                break;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-    if ( (abs(mesh->info.imprim) > 3 || mesh->info.ddebug) && nf > 0 )
-        fprintf(stdout,"    %8d problematic edges, %d corrected\n",nf,nc);
-    return(1);
-}
-#endif
 
 /** Set references to tets according to the sign of the level set function */
 static int _MMG5_setref_ls(MMG5_pMesh mesh, MMG5_pSol sol) {
@@ -1579,12 +1356,6 @@ int _MMG5_mmg3d2(MMG5_pMesh mesh,MMG5_pSol sol) {
         fprintf(stdout,"  ## Problem in setting boundary. Exit program.\n");
         return(0);
     }
-
-#ifdef SINGUL
-    if ( !_MMG5_chkedg_ls(mesh,sol) ) {
-        fprintf(stdout,"  ## Warning: some singular edges will be lost.\n");
-    }
-#endif
 
     if ( !_MMG5_cuttet_ls(mesh,sol/*,tmp*/) ) {
         fprintf(stdout,"  ## Problem in discretizing implicit function. Exit program.\n");

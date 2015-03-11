@@ -211,13 +211,9 @@ static int _MMG5_adpspl(MMG5_pMesh mesh,MMG5_pSol met, int* warn) {
             o[0] = 0.5*(p0->c[0] + p1->c[0]);
             o[1] = 0.5*(p0->c[1] + p1->c[1]);
             o[2] = 0.5*(p0->c[2] + p1->c[2]);
-#ifdef SINGUL
-            if ( mesh->info.sing && pt->xt && (pxt->tag[imax] & MG_SGL) ) {
-                ip = _MMG5_newPt(mesh,o,MG_SGL);
-            }
-            else
-#endif
-                ip = _MMG5_newPt(mesh,o,MG_NOTAG);
+
+            ip = _MMG5_newPt(mesh,o,MG_NOTAG);
+
             if ( !ip )  {
                 /* reallocation of point table */
                 _MMG5_POINT_REALLOC(mesh,met,ip,mesh->gap,
@@ -302,11 +298,7 @@ static int _MMG5_adpcol(MMG5_pMesh mesh,MMG5_pSol met) {
         p0 = &mesh->point[ip];
         p1 = &mesh->point[iq];
         if ( (p0->tag > p1->tag) || (p0->tag & MG_REQ) )  continue;
-#ifdef SINGUL
-        else if ( mesh->info.sing && (p0->tag & MG_SGL) ) {
-            if ( !( pt->xt && (pxt->tag[imin] & MG_SGL) ) )  continue;
-        }
-#endif
+
 
         /* Case of a boundary face */
         ilist = 0;

@@ -602,9 +602,6 @@ int _MMG5_colver(MMG5_pMesh mesh,int *list,int ilist,char indq) {
         { { 1, 2}, {-1,-1}, { 1, 5}, { 2, 5} },
         { { 0, 2}, { 0, 4}, {-1,-1}, { 2, 4} },
         { { 0, 1}, { 0, 3}, { 1, 3}, {-1,-1} } };
-#ifdef SINGUL
-    int             warn_sing,need_xt;
-#endif
 
     iel = list[0] / 4;
     ip  = list[0] % 4;
@@ -612,9 +609,6 @@ int _MMG5_colver(MMG5_pMesh mesh,int *list,int ilist,char indq) {
     np  = pt->v[ip];
     nq  = pt->v[indq];
 
-#ifdef SINGUL
-    warn_sing = 0;
-#endif
     memset(p0_c,0,ilist*sizeof(int));
     memset(p1_c,0,ilist*sizeof(int));
     /* Mark elements of the shell of edge (pq) */
@@ -622,9 +616,6 @@ int _MMG5_colver(MMG5_pMesh mesh,int *list,int ilist,char indq) {
         iel = list[k] / 4;
         i   = list[k] % 4;
         pt  = &mesh->tetra[iel];
-#ifdef SINGUL
-        if ( mesh->info.sing )  pt->flag = 0;
-#endif
 
         for (j=0; j<3; j++) {
             i = _MMG5_inxt3[i];
@@ -635,20 +626,11 @@ int _MMG5_colver(MMG5_pMesh mesh,int *list,int ilist,char indq) {
                     ip  = list[k]%4;
                     ind[k][0] = indar[ip][i][0];
                     if ( pxt->tag[ind[k][0]] || pxt->edg[ind[k][0]] ) {
-#ifdef SINGUL
-                        /* Check if we need to take care about singularities */
-                        if ( mesh->info.sing && (pxt->tag[ind[k][0]] & MG_SGL) )  warn_sing = 1;
-#endif
                         if ( _MMG5_iare[ind[k][0]][0]==i )  p0_c[k] = pt->v[_MMG5_iare[ind[k][0]][1]];
                         else  p0_c[k] = pt->v[_MMG5_iare[ind[k][0]][0]];
                     }
                     ind[k][1] = indar[ip][i][1];
                     if ( pxt->tag[ind[k][1]] || pxt->edg[ind[k][1]] ) {
-#ifdef SINGUL
-                        /* Check if we need to take care about singularities */
-                        if ( mesh->info.sing && (pxt->tag[ind[k][1]] & MG_SGL) )
-                            warn_sing = 1;
-#endif
                         if ( _MMG5_iare[ind[k][1]][0]==i )  p1_c[k] = pt->v[_MMG5_iare[ind[k][1]][1]];
                         else  p1_c[k] = pt->v[_MMG5_iare[ind[k][1]][0]];
                     }
@@ -668,50 +650,8 @@ int _MMG5_colver(MMG5_pMesh mesh,int *list,int ilist,char indq) {
 
         /* update edges of elements that do not belong to the shell of pq */
         if ( !pt->xt ) {
-#ifndef SINGUL
             continue;
-#else
-            if ( !mesh->info.sing || !warn_sing ) continue;
-
-            /* we need a xtetra for all singular edges so we may need to create it. */
-            /* First: check that xtetra will not be created by adjacency at next step */
-            for ( i=0; i<ilist; i++ ) {
-                if ( list[i] > 0 ) continue;
-                pt1  = &mesh->tetra[(-list[i])/4];
-
-                iq  = (-list[i]) % 4;
-                for (j=0; j<3; j++) {
-                    iq = _MMG5_inxt3[iq];
-                    if ( pt1->v[iq] == nq )  break;
-                }
-                assert(j<3);
-
-                adja = &mesh->adja[4*(iel-1)+1];
-                if ( adja[iq]/4 == iel ) break;
-            }
-            if ( i < ilist ) {
-                /* our element is adjacent to an element of the shell */
-                continue;
-            }
-            else {
-                /* we need to create the xtetra */
-                mesh->xt++;
-                if ( mesh->xt > mesh->xtmax ) {
-                    _MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,"larger xtetra table",
-                                 mesh->xt--;
-                                 return(-1));
-                }
-                pt->xt = mesh->xt;
-                memset(&mesh->xtetra[pt->xt],0,sizeof(MMG5_xTetra));
-                mesh->xtetra[pt->xt].ori = 15;
-                /* mark tetra for which we have created MMG5_xTetras */
-                pt->flag = 1;
-            }
-#endif
         }
-#ifdef SINGUL
-        need_xt = 0;
-#endif
         pxt = &mesh->xtetra[pt->xt];
         for ( i=0; i<ilist; i++ ) {
             if ( (list[i]>0) || (!(mesh->tetra[-list[i]/4].xt)) )  continue;
@@ -722,10 +662,6 @@ int _MMG5_colver(MMG5_pMesh mesh,int *list,int ilist,char indq) {
                     ia = _MMG5_idir[ip][j];
                     if ( pt->v[ia]==p0_c[i] ) {
                         pxt->tag[_MMG5_arpt[ip][j]] |= pxt1->tag[ind[i][0]];
-#ifdef SINGUL
-                        /* we need the xtetra? */
-                        if ( mesh->info.sing && (pxt1->tag[ind[i][0]] & MG_SGL) )  need_xt=1;
-#endif
                         if ( !pxt->edg[_MMG5_arpt[ip][j]] )
                             pxt->edg[_MMG5_arpt[ip][j]] = pxt1->edg[ind[i][0]];
                         else if ( pxt1->edg[_MMG5_arpt[ip][j]] )
@@ -740,10 +676,6 @@ int _MMG5_colver(MMG5_pMesh mesh,int *list,int ilist,char indq) {
                     ia = _MMG5_idir[ip][j];
                     if ( pt->v[ia]==p1_c[i] ) {
                         pxt->tag[_MMG5_arpt[ip][j]] |= pxt1->tag[ind[i][1]];
-#ifdef SINGUL
-                        /* we need the xtetra? */
-                        if ( mesh->info.sing && (pxt1->tag[ind[i][1]] & MG_SGL) )  need_xt=1;
-#endif
                         if ( !pxt->edg[_MMG5_arpt[ip][j]] )
                             pxt->edg[_MMG5_arpt[ip][j]] = pxt1->edg[ind[i][1]];
                         else if ( pxt1->edg[_MMG5_arpt[ip][j]] )
@@ -754,15 +686,6 @@ int _MMG5_colver(MMG5_pMesh mesh,int *list,int ilist,char indq) {
                 }
             }
         }
-#ifdef SINGUL
-        /* delete useless created MMG5_xTetra */
-        if ( mesh->info.sing && pt->flag && (!need_xt) ) {
-            pt->xt = 0;
-            mesh->xt--;
-        }
-        else
-            need_xt = 0;
-#endif
         adja = &mesh->adja[4*(iel-1)+1];
         jel  = adja[ip] / 4;
         voy  = adja[ip] % 4;

@@ -58,13 +58,6 @@
  *
  */
 #define MMG5_STRONGFAILURE 2
-/**
- * \def SIZE
- *
- * Size of the mesh of singularities inside the main mesh (SINGUL mode only).
- *
- */
-#define MMG5_SIZE 0.75
 
 /**
  * \enum MMG5_type
@@ -110,7 +103,6 @@ enum MMG5_Param
     MMG5_IPARAM_nomove,            /*!< [1/0], Avoid/allow point relocation */
     MMG5_IPARAM_numberOfLocalParam,/*!< [n], Number of local parameters */
     MMG5_IPARAM_renum,             /*!< [1/0], Turn on/off point relocation with Scotch */
-    MMG5_IPARAM_sing,              /*!< [1/0], Turn on/off the insertion of singularities */
     MMG5_IPARAM_bucket,            /*!< [n], Specify the size of the bucket per dimension (DELAUNAY) */
     MMG5_DPARAM_angleDetection,    /*!< [val], Value for angle detection */
     MMG5_DPARAM_hmin,              /*!< [val], Minimal mesh size */
@@ -314,45 +306,10 @@ typedef struct {
 } MMG5_Sol;
 typedef MMG5_Sol * MMG5_pSol;
 
-/**
- * \struct MMG5_sPoint
- * \brief Structure to store MMG3D singular point.
- * (only for singularities insertion).
- *
- * Structure to store MMG3D singular points (only used for singularities
- * insertion: \a SINGUL precompilator flag).
- *
- */
-typedef struct {
-  double         c[3]; /*!< Coordinates of the point */
-  double         n[3]; /*!< Normal to the point */
-  int            flag,tmp,tet;
-  unsigned char  tag;
-} MMG5_sPoint;
-typedef MMG5_sPoint * MMG5_psPoint;
-
-/**
- * \struct MMG5_Singul
- * \brief Structure to store the singularities of a mesh.
- * (only for singularities insertion).
- */
-typedef struct {
-  char     *namein; /*!< Name of the mesh containing the singularities */
-  double   min[3]; /*!< Minimum coordinates for rescaling */
-  double   max[3]; /*!< Maximum coordinates for rescaling */
-  int      nsi;
-  int      ns; /*!< Number of singular vertices */
-  int      na; /*!< Number of singular edges */
-  MMG5_psPoint  point; /*!< Pointer toward \ref MMG5_sPoint structure */
-  MMG5_pEdge    edge; /*!< Pointer toward \ref MMG5_Edge structure */
-} MMG5_Singul;
-typedef MMG5_Singul * MMG5_pSingul;
-
-
 /*----------------------------- functions header -----------------------------*/
 /** Initialization functions */
 /* init structures */
-#ifndef SINGUL
+
 /**
  * \param mesh pointer toward a pointer toward the mesh structure.
  * \param sol pointer toward a pointer toward the sol structure.
@@ -371,29 +328,6 @@ void  MMG5_Init_mesh(MMG5_pMesh *mesh, MMG5_pSol *sol);
  *
  */
 void  MMG5_Init_fileNames(MMG5_pMesh mesh, MMG5_pSol sol);
-#else
-/**
- * \param mesh pointer toward a pointer toward the mesh structure.
- * \param sol pointer toward a pointer toward the sol structure.
- * \param sing pointer toward a pointer toward the sing structure
- * (only for insertion of singularities mode).
- *
- * Allocate the mesh and solution structures and initialize it to
- * their default values.
- *
- */
-void  MMG5_Init_mesh(MMG5_pMesh *mesh, MMG5_pSol *sol, MMG5_pSingul *sing);
-/**
- * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the sol structure.
- * \param sing pointer toward the sing structure (only for insertion of
- * singularities mode).
- *
- * Initialize file names to their default values.
- *
- */
-void  MMG5_Init_fileNames(MMG5_pMesh mesh, MMG5_pSol sol, MMG5_pSingul sing);
-#endif
 /**
  * \param mesh pointer toward the mesh structure.
  *
@@ -441,19 +375,6 @@ int  MMG5_Set_outputMeshName(MMG5_pMesh mesh, char* meshout);
  *
  */
 int  MMG5_Set_outputSolName(MMG5_pMesh mesh,MMG5_pSol sol, char* solout);
-#ifdef SINGUL
-/**
- * \param mesh pointer toward the mesh structure.
- * \param sing pointer toward the sing structure.
- * \param singin name for the input singularies file.
- * \return 1.
- *
- * Set the name of input singularities file (only for insertion of
- * singularities mode).
- *
- */
-int  MMG5_Set_inputSingulName(MMG5_pMesh mesh,MMG5_pSingul sing, char* singin);
-#endif
 
 /* init structure sizes */
 /**
@@ -482,21 +403,6 @@ int  MMG5_Set_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int typEntity, int np, int
  *
  */
 int  MMG5_Set_meshSize(MMG5_pMesh mesh, int np, int ne, int nt, int na);
-#ifdef SINGUL
-/**
- * \param mesh pointer toward the mesh structure.
- * \param sing pointer toward the sing structure.
- * \param np number of singular vertices.
- * \param na number of singular edges.
- * \return 1.
- *
- * Set the number of singular vertices and edges and allocate the
- * associated tables (only for insertion of singularities mode: \a
- * SINGUL preprocessor flag).
- *
- */
-int  MMG5_Set_singulSize(MMG5_pMesh mesh,MMG5_pSingul sing, int np, int na);
-#endif
 
 /* init structure datas */
 /**
@@ -622,78 +528,6 @@ int  MMG5_Set_requiredEdge(MMG5_pMesh mesh, int pos);
  *
  */
 int  MMG5_Set_scalarSol(MMG5_pSol met, double s,int pos);
-#ifdef SINGUL
-/**
- * \param sing pointer toward the sing structure.
- * \param c0 coordinate of the point along the first dimension.
- * \param c1 coordinate of the point along the second dimension.
- * \param c2 coordinate of the point along the third dimension.
- * \param typ unused parameter.
- * \param pos position of the point in the mesh.
- * \return 0 if failed, 1 otherwise.
- *
- * Set singular point of coordinates \a c0, \a c1, \a c2 at position
- * \a pos in the singularities structure (only for insertion of
- * singularities mode: SINGUL preprocessor flag).
- *
- */
-int  MMG5_Set_singulVertex(MMG5_pSingul sing, double c0,
-                           double c1, double c2, int typ,int pos);
-/**
- * \param sing pointer toward the sing structure.
- * \param v0 first extremity of the edge.
- * \param v1 second extremity of the edge.
- * \param ref edge reference.
- * \param pos edge position in the mesh.
- * \return 0 if failed, 1 otherwise.
- *
- * Set singular edge of extremities \a v0,\a v1 and reference \a ref at
- * position \a pos in the singularities structure (only for insertion of
- * singularities mode: \a SINGUL preprocessor flag).
- *
- */
-int  MMG5_Set_singulEdge(MMG5_pSingul sing, int v0, int v1, int ref,int pos);
-/**
- * \param sing pointer toward the sing structure.
- * \param k vertex index.
- * \return 1.
- *
- * Set corner at singular vertex \a k (only for insertion of
- * singularities mode: \a SINGUL preprocessor flag).
- *
- */
-int  MMG5_Set_singulCorner(MMG5_pSingul sing, int pos);
-/**
- * \param sing pointer toward the sing structure.
- * \param k vertex index.
- * \return 1.
- *
- * Set required vertex at singular vertex \a k (only for insertion of
- * singularities mode: \a SINGUL preprocessor flag).
- *
- */
-int  MMG5_Set_singulRequiredVertex(MMG5_pSingul sing, int pos);
-/**
- * \param sing pointer toward the sing structure.
- * \param k vertex index.
- * \return 1.
- *
- * Set ridge at singular edge \a k (only for insertion of
- * singularities mode: \a SINGUL preprocessor flag).
- *
- */
-int  MMG5_Set_singulRidge(MMG5_pSingul sing, int pos);
-/**
- * \param sing pointer toward the sing structure.
- * \param k vertex index.
- * \return 1.
- *
- * Set required edge at singular edge \a k (only for insertion of
- * singularities mode: \a SINGUL preprocessor flag).
- *
- */
-int  MMG5_Set_singulRequiredEdge(MMG5_pSingul sing, int pos);
-#endif
 /**
  * \param mesh pointer toward the mesh structure.
  *
@@ -884,32 +718,8 @@ int  MMG5_loadMet(MMG5_pMesh mesh,MMG5_pSol met);
  *
  */
 int  MMG5_saveMet(MMG5_pMesh mesh, MMG5_pSol met);
-#ifdef SINGUL
-/**
- * \param mesh pointer toward the mesh structure.
- * \param singul pointer toward the singul structure.
- * \return 0 if failed, 1 otherwise
- *
- * Read singul data. Here we suppose that the file contains the
- * singularities (corner, required, ridges....)
- *
- */
-int  MMG5_loadSingul(MMG5_pMesh mesh,MMG5_pSingul singul);
-#endif
 
 /** deallocations */
-#ifdef SINGUL
-/**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the sol structure.
- * \param sing pointer toward the sing structure (only for insertion of
- * singularities mode).
- *
- * Deallocations before return.
- *
- */
-void MMG5_Free_all(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pSingul sing);
-#else
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the sol structure.
@@ -918,19 +728,7 @@ void MMG5_Free_all(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pSingul sing);
  *
  */
 void MMG5_Free_all(MMG5_pMesh mesh, MMG5_pSol met);
-#endif
 
-#ifdef SINGUL
-/**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the sol structure.
- * \param sing pointer toward the sing structure (only for insertion of singularities mode).
- *
- * Structure deallocations before return.
- *
- */
-void MMG5_Free_structures(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pSingul sing);
-#else
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the sol structure.
@@ -939,20 +737,6 @@ void MMG5_Free_structures(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pSingul sing);
  *
  */
 void MMG5_Free_structures(MMG5_pMesh mesh, MMG5_pSol met);
-#endif
-
-#ifdef SINGUL
-/**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the sol structure.
- * \param sing pointer toward the sing structure (only for insertion of
- * singularities mode).
- *
- * File name deallocations before return.
- *
- */
-void MMG5_Free_names(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pSingul sing);
-#else
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the sol structure.
@@ -961,25 +745,8 @@ void MMG5_Free_names(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pSingul sing);
  *
  */
 void MMG5_Free_names(MMG5_pMesh mesh, MMG5_pSol met);
-#endif
-
 
 /** library */
-#ifdef SINGUL
-/**
- * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the sol structure.
- * \param sing pointer toward the sing structure (only for insertion of
- * singularities mode).
- * \return Return \ref MMG5_SUCCESS if success,
- * \ref MMG5_LOWFAILURE if fail but a conform mesh is saved or
- * \ref MMG5_STRONGFAILURE if fail and we can't save the mesh.
- *
- * Main program for the library.
- *
- */
-int  MMG5_mmg3dlib(MMG5_pMesh mesh, MMG5_pSol sol, MMG5_pSingul singul);
-#else
 /**
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the sol structure.
@@ -991,26 +758,9 @@ int  MMG5_mmg3dlib(MMG5_pMesh mesh, MMG5_pSol sol, MMG5_pSingul singul);
  *
  */
 int  MMG5_mmg3dlib(MMG5_pMesh mesh, MMG5_pSol sol);
-#endif
 
 /** for PAMPA library */
 /** Options management */
-#ifdef SINGUL
-/**
- * \param argc number of command line arguments.
- * \param argv command line arguments.
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the sol structure.
- * \param sing pointer toward the sing structure (only for insertion of
- * singularities mode).
- * \return 1.
- * \note Developped for the PaMPA library interface.
- *
- * Store command line arguments.
- *
- */
-int  MMG5_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSingul sing);
-#else
 /**
  * \param argc number of command line arguments.
  * \param argv command line arguments.
@@ -1023,7 +773,6 @@ int  MMG5_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSingu
  *
  */
 int  MMG5_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met);
-#endif
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the sol structure.
@@ -1065,24 +814,6 @@ int  MMG5_stockOptions(MMG5_pMesh mesh, MMG5_Info *info);
 void  MMG5_destockOptions(MMG5_pMesh mesh, MMG5_Info *info);
 
 /** Checks */
-#ifdef SINGUL
-/**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the sol structure.
- * \param sing pointer toward the sing structure (only for insertion of
- * singularities mode).
- * \param critmin minimum quality for elements.
- * \param lmin minimum edge length.
- * \param lmax maximum ede length.
- * \param eltab table of invalid elements.
- * \note Developped for the PaMPA library interface.
- *
- * Search invalid elements (in term of quality or edge length).
- *
- */
-int  MMG5_mmg3dcheck(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSingul sing,
-                     double critmin, double lmin, double lmax, int *eltab);
-#else
 /**
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the sol structure.
@@ -1097,7 +828,6 @@ int  MMG5_mmg3dcheck(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSingul sing,
  */
 int MMG5_mmg3dcheck(MMG5_pMesh mesh,MMG5_pSol sol,
                     double critmin, double lmin, double lmax, int *eltab);
-#endif
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the sol structure.

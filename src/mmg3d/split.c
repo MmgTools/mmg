@@ -193,15 +193,6 @@ void _MMG5_split1(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
         if ( xt1.ref[i] || xt1.ftag[i] ) isxt1 = 1;
         if ( isxt && isxt1 )  goto nextstep1;
     }
-#ifdef SINGUL
-    if ( mesh->info.sing ) {
-        for (i=0; i<6; i++) {
-            if ( xt.edg[i]  || xt.tag[i] )  isxt = 1;
-            if ( xt1.edg[i] || xt1.tag[i] ) isxt1 = 1;
-            if ( isxt && isxt1 )  break;
-        }
-    }
-#endif
 
 nextstep1:
     if ( pt->xt ) {
@@ -450,14 +441,6 @@ int _MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,int 
             if ( xt.ref[i]  || xt.ftag[i] )  isxt = 1;
             if ( xt1.ref[i] || xt1.ftag[i])  isxt1 = 1;
         }
-#ifdef SINGUL
-        if ( mesh->info.sing ) {
-            for (i=0; i<6; i++) {
-                if ( xt.edg[i]  || xt.tag[i]  ) isxt = 1;
-                if ( xt1.edg[i] || xt1.tag[i] ) isxt1 = 1;
-            }
-        }
-#endif
 
         if ( pt->xt ) {
             if ( (isxt) && (!isxt1) ) {
@@ -585,14 +568,6 @@ int _MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,int 
             if ( xt.ref[i]  || xt.ftag[i]  )  isxt  = 1;
             if ( xt1.ref[i] || xt1.ftag[i] )  isxt1 = 1;
         }
-#ifdef SINGUL
-        if ( mesh->info.sing ) {
-            for (i=0; i<6; i++) {
-                if ( xt.edg[i]  || xt.tag[i]  ) isxt  = 1;
-                if ( xt1.edg[i] || xt1.tag[i] ) isxt1 = 1;
-            }
-        }
-#endif
 
         if ( pt->xt ) {
             if ( (isxt)&&(!isxt1) ) {
@@ -1071,15 +1046,6 @@ void _MMG5_split2sf(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]){
         if ( xt[1].ref[i] || xt[1].ftag[i] ) isxt[1] = 1;
         if ( xt[2].ref[i] || xt[2].ftag[i] ) isxt[2] = 1;
     }
-#ifdef SINGUL
-    if ( mesh->info.sing ) {
-        for (i=0; i<6; i++) {
-            if ( xt[0].edg[i] || xt[0].tag[i] ) isxt[0] = 1;
-            if ( xt[1].edg[i] || xt[1].tag[i] ) isxt[1] = 1;
-            if ( xt[2].edg[i] || xt[2].tag[i] ) isxt[2] = 1;
-        }
-    }
-#endif
 
     if ( pt[0]->xt ) {
         if ( isxt[0] ) {
@@ -1266,16 +1232,6 @@ void _MMG5_split2(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
         if ( xt[2].ref[i] || xt[2].ftag[i] )  isxt[2] = 1;
         if ( xt[3].ref[i] || xt[3].ftag[i] )  isxt[3] = 1;
     }
-#ifdef SINGUL
-    if ( mesh->info.sing ) {
-        for (i=0; i<6; i++) {
-            if ( xt[0].edg[i] || xt[0].tag[i] ) isxt[0] = 1;
-            if ( xt[1].edg[i] || xt[1].tag[i] ) isxt[1] = 1;
-            if ( xt[2].edg[i] || xt[2].tag[i] ) isxt[2] = 1;
-            if ( xt[3].edg[i] || xt[3].tag[i] ) isxt[3] = 1;
-        }
-    }
-#endif
 
     if ( pt[0]->xt) {
         if ( isxt[0] ) {
@@ -1531,16 +1487,6 @@ void _MMG5_split3(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
         if ( xt[2].ref[i] || xt[2].ftag[i] ) isxt[2] = 1;
         if ( xt[3].ref[i] || xt[3].ftag[i] ) isxt[3] = 1;
     }
-#ifdef SINGUL
-    if ( mesh->info.sing ) {
-        for (i=0; i<6; i++) {
-            if ( xt[0].edg[i] || xt[0].tag[i] ) isxt[0] = 1;
-            if ( xt[1].edg[i] || xt[1].tag[i] ) isxt[1] = 1;
-            if ( xt[2].edg[i] || xt[2].tag[i] ) isxt[2] = 1;
-            if ( xt[3].edg[i] || xt[3].tag[i] ) isxt[3] = 1;
-        }
-    }
-#endif
 
     if ( pt[0]->xt ) {
         if ( isxt[0] ) {
@@ -1883,16 +1829,6 @@ void _MMG5_split3cone(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
         if ( xt[2].ref[i] || xt[2].ftag[i] ) isxt[2] = 1;
         if ( xt[3].ref[i] || xt[3].ftag[i] ) isxt[3] = 1;
     }
-#ifdef SINGUL
-    if ( mesh->info.sing ) {
-        for (i=0; i<6; i++) {
-            if ( xt[0].edg[i] || xt[0].tag[i] ) isxt[0] = 1;
-            if ( xt[1].edg[i] || xt[1].tag[i] ) isxt[1] = 1;
-            if ( xt[2].edg[i] || xt[2].tag[i] ) isxt[2] = 1;
-            if ( xt[3].edg[i] || xt[3].tag[i] ) isxt[3] = 1;
-        }
-    }
-#endif
 
     if ( (pt[0])->xt ) {
         if ( isxt[0] ) {
@@ -2372,16 +2308,6 @@ void _MMG5_split3op(MMG5_pMesh mesh, MMG5_pSol met, int k, int vx[6]){
             if ( (xt[2]).ref[i] || xt[2].ftag[i] ) isxt[2] = 1;
             if ( (xt[3]).ref[i] || xt[3].ftag[i] ) isxt[3] = 1;
         }
-#ifdef SINGUL
-        if ( mesh->info.sing ) {
-            for (i=0; i<6; i++) {
-                if ( xt[0].edg[i] || xt[0].tag[i] ) isxt[0] = 1;
-                if ( xt[1].edg[i] || xt[1].tag[i] ) isxt[1] = 1;
-                if ( xt[2].edg[i] || xt[2].tag[i] ) isxt[2] = 1;
-                if ( xt[3].edg[i] || xt[3].tag[i] ) isxt[3] = 1;
-            }
-        }
-#endif
 
         if ( pt[0]->xt ) {
             if ( isxt[0] ) {
@@ -2448,17 +2374,6 @@ void _MMG5_split3op(MMG5_pMesh mesh, MMG5_pSol met, int k, int vx[6]){
             if ( (xt[3]).ref[i] || xt[3].ftag[i] ) isxt[3] = 1;
             if ( (xt[4]).ref[i] || xt[4].ftag[i] ) isxt[4] = 1;
         }
-#ifdef SINGUL
-        if ( mesh->info.sing ) {
-            for (i=0; i<6; i++) {
-                if ( xt[0].edg[i] || xt[0].tag[i] ) isxt[0] = 1;
-                if ( xt[1].edg[i] || xt[1].tag[i] ) isxt[1] = 1;
-                if ( xt[2].edg[i] || xt[2].tag[i] ) isxt[2] = 1;
-                if ( xt[3].edg[i] || xt[3].tag[i] ) isxt[3] = 1;
-                if ( xt[4].edg[i] || xt[4].tag[i] ) isxt[4] = 1;
-            }
-        }
-#endif
 
         if ( pt[0]->xt ) {
             if ( isxt[0] ) {
@@ -2524,434 +2439,6 @@ void _MMG5_split3op(MMG5_pMesh mesh, MMG5_pSol met, int k, int vx[6]){
     }
 
 }
-
-#ifdef SINGUL
-/** Split a tetra in 3 tetras by introducing the point of coordinates o
- *  and barycentric coordinates cb in the face ifac;
- *  Update adjacency relations and return local indice of the new point in k. */
-int _MMG5_split3cb(MMG5_pMesh mesh, MMG5_pSol met, int k, int ifac, double o[3],
-             double cb[4], int *ip ) {
-    MMG5_pTetra        pt[3];
-    MMG5_xTetra        xt[3];
-    MMG5_pxTetra       pxt0;
-    double        hnew;
-    int           ip0,ip1,ip2,iq0,iq1,iq2,i,iel,ifac2;
-    int           newtet[3],newtet2[3],*adja, adj[4];
-    unsigned char tau[4],tau2[4],*taued,isxt[3],firstxt;
-
-    pt[0] = &mesh->tetra[k];
-    pt[0]->flag = 0;
-    newtet[0]=k;
-
-    hnew = 0.0;
-    if ( met->m ) {
-        for ( i=0; i<3; i++) {
-            (*ip)    = pt[0]->v[_MMG5_idir[ifac][i]];
-            hnew += met->m[(*ip)]*cb[_MMG5_idir[ifac][i]];
-        }
-    }
-
-    (*ip) = _MMG5_newPt(mesh,o,MG_NOTAG);
-    if ( !(*ip) ) {
-        _MMG5_POINT_REALLOC(mesh,met,*ip,mesh->gap,
-                      printf("  ## Error: unable to allocate a new point\n");
-                      _MMG5_INCREASE_MEM_MESSAGE();
-                      return(-1)
-                      ,o,MG_NOTAG);
-    }
-    if ( met->m )  met->m[(*ip)] = hnew;
-
-    /* 1. we split the k^th tetra on face ifac */
-    tau[0] = ifac;
-    tau[1] = _MMG5_idir[ifac][0];
-    tau[2] = _MMG5_idir[ifac][1];
-    tau[3] = _MMG5_idir[ifac][2];
-    taued = &permedge[ifac*3][0];
-
-    ip0 = pt[0]->v[tau[1]];
-    ip1 = pt[0]->v[tau[2]];
-    ip2 = pt[0]->v[tau[3]];
-
-    /* create 2 new tetras */
-    iel = _MMG5_newElt(mesh);
-    if ( !iel ) {
-        _MMG5_TETRA_REALLOC(mesh,iel,mesh->gap,
-                      printf("  ## Error: unable to allocate a new element.\n");
-                      _MMG5_INCREASE_MEM_MESSAGE();
-                      _MMG5_delPt(mesh,(*ip));
-                      return(-1));
-        pt[0] = &mesh->tetra[newtet[0]];
-    }
-    pt[1] = &mesh->tetra[iel];
-    pt[1] = memcpy(pt[1],pt[0],sizeof(MMG5_Tetra));
-    newtet[1]=iel;
-
-    iel = _MMG5_newElt(mesh);
-    if ( !iel ) {
-        _MMG5_TETRA_REALLOC(mesh,iel,mesh->gap,
-                      printf("  ## Error: unable to allocate a new element.\n");
-                      _MMG5_INCREASE_MEM_MESSAGE();
-                      _MMG5_delPt(mesh,(*ip));
-                      _MMG5_delElt(mesh,newtet[1]);
-                      return(-1));
-        pt[0] = &mesh->tetra[newtet[0]];
-        pt[1] = &mesh->tetra[newtet[1]];
-    }
-    pt[2] = &mesh->tetra[iel];
-    pt[2] = memcpy(pt[2],pt[0],sizeof(MMG5_Tetra));
-    newtet[2]=iel;
-
-    if ( pt[0]->xt ) {
-        pxt0 = &mesh->xtetra[pt[0]->xt];
-        memcpy(&xt[0],pxt0,sizeof(MMG5_xTetra));
-        memcpy(&xt[1],pxt0,sizeof(MMG5_xTetra));
-        memcpy(&xt[2],pxt0,sizeof(MMG5_xTetra));
-    }
-    else {
-        pxt0 = 0;
-        memset(&xt[0],0,sizeof(MMG5_xTetra));
-        memset(&xt[1],0,sizeof(MMG5_xTetra));
-        memset(&xt[2],0,sizeof(MMG5_xTetra));
-    }
-
-    /* Update vertices and xt fields */
-    pt[0]->v[tau[1]] = pt[1]->v[tau[2]] = pt[2]->v[tau[3]] = (*ip);
-
-    xt[0].tag[taued[0]] = 0;  xt[0].edg[taued[0]] = 0;
-    xt[0].tag[taued[3]] = 0;  xt[0].edg[taued[3]] = 0;
-    xt[0].tag[taued[4]] = 0;  xt[0].edg[taued[4]] = 0;
-    xt[0].ref  [tau[2]] = 0;  xt[0].ref [tau[3]] = 0;
-    xt[0].ftag [tau[2]] = 0;  xt[0].ftag[tau[3]] = 0;
-    MG_SET(xt[0].ori, tau[2]);  MG_SET(xt[0].ori, tau[3]);
-
-    xt[1].tag[taued[1]] = 0;  xt[1].edg[taued[1]] = 0;
-    xt[1].tag[taued[3]] = 0;  xt[1].edg[taued[3]] = 0;
-    xt[1].tag[taued[5]] = 0;  xt[1].edg[taued[5]] = 0;
-    xt[1].ref  [tau[1]] = 0;  xt[1].ref [tau[3]] = 0;
-    xt[1].ftag [tau[1]] = 0;  xt[1].ftag[tau[3]] = 0;
-    MG_SET(xt[1].ori, tau[1]);  MG_SET(xt[1].ori, tau[3]);
-
-    xt[2].tag[taued[2]] = 0;  xt[2].edg[taued[2]] = 0;
-    xt[2].tag[taued[4]] = 0;  xt[2].edg[taued[4]] = 0;
-    xt[2].tag[taued[5]] = 0;  xt[2].edg[taued[5]] = 0;
-    xt[2].ref  [tau[1]] = 0;  xt[2].ref [tau[2]] = 0;
-    xt[2].ftag [tau[1]] = 0;  xt[2].ftag[tau[2]] = 0;
-    MG_SET(xt[2].ori, tau[1]);  MG_SET(xt[2].ori, tau[2]);
-
-    /* Assignation of the xt fields to the appropriate tets */
-    memset(isxt,0,3*sizeof(char));
-    for (i=0; i<4; i++) {
-        if ( xt[0].ref[i] || xt[0].ftag[i] ) isxt[0] = 1;
-        if ( xt[1].ref[i] || xt[1].ftag[i] ) isxt[1] = 1;
-        if ( xt[2].ref[i] || xt[2].ftag[i] ) isxt[2] = 1;
-    }
-    if ( mesh->info.sing ) {
-        for (i=0; i<6; i++) {
-            if ( xt[0].edg[i] || xt[0].tag[i] ) isxt[0] = 1;
-            if ( xt[1].edg[i] || xt[1].tag[i] ) isxt[1] = 1;
-            if ( xt[2].edg[i] || xt[2].tag[i] ) isxt[2] = 1;
-        }
-    }
-
-    if ( pt[0]->xt ) {
-        if ( isxt[0] ) {
-            memcpy(pxt0,&xt[0],sizeof(MMG5_xTetra));
-            for (i=1; i<3; i++) {
-                if ( isxt[i] ) {
-                    mesh->xt++;
-                    if ( mesh->xt > mesh->xtmax ) {
-                        /* realloc of xtetras table */
-                        _MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
-                                     "larger xtetra table",
-                                     mesh->xt--;
-                                     return(-1));
-                    }
-                    pt[i]->xt = mesh->xt;
-                    pxt0 = &mesh->xtetra[mesh->xt];
-                    memcpy(pxt0,&xt[i],sizeof(MMG5_xTetra));
-                }
-                else {
-                    pt[i]->xt = 0;
-                }
-            }
-        }
-        else {
-            firstxt = 1;
-            for (i=1; i<3; i++) {
-                if ( isxt[i] ) {
-                    if ( firstxt ) {
-                        firstxt = 0;
-                        pt[i]->xt = pt[0]->xt;
-                        pxt0 = &mesh->xtetra[(pt[i])->xt];
-                        memcpy(pxt0,&xt[i],sizeof(MMG5_xTetra));
-                    }
-                    else {
-                        mesh->xt++;
-                        if ( mesh->xt > mesh->xtmax ) {
-                            /* realloc of xtetras table */
-                            _MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
-                                         "larger xtetra table",
-                                         mesh->xt--;
-                                         return(-1));
-                        }
-                        pt[i]->xt = mesh->xt;
-                        pxt0 = &mesh->xtetra[mesh->xt];
-                        memcpy(pxt0,&xt[i],sizeof(MMG5_xTetra));
-                    }
-                }
-                else {
-                    pt[i]->xt = 0;
-                }
-            }
-            pt[0]->xt = 0;
-        }
-    }
-
-    /* Quality update */
-    pt[0]->qual=_MMG5_orcal(mesh,newtet[0]);
-    pt[1]->qual=_MMG5_orcal(mesh,newtet[1]);
-    pt[2]->qual=_MMG5_orcal(mesh,newtet[2]);
-
-    adja = &mesh->adja[4*(k-1)+1];
-
-    /* Update of adjacency relations */
-    for ( i=0; i<4; i++) {
-        adj[i] = adja[i];
-    }
-    adja[tau[2]] = 4*newtet[1]+tau[1];
-    adja[tau[3]] = 4*newtet[2]+tau[1];
-
-    adja = &mesh->adja[4*(newtet[1]-1)+1];
-    adja[tau[2]] = adj[tau[2]];
-    adja[tau[1]] = 4*newtet[0]+tau[2];
-    adja[tau[3]] = 4*newtet[2]+tau[2];
-    if ( adj[tau[2]] )
-        mesh->adja[4*(adj[tau[2]]/4-1)+adj[tau[2]]%4+1] = 4*newtet[1]+tau[2];
-
-    adja = &mesh->adja[4*(newtet[2]-1)+1];
-    adja[tau[3]] = adj[tau[3]];
-    adja[tau[1]] = 4*newtet[0]+tau[3];
-    adja[tau[2]] = 4*newtet[1]+tau[3];
-    if ( adj[tau[3]] )
-        mesh->adja[4*(adj[tau[3]]/4-1)+adj[tau[3]]%4+1] = 4*newtet[2]+tau[3];
-
-    adja = &mesh->adja[4*(k-1)+1];
-    if ( !adja[ifac] ) {
-        mesh->adja[4*(newtet[0]-1)+ifac+1] = 0;
-        mesh->adja[4*(newtet[1]-1)+ifac+1] = 0;
-        mesh->adja[4*(newtet[2]-1)+ifac+1] = 0;
-        return(tau[1]);
-    }
-
-    /* 2. we split the ifac^th neighbour of th k^th tetra */
-    ifac2       = adja[ifac]%4;
-    newtet2[0]  = adja[ifac]/4;
-    pt[0]       = &mesh->tetra[newtet2[0]];
-    pt[0]->flag = 0;
-
-    tau2[0] = ifac2;
-    tau2[1] = _MMG5_idir[ifac2][0];
-    tau2[2] = _MMG5_idir[ifac2][1];
-    tau2[3] = _MMG5_idir[ifac2][2];
-    taued = &permedge[ifac2*3][0];
-
-    iq0 = pt[0]->v[tau2[1]];
-    iq1 = pt[0]->v[tau2[2]];
-    iq2 = pt[0]->v[tau2[3]];
-
-    /* create 2 new tetras */
-    iel = _MMG5_newElt(mesh);
-    if ( !iel ) {
-        _MMG5_TETRA_REALLOC(mesh,iel,mesh->gap,
-                      printf("  ## Error: unable to allocate a new element.\n");
-                      _MMG5_INCREASE_MEM_MESSAGE();
-                      _MMG5_delPt(mesh,(*ip));
-                      return(-1));
-        pt[0] = &mesh->tetra[newtet2[0]];
-    }
-    pt[1] = &mesh->tetra[iel];
-    pt[1] = memcpy(pt[1],pt[0],sizeof(MMG5_Tetra));
-    newtet2[1]=iel;
-
-    iel = _MMG5_newElt(mesh);
-    if ( !iel ) {
-        _MMG5_TETRA_REALLOC(mesh,iel,mesh->gap,
-                      printf("  ## Error: unable to allocate a new element.\n");
-                      _MMG5_INCREASE_MEM_MESSAGE();
-                      _MMG5_delPt(mesh,(*ip));
-                      _MMG5_delElt(mesh,newtet[1]);
-                      return(-1));
-        pt[0] = &mesh->tetra[newtet2[0]];
-        pt[1] = &mesh->tetra[newtet2[1]];
-    }
-    pt[2] = &mesh->tetra[iel];
-    pt[2] = memcpy(pt[2],pt[0],sizeof(MMG5_Tetra));
-    newtet2[2]=iel;
-
-    if ( pt[0]->xt ) {
-        pxt0 = &mesh->xtetra[pt[0]->xt];
-        memcpy(&xt[0],pxt0,sizeof(MMG5_xTetra));
-        memcpy(&xt[1],pxt0,sizeof(MMG5_xTetra));
-        memcpy(&xt[2],pxt0,sizeof(MMG5_xTetra));
-    }
-    else {
-        pxt0 = 0;
-        memset(&xt[0],0,sizeof(MMG5_xTetra));
-        memset(&xt[1],0,sizeof(MMG5_xTetra));
-        memset(&xt[2],0,sizeof(MMG5_xTetra));
-    }
-
-    /* Update vertices and xt fields */
-    pt[0]->v[tau2[1]] = pt[1]->v[tau2[2]] = pt[2]->v[tau2[3]] = (*ip);
-
-    xt[0].tag[taued[0]]  = 0;  xt[0].edg[taued[0]] = 0;
-    xt[0].tag[taued[3]]  = 0;  xt[0].edg[taued[3]] = 0;
-    xt[0].tag[taued[4]]  = 0;  xt[0].edg[taued[4]] = 0;
-    xt[0].ref  [tau2[2]] = 0;  xt[0].ref [tau2[3]] = 0;
-    xt[0].ftag [tau2[2]] = 0;  xt[0].ftag[tau2[3]] = 0;
-    MG_SET(xt[0].ori, tau2[2]);  MG_SET(xt[0].ori, tau2[3]);
-
-    xt[1].tag[taued[1]]  = 0;  xt[1].edg[taued[1]] = 0;
-    xt[1].tag[taued[3]]  = 0;  xt[1].edg[taued[3]] = 0;
-    xt[1].tag[taued[5]]  = 0;  xt[1].edg[taued[5]] = 0;
-    xt[1].ref  [tau2[1]] = 0;  xt[1].ref [tau2[3]] = 0;
-    xt[1].ftag [tau2[1]] = 0;  xt[1].ftag[tau2[3]] = 0;
-    MG_SET(xt[1].ori, tau2[1]);  MG_SET(xt[1].ori, tau2[3]);
-
-    xt[2].tag[taued[2]]  = 0;  xt[2].edg[taued[2]] = 0;
-    xt[2].tag[taued[4]]  = 0;  xt[2].edg[taued[4]] = 0;
-    xt[2].tag[taued[5]]  = 0;  xt[2].edg[taued[5]] = 0;
-    xt[2].ref  [tau2[1]] = 0;  xt[2].ref [tau2[2]] = 0;
-    xt[2].ftag [tau2[1]] = 0;  xt[2].ftag[tau2[2]] = 0;
-    MG_SET(xt[2].ori, tau2[1]);  MG_SET(xt[2].ori, tau2[2]);
-
-    /* Assignation of the xt fields to the appropriate tets */
-    memset(isxt,0,3*sizeof(char));
-    for (i=0; i<4; i++) {
-        if ( xt[0].ref[i] || xt[0].ftag[i] ) isxt[0] = 1;
-        if ( xt[1].ref[i] || xt[1].ftag[i] ) isxt[1] = 1;
-        if ( xt[2].ref[i] || xt[2].ftag[i] ) isxt[2] = 1;
-    }
-    if ( mesh->info.sing ) {
-        for (i=0; i<6; i++) {
-            if ( xt[0].edg[i] || xt[0].tag[i] ) isxt[0] = 1;
-            if ( xt[1].edg[i] || xt[1].tag[i] ) isxt[1] = 1;
-            if ( xt[2].edg[i] || xt[2].tag[i] ) isxt[2] = 1;
-        }
-    }
-
-    if ( pt[0]->xt ) {
-        if ( isxt[0] ) {
-            memcpy(pxt0,&xt[0],sizeof(MMG5_xTetra));
-            for (i=1; i<3; i++) {
-                if ( isxt[i] ) {
-                    mesh->xt++;
-                    if ( mesh->xt > mesh->xtmax ) {
-                        /* realloc of xtetras table */
-                        _MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
-                                     "larger xtetra table",
-                                     mesh->xt--;
-                                     return(-1));
-                    }
-                    pt[i]->xt = mesh->xt;
-                    pxt0 = &mesh->xtetra[mesh->xt];
-                    memcpy(pxt0,&xt[i],sizeof(MMG5_xTetra));
-                }
-                else {
-                    pt[i]->xt = 0;
-                }
-            }
-        }
-        else {
-            firstxt = 1;
-            for (i=1; i<3; i++) {
-                if ( isxt[i] ) {
-                    if ( firstxt ) {
-                        firstxt = 0;
-                        pt[i]->xt = pt[0]->xt;
-                        pxt0 = &mesh->xtetra[(pt[i])->xt];
-                        memcpy(pxt0,&xt[i],sizeof(MMG5_xTetra));
-                    }
-                    else {
-                        mesh->xt++;
-                        if ( mesh->xt > mesh->xtmax ) {
-                            /* realloc of xtetras table */
-                            _MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
-                                         "larger xtetra table",
-                                         mesh->xt--;
-                                         return(-1));
-                        }
-                        pt[i]->xt = mesh->xt;
-                        pxt0 = &mesh->xtetra[mesh->xt];
-                        memcpy(pxt0,&xt[i],sizeof(MMG5_xTetra));
-                    }
-                }
-                else {
-                    pt[i]->xt = 0;
-                }
-            }
-            pt[0]->xt = 0;
-        }
-    }
-
-    /* Quality update */
-    pt[0]->qual=_MMG5_orcal(mesh,newtet2[0]);
-    pt[1]->qual=_MMG5_orcal(mesh,newtet2[1]);
-    pt[2]->qual=_MMG5_orcal(mesh,newtet2[2]);
-
-    /* Update of adjacency relations */
-    adja = &mesh->adja[4*(newtet2[0]-1)+1];
-    for ( i=0; i<4; i++) {
-        adj[i] = adja[i];
-    }
-    adja[tau2[2]] = 4*newtet2[1]+tau2[1];
-    adja[tau2[3]] = 4*newtet2[2]+tau2[1];
-
-    adja = &mesh->adja[4*(newtet2[1]-1)+1];
-    adja[tau2[2]] = adj[tau2[2]];
-    adja[tau2[1]] = 4*newtet2[0]+tau2[2];
-    adja[tau2[3]] = 4*newtet2[2]+tau2[2];
-    if ( adj[tau2[2]] )
-        mesh->adja[4*(adj[tau2[2]]/4-1)+adj[tau2[2]]%4+1] = 4*newtet2[1]+tau2[2];
-
-    adja = &mesh->adja[4*(newtet2[2]-1)+1];
-    adja[tau2[3]] = adj[tau2[3]];
-    adja[tau2[1]] = 4*newtet2[0]+tau2[3];
-    adja[tau2[2]] = 4*newtet2[1]+tau2[3];
-    if ( adj[tau2[3]] )
-        mesh->adja[4*(adj[tau2[3]]/4-1)+adj[tau2[3]]%4+1] = 4*newtet2[2]+tau2[3];
-
-    if ( iq0==ip0 ) {
-        assert( iq1==ip2 && iq2==ip1 );
-        mesh->adja[4*(newtet[0] -1)+ifac +1] = 4*newtet2[0]+ifac2;
-        mesh->adja[4*(newtet[1] -1)+ifac +1] = 4*newtet2[2]+ifac2;
-        mesh->adja[4*(newtet[2] -1)+ifac +1] = 4*newtet2[1]+ifac2;
-        mesh->adja[4*(newtet2[0]-1)+ifac2+1] = 4*newtet[0] +ifac;
-        mesh->adja[4*(newtet2[2]-1)+ifac2+1] = 4*newtet[1] +ifac;
-        mesh->adja[4*(newtet2[1]-1)+ifac2+1] = 4*newtet[2] +ifac;
-    }
-    else if ( iq1==ip1 ) {
-        assert( iq0==ip2 && iq2==ip0 );
-        mesh->adja[4*(newtet[0] -1)+ifac +1] = 4*newtet2[2]+ifac2;
-        mesh->adja[4*(newtet[1] -1)+ifac +1] = 4*newtet2[1]+ifac2;
-        mesh->adja[4*(newtet[2] -1)+ifac +1] = 4*newtet2[0]+ifac2;
-        mesh->adja[4*(newtet2[2]-1)+ifac2+1] = 4*newtet[0] +ifac;
-        mesh->adja[4*(newtet2[1]-1)+ifac2+1] = 4*newtet[1] +ifac;
-        mesh->adja[4*(newtet2[0]-1)+ifac2+1] = 4*newtet[2] +ifac;
-    }
-    else {
-        assert( iq2==ip2 && iq0==ip1 && iq1==ip0 );
-        mesh->adja[4*(newtet[0] -1)+ifac +1] = 4*newtet2[1]+ifac2;
-        mesh->adja[4*(newtet[1] -1)+ifac +1] = 4*newtet2[0]+ifac2;
-        mesh->adja[4*(newtet[2] -1)+ifac +1] = 4*newtet2[2]+ifac2;
-        mesh->adja[4*(newtet2[1]-1)+ifac2+1] = 4*newtet[0] +ifac;
-        mesh->adja[4*(newtet2[0]-1)+ifac2+1] = 4*newtet[1] +ifac;
-        mesh->adja[4*(newtet2[2]-1)+ifac2+1] = 4*newtet[2] +ifac;
-    }
-
-    return(tau[1]);
-}
-#endif
 
 /** Split a tetra in 4 tetras by introducing its barycenter
     FOR NOW : flags, that tell which edge should be split, are not updated (erased) : UPDATE NEEDED ?*/
@@ -3092,16 +2579,6 @@ int _MMG5_split4bar(MMG5_pMesh mesh, MMG5_pSol met, int k) {
         if ( xt[2].ref[i] || xt[2].ftag[i] ) isxt[2] = 1;
         if ( xt[3].ref[i] || xt[3].ftag[i] ) isxt[3] = 1;
     }
-#ifdef SINGUL
-    if ( mesh->info.sing ) {
-        for (i=0; i<6; i++) {
-            if ( xt[0].edg[i] || xt[0].tag[i] ) isxt[0] = 1;
-            if ( xt[1].edg[i] || xt[1].tag[i] ) isxt[1] = 1;
-            if ( xt[2].edg[i] || xt[2].tag[i] ) isxt[2] = 1;
-            if ( xt[3].edg[i] || xt[3].tag[i] ) isxt[3] = 1;
-        }
-    }
-#endif
 
     if ( pt[0]->xt ) {
         if ( isxt[0] ) {
@@ -3164,243 +2641,6 @@ int _MMG5_split4bar(MMG5_pMesh mesh, MMG5_pSol met, int k) {
 
     return(1);
 }
-
-#ifdef SINGUL
-/** Split a tetra in 4 tetras by introducing a point o whose barycentric coordinates cb
- *  are known.
- *  Update adjacency relations */
-int _MMG5_split4cb(MMG5_pMesh mesh, MMG5_pSol met, int k, double o[3], double cb[4], int *ip ) {
-    MMG5_pTetra        pt[4];
-    MMG5_xTetra        xt[4];
-    MMG5_pxTetra       pxt0;
-    double        hnew;
-    int           i,iel,*adja, adj[4],newtet[4];
-    unsigned char isxt[4],firstxt;
-
-    pt[0] = &mesh->tetra[k];
-    pt[0]->flag = 0;
-    newtet[0]=k;
-
-    hnew = 0.0;
-    if ( met->m ) {
-        for ( i=0; i<4; i++) {
-            (*ip)    = pt[0]->v[i];
-            hnew += cb[i]*met->m[(*ip)];
-        }
-    }
-
-    (*ip) = _MMG5_newPt(mesh,o,0);
-    if ( !(*ip) ) {
-        fprintf(stdout,"%s:%d: Error: unable to allocate a new point\n"
-                ,__FILE__,__LINE__);
-        return(0);
-    }
-    if ( met->m )  met->m[(*ip)] = hnew;
-
-    /* create 3 new tetras */
-    iel = _MMG5_newElt(mesh);
-    if ( !iel ) {
-        _MMG5_TETRA_REALLOC(mesh,iel,mesh->gap,
-                      printf("  ## Error: unable to allocate a new element.\n");
-                      _MMG5_INCREASE_MEM_MESSAGE();
-                      _MMG5_delPt(mesh,(*ip));
-                      return(0));
-        pt[0] = &mesh->tetra[newtet[0]];
-    }
-    pt[1] = &mesh->tetra[iel];
-    pt[1] = memcpy(pt[1],pt[0],sizeof(MMG5_Tetra));
-    newtet[1]=iel;
-
-    iel = _MMG5_newElt(mesh);
-    if ( !iel ) {
-        _MMG5_TETRA_REALLOC(mesh,iel,mesh->gap,
-                      printf("  ## Error: unable to allocate a new element.\n");
-                      _MMG5_INCREASE_MEM_MESSAGE();
-                      _MMG5_delPt(mesh,(*ip));
-                      _MMG5_delElt(mesh,newtet[1]);
-                      return(0));
-        pt[0] = &mesh->tetra[newtet[0]];
-        pt[1] = &mesh->tetra[newtet[1]];
-    }
-    pt[2] = &mesh->tetra[iel];
-    pt[2] = memcpy(pt[2],pt[0],sizeof(MMG5_Tetra));
-    newtet[2]=iel;
-
-    iel = _MMG5_newElt(mesh);
-    if ( !iel ) {
-        _MMG5_TETRA_REALLOC(mesh,iel,mesh->gap,
-                      printf("  ## Error: unable to allocate a new element.\n");
-                      _MMG5_INCREASE_MEM_MESSAGE();
-                      _MMG5_delPt(mesh,(*ip));
-                      _MMG5_delElt(mesh,newtet[1]);
-                      _MMG5_delElt(mesh,newtet[2]);
-                      return(0));
-        pt[0] = &mesh->tetra[newtet[0]];
-        pt[1] = &mesh->tetra[newtet[1]];
-        pt[2] = &mesh->tetra[newtet[2]];
-    }
-    pt[3] = &mesh->tetra[iel];
-    pt[3] = memcpy(pt[3],pt[0],sizeof(MMG5_Tetra));
-    newtet[3]=iel;
-
-    memset(&xt[0],0, sizeof(MMG5_xTetra));
-    memset(&xt[1],0, sizeof(MMG5_xTetra));
-    memset(&xt[2],0, sizeof(MMG5_xTetra));
-    memset(&xt[3],0, sizeof(MMG5_xTetra));
-    pxt0 = 0;
-    if ( pt[0]->xt ) {
-        pxt0 = &mesh->xtetra[pt[0]->xt];
-        memcpy(&xt[0],pxt0,sizeof(MMG5_xTetra));
-        memcpy(&xt[1],pxt0,sizeof(MMG5_xTetra));
-        memcpy(&xt[2],pxt0,sizeof(MMG5_xTetra));
-        memcpy(&xt[3],pxt0,sizeof(MMG5_xTetra));
-    }
-
-    /* Update vertices and xt fields */
-    pt[0]->v[0] = pt[1]->v[1] = pt[2]->v[2] = pt[3]->v[3] = (*ip);
-
-    xt[0].tag[0]  = 0;  xt[0].edg[0]  = 0;
-    xt[0].tag[1]  = 0;  xt[0].edg[1]  = 0;
-    xt[0].tag[2]  = 0;  xt[0].edg[2]  = 0;
-    xt[0].ref [1] = 0;  xt[0].ref [2] = 0;  xt[0].ref [3] = 0;
-    xt[0].ftag[1] = 0;  xt[0].ftag[2] = 0;  xt[0].ftag[3] = 0;
-    MG_SET(xt[0].ori, 1);  MG_SET(xt[0].ori, 2);  MG_SET(xt[0].ori, 3);
-
-    xt[1].tag[0]  = 0;  xt[1].edg[0]  = 0;
-    xt[1].tag[3]  = 0;  xt[1].edg[3]  = 0;
-    xt[1].tag[4]  = 0;  xt[1].edg[4]  = 0;
-    xt[1].ref [0] = 0;  xt[1].ref [2] = 0;  xt[1].ref [3] = 0;
-    xt[1].ftag[0] = 0;  xt[1].ftag[2] = 0;  xt[1].ftag[3] = 0;
-    MG_SET(xt[1].ori, 0);  MG_SET(xt[1].ori, 2);  MG_SET(xt[1].ori, 3);
-
-    xt[2].tag[1]  = 0;  xt[2].edg[1]  = 0;
-    xt[2].tag[3]  = 0;  xt[2].edg[3]  = 0;
-    xt[2].tag[5]  = 0;  xt[2].edg[5]  = 0;
-    xt[2].ref [0] = 0;  xt[2].ref [1] = 0;  xt[2].ref [3] = 0;
-    xt[2].ftag[0] = 0;  xt[2].ftag[1] = 0;  xt[2].ftag[3] = 0;
-    MG_SET(xt[2].ori, 0);  MG_SET(xt[2].ori, 1);  MG_SET(xt[2].ori, 3);
-
-    xt[3].tag[2]  = 0;  xt[3].edg[2]  = 0;
-    xt[3].tag[4]  = 0;  xt[3].edg[4]  = 0;
-    xt[3].tag[5]  = 0;  xt[3].edg[5]  = 0;
-    xt[3].ref [0] = 0;  xt[3].ref [1] = 0;  xt[3].ref [2] = 0;
-    xt[3].ftag[0] = 0;  xt[3].ftag[1] = 0;  xt[3].ftag[2] = 0;
-    MG_SET(xt[3].ori, 0);  MG_SET(xt[3].ori, 1);  MG_SET(xt[3].ori, 2);
-
-    /* Assignation of the xt fields to the appropriate tets */
-    memset(isxt,0,4*sizeof(char));
-    for (i=0; i<4; i++) {
-        if ( xt[0].ref[i] || xt[0].ftag[i] ) isxt[0] = 1;
-        if ( xt[1].ref[i] || xt[1].ftag[i] ) isxt[1] = 1;
-        if ( xt[2].ref[i] || xt[2].ftag[i] ) isxt[2] = 1;
-        if ( xt[3].ref[i] || xt[3].ftag[i] ) isxt[3] = 1;
-    }
-    if ( mesh->info.sing ) {
-        for (i=0; i<6; i++) {
-            if ( xt[0].edg[i] || xt[0].tag[i] ) isxt[0] = 1;
-            if ( xt[1].edg[i] || xt[1].tag[i] ) isxt[1] = 1;
-            if ( xt[2].edg[i] || xt[2].tag[i] ) isxt[2] = 1;
-            if ( xt[3].edg[i] || xt[3].tag[i] ) isxt[3] = 1;
-        }
-    }
-
-    if ( pt[0]->xt ) {
-        if ( isxt[0] ) {
-            memcpy(pxt0,&xt[0],sizeof(MMG5_xTetra));
-            for (i=1; i<4; i++) {
-                if ( isxt[i] ) {
-                    if ( mesh->xt > mesh->xtmax ) {
-                        /* realloc of xtetras table */
-                        _MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
-                                     "larger xtetra table",
-                                     mesh->xt--;
-                                     printf("  Exit program.\n");
-                                     return(0));
-                    }
-                    pt[i]->xt = mesh->xt;
-                    pxt0 = &mesh->xtetra[mesh->xt];
-                    memcpy(pxt0,&xt[i],sizeof(MMG5_xTetra));
-                }
-                else {
-                    pt[i]->xt = 0;
-                }
-            }
-        }
-        else {
-            firstxt = 1;
-            for (i=1; i<4; i++) {
-                if ( isxt[i] ) {
-                    if ( firstxt ) {
-                        firstxt = 0;
-                        pt[i]->xt = pt[0]->xt;
-                        pxt0 = &mesh->xtetra[(pt[i])->xt];
-                        memcpy(pxt0,&xt[i],sizeof(MMG5_xTetra));
-                    }
-                    else {
-                        if ( mesh->xt > mesh->xtmax ) {
-                            /* realloc of xtetras table */
-                            _MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
-                                         "larger xtetra table",
-                                         mesh->xt--;
-                                         return(0));
-                        }
-                        pt[i]->xt = mesh->xt;
-                        pxt0 = &mesh->xtetra[mesh->xt];
-                        memcpy(pxt0,&xt[i],sizeof(MMG5_xTetra));
-                    }
-                }
-                else {
-                    pt[i]->xt = 0;
-                }
-            }
-            pt[0]->xt = 0;
-        }
-    }
-
-    /* Update of adjacency relations */
-    adja = &mesh->adja[4*(k-1)+1];
-    for ( i=0; i<4; i++ ) {
-        adj[i] = adja[i];
-    }
-
-    adja[1] = 4*newtet[1];
-    adja[2] = 4*newtet[2];
-    adja[3] = 4*newtet[3];
-
-    adja = &mesh->adja[4*(newtet[1]-1)+1];
-    adja[1] = adj[1];
-    adja[0] = 4*newtet[0] + 1;
-    adja[2] = 4*newtet[2] + 1;
-    adja[3] = 4*newtet[3] + 1;
-    if ( adj[1] )
-        mesh->adja[4*(adj[1]/4-1)+adj[1]%4+1] = 4*newtet[1]+1;
-
-    adja = &mesh->adja[4*(newtet[2]-1)+1];
-    adja[2] = adj[2];
-    adja[0] = 4*newtet[0] + 2;
-    adja[1] = 4*newtet[1] + 2;
-    adja[3] = 4*newtet[3] + 2;
-
-    if ( adj[2] )
-        mesh->adja[4*(adj[2]/4-1)+adj[2]%4+1] = 4*newtet[2]+2;
-
-    adja = &mesh->adja[4*(newtet[3]-1)+1];
-    adja[3] = adj[3];
-    adja[0] = 4*newtet[0] + 3;
-    adja[1] = 4*newtet[1] + 3;
-    adja[2] = 4*newtet[2] + 3;
-    if ( adj[3] )
-        mesh->adja[4*(adj[3]/4-1)+adj[3]%4+1] = 4*newtet[3]+3;
-
-    /* Quality update */
-    pt[0]->qual=_MMG5_orcal(mesh,newtet[0]);
-    pt[1]->qual=_MMG5_orcal(mesh,newtet[1]);
-    pt[2]->qual=_MMG5_orcal(mesh,newtet[2]);
-    pt[3]->qual=_MMG5_orcal(mesh,newtet[3]);
-
-    return(1);
-}
-#endif
 
 /** Split 4 edges in a configuration when 3 lie on the same face */
 void _MMG5_split4sf(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
@@ -3620,15 +2860,6 @@ void _MMG5_split4sf(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
             if ( (xt[j]).ref[i] || xt[j].ftag[i] ) isxt[j] = 1;
         }
     }
-#ifdef SINGUL
-    if ( mesh->info.sing ) {
-        for (i=0; i<6; i++) {
-            for (j=0; j<6; j++) {
-                if ( xt[j].edg[i] || xt[j].tag[i] ) isxt[j] = 1;
-            }
-        }
-    }
-#endif
 
     if ( pt[0]->xt ) {
         if ( isxt[0] ) {
@@ -3877,15 +3108,6 @@ void _MMG5_split4op(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
             if ( (xt[j]).ref[i] || xt[j].ftag[i] ) isxt[j] = 1;
         }
     }
-#ifdef SINGUL
-    if ( mesh->info.sing ) {
-        for (i=0; i<6; i++) {
-            for (j=0; j<6; j++) {
-                if ( xt[j].edg[i] || xt[j].tag[i] ) isxt[j] = 1;
-            }
-        }
-    }
-#endif
 
     // In this case, at least one of the 4 created tets must have a special field
     if ( pt[0]->xt ) {
@@ -4136,15 +3358,6 @@ void _MMG5_split5(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
             if ( (xt[j]).ref[i] || xt[j].ftag[i] ) isxt[j] = 1;
         }
     }
-#ifdef SINGUL
-    if ( mesh->info.sing ) {
-        for (i=0; i<6; i++) {
-            for (j=0; j<7; j++) {
-                if ( xt[j].edg[i] || xt[j].tag[i] ) isxt[j] = 1;
-            }
-        }
-    }
-#endif
 
     if ( pt[0]->xt ) {
         if ( isxt[0] ) {
@@ -4251,13 +3464,6 @@ void _MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
         for(i=0;i<4;i++ ) {
             if ( (xt.ref[i]) || xt.ftag[i] ) isxt0 = 1;
         }
-#ifdef SINGUL
-        if ( mesh->info.sing ) {
-            for (i=0; i<6; i++) {
-                if ( xt.edg[i] || xt.tag[i] ) isxt0 = 1;
-            }
-        }
-#endif
 
         if ( isxt0 ) {
             memcpy(pxt,&xt,sizeof(MMG5_xTetra));
@@ -4282,13 +3488,6 @@ void _MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
         for (i=0; i<4; i++) {
             if ( (xt.ref[i]) || xt.ftag[i]) isxt = 1;
         }
-#ifdef SINGUL
-        if ( mesh->info.sing ) {
-            for (i=0; i<6; i++) {
-                if ( xt.edg[i] || xt.tag[i] ) isxt = 1;
-            }
-        }
-#endif
 
         pt[1]->xt = 0;
         if ( isxt ) {
@@ -4329,13 +3528,6 @@ void _MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
         for (i=0; i<4;i++) {
             if ( (xt.ref[i]) || xt.ftag[i]) isxt = 1;
         }
-#ifdef SINGUL
-        if ( mesh->info.sing ) {
-            for (i=0; i<6; i++) {
-                if ( xt.edg[i] || xt.tag[i] ) isxt = 1;
-            }
-        }
-#endif
 
         pt[2]->xt = 0;
         if ( isxt ) {
@@ -4377,13 +3569,6 @@ void _MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
         for (i=0; i<4; i++) {
             if ( (xt.ref[i]) || xt.ftag[i]) isxt = 1;
         }
-#ifdef SINGUL
-        if ( mesh->info.sing ) {
-            for (i=0; i<6; i++) {
-                if ( xt.edg[i] || xt.tag[i] ) isxt = 1;
-            }
-        }
-#endif
 
         pt[3]->xt = 0;
         if ( isxt ) {

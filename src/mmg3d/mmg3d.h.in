@@ -56,19 +56,11 @@
 #define MG_SMSGN(a,b)  (((double)(a)*(double)(b) > (0.0)) ? (1) : (0))
 
 /** Free allocated pointers of mesh and sol structure and return value val */
-#ifdef SINGUL
-#define _MMG5_RETURN_AND_FREE(mesh,met,sing,val)do  \
-    {                                               \
-        MMG5_Free_all(mesh,met,sing);               \
-        return(val);                                \
-    }while(0)
-#else
-#define _MMG5_RETURN_AND_FREE(mesh,met,sing,val)do  \
+#define _MMG5_RETURN_AND_FREE(mesh,met,val)do       \
     {                                               \
         MMG5_Free_all(mesh,met);                    \
         return(val);                                \
     }while(0)
-#endif
 
 /** Error message when lack of memory */
 #define _MMG5_INCREASE_MEM_MESSAGE() do                         \
@@ -324,9 +316,6 @@
 #define _MMG5_LMAX      10240
 #define _MMG5_BADKAL    0.2
 #define _MMG5_NULKAL    1.e-30
-#ifdef SINGUL
-#define _MMG5_EPS2      1.e-12
-#endif
 
 #define _MMG5_NPMAX  1000000 //200000
 #define _MMG5_NAMAX   200000 //40000
@@ -350,9 +339,6 @@
 #define  MG_BDY       (1 << 4)        /**< 16  boundary entity */
 #define  MG_CRN       (1 << 5)        /**< 32  corner         */
 #define  MG_NUL       (1 << 6)        /**< 64  vertex removed */
-#ifdef SINGUL
-#define  MG_SGL       (1 << 7)        /**< 128 inserted singularity */
-#endif
 
 #define MG_PLUS    2
 #define MG_MINUS   3
@@ -405,16 +391,6 @@ typedef struct {
     int    *link;
 } _MMG5_Bucket;
 typedef _MMG5_Bucket * _MMG5_pBucket;
-
-#ifdef SINGUL
-typedef struct {
-    double   c[3],cb[4]; /**< c: coor of entrance/exit point, cb: bary coor of entrance/exit */
-    int      kel,key; /**< kel: elt in which we travel, key: location of entrance or exit */
-    int      np; /**< global indice of entrance point */
-    char     tag; /**< tag of edge */
-
-} _MMG5_Travel;
-#endif
 
 /* bucket */
 _MMG5_pBucket _MMG5_newBucket(MMG5_pMesh ,int );
@@ -515,7 +491,7 @@ int    _MMG5_movbdyrefpt(MMG5_pMesh mesh, int *listv, int ilistv, int *lists, in
 int    _MMG5_movbdynompt(MMG5_pMesh mesh, int *listv, int ilistv, int *lists, int ilists);
 int    _MMG5_movbdyridpt(MMG5_pMesh mesh, int *listv, int ilistv, int *lists, int ilists);
 double _MMG5_caltri(MMG5_pMesh mesh,MMG5_pTria ptt);
-int  _MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSingul sin);
+int  _MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met);
 int  _MMG5_unscaleMesh(MMG5_pMesh mesh,MMG5_pSol met);
 int  _MMG5_chkswpbdy(MMG5_pMesh mesh,int *list,int ilist,int it1,int it2);
 int  _MMG5_swpbdy(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int it1,_MMG5_pBucket bucket);
@@ -550,20 +526,6 @@ int  _MMG5_saveLibraryMesh(MMG5_pMesh mesh);
 int _MMG5_renumbering(int vertBoxNbr, MMG5_pMesh mesh, MMG5_pSol sol);
 #endif
 int _MMG5_scotchCall(MMG5_pMesh mesh, MMG5_pSol sol);
-
-#ifdef SINGUL
-int  _MMG5_inserSingul(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pSingul singul);
-int  _MMG5_creaEdge(MMG5_pMesh mesh, MMG5_pSol met, _MMG5_Travel *trav, char tag);
-int  _MMG5_creaPoint(MMG5_pMesh mesh, MMG5_pSol met,int iel, double c[3], double cb[4], char tag);
-int  _MMG5_colSing(MMG5_pMesh mesh,MMG5_pSol met);
-int  _MMG5_seekEdge(MMG5_pMesh mesh, MMG5_pSol met, MMG5_psPoint ppt0, MMG5_psPoint ppt1,
-              _MMG5_Travel *trav, int *lastet,int*,int*);
-int  _MMG5_seekPoint(MMG5_pMesh mesh, MMG5_psPoint ppt, double cb[4],int*,int*);
-int  _MMG5_solveUnsignedTet(MMG5_pMesh mesh,MMG5_pSol met);
-int  _MMG5_split3cb(MMG5_pMesh mesh, MMG5_pSol met, int k, int ifac, double o[3],double cb[4], int *ip);
-int  _MMG5_split4cb(MMG5_pMesh mesh, MMG5_pSol met, int k, double o[3], double cb[4],int *ip);
-int  _MMG5_swap23(MMG5_pMesh mesh,int k, int ip);
-#endif
 
 int    _MMG5_meancur(MMG5_pMesh mesh,int np,double c[3],int ilist,int *list,double h[3]);
 double _MMG5_surftri(MMG5_pMesh,int,int);

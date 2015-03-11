@@ -40,24 +40,14 @@ mytime         MMG5_ctim[TIMEMAX];
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the sol structure.
- * \param sing pointer toward the sing structure (only for insertion of
- * singularities mode).
  *
  * Deallocations before return.
  *
  */
 void MMG5_Free_all(MMG5_pMesh mesh,MMG5_pSol met
-#ifdef SINGUL
-                   ,MMG5_pSingul singul
-#endif
     ){
 
-#ifdef SINGUL
-    MMG5_Free_structures(mesh,met,singul);
-#else
     MMG5_Free_structures(mesh,met);
-#endif
-
 }
 
 /**
@@ -96,7 +86,6 @@ static void _MMG5_endcod() {
 int main(int argc,char *argv[]) {
     MMG5_Mesh      mesh;
     MMG5_Sol       met;
-    MMG5_Singul    sing;
     int       ier;
     char      stim[32];
 
@@ -118,20 +107,13 @@ int main(int argc,char *argv[]) {
     /* assign default values */
     memset(&mesh,0,sizeof(MMG5_Mesh));
     memset(&met,0,sizeof(MMG5_Sol));
-#ifdef SINGUL
-    memset(&sing,0,sizeof(MMG5_Singul));
-#endif
 
     MMG5_Init_parameters(&mesh);
 
     met.size      = 1;
 
     /* command line */
-#ifdef SINGUL
-    if ( !MMG5_parsar(argc,argv,&mesh,&met,&sing) )  return(MMG5_STRONGFAILURE);
-#else
     if ( !MMG5_parsar(argc,argv,&mesh,&met) )  return(MMG5_STRONGFAILURE);
-#endif
 #ifdef USE_SCOTCH
     _MMG5_warnScotch(&mesh);
 #endif
@@ -141,38 +123,22 @@ int main(int argc,char *argv[]) {
     chrono(ON,&MMG5_ctim[1]);
     _MMG5_warnOrientation(&mesh);
     /* read mesh file */
-    if ( !MMG5_loadMesh(&mesh) ) _MMG5_RETURN_AND_FREE(&mesh,&met,&sing,MMG5_STRONGFAILURE);
+    if ( !MMG5_loadMesh(&mesh) ) _MMG5_RETURN_AND_FREE(&mesh,&met,MMG5_STRONGFAILURE);
 
     /* read metric if any */
     ier = MMG5_loadMet(&mesh,&met);
     if ( !ier )
-        _MMG5_RETURN_AND_FREE(&mesh,&met,&sing,MMG5_STRONGFAILURE);
+        _MMG5_RETURN_AND_FREE(&mesh,&met,MMG5_STRONGFAILURE);
     else if ( ier > 0 && met.np != mesh.np ) {
         fprintf(stdout,"  ## WARNING: WRONG SOLUTION NUMBER. IGNORED\n");
         _MMG5_DEL_MEM(&mesh,met.m,(met.size*met.npmax+1)*sizeof(double));
         met.np = 0;
     } else if ( met.size!=1 ) {
         fprintf(stdout,"  ## ERROR: ANISOTROPIC METRIC NOT IMPLEMENTED.\n");
-        _MMG5_RETURN_AND_FREE(&mesh,&met,&sing,MMG5_STRONGFAILURE);
+        _MMG5_RETURN_AND_FREE(&mesh,&met,MMG5_STRONGFAILURE);
     }
-#ifdef SINGUL
-    if ( mesh.info.sing ) {
-        if ( !mesh.info.iso ) {
-            if ( !sing.namein )
-                fprintf(stdout,"  ## WARNING: NO SINGULARITIES PROVIDED.\n");
-            else
-                if ( !MMG5_loadSingul(&mesh,&sing) )
-                    _MMG5_RETURN_AND_FREE(&mesh,&met,&sing,MMG5_STRONGFAILURE);
-        }
-        else if ( sing.namein ) {
-            fprintf(stdout,"  ## WARNING: SINGULARITIES MUST BE INSERTED IN");
-            fprintf(stdout," A PRE-REMESHING PROCESS.\n");
-            fprintf(stdout,"              FILE %s IGNORED\n",sing.namein);
-        }
-    }
-#endif
     if ( !MMG5_parsop(&mesh,&met) )
-        _MMG5_RETURN_AND_FREE(&mesh,&met,&sing,MMG5_LOWFAILURE);
+        _MMG5_RETURN_AND_FREE(&mesh,&met,MMG5_LOWFAILURE);
 
     chrono(OFF,&MMG5_ctim[1]);
     printim(MMG5_ctim[1].gdif,stim);
@@ -188,39 +154,22 @@ int main(int argc,char *argv[]) {
             MG_STR,MG_VER,MG_REL,MG_STR);
     if ( mesh.info.imprim )  fprintf(stdout,"\n  -- PHASE 1 : ANALYSIS\n");
 
-    if ( !_MMG5_scaleMesh(&mesh,&met,&sing) )
-        _MMG5_RETURN_AND_FREE(&mesh,&met,&sing,MMG5_STRONGFAILURE);
+    if ( !_MMG5_scaleMesh(&mesh,&met) )
+        _MMG5_RETURN_AND_FREE(&mesh,&met,MMG5_STRONGFAILURE);
     if ( mesh.info.iso ) {
         if ( !met.np ) {
             fprintf(stdout,"\n  ## ERROR: A VALID SOLUTION FILE IS NEEDED \n");
-            _MMG5_RETURN_AND_FREE(&mesh,&met,&sing,MMG5_STRONGFAILURE);
+            _MMG5_RETURN_AND_FREE(&mesh,&met,MMG5_STRONGFAILURE);
         }
         if ( !_MMG5_mmg3d2(&mesh,&met) )
-            _MMG5_RETURN_AND_FREE(&mesh,&met,&sing,MMG5_STRONGFAILURE);
+            _MMG5_RETURN_AND_FREE(&mesh,&met,MMG5_STRONGFAILURE);
     }
-
-#ifdef SINGUL
-    if ( mesh.info.sing ) {
-        if ( !mesh.info.iso ) {
-            if ( !met.np && !_MMG5_DoSol(&mesh,&met) )
-                _MMG5_RETURN_AND_FREE(&mesh,&met,&sing,MMG5_LOWFAILURE);
-            if ( !( ier=_MMG5_inserSingul(&mesh,&met,&sing) ) )
-                _MMG5_RETURN_AND_FREE(&mesh,&met,&sing,MMG5_STRONGFAILURE);
-            else if (ier > 0 ) {
-                chrono(OFF,&MMG5_ctim[2]);
-                printim(MMG5_ctim[2].gdif,stim);
-                fprintf(stdout,"  -- INSERTION OF SINGULARITIES COMPLETED.     %s\n\n",stim);
-                chrono(ON,&MMG5_ctim[2]);
-            }
-        }
-    }
-#endif
 
     if ( !mesh.info.iso && !met.np && !_MMG5_DoSol(&mesh,&met) )
-        _MMG5_RETURN_AND_FREE(&mesh,&met,&sing,MMG5_LOWFAILURE);
+        _MMG5_RETURN_AND_FREE(&mesh,&met,MMG5_LOWFAILURE);
 
     if ( !_MMG5_analys(&mesh) )
-        _MMG5_RETURN_AND_FREE(&mesh,&met,&sing,MMG5_LOWFAILURE);
+        _MMG5_RETURN_AND_FREE(&mesh,&met,MMG5_LOWFAILURE);
 
     if ( mesh.info.imprim > 3 && !mesh.info.iso && met.m ) _MMG5_prilen(&mesh,&met);
 
@@ -236,31 +185,22 @@ int main(int argc,char *argv[]) {
 
     /* renumerotation if available */
     if ( !_MMG5_scotchCall(&mesh,&met) )
-        _MMG5_RETURN_AND_FREE(&mesh,&met,&sing,MMG5_STRONGFAILURE);
-
-#ifdef SINGUL
-    if ( mesh.info.sing && (!mesh.info.iso) ) {
-        if ( _MMG5_colSing(&mesh,&met)<0 ) {
-            fprintf(stdout,"  ## Collapse of singularities problem.\n");
-            // _MMG5_RETURN_AND_FREE(&mesh,&met,&sing,MMG5_STRONGFAILURE);
-        }
-    }
-#endif
+        _MMG5_RETURN_AND_FREE(&mesh,&met,MMG5_STRONGFAILURE);
 
 
 #ifdef PATTERN
     if ( !_MMG5_mmg3d1_pattern(&mesh,&met) ) {
         if ( !(mesh.adja) && !_MMG5_hashTetra(&mesh,1) ) {
             fprintf(stdout,"  ## Hashing problem. Unable to save mesh.\n");
-            _MMG5_RETURN_AND_FREE(&mesh,&met,&sing,MMG5_STRONGFAILURE);
+            _MMG5_RETURN_AND_FREE(&mesh,&met,MMG5_STRONGFAILURE);
         }
         if ( !_MMG5_unscaleMesh(&mesh,&met) )
-            _MMG5_RETURN_AND_FREE(&mesh,&met,&sing,MMG5_STRONGFAILURE);
+            _MMG5_RETURN_AND_FREE(&mesh,&met,MMG5_STRONGFAILURE);
         if ( !MMG5_saveMesh(&mesh) )
-            _MMG5_RETURN_AND_FREE(&mesh,&met,&sing,MMG5_STRONGFAILURE);
+            _MMG5_RETURN_AND_FREE(&mesh,&met,MMG5_STRONGFAILURE);
         if ( met.m && !MMG5_saveMet(&mesh,&met) )
-            _MMG5_RETURN_AND_FREE(&mesh,&met,&sing,MMG5_STRONGFAILURE);
-        _MMG5_RETURN_AND_FREE(&mesh,&met,&sing,MMG5_LOWFAILURE);
+            _MMG5_RETURN_AND_FREE(&mesh,&met,MMG5_STRONGFAILURE);
+        _MMG5_RETURN_AND_FREE(&mesh,&met,MMG5_LOWFAILURE);
     }
 #else
     /* Pattern in iso mode, delauney otherwise */
@@ -268,46 +208,30 @@ int main(int argc,char *argv[]) {
         if( !_MMG5_mmg3d1_delone(&mesh,&met) ) {
             if ( !(mesh.adja) && !_MMG5_hashTetra(&mesh,1) ) {
                 fprintf(stdout,"  ## Hashing problem. Unable to save mesh.\n");
-                _MMG5_RETURN_AND_FREE(&mesh,&met,&sing,MMG5_STRONGFAILURE);
+                _MMG5_RETURN_AND_FREE(&mesh,&met,MMG5_STRONGFAILURE);
             }
             if ( !_MMG5_unscaleMesh(&mesh,&met) )
-                _MMG5_RETURN_AND_FREE(&mesh,&met,&sing,MMG5_STRONGFAILURE);
+                _MMG5_RETURN_AND_FREE(&mesh,&met,MMG5_STRONGFAILURE);
             if ( !MMG5_saveMesh(&mesh) )
-                _MMG5_RETURN_AND_FREE(&mesh,&met,&sing,MMG5_STRONGFAILURE);
+                _MMG5_RETURN_AND_FREE(&mesh,&met,MMG5_STRONGFAILURE);
             if ( met.m && !MMG5_saveMet(&mesh,&met) )
-                _MMG5_RETURN_AND_FREE(&mesh,&met,&sing,MMG5_STRONGFAILURE);
-            _MMG5_RETURN_AND_FREE(&mesh,&met,&sing,MMG5_LOWFAILURE);
+                _MMG5_RETURN_AND_FREE(&mesh,&met,MMG5_STRONGFAILURE);
+            _MMG5_RETURN_AND_FREE(&mesh,&met,MMG5_LOWFAILURE);
         }
     }
     else {
         if( !_MMG5_mmg3d1_pattern(&mesh,&met) ) {
             if ( !(mesh.adja) && !_MMG5_hashTetra(&mesh,1) ) {
                 fprintf(stdout,"  ## Hashing problem. Unable to save mesh.\n");
-                _MMG5_RETURN_AND_FREE(&mesh,&met,&sing,MMG5_STRONGFAILURE);
+                _MMG5_RETURN_AND_FREE(&mesh,&met,MMG5_STRONGFAILURE);
             }
             if ( !_MMG5_unscaleMesh(&mesh,&met) )
-                _MMG5_RETURN_AND_FREE(&mesh,&met,&sing,MMG5_STRONGFAILURE);
+                _MMG5_RETURN_AND_FREE(&mesh,&met,MMG5_STRONGFAILURE);
             if ( !MMG5_saveMesh(&mesh) )
-                _MMG5_RETURN_AND_FREE(&mesh,&met,&sing,MMG5_STRONGFAILURE);
+                _MMG5_RETURN_AND_FREE(&mesh,&met,MMG5_STRONGFAILURE);
             if ( met.m && !MMG5_saveMet(&mesh,&met) )
-                _MMG5_RETURN_AND_FREE(&mesh,&met,&sing,MMG5_STRONGFAILURE);
-            _MMG5_RETURN_AND_FREE(&mesh,&met,&sing,MMG5_LOWFAILURE);
-        }
-    }
-#endif
-
-
-#ifdef SINGUL
-    if ( mesh.info.sing && (!mesh.info.iso) ) {
-        if ( !_MMG5_solveUnsignedTet(&mesh,&met) ) {
-            fprintf(stdout,"  ## Solve of undetermined tetrahedra problem.\n");
-            if ( !_MMG5_unscaleMesh(&mesh,&met) )
-                _MMG5_RETURN_AND_FREE(&mesh,&met,&sing,MMG5_STRONGFAILURE);
-            if ( !MMG5_saveMesh(&mesh) )
-                _MMG5_RETURN_AND_FREE(&mesh,&met,&sing,MMG5_STRONGFAILURE);
-            if ( met.m && !MMG5_saveMet(&mesh,&met) )
-                _MMG5_RETURN_AND_FREE(&mesh,&met,&sing,MMG5_STRONGFAILURE);
-            _MMG5_RETURN_AND_FREE(&mesh,&met,&sing,MMG5_LOWFAILURE);
+                _MMG5_RETURN_AND_FREE(&mesh,&met,MMG5_STRONGFAILURE);
+            _MMG5_RETURN_AND_FREE(&mesh,&met,MMG5_LOWFAILURE);
         }
     }
 #endif
@@ -327,16 +251,16 @@ int main(int argc,char *argv[]) {
     chrono(ON,&MMG5_ctim[1]);
     if ( mesh.info.imprim )  fprintf(stdout,"\n  -- WRITING DATA FILE %s\n",mesh.nameout);
     if ( !_MMG5_unscaleMesh(&mesh,&met) )
-        _MMG5_RETURN_AND_FREE(&mesh,&met,&sing,MMG5_STRONGFAILURE);
+        _MMG5_RETURN_AND_FREE(&mesh,&met,MMG5_STRONGFAILURE);
 
     if ( !MMG5_saveMesh(&mesh) )
-        _MMG5_RETURN_AND_FREE(&mesh,&met,&sing,MMG5_STRONGFAILURE);
+        _MMG5_RETURN_AND_FREE(&mesh,&met,MMG5_STRONGFAILURE);
 
     if ( !MMG5_saveMet(&mesh,&met) )
-        _MMG5_RETURN_AND_FREE(&mesh,&met,&sing,MMG5_STRONGFAILURE);
+        _MMG5_RETURN_AND_FREE(&mesh,&met,MMG5_STRONGFAILURE);
     chrono(OFF,&MMG5_ctim[1]);
     if ( mesh.info.imprim )  fprintf(stdout,"  -- WRITING COMPLETED\n");
 
     /* free mem */
-    _MMG5_RETURN_AND_FREE(&mesh,&met,&sing,MMG5_SUCCESS);
+    _MMG5_RETURN_AND_FREE(&mesh,&met,MMG5_SUCCESS);
 }

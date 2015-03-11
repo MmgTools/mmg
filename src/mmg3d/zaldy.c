@@ -175,19 +175,7 @@ void _MMG5_memOption(MMG5_pMesh mesh) {
         }
 
         /* if asked memory is lower than default _MMG5_NPMAX/_MMG5_NEMAX/_MMG5_NTMAX we take lower values */
-#ifdef SINGUL
-        /* Remarks:
-         * 1-- in insertion part, we have memory allocated to store *
-         * edges and singular points (in MMG5_Singul) but we don't need to take this *
-         * into account because xpoints and xtetra are free and need more memory *
-         * 2-- we need more xtetra so we increase the memory to save for triangles */
-        if ( mesh->info.sing )
-            ctri = 4;
-        else
-            ctri = 2;
-#else
         ctri = 2;
-#endif
 
         /* Euler-poincare: ne = 6*np; nt = 2*np; na = np/5 *
          * point+tria+tets+adja+adjt+sol+item *
