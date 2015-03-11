@@ -4,7 +4,8 @@ CTestConfig.cmake
 
 archives
 bin
-build.*/*
+build*/*
+build/*
 lib
 
 doc/doxygen/*/Doxyfile
