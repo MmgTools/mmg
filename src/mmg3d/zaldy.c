@@ -135,7 +135,7 @@ long long _MMG5_memSize (void) {
 
 #elif defined(__unix__) || defined(__unix) || defined(unix)
     mem = ((long long)sysconf(_SC_PHYS_PAGES))*
-        ((long long)sysconf(_SC_PAGEMMG5_SIZE));
+        ((long long)sysconf(_SC_PAGE_SIZE));
 #else
     printf("  ## WARNING: UNKNOWN SYSTEM, RECOVER OF MAXIMAL MEMORY NOT AVAILABLE.\n");
     return(0);
