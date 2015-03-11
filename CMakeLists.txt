@@ -104,7 +104,9 @@ ENDIF(NOT CMAKE_COMPILER_IS_CLANG)
 #####         Choose executable target to compile
 #####
 ###############################################################################
-SET ( BUILD "MMG3D" CACHE STRING
+SET ( CMAKE_BUILD_TYPE "Release" )
+
+SET ( BUILD "MMG" CACHE STRING
     "\"MMG3D\", \"MMGS\" or \"MMG\" to compile both MMGS and MMG3D" )
 
 IF ( BUILD MATCHES "MMGS" )
@@ -425,8 +427,10 @@ ENDIF()
 #####
 ###############################################################################
 IF ( BUILD_MMG3D OR BUILD_MMG )
-    OPTION ( BUILD_TESTING "Enable/Disable continuous integration" ON )
+    OPTION ( BUILD_TESTING "Enable/Disable continuous integration" OFF )
     IF(BUILD_TESTING)
+        MESSAGE(WARNING "Migration of the continuous integration is in progress and may not work.")
+
         # Run some tests twice with the output of the previous test as input
         OPTION ( RUN_AGAIN "Enable/Disable second run of some tests" ON )
         MARK_AS_ADVANCED(RUN_AGAIN)
@@ -522,7 +526,7 @@ IF(DOXYGEN_FOUND)
         # COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmgs/latex/refman.pdf ${CMAKE_CURRENT_SOURCE_DIR}
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmgs
         COMMENT "Generating MMGS API documentation with Doxygen.
-    Open up the doc/mmgs/html/index.html file to see it." VERBATIM
+    Open up the doc/doxygen/mmgs/html/index.html file to see it." VERBATIM
         )
     # MMG3D Documentation
     CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmg3d/Doxyfile.in ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmg3d/Doxyfile @ONLY)
@@ -532,14 +536,14 @@ IF(DOXYGEN_FOUND)
         # COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmg3d/latex/refman.pdf ${CMAKE_CURRENT_SOURCE_DIR}
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmg3d
         COMMENT "Generating MMG3D API documentation with Doxygen.
-     Open up the doc/mmg3d/html/index.html file to see it" VERBATIM
+     Open up the doc/doxygen/mmg3d/html/index.html file to see it" VERBATIM
         )
     # MMGS and MMG3D Documentation
     ADD_CUSTOM_TARGET(doc
         DEPENDS mmgs_doc mmg3d_doc
         COMMENT "Generating MMGS and MMG3D API documentation with Doxygen.
-    To see the MMGS documentation, open up the doc/mmgs/html/index.html file.
-    To see the MMGS documentation, open up the doc/mmg3d/html/index.html file."
+    To see the MMGS documentation, open up the doc/doxygen/mmgs/html/index.html file.
+    To see the MMG3D documentation, open up the doc/doxygen/mmg3d/html/index.html file."
         VERBATIM
         )
 ENDIF(DOXYGEN_FOUND)
