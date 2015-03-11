@@ -25,7 +25,7 @@
  * genheader.c
  *
  * generate an executable to generate
- * headers for Fortran Mmg3d5 users.
+ * headers for Fortran Mmg3d users.
  * Used by makefile
  ****************************************/
 
@@ -58,7 +58,7 @@ int main (int argc, char ** argv)
 
   if (argc != 4)
     {
-      fprintf(stderr, "usage : %s headerNameFortran.h libmmg3d5.h"
+      fprintf(stderr, "usage : %s headerNameFortran.h libmmg3d.h"
               " genfort.pl\n",argv[0]);
       return EXIT_FAILURE;
     }
@@ -78,13 +78,13 @@ int main (int argc, char ** argv)
   fprintf(file,"! ** and the \"genfort.pl\" script (scripts directory).\n");
   fprintf(file,"! ** Do not modified it by hand, it will be discarded.\n");
   fprintf(file,"! **\n");
-  fprintf(file,"! ** This scripts recopy the macros of the libmmg3d5.h file\n");
+  fprintf(file,"! ** This scripts recopy the macros of the libmmg3d.h file\n");
   fprintf(file,"! ** and convert enumerations into macros.\n");
   fprintf(file,"! **\n");
   fprintf(file,"! ** Note: \"genfort.pl\" is automatically called by the ");
   fprintf(file,"\"genheader.c\"\n! ** executable code.\n");
   fprintf(file,"! **\n");
-  fprintf(file,"! ** See the \"libmmg3d5.h\" file for a correct displaying of"
+  fprintf(file,"! ** See the \"libmmg3d.h\" file for a correct displaying of"
           " the documentation.\n");
   fprintf(file,"! */\n\n");
 

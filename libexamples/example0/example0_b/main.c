@@ -33,7 +33,7 @@
 #include <math.h>
 #include <float.h>
 
-#include "libmmg3d5.h"
+#include "libmmg3d.h"
 
 #define MAX0(a,b)     (((a) > (b)) ? (a) : (b))
 #define MAX(a,b,c,d)  (((MAX0(a,b)) > (MAX0(c,d))) ? (MAX0(a,b)) : (MAX0(c,d)))

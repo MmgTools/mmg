@@ -33,7 +33,7 @@
 #include <math.h>
 #include <float.h>
 
-#include "libmmg3d5.h"
+#include "libmmg3d.h"
 
 int main(int argc,char *argv[]) {
   MMG5_pMesh      mmgMesh;

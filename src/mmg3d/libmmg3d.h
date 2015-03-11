@@ -22,7 +22,7 @@
 */
 
  /**
- * \file mmg3d/libmmg3d5.h
+ * \file mmg3d/libmmg3d.h
  * \brief C API for MMG3D library.
  * \author Algiane Froehly (Inria / IMB, Université de Bordeaux)
  * \version 5

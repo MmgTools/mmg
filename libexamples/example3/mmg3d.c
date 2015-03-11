@@ -33,7 +33,7 @@
 #include <memory.h>
 #include <ctype.h>
 
-#include "libmmg3d5.h"
+#include "libmmg3d.h"
 
 mytime    ctim[TIMEMAX];
 

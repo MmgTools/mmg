@@ -2,13 +2,13 @@
 ! ** and the "genfort.pl" script (scripts directory).
 ! ** Do not modified it by hand, it will be discarded.
 ! **
-! ** This scripts recopy the macros of the libmmg3d5.h file
+! ** This scripts recopy the macros of the libmmg3d.h file
 ! ** and convert enumerations into macros.
 ! **
 ! ** Note: "genfort.pl" is automatically called by the "genheader.c"
 ! ** executable code.
 ! **
-! ** See the "libmmg3d5.h" file for a correct displaying of the documentation.
+! ** See the "libmmg3d.h" file for a correct displaying of the documentation.
 ! */
 
 #define MMG5_DATA_PTR_T INTEGER(kind=8)
@@ -37,7 +37,7 @@
 
 
 !  /**
-!  * \file mmg3d/libmmg3d5.h
+!  * \file mmg3d/libmmg3d.h
 !  * \brief C API for MMG3D library.
 !  * \author Algiane Froehly (Inria / IMB, Université de Bordeaux)
 !  * \version 5

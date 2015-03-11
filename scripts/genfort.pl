@@ -6,11 +6,11 @@
 #
 ###############################################################################
 #
-#   A script that converts <libmmg3d5.h> file into a Fortran include file.
+#   A script that converts <libmmg3d.h> file into a Fortran include file.
 #
 #   Usage:
-#    > ./genfort.pl -f libmmg3d5.h
-#    >    converts the libmmg3d5.h into a fortran header.
+#    > ./genfort.pl -f libmmg3d.h
+#    >    converts the libmmg3d.h into a fortran header.
 #    >     -h          Shows this help
 #    >     -r <size>   Defines REAL kind (4 or 8 usually)
 #    >     -s <size>   Defines MMG3D_INT  kind (4 or 8 usually)
@@ -34,7 +34,7 @@ use Getopt::Std;
 #     Kind of the MMG3D_INT
 #
 #   string: fichier
-#     Path to the <libmmg3d5.h> file
+#     Path to the <libmmg3d.h> file
 #
 #   string: format
 #     Format to print PARAMETERs.
@@ -44,7 +44,7 @@ use Getopt::Std;
 my $real     = 0;
 my $int      = 0;
 my $fichier;
-#my $format = "MMG3D5_INTEGER, PARAMETER :: %-30s = %d";
+#my $format = "MMG3D_INTEGER, PARAMETER :: %-30s = %d";
 my $format = "#define %-30s %d";
 my %opts;
 
@@ -58,8 +58,8 @@ my %opts;
 #
 sub Usage {
 
-    print "./genfort.pl -f libmmg3d5.h\n";
-    print "  converts the file libmmg3d5.h into a fortran header.\n";
+    print "./genfort.pl -f libmmg3d.h\n";
+    print "  converts the file libmmg3d.h into a fortran header.\n";
     print "   -h          Shows this help\n";
     print "   -r <size>   Defines COEF/REAL kind (4 or 8 usually)\n";
     print "   -s <size>   Defines INT kind (4 or 8 usually)\n";
@@ -88,11 +88,11 @@ sub printTab # ($chaine, $tabcount, $comm)
     {
         if ($int != 0)
         {
-            $chaine =~ s/MMG3D5_INTEGER,/INTEGER(KIND=$int),/g;
+            $chaine =~ s/MMG3D_INTEGER,/INTEGER(KIND=$int),/g;
         }
         else
         {
-            $chaine =~ s/MMG3D5_INTEGER,/INTEGER,/g;
+            $chaine =~ s/MMG3D_INTEGER,/INTEGER,/g;
         }
         if ($real != 0)
         {
@@ -116,7 +116,7 @@ sub printTab # ($chaine, $tabcount, $comm)
 #
 # Main function.
 #
-# Converts the header <libmmg3d5.h> file into a Fortran include.
+# Converts the header <libmmg3d.h> file into a Fortran include.
 #
 sub Convert {
 
@@ -273,7 +273,7 @@ sub Convert {
 
 
                 $chaine = sprintf("! %s\n", $line);
-                if ($line =~ /Mmg3d5's constants/)
+                if ($line =~ /Mmg3d's constants/)
                 {
                     my $chaine2 = "END INTERFACE\n\n";
                     $chaine2 .= "!\n";
@@ -282,16 +282,16 @@ sub Convert {
                     $chaine2 .= "!   Type kinds\n";
                     $chaine2 .= "!\n";
                     $chaine2 .= "!   Contains:\n";
-                    $chaine2 .= "!     MMG3D5_REAL_KIND - Kind to use for REAL\n";
-                    $chaine2 .= "!     MMG3D5_INT_KIND  - Kind to use for INT\n";
+                    $chaine2 .= "!     MMG3D_REAL_KIND - Kind to use for REAL\n";
+                    $chaine2 .= "!     MMG3D_INT_KIND  - Kind to use for INT\n";
                     $chaine2 .= "!\n";
                     if ($real != 0)
                     {
-                        $chaine2 .= "INTEGER, PARAMETER :: MMG3D5_REAL_KIND                = $real\n";
+                        $chaine2 .= "INTEGER, PARAMETER :: MMG3D_REAL_KIND                = $real\n";
                     }
                     if ($int != 0)
                     {
-                        $chaine2 .= "INTEGER, PARAMETER :: MMG3D5_INT_KIND                = $int\n";
+                        $chaine2 .= "INTEGER, PARAMETER :: MMG3D_INT_KIND                = $int\n";
                     }
                     $tabcount --;
                     printTab($chaine2, $tabcount, 0);

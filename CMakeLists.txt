@@ -21,7 +21,7 @@
 ## =============================================================================
 
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8.5)
-PROJECT (mmg3d5)
+PROJECT (mmg)
 
 ###############################################################################
 #####
@@ -129,15 +129,15 @@ IF ( BUILD_MMG3D OR BUILD_MMG )
 
     ###############################################################################
     #####
-    #####         Fortran header: libmmg3d5f.h
+    #####         Fortran header: libmmg3df.h
     #####
     ###############################################################################
     ADD_EXECUTABLE(genheader ${CMAKE_SOURCE_DIR}/scripts/genheader.c)
 
-    ADD_CUSTOM_COMMAND(OUTPUT ${MMG_SOURCE_DIR}/libmmg3d5f.h
-        COMMAND genheader ${MMG_SOURCE_DIR}/libmmg3d5f.h ${MMG_SOURCE_DIR}/libmmg3d5.h ${CMAKE_SOURCE_DIR}/scripts/genfort.pl
+    ADD_CUSTOM_COMMAND(OUTPUT ${MMG_SOURCE_DIR}/libmmg3df.h
+        COMMAND genheader ${MMG_SOURCE_DIR}/libmmg3df.h ${MMG_SOURCE_DIR}/libmmg3d.h ${CMAKE_SOURCE_DIR}/scripts/genfort.pl
         WORKING_DIRECTORY ${CMAKE_BUILD_DIR}
-        DEPENDS genheader ${MMG_SOURCE_DIR}/libmmg3d5.h ${CMAKE_SOURCE_DIR}/scripts/genfort.pl
+        DEPENDS genheader ${MMG_SOURCE_DIR}/libmmg3d.h ${CMAKE_SOURCE_DIR}/scripts/genfort.pl
         COMMENT "Generating Fortran header"
         )
 
@@ -194,8 +194,8 @@ FILE(
     )
 LIST(REMOVE_ITEM source_files
     ${MMG_SOURCE_DIR}/mmg3d.c
-    ${MMG_SOURCE_DIR}/lib${PROJECT_NAME}.c
-    ${MMG_SOURCE_DIR}/lib${PROJECT_NAME}f.c
+    ${MMG_SOURCE_DIR}/lib${PROJECT_NAME}3d.c
+    ${MMG_SOURCE_DIR}/lib${PROJECT_NAME}3df.c
     ${REMOVE_FILE})
 FILE(
     GLOB
@@ -205,8 +205,8 @@ FILE(
 FILE(
     GLOB
     lib_file
-    ${MMG_SOURCE_DIR}/lib${PROJECT_NAME}.c
-    ${MMG_SOURCE_DIR}/lib${PROJECT_NAME}f.c
+    ${MMG_SOURCE_DIR}/lib${PROJECT_NAME}3d.c
+    ${MMG_SOURCE_DIR}/lib${PROJECT_NAME}3df.c
     )
 FILE(
     GLOB
@@ -284,38 +284,38 @@ IF ( BUILD_MMG3D OR BUILD_MMG )
 
     ###############################################################################
     #####
-    #####         Compile mmg3d5 libraries
+    #####         Compile mmg3d libraries
     #####
     ###############################################################################
     SET(LIBRARY_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/lib)
 
-    OPTION ( LIBMMG3D5_STATIC "Compile static library" ON)
-    IF ( LIBMMG3D5_STATIC )
-        ADD_LIBRARY(${PROJECT_NAME}_a  STATIC
-            ${MMG_SOURCE_DIR}/lib${PROJECT_NAME}f.h
+    OPTION ( LIBMMG3D_STATIC "Compile static library" ON)
+    IF ( LIBMMG3D_STATIC )
+        ADD_LIBRARY(${PROJECT_NAME}3d_a  STATIC
+            ${MMG_SOURCE_DIR}/lib${PROJECT_NAME}3df.h
             ${source_files} ${lib_file} )
-        SET_TARGET_PROPERTIES(${PROJECT_NAME}_a PROPERTIES OUTPUT_NAME ${PROJECT_NAME})
-        TARGET_LINK_LIBRARIES(${PROJECT_NAME}_a ${LIBRARIES})
-        INSTALL(FILES ${MMG_SOURCE_DIR}/lib${PROJECT_NAME}f.h DESTINATION include)
-        INSTALL(FILES ${MMG_SOURCE_DIR}/lib${PROJECT_NAME}.h DESTINATION include)
+        SET_TARGET_PROPERTIES(${PROJECT_NAME}3d_a PROPERTIES OUTPUT_NAME ${PROJECT_NAME}3d)
+        TARGET_LINK_LIBRARIES(${PROJECT_NAME}3d_a ${LIBRARIES})
+        INSTALL(FILES ${MMG_SOURCE_DIR}/lib${PROJECT_NAME}3df.h DESTINATION include)
+        INSTALL(FILES ${MMG_SOURCE_DIR}/lib${PROJECT_NAME}3d.h DESTINATION include)
         INSTALL(FILES ${COMMON_SOURCE_DIR}/chrono.h DESTINATION include)
-        INSTALL(TARGETS ${PROJECT_NAME}_a
+        INSTALL(TARGETS ${PROJECT_NAME}3d_a
             ARCHIVE DESTINATION lib
             LIBRARY DESTINATION lib)
     ENDIF()
 
     # Compile shared library
-    OPTION ( LIBMMG3D5_SHARED "Compile dynamic library" OFF)
-    IF ( LIBMMG3D5_SHARED )
-        ADD_LIBRARY(${PROJECT_NAME}_so SHARED
-            ${MMG_SOURCE_DIR}/lib${PROJECT_NAME}f.h
+    OPTION ( LIBMMG3D_SHARED "Compile dynamic library" OFF)
+    IF ( LIBMMG3D_SHARED )
+        ADD_LIBRARY(${PROJECT_NAME}3d_so SHARED
+            ${MMG_SOURCE_DIR}/lib${PROJECT_NAME}3df.h
             ${source_files} ${lib_file})
-        SET_TARGET_PROPERTIES(${PROJECT_NAME}_so PROPERTIES OUTPUT_NAME ${PROJECT_NAME})
-        TARGET_LINK_LIBRARIES(${PROJECT_NAME}_so ${LIBRARIES})
-        INSTALL(FILES ${MMG_SOURCE_DIR}/lib${PROJECT_NAME}f.h DESTINATION include)
-        INSTALL(FILES ${MMG_SOURCE_DIR}/lib${PROJECT_NAME}.h DESTINATION include)
+        SET_TARGET_PROPERTIES(${PROJECT_NAME}3d_so PROPERTIES OUTPUT_NAME ${PROJECT_NAME}3d)
+        TARGET_LINK_LIBRARIES(${PROJECT_NAME}3d_so ${LIBRARIES})
+        INSTALL(FILES ${MMG_SOURCE_DIR}/lib${PROJECT_NAME}3df.h DESTINATION include)
+        INSTALL(FILES ${MMG_SOURCE_DIR}/lib${PROJECT_NAME}3d.h DESTINATION include)
         INSTALL(FILES ${COMMON_SOURCE_DIR}/chrono.h DESTINATION include)
-        INSTALL(TARGETS ${PROJECT_NAME}_so
+        INSTALL(TARGETS ${PROJECT_NAME}3d_so
             ARCHIVE DESTINATION
             LIBRARY DESTINATION lib)
     ENDIF()
@@ -325,62 +325,62 @@ IF ( BUILD_MMG3D OR BUILD_MMG )
     #####         Compile program to test library
     #####
     ###############################################################################
-    OPTION ( TEST_LIBMMG3D5 "Compile tests of library" OFF)
-    IF ( TEST_LIBMMG3D5 )
-        IF ( LIBMMG3D5_STATIC )
-            IF ( INSER_SINGULARITIES AND TEST_LIBMMG3D5 )
-                MESSAGE(WARNING "\"libmmg5_example3\" is the only library test available with the flag of insertion of singularities set to \"ON\"")
+    OPTION ( TEST_LIBMMG3D "Compile tests of library" OFF)
+    IF ( TEST_LIBMMG3D )
+        IF ( LIBMMG3D_STATIC )
+            IF ( INSER_SINGULARITIES AND TEST_LIBMMG3D )
+                MESSAGE(WARNING "\"libmmg_example3\" is the only library test available with the flag of insertion of singularities set to \"ON\"")
             ELSE()
-                ADD_EXECUTABLE(libmmg5_example0_a ${CMAKE_SOURCE_DIR}/libexamples/example0/example0_a/main.c)
-                TARGET_LINK_LIBRARIES(libmmg5_example0_a ${PROJECT_NAME}_a)
-                INSTALL(TARGETS libmmg5_example0_a RUNTIME DESTINATION bin )
+                ADD_EXECUTABLE(libmmg_example0_a ${CMAKE_SOURCE_DIR}/libexamples/example0/example0_a/main.c)
+                TARGET_LINK_LIBRARIES(libmmg_example0_a ${PROJECT_NAME}3d_a)
+                INSTALL(TARGETS libmmg_example0_a RUNTIME DESTINATION bin )
 
-                ADD_EXECUTABLE(libmmg5_example0_b ${CMAKE_SOURCE_DIR}/libexamples/example0/example0_b/main.c)
-                TARGET_LINK_LIBRARIES(libmmg5_example0_b ${PROJECT_NAME}_a)
-                INSTALL(TARGETS libmmg5_example0_b RUNTIME DESTINATION bin )
+                ADD_EXECUTABLE(libmmg_example0_b ${CMAKE_SOURCE_DIR}/libexamples/example0/example0_b/main.c)
+                TARGET_LINK_LIBRARIES(libmmg_example0_b ${PROJECT_NAME}3d_a)
+                INSTALL(TARGETS libmmg_example0_b RUNTIME DESTINATION bin )
 
-                ADD_EXECUTABLE(libmmg5_example1 ${CMAKE_SOURCE_DIR}/libexamples/example1/main.c)
-                TARGET_LINK_LIBRARIES(libmmg5_example1 ${PROJECT_NAME}_a)
-                INSTALL(TARGETS libmmg5_example1 RUNTIME DESTINATION bin )
-                ADD_EXECUTABLE(libmmg5_example2 ${CMAKE_SOURCE_DIR}/libexamples/example2/main.c)
-                TARGET_LINK_LIBRARIES(libmmg5_example2 ${PROJECT_NAME}_a)
-                INSTALL(TARGETS libmmg5_example2 RUNTIME DESTINATION bin )
+                ADD_EXECUTABLE(libmmg_example1 ${CMAKE_SOURCE_DIR}/libexamples/example1/main.c)
+                TARGET_LINK_LIBRARIES(libmmg_example1 ${PROJECT_NAME}3d_a)
+                INSTALL(TARGETS libmmg_example1 RUNTIME DESTINATION bin )
+                ADD_EXECUTABLE(libmmg_example2 ${CMAKE_SOURCE_DIR}/libexamples/example2/main.c)
+                TARGET_LINK_LIBRARIES(libmmg_example2 ${PROJECT_NAME}3d_a)
+                INSTALL(TARGETS libmmg_example2 RUNTIME DESTINATION bin )
 
                 ENABLE_LANGUAGE (Fortran)
-                ADD_EXECUTABLE(libmmg5_fortran_a ${CMAKE_SOURCE_DIR}/libexamples/example0_fortran/example0_a/main.F90)
-                TARGET_LINK_LIBRARIES(libmmg5_fortran_a ${PROJECT_NAME}_a)
-                INSTALL(TARGETS libmmg5_fortran_a RUNTIME DESTINATION bin )
-                ADD_EXECUTABLE(libmmg5_fortran_b ${CMAKE_SOURCE_DIR}/libexamples/example0_fortran/example0_b/main.F90)
-                TARGET_LINK_LIBRARIES(libmmg5_fortran_b ${PROJECT_NAME}_a)
-                INSTALL(TARGETS libmmg5_fortran_b RUNTIME DESTINATION bin )
+                ADD_EXECUTABLE(libmmg_fortran_a ${CMAKE_SOURCE_DIR}/libexamples/example0_fortran/example0_a/main.F90)
+                TARGET_LINK_LIBRARIES(libmmg_fortran_a ${PROJECT_NAME}3d_a)
+                INSTALL(TARGETS libmmg_fortran_a RUNTIME DESTINATION bin )
+                ADD_EXECUTABLE(libmmg_fortran_b ${CMAKE_SOURCE_DIR}/libexamples/example0_fortran/example0_b/main.F90)
+                TARGET_LINK_LIBRARIES(libmmg_fortran_b ${PROJECT_NAME}3d_a)
+                INSTALL(TARGETS libmmg_fortran_b RUNTIME DESTINATION bin )
 
 
             ENDIF()
-            ADD_EXECUTABLE(libmmg5_example3  ${CMAKE_SOURCE_DIR}/libexamples/example3/mmg3d.c)
-            TARGET_LINK_LIBRARIES(libmmg5_example3 ${PROJECT_NAME}_a)
-            INSTALL(TARGETS libmmg5_example3 RUNTIME DESTINATION bin )
-        ELSEIF ( LIBMMG3D5_SHARED )
-            IF ( INSER_SINGULARITIES AND TEST_LIBMMG3D5 )
-                MESSAGE(WARNING "\"libmmg5_example2\" is the only library test available with the flag of insertion of singularities set to \"ON\"")
+            ADD_EXECUTABLE(libmmg_example3  ${CMAKE_SOURCE_DIR}/libexamples/example3/mmg3d.c)
+            TARGET_LINK_LIBRARIES(libmmg_example3 ${PROJECT_NAME}3d_a)
+            INSTALL(TARGETS libmmg_example3 RUNTIME DESTINATION bin )
+        ELSEIF ( LIBMMG3D_SHARED )
+            IF ( INSER_SINGULARITIES AND TEST_LIBMMG3D )
+                MESSAGE(WARNING "\"libmmg_example2\" is the only library test available with the flag of insertion of singularities set to \"ON\"")
             ELSE()
-                ADD_EXECUTABLE(libmmg5_example0_a ${CMAKE_SOURCE_DIR}/libexamples/example0/example0_a/main.c)
-                TARGET_LINK_LIBRARIES(libmmg5_example0_a ${PROJECT_NAME}_so)
-                INSTALL(TARGETS libmmg5_example0_a RUNTIME DESTINATION bin )
+                ADD_EXECUTABLE(libmmg_example0_a ${CMAKE_SOURCE_DIR}/libexamples/example0/example0_a/main.c)
+                TARGET_LINK_LIBRARIES(libmmg_example0_a ${PROJECT_NAME}3d_so)
+                INSTALL(TARGETS libmmg_example0_a RUNTIME DESTINATION bin )
 
-                ADD_EXECUTABLE(libmmg5_example0_b ${CMAKE_SOURCE_DIR}/libexamples/example0/example0_b/main.c)
-                TARGET_LINK_LIBRARIES(libmmg5_example0_b ${PROJECT_NAME}_so)
-                INSTALL(TARGETS libmmg5_example0_b RUNTIME DESTINATION bin )
+                ADD_EXECUTABLE(libmmg_example0_b ${CMAKE_SOURCE_DIR}/libexamples/example0/example0_b/main.c)
+                TARGET_LINK_LIBRARIES(libmmg_example0_b ${PROJECT_NAME}3d_so)
+                INSTALL(TARGETS libmmg_example0_b RUNTIME DESTINATION bin )
 
-                ADD_EXECUTABLE(libmmg5_example1 ${CMAKE_SOURCE_DIR}/libexamples/example1/main.c)
-                TARGET_LINK_LIBRARIES(libmmg5_example1 ${PROJECT_NAME}_so)
-                INSTALL(TARGETS libmmg5_example1 RUNTIME DESTINATION bin )
-                ADD_EXECUTABLE(libmmg5_example2  ${CMAKE_SOURCE_DIR}/libexamples/example2/main.c)
-                TARGET_LINK_LIBRARIES(libmmg5_example2 ${PROJECT_NAME}_so)
-                INSTALL(TARGETS libmmg5_example2 RUNTIME DESTINATION bin )
+                ADD_EXECUTABLE(libmmg_example1 ${CMAKE_SOURCE_DIR}/libexamples/example1/main.c)
+                TARGET_LINK_LIBRARIES(libmmg_example1 ${PROJECT_NAME}3d_so)
+                INSTALL(TARGETS libmmg_example1 RUNTIME DESTINATION bin )
+                ADD_EXECUTABLE(libmmg_example2  ${CMAKE_SOURCE_DIR}/libexamples/example2/main.c)
+                TARGET_LINK_LIBRARIES(libmmg_example2 ${PROJECT_NAME}3d_so)
+                INSTALL(TARGETS libmmg_example2 RUNTIME DESTINATION bin )
             ENDIF()
-            ADD_EXECUTABLE(libmmg5_example3  ${CMAKE_SOURCE_DIR}/libexamples/example3/mmg3d.c)
-            TARGET_LINK_LIBRARIES(libmmg5_example3 ${PROJECT_NAME}_so)
-            INSTALL(TARGETS libmmg5_example3 RUNTIME DESTINATION bin )
+            ADD_EXECUTABLE(libmmg_example3  ${CMAKE_SOURCE_DIR}/libexamples/example3/mmg3d.c)
+            TARGET_LINK_LIBRARIES(libmmg_example3 ${PROJECT_NAME}3d_so)
+            INSTALL(TARGETS libmmg_example3 RUNTIME DESTINATION bin )
         ELSE ()
             MESSAGE(WARNING "You must activate the compilation of the static or shared ${PROJECT_NAME} library to compile this tests." )
         ENDIF ()
@@ -388,20 +388,19 @@ IF ( BUILD_MMG3D OR BUILD_MMG )
 
     ###############################################################################
     #####
-    #####         Compile MMG3D5 executable
+    #####         Compile MMG3D executable
     #####
     ###############################################################################
-    ADD_EXECUTABLE(${PROJECT_NAME}
-#        .dummy  ${MMG_SOURCE_DIR}/${PROJECT_NAME}_redefine.h
-        ${MMG_SOURCE_DIR}/lib${PROJECT_NAME}f.h
+    ADD_EXECUTABLE(${PROJECT_NAME}3d
+        ${MMG_SOURCE_DIR}/lib${PROJECT_NAME}3df.h
         ${source_files} ${main_file})
-    TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${LIBRARIES})
-    INSTALL(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin)
+    TARGET_LINK_LIBRARIES(${PROJECT_NAME}3d ${LIBRARIES})
+    INSTALL(TARGETS ${PROJECT_NAME}3d RUNTIME DESTINATION bin)
 
 
-    SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES DEBUG_POSTFIX _debug) # in debug mode we name the executable mmg3d5_debug
-    SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES RELEASE_POSTFIX _O3) # in Release mode we name the executable mmg3d5_O3
-    SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES MINSIZEREL_POSTFIX _Os)
+    SET_TARGET_PROPERTIES(${PROJECT_NAME}3d PROPERTIES DEBUG_POSTFIX _debug) # in debug mode we name the executable mmg3d_debug
+    SET_TARGET_PROPERTIES(${PROJECT_NAME}3d PROPERTIES RELEASE_POSTFIX _O3) # in Release mode we name the executable mmg3d_O3
+    SET_TARGET_PROPERTIES(${PROJECT_NAME}3d PROPERTIES MINSIZEREL_POSTFIX _Os)
 
 ENDIF()
 
@@ -411,14 +410,14 @@ ENDIF()
 #####
 ###############################################################################
 IF ( BUILD_MMGS OR BUILD_MMG )
-    ADD_EXECUTABLE(mmgs    ${sourcemmgs_files} )
-    TARGET_LINK_LIBRARIES(mmgs ${LIBRARIES})
-    INSTALL(TARGETS mmgs RUNTIME DESTINATION bin)
+    ADD_EXECUTABLE(${PROJECT_NAME}s    ${sourcemmgs_files} )
+    TARGET_LINK_LIBRARIES(${PROJECT_NAME}s ${LIBRARIES})
+    INSTALL(TARGETS ${PROJECT_NAME}s RUNTIME DESTINATION bin)
 
 
-    SET_TARGET_PROPERTIES(mmgs PROPERTIES DEBUG_POSTFIX _debug) # in debug mode we name the executable mmgs_debug
-    SET_TARGET_PROPERTIES(mmgs PROPERTIES RELEASE_POSTFIX _O3) # in Release mode we name the executable mmgs_O3
-    SET_TARGET_PROPERTIES(mmgs PROPERTIES MINSIZEREL_POSTFIX _Os)
+    SET_TARGET_PROPERTIES(${PROJECT_NAME}s PROPERTIES DEBUG_POSTFIX _debug) # in debug mode we name the executable mmgs_debug
+    SET_TARGET_PROPERTIES(${PROJECT_NAME}s PROPERTIES RELEASE_POSTFIX _O3) # in Release mode we name the executable mmgs_O3
+    SET_TARGET_PROPERTIES(${PROJECT_NAME}s PROPERTIES MINSIZEREL_POSTFIX _Os)
 ENDIF()
 
 ###############################################################################
@@ -437,7 +436,7 @@ IF ( BUILD_MMG3D OR BUILD_MMG )
 
         # Remove the --show-reachable=yes option from the default valgrind command
         set(VALGRIND_COMMAND_OPTIONS "-q --tool=memcheck --leak-check=yes --workaround-gcc296-bugs=yes --num-callers=100")
-        # Ignore errors coming from the libmesh5 library
+        # Ignore errors coming from the libmesh library
         IF(APPLE)
             # and errors from the libSystem.B library
             SET(MEMORYCHECK_SUPPRESSIONS_FILE "${CMAKE_SOURCE_DIR}/cmake/Supp/libSystem.supp")
@@ -468,26 +467,26 @@ IF ( BUILD_MMG3D OR BUILD_MMG )
 
         # Add runtime that we want to test
         IF(${CMAKE_BUILD_TYPE} MATCHES "Debug")
-            SET(EXECUT ${EXECUTABLE_OUTPUT_PATH}/${PROJECT_NAME}_debug)
+            SET(EXECUT ${EXECUTABLE_OUTPUT_PATH}/${PROJECT_NAME}3d_debug)
             SET(BUILDNAME ${BUILDNAME}_debug CACHE STRING "build name variable")
         ELSEIF(${CMAKE_BUILD_TYPE} MATCHES "Release")
-            SET(EXECUT ${EXECUTABLE_OUTPUT_PATH}/${PROJECT_NAME}_O3)
+            SET(EXECUT ${EXECUTABLE_OUTPUT_PATH}/${PROJECT_NAME}3d_O3)
             SET(BUILDNAME ${BUILDNAME}_O3 CACHE STRING "build name variable")
         ELSEIF(${CMAKE_BUILD_TYPE} MATCHES "Minsizerel")
-            SET(EXECUT ${EXECUTABLE_OUTPUT_PATH}/${PROJECT_NAME}_Os)
+            SET(EXECUT ${EXECUTABLE_OUTPUT_PATH}/${PROJECT_NAME}3d_Os)
             SET(BUILDNAME ${BUILDNAME}_Os CACHE STRING "build name variable")
         ELSE()
-            SET(EXECUT ${EXECUTABLE_OUTPUT_PATH}/${PROJECT_NAME})
+            SET(EXECUT ${EXECUTABLE_OUTPUT_PATH}/${PROJECT_NAME}3d)
             SET(BUILDNAME ${BUILDNAME} CACHE STRING "build name variable")
         ENDIF()
 
         SET ( LISTEXEC ${EXECUT} )
-        IF ( TEST_LIBMMG3D5 )
-            IF ( LIBMMG3D5_STATIC OR LIBMMG3D5_SHARED )
-                SET(LIBEXEC0_a ${EXECUTABLE_OUTPUT_PATH}/libmmg5_example0_a)
-                SET(LIBEXEC0_b ${EXECUTABLE_OUTPUT_PATH}/libmmg5_example0_b)
-                SET(LIBEXEC1   ${EXECUTABLE_OUTPUT_PATH}/libmmg5_example1)
-                SET(LIBEXEC2   ${EXECUTABLE_OUTPUT_PATH}/libmmg5_example2)
+        IF ( TEST_LIBMMG3D )
+            IF ( LIBMMG3D_STATIC OR LIBMMG3D_SHARED )
+                SET(LIBEXEC0_a ${EXECUTABLE_OUTPUT_PATH}/libmmg_example0_a)
+                SET(LIBEXEC0_b ${EXECUTABLE_OUTPUT_PATH}/libmmg_example0_b)
+                SET(LIBEXEC1   ${EXECUTABLE_OUTPUT_PATH}/libmmg_example1)
+                SET(LIBEXEC2   ${EXECUTABLE_OUTPUT_PATH}/libmmg_example2)
 
                 IF ( NOT INSER_SINGULARITIES )
                     ADD_TEST(NAME libexample0_a COMMAND ${LIBEXEC0_a})
@@ -495,7 +494,7 @@ IF ( BUILD_MMG3D OR BUILD_MMG )
                     ADD_TEST(NAME libexample1   COMMAND ${LIBEXEC1})
                     ADD_TEST(NAME libexample2   COMMAND ${LIBEXEC2})
                 ENDIF()
-                SET(LIBEXEC3 ${EXECUTABLE_OUTPUT_PATH}/libmmg5_example3)
+                SET(LIBEXEC3 ${EXECUTABLE_OUTPUT_PATH}/libmmg_example3)
                 SET( LISTEXEC ${LISTEXEC} ${LIBEXEC3} )
             ENDIF()
         ENDIF()
@@ -574,7 +573,7 @@ SET(CPACK_PACKAGE_EXECUTABLES "${PROJECT_NAME}")
 SET(CPACK_OUTPUT_FILE_PREFIX "../archives")
 
 SET(CPACK_IGNORE_FILES ";.\\\\\\\\.#;/\\\\\\\\.svn;.~;.#;.-e;.DS_Store" ${CPACK_IGNORE_FILES})
-SET(CPACK_IGNORE_FILES ";libmmg5.*" ${CPACK_IGNORE_FILES})
+SET(CPACK_IGNORE_FILES ";libmmg.*" ${CPACK_IGNORE_FILES})
 
 SET(CPACK_SOURCE_IGNORE_FILES ";src/mmg3d/mmg3d.h$" ${CPACK_SOURCE_IGNORE_FILE})
 SET(CPACK_SOURCE_IGNORE_FILES ";.\\\\\\\\.#;/\\\\\\\\.svn;.~;.#;.-e;.DS_Store" ${CPACK_SOURCE_IGNORE_FILES})

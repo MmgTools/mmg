@@ -3,7 +3,7 @@
 !> @brief
 !>  Example for using mmg3dlib (basic use)
 
-#include "libmmg3d5f.h"
+#include "libmmg3df.h"
 
 PROGRAM main
   MMG5_DATA_PTR_T  :: mmgMesh
