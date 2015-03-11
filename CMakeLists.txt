@@ -20,7 +20,7 @@
 ##  use this copy of the Mmg distribution only if you accept them.
 ## =============================================================================
 
-CMAKE_MINIMUM_REQUIRED(VERSION 2.8.5)
+CMAKE_MINIMUM_REQUIRED(VERSION 3.0.0)
 PROJECT (mmg)
 
 ###############################################################################
@@ -135,12 +135,11 @@ IF ( BUILD_MMG3D OR BUILD_MMG )
     ADD_EXECUTABLE(genheader ${CMAKE_SOURCE_DIR}/scripts/genheader.c)
 
     ADD_CUSTOM_COMMAND(OUTPUT ${MMG_SOURCE_DIR}/libmmg3df.h
-        COMMAND genheader ${MMG_SOURCE_DIR}/libmmg3df.h ${MMG_SOURCE_DIR}/libmmg3d.h ${CMAKE_SOURCE_DIR}/scripts/genfort.pl
-        WORKING_DIRECTORY ${CMAKE_BUILD_DIR}
+        COMMAND Genheader ${MMG_SOURCE_DIR}/libmmg3df.h ${MMG_SOURCE_DIR}/libmmg3d.h ${CMAKE_SOURCE_DIR}/scripts/genfort.pl
+        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
         DEPENDS genheader ${MMG_SOURCE_DIR}/libmmg3d.h ${CMAKE_SOURCE_DIR}/scripts/genfort.pl
-        COMMENT "Generating Fortran header"
+        COMMENT "Generating Fortran header ${CMAKE_BUILD_DIR}"
         )
-
     ###############################################################################
     #####
     #####         Choose type of insertion: delaunay kernel or patterns
@@ -402,9 +401,49 @@ ENDIF()
 #####
 ###############################################################################
 IF ( BUILD_MMG3D OR BUILD_MMG )
-    OPTION ( BUILD_TESTING "Enable/Disable continuous integration" OFF )
-    IF(BUILD_TESTING)
-        MESSAGE(WARNING "Migration of the continuous integration is in progress and may not work.")
+
+    OPTION ( CONTINUOUS_INTEGRATION "Enable/Disable continuous integration" OFF )
+
+    IF(CONTINUOUS_INTEGRATION)
+        ##-------------------------------------------------------------------##
+        ##------- Get the continuous integration tests ----------------------##
+        ##-------------------------------------------------------------------##
+        # Check if the ci_tests directory exists
+        IF ( NOT EXISTS ${CMAKE_SOURCE_DIR}/ci_tests )
+            MESSAGE("-- Get the continuous integration directory (ci_tests.tgz)."
+                "May be very long...")
+            FILE(DOWNLOAD https://www.dropbox.com/s/0l2p1dwkokkkx4o/ci_tests.tgz?dl=0
+                ${CMAKE_SOURCE_DIR}/ci_test.tgz
+                SHOW_PROGRESS)
+            IF ( NOT EXISTS ${CMAKE_SOURCE_DIR}/ci_tests.tgz )
+                MESSAGE("\n")
+                MESSAGE(WARNING "Fail to automatically download the continuous "
+                    "integration directory."
+                    " Try to get it at the following link:"
+                    " https://www.dropbox.com/s/0l2p1dwkokkkx4o/ci_tests.tgz?dl=0"
+                    " then untar it in the project directory (Mmg/ by default).")
+            ELSE()
+                EXECUTE_PROCESS(
+                    COMMAND ${CMAKE_COMMAND} -E tar xzf ${CMAKE_SOURCE_DIR}/ci_test.tgz
+                    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+                    )
+                IF ( NOT EXISTS ${CMAKE_SOURCE_DIR}/ci_tests.tgz )
+                    MESSAGE("\n")
+                    MESSAGE(WARNING "Fail to automatically untar the "
+                        "integration directory (ci_tests.tgz)."
+                        "Try to untar it by hand in the project directory"
+                        " (Mmg/ by default).")
+                ENDIF()
+
+                FILE(REMOVE ${CMAKE_SOURCE_DIR}/ci_test.tgz)
+            ENDIF()
+        ENDIF()
+
+
+        ##-------------------------------------------------------------------##
+        ##------- Set the continuous integration options --------------------##
+        ##-------------------------------------------------------------------##
+        SET(CMAKE_CI_TESTS ${CMAKE_SOURCE_DIR}/ci_tests )
 
         # Run some tests twice with the output of the previous test as input
         OPTION ( RUN_AGAIN "Enable/Disable second run of some tests" ON )
@@ -425,7 +464,7 @@ IF ( BUILD_MMG3D OR BUILD_MMG )
         INCLUDE(CTest)
 
         # Max time for test case
-        SET(DART_TESTING_TIMEOUT 2000)
+        SET(DART_TESTING_TIMEOUT 2500)
 
         IF ( NOT APPLE)
             # Add coverage flags
@@ -441,6 +480,9 @@ IF ( BUILD_MMG3D OR BUILD_MMG )
             SET(CMAKE_EXE_LINKER_FLAGS_DEBUG "-g ${CMAKE_EXE_LINKER_FLAGS_DEBUG}")
         ENDIF ( )
 
+        ##-------------------------------------------------------------------##
+        ##--------------------------- Add tests and configure it ------------##
+        ##-------------------------------------------------------------------##
         # Add runtime that we want to test
         IF(${CMAKE_BUILD_TYPE} MATCHES "Debug")
             SET(EXECUT ${EXECUTABLE_OUTPUT_PATH}/${PROJECT_NAME}3d_debug)
@@ -480,7 +522,21 @@ IF ( BUILD_MMG3D OR BUILD_MMG )
         IF ( RUN_AGAIN )
             INCLUDE( ${CMAKE_SOURCE_DIR}/cmake/testing/testing_rerun.cmake )
         ENDIF()
-    ENDIF(BUILD_TESTING)
+
+        # Change authorisations for some files...
+        IF ( EXISTS ${CMAKE_CI_TESTS}/LeakCheck_AbnormalEnd7/unreadable.meshb)
+            FILE(REMOVE ${CMAKE_CI_TESTS}/LeakCheck_AbnormalEnd7/unwrittable.meshb)
+        ENDIF()
+        FILE(COPY ${CMAKE_CI_TESTS}/LeakCheck_AbnormalEnd7/dout.mesh
+            DESTINATION ${CMAKE_CI_TESTS}/LeakCheck_AbnormalEnd7/unwrittable.meshb)
+
+        IF ( EXISTS ${CMAKE_CI_TESTS}/LeakCheck_AbnormalEnd8/unwrittable.sol)
+            FILE(REMOVE ${CMAKE_CI_TESTS}/LeakCheck_AbnormalEnd8/unwrittable.sol)
+        ENDIF()
+        FILE(COPY ${CMAKE_CI_TESTS}/LeakCheck_AbnormalEnd8/dsol.sol
+            DESTINATION ${CMAKE_CI_TESTS}/LeakCheck_AbnormalEnd8/unwrittable.sol)
+
+    ENDIF(CONTINUOUS_INTEGRATION)
 ENDIF()
 
 ###############################################################################
