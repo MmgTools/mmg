@@ -9,7 +9,7 @@ It provides two applications:
 
 ## Get and compile the Mmg project
   1. Get the repository:  
-      `git clone https://github.com/<UserName>/Mmg.git`
+      `git clone https://github.com/MmgTools/Mmg.git`
 
     The project sources are available under the **_src/_** directory, see:
       * **_src/mmgs/_**   for files related to the mmgs application;
@@ -31,15 +31,15 @@ It provides two applications:
 More detailed informations about the compilation and configuration of the Mmg's applications are available on the project [wiki](https://github.com/MmgTools/Mmg/wiki).
 
 ### User guide
-The Mmg3d user guide will be soon available on the project webpage: [mmgtools.org/doc/](http://www.mmgtools.org/doc/).
+The Mmg3d user guide will be soon available on the project webpage: [http://www.mmgtools.org/doc/](http://www.mmgtools.org/doc/).
 
 ### Code documentation
 Run the `make doc` command to build the Doxygen documentation.
   * To see the **mmgs** documentation, open up the **_Mmg/doc/mmgs/html/index.html_** file;
-  * To see the **mmg3d** documentation, open up the **_Mmg/doc/mmg3d/html/index.html_** file;
+  * To see the **mmg3d** documentation, open up the **_Mmg/doc/mmg3d/html/index.html_** file.
 
 ## Platforms
-The Mmg applications are validated on OS X and on most of the Linux platforms. 
+The **Mmg** applications are validated on OS X and on most of the Linux platforms. 
 
 ## Contributing
 Coming soon...
