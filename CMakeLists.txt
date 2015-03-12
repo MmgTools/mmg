@@ -408,34 +408,96 @@ IF ( BUILD_MMG3D OR BUILD_MMG )
         ##-------------------------------------------------------------------##
         ##------- Get the continuous integration tests ----------------------##
         ##-------------------------------------------------------------------##
+        # SET ( GET_MMGS_TESTS "FALSE" )
+        SET ( GET_MMG3D_TESTS "FALSE" )
         # Check if the ci_tests directory exists
         IF ( NOT EXISTS ${CMAKE_SOURCE_DIR}/ci_tests )
-            MESSAGE("-- Get the continuous integration directory (ci_tests.tgz)."
-                "May be very long...")
-            FILE(DOWNLOAD https://www.dropbox.com/s/0l2p1dwkokkkx4o/ci_tests.tgz?dl=0
-                ${CMAKE_SOURCE_DIR}/ci_test.tgz
+            # First download of the tests
+            MESSAGE("-- Create the continuous integration directory (ci_tests)"
+                " and download the test cases. May be very long...")
+            FILE(MAKE_DIRECTORY ${CMAKE_SOURCE_DIR}/ci_tests)
+            # SET ( GET_MMGS_TESTS "TRUE" )
+            SET ( GET_MMG3D_TESTS "TRUE" )
+        ELSE ( )
+            # Check if the tests are up to date
+            #IF ( EXISTS ${CMAKE_SOURCE_DIR}/ci_tests/mmgs.version )
+            #    FILE(READ ${CMAKE_SOURCE_DIR}/ci_tests/mmgs.version OLD_MMGS_VERSION)
+            #ELSE ( )
+            #    SET ( OLD_MMGS_VERSION "0" )
+            #ENDIF ( )
+            # File(DOWNLOAD
+            #    ${CMAKE_SOURCE_DIR}/ci_tests/mmgs.version)
+            # FILE(READ ${CMAKE_SOURCE_DIR}/ci_tests/mmgs.version MMGS_VERSION)
+            # IF ( NOT (${OLD_MMGS_VERSION} MATCHES ${MMGS_VERSION})
+            #     SET ( GET_MMGS_TESTS "TRUE" )
+            # ENDIF ()
+
+            IF ( EXISTS ${CMAKE_SOURCE_DIR}/ci_tests/mmg3d.version )
+                FILE(READ ${CMAKE_SOURCE_DIR}/ci_tests/mmg3d.version OLD_MMG3D_VERSION)
+            ELSE ( )
+                SET ( OLD_MMG3D_VERSION "0" )
+            ENDIF ( )
+
+            FILE(DOWNLOAD https://www.dropbox.com/s/s723rs0xqu2j6k8/mmg3d.version?dl=0
+                ${CMAKE_SOURCE_DIR}/ci_tests/mmg3d.version)
+            FILE(READ ${CMAKE_SOURCE_DIR}/ci_tests/mmg3d.version MMG3D_VERSION)
+
+            IF (NOT (${OLD_MMG3D_VERSION} MATCHES ${MMG3D_VERSION}))
+                SET ( GET_MMG3D_TESTS "TRUE" )
+            ENDIF ()
+        ENDIF()
+        # Download the tests if needed
+        # IF ( GET_MMGS_TESTS MATCHES "TRUE" )
+        #     MESSAGE("-- Download the mmgs test cases. May be very long...")
+        #     FILE(DOWNLOAD
+        #         ${CMAKE_SOURCE_DIR}/ci_tests/mmgs.tgz
+        #         SHOW_PROGRESS)
+        #     IF ( NOT EXISTS ${CMAKE_SOURCE_DIR}/ci_tests/mmgs.tgz )
+        #         MESSAGE("\n")
+        #         MESSAGE(WARNING "Fail to automatically download the mmgs test cases "
+        #             " Try to get it at the following link:"
+        #
+        #             " then untar it in the project directory (Mmg/ by default).")
+        #     ELSE()
+        #         EXECUTE_PROCESS(
+        #             COMMAND ${CMAKE_COMMAND} -E tar xzf ${CMAKE_SOURCE_DIR}/ci_tests/mmgs.tgz
+        #             WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/ci_tests/
+        #             )
+        #         IF ( NOT EXISTS ${CMAKE_SOURCE_DIR}/ci_tests.tgz )
+        #             MESSAGE("\n")
+        #             MESSAGE(WARNING "Fail to automatically untar the mmgs "
+        #                 "test cases directory (mmgs.tgz)."
+        #                 "Try to untar it by hand in the project directory"
+        #                 " (Mmg/ci_tests/ by default).")
+        #         ENDIF()
+        #         FILE(REMOVE ${CMAKE_SOURCE_DIR}/ci_tests/mmgs.tgz)
+        #     ENDIF ()
+        # ENDIF ()
+        IF ( GET_MMG3D_TESTS MATCHES "TRUE" )
+            MESSAGE("-- Download the mmg3d test cases. May be very long...")
+            FILE(DOWNLOAD https://www.dropbox.com/s/e9yuc46617jynku/mmg3d.tgz?dl=0
+                ${CMAKE_SOURCE_DIR}/ci_tests/mmg3d.tgz
                 SHOW_PROGRESS)
-            IF ( NOT EXISTS ${CMAKE_SOURCE_DIR}/ci_tests.tgz )
+            IF ( NOT EXISTS ${CMAKE_SOURCE_DIR}/ci_tests/mmg3d.tgz )
                 MESSAGE("\n")
-                MESSAGE(WARNING "Fail to automatically download the continuous "
-                    "integration directory."
+                MESSAGE(WARNING "Fail to automatically download the mmg3d test cases "
                     " Try to get it at the following link:"
-                    " https://www.dropbox.com/s/0l2p1dwkokkkx4o/ci_tests.tgz?dl=0"
+                    " https://www.dropbox.com/s/e9yuc46617jynku/mmg3d.tgz?dl=0"
                     " then untar it in the project directory (Mmg/ by default).")
             ELSE()
                 EXECUTE_PROCESS(
-                    COMMAND ${CMAKE_COMMAND} -E tar xzf ${CMAKE_SOURCE_DIR}/ci_test.tgz
-                    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+                    COMMAND ${CMAKE_COMMAND} -E tar xzf ${CMAKE_SOURCE_DIR}/ci_tests/mmg3d.tgz
+                    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/ci_tests/
                     )
-                IF ( NOT EXISTS ${CMAKE_SOURCE_DIR}/ci_tests.tgz )
+                IF ( NOT EXISTS ${CMAKE_SOURCE_DIR}/ci_tests/mmg3d.tgz )
                     MESSAGE("\n")
-                    MESSAGE(WARNING "Fail to automatically untar the "
-                        "integration directory (ci_tests.tgz)."
+                    MESSAGE(WARNING "Fail to automatically untar the mmg3d "
+                        "test cases directory (mmg3d.tgz)."
                         "Try to untar it by hand in the project directory"
-                        " (Mmg/ by default).")
+                        " (Mmg/ci_tests/ by default).")
                 ENDIF()
 
-                FILE(REMOVE ${CMAKE_SOURCE_DIR}/ci_test.tgz)
+                FILE(REMOVE ${CMAKE_SOURCE_DIR}/ci_tests/mmg3d.tgz)
             ENDIF()
         ENDIF()
 
@@ -443,7 +505,8 @@ IF ( BUILD_MMG3D OR BUILD_MMG )
         ##-------------------------------------------------------------------##
         ##------- Set the continuous integration options --------------------##
         ##-------------------------------------------------------------------##
-        SET(CMAKE_CI_TESTS ${CMAKE_SOURCE_DIR}/ci_tests )
+        SET(MMGS_CI_TESTS ${CMAKE_SOURCE_DIR}/ci_tests/mmgs )
+        SET(MMG3D_CI_TESTS ${CMAKE_SOURCE_DIR}/ci_tests/mmg3d )
 
         # Run some tests twice with the output of the previous test as input
         OPTION ( RUN_AGAIN "Enable/Disable second run of some tests" ON )
@@ -517,24 +580,24 @@ IF ( BUILD_MMG3D OR BUILD_MMG )
         ENDIF()
 
         # Add more tests
-        INCLUDE( ${CMAKE_SOURCE_DIR}/cmake/testing/testing.cmake )
+        INCLUDE( ${CMAKE_SOURCE_DIR}/cmake/testing/mmg3d_tests.cmake )
 
         IF ( RUN_AGAIN )
-            INCLUDE( ${CMAKE_SOURCE_DIR}/cmake/testing/testing_rerun.cmake )
+            INCLUDE( ${CMAKE_SOURCE_DIR}/cmake/testing/mmg3d_rerun_tests.cmake )
         ENDIF()
 
         # Change authorisations for some files...
-        IF ( EXISTS ${CMAKE_CI_TESTS}/LeakCheck_AbnormalEnd7/unreadable.meshb)
-            FILE(REMOVE ${CMAKE_CI_TESTS}/LeakCheck_AbnormalEnd7/unwrittable.meshb)
+        IF ( EXISTS ${MMG3D_CI_TESTS}/LeakCheck_AbnormalEnd7/unreadable.meshb)
+            FILE(REMOVE ${MMG3D_CI_TESTS}/LeakCheck_AbnormalEnd7/unwrittable.meshb)
         ENDIF()
-        FILE(COPY ${CMAKE_CI_TESTS}/LeakCheck_AbnormalEnd7/dout.mesh
-            DESTINATION ${CMAKE_CI_TESTS}/LeakCheck_AbnormalEnd7/unwrittable.meshb)
+        FILE(COPY ${MMG3D_CI_TESTS}/LeakCheck_AbnormalEnd7/dout.mesh
+            DESTINATION ${MMG3D_CI_TESTS}/LeakCheck_AbnormalEnd7/unwrittable.meshb)
 
-        IF ( EXISTS ${CMAKE_CI_TESTS}/LeakCheck_AbnormalEnd8/unwrittable.sol)
-            FILE(REMOVE ${CMAKE_CI_TESTS}/LeakCheck_AbnormalEnd8/unwrittable.sol)
+        IF ( EXISTS ${MMG3D_CI_TESTS}/LeakCheck_AbnormalEnd8/unwrittable.sol)
+            FILE(REMOVE ${MMG3D_CI_TESTS}/LeakCheck_AbnormalEnd8/unwrittable.sol)
         ENDIF()
-        FILE(COPY ${CMAKE_CI_TESTS}/LeakCheck_AbnormalEnd8/dsol.sol
-            DESTINATION ${CMAKE_CI_TESTS}/LeakCheck_AbnormalEnd8/unwrittable.sol)
+        FILE(COPY ${MMG3D_CI_TESTS}/LeakCheck_AbnormalEnd8/dsol.sol
+            DESTINATION ${MMG3D_CI_TESTS}/LeakCheck_AbnormalEnd8/unwrittable.sol)
 
     ENDIF(CONTINUOUS_INTEGRATION)
 ENDIF()
@@ -601,11 +664,11 @@ SET(CPACK_PACKAGE_FILE_NAME ${CPACK_PACKAGE_INSTALL_DIRECTORY}-${CMAKE_SYSTEM})
 SET(CPACK_PACKAGE_EXECUTABLES "${PROJECT_NAME}")
 SET(CPACK_OUTPUT_FILE_PREFIX "../archives")
 
-SET(CPACK_IGNORE_FILES ";.\\\\\\\\.#;/\\\\\\\\.svn;.~;.#;.-e;.DS_Store" ${CPACK_IGNORE_FILES})
+SET(CPACK_IGNORE_FILES ";.\\\\\\\\.#;/\\\\\\\\.git;.~;.#;.-e;.DS_Store" ${CPACK_IGNORE_FILES})
 SET(CPACK_IGNORE_FILES ";libmmg.*" ${CPACK_IGNORE_FILES})
 
 SET(CPACK_SOURCE_IGNORE_FILES ";src/mmg3d/mmg3d.h$" ${CPACK_SOURCE_IGNORE_FILE})
-SET(CPACK_SOURCE_IGNORE_FILES ";.\\\\\\\\.#;/\\\\\\\\.svn;.~;.#;.-e;.DS_Store" ${CPACK_SOURCE_IGNORE_FILES})
+SET(CPACK_SOURCE_IGNORE_FILES ";.\\\\\\\\.#;/\\\\\\\\.git;.~;.#;.-e;.DS_Store" ${CPACK_SOURCE_IGNORE_FILES})
 SET(CPACK_SOURCE_IGNORE_FILES ";lib/;bin;archives;def" ${CPACK_SOURCE_IGNORE_FILES})
 SET(CPACK_SOURCE_IGNORE_FILES ";.dir-locals.el;.tm_properties" ${CPACK_SOURCE_IGNORE_FILES})
 SET(CPACK_SOURCE_IGNORE_FILES ";libexamples/example0/example0_a/mesh.o.*" ${CPACK_SOURCE_IGNORE_FILES})
