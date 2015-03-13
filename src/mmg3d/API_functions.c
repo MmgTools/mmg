@@ -30,7 +30,7 @@
  * \copyright GNU Lesser General Public License.
  *
  * \note This file contains some internal functions for the API, see
- * the \ref mmg3d/libmmg3d5.h header file for the documentation of all
+ * the \ref mmg3d/libmmg3d.h header file for the documentation of all
  * the usefull user's API functions.
  *
  * C API for MMG3D library. All functions are automatically prefixed
