@@ -135,11 +135,12 @@ IF ( BUILD_MMG3D OR BUILD_MMG )
     ADD_EXECUTABLE(genheader ${CMAKE_SOURCE_DIR}/scripts/genheader.c)
 
     ADD_CUSTOM_COMMAND(OUTPUT ${MMG_SOURCE_DIR}/libmmg3df.h
-        COMMAND Genheader ${MMG_SOURCE_DIR}/libmmg3df.h ${MMG_SOURCE_DIR}/libmmg3d.h ${CMAKE_SOURCE_DIR}/scripts/genfort.pl
+        COMMAND genheader ${MMG_SOURCE_DIR}/libmmg3df.h ${MMG_SOURCE_DIR}/libmmg3d.h ${CMAKE_SOURCE_DIR}/scripts/genfort.pl
         WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
         DEPENDS genheader ${MMG_SOURCE_DIR}/libmmg3d.h ${CMAKE_SOURCE_DIR}/scripts/genfort.pl
-        COMMENT "Generating Fortran header ${CMAKE_BUILD_DIR}"
+        COMMENT "Generating Fortran header"
         )
+    
     ###############################################################################
     #####
     #####         Choose type of insertion: delaunay kernel or patterns
