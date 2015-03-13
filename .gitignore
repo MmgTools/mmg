@@ -6,17 +6,20 @@ archives
 bin
 build*/*
 build/*
-lib
 
 doc/doxygen/*/Doxyfile
 doc/doxygen/*/html
 doc/doxygen/*/latex
 doc/doxygen/man
 
+lib
+
 libexamples/example0/example0_a/mesh.*
 libexamples/example0/example0_b/mesh.*
 libexamples/example1/result0.*
 libexamples/example2/2spheres_*
+
+ci_tests
 
 src/mmg3d/mmg3d.h
 
