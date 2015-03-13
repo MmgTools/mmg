@@ -722,5 +722,6 @@ inline double _MMG5_lenedgCoor_iso(double *ca,double *cb,double *ma,double *mb) 
  *
  */
 inline double _MMG5_lenedgCoor_ani(double *ca,double *cb,double *sa,double *sb) {
+    fprintf("under develop : first thing to do\n");
     return(0.0);
 }
