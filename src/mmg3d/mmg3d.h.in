@@ -41,7 +41,6 @@
 #include <unistd.h>
 #endif
 
-//#include "mmg3d5_redefine.h"
 #include "libmmg3d.h"
 
 #define MG_VER   "@CMAKE_RELEASE_VERSION@"" c"
