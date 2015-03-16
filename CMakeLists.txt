@@ -407,6 +407,9 @@ IF ( BUILD_MMG3D OR BUILD_MMG )
     OPTION ( CONTINUOUS_INTEGRATION "Enable/Disable continuous integration" OFF )
 
     IF(CONTINUOUS_INTEGRATION)
+        OPTION(MMGS_CI "Enable/Disable continuous integration for mmgs" ON )
+        OPTION(MMG3D_CI "Enable/Disable continuous integration for mmg3d" ON )
+
         ##-------------------------------------------------------------------##
         ##------- Get the continuous integration tests ----------------------##
         ##-------------------------------------------------------------------##
@@ -418,22 +421,22 @@ IF ( BUILD_MMG3D OR BUILD_MMG )
             MESSAGE("-- Create the continuous integration directory (ci_tests)"
                 " and download the test cases. May be very long...")
             FILE(MAKE_DIRECTORY ${CMAKE_SOURCE_DIR}/ci_tests)
-            # SET ( GET_MMGS_TESTS "TRUE" )
+            SET ( GET_MMGS_TESTS "TRUE" )
             SET ( GET_MMG3D_TESTS "TRUE" )
         ELSE ( )
             # Check if the tests are up to date
-            #IF ( EXISTS ${CMAKE_SOURCE_DIR}/ci_tests/mmgs.version )
-            #    FILE(READ ${CMAKE_SOURCE_DIR}/ci_tests/mmgs.version OLD_MMGS_VERSION)
-            #ELSE ( )
-            #    SET ( OLD_MMGS_VERSION "0" )
-            #ENDIF ( )
-            # File(DOWNLOAD
-            #    ${CMAKE_SOURCE_DIR}/ci_tests/mmgs.version)
-            # FILE(READ ${CMAKE_SOURCE_DIR}/ci_tests/mmgs.version MMGS_VERSION)
-            # IF ( NOT (${OLD_MMGS_VERSION} MATCHES ${MMGS_VERSION})
-            #     MESSAGE("-- Continuous integration tests cases need to be updated.")
-            #     SET ( GET_MMGS_TESTS "TRUE" )
-            # ENDIF ()
+            IF ( EXISTS ${CMAKE_SOURCE_DIR}/ci_tests/mmgs.version )
+                FILE(READ ${CMAKE_SOURCE_DIR}/ci_tests/mmgs.version OLD_MMGS_VERSION)
+            ELSE ( )
+                SET ( OLD_MMGS_VERSION "0" )
+            ENDIF ( )
+            FILE(DOWNLOAD https://www.dropbox.com/s/j7om7gl7r5mlnvj/mmgs.version?dl=0
+                ${CMAKE_SOURCE_DIR}/ci_tests/mmgs.version)
+            FILE(READ ${CMAKE_SOURCE_DIR}/ci_tests/mmgs.version MMGS_VERSION)
+            IF ( NOT (${OLD_MMGS_VERSION} MATCHES ${MMGS_VERSION}) )
+                MESSAGE("-- Continuous integration tests cases need to be updated.")
+                SET ( GET_MMGS_TESTS "TRUE" )
+            ENDIF ()
 
             IF ( EXISTS ${CMAKE_SOURCE_DIR}/ci_tests/mmg3d.version )
                 FILE(READ ${CMAKE_SOURCE_DIR}/ci_tests/mmg3d.version OLD_MMG3D_VERSION)
@@ -451,32 +454,32 @@ IF ( BUILD_MMG3D OR BUILD_MMG )
             ENDIF ()
         ENDIF()
         # Download the tests if needed
-        # IF ( GET_MMGS_TESTS MATCHES "TRUE" )
-        #     MESSAGE("-- Download the mmgs test cases. May be very long...")
-        #     FILE(DOWNLOAD
-        #         ${CMAKE_SOURCE_DIR}/ci_tests/mmgs.tgz
-        #         SHOW_PROGRESS)
-        #     IF ( NOT EXISTS ${CMAKE_SOURCE_DIR}/ci_tests/mmgs.tgz )
-        #         MESSAGE("\n")
-        #         MESSAGE(WARNING "Fail to automatically download the mmgs test cases "
-        #             " Try to get it at the following link:"
-        #
-        #             " then untar it in the project directory (Mmg/ by default).")
-        #     ELSE()
-        #         EXECUTE_PROCESS(
-        #             COMMAND ${CMAKE_COMMAND} -E tar xzf ${CMAKE_SOURCE_DIR}/ci_tests/mmgs.tgz
-        #             WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/ci_tests/
-        #             )
-        #         IF ( NOT EXISTS ${CMAKE_SOURCE_DIR}/ci_tests.tgz )
-        #             MESSAGE("\n")
-        #             MESSAGE(WARNING "Fail to automatically untar the mmgs "
-        #                 "test cases directory (mmgs.tgz)."
-        #                 "Try to untar it by hand in the project directory"
-        #                 " (Mmg/ci_tests/ by default).")
-        #         ENDIF()
-        #         FILE(REMOVE ${CMAKE_SOURCE_DIR}/ci_tests/mmgs.tgz)
-        #     ENDIF ()
-        # ENDIF ()
+        IF ( GET_MMGS_TESTS MATCHES "TRUE" )
+            MESSAGE("-- Download the mmgs test cases. May be very long...")
+            FILE(DOWNLOAD https://www.dropbox.com/s/zusur5gzz1tvmvh/mmgs.tgz?dl=0
+                ${CMAKE_SOURCE_DIR}/ci_tests/mmgs.tgz
+                SHOW_PROGRESS)
+            IF ( NOT EXISTS ${CMAKE_SOURCE_DIR}/ci_tests/mmgs.tgz )
+                MESSAGE("\n")
+                MESSAGE(WARNING "Fail to automatically download the mmgs test cases "
+                    " Try to get it at the following link:"
+                    " https://www.dropbox.com/s/zusur5gzz1tvmvh/mmgs.tgz?dl=0"
+                    " then untar it in the project directory (Mmg/ by default).")
+            ELSE()
+                EXECUTE_PROCESS(
+                    COMMAND ${CMAKE_COMMAND} -E tar xzf ${CMAKE_SOURCE_DIR}/ci_tests/mmgs.tgz
+                    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/ci_tests/
+                    )
+                IF ( NOT EXISTS ${CMAKE_SOURCE_DIR}/ci_tests/mmgs.tgz )
+                    MESSAGE("\n")
+                    MESSAGE(WARNING "Fail to automatically untar the mmgs "
+                        "test cases directory (mmgs.tgz)."
+                        "Try to untar it by hand in the project directory"
+                        " (Mmg/ci_tests/ by default).")
+                ENDIF()
+                FILE(REMOVE ${CMAKE_SOURCE_DIR}/ci_tests/mmgs.tgz)
+            ENDIF ()
+        ENDIF ()
         IF ( GET_MMG3D_TESTS MATCHES "TRUE" )
             MESSAGE("-- Download the mmg3d test cases. May be very long...")
             FILE(DOWNLOAD https://www.dropbox.com/s/e9yuc46617jynku/mmg3d.tgz?dl=0
@@ -512,10 +515,6 @@ IF ( BUILD_MMG3D OR BUILD_MMG )
         SET(MMGS_CI_TESTS ${CMAKE_SOURCE_DIR}/ci_tests/mmgs )
         SET(MMG3D_CI_TESTS ${CMAKE_SOURCE_DIR}/ci_tests/mmg3d )
 
-        # Run some tests twice with the output of the previous test as input
-        OPTION ( RUN_AGAIN "Enable/Disable second run of some tests" ON )
-        MARK_AS_ADVANCED(RUN_AGAIN)
-
         # Remove the --show-reachable=yes option from the default valgrind command
         set(VALGRIND_COMMAND_OPTIONS "-q --tool=memcheck --leak-check=yes --workaround-gcc296-bugs=yes --num-callers=100")
         # Ignore errors coming from the libmesh library
@@ -550,59 +549,90 @@ IF ( BUILD_MMG3D OR BUILD_MMG )
         ##-------------------------------------------------------------------##
         ##--------------------------- Add tests and configure it ------------##
         ##-------------------------------------------------------------------##
-        # Add runtime that we want to test
+        # Add runtime that we want to test for mmg3d
         IF(${CMAKE_BUILD_TYPE} MATCHES "Debug")
-            SET(EXECUT ${EXECUTABLE_OUTPUT_PATH}/${PROJECT_NAME}3d_debug)
+            SET(EXECUT ${EXECUTABLE_OUTPUT_PATH}/${PROJECT_NAME}s_debug)
             SET(BUILDNAME ${BUILDNAME}_debug CACHE STRING "build name variable")
         ELSEIF(${CMAKE_BUILD_TYPE} MATCHES "Release")
-            SET(EXECUT ${EXECUTABLE_OUTPUT_PATH}/${PROJECT_NAME}3d_O3)
+            SET(EXECUT ${EXECUTABLE_OUTPUT_PATH}/${PROJECT_NAME}s_O3)
             SET(BUILDNAME ${BUILDNAME}_O3 CACHE STRING "build name variable")
+        ELSEIF(${CMAKE_BUILD_TYPE} MATCHES "Relwithdebinfo")
+            SET(EXECUT ${EXECUTABLE_OUTPUT_PATH}/${PROJECT_NAME}s_O3d)
+            SET(BUILDNAME ${BUILDNAME}_O3d CACHE STRING "build name variable")
         ELSEIF(${CMAKE_BUILD_TYPE} MATCHES "Minsizerel")
-            SET(EXECUT ${EXECUTABLE_OUTPUT_PATH}/${PROJECT_NAME}3d_Os)
+            SET(EXECUT ${EXECUTABLE_OUTPUT_PATH}/${PROJECT_NAME}s_Os)
             SET(BUILDNAME ${BUILDNAME}_Os CACHE STRING "build name variable")
         ELSE()
-            SET(EXECUT ${EXECUTABLE_OUTPUT_PATH}/${PROJECT_NAME}3d)
+            SET(EXECUT ${EXECUTABLE_OUTPUT_PATH}/${PROJECT_NAME}s)
             SET(BUILDNAME ${BUILDNAME} CACHE STRING "build name variable")
         ENDIF()
 
-        SET ( LISTEXEC ${EXECUT} )
-        IF ( TEST_LIBMMG3D )
-            IF ( LIBMMG3D_STATIC OR LIBMMG3D_SHARED )
-                SET(LIBEXEC0_a ${EXECUTABLE_OUTPUT_PATH}/libmmg_example0_a)
-                SET(LIBEXEC0_b ${EXECUTABLE_OUTPUT_PATH}/libmmg_example0_b)
-                SET(LIBEXEC1   ${EXECUTABLE_OUTPUT_PATH}/libmmg_example1)
-                SET(LIBEXEC2   ${EXECUTABLE_OUTPUT_PATH}/libmmg_example2)
+        # Add mmgs tests
+        IF( MMGS_CI )
+            INCLUDE( ${CMAKE_SOURCE_DIR}/cmake/testing/mmgs_tests.cmake )
+        ENDIF()
 
-                ADD_TEST(NAME libexample0_a COMMAND ${LIBEXEC0_a})
-                ADD_TEST(NAME libexample0_b COMMAND ${LIBEXEC0_b})
-                ADD_TEST(NAME libexample1   COMMAND ${LIBEXEC1})
-                ADD_TEST(NAME libexample2   COMMAND ${LIBEXEC2})
+        # Add runtime that we want to test for mmg3d
+        IF ( MMG3D_CI )
+            # Run some tests twice with the output of the previous test as input
+            OPTION ( RUN_AGAIN "Enable/Disable second run of some tests" ON )
+            MARK_AS_ADVANCED(RUN_AGAIN)
 
-                SET(LIBEXEC3 ${EXECUTABLE_OUTPUT_PATH}/libmmg_example3)
-                SET( LISTEXEC ${LISTEXEC} ${LIBEXEC3} )
+            IF(${CMAKE_BUILD_TYPE} MATCHES "Debug")
+                SET(EXECUT ${EXECUTABLE_OUTPUT_PATH}/${PROJECT_NAME}3d_debug)
+                SET(BUILDNAME ${BUILDNAME}_debug CACHE STRING "build name variable")
+            ELSEIF(${CMAKE_BUILD_TYPE} MATCHES "Release")
+                SET(EXECUT ${EXECUTABLE_OUTPUT_PATH}/${PROJECT_NAME}3d_O3)
+                SET(BUILDNAME ${BUILDNAME}_O3 CACHE STRING "build name variable")
+            ELSEIF(${CMAKE_BUILD_TYPE} MATCHES "Release")
+                SET(EXECUT ${EXECUTABLE_OUTPUT_PATH}/${PROJECT_NAME}3d_O3d)
+                SET(BUILDNAME ${BUILDNAME}_O3d CACHE STRING "build name variable")
+            ELSEIF(${CMAKE_BUILD_TYPE} MATCHES "Minsizerel")
+                SET(EXECUT ${EXECUTABLE_OUTPUT_PATH}/${PROJECT_NAME}3d_Os)
+                SET(BUILDNAME ${BUILDNAME}_Os CACHE STRING "build name variable")
+            ELSE()
+                SET(EXECUT ${EXECUTABLE_OUTPUT_PATH}/${PROJECT_NAME}3d)
+                SET(BUILDNAME ${BUILDNAME} CACHE STRING "build name variable")
             ENDIF()
-        ENDIF()
 
-        # Add more tests
-        INCLUDE( ${CMAKE_SOURCE_DIR}/cmake/testing/mmg3d_tests.cmake )
+            SET ( LISTEXEC ${EXECUT} )
+            IF ( TEST_LIBMMG3D )
+                IF ( LIBMMG3D_STATIC OR LIBMMG3D_SHARED )
+                    SET(LIBEXEC0_a ${EXECUTABLE_OUTPUT_PATH}/libmmg_example0_a)
+                    SET(LIBEXEC0_b ${EXECUTABLE_OUTPUT_PATH}/libmmg_example0_b)
+                    SET(LIBEXEC1   ${EXECUTABLE_OUTPUT_PATH}/libmmg_example1)
+                    SET(LIBEXEC2   ${EXECUTABLE_OUTPUT_PATH}/libmmg_example2)
 
-        IF ( RUN_AGAIN )
-            INCLUDE( ${CMAKE_SOURCE_DIR}/cmake/testing/mmg3d_rerun_tests.cmake )
-        ENDIF()
+                    ADD_TEST(NAME libexample0_a COMMAND ${LIBEXEC0_a})
+                    ADD_TEST(NAME libexample0_b COMMAND ${LIBEXEC0_b})
+                    ADD_TEST(NAME libexample1   COMMAND ${LIBEXEC1})
+                    ADD_TEST(NAME libexample2   COMMAND ${LIBEXEC2})
 
-        # Change authorisations for some files...
-        IF ( EXISTS ${MMG3D_CI_TESTS}/LeakCheck_AbnormalEnd7/unreadable.meshb)
-            FILE(REMOVE ${MMG3D_CI_TESTS}/LeakCheck_AbnormalEnd7/unwrittable.meshb)
-        ENDIF()
-        FILE(COPY ${MMG3D_CI_TESTS}/LeakCheck_AbnormalEnd7/dout.mesh
-            DESTINATION ${MMG3D_CI_TESTS}/LeakCheck_AbnormalEnd7/unwrittable.meshb)
+                    SET(LIBEXEC3 ${EXECUTABLE_OUTPUT_PATH}/libmmg_example3)
+                    SET( LISTEXEC ${LISTEXEC} ${LIBEXEC3} )
+                ENDIF()
+            ENDIF()
 
-        IF ( EXISTS ${MMG3D_CI_TESTS}/LeakCheck_AbnormalEnd8/unwrittable.sol)
-            FILE(REMOVE ${MMG3D_CI_TESTS}/LeakCheck_AbnormalEnd8/unwrittable.sol)
-        ENDIF()
-        FILE(COPY ${MMG3D_CI_TESTS}/LeakCheck_AbnormalEnd8/dsol.sol
-            DESTINATION ${MMG3D_CI_TESTS}/LeakCheck_AbnormalEnd8/unwrittable.sol)
+            # Add more tests
+            INCLUDE( ${CMAKE_SOURCE_DIR}/cmake/testing/mmg3d_tests.cmake )
 
+            IF ( RUN_AGAIN )
+                INCLUDE( ${CMAKE_SOURCE_DIR}/cmake/testing/mmg3d_rerun_tests.cmake )
+            ENDIF()
+
+            # Change authorisations for some files...
+            IF ( EXISTS ${MMG3D_CI_TESTS}/LeakCheck_AbnormalEnd7/unreadable.meshb)
+                FILE(REMOVE ${MMG3D_CI_TESTS}/LeakCheck_AbnormalEnd7/unwrittable.meshb)
+            ENDIF()
+            FILE(COPY ${MMG3D_CI_TESTS}/LeakCheck_AbnormalEnd7/dout.mesh
+                DESTINATION ${MMG3D_CI_TESTS}/LeakCheck_AbnormalEnd7/unwrittable.meshb)
+
+            IF ( EXISTS ${MMG3D_CI_TESTS}/LeakCheck_AbnormalEnd8/unwrittable.sol)
+                FILE(REMOVE ${MMG3D_CI_TESTS}/LeakCheck_AbnormalEnd8/unwrittable.sol)
+            ENDIF()
+            FILE(COPY ${MMG3D_CI_TESTS}/LeakCheck_AbnormalEnd8/dsol.sol
+                DESTINATION ${MMG3D_CI_TESTS}/LeakCheck_AbnormalEnd8/unwrittable.sol)
+        ENDIF(MMG3D_CI)
     ENDIF(CONTINUOUS_INTEGRATION)
 ENDIF()
 
