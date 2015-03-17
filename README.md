@@ -50,4 +50,4 @@ Mmg's current developers and maintainers are Charles Dapogny, Cécile Dobrzynski
 ## License and copyright
 Code is under the [terms of the GNU Lesser General Public License](https://raw.githubusercontent.com/MmgTools/Mmg/master/LICENSE).
 
-Copyright (c) Inria - IMB (Université de Bordeaux) - LJLL (UPMC), 2004- .
+Copyright © Inria - IMB (Université de Bordeaux) - LJLL (UPMC), 2004- .
