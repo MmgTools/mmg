@@ -402,11 +402,11 @@ ENDIF()
 #####         Continuous integration
 #####
 ###############################################################################
-IF ( BUILD_MMG3D OR BUILD_MMG )
+IF ( BUILD_MMG3D OR BUILD_MMGS OR BUILD_MMG )
 
-    OPTION ( CONTINUOUS_INTEGRATION "Enable/Disable continuous integration" OFF )
+    OPTION ( BUILD_TESTING "Enable/Disable continuous integration" OFF )
 
-    IF(CONTINUOUS_INTEGRATION)
+    IF(BUILD_TESTING)
         OPTION(MMGS_CI "Enable/Disable continuous integration for mmgs" ON )
         OPTION(MMG3D_CI "Enable/Disable continuous integration for mmg3d" ON )
 
@@ -426,14 +426,26 @@ IF ( BUILD_MMG3D OR BUILD_MMG )
         ELSE ( )
             # Check if the tests are up to date
             IF ( EXISTS ${CMAKE_SOURCE_DIR}/ci_tests/mmgs.version )
-                FILE(READ ${CMAKE_SOURCE_DIR}/ci_tests/mmgs.version OLD_MMGS_VERSION)
+                FILE(MD5 ${CMAKE_SOURCE_DIR}/ci_tests/mmgs.version OLD_MMGS_MD5)
             ELSE ( )
-                SET ( OLD_MMGS_VERSION "0" )
+                SET ( OLD_MMGS_MD5 "0" )
             ENDIF ( )
+
             FILE(DOWNLOAD https://www.dropbox.com/s/j7om7gl7r5mlnvj/mmgs.version?dl=0
-                ${CMAKE_SOURCE_DIR}/ci_tests/mmgs.version)
-            FILE(READ ${CMAKE_SOURCE_DIR}/ci_tests/mmgs.version MMGS_VERSION)
-            IF ( NOT (${OLD_MMGS_VERSION} MATCHES ${MMGS_VERSION}) )
+                ${CMAKE_SOURCE_DIR}/ci_tests/mmgs.version
+                STATUS MMGS_VERSION_STATUS
+                INACTIVITY_TIMEOUT 5)
+            LIST(GET MMGS_VERSION_STATUS 0 MMGS_VERSION_STATUS_0)
+            LIST(GET MMGS_VERSION_STATUS 1 MMGS_VERSION_STATUS_1)
+            MESSAGE("PLOP3 " ${MMGS_VERSION_STATUS_0} "pl" ${MMGS_VERSION_1} )
+
+            IF ( MMGS_VERSION_STATUS_0 MATCHES 0)
+                 MESSAGE("DOWNLOAD OK")
+            ENDIF()
+
+            FILE(MD5 ${CMAKE_SOURCE_DIR}/ci_tests/mmgs.version MMGS_MD5)
+
+            IF ( NOT (${OLD_MMGS_MD5} MATCHES ${MMGS_MD5}) )
                 MESSAGE("-- Continuous integration tests cases need to be updated.")
                 SET ( GET_MMGS_TESTS "TRUE" )
             ENDIF ()
@@ -444,6 +456,8 @@ IF ( BUILD_MMG3D OR BUILD_MMG )
                 SET ( OLD_MMG3D_VERSION "0" )
             ENDIF ( )
 
+            # Fill variable in case of download fail
+            SET ( MMG3D_VERSION "empty" )
             FILE(DOWNLOAD https://www.dropbox.com/s/s723rs0xqu2j6k8/mmg3d.version?dl=0
                 ${CMAKE_SOURCE_DIR}/ci_tests/mmg3d.version)
             FILE(READ ${CMAKE_SOURCE_DIR}/ci_tests/mmg3d.version MMG3D_VERSION)
@@ -632,9 +646,9 @@ IF ( BUILD_MMG3D OR BUILD_MMG )
             ENDIF()
             FILE(COPY ${MMG3D_CI_TESTS}/LeakCheck_AbnormalEnd8/dsol.sol
                 DESTINATION ${MMG3D_CI_TESTS}/LeakCheck_AbnormalEnd8/unwrittable.sol)
-        ENDIF(MMG3D_CI)
-    ENDIF(CONTINUOUS_INTEGRATION)
-ENDIF()
+        ENDIF ( MMG3D_CI )
+    ENDIF ( BUILD_TESTING )
+ENDIF ( BUILD_MMG3D OR BUILD_MMGS OR BUILD_MMG )
 
 ###############################################################################
 #####
