@@ -88,7 +88,7 @@ int paratmet(double c0[3],double n0[3],double m[6],double c1[3],double n1[3],dou
     u[1] -= ps*n1[1];
     u[2] -= ps*n1[2];
     ll = u[0]*u[0] + u[1]*u[1] + u[2]*u[2];
-    if ( ll < EPSD )  return(0);
+    if ( ll < _MMG5_EPSD )  return(0);
     ll = 1.0 / sqrt(ll);
     u[0] *= ll;
     u[1] *= ll;
@@ -104,7 +104,7 @@ int paratmet(double c0[3],double n0[3],double m[6],double c1[3],double n1[3],dou
     r[2][1] = n1[0]*u[1] - n1[1]*u[0];
 
     ll = r[0][1]*r[0][1] + r[1][1]*r[1][1] + r[2][1]*r[2][1];
-    if ( ll < EPSD )  return(0);
+    if ( ll < _MMG5_EPSD )  return(0);
     ll = 1.0 / sqrt(ll);
     r[0][1] *= ll;
     r[1][1] *= ll;
@@ -436,7 +436,7 @@ static int intersecmet22(MMG5_pMesh mesh, double *m,double *n,double *mr) {
 
     /* Compute imn = M^{-1}N */
     det = m[0]*m[2] - m[1]*m[1];
-    if ( fabs(det) < EPS*EPS ) {
+    if ( fabs(det) < _MMG5_EPS*_MMG5_EPS ) {
         printf("  ## Function intersecmet : null metric det : %E \n",det);
         return(0);
     }
@@ -457,7 +457,7 @@ static int intersecmet22(MMG5_pMesh mesh, double *m,double *n,double *mr) {
     }
 
     /* First case : matrices m and n are homothetic : n = lambda0*m */
-    if ( sqDelta < EPS ) {
+    if ( sqDelta < _MMG5_EPS ) {
         /* Diagonalize m and truncate eigenvalues : trimn, det, etc... are reused */
         dd    = m[0] - m[2];
         trimn = m[0] + m[2];
@@ -471,11 +471,11 @@ static int intersecmet22(MMG5_pMesh mesh, double *m,double *n,double *mr) {
         vp0[1] = (dm[0]-m[0]);
         vnorm  = sqrt(vp0[0]*vp0[0] + vp0[1]*vp0[1]);
 
-        if ( vnorm < EPS ) {
+        if ( vnorm < _MMG5_EPS ) {
             vp0[0] = (dm[0] - m[2]);
             vp0[1] = m[1];
             vnorm  = sqrt(vp0[0]*vp0[0] + vp0[1]*vp0[1]);
-            if ( vnorm < EPS ) return(0);
+            if ( vnorm < _MMG5_EPS ) return(0);
         }
 
         vnorm   = 1.0 / vnorm;
@@ -486,11 +486,11 @@ static int intersecmet22(MMG5_pMesh mesh, double *m,double *n,double *mr) {
         vp1[1] = (dm[1]-m[0]);
         vnorm  = sqrt(vp1[0]*vp1[0] + vp1[1]*vp1[1]);
 
-        if ( vnorm < EPS ) {
+        if ( vnorm < _MMG5_EPS ) {
             vp1[0] = (dm[1] - m[2]);
             vp1[1] = m[1];
             vnorm  = sqrt(vp1[0]*vp1[0] + vp1[1]*vp1[1]);
-            if ( vnorm < EPS ) return(0);
+            if ( vnorm < _MMG5_EPS ) return(0);
         }
 
         vnorm   = 1.0 / vnorm;
@@ -521,7 +521,7 @@ static int intersecmet22(MMG5_pMesh mesh, double *m,double *n,double *mr) {
         vp0[1] = (lambda[0] - imn[0]);
         vnorm  = sqrt(vp0[0]*vp0[0] + vp0[1]*vp0[1]);
 
-        if ( vnorm < EPS ) {
+        if ( vnorm < _MMG5_EPS ) {
             vp0[0] = (lambda[0] - imn[3]);
             vp0[1] = imn[2];
             vnorm  = sqrt(vp0[0]*vp0[0] + vp0[1]*vp0[1]);
@@ -535,7 +535,7 @@ static int intersecmet22(MMG5_pMesh mesh, double *m,double *n,double *mr) {
         vp1[1] = (lambda[1] - imn[0]);
         vnorm  = sqrt(vp1[0]*vp1[0] + vp1[1]*vp1[1]);
 
-        if ( vnorm < EPS ) {
+        if ( vnorm < _MMG5_EPS ) {
             vp1[0] = (lambda[1] - imn[3]);
             vp1[1] = imn[2];
             vnorm  = sqrt(vp1[0]*vp1[0] + vp1[1]*vp1[1]);
@@ -560,7 +560,7 @@ static int intersecmet22(MMG5_pMesh mesh, double *m,double *n,double *mr) {
 
         /* Intersected metric = tP^-1 diag(d0,d1)P^-1, P = (vp0, vp1) stored in columns */
         det = vp0[0]*vp1[1] - vp0[1]*vp1[0];
-        if ( fabs(det) < EPS )  return(0);
+        if ( fabs(det) < _MMG5_EPS )  return(0);
         det = 1.0 / det;
 
         ip[0] =  vp1[1]*det;
@@ -634,7 +634,7 @@ int intextmet(MMG5_pMesh mesh,MMG5_pSol met,int np,double me[6]) {
         u[1] = n1[2]*t[0] - n1[0]*t[2];
         u[2] = n1[0]*t[1] - n1[1]*t[0];
         dd = u[0]*u[0] + u[1]*u[1] + u[2]*u[2];
-        if ( dd < EPSD ) return(0);
+        if ( dd < _MMG5_EPSD ) return(0);
         dd = 1.0 / sqrt(dd);
 
         u[0] *= dd;
@@ -653,7 +653,7 @@ int intextmet(MMG5_pMesh mesh,MMG5_pSol met,int np,double me[6]) {
         u[1] = n2[2]*t[0] - n2[0]*t[2];
         u[2] = n2[0]*t[1] - n2[1]*t[0];
         dd = u[0]*u[0] + u[1]*u[1] + u[2]*u[2];
-        if ( dd < EPSD ) return(0);
+        if ( dd < _MMG5_EPSD ) return(0);
         dd = 1.0 / sqrt(dd);
 
         u[0] *= dd;

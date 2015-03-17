@@ -129,7 +129,7 @@ int chkswp(MMG5_pMesh mesh,MMG5_pSol met,int k,int i,char typchk) {
     uz = p[2]->c[2] - p[1]->c[2];
 
     ll = ux*ux + uy*uy + uz*uz;
-    if ( ll < EPS )  return(0); /* no change for short edge */
+    if ( ll < _MMG5_EPS )  return(0); /* no change for short edge */
 
     n1 = np[1];
     n2 = np[2];
@@ -160,7 +160,7 @@ int chkswp(MMG5_pMesh mesh,MMG5_pSol met,int k,int i,char typchk) {
     cosn2 *= (0.25*ll);
 
     cosnat = MG_MAX(fabs(cosn1),fabs(cosn2));
-    cosnat = cosnat < EPS ? 0.0 : cosnat;
+    cosnat = cosnat < _MMG5_EPS ? 0.0 : cosnat;
 
     /* Estimate of the Hausdorff distance between approximation and underlying surface
        when using the 'swapped' edge [i0,q] */
@@ -169,7 +169,7 @@ int chkswp(MMG5_pMesh mesh,MMG5_pSol met,int k,int i,char typchk) {
     uz = q->c[2] - p[0]->c[2];
 
     ll = ux*ux + uy*uy + uz*uz;
-    if ( ll < EPS )  return(0);
+    if ( ll < _MMG5_EPS )  return(0);
 
     n1 = np[0];
     n2 = nq;
@@ -200,7 +200,7 @@ int chkswp(MMG5_pMesh mesh,MMG5_pSol met,int k,int i,char typchk) {
     cosn2 *= (0.25*ll);
 
     coschg = MG_MAX(fabs(cosn1),fabs(cosn2));
-    coschg = coschg < EPS ? 0.0 : coschg;
+    coschg = coschg < _MMG5_EPS ? 0.0 : coschg;
 
     /* swap if Hausdorff contribution of the swapped edge is less than existing one */
     if ( coschg > mesh->info.hausd*mesh->info.hausd )  return(0);

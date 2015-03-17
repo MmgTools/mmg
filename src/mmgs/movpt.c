@@ -119,7 +119,7 @@ int movintpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
     sinalpha = sqrt(1.0- MG_MIN(1.0,cosalpha*cosalpha));
 
     /* No rotation needed in this case */
-    if ( ll < EPS ) {
+    if ( ll < _MMG5_EPS ) {
         if ( n[2] > 0.0 ) {
             r[0][0] = 1.0 ; r[0][1] = 0.0 ; r[0][2] = 0.0;
             r[1][0] = 0.0 ; r[1][1] = 1.0 ; r[1][2] = 0.0;
@@ -216,7 +216,7 @@ int movintpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
     iel = list[kel] / 3;
     det2d = -gv[1]*(lispoi[3*(kel+1)+1] - lispoi[3*(kel)+1]) \
         +  gv[0]*(lispoi[3*(kel+1)+2] - lispoi[3*(kel)+2]);
-    if ( fabs(det2d) < EPSD )  return(0);
+    if ( fabs(det2d) < _MMG5_EPSD )  return(0);
 
     det2d = 1/det2d;
     step *= det2d;
@@ -229,7 +229,7 @@ int movintpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
 
     /* Computation of the barycentric coordinates of the new point in the corresponding triangle. */
     det2d = lispoi[3*kel+1]*lispoi[3*(kel+1)+2] - lispoi[3*kel+2]*lispoi[3*(kel+1)+1];
-    if ( det2d < EPSD )  return(0);
+    if ( det2d < _MMG5_EPSD )  return(0);
     det2d = 1.0 / det2d;
     lambda[1] = lispoi[3*(kel+1)+2]*gv[0] - lispoi[3*(kel+1)+1]*gv[1];
     lambda[2] = -lispoi[3*(kel)+2]*gv[0] + lispoi[3*(kel)+1]*gv[1];
@@ -311,7 +311,7 @@ int movintpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
         caltmp = caleltsig_iso(mesh,NULL,iel);
         calold = MG_MIN(calold,caltmp);
         caltmp = caleltsig_iso(mesh,NULL,0);
-        if ( caltmp < EPSD )        return(0.0);
+        if ( caltmp < _MMG5_EPSD )        return(0.0);
         calnew = MG_MIN(calnew,caltmp);
         /*if ( (calnew < BADKAL) && (calnew<=calold) )  return(0);
           if ( chkedg(mesh,0) )  return(0); */
@@ -536,7 +536,7 @@ int movridpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
             nn2[2] = no2[2]+np2[2];
 
             ps2 = (p2->c[0]-p0->c[0])*nn1[0]+(p2->c[1]-p0->c[1])*nn1[1]+(p2->c[2]-p0->c[2])*nn1[2];
-            if ( ll2old < EPSD )  return(0);
+            if ( ll2old < _MMG5_EPSD )  return(0);
             ps2 *= (2.0 / ll2old);
             nn1[0] -= ps2*(p2->c[0]-p0->c[0]);
             nn1[1] -= ps2*(p2->c[1]-p0->c[1]);
@@ -550,7 +550,7 @@ int movridpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
 
             dd1 = nn1[0]*nn1[0] + nn1[1]*nn1[1] + nn1[2]*nn1[2];
             dd2 = nn2[0]*nn2[0] + nn2[1]*nn2[1] + nn2[2]*nn2[2];
-            if ( (dd1 < EPSD2) || (dd2<EPSD2) )  return(0);
+            if ( (dd1 < _MMG5_EPSD2) || (dd2<_MMG5_EPSD2) )  return(0);
             dd1 = 1.0 / sqrt(dd1);
             nn1[0] = dd1*nn1[0];
             nn1[1] = dd1*nn1[1];
@@ -578,7 +578,7 @@ int movridpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
             dd1 = nn1[0]*nn1[0] + nn1[1]*nn1[1] + nn1[2]*nn1[2];
             dd2 = nn2[0]*nn2[0] + nn2[1]*nn2[1] + nn2[2]*nn2[2];
 
-            if ( (dd1 < EPSD2) || (dd2<EPSD2) || (ddt < EPSD2) )  return(0);
+            if ( (dd1 < _MMG5_EPSD2) || (dd2<_MMG5_EPSD2) || (ddt < _MMG5_EPSD2) )  return(0);
             dd1 = 1.0 / sqrt(dd1);
             nn1[0] = dd1*nn1[0];
             nn1[1] = dd1*nn1[1];
@@ -604,7 +604,7 @@ int movridpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
             nn2[2] = no2[2]+np1[2];
 
             ps2 = (p2->c[0]-p0->c[0])*nn1[0]+(p2->c[1]-p0->c[1])*nn1[1]+(p2->c[2]-p0->c[2])*nn1[2];
-            if ( ll2old < EPSD )  return(0);
+            if ( ll2old < _MMG5_EPSD )  return(0);
             ps2 *= (2.0 / ll2old);
             nn1[0] -= ps2*(p2->c[0]-p0->c[0]);
             nn1[1] -= ps2*(p2->c[1]-p0->c[1]);
@@ -619,7 +619,7 @@ int movridpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
             dd1 = nn1[0]*nn1[0] + nn1[1]*nn1[1] + nn1[2]*nn1[2];
             dd2 = nn2[0]*nn2[0] + nn2[1]*nn2[1] + nn2[2]*nn2[2];
 
-            if (( dd1 < EPSD2 ) || (dd2<EPSD2) )  return(0);
+            if (( dd1 < _MMG5_EPSD2 ) || (dd2<_MMG5_EPSD2) )  return(0);
             dd1 = 1.0 / sqrt(dd1);
             nn1[0] = dd1*nn1[0];
             nn1[1] = dd1*nn1[1];
@@ -647,7 +647,7 @@ int movridpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
             dd2 = nn2[0]*nn2[0] + nn2[1]*nn2[1] + nn2[2]*nn2[2];
             ddt = to[0]*to[0] + to[1]*to[1] + to[2]*to[2];
 
-            if ( (dd1 < EPSD2) || (dd2<EPSD2) || (ddt < EPSD2) )  return(0);
+            if ( (dd1 < _MMG5_EPSD2) || (dd2<_MMG5_EPSD2) || (ddt < _MMG5_EPSD2) )  return(0);
             dd1 = 1.0 / sqrt(dd1);
             nn1[0] = dd1*nn1[0];
             nn1[1] = dd1*nn1[1];
@@ -688,7 +688,7 @@ int movridpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
             nn2[2] = no2[2]+np2[2];
 
             ps2 = (p1->c[0]-p0->c[0])*nn1[0]+(p1->c[1]-p0->c[1])*nn1[1]+(p1->c[2]-p0->c[2])*nn1[2];
-            if ( ll1old < EPSD )  return(0);
+            if ( ll1old < _MMG5_EPSD )  return(0);
             ps2 *= (2.0 / ll1old);
             nn1[0] -= ps2*(p1->c[0]-p0->c[0]);
             nn1[1] -= ps2*(p1->c[1]-p0->c[1]);
@@ -703,7 +703,7 @@ int movridpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
             dd1 = nn1[0]*nn1[0] + nn1[1]*nn1[1] + nn1[2]*nn1[2];
             dd2 = nn2[0]*nn2[0] + nn2[1]*nn2[1] + nn2[2]*nn2[2];
 
-            if ( (dd1 < EPSD2 ) || (dd2<EPSD2) )  return(0);
+            if ( (dd1 < _MMG5_EPSD2 ) || (dd2<_MMG5_EPSD2) )  return(0);
             dd1 = 1.0 / sqrt(dd1);
             nn1[0] = dd1*nn1[0];
             nn1[1] = dd1*nn1[1];
@@ -731,7 +731,7 @@ int movridpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
             dd2 = nn2[0]*nn2[0] + nn2[1]*nn2[1] + nn2[2]*nn2[2];
             ddt = to[0]*to[0] + to[1]*to[1] + to[2]*to[2];
 
-            if ( (dd1 < EPSD2) || (dd2<EPSD2) || (ddt < EPSD2) )  return(0);
+            if ( (dd1 < _MMG5_EPSD2) || (dd2<_MMG5_EPSD2) || (ddt < _MMG5_EPSD2) )  return(0);
             dd1 = 1.0 / sqrt(dd1);
             nn1[0] = dd1*nn1[0];
             nn1[1] = dd1*nn1[1];
@@ -757,7 +757,7 @@ int movridpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
             nn2[2] = no2[2]+np1[2];
 
             ps2 = (p1->c[0]-p0->c[0])*nn1[0]+(p1->c[1]-p0->c[1])*nn1[1]+(p1->c[2]-p0->c[2])*nn1[2];
-            if ( ll1old < EPSD )  return(0);
+            if ( ll1old < _MMG5_EPSD )  return(0);
             ps2 *= (2.0 / ll1old);
             nn1[0] -= ps2*(p1->c[0]-p0->c[0]);
             nn1[1] -= ps2*(p1->c[1]-p0->c[1]);
@@ -772,7 +772,7 @@ int movridpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
             dd1 = nn1[0]*nn1[0] + nn1[1]*nn1[1] + nn1[2]*nn1[2];
             dd2 = nn2[0]*nn2[0] + nn2[1]*nn2[1] + nn2[2]*nn2[2];
 
-            if ( (dd1 < EPSD2) || (dd2<EPSD2) )  return(0);
+            if ( (dd1 < _MMG5_EPSD2) || (dd2<_MMG5_EPSD2) )  return(0);
             dd1 = 1.0 / sqrt(dd1);
             nn1[0] = dd1*nn1[0];
             nn1[1] = dd1*nn1[1];
@@ -800,7 +800,7 @@ int movridpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
             dd2 = nn2[0]*nn2[0] + nn2[1]*nn2[1] + nn2[2]*nn2[2];
             ddt = to[0]*to[0] + to[1]*to[1] + to[2]*to[2];
 
-            if ( (dd1 < EPSD2) || (dd2<EPSD2) || (ddt < EPSD2) )  return(0);
+            if ( (dd1 < _MMG5_EPSD2) || (dd2<_MMG5_EPSD2) || (ddt < _MMG5_EPSD2) )  return(0);
             dd1 = 1.0 / sqrt(dd1);
             nn1[0] = dd1*nn1[0];
             nn1[1] = dd1*nn1[1];

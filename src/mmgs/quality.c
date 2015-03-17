@@ -115,7 +115,7 @@ static double calelt33_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel) {
     for (i=0; i<6; i++)
         m[i] = dd * (ma[i] + mb[i] + mc[i]);
     det = m[0]*(m[3]*m[5] - m[4]*m[4]) - m[1]*(m[1]*m[5] - m[2]*m[4]) + m[2]*(m[1]*m[4] - m[2]*m[3]);
-    if ( det < EPSD2 )  return(0.0);
+    if ( det < _MMG5_EPSD2 )  return(0.0);
 
     a = &mesh->point[ia].c[0];
     b = &mesh->point[ib].c[0];
@@ -136,7 +136,7 @@ static double calelt33_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel) {
     n[1] = (abz*acx - abx*acz) * (abz*acx - abx*acz);
     n[2] = (abx*acy - aby*acx) * (abx*acy - aby*acx);
     cal  = sqrt(n[0] + n[1] + n[2]);
-    if ( cal > EPSD ) {
+    if ( cal > _MMG5_EPSD ) {
         dd    = 1.0 / cal;
         n[0] *= dd;
         n[1] *= dd;
@@ -146,7 +146,7 @@ static double calelt33_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel) {
         rap += m[0]*acx*acx + m[3]*acy*acy + m[5]*acz*acz + 2.0*(m[1]*acx*acy + m[2]*acx*acz + m[4]*acy*acz);
         rap += m[0]*bcx*bcx + m[3]*bcy*bcy + m[5]*bcz*bcz + 2.0*(m[1]*bcx*bcy + m[2]*bcx*bcz + m[4]*bcy*bcz);
         /* quality */
-        if ( rap > EPSD )
+        if ( rap > _MMG5_EPSD )
             return(sqrt(det)*cal / rap);
         else
             return(0.0);
@@ -178,7 +178,7 @@ inline double calelt_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel) {
     l[2] = lenedg_ani(mesh,met,ia,ib,( pt->tag[2] & MG_GEO ));
 
     rap = l[0]*l[0] + l[1]*l[1] + l[2]*l[2];
-    if ( rap < EPSD ) return(0.0);
+    if ( rap < _MMG5_EPSD ) return(0.0);
     return (anisurf / rap);
 }
 
@@ -211,12 +211,12 @@ inline double calelt_iso(MMG5_pMesh mesh,MMG5_pSol met,int iel) {
     cal  = (aby*acz - abz*acy) * (aby*acz - abz*acy);
     cal += (abz*acx - abx*acz) * (abz*acx - abx*acz);
     cal += (abx*acy - aby*acx) * (abx*acy - aby*acx);
-    if ( cal > EPSD ) {
+    if ( cal > _MMG5_EPSD ) {
         /* qual = 2.*surf / length */
         rap  = abx*abx + aby*aby + abz*abz;
         rap += acx*acx + acy*acy + acz*acz;
         rap += bcx*bcx + bcy*bcy + bcz*bcz;
-        if ( rap > EPSD )
+        if ( rap > _MMG5_EPSD )
             return(sqrt(cal) / rap);
         else
             return(0.0);
@@ -262,7 +262,7 @@ inline double caleltsig_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel) {
     pv[2] = abx*acy - aby*acx;
 
     dd   = pv[0]*pv[0] + pv[1]*pv[1] + pv[2]*pv[2];
-    if ( dd < EPSD )  return(0.0);
+    if ( dd < _MMG5_EPSD )  return(0.0);
     dd = 1.0 / sqrt(dd);
 
     if ( !MS_EDG(pa->tag) ) {
@@ -306,7 +306,7 @@ inline double caleltsig_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel) {
     l[2] = lenedg_ani(mesh,met,ia,ib,( pt->tag[2] & MG_GEO ));
 
     rap = l[0]*l[0] + l[1]*l[1] + l[2]*l[2];
-    if ( rap < EPSD )  return(0.0);
+    if ( rap < _MMG5_EPSD )  return(0.0);
     return(anisurf / rap);
 }
 
@@ -350,7 +350,7 @@ inline double caleltsig_iso(MMG5_pMesh mesh,MMG5_pSol met,int iel) {
     sqcal = sqrt(cal);
     ps1   = 0.0;
 
-    if ( sqcal < EPSD )  return(0.0);
+    if ( sqcal < _MMG5_EPSD )  return(0.0);
     invsqcal = 1.0 / sqcal;
 
     if ( !MS_EDG(pa->tag) ) {
@@ -385,12 +385,12 @@ inline double caleltsig_iso(MMG5_pMesh mesh,MMG5_pSol met,int iel) {
 
     /* if orientation is reversed with regards to orientation of vertex */
     if ( ps1 < 0.0 )  return(-1.0);
-    if ( cal > EPSD ) {
+    if ( cal > _MMG5_EPSD ) {
         /* qual = 2.*surf / length */
         rap  = abx*abx + aby*aby + abz*abz;
         rap += acx*acx + acy*acy + acz*acz;
         rap += bcx*bcx + bcy*bcy + bcz*bcz;
-        if ( rap > EPSD )
+        if ( rap > _MMG5_EPSD )
             return(sqrt(cal) / rap);
         else
             return(0.0);
@@ -420,7 +420,7 @@ inline int nortri(MMG5_pMesh mesh,MMG5_pTria pt,double *n) {
     n[1] = abz*acx - abx*acz;
     n[2] = abx*acy - aby*acx;
     det  = n[0]*n[0] + n[1]*n[1] + n[2]*n[2];
-    if ( det > EPSD ) {
+    if ( det > _MMG5_EPSD ) {
         dd = 1.0 / sqrt(det);
         n[0] *= dd;
         n[1] *= dd;
@@ -448,7 +448,7 @@ inline int norpts(MMG5_pPoint p1,MMG5_pPoint p2,MMG5_pPoint p3,double *n) {
     n[1] = abz*acx - abx*acz;
     n[2] = abx*acy - aby*acx;
     det  = n[0]*n[0] + n[1]*n[1] + n[2]*n[2];
-    if ( det > EPSD ) {
+    if ( det > _MMG5_EPSD ) {
         dd = 1.0 / sqrt(det);
         n[0] *= dd;
         n[1] *= dd;

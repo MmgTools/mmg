@@ -45,7 +45,7 @@ static int intmet22(double *m,double *n,double *mr,double s) {
 
     /* Compute imn = M^{-1}N */
     det = m[0]*m[2] - m[1]*m[1];
-    if ( fabs(det) < EPS*EPS ) {
+    if ( fabs(det) < _MMG5_EPS*_MMG5_EPS ) {
         printf("BEWARE : function intmet : null metric det : %E \n",det);
         return(0);
     }
@@ -66,10 +66,10 @@ static int intmet22(double *m,double *n,double *mr,double s) {
     }
 
     /* First case : matrices m and n are homothetic = n = lambda0*m */
-    if ( sqDelta < EPS ) {
+    if ( sqDelta < _MMG5_EPS ) {
         dd  = (1.0-s)*sqrt(lambda[0]) + s;
         dd *= dd;
-        if ( dd < EPSD ) {
+        if ( dd < _MMG5_EPSD ) {
             mr[0] = m[0];
             mr[1] = m[1];
             mr[2] = m[2];
@@ -91,7 +91,7 @@ static int intmet22(double *m,double *n,double *mr,double s) {
         vp0[0] = imn[1];
         vp0[1] = (lambda[0] - imn[0]);
         vnorm  = sqrt(vp0[0]*vp0[0] + vp0[1]*vp0[1]);
-        if ( vnorm < EPS ) {
+        if ( vnorm < _MMG5_EPS ) {
             vp0[0] = (lambda[0] - imn[3]);
             vp0[1] = imn[2];
             vnorm  = sqrt(vp0[0]*vp0[0] + vp0[1]*vp0[1]);
@@ -103,7 +103,7 @@ static int intmet22(double *m,double *n,double *mr,double s) {
         vp1[0] = imn[1];
         vp1[1] = (lambda[1] - imn[0]);
         vnorm  = sqrt(vp1[0]*vp1[0] + vp1[1]*vp1[1]);
-        if ( vnorm < EPS ) {
+        if ( vnorm < _MMG5_EPS ) {
             vp1[0] = (lambda[1] - imn[3]);
             vp1[1] = imn[2];
             vnorm  = sqrt(vp1[0]*vp1[0] + vp1[1]*vp1[1]);
@@ -121,7 +121,7 @@ static int intmet22(double *m,double *n,double *mr,double s) {
         /* Diagonal values of the interpolated metric */
         dd  = (1.0-s)*sqrt(dn[0]) + s*sqrt(dm[0]);
         dd *= dd;
-        if ( dd < EPSD ) {
+        if ( dd < _MMG5_EPSD ) {
             d0 = s < 0.5 ? dm[0] : dn[0];
         }
         else {
@@ -129,7 +129,7 @@ static int intmet22(double *m,double *n,double *mr,double s) {
         }
         dd = (1.0-s)*sqrt(dn[1]) + s*sqrt(dm[1]);
         dd *= dd;
-        if ( dd < EPSD ) {
+        if ( dd < _MMG5_EPSD ) {
             d1 = s < 0.5 ? dm[1] : dn[1];
         }
         else{
@@ -138,7 +138,7 @@ static int intmet22(double *m,double *n,double *mr,double s) {
 
         /* Intersected metric = tP^-1 diag(d0,d1)P^-1, P = (vp0, vp1) stored in columns */
         det = vp0[0]*vp1[1] - vp0[1]*vp1[0];
-        if ( fabs(det) < EPS )  return(0);
+        if ( fabs(det) < _MMG5_EPS )  return(0);
         det = 1.0 / det;
 
         ip[0] =  vp1[1]*det;
@@ -178,7 +178,7 @@ int intridmet(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,double s,double v[3],do
     if ( MS_SIN(p1->tag) && MS_SIN(p2->tag) ) {
         dd  = (1-s)*sqrt(m2[0]) + s*sqrt(m1[0]);
         dd *= dd;
-        if ( dd < EPSD ) {
+        if ( dd < _MMG5_EPSD ) {
             mr[0] = s < 0.5 ? m1[0] : m2[0];
             mr[1] = s < 0.5 ? m1[0] : m2[0];
             mr[2] = s < 0.5 ? m1[0] : m2[0];
@@ -198,7 +198,7 @@ int intridmet(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,double s,double v[3],do
         /* Interpolation of the eigenvalue associated to tangent vector */
         dd = (1-s)*sqrt(m2[0]) + s*sqrt(m1[0]);
         dd *= dd;
-        if ( dd < EPSD ) {
+        if ( dd < _MMG5_EPSD ) {
             mr[0] = s < 0.5 ? m1[0] : m2[0];
         }
         else {
@@ -207,7 +207,7 @@ int intridmet(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,double s,double v[3],do
         /* Interpolation of the two other eigenvalues */
         dd  = (1-s)*sqrt(m2[1]) + s*sqrt(m1[0]);
         dd *= dd;
-        if ( dd < EPSD ) {
+        if ( dd < _MMG5_EPSD ) {
             hn1 = s < 0.5 ? m1[0] : m2[1];
         }
         else {
@@ -215,7 +215,7 @@ int intridmet(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,double s,double v[3],do
         }
         dd = (1-s)*sqrt(m2[2]) + s*sqrt(m1[0]);
         dd *= dd;
-        if ( dd < EPSD ) {
+        if ( dd < _MMG5_EPSD ) {
             hn2 = s < 0.5 ? m1[0] : m2[2];
         }
         else {
@@ -243,7 +243,7 @@ int intridmet(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,double s,double v[3],do
         /* Interpolation of the eigenvalue associated to tangent vector */
         dd  = (1-s)*sqrt(m2[0]) + s*sqrt(m1[0]);
         dd *= dd;
-        if ( dd < EPSD ) {
+        if ( dd < _MMG5_EPSD ) {
             mr[0] = s < 0.5 ? m1[0] : m2[0];
         }
         else {
@@ -252,7 +252,7 @@ int intridmet(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,double s,double v[3],do
         /* Interpolation of the two other eigenvalues */
         dd = (1-s)*sqrt(m2[0]) + s*sqrt(m1[1]);
         dd *= dd;
-        if ( dd < EPSD ) {
+        if ( dd < _MMG5_EPSD ) {
             hn1 = s < 0.5 ? m1[1] : m2[0];
         }
         else {
@@ -260,7 +260,7 @@ int intridmet(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,double s,double v[3],do
         }
         dd  = (1-s)*sqrt(m2[0]) + s*sqrt(m1[2]);
         dd *= dd;
-        if ( dd < EPSD ) {
+        if ( dd < _MMG5_EPSD ) {
             hn2 = s < 0.5 ? m1[2] : m2[0];
         }
         else {
@@ -287,7 +287,7 @@ int intridmet(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,double s,double v[3],do
         /* Interpolation of the eigenvalue associated to tangent vector */
         dd  = (1-s)*sqrt(m2[0]) + s*sqrt(m1[0]);
         dd *= dd;
-        if ( dd < EPSD ) {
+        if ( dd < _MMG5_EPSD ) {
             mr[0] = s < 0.5 ? m1[0] : m2[0];
         }
         else {
@@ -304,7 +304,7 @@ int intridmet(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,double s,double v[3],do
         if ( fabs(ps11) > fabs(ps12) ) {   //n11 and n21 go together
             dd  = (1-s)*sqrt(m2[1]) + s*sqrt(m1[1]);
             dd *= dd;
-            if ( dd < EPSD ) {
+            if ( dd < _MMG5_EPSD ) {
                 hn1 = s < 0.5 ? m1[1] : m2[1];
             }
             else {
@@ -312,7 +312,7 @@ int intridmet(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,double s,double v[3],do
             }
             dd = (1-s)*sqrt(m2[2]) + s*sqrt(m1[2]);
             dd *= dd;
-            if ( dd < EPSD ) {
+            if ( dd < _MMG5_EPSD ) {
                 hn2 = s < 0.5 ? m1[2] : m2[2];
             }
             else {
@@ -322,7 +322,7 @@ int intridmet(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,double s,double v[3],do
         else {
             dd  = (1-s)*sqrt(m2[2]) + s*sqrt(m1[1]);
             dd *= dd;
-            if ( dd < EPSD ) {
+            if ( dd < _MMG5_EPSD ) {
                 hn1 = s < 0.5 ? m1[1] : m2[2];
             }
             else {
@@ -330,7 +330,7 @@ int intridmet(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,double s,double v[3],do
             }
             dd  = (1-s)*sqrt(m2[1]) + s*sqrt(m1[2]);
             dd *= dd;
-            if ( dd < EPSD ) {
+            if ( dd < _MMG5_EPSD ) {
                 hn2 = s < 0.5 ? m1[2] : m2[1];
             }
             else {
@@ -425,7 +425,7 @@ int intregmet(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,double s,double mr[6]) 
             n[1] = (1.0-u)*(1.0-u)*n1[1] + 2.0*u*(1.0-u)*bn[1] + u*u*n2[1];
             n[2] = (1.0-u)*(1.0-u)*n1[2] + 2.0*u*(1.0-u)*bn[2] + u*u*n2[2];
             dd   = n[0]*n[0] + n[1]*n[1] + n[2]*n[2];
-            if ( dd < EPSD )  return(0);
+            if ( dd < _MMG5_EPSD )  return(0);
             dd = 1.0 / sqrt(dd);
             n[0] *= dd;
             n[1] *= dd;
@@ -479,7 +479,7 @@ int intregmet(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,double s,double mr[6]) 
             n[1] = (1.0-u)*(1.0-u)*n1[1] + 2.0*u*(1.0-u)*bn[1] + u*u*n2[1];
             n[2] = (1.0-u)*(1.0-u)*n1[2] + 2.0*u*(1.0-u)*bn[2] + u*u*n2[2];
             dd = n[0]*n[0] + n[1]*n[1] + n[2]*n[2];
-            if ( dd < EPSD )  return(0);
+            if ( dd < _MMG5_EPSD )  return(0);
             dd = 1.0 / sqrt(dd);
             n[0] *= dd;
             n[1] *= dd;
@@ -584,7 +584,7 @@ int intmet33(MMG5_pMesh mesh,MMG5_pSol met,int np,int nq,int ip,double s) {
     if ( !order ) return(0);
 
     for (i=0; i<3; i++) {
-        if ( lambda[i] < EPSD ) return(0);
+        if ( lambda[i] < _MMG5_EPSD ) return(0);
         lambda[i] = sqrt(lambda[i]);
         lambda[i] = 1.0 / lambda[i];
     }
@@ -633,7 +633,7 @@ int intmet33(MMG5_pMesh mesh,MMG5_pSol met,int np,int nq,int ip,double s) {
         if ( lambda[i] < 0.0 ) return(0);
         dd = s*sqrt(lambda[i]) + (1.0-s);
         dd = dd*dd;
-        if ( dd < EPSD )  return(0);
+        if ( dd < _MMG5_EPSD )  return(0);
         mu[i] = lambda[i]/dd;
     }
 

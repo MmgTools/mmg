@@ -487,7 +487,7 @@ int singul(MMG5_pMesh mesh) {
                     vy = p2->c[1] - ppt->c[1];
                     vz = p2->c[2] - ppt->c[2];
                     dd = (ux*ux + uy*uy + uz*uz) * (vx*vx + vy*vy + vz*vz);
-                    if ( fabs(dd) > EPSD ) {
+                    if ( fabs(dd) > _MMG5_EPSD ) {
                         dd = (ux*vx + uy*vy + uz*vz) / sqrt(dd);
                         if ( dd > -mesh->info.dhd ) {
                             ppt->tag |= MG_CRN;
@@ -611,7 +611,7 @@ static int norver(MMG5_pMesh mesh) {
                         ppt->n[2] = go->n1[0]*go->n2[1] - go->n1[1]*go->n2[0];
                         ppt->flag = mesh->base;
                         dd = ppt->n[0]*ppt->n[0] + ppt->n[1]*ppt->n[1] + ppt->n[2]*ppt->n[2];
-                        if ( dd > EPSD2 ) {
+                        if ( dd > _MMG5_EPSD2 ) {
                             dd = 1.0 / sqrt(dd);
                             ppt->n[0] *= dd;
                             ppt->n[1] *= dd;
@@ -630,7 +630,7 @@ static int norver(MMG5_pMesh mesh) {
                 ppt->n[1] -= dd*go->n1[1];
                 ppt->n[2] -= dd*go->n1[2];
                 dd = ppt->n[0]*ppt->n[0] + ppt->n[1]*ppt->n[1] + ppt->n[2]*ppt->n[2];
-                if ( dd > EPSD2 ) {
+                if ( dd > _MMG5_EPSD2 ) {
                     dd = 1.0 / sqrt(dd);
                     ppt->n[0] *= dd;
                     ppt->n[1] *= dd;
@@ -699,7 +699,7 @@ static int regnor(MMG5_pMesh mesh) {
                 nz += p0->n[2];
             }
             dd  = nx*nx + ny*ny + nz*nz;
-            if ( dd > EPSD2 ) {
+            if ( dd > _MMG5_EPSD2 ) {
                 dd = 1.0 / sqrt(dd);
                 nx *= dd;
                 ny *= dd;
@@ -738,7 +738,7 @@ static int regnor(MMG5_pMesh mesh) {
                 nz += tabl[iad+2];
             }
             dd  = nx*nx + ny*ny + nz*nz;
-            if ( dd > EPSD2 ) {
+            if ( dd > _MMG5_EPSD2 ) {
                 dd = 1.0 / sqrt(dd);
                 nx *= dd;
                 ny *= dd;
@@ -755,12 +755,12 @@ static int regnor(MMG5_pMesh mesh) {
         }
 
         if ( it == 1 )  res0 = res;
-        if ( res0 > EPSD )  res  = res / res0;
+        if ( res0 > _MMG5_EPSD )  res  = res / res0;
         if ( mesh->info.imprim < 0 || mesh->info.ddebug ) {
             fprintf(stdout,"     iter %5d  res %.3E\r",it,res); 
             fflush(stdout);
         }
-        if ( it > 1 && res < EPS )  break;
+        if ( it > 1 && res < _MMG5_EPS )  break;
     }
     if ( mesh->info.imprim < 0 || mesh->info.ddebug )  fprintf(stdout,"\n");
 

@@ -46,7 +46,7 @@ inline int rotmatrix(double n[3],double r[3][3]) {
     sinalpha = sqrt(1.0- MG_MIN(1.0,cosalpha*cosalpha));
 
     /* No rotation needed in this case */
-    if ( ll < EPS ) {
+    if ( ll < _MMG5_EPS ) {
         if ( n[2] > 0.0 ) {
             r[0][0] = 1.0 ; r[0][1] = 0.0 ; r[0][2] = 0.0;
             r[1][0] = 0.0 ; r[1][1] = 1.0 ; r[1][2] = 0.0;
@@ -137,7 +137,7 @@ inline int sys33sym(double a[6],double b[3],double r[3]) {
     for (i=1; i<6; i++) {
         if ( fabs(a[i]) < m )  m = fabs(a[i]);
     }
-    if ( m < EPSD )  return(0);
+    if ( m < _MMG5_EPSD )  return(0);
     m = 1.0 / m;
 
     for (i=0; i<6; i++) {
@@ -145,7 +145,7 @@ inline int sys33sym(double a[6],double b[3],double r[3]) {
     }
     det = as[0]*(as[3]*as[5]-as[4]*as[4]) - as[1]*(as[1]*as[5]-as[2]*as[4]) \
         + as[2]*(as[1]*as[4]-as[2]*as[3]);
-    if ( fabs(det) < EPSD )  return(0);
+    if ( fabs(det) < _MMG5_EPSD )  return(0);
     det = 1.0 / det;
 
     ia[0] = (as[3]*as[5]-as[4]*as[4]);
@@ -176,7 +176,7 @@ inline int eigensym(double m[3],double lambda[2],double vp[2][2]) {
     lambda[0] = 0.5*(trm - sqDelta);
 
     /* Case when m = lambda[0]*I */
-    if ( sqDelta < EPS ) {
+    if ( sqDelta < _MMG5_EPS ) {
         lambda[1] = lambda[0];
         vp[0][0] = 1.0;
         vp[0][1] = 0.0;
@@ -189,17 +189,17 @@ inline int eigensym(double m[3],double lambda[2],double vp[2][2]) {
     vp[0][1] = (lambda[0] - m[0]);
     vnorm = sqrt(vp[0][0]*vp[0][0] + vp[0][1]*vp[0][1]);
 
-    if ( vnorm < EPS ) {
+    if ( vnorm < _MMG5_EPS ) {
         vp[0][0] = (lambda[0] - m[2]);
         vp[0][1] = m[1];
         vnorm = sqrt(vp[0][0]*vp[0][0] + vp[0][1]*vp[0][1]);
     }
 
-    if( !(vnorm > EPSD) ) {
+    if( !(vnorm > _MMG5_EPSD) ) {
         printf("la matrice : %f %f %f \n",m[0],m[1],m[2]);
         printf("le vp qui deconne %f %f \n",vp[0][0],vp[0][1]);
     }
-    assert(vnorm > EPSD);
+    assert(vnorm > _MMG5_EPSD);
 
     vnorm = 1.0/vnorm;
     vp[0][0] *= vnorm;
@@ -327,7 +327,7 @@ int invmatg(double m[9],double mi[9]) {
     bb = m[5]*m[6] - m[3]*m[8];
     cc = m[3]*m[7] - m[4]*m[6];
     det = m[0]*aa + m[1]*bb + m[2]*cc;
-    if ( fabs(det) < EPSD )  return(0);
+    if ( fabs(det) < _MMG5_EPSD )  return(0);
     det = 1.0 / det;
 
     mi[0] = aa*det;
