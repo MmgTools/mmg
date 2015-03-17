@@ -43,15 +43,6 @@
 
 #include "libmmg3d.h"
 
-#define MG_VER   "@CMAKE_RELEASE_VERSION@"" c"
-#define MG_REL   "@CMAKE_RELEASE_DATE@"
-#define MG_CPY   "Copyright (c) IMB-LJLL, 2004-"
-#define MG_STR   "&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&"
-
-/* Macros */
-#define MG_MAX(a,b) (((a) > (b)) ? (a) : (b))
-#define MG_MIN(a,b) (((a) < (b)) ? (a) : (b))
-
 #define MG_SMSGN(a,b)  (((double)(a)*(double)(b) > (0.0)) ? (1) : (0))
 
 /** Free allocated pointers of mesh and sol structure and return value val */
@@ -329,22 +320,12 @@
 #define M_PI_2          1.57079632679489661923   /**< pi/2 */
 #endif
 
-/* tags */
-#define  MG_NOTAG     (0)
-#define  MG_REF       (1 << 0)        /**< 1  edge reference  */
-#define  MG_GEO       (1 << 1)        /**< 2  geometric ridge */
-#define  MG_REQ       (1 << 2)        /**< 4  required entity */
-#define  MG_NOM       (1 << 3)        /**< 8  non manifold    */
-#define  MG_BDY       (1 << 4)        /**< 16  boundary entity */
-#define  MG_CRN       (1 << 5)        /**< 32  corner         */
-#define  MG_NUL       (1 << 6)        /**< 64  vertex removed */
+
 
 #define MG_PLUS    2
 #define MG_MINUS   3
 #define MG_ISO    10
 
-#define MG_VOK(ppt)      (ppt && ((ppt)->tag < MG_NUL)) /**< Vertex OK */
-#define MG_EOK(pt)       (pt && ((pt)->v[0] > 0))       /**< Element OK */
 #define MG_EDG(tag)      ((tag & MG_GEO) || (tag & MG_REF)) /**< Edge or Ridge */
 #define MG_SIN(tag)      ((tag & MG_CRN) || (tag & MG_REQ)) /**< Corner or Required */
 
@@ -366,12 +347,6 @@ extern unsigned char _MMG5_isar[6][2]; /**< isar[i][]: vertices of extremities o
 extern unsigned char _MMG5_arpt[4][3]; /**< arpt[i]: edges passing through vertex i */
 
 
-typedef struct {
-    double  b[10][3]; /**< Bezier basis functions */
-    double  n[6][3],t[6][3]; /**< normals and tangents at points */
-    MMG5_pPoint  p[3];
-} _MMG5_Bezier;
-typedef _MMG5_Bezier * _MMG5_pBezier;
 
 /** used to hash edges */
 typedef struct {

@@ -39,14 +39,6 @@
 #include "memory.h"
 #include "libmmg.h"
 
-#define MS_VER   "2.0 a"
-#define MS_REL   "Sept. 11, 2012"
-#define MS_CPY   "Copyright (c) LJLL, 2009-"
-#define MS_STR   "&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&"
-
-#define MS_MAX(a,b) (((a) > (b)) ? (a) : (b))
-#define MS_MIN(a,b) (((a) < (b)) ? (a) : (b))
-
 /* numerical accuracy */
 #define ATHIRD    0.333333333333333
 #define A64TH     0.015625
@@ -76,15 +68,6 @@
 #define M_PI_2          1.57079632679489661923   /* pi/2 */
 #endif
 
-/* edge tag */
-#define  MS_NOTAG     (0)
-#define  MS_REF       (1 << 0)        /* 1 edge reference     */
-#define  MS_GEO       (1 << 1)        /* 2 geometric ridge    */
-#define  MS_REQ       (1 << 2)        /* 4 required entity    */
-#define  MS_NOM       (1 << 3)        /* 8 non manifold      */
-/* point tags */
-#define  MS_CRN       (1 << 5)        /* 32 corner           */
-#define  MS_NUL       (1 << 6)        /* 64 vertex removed   */
 
 #define MS_VOK(ppt)      (ppt && (ppt->tag < MS_NUL))
 #define MS_EOK(pt)       (pt && (pt->v[0] > 0))
@@ -100,12 +83,6 @@
 
 extern unsigned char inxt[3];
 extern unsigned char iprv[3];
-
-typedef struct {
-    double  b[10][3],n[6][3],t[6][3];
-    MMG5_pPoint  p[3];
-} Bezier;
-typedef Bezier * pBezier;
 
 /* prototypes */
 int  loadMesh(MMG5_pMesh );

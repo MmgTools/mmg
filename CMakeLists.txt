@@ -35,9 +35,9 @@ SET (CMAKE_RELEASE_DATE "Jul. 6, 2012")
 
 SET (CMAKE_RELEASE_VERSION "${CMAKE_RELEASE_VERSION_MAJOR}.${CMAKE_RELEASE_VERSION_MINOR}.${CMAKE_RELEASE_VERSION_PATCH}")
 
-# Create mmg3d.h file with the good release infos.
-CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/src/mmg3d/mmg3d.h.in
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/mmg3d/mmg3d.h @ONLY)
+# Create mmg.h file with the good release infos.
+CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/src/common/mmg.h.in
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/common/mmg.h @ONLY)
 
 ###############################################################################
 #####
