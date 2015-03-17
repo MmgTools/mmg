@@ -388,7 +388,7 @@ int main(int argc,char *argv[]) {
         memset(&met,0,sizeof(MMG5_Sol));
     }
     if ( !parsop(&mesh,&met) )     return(1);
-    if ( !scaleMesh(&mesh,&met) )  return(1);
+    if ( !_MMG5_scaleMesh(&mesh,&met) )  return(1);
     chrono(OFF,&MMG5_ctim[1]);
     printim(MMG5_ctim[1].gdif,stim);
     fprintf(stdout,"  -- DATA READING COMPLETED.     %s\n",stim);
@@ -421,7 +421,7 @@ int main(int argc,char *argv[]) {
     outqua(&mesh,&met);
     chrono(ON,&MMG5_ctim[1]);
     if ( mesh.info.imprim )  fprintf(stdout,"\n  -- WRITING DATA FILE %s\n",mesh.nameout);
-    if ( !unscaleMesh(&mesh,&met) )  return(1);
+    if ( !_MMG5_unscaleMesh(&mesh,&met) )  return(1);
     if ( !saveMesh(&mesh) )      return(1);
     if ( !saveMet(&mesh,&met) )  return(1);
     chrono(OFF,&MMG5_ctim[1]);

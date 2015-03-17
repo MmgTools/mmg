@@ -52,7 +52,7 @@ double lenedg_iso(MMG5_pMesh mesh,MMG5_pSol met,int ip1,int ip2,char isedg) {
     h1 = met->m[ip1];
     h2 = met->m[ip2];
     r  = h2 / h1 - 1.0;
-    len = fabs(r) < EPS ? l / h1 : l / (h2-h1) * log(r+1.0);
+    len = fabs(r) < _MMG5_EPS ? l / h1 : l / (h2-h1) * log(r+1.0);
 
     return(len);
 }
@@ -125,7 +125,7 @@ int defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
             uz = p[i2]->c[2] - p[i1]->c[2];
             ll = ux*ux + uy*uy + uz*uz;
 
-            if ( ll < EPSD )  continue;
+            if ( ll < _MMG5_EPSD )  continue;
 
             if ( MS_EDG(pt->tag[i]) ) {
                 if ( MS_SIN(p[i1]->tag) ) {
@@ -172,7 +172,7 @@ int defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
                 M2 = 6.0 * sqrt(M2);
                 M1 = MG_MAX(M1,M2);
 
-                if ( M1 < EPSD )
+                if ( M1 < _MMG5_EPSD )
                     lm = MAXLEN;
                 else {
                     lm = (16.0*ll*mesh->info.hausd) / (3.0*M1);
@@ -207,7 +207,7 @@ int defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
                 M2 = 6.0 * sqrt(M2);
                 M1 = MG_MAX(M1,M2);
 
-                if ( M1 < EPSD )
+                if ( M1 < _MMG5_EPSD )
                     lm = MAXLEN;
                 else {
                     lm = (16.0*ll*mesh->info.hausd) / (3.0*M1);
@@ -283,7 +283,7 @@ int gradsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
                 h1 = met->m[ip1];
                 h2 = met->m[ip2];
                 if ( h1 < h2 ) {
-                    if ( h1 < EPSD )  continue;
+                    if ( h1 < _MMG5_EPSD )  continue;
                     hn  = h1 + mesh->info.hgrad*ll;
                     if ( h2 > hn ) {
                         met->m[ip2] = hn;
@@ -292,7 +292,7 @@ int gradsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
                     }
                 }
                 else {
-                    if ( h2 < EPSD )  continue;
+                    if ( h2 < _MMG5_EPSD )  continue;
                     hn = h2 + mesh->info.hgrad*ll;
                     if ( h1 > hn ) {
                         met->m[ip1] = hn;

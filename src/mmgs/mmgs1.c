@@ -334,7 +334,7 @@ static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
                     ppt->n[1] -= dd*go->n1[1];
                     ppt->n[2] -= dd*go->n1[2];
                     dd = ppt->n[0]*ppt->n[0] + ppt->n[1]*ppt->n[1] + ppt->n[2]*ppt->n[2];
-                    if ( dd > EPSD2 ) {
+                    if ( dd > _MMG5_EPSD2 ) {
                         dd = 1.0 / sqrt(dd);
                         ppt->n[0] *= dd;
                         ppt->n[1] *= dd;
@@ -358,7 +358,7 @@ static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
                 ppt->n[1] = go->n1[2]*go->n2[0] - go->n1[0]*go->n2[2];
                 ppt->n[2] = go->n1[0]*go->n2[1] - go->n1[1]*go->n2[0];
                 dd = ppt->n[0]*ppt->n[0] + ppt->n[1]*ppt->n[1] + ppt->n[2]*ppt->n[2];
-                if ( dd > EPSD2 ) {
+                if ( dd > _MMG5_EPSD2 ) {
                     dd = 1.0 / sqrt(dd);
                     ppt->n[0] *= dd;
                     ppt->n[1] *= dd;
@@ -405,7 +405,7 @@ static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
                         ppt->n[1] = go->n1[2]*go->n2[0] - go->n1[0]*go->n2[2];
                         ppt->n[2] = go->n1[0]*go->n2[1] - go->n1[1]*go->n2[0];
                         dd = ppt->n[0]*ppt->n[0] + ppt->n[1]*ppt->n[1] + ppt->n[2]*ppt->n[2];
-                        if ( dd > EPSD2 ) {
+                        if ( dd > _MMG5_EPSD2 ) {
                             dd = 1.0 / sqrt(dd);
                             ppt->n[0] *= dd;
                             ppt->n[1] *= dd;

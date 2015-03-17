@@ -274,7 +274,7 @@ int boulen(MMG5_pMesh mesh,int start,int ip,double *nn) {
 
     /* normalize */
     dd = nn[0]*nn[0] + nn[1]*nn[1] + nn[2]*nn[2];
-    if ( dd > EPSD2 ) {
+    if ( dd > _MMG5_EPSD2 ) {
         dd = 1.0 / sqrt(dd);
         nn[0] *= dd;
         nn[1] *= dd;
@@ -402,7 +402,7 @@ int boulec(MMG5_pMesh mesh,int start,int ip,double *tt) {
     tt[1] = p2->c[1] - p1->c[1];
     tt[2] = p2->c[2] - p1->c[2];
     dd = tt[0]*tt[0] + tt[1]*tt[1] + tt[2]*tt[2];
-    if ( dd > EPSD2 ) {
+    if ( dd > _MMG5_EPSD2 ) {
         dd = 1.0 / sqrt(dd);
         tt[0] *= dd;
         tt[1] *= dd;

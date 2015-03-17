@@ -24,15 +24,6 @@
 #ifndef _MMGS_H
 #define _MMGS_H
 
-#include <assert.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <limits.h>
-#include <string.h>
-#include <signal.h>
-#include <ctype.h>
-#include <float.h>
-#include <math.h>
 #include <complex.h>
 
 #include "eigenv.h"
@@ -53,9 +44,6 @@
 #define LLONG     2.0
 #define LSHRT     0.3
 #define ANGLIM   -0.999999
-#define EPSD      1.e-30
-#define EPSD2     1.0e-200
-#define EPS       1.e-06
 #define LMAX      1024
 #define BADKAL    2.e-2
 #define NULKAL    1.e-4
@@ -91,8 +79,6 @@ int  loadMet(MMG5_pSol );
 int  saveMet(MMG5_pMesh ,MMG5_pSol );
 int  zaldy(MMG5_pMesh mesh);
 int  assignEdge(MMG5_pMesh mesh);
-int  scaleMesh(MMG5_pMesh mesh,MMG5_pSol met);
-int  unscaleMesh(MMG5_pMesh mesh,MMG5_pSol met);
 int  analys(MMG5_pMesh mesh);
 int  nortri(MMG5_pMesh ,MMG5_pTria ,double *n);
 int  norpts(MMG5_pPoint ,MMG5_pPoint ,MMG5_pPoint ,double *);

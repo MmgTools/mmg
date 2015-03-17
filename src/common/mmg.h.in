@@ -24,12 +24,27 @@
 #ifndef _MMG_H
 #define _MMG_H
 
+#include <assert.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <limits.h>
+#include <string.h>
+#include <signal.h>
+#include <ctype.h>
+#include <float.h>
+#include <math.h>
+
 #define MG_VER   "@CMAKE_RELEASE_VERSION@"" c"
 #define MG_REL   "@CMAKE_RELEASE_DATE@"
 #define MG_CPY   "Copyright (c) IMB-LJLL, 2004-"
 #define MG_STR   "&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&"
 
 #include "libmmg.h"
+
+/* numerical accuracy */
+#define _MMG5_EPSD      1.e-30
+#define _MMG5_EPSD2     1.0e-200
+#define _MMG5_EPS       1.e-06
 
 /* Macros */
 #define MG_MAX(a,b) (((a) > (b)) ? (a) : (b))

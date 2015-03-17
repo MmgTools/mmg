@@ -42,8 +42,8 @@
 int rootDeg2(double complex a[3], double complex r[2]){
     double complex Delta,delta,r1,r2;
 
-    if( cabs(a[2])<EPSD ) {
-        if( cabs(a[1])<EPSD ) {
+    if( cabs(a[2])<_MMG5_EPSD ) {
+        if( cabs(a[1])<_MMG5_EPSD ) {
             r[0] = r[1] = 0.0;
             return(0);
         }
@@ -84,10 +84,10 @@ int rootDeg3(double a[4],double complex r[3]) {
     j = cos(2.0*ATHIRD*pi)+I*sin(2.0*ATHIRD*pi);
 
     /* Case when the polynomial is actually second order */
-    if( fabs(a[3]) < EPSD ) {
+    if( fabs(a[3]) < _MMG5_EPSD ) {
         /* Case it is first order : return 0.0 when root does not exist */
-        if( fabs(a[2]) < EPSD ) {
-            if( fabs(a[1]) < EPSD ) {
+        if( fabs(a[2]) < _MMG5_EPSD ) {
+            if( fabs(a[1]) < _MMG5_EPSD ) {
                 r[0] = r[1] = r[2] = 0.0;
                 return(0);
             }

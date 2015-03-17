@@ -22,7 +22,7 @@
 */
 
 /**
- * \file mmgs/scalem.c
+ * \file common/scalem.c
  * \brief Scale and unscale mesh and solution.
  * \author Charles Dapogny (LJLL, UPMC)
  * \author Cécile Dobrzynski (Inria / IMB, Université de Bordeaux)
@@ -33,13 +33,13 @@
  * \todo Doxygen documentation
  */
 
-#include "mmgs.h"
+#include "mmg.h"
 
-int scaleMesh(MMG5_pMesh mesh,MMG5_pSol met) {
+int _MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met) {
     MMG5_pPoint    ppt;
+    double         dd,d1;
+    int            i,k;
     MMG5_pPar      par;
-    double    dd,d1;
-    int       i,k;
 
     /* compute bounding box */
     for (i=0; i<3; i++) {
@@ -53,13 +53,14 @@ int scaleMesh(MMG5_pMesh mesh,MMG5_pSol met) {
             if ( ppt->c[i] > mesh->info.max[i] )  mesh->info.max[i] = ppt->c[i];
             if ( ppt->c[i] < mesh->info.min[i] )  mesh->info.min[i] = ppt->c[i];
         }
+        ppt->tmp = 0;
     }
     mesh->info.delta = 0.0;
     for (i=0; i<3; i++) {
         dd = mesh->info.max[i] - mesh->info.min[i];
         if ( dd > mesh->info.delta )  mesh->info.delta = dd;
     }
-    if ( mesh->info.delta < EPSD ) {
+    if ( mesh->info.delta < _MMG5_EPSD ) {
         fprintf(stdout,"  ## Unable to scale mesh.\n");
         return(0);
     }
@@ -97,13 +98,15 @@ int scaleMesh(MMG5_pMesh mesh,MMG5_pSol met) {
         par->hmax  *= dd;
         par->hausd *= dd;
     }
+
     return(1);
 }
 
-int unscaleMesh(MMG5_pMesh mesh,MMG5_pSol met) {
+int _MMG5_unscaleMesh(MMG5_pMesh mesh,MMG5_pSol met) {
     MMG5_pPoint     ppt;
     double     dd;
     int        k,i;
+    MMG5_pPar       par;
 
     /* de-normalize coordinates */
     dd = mesh->info.delta;
@@ -133,5 +136,17 @@ int unscaleMesh(MMG5_pMesh mesh,MMG5_pSol met) {
             }
         }
     }
+
+    /* unscale paramter values */
+    mesh->info.hmin  *= dd;
+    mesh->info.hmax  *= dd;
+    mesh->info.hausd *= dd;
+
+    /* normalize local parameters */
+    for (k=0; k<mesh->info.npar; k++) {
+        par = &mesh->info.par[k];
+        par->hausd *= dd;
+    }
+
     return(1);
 }

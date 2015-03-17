@@ -565,7 +565,7 @@ int loadMesh(MMG5_pMesh mesh) {
                 }
             }
             dd = n[0]*n[0] + n[1]*n[1] + n[2]*n[2];
-            if ( dd > EPSD2 ) {
+            if ( dd > _MMG5_EPSD2 ) {
                 dd = 1.0 / sqrt(dd);
                 n[0] *= dd;
                 n[1] *= dd;

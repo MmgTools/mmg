@@ -26,15 +26,7 @@
 
 /* Warning: never ever use assert() with a function,
    the option -DNDEBUG suppress all assert()*/
-#include <assert.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <limits.h>
-#include <string.h>
-#include <signal.h>
-#include <ctype.h>
-#include <float.h>
-#include <math.h>
+
 #if (defined(__APPLE__) && defined(__MACH__))
 #include <sys/sysctl.h>
 #elif defined(__unix__) || defined(__unix) || defined(unix)
@@ -301,9 +293,6 @@
 #define _MMG5_ANGLIM   -0.999999
 #define _MMG5_SQR32     0.866025403784
 #define _MMG5_ATHIRD    0.333333333333
-#define _MMG5_EPSD      1.e-30
-#define _MMG5_EPSD2     1.0e-200
-#define _MMG5_EPS       1.e-06
 #define _MMG5_LMAX      10240
 #define _MMG5_BADKAL    0.2
 #define _MMG5_NULKAL    1.e-30
@@ -466,8 +455,6 @@ int    _MMG5_movbdyrefpt(MMG5_pMesh mesh, int *listv, int ilistv, int *lists, in
 int    _MMG5_movbdynompt(MMG5_pMesh mesh, int *listv, int ilistv, int *lists, int ilists);
 int    _MMG5_movbdyridpt(MMG5_pMesh mesh, int *listv, int ilistv, int *lists, int ilists);
 double _MMG5_caltri(MMG5_pMesh mesh,MMG5_pTria ptt);
-int  _MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met);
-int  _MMG5_unscaleMesh(MMG5_pMesh mesh,MMG5_pSol met);
 int  _MMG5_chkswpbdy(MMG5_pMesh mesh,int *list,int ilist,int it1,int it2);
 int  _MMG5_swpbdy(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int it1,_MMG5_pBucket bucket);
 int  _MMG5_swpgen(MMG5_pMesh mesh,MMG5_pSol met,int nconf, int ilist, int *list,_MMG5_pBucket bucket);

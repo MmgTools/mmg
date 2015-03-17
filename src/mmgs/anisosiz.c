@@ -84,7 +84,7 @@ static int defmetsin(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
         gammasec[0] = 6.0*p0->c[0] - 12.0*b0[0] + 6.0*b1[0];
         gammasec[1] = 6.0*p0->c[1] - 12.0*b0[1] + 6.0*b1[1];
         gammasec[2] = 6.0*p0->c[2] - 12.0*b0[2] + 6.0*b1[2];
-        if ( ntau2 < EPSD )  continue;
+        if ( ntau2 < _MMG5_EPSD )  continue;
         ntau2 = 1.0 / ntau2;
 
         /* derivative via the normal parametrization */
@@ -151,7 +151,7 @@ static int defmetrid(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
         tau[1] = 3.0*(b0[1] - p0->c[1]);
         tau[2] = 3.0*(b0[2] - p0->c[2]);
         ll = tau[0]*tau[0] + tau[1]*tau[1] + tau[2]*tau[2];
-        if ( ll < EPSD )  continue;
+        if ( ll < _MMG5_EPSD )  continue;
         l = 1.0 / sqrt(ll);
         tau[0] *= l;
         tau[1] *= l;
@@ -259,7 +259,7 @@ static int defmetrid(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
         detg = lispoi[3*k+1]*u[1] - lispoi[3*k+2]*u[0];
         detd = u[0]*lispoi[3*(k+1)+2] - u[1]*lispoi[3*(k+1)+1];
         det = detg + detd;
-        if ( det < EPSD )  continue;
+        if ( det < _MMG5_EPSD )  continue;
 
         det = 1.0 / det;
         bcu[0] = 0.0;
@@ -349,7 +349,7 @@ static int defmetrid(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
         tau[1] = Jacb[1][0]*lambda[0] + Jacb[1][1]*lambda[1];
         tau[2] = Jacb[2][0]*lambda[0] + Jacb[2][1]*lambda[1];
         ll = tau[0]*tau[0] + tau[1]*tau[1] + tau[2]*tau[2];
-        if ( ll < EPSD )  continue;
+        if ( ll < _MMG5_EPSD )  continue;
 
         l = 1.0 / sqrt(ll);
         tau[0] *= l;
@@ -670,7 +670,7 @@ static int defmetref(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
         tau[0] = 3.0*b0[0];
         tau[1] = 3.0*b0[1];
         ll = tau[0]*tau[0] + tau[1]*tau[1];
-        if ( ll < EPSD ) {
+        if ( ll < _MMG5_EPSD ) {
             kappacur = isqhmax;
             continue;
         }
@@ -1196,7 +1196,7 @@ static int grad2met(MMG5_pMesh mesh, MMG5_pSol met, int iel, int i){
     c[2] = r1[2][0]*ux + r1[2][1]*uy + r1[2][2]*uz;
     memcpy(t1,c,3*sizeof(double));
     dd = t1[0]*t1[0] + t1[1]*t1[1];
-    if(dd < EPSD2)
+    if(dd < _MMG5_EPSD2)
         return(-1);
 
     dd = 1.0/sqrt(dd);
@@ -1215,7 +1215,7 @@ static int grad2met(MMG5_pMesh mesh, MMG5_pSol met, int iel, int i){
     memcpy(t2,c,3*sizeof(double));
 
     dd = t2[0]*t2[0] + t2[1]*t2[1];
-    if(dd < EPSD2)
+    if(dd < _MMG5_EPSD2)
         return(-1);
 
     dd = 1.0/sqrt(dd);
@@ -1227,7 +1227,7 @@ static int grad2met(MMG5_pMesh mesh, MMG5_pSol met, int iel, int i){
     /* Metric in p1 has to be changed */
     if( ps2 > ps1 ){
         alpha = ps2 /(1.0+mesh->info.hgrad*l*ps2);
-        if( ps1 >= alpha -EPS )
+        if( ps1 >= alpha -_MMG5_EPS )
             return(-1);
 
         eigensym(mtan1,lambda,vp);
@@ -1297,7 +1297,7 @@ static int grad2met(MMG5_pMesh mesh, MMG5_pSol met, int iel, int i){
     /* Metric in p2 has to be changed */
     else{
         alpha = ps1 /(1.0+mesh->info.hgrad*l*ps1);
-        if( ps2 >= alpha - EPS)
+        if( ps2 >= alpha - _MMG5_EPS)
             return(-1);
 
         eigensym(mtan2,lambda,vp);
