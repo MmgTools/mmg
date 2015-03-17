@@ -61,7 +61,7 @@ int split1(MMG5_pMesh mesh,MMG5_pSol met,int k,int i,int *vx) {
     }
 
     pt->v[i2]   = pt1->v[i1]   = vx[i];
-    pt->tag[i1] = pt1->tag[i2] = MS_NOTAG;
+    pt->tag[i1] = pt1->tag[i2] = MG_NOTAG;
     pt->edg[i1] = pt1->edg[i2] = 0;
 
     return(1);
@@ -72,7 +72,7 @@ int split1(MMG5_pMesh mesh,MMG5_pSol met,int k,int i,int *vx) {
 int split1b(MMG5_pMesh mesh,int k,char i,int ip) {
     MMG5_pTria     pt,pt1;
     MMG5_pPoint    ppt;
-    Bezier    b;
+    _MMG5_Bezier    b;
     MMG5_pxPoint     go;
     double    uv[2],o[3],no[3],to[3];
     int      *adja,iel,jel,kel,mel,ier;
@@ -98,7 +98,7 @@ int split1b(MMG5_pMesh mesh,int k,char i,int ip) {
     j   = adja[i] % 3;
 
     /* update normal n2 if need be */
-    if ( jel && pt->tag[i] & MS_GEO ) {
+    if ( jel && pt->tag[i] & MG_GEO ) {
         ier = bezierCP(mesh,jel,&b);
         assert(ier);
         uv[0] = 0.5;
@@ -116,10 +116,10 @@ int split1b(MMG5_pMesh mesh,int k,char i,int ip) {
     i1  = inxt[i];
     i2  = iprv[i];
     pt->v[i2]   = ip;
-    pt->tag[i1] = MS_NOTAG;
+    pt->tag[i1] = MG_NOTAG;
     pt->edg[i1] = 0;
     pt1->v[i1]   = ip;
-    pt1->tag[i2] = MS_NOTAG;
+    pt1->tag[i2] = MG_NOTAG;
     pt1->edg[i2] = 0;
 
     /* update adjacency relations */
@@ -144,10 +144,10 @@ int split1b(MMG5_pMesh mesh,int k,char i,int ip) {
         j1 = inxt[j];
         j2 = iprv[j];
         pt->v[j1]    = ip;
-        pt->tag[j2]  = MS_NOTAG;
+        pt->tag[j2]  = MG_NOTAG;
         pt->edg[j2]  = 0;
         pt1->v[j2]   = ip;
-        pt1->tag[j1] = MS_NOTAG;
+        pt1->tag[j1] = MG_NOTAG;
         pt1->edg[j1] = 0;
 
         /* update adjacency */
@@ -210,14 +210,14 @@ int split2(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
         pt->v[i1] = pt1->v[i2] = pt2->v[i1] = vx[i];
         pt->v[i2] = pt2->v[i]  = vx[i1];
 
-        pt->tag[i] = pt->tag[i2] = pt1->tag[i1] = pt2->tag[i2] = MS_NOTAG;
+        pt->tag[i] = pt->tag[i2] = pt1->tag[i1] = pt2->tag[i2] = MG_NOTAG;
         pt->edg[i] = pt->edg[i2] = pt1->edg[i1] = pt2->edg[i2] = 0;
     }
     else {
         pt->v[i2]  = pt1->v[i]  = pt2->v[i] = vx[i1];
         pt1->v[i2] = pt2->v[i1] = vx[i];
 
-        pt->tag[i] = pt1->tag[i1] = pt1->tag[i2] = pt2->tag[i2] = MS_NOTAG;
+        pt->tag[i] = pt1->tag[i1] = pt1->tag[i2] = pt2->tag[i2] = MG_NOTAG;
         pt->edg[i] = pt1->edg[i1] = pt1->edg[i2] = pt2->edg[i2] = 0;
     }
 
@@ -265,10 +265,10 @@ int split3(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
     pt->v[2]  = pt2->v[0] = pt3->v[2] = vx[1];
     pt1->v[2] = pt2->v[1] = pt3->v[1] = vx[0];
 
-    pt->tag[0]  = pt1->tag[1] = pt2->tag[2] = MS_NOTAG;
+    pt->tag[0]  = pt1->tag[1] = pt2->tag[2] = MG_NOTAG;
     pt->edg[0]  = pt1->edg[1] = pt2->edg[2] = 0;
 
-    pt3->tag[0] = pt3->tag[1] = pt3->tag[2] = MS_NOTAG;
+    pt3->tag[0] = pt3->tag[1] = pt3->tag[2] = MG_NOTAG;
     pt3->edg[0] = pt3->edg[1] = pt3->edg[2] = 0;
 
     return(1);

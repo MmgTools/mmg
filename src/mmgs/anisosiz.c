@@ -94,11 +94,11 @@ static int defmetsin(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
         c[2] = gammasec[2] - ps1*tau[2]*ntau2;
 
         kappa = ntau2 * sqrt(c[0]*c[0] + c[1]*c[1] + c[2]*c[2]);
-        maxkappa = MS_MAX(kappa,maxkappa);
+        maxkappa = MG_MAX(kappa,maxkappa);
     }
     alpha = 1.0 / 8.0 * maxkappa / mesh->info.hausd;
-    alpha = MS_MIN(alpha,isqhmin);
-    alpha = MS_MAX(alpha,isqhmax);
+    alpha = MG_MIN(alpha,isqhmin);
+    alpha = MG_MAX(alpha,isqhmax);
 
     m = &met->m[6*(idp)+1];
     memset(m,0,6*sizeof(double));
@@ -115,7 +115,7 @@ static int defmetsin(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
 static int defmetrid(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
     MMG5_pTria          pt;
     MMG5_pPoint         p0,p1,p2;
-    Bezier         b;
+    _MMG5_Bezier         b;
     int            k,iel,idp,ilist1,ilist2,ilist,*list,list1[LMAX+2],list2[LMAX+2],iprid[2],ier;
     double        *m,isqhmin,isqhmax,*n1,*n2,*n,*t,kappacur,b0[3],b1[3],n0[3],tau[3],trot[2],u[2];
     double         l,ll,ps,gammasec[3],c[3],r[3][3],lispoi[3*LMAX+1],ux,uy,uz,det,bcu[3];
@@ -166,11 +166,11 @@ static int defmetrid(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
         c[1] = gammasec[1] - ps*tau[1];
         c[2] = gammasec[2] - ps*tau[2];
 
-        kappacur = MS_MAX(0.0,1.0/ll*sqrt(c[0]*c[0] + c[1]*c[1] + c[2]*c[2]));
+        kappacur = MG_MAX(0.0,1.0/ll*sqrt(c[0]*c[0] + c[1]*c[1] + c[2]*c[2]));
         kappacur = 1.0/8.0*kappacur/mesh->info.hausd;
-        kappacur = MS_MIN(kappacur,isqhmin);
-        kappacur = MS_MAX(kappacur,isqhmax);
-        m[0] = MS_MAX(m[0],kappacur);
+        kappacur = MG_MIN(kappacur,isqhmin);
+        kappacur = MG_MAX(kappacur,isqhmax);
+        m[0] = MG_MAX(m[0],kappacur);
     }
 
     /* Characteristic sizes in directions u1 and u2 */
@@ -365,12 +365,12 @@ static int defmetrid(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
         c[1] = gammasec[1] - ps*tau[1];
         c[2] = gammasec[2] - ps*tau[2];
 
-        kappacur = MS_MAX(0.0,1.0/ll*sqrt(c[0]*c[0] + c[1]*c[1] + c[2]*c[2]));
+        kappacur = MG_MAX(0.0,1.0/ll*sqrt(c[0]*c[0] + c[1]*c[1] + c[2]*c[2]));
         kappacur = 1.0/8.0 * kappacur/mesh->info.hausd;
-        kappacur = MS_MIN(kappacur,isqhmin);
-        kappacur = MS_MAX(kappacur,isqhmax);
+        kappacur = MG_MIN(kappacur,isqhmin);
+        kappacur = MG_MAX(kappacur,isqhmax);
 
-        m[i+1] = MS_MAX(m[i+1],kappacur);
+        m[i+1] = MG_MAX(m[i+1],kappacur);
     }
 
     return(1);
@@ -381,7 +381,7 @@ static int defmetrid(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
 static int defmetref(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
     MMG5_pTria         pt;
     MMG5_pPoint        p0,p1;
-    Bezier        b;
+    _MMG5_Bezier        b;
     int           ilist,list[LMAX+2],k,iel,ipref[2],idp;
     double        *m,isqhmin,isqhmax,*n,*t,l,ll,r[3][3],lispoi[3*LMAX+1];
     double        ux,uy,uz,det2d,intm[3],tau[2],b0[3],b1[3],kappa[2],vp[2][2],c[3];
@@ -413,7 +413,7 @@ static int defmetref(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
         p1 = &mesh->point[pt->v[i1]];
 
         /* Store the two ending points of ref curves */
-        if ( MS_REF & pt->tag[i1] ) {
+        if ( MG_REF & pt->tag[i1] ) {
             if ( !ipref[0] ) {
                 ipref[0] = pt->v[i2];
             }
@@ -426,7 +426,7 @@ static int defmetref(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
             }
         }
 
-        if ( MS_REF & pt->tag[i2] ) {
+        if ( MG_REF & pt->tag[i2] ) {
             if ( !ipref[0] ) {
                 ipref[0] = pt->v[i1];
             }
@@ -613,12 +613,12 @@ static int defmetref(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
 
     /* Truncation of eigenvalues */
     kappa[0] = 2.0/9.0 * fabs(kappa[0])/mesh->info.hausd;
-    kappa[0] = MS_MIN(kappa[0],isqhmin);
-    kappa[0] = MS_MAX(kappa[0],isqhmax);
+    kappa[0] = MG_MIN(kappa[0],isqhmin);
+    kappa[0] = MG_MAX(kappa[0],isqhmax);
 
     kappa[1] = 2.0/9.0 * fabs(kappa[1])/mesh->info.hausd;
-    kappa[1] = MS_MIN(kappa[1],isqhmin);
-    kappa[1] = MS_MAX(kappa[1],isqhmax);
+    kappa[1] = MG_MIN(kappa[1],isqhmin);
+    kappa[1] = MG_MAX(kappa[1],isqhmax);
 
     /* Send back the metric to the canonical basis of tangent plane :
        diag(lambda) = {^t}vp * M * vp, M = vp * diag(lambda) * {^t}vp */
@@ -645,13 +645,13 @@ static int defmetref(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
         b0[1] =  r[1][0]*c[0] + r[1][1]*c[1] + r[1][2]*c[2];
         b0[2] =  r[2][0]*c[0] + r[2][1]*c[1] + r[2][2]*c[2];
 
-        if ( (MS_CRN & p1->tag) || (MS_NOM & p1->tag) ) {
+        if ( (MG_CRN & p1->tag) || (MG_NOM & p1->tag) ) {
             c[0] = p1->c[0] - ATHIRD*ux;
             c[1] = p1->c[1] - ATHIRD*uy;
             c[2] = p1->c[2] - ATHIRD*uz;
         }
         else {
-            assert(MS_REF & p1->tag);
+            assert(MG_REF & p1->tag);
             t1 = &(p1->n[0]);
             ps1 =  -(ux*t1[0] + uy*t1[1] + uz*t1[2]);
             c[0] = p1->c[0] + ATHIRD*ps1*t1[0];
@@ -687,7 +687,7 @@ static int defmetref(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
         c[1] = gammasec[1] - ps1*tau[1];
         c[2] = gammasec[2];
 
-        kappacur = MS_MAX(kappacur,MS_MAX(0.0,1.0/ll*fabs(c[2]))); // p.s. with normal at p0
+        kappacur = MG_MAX(kappacur,MG_MAX(0.0,1.0/ll*fabs(c[2]))); // p.s. with normal at p0
     }
 
     /* Rotation of tangent vector : tau is reused */
@@ -698,8 +698,8 @@ static int defmetref(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
 
     /* Truncation of curvature */
     kappacur = 1.0/8.0 * kappacur/mesh->info.hausd;
-    kappacur = MS_MIN(kappacur,isqhmin);
-    kappacur = MS_MAX(kappacur,isqhmax);
+    kappacur = MG_MIN(kappacur,isqhmin);
+    kappacur = MG_MAX(kappacur,isqhmax);
 
     /* The associated matrix in basis (rt, orth rt) */
     c[0] = kappacur*tau[0]*tau[0] + isqhmax*tau[1]*tau[1];
@@ -735,7 +735,7 @@ static int defmetref(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
 static int defmetreg(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
     MMG5_pTria          pt;
     MMG5_pPoint         p0,p1;
-    Bezier         b;
+    _MMG5_Bezier         b;
     int            ilist,list[LMAX+2],k,iel,idp;
     double        *n,*m,r[3][3],ux,uy,uz,lispoi[3*LMAX+1];
     double         det2d,intm[3],b0[3],b1[3],c[3],isqhmin,isqhmax;
@@ -941,12 +941,12 @@ static int defmetreg(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
 
     /* Truncation of eigenvalues */
     kappa[0] = 2.0/9.0 * fabs(kappa[0])/mesh->info.hausd;
-    kappa[0] = MS_MIN(kappa[0],isqhmin);
-    kappa[0] = MS_MAX(kappa[0],isqhmax);
+    kappa[0] = MG_MIN(kappa[0],isqhmin);
+    kappa[0] = MG_MAX(kappa[0],isqhmax);
 
     kappa[1] = 2.0/9.0 * fabs(kappa[1])/mesh->info.hausd;
-    kappa[1] = MS_MIN(kappa[1],isqhmin);
-    kappa[1] = MS_MAX(kappa[1],isqhmax);
+    kappa[1] = MG_MIN(kappa[1],isqhmin);
+    kappa[1] = MG_MAX(kappa[1],isqhmax);
 
     /* Send back the metric to the canonical basis of tangent plane :
        diag(lambda) = {^t}vp * M * vp, M = vp * diag(lambda) * {^t}vp */
@@ -1019,20 +1019,20 @@ int defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
 
     for (k=1; k<=mesh->nt; k++) {
         pt = &mesh->tria[k];
-        if ( !MS_EOK(pt) || pt->ref < 0 )  continue;
+        if ( !MG_EOK(pt) || pt->ref < 0 )  continue;
 
         for (i=0; i<3; i++) {
             ppt = &mesh->point[pt->v[i]];
-            if ( ppt->flag || !MS_VOK(ppt) )  continue;
+            if ( ppt->flag || !MG_VOK(ppt) )  continue;
             if ( ismet )  memcpy(mm,&met->m[6*(pt->v[i])+1],6*sizeof(double));
 
             if ( MS_SIN(ppt->tag) ) {
                 if ( !defmetsin(mesh,met,k,i) )  continue;
             }
-            else if ( ppt->tag & MS_GEO ) {
+            else if ( ppt->tag & MG_GEO ) {
                 if ( !defmetrid(mesh,met,k,i))  continue;
             }
-            else if ( (ppt->tag & MS_REF) && (!(ppt->tag & MS_GEO)) ) {
+            else if ( (ppt->tag & MG_REF) && (!(ppt->tag & MG_GEO)) ) {
                 if ( !defmetref(mesh,met,k,i) )  continue;
             }
             else if ( ppt->tag )  continue;
@@ -1049,18 +1049,18 @@ int defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
     isqhmax = 1.0 / (mesh->info.hmax*mesh->info.hmax);
     for (k=1; k<=mesh->np; k++) {
         ppt = &mesh->point[k];
-        if ( !MS_VOK(ppt) || ppt->flag == 1 )  continue;
+        if ( !MG_VOK(ppt) || ppt->flag == 1 )  continue;
 
         m = &met->m[6*(k)+1];
         memset(m,0,6*sizeof(double));
         if ( MS_SIN(ppt->tag) ) {
             m[0] = m[3] = m[5] = isqhmax;
         }
-        else if ( ppt->tag & MS_GEO ) {
+        else if ( ppt->tag & MG_GEO ) {
             m[0] = m[1] = m[2] = isqhmax;
         }
         else {
-            n = ppt->tag & MS_REF ? &mesh->xpoint[ppt->ig].n1[0] : ppt->n;
+            n = ppt->tag & MG_REF ? &mesh->xpoint[ppt->ig].n1[0] : ppt->n;
             rotmatrix(n,r);
             m[0] = isqhmax*(r[0][0]*r[0][0]+r[1][0]*r[1][0]);
             m[1] = isqhmax*(r[0][0]*r[0][1]+r[1][0]*r[1][1]);
@@ -1112,7 +1112,7 @@ static int grad2met(MMG5_pMesh mesh, MMG5_pSol met, int iel, int i){
         memcpy(n1,nt,3*sizeof(double));
         memcpy(m1,mm1,6*sizeof(double));
     }
-    else if( MS_GEO & p1->tag ){
+    else if( MG_GEO & p1->tag ){
         nn1 = &mesh->xpoint[p1->ig].n1[0];
         nn2 = &mesh->xpoint[p1->ig].n2[0];
         ps1 = nt[0]*nn1[0] + nt[1]*nn1[1] + nt[2]*nn1[2];
@@ -1126,7 +1126,7 @@ static int grad2met(MMG5_pMesh mesh, MMG5_pSol met, int iel, int i){
         if( !buildridmet(mesh,met,np1,ux,uy,uz,m1) )
             return(-1);
     }
-    else if( MS_REF & p1->tag ){
+    else if( MG_REF & p1->tag ){
         memcpy(n1,&(mesh->xpoint[p1->ig].n1[0]),3*sizeof(double));
         memcpy(m1,mm1,6*sizeof(double));
     }
@@ -1140,7 +1140,7 @@ static int grad2met(MMG5_pMesh mesh, MMG5_pSol met, int iel, int i){
         memcpy(n2,nt,3*sizeof(double));
         memcpy(m2,mm2,6*sizeof(double));
     }
-    else if ( MS_GEO & p2->tag ) {
+    else if ( MG_GEO & p2->tag ) {
         nn1 = &mesh->xpoint[p2->ig].n1[0];
         nn2 = &mesh->xpoint[p2->ig].n2[0];
         ps1 = nt[0]*nn1[0] + nt[1]*nn1[1] + nt[2]*nn1[2];
@@ -1154,7 +1154,7 @@ static int grad2met(MMG5_pMesh mesh, MMG5_pSol met, int iel, int i){
         if( !buildridmet(mesh,met,np2,ux,uy,uz,m2) )
             return(-1);
     }
-    else if( MS_REF & p2->tag ){
+    else if( MG_REF & p2->tag ){
         memcpy(n2,&(mesh->xpoint[p2->ig].n1[0]),3*sizeof(double));
         memcpy(m2,mm2,6*sizeof(double));
     }
@@ -1257,7 +1257,7 @@ static int grad2met(MMG5_pMesh mesh, MMG5_pSol met, int iel, int i){
             mm1[3] += 0.5*beta;
             mm1[5] += 0.5*beta;
         }
-        else if( p1->tag & MS_GEO ){
+        else if( p1->tag & MG_GEO ){
             c[0] = fabs(mm1[0]-lambda[ichg]);
             c[1] = fabs(mm1[1]-lambda[ichg]);
             c[2] = fabs(mm1[2]-lambda[ichg]);
@@ -1327,7 +1327,7 @@ static int grad2met(MMG5_pMesh mesh, MMG5_pSol met, int iel, int i){
             mm2[3] += 0.5*beta;
             mm2[5] += 0.5*beta;
         }
-        else if( p2->tag & MS_GEO ){
+        else if( p2->tag & MG_GEO ){
             c[0] = fabs(mm2[0]-lambda[ichg]);
             c[1] = fabs(mm2[1]-lambda[ichg]);
             c[2] = fabs(mm2[2]-lambda[ichg]);
@@ -1385,12 +1385,12 @@ int gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
     /* First step : make ridges iso */
     for (k=1; k<= mesh->np; k++) {
         p1 = &mesh->point[k];
-        if ( !MS_VOK(p1) ) continue;
+        if ( !MG_VOK(p1) ) continue;
         if ( MS_SIN(p1->tag) ) continue;
-        if ( !(p1->tag & MS_GEO) ) continue;
+        if ( !(p1->tag & MG_GEO) ) continue;
 
         m = &met->m[6*k+1];
-        mv = MS_MAX(m[0],MS_MAX(m[1],m[2]));
+        mv = MG_MAX(m[0],MG_MAX(m[1],m[2]));
         m[0] = mv;
         m[1] = mv;
         m[2] = mv;
@@ -1404,7 +1404,7 @@ int gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
         nu = 0;
         for (k=1; k<=mesh->nt; k++) {
             pt = &mesh->tria[k];
-            if ( !MS_EOK(pt) )  continue;
+            if ( !MG_EOK(pt) )  continue;
 
             for (i=0; i<3; i++) {
                 i1 = inxt[i];

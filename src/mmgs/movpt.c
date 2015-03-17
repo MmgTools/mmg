@@ -41,7 +41,7 @@
 int movintpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
     MMG5_pPoint   p0,p1,ppt0;
     MMG5_pTria    pt,pt0;
-    Bezier   b;
+    _MMG5_Bezier   b;
     double   aa,bb,ab,ll,l,mlon,devmean,GV[3],gv[2],cosalpha,sinalpha,r[3][3],*n,lispoi[3*LMAX+1];
     double   ux,uy,uz,det2d,detloc,step,lambda[3],uv[2],o[3],no[3],to[3],Vold,Vnew,calold,calnew,caltmp;
     int      ier,iel,ipp,k,kel,npt,ibeg,iend;
@@ -116,7 +116,7 @@ int movintpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
     ab = n[0]*n[1];
     ll = aa+bb;
     cosalpha = n[2];
-    sinalpha = sqrt(1.0- MS_MIN(1.0,cosalpha*cosalpha));
+    sinalpha = sqrt(1.0- MG_MIN(1.0,cosalpha*cosalpha));
 
     /* No rotation needed in this case */
     if ( ll < EPS ) {
@@ -309,10 +309,10 @@ int movintpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
         memcpy(pt0,pt,sizeof(MMG5_Tria));
         pt0->v[i0] = 0;
         caltmp = caleltsig_iso(mesh,NULL,iel);
-        calold = MS_MIN(calold,caltmp);
+        calold = MG_MIN(calold,caltmp);
         caltmp = caleltsig_iso(mesh,NULL,0);
         if ( caltmp < EPSD )        return(0.0);
-        calnew = MS_MIN(calnew,caltmp);
+        calnew = MG_MIN(calnew,caltmp);
         /*if ( (calnew < BADKAL) && (calnew<=calold) )  return(0);
           if ( chkedg(mesh,0) )  return(0); */
     }
@@ -335,7 +335,7 @@ int movintpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
 int movridpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
     MMG5_pTria   pt,pt0;
     MMG5_pxPoint   go;
-    Bezier  b;
+    _MMG5_Bezier  b;
     MMG5_pPoint  p0,p1,p2,ppt0;
     double  step,dd1,dd2,ddt,ps2,ll1old,ll1new,ll2old,ll2new,uv[2],o[3],*no1,*no2,*np1,*np2;
     double  nn1[3],nn2[3],psn11,psn12,to[3],calold,calnew,lam0,lam1,lam2;
@@ -362,14 +362,14 @@ int movridpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
                 it1  = iel;
                 ip1  = pt->v[i2]; // edge(i1) = (p0p2)
                 voy1 = i1;
-                if ( pt->tag[i1] & MS_GEO )  isrid1 = 1;
+                if ( pt->tag[i1] & MG_GEO )  isrid1 = 1;
             }
             else if ( it1 && !it2 ) {
                 if ( ip1 != pt->v[i2] ) {
                     it2  = iel;
                     ip2  = pt->v[i2]; // edge(i1) = (p0p2)
                     voy2 = i1;
-                    if ( pt->tag[i1] & MS_GEO )  isrid2 = 1;
+                    if ( pt->tag[i1] & MG_GEO )  isrid2 = 1;
                 }
             }
             else if ( it1 && it2 && (pt->v[i2] != ip1) && (pt->v[i2] != ip2) ) {
@@ -383,14 +383,14 @@ int movridpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
                 it1  = iel;
                 ip1  = pt->v[i1]; // edge(i2) = (p0p1)
                 voy1 = i2;
-                if ( pt->tag[i2] & MS_GEO )  isrid1 = 1;
+                if ( pt->tag[i2] & MG_GEO )  isrid1 = 1;
             }
             else if ( it1 && !it2 ) {
                 if ( ip1 != pt->v[i1] ) {
                     it2  = iel;
                     ip2  = pt->v[i1]; // edge(i1) = (p0p2)
                     voy2 = i2;
-                    if ( pt->tag[i2] & MS_GEO )  isrid2 = 1;
+                    if ( pt->tag[i2] & MG_GEO )  isrid2 = 1;
                 }
             }
             else if ( it1 && it2 && (pt->v[i1] != ip1) && (pt->v[i1] != ip2) ) {

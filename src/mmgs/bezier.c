@@ -38,7 +38,7 @@
 extern char ddb;
 
 /* return Bezier control points on triangle iel (cf. Vlachos) */
-int bezierCP(MMG5_pMesh mesh,int iel,pBezier pb) {
+int bezierCP(MMG5_pMesh mesh,int iel,_MMG5_pBezier pb) {
     MMG5_pTria     pt;
     MMG5_pPoint    p[3];
     double   *n1,*n2,nt[3],ps,ps2,dd,ux,uy,uz;
@@ -49,7 +49,7 @@ int bezierCP(MMG5_pMesh mesh,int iel,pBezier pb) {
     p[1] = &mesh->point[pt->v[1]];
     p[2] = &mesh->point[pt->v[2]];
 
-    memset(pb,0,sizeof(Bezier));
+    memset(pb,0,sizeof(_MMG5_Bezier));
 
     /* first 3 CP = vertices, normals */
     for (i=0; i<3; i++) {
@@ -175,7 +175,7 @@ int bezierCP(MMG5_pMesh mesh,int iel,pBezier pb) {
 
 
 /* return point o at (u,v) in Bezier patch and normal */
-int bezierInt(pBezier pb,double uv[2],double o[3],double no[3],double to[3]) {
+int bezierInt(_MMG5_pBezier pb,double uv[2],double o[3],double no[3],double to[3]) {
     double    dd,u,v,w,ps,ux,uy,uz;
     char      i;
 
@@ -376,7 +376,7 @@ inline void bezierEdge(MMG5_pMesh mesh,int i0,int i1,double b0[3],double b1[3],c
             b0[2] = p0->c[2] + ATHIRD*uz;
         }
         else {
-            if ( MS_GEO & p0->tag ) {
+            if ( MG_GEO & p0->tag ) {
                 n1 = &mesh->xpoint[p0->ig].n1[0];
                 n2 = &mesh->xpoint[p0->ig].n2[0];
                 ps1 = v[0]*n1[0] + v[1]*n1[1] + v[2]*n1[2];
@@ -386,7 +386,7 @@ inline void bezierEdge(MMG5_pMesh mesh,int i0,int i1,double b0[3],double b1[3],c
                     ps1 = ps2;
                 }
             }
-            else if ( MS_REF & p0->tag ) {
+            else if ( MG_REF & p0->tag ) {
                 n1 = &mesh->xpoint[p0->ig].n1[0];
                 ps1 = ux*n1[0] + uy*n1[1] + uz*n1[2];
             }
@@ -405,7 +405,7 @@ inline void bezierEdge(MMG5_pMesh mesh,int i0,int i1,double b0[3],double b1[3],c
             b1[2] = p1->c[2] - ATHIRD*uz;
         }
         else {
-            if ( MS_GEO & p1->tag ) {
+            if ( MG_GEO & p1->tag ) {
                 n1 = &mesh->xpoint[p1->ig].n1[0];
                 n2 = &mesh->xpoint[p1->ig].n2[0];
                 ps1 = -(v[0]*n1[0] + v[1]*n1[1] + v[2]*n1[2]);
@@ -415,7 +415,7 @@ inline void bezierEdge(MMG5_pMesh mesh,int i0,int i1,double b0[3],double b1[3],c
                     ps1 = ps2;
                 }
             }
-            else if ( MS_REF & p1->tag ) {
+            else if ( MG_REF & p1->tag ) {
                 n1 = &mesh->xpoint[p1->ig].n1[0];
                 ps1 = -(ux*n1[0] + uy*n1[1] + uz*n1[2]);
             }

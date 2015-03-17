@@ -173,9 +173,9 @@ inline double calelt_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel) {
 
     anisurf = surftri_ani(mesh,met,iel);
 
-    l[0] = lenedg_ani(mesh,met,ib,ic,( pt->tag[0] & MS_GEO ));
-    l[1] = lenedg_ani(mesh,met,ia,ic,( pt->tag[1] & MS_GEO ));
-    l[2] = lenedg_ani(mesh,met,ia,ib,( pt->tag[2] & MS_GEO ));
+    l[0] = lenedg_ani(mesh,met,ib,ic,( pt->tag[0] & MG_GEO ));
+    l[1] = lenedg_ani(mesh,met,ia,ic,( pt->tag[1] & MG_GEO ));
+    l[2] = lenedg_ani(mesh,met,ia,ib,( pt->tag[2] & MG_GEO ));
 
     rap = l[0]*l[0] + l[1]*l[1] + l[2]*l[2];
     if ( rap < EPSD ) return(0.0);
@@ -282,7 +282,7 @@ inline double caleltsig_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel) {
     }
     else {
         memcpy(n,&mesh->xpoint[pa->ig].n1[0],3*sizeof(double));
-        if ( !(pa->tag & MS_REF) ) {
+        if ( !(pa->tag & MG_REF) ) {
             ncomp = &mesh->xpoint[pa->ig].n2[0];
             ps1 = n[0]*pv[0]+n[1]*pv[1]+n[2]*pv[2];
             ps1 *= dd;
@@ -301,9 +301,9 @@ inline double caleltsig_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel) {
     anisurf = surftri_ani(mesh,met,iel);
     if ( anisurf == 0.0 )  return(-1.0);
 
-    l[0] = lenedg_ani(mesh,met,ib,ic,( pt->tag[0] & MS_GEO ));
-    l[1] = lenedg_ani(mesh,met,ia,ic,( pt->tag[1] & MS_GEO ));
-    l[2] = lenedg_ani(mesh,met,ia,ib,( pt->tag[2] & MS_GEO ));
+    l[0] = lenedg_ani(mesh,met,ib,ic,( pt->tag[0] & MG_GEO ));
+    l[1] = lenedg_ani(mesh,met,ia,ic,( pt->tag[1] & MG_GEO ));
+    l[2] = lenedg_ani(mesh,met,ia,ib,( pt->tag[2] & MG_GEO ));
 
     rap = l[0]*l[0] + l[1]*l[1] + l[2]*l[2];
     if ( rap < EPSD )  return(0.0);
@@ -370,7 +370,7 @@ inline double caleltsig_iso(MMG5_pMesh mesh,MMG5_pSol met,int iel) {
     }
     else {
         memcpy(n,&mesh->xpoint[pa->ig].n1[0],3*sizeof(double));
-        if ( !(pa->tag & MS_REF) ) {
+        if ( !(pa->tag & MG_REF) ) {
             ncomp = &mesh->xpoint[pa->ig].n2[0];
             ps1 = n[0]*pv[0]+n[1]*pv[1]+n[2]*pv[2];
             ps1 *= invsqcal;
@@ -473,11 +473,11 @@ inline double incircle(MMG5_pPoint p0,MMG5_pPoint p1,MMG5_pPoint p2,double *o) {
 
     r = sqrt((p1->c[0]-o[0])*(p1->c[0]-o[0]) + (p1->c[1]-o[1])*(p1->c[1]-o[1]) \
              + (p1->c[2]-o[2])*(p1->c[2]-o[2]));
-    rr = MS_MAX(rr,r);
+    rr = MG_MAX(rr,r);
 
     r = sqrt((p2->c[0]-o[0])*(p2->c[0]-o[0]) + (p2->c[1]-o[1])*(p2->c[1]-o[1]) \
              + (p2->c[2]-o[2])*(p2->c[2]-o[2]));
-    rr = MS_MAX(rr,r);
+    rr = MG_MAX(rr,r);
 
     return(rr);
 }
@@ -490,11 +490,11 @@ inline double diamelt(MMG5_pPoint p0,MMG5_pPoint p1,MMG5_pPoint p2) {
 
     dd = (p2->c[0]-p0->c[0])*(p2->c[0]-p0->c[0]) + (p2->c[1]-p0->c[1])*(p2->c[1]-p0->c[1]) \
         + (p2->c[2]-p0->c[2])*(p2->c[2]-p0->c[2]);
-    di = MS_MAX(di,dd);
+    di = MG_MAX(di,dd);
 
     dd = (p2->c[0]-p1->c[0])*(p2->c[0]-p1->c[0]) + (p2->c[1]-p1->c[1])*(p2->c[1]-p1->c[1]) \
         + (p2->c[2]-p1->c[2])*(p2->c[2]-p1->c[2]);
-    di = MS_MAX(di,dd);
+    di = MG_MAX(di,dd);
 
     return(di);
 }
@@ -514,7 +514,7 @@ void inqua(MMG5_pMesh mesh,MMG5_pSol met) {
     nex  = 0;
     for (k=1; k<=mesh->nt; k++) {
         pt = &mesh->tria[k];
-        if ( !MS_EOK(pt) ) {
+        if ( !MG_EOK(pt) ) {
             nex++;
             continue;
         }
@@ -529,8 +529,8 @@ void inqua(MMG5_pMesh mesh,MMG5_pSol met) {
         if ( rap > 0.5 )  med++;
         if ( rap < BADKAL )  mesh->info.badkal = 1;
         rapavg += rap;
-        rapmax  = MS_MAX(rapmax,rap);
-        ir = MS_MIN(4,(int)(5.0*rap));
+        rapmax  = MG_MAX(rapmax,rap);
+        ir = MG_MIN(4,(int)(5.0*rap));
         his[ir] += 1;
     }
 
@@ -541,7 +541,7 @@ void inqua(MMG5_pMesh mesh,MMG5_pSol met) {
 
     /* print histo */
     fprintf(stdout,"     HISTOGRAMM:  %6.2f %% > 0.5\n",100.0*(med/(float)(mesh->nt-nex)));
-    imax = MS_MIN(4,(int)(5.*rapmax));
+    imax = MG_MIN(4,(int)(5.*rapmax));
     for (i=imax; i>=(int)(5*rapmin); i--) {
         fprintf(stdout,"     %5.1f < Q < %5.1f   %7d   %6.2f %%\n",
                 i/5.,i/5.+0.2,his[i],100.*(his[i]/(float)(mesh->nt-nex)));
@@ -563,7 +563,7 @@ void outqua(MMG5_pMesh mesh,MMG5_pSol met) {
     nex  = 0;
     for (k=1; k<=mesh->nt; k++) {
         pt = &mesh->tria[k];
-        if ( !MS_EOK(pt) ) {
+        if ( !MG_EOK(pt) ) {
             nex++;
             continue;
         }
@@ -581,8 +581,8 @@ void outqua(MMG5_pMesh mesh,MMG5_pSol met) {
         if ( rap > 0.5 )  med++;
         if ( rap < BADKAL )  mesh->info.badkal = 1;
         rapavg += rap;
-        rapmax  = MS_MAX(rapmax,rap);
-        ir = MS_MIN(4,(int)(5.0*rap));
+        rapmax  = MG_MAX(rapmax,rap);
+        ir = MG_MIN(4,(int)(5.0*rap));
         his[ir] += 1;
     }
 
@@ -593,7 +593,7 @@ void outqua(MMG5_pMesh mesh,MMG5_pSol met) {
 
     /* print histo */
     fprintf(stdout,"     HISTOGRAMM:  %6.2f %% > 0.5\n",100.0*(med/(float)(mesh->nt-nex)));
-    imax = MS_MIN(4,(int)(5.*rapmax));
+    imax = MG_MIN(4,(int)(5.*rapmax));
     for (i=imax; i>=(int)(5*rapmin); i--) {
         fprintf(stdout,"     %5.1f < Q < %5.1f   %7d   %6.2f %%\n",
                 i/5.,i/5.+0.2,his[i],100.*(his[i]/(float)(mesh->nt-nex)));

@@ -43,7 +43,7 @@ inline int rotmatrix(double n[3],double r[3][3]) {
     ab = n[0]*n[1];
     ll = aa+bb;
     cosalpha = n[2];
-    sinalpha = sqrt(1.0- MS_MIN(1.0,cosalpha*cosalpha));
+    sinalpha = sqrt(1.0- MG_MIN(1.0,cosalpha*cosalpha));
 
     /* No rotation needed in this case */
     if ( ll < EPS ) {
@@ -224,8 +224,8 @@ int intmetsavedir(MMG5_pMesh mesh, double *m,double *n,double *mr) {
 
     for (i=0; i<2; i++) {
         siz = n[0]*vp[i][0]*vp[i][0] + 2.0*n[1]*vp[i][0]*vp[i][1] + n[2]*vp[i][1]*vp[i][1];
-        lambda[i] = MS_MAX(lambda[i],siz);
-        lambda[i] = MS_MIN(lambda[i],isqhmin);
+        lambda[i] = MG_MAX(lambda[i],siz);
+        lambda[i] = MG_MIN(lambda[i],isqhmin);
     }
     mr[0] = lambda[0]*vp[0][0]*vp[0][0] + lambda[1]*vp[1][0]*vp[1][0];
     mr[1] = lambda[0]*vp[0][0]*vp[0][1] + lambda[1]*vp[1][0]*vp[1][1];
@@ -249,7 +249,7 @@ int delref(MMG5_pMesh mesh) {
 
 /* Start from triangle start, and pile up triangles by adjacency, till a GEO or REF curve is met ;
    pass all references of travelled faces to ref ; putreq = 1 if boundary edges met must
-   be set to MS_REQ, 0 otherwise. */
+   be set to MG_REQ, 0 otherwise. */
 int setref(MMG5_pMesh mesh,int start,int ref,int putreq) {
     MMG5_pTria      pt,pt1;
     int        *list,*adja,cur,base,k,iel,jel,ilist;
@@ -274,12 +274,12 @@ int setref(MMG5_pMesh mesh,int start,int ref,int putreq) {
         for(j=0; j<3; j++) {
             if( MS_EDG(pt->tag[j]) ) {
                 if( putreq ) {
-                    pt->tag[j] |= MS_REQ;
+                    pt->tag[j] |= MG_REQ;
                     jel = adja[j] / 3;
                     voy = adja[j] % 3;
                     if( !jel ) continue;
                     pt1 = &mesh->tria[jel];
-                    pt1->tag[voy] |= MS_REQ;
+                    pt1->tag[voy] |= MG_REQ;
                 }
                 continue;
             }

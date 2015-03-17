@@ -46,7 +46,7 @@ int chkmsh(MMG5_pMesh mesh,int severe) {
 
     for (k=1; k<=mesh->nt; k++) {
         pt1 = &mesh->tria[k];
-        if ( !MS_EOK(pt1) )  continue;
+        if ( !MG_EOK(pt1) )  continue;
         adja = &mesh->adja[3*(k-1)+1];
 
         for (i=0; i<3; i++) {
@@ -55,7 +55,7 @@ int chkmsh(MMG5_pMesh mesh,int severe) {
             i2  = iprv[i];
             adj = adja[i] / 3;
             voy = adja[i] % 3;
-            if ( !adj && !(pt1->tag[i] & MS_GEO) ) {
+            if ( !adj && !(pt1->tag[i] & MG_GEO) ) {
                 fprintf(stdout,"  0. Missing edge tag %d %d\n",k,adj);
                 printf("k %d: %d %d %d \n",k,pt1->v[0],pt1->v[1],pt1->v[2]);
                 printf("tag (%d): %d %d %d \n",k,pt1->tag[0],pt1->tag[1],pt1->tag[2]);
@@ -70,7 +70,7 @@ int chkmsh(MMG5_pMesh mesh,int severe) {
                 exit(1);
             }
             pt2 = &mesh->tria[adj];
-            if ( !MS_EOK(pt2) ) {
+            if ( !MG_EOK(pt2) ) {
                 fprintf(stdout,"  4. Invalid adjacent %d %d\n",adj,k);
                 printf("sommets k   %d: %d %d %d\n",k,pt1->v[0],pt1->v[1],pt1->v[2]);
                 printf("sommets adj %d: %d %d %d \n",adj,pt2->v[0],pt2->v[1],pt2->v[2]);
@@ -109,7 +109,7 @@ int chkmsh(MMG5_pMesh mesh,int severe) {
 
     for (k=1; k<=mesh->nt; k++) {
         pt1 = &mesh->tria[k];
-        if ( !MS_EOK(pt1) )  continue;
+        if ( !MG_EOK(pt1) )  continue;
 
         adja = &mesh->adja[3*(k-1)+1];
         for (i=0; i<3; i++) {
@@ -117,7 +117,7 @@ int chkmsh(MMG5_pMesh mesh,int severe) {
 
             ip  = pt1->v[i];
             ppt = &mesh->point[ip];
-            if ( !MS_VOK(ppt) ) {
+            if ( !MG_VOK(ppt) ) {
                 fprintf(stdout,"  6. Unused vertex %d  %d\n",k,ip);
                 printf("%d %d %d\n",pt1->v[0],pt1->v[1],pt1->v[2]);
                 exit(1);
@@ -139,7 +139,7 @@ int chkmsh(MMG5_pMesh mesh,int severe) {
             len = 0;
             for (kk=1; kk<=mesh->nt; kk++) {
                 pt2 = &mesh->tria[kk];
-                if ( !MS_EOK(pt2) )  continue;
+                if ( !MG_EOK(pt2) )  continue;
                 for (j=0; j<3; j++)
                     if ( pt2->v[j] == ip ) {
                         len++;
@@ -148,7 +148,7 @@ int chkmsh(MMG5_pMesh mesh,int severe) {
             }
             if ( len != lon ) {
                 fprintf(stdout,"  7. Incorrect ball %d: %d %d\n",ip,lon,len);
-                ppt->tag |= MS_CRN + MS_REQ;
+                ppt->tag |= MG_CRN + MG_REQ;
             }
         }
     }
@@ -164,7 +164,7 @@ int chkeigen(MMG5_pMesh mesh,MMG5_pSol met,int k,double lambda[3]) {
     double    *m,*n,r[3][3],mr[6],mtan[3],vp[2][2];
 
     p0 = &mesh->point[k];
-    assert( MS_VOK(p0) );
+    assert( MG_VOK(p0) );
 
     m = &met->m[6*k+1];
 
@@ -173,13 +173,13 @@ int chkeigen(MMG5_pMesh mesh,MMG5_pSol met,int k,double lambda[3]) {
         lambda[1] = m[3];
         lambda[2] = m[5];
     }
-    else if ( p0->tag & MS_GEO ) {
+    else if ( p0->tag & MG_GEO ) {
         lambda[0] = m[0];
         lambda[1] = m[1];
         lambda[2] = m[2];
     }
     else {
-        if ( p0->tag & MS_REF ) {
+        if ( p0->tag & MG_REF ) {
             go = &mesh->xpoint[p0->ig];
             n = &go->n1[0];
         }
@@ -216,7 +216,7 @@ int chkmet(MMG5_pMesh mesh,MMG5_pSol met) {
     /* First test : check wether metric at singular point has the suitable form */
     for(k=1; k<=mesh->np; k++) {
         p0 = &mesh->point[k];
-        if ( !MS_VOK(p0) ) continue;
+        if ( !MG_VOK(p0) ) continue;
 
         if( MS_SIN(p0->tag) ) {
             m = &met->m[6*k+1];
@@ -231,7 +231,7 @@ int chkmet(MMG5_pMesh mesh,MMG5_pSol met) {
                 exit(0);
             }
         }
-        else if ( p0->tag & MS_GEO ) {
+        else if ( p0->tag & MG_GEO ) {
             m = &met->m[6*k+1];
             for (i=0; i<3; i++) {
                 if ( m[i] > isqhmin + 1.e-6 || m[i] < isqhmax - 1.e-6 ){
@@ -292,9 +292,9 @@ int chknor(MMG5_pMesh mesh) {
     /* First test : check that all normal vectors at points are non 0 */
     for (k=1; k<=mesh->np; k++) {
         p0 = &mesh->point[k];
-        if ( !MS_VOK(p0) ) continue;
+        if ( !MG_VOK(p0) ) continue;
         if ( MS_SIN(p0->tag) ) continue;
-        if ( !(p0->tag & MS_GEO) ) continue;
+        if ( !(p0->tag & MG_GEO) ) continue;
 
         assert( p0->ig );
         go = &mesh->xpoint[p0->ig];
@@ -319,7 +319,7 @@ int chknor(MMG5_pMesh mesh) {
        respect to the underlying triangles */
     for (k=1; k<=mesh->nt; k++) {
         pt = &mesh->tria[k];
-        if ( !MS_EOK(pt) ) continue;
+        if ( !MG_EOK(pt) ) continue;
 
         nortri(mesh,pt,nt);
         for (i=0; i<3; i++) {
@@ -328,7 +328,7 @@ int chknor(MMG5_pMesh mesh) {
             else if ( MS_EDG(p0->tag) ) {
                 assert ( p0->ig );
                 go = &mesh->xpoint[p0->ig];
-                if ( p0->tag & MS_GEO ) {
+                if ( p0->tag & MG_GEO ) {
                     n = &go->n1[0];
                     ps = n[0]*nt[0] + n[1]*nt[1] + n[2]*nt[2];
                     if ( ps < -0.99 ) {

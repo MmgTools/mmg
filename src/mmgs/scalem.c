@@ -48,7 +48,7 @@ int scaleMesh(MMG5_pMesh mesh,MMG5_pSol met) {
     }
     for (k=1; k<=mesh->np; k++) {
         ppt = &mesh->point[k];
-        if ( !MS_VOK(ppt) )  continue;
+        if ( !MG_VOK(ppt) )  continue;
         for (i=0; i<3; i++) {
             if ( ppt->c[i] > mesh->info.max[i] )  mesh->info.max[i] = ppt->c[i];
             if ( ppt->c[i] < mesh->info.min[i] )  mesh->info.min[i] = ppt->c[i];
@@ -68,7 +68,7 @@ int scaleMesh(MMG5_pMesh mesh,MMG5_pSol met) {
     dd = 1.0 / mesh->info.delta;
     for (k=1; k<=mesh->np; k++) {
         ppt = &mesh->point[k];
-        if ( !MS_VOK(ppt) )  continue;
+        if ( !MG_VOK(ppt) )  continue;
         ppt->c[0] = dd * (ppt->c[0] - mesh->info.min[0]);
         ppt->c[1] = dd * (ppt->c[1] - mesh->info.min[1]);
         ppt->c[2] = dd * (ppt->c[2] - mesh->info.min[2]);
@@ -109,7 +109,7 @@ int unscaleMesh(MMG5_pMesh mesh,MMG5_pSol met) {
     dd = mesh->info.delta;
     for (k=1; k<=mesh->np; k++) {
         ppt = &mesh->point[k];
-        if ( !MS_VOK(ppt) )  continue;
+        if ( !MG_VOK(ppt) )  continue;
         ppt->c[0] = ppt->c[0] * dd + mesh->info.min[0];
         ppt->c[1] = ppt->c[1] * dd + mesh->info.min[1];
         ppt->c[2] = ppt->c[2] * dd + mesh->info.min[2];
@@ -121,7 +121,7 @@ int unscaleMesh(MMG5_pMesh mesh,MMG5_pSol met) {
             dd = 1.0 / (dd*dd);
             for (k=1; k<=mesh->np; k++) {
                 ppt = &mesh->point[k];
-                if ( !MS_VOK(ppt) )  continue;
+                if ( !MG_VOK(ppt) )  continue;
                 for (i=0; i<6; i++)  met->m[6*(k)+1+i] *= dd;
             }
         }
@@ -129,7 +129,7 @@ int unscaleMesh(MMG5_pMesh mesh,MMG5_pSol met) {
             dd = 1.0 / dd;
             for (k=1; k<=mesh->np ; k++) {
                 ppt = &mesh->point[k];
-                if ( MS_VOK(ppt) )  met->m[k] *= dd;
+                if ( MG_VOK(ppt) )  met->m[k] *= dd;
             }
         }
     }

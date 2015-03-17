@@ -40,7 +40,7 @@
 int movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
     MMG5_pTria     pt,pt0;
     MMG5_pPoint    p0,p1,p2,ppt0;
-    Bezier         pb;
+    _MMG5_Bezier         pb;
     double         r[3][3],ux,uy,uz,*n,area,lispoi[3*LMAX+1],Jacsigma[3][2],Jactmp[3][2],*m0,m[6],mo[6];
     double         dens[3],intpt[2],gv[2],density,detloc,step,lambda[3],o[3],no[3],to[3],uv[2];
     double         ll,*n1,*n2,ps1,ps2,calold,calnew,caltmp;
@@ -149,7 +149,7 @@ int movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
             }
 
             /* Take metric at control point */
-            if ( !(MS_GEO & pt->tag[i2]) ) {
+            if ( !(MG_GEO & pt->tag[i2]) ) {
                 if ( !intregmet(mesh,met,iel,i2,0.5,m) )  return(0);
             }
             else {
@@ -338,10 +338,10 @@ int movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
         pt0->v[i0] = 0;
 
         caltmp = caleltsig_ani(mesh,met,iel);
-        calold = MS_MIN(calold,caltmp);
+        calold = MG_MIN(calold,caltmp);
         caltmp = caleltsig_ani(mesh,met,0);
         if ( caltmp < EPSD )        return(0.0);
-        calnew = MS_MIN(calnew,caltmp);
+        calnew = MG_MIN(calnew,caltmp);
 
         if ( calold < NULKAL && calnew <= calold )  return(0);
         else if ( calnew < 0.3*calold )      return(0);
@@ -370,7 +370,7 @@ int movridpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
     MMG5_pTria    pt,pt0;
     MMG5_pPoint   p0,p1,p2,ppt0;
     MMG5_pxPoint    go;
-    Bezier   b;
+    _MMG5_Bezier   b;
     double  *m0,*m00,step,l1old,l2old,ll1old,ll2old,uv[2],o[3],nn1[3],nn2[3],to[3],mo[6];
     double   lam0,lam1,lam2,*no1,*no2,*np1,*np2;
     double   psn11,psn12,ps2,l1new,l2new,dd1,dd2,ddt,calold,calnew;
@@ -397,14 +397,14 @@ int movridpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
                 it1  = iel;
                 ip1  = pt->v[i2]; // edge(i1) = (p0p2)
                 voy1 = i1;
-                if ( pt->tag[i1] & MS_GEO )  isrid1 = 1;
+                if ( pt->tag[i1] & MG_GEO )  isrid1 = 1;
             }
             else if ( it1 && !it2 ) {
                 if ( ip1 != pt->v[i2] ) {
                     it2  = iel;
                     ip2  = pt->v[i2]; // edge(i1) = (p0p2)
                     voy2 = i1;
-                    if ( pt->tag[i1] & MS_GEO )  isrid2 = 1;
+                    if ( pt->tag[i1] & MG_GEO )  isrid2 = 1;
                 }
             }
             else if ( it1 && it2 && (pt->v[i2] != ip1) && (pt->v[i2] != ip2) ) {
@@ -418,14 +418,14 @@ int movridpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
                 it1  = iel;
                 ip1  = pt->v[i1]; // edge(i2) = (p0p1)
                 voy1 = i2;
-                if ( pt->tag[i2] & MS_GEO )  isrid1 = 1;
+                if ( pt->tag[i2] & MG_GEO )  isrid1 = 1;
             }
             else if ( it1 && !it2 ) {
                 if ( ip1 != pt->v[i1] ) {
                     it2  = iel;
                     ip2  = pt->v[i1]; // edge(i1) = (p0p2)
                     voy2 = i2;
-                    if ( pt->tag[i2] & MS_GEO )  isrid2 = 1;
+                    if ( pt->tag[i2] & MG_GEO )  isrid2 = 1;
                 }
             }
             else if ( it1 && it2 && (pt->v[i1] != ip1) && (pt->v[i1] != ip2) ) {

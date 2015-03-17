@@ -46,7 +46,7 @@ static void paktri(MMG5_pMesh mesh) {
     k = 1;
     do {
         pt = &mesh->tria[k];
-        if ( !MS_EOK(pt) ) {
+        if ( !MG_EOK(pt) ) {
             pt1 = &mesh->tria[mesh->nt];
             memcpy(pt,pt1,sizeof(MMG5_Tria));
             delElt(mesh,mesh->nt);
@@ -97,7 +97,7 @@ int hashTria(MMG5_pMesh mesh) {
     dup = nmf = 0;
     for (k=1; k<=mesh->nt; k++) {
         pt = &mesh->tria[k];
-        if ( !MS_EOK(pt) )  continue;
+        if ( !MG_EOK(pt) )  continue;
 
         pt->flag = 0;
         pt->base = mesh->base;
@@ -107,8 +107,8 @@ int hashTria(MMG5_pMesh mesh) {
             i2 = iprv[i];
 
             /* compute key */
-            ia  = MS_MIN(pt->v[i1],pt->v[i2]);
-            ib  = MS_MAX(pt->v[i1],pt->v[i2]);
+            ia  = MG_MIN(pt->v[i1],pt->v[i2]);
+            ib  = MG_MAX(pt->v[i1],pt->v[i2]);
             key = (KA*ia + KB*ib) % hash.siz;
             ph  = &hash.geom[key];
 
@@ -139,8 +139,8 @@ int hashTria(MMG5_pMesh mesh) {
                     }
                     /* non-manifold case */
                     else if ( adja[i] != 3*jel+j ) {
-                        pt->tag[i] |= MS_GEO + MS_NOM;
-                        pt1->tag[j]|= MS_GEO + MS_NOM;
+                        pt->tag[i] |= MG_GEO + MG_NOM;
+                        pt1->tag[j]|= MG_GEO + MG_NOM;
                         nmf++;
                     }
                     ok = 1;
@@ -175,9 +175,9 @@ int hashTria(MMG5_pMesh mesh) {
     for (k=1; k<=mesh->nt; k++) {
         pt  = &mesh->tria[k];
         for (i=0; i<3; i++) {
-            if ( pt->tag[i] & MS_NOM ) {
-                mesh->point[pt->v[inxt[i]]].tag |= MS_NOM;
-                mesh->point[pt->v[iprv[i]]].tag |= MS_NOM;
+            if ( pt->tag[i] & MG_NOM ) {
+                mesh->point[pt->v[inxt[i]]].tag |= MG_NOM;
+                mesh->point[pt->v[iprv[i]]].tag |= MG_NOM;
             }
         }
     }
@@ -207,8 +207,8 @@ int hashEdge(MMG5_pMesh mesh, MMG5_HGeom *hash,int a,int b,int k) {
     MMG5_hgeom  *ph;
     int         j,key,ia,ib;
 
-    ia  = MS_MIN(a,b);
-    ib  = MS_MAX(a,b);
+    ia  = MG_MIN(a,b);
+    ib  = MG_MAX(a,b);
     key = (KA*ia + KB*ib) % hash->siz;
     ph  = &hash->geom[key];
 
@@ -246,8 +246,8 @@ int hashGet(MMG5_HGeom *hash,int a,int b) {
     MMG5_hgeom  *ph;
     int         key,ia,ib;
 
-    ia  = MS_MIN(a,b);
-    ib  = MS_MAX(a,b);
+    ia  = MG_MIN(a,b);
+    ib  = MG_MAX(a,b);
     key = (KA*ia + KB*ib) % hash->siz;
     ph  = &hash->geom[key];
 
@@ -285,7 +285,7 @@ int assignEdge(MMG5_pMesh mesh) {
     /* set references to triangles */
     for (k=1; k<=mesh->nt; k++) {
         pt = &mesh->tria[k];
-        if ( !MS_EOK(pt) )  continue;
+        if ( !MG_EOK(pt) )  continue;
 
         for (i=0; i<3; i++) {
             i1 = inxt[i];

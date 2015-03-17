@@ -58,7 +58,7 @@ static int setadj(MMG5_pMesh mesh){
             k  = pile[ipil--];
             pt = &mesh->tria[k];
             pt->flag = 0;
-            if ( !MS_EOK(pt) )  continue;
+            if ( !MG_EOK(pt) )  continue;
 
             pt->cc = ncc;
             adja = &mesh->adja[3*(k-1)+1];
@@ -76,9 +76,9 @@ static int setadj(MMG5_pMesh mesh){
 
                 /* open boundary */
                 if ( !adja[i] ) {
-                    pt->tag[i] |= MS_GEO;
-                    mesh->point[ip1].tag |= MS_GEO;
-                    mesh->point[ip2].tag |= MS_GEO;
+                    pt->tag[i] |= MG_GEO;
+                    mesh->point[ip1].tag |= MG_GEO;
+                    mesh->point[ip2].tag |= MG_GEO;
                     nr++;
                     ned++;
                     continue;
@@ -90,19 +90,19 @@ static int setadj(MMG5_pMesh mesh){
 
                 /* correct edge tag */
                 pt1 = &mesh->tria[kk];
-                if ( pt->tag[i] & MS_NOM && !(pt1->tag[ii] & MS_NOM) ) {
+                if ( pt->tag[i] & MG_NOM && !(pt1->tag[ii] & MG_NOM) ) {
                     pt1->tag[ii] = pt->tag[i];
                     pt1->edg[ii] = pt->edg[i];
-                    mesh->point[ip1].tag |= MS_NOM;
-                    mesh->point[ip2].tag |= MS_NOM;
+                    mesh->point[ip1].tag |= MG_NOM;
+                    mesh->point[ip2].tag |= MG_NOM;
                 }
                 if ( pt1->cc > 0 )  continue;
 
                 if ( abs(pt1->ref) != abs(pt->ref) ) {
-                    pt->tag[i]   |= MS_REF;
-                    pt1->tag[ii] |= MS_REF;
-                    mesh->point[ip1].tag |= MS_REF;
-                    mesh->point[ip2].tag |= MS_REF;
+                    pt->tag[i]   |= MG_REF;
+                    pt1->tag[ii] |= MG_REF;
+                    mesh->point[ip1].tag |= MG_REF;
+                    mesh->point[ip2].tag |= MG_REF;
                     nre++;
                 }
 
@@ -119,12 +119,12 @@ static int setadj(MMG5_pMesh mesh){
                     /* Moebius strip */
                     if ( pt1->base < 0 ) {
                         pt1->ref      = -1;
-                        pt->tag[i]   |= MS_REF;
-                        pt1->tag[ii] |= MS_REF;
+                        pt->tag[i]   |= MG_REF;
+                        pt1->tag[ii] |= MG_REF;
                         nre++;
                     }
                     /* flip orientation */
-                    else if ( !(pt->tag[i] & MS_NOM) ) {
+                    else if ( !(pt->tag[i] & MG_NOM) ) {
                         pt1->base   = -pt1->base;
                         pt1->v[ii1] = ip2;
                         pt1->v[ii2] = ip1;
@@ -180,15 +180,15 @@ static int setadj(MMG5_pMesh mesh){
     nr = nre = 0;
     for (k=1; k<=mesh->nt; k++) {
         pt = &mesh->tria[k];
-        if ( !MS_EOK(pt) )  continue;
+        if ( !MG_EOK(pt) )  continue;
         for (i=0; i<3; i++) {
             if ( !MS_EDG(pt->tag[i]) )  continue;
 
             adja = &mesh->adja[3*(k-1)+1];
             jel  = adja[i] / 3;
             if ( !jel || jel > k ) {
-                if ( pt->tag[i] & MS_GEO )  nr++;
-                if ( pt->tag[i] & MS_REF )  nre++;
+                if ( pt->tag[i] & MG_GEO )  nr++;
+                if ( pt->tag[i] & MG_REF )  nre++;
             }
         }
     }
@@ -224,7 +224,7 @@ static void nmpoints(MMG5_pMesh mesh) {
   
     for (k=1; k<=mesh->nt; k++) {
         pt = &mesh->tria[k];
-        if ( !MS_EOK(pt) )  continue; 
+        if ( !MG_EOK(pt) )  continue; 
 
         for (i=0; i<3; i++) {
             np = pt->v[i];
@@ -235,7 +235,7 @@ static void nmpoints(MMG5_pMesh mesh) {
           
     for (k=1; k<=mesh->nt; k++) {
         pt = &mesh->tria[k];
-        if ( !MS_EOK(pt) )  continue; 
+        if ( !MG_EOK(pt) )  continue; 
     
         for (i=0; i<3; i++) {
             np = pt->v[i];
@@ -259,9 +259,9 @@ static void nmpoints(MMG5_pMesh mesh) {
 
             /* Ball has been completely traveled without meeting numt */
             if ( jel == k ) {
-                if ( !(p0->tag & MS_CRN) || !(p0->tag & MS_REQ) ) {
+                if ( !(p0->tag & MG_CRN) || !(p0->tag & MG_REQ) ) {
                     nmp++;
-                    p0->tag |= MS_CRN + MS_REQ;
+                    p0->tag |= MG_CRN + MG_REQ;
                 }
                 continue;
             }
@@ -284,8 +284,8 @@ static void nmpoints(MMG5_pMesh mesh) {
             while ( jel && (jel != numt));  
           
             if ( jel != numt) {
-                if ( !(p0->tag & MS_CRN) || !(p0->tag & MS_REQ) ) {
-                    p0->tag |= MS_CRN + MS_REQ; 
+                if ( !(p0->tag & MG_CRN) || !(p0->tag & MG_REQ) ) {
+                    p0->tag |= MG_CRN + MG_REQ; 
                     nmp++;
                 }
             }
@@ -315,7 +315,7 @@ static int delbad(MMG5_pMesh mesh) {
         nd = 0;
         for (k=1; k<=mesh->nt; k++) {
             pt = &mesh->tria[k];
-            if ( !MS_EOK(pt) )  continue;
+            if ( !MG_EOK(pt) )  continue;
 
             kal = calelt(mesh,NULL,k);
             if ( kal > declic )  continue;
@@ -402,12 +402,12 @@ static int setdhd(MMG5_pMesh mesh) {
     nr = 0;
     for (k=1; k<=mesh->nt; k++) {
         pt = &mesh->tria[k];
-        if ( !MS_EOK(pt) )  continue;
+        if ( !MG_EOK(pt) )  continue;
 
         nortri(mesh,pt,n1);
         adja = &mesh->adja[3*(k-1)+1];
         for (i=0; i<3; i++) {
-            if ( pt->tag[i] & MS_GEO )  continue;
+            if ( pt->tag[i] & MG_GEO )  continue;
             kk = adja[i] / 3;
             ii = adja[i] % 3;
 
@@ -417,12 +417,12 @@ static int setdhd(MMG5_pMesh mesh) {
                 nortri(mesh,pt1,n2);
                 dhd = n1[0]*n2[0] + n1[1]*n2[1] + n1[2]*n2[2];
                 if ( dhd <= mesh->info.dhd ) {
-                    pt->tag[i]   |= MS_GEO;
-                    pt1->tag[ii] |= MS_GEO;
+                    pt->tag[i]   |= MG_GEO;
+                    pt1->tag[ii] |= MG_GEO;
                     i1 = inxt[i];
                     i2 = inxt[i1];
-                    mesh->point[pt->v[i1]].tag |= MS_GEO;
-                    mesh->point[pt->v[i2]].tag |= MS_GEO;
+                    mesh->point[pt->v[i1]].tag |= MG_GEO;
+                    mesh->point[pt->v[i2]].tag |= MG_GEO;
                     nr++;
                 }
             }
@@ -446,32 +446,32 @@ int singul(MMG5_pMesh mesh) {
     nre = nc = 0;
     for (k=1; k<=mesh->nt; k++) {
         pt = &mesh->tria[k];
-        if ( !MS_EOK(pt) )  continue;
+        if ( !MG_EOK(pt) )  continue;
 
         for (i=0; i<3; i++) {
             ppt = &mesh->point[pt->v[i]];
             ppt->s++;
-            if ( !MS_VOK(ppt) || MS_SIN(ppt->tag) )  continue;
+            if ( !MG_VOK(ppt) || MS_SIN(ppt->tag) )  continue;
             else if ( MS_EDG(ppt->tag) ) {
                 ns = bouler(mesh,k,i,list,&ng,&nr);
                 if ( !ns ) continue;
         
                 if ( (ng + nr) > 2 ) {
-                    ppt->tag |= MS_CRN + MS_REQ; 
+                    ppt->tag |= MG_CRN + MG_REQ; 
                     nre++;   
                     nc++;
                 } 
                 else if ( ng == 1 && nr == 1 ) {
-                    ppt->tag |= MS_REQ; 
+                    ppt->tag |= MG_REQ; 
                     nre++;
                 } 
                 else if ( ng == 1 && !nr ) {
-                    ppt->tag |= MS_CRN + MS_REQ; 
+                    ppt->tag |= MG_CRN + MG_REQ; 
                     nre++;
                     nc++;
                 }
                 else if ( nr == 1 && !ng ) {
-                    ppt->tag |= MS_CRN + MS_REQ; 
+                    ppt->tag |= MG_CRN + MG_REQ; 
                     nre++;
                     nc++;
                 }
@@ -490,7 +490,7 @@ int singul(MMG5_pMesh mesh) {
                     if ( fabs(dd) > EPSD ) {
                         dd = (ux*vx + uy*vy + uz*vz) / sqrt(dd);
                         if ( dd > -mesh->info.dhd ) {
-                            ppt->tag |= MS_CRN;
+                            ppt->tag |= MG_CRN;
                             nc++;
                         }
                     }
@@ -502,13 +502,13 @@ int singul(MMG5_pMesh mesh) {
     /* check for handle */
     for (k=1; k<=mesh->nt; k++) {
         pt = &mesh->tria[k];
-        if ( !MS_EOK(pt) )  continue;
+        if ( !MG_EOK(pt) )  continue;
         for (i=0; i<3; i++) {
             ppt = &mesh->point[pt->v[i]];
             if ( !ppt->s )  continue;
             nr = boulet(mesh,k,i,list);
             if ( nr != ppt->s ) {
-                ppt->tag |= MS_CRN + MS_REQ;
+                ppt->tag |= MG_CRN + MG_REQ;
                 ppt->s = 0;
                 nc++;
             }
@@ -538,7 +538,7 @@ static int norver(MMG5_pMesh mesh) {
     ++mesh->base;
     for (k=1; k<=mesh->nt; k++) {
         pt = &mesh->tria[k];
-        if ( !MS_EOK(pt) )  continue;
+        if ( !MG_EOK(pt) )  continue;
 
         for (i=0; i<3; i++) {
             ppt = &mesh->point[pt->v[i]];
@@ -567,14 +567,14 @@ static int norver(MMG5_pMesh mesh) {
         assert(mesh->xpoint);
 
     } else if ( ng ) {
-        mesh->ngmax = MS_MAX(1.5*ng,NGMAX);
+        mesh->ngmax = MG_MAX(1.5*ng,NGMAX);
         mesh->xpoint  = (MMG5_pxPoint)calloc(mesh->ngmax+1,sizeof(MMG5_xPoint));
         assert(mesh->xpoint);
 
         /* 2. process C0 vertices on curves, tangents */
         for (k=1; k<=mesh->nt; k++) {
             pt = &mesh->tria[k];
-            if ( !MS_EOK(pt) )  continue;
+            if ( !MG_EOK(pt) )  continue;
       
             adja = &mesh->adja[3*(k-1)+1];
             for (i=0; i<3; i++) {
@@ -582,7 +582,7 @@ static int norver(MMG5_pMesh mesh) {
                 i2  = inxt[i1];
                 ppt = &mesh->point[pt->v[i]];
 
-                if ( ppt->tag & MS_CRN || ppt->flag == mesh->base )  continue;
+                if ( ppt->tag & MG_CRN || ppt->flag == mesh->base )  continue;
                 else if ( !MS_EDG(pt->tag[i1]) )  continue;
 
                 ier = boulen(mesh,k,i,n);
@@ -595,7 +595,7 @@ static int norver(MMG5_pMesh mesh) {
                 memcpy(go->n1,n,3*sizeof(double));         
 
                 /* compute n2 along ridge */
-                if ( pt->tag[i1] & MS_GEO ) {
+                if ( pt->tag[i1] & MG_GEO ) {
                     if ( adja[i1] ) {
                         kk  = adja[i1] / 3;
                         ii  = adja[i1] % 3;
@@ -658,7 +658,7 @@ static int regnor(MMG5_pMesh mesh) {
     /* assign seed to vertex */
     for (k=1; k<=mesh->nt; k++) {
         pt = &mesh->tria[k];
-        if ( !MS_EOK(pt) )  continue;
+        if ( !MG_EOK(pt) )  continue;
         for (i=0; i<3; i++) {
             ppt = &mesh->point[pt->v[i]];
             if ( !ppt->s )  ppt->s = k;
@@ -678,7 +678,7 @@ static int regnor(MMG5_pMesh mesh) {
         /* step 1: laplacian */
         for (k=1; k<=mesh->np; k++) {
             ppt = &mesh->point[k];
-            if ( !MS_VOK(ppt) || ppt->tag > MS_REF )  continue;
+            if ( !MG_VOK(ppt) || ppt->tag > MG_REF )  continue;
 
             iel = ppt->s;
             assert(iel);
@@ -693,7 +693,7 @@ static int regnor(MMG5_pMesh mesh) {
             nx = ny = nz = 0.0;
             for (i=1; i<=ilist; i++) {
                 p0  = &mesh->point[list[i]];
-                if ( p0->tag > MS_REF )  continue;
+                if ( p0->tag > MG_REF )  continue;
                 nx += p0->n[0];
                 ny += p0->n[1];
                 nz += p0->n[2];
@@ -718,7 +718,7 @@ static int regnor(MMG5_pMesh mesh) {
         nn  = 0;
         for (k=1; k<=mesh->np; k++) {
             ppt = &mesh->point[k];
-            if ( !MS_VOK(ppt) || ppt->tag > MS_REF )  continue;
+            if ( !MG_VOK(ppt) || ppt->tag > MG_REF )  continue;
 
             iel = ppt->s;
             assert(iel);

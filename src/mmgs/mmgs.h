@@ -38,6 +38,7 @@
 #include "eigenv.h"
 #include "memory.h"
 #include "libmmg.h"
+#include "mmg.h"
 
 /* numerical accuracy */
 #define ATHIRD    0.333333333333333
@@ -69,10 +70,8 @@
 #endif
 
 
-#define MS_VOK(ppt)      (ppt && (ppt->tag < MS_NUL))
-#define MS_EOK(pt)       (pt && (pt->v[0] > 0))
-#define MS_EDG(tag)      ((tag & MS_GEO) || (tag & MS_REF))
-#define MS_SIN(tag)      ((tag & MS_CRN) || (tag & MS_REQ) || (tag & MS_NOM))
+#define MS_EDG(tag)      ((tag & MG_GEO) || (tag & MG_REF))
+#define MS_SIN(tag)      ((tag & MG_CRN) || (tag & MG_REQ) || (tag & MG_NOM))
 
 #define MS_SET(flag,bit) ((flag) |= (1 << (bit)))
 #define MS_CLR(flag,bit) ((flag) &= ~(1 << (bit)))
@@ -83,6 +82,7 @@
 
 extern unsigned char inxt[3];
 extern unsigned char iprv[3];
+
 
 /* prototypes */
 int  loadMesh(MMG5_pMesh );
@@ -115,8 +115,8 @@ void delPt(MMG5_pMesh mesh,int ip);
 int  newElt(MMG5_pMesh mesh);
 void delElt(MMG5_pMesh mesh,int iel);
 int  chkedg(MMG5_pMesh ,int );
-int  bezierCP(MMG5_pMesh ,int ,pBezier );
-int  bezierInt(pBezier ,double *,double *,double *,double *);
+int  bezierCP(MMG5_pMesh ,int ,_MMG5_pBezier );
+int  bezierInt(_MMG5_pBezier ,double *,double *,double *,double *);
 void bezierEdge(MMG5_pMesh mesh,int i0,int i1,double b0[3],double b1[3],char isrid,double v[3]);
 int  split1(MMG5_pMesh mesh,MMG5_pSol met,int k,int i,int *vx);
 int  split2(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx);

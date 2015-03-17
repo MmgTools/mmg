@@ -381,7 +381,7 @@ int loadMesh(MMG5_pMesh mesh) {
                 if(iswp) ppt->ref=swapbin(ppt->ref);
             }
         }
-        ppt->tag = MS_NUL;
+        ppt->tag = MG_NUL;
     }
 
     /* read triangles and set seed */
@@ -401,7 +401,7 @@ int loadMesh(MMG5_pMesh mesh) {
         }
         for (i=0; i<3; i++) {
             ppt = &mesh->point[pt1->v[i]];
-            ppt->tag &= ~MS_NUL;
+            ppt->tag &= ~MG_NUL;
         }
     }
     /* read quads */
@@ -432,9 +432,9 @@ int loadMesh(MMG5_pMesh mesh) {
             pt2->ref  = pt1->ref;
             for (i=0; i<3; i++) {
                 ppt = &mesh->point[pt1->v[i]];
-                ppt->tag &= ~MS_NUL;
+                ppt->tag &= ~MG_NUL;
                 ppt = &mesh->point[pt2->v[i]];
-                ppt->tag &= ~MS_NUL;
+                ppt->tag &= ~MG_NUL;
             }
         }
         mesh->nt = mesh->nti;
@@ -454,7 +454,7 @@ int loadMesh(MMG5_pMesh mesh) {
                 fprintf(stdout,"   Warning Corner number %8d IGNORED\n",i);
             } else {
                 ppt = &mesh->point[i];
-                ppt->tag |= MS_CRN;
+                ppt->tag |= MG_CRN;
             }
         }
     }
@@ -474,7 +474,7 @@ int loadMesh(MMG5_pMesh mesh) {
                 fprintf(stdout,"   Warning Required Vertices number %8d IGNORED\n",i);
             } else {
                 ppt = &mesh->point[i];
-                ppt->tag |= MS_REQ;
+                ppt->tag |= MG_REQ;
             }
         }
     }
@@ -496,9 +496,9 @@ int loadMesh(MMG5_pMesh mesh) {
                 fread(&mesh->edge[k].ref,sw,1,inm);
                 if(iswp) mesh->edge[k].ref=swapbin(mesh->edge[k].ref);
             }
-            mesh->edge[k].tag |= MS_REF;
-            mesh->point[mesh->edge[k].a].tag |= MS_REF;
-            mesh->point[mesh->edge[k].b].tag |= MS_REF;
+            mesh->edge[k].tag |= MG_REF;
+            mesh->point[mesh->edge[k].a].tag |= MG_REF;
+            mesh->point[mesh->edge[k].b].tag |= MG_REF;
         }
 
         if ( nri ) {
@@ -511,7 +511,7 @@ int loadMesh(MMG5_pMesh mesh) {
                     fread(&ia,sw,1,inm);
                     if(iswp) ia=swapbin(ia);
                 }
-                if ( ia > 0 && ia <= mesh->na )  mesh->edge[ia].tag |= MS_GEO;
+                if ( ia > 0 && ia <= mesh->na )  mesh->edge[ia].tag |= MG_GEO;
             }
         }
         if ( nedreq ) {
@@ -524,7 +524,7 @@ int loadMesh(MMG5_pMesh mesh) {
                     fread(&ia,sw,1,inm);
                     if(iswp) ia=swapbin(ia);
                 }
-                if ( ia > 0 && ia <= mesh->na )   mesh->edge[ia].tag |= MS_REQ;
+                if ( ia > 0 && ia <= mesh->na )   mesh->edge[ia].tag |= MG_REQ;
             }
         }
         /* set tria edges tags */
@@ -663,11 +663,11 @@ int saveMesh(MMG5_pMesh mesh) {
     for (k=1; k<=mesh->np; k++) {
         ppt = &mesh->point[k];
         ppt->tmp = 0;
-        if ( MS_VOK(ppt) ) {
+        if ( MG_VOK(ppt) ) {
             np++;
             ppt->tmp = np;
-            if ( ppt->tag & MS_CRN )  nc++;
-            if ( ppt->tag & MS_REQ )  nre++;
+            if ( ppt->tag & MG_CRN )  nc++;
+            if ( ppt->tag & MG_REQ )  nre++;
             if ( MS_EDG(ppt->tag) )   ng++;
         }
     }
@@ -685,7 +685,7 @@ int saveMesh(MMG5_pMesh mesh) {
     }
     for (k=1; k<=mesh->np; k++) {
         ppt = &mesh->point[k];
-        if ( MS_VOK(ppt) ) {
+        if ( MG_VOK(ppt) ) {
             if(!bin) {
                 fprintf(inm,"%.15lg %.15lg %.15lg %d\n",ppt->c[0],ppt->c[1],ppt->c[2],abs(ppt->ref));
             } else {
@@ -695,14 +695,14 @@ int saveMesh(MMG5_pMesh mesh) {
                 ppt->ref = abs(ppt->ref);
                 fwrite((unsigned char*)&ppt->ref,sw,1,inm);
             }
-            if ( !(ppt->tag & MS_GEO) )  nn++;
+            if ( !(ppt->tag & MG_GEO) )  nn++;
         }
     }
 
     nt = na = nr = 0;
     for (k=1; k<=mesh->nt; k++) {
         pt = &mesh->tria[k];
-        if ( MS_EOK(pt) ) {
+        if ( MG_EOK(pt) ) {
             nt++;
             for (i=0; i<3; i++)
                 if ( MS_EDG(pt->tag[i]) )  na++;
@@ -730,7 +730,7 @@ int saveMesh(MMG5_pMesh mesh) {
     na = 0;
     for (k=1; k<=mesh->nt; k++) {
         pt = &mesh->tria[k];
-        if ( MS_EOK(pt) ) {
+        if ( MG_EOK(pt) ) {
             if(!bin) {
                 fprintf(inm,"%d %d %d %d\n",mesh->point[pt->v[0]].tmp,mesh->point[pt->v[1]].tmp
                         ,mesh->point[pt->v[2]].tmp,pt->ref);
@@ -753,7 +753,7 @@ int saveMesh(MMG5_pMesh mesh) {
                     edge[na].b    = mesh->point[pt->v[i2]].tmp;
                     edge[na].ref  = pt->edg[i];
                     edge[na].tag |= pt->tag[i];
-                    if ( pt->tag[i] & MS_GEO )  nr++;
+                    if ( pt->tag[i] & MG_GEO )  nr++;
                 }
             }
         }
@@ -774,7 +774,7 @@ int saveMesh(MMG5_pMesh mesh) {
         }
         for (k=1; k<=mesh->np; k++) {
             ppt = &mesh->point[k];
-            if ( MS_VOK(ppt) && ppt->tag & MS_CRN ) {
+            if ( MG_VOK(ppt) && ppt->tag & MG_CRN ) {
                 if(!bin) {
                     fprintf(inm,"%d \n",ppt->tmp);
                 } else {
@@ -797,7 +797,7 @@ int saveMesh(MMG5_pMesh mesh) {
         }
         for (k=1; k<=mesh->np; k++) {
             ppt = &mesh->point[k];
-            if ( MS_VOK(ppt) && ppt->tag & MS_REQ ) {
+            if ( MG_VOK(ppt) && ppt->tag & MG_REQ ) {
                 if(!bin) {
                     fprintf(inm,"%d \n",ppt->tmp);
                 } else {
@@ -829,7 +829,7 @@ int saveMesh(MMG5_pMesh mesh) {
                 fwrite(&edge[k].b,sw,1,inm);
                 fwrite(&edge[k].ref,sw,1,inm);
             }
-            if ( edge[k].tag & MS_REQ )  nre++;
+            if ( edge[k].tag & MG_REQ )  nre++;
         }
         /* ridges */
         if ( nr ) {
@@ -845,7 +845,7 @@ int saveMesh(MMG5_pMesh mesh) {
                 fwrite(&nr,sw,1,inm);
             }
             for (k=1; k<=na; k++) {
-                if ( edge[k].tag & MS_GEO ) {
+                if ( edge[k].tag & MG_GEO ) {
                     if(!bin) {
                         fprintf(inm,"%d \n",k);
                     } else {
@@ -867,7 +867,7 @@ int saveMesh(MMG5_pMesh mesh) {
                 fwrite(&nre,sw,1,inm);
             }
             for (k=1; k<=na; k++)
-                if ( edge[k].tag & MS_REQ )  {
+                if ( edge[k].tag & MG_REQ )  {
                     if(!bin) {
                         fprintf(inm,"%d \n",k);
                     } else {
@@ -893,9 +893,9 @@ int saveMesh(MMG5_pMesh mesh) {
         }
         for (k=1; k<=mesh->np; k++) {
             ppt = &mesh->point[k];
-            if ( !MS_VOK(ppt) )  continue;
-            else if ( !(ppt->tag & MS_GEO) ) {
-                if ( ppt->tag & MS_REF ) {
+            if ( !MG_VOK(ppt) )  continue;
+            else if ( !(ppt->tag & MG_GEO) ) {
+                if ( ppt->tag & MG_REF ) {
                     go = &mesh->xpoint[ppt->ig];
                     if(!bin) {
                         fprintf(inm,"%.15lg %.15lg %.15lg \n",go->n1[0],go->n1[1],go->n1[2]);
@@ -930,7 +930,7 @@ int saveMesh(MMG5_pMesh mesh) {
         nn = 0;
         for (k=1; k<=mesh->np; k++) {
             ppt = &mesh->point[k];
-            if ( MS_VOK(ppt) && !(ppt->tag & MS_GEO) ) {
+            if ( MG_VOK(ppt) && !(ppt->tag & MG_GEO) ) {
                 if(!bin) {
                     fprintf(inm,"%d %d\n",ppt->tmp,++nn);
                 } else {
@@ -944,19 +944,19 @@ int saveMesh(MMG5_pMesh mesh) {
   nn = 0;
   for (k=1; k<=mesh->nt; k++) {
   pt = &mesh->tria[k];
-  if ( !MS_EOK(pt) )  continue;
+  if ( !MG_EOK(pt) )  continue;
   for (i=0; i<3; i++) {
   ppt = &mesh->point[pt->v[i]];
-  if ( ppt->tag & MS_GEO )  nn++;
+  if ( ppt->tag & MG_GEO )  nn++;
   }
   }
   GmfSetKwd(outm,GmfNormalAtTriangleVertices,nn);
   for (k=1; k<=mesh->nt; k++) {
   pt = &mesh->tria[k];
-  if ( !MS_EOK(pt) )  continue;
+  if ( !MG_EOK(pt) )  continue;
   for (i=0; i<3; i++) {
   ppt = &mesh->point[pt->v[i]];
-  if ( ppt->tag & MS_GEO )  nn++;
+  if ( ppt->tag & MG_GEO )  nn++;
   }
 */
     }
@@ -977,7 +977,7 @@ int saveMesh(MMG5_pMesh mesh) {
         }
         for (k=1; k<=mesh->np; k++) {
             ppt = &mesh->point[k];
-            if ( MS_VOK(ppt) && MS_EDG(ppt->tag) ) {
+            if ( MG_VOK(ppt) && MS_EDG(ppt->tag) ) {
                 if(!bin) {
                     fprintf(inm,"%.15lg %.15lg %.15lg \n",ppt->n[0],ppt->n[1],ppt->n[2]);
                 } else {
@@ -1001,7 +1001,7 @@ int saveMesh(MMG5_pMesh mesh) {
         ng = 0;
         for (k=1; k<=mesh->np; k++) {
             ppt = &mesh->point[k];
-            if ( MS_VOK(ppt) && MS_EDG(ppt->tag) ) {
+            if ( MG_VOK(ppt) && MS_EDG(ppt->tag) ) {
                 if(!bin) {
                     fprintf(inm,"%d %d\n",ppt->tmp,++ng);
                 } else {
@@ -1276,7 +1276,7 @@ int saveMet(MMG5_pMesh mesh,MMG5_pSol met) {
     np = 0;
     for (k=1; k<=mesh->np; k++) {
         ppt = &mesh->point[k];
-        if ( MS_VOK(ppt) )  np++;
+        if ( MG_VOK(ppt) )  np++;
     }
 
     if(met->size==1) {
@@ -1306,7 +1306,7 @@ int saveMet(MMG5_pMesh mesh,MMG5_pSol met) {
     if ( met->size == 1 ) {
         for (k=1; k<=mesh->np; k++) {
             ppt = &mesh->point[k];
-            if ( MS_VOK(ppt) ) {
+            if ( MG_VOK(ppt) ) {
                 dbuf[0] = met->m[k];
                 if(!bin) {
                     fprintf(inm,"%.15lg \n",dbuf[0]);
@@ -1320,7 +1320,7 @@ int saveMet(MMG5_pMesh mesh,MMG5_pSol met) {
     else {
         for (k=1; k<=mesh->np; k++) {
             ppt = &mesh->point[k];
-            if ( MS_VOK(ppt) ) {
+            if ( MG_VOK(ppt) ) {
                 for (i=0; i<met->size; i++)  dbuf[i] = met->m[met->size*(k)+1+i];
                 tmp = dbuf[2];
                 dbuf[2] = dbuf[3];

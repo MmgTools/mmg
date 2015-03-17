@@ -132,7 +132,7 @@ int buildridmetnor(MMG5_pMesh mesh,MMG5_pSol met,int np0,double nt[3],double mr[
     double ps1,ps2,*n1,*n2,*t,*m,dv,u[3],r[3][3];
 
     p0 = &mesh->point[np0];
-    if ( !(MS_GEO & p0->tag) )  return(0);
+    if ( !(MG_GEO & p0->tag) )  return(0);
     m = &met->m[6*(np0)+1];
     t = &p0->n[0];
     go = &mesh->xpoint[p0->ig];
@@ -178,7 +178,7 @@ int buildridmet(MMG5_pMesh mesh,MMG5_pSol met,int np0,double ux,double uy,double
     double ps1,ps2,*n1,*n2,*t,*m,dv,u[3],r[3][3];
 
     p0 = &mesh->point[np0];
-    if ( !(MS_GEO & p0->tag) )  return(0);
+    if ( !(MG_GEO & p0->tag) )  return(0);
     m = &met->m[6*(np0)+1];
     t = &p0->n[0];
     go = &mesh->xpoint[p0->ig];
@@ -244,7 +244,7 @@ double lenedg_ani(MMG5_pMesh mesh,MMG5_pSol met,int np0,int np1,char isedg) {
         gammaprim0[2] = ps1*t[2];
     }
     else {
-        if ( MS_GEO & p0->tag ) {
+        if ( MG_GEO & p0->tag ) {
             //assert(p0->ig);
             n1 = &mesh->xpoint[p0->ig].n1[0];
             n2 = &mesh->xpoint[p0->ig].n2[0];
@@ -256,7 +256,7 @@ double lenedg_ani(MMG5_pMesh mesh,MMG5_pSol met,int np0,int np1,char isedg) {
                 ps1 = ps2;
             }
         }
-        else if ( MS_REF & p0->tag ) {
+        else if ( MG_REF & p0->tag ) {
             n1  = &mesh->xpoint[p0->ig].n1[0];
             ps1 = ux*n1[0] + uy*n1[1] + uz*n1[2];
         }
@@ -282,7 +282,7 @@ double lenedg_ani(MMG5_pMesh mesh,MMG5_pSol met,int np0,int np1,char isedg) {
         gammaprim1[2] = ps1*t[2];
     }
     else {
-        if ( MS_GEO & p1->tag ) {
+        if ( MG_GEO & p1->tag ) {
             n1 = &mesh->xpoint[p1->ig].n1[0];
             n2 = &mesh->xpoint[p1->ig].n2[0];
             ps1 = -ux*n1[0] - uy*n1[1] - uz*n1[2];
@@ -293,7 +293,7 @@ double lenedg_ani(MMG5_pMesh mesh,MMG5_pSol met,int np0,int np1,char isedg) {
                 ps1 = ps2;
             }
         }
-        else if ( MS_REF & p1->tag ) {
+        else if ( MG_REF & p1->tag ) {
             n1  = &mesh->xpoint[p1->ig].n1[0];
             ps1 = - ux*n1[0] - uy*n1[1] - uz*n1[2];
         }
@@ -310,7 +310,7 @@ double lenedg_ani(MMG5_pMesh mesh,MMG5_pSol met,int np0,int np1,char isedg) {
     if ( MS_SIN(p0->tag) ) {
         m0 = &met->m[6*(np0)+1];
     }
-    else if ( MS_GEO & p0->tag ) {
+    else if ( MG_GEO & p0->tag ) {
         if ( !buildridmet(mesh,met,np0,ux,uy,uz,met0) )  return(-1.0);
         m0 = met0;
     }
@@ -321,7 +321,7 @@ double lenedg_ani(MMG5_pMesh mesh,MMG5_pSol met,int np0,int np1,char isedg) {
     if ( MS_SIN(p1->tag) ) {
         m1 = &met->m[6*(np1)+1];
     }
-    else if ( MS_GEO & p1->tag ) {
+    else if ( MG_GEO & p1->tag ) {
         if ( !buildridmet(mesh,met,np1,ux,uy,uz,met1) )  return(-1.0);
         m1 = met1;
     }
@@ -348,7 +348,7 @@ double lenedg_ani(MMG5_pMesh mesh,MMG5_pSol met,int np0,int np1,char isedg) {
 double surftri_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel) {
     MMG5_pTria     pt;
     MMG5_pPoint    p[3];
-    Bezier    b;
+    _MMG5_Bezier    b;
     int       np[3];
     double    surf,ux,uy,uz,dens,m[3][6],J[3][2],mJ[3][2],tJmJ[2][2];
     char      i,i1,i2;
@@ -373,7 +373,7 @@ double surftri_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel) {
         if ( MS_SIN(p[i]->tag) ) {
             memcpy(&m[i][0],&met->m[6*np[i]+1],6*sizeof(double));
         }
-        else if ( p[i]->tag & MS_GEO ) {
+        else if ( p[i]->tag & MG_GEO ) {
             if ( !buildridmet(mesh,met,np[i],ux,uy,uz,&m[i][0]) )  return(0.0);
         }
         else {
@@ -498,10 +498,10 @@ static int intersecmet22(MMG5_pMesh mesh, double *m,double *n,double *mr) {
         vp1[1] *= vnorm;
 
         /* Eigenvalues of the resulting matrix*/
-        dn[0] = MS_MAX(dm[0],lambda[0]*dm[0]);
-        dn[0] = MS_MIN(isqhmin,MS_MAX(isqhmax,dn[0]));
-        dn[1] = MS_MAX(dm[1],lambda[0]*dm[1]);
-        dn[1] = MS_MIN(isqhmin,MS_MAX(isqhmax,dn[1]));
+        dn[0] = MG_MAX(dm[0],lambda[0]*dm[0]);
+        dn[0] = MG_MIN(isqhmin,MG_MAX(isqhmax,dn[0]));
+        dn[1] = MG_MAX(dm[1],lambda[0]*dm[1]);
+        dn[1] = MG_MIN(isqhmin,MG_MAX(isqhmax,dn[1]));
 
         /* Intersected metric = P diag(d0,d1){^t}P, P = (vp0, vp1) stored in columns */
         mr[0] = dn[0]*vp0[0]*vp0[0] + dn[1]*vp1[0]*vp1[0];
@@ -552,11 +552,11 @@ static int intersecmet22(MMG5_pMesh mesh, double *m,double *n,double *mr) {
         dn[1] = n[0]*vp1[0]*vp1[0] + 2.0*n[1]*vp1[0]*vp1[1] + n[2]*vp1[1]*vp1[1];
 
         /* Diagonal values of the intersected metric */
-        d0 = MS_MAX(dm[0],dn[0]);
-        d0 = MS_MIN(isqhmin,MS_MAX(d0,isqhmax));
+        d0 = MG_MAX(dm[0],dn[0]);
+        d0 = MG_MIN(isqhmin,MG_MAX(d0,isqhmax));
 
-        d1 = MS_MAX(dm[1],dn[1]);
-        d1 = MS_MIN(isqhmin,MS_MAX(d1,isqhmax));
+        d1 = MG_MAX(dm[1],dn[1]);
+        d1 = MG_MIN(isqhmin,MG_MAX(d1,isqhmax));
 
         /* Intersected metric = tP^-1 diag(d0,d1)P^-1, P = (vp0, vp1) stored in columns */
         det = vp0[0]*vp1[1] - vp0[1]*vp1[0];
@@ -605,24 +605,24 @@ int intextmet(MMG5_pMesh mesh,MMG5_pSol met,int np,double me[6]) {
             if( cimag(ro[i]) != 0.0 )
                 break;
             else
-                hu = MS_MAX(hu,creal(ro[i]));
+                hu = MG_MAX(hu,creal(ro[i]));
         }
-        hu = MS_MIN(isqhmin,hu);
-        hu = MS_MAX(isqhmax,hu);
+        hu = MG_MIN(isqhmin,hu);
+        hu = MG_MAX(isqhmax,hu);
         m[0] = hu;
         m[3] = hu;
         m[5] = hu;
     }
     /* Case of a ridge point : take sizes in 3 directions t,n1,u */
-    else if ( p0->tag & MS_GEO ) {
+    else if ( p0->tag & MG_GEO ) {
         /* Size prescribed by metric me in direction t */
         t = &p0->n[0];
         hu = me[0]*t[0]*t[0] + me[3]*t[1]*t[1] + me[5]*t[2]*t[2] \
             + 2.0*me[1]*t[0]*t[1] + 2.0*me[2]*t[0]*t[2] + 2.0*me[4]*t[1]*t[2];
 
-        hu = MS_MIN(isqhmin,hu);
-        hu = MS_MAX(isqhmax,hu);
-        m[0] = MS_MAX(m[0],hu);
+        hu = MG_MIN(isqhmin,hu);
+        hu = MG_MAX(isqhmax,hu);
+        m[0] = MG_MAX(m[0],hu);
 
         /* Size prescribed by metric me in direction u1 = n1 ^ t */
         assert ( p0->ig );
@@ -644,9 +644,9 @@ int intextmet(MMG5_pMesh mesh,MMG5_pSol met,int np,double me[6]) {
         hu = me[0]*u[0]*u[0] + me[3]*u[1]*u[1] + me[5]*u[2]*u[2] \
             + 2.0*me[1]*u[0]*u[1] + 2.0*me[2]*u[0]*u[2] + 2.0*me[4]*u[1]*u[2];
 
-        hu = MS_MIN(isqhmin,hu);
-        hu = MS_MAX(isqhmax,hu);
-        m[1] = MS_MAX(m[1],hu);
+        hu = MG_MIN(isqhmin,hu);
+        hu = MG_MAX(isqhmax,hu);
+        m[1] = MG_MAX(m[1],hu);
 
         /* Size prescribed by metric me in direction u1 = n1 ^ t */
         u[0] = n2[1]*t[2] - n2[2]*t[1];
@@ -663,9 +663,9 @@ int intextmet(MMG5_pMesh mesh,MMG5_pSol met,int np,double me[6]) {
         hu =     me[0]*u[0]*u[0] +     me[3]*u[1]*u[1] +     me[5]*u[2]*u[2] \
             + 2.0*me[1]*u[0]*u[1] + 2.0*me[2]*u[0]*u[2] + 2.0*me[4]*u[1]*u[2];
 
-        hu = MS_MIN(isqhmin,hu);
-        hu = MS_MAX(isqhmax,hu);
-        m[2] = MS_MAX(m[2],hu);
+        hu = MG_MIN(isqhmin,hu);
+        hu = MG_MAX(isqhmax,hu);
+        m[2] = MG_MAX(m[2],hu);
     }
     /* Case of a ref, or regular point : intersect metrics in tangent plane */
     else {

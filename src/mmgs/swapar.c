@@ -74,7 +74,7 @@ int chkswp(MMG5_pMesh mesh,MMG5_pSol met,int k,int i,char typchk) {
     if ( typchk == 2 && met->m ) {
         loni = lenedg(mesh,met,ip1,ip2,0);
         lona = lenedg(mesh,met,ip0,iq,0);
-        if ( loni > 1.0 )  loni = MS_MIN(1.0 / loni,LSHRT);
+        if ( loni > 1.0 )  loni = MG_MIN(1.0 / loni,LSHRT);
         if ( lona > 1.0 )  lona = 1.0 / lona;
         if ( lona < loni )  return(0);
     }
@@ -159,7 +159,7 @@ int chkswp(MMG5_pMesh mesh,MMG5_pSol met,int k,int i,char typchk) {
     cosn2 *= (1.0-cosn2);
     cosn2 *= (0.25*ll);
 
-    cosnat = MS_MAX(fabs(cosn1),fabs(cosn2));
+    cosnat = MG_MAX(fabs(cosn1),fabs(cosn2));
     cosnat = cosnat < EPS ? 0.0 : cosnat;
 
     /* Estimate of the Hausdorff distance between approximation and underlying surface
@@ -199,7 +199,7 @@ int chkswp(MMG5_pMesh mesh,MMG5_pSol met,int k,int i,char typchk) {
     cosn2 *= (1.0-cosn2);
     cosn2 *= (0.25*ll);
 
-    coschg = MS_MAX(fabs(cosn1),fabs(cosn2));
+    coschg = MG_MAX(fabs(cosn1),fabs(cosn2));
     coschg = coschg < EPS ? 0.0 : coschg;
 
     /* swap if Hausdorff contribution of the swapped edge is less than existing one */
@@ -211,24 +211,24 @@ int chkswp(MMG5_pMesh mesh,MMG5_pSol met,int k,int i,char typchk) {
         cal1 = calelt(mesh,met,0);
         pt0->v[0]= ip1;  pt0->v[1]= iq;   pt0->v[2]= ip2;
         cal2 = calelt(mesh,met,0);
-        calnat = MS_MIN(cal1,cal2);
+        calnat = MG_MIN(cal1,cal2);
         pt0->v[0]= ip0;  pt0->v[1]= ip1;  pt0->v[2]= iq;
         cal1 = calelt(mesh,met,0);
         pt0->v[0]= ip0;  pt0->v[1]= iq;   pt0->v[2]= ip2;
         cal2 = calelt(mesh,met,0);
-        calchg = MS_MIN(cal1,cal2);
+        calchg = MG_MIN(cal1,cal2);
     }
     else {
         pt0->v[0]= ip0;  pt0->v[1]= ip1;  pt0->v[2]= ip2;
         cal1 = calelt_iso(mesh,met,0);
         pt0->v[0]= ip1;  pt0->v[1]= iq;   pt0->v[2]= ip2;
         cal2 = calelt_iso(mesh,met,0);
-        calnat = MS_MIN(cal1,cal2);
+        calnat = MG_MIN(cal1,cal2);
         pt0->v[0]= ip0;  pt0->v[1]= ip1;  pt0->v[2]= iq;
         cal1 = calelt_iso(mesh,met,0);
         pt0->v[0]= ip0;  pt0->v[1]= iq;   pt0->v[2]= ip2;
         cal2 = calelt_iso(mesh,met,0);
-        calchg = MS_MIN(cal1,cal2);
+        calchg = MG_MIN(cal1,cal2);
     }
     return(calchg > 1.01 * calnat);
 }
@@ -300,7 +300,7 @@ int litswp(MMG5_pMesh mesh,int k,char i,double kali) {
 
     pt0 = &mesh->tria[0];
     pt  = &mesh->tria[k];
-    if ( !MS_EOK(pt) || MS_EDG(pt->tag[i]) )  return(0);
+    if ( !MG_EOK(pt) || MS_EDG(pt->tag[i]) )  return(0);
 
     i1 = inxt[i];
     i2 = iprv[i];
@@ -328,12 +328,12 @@ int litswp(MMG5_pMesh mesh,int k,char i,double kali) {
     /* check quality */
     pt0->v[0] = id;  pt0->v[1] = ic;  pt0->v[2] = ib;
     kalt = calelt(mesh,NULL,0);
-    kali = MS_MIN(kali,kalt);
+    kali = MG_MIN(kali,kalt);
     pt0->v[0] = ia;  pt0->v[1] = id;  pt0->v[2] = ic;
     kalt = calelt(mesh,NULL,0);
     pt0->v[0] = ia;  pt0->v[1] = ib;  pt0->v[2] = id;
     kalf = calelt(mesh,NULL,0);
-    kalf = MS_MIN(kalf,kalt);
+    kalf = MG_MIN(kalf,kalt);
     if ( kalf > 1.02 * kali ) {
         swapar(mesh,k,i);
         return(1);

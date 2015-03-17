@@ -47,7 +47,7 @@ int newPt(MMG5_pMesh mesh,double c[3],double n[3]) {
     ppt   = &mesh->point[curpt];
     memcpy(ppt->c,c,3*sizeof(double));
     memcpy(ppt->n,n,3*sizeof(double));
-    ppt->tag   &= ~MS_NUL;
+    ppt->tag   &= ~MG_NUL;
     mesh->npnil = ppt->tmp;
     ppt->tmp    = 0;
 
@@ -59,11 +59,11 @@ void delPt(MMG5_pMesh mesh,int ip) {
 
     ppt = &mesh->point[ip];
     memset(ppt,0,sizeof(MMG5_Point));
-    ppt->tag    = MS_NUL;
+    ppt->tag    = MG_NUL;
     ppt->tmp    = mesh->npnil;
     mesh->npnil = ip;
     if ( ip == mesh->np ) {
-        while ( !MS_VOK((&mesh->point[mesh->np])) )  mesh->np--;
+        while ( !MG_VOK((&mesh->point[mesh->np])) )  mesh->np--;
     }
 }
 
@@ -84,7 +84,7 @@ void delElt(MMG5_pMesh mesh,int iel) {
     MMG5_pTria    pt;
 
     pt = &mesh->tria[iel];
-    if ( !MS_EOK(pt) ) {
+    if ( !MG_EOK(pt) ) {
         fprintf(stdout,"  ## INVALID ELEMENT: %d.\n",iel);
         return;
     }
@@ -94,7 +94,7 @@ void delElt(MMG5_pMesh mesh,int iel) {
         memset(&mesh->adja[3*(iel-1)+1],0,3*sizeof(int));
     mesh->ntnil = iel;
     if ( iel == mesh->nt ) {
-        while ( !MS_EOK((&mesh->tria[mesh->nt])) )  mesh->nt--;
+        while ( !MG_EOK((&mesh->tria[mesh->nt])) )  mesh->nt--;
     }
 }
 
@@ -104,16 +104,16 @@ int zaldy(MMG5_pMesh mesh) {
     int     k,npask,bytes;
 
     if ( mesh->info.mem < 0 ) {
-        mesh->npmax = MS_MAX(1.5*mesh->np,NPMAX);
-        mesh->ntmax = MS_MAX(1.5*mesh->nt,NTMAX);
+        mesh->npmax = MG_MAX(1.5*mesh->np,NPMAX);
+        mesh->ntmax = MG_MAX(1.5*mesh->nt,NTMAX);
     }
     else {
         /* point+tria+adja */
         bytes = sizeof(MMG5_Point) + 2*sizeof(MMG5_Tria) + 3*sizeof(int);
 
         npask = (int)((double)mesh->info.mem / bytes * million);
-        mesh->npmax = MS_MAX(1.5*mesh->np,npask);
-        mesh->ntmax = MS_MAX(1.5*mesh->nt,2*npask);
+        mesh->npmax = MG_MAX(1.5*mesh->np,npask);
+        mesh->ntmax = MG_MAX(1.5*mesh->nt,2*npask);
     }
 
     mesh->point = (MMG5_pPoint)calloc(mesh->npmax+1,sizeof(MMG5_Point));

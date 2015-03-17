@@ -87,7 +87,7 @@ int defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
 
     for (k=1; k<=mesh->nt; k++) {
         pt = &mesh->tria[k];
-        if ( !MS_EOK(pt) )  continue;
+        if ( !MG_EOK(pt) )  continue;
 
         p[0] = &mesh->point[pt->v[0]];
         p[1] = &mesh->point[pt->v[1]];
@@ -170,7 +170,7 @@ int defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
 
                 M1 = 6.0 * sqrt(M1);
                 M2 = 6.0 * sqrt(M2);
-                M1 = MS_MAX(M1,M2);
+                M1 = MG_MAX(M1,M2);
 
                 if ( M1 < EPSD )
                     lm = MAXLEN;
@@ -178,8 +178,8 @@ int defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
                     lm = (16.0*ll*mesh->info.hausd) / (3.0*M1);
                     lm = sqrt(lm);
                 }
-                met->m[ip1] = MS_MAX(mesh->info.hmin,MS_MIN(met->m[ip1],lm));
-                met->m[ip2] = MS_MAX(mesh->info.hmin,MS_MIN(met->m[ip2],lm));
+                met->m[ip1] = MG_MAX(mesh->info.hmin,MG_MIN(met->m[ip1],lm));
+                met->m[ip2] = MG_MAX(mesh->info.hmin,MG_MIN(met->m[ip2],lm));
             }
             else {
                 n1 = n[i1];
@@ -205,7 +205,7 @@ int defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
 
                 M1 = 6.0 * sqrt(M1);
                 M2 = 6.0 * sqrt(M2);
-                M1 = MS_MAX(M1,M2);
+                M1 = MG_MAX(M1,M2);
 
                 if ( M1 < EPSD )
                     lm = MAXLEN;
@@ -213,8 +213,8 @@ int defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
                     lm = (16.0*ll*mesh->info.hausd) / (3.0*M1);
                     lm = sqrt(lm);
                 }
-                met->m[ip1] = MS_MAX(mesh->info.hmin,MS_MIN(met->m[ip1],lm));
-                met->m[ip2] = MS_MAX(mesh->info.hmin,MS_MIN(met->m[ip2],lm));
+                met->m[ip1] = MG_MAX(mesh->info.hmin,MG_MIN(met->m[ip1],lm));
+                met->m[ip2] = MG_MAX(mesh->info.hmin,MG_MIN(met->m[ip2],lm));
             }
         }
     }
@@ -225,17 +225,17 @@ int defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
         if ( par->elt == MS_Ver ) {
             for (k=1; k<=mesh->np; k++) {
                 ppt = &mesh->point[k];
-                if ( !MS_VOK(ppt) || ppt->ref != par->ref )  continue;
-                met->m[k] = MS_MAX(par->hmin,MS_MIN(met->m[k],par->hmax));
+                if ( !MG_VOK(ppt) || ppt->ref != par->ref )  continue;
+                met->m[k] = MG_MAX(par->hmin,MG_MIN(met->m[k],par->hmax));
             }
         }
         else if ( par->elt == MS_Tri ) {
             for (k=1; k<=mesh->nt; k++) {
                 pt = &mesh->tria[k];
-                if ( !MS_EOK(pt) || pt->ref != par->ref )  continue;
-                met->m[pt->v[0]] = MS_MAX(par->hmin,MS_MIN(met->m[pt->v[0]],par->hmax));
-                met->m[pt->v[1]] = MS_MAX(par->hmin,MS_MIN(met->m[pt->v[1]],par->hmax));
-                met->m[pt->v[2]] = MS_MAX(par->hmin,MS_MIN(met->m[pt->v[2]],par->hmax));
+                if ( !MG_EOK(pt) || pt->ref != par->ref )  continue;
+                met->m[pt->v[0]] = MG_MAX(par->hmin,MG_MIN(met->m[pt->v[0]],par->hmax));
+                met->m[pt->v[1]] = MG_MAX(par->hmin,MG_MIN(met->m[pt->v[1]],par->hmax));
+                met->m[pt->v[2]] = MG_MAX(par->hmin,MG_MIN(met->m[pt->v[2]],par->hmax));
             }
         }
     }
@@ -265,7 +265,7 @@ int gradsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
         nu = 0;
         for (k=1; k<=mesh->nt; k++) {
             pt = &mesh->tria[k];
-            if ( !MS_EOK(pt) )  continue;
+            if ( !MG_EOK(pt) )  continue;
 
             for (i=0; i<3; i++) {
                 i1  = inxt[i];

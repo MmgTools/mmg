@@ -87,7 +87,7 @@ int chkedg(MMG5_pMesh mesh,int iel) {
             MS_SET(pt->flag,i);
             continue;
         }
-        else if ( !MS_EDG(pt->tag[i]) && p[i1]->tag > MS_NOTAG && p[i2]->tag > MS_NOTAG ) {
+        else if ( !MS_EDG(pt->tag[i]) && p[i1]->tag > MG_NOTAG && p[i2]->tag > MG_NOTAG ) {
             MS_SET(pt->flag,i);
             continue;
         }
@@ -188,7 +188,7 @@ static int swpmsh(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
         ns = 0;
         for (k=1; k<=mesh->nt; k++) {
             pt = &mesh->tria[k];
-            if ( !MS_EOK(pt) || pt->ref < 0 )   continue;
+            if ( !MG_EOK(pt) || pt->ref < 0 )   continue;
 
             for (i=0; i<3; i++) {
                 if ( MS_SIN(pt->tag[i]) || MS_EDG(pt->tag[i]) )  continue;
@@ -226,12 +226,12 @@ static int movtri(MMG5_pMesh mesh,MMG5_pSol met,int maxit) {
         nm = ns = 0;
         for (k=1; k<=mesh->nt; k++) {
             pt = &mesh->tria[k];
-            if ( !MS_EOK(pt) || pt->ref < 0 )   continue;
+            if ( !MG_EOK(pt) || pt->ref < 0 )   continue;
 
             for (i=0; i<3; i++) {
                 ppt = &mesh->point[pt->v[i]];
 
-                if ( ppt->flag == base || MS_SIN(ppt->tag) || ppt->tag & MS_NOM )
+                if ( ppt->flag == base || MS_SIN(ppt->tag) || ppt->tag & MG_NOM )
                     continue;
                 ier = 0;
                 ilist = boulet(mesh,k,i,list);
@@ -264,7 +264,7 @@ static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
     MMG5_pTria    pt;
     MMG5_pPoint   ppt,p1,p2;
     MMG5_HGeom     hash;
-    Bezier   pb;
+    _MMG5_Bezier   pb;
     MMG5_pxPoint    go;
     double   s,o[3],no[3],to[3],dd,len;
     int      vx[3],i,j,ip,ip1,ip2,ier,k,ns,nc,nt;
@@ -276,7 +276,7 @@ static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
     s  = 0.5;
     for (k=1; k<=mesh->nt; k++) {
         pt = &mesh->tria[k];
-        if ( !MS_EOK(pt) || pt->ref < 0 )  continue;
+        if ( !MG_EOK(pt) || pt->ref < 0 )  continue;
         if ( MS_SIN(pt->tag[0]) || MS_SIN(pt->tag[1]) || MS_SIN(pt->tag[2]) )  continue;
 
         /* check element cut */
@@ -348,7 +348,7 @@ static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
                         intmet(mesh,met,k,i,ip,s);
                 }
             }
-            else if ( pt->tag[i] & MS_GEO ) {
+            else if ( pt->tag[i] & MG_GEO ) {
                 ppt = &mesh->point[ip];
                 go  = &mesh->xpoint[ppt->ig];
                 memcpy(go->n2,no,3*sizeof(double));
@@ -375,7 +375,7 @@ static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
     /* step 2. checking if split by adjacent */
     for (k=1; k<=mesh->nt; k++) {
         pt = &mesh->tria[k];
-        if ( !MS_EOK(pt) || pt->ref < 0 )  continue;
+        if ( !MG_EOK(pt) || pt->ref < 0 )  continue;
         else if ( pt->flag == 7 )  continue;
 
         /* geometric support */
@@ -391,7 +391,7 @@ static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
                 if ( ip > 0 ) {
                     MS_SET(pt->flag,i);
                     nc++;
-                    if ( pt->tag[i] & MS_GEO ) {
+                    if ( pt->tag[i] & MG_GEO ) {
                         /* new point along edge */
                         ier = bezierInt(&pb,uv[i],o,no,to);
                         assert(ier);
@@ -427,7 +427,7 @@ static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
     nt = mesh->nt;
     for (k=1; k<=nt; k++) {
         pt = &mesh->tria[k];
-        if ( !MS_EOK(pt) || pt->ref < 0 )  continue;
+        if ( !MG_EOK(pt) || pt->ref < 0 )  continue;
         else if ( pt->flag == 0 )  continue;
 
         j  = -1;
@@ -469,7 +469,7 @@ int chkspl(MMG5_pMesh mesh,MMG5_pSol met,int k,int i) {
     MMG5_pTria    pt,pt1;
     MMG5_pPoint   ppt;
     MMG5_pxPoint    go;
-    Bezier   b;
+    _MMG5_Bezier   b;
     double   s,uv[2],o[3],no[3],to[3];
     int     *adja,jel,ip,ier;
     char     i1,i2,j,jj,j2;
@@ -528,7 +528,7 @@ static int colelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
     nc = 0;
     for (k=1; k<=mesh->nt; k++) {
         pt = &mesh->tria[k];
-        if ( !MS_EOK(pt) || pt->ref < 0 )   continue;
+        if ( !MG_EOK(pt) || pt->ref < 0 )   continue;
 
         /* check edge length */
         pt->flag = 0;
@@ -540,7 +540,7 @@ static int colelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
             i2 = iprv[i];
             p1 = &mesh->point[pt->v[i1]];
             p2 = &mesh->point[pt->v[i2]];
-            if ( p1->tag & MS_NOM || p2->tag & MS_NOM )  continue;
+            if ( p1->tag & MG_NOM || p2->tag & MG_NOM )  continue;
             else if ( MS_SIN(p1->tag) )   continue;
             else if ( p1->tag > p2->tag || p1->tag > pt->tag[i] )  continue;
 
@@ -589,7 +589,7 @@ static int adpspl(MMG5_pMesh mesh,MMG5_pSol met) {
     ns = 0;
     for (k=1; k<=mesh->nt; k++) {
         pt = &mesh->tria[k];
-        if ( !MS_EOK(pt) || pt->ref < 0 )   continue;
+        if ( !MG_EOK(pt) || pt->ref < 0 )   continue;
 
         /* check edge length */
         pt->flag = 0;
@@ -612,7 +612,7 @@ static int adpspl(MMG5_pMesh mesh,MMG5_pSol met) {
         i2 = iprv[imax];
         p1 = &mesh->point[pt->v[i1]];
         p2 = &mesh->point[pt->v[i2]];
-        if ( p1->tag & MS_NOM || p2->tag & MS_NOM )  continue;
+        if ( p1->tag & MG_NOM || p2->tag & MG_NOM )  continue;
 
         ip = chkspl(mesh,met,k,imax);
         if ( ip > 0 )
@@ -632,7 +632,7 @@ static int adpcol(MMG5_pMesh mesh,MMG5_pSol met) {
     nc = 0;
     for (k=1; k<=mesh->nt; k++) {
         pt = &mesh->tria[k];
-        if ( !MS_EOK(pt) || pt->ref < 0 )   continue;
+        if ( !MG_EOK(pt) || pt->ref < 0 )   continue;
 
         /* check edge length */
         pt->flag = 0;
@@ -644,7 +644,7 @@ static int adpcol(MMG5_pMesh mesh,MMG5_pSol met) {
             i2 = iprv[i];
             p1 = &mesh->point[pt->v[i1]];
             p2 = &mesh->point[pt->v[i2]];
-            if ( p1->tag & MS_NOM || p2->tag & MS_NOM )  continue;
+            if ( p1->tag & MG_NOM || p2->tag & MG_NOM )  continue;
 
             len = lenedg(mesh,met,pt->v[i1],pt->v[i2],0);
             if ( len > LOPTS )  continue;
@@ -714,7 +714,7 @@ static int adptri(MMG5_pMesh mesh,MMG5_pSol met) {
         if ( (abs(mesh->info.imprim) > 4 || mesh->info.ddebug) && ns+nc+nf+nm > 0 )
             fprintf(stdout,"     %8d splitted, %8d collapsed, %8d swapped, %8d moved\n",ns,nc,nf,nm);
         if ( ns < 10 && abs(nc-ns) < 3 )  break;
-        else if ( it > 3 && abs(nc-ns) < 0.3 * MS_MAX(nc,ns) )  break;
+        else if ( it > 3 && abs(nc-ns) < 0.3 * MG_MAX(nc,ns) )  break;
     }
     while( ++it < maxit && nc+ns > 0 );
 
@@ -774,7 +774,7 @@ static int anatri(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
         nnf += nf;
         if ( (abs(mesh->info.imprim) > 4 || mesh->info.ddebug) && ns+nc > 0 )
             fprintf(stdout,"     %8d splitted, %8d collapsed, %8d swapped\n",ns,nc,nf);
-        if ( it > 3 && abs(nc-ns) < 0.1 * MS_MAX(nc,ns) )  break;
+        if ( it > 3 && abs(nc-ns) < 0.1 * MG_MAX(nc,ns) )  break;
     }
     while ( ++it < maxit && ns+nc+nf > 0 );
 

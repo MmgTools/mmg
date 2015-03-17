@@ -42,6 +42,7 @@
 #endif
 
 #include "libmmg3d.h"
+#include "mmg.h"
 
 #define MG_SMSGN(a,b)  (((double)(a)*(double)(b) > (0.0)) ? (1) : (0))
 

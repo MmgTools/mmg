@@ -44,10 +44,10 @@ int boulet(MMG5_pMesh mesh,int start,int ip,int *list) {
     char     i,i1,i2;
 
     pt = &mesh->tria[start];
-    if ( !MS_EOK(pt) )  return(0);
+    if ( !MG_EOK(pt) )  return(0);
     idp = pt->v[ip];
     ppt = &mesh->point[pt->v[ip]];
-    if ( ppt->tag & MS_NOM )  return(0);
+    if ( ppt->tag & MG_NOM )  return(0);
     ilist = 0;
 
     /* store neighbors */
@@ -100,10 +100,10 @@ int boulechknm(MMG5_pMesh mesh,int start,int ip,int *list) {
     pt = &mesh->tria[start];
     ia = iprv[ip];
     iq = inxt[ip];
-    if ( !MS_EOK(pt) )  return(0);
+    if ( !MG_EOK(pt) )  return(0);
     idp = pt->v[ip];
     ppt = &mesh->point[pt->v[ip]];
-    if ( ppt->tag & MS_NOM )  return(0);
+    if ( ppt->tag & MG_NOM )  return(0);
     ilist = 0;
 
     /* store neighbors */
@@ -228,7 +228,7 @@ int boulen(MMG5_pMesh mesh,int start,int ip,double *nn) {
     char     i,i1,i2;
 
     pt = &mesh->tria[start];
-    if ( !MS_EOK(pt) )  return(0);
+    if ( !MG_EOK(pt) )  return(0);
     nn[0] = nn[1] = nn[2] = 0.0;
 
     /* store neighbors */
@@ -240,7 +240,7 @@ int boulen(MMG5_pMesh mesh,int start,int ip,double *nn) {
         nortri(mesh,pt,n);
         nn[0] += n[0];  nn[1] += n[1];  nn[2] += n[2];
 
-        if ( pt->tag[i1] & MS_GEO ) {
+        if ( pt->tag[i1] & MG_GEO ) {
             k = 0;
             break;
         }
@@ -257,7 +257,7 @@ int boulen(MMG5_pMesh mesh,int start,int ip,double *nn) {
         i2 = iprv[i];
         pt = &mesh->tria[k];
         do {
-            if ( pt->tag[i2] & MS_GEO )  break;
+            if ( pt->tag[i2] & MG_GEO )  break;
 
             adja = &mesh->adja[3*(k-1)+1];
             k  = adja[i2] / 3;
@@ -293,7 +293,7 @@ int boulep(MMG5_pMesh mesh,int start,int ip,int *list) {
     char     i,i1,i2;
 
     pt = &mesh->tria[start];
-    if ( !MS_EOK(pt) )  return(0);
+    if ( !MG_EOK(pt) )  return(0);
     list[0] = pt->v[ip];
     ilist   = 0;
 
@@ -348,7 +348,7 @@ int boulec(MMG5_pMesh mesh,int start,int ip,double *tt) {
     char     i,i1,i2;
 
     pt = &mesh->tria[start];
-    if ( !MS_EOK(pt) )  return(0);
+    if ( !MG_EOK(pt) )  return(0);
     p0 = &mesh->point[pt->v[ip]];
     if ( !MS_EDG(p0->tag) )  return(0);
 
@@ -420,7 +420,7 @@ int bouler(MMG5_pMesh mesh,int start,int ip,int *list,int *ng,int *nr) {
     char     i,i1,i2;
 
     pt  = &mesh->tria[start];
-    if ( !MS_EOK(pt) )  return(0);
+    if ( !MG_EOK(pt) )  return(0);
 
     /* check other triangle vertices */
     k  = start;
@@ -431,7 +431,7 @@ int bouler(MMG5_pMesh mesh,int start,int ip,int *list,int *ng,int *nr) {
         if ( MS_EDG(pt->tag[i1]) ) {
             i2 = iprv[i];
             ns++;
-            if ( pt->tag[i1] & MS_GEO )
+            if ( pt->tag[i1] & MG_GEO )
                 *ng = *ng + 1;
             else
                 *nr = *nr + 1;
@@ -456,7 +456,7 @@ int bouler(MMG5_pMesh mesh,int start,int ip,int *list,int *ng,int *nr) {
             if ( MS_EDG(pt->tag[i2]) ) {
                 i1 = inxt[i];
                 ns++;
-                if ( pt->tag[i2] & MS_GEO )
+                if ( pt->tag[i2] & MG_GEO )
                     *ng = *ng + 1;
                 else
                     *nr = *nr + 1;
@@ -485,11 +485,11 @@ int bouletrid(MMG5_pMesh mesh,int start,int ip,int *il1,int *l1,int *il2,int *l2
     double          *n1,*n2,nt[3],ps1,ps2;
 
     pt = &mesh->tria[start];
-    if ( !MS_EOK(pt) )  return(0);
+    if ( !MG_EOK(pt) )  return(0);
 
     idp = pt->v[ip];
     ppt = &mesh->point[idp];
-    assert( ppt->tag & MS_GEO );
+    assert( ppt->tag & MG_GEO );
 
     /* set pointers: first manifold is on side of triangle */
     if ( !nortri(mesh,pt,nt) )  return(0);
@@ -527,7 +527,7 @@ int bouletrid(MMG5_pMesh mesh,int start,int ip,int *il1,int *l1,int *il2,int *l2
         i = adja[i1] % 3;
         i = inxt[i];
     }
-    while ( k && k != start && !(pt->tag[i1] & MS_GEO) );
+    while ( k && k != start && !(pt->tag[i1] & MG_GEO) );
     *ip0 = pt->v[i2];
 
     /* Store the needed elements to start back in the new area,
@@ -548,7 +548,7 @@ int bouletrid(MMG5_pMesh mesh,int start,int ip,int *il1,int *l1,int *il2,int *l2
         i = adja[i2] % 3;
         i = iprv[i];
     }
-    while ( k && !(MS_GEO & pt->tag[i2]) );
+    while ( k && !(MG_GEO & pt->tag[i2]) );
     *ip1 = pt->v[i1];
 
     /* Invert the order in list1, so that it is enumerated in DIRECT order */
@@ -575,9 +575,9 @@ int bouletrid(MMG5_pMesh mesh,int start,int ip,int *il1,int *l1,int *il2,int *l2
         i = adja[i1] % 3;
         i = inxt[i];
     }
-    while ( k && !(MS_GEO & pt->tag[i1]) );
+    while ( k && !(MG_GEO & pt->tag[i1]) );
 
-    if ( !(MS_GEO & pt->tag[i1]) )
+    if ( !(MG_GEO & pt->tag[i1]) )
         return(0);
     else
         return(1);

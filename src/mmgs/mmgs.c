@@ -103,7 +103,7 @@ static int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
             case 'a': /* ridge angle */
                 if ( !strcmp(argv[i],"-ar") && ++i < argc ) {
                     mesh->info.dhd = atof(argv[i]);
-                    mesh->info.dhd = MS_MAX(0.0, MS_MIN(180.0,mesh->info.dhd));
+                    mesh->info.dhd = MG_MAX(0.0, MG_MIN(180.0,mesh->info.dhd));
                     mesh->info.dhd = cos(mesh->info.dhd*M_PI/180.0);
                 }
                 break;
@@ -333,12 +333,12 @@ static void setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
 
 int main(int argc,char *argv[]) {
     MMG5_Mesh mesh;
-    MMG5_Sol       met;
+    MMG5_Sol  met;
     int       ier;
     char      stim[32];
 
-    fprintf(stdout,"  -- MMGS, Release %s (%s) \n",MS_VER,MS_REL);
-    fprintf(stdout,"     %s\n",MS_CPY);
+    fprintf(stdout,"  -- MMGS, Release %s (%s) \n",MG_VER,MG_REL);
+    fprintf(stdout,"     %s\n",MG_CPY);
     fprintf(stdout,"     %s %s\n",__DATE__,__TIME__);
 
     /* trap exceptions */
@@ -397,7 +397,7 @@ int main(int argc,char *argv[]) {
     chrono(ON,&MMG5_ctim[2]);
     setfunc(&mesh,&met);
     inqua(&mesh,&met);
-    fprintf(stdout,"\n  %s\n   MODULE MMGS-LJLL : %s (%s)\n  %s\n",MS_STR,MS_VER,MS_REL,MS_STR);
+    fprintf(stdout,"\n  %s\n   MODULE MMGS-LJLL : %s (%s)\n  %s\n",MG_STR,MG_VER,MG_REL,MG_STR);
     if ( mesh.info.imprim )   fprintf(stdout,"\n  -- PHASE 1 : ANALYSIS\n");
     if ( !analys(&mesh) )  return(1);
     chrono(OFF,&MMG5_ctim[2]);
@@ -415,7 +415,7 @@ int main(int argc,char *argv[]) {
         printim(MMG5_ctim[3].gdif,stim);
         fprintf(stdout,"  -- PHASE 2 COMPLETED.     %s\n",stim);
     }
-    fprintf(stdout,"\n  %s\n   END OF MODULE MMGS-LJLL \n  %s\n",MS_STR,MS_STR);
+    fprintf(stdout,"\n  %s\n   END OF MODULE MMGS-LJLL \n  %s\n",MG_STR,MG_STR);
 
     /* save file */
     outqua(&mesh,&met);

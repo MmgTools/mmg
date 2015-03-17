@@ -55,8 +55,8 @@ int chkcol(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int *list,char typchk) {
     ip2 = pt->v[i2];
     if ( typchk == 2 && met->m ) {
         lon = lenedg(mesh,met,ip1,ip2,0);
-        lon = MS_MIN(lon,LSHRT);
-        lon = MS_MAX(1.0/lon,LLONG);
+        lon = MG_MIN(lon,LSHRT);
+        lon = MG_MAX(1.0/lon,LLONG);
     }
 
     /* collect all triangles around vertex i1 */
@@ -106,7 +106,7 @@ int chkcol(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int *list,char typchk) {
             }
 
             /* check normals deviation */
-            if ( !(pt1->tag[j2] & MS_GEO) ) {
+            if ( !(pt1->tag[j2] & MG_GEO) ) {
                 if ( l > 1 ) {
                     cosnold = n0old[0]*n1old[0] + n0old[1]*n1old[1] + n0old[2]*n1old[2];
                     cosnnew = n0new[0]*n1new[0] + n0new[1]*n1new[1] + n0new[2]*n1new[2];
@@ -121,13 +121,13 @@ int chkcol(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int *list,char typchk) {
 
             /* check geometric support */
             if ( l == 1 ) {
-                pt0->tag[j2] = MS_MAX(pt0->tag[j2],pt->tag[i1]);
+                pt0->tag[j2] = MG_MAX(pt0->tag[j2],pt->tag[i1]);
             }
             else if ( l == ilist-3+open ) {
                 ll = list[ilist-2+open] / 3;
                 if ( ll > mesh->nt )  return(0);
                 lj = list[ilist-2+open] % 3;
-                pt0->tag[jj] = MS_MAX(pt0->tag[jj],mesh->tria[ll].tag[lj]);
+                pt0->tag[jj] = MG_MAX(pt0->tag[jj],mesh->tria[ll].tag[lj]);
             }
             if ( chkedg(mesh,0) )  return(0);
 
@@ -140,7 +140,7 @@ int chkcol(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int *list,char typchk) {
         }
 
         /* check angle between 1st and last triangles */
-        if ( !open && !(pt->tag[i] & MS_GEO) ) {
+        if ( !open && !(pt->tag[i] & MG_GEO) ) {
             cosnold = n00old[0]*n1old[0] + n00old[1]*n1old[1] + n00old[2]*n1old[2];
             cosnnew = n00new[0]*n1new[0] + n00new[1]*n1new[1] + n00new[2]*n1new[2];
             if ( cosnold < ANGEDG ) {
@@ -197,7 +197,7 @@ int chkcol(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int *list,char typchk) {
         jj  = inxt[j];
         pt1 = &mesh->tria[jel];
         if ( abs(pt->ref) != abs(pt1->ref) )  return(0);
-        else if ( !(pt1->tag[jj] & MS_GEO) )  return(0);
+        else if ( !(pt1->tag[jj] & MG_GEO) )  return(0);
 
         p1 = &mesh->point[pt->v[i1]];
         p2 = &mesh->point[pt1->v[jj]];
@@ -246,16 +246,16 @@ int colver(MMG5_pMesh mesh,int *list,int ilist) {
     jj  = list[1] % 3;
     j   = iprv[jj];
     pt1 = &mesh->tria[jel];
-    pt1->tag[j] = MS_MAX(pt->tag[i1],pt1->tag[j]);
-    pt1->edg[j] = MS_MAX(pt->edg[i1],pt1->edg[j]);
+    pt1->tag[j] = MG_MAX(pt->tag[i1],pt1->tag[j]);
+    pt1->edg[j] = MG_MAX(pt->edg[i1],pt1->edg[j]);
     if ( adja[i1] ) {
         kel = adja[i1] / 3;
         k   = adja[i1] % 3;
         mesh->adja[3*(kel-1)+1+k] = 3*jel + j;
         mesh->adja[3*(jel-1)+1+j] = 3*kel + k;
         pt2 = &mesh->tria[kel];
-        pt2->tag[k] = MS_MAX(pt1->tag[j],pt2->tag[k]);
-        pt2->edg[k] = MS_MAX(pt1->edg[j],pt2->edg[k]);
+        pt2->tag[k] = MG_MAX(pt1->tag[j],pt2->tag[k]);
+        pt2->edg[k] = MG_MAX(pt1->edg[j],pt2->edg[k]);
     }
     else
         mesh->adja[3*(jel-1)+1+j] = 0;
@@ -270,8 +270,8 @@ int colver(MMG5_pMesh mesh,int *list,int ilist) {
         jj  = list[ilist-2] % 3;
         j   = inxt[jj];
         pt1 = &mesh->tria[jel];
-        pt1->tag[j] = MS_MAX(pt->tag[i1],pt1->tag[j]);
-        pt1->edg[j] = MS_MAX(pt->edg[i1],pt1->edg[j]);
+        pt1->tag[j] = MG_MAX(pt->tag[i1],pt1->tag[j]);
+        pt1->edg[j] = MG_MAX(pt->edg[i1],pt1->edg[j]);
         adja = &mesh->adja[3*(iel-1)+1];
         if ( adja[i1] ) {
             kel = adja[i1] / 3;
@@ -279,8 +279,8 @@ int colver(MMG5_pMesh mesh,int *list,int ilist) {
             mesh->adja[3*(kel-1)+1+k] = 3*jel + j;
             mesh->adja[3*(jel-1)+1+j] = 3*kel + k;
             pt2 = &mesh->tria[kel];
-            pt2->tag[k] = MS_MAX(pt1->tag[j],pt2->tag[k]);
-            pt2->edg[k] = MS_MAX(pt1->edg[j],pt2->edg[k]);
+            pt2->tag[k] = MG_MAX(pt1->tag[j],pt2->tag[k]);
+            pt2->edg[k] = MG_MAX(pt1->edg[j],pt2->edg[k]);
         }
         else
             mesh->adja[3*(jel-1)+1+j] = 0;
@@ -319,8 +319,8 @@ int colver3(MMG5_pMesh mesh,int* list) {
 
     /* update info */
     pt->v[i]    = pt1->v[j2];
-    pt->tag[i]  = MS_MAX(pt->tag[i],pt->tag[i1]);
-    pt->edg[i]  = MS_MAX(pt->edg[i],pt->edg[i1]);
+    pt->tag[i]  = MG_MAX(pt->tag[i],pt->tag[i1]);
+    pt->edg[i]  = MG_MAX(pt->edg[i],pt->edg[i1]);
     pt->tag[i1] = pt1->tag[j];
     pt->edg[i1] = pt1->edg[j];
     pt->tag[i2] = pt2->tag[k];
@@ -448,12 +448,12 @@ int litcol(MMG5_pMesh mesh,int k,char i,double kali) {
             }
 
             /* check normals deviation */
-            if ( !(pt1->tag[j2] & MS_GEO) ) {
+            if ( !(pt1->tag[j2] & MG_GEO) ) {
                 if ( l > 1 ) {
                     cosnold = n0old[0]*n1old[0] + n0old[1]*n1old[1] + n0old[2]*n1old[2];
                     cosnnew = n0new[0]*n1new[0] + n0new[1]*n1new[1] + n0new[2]*n1new[2];
                     if ( cosnold < ANGEDG ) {
-                        if ( cosnnew < MS_MIN(0.0,cosnold) )  return(0);
+                        if ( cosnnew < MG_MIN(0.0,cosnold) )  return(0);
                     }
                     else if ( cosnnew < ANGEDG )  return(0);
                 }
@@ -471,7 +471,7 @@ int litcol(MMG5_pMesh mesh,int k,char i,double kali) {
             cosnold = n00old[0]*n1old[0] + n00old[1]*n1old[1] + n00old[2]*n1old[2];
             cosnnew = n00new[0]*n1new[0] + n00new[1]*n1new[1] + n00new[2]*n1new[2];
             if ( cosnold < ANGEDG ) {
-                if ( cosnnew < MS_MIN(0.0,cosnold) )  return(0);
+                if ( cosnnew < MG_MIN(0.0,cosnold) )  return(0);
             }
             else if ( cosnnew < ANGEDG )  return(0);
 
@@ -505,7 +505,7 @@ int litcol(MMG5_pMesh mesh,int k,char i,double kali) {
         jj  = inxt[j];
         pt1 = &mesh->tria[jel];
         if ( abs(pt->ref) != abs(pt1->ref) )  return(0);
-        else if ( !(pt1->tag[jj] & MS_GEO) )  return(0);
+        else if ( !(pt1->tag[jj] & MG_GEO) )  return(0);
 
         p1 = &mesh->point[pt->v[i1]];
         p2 = &mesh->point[pt1->v[jj]];
