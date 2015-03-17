@@ -105,7 +105,7 @@ int loadMesh(pMesh mesh) {
     posnp = posnt = posne = posncor = posnq = posntreq = 0;
     posned = posnr = posnpreq = posnc1 = npreq = 0;
     posnedreq = posnormal = 0;
-    ncor = nr = ng = nedreq = ntreq = 0;
+    ncor = nr = ng = nq = nedreq = ntreq = 0;
     bin = 0;
     iswp = 0;
 
