@@ -37,15 +37,15 @@
 #include <math.h>
 
 /* compute movement of an internal point whose ball is passed */
-int movintpt_ani(pMesh mesh,pSol met,int *list,int ilist) {
-    pTria     pt,pt0;
-    pPoint    p0,p1,p2,ppt0;
-    Bezier    pb;
-    double    r[3][3],ux,uy,uz,*n,area,lispoi[3*LMAX+1],Jacsigma[3][2],Jactmp[3][2],*m0,m[6],mo[6];
-    double    dens[3],intpt[2],gv[2],density,detloc,step,lambda[3],o[3],no[3],to[3],uv[2];
-    double    ll,*n1,*n2,ps1,ps2,calold,calnew,caltmp;
-    int       k,iel,kel,nump,nbeg,nend;
-    char      i0,i1,i2,j,ier;
+int movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
+    MMG5_pTria     pt,pt0;
+    MMG5_pPoint    p0,p1,p2,ppt0;
+    Bezier         pb;
+    double         r[3][3],ux,uy,uz,*n,area,lispoi[3*LMAX+1],Jacsigma[3][2],Jactmp[3][2],*m0,m[6],mo[6];
+    double         dens[3],intpt[2],gv[2],density,detloc,step,lambda[3],o[3],no[3],to[3],uv[2];
+    double         ll,*n1,*n2,ps1,ps2,calold,calnew,caltmp;
+    int            k,iel,kel,nump,nbeg,nend;
+    char           i0,i1,i2,j,ier;
 
     step = 0.1;
 
@@ -174,8 +174,8 @@ int movintpt_ani(pMesh mesh,pSol met,int *list,int ilist) {
                     if ( !buildridmetfic(mesh,to,no,mo[0],mo[0],m) )  return(0);
                 }
                 else if ( !MS_SIN(p1->tag) ) {
-                    n1 = &mesh->geom[p1->ig].n1[0];
-                    n2 = &mesh->geom[p1->ig].n2[0];
+                    n1 = &mesh->xpoint[p1->ig].n1[0];
+                    n2 = &mesh->xpoint[p1->ig].n2[0];
                     ps1 = n1[0]*no[0] + n1[1]*no[1] + n1[2]*no[2];
                     ps2 = n2[0]*no[0] + n2[1]*no[1] + n2[2]*no[2];
                     if ( fabs(ps1) > fabs(ps2) ) {
@@ -187,8 +187,8 @@ int movintpt_ani(pMesh mesh,pSol met,int *list,int ilist) {
                 }
                 else {
                     assert(!MS_SIN(p2->tag));
-                    n1 = &mesh->geom[p2->ig].n1[0];
-                    n2 = &mesh->geom[p2->ig].n2[0];
+                    n1 = &mesh->xpoint[p2->ig].n1[0];
+                    n2 = &mesh->xpoint[p2->ig].n2[0];
                     ps1 = n1[0]*no[0] + n1[1]*no[1] + n1[2]*no[2];
                     ps2 = n2[0]*no[0] + n2[1]*no[1] + n2[2]*no[2];
                     if ( fabs(ps1) > fabs(ps2) ) {
@@ -334,7 +334,7 @@ int movintpt_ani(pMesh mesh,pSol met,int *list,int ilist) {
         i0  = list[k] % 3;
         pt  = &mesh->tria[iel];
         pt0 = &mesh->tria[0];
-        memcpy(pt0,pt,sizeof(Tria));
+        memcpy(pt0,pt,sizeof(MMG5_Tria));
         pt0->v[i0] = 0;
 
         caltmp = caleltsig_ani(mesh,met,iel);
@@ -366,10 +366,10 @@ int movintpt_ani(pMesh mesh,pSol met,int *list,int ilist) {
 }
 
 /* Compute movement of a ref, or ridge point whose ball is passed */
-int movridpt_ani(pMesh mesh,pSol met,int *list,int ilist) {
-    pTria    pt,pt0;
-    pPoint   p0,p1,p2,ppt0;
-    pGeom    go;
+int movridpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
+    MMG5_pTria    pt,pt0;
+    MMG5_pPoint   p0,p1,p2,ppt0;
+    MMG5_pxPoint    go;
     Bezier   b;
     double  *m0,*m00,step,l1old,l2old,ll1old,ll2old,uv[2],o[3],nn1[3],nn2[3],to[3],mo[6];
     double   lam0,lam1,lam2,*no1,*no2,*np1,*np2;
@@ -544,16 +544,16 @@ int movridpt_ani(pMesh mesh,pSol met,int *list,int ilist) {
 
     /* Move is made towards p2 */
     if ( l2old > l1old ) {
-        no1 = &mesh->geom[p0->ig].n1[0];
-        no2 = &mesh->geom[p0->ig].n2[0];
+        no1 = &mesh->xpoint[p0->ig].n1[0];
+        no2 = &mesh->xpoint[p0->ig].n2[0];
 
         if ( MS_SIN(p2->tag) ) {
-            np1 = &mesh->geom[p0->ig].n1[0];
-            np2 = &mesh->geom[p0->ig].n2[0];
+            np1 = &mesh->xpoint[p0->ig].n1[0];
+            np2 = &mesh->xpoint[p0->ig].n2[0];
         }
         else {
-            np1 = &mesh->geom[p2->ig].n1[0];
-            np2 = &mesh->geom[p2->ig].n2[0];
+            np1 = &mesh->xpoint[p2->ig].n1[0];
+            np2 = &mesh->xpoint[p2->ig].n2[0];
         }
         psn11 = no1[0]*np1[0] + no1[1]*np1[1] + no1[2]*np1[2];
         psn12 = no1[0]*np2[0] + no1[1]*np2[1] + no1[2]*np2[2];
@@ -711,15 +711,15 @@ int movridpt_ani(pMesh mesh,pSol met,int *list,int ilist) {
 
     /* Move along p1 */
     else {
-        no1 = &mesh->geom[p0->ig].n1[0];
-        no2 = &mesh->geom[p0->ig].n2[0];
+        no1 = &mesh->xpoint[p0->ig].n1[0];
+        no2 = &mesh->xpoint[p0->ig].n2[0];
         if ( MS_SIN(p1->tag) ) {
-            np1 = &mesh->geom[p0->ig].n1[0];
-            np2 = &mesh->geom[p0->ig].n2[0];
+            np1 = &mesh->xpoint[p0->ig].n1[0];
+            np2 = &mesh->xpoint[p0->ig].n2[0];
         }
         else {
-            np1 = &mesh->geom[p1->ig].n1[0];
-            np2 = &mesh->geom[p1->ig].n2[0];
+            np1 = &mesh->xpoint[p1->ig].n1[0];
+            np2 = &mesh->xpoint[p1->ig].n2[0];
         }
         psn11 = no1[0]*np1[0] + no1[1]*np1[1] + no1[2]*np1[2];
         psn12 = no1[0]*np2[0] + no1[1]*np2[1] + no1[2]*np2[2];
@@ -879,7 +879,7 @@ int movridpt_ani(pMesh mesh,pSol met,int *list,int ilist) {
     ppt0->ig = 0;
     ppt0->tag = p0->tag;
 
-    go = &mesh->geom[0];
+    go = &mesh->xpoint[0];
     go->n1[0] = nn1[0];
     go->n1[1] = nn1[1];
     go->n1[2] = nn1[2];
@@ -914,7 +914,7 @@ int movridpt_ani(pMesh mesh,pSol met,int *list,int ilist) {
         i0  = list[k] % 3;
         pt  = &mesh->tria[iel];
         pt0 = &mesh->tria[0];
-        memcpy(pt0,pt,sizeof(Tria));
+        memcpy(pt0,pt,sizeof(MMG5_Tria));
         pt0->v[i0] = 0;
 
         calold = caleltsig_ani(mesh,met,iel);

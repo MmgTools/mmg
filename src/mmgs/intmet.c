@@ -156,10 +156,10 @@ static int intmet22(double *m,double *n,double *mr,double s) {
 
 /* Metric interpolation between two points p1 and p2 such that edge 0 = (p1p2) is ridge.
    v is a direction vector, aimed at pointing towards direction of n1 at interpolated point */
-int intridmet(pMesh mesh,pSol met,int k,char i,double s,double v[3],double mr[6]) {
-    pTria     pt;
-    pGeom     go1,go2;
-    pPoint    p1,p2;
+int intridmet(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,double s,double v[3],double mr[6]) {
+    MMG5_pTria     pt;
+    MMG5_pxPoint     go1,go2;
+    MMG5_pPoint    p1,p2;
     double   *m1,*m2,*n11,*n12,*n21,*n22,ps11,ps12,dd,hn1,hn2;
     int       ip1,ip2;
     char      i1,i2;
@@ -191,7 +191,7 @@ int intridmet(pMesh mesh,pSol met,int k,char i,double s,double v[3],double mr[6]
     }
     /* vertex p1 is singular, p2 is regular */
     else if ( MS_SIN(p1->tag) && (!MS_SIN(p2->tag)) ) {
-        go2 = &mesh->geom[p2->ig];
+        go2 = &mesh->xpoint[p2->ig];
         n21 = &go2->n1[0];
         n22 = &go2->n2[0];
 
@@ -236,7 +236,7 @@ int intridmet(pMesh mesh,pSol met,int k,char i,double s,double v[3],double mr[6]
     }
     /* vertex p2 is singular, p1 is regular */
     else if ( MS_SIN(p2->tag) && (!MS_SIN(p1->tag)) ) {
-        go1 = &mesh->geom[p2->ig];
+        go1 = &mesh->xpoint[p2->ig];
         n11 = &go1->n1[0];
         n12 = &go1->n2[0];
 
@@ -281,8 +281,8 @@ int intridmet(pMesh mesh,pSol met,int k,char i,double s,double v[3],double mr[6]
     }
     /* p1,p2 : nonsingular vertices */
     else {
-        go1 = &mesh->geom[p1->ig];
-        go2 = &mesh->geom[p2->ig];
+        go1 = &mesh->xpoint[p1->ig];
+        go2 = &mesh->xpoint[p2->ig];
 
         /* Interpolation of the eigenvalue associated to tangent vector */
         dd  = (1-s)*sqrt(m2[0]) + s*sqrt(m1[0]);
@@ -361,9 +361,9 @@ int intridmet(pMesh mesh,pSol met,int k,char i,double s,double v[3],double mr[6]
 
 /* Metric interpolation between points p1 and p2, in tria it at parameter 0 <= s0 <= 1 from p1
    result is stored in mr. edge p1p2 must not be a ridge */
-int intregmet(pMesh mesh,pSol met,int k,char i,double s,double mr[6]) {
-    pTria     pt;
-    pPoint    p1,p2;
+int intregmet(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,double s,double mr[6]) {
+    MMG5_pTria     pt;
+    MMG5_pPoint    p1,p2;
     Bezier    b;
     double    b1[3],b2[3],bn[3],c[3],nt[3],cold[3],n[3],nold[3],mold[6],m1[6],m2[6];
     double   *n1,*n2,step,u,r[3][3],mt1[3],mt2[3],dd;
@@ -536,8 +536,8 @@ int intregmet(pMesh mesh,pSol met,int k,char i,double s,double mr[6]) {
 }
 
 /* linear interpolation of sizemap along edge i of tria k */
-void intmet_iso(pMesh mesh,pSol met,int k,char i,int ip,double s) {
-    pTria  pt;
+void intmet_iso(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int ip,double s) {
+    MMG5_pTria  pt;
     int    ip1,ip2;
     char   i1,i2;
 
@@ -549,10 +549,10 @@ void intmet_iso(pMesh mesh,pSol met,int k,char i,int ip,double s) {
     met->m[ip] = s * (met->m[ip1] + met->m[ip2]);
 }
 
-void intmet_ani(pMesh mesh,pSol met,int k,char i,int ip,double s) {
-    pTria    pt;
-    pPoint   ppt;
-    pGeom    go;
+void intmet_ani(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int ip,double s) {
+    MMG5_pTria    pt;
+    MMG5_pPoint   ppt;
+    MMG5_pxPoint    go;
     double  *m;
 
     pt = &mesh->tria[k];
@@ -560,7 +560,7 @@ void intmet_ani(pMesh mesh,pSol met,int k,char i,int ip,double s) {
     if ( pt->tag[i] & MS_GEO ) {
         ppt = &mesh->point[ip];
         assert(ppt->ig);
-        go = &mesh->geom[ppt->ig];
+        go = &mesh->xpoint[ppt->ig];
         intridmet(mesh,met,k,i,s,go->n1,m);
     }
     else {
@@ -570,7 +570,7 @@ void intmet_ani(pMesh mesh,pSol met,int k,char i,int ip,double s) {
 
 /* Interpolation of size features for a 3*3 metric tensor field, between points np and nq,
    at parameter s from np */
-int intmet33(pMesh mesh,pSol met,int np,int nq,int ip,double s) {
+int intmet33(MMG5_pMesh mesh,MMG5_pSol met,int np,int nq,int ip,double s) {
     int     order;
     double  *m,*n,*mr,lambda[3],vp[3][3],mu[3],is[6],isnis[6],mt[9],P[9],dd;
     char    i;

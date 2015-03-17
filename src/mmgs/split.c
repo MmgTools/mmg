@@ -36,13 +36,10 @@
 #include "mmgs.h"
 
 
-extern Info  info;
-
-
 /* split element k along edge i */
-int split1(pMesh mesh,pSol met,int k,int i,int *vx) {
-    pTria      pt,pt1;
-    pPoint     ppt;
+int split1(MMG5_pMesh mesh,MMG5_pSol met,int k,int i,int *vx) {
+    MMG5_pTria      pt,pt1;
+    MMG5_pPoint     ppt;
     int        iel;
     char       i1,i2;
 
@@ -52,7 +49,7 @@ int split1(pMesh mesh,pSol met,int k,int i,int *vx) {
     pt  = &mesh->tria[k];
     pt->flag = 0;
     pt1 = &mesh->tria[iel];
-    pt1 = memcpy(pt1,pt,sizeof(Tria));
+    pt1 = memcpy(pt1,pt,sizeof(MMG5_Tria));
 
     i1 = inxt[i];
     i2 = inxt[i1];
@@ -72,11 +69,11 @@ int split1(pMesh mesh,pSol met,int k,int i,int *vx) {
 
 
 /* Split tria k, along edge i, inserting point ip, updating adjacency relations */
-int split1b(pMesh mesh,int k,char i,int ip) {
-    pTria     pt,pt1;
-    pPoint    ppt;
+int split1b(MMG5_pMesh mesh,int k,char i,int ip) {
+    MMG5_pTria     pt,pt1;
+    MMG5_pPoint    ppt;
     Bezier    b;
-    pGeom     go;
+    MMG5_pxPoint     go;
     double    uv[2],o[3],no[3],to[3];
     int      *adja,iel,jel,kel,mel,ier;
     char      i1,i2,j,j1,j2,m;
@@ -89,7 +86,7 @@ int split1b(pMesh mesh,int k,char i,int ip) {
     if ( !iel )  return(0);
 
     pt1 = &mesh->tria[iel];
-    memcpy(pt1,pt,sizeof(Tria));
+    memcpy(pt1,pt,sizeof(MMG5_Tria));
     memcpy(&mesh->adja[3*(iel-1)+1],&mesh->adja[3*(k-1)+1],3*sizeof(int));
 
     ppt = &mesh->point[ip];
@@ -111,7 +108,7 @@ int split1b(pMesh mesh,int k,char i,int ip) {
 
         ier = bezierInt(&b,uv,o,no,to);
         assert(ier);
-        go = &mesh->geom[ppt->ig];
+        go = &mesh->xpoint[ppt->ig];
         memcpy(go->n2,no,3*sizeof(double));
     }
 
@@ -141,7 +138,7 @@ int split1b(pMesh mesh,int k,char i,int ip) {
         pt1 = &mesh->tria[kel];
         pt->flag = 0;
         pt->base = mesh->base;
-        memcpy(pt1,pt,sizeof(Tria));
+        memcpy(pt1,pt,sizeof(MMG5_Tria));
         memcpy(&mesh->adja[3*(kel-1)+1],&mesh->adja[3*(jel-1)+1],3*sizeof(int));
 
         j1 = inxt[j];
@@ -172,9 +169,9 @@ int split1b(pMesh mesh,int k,char i,int ip) {
 
 
 /* split element k along 2 edges i1 and i2 */
-int split2(pMesh mesh,pSol met,int k,int *vx) {
-    pTria    pt,pt1,pt2;
-    pPoint   p0,p1,p2,p3,p4;
+int split2(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
+    MMG5_pTria    pt,pt1,pt2;
+    MMG5_pPoint   p0,p1,p2,p3,p4;
     int      iel,jel;
     char     i,i1,i2;
 
@@ -188,8 +185,8 @@ int split2(pMesh mesh,pSol met,int k,int *vx) {
     pt->flag = 0;
     pt1 = &mesh->tria[iel];
     pt2 = &mesh->tria[jel];
-    pt1 = memcpy(pt1,pt,sizeof(Tria));
-    pt2 = memcpy(pt2,pt,sizeof(Tria));
+    pt1 = memcpy(pt1,pt,sizeof(MMG5_Tria));
+    pt2 = memcpy(pt2,pt,sizeof(MMG5_Tria));
 
     i = 0;
     if ( !vx[0] )  i = 1;
@@ -229,9 +226,9 @@ int split2(pMesh mesh,pSol met,int k,int *vx) {
 
 
 /* split all 3 edges of element k */
-int split3(pMesh mesh,pSol met,int k,int *vx) {
-    pTria    pt,pt1,pt2,pt3;
-    pPoint   p0,p1,p2,p3,p4,p5;
+int split3(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
+    MMG5_pTria    pt,pt1,pt2,pt3;
+    MMG5_pPoint   p0,p1,p2,p3,p4,p5;
     int      iel,jel,kel;
 
     /* create 3 elements */
@@ -247,9 +244,9 @@ int split3(pMesh mesh,pSol met,int k,int *vx) {
     pt1 = &mesh->tria[iel];
     pt2 = &mesh->tria[jel];
     pt3 = &mesh->tria[kel];
-    pt1 = memcpy(pt1,pt,sizeof(Tria));
-    pt2 = memcpy(pt2,pt,sizeof(Tria));
-    pt3 = memcpy(pt3,pt,sizeof(Tria));
+    pt1 = memcpy(pt1,pt,sizeof(MMG5_Tria));
+    pt2 = memcpy(pt2,pt,sizeof(MMG5_Tria));
+    pt3 = memcpy(pt3,pt,sizeof(MMG5_Tria));
 
     p0 = &mesh->point[pt->v[0]];
     p1 = &mesh->point[pt->v[1]];

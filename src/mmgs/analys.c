@@ -35,16 +35,14 @@
 
 #include "mmgs.h"
 
-extern Info   info;
-
 /* topology: set adjacent, detect Moebius, flip faces, count connected comp. */
-static int setadj(pMesh mesh){
-    pTria   pt,pt1;
+static int setadj(MMG5_pMesh mesh){
+    MMG5_pTria   pt,pt1;
     int    *adja,*adjb,adji1,adji2,*pile,iad,ipil,ip1,ip2,gen;
     int     k,kk,iel,jel,nf,nr,nt,nre,ncc,ned,ref;
     char    i,ii,i1,i2,ii1,ii2,tag,voy;
 
-    if ( abs(info.imprim) > 5  || info.ddebug )
+    if ( abs(mesh->info.imprim) > 5  || mesh->info.ddebug )
         fprintf(stdout,"  ** SETTING TOPOLOGY\n");
 
     pile = (int*)malloc((mesh->nt+1)*sizeof(int));
@@ -195,15 +193,15 @@ static int setadj(pMesh mesh){
         }
     }
 
-    info.ncc = ncc;
-    if ( info.ddebug ) {
+    mesh->info.ncc = ncc;
+    if ( mesh->info.ddebug ) {
         fprintf(stdout,"  a- ridges: %d found.\n",nr);
         fprintf(stdout,"  a- connex: %d connected component(s)\n",ncc);
         fprintf(stdout,"  a- orient: %d flipped\n",nf);
     }
-    else if ( abs(info.imprim) > 4 ) {
+    else if ( abs(mesh->info.imprim) > 4 ) {
         gen = (2 - mesh->np + ned - nt) / 2;
-        if ( !info.mani )  fprintf(stdout,"  ## [non-manifold model]\n");
+        if ( !mesh->info.mani )  fprintf(stdout,"  ## [non-manifold model]\n");
         fprintf(stdout,"     Connected component: %d,  genus: %d,   reoriented: %d\n",ncc,gen,nf);
         fprintf(stdout,"     Edges: %d,  tagged: %d,  ridges: %d,  refs: %d\n",ned,nr+nre,nr,nre);
     }
@@ -213,9 +211,9 @@ static int setadj(pMesh mesh){
 }
 
 /* Detect non manifold points */
-static void nmpoints(pMesh mesh) {
-    pTria      pt;
-    pPoint     p0;
+static void nmpoints(MMG5_pMesh mesh) {
+    MMG5_pTria      pt;
+    MMG5_pPoint     p0;
     int        k,np,numt,iel,jel,nmp,*adja;
     char       i0,i1,i,jp;
   
@@ -298,14 +296,14 @@ static void nmpoints(pMesh mesh) {
     for (k=1; k<=mesh->np; k++)
         mesh->point[k].s = 0;
 
-    if ( nmp && abs(info.imprim) > 4 )
+    if ( nmp && abs(mesh->info.imprim) > 4 )
         fprintf(stdout,"  ## %d non manifold points detected\n",nmp);
 }
 
 /* improve badly shaped elts */
-static int delbad(pMesh mesh) {
-    pTria    pt;
-    pPoint   p[3];
+static int delbad(MMG5_pMesh mesh) {
+    MMG5_pTria    pt;
+    MMG5_pPoint   p[3];
     double   s,kal,declic,ux,uy,uz,vx,vy,vz;
     int     *adja,k,iel,nd,ndd,it;
     char     i,ia,i1,i2,j,typ;
@@ -383,11 +381,11 @@ static int delbad(pMesh mesh) {
             }
         }
         ndd += nd;
-        if ( nd && (info.ddebug || info.imprim < 0) )  fprintf(stdout,"     %d improved\n",nd);
+        if ( nd && (mesh->info.ddebug || mesh->info.imprim < 0) )  fprintf(stdout,"     %d improved\n",nd);
     }
     while ( nd > 0 && ++it < 5 );
 
-    if ( abs(info.imprim) > 4 )
+    if ( abs(mesh->info.imprim) > 4 )
         fprintf(stdout,"     %d bad elements improved\n",ndd);
 
     return(1);
@@ -395,8 +393,8 @@ static int delbad(pMesh mesh) {
 
 
 /* check for ridges: dihedral angle */
-static int setdhd(pMesh mesh) {
-    pTria    pt,pt1;
+static int setdhd(MMG5_pMesh mesh) {
+    MMG5_pTria    pt,pt1;
     double   n1[3],n2[3],dhd;
     int     *adja,k,kk,nr;
     char     i,ii,i1,i2;
@@ -418,7 +416,7 @@ static int setdhd(pMesh mesh) {
                 pt1 = &mesh->tria[kk];
                 nortri(mesh,pt1,n2);
                 dhd = n1[0]*n2[0] + n1[1]*n2[1] + n1[2]*n2[2];
-                if ( dhd <= info.dhd ) {
+                if ( dhd <= mesh->info.dhd ) {
                     pt->tag[i]   |= MS_GEO;
                     pt1->tag[ii] |= MS_GEO;
                     i1 = inxt[i];
@@ -431,16 +429,16 @@ static int setdhd(pMesh mesh) {
         }
     }
 
-    if ( abs(info.imprim) > 4 && nr > 0 )
+    if ( abs(mesh->info.imprim) > 4 && nr > 0 )
         fprintf(stdout,"     %d ridges updated\n",nr);
 
     return(1);
 }
 
 /* check for singularities (corners) */
-int singul(pMesh mesh) {
-    pTria     pt;
-    pPoint    ppt,p1,p2;
+int singul(MMG5_pMesh mesh) {
+    MMG5_pTria     pt;
+    MMG5_pPoint    ppt,p1,p2;
     double    ux,uy,uz,vx,vy,vz,dd;
     int       list[LMAX+2],k,nc,ng,nr,ns,nre;
     char      i;
@@ -491,7 +489,7 @@ int singul(pMesh mesh) {
                     dd = (ux*ux + uy*uy + uz*uz) * (vx*vx + vy*vy + vz*vz);
                     if ( fabs(dd) > EPSD ) {
                         dd = (ux*vx + uy*vy + uz*vz) / sqrt(dd);
-                        if ( dd > -info.dhd ) {
+                        if ( dd > -mesh->info.dhd ) {
                             ppt->tag |= MS_CRN;
                             nc++;
                         }
@@ -517,22 +515,22 @@ int singul(pMesh mesh) {
         }
     }
 
-    if ( abs(info.imprim) > 4 && nre > 0 )
+    if ( abs(mesh->info.imprim) > 4 && nre > 0 )
         fprintf(stdout,"     %d corners, %d singular points detected\n",nc,nre);
     return(1);
 }
 
 
 /* compute normals at C1 vertices, for C0: tangents */
-static int norver(pMesh mesh) {
-    pTria     pt;
-    pPoint    ppt;
-    pGeom     go;
+static int norver(MMG5_pMesh mesh) {
+    MMG5_pTria     pt;
+    MMG5_pPoint    ppt;
+    MMG5_pxPoint     go;
     double    n[3],dd;
     int      *adja,k,kk,ier,ng,nn,nt,nf;
     char      i,ii,i1,i2;
 
-    if ( abs(info.imprim) > 4 || info.ddebug )
+    if ( abs(mesh->info.imprim) > 4 || mesh->info.ddebug )
         fprintf(stdout,"  ** DEFINING GEOMETRY\n"); 
 
     /* 1. process C1 vertices, normals */
@@ -565,13 +563,13 @@ static int norver(pMesh mesh) {
     /* memory to store normals on both sides of ridges */
     if(!ng) {
         mesh->ngmax = NGMAX;
-        mesh->geom  = (pGeom)calloc(mesh->ngmax+1,sizeof(Geom));
-        assert(mesh->geom);
+        mesh->xpoint  = (MMG5_pxPoint)calloc(mesh->ngmax+1,sizeof(MMG5_xPoint));
+        assert(mesh->xpoint);
 
     } else if ( ng ) {
         mesh->ngmax = MS_MAX(1.5*ng,NGMAX);
-        mesh->geom  = (pGeom)calloc(mesh->ngmax+1,sizeof(Geom));
-        assert(mesh->geom);
+        mesh->xpoint  = (MMG5_pxPoint)calloc(mesh->ngmax+1,sizeof(MMG5_xPoint));
+        assert(mesh->xpoint);
 
         /* 2. process C0 vertices on curves, tangents */
         for (k=1; k<=mesh->nt; k++) {
@@ -593,7 +591,7 @@ static int norver(pMesh mesh) {
                 ++mesh->ng;
                 assert(mesh->ng < mesh->ngmax);
                 ppt->ig = mesh->ng;
-                go = &mesh->geom[mesh->ng];
+                go = &mesh->xpoint[mesh->ng];
                 memcpy(go->n1,n,3*sizeof(double));         
 
                 /* compute n2 along ridge */
@@ -644,16 +642,16 @@ static int norver(pMesh mesh) {
         }
     }
 
-    if ( abs(info.imprim) > 4 && nn+nt > 0 )
+    if ( abs(mesh->info.imprim) > 4 && nn+nt > 0 )
         fprintf(stdout,"     %d normals,  %d tangents updated  (%d failed)\n",nn,nt,nf);
 
     return(1);
 }
 
 /* regularization procedure for derivatives, dual Laplacian */
-static int regnor(pMesh mesh) {
-    pTria    pt;
-    pPoint   ppt,p0;
+static int regnor(MMG5_pMesh mesh) {
+    MMG5_pTria    pt;
+    MMG5_pPoint   ppt,p0;
     double  *tabl,n[3],lm1,lm2,dd,nx,ny,nz,res0,res;
     int      i,k,iad,it,nn,nit,iel,ilist,list[LMAX];
 
@@ -758,15 +756,15 @@ static int regnor(pMesh mesh) {
 
         if ( it == 1 )  res0 = res;
         if ( res0 > EPSD )  res  = res / res0;
-        if ( info.imprim < 0 || info.ddebug ) {
+        if ( mesh->info.imprim < 0 || mesh->info.ddebug ) {
             fprintf(stdout,"     iter %5d  res %.3E\r",it,res); 
             fflush(stdout);
         }
         if ( it > 1 && res < EPS )  break;
     }
-    if ( info.imprim < 0 || info.ddebug )  fprintf(stdout,"\n");
+    if ( mesh->info.imprim < 0 || mesh->info.ddebug )  fprintf(stdout,"\n");
 
-    if ( abs(info.imprim) > 4 )
+    if ( abs(mesh->info.imprim) > 4 )
         fprintf(stdout,"     %d normals regularized: %.3e\n",nn,res);
 
     free(tabl);
@@ -775,7 +773,7 @@ static int regnor(pMesh mesh) {
 
 
 /* preprocessing stage: mesh analysis */
-int analys(pMesh mesh) {
+int analys(MMG5_pMesh mesh) {
 
     /* create adjacency */
     if ( !hashTria(mesh) ) {
@@ -784,7 +782,7 @@ int analys(pMesh mesh) {
     }
 
     /* delete badly shaped elts */
-    /*if ( info.badkal && !delbad(mesh) ) {
+    /*if ( mesh->info.badkal && !delbad(mesh) ) {
       fprintf(stdout,"  ## Geometry trouble. Exit program.\n");
       return(0);
       }*/
@@ -799,7 +797,7 @@ int analys(pMesh mesh) {
     nmpoints(mesh);
 
     /* check for ridges */
-    if ( info.dhd > ANGLIM && !setdhd(mesh) ) {
+    if ( mesh->info.dhd > ANGLIM && !setdhd(mesh) ) {
         fprintf(stdout,"  ## Geometry problem. Exit program.\n");
         return(0);
     }
@@ -817,7 +815,7 @@ int analys(pMesh mesh) {
             return(0);
         }
         /* regularize normals */
-        if ( info.nreg && !regnor(mesh) ) {
+        if ( mesh->info.nreg && !regnor(mesh) ) {
             fprintf(stdout,"  ## Normal regularization problem. Exit program.\n");
             return(0);
         }

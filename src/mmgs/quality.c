@@ -35,14 +35,13 @@
 
 #include "mmgs.h"
 
-extern Info  info;
 extern char  ddb;
 
 #define COS145   -0.81915204428899
 
 
 /* return 0: triangle ok, 1: needle, 2: obtuse; ia: edge problem */
-char typelt(pPoint p[3],char *ia) {
+char typelt(MMG5_pPoint p[3],char *ia) {
     double   h1,h2,h3,hmi,hma,ux,uy,uz,vx,vy,vz,wx,wy,wz,dd;
 
     ux = p[1]->c[0] - p[0]->c[0];
@@ -96,8 +95,8 @@ char typelt(pPoint p[3],char *ia) {
     return(0);
 }
 
-static double calelt33_ani(pMesh mesh,pSol met,int iel) {
-    pTria    pt;
+static double calelt33_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel) {
+    MMG5_pTria    pt;
     double   cal,dd,abx,aby,abz,acx,acy,acz,bcx,bcy,bcz,rap,det;
     double  *a,*b,*c,*ma,*mb,*mc,n[3],m[6];
     int      ia,ib,ic;
@@ -157,9 +156,9 @@ static double calelt33_ani(pMesh mesh,pSol met,int iel) {
 }
 
 /* quality = surf / sigma(length_edges) */
-inline double calelt_ani(pMesh mesh,pSol met,int iel) {
-    pTria    pt;
-    pPoint   pa,pb,pc;
+inline double calelt_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel) {
+    MMG5_pTria    pt;
+    MMG5_pPoint   pa,pb,pc;
     double   rap,anisurf,l[3];
     int      ia,ib,ic;
 
@@ -184,8 +183,8 @@ inline double calelt_ani(pMesh mesh,pSol met,int iel) {
 }
 
 /* quality = surf / sigma(length_edges) */
-inline double calelt_iso(pMesh mesh,pSol met,int iel) {
-    pTria     pt;
+inline double calelt_iso(MMG5_pMesh mesh,MMG5_pSol met,int iel) {
+    MMG5_pTria     pt;
     double   *a,*b,*c,cal,abx,aby,abz,acx,acy,acz,bcx,bcy,bcz,rap;
     int       ia,ib,ic;
 
@@ -227,9 +226,9 @@ inline double calelt_iso(pMesh mesh,pSol met,int iel) {
 }
 
 /* Same quality function but puts a sign according to deviation to normal to vertices */
-inline double caleltsig_ani(pMesh mesh,pSol met,int iel) {
-    pTria    pt;
-    pPoint   pa,pb,pc;
+inline double caleltsig_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel) {
+    MMG5_pTria    pt;
+    MMG5_pPoint   pa,pb,pc;
     double   ps1,ps2,abx,aby,abz,acx,acy,acz,bcx,bcy,bcz,dd,rap,anisurf;
     double   n[3],pv[3],l[3],*ncomp,*a,*b,*c;
     int      ia,ib,ic;
@@ -282,9 +281,9 @@ inline double caleltsig_ani(pMesh mesh,pSol met,int iel) {
         ps1 *= dd;
     }
     else {
-        memcpy(n,&mesh->geom[pa->ig].n1[0],3*sizeof(double));
+        memcpy(n,&mesh->xpoint[pa->ig].n1[0],3*sizeof(double));
         if ( !(pa->tag & MS_REF) ) {
-            ncomp = &mesh->geom[pa->ig].n2[0];
+            ncomp = &mesh->xpoint[pa->ig].n2[0];
             ps1 = n[0]*pv[0]+n[1]*pv[1]+n[2]*pv[2];
             ps1 *= dd;
             ps2 = ncomp[0]*pv[0]+ncomp[1]*pv[1]+ncomp[2]*pv[2];
@@ -312,9 +311,9 @@ inline double caleltsig_ani(pMesh mesh,pSol met,int iel) {
 }
 
 /* Same quality function but puts a sign according to deviation to normal to vertices */
-inline double caleltsig_iso(pMesh mesh,pSol met,int iel) {
-    pTria     pt;
-    pPoint    pa,pb,pc;
+inline double caleltsig_iso(MMG5_pMesh mesh,MMG5_pSol met,int iel) {
+    MMG5_pTria     pt;
+    MMG5_pPoint    pa,pb,pc;
     double   *a,*b,*c,cal,abx,aby,abz,acx,acy,acz,bcx,bcy,bcz,rap;
     double    n[3],*ncomp,pv[3],ps1,ps2,sqcal,invsqcal;
     int       ia,ib,ic;
@@ -370,9 +369,9 @@ inline double caleltsig_iso(pMesh mesh,pSol met,int iel) {
         ps1 *= invsqcal;
     }
     else {
-        memcpy(n,&mesh->geom[pa->ig].n1[0],3*sizeof(double));
+        memcpy(n,&mesh->xpoint[pa->ig].n1[0],3*sizeof(double));
         if ( !(pa->tag & MS_REF) ) {
-            ncomp = &mesh->geom[pa->ig].n2[0];
+            ncomp = &mesh->xpoint[pa->ig].n2[0];
             ps1 = n[0]*pv[0]+n[1]*pv[1]+n[2]*pv[2];
             ps1 *= invsqcal;
             ps2 = ncomp[0]*pv[0]+ncomp[1]*pv[1]+ncomp[2]*pv[2];
@@ -401,7 +400,7 @@ inline double caleltsig_iso(pMesh mesh,pSol met,int iel) {
 }
 
 /* compute face normal */
-inline int nortri(pMesh mesh,pTria pt,double *n) {
+inline int nortri(MMG5_pMesh mesh,MMG5_pTria pt,double *n) {
     double   *a,*b,*c,dd,abx,aby,abz,acx,acy,acz,det;
 
     a = mesh->point[pt->v[0]].c;
@@ -433,7 +432,7 @@ inline int nortri(pMesh mesh,pTria pt,double *n) {
 }
 
 /* compute face normal */
-inline int norpts(pPoint p1,pPoint p2,pPoint p3,double *n) {
+inline int norpts(MMG5_pPoint p1,MMG5_pPoint p2,MMG5_pPoint p3,double *n) {
     double   dd,abx,aby,abz,acx,acy,acz,det;
 
     /* area */
@@ -461,7 +460,7 @@ inline int norpts(pPoint p1,pPoint p2,pPoint p3,double *n) {
 }
 
 /* coordinates of the center of incircle of p0p1p2 and its 'size' */
-inline double incircle(pPoint p0,pPoint p1,pPoint p2,double *o) {
+inline double incircle(MMG5_pPoint p0,MMG5_pPoint p1,MMG5_pPoint p2,double *o) {
     double   dd,r,rr;
 
     dd = 1.0 / 3.0;
@@ -483,7 +482,7 @@ inline double incircle(pPoint p0,pPoint p1,pPoint p2,double *o) {
     return(rr);
 }
 
-inline double diamelt(pPoint p0,pPoint p1,pPoint p2) {
+inline double diamelt(MMG5_pPoint p0,MMG5_pPoint p1,MMG5_pPoint p2) {
     double  di,dd;
 
     di = (p1->c[0]-p0->c[0])*(p1->c[0]-p0->c[0]) + (p1->c[1]-p0->c[1])*(p1->c[1]-p0->c[1]) \
@@ -501,8 +500,8 @@ inline double diamelt(pPoint p0,pPoint p1,pPoint p2) {
 }
 
 /* print histogram of qualities */
-void inqua(pMesh mesh,pSol met) {
-    pTria    pt;
+void inqua(MMG5_pMesh mesh,MMG5_pSol met) {
+    MMG5_pTria    pt;
     double   rap,rapmin,rapmax,rapavg,med;
     int      i,k,iel,ir,imax,nex,his[5];
 
@@ -528,7 +527,7 @@ void inqua(pMesh mesh,pSol met) {
             iel    = k;
         }
         if ( rap > 0.5 )  med++;
-        if ( rap < BADKAL )  info.badkal = 1;
+        if ( rap < BADKAL )  mesh->info.badkal = 1;
         rapavg += rap;
         rapmax  = MS_MAX(rapmax,rap);
         ir = MS_MIN(4,(int)(5.0*rap));
@@ -538,7 +537,7 @@ void inqua(pMesh mesh,pSol met) {
     fprintf(stdout,"\n  -- MESH QUALITY   %d\n",mesh->nt - nex);
     fprintf(stdout,"     BEST   %8.6f  AVRG.   %8.6f  WRST.   %8.6f (%d)\n",
             rapmax,rapavg / (mesh->nt-nex),rapmin,iel);
-    if ( abs(info.imprim) < 5 )  return;
+    if ( abs(mesh->info.imprim) < 5 )  return;
 
     /* print histo */
     fprintf(stdout,"     HISTOGRAMM:  %6.2f %% > 0.5\n",100.0*(med/(float)(mesh->nt-nex)));
@@ -550,8 +549,8 @@ void inqua(pMesh mesh,pSol met) {
 }
 
 /* print histogram of qualities */
-void outqua(pMesh mesh,pSol met) {
-    pTria    pt;
+void outqua(MMG5_pMesh mesh,MMG5_pSol met) {
+    MMG5_pTria    pt;
     double   rap,rapmin,rapmax,rapavg,med;
     int      i,k,iel,ir,imax,nex,his[5];
 
@@ -580,7 +579,7 @@ void outqua(pMesh mesh,pSol met) {
         }
 
         if ( rap > 0.5 )  med++;
-        if ( rap < BADKAL )  info.badkal = 1;
+        if ( rap < BADKAL )  mesh->info.badkal = 1;
         rapavg += rap;
         rapmax  = MS_MAX(rapmax,rap);
         ir = MS_MIN(4,(int)(5.0*rap));
@@ -590,7 +589,7 @@ void outqua(pMesh mesh,pSol met) {
     fprintf(stdout,"\n  -- MESH QUALITY   %d\n",mesh->nt - nex);
     fprintf(stdout,"     BEST   %8.6f  AVRG.   %8.6f  WRST.   %8.6f (%d)\n",
             rapmax,rapavg / (mesh->nt-nex),rapmin,iel);
-    if ( abs(info.imprim) < 5 )  return;
+    if ( abs(mesh->info.imprim) < 5 )  return;
 
     /* print histo */
     fprintf(stdout,"     HISTOGRAMM:  %6.2f %% > 0.5\n",100.0*(med/(float)(mesh->nt-nex)));

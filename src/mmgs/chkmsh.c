@@ -35,11 +35,11 @@
 
 #include "mmgs.h"
 
-extern Info info;
 
-int chkmsh(pMesh mesh,int severe) {
-    pPoint         ppt;
-    pTria          pt1,pt2;
+
+int chkmsh(MMG5_pMesh mesh,int severe) {
+    MMG5_pPoint         ppt;
+    MMG5_pTria          pt1,pt2;
     int              adj,adj1,k,kk,l,nk,i,j,ip,lon,len;
     int       *adja,*adjb,list[LMAX+2];
     char     voy,voy1,i1,i2,j1,j2;
@@ -157,9 +157,9 @@ int chkmsh(pMesh mesh,int severe) {
 }
 
 /* Check size prescriptions at point k */
-int chkeigen(pMesh mesh,pSol met,int k,double lambda[3]) {
-    pPoint    p0;
-    pGeom     go;
+int chkeigen(MMG5_pMesh mesh,MMG5_pSol met,int k,double lambda[3]) {
+    MMG5_pPoint    p0;
+    MMG5_pxPoint     go;
     int       ord;
     double    *m,*n,r[3][3],mr[6],mtan[3],vp[2][2];
 
@@ -180,7 +180,7 @@ int chkeigen(pMesh mesh,pSol met,int k,double lambda[3]) {
     }
     else {
         if ( p0->tag & MS_REF ) {
-            go = &mesh->geom[p0->ig];
+            go = &mesh->xpoint[p0->ig];
             n = &go->n1[0];
         }
         else
@@ -203,15 +203,15 @@ int chkeigen(pMesh mesh,pSol met,int k,double lambda[3]) {
 }
 
 /* Check metric consistency */
-int chkmet(pMesh mesh,pSol met) {
-    pPoint    p0;
-    pGeom     go;
+int chkmet(MMG5_pMesh mesh,MMG5_pSol met) {
+    MMG5_pPoint    p0;
+    MMG5_pxPoint     go;
     double    *m,*n,isqhmin,isqhmax,r[3][3],mr[6],mtan[3],vp[2][2],lambda[2];
     int       k,ord;
     char      i;
 
-    isqhmin = 1.0 / (info.hmin*info.hmin);
-    isqhmax = 1.0 / (info.hmax*info.hmax);
+    isqhmin = 1.0 / (mesh->info.hmin*mesh->info.hmin);
+    isqhmax = 1.0 / (mesh->info.hmax*mesh->info.hmax);
 
     /* First test : check wether metric at singular point has the suitable form */
     for(k=1; k<=mesh->np; k++) {
@@ -244,7 +244,7 @@ int chkmet(pMesh mesh,pSol met) {
         else {
             m = &met->m[6*k+1];
             if ( MS_EDG(p0->tag) ) {
-                go = &mesh->geom[p0->ig];
+                go = &mesh->xpoint[p0->ig];
                 n = &go->n1[0];
             }
             else{
@@ -281,10 +281,10 @@ int chkmet(pMesh mesh,pSol met) {
 }
 
 /* Check normal vectors consistency */
-int chknor(pMesh mesh) {
-    pTria    pt;
-    pPoint   p0;
-    pGeom    go;
+int chknor(MMG5_pMesh mesh) {
+    MMG5_pTria    pt;
+    MMG5_pPoint   p0;
+    MMG5_pxPoint    go;
     double   dd,ps,*n,nt[3];
     int      k;
     char     i;
@@ -297,7 +297,7 @@ int chknor(pMesh mesh) {
         if ( !(p0->tag & MS_GEO) ) continue;
 
         assert( p0->ig );
-        go = &mesh->geom[p0->ig];
+        go = &mesh->xpoint[p0->ig];
         n = &go->n1[0];
 
         dd = n[0]*n[0] + n[1]*n[1] + n[2]*n[2];
@@ -327,7 +327,7 @@ int chknor(pMesh mesh) {
             if ( MS_SIN(p0->tag) ) continue;
             else if ( MS_EDG(p0->tag) ) {
                 assert ( p0->ig );
-                go = &mesh->geom[p0->ig];
+                go = &mesh->xpoint[p0->ig];
                 if ( p0->tag & MS_GEO ) {
                     n = &go->n1[0];
                     ps = n[0]*nt[0] + n[1]*nt[1] + n[2]*nt[2];

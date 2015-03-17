@@ -35,12 +35,9 @@
 
 #include "mmgs.h"
 
-extern Info  info;
-
-
 /* get new point address */
-int newPt(pMesh mesh,double c[3],double n[3]) {
-    pPoint  ppt;
+int newPt(MMG5_pMesh mesh,double c[3],double n[3]) {
+    MMG5_pPoint  ppt;
     int     curpt;
 
     if ( !mesh->npnil )  return(0);
@@ -57,11 +54,11 @@ int newPt(pMesh mesh,double c[3],double n[3]) {
     return(curpt);
 }
 
-void delPt(pMesh mesh,int ip) {
-    pPoint   ppt;
+void delPt(MMG5_pMesh mesh,int ip) {
+    MMG5_pPoint   ppt;
 
     ppt = &mesh->point[ip];
-    memset(ppt,0,sizeof(Point));
+    memset(ppt,0,sizeof(MMG5_Point));
     ppt->tag    = MS_NUL;
     ppt->tmp    = mesh->npnil;
     mesh->npnil = ip;
@@ -70,7 +67,7 @@ void delPt(pMesh mesh,int ip) {
     }
 }
 
-int newElt(pMesh mesh) {
+int newElt(MMG5_pMesh mesh) {
     int     curiel;
 
     if ( !mesh->ntnil )  return(0);
@@ -83,15 +80,15 @@ int newElt(pMesh mesh) {
     return(curiel);
 }
 
-void delElt(pMesh mesh,int iel) {
-    pTria    pt;
+void delElt(MMG5_pMesh mesh,int iel) {
+    MMG5_pTria    pt;
 
     pt = &mesh->tria[iel];
     if ( !MS_EOK(pt) ) {
         fprintf(stdout,"  ## INVALID ELEMENT: %d.\n",iel);
         return;
     }
-    memset(pt,0,sizeof(Tria));
+    memset(pt,0,sizeof(MMG5_Tria));
     pt->v[2] = mesh->ntnil;
     if ( mesh->adja )
         memset(&mesh->adja[3*(iel-1)+1],0,3*sizeof(int));
@@ -102,26 +99,26 @@ void delElt(pMesh mesh,int iel) {
 }
 
 
-int zaldy(pMesh mesh) {
+int zaldy(MMG5_pMesh mesh) {
     int     million = 1048576L;
     int     k,npask,bytes;
 
-    if ( info.mem < 0 ) {
+    if ( mesh->info.mem < 0 ) {
         mesh->npmax = MS_MAX(1.5*mesh->np,NPMAX);
         mesh->ntmax = MS_MAX(1.5*mesh->nt,NTMAX);
     }
     else {
         /* point+tria+adja */
-        bytes = sizeof(Point) + 2*sizeof(Tria) + 3*sizeof(int);
+        bytes = sizeof(MMG5_Point) + 2*sizeof(MMG5_Tria) + 3*sizeof(int);
 
-        npask = (int)((double)info.mem / bytes * million);
+        npask = (int)((double)mesh->info.mem / bytes * million);
         mesh->npmax = MS_MAX(1.5*mesh->np,npask);
         mesh->ntmax = MS_MAX(1.5*mesh->nt,2*npask);
     }
 
-    mesh->point = (pPoint)calloc(mesh->npmax+1,sizeof(Point));
+    mesh->point = (MMG5_pPoint)calloc(mesh->npmax+1,sizeof(MMG5_Point));
     assert(mesh->point);
-    mesh->tria  = (pTria)calloc(mesh->ntmax+1,sizeof(Tria));
+    mesh->tria  = (MMG5_pTria)calloc(mesh->ntmax+1,sizeof(MMG5_Tria));
     assert(mesh->tria);
 
     /* store empty links */

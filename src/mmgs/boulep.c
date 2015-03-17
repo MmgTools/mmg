@@ -37,9 +37,9 @@
 
 /* find all triangles sharing P, list[0] = start
    do not stop when crossing ridge */
-int boulet(pMesh mesh,int start,int ip,int *list) {
-    pTria    pt;
-    pPoint   ppt;
+int boulet(MMG5_pMesh mesh,int start,int ip,int *list) {
+    MMG5_pTria    pt;
+    MMG5_pPoint   ppt;
     int     *adja,k,ilist,idp;
     char     i,i1,i2;
 
@@ -89,9 +89,9 @@ int boulet(pMesh mesh,int start,int ip,int *list) {
 
 /* find all triangles sharing P, list[0] = start ; do not stop when crossing ridge ;
    check whether resulting configuration is manifold */
-int boulechknm(pMesh mesh,int start,int ip,int *list) {
-    pTria    pt;
-    pPoint   ppt;
+int boulechknm(MMG5_pMesh mesh,int start,int ip,int *list) {
+    MMG5_pTria    pt;
+    MMG5_pPoint   ppt;
     int     *adja,k,ilist,idp,base,iel;
     char     i,i1,i2,ia,iq,voy;
 
@@ -221,8 +221,8 @@ int boulechknm(pMesh mesh,int start,int ip,int *list) {
 }
 
 /* return average normal of triangles sharing P */
-int boulen(pMesh mesh,int start,int ip,double *nn) {
-    pTria    pt;
+int boulen(MMG5_pMesh mesh,int start,int ip,double *nn) {
+    MMG5_pTria    pt;
     double   n[3],dd;
     int     *adja,k,ier;
     char     i,i1,i2;
@@ -287,8 +287,8 @@ int boulen(pMesh mesh,int start,int ip,double *nn) {
 
 
 /* return all vertices connected to ip, list[0] = ip */
-int boulep(pMesh mesh,int start,int ip,int *list) {
-    pTria    pt;
+int boulep(MMG5_pMesh mesh,int start,int ip,int *list) {
+    MMG5_pTria    pt;
     int     *adja,k,ilist;
     char     i,i1,i2;
 
@@ -340,9 +340,9 @@ int boulep(pMesh mesh,int start,int ip,int *list) {
 
 
 /* return tangent to curve at ip */
-int boulec(pMesh mesh,int start,int ip,double *tt) {
-    pTria    pt;
-    pPoint   p0,p1,p2;
+int boulec(MMG5_pMesh mesh,int start,int ip,double *tt) {
+    MMG5_pTria    pt;
+    MMG5_pPoint   p0,p1,p2;
     double   dd;
     int     *adja,k;
     char     i,i1,i2;
@@ -414,8 +414,8 @@ int boulec(pMesh mesh,int start,int ip,double *tt) {
 
 
 /* store edges and return number (nref+ngeo) incident to ip */
-int bouler(pMesh mesh,int start,int ip,int *list,int *ng,int *nr) {
-    pTria    pt;
+int bouler(MMG5_pMesh mesh,int start,int ip,int *list,int *ng,int *nr) {
+    MMG5_pTria    pt;
     int     *adja,k,ns;
     char     i,i1,i2;
 
@@ -477,9 +477,9 @@ int bouler(pMesh mesh,int start,int ip,int *list,int *ng,int *nr) {
 /* Computation of the two balls of a ridge point : list1 is associated to normal n1's side
    ip0, ip1 = indices of the 2 ending point of the ridge
    Both lists are returned enumerated in direct order  */
-int bouletrid(pMesh mesh,int start,int ip,int *il1,int *l1,int *il2,int *l2,int *ip0,int *ip1) {
-    pTria           pt;
-    pPoint          ppt;
+int bouletrid(MMG5_pMesh mesh,int start,int ip,int *il1,int *l1,int *il2,int *l2,int *ip0,int *ip1) {
+    MMG5_pTria           pt;
+    MMG5_pPoint          ppt;
     int             idp,k,kold,*adja,iel,*ilist1,*ilist2,*list1,*list2,aux;
     unsigned char   i,iold,i1,i2,ipn;
     double          *n1,*n2,nt[3],ps1,ps2;
@@ -494,8 +494,8 @@ int bouletrid(pMesh mesh,int start,int ip,int *il1,int *l1,int *il2,int *l2,int 
     /* set pointers: first manifold is on side of triangle */
     if ( !nortri(mesh,pt,nt) )  return(0);
 
-    n1 = &(mesh->geom[ppt->ig].n1[0]);
-    n2 = &(mesh->geom[ppt->ig].n2[0]);
+    n1 = &(mesh->xpoint[ppt->ig].n1[0]);
+    n2 = &(mesh->xpoint[ppt->ig].n2[0]);
     ps1 = n1[0]*nt[0] + n1[1]*nt[1] + n1[2]*nt[2];
     ps2 = n2[0]*nt[0] + n2[1]*nt[1] + n2[2]*nt[2];
 

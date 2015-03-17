@@ -90,11 +90,9 @@ int _MMG5_hashTetra(MMG5_pMesh mesh, int pack) {
 
     /* default */
     if ( mesh->adja ) {
-        if( !mesh->info.sing ) {
-            if ( abs(mesh->info.imprim) > 3 || mesh->info.ddebug ) {
-                fprintf(stdout,"  ## Warning: no re-build of adjacencies of mesh. ");
-                fprintf(stdout,"mesh->adja must be freed to enforce analysis.\n");
-            }
+        if ( abs(mesh->info.imprim) > 3 || mesh->info.ddebug ) {
+            fprintf(stdout,"  ## Warning: no re-build of adjacencies of mesh. ");
+            fprintf(stdout,"mesh->adja must be freed to enforce analysis.\n");
         }
         return(1);
     }

@@ -35,12 +35,10 @@
 
 #include "mmgs.h"
 
-extern Info  info;
-
 /* Check whether edge i of triangle k should be swapped for geometric approximation purposes */
-int chkswp(pMesh mesh,pSol met,int k,int i,char typchk) {
-    pTria    pt,pt0,pt1;
-    pPoint   p[3],q;
+int chkswp(MMG5_pMesh mesh,MMG5_pSol met,int k,int i,char typchk) {
+    MMG5_pTria    pt,pt0,pt1;
+    MMG5_pPoint   p[3],q;
     double   np[3][3],nq[3],*nr1,*nr2,nt[3],ps,ps2,*n1,*n2,dd,c1[3],c2[3];
     double   cosn1,cosn2,calnat,calchg,cal1,cal2,cosnat,coschg,ux,uy,uz,ll,loni,lona;
     int     *adja,j,kk,ip0,ip1,ip2,iq;
@@ -94,8 +92,8 @@ int chkswp(pMesh mesh,pSol met,int k,int i,char typchk) {
         }
         else if ( MS_EDG(p[j]->tag) ) {
             nortri(mesh,pt,nt);
-            nr1  = &mesh->geom[p[j]->ig].n1[0];
-            nr2  = &mesh->geom[p[j]->ig].n2[0];
+            nr1  = &mesh->xpoint[p[j]->ig].n1[0];
+            nr2  = &mesh->xpoint[p[j]->ig].n2[0];
             ps  = nr1[0]*nt[0] + nr1[1]*nt[1] + nr1[2]*nt[2];
             ps2 = nr2[0]*nt[0] + nr2[1]*nt[1] + nr2[2]*nt[2];
             if ( fabs(ps) > fabs(ps2) )
@@ -112,8 +110,8 @@ int chkswp(pMesh mesh,pSol met,int k,int i,char typchk) {
     }
     else if ( MS_EDG(q->tag) ) {
         nortri(mesh,pt,nt);
-        nr1  = &mesh->geom[q->ig].n1[0];
-        nr2  = &mesh->geom[q->ig].n2[0];
+        nr1  = &mesh->xpoint[q->ig].n1[0];
+        nr2  = &mesh->xpoint[q->ig].n2[0];
         ps  = nr1[0]*nt[0] + nr1[1]*nt[1] + nr1[2]*nt[2];
         ps2 = nr2[0]*nt[0] + nr2[1]*nt[1] + nr2[2]*nt[2];
         if ( fabs(ps) > fabs(ps2) )
@@ -205,8 +203,8 @@ int chkswp(pMesh mesh,pSol met,int k,int i,char typchk) {
     coschg = coschg < EPS ? 0.0 : coschg;
 
     /* swap if Hausdorff contribution of the swapped edge is less than existing one */
-    if ( coschg > info.hausd*info.hausd )  return(0);
-    else if ( coschg < info.hausd*info.hausd && cosnat > info.hausd*info.hausd )  return(1);
+    if ( coschg > mesh->info.hausd*mesh->info.hausd )  return(0);
+    else if ( coschg < mesh->info.hausd*mesh->info.hausd && cosnat > mesh->info.hausd*mesh->info.hausd )  return(1);
 
     if ( typchk == 2 && met->m ) {
         pt0->v[0]= ip0;  pt0->v[1]= ip1;  pt0->v[2]= ip2;
@@ -235,8 +233,8 @@ int chkswp(pMesh mesh,pSol met,int k,int i,char typchk) {
     return(calchg > 1.01 * calnat);
 }
 
-int swapar(pMesh mesh,int k,int i) {
-    pTria    pt,pt1;
+int swapar(MMG5_pMesh mesh,int k,int i) {
+    MMG5_pTria    pt,pt1;
     int     *adja,adj,k11,k21;
     char     i1,i2,j,jj,j2,v11,v21;
 
@@ -293,9 +291,9 @@ int swapar(pMesh mesh,int k,int i) {
 
 
 /* flip edge i of tria k */
-int litswp(pMesh mesh,int k,char i,double kali) {
-    pTria    pt,pt0,pt1;
-    pPoint   a,b,c,d;
+int litswp(MMG5_pMesh mesh,int k,char i,double kali) {
+    MMG5_pTria    pt,pt0,pt1;
+    MMG5_pPoint   a,b,c,d;
     double   kalf,kalt,ps,n1[3],n2[3];
     int     *adja,ia,ib,ic,id,kk;
     char     ii,i1,i2;
@@ -346,7 +344,7 @@ int litswp(pMesh mesh,int k,char i,double kali) {
 
 /* attempt to swap any edge below quality value
    list goes from 0 to ilist-1 */
-int swpedg(pMesh mesh,pSol met,int *list,int ilist,char typchk) {
+int swpedg(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,char typchk) {
     int      k,ns,iel;
     char     i,i1;
 

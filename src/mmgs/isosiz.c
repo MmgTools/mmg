@@ -36,14 +36,12 @@
 #include "mmgs.h"
 #include <math.h>
 
-extern Info   info;
-
 #define MAXLEN   1.0e+3
 
 
 /* Compute length of edge [ip1 ip2] according to the prescribed size */
-double lenedg_iso(pMesh mesh,pSol met,int ip1,int ip2,char isedg) {
-    pPoint   p1,p2;
+double lenedg_iso(MMG5_pMesh mesh,MMG5_pSol met,int ip1,int ip2,char isedg) {
+    MMG5_pPoint   p1,p2;
     double   h1,h2,r,l,len;
 
     p1 = &mesh->point[ip1];
@@ -61,19 +59,19 @@ double lenedg_iso(pMesh mesh,pSol met,int ip1,int ip2,char isedg) {
 
 /* Define isotropic size map at all vertices of the mesh, associated with geometric approx ;
    by convention, p0->h stores desired length at point p0 */
-int defsiz_iso(pMesh mesh,pSol met) {
-    pTria    pt;
-    pPoint   ppt,p[3];
-    pPar     par;
+int defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
+    MMG5_pTria    pt;
+    MMG5_pPoint   ppt,p[3];
+    MMG5_pPar     par;
     double   n[3][3],t[3][3],nt[3],c1[3],c2[3],*n1,*n2,*t1,*t2;
     double   ps,ps2,ux,uy,uz,ll,l,lm,dd,M1,M2;
     int      k,j,ip1,ip2;
     char     i,i1,i2;
 
-    if ( abs(info.imprim) > 5 || info.ddebug )
+    if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug )
         fprintf(stdout,"  ** Defining map\n");
 
-    if ( info.hmax < 0.0 )  info.hmax = 0.5 * info.delta;
+    if ( mesh->info.hmax < 0.0 )  mesh->info.hmax = 0.5 * mesh->info.delta;
 
     /* alloc structure */
     if ( !met->m ) {
@@ -84,7 +82,7 @@ int defsiz_iso(pMesh mesh,pSol met) {
         assert(met->m);
         /* init constant size */
         for (k=1; k<=mesh->np; k++)
-            met->m[k] = info.hmax;
+            met->m[k] = mesh->info.hmax;
     }
 
     for (k=1; k<=mesh->nt; k++) {
@@ -102,8 +100,8 @@ int defsiz_iso(pMesh mesh,pSol met) {
             }
             else if ( MS_EDG(p[i]->tag) ) {
                 nortri(mesh,pt,nt);
-                n1  = &mesh->geom[p[i]->ig].n1[0];
-                n2  = &mesh->geom[p[i]->ig].n2[0];
+                n1  = &mesh->xpoint[p[i]->ig].n1[0];
+                n2  = &mesh->xpoint[p[i]->ig].n2[0];
                 ps  = n1[0]*nt[0] + n1[1]*nt[1] + n1[2]*nt[2];
                 ps2 = n2[0]*nt[0] + n2[1]*nt[1] + n2[2]*nt[2];
                 if ( fabs(ps) > fabs(ps2) )
@@ -177,11 +175,11 @@ int defsiz_iso(pMesh mesh,pSol met) {
                 if ( M1 < EPSD )
                     lm = MAXLEN;
                 else {
-                    lm = (16.0*ll*info.hausd) / (3.0*M1);
+                    lm = (16.0*ll*mesh->info.hausd) / (3.0*M1);
                     lm = sqrt(lm);
                 }
-                met->m[ip1] = MS_MAX(info.hmin,MS_MIN(met->m[ip1],lm));
-                met->m[ip2] = MS_MAX(info.hmin,MS_MIN(met->m[ip2],lm));
+                met->m[ip1] = MS_MAX(mesh->info.hmin,MS_MIN(met->m[ip1],lm));
+                met->m[ip2] = MS_MAX(mesh->info.hmin,MS_MIN(met->m[ip2],lm));
             }
             else {
                 n1 = n[i1];
@@ -212,18 +210,18 @@ int defsiz_iso(pMesh mesh,pSol met) {
                 if ( M1 < EPSD )
                     lm = MAXLEN;
                 else {
-                    lm = (16.0*ll*info.hausd) / (3.0*M1);
+                    lm = (16.0*ll*mesh->info.hausd) / (3.0*M1);
                     lm = sqrt(lm);
                 }
-                met->m[ip1] = MS_MAX(info.hmin,MS_MIN(met->m[ip1],lm));
-                met->m[ip2] = MS_MAX(info.hmin,MS_MIN(met->m[ip2],lm));
+                met->m[ip1] = MS_MAX(mesh->info.hmin,MS_MIN(met->m[ip1],lm));
+                met->m[ip2] = MS_MAX(mesh->info.hmin,MS_MIN(met->m[ip2],lm));
             }
         }
     }
 
     /* take local parameters */
-    for (j=0; j<info.npar; j++) {
-        par = &info.par[j];
+    for (j=0; j<mesh->info.npar; j++) {
+        par = &mesh->info.par[j];
         if ( par->elt == MS_Ver ) {
             for (k=1; k<=mesh->np; k++) {
                 ppt = &mesh->point[k];
@@ -246,14 +244,14 @@ int defsiz_iso(pMesh mesh,pSol met) {
 
 
 /* Enforces mesh gradations by truncating size map */
-int gradsiz_iso(pMesh mesh,pSol met) {
-    pTria    pt;
-    pPoint   p1,p2;
+int gradsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
+    MMG5_pTria    pt;
+    MMG5_pPoint   p1,p2;
     double   ll,hn,h1,h2;
     int      k,nu,nup,it,maxit,ip1,ip2;
     char     i,i1,i2;
 
-    if ( abs(info.imprim) > 5 || info.ddebug )
+    if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug )
         fprintf(stdout,"  ** Grading mesh\n");
 
     mesh->base = 0;
@@ -286,7 +284,7 @@ int gradsiz_iso(pMesh mesh,pSol met) {
                 h2 = met->m[ip2];
                 if ( h1 < h2 ) {
                     if ( h1 < EPSD )  continue;
-                    hn  = h1 + info.hgrad*ll;
+                    hn  = h1 + mesh->info.hgrad*ll;
                     if ( h2 > hn ) {
                         met->m[ip2] = hn;
                         p2->flag    = mesh->base;
@@ -295,7 +293,7 @@ int gradsiz_iso(pMesh mesh,pSol met) {
                 }
                 else {
                     if ( h2 < EPSD )  continue;
-                    hn = h2 + info.hgrad*ll;
+                    hn = h2 + mesh->info.hgrad*ll;
                     if ( h1 > hn ) {
                         met->m[ip1] = hn;
                         p1->flag    = mesh->base;
@@ -308,7 +306,7 @@ int gradsiz_iso(pMesh mesh,pSol met) {
     }
     while ( ++it < maxit && nu > 0 );
 
-    if ( abs(info.imprim) > 4 )  fprintf(stdout,"     gradation: %7d updated, %d iter.\n",nup,it);
+    if ( abs(mesh->info.imprim) > 4 )  fprintf(stdout,"     gradation: %7d updated, %d iter.\n",nup,it);
     return(1);
 }
 
