@@ -131,7 +131,8 @@ int split1b(pMesh mesh,int k,char i,int ip) {
     mesh->adja[3*(k-1)+1+i1]   = 3*iel+i2;
     mesh->adja[3*(iel-1)+1+i2] = 3*k+i1;
     mesh->adja[3*(iel-1)+1+i1] = 3*mel+m;
-    mesh->adja[3*(mel-1)+1+m]  = 3*iel+i1;
+    if(mel)
+        mesh->adja[3*(mel-1)+1+m]  = 3*iel+i1;
 
     if ( jel ) {
         kel = newElt(mesh);
@@ -159,7 +160,8 @@ int split1b(pMesh mesh,int k,char i,int ip) {
         mesh->adja[3*(jel-1)+1+j2] = 3*kel+j1;
         mesh->adja[3*(kel-1)+1+j1] = 3*jel+j2;
         mesh->adja[3*(kel-1)+1+j2] = 3*mel+m;
-        mesh->adja[3*(mel-1)+1+m]  = 3*kel+j2;
+        if(mel)
+            mesh->adja[3*(mel-1)+1+m]  = 3*kel+j2;
 
         mesh->adja[3*(iel-1)+1+i]  = 3*kel+j;
         mesh->adja[3*(kel-1)+1+j]  = 3*iel+i;

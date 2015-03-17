@@ -104,7 +104,7 @@ ENDIF(NOT CMAKE_COMPILER_IS_CLANG)
 #####         Choose executable target to compile
 #####
 ###############################################################################
-SET ( CMAKE_BUILD_TYPE "Release" )
+SET ( CMAKE_BUILD_TYPE CACHE STRING "Release" )
 
 SET ( BUILD "MMG" CACHE STRING
     "\"MMG3D\", \"MMGS\" or \"MMG\" to compile both MMGS and MMG3D" )
@@ -376,7 +376,8 @@ IF ( BUILD_MMG3D OR BUILD_MMG )
 
     SET_TARGET_PROPERTIES(${PROJECT_NAME}3d PROPERTIES DEBUG_POSTFIX _debug) # in debug mode we name the executable mmg3d_debug
     SET_TARGET_PROPERTIES(${PROJECT_NAME}3d PROPERTIES RELEASE_POSTFIX _O3) # in Release mode we name the executable mmg3d_O3
-    SET_TARGET_PROPERTIES(${PROJECT_NAME}3d PROPERTIES MINSIZEREL_POSTFIX _Os)
+    SET_TARGET_PROPERTIES(${PROJECT_NAME}3d PROPERTIES RELWITHDEBINFO_POSTFIX _O3d) # in Release mode we name the executable mmg3d_O3
+    SET_TARGET_PROPERTIES(${PROJECT_NAME}3d PROPERTIES MINSIZEREL_POSTFIX _Os) # in MinSizeRel mode we name the executable mmg3d_Os
 
 ENDIF()
 
@@ -430,6 +431,7 @@ IF ( BUILD_MMG3D OR BUILD_MMG )
             #    ${CMAKE_SOURCE_DIR}/ci_tests/mmgs.version)
             # FILE(READ ${CMAKE_SOURCE_DIR}/ci_tests/mmgs.version MMGS_VERSION)
             # IF ( NOT (${OLD_MMGS_VERSION} MATCHES ${MMGS_VERSION})
+            #     MESSAGE("-- Continuous integration tests cases need to be updated.")
             #     SET ( GET_MMGS_TESTS "TRUE" )
             # ENDIF ()
 
@@ -444,6 +446,7 @@ IF ( BUILD_MMG3D OR BUILD_MMG )
             FILE(READ ${CMAKE_SOURCE_DIR}/ci_tests/mmg3d.version MMG3D_VERSION)
 
             IF (NOT (${OLD_MMG3D_VERSION} MATCHES ${MMG3D_VERSION}))
+                MESSAGE("-- Continuous integration tests cases need to be updated.")
                 SET ( GET_MMG3D_TESTS "TRUE" )
             ENDIF ()
         ENDIF()
