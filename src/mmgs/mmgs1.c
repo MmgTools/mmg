@@ -34,15 +34,15 @@
 
 #include "mmgs.h"
 
-extern Info info;
+
 char ddb;
 
 
 /* check if edge need to be split and return a binary coding the numbers of the edges of tria iel
    that should be split according to a hausdorff distance criterion */
-int chkedg(pMesh mesh,int iel) {
-    pTria    pt;
-    pPoint   p[3];
+int chkedg(MMG5_pMesh mesh,int iel) {
+    MMG5_pTria    pt;
+    MMG5_pPoint   p[3];
     double   n[3][3],t[3][3],nt[3],c1[3],c2[3],*n1,*n2,t1[3],t2[3];
     double   ps,ps2,cosn,ux,uy,uz,ll,li,dd;
     char     i,i1,i2;
@@ -59,8 +59,8 @@ int chkedg(pMesh mesh,int iel) {
         }
         else if ( MS_EDG(p[i]->tag) ) {
             nortri(mesh,pt,nt);
-            n1  = &mesh->geom[p[i]->ig].n1[0];
-            n2  = &mesh->geom[p[i]->ig].n2[0];
+            n1  = &mesh->xpoint[p[i]->ig].n1[0];
+            n2  = &mesh->xpoint[p[i]->ig].n2[0];
             ps  = n1[0]*nt[0] + n1[1]*nt[1] + n1[2]*nt[2];
             ps2 = n2[0]*nt[0] + n2[1]*nt[1] + n2[2]*nt[2];
             if ( fabs(ps) > fabs(ps2) )
@@ -83,7 +83,7 @@ int chkedg(pMesh mesh,int iel) {
         uy = p[i2]->c[1] - p[i1]->c[1];
         uz = p[i2]->c[2] - p[i1]->c[2];
         ll = ux*ux + uy*uy + uz*uz;
-        if ( ll > info.hmax*info.hmax ) {
+        if ( ll > mesh->info.hmax*mesh->info.hmax ) {
             MS_SET(pt->flag,i);
             continue;
         }
@@ -119,7 +119,7 @@ int chkedg(pMesh mesh,int iel) {
             cosn = ps/ll ;
             cosn *= (1.0-cosn);
             cosn *= (0.25*ll);
-            if ( cosn > info.hausd*info.hausd ) {
+            if ( cosn > mesh->info.hausd*mesh->info.hausd ) {
                 MS_SET(pt->flag,i);
                 continue;
             }
@@ -129,7 +129,7 @@ int chkedg(pMesh mesh,int iel) {
             cosn = ps/ll ;
             cosn *= (1.0-cosn);
             cosn *= (0.25*ll);
-            if ( cosn > info.hausd*info.hausd ) {
+            if ( cosn > mesh->info.hausd*mesh->info.hausd ) {
                 MS_SET(pt->flag,i);
                 continue;
             }
@@ -155,7 +155,7 @@ int chkedg(pMesh mesh,int iel) {
             cosn  =  ps / (dd*ll);
             cosn *= (1.0-cosn);
             cosn *= (0.25*ll);
-            if ( cosn > info.hausd*info.hausd ) {
+            if ( cosn > mesh->info.hausd*mesh->info.hausd ) {
                 MS_SET(pt->flag,i);
                 continue;
             }
@@ -166,7 +166,7 @@ int chkedg(pMesh mesh,int iel) {
             cosn  =  ps / (dd*ll);
             cosn *= (1.0-cosn);
             cosn *= (0.25*ll);
-            if ( cosn > info.hausd*info.hausd ) {
+            if ( cosn > mesh->info.hausd*mesh->info.hausd ) {
                 MS_SET(pt->flag,i);
                 continue;
             }
@@ -176,8 +176,8 @@ int chkedg(pMesh mesh,int iel) {
     return(pt->flag);
 }
 
-static int swpmsh(pMesh mesh,pSol met,char typchk) {
-    pTria    pt;
+static int swpmsh(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
+    MMG5_pTria    pt;
     int      k,it,ns,nns,maxit;
     char     i;
 
@@ -201,20 +201,20 @@ static int swpmsh(pMesh mesh,pSol met,char typchk) {
         nns += ns;
     }
     while ( ns > 0 && ++it < maxit );
-    if ( (abs(info.imprim) > 5 || info.ddebug) && nns > 0 )
+    if ( (abs(mesh->info.imprim) > 5 || mesh->info.ddebug) && nns > 0 )
         fprintf(stdout,"     %8d edge swapped\n",nns);
 
     return(nns);
 }
 
 /* Analyze triangles and move points to make mesh more uniform */
-static int movtri(pMesh mesh,pSol met,int maxit) {
-    pTria    pt;
-    pPoint   ppt;
+static int movtri(MMG5_pMesh mesh,MMG5_pSol met,int maxit) {
+    MMG5_pTria    pt;
+    MMG5_pPoint   ppt;
     int      it,k,ier,base,nm,ns,nnm,list[LMAX+2],ilist;
     char     i;
 
-    if ( abs(info.imprim) > 5 || info.ddebug )
+    if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug )
         fprintf(stdout,"  ** OPTIMIZING MESH\n");
 
     base = 1;
@@ -249,23 +249,23 @@ static int movtri(pMesh mesh,pSol met,int maxit) {
             }
         }
         nnm += nm;
-        if ( info.ddebug )  fprintf(stdout,"     %8d moved, %d geometry\n",nm,ns);
+        if ( mesh->info.ddebug )  fprintf(stdout,"     %8d moved, %d geometry\n",nm,ns);
     }
     while ( ++it < maxit && nm > 0);
 
-    if ( (abs(info.imprim) > 5 || info.ddebug) && nnm > 0 )
+    if ( (abs(mesh->info.imprim) > 5 || mesh->info.ddebug) && nnm > 0 )
         fprintf(stdout,"     %8d vertices moved, %d iter.\n",nnm,it);
 
     return(nnm);
 }
 
 /* analyze triangles and split if needed */
-static int anaelt(pMesh mesh,pSol met,char typchk) {
-    pTria    pt;
-    pPoint   ppt,p1,p2;
-    Hash     hash;
+static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
+    MMG5_pTria    pt;
+    MMG5_pPoint   ppt,p1,p2;
+    MMG5_HGeom     hash;
     Bezier   pb;
-    pGeom    go;
+    MMG5_pxPoint    go;
     double   s,o[3],no[3],to[3],dd,len;
     int      vx[3],i,j,ip,ip1,ip2,ier,k,ns,nc,nt;
     char     i1,i2;
@@ -314,7 +314,7 @@ static int anaelt(pMesh mesh,pSol met,char typchk) {
             if ( !ip ) {
                 ip = newPt(mesh,o,MS_EDG(pt->tag[i]) ? to : no);
                 assert(ip);
-                hashEdge(&hash,ip1,ip2,ip);
+                hashEdge(mesh,&hash,ip1,ip2,ip);
                 p1  = &mesh->point[ip1];
                 p2  = &mesh->point[ip2];
                 ppt = &mesh->point[ip];
@@ -326,7 +326,7 @@ static int anaelt(pMesh mesh,pSol met,char typchk) {
                     if ( p1->ref == pt->edg[i] || p2->ref == pt->edg[i] )
                         ppt->ref = pt->edg[i];
                     ppt->ig  = mesh->ng;
-                    go = &mesh->geom[mesh->ng];
+                    go = &mesh->xpoint[mesh->ng];
                     memcpy(go->n1,no,3*sizeof(double));
 
                     dd = go->n1[0]*ppt->n[0] + go->n1[1]*ppt->n[1] + go->n1[2]*ppt->n[2];
@@ -350,7 +350,7 @@ static int anaelt(pMesh mesh,pSol met,char typchk) {
             }
             else if ( pt->tag[i] & MS_GEO ) {
                 ppt = &mesh->point[ip];
-                go  = &mesh->geom[ppt->ig];
+                go  = &mesh->xpoint[ppt->ig];
                 memcpy(go->n2,no,3*sizeof(double));
 
                 /* a computation of the tangent with respect to these two normals is possible */
@@ -368,7 +368,7 @@ static int anaelt(pMesh mesh,pSol met,char typchk) {
         }
     }
     if ( !ns ) {
-        free(hash.item);
+        free(hash.geom);
         return(ns);
     }
 
@@ -397,7 +397,7 @@ static int anaelt(pMesh mesh,pSol met,char typchk) {
                         assert(ier);
 
                         ppt = &mesh->point[ip];
-                        go  = &mesh->geom[ppt->ig];
+                        go  = &mesh->xpoint[ppt->ig];
                         memcpy(go->n2,no,3*sizeof(double));
 
                         /* a computation of the tangent with respect to these two normals is possible */
@@ -417,7 +417,7 @@ static int anaelt(pMesh mesh,pSol met,char typchk) {
         }
         if ( nc > 0 )  ++ns;
     }
-    if ( info.ddebug && ns ) {
+    if ( mesh->info.ddebug && ns ) {
         fprintf(stdout,"     %d analyzed  %d proposed\n",mesh->nt,ns);
         fflush(stdout);
     }
@@ -457,18 +457,18 @@ static int anaelt(pMesh mesh,pSol met,char typchk) {
             ns++;
         }
     }
-    if ( (info.ddebug || abs(info.imprim) > 5) && ns > 0 )
+    if ( (mesh->info.ddebug || abs(mesh->info.imprim) > 5) && ns > 0 )
         fprintf(stdout,"     %7d splitted\n",ns);
-    free(hash.item);
+    free(hash.geom);
 
     return(ns);
 }
 
 /* check if splitting edge i of k is ok */
-int chkspl(pMesh mesh,pSol met,int k,int i) {
-    pTria    pt,pt1;
-    pPoint   ppt;
-    pGeom    go;
+int chkspl(MMG5_pMesh mesh,MMG5_pSol met,int k,int i) {
+    MMG5_pTria    pt,pt1;
+    MMG5_pPoint   ppt;
+    MMG5_pxPoint    go;
     Bezier   b;
     double   s,uv[2],o[3],no[3],to[3];
     int     *adja,jel,ip,ier;
@@ -507,7 +507,7 @@ int chkspl(pMesh mesh,pSol met,int k,int i) {
         ++mesh->ng;
         ppt = &mesh->point[ip];
         ppt->ig  = mesh->ng;
-        go = &mesh->geom[mesh->ng];
+        go = &mesh->xpoint[mesh->ng];
         memcpy(go->n1,no,3*sizeof(double));
     }
     s = 0.5;
@@ -518,9 +518,9 @@ int chkspl(pMesh mesh,pSol met,int k,int i) {
 }
 
 /* attempt to collapse small edges */
-static int colelt(pMesh mesh,pSol met,char typchk) {
-    pTria    pt;
-    pPoint   p1,p2;
+static int colelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
+    MMG5_pTria    pt;
+    MMG5_pPoint   p1,p2;
     double   ll,ux,uy,uz;
     int      ier,list[LMAX+2],ilist,k,nc;
     char     i,i1,i2;
@@ -550,7 +550,7 @@ static int colelt(pMesh mesh,pSol met,char typchk) {
                 uy = p2->c[1] - p1->c[1];
                 uz = p2->c[2] - p1->c[2];
                 ll = ux*ux + uy*uy + uz*uz;
-                if ( ll > info.hmin*info.hmin )  continue;
+                if ( ll > mesh->info.hmin*mesh->info.hmin )  continue;
             }
             else {
                 ll = lenedg(mesh,met,pt->v[i1],pt->v[i2],0);
@@ -573,15 +573,15 @@ static int colelt(pMesh mesh,pSol met,char typchk) {
             }
         }
     }
-    if ( nc > 0 && (abs(info.imprim) > 5 || info.ddebug) )
+    if ( nc > 0 && (abs(mesh->info.imprim) > 5 || mesh->info.ddebug) )
         fprintf(stdout,"     %8d vertices removed\n",nc);
 
     return(nc);
 }
 
-static int adpspl(pMesh mesh,pSol met) {
-    pTria    pt;
-    pPoint   p1,p2;
+static int adpspl(MMG5_pMesh mesh,MMG5_pSol met) {
+    MMG5_pTria    pt;
+    MMG5_pPoint   p1,p2;
     double   len,lmax;
     int      ip,k,ns;
     char     i,i1,i2,imax;
@@ -622,9 +622,9 @@ static int adpspl(pMesh mesh,pSol met) {
 }
 
 /* analyze triangles and split or collapse to match gradation */
-static int adpcol(pMesh mesh,pSol met) {
-    pTria    pt;
-    pPoint   p1,p2;
+static int adpcol(MMG5_pMesh mesh,MMG5_pSol met) {
+    MMG5_pTria    pt;
+    MMG5_pPoint   p1,p2;
     double   len;
     int      k,list[LMAX+2],ilist,nc;
     char     i,i1,i2;
@@ -675,7 +675,7 @@ static int adpcol(pMesh mesh,pSol met) {
 
 
 /* analyze triangles and split or collapse to match gradation */
-static int adptri(pMesh mesh,pSol met) {
+static int adptri(MMG5_pMesh mesh,MMG5_pSol met) {
     int        it,nnc,nns,nnf,nnm,maxit,nc,ns,nf,nm;
 
     /* iterative mesh modifications */
@@ -711,7 +711,7 @@ static int adptri(pMesh mesh,pSol met) {
         nns += ns;
         nnf += nf;
         nnm += nm;
-        if ( (abs(info.imprim) > 4 || info.ddebug) && ns+nc+nf+nm > 0 )
+        if ( (abs(mesh->info.imprim) > 4 || mesh->info.ddebug) && ns+nc+nf+nm > 0 )
             fprintf(stdout,"     %8d splitted, %8d collapsed, %8d swapped, %8d moved\n",ns,nc,nf,nm);
         if ( ns < 10 && abs(nc-ns) < 3 )  break;
         else if ( it > 3 && abs(nc-ns) < 0.3 * MS_MAX(nc,ns) )  break;
@@ -726,13 +726,13 @@ static int adptri(pMesh mesh,pSol met) {
     }
     nnm += nm;
 
-    if ( abs(info.imprim) < 5 && (nnc > 0 || nns > 0) )
+    if ( abs(mesh->info.imprim) < 5 && (nnc > 0 || nns > 0) )
         fprintf(stdout,"     %8d splitted, %8d collapsed, %8d swapped, %8d moved, %d iter. \n",nns,nnc,nnf,nnm,it);
     return(1);
 }
 
 /* analyze tetrahedra and split if needed */
-static int anatri(pMesh mesh,pSol met,char typchk) {
+static int anatri(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
     int     nc,ns,nf,nnc,nns,nnf,it,maxit;
 
     /* analyze tetras : initial splitting */
@@ -772,20 +772,20 @@ static int anatri(pMesh mesh,pSol met,char typchk) {
         nnc += nc;
         nns += ns;
         nnf += nf;
-        if ( (abs(info.imprim) > 4 || info.ddebug) && ns+nc > 0 )
+        if ( (abs(mesh->info.imprim) > 4 || mesh->info.ddebug) && ns+nc > 0 )
             fprintf(stdout,"     %8d splitted, %8d collapsed, %8d swapped\n",ns,nc,nf);
         if ( it > 3 && abs(nc-ns) < 0.1 * MS_MAX(nc,ns) )  break;
     }
     while ( ++it < maxit && ns+nc+nf > 0 );
 
-    if ( (abs(info.imprim) < 5 || info.ddebug ) && nns+nnc > 0 )
+    if ( (abs(mesh->info.imprim) < 5 || mesh->info.ddebug ) && nns+nnc > 0 )
         fprintf(stdout,"     %8d splitted, %8d collapsed, %8d swapped, %d iter.\n",nns,nnc,nnf,it);
 
     return(1);
 }
 
-int mmgs1(pMesh mesh,pSol met) {
-    if ( abs(info.imprim) > 4 )
+int mmgs1(MMG5_pMesh mesh,MMG5_pSol met) {
+    if ( abs(mesh->info.imprim) > 4 )
         fprintf(stdout,"  ** MESH ANALYSIS\n");
 
     /*delref(mesh);
@@ -795,7 +795,7 @@ int mmgs1(pMesh mesh,pSol met) {
       return(1);*/
 
     /*--- stage 1: geometric mesh */
-    if ( abs(info.imprim) > 4 || info.ddebug )
+    if ( abs(mesh->info.imprim) > 4 || mesh->info.ddebug )
         fprintf(stdout,"  ** GEOMETRIC MESH\n");
 
     if ( !anatri(mesh,met,1) ) {
@@ -804,7 +804,7 @@ int mmgs1(pMesh mesh,pSol met) {
     }
 
     /*--- stage 2: computational mesh */
-    if ( abs(info.imprim) > 4 || info.ddebug )
+    if ( abs(mesh->info.imprim) > 4 || mesh->info.ddebug )
         fprintf(stdout,"  ** COMPUTATIONAL MESH\n");
 
     /* define metric map */
@@ -812,7 +812,7 @@ int mmgs1(pMesh mesh,pSol met) {
         fprintf(stdout,"  ## Metric undefined. Exit program.\n");
         return(0);
     }
-    if ( info.hgrad > 0. && !gradsiz(mesh,met) ) {
+    if ( mesh->info.hgrad > 0. && !gradsiz(mesh,met) ) {
         fprintf(stdout,"  ## Gradation problem. Exit program.\n");
         return(0);
     }

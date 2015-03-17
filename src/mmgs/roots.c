@@ -36,8 +36,6 @@
 #include "mmgs.h"
 #define EPSRO     1.e-3
 
-extern Info  info;
-
 /* Returns the 2 complex roots of a degree 2 polynomial with real coefficients a[2]T^2 + ... + a[0]
    By convention, the real roots are stored first (same thing for multiple roots) :
    return value = number of roots, counted with multiplicity */

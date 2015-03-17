@@ -36,8 +36,6 @@
 #include "mmgs.h"
 #include <math.h>
 
-extern Info   info;
-
 #define sw 4
 #define sd 8
 
@@ -90,10 +88,10 @@ double swapd(double sbin)
     //printf("CONVERTION DOUBLE\n");
     return(out);
 }
-int loadMesh(pMesh mesh) {
+int loadMesh(MMG5_pMesh mesh) {
     FILE      *inm;
-    pTria      pt1,pt2;
-    pPoint     ppt;
+    MMG5_pTria      pt1,pt2;
+    MMG5_pPoint     ppt;
     double    *norm,*n,dd;
     float      fc;
     int        i,k,ia,nq,nri,nr,num,ip,idn,ng;
@@ -483,7 +481,7 @@ int loadMesh(pMesh mesh) {
 
     nri = 0;
     if ( mesh->na ) {
-        mesh->edge = (pEdge)calloc(mesh->na+1,sizeof(Edge));
+        mesh->edge = (MMG5_pEdge)calloc(mesh->na+1,sizeof(MMG5_Edge));
         assert(mesh->edge);
         rewind(inm);
         fseek(inm,posned,SEEK_SET);
@@ -592,7 +590,7 @@ int loadMesh(pMesh mesh) {
         free(norm);
     }
 
-    if ( abs(info.imprim) > 4 ) {
+    if ( abs(mesh->info.imprim) > 4 ) {
         fprintf(stdout,"     NUMBER OF VERTICES   %8d / %8d   CORNERS/REQ. %d / %d\n",mesh->npi,mesh->npmax,ncor,npreq);
         if ( mesh->na )
             fprintf(stdout,"     NUMBER OF EDGES      %8d  RIDGES %6d\n",mesh->na,nri);
@@ -602,12 +600,12 @@ int loadMesh(pMesh mesh) {
     return(1);
 }
 
-int saveMesh(pMesh mesh) {
+int saveMesh(MMG5_pMesh mesh) {
     FILE        *inm;
-    pPoint       ppt;
-    pTria        pt;
-    pEdge        edge;
-    pGeom        go;
+    MMG5_pPoint       ppt;
+    MMG5_pTria        pt;
+    MMG5_pEdge        edge;
+    MMG5_pxPoint        go;
     int         *adja,k,jel,outm,np,nt,na,nc,ng,nn,nr,nre;
     int          bin,binch,bpos;
     char         data[128],*ptr,chaine[128],i,i1,i2;
@@ -713,7 +711,7 @@ int saveMesh(pMesh mesh) {
 
     /* memory alloc */
     if ( na ) {
-        edge = (pEdge)calloc(na+1,sizeof(Edge));
+        edge = (MMG5_pEdge)calloc(na+1,sizeof(MMG5_Edge));
         assert(edge);
     }
 
@@ -898,7 +896,7 @@ int saveMesh(pMesh mesh) {
             if ( !MS_VOK(ppt) )  continue;
             else if ( !(ppt->tag & MS_GEO) ) {
                 if ( ppt->tag & MS_REF ) {
-                    go = &mesh->geom[ppt->ig];
+                    go = &mesh->xpoint[ppt->ig];
                     if(!bin) {
                         fprintf(inm,"%.15lg %.15lg %.15lg \n",go->n1[0],go->n1[1],go->n1[2]);
                     } else {
@@ -1015,7 +1013,7 @@ int saveMesh(pMesh mesh) {
         }
     }
 
-    if ( abs(info.imprim) > 4 ) {
+    if ( abs(mesh->info.imprim) > 4 ) {
         fprintf(stdout,"     NUMBER OF VERTICES   %8d  CORNERS    %6d\n",np,nc);
         if ( na )
             fprintf(stdout,"     NUMBER OF EDGES      %8d  RIDGES     %6d\n",na,nr);
@@ -1036,7 +1034,7 @@ int saveMesh(pMesh mesh) {
 }
 
 /* load metric field */
-int loadMet(pSol met) {
+int loadMet(MMG5_pSol met) {
     FILE       *inm;
     float       fbuf[6],tmpf;
     double      tmp,dbuf[6],tmpd;
@@ -1234,9 +1232,9 @@ int loadMet(pSol met) {
 }
 
 /* write iso or aniso metric */
-int saveMet(pMesh mesh,pSol met) {
+int saveMet(MMG5_pMesh mesh,MMG5_pSol met) {
     FILE*        inm;
-    pPoint     ppt;
+    MMG5_pPoint     ppt;
     double     dbuf[6],tmp;
     char        *ptr,data[128],chaine[128];
     int          binch,bpos,bin,np,k,typ,i;

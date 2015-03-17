@@ -35,12 +35,11 @@
 
 #include "mmgs.h"
 
-extern Info  info;
 extern char ddb;
 
 
 /* Build metric tensor at a fictitious ridge point, whose normal and tangent are provided */
-inline int buildridmetfic(pMesh mesh,double t[3],double n[3],double dtan,double dv,double m[6]) {
+inline int buildridmetfic(MMG5_pMesh mesh,double t[3],double n[3],double dtan,double dv,double m[6]) {
     double u[3],r[3][3];
 
     u[0] = n[1]*t[2] - n[2]*t[1];
@@ -127,16 +126,16 @@ int paratmet(double c0[3],double n0[3],double m[6],double c1[3],double n1[3],dou
 }
 
 /* Build metric tensor at ridge point p0, when the 'good' normal direction is given by nt */
-int buildridmetnor(pMesh mesh,pSol met,int np0,double nt[3],double mr[6]) {
-    pPoint p0;
-    pGeom  go;
+int buildridmetnor(MMG5_pMesh mesh,MMG5_pSol met,int np0,double nt[3],double mr[6]) {
+    MMG5_pPoint p0;
+    MMG5_pxPoint  go;
     double ps1,ps2,*n1,*n2,*t,*m,dv,u[3],r[3][3];
 
     p0 = &mesh->point[np0];
     if ( !(MS_GEO & p0->tag) )  return(0);
     m = &met->m[6*(np0)+1];
     t = &p0->n[0];
-    go = &mesh->geom[p0->ig];
+    go = &mesh->xpoint[p0->ig];
 
     /* Decide between the two possible configurations */
     n1 = &go->n1[0];
@@ -173,16 +172,16 @@ int buildridmetnor(pMesh mesh,pSol met,int np0,double nt[3],double mr[6]) {
 }
 
 /* Build metric tensor at ridge point p0, when computations with respect to p1 are to be held */
-int buildridmet(pMesh mesh,pSol met,int np0,double ux,double uy,double uz,double mr[6]) {
-    pPoint p0;
-    pGeom  go;
+int buildridmet(MMG5_pMesh mesh,MMG5_pSol met,int np0,double ux,double uy,double uz,double mr[6]) {
+    MMG5_pPoint p0;
+    MMG5_pxPoint  go;
     double ps1,ps2,*n1,*n2,*t,*m,dv,u[3],r[3][3];
 
     p0 = &mesh->point[np0];
     if ( !(MS_GEO & p0->tag) )  return(0);
     m = &met->m[6*(np0)+1];
     t = &p0->n[0];
-    go = &mesh->geom[p0->ig];
+    go = &mesh->xpoint[p0->ig];
 
     /* Decide between the two possible configurations */
     n1 = &go->n1[0];
@@ -219,8 +218,8 @@ int buildridmet(pMesh mesh,pSol met,int np0,double ux,double uy,double uz,double
 }
 
 /* Compute length of edge [i0i1] according to the prescribed metric */
-double lenedg_ani(pMesh mesh,pSol met,int np0,int np1,char isedg) {
-    pPoint   p0,p1;
+double lenedg_ani(MMG5_pMesh mesh,MMG5_pSol met,int np0,int np1,char isedg) {
+    MMG5_pPoint   p0,p1;
     double   gammaprim0[3],gammaprim1[3],t[3],*n1,*n2,ux,uy,uz,ps1,ps2,l0,l1;
     double  *m0,*m1,met0[6],met1[6];
 
@@ -247,18 +246,18 @@ double lenedg_ani(pMesh mesh,pSol met,int np0,int np1,char isedg) {
     else {
         if ( MS_GEO & p0->tag ) {
             //assert(p0->ig);
-            n1 = &mesh->geom[p0->ig].n1[0];
-            n2 = &mesh->geom[p0->ig].n2[0];
+            n1 = &mesh->xpoint[p0->ig].n1[0];
+            n2 = &mesh->xpoint[p0->ig].n2[0];
             ps1 = ux*n1[0] + uy*n1[1] + uz*n1[2];
             ps2 = ux*n2[0] + uy*n2[1] + uz*n2[2];
 
             if ( fabs(ps2) < fabs(ps1) ) {
-                n1  = &mesh->geom[p0->ig].n2[0];
+                n1  = &mesh->xpoint[p0->ig].n2[0];
                 ps1 = ps2;
             }
         }
         else if ( MS_REF & p0->tag ) {
-            n1  = &mesh->geom[p0->ig].n1[0];
+            n1  = &mesh->xpoint[p0->ig].n1[0];
             ps1 = ux*n1[0] + uy*n1[1] + uz*n1[2];
         }
         else {
@@ -284,18 +283,18 @@ double lenedg_ani(pMesh mesh,pSol met,int np0,int np1,char isedg) {
     }
     else {
         if ( MS_GEO & p1->tag ) {
-            n1 = &mesh->geom[p1->ig].n1[0];
-            n2 = &mesh->geom[p1->ig].n2[0];
+            n1 = &mesh->xpoint[p1->ig].n1[0];
+            n2 = &mesh->xpoint[p1->ig].n2[0];
             ps1 = -ux*n1[0] - uy*n1[1] - uz*n1[2];
             ps2 = -ux*n2[0] - uy*n2[1] - uz*n2[2];
 
             if ( fabs(ps2) < fabs(ps1) ) {
-                n1  = &mesh->geom[p1->ig].n2[0];
+                n1  = &mesh->xpoint[p1->ig].n2[0];
                 ps1 = ps2;
             }
         }
         else if ( MS_REF & p1->tag ) {
-            n1  = &mesh->geom[p1->ig].n1[0];
+            n1  = &mesh->xpoint[p1->ig].n1[0];
             ps1 = - ux*n1[0] - uy*n1[1] - uz*n1[2];
         }
         else {
@@ -346,9 +345,9 @@ double lenedg_ani(pMesh mesh,pSol met,int np0,int np1,char isedg) {
 }
 
 /* Compute anisotropic volume of element iel, with respect to metric met */
-double surftri_ani(pMesh mesh,pSol met,int iel) {
-    pTria     pt;
-    pPoint    p[3];
+double surftri_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel) {
+    MMG5_pTria     pt;
+    MMG5_pPoint    p[3];
     Bezier    b;
     int       np[3];
     double    surf,ux,uy,uz,dens,m[3][6],J[3][2],mJ[3][2],tJmJ[2][2];
@@ -428,12 +427,12 @@ double surftri_ani(pMesh mesh,pSol met,int iel) {
 
 /* Compute the intersected (2 x 2) metric from metrics m and n : take simultaneous reduction,
    and proceed to truncation in sizes */
-static int intersecmet22(double *m,double *n,double *mr) {
+static int intersecmet22(MMG5_pMesh mesh, double *m,double *n,double *mr) {
     double  det,imn[4],dd,sqDelta,trimn,lambda[2],vp0[2],vp1[2],dm[2],dn[2],vnorm,d0,d1,ip[4];
     double  isqhmin,isqhmax;
 
-    isqhmin  = 1.0 / (info.hmin*info.hmin);
-    isqhmax  = 1.0 / (info.hmax*info.hmax);
+    isqhmin  = 1.0 / (mesh->info.hmin*mesh->info.hmin);
+    isqhmax  = 1.0 / (mesh->info.hmax*mesh->info.hmax);
 
     /* Compute imn = M^{-1}N */
     det = m[0]*m[2] - m[1]*m[1];
@@ -577,16 +576,16 @@ static int intersecmet22(double *m,double *n,double *mr) {
 }
 
 /* Intersect metric held in np (supported in tangent plane of np) with 3*3 metric in me */
-int intextmet(pMesh mesh,pSol met,int np,double me[6]) {
-    pPoint         p0;
-    pGeom          go;
+int intextmet(MMG5_pMesh mesh,MMG5_pSol met,int np,double me[6]) {
+    MMG5_pPoint         p0;
+    MMG5_pxPoint          go;
     double         hu,isqhmin,isqhmax,dd;
     double        *m,*n,*n1,*n2,*t,r[3][3],mrot[6],mr[3],mtan[3],metan[3],u[3],a[4];
     double complex ro[3];
     char           i;
 
-    isqhmin = 1.0 / (info.hmin*info.hmin);
-    isqhmax = 1.0 / (info.hmax*info.hmax);
+    isqhmin = 1.0 / (mesh->info.hmin*mesh->info.hmin);
+    isqhmax = 1.0 / (mesh->info.hmax*mesh->info.hmax);
 
     p0 = &mesh->point[np];
     m  = &met->m[6*np+1];
@@ -627,7 +626,7 @@ int intextmet(pMesh mesh,pSol met,int np,double me[6]) {
 
         /* Size prescribed by metric me in direction u1 = n1 ^ t */
         assert ( p0->ig );
-        go = &mesh->geom[p0->ig];
+        go = &mesh->xpoint[p0->ig];
         n1 = &go->n1[0];
         n2 = &go->n2[0];
 
@@ -685,7 +684,7 @@ int intextmet(pMesh mesh,pSol met,int np,double me[6]) {
         metan[2] = mrot[3];
 
         /* Intersection of metrics in the tangent plane */
-        if ( !intersecmet22(mtan,metan,mr) ) return(0);
+        if ( !intersecmet22(mesh,mtan,metan,mr) ) return(0);
 
         /* Back to the canonical basis of \mathbb{R}^3 : me = ^tR*mr*R : mtan and metan are reused */
         mtan[0]  = mr[0]*r[0][0] + mr[1]*r[1][0];  mtan[1]  = mr[0]*r[0][1] + mr[1]*r[1][1];   mtan[2]  = mr[0]*r[0][2] + mr[1]*r[1][2] ;

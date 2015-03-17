@@ -38,9 +38,9 @@
 
 
 /* compute movement of an internal point whose ball is passed */
-int movintpt_iso(pMesh mesh,pSol met,int *list,int ilist) {
-    pPoint   p0,p1,ppt0;
-    pTria    pt,pt0;
+int movintpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
+    MMG5_pPoint   p0,p1,ppt0;
+    MMG5_pTria    pt,pt0;
     Bezier   b;
     double   aa,bb,ab,ll,l,mlon,devmean,GV[3],gv[2],cosalpha,sinalpha,r[3][3],*n,lispoi[3*LMAX+1];
     double   ux,uy,uz,det2d,detloc,step,lambda[3],uv[2],o[3],no[3],to[3],Vold,Vnew,calold,calnew,caltmp;
@@ -306,7 +306,7 @@ int movintpt_iso(pMesh mesh,pSol met,int *list,int ilist) {
         i0  = list[k] % 3;
         pt  = &mesh->tria[iel];
         pt0 = &mesh->tria[0];
-        memcpy(pt0,pt,sizeof(Tria));
+        memcpy(pt0,pt,sizeof(MMG5_Tria));
         pt0->v[i0] = 0;
         caltmp = caleltsig_iso(mesh,NULL,iel);
         calold = MS_MIN(calold,caltmp);
@@ -332,11 +332,11 @@ int movintpt_iso(pMesh mesh,pSol met,int *list,int ilist) {
 }
 
 /* compute movement of a ridge point whose ball (consisting of triangles) is passed */
-int movridpt_iso(pMesh mesh,pSol met,int *list,int ilist) {
-    pTria   pt,pt0;
-    pGeom   go;
+int movridpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
+    MMG5_pTria   pt,pt0;
+    MMG5_pxPoint   go;
     Bezier  b;
-    pPoint  p0,p1,p2,ppt0;
+    MMG5_pPoint  p0,p1,p2,ppt0;
     double  step,dd1,dd2,ddt,ps2,ll1old,ll1new,ll2old,ll2new,uv[2],o[3],*no1,*no2,*np1,*np2;
     double  nn1[3],nn2[3],psn11,psn12,to[3],calold,calnew,lam0,lam1,lam2;
     int     ier,k,iel,ip0,ip1,ip2,it1,it2;
@@ -512,16 +512,16 @@ int movridpt_iso(pMesh mesh,pSol met,int *list,int ilist) {
     lam2 = step*step;
 
     if ( ll2old > ll1old ) {  //move is made towards p2
-        no1 = &mesh->geom[p0->ig].n1[0];
-        no2 = &mesh->geom[p0->ig].n2[0];
+        no1 = &mesh->xpoint[p0->ig].n1[0];
+        no2 = &mesh->xpoint[p0->ig].n2[0];
 
         if ( MS_SIN(p2->tag) ) {
-            np1 = &mesh->geom[p0->ig].n1[0];
-            np2 = &mesh->geom[p0->ig].n2[0];
+            np1 = &mesh->xpoint[p0->ig].n1[0];
+            np2 = &mesh->xpoint[p0->ig].n2[0];
         }
         else {
-            np1 = &mesh->geom[p2->ig].n1[0];
-            np2 = &mesh->geom[p2->ig].n2[0];
+            np1 = &mesh->xpoint[p2->ig].n1[0];
+            np2 = &mesh->xpoint[p2->ig].n2[0];
         }
         psn11 = no1[0]*np1[0] + no1[1]*np1[1] + no1[2]*np1[2];
         psn12 = no1[0]*np2[0] + no1[1]*np2[1] + no1[2]*np2[2];
@@ -665,15 +665,15 @@ int movridpt_iso(pMesh mesh,pSol met,int *list,int ilist) {
         }
     }
     else {   /* move along p1 */
-        no1 = &mesh->geom[p0->ig].n1[0];
-        no2 = &mesh->geom[p0->ig].n2[0];
+        no1 = &mesh->xpoint[p0->ig].n1[0];
+        no2 = &mesh->xpoint[p0->ig].n2[0];
         if ( MS_SIN(p1->tag) ) {
-            np1 = &mesh->geom[p0->ig].n1[0];
-            np2 = &mesh->geom[p0->ig].n2[0];
+            np1 = &mesh->xpoint[p0->ig].n1[0];
+            np2 = &mesh->xpoint[p0->ig].n2[0];
         }
         else {
-            np1 = &mesh->geom[p1->ig].n1[0];
-            np2 = &mesh->geom[p1->ig].n2[0];
+            np1 = &mesh->xpoint[p1->ig].n1[0];
+            np2 = &mesh->xpoint[p1->ig].n2[0];
         }
         psn11 = no1[0]*np1[0] + no1[1]*np1[1] + no1[2]*np1[2];
         psn12 = no1[0]*np2[0] + no1[1]*np2[1] + no1[2]*np2[2];
@@ -823,7 +823,7 @@ int movridpt_iso(pMesh mesh,pSol met,int *list,int ilist) {
     ppt0->ig = 0;
     ppt0->tag = p0->tag;
 
-    go = &mesh->geom[0];
+    go = &mesh->xpoint[0];
     go->n1[0] = nn1[0];
     go->n1[1] = nn1[1];
     go->n1[2] = nn1[2];
@@ -846,7 +846,7 @@ int movridpt_iso(pMesh mesh,pSol met,int *list,int ilist) {
         i0  = list[k] % 3;
         pt  = &mesh->tria[iel];
         pt0 = &mesh->tria[0];
-        memcpy(pt0,pt,sizeof(Tria));
+        memcpy(pt0,pt,sizeof(MMG5_Tria));
         pt0->v[i0] = 0;
         calold = caleltsig_iso(mesh,NULL,iel);
         calnew = caleltsig_iso(mesh,NULL,0);

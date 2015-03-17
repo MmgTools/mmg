@@ -35,13 +35,11 @@
 
 #include "mmgs.h"
 
-extern Info   info;
-
 /* Define anisotropic metric map at a SINGULARITY of the geometry, associated to the
    geometric approx of the surface. metric= alpha* Id, alpha = size */
-static int defmetsin(pMesh mesh,pSol met,int it,int ip) {
-    pTria         pt;
-    pPoint        p0,p1;
+static int defmetsin(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
+    MMG5_pTria         pt;
+    MMG5_pPoint        p0,p1;
     double       *m,n[3],ux,uy,uz,isqhmin,isqhmax,b0[3],b1[3],ps1,tau[3],ntau2,gammasec[3];
     double        c[3],kappa,maxkappa,alpha;
     int           ilist,list[LMAX+2],k,iel,idp;
@@ -54,8 +52,8 @@ static int defmetsin(pMesh mesh,pSol met,int it,int ip) {
     ilist = boulet(mesh,it,ip,list);
     assert(ilist);
 
-    isqhmin  = 1.0 / (info.hmin*info.hmin);
-    isqhmax  = 1.0 / (info.hmax*info.hmax);
+    isqhmin  = 1.0 / (mesh->info.hmin*mesh->info.hmin);
+    isqhmax  = 1.0 / (mesh->info.hmax*mesh->info.hmax);
     maxkappa = 0.0;
     for (k=0; k<ilist; k++) {
         iel = list[k] / 3;
@@ -98,7 +96,7 @@ static int defmetsin(pMesh mesh,pSol met,int it,int ip) {
         kappa = ntau2 * sqrt(c[0]*c[0] + c[1]*c[1] + c[2]*c[2]);
         maxkappa = MS_MAX(kappa,maxkappa);
     }
-    alpha = 1.0 / 8.0 * maxkappa / info.hausd;
+    alpha = 1.0 / 8.0 * maxkappa / mesh->info.hausd;
     alpha = MS_MIN(alpha,isqhmin);
     alpha = MS_MAX(alpha,isqhmax);
 
@@ -114,9 +112,9 @@ static int defmetsin(pMesh mesh,pSol met,int it,int ip) {
    p->m[1] is the specific size in direction u1 = n1 ^ t
    p->m[2] is the specific size in direction u2 = n2 ^ t,
    and at each time, metric tensor has to be recomputed, depending on the side */
-static int defmetrid(pMesh mesh,pSol met,int it,int ip) {
-    pTria          pt;
-    pPoint         p0,p1,p2;
+static int defmetrid(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
+    MMG5_pTria          pt;
+    MMG5_pPoint         p0,p1,p2;
     Bezier         b;
     int            k,iel,idp,ilist1,ilist2,ilist,*list,list1[LMAX+2],list2[LMAX+2],iprid[2],ier;
     double        *m,isqhmin,isqhmax,*n1,*n2,*n,*t,kappacur,b0[3],b1[3],n0[3],tau[3],trot[2],u[2];
@@ -128,11 +126,11 @@ static int defmetrid(pMesh mesh,pSol met,int it,int ip) {
     idp = pt->v[ip];
     p0  = &mesh->point[idp];
 
-    isqhmin = 1.0 / (info.hmin*info.hmin);
-    isqhmax = 1.0 / (info.hmax*info.hmax);
+    isqhmin = 1.0 / (mesh->info.hmin*mesh->info.hmin);
+    isqhmax = 1.0 / (mesh->info.hmax*mesh->info.hmax);
 
-    n1 = &mesh->geom[p0->ig].n1[0];
-    n2 = &mesh->geom[p0->ig].n2[0];
+    n1 = &mesh->xpoint[p0->ig].n1[0];
+    n2 = &mesh->xpoint[p0->ig].n2[0];
     t  = p0->n;
 
     m = &met->m[6*(idp)+1];
@@ -169,7 +167,7 @@ static int defmetrid(pMesh mesh,pSol met,int it,int ip) {
         c[2] = gammasec[2] - ps*tau[2];
 
         kappacur = MS_MAX(0.0,1.0/ll*sqrt(c[0]*c[0] + c[1]*c[1] + c[2]*c[2]));
-        kappacur = 1.0/8.0*kappacur/info.hausd;
+        kappacur = 1.0/8.0*kappacur/mesh->info.hausd;
         kappacur = MS_MIN(kappacur,isqhmin);
         kappacur = MS_MAX(kappacur,isqhmax);
         m[0] = MS_MAX(m[0],kappacur);
@@ -368,7 +366,7 @@ static int defmetrid(pMesh mesh,pSol met,int it,int ip) {
         c[2] = gammasec[2] - ps*tau[2];
 
         kappacur = MS_MAX(0.0,1.0/ll*sqrt(c[0]*c[0] + c[1]*c[1] + c[2]*c[2]));
-        kappacur = 1.0/8.0 * kappacur/info.hausd;
+        kappacur = 1.0/8.0 * kappacur/mesh->info.hausd;
         kappacur = MS_MIN(kappacur,isqhmin);
         kappacur = MS_MAX(kappacur,isqhmax);
 
@@ -380,9 +378,9 @@ static int defmetrid(pMesh mesh,pSol met,int it,int ip) {
 
 /* Define anisotropic metric map at a REF point of the geometry, associated to the
    geometric approx of the surface.*/
-static int defmetref(pMesh mesh,pSol met,int it,int ip) {
-    pTria         pt;
-    pPoint        p0,p1;
+static int defmetref(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
+    MMG5_pTria         pt;
+    MMG5_pPoint        p0,p1;
     Bezier        b;
     int           ilist,list[LMAX+2],k,iel,ipref[2],idp;
     double        *m,isqhmin,isqhmax,*n,*t,l,ll,r[3][3],lispoi[3*LMAX+1];
@@ -397,11 +395,11 @@ static int defmetref(pMesh mesh,pSol met,int it,int ip) {
     ilist = boulet(mesh,it,ip,list);
     assert(ilist);
 
-    isqhmin = 1.0 / (info.hmin*info.hmin);
-    isqhmax = 1.0 / (info.hmax*info.hmax);
+    isqhmin = 1.0 / (mesh->info.hmin*mesh->info.hmin);
+    isqhmax = 1.0 / (mesh->info.hmax*mesh->info.hmax);
 
     /* Computation of the rotation matrix T_p0 S -> [z = 0] */
-    n  = &mesh->geom[p0->ig].n1[0];
+    n  = &mesh->xpoint[p0->ig].n1[0];
     assert(rotmatrix(n,r));
     m = &met->m[6*(idp)+1];
 
@@ -614,11 +612,11 @@ static int defmetref(pMesh mesh,pSol met,int it,int ip) {
     assert(eigensym(intm,kappa,vp));
 
     /* Truncation of eigenvalues */
-    kappa[0] = 2.0/9.0 * fabs(kappa[0])/info.hausd;
+    kappa[0] = 2.0/9.0 * fabs(kappa[0])/mesh->info.hausd;
     kappa[0] = MS_MIN(kappa[0],isqhmin);
     kappa[0] = MS_MAX(kappa[0],isqhmax);
 
-    kappa[1] = 2.0/9.0 * fabs(kappa[1])/info.hausd;
+    kappa[1] = 2.0/9.0 * fabs(kappa[1])/mesh->info.hausd;
     kappa[1] = MS_MIN(kappa[1],isqhmin);
     kappa[1] = MS_MAX(kappa[1],isqhmax);
 
@@ -699,7 +697,7 @@ static int defmetref(pMesh mesh,pSol met,int it,int ip) {
     memcpy(tau,&c[0],2*sizeof(double));
 
     /* Truncation of curvature */
-    kappacur = 1.0/8.0 * kappacur/info.hausd;
+    kappacur = 1.0/8.0 * kappacur/mesh->info.hausd;
     kappacur = MS_MIN(kappacur,isqhmin);
     kappacur = MS_MAX(kappacur,isqhmax);
 
@@ -709,7 +707,7 @@ static int defmetref(pMesh mesh,pSol met,int it,int ip) {
     c[2] = kappacur*tau[1]*tau[1] + isqhmax*tau[0]*tau[0];
 
     /* Reuse b0 for commodity */
-    assert(intmetsavedir(c,intm,b0));
+    assert(intmetsavedir(mesh,c,intm,b0));
     memcpy(intm,b0,3*sizeof(double));
 
     /* At this point, intm (with 0 in the z direction)  is the desired metric, except
@@ -734,9 +732,9 @@ static int defmetref(pMesh mesh,pSol met,int it,int ip) {
 
 /* Define anisotropic metric map at a REGULAR vertex of the mesh, associated to the
    geometric approx of the surface.*/
-static int defmetreg(pMesh mesh,pSol met,int it,int ip) {
-    pTria          pt;
-    pPoint         p0,p1;
+static int defmetreg(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
+    MMG5_pTria          pt;
+    MMG5_pPoint         p0,p1;
     Bezier         b;
     int            ilist,list[LMAX+2],k,iel,idp;
     double        *n,*m,r[3][3],ux,uy,uz,lispoi[3*LMAX+1];
@@ -751,8 +749,8 @@ static int defmetreg(pMesh mesh,pSol met,int it,int ip) {
     ilist = boulet(mesh,it,ip,list);
     assert(ilist);
 
-    isqhmin = 1.0 / (info.hmin*info.hmin);
-    isqhmax = 1.0 / (info.hmax*info.hmax);
+    isqhmin = 1.0 / (mesh->info.hmin*mesh->info.hmin);
+    isqhmax = 1.0 / (mesh->info.hmax*mesh->info.hmax);
 
     /* Computation of the rotation matrix T_p0 S -> [z = 0] */
     n  = &p0->n[0];
@@ -942,11 +940,11 @@ static int defmetreg(pMesh mesh,pSol met,int it,int ip) {
     assert(eigensym(intm,kappa,vp));
 
     /* Truncation of eigenvalues */
-    kappa[0] = 2.0/9.0 * fabs(kappa[0])/info.hausd;
+    kappa[0] = 2.0/9.0 * fabs(kappa[0])/mesh->info.hausd;
     kappa[0] = MS_MIN(kappa[0],isqhmin);
     kappa[0] = MS_MAX(kappa[0],isqhmax);
 
-    kappa[1] = 2.0/9.0 * fabs(kappa[1])/info.hausd;
+    kappa[1] = 2.0/9.0 * fabs(kappa[1])/mesh->info.hausd;
     kappa[1] = MS_MIN(kappa[1],isqhmin);
     kappa[1] = MS_MAX(kappa[1],isqhmax);
 
@@ -995,14 +993,14 @@ static int defmetreg(pMesh mesh,pSol met,int it,int ip) {
     return(1);
 }
 
-int defsiz_ani(pMesh mesh,pSol met) {
-    pTria    pt;
-    pPoint   ppt;
+int defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
+    MMG5_pTria    pt;
+    MMG5_pPoint   ppt;
     double  *m,*n,mm[6],r[3][3],isqhmax;
     int      k;
     char     i,ismet;
 
-    if ( abs(info.imprim) > 5 || info.ddebug )
+    if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug )
         fprintf(stdout,"  ** Defining map\n");
 
     ismet = (met->m > 0);
@@ -1012,7 +1010,7 @@ int defsiz_ani(pMesh mesh,pSol met) {
         met->m = calloc(6*(mesh->npmax+1)+1,sizeof(double));
         assert(met->m);
     }
-    if ( info.hmax < 0.0 )  info.hmax = 0.5 * info.delta;
+    if ( mesh->info.hmax < 0.0 )  mesh->info.hmax = 0.5 * mesh->info.delta;
 
     for (k=1; k<=mesh->np; k++) {
         ppt = &mesh->point[k];
@@ -1048,7 +1046,7 @@ int defsiz_ani(pMesh mesh,pSol met) {
     }
 
     /* search for unintialized metric */
-    isqhmax = 1.0 / (info.hmax*info.hmax);
+    isqhmax = 1.0 / (mesh->info.hmax*mesh->info.hmax);
     for (k=1; k<=mesh->np; k++) {
         ppt = &mesh->point[k];
         if ( !MS_VOK(ppt) || ppt->flag == 1 )  continue;
@@ -1062,7 +1060,7 @@ int defsiz_ani(pMesh mesh,pSol met) {
             m[0] = m[1] = m[2] = isqhmax;
         }
         else {
-            n = ppt->tag & MS_REF ? &mesh->geom[ppt->ig].n1[0] : ppt->n;
+            n = ppt->tag & MS_REF ? &mesh->xpoint[ppt->ig].n1[0] : ppt->n;
             rotmatrix(n,r);
             m[0] = isqhmax*(r[0][0]*r[0][0]+r[1][0]*r[1][0]);
             m[1] = isqhmax*(r[0][0]*r[0][1]+r[1][0]*r[1][1]);
@@ -1080,9 +1078,9 @@ int defsiz_ani(pMesh mesh,pSol met) {
 /* Enforces gradation of metric in one extremity of edge i in tria k with respect to the other,
    along the direction of the associated support curve
    Return -1 if no gradation is needed, else index of graded point */
-static int grad2met(pMesh mesh, pSol met, int iel, int i){
-    pTria    pt;
-    pPoint   p1,p2;
+static int grad2met(MMG5_pMesh mesh, MMG5_pSol met, int iel, int i){
+    MMG5_pTria    pt;
+    MMG5_pPoint   p1,p2;
     double   *mm1,*mm2,*nn1,*nn2,ps1,ps2,ux,uy,uz,m1[6],m2[6],n1[3],n2[3],nt[3];
     double   r1[3][3],r2[3][3],t1[3],t2[3],c[3],mtan1[3],mtan2[3],mr[6],l1,l2,l,dd;
     double   lambda[2],vp[2][2],alpha,beta,mu;
@@ -1115,8 +1113,8 @@ static int grad2met(pMesh mesh, pSol met, int iel, int i){
         memcpy(m1,mm1,6*sizeof(double));
     }
     else if( MS_GEO & p1->tag ){
-        nn1 = &mesh->geom[p1->ig].n1[0];
-        nn2 = &mesh->geom[p1->ig].n2[0];
+        nn1 = &mesh->xpoint[p1->ig].n1[0];
+        nn2 = &mesh->xpoint[p1->ig].n2[0];
         ps1 = nt[0]*nn1[0] + nt[1]*nn1[1] + nt[2]*nn1[2];
         ps2 = nt[0]*nn2[0] + nt[1]*nn2[1] + nt[2]*nn2[2];
 
@@ -1129,7 +1127,7 @@ static int grad2met(pMesh mesh, pSol met, int iel, int i){
             return(-1);
     }
     else if( MS_REF & p1->tag ){
-        memcpy(n1,&(mesh->geom[p1->ig].n1[0]),3*sizeof(double));
+        memcpy(n1,&(mesh->xpoint[p1->ig].n1[0]),3*sizeof(double));
         memcpy(m1,mm1,6*sizeof(double));
     }
     else{
@@ -1143,8 +1141,8 @@ static int grad2met(pMesh mesh, pSol met, int iel, int i){
         memcpy(m2,mm2,6*sizeof(double));
     }
     else if ( MS_GEO & p2->tag ) {
-        nn1 = &mesh->geom[p2->ig].n1[0];
-        nn2 = &mesh->geom[p2->ig].n2[0];
+        nn1 = &mesh->xpoint[p2->ig].n1[0];
+        nn2 = &mesh->xpoint[p2->ig].n2[0];
         ps1 = nt[0]*nn1[0] + nt[1]*nn1[1] + nt[2]*nn1[2];
         ps2 = nt[0]*nn2[0] + nt[1]*nn2[1] + nt[2]*nn2[2];
 
@@ -1157,7 +1155,7 @@ static int grad2met(pMesh mesh, pSol met, int iel, int i){
             return(-1);
     }
     else if( MS_REF & p2->tag ){
-        memcpy(n2,&(mesh->geom[p2->ig].n1[0]),3*sizeof(double));
+        memcpy(n2,&(mesh->xpoint[p2->ig].n1[0]),3*sizeof(double));
         memcpy(m2,mm2,6*sizeof(double));
     }
     else{
@@ -1228,7 +1226,7 @@ static int grad2met(pMesh mesh, pSol met, int iel, int i){
 
     /* Metric in p1 has to be changed */
     if( ps2 > ps1 ){
-        alpha = ps2 /(1.0+info.hgrad*l*ps2);
+        alpha = ps2 /(1.0+mesh->info.hgrad*l*ps2);
         if( ps1 >= alpha -EPS )
             return(-1);
 
@@ -1298,7 +1296,7 @@ static int grad2met(pMesh mesh, pSol met, int iel, int i){
     }
     /* Metric in p2 has to be changed */
     else{
-        alpha = ps1 /(1.0+info.hgrad*l*ps1);
+        alpha = ps1 /(1.0+mesh->info.hgrad*l*ps1);
         if( ps2 >= alpha - EPS)
             return(-1);
 
@@ -1370,14 +1368,14 @@ static int grad2met(pMesh mesh, pSol met, int iel, int i){
 }
 
 /* Enforces mesh gradation by truncating metric field */
-int gradsiz_ani(pMesh mesh,pSol met) {
-    pTria   pt;
-    pPoint  p1,p2;
+int gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
+    MMG5_pTria   pt;
+    MMG5_pPoint  p1,p2;
     double  *m,mv;
     int     k,it,nup,nu,maxit;
     char    i,ier,i1,i2;
 
-    if ( abs(info.imprim) > 5 || info.ddebug )
+    if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug )
         fprintf(stdout,"  ** Anisotropic mesh gradation\n");
 
     mesh->base = 0;
@@ -1430,7 +1428,7 @@ int gradsiz_ani(pMesh mesh,pSol met) {
     }
     while( ++it < maxit && nu > 0 );
 
-    if ( abs(info.imprim) > 4 )  fprintf(stdout,"     gradation: %7d updated, %d iter.\n",nup,it);
+    if ( abs(mesh->info.imprim) > 4 )  fprintf(stdout,"     gradation: %7d updated, %d iter.\n",nup,it);
     return(1);
 }
 

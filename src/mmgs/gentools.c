@@ -34,8 +34,6 @@
 
 #include "mmgs.h"
 
-extern Info  info;
-
 /* Compute rotation matrix that sends vector n to the third vector of canonical basis */
 inline int rotmatrix(double n[3],double r[3][3]) {
     double aa,bb,ab,ll,l,cosalpha,sinalpha;
@@ -76,8 +74,8 @@ inline int rotmatrix(double n[3],double r[3][3]) {
     return(1);
 }
 
-double surftri_iso(pMesh mesh,pSol met,int iel) {
-    pTria    pt;
+double surftri_iso(MMG5_pMesh mesh,MMG5_pSol met,int iel) {
+    MMG5_pTria    pt;
     double   *a,*b,*c,abx,aby,abz,acx,acy,acz,det,n[3];
 
     pt = &mesh->tria[iel];
@@ -217,11 +215,11 @@ inline int eigensym(double m[3],double lambda[2],double vp[2][2]) {
 
 /* Compute the intersected (2 x 2) metric between metrics m and n, PRESERVING the directions
    of m. Result is stored in mr*/
-int intmetsavedir(double *m,double *n,double *mr) {
+int intmetsavedir(MMG5_pMesh mesh, double *m,double *n,double *mr) {
     int    i;
     double lambda[2],vp[2][2],siz,isqhmin;
 
-    isqhmin = 1.0 / (info.hmin * info.hmin);
+    isqhmin = 1.0 / (mesh->info.hmin * mesh->info.hmin);
     eigensym(m,lambda,vp);
 
     for (i=0; i<2; i++) {
@@ -237,8 +235,8 @@ int intmetsavedir(double *m,double *n,double *mr) {
 }
 
 /* Delete all triangle references in mesh */
-int delref(pMesh mesh) {
-    pTria    pt;
+int delref(MMG5_pMesh mesh) {
+    MMG5_pTria    pt;
     int      k;
 
     for(k=1; k<=mesh->nt; k++) {
@@ -252,8 +250,8 @@ int delref(pMesh mesh) {
 /* Start from triangle start, and pile up triangles by adjacency, till a GEO or REF curve is met ;
    pass all references of travelled faces to ref ; putreq = 1 if boundary edges met must
    be set to MS_REQ, 0 otherwise. */
-int setref(pMesh mesh,int start,int ref,int putreq) {
-    pTria      pt,pt1;
+int setref(MMG5_pMesh mesh,int start,int ref,int putreq) {
+    MMG5_pTria      pt,pt1;
     int        *list,*adja,cur,base,k,iel,jel,ilist;
     char       j,voy;
 
