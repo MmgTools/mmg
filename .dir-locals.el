@@ -4,7 +4,7 @@
          (fill-column              . 80 )
          (mode                     . whitespace)
          (indent-tabs-mode         . nil)
-         (tab-width                . 4 )
+         (tab-width                . 2 )
          (show-trailing-whitespace . t  )
          )
       )
@@ -12,9 +12,9 @@
  (c-mode . (
             (indent-tabs-mode         . nil)
             (c-file-style             . "linux")
-            (c-basic-offset           . 4  )))
+            (c-basic-offset           . 2  )))
 
  (cmake-mode . (
                 (cmake-file-style            . "linux")
-                (cmake-tab-width          . 4  )))
+                (cmake-tab-width          . 2  )))
  )
