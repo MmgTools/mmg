@@ -173,9 +173,9 @@ inline double calelt_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel) {
 
     anisurf = surftri_ani(mesh,met,iel);
 
-    l[0] = lenedg_ani(mesh,met,ib,ic,( pt->tag[0] & MG_GEO ));
-    l[1] = lenedg_ani(mesh,met,ia,ic,( pt->tag[1] & MG_GEO ));
-    l[2] = lenedg_ani(mesh,met,ia,ib,( pt->tag[2] & MG_GEO ));
+    l[0] = _MMG5_lenedg_ani(mesh,met,ib,ic,( pt->tag[0] & MG_GEO ));
+    l[1] = _MMG5_lenedg_ani(mesh,met,ia,ic,( pt->tag[1] & MG_GEO ));
+    l[2] = _MMG5_lenedg_ani(mesh,met,ia,ib,( pt->tag[2] & MG_GEO ));
 
     rap = l[0]*l[0] + l[1]*l[1] + l[2]*l[2];
     if ( rap < _MMG5_EPSD ) return(0.0);
@@ -301,9 +301,9 @@ inline double caleltsig_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel) {
     anisurf = surftri_ani(mesh,met,iel);
     if ( anisurf == 0.0 )  return(-1.0);
 
-    l[0] = lenedg_ani(mesh,met,ib,ic,( pt->tag[0] & MG_GEO ));
-    l[1] = lenedg_ani(mesh,met,ia,ic,( pt->tag[1] & MG_GEO ));
-    l[2] = lenedg_ani(mesh,met,ia,ib,( pt->tag[2] & MG_GEO ));
+    l[0] = _MMG5_lenedg_ani(mesh,met,ib,ic,( pt->tag[0] & MG_GEO ));
+    l[1] = _MMG5_lenedg_ani(mesh,met,ia,ic,( pt->tag[1] & MG_GEO ));
+    l[2] = _MMG5_lenedg_ani(mesh,met,ia,ib,( pt->tag[2] & MG_GEO ));
 
     rap = l[0]*l[0] + l[1]*l[1] + l[2]*l[2];
     if ( rap < _MMG5_EPSD )  return(0.0);

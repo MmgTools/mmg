@@ -315,7 +315,7 @@ static void setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
         calelt  = calelt_iso;
         defsiz  = defsiz_iso;
         gradsiz = gradsiz_iso;
-        lenedg  = lenedg_iso;
+        _MMG5_lenedg  = _MMG5_lenedg_iso;
         intmet  = intmet_iso;
         movintpt= movintpt_iso;
         movridpt= movridpt_iso;
@@ -324,7 +324,7 @@ static void setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
         calelt  = calelt_ani;
         defsiz  = defsiz_ani;
         gradsiz = gradsiz_ani;
-        lenedg  = lenedg_ani;
+        _MMG5_lenedg  = _MMG5_lenedg_ani;
         intmet  = intmet_ani;
         movintpt= movintpt_ani;
         movridpt= movridpt_ani;

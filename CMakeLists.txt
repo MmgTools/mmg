@@ -50,7 +50,7 @@ CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/src/common/mmg.h.in
 
 # Executable path
 SET(EXECUTABLE_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/bin)
-SET(MMG_SOURCE_DIR ${CMAKE_SOURCE_DIR}/src/mmg3d)
+SET(MMG3D_SOURCE_DIR ${CMAKE_SOURCE_DIR}/src/mmg3d)
 SET(MMGS_SOURCE_DIR ${CMAKE_SOURCE_DIR}/src/mmgs)
 SET(COMMON_SOURCE_DIR ${CMAKE_SOURCE_DIR}/src/common)
 
@@ -134,10 +134,10 @@ IF ( BUILD_MMG3D OR BUILD_MMG )
     ###############################################################################
     ADD_EXECUTABLE(genheader ${CMAKE_SOURCE_DIR}/scripts/genheader.c)
 
-    ADD_CUSTOM_COMMAND(OUTPUT ${MMG_SOURCE_DIR}/libmmg3df.h
-        COMMAND genheader ${MMG_SOURCE_DIR}/libmmg3df.h ${MMG_SOURCE_DIR}/libmmg3d.h ${CMAKE_SOURCE_DIR}/scripts/genfort.pl
+    ADD_CUSTOM_COMMAND(OUTPUT ${MMG3D_SOURCE_DIR}/libmmg3df.h
+        COMMAND genheader ${MMG3D_SOURCE_DIR}/libmmg3df.h ${MMG3D_SOURCE_DIR}/libmmg3d.h ${CMAKE_SOURCE_DIR}/scripts/genfort.pl
         WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-        DEPENDS genheader ${MMG_SOURCE_DIR}/libmmg3d.h ${CMAKE_SOURCE_DIR}/scripts/genfort.pl
+        DEPENDS genheader ${MMG3D_SOURCE_DIR}/libmmg3d.h ${CMAKE_SOURCE_DIR}/scripts/genfort.pl
         COMMENT "Generating Fortran header"
         )
     
@@ -167,30 +167,31 @@ ENDIF()
 #####
 ###############################################################################
 # Header files
-INCLUDE_DIRECTORIES(${MMG_SOURCE_DIR})
+INCLUDE_DIRECTORIES(${MMG3D_SOURCE_DIR})
+INCLUDE_DIRECTORIES(${MMGS_SOURCE_DIR})
 
 # Source files
 FILE(
     GLOB
     source_files
-    ${MMG_SOURCE_DIR}/*.c   ${MMG_SOURCE_DIR}/*.h
+    ${MMG3D_SOURCE_DIR}/*.c   ${MMG3D_SOURCE_DIR}/*.h
     ${COMMON_SOURCE_DIR}/*.c ${COMMON_SOURCE_DIR}/*.h
     )
 LIST(REMOVE_ITEM source_files
-    ${MMG_SOURCE_DIR}/mmg3d.c
-    ${MMG_SOURCE_DIR}/lib${PROJECT_NAME}3d.c
-    ${MMG_SOURCE_DIR}/lib${PROJECT_NAME}3df.c
+    ${MMG3D_SOURCE_DIR}/mmg3d.c
+    ${MMG3D_SOURCE_DIR}/lib${PROJECT_NAME}3d.c
+    ${MMG3D_SOURCE_DIR}/lib${PROJECT_NAME}3df.c
     ${REMOVE_FILE})
 FILE(
     GLOB
     main_file
-    ${MMG_SOURCE_DIR}/mmg3d.c
+    ${MMG3D_SOURCE_DIR}/mmg3d.c
     )
 FILE(
     GLOB
     lib_file
-    ${MMG_SOURCE_DIR}/lib${PROJECT_NAME}3d.c
-    ${MMG_SOURCE_DIR}/lib${PROJECT_NAME}3df.c
+    ${MMG3D_SOURCE_DIR}/lib${PROJECT_NAME}3d.c
+    ${MMG3D_SOURCE_DIR}/lib${PROJECT_NAME}3df.c
     )
 FILE(
     GLOB
@@ -276,12 +277,12 @@ IF ( BUILD_MMG3D OR BUILD_MMG )
     OPTION ( LIBMMG3D_STATIC "Compile static library" ON)
     IF ( LIBMMG3D_STATIC )
         ADD_LIBRARY(${PROJECT_NAME}3d_a  STATIC
-            ${MMG_SOURCE_DIR}/lib${PROJECT_NAME}3df.h
+            ${MMG3D_SOURCE_DIR}/lib${PROJECT_NAME}3df.h
             ${source_files} ${lib_file} )
         SET_TARGET_PROPERTIES(${PROJECT_NAME}3d_a PROPERTIES OUTPUT_NAME ${PROJECT_NAME}3d)
         TARGET_LINK_LIBRARIES(${PROJECT_NAME}3d_a ${LIBRARIES})
-        INSTALL(FILES ${MMG_SOURCE_DIR}/lib${PROJECT_NAME}3df.h DESTINATION include)
-        INSTALL(FILES ${MMG_SOURCE_DIR}/lib${PROJECT_NAME}3d.h DESTINATION include)
+        INSTALL(FILES ${MMG3D_SOURCE_DIR}/lib${PROJECT_NAME}3df.h DESTINATION include)
+        INSTALL(FILES ${MMG3D_SOURCE_DIR}/lib${PROJECT_NAME}3d.h DESTINATION include)
         INSTALL(FILES ${COMMON_SOURCE_DIR}/chrono.h DESTINATION include)
         INSTALL(TARGETS ${PROJECT_NAME}3d_a
             ARCHIVE DESTINATION lib
@@ -292,12 +293,12 @@ IF ( BUILD_MMG3D OR BUILD_MMG )
     OPTION ( LIBMMG3D_SHARED "Compile dynamic library" OFF)
     IF ( LIBMMG3D_SHARED )
         ADD_LIBRARY(${PROJECT_NAME}3d_so SHARED
-            ${MMG_SOURCE_DIR}/lib${PROJECT_NAME}3df.h
+            ${MMG3D_SOURCE_DIR}/lib${PROJECT_NAME}3df.h
             ${source_files} ${lib_file})
         SET_TARGET_PROPERTIES(${PROJECT_NAME}3d_so PROPERTIES OUTPUT_NAME ${PROJECT_NAME}3d)
         TARGET_LINK_LIBRARIES(${PROJECT_NAME}3d_so ${LIBRARIES})
-        INSTALL(FILES ${MMG_SOURCE_DIR}/lib${PROJECT_NAME}3df.h DESTINATION include)
-        INSTALL(FILES ${MMG_SOURCE_DIR}/lib${PROJECT_NAME}3d.h DESTINATION include)
+        INSTALL(FILES ${MMG3D_SOURCE_DIR}/lib${PROJECT_NAME}3df.h DESTINATION include)
+        INSTALL(FILES ${MMG3D_SOURCE_DIR}/lib${PROJECT_NAME}3d.h DESTINATION include)
         INSTALL(FILES ${COMMON_SOURCE_DIR}/chrono.h DESTINATION include)
         INSTALL(TARGETS ${PROJECT_NAME}3d_so
             ARCHIVE DESTINATION
@@ -368,7 +369,7 @@ IF ( BUILD_MMG3D OR BUILD_MMG )
     #####
     ###############################################################################
     ADD_EXECUTABLE(${PROJECT_NAME}3d
-        ${MMG_SOURCE_DIR}/lib${PROJECT_NAME}3df.h
+        ${MMG3D_SOURCE_DIR}/lib${PROJECT_NAME}3df.h
         ${source_files} ${main_file})
     TARGET_LINK_LIBRARIES(${PROJECT_NAME}3d ${LIBRARIES})
     INSTALL(TARGETS ${PROJECT_NAME}3d RUNTIME DESTINATION bin)

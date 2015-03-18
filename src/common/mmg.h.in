@@ -34,12 +34,12 @@
 #include <float.h>
 #include <math.h>
 
+#include "libmmg.h"
+
 #define MG_VER   "@CMAKE_RELEASE_VERSION@"" c"
 #define MG_REL   "@CMAKE_RELEASE_DATE@"
 #define MG_CPY   "Copyright (c) IMB-LJLL, 2004-"
 #define MG_STR   "&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&"
-
-#include "libmmg.h"
 
 /* numerical accuracy */
 #define _MMG5_EPSD      1.e-30
@@ -72,5 +72,13 @@ typedef _MMG5_Bezier * _MMG5_pBezier;
 
 int  _MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met);
 int  _MMG5_unscaleMesh(MMG5_pMesh mesh,MMG5_pSol met);
+
+int _MMG5_buildridmet(MMG5_pMesh mesh,MMG5_pSol met,int np0,
+                      double ux,double uy,double uz,double mr[6]);
+
+/* function pointers */
+double _MMG5_lenedg_iso(MMG5_pMesh ,MMG5_pSol ,int ,int, char );
+double _MMG5_lenedg_ani(MMG5_pMesh mesh,MMG5_pSol met,int ip1,int ip2,char isedg);
+double (*_MMG5_lenedg)(MMG5_pMesh mesh,MMG5_pSol sol ,int ,int, char );
 
 #endif

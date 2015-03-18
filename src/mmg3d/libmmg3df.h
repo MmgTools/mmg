@@ -48,7 +48,7 @@
 ! #ifndef _MMG3DLIB_H
 
 ! #include "chrono.h"
-! #include "libmmg.h"
+! #include "mmg.h"
 ! /**
 !  * \def MMG5_SUCCESS
 !  *

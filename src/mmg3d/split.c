@@ -285,7 +285,7 @@ int _MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,int 
     MMG5_pxTetra        pxt0;
     int            ilist,k,open,iel,jel,*newtet,nump,*adja,j;
     int            *adjan,nei2,nei3,mel;
-    char           ie,tau[4],isxt,isxt1,i,voy;
+    char           ie,tau[4],isxt,isxt1,i,voy,tag;
     unsigned char  *taued;
     double         lmin,lmax,len;
 
@@ -297,8 +297,10 @@ int _MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,int 
         lmax = 1.3;
         for (j=0; j<ilist; j++) {
             for (i=0; i<6; i++) {
-                len = _MMG5_lenedg(mesh,met, mesh->tetra[list[j]/6].v[_MMG5_iare[i][0]],
-                             mesh->tetra[list[j]/6].v[_MMG5_iare[i][1]]);
+                pt   = &mesh->tetra[list[j]/6];
+                tag  = pt->xt ? (mesh->xtetra[pt->xt].tag[i]) : 0;
+                len  = _MMG5_lenedg(mesh,met, pt->v[_MMG5_iare[i][0]],
+                                   pt->v[_MMG5_iare[i][1]],tag);
                 if ( len < lmin) {
                     lmin = len;
                 }
@@ -312,9 +314,9 @@ int _MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,int 
             iel = list[j] / 6;
             pt  = &mesh->tetra[iel];
             ie  = list[j] % 6;
-            len = _MMG5_lenedg(mesh,met, pt->v[_MMG5_isar[ie][0]],ip);
+            len = _MMG5_lenedg(mesh,met, pt->v[_MMG5_isar[ie][0]],ip,0);
             if ( len < lmin )  break;
-            len = _MMG5_lenedg(mesh,met, pt->v[_MMG5_isar[ie][1]],ip);
+            len = _MMG5_lenedg(mesh,met, pt->v[_MMG5_isar[ie][1]],ip,0);
             if ( len < lmin )  break;
         }
         if ( j < ilist )  return(0);

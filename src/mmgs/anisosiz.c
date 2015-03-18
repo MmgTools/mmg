@@ -1123,7 +1123,7 @@ static int grad2met(MMG5_pMesh mesh, MMG5_pSol met, int iel, int i){
         else
             memcpy(n1,nn1,3*sizeof(double));
 
-        if( !buildridmet(mesh,met,np1,ux,uy,uz,m1) )
+        if( !_MMG5_buildridmet(mesh,met,np1,ux,uy,uz,m1) )
             return(-1);
     }
     else if( MG_REF & p1->tag ){
@@ -1151,7 +1151,7 @@ static int grad2met(MMG5_pMesh mesh, MMG5_pSol met, int iel, int i){
         else
             memcpy(n2,nn1,3*sizeof(double));
 
-        if( !buildridmet(mesh,met,np2,ux,uy,uz,m2) )
+        if( !_MMG5_buildridmet(mesh,met,np2,ux,uy,uz,m2) )
             return(-1);
     }
     else if( MG_REF & p2->tag ){

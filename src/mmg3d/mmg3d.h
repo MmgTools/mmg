@@ -34,7 +34,6 @@
 #endif
 
 #include "libmmg3d.h"
-#include "mmg.h"
 
 #define MG_SMSGN(a,b)  (((double)(a)*(double)(b) > (0.0)) ? (1) : (0))
 
@@ -515,8 +514,6 @@ int  _MMG5_swptet(MMG5_pMesh mesh,MMG5_pSol met,double crit,_MMG5_pBucket bucket
 /* pointers */
 double _MMG5_caltet_ani(MMG5_pMesh mesh,MMG5_pSol met,int ia,int ib,int ic,int id);
 double _MMG5_caltet_iso(MMG5_pMesh mesh,MMG5_pSol met,int ia,int ib,int ic,int id);
-double _MMG5_lenedg_ani(MMG5_pMesh ,MMG5_pSol ,int ,int );
-double _MMG5_lenedg_iso(MMG5_pMesh ,MMG5_pSol ,int ,int );
 double _MMG5_lenedgCoor_ani(double*, double*, double*, double*);
 double _MMG5_lenedgCoor_iso(double*, double*, double*, double*);
 int    _MMG5_defsiz_iso(MMG5_pMesh,MMG5_pSol );
@@ -526,7 +523,6 @@ int    _MMG5_gradsiz_ani(MMG5_pMesh ,MMG5_pSol );
 
 double (*_MMG5_caltet)(MMG5_pMesh mesh,MMG5_pSol met,int ia,int ib,int ic,int id);
 int    (*_MMG5_defsiz)(MMG5_pMesh ,MMG5_pSol );
-double (*_MMG5_lenedg)(MMG5_pMesh mesh,MMG5_pSol sol ,int ,int );
 int    (*_MMG5_gradsiz)(MMG5_pMesh ,MMG5_pSol );
 
 #endif

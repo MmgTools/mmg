@@ -28,7 +28,6 @@
 
 #include "eigenv.h"
 #include "memory.h"
-#include "libmmg.h"
 #include "mmg.h"
 
 /* numerical accuracy */
@@ -127,7 +126,6 @@ int  invmatg(double m[9],double mi[9]);
 int  rootDeg2(double complex a[3], double complex r[2]);
 int  rootDeg3(double a[4],double complex r[3]);
 
-int  buildridmet(MMG5_pMesh mesh,MMG5_pSol met,int np0,double ux,double uy,double uz,double mr[6]);
 int  buildridmetnor(MMG5_pMesh mesh,MMG5_pSol met,int np0,double nt[3],double mr[6]);
 int  buildridmetfic(MMG5_pMesh mesh,double t[3],double n[3],double dtan,double dv,double m[6]);
 int  rotmatrix(double n[3], double r[3][3]);
@@ -152,8 +150,6 @@ int    defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met);
 int    defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met);
 int    gradsiz_iso(MMG5_pMesh mesh,MMG5_pSol met);
 int    gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met);
-double lenedg_iso(MMG5_pMesh mesh,MMG5_pSol met,int ip1,int ip2,char isedg);
-double lenedg_ani(MMG5_pMesh mesh,MMG5_pSol met,int ip1,int ip2,char isedg);
 void   intmet_iso(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int ip,double s);
 void   intmet_ani(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int ip,double s);
 int    movridpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist);
@@ -162,7 +158,6 @@ int    movridpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist);
 int    movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist);
 
 double (*calelt)(MMG5_pMesh mesh,MMG5_pSol met,int iel);
-double (*lenedg)(MMG5_pMesh ,MMG5_pSol ,int ,int ,char );
 int    (*defsiz)(MMG5_pMesh mesh,MMG5_pSol met);
 int    (*gradsiz)(MMG5_pMesh mesh,MMG5_pSol met);
 void   (*intmet)(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int ip,double s);

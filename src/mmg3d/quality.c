@@ -37,29 +37,6 @@
 
 extern char ddb;
 
-inline double _MMG5_lenedg_ani(MMG5_pMesh mesh,MMG5_pSol met,int ip1,int ip2) {
-    return(0.0);
-}
-
-/** Compute length of edge [ip1,ip2] according to the size prescription */
-inline double _MMG5_lenedg_iso(MMG5_pMesh mesh,MMG5_pSol met,int ip1,int ip2) {
-    MMG5_pPoint   p1,p2;
-    double   h1,h2,l,r,len;
-
-    p1 = &mesh->point[ip1];
-    p2 = &mesh->point[ip2];
-    h1 = met->m[ip1];
-    h2 = met->m[ip2];
-    l = (p2->c[0]-p1->c[0])*(p2->c[0]-p1->c[0]) + (p2->c[1]-p1->c[1])*(p2->c[1]-p1->c[1]) \
-        + (p2->c[2]-p1->c[2])*(p2->c[2]-p1->c[2]);
-    l = sqrt(l);
-    r = h2 / h1 - 1.0;
-    len = fabs(r) < _MMG5_EPS ? l / h1 : l / (h2-h1) * log(r+1.0);
-
-    return(len);
-}
-
-
 /** Return quality of surface triangle */
 inline double _MMG5_caltri(MMG5_pMesh mesh,MMG5_pTria ptt) {
     double   *a,*b,*c,cal,abx,aby,abz,acx,acy,acz,bcx,bcy,bcz,rap;
@@ -570,8 +547,9 @@ int _MMG5_badelt(MMG5_pMesh mesh,MMG5_pSol met) {
 
 /** Compute sizes of edges of the mesh, and displays histo */
 int _MMG5_prilen(MMG5_pMesh mesh, MMG5_pSol met) {
-    MMG5_pTetra          pt;
-    _MMG5_Hash           hash;
+    MMG5_pTetra     pt;
+    MMG5_pxTetra    pxt;
+    _MMG5_Hash      hash;
     double          len,avlen,dned,lmin,lmax;
     int             k,np,nq,amin,bmin,amax,bmax,ned,hl[9];
     char            ia,i0,i1,ier,i;
@@ -610,6 +588,7 @@ int _MMG5_prilen(MMG5_pMesh mesh, MMG5_pSol met) {
     for(k=1; k<=mesh->ne; k++) {
         pt = &mesh->tetra[k];
         if ( !MG_EOK(pt) ) continue;
+        pxt = pt->xt ? &mesh->xtetra[pt->xt] : 0;
 
         for(ia=0; ia<6; ia++) {
             i0 = _MMG5_iare[ia][0];
@@ -621,7 +600,11 @@ int _MMG5_prilen(MMG5_pMesh mesh, MMG5_pSol met) {
             ier = _MMG5_hashPop(&hash,np,nq);
             if( ier ) {
                 ned ++;
-                len = _MMG5_lenedg(mesh,met,np,nq);
+                if ( pt->xt )
+                    len = _MMG5_lenedg(mesh,met,np,nq,(pxt->tag[ia] & MG_GEO));
+                else
+                    len = _MMG5_lenedg(mesh,met,np,nq,0);
+
                 avlen += len;
 
                 if( len < lmin ) {
@@ -772,15 +755,16 @@ void _MMG5_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
  */
 int _MMG5_countelt(MMG5_pMesh mesh,MMG5_pSol sol, double *weightelt, long *npcible) {
     MMG5_pTetra pt;
-    double  len;
-    int    k,ia,ipa,ipb,lon,l;
+    MMG5_pxTetra pxt;
+    double      len;
+    int         k,ia,ipa,ipb,lon,l;
     //int   npbdry;
     int    *pdel,lenint,loc,nedel,longen;
     int      isbdry;
     double   dned,dnface,dnint/*,dnins*/,w,lenavg,lent[6];
     double   dnpdel,dnadd,leninv,dnaddloc,dnpdelloc;
-    int   list[_MMG5_LMAX],ddebug,ib;
-    long  nptot;
+    int      list[_MMG5_LMAX],ddebug=0,ib;
+    long     nptot;
     //FILE *inm;
 
     pdel = (int*) calloc(mesh->np+1,sizeof(int));
@@ -802,17 +786,18 @@ int _MMG5_countelt(MMG5_pMesh mesh,MMG5_pSol sol, double *weightelt, long *npcib
     for (k=1; k<=mesh->ne; k++) {
         pt = &mesh->tetra[k];
         if ( !pt->v[0] )  continue;
-        if(0 && k==250343) ddebug = 1;
-        else ddebug = 0;
-
-        if(ddebug) printf("on traite %d %e\n",k,_MMG5_ALPHAD*pt->qual);
+        pxt = pt->xt ? &mesh->xtetra[pt->xt] : 0;
 
         /*longueur moyenne*/
         lenavg = 0;
         for(ib=0 ; ib<6 ; ib++) {
             ipa = _MMG5_iare[ib][0];
             ipb = _MMG5_iare[ib][1];
-            lent[ib] = _MMG5_lenedg(mesh,sol,pt->v[ipa],pt->v[ipb]);
+            if ( pt->xt )
+                lent[ib] = _MMG5_lenedg(mesh,sol,pt->v[ipa],pt->v[ipb],
+                                        (pxt->tag[ib] & MG_GEO ));
+            else
+                lent[ib] = _MMG5_lenedg(mesh,sol,pt->v[ipa],pt->v[ipb],0);
             lenavg+=lent[ib];
         }
         lenavg /= 6.;
