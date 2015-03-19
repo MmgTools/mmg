@@ -51,46 +51,46 @@
  */
 int _MMG5_buildridmet(MMG5_pMesh mesh,MMG5_pSol met,int np0,
                       double ux,double uy,double uz,double mr[6]) {
-    MMG5_pPoint p0;
-    MMG5_pxPoint  go;
-    double ps1,ps2,*n1,*n2,*t,*m,dv,u[3],r[3][3];
+  MMG5_pPoint p0;
+  MMG5_pxPoint  go;
+  double ps1,ps2,*n1,*n2,*t,*m,dv,u[3],r[3][3];
 
-    p0 = &mesh->point[np0];
-    if ( !(MG_GEO & p0->tag) )  return(0);
-    m = &met->m[6*(np0)+1];
-    t = &p0->n[0];
-    go = &mesh->xpoint[p0->ig];
+  p0 = &mesh->point[np0];
+  if ( !(MG_GEO & p0->tag) )  return(0);
+  m = &met->m[6*(np0)+1];
+  t = &p0->n[0];
+  go = &mesh->xpoint[p0->ig];
 
-    /* Decide between the two possible configurations */
-    n1 = &go->n1[0];
-    n2 = &go->n2[0];
+  /* Decide between the two possible configurations */
+  n1 = &go->n1[0];
+  n2 = &go->n2[0];
 
-    ps1 = ux*n1[0] + uy*n1[1] + uz*n1[2];
-    ps2 = ux*n2[0] + uy*n2[1] + uz*n2[2];
+  ps1 = ux*n1[0] + uy*n1[1] + uz*n1[2];
+  ps2 = ux*n2[0] + uy*n2[1] + uz*n2[2];
 
-    if ( fabs(ps2)<fabs(ps1) ) {
-        n1 = &go->n2[0];
-        dv = m[2];
-    }
-    else{
-        dv = m[1];
-    }
+  if ( fabs(ps2)<fabs(ps1) ) {
+    n1 = &go->n2[0];
+    dv = m[2];
+  }
+  else{
+    dv = m[1];
+  }
 
-    u[0] = n1[1]*t[2] - n1[2]*t[1];
-    u[1] = n1[2]*t[0] - n1[0]*t[2];
-    u[2] = n1[0]*t[1] - n1[1]*t[0];
+  u[0] = n1[1]*t[2] - n1[2]*t[1];
+  u[1] = n1[2]*t[0] - n1[0]*t[2];
+  u[2] = n1[0]*t[1] - n1[1]*t[0];
 
-    /* If u = n1 ^ t, matrix of the desired metric in (t,u,n1) = diag(m[0],dv,0)*/
-    r[0][0] = t[0];  r[0][1] = u[0];  r[0][2] = n1[0];
-    r[1][0] = t[1];  r[1][1] = u[1];  r[1][2] = n1[1];
-    r[2][0] = t[2];  r[2][1] = u[2];  r[2][2] = n1[2];
+  /* If u = n1 ^ t, matrix of the desired metric in (t,u,n1) = diag(m[0],dv,0)*/
+  r[0][0] = t[0];  r[0][1] = u[0];  r[0][2] = n1[0];
+  r[1][0] = t[1];  r[1][1] = u[1];  r[1][2] = n1[1];
+  r[2][0] = t[2];  r[2][1] = u[2];  r[2][2] = n1[2];
 
-    mr[0] = m[0]*r[0][0]*r[0][0] + dv*r[0][1]*r[0][1];
-    mr[1] = m[0]*r[0][0]*r[1][0] + dv*r[0][1]*r[1][1];
-    mr[2] = m[0]*r[0][0]*r[2][0] + dv*r[0][1]*r[2][1];
-    mr[3] = m[0]*r[1][0]*r[1][0] + dv*r[1][1]*r[1][1];
-    mr[4] = m[0]*r[1][0]*r[2][0] + dv*r[1][1]*r[2][1];
-    mr[5] = m[0]*r[2][0]*r[2][0] + dv*r[2][1]*r[2][1];
+  mr[0] = m[0]*r[0][0]*r[0][0] + dv*r[0][1]*r[0][1];
+  mr[1] = m[0]*r[0][0]*r[1][0] + dv*r[0][1]*r[1][1];
+  mr[2] = m[0]*r[0][0]*r[2][0] + dv*r[0][1]*r[2][1];
+  mr[3] = m[0]*r[1][0]*r[1][0] + dv*r[1][1]*r[1][1];
+  mr[4] = m[0]*r[1][0]*r[2][0] + dv*r[1][1]*r[2][1];
+  mr[5] = m[0]*r[2][0]*r[2][0] + dv*r[2][1]*r[2][1];
 
-    return(1);
+  return(1);
 }

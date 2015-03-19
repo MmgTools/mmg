@@ -42,18 +42,18 @@
  *
  */
 inline double _MMG5_lenedg_iso(MMG5_pMesh mesh,MMG5_pSol met,int ip1,int ip2, char isedg) {
-    MMG5_pPoint   p1,p2;
-    double   h1,h2,l,r,len;
+  MMG5_pPoint   p1,p2;
+  double   h1,h2,l,r,len;
 
-    p1 = &mesh->point[ip1];
-    p2 = &mesh->point[ip2];
-    h1 = met->m[ip1];
-    h2 = met->m[ip2];
-    l = (p2->c[0]-p1->c[0])*(p2->c[0]-p1->c[0]) + (p2->c[1]-p1->c[1])*(p2->c[1]-p1->c[1]) \
-        + (p2->c[2]-p1->c[2])*(p2->c[2]-p1->c[2]);
-    l = sqrt(l);
-    r = h2 / h1 - 1.0;
-    len = fabs(r) < _MMG5_EPS ? l / h1 : l / (h2-h1) * log(r+1.0);
+  p1 = &mesh->point[ip1];
+  p2 = &mesh->point[ip2];
+  h1 = met->m[ip1];
+  h2 = met->m[ip2];
+  l = (p2->c[0]-p1->c[0])*(p2->c[0]-p1->c[0]) + (p2->c[1]-p1->c[1])*(p2->c[1]-p1->c[1]) \
+    + (p2->c[2]-p1->c[2])*(p2->c[2]-p1->c[2]);
+  l = sqrt(l);
+  r = h2 / h1 - 1.0;
+  len = fabs(r) < _MMG5_EPS ? l / h1 : l / (h2-h1) * log(r+1.0);
 
-    return(len);
+  return(len);
 }

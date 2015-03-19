@@ -64,9 +64,9 @@
 #define MG_EOK(pt)       (pt && ((pt)->v[0] > 0))       /**< Element OK */
 
 typedef struct {
-    double  b[10][3]; /**< Bezier basis functions */
-    double  n[6][3],t[6][3]; /**< normals and tangents at points */
-    MMG5_pPoint  p[3];
+  double  b[10][3]; /**< Bezier basis functions */
+  double  n[6][3],t[6][3]; /**< normals and tangents at points */
+  MMG5_pPoint  p[3];
 } _MMG5_Bezier;
 typedef _MMG5_Bezier * _MMG5_pBezier;
 

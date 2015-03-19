@@ -36,117 +36,117 @@
 #include "mmg.h"
 
 int _MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met) {
-    MMG5_pPoint    ppt;
-    double         dd,d1;
-    int            i,k;
-    MMG5_pPar      par;
+  MMG5_pPoint    ppt;
+  double         dd,d1;
+  int            i,k;
+  MMG5_pPar      par;
 
-    /* compute bounding box */
+  /* compute bounding box */
+  for (i=0; i<3; i++) {
+    mesh->info.min[i] =  DBL_MAX;
+    mesh->info.max[i] = -DBL_MAX;
+  }
+  for (k=1; k<=mesh->np; k++) {
+    ppt = &mesh->point[k];
+    if ( !MG_VOK(ppt) )  continue;
     for (i=0; i<3; i++) {
-        mesh->info.min[i] =  DBL_MAX;
-        mesh->info.max[i] = -DBL_MAX;
+      if ( ppt->c[i] > mesh->info.max[i] )  mesh->info.max[i] = ppt->c[i];
+      if ( ppt->c[i] < mesh->info.min[i] )  mesh->info.min[i] = ppt->c[i];
     }
-    for (k=1; k<=mesh->np; k++) {
-        ppt = &mesh->point[k];
-        if ( !MG_VOK(ppt) )  continue;
-        for (i=0; i<3; i++) {
-            if ( ppt->c[i] > mesh->info.max[i] )  mesh->info.max[i] = ppt->c[i];
-            if ( ppt->c[i] < mesh->info.min[i] )  mesh->info.min[i] = ppt->c[i];
-        }
-        ppt->tmp = 0;
-    }
-    mesh->info.delta = 0.0;
-    for (i=0; i<3; i++) {
-        dd = mesh->info.max[i] - mesh->info.min[i];
-        if ( dd > mesh->info.delta )  mesh->info.delta = dd;
-    }
-    if ( mesh->info.delta < _MMG5_EPSD ) {
-        fprintf(stdout,"  ## Unable to scale mesh.\n");
-        return(0);
-    }
+    ppt->tmp = 0;
+  }
+  mesh->info.delta = 0.0;
+  for (i=0; i<3; i++) {
+    dd = mesh->info.max[i] - mesh->info.min[i];
+    if ( dd > mesh->info.delta )  mesh->info.delta = dd;
+  }
+  if ( mesh->info.delta < _MMG5_EPSD ) {
+    fprintf(stdout,"  ## Unable to scale mesh.\n");
+    return(0);
+  }
 
-    /* normalize coordinates */
-    dd = 1.0 / mesh->info.delta;
-    for (k=1; k<=mesh->np; k++) {
-        ppt = &mesh->point[k];
-        if ( !MG_VOK(ppt) )  continue;
-        ppt->c[0] = dd * (ppt->c[0] - mesh->info.min[0]);
-        ppt->c[1] = dd * (ppt->c[1] - mesh->info.min[1]);
-        ppt->c[2] = dd * (ppt->c[2] - mesh->info.min[2]);
+  /* normalize coordinates */
+  dd = 1.0 / mesh->info.delta;
+  for (k=1; k<=mesh->np; k++) {
+    ppt = &mesh->point[k];
+    if ( !MG_VOK(ppt) )  continue;
+    ppt->c[0] = dd * (ppt->c[0] - mesh->info.min[0]);
+    ppt->c[1] = dd * (ppt->c[1] - mesh->info.min[1]);
+    ppt->c[2] = dd * (ppt->c[2] - mesh->info.min[2]);
+  }
+
+  /* normalize values */
+  mesh->info.hmin  *= dd;
+  mesh->info.hmax  *= dd;
+  mesh->info.hausd *= dd;
+
+  /* normalize sizes */
+  if ( met->m ) {
+    if ( met->size == 1 ) {
+      for (k=1; k<=mesh->np; k++)    met->m[k] *= dd;
     }
-
-    /* normalize values */
-    mesh->info.hmin  *= dd;
-    mesh->info.hmax  *= dd;
-    mesh->info.hausd *= dd;
-
-    /* normalize sizes */
-    if ( met->m ) {
-        if ( met->size == 1 ) {
-            for (k=1; k<=mesh->np; k++)    met->m[k] *= dd;
-        }
-        else {
-            d1 = 1.0 / (dd*dd);
-            for (k=1; k<=6*mesh->np; k++)  met->m[k] *= d1;
-        }
+    else {
+      d1 = 1.0 / (dd*dd);
+      for (k=1; k<=6*mesh->np; k++)  met->m[k] *= d1;
     }
+  }
 
-    /* normalize local parameters */
-    for (k=0; k<mesh->info.npar; k++) {
-        par = &mesh->info.par[k];
-        par->hmin  *= dd;
-        par->hmax  *= dd;
-        par->hausd *= dd;
-    }
+  /* normalize local parameters */
+  for (k=0; k<mesh->info.npar; k++) {
+    par = &mesh->info.par[k];
+    par->hmin  *= dd;
+    par->hmax  *= dd;
+    par->hausd *= dd;
+  }
 
-    return(1);
+  return(1);
 }
 
 int _MMG5_unscaleMesh(MMG5_pMesh mesh,MMG5_pSol met) {
-    MMG5_pPoint     ppt;
-    double     dd;
-    int        k,i;
-    MMG5_pPar       par;
+  MMG5_pPoint     ppt;
+  double     dd;
+  int        k,i;
+  MMG5_pPar       par;
 
-    /* de-normalize coordinates */
-    dd = mesh->info.delta;
-    for (k=1; k<=mesh->np; k++) {
+  /* de-normalize coordinates */
+  dd = mesh->info.delta;
+  for (k=1; k<=mesh->np; k++) {
+    ppt = &mesh->point[k];
+    if ( !MG_VOK(ppt) )  continue;
+    ppt->c[0] = ppt->c[0] * dd + mesh->info.min[0];
+    ppt->c[1] = ppt->c[1] * dd + mesh->info.min[1];
+    ppt->c[2] = ppt->c[2] * dd + mesh->info.min[2];
+  }
+
+  /* unscale sizes */
+  if ( met->m ) {
+    if ( met->size == 6 ) {
+      dd = 1.0 / (dd*dd);
+      for (k=1; k<=mesh->np; k++) {
         ppt = &mesh->point[k];
         if ( !MG_VOK(ppt) )  continue;
-        ppt->c[0] = ppt->c[0] * dd + mesh->info.min[0];
-        ppt->c[1] = ppt->c[1] * dd + mesh->info.min[1];
-        ppt->c[2] = ppt->c[2] * dd + mesh->info.min[2];
+        for (i=0; i<6; i++)  met->m[6*(k)+1+i] *= dd;
+      }
     }
-
-    /* unscale sizes */
-    if ( met->m ) {
-        if ( met->size == 6 ) {
-            dd = 1.0 / (dd*dd);
-            for (k=1; k<=mesh->np; k++) {
-                ppt = &mesh->point[k];
-                if ( !MG_VOK(ppt) )  continue;
-                for (i=0; i<6; i++)  met->m[6*(k)+1+i] *= dd;
-            }
-        }
-        else {
-            dd = 1.0 / dd;
-            for (k=1; k<=mesh->np ; k++) {
-                ppt = &mesh->point[k];
-                if ( MG_VOK(ppt) )  met->m[k] *= dd;
-            }
-        }
+    else {
+      dd = 1.0 / dd;
+      for (k=1; k<=mesh->np ; k++) {
+        ppt = &mesh->point[k];
+        if ( MG_VOK(ppt) )  met->m[k] *= dd;
+      }
     }
+  }
 
-    /* unscale paramter values */
-    mesh->info.hmin  *= dd;
-    mesh->info.hmax  *= dd;
-    mesh->info.hausd *= dd;
+  /* unscale paramter values */
+  mesh->info.hmin  *= dd;
+  mesh->info.hmax  *= dd;
+  mesh->info.hausd *= dd;
 
-    /* normalize local parameters */
-    for (k=0; k<mesh->info.npar; k++) {
-        par = &mesh->info.par[k];
-        par->hausd *= dd;
-    }
+  /* normalize local parameters */
+  for (k=0; k<mesh->info.npar; k++) {
+    par = &mesh->info.par[k];
+    par->hausd *= dd;
+  }
 
-    return(1);
+  return(1);
 }
