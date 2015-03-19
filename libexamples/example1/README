@@ -1,6 +1,6 @@
-Example to move from Mmg3d4 library to Mmg3d5 library:
-   main.cold correspond to a Mmg3d4 library call
-   main.c is the same code but with a call to Mmg3d5 library
+Example to move from mmg3d4 library to mmg3d5 library:
+   main.cold correspond to a mmg3d4 library call
+   main.c is the same code but with a call to mmg3d5 library
 
 Remark: you will find the same example (with additionnal boundary triangles) in the example0 directory
 

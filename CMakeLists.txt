@@ -1,23 +1,23 @@
 ## =============================================================================
-##  This file is part of the Mmg software package for the tetrahedral
+##  This file is part of the mmg software package for the tetrahedral
 ##  mesh modification.
 ##  Copyright (c) Inria - IMB (Université de Bordeaux) - LJLL (UPMC), 2004- .
 ##
-##  Mmg is free software: you can redistribute it and/or modify it
+##  mmg is free software: you can redistribute it and/or modify it
 ##  under the terms of the GNU Lesser General Public License as published
 ##  by the Free Software Foundation, either version 3 of the License, or
 ##  (at your option) any later version.
 ##
-##  Mmg is distributed in the hope that it will be useful, but WITHOUT
+##  mmg is distributed in the hope that it will be useful, but WITHOUT
 ##  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
 ##  FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
 ##  License for more details.
 ##
 ##  You should have received a copy of the GNU Lesser General Public
-##  License and of the GNU General Public License along with Mmg (in
+##  License and of the GNU General Public License along with mmg (in
 ##  files COPYING.LESSER and COPYING). If not, see
 ##  <http://www.gnu.org/licenses/>. Please read their terms carefully and
-##  use this copy of the Mmg distribution only if you accept them.
+##  use this copy of the mmg distribution only if you accept them.
 ## =============================================================================
 
 CMAKE_MINIMUM_REQUIRED(VERSION 3.0.0)
@@ -132,14 +132,16 @@ IF ( BUILD_MMG3D OR BUILD_MMG )
     #####         Fortran header: libmmg3df.h
     #####
     ###############################################################################
-    ADD_EXECUTABLE(genheader ${CMAKE_SOURCE_DIR}/scripts/genheader.c)
+    IF (NOT WIN32)
+      ADD_EXECUTABLE(genheader ${CMAKE_SOURCE_DIR}/scripts/genheader.c)
 
-    ADD_CUSTOM_COMMAND(OUTPUT ${MMG3D_SOURCE_DIR}/libmmg3df.h
+      ADD_CUSTOM_COMMAND(OUTPUT ${MMG3D_SOURCE_DIR}/libmmg3df.h
         COMMAND genheader ${MMG3D_SOURCE_DIR}/libmmg3df.h ${MMG3D_SOURCE_DIR}/libmmg3d.h ${CMAKE_SOURCE_DIR}/scripts/genfort.pl
         WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
         DEPENDS genheader ${MMG3D_SOURCE_DIR}/libmmg3d.h ${CMAKE_SOURCE_DIR}/scripts/genfort.pl
         COMMENT "Generating Fortran header"
         )
+    ENDIF ()
     
     ###############################################################################
     #####
@@ -202,7 +204,7 @@ FILE(
 
 INCLUDE_DIRECTORIES(${COMMON_SOURCE_DIR})
 
-IF ((NOT WIN32) AND (NOT WIN64))
+IF (NOT WIN32)
     FIND_LIBRARY(M_LIB m)
     SET( LIBRARIES ${M_LIB} ${LIBRARIES})
 ENDIF()
@@ -462,7 +464,7 @@ IF ( BUILD_MMG3D OR BUILD_MMG )
         #         MESSAGE(WARNING "Fail to automatically download the mmgs test cases "
         #             " Try to get it at the following link:"
         #
-        #             " then untar it in the project directory (Mmg/ by default).")
+        #             " then untar it in the project directory (mmg/ by default).")
         #     ELSE()
         #         EXECUTE_PROCESS(
         #             COMMAND ${CMAKE_COMMAND} -E tar xzf ${CMAKE_SOURCE_DIR}/ci_tests/mmgs.tgz
@@ -473,7 +475,7 @@ IF ( BUILD_MMG3D OR BUILD_MMG )
         #             MESSAGE(WARNING "Fail to automatically untar the mmgs "
         #                 "test cases directory (mmgs.tgz)."
         #                 "Try to untar it by hand in the project directory"
-        #                 " (Mmg/ci_tests/ by default).")
+        #                 " (mmg/ci_tests/ by default).")
         #         ENDIF()
         #         FILE(REMOVE ${CMAKE_SOURCE_DIR}/ci_tests/mmgs.tgz)
         #     ENDIF ()
@@ -488,7 +490,7 @@ IF ( BUILD_MMG3D OR BUILD_MMG )
                 MESSAGE(WARNING "Fail to automatically download the mmg3d test cases "
                     " Try to get it at the following link:"
                     " https://www.dropbox.com/s/e9yuc46617jynku/mmg3d.tgz?dl=0"
-                    " then untar it in the project directory (Mmg/ by default).")
+                    " then untar it in the project directory (mmg/ by default).")
             ELSE()
                 EXECUTE_PROCESS(
                     COMMAND ${CMAKE_COMMAND} -E tar xzf ${CMAKE_SOURCE_DIR}/ci_tests/mmg3d.tgz
@@ -499,7 +501,7 @@ IF ( BUILD_MMG3D OR BUILD_MMG )
                     MESSAGE(WARNING "Fail to automatically untar the mmg3d "
                         "test cases directory (mmg3d.tgz)."
                         "Try to untar it by hand in the project directory"
-                        " (Mmg/ci_tests/ by default).")
+                        " (mmg/ci_tests/ by default).")
                 ENDIF()
 
                 FILE(REMOVE ${CMAKE_SOURCE_DIR}/ci_tests/mmg3d.tgz)
@@ -693,7 +695,7 @@ IF ((WIN32 OR WIN64) AND NOT UNIX)
     # Warning compilation under windows not tested
     #SET(CPACK_PACKAGE_ICON "${CMAKE_SOURCE_DIR}/logo.pdf")
     SET(CPACK_NSIS_INSTALLED_ICON_NAME "bin\\\\${PROJECT_NAME}.exe")
-    SET(CPACK_NSIS_DISPLAY_NAME "${CPACK_PACKAGE_INSTALL_DIRECTORY} Mmg: surface and volume remeshers")
+    SET(CPACK_NSIS_DISPLAY_NAME "${CPACK_PACKAGE_INSTALL_DIRECTORY} mmg: surface and volume remeshers")
     SET(CPACK_NSIS_HELP_LINK "http:\\\\\\\\www.mmgtools.org‎")
     SET(CPACK_NSIS_URL_INFO_ABOUT "http:\\\\\\\\www.math.u-bordeaux1.fr/~dobrzyns/.../mmg3d.php‎")
     SET(CPACK_NSIS_CONTACT ${CPACK_PACKAGE_CONTACT})
