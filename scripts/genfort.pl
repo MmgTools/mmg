@@ -273,7 +273,7 @@ sub Convert {
 
 
                 $chaine = sprintf("! %s\n", $line);
-                if ($line =~ /Mmg3d's constants/)
+                if ($line =~ /mmg3d's constants/)
                 {
                     my $chaine2 = "END INTERFACE\n\n";
                     $chaine2 .= "!\n";
