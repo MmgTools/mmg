@@ -330,63 +330,63 @@ IF ( BUILD_MMG3D OR BUILD_MMG )
   OPTION ( TEST_LIBMMG3D "Compile tests of library" OFF)
   IF ( TEST_LIBMMG3D )
     IF ( LIBMMG3D_STATIC )
-      ADD_EXECUTABLE(libmmg_example0_a
-        ${CMAKE_SOURCE_DIR}/libexamples/example0/example0_a/main.c)
-      TARGET_LINK_LIBRARIES(libmmg_example0_a ${PROJECT_NAME}3d_a)
-      INSTALL(TARGETS libmmg_example0_a RUNTIME DESTINATION bin )
+      ADD_EXECUTABLE(libmmg3d_example0_a
+        ${CMAKE_SOURCE_DIR}/libexamples/mmg3d/example0/example0_a/main.c)
+      TARGET_LINK_LIBRARIES(libmmg3d_example0_a ${PROJECT_NAME}3d_a)
+      INSTALL(TARGETS libmmg3d_example0_a RUNTIME DESTINATION bin )
 
-      ADD_EXECUTABLE(libmmg_example0_b
-        ${CMAKE_SOURCE_DIR}/libexamples/example0/example0_b/main.c)
-      TARGET_LINK_LIBRARIES(libmmg_example0_b ${PROJECT_NAME}3d_a)
-      INSTALL(TARGETS libmmg_example0_b RUNTIME DESTINATION bin )
+      ADD_EXECUTABLE(libmmg3d_example0_b
+        ${CMAKE_SOURCE_DIR}/libexamples/mmg3d/example0/example0_b/main.c)
+      TARGET_LINK_LIBRARIES(libmmg3d_example0_b ${PROJECT_NAME}3d_a)
+      INSTALL(TARGETS libmmg3d_example0_b RUNTIME DESTINATION bin )
 
-      ADD_EXECUTABLE(libmmg_example1
-        ${CMAKE_SOURCE_DIR}/libexamples/example1/main.c)
-      TARGET_LINK_LIBRARIES(libmmg_example1 ${PROJECT_NAME}3d_a)
-      INSTALL(TARGETS libmmg_example1 RUNTIME DESTINATION bin )
-      ADD_EXECUTABLE(libmmg_example2
-        ${CMAKE_SOURCE_DIR}/libexamples/example2/main.c)
-      TARGET_LINK_LIBRARIES(libmmg_example2 ${PROJECT_NAME}3d_a)
-      INSTALL(TARGETS libmmg_example2 RUNTIME DESTINATION bin )
+      ADD_EXECUTABLE(libmmg3d_example1
+        ${CMAKE_SOURCE_DIR}/libexamples/mmg3d/example1/main.c)
+      TARGET_LINK_LIBRARIES(libmmg3d_example1 ${PROJECT_NAME}3d_a)
+      INSTALL(TARGETS libmmg3d_example1 RUNTIME DESTINATION bin )
+      ADD_EXECUTABLE(libmmg3d_example2
+        ${CMAKE_SOURCE_DIR}/libexamples/mmg3d/example2/main.c)
+      TARGET_LINK_LIBRARIES(libmmg3d_example2 ${PROJECT_NAME}3d_a)
+      INSTALL(TARGETS libmmg3d_example2 RUNTIME DESTINATION bin )
 
       ENABLE_LANGUAGE (Fortran)
-      ADD_EXECUTABLE(libmmg_fortran_a
-        ${CMAKE_SOURCE_DIR}/libexamples/example0_fortran/example0_a/main.F90)
-      TARGET_LINK_LIBRARIES(libmmg_fortran_a ${PROJECT_NAME}3d_a)
-      INSTALL(TARGETS libmmg_fortran_a RUNTIME DESTINATION bin )
-      ADD_EXECUTABLE(libmmg_fortran_b
-        ${CMAKE_SOURCE_DIR}/libexamples/example0_fortran/example0_b/main.F90)
-      TARGET_LINK_LIBRARIES(libmmg_fortran_b ${PROJECT_NAME}3d_a)
-      INSTALL(TARGETS libmmg_fortran_b RUNTIME DESTINATION bin )
+      ADD_EXECUTABLE(libmmg3d_fortran_a
+        ${CMAKE_SOURCE_DIR}/libexamples/mmg3d/example0_fortran/example0_a/main.F90)
+      TARGET_LINK_LIBRARIES(libmmg3d_fortran_a ${PROJECT_NAME}3d_a)
+      INSTALL(TARGETS libmmg3d_fortran_a RUNTIME DESTINATION bin )
+      ADD_EXECUTABLE(libmmg3d_fortran_b
+        ${CMAKE_SOURCE_DIR}/libexamples/mmg3d/example0_fortran/example0_b/main.F90)
+      TARGET_LINK_LIBRARIES(libmmg3d_fortran_b ${PROJECT_NAME}3d_a)
+      INSTALL(TARGETS libmmg3d_fortran_b RUNTIME DESTINATION bin )
 
-      ADD_EXECUTABLE(libmmg_example3
-        ${CMAKE_SOURCE_DIR}/libexamples/example3/mmg3d.c)
-      TARGET_LINK_LIBRARIES(libmmg_example3 ${PROJECT_NAME}3d_a)
-      INSTALL(TARGETS libmmg_example3 RUNTIME DESTINATION bin )
+      ADD_EXECUTABLE(libmmg3d_example3
+        ${CMAKE_SOURCE_DIR}/libexamples/mmg3d/example3/mmg3d.c)
+      TARGET_LINK_LIBRARIES(libmmg3d_example3 ${PROJECT_NAME}3d_a)
+      INSTALL(TARGETS libmmg3d_example3 RUNTIME DESTINATION bin )
     ELSEIF ( LIBMMG3D_SHARED )
-      ADD_EXECUTABLE(libmmg_example0_a
-        ${CMAKE_SOURCE_DIR}/libexamples/example0/example0_a/main.c)
-      TARGET_LINK_LIBRARIES(libmmg_example0_a ${PROJECT_NAME}3d_so)
-      INSTALL(TARGETS libmmg_example0_a RUNTIME DESTINATION bin )
+      ADD_EXECUTABLE(libmmg3d_example0_a
+        ${CMAKE_SOURCE_DIR}/libexamples/mmg3d/example0/example0_a/main.c)
+      TARGET_LINK_LIBRARIES(libmmg3d_example0_a ${PROJECT_NAME}3d_so)
+      INSTALL(TARGETS libmmg3d_example0_a RUNTIME DESTINATION bin )
 
-      ADD_EXECUTABLE(libmmg_example0_b
-        ${CMAKE_SOURCE_DIR}/libexamples/example0/example0_b/main.c)
-      TARGET_LINK_LIBRARIES(libmmg_example0_b ${PROJECT_NAME}3d_so)
-      INSTALL(TARGETS libmmg_example0_b RUNTIME DESTINATION bin )
+      ADD_EXECUTABLE(libmmg3d_example0_b
+        ${CMAKE_SOURCE_DIR}/libexamples/mmg3d/example0/example0_b/main.c)
+      TARGET_LINK_LIBRARIES(libmmg3d_example0_b ${PROJECT_NAME}3d_so)
+      INSTALL(TARGETS libmmg3d_example0_b RUNTIME DESTINATION bin )
 
-      ADD_EXECUTABLE(libmmg_example1
-        ${CMAKE_SOURCE_DIR}/libexamples/example1/main.c)
-      TARGET_LINK_LIBRARIES(libmmg_example1 ${PROJECT_NAME}3d_so)
-      INSTALL(TARGETS libmmg_example1 RUNTIME DESTINATION bin )
-      ADD_EXECUTABLE(libmmg_example2
-        ${CMAKE_SOURCE_DIR}/libexamples/example2/main.c)
-      TARGET_LINK_LIBRARIES(libmmg_example2 ${PROJECT_NAME}3d_so)
-      INSTALL(TARGETS libmmg_example2 RUNTIME DESTINATION bin )
+      ADD_EXECUTABLE(libmmg3d_example1
+        ${CMAKE_SOURCE_DIR}/libexamples/mmg3d/example1/main.c)
+      TARGET_LINK_LIBRARIES(libmmg3d_example1 ${PROJECT_NAME}3d_so)
+      INSTALL(TARGETS libmmg3d_example1 RUNTIME DESTINATION bin )
+      ADD_EXECUTABLE(libmmg3d_example2
+        ${CMAKE_SOURCE_DIR}/libexamples/mmg3d/example2/main.c)
+      TARGET_LINK_LIBRARIES(libmmg3d_example2 ${PROJECT_NAME}3d_so)
+      INSTALL(TARGETS libmmg3d_example2 RUNTIME DESTINATION bin )
 
-      ADD_EXECUTABLE(libmmg_example3
-        ${CMAKE_SOURCE_DIR}/libexamples/example3/mmg3d.c)
-      TARGET_LINK_LIBRARIES(libmmg_example3 ${PROJECT_NAME}3d_so)
-      INSTALL(TARGETS libmmg_example3 RUNTIME DESTINATION bin )
+      ADD_EXECUTABLE(libmmg3d_example3
+        ${CMAKE_SOURCE_DIR}/libexamples/mmg3d/example3/mmg3d.c)
+      TARGET_LINK_LIBRARIES(libmmg3d_example3 ${PROJECT_NAME}3d_so)
+      INSTALL(TARGETS libmmg3d_example3 RUNTIME DESTINATION bin )
     ELSE ()
       MESSAGE(WARNING "You must activate the compilation of the static or"
         " shared ${PROJECT_NAME} library to compile this tests." )
@@ -447,6 +447,8 @@ IF ( BUILD_MMG3D OR BUILD_MMGS OR BUILD_MMG )
   IF( BUILD_TESTING )
     OPTION(MMGS_CI "Enable/Disable continuous integration for mmgs" ON )
     OPTION(MMG3D_CI "Enable/Disable continuous integration for mmg3d" ON )
+    OPTION(LONG_TESTS "Enable/Disable time consuming tests for the project" OFF )
+    MARK_AS_ADVANCED(LONG_TESTS)
 
     ##-------------------------------------------------------------------##
     ##------- Get the continuous integration tests ----------------------##
@@ -456,6 +458,7 @@ IF ( BUILD_MMG3D OR BUILD_MMGS OR BUILD_MMG )
     ##-------------------------------------------------------------------##
     ##------- Set the continuous integration options --------------------##
     ##-------------------------------------------------------------------##
+    SET(MMG_CI_TESTS ${CMAKE_SOURCE_DIR}/ci_tests/mmg )
     SET(MMGS_CI_TESTS ${CMAKE_SOURCE_DIR}/ci_tests/mmgs )
     SET(MMG3D_CI_TESTS ${CMAKE_SOURCE_DIR}/ci_tests/mmg3d )
 
@@ -474,11 +477,11 @@ IF ( BUILD_MMG3D OR BUILD_MMGS OR BUILD_MMG )
     CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/cmake/config/CTestCustom.cmake
       ./CTestCustom.cmake)
 
+    # Max time for test case
+    SET(DART_TESTING_TIMEOUT 2500 FORCE)
+
     ENABLE_TESTING()
     INCLUDE(CTest)
-
-    # Max time for test case
-    SET(DART_TESTING_TIMEOUT 2)
 
     IF ( NOT APPLE)
       # Add coverage flags
@@ -500,66 +503,75 @@ IF ( BUILD_MMG3D OR BUILD_MMGS OR BUILD_MMG )
     ##-------------------------------------------------------------------##
     ##--------------------------- Add tests and configure it ------------##
     ##-------------------------------------------------------------------##
-    # Add runtime that we want to test for mmg3d
-    IF(${CMAKE_BUILD_TYPE} MATCHES "Debug")
-      SET(EXECUT ${EXECUTABLE_OUTPUT_PATH}/${PROJECT_NAME}s_debug)
-      SET(BUILDNAME ${BUILDNAME}_debug CACHE STRING "build name variable")
-    ELSEIF(${CMAKE_BUILD_TYPE} MATCHES "Release")
-      SET(EXECUT ${EXECUTABLE_OUTPUT_PATH}/${PROJECT_NAME}s_O3)
-      SET(BUILDNAME ${BUILDNAME}_O3 CACHE STRING "build name variable")
-    ELSEIF(${CMAKE_BUILD_TYPE} MATCHES "Relwithdebinfo")
-      SET(EXECUT ${EXECUTABLE_OUTPUT_PATH}/${PROJECT_NAME}s_O3d)
-      SET(BUILDNAME ${BUILDNAME}_O3d CACHE STRING "build name variable")
-    ELSEIF(${CMAKE_BUILD_TYPE} MATCHES "Minsizerel")
-      SET(EXECUT ${EXECUTABLE_OUTPUT_PATH}/${PROJECT_NAME}s_Os)
-      SET(BUILDNAME ${BUILDNAME}_Os CACHE STRING "build name variable")
-    ELSE()
-      SET(EXECUT ${EXECUTABLE_OUTPUT_PATH}/${PROJECT_NAME}s)
-      SET(BUILDNAME ${BUILDNAME} CACHE STRING "build name variable")
-    ENDIF()
 
-    # Add mmgs tests
+    # Add runtime that we want to test for mmgs
     IF( MMGS_CI )
+      IF(${CMAKE_BUILD_TYPE} MATCHES "Debug")
+        SET(EXECUT_MMGS ${EXECUTABLE_OUTPUT_PATH}/${PROJECT_NAME}s_debug)
+        SET(BUILDNAME ${BUILDNAME}_debug CACHE STRING "build name variable")
+      ELSEIF(${CMAKE_BUILD_TYPE} MATCHES "Release")
+        SET(EXECUT_MMGS ${EXECUTABLE_OUTPUT_PATH}/${PROJECT_NAME}s_O3)
+        SET(BUILDNAME ${BUILDNAME}_O3 CACHE STRING "build name variable")
+      ELSEIF(${CMAKE_BUILD_TYPE} MATCHES "Relwithdebinfo")
+        SET(EXECUT_MMGS ${EXECUTABLE_OUTPUT_PATH}/${PROJECT_NAME}s_O3d)
+        SET(BUILDNAME ${BUILDNAME}_O3d CACHE STRING "build name variable")
+      ELSEIF(${CMAKE_BUILD_TYPE} MATCHES "Minsizerel")
+        SET(EXECUT_MMGS ${EXECUTABLE_OUTPUT_PATH}/${PROJECT_NAME}s_Os)
+        SET(BUILDNAME ${BUILDNAME}_Os CACHE STRING "build name variable")
+      ELSE()
+        SET(EXECUT_MMGS ${EXECUTABLE_OUTPUT_PATH}/${PROJECT_NAME}s)
+        SET(BUILDNAME ${BUILDNAME} CACHE STRING "build name variable")
+      ENDIF()
+
+      SET ( LISTEXEC_MMGS ${EXECUT_MMGS} )
+
+      # Add mmgs tests
       INCLUDE( ${CMAKE_SOURCE_DIR}/cmake/testing/mmgs_tests.cmake )
     ENDIF()
 
     # Add runtime that we want to test for mmg3d
     IF ( MMG3D_CI )
-      # Run some tests twice with the output of the previous test as input
-      OPTION ( RUN_AGAIN "Enable/Disable second run of some tests" ON )
-      MARK_AS_ADVANCED(RUN_AGAIN)
+
+      IF ( LONG_TESTS )
+        # Run some tests twice with the output of the previous test as input
+        OPTION ( RUN_AGAIN "Enable/Disable second run of some tests" ON )
+        MARK_AS_ADVANCED(RUN_AGAIN)
+      ELSE ( )
+        SET ( RUN_AGAIN OFF )
+      ENDIF ( )
+
       IF(${CMAKE_BUILD_TYPE} MATCHES "Debug")
-        SET(EXECUT ${EXECUTABLE_OUTPUT_PATH}/${PROJECT_NAME}3d_debug)
+        SET(EXECUT_MMG3D ${EXECUTABLE_OUTPUT_PATH}/${PROJECT_NAME}3d_debug)
         SET(BUILDNAME ${BUILDNAME}_debug CACHE STRING "build name variable")
       ELSEIF(${CMAKE_BUILD_TYPE} MATCHES "Release")
-        SET(EXECUT ${EXECUTABLE_OUTPUT_PATH}/${PROJECT_NAME}3d_O3)
+        SET(EXECUT_MMG3D ${EXECUTABLE_OUTPUT_PATH}/${PROJECT_NAME}3d_O3)
         SET(BUILDNAME ${BUILDNAME}_O3 CACHE STRING "build name variable")
       ELSEIF(${CMAKE_BUILD_TYPE} MATCHES "Release")
-        SET(EXECUT ${EXECUTABLE_OUTPUT_PATH}/${PROJECT_NAME}3d_O3d)
+        SET(EXECUT_MMG3D ${EXECUTABLE_OUTPUT_PATH}/${PROJECT_NAME}3d_O3d)
         SET(BUILDNAME ${BUILDNAME}_O3d CACHE STRING "build name variable")
       ELSEIF(${CMAKE_BUILD_TYPE} MATCHES "Minsizerel")
-        SET(EXECUT ${EXECUTABLE_OUTPUT_PATH}/${PROJECT_NAME}3d_Os)
+        SET(EXECUT_MMG3D ${EXECUTABLE_OUTPUT_PATH}/${PROJECT_NAME}3d_Os)
         SET(BUILDNAME ${BUILDNAME}_Os CACHE STRING "build name variable")
       ELSE()
-        SET(EXECUT ${EXECUTABLE_OUTPUT_PATH}/${PROJECT_NAME}3d)
+        SET(EXECUT_MMG3D ${EXECUTABLE_OUTPUT_PATH}/${PROJECT_NAME}3d)
         SET(BUILDNAME ${BUILDNAME} CACHE STRING "build name variable")
       ENDIF()
 
-      SET ( LISTEXEC ${EXECUT} )
+      SET ( LISTEXEC_MMG3D ${EXECUT_MMG3D} )
       IF ( TEST_LIBMMG3D )
         IF ( LIBMMG3D_STATIC OR LIBMMG3D_SHARED )
-          SET(LIBEXEC0_a ${EXECUTABLE_OUTPUT_PATH}/libmmg_example0_a)
-          SET(LIBEXEC0_b ${EXECUTABLE_OUTPUT_PATH}/libmmg_example0_b)
-          SET(LIBEXEC1   ${EXECUTABLE_OUTPUT_PATH}/libmmg_example1)
-          SET(LIBEXEC2   ${EXECUTABLE_OUTPUT_PATH}/libmmg_example2)
+          SET(LIBMMG3D_EXEC0_a ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_example0_a)
+          SET(LIBMMG3D_EXEC0_b ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_example0_b)
+          SET(LIBMMG3D_EXEC1   ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_example1)
+          SET(LIBMMG3D_EXEC2   ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_example2)
 
-          ADD_TEST(NAME libexample0_a COMMAND ${LIBEXEC0_a})
-          ADD_TEST(NAME libexample0_b COMMAND ${LIBEXEC0_b})
-          ADD_TEST(NAME libexample1   COMMAND ${LIBEXEC1})
-          ADD_TEST(NAME libexample2   COMMAND ${LIBEXEC2})
+          ADD_TEST(NAME libmmg3d_example0_a COMMAND ${LIBMMG3D_EXEC0_a})
+          ADD_TEST(NAME libmmg3d_example0_b COMMAND ${LIBMMG3D_EXEC0_b})
+          ADD_TEST(NAME libmmg3d_example1   COMMAND ${LIBMMG3D_EXEC1})
+          ADD_TEST(NAME libmmg3d_example2   COMMAND ${LIBMMG3D_EXEC2})
 
-          SET(LIBEXEC3 ${EXECUTABLE_OUTPUT_PATH}/libmmg_example3)
-          SET( LISTEXEC ${LISTEXEC} ${LIBEXEC3} )
+          SET(LIBMMG3D_EXEC3 ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_example3)
+          SET( LISTEXEC_MMG3D ${LISTEXEC_MMG3D} ${LIBMMG3D_EXEC3} )
         ENDIF()
       ENDIF()
 
@@ -570,20 +582,30 @@ IF ( BUILD_MMG3D OR BUILD_MMGS OR BUILD_MMG )
         INCLUDE( ${CMAKE_SOURCE_DIR}/cmake/testing/mmg3d_rerun_tests.cmake )
       ENDIF()
 
-      # Change authorisations for some files...
-      IF ( EXISTS ${MMG3D_CI_TESTS}/LeakCheck_AbnormalEnd7/unreadable.meshb)
-        FILE(REMOVE ${MMG3D_CI_TESTS}/LeakCheck_AbnormalEnd7/unwrittable.meshb)
-      ENDIF()
-      FILE(COPY ${MMG3D_CI_TESTS}/LeakCheck_AbnormalEnd7/dout.mesh
-        DESTINATION ${MMG3D_CI_TESTS}/LeakCheck_AbnormalEnd7/unwrittable.meshb)
-
-      IF ( EXISTS ${MMG3D_CI_TESTS}/LeakCheck_AbnormalEnd8/unwrittable.sol)
-        FILE(REMOVE ${MMG3D_CI_TESTS}/LeakCheck_AbnormalEnd8/unwrittable.sol)
-      ENDIF()
-      FILE(COPY ${MMG3D_CI_TESTS}/LeakCheck_AbnormalEnd8/dsol.sol
-        DESTINATION ${MMG3D_CI_TESTS}/LeakCheck_AbnormalEnd8/unwrittable.sol)
-
     ENDIF ( MMG3D_CI )
+
+    IF ( MMG3D_CI OR MMGS_CI )
+      SET(LISTEXEC_MMG ${LISTEXEC_MMGS} ${LISTEXEC_MMG3D})
+      SET(EXECUT_MMG ${EXECUT_MMGS} ${EXECUT_MMG3D})
+
+      # Change authorisations for some files...
+      IF ( EXISTS ${MMG_CI_TESTS}/LeakCheck_AbnormalEnd7/unreadable.meshb)
+        FILE(REMOVE ${MMG_CI_TESTS}/LeakCheck_AbnormalEnd7/unwrittable.meshb)
+      ENDIF()
+      FILE(COPY ${MMG_CI_TESTS}/LeakCheck_AbnormalEnd7/dout.mesh
+        DESTINATION ${MMG_CI_TESTS}/LeakCheck_AbnormalEnd7/unwrittable.meshb)
+
+      IF ( EXISTS ${MMG_CI_TESTS}/LeakCheck_AbnormalEnd8/unwrittable.sol)
+        FILE(REMOVE ${MMG_CI_TESTS}/LeakCheck_AbnormalEnd8/unwrittable.sol)
+      ENDIF()
+      FILE(COPY ${MMG_CI_TESTS}/LeakCheck_AbnormalEnd8/dsol.sol
+        DESTINATION ${MMG_CI_TESTS}/LeakCheck_AbnormalEnd8/unwrittable.sol)
+
+      # Add common tests for mmgs/3d appli
+      INCLUDE( ${CMAKE_SOURCE_DIR}/cmake/testing/mmg_tests.cmake )
+
+    ENDIF(MMG3D_CI OR MMGS_CI)
+
   ENDIF ( BUILD_TESTING )
 
 ENDIF ( BUILD_MMG3D OR BUILD_MMGS OR BUILD_MMG )
@@ -664,7 +686,8 @@ SET(CPACK_OUTPUT_FILE_PREFIX "../archives")
 
 SET(CPACK_IGNORE_FILES ";.\\\\\\\\.#;/\\\\\\\\.git;.~;.#;.-e;.DS_Store"
   ${CPACK_IGNORE_FILES})
-SET(CPACK_IGNORE_FILES ";libmmg.*" ${CPACK_IGNORE_FILES})
+SET(CPACK_IGNORE_FILES ";libmmg3d.*" ${CPACK_IGNORE_FILES})
+SET(CPACK_IGNORE_FILES ";libmmgs.*" ${CPACK_IGNORE_FILES})
 
 SET(CPACK_SOURCE_IGNORE_FILES ";src/mmg3d/mmg3d.h$" ${CPACK_SOURCE_IGNORE_FILE})
 SET(CPACK_SOURCE_IGNORE_FILES ";.\\\\\\\\.#;/\\\\\\\\.git;.~;.#;.-e;.DS_Store"
@@ -673,15 +696,15 @@ SET(CPACK_SOURCE_IGNORE_FILES ";lib/;bin;archives;def"
   ${CPACK_SOURCE_IGNORE_FILES})
 SET(CPACK_SOURCE_IGNORE_FILES ";.dir-locals.el;.tm_properties"
   ${CPACK_SOURCE_IGNORE_FILES})
-SET(CPACK_SOURCE_IGNORE_FILES ";libexamples/example0/example0_a/mesh.o.*"
+SET(CPACK_SOURCE_IGNORE_FILES ";libexamples/mmg3d/example0/example0_a/mesh.o.*"
   ${CPACK_SOURCE_IGNORE_FILES})
-SET(CPACK_SOURCE_IGNORE_FILES ";libexamples/example0/example0_b/mesh.o.*"
+SET(CPACK_SOURCE_IGNORE_FILES ";libexamples/mmg3d/example0/example0_b/mesh.o.*"
   ${CPACK_SOURCE_IGNORE_FILES})
-SET(CPACK_SOURCE_IGNORE_FILES ";libexamples/example1/result0.*"
+SET(CPACK_SOURCE_IGNORE_FILES ";libexamples/mmg3d/example1/result0.*"
   ${CPACK_SOURCE_IGNORE_FILES})
-SET(CPACK_SOURCE_IGNORE_FILES ";libexamples/example2/result1.*"
+SET(CPACK_SOURCE_IGNORE_FILES ";libexamples/mmg3d/example2/result1.*"
   ${CPACK_SOURCE_IGNORE_FILES})
-SET(CPACK_SOURCE_IGNORE_FILES ";libexamples/example3/SphereIso.*"
+SET(CPACK_SOURCE_IGNORE_FILES ";libexamples/mmg3d/example3/SphereIso.*"
   ${CPACK_SOURCE_IGNORE_FILES})
 SET(CPACK_SOURCE_IGNORE_FILES ";CMakeFiles" ${CPACK_SOURCE_IGNORE_FILES})
 SET(CPACK_SOURCE_IGNORE_FILES ";cmake/supp/libSystem.supp"

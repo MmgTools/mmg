@@ -19,7 +19,7 @@ PROGRAM main
 
   ! Name and path of the mesh file
   CALL getenv("PWD",pwd)
-  WRITE(filename,*) TRIM(pwd),"/../libexamples/example0/example0_a/cube"
+  WRITE(filename,*) TRIM(pwd),"/../libexamples/mmg3d/example0/example0_a/cube"
 
   !> ------------------------------ STEP   I --------------------------
   !! 1) Initialisation of mesh and sol structures

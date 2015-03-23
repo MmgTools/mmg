@@ -26,8 +26,30 @@
 #####
 ###############################################################################
 
-# Simple test: must already pass
+# Simple tests: must already pass
 ADD_TEST(NAME SimpleTeapot
-  COMMAND ${EXECUT} -v 6 -d
+  COMMAND ${EXECUT_MMGS} -v 6 -d
   ${MMGS_CI_TESTS}/Teapot/teapot
   -out ${MMGS_CI_TESTS}/Teapot/teapot.d.meshb)
+
+ADD_TEST(NAME CubeAni
+  COMMAND ${EXECUT_MMGS} -v 6 -d
+  ${MMGS_CI_TESTS}/CubeAni/cube
+  -out ${MMGS_CI_TESTS}/CubeAni/cube.d.meshb)
+
+ADD_TEST(NAME CubeVolAni
+  COMMAND ${EXECUT_MMGS} -v 6 -d
+  ${MMGS_CI_TESTS}/CubeVolAni/cube
+  -out ${MMGS_CI_TESTS}/CubeVolAni/cube.d.meshb)
+
+ADD_TEST(NAME SphereAni
+  COMMAND ${EXECUT_MMGS} -v 6 -d
+  ${MMGS_CI_TESTS}/SphereAni/sphere
+  -out ${MMGS_CI_TESTS}/SphereAni/sphere.d.meshb)
+
+###############################################################################
+#####
+#####         Check Memory Leak
+#####
+###############################################################################
+#####
