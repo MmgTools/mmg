@@ -156,7 +156,7 @@ void _MMG5_usage(char *prog) {
     fprintf(stdout,"\n**  File specifications\n");
     fprintf(stdout,"-in  file  input triangulation\n");
     fprintf(stdout,"-out file  output triangulation\n");
-    fprintf(stdout,"-sol file  load solution file\n");
+    fprintf(stdout,"-sol file  load solution or metric file\n");
 
     fprintf(stdout,"\n**  Parameters\n");
     fprintf(stdout,"-ar     val  angle detection\n");
