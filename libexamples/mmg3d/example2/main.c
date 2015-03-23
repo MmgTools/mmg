@@ -45,12 +45,12 @@ int main(int argc,char *argv[]) {
 
   /* Name and path of the mesh files */
   pwd = getenv("PWD");
-  inname = (char *) calloc(strlen(pwd) + 34, sizeof(char));
+  inname = (char *) calloc(strlen(pwd) + 40, sizeof(char));
   if ( inname == NULL ) {
     perror("  ## Memory problem: calloc");
     exit(EXIT_FAILURE);
   }
-  outname = (char *) calloc(strlen(pwd) + 43, sizeof(char));
+  outname = (char *) calloc(strlen(pwd) + 49, sizeof(char));
   if ( outname == NULL ) {
     perror("  ## Memory problem: calloc");
     exit(EXIT_FAILURE);
