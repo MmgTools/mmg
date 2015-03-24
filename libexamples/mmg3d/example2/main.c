@@ -55,7 +55,7 @@ int main(int argc,char *argv[]) {
     perror("  ## Memory problem: calloc");
     exit(EXIT_FAILURE);
   }
-  sprintf(inname, "%s%s%s", pwd, "/../libexamples/example2/", "2spheres");
+  sprintf(inname, "%s%s%s", pwd, "/../libexamples/mmg3d/example2/", "2spheres");
 
   /** 1) Initialisation of mesh and sol structures */
   /* args of InitMesh: mesh=&mmgMesh, sol=&mmgSol, input mesh name, input sol name,
@@ -132,7 +132,7 @@ int main(int argc,char *argv[]) {
     fprintf(stdout,"BAD ENDING OF MMG3DLIB\n");
 
   /* (Not mandatory) Automatically save the mesh */
-  sprintf(outname, "%s%s%s", pwd, "/../libexamples/example2/", "2spheres_1.o.mesh");
+  sprintf(outname, "%s%s%s", pwd, "/../libexamples/mmg3d/example2/", "2spheres_1.o.mesh");
   if ( !MMG5_Set_outputMeshName(mmgMesh,outname) )
     exit(EXIT_FAILURE);
 
@@ -207,7 +207,7 @@ int main(int argc,char *argv[]) {
 
 
   /* 7) Automatically save the mesh */
-  sprintf(outname, "%s%s%s", pwd, "/../libexamples/example2/", "2spheres_2.o.mesh");
+  sprintf(outname, "%s%s%s", pwd, "/../libexamples/mmg3d/example2/", "2spheres_2.o.mesh");
   if ( !MMG5_Set_outputMeshName(mmgMesh,outname) )
     exit(EXIT_FAILURE);
 

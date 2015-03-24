@@ -22,16 +22,13 @@ It provides two applications:
       `cd build`  
       `cmake ..`  
       `make`  
-      `make install`    
+      `make install` or `sudo make install` if needed.
 
     The **mmgs** and **mmg3d** applications are available under the `mmgs_O3` and `mmg3d_O3` commands. 
 
 ## Documentation
 ### Wiki
 More detailed informations about the compilation and configuration of the mmg's applications are available on the project [wiki](https://github.com/MmgTools/mmg/wiki).
-
-[//]: ### User guide
-[//]: The mmg3d user guide will be soon available on the project webpage: [http://www.mmgtools.org/doc/](http://www.mmgtools.org/doc/).
 
 ### Code documentation
 Run the `make doc` command to build the Doxygen documentation.
@@ -42,7 +39,11 @@ Run the `make doc` command to build the Doxygen documentation.
 The **mmg** applications are validated on OS X and on most of the Linux platforms. 
 
 ## Contributing
-Coming soon...
+Your contributions to the **mmg** project are welcomed. You can help us to improve
+our code by many means:
+  * pull requests: please follow the wiki's guideline;
+  * feature requests: please use the [GitHub issue tracker](https://github.com/MmgTools/mmg/issues/new) with the **_enhancement_** label;
+  * bug reports: please use the [GitHub issue tracker](https://github.com/MmgTools/mmg/issues/new) with the **_bug_** label.
 
 ## About the team
 mmg's current developers and maintainers are Charles Dapogny, Cécile Dobrzynski, Pascal Frey and Algiane Froehly.

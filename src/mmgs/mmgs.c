@@ -71,8 +71,7 @@ static void usage(char *name) {
     fprintf(stdout,"\n**  File specifications\n");
     fprintf(stdout,"-in  file  input triangulation\n");
     fprintf(stdout,"-out file  output triangulation\n");
-    fprintf(stdout,"-met file  load metric field\n");
-    fprintf(stdout,"-sol file  load solution file\n");
+    fprintf(stdout,"-sol file  load solution or metric file\n");
 
     fprintf(stdout,"\n**  Parameters\n");
     fprintf(stdout,"-ar val    angle detection\n");
@@ -139,16 +138,11 @@ static int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
                 }
                 break;
             case 'm':
-                if ( !strcmp(argv[i],"-met") ) {
-                    ++i;
-                    met->namein = argv[i];
-                    mesh->info.imprim = 5;
-                }
-                else if ( !strcmp(argv[i],"-m") ) {
-                    ++i;
-                    mesh->info.mem = atoi(argv[i]);
-                }
-                break;
+              if ( !strcmp(argv[i],"-m") ) {
+                ++i;
+                mesh->info.mem = atoi(argv[i]);
+              }
+              break;
             case 'n':
                 if ( !strcmp(argv[i],"-nr") )
                     mesh->info.dhd = -1.0;
@@ -163,6 +157,13 @@ static int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
                     mesh->nameout = argv[i];
                 }
                 break;
+            case 's':
+              if ( !strcmp(argv[i],"-sol") ) {
+                ++i;
+                met->namein = argv[i];
+                mesh->info.imprim = 5;
+              }
+              break;
             case 'v':
                 if ( ++i < argc ) {
                     if ( argv[i][0] == '-' || isdigit(argv[i][0]) )
