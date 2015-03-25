@@ -210,25 +210,25 @@ int hashEdge(MMG5_pMesh mesh, MMG5_HGeom *hash,int a,int b,int k) {
   key = (KA*ia + KB*ib) % hash->siz;
   ph  = &hash->geom[key];
 
-  if ( ph->a ) {
-    if ( ph->a != ia || ph->b != ib ) {
-      while ( ph->nxt && ph->nxt < hash->max ) {
-        ph = &hash->geom[ph->nxt];
-        if ( ph->a == ia && ph->b == ib )  return(1);
-      }
+  if ( ph->a == ia && ph->b == ib )
+    return(1);
+  else if ( ph->a ) {
+    while ( ph->nxt && ph->nxt < hash->max ) {
+      ph = &hash->geom[ph->nxt];
+      if ( ph->a == ia && ph->b == ib )  return(1);
     }
-    ph->nxt = hash->nxt;
-    ph      = &hash->geom[hash->nxt];
-    ++hash->nxt;
+
+    ph->nxt   = hash->nxt;
+    ph        = &hash->geom[hash->nxt];
+    hash->nxt = ph->nxt;
+
     if ( hash->nxt >= hash->max ) {
       if ( mesh->info.ddebug )
         fprintf(stdout,"  ## Memory alloc problem (edge): %d\n",hash->max);
-
       hash->max *= 1.2;
       _MMG5_SAFE_REALLOC(hash->geom,hash->max,MMG5_hgeom, "MMG5_hgeom");
       for (j=hash->nxt; j<hash->max; j++)
         hash->geom[j].nxt = j+1;
-      return(0);
     }
   }
 

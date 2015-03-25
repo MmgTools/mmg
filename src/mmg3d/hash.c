@@ -342,7 +342,8 @@ int _MMG5_hashEdge(MMG5_pMesh mesh,_MMG5_Hash *hash, int a,int b,int k) {
     }
     ph->nxt   = hash->nxt;
     ph        = &hash->item[hash->nxt];
-    ph->a     = ia;  ph->b   = ib;
+    ph->a     = ia;
+    ph->b     = ib;
     ph->k     = k;
     hash->nxt = ph->nxt;
     ph->nxt   = 0;
@@ -352,12 +353,13 @@ int _MMG5_hashEdge(MMG5_pMesh mesh,_MMG5_Hash *hash, int a,int b,int k) {
       _MMG5_TAB_RECALLOC(mesh,hash->item,hash->max,0.2,_MMG5_hedge,"edge",return(0));
       for (j=hash->nxt; j<hash->max; j++)  hash->item[j].nxt = j+1;
     }
-    return(1);
   }
   /* insert new edge */
-  ph->a = ia;  ph->b = ib;
+  ph->a = ia;
+  ph->b = ib;
   ph->k = k;
   ph->nxt = 0;
+
   return(1);
 }
 
