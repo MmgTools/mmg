@@ -170,12 +170,15 @@ typedef struct {
 /**
  * \struct MMG5_hgeom
  * \brief To store geometric edges.
- * \todo try to remove k in mmgs.
+ * \todo try to remove k in mmgs (see _MMG5_Hash structure of mmg3d).
  */
 typedef struct {
-  int   a,b,ref,nxt;
-  int   k;
-  char  tag;
+  int   a; /*!< First extremity of edge */
+  int   b;  /*!< Second extremity of edge */
+  int   ref; /*!< Reference of edge */
+  int   nxt; /*!< Next element of hash table */
+  int   k; /*!< Index of point along edge \f$[a;b]\f$ */
+  char  tag; /*!< tag of edge */
 } MMG5_hgeom;
 
 typedef struct {

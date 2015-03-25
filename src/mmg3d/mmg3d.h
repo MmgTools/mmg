@@ -84,50 +84,6 @@
   }while(0)
 
 
-/** Safe reallocation */
-#define _MMG5_SAFE_REALLOC(ptr,size,type,message) do        \
-  {                                                         \
-    type* tmp;                                              \
-    tmp = (type *)realloc((ptr),(size)*sizeof(type));       \
-    if ( !tmp ) {                                           \
-      _MMG5_SAFE_FREE(ptr);                                 \
-      perror(" ## Memory problem: realloc");                \
-      exit(EXIT_FAILURE);                                   \
-    }                                                       \
-                                                            \
-    if ( abs(mesh->info.imprim) > 6 || mesh->info.ddebug )  \
-      fprintf(stdout,                                       \
-              "  ## Warning: %s:%d: %s reallocation.\n",    \
-              __FILE__,__LINE__,message);                   \
-                                                            \
-                                                            \
-    (ptr) = tmp;                                            \
-  }while(0)
-
-/** safe reallocation with memset at 0 for the new values of tab */
-#define _MMG5_SAFE_RECALLOC(ptr,prevSize,newSize,type,message) do \
-  {                                                               \
-    type* tmp;                                                    \
-    int k;                                                        \
-                                                                  \
-    tmp = (type *)realloc((ptr),(newSize)*sizeof(type));          \
-    if ( !tmp ) {                                                 \
-      _MMG5_SAFE_FREE(ptr);                                       \
-      perror(" ## Memory problem: realloc");                      \
-      exit(EXIT_FAILURE);                                         \
-    }                                                             \
-                                                                  \
-    if ( abs(mesh->info.imprim) > 6 || mesh->info.ddebug )        \
-      fprintf(stdout,                                             \
-              "  ## Warning: %s:%d: %s reallocation.\n",          \
-              __FILE__,__LINE__,message);                         \
-                                                                  \
-    (ptr) = tmp;                                                  \
-    for ( k=prevSize; k<newSize; k++) {                           \
-      memset(&ptr[k],0,sizeof(type));                             \
-    }                                                             \
-  }while(0)
-
 /** Reallocation of ptr of type type at size (initSize+wantedGap*initSize)
     if possible or at maximum available size if not. Execute the command law
     if reallocation failed. Memset to 0 for the new values of table. */

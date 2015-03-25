@@ -221,10 +221,11 @@ int hashEdge(MMG5_pMesh mesh, MMG5_HGeom *hash,int a,int b,int k) {
     ph      = &hash->geom[hash->nxt];
     ++hash->nxt;
     if ( hash->nxt >= hash->max ) {
-      if ( mesh->info.ddebug )  fprintf(stdout,"  ## Memory realloc (edge): %d\n",hash->max);
+      if ( mesh->info.ddebug )
+        fprintf(stdout,"  ## Memory alloc problem (edge): %d\n",hash->max);
+
       hash->max *= 1.2;
-      hash->geom  = (MMG5_hgeom*)realloc(hash->geom,hash->max*sizeof(MMG5_hgeom));
-      assert(hash->geom);
+      _MMG5_SAFE_REALLOC(hash->geom,hash->max,MMG5_hgeom, "MMG5_hgeom");
       for (j=hash->nxt; j<hash->max; j++)
         hash->geom[j].nxt = j+1;
       return(0);
