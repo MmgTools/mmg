@@ -199,7 +199,7 @@ typedef struct {
   long long memCur; /*!< Current memory used */
   double    gap; /*!< Gap for table reallocation */
   int       npi,nti,nai,nei,np,na,nt,ne,npmax,namax,ntmax,nemax,xpmax,xtmax;
-  int       ng,nc1,ngmax,ntnil;
+  int       nc1,ngmax,ntnil;
 
   int       base; /*!< Used with \a flag to know if an entity has been
                     treated */

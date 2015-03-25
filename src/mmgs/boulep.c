@@ -412,7 +412,7 @@ int boulec(MMG5_pMesh mesh,int start,int ip,double *tt) {
 
 
 /* store edges and return number (nref+ngeo) incident to ip */
-int bouler(MMG5_pMesh mesh,int start,int ip,int *list,int *ng,int *nr) {
+int bouler(MMG5_pMesh mesh,int start,int ip,int *list,int *xp,int *nr) {
   MMG5_pTria    pt;
   int     *adja,k,ns;
   char     i,i1,i2;
@@ -423,14 +423,14 @@ int bouler(MMG5_pMesh mesh,int start,int ip,int *list,int *ng,int *nr) {
   /* check other triangle vertices */
   k  = start;
   i  = ip;
-  *ng = *nr = ns = 0;
+  *xp = *nr = ns = 0;
   do {
     i1 = inxt[i];
     if ( MS_EDG(pt->tag[i1]) ) {
       i2 = iprv[i];
       ns++;
       if ( pt->tag[i1] & MG_GEO )
-        *ng = *ng + 1;
+        *xp = *xp + 1;
       else
         *nr = *nr + 1;
       list[ns] = pt->v[i2];
@@ -455,7 +455,7 @@ int bouler(MMG5_pMesh mesh,int start,int ip,int *list,int *ng,int *nr) {
         i1 = inxt[i];
         ns++;
         if ( pt->tag[i2] & MG_GEO )
-          *ng = *ng + 1;
+          *xp = *xp + 1;
         else
           *nr = *nr + 1;
         list[ns] = pt->v[i1];

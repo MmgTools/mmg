@@ -320,13 +320,13 @@ static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
         ppt = &mesh->point[ip];
 
         if ( MS_EDG(pt->tag[i]) ) {
-          ++mesh->ng;
-          assert(mesh->ng < mesh->ngmax);
+          ++mesh->xp;
+          assert(mesh->xp < mesh->xpmax);
           ppt->tag = pt->tag[i];
           if ( p1->ref == pt->edg[i] || p2->ref == pt->edg[i] )
             ppt->ref = pt->edg[i];
-          ppt->ig  = mesh->ng;
-          go = &mesh->xpoint[mesh->ng];
+          ppt->ig  = mesh->xp;
+          go = &mesh->xpoint[mesh->xp];
           memcpy(go->n1,no,3*sizeof(double));
 
           dd = go->n1[0]*ppt->n[0] + go->n1[1]*ppt->n[1] + go->n1[2]*ppt->n[2];
@@ -474,7 +474,7 @@ int chkspl(MMG5_pMesh mesh,MMG5_pSol met,int k,int i) {
   int     *adja,jel,ip,ier;
   char     i1,i2,j,jj,j2;
 
-  if ( mesh->ng > mesh->ngmax-2 )  return(0);
+  if ( mesh->xp > mesh->xpmax-2 )  return(0);
   pt = &mesh->tria[k];
   i1 = inxt[i];
   i2 = iprv[i];
@@ -504,10 +504,10 @@ int chkspl(MMG5_pMesh mesh,MMG5_pSol met,int k,int i) {
   assert(ip);
 
   if ( MS_EDG(pt->tag[i]) ) {
-    ++mesh->ng;
+    ++mesh->xp;
     ppt = &mesh->point[ip];
-    ppt->ig  = mesh->ng;
-    go = &mesh->xpoint[mesh->ng];
+    ppt->ig  = mesh->xp;
+    go = &mesh->xpoint[mesh->xp];
     memcpy(go->n1,no,3*sizeof(double));
   }
   s = 0.5;

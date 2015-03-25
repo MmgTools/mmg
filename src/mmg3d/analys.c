@@ -337,10 +337,11 @@ static int _MMG5_singul(MMG5_pMesh mesh) {
 static int _MMG5_norver(MMG5_pMesh mesh) {
   MMG5_pTria     pt;
   MMG5_pPoint    ppt;
-  MMG5_xPoint   *pxp;
-  double    n[3],dd;
-  int      *adja,k,kk,ng,nn,nt,nf;
-  char      i,ii,i1;
+  MMG5_xPoint    *pxp;
+  double         n[3],dd;
+  int            *adja,k,kk,ng,nn,nt,nf;
+  char           i,ii,i1;
+  
   /* recomputation of normals only if mesh->xpoint has been freed */
   if ( mesh->xpoint ) {
     if ( abs(mesh->info.imprim) > 3 || mesh->info.ddebug ) {

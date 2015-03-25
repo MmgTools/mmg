@@ -439,7 +439,7 @@ int singul(MMG5_pMesh mesh) {
   MMG5_pTria     pt;
   MMG5_pPoint    ppt,p1,p2;
   double    ux,uy,uz,vx,vy,vz,dd;
-  int       list[LMAX+2],k,nc,ng,nr,ns,nre;
+  int       list[LMAX+2],k,nc,xp,nr,ns,nre;
   char      i;
 
   nre = nc = 0;
@@ -452,24 +452,24 @@ int singul(MMG5_pMesh mesh) {
       ppt->s++;
       if ( !MG_VOK(ppt) || MS_SIN(ppt->tag) )  continue;
       else if ( MS_EDG(ppt->tag) ) {
-        ns = bouler(mesh,k,i,list,&ng,&nr);
+        ns = bouler(mesh,k,i,list,&xp,&nr);
         if ( !ns ) continue;
         
-        if ( (ng + nr) > 2 ) {
+        if ( (xp + nr) > 2 ) {
           ppt->tag |= MG_CRN + MG_REQ; 
           nre++;   
           nc++;
         } 
-        else if ( ng == 1 && nr == 1 ) {
+        else if ( xp == 1 && nr == 1 ) {
           ppt->tag |= MG_REQ; 
           nre++;
         } 
-        else if ( ng == 1 && !nr ) {
+        else if ( xp == 1 && !nr ) {
           ppt->tag |= MG_CRN + MG_REQ; 
           nre++;
           nc++;
         }
-        else if ( nr == 1 && !ng ) {
+        else if ( nr == 1 && !xp ) {
           ppt->tag |= MG_CRN + MG_REQ; 
           nre++;
           nc++;
@@ -524,16 +524,16 @@ int singul(MMG5_pMesh mesh) {
 static int norver(MMG5_pMesh mesh) {
   MMG5_pTria     pt;
   MMG5_pPoint    ppt;
-  MMG5_pxPoint     go;
-  double    n[3],dd;
-  int      *adja,k,kk,ier,ng,nn,nt,nf;
-  char      i,ii,i1,i2;
+  MMG5_pxPoint   go;
+  double         n[3],dd;
+  int            *adja,k,kk,ier,xp,nn,nt,nf;
+  char           i,ii,i1,i2;
 
   if ( abs(mesh->info.imprim) > 4 || mesh->info.ddebug )
     fprintf(stdout,"  ** DEFINING GEOMETRY\n"); 
 
   /* 1. process C1 vertices, normals */
-  nn = ng = nt = nf = 0;
+  nn = xp = nt = nf = 0;
   ++mesh->base;
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
@@ -543,7 +543,7 @@ static int norver(MMG5_pMesh mesh) {
       ppt = &mesh->point[pt->v[i]];
       if ( MS_SIN(ppt->tag) )  continue;
       else if ( MS_EDG(ppt->tag) ) {
-        ng++;
+        xp++;
         continue;
       }
       else if ( ppt->flag == mesh->base )  continue;
@@ -560,14 +560,10 @@ static int norver(MMG5_pMesh mesh) {
   }
 
   /* memory to store normals on both sides of ridges */
-  if(!ng) {
-    mesh->ngmax = NGMAX;
-    _MMG5_SAFE_CALLOC(mesh->xpoint,mesh->ngmax+1,MMG5_xPoint);
+  mesh->xpmax = MG_MAX(1.5*xp,NGMAX);
+  _MMG5_SAFE_CALLOC(mesh->xpoint,mesh->xpmax+1,MMG5_xPoint);
 
-  } else if ( ng ) {
-    mesh->ngmax = MG_MAX(1.5*ng,NGMAX);
-    _MMG5_SAFE_CALLOC(mesh->xpoint,mesh->ngmax+1,MMG5_xPoint);
-
+  if ( xp ) {
     /* 2. process C0 vertices on curves, tangents */
     for (k=1; k<=mesh->nt; k++) {
       pt = &mesh->tria[k];
@@ -585,10 +581,10 @@ static int norver(MMG5_pMesh mesh) {
         ier = boulen(mesh,k,i,n);
         if ( !ier )  continue;
 
-        ++mesh->ng;
-        assert(mesh->ng < mesh->ngmax);
-        ppt->ig = mesh->ng;
-        go = &mesh->xpoint[mesh->ng];
+        ++mesh->xp;
+        assert(mesh->xp < mesh->xpmax);
+        ppt->ig = mesh->xp;
+        go = &mesh->xpoint[mesh->xp];
         memcpy(go->n1,n,3*sizeof(double));         
 
         /* compute n2 along ridge */
@@ -805,7 +801,7 @@ int analys(MMG5_pMesh mesh) {
   }
 
   /* define normals */
-  if ( !mesh->ng ) {
+  if ( !mesh->xp ) {
     if ( !norver(mesh) ) {
       fprintf(stdout,"  ## Normal problem. Exit program.\n");
       return(0);
