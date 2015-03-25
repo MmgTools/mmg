@@ -521,9 +521,9 @@ int chkspl(MMG5_pMesh mesh,MMG5_pSol met,int k,int i) {
 static int colelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
   MMG5_pTria    pt;
   MMG5_pPoint   p1,p2;
-  double   ll,ux,uy,uz;
-  int      ier,list[LMAX+2],ilist,k,nc;
-  char     i,i1,i2;
+  double        ll,ux,uy,uz;
+  int           list[LMAX+2],ilist,k,nc;
+  char          i,i1,i2;
 
   nc = 0;
   for (k=1; k<=mesh->nt; k++) {
@@ -532,7 +532,6 @@ static int colelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
 
     /* check edge length */
     pt->flag = 0;
-    ier = 0;
     for (i=0; i<3; i++) {
       if ( MS_SIN(pt->tag[i]) )  continue;
 

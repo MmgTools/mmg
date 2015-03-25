@@ -40,8 +40,8 @@
 int split1(MMG5_pMesh mesh,MMG5_pSol met,int k,int i,int *vx) {
   MMG5_pTria      pt,pt1;
   MMG5_pPoint     ppt;
-  int        iel;
-  char       i1,i2;
+  int             iel;
+  char            i1,i2;
 
   iel = newElt(mesh);
   assert(iel);
@@ -72,11 +72,11 @@ int split1(MMG5_pMesh mesh,MMG5_pSol met,int k,int i,int *vx) {
 int split1b(MMG5_pMesh mesh,int k,char i,int ip) {
   MMG5_pTria     pt,pt1;
   MMG5_pPoint    ppt;
-  _MMG5_Bezier    b;
-  MMG5_pxPoint     go;
-  double    uv[2],o[3],no[3],to[3];
-  int      *adja,iel,jel,kel,mel,ier;
-  char      i1,i2,j,j1,j2,m;
+  _MMG5_Bezier   b;
+  MMG5_pxPoint   go;
+  double         uv[2],o[3],no[3],to[3];
+  int            *adja,iel,jel,kel,mel,ier;
+  char           i1,i2,j,j1,j2,m;
 
   pt = &mesh->tria[k];
   pt->flag = 0;
@@ -171,9 +171,9 @@ int split1b(MMG5_pMesh mesh,int k,char i,int ip) {
 /* split element k along 2 edges i1 and i2 */
 int split2(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
   MMG5_pTria    pt,pt1,pt2;
-  MMG5_pPoint   p0,p1,p2,p3,p4;
-  int      iel,jel;
-  char     i,i1,i2;
+  MMG5_pPoint   p3,p4;
+  int           iel,jel;
+  char          i,i1,i2;
 
   /* create 2 elements */
   iel = newElt(mesh);
@@ -194,9 +194,6 @@ int split2(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
   i1 = inxt[i];
   i2 = inxt[i1];
 
-  p0 = &mesh->point[pt->v[i]];
-  p1 = &mesh->point[pt->v[i1]];
-  p2 = &mesh->point[pt->v[i2]];
   p3 = &mesh->point[vx[i]];
   p4 = &mesh->point[vx[i1]];
 
@@ -228,8 +225,8 @@ int split2(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
 /* split all 3 edges of element k */
 int split3(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
   MMG5_pTria    pt,pt1,pt2,pt3;
-  MMG5_pPoint   p0,p1,p2,p3,p4,p5;
-  int      iel,jel,kel;
+  MMG5_pPoint   p3,p4,p5;
+  int           iel,jel,kel;
 
   /* create 3 elements */
   iel = newElt(mesh);
@@ -248,9 +245,6 @@ int split3(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
   pt2 = memcpy(pt2,pt,sizeof(MMG5_Tria));
   pt3 = memcpy(pt3,pt,sizeof(MMG5_Tria));
 
-  p0 = &mesh->point[pt->v[0]];
-  p1 = &mesh->point[pt->v[1]];
-  p2 = &mesh->point[pt->v[2]];
   p3 = &mesh->point[vx[0]];
   p4 = &mesh->point[vx[1]];
   p5 = &mesh->point[vx[2]];

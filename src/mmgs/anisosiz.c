@@ -40,10 +40,11 @@
 static int defmetsin(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
   MMG5_pTria         pt;
   MMG5_pPoint        p0,p1;
-  double       *m,n[3],ux,uy,uz,isqhmin,isqhmax,b0[3],b1[3],ps1,tau[3],ntau2,gammasec[3];
-  double        c[3],kappa,maxkappa,alpha;
-  int           ilist,list[LMAX+2],k,iel,idp;
-  unsigned char i0,i1,i2;
+  double             *m,n[3],isqhmin,isqhmax,b0[3],b1[3],ps1,tau[3];
+  double             ntau2,gammasec[3];
+  double             c[3],kappa,maxkappa,alpha;
+  int                ilist,list[LMAX+2],k,iel,idp;
+  unsigned char      i0,i1,i2;
 
   pt  = &mesh->tria[it];
   idp = pt->v[ip];
@@ -62,10 +63,6 @@ static int defmetsin(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
     i2  = iprv[i0];
     pt  = &mesh->tria[iel];
     p1  = &mesh->point[pt->v[i1]];
-
-    ux = p1->c[0] - p0->c[0];
-    uy = p1->c[1] - p0->c[1];
-    uz = p1->c[2] - p0->c[2];
 
     /* Computation of the two control points associated to edge p0p1: p0 is singular */
     nortri(mesh,pt,n);

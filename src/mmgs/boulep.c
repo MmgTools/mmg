@@ -40,12 +40,11 @@
 int boulet(MMG5_pMesh mesh,int start,int ip,int *list) {
   MMG5_pTria    pt;
   MMG5_pPoint   ppt;
-  int     *adja,k,ilist,idp;
-  char     i,i1,i2;
+  int           *adja,k,ilist;
+  char          i,i1,i2;
 
   pt = &mesh->tria[start];
   if ( !MG_EOK(pt) )  return(0);
-  idp = pt->v[ip];
   ppt = &mesh->point[pt->v[ip]];
   if ( ppt->tag & MG_NOM )  return(0);
   ilist = 0;
@@ -92,8 +91,8 @@ int boulet(MMG5_pMesh mesh,int start,int ip,int *list) {
 int boulechknm(MMG5_pMesh mesh,int start,int ip,int *list) {
   MMG5_pTria    pt;
   MMG5_pPoint   ppt;
-  int     *adja,k,ilist,idp,base,iel;
-  char     i,i1,i2,ia,iq,voy;
+  int           *adja,k,ilist,base,iel;
+  char          i,i1,i2,ia,iq,voy;
 
   base = ++mesh->base;
 
@@ -101,7 +100,6 @@ int boulechknm(MMG5_pMesh mesh,int start,int ip,int *list) {
   ia = iprv[ip];
   iq = inxt[ip];
   if ( !MG_EOK(pt) )  return(0);
-  idp = pt->v[ip];
   ppt = &mesh->point[pt->v[ip]];
   if ( ppt->tag & MG_NOM )  return(0);
   ilist = 0;
@@ -223,9 +221,9 @@ int boulechknm(MMG5_pMesh mesh,int start,int ip,int *list) {
 /* return average normal of triangles sharing P */
 int boulen(MMG5_pMesh mesh,int start,int ip,double *nn) {
   MMG5_pTria    pt;
-  double   n[3],dd;
-  int     *adja,k,ier;
-  char     i,i1,i2;
+  double        n[3],dd;
+  int           *adja,k;
+  char          i,i1,i2;
 
   pt = &mesh->tria[start];
   if ( !MG_EOK(pt) )  return(0);
@@ -266,7 +264,7 @@ int boulen(MMG5_pMesh mesh,int start,int ip,double *nn) {
       i2 = inxt[i1];
       pt = &mesh->tria[k];
 
-      ier = nortri(mesh,pt,n);
+      nortri(mesh,pt,n);
       nn[0] += n[0];  nn[1] += n[1];  nn[2] += n[2];
     }
     while ( k && k != start );

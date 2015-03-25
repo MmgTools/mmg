@@ -65,7 +65,6 @@ inline int buildridmetfic(MMG5_pMesh mesh,double t[3],double n[3],double dtan,do
    to point c1, with normal n1 */
 int paratmet(double c0[3],double n0[3],double m[6],double c1[3],double n1[3],double mt[6]) {
   double  r[3][3],mrot[6],mtan[3],lambda[2],vp[2][2],u[3],ps,ll;
-  int     ord;
 
   /* Take the induced metric tensor in the tangent plane by change of basis : R * M * {^t}R*/
   if ( !rotmatrix(n0,r) )  return(0);
@@ -75,7 +74,7 @@ int paratmet(double c0[3],double n0[3],double m[6],double c1[3],double n1[3],dou
   mtan[2] = mrot[3];
 
   /* Take eigenvectors of metric tensor in tangent plane */
-  ord = eigensym(mtan,lambda,vp);
+  eigensym(mtan,lambda,vp);
 
   /* Eigenvector in canonical basis = {t}R*vp[0] */
   u[0] = r[0][0]*vp[0][0] + r[1][0]*vp[0][1];

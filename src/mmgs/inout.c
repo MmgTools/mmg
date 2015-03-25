@@ -89,16 +89,16 @@ double swapd(double sbin)
   return(out);
 }
 int loadMesh(MMG5_pMesh mesh) {
-  FILE      *inm;
-  MMG5_pTria      pt1,pt2;
-  MMG5_pPoint     ppt;
-  double    *norm,*n,dd;
-  float      fc;
-  int        i,k,ia,nq,nri,nr,num,ip,idn,ng;
-  char      *ptr,*name,data[256],chaine[128];
-  int      posnp,posnt,posne,posncor,posnq,posned,posnr;
-  int      posnpreq,npreq,ntreq,posnormal,posnc1,posntreq;
-  int      ncor,bin,iswp,nedreq,posnedreq,bdim,binch,bpos;
+  FILE        *inm;
+  MMG5_pTria  pt1,pt2;
+  MMG5_pPoint ppt;
+  double      *norm,*n,dd;
+  float       fc;
+  int         i,k,ia,nq,nri,nr,ip,idn,ng;
+  char        *ptr,*name,data[256],chaine[128];
+  int         posnp,posnt,posne,posncor,posnq,posned,posnr;
+  int         posnpreq,npreq,ntreq,posnormal,posnc1,posntreq;
+  int         ncor,bin,iswp,nedreq,posnedreq,bdim,binch,bpos;
 
   posnp = posnt = posne = posncor = posnq = posntreq = 0;
   posned = posnr = posnpreq = posnc1 = npreq = 0;
@@ -599,13 +599,14 @@ int loadMesh(MMG5_pMesh mesh) {
 }
 
 int saveMesh(MMG5_pMesh mesh) {
-  FILE        *inm;
-  MMG5_pPoint       ppt;
-  MMG5_pTria        pt;
-  MMG5_pEdge        edge;
-  MMG5_pxPoint        go;
-  int         *adja,k,jel,outm,np,nt,na,nc,ng,nn,nr,nre;
+  FILE         *inm;
+  MMG5_pPoint  ppt;
+  MMG5_pTria   pt;
+  MMG5_pEdge   edge;
+  MMG5_pxPoint go;
+  int          *adja,k,jel,np,nt,na,nc,ng,nn,nr,nre;
   int          bin,binch,bpos;
+  // int          outm;
   char         data[128],*ptr,chaine[128],i,i1,i2;
 
   edge = 0;
@@ -1034,12 +1035,11 @@ int saveMesh(MMG5_pMesh mesh) {
 int loadMet(MMG5_pSol met) {
   FILE       *inm;
   float       fbuf[6],tmpf;
-  double      tmp,dbuf[6],tmpd;
+  double      dbuf[6],tmpd;
   int         binch,bdim,iswp;
-  int         k,i,isol,type,bin,dim,btyp,bpos;
+  int         k,i,type,bin,dim,bpos;
   long        posnp;
   char        *ptr,data[128],chaine[128];
-
 
   if ( !met->namein )  return(0);
   posnp = 0;
@@ -1079,7 +1079,7 @@ int loadMet(MMG5_pSol met) {
       if(!strncmp(chaine,"Dimension",strlen("Dimension"))) {
         fscanf(inm,"%d",&met->dim);
         if(met->dim!=3) {
-          fprintf(stdout,"BAD SOL DIMENSION : %d\n",dim);
+          fprintf(stdout,"BAD SOL DIMENSION : %d\n",met->dim);
           return(1);
         }
         continue;

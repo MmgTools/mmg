@@ -158,18 +158,13 @@ static double calelt33_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel) {
 /* quality = surf / sigma(length_edges) */
 inline double calelt_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel) {
   MMG5_pTria    pt;
-  MMG5_pPoint   pa,pb,pc;
-  double   rap,anisurf,l[3];
-  int      ia,ib,ic;
+  double        rap,anisurf,l[3];
+  int           ia,ib,ic;
 
   pt = &mesh->tria[iel];
   ia = pt->v[0];
   ib = pt->v[1];
   ic = pt->v[2];
-
-  pa = &mesh->point[ia];
-  pb = &mesh->point[ib];
-  pc = &mesh->point[ic];
 
   anisurf = surftri_ani(mesh,met,iel);
 
@@ -229,7 +224,7 @@ inline double calelt_iso(MMG5_pMesh mesh,MMG5_pSol met,int iel) {
 inline double caleltsig_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel) {
   MMG5_pTria    pt;
   MMG5_pPoint   pa,pb,pc;
-  double   ps1,ps2,abx,aby,abz,acx,acy,acz,bcx,bcy,bcz,dd,rap,anisurf;
+  double   ps1,ps2,abx,aby,abz,acx,acy,acz,dd,rap,anisurf;
   double   n[3],pv[3],l[3],*ncomp,*a,*b,*c;
   int      ia,ib,ic;
 
@@ -253,9 +248,6 @@ inline double caleltsig_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel) {
   acx = c[0] - a[0];
   acy = c[1] - a[1];
   acz = c[2] - a[2];
-  bcx = c[0] - b[0];
-  bcy = c[1] - b[1];
-  bcz = c[2] - b[2];
 
   pv[0] = aby*acz - abz*acy;
   pv[1] = abz*acx - abx*acz;

@@ -38,9 +38,9 @@
 /* topology: set adjacent, detect Moebius, flip faces, count connected comp. */
 static int setadj(MMG5_pMesh mesh){
   MMG5_pTria   pt,pt1;
-  int    *adja,*adjb,adji1,adji2,*pile,iad,ipil,ip1,ip2,gen;
-  int     k,kk,iel,jel,nf,nr,nt,nre,ncc,ned,ref;
-  char    i,ii,i1,i2,ii1,ii2,tag,voy;
+  int          *adja,*adjb,adji1,adji2,*pile,iad,ipil,ip1,ip2,gen;
+  int          k,kk,iel,jel,nf,nr,nt,nre,ncc,ned,ref;
+  char         i,ii,i1,i2,ii1,ii2,tag,voy;
 
   if ( abs(mesh->info.imprim) > 5  || mesh->info.ddebug )
     fprintf(stdout,"  ** SETTING TOPOLOGY\n");
@@ -299,96 +299,96 @@ static void nmpoints(MMG5_pMesh mesh) {
     fprintf(stdout,"  ## %d non manifold points detected\n",nmp);
 }
 
-/* improve badly shaped elts */
-static int delbad(MMG5_pMesh mesh) {
-  MMG5_pTria    pt;
-  MMG5_pPoint   p[3];
-  double   s,kal,declic,ux,uy,uz,vx,vy,vz;
-  int     *adja,k,iel,nd,ndd,it;
-  char     i,ia,i1,i2,j,typ;
+/** improve badly shaped elts */
+/* static int delbad(MMG5_pMesh mesh) { */
+/*   MMG5_pTria    pt; */
+/*   MMG5_pPoint   p[3]; */
+/*   double   s,kal,declic,ux,uy,uz,vx,vy,vz; */
+/*   int     *adja,k,iel,nd,ndd,it; */
+/*   char     i,ia,i1,i2,j,typ; */
 
-  it = ndd = 0;
-  declic = BADKAL / ALPHAD;
+/*   it = ndd = 0; */
+/*   declic = BADKAL / ALPHAD; */
 
-  do {
-    nd = 0;
-    for (k=1; k<=mesh->nt; k++) {
-      pt = &mesh->tria[k];
-      if ( !MG_EOK(pt) )  continue;
+/*   do { */
+/*     nd = 0; */
+/*     for (k=1; k<=mesh->nt; k++) { */
+/*       pt = &mesh->tria[k]; */
+/*       if ( !MG_EOK(pt) )  continue; */
 
-      kal = calelt(mesh,NULL,k);
-      if ( kal > declic )  continue;
+/*       kal = calelt(mesh,NULL,k); */
+/*       if ( kal > declic )  continue; */
 
-      p[0] = &mesh->point[pt->v[0]];
-      p[1] = &mesh->point[pt->v[1]];
-      p[2] = &mesh->point[pt->v[2]];
-      adja = &mesh->adja[3*(k-1)+1];
-      typ  = typelt(p,&ia);
+/*       p[0] = &mesh->point[pt->v[0]]; */
+/*       p[1] = &mesh->point[pt->v[1]]; */
+/*       p[2] = &mesh->point[pt->v[2]]; */
+/*       adja = &mesh->adja[3*(k-1)+1]; */
+/*       typ  = typelt(p,&ia); */
       
-      /* needle */
-      if ( typ == 1 ) {
-        if ( litcol(mesh,k,ia,kal) ) {
-          nd++;
-          continue;
-        }
-      }
-      /* obtuse */
-      else if ( typ == 2 ) {
-        /* delete boundary elt */
-        if ( !adja[ia] ) {
-          /* update point coordinates on ridge */
-          i1 = inxt[ia];
-          i2 = iprv[ia];
-          p[0] = &mesh->point[pt->v[ia]];
-          p[1] = &mesh->point[pt->v[i1]];
-          p[2] = &mesh->point[pt->v[i2]];
-          ux = p[2]->c[0] - p[1]->c[0];
-          uy = p[2]->c[1] - p[1]->c[1];
-          uz = p[2]->c[2] - p[1]->c[2];
-          vx = p[0]->c[0] - p[1]->c[0];
-          vy = p[0]->c[1] - p[1]->c[1];
-          vz = p[0]->c[2] - p[1]->c[2];
-          s  = (ux*vx + uy*vy + uz*vz) / sqrt(ux*ux + uy*uy + uz*uz);
-          p[0]->c[0] = vx - s*ux;
-          p[0]->c[1] = vy - s*uy;
-          p[0]->c[2] = vz - s*uz;
+/*       /\* needle *\/ */
+/*       if ( typ == 1 ) { */
+/*         if ( litcol(mesh,k,ia,kal) ) { */
+/*           nd++; */
+/*           continue; */
+/*         } */
+/*       } */
+/*       /\* obtuse *\/ */
+/*       else if ( typ == 2 ) { */
+/*         /\* delete boundary elt *\/ */
+/*         if ( !adja[ia] ) { */
+/*           /\* update point coordinates on ridge *\/ */
+/*           i1 = inxt[ia]; */
+/*           i2 = iprv[ia]; */
+/*           p[0] = &mesh->point[pt->v[ia]]; */
+/*           p[1] = &mesh->point[pt->v[i1]]; */
+/*           p[2] = &mesh->point[pt->v[i2]]; */
+/*           ux = p[2]->c[0] - p[1]->c[0]; */
+/*           uy = p[2]->c[1] - p[1]->c[1]; */
+/*           uz = p[2]->c[2] - p[1]->c[2]; */
+/*           vx = p[0]->c[0] - p[1]->c[0]; */
+/*           vy = p[0]->c[1] - p[1]->c[1]; */
+/*           vz = p[0]->c[2] - p[1]->c[2]; */
+/*           s  = (ux*vx + uy*vy + uz*vz) / sqrt(ux*ux + uy*uy + uz*uz); */
+/*           p[0]->c[0] = vx - s*ux; */
+/*           p[0]->c[1] = vy - s*uy; */
+/*           p[0]->c[2] = vz - s*uz; */
           
-          delElt(mesh,k);
-          nd++;
-          continue;
-        }
-        if ( litswp(mesh,k,ia,kal) || litcol(mesh,k,ia,kal) ) {
-          nd++;
-          continue;
-        }
-      }
+/*           delElt(mesh,k); */
+/*           nd++; */
+/*           continue; */
+/*         } */
+/*         if ( litswp(mesh,k,ia,kal) || litcol(mesh,k,ia,kal) ) { */
+/*           nd++; */
+/*           continue; */
+/*         } */
+/*       } */
 
-      /* brute force to improve */
-      for (i=0; i<3; i++) {
-        if ( litswp(mesh,k,i,kal) || litcol(mesh,k,i,kal) ) {
-          nd++;
-          break;
-        }
-        else if ( adja[i] ) {
-          iel = adja[i] / 3;
-          j   = adja[i] % 3;
-          if ( litcol(mesh,iel,j,kal) ) {
-            nd++;
-            break;
-          }
-        }
-      }
-    }
-    ndd += nd;
-    if ( nd && (mesh->info.ddebug || mesh->info.imprim < 0) )  fprintf(stdout,"     %d improved\n",nd);
-  }
-  while ( nd > 0 && ++it < 5 );
+/*       /\* brute force to improve *\/ */
+/*       for (i=0; i<3; i++) { */
+/*         if ( litswp(mesh,k,i,kal) || litcol(mesh,k,i,kal) ) { */
+/*           nd++; */
+/*           break; */
+/*         } */
+/*         else if ( adja[i] ) { */
+/*           iel = adja[i] / 3; */
+/*           j   = adja[i] % 3; */
+/*           if ( litcol(mesh,iel,j,kal) ) { */
+/*             nd++; */
+/*             break; */
+/*           } */
+/*         } */
+/*       } */
+/*     } */
+/*     ndd += nd; */
+/*     if ( nd && (mesh->info.ddebug || mesh->info.imprim < 0) )  fprintf(stdout,"     %d improved\n",nd); */
+/*   } */
+/*   while ( nd > 0 && ++it < 5 ); */
 
-  if ( abs(mesh->info.imprim) > 4 )
-    fprintf(stdout,"     %d bad elements improved\n",ndd);
+/*   if ( abs(mesh->info.imprim) > 4 ) */
+/*     fprintf(stdout,"     %d bad elements improved\n",ndd); */
 
-  return(1);
-}
+/*   return(1); */
+/* } */
 
 
 /* check for ridges: dihedral angle */

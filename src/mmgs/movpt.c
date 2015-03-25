@@ -340,14 +340,13 @@ int movridpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
   double  step,dd1,dd2,ddt,ps2,ll1old,ll1new,ll2old,ll2new,uv[2],o[3],*no1,*no2,*np1,*np2;
   double  nn1[3],nn2[3],psn11,psn12,to[3],calold,calnew,lam0,lam1,lam2;
   int     ier,k,iel,ip0,ip1,ip2,it1,it2;
-  char    i0,i1,i2,voy1,voy2,isrid1,isrid2,isrid;
+  char    i0,i1,i2,isrid1,isrid2,isrid;
 
   step   = 0.1;
   isrid  = 0  ;
   isrid1 = 0  ;  isrid2 = 0;
   it1    = 0  ;  it2    = 0;
   ip1    = 0  ;  ip2    = 0;
-  voy1   = 0  ;  voy2   = 0;
 
   /* First step : make sure 2 ridge edges pass through point, and recoved them, with neighbouring triangles */
   for (k=0; k<ilist; k++) {
@@ -361,14 +360,12 @@ int movridpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
       if ( !it1 ) {
         it1  = iel;
         ip1  = pt->v[i2]; // edge(i1) = (p0p2)
-        voy1 = i1;
         if ( pt->tag[i1] & MG_GEO )  isrid1 = 1;
       }
       else if ( it1 && !it2 ) {
         if ( ip1 != pt->v[i2] ) {
           it2  = iel;
           ip2  = pt->v[i2]; // edge(i1) = (p0p2)
-          voy2 = i1;
           if ( pt->tag[i1] & MG_GEO )  isrid2 = 1;
         }
       }
@@ -382,14 +379,12 @@ int movridpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
       if ( !it1 ) {
         it1  = iel;
         ip1  = pt->v[i1]; // edge(i2) = (p0p1)
-        voy1 = i2;
         if ( pt->tag[i2] & MG_GEO )  isrid1 = 1;
       }
       else if ( it1 && !it2 ) {
         if ( ip1 != pt->v[i1] ) {
           it2  = iel;
           ip2  = pt->v[i1]; // edge(i1) = (p0p2)
-          voy2 = i2;
           if ( pt->tag[i2] & MG_GEO )  isrid2 = 1;
         }
       }

@@ -42,10 +42,10 @@
 int chkcol(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int *list,char typchk) {
   MMG5_pTria     pt,pt0,pt1,pt2;
   MMG5_pPoint    p1,p2;
-  double    len,lon,ps,cosnold,cosnnew,kal,n0old[3],n1old[3],n00old[3];
-  double    n0new[3],n1new[3],n00new[3];
-  int      *adja,jel,kel,ip1,ip2,l,ll,ilist;
-  char      i1,i2,j,jj,j2,lj,open,voy;
+  double         len,lon,ps,cosnold,cosnnew,kal,n0old[3],n1old[3],n00old[3];
+  double         n0new[3],n1new[3],n00new[3];
+  int            *adja,jel,kel,ip1,ip2,l,ll,ilist;
+  char           i1,i2,j,jj,j2,lj,open,voy;
 
   pt0 = &mesh->tria[0];
   pt  = &mesh->tria[k];
@@ -360,13 +360,12 @@ int colver3(MMG5_pMesh mesh,int* list) {
 /* collapse point along open ridge */
 int colver2(MMG5_pMesh mesh,int* list) {
   MMG5_pTria   pt,pt1;
-  int    *adja,iel,jel,kel,ip;
-  char    i,i1,i2,jj,j2,k;
+  int          *adja,iel,jel,kel,ip;
+  char         i1,i2,jj,j2,k;
 
   /* update of new point for triangle list[0] */
   iel = list[0] / 3;
   i1  = list[0] % 3;
-  i   = iprv[i1];
   i2  = inxt[i1];
   pt  = &mesh->tria[iel];
   ip  = pt->v[i1];
@@ -401,15 +400,14 @@ int colver2(MMG5_pMesh mesh,int* list) {
 int litcol(MMG5_pMesh mesh,int k,char i,double kali) {
   MMG5_pTria     pt,pt0,pt1;
   MMG5_pPoint    p1,p2;
-  double    kal,ps,cosnold,cosnnew,n0old[3],n0new[3],n1old[3],n1new[3],n00old[3],n00new[3];
-  int      *adja,list[LMAX+2],jel,ip1,ip2,l,ilist;
-  char      i1,i2,j,jj,j2,open;
+  double         kal,ps,cosnold,cosnnew,n0old[3],n0new[3],n1old[3],n1new[3],n00old[3],n00new[3];
+  int            *adja,list[LMAX+2],jel,ip2,l,ilist;
+  char           i1,i2,j,jj,j2,open;
 
   pt0 = &mesh->tria[0];
   pt  = &mesh->tria[k];
   i1  = inxt[i];
   i2  = iprv[i];
-  ip1 = pt->v[i1];
   ip2 = pt->v[i2];
 
   /* collect all triangles around vertex i1 */
