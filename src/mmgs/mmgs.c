@@ -274,6 +274,10 @@ static int parsop(MMG5_pMesh mesh,MMG5_pSol met) {
     /* check for condition type */
     if ( !strcmp(data,"parameters") ) {
       fscanf(in,"%d",&mesh->info.npar);
+      _MMG5_ADD_MEM(mesh,mesh->info.npar*sizeof(MMG5_Par),
+                    "parameters",
+                    printf("  Exit program.\n");
+                    exit(EXIT_FAILURE));
       _MMG5_SAFE_CALLOC(mesh->info.par,mesh->info.npar,MMG5_Par);
 
       for (i=0; i<mesh->info.npar; i++) {
@@ -375,12 +379,12 @@ int main(int argc,char *argv[]) {
   if ( !loadMesh(&mesh) )  return(1);
   met.npmax = mesh.npmax;
   met.dim   = 3;
-  ier = loadMet(&met);
+  ier = MMG5_loadMet(&mesh,&met);
   if ( !ier )
     return(1);
   else if ( ier > 0 && met.np != mesh.np ) {
     fprintf(stdout,"  ## WARNING: WRONG SOLUTION NUMBER. IGNORED\n");
-    _MMG5_SAFE_FREE(met.m);
+    _MMG5_DEL_MEM(&mesh,met.m,(met.size*met.npmax+1)*sizeof(double));
     memset(&met,0,sizeof(MMG5_Sol));
   }
   if ( !parsop(&mesh,&met) )     return(1);
@@ -424,11 +428,20 @@ int main(int argc,char *argv[]) {
   if ( mesh.info.imprim )  fprintf(stdout,"  -- WRITING COMPLETED\n");
 
   /* release memory */
-  _MMG5_SAFE_FREE(mesh.point);
-  _MMG5_SAFE_FREE(mesh.tria);
-  _MMG5_SAFE_FREE(mesh.adja);
-  if ( met.m )  _MMG5_SAFE_FREE(met.m);
-  if ( mesh.info.par )  _MMG5_SAFE_FREE(mesh.info.par);
+  if ( mesh.point )
+    _MMG5_DEL_MEM(&mesh,mesh.point,(mesh.npmax+1)*sizeof(MMG5_Point));
+  if ( mesh.adja )
+    _MMG5_DEL_MEM(&mesh,mesh.adja,(3*mesh.ntmax+5)*sizeof(int));
+  if ( mesh.tria )
+    _MMG5_DEL_MEM(&mesh,mesh.tria,(mesh.ntmax+1)*sizeof(MMG5_Tria));
+  if ( mesh.edge )
+    _MMG5_DEL_MEM(&mesh,mesh.tria,(mesh.na+1)*sizeof(MMG5_Tria));
+  if ( met.m )
+    _MMG5_DEL_MEM(&mesh,met.m,(met.size*met.npmax+1)*sizeof(double));
+  if ( mesh.info.par )
+    _MMG5_DEL_MEM(&mesh,mesh.info.par,mesh.info.npar*sizeof(MMG5_Par));
+  if ( mesh.xpoint )
+    _MMG5_DEL_MEM(&mesh,mesh.xpoint,(mesh.xpmax+1)*sizeof(MMG5_xPoint));
 
   return(0);
 }

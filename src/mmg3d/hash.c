@@ -194,9 +194,9 @@ int _MMG5_hashTria(MMG5_pMesh mesh) {
   MMG5_pTria     pt,pt1;
   _MMG5_Hash     hash;
   _MMG5_hedge    *ph;
-  int      *adja,k,jel,lel,hmax,dup,nmf,ia,ib;
-  char      i,i1,i2,j,l,ok;
-  unsigned int key;
+  int            *adja,k,jel,lel,hmax,dup,nmf,ia,ib;
+  char           i,i1,i2,j,l,ok;
+  unsigned int   key;
 
   _MMG5_ADD_MEM(mesh,(3*mesh->nt+4)*sizeof(int),"surfacic adjacency table",return(0));
   _MMG5_SAFE_CALLOC(mesh->adjt,3*mesh->nt+4,int);
@@ -350,7 +350,8 @@ int _MMG5_hashEdge(MMG5_pMesh mesh,_MMG5_Hash *hash, int a,int b,int k) {
     if ( hash->nxt >= hash->max ) {
       if ( mesh->info.ddebug )
         fprintf(stdout,"  ## Memory alloc problem (edge): %d\n",hash->max);
-      _MMG5_TAB_RECALLOC(mesh,hash->item,hash->max,0.2,_MMG5_hedge,"edge",return(0));
+      _MMG5_TAB_RECALLOC(mesh,hash->item,hash->max,0.2,_MMG5_hedge,
+                         "_MMG5_edge",return(0));
       for (j=hash->nxt; j<hash->max; j++)  hash->item[j].nxt = j+1;
     }
   }

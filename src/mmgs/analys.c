@@ -205,7 +205,7 @@ static int setadj(MMG5_pMesh mesh){
     fprintf(stdout,"     Edges: %d,  tagged: %d,  ridges: %d,  refs: %d\n",ned,nr+nre,nr,nre);
   }
 
-  free(pile);
+  _MMG5_SAFE_FREE(pile);
   return(1);
 }
 
@@ -560,7 +560,8 @@ static int norver(MMG5_pMesh mesh) {
   }
 
   /* memory to store normals on both sides of ridges */
-  mesh->xpmax = MG_MAX(1.5*xp,NGMAX);
+  mesh->xpmax = MG_MAX(1.5*xp,_MMG5_XPMAX);
+  _MMG5_ADD_MEM(mesh,(mesh->xpmax+1)*sizeof(MMG5_xPoint),"boundary points",return(0));
   _MMG5_SAFE_CALLOC(mesh->xpoint,mesh->xpmax+1,MMG5_xPoint);
 
   if ( xp ) {
@@ -759,7 +760,7 @@ static int regnor(MMG5_pMesh mesh) {
   if ( abs(mesh->info.imprim) > 4 )
     fprintf(stdout,"     %d normals regularized: %.3e\n",nn,res);
 
-  free(tabl);
+  _MMG5_SAFE_FREE(tabl);
   return(1);
 }
 

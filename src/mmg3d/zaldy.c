@@ -143,6 +143,7 @@ long long _MMG5_memSize (void) {
 
   return(mem);
 }
+
 /** memory repartition for the -m option */
 void _MMG5_memOption(MMG5_pMesh mesh) {
   long long  million = 1048576L;

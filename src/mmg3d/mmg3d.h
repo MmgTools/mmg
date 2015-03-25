@@ -27,13 +27,6 @@
 /* Warning: never ever use assert() with a function,
    the option -DNDEBUG suppress all assert()*/
 
-#if (defined(__APPLE__) && defined(__MACH__))
-#include <sys/sysctl.h>
-#elif defined(__unix__) || defined(__unix) || defined(unix)
-#include <unistd.h>
-#endif
-
-#include "eigenv.h"
 #include "libmmg3d.h"
 
 #define MG_SMSGN(a,b)  (((double)(a)*(double)(b) > (0.0)) ? (1) : (0))
@@ -51,65 +44,6 @@
     printf("  ## Check the mesh size or increase maximal"); \
     printf(" authorized memory with the -m option.\n");     \
   } while(0)
-
-/** Check if used memory overflow maximal authorized memory.
-    Execute the command law if lack of memory. */
-#define _MMG5_CHK_MEM(mesh,size,string,law) do                          \
-  {                                                                     \
-    if ( ((mesh)->memCur) > ((mesh)->memMax) ||                         \
-         ((mesh)->memCur < 0 )) {                                       \
-      fprintf(stdout,"  ## Error:");                                    \
-      fprintf(stdout," unable to allocate %s.\n",string);               \
-      fprintf(stdout,"  ## Check the mesh size or ");                   \
-      fprintf(stdout,"increase maximal authorized memory with the -m option.\n"); \
-      (mesh)->memCur -= (long long)(size);                              \
-      law;                                                              \
-    }                                                                   \
-  }while(0)
-
-/** Free pointer ptr of mesh structure and compute the new used memory.
-    size is the size of the pointer */
-#define _MMG5_DEL_MEM(mesh,ptr,size) do         \
-  {                                             \
-    (mesh)->memCur -= (long long)(size);        \
-    free(ptr);                                  \
-    ptr = NULL;                                 \
-  }while(0)
-
-/** Increment memory counter memCur and check if we don't overflow
-    the maximum authorizied memory memMax. */
-#define _MMG5_ADD_MEM(mesh,size,message,law) do \
-  {                                             \
-    (mesh)->memCur += (long long)(size);        \
-    _MMG5_CHK_MEM(mesh,size,message,law);       \
-  }while(0)
-
-
-/** Reallocation of ptr of type type at size (initSize+wantedGap*initSize)
-    if possible or at maximum available size if not. Execute the command law
-    if reallocation failed. Memset to 0 for the new values of table. */
-#define _MMG5_TAB_RECALLOC(mesh,ptr,initSize,wantedGap,type,message,law) do \
-  {                                                                     \
-    int gap;                                                            \
-                                                                        \
-    if ( (mesh->memMax-mesh->memCur) <                                  \
-         (long long) (wantedGap*initSize*sizeof(type)) ) {              \
-      gap = (int)(mesh->memMax-mesh->memCur)/sizeof(type);              \
-      if(gap<1) {                                                       \
-        fprintf(stdout,"  ## Error:");                                  \
-        fprintf(stdout," unable to allocate %s.\n",message);            \
-        fprintf(stdout,"  ## Check the mesh size or ");                 \
-        fprintf(stdout,"increase maximal authorized memory with the -m option.\n"); \
-        law;                                                            \
-      }                                                                 \
-    }                                                                   \
-    else                                                                \
-      gap = wantedGap*initSize;                                         \
-                                                                        \
-    _MMG5_ADD_MEM(mesh,gap*sizeof(type),message,law);                   \
-    _MMG5_SAFE_RECALLOC((ptr),initSize+1,initSize+gap+1,type,message);  \
-    initSize = initSize+gap;                                            \
-  }while(0);
 
 
 /** Reallocation of point table and sol table and creation

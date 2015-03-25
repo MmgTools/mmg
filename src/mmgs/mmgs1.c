@@ -271,7 +271,7 @@ static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
   char     i1,i2;
   static double uv[3][2] = { {0.5,0.5}, {0.,0.5}, {0.5,0.} };
 
-  hashNew(&hash,mesh->np);
+  _MMG5_hashNew(mesh,&hash,mesh->np);
   ns = 0;
   s  = 0.5;
   for (k=1; k<=mesh->nt; k++) {
@@ -368,7 +368,7 @@ static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
     }
   }
   if ( !ns ) {
-    _MMG5_SAFE_FREE(hash.geom);
+    _MMG5_DEL_MEM(mesh,hash.geom,(hash.max+1)*sizeof(MMG5_hgeom));
     return(ns);
   }
 
@@ -459,7 +459,7 @@ static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
   }
   if ( (mesh->info.ddebug || abs(mesh->info.imprim) > 5) && ns > 0 )
     fprintf(stdout,"     %7d splitted\n",ns);
-  _MMG5_SAFE_FREE(hash.geom);
+  _MMG5_DEL_MEM(mesh,hash.geom,(hash.max+1)*sizeof(MMG5_hgeom));
 
   return(ns);
 }
@@ -739,7 +739,7 @@ static int anatri(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
   maxit = 5;
   do {
     /* memory free */
-    _MMG5_SAFE_FREE(mesh->adja);
+    _MMG5_DEL_MEM(mesh,mesh->adja,(3*mesh->ntmax+5)*sizeof(int));
     mesh->adja = 0;
 
     /* analyze surface */

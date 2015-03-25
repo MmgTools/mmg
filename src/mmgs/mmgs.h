@@ -26,7 +26,6 @@
 
 #include <complex.h>
 
-#include "eigenv.h"
 #include "memory.h"
 #include "mmg.h"
 
@@ -47,9 +46,9 @@
 #define BADKAL    2.e-2
 #define NULKAL    1.e-4
 
-#define NPMAX     500000
-#define NTMAX    1000000
-#define NGMAX     500000
+#define _MMG5_NPMAX     500000
+#define _MMG5_NTMAX    1000000
+#define _MMG5_XPMAX     500000
 
 #ifndef M_PI
 #define M_PI            3.14159265358979323846   /* pi   */
@@ -74,7 +73,7 @@ extern unsigned char iprv[3];
 /* prototypes */
 int  loadMesh(MMG5_pMesh );
 int  saveMesh(MMG5_pMesh );
-int  loadMet(MMG5_pSol );
+int  MMG5_loadMet(MMG5_pMesh,MMG5_pSol );
 int  saveMet(MMG5_pMesh ,MMG5_pSol );
 int  zaldy(MMG5_pMesh mesh);
 int  assignEdge(MMG5_pMesh mesh);
@@ -92,7 +91,7 @@ int  boulep(MMG5_pMesh mesh,int start,int ip,int *list);
 int  boulec(MMG5_pMesh mesh,int k,int i,double *tt);
 int  bouler(MMG5_pMesh mesh,int k,int i,int *list,int *xp,int *nr);
 int  bouletrid(MMG5_pMesh mesh,int start,int ip,int *il1,int *l1,int *il2,int *l2,int *ip0,int *ip1);
-int  hashNew(MMG5_HGeom *hash,int hmax);
+int  _MMG5_hashNew(MMG5_pMesh mesh, MMG5_HGeom *hash,int hmax);
 int  hashGet(MMG5_HGeom *hash,int a,int b);
 int  hashEdge(MMG5_pMesh mesh,MMG5_HGeom *hash,int a,int b,int k);
 int  newPt(MMG5_pMesh mesh,double c[3],double n[3]);
@@ -139,6 +138,8 @@ int  delref(MMG5_pMesh);
 int  chkmet(MMG5_pMesh,MMG5_pSol);
 int  chknor(MMG5_pMesh);
 void inqua(MMG5_pMesh mesh,MMG5_pSol met);
+long long _MMG5_memSize(void);
+void _MMG5_memOption(MMG5_pMesh mesh);
 
 /* function pointers */
 double calelt_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel);

@@ -481,6 +481,7 @@ int loadMesh(MMG5_pMesh mesh) {
 
   nri = 0;
   if ( mesh->na ) {
+    _MMG5_ADD_MEM(mesh,(mesh->na+1)*sizeof(MMG5_Edge),"initial edges",return(0));
     _MMG5_SAFE_CALLOC(mesh->edge,mesh->na+1,MMG5_Edge);
     rewind(inm);
     fseek(inm,posned,SEEK_SET);
@@ -1032,7 +1033,7 @@ int saveMesh(MMG5_pMesh mesh) {
 }
 
 /* load metric field */
-int loadMet(MMG5_pSol met) {
+int MMG5_loadMet(MMG5_pMesh mesh,MMG5_pSol met) {
   FILE       *inm;
   float       fbuf[6],tmpf;
   double      dbuf[6],tmpd;
@@ -1156,7 +1157,12 @@ int loadMet(MMG5_pSol met) {
   if(met->size == 3) met->size = 6;
 
   /* mem alloc */
-  _MMG5_SAFE_CALLOC(met->m,met->size*(met->npmax+1)+1,double);
+  if ( met->m )
+    _MMG5_DEL_MEM(mesh,met->m,(met->size*met->npmax+1)*sizeof(double));
+
+  _MMG5_ADD_MEM(mesh,(met->size*met->npmax+1)*sizeof(double),
+                "initial solution",return(0));
+  _MMG5_SAFE_CALLOC(met->m,met->size*met->npmax+1,double);
 
   rewind(inm);
   fseek(inm,posnp,SEEK_SET);
@@ -1230,8 +1236,8 @@ int loadMet(MMG5_pSol met) {
 /* write iso or aniso metric */
 int saveMet(MMG5_pMesh mesh,MMG5_pSol met) {
   FILE*        inm;
-  MMG5_pPoint     ppt;
-  double     dbuf[6],tmp;
+  MMG5_pPoint  ppt;
+  double       dbuf[6],tmp;
   char        *ptr,data[128],chaine[128];
   int          binch,bpos,bin,np,k,typ,i;
 

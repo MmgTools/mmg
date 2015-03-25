@@ -98,25 +98,110 @@ void delElt(MMG5_pMesh mesh,int iel) {
   }
 }
 
+long long _MMG5_memSize (void) {
+  long long mem;
 
-int zaldy(MMG5_pMesh mesh) {
-  int     million = 1048576L;
-  int     k,npask,bytes;
+#if (defined(__APPLE__) && defined(__MACH__))
+  size_t size;
 
-  if ( mesh->info.mem < 0 ) {
-    mesh->npmax = MG_MAX(1.5*mesh->np,NPMAX);
-    mesh->ntmax = MG_MAX(1.5*mesh->nt,NTMAX);
+  size = sizeof(mem);
+  if ( sysctlbyname("hw.memsize",&mem,&size,NULL,0) == -1)
+    return(0);
+
+#elif defined(__unix__) || defined(__unix) || defined(unix)
+  mem = ((long long)sysconf(_SC_PHYS_PAGES))*
+    ((long long)sysconf(_SC_PAGE_SIZE));
+#else
+  printf("  ## WARNING: UNKNOWN SYSTEM, RECOVER OF MAXIMAL MEMORY NOT AVAILABLE.\n");
+  return(0);
+#endif
+
+  return(mem);
+}
+
+/** memory repartition for the -m option */
+void _MMG5_memOption(MMG5_pMesh mesh) {
+  long long  million = 1048576L;
+  int        npask,bytes,memtmp;
+
+  mesh->memMax = _MMG5_memSize();
+
+  mesh->npmax = MG_MAX(1.5*mesh->np,_MMG5_NPMAX);
+  mesh->ntmax = MG_MAX(1.5*mesh->nt,_MMG5_NTMAX);
+
+  if ( mesh->info.mem <= 0 ) {
+    if ( mesh->memMax )
+      /* maximal memory = 50% of total physical memory */
+      mesh->memMax = mesh->memMax*50/100;
+    else {
+      /* default value = 800 Mo */
+      printf("  Maximum memory set to default value: %d Mo.\n",_MMG5_MEMMAX);
+      mesh->memMax = _MMG5_MEMMAX*million;
+    }
   }
   else {
-    /* point+tria+adja */
-    bytes = sizeof(MMG5_Point) + 2*sizeof(MMG5_Tria) + 3*sizeof(int);
+    /* memory asked by user if possible, otherwise total physical memory */
+    if ( (long long)mesh->info.mem*million > mesh->memMax && mesh->memMax ) {
+      fprintf(stdout,"  ## Warning: asking for %d Mo of memory ",mesh->info.mem);
+      fprintf(stdout,"when only %lld available.\n",mesh->memMax/million);
+    }
+    else {
+      mesh->memMax= (long long)(mesh->info.mem)*million;
+    }
 
-    npask = (int)((double)mesh->info.mem / bytes * million);
-    mesh->npmax = MG_MAX(1.5*mesh->np,npask);
-    mesh->ntmax = MG_MAX(1.5*mesh->nt,2*npask);
+    /* if asked memory is lower than default _MMG5_NPMAX/_MMG5_NTMAX we take lower values */
+
+    /* point+tria+adja */
+    bytes = sizeof(MMG5_Point) + sizeof(MMG5_xPoint) +
+      2*sizeof(MMG5_Tria) + 3*sizeof(int) + sizeof(MMG5_Sol);
+
+    /*init allocation need 38Mo*/
+    npask = (double)(mesh->info.mem-38) / bytes * (int)million;
+    mesh->npmax = MG_MIN(npask,mesh->npmax);
+    mesh->ntmax = MG_MIN(2*npask,mesh->ntmax);
+
+    /*check if the memory asked is enough to load the mesh*/
+    if(mesh->np &&
+       (mesh->npmax < mesh->np || mesh->ntmax < mesh->nt )) {
+      memtmp = mesh->np * bytes /(int)million + 38;
+      memtmp = MG_MAX(memtmp, mesh->nt * bytes /(2 * (int)million) + 38);
+      mesh->memMax = (long long) memtmp+1;
+      fprintf(stdout,"  ## ERROR: asking for %d Mo of memory ",mesh->info.mem);
+      fprintf(stdout,"is not enough to load mesh. You need to ask %d Mo minimum\n",
+              memtmp+1);
+    }
+    if(mesh->info.mem < 39) {
+      mesh->memMax = (long long) 39;
+      fprintf(stdout,"  ## ERROR: asking for %d Mo of memory ",mesh->info.mem);
+      fprintf(stdout,"is not enough to load mesh. You need to ask %d Mo minimum\n",
+              39);
+    }
   }
 
+  if ( abs(mesh->info.imprim) > 4 || mesh->info.ddebug )
+    fprintf(stdout,"  MAXIMUM MEMORY AUTHORIZED (Mo)    %lld\n",
+            mesh->memMax/million);
+
+  if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug ) {
+    fprintf(stdout,"  _MMG5_NPMAX    %d\n",mesh->npmax);
+    fprintf(stdout,"  _MMG5_NTMAX    %d\n",mesh->ntmax);
+  }
+
+  return;
+}
+
+int zaldy(MMG5_pMesh mesh) {
+  int     k;
+
+  _MMG5_memOption(mesh);
+
+  _MMG5_ADD_MEM(mesh,(mesh->npmax+1)*sizeof(MMG5_Point),"initial vertices",
+                printf("  Exit program.\n");
+                exit(EXIT_FAILURE));
   _MMG5_SAFE_CALLOC(mesh->point,mesh->npmax+1,MMG5_Point);
+  _MMG5_ADD_MEM(mesh,(mesh->ntmax+1)*sizeof(MMG5_Tria),"initial triangles",
+                printf("  Exit program.\n");
+                exit(EXIT_FAILURE));
   _MMG5_SAFE_CALLOC(mesh->tria,mesh->ntmax+1,MMG5_Tria);
 
   /* store empty links */

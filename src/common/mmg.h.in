@@ -34,12 +34,22 @@
 #include <float.h>
 #include <math.h>
 
+#if (defined(__APPLE__) && defined(__MACH__))
+#include <sys/sysctl.h>
+#elif defined(__unix__) || defined(__unix) || defined(unix)
+#include <unistd.h>
+#endif
+
+#include "eigenv.h"
 #include "libmmg.h"
 
 #define MG_VER   "@CMAKE_RELEASE_VERSION@"" c"
 #define MG_REL   "@CMAKE_RELEASE_DATE@"
 #define MG_CPY   "Copyright (c) IMB-LJLL, 2004-"
 #define MG_STR   "&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&"
+
+/** Maximal memory used if available memory compitation fail. */
+#define _MMG5_MEMMAX  800
 
 /* numerical accuracy */
 #define _MMG5_EPSD      1.e-30
@@ -64,6 +74,39 @@
 #define MG_EOK(pt)       (pt && ((pt)->v[0] > 0))       /**< Element OK */
 
 /* Macros for memory management */
+
+/** Check if used memory overflow maximal authorized memory.
+    Execute the command law if lack of memory. */
+#define _MMG5_CHK_MEM(mesh,size,string,law) do                          \
+  {                                                                     \
+    if ( ((mesh)->memCur) > ((mesh)->memMax) ||                         \
+         ((mesh)->memCur < 0 )) {                                       \
+      fprintf(stdout,"  ## Error:");                                    \
+      fprintf(stdout," unable to allocate %s.\n",string);               \
+      fprintf(stdout,"  ## Check the mesh size or ");                   \
+      fprintf(stdout,"increase maximal authorized memory with the -m option.\n"); \
+      (mesh)->memCur -= (long long)(size);                              \
+      law;                                                              \
+    }                                                                   \
+  }while(0)
+
+/** Free pointer ptr of mesh structure and compute the new used memory.
+    size is the size of the pointer */
+#define _MMG5_DEL_MEM(mesh,ptr,size) do         \
+  {                                             \
+    (mesh)->memCur -= (long long)(size);        \
+    free(ptr);                                  \
+    ptr = NULL;                                 \
+  }while(0)
+
+/** Increment memory counter memCur and check if we don't overflow
+    the maximum authorizied memory memMax. */
+#define _MMG5_ADD_MEM(mesh,size,message,law) do \
+  {                                             \
+    (mesh)->memCur += (long long)(size);        \
+    _MMG5_CHK_MEM(mesh,size,message,law);       \
+  }while(0)
+
 /** Safe deallocation */
 #define _MMG5_SAFE_FREE(ptr) do                 \
   {                                             \
@@ -134,6 +177,32 @@
       memset(&ptr[k],0,sizeof(type));                             \
     }                                                             \
   }while(0)
+
+/** Reallocation of ptr of type type at size (initSize+wantedGap*initSize)
+    if possible or at maximum available size if not. Execute the command law
+    if reallocation failed. Memset to 0 for the new values of table. */
+#define _MMG5_TAB_RECALLOC(mesh,ptr,initSize,wantedGap,type,message,law) do \
+  {                                                                     \
+    int gap;                                                            \
+                                                                        \
+    if ( (mesh->memMax-mesh->memCur) <                                  \
+         (long long) (wantedGap*initSize*sizeof(type)) ) {              \
+      gap = (int)(mesh->memMax-mesh->memCur)/sizeof(type);              \
+      if(gap<1) {                                                       \
+        fprintf(stdout,"  ## Error:");                                  \
+        fprintf(stdout," unable to allocate %s.\n",message);            \
+        fprintf(stdout,"  ## Check the mesh size or ");                 \
+        fprintf(stdout,"increase maximal authorized memory with the -m option.\n"); \
+        law;                                                            \
+      }                                                                 \
+    }                                                                   \
+    else                                                                \
+      gap = wantedGap*initSize;                                         \
+                                                                        \
+    _MMG5_ADD_MEM(mesh,gap*sizeof(type),message,law);                   \
+    _MMG5_SAFE_RECALLOC((ptr),initSize+1,initSize+gap+1,type,message);  \
+    initSize = initSize+gap;                                            \
+  }while(0);
 
 
 /* Private structures */

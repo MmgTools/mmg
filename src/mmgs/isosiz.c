@@ -59,6 +59,7 @@ int defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
     met->np    = mesh->np;
     met->npmax = mesh->npmax;
     met->size  = 1;
+    _MMG5_ADD_MEM(mesh,(met->npmax+1)*sizeof(double),"solution",return(0));
     _MMG5_SAFE_MALLOC(met->m,mesh->npmax+1,double);
 
     /* init constant size */
