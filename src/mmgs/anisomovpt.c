@@ -38,917 +38,917 @@
 
 /* compute movement of an internal point whose ball is passed */
 int movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
-    MMG5_pTria     pt,pt0;
-    MMG5_pPoint    p0,p1,p2,ppt0;
-    _MMG5_Bezier         pb;
-    double         r[3][3],ux,uy,uz,*n,area,lispoi[3*LMAX+1],Jacsigma[3][2],Jactmp[3][2],*m0,m[6],mo[6];
-    double         dens[3],intpt[2],gv[2],density,detloc,step,lambda[3],o[3],no[3],to[3],uv[2];
-    double         ll,*n1,*n2,ps1,ps2,calold,calnew,caltmp;
-    int            k,iel,kel,nump,nbeg,nend;
-    char           i0,i1,i2,j,ier;
+  MMG5_pTria     pt,pt0;
+  MMG5_pPoint    p0,p1,p2,ppt0;
+  _MMG5_Bezier         pb;
+  double         r[3][3],ux,uy,uz,*n,area,lispoi[3*LMAX+1],Jacsigma[3][2],Jactmp[3][2],*m0,m[6],mo[6];
+  double         dens[3],intpt[2],gv[2],density,detloc,step,lambda[3],o[3],no[3],to[3],uv[2];
+  double         ll,*n1,*n2,ps1,ps2,calold,calnew,caltmp;
+  int            k,iel,kel,nump,nbeg,nend;
+  char           i0,i1,i2,j,ier;
 
-    step = 0.1;
+  step = 0.1;
 
-    /* Make sure ball of point is closed */
-    iel = list[0] / 3;
-    i0  = list[0] % 3;
+  /* Make sure ball of point is closed */
+  iel = list[0] / 3;
+  i0  = list[0] % 3;
+  i1  = inxt[i0];
+
+  pt   = &mesh->tria[iel];
+  nump = pt->v[i0];
+  nbeg = pt->v[i1];
+  p0   = &mesh->point[nump];
+  m0   = &met->m[6*(nump)+1];
+  assert( !p0->tag );
+
+  iel = list[ilist-1] / 3;
+  i0  = list[ilist-1] % 3;
+  i2  = iprv[i0];
+
+  pt   = &mesh->tria[iel];
+  nend = pt->v[i2];
+  if ( nbeg != nend )  return(0);
+
+  /* Rotation matrix that sends normal at p0 to e_z */
+  n = &(p0->n[0]);
+  if ( !rotmatrix(n,r) )  return(0);
+
+  /* Apply rotation \circ translation to the whole ball */
+  for (k=0; k<ilist; k++) {
+    iel = list[k] / 3;
+    i0  = list[k] % 3;
     i1  = inxt[i0];
-
-    pt   = &mesh->tria[iel];
-    nump = pt->v[i0];
-    nbeg = pt->v[i1];
-    p0   = &mesh->point[nump];
-    m0   = &met->m[6*(nump)+1];
-    assert( !p0->tag );
-
-    iel = list[ilist-1] / 3;
-    i0  = list[ilist-1] % 3;
-    i2  = iprv[i0];
-
-    pt   = &mesh->tria[iel];
-    nend = pt->v[i2];
-    if ( nbeg != nend )  return(0);
-
-    /* Rotation matrix that sends normal at p0 to e_z */
-    n = &(p0->n[0]);
-    if ( !rotmatrix(n,r) )  return(0);
-
-    /* Apply rotation \circ translation to the whole ball */
-    for (k=0; k<ilist; k++) {
-        iel = list[k] / 3;
-        i0  = list[k] % 3;
-        i1  = inxt[i0];
-        pt  = &mesh->tria[iel];
-        p1  = &mesh->point[pt->v[i1]];
-
-        ux = p1->c[0] - p0->c[0];
-        uy = p1->c[1] - p0->c[1];
-        uz = p1->c[2] - p0->c[2];
-
-        lispoi[3*k+1] = r[0][0]*ux + r[0][1]*uy + r[0][2]*uz;
-        lispoi[3*k+2] = r[1][0]*ux + r[1][1]*uy + r[1][2]*uz;
-        lispoi[3*k+3] = r[2][0]*ux + r[2][1]*uy + r[2][2]*uz;
-    }
-
-    /* list goes modulo ilist */
-    lispoi[3*ilist+1] = lispoi[1];
-    lispoi[3*ilist+2] = lispoi[2];
-    lispoi[3*ilist+3] = lispoi[3];
-
-    /* Check all projections over tangent plane. */
-    for (k=0; k<ilist-1; k++) {
-        area = lispoi[3*k+1]*lispoi[3*(k+1)+2] - lispoi[3*k+2]*lispoi[3*(k+1)+1];
-        if ( area < 0.0 )  return(0);
-    }
-    area = lispoi[3*(ilist-1)+1]*lispoi[3*0+2] - lispoi[3*(ilist-1)+2]*lispoi[3*0+1];
-    if ( area < 0.0 )  return(0);
-
-    /* Step 2 : Compute gradient towards optimal position = centre of mass of the ball,
-       projected to tangent plane */
-    gv[0] = 0.0;
-    gv[1] = 0.0;
-
-    for (k=0; k<ilist; k++) {
-        iel = list[k] / 3;
-        pt = &mesh->tria[iel];
-        if ( !bezierCP(mesh,iel,&pb) )  return(0);
-
-        area = lispoi[3*k+1]*lispoi[3*(k+1)+2] - lispoi[3*k+2]*lispoi[3*(k+1)+1];
-        i0 = 0;
-        i1 = 1;
-        i2 = 2;
-
-        for (j=0; j<3; j++) {
-            /* Set jacobian matrix of parametric Bezier patch, for each quadrature point */
-            if ( j == 0 ) {  //w,u = 1/2, v = 0
-                Jacsigma[0][0] = 0.75*(pb.b[7][0] - pb.b[0][0]) + 0.75*(pb.b[1][0] - pb.b[8][0]) + 1.5*(pb.b[8][0] - pb.b[7][0]);
-                Jacsigma[1][0] = 0.75*(pb.b[7][1] - pb.b[0][1]) + 0.75*(pb.b[1][1] - pb.b[8][1]) + 1.5*(pb.b[8][1] - pb.b[7][1]);
-                Jacsigma[2][0] = 0.75*(pb.b[7][2] - pb.b[0][2]) + 0.75*(pb.b[1][2] - pb.b[8][2]) + 1.5*(pb.b[8][2] - pb.b[7][2]);
-
-                Jacsigma[0][1] = 0.75*(pb.b[6][0] - pb.b[0][0]) + 0.75*(pb.b[3][0] - pb.b[8][0]) + 1.5*(pb.b[9][0] - pb.b[7][0]);
-                Jacsigma[1][1] = 0.75*(pb.b[6][1] - pb.b[0][1]) + 0.75*(pb.b[3][1] - pb.b[8][1]) + 1.5*(pb.b[9][1] - pb.b[7][1]);
-                Jacsigma[2][1] = 0.75*(pb.b[6][2] - pb.b[0][2]) + 0.75*(pb.b[3][2] - pb.b[8][2]) + 1.5*(pb.b[9][2] - pb.b[7][2]);
-            }
-            else if( j == 1 ) { //u,v = 1/2, w = 0
-                Jacsigma[0][0] = 0.75*(pb.b[1][0] - pb.b[8][0]) + 0.75*(pb.b[4][0] - pb.b[5][0]) + 1.5*(pb.b[3][0] - pb.b[9][0]);
-                Jacsigma[1][0] = 0.75*(pb.b[1][1] - pb.b[8][1]) + 0.75*(pb.b[4][1] - pb.b[5][1]) + 1.5*(pb.b[3][1] - pb.b[9][1]);
-                Jacsigma[2][0] = 0.75*(pb.b[1][2] - pb.b[8][2]) + 0.75*(pb.b[4][2] - pb.b[5][2]) + 1.5*(pb.b[3][2] - pb.b[9][2]);
-
-                Jacsigma[0][1] = 0.75*(pb.b[3][0] - pb.b[8][0]) + 0.75*(pb.b[2][0] - pb.b[5][0]) + 1.5*(pb.b[4][0] - pb.b[9][0]);
-                Jacsigma[1][1] = 0.75*(pb.b[3][1] - pb.b[8][1]) + 0.75*(pb.b[2][1] - pb.b[5][1]) + 1.5*(pb.b[4][1] - pb.b[9][1]);
-                Jacsigma[2][1] = 0.75*(pb.b[3][2] - pb.b[8][2]) + 0.75*(pb.b[2][2] - pb.b[5][2]) + 1.5*(pb.b[4][2] - pb.b[9][2]);
-            }
-            else { //w,v = 1/2, u= 0
-                Jacsigma[0][0] = 0.75*(pb.b[7][0] - pb.b[0][0]) + 0.75*(pb.b[4][0] - pb.b[5][0]) + 1.5*(pb.b[9][0] - pb.b[6][0]);
-                Jacsigma[1][0] = 0.75*(pb.b[7][1] - pb.b[0][1]) + 0.75*(pb.b[4][1] - pb.b[5][1]) + 1.5*(pb.b[9][1] - pb.b[6][1]);
-                Jacsigma[2][0] = 0.75*(pb.b[7][2] - pb.b[0][2]) + 0.75*(pb.b[4][2] - pb.b[5][2]) + 1.5*(pb.b[9][2] - pb.b[6][2]);
-
-                Jacsigma[0][1] = 0.75*(pb.b[6][0] - pb.b[0][0]) + 0.75*(pb.b[2][0] - pb.b[5][0]) + 1.5*(pb.b[5][0] - pb.b[6][0]);
-                Jacsigma[1][1] = 0.75*(pb.b[6][1] - pb.b[0][1]) + 0.75*(pb.b[2][1] - pb.b[5][1]) + 1.5*(pb.b[5][1] - pb.b[6][1]);
-                Jacsigma[2][1] = 0.75*(pb.b[6][2] - pb.b[0][2]) + 0.75*(pb.b[2][2] - pb.b[5][2]) + 1.5*(pb.b[5][2] - pb.b[6][2]);
-            }
-
-            /* Take metric at control point */
-            if ( !(MG_GEO & pt->tag[i2]) ) {
-                if ( !intregmet(mesh,met,iel,i2,0.5,m) )  return(0);
-            }
-            else {
-                if ( !nortri(mesh,pt,no) )  return(0);
-                if ( !intridmet(mesh,met,iel,i2,0.5,no,mo) )  return(0);
-
-                p1 = &mesh->point[pt->v[i0]];
-                p2 = &mesh->point[pt->v[i1]];
-
-                to[0] = p2->c[0] - p1->c[0];
-                to[1] = p2->c[1] - p1->c[1];
-                to[2] = p2->c[2] - p1->c[2];
-
-                ll = to[0]*to[0] + to[1]*to[1] + to[2]*to[2];
-                if ( ll < _MMG5_EPSD )  return(0);
-                ll = 1.0 / sqrt(ll);
-                to[0] *= ll;
-                to[1] *= ll;
-                to[2] *= ll;
-
-                if ( MS_SIN(p1->tag) && MS_SIN(p2->tag) ) {
-                    if ( !buildridmetfic(mesh,to,no,mo[0],mo[0],m) )  return(0);
-                }
-                else if ( !MS_SIN(p1->tag) ) {
-                    n1 = &mesh->xpoint[p1->ig].n1[0];
-                    n2 = &mesh->xpoint[p1->ig].n2[0];
-                    ps1 = n1[0]*no[0] + n1[1]*no[1] + n1[2]*no[2];
-                    ps2 = n2[0]*no[0] + n2[1]*no[1] + n2[2]*no[2];
-                    if ( fabs(ps1) > fabs(ps2) ) {
-                        if ( !buildridmetfic(mesh,to,no,mo[0],mo[1],m) )  return(0);
-                    }
-                    else {
-                        if ( !buildridmetfic(mesh,to,no,mo[0],mo[2],m) )  return(0);
-                    }
-                }
-                else {
-                    assert(!MS_SIN(p2->tag));
-                    n1 = &mesh->xpoint[p2->ig].n1[0];
-                    n2 = &mesh->xpoint[p2->ig].n2[0];
-                    ps1 = n1[0]*no[0] + n1[1]*no[1] + n1[2]*no[2];
-                    ps2 = n2[0]*no[0] + n2[1]*no[1] + n2[2]*no[2];
-                    if ( fabs(ps1) > fabs(ps2) ) {
-                        if ( !buildridmetfic(mesh,to,no,mo[0],mo[1],m) )  return(0);
-                    }
-                    else {
-                        if ( !buildridmetfic(mesh,to,no,mo[0],mo[2],m) )  return(0);
-                    }
-                }
-            }
-
-            /* Compute density matrix {^t}Jacsigma * M * Jacsigma */
-            Jactmp[0][0] = m[0]*Jacsigma[0][0] + m[1]*Jacsigma[1][0] + m[2]*Jacsigma[2][0];
-            Jactmp[1][0] = m[1]*Jacsigma[0][0] + m[3]*Jacsigma[1][0] + m[4]*Jacsigma[2][0];
-            Jactmp[2][0] = m[2]*Jacsigma[0][0] + m[4]*Jacsigma[1][0] + m[5]*Jacsigma[2][0];
-
-            Jactmp[0][1] = m[0]*Jacsigma[0][1] + m[1]*Jacsigma[1][1] + m[2]*Jacsigma[2][1];
-            Jactmp[1][1] = m[1]*Jacsigma[0][1] + m[3]*Jacsigma[1][1] + m[4]*Jacsigma[2][1];
-            Jactmp[2][1] = m[2]*Jacsigma[0][1] + m[4]*Jacsigma[1][1] + m[5]*Jacsigma[2][1];
-
-            dens[0] = Jacsigma[0][0]*Jactmp[0][0] + Jacsigma[1][0]*Jactmp[1][0] + Jacsigma[2][0]*Jactmp[2][0];
-            dens[1] = Jacsigma[0][0]*Jactmp[0][1] + Jacsigma[1][0]*Jactmp[1][1] + Jacsigma[2][0]*Jactmp[2][1];
-            dens[2] = Jacsigma[0][1]*Jactmp[0][1] + Jacsigma[1][1]*Jactmp[1][1] + Jacsigma[2][1]*Jactmp[2][1];
-
-            density = dens[0]*dens[2] - dens[1]*dens[1];
-            if ( density <= 0.0 ) {
-                fprintf(stdout,"  ## Fct movptaniso: negative density \n");
-                continue;
-            }
-            density = sqrt(density);
-            /* Coordinates of the integration point */
-            p1 = &mesh->point[pt->v[i0]];
-            p2 = &mesh->point[pt->v[i1]];
-
-            ux = 0.5*(p1->c[0] + p2->c[0]) - p0->c[0];
-            uy = 0.5*(p1->c[1] + p2->c[1]) - p0->c[1];
-            uz = 0.5*(p1->c[2] + p2->c[2]) - p0->c[2];
-
-            intpt[0] =  r[0][0]*ux + r[0][1]*uy + r[0][2]*uz;
-            intpt[1] =  r[1][0]*ux + r[1][1]*uy + r[1][2]*uz;
-
-            gv[0] += density*ATHIRD*intpt[0];
-            gv[1] += density*ATHIRD*intpt[1];
-
-            i0 = inxt[i0];
-            i1 = inxt[i1];
-            i2 = inxt[i2];
-        }
-    }
-
-    /* At this point : gv = - gradient of V = direction to follow */
-    /* Step 3 : locate new point in the ball, and compute its barycentric coordinates */
-    area = lispoi[1]*gv[1] - lispoi[2]*gv[0];
-    kel = 0;
-    if ( area >= 0.0 ) {
-        for (k=0; k<ilist; k++) {
-            detloc = gv[0]*lispoi[3*(k+1)+2] - gv[1]*lispoi[3*(k+1)+1]; /*orientation with respect to p2 */
-            if ( detloc >= 0.0 ) {
-                kel = k;
-                break;
-            }
-        }
-        if ( k == ilist )  return(0);
-    }
-    else {
-        for (k=ilist-1; k>=0; k--) {
-            detloc = lispoi[3*k+1]*gv[1] - lispoi[3*k+2]*gv[0]; //orientation with respect to p2
-            if ( detloc >= 0.0 ) {
-                kel = k;
-                break;
-            }
-        }
-        if ( k == -1 )  return(0);
-    }
-
-    /* Sizing of time step : make sure point does not go out corresponding triangle. */
-    iel = list[kel] / 3;
-
-    area = - gv[1]*(lispoi[3*(kel+1)+1] - lispoi[3*(kel)+1]) \
-        + gv[0]*(lispoi[3*(kel+1)+2] - lispoi[3*(kel)+2]);
-    if ( fabs(area) < _MMG5_EPSD )  return(0);
-    area = 1.0 / area;
-    step *= area;
-
-    area = lispoi[3*(kel)+1]*(lispoi[3*(kel+1)+2] - lispoi[3*(kel)+2]) \
-        - lispoi[3*(kel)+2 ]*(lispoi[3*(kel+1)+1] - lispoi[3*(kel)+1]);
-    step *= area;
-    step = fabs(step);
-    gv[0] *= step;
-    gv[1] *= step;
-
-    /* Computation of the barycentric coordinates of the new point in the corresponding triangle. */
-    area = lispoi[3*kel+1]*lispoi[3*(kel+1)+2] - lispoi[3*kel+2]*lispoi[3*(kel+1)+1];
-    if ( area < _MMG5_EPSD )  return(0);
-    area = 1.0 / area;
-    lambda[1] = lispoi[3*(kel+1)+2]*gv[0] - lispoi[3*(kel+1)+1]*gv[1];
-    lambda[2] = -lispoi[3*(kel)+2]*gv[0] + lispoi[3*(kel)+1]*gv[1];
-    lambda[1]*= (area);
-    lambda[2]*= (area);
-    lambda[0] = 1.0 - lambda[1] - lambda[2];
-
-    /* Step 4 : come back to original problem, and compute patch in triangle iel */
-    iel = list[kel] / 3;
-    i0  = list[kel] % 3;
-    i1  = inxt[i0];
-    i2  = inxt[i1];
     pt  = &mesh->tria[iel];
+    p1  = &mesh->point[pt->v[i1]];
 
-    ier = bezierCP(mesh,iel,&pb);
-    assert(ier);
+    ux = p1->c[0] - p0->c[0];
+    uy = p1->c[1] - p0->c[1];
+    uz = p1->c[2] - p0->c[2];
 
-    /* Now, for Bezier interpolation, one should identify which of i,i1,i2 is 0,1,2
-       recall uv[0] = barycentric coord associated to pt->v[1], uv[1] associated to pt->v[2] */
-    if ( i0 == 0 ) {
-        uv[0] = lambda[1];
-        uv[1] = lambda[2];
+    lispoi[3*k+1] = r[0][0]*ux + r[0][1]*uy + r[0][2]*uz;
+    lispoi[3*k+2] = r[1][0]*ux + r[1][1]*uy + r[1][2]*uz;
+    lispoi[3*k+3] = r[2][0]*ux + r[2][1]*uy + r[2][2]*uz;
+  }
+
+  /* list goes modulo ilist */
+  lispoi[3*ilist+1] = lispoi[1];
+  lispoi[3*ilist+2] = lispoi[2];
+  lispoi[3*ilist+3] = lispoi[3];
+
+  /* Check all projections over tangent plane. */
+  for (k=0; k<ilist-1; k++) {
+    area = lispoi[3*k+1]*lispoi[3*(k+1)+2] - lispoi[3*k+2]*lispoi[3*(k+1)+1];
+    if ( area < 0.0 )  return(0);
+  }
+  area = lispoi[3*(ilist-1)+1]*lispoi[3*0+2] - lispoi[3*(ilist-1)+2]*lispoi[3*0+1];
+  if ( area < 0.0 )  return(0);
+
+  /* Step 2 : Compute gradient towards optimal position = centre of mass of the ball,
+     projected to tangent plane */
+  gv[0] = 0.0;
+  gv[1] = 0.0;
+
+  for (k=0; k<ilist; k++) {
+    iel = list[k] / 3;
+    pt = &mesh->tria[iel];
+    if ( !bezierCP(mesh,iel,&pb) )  return(0);
+
+    area = lispoi[3*k+1]*lispoi[3*(k+1)+2] - lispoi[3*k+2]*lispoi[3*(k+1)+1];
+    i0 = 0;
+    i1 = 1;
+    i2 = 2;
+
+    for (j=0; j<3; j++) {
+      /* Set jacobian matrix of parametric Bezier patch, for each quadrature point */
+      if ( j == 0 ) {  //w,u = 1/2, v = 0
+        Jacsigma[0][0] = 0.75*(pb.b[7][0] - pb.b[0][0]) + 0.75*(pb.b[1][0] - pb.b[8][0]) + 1.5*(pb.b[8][0] - pb.b[7][0]);
+        Jacsigma[1][0] = 0.75*(pb.b[7][1] - pb.b[0][1]) + 0.75*(pb.b[1][1] - pb.b[8][1]) + 1.5*(pb.b[8][1] - pb.b[7][1]);
+        Jacsigma[2][0] = 0.75*(pb.b[7][2] - pb.b[0][2]) + 0.75*(pb.b[1][2] - pb.b[8][2]) + 1.5*(pb.b[8][2] - pb.b[7][2]);
+
+        Jacsigma[0][1] = 0.75*(pb.b[6][0] - pb.b[0][0]) + 0.75*(pb.b[3][0] - pb.b[8][0]) + 1.5*(pb.b[9][0] - pb.b[7][0]);
+        Jacsigma[1][1] = 0.75*(pb.b[6][1] - pb.b[0][1]) + 0.75*(pb.b[3][1] - pb.b[8][1]) + 1.5*(pb.b[9][1] - pb.b[7][1]);
+        Jacsigma[2][1] = 0.75*(pb.b[6][2] - pb.b[0][2]) + 0.75*(pb.b[3][2] - pb.b[8][2]) + 1.5*(pb.b[9][2] - pb.b[7][2]);
+      }
+      else if( j == 1 ) { //u,v = 1/2, w = 0
+        Jacsigma[0][0] = 0.75*(pb.b[1][0] - pb.b[8][0]) + 0.75*(pb.b[4][0] - pb.b[5][0]) + 1.5*(pb.b[3][0] - pb.b[9][0]);
+        Jacsigma[1][0] = 0.75*(pb.b[1][1] - pb.b[8][1]) + 0.75*(pb.b[4][1] - pb.b[5][1]) + 1.5*(pb.b[3][1] - pb.b[9][1]);
+        Jacsigma[2][0] = 0.75*(pb.b[1][2] - pb.b[8][2]) + 0.75*(pb.b[4][2] - pb.b[5][2]) + 1.5*(pb.b[3][2] - pb.b[9][2]);
+
+        Jacsigma[0][1] = 0.75*(pb.b[3][0] - pb.b[8][0]) + 0.75*(pb.b[2][0] - pb.b[5][0]) + 1.5*(pb.b[4][0] - pb.b[9][0]);
+        Jacsigma[1][1] = 0.75*(pb.b[3][1] - pb.b[8][1]) + 0.75*(pb.b[2][1] - pb.b[5][1]) + 1.5*(pb.b[4][1] - pb.b[9][1]);
+        Jacsigma[2][1] = 0.75*(pb.b[3][2] - pb.b[8][2]) + 0.75*(pb.b[2][2] - pb.b[5][2]) + 1.5*(pb.b[4][2] - pb.b[9][2]);
+      }
+      else { //w,v = 1/2, u= 0
+        Jacsigma[0][0] = 0.75*(pb.b[7][0] - pb.b[0][0]) + 0.75*(pb.b[4][0] - pb.b[5][0]) + 1.5*(pb.b[9][0] - pb.b[6][0]);
+        Jacsigma[1][0] = 0.75*(pb.b[7][1] - pb.b[0][1]) + 0.75*(pb.b[4][1] - pb.b[5][1]) + 1.5*(pb.b[9][1] - pb.b[6][1]);
+        Jacsigma[2][0] = 0.75*(pb.b[7][2] - pb.b[0][2]) + 0.75*(pb.b[4][2] - pb.b[5][2]) + 1.5*(pb.b[9][2] - pb.b[6][2]);
+
+        Jacsigma[0][1] = 0.75*(pb.b[6][0] - pb.b[0][0]) + 0.75*(pb.b[2][0] - pb.b[5][0]) + 1.5*(pb.b[5][0] - pb.b[6][0]);
+        Jacsigma[1][1] = 0.75*(pb.b[6][1] - pb.b[0][1]) + 0.75*(pb.b[2][1] - pb.b[5][1]) + 1.5*(pb.b[5][1] - pb.b[6][1]);
+        Jacsigma[2][1] = 0.75*(pb.b[6][2] - pb.b[0][2]) + 0.75*(pb.b[2][2] - pb.b[5][2]) + 1.5*(pb.b[5][2] - pb.b[6][2]);
+      }
+
+      /* Take metric at control point */
+      if ( !(MG_GEO & pt->tag[i2]) ) {
+        if ( !intregmet(mesh,met,iel,i2,0.5,m) )  return(0);
+      }
+      else {
+        if ( !nortri(mesh,pt,no) )  return(0);
+        if ( !intridmet(mesh,met,iel,i2,0.5,no,mo) )  return(0);
+
+        p1 = &mesh->point[pt->v[i0]];
+        p2 = &mesh->point[pt->v[i1]];
+
+        to[0] = p2->c[0] - p1->c[0];
+        to[1] = p2->c[1] - p1->c[1];
+        to[2] = p2->c[2] - p1->c[2];
+
+        ll = to[0]*to[0] + to[1]*to[1] + to[2]*to[2];
+        if ( ll < _MMG5_EPSD )  return(0);
+        ll = 1.0 / sqrt(ll);
+        to[0] *= ll;
+        to[1] *= ll;
+        to[2] *= ll;
+
+        if ( MS_SIN(p1->tag) && MS_SIN(p2->tag) ) {
+          if ( !buildridmetfic(mesh,to,no,mo[0],mo[0],m) )  return(0);
+        }
+        else if ( !MS_SIN(p1->tag) ) {
+          n1 = &mesh->xpoint[p1->ig].n1[0];
+          n2 = &mesh->xpoint[p1->ig].n2[0];
+          ps1 = n1[0]*no[0] + n1[1]*no[1] + n1[2]*no[2];
+          ps2 = n2[0]*no[0] + n2[1]*no[1] + n2[2]*no[2];
+          if ( fabs(ps1) > fabs(ps2) ) {
+            if ( !buildridmetfic(mesh,to,no,mo[0],mo[1],m) )  return(0);
+          }
+          else {
+            if ( !buildridmetfic(mesh,to,no,mo[0],mo[2],m) )  return(0);
+          }
+        }
+        else {
+          assert(!MS_SIN(p2->tag));
+          n1 = &mesh->xpoint[p2->ig].n1[0];
+          n2 = &mesh->xpoint[p2->ig].n2[0];
+          ps1 = n1[0]*no[0] + n1[1]*no[1] + n1[2]*no[2];
+          ps2 = n2[0]*no[0] + n2[1]*no[1] + n2[2]*no[2];
+          if ( fabs(ps1) > fabs(ps2) ) {
+            if ( !buildridmetfic(mesh,to,no,mo[0],mo[1],m) )  return(0);
+          }
+          else {
+            if ( !buildridmetfic(mesh,to,no,mo[0],mo[2],m) )  return(0);
+          }
+        }
+      }
+
+      /* Compute density matrix {^t}Jacsigma * M * Jacsigma */
+      Jactmp[0][0] = m[0]*Jacsigma[0][0] + m[1]*Jacsigma[1][0] + m[2]*Jacsigma[2][0];
+      Jactmp[1][0] = m[1]*Jacsigma[0][0] + m[3]*Jacsigma[1][0] + m[4]*Jacsigma[2][0];
+      Jactmp[2][0] = m[2]*Jacsigma[0][0] + m[4]*Jacsigma[1][0] + m[5]*Jacsigma[2][0];
+
+      Jactmp[0][1] = m[0]*Jacsigma[0][1] + m[1]*Jacsigma[1][1] + m[2]*Jacsigma[2][1];
+      Jactmp[1][1] = m[1]*Jacsigma[0][1] + m[3]*Jacsigma[1][1] + m[4]*Jacsigma[2][1];
+      Jactmp[2][1] = m[2]*Jacsigma[0][1] + m[4]*Jacsigma[1][1] + m[5]*Jacsigma[2][1];
+
+      dens[0] = Jacsigma[0][0]*Jactmp[0][0] + Jacsigma[1][0]*Jactmp[1][0] + Jacsigma[2][0]*Jactmp[2][0];
+      dens[1] = Jacsigma[0][0]*Jactmp[0][1] + Jacsigma[1][0]*Jactmp[1][1] + Jacsigma[2][0]*Jactmp[2][1];
+      dens[2] = Jacsigma[0][1]*Jactmp[0][1] + Jacsigma[1][1]*Jactmp[1][1] + Jacsigma[2][1]*Jactmp[2][1];
+
+      density = dens[0]*dens[2] - dens[1]*dens[1];
+      if ( density <= 0.0 ) {
+        fprintf(stdout,"  ## Fct movptaniso: negative density \n");
+        continue;
+      }
+      density = sqrt(density);
+      /* Coordinates of the integration point */
+      p1 = &mesh->point[pt->v[i0]];
+      p2 = &mesh->point[pt->v[i1]];
+
+      ux = 0.5*(p1->c[0] + p2->c[0]) - p0->c[0];
+      uy = 0.5*(p1->c[1] + p2->c[1]) - p0->c[1];
+      uz = 0.5*(p1->c[2] + p2->c[2]) - p0->c[2];
+
+      intpt[0] =  r[0][0]*ux + r[0][1]*uy + r[0][2]*uz;
+      intpt[1] =  r[1][0]*ux + r[1][1]*uy + r[1][2]*uz;
+
+      gv[0] += density*ATHIRD*intpt[0];
+      gv[1] += density*ATHIRD*intpt[1];
+
+      i0 = inxt[i0];
+      i1 = inxt[i1];
+      i2 = inxt[i2];
     }
-    else if ( i0 == 1 ) {
-        uv[0] = lambda[0];
-        uv[1] = lambda[1];
+  }
+
+  /* At this point : gv = - gradient of V = direction to follow */
+  /* Step 3 : locate new point in the ball, and compute its barycentric coordinates */
+  area = lispoi[1]*gv[1] - lispoi[2]*gv[0];
+  kel = 0;
+  if ( area >= 0.0 ) {
+    for (k=0; k<ilist; k++) {
+      detloc = gv[0]*lispoi[3*(k+1)+2] - gv[1]*lispoi[3*(k+1)+1]; /*orientation with respect to p2 */
+      if ( detloc >= 0.0 ) {
+        kel = k;
+        break;
+      }
     }
-    else{
-        uv[0] = lambda[2];
-        uv[1] = lambda[0];
+    if ( k == ilist )  return(0);
+  }
+  else {
+    for (k=ilist-1; k>=0; k--) {
+      detloc = lispoi[3*k+1]*gv[1] - lispoi[3*k+2]*gv[0]; //orientation with respect to p2
+      if ( detloc >= 0.0 ) {
+        kel = k;
+        break;
+      }
     }
+    if ( k == -1 )  return(0);
+  }
 
-    ier = bezierInt(&pb,uv,o,no,to);
-    assert(ier);
+  /* Sizing of time step : make sure point does not go out corresponding triangle. */
+  iel = list[kel] / 3;
 
-    /* Second test : check whether geometric approximation has not been too much degraded */
-    ppt0 = &mesh->point[0];
-    ppt0->c[0] = o[0];
-    ppt0->c[1] = o[1];
-    ppt0->c[2] = o[2];
+  area = - gv[1]*(lispoi[3*(kel+1)+1] - lispoi[3*(kel)+1]) \
+    + gv[0]*(lispoi[3*(kel+1)+2] - lispoi[3*(kel)+2]);
+  if ( fabs(area) < _MMG5_EPSD )  return(0);
+  area = 1.0 / area;
+  step *= area;
 
-    ppt0->n[0] = no[0];
-    ppt0->n[1] = no[1];
-    ppt0->n[2] = no[2];
+  area = lispoi[3*(kel)+1]*(lispoi[3*(kel+1)+2] - lispoi[3*(kel)+2]) \
+    - lispoi[3*(kel)+2 ]*(lispoi[3*(kel+1)+1] - lispoi[3*(kel)+1]);
+  step *= area;
+  step = fabs(step);
+  gv[0] *= step;
+  gv[1] *= step;
 
-    calold = calnew = DBL_MAX;
-    for (k= 0; k<ilist; k++) {
-        iel = list[k] / 3;
-        i0  = list[k] % 3;
-        pt  = &mesh->tria[iel];
-        pt0 = &mesh->tria[0];
-        memcpy(pt0,pt,sizeof(MMG5_Tria));
-        pt0->v[i0] = 0;
+  /* Computation of the barycentric coordinates of the new point in the corresponding triangle. */
+  area = lispoi[3*kel+1]*lispoi[3*(kel+1)+2] - lispoi[3*kel+2]*lispoi[3*(kel+1)+1];
+  if ( area < _MMG5_EPSD )  return(0);
+  area = 1.0 / area;
+  lambda[1] = lispoi[3*(kel+1)+2]*gv[0] - lispoi[3*(kel+1)+1]*gv[1];
+  lambda[2] = -lispoi[3*(kel)+2]*gv[0] + lispoi[3*(kel)+1]*gv[1];
+  lambda[1]*= (area);
+  lambda[2]*= (area);
+  lambda[0] = 1.0 - lambda[1] - lambda[2];
 
-        caltmp = caleltsig_ani(mesh,met,iel);
-        calold = MG_MIN(calold,caltmp);
-        caltmp = caleltsig_ani(mesh,met,0);
-        if ( caltmp < _MMG5_EPSD )        return(0.0);
-        calnew = MG_MIN(calnew,caltmp);
+  /* Step 4 : come back to original problem, and compute patch in triangle iel */
+  iel = list[kel] / 3;
+  i0  = list[kel] % 3;
+  i1  = inxt[i0];
+  i2  = inxt[i1];
+  pt  = &mesh->tria[iel];
 
-        if ( calold < NULKAL && calnew <= calold )  return(0);
-        else if ( calnew < 0.3*calold )      return(0);
+  ier = bezierCP(mesh,iel,&pb);
+  assert(ier);
 
-        /* if ( chkedg(mesh,0) )  return(0); */
-    }
+  /* Now, for Bezier interpolation, one should identify which of i,i1,i2 is 0,1,2
+     recall uv[0] = barycentric coord associated to pt->v[1], uv[1] associated to pt->v[2] */
+  if ( i0 == 0 ) {
+    uv[0] = lambda[1];
+    uv[1] = lambda[2];
+  }
+  else if ( i0 == 1 ) {
+    uv[0] = lambda[0];
+    uv[1] = lambda[1];
+  }
+  else{
+    uv[0] = lambda[2];
+    uv[1] = lambda[0];
+  }
 
-    /* Finally, update coordinates and normals of point, if new position is accepted :*/
-    assert(paratmet(p0->c,p0->n,m0,o,no,m)); // parallel transport of metric at p0 to new point
+  ier = bezierInt(&pb,uv,o,no,to);
+  assert(ier);
 
-    p0->c[0] = o[0];
-    p0->c[1] = o[1];
-    p0->c[2] = o[2];
+  /* Second test : check whether geometric approximation has not been too much degraded */
+  ppt0 = &mesh->point[0];
+  ppt0->c[0] = o[0];
+  ppt0->c[1] = o[1];
+  ppt0->c[2] = o[2];
 
-    p0->n[0] = no[0];
-    p0->n[1] = no[1];
-    p0->n[2] = no[2];
+  ppt0->n[0] = no[0];
+  ppt0->n[1] = no[1];
+  ppt0->n[2] = no[2];
 
-    memcpy(m0,m,6*sizeof(double));
+  calold = calnew = DBL_MAX;
+  for (k= 0; k<ilist; k++) {
+    iel = list[k] / 3;
+    i0  = list[k] % 3;
+    pt  = &mesh->tria[iel];
+    pt0 = &mesh->tria[0];
+    memcpy(pt0,pt,sizeof(MMG5_Tria));
+    pt0->v[i0] = 0;
 
-    return(1);
+    caltmp = caleltsig_ani(mesh,met,iel);
+    calold = MG_MIN(calold,caltmp);
+    caltmp = caleltsig_ani(mesh,met,0);
+    if ( caltmp < _MMG5_EPSD )        return(0.0);
+    calnew = MG_MIN(calnew,caltmp);
+
+    if ( calold < NULKAL && calnew <= calold )  return(0);
+    else if ( calnew < 0.3*calold )      return(0);
+
+    /* if ( chkedg(mesh,0) )  return(0); */
+  }
+
+  /* Finally, update coordinates and normals of point, if new position is accepted :*/
+  assert(paratmet(p0->c,p0->n,m0,o,no,m)); // parallel transport of metric at p0 to new point
+
+  p0->c[0] = o[0];
+  p0->c[1] = o[1];
+  p0->c[2] = o[2];
+
+  p0->n[0] = no[0];
+  p0->n[1] = no[1];
+  p0->n[2] = no[2];
+
+  memcpy(m0,m,6*sizeof(double));
+
+  return(1);
 }
 
 /* Compute movement of a ref, or ridge point whose ball is passed */
 int movridpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
-    MMG5_pTria    pt,pt0;
-    MMG5_pPoint   p0,p1,p2,ppt0;
-    MMG5_pxPoint    go;
-    _MMG5_Bezier   b;
-    double  *m0,*m00,step,l1old,l2old,ll1old,ll2old,uv[2],o[3],nn1[3],nn2[3],to[3],mo[6];
-    double   lam0,lam1,lam2,*no1,*no2,*np1,*np2;
-    double   psn11,psn12,ps2,l1new,l2new,dd1,dd2,ddt,calold,calnew;
-    int      it1,it2,ip0,ip1,ip2,k,iel,ier;
-    char     voy1,voy2,isrid,isrid1,isrid2,i0,i1,i2;
+  MMG5_pTria    pt,pt0;
+  MMG5_pPoint   p0,p1,p2,ppt0;
+  MMG5_pxPoint    go;
+  _MMG5_Bezier   b;
+  double  *m0,*m00,step,l1old,l2old,ll1old,ll2old,uv[2],o[3],nn1[3],nn2[3],to[3],mo[6];
+  double   lam0,lam1,lam2,*no1,*no2,*np1,*np2;
+  double   psn11,psn12,ps2,l1new,l2new,dd1,dd2,ddt,calold,calnew;
+  int      it1,it2,ip0,ip1,ip2,k,iel,ier;
+  char     voy1,voy2,isrid,isrid1,isrid2,i0,i1,i2;
 
-    step  = 0.2;
-    isrid = isrid1 = isrid2 = 0;
-    it1   = it2 = 0;
-    ip1   = ip2 = 0;
-    voy1  = voy2 = 0;
+  step  = 0.2;
+  isrid = isrid1 = isrid2 = 0;
+  it1   = it2 = 0;
+  ip1   = ip2 = 0;
+  voy1  = voy2 = 0;
 
-    /* First step : make sure 2 ridge edges pass through point, and recoved them,
-       along with neighbouring triangles */
-    for (k=0; k<ilist; k++) {
-        iel = list[k] / 3;
-        i0  = list[k] % 3;
-        i1  = inxt[i0];
-        i2  = inxt[i1];
-        pt  = &mesh->tria[iel];
-
-        if ( MS_EDG(pt->tag[i1]) ) {
-            if ( !it1 ) {
-                it1  = iel;
-                ip1  = pt->v[i2]; // edge(i1) = (p0p2)
-                voy1 = i1;
-                if ( pt->tag[i1] & MG_GEO )  isrid1 = 1;
-            }
-            else if ( it1 && !it2 ) {
-                if ( ip1 != pt->v[i2] ) {
-                    it2  = iel;
-                    ip2  = pt->v[i2]; // edge(i1) = (p0p2)
-                    voy2 = i1;
-                    if ( pt->tag[i1] & MG_GEO )  isrid2 = 1;
-                }
-            }
-            else if ( it1 && it2 && (pt->v[i2] != ip1) && (pt->v[i2] != ip2) ) {
-                printf("   *** function movridptaniso : 3 ridge edges landing on point %d\n",pt->v[i0]);
-                return(0);
-            }
-        }
-
-        if ( MS_EDG(pt->tag[i2]) ) {
-            if ( !it1 ) {
-                it1  = iel;
-                ip1  = pt->v[i1]; // edge(i2) = (p0p1)
-                voy1 = i2;
-                if ( pt->tag[i2] & MG_GEO )  isrid1 = 1;
-            }
-            else if ( it1 && !it2 ) {
-                if ( ip1 != pt->v[i1] ) {
-                    it2  = iel;
-                    ip2  = pt->v[i1]; // edge(i1) = (p0p2)
-                    voy2 = i2;
-                    if ( pt->tag[i2] & MG_GEO )  isrid2 = 1;
-                }
-            }
-            else if ( it1 && it2 && (pt->v[i1] != ip1) && (pt->v[i1] != ip2) ) {
-                printf("   *** function movridptaniso : 3 ridge edges landing on point %d\n",pt->v[i0]);
-                return(0);
-            }
-        }
-    }
-
-    /* Second step : compute lengths of edges (p0p1),(p0p2) */
-    iel = list[0] / 3;
-    i0  = list[0] % 3;
+  /* First step : make sure 2 ridge edges pass through point, and recoved them,
+     along with neighbouring triangles */
+  for (k=0; k<ilist; k++) {
+    iel = list[k] / 3;
+    i0  = list[k] % 3;
+    i1  = inxt[i0];
+    i2  = inxt[i1];
     pt  = &mesh->tria[iel];
-    ip0 = pt->v[i0];
-    p0  = &mesh->point[ip0];
-    p1  = &mesh->point[ip1];
-    p2  = &mesh->point[ip2];
-    m0  = &met->m[6*(ip0)+1];
 
-    l1old = _MMG5_lenedg(mesh,met,ip0,ip1,1);
-    l2old = _MMG5_lenedg(mesh,met,ip0,ip2,1);
-    ll1old = l1old*l1old;
-    ll2old = l2old*l2old;
-
-    /* Third step : infer arc length of displacement, parameterized over edges */
-    /* Move is made towards p2 */
-    if ( l2old > l1old ) {
-        isrid = isrid2;
-        pt = &mesh->tria[it2];
-
-        ier = bezierCP(mesh,it2,&b);
-        assert(ier);
-
-        /* fill table uv */
-        if ( pt->v[0] == ip0 ) {
-            if ( pt->v[1] == ip2 ) {
-                uv[0] = step;
-                uv[1] = 0.0;
-            }
-            else if ( pt->v[2] == ip2 ) {
-                uv[0] = 0.0;
-                uv[1] = step;
-            }
+    if ( MS_EDG(pt->tag[i1]) ) {
+      if ( !it1 ) {
+        it1  = iel;
+        ip1  = pt->v[i2]; // edge(i1) = (p0p2)
+        voy1 = i1;
+        if ( pt->tag[i1] & MG_GEO )  isrid1 = 1;
+      }
+      else if ( it1 && !it2 ) {
+        if ( ip1 != pt->v[i2] ) {
+          it2  = iel;
+          ip2  = pt->v[i2]; // edge(i1) = (p0p2)
+          voy2 = i1;
+          if ( pt->tag[i1] & MG_GEO )  isrid2 = 1;
         }
-        else if ( pt->v[0] == ip2 ) {
-            if ( pt->v[1] == ip0 ) {
-                uv[0] = 1.0 - step;
-                uv[1] = 0.0;
-            }
-            else if ( pt->v[2] == ip0 ) {
-                uv[0] = 0.0;
-                uv[1] = 1.0-step;
-            }
-        }
-        else {
-            if ( pt->v[1] == ip0 ) {
-                uv[0] = 1.0 - step;
-                uv[1] = step;
-            }
-            else if ( pt->v[2] == ip0 ) {
-                uv[0] = step;
-                uv[1] = 1.0-step;
-            }
-        }
-        ier = bezierInt(&b,uv,o,nn1,to);
-        assert(ier);
-    }
-    /* move towards p1 */
-    else {
-        isrid = isrid1;
-        pt = &mesh->tria[it1];
-
-        ier = bezierCP(mesh,it1,&b);
-        assert(ier);
-
-        /* fill table uv */
-        if ( pt->v[0] == ip0 ) {
-            if ( pt->v[1] == ip1 ) {
-                uv[0] = step;
-                uv[1] = 0.0;
-            }
-            else if ( pt->v[2] == ip1 ) {
-                uv[0] = 0.0;
-                uv[1] = step;
-            }
-        }
-        else if ( pt->v[0] == ip1 ) {
-            if ( pt->v[1] == ip0 ) {
-                uv[0] = 1.0 - step;
-                uv[1] = 0.0;
-            }
-            else if ( pt->v[2] == ip0 ) {
-                uv[0] = 0.0;
-                uv[1] = 1.0-step;
-            }
-        }
-        else {
-            if ( pt->v[1] == ip0 ) {
-                uv[0] = 1.0-step;
-                uv[1] = step;
-            }
-            else if ( pt->v[2] == ip0 ) {
-                uv[0] = step;
-                uv[1] = 1.0-step;
-            }
-        }
-        ier = bezierInt(&b,uv,o,nn1,to);
-        assert(ier);
-    }
-
-    /* check whether proposed move is admissible uner consideration of distances */
-    /* Normal and tangent vector updates */
-    lam0 = (1.0-step)*(1.0-step);
-    lam1 = 2.0*step*(1.0-step);
-    lam2 = step*step;
-
-    /* Move is made towards p2 */
-    if ( l2old > l1old ) {
-        no1 = &mesh->xpoint[p0->ig].n1[0];
-        no2 = &mesh->xpoint[p0->ig].n2[0];
-
-        if ( MS_SIN(p2->tag) ) {
-            np1 = &mesh->xpoint[p0->ig].n1[0];
-            np2 = &mesh->xpoint[p0->ig].n2[0];
-        }
-        else {
-            np1 = &mesh->xpoint[p2->ig].n1[0];
-            np2 = &mesh->xpoint[p2->ig].n2[0];
-        }
-        psn11 = no1[0]*np1[0] + no1[1]*np1[1] + no1[2]*np1[2];
-        psn12 = no1[0]*np2[0] + no1[1]*np2[1] + no1[2]*np2[2];
-
-        /* no1 goes with np1, no2 with np2 */
-        if ( fabs(1.0-fabs(psn11)) < fabs(1.0-fabs(psn12)) ){
-            nn1[0] = no1[0]+np1[0];
-            nn1[1] = no1[1]+np1[1];
-            nn1[2] = no1[2]+np1[2];
-
-            nn2[0] = no2[0]+np2[0];
-            nn2[1] = no2[1]+np2[1];
-            nn2[2] = no2[2]+np2[2];
-
-            ps2 = (p2->c[0]-p0->c[0])*nn1[0]+(p2->c[1]-p0->c[1])*nn1[1]+(p2->c[2]-p0->c[2])*nn1[2];
-            if ( ll2old < _MMG5_EPSD )  return(0);
-            ps2 *= (2.0 / ll2old);
-            nn1[0] -= ps2*(p2->c[0]-p0->c[0]);
-            nn1[1] -= ps2*(p2->c[1]-p0->c[1]);
-            nn1[2] -= ps2*(p2->c[2]-p0->c[2]);
-
-            ps2 = (p2->c[0]-p0->c[0])*nn2[0]+(p2->c[1]-p0->c[1])*nn2[1]+(p2->c[2]-p0->c[2])*nn2[2];
-            ps2 *= (2.0/ll2old);
-            nn2[0] -=  ps2*(p2->c[0]-p0->c[0]);
-            nn2[1] -=  ps2*(p2->c[1]-p0->c[1]);
-            nn2[2] -=  ps2*(p2->c[2]-p0->c[2]);
-
-            dd1 = nn1[0]*nn1[0] + nn1[1]*nn1[1] + nn1[2]*nn1[2];
-            dd2 = nn2[0]*nn2[0] + nn2[1]*nn2[1] + nn2[2]*nn2[2];
-            if ( (dd1 < _MMG5_EPSD2) || (dd2<_MMG5_EPSD2) )  return(0);
-            dd1 = 1.0 / sqrt(dd1);
-            nn1[0] = dd1*nn1[0];
-            nn1[1] = dd1*nn1[1];
-            nn1[2] = dd1*nn1[2];
-
-            dd2 = 1.0 / sqrt(dd2);
-            nn2[0] = dd2*nn2[0];
-            nn2[1] = dd2*nn2[1];
-            nn2[2] = dd2*nn2[2];
-
-            /* At this point, the control points associated to the interpolation formula for normals
-               have been computed .*/
-            nn1[0] = lam0*no1[0] + lam1*nn1[0] + lam2*np1[0];
-            nn1[1] = lam0*no1[1] + lam1*nn1[1] + lam2*np1[1];
-            nn1[2] = lam0*no1[2] + lam1*nn1[2] + lam2*np1[2];
-
-            nn2[0] = lam0*no2[0] + lam1*nn2[0] + lam2*np2[0];
-            nn2[1] = lam0*no2[1] + lam1*nn2[1] + lam2*np2[1];
-            nn2[2] = lam0*no2[2] + lam1*nn2[2] + lam2*np2[2];
-
-            to[0] = nn1[1]*nn2[2]-nn1[2]*nn2[1];
-            to[1] = nn1[2]*nn2[0]-nn1[0]*nn2[2];
-            to[2] = nn1[0]*nn2[1]-nn1[1]*nn2[0];
-
-            ddt = to[0]*to[0] + to[1]*to[1] + to[2]*to[2];
-            dd1 = nn1[0]*nn1[0] + nn1[1]*nn1[1] + nn1[2]*nn1[2];
-            dd2 = nn2[0]*nn2[0] + nn2[1]*nn2[1] + nn2[2]*nn2[2];
-
-            if ( (dd1 < _MMG5_EPSD2) || (dd2<_MMG5_EPSD2) || (ddt < _MMG5_EPSD2) )  return(0);
-            dd1 = 1.0 / sqrt(dd1);
-            nn1[0] = dd1*nn1[0];
-            nn1[1] = dd1*nn1[1];
-            nn1[2] = dd1*nn1[2];
-
-            dd2 = 1.0 / sqrt(dd2);
-            nn2[0] = dd2*nn2[0];
-            nn2[1] = dd2*nn2[1];
-            nn2[2] = dd2*nn2[2];
-
-            ddt = 1.0 / sqrt(ddt);
-            to[0] = ddt*to[0];
-            to[1] = ddt*to[1];
-            to[2] = ddt*to[2];
-        }
-
-        /* no1 goes with np2 and no2 with np1 */
-        else {
-            nn1[0] = no1[0]+np2[0];
-            nn1[1] = no1[1]+np2[1];
-            nn1[2] = no1[2]+np2[2];
-
-            nn2[0] = no2[0]+np1[0];
-            nn2[1] = no2[1]+np1[1];
-            nn2[2] = no2[2]+np1[2];
-
-            ps2 = (p2->c[0]-p0->c[0])*nn1[0]+(p2->c[1]-p0->c[1])*nn1[1]+(p2->c[2]-p0->c[2])*nn1[2];
-            if ( ll2old < _MMG5_EPSD )  return(0);
-            ps2 *= (2.0 / ll2old);
-            nn1[0] -= ps2*(p2->c[0]-p0->c[0]);
-            nn1[1] -= ps2*(p2->c[1]-p0->c[1]);
-            nn1[2] -= ps2*(p2->c[2]-p0->c[2]);
-
-            ps2 = (p2->c[0]-p0->c[0])*nn2[0]+(p2->c[1]-p0->c[1])*nn2[1]+(p2->c[2]-p0->c[2])*nn2[2];
-            ps2 *= (2.0 / ll2old);
-            nn2[0] -=  ps2*(p2->c[0]-p0->c[0]);
-            nn2[1] -=  ps2*(p2->c[1]-p0->c[1]);
-            nn2[2] -=  ps2*(p2->c[2]-p0->c[2]);
-
-            dd1 = nn1[0]*nn1[0] + nn1[1]*nn1[1] + nn1[2]*nn1[2];
-            dd2 = nn2[0]*nn2[0] + nn2[1]*nn2[1] + nn2[2]*nn2[2];
-
-            if (( dd1 < _MMG5_EPSD2 ) || (dd2<_MMG5_EPSD2) )  return(0);
-            dd1 = 1.0 / sqrt(dd1);
-            nn1[0] = dd1*nn1[0];
-            nn1[1] = dd1*nn1[1];
-            nn1[2] = dd1*nn1[2];
-
-            dd2 = 1.0 / sqrt(dd2);
-            nn2[0] = dd2*nn2[0];
-            nn2[1] = dd2*nn2[1];
-            nn2[2] = dd2*nn2[2];
-
-            /* At this point, the control points associated to the interpolation formula for normals
-               have been computed .*/
-            nn1[0] = lam0*no1[0] + lam1*nn1[0] + lam2*np2[0];
-            nn1[1] = lam0*no1[1] + lam1*nn1[1] + lam2*np2[1];
-            nn1[2] = lam0*no1[2] + lam1*nn1[2] + lam2*np2[2];
-
-            nn2[0] = lam0*no2[0] + lam1*nn2[0] + lam2*np1[0];
-            nn2[1] = lam0*no2[1] + lam1*nn2[1] + lam2*np1[1];
-            nn2[2] = lam0*no2[2] + lam1*nn2[2] + lam2*np1[2];
-
-            to[0] = nn1[1]*nn2[2]-nn1[2]*nn2[1];
-            to[1] = nn1[2]*nn2[0]-nn1[0]*nn2[2];
-            to[2] = nn1[0]*nn2[1]-nn1[1]*nn2[0];
-
-            dd1 = nn1[0]*nn1[0] + nn1[1]*nn1[1] + nn1[2]*nn1[2];
-            dd2 = nn2[0]*nn2[0] + nn2[1]*nn2[1] + nn2[2]*nn2[2];
-            ddt = to[0]*to[0] + to[1]*to[1] + to[2]*to[2];
-
-            if ( (dd1 < _MMG5_EPSD2) || (dd2<_MMG5_EPSD2) || (ddt < _MMG5_EPSD2) )  return(0);
-            dd1 = 1.0 / sqrt(dd1);
-            nn1[0] = dd1*nn1[0];
-            nn1[1] = dd1*nn1[1];
-            nn1[2] = dd1*nn1[2];
-
-            dd2 = 1.0 / sqrt(dd2);
-            nn2[0] = dd2*nn2[0];
-            nn2[1] = dd2*nn2[1];
-            nn2[2] = dd2*nn2[2];
-
-            ddt = 1.0 / sqrt(ddt);
-            to[0] = ddt*to[0];
-            to[1] = ddt*to[1];
-            to[2] = ddt*to[2];
-        }
-
-        /* Interpolation of metric between ip0 and ip2 */
-        if ( isrid )
-            intridmet(mesh,met,it2,voy2,(1.0-step),nn1,mo);
-        else {
-            if ( !paratmet(p0->c,p0->n,m0,o,nn1,mo) )  return(0);
-        }
-    }
-
-    /* Move along p1 */
-    else {
-        no1 = &mesh->xpoint[p0->ig].n1[0];
-        no2 = &mesh->xpoint[p0->ig].n2[0];
-        if ( MS_SIN(p1->tag) ) {
-            np1 = &mesh->xpoint[p0->ig].n1[0];
-            np2 = &mesh->xpoint[p0->ig].n2[0];
-        }
-        else {
-            np1 = &mesh->xpoint[p1->ig].n1[0];
-            np2 = &mesh->xpoint[p1->ig].n2[0];
-        }
-        psn11 = no1[0]*np1[0] + no1[1]*np1[1] + no1[2]*np1[2];
-        psn12 = no1[0]*np2[0] + no1[1]*np2[1] + no1[2]*np2[2];
-
-        /* no1 goes with np1, no2 with np2 */
-        if ( fabs(1.0-fabs(psn11)) < fabs(1.0-fabs(psn12)) ) {
-            nn1[0] = no1[0]+np1[0];
-            nn1[1] = no1[1]+np1[1];
-            nn1[2] = no1[2]+np1[2];
-
-            nn2[0] = no2[0]+np2[0];
-            nn2[1] = no2[1]+np2[1];
-            nn2[2] = no2[2]+np2[2];
-
-            ps2 = (p1->c[0]-p0->c[0])*nn1[0]+(p1->c[1]-p0->c[1])*nn1[1]+(p1->c[2]-p0->c[2])*nn1[2];
-            if ( ll1old < _MMG5_EPSD )  return(0);
-            ps2 *= (2.0 / ll1old);
-            nn1[0] -= ps2*(p1->c[0]-p0->c[0]);
-            nn1[1] -= ps2*(p1->c[1]-p0->c[1]);
-            nn1[2] -= ps2*(p1->c[2]-p0->c[2]);
-
-            ps2 = (p1->c[0]-p0->c[0])*nn2[0]+(p1->c[1]-p0->c[1])*nn2[1]+(p1->c[2]-p0->c[2])*nn2[2];
-            ps2 *= (2.0 / ll1old);
-            nn2[0] -=  ps2*(p1->c[0]-p0->c[0]);
-            nn2[1] -=  ps2*(p1->c[1]-p0->c[1]);
-            nn2[2] -=  ps2*(p1->c[2]-p0->c[2]);
-
-            dd1 = nn1[0]*nn1[0] + nn1[1]*nn1[1] + nn1[2]*nn1[2];
-            dd2 = nn2[0]*nn2[0] + nn2[1]*nn2[1] + nn2[2]*nn2[2];
-
-            if ( (dd1 < _MMG5_EPSD2 ) || (dd2<_MMG5_EPSD2) )  return(0);
-            dd1 = 1.0 / sqrt(dd1);
-            nn1[0] = dd1*nn1[0];
-            nn1[1] = dd1*nn1[1];
-            nn1[2] = dd1*nn1[2];
-
-            dd2 = 1.0 / sqrt(dd2);
-            nn2[0] = dd2*nn2[0];
-            nn2[1] = dd2*nn2[1];
-            nn2[2] = dd2*nn2[2];
-
-            /* Interpolation formula from the control point */
-            nn1[0] = lam0*no1[0] + lam1*nn1[0] + lam2*np1[0];
-            nn1[1] = lam0*no1[1] + lam1*nn1[1] + lam2*np1[1];
-            nn1[2] = lam0*no1[2] + lam1*nn1[2] + lam2*np1[2];
-
-            nn2[0] = lam0*no2[0] + lam1*nn2[0] + lam2*np2[0];
-            nn2[1] = lam0*no2[1] + lam1*nn2[1] + lam2*np2[1];
-            nn2[2] = lam0*no2[2] + lam1*nn2[2] + lam2*np2[2];
-
-            to[0] = nn1[1]*nn2[2]-nn1[2]*nn2[1];
-            to[1] = nn1[2]*nn2[0]-nn1[0]*nn2[2];
-            to[2] = nn1[0]*nn2[1]-nn1[1]*nn2[0];
-
-            dd1 = nn1[0]*nn1[0] + nn1[1]*nn1[1] + nn1[2]*nn1[2];
-            dd2 = nn2[0]*nn2[0] + nn2[1]*nn2[1] + nn2[2]*nn2[2];
-            ddt = to[0]*to[0] + to[1]*to[1] + to[2]*to[2];
-
-            if ( (dd1 < _MMG5_EPSD2) || (dd2<_MMG5_EPSD2) || (ddt < _MMG5_EPSD2) )  return(0);
-            dd1 = 1.0 / sqrt(dd1);
-            nn1[0] = dd1*nn1[0];
-            nn1[1] = dd1*nn1[1];
-            nn1[2] = dd1*nn1[2];
-
-            dd2 = 1.0 / sqrt(dd2);
-            nn2[0] = dd2*nn2[0];
-            nn2[1] = dd2*nn2[1];
-            nn2[2] = dd2*nn2[2];
-
-            ddt = 1.0 / sqrt(ddt);
-            to[0] = ddt*to[0];
-            to[1] = ddt*to[1];
-            to[2] = ddt*to[2];
-        }
-        /* no1 goes with np2 and no2 with np1 */
-        else {
-            nn1[0] = no1[0]+np2[0];
-            nn1[1] = no1[1]+np2[1];
-            nn1[2] = no1[2]+np2[2];
-
-            nn2[0] = no2[0]+np1[0];
-            nn2[1] = no2[1]+np1[1];
-            nn2[2] = no2[2]+np1[2];
-
-            ps2 = (p1->c[0]-p0->c[0])*nn1[0]+(p1->c[1]-p0->c[1])*nn1[1]+(p1->c[2]-p0->c[2])*nn1[2];
-            if ( ll1old < _MMG5_EPSD )  return(0);
-            ps2 *= (2.0 / ll1old);
-            nn1[0] -= ps2*(p1->c[0]-p0->c[0]);
-            nn1[1] -= ps2*(p1->c[1]-p0->c[1]);
-            nn1[2] -= ps2*(p1->c[2]-p0->c[2]);
-
-            ps2 = (p1->c[0]-p0->c[0])*nn2[0]+(p1->c[1]-p0->c[1])*nn2[1]+(p1->c[2]-p0->c[2])*nn2[2];
-            ps2 *= (2.0 / ll1old);
-            nn2[0] -=  ps2*(p1->c[0]-p0->c[0]);
-            nn2[1] -=  ps2*(p1->c[1]-p0->c[1]);
-            nn2[2] -=  ps2*(p1->c[2]-p0->c[2]);
-
-            dd1 = nn1[0]*nn1[0] + nn1[1]*nn1[1] + nn1[2]*nn1[2];
-            dd2 = nn2[0]*nn2[0] + nn2[1]*nn2[1] + nn2[2]*nn2[2];
-
-            if ( (dd1 < _MMG5_EPSD2) || (dd2<_MMG5_EPSD2) )  return(0);
-            dd1 = 1.0 / sqrt(dd1);
-            nn1[0] = dd1*nn1[0];
-            nn1[1] = dd1*nn1[1];
-            nn1[2] = dd1*nn1[2];
-
-            dd2 = 1.0 / sqrt(dd2);
-            nn2[0] = dd2*nn2[0];
-            nn2[1] = dd2*nn2[1];
-            nn2[2] = dd2*nn2[2];
-
-            /* Interpolation formula from the control point */
-            nn1[0] = lam0*no1[0] + lam1*nn1[0] + lam2*np2[0];
-            nn1[1] = lam0*no1[1] + lam1*nn1[1] + lam2*np2[1];
-            nn1[2] = lam0*no1[2] + lam1*nn1[2] + lam2*np2[2];
-
-            nn2[0] = lam0*no2[0] + lam1*nn2[0] + lam2*np1[0];
-            nn2[1] = lam0*no2[1] + lam1*nn2[1] + lam2*np1[1];
-            nn2[2] = lam0*no2[2] + lam1*nn2[2] + lam2*np1[2];
-
-            to[0] = nn1[1]*nn2[2]-nn1[2]*nn2[1];
-            to[1] = nn1[2]*nn2[0]-nn1[0]*nn2[2];
-            to[2] = nn1[0]*nn2[1]-nn1[1]*nn2[0];
-
-            dd1 = nn1[0]*nn1[0] + nn1[1]*nn1[1] + nn1[2]*nn1[2];
-            dd2 = nn2[0]*nn2[0] + nn2[1]*nn2[1] + nn2[2]*nn2[2];
-            ddt = to[0]*to[0] + to[1]*to[1] + to[2]*to[2];
-
-            if ( (dd1 < _MMG5_EPSD2) || (dd2<_MMG5_EPSD2) || (ddt < _MMG5_EPSD2) )  return(0);
-            dd1 = 1.0 / sqrt(dd1);
-            nn1[0] = dd1*nn1[0];
-            nn1[1] = dd1*nn1[1];
-            nn1[2] = dd1*nn1[2];
-
-            dd2 = 1.0 / sqrt(dd2);
-            nn2[0] = dd2*nn2[0];
-            nn2[1] = dd2*nn2[1];
-            nn2[2] = dd2*nn2[2];
-
-            ddt = 1.0 / sqrt(ddt);
-            to[0] = ddt*to[0];
-            to[1] = ddt*to[1];
-            to[2] = ddt*to[2];
-        }
-
-        /* Interpolation of metric between ip0 and ip1 */
-        if ( isrid ) {
-            intridmet(mesh,met,it1,voy1,(1.0-step),nn1,mo);
-        }
-        else {
-            if ( !paratmet(p0->c,p0->n,m0,o,nn1,mo) )  return(0);
-        }
-    }
-
-    /* Check proposed motion */
-    ppt0 = &mesh->point[0];
-    ppt0->ig = 0;
-    ppt0->tag = p0->tag;
-
-    go = &mesh->xpoint[0];
-    go->n1[0] = nn1[0];
-    go->n1[1] = nn1[1];
-    go->n1[2] = nn1[2];
-
-    if ( isrid ) {
-        go->n2[0] = nn2[0];
-        go->n2[1] = nn2[1];
-        go->n2[2] = nn2[2];
-    }
-
-    ppt0->c[0] = o[0];
-    ppt0->c[1] = o[1];
-    ppt0->c[2] = o[2];
-
-    ppt0->n[0] = to[0];
-    ppt0->n[1] = to[1];
-    ppt0->n[2] = to[2];
-
-    m00 = &met->m[6*0+1];
-    memcpy(m00,mo,6*sizeof(double));
-
-    /* Check whether proposed move is admissible under consideration of distances */
-    l1new = _MMG5_lenedg(mesh,met,0,ip1,1);
-    l2new = _MMG5_lenedg(mesh,met,0,ip2,1);
-    if ( fabs(l2new -l1new) >= fabs(l2old -l1old) ) {
-        ppt0->tag = 0;
+      }
+      else if ( it1 && it2 && (pt->v[i2] != ip1) && (pt->v[i2] != ip2) ) {
+        printf("   *** function movridptaniso : 3 ridge edges landing on point %d\n",pt->v[i0]);
         return(0);
+      }
     }
 
-    for (k=0; k<ilist; k++) {
-        iel = list[k] / 3;
-        i0  = list[k] % 3;
-        pt  = &mesh->tria[iel];
-        pt0 = &mesh->tria[0];
-        memcpy(pt0,pt,sizeof(MMG5_Tria));
-        pt0->v[i0] = 0;
+    if ( MS_EDG(pt->tag[i2]) ) {
+      if ( !it1 ) {
+        it1  = iel;
+        ip1  = pt->v[i1]; // edge(i2) = (p0p1)
+        voy1 = i2;
+        if ( pt->tag[i2] & MG_GEO )  isrid1 = 1;
+      }
+      else if ( it1 && !it2 ) {
+        if ( ip1 != pt->v[i1] ) {
+          it2  = iel;
+          ip2  = pt->v[i1]; // edge(i1) = (p0p2)
+          voy2 = i2;
+          if ( pt->tag[i2] & MG_GEO )  isrid2 = 1;
+        }
+      }
+      else if ( it1 && it2 && (pt->v[i1] != ip1) && (pt->v[i1] != ip2) ) {
+        printf("   *** function movridptaniso : 3 ridge edges landing on point %d\n",pt->v[i0]);
+        return(0);
+      }
+    }
+  }
 
-        calold = caleltsig_ani(mesh,met,iel);
-        calnew = caleltsig_ani(mesh,met,0);
-        if ( (calnew < 0.001) && (calnew<calold) ) {
-            ppt0->tag = 0;
-            return(0);
-        }
-        else if ( calnew < 0.3*calold ) {
-            ppt0->tag = 0;
-            return(0);
-        }
-        /* if ( chkedg(mesh,0) )  return(0);*/
+  /* Second step : compute lengths of edges (p0p1),(p0p2) */
+  iel = list[0] / 3;
+  i0  = list[0] % 3;
+  pt  = &mesh->tria[iel];
+  ip0 = pt->v[i0];
+  p0  = &mesh->point[ip0];
+  p1  = &mesh->point[ip1];
+  p2  = &mesh->point[ip2];
+  m0  = &met->m[6*(ip0)+1];
+
+  l1old = _MMG5_lenedg(mesh,met,ip0,ip1,1);
+  l2old = _MMG5_lenedg(mesh,met,ip0,ip2,1);
+  ll1old = l1old*l1old;
+  ll2old = l2old*l2old;
+
+  /* Third step : infer arc length of displacement, parameterized over edges */
+  /* Move is made towards p2 */
+  if ( l2old > l1old ) {
+    isrid = isrid2;
+    pt = &mesh->tria[it2];
+
+    ier = bezierCP(mesh,it2,&b);
+    assert(ier);
+
+    /* fill table uv */
+    if ( pt->v[0] == ip0 ) {
+      if ( pt->v[1] == ip2 ) {
+        uv[0] = step;
+        uv[1] = 0.0;
+      }
+      else if ( pt->v[2] == ip2 ) {
+        uv[0] = 0.0;
+        uv[1] = step;
+      }
+    }
+    else if ( pt->v[0] == ip2 ) {
+      if ( pt->v[1] == ip0 ) {
+        uv[0] = 1.0 - step;
+        uv[1] = 0.0;
+      }
+      else if ( pt->v[2] == ip0 ) {
+        uv[0] = 0.0;
+        uv[1] = 1.0-step;
+      }
+    }
+    else {
+      if ( pt->v[1] == ip0 ) {
+        uv[0] = 1.0 - step;
+        uv[1] = step;
+      }
+      else if ( pt->v[2] == ip0 ) {
+        uv[0] = step;
+        uv[1] = 1.0-step;
+      }
+    }
+    ier = bezierInt(&b,uv,o,nn1,to);
+    assert(ier);
+  }
+  /* move towards p1 */
+  else {
+    isrid = isrid1;
+    pt = &mesh->tria[it1];
+
+    ier = bezierCP(mesh,it1,&b);
+    assert(ier);
+
+    /* fill table uv */
+    if ( pt->v[0] == ip0 ) {
+      if ( pt->v[1] == ip1 ) {
+        uv[0] = step;
+        uv[1] = 0.0;
+      }
+      else if ( pt->v[2] == ip1 ) {
+        uv[0] = 0.0;
+        uv[1] = step;
+      }
+    }
+    else if ( pt->v[0] == ip1 ) {
+      if ( pt->v[1] == ip0 ) {
+        uv[0] = 1.0 - step;
+        uv[1] = 0.0;
+      }
+      else if ( pt->v[2] == ip0 ) {
+        uv[0] = 0.0;
+        uv[1] = 1.0-step;
+      }
+    }
+    else {
+      if ( pt->v[1] == ip0 ) {
+        uv[0] = 1.0-step;
+        uv[1] = step;
+      }
+      else if ( pt->v[2] == ip0 ) {
+        uv[0] = step;
+        uv[1] = 1.0-step;
+      }
+    }
+    ier = bezierInt(&b,uv,o,nn1,to);
+    assert(ier);
+  }
+
+  /* check whether proposed move is admissible uner consideration of distances */
+  /* Normal and tangent vector updates */
+  lam0 = (1.0-step)*(1.0-step);
+  lam1 = 2.0*step*(1.0-step);
+  lam2 = step*step;
+
+  /* Move is made towards p2 */
+  if ( l2old > l1old ) {
+    no1 = &mesh->xpoint[p0->ig].n1[0];
+    no2 = &mesh->xpoint[p0->ig].n2[0];
+
+    if ( MS_SIN(p2->tag) ) {
+      np1 = &mesh->xpoint[p0->ig].n1[0];
+      np2 = &mesh->xpoint[p0->ig].n2[0];
+    }
+    else {
+      np1 = &mesh->xpoint[p2->ig].n1[0];
+      np2 = &mesh->xpoint[p2->ig].n2[0];
+    }
+    psn11 = no1[0]*np1[0] + no1[1]*np1[1] + no1[2]*np1[2];
+    psn12 = no1[0]*np2[0] + no1[1]*np2[1] + no1[2]*np2[2];
+
+    /* no1 goes with np1, no2 with np2 */
+    if ( fabs(1.0-fabs(psn11)) < fabs(1.0-fabs(psn12)) ){
+      nn1[0] = no1[0]+np1[0];
+      nn1[1] = no1[1]+np1[1];
+      nn1[2] = no1[2]+np1[2];
+
+      nn2[0] = no2[0]+np2[0];
+      nn2[1] = no2[1]+np2[1];
+      nn2[2] = no2[2]+np2[2];
+
+      ps2 = (p2->c[0]-p0->c[0])*nn1[0]+(p2->c[1]-p0->c[1])*nn1[1]+(p2->c[2]-p0->c[2])*nn1[2];
+      if ( ll2old < _MMG5_EPSD )  return(0);
+      ps2 *= (2.0 / ll2old);
+      nn1[0] -= ps2*(p2->c[0]-p0->c[0]);
+      nn1[1] -= ps2*(p2->c[1]-p0->c[1]);
+      nn1[2] -= ps2*(p2->c[2]-p0->c[2]);
+
+      ps2 = (p2->c[0]-p0->c[0])*nn2[0]+(p2->c[1]-p0->c[1])*nn2[1]+(p2->c[2]-p0->c[2])*nn2[2];
+      ps2 *= (2.0/ll2old);
+      nn2[0] -=  ps2*(p2->c[0]-p0->c[0]);
+      nn2[1] -=  ps2*(p2->c[1]-p0->c[1]);
+      nn2[2] -=  ps2*(p2->c[2]-p0->c[2]);
+
+      dd1 = nn1[0]*nn1[0] + nn1[1]*nn1[1] + nn1[2]*nn1[2];
+      dd2 = nn2[0]*nn2[0] + nn2[1]*nn2[1] + nn2[2]*nn2[2];
+      if ( (dd1 < _MMG5_EPSD2) || (dd2<_MMG5_EPSD2) )  return(0);
+      dd1 = 1.0 / sqrt(dd1);
+      nn1[0] = dd1*nn1[0];
+      nn1[1] = dd1*nn1[1];
+      nn1[2] = dd1*nn1[2];
+
+      dd2 = 1.0 / sqrt(dd2);
+      nn2[0] = dd2*nn2[0];
+      nn2[1] = dd2*nn2[1];
+      nn2[2] = dd2*nn2[2];
+
+      /* At this point, the control points associated to the interpolation formula for normals
+         have been computed .*/
+      nn1[0] = lam0*no1[0] + lam1*nn1[0] + lam2*np1[0];
+      nn1[1] = lam0*no1[1] + lam1*nn1[1] + lam2*np1[1];
+      nn1[2] = lam0*no1[2] + lam1*nn1[2] + lam2*np1[2];
+
+      nn2[0] = lam0*no2[0] + lam1*nn2[0] + lam2*np2[0];
+      nn2[1] = lam0*no2[1] + lam1*nn2[1] + lam2*np2[1];
+      nn2[2] = lam0*no2[2] + lam1*nn2[2] + lam2*np2[2];
+
+      to[0] = nn1[1]*nn2[2]-nn1[2]*nn2[1];
+      to[1] = nn1[2]*nn2[0]-nn1[0]*nn2[2];
+      to[2] = nn1[0]*nn2[1]-nn1[1]*nn2[0];
+
+      ddt = to[0]*to[0] + to[1]*to[1] + to[2]*to[2];
+      dd1 = nn1[0]*nn1[0] + nn1[1]*nn1[1] + nn1[2]*nn1[2];
+      dd2 = nn2[0]*nn2[0] + nn2[1]*nn2[1] + nn2[2]*nn2[2];
+
+      if ( (dd1 < _MMG5_EPSD2) || (dd2<_MMG5_EPSD2) || (ddt < _MMG5_EPSD2) )  return(0);
+      dd1 = 1.0 / sqrt(dd1);
+      nn1[0] = dd1*nn1[0];
+      nn1[1] = dd1*nn1[1];
+      nn1[2] = dd1*nn1[2];
+
+      dd2 = 1.0 / sqrt(dd2);
+      nn2[0] = dd2*nn2[0];
+      nn2[1] = dd2*nn2[1];
+      nn2[2] = dd2*nn2[2];
+
+      ddt = 1.0 / sqrt(ddt);
+      to[0] = ddt*to[0];
+      to[1] = ddt*to[1];
+      to[2] = ddt*to[2];
     }
 
-    /* Coordinates, normals, tangents update */
-    p0->c[0] = o[0];
-    p0->c[1] = o[1];
-    p0->c[2] = o[2];
+    /* no1 goes with np2 and no2 with np1 */
+    else {
+      nn1[0] = no1[0]+np2[0];
+      nn1[1] = no1[1]+np2[1];
+      nn1[2] = no1[2]+np2[2];
 
-    no1[0] = nn1[0];
-    no1[1] = nn1[1];
-    no1[2] = nn1[2];
+      nn2[0] = no2[0]+np1[0];
+      nn2[1] = no2[1]+np1[1];
+      nn2[2] = no2[2]+np1[2];
 
+      ps2 = (p2->c[0]-p0->c[0])*nn1[0]+(p2->c[1]-p0->c[1])*nn1[1]+(p2->c[2]-p0->c[2])*nn1[2];
+      if ( ll2old < _MMG5_EPSD )  return(0);
+      ps2 *= (2.0 / ll2old);
+      nn1[0] -= ps2*(p2->c[0]-p0->c[0]);
+      nn1[1] -= ps2*(p2->c[1]-p0->c[1]);
+      nn1[2] -= ps2*(p2->c[2]-p0->c[2]);
+
+      ps2 = (p2->c[0]-p0->c[0])*nn2[0]+(p2->c[1]-p0->c[1])*nn2[1]+(p2->c[2]-p0->c[2])*nn2[2];
+      ps2 *= (2.0 / ll2old);
+      nn2[0] -=  ps2*(p2->c[0]-p0->c[0]);
+      nn2[1] -=  ps2*(p2->c[1]-p0->c[1]);
+      nn2[2] -=  ps2*(p2->c[2]-p0->c[2]);
+
+      dd1 = nn1[0]*nn1[0] + nn1[1]*nn1[1] + nn1[2]*nn1[2];
+      dd2 = nn2[0]*nn2[0] + nn2[1]*nn2[1] + nn2[2]*nn2[2];
+
+      if (( dd1 < _MMG5_EPSD2 ) || (dd2<_MMG5_EPSD2) )  return(0);
+      dd1 = 1.0 / sqrt(dd1);
+      nn1[0] = dd1*nn1[0];
+      nn1[1] = dd1*nn1[1];
+      nn1[2] = dd1*nn1[2];
+
+      dd2 = 1.0 / sqrt(dd2);
+      nn2[0] = dd2*nn2[0];
+      nn2[1] = dd2*nn2[1];
+      nn2[2] = dd2*nn2[2];
+
+      /* At this point, the control points associated to the interpolation formula for normals
+         have been computed .*/
+      nn1[0] = lam0*no1[0] + lam1*nn1[0] + lam2*np2[0];
+      nn1[1] = lam0*no1[1] + lam1*nn1[1] + lam2*np2[1];
+      nn1[2] = lam0*no1[2] + lam1*nn1[2] + lam2*np2[2];
+
+      nn2[0] = lam0*no2[0] + lam1*nn2[0] + lam2*np1[0];
+      nn2[1] = lam0*no2[1] + lam1*nn2[1] + lam2*np1[1];
+      nn2[2] = lam0*no2[2] + lam1*nn2[2] + lam2*np1[2];
+
+      to[0] = nn1[1]*nn2[2]-nn1[2]*nn2[1];
+      to[1] = nn1[2]*nn2[0]-nn1[0]*nn2[2];
+      to[2] = nn1[0]*nn2[1]-nn1[1]*nn2[0];
+
+      dd1 = nn1[0]*nn1[0] + nn1[1]*nn1[1] + nn1[2]*nn1[2];
+      dd2 = nn2[0]*nn2[0] + nn2[1]*nn2[1] + nn2[2]*nn2[2];
+      ddt = to[0]*to[0] + to[1]*to[1] + to[2]*to[2];
+
+      if ( (dd1 < _MMG5_EPSD2) || (dd2<_MMG5_EPSD2) || (ddt < _MMG5_EPSD2) )  return(0);
+      dd1 = 1.0 / sqrt(dd1);
+      nn1[0] = dd1*nn1[0];
+      nn1[1] = dd1*nn1[1];
+      nn1[2] = dd1*nn1[2];
+
+      dd2 = 1.0 / sqrt(dd2);
+      nn2[0] = dd2*nn2[0];
+      nn2[1] = dd2*nn2[1];
+      nn2[2] = dd2*nn2[2];
+
+      ddt = 1.0 / sqrt(ddt);
+      to[0] = ddt*to[0];
+      to[1] = ddt*to[1];
+      to[2] = ddt*to[2];
+    }
+
+    /* Interpolation of metric between ip0 and ip2 */
+    if ( isrid )
+      intridmet(mesh,met,it2,voy2,(1.0-step),nn1,mo);
+    else {
+      if ( !paratmet(p0->c,p0->n,m0,o,nn1,mo) )  return(0);
+    }
+  }
+
+  /* Move along p1 */
+  else {
+    no1 = &mesh->xpoint[p0->ig].n1[0];
+    no2 = &mesh->xpoint[p0->ig].n2[0];
+    if ( MS_SIN(p1->tag) ) {
+      np1 = &mesh->xpoint[p0->ig].n1[0];
+      np2 = &mesh->xpoint[p0->ig].n2[0];
+    }
+    else {
+      np1 = &mesh->xpoint[p1->ig].n1[0];
+      np2 = &mesh->xpoint[p1->ig].n2[0];
+    }
+    psn11 = no1[0]*np1[0] + no1[1]*np1[1] + no1[2]*np1[2];
+    psn12 = no1[0]*np2[0] + no1[1]*np2[1] + no1[2]*np2[2];
+
+    /* no1 goes with np1, no2 with np2 */
+    if ( fabs(1.0-fabs(psn11)) < fabs(1.0-fabs(psn12)) ) {
+      nn1[0] = no1[0]+np1[0];
+      nn1[1] = no1[1]+np1[1];
+      nn1[2] = no1[2]+np1[2];
+
+      nn2[0] = no2[0]+np2[0];
+      nn2[1] = no2[1]+np2[1];
+      nn2[2] = no2[2]+np2[2];
+
+      ps2 = (p1->c[0]-p0->c[0])*nn1[0]+(p1->c[1]-p0->c[1])*nn1[1]+(p1->c[2]-p0->c[2])*nn1[2];
+      if ( ll1old < _MMG5_EPSD )  return(0);
+      ps2 *= (2.0 / ll1old);
+      nn1[0] -= ps2*(p1->c[0]-p0->c[0]);
+      nn1[1] -= ps2*(p1->c[1]-p0->c[1]);
+      nn1[2] -= ps2*(p1->c[2]-p0->c[2]);
+
+      ps2 = (p1->c[0]-p0->c[0])*nn2[0]+(p1->c[1]-p0->c[1])*nn2[1]+(p1->c[2]-p0->c[2])*nn2[2];
+      ps2 *= (2.0 / ll1old);
+      nn2[0] -=  ps2*(p1->c[0]-p0->c[0]);
+      nn2[1] -=  ps2*(p1->c[1]-p0->c[1]);
+      nn2[2] -=  ps2*(p1->c[2]-p0->c[2]);
+
+      dd1 = nn1[0]*nn1[0] + nn1[1]*nn1[1] + nn1[2]*nn1[2];
+      dd2 = nn2[0]*nn2[0] + nn2[1]*nn2[1] + nn2[2]*nn2[2];
+
+      if ( (dd1 < _MMG5_EPSD2 ) || (dd2<_MMG5_EPSD2) )  return(0);
+      dd1 = 1.0 / sqrt(dd1);
+      nn1[0] = dd1*nn1[0];
+      nn1[1] = dd1*nn1[1];
+      nn1[2] = dd1*nn1[2];
+
+      dd2 = 1.0 / sqrt(dd2);
+      nn2[0] = dd2*nn2[0];
+      nn2[1] = dd2*nn2[1];
+      nn2[2] = dd2*nn2[2];
+
+      /* Interpolation formula from the control point */
+      nn1[0] = lam0*no1[0] + lam1*nn1[0] + lam2*np1[0];
+      nn1[1] = lam0*no1[1] + lam1*nn1[1] + lam2*np1[1];
+      nn1[2] = lam0*no1[2] + lam1*nn1[2] + lam2*np1[2];
+
+      nn2[0] = lam0*no2[0] + lam1*nn2[0] + lam2*np2[0];
+      nn2[1] = lam0*no2[1] + lam1*nn2[1] + lam2*np2[1];
+      nn2[2] = lam0*no2[2] + lam1*nn2[2] + lam2*np2[2];
+
+      to[0] = nn1[1]*nn2[2]-nn1[2]*nn2[1];
+      to[1] = nn1[2]*nn2[0]-nn1[0]*nn2[2];
+      to[2] = nn1[0]*nn2[1]-nn1[1]*nn2[0];
+
+      dd1 = nn1[0]*nn1[0] + nn1[1]*nn1[1] + nn1[2]*nn1[2];
+      dd2 = nn2[0]*nn2[0] + nn2[1]*nn2[1] + nn2[2]*nn2[2];
+      ddt = to[0]*to[0] + to[1]*to[1] + to[2]*to[2];
+
+      if ( (dd1 < _MMG5_EPSD2) || (dd2<_MMG5_EPSD2) || (ddt < _MMG5_EPSD2) )  return(0);
+      dd1 = 1.0 / sqrt(dd1);
+      nn1[0] = dd1*nn1[0];
+      nn1[1] = dd1*nn1[1];
+      nn1[2] = dd1*nn1[2];
+
+      dd2 = 1.0 / sqrt(dd2);
+      nn2[0] = dd2*nn2[0];
+      nn2[1] = dd2*nn2[1];
+      nn2[2] = dd2*nn2[2];
+
+      ddt = 1.0 / sqrt(ddt);
+      to[0] = ddt*to[0];
+      to[1] = ddt*to[1];
+      to[2] = ddt*to[2];
+    }
+    /* no1 goes with np2 and no2 with np1 */
+    else {
+      nn1[0] = no1[0]+np2[0];
+      nn1[1] = no1[1]+np2[1];
+      nn1[2] = no1[2]+np2[2];
+
+      nn2[0] = no2[0]+np1[0];
+      nn2[1] = no2[1]+np1[1];
+      nn2[2] = no2[2]+np1[2];
+
+      ps2 = (p1->c[0]-p0->c[0])*nn1[0]+(p1->c[1]-p0->c[1])*nn1[1]+(p1->c[2]-p0->c[2])*nn1[2];
+      if ( ll1old < _MMG5_EPSD )  return(0);
+      ps2 *= (2.0 / ll1old);
+      nn1[0] -= ps2*(p1->c[0]-p0->c[0]);
+      nn1[1] -= ps2*(p1->c[1]-p0->c[1]);
+      nn1[2] -= ps2*(p1->c[2]-p0->c[2]);
+
+      ps2 = (p1->c[0]-p0->c[0])*nn2[0]+(p1->c[1]-p0->c[1])*nn2[1]+(p1->c[2]-p0->c[2])*nn2[2];
+      ps2 *= (2.0 / ll1old);
+      nn2[0] -=  ps2*(p1->c[0]-p0->c[0]);
+      nn2[1] -=  ps2*(p1->c[1]-p0->c[1]);
+      nn2[2] -=  ps2*(p1->c[2]-p0->c[2]);
+
+      dd1 = nn1[0]*nn1[0] + nn1[1]*nn1[1] + nn1[2]*nn1[2];
+      dd2 = nn2[0]*nn2[0] + nn2[1]*nn2[1] + nn2[2]*nn2[2];
+
+      if ( (dd1 < _MMG5_EPSD2) || (dd2<_MMG5_EPSD2) )  return(0);
+      dd1 = 1.0 / sqrt(dd1);
+      nn1[0] = dd1*nn1[0];
+      nn1[1] = dd1*nn1[1];
+      nn1[2] = dd1*nn1[2];
+
+      dd2 = 1.0 / sqrt(dd2);
+      nn2[0] = dd2*nn2[0];
+      nn2[1] = dd2*nn2[1];
+      nn2[2] = dd2*nn2[2];
+
+      /* Interpolation formula from the control point */
+      nn1[0] = lam0*no1[0] + lam1*nn1[0] + lam2*np2[0];
+      nn1[1] = lam0*no1[1] + lam1*nn1[1] + lam2*np2[1];
+      nn1[2] = lam0*no1[2] + lam1*nn1[2] + lam2*np2[2];
+
+      nn2[0] = lam0*no2[0] + lam1*nn2[0] + lam2*np1[0];
+      nn2[1] = lam0*no2[1] + lam1*nn2[1] + lam2*np1[1];
+      nn2[2] = lam0*no2[2] + lam1*nn2[2] + lam2*np1[2];
+
+      to[0] = nn1[1]*nn2[2]-nn1[2]*nn2[1];
+      to[1] = nn1[2]*nn2[0]-nn1[0]*nn2[2];
+      to[2] = nn1[0]*nn2[1]-nn1[1]*nn2[0];
+
+      dd1 = nn1[0]*nn1[0] + nn1[1]*nn1[1] + nn1[2]*nn1[2];
+      dd2 = nn2[0]*nn2[0] + nn2[1]*nn2[1] + nn2[2]*nn2[2];
+      ddt = to[0]*to[0] + to[1]*to[1] + to[2]*to[2];
+
+      if ( (dd1 < _MMG5_EPSD2) || (dd2<_MMG5_EPSD2) || (ddt < _MMG5_EPSD2) )  return(0);
+      dd1 = 1.0 / sqrt(dd1);
+      nn1[0] = dd1*nn1[0];
+      nn1[1] = dd1*nn1[1];
+      nn1[2] = dd1*nn1[2];
+
+      dd2 = 1.0 / sqrt(dd2);
+      nn2[0] = dd2*nn2[0];
+      nn2[1] = dd2*nn2[1];
+      nn2[2] = dd2*nn2[2];
+
+      ddt = 1.0 / sqrt(ddt);
+      to[0] = ddt*to[0];
+      to[1] = ddt*to[1];
+      to[2] = ddt*to[2];
+    }
+
+    /* Interpolation of metric between ip0 and ip1 */
     if ( isrid ) {
-        no2[0] = nn2[0];
-        no2[1] = nn2[1];
-        no2[2] = nn2[2];
+      intridmet(mesh,met,it1,voy1,(1.0-step),nn1,mo);
     }
+    else {
+      if ( !paratmet(p0->c,p0->n,m0,o,nn1,mo) )  return(0);
+    }
+  }
 
-    p0->n[0] = to[0];
-    p0->n[1] = to[1];
-    p0->n[2] = to[2];
-    memcpy(m0,mo,6*sizeof(double));
+  /* Check proposed motion */
+  ppt0 = &mesh->point[0];
+  ppt0->ig = 0;
+  ppt0->tag = p0->tag;
 
-    return(1);
+  go = &mesh->xpoint[0];
+  go->n1[0] = nn1[0];
+  go->n1[1] = nn1[1];
+  go->n1[2] = nn1[2];
+
+  if ( isrid ) {
+    go->n2[0] = nn2[0];
+    go->n2[1] = nn2[1];
+    go->n2[2] = nn2[2];
+  }
+
+  ppt0->c[0] = o[0];
+  ppt0->c[1] = o[1];
+  ppt0->c[2] = o[2];
+
+  ppt0->n[0] = to[0];
+  ppt0->n[1] = to[1];
+  ppt0->n[2] = to[2];
+
+  m00 = &met->m[6*0+1];
+  memcpy(m00,mo,6*sizeof(double));
+
+  /* Check whether proposed move is admissible under consideration of distances */
+  l1new = _MMG5_lenedg(mesh,met,0,ip1,1);
+  l2new = _MMG5_lenedg(mesh,met,0,ip2,1);
+  if ( fabs(l2new -l1new) >= fabs(l2old -l1old) ) {
+    ppt0->tag = 0;
+    return(0);
+  }
+
+  for (k=0; k<ilist; k++) {
+    iel = list[k] / 3;
+    i0  = list[k] % 3;
+    pt  = &mesh->tria[iel];
+    pt0 = &mesh->tria[0];
+    memcpy(pt0,pt,sizeof(MMG5_Tria));
+    pt0->v[i0] = 0;
+
+    calold = caleltsig_ani(mesh,met,iel);
+    calnew = caleltsig_ani(mesh,met,0);
+    if ( (calnew < 0.001) && (calnew<calold) ) {
+      ppt0->tag = 0;
+      return(0);
+    }
+    else if ( calnew < 0.3*calold ) {
+      ppt0->tag = 0;
+      return(0);
+    }
+    /* if ( chkedg(mesh,0) )  return(0);*/
+  }
+
+  /* Coordinates, normals, tangents update */
+  p0->c[0] = o[0];
+  p0->c[1] = o[1];
+  p0->c[2] = o[2];
+
+  no1[0] = nn1[0];
+  no1[1] = nn1[1];
+  no1[2] = nn1[2];
+
+  if ( isrid ) {
+    no2[0] = nn2[0];
+    no2[1] = nn2[1];
+    no2[2] = nn2[2];
+  }
+
+  p0->n[0] = to[0];
+  p0->n[1] = to[1];
+  p0->n[2] = to[2];
+  memcpy(m0,mo,6*sizeof(double));
+
+  return(1);
 }
