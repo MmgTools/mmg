@@ -481,8 +481,7 @@ int loadMesh(MMG5_pMesh mesh) {
 
   nri = 0;
   if ( mesh->na ) {
-    mesh->edge = (MMG5_pEdge)calloc(mesh->na+1,sizeof(MMG5_Edge));
-    assert(mesh->edge);
+    _MMG5_SAFE_CALLOC(mesh->edge,mesh->na+1,MMG5_Edge);
     rewind(inm);
     fseek(inm,posned,SEEK_SET);
     for (k=1; k<=mesh->na; k++) {
@@ -533,8 +532,7 @@ int loadMesh(MMG5_pMesh mesh) {
 
   /* read geometric entities */
   if ( ng > 0 ) {
-    norm = (double*)calloc(3*ng+1,sizeof(double));
-    assert(norm);
+    _MMG5_SAFE_CALLOC(norm,3*ng+1,double);
 
     rewind(inm);
     fseek(inm,posnormal,SEEK_SET);
@@ -711,8 +709,7 @@ int saveMesh(MMG5_pMesh mesh) {
 
   /* memory alloc */
   if ( na ) {
-    edge = (MMG5_pEdge)calloc(na+1,sizeof(MMG5_Edge));
-    assert(edge);
+    _MMG5_SAFE_CALLOC(edge,na+1,MMG5_Edge);
   }
 
   /* write triangles */
@@ -1159,8 +1156,7 @@ int loadMet(MMG5_pSol met) {
   if(met->size == 3) met->size = 6;
 
   /* mem alloc */
-  met->m = (double*)calloc(met->size*(met->npmax+1)+1,sizeof(double));
-  assert(met->m);
+  _MMG5_SAFE_CALLOC(met->m,met->size*(met->npmax+1)+1,double);
 
   rewind(inm);
   fseek(inm,posnp,SEEK_SET);

@@ -563,13 +563,11 @@ static int norver(MMG5_pMesh mesh) {
   /* memory to store normals on both sides of ridges */
   if(!ng) {
     mesh->ngmax = NGMAX;
-    mesh->xpoint  = (MMG5_pxPoint)calloc(mesh->ngmax+1,sizeof(MMG5_xPoint));
-    assert(mesh->xpoint);
+    _MMG5_SAFE_CALLOC(mesh->xpoint,mesh->ngmax+1,MMG5_xPoint);
 
   } else if ( ng ) {
     mesh->ngmax = MG_MAX(1.5*ng,NGMAX);
-    mesh->xpoint  = (MMG5_pxPoint)calloc(mesh->ngmax+1,sizeof(MMG5_xPoint));
-    assert(mesh->xpoint);
+    _MMG5_SAFE_CALLOC(mesh->xpoint,mesh->ngmax+1,MMG5_xPoint);
 
     /* 2. process C0 vertices on curves, tangents */
     for (k=1; k<=mesh->nt; k++) {
@@ -666,8 +664,7 @@ static int regnor(MMG5_pMesh mesh) {
   }
 
   /* allocate memory for normals */
-  tabl = (double*)calloc(3*mesh->np+1,sizeof(double));
-  assert(tabl);
+  _MMG5_SAFE_CALLOC(tabl,3*mesh->np+1,double);
 
   it   = 0;
   nit  = 2;

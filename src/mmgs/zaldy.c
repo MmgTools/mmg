@@ -116,10 +116,8 @@ int zaldy(MMG5_pMesh mesh) {
     mesh->ntmax = MG_MAX(1.5*mesh->nt,2*npask);
   }
 
-  mesh->point = (MMG5_pPoint)calloc(mesh->npmax+1,sizeof(MMG5_Point));
-  assert(mesh->point);
-  mesh->tria  = (MMG5_pTria)calloc(mesh->ntmax+1,sizeof(MMG5_Tria));
-  assert(mesh->tria);
+  _MMG5_SAFE_CALLOC(mesh->point,mesh->npmax+1,MMG5_Point);
+  _MMG5_SAFE_CALLOC(mesh->tria,mesh->ntmax+1,MMG5_Tria);
 
   /* store empty links */
   mesh->npnil = mesh->np + 1;

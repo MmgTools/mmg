@@ -256,7 +256,7 @@ int setref(MMG5_pMesh mesh,int start,int ref,int putreq) {
   char       j,voy;
 
   ilist = cur = 0;
-  list = (int*)calloc(mesh->nt+1,sizeof(int));
+  _MMG5_SAFE_CALLOC(list,mesh->nt+1,int);
   base = ++mesh->base;
 
   /* Pile up triangles from start, till a GEO boundary is met */

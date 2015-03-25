@@ -81,6 +81,7 @@
     }                                           \
   }while(0)
 
+/* Private structures */
 typedef struct {
   double  b[10][3]; /**< Bezier basis functions */
   double  n[6][3],t[6][3]; /**< normals and tangents at points */
@@ -88,6 +89,7 @@ typedef struct {
 } _MMG5_Bezier;
 typedef _MMG5_Bezier * _MMG5_pBezier;
 
+/* Functions declarations */
 int  _MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met);
 int  _MMG5_unscaleMesh(MMG5_pMesh mesh,MMG5_pSol met);
 

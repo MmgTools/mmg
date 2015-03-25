@@ -210,16 +210,14 @@ static int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
   }
 
   if ( mesh->namein == NULL ) {
-    mesh->namein = (char *)calloc(128,sizeof(char));
-    assert(mesh->namein);
+    _MMG5_SAFE_CALLOC(mesh->namein,128,char);
     fprintf(stdout,"  -- INPUT MESH NAME ?\n");
     fflush(stdin);
     fscanf(stdin,"%s",mesh->namein);
   }
 
   if ( mesh->nameout == NULL ) {
-    mesh->nameout = (char *)calloc(128,sizeof(char));
-    assert(mesh->nameout);
+    _MMG5_SAFE_CALLOC(mesh->nameout,128,char);
     strcpy(mesh->nameout,mesh->namein);
     ptr = strstr(mesh->nameout,".mesh");
     if ( ptr ) *ptr = '\0';
@@ -227,8 +225,7 @@ static int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
   }
 
   if ( met->namein == NULL ) {
-    met->namein = (char *)calloc(128,sizeof(char));
-    assert(met->namein);
+    _MMG5_SAFE_CALLOC(met->namein,128,char);
     strcpy(met->namein,mesh->namein);
     ptr = strstr(met->namein,".mesh");
     if ( ptr ) *ptr = '\0';
@@ -236,8 +233,7 @@ static int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
   }
 
   if ( met->nameout == NULL ) {
-    met->nameout = (char *)calloc(128,sizeof(char));
-    assert(met->nameout);
+    _MMG5_SAFE_CALLOC(met->nameout,128,char);
     strcpy(met->nameout,mesh->nameout);
     ptr = strstr(met->nameout,".mesh");
     if ( ptr ) *ptr = '\0';
@@ -278,8 +274,7 @@ static int parsop(MMG5_pMesh mesh,MMG5_pSol met) {
     /* check for condition type */
     if ( !strcmp(data,"parameters") ) {
       fscanf(in,"%d",&mesh->info.npar);
-      mesh->info.par = (MMG5_pPar)calloc(mesh->info.npar,sizeof(MMG5_Par));
-      assert(mesh->info.par);
+      _MMG5_SAFE_CALLOC(mesh->info.par,mesh->info.npar,MMG5_Par);
 
       for (i=0; i<mesh->info.npar; i++) {
         par = &mesh->info.par[i];

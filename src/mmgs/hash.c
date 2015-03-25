@@ -78,16 +78,14 @@ int hashTria(MMG5_pMesh mesh) {
   /* tassage */
   paktri(mesh);
 
-  mesh->adja = (int*)calloc(3*mesh->ntmax+5,sizeof(int));
-  assert(mesh->adja);
+  _MMG5_SAFE_CALLOC(mesh->adja,3*mesh->ntmax+5,int);
 
   /* adjust hash table params */
   hmax = 3.71*mesh->np;
   hash.siz  = mesh->np;
   hash.max  = hmax;
   hash.nxt  = hash.siz;
-  hash.geom = (MMG5_hgeom*)calloc(hash.max+1,sizeof(MMG5_hgeom));
-  assert(hash.geom);
+  _MMG5_SAFE_CALLOC(hash.geom,hash.max+1,MMG5_hgeom);
 
   for (k=hash.siz; k<hash.max-1; k++)
     hash.geom[k].nxt = k+1;
@@ -268,8 +266,7 @@ int assignEdge(MMG5_pMesh mesh) {
   int         k,ia;
   char        i,i1,i2;
 
-  hash.geom = (MMG5_hgeom*)calloc(3*mesh->na+1,sizeof(MMG5_hgeom));
-  assert(hash.geom);
+  _MMG5_SAFE_CALLOC(hash.geom,3*mesh->na+1,MMG5_hgeom);
 
   /* adjust hash table params */
   hash.siz  = mesh->na;
@@ -309,8 +306,7 @@ int assignEdge(MMG5_pMesh mesh) {
 int hashNew(MMG5_HGeom *hash,int hmax) {
   int   k;
 
-  hash->geom = (MMG5_hgeom*)calloc(3*hmax+1,sizeof(MMG5_hgeom));
-  assert(hash->geom);
+  _MMG5_SAFE_CALLOC(hash->geom,3*hmax+1,MMG5_hgeom);
 
   /* adjust hash table params */
   hash->siz  = hmax;

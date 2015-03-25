@@ -1007,8 +1007,7 @@ int defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   if ( !met->m ) {
     met->np    = mesh->np;
     met->npmax = mesh->npmax;
-    met->m = calloc(6*(mesh->npmax+1)+1,sizeof(double));
-    assert(met->m);
+    _MMG5_SAFE_CALLOC(met->m,6*(mesh->npmax+1)+1,double);
   }
   if ( mesh->info.hmax < 0.0 )  mesh->info.hmax = 0.5 * mesh->info.delta;
 
