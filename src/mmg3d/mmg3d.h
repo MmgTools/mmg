@@ -38,232 +38,232 @@
 #define MG_SMSGN(a,b)  (((double)(a)*(double)(b) > (0.0)) ? (1) : (0))
 
 /** Free allocated pointers of mesh and sol structure and return value val */
-#define _MMG5_RETURN_AND_FREE(mesh,met,val)do       \
-    {                                               \
-        MMG5_Free_all(mesh,met);                    \
-        return(val);                                \
-    }while(0)
+#define _MMG5_RETURN_AND_FREE(mesh,met,val)do   \
+  {                                             \
+    MMG5_Free_all(mesh,met);                    \
+    return(val);                                \
+  }while(0)
 
 /** Error message when lack of memory */
-#define _MMG5_INCREASE_MEM_MESSAGE() do                         \
-    {                                                           \
-        printf("  ## Check the mesh size or increase maximal"); \
-        printf(" authorized memory with the -m option.\n");     \
-    } while(0)
+#define _MMG5_INCREASE_MEM_MESSAGE() do                     \
+  {                                                         \
+    printf("  ## Check the mesh size or increase maximal"); \
+    printf(" authorized memory with the -m option.\n");     \
+  } while(0)
 
 /** Check if used memory overflow maximal authorized memory.
     Execute the command law if lack of memory. */
 #define _MMG5_CHK_MEM(mesh,size,string,law) do                          \
-    {                                                                   \
-        if ( ((mesh)->memCur) > ((mesh)->memMax) ||                     \
-             ((mesh)->memCur < 0 )) {                                   \
-            fprintf(stdout,"  ## Error:");                              \
-            fprintf(stdout," unable to allocate %s.\n",string);         \
-            fprintf(stdout,"  ## Check the mesh size or ");             \
-            fprintf(stdout,"increase maximal authorized memory with the -m option.\n"); \
-            (mesh)->memCur -= (long long)(size);                        \
-            law;                                                        \
-        }                                                               \
-    }while(0)
+  {                                                                     \
+    if ( ((mesh)->memCur) > ((mesh)->memMax) ||                         \
+         ((mesh)->memCur < 0 )) {                                       \
+      fprintf(stdout,"  ## Error:");                                    \
+      fprintf(stdout," unable to allocate %s.\n",string);               \
+      fprintf(stdout,"  ## Check the mesh size or ");                   \
+      fprintf(stdout,"increase maximal authorized memory with the -m option.\n"); \
+      (mesh)->memCur -= (long long)(size);                              \
+      law;                                                              \
+    }                                                                   \
+  }while(0)
 
 /** Free pointer ptr of mesh structure and compute the new used memory.
     size is the size of the pointer */
 #define _MMG5_DEL_MEM(mesh,ptr,size) do         \
-    {                                           \
-        (mesh)->memCur -= (long long)(size);    \
-        free(ptr);                              \
-        ptr = NULL;                             \
-    }while(0)
+  {                                             \
+    (mesh)->memCur -= (long long)(size);        \
+    free(ptr);                                  \
+    ptr = NULL;                                 \
+  }while(0)
 
 /** Increment memory counter memCur and check if we don't overflow
     the maximum authorizied memory memMax. */
 #define _MMG5_ADD_MEM(mesh,size,message,law) do \
-    {                                           \
-        (mesh)->memCur += (long long)(size);    \
-        _MMG5_CHK_MEM(mesh,size,message,law);   \
-    }while(0)
+  {                                             \
+    (mesh)->memCur += (long long)(size);        \
+    _MMG5_CHK_MEM(mesh,size,message,law);       \
+  }while(0)
 
 
 /** Safe allocation with malloc */
-#define _MMG5_SAFE_MALLOC(ptr,size,type) do             \
-    {                                                   \
-        ptr = (type *)malloc((size)*sizeof(type));      \
-        if ( !ptr ) {                                   \
-            perror("  ## Memory problem: malloc");      \
-            exit(EXIT_FAILURE);                         \
-        }                                               \
-    }while(0)
+#define _MMG5_SAFE_MALLOC(ptr,size,type) do     \
+  {                                             \
+    ptr = (type *)malloc((size)*sizeof(type));  \
+    if ( !ptr ) {                               \
+      perror("  ## Memory problem: malloc");    \
+      exit(EXIT_FAILURE);                       \
+    }                                           \
+  }while(0)
 
 /** Safe reallocation */
-#define _MMG5_SAFE_REALLOC(ptr,size,type,message) do            \
-    {                                                           \
-        type* tmp;                                              \
-        tmp = (type *)realloc((ptr),(size)*sizeof(type));       \
-        if ( !tmp ) {                                           \
-            _MMG5_SAFE_FREE(ptr);                               \
-            perror(" ## Memory problem: realloc");              \
-            exit(EXIT_FAILURE);                                 \
-        }                                                       \
-                                                                \
-        if ( abs(mesh->info.imprim) > 6 || mesh->info.ddebug )  \
-            fprintf(stdout,                                     \
-                    "  ## Warning: %s:%d: %s reallocation.\n",  \
-                    __FILE__,__LINE__,message);                 \
-                                                                \
-                                                                \
-        (ptr) = tmp;                                            \
-    }while(0)
+#define _MMG5_SAFE_REALLOC(ptr,size,type,message) do        \
+  {                                                         \
+    type* tmp;                                              \
+    tmp = (type *)realloc((ptr),(size)*sizeof(type));       \
+    if ( !tmp ) {                                           \
+      _MMG5_SAFE_FREE(ptr);                                 \
+      perror(" ## Memory problem: realloc");                \
+      exit(EXIT_FAILURE);                                   \
+    }                                                       \
+                                                            \
+    if ( abs(mesh->info.imprim) > 6 || mesh->info.ddebug )  \
+      fprintf(stdout,                                       \
+              "  ## Warning: %s:%d: %s reallocation.\n",    \
+              __FILE__,__LINE__,message);                   \
+                                                            \
+                                                            \
+    (ptr) = tmp;                                            \
+  }while(0)
 
 /** safe reallocation with memset at 0 for the new values of tab */
-#define _MMG5_SAFE_RECALLOC(ptr,prevSize,newSize,type,message) do   \
-    {                                                               \
-        type* tmp;                                                  \
-        int k;                                                      \
-                                                                    \
-        tmp = (type *)realloc((ptr),(newSize)*sizeof(type));        \
-        if ( !tmp ) {                                               \
-            _MMG5_SAFE_FREE(ptr);                                   \
-            perror(" ## Memory problem: realloc");                  \
-            exit(EXIT_FAILURE);                                     \
-        }                                                           \
-                                                                    \
-        if ( abs(mesh->info.imprim) > 6 || mesh->info.ddebug )      \
-            fprintf(stdout,                                         \
-                    "  ## Warning: %s:%d: %s reallocation.\n",      \
-                    __FILE__,__LINE__,message);                     \
-                                                                    \
-        (ptr) = tmp;                                                \
-        for ( k=prevSize; k<newSize; k++) {                         \
-            memset(&ptr[k],0,sizeof(type));                         \
-        }                                                           \
-    }while(0)
+#define _MMG5_SAFE_RECALLOC(ptr,prevSize,newSize,type,message) do \
+  {                                                               \
+    type* tmp;                                                    \
+    int k;                                                        \
+                                                                  \
+    tmp = (type *)realloc((ptr),(newSize)*sizeof(type));          \
+    if ( !tmp ) {                                                 \
+      _MMG5_SAFE_FREE(ptr);                                       \
+      perror(" ## Memory problem: realloc");                      \
+      exit(EXIT_FAILURE);                                         \
+    }                                                             \
+                                                                  \
+    if ( abs(mesh->info.imprim) > 6 || mesh->info.ddebug )        \
+      fprintf(stdout,                                             \
+              "  ## Warning: %s:%d: %s reallocation.\n",          \
+              __FILE__,__LINE__,message);                         \
+                                                                  \
+    (ptr) = tmp;                                                  \
+    for ( k=prevSize; k<newSize; k++) {                           \
+      memset(&ptr[k],0,sizeof(type));                             \
+    }                                                             \
+  }while(0)
 
 /** Reallocation of ptr of type type at size (initSize+wantedGap*initSize)
     if possible or at maximum available size if not. Execute the command law
     if reallocation failed. Memset to 0 for the new values of table. */
 #define _MMG5_TAB_RECALLOC(mesh,ptr,initSize,wantedGap,type,message,law) do \
-    {                                                                   \
-        int gap;                                                        \
+  {                                                                     \
+    int gap;                                                            \
                                                                         \
-        if ( (mesh->memMax-mesh->memCur) <                              \
-             (long long) (wantedGap*initSize*sizeof(type)) ) {          \
-            gap = (int)(mesh->memMax-mesh->memCur)/sizeof(type);        \
-            if(gap<1) {                                                 \
-                fprintf(stdout,"  ## Error:");                          \
-                fprintf(stdout," unable to allocate %s.\n",message);    \
-                fprintf(stdout,"  ## Check the mesh size or ");         \
-                fprintf(stdout,"increase maximal authorized memory with the -m option.\n"); \
-                law;                                                    \
-            }                                                           \
-        }                                                               \
-        else                                                            \
-            gap = wantedGap*initSize;                                   \
+    if ( (mesh->memMax-mesh->memCur) <                                  \
+         (long long) (wantedGap*initSize*sizeof(type)) ) {              \
+      gap = (int)(mesh->memMax-mesh->memCur)/sizeof(type);              \
+      if(gap<1) {                                                       \
+        fprintf(stdout,"  ## Error:");                                  \
+        fprintf(stdout," unable to allocate %s.\n",message);            \
+        fprintf(stdout,"  ## Check the mesh size or ");                 \
+        fprintf(stdout,"increase maximal authorized memory with the -m option.\n"); \
+        law;                                                            \
+      }                                                                 \
+    }                                                                   \
+    else                                                                \
+      gap = wantedGap*initSize;                                         \
                                                                         \
-        _MMG5_ADD_MEM(mesh,gap*sizeof(type),message,law);               \
-        _MMG5_SAFE_RECALLOC((ptr),initSize+1,initSize+gap+1,type,message); \
-        initSize = initSize+gap;                                        \
-    }while(0);
+    _MMG5_ADD_MEM(mesh,gap*sizeof(type),message,law);                   \
+    _MMG5_SAFE_RECALLOC((ptr),initSize+1,initSize+gap+1,type,message);  \
+    initSize = initSize+gap;                                            \
+  }while(0);
 
 
 /** Reallocation of point table and sol table and creation
     of point ip with coordinates o and tag tag*/
 #define _MMG5_POINT_REALLOC(mesh,sol,ip,wantedGap,law,o,tag ) do        \
-    {                                                                   \
-        int klink;                                                      \
+  {                                                                     \
+    int klink;                                                          \
                                                                         \
-        _MMG5_TAB_RECALLOC(mesh,mesh->point,mesh->npmax,wantedGap,MMG5_Point, \
-                     "larger point table",law);                         \
+    _MMG5_TAB_RECALLOC(mesh,mesh->point,mesh->npmax,wantedGap,MMG5_Point, \
+                       "larger point table",law);                       \
                                                                         \
-        mesh->npnil = mesh->np+1;                                       \
-        for (klink=mesh->npnil; klink<mesh->npmax-1; klink++)           \
-            mesh->point[klink].tmp  = klink+1;                          \
+    mesh->npnil = mesh->np+1;                                           \
+    for (klink=mesh->npnil; klink<mesh->npmax-1; klink++)               \
+      mesh->point[klink].tmp  = klink+1;                                \
                                                                         \
-        /* solution */                                                  \
-        if ( sol->m ) {                                                 \
-            _MMG5_ADD_MEM(mesh,(mesh->npmax-sol->npmax)*sizeof(double), \
+    /* solution */                                                      \
+    if ( sol->m ) {                                                     \
+      _MMG5_ADD_MEM(mesh,(mesh->npmax-sol->npmax)*sizeof(double),       \
                     "larger solution",law);                             \
-            _MMG5_SAFE_REALLOC(sol->m,mesh->npmax+1,double,"larger solution"); \
-        }                                                               \
-        sol->npmax = mesh->npmax;                                       \
+      _MMG5_SAFE_REALLOC(sol->m,mesh->npmax+1,double,"larger solution"); \
+    }                                                                   \
+    sol->npmax = mesh->npmax;                                           \
                                                                         \
-        /* We try again to add the point */                             \
-        ip = _MMG5_newPt(mesh,o,tag);                                   \
-        if ( !ip ) {law;}                                               \
-    }while(0)
+    /* We try again to add the point */                                 \
+    ip = _MMG5_newPt(mesh,o,tag);                                       \
+    if ( !ip ) {law;}                                                   \
+  }while(0)
 
 /** Reallocation of point table, sol table and bucket table and creation
     of point ip with coordinates o and tag tag*/
 #define _MMG5_POINT_AND_BUCKET_REALLOC(mesh,sol,ip,wantedGap,law,o,tag ) do \
-    {                                                                   \
-        int klink,gap;                                                  \
+  {                                                                     \
+    int klink,gap;                                                      \
                                                                         \
-        if ( (mesh->memMax-mesh->memCur) <                              \
-             (long long) (wantedGap*mesh->npmax*                        \
-                          (sizeof(MMG5_Point)+sizeof(int))) ) {         \
-            gap = (int)(mesh->memMax-mesh->memCur)/                     \
-                (sizeof(MMG5_Point)+sizeof(int));                            \
-            if(gap < 1) {                                               \
-                fprintf(stdout,"  ## Error:");                          \
-                fprintf(stdout," unable to allocate %s.\n","larger point/bucket table"); \
-                fprintf(stdout,"  ## Check the mesh size or ");         \
-                fprintf(stdout,"increase maximal authorized memory with the -m option.\n"); \
-                law;                                                    \
-            }                                                           \
-        }                                                               \
-        else                                                            \
-            gap = (int)(wantedGap*mesh->npmax);                         \
+    if ( (mesh->memMax-mesh->memCur) <                                  \
+         (long long) (wantedGap*mesh->npmax*                            \
+                      (sizeof(MMG5_Point)+sizeof(int))) ) {             \
+      gap = (int)(mesh->memMax-mesh->memCur)/                           \
+        (sizeof(MMG5_Point)+sizeof(int));                               \
+      if(gap < 1) {                                                     \
+        fprintf(stdout,"  ## Error:");                                  \
+        fprintf(stdout," unable to allocate %s.\n","larger point/bucket table"); \
+        fprintf(stdout,"  ## Check the mesh size or ");                 \
+        fprintf(stdout,"increase maximal authorized memory with the -m option.\n"); \
+        law;                                                            \
+      }                                                                 \
+    }                                                                   \
+    else                                                                \
+      gap = (int)(wantedGap*mesh->npmax);                               \
                                                                         \
-        _MMG5_ADD_MEM(mesh,gap*(sizeof(MMG5_Point)+sizeof(int)),             \
-                "point and bucket",law);                                \
-        _MMG5_SAFE_RECALLOC(mesh->point,mesh->npmax+1,                  \
-                            mesh->npmax+gap+1,MMG5_Point,"larger point table"); \
-        _MMG5_SAFE_RECALLOC(bucket->link,mesh->npmax+1,                 \
-                      mesh->npmax+gap+1,int,"larger bucket table");     \
-        mesh->npmax = mesh->npmax+gap;                                  \
+    _MMG5_ADD_MEM(mesh,gap*(sizeof(MMG5_Point)+sizeof(int)),            \
+                  "point and bucket",law);                              \
+    _MMG5_SAFE_RECALLOC(mesh->point,mesh->npmax+1,                      \
+                        mesh->npmax+gap+1,MMG5_Point,"larger point table"); \
+    _MMG5_SAFE_RECALLOC(bucket->link,mesh->npmax+1,                     \
+                        mesh->npmax+gap+1,int,"larger bucket table");   \
+    mesh->npmax = mesh->npmax+gap;                                      \
                                                                         \
-        mesh->npnil = mesh->np+1;                                       \
-        for (klink=mesh->npnil; klink<mesh->npmax-1; klink++)           \
-            mesh->point[klink].tmp  = klink+1;                          \
+    mesh->npnil = mesh->np+1;                                           \
+    for (klink=mesh->npnil; klink<mesh->npmax-1; klink++)               \
+      mesh->point[klink].tmp  = klink+1;                                \
                                                                         \
-        /* solution */                                                  \
-        if ( sol->m ) {                                                 \
-            _MMG5_ADD_MEM(mesh,(mesh->npmax-sol->npmax)*sizeof(double), \
+    /* solution */                                                      \
+    if ( sol->m ) {                                                     \
+      _MMG5_ADD_MEM(mesh,(mesh->npmax-sol->npmax)*sizeof(double),       \
                     "larger solution",law);                             \
-            _MMG5_SAFE_REALLOC(sol->m,mesh->npmax+1,double,"larger solution"); \
-        }                                                               \
-        sol->npmax = mesh->npmax;                                       \
+      _MMG5_SAFE_REALLOC(sol->m,mesh->npmax+1,double,"larger solution"); \
+    }                                                                   \
+    sol->npmax = mesh->npmax;                                           \
                                                                         \
-        /* We try again to add the point */                             \
-        ip = _MMG5_newPt(mesh,o,tag);                                   \
-        if ( !ip ) {law;}                                               \
-    }while(0)
+    /* We try again to add the point */                                 \
+    ip = _MMG5_newPt(mesh,o,tag);                                       \
+    if ( !ip ) {law;}                                                   \
+  }while(0)
 
 /** Reallocation of tetra table and creation
     of tetra jel */
 #define _MMG5_TETRA_REALLOC(mesh,jel,wantedGap,law ) do                 \
-    {                                                                   \
-        int klink,oldSiz;                                               \
+  {                                                                     \
+    int klink,oldSiz;                                                   \
                                                                         \
-        oldSiz = mesh->nemax;                                           \
-        _MMG5_TAB_RECALLOC(mesh,mesh->tetra,mesh->nemax,wantedGap,MMG5_Tetra, \
-                           "larger tetra table",law);                   \
+    oldSiz = mesh->nemax;                                               \
+    _MMG5_TAB_RECALLOC(mesh,mesh->tetra,mesh->nemax,wantedGap,MMG5_Tetra, \
+                       "larger tetra table",law);                       \
                                                                         \
-        mesh->nenil = mesh->ne+1;                                       \
-        for (klink=mesh->nenil; klink<mesh->nemax-1; klink++)           \
-            mesh->tetra[klink].v[3]  = klink+1;                         \
+    mesh->nenil = mesh->ne+1;                                           \
+    for (klink=mesh->nenil; klink<mesh->nemax-1; klink++)               \
+      mesh->tetra[klink].v[3]  = klink+1;                               \
                                                                         \
-        if ( mesh->adja ) {                                             \
-            /* adja table */                                            \
-            _MMG5_ADD_MEM(mesh,4*(mesh->nemax-oldSiz)*sizeof(int),      \
-                          "larger adja table",law);                     \
-            _MMG5_SAFE_RECALLOC(mesh->adja,4*mesh->ne+5,4*mesh->nemax+5,int \
-                                ,"larger adja table");                  \
-        }                                                               \
+    if ( mesh->adja ) {                                                 \
+      /* adja table */                                                  \
+      _MMG5_ADD_MEM(mesh,4*(mesh->nemax-oldSiz)*sizeof(int),            \
+                    "larger adja table",law);                           \
+      _MMG5_SAFE_RECALLOC(mesh->adja,4*mesh->ne+5,4*mesh->nemax+5,int   \
+                          ,"larger adja table");                        \
+    }                                                                   \
                                                                         \
-        /* We try again to add the point */                             \
-        jel = _MMG5_newElt(mesh);                                       \
-        if ( !jel ) {law;}                                              \
-    }while(0)
+    /* We try again to add the point */                                 \
+    jel = _MMG5_newElt(mesh);                                           \
+    if ( !jel ) {law;}                                                  \
+  }while(0)
 
 /* numerical accuracy */
 #define _MMG5_ALPHAD    20.7846096908265    //0.04811252243247      /* 12*sqrt(3) */
@@ -322,19 +322,19 @@ extern unsigned char _MMG5_arpt[4][3]; /**< arpt[i]: edges passing through verte
 
 /** used to hash edges */
 typedef struct {
-    int   a,b,nxt;
-    int   s,k; /** k = point along edge a b */
+  int   a,b,nxt;
+  int   s,k; /** k = point along edge a b */
 } _MMG5_hedge;
 
 typedef struct {
-    int     siz,max,nxt;
-    _MMG5_hedge  *item;
+  int     siz,max,nxt;
+  _MMG5_hedge  *item;
 } _MMG5_Hash;
 
 typedef struct {
-    int     size;
-    int    *head;
-    int    *link;
+  int     size;
+  int    *head;
+  int    *link;
 } _MMG5_Bucket;
 typedef _MMG5_Bucket * _MMG5_pBucket;
 

@@ -36,7 +36,7 @@
 ! */
 
 
-!  /**
+! /**
 !  * \file mmg3d/libmmg3d.h
 !  * \brief C API for MMG3D library.
 !  * \author Algiane Froehly (Inria / IMB, Université de Bordeaux)
@@ -44,6 +44,7 @@
 !  * \date 01 2014
 !  * \copyright GNU Lesser General Public License.
 !  */
+
 
 ! #ifndef _MMG3DLIB_H
 
@@ -82,13 +83,13 @@
 !  */
 
 ! /*!< Undefined type (unusable) */
-#define     MMG5_Notype                0
+#define   MMG5_Notype                  0
 ! /*!< Scalar solution */
-#define     MMG5_Scalar                1
+#define   MMG5_Scalar                  1
 ! /*!< Vectorial solution */
-#define     MMG5_Vector                2
+#define   MMG5_Vector                  2
 ! /*!< Tensorial solution */
-#define     MMG5_Tensor                3
+#define   MMG5_Tensor                  3
 
 ! /**
 !  * \enum MMG5_entities
@@ -96,11 +97,11 @@
 !  */
 
 ! /*!< Undefined type (unusable) */
-#define     MMG5_Noentity              0
+#define   MMG5_Noentity                0
 ! /*!< Vertex entity */
-#define     MMG5_Vertex                1
+#define   MMG5_Vertex                  1
 ! /*!< Triangle entity */
-#define     MMG5_Triangle              2
+#define   MMG5_Triangle                2
 
 ! /**
 !  * \enum MMG5_Param
@@ -113,41 +114,41 @@
 !  */
 
 ! /*!< [-10..10] Tune level of verbosity */
-#define     MMG5_IPARAM_verbose            0
+#define   MMG5_IPARAM_verbose            0
 ! /*!< [n/-1] Set memory size to n Mbytes or keep the default value */
-#define     MMG5_IPARAM_mem                1
+#define   MMG5_IPARAM_mem                1
 ! /*!< [1/0] Turn on/off debug mode */
-#define     MMG5_IPARAM_debug              2
+#define   MMG5_IPARAM_debug              2
 ! /*!< [1/0] Turn on/off angle detection */
-#define     MMG5_IPARAM_angle              3
+#define   MMG5_IPARAM_angle              3
 ! /*!< [1/0] Level-set meshing */
-#define     MMG5_IPARAM_iso                4
+#define   MMG5_IPARAM_iso                4
 ! /*!< [1/0] Avoid/allow point insertion */
-#define     MMG5_IPARAM_noinsert           5
+#define   MMG5_IPARAM_noinsert           5
 ! /*!< [1/0] Avoid/allow edge or face flipping */
-#define     MMG5_IPARAM_noswap             6
+#define   MMG5_IPARAM_noswap             6
 ! /*!< [1/0] Avoid/allow point relocation */
-#define     MMG5_IPARAM_nomove             7
+#define   MMG5_IPARAM_nomove             7
 ! /*!< [n] Number of local parameters */
-#define     MMG5_IPARAM_numberOfLocalParam 8
+#define   MMG5_IPARAM_numberOfLocalParam 8
 ! /*!< [1/0] Turn on/off point relocation with Scotch */
-#define     MMG5_IPARAM_renum              9
+#define   MMG5_IPARAM_renum              9
 ! /*!< [n] Specify the size of the bucket per dimension (DELAUNAY) */
-#define     MMG5_IPARAM_bucket             10
+#define   MMG5_IPARAM_bucket             10
 ! /*!< [val] Value for angle detection */
-#define     MMG5_DPARAM_angleDetection     11
+#define   MMG5_DPARAM_angleDetection     11
 ! /*!< [val] Minimal mesh size */
-#define     MMG5_DPARAM_hmin               12
+#define   MMG5_DPARAM_hmin               12
 ! /*!< [val] Maximal mesh size */
-#define     MMG5_DPARAM_hmax               13
+#define   MMG5_DPARAM_hmax               13
 ! /*!< [val] Control global Hausdorff distance (on all the boundary surfaces of the mesh) */
-#define     MMG5_DPARAM_hausd              14
+#define   MMG5_DPARAM_hausd              14
 ! /*!< [val] Control gradation */
-#define     MMG5_DPARAM_hgrad              15
+#define   MMG5_DPARAM_hgrad              15
 ! /*!< [val] Value of level-set (not use for now) */
-#define     MMG5_DPARAM_ls                 16
+#define   MMG5_DPARAM_ls                 16
 ! /*!< [n] Number of parameters */
-#define     MMG5_PARAM_size                17
+#define   MMG5_PARAM_size                17
 
 
 ! /*----------------------------- functions header -----------------------------*/

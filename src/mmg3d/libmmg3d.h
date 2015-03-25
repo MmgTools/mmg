@@ -21,7 +21,7 @@
 ** =============================================================================
 */
 
- /**
+/**
  * \file mmg3d/libmmg3d.h
  * \brief C API for MMG3D library.
  * \author Algiane Froehly (Inria / IMB, Université de Bordeaux)
@@ -64,23 +64,23 @@
  * \brief Type of solutions.
  */
 enum MMG5_type
-  {
-    MMG5_Notype, /*!< Undefined type (unusable) */
-    MMG5_Scalar, /*!< Scalar solution */
-    MMG5_Vector, /*!< Vectorial solution */
-    MMG5_Tensor  /*!< Tensorial solution */
-  };
+{
+  MMG5_Notype, /*!< Undefined type (unusable) */
+  MMG5_Scalar, /*!< Scalar solution */
+  MMG5_Vector, /*!< Vectorial solution */
+  MMG5_Tensor  /*!< Tensorial solution */
+};
 
 /**
  * \enum MMG5_entities
  * \brief Type of mesh entities to which solutions are applied.
  */
 enum MMG5_entities
-  {
-    MMG5_Noentity, /*!< Undefined type (unusable) */
-    MMG5_Vertex, /*!< Vertex entity */
-    MMG5_Triangle, /*!< Triangle entity */
-  };
+{
+  MMG5_Noentity, /*!< Undefined type (unusable) */
+  MMG5_Vertex, /*!< Vertex entity */
+  MMG5_Triangle, /*!< Triangle entity */
+};
 
 /**
  * \enum MMG5_Param
@@ -92,26 +92,26 @@ enum MMG5_entities
  *
  */
 enum MMG5_Param
-  {
-    MMG5_IPARAM_verbose,           /*!< [-10..10], Tune level of verbosity */
-    MMG5_IPARAM_mem,               /*!< [n/-1], Set memory size to n Mbytes or keep the default value */
-    MMG5_IPARAM_debug,             /*!< [1/0], Turn on/off debug mode */
-    MMG5_IPARAM_angle,             /*!< [1/0], Turn on/off angle detection */
-    MMG5_IPARAM_iso,               /*!< [1/0], Level-set meshing */
-    MMG5_IPARAM_noinsert,          /*!< [1/0], Avoid/allow point insertion */
-    MMG5_IPARAM_noswap,            /*!< [1/0], Avoid/allow edge or face flipping */
-    MMG5_IPARAM_nomove,            /*!< [1/0], Avoid/allow point relocation */
-    MMG5_IPARAM_numberOfLocalParam,/*!< [n], Number of local parameters */
-    MMG5_IPARAM_renum,             /*!< [1/0], Turn on/off point relocation with Scotch */
-    MMG5_IPARAM_bucket,            /*!< [n], Specify the size of the bucket per dimension (DELAUNAY) */
-    MMG5_DPARAM_angleDetection,    /*!< [val], Value for angle detection */
-    MMG5_DPARAM_hmin,              /*!< [val], Minimal mesh size */
-    MMG5_DPARAM_hmax,              /*!< [val], Maximal mesh size */
-    MMG5_DPARAM_hausd,             /*!< [val], Control global Hausdorff distance (on all the boundary surfaces of the mesh) */
-    MMG5_DPARAM_hgrad,             /*!< [val], Control gradation */
-    MMG5_DPARAM_ls,                /*!< [val], Value of level-set (not use for now) */
-    MMG5_PARAM_size,               /*!< [n], Number of parameters */
-  };
+{
+  MMG5_IPARAM_verbose,           /*!< [-10..10], Tune level of verbosity */
+  MMG5_IPARAM_mem,               /*!< [n/-1], Set memory size to n Mbytes or keep the default value */
+  MMG5_IPARAM_debug,             /*!< [1/0], Turn on/off debug mode */
+  MMG5_IPARAM_angle,             /*!< [1/0], Turn on/off angle detection */
+  MMG5_IPARAM_iso,               /*!< [1/0], Level-set meshing */
+  MMG5_IPARAM_noinsert,          /*!< [1/0], Avoid/allow point insertion */
+  MMG5_IPARAM_noswap,            /*!< [1/0], Avoid/allow edge or face flipping */
+  MMG5_IPARAM_nomove,            /*!< [1/0], Avoid/allow point relocation */
+  MMG5_IPARAM_numberOfLocalParam,/*!< [n], Number of local parameters */
+  MMG5_IPARAM_renum,             /*!< [1/0], Turn on/off point relocation with Scotch */
+  MMG5_IPARAM_bucket,            /*!< [n], Specify the size of the bucket per dimension (DELAUNAY) */
+  MMG5_DPARAM_angleDetection,    /*!< [val], Value for angle detection */
+  MMG5_DPARAM_hmin,              /*!< [val], Minimal mesh size */
+  MMG5_DPARAM_hmax,              /*!< [val], Maximal mesh size */
+  MMG5_DPARAM_hausd,             /*!< [val], Control global Hausdorff distance (on all the boundary surfaces of the mesh) */
+  MMG5_DPARAM_hgrad,             /*!< [val], Control gradation */
+  MMG5_DPARAM_ls,                /*!< [val], Value of level-set (not use for now) */
+  MMG5_PARAM_size,               /*!< [n], Number of parameters */
+};
 
 
 /*----------------------------- functions header -----------------------------*/
