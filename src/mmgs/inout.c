@@ -587,7 +587,7 @@ int loadMesh(MMG5_pMesh mesh) {
             if ( idn > 0 && ip < mesh->np+1 )
                 memcpy(&mesh->point[ip].n,&norm[3*(idn-1)+1],3*sizeof(double));
         }
-        free(norm);
+        _MMG5_SAFE_FREE(norm);
     }
 
     if ( abs(mesh->info.imprim) > 4 ) {
@@ -875,7 +875,7 @@ int saveMesh(MMG5_pMesh mesh) {
                     }
                 }
         }
-        free(edge);
+        _MMG5_SAFE_FREE(edge);
     }
 
     /* write normals */

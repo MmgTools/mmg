@@ -63,6 +63,24 @@
 #define MG_VOK(ppt)      (ppt && ((ppt)->tag < MG_NUL)) /**< Vertex OK */
 #define MG_EOK(pt)       (pt && ((pt)->v[0] > 0))       /**< Element OK */
 
+/* Macros for memory management */
+/** Safe deallocation */
+#define _MMG5_SAFE_FREE(ptr) do                 \
+    {                                           \
+        free(ptr);                              \
+        ptr = NULL;                             \
+    }while(0)
+
+/** Safe allocation with calloc */
+#define _MMG5_SAFE_CALLOC(ptr,size,type) do             \
+    {                                                   \
+        ptr = (type *)calloc((size),sizeof(type));      \
+        if ( !ptr ) {                                   \
+            perror("  ## Memory problem: calloc");      \
+            exit(EXIT_FAILURE);                         \
+        }                                               \
+    }while(0)
+
 typedef struct {
   double  b[10][3]; /**< Bezier basis functions */
   double  n[6][3],t[6][3]; /**< normals and tangents at points */

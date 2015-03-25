@@ -83,23 +83,6 @@
         _MMG5_CHK_MEM(mesh,size,message,law);   \
     }while(0)
 
-/** Safe deallocation */
-#define _MMG5_SAFE_FREE(ptr) do                 \
-    {                                           \
-        free(ptr);                              \
-        ptr = NULL;                             \
-    }while(0)
-
-
-/** Safe allocation with calloc */
-#define _MMG5_SAFE_CALLOC(ptr,size,type) do             \
-    {                                                   \
-        ptr = (type *)calloc((size),sizeof(type));      \
-        if ( !ptr ) {                                   \
-            perror("  ## Memory problem: calloc");      \
-            exit(EXIT_FAILURE);                         \
-        }                                               \
-    }while(0)
 
 /** Safe allocation with malloc */
 #define _MMG5_SAFE_MALLOC(ptr,size,type) do             \

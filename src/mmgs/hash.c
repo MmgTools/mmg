@@ -169,7 +169,7 @@ int hashTria(MMG5_pMesh mesh) {
             }
         }
     }
-    free(hash.geom);
+    _MMG5_SAFE_FREE(hash.geom);
 
     /* set tag */
     for (k=1; k<=mesh->nt; k++) {
@@ -300,8 +300,8 @@ int assignEdge(MMG5_pMesh mesh) {
     }
 
     /* reset edge structure */
-    free(hash.geom);
-    free(mesh->edge);
+    _MMG5_SAFE_FREE(hash.geom);
+    _MMG5_SAFE_FREE(mesh->edge);
 
     return(1);
 }

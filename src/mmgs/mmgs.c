@@ -385,7 +385,7 @@ int main(int argc,char *argv[]) {
         return(1);
     else if ( ier > 0 && met.np != mesh.np ) {
         fprintf(stdout,"  ## WARNING: WRONG SOLUTION NUMBER. IGNORED\n");
-        free(met.m);
+        _MMG5_SAFE_FREE(met.m);
         memset(&met,0,sizeof(MMG5_Sol));
     }
     if ( !parsop(&mesh,&met) )     return(1);
@@ -429,11 +429,11 @@ int main(int argc,char *argv[]) {
     if ( mesh.info.imprim )  fprintf(stdout,"  -- WRITING COMPLETED\n");
 
     /* release memory */
-    free(mesh.point);
-    free(mesh.tria);
-    free(mesh.adja);
-    if ( met.m )  free(met.m);
-    if ( mesh.info.par )  free(mesh.info.par);
+    _MMG5_SAFE_FREE(mesh.point);
+    _MMG5_SAFE_FREE(mesh.tria);
+    _MMG5_SAFE_FREE(mesh.adja);
+    if ( met.m )  _MMG5_SAFE_FREE(met.m);
+    if ( mesh.info.par )  _MMG5_SAFE_FREE(mesh.info.par);
 
     return(0);
 }
