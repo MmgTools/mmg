@@ -606,7 +606,7 @@ static int defmetref(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
 
   /* At this point, intm stands for the integral matrix of Taubin's approach : vp[0] and vp[1]
      are the two pr. directions of curvature, and the two curvatures can be inferred from lambdas*/
-  assert(eigensym(intm,kappa,vp));
+  assert(_MMG5_eigensym(intm,kappa,vp));
 
   /* Truncation of eigenvalues */
   kappa[0] = 2.0/9.0 * fabs(kappa[0])/mesh->info.hausd;
@@ -934,7 +934,7 @@ static int defmetreg(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
 
   /* At this point, intm stands for the integral matrix of Taubin's approach : vp[0] and vp[1]
      are the two pr. directions of curvature, and the two curvatures can be inferred from lambdas*/
-  assert(eigensym(intm,kappa,vp));
+  assert(_MMG5_eigensym(intm,kappa,vp));
 
   /* Truncation of eigenvalues */
   kappa[0] = 2.0/9.0 * fabs(kappa[0])/mesh->info.hausd;
@@ -1226,7 +1226,7 @@ static int grad2met(MMG5_pMesh mesh, MMG5_pSol met, int iel, int i){
     if( ps1 >= alpha -_MMG5_EPS )
       return(-1);
 
-    eigensym(mtan1,lambda,vp);
+    _MMG5_eigensym(mtan1,lambda,vp);
     c[0] = t1[0]*vp[0][0] + t1[1]*vp[0][1];
     c[1] = t1[0]*vp[1][0] + t1[1]*vp[1][1];
 
@@ -1296,7 +1296,7 @@ static int grad2met(MMG5_pMesh mesh, MMG5_pSol met, int iel, int i){
     if( ps2 >= alpha - _MMG5_EPS)
       return(-1);
 
-    eigensym(mtan2,lambda,vp);
+    _MMG5_eigensym(mtan2,lambda,vp);
     c[0] = t2[0]*vp[0][0] + t2[1]*vp[0][1];
     c[1] = t2[0]*vp[1][0] + t2[1]*vp[1][1];
 

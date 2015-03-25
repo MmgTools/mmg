@@ -74,7 +74,7 @@ int paratmet(double c0[3],double n0[3],double m[6],double c1[3],double n1[3],dou
   mtan[2] = mrot[3];
 
   /* Take eigenvectors of metric tensor in tangent plane */
-  eigensym(mtan,lambda,vp);
+  _MMG5_eigensym(mtan,lambda,vp);
 
   /* Eigenvector in canonical basis = {t}R*vp[0] */
   u[0] = r[0][0]*vp[0][0] + r[1][0]*vp[0][1];

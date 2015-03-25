@@ -191,7 +191,7 @@ int chkeigen(MMG5_pMesh mesh,MMG5_pSol met,int k,double lambda[3]) {
         mtan[0] = mr[0];
         mtan[1] = mr[1];
         mtan[2] = mr[3];
-        ord = eigensym(mtan,lambda,vp);
+        ord = _MMG5_eigensym(mtan,lambda,vp);
 
         if ( !ord ) {
             printf("wrong matrix \n");
@@ -258,7 +258,7 @@ int chkmet(MMG5_pMesh mesh,MMG5_pSol met) {
             mtan[0] = mr[0];
             mtan[1] = mr[1];
             mtan[2] = mr[3];
-            eigensym(mtan,lambda,vp);
+            _MMG5_eigensym(mtan,lambda,vp);
 
             if ( lambda[0] > isqhmin + 1.e-6 || lambda[0] < isqhmax - 1.e-6 ){
                 printf("   ### Error in definition of metric at regular point %d,\

@@ -580,7 +580,7 @@ int intmet33(MMG5_pMesh mesh,MMG5_pSol met,int np,int nq,int ip,double s) {
   mr = &met->m[6*ip+1];
 
   /* Compute inverse of square root of matrix M : is = P*diag(1/sqrt(lambda))*{^t}P */
-  order = eigenv(1,m,lambda,vp);
+  order = _MMG5_eigenv(1,m,lambda,vp);
   if ( !order ) return(0);
 
   for (i=0; i<3; i++) {
@@ -613,7 +613,7 @@ int intmet33(MMG5_pMesh mesh,MMG5_pSol met,int np,int nq,int ip,double s) {
   isnis[4] = is[1]*mt[2] + is[3]*mt[5] + is[4]*mt[8];
   isnis[5] = is[2]*mt[2] + is[4]*mt[5] + is[5]*mt[8];
 
-  order = eigenv(1,isnis,lambda,vp);
+  order = _MMG5_eigenv(1,isnis,lambda,vp);
   if ( !order ) return(0);
 
   /* P = is * (vp) */

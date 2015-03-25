@@ -166,53 +166,6 @@ inline int sys33sym(double a[6],double b[3],double r[3]) {
   return(1);
 }
 
-/* Compute eigenelements of a SYMMETRIC matrix m. Eigenvectors are orthogonal. Return order */
-inline int eigensym(double m[3],double lambda[2],double vp[2][2]) {
-  double   sqDelta,dd,trm,vnorm;
-
-  dd  = m[0]-m[2];
-  trm = m[0]+m[2];
-  sqDelta = sqrt(dd*dd + 4.0*m[1]*m[1]);
-  lambda[0] = 0.5*(trm - sqDelta);
-
-  /* Case when m = lambda[0]*I */
-  if ( sqDelta < _MMG5_EPS ) {
-    lambda[1] = lambda[0];
-    vp[0][0] = 1.0;
-    vp[0][1] = 0.0;
-
-    vp[1][0] = 0.0;
-    vp[1][1] = 1.0;
-    return(2);
-  }
-  vp[0][0] = m[1];
-  vp[0][1] = (lambda[0] - m[0]);
-  vnorm = sqrt(vp[0][0]*vp[0][0] + vp[0][1]*vp[0][1]);
-
-  if ( vnorm < _MMG5_EPS ) {
-    vp[0][0] = (lambda[0] - m[2]);
-    vp[0][1] = m[1];
-    vnorm = sqrt(vp[0][0]*vp[0][0] + vp[0][1]*vp[0][1]);
-  }
-
-  if( !(vnorm > _MMG5_EPSD) ) {
-    printf("la matrice : %f %f %f \n",m[0],m[1],m[2]);
-    printf("le vp qui deconne %f %f \n",vp[0][0],vp[0][1]);
-  }
-  assert(vnorm > _MMG5_EPSD);
-
-  vnorm = 1.0/vnorm;
-  vp[0][0] *= vnorm;
-  vp[0][1] *= vnorm;
-
-  vp[1][0] = -vp[0][1];
-  vp[1][1] = vp[0][0];
-
-  lambda[1] = m[0]*vp[1][0]*vp[1][0] + 2.0*m[1]*vp[1][0]*vp[1][1] + m[2]*vp[1][1]*vp[1][1];
-
-  return(1);
-}
-
 /* Compute the intersected (2 x 2) metric between metrics m and n, PRESERVING the directions
    of m. Result is stored in mr*/
 int intmetsavedir(MMG5_pMesh mesh, double *m,double *n,double *mr) {
@@ -220,7 +173,7 @@ int intmetsavedir(MMG5_pMesh mesh, double *m,double *n,double *mr) {
   double lambda[2],vp[2][2],siz,isqhmin;
 
   isqhmin = 1.0 / (mesh->info.hmin * mesh->info.hmin);
-  eigensym(m,lambda,vp);
+  _MMG5_eigensym(m,lambda,vp);
 
   for (i=0; i<2; i++) {
     siz = n[0]*vp[i][0]*vp[i][0] + 2.0*n[1]*vp[i][0]*vp[i][1] + n[2]*vp[i][1]*vp[i][1];

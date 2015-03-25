@@ -32,7 +32,6 @@
  * \todo doxygen documentation.
  */
 
-#include "eigenv.h"
 #include "mmg3d.h"
 
 #define  _MMG5_EPSRAD       1.00005
