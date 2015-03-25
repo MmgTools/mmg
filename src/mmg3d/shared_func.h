@@ -128,4 +128,6 @@ void _MMG5_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
     /*defsiz = defsiz_ani;
       gradsiz = gradsiz_ani;*/
   }
+  MMG5_Set_outputMeshName = MMG5_MMG3D_Set_outputMeshName;
+  MMG5_Init_parameters = MMG5_MMG3D_Init_parameters;
 }

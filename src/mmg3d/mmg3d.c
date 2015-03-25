@@ -93,6 +93,9 @@ int main(int argc,char *argv[]) {
   fprintf(stdout,"     %s\n",MG_CPY);
   fprintf(stdout,"     %s %s\n",__DATE__,__TIME__);
 
+  _MMG5_setfunc(&mesh,&met);
+  MMG5_Set_saveFunc(&mesh);
+
   signal(SIGABRT,_MMG5_excfun);
   signal(SIGFPE,_MMG5_excfun);
   signal(SIGILL,_MMG5_excfun);
@@ -146,8 +149,6 @@ int main(int argc,char *argv[]) {
 
   /* analysis */
   chrono(ON,&MMG5_ctim[2]);
-  _MMG5_setfunc(&mesh,&met);
-  MMG5_Set_saveFunc(&mesh);
 
   if ( abs(mesh.info.imprim) > 0 )  _MMG5_outqua(&mesh,&met);
   fprintf(stdout,"\n  %s\n   MODULE MMG3D: IMB-LJLL : %s (%s)\n  %s\n",

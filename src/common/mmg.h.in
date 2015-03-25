@@ -204,6 +204,29 @@
     initSize = initSize+gap;                                            \
   }while(0);
 
+/* Macro for fortran function generation */
+/**
+ * \def FORTRAN_NAME(nu,nl,pl,pc)
+ * \brief Adds function definitions.
+ * \param nu function name in upper case.
+ * \param nl function name in lower case.
+ * \param pl type of arguments.
+ * \param pc name of arguments.
+ * \note Macro coming from Scotch library.
+ *
+ * Adds function definitions with upcase, underscore and double
+ * underscore to match any fortran compiler.
+ *
+ */
+#define FORTRAN_NAME(nu,nl,pl,pc)               \
+  void nu pl;                                   \
+  void nl pl                                    \
+  { nu pc; }                                    \
+  void nl##_ pl                                 \
+  { nu pc; }                                    \
+  void nl##__ pl                                \
+  { nu pc; }                                    \
+  void nu pl
 
 /* Private structures */
 typedef struct {

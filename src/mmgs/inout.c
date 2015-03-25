@@ -111,18 +111,37 @@ int loadMesh(MMG5_pMesh mesh) {
   name = mesh->namein;
   strcpy(data,name);
   ptr = strstr(data,".mesh");
-  if ( !ptr ) {
+    if ( !ptr ) {
+    /* data contains the filename without extension */
     strcat(data,".meshb");
-    if(  !(inm = fopen(data,"rb")) ) {
+    if( !(inm = fopen(data,"rb")) ) {
+      /* our file is not a .meshb file, try with .mesh ext */
       ptr = strstr(data,".mesh");
       *ptr = '\0';
       strcat(data,".mesh");
-      if(  !(inm = fopen(data,"r")) ) {
+      if( !(inm = fopen(data,"r")) ) {
         fprintf(stderr,"  ** %s  NOT FOUND.\n",data);
         return(0);
       }
-    } else {
+      else {
+        if ( !strstr(mesh->nameout,".mesh") ) {
+          _MMG5_ADD_MEM(mesh,5*sizeof(char),"output file name",
+                        printf("  Exit program.\n");
+                        exit(EXIT_FAILURE));
+          _MMG5_SAFE_REALLOC(mesh->nameout,strlen(mesh->nameout)+6,char,"output mesh name");
+          strcat(mesh->nameout,".mesh");
+        }
+      }
+    }
+    else {
       bin = 1;
+      if ( !strstr(mesh->nameout,".mesh") ) {
+        _MMG5_ADD_MEM(mesh,6*sizeof(char),"input file name",
+                      printf("  Exit program.\n");
+                      exit(EXIT_FAILURE));
+        _MMG5_SAFE_REALLOC(mesh->nameout,strlen(mesh->nameout)+7,char,"input file name");
+        strcat(mesh->nameout,".meshb");
+      }
     }
   }
   else {

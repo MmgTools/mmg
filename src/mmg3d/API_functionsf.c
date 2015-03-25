@@ -40,50 +40,6 @@
 #include "mmg3d.h"
 
 /**
- * \def FORTRAN_NAME(nu,nl,pl,pc)
- * \brief Adds function definitions.
- * \param nu function name in upper case.
- * \param nl function name in lower case.
- * \param pl type of arguments.
- * \param pc name of arguments.
- * \note Macro coming from Scotch library.
- *
- * Adds function definitions with upcase, underscore and double
- * underscore to match any fortran compiler.
- *
- */
-#define FORTRAN_NAME(nu,nl,pl,pc)               \
-  void nu pl;                                   \
-  void nl pl                                    \
-  { nu pc; }                                    \
-  void nl##_ pl                                 \
-  { nu pc; }                                    \
-  void nl##__ pl                                \
-  { nu pc; }                                    \
-  void nu pl
-
-/**
- * See \ref MMG5_Init_mesh function in \ref mmg3d/libmmg3d.h file.
- */
-FORTRAN_NAME(MMG5_INIT_MESH, mmg5_init_mesh,(MMG5_pMesh *mesh, MMG5_pSol *sol
-#ifdef SINGUL
-                                             , MMG5_pSingul *sing
-#endif
-               ),(mesh,sol
-#ifdef SINGUL
-                  ,sing
-#endif
-                 )) {
-#ifdef SINGUL
-  MMG5_Init_mesh(mesh,sol,sing);
-#else
-  MMG5_Init_mesh(mesh,sol);
-#endif
-
-  return;
-}
-
-/**
  * See \ref MMG5_Init_parameters function in \ref mmg3d/libmmg3d.h file.
  */
 FORTRAN_NAME(MMG5_INIT_PARAMETERS,mmg5_init_parameters,(MMG5_pMesh *mesh),(mesh)) {
@@ -91,94 +47,6 @@ FORTRAN_NAME(MMG5_INIT_PARAMETERS,mmg5_init_parameters,(MMG5_pMesh *mesh),(mesh)
   return;
 }
 
-/**
- * See \ref MMG5_Init_fileNames function in \ref mmg3d/libmmg3d.h file.
- */
-FORTRAN_NAME(INIT_FILENAMES,init_filenames,(MMG5_pMesh *mesh,MMG5_pSol *sol
-#ifdef SINGUL
-                                            ,MMG5_pSingul *sing
-#endif
-               ),(mesh,sol
-#ifdef SINGUL
-                  ,sing
-#endif
-                 )) {
-#ifdef SINGUL
-  MMG5_Init_fileNames(*mesh,*sol,*sing);
-#else
-  MMG5_Init_fileNames(*mesh,*sol);
-#endif
-  return;
-}
-
-/**
- * See \ref MMG5_Set_inputMeshName function in \ref mmg3d/libmmg3d.h file.
- */
-FORTRAN_NAME(MMG5_SET_INPUTMESHNAME, mmg5_set_inputmeshname,
-             (MMG5_pMesh *mesh, char* meshin, int *strlen, int* retval),
-             (mesh,meshin,strlen,retval)) {
-  char *tmp = NULL;
-
-  tmp = (char*)malloc((*strlen+1)*sizeof(char));
-  strncpy(tmp,meshin,*strlen);
-  tmp[*strlen] = '\0';
-  *retval = MMG5_Set_inputMeshName(*mesh,tmp);
-  _MMG5_SAFE_FREE(tmp);
-
-  return;
-}
-
-/**
- * See \ref MMG5_Set_inputSolName function in \ref mmg3d/libmmg3d.h file.
- */
-FORTRAN_NAME(MMG5_SET_INPUTSOLNAME, mmg5_set_inputsolname,
-             (MMG5_pMesh *mesh,MMG5_pSol *sol, char* solin, int* strlen, int* retval),
-             (mesh,sol,solin,strlen,retval)) {
-
-  char *tmp = NULL;
-
-  tmp = (char*)malloc((*strlen+1)*sizeof(char));
-  strncpy(tmp,solin,*strlen);
-  tmp[*strlen] = '\0';
-  *retval = MMG5_Set_inputSolName(*mesh,*sol,tmp);
-  _MMG5_SAFE_FREE(tmp);
-
-  return;
-}
-
-/**
- * See \ref MMG5_Set_outputMeshName function in \ref mmg3d/libmmg3d.h file.
- */
-FORTRAN_NAME(MMG5_SET_OUTPUTMESHNAME,mmg5_set_outputmeshname,
-             (MMG5_pMesh *mesh, char* meshout, int* strlen,int* retval),
-             (mesh,meshout,strlen,retval)){
-  char *tmp = NULL;
-
-  tmp = (char*)malloc((*strlen+1)*sizeof(char));
-  strncpy(tmp,meshout,*strlen);
-  tmp[*strlen] = '\0';
-  *retval = MMG5_Set_outputMeshName(*mesh, tmp);
-  _MMG5_SAFE_FREE(tmp);
-
-  return;
-}
-
-/**
- * See \ref MMG5_Set_outputSolName function in \ref mmg3d/libmmg3d.h file.
- */
-FORTRAN_NAME(MMG5_SET_OUTPUTSOLNAME,mmg5_set_outputsolname,
-             (MMG5_pMesh *mesh,MMG5_pSol *sol, char* solout,int* strlen, int* retval),
-             (mesh,sol,solout,strlen,retval)){
-  char *tmp = NULL;
-
-  tmp = (char*)malloc((*strlen+1)*sizeof(char));
-  strncpy(tmp,solout,*strlen);
-  tmp[*strlen] = '\0';
-  *retval = MMG5_Set_outputSolName(*mesh,*sol,tmp);
-  _MMG5_SAFE_FREE(tmp);
-
-  return;
-}
 
 #ifdef SINGUL
 /**
@@ -533,26 +401,6 @@ FORTRAN_NAME(MMG5_SET_LOCALPARAMETER,mmg5_set_localparameter,
   return;
 }
 
-
-/**
- * See \ref MMG5_Free_names function in \ref mmg3d/libmmg3d.h file.
- */
-FORTRAN_NAME(MMG5_FREE_NAMES,mmg5_free_names,(MMG5_pMesh *mesh,MMG5_pSol *met
-#ifdef SINGUL
-                                              ,MMG5_pSingul *singul
-#endif
-               ),(mesh,met
-#ifdef SINGUL
-                  ,singul
-#endif
-                 )){
-#ifdef SINGUL
-  MMG5_Free_names(*mesh,*met,*singul);
-#else
-  MMG5_Free_names(*mesh,*met);
-#endif
-  return;
-}
 
 /**
  * See \ref MMG5_Free_structures function in \ref mmg3d/libmmg3d.h file.

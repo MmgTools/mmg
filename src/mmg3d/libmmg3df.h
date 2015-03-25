@@ -48,8 +48,8 @@
 
 ! #ifndef _MMG3DLIB_H
 
-! #include "chrono.h"
 ! #include "mmg.h"
+
 ! /**
 !  * \def MMG5_SUCCESS
 !  *
@@ -152,29 +152,8 @@
 
 
 ! /*----------------------------- functions header -----------------------------*/
-! /** Initialization functions */
+! /* Initialization functions */
 ! /* init structures */
-
-! /**
-!  * \param mesh pointer toward a pointer toward the mesh structure.
-!  * \param sol pointer toward a pointer toward the sol structure.
-!  *
-!  * Allocate the mesh and solution structures and initialize it to
-!  * their default values.
-!  *
-!  */
-
-! void  MMG5_Init_mesh(MMG5_pMesh *mesh, MMG5_pSol *sol);
-! /**
-!  * \param mesh pointer toward the mesh structure.
-!  * \param sol pointer toward the sol structure.
-!  * singularities mode).
-!  *
-!  * Initialize file names to their default values.
-!  *
-!  */
-
-! void  MMG5_Init_fileNames(MMG5_pMesh mesh, MMG5_pSol sol);
 ! /**
 !  * \param mesh pointer toward the mesh structure.
 !  *
@@ -182,30 +161,9 @@
 !  *
 !  */
 
-! void  MMG5_Init_parameters(MMG5_pMesh mesh);
+! void  MMG5_MMG3D_Init_parameters(MMG5_pMesh mesh);
 
 ! /* init file names */
-! /**
-!  * \param mesh pointer toward the mesh structure.
-!  * \param meshin input mesh name.
-!  * \return 1.
-!  *
-!  * Set the name of input mesh.
-!  *
-!  */
-
-! int  MMG5_Set_inputMeshName(MMG5_pMesh mesh, char* meshin);
-! /**
-!  * \param mesh pointer toward the mesh structure.
-!  * \param sol pointer toward the sol structure.
-!  * \param solin name of the input solution file.
-!  * \return 1.
-!  *
-!  * Set the name of input solution file.
-!  *
-!  */
-
-! int  MMG5_Set_inputSolName(MMG5_pMesh mesh,MMG5_pSol sol, char* solin);
 ! /**
 !  * \param mesh pointer toward the mesh structure.
 !  * \param meshout name of the output mesh file.
@@ -215,18 +173,7 @@
 !  *
 !  */
 
-! int  MMG5_Set_outputMeshName(MMG5_pMesh mesh, char* meshout);
-! /**
-!  * \param mesh pointer toward the mesh structure.
-!  * \param sol pointer toward the sol structure.
-!  * \param solout name of the output solution file.
-!  * \return 0 if failed, 1 otherwise.
-!  *
-!  *  Set the name of output solution file.
-!  *
-!  */
-
-! int  MMG5_Set_outputSolName(MMG5_pMesh mesh,MMG5_pSol sol, char* solout);
+! int  MMG5_MMG3D_Set_outputMeshName(MMG5_pMesh mesh, char* meshout);
 
 ! /* init structure sizes */
 ! /**
@@ -560,7 +507,7 @@
 
 ! int  MMG5_Get_scalarSol(MMG5_pSol met, double* s);
 
-! /** input/output functions */
+! /* input/output functions */
 ! /**
 !  * \param mesh pointer toward the mesh structure.
 !  * \return 0 if failed, 1 otherwise.
@@ -600,7 +547,7 @@
 
 ! int  MMG5_saveMet(MMG5_pMesh mesh, MMG5_pSol met);
 
-! /** deallocations */
+! /* deallocations */
 ! /**
 !  * \param mesh pointer toward the mesh structure.
 !  * \param met pointer toward the sol structure.
@@ -620,17 +567,8 @@
 !  */
 
 ! void MMG5_Free_structures(MMG5_pMesh mesh, MMG5_pSol met);
-! /**
-!  * \param mesh pointer toward the mesh structure.
-!  * \param met pointer toward the sol structure.
-!  *
-!  * File name deallocations before return.
-!  *
-!  */
 
-! void MMG5_Free_names(MMG5_pMesh mesh, MMG5_pSol met);
-
-! /** library */
+! /* library */
 ! /**
 !  * \param mesh pointer toward the mesh structure.
 !  * \param sol pointer toward the sol structure.
@@ -644,7 +582,7 @@
 
 ! int  MMG5_mmg3dlib(MMG5_pMesh mesh, MMG5_pSol sol);
 
-! /** for PAMPA library */
+! /* for PAMPA library */
 ! /** Options management */
 ! /**
 !  * \param argc number of command line arguments.

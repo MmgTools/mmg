@@ -24,9 +24,6 @@
 #ifndef _MMG3D_H
 #define _MMG3D_H
 
-/* Warning: never ever use assert() with a function,
-   the option -DNDEBUG suppress all assert()*/
-
 #include "libmmg3d.h"
 
 #define MG_SMSGN(a,b)  (((double)(a)*(double)(b) > (0.0)) ? (1) : (0))

@@ -26,8 +26,8 @@
 
 #include <complex.h>
 
-#include "memory.h"
-#include "mmg.h"
+//#include "memory.h"
+#include "libmmgs.h"
 
 /* numerical accuracy */
 #define ATHIRD    0.333333333333333
