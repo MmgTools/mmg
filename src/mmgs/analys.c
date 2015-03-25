@@ -45,8 +45,7 @@ static int setadj(MMG5_pMesh mesh){
   if ( abs(mesh->info.imprim) > 5  || mesh->info.ddebug )
     fprintf(stdout,"  ** SETTING TOPOLOGY\n");
 
-  pile = (int*)malloc((mesh->nt+1)*sizeof(int));
-  assert(pile);
+  _MMG5_SAFE_MALLOC(pile,mesh->nt+1,int);
   pile[1] = 1;
   ipil    = 1;
   nre = nr = nf = nt = ncc = ned = 0;

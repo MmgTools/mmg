@@ -59,8 +59,8 @@ int defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
     met->np    = mesh->np;
     met->npmax = mesh->npmax;
     met->size  = 1;
-    met->m = (double*)malloc((mesh->npmax+1)*sizeof(double));
-    assert(met->m);
+    _MMG5_SAFE_MALLOC(met->m,mesh->npmax+1,double);
+
     /* init constant size */
     for (k=1; k<=mesh->np; k++)
       met->m[k] = mesh->info.hmax;

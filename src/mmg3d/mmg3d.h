@@ -84,16 +84,6 @@
   }while(0)
 
 
-/** Safe allocation with malloc */
-#define _MMG5_SAFE_MALLOC(ptr,size,type) do     \
-  {                                             \
-    ptr = (type *)malloc((size)*sizeof(type));  \
-    if ( !ptr ) {                               \
-      perror("  ## Memory problem: malloc");    \
-      exit(EXIT_FAILURE);                       \
-    }                                           \
-  }while(0)
-
 /** Safe reallocation */
 #define _MMG5_SAFE_REALLOC(ptr,size,type,message) do        \
   {                                                         \
