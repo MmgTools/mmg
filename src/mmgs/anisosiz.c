@@ -65,7 +65,7 @@ static int defmetsin(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
     p1  = &mesh->point[pt->v[i1]];
 
     /* Computation of the two control points associated to edge p0p1: p0 is singular */
-    nortri(mesh,pt,n);
+    _MMG5_nortri(mesh,pt,n);
     if ( MG_EDG(pt->tag[i2]) )
       bezierEdge(mesh,idp,pt->v[i1],b0,b1,1,n);
     else
@@ -1101,7 +1101,7 @@ static int grad2met(MMG5_pMesh mesh, MMG5_pSol met, int iel, int i){
   mm1 = &met->m[6*(np1)+1];
   mm2 = &met->m[6*(np2)+1];
 
-  if( !nortri(mesh,pt,nt) )
+  if( !_MMG5_nortri(mesh,pt,nt) )
     return(-1);
 
   /* Recover normal and metric associated to p1 */

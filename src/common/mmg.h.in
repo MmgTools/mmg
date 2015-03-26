@@ -298,6 +298,7 @@ int  _MMG5_hashEdge(MMG5_pMesh mesh,_MMG5_Hash *hash,int a,int b,int k);
 int  _MMG5_hashGet(_MMG5_Hash *hash,int a,int b);
 int  _MMG5_hashNew(MMG5_pMesh mesh, _MMG5_Hash *hash,int hsiz,int hmax);
 int  _MMG5_mmgHashTria(MMG5_pMesh mesh, int *adja, int chkISO);
+int  _MMG5_nortri(MMG5_pMesh mesh,MMG5_pTria pt,double *n);
 int  _MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met);
 int  _MMG5_unscaleMesh(MMG5_pMesh mesh,MMG5_pSol met);
 

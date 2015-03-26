@@ -62,7 +62,6 @@ int  saveMet(MMG5_pMesh ,MMG5_pSol );
 int  zaldy(MMG5_pMesh mesh);
 int  assignEdge(MMG5_pMesh mesh);
 int  analys(MMG5_pMesh mesh);
-int  nortri(MMG5_pMesh ,MMG5_pTria ,double *n);
 int  norpts(MMG5_pPoint ,MMG5_pPoint ,MMG5_pPoint ,double *);
 void outqua(MMG5_pMesh ,MMG5_pSol );
 int  _MMG5_hashTria(MMG5_pMesh );

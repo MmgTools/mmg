@@ -153,7 +153,7 @@ int movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
         if ( !intregmet(mesh,met,iel,i2,0.5,m) )  return(0);
       }
       else {
-        if ( !nortri(mesh,pt,no) )  return(0);
+        if ( !_MMG5_nortri(mesh,pt,no) )  return(0);
         if ( !intridmet(mesh,met,iel,i2,0.5,no,mo) )  return(0);
 
         p1 = &mesh->point[pt->v[i0]];

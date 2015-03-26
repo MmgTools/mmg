@@ -273,7 +273,6 @@ int  _MMG5_split4bar(MMG5_pMesh mesh,MMG5_pSol met,int k);
 int  _MMG5_simbulgept(MMG5_pMesh mesh, int *list, int ilist, double o[3]);
 int  _MMG5_dichoto1b(MMG5_pMesh mesh,int *list,int ret,double o[3],double ro[3]);
 void _MMG5_nsort(int ,double *,char *);
-int  _MMG5_nortri(MMG5_pMesh mesh,MMG5_pTria pt,double *n);
 double _MMG5_orcal(MMG5_pMesh mesh,int iel);
 int    _MMG5_movintpt(MMG5_pMesh mesh, int *list, int ilist, int improve);
 int    _MMG5_movbdyregpt(MMG5_pMesh mesh, int *listv, int ilistv, int *lists, int ilists);

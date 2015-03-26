@@ -373,7 +373,7 @@ int intregmet(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,double s,double mr[6]) 
   /* Number of steps for parallel transport */
   nstep = 4;
   pt  = &mesh->tria[k];
-  nortri(mesh,pt,nt);
+  _MMG5_nortri(mesh,pt,nt);
   i1  = _MMG5_inxt2[i];
   i2  = _MMG5_iprv2[i];
   ip1 = pt->v[i1];

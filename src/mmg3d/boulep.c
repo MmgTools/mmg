@@ -40,9 +40,9 @@ extern MMG5_Info  info;
 /** return average normal of triangles sharing P without crossing ridge */
 int _MMG5_boulen(MMG5_pMesh mesh,int start,int ip,double *nn) {
   MMG5_pTria    pt;
-  double   n[3],dd;
-  int     *adja,k;
-  char     i,i1,i2;
+  double        n[3],dd;
+  int           *adja,k;
+  char          i,i1,i2;
 
   pt = &mesh->tria[start];
   if ( !MG_EOK(pt) )  return(0);

@@ -171,7 +171,7 @@ int _MMG5_bezierCP(MMG5_pMesh mesh,MMG5_Tria *pt,_MMG5_pBezier pb,char ori) {
     pb->p[i] = p[i];
 
     if ( MS_SIN(p[i]->tag) ) {
-      nortri(mesh,pt,pb->n[i]);
+      _MMG5_nortri(mesh,pt,pb->n[i]);
       if ( !ori ) {
         pb->n[i][0] *= -1.0;
         pb->n[i][1] *= -1.0;
@@ -179,7 +179,7 @@ int _MMG5_bezierCP(MMG5_pMesh mesh,MMG5_Tria *pt,_MMG5_pBezier pb,char ori) {
       }
     }
     else if ( MG_EDG(p[i]->tag) ) {
-      nortri(mesh,pt,nt);
+      _MMG5_nortri(mesh,pt,nt);
       if ( !ori ) {
         pb->n[i][0] *= -1.0;
         pb->n[i][1] *= -1.0;

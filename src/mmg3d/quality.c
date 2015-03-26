@@ -188,37 +188,6 @@ inline double _MMG5_caltet_ani(MMG5_pMesh mesh,MMG5_pSol met,int ia,int ib,int i
   return(0.0);
 }
 
-
-/** compute face normal */
-inline int _MMG5_nortri(MMG5_pMesh mesh,MMG5_pTria pt,double *n) {
-  double   *a,*b,*c,dd,abx,aby,abz,acx,acy,acz,det;
-
-  a = mesh->point[pt->v[0]].c;
-  b = mesh->point[pt->v[1]].c;
-  c = mesh->point[pt->v[2]].c;
-
-  /* area */
-  abx = b[0] - a[0];
-  aby = b[1] - a[1];
-  abz = b[2] - a[2];
-
-  acx = c[0] - a[0];
-  acy = c[1] - a[1];
-  acz = c[2] - a[2];
-
-  n[0] = aby*acz - abz*acy;
-  n[1] = abz*acx - abx*acz;
-  n[2] = abx*acy - aby*acx;
-  det  = n[0]*n[0] + n[1]*n[1] + n[2]*n[2];
-  if ( det < _MMG5_EPSD2 )  return(0);
-
-  dd = 1.0 / sqrt(det);
-  n[0] *= dd;
-  n[1] *= dd;
-  n[2] *= dd;
-  return(1);
-}
-
 /* identify type of element :
    ityp= 0: 4 faces bonnes          (elt ok)
    1: 4 faces bonnes, vol nul (sliver) ou "quasi sliver" ie 4 faces ok

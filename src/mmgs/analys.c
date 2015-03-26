@@ -401,7 +401,7 @@ static int setdhd(MMG5_pMesh mesh) {
     pt = &mesh->tria[k];
     if ( !MG_EOK(pt) )  continue;
 
-    nortri(mesh,pt,n1);
+    _MMG5_nortri(mesh,pt,n1);
     adja = &mesh->adja[3*(k-1)+1];
     for (i=0; i<3; i++) {
       if ( pt->tag[i] & MG_GEO )  continue;
@@ -411,7 +411,7 @@ static int setdhd(MMG5_pMesh mesh) {
       /* check angle w. neighbor */
       if ( k < kk ) {
         pt1 = &mesh->tria[kk];
-        nortri(mesh,pt1,n2);
+        _MMG5_nortri(mesh,pt1,n2);
         dhd = n1[0]*n2[0] + n1[1]*n2[1] + n1[2]*n2[2];
         if ( dhd <= mesh->info.dhd ) {
           pt->tag[i]   |= MG_GEO;

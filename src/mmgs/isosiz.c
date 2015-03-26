@@ -78,10 +78,10 @@ int defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
     /* normal recovery */
     for (i=0; i<3; i++) {
       if ( MS_SIN(p[i]->tag) ) {
-        nortri(mesh,pt,n[i]);
+        _MMG5_nortri(mesh,pt,n[i]);
       }
       else if ( MG_EDG(p[i]->tag) ) {
-        nortri(mesh,pt,nt);
+        _MMG5_nortri(mesh,pt,nt);
         n1  = &mesh->xpoint[p[i]->ig].n1[0];
         n2  = &mesh->xpoint[p[i]->ig].n2[0];
         ps  = n1[0]*nt[0] + n1[1]*nt[1] + n1[2]*nt[2];

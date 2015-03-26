@@ -235,7 +235,7 @@ int boulen(MMG5_pMesh mesh,int start,int ip,double *nn) {
   i1 = _MMG5_inxt2[i];
   do {
     pt = &mesh->tria[k];
-    nortri(mesh,pt,n);
+    _MMG5_nortri(mesh,pt,n);
     nn[0] += n[0];  nn[1] += n[1];  nn[2] += n[2];
 
     if ( pt->tag[i1] & MG_GEO ) {
@@ -264,7 +264,7 @@ int boulen(MMG5_pMesh mesh,int start,int ip,double *nn) {
       i2 = _MMG5_inxt2[i1];
       pt = &mesh->tria[k];
 
-      nortri(mesh,pt,n);
+      _MMG5_nortri(mesh,pt,n);
       nn[0] += n[0];  nn[1] += n[1];  nn[2] += n[2];
     }
     while ( k && k != start );
@@ -490,7 +490,7 @@ int bouletrid(MMG5_pMesh mesh,int start,int ip,int *il1,int *l1,int *il2,int *l2
   assert( ppt->tag & MG_GEO );
 
   /* set pointers: first manifold is on side of triangle */
-  if ( !nortri(mesh,pt,nt) )  return(0);
+  if ( !_MMG5_nortri(mesh,pt,nt) )  return(0);
 
   n1 = &(mesh->xpoint[ppt->ig].n1[0]);
   n2 = &(mesh->xpoint[ppt->ig].n2[0]);

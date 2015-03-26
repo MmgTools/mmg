@@ -91,10 +91,10 @@ int chkcol(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int *list,char typchk) {
       }
 
       /* check normal flipping */
-      if ( !nortri(mesh,pt1,n1old) )  return(0);
+      if ( !_MMG5_nortri(mesh,pt1,n1old) )  return(0);
       memcpy(pt0,pt1,sizeof(MMG5_Tria));
       pt0->v[j] = ip2;
-      if ( !nortri(mesh,pt0,n1new) )  return(0);
+      if ( !_MMG5_nortri(mesh,pt0,n1new) )  return(0);
 
       ps = n1new[0]*n1old[0] + n1new[1]*n1old[1]  + n1new[2]*n1old[2];
       if ( ps < 0.0 )  return(0);
@@ -432,10 +432,10 @@ int litcol(MMG5_pMesh mesh,int k,char i,double kali) {
       pt1 = &mesh->tria[jel];
 
       /* check normal flipping */
-      if ( !nortri(mesh,pt1,n1old) )  return(0);
+      if ( !_MMG5_nortri(mesh,pt1,n1old) )  return(0);
       memcpy(pt0,pt1,sizeof(MMG5_Tria));
       pt0->v[j] = ip2;
-      if ( !nortri(mesh,pt0,n1new) )  return(0);
+      if ( !_MMG5_nortri(mesh,pt0,n1new) )  return(0);
       ps = n1new[0]*n1old[0] + n1new[1]*n1old[1]  + n1new[2]*n1old[2];
       if ( ps < 0.0 )  return(0);
 

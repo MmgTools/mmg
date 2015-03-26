@@ -322,7 +322,7 @@ int chknor(MMG5_pMesh mesh) {
         pt = &mesh->tria[k];
         if ( !MG_EOK(pt) ) continue;
 
-        nortri(mesh,pt,nt);
+        _MMG5_nortri(mesh,pt,nt);
         for (i=0; i<3; i++) {
             p0 = &mesh->point[pt->v[i]];
             if ( MS_SIN(p0->tag) ) continue;
