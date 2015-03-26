@@ -198,9 +198,18 @@ int _MMG5_bezierCP(MMG5_pMesh mesh,MMG5_Tria *pt,_MMG5_pBezier pb,char ori) {
   return(1);
 }
 
-
-/* return point o at (u,v) in Bezier patch and normal */
-int bezierInt(_MMG5_pBezier pb,double uv[2],double o[3],double no[3],double to[3]) {
+/**
+ * \param pb pointer toward the Bezier structure.
+ * \param uv coordinates of the point in the parametric space.
+ * \param o computed coordinates of the point in the real space.
+ * \param no computed normal.
+ * \param to computed tangent.
+ * \return 1.
+ *
+ * Compute \a o, \a no and \a to at \f$(u,v)\f$ in Bezier patch.
+ *
+ */
+int _MMG5_bezierInt(_MMG5_pBezier pb,double uv[2],double o[3],double no[3],double to[3]) {
   double    dd,u,v,w,ps,ux,uy,uz;
   char      i;
 
@@ -217,8 +226,8 @@ int bezierInt(_MMG5_pBezier pb,double uv[2],double o[3],double no[3],double to[3
       + 6.0 * pb->b[9][i]*u*v*w;
 
     /* quadratic interpolation of normals */
-    no[i] = pb->n[0][i]*w*w + pb->n[1][i]*u*u + pb->n[2][i]*v*v \
-      + 2.0*(pb->n[3][i]*u*v + pb->n[4][i]*v*w + pb->n[5][i]*u*w);
+    no[i] =        pb->n[0][i]*w*w + pb->n[1][i]*u*u + pb->n[2][i]*v*v \
+      + 2.0 * (pb->n[3][i]*u*v + pb->n[4][i]*v*w + pb->n[5][i]*u*w);
 
     /* linear interpolation, not used here
        no[i] = pb->n[0][i]*w + pb->n[1][i]*u + pb->n[2][i]*v; */

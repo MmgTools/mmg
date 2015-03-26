@@ -166,8 +166,6 @@
 #define MG_PLUS    2
 #define MG_MINUS   3
 
-#define MG_SIN(tag) ((tag & MG_CRN) || (tag & MG_REQ)) /**< Corner or Required */
-
 extern unsigned char _MMG5_inxt3[7];   /*!< next vertex of tetra: {1,2,3,0,1,2,3} */
 extern unsigned char _MMG5_iprv3[7];   /*!< previous vertex of tetra: {3,0,1,2,3,0,1} */
 extern unsigned char _MMG5_idir[4][3]; /*!< idir[i] : vertices of face opposite to vertex i */

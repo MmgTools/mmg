@@ -261,7 +261,7 @@ int movintpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
     uv[0] = lambda[2];
     uv[1] = lambda[0];
   }
-  ier = bezierInt(&b,uv,o,no,to);
+  ier = _MMG5_bezierInt(&b,uv,o,no,to);
   assert(ier);
 
   /* First test : check whether variance has been decreased */
@@ -448,7 +448,7 @@ int movridpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
         uv[1] = 1.0 - step;
       }
     }
-    ier = bezierInt(&b,uv,o,nn1,to);
+    ier = _MMG5_bezierInt(&b,uv,o,nn1,to);
     assert(ier);
   }
   /* move towards p1 */
@@ -490,7 +490,7 @@ int movridpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
         uv[1] = 1.0 - step;
       }
     }
-    ier = bezierInt(&b,uv,o,nn1,to);
+    ier = _MMG5_bezierInt(&b,uv,o,nn1,to);
     assert(ier);
   }
 

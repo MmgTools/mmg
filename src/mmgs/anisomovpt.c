@@ -315,7 +315,7 @@ int movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
     uv[1] = lambda[0];
   }
 
-  ier = bezierInt(&pb,uv,o,no,to);
+  ier = _MMG5_bezierInt(&pb,uv,o,no,to);
   assert(ier);
 
   /* Second test : check whether geometric approximation has not been too much degraded */
@@ -490,7 +490,7 @@ int movridpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
         uv[1] = 1.0-step;
       }
     }
-    ier = bezierInt(&b,uv,o,nn1,to);
+    ier = _MMG5_bezierInt(&b,uv,o,nn1,to);
     assert(ier);
   }
   /* move towards p1 */
@@ -532,7 +532,7 @@ int movridpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
         uv[1] = 1.0-step;
       }
     }
-    ier = bezierInt(&b,uv,o,nn1,to);
+    ier = _MMG5_bezierInt(&b,uv,o,nn1,to);
     assert(ier);
   }
 

@@ -310,7 +310,7 @@ static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
       if ( !MG_EDG(pt->tag[i]) && ip > 0 )  continue;
 
       /* new point along edge */
-      ier = bezierInt(&pb,uv[i],o,no,to);
+      ier = _MMG5_bezierInt(&pb,uv[i],o,no,to);
       if ( !ip ) {
         ip = newPt(mesh,o,MG_EDG(pt->tag[i]) ? to : no);
         assert(ip);
@@ -393,7 +393,7 @@ static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
           nc++;
           if ( pt->tag[i] & MG_GEO ) {
             /* new point along edge */
-            ier = bezierInt(&pb,uv[i],o,no,to);
+            ier = _MMG5_bezierInt(&pb,uv[i],o,no,to);
             assert(ier);
 
             ppt = &mesh->point[ip];
@@ -498,7 +498,7 @@ int chkspl(MMG5_pMesh mesh,MMG5_pSol met,int k,int i) {
   if (i == 1)         uv[0] = 0.0;
   else if ( i == 2 )  uv[1] = 0.0;
 
-  ier = bezierInt(&b,uv,o,no,to);
+  ier = _MMG5_bezierInt(&b,uv,o,no,to);
   assert(ier);
   ip = newPt(mesh,o,MG_EDG(pt->tag[i]) ? to : no);
   assert(ip);

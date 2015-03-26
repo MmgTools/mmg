@@ -106,7 +106,7 @@ int split1b(MMG5_pMesh mesh,int k,char i,int ip) {
     if ( j == 1 )       uv[0] = 0.0;
     else if ( j == 2 )  uv[1] = 0.0;
 
-    ier = bezierInt(&b,uv,o,no,to);
+    ier = _MMG5_bezierInt(&b,uv,o,no,to);
     assert(ier);
     go = &mesh->xpoint[ppt->ig];
     memcpy(go->n2,no,3*sizeof(double));
