@@ -767,7 +767,7 @@ static int regnor(MMG5_pMesh mesh) {
 int analys(MMG5_pMesh mesh) {
 
   /* create adjacency */
-  if ( !hashTria(mesh) ) {
+  if ( !_MMG5_hashTria(mesh) ) {
     fprintf(stdout,"  ## Hashing problem. Exit program.\n");
     return(0);
   }

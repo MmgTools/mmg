@@ -165,7 +165,6 @@
 /* Domain refs in iso mode */
 #define MG_PLUS    2
 #define MG_MINUS   3
-#define MG_ISO    10
 
 #define MG_SIN(tag) ((tag & MG_CRN) || (tag & MG_REQ)) /**< Corner or Required */
 

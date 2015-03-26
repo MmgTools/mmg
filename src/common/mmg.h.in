@@ -94,6 +94,8 @@
 #define _MMG5_KA 7 /*!< Key for hash tables. */
 #define _MMG5_KB 11  /*!< Key for hash tables. */
 
+/* Domain refs in iso mode */
+#define MG_ISO    10
 
 /* Macros for memory management */
 /** Check if used memory overflow maximal authorized memory.
@@ -294,6 +296,7 @@ int _MMG5_buildridmet(MMG5_pMesh mesh,MMG5_pSol met,int np0,
 int  _MMG5_hashEdge(MMG5_pMesh mesh,_MMG5_Hash *hash,int a,int b,int k);
 int  _MMG5_hashGet(_MMG5_Hash *hash,int a,int b);
 int  _MMG5_hashNew(MMG5_pMesh mesh, _MMG5_Hash *hash,int hsiz,int hmax);
+int  _MMG5_mmgHashTria(MMG5_pMesh mesh, int *adja, int chkISO);
 int  _MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met);
 int  _MMG5_unscaleMesh(MMG5_pMesh mesh,MMG5_pSol met);
 

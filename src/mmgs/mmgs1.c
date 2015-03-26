@@ -749,7 +749,7 @@ static int anatri(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
       return(0);
     }
 
-    if ( !hashTria(mesh) ) {
+    if ( !_MMG5_hashTria(mesh) ) {
       fprintf(stdout,"  ## Hashing problem. Exit program.\n");
       return(0);
     }

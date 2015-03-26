@@ -65,7 +65,7 @@ int  analys(MMG5_pMesh mesh);
 int  nortri(MMG5_pMesh ,MMG5_pTria ,double *n);
 int  norpts(MMG5_pPoint ,MMG5_pPoint ,MMG5_pPoint ,double *);
 void outqua(MMG5_pMesh ,MMG5_pSol );
-int  hashTria(MMG5_pMesh );
+int  _MMG5_hashTria(MMG5_pMesh );
 int  curvpo(MMG5_pMesh ,MMG5_pSol );
 int  mmgs1(MMG5_pMesh ,MMG5_pSol );
 int  boulet(MMG5_pMesh mesh,int start,int ip,int *list);
