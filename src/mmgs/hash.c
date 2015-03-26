@@ -86,12 +86,12 @@ int hashTria(MMG5_pMesh mesh) {
   /* adjust hash table params */
   hmax = 3.71*mesh->np;
   hash.siz  = mesh->np;
-  hash.max  = hmax;
+  hash.max  = hmax + 1;
   hash.nxt  = hash.siz;
   _MMG5_ADD_MEM(mesh,(hash.max+1)*sizeof(MMG5_hgeom),"hash table",return(0));
   _MMG5_SAFE_CALLOC(hash.geom,hash.max+1,MMG5_hgeom);
 
-  for (k=hash.siz; k<hash.max-1; k++)
+  for (k=hash.siz; k<hash.max; k++)
     hash.geom[k].nxt = k+1;
 
   /* hash triangles */

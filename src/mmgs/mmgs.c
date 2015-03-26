@@ -376,7 +376,7 @@ int main(int argc,char *argv[]) {
   memset(&met,0,sizeof(MMG5_Sol));
 
   MMG5_Init_parameters(&mesh);
-  
+
   met.size    = 1;
 
   /* command line */
