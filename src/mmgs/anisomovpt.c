@@ -230,8 +230,8 @@ int movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
       intpt[0] =  r[0][0]*ux + r[0][1]*uy + r[0][2]*uz;
       intpt[1] =  r[1][0]*ux + r[1][1]*uy + r[1][2]*uz;
 
-      gv[0] += density*ATHIRD*intpt[0];
-      gv[1] += density*ATHIRD*intpt[1];
+      gv[0] += density*_MMG5_ATHIRD*intpt[0];
+      gv[1] += density*_MMG5_ATHIRD*intpt[1];
 
       i0 = inxt[i0];
       i1 = inxt[i1];
@@ -392,7 +392,7 @@ int movridpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
     i2  = inxt[i1];
     pt  = &mesh->tria[iel];
 
-    if ( MS_EDG(pt->tag[i1]) ) {
+    if ( MG_EDG(pt->tag[i1]) ) {
       if ( !it1 ) {
         it1  = iel;
         ip1  = pt->v[i2]; // edge(i1) = (p0p2)
@@ -413,7 +413,7 @@ int movridpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
       }
     }
 
-    if ( MS_EDG(pt->tag[i2]) ) {
+    if ( MG_EDG(pt->tag[i2]) ) {
       if ( !it1 ) {
         it1  = iel;
         ip1  = pt->v[i1]; // edge(i2) = (p0p1)

@@ -66,7 +66,7 @@ static int defmetsin(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
 
     /* Computation of the two control points associated to edge p0p1: p0 is singular */
     nortri(mesh,pt,n);
-    if ( MS_EDG(pt->tag[i2]) )
+    if ( MG_EDG(pt->tag[i2]) )
       bezierEdge(mesh,idp,pt->v[i1],b0,b1,1,n);
     else
       bezierEdge(mesh,idp,pt->v[i1],b0,b1,0,n);
@@ -634,26 +634,26 @@ static int defmetref(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
     uz = p1->c[2] - p0->c[2];
 
     ps1 =  ux*t[0] + uy*t[1] + uz*t[2];
-    c[0] = ATHIRD*ps1*t[0];
-    c[1] = ATHIRD*ps1*t[1];
-    c[2] = ATHIRD*ps1*t[2];
+    c[0] = _MMG5_ATHIRD*ps1*t[0];
+    c[1] = _MMG5_ATHIRD*ps1*t[1];
+    c[2] = _MMG5_ATHIRD*ps1*t[2];
 
     b0[0] =  r[0][0]*c[0] + r[0][1]*c[1] + r[0][2]*c[2];
     b0[1] =  r[1][0]*c[0] + r[1][1]*c[1] + r[1][2]*c[2];
     b0[2] =  r[2][0]*c[0] + r[2][1]*c[1] + r[2][2]*c[2];
 
     if ( (MG_CRN & p1->tag) || (MG_NOM & p1->tag) ) {
-      c[0] = p1->c[0] - ATHIRD*ux;
-      c[1] = p1->c[1] - ATHIRD*uy;
-      c[2] = p1->c[2] - ATHIRD*uz;
+      c[0] = p1->c[0] - _MMG5_ATHIRD*ux;
+      c[1] = p1->c[1] - _MMG5_ATHIRD*uy;
+      c[2] = p1->c[2] - _MMG5_ATHIRD*uz;
     }
     else {
       assert(MG_REF & p1->tag);
       t1 = &(p1->n[0]);
       ps1 =  -(ux*t1[0] + uy*t1[1] + uz*t1[2]);
-      c[0] = p1->c[0] + ATHIRD*ps1*t1[0];
-      c[1] = p1->c[1] + ATHIRD*ps1*t1[1];
-      c[2] = p1->c[2] + ATHIRD*ps1*t1[2];
+      c[0] = p1->c[0] + _MMG5_ATHIRD*ps1*t1[0];
+      c[1] = p1->c[1] + _MMG5_ATHIRD*ps1*t1[1];
+      c[2] = p1->c[2] + _MMG5_ATHIRD*ps1*t1[2];
     }
     c[0] -= p0->c[0];
     c[1] -= p0->c[1];

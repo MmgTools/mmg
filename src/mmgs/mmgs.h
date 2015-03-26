@@ -30,18 +30,16 @@
 #include "libmmgs.h"
 
 /* numerical accuracy */
-#define ATHIRD    0.333333333333333
 #define A64TH     0.015625
 #define A16TH     0.0625
 #define A32TH     0.03125
 #define ALPHAD    3.464101615137755   /* 6.0 / sqrt(3.0)  */
-#define ANGEDG    0.707106781186548   /*0.573576436351046 */
-#define SQR32     0.866025403784
+
 #define LOPTL     1.4
 #define LOPTS     0.71
 #define LLONG     2.0
 #define LSHRT     0.3
-#define ANGLIM   -0.999999
+
 #define LMAX      1024
 #define BADKAL    2.e-2
 #define NULKAL    1.e-4
@@ -50,18 +48,8 @@
 #define _MMG5_NTMAX    1000000
 #define _MMG5_XPMAX     500000
 
-#ifndef M_PI
-#define M_PI            3.14159265358979323846   /* pi   */
-#define M_PI_2          1.57079632679489661923   /* pi/2 */
-#endif
 
-
-#define MS_EDG(tag)      ((tag & MG_GEO) || (tag & MG_REF))
 #define MS_SIN(tag)      ((tag & MG_CRN) || (tag & MG_REQ) || (tag & MG_NOM))
-
-#define MS_SET(flag,bit) ((flag) |= (1 << (bit)))
-#define MS_CLR(flag,bit) ((flag) &= ~(1 << (bit)))
-#define MS_GET(flag,bit) ((flag) & (1 << (bit)))
 
 #define MS_Ver       1
 #define MS_Tri       2

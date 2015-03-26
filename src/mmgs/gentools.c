@@ -225,7 +225,7 @@ int setref(MMG5_pMesh mesh,int start,int ref,int putreq) {
     adja = &mesh->adja[3*(iel-1)+1];
 
     for(j=0; j<3; j++) {
-      if( MS_EDG(pt->tag[j]) ) {
+      if( MG_EDG(pt->tag[j]) ) {
         if( putreq ) {
           pt->tag[j] |= MG_REQ;
           jel = adja[j] / 3;

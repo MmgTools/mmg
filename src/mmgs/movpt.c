@@ -356,7 +356,7 @@ int movridpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
     i2  = inxt[i1];
     pt  = &mesh->tria[iel];
 
-    if ( MS_EDG(pt->tag[i1]) ) {
+    if ( MG_EDG(pt->tag[i1]) ) {
       if ( !it1 ) {
         it1  = iel;
         ip1  = pt->v[i2]; // edge(i1) = (p0p2)
@@ -375,7 +375,7 @@ int movridpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
       }
     }
 
-    if ( MS_EDG(pt->tag[i2]) ) {
+    if ( MG_EDG(pt->tag[i2]) ) {
       if ( !it1 ) {
         it1  = iel;
         ip1  = pt->v[i1]; // edge(i2) = (p0p1)

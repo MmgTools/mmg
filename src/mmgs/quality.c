@@ -257,17 +257,17 @@ inline double caleltsig_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel) {
   if ( dd < _MMG5_EPSD )  return(0.0);
   dd = 1.0 / sqrt(dd);
 
-  if ( !MS_EDG(pa->tag) ) {
+  if ( !MG_EDG(pa->tag) ) {
     memcpy(n,&pa->n[0],3*sizeof(double));
     ps1 = n[0]*pv[0]+n[1]*pv[1]+n[2]*pv[2];
     ps1 *= dd;
   }
-  else if ( !MS_EDG(pb->tag) ) {
+  else if ( !MG_EDG(pb->tag) ) {
     memcpy(n,&pb->n[0],3*sizeof(double));
     ps1 = n[0]*pv[0]+n[1]*pv[1]+n[2]*pv[2];
     ps1 *= dd;
   }
-  else if ( !MS_EDG(pc->tag) ) {
+  else if ( !MG_EDG(pc->tag) ) {
     memcpy(n,&pc->n[0],3*sizeof(double));
     ps1 = n[0]*pv[0]+n[1]*pv[1]+n[2]*pv[2];
     ps1 *= dd;
@@ -345,17 +345,17 @@ inline double caleltsig_iso(MMG5_pMesh mesh,MMG5_pSol met,int iel) {
   if ( sqcal < _MMG5_EPSD )  return(0.0);
   invsqcal = 1.0 / sqcal;
 
-  if ( !MS_EDG(pa->tag) ) {
+  if ( !MG_EDG(pa->tag) ) {
     memcpy(n,&pa->n[0],3*sizeof(double));
     ps1 = n[0]*pv[0]+n[1]*pv[1]+n[2]*pv[2];
     ps1 *= invsqcal;
   }
-  else if ( !MS_EDG(pb->tag) ) {
+  else if ( !MG_EDG(pb->tag) ) {
     memcpy(n,&pb->n[0],3*sizeof(double));
     ps1 = n[0]*pv[0]+n[1]*pv[1]+n[2]*pv[2];
     ps1 *= invsqcal;
   }
-  else if ( !MS_EDG(pc->tag) ) {
+  else if ( !MG_EDG(pc->tag) ) {
     memcpy(n,&pc->n[0],3*sizeof(double));
     ps1 = n[0]*pv[0]+n[1]*pv[1]+n[2]*pv[2];
     ps1 *= invsqcal;

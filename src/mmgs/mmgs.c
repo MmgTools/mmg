@@ -380,7 +380,7 @@ int main(int argc,char *argv[]) {
   mesh.info.imprim = -99;
   mesh.info.ddebug = 0;
   mesh.info.mem    = -1;
-  mesh.info.dhd    = ANGEDG;
+  mesh.info.dhd    = _MMG5_ANGEDG;
   mesh.info.hmin   = 0.0;
   mesh.info.hmax   = FLT_MAX;
   mesh.info.hausd  = 0.01;

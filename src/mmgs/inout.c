@@ -687,7 +687,7 @@ int saveMesh(MMG5_pMesh mesh) {
       ppt->tmp = np;
       if ( ppt->tag & MG_CRN )  nc++;
       if ( ppt->tag & MG_REQ )  nre++;
-      if ( MS_EDG(ppt->tag) )   ng++;
+      if ( MG_EDG(ppt->tag) )   ng++;
     }
   }
 
@@ -724,7 +724,7 @@ int saveMesh(MMG5_pMesh mesh) {
     if ( MG_EOK(pt) ) {
       nt++;
       for (i=0; i<3; i++)
-        if ( MS_EDG(pt->tag[i]) )  na++;
+        if ( MG_EDG(pt->tag[i]) )  na++;
     }
   }
 
@@ -759,7 +759,7 @@ int saveMesh(MMG5_pMesh mesh) {
         fwrite(&pt->ref,sw,1,inm);
       }
       for (i=0; i<3; i++) {
-        if ( !MS_EDG(pt->tag[i]) )  continue;
+        if ( !MG_EDG(pt->tag[i]) )  continue;
 
         adja = &mesh->adja[3*(k-1)+1];
         jel  = adja[i] / 3;
@@ -995,7 +995,7 @@ int saveMesh(MMG5_pMesh mesh) {
     }
     for (k=1; k<=mesh->np; k++) {
       ppt = &mesh->point[k];
-      if ( MG_VOK(ppt) && MS_EDG(ppt->tag) ) {
+      if ( MG_VOK(ppt) && MG_EDG(ppt->tag) ) {
         if(!bin) {
           fprintf(inm,"%.15lg %.15lg %.15lg \n",ppt->n[0],ppt->n[1],ppt->n[2]);
         } else {
@@ -1019,7 +1019,7 @@ int saveMesh(MMG5_pMesh mesh) {
     ng = 0;
     for (k=1; k<=mesh->np; k++) {
       ppt = &mesh->point[k];
-      if ( MG_VOK(ppt) && MS_EDG(ppt->tag) ) {
+      if ( MG_VOK(ppt) && MG_EDG(ppt->tag) ) {
         if(!bin) {
           fprintf(inm,"%d %d\n",ppt->tmp,++ng);
         } else {

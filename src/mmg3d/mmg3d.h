@@ -149,10 +149,7 @@
 #define _MMG5_LSHRT     0.3  // 0.707106781186
 #define _MMG5_LOPTL     1.3
 #define _MMG5_LOPTS     0.6
-#define _MMG5_ANGEDG    0.707106781186548   /*0.573576436351046 */
-#define _MMG5_ANGLIM   -0.999999
-#define _MMG5_SQR32     0.866025403784
-#define _MMG5_ATHIRD    0.333333333333
+
 #define _MMG5_LMAX      10240
 #define _MMG5_BADKAL    0.2
 #define _MMG5_NULKAL    1.e-30
@@ -162,26 +159,15 @@
 #define _MMG5_NTMAX  2000000 //400000
 #define _MMG5_NEMAX  6000000 //1200000
 
-#define _MMG5_MEMMAX  800 //160
 #define _MMG5_BOXSIZE 500
 
-#ifndef M_PI
-#define M_PI            3.14159265358979323846   /**< pi   */
-#define M_PI_2          1.57079632679489661923   /**< pi/2 */
-#endif
 
-
-
+/* Domain refs in iso mode */
 #define MG_PLUS    2
 #define MG_MINUS   3
 #define MG_ISO    10
 
-#define MG_EDG(tag)      ((tag & MG_GEO) || (tag & MG_REF)) /**< Edge or Ridge */
 #define MG_SIN(tag)      ((tag & MG_CRN) || (tag & MG_REQ)) /**< Corner or Required */
-
-#define MG_SET(flag,bit) ((flag) |= (1 << (bit)))  /**< bit number bit is set to 1 */
-#define MG_CLR(flag,bit) ((flag) &= ~(1 << (bit))) /**< bit number bit is set to 0 */
-#define MG_GET(flag,bit) ((flag) & (1 << (bit)))   /**< return bit number bit value */
 
 extern unsigned char _MMG5_inxt2[3];   /**< next vertex of triangle: {1,2,0} */
 extern unsigned char _MMG5_iprv2[3];   /**< previous vertex of triangle: {2,0,1} */

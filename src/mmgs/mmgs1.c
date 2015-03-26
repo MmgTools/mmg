@@ -57,7 +57,7 @@ int chkedg(MMG5_pMesh mesh,int iel) {
     if ( MS_SIN(p[i]->tag) ) {
       nortri(mesh,pt,n[i]);
     }
-    else if ( MS_EDG(p[i]->tag) ) {
+    else if ( MG_EDG(p[i]->tag) ) {
       nortri(mesh,pt,nt);
       n1  = &mesh->xpoint[p[i]->ig].n1[0];
       n2  = &mesh->xpoint[p[i]->ig].n2[0];
@@ -84,16 +84,16 @@ int chkedg(MMG5_pMesh mesh,int iel) {
     uz = p[i2]->c[2] - p[i1]->c[2];
     ll = ux*ux + uy*uy + uz*uz;
     if ( ll > mesh->info.hmax*mesh->info.hmax ) {
-      MS_SET(pt->flag,i);
+      MG_SET(pt->flag,i);
       continue;
     }
-    else if ( !MS_EDG(pt->tag[i]) && p[i1]->tag > MG_NOTAG && p[i2]->tag > MG_NOTAG ) {
-      MS_SET(pt->flag,i);
+    else if ( !MG_EDG(pt->tag[i]) && p[i1]->tag > MG_NOTAG && p[i2]->tag > MG_NOTAG ) {
+      MG_SET(pt->flag,i);
       continue;
     }
 
     /* Hausdorff w/r tangent direction */
-    if ( MS_EDG(pt->tag[i]) ) {
+    if ( MG_EDG(pt->tag[i]) ) {
       if ( MS_SIN(p[i1]->tag) ) {
         li = 1.0 / sqrt(ll);
         t1[0] = li*ux;
@@ -120,7 +120,7 @@ int chkedg(MMG5_pMesh mesh,int iel) {
       cosn *= (1.0-cosn);
       cosn *= (0.25*ll);
       if ( cosn > mesh->info.hausd*mesh->info.hausd ) {
-        MS_SET(pt->flag,i);
+        MG_SET(pt->flag,i);
         continue;
       }
 
@@ -130,7 +130,7 @@ int chkedg(MMG5_pMesh mesh,int iel) {
       cosn *= (1.0-cosn);
       cosn *= (0.25*ll);
       if ( cosn > mesh->info.hausd*mesh->info.hausd ) {
-        MS_SET(pt->flag,i);
+        MG_SET(pt->flag,i);
         continue;
       }
     }
@@ -156,7 +156,7 @@ int chkedg(MMG5_pMesh mesh,int iel) {
       cosn *= (1.0-cosn);
       cosn *= (0.25*ll);
       if ( cosn > mesh->info.hausd*mesh->info.hausd ) {
-        MS_SET(pt->flag,i);
+        MG_SET(pt->flag,i);
         continue;
       }
 
@@ -167,7 +167,7 @@ int chkedg(MMG5_pMesh mesh,int iel) {
       cosn *= (1.0-cosn);
       cosn *= (0.25*ll);
       if ( cosn > mesh->info.hausd*mesh->info.hausd ) {
-        MS_SET(pt->flag,i);
+        MG_SET(pt->flag,i);
         continue;
       }
     }
@@ -191,7 +191,7 @@ static int swpmsh(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
       if ( !MG_EOK(pt) || pt->ref < 0 )   continue;
 
       for (i=0; i<3; i++) {
-        if ( MS_SIN(pt->tag[i]) || MS_EDG(pt->tag[i]) )  continue;
+        if ( MS_SIN(pt->tag[i]) || MG_EDG(pt->tag[i]) )  continue;
         else if ( chkswp(mesh,met,k,i,typchk) ) {
           ns += swapar(mesh,k,i);
           break;
@@ -236,7 +236,7 @@ static int movtri(MMG5_pMesh mesh,MMG5_pSol met,int maxit) {
         ier = 0;
         ilist = boulet(mesh,k,i,list);
 
-        if ( MS_EDG(ppt->tag) ) {
+        if ( MG_EDG(ppt->tag) ) {
           ier = movridpt(mesh,met,list,ilist);
           if ( ier )  ns++;
         }
@@ -289,7 +289,7 @@ static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
         i1 = inxt[i];
         i2 = iprv[i];
         len = _MMG5_lenedg(mesh,met,pt->v[i1],pt->v[i2],0);
-        if ( len > LLONG )  MS_SET(pt->flag,i);
+        if ( len > LLONG )  MG_SET(pt->flag,i);
       }
       if ( !pt->flag )  continue;
     }
@@ -301,25 +301,25 @@ static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
 
     /* scan edges to split */
     for (i=0; i<3; i++) {
-      if ( !MS_GET(pt->flag,i) )  continue;
+      if ( !MG_GET(pt->flag,i) )  continue;
       i1  = inxt[i];
       i2  = iprv[i];
       ip1 = pt->v[i1];
       ip2 = pt->v[i2];
       ip = hashGet(&hash,ip1,ip2);
-      if ( !MS_EDG(pt->tag[i]) && ip > 0 )  continue;
+      if ( !MG_EDG(pt->tag[i]) && ip > 0 )  continue;
 
       /* new point along edge */
       ier = bezierInt(&pb,uv[i],o,no,to);
       if ( !ip ) {
-        ip = newPt(mesh,o,MS_EDG(pt->tag[i]) ? to : no);
+        ip = newPt(mesh,o,MG_EDG(pt->tag[i]) ? to : no);
         assert(ip);
         hashEdge(mesh,&hash,ip1,ip2,ip);
         p1  = &mesh->point[ip1];
         p2  = &mesh->point[ip2];
         ppt = &mesh->point[ip];
 
-        if ( MS_EDG(pt->tag[i]) ) {
+        if ( MG_EDG(pt->tag[i]) ) {
           ++mesh->xp;
           assert(mesh->xp < mesh->xpmax);
           ppt->tag = pt->tag[i];
@@ -386,10 +386,10 @@ static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
     for (i=0; i<3; i++) {
       i1 = inxt[i];
       i2 = inxt[i1];
-      if ( !MS_GET(pt->flag,i) && !MS_SIN(pt->tag[i]) ) {
+      if ( !MG_GET(pt->flag,i) && !MS_SIN(pt->tag[i]) ) {
         ip = hashGet(&hash,pt->v[i1],pt->v[i2]);
         if ( ip > 0 ) {
-          MS_SET(pt->flag,i);
+          MG_SET(pt->flag,i);
           nc++;
           if ( pt->tag[i] & MG_GEO ) {
             /* new point along edge */
@@ -435,7 +435,7 @@ static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
     for (i=0; i<3; i++) {
       i1 = inxt[i];
       i2 = inxt[i1];
-      if ( MS_GET(pt->flag,i) ) {
+      if ( MG_GET(pt->flag,i) ) {
         vx[i] = hashGet(&hash,pt->v[i1],pt->v[i2]);
         assert(vx[i]);
         j = i;
@@ -500,10 +500,10 @@ int chkspl(MMG5_pMesh mesh,MMG5_pSol met,int k,int i) {
 
   ier = bezierInt(&b,uv,o,no,to);
   assert(ier);
-  ip = newPt(mesh,o,MS_EDG(pt->tag[i]) ? to : no);
+  ip = newPt(mesh,o,MG_EDG(pt->tag[i]) ? to : no);
   assert(ip);
 
-  if ( MS_EDG(pt->tag[i]) ) {
+  if ( MG_EDG(pt->tag[i]) ) {
     ++mesh->xp;
     ppt = &mesh->point[ip];
     ppt->ig  = mesh->xp;

@@ -244,7 +244,7 @@ int chkmet(MMG5_pMesh mesh,MMG5_pSol met) {
         }
         else {
             m = &met->m[6*k+1];
-            if ( MS_EDG(p0->tag) ) {
+            if ( MG_EDG(p0->tag) ) {
                 go = &mesh->xpoint[p0->ig];
                 n = &go->n1[0];
             }
@@ -326,7 +326,7 @@ int chknor(MMG5_pMesh mesh) {
         for (i=0; i<3; i++) {
             p0 = &mesh->point[pt->v[i]];
             if ( MS_SIN(p0->tag) ) continue;
-            else if ( MS_EDG(p0->tag) ) {
+            else if ( MG_EDG(p0->tag) ) {
                 assert ( p0->ig );
                 go = &mesh->xpoint[p0->ig];
                 if ( p0->tag & MG_GEO ) {

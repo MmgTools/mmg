@@ -52,9 +52,21 @@
 #define _MMG5_MEMMAX  800
 
 /* numerical accuracy */
+#define _MMG5_ANGEDG    0.707106781186548   /*0.573576436351046 */
+#define _MMG5_ANGLIM   -0.999999
+#define _MMG5_ATHIRD    0.333333333333333
+
 #define _MMG5_EPSD      1.e-30
 #define _MMG5_EPSD2     1.0e-200
 #define _MMG5_EPS       1.e-06
+
+#define _MMG5_SQR32     0.866025403784439
+
+#ifndef M_PI
+#define M_PI            3.14159265358979323846   /**< pi   */
+#define M_PI_2          1.57079632679489661923   /**< pi/2 */
+#endif
+
 
 /* Macros */
 #define MG_MAX(a,b) (((a) > (b)) ? (a) : (b))
@@ -72,6 +84,12 @@
 
 #define MG_VOK(ppt)      (ppt && ((ppt)->tag < MG_NUL)) /**< Vertex OK */
 #define MG_EOK(pt)       (pt && ((pt)->v[0] > 0))       /**< Element OK */
+
+#define MG_EDG(tag)      ((tag & MG_GEO) || (tag & MG_REF)) /**< Edge or Ridge */
+
+#define MG_SET(flag,bit) ((flag) |= (1 << (bit)))  /**< bit number bit is set to 1 */
+#define MG_CLR(flag,bit) ((flag) &= ~(1 << (bit))) /**< bit number bit is set to 0 */
+#define MG_GET(flag,bit) ((flag) & (1 << (bit)))   /**< return bit number bit value */
 
 /* Macros for memory management */
 

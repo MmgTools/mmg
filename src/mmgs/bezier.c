@@ -59,7 +59,7 @@ int bezierCP(MMG5_pMesh mesh,int iel,_MMG5_pBezier pb) {
     if ( MS_SIN(p[i]->tag) ) {
       nortri(mesh,pt,pb->n[i]);
     }
-    else if ( MS_EDG(p[i]->tag) ) {
+    else if ( MG_EDG(p[i]->tag) ) {
       nortri(mesh,pt,nt);
       n1 = &mesh->xpoint[p[i]->ig].n1[0];
       n2 = &mesh->xpoint[p[i]->ig].n2[0];
@@ -90,7 +90,7 @@ int bezierCP(MMG5_pMesh mesh,int iel,_MMG5_pBezier pb) {
     n2 = pb->n[i2];
 
     /* check for boundary curve */
-    if ( MS_EDG(pt->tag[i]) ) {
+    if ( MG_EDG(pt->tag[i]) ) {
       if ( MS_SIN(p[i1]->tag) ) {
         dd = 1.0 / 3.0;
         pb->b[2*i+3][0] = p[i1]->c[0] + dd * ux;
@@ -159,9 +159,9 @@ int bezierCP(MMG5_pMesh mesh,int iel,_MMG5_pBezier pb) {
 
   /* Central Bezier coefficient */
   for (i=0; i<3; i++) {
-    pb->b[9][0] -= (0.5*ATHIRD*pb->b[i][0]);
-    pb->b[9][1] -= (0.5*ATHIRD*pb->b[i][1]);
-    pb->b[9][2] -= (0.5*ATHIRD*pb->b[i][2]);
+    pb->b[9][0] -= (0.5*_MMG5_ATHIRD*pb->b[i][0]);
+    pb->b[9][1] -= (0.5*_MMG5_ATHIRD*pb->b[i][1]);
+    pb->b[9][2] -= (0.5*_MMG5_ATHIRD*pb->b[i][2]);
   }
 
   for (i=0; i<3; i++) {
@@ -342,38 +342,38 @@ inline void bezierEdge(MMG5_pMesh mesh,int i0,int i1,double b0[3],double b1[3],c
 
   if ( isrid ) {
     if ( MS_SIN(p0->tag) ) {
-      b0[0] = p0->c[0] + ATHIRD*ux;
-      b0[1] = p0->c[1] + ATHIRD*uy;
-      b0[2] = p0->c[2] + ATHIRD*uz;
+      b0[0] = p0->c[0] + _MMG5_ATHIRD*ux;
+      b0[1] = p0->c[1] + _MMG5_ATHIRD*uy;
+      b0[2] = p0->c[2] + _MMG5_ATHIRD*uz;
     }
     else {
       t = &p0->n[0];
       ps1 = t[0]*ux + t[1]*uy + t[2]*uz;
-      b0[0] = p0->c[0] + ATHIRD*ps1*t[0];
-      b0[1] = p0->c[1] + ATHIRD*ps1*t[1];
-      b0[2] = p0->c[2] + ATHIRD*ps1*t[2];
+      b0[0] = p0->c[0] + _MMG5_ATHIRD*ps1*t[0];
+      b0[1] = p0->c[1] + _MMG5_ATHIRD*ps1*t[1];
+      b0[2] = p0->c[2] + _MMG5_ATHIRD*ps1*t[2];
     }
 
     if (MS_SIN(p1->tag) ) {
-      b1[0] = p1->c[0] - ATHIRD*ux;
-      b1[1] = p1->c[1] - ATHIRD*uy;
-      b1[2] = p1->c[2] - ATHIRD*uz;
+      b1[0] = p1->c[0] - _MMG5_ATHIRD*ux;
+      b1[1] = p1->c[1] - _MMG5_ATHIRD*uy;
+      b1[2] = p1->c[2] - _MMG5_ATHIRD*uz;
     }
     else {
       t = &p1->n[0];
       ps1 = -(t[0]*ux + t[1]*uy + t[2]*uz);
-      b1[0] = p1->c[0] + ATHIRD*ps1*t[0];
-      b1[1] = p1->c[1] + ATHIRD*ps1*t[1];
-      b1[2] = p1->c[2] + ATHIRD*ps1*t[2];
+      b1[0] = p1->c[0] + _MMG5_ATHIRD*ps1*t[0];
+      b1[1] = p1->c[1] + _MMG5_ATHIRD*ps1*t[1];
+      b1[2] = p1->c[2] + _MMG5_ATHIRD*ps1*t[2];
     }
   }
 
   /* regular edge */
   else {
     if ( MS_SIN(p0->tag) ) {
-      b0[0] = p0->c[0] + ATHIRD*ux;
-      b0[1] = p0->c[1] + ATHIRD*uy;
-      b0[2] = p0->c[2] + ATHIRD*uz;
+      b0[0] = p0->c[0] + _MMG5_ATHIRD*ux;
+      b0[1] = p0->c[1] + _MMG5_ATHIRD*uy;
+      b0[2] = p0->c[2] + _MMG5_ATHIRD*uz;
     }
     else {
       if ( MG_GEO & p0->tag ) {
@@ -394,15 +394,15 @@ inline void bezierEdge(MMG5_pMesh mesh,int i0,int i1,double b0[3],double b1[3],c
         n1 = &p0->n[0];
         ps1 = ux*n1[0] + uy*n1[1] + uz*n1[2];
       }
-      b0[0] = ATHIRD*(2.0*p0->c[0] + p1->c[0] - ps1*n1[0]);
-      b0[1] = ATHIRD*(2.0*p0->c[1] + p1->c[1] - ps1*n1[1]);
-      b0[2] = ATHIRD*(2.0*p0->c[2] + p1->c[2] - ps1*n1[2]);
+      b0[0] = _MMG5_ATHIRD*(2.0*p0->c[0] + p1->c[0] - ps1*n1[0]);
+      b0[1] = _MMG5_ATHIRD*(2.0*p0->c[1] + p1->c[1] - ps1*n1[1]);
+      b0[2] = _MMG5_ATHIRD*(2.0*p0->c[2] + p1->c[2] - ps1*n1[2]);
     }
 
     if ( MS_SIN(p1->tag) ) {
-      b1[0] = p1->c[0] - ATHIRD*ux;
-      b1[1] = p1->c[1] - ATHIRD*uy;
-      b1[2] = p1->c[2] - ATHIRD*uz;
+      b1[0] = p1->c[0] - _MMG5_ATHIRD*ux;
+      b1[1] = p1->c[1] - _MMG5_ATHIRD*uy;
+      b1[2] = p1->c[2] - _MMG5_ATHIRD*uz;
     }
     else {
       if ( MG_GEO & p1->tag ) {
@@ -423,9 +423,9 @@ inline void bezierEdge(MMG5_pMesh mesh,int i0,int i1,double b0[3],double b1[3],c
         n1 = &p1->n[0];
         ps1 = -(ux*n1[0] + uy*n1[1] + uz*n1[2]);
       }
-      b1[0] = ATHIRD*(2.0*p1->c[0] + p0->c[0] - ps1*n1[0]);
-      b1[1] = ATHIRD*(2.0*p1->c[1] + p0->c[1] - ps1*n1[1]);
-      b1[2] = ATHIRD*(2.0*p1->c[2] + p0->c[2] - ps1*n1[2]);
+      b1[0] = _MMG5_ATHIRD*(2.0*p1->c[0] + p0->c[0] - ps1*n1[0]);
+      b1[1] = _MMG5_ATHIRD*(2.0*p1->c[1] + p0->c[1] - ps1*n1[1]);
+      b1[2] = _MMG5_ATHIRD*(2.0*p1->c[2] + p0->c[2] - ps1*n1[2]);
     }
   }
 }

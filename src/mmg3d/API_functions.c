@@ -79,7 +79,7 @@ void MMG5_MMG3D_Init_parameters(MMG5_pMesh mesh) {
   mesh->info.hmax     = FLT_MAX;  /* maximal mesh size; */
   /** MMG5_DPARAM_hausd = 0.01 */
   mesh->info.hausd    = 0.01;     /* control Hausdorff */
-  /** MMG5_DPARAM_hausd = 0.1 */
+  /** MMG5_DPARAM_hgrad = 0.1 */
   mesh->info.hgrad    = 0.1;      /* control gradation; */
   mesh->info.ls       = 0.0;      /* level set value */
 

@@ -48,7 +48,7 @@ int chkswp(MMG5_pMesh mesh,MMG5_pSol met,int k,int i,char typchk) {
   pt  = &mesh->tria[k];
   i1 = inxt[i];
   i2 = iprv[i];
-  if ( MS_EDG(pt->tag[i]) || MS_SIN(pt->tag[i]) )  return(0);
+  if ( MG_EDG(pt->tag[i]) || MS_SIN(pt->tag[i]) )  return(0);
   else if ( MS_SIN(pt->tag[i1]) )  return(0);
 
   ip0  = pt->v[i];
@@ -83,14 +83,14 @@ int chkswp(MMG5_pMesh mesh,MMG5_pSol met,int k,int i,char typchk) {
   norpts(p[0],p[1],q,c1);
   norpts(p[0],q,p[2],c2);
   ps = c1[0]*c2[0] + c1[1]*c2[1] + c1[2]*c2[2];
-  if ( ps < ANGEDG )   return(0);
+  if ( ps < _MMG5_ANGEDG )   return(0);
 
   /* normal recovery at points p[0],p[1],p[2],q */
   for (j=0; j<3; j++) {
     if ( MS_SIN(p[j]->tag) ) {
       nortri(mesh,pt,np[j]);
     }
-    else if ( MS_EDG(p[j]->tag) ) {
+    else if ( MG_EDG(p[j]->tag) ) {
       nortri(mesh,pt,nt);
       nr1  = &mesh->xpoint[p[j]->ig].n1[0];
       nr2  = &mesh->xpoint[p[j]->ig].n2[0];
@@ -108,7 +108,7 @@ int chkswp(MMG5_pMesh mesh,MMG5_pSol met,int k,int i,char typchk) {
   if ( MS_SIN(q->tag) ) {
     nortri(mesh,pt,nq);
   }
-  else if ( MS_EDG(q->tag) ) {
+  else if ( MG_EDG(q->tag) ) {
     nortri(mesh,pt,nt);
     nr1  = &mesh->xpoint[q->ig].n1[0];
     nr2  = &mesh->xpoint[q->ig].n2[0];
@@ -239,7 +239,7 @@ int swapar(MMG5_pMesh mesh,int k,int i) {
   char     i1,i2,j,jj,j2,v11,v21;
 
   pt   = &mesh->tria[k];
-  if ( MS_EDG(pt->tag[i]) || MS_SIN(pt->tag[i]) )  return(0);
+  if ( MG_EDG(pt->tag[i]) || MS_SIN(pt->tag[i]) )  return(0);
 
   adja = &mesh->adja[3*(k-1)+1];
   assert(adja[i]);
@@ -300,7 +300,7 @@ int litswp(MMG5_pMesh mesh,int k,char i,double kali) {
 
   pt0 = &mesh->tria[0];
   pt  = &mesh->tria[k];
-  if ( !MG_EOK(pt) || MS_EDG(pt->tag[i]) )  return(0);
+  if ( !MG_EOK(pt) || MG_EDG(pt->tag[i]) )  return(0);
 
   i1 = inxt[i];
   i2 = iprv[i];
@@ -323,7 +323,7 @@ int litswp(MMG5_pMesh mesh,int k,char i,double kali) {
   norpts(a,b,d,n1);
   norpts(a,d,c,n2);
   ps = n1[0]*n2[0] + n1[1]*n2[1] + n1[2]*n2[2];
-  if ( ps < ANGEDG )  return(0);
+  if ( ps < _MMG5_ANGEDG )  return(0);
 
   /* check quality */
   pt0->v[0] = id;  pt0->v[1] = ic;  pt0->v[2] = ib;

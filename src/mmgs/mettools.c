@@ -247,7 +247,7 @@ double surftri_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel) {
     surf += sqrt(fabs(dens));
   }
 
-  surf *= ATHIRD;
+  surf *= _MMG5_ATHIRD;
   return(surf);
 }
 

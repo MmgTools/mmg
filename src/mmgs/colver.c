@@ -69,7 +69,7 @@ int chkcol(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int *list,char typchk) {
 
   if ( ilist > 3 ) {
     /* check references */
-    if ( MS_EDG(pt->tag[i2]) ) {
+    if ( MG_EDG(pt->tag[i2]) ) {
       jel = list[1] / 3;
       pt1 = &mesh->tria[jel];
       if ( abs(pt->ref) != abs(pt1->ref) )  return(0);
@@ -84,7 +84,7 @@ int chkcol(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int *list,char typchk) {
       pt1 = &mesh->tria[jel];
 
       /* check length */
-      if ( typchk == 2 && met->m && !MS_EDG(mesh->point[ip2].tag) ) {
+      if ( typchk == 2 && met->m && !MG_EDG(mesh->point[ip2].tag) ) {
         ip1 = pt1->v[j2];
         len = _MMG5_lenedg(mesh,met,ip1,ip2,0);
         if ( len > lon )  return(0);
@@ -110,10 +110,10 @@ int chkcol(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int *list,char typchk) {
         if ( l > 1 ) {
           cosnold = n0old[0]*n1old[0] + n0old[1]*n1old[1] + n0old[2]*n1old[2];
           cosnnew = n0new[0]*n1new[0] + n0new[1]*n1new[1] + n0new[2]*n1new[2];
-          if ( cosnold < ANGEDG ) {
+          if ( cosnold < _MMG5_ANGEDG ) {
             if ( cosnnew < cosnold )  return(0);
           }
-          else if ( cosnnew < ANGEDG )  return(0);
+          else if ( cosnnew < _MMG5_ANGEDG )  return(0);
         }
         memcpy(n0old,n1old,3*sizeof(double));
         memcpy(n0new,n1new,3*sizeof(double));
@@ -143,17 +143,17 @@ int chkcol(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int *list,char typchk) {
     if ( !open && !(pt->tag[i] & MG_GEO) ) {
       cosnold = n00old[0]*n1old[0] + n00old[1]*n1old[1] + n00old[2]*n1old[2];
       cosnnew = n00new[0]*n1new[0] + n00new[1]*n1new[1] + n00new[2]*n1new[2];
-      if ( cosnold < ANGEDG ) {
+      if ( cosnold < _MMG5_ANGEDG ) {
         if ( cosnnew < cosnold )  return(0);
       }
-      else if ( cosnnew < ANGEDG )  return(0);
+      else if ( cosnnew < _MMG5_ANGEDG )  return(0);
 
       /* other checks for reference collapse */
       jel = list[ilist-1] / 3;
       j   = list[ilist-1] % 3;
       j   = iprv[j];
       pt  = &mesh->tria[jel];
-      if ( MS_EDG(pt->tag[j]) ) {
+      if ( MG_EDG(pt->tag[j]) ) {
         jel = list[ilist-2] / 3;
         pt1 = &mesh->tria[jel];
         if ( abs(pt->ref) != abs(pt1->ref) )  return(0);
@@ -165,9 +165,9 @@ int chkcol(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int *list,char typchk) {
   else if ( ilist == 3 ) {
     p1 = &mesh->point[pt->v[i1]];
     if ( MS_SIN(p1->tag) )  return(0);
-    else if ( MS_EDG(pt->tag[i2]) && !MS_EDG(pt->tag[i]) )  return(0);
-    else if ( !MS_EDG(pt->tag[i2]) && MS_EDG(pt->tag[i]) )  return(0);
-    else if ( MS_EDG(pt->tag[i2]) && MS_EDG(pt->tag[i]) && MS_EDG(pt->tag[i1]) )  return(0);
+    else if ( MG_EDG(pt->tag[i2]) && !MG_EDG(pt->tag[i]) )  return(0);
+    else if ( !MG_EDG(pt->tag[i2]) && MG_EDG(pt->tag[i]) )  return(0);
+    else if ( MG_EDG(pt->tag[i2]) && MG_EDG(pt->tag[i]) && MG_EDG(pt->tag[i1]) )  return(0);
 
     /* Check geometric approximation */
     jel = list[1] / 3;
@@ -450,10 +450,10 @@ int litcol(MMG5_pMesh mesh,int k,char i,double kali) {
         if ( l > 1 ) {
           cosnold = n0old[0]*n1old[0] + n0old[1]*n1old[1] + n0old[2]*n1old[2];
           cosnnew = n0new[0]*n1new[0] + n0new[1]*n1new[1] + n0new[2]*n1new[2];
-          if ( cosnold < ANGEDG ) {
+          if ( cosnold < _MMG5_ANGEDG ) {
             if ( cosnnew < MG_MIN(0.0,cosnold) )  return(0);
           }
-          else if ( cosnnew < ANGEDG )  return(0);
+          else if ( cosnnew < _MMG5_ANGEDG )  return(0);
         }
 
         memcpy(n0old,n1old,3*sizeof(double));
@@ -468,10 +468,10 @@ int litcol(MMG5_pMesh mesh,int k,char i,double kali) {
     if ( !open ) {
       cosnold = n00old[0]*n1old[0] + n00old[1]*n1old[1] + n00old[2]*n1old[2];
       cosnnew = n00new[0]*n1new[0] + n00new[1]*n1new[1] + n00new[2]*n1new[2];
-      if ( cosnold < ANGEDG ) {
+      if ( cosnold < _MMG5_ANGEDG ) {
         if ( cosnnew < MG_MIN(0.0,cosnold) )  return(0);
       }
-      else if ( cosnnew < ANGEDG )  return(0);
+      else if ( cosnnew < _MMG5_ANGEDG )  return(0);
 
       /* other reference checks */
       jel = list[ilist-1] / 3;
@@ -488,9 +488,9 @@ int litcol(MMG5_pMesh mesh,int k,char i,double kali) {
   else if ( ilist == 3 ) {
     p1 = &mesh->point[pt->v[i1]];
     if ( MS_SIN(p1->tag) )  return(0);
-    else if (  MS_EDG(pt->tag[i2]) && !MS_EDG(pt->tag[i]) )  return(0);
-    else if ( !MS_EDG(pt->tag[i2]) &&  MS_EDG(pt->tag[i]) )  return(0);
-    else if (  MS_EDG(pt->tag[i2]) &&  MS_EDG(pt->tag[i]) && MS_EDG(pt->tag[i1]) )  return(0);
+    else if (  MG_EDG(pt->tag[i2]) && !MG_EDG(pt->tag[i]) )  return(0);
+    else if ( !MG_EDG(pt->tag[i2]) &&  MG_EDG(pt->tag[i]) )  return(0);
+    else if (  MG_EDG(pt->tag[i2]) &&  MG_EDG(pt->tag[i]) && MG_EDG(pt->tag[i1]) )  return(0);
 
     return(colver3(mesh,list));
   }

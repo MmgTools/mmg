@@ -80,7 +80,7 @@ int defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
       if ( MS_SIN(p[i]->tag) ) {
         nortri(mesh,pt,n[i]);
       }
-      else if ( MS_EDG(p[i]->tag) ) {
+      else if ( MG_EDG(p[i]->tag) ) {
         nortri(mesh,pt,nt);
         n1  = &mesh->xpoint[p[i]->ig].n1[0];
         n2  = &mesh->xpoint[p[i]->ig].n2[0];
@@ -109,7 +109,7 @@ int defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
 
       if ( ll < _MMG5_EPSD )  continue;
 
-      if ( MS_EDG(pt->tag[i]) ) {
+      if ( MG_EDG(pt->tag[i]) ) {
         if ( MS_SIN(p[i1]->tag) ) {
           t[i1][0] = ux;
           t[i1][1] = uy;

@@ -348,7 +348,7 @@ int boulec(MMG5_pMesh mesh,int start,int ip,double *tt) {
   pt = &mesh->tria[start];
   if ( !MG_EOK(pt) )  return(0);
   p0 = &mesh->point[pt->v[ip]];
-  if ( !MS_EDG(p0->tag) )  return(0);
+  if ( !MG_EDG(p0->tag) )  return(0);
 
   /* check other triangle vertices */
   k  = start;
@@ -358,7 +358,7 @@ int boulec(MMG5_pMesh mesh,int start,int ip,double *tt) {
   p1 = p2 = 0;
   do {
     pt = &mesh->tria[k];
-    if ( MS_EDG(pt->tag[i1]) ) {
+    if ( MG_EDG(pt->tag[i1]) ) {
       p1 = &mesh->point[pt->v[i2]];
       k  = 0;
       break;
@@ -378,7 +378,7 @@ int boulec(MMG5_pMesh mesh,int start,int ip,double *tt) {
     i2 = iprv[i];
     do {
       pt = &mesh->tria[k];
-      if ( MS_EDG(pt->tag[i2]) ) {
+      if ( MG_EDG(pt->tag[i2]) ) {
         p2 = &mesh->point[pt->v[i1]];
         break;
       }
@@ -426,7 +426,7 @@ int bouler(MMG5_pMesh mesh,int start,int ip,int *list,int *xp,int *nr) {
   *xp = *nr = ns = 0;
   do {
     i1 = inxt[i];
-    if ( MS_EDG(pt->tag[i1]) ) {
+    if ( MG_EDG(pt->tag[i1]) ) {
       i2 = iprv[i];
       ns++;
       if ( pt->tag[i1] & MG_GEO )
@@ -451,7 +451,7 @@ int bouler(MMG5_pMesh mesh,int start,int ip,int *list,int *xp,int *nr) {
     do {
       pt = &mesh->tria[k];
       i2 = iprv[i];
-      if ( MS_EDG(pt->tag[i2]) ) {
+      if ( MG_EDG(pt->tag[i2]) ) {
         i1 = inxt[i];
         ns++;
         if ( pt->tag[i2] & MG_GEO )

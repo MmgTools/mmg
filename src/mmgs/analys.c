@@ -68,7 +68,7 @@ static int setadj(MMG5_pMesh mesh){
         ip1 = pt->v[i1];
         ip2 = pt->v[i2];
 
-        if ( MS_EDG(pt->tag[i]) ) {
+        if ( MG_EDG(pt->tag[i]) ) {
           mesh->point[ip1].tag |= pt->tag[i];
           mesh->point[ip2].tag |= pt->tag[i];
         }
@@ -181,7 +181,7 @@ static int setadj(MMG5_pMesh mesh){
     pt = &mesh->tria[k];
     if ( !MG_EOK(pt) )  continue;
     for (i=0; i<3; i++) {
-      if ( !MS_EDG(pt->tag[i]) )  continue;
+      if ( !MG_EDG(pt->tag[i]) )  continue;
 
       adja = &mesh->adja[3*(k-1)+1];
       jel  = adja[i] / 3;
@@ -451,7 +451,7 @@ int singul(MMG5_pMesh mesh) {
       ppt = &mesh->point[pt->v[i]];
       ppt->s++;
       if ( !MG_VOK(ppt) || MS_SIN(ppt->tag) )  continue;
-      else if ( MS_EDG(ppt->tag) ) {
+      else if ( MG_EDG(ppt->tag) ) {
         ns = bouler(mesh,k,i,list,&xp,&nr);
         if ( !ns ) continue;
         
@@ -542,7 +542,7 @@ static int norver(MMG5_pMesh mesh) {
     for (i=0; i<3; i++) {
       ppt = &mesh->point[pt->v[i]];
       if ( MS_SIN(ppt->tag) )  continue;
-      else if ( MS_EDG(ppt->tag) ) {
+      else if ( MG_EDG(ppt->tag) ) {
         xp++;
         continue;
       }
@@ -577,7 +577,7 @@ static int norver(MMG5_pMesh mesh) {
         ppt = &mesh->point[pt->v[i]];
 
         if ( ppt->tag & MG_CRN || ppt->flag == mesh->base )  continue;
-        else if ( !MS_EDG(pt->tag[i1]) )  continue;
+        else if ( !MG_EDG(pt->tag[i1]) )  continue;
 
         ier = boulen(mesh,k,i,n);
         if ( !ier )  continue;
@@ -790,7 +790,7 @@ int analys(MMG5_pMesh mesh) {
   nmpoints(mesh);
 
   /* check for ridges */
-  if ( mesh->info.dhd > ANGLIM && !setdhd(mesh) ) {
+  if ( mesh->info.dhd > _MMG5_ANGLIM && !setdhd(mesh) ) {
     fprintf(stdout,"  ## Geometry problem. Exit program.\n");
     return(0);
   }

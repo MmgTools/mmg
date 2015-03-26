@@ -81,7 +81,7 @@ int rootDeg3(double a[4],double complex r[3]) {
 
   pi = 3.14159;
   i = _Complex_I;
-  j = cos(2.0*ATHIRD*pi)+I*sin(2.0*ATHIRD*pi);
+  j = cos(2.0*_MMG5_ATHIRD*pi)+I*sin(2.0*_MMG5_ATHIRD*pi);
 
   /* Case when the polynomial is actually second order */
   if( fabs(a[3]) < _MMG5_EPSD ) {
@@ -119,8 +119,8 @@ int rootDeg3(double a[4],double complex r[3]) {
   b[1] = a[1]/a[3];
   b[0] = a[0]/a[3];
 
-  p = b[1] - ATHIRD*b[2]*b[2];
-  q = b[0] - ATHIRD*b[2]*b[1] + 2.0/27.0*b[2]*b[2]*b[2];
+  p = b[1] - _MMG5_ATHIRD*b[2]*b[2];
+  q = b[0] - _MMG5_ATHIRD*b[2]*b[1] + 2.0/27.0*b[2]*b[2]*b[2];
   Delta = 4.0/27.0*p*p*p+q*q;
 
   if( Delta>0.0 ) {
@@ -128,8 +128,8 @@ int rootDeg3(double a[4],double complex r[3]) {
     u = 0.5*(-q - sqrt(Delta));
     v = 0.5*(-q + sqrt(Delta));
 
-    u = u < 0.0 ? - pow(fabs(u),ATHIRD) :pow(fabs(u),ATHIRD);
-    v = v < 0.0 ? - pow(fabs(v),ATHIRD) :pow(fabs(v),ATHIRD);
+    u = u < 0.0 ? - pow(fabs(u),_MMG5_ATHIRD) :pow(fabs(u),_MMG5_ATHIRD);
+    v = v < 0.0 ? - pow(fabs(v),_MMG5_ATHIRD) :pow(fabs(v),_MMG5_ATHIRD);
 
     r[0] = u+v;
     r[1] = j*j*u + j*v;
@@ -139,7 +139,7 @@ int rootDeg3(double a[4],double complex r[3]) {
   else if (Delta<0.0){
     /* Polynomial T^2 +qT -p^3/27 admits two complex conjuguate roots u and v */
     t = -0.5*q - 0.5*i*sqrt(-Delta);
-    t = cpow(t,ATHIRD);
+    t = cpow(t,_MMG5_ATHIRD);
     tbar = conj(t);
 
     /* Theoretically speaking, the 3 roots are real... But to make sure... */
@@ -150,7 +150,7 @@ int rootDeg3(double a[4],double complex r[3]) {
   else{
     /* Polynomial T^2 +qT -p^3/27 admits one double real root */
     u = -0.5*q;
-    u = pow(u,ATHIRD);
+    u = pow(u,_MMG5_ATHIRD);
 
     r[0] = -u;
     r[1] = -u;
@@ -158,9 +158,9 @@ int rootDeg3(double a[4],double complex r[3]) {
 
   }
 
-  r[0] -= ATHIRD*b[2];
-  r[1] -= ATHIRD*b[2];
-  r[2] -= ATHIRD*b[2];
+  r[0] -= _MMG5_ATHIRD*b[2];
+  r[1] -= _MMG5_ATHIRD*b[2];
+  r[2] -= _MMG5_ATHIRD*b[2];
 
   return(3);
 }
