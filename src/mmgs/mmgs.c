@@ -38,8 +38,8 @@
 /* globals */
 mytime         MMG5_ctim[TIMEMAX];
 
-unsigned char inxt[3] = {1,2,0};
-unsigned char iprv[3] = {2,0,1};
+unsigned char _MMG5_inxt2[3] = {1,2,0};
+unsigned char _MMG5_iprv2[3] = {2,0,1};
 
 
 static void excfun(int sigid) {

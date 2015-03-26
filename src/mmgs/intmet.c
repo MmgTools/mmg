@@ -165,8 +165,8 @@ int intridmet(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,double s,double v[3],do
   char      i1,i2;
 
   pt  = &mesh->tria[k];
-  i1  = inxt[i];
-  i2  = iprv[i];
+  i1  = _MMG5_inxt2[i];
+  i2  = _MMG5_iprv2[i];
   ip1 = pt->v[i1];
   ip2 = pt->v[i2];
   p1  = &mesh->point[ip1];
@@ -374,8 +374,8 @@ int intregmet(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,double s,double mr[6]) 
   nstep = 4;
   pt  = &mesh->tria[k];
   nortri(mesh,pt,nt);
-  i1  = inxt[i];
-  i2  = iprv[i];
+  i1  = _MMG5_inxt2[i];
+  i2  = _MMG5_iprv2[i];
   ip1 = pt->v[i1];
   ip2 = pt->v[i2];
   p1  = &mesh->point[ip1];
@@ -542,8 +542,8 @@ void intmet_iso(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int ip,double s) {
   char   i1,i2;
 
   pt  = &mesh->tria[k];
-  i1  = inxt[i];
-  i2  = iprv[i];
+  i1  = _MMG5_inxt2[i];
+  i2  = _MMG5_iprv2[i];
   ip1 = pt->v[i1];
   ip2 = pt->v[i2];
   met->m[ip] = s * (met->m[ip1] + met->m[ip2]);

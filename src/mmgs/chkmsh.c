@@ -51,8 +51,8 @@ int chkmsh(MMG5_pMesh mesh,int severe) {
 
         for (i=0; i<3; i++) {
             if ( !adja[i] )  continue;
-            i1  = inxt[i];
-            i2  = iprv[i];
+            i1  = _MMG5_inxt2[i];
+            i2  = _MMG5_iprv2[i];
             adj = adja[i] / 3;
             voy = adja[i] % 3;
             if ( !adj && !(pt1->tag[i] & MG_GEO) ) {
@@ -95,8 +95,8 @@ int chkmsh(MMG5_pMesh mesh,int severe) {
                 exit(1);
             }
             if ( !MS_SIN(pt1->tag[i]) ) {
-                j1 = inxt[voy];
-                j2 = iprv[voy];
+                j1 = _MMG5_inxt2[voy];
+                j2 = _MMG5_iprv2[voy];
                 if ( pt2->v[j2] != pt1->v[i1] || pt2->v[j1] != pt1->v[i2] ) {
                     fprintf(stdout,"  8. Wrong orientation %d %d\n",k,adj);
                     exit(1);

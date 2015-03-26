@@ -764,8 +764,8 @@ int saveMesh(MMG5_pMesh mesh) {
         adja = &mesh->adja[3*(k-1)+1];
         jel  = adja[i] / 3;
         if ( !jel || jel > k ) {
-          i1 = inxt[i];
-          i2 = inxt[i1];
+          i1 = _MMG5_inxt2[i];
+          i2 = _MMG5_inxt2[i1];
           na++;
           edge[na].a    = mesh->point[pt->v[i1]].tmp;
           edge[na].b    = mesh->point[pt->v[i2]].tmp;

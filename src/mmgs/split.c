@@ -51,8 +51,8 @@ int split1(MMG5_pMesh mesh,MMG5_pSol met,int k,int i,int *vx) {
   pt1 = &mesh->tria[iel];
   pt1 = memcpy(pt1,pt,sizeof(MMG5_Tria));
 
-  i1 = inxt[i];
-  i2 = inxt[i1];
+  i1 = _MMG5_inxt2[i];
+  i2 = _MMG5_inxt2[i1];
 
 
   if ( pt->edg[i] > 0 ) {
@@ -113,8 +113,8 @@ int split1b(MMG5_pMesh mesh,int k,char i,int ip) {
   }
 
   /* update two triangles */
-  i1  = inxt[i];
-  i2  = iprv[i];
+  i1  = _MMG5_inxt2[i];
+  i2  = _MMG5_iprv2[i];
   pt->v[i2]   = ip;
   pt->tag[i1] = MG_NOTAG;
   pt->edg[i1] = 0;
@@ -141,8 +141,8 @@ int split1b(MMG5_pMesh mesh,int k,char i,int ip) {
     memcpy(pt1,pt,sizeof(MMG5_Tria));
     memcpy(&mesh->adja[3*(kel-1)+1],&mesh->adja[3*(jel-1)+1],3*sizeof(int));
 
-    j1 = inxt[j];
-    j2 = iprv[j];
+    j1 = _MMG5_inxt2[j];
+    j2 = _MMG5_iprv2[j];
     pt->v[j1]    = ip;
     pt->tag[j2]  = MG_NOTAG;
     pt->edg[j2]  = 0;
@@ -191,8 +191,8 @@ int split2(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
   i = 0;
   if ( !vx[0] )  i = 1;
   else if ( !vx[1] )  i = 2;
-  i1 = inxt[i];
-  i2 = inxt[i1];
+  i1 = _MMG5_inxt2[i];
+  i2 = _MMG5_inxt2[i1];
 
   p3 = &mesh->point[vx[i]];
   p4 = &mesh->point[vx[i1]];

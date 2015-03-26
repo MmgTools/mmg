@@ -54,10 +54,6 @@
 #define MS_Ver       1
 #define MS_Tri       2
 
-extern unsigned char inxt[3];
-extern unsigned char iprv[3];
-
-
 /* prototypes */
 int  loadMesh(MMG5_pMesh );
 int  saveMesh(MMG5_pMesh );

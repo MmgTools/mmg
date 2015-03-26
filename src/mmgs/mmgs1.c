@@ -75,8 +75,8 @@ int chkedg(MMG5_pMesh mesh,int iel) {
 
   /* analyze edges */
   for (i=0; i<3; i++) {
-    i1 = inxt[i];
-    i2 = iprv[i];
+    i1 = _MMG5_inxt2[i];
+    i2 = _MMG5_iprv2[i];
 
     /* check length */
     ux = p[i2]->c[0] - p[i1]->c[0];
@@ -286,8 +286,8 @@ static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
     }
     else if ( typchk == 2 ) {
       for (i=0; i<3; i++) {
-        i1 = inxt[i];
-        i2 = iprv[i];
+        i1 = _MMG5_inxt2[i];
+        i2 = _MMG5_iprv2[i];
         len = _MMG5_lenedg(mesh,met,pt->v[i1],pt->v[i2],0);
         if ( len > LLONG )  MG_SET(pt->flag,i);
       }
@@ -302,8 +302,8 @@ static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
     /* scan edges to split */
     for (i=0; i<3; i++) {
       if ( !MG_GET(pt->flag,i) )  continue;
-      i1  = inxt[i];
-      i2  = iprv[i];
+      i1  = _MMG5_inxt2[i];
+      i2  = _MMG5_iprv2[i];
       ip1 = pt->v[i1];
       ip2 = pt->v[i2];
       ip = hashGet(&hash,ip1,ip2);
@@ -384,8 +384,8 @@ static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
     nc = 0;
 
     for (i=0; i<3; i++) {
-      i1 = inxt[i];
-      i2 = inxt[i1];
+      i1 = _MMG5_inxt2[i];
+      i2 = _MMG5_inxt2[i1];
       if ( !MG_GET(pt->flag,i) && !MS_SIN(pt->tag[i]) ) {
         ip = hashGet(&hash,pt->v[i1],pt->v[i2]);
         if ( ip > 0 ) {
@@ -433,8 +433,8 @@ static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
     j  = -1;
     vx[0] = vx[1] = vx[2] = 0;
     for (i=0; i<3; i++) {
-      i1 = inxt[i];
-      i2 = inxt[i1];
+      i1 = _MMG5_inxt2[i];
+      i2 = _MMG5_inxt2[i1];
       if ( MG_GET(pt->flag,i) ) {
         vx[i] = hashGet(&hash,pt->v[i1],pt->v[i2]);
         assert(vx[i]);
@@ -476,15 +476,15 @@ int chkspl(MMG5_pMesh mesh,MMG5_pSol met,int k,int i) {
 
   if ( mesh->xp > mesh->xpmax-2 )  return(0);
   pt = &mesh->tria[k];
-  i1 = inxt[i];
-  i2 = iprv[i];
+  i1 = _MMG5_inxt2[i];
+  i2 = _MMG5_iprv2[i];
   if ( MS_SIN(pt->tag[i1]) || MS_SIN(pt->tag[i2]) )  return(0);
   adja = &mesh->adja[3*(k-1)+1];
   jel  = adja[i] / 3;
   if ( jel ) {
     j   = adja[i] % 3;
-    jj  = inxt[j];
-    j2  = iprv[j];
+    jj  = _MMG5_inxt2[j];
+    j2  = _MMG5_iprv2[j];
     pt1 = &mesh->tria[jel];
     if ( MS_SIN(pt1->tag[jj]) || MS_SIN(pt1->tag[j2]) )  return(0);
   }
@@ -535,8 +535,8 @@ static int colelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
     for (i=0; i<3; i++) {
       if ( MS_SIN(pt->tag[i]) )  continue;
 
-      i1 = inxt[i];
-      i2 = iprv[i];
+      i1 = _MMG5_inxt2[i];
+      i2 = _MMG5_iprv2[i];
       p1 = &mesh->point[pt->v[i1]];
       p2 = &mesh->point[pt->v[i2]];
       if ( p1->tag & MG_NOM || p2->tag & MG_NOM )  continue;
@@ -595,8 +595,8 @@ static int adpspl(MMG5_pMesh mesh,MMG5_pSol met) {
     imax = -1;
     lmax = -1.0;
     for (i=0; i<3; i++) {
-      i1  = inxt[i];
-      i2  = iprv[i];
+      i1  = _MMG5_inxt2[i];
+      i2  = _MMG5_iprv2[i];
       len = _MMG5_lenedg(mesh,met,pt->v[i1],pt->v[i2],0);
       if ( len > lmax ) {
         lmax = len;
@@ -607,8 +607,8 @@ static int adpspl(MMG5_pMesh mesh,MMG5_pSol met) {
     else if ( MS_SIN(pt->tag[imax]) )  continue;
 
     /* check length */
-    i1 = inxt[imax];
-    i2 = iprv[imax];
+    i1 = _MMG5_inxt2[imax];
+    i2 = _MMG5_iprv2[imax];
     p1 = &mesh->point[pt->v[i1]];
     p2 = &mesh->point[pt->v[i2]];
     if ( p1->tag & MG_NOM || p2->tag & MG_NOM )  continue;
@@ -639,8 +639,8 @@ static int adpcol(MMG5_pMesh mesh,MMG5_pSol met) {
       if ( MS_SIN(pt->tag[i]) )  continue;
 
       /* check length */
-      i1 = inxt[i];
-      i2 = iprv[i];
+      i1 = _MMG5_inxt2[i];
+      i2 = _MMG5_iprv2[i];
       p1 = &mesh->point[pt->v[i1]];
       p2 = &mesh->point[pt->v[i2]];
       if ( p1->tag & MG_NOM || p2->tag & MG_NOM )  continue;

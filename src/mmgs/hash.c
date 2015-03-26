@@ -105,8 +105,8 @@ int hashTria(MMG5_pMesh mesh) {
     pt->base = mesh->base;
     adja = &mesh->adja[3*(k-1)+1];
     for (i=0; i<3; i++) {
-      i1 = inxt[i];
-      i2 = iprv[i];
+      i1 = _MMG5_inxt2[i];
+      i2 = _MMG5_iprv2[i];
 
       /* compute key */
       ia  = MG_MIN(pt->v[i1],pt->v[i2]);
@@ -178,8 +178,8 @@ int hashTria(MMG5_pMesh mesh) {
     pt  = &mesh->tria[k];
     for (i=0; i<3; i++) {
       if ( pt->tag[i] & MG_NOM ) {
-        mesh->point[pt->v[inxt[i]]].tag |= MG_NOM;
-        mesh->point[pt->v[iprv[i]]].tag |= MG_NOM;
+        mesh->point[pt->v[_MMG5_inxt2[i]]].tag |= MG_NOM;
+        mesh->point[pt->v[_MMG5_iprv2[i]]].tag |= MG_NOM;
       }
     }
   }
@@ -189,7 +189,7 @@ int hashTria(MMG5_pMesh mesh) {
     pt   = &mesh->tria[k];
     adja = &mesh->adja[3*(k-1)+1];
     for (i=0; i<3; i++) {
-      if ( !adja[i] )  mesh->point[pt->v[inxt[i]]].s = k;
+      if ( !adja[i] )  mesh->point[pt->v[_MMG5_inxt2[i]]].s = k;
     }
   }
   if ( nmf > 0 )  mesh->info.mani = 0;
@@ -290,10 +290,10 @@ int assignEdge(MMG5_pMesh mesh) {
     if ( !MG_EOK(pt) )  continue;
 
     for (i=0; i<3; i++) {
-      i1 = inxt[i];
+      i1 = _MMG5_inxt2[i];
       ia = hashGet(&hash,pt->v[i],pt->v[i1]);
       if ( ia ) {
-        i2 = inxt[i1];
+        i2 = _MMG5_inxt2[i1];
         pa = &mesh->edge[ia];
         pt->edg[i2] = pa->ref;
         pt->tag[i2] = pa->tag;

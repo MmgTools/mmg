@@ -52,7 +52,7 @@ int movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
   /* Make sure ball of point is closed */
   iel = list[0] / 3;
   i0  = list[0] % 3;
-  i1  = inxt[i0];
+  i1  = _MMG5_inxt2[i0];
 
   pt   = &mesh->tria[iel];
   nump = pt->v[i0];
@@ -63,7 +63,7 @@ int movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
 
   iel = list[ilist-1] / 3;
   i0  = list[ilist-1] % 3;
-  i2  = iprv[i0];
+  i2  = _MMG5_iprv2[i0];
 
   pt   = &mesh->tria[iel];
   nend = pt->v[i2];
@@ -77,7 +77,7 @@ int movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
   for (k=0; k<ilist; k++) {
     iel = list[k] / 3;
     i0  = list[k] % 3;
-    i1  = inxt[i0];
+    i1  = _MMG5_inxt2[i0];
     pt  = &mesh->tria[iel];
     p1  = &mesh->point[pt->v[i1]];
 
@@ -233,9 +233,9 @@ int movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
       gv[0] += density*_MMG5_ATHIRD*intpt[0];
       gv[1] += density*_MMG5_ATHIRD*intpt[1];
 
-      i0 = inxt[i0];
-      i1 = inxt[i1];
-      i2 = inxt[i2];
+      i0 = _MMG5_inxt2[i0];
+      i1 = _MMG5_inxt2[i1];
+      i2 = _MMG5_inxt2[i2];
     }
   }
 
@@ -293,8 +293,8 @@ int movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
   /* Step 4 : come back to original problem, and compute patch in triangle iel */
   iel = list[kel] / 3;
   i0  = list[kel] % 3;
-  i1  = inxt[i0];
-  i2  = inxt[i1];
+  i1  = _MMG5_inxt2[i0];
+  i2  = _MMG5_inxt2[i1];
   pt  = &mesh->tria[iel];
 
   ier = bezierCP(mesh,iel,&pb);
@@ -388,8 +388,8 @@ int movridpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
   for (k=0; k<ilist; k++) {
     iel = list[k] / 3;
     i0  = list[k] % 3;
-    i1  = inxt[i0];
-    i2  = inxt[i1];
+    i1  = _MMG5_inxt2[i0];
+    i2  = _MMG5_inxt2[i1];
     pt  = &mesh->tria[iel];
 
     if ( MG_EDG(pt->tag[i1]) ) {

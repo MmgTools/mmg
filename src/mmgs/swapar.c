@@ -46,8 +46,8 @@ int chkswp(MMG5_pMesh mesh,MMG5_pSol met,int k,int i,char typchk) {
 
   pt0 = &mesh->tria[0];
   pt  = &mesh->tria[k];
-  i1 = inxt[i];
-  i2 = iprv[i];
+  i1 = _MMG5_inxt2[i];
+  i2 = _MMG5_iprv2[i];
   if ( MG_EDG(pt->tag[i]) || MS_SIN(pt->tag[i]) )  return(0);
   else if ( MS_SIN(pt->tag[i1]) )  return(0);
 
@@ -63,7 +63,7 @@ int chkswp(MMG5_pMesh mesh,MMG5_pSol met,int k,int i,char typchk) {
 
   kk = adja[i] / 3;
   ii = adja[i] % 3;
-  jj = inxt[ii];
+  jj = _MMG5_inxt2[ii];
   pt1 = &mesh->tria[kk];
   if ( MS_SIN(pt1->tag[jj]) )  return(0);
 
@@ -249,16 +249,16 @@ int swapar(MMG5_pMesh mesh,int k,int i) {
   pt1 = &mesh->tria[adj];
 
   /* simulation */
-  i1 = inxt[i];
-  i2 = iprv[i];
+  i1 = _MMG5_inxt2[i];
+  i2 = _MMG5_iprv2[i];
 
   /* update structure */
   k11 = adja[i1] / 3;
   v11 = adja[i1] % 3;
   if ( k11 < 1 )  return(0);
   adja = &mesh->adja[3*(adj-1)+1];
-  jj  = inxt[j];
-  j2  = iprv[j];
+  jj  = _MMG5_inxt2[j];
+  j2  = _MMG5_iprv2[j];
   k21 = adja[jj] / 3;
   v21 = adja[jj] % 3;
   if ( k21 < 1 )  return(0);
@@ -302,8 +302,8 @@ int litswp(MMG5_pMesh mesh,int k,char i,double kali) {
   pt  = &mesh->tria[k];
   if ( !MG_EOK(pt) || MG_EDG(pt->tag[i]) )  return(0);
 
-  i1 = inxt[i];
-  i2 = iprv[i];
+  i1 = _MMG5_inxt2[i];
+  i2 = _MMG5_iprv2[i];
   ia = pt->v[i];
   ib = pt->v[i1];
   ic = pt->v[i2];
@@ -353,7 +353,7 @@ int swpedg(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,char typchk) {
   do {
     iel = list[k] / 3;
     i   = list[k] % 3;
-    i1  = inxt[i];
+    i1  = _MMG5_inxt2[i];
     if ( chkswp(mesh,met,iel,i1,typchk) ) {
       ns += swapar(mesh,iel,i1);
       k++;

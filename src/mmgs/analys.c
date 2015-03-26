@@ -63,8 +63,8 @@ static int setadj(MMG5_pMesh mesh){
       adja = &mesh->adja[3*(k-1)+1];
       nt++;
       for (i=0; i<3; i++) {
-        i1  = inxt[i];
-        i2  = iprv[i];
+        i1  = _MMG5_inxt2[i];
+        i2  = _MMG5_iprv2[i];
         ip1 = pt->v[i1];
         ip2 = pt->v[i2];
 
@@ -112,8 +112,8 @@ static int setadj(MMG5_pMesh mesh){
         }
 
         /* check orientation */
-        ii1 = inxt[ii];
-        ii2 = iprv[ii];
+        ii1 = _MMG5_inxt2[ii];
+        ii2 = _MMG5_iprv2[ii];
         if ( pt1->v[ii1] == ip1 ) {
           /* Moebius strip */
           if ( pt1->base < 0 ) {
@@ -248,11 +248,11 @@ static void nmpoints(MMG5_pMesh mesh) {
       do {
         iel = jel;
         i0  =  jp;
-        i1  = inxt[i0];
+        i1  = _MMG5_inxt2[i0];
         adja = &mesh->adja[3*(iel-1)+1];
         jel = adja[i1] / 3;
         jp  = adja[i1] % 3;
-        jp  = inxt[jp];
+        jp  = _MMG5_inxt2[jp];
       }
       while ( jel && (jel != numt) && (jel !=k) );
 
@@ -274,11 +274,11 @@ static void nmpoints(MMG5_pMesh mesh) {
       do {
         iel = jel;
         i0  =  jp;
-        i1  = iprv[i0];
+        i1  = _MMG5_iprv2[i0];
         adja = &mesh->adja[3*(iel-1)+1];
         jel = adja[i1] / 3;
         jp  = adja[i1] % 3;
-        jp  = iprv[jp];
+        jp  = _MMG5_iprv2[jp];
       }
       while ( jel && (jel != numt));  
           
@@ -337,8 +337,8 @@ static void nmpoints(MMG5_pMesh mesh) {
 /*         /\* delete boundary elt *\/ */
 /*         if ( !adja[ia] ) { */
 /*           /\* update point coordinates on ridge *\/ */
-/*           i1 = inxt[ia]; */
-/*           i2 = iprv[ia]; */
+/*           i1 = _MMG5_inxt2[ia]; */
+/*           i2 = _MMG5_iprv2[ia]; */
 /*           p[0] = &mesh->point[pt->v[ia]]; */
 /*           p[1] = &mesh->point[pt->v[i1]]; */
 /*           p[2] = &mesh->point[pt->v[i2]]; */
@@ -418,8 +418,8 @@ static int setdhd(MMG5_pMesh mesh) {
         if ( dhd <= mesh->info.dhd ) {
           pt->tag[i]   |= MG_GEO;
           pt1->tag[ii] |= MG_GEO;
-          i1 = inxt[i];
-          i2 = inxt[i1];
+          i1 = _MMG5_inxt2[i];
+          i2 = _MMG5_inxt2[i1];
           mesh->point[pt->v[i1]].tag |= MG_GEO;
           mesh->point[pt->v[i2]].tag |= MG_GEO;
           nr++;
@@ -572,8 +572,8 @@ static int norver(MMG5_pMesh mesh) {
       
       adja = &mesh->adja[3*(k-1)+1];
       for (i=0; i<3; i++) {
-        i1  = inxt[i];
-        i2  = inxt[i1];
+        i1  = _MMG5_inxt2[i];
+        i2  = _MMG5_inxt2[i1];
         ppt = &mesh->point[pt->v[i]];
 
         if ( ppt->tag & MG_CRN || ppt->flag == mesh->base )  continue;
@@ -593,7 +593,7 @@ static int norver(MMG5_pMesh mesh) {
           if ( adja[i1] ) {
             kk  = adja[i1] / 3;
             ii  = adja[i1] % 3;
-            ii  = inxt[ii];
+            ii  = _MMG5_inxt2[ii];
 
             ier = boulen(mesh,kk,ii,n);
             if ( !ier )  continue;

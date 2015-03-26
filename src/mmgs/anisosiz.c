@@ -59,8 +59,8 @@ static int defmetsin(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
   for (k=0; k<ilist; k++) {
     iel = list[k] / 3;
     i0  = list[k] % 3;
-    i1  = inxt[i0];
-    i2  = iprv[i0];
+    i1  = _MMG5_inxt2[i0];
+    i2  = _MMG5_iprv2[i0];
     pt  = &mesh->tria[iel];
     p1  = &mesh->point[pt->v[i1]];
 
@@ -189,7 +189,7 @@ static int defmetrid(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
     for (k=0; k<ilist; k++) {
       iel = list[k] / 3;
       i0  = list[k] % 3;
-      i1  = inxt[i0];
+      i1  = _MMG5_inxt2[i0];
       pt = &mesh->tria[iel];
       p1 = &mesh->point[pt->v[i1]];
 
@@ -204,7 +204,7 @@ static int defmetrid(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
 
     /* last point : the half-ball is open : ilist tria, and ilist +1 points ;
        lists are enumerated in direct order */
-    i2 = inxt[i1];
+    i2 = _MMG5_inxt2[i1];
     p2 = &mesh->point[pt->v[i2]];
 
     ux = p2->c[0] - p0->c[0];
@@ -247,8 +247,8 @@ static int defmetrid(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
 
     iel = list[k] / 3;
     i0  = list[k] % 3;
-    i1  = inxt[i0];
-    i2  = iprv[i0];
+    i1  = _MMG5_inxt2[i0];
+    i2  = _MMG5_iprv2[i0];
     pt = &mesh->tria[iel];
     if ( !bezierCP(mesh,iel,&b) )  continue;
 
@@ -404,8 +404,8 @@ static int defmetref(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
   for (k=0; k<ilist; k++) {
     iel = list[k] / 3;
     i0  = list[k] % 3;
-    i1  = inxt[i0];
-    i2  = iprv[i0];
+    i1  = _MMG5_inxt2[i0];
+    i2  = _MMG5_iprv2[i0];
     pt = &mesh->tria[iel];
     p1 = &mesh->point[pt->v[i1]];
 
@@ -479,7 +479,7 @@ static int defmetref(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
        p1 is either regular, either on a ridge (or a singularity), but p0p1 is not ridge*/
     iel = list[k] / 3;
     i0  = list[k] % 3;
-    i1  = inxt[i0];
+    i1  = _MMG5_inxt2[i0];
     pt = &mesh->tria[iel];
     bezierCP(mesh,iel,&b);
 
@@ -758,7 +758,7 @@ static int defmetreg(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
   for (k=0; k<ilist; k++) {
     iel = list[k] / 3;
     i0  = list[k] % 3;
-    i1  = inxt[i0];
+    i1  = _MMG5_inxt2[i0];
     pt = &mesh->tria[iel];
     p1 = &mesh->point[pt->v[i1]];
 
@@ -804,7 +804,7 @@ static int defmetreg(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
        p1 is either regular, either on a ridge (or a singularity), but p0p1 is not ridge*/
     iel = list[k] / 3;
     i0  = list[k] % 3;
-    i1  = inxt[i0];
+    i1  = _MMG5_inxt2[i0];
     pt = &mesh->tria[iel];
     bezierCP(mesh,iel,&b);
 
@@ -1086,8 +1086,8 @@ static int grad2met(MMG5_pMesh mesh, MMG5_pSol met, int iel, int i){
 
   pt = &mesh->tria[iel];
 
-  i1 = inxt[i];
-  i2 = iprv[i];
+  i1 = _MMG5_inxt2[i];
+  i2 = _MMG5_iprv2[i];
   np1 = pt->v[i1];
   np2 = pt->v[i2];
 
@@ -1404,8 +1404,8 @@ int gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
       if ( !MG_EOK(pt) )  continue;
 
       for (i=0; i<3; i++) {
-        i1 = inxt[i];
-        i2 = iprv[i];
+        i1 = _MMG5_inxt2[i];
+        i2 = _MMG5_iprv2[i];
         p1 = &mesh->point[pt->v[i1]];
         p2 = &mesh->point[pt->v[i2]];
 

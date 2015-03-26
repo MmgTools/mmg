@@ -167,20 +167,18 @@
 #define MG_MINUS   3
 #define MG_ISO    10
 
-#define MG_SIN(tag)      ((tag & MG_CRN) || (tag & MG_REQ)) /**< Corner or Required */
+#define MG_SIN(tag) ((tag & MG_CRN) || (tag & MG_REQ)) /**< Corner or Required */
 
-extern unsigned char _MMG5_inxt2[3];   /**< next vertex of triangle: {1,2,0} */
-extern unsigned char _MMG5_iprv2[3];   /**< previous vertex of triangle: {2,0,1} */
-extern unsigned char _MMG5_inxt3[7];   /**< next vertex of tetra: {1,2,3,0,1,2,3} */
-extern unsigned char _MMG5_iprv3[7];   /**< previous vertex of tetra: {3,0,1,2,3,0,1} */
-extern unsigned char _MMG5_idir[4][3]; /**< idir[i] : vertices of face opposite to vertex i */
-extern          char _MMG5_idirinv[4][4]; /**< idirinv[i][j] : num of the jth point in the ith face */
-extern unsigned char _MMG5_iarf[4][3]; /**< iarf[i]: edges of face opposite to vertex i */
-extern unsigned char _MMG5_iarfinv[4][6]; /**< num of the j^th edge in the i^th face */
-extern unsigned char _MMG5_iare[6][2]; /**< vertices of extremities of the edges of the tetra */
-extern unsigned char _MMG5_ifar[6][2]; /**< ifar[i][]: faces sharing the ith edge of the tetra */
-extern unsigned char _MMG5_isar[6][2]; /**< isar[i][]: vertices of extremities of the edge opposite to the ith edge */
-extern unsigned char _MMG5_arpt[4][3]; /**< arpt[i]: edges passing through vertex i */
+extern unsigned char _MMG5_inxt3[7];   /*!< next vertex of tetra: {1,2,3,0,1,2,3} */
+extern unsigned char _MMG5_iprv3[7];   /*!< previous vertex of tetra: {3,0,1,2,3,0,1} */
+extern unsigned char _MMG5_idir[4][3]; /*!< idir[i] : vertices of face opposite to vertex i */
+extern          char _MMG5_idirinv[4][4]; /*!< idirinv[i][j] : num of the jth point in the ith face */
+extern unsigned char _MMG5_iarf[4][3]; /*!< iarf[i]: edges of face opposite to vertex i */
+extern unsigned char _MMG5_iarfinv[4][6]; /*!< num of the j^th edge in the i^th face */
+extern unsigned char _MMG5_iare[6][2]; /*!< vertices of extremities of the edges of the tetra */
+extern unsigned char _MMG5_ifar[6][2]; /*!< ifar[i][]: faces sharing the ith edge of the tetra */
+extern unsigned char _MMG5_isar[6][2]; /*!< isar[i][]: vertices of extremities of the edge opposite to the ith edge */
+extern unsigned char _MMG5_arpt[4][3]; /*!< arpt[i]: edges passing through vertex i */
 
 
 typedef struct {

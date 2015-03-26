@@ -246,6 +246,10 @@
   { nu pc; }                                    \
   void nu pl
 
+/* Global variables */
+extern unsigned char _MMG5_inxt2[3]; /*!< next vertex of triangle: {1,2,0} */
+extern unsigned char _MMG5_iprv2[3]; /*!< previous vertex of triangle: {2,0,1} */
+
 /* Private structures */
 /**
  * \struct _MMG5_Bezier

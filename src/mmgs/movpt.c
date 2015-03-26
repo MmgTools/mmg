@@ -53,7 +53,7 @@ int movintpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
 
   k  = list[0] / 3;
   i0 = list[0] % 3;
-  i1 = inxt[i0];
+  i1 = _MMG5_inxt2[i0];
   pt = &mesh->tria[k];
   ibeg = pt->v[i1];
   ipp  = pt->v[i0];
@@ -61,8 +61,8 @@ int movintpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
 
   k  = list[ilist-1] / 3;
   i0 = list[ilist-1] % 3;
-  i1 = inxt[i0];
-  i2 = inxt[i1];
+  i1 = _MMG5_inxt2[i0];
+  i2 = _MMG5_inxt2[i1];
   pt = &mesh->tria[k];
   iend = pt->v[i2];
 
@@ -78,7 +78,7 @@ int movintpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
   for (k=0; k<ilist; k++) {
     iel = list[k] / 3;
     i0  = list[k] % 3;
-    i1  = inxt[i0];
+    i1  = _MMG5_inxt2[i0];
     pt  = &mesh->tria[iel];
     p1  = &mesh->point[pt->v[i1]];
     mlon += (p1->c[0]-p0->c[0])*(p1->c[0]-p0->c[0]) + (p1->c[1]-p0->c[1])*(p1->c[1]-p0->c[1]) \
@@ -92,7 +92,7 @@ int movintpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
   for (k=0; k<ilist; k++) {
     iel = list[k] / 3;
     i0  = list[k] % 3;
-    i1  = inxt[i0];
+    i1  = _MMG5_inxt2[i0];
     pt  = &mesh->tria[iel];
     p1  = &mesh->point[pt->v[i1]];
 
@@ -153,7 +153,7 @@ int movintpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
   for (k=0; k<ilist; k++) {
     iel = list[k] / 3;
     i0  = list[k] % 3;
-    i1  = inxt[i0];
+    i1  = _MMG5_inxt2[i0];
     pt = &mesh->tria[iel];
     p1 = &mesh->point[pt->v[i1]];
 
@@ -240,8 +240,8 @@ int movintpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
   /* Step 4 : come back to original problem, and compute patch in triangle iel */
   iel  = list[kel]/3;
   i0 = list[kel]%3;
-  i1 = inxt[i0];
-  i2 = inxt[i1];
+  i1 = _MMG5_inxt2[i0];
+  i2 = _MMG5_inxt2[i1];
   pt = &mesh->tria[iel];
 
   ier = bezierCP(mesh,iel,&b);
@@ -269,7 +269,7 @@ int movintpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
   for (k=0; k<ilist; k++) {
     iel = list[k] / 3;
     i0  = list[k] % 3;
-    i1 = inxt[i0];
+    i1 = _MMG5_inxt2[i0];
     pt = &mesh->tria[iel];
     p1 = &mesh->point[pt->v[i1]];
     mlon += (p1->c[0]-o[0])*(p1->c[0]-o[0]) + (p1->c[1]-o[1])*(p1->c[1]-o[1]) \
@@ -280,7 +280,7 @@ int movintpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
   for (k=0; k<ilist; k++) {
     iel = list[k] / 3;
     i0  = list[k] % 3;
-    i1  = inxt[i0];
+    i1  = _MMG5_inxt2[i0];
     pt  = &mesh->tria[iel];
     p1  = &mesh->point[pt->v[i1]];
     devmean = (p1->c[0]-o[0])*(p1->c[0]-o[0]) + (p1->c[1]-o[1])*(p1->c[1]-o[1]) \
@@ -352,8 +352,8 @@ int movridpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
   for (k=0; k<ilist; k++) {
     iel = list[k] / 3;
     i0  = list[k] % 3;
-    i1  = inxt[i0];
-    i2  = inxt[i1];
+    i1  = _MMG5_inxt2[i0];
+    i2  = _MMG5_inxt2[i1];
     pt  = &mesh->tria[iel];
 
     if ( MG_EDG(pt->tag[i1]) ) {

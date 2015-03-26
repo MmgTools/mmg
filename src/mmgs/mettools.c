@@ -190,8 +190,8 @@ double surftri_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel) {
 
   /* Set metric tensors at vertices of tria iel */
   for(i=0; i<3; i++) {
-    i1 = inxt[i];
-    i2 = iprv[i];
+    i1 = _MMG5_inxt2[i];
+    i2 = _MMG5_iprv2[i];
     ux = 0.5*(p[i1]->c[0]+p[i2]->c[0]) - p[i]->c[0];
     uy = 0.5*(p[i1]->c[1]+p[i2]->c[1]) - p[i]->c[1];
     uz = 0.5*(p[i1]->c[2]+p[i2]->c[2]) - p[i]->c[2];

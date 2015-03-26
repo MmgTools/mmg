@@ -78,8 +78,8 @@ int bezierCP(MMG5_pMesh mesh,int iel,_MMG5_pBezier pb) {
 
   /* compute control points along edges */
   for (i=0; i<3; i++) {
-    i1 = inxt[i];
-    i2 = inxt[i1];
+    i1 = _MMG5_inxt2[i];
+    i2 = _MMG5_inxt2[i1];
 
     ux = p[i2]->c[0] - p[i1]->c[0];
     uy = p[i2]->c[1] - p[i1]->c[1];

@@ -49,8 +49,8 @@ int chkcol(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int *list,char typchk) {
 
   pt0 = &mesh->tria[0];
   pt  = &mesh->tria[k];
-  i1  = inxt[i];
-  i2  = iprv[i];
+  i1  = _MMG5_inxt2[i];
+  i2  = _MMG5_iprv2[i];
   ip1 = pt->v[i1];
   ip2 = pt->v[i2];
   if ( typchk == 2 && met->m ) {
@@ -79,8 +79,8 @@ int chkcol(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int *list,char typchk) {
     for (l=1; l<ilist-1+open; l++) {
       jel = list[l] / 3;
       j   = list[l] % 3;
-      jj  = inxt[j];
-      j2  = iprv[j];
+      jj  = _MMG5_inxt2[j];
+      j2  = _MMG5_iprv2[j];
       pt1 = &mesh->tria[jel];
 
       /* check length */
@@ -151,7 +151,7 @@ int chkcol(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int *list,char typchk) {
       /* other checks for reference collapse */
       jel = list[ilist-1] / 3;
       j   = list[ilist-1] % 3;
-      j   = iprv[j];
+      j   = _MMG5_iprv2[j];
       pt  = &mesh->tria[jel];
       if ( MG_EDG(pt->tag[j]) ) {
         jel = list[ilist-2] / 3;
@@ -172,7 +172,7 @@ int chkcol(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int *list,char typchk) {
     /* Check geometric approximation */
     jel = list[1] / 3;
     j   = list[1] % 3;
-    j2  = iprv[j];
+    j2  = _MMG5_iprv2[j];
     pt0 = &mesh->tria[0];
     pt1 = &mesh->tria[jel];
     memcpy(pt0,pt,sizeof(MMG5_Tria));
@@ -194,7 +194,7 @@ int chkcol(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int *list,char typchk) {
 
     if ( pt2->v[voy] == ip2) return(0);
 
-    jj  = inxt[j];
+    jj  = _MMG5_inxt2[j];
     pt1 = &mesh->tria[jel];
     if ( abs(pt->ref) != abs(pt1->ref) )  return(0);
     else if ( !(pt1->tag[jj] & MG_GEO) )  return(0);
@@ -204,7 +204,7 @@ int chkcol(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int *list,char typchk) {
     if ( p2->tag > p1->tag || p2->ref != p1->ref )  return(0);
 
     /* Check geometric approximation */
-    j2  = iprv[j];
+    j2  = _MMG5_iprv2[j];
     pt0 = &mesh->tria[0];
     memcpy(pt0,pt,sizeof(MMG5_Tria));
     pt0->v[i1] = pt1->v[j2];
@@ -222,8 +222,8 @@ int colver(MMG5_pMesh mesh,int *list,int ilist) {
 
   iel = list[0] / 3;
   i1  = list[0] % 3;
-  i   = iprv[i1];
-  i2  = inxt[i1];
+  i   = _MMG5_iprv2[i1];
+  i2  = _MMG5_inxt2[i1];
   pt  = &mesh->tria[iel];
   ip1 = pt->v[i1];
   ip2 = pt->v[i2];
@@ -244,7 +244,7 @@ int colver(MMG5_pMesh mesh,int *list,int ilist) {
   /* update adjacent with 1st elt */
   jel = list[1] / 3;
   jj  = list[1] % 3;
-  j   = iprv[jj];
+  j   = _MMG5_iprv2[jj];
   pt1 = &mesh->tria[jel];
   pt1->tag[j] = MG_MAX(pt->tag[i1],pt1->tag[j]);
   pt1->edg[j] = MG_MAX(pt->edg[i1],pt1->edg[j]);
@@ -268,7 +268,7 @@ int colver(MMG5_pMesh mesh,int *list,int ilist) {
 
     jel = list[ilist-2] / 3;
     jj  = list[ilist-2] % 3;
-    j   = inxt[jj];
+    j   = _MMG5_inxt2[jj];
     pt1 = &mesh->tria[jel];
     pt1->tag[j] = MG_MAX(pt->tag[i1],pt1->tag[j]);
     pt1->edg[j] = MG_MAX(pt->edg[i1],pt1->edg[j]);
@@ -303,14 +303,14 @@ int colver3(MMG5_pMesh mesh,int* list) {
   /* update of new point for triangle list[0] */
   iel = list[0] / 3;
   i   = list[0] % 3;
-  i1  = inxt[i];
-  i2  = iprv[i];
+  i1  = _MMG5_inxt2[i];
+  i2  = _MMG5_iprv2[i];
   pt  = &mesh->tria[iel];
   ip  = pt->v[i];
 
   jel = list[1] / 3;
   j   = list[1] % 3;
-  j2  = iprv[j];
+  j2  = _MMG5_iprv2[j];
   pt1 = &mesh->tria[jel];
 
   kel = list[2] / 3;
@@ -366,13 +366,13 @@ int colver2(MMG5_pMesh mesh,int* list) {
   /* update of new point for triangle list[0] */
   iel = list[0] / 3;
   i1  = list[0] % 3;
-  i2  = inxt[i1];
+  i2  = _MMG5_inxt2[i1];
   pt  = &mesh->tria[iel];
   ip  = pt->v[i1];
 
   jel = list[1] / 3;
   j2  = list[1] % 3;
-  jj  = iprv[j2];
+  jj  = _MMG5_iprv2[j2];
   pt1 = &mesh->tria[jel];
 
   /* update info */
@@ -406,8 +406,8 @@ int litcol(MMG5_pMesh mesh,int k,char i,double kali) {
 
   pt0 = &mesh->tria[0];
   pt  = &mesh->tria[k];
-  i1  = inxt[i];
-  i2  = iprv[i];
+  i1  = _MMG5_inxt2[i];
+  i2  = _MMG5_iprv2[i];
   ip2 = pt->v[i2];
 
   /* collect all triangles around vertex i1 */
@@ -427,8 +427,8 @@ int litcol(MMG5_pMesh mesh,int k,char i,double kali) {
     for (l=1; l<ilist-1+open; l++) {
       jel = list[l] / 3;
       j   = list[l] % 3;
-      jj  = inxt[j];
-      j2  = iprv[j];
+      jj  = _MMG5_inxt2[j];
+      j2  = _MMG5_iprv2[j];
       pt1 = &mesh->tria[jel];
 
       /* check normal flipping */
@@ -500,7 +500,7 @@ int litcol(MMG5_pMesh mesh,int k,char i,double kali) {
     if ( !open )  return(0);
     jel = list[1] / 3;
     j   = list[1] % 3;
-    jj  = inxt[j];
+    jj  = _MMG5_inxt2[j];
     pt1 = &mesh->tria[jel];
     if ( abs(pt->ref) != abs(pt1->ref) )  return(0);
     else if ( !(pt1->tag[jj] & MG_GEO) )  return(0);
