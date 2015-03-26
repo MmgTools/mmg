@@ -72,12 +72,6 @@ void MMG5_MMGS_Init_parameters(MMG5_pMesh mesh) {
   /** MMG5_DPARAM_hgrad = 0.1 */
   mesh->info.hgrad    = 0.1;      /* control gradation; */
 
-  // To treat...
-  mesh->info.badkal = 0;
-  mesh->info.nreg   = 0;
-  mesh->info.opt    = 1;
-  mesh->info.mani   = 1;
-
   /* initial value for memMax and gap */
   mesh->gap = 0.2;
   mesh->memMax = _MMG5_memSize();

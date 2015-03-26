@@ -192,7 +192,6 @@ static int setadj(MMG5_pMesh mesh){
     }
   }
 
-  mesh->info.ncc = ncc;
   if ( mesh->info.ddebug ) {
     fprintf(stdout,"  a- ridges: %d found.\n",nr);
     fprintf(stdout,"  a- connex: %d connected component(s)\n",ncc);
@@ -200,7 +199,6 @@ static int setadj(MMG5_pMesh mesh){
   }
   else if ( abs(mesh->info.imprim) > 4 ) {
     gen = (2 - mesh->np + ned - nt) / 2;
-    if ( !mesh->info.mani )  fprintf(stdout,"  ## [non-manifold model]\n");
     fprintf(stdout,"     Connected component: %d,  genus: %d,   reoriented: %d\n",ncc,gen,nf);
     fprintf(stdout,"     Edges: %d,  tagged: %d,  ridges: %d,  refs: %d\n",ned,nr+nre,nr,nre);
   }

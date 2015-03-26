@@ -75,9 +75,8 @@ static void usage(char *name) {
 
   fprintf(stdout,"\n**  Parameters\n");
   fprintf(stdout,"-ar val    angle detection\n");
-  fprintf(stdout,"-no        no mesh optimisation\n");
   fprintf(stdout,"-nr        no angle detection\n");
-  fprintf(stdout,"-nreg      nornal regul.\n");
+  fprintf(stdout,"-nreg      normal regul.\n");
   fprintf(stdout,"-hmin val  minimal mesh size\n");
   fprintf(stdout,"-hmax val  maximal mesh size\n");
   fprintf(stdout,"-hausd val control Hausdorff distance\n");
@@ -153,8 +152,6 @@ static int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
           mesh->info.dhd = -1.0;
         else if ( !strcmp(argv[i],"-nreg") )
           mesh->info.nreg = 1;
-        else if ( !strcmp(argv[i],"-no") )
-          mesh->info.opt = 0;
         break;
       case 'o':
         if ( !strcmp(argv[i],"-out") ) {

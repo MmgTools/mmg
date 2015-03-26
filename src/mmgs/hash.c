@@ -191,7 +191,6 @@ int hashTria(MMG5_pMesh mesh) {
       if ( !adja[i] )  mesh->point[pt->v[_MMG5_inxt2[i]]].s = k;
     }
   }
-  if ( nmf > 0 )  mesh->info.mani = 0;
 
   if ( (abs(mesh->info.imprim) > 5 || mesh->info.ddebug) && dup+nmf > 0 ) {
     fprintf(stdout,"  ## ");  fflush(stdout);

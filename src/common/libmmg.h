@@ -153,13 +153,11 @@ typedef MMG5_xTetra * MMG5_pxTetra;
 /**
  * \struct MMG5_Info
  * \brief Store input parameters of the run.
- * \todo Try to remove ncc, nreg, opt, mani from mmgs.
  */
 typedef struct {
   double        dhd,hmin,hmax,hgrad,hausd,min[3],max[3],delta,ls;
   int           mem,npar,npari;
-  int       ncc;
-  char      nreg,opt,mani;
+  char          nreg;
   int           renum;
   char          imprim,ddebug,badkal,iso,fem;
   unsigned char noinsert, noswap, nomove;
