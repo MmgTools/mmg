@@ -45,7 +45,7 @@
  * Initialization of the input parameters (stored in the Info structure).
  *
  */
-void MMG5_MMG3D_Init_parameters(MMG5_pMesh mesh) {
+void _MMG5_Init_parameters(MMG5_pMesh mesh) {
 
   memset(&mesh->info,0, sizeof(MMG5_Info));
 
@@ -111,7 +111,7 @@ void MMG5_MMG3D_Init_parameters(MMG5_pMesh mesh) {
  * Set the name of output mesh file.
  *
  */
-int MMG5_MMG3D_Set_outputMeshName(MMG5_pMesh mesh, char* meshout) {
+int _MMG5_Set_outputMeshName(MMG5_pMesh mesh, char* meshout) {
   char *ptr;
 
   if ( mesh->nameout )

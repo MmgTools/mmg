@@ -123,6 +123,11 @@ long long _MMG5_memSize(void);
 void _MMG5_memOption(MMG5_pMesh mesh);
 
 /* function pointers */
+/* init structures */
+void  _MMG5_Init_parameters(MMG5_pMesh mesh);
+/* init file names */
+int  _MMG5_Set_outputMeshName(MMG5_pMesh mesh, char* meshout);
+/* iso/aniso computations */
 double calelt_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel);
 double calelt_iso(MMG5_pMesh mesh,MMG5_pSol met,int iel);
 double caleltsig_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel);

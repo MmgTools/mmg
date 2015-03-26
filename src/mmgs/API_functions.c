@@ -46,7 +46,7 @@
  *
  * \todo try to remive paramters that do not coincide with mmg3d.
  */
-void MMG5_MMGS_Init_parameters(MMG5_pMesh mesh) {
+void _MMG5_Init_parameters(MMG5_pMesh mesh) {
 
   memset(&mesh->info,0, sizeof(MMG5_Info));
 
@@ -94,7 +94,7 @@ void MMG5_MMGS_Init_parameters(MMG5_pMesh mesh) {
  * Set the name of output mesh file.
  *
  */
-int MMG5_MMGS_Set_outputMeshName(MMG5_pMesh mesh, char* meshout) {
+int _MMG5_Set_outputMeshName(MMG5_pMesh mesh, char* meshout) {
   char *ptr;
 
   if ( mesh->nameout )

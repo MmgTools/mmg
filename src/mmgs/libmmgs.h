@@ -28,6 +28,7 @@
  * \version 5
  * \date 01 2014
  * \copyright GNU Lesser General Public License.
+ *
  */
 
 #ifndef _MMGSLIB_H
@@ -37,24 +38,5 @@
 
 /*----------------------------- functions header -----------------------------*/
 /** Initialization functions */
-/* init structures */
-/**
- * \param mesh pointer toward the mesh structure.
- *
- * Initialization of the input parameters (stored in the Info structure).
- *
- */
-void  MMG5_MMGS_Init_parameters(MMG5_pMesh mesh);
-
-/* init file names */
-/**
- * \param mesh pointer toward the mesh structure.
- * \param meshout name of the output mesh file.
- * \return 1.
- *
- * Set the name of output mesh file.
- *
- */
-int  MMG5_MMGS_Set_outputMeshName(MMG5_pMesh mesh, char* meshout);
 
 #endif
