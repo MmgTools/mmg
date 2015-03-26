@@ -354,6 +354,6 @@ double (*_MMG5_caltet)(MMG5_pMesh mesh,MMG5_pSol met,int ia,int ib,int ic,int id
 int    (*_MMG5_defsiz)(MMG5_pMesh ,MMG5_pSol );
 int    (*_MMG5_gradsiz)(MMG5_pMesh ,MMG5_pSol );
 
-void   _MMG5_MMG3D_Set_APIFunc();
+void   _MMG5_Set_APIFunc();
 
 #endif
