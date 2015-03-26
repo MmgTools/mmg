@@ -91,6 +91,8 @@ int hashTria(MMG5_pMesh mesh) {
   for (k=hash.siz; k<hash.max; k++)
     hash.item[k].nxt = k+1;
 
+  if ( mesh->info.ddebug )  fprintf(stdout,"  h- stage 1: init\n");
+
   /* hash triangles */
   mesh->base = 1;
   dup = nmf = 0;
