@@ -65,8 +65,8 @@ static void paktri(MMG5_pMesh mesh) {
 /* create adjacency */
 int hashTria(MMG5_pMesh mesh) {
   MMG5_pTria          pt,pt1;
-  MMG5_HGeom          hash;
-  MMG5_hgeom          *ph;
+  _MMG5_Hash          hash;
+  _MMG5_hedge         *ph;
   int                 *adja,k,jel,hmax,dup,nmf,ia,ib;
   char                i,i1,i2,j,ok;
   unsigned int        key;
@@ -88,11 +88,11 @@ int hashTria(MMG5_pMesh mesh) {
   hash.siz  = mesh->np;
   hash.max  = hmax + 1;
   hash.nxt  = hash.siz;
-  _MMG5_ADD_MEM(mesh,(hash.max+1)*sizeof(MMG5_hgeom),"hash table",return(0));
-  _MMG5_SAFE_CALLOC(hash.geom,hash.max+1,MMG5_hgeom);
+  _MMG5_ADD_MEM(mesh,(hash.max+1)*sizeof(_MMG5_hedge),"hash table",return(0));
+  _MMG5_SAFE_CALLOC(hash.item,hash.max+1,_MMG5_hedge);
 
   for (k=hash.siz; k<hash.max; k++)
-    hash.geom[k].nxt = k+1;
+    hash.item[k].nxt = k+1;
 
   /* hash triangles */
   mesh->base = 1;
@@ -112,7 +112,7 @@ int hashTria(MMG5_pMesh mesh) {
       ia  = MG_MIN(pt->v[i1],pt->v[i2]);
       ib  = MG_MAX(pt->v[i1],pt->v[i2]);
       key = (KA*ia + KB*ib) % hash.siz;
-      ph  = &hash.geom[key];
+      ph  = &hash.item[key];
 
       /* store edge */
       if ( ph->a == 0 ) {
@@ -150,7 +150,7 @@ int hashTria(MMG5_pMesh mesh) {
         }
         else if ( !ph->nxt ) {
           ph->nxt = hash.nxt;
-          ph = &hash.geom[ph->nxt];
+          ph = &hash.item[ph->nxt];
           assert(ph);
           hash.nxt = ph->nxt;
           ph->a = ia;
@@ -161,7 +161,7 @@ int hashTria(MMG5_pMesh mesh) {
           break;
         }
         else
-          ph = &hash.geom[ph->nxt];
+          ph = &hash.item[ph->nxt];
       }
       if ( !ok ) {
         ph->a = ia;
@@ -171,7 +171,7 @@ int hashTria(MMG5_pMesh mesh) {
       }
     }
   }
-  _MMG5_DEL_MEM(mesh,hash.geom,(hash.max+1)*sizeof(MMG5_hgeom));
+  _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
 
   /* set tag */
   for (k=1; k<=mesh->nt; k++) {
@@ -197,11 +197,10 @@ int hashTria(MMG5_pMesh mesh) {
   if ( (abs(mesh->info.imprim) > 5 || mesh->info.ddebug) && dup+nmf > 0 ) {
     fprintf(stdout,"  ## ");  fflush(stdout);
     if ( nmf > 0 )  fprintf(stdout,"[non-manifold model]  ");
-    if ( dup > 0 )  fprintf(stdout," %d duplicate removed\n",dup);
+    if ( dup > 0 )  fprintf(stdout," %d duplicate removed",dup);
     fprintf(stdout,"\n");
   }
   if ( mesh->info.ddebug )  fprintf(stdout,"  h- completed.\n");
-
   return(1);
 }
 

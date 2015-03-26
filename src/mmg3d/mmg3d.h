@@ -183,18 +183,6 @@ extern unsigned char _MMG5_isar[6][2]; /**< isar[i][]: vertices of extremities o
 extern unsigned char _MMG5_arpt[4][3]; /**< arpt[i]: edges passing through vertex i */
 
 
-
-/** used to hash edges */
-typedef struct {
-  int   a,b,nxt;
-  int   s,k; /** k = point along edge a b */
-} _MMG5_hedge;
-
-typedef struct {
-  int     siz,max,nxt;
-  _MMG5_hedge  *item;
-} _MMG5_Hash;
-
 typedef struct {
   int     size;
   int    *head;
