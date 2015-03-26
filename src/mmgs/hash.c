@@ -306,17 +306,17 @@ int assignEdge(MMG5_pMesh mesh) {
   return(1);
 }
 
-int _MMG5_hashNew(MMG5_pMesh mesh, _MMG5_Hash *hash,int hmax) {
+int _MMG5_hashNew(MMG5_pMesh mesh, _MMG5_Hash *hash,int hsiz,int hmax) {
   int   k;
 
   /* adjust hash table params */
-  hash->siz  = hmax;
-  hash->max  = 3*hmax + 1;
+  hash->siz  = hsiz;
+  hash->max  = hmax + 1;
   _MMG5_ADD_MEM(mesh,(hash->max+1)*sizeof(_MMG5_hedge),"hash table",return(0));
   _MMG5_SAFE_CALLOC(hash->item,hash->max+1,_MMG5_hedge);
 
-  hash->nxt  = hmax;
-  for (k=hmax; k<hash->max; k++)
+  hash->nxt  = hsiz;
+  for (k=hsiz; k<hash->max; k++)
     hash->item[k].nxt = k+1;
 
   return(1);

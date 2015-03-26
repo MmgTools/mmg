@@ -271,7 +271,7 @@ static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
   char          i1,i2;
   static double uv[3][2] = { {0.5,0.5}, {0.,0.5}, {0.5,0.} };
 
-  _MMG5_hashNew(mesh,&hash,mesh->np);
+  _MMG5_hashNew(mesh,&hash,mesh->np,3*mesh->np);
   ns = 0;
   s  = 0.5;
   for (k=1; k<=mesh->nt; k++) {

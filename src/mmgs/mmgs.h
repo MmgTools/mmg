@@ -75,7 +75,7 @@ int  boulep(MMG5_pMesh mesh,int start,int ip,int *list);
 int  boulec(MMG5_pMesh mesh,int k,int i,double *tt);
 int  bouler(MMG5_pMesh mesh,int k,int i,int *list,int *xp,int *nr);
 int  bouletrid(MMG5_pMesh mesh,int start,int ip,int *il1,int *l1,int *il2,int *l2,int *ip0,int *ip1);
-int  _MMG5_hashNew(MMG5_pMesh mesh, _MMG5_Hash *hash,int hmax);
+int  _MMG5_hashNew(MMG5_pMesh mesh, _MMG5_Hash *hash,int hsiz, int hmax);
 int  hashGet(_MMG5_Hash *hash,int a,int b);
 int  hashEdge(MMG5_pMesh mesh,_MMG5_Hash *hash,int a,int b,int k);
 int  newPt(MMG5_pMesh mesh,double c[3],double n[3]);
