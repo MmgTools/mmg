@@ -47,6 +47,9 @@
  * \todo try to remive paramters that do not coincide with mmg3d.
  */
 void MMG5_MMGS_Init_parameters(MMG5_pMesh mesh) {
+
+  memset(&mesh->info,0, sizeof(MMG5_Info));
+
   /* default values for integers */
   /** MMG5_IPARAM_verbose = -99 */
   mesh->info.imprim   =  -99;  /* [-10..10],Tune level of imprim */

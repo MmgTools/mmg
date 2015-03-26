@@ -358,7 +358,7 @@ int main(int argc,char *argv[]) {
   fprintf(stdout,"     %s %s\n",__DATE__,__TIME__);
 
   setfunc(&mesh,&met);
-  
+
   /* trap exceptions */
   signal(SIGABRT,excfun);
   signal(SIGFPE,excfun);
@@ -375,33 +375,9 @@ int main(int argc,char *argv[]) {
   memset(&mesh,0,sizeof(MMG5_Mesh));
   memset(&met,0,sizeof(MMG5_Sol));
 
-  memset(&mesh,0,sizeof(MMG5_Mesh));
-  memset(&met,0,sizeof(MMG5_Sol));
-  mesh.info.imprim = -99;
-  mesh.info.ddebug = 0;
-  mesh.info.mem    = -1;
-  mesh.info.dhd    = _MMG5_ANGEDG;
-  mesh.info.hmin   = 0.0;
-  mesh.info.hmax   = FLT_MAX;
-  mesh.info.hausd  = 0.01;
-  mesh.info.hgrad  = 0.1;
-  mesh.info.badkal = 0;
-  mesh.info.nreg   = 0;
-  mesh.info.opt    = 1;
-  mesh.info.mani   = 1;
+  MMG5_Init_parameters(&mesh);
+  
   met.size    = 1;
-
-  /* initial value for memMax and gap */
-  mesh.gap = 0.2;
-  mesh.memMax = _MMG5_memSize();
-  if ( mesh.memMax )
-    /* maximal memory = 50% of total physical memory */
-    mesh.memMax = mesh.memMax*50/100;
-  else {
-    /* default value = 800 Mo */
-    printf("  Maximum memory set to default value: %d Mo.\n",_MMG5_MEMMAX);
-    mesh.memMax = _MMG5_MEMMAX << 20;
-  }
 
   /* command line */
   if ( !parsar(argc,argv,&mesh,&met) )  return(1);

@@ -47,6 +47,8 @@
  */
 void MMG5_MMG3D_Init_parameters(MMG5_pMesh mesh) {
 
+  memset(&mesh->info,0, sizeof(MMG5_Info));
+
   /* default values for integers */
   /** MMG5_IPARAM_verbose = 4 */
   mesh->info.imprim   =  4;  /* [-10..10],Tune level of imprim */
