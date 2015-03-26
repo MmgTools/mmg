@@ -238,10 +238,7 @@ int  _MMG5_colver(MMG5_pMesh,int *,int,char);
 int  _MMG5_analys(MMG5_pMesh mesh);
 int  _MMG5_hashTetra(MMG5_pMesh mesh, int pack);
 int  _MMG5_hashTria(MMG5_pMesh mesh);
-int  _MMG5_hashEdge(MMG5_pMesh mesh,_MMG5_Hash *hash,int a,int b,int k);
-int  _MMG5_hashGet(_MMG5_Hash *hash,int a,int b);
 int  _MMG5_hashPop(_MMG5_Hash *hash,int a,int b);
-int  _MMG5_hashNew(MMG5_pMesh mesh, _MMG5_Hash *hash,int hsiz,int hmax);
 int  _MMG5_hPop(MMG5_HGeom *hash,int a,int b,int *ref,char *tag);
 int  _MMG5_hTag(MMG5_HGeom *hash,int a,int b,int ref,char tag);
 int  _MMG5_hGet(MMG5_HGeom *hash,int a,int b,int *ref,char *tag);
@@ -356,5 +353,7 @@ int    _MMG5_gradsiz_ani(MMG5_pMesh ,MMG5_pSol );
 double (*_MMG5_caltet)(MMG5_pMesh mesh,MMG5_pSol met,int ia,int ib,int ic,int id);
 int    (*_MMG5_defsiz)(MMG5_pMesh ,MMG5_pSol );
 int    (*_MMG5_gradsiz)(MMG5_pMesh ,MMG5_pSol );
+
+void   _MMG5_MMG3D_Set_APIFunc();
 
 #endif

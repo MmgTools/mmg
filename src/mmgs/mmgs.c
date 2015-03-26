@@ -340,6 +340,12 @@ static void setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
     movintpt= movintpt_ani;
     movridpt= movridpt_ani;
   }
+}
+
+/**
+ * Set API pointer functions to the matching mmgs function.
+ */
+static void _MMG5_MMGS_Set_APIFunc() {
   MMG5_Set_outputMeshName = MMG5_MMGS_Set_outputMeshName;
   MMG5_Init_parameters = MMG5_MMGS_Init_parameters;
 }
@@ -354,7 +360,7 @@ int main(int argc,char *argv[]) {
   fprintf(stdout,"     %s\n",MG_CPY);
   fprintf(stdout,"     %s %s\n",__DATE__,__TIME__);
 
-  setfunc(&mesh,&met);
+  _MMG5_MMGS_Set_APIFunc();
 
   /* trap exceptions */
   signal(SIGABRT,excfun);
@@ -382,6 +388,8 @@ int main(int argc,char *argv[]) {
   /* load data */
   fprintf(stdout,"\n  -- INPUT DATA\n");
   chrono(ON,&MMG5_ctim[1]);
+  setfunc(&mesh,&met);
+
   if ( !loadMesh(&mesh) )  return(1);
   met.npmax = mesh.npmax;
   met.dim   = 3;

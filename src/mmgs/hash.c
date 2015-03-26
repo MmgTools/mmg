@@ -188,7 +188,9 @@ int hashTria(MMG5_pMesh mesh) {
     pt   = &mesh->tria[k];
     adja = &mesh->adja[3*(k-1)+1];
     for (i=0; i<3; i++) {
-      if ( !adja[i] )  mesh->point[pt->v[_MMG5_inxt2[i]]].s = k;
+      if ( !adja[i] ) {
+        mesh->point[pt->v[_MMG5_inxt2[i]]].s = k;
+      }
     }
   }
 
