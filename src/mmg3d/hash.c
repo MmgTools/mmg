@@ -342,11 +342,8 @@ int _MMG5_hashEdge(MMG5_pMesh mesh,_MMG5_Hash *hash, int a,int b,int k) {
     }
     ph->nxt   = hash->nxt;
     ph        = &hash->item[hash->nxt];
-    ph->a     = ia;
-    ph->b     = ib;
-    ph->k     = k;
     hash->nxt = ph->nxt;
-    ph->nxt   = 0;
+
     if ( hash->nxt >= hash->max ) {
       if ( mesh->info.ddebug )
         fprintf(stdout,"  ## Memory alloc problem (edge): %d\n",hash->max);

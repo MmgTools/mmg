@@ -204,36 +204,34 @@ int hashTria(MMG5_pMesh mesh) {
   return(1);
 }
 
-int hashEdge(MMG5_pMesh mesh, MMG5_HGeom *hash,int a,int b,int k) {
-  MMG5_hgeom  *ph;
-  int         j,key,ia,ib;
+int _MMG5_hashEdge(MMG5_pMesh mesh,_MMG5_Hash *hash, int a,int b,int k) {
+  _MMG5_hedge  *ph;
+  int          key,ia,ib,j;
 
   ia  = MG_MIN(a,b);
   ib  = MG_MAX(a,b);
   key = (KA*ia + KB*ib) % hash->siz;
-  ph  = &hash->geom[key];
+  ph  = &hash->item[key];
 
   if ( ph->a == ia && ph->b == ib )
     return(1);
   else if ( ph->a ) {
     while ( ph->nxt && ph->nxt < hash->max ) {
-      ph = &hash->geom[ph->nxt];
+      ph = &hash->item[ph->nxt];
       if ( ph->a == ia && ph->b == ib )  return(1);
     }
-
     ph->nxt   = hash->nxt;
-    ph        = &hash->geom[hash->nxt];
+    ph        = &hash->item[hash->nxt];
     hash->nxt = ph->nxt;
 
     if ( hash->nxt >= hash->max ) {
       if ( mesh->info.ddebug )
         fprintf(stdout,"  ## Memory alloc problem (edge): %d\n",hash->max);
-      _MMG5_TAB_RECALLOC(mesh,hash->geom,hash->max,0.2,MMG5_hgeom,
-                         "MMG5_hgeom",return(0));
-      for (j=hash->nxt; j<hash->max; j++) hash->geom[j].nxt = j+1;
+      _MMG5_TAB_RECALLOC(mesh,hash->item,hash->max,0.2,_MMG5_hedge,
+                         "_MMG5_edge",return(0));
+      for (j=hash->nxt; j<hash->max; j++)  hash->item[j].nxt = j+1;
     }
   }
-
   /* insert new edge */
   ph->a = ia;
   ph->b = ib;
