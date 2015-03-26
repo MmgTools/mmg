@@ -91,8 +91,11 @@
 #define MG_CLR(flag,bit) ((flag) &= ~(1 << (bit))) /**< bit number bit is set to 0 */
 #define MG_GET(flag,bit) ((flag) & (1 << (bit)))   /**< return bit number bit value */
 
-/* Macros for memory management */
+#define _MMG5_KA 7 /*!< Key for hash tables. */
+#define _MMG5_KB 11  /*!< Key for hash tables. */
 
+
+/* Macros for memory management */
 /** Check if used memory overflow maximal authorized memory.
     Execute the command law if lack of memory. */
 #define _MMG5_CHK_MEM(mesh,size,string,law) do                          \
@@ -286,11 +289,13 @@ typedef struct {
 
 
 /* Functions declarations */
-int  _MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met);
-int  _MMG5_unscaleMesh(MMG5_pMesh mesh,MMG5_pSol met);
-
 int _MMG5_buildridmet(MMG5_pMesh mesh,MMG5_pSol met,int np0,
                       double ux,double uy,double uz,double mr[6]);
+int  _MMG5_hashEdge(MMG5_pMesh mesh,_MMG5_Hash *hash,int a,int b,int k);
+int  _MMG5_hashGet(_MMG5_Hash *hash,int a,int b);
+int  _MMG5_hashNew(MMG5_pMesh mesh, _MMG5_Hash *hash,int hsiz,int hmax);
+int  _MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met);
+int  _MMG5_unscaleMesh(MMG5_pMesh mesh,MMG5_pSol met);
 
 /* function pointers */
 double _MMG5_lenedg_iso(MMG5_pMesh ,MMG5_pSol ,int ,int, char );

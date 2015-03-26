@@ -35,8 +35,6 @@
 
 #include "mmg3d.h"
 
-#define KA     7
-#define KB    11
 #define KC    13
 
 extern char  ddb;
@@ -133,7 +131,7 @@ int _MMG5_hashTetra(MMG5_pMesh mesh, int pack) {
 
       /* compute key and insert */
       sum = pt->v[i1] + pt->v[i2] + pt->v[i3];
-      key = KA*mins + KB*maxs + KC*sum;
+      key = _MMG5_KA*mins + _MMG5_KB*maxs + KC*sum;
       key = key % hsize + 1;
       iadr++;
       link[iadr] = hcode[key];
@@ -231,7 +229,7 @@ int _MMG5_hashTria(MMG5_pMesh mesh) {
       /* compute key */
       ia  = MG_MIN(pt->v[i1],pt->v[i2]);
       ib  = MG_MAX(pt->v[i1],pt->v[i2]);
-      key = (KA*ia + KB*ib) % hash.siz;
+      key = (_MMG5_KA*ia + _MMG5_KB*ib) % hash.siz;
       ph  = &hash.item[key];
 
       /* store edge */
@@ -324,61 +322,6 @@ int _MMG5_hashTria(MMG5_pMesh mesh) {
   return(1);
 }
 
-int _MMG5_hashEdge(MMG5_pMesh mesh,_MMG5_Hash *hash, int a,int b,int k) {
-  _MMG5_hedge  *ph;
-  int          key,ia,ib,j;
-
-  ia  = MG_MIN(a,b);
-  ib  = MG_MAX(a,b);
-  key = (KA*ia + KB*ib) % hash->siz;
-  ph  = &hash->item[key];
-
-  if ( ph->a == ia && ph->b == ib )
-    return(1);
-  else if ( ph->a ) {
-    while ( ph->nxt && ph->nxt < hash->max ) {
-      ph = &hash->item[ph->nxt];
-      if ( ph->a == ia && ph->b == ib )  return(1);
-    }
-    ph->nxt   = hash->nxt;
-    ph        = &hash->item[hash->nxt];
-    hash->nxt = ph->nxt;
-
-    if ( hash->nxt >= hash->max ) {
-      if ( mesh->info.ddebug )
-        fprintf(stdout,"  ## Memory alloc problem (edge): %d\n",hash->max);
-      _MMG5_TAB_RECALLOC(mesh,hash->item,hash->max,0.2,_MMG5_hedge,
-                         "_MMG5_edge",return(0));
-      for (j=hash->nxt; j<hash->max; j++)  hash->item[j].nxt = j+1;
-    }
-  }
-  /* insert new edge */
-  ph->a = ia;
-  ph->b = ib;
-  ph->k = k;
-  ph->nxt = 0;
-
-  return(1);
-}
-
-/** return index of point stored along (ia,ib) */
-int _MMG5_hashGet(_MMG5_Hash *hash,int a,int b) {
-  _MMG5_hedge  *ph;
-  int          key,ia,ib;
-
-  ia  = MG_MIN(a,b);
-  ib  = MG_MAX(a,b);
-  key = (KA*ia + KB*ib) % hash->siz;
-  ph  = &hash->item[key];
-
-  if ( !ph->a )  return(0);
-  if ( ph->a == ia && ph->b == ib )  return(ph->k);
-  while ( ph->nxt ) {
-    ph = &hash->item[ph->nxt];
-    if ( ph->a == ia && ph->b == ib )  return(ph->k);
-  }
-  return(0);
-}
 
 
 /** remove edge from hash table */
@@ -388,7 +331,7 @@ int _MMG5_hashPop(_MMG5_Hash *hash,int a,int b) {
 
   ia  = MG_MIN(a,b);
   ib  = MG_MAX(a,b);
-  key = (KA*ia + KB*ib) % hash->siz;
+  key = (_MMG5_KA*ia + _MMG5_KB*ib) % hash->siz;
   ph  = &hash->item[key];
 
   if ( !ph->a ) return(0);
@@ -432,24 +375,6 @@ int _MMG5_hashPop(_MMG5_Hash *hash,int a,int b) {
   return(0);
 }
 
-/** used to hash edges or faces */
-int _MMG5_hashNew(MMG5_pMesh mesh,_MMG5_Hash *hash,int hsiz,int hmax) {
-  int   k;
-
-  /* adjust hash table params */
-  hash->siz  = hsiz;
-  hash->max  = hmax + 1;
-  hash->nxt  = hsiz;
-
-  _MMG5_ADD_MEM(mesh,(hash->max+1)*sizeof(_MMG5_hedge),"hash table",
-                return(0));
-  _MMG5_SAFE_CALLOC(hash->item,hmax+2,_MMG5_hedge);
-
-  for (k=hsiz; k<hash->max; k++)
-    hash->item[k].nxt = k+1;
-
-  return(1);
-}
 
 /** set tag to edge on geometry */
 int _MMG5_hTag(MMG5_HGeom *hash,int a,int b,int ref,char tag) {
@@ -458,7 +383,7 @@ int _MMG5_hTag(MMG5_HGeom *hash,int a,int b,int ref,char tag) {
 
   ia  = MG_MIN(a,b);
   ib  = MG_MAX(a,b);
-  key = (KA*ia + KB*ib) % hash->siz;
+  key = (_MMG5_KA*ia + _MMG5_KB*ib) % hash->siz;
   ph  = &hash->geom[key];
 
   if ( !ph->a )
@@ -490,7 +415,7 @@ int _MMG5_hPop(MMG5_HGeom *hash,int a,int b,int *ref,char *tag) {
 
   ia  = MG_MIN(a,b);
   ib  = MG_MAX(a,b);
-  key = (KA*ia + KB*ib) % hash->siz;
+  key = (_MMG5_KA*ia + _MMG5_KB*ib) % hash->siz;
   ph  = &hash->geom[key];
 
   if ( !ph->a )  return(0);
@@ -547,7 +472,7 @@ int _MMG5_hGet(MMG5_HGeom *hash,int a,int b,int *ref,char *tag) {
   if ( !hash->siz )  return(0);
   ia  = MG_MIN(a,b);
   ib  = MG_MAX(a,b);
-  key = (KA*ia + KB*ib) % hash->siz;
+  key = (_MMG5_KA*ia + _MMG5_KB*ib) % hash->siz;
   ph  = &hash->geom[key];
 
   if ( !ph->a )  return(0);
@@ -575,7 +500,7 @@ void _MMG5_hEdge(MMG5_pMesh mesh,int a,int b,int ref,char tag) {
   if ( !mesh->htab.siz )  return;
   ia  = MG_MIN(a,b);
   ib  = MG_MAX(a,b);
-  key = (KA*ia + KB*ib) % mesh->htab.siz;
+  key = (_MMG5_KA*ia + _MMG5_KB*ib) % mesh->htab.siz;
   ph  = &mesh->htab.geom[key];
 
   if ( ph->a == ia && ph->b == ib )
@@ -861,7 +786,7 @@ static int _MMG5_hashFace(MMG5_pMesh mesh,_MMG5_Hash *hash,int ia,int ib,int ic,
 
   /* compute key */
   sum = ia + ib + ic;
-  key = (KA*mins + KB*maxs) % hash->siz;
+  key = (_MMG5_KA*mins + _MMG5_KB*maxs) % hash->siz;
   ph  = &hash->item[key];
 
   if ( ph->a ) {
@@ -910,7 +835,7 @@ static int _MMG5_hashGetFace(_MMG5_Hash *hash,int ia,int ib,int ic) {
 
   /* compute key */
   sum = ia + ib + ic;
-  key = (KA*mins + KB*maxs) % hash->siz;
+  key = (_MMG5_KA*mins + _MMG5_KB*maxs) % hash->siz;
   ph  = &hash->item[key];
 
   if ( ph->a ) {

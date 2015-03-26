@@ -306,7 +306,7 @@ static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
       i2  = _MMG5_iprv2[i];
       ip1 = pt->v[i1];
       ip2 = pt->v[i2];
-      ip = hashGet(&hash,ip1,ip2);
+      ip = _MMG5_hashGet(&hash,ip1,ip2);
       if ( !MG_EDG(pt->tag[i]) && ip > 0 )  continue;
 
       /* new point along edge */
@@ -314,7 +314,7 @@ static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
       if ( !ip ) {
         ip = newPt(mesh,o,MG_EDG(pt->tag[i]) ? to : no);
         assert(ip);
-        hashEdge(mesh,&hash,ip1,ip2,ip);
+        _MMG5_hashEdge(mesh,&hash,ip1,ip2,ip);
         p1  = &mesh->point[ip1];
         p2  = &mesh->point[ip2];
         ppt = &mesh->point[ip];
@@ -387,7 +387,7 @@ static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
       i1 = _MMG5_inxt2[i];
       i2 = _MMG5_inxt2[i1];
       if ( !MG_GET(pt->flag,i) && !MS_SIN(pt->tag[i]) ) {
-        ip = hashGet(&hash,pt->v[i1],pt->v[i2]);
+        ip = _MMG5_hashGet(&hash,pt->v[i1],pt->v[i2]);
         if ( ip > 0 ) {
           MG_SET(pt->flag,i);
           nc++;
@@ -436,7 +436,7 @@ static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
       i1 = _MMG5_inxt2[i];
       i2 = _MMG5_inxt2[i1];
       if ( MG_GET(pt->flag,i) ) {
-        vx[i] = hashGet(&hash,pt->v[i1],pt->v[i2]);
+        vx[i] = _MMG5_hashGet(&hash,pt->v[i1],pt->v[i2]);
         assert(vx[i]);
         j = i;
       }

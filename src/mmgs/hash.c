@@ -35,9 +35,6 @@
 
 #include "mmgs.h"
 
-#define KA     7
-#define KB     11
-
 /* tria packing */
 static void paktri(MMG5_pMesh mesh) {
   MMG5_pTria   pt,pt1;
@@ -111,7 +108,7 @@ int hashTria(MMG5_pMesh mesh) {
       /* compute key */
       ia  = MG_MIN(pt->v[i1],pt->v[i2]);
       ib  = MG_MAX(pt->v[i1],pt->v[i2]);
-      key = (KA*ia + KB*ib) % hash.siz;
+      key = (_MMG5_KA*ia + _MMG5_KB*ib) % hash.siz;
       ph  = &hash.item[key];
 
       /* store edge */
@@ -204,61 +201,6 @@ int hashTria(MMG5_pMesh mesh) {
   return(1);
 }
 
-int hashEdge(MMG5_pMesh mesh,_MMG5_Hash *hash, int a,int b,int k) {
-  _MMG5_hedge  *ph;
-  int          key,ia,ib,j;
-
-  ia  = MG_MIN(a,b);
-  ib  = MG_MAX(a,b);
-  key = (KA*ia + KB*ib) % hash->siz;
-  ph  = &hash->item[key];
-
-  if ( ph->a == ia && ph->b == ib )
-    return(1);
-  else if ( ph->a ) {
-    while ( ph->nxt && ph->nxt < hash->max ) {
-      ph = &hash->item[ph->nxt];
-      if ( ph->a == ia && ph->b == ib )  return(1);
-    }
-    ph->nxt   = hash->nxt;
-    ph        = &hash->item[hash->nxt];
-    hash->nxt = ph->nxt;
-
-    if ( hash->nxt >= hash->max ) {
-      if ( mesh->info.ddebug )
-        fprintf(stdout,"  ## Memory alloc problem (edge): %d\n",hash->max);
-      _MMG5_TAB_RECALLOC(mesh,hash->item,hash->max,0.2,_MMG5_hedge,
-                         "_MMG5_edge",return(0));
-      for (j=hash->nxt; j<hash->max; j++)  hash->item[j].nxt = j+1;
-    }
-  }
-  /* insert new edge */
-  ph->a = ia;
-  ph->b = ib;
-  ph->k = k;
-  ph->nxt = 0;
-
-  return(1);
-}
-
-int hashGet(_MMG5_Hash *hash,int a,int b) {
-  _MMG5_hedge  *ph;
-  int          key,ia,ib;
-
-  ia  = MG_MIN(a,b);
-  ib  = MG_MAX(a,b);
-  key = (KA*ia + KB*ib) % hash->siz;
-  ph  = &hash->item[key];
-
-  if ( !ph->a )  return(0);
-  if ( ph->a == ia && ph->b == ib )  return(ph->k);
-  while ( ph->nxt ) {
-    ph = &hash->item[ph->nxt];
-    if ( ph->a == ia && ph->b == ib )  return(ph->k);
-  }
-  return(0);
-}
-
 /* store edges in hash table */
 int assignEdge(MMG5_pMesh mesh) {
   _MMG5_Hash  hash;
@@ -280,7 +222,7 @@ int assignEdge(MMG5_pMesh mesh) {
 
   /* hash mesh edges */
   for (k=1; k<=mesh->na; k++)
-    hashEdge(mesh,&hash,mesh->edge[k].a,mesh->edge[k].b,k);
+    _MMG5_hashEdge(mesh,&hash,mesh->edge[k].a,mesh->edge[k].b,k);
 
   /* set references to triangles */
   for (k=1; k<=mesh->nt; k++) {
@@ -289,7 +231,7 @@ int assignEdge(MMG5_pMesh mesh) {
 
     for (i=0; i<3; i++) {
       i1 = _MMG5_inxt2[i];
-      ia = hashGet(&hash,pt->v[i],pt->v[i1]);
+      ia = _MMG5_hashGet(&hash,pt->v[i],pt->v[i1]);
       if ( ia ) {
         i2 = _MMG5_inxt2[i1];
         pa = &mesh->edge[ia];
@@ -302,22 +244,6 @@ int assignEdge(MMG5_pMesh mesh) {
   /* reset edge structure */
   _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
   _MMG5_DEL_MEM(mesh,mesh->edge,(mesh->na+1)*sizeof(MMG5_Edge));
-
-  return(1);
-}
-
-int _MMG5_hashNew(MMG5_pMesh mesh, _MMG5_Hash *hash,int hsiz,int hmax) {
-  int   k;
-
-  /* adjust hash table params */
-  hash->siz  = hsiz;
-  hash->max  = hmax + 1;
-  _MMG5_ADD_MEM(mesh,(hash->max+1)*sizeof(_MMG5_hedge),"hash table",return(0));
-  _MMG5_SAFE_CALLOC(hash->item,hash->max+1,_MMG5_hedge);
-
-  hash->nxt  = hsiz;
-  for (k=hsiz; k<hash->max; k++)
-    hash->item[k].nxt = k+1;
 
   return(1);
 }
