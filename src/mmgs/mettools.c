@@ -186,7 +186,7 @@ double surftri_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel) {
     np[i] = pt->v[i];
     p[i]  = &mesh->point[np[i]];
   }
-  if ( !bezierCP(mesh,iel,&b) ) return(0.0);
+  if ( !_MMG5_bezierCP(mesh,pt,&b,1) ) return(0.0);
 
   /* Set metric tensors at vertices of tria iel */
   for(i=0; i<3; i++) {

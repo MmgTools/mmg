@@ -37,17 +37,28 @@
 
 extern char ddb;
 
-/* return Bezier control points on triangle iel (cf. Vlachos) */
-int bezierCP(MMG5_pMesh mesh,int iel,_MMG5_pBezier pb) {
-  MMG5_pTria     pt;
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param pt pointer toward the triangle structure.
+ * \param pb pointer toward the computed Bezier structure.
+ * \param ori triangle orientation.
+ * \return 1.
+ *
+ * Compute Bezier control points on triangle \a pt (cf. Vlachos)
+ *
+ */
+int _MMG5_bezierCP(MMG5_pMesh mesh,MMG5_Tria *pt,_MMG5_pBezier pb,char ori) {
   MMG5_pPoint    p[3];
-  double   *n1,*n2,nt[3],ps,ps2,dd,ux,uy,uz;
+  double   *n1,*n2,nt[3],ps,ps2,dd,ux,uy,uz,l,ll;
+  int       ia,ib,ic;
   char      i,i1,i2;
 
-  pt   = &mesh->tria[iel];
-  p[0] = &mesh->point[pt->v[0]];
-  p[1] = &mesh->point[pt->v[1]];
-  p[2] = &mesh->point[pt->v[2]];
+  ia   = pt->v[0];
+  ib   = pt->v[1];
+  ic   = pt->v[2];
+  p[0] = &mesh->point[ia];
+  p[1] = &mesh->point[ib];
+  p[2] = &mesh->point[ic];
 
   memset(pb,0,sizeof(_MMG5_Bezier));
 
@@ -58,9 +69,19 @@ int bezierCP(MMG5_pMesh mesh,int iel,_MMG5_pBezier pb) {
 
     if ( MS_SIN(p[i]->tag) ) {
       nortri(mesh,pt,pb->n[i]);
+      if ( !ori ) {
+        pb->n[i][0] *= -1.0;
+        pb->n[i][1] *= -1.0;
+        pb->n[i][2] *= -1.0;
+      }
     }
     else if ( MG_EDG(p[i]->tag) ) {
       nortri(mesh,pt,nt);
+      if ( !ori ) {
+        pb->n[i][0] *= -1.0;
+        pb->n[i][1] *= -1.0;
+        pb->n[i][2] *= -1.0;
+      }
       n1 = &mesh->xpoint[p[i]->ig].n1[0];
       n2 = &mesh->xpoint[p[i]->ig].n2[0];
 
@@ -79,11 +100,14 @@ int bezierCP(MMG5_pMesh mesh,int iel,_MMG5_pBezier pb) {
   /* compute control points along edges */
   for (i=0; i<3; i++) {
     i1 = _MMG5_inxt2[i];
-    i2 = _MMG5_inxt2[i1];
+    i2 = _MMG5_iprv2[i];
 
     ux = p[i2]->c[0] - p[i1]->c[0];
     uy = p[i2]->c[1] - p[i1]->c[1];
     uz = p[i2]->c[2] - p[i1]->c[2];
+
+    ll = ux*ux + uy*uy + uz*uz;   // A PROTEGER !!!!
+    l = sqrt(ll);
 
     /* choose normals */
     n1 = pb->n[i1];
@@ -118,7 +142,7 @@ int bezierCP(MMG5_pMesh mesh,int iel,_MMG5_pBezier pb) {
 
       /* tangent evaluation */
       ps = ux*(pb->t[i1][0]+pb->t[i2][0]) + uy*(pb->t[i1][1]+pb->t[i2][1]) + uz*(pb->t[i1][2]+pb->t[i2][2]);
-      ps = 2.0*ps / (ux*ux + uy*uy + uz*uz);
+      ps = 2.0 * ps / ll;
       pb->t[i+3][0] = pb->t[i1][0] + pb->t[i2][0] - ps*ux;
       pb->t[i+3][1] = pb->t[i1][1] + pb->t[i2][1] - ps*uy;
       pb->t[i+3][2] = pb->t[i1][2] + pb->t[i2][2] - ps*uz;
@@ -130,6 +154,7 @@ int bezierCP(MMG5_pMesh mesh,int iel,_MMG5_pBezier pb) {
         pb->t[i+3][2] *= dd;
       }
     }
+
     else { /* internal edge */
       ps = ux*n1[0] + uy*n1[1] + uz*n1[2];
       pb->b[2*i+3][0] = (2.0*p[i1]->c[0] + p[i2]->c[0] - ps*n1[0]) / 3.0;
@@ -144,7 +169,7 @@ int bezierCP(MMG5_pMesh mesh,int iel,_MMG5_pBezier pb) {
 
     /* normal evaluation */
     ps = ux*(n1[0]+n2[0]) + uy*(n1[1]+n2[1]) + uz*(n1[2]+n2[2]);
-    ps = 2.0*ps / (ux*ux + uy*uy + uz*uz);
+    ps = 2.0*ps / ll;
     pb->n[i+3][0] = n1[0] + n2[0] - ps*ux;
     pb->n[i+3][1] = n1[1] + n2[1] - ps*uy;
     pb->n[i+3][2] = n1[2] + n2[2] - ps*uz;
@@ -159,11 +184,11 @@ int bezierCP(MMG5_pMesh mesh,int iel,_MMG5_pBezier pb) {
 
   /* Central Bezier coefficient */
   for (i=0; i<3; i++) {
-    pb->b[9][0] -= (0.5*_MMG5_ATHIRD*pb->b[i][0]);
-    pb->b[9][1] -= (0.5*_MMG5_ATHIRD*pb->b[i][1]);
-    pb->b[9][2] -= (0.5*_MMG5_ATHIRD*pb->b[i][2]);
+    dd = 0.5 / 3.0;
+    pb->b[9][0] -= dd * pb->b[i][0];
+    pb->b[9][1] -= dd * pb->b[i][1];
+    pb->b[9][2] -= dd * pb->b[i][2];
   }
-
   for (i=0; i<3; i++) {
     pb->b[9][0] += 0.25 * (pb->b[2*i+3][0] + pb->b[2*i+4][0]);
     pb->b[9][1] += 0.25 * (pb->b[2*i+3][1] + pb->b[2*i+4][1]);
