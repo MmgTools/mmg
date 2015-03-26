@@ -380,6 +380,7 @@ int _MMG5_hashGet(_MMG5_Hash *hash,int a,int b) {
   return(0);
 }
 
+
 /** remove edge from hash table */
 int _MMG5_hashPop(_MMG5_Hash *hash,int a,int b) {
   _MMG5_hedge  *ph,*php;

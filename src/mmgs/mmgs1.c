@@ -263,12 +263,12 @@ static int movtri(MMG5_pMesh mesh,MMG5_pSol met,int maxit) {
 static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
   MMG5_pTria    pt;
   MMG5_pPoint   ppt,p1,p2;
-  MMG5_HGeom     hash;
-  _MMG5_Bezier   pb;
-  MMG5_pxPoint    go;
-  double   s,o[3],no[3],to[3],dd,len;
-  int      vx[3],i,j,ip,ip1,ip2,ier,k,ns,nc,nt;
-  char     i1,i2;
+  _MMG5_Hash    hash;
+  _MMG5_Bezier  pb;
+  MMG5_pxPoint  go;
+  double        s,o[3],no[3],to[3],dd,len;
+  int           vx[3],i,j,ip,ip1,ip2,ier,k,ns,nc,nt;
+  char          i1,i2;
   static double uv[3][2] = { {0.5,0.5}, {0.,0.5}, {0.5,0.} };
 
   _MMG5_hashNew(mesh,&hash,mesh->np);
@@ -368,7 +368,7 @@ static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
     }
   }
   if ( !ns ) {
-    _MMG5_DEL_MEM(mesh,hash.geom,(hash.max+1)*sizeof(MMG5_hgeom));
+    _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
     return(ns);
   }
 
@@ -459,7 +459,7 @@ static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
   }
   if ( (mesh->info.ddebug || abs(mesh->info.imprim) > 5) && ns > 0 )
     fprintf(stdout,"     %7d splitted\n",ns);
-  _MMG5_DEL_MEM(mesh,hash.geom,(hash.max+1)*sizeof(MMG5_hgeom));
+  _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
 
   return(ns);
 }

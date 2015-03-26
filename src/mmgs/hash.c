@@ -204,7 +204,7 @@ int hashTria(MMG5_pMesh mesh) {
   return(1);
 }
 
-int _MMG5_hashEdge(MMG5_pMesh mesh,_MMG5_Hash *hash, int a,int b,int k) {
+int hashEdge(MMG5_pMesh mesh,_MMG5_Hash *hash, int a,int b,int k) {
   _MMG5_hedge  *ph;
   int          key,ia,ib,j;
 
@@ -241,19 +241,19 @@ int _MMG5_hashEdge(MMG5_pMesh mesh,_MMG5_Hash *hash, int a,int b,int k) {
   return(1);
 }
 
-int hashGet(MMG5_HGeom *hash,int a,int b) {
-  MMG5_hgeom  *ph;
-  int         key,ia,ib;
+int hashGet(_MMG5_Hash *hash,int a,int b) {
+  _MMG5_hedge  *ph;
+  int          key,ia,ib;
 
   ia  = MG_MIN(a,b);
   ib  = MG_MAX(a,b);
   key = (KA*ia + KB*ib) % hash->siz;
-  ph  = &hash->geom[key];
+  ph  = &hash->item[key];
 
   if ( !ph->a )  return(0);
   if ( ph->a == ia && ph->b == ib )  return(ph->k);
   while ( ph->nxt ) {
-    ph = &hash->geom[ph->nxt];
+    ph = &hash->item[ph->nxt];
     if ( ph->a == ia && ph->b == ib )  return(ph->k);
   }
   return(0);
@@ -261,7 +261,7 @@ int hashGet(MMG5_HGeom *hash,int a,int b) {
 
 /* store edges in hash table */
 int assignEdge(MMG5_pMesh mesh) {
-  MMG5_HGeom  hash;
+  _MMG5_Hash  hash;
   MMG5_pTria  pt;
   MMG5_pEdge  pa;
   int         k,ia;
@@ -271,12 +271,12 @@ int assignEdge(MMG5_pMesh mesh) {
   /* adjust hash table params */
   hash.siz  = mesh->na;
   hash.max  = 3*mesh->na+1;
-  _MMG5_ADD_MEM(mesh,(hash.max+1)*sizeof(MMG5_hgeom),"hash table",return(0));
-  _MMG5_SAFE_CALLOC(hash.geom,hash.max+1,MMG5_hgeom);
+  _MMG5_ADD_MEM(mesh,(hash.max+1)*sizeof(_MMG5_Hash),"hash table",return(0));
+  _MMG5_SAFE_CALLOC(hash.item,hash.max+1,_MMG5_hedge);
 
   hash.nxt  = mesh->na;
   for (k=mesh->na; k<hash.max; k++)
-    hash.geom[k].nxt = k+1;
+    hash.item[k].nxt = k+1;
 
   /* hash mesh edges */
   for (k=1; k<=mesh->na; k++)
@@ -300,24 +300,24 @@ int assignEdge(MMG5_pMesh mesh) {
   }
 
   /* reset edge structure */
-  _MMG5_DEL_MEM(mesh,hash.geom,(hash.max+1)*sizeof(MMG5_hgeom));
+  _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
   _MMG5_DEL_MEM(mesh,mesh->edge,(mesh->na+1)*sizeof(MMG5_Edge));
 
   return(1);
 }
 
-int _MMG5_hashNew(MMG5_pMesh mesh, MMG5_HGeom *hash,int hmax) {
+int _MMG5_hashNew(MMG5_pMesh mesh, _MMG5_Hash *hash,int hmax) {
   int   k;
 
   /* adjust hash table params */
   hash->siz  = hmax;
   hash->max  = 3*hmax + 1;
-  _MMG5_ADD_MEM(mesh,(hash->max+1)*sizeof(MMG5_hgeom),"hash table",return(0));
-  _MMG5_SAFE_CALLOC(hash->geom,hash->max+1,MMG5_hgeom);
+  _MMG5_ADD_MEM(mesh,(hash->max+1)*sizeof(_MMG5_hedge),"hash table",return(0));
+  _MMG5_SAFE_CALLOC(hash->item,hash->max+1,_MMG5_hedge);
 
   hash->nxt  = hmax;
   for (k=hmax; k<hash->max; k++)
-    hash->geom[k].nxt = k+1;
+    hash->item[k].nxt = k+1;
 
   return(1);
 }
