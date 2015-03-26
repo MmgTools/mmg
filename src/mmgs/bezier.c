@@ -246,12 +246,13 @@ int _MMG5_bezierInt(_MMG5_pBezier pb,double uv[2],double o[3],double no[3],doubl
       uz *= dd;
     }
 
-    if ( MS_SIN(pb->p[1]->tag) ) {
+    /* corners */
+    if ( MG_SIN(pb->p[1]->tag) ) {
       pb->t[1][0] = ux;
       pb->t[1][1] = uy;
       pb->t[1][2] = uz;
     }
-    if ( MS_SIN(pb->p[2]->tag) ) {
+    if ( MG_SIN(pb->p[2]->tag) ) {
       pb->t[2][0] = ux;
       pb->t[2][1] = uy;
       pb->t[2][2] = uz;
@@ -282,12 +283,13 @@ int _MMG5_bezierInt(_MMG5_pBezier pb,double uv[2],double o[3],double no[3],doubl
       uz *= dd;
     }
 
-    if ( MS_SIN(pb->p[0]->tag) ) {
+    /* corners */
+    if ( MG_SIN(pb->p[0]->tag) ) {
       pb->t[0][0] = ux;
       pb->t[0][1] = uy;
       pb->t[0][2] = uz;
     }
-    if ( MS_SIN(pb->p[2]->tag) ) {
+    if ( MG_SIN(pb->p[2]->tag) ) {
       pb->t[2][0] = ux;
       pb->t[2][1] = uy;
       pb->t[2][2] = uz;
@@ -318,12 +320,13 @@ int _MMG5_bezierInt(_MMG5_pBezier pb,double uv[2],double o[3],double no[3],doubl
       uz *= dd;
     }
 
-    if ( MS_SIN(pb->p[0]->tag) ) {
+    /* corners */
+    if ( MG_SIN(pb->p[0]->tag) ) {
       pb->t[0][0] = ux;
       pb->t[0][1] = uy;
       pb->t[0][2] = uz;
     }
-    if ( MS_SIN(pb->p[1]->tag) ) {
+    if ( MG_SIN(pb->p[1]->tag) ) {
       pb->t[1][0] = ux;
       pb->t[1][1] = uy;
       pb->t[1][2] = uz;
