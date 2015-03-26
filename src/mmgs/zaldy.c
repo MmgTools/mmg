@@ -70,11 +70,11 @@ void delPt(MMG5_pMesh mesh,int ip) {
 int newElt(MMG5_pMesh mesh) {
   int     curiel;
 
-  if ( !mesh->ntnil )  return(0);
-  curiel = mesh->ntnil;
+  if ( !mesh->nenil )  return(0);
+  curiel = mesh->nenil;
 
-  if ( mesh->ntnil > mesh->nt )  mesh->nt = mesh->ntnil;
-  mesh->ntnil = mesh->tria[curiel].v[2];
+  if ( mesh->nenil > mesh->nt )  mesh->nt = mesh->nenil;
+  mesh->nenil = mesh->tria[curiel].v[2];
   mesh->tria[curiel].v[2] = 0;
 
   return(curiel);
@@ -89,10 +89,10 @@ void delElt(MMG5_pMesh mesh,int iel) {
     return;
   }
   memset(pt,0,sizeof(MMG5_Tria));
-  pt->v[2] = mesh->ntnil;
+  pt->v[2] = mesh->nenil;
   if ( mesh->adja )
     memset(&mesh->adja[3*(iel-1)+1],0,3*sizeof(int));
-  mesh->ntnil = iel;
+  mesh->nenil = iel;
   if ( iel == mesh->nt ) {
     while ( !MG_EOK((&mesh->tria[mesh->nt])) )  mesh->nt--;
   }
@@ -206,12 +206,12 @@ int zaldy(MMG5_pMesh mesh) {
 
   /* store empty links */
   mesh->npnil = mesh->np + 1;
-  mesh->ntnil = mesh->nt + 1;
+  mesh->nenil = mesh->nt + 1;
 
   for (k=mesh->npnil; k<mesh->npmax-1; k++)
     mesh->point[k].tmp  = k+1;
 
-  for (k=mesh->ntnil; k<mesh->ntmax-1; k++)
+  for (k=mesh->nenil; k<mesh->ntmax-1; k++)
     mesh->tria[k].v[2] = k+1;
 
   return(1);

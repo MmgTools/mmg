@@ -98,7 +98,7 @@ typedef MMG5_Edge * MMG5_pEdge;
 /**
  * \struct MMG5_Tria
  * \brief Structure to store triangles of a MMG mesh.
- * \todo try to remove ng,nc1,ngmax,ntnil from mmgs.
+ * \todo try to remove cc.
  */
 typedef struct {
   int      v[3]; /*!< Vertices of the triangle */
@@ -168,14 +168,12 @@ typedef struct {
 /**
  * \struct MMG5_hgeom
  * \brief To store geometric edges.
- * \todo try to remove k in mmgs (see _MMG5_Hash structure of mmg3d).
  */
 typedef struct {
   int   a; /*!< First extremity of edge */
   int   b;  /*!< Second extremity of edge */
   int   ref; /*!< Reference of edge */
   int   nxt; /*!< Next element of hash table */
-  int   k; /*!< Index of point along edge \f$[a;b]\f$ */
   char  tag; /*!< tag of edge */
 } MMG5_hgeom;
 
@@ -187,7 +185,7 @@ typedef struct {
 /**
  * \struct MMG5_Mesh
  * \brief MMG mesh structure.
- * \todo try to remove   ng,nc1,ngmax,ntnil;
+ * \todo try to remove nc1;
  */
 typedef struct {
   int       ver; /*!< Version of the mesh file */
@@ -197,7 +195,7 @@ typedef struct {
   long long memCur; /*!< Current memory used */
   double    gap; /*!< Gap for table reallocation */
   int       npi,nti,nai,nei,np,na,nt,ne,npmax,namax,ntmax,nemax,xpmax,xtmax;
-  int       nc1,ngmax,ntnil;
+  int       nc1;
 
   int       base; /*!< Used with \a flag to know if an entity has been
                     treated */

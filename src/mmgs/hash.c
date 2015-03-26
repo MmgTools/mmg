@@ -52,9 +52,9 @@ static void paktri(MMG5_pMesh mesh) {
   while ( ++k < mesh->nt );
 
   /* Recreate nil chain */
-  mesh->ntnil = mesh->nt + 1;
+  mesh->nenil = mesh->nt + 1;
 
-  for(k=mesh->ntnil; k<=mesh->ntmax-1; k++){
+  for(k=mesh->nenil; k<=mesh->ntmax-1; k++){
     mesh->tria[k].v[2] = k+1;
   }
 }
