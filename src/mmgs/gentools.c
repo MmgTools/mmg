@@ -74,7 +74,17 @@ inline int rotmatrix(double n[3],double r[3][3]) {
   return(1);
 }
 
-double surftri_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt) {
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the meric structure.
+ * \param ptt pointer toward the triangle structure.
+ * \return The computed area.
+ *
+ * Compute the area of the surface triangle \a ptt with respect to
+ * the isotropic metric \a met.
+ *
+ */
+double _MMG5_surftri_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt) {
   double   *a,*b,*c,abx,aby,abz,acx,acy,acz,det,n[3];
 
   a = mesh->point[ptt->v[0]].c;

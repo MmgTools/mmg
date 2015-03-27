@@ -170,8 +170,17 @@ int buildridmetnor(MMG5_pMesh mesh,MMG5_pSol met,int np0,double nt[3],double mr[
   return(1);
 }
 
-/* Compute anisotropic volume of element iel, with respect to metric met */
-double surftri_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt) {
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the meric structure.
+ * \param ptt pointer toward the triangle structure.
+ * \return The computed area.
+ *
+ * Compute the area of the surface triangle \a ptt with respect to
+ * the anisotropic metric \a met.
+ *
+ */
+double _MMG5_surftri_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt) {
   MMG5_pPoint    p[3];
   _MMG5_Bezier    b;
   int       np[3];

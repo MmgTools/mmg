@@ -292,8 +292,7 @@ typedef struct {
 
 
 /* Functions declarations */
-int _MMG5_buildridmet(MMG5_pMesh mesh,MMG5_pSol met,int np0,
-                      double ux,double uy,double uz,double mr[6]);
+int  _MMG5_buildridmet(MMG5_pMesh,MMG5_pSol,int,double,double,double,double* );
 int  _MMG5_hashEdge(MMG5_pMesh mesh,_MMG5_Hash *hash,int a,int b,int k);
 int  _MMG5_hashGet(_MMG5_Hash *hash,int a,int b);
 int  _MMG5_hashNew(MMG5_pMesh mesh, _MMG5_Hash *hash,int hsiz,int hmax);

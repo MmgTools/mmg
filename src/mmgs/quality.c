@@ -155,7 +155,10 @@ static double calelt33_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel) {
     return(0.0);
 }
 
-/* quality = surf / sigma(length_edges) */
+/**
+ * quality = surf / sigma(length_edges)
+ * \todo move in common dir when bezierCP will be merged.
+ */
 inline double _MMG5_caltri_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt) {
   double        rap,anisurf,l[3];
   int           ia,ib,ic;
@@ -164,14 +167,16 @@ inline double _MMG5_caltri_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt) {
   ib = ptt->v[1];
   ic = ptt->v[2];
 
-  anisurf = surftri_ani(mesh,met,ptt);
+  anisurf = _MMG5_surftri_ani(mesh,met,ptt);
 
   l[0] = _MMG5_lenedg_ani(mesh,met,ib,ic,( ptt->tag[0] & MG_GEO ));
   l[1] = _MMG5_lenedg_ani(mesh,met,ia,ic,( ptt->tag[1] & MG_GEO ));
   l[2] = _MMG5_lenedg_ani(mesh,met,ia,ib,( ptt->tag[2] & MG_GEO ));
 
   rap = l[0]*l[0] + l[1]*l[1] + l[2]*l[2];
+
   if ( rap < _MMG5_EPSD ) return(0.0);
+
   return (anisurf / rap);
 }
 
@@ -285,7 +290,7 @@ inline double caleltsig_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel) {
   /* if orientation is reversed with regards to orientation of vertices */
   if ( ps1 < 0.0 )  return(-1.0);
 
-  anisurf = surftri_ani(mesh,met,pt);
+  anisurf = _MMG5_surftri_ani(mesh,met,pt);
   if ( anisurf == 0.0 )  return(-1.0);
 
   l[0] = _MMG5_lenedg_ani(mesh,met,ib,ic,( pt->tag[0] & MG_GEO ));
@@ -403,7 +408,9 @@ inline int norpts(MMG5_pPoint p1,MMG5_pPoint p2,MMG5_pPoint p3,double *n) {
   n[0] = aby*acz - abz*acy;
   n[1] = abz*acx - abx*acz;
   n[2] = abx*acy - aby*acx;
+
   det  = n[0]*n[0] + n[1]*n[1] + n[2]*n[2];
+
   if ( det > _MMG5_EPSD ) {
     dd = 1.0 / sqrt(det);
     n[0] *= dd;
@@ -441,14 +448,17 @@ inline double incircle(MMG5_pPoint p0,MMG5_pPoint p1,MMG5_pPoint p2,double *o) {
 inline double diamelt(MMG5_pPoint p0,MMG5_pPoint p1,MMG5_pPoint p2) {
   double  di,dd;
 
-  di = (p1->c[0]-p0->c[0])*(p1->c[0]-p0->c[0]) + (p1->c[1]-p0->c[1])*(p1->c[1]-p0->c[1]) \
+  di = (p1->c[0]-p0->c[0])*(p1->c[0]-p0->c[0])
+    + (p1->c[1]-p0->c[1])*(p1->c[1]-p0->c[1])
     + (p1->c[2]-p0->c[2])*(p1->c[2]-p0->c[2]);
 
-  dd = (p2->c[0]-p0->c[0])*(p2->c[0]-p0->c[0]) + (p2->c[1]-p0->c[1])*(p2->c[1]-p0->c[1]) \
+  dd = (p2->c[0]-p0->c[0])*(p2->c[0]-p0->c[0])
+    + (p2->c[1]-p0->c[1])*(p2->c[1]-p0->c[1])
     + (p2->c[2]-p0->c[2])*(p2->c[2]-p0->c[2]);
   di = MG_MAX(di,dd);
 
-  dd = (p2->c[0]-p1->c[0])*(p2->c[0]-p1->c[0]) + (p2->c[1]-p1->c[1])*(p2->c[1]-p1->c[1]) \
+  dd = (p2->c[0]-p1->c[0])*(p2->c[0]-p1->c[0])
+    + (p2->c[1]-p1->c[1])*(p2->c[1]-p1->c[1])
     + (p2->c[2]-p1->c[2])*(p2->c[2]-p1->c[2]);
   di = MG_MAX(di,dd);
 
@@ -507,8 +517,8 @@ void inqua(MMG5_pMesh mesh,MMG5_pSol met) {
 /* print histogram of qualities */
 void outqua(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTria    pt;
-  double   rap,rapmin,rapmax,rapavg,med;
-  int      i,k,iel,ir,imax,nex,his[5];
+  double        rap,rapmin,rapmax,rapavg,med;
+  int           i,k,iel,ir,imax,nex,his[5];
 
   rapmin  = 1.0;
   rapmax  = 0.0;
@@ -524,7 +534,6 @@ void outqua(MMG5_pMesh mesh,MMG5_pSol met) {
       continue;
     }
 
-    ddb = ( k == 669 );
     if ( met->m )
       rap = ALPHAD * _MMG5_calelt(mesh,met,pt);
     else
@@ -555,6 +564,3 @@ void outqua(MMG5_pMesh mesh,MMG5_pSol met) {
             i/5.,i/5.+0.2,his[i],100.*(his[i]/(float)(mesh->nt-nex)));
   }
 }
-
-
-
