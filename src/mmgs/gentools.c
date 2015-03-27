@@ -74,15 +74,12 @@ inline int rotmatrix(double n[3],double r[3][3]) {
   return(1);
 }
 
-double surftri_iso(MMG5_pMesh mesh,MMG5_pSol met,int iel) {
-  MMG5_pTria    pt;
+double surftri_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt) {
   double   *a,*b,*c,abx,aby,abz,acx,acy,acz,det,n[3];
 
-  pt = &mesh->tria[iel];
-
-  a = mesh->point[pt->v[0]].c;
-  b = mesh->point[pt->v[1]].c;
-  c = mesh->point[pt->v[2]].c;
+  a = mesh->point[ptt->v[0]].c;
+  b = mesh->point[ptt->v[1]].c;
+  c = mesh->point[ptt->v[2]].c;
 
   /* area */
   abx = b[0] - a[0];

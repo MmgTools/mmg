@@ -37,27 +37,28 @@
 extern char ddb;
 
 /**
- * \param mesh pointer toward the mesh structure
- * \param list pointer toward the shell of the edge
- * \param ilist pointer toward the size of the shell of the edge
- * \param it1 first element of the open shell
- * \param it2 last element of the open shell
- * \return 0 if fail, 1 otherwise
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param list pointer toward the shell of the edge.
+ * \param ilist pointer toward the size of the shell of the edge.
+ * \param it1 first element of the open shell.
+ * \param it2 last element of the open shell.
+ * \return 0 if fail, 1 otherwise.
  *
  * Check whether edge whose shell is provided should be swapped for
  * geometric approximation purposes (the 2 surface triangles are also
  * provided).
  *
  */
-int _MMG5_chkswpbdy(MMG5_pMesh mesh,int *list,int ilist,int it1,int it2) {
+int _MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, int *list,int ilist,int it1,int it2) {
   MMG5_pTetra   pt,pt0;
   MMG5_pxTetra  pxt;
   MMG5_pPoint   p0,p1,ppt0;
   MMG5_Tria     tt1,tt2;
-  double   b0[3],b1[3],v[3],c[3],ux,uy,uz,ps,disnat,dischg;
-  double   cal1,cal2,calnat,calchg,calold,calnew,caltmp,hausd;
-  int      iel,iel1,iel2,np,nq,na1,na2,k,nminus,nplus;
-  char     ifa1,ifa2,ia,ip,iq,ia1,ia2,j,isshell;
+  double        b0[3],b1[3],v[3],c[3],ux,uy,uz,ps,disnat,dischg;
+  double        cal1,cal2,calnat,calchg,calold,calnew,caltmp,hausd;
+  int           iel,iel1,iel2,np,nq,na1,na2,k,nminus,nplus;
+  char          ifa1,ifa2,ia,ip,iq,ia1,ia2,j,isshell;
   MMG5_pPar     par;
 
   iel = list[0] / 6;
@@ -175,15 +176,15 @@ int _MMG5_chkswpbdy(MMG5_pMesh mesh,int *list,int ilist,int it1,int it2) {
   dischg = MG_MAX(dischg,hausd * hausd);
 
   if ( dischg > disnat )   return(0);
-  cal1 = _MMG5_caltri(mesh,&tt1);
-  cal2 = _MMG5_caltri(mesh,&tt2);
+  cal1 = _MMG5_caltri(mesh,met,&tt1);
+  cal2 = _MMG5_caltri(mesh,met,&tt2);
   calnat = MG_MIN(cal1,cal2);
   for (j=0; j<3; j++) {
     if ( tt1.v[j] == nq )  tt1.v[j] = na2;
     if ( tt2.v[j] == np )  tt2.v[j] = na1;
   }
-  cal1 = _MMG5_caltri(mesh,&tt1);
-  cal2 = _MMG5_caltri(mesh,&tt2);
+  cal1 = _MMG5_caltri(mesh,met,&tt1);
+  cal2 = _MMG5_caltri(mesh,met,&tt2);
   calchg = MG_MIN(cal1,cal2);
   if ( calchg < 1.01 * calnat )  return(0);
 

@@ -208,26 +208,27 @@ int chkswp(MMG5_pMesh mesh,MMG5_pSol met,int k,int i,char typchk) {
 
   if ( typchk == 2 && met->m ) {
     pt0->v[0]= ip0;  pt0->v[1]= ip1;  pt0->v[2]= ip2;
-    cal1 = calelt(mesh,met,0);
+    cal1 = _MMG5_calelt(mesh,met,pt0);
     pt0->v[0]= ip1;  pt0->v[1]= iq;   pt0->v[2]= ip2;
-    cal2 = calelt(mesh,met,0);
+    cal2 = _MMG5_calelt(mesh,met,pt0);
     calnat = MG_MIN(cal1,cal2);
     pt0->v[0]= ip0;  pt0->v[1]= ip1;  pt0->v[2]= iq;
-    cal1 = calelt(mesh,met,0);
+    cal1 = _MMG5_calelt(mesh,met,pt0);
     pt0->v[0]= ip0;  pt0->v[1]= iq;   pt0->v[2]= ip2;
-    cal2 = calelt(mesh,met,0);
+    cal2 = _MMG5_calelt(mesh,met,pt0);
     calchg = MG_MIN(cal1,cal2);
   }
   else {
+#warning if typchk==1 iso??
     pt0->v[0]= ip0;  pt0->v[1]= ip1;  pt0->v[2]= ip2;
-    cal1 = calelt_iso(mesh,met,0);
+    cal1 = _MMG5_caltri_iso(mesh,NULL,pt0);
     pt0->v[0]= ip1;  pt0->v[1]= iq;   pt0->v[2]= ip2;
-    cal2 = calelt_iso(mesh,met,0);
+    cal2 = _MMG5_caltri_iso(mesh,NULL,pt0);
     calnat = MG_MIN(cal1,cal2);
     pt0->v[0]= ip0;  pt0->v[1]= ip1;  pt0->v[2]= iq;
-    cal1 = calelt_iso(mesh,met,0);
+    cal1 = _MMG5_caltri_iso(mesh,NULL,pt0);
     pt0->v[0]= ip0;  pt0->v[1]= iq;   pt0->v[2]= ip2;
-    cal2 = calelt_iso(mesh,met,0);
+    cal2 = _MMG5_caltri_iso(mesh,NULL,pt0);
     calchg = MG_MIN(cal1,cal2);
   }
   return(calchg > 1.01 * calnat);
@@ -327,12 +328,13 @@ int litswp(MMG5_pMesh mesh,int k,char i,double kali) {
 
   /* check quality */
   pt0->v[0] = id;  pt0->v[1] = ic;  pt0->v[2] = ib;
-  kalt = calelt(mesh,NULL,0);
+#warning dont work in ani
+  kalt = _MMG5_calelt(mesh,NULL,pt0);
   kali = MG_MIN(kali,kalt);
   pt0->v[0] = ia;  pt0->v[1] = id;  pt0->v[2] = ic;
-  kalt = calelt(mesh,NULL,0);
+  kalt = _MMG5_calelt(mesh,NULL,pt0);
   pt0->v[0] = ia;  pt0->v[1] = ib;  pt0->v[2] = id;
-  kalf = calelt(mesh,NULL,0);
+  kalf = _MMG5_calelt(mesh,NULL,pt0);
   kalf = MG_MIN(kalf,kalt);
   if ( kalf > 1.02 * kali ) {
     swapar(mesh,k,i);

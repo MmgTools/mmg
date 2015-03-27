@@ -111,8 +111,8 @@ int  rmtr(double r[3][3],double m[6], double mr[6]);
 int  paratmet(double c0[3],double n0[3],double m[6],double c1[3],double n1[3],double mt[6]);
 int  intregmet(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,double s,double mr[6]);
 int  intridmet(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,double s,double v[3],double mr[6]);
-double surftri_iso(MMG5_pMesh mesh,MMG5_pSol met,int iel);
-double surftri_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel);
+double surftri_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt);
+double surftri_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt);
 int  setref(MMG5_pMesh,int,int,int);
 int  delref(MMG5_pMesh);
 int  chkmet(MMG5_pMesh,MMG5_pSol);
@@ -127,8 +127,8 @@ void  _MMG5_Init_parameters(MMG5_pMesh mesh);
 /* init file names */
 int  _MMG5_Set_outputMeshName(MMG5_pMesh mesh, char* meshout);
 /* iso/aniso computations */
-double calelt_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel);
-double calelt_iso(MMG5_pMesh mesh,MMG5_pSol met,int iel);
+double _MMG5_caltri_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt);
+double _MMG5_caltri_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt);
 double caleltsig_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel);
 double caleltsig_iso(MMG5_pMesh mesh,MMG5_pSol met,int iel);
 int    defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met);
@@ -142,7 +142,7 @@ int    movintpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist);
 int    movridpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist);
 int    movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist);
 
-double (*calelt)(MMG5_pMesh mesh,MMG5_pSol met,int iel);
+double (*_MMG5_calelt)(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt);
 int    (*defsiz)(MMG5_pMesh mesh,MMG5_pSol met);
 int    (*gradsiz)(MMG5_pMesh mesh,MMG5_pSol met);
 void   (*intmet)(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int ip,double s);

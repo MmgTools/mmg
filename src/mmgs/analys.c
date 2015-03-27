@@ -314,7 +314,7 @@ static void nmpoints(MMG5_pMesh mesh) {
 /*       pt = &mesh->tria[k]; */
 /*       if ( !MG_EOK(pt) )  continue; */
 
-/*       kal = calelt(mesh,NULL,k); */
+/*       kal = _MMG5_calelt(mesh,NULL,pt); */
 /*       if ( kal > declic )  continue; */
 
 /*       p[0] = &mesh->point[pt->v[0]]; */

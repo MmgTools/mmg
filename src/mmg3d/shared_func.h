@@ -118,12 +118,14 @@ void _MMG5_excfun(int sigid) {
 void _MMG5_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
   if ( met->size < 6 ) {
     _MMG5_caltet  = _MMG5_caltet_iso;
+    _MMG5_caltri  = _MMG5_caltri_iso;
     _MMG5_lenedg  = _MMG5_lenedg_iso;
     _MMG5_defsiz  = _MMG5_defsiz_iso;
     _MMG5_gradsiz = _MMG5_gradsiz_iso;
   }
   else {
     _MMG5_caltet = _MMG5_caltet_ani;
+    // _MMG5_caltri  = _MMG5_caltri_ani;
     _MMG5_lenedg = _MMG5_lenedg_ani;
     /*defsiz = defsiz_ani;
       gradsiz = gradsiz_ani;*/

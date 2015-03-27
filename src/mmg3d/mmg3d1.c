@@ -433,7 +433,7 @@ int _MMG5_swpmsh(MMG5_pMesh mesh,MMG5_pSol met,_MMG5_pBucket bucket) {
           if ( ret < 0 )  return(-1);
           /* CAUTION: trigger collapse with 2 elements */
           if ( ilist <= 1 )  continue;
-          ier = _MMG5_chkswpbdy(mesh,list,ilist,it1,it2);
+          ier = _MMG5_chkswpbdy(mesh,met,list,ilist,it1,it2);
           if ( ier ) {
             ier = _MMG5_swpbdy(mesh,met,list,ret,it1,bucket);
             if ( ier > 0 )  ns++;
@@ -575,7 +575,7 @@ int _MMG5_movtet(MMG5_pMesh mesh,MMG5_pSol met,int maxitin) {
               if( mesh->adja[4*(k-1)+1+i] ) continue;
               if( !(ier=_MMG5_bouleext(mesh,k,i0,i,listv,&ilistv,lists,&ilists)) )  continue;
               else if ( ier>0 )
-                ier = _MMG5_movbdynompt(mesh,listv,ilistv,lists,ilists);
+                ier = _MMG5_movbdynompt(mesh,met,listv,ilistv,lists,ilists);
               else
                 return(-1);
             }
@@ -583,7 +583,7 @@ int _MMG5_movtet(MMG5_pMesh mesh,MMG5_pSol met,int maxitin) {
               if ( !(ier=_MMG5_boulesurfvolp(mesh,k,i0,i,listv,&ilistv,lists,&ilists)) )
                 continue;
               else if ( ier>0 )
-                ier = _MMG5_movbdyridpt(mesh,listv,ilistv,lists,ilists);
+                ier = _MMG5_movbdyridpt(mesh,met,listv,ilistv,lists,ilists);
               else
                 return(-1);
             }
@@ -591,7 +591,7 @@ int _MMG5_movtet(MMG5_pMesh mesh,MMG5_pSol met,int maxitin) {
               if ( !(ier=_MMG5_boulesurfvolp(mesh,k,i0,i,listv,&ilistv,lists,&ilists)) )
                 continue;
               else if ( ier>0 )
-                ier = _MMG5_movbdyrefpt(mesh,listv,ilistv,lists,ilists);
+                ier = _MMG5_movbdyrefpt(mesh,met,listv,ilistv,lists,ilists);
               else
                 return(-1);
             }
@@ -603,7 +603,7 @@ int _MMG5_movtet(MMG5_pMesh mesh,MMG5_pSol met,int maxitin) {
 
               n = &(mesh->xpoint[ppt->xp].n1[0]);
               if ( !_MMG5_directsurfball(mesh, pt->v[i0],lists,ilists,n) )  continue;
-              ier = _MMG5_movbdyregpt(mesh,listv,ilistv,lists,ilists);
+              ier = _MMG5_movbdyregpt(mesh,met,listv,ilistv,lists,ilists);
               if ( ier )  ns++;
             }
           }

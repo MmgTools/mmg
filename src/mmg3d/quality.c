@@ -37,8 +37,17 @@
 
 extern char ddb;
 
-/** Return quality of surface triangle */
-inline double _MMG5_caltri(MMG5_pMesh mesh,MMG5_pTria ptt) {
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the meric structure.
+ * \param ptt pointer toward the triangle structure.
+ * \return The computed quality.
+ *
+ * Compute the quality of the surface triangle \a ptt with respect to
+ * an isotropic metric.
+ *
+ */
+inline double _MMG5_caltri_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt) {
   double   *a,*b,*c,cal,abx,aby,abz,acx,acy,acz,bcx,bcy,bcz,rap;
 
   a = &mesh->point[ptt->v[0]].c[0];
@@ -59,12 +68,14 @@ inline double _MMG5_caltri(MMG5_pMesh mesh,MMG5_pTria ptt) {
   cal  = (aby*acz - abz*acy) * (aby*acz - abz*acy);
   cal += (abz*acx - abx*acz) * (abz*acx - abx*acz);
   cal += (abx*acy - aby*acx) * (abx*acy - aby*acx);
+
   if ( cal < _MMG5_EPSD2 )  return(0.0);
 
   /* qual = 2.*surf / length */
   rap  = abx*abx + aby*aby + abz*abz;
   rap += acx*acx + acy*acy + acz*acz;
   rap += bcx*bcx + bcy*bcy + bcz*bcz;
+
   if ( rap < _MMG5_EPSD2 )  return(0.0);
 
   return(sqrt(cal) / rap);

@@ -101,19 +101,32 @@ int _MMG5_movintpt(MMG5_pMesh mesh,int *list,int ilist,int improve) {
   return(1);
 }
 
-/** Move boundary regular point, whose volumic and surfacic balls are passed */
-int _MMG5_movbdyregpt(MMG5_pMesh mesh,int *listv,int ilistv,int *lists,int ilists) {
-  MMG5_pTetra                pt,pt0;
-  MMG5_pxTetra               pxt;
-  MMG5_pPoint                p0,p1,p2,ppt0;
-  MMG5_Tria                  tt;
-  MMG5_pxPoint               pxp;
-  _MMG5_Bezier                b;
-  double                *n,r[3][3],lispoi[3*_MMG5_LMAX+1],ux,uy,uz,det2d,detloc,oppt[2],step,lambda[3];
-  double                ll,m[2],uv[2],o[3],no[3],to[3];
-  double                calold,calnew,caltmp,callist[ilistv];
-  int                   k,kel,iel,l,n0,na,nb,ntempa,ntempb,ntempc,nut,nxp;
-  unsigned char         i0,iface,i;
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param listv pointer toward the volumic ball of the point.
+ * \param ilistv size of the volumic ball.
+ * \param lists pointer toward the surfacic ball of the point.
+ * \param ilists size of the surfacic ball.
+ * \return 0 if fail, 1 if success.
+ *
+ * Move boundary regular point, whose volumic and surfacic balls are passed.
+ *
+ */
+int _MMG5_movbdyregpt(MMG5_pMesh mesh, MMG5_pSol met,int *listv,
+                      int ilistv,int *lists,int ilists) {
+  MMG5_pTetra       pt,pt0;
+  MMG5_pxTetra      pxt;
+  MMG5_pPoint       p0,p1,p2,ppt0;
+  MMG5_Tria         tt;
+  MMG5_pxPoint      pxp;
+  _MMG5_Bezier      b;
+  double            *n,r[3][3],lispoi[3*_MMG5_LMAX+1],ux,uy,uz,det2d;
+  double            detloc,oppt[2],step,lambda[3];
+  double            ll,m[2],uv[2],o[3],no[3],to[3];
+  double            calold,calnew,caltmp,callist[ilistv];
+  int               k,kel,iel,l,n0,na,nb,ntempa,ntempb,ntempc,nut,nxp;
+  unsigned char     i0,iface,i;
 
   step = 0.1;
   nut    = 0;
@@ -407,12 +420,12 @@ int _MMG5_movbdyregpt(MMG5_pMesh mesh,int *listv,int ilistv,int *lists,int ilist
     iface = lists[l] % 4;
     pt          = &mesh->tetra[k];
     _MMG5_tet2tri(mesh,k,iface,&tt);
-    calold = MG_MIN(calold,_MMG5_caltri(mesh,&tt));
+    calold = MG_MIN(calold,_MMG5_caltri(mesh,met,&tt));
     for( i=0 ; i<3 ; i++ )
       if ( tt.v[i] == n0 )      break;
     assert(i<3);
     tt.v[i] = 0;
-    caltmp = _MMG5_caltri(mesh,&tt);
+    caltmp = _MMG5_caltri(mesh,met,&tt);
     if ( caltmp < _MMG5_EPSD )        return(0.0);
     calnew = MG_MIN(calnew,caltmp);
   }
@@ -454,13 +467,25 @@ int _MMG5_movbdyregpt(MMG5_pMesh mesh,int *listv,int ilistv,int *lists,int ilist
   return(1);
 }
 
-/** Move boundary reference point, whose volumic and surfacic balls are passed */
-int _MMG5_movbdyrefpt(MMG5_pMesh mesh, int *listv, int ilistv, int *lists, int ilists){
-  MMG5_pTetra                pt,pt0;
-  MMG5_pxTetra               pxt;
-  MMG5_pPoint                p0,p1,p2,ppt0;
-  MMG5_Tria                  tt;
-  MMG5_pxPoint               pxp;
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param listv pointer toward the volumic ball of the point.
+ * \param ilistv size of the volumic ball.
+ * \param lists pointer toward the surfacic ball of the point.
+ * \param ilists size of the surfacic ball.
+ * \return 0 if fail, 1 if success.
+ *
+ * Move boundary reference point, whose volumic and surfacic balls are passed.
+ *
+ */
+int _MMG5_movbdyrefpt(MMG5_pMesh mesh, MMG5_pSol met, int *listv,
+                      int ilistv, int *lists, int ilists){
+  MMG5_pTetra           pt,pt0;
+  MMG5_pxTetra          pxt;
+  MMG5_pPoint           p0,p1,p2,ppt0;
+  MMG5_Tria             tt;
+  MMG5_pxPoint          pxp;
   double                step,ll1old,ll2old,o[3],no[3],to[3];
   double                calold,calnew,caltmp,callist[ilistv];
   int                   l,iel,ip0,ipa,ipb,iptmpa,iptmpb,it1,it2,ip1,ip2,ip,nxp;
@@ -677,12 +702,12 @@ int _MMG5_movbdyrefpt(MMG5_pMesh mesh, int *listv, int ilistv, int *lists, int i
     pt          = &mesh->tetra[iel];
     pxt         = &mesh->xtetra[pt->xt];
     _MMG5_tet2tri(mesh,iel,iface,&tt);
-    calold = MG_MIN(calold,_MMG5_caltri(mesh,&tt));
+    calold = MG_MIN(calold,_MMG5_caltri(mesh,met,&tt));
     for( i=0 ; i<3 ; i++ )
       if ( tt.v[i] == ip0 )      break;
     assert(i<3);
     tt.v[i] = 0;
-    caltmp = _MMG5_caltri(mesh,&tt);
+    caltmp = _MMG5_caltri(mesh,met,&tt);
     if ( caltmp < _MMG5_EPSD )        return(0);
     calnew = MG_MIN(calnew,caltmp);
     if ( _MMG5_chkedg(mesh,&tt,MG_GET(pxt->ori,iface)) ) {
@@ -736,17 +761,30 @@ int _MMG5_movbdyrefpt(MMG5_pMesh mesh, int *listv, int ilistv, int *lists, int i
 }
 
 
-/** Move boundary non manifold point, whose volumic and (exterior) surfacic balls are passed */
-int _MMG5_movbdynompt(MMG5_pMesh mesh, int *listv, int ilistv, int *lists, int ilists){
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param listv pointer toward the volumic ball of the point.
+ * \param ilistv size of the volumic ball.
+ * \param lists pointer toward the surfacic ball of the point.
+ * \param ilists size of the surfacic ball.
+ * \return 0 if fail, 1 if success.
+ *
+ * Move boundary non manifold point, whose volumic and (exterior)
+ * surfacic balls are passed
+ *
+ */
+int _MMG5_movbdynompt(MMG5_pMesh mesh,MMG5_pSol met, int *listv,
+                      int ilistv, int *lists, int ilists){
   MMG5_pTetra       pt,pt0;
   MMG5_pxTetra      pxt;
   MMG5_pPoint       p0,p1,p2,ppt0;
   MMG5_pxPoint      pxp;
   MMG5_Tria         tt;
-  double       step,ll1old,ll2old,calold,calnew,caltmp,callist[ilistv];
-  double       o[3],no[3],to[3];
-  int          ip0,ip1,ip2,ip,iel,ipa,ipb,l,iptmpa,iptmpb,it1,it2,nxp;
-  char         iface,i,i0,iea,ieb,ie,tag,ie1,ie2,iface1,iface2;
+  double            step,ll1old,ll2old,calold,calnew,caltmp,callist[ilistv];
+  double            o[3],no[3],to[3];
+  int               ip0,ip1,ip2,ip,iel,ipa,ipb,l,iptmpa,iptmpb,it1,it2,nxp;
+  char              iface,i,i0,iea,ieb,ie,tag,ie1,ie2,iface1,iface2;
 
   step = 0.1;
   ip1 = ip2 = 0;
@@ -956,14 +994,14 @@ int _MMG5_movbdynompt(MMG5_pMesh mesh, int *listv, int ilistv, int *lists, int i
     pt          = &mesh->tetra[iel];
     pxt         = &mesh->xtetra[pt->xt];
     _MMG5_tet2tri(mesh,iel,iface,&tt);
-    caltmp = _MMG5_caltri(mesh,&tt);
+    caltmp = _MMG5_caltri(mesh,met,&tt);
     calold = MG_MIN(calold,caltmp);
     for( i=0 ; i<3 ; i++ )
       if ( tt.v[i] == ip0 )      break;
     assert(i<3);
 
     tt.v[i] = 0;
-    caltmp = _MMG5_caltri(mesh,&tt);
+    caltmp = _MMG5_caltri(mesh,met,&tt);
     if ( caltmp < _MMG5_EPSD )        return(0);
     calnew = MG_MIN(calnew,caltmp);
     if ( _MMG5_chkedg(mesh,&tt,MG_GET(pxt->ori,iface)) ) {
@@ -1016,13 +1054,25 @@ int _MMG5_movbdynompt(MMG5_pMesh mesh, int *listv, int ilistv, int *lists, int i
   return(1);
 }
 
-/** Move boundary ridge point, whose volumic and surfacic balls are passed */
-int _MMG5_movbdyridpt(MMG5_pMesh mesh,int *listv,int ilistv,int *lists,int ilists) {
-  MMG5_pTetra               pt,pt0;
-  MMG5_pxTetra              pxt;
-  MMG5_pPoint               p0,p1,p2,ppt0;
-  MMG5_Tria                 tt;
-  MMG5_pxPoint              pxp;
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param listv pointer toward the volumic ball of the point.
+ * \param ilistv size of the volumic ball.
+ * \param lists pointer toward the surfacic ball of the point.
+ * \param ilists size of the surfacic ball.
+ * \return 0 if fail, 1 if success.
+ *
+ * Move boundary ridge point, whose volumic and surfacic balls are passed.
+ *
+ */
+int _MMG5_movbdyridpt(MMG5_pMesh mesh, MMG5_pSol met, int *listv,
+                      int ilistv,int *lists,int ilists) {
+  MMG5_pTetra          pt,pt0;
+  MMG5_pxTetra         pxt;
+  MMG5_pPoint          p0,p1,p2,ppt0;
+  MMG5_Tria            tt;
+  MMG5_pxPoint         pxp;
   double               step,ll1old,ll2old,o[3],no1[3],no2[3],to[3];
   double               calold,calnew,caltmp,callist[ilistv];
   int                  l,iel,ip0,ipa,ipb,iptmpa,iptmpb,it1,it2,ip1,ip2,ip,nxp;
@@ -1246,13 +1296,13 @@ int _MMG5_movbdyridpt(MMG5_pMesh mesh,int *listv,int ilistv,int *lists,int ilist
     pt          = &mesh->tetra[iel];
     pxt         = &mesh->xtetra[pt->xt];
     _MMG5_tet2tri(mesh,iel,iface,&tt);
-    calold = MG_MIN(calold,_MMG5_caltri(mesh,&tt));
+    calold = MG_MIN(calold,_MMG5_caltri(mesh,met,&tt));
     for (i=0; i<3; i++) {
       if ( tt.v[i] == ip0 )      break;
     }
     assert(i<3);
     tt.v[i] = 0;
-    caltmp = _MMG5_caltri(mesh,&tt);
+    caltmp = _MMG5_caltri(mesh,met,&tt);
     if ( caltmp < _MMG5_EPSD )        return(0);
     calnew = MG_MIN(calnew,caltmp);
     if ( _MMG5_chkedg(mesh,&tt,MG_GET(pxt->ori,iface)) ) {            //MAYBE CHECKEDG ASKS STH FOR _MMG5_POINTS !!!!!

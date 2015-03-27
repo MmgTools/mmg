@@ -275,12 +275,12 @@ int  _MMG5_dichoto1b(MMG5_pMesh mesh,int *list,int ret,double o[3],double ro[3])
 void _MMG5_nsort(int ,double *,char *);
 double _MMG5_orcal(MMG5_pMesh mesh,int iel);
 int    _MMG5_movintpt(MMG5_pMesh mesh, int *list, int ilist, int improve);
-int    _MMG5_movbdyregpt(MMG5_pMesh mesh, int *listv, int ilistv, int *lists, int ilists);
-int    _MMG5_movbdyrefpt(MMG5_pMesh mesh, int *listv, int ilistv, int *lists, int ilists);
-int    _MMG5_movbdynompt(MMG5_pMesh mesh, int *listv, int ilistv, int *lists, int ilists);
-int    _MMG5_movbdyridpt(MMG5_pMesh mesh, int *listv, int ilistv, int *lists, int ilists);
-double _MMG5_caltri(MMG5_pMesh mesh,MMG5_pTria ptt);
-int  _MMG5_chkswpbdy(MMG5_pMesh mesh,int *list,int ilist,int it1,int it2);
+int    _MMG5_movbdyregpt(MMG5_pMesh, MMG5_pSol, int*, int, int*, int);
+int    _MMG5_movbdyrefpt(MMG5_pMesh, MMG5_pSol, int*, int, int*, int);
+int    _MMG5_movbdynompt(MMG5_pMesh, MMG5_pSol, int*, int, int*, int);
+int    _MMG5_movbdyridpt(MMG5_pMesh, MMG5_pSol, int*, int, int*, int);
+double _MMG5_caltri_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt);
+int  _MMG5_chkswpbdy(MMG5_pMesh, MMG5_pSol,int*, int, int, int);
 int  _MMG5_swpbdy(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int it1,_MMG5_pBucket bucket);
 int  _MMG5_swpgen(MMG5_pMesh mesh,MMG5_pSol met,int nconf, int ilist, int *list,_MMG5_pBucket bucket);
 int  _MMG5_chkswpgen(MMG5_pMesh mesh, int start, int ia, int *ilist, int *list,double crit);
@@ -352,6 +352,7 @@ int    _MMG5_gradsiz_iso(MMG5_pMesh ,MMG5_pSol );
 int    _MMG5_gradsiz_ani(MMG5_pMesh ,MMG5_pSol );
 
 double (*_MMG5_caltet)(MMG5_pMesh mesh,MMG5_pSol met,int ia,int ib,int ic,int id);
+double (*_MMG5_caltri)(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt);
 int    (*_MMG5_defsiz)(MMG5_pMesh ,MMG5_pSol );
 int    (*_MMG5_gradsiz)(MMG5_pMesh ,MMG5_pSol );
 

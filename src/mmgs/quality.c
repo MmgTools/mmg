@@ -156,21 +156,19 @@ static double calelt33_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel) {
 }
 
 /* quality = surf / sigma(length_edges) */
-inline double calelt_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel) {
-  MMG5_pTria    pt;
+inline double _MMG5_caltri_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt) {
   double        rap,anisurf,l[3];
   int           ia,ib,ic;
 
-  pt = &mesh->tria[iel];
-  ia = pt->v[0];
-  ib = pt->v[1];
-  ic = pt->v[2];
+  ia = ptt->v[0];
+  ib = ptt->v[1];
+  ic = ptt->v[2];
 
-  anisurf = surftri_ani(mesh,met,iel);
+  anisurf = surftri_ani(mesh,met,ptt);
 
-  l[0] = _MMG5_lenedg_ani(mesh,met,ib,ic,( pt->tag[0] & MG_GEO ));
-  l[1] = _MMG5_lenedg_ani(mesh,met,ia,ic,( pt->tag[1] & MG_GEO ));
-  l[2] = _MMG5_lenedg_ani(mesh,met,ia,ib,( pt->tag[2] & MG_GEO ));
+  l[0] = _MMG5_lenedg_ani(mesh,met,ib,ic,( ptt->tag[0] & MG_GEO ));
+  l[1] = _MMG5_lenedg_ani(mesh,met,ia,ic,( ptt->tag[1] & MG_GEO ));
+  l[2] = _MMG5_lenedg_ani(mesh,met,ia,ib,( ptt->tag[2] & MG_GEO ));
 
   rap = l[0]*l[0] + l[1]*l[1] + l[2]*l[2];
   if ( rap < _MMG5_EPSD ) return(0.0);
@@ -178,15 +176,13 @@ inline double calelt_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel) {
 }
 
 /* quality = surf / sigma(length_edges) */
-inline double calelt_iso(MMG5_pMesh mesh,MMG5_pSol met,int iel) {
-  MMG5_pTria     pt;
+inline double _MMG5_caltri_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt) {
   double   *a,*b,*c,cal,abx,aby,abz,acx,acy,acz,bcx,bcy,bcz,rap;
   int       ia,ib,ic;
 
-  pt = &mesh->tria[iel];
-  ia = pt->v[0];
-  ib = pt->v[1];
-  ic = pt->v[2];
+  ia = ptt->v[0];
+  ib = ptt->v[1];
+  ic = ptt->v[2];
 
   a = &mesh->point[ia].c[0];
   b = &mesh->point[ib].c[0];
@@ -206,18 +202,17 @@ inline double calelt_iso(MMG5_pMesh mesh,MMG5_pSol met,int iel) {
   cal  = (aby*acz - abz*acy) * (aby*acz - abz*acy);
   cal += (abz*acx - abx*acz) * (abz*acx - abx*acz);
   cal += (abx*acy - aby*acx) * (abx*acy - aby*acx);
-  if ( cal > _MMG5_EPSD ) {
-    /* qual = 2.*surf / length */
-    rap  = abx*abx + aby*aby + abz*abz;
-    rap += acx*acx + acy*acy + acz*acz;
-    rap += bcx*bcx + bcy*bcy + bcz*bcz;
-    if ( rap > _MMG5_EPSD )
-      return(sqrt(cal) / rap);
-    else
-      return(0.0);
-  }
-  else
-    return(0.0);
+
+  if ( cal < _MMG5_EPSD2 )  return(0.0);
+
+  /* qual = 2.*surf / length */
+  rap  = abx*abx + aby*aby + abz*abz;
+  rap += acx*acx + acy*acy + acz*acz;
+  rap += bcx*bcx + bcy*bcy + bcz*bcz;
+
+  if ( rap < _MMG5_EPSD2 )  return(0.0);
+
+  return(sqrt(cal) / rap);
 }
 
 /* Same quality function but puts a sign according to deviation to normal to vertices */
@@ -290,7 +285,7 @@ inline double caleltsig_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel) {
   /* if orientation is reversed with regards to orientation of vertices */
   if ( ps1 < 0.0 )  return(-1.0);
 
-  anisurf = surftri_ani(mesh,met,iel);
+  anisurf = surftri_ani(mesh,met,pt);
   if ( anisurf == 0.0 )  return(-1.0);
 
   l[0] = _MMG5_lenedg_ani(mesh,met,ib,ic,( pt->tag[0] & MG_GEO ));
@@ -482,7 +477,7 @@ void inqua(MMG5_pMesh mesh,MMG5_pSol met) {
     if ( met->m )
       rap = ALPHAD * calelt33_ani(mesh,met,k);
     else
-      rap = ALPHAD * calelt_iso(mesh,0,k);
+      rap = ALPHAD * _MMG5_caltri_iso(mesh,NULL,pt);
     if ( rap < rapmin ) {
       rapmin = rap;
       iel    = k;
@@ -531,9 +526,9 @@ void outqua(MMG5_pMesh mesh,MMG5_pSol met) {
 
     ddb = ( k == 669 );
     if ( met->m )
-      rap = ALPHAD * calelt(mesh,met,k);
+      rap = ALPHAD * _MMG5_calelt(mesh,met,pt);
     else
-      rap = ALPHAD * calelt_iso(mesh,0,k);
+      rap = ALPHAD * _MMG5_caltri_iso(mesh,NULL,pt);
     if ( rap < rapmin ) {
       rapmin = rap;
       iel    = k;

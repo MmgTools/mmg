@@ -171,8 +171,7 @@ int buildridmetnor(MMG5_pMesh mesh,MMG5_pSol met,int np0,double nt[3],double mr[
 }
 
 /* Compute anisotropic volume of element iel, with respect to metric met */
-double surftri_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel) {
-  MMG5_pTria     pt;
+double surftri_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt) {
   MMG5_pPoint    p[3];
   _MMG5_Bezier    b;
   int       np[3];
@@ -180,13 +179,12 @@ double surftri_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel) {
   char      i,i1,i2;
 
   surf = 0.0;
-  pt = &mesh->tria[iel];
 
   for (i=0; i<3; i++) {
-    np[i] = pt->v[i];
+    np[i] = ptt->v[i];
     p[i]  = &mesh->point[np[i]];
   }
-  if ( !_MMG5_bezierCP(mesh,pt,&b,1) ) return(0.0);
+  if ( !_MMG5_bezierCP(mesh,ptt,&b,1) ) return(0.0);
 
   /* Set metric tensors at vertices of tria iel */
   for(i=0; i<3; i++) {
@@ -241,7 +239,7 @@ double surftri_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel) {
 
     dens = tJmJ[0][0]*tJmJ[1][1] - tJmJ[1][0]*tJmJ[0][1];
     if ( dens < 0.0 ) {
-      //fprintf(stdout,"  ## Density should be positive : %E for elt %d %d %d \n",dens,pt->v[0],pt->v[1],pt->v[2]);
+      //fprintf(stdout,"  ## Density should be positive : %E for elt %d %d %d \n",dens,ptt->v[0],ptt->v[1],ptt->v[2]);
       //return(0.0);
     }
     surf += sqrt(fabs(dens));
