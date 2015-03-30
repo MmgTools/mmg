@@ -115,9 +115,7 @@ int chkcol(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int *list,char typchk) {
           }
           else if ( cosnnew < _MMG5_ANGEDG )  return(0);
         }
-        memcpy(n0old,n1old,3*sizeof(double));
-        memcpy(n0new,n1new,3*sizeof(double));
-      }
+       }
 
       /* check geometric support */
       if ( l == 1 ) {
@@ -138,6 +136,9 @@ int chkcol(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int *list,char typchk) {
 #warning qualite en iso en typchk=1???
         kal = ALPHAD*_MMG5_caltri_iso(mesh,NULL,pt0);
       if ( kal < NULKAL )  return(0);
+       
+      memcpy(n0old,n1old,3*sizeof(double));
+      memcpy(n0new,n1new,3*sizeof(double));
     }
 
     /* check angle between 1st and last triangles */
@@ -347,7 +348,8 @@ int colver3(MMG5_pMesh mesh,int* list) {
   adja = &mesh->adja[3*(kel-1)+1];
   mel  = adja[k] / 3;
   m    = adja[k] % 3;
-  mesh->adja[3*(mel-1)+1+m] = 3*iel + i2;
+  if(mel)
+    mesh->adja[3*(mel-1)+1+m] = 3*iel + i2;
 
   /* remove vertex + elements */
   delPt(mesh,ip);

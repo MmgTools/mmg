@@ -751,11 +751,12 @@ int saveMesh(MMG5_pMesh mesh) {
     if ( MG_EOK(pt) ) {
       if(!bin) {
         fprintf(inm,"%d %d %d %d\n",mesh->point[pt->v[0]].tmp,mesh->point[pt->v[1]].tmp
-                ,mesh->point[pt->v[2]].tmp,pt->ref);
+                ,mesh->point[pt->v[2]].tmp,abs(pt->ref));
       } else {
         fwrite(&mesh->point[pt->v[0]].tmp,sw,1,inm);
         fwrite(&mesh->point[pt->v[1]].tmp,sw,1,inm);
         fwrite(&mesh->point[pt->v[2]].tmp,sw,1,inm);
+	pt->ref = abs(pt->ref);
         fwrite(&pt->ref,sw,1,inm);
       }
       for (i=0; i<3; i++) {

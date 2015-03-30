@@ -52,6 +52,12 @@ int chkedg(MMG5_pMesh mesh,int iel) {
   p[1] = &mesh->point[pt->v[1]];
   p[2] = &mesh->point[pt->v[2]];
 
+  for(i=0 ; i<3 ;i++) {
+    t1[i]=400;
+    t2[i]=300;
+    for(i1=0 ; i1<3 ; i1++)
+      t[i][i1] = 1000000;
+  }
   /* normal recovery */
   for (i=0; i<3; i++) {
     if ( MS_SIN(p[i]->tag) ) {
@@ -101,6 +107,11 @@ int chkedg(MMG5_pMesh mesh,int iel) {
         t1[2] = li*uz;
       }
       else{
+	if(!((p[i1]->tag & MG_NOM) ||  MG_EDG(p[i1]->tag) ) ) {
+          //  if(t[i1][0] > 10) {
+          fprintf(stdout,"1. warning geometrical problem\n");
+          return(0);
+        }
         memcpy(t1,t[i1],3*sizeof(double));
       }
 
@@ -111,6 +122,11 @@ int chkedg(MMG5_pMesh mesh,int iel) {
         t2[2] = li*uz;
       }
       else{
+	if(!((p[i2]->tag & MG_NOM) || MG_EDG(p[i2]->tag) ) ) {
+	  saveMesh(mesh);
+          fprintf(stdout,"2. warning geometrical problem\n");
+          return(0);
+        }
         memcpy(t2,t[i2],3*sizeof(double));
       }
 
@@ -506,6 +522,7 @@ int chkspl(MMG5_pMesh mesh,MMG5_pSol met,int k,int i) {
   if ( MG_EDG(pt->tag[i]) ) {
     ++mesh->xp;
     ppt = &mesh->point[ip];
+    ppt->tag = pt->tag[i];
     ppt->ig  = mesh->xp;
     go = &mesh->xpoint[mesh->xp];
     memcpy(go->n1,no,3*sizeof(double));
@@ -786,12 +803,6 @@ static int anatri(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
 int mmgs1(MMG5_pMesh mesh,MMG5_pSol met) {
   if ( abs(mesh->info.imprim) > 4 )
     fprintf(stdout,"  ** MESH ANALYSIS\n");
-
-  /*delref(mesh);
-    setref(mesh,1566,6,1);
-    setref(mesh,1016,6,1);
-    setref(mesh,5120,4,1);
-    return(1);*/
 
   /*--- stage 1: geometric mesh */
   if ( abs(mesh->info.imprim) > 4 || mesh->info.ddebug )
