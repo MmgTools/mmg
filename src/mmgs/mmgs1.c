@@ -107,7 +107,7 @@ int chkedg(MMG5_pMesh mesh,int iel) {
         t1[2] = li*uz;
       }
       else{
-	if(!((p[i1]->tag & MG_NOM) ||  MG_EDG(p[i1]->tag) ) ) {
+        if(!((p[i1]->tag & MG_NOM) ||  MG_EDG(p[i1]->tag) ) ) {
           //  if(t[i1][0] > 10) {
           fprintf(stdout,"1. warning geometrical problem\n");
           return(0);
@@ -122,8 +122,8 @@ int chkedg(MMG5_pMesh mesh,int iel) {
         t2[2] = li*uz;
       }
       else{
-	if(!((p[i2]->tag & MG_NOM) || MG_EDG(p[i2]->tag) ) ) {
-	  saveMesh(mesh);
+        if(!((p[i2]->tag & MG_NOM) || MG_EDG(p[i2]->tag) ) ) {
+          saveMesh(mesh);
           fprintf(stdout,"2. warning geometrical problem\n");
           return(0);
         }
@@ -801,6 +801,7 @@ static int anatri(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
 }
 
 int mmgs1(MMG5_pMesh mesh,MMG5_pSol met) {
+
   if ( abs(mesh->info.imprim) > 4 )
     fprintf(stdout,"  ** MESH ANALYSIS\n");
 

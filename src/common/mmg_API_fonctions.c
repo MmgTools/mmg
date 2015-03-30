@@ -38,6 +38,7 @@
  */
 
 #include "mmg.h"
+#include "mmg3d.h"
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -71,6 +72,8 @@ void MMG5_Alloc_mesh(MMG5_pMesh *mesh, MMG5_pSol *sol
 static inline
 void MMG5_Init_woalloc_mesh(MMG5_pMesh mesh, MMG5_pSol sol
   ) {
+
+  _MMG5_Set_APIFunc();
 
   (mesh)->dim = 3;
   (mesh)->ver = 2;

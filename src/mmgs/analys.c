@@ -117,7 +117,7 @@ static int setadj(MMG5_pMesh mesh){
         if ( pt1->v[ii1] == ip1 ) {
           /* Moebius strip */
           if ( pt1->base < 0 ) {
-            pt1->ref      = -1;
+            pt1->ref      = -abs(pt1->ref);
             pt->tag[i]   |= MG_REF;
             pt1->tag[ii] |= MG_REF;
             nre++;
@@ -258,7 +258,7 @@ static void nmpoints(MMG5_pMesh mesh) {
       if ( jel == k ) {
         if ( !(p0->tag & MG_CRN) || !(p0->tag & MG_REQ) ) {
           nmp++;
-          p0->tag |= MG_CRN + MG_REQ;
+          // p0->tag |= MG_CRN + MG_REQ;
         }
         continue;
       }
@@ -401,6 +401,7 @@ static int setdhd(MMG5_pMesh mesh) {
     pt = &mesh->tria[k];
     if ( !MG_EOK(pt) )  continue;
 
+    /* triangle normal */
     _MMG5_nortri(mesh,pt,n1);
     adja = &mesh->adja[3*(k-1)+1];
     for (i=0; i<3; i++) {
@@ -792,6 +793,7 @@ int analys(MMG5_pMesh mesh) {
     fprintf(stdout,"  ## Geometry problem. Exit program.\n");
     return(0);
   }
+  saveMesh(mesh); exit(100);
 
   /* identify singularities */
   if ( !singul(mesh) ) {
