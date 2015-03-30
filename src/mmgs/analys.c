@@ -95,6 +95,12 @@ static int setadj(MMG5_pMesh mesh){
           mesh->point[ip1].tag |= MG_NOM;
           mesh->point[ip2].tag |= MG_NOM;
         }
+        if ( pt1->tag[ii] & MG_NOM && !(pt->tag[i] & MG_NOM) ) {
+          pt->tag[i] = pt1->tag[ii];
+          pt->edg[i] = pt1->edg[ii];
+          mesh->point[ip1].tag |= MG_NOM;
+          mesh->point[ip2].tag |= MG_NOM;
+        }
         if ( pt1->cc > 0 )  continue;
 
         if ( abs(pt1->ref) != abs(pt->ref) ) {
