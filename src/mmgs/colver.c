@@ -115,16 +115,16 @@ int chkcol(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int *list,char typchk) {
           }
           else if ( cosnnew < _MMG5_ANGEDG )  return(0);
         }
-       }
+      }
 
       /* check geometric support */
       if ( l == 1 ) {
         pt0->tag[j2] = MG_MAX(pt0->tag[j2],pt->tag[i1]);
       }
-      else if ( l == ilist-3+open ) {
-        ll = list[ilist-2+open] / 3;
+      else if ( l == ilist-2+open ) {
+        ll = list[ilist-1+open] / 3;
         if ( ll > mesh->nt )  return(0);
-        lj = list[ilist-2+open] % 3;
+        lj = list[ilist-1+open] % 3;
         pt0->tag[jj] = MG_MAX(pt0->tag[jj],mesh->tria[ll].tag[lj]);
       }
       if ( chkedg(mesh,0) )  return(0);
@@ -174,11 +174,18 @@ int chkcol(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int *list,char typchk) {
     /* Check geometric approximation */
     jel = list[1] / 3;
     j   = list[1] % 3;
+    jj  = _MMG5_inxt2[j];
     j2  = _MMG5_iprv2[j];
     pt0 = &mesh->tria[0];
     pt1 = &mesh->tria[jel];
-    memcpy(pt0,pt,sizeof(MMG5_Tria));
-    pt0->v[i1] = pt1->v[j2];
+    memcpy(pt0,pt1,sizeof(MMG5_Tria));
+    pt0->v[j] = ip2;
+
+    jel = list[2] / 3;
+    j   = list[2] % 3;
+    pt1 = &mesh->tria[jel];
+    pt0->tag[jj] |= pt1->tag[j];
+    pt0->tag[j2] |= pt1->tag[_MMG5_inxt2[j]];
     if ( chkedg(mesh,0) )  return(0);
   }
 
