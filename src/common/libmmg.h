@@ -290,7 +290,7 @@ int  MMG5_Set_inputMeshName(MMG5_pMesh mesh, char* meshin);
  * Set the name of output mesh file.
  *
  */
-int  (*MMG5_Set_outputMeshName)(MMG5_pMesh mesh, char* meshout);
+int  MMG5_Set_outputMeshName(MMG5_pMesh mesh, char* meshout);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the sol structure.

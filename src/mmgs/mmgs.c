@@ -346,7 +346,6 @@ static void setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
  * Set API pointer functions to the matching mmgs function.
  */
 void _MMG5_Set_APIFunc() {
-  MMG5_Set_outputMeshName = _MMG5_Set_outputMeshName;
   MMG5_Init_parameters = _MMG5_Init_parameters;
 }
 
@@ -399,7 +398,6 @@ int main(int argc,char *argv[]) {
   else if ( ier > 0 && met.np != mesh.np ) {
     fprintf(stdout,"  ## WARNING: WRONG SOLUTION NUMBER. IGNORED\n");
     _MMG5_DEL_MEM(&mesh,met.m,(met.size*met.npmax+1)*sizeof(double));
-    memset(&met,0,sizeof(MMG5_Sol));
   }
   if ( !parsop(&mesh,&met) )     return(1);
   if ( !_MMG5_scaleMesh(&mesh,&met) )  return(1);

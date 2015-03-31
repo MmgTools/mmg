@@ -105,65 +105,6 @@ void _MMG5_Init_parameters(MMG5_pMesh mesh) {
 
 /**
  * \param mesh pointer toward the mesh structure.
- * \param meshout name of the output mesh file.
- * \return 1.
- *
- * Set the name of output mesh file.
- *
- */
-int _MMG5_Set_outputMeshName(MMG5_pMesh mesh, char* meshout) {
-  char *ptr;
-
-  if ( mesh->nameout )
-    _MMG5_DEL_MEM(mesh,mesh->nameout,(strlen(mesh->nameout)+1)*sizeof(char));
-
-  if ( strlen(meshout) ) {
-    _MMG5_ADD_MEM(mesh,(strlen(meshout)+1)*sizeof(char),"output mesh name",
-                  printf("  Exit program.\n");
-                  exit(EXIT_FAILURE));
-    _MMG5_SAFE_CALLOC(mesh->nameout,strlen(meshout)+1,char);
-    strcpy(mesh->nameout,meshout);
-  }
-  else {
-    if ( strlen(mesh->namein) ) {
-      _MMG5_ADD_MEM(mesh,(strlen(mesh->namein)+3)*sizeof(char),"output mesh name",
-                    printf("  Exit program.\n");
-                    exit(EXIT_FAILURE));
-      _MMG5_SAFE_CALLOC(mesh->nameout,strlen(mesh->namein)+3,char);
-      strcpy(mesh->nameout,mesh->namein);
-      ptr = strstr(mesh->nameout,".mesh");
-      if ( !ptr ) {
-        /* filename without extension */
-        strcat(mesh->nameout,".o");
-      }
-      else {
-        *ptr = '\0';
-        strcat(mesh->nameout,".o.mesh");
-      }
-      ptr = strstr(mesh->namein,".meshb");
-      if ( ptr ) {
-        /* filename with .meshb extention */
-        strcat(mesh->nameout,"b");
-      }
-    }
-    else {
-      _MMG5_ADD_MEM(mesh,7*sizeof(char),"output mesh name",
-                    printf("  Exit program.\n");
-                    exit(EXIT_FAILURE));
-      _MMG5_SAFE_CALLOC(mesh->nameout,7,char);
-      if ( (mesh->info.imprim > 5) || mesh->info.ddebug ) {
-        fprintf(stdout,"  ## Warning: no name given for output mesh.\n");
-        fprintf(stdout,"     Use of default value \"mesh.o.mesh\".\n");
-      }
-      strcpy(mesh->nameout,"mesh.o.mesh");
-    }
-  }
-  return(1);
-}
-
-
-/**
- * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the sol structure.
  * \param typEntity type of solutions entities (vertices, triangles...).
  * \param np number of solutions.
