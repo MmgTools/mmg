@@ -46,8 +46,9 @@ static int setadj(MMG5_pMesh mesh){
     fprintf(stdout,"  ** SETTING TOPOLOGY\n");
 
   _MMG5_SAFE_MALLOC(pile,mesh->nt+1,int);
-  pile[1] = 1;
-  ipil    = 1;
+
+  pile[1]  = 1;
+  ipil     = 1;
   nre = nr = nf = nt = ncc = ned = 0;
 
   while ( ipil > 0 ) {
@@ -82,7 +83,7 @@ static int setadj(MMG5_pMesh mesh){
           ned++;
           continue;
         }
- 
+
         kk = adja[i] / 3;
         ii = adja[i] % 3;
         if ( kk > k )  ned++;
@@ -111,10 +112,12 @@ static int setadj(MMG5_pMesh mesh){
           nre++;
         }
 
-        /* store adjacent */ 
+        /* store adjacent */
         if ( !pt1->flag ) {
           pt1->flag    = 1;
-          pile[++ipil] = kk;
+          if ( !(pt1->tag[ii] & MG_NOM) ) {
+            pile[++ipil] = kk;
+          }
         }
 
         /* check orientation */
