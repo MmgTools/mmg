@@ -799,7 +799,6 @@ int analys(MMG5_pMesh mesh) {
     fprintf(stdout,"  ## Geometry problem. Exit program.\n");
     return(0);
   }
-  saveMesh(mesh); exit(100);
 
   /* identify singularities */
   if ( !singul(mesh) ) {
