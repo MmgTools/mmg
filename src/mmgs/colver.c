@@ -133,7 +133,6 @@ int chkcol(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int *list,char typchk) {
       if ( typchk == 2 && met->m )
         kal = ALPHAD*_MMG5_calelt(mesh,met,pt0);
       else
-#warning qualite en iso en typchk=1???
         kal = ALPHAD*_MMG5_caltri_iso(mesh,NULL,pt0);
       if ( kal < NULKAL )  return(0);
        
@@ -479,7 +478,6 @@ int litcol(MMG5_pMesh mesh,int k,char i,double kali) {
         memcpy(n0new,n1new,3*sizeof(double));
       }
       /* check quality */
-#warning qualite en iso???
       kal = ALPHAD*_MMG5_caltri_iso(mesh,NULL,pt0);
       if ( kal < NULKAL )  return(0);
     }

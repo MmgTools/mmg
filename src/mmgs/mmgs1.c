@@ -380,10 +380,11 @@ static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
           }
         }
         if ( met->m ) {
-          if ( typchk == 1 )
-            intmet33(mesh,met,ip1,ip2,ip,s);
-          else
-            intmet(mesh,met,k,i,ip,s);
+          intmet(mesh,met,k,i,ip,s);
+          /* if ( typchk == 1 ) */
+          /*   intmet33(mesh,met,ip1,ip2,ip,s); */
+          /* else */
+          /*   intmet(mesh,met,k,i,ip,s); */
         }
       }
       else if ( pt->tag[i] & MG_GEO ) {
