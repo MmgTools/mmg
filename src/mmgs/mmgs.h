@@ -166,6 +166,7 @@ int    movridpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist);
 int    movintpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist);
 int    movridpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist);
 int    movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist);
+int    _MMG5_prilen(MMG5_pMesh mesh,MMG5_pSol met);
 
 double (*_MMG5_calelt)(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt);
 int    (*defsiz)(MMG5_pMesh mesh,MMG5_pSol met);
