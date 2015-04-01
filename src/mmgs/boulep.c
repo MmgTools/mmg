@@ -97,8 +97,17 @@ int boulet(MMG5_pMesh mesh,int start,int ip,int *list) {
   return(ilist);
 }
 
-/* find all triangles sharing P, list[0] = start ; do not stop when crossing ridge ;
-   check whether resulting configuration is manifold */
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param start index of tetra to start to compute the ball.
+ * \param ip index of point in tetra \ref start for which we want to compute
+ * the ball.
+ * \list pointer toward the computed ball of point.
+ *
+ * Find all triangles sharing \a ip, \f$list[0] = start\f$. Do not stop when crossing
+ * ridge. Check whether resulting configuration is manifold.
+ *
+ */
 int boulechknm(MMG5_pMesh mesh,int start,int ip,int *list) {
   MMG5_pTria    pt;
   MMG5_pPoint   ppt;

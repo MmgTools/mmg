@@ -308,14 +308,14 @@ int colver(MMG5_pMesh mesh,int *list,int ilist) {
  * \param list pointer toward the ball of the point to collapse.
  * \return 1.
  *
- * Collapse point of index \f$list[0]%3\f$ in tet \f$list[0]/3\f$ for a ball of
- * size 3: the collapsed point is removed.
+ * Collapse edge \f$list[0]%3\f$ in tet \f$list[0]/3\f$ (\f$ ip->i1\f$ ) for a
+ * ball of the collapsed point of size 3: the collapsed point is removed.
  *
  */
 int colver3(MMG5_pMesh mesh,int* list) {
   MMG5_pTria   pt,pt1,pt2;
-  int    *adja,iel,jel,kel,mel,ip;
-  char    i,i1,i2,j,j2,k,m;
+  int          *adja,iel,jel,kel,mel,ip;
+  char         i,i1,i2,j,j1,j2,k,m;
 
   /* update of new point for triangle list[0] */
   iel = list[0] / 3;
@@ -327,6 +327,7 @@ int colver3(MMG5_pMesh mesh,int* list) {
 
   jel = list[1] / 3;
   j   = list[1] % 3;
+  j1  = _MMG5_inxt2[j];
   j2  = _MMG5_iprv2[j];
   pt1 = &mesh->tria[jel];
 
@@ -335,40 +336,39 @@ int colver3(MMG5_pMesh mesh,int* list) {
   pt2 = &mesh->tria[kel];
 
   /* update info */
-  pt->v[i]    = pt1->v[j2];
-  pt->tag[i]  = MG_MAX(pt->tag[i],pt->tag[i1]);
-  pt->edg[i]  = MG_MAX(pt->edg[i],pt->edg[i1]);
-  pt->tag[i1] = pt1->tag[j];
-  pt->edg[i1] = pt1->edg[j];
-  pt->tag[i2] = pt2->tag[k];
-  pt->edg[i2] = pt2->edg[k];
-  pt->base    = mesh->base;
+  pt1->v[j]     = pt->v[i1];
+  pt1->tag[j1] |= pt2->tag[k];
+  pt1->edg[j1]  = MG_MAX(pt1->edg[j1],pt2->edg[k]);
+  pt1->tag[j2] |= pt->tag[i];
+  pt1->edg[j2]  = MG_MAX(pt1->edg[j2],pt->edg[i]);
+  pt1->base     = mesh->base;
 
   /* update neighbours of new triangle */
-  adja = &mesh->adja[3*(iel-1)+1];
-  adja[i1] = mesh->adja[3*(jel-1)+1+j];
-  adja[i2] = mesh->adja[3*(kel-1)+1+k];
-  mel = adja[i] / 3;
-  m   = adja[i] % 3;
-  pt1 = &mesh->tria[mel];
-  pt1->tag[m] = pt->tag[i];
-  pt1->edg[m] = pt->edg[i];
-
-  /* update of neighbours of old neighbours */
   adja = &mesh->adja[3*(jel-1)+1];
-  mel   = adja[j] / 3;
-  m     = adja[j] % 3;
-  mesh->adja[3*(mel-1)+1+m] = 3*iel + i1;
+  adja[j1] = mesh->adja[3*(kel-1)+1+k];
+  adja[j2] = mesh->adja[3*(iel-1)+1+i];
 
-  adja = &mesh->adja[3*(kel-1)+1];
-  mel  = adja[k] / 3;
-  m    = adja[k] % 3;
-  if(mel)
-    mesh->adja[3*(mel-1)+1+m] = 3*iel + i2;
+  mel  = adja[j2] / 3;
+  if ( mel ) {
+    m    = adja[j2] % 3;
+    pt   = &mesh->tria[mel];
+    pt->tag[m]  = pt1->tag[j2];
+    pt->edg[m]  = pt1->edg[j2];
+    mesh->adja[3*(mel-1)+1+m] = 3*jel + j2;
+  }
+
+  mel = adja[j1] / 3;
+  if ( mel ) {
+    m    = adja[j1] % 3;
+    pt   = &mesh->tria[mel];
+    pt->tag[m]  = pt1->tag[j1];
+    pt->edg[m]  = pt1->edg[j1];
+    mesh->adja[3*(mel-1)+1+m] = 3*jel + j1;
+  }
 
   /* remove vertex + elements */
   _MMG5_delPt(mesh,ip);
-  _MMG5_delElt(mesh,jel);
+  _MMG5_delElt(mesh,iel);
   _MMG5_delElt(mesh,kel);
 
   return(1);

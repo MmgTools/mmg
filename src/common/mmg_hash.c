@@ -165,7 +165,7 @@ int _MMG5_mmgHashTria(MMG5_pMesh mesh, int *adjt, int chkISO) {
     }
   }
 
-  if ( abs(mesh->info.imprim) > 3 && dup+nmf > 0 ) {
+  if ( abs(mesh->info.imprim) > 5 && dup+nmf > 0 ) {
     fprintf(stdout,"  ## ");  fflush(stdout);
     if ( nmf > 0 )  fprintf(stdout,"[non-manifold model]  ");
     if ( dup > 0 )  fprintf(stdout," %d duplicate removed",dup);
