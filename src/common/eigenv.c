@@ -69,8 +69,8 @@ static double Id[3][3] = {
 /**
  * \fn static int newton3(double p[4],double x[3])
  * \brief Find root(s) of a polynomial of degree 3.
- * \param p[4] polynomial coefficients (b=p[2], c=p[1], d=p[0]).
- * \param x[3] root(s) of polynomial.
+ * \param p polynomial coefficients (b=p[2], c=p[1], d=p[0]).
+ * \param x root(s) of polynomial.
  * \return 0 if no roots.
  * \return 1 for 3 roots.
  * \return 2 for 2 roots.
@@ -251,9 +251,9 @@ static int newton3(double p[4],double x[3]) {
 /**
  * \brief Find eigenvalues and vectors of a 3x3 matrix.
  * \param symmat 0 if matrix is not symetric, 1 otherwise.
- * \param *mat pointer toward the matrix.
- * \param lambda[3] eigenvalues.
- * \param v[3][3] eigenvectors.
+ * \param mat pointer toward the matrix.
+ * \param lambda eigenvalues.
+ * \param v eigenvectors.
  * \return order of eigenvalues (1,2,3) or 0 if failed.
  */
 int _MMG5_eigenv(int symmat,double *mat,double lambda[3],double v[3][3]) {
@@ -575,9 +575,9 @@ int _MMG5_eigenv(int symmat,double *mat,double lambda[3],double v[3][3]) {
 
 /**
  * \brief Find eigenvalues and vectors of a 2x2 matrix.
- * \param *mm pointer toward the matrix.
- * \param *lambda pointer toward the output eigenvalues.
- * \param vp[2][2] eigenvectors.
+ * \param mm pointer toward the matrix.
+ * \param lambda pointer toward the output eigenvalues.
+ * \param vp eigenvectors.
  * \return 1.
  *
  * \warning not used for now

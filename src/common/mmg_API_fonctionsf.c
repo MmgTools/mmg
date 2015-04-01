@@ -22,15 +22,15 @@
 */
 
 /**
- * \file common/API_functionsf.c
+ * \file common/mmg_API_functionsf.c
  * \brief Fortran API functions for MMG library.
  * \author Algiane Froehly (Inria / IMB, Université de Bordeaux)
  * \version 5
  * \date 01 2014
  * \copyright GNU Lesser General Public License.
  *
- * \note Please, refer to the \ref common/libmmg.h, \ref mmgs/libmmgs.h and
- * \ref mmg3d/libmmg3d.h header files for functions documentation.
+ * \note Please, refer to the \ref common/libmmg.h, mmgs/libmmgs.h and
+ * mmg3d/libmmg3d.h header files for functions documentation.
  *
  * Define the Fortran API functions for MMG library: adds function
  * definitions with upcase, underscore and double underscore to match
@@ -117,7 +117,7 @@ FORTRAN_NAME(MMG5_SET_INPUTSOLNAME, mmg5_set_inputsolname,
 }
 
 /**
- * See \ref MMG5_Set_outputMeshName function in \ref mmgs/libmmgs.h or \ref
+ * See \ref MMG5_Set_outputMeshName function in mmgs/libmmgs.h or
  * mmg3d/libmmg3d.h file.
  */
 FORTRAN_NAME(MMG5_SET_OUTPUTMESHNAME,mmg5_set_outputmeshname,

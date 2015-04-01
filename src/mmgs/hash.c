@@ -46,7 +46,7 @@ static void paktri(MMG5_pMesh mesh) {
     if ( !MG_EOK(pt) ) {
       pt1 = &mesh->tria[mesh->nt];
       memcpy(pt,pt1,sizeof(MMG5_Tria));
-      delElt(mesh,mesh->nt);
+      _MMG5_delElt(mesh,mesh->nt);
     }
   }
   while ( ++k < mesh->nt );

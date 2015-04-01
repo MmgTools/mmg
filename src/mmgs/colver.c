@@ -295,15 +295,23 @@ int colver(MMG5_pMesh mesh,int *list,int ilist) {
       mesh->adja[3*(jel-1)+1+j] = 0;
   }
 
-  delPt(mesh,ip1);
-  delElt(mesh,list[0] / 3);
-  if ( !open )  delElt(mesh,list[ilist-1] / 3);
+  _MMG5_delPt(mesh,ip1);
+  _MMG5_delElt(mesh,list[0] / 3);
+  if ( !open )  _MMG5_delElt(mesh,list[ilist-1] / 3);
 
   return(1);
 }
 
 
-/* collapse point list[0]/3 in case ilist = 3 : point is removed */
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param list pointer toward the ball of the point to collapse.
+ * \return 1.
+ *
+ * Collapse point of index \f$list[0]%3\f$ in tet \f$list[0]/3\f$ for a ball of
+ * size 3: the collapsed point is removed.
+ *
+ */
 int colver3(MMG5_pMesh mesh,int* list) {
   MMG5_pTria   pt,pt1,pt2;
   int    *adja,iel,jel,kel,mel,ip;
@@ -359,9 +367,9 @@ int colver3(MMG5_pMesh mesh,int* list) {
     mesh->adja[3*(mel-1)+1+m] = 3*iel + i2;
 
   /* remove vertex + elements */
-  delPt(mesh,ip);
-  delElt(mesh,jel);
-  delElt(mesh,kel);
+  _MMG5_delPt(mesh,ip);
+  _MMG5_delElt(mesh,jel);
+  _MMG5_delElt(mesh,kel);
 
   return(1);
 }
@@ -387,7 +395,7 @@ int colver2(MMG5_pMesh mesh,int* list) {
 
   /* update info */
   pt->v[i1] = pt1->v[jj];
-  pt->tag[i2] = pt1->tag[j2];
+  pt->tag[i2] |= pt1->tag[j2];
   pt->edg[i2] = pt1->edg[j2];
   pt->base  = mesh->base;
 
@@ -397,11 +405,12 @@ int colver2(MMG5_pMesh mesh,int* list) {
   adja = &mesh->adja[3*(jel-1)+1];
   kel  = adja[j2] / 3;
   k    = adja[j2] % 3;
-  mesh->adja[3*(kel-1)+1+k] = 3*iel + i2;
+  if ( kel )
+    mesh->adja[3*(kel-1)+1+k] = 3*iel + i2;
 
   /* remove vertex + element */
-  delPt(mesh,ip);
-  delElt(mesh,jel);
+  _MMG5_delPt(mesh,ip);
+  _MMG5_delElt(mesh,jel);
 
   return(1);
 }

@@ -30,21 +30,37 @@
  * \author Algiane Froehly (Inria / IMB, Université de Bordeaux)
  * \version 5
  * \copyright GNU Lesser General Public License.
- * \todo Doxygen documentation
  */
 
 #include "mmgs.h"
 
 
-/* split element k along edge i */
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param k index of element to split.
+ * \param i index of edge to split.
+ * \param vx \f$vx[i]\f$ is the index of the point to add on the edge \a i.
+ * \return 1.
+ *
+ * Split element \a k along edge \a i.
+ *
+ */
 int split1(MMG5_pMesh mesh,MMG5_pSol met,int k,int i,int *vx) {
   MMG5_pTria      pt,pt1;
   MMG5_pPoint     ppt;
   int             iel;
   char            i1,i2;
 
-  iel = newElt(mesh);
-  assert(iel);
+  iel = _MMG5_newElt(mesh);
+  if ( !iel ) {
+    _MMG5_TRIA_REALLOC(mesh,iel,mesh->gap,
+                       printf("  ## Error: unable to allocate a new element.\n");
+                       _MMG5_INCREASE_MEM_MESSAGE();
+                       printf("  Exit program.\n");
+                       exit(EXIT_FAILURE)
+      );
+  }
 
   pt  = &mesh->tria[k];
   pt->flag = 0;
@@ -68,7 +84,17 @@ int split1(MMG5_pMesh mesh,MMG5_pSol met,int k,int i,int *vx) {
 }
 
 
-/* Split tria k, along edge i, inserting point ip, updating adjacency relations */
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param k index of element to split.
+ * \param i index of edge to split.
+ * \param ip index of the new point.
+ * \return 0 if lack of memory, 1 otherwise.
+ *
+ * Split element \a k along edge \a i, inserting point \a ip and updating
+ * the adjacency relations.
+ *
+ */
 int split1b(MMG5_pMesh mesh,int k,char i,int ip) {
   MMG5_pTria     pt,pt1;
   MMG5_pPoint    ppt;
@@ -78,12 +104,15 @@ int split1b(MMG5_pMesh mesh,int k,char i,int ip) {
   int            *adja,iel,jel,kel,mel,ier;
   char           i1,i2,j,j1,j2,m;
 
+  iel = _MMG5_newElt(mesh);
+  if ( !iel )  {
+    _MMG5_TRIA_REALLOC(mesh,iel,mesh->gap,
+                       _MMG5_INCREASE_MEM_MESSAGE();
+                       return(0));
+  }
   pt = &mesh->tria[k];
   pt->flag = 0;
   pt->base = mesh->base;
-
-  iel = newElt(mesh);
-  if ( !iel )  return(0);
 
   pt1 = &mesh->tria[iel];
   memcpy(pt1,pt,sizeof(MMG5_Tria));
@@ -132,8 +161,13 @@ int split1b(MMG5_pMesh mesh,int k,char i,int ip) {
     mesh->adja[3*(mel-1)+1+m]  = 3*iel+i1;
 
   if ( jel ) {
-    kel = newElt(mesh);
-    assert(kel);
+    kel = _MMG5_newElt(mesh);
+    if ( !kel )  {
+      _MMG5_TRIA_REALLOC(mesh,kel,mesh->gap,
+                         _MMG5_INCREASE_MEM_MESSAGE();
+                         _MMG5_delElt(mesh,iel);
+                         return(0));
+    }
     pt  = &mesh->tria[jel];
     pt1 = &mesh->tria[kel];
     pt->flag = 0;
@@ -168,7 +202,16 @@ int split1b(MMG5_pMesh mesh,int k,char i,int ip) {
 }
 
 
-/* split element k along 2 edges i1 and i2 */
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param k index of element to split.
+ * \param vx \f$vx[i]\f$ is the index of the point to add on the edge \a i.
+ * \return 1.
+ *
+ * Split element \a k along the 2 edges \a i1 and \a i2.
+ *
+ */
 int split2(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
   MMG5_pTria    pt,pt1,pt2;
   MMG5_pPoint   p3,p4;
@@ -176,10 +219,22 @@ int split2(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
   char          i,i1,i2;
 
   /* create 2 elements */
-  iel = newElt(mesh);
-  assert(iel);
-  jel = newElt(mesh);
-  assert(jel);
+  iel = _MMG5_newElt(mesh);
+  if ( !iel ) {
+    _MMG5_TRIA_REALLOC(mesh,iel,mesh->gap,
+                       printf("  ## Error: unable to allocate a new element.\n");
+                       _MMG5_INCREASE_MEM_MESSAGE();
+                       printf("  Exit program.\n");
+                       exit(EXIT_FAILURE));
+  }
+  jel = _MMG5_newElt(mesh);
+  if ( !jel ) {
+    _MMG5_TRIA_REALLOC(mesh,jel,mesh->gap,
+                       printf("  ## Error: unable to allocate a new element.\n");
+                       _MMG5_INCREASE_MEM_MESSAGE();
+                       printf("  Exit program.\n");
+                       exit(EXIT_FAILURE));
+  }
 
   pt  = &mesh->tria[k];
   pt->flag = 0;
@@ -221,20 +276,46 @@ int split2(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
   return(1);
 }
 
-
-/* split all 3 edges of element k */
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param k index of element to split.
+ * \param vx \f$vx[i]\f$ is the index of the point to add on the edge \a i.
+ * \return 1.
+ *
+ * Split element \a k along the 2 edges \a i1 and \a i2.
+ *
+ */
 int split3(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
   MMG5_pTria    pt,pt1,pt2,pt3;
   MMG5_pPoint   p3,p4,p5;
   int           iel,jel,kel;
 
   /* create 3 elements */
-  iel = newElt(mesh);
-  assert(iel);
-  jel = newElt(mesh);
-  assert(jel);
-  kel = newElt(mesh);
-  assert(jel);
+  iel = _MMG5_newElt(mesh);
+  if ( !iel ) {
+    _MMG5_TRIA_REALLOC(mesh,iel,mesh->gap,
+                       printf("  ## Error: unable to allocate a new element.\n");
+                       _MMG5_INCREASE_MEM_MESSAGE();
+                       printf("  Exit program.\n");
+                       exit(EXIT_FAILURE));
+  }
+  jel = _MMG5_newElt(mesh);
+  if ( !jel ) {
+    _MMG5_TRIA_REALLOC(mesh,jel,mesh->gap,
+                       printf("  ## Error: unable to allocate a new element.\n");
+                       _MMG5_INCREASE_MEM_MESSAGE();
+                       printf("  Exit program.\n");
+                       exit(EXIT_FAILURE));
+  }
+  kel = _MMG5_newElt(mesh);
+  if ( !kel ) {
+    _MMG5_TRIA_REALLOC(mesh,kel,mesh->gap,
+                       printf("  ## Error: unable to allocate a new element.\n");
+                       _MMG5_INCREASE_MEM_MESSAGE();
+                       printf("  Exit program.\n");
+                       exit(EXIT_FAILURE));
+  }
 
   pt  = &mesh->tria[k];
   pt->flag = 0;

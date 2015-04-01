@@ -35,8 +35,17 @@
 
 #include "mmgs.h"
 
-/* find all triangles sharing P, list[0] = start
-   do not stop when crossing ridge */
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param start index of triangle to start.
+ * \param ip index of point for wich we compute the ball.
+ * \param list pointer toward the computed ball of \a ip.
+ * \return the size of the computed ball or 0 if fail.
+ *
+ * Find all triangles sharing \a ip, \f$list[0] =\f$ \a start do not stop when
+ * crossing ridge.
+ *
+ */
 int boulet(MMG5_pMesh mesh,int start,int ip,int *list) {
   MMG5_pTria    pt;
   MMG5_pPoint   ppt;
@@ -44,9 +53,11 @@ int boulet(MMG5_pMesh mesh,int start,int ip,int *list) {
   char          i,i1,i2;
 
   pt = &mesh->tria[start];
-  if ( !MG_EOK(pt) )  return(0);
+
   ppt = &mesh->point[pt->v[ip]];
-  if ( ppt->tag & MG_NOM )  return(0);
+  if ( ppt->tag & MG_NOM ) {
+    return(0);
+  }
   ilist = 0;
 
   /* store neighbors */

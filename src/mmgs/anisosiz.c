@@ -51,7 +51,11 @@ static int defmetsin(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
   p0  = &mesh->point[idp];
 
   ilist = boulet(mesh,it,ip,list);
-  assert(ilist);
+  if ( !ilist ) {
+    printf("Error; unable to compute the ball af the point %d.\n", idp);
+    printf("Exit program.\n");
+    exit(EXIT_FAILURE);
+  }
 
   isqhmin  = 1.0 / (mesh->info.hmin*mesh->info.hmin);
   isqhmax  = 1.0 / (mesh->info.hmax*mesh->info.hmax);
@@ -137,7 +141,11 @@ static int defmetrid(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
   m[2] = isqhmax;
 
   ier = bouletrid(mesh,it,ip,&ilist1,list1,&ilist2,list2,&iprid[0],&iprid[1]);
-  assert(ier);
+  if ( !ier ) {
+    printf("Error; unable to compute the two balls af the ridge point %d.\n", idp);
+    printf("Exit program.\n");
+    exit(EXIT_FAILURE);
+  }
 
   /* Specific size in direction of t */
   for (i=0; i<2; i++) {
@@ -182,7 +190,7 @@ static int defmetrid(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
       ilist = ilist2;
       list  = &(list2[0]);
     }
-    assert(rotmatrix(n,r));
+    rotmatrix(n,r);
 
     /* Apply rotation to the half-ball under consideration */
     i1 = 0;
@@ -390,14 +398,18 @@ static int defmetref(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
   idp = pt->v[ip];
   p0  = &mesh->point[idp];
   ilist = boulet(mesh,it,ip,list);
-  assert(ilist);
+  if ( !ilist ) {
+    printf("Error; unable to compute the ball af the point %d.\n", idp);
+    printf("Exit program.\n");
+    exit(EXIT_FAILURE);
+  }
 
   isqhmin = 1.0 / (mesh->info.hmin*mesh->info.hmin);
   isqhmax = 1.0 / (mesh->info.hmax*mesh->info.hmax);
 
   /* Computation of the rotation matrix T_p0 S -> [z = 0] */
   n  = &mesh->xpoint[p0->ig].n1[0];
-  assert(rotmatrix(n,r));
+  rotmatrix(n,r);
   m = &met->m[6*(idp)+1];
 
   /* Apply rotation \circ translation to the whole ball */
@@ -606,7 +618,7 @@ static int defmetref(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
 
   /* At this point, intm stands for the integral matrix of Taubin's approach : vp[0] and vp[1]
      are the two pr. directions of curvature, and the two curvatures can be inferred from lambdas*/
-  assert(_MMG5_eigensym(intm,kappa,vp));
+  _MMG5_eigensym(intm,kappa,vp);
 
   /* Truncation of eigenvalues */
   kappa[0] = 2.0/9.0 * fabs(kappa[0])/mesh->info.hausd;
@@ -704,7 +716,7 @@ static int defmetref(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
   c[2] = kappacur*tau[1]*tau[1] + isqhmax*tau[0]*tau[0];
 
   /* Reuse b0 for commodity */
-  assert(intmetsavedir(mesh,c,intm,b0));
+  intmetsavedir(mesh,c,intm,b0);
   memcpy(intm,b0,3*sizeof(double));
 
   /* At this point, intm (with 0 in the z direction)  is the desired metric, except
@@ -744,14 +756,18 @@ static int defmetreg(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
   p0  = &mesh->point[idp];
 
   ilist = boulet(mesh,it,ip,list);
-  assert(ilist);
+  if ( !ilist ) {
+    printf("Error; unable to compute the ball af the point %d.\n", idp);
+    printf("Exit program.\n");
+    exit(EXIT_FAILURE);
+  }
 
   isqhmin = 1.0 / (mesh->info.hmin*mesh->info.hmin);
   isqhmax = 1.0 / (mesh->info.hmax*mesh->info.hmax);
 
   /* Computation of the rotation matrix T_p0 S -> [z = 0] */
   n  = &p0->n[0];
-  assert(rotmatrix(n,r));
+  rotmatrix(n,r);
   m = &met->m[6*(idp)+1];
 
   /* Apply rotation \circ translation to the whole ball */
@@ -934,7 +950,7 @@ static int defmetreg(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
 
   /* At this point, intm stands for the integral matrix of Taubin's approach : vp[0] and vp[1]
      are the two pr. directions of curvature, and the two curvatures can be inferred from lambdas*/
-  assert(_MMG5_eigensym(intm,kappa,vp));
+  _MMG5_eigensym(intm,kappa,vp);
 
   /* Truncation of eigenvalues */
   kappa[0] = 2.0/9.0 * fabs(kappa[0])/mesh->info.hausd;

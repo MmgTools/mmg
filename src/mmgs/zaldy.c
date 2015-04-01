@@ -36,7 +36,7 @@
 #include "mmgs.h"
 
 /* get new point address */
-int newPt(MMG5_pMesh mesh,double c[3],double n[3]) {
+int _MMG5_newPt(MMG5_pMesh mesh,double c[3],double n[3]) {
   MMG5_pPoint  ppt;
   int     curpt;
 
@@ -54,7 +54,7 @@ int newPt(MMG5_pMesh mesh,double c[3],double n[3]) {
   return(curpt);
 }
 
-void delPt(MMG5_pMesh mesh,int ip) {
+void _MMG5_delPt(MMG5_pMesh mesh,int ip) {
   MMG5_pPoint   ppt;
 
   ppt = &mesh->point[ip];
@@ -67,7 +67,7 @@ void delPt(MMG5_pMesh mesh,int ip) {
   }
 }
 
-int newElt(MMG5_pMesh mesh) {
+int _MMG5_newElt(MMG5_pMesh mesh) {
   int     curiel;
 
   if ( !mesh->nenil )  return(0);
@@ -80,7 +80,7 @@ int newElt(MMG5_pMesh mesh) {
   return(curiel);
 }
 
-void delElt(MMG5_pMesh mesh,int iel) {
+void _MMG5_delElt(MMG5_pMesh mesh,int iel) {
   MMG5_pTria    pt;
 
   pt = &mesh->tria[iel];

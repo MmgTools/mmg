@@ -283,13 +283,14 @@ static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
   _MMG5_Bezier  pb;
   MMG5_pxPoint  go;
   double        s,o[3],no[3],to[3],dd,len;
-  int           vx[3],i,j,ip,ip1,ip2,ier,k,ns,nc,nt;
+  int           vx[3],i,j,ip,ip1,ip2,ier,k,ns,nc,nt,npinit;
   char          i1,i2;
   static double uv[3][2] = { {0.5,0.5}, {0.,0.5}, {0.5,0.} };
 
   _MMG5_hashNew(mesh,&hash,mesh->np,3*mesh->np);
   ns = 0;
   s  = 0.5;
+  npinit = mesh->np;
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
     if ( !MG_EOK(pt) || pt->ref < 0 )  continue;
@@ -328,8 +329,23 @@ static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
       /* new point along edge */
       ier = _MMG5_bezierInt(&pb,uv[i],o,no,to);
       if ( !ip ) {
-        ip = newPt(mesh,o,MG_EDG(pt->tag[i]) ? to : no);
-        assert(ip);
+        ip = _MMG5_newPt(mesh,o,MG_EDG(pt->tag[i]) ? to : no);
+        if ( !ip ) {
+          /* reallocation of point table */
+          _MMG5_POINT_REALLOC(mesh,met,ip,mesh->gap,
+                              printf("  ## Error: unable to allocate a new point.\n");
+                              _MMG5_INCREASE_MEM_MESSAGE();
+                              do {
+                                _MMG5_delPt(mesh,mesh->np);
+                              } while ( mesh->np>npinit );
+                              return(-1)
+                              ,o,MG_EDG(pt->tag[i]) ? to : no);
+          // Now pb->p contain a wrong memory address.
+          pb.p[0] = &mesh->point[pt->v[0]];
+          pb.p[1] = &mesh->point[pt->v[1]];
+          pb.p[2] = &mesh->point[pt->v[2]];
+        }
+
         _MMG5_hashEdge(mesh,&hash,ip1,ip2,ip);
         p1  = &mesh->point[ip1];
         p2  = &mesh->point[ip2];
@@ -337,7 +353,13 @@ static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
 
         if ( MG_EDG(pt->tag[i]) ) {
           ++mesh->xp;
-          assert(mesh->xp < mesh->xpmax);
+          if(mesh->xp > mesh->xpmax){
+            /* reallocation of xpoint table */
+            _MMG5_TAB_RECALLOC(mesh,mesh->xpoint,mesh->xpmax,0.2,MMG5_xPoint,
+                               "larger xpoint table",
+                               return(-1));
+          }
+          ppt->xp  = mesh->xp;
           ppt->tag = pt->tag[i];
           if ( p1->ref == pt->edg[i] || p2->ref == pt->edg[i] )
             ppt->ref = pt->edg[i];
@@ -453,7 +475,10 @@ static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
       i2 = _MMG5_inxt2[i1];
       if ( MG_GET(pt->flag,i) ) {
         vx[i] = _MMG5_hashGet(&hash,pt->v[i1],pt->v[i2]);
-        assert(vx[i]);
+        if ( !vx[i] ) {
+          printf("Error: unable to create point on edge.\n Exit program.\n");
+          exit(EXIT_FAILURE);
+        }
         j = i;
       }
     }
@@ -480,7 +505,17 @@ static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
   return(ns);
 }
 
-/* check if splitting edge i of k is ok */
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param k index of element to split.
+ * \param i index of edge to split.
+ * \return -1 if lack of memory, 0 if the edge should not be split and 1
+ * if success.
+ *
+ * Check if splitting edge \a i of element \a k is ok.
+ *
+ */
 int chkspl(MMG5_pMesh mesh,MMG5_pSol met,int k,int i) {
   MMG5_pTria    pt,pt1;
   MMG5_pPoint   ppt;
@@ -516,8 +551,14 @@ int chkspl(MMG5_pMesh mesh,MMG5_pSol met,int k,int i) {
 
   ier = _MMG5_bezierInt(&b,uv,o,no,to);
   assert(ier);
-  ip = newPt(mesh,o,MG_EDG(pt->tag[i]) ? to : no);
-  assert(ip);
+  ip = _MMG5_newPt(mesh,o,MG_EDG(pt->tag[i]) ? to : no);
+  if ( !ip ) {
+    /* reallocation of point table */
+    _MMG5_POINT_REALLOC(mesh,met,ip,mesh->gap,
+                        _MMG5_INCREASE_MEM_MESSAGE();
+                        return(-1)
+                        ,o,MG_EDG(pt->tag[i]) ? to : no);
+  }
 
   if ( MG_EDG(pt->tag[i]) ) {
     ++mesh->xp;
@@ -599,7 +640,7 @@ static int adpspl(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTria    pt;
   MMG5_pPoint   p1,p2;
   double   len,lmax;
-  int      ip,k,ns;
+  int      ip,k,ns,ier;
   char     i,i1,i2,imax;
 
   ns = 0;
@@ -631,8 +672,21 @@ static int adpspl(MMG5_pMesh mesh,MMG5_pSol met) {
     if ( p1->tag & MG_NOM || p2->tag & MG_NOM )  continue;
 
     ip = chkspl(mesh,met,k,imax);
-    if ( ip > 0 )
-      ns += split1b(mesh,k,imax,ip);
+    if ( ip < 0 ) {
+      /* Lack of memory, go to collapse step. */
+      return (ns);
+    }
+    else if ( ip > 0 ) {
+      ier = split1b(mesh,k,imax,ip);
+      if ( !ier ) {
+        /* Lack of memory, go to collapse step. */
+        _MMG5_delPt(mesh,ip);
+        return(ns);
+      }
+      /* if we realloc memory in split1b pt pointer is not valid aymore. */
+      pt = &mesh->tria[k];
+      ns += ier;
+    }
   }
   return(ns);
 }

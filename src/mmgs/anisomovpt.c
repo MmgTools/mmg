@@ -350,7 +350,7 @@ int movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
   }
 
   /* Finally, update coordinates and normals of point, if new position is accepted :*/
-  assert(paratmet(p0->c,p0->n,m0,o,no,m)); // parallel transport of metric at p0 to new point
+  paratmet(p0->c,p0->n,m0,o,no,m); // parallel transport of metric at p0 to new point
 
   p0->c[0] = o[0];
   p0->c[1] = o[1];

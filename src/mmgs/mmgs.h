@@ -54,6 +54,33 @@
 #define MS_Ver       1
 #define MS_Tri       2
 
+/** Reallocation of tria table and creation
+    of tria jel */
+#define _MMG5_TRIA_REALLOC( mesh,jel,wantedGap,law ) do                 \
+  {                                                                     \
+    int klink,oldSiz;                                                   \
+                                                                        \
+    oldSiz = mesh->ntmax;                                               \
+    _MMG5_TAB_RECALLOC(mesh,mesh->tria,mesh->ntmax,wantedGap,MMG5_Tria, \
+                       "larger tria table",law);                        \
+                                                                        \
+    mesh->nenil = mesh->nt+1;                                           \
+    for (klink=mesh->nenil; klink<mesh->ntmax-1; klink++)               \
+      mesh->tria[klink].v[2]  = klink+1;                                \
+                                                                        \
+    if ( mesh->adja ) {                                                 \
+      /* adja table */                                                  \
+      _MMG5_ADD_MEM(mesh,3*(mesh->ntmax-oldSiz)*sizeof(int),            \
+                    "larger adja table",law);                           \
+      _MMG5_SAFE_RECALLOC(mesh->adja,3*mesh->nt+5,3*mesh->ntmax+5,int   \
+                          ,"larger adja table");                        \
+    }                                                                   \
+                                                                        \
+    /* We try again to add the point */                                 \
+    jel = _MMG5_newElt(mesh);                                           \
+    if ( !jel ) {law;}                                                  \
+  }while(0)
+
 /* prototypes */
 int  loadMesh(MMG5_pMesh );
 int  saveMesh(MMG5_pMesh );
@@ -74,10 +101,10 @@ int  boulep(MMG5_pMesh mesh,int start,int ip,int *list);
 int  boulec(MMG5_pMesh mesh,int k,int i,double *tt);
 int  bouler(MMG5_pMesh mesh,int k,int i,int *list,int *xp,int *nr);
 int  bouletrid(MMG5_pMesh mesh,int start,int ip,int *il1,int *l1,int *il2,int *l2,int *ip0,int *ip1);
-int  newPt(MMG5_pMesh mesh,double c[3],double n[3]);
-void delPt(MMG5_pMesh mesh,int ip);
-int  newElt(MMG5_pMesh mesh);
-void delElt(MMG5_pMesh mesh,int iel);
+int  _MMG5_newPt(MMG5_pMesh mesh,double c[3],double n[3]);
+void _MMG5_delPt(MMG5_pMesh mesh,int ip);
+int  _MMG5_newElt(MMG5_pMesh mesh);
+void _MMG5_delElt(MMG5_pMesh mesh,int iel);
 int  chkedg(MMG5_pMesh ,int );
 int  _MMG5_bezierCP(MMG5_pMesh ,MMG5_Tria *,_MMG5_pBezier, char );
 int  _MMG5_bezierInt(_MMG5_pBezier ,double *,double *,double *,double *);

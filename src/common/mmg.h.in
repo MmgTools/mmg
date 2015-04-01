@@ -228,6 +228,47 @@
     initSize = initSize+gap;                                            \
   }while(0);
 
+/** Free allocated pointers of mesh and sol structure and return value val */
+#define _MMG5_RETURN_AND_FREE(mesh,met,val)do   \
+  {                                             \
+    MMG5_Free_all(mesh,met);                    \
+    return(val);                                \
+  }while(0)
+
+/** Error message when lack of memory */
+#define _MMG5_INCREASE_MEM_MESSAGE() do                     \
+  {                                                         \
+    printf("  ## Check the mesh size or increase maximal"); \
+    printf(" authorized memory with the -m option.\n");     \
+  } while(0)
+
+
+/** Reallocation of point table and sol table and creation
+    of point ip with coordinates o and tag tag*/
+#define _MMG5_POINT_REALLOC(mesh,sol,ip,wantedGap,law,o,tag ) do        \
+  {                                                                     \
+    int klink;                                                          \
+                                                                        \
+    _MMG5_TAB_RECALLOC(mesh,mesh->point,mesh->npmax,wantedGap,MMG5_Point, \
+                       "larger point table",law);                       \
+                                                                        \
+    mesh->npnil = mesh->np+1;                                           \
+    for (klink=mesh->npnil; klink<mesh->npmax-1; klink++)               \
+      mesh->point[klink].tmp  = klink+1;                                \
+                                                                        \
+    /* solution */                                                      \
+    if ( sol->m ) {                                                     \
+      _MMG5_ADD_MEM(mesh,(mesh->npmax-sol->npmax)*sizeof(double),       \
+                    "larger solution",law);                             \
+      _MMG5_SAFE_REALLOC(sol->m,mesh->npmax+1,double,"larger solution"); \
+    }                                                                   \
+    sol->npmax = mesh->npmax;                                           \
+                                                                        \
+    /* We try again to add the point */                                 \
+    ip = _MMG5_newPt(mesh,o,tag);                                       \
+    if ( !ip ) {law;}                                                   \
+  }while(0)
+
 /* Macro for fortran function generation */
 /**
  * \def FORTRAN_NAME(nu,nl,pl,pc)

@@ -591,7 +591,12 @@ static int norver(MMG5_pMesh mesh) {
         if ( !ier )  continue;
 
         ++mesh->xp;
-        assert(mesh->xp < mesh->xpmax);
+        if(mesh->xp > mesh->xpmax){
+          _MMG5_TAB_RECALLOC(mesh,mesh->xpoint,mesh->xpmax,0.2,MMG5_xPoint,
+                             "larger xpoint table",
+                             mesh->xp--;
+                             return(0));
+        }
         ppt->ig = mesh->xp;
         go = &mesh->xpoint[mesh->xp];
         memcpy(go->n1,n,3*sizeof(double));         

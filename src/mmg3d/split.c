@@ -112,7 +112,15 @@ int _MMG5_split1_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
   return(1);
 }
 
-/** split 1 edge of tetra */
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param k index of element to split.
+ * \param vx \f$vx[i]\f$ is the index of the point to add on the edge \a i.
+ *
+ * Split 1 edge of tetra \a k.
+ *
+ */
 void _MMG5_split1(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
   MMG5_pTetra   pt,pt1;
   MMG5_xTetra   xt,xt1;
@@ -277,8 +285,20 @@ int _MMG5_simbulgept(MMG5_pMesh mesh,int *list,int ret,double o[3]) {
   return(1);
 }
 
-/** Split edge list[0]%6, whose shell list is passed, introducing point ip
-    Beware : shell has to be enumerated in ONLY ONE TRAVEL (always same sense) */
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param list pointer toward the shell of edge.
+ * \param ret size of the shell of edge.
+ * \param ip idex of new point.
+ * \param cas flag to watch the length of the new edges.
+ * \return -1 if lack of memory, 0 if we don't split the edge, 1 if success.
+ *
+ * Split edge \f$list[0]%6\f$, whose shell list is passed, introducing point \a
+ * ip Beware : shell has to be enumerated in ONLY ONE TRAVEL (always same
+ * sense).
+ *
+ */
 int _MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,int cas){
   MMG5_pTetra         pt,pt1;
   MMG5_xTetra         xt,xt1;
