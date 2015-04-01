@@ -572,35 +572,30 @@ int _MMG5_prilen(MMG5_pMesh mesh, MMG5_pSol met) {
 
       /* Remove edge from hash ; ier = 1 if edge has been found */
       ier = _MMG5_hashGet(&hash,np,nq);
-      if( ier ) {
-        ned ++;
-        len = _MMG5_lenedg(mesh,met,np,nq,(pt->tag[ia] & MG_GEO));
-        avlen += len;
+      ned ++;
+      len = _MMG5_lenedg(mesh,met,np,nq,(pt->tag[ia] & MG_GEO));
+      avlen += len;
 
-        if( len < lmin ) {
-          lmin = len;
-          amin = np;
-          bmin = nq;
-        }
-
-        if ( len > lmax ) {
-          lmax = len;
-          amax = np;
-          bmax = nq;
-        }
-
-        /* Locate size of edge among given table */
-        for(i=0; i<8; i++) {
-          if ( bd[i] <= len && len < bd[i+1] ) {
-            hl[i]++;
-            break;
-          }
-        }
-        if( i == 8 ) hl[8]++;
+      if( len < lmin ) {
+        lmin = len;
+        amin = np;
+        bmin = nq;
       }
-      else {
-        printf("edge %d:%d %d in %d not found\n",ia, np,nq,k);
+
+      if ( len > lmax ) {
+        lmax = len;
+        amax = np;
+        bmax = nq;
       }
+
+      /* Locate size of edge among given table */
+      for(i=0; i<8; i++) {
+        if ( bd[i] <= len && len < bd[i+1] ) {
+          hl[i]++;
+          break;
+        }
+      }
+      if( i == 8 ) hl[8]++;
     }
   }
 

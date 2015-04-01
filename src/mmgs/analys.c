@@ -306,7 +306,7 @@ static void nmpoints(MMG5_pMesh mesh) {
     fprintf(stdout,"  ## %d non manifold points detected\n",nmp);
 }
 
-/** improve badly shaped elts */
+/** improve badly shaped elts for isotropic mesh */
 /* static int delbad(MMG5_pMesh mesh) { */
 /*   MMG5_pTria    pt; */
 /*   MMG5_pPoint   p[3]; */

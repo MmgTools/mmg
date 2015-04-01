@@ -291,7 +291,7 @@ int swapar(MMG5_pMesh mesh,int k,int i) {
 }
 
 
-/* flip edge i of tria k */
+/* flip edge i of tria k for isotropic mesh*/
 int litswp(MMG5_pMesh mesh,int k,char i,double kali) {
   MMG5_pTria    pt,pt0,pt1;
   MMG5_pPoint   a,b,c,d;
@@ -328,7 +328,6 @@ int litswp(MMG5_pMesh mesh,int k,char i,double kali) {
 
   /* check quality */
   pt0->v[0] = id;  pt0->v[1] = ic;  pt0->v[2] = ib;
-#warning dont work in ani
   kalt = _MMG5_calelt(mesh,NULL,pt0);
   kali = MG_MIN(kali,kalt);
   pt0->v[0] = ia;  pt0->v[1] = id;  pt0->v[2] = ic;
