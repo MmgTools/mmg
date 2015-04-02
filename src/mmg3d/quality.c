@@ -525,7 +525,14 @@ int _MMG5_badelt(MMG5_pMesh mesh,MMG5_pSol met) {
   return(nd);
 }
 
-/** Compute sizes of edges of the mesh, and displays histo */
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \return 0 if fail, 1 otherwise.
+ *
+ * Compute sizes of edges of the mesh, and displays histo.
+ *
+ */
 int _MMG5_prilen(MMG5_pMesh mesh, MMG5_pSol met) {
   MMG5_pTetra     pt;
   MMG5_pxTetra    pxt;

@@ -514,6 +514,131 @@ void inqua(MMG5_pMesh mesh,MMG5_pSol met) {
   }
 }
 
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \return 0 if fail, 1 otherwise.
+ *
+ * Compute sizes of edges of the mesh, and displays histo.
+ *
+ */
+int _MMG5_prilen(MMG5_pMesh mesh, MMG5_pSol met) {
+  MMG5_pTria      pt;
+  _MMG5_Hash      hash;
+  double          len,avlen,dned,lmin,lmax;
+  int             k,np,nq,amin,bmin,amax,bmax,ned,hl[9];
+  char            ia,i0,i1,ier,i;
+  static double   bd[9]= {0.0, 0.3, 0.6, 0.7071, 0.9, 1.3, 1.4142, 2.0, 5.0};
+  //{0.0, 0.2, 0.5, 0.7071, 0.9, 1.111, 1.4142, 2.0, 5.0};
+
+  memset(hl,0,9*sizeof(int));
+  ned = 0;
+  avlen = 0.0;
+  lmax = 0.0;
+  lmin = 1.e30;
+  amin = amax = bmin = bmax = 0;
+
+  /* Hash all edges in the mesh */
+  if ( !_MMG5_hashNew(mesh,&hash,mesh->np,7*mesh->np) )  return(0);
+
+  for(k=1; k<=mesh->nt; k++) {
+    pt = &mesh->tria[k];
+    if ( !MG_EOK(pt) ) continue;
+
+    for(ia=0; ia<3; ia++) {
+      i0 = _MMG5_iprv2[ia];
+      i1 = _MMG5_inxt2[ia];
+      np = pt->v[i0];
+      nq = pt->v[i1];
+
+      if(!_MMG5_hashEdge(mesh,&hash,np,nq,0)){
+        fprintf(stdout,"%s:%d: Error: function _MMG5_hashEdge return 0\n",
+                __FILE__,__LINE__);
+        exit(EXIT_FAILURE);
+      }
+    }
+  }
+
+  /* Pop edges from hash table, and analyze their length */
+  for(k=1; k<=mesh->nt; k++) {
+    pt = &mesh->tria[k];
+    if ( !MG_EOK(pt) ) continue;
+
+    for(ia=0; ia<3; ia++) {
+      i0 = _MMG5_iprv2[ia];
+      i1 = _MMG5_inxt2[ia];
+      np = pt->v[i0];
+      nq = pt->v[i1];
+
+      /* Remove edge from hash ; ier = 1 if edge has been found */
+      ier = _MMG5_hashGet(&hash,np,nq);
+      ned ++;
+      len = _MMG5_lenedg(mesh,met,np,nq,(pt->tag[ia] & MG_GEO));
+      avlen += len;
+
+      if( len < lmin ) {
+        lmin = len;
+        amin = np;
+        bmin = nq;
+      }
+
+      if ( len > lmax ) {
+        lmax = len;
+        amax = np;
+        bmax = nq;
+      }
+
+      /* Locate size of edge among given table */
+      for(i=0; i<8; i++) {
+        if ( bd[i] <= len && len < bd[i+1] ) {
+          hl[i]++;
+          break;
+        }
+      }
+      if( i == 8 ) hl[8]++;
+    }
+  }
+
+  /* Display histogram */
+  dned = (double)ned;
+  avlen = avlen / dned;
+
+  fprintf(stdout,"\n  -- RESULTING EDGE LENGTHS  %d\n",ned);
+  fprintf(stdout,"     AVERAGE LENGTH         %12.4f\n",avlen);
+  fprintf(stdout,"     SMALLEST EDGE LENGTH   %12.4f   %6d %6d\n",
+          lmin,amin,bmin);
+  fprintf(stdout,"     LARGEST  EDGE LENGTH   %12.4f   %6d %6d \n",
+          lmax,amax,bmax);
+
+  if ( hl[3]+hl[4]+hl[5] )
+    fprintf(stdout,"   %6.2f < L <%5.2f  %8d   %5.2f %%  \n",
+            bd[3],bd[6],hl[3]+hl[4]+hl[5],100.*(hl[3]+hl[4]+hl[5])/(double)ned);
+  if ( hl[2]+hl[3]+hl[4] )
+    fprintf(stdout,"   %6.2f < L <%5.2f  %8d   %5.2f %%  \n",
+            bd[2],bd[5],hl[2]+hl[3]+hl[4],100.*(hl[2]+hl[3]+hl[4])/(double)ned);
+
+
+  if ( abs(mesh->info.imprim) > 3 ) {
+    fprintf(stdout,"\n     HISTOGRAMM:\n");
+    if ( hl[0] )
+      fprintf(stdout,"     0.00 < L < 0.30  %8d   %5.2f %%  \n",
+              hl[0],100.*(hl[0]/(float)ned));
+    if ( lmax > 0.2 ) {
+      for (k=2; k<9; k++) {
+        if ( hl[k-1] > 0 )
+          fprintf(stdout,"   %6.2f < L <%5.2f  %8d   %5.2f %%  \n",
+                  bd[k-1],bd[k],hl[k-1],100.*(hl[k-1]/(float)ned));
+      }
+      if ( hl[8] )
+        fprintf(stdout,"     5.   < L         %8d   %5.2f %%  \n",
+                hl[8],100.*(hl[8]/(float)ned));
+    }
+  }
+
+  _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
+  return(1);
+}
+
 /* print histogram of qualities */
 void outqua(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTria    pt;

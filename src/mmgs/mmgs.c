@@ -412,6 +412,9 @@ int main(int argc,char *argv[]) {
   fprintf(stdout,"\n  %s\n   MODULE MMGS-LJLL : %s (%s)\n  %s\n",MG_STR,MG_VER,MG_REL,MG_STR);
   if ( mesh.info.imprim )   fprintf(stdout,"\n  -- PHASE 1 : ANALYSIS\n");
   if ( !analys(&mesh) )  return(1);
+
+  if ( mesh.info.imprim > 3 && met.m ) _MMG5_prilen(&mesh,&met);
+
   chrono(OFF,&MMG5_ctim[2]);
   if ( mesh.info.imprim ) {
     printim(MMG5_ctim[2].gdif,stim);
@@ -431,6 +434,8 @@ int main(int argc,char *argv[]) {
 
   /* save file */
   outqua(&mesh,&met);
+  if ( mesh.info.imprim > 3 )  _MMG5_prilen(&mesh,&met);
+
   chrono(ON,&MMG5_ctim[1]);
   if ( mesh.info.imprim )  fprintf(stdout,"\n  -- WRITING DATA FILE %s\n",mesh.nameout);
   if ( !_MMG5_unscaleMesh(&mesh,&met) )  return(1);
