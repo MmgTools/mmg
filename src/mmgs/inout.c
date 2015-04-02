@@ -1097,7 +1097,10 @@ int MMG5_loadMet(MMG5_pMesh mesh,MMG5_pSol met) {
   if(!bin) {
     strcpy(chaine,"DDD");
     while(fscanf(inm,"%s",&chaine[0])!=EOF && strncmp(chaine,"End",strlen("End")) ) {
-      if(!strncmp(chaine,"Dimension",strlen("Dimension"))) {
+      if(!strncmp(chaine,"MeshVersionFormatted",strlen("MeshVersionFormatted"))) {
+        fscanf(inm,"%d",&met->ver);
+        continue;
+      } else if(!strncmp(chaine,"Dimension",strlen("Dimension"))) {
         fscanf(inm,"%d",&met->dim);
         if(met->dim!=3) {
           fprintf(stdout,"BAD SOL DIMENSION : %d\n",met->dim);
