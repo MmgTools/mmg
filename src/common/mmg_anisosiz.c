@@ -168,6 +168,14 @@ double _MMG5_lenedg_ani(MMG5_pMesh mesh,MMG5_pSol met,int np0,int np1,char isedg
     +2.0*m1[1]*gammaprim1[0]*gammaprim1[1]  + 2.0*m1[2]*gammaprim1[0]*gammaprim1[2] \
     + 2.0*m1[4]*gammaprim1[1]*gammaprim1[2];
 
+  if(l0 < 0) {
+    printf("neg %e\n",l0);
+    l0 =1;
+  }
+  if(l1 < 0) {
+    printf("neg1 %e\n",l1);
+    l1 = 1;
+  }
   l0 = 0.5*(sqrt(l0) + sqrt(l1));
   return(l0);
 }

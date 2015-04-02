@@ -387,7 +387,6 @@ int main(int argc,char *argv[]) {
   /* load data */
   fprintf(stdout,"\n  -- INPUT DATA\n");
   chrono(ON,&MMG5_ctim[1]);
-  setfunc(&mesh,&met);
 
   if ( !loadMesh(&mesh) )  return(1);
   met.npmax = mesh.npmax;
@@ -407,6 +406,7 @@ int main(int argc,char *argv[]) {
 
   /* analysis */
   chrono(ON,&MMG5_ctim[2]);
+  setfunc(&mesh,&met);
 
   inqua(&mesh,&met);
   fprintf(stdout,"\n  %s\n   MODULE MMGS-LJLL : %s (%s)\n  %s\n",MG_STR,MG_VER,MG_REL,MG_STR);
