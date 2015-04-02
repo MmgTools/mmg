@@ -60,37 +60,34 @@ static void excfun(int sigid) {
   exit(1);
 }
 
-static void usage(char *name) {
-  fprintf(stdout,"\nUsage: %s [-v [n]] [-h] filein [fileout]\n",name);
+static void usage(char *prog) {
 
-  fprintf(stdout,"\n** Generic options :\n");
-  fprintf(stdout,"-h      Print this message\n");
-  fprintf(stdout,"-v [n]  Turn on numerical information, [-10..10]\n");
-  fprintf(stdout,"-d      Debbuging mesh->info.\n");
+  _MMG5_mmgUsage(prog);
 
-  fprintf(stdout,"\n**  File specifications\n");
-  fprintf(stdout,"-in  file  input triangulation\n");
-  fprintf(stdout,"-out file  output triangulation\n");
-  fprintf(stdout,"-sol file  load solution or metric file\n");
-
-  fprintf(stdout,"\n**  Parameters\n");
-  fprintf(stdout,"-ar val    angle detection\n");
-  fprintf(stdout,"-nr        no angle detection\n");
   fprintf(stdout,"-nreg      normal regul.\n");
-  fprintf(stdout,"-hmin val  minimal mesh size\n");
-  fprintf(stdout,"-hmax val  maximal mesh size\n");
-  fprintf(stdout,"-hausd val control Hausdorff distance\n");
-  fprintf(stdout,"-hgrad val control gradation\n");
-  fprintf(stdout,"-A         enable anisotropy\n");
 
-  exit(1);
+  exit(EXIT_FAILURE);
 }
 
+static void _MMG5_defaultValues(MMG5_pMesh mesh) {
+
+  _MMG5_mmgDefaultValues(mesh);
+
+  exit(EXIT_FAILURE);
+}
 
 static int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
   int    i;
   char   namein[128];
 
+  /* First step: search if user want to see the default parameters values. */
+  for ( i=1; i< argc; ++i ) {
+    if ( !strcmp(argv[i],"-val") ) {
+      _MMG5_defaultValues(mesh);
+    }
+  }
+
+  /* Second step: read all other arguments. */
   i = 1;
   while ( i < argc ) {
     if ( *argv[i] == '-' ) {
@@ -104,9 +101,6 @@ static int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
           mesh->info.dhd = MG_MAX(0.0, MG_MIN(180.0,mesh->info.dhd));
           mesh->info.dhd = cos(mesh->info.dhd*M_PI/180.0);
         }
-        break;
-      case 'A': /* anisotropy */
-        met->size = 6;
         break;
       case 'h':
         if ( !strcmp(argv[i],"-hmin") && ++i < argc )

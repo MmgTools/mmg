@@ -266,6 +266,8 @@ void _MMG5_outqua(MMG5_pMesh mesh,MMG5_pSol met);
 int  _MMG5_badelt(MMG5_pMesh mesh,MMG5_pSol met);
 int _MMG5_prilen(MMG5_pMesh mesh,MMG5_pSol met);
 int _MMG5_DoSol(MMG5_pMesh mesh,MMG5_pSol met);
+void _MMG5_defaultValues(MMG5_pMesh);
+
 /* useful functions to debug */
 int  _MMG5_indElt(MMG5_pMesh mesh,int kel);
 int  _MMG5_indPt(MMG5_pMesh mesh,int kp);

@@ -145,26 +145,9 @@ int MMG5_Get_adjaTet(MMG5_pMesh mesh, int kel, int *v0, int *v1, int *v2, int *v
  *
  */
 void _MMG5_usage(char *prog) {
-  fprintf(stdout,"\nUsage: %s [-v [n]] [opts..] filein [fileout]\n",prog);
 
-  fprintf(stdout,"\n** Generic options :\n");
-  fprintf(stdout,"-h      Print this message\n");
-  fprintf(stdout,"-v [n]  Tune level of verbosity, [-10..10]\n");
-  fprintf(stdout,"-m [n]  Set maximal memory size to n Mbytes\n");
-  fprintf(stdout,"-d      Turn on debug mode\n");
+  _MMG5_mmgUsage(prog);
 
-  fprintf(stdout,"\n**  File specifications\n");
-  fprintf(stdout,"-in  file  input triangulation\n");
-  fprintf(stdout,"-out file  output triangulation\n");
-  fprintf(stdout,"-sol file  load solution or metric file\n");
-
-  fprintf(stdout,"\n**  Parameters\n");
-  fprintf(stdout,"-ar     val  angle detection\n");
-  fprintf(stdout,"-nr          no angle detection\n");
-  fprintf(stdout,"-hmin   val  minimal mesh size\n");
-  fprintf(stdout,"-hmax   val  maximal mesh size\n");
-  fprintf(stdout,"-hausd  val  control Hausdorff distance\n");
-  fprintf(stdout,"-hgrad  val  control gradation\n");
   fprintf(stdout,"-ls          levelset meshing \n");
   fprintf(stdout,"-noswap      no edge or face flipping\n");
   fprintf(stdout,"-nomove      no point relocation\n");
@@ -175,6 +158,25 @@ void _MMG5_usage(char *prog) {
 #ifdef USE_SCOTCH
   fprintf(stdout,"-rn [n]      Turn on or off the renumbering using SCOTCH [1/0] \n");
 #endif
+  exit(EXIT_FAILURE);
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \return 0 if fail, 1 if success.
+ *
+ * Print the default parameters values.
+ *
+ */
+void _MMG5_defaultValues(MMG5_pMesh mesh) {
+
+  _MMG5_mmgDefaultValues(mesh);
+
+#ifndef PATTERN
+  fprintf(stdout,"Bucket size per dimension (-bucket) : %d\n",
+          mesh->info.bucket);
+#endif
+
   exit(EXIT_FAILURE);
 }
 
@@ -193,6 +195,14 @@ int MMG5_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met
   int     i;
   char    namein[128];
 
+  /* First step: search if user want to see the default parameters values. */
+  for ( i=1; i< argc; ++i ) {
+    if ( !strcmp(argv[i],"-val") ) {
+      _MMG5_defaultValues(mesh);
+    }
+  }
+
+  /* Second step: read all other arguments. */
   i = 1;
   while ( i < argc ) {
     if ( *argv[i] == '-' ) {

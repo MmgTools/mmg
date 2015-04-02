@@ -60,8 +60,8 @@ static void paktri(MMG5_pMesh mesh) {
 }
 
 /**
- * \param mesh pointer towar the mesh structure.
- * \return 1 if success, 0 if failed.
+ * \param mesh pointer toward the mesh structure.
+ * \return 1 if success, 0 if fail.
  *
  * Create adjacency table.
  *

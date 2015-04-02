@@ -24,9 +24,12 @@
 /**
  * \file common/mmg_API_functions.c
  * \brief C API functions definitions for MMG library.
+ * \author Charles Dapogny (LJLL, UPMC)
+ * \author Cécile Dobrzynski (Inria / IMB, Université de Bordeaux)
+ * \author Pascal Frey (LJLL, UPMC)
  * \author Algiane Froehly (Inria / IMB, Université de Bordeaux)
  * \version 5
- * \date 01 2014
+ * \date 03 2014
  * \copyright GNU Lesser General Public License.
  *
  * \note This file contains some internal functions for the API, see the \ref

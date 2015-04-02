@@ -30,18 +30,23 @@
  * \author Algiane Froehly (Inria / IMB, Université de Bordeaux)
  * \version 5
  * \copyright GNU Lesser General Public License.
- * \todo Doxygen documentation
  */
 
 #include "mmg.h"
 
-int _MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met) {
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \return 1 if success, 0 if fail (computed bounding box too small).
+ *
+ * Compute the mesh bounding box and fill the \a min, \a max and \a delta fields
+ * of the \ref _MMG5_info structure.
+ *
+ */
+int _MMG5_boundingBox(MMG5_pMesh mesh) {
   MMG5_pPoint    ppt;
-  double         dd,d1;
-  int            i,k;
-  MMG5_pPar      par;
+  int            k,i;
+  double         dd;
 
-  /* compute bounding box */
   for (i=0; i<3; i++) {
     mesh->info.min[i] =  DBL_MAX;
     mesh->info.max[i] = -DBL_MAX;
@@ -65,6 +70,27 @@ int _MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met) {
     return(0);
   }
 
+  return(1);
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric or solution structure.
+ * \return 1 if success, 0 if fail (computed bounding box too small).
+ *
+ * Scale the mesh and the size informations between 0 and 1.
+ *
+ */
+int _MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met) {
+  MMG5_pPoint    ppt;
+  double         dd,d1;
+  int            k;
+  MMG5_pPar      par;
+
+
+  /* compute bounding box */
+  if ( ! _MMG5_boundingBox(mesh) ) return(0);
+
   /* normalize coordinates */
   dd = 1.0 / mesh->info.delta;
   for (k=1; k<=mesh->np; k++) {
@@ -76,8 +102,12 @@ int _MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met) {
   }
 
   /* normalize values */
-  mesh->info.hmin  *= dd;
-  mesh->info.hmax  *= dd;
+  if ( mesh->info.hmin > 0. )  mesh->info.hmin  *= dd;
+  else  mesh->info.hmin = 0.01;
+
+  if ( mesh->info.hmax > 0. )  mesh->info.hmax  *= dd;
+  else mesh->info.hmax  = 1.;
+
   mesh->info.hausd *= dd;
 
   /* normalize sizes */
@@ -102,6 +132,14 @@ int _MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met) {
   return(1);
 }
 
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric or solution structure.
+ * \return 1.
+ *
+ * Unscale the mesh and the size informations to their initial sizes.
+ *
+ */
 int _MMG5_unscaleMesh(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pPoint     ppt;
   double     dd;
