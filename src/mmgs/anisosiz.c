@@ -35,8 +35,18 @@
 
 #include "mmgs.h"
 
-/* Define anisotropic metric map at a SINGULARITY of the geometry, associated to the
-   geometric approx of the surface. metric= alpha* Id, alpha = size */
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param it index of the triangle in which we work.
+ * \param ip index of the point on which we want to compute the metric in \a it.
+ * \return 1 if success, 0 otherwise.
+ *
+ * Define metric map at a SINGULARITY of the geometry, associated to
+ * the geometric approx of the surface. metric \f$=\alpha*Id\f$, \f$\alpha =\f$
+ * size.
+ *
+ */
 static int defmetsin(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
   MMG5_pTria         pt;
   MMG5_pPoint        p0,p1;
@@ -108,15 +118,25 @@ static int defmetsin(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
   return(1);
 }
 
-/* Compute metric tensor associated to a ridge point : convention is a bit weird here :
-   p->m[0] is the specific size in direction t,
-   p->m[1] is the specific size in direction u1 = n1 ^ t
-   p->m[2] is the specific size in direction u2 = n2 ^ t,
-   and at each time, metric tensor has to be recomputed, depending on the side */
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param it index of the triangle in which we work.
+ * \param ip index of the point on which we want to compute the metric in \a it.
+ * \return 1 if success, 0 otherwise.
+ *
+ * Compute metric tensor associated to a ridge point : convention is a bit weird
+ * here :
+ * \a p->m[0] is the specific size in direction \a t,
+ * \a p->m[1] is the specific size in direction \f$ u1 = n1 ^ t\f$
+ * \a p->m[2] is the specific size in direction \f$ u2 = n2 ^ t\f$,
+ * and at each time, metric tensor has to be recomputed, depending on the side.
+ *
+ */
 static int defmetrid(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
-  MMG5_pTria          pt;
-  MMG5_pPoint         p0,p1,p2;
-  _MMG5_Bezier         b;
+  MMG5_pTria     pt;
+  MMG5_pPoint    p0,p1,p2;
+  _MMG5_Bezier   b;
   int            k,iel,idp,ilist1,ilist2,ilist,*list,list1[LMAX+2],list2[LMAX+2],iprid[2],ier;
   double        *m,isqhmin,isqhmax,*n1,*n2,*n,*t,kappacur,b0[3],b1[3],n0[3],tau[3],trot[2],u[2];
   double         l,ll,ps,gammasec[3],c[3],r[3][3],lispoi[3*LMAX+1],ux,uy,uz,det,bcu[3];
@@ -381,8 +401,17 @@ static int defmetrid(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
   return(1);
 }
 
-/* Define anisotropic metric map at a REF point of the geometry, associated to the
-   geometric approx of the surface.*/
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param it index of the triangle in which we work.
+ * \param ip index of the point on which we want to compute the metric in \a it.
+ * \return 1 if success, 0 otherwise.
+ *
+ * Define metric map at a REF vertex of the mesh, associated to the
+ * geometric approx of the surface.
+ *
+ */
 static int defmetref(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
   MMG5_pTria         pt;
   MMG5_pPoint        p0,p1;
@@ -739,8 +768,17 @@ static int defmetref(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
   return(1);
 }
 
-/* Define anisotropic metric map at a REGULAR vertex of the mesh, associated to the
-   geometric approx of the surface.*/
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param it index of the triangle in which we work.
+ * \param ip index of the point on which we want to compute the metric in \a it.
+ * \return 1 if success, 0 otherwise.
+ *
+ * Define metric map at a REGULAR vertex of the mesh, associated to
+ * the geometric approx of the surface.
+ *
+ */
 static int defmetreg(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
   MMG5_pTria          pt;
   MMG5_pPoint         p0,p1;
@@ -795,13 +833,13 @@ static int defmetreg(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
   /* Check all projections over tangent plane. */
   for (k=0; k<ilist-1; k++) {
     det2d = lispoi[3*k+1]*lispoi[3*(k+1)+2] - lispoi[3*k+2]*lispoi[3*(k+1)+1];
-    if ( det2d < 0.0 ) {
+    if ( det2d <= 0.0 ) {
       printf("PROBLEM : BAD PROJECTION OVER TANGENT PLANE %f \n", det2d);
       return(0);
     }
   }
   det2d = lispoi[3*(ilist-1)+1]*lispoi[3*0+2] - lispoi[3*(ilist-1)+2]*lispoi[3*0+1];
-  if ( det2d < 0.0 ) {
+  if ( det2d <= 0.0 ) {
     printf("PROBLEM : BAD PROJECTION OVER TANGENT PLANE %f \n", det2d);
     return(0);
   }
@@ -834,7 +872,7 @@ static int defmetreg(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
       b.b[j][2] =  r[2][0]*c[0] + r[2][1]*c[1] + r[2][2]*c[2];
     }
 
-    /* Mid-point along left edge and endpoint in the rotated frame */
+    /* Mid-point along edge [i0;i1] and endpoint in the rotated frame */
     if(i0 == 0){
       memcpy(b0,&(b.b[7][0]),3*sizeof(double));
       memcpy(b1,&(b.b[8][0]),3*sizeof(double));
@@ -848,12 +886,16 @@ static int defmetreg(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
       memcpy(b1,&(b.b[6][0]),3*sizeof(double));
     }
 
-    /* At this point, the two control points are expressed in the rotated frame */
+    /* At this point, the two control points b0 and b1 are expressed in the
+     * rotated frame. We compute the physical coor of the curve edge's
+     * mid-point. */
     c[0] = 3.0/8.0*b0[0] + 3.0/8.0*b1[0] + 1.0/8.0*lispoi[3*k+1];
     c[1] = 3.0/8.0*b0[1] + 3.0/8.0*b1[1] + 1.0/8.0*lispoi[3*k+2];
     c[2] = 3.0/8.0*b0[2] + 3.0/8.0*b1[2] + 1.0/8.0*lispoi[3*k+3];
 
-    /* Fill matric tAA and second member tAb*/
+    /* Fill matrice tAA and second member tAb with A=(\sum X_{P_i}^2 \sum
+     * Y_{P_i}^2 \sum X_{P_i}Y_{P_i}) and b=\sum Z_{P_i} with P_i the physical
+     * points at edge [i0;i1] extremities and middle. */
     tAA[0] += c[0]*c[0]*c[0]*c[0];
     tAA[1] += c[0]*c[0]*c[1]*c[1];
     tAA[2] += c[0]*c[0]*c[0]*c[1];
@@ -876,7 +918,9 @@ static int defmetreg(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
     tAb[1] += lispoi[3*k+2]*lispoi[3*k+2]*lispoi[3*k+3];
     tAb[2] += lispoi[3*k+1]*lispoi[3*k+2]*lispoi[3*k+3];
 
-    /* Mid-point along median edge and endpoint in the rotated frame */
+    /* Mid-point along median edge (coor of mid-point in parametric space : (1/4
+     * 1/4)) and endpoint in the rotated frame (coor of end-point in parametric
+     * space (1/2 1/2)). */
     if(i0 == 0){
       c[0] = A64TH*(b.b[1][0] + b.b[2][0] + 3.0*(b.b[3][0] + b.b[4][0])) \
         + 3.0*A16TH*(b.b[6][0] + b.b[7][0] + b.b[9][0]) + A32TH*(b.b[5][0] + b.b[8][0]);
@@ -914,7 +958,7 @@ static int defmetreg(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
       d[2] = 0.125*b.b[0][2] + 0.375*(b.b[7][2] + b.b[8][2]) + 0.125*b.b[1][2];
     }
 
-    /* Fill matric tAA and second member tAb*/
+    /* Fill matrice tAA and second member tAb*/
     tAA[0] += c[0]*c[0]*c[0]*c[0];
     tAA[1] += c[0]*c[0]*c[1]*c[1];
     tAA[2] += c[0]*c[0]*c[0]*c[1];
@@ -940,10 +984,9 @@ static int defmetreg(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
 
   /* solve now (a b c) = tAA^{-1} * tAb */
   if ( !sys33sym(tAA,tAb,c) ) {
-    //printf(" La matrice %f %f %f %f %f %f \n",tAA[0],tAA[1],tAA[2],tAA[3],tAA[4],tAA[5]);
+    printf(" La matrice %f %f %f %f %f %f \n",tAA[0],tAA[1],tAA[2],tAA[3],tAA[4],tAA[5]);
     return(0);
   }
-
   intm[0] = 2.0*c[0];
   intm[1] = c[2];
   intm[2] = 2.0*c[1];
@@ -1006,6 +1049,15 @@ static int defmetreg(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
   return(1);
 }
 
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric stucture.
+ * \return 0 if fail, 1 otherwise.
+ *
+ * Define size at points by intersecting the surfacic metric and the
+ * pysical metric.
+ *
+ */
 int defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTria    pt;
   MMG5_pPoint   ppt;
@@ -1075,12 +1127,12 @@ int defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
     else {
       n = ppt->tag & MG_REF ? &mesh->xpoint[ppt->ig].n1[0] : ppt->n;
       rotmatrix(n,r);
-      m[0] = isqhmax*(r[0][0]*r[0][0]+r[1][0]*r[1][0]);
-      m[1] = isqhmax*(r[0][0]*r[0][1]+r[1][0]*r[1][1]);
-      m[2] = isqhmax*(r[0][0]*r[0][2]+r[1][0]*r[1][2]);
-      m[3] = isqhmax*(r[0][1]*r[0][1]+r[1][1]*r[1][1]);
-      m[4] = isqhmax*(r[0][1]*r[0][2]+r[1][1]*r[1][2]);
-      m[5] = isqhmax*(r[0][2]*r[0][2]+r[1][2]*r[1][2]);
+      m[0] = isqhmax*(r[0][0]*r[0][0]+r[1][0]*r[1][0]+r[2][0]*r[2][0]);
+      m[1] = isqhmax*(r[0][0]*r[0][1]+r[1][0]*r[1][1]+r[2][0]*r[2][1]);
+      m[2] = isqhmax*(r[0][0]*r[0][2]+r[1][0]*r[1][2]+r[2][0]*r[2][2]);
+      m[3] = isqhmax*(r[0][1]*r[0][1]+r[1][1]*r[1][1]+r[2][1]*r[2][1]);
+      m[4] = isqhmax*(r[0][1]*r[0][2]+r[1][1]*r[1][2]+r[2][1]*r[2][2]);
+      m[5] = isqhmax*(r[0][2]*r[0][2]+r[1][2]*r[1][2]+r[2][2]*r[2][2]);
     }
     ppt->flag = 1;
   }
