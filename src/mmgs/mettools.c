@@ -412,7 +412,7 @@ static int intersecmet22(MMG5_pMesh mesh, double *m,double *n,double *mr) {
 int intextmet(MMG5_pMesh mesh,MMG5_pSol met,int np,double me[6]) {
   MMG5_pPoint         p0;
   MMG5_pxPoint          go;
-  double         hu,isqhmin,isqhmax,dd;
+  double         hu,isqhmin,isqhmax,dd,alpha1,alpha2,alpha3;
   double        *m,*n,*n1,*n2,*t,r[3][3],mrot[6],mr[3],mtan[3],metan[3],u[3],a[4];
   double complex ro[3];
   char           i;
@@ -511,24 +511,45 @@ int intextmet(MMG5_pMesh mesh,MMG5_pSol met,int np,double me[6]) {
     mtan[1] = mrot[1];
     mtan[2] = mrot[3];
 
+
     rmtr(r,me,mrot);
     metan[0] = mrot[0];
     metan[1] = mrot[1];
     metan[2] = mrot[3];
+    /* printf("metsurf %e %e %e\n",mtan[0],mtan[1],mtan[2]); */
+    /* printf("metphys %e %e %e\n",metan[0],metan[1],metan[2]); */
 
     /* Intersection of metrics in the tangent plane */
-    if ( !intersecmet22(mesh,mtan,metan,mr) ) return(0);
+    if ( !intersecmet22(mesh,mtan,metan,mr) ) {
+      printf("en ces points on fait quoi ???\n");
+      m[0] = me[0];
+      m[1] = me[1];
+      m[2] = me[2];
+      m[3] = me[3];
+      m[4] = me[4];
+      m[5] = me[5];
+
+      return(0);
+    }
 
     /* Back to the canonical basis of \mathbb{R}^3 : me = ^tR*mr*R : mtan and metan are reused */
-    mtan[0]  = mr[0]*r[0][0] + mr[1]*r[1][0];  mtan[1]  = mr[0]*r[0][1] + mr[1]*r[1][1];   mtan[2]  = mr[0]*r[0][2] + mr[1]*r[1][2] ;
-    metan[0] = mr[1]*r[0][0] + mr[2]*r[1][0];  metan[1] = mr[1]*r[0][1] + mr[2]*r[1][1];   metan[2] = mr[1]*r[0][2] + mr[2]*r[1][2] ;
+    mtan[0]  = mr[0]*r[0][0] + mr[1]*r[1][0] + r[2][0]*mrot[2];
+    mtan[1]  = mr[0]*r[0][1] + mr[1]*r[1][1] + r[2][1]*mrot[2];
+    mtan[2]  = mr[0]*r[0][2] + mr[1]*r[1][2] + r[2][2]*mrot[2];
+    metan[0] = mr[1]*r[0][0] + mr[2]*r[1][0] + r[2][0]*mrot[4];
+    metan[1] = mr[1]*r[0][1] + mr[2]*r[1][1] + r[2][1]*mrot[4];
+    metan[2] = mr[1]*r[0][2] + mr[2]*r[1][2] + r[2][2]*mrot[4];
+    alpha1 = r[0][0]*mrot[2] + r[1][0]*mrot[4] + r[2][0]*mrot[5];
+    alpha2 = r[0][1]*mrot[2] + r[1][1]*mrot[4] + r[2][1]*mrot[5];
+    alpha3 = r[0][2]*mrot[2] + r[1][2]*mrot[4] + r[2][2]*mrot[5];
 
-    m[0] = r[0][0] * mtan[0] + r[1][0] * metan[0];
-    m[1] = r[0][0] * mtan[1] + r[1][0] * metan[1];
-    m[2] = r[0][0] * mtan[2] + r[1][0] * metan[2];
-    m[3] = r[0][1] * mtan[1] + r[1][1] * metan[1];
-    m[4] = r[0][1] * mtan[2] + r[1][1] * metan[2];
-    m[5] = r[0][2] * mtan[2] + r[1][2] * metan[2];
+    m[0] = r[0][0] * mtan[0] + r[1][0] * metan[0] + r[2][0]*alpha1;
+    m[1] = r[0][0] * mtan[1] + r[1][0] * metan[1] + r[2][0]*alpha2;
+    m[2] = r[0][0] * mtan[2] + r[1][0] * metan[2] + r[2][0]*alpha3;
+    m[3] = r[0][1] * mtan[1] + r[1][1] * metan[1] + r[2][1]*alpha2;
+    m[4] = r[0][1] * mtan[2] + r[1][1] * metan[2] + r[2][1]*alpha3;
+    m[5] = r[0][2] * mtan[2] + r[1][2] * metan[2] + r[2][2]*alpha3;
+
   }
 
   return(1);
