@@ -994,6 +994,18 @@ static int defmetreg(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
     tAb[2] += d[0]*d[1]*d[2];
   }
 
+  /* case planar surface : tAb = 0 => no curvature */
+  /* isotropic metric with hmax size*/
+  if((tAb[0]*tAb[0] + tAb[1]*tAb[1] + tAb[2]*tAb[2]) < _MMG5_EPSD) {
+    m[0] = isqhmax; 
+    m[1] = 0;
+    m[2] = 0;
+    m[3] = isqhmax; 
+    m[4] = 0;
+    m[5] = isqhmax; 
+    return(1);
+  } 
+
   /* solve now (a b c) = tAA^{-1} * tAb */
   if ( !sys33sym(tAA,tAb,c) ) {
     printf(" La matrice %f %f %f %f %f %f \n",tAA[0],tAA[1],tAA[2],tAA[3],tAA[4],tAA[5]);
@@ -1129,6 +1141,11 @@ int defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
     if ( !MG_VOK(ppt) || ppt->flag == 1 )  continue;
 
     m = &met->m[6*(k)+1];
+    if(ismet) {
+      for(i=0;i<6;i++) m[i] = mm[i];
+      ppt->flag = 1;
+      continue;
+    }
     memset(m,0,6*sizeof(double));
     if ( MS_SIN(ppt->tag) ) {
       m[0] = m[3] = m[5] = isqhmax;

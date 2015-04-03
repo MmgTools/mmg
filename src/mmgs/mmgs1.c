@@ -380,12 +380,11 @@ static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
           }
         }
         if ( met->m ) {
-          intmet(mesh,met,k,i,ip,s);
-          /* if ( typchk == 1 ) */
-          /*   intmet33(mesh,met,ip1,ip2,ip,s); */
-          /* else */
-          /*   intmet(mesh,met,k,i,ip,s); */
-        }
+          if ( /*typchk == 1 &&*/ (met->size>1))
+            intmet33(mesh,met,ip1,ip2,ip,s);
+          else
+            intmet(mesh,met,k,i,ip,s);
+       }
       }
       else if ( pt->tag[i] & MG_GEO ) {
         ppt = &mesh->point[ip];
@@ -402,6 +401,20 @@ static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
           ppt->n[0] *= dd;
           ppt->n[1] *= dd;
           ppt->n[2] *= dd;
+        }
+        if ( met->m ) {
+          if ( /*typchk == 1 &&*/ (met->size>1))
+           intmet33(mesh,met,ip1,ip2,ip,s);
+         else
+           intmet(mesh,met,k,i,ip,s);
+        }
+      } else {
+        printf("on passe par la\n");
+         if ( met->m ) {
+           if ( /*typchk == 1 &&*/ (met->size>1))
+           intmet33(mesh,met,ip1,ip2,ip,s);
+         else
+           intmet(mesh,met,k,i,ip,s);
         }
       }
     }
@@ -570,8 +583,10 @@ int chkspl(MMG5_pMesh mesh,MMG5_pSol met,int k,int i) {
     memcpy(go->n1,no,3*sizeof(double));
   }
   s = 0.5;
-
-  intmet(mesh,met,k,i,ip,s);
+  if( (met->size>1) )
+    intmet33(mesh,met,pt->v[i1],pt->v[i2],ip,s);
+  else
+    intmet(mesh,met,k,i,ip,s); 
 
   return(ip);
 }

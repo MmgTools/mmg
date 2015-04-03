@@ -532,6 +532,11 @@ int intregmet(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,double s,double mr[6]) 
   mr[4] = r[0][1] * mt1[2] + r[1][1] * mt2[2];
   mr[5] = r[0][2] * mt1[2] + r[1][2] * mt2[2];
 
+#warning false
+//reappliquer la rotation aux deux metriques initiales
+//extraire les vp : 2 devraient etre egales et la troisieme differente
+//prendre le min des vp
+
   return(1);
 }
 

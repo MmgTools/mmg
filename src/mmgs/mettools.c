@@ -292,44 +292,53 @@ static int intersecmet22(MMG5_pMesh mesh, double *m,double *n,double *mr) {
   /* First case : matrices m and n are homothetic : n = lambda0*m */
   if ( sqDelta < _MMG5_EPS ) {
     /* Diagonalize m and truncate eigenvalues : trimn, det, etc... are reused */
-    dd    = m[0] - m[2];
-    trimn = m[0] + m[2];
-    det   = m[0]*m[2] - m[1]*m[1];
-
-    sqDelta = sqrt(fabs(dd*dd +4*0*m[1]*m[1]));
-    dm[0]   = 0.5 * (trimn + sqDelta);
-    dm[1]   = 0.5 * (trimn - sqDelta);
-
-    vp0[0] = m[1];
-    vp0[1] = (dm[0]-m[0]);
-    vnorm  = sqrt(vp0[0]*vp0[0] + vp0[1]*vp0[1]);
-
-    if ( vnorm < _MMG5_EPS ) {
-      vp0[0] = (dm[0] - m[2]);
-      vp0[1] = m[1];
+    if (fabs(m[1]) < _MMG5_EPS) {
+      dm[0]   = m[0];
+      dm[1]   = m[2];
+      vp0[0] = 1;
+      vp0[1] = 0;
+      vp1[0] = 0;
+      vp1[1] = 1;
+    } else {
+      dd    = m[0] - m[2];
+      trimn = m[0] + m[2];
+      det   = m[0]*m[2] - m[1]*m[1];
+      
+      sqDelta = sqrt(fabs(dd*dd +4*0*m[1]*m[1]));
+      dm[0]   = 0.5 * (trimn + sqDelta);
+      dm[1]   = 0.5 * (trimn - sqDelta);
+      
+      vp0[0] = m[1];
+      vp0[1] = (dm[0]-m[0]);
       vnorm  = sqrt(vp0[0]*vp0[0] + vp0[1]*vp0[1]);
-      if ( vnorm < _MMG5_EPS ) return(0);
-    }
-
-    vnorm   = 1.0 / vnorm;
-    vp0[0] *= vnorm;
-    vp0[1] *= vnorm;
-
-    vp1[0] = m[1];
-    vp1[1] = (dm[1]-m[0]);
-    vnorm  = sqrt(vp1[0]*vp1[0] + vp1[1]*vp1[1]);
-
-    if ( vnorm < _MMG5_EPS ) {
-      vp1[0] = (dm[1] - m[2]);
-      vp1[1] = m[1];
+      if ( vnorm < _MMG5_EPS ) {
+        vp0[0] = (dm[0] - m[2]);
+        vp0[1] = m[1];
+        vnorm  = sqrt(vp0[0]*vp0[0] + vp0[1]*vp0[1]);
+        
+        if ( vnorm < _MMG5_EPS ) return(0);
+      }
+      
+      vnorm   = 1.0 / vnorm;
+      vp0[0] *= vnorm;
+      vp0[1] *= vnorm;
+      
+      vp1[0] = m[1];
+      vp1[1] = (dm[1]-m[0]);
       vnorm  = sqrt(vp1[0]*vp1[0] + vp1[1]*vp1[1]);
-      if ( vnorm < _MMG5_EPS ) return(0);
+      
+      if ( vnorm < _MMG5_EPS ) {
+        vp1[0] = (dm[1] - m[2]);
+        vp1[1] = m[1];
+        vnorm  = sqrt(vp1[0]*vp1[0] + vp1[1]*vp1[1]);
+
+        if ( vnorm < _MMG5_EPS ) return(0);
+      }
+
+      vnorm   = 1.0 / vnorm;
+      vp1[0] *= vnorm;
+      vp1[1] *= vnorm;
     }
-
-    vnorm   = 1.0 / vnorm;
-    vp1[0] *= vnorm;
-    vp1[1] *= vnorm;
-
     /* Eigenvalues of the resulting matrix*/
     dn[0] = MG_MAX(dm[0],lambda[0]*dm[0]);
     dn[0] = MG_MIN(isqhmin,MG_MAX(isqhmax,dn[0]));
@@ -521,7 +530,7 @@ int intextmet(MMG5_pMesh mesh,MMG5_pSol met,int np,double me[6]) {
 
     /* Intersection of metrics in the tangent plane */
     if ( !intersecmet22(mesh,mtan,metan,mr) ) {
-      printf("en ces points on fait quoi ???\n");
+      fprintf(stdout,"WARNING IMPOSSIBLE INTERSECTION : SURFACIC METRIC SKIPPED \n");
       m[0] = me[0];
       m[1] = me[1];
       m[2] = me[2];
