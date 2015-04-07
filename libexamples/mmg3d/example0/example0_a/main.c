@@ -1,23 +1,23 @@
 /* =============================================================================
-**  This file is part of the Mmg software package for the tetrahedral
+**  This file is part of the mmg software package for the tetrahedral
 **  mesh modification.
 **  Copyright (c) Inria - IMB (Université de Bordeaux) - LJLL (UPMC), 2004- .
 **
-**  Mmg is free software: you can redistribute it and/or modify it
+**  mmg is free software: you can redistribute it and/or modify it
 **  under the terms of the GNU Lesser General Public License as published
 **  by the Free Software Foundation, either version 3 of the License, or
 **  (at your option) any later version.
 **
-**  Mmg is distributed in the hope that it will be useful, but WITHOUT
+**  mmg is distributed in the hope that it will be useful, but WITHOUT
 **  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
 **  FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
 **  License for more details.
 **
 **  You should have received a copy of the GNU Lesser General Public
-**  License and of the GNU General Public License along with Mmg (in
+**  License and of the GNU General Public License along with mmg (in
 **  files COPYING.LESSER and COPYING). If not, see
 **  <http://www.gnu.org/licenses/>. Please read their terms carefully and
-**  use this copy of the Mmg distribution only if you accept them.
+**  use this copy of the mmg distribution only if you accept them.
 ** =============================================================================
 */
 
@@ -45,12 +45,12 @@ int main(int argc,char *argv[]) {
 
   /* Name and path of the mesh file */
   pwd = getenv("PWD");
-  filename = (char *) calloc(strlen(pwd) + 41, sizeof(char));
+  filename = (char *) calloc(strlen(pwd) + 47, sizeof(char));
   if ( filename == NULL ) {
     perror("  ## Memory problem: calloc");
     exit(EXIT_FAILURE);
   }
-  sprintf(filename, "%s%s%s", pwd, "/../libexamples/example0/example0_a/", "cube");
+  sprintf(filename, "%s%s%s", pwd, "/../libexamples/mmg3d/example0/example0_a/", "cube");
 
   /** ------------------------------ STEP   I -------------------------- */
   /** 1) Initialisation of mesh and sol structures */

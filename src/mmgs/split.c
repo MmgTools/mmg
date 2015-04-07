@@ -1,23 +1,23 @@
 /* =============================================================================
-**  This file is part of the Mmg software package for the tetrahedral
+**  This file is part of the mmg software package for the tetrahedral
 **  mesh modification.
 **  Copyright (c) Inria - IMB (Université de Bordeaux) - LJLL (UPMC), 2004- .
 **
-**  Mmg is free software: you can redistribute it and/or modify it
+**  mmg is free software: you can redistribute it and/or modify it
 **  under the terms of the GNU Lesser General Public License as published
 **  by the Free Software Foundation, either version 3 of the License, or
 **  (at your option) any later version.
 **
-**  Mmg is distributed in the hope that it will be useful, but WITHOUT
+**  mmg is distributed in the hope that it will be useful, but WITHOUT
 **  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
 **  FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
 **  License for more details.
 **
 **  You should have received a copy of the GNU Lesser General Public
-**  License and of the GNU General Public License along with Mmg (in
+**  License and of the GNU General Public License along with mmg (in
 **  files COPYING.LESSER and COPYING). If not, see
 **  <http://www.gnu.org/licenses/>. Please read their terms carefully and
-**  use this copy of the Mmg distribution only if you accept them.
+**  use this copy of the mmg distribution only if you accept them.
 ** =============================================================================
 */
 
@@ -131,7 +131,8 @@ int split1b(pMesh mesh,int k,char i,int ip) {
     mesh->adja[3*(k-1)+1+i1]   = 3*iel+i2;
     mesh->adja[3*(iel-1)+1+i2] = 3*k+i1;
     mesh->adja[3*(iel-1)+1+i1] = 3*mel+m;
-    mesh->adja[3*(mel-1)+1+m]  = 3*iel+i1;
+    if(mel)
+        mesh->adja[3*(mel-1)+1+m]  = 3*iel+i1;
 
     if ( jel ) {
         kel = newElt(mesh);
@@ -159,7 +160,8 @@ int split1b(pMesh mesh,int k,char i,int ip) {
         mesh->adja[3*(jel-1)+1+j2] = 3*kel+j1;
         mesh->adja[3*(kel-1)+1+j1] = 3*jel+j2;
         mesh->adja[3*(kel-1)+1+j2] = 3*mel+m;
-        mesh->adja[3*(mel-1)+1+m]  = 3*kel+j2;
+        if(mel)
+            mesh->adja[3*(mel-1)+1+m]  = 3*kel+j2;
 
         mesh->adja[3*(iel-1)+1+i]  = 3*kel+j;
         mesh->adja[3*(kel-1)+1+j]  = 3*iel+i;

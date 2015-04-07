@@ -1,23 +1,23 @@
 /* =============================================================================
-**  This file is part of the Mmg software package for the tetrahedral
+**  This file is part of the mmg software package for the tetrahedral
 **  mesh modification.
 **  Copyright (c) Inria - IMB (Université de Bordeaux) - LJLL (UPMC), 2004- .
 **
-**  Mmg is free software: you can redistribute it and/or modify it
+**  mmg is free software: you can redistribute it and/or modify it
 **  under the terms of the GNU Lesser General Public License as published
 **  by the Free Software Foundation, either version 3 of the License, or
 **  (at your option) any later version.
 **
-**  Mmg is distributed in the hope that it will be useful, but WITHOUT
+**  mmg is distributed in the hope that it will be useful, but WITHOUT
 **  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
 **  FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
 **  License for more details.
 **
 **  You should have received a copy of the GNU Lesser General Public
-**  License and of the GNU General Public License along with Mmg (in
+**  License and of the GNU General Public License along with mmg (in
 **  files COPYING.LESSER and COPYING). If not, see
 **  <http://www.gnu.org/licenses/>. Please read their terms carefully and
-**  use this copy of the Mmg distribution only if you accept them.
+**  use this copy of the mmg distribution only if you accept them.
 ** =============================================================================
 */
 
@@ -96,7 +96,7 @@ int loadMesh(pMesh mesh) {
     pPoint     ppt;
     double    *norm,*n,dd;
     float      fc;
-    int        i,k,ia,nq,nc,nrv,nri,nr,num,ip,idn,ng;
+    int        i,k,ia,nq,nri,nr,num,ip,idn,ng;
     char      *ptr,*name,data[256],chaine[128];
     int      posnp,posnt,posne,posncor,posnq,posned,posnr;
     int      posnpreq,npreq,ntreq,posnormal,posnc1,posntreq;
@@ -105,9 +105,10 @@ int loadMesh(pMesh mesh) {
     posnp = posnt = posne = posncor = posnq = posntreq = 0;
     posned = posnr = posnpreq = posnc1 = npreq = 0;
     posnedreq = posnormal = 0;
-    ncor = nr = ng = nq = nedreq = ntreq = 0;
+    ncor = nr = ng = nedreq = nq = ntreq = 0;
     bin = 0;
     iswp = 0;
+    mesh->np = mesh->nt = mesh->nti = mesh->npi = 0;
 
     name = mesh->namein;
     strcpy(data,name);
@@ -592,7 +593,7 @@ int loadMesh(pMesh mesh) {
     }
 
     if ( abs(info.imprim) > 4 ) {
-        fprintf(stdout,"     NUMBER OF VERTICES   %8d / %8d   CORNERS/REQ. %d / %d\n",mesh->npi,mesh->npmax,nc,nrv);
+        fprintf(stdout,"     NUMBER OF VERTICES   %8d / %8d   CORNERS/REQ. %d / %d\n",mesh->npi,mesh->npmax,ncor,npreq);
         if ( mesh->na )
             fprintf(stdout,"     NUMBER OF EDGES      %8d  RIDGES %6d\n",mesh->na,nri);
         fprintf(stdout,"     NUMBER OF TRIANGLES  %8d / %8d\n",mesh->nti,mesh->ntmax);

@@ -1,11 +1,10 @@
 ## Set TextMate indentation
-
 encoding         = UTF-8
 softWrap         = true
-tabSize          = 4
+tabSize          = 2
 # invisiblesMap    = true
 
-[ * ]
+[ *]
 softTabs         = true
 
 [ {CMakeLists.txt,*.cmake} ]
@@ -13,4 +12,3 @@ fileType         = "source.CMakeListfile"
 
 [ *.{c,h,h.in} ]
 fileType         = "source.c"
-
