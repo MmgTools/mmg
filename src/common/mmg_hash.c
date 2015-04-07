@@ -204,16 +204,20 @@ int _MMG5_hashEdge(MMG5_pMesh mesh,_MMG5_Hash *hash, int a,int b,int k) {
     }
     ph->nxt   = hash->nxt;
     ph        = &hash->item[hash->nxt];
-    hash->nxt = ph->nxt;
 
-    if ( hash->nxt >= hash->max ) {
+    if ( hash->nxt >= hash->max-1 ) {
       if ( mesh->info.ddebug )
         fprintf(stdout,"  ## Memory alloc problem (edge): %d\n",hash->max);
       _MMG5_TAB_RECALLOC(mesh,hash->item,hash->max,0.2,_MMG5_hedge,
                          "_MMG5_edge",return(0));
-      for (j=hash->nxt; j<hash->max; j++)  hash->item[j].nxt = j+1;
+      /* ph pointer may be false after realloc */
+      ph        = &hash->item[hash->nxt];
+
+      for (j=ph->nxt; j<hash->max; j++)  hash->item[j].nxt = j+1;
     }
+    hash->nxt = ph->nxt;
   }
+
   /* insert new edge */
   ph->a = ia;
   ph->b = ib;
