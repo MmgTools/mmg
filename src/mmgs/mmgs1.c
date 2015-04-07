@@ -409,7 +409,6 @@ static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
            intmet(mesh,met,k,i,ip,s);
         }
       } else {
-        printf("on passe par la\n");
          if ( met->m ) {
            if ( /*typchk == 1 &&*/ (met->size>1))
            intmet33(mesh,met,ip1,ip2,ip,s);
