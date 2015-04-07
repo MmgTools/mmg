@@ -314,13 +314,12 @@ int colver(MMG5_pMesh mesh,int *list,int ilist) {
 int colver3(MMG5_pMesh mesh,int* list) {
   MMG5_pTria   pt,pt1,pt2;
   int          *adja,iel,jel,kel,mel,ip;
-  char         i,i1,i2,j,j1,j2,k,m;
+  char         i,i1,j,j1,j2,k,m;
 
   /* update of new point for triangle list[0] */
   iel = list[0] / 3;
   i   = list[0] % 3;
   i1  = _MMG5_inxt2[i];
-  i2  = _MMG5_iprv2[i];
   pt  = &mesh->tria[iel];
   ip  = pt->v[i];
 

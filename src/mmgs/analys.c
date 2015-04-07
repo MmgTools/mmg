@@ -535,10 +535,10 @@ static int norver(MMG5_pMesh mesh) {
   MMG5_pxPoint   go;
   double         n[3],dd;
   int            *adja,k,kk,ier,xp,nn,nt,nf;
-  char           i,ii,i1,i2;
+  char           i,ii,i1;
 
   if ( abs(mesh->info.imprim) > 4 || mesh->info.ddebug )
-    fprintf(stdout,"  ** DEFINING GEOMETRY\n"); 
+    fprintf(stdout,"  ** DEFINING GEOMETRY\n");
 
   /* 1. process C1 vertices, normals */
   nn = xp = nt = nf = 0;
@@ -577,11 +577,10 @@ static int norver(MMG5_pMesh mesh) {
     for (k=1; k<=mesh->nt; k++) {
       pt = &mesh->tria[k];
       if ( !MG_EOK(pt) )  continue;
-      
+
       adja = &mesh->adja[3*(k-1)+1];
       for (i=0; i<3; i++) {
         i1  = _MMG5_inxt2[i];
-        i2  = _MMG5_inxt2[i1];
         ppt = &mesh->point[pt->v[i]];
 
         if ( ppt->tag & MG_CRN || ppt->flag == mesh->base )  continue;
@@ -599,7 +598,7 @@ static int norver(MMG5_pMesh mesh) {
         }
         ppt->ig = mesh->xp;
         go = &mesh->xpoint[mesh->xp];
-        memcpy(go->n1,n,3*sizeof(double));         
+        memcpy(go->n1,n,3*sizeof(double));
 
         /* compute n2 along ridge */
         if ( pt->tag[i1] & MG_GEO ) {

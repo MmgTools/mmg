@@ -37,7 +37,7 @@
 
 extern char ddb;
 
-/* Computes the Bezier coefficients associated to the underlying curve to [p0p1]
+/* Computes the Bezier coefficients associated to the underlying curve to [p0p1].
    isrid = 0 if p0p1 is not a special edge, 1 otherwise */
 inline void bezierEdge(MMG5_pMesh mesh,int i0,int i1,double b0[3],double b1[3],char isrid,double v[3]) {
   MMG5_pPoint    p0,p1;
@@ -150,9 +150,9 @@ inline void bezierEdge(MMG5_pMesh mesh,int i0,int i1,double b0[3],double b1[3],c
  * Compute Bezier control points on triangle \a pt (cf. Vlachos)
  *
  */
-int _MMG5_bezierCP(MMG5_pMesh mesh,MMG5_Tria *pt,_MMG5_pBezier pb,char ori) {
+int _MMG5_bezierCP(MMG5_pMesh mesh,MMG5_Tria *pt,_MMG5_pBezier pb) {
   MMG5_pPoint    p[3];
-  double   *n1,*n2,nt[3],ps,ps2,dd,ux,uy,uz,l,ll;
+  double   *n1,*n2,nt[3],ps,ps2,dd,ux,uy,uz,ll;
   int       ia,ib,ic;
   char      i,i1,i2;
 
@@ -172,19 +172,10 @@ int _MMG5_bezierCP(MMG5_pMesh mesh,MMG5_Tria *pt,_MMG5_pBezier pb,char ori) {
 
     if ( MS_SIN(p[i]->tag) ) {
       _MMG5_nortri(mesh,pt,pb->n[i]);
-      if ( !ori ) {
-        pb->n[i][0] *= -1.0;
-        pb->n[i][1] *= -1.0;
-        pb->n[i][2] *= -1.0;
-      }
     }
     else if ( MG_EDG(p[i]->tag) ) {
       _MMG5_nortri(mesh,pt,nt);
-      if ( !ori ) {
-        pb->n[i][0] *= -1.0;
-        pb->n[i][1] *= -1.0;
-        pb->n[i][2] *= -1.0;
-      }
+
       n1 = &mesh->xpoint[p[i]->ig].n1[0];
       n2 = &mesh->xpoint[p[i]->ig].n2[0];
 
@@ -210,7 +201,6 @@ int _MMG5_bezierCP(MMG5_pMesh mesh,MMG5_Tria *pt,_MMG5_pBezier pb,char ori) {
     uz = p[i2]->c[2] - p[i1]->c[2];
 
     ll = ux*ux + uy*uy + uz*uz;   // A PROTEGER !!!!
-    l = sqrt(ll);
 
     /* choose normals */
     n1 = pb->n[i1];

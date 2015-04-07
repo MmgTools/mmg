@@ -527,7 +527,7 @@ int _MMG5_prilen(MMG5_pMesh mesh, MMG5_pSol met) {
   _MMG5_Hash      hash;
   double          len,avlen,dned,lmin,lmax;
   int             k,np,nq,amin,bmin,amax,bmax,ned,hl[9];
-  char            ia,i0,i1,ier,i;
+  char            ia,i0,i1,i;
   static double   bd[9]= {0.0, 0.3, 0.6, 0.7071, 0.9, 1.3, 1.4142, 2.0, 5.0};
   //{0.0, 0.2, 0.5, 0.7071, 0.9, 1.111, 1.4142, 2.0, 5.0};
 
@@ -570,8 +570,8 @@ int _MMG5_prilen(MMG5_pMesh mesh, MMG5_pSol met) {
       np = pt->v[i0];
       nq = pt->v[i1];
 
-      /* Remove edge from hash ; ier = 1 if edge has been found */
-      ier = _MMG5_hashGet(&hash,np,nq);
+      /* Remove edge from hash */
+      _MMG5_hashGet(&hash,np,nq);
       ned ++;
       len = _MMG5_lenedg(mesh,met,np,nq,(pt->tag[ia] & MG_GEO));
       avlen += len;

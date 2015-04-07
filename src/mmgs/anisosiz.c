@@ -49,7 +49,7 @@
  */
 static int defmetsin(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
   MMG5_pTria         pt;
-  MMG5_pPoint        p0,p1;
+  MMG5_pPoint        p0;
   double             *m,n[3],isqhmin,isqhmax,b0[3],b1[3],ps1,tau[3];
   double             ntau2,gammasec[3];
   double             c[3],kappa,maxkappa,alpha;
@@ -76,9 +76,9 @@ static int defmetsin(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
     i1  = _MMG5_inxt2[i0];
     i2  = _MMG5_iprv2[i0];
     pt  = &mesh->tria[iel];
-    p1  = &mesh->point[pt->v[i1]];
 
-    /* Computation of the two control points associated to edge p0p1: p0 is singular */
+    /* Computation of the two control points associated to edge p0p1 with
+     * p1=mesh->point[pt->v[i1]]: p0 is singular */
     _MMG5_nortri(mesh,pt,n);
     if ( MG_EDG(pt->tag[i2]) )
       bezierEdge(mesh,idp,pt->v[i1],b0,b1,1,n);
@@ -278,7 +278,7 @@ static int defmetrid(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
     i1  = _MMG5_inxt2[i0];
     i2  = _MMG5_iprv2[i0];
     pt = &mesh->tria[iel];
-    if ( !_MMG5_bezierCP(mesh,pt,&b,1) )  continue;
+    if ( !_MMG5_bezierCP(mesh,pt,&b) )  continue;
 
     /* Barycentric coordinates of vector u in tria iel */
     detg = lispoi[3*k+1]*u[1] - lispoi[3*k+2]*u[0];
@@ -522,7 +522,7 @@ static int defmetref(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
     i0  = list[k] % 3;
     i1  = _MMG5_inxt2[i0];
     pt = &mesh->tria[iel];
-    _MMG5_bezierCP(mesh,pt,&b,1);
+    _MMG5_bezierCP(mesh,pt,&b);
 
     for(j=0; j<10; j++){
       c[0] = b.b[j][0] - p0->c[0];
@@ -872,7 +872,7 @@ static int defmetreg(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
     i0  = list[k] % 3;
     i1  = _MMG5_inxt2[i0];
     pt = &mesh->tria[iel];
-    _MMG5_bezierCP(mesh,pt,&b,1);
+    _MMG5_bezierCP(mesh,pt,&b);
 
     for(j=0; j<10; j++){
       c[0] = b.b[j][0] - p0->c[0];
@@ -1122,14 +1122,14 @@ int defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
         if ( !defmetrid(mesh,met,k,i))  continue;
       }
       else if ( (ppt->tag & MG_REF) && (!(ppt->tag & MG_GEO)) ) {
-        if ( !defmetref(mesh,met,k,i) )  continue;
+        if ( 1 || !defmetref(mesh,met,k,i) )  continue;
       }
       else if ( ppt->tag )  continue;
       else {
-        if ( !defmetreg(mesh,met,k,i) )  continue;
+        if ( 1 || !defmetreg(mesh,met,k,i) )  continue;
       }
 /* A FAIRE */
-      if ( ismet )  intextmet(mesh,met,pt->v[i],mm);
+      // if ( ismet )  intextmet(mesh,met,pt->v[i],mm);
       ppt->flag = 1;
     }
   }
@@ -1151,6 +1151,7 @@ int defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
       m[0] = m[3] = m[5] = isqhmax;
     }
     else if ( ppt->tag & MG_GEO ) {
+      puts("plop0");
       m[0] = m[1] = m[2] = isqhmax;
     }
     else {

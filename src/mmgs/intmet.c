@@ -381,7 +381,7 @@ int intregmet(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,double s,double mr[6]) 
   p1  = &mesh->point[ip1];
   p2  = &mesh->point[ip2];
 
-  if ( !_MMG5_bezierCP(mesh,pt,&b,1) )  return(0);
+  if ( !_MMG5_bezierCP(mesh,pt,&b) )  return(0);
 
   n1 = &b.n[i1][0];
   n2 = &b.n[i2][0];

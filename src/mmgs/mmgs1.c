@@ -313,7 +313,7 @@ static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
     ns++;
 
     /* geometric support */
-    ier = _MMG5_bezierCP(mesh,pt,&pb,1);
+    ier = _MMG5_bezierCP(mesh,pt,&pb);
     assert(ier);
 
     /* scan edges to split */
@@ -431,7 +431,7 @@ static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
     else if ( pt->flag == 7 )  continue;
 
     /* geometric support */
-    ier = _MMG5_bezierCP(mesh,pt,&pb,1);
+    ier = _MMG5_bezierCP(mesh,pt,&pb);
     assert(ier);
     nc = 0;
 
@@ -554,7 +554,7 @@ int chkspl(MMG5_pMesh mesh,MMG5_pSol met,int k,int i) {
     if ( MS_SIN(pt1->tag[jj]) || MS_SIN(pt1->tag[j2]) )  return(0);
   }
 
-  ier = _MMG5_bezierCP(mesh,pt,&b,1);
+  ier = _MMG5_bezierCP(mesh,pt,&b);
   assert(ier);
 
   /* create midedge point */

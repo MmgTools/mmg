@@ -1058,7 +1058,7 @@ int MMG5_loadMet(MMG5_pMesh mesh,MMG5_pSol met) {
   float       fbuf[6],tmpf;
   double      dbuf[6],tmpd;
   int         binch,bdim,iswp;
-  int         k,i,type,bin,dim,bpos;
+  int         k,i,type,bin,bpos;
   long        posnp;
   char        *ptr,data[128],chaine[128];
 

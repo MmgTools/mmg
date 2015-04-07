@@ -61,7 +61,7 @@ ADD_TEST(NAME SphereAni
 ###############################################################################
 ADD_TEST(NAME Rhino_M
   COMMAND ${EXECUT_MMGS}
-  ${MMGS_CI_TESTS}/Rhino_M/Rhino -hausd 1
+  ${MMGS_CI_TESTS}/Rhino_M/rhino -hausd 1
   -out ${MMGS_CI_TESTS}/Rhino_M/rhino.d.meshb)
 
 ###############################################################################
