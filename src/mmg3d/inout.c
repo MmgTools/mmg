@@ -1643,6 +1643,7 @@ int MMG5_loadMet(MMG5_pMesh mesh,MMG5_pSol met) {
   double      dbuf[6];
   int         binch,bdim,iswp;
   int         k,bin,bpos;
+  int         compute_hmin, compute_hmax;
   long        posnp;
   char        *ptr,data[128],chaine[128];
   //  int         i;
@@ -1775,6 +1776,21 @@ int MMG5_loadMet(MMG5_pMesh mesh,MMG5_pSol met) {
   rewind(inm);
   fseek(inm,posnp,SEEK_SET);
 
+  /* If they are not provided by the user, enforce default values for hmin and
+   * hmax:
+   *    - for hmin we take 0.1 \times the minimum of the metric sizes.
+   *    - for hmax we take 10 \times the max of the metric sizes. */
+  compute_hmin = compute_hmax = 0;
+
+  if ( mesh->info.hmin < 0. ) {
+    compute_hmin=1;
+    mesh->info.hmin = FLT_MAX;
+  }
+  if ( mesh->info.hmax < 0. ){
+    compute_hmax=1;
+    mesh->info.hmax = 0.;
+  }
+
   /* isotropic metric */
   if ( met->size == 1 ) {
     if ( met->ver == 1 ) {
@@ -1799,7 +1815,19 @@ int MMG5_loadMet(MMG5_pMesh mesh,MMG5_pSol met) {
         met->m[k] = dbuf[0];
       }
     }
+    /* Find the minimum and maximum of the metric sizes. */
+    if ( compute_hmin ) {
+      for (k=1; k<=met->np; k++) {
+        mesh->info.hmin = MG_MIN(mesh->info.hmin,met->m[k]);
+      }
+    }
+    if ( compute_hmax ) {
+      for (k=1; k<=met->np; k++) {
+        mesh->info.hmax = MG_MAX(mesh->info.hmax,met->m[k]);
+      }
+    }
   }
+
   /* anisotropic metric */
   /*else {
     if ( met->ver == GmfFloat ) {
@@ -1821,6 +1849,24 @@ int MMG5_loadMet(MMG5_pMesh mesh,MMG5_pSol met) {
     }
     }
     }*/
+
+  if ( compute_hmin ) {
+    mesh->info.hmin *=.1;
+    /* Check that user has not given a hmax value lower that the founded
+     * hmin. */
+    if ( mesh->info.hmin > mesh->info.hmax ) {
+      mesh->info.hmin = 0.1*mesh->info.hmax;
+    }
+  }
+  if ( compute_hmax ) {
+    mesh->info.hmax *=10.;
+    /* Check that user has not given a hmin value bigger that the founded
+     * hmax. */
+    if ( mesh->info.hmax < mesh->info.hmin ) {
+      mesh->info.hmax = 10.*mesh->info.hmin;
+    }
+  }
+
   met->npi = met->np;
   fclose(inm);
   return(1);

@@ -84,9 +84,11 @@ void _MMG5_mmgDefaultValues(MMG5_pMesh mesh) {
   fprintf(stdout,"angle detection           (-ar)     : %lf\n",
           180/M_PI*acos(mesh->info.dhd) );
   fprintf(stdout,"minimal mesh size         (-hmin)   : 0.01 of "
-          "the mesh bounding box\n");
+          "the mesh bounding box if no metric is provided, 0.1 times the "
+          "minimum of the metric sizes otherwise.\n");
   fprintf(stdout,"maximal mesh size         (-hmax)   : size of "
-          "the mesh bounding box\n");
+          "the mesh bounding box without metric, 10 times the maximum of the "
+          "metric sizes otherwise.\n");
   fprintf(stdout,"Hausdorff distance        (-hausd)  : %lf\n",
           mesh->info.hausd);
   fprintf(stdout,"gradation control         (-hgrad)  : %lf\n",
