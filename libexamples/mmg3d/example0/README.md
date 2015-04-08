@@ -1,9 +1,9 @@
 # Basic use of the **mmg3d** library
 
   3 main steps:
-    *1) Build mesh and sol at MMG5 format;
-    *2) Call MMG5 library;
-    *3) Get the final mesh and sol.
+    1. Build mesh and sol at MMG5 format;
+    2. Call MMG5 library;
+    3. Get the final mesh and sol.
 
   Results are saved in the **_mesh.o.mesh_** and **_mesh.o.sol_** files.  
 
