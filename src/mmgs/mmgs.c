@@ -448,7 +448,7 @@ int main(int argc,char *argv[]) {
   if ( mesh.tria )
     _MMG5_DEL_MEM(&mesh,mesh.tria,(mesh.ntmax+1)*sizeof(MMG5_Tria));
   if ( mesh.edge )
-    _MMG5_DEL_MEM(&mesh,mesh.tria,(mesh.na+1)*sizeof(MMG5_Tria));
+    _MMG5_DEL_MEM(&mesh,mesh.edge,(mesh.na+1)*sizeof(MMG5_Edge));
   if ( met.m )
     _MMG5_DEL_MEM(&mesh,met.m,(met.size*met.npmax+1)*sizeof(double));
   if ( mesh.info.par )
