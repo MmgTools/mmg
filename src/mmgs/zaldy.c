@@ -80,13 +80,14 @@ int _MMG5_newElt(MMG5_pMesh mesh) {
   return(curiel);
 }
 
+
 void _MMG5_delElt(MMG5_pMesh mesh,int iel) {
   MMG5_pTria    pt;
 
   pt = &mesh->tria[iel];
   if ( !MG_EOK(pt) ) {
-    fprintf(stdout,"  ## INVALID ELEMENT: %d.\n",iel);
-    return;
+    fprintf(stdout,"  ## INVALID ELEMENT %d.\n",iel);
+    exit(EXIT_FAILURE);
   }
   memset(pt,0,sizeof(MMG5_Tria));
   pt->v[2] = mesh->nenil;
