@@ -210,34 +210,6 @@ inline double caleltsig_iso(MMG5_pMesh mesh,MMG5_pSol met,int iel) {
 }
 
 
-/* compute face normal */
-inline int _MMG5_norpts(MMG5_pPoint p1,MMG5_pPoint p2,MMG5_pPoint p3,double *n) {
-  double   dd,abx,aby,abz,acx,acy,acz,det;
-
-  /* area */
-  abx = p2->c[0] - p1->c[0];
-  aby = p2->c[1] - p1->c[1];
-  abz = p2->c[2] - p1->c[2];
-
-  acx = p3->c[0] - p1->c[0];
-  acy = p3->c[1] - p1->c[1];
-  acz = p3->c[2] - p1->c[2];
-
-  n[0] = aby*acz - abz*acy;
-  n[1] = abz*acx - abx*acz;
-  n[2] = abx*acy - aby*acx;
-  det  = n[0]*n[0] + n[1]*n[1] + n[2]*n[2];
-
-  if ( det < _MMG5_EPSD2 )  return(0);
-
-  dd = 1.0 / sqrt(det);
-  n[0] *= dd;
-  n[1] *= dd;
-  n[2] *= dd;
-
-  return(1);
-}
-
 /* coordinates of the center of incircle of p0p1p2 and its 'size' */
 inline double incircle(MMG5_pPoint p0,MMG5_pPoint p1,MMG5_pPoint p2,double *o) {
   double   dd,r,rr;

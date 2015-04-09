@@ -252,7 +252,6 @@ int  _MMG5_chkswpgen(MMG5_pMesh mesh, int start, int ia, int *ilist, int *list,d
 int  _MMG5_srcface(MMG5_pMesh mesh,int n0,int n1,int n2);
 int  _MMG5_bouleext(MMG5_pMesh mesh, int start, int ip, int iface, int *listv, int *ilistv, int *lists, int*ilists);
 int _MMG5_chkptonbdy(MMG5_pMesh,int);
-int _MMG5_norpts(MMG5_pMesh,int,int,int,double *);
 double _MMG5_orcal_poi(double a[3],double b[3],double c[3],double d[3]);
 int _MMG5_countelt(MMG5_pMesh mesh,MMG5_pSol sol, double *weightelt, long *npcible);
 int _MMG5_trydisp(MMG5_pMesh,double *,short);

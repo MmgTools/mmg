@@ -160,40 +160,6 @@ inline int _MMG5_norface(MMG5_pMesh mesh,int k,int iface,double n[3]) {
   return(1);
 }
 
-/** compute face normal */
-inline int _MMG5_norpts(MMG5_pMesh mesh,int ip1,int ip2, int ip3,double *n) {
-  MMG5_pPoint   p1,p2,p3;
-  double   dd,abx,aby,abz,acx,acy,acz,det;
-
-  p1 = &mesh->point[ip1];
-  p2 = &mesh->point[ip2];
-  p3 = &mesh->point[ip3];
-
-  /* area */
-  abx = p2->c[0] - p1->c[0];
-  aby = p2->c[1] - p1->c[1];
-  abz = p2->c[2] - p1->c[2];
-
-  acx = p3->c[0] - p1->c[0];
-  acy = p3->c[1] - p1->c[1];
-  acz = p3->c[2] - p1->c[2];
-
-  n[0] = aby*acz - abz*acy;
-  n[1] = abz*acx - abx*acz;
-  n[2] = abx*acy - aby*acx;
-  det  = n[0]*n[0] + n[1]*n[1] + n[2]*n[2];
-
-  if ( det < _MMG5_EPSD2 )  return(0);
-
-  dd = 1.0 / sqrt(det);
-  n[0] *= dd;
-  n[1] *= dd;
-  n[2] *= dd;
-
-  return(1);
-}
-
-
 /** Solve 3*3 symmetric system A*r = b */
 inline int _MMG5_sys33sym(double a[6], double b[3], double r[3]){
   double ia[6],as[6],det,m;

@@ -94,3 +94,84 @@ int _MMG5_buildridmet(MMG5_pMesh mesh,MMG5_pSol met,int np0,
 
   return(1);
 }
+
+/**
+ * \param mesh pointer toward the mesh stucture.
+ * \param ip1 first point of face.
+ * \param ip2 second point of face.
+ * \param ip3 third point of face.
+ * \param n pointer to store the computed normal.
+ * \return 1
+ *
+ * Compute face normal.
+ *
+ */
+inline int _MMG5_norpts(MMG5_pMesh mesh,int ip1,int ip2, int ip3,double *n) {
+  MMG5_pPoint   p1,p2,p3;
+  double   dd,abx,aby,abz,acx,acy,acz,det;
+
+  p1 = &mesh->point[ip1];
+  p2 = &mesh->point[ip2];
+  p3 = &mesh->point[ip3];
+
+  /* area */
+  abx = p2->c[0] - p1->c[0];
+  aby = p2->c[1] - p1->c[1];
+  abz = p2->c[2] - p1->c[2];
+
+  acx = p3->c[0] - p1->c[0];
+  acy = p3->c[1] - p1->c[1];
+  acz = p3->c[2] - p1->c[2];
+
+  n[0] = aby*acz - abz*acy;
+  n[1] = abz*acx - abx*acz;
+  n[2] = abx*acy - aby*acx;
+  det  = n[0]*n[0] + n[1]*n[1] + n[2]*n[2];
+
+  if ( det < _MMG5_EPSD2 )  return(0);
+
+  dd = 1.0 / sqrt(det);
+  n[0] *= dd;
+  n[1] *= dd;
+  n[2] *= dd;
+
+  return(1);
+}
+
+/**
+ * \param mesh pointer toward the mesh stucture.
+ * \param pt pointer toward the triangle structure.
+ * \param n pointer to store the computed normal.
+ * \return 1
+ *
+ * Compute face normal.
+ *
+ */
+inline int _MMG5_nortri(MMG5_pMesh mesh,MMG5_pTria pt,double *n) {
+  double   *a,*b,*c,dd,abx,aby,abz,acx,acy,acz,det;
+
+  a = mesh->point[pt->v[0]].c;
+  b = mesh->point[pt->v[1]].c;
+  c = mesh->point[pt->v[2]].c;
+
+  /* area */
+  abx = b[0] - a[0];
+  aby = b[1] - a[1];
+  abz = b[2] - a[2];
+
+  acx = c[0] - a[0];
+  acy = c[1] - a[1];
+  acz = c[2] - a[2];
+
+  n[0] = aby*acz - abz*acy;
+  n[1] = abz*acx - abx*acz;
+  n[2] = abx*acy - aby*acx;
+  det  = n[0]*n[0] + n[1]*n[1] + n[2]*n[2];
+  if ( det < _MMG5_EPSD2 )  return(0);
+
+  dd = 1.0 / sqrt(det);
+  n[0] *= dd;
+  n[1] *= dd;
+  n[2] *= dd;
+  return(1);
+}

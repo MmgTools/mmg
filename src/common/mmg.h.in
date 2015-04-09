@@ -348,6 +348,7 @@ void   _MMG5_mmgDefaultValues(MMG5_pMesh mesh);
 int    _MMG5_mmgHashTria(MMG5_pMesh mesh, int *adja, int chkISO);
 void   _MMG5_mmgInit_parameters(MMG5_pMesh mesh);
 void   _MMG5_mmgUsage(char *prog);
+int    _MMG5_norpts(MMG5_pMesh,int,int,int,double *);
 int    _MMG5_nortri(MMG5_pMesh mesh,MMG5_pTria pt,double *n);
 int    _MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met);
 double _MMG5_surftri_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt);

@@ -89,7 +89,6 @@ int  saveMet(MMG5_pMesh ,MMG5_pSol );
 int  zaldy(MMG5_pMesh mesh);
 int  assignEdge(MMG5_pMesh mesh);
 int  analys(MMG5_pMesh mesh);
-int  _MMG5_norpts(MMG5_pPoint ,MMG5_pPoint ,MMG5_pPoint ,double *);
 void _MMG5_outqua(MMG5_pMesh ,MMG5_pSol );
 int  _MMG5_hashTria(MMG5_pMesh );
 int  curvpo(MMG5_pMesh ,MMG5_pSol );

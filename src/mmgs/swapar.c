@@ -80,8 +80,8 @@ int chkswp(MMG5_pMesh mesh,MMG5_pSol met,int k,int i,char typchk) {
   }
 
   /* check non convexity */
-  _MMG5_norpts(p[0],p[1],q,c1);
-  _MMG5_norpts(p[0],q,p[2],c2);
+  _MMG5_norpts(mesh,ip0,ip1,iq,c1);
+  _MMG5_norpts(mesh,ip0,iq,ip2,c2);
   ps = c1[0]*c2[0] + c1[1]*c2[1] + c1[2]*c2[2];
   if ( ps < _MMG5_ANGEDG )   return(0);
 
@@ -321,8 +321,8 @@ int litswp(MMG5_pMesh mesh,int k,char i,double kali) {
   d  = &mesh->point[id];
 
   /* check non convexity */
-  _MMG5_norpts(a,b,d,n1);
-  _MMG5_norpts(a,d,c,n2);
+  _MMG5_norpts(mesh,ia,ib,id,n1);
+  _MMG5_norpts(mesh,ia,id,ic,n2);
   ps = n1[0]*n2[0] + n1[1]*n2[1] + n1[2]*n2[2];
   if ( ps < _MMG5_ANGEDG )  return(0);
 
