@@ -68,14 +68,13 @@ inline double _MMG5_det3pt1vec(double c0[3],double c1[3],double c2[3],double v[3
 
 /** Compute 3 * 3 determinant : det(c1-c0,c2-c0,c3-c0) */
 inline double _MMG5_det4pt(double c0[3],double c1[3],double c2[3],double c3[3]) {
-  double m00,m10,m20,m01,m11,m21,m02,m12,m22,det;
+  double m[3];
 
-  m00 = c1[0] - c0[0] ; m01 = c2[0] - c0[0]; m02 = c3[0] - c0[0];
-  m10 = c1[1] - c0[1] ; m11 = c2[1] - c0[1]; m12 = c3[1] - c0[1];
-  m20 = c1[2] - c0[2] ; m21 = c2[2] - c0[2]; m22 = c3[2] - c0[2];
-  det = m02*(m10*m21 - m20*m11) -m12*(m00*m21-m20*m01) + m22*(m00*m11-m10*m01);
+  m[0] = c3[0] - c0[0];
+  m[1] = c3[1] - c0[1];
+  m[2] = c3[2] - c0[2];
 
-  return(det);
+  return( _MMG5_det3pt1vec(c0,c1,c2,m) );
 }
 
 /** Compute oriented volume of a tetrahedron */
@@ -97,29 +96,11 @@ inline int _MMG5_norface(MMG5_pMesh mesh,int k,int iface,double n[3]) {
   double     ux,uy,uz,vx,vy,vz,norm;
 
   pt = &mesh->tetra[k];
-  p0 = &mesh->point[pt->v[_MMG5_idir[iface][0]]];
-  p1 = &mesh->point[pt->v[_MMG5_idir[iface][1]]];
-  p2 = &mesh->point[pt->v[_MMG5_idir[iface][2]]];
 
-  ux = p1->c[0] - p0->c[0];
-  uy = p1->c[1] - p0->c[1];
-  uz = p1->c[2] - p0->c[2];
-
-  vx = p2->c[0] - p0->c[0];
-  vy = p2->c[1] - p0->c[1];
-  vz = p2->c[2] - p0->c[2];
-
-  n[0] = uy*vz - uz*vy;
-  n[1] = uz*vx - ux*vz;
-  n[2] = ux*vy - uy*vx;
-  norm = n[0]*n[0] + n[1]*n[1] + n[2]*n[2];
-  if ( norm < _MMG5_EPSD2 )  return(0);
-
-  norm = 1.0 / sqrt(norm);
-  n[0] *= norm;
-  n[1] *= norm;
-  n[2] *= norm;
-  return(1);
+  return( _MMG5_norpts(mesh,
+                       pt->v[_MMG5_idir[iface][0]],
+                       pt->v[_MMG5_idir[iface][1]],
+                       pt->v[_MMG5_idir[iface][2]],n) );
 }
 
 /** If need be, invert the travelling sense of surfacic ball so that it is travelled in
