@@ -47,13 +47,14 @@ The **mmg** applications are validated on OS X and on most of the Linux platform
 ## Contributing
 Your contributions to the **mmg** project are welcomed. You can help us to improve
 our code by many means:
-  * documentation contribution: please follow the [wiki's guideline](https://github.com/MmgTools/mmg/wiki/Developpers-wiki#documentation-contribution);
   * pull requests: please follow the [wiki's guideline](https://github.com/MmgTools/mmg/wiki/Developpers-wiki#software-contribution);
   * feature requests: please use the [GitHub issue tracker](https://github.com/MmgTools/mmg/issues/new) with the **_enhancement_** label;
   * bug reports: please use the [GitHub issue tracker](https://github.com/MmgTools/mmg/issues/new) with the **_bug_** label.
 
 ## About the team
 mmg's current developers and maintainers are Charles Dapogny, Cécile Dobrzynski, Pascal Frey and Algiane Froehly.
+
+Contact: contact@mmgtools.org
 
 ## License and copyright
 Code is under the [terms of the GNU Lesser General Public License](https://raw.githubusercontent.com/MmgTools/mmg/master/LICENSE).
