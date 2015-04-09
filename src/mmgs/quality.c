@@ -37,63 +37,6 @@
 
 extern char  ddb;
 
-#define COS145   -0.81915204428899
-
-
-/* return 0: triangle ok, 1: needle, 2: obtuse; ia: edge problem */
-char typelt(MMG5_pPoint p[3],char *ia) {
-  double   h1,h2,h3,hmi,hma,ux,uy,uz,vx,vy,vz,wx,wy,wz,dd;
-
-  ux = p[1]->c[0] - p[0]->c[0];
-  uy = p[1]->c[1] - p[0]->c[1];
-  uz = p[1]->c[2] - p[0]->c[2];
-  h1 = ux*ux + uy*uy + uz*uz;
-
-  vx = p[2]->c[0] - p[0]->c[0];
-  vy = p[2]->c[1] - p[0]->c[1];
-  vz = p[2]->c[2] - p[0]->c[2];
-  h2 = vx*vx + vy*vy + vz*vz;
-  hmi = h1;
-  hma = h2;
-  *ia = 2;
-  if ( h1 > h2 ) {
-    hmi = h2;
-    hma = h1;
-    *ia = 1;
-  }
-  wx = p[2]->c[0] - p[1]->c[0];
-  wy = p[2]->c[1] - p[1]->c[1];
-  wz = p[2]->c[2] - p[1]->c[2];
-  h3 = wx*wx + wy*wy + wz*wz;
-  if ( h3 < hmi ) {
-    hmi = h3;
-    *ia = 0;
-  }
-  else if ( h3 > hma )
-    hma = h3;
-
-  /* needle */
-  if ( hmi < 0.01 * hma )  return(1);
-
-  /* check obtuse angle */
-  dd = (ux*vx + uy*vy + uz*vz) / sqrt(h1*h2);
-  if ( dd < COS145 ) {
-    *ia = 0;
-    return(2);
-  }
-  dd = (vx*wx + vy*wy + vz*wz) / sqrt(h2*h3);
-  if ( dd < COS145 ) {
-    *ia = 2;
-    return(2);
-  }
-  dd = -(ux*wx + uy*wy + uz*wz) / sqrt(h1*h3);
-  if ( dd < COS145 ) {
-    *ia = 1;
-    return(2);
-  }
-
-  return(0);
-}
 
 /* Same quality function but puts a sign according to deviation to normal to vertices */
 inline double caleltsig_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel) {
@@ -494,4 +437,61 @@ void _MMG5_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
     fprintf(stdout,"     %5.1f < Q < %5.1f   %7d   %6.2f %%\n",
             i/5.,i/5.+0.2,his[i],100.*(his[i]/(float)(mesh->nt-nex)));
   }
+}
+
+#define COS145   -0.81915204428899
+
+/* return 0: triangle ok, 1: needle, 2: obtuse; ia: edge problem */
+char typelt(MMG5_pPoint p[3],char *ia) {
+  double   h1,h2,h3,hmi,hma,ux,uy,uz,vx,vy,vz,wx,wy,wz,dd;
+
+  ux = p[1]->c[0] - p[0]->c[0];
+  uy = p[1]->c[1] - p[0]->c[1];
+  uz = p[1]->c[2] - p[0]->c[2];
+  h1 = ux*ux + uy*uy + uz*uz;
+
+  vx = p[2]->c[0] - p[0]->c[0];
+  vy = p[2]->c[1] - p[0]->c[1];
+  vz = p[2]->c[2] - p[0]->c[2];
+  h2 = vx*vx + vy*vy + vz*vz;
+  hmi = h1;
+  hma = h2;
+  *ia = 2;
+  if ( h1 > h2 ) {
+    hmi = h2;
+    hma = h1;
+    *ia = 1;
+  }
+  wx = p[2]->c[0] - p[1]->c[0];
+  wy = p[2]->c[1] - p[1]->c[1];
+  wz = p[2]->c[2] - p[1]->c[2];
+  h3 = wx*wx + wy*wy + wz*wz;
+  if ( h3 < hmi ) {
+    hmi = h3;
+    *ia = 0;
+  }
+  else if ( h3 > hma )
+    hma = h3;
+
+  /* needle */
+  if ( hmi < 0.01 * hma )  return(1);
+
+  /* check obtuse angle */
+  dd = (ux*vx + uy*vy + uz*vz) / sqrt(h1*h2);
+  if ( dd < COS145 ) {
+    *ia = 0;
+    return(2);
+  }
+  dd = (vx*wx + vy*wy + vz*wz) / sqrt(h2*h3);
+  if ( dd < COS145 ) {
+    *ia = 2;
+    return(2);
+  }
+  dd = -(ux*wx + uy*wy + uz*wz) / sqrt(h1*h3);
+  if ( dd < COS145 ) {
+    *ia = 1;
+    return(2);
+  }
+
+  return(0);
 }
