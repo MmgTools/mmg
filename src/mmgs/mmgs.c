@@ -402,7 +402,7 @@ int main(int argc,char *argv[]) {
   chrono(ON,&MMG5_ctim[2]);
   setfunc(&mesh,&met);
 
-  inqua(&mesh,&met);
+  _MMG5_outqua(&mesh,&met);
   fprintf(stdout,"\n  %s\n   MODULE MMGS-LJLL : %s (%s)\n  %s\n",MG_STR,MG_VER,MG_REL,MG_STR);
   if ( mesh.info.imprim )   fprintf(stdout,"\n  -- PHASE 1 : ANALYSIS\n");
   if ( !analys(&mesh) )  return(1);
@@ -427,7 +427,7 @@ int main(int argc,char *argv[]) {
   fprintf(stdout,"\n  %s\n   END OF MODULE MMGS-LJLL \n  %s\n",MG_STR,MG_STR);
 
   /* save file */
-  outqua(&mesh,&met);
+  _MMG5_outqua(&mesh,&met);
   if ( mesh.info.imprim > 3 )  _MMG5_prilen(&mesh,&met);
 
   chrono(ON,&MMG5_ctim[1]);

@@ -72,3 +72,63 @@ inline int _MMG5_nortri(MMG5_pMesh mesh,MMG5_pTria pt,double *n) {
   n[2] *= dd;
   return(1);
 }
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param ned edges number.
+ * \param avlen pointer toward the average edges lengths.
+ * \param amin index of first extremity of the smallest edge.
+ * \param bmin index of second extremity of the smallest edge.
+ * \param lmin smallest edge length.
+ * \param amax index of first extremity of the largest edge.
+ * \param bmax index of second extremity of the largest edge.
+ * \param lmax largest edge length.
+ * \param bd pointer toward the table of the quality span.
+ * \param hl pointer toward the table that store the number of edges for each
+ * span of quality
+ *
+ * Display histogram of edge length.
+ *
+ */
+void _MMG5_displayHisto(MMG5_pMesh mesh, int ned, double *avlen,
+                        int amin, int bmin, double lmin,
+                        int amax, int bmax, double lmax, double *bd, int *hl )
+{
+  double dned;
+  int    k;
+
+  dned     = (double)ned;
+  (*avlen) = (*avlen) / dned;
+
+  fprintf(stdout,"\n  -- RESULTING EDGE LENGTHS  %d\n",ned);
+  fprintf(stdout,"     AVERAGE LENGTH         %12.4f\n",(*avlen));
+  fprintf(stdout,"     SMALLEST EDGE LENGTH   %12.4f   %6d %6d\n",
+          lmin,amin,bmin);
+  fprintf(stdout,"     LARGEST  EDGE LENGTH   %12.4f   %6d %6d \n",
+          lmax,amax,bmax);
+
+  if ( hl[3]+hl[4]+hl[5] )
+    fprintf(stdout,"   %6.2f < L <%5.2f  %8d   %5.2f %%  \n",
+            bd[3],bd[6],hl[3]+hl[4]+hl[5],100.*(hl[3]+hl[4]+hl[5])/(double)ned);
+  if ( hl[2]+hl[3]+hl[4] )
+    fprintf(stdout,"   %6.2f < L <%5.2f  %8d   %5.2f %%  \n",
+            bd[2],bd[5],hl[2]+hl[3]+hl[4],100.*(hl[2]+hl[3]+hl[4])/(double)ned);
+
+
+  if ( abs(mesh->info.imprim) > 3 ) {
+    fprintf(stdout,"\n     HISTOGRAMM:\n");
+    if ( hl[0] )
+      fprintf(stdout,"     0.00 < L < 0.30  %8d   %5.2f %%  \n",
+              hl[0],100.*(hl[0]/(float)ned));
+    if ( lmax > 0.2 ) {
+      for (k=2; k<9; k++) {
+        if ( hl[k-1] > 0 )
+          fprintf(stdout,"   %6.2f < L <%5.2f  %8d   %5.2f %%  \n",
+                  bd[k-1],bd[k],hl[k-1],100.*(hl[k-1]/(float)ned));
+      }
+      if ( hl[8] )
+        fprintf(stdout,"     5.   < L         %8d   %5.2f %%  \n",
+                hl[8],100.*(hl[8]/(float)ned));
+    }
+  }
+}

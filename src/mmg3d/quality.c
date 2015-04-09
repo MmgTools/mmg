@@ -619,46 +619,20 @@ int _MMG5_prilen(MMG5_pMesh mesh, MMG5_pSol met) {
   }
 
   /* Display histogram */
-  dned = (double)ned;
-  avlen = avlen / dned;
-
-  fprintf(stdout,"\n  -- RESULTING EDGE LENGTHS  %d\n",ned);
-  fprintf(stdout,"     AVERAGE LENGTH         %12.4f\n",avlen);
-  fprintf(stdout,"     SMALLEST EDGE LENGTH   %12.4f   %6d %6d\n",
-          lmin,amin,bmin);
-  fprintf(stdout,"     LARGEST  EDGE LENGTH   %12.4f   %6d %6d \n",
-          lmax,amax,bmax);
-
-  if ( hl[3]+hl[4]+hl[5] )
-    fprintf(stdout,"   %6.2f < L <%5.2f  %8d   %5.2f %%  \n",
-            bd[3],bd[6],hl[3]+hl[4]+hl[5],100.*(hl[3]+hl[4]+hl[5])/(double)ned);
-  if ( hl[2]+hl[3]+hl[4] )
-    fprintf(stdout,"   %6.2f < L <%5.2f  %8d   %5.2f %%  \n",
-            bd[2],bd[5],hl[2]+hl[3]+hl[4],100.*(hl[2]+hl[3]+hl[4])/(double)ned);
-
-
-  if ( abs(mesh->info.imprim) > 3 ) {
-    fprintf(stdout,"\n     HISTOGRAMM:\n");
-    if ( hl[0] )
-      fprintf(stdout,"     0.00 < L < 0.30  %8d   %5.2f %%  \n",
-              hl[0],100.*(hl[0]/(float)ned));
-    if ( lmax > 0.2 ) {
-      for (k=2; k<9; k++) {
-        if ( hl[k-1] > 0 )
-          fprintf(stdout,"   %6.2f < L <%5.2f  %8d   %5.2f %%  \n",
-                  bd[k-1],bd[k],hl[k-1],100.*(hl[k-1]/(float)ned));
-      }
-      if ( hl[8] )
-        fprintf(stdout,"     5.   < L         %8d   %5.2f %%  \n",
-                hl[8],100.*(hl[8]/(float)ned));
-    }
-  }
+  _MMG5_displayHisto(mesh, ned, &avlen, amin, bmin, lmin,
+                     amax, bmax, lmax, &bd[0], &hl[0]);
 
   _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
   return(1);
 }
 
-/** print mesh quality histo */
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ *
+ * Print histogram of mesh qualities.
+ *
+ */
 void _MMG5_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTetra    pt;
   double   rap,rapmin,rapmax,rapavg,med,good;

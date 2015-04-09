@@ -95,66 +95,6 @@ char typelt(MMG5_pPoint p[3],char *ia) {
   return(0);
 }
 
-static double calelt33_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel) {
-  MMG5_pTria    pt;
-  double   cal,dd,abx,aby,abz,acx,acy,acz,bcx,bcy,bcz,rap,det;
-  double  *a,*b,*c,*ma,*mb,*mc,n[3],m[6];
-  int      ia,ib,ic;
-  char     i;
-
-  pt = &mesh->tria[iel];
-  ia = pt->v[0];
-  ib = pt->v[1];
-  ic = pt->v[2];
-
-  ma = &met->m[6*ia+1];
-  mb = &met->m[6*ib+1];
-  mc = &met->m[6*ic+1];
-
-  dd  = 1.0 / 3.0;
-  for (i=0; i<6; i++)
-    m[i] = dd * (ma[i] + mb[i] + mc[i]);
-  det = m[0]*(m[3]*m[5] - m[4]*m[4]) - m[1]*(m[1]*m[5] - m[2]*m[4]) + m[2]*(m[1]*m[4] - m[2]*m[3]);
-  if ( det < _MMG5_EPSD2 )  return(0.0);
-
-  a = &mesh->point[ia].c[0];
-  b = &mesh->point[ib].c[0];
-  c = &mesh->point[ic].c[0];
-
-  /* area */
-  abx = b[0] - a[0];
-  aby = b[1] - a[1];
-  abz = b[2] - a[2];
-  acx = c[0] - a[0];
-  acy = c[1] - a[1];
-  acz = c[2] - a[2];
-  bcx = c[0] - b[0];
-  bcy = c[1] - b[1];
-  bcz = c[2] - b[2];
-
-  n[0] = (aby*acz - abz*acy) * (aby*acz - abz*acy);
-  n[1] = (abz*acx - abx*acz) * (abz*acx - abx*acz);
-  n[2] = (abx*acy - aby*acx) * (abx*acy - aby*acx);
-  cal  = sqrt(n[0] + n[1] + n[2]);
-  if ( cal > _MMG5_EPSD ) {
-    dd    = 1.0 / cal;
-    n[0] *= dd;
-    n[1] *= dd;
-    n[2] *= dd;
-    /* length */
-    rap  = m[0]*abx*abx + m[3]*aby*aby + m[5]*abz*abz + 2.0*(m[1]*abx*aby + m[2]*abx*abz + m[4]*aby*abz);
-    rap += m[0]*acx*acx + m[3]*acy*acy + m[5]*acz*acz + 2.0*(m[1]*acx*acy + m[2]*acx*acz + m[4]*acy*acz);
-    rap += m[0]*bcx*bcx + m[3]*bcy*bcy + m[5]*bcz*bcz + 2.0*(m[1]*bcx*bcy + m[2]*bcx*bcz + m[4]*bcy*bcz);
-    /* quality */
-    if ( rap > _MMG5_EPSD )
-      return(sqrt(det)*cal / rap);
-    else
-      return(0.0);
-  }
-  else
-    return(0.0);
-}
-
 /**
  * quality = surf / sigma(length_edges)
  * \todo move in common dir when bezierCP will be merged.
@@ -465,55 +405,6 @@ inline double diamelt(MMG5_pPoint p0,MMG5_pPoint p1,MMG5_pPoint p2) {
   return(di);
 }
 
-/* print histogram of qualities */
-void inqua(MMG5_pMesh mesh,MMG5_pSol met) {
-  MMG5_pTria    pt;
-  double   rap,rapmin,rapmax,rapavg,med;
-  int      i,k,iel,ir,imax,nex,his[5];
-
-  rapmin  = 1.0;
-  rapmax  = 0.0;
-  rapavg  = med = 0.0;
-  iel     = 0;
-
-  for (k=0; k<5; k++)  his[k] = 0;
-  nex  = 0;
-  for (k=1; k<=mesh->nt; k++) {
-    pt = &mesh->tria[k];
-    if ( !MG_EOK(pt) ) {
-      nex++;
-      continue;
-    }
-    if ( met->m )
-      rap = ALPHAD * calelt33_ani(mesh,met,k);
-    else
-      rap = ALPHAD * _MMG5_caltri_iso(mesh,NULL,pt);
-    if ( rap < rapmin ) {
-      rapmin = rap;
-      iel    = k;
-    }
-    if ( rap > 0.5 )  med++;
-    if ( rap < BADKAL )  mesh->info.badkal = 1;
-    rapavg += rap;
-    rapmax  = MG_MAX(rapmax,rap);
-    ir = MG_MIN(4,(int)(5.0*rap));
-    his[ir] += 1;
-  }
-
-  fprintf(stdout,"\n  -- MESH QUALITY   %d\n",mesh->nt - nex);
-  fprintf(stdout,"     BEST   %8.6f  AVRG.   %8.6f  WRST.   %8.6f (%d)\n",
-          rapmax,rapavg / (mesh->nt-nex),rapmin,iel);
-  if ( abs(mesh->info.imprim) < 5 )  return;
-
-  /* print histo */
-  fprintf(stdout,"     HISTOGRAMM:  %6.2f %% > 0.5\n",100.0*(med/(float)(mesh->nt-nex)));
-  imax = MG_MIN(4,(int)(5.*rapmax));
-  for (i=imax; i>=(int)(5*rapmin); i--) {
-    fprintf(stdout,"     %5.1f < Q < %5.1f   %7d   %6.2f %%\n",
-            i/5.,i/5.+0.2,his[i],100.*(his[i]/(float)(mesh->nt-nex)));
-  }
-}
-
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
@@ -600,50 +491,24 @@ int _MMG5_prilen(MMG5_pMesh mesh, MMG5_pSol met) {
   }
 
   /* Display histogram */
-  dned = (double)ned;
-  avlen = avlen / dned;
-
-  fprintf(stdout,"\n  -- RESULTING EDGE LENGTHS  %d\n",ned);
-  fprintf(stdout,"     AVERAGE LENGTH         %12.4f\n",avlen);
-  fprintf(stdout,"     SMALLEST EDGE LENGTH   %12.4f   %6d %6d\n",
-          lmin,amin,bmin);
-  fprintf(stdout,"     LARGEST  EDGE LENGTH   %12.4f   %6d %6d \n",
-          lmax,amax,bmax);
-
-  if ( hl[3]+hl[4]+hl[5] )
-    fprintf(stdout,"   %6.2f < L <%5.2f  %8d   %5.2f %%  \n",
-            bd[3],bd[6],hl[3]+hl[4]+hl[5],100.*(hl[3]+hl[4]+hl[5])/(double)ned);
-  if ( hl[2]+hl[3]+hl[4] )
-    fprintf(stdout,"   %6.2f < L <%5.2f  %8d   %5.2f %%  \n",
-            bd[2],bd[5],hl[2]+hl[3]+hl[4],100.*(hl[2]+hl[3]+hl[4])/(double)ned);
-
-
-  if ( abs(mesh->info.imprim) > 3 ) {
-    fprintf(stdout,"\n     HISTOGRAMM:\n");
-    if ( hl[0] )
-      fprintf(stdout,"     0.00 < L < 0.30  %8d   %5.2f %%  \n",
-              hl[0],100.*(hl[0]/(float)ned));
-    if ( lmax > 0.2 ) {
-      for (k=2; k<9; k++) {
-        if ( hl[k-1] > 0 )
-          fprintf(stdout,"   %6.2f < L <%5.2f  %8d   %5.2f %%  \n",
-                  bd[k-1],bd[k],hl[k-1],100.*(hl[k-1]/(float)ned));
-      }
-      if ( hl[8] )
-        fprintf(stdout,"     5.   < L         %8d   %5.2f %%  \n",
-                hl[8],100.*(hl[8]/(float)ned));
-    }
-  }
+  _MMG5_displayHisto(mesh, ned, &avlen, amin, bmin, lmin,
+                     amax, bmax, lmax, &bd[0], &hl[0]);
 
   _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
   return(1);
 }
 
-/* print histogram of qualities */
-void outqua(MMG5_pMesh mesh,MMG5_pSol met) {
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ *
+ * Print histogram of mesh qualities.
+ *
+ */
+void _MMG5_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTria    pt;
   double        rap,rapmin,rapmax,rapavg,med;
-  int           i,k,iel,ir,imax,nex,his[5];
+  int           i,k,iel,ok,ir,imax,nex,his[5];
 
   rapmin  = 1.0;
   rapmax  = 0.0;
@@ -651,23 +516,21 @@ void outqua(MMG5_pMesh mesh,MMG5_pSol met) {
   iel     = 0;
 
   for (k=0; k<5; k++)  his[k] = 0;
-  nex  = 0;
+
+  nex = ok = 0;
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
     if ( !MG_EOK(pt) ) {
       nex++;
       continue;
     }
+    ok++;
 
-    if ( met->m )
-      rap = ALPHAD * _MMG5_calelt(mesh,met,pt);
-    else
-      rap = ALPHAD * _MMG5_caltri_iso(mesh,NULL,pt);
+    rap = ALPHAD * _MMG5_calelt(mesh,met,pt);
     if ( rap < rapmin ) {
       rapmin = rap;
-      iel    = k;
+      iel    = ok;
     }
-
     if ( rap > 0.5 )  med++;
     if ( rap < BADKAL )  mesh->info.badkal = 1;
     rapavg += rap;
@@ -679,7 +542,15 @@ void outqua(MMG5_pMesh mesh,MMG5_pSol met) {
   fprintf(stdout,"\n  -- MESH QUALITY   %d\n",mesh->nt - nex);
   fprintf(stdout,"     BEST   %8.6f  AVRG.   %8.6f  WRST.   %8.6f (%d)\n",
           rapmax,rapavg / (mesh->nt-nex),rapmin,iel);
-  if ( abs(mesh->info.imprim) < 5 )  return;
+
+  if ( abs(mesh->info.imprim) < 4 ){
+    if (rapmin == 0){
+      fprintf(stdout,"  ## WARNING: TOO BAD QUALITY FOR THE WORST ELEMENT\n");
+      MMG5_saveMesh(mesh);
+      exit(EXIT_FAILURE);
+    }
+    return;
+  }
 
   /* print histo */
   fprintf(stdout,"     HISTOGRAMM:  %6.2f %% > 0.5\n",100.0*(med/(float)(mesh->nt-nex)));
