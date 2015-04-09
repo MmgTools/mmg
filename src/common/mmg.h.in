@@ -354,6 +354,7 @@ int    _MMG5_rotmatrix(double n[3],double r[3][3]);
 int    _MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met);
 double _MMG5_surftri_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt);
 double _MMG5_surftri_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt);
+int    _MMG5_sys33sym(double a[6], double b[3], double r[3]);
 int    _MMG5_unscaleMesh(MMG5_pMesh mesh,MMG5_pSol met);
 
 /* function pointers */

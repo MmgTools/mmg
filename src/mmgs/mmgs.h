@@ -123,7 +123,6 @@ char typelt(MMG5_pPoint p[3],char *ia);
 int  litswp(MMG5_pMesh mesh,int k,char i,double kal);
 int  litcol(MMG5_pMesh mesh,int k,char i,double kal);
 int  intmetsavedir(MMG5_pMesh mesh, double *m,double *n,double *mr);
-int  sys33sym(double a[6],double b[3],double r[3]);
 int  intmet33(MMG5_pMesh mesh,MMG5_pSol met,int np,int nq,int ip,double s);
 int  intextmet(MMG5_pMesh mesh,MMG5_pSol met,int np,double me[6]);
 int  invmatg(double m[9],double mi[9]);

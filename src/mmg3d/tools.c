@@ -122,55 +122,6 @@ inline int _MMG5_norface(MMG5_pMesh mesh,int k,int iface,double n[3]) {
   return(1);
 }
 
-/** Solve 3*3 symmetric system A*r = b */
-inline int _MMG5_sys33sym(double a[6], double b[3], double r[3]){
-  double ia[6],as[6],det,m;
-  int    i;
-
-  /* Multiply matrix by a constant coefficient for stability purpose (because of the scaling) */
-  m = fabs(a[0]);
-  for(i=1;i<6;i++){
-    if(fabs(a[i])<m){
-      m = fabs(a[i]);
-    }
-  }
-
-  if(m < _MMG5_EPSD)
-    return(0);
-
-  m = 1.0/m;
-
-  for(i=0;i<6;i++){
-    as[i] = a[i]*m;
-  }
-
-  det = as[0]*(as[3]*as[5]-as[4]*as[4]) - as[1]*(as[1]*as[5]-as[2]*as[4]) \
-    + as[2]*(as[1]*as[4]-as[2]*as[3]);
-
-  if(fabs(det) < _MMG5_EPSD)
-    return(0);
-
-  det = 1.0/det;
-
-  ia[0] = (as[3]*as[5]-as[4]*as[4]);
-  ia[1] = - (as[1]*as[5]-as[2]*as[4]);
-  ia[2] = (as[1]*as[4]-as[2]*as[3]);
-  ia[3] = (as[0]*as[5]-as[2]*as[2]);
-  ia[4] = -(as[0]*as[4]-as[2]*as[1]);
-  ia[5] = (as[0]*as[3]-as[1]*as[1]);
-
-  r[0] = ia[0]*b[0] + ia[1]*b[1] + ia[2]*b[2];
-  r[1] = ia[1]*b[0] + ia[3]*b[1] + ia[4]*b[2];
-  r[2] = ia[2]*b[0] + ia[4]*b[1] + ia[5]*b[2];
-
-  r[0]*=(det*m);
-  r[1]*=(det*m);
-  r[2]*=(det*m);
-
-  return(1);
-}
-
-
 /** If need be, invert the travelling sense of surfacic ball so that it is travelled in
     the direct sense with respect to direction n anchored at point ip (ip = global num.):
     return 2 = orientation reversed, 1 otherwise */

@@ -258,7 +258,6 @@ int _MMG5_dichodisp(MMG5_pMesh,double *);
 int _MMG5_lapantilap(MMG5_pMesh,double *);
 int _MMG5_ppgdisp(MMG5_pMesh,double *);
 int _MMG5_denoisbdy(MMG5_pMesh);
-int _MMG5_sys33sym(double a[6], double b[3], double r[3]);
 void _MMG5_outqua(MMG5_pMesh mesh,MMG5_pSol met);
 int  _MMG5_badelt(MMG5_pMesh mesh,MMG5_pSol met);
 int _MMG5_prilen(MMG5_pMesh mesh,MMG5_pSol met);

@@ -651,7 +651,7 @@ static int defmetref(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
   } 
   
   /* solve now (a b c) = tAA^{-1} * tAb */
-  if ( !sys33sym(tAA,tAb,c) )  return(0);
+  if ( !_MMG5_sys33sym(tAA,tAb,c) )  return(0);
 
   intm[0] = 2.0*c[0];
   intm[1] = c[2];
@@ -1007,7 +1007,7 @@ static int defmetreg(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
   } 
 
   /* solve now (a b c) = tAA^{-1} * tAb */
-  if ( !sys33sym(tAA,tAb,c) ) {
+  if ( !_MMG5_sys33sym(tAA,tAb,c) ) {
     printf(" La matrice %f %f %f %f %f %f \n",tAA[0],tAA[1],tAA[2],tAA[3],tAA[4],tAA[5]);
     return(0);
   }
