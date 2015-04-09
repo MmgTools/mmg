@@ -157,7 +157,6 @@ int     _MMG5_addBucket(MMG5_pMesh ,_MMG5_pBucket ,int );
 int     _MMG5_delBucket(MMG5_pMesh ,_MMG5_pBucket ,int );
 int     _MMG5_buckin_iso(MMG5_pMesh mesh,MMG5_pSol sol,_MMG5_pBucket bucket,int ip);
 /* prototypes */
-void   _MMG5_rotmatrix(double n[3],double r[3][3]);
 double _MMG5_det3pt1vec(double c0[3],double c1[3],double c2[3],double v[3]);
 double _MMG5_det4pt(double c0[3],double c1[3],double c2[3],double c3[3]);
 double _MMG5_orvol(MMG5_pPoint point,int *v);

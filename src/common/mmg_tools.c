@@ -153,3 +153,51 @@ inline int _MMG5_nortri(MMG5_pMesh mesh,MMG5_pTria pt,double *n) {
   return(_MMG5_norpts(mesh,pt->v[0],pt->v[1],pt->v[2],n));
 
 }
+
+/**
+ * \param n pointer toward the vector that we want to send on the third vector
+ * of canonical basis.
+ * \param r computed rotation matrix.
+ *
+ * Compute rotation matrix that sends vector \a n to the third vector of
+ * canonical basis.
+ *
+ */
+inline int _MMG5_rotmatrix(double n[3],double r[3][3]) {
+  double aa,bb,ab,ll,l,cosalpha,sinalpha;
+
+  aa = n[0]*n[0];
+  bb = n[1]*n[1];
+  ab = n[0]*n[1];
+  ll = aa+bb;
+  cosalpha = n[2];
+  sinalpha = sqrt(1.0- MG_MIN(1.0,cosalpha*cosalpha));
+
+  /* No rotation needed in this case */
+  if ( ll < _MMG5_EPS ) {
+    if ( n[2] > 0.0 ) {
+      r[0][0] = 1.0 ; r[0][1] = 0.0 ; r[0][2] = 0.0;
+      r[1][0] = 0.0 ; r[1][1] = 1.0 ; r[1][2] = 0.0;
+      r[2][0] = 0.0 ; r[2][1] = 0.0 ; r[2][2] = 1.0;
+    }
+    else {
+      r[0][0] = -1.0 ; r[0][1] = 0.0 ; r[0][2] = 0.0;
+      r[1][0] = 0.0 ; r[1][1] = 1.0 ; r[1][2] = 0.0;
+      r[2][0] = 0.0 ; r[2][1] = 0.0 ; r[2][2] = -1.0;
+    }
+  }
+  else {
+    l = sqrt(ll);
+
+    r[0][0] = (aa*cosalpha + bb)/ll;
+    r[0][1] = ab*(cosalpha-1)/ll;
+    r[0][2] = -n[0]*sinalpha/l;
+    r[1][0] = r[0][1];
+    r[1][1] = (bb*cosalpha + aa)/ll;
+    r[1][2] = -n[1]*sinalpha/l;
+    r[2][0] = n[0]*sinalpha/l;
+    r[2][1] = n[1]*sinalpha/l;
+    r[2][2] = cosalpha;
+  }
+  return(1);
+}

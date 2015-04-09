@@ -43,7 +43,18 @@ extern char   ddb;
 #define A32TH     0.03125
 
 
-/** Define isotropic size at regular point nump, whose surfacic ball is provided */
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param nump index of point in which the size must be computed.
+ * \param lists pointer toward the surfacic ball of \a nump.
+ * \param ilists size of surfacic ball of \a nump.
+ * \param hausd hausdorff value.
+ * \return the isotropic size at the point.
+ *
+ * Define isotropic size at regular point nump, whose surfacic ball is provided.
+ *
+ */
 static double
 _MMG5_defsizreg(MMG5_pMesh mesh,MMG5_pSol met,int nump,int *lists,
                 int ilists, double hausd) {
@@ -70,7 +81,11 @@ _MMG5_defsizreg(MMG5_pMesh mesh,MMG5_pSol met,int nump,int *lists,
   n = &mesh->xpoint[p0->xp].n1[0];
 
   /* Step 1 : rotation matrix that sends normal n to the third coordinate vector of R^3 */
-  _MMG5_rotmatrix(n,r);
+  if ( !_MMG5_rotmatrix(n,r) ) {
+    fprintf(stdout,"%s:%d: Error: function _MMG5_rotmatrix return 0\n",
+            __FILE__,__LINE__);
+    exit(EXIT_FAILURE);
+  }
 
   /* Step 2 : rotation of the oriented surfacic ball with r : lispoi[k] is the common edge
      between faces lists[k-1] and lists[k] */

@@ -210,7 +210,7 @@ static int defmetrid(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
       ilist = ilist2;
       list  = &(list2[0]);
     }
-    rotmatrix(n,r);
+    _MMG5_rotmatrix(n,r);
 
     /* Apply rotation to the half-ball under consideration */
     i1 = 0;
@@ -438,7 +438,7 @@ static int defmetref(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
 
   /* Computation of the rotation matrix T_p0 S -> [z = 0] */
   n  = &mesh->xpoint[p0->ig].n1[0];
-  rotmatrix(n,r);
+  _MMG5_rotmatrix(n,r);
   m = &met->m[6*(idp)+1];
 
   /* Apply rotation \circ translation to the whole ball */
@@ -817,7 +817,7 @@ static int defmetreg(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
 
   /* Computation of the rotation matrix T_p0 S -> [z = 0] */
   n  = &p0->n[0];
-  rotmatrix(n,r);
+  _MMG5_rotmatrix(n,r);
   m = &met->m[6*(idp)+1];
 
   /* Apply rotation \circ translation to the whole ball */
@@ -1156,7 +1156,7 @@ int defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
     }
     else {
       n = ppt->tag & MG_REF ? &mesh->xpoint[ppt->ig].n1[0] : ppt->n;
-      rotmatrix(n,r);
+      _MMG5_rotmatrix(n,r);
       m[0] = isqhmax*(r[0][0]*r[0][0]+r[1][0]*r[1][0]+r[2][0]*r[2][0]);
       m[1] = isqhmax*(r[0][0]*r[0][1]+r[1][0]*r[1][1]+r[2][0]*r[2][1]);
       m[2] = isqhmax*(r[0][0]*r[0][2]+r[1][0]*r[1][2]+r[2][0]*r[2][2]);
@@ -1259,8 +1259,8 @@ static int grad2met(MMG5_pMesh mesh, MMG5_pSol met, int iel, int i){
   }
 
   /* Rotation matrices mapping n1/n2 to e_3 */
-  rotmatrix(n1,r1);
-  rotmatrix(n2,r2);
+  _MMG5_rotmatrix(n1,r1);
+  _MMG5_rotmatrix(n2,r2);
 
   /* Geodesic length of support curve to edge i */
   ps1 = ux*n1[0] + uy*n1[1] + uz*n1[2];

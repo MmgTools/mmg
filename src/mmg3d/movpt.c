@@ -144,7 +144,7 @@ int _MMG5_movbdyregpt(MMG5_pMesh mesh, MMG5_pSol met,int *listv,
   n = &(mesh->xpoint[p0->xp].n1[0]);
 
   /** Step 1 : rotation matrix that sends normal n to the third coordinate vector of R^3 */
-  _MMG5_rotmatrix(n,r);
+  if ( !_MMG5_rotmatrix(n,r) ) return(0);
 
   /** Step 2 : rotation of the oriented surfacic ball with r : lispoi[k] is the common edge
       between faces lists[k-1] and lists[k] */

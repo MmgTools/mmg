@@ -67,7 +67,7 @@ int paratmet(double c0[3],double n0[3],double m[6],double c1[3],double n1[3],dou
   double  r[3][3],mrot[6],mtan[3],lambda[2],vp[2][2],u[3],ps,ll;
 
   /* Take the induced metric tensor in the tangent plane by change of basis : R * M * {^t}R*/
-  if ( !rotmatrix(n0,r) )  return(0);
+  if ( !_MMG5_rotmatrix(n0,r) )  return(0);
   rmtr(r,m,mrot);
   mtan[0] = mrot[0];
   mtan[1] = mrot[1];
@@ -425,7 +425,7 @@ int intextmet(MMG5_pMesh mesh,MMG5_pSol met,int np,double me[6]) {
   /* Case of a ref, or regular point : intersect metrics in tangent plane */
   else {
     n = &p0->n[0];
-    rotmatrix(n,r);
+    _MMG5_rotmatrix(n,r);
 
     /* Expression of both metrics in tangent plane */
     rmtr(r,m,mrot);

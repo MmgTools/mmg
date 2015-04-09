@@ -496,7 +496,7 @@ int intregmet(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,double s,double mr[6]) 
      transported metric tensors from p1 and p2 to p(s) */
 
   /* Rotate both matrices to the tangent plane */
-  if ( !rotmatrix(n,r) )  return(0);
+  if ( !_MMG5_rotmatrix(n,r) )  return(0);
   rmtr(r,m1,mold);
   mt1[0] = mold[0];
   mt1[1] = mold[1];

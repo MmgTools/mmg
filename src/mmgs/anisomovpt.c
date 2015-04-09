@@ -71,7 +71,7 @@ int movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
 
   /* Rotation matrix that sends normal at p0 to e_z */
   n = &(p0->n[0]);
-  if ( !rotmatrix(n,r) )  return(0);
+  if ( !_MMG5_rotmatrix(n,r) )  return(0);
 
   /* Apply rotation \circ translation to the whole ball */
   for (k=0; k<ilist; k++) {
