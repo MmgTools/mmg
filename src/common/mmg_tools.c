@@ -22,7 +22,7 @@
 */
 
 /**
- * \file common/mmg_mettools.c
+ * \file common/mmg_tools.c
  * \brief Fonctions for anisotropic size map computation.
  * \author Charles Dapogny (LJLL, UPMC)
  * \author Cécile Dobrzynski (Inria / IMB, Université de Bordeaux)
