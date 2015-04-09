@@ -111,7 +111,7 @@ int movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
   for (k=0; k<ilist; k++) {
     iel = list[k] / 3;
     pt = &mesh->tria[iel];
-    if ( !_MMG5_bezierCP(mesh,pt,&pb) )  return(0);
+    if ( !_MMG5_bezierCP(mesh,pt,&pb,1) )  return(0);
 
     area = lispoi[3*k+1]*lispoi[3*(k+1)+2] - lispoi[3*k+2]*lispoi[3*(k+1)+1];
     i0 = 0;
@@ -297,7 +297,7 @@ int movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
   i2  = _MMG5_inxt2[i1];
   pt  = &mesh->tria[iel];
 
-  ier = _MMG5_bezierCP(mesh,pt,&pb);
+  ier = _MMG5_bezierCP(mesh,pt,&pb,1);
   assert(ier);
 
   /* Now, for Bezier interpolation, one should identify which of i,i1,i2 is 0,1,2
@@ -456,7 +456,7 @@ int movridpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
     isrid = isrid2;
     pt = &mesh->tria[it2];
 
-    ier = _MMG5_bezierCP(mesh,pt,&b);
+    ier = _MMG5_bezierCP(mesh,pt,&b,1);
     assert(ier);
 
     /* fill table uv */
@@ -498,7 +498,7 @@ int movridpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
     isrid = isrid1;
     pt = &mesh->tria[it1];
 
-    ier = _MMG5_bezierCP(mesh,pt,&b);
+    ier = _MMG5_bezierCP(mesh,pt,&b,1);
     assert(ier);
 
     /* fill table uv */

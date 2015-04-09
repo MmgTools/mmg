@@ -123,7 +123,7 @@ int chkedg(MMG5_pMesh mesh,int iel) {
       }
       else{
         if(!((p[i2]->tag & MG_NOM) || MG_EDG(p[i2]->tag) ) ) {
-          //saveMesh(mesh);
+          //MMG5_saveMesh(mesh);
           fprintf(stdout,"2. warning geometrical problem\n");
           return(0);
         }
@@ -313,7 +313,7 @@ static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
     ns++;
 
     /* geometric support */
-    ier = _MMG5_bezierCP(mesh,pt,&pb);
+    ier = _MMG5_bezierCP(mesh,pt,&pb,1);
     assert(ier);
 
     /* scan edges to split */
@@ -430,7 +430,7 @@ static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
     else if ( pt->flag == 7 )  continue;
 
     /* geometric support */
-    ier = _MMG5_bezierCP(mesh,pt,&pb);
+    ier = _MMG5_bezierCP(mesh,pt,&pb,1);
     assert(ier);
     nc = 0;
 
@@ -553,7 +553,7 @@ int chkspl(MMG5_pMesh mesh,MMG5_pSol met,int k,int i) {
     if ( MS_SIN(pt1->tag[jj]) || MS_SIN(pt1->tag[j2]) )  return(0);
   }
 
-  ier = _MMG5_bezierCP(mesh,pt,&b);
+  ier = _MMG5_bezierCP(mesh,pt,&b,1);
   assert(ier);
 
   /* create midedge point */

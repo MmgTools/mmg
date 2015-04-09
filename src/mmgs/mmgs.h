@@ -83,7 +83,7 @@
 
 /* prototypes */
 int  loadMesh(MMG5_pMesh );
-int  saveMesh(MMG5_pMesh );
+int  MMG5_saveMesh(MMG5_pMesh );
 int  MMG5_loadMet(MMG5_pMesh,MMG5_pSol );
 int  saveMet(MMG5_pMesh ,MMG5_pSol );
 int  zaldy(MMG5_pMesh mesh);
@@ -106,7 +106,7 @@ void _MMG5_delPt(MMG5_pMesh mesh,int ip);
 int  _MMG5_newElt(MMG5_pMesh mesh);
 void _MMG5_delElt(MMG5_pMesh mesh,int iel);
 int  chkedg(MMG5_pMesh ,int );
-int  _MMG5_bezierCP(MMG5_pMesh ,MMG5_Tria *,_MMG5_pBezier);
+int  _MMG5_mmgsBezierCP(MMG5_pMesh ,MMG5_Tria*, _MMG5_pBezier, char ori);
 int  _MMG5_bezierInt(_MMG5_pBezier ,double *,double *,double *,double *);
 void bezierEdge(MMG5_pMesh mesh,int i0,int i1,double b0[3],double b1[3],char isrid,double v[3]);
 int  split1(MMG5_pMesh mesh,MMG5_pSol met,int k,int i,int *vx);

@@ -144,17 +144,19 @@ inline void bezierEdge(MMG5_pMesh mesh,int i0,int i1,double b0[3],double b1[3],c
  * \param mesh pointer toward the mesh structure.
  * \param pt pointer toward the triangle structure.
  * \param pb pointer toward the computed Bezier structure.
- * \param ori triangle orientation.
+ * \param ori triangle orientation (unused but here for compatibility
+ * with the _MMG5_bezierCP interface).
  * \return 1.
  *
  * Compute Bezier control points on triangle \a pt (cf. Vlachos)
  *
  */
-int _MMG5_bezierCP(MMG5_pMesh mesh,MMG5_Tria *pt,_MMG5_pBezier pb) {
+int _MMG5_mmgsBezierCP(MMG5_pMesh mesh,MMG5_Tria *pt,_MMG5_pBezier pb,
+                       char ori) {
   MMG5_pPoint    p[3];
-  double   *n1,*n2,nt[3],ps,ps2,dd,ux,uy,uz,ll;
-  int       ia,ib,ic;
-  char      i,i1,i2;
+  double         *n1,*n2,nt[3],ps,ps2,dd,ux,uy,uz,ll;
+  int            ia,ib,ic;
+  char           i,i1,i2;
 
   ia   = pt->v[0];
   ib   = pt->v[1];

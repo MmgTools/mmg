@@ -381,7 +381,7 @@ int intregmet(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,double s,double mr[6]) 
   p1  = &mesh->point[ip1];
   p2  = &mesh->point[ip2];
 
-  if ( !_MMG5_bezierCP(mesh,pt,&b) )  return(0);
+  if ( !_MMG5_bezierCP(mesh,pt,&b,1) )  return(0);
 
   n1 = &b.n[i1][0];
   n2 = &b.n[i2][0];
@@ -515,7 +515,7 @@ int intregmet(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,double s,double mr[6]) 
     printf("mt1 : %E %E %E et det %E \n",mt1[0],mt1[1],mt1[2],mt1[0]*mt1[2]-mt1[1]*mt1[1]);
     printf("mt2 : %E %E %E et det : %E \n",mt2[0],mt2[1],mt2[2],mt2[0]*mt2[2]-mt2[1]*mt2[1]);
     _MMG5_hashTria(mesh);
-    saveMesh(mesh);
+    MMG5_saveMesh(mesh);
     exit(0);
     return(0);
   }

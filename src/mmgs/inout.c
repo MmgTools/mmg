@@ -618,7 +618,7 @@ int loadMesh(MMG5_pMesh mesh) {
   return(1);
 }
 
-int saveMesh(MMG5_pMesh mesh) {
+int MMG5_saveMesh(MMG5_pMesh mesh) {
   FILE         *inm;
   MMG5_pPoint  ppt;
   MMG5_pTria   pt;

@@ -341,6 +341,7 @@ static void setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
  */
 void _MMG5_Set_APIFunc() {
   MMG5_Init_parameters = _MMG5_Init_parameters;
+  _MMG5_bezierCP       = _MMG5_mmgsBezierCP;
 }
 
 int main(int argc,char *argv[]) {
@@ -433,7 +434,7 @@ int main(int argc,char *argv[]) {
   chrono(ON,&MMG5_ctim[1]);
   if ( mesh.info.imprim )  fprintf(stdout,"\n  -- WRITING DATA FILE %s\n",mesh.nameout);
   if ( !_MMG5_unscaleMesh(&mesh,&met) )  return(1);
-  if ( !saveMesh(&mesh) )      return(1);
+  if ( !MMG5_saveMesh(&mesh) )      return(1);
   if ( !saveMet(&mesh,&met) )  return(1);
   chrono(OFF,&MMG5_ctim[1]);
   if ( mesh.info.imprim )  fprintf(stdout,"  -- WRITING COMPLETED\n");

@@ -137,4 +137,5 @@ void _MMG5_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
  */
 void _MMG5_Set_APIFunc() {
   MMG5_Init_parameters    = _MMG5_Init_parameters;
+  _MMG5_bezierCP          = _MMG5_mmg3dBezierCP;
 }

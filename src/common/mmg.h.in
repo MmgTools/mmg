@@ -333,25 +333,27 @@ typedef struct {
 
 
 /* Functions declarations */
-int  _MMG5_buildridmet(MMG5_pMesh,MMG5_pSol,int,double,double,double,double* );
-int  _MMG5_boundingBox(MMG5_pMesh mesh);
-void _MMG5_displayHisto(MMG5_pMesh,int, double*, int, int, double, int, int,
-                        double, double*, int*);
-int  _MMG5_hashEdge(MMG5_pMesh mesh,_MMG5_Hash *hash,int a,int b,int k);
-int  _MMG5_hashGet(_MMG5_Hash *hash,int a,int b);
-int  _MMG5_hashNew(MMG5_pMesh mesh, _MMG5_Hash *hash,int hsiz,int hmax);
-void _MMG5_mmgDefaultValues(MMG5_pMesh mesh);
-int  _MMG5_mmgHashTria(MMG5_pMesh mesh, int *adja, int chkISO);
-void _MMG5_mmgInit_parameters(MMG5_pMesh mesh);
-void _MMG5_mmgUsage(char *prog);
-int  _MMG5_nortri(MMG5_pMesh mesh,MMG5_pTria pt,double *n);
-int  _MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met);
-int  _MMG5_unscaleMesh(MMG5_pMesh mesh,MMG5_pSol met);
+int    _MMG5_buildridmet(MMG5_pMesh,MMG5_pSol,int,double,double,double,double*);
+int    _MMG5_boundingBox(MMG5_pMesh mesh);
+void   _MMG5_displayHisto(MMG5_pMesh,int, double*, int, int, double, int, int,
+                          double, double*, int*);
+int    _MMG5_hashEdge(MMG5_pMesh mesh,_MMG5_Hash *hash,int a,int b,int k);
+int    _MMG5_hashGet(_MMG5_Hash *hash,int a,int b);
+int    _MMG5_hashNew(MMG5_pMesh mesh, _MMG5_Hash *hash,int hsiz,int hmax);
+double _MMG5_lenedg_ani(MMG5_pMesh mesh,MMG5_pSol met,int ip1,int ip2,char);
+double _MMG5_lenedg_iso(MMG5_pMesh ,MMG5_pSol ,int ,int, char );
+void   _MMG5_mmgDefaultValues(MMG5_pMesh mesh);
+int    _MMG5_mmgHashTria(MMG5_pMesh mesh, int *adja, int chkISO);
+void   _MMG5_mmgInit_parameters(MMG5_pMesh mesh);
+void   _MMG5_mmgUsage(char *prog);
+int    _MMG5_nortri(MMG5_pMesh mesh,MMG5_pTria pt,double *n);
+int    _MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met);
+int    _MMG5_unscaleMesh(MMG5_pMesh mesh,MMG5_pSol met);
 
 
 /* function pointers */
-double _MMG5_lenedg_iso(MMG5_pMesh ,MMG5_pSol ,int ,int, char );
-double _MMG5_lenedg_ani(MMG5_pMesh mesh,MMG5_pSol met,int ip1,int ip2,char isedg);
+int    (*_MMG5_bezierCP)(MMG5_pMesh ,MMG5_Tria *,_MMG5_pBezier ,char );
 double (*_MMG5_lenedg)(MMG5_pMesh mesh,MMG5_pSol sol ,int ,int, char );
+
 
 #endif

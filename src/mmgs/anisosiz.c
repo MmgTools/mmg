@@ -278,7 +278,7 @@ static int defmetrid(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
     i1  = _MMG5_inxt2[i0];
     i2  = _MMG5_iprv2[i0];
     pt = &mesh->tria[iel];
-    if ( !_MMG5_bezierCP(mesh,pt,&b) )  continue;
+    if ( !_MMG5_bezierCP(mesh,pt,&b,1) )  continue;
 
     /* Barycentric coordinates of vector u in tria iel */
     detg = lispoi[3*k+1]*u[1] - lispoi[3*k+2]*u[0];
@@ -522,7 +522,7 @@ static int defmetref(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
     i0  = list[k] % 3;
     i1  = _MMG5_inxt2[i0];
     pt = &mesh->tria[iel];
-    _MMG5_bezierCP(mesh,pt,&b);
+    _MMG5_bezierCP(mesh,pt,&b,1);
 
     for(j=0; j<10; j++){
       c[0] = b.b[j][0] - p0->c[0];
@@ -872,7 +872,7 @@ static int defmetreg(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
     i0  = list[k] % 3;
     i1  = _MMG5_inxt2[i0];
     pt = &mesh->tria[iel];
-    _MMG5_bezierCP(mesh,pt,&b);
+    _MMG5_bezierCP(mesh,pt,&b,1);
 
     for(j=0; j<10; j++){
       c[0] = b.b[j][0] - p0->c[0];

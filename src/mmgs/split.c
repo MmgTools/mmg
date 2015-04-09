@@ -128,7 +128,7 @@ int split1b(MMG5_pMesh mesh,int k,char i,int ip) {
 
   /* update normal n2 if need be */
   if ( jel && pt->tag[i] & MG_GEO ) {
-    ier = _MMG5_bezierCP(mesh,&mesh->tria[jel],&b);
+    ier = _MMG5_bezierCP(mesh,&mesh->tria[jel],&b,1);
     assert(ier);
     uv[0] = 0.5;
     uv[1] = 0.5;
