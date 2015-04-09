@@ -44,44 +44,11 @@
  *
  * Initialization of the input parameters (stored in the Info structure).
  *
- * \todo try to remive paramters that do not coincide with mmg3d.
+ * \todo try to remove paramters that do not coincide with mmg3d.
  */
 void _MMG5_Init_parameters(MMG5_pMesh mesh) {
 
-  memset(&mesh->info,0, sizeof(MMG5_Info));
-
-  /* default values for integers */
-  /** MMG5_IPARAM_verbose = -99 */
-  mesh->info.imprim   =  -99;  /* [-10..10],Tune level of imprim */
-  /** MMG5_IPARAM_mem = -1 */
-  mesh->info.mem      = -1;  /* [n/-1]   ,Set memory size to n Mbytes/keep the default value */
-  /** MMG5_IPARAM_debug = 0 */
-  mesh->info.ddebug   =  0;  /* [0/1]    ,Turn on/off debug mode */
-  /** MMG5_IPARAM_npar = 0 */
-  mesh->info.npar     =  0;  /* [n]      ,number of local parameters */
-
-  /* default values for doubles */
-  /** MMG5_DPARAM_angleDetection = \ref _MMG5_ANGEDG */
-  mesh->info.dhd      = _MMG5_ANGEDG;   /* angle detection; */
-  /** MMG5_DPARAM_hmin = 0.0 */
-  mesh->info.hmin     = -1.;      /* minimal mesh size; */
-  /** MMG5_DPARAM_hmax = \f$ \infty \f$ */
-  mesh->info.hmax     = -1.;  /* maximal mesh size; */
-  /** MMG5_DPARAM_hausd = 0.01 */
-  mesh->info.hausd    = 0.01;     /* control Hausdorff */
-  /** MMG5_DPARAM_hgrad = 0.1 */
-  mesh->info.hgrad    = 0.1;      /* control gradation; */
-
-  /* initial value for memMax and gap */
-  mesh->gap = 0.2;
-  mesh->memMax = _MMG5_memSize();
-  if ( mesh->memMax )
-    /* maximal memory = 50% of total physical memory */
-    mesh->memMax = mesh->memMax*50/100;
-  else {
-    /* default value = 800 Mo */
-    printf("  Maximum memory set to default value: %d Mo.\n",_MMG5_MEMMAX);
-    mesh->memMax = _MMG5_MEMMAX << 20;
-  }
+  /* Init common parameters for mmgs and mmg3d. */
+  _MMG5_mmgInit_parameters(mesh);
 
 }

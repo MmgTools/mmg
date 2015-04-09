@@ -344,6 +344,7 @@ int  _MMG5_nortri(MMG5_pMesh mesh,MMG5_pTria pt,double *n);
 int  _MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met);
 int  _MMG5_unscaleMesh(MMG5_pMesh mesh,MMG5_pSol met);
 void _MMG5_mmgUsage(char *prog);
+void _MMG5_mmgInit_parameters(MMG5_pMesh mesh);
 
 /* function pointers */
 double _MMG5_lenedg_iso(MMG5_pMesh ,MMG5_pSol ,int ,int, char );
