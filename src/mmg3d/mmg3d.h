@@ -181,10 +181,8 @@ int  _MMG5_BezierEdge(MMG5_pMesh mesh,int ip0, int ip1, double b0[3], double b1[
 int  _MMG5_BezierRidge(MMG5_pMesh mesh,int ip0, int ip1, double s, double *o, double *no1, double *no2, double *to);
 int  _MMG5_BezierNom(MMG5_pMesh mesh,int ip0,int ip1,double s,double *o,double *no,double *to);
 int  _MMG5_norface(MMG5_pMesh mesh ,int k, int iface, double v[3]);
-int  _MMG5_boulen(MMG5_pMesh mesh, int*, int start,int ip,double *nn);
 int  _MMG5_bouler(MMG5_pMesh mesh, int*, int start,int ip,int *list,int *ng,int *nr);
 int  _MMG5_boulenm(MMG5_pMesh mesh, int start, int ip, int iface, double n[3],double t[3]);
-int  _MMG5_boulec(MMG5_pMesh mesh, int*, int start,int ip,double *tt);
 int  _MMG5_boulevolp(MMG5_pMesh mesh, int start, int ip, int * list);
 int  _MMG5_boulesurfvolp(MMG5_pMesh mesh,int start,int ip,int iface,int *listv,int *ilistv,int *lists,int*ilists);
 int  _MMG5_startedgsurfball(MMG5_pMesh mesh,int nump,int numq,int *list,int ilist);
