@@ -418,7 +418,7 @@ int litcol(MMG5_pMesh mesh,int k,char i,double kali) {
   MMG5_pTria     pt,pt0,pt1;
   MMG5_pPoint    p1,p2;
   double         kal,ps,cosnold,cosnnew,n0old[3],n0new[3],n1old[3],n1new[3],n00old[3],n00new[3];
-  int            *adja,list[LMAX+2],jel,ip2,l,ilist;
+  int            *adja,list[_MMG5_LMAX+2],jel,ip2,l,ilist;
   char           i1,i2,j,jj,j2,open;
 
   pt0 = &mesh->tria[0];

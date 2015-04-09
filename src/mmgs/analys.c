@@ -442,13 +442,13 @@ static int setdhd(MMG5_pMesh mesh) {
   return(1);
 }
 
-/* check for singularities (corners) */
-int singul(MMG5_pMesh mesh) {
+/** check for singularities */
+static int _MMG5_singul(MMG5_pMesh mesh) {
   MMG5_pTria     pt;
   MMG5_pPoint    ppt,p1,p2;
-  double    ux,uy,uz,vx,vy,vz,dd;
-  int       list[LMAX+2],k,nc,xp,nr,ns,nre;
-  char      i;
+  double         ux,uy,uz,vx,vy,vz,dd;
+  int            list[_MMG5_LMAX+2],k,nc,xp,nr,ns,nre;
+  char           i;
 
   nre = nc = 0;
   for (k=1; k<=mesh->nt; k++) {
@@ -461,28 +461,27 @@ int singul(MMG5_pMesh mesh) {
       if ( !MG_VOK(ppt) || MS_SIN(ppt->tag) )  continue;
       else if ( MG_EDG(ppt->tag) ) {
         ns = bouler(mesh,k,i,list,&xp,&nr);
-        if ( !ns ) continue;
-        
-        if ( (xp + nr) > 2 ) {
-          ppt->tag |= MG_CRN + MG_REQ; 
-          nre++;   
-          nc++;
-        } 
-        else if ( xp == 1 && nr == 1 ) {
-          ppt->tag |= MG_REQ; 
-          nre++;
-        } 
-        else if ( xp == 1 && !nr ) {
-          ppt->tag |= MG_CRN + MG_REQ; 
+
+        if ( !ns )  continue;
+        if ( (xp+nr) > 2 ) {
+          ppt->tag |= MG_CRN + MG_REQ;
           nre++;
           nc++;
         }
-        else if ( nr == 1 && !xp ) {
-          ppt->tag |= MG_CRN + MG_REQ; 
+        else if ( (xp == 1) && (nr == 1) ) {
+          ppt->tag |= MG_REQ;
+          nre++;
+        }
+        else if ( xp == 1 && !nr ){
+          ppt->tag |= MG_CRN + MG_REQ;
           nre++;
           nc++;
         }
-     
+        else if ( nr == 1 && !xp ){
+          ppt->tag |= MG_CRN + MG_REQ;
+          nre++;
+          nc++;
+        }
         /* check ridge angle */
         else {
           p1 = &mesh->point[list[1]];
@@ -522,7 +521,7 @@ int singul(MMG5_pMesh mesh) {
     }
   }
 
-  if ( abs(mesh->info.imprim) > 4 && nre > 0 )
+  if ( abs(mesh->info.imprim) > 3 && nre > 0 )
     fprintf(stdout,"     %d corners, %d singular points detected\n",nc,nre);
   return(1);
 }
@@ -659,7 +658,7 @@ static int regnor(MMG5_pMesh mesh) {
   MMG5_pTria    pt;
   MMG5_pPoint   ppt,p0;
   double  *tabl,n[3],lm1,lm2,dd,nx,ny,nz,res0,res;
-  int      i,k,iad,it,nn,nit,iel,ilist,list[LMAX];
+  int      i,k,iad,it,nn,nit,iel,ilist,list[_MMG5_LMAX];
 
   /* assign seed to vertex */
   for (k=1; k<=mesh->nt; k++) {
@@ -808,7 +807,7 @@ int analys(MMG5_pMesh mesh) {
   }
 
   /* identify singularities */
-  if ( !singul(mesh) ) {
+  if ( !_MMG5_singul(mesh) ) {
     fprintf(stdout,"  ## Singularity problem. Exit program.\n");
     return(0);
   }

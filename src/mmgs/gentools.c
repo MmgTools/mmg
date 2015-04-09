@@ -155,7 +155,13 @@ int setref(MMG5_pMesh mesh,int start,int ref,int putreq) {
   return(1);
 }
 
-/* invert 3x3 non-symmetric matrix */
+/**
+ * \param m initial matrix.
+ * \param mi inverted matrix.
+ *
+ * Invert 3x3 non-symmetric matrix.
+ *
+ */
 int invmatg(double m[9],double mi[9]) {
   double  aa,bb,cc,det,vmin,vmax,maxx;
   int     k;

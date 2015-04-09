@@ -257,3 +257,31 @@ inline int _MMG5_sys33sym(double a[6], double b[3], double r[3]){
 
   return(1);
 }
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param filename pointer toward the file name.
+ *
+ * Debug function (not use in clean code): write mesh->tria structure in file.
+ *
+ */
+void _MMG5_printTria(MMG5_pMesh mesh,char* fileName) {
+  MMG5_pTria ptt;
+  int   k;
+  FILE  *inm;
+
+  inm = fopen(fileName,"w");
+
+  fprintf(inm,"----------> %d TRIANGLES <----------\n",mesh->nt);
+  for(k=1; k<=mesh->nt; k++) {
+    ptt = &mesh->tria[k];
+    fprintf(inm,"num %d -> %d %d %d\n",k,ptt->v[0],ptt->v[1],
+            ptt->v[2]);
+    fprintf(inm,"ref   -> %d\n",ptt->ref);
+    fprintf(inm,"tag   -> %d %d %d\n",ptt->tag[0],ptt->tag[1],ptt->tag[2]);
+    fprintf(inm,"edg   -> %d %d %d\n",ptt->edg[0],ptt->edg[1],ptt->edg[2]);
+    fprintf(inm,"\n");
+  }
+  fprintf(inm,"---------> END TRIANGLES <--------\n");
+  fclose(inm);
+}

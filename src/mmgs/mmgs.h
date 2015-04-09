@@ -40,9 +40,9 @@
 #define LLONG     2.0
 #define LSHRT     0.3
 
-#define LMAX      1024
-#define BADKAL    2.e-2
-#define NULKAL    1.e-4
+#define _MMG5_LMAX  1024
+#define BADKAL      2.e-2
+#define NULKAL      1.e-4
 
 #define _MMG5_NPMAX     500000
 #define _MMG5_NTMAX    1000000

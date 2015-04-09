@@ -267,7 +267,6 @@ void _MMG5_defaultValues(MMG5_pMesh);
 /* useful functions to debug */
 int  _MMG5_indElt(MMG5_pMesh mesh,int kel);
 int  _MMG5_indPt(MMG5_pMesh mesh,int kp);
-void _MMG5_printTria(MMG5_pMesh mesh,char* fileName);
 void _MMG5_printTetra(MMG5_pMesh mesh,char* fileName);
 int  _MMG5_saveAllMesh(MMG5_pMesh mesh);
 int  _MMG5_saveLibraryMesh(MMG5_pMesh mesh);

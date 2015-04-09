@@ -227,7 +227,7 @@ static int swpmsh(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
 static int movtri(MMG5_pMesh mesh,MMG5_pSol met,int maxit) {
   MMG5_pTria    pt;
   MMG5_pPoint   ppt;
-  int      it,k,ier,base,nm,ns,nnm,list[LMAX+2],ilist;
+  int      it,k,ier,base,nm,ns,nnm,list[_MMG5_LMAX+2],ilist;
   char     i;
 
   if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug )
@@ -595,7 +595,7 @@ static int colelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
   MMG5_pTria    pt;
   MMG5_pPoint   p1,p2;
   double        ll,ux,uy,uz;
-  int           list[LMAX+2],ilist,k,nc;
+  int           list[_MMG5_LMAX+2],ilist,k,nc;
   char          i,i1,i2;
 
   nc = 0;
@@ -711,7 +711,7 @@ static int adpcol(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTria    pt;
   MMG5_pPoint   p1,p2;
   double   len;
-  int      k,list[LMAX+2],ilist,nc;
+  int      k,list[_MMG5_LMAX+2],ilist,nc;
   char     i,i1,i2;
 
   nc = 0;
