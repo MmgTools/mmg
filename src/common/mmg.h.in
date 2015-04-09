@@ -335,8 +335,9 @@ typedef struct {
 /* Functions declarations */
 int    _MMG5_buildridmet(MMG5_pMesh,MMG5_pSol,int,double,double,double,double*);
 int    _MMG5_boundingBox(MMG5_pMesh mesh);
-int    _MMG5_boulec(MMG5_pMesh mesh, int*, int k,int i,double *tt);
-int    _MMG5_boulen(MMG5_pMesh mesh, int*, int start,int ip,double *nn);
+int    _MMG5_boulec(MMG5_pMesh, int*, int, int i,double *tt);
+int    _MMG5_boulen(MMG5_pMesh, int*, int, int i,double *nn);
+int    _MMG5_bouler(MMG5_pMesh, int*, int, int i,int *list,int *ng,int *nr);
 double _MMG5_caltri_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt);
 double _MMG5_caltri_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt);
 void   _MMG5_displayHisto(MMG5_pMesh,int, double*, int, int, double, int, int,

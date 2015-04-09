@@ -290,68 +290,6 @@ int boulep(MMG5_pMesh mesh,int start,int ip,int *list) {
   return(ilist);
 }
 
-/* store edges and return number (nref+ngeo) incident to ip */
-int _MMG5_bouler(MMG5_pMesh mesh,int *adjt,int start,int ip,int *list,int *xp,int *nr)
-{
-  MMG5_pTria    pt;
-  int     *adja,k,ns;
-  char     i,i1,i2;
-
-  pt  = &mesh->tria[start];
-  if ( !MG_EOK(pt) )  return(0);
-
-  /* check other triangle vertices */
-  k  = start;
-  i  = ip;
-  *xp = *nr = ns = 0;
-  do {
-    i1 = _MMG5_inxt2[i];
-    if ( MG_EDG(pt->tag[i1]) ) {
-      i2 = _MMG5_iprv2[i];
-      ns++;
-      if ( pt->tag[i1] & MG_GEO )
-        *xp = *xp + 1;
-      else
-        *nr = *nr + 1;
-      list[ns] = pt->v[i2];
-      if ( ns > _MMG5_LMAX-2 )  return(-ns);
-    }
-    adja = &adjt[3*(k-1)+1];
-    k  = adja[i1] / 3;
-    i  = adja[i1] % 3;
-    i  = _MMG5_inxt2[i];
-    pt = &mesh->tria[k];
-  }
-  while ( k && k != start );
-
-  /* reverse loop */
-  if ( k != start ) {
-    k = start;
-    i = ip;
-    do {
-      pt = &mesh->tria[k];
-      i2 = _MMG5_iprv2[i];
-      if ( MG_EDG(pt->tag[i2]) ) {
-        i1 = _MMG5_inxt2[i];
-        ns++;
-        if ( pt->tag[i2] & MG_GEO )
-          *xp = *xp + 1;
-        else
-          *nr = *nr + 1;
-        list[ns] = pt->v[i1];
-        if ( ns > _MMG5_LMAX-2 )  return(-ns);
-      }
-      adja = &adjt[3*(k-1)+1];
-      k  = adja[i2] / 3;
-      i  = adja[i2] % 3;
-      i  = _MMG5_iprv2[i];
-    }
-    while ( k && k != start );
-  }
-
-  return(ns);
-}
-
 /* Computation of the two balls of a ridge point : list1 is associated to normal n1's side
    ip0, ip1 = indices of the 2 ending point of the ridge
    Both lists are returned enumerated in direct order  */

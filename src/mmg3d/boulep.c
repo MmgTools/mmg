@@ -38,67 +38,6 @@
 extern MMG5_Info  info;
 
 
-/** store edges and return number (ref+geo) incident to ip */
-int _MMG5_bouler(MMG5_pMesh mesh,int *adjt,int start,int ip,
-                 int *list,int *xp,int *nr) {
-  MMG5_pTria    pt;
-  int           *adja,k,ns;
-  char          i,i1,i2;
-
-  pt  = &mesh->tria[start];
-  if ( !MG_EOK(pt) )  return(0);
-
-  /* check other triangle vertices */
-  k  = start;
-  i  = ip;
-  *xp = *nr = ns = 0;
-  do {
-    i1 = _MMG5_inxt2[i];
-    if ( MG_EDG(pt->tag[i1])) {
-      i2 = _MMG5_iprv2[i];
-      if ( pt->tag[i1] & MG_GEO )
-        *xp = *xp + 1;
-      else if ( pt->tag[i1] & MG_REF )
-        *nr = *nr + 1;
-      ns++;
-      list[ns] = pt->v[i2];
-      if ( ns > _MMG5_LMAX-2 )  return(-ns);
-    }
-    adja = &adjt[3*(k-1)+1];
-    k  = adja[i1] / 3;
-    i  = adja[i1] % 3;
-    i  = _MMG5_inxt2[i];
-    pt = &mesh->tria[k];
-  }
-  while ( k && k != start );
-
-  /* reverse loop */
-  if ( k != start ) {
-    k = start;
-    i = ip;
-    do {
-      pt = &mesh->tria[k];
-      i2 = _MMG5_iprv2[i];
-      if ( MG_EDG(pt->tag[i2]) ) {
-        i1 = _MMG5_inxt2[i];
-        if ( pt->tag[i2] & MG_GEO )
-          *xp = *xp + 1;
-        else if ( pt->tag[i1] & MG_REF )
-          *nr = *nr + 1;
-        ns++;
-        list[ns] = pt->v[i1];
-        if ( ns > _MMG5_LMAX-2 )  return(-ns);
-      }
-      adja = &adjt[3*(k-1)+1];
-      k = adja[i2] / 3;
-      i = adja[i2] % 3;
-      i = _MMG5_iprv2[i];
-    }
-    while ( k && k != start );
-  }
-  return(ns);
-}
-
 /** Return volumic ball (i.e. filled with tetrahedra) of point ip in tetra start.
     Results are stored under the form 4*kel + jel , kel = number of the tetra, jel = local
     index of p within kel */
