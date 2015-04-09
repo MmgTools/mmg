@@ -37,50 +37,6 @@
 
 extern char ddb;
 
-/**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the meric structure.
- * \param ptt pointer toward the triangle structure.
- * \return The computed quality.
- *
- * Compute the quality of the surface triangle \a ptt with respect to
- * an isotropic metric.
- *
- */
-inline double _MMG5_caltri_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt) {
-  double   *a,*b,*c,cal,abx,aby,abz,acx,acy,acz,bcx,bcy,bcz,rap;
-
-  a = &mesh->point[ptt->v[0]].c[0];
-  b = &mesh->point[ptt->v[1]].c[0];
-  c = &mesh->point[ptt->v[2]].c[0];
-
-  /* area */
-  abx = b[0] - a[0];
-  aby = b[1] - a[1];
-  abz = b[2] - a[2];
-  acx = c[0] - a[0];
-  acy = c[1] - a[1];
-  acz = c[2] - a[2];
-  bcx = c[0] - b[0];
-  bcy = c[1] - b[1];
-  bcz = c[2] - b[2];
-
-  cal  = (aby*acz - abz*acy) * (aby*acz - abz*acy);
-  cal += (abz*acx - abx*acz) * (abz*acx - abx*acz);
-  cal += (abx*acy - aby*acx) * (abx*acy - aby*acx);
-
-  if ( cal < _MMG5_EPSD2 )  return(0.0);
-
-  /* qual = 2.*surf / length */
-  rap  = abx*abx + aby*aby + abz*abz;
-  rap += acx*acx + acy*acy + acz*acz;
-  rap += bcx*bcx + bcy*bcy + bcz*bcz;
-
-  if ( rap < _MMG5_EPSD2 )  return(0.0);
-
-  return(sqrt(cal) / rap);
-}
-
 /** compute tetra oriented quality of iel (return 0.0 when element is inverted) */
 inline double _MMG5_orcal(MMG5_pMesh mesh,int iel) {
   MMG5_pTetra     pt;

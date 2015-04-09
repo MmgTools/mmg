@@ -151,8 +151,6 @@ void _MMG5_memOption(MMG5_pMesh mesh);
 /* init structures */
 void  _MMG5_Init_parameters(MMG5_pMesh mesh);
 /* iso/aniso computations */
-double _MMG5_caltri_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt);
-double _MMG5_caltri_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt);
 double caleltsig_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel);
 double caleltsig_iso(MMG5_pMesh mesh,MMG5_pSol met,int iel);
 int    defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met);

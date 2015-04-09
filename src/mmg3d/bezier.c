@@ -316,6 +316,8 @@ _MMG5_BezierEdge(MMG5_pMesh mesh,int ip0,int ip1,double b0[3],double b1[3],char 
  *
  * Compute Bezier control points on triangle \a pt (cf. Vlachos)
  *
+ * \todo merge with the _MMG5_mmg3dBeizerCP function and remove the pointer
+ * toward this functions.
  */
 int _MMG5_mmg3dBezierCP(MMG5_pMesh mesh,MMG5_Tria *pt,_MMG5_pBezier pb,char ori) {
   MMG5_pPoint    p[3];

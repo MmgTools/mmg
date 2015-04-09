@@ -245,7 +245,6 @@ int    _MMG5_movbdyregpt(MMG5_pMesh, MMG5_pSol, int*, int, int*, int);
 int    _MMG5_movbdyrefpt(MMG5_pMesh, MMG5_pSol, int*, int, int*, int);
 int    _MMG5_movbdynompt(MMG5_pMesh, MMG5_pSol, int*, int, int*, int);
 int    _MMG5_movbdyridpt(MMG5_pMesh, MMG5_pSol, int*, int, int*, int);
-double _MMG5_caltri_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt);
 int  _MMG5_chkswpbdy(MMG5_pMesh, MMG5_pSol,int*, int, int, int);
 int  _MMG5_swpbdy(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int it1,_MMG5_pBucket bucket);
 int  _MMG5_swpgen(MMG5_pMesh mesh,MMG5_pSol met,int nconf, int ilist, int *list,_MMG5_pBucket bucket);

@@ -57,3 +57,37 @@ inline double _MMG5_lenedg_iso(MMG5_pMesh mesh,MMG5_pSol met,int ip1,int ip2, ch
 
   return(len);
 }
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the meric structure.
+ * \param ptt pointer toward the triangle structure.
+ * \return The computed area.
+ *
+ * Compute the area of the surface triangle \a ptt with respect to
+ * the isotropic metric \a met.
+ *
+ */
+double _MMG5_surftri_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt) {
+  double   *a,*b,*c,abx,aby,abz,acx,acy,acz,det,n[3];
+
+  a = mesh->point[ptt->v[0]].c;
+  b = mesh->point[ptt->v[1]].c;
+  c = mesh->point[ptt->v[2]].c;
+
+  /* area */
+  abx = b[0] - a[0];
+  aby = b[1] - a[1];
+  abz = b[2] - a[2];
+
+  acx = c[0] - a[0];
+  acy = c[1] - a[1];
+  acz = c[2] - a[2];
+
+  n[0] = aby*acz - abz*acy;
+  n[1] = abz*acx - abx*acz;
+  n[2] = abx*acy - aby*acx;
+  det  = n[0]*n[0] + n[1]*n[1] + n[2]*n[2];
+
+  return( 0.5*sqrt(det) );
+}
