@@ -239,7 +239,7 @@ int boulechknm(MMG5_pMesh mesh,int start,int ip,int *list) {
 }
 
 /* return average normal of triangles sharing P */
-int boulen(MMG5_pMesh mesh,int start,int ip,double *nn) {
+int _MMG5_boulen(MMG5_pMesh mesh,int *adjt,int start,int ip,double *nn) {
   MMG5_pTria    pt;
   double        n[3],dd;
   int           *adja,k;
@@ -262,7 +262,7 @@ int boulen(MMG5_pMesh mesh,int start,int ip,double *nn) {
       k = 0;
       break;
     }
-    adja = &mesh->adja[3*(k-1)+1];
+    adja = &adjt[3*(k-1)+1];
     k  = adja[i1] / 3;
     i2 = adja[i1] % 3;
     i1 = _MMG5_iprv2[i2];
@@ -277,7 +277,7 @@ int boulen(MMG5_pMesh mesh,int start,int ip,double *nn) {
     do {
       if ( pt->tag[i2] & MG_GEO )  break;
 
-      adja = &mesh->adja[3*(k-1)+1];
+      adja = &adjt[3*(k-1)+1];
       k  = adja[i2] / 3;
       if ( k == 0 )  break;
       i1 = adja[i2] % 3;
@@ -358,7 +358,7 @@ int boulep(MMG5_pMesh mesh,int start,int ip,int *list) {
 
 
 /* return tangent to curve at ip */
-int boulec(MMG5_pMesh mesh,int start,int ip,double *tt) {
+int _MMG5_boulec(MMG5_pMesh mesh,int *adjt,int start,int ip,double *tt) {
   MMG5_pTria    pt;
   MMG5_pPoint   p0,p1,p2;
   double   dd;
@@ -383,7 +383,7 @@ int boulec(MMG5_pMesh mesh,int start,int ip,double *tt) {
       k  = 0;
       break;
     }
-    adja = &mesh->adja[3*(k-1)+1];
+    adja = &adjt[3*(k-1)+1];
     k  = adja[i1] / 3;
     i2 = adja[i1] % 3;
     i1 = _MMG5_iprv2[i2];
@@ -402,7 +402,7 @@ int boulec(MMG5_pMesh mesh,int start,int ip,double *tt) {
         p2 = &mesh->point[pt->v[i1]];
         break;
       }
-      adja = &mesh->adja[3*(k-1)+1];
+      adja = &adjt[3*(k-1)+1];
       k  = adja[i2] / 3;
       i1 = adja[i2] % 3;
       i2 = _MMG5_inxt2[i1];
@@ -432,7 +432,8 @@ int boulec(MMG5_pMesh mesh,int start,int ip,double *tt) {
 
 
 /* store edges and return number (nref+ngeo) incident to ip */
-int bouler(MMG5_pMesh mesh,int start,int ip,int *list,int *xp,int *nr) {
+int _MMG5_bouler(MMG5_pMesh mesh,int *adjt,int start,int ip,int *list,int *xp,int *nr)
+{
   MMG5_pTria    pt;
   int     *adja,k,ns;
   char     i,i1,i2;
@@ -456,7 +457,7 @@ int bouler(MMG5_pMesh mesh,int start,int ip,int *list,int *xp,int *nr) {
       list[ns] = pt->v[i2];
       if ( ns > _MMG5_LMAX-2 )  return(-ns);
     }
-    adja = &mesh->adja[3*(k-1)+1];
+    adja = &adjt[3*(k-1)+1];
     k  = adja[i1] / 3;
     i  = adja[i1] % 3;
     i  = _MMG5_inxt2[i];
@@ -481,7 +482,7 @@ int bouler(MMG5_pMesh mesh,int start,int ip,int *list,int *xp,int *nr) {
         list[ns] = pt->v[i1];
         if ( ns > _MMG5_LMAX-2 )  return(-ns);
       }
-      adja = &mesh->adja[3*(k-1)+1];
+      adja = &adjt[3*(k-1)+1];
       k  = adja[i2] / 3;
       i  = adja[i2] % 3;
       i  = _MMG5_iprv2[i];

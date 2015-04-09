@@ -38,7 +38,7 @@
 extern MMG5_Info  info;
 
 /** return average normal of triangles sharing P without crossing ridge */
-int _MMG5_boulen(MMG5_pMesh mesh,int start,int ip,double *nn) {
+int _MMG5_boulen(MMG5_pMesh mesh,int *adjt,int start,int ip,double *nn) {
   MMG5_pTria    pt;
   double        n[3],dd;
   int           *adja,k;
@@ -61,7 +61,7 @@ int _MMG5_boulen(MMG5_pMesh mesh,int start,int ip,double *nn) {
       k = 0;
       break;
     }
-    adja = &mesh->adjt[3*(k-1)+1];
+    adja = &adjt[3*(k-1)+1];
     k  = adja[i1] / 3;
     i2 = adja[i1] % 3;
     i1 = _MMG5_iprv2[i2];
@@ -76,7 +76,7 @@ int _MMG5_boulen(MMG5_pMesh mesh,int start,int ip,double *nn) {
     do {
       if ( pt->tag[i2] & MG_GEO )  break;
 
-      adja = &mesh->adjt[3*(k-1)+1];
+      adja = &adjt[3*(k-1)+1];
       k  = adja[i2] / 3;
       if ( k == 0 )  break;
       i1 = adja[i2] % 3;
@@ -105,12 +105,12 @@ int _MMG5_boulen(MMG5_pMesh mesh,int start,int ip,double *nn) {
 
 
 /** return tangent to curve at ip */
-int _MMG5_boulec(MMG5_pMesh mesh,int start,int ip,double *tt) {
+int _MMG5_boulec(MMG5_pMesh mesh,int *adjt,int start,int ip,double *tt) {
   MMG5_pTria    pt;
   MMG5_pPoint   p0,p1,p2;
-  double   dd;
-  int     *adja,k;
-  char     i,i1,i2;
+  double        dd;
+  int           *adja,k;
+  char          i,i1,i2;
 
   pt = &mesh->tria[start];
   if ( !MG_EOK(pt) )       return(0);
@@ -130,7 +130,7 @@ int _MMG5_boulec(MMG5_pMesh mesh,int start,int ip,double *tt) {
       k  = 0;
       break;
     }
-    adja = &mesh->adjt[3*(k-1)+1];
+    adja = &adjt[3*(k-1)+1];
     k  = adja[i1] / 3;
     i2 = adja[i1] % 3;
     i1 = _MMG5_iprv2[i2];
@@ -149,7 +149,7 @@ int _MMG5_boulec(MMG5_pMesh mesh,int start,int ip,double *tt) {
         p2 = &mesh->point[pt->v[i1]];
         break;
       }
-      adja = &mesh->adjt[3*(k-1)+1];
+      adja = &adjt[3*(k-1)+1];
       k  = adja[i2] / 3;
       i1 = adja[i2] % 3;
       i2 = _MMG5_inxt2[i1];
@@ -179,30 +179,32 @@ int _MMG5_boulec(MMG5_pMesh mesh,int start,int ip,double *tt) {
 
 
 /** store edges and return number (ref+geo) incident to ip */
-int _MMG5_bouler(MMG5_pMesh mesh,int start,int ip,int *list,int *ng,int *nr) {
+int _MMG5_bouler(MMG5_pMesh mesh,int *adjt,int start,int ip,
+                 int *list,int *xp,int *nr) {
   MMG5_pTria    pt;
-  int     *adja,k,ns;
-  char     i,i1,i2;
+  int           *adja,k,ns;
+  char          i,i1,i2;
 
   pt  = &mesh->tria[start];
   if ( !MG_EOK(pt) )  return(0);
+
   /* check other triangle vertices */
   k  = start;
   i  = ip;
-  *ng = *nr = ns = 0;
+  *xp = *nr = ns = 0;
   do {
     i1 = _MMG5_inxt2[i];
     if ( MG_EDG(pt->tag[i1])) {
       i2 = _MMG5_iprv2[i];
       if ( pt->tag[i1] & MG_GEO )
-        *ng = *ng + 1;
+        *xp = *xp + 1;
       else if ( pt->tag[i1] & MG_REF )
         *nr = *nr + 1;
       ns++;
       list[ns] = pt->v[i2];
       if ( ns > _MMG5_LMAX-2 )  return(-ns);
     }
-    adja = &mesh->adjt[3*(k-1)+1];
+    adja = &adjt[3*(k-1)+1];
     k  = adja[i1] / 3;
     i  = adja[i1] % 3;
     i  = _MMG5_inxt2[i];
@@ -220,14 +222,14 @@ int _MMG5_bouler(MMG5_pMesh mesh,int start,int ip,int *list,int *ng,int *nr) {
       if ( MG_EDG(pt->tag[i2]) ) {
         i1 = _MMG5_inxt2[i];
         if ( pt->tag[i2] & MG_GEO )
-          *ng = *ng + 1;
+          *xp = *xp + 1;
         else if ( pt->tag[i1] & MG_REF )
           *nr = *nr + 1;
         ns++;
         list[ns] = pt->v[i1];
         if ( ns > _MMG5_LMAX-2 )  return(-ns);
       }
-      adja = &mesh->adjt[3*(k-1)+1];
+      adja = &adjt[3*(k-1)+1];
       k = adja[i2] / 3;
       i = adja[i2] % 3;
       i = _MMG5_iprv2[i];

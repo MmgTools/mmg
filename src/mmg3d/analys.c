@@ -283,7 +283,7 @@ static int _MMG5_singul(MMG5_pMesh mesh) {
       ppt = &mesh->point[pt->v[i]];
       if ( !MG_VOK(ppt) || MG_SIN(ppt->tag) || ppt->tag & MG_NOM ) continue;
       else if ( MG_EDG(ppt->tag) ) {
-        ns = _MMG5_bouler(mesh,k,i,list,&xp,&nr);
+        ns = _MMG5_bouler(mesh,mesh->adjt,k,i,list,&xp,&nr);
 
         if ( !ns )  continue;
         if ( (xp+nr) > 2 ) {
@@ -390,7 +390,7 @@ static int _MMG5_norver(MMG5_pMesh mesh) {
 
       /* C1 point */
       if ( !MG_EDG(ppt->tag) ) {
-        if ( !_MMG5_boulen(mesh,k,i,n) ) {
+        if ( !_MMG5_boulen(mesh,mesh->adjt,k,i,n) ) {
           ++nf;
           continue;
         }
@@ -413,7 +413,7 @@ static int _MMG5_norver(MMG5_pMesh mesh) {
       /* along ridge-curve */
       i1  = _MMG5_inxt2[i];
       if ( !MG_EDG(pt->tag[i1]) )  continue;
-      else if ( !_MMG5_boulen(mesh,k,i,n) ) {
+      else if ( !_MMG5_boulen(mesh,mesh->adjt,k,i,n) ) {
         ++nf;
         continue;
       }
@@ -432,7 +432,7 @@ static int _MMG5_norver(MMG5_pMesh mesh) {
         kk = adja[i1] / 3;
         ii = adja[i1] % 3;
         ii = _MMG5_inxt2[ii];
-        if ( !_MMG5_boulen(mesh,kk,ii,n) ) {
+        if ( !_MMG5_boulen(mesh,mesh->adjt,kk,ii,n) ) {
           ++nf;
           continue;
         }
@@ -457,7 +457,7 @@ static int _MMG5_norver(MMG5_pMesh mesh) {
       /* compute tgte */
       ppt->flag = mesh->base;
       ++nt;
-      if ( !_MMG5_boulec(mesh,k,i,pxp->t) ) {
+      if ( !_MMG5_boulec(mesh,mesh->adjt,k,i,pxp->t) ) {
         ++nf;
         continue;
       }

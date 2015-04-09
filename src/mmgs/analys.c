@@ -460,7 +460,7 @@ static int _MMG5_singul(MMG5_pMesh mesh) {
       ppt->s++;
       if ( !MG_VOK(ppt) || MS_SIN(ppt->tag) )  continue;
       else if ( MG_EDG(ppt->tag) ) {
-        ns = bouler(mesh,k,i,list,&xp,&nr);
+        ns = _MMG5_bouler(mesh,mesh->adja,k,i,list,&xp,&nr);
 
         if ( !ns )  continue;
         if ( (xp+nr) > 2 ) {
@@ -556,7 +556,7 @@ static int norver(MMG5_pMesh mesh) {
       else if ( ppt->flag == mesh->base )  continue;
       else if ( mesh->nc1 )  continue;
 
-      ier = boulen(mesh,k,i,ppt->n);
+      ier = _MMG5_boulen(mesh,mesh->adja,k,i,ppt->n);
       if ( ier ) {
         ppt->flag = mesh->base;
         nn++;
@@ -585,7 +585,7 @@ static int norver(MMG5_pMesh mesh) {
         if ( ppt->tag & MG_CRN || ppt->flag == mesh->base )  continue;
         else if ( !MG_EDG(pt->tag[i1]) )  continue;
 
-        ier = boulen(mesh,k,i,n);
+        ier = _MMG5_boulen(mesh,mesh->adja,k,i,n);
         if ( !ier )  continue;
 
         ++mesh->xp;
@@ -606,7 +606,7 @@ static int norver(MMG5_pMesh mesh) {
             ii  = adja[i1] % 3;
             ii  = _MMG5_inxt2[ii];
 
-            ier = boulen(mesh,kk,ii,n);
+            ier = _MMG5_boulen(mesh,mesh->adja,kk,ii,n);
             if ( !ier )  continue;
             memcpy(go->n2,n,3*sizeof(double));
 
@@ -628,7 +628,7 @@ static int norver(MMG5_pMesh mesh) {
         }
 
         /* compute tgte */
-        ier = boulec(mesh,k,i,ppt->n);
+        ier = _MMG5_boulec(mesh,mesh->adja,k,i,ppt->n);
         if ( !ier )  continue;
         dd = go->n1[0]*ppt->n[0] + go->n1[1]*ppt->n[1] + go->n1[2]*ppt->n[2];
         ppt->n[0] -= dd*go->n1[0];
