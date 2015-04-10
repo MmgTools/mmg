@@ -53,8 +53,8 @@ static inline void endcod() {
 
 int main(int argc,char *argv[]) {
   MMG5_pMesh      mesh;
-  MMG5_pSol       met;
-  int             ier;
+  MMG5_pSol       met,disp;
+  int             ier,dummy,typSol;
   char            stim[32];
 
   atexit(endcod);
@@ -65,6 +65,7 @@ int main(int argc,char *argv[]) {
   /* assign default values */
   mesh = NULL;
   met  = NULL;
+  disp = NULL;
 
   MMG5_Init_mesh(&mesh,&met);
 
@@ -78,7 +79,7 @@ int main(int argc,char *argv[]) {
   fprintf(stdout,"\n  -- INPUT DATA\n");
   chrono(ON,&ctim[1]);
   /* read mesh file */
-  if ( !MMG5_loadMesh(mesh) ) {
+  if ( MMG5_loadMesh(mesh)<1 ) {
     MMG5_Free_all(mesh,met );
     return(MMG5_STRONGFAILURE);
   }
@@ -87,15 +88,48 @@ int main(int argc,char *argv[]) {
     return(MMG5_STRONGFAILURE);
   }
 
-  /* read metric if any */
-  ier = MMG5_loadMet(mesh,met);
-  if ( !ier ) {
-    MMG5_Free_all(mesh,met);
+  /* read displacement if any */
+  if ( MMG5_Get_iparameter(mesh, MMG5_IPARAM_lag) > -1 ) {
+    fprintf(stdout,"  ## ERROR: LAGRANGIAN MOTION NOT YET IMPLEMENTED IN LIBRARY.\n");
     return(MMG5_STRONGFAILURE);
-  }
 
-  if ( !MMG5_parsop(mesh,met) )
-    RETURN_AND_FREE(mesh,met,MMG5_LOWFAILURE);
+    if ( !MMG5_Set_inputSolName(mesh,disp,met->namein) ) {
+      return(MMG5_STRONGFAILURE);
+    }
+    ier = MMG5_loadMet(mesh,disp);
+    if ( ier == 0 ) {
+      fprintf(stdout,"  ## ERROR: NO DISPLACEMENT FOUND.\n");
+      return(MMG5_STRONGFAILURE);
+    }
+    else if ( ier == -1 ) {
+      fprintf(stdout,"  ## ERROR: WRONG DATA TYPE OR WRONG SOLUTION NUMBER.\n");
+      return(MMG5_STRONGFAILURE);
+    }
+  }
+  /* read metric if any */
+  else {
+    ier = MMG5_loadMet(mesh,met);
+    if ( ier == -1 ) {
+      fprintf(stdout,"  ## ERROR: WRONG DATA TYPE OR WRONG SOLUTION NUMBER.\n");
+      MMG5_Free_all(mesh,met);
+      return(MMG5_STRONGFAILURE);
+    }
+    else {
+      MMG5_Get_solSize( mesh, met, &dummy, &dummy, &typSol);
+      if ( typSol != MMG5_Scalar ) {
+        fprintf(stdout,"  ## ERROR: ANISOTROPIC METRIC NOT IMPLEMENTED.\n");
+        MMG5_Free_all(mesh,met);
+        return(MMG5_STRONGFAILURE);
+      }
+    }
+    if ( MMG5_Get_iparameter(mesh, MMG5_IPARAM_iso) && !ier ) {
+      fprintf(stdout,"  ## ERROR: NO ISOVALUE DATA.\n");
+      MMG5_Free_all(mesh,met);
+      return(MMG5_STRONGFAILURE);
+    }
+    if ( !MMG5_parsop(mesh,met) )
+      return(MMG5_LOWFAILURE);
+  }
 
   chrono(OFF,&ctim[1]);
   printim(ctim[1].gdif,stim);

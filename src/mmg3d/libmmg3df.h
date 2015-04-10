@@ -763,6 +763,16 @@
 !  */
 
 ! int  MMG5_Get_scalarSol(MMG5_pSol met, double* s);
+! /**
+!  * \param mesh pointer toward the mesh structure.
+!  * \param iparam integer parameter to set (see \a MMG5_Param structure).
+!  * \return The value of integer parameter.
+!  *
+!  * Get the value of integer parameter \a iparam.
+!  *
+!  */
+
+! int MMG5_Get_iparameter(MMG5_pMesh mesh, int iparam);
 
 ! /** input/output functions */
 ! /**

@@ -127,7 +127,7 @@ void MMG5_Init_parameters(MMG5_pMesh mesh) {
     mesh->info.ddebug   =  0;  /* [0/1]    ,Turn on/off debug mode */
     /** MMG5_IPARAM_iso = 0 */
     mesh->info.iso      =  0;  /* [0/1]    ,Turn on/off levelset meshing */
-    /** MMG5_IPARAM_lag = 0 */
+    /** MMG5_IPARAM_lag = -1 */
     mesh->info.lag      = -1;
     /** MMG5_IPARAM_noinsert = 0 */
     mesh->info.noinsert =  0;  /* [0/1]    ,avoid/allow point insertion/deletion */
@@ -1396,6 +1396,65 @@ int MMG5_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
     /* other options */
     mesh->info.fem      = 0;
     return(1);
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param iparam integer parameter to set (see \a MMG5_Param structure).
+ * \return The value of integer parameter.
+ *
+ * Get the value of integer parameter \a iparam.
+ *
+ */
+int MMG5_Get_iparameter(MMG5_pMesh mesh, int iparam) {
+    int k;
+
+    switch ( iparam ) {
+        /* Integer parameters */
+    case MMG5_IPARAM_verbose :
+      return ( mesh->info.imprim );
+      break;
+    case MMG5_IPARAM_mem :
+      return ( mesh->info.mem );
+      break;
+#ifndef PATTERN
+    case MMG5_IPARAM_bucket :
+      return ( mesh->info.bucket );
+      break;
+#endif
+    case MMG5_IPARAM_debug :
+      return ( mesh->info.ddebug );
+      break;
+    case MMG5_IPARAM_angle :
+      return ( mesh->info.dhd );
+      break;
+    case MMG5_IPARAM_iso :
+      return ( mesh->info.iso );
+      break;
+    case MMG5_IPARAM_lag :
+      return ( mesh->info.lag );
+      break;
+    case MMG5_IPARAM_noinsert :
+      return ( mesh->info.noinsert );
+      break;
+    case MMG5_IPARAM_noswap :
+      return ( mesh->info.noswap );
+      break;
+    case MMG5_IPARAM_nomove :
+      return ( mesh->info.nomove );
+      break;
+    case MMG5_IPARAM_numberOfLocalParam :
+      return ( mesh->info.npar );
+      break;
+#ifdef USE_SCOTCH
+    case MMG5_IPARAM_renum :
+      return ( mesh->info.renum );
+      break;
+#endif
+    default :
+        fprintf(stdout,"  ## Error: unknown type of parameter\n");
+        exit(EXIT_FAILURE);
+    }
 }
 
 /**
