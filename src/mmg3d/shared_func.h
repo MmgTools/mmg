@@ -118,14 +118,24 @@ void _MMG5_excfun(int sigid) {
 void _MMG5_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
     if ( met->size == 1 || ( met->size == 3 && mesh->info.lag >= 0 ) ) {
         _MMG5_caltet  = _MMG5_caltet_iso;
+    _MMG5_caltri  = _MMG5_caltri_iso;
         _MMG5_lenedg  = _MMG5_lenedg_iso;
         _MMG5_defsiz  = _MMG5_defsiz_iso;
         _MMG5_gradsiz = _MMG5_gradsiz_iso;
     }
     else if ( met->size == 6 ) {
         _MMG5_caltet = _MMG5_caltet_ani;
+    // _MMG5_caltri  = _MMG5_caltri_ani;
         _MMG5_lenedg = _MMG5_lenedg_ani;
         /*defsiz = defsiz_ani;
           gradsiz = gradsiz_ani;*/
     }
+}
+
+/**
+ * Set API pointer functions to the matching mmg3d functions.
+ */
+void _MMG5_Set_APIFunc() {
+  MMG5_Init_parameters    = _MMG5_Init_parameters;
+  _MMG5_bezierCP          = _MMG5_mmg3dBezierCP;
 }

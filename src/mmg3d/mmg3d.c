@@ -93,6 +93,8 @@ int main(int argc,char *argv[]) {
     fprintf(stdout,"     %s\n",MG_CPY);
     fprintf(stdout,"     %s %s\n",__DATE__,__TIME__);
 
+    _MMG5_Set_APIFunc();
+
     signal(SIGABRT,_MMG5_excfun);
     signal(SIGFPE,_MMG5_excfun);
     signal(SIGILL,_MMG5_excfun);
@@ -144,21 +146,21 @@ int main(int argc,char *argv[]) {
     }
     /* read metric if any */
     else {
-        ier = MMG5_loadMet(&mesh,&met);
+    ier = MMG5_loadMet(&mesh,&met);
         if ( ier == -1 ) {
             fprintf(stdout,"  ## ERROR: WRONG DATA TYPE OR WRONG SOLUTION NUMBER.\n");
-            _MMG5_RETURN_AND_FREE(&mesh,&met,MMG5_STRONGFAILURE);
+        _MMG5_RETURN_AND_FREE(&mesh,&met,MMG5_STRONGFAILURE);
         }
         else if ( met.size != 1 ) {
-            fprintf(stdout,"  ## ERROR: ANISOTROPIC METRIC NOT IMPLEMENTED.\n");
+        fprintf(stdout,"  ## ERROR: ANISOTROPIC METRIC NOT IMPLEMENTED.\n");
             _MMG5_RETURN_AND_FREE(&mesh,&met,MMG5_STRONGFAILURE);
         }
         if ( mesh.info.iso && !ier ) {
             fprintf(stdout,"  ## ERROR: NO ISOVALUE DATA.\n");
-            _MMG5_RETURN_AND_FREE(&mesh,&met,MMG5_STRONGFAILURE);
-        }
-        if ( !MMG5_parsop(&mesh,&met) )
-            _MMG5_RETURN_AND_FREE(&mesh,&met,MMG5_LOWFAILURE);
+        _MMG5_RETURN_AND_FREE(&mesh,&met,MMG5_STRONGFAILURE);
+    }
+    if ( !MMG5_parsop(&mesh,&met) )
+        _MMG5_RETURN_AND_FREE(&mesh,&met,MMG5_LOWFAILURE);
     }
     chrono(OFF,&MMG5_ctim[1]);
     printim(MMG5_ctim[1].gdif,stim);
@@ -176,8 +178,8 @@ int main(int argc,char *argv[]) {
 
     /* scaling mesh */
     if ( mesh.info.lag == -1 ) {
-        if ( !_MMG5_scaleMesh(&mesh,&met) )
-            _MMG5_RETURN_AND_FREE(&mesh,&met,MMG5_STRONGFAILURE);
+    if ( !_MMG5_scaleMesh(&mesh,&met) )
+        _MMG5_RETURN_AND_FREE(&mesh,&met,MMG5_STRONGFAILURE);
     }
     else {
         if ( !_MMG5_scaleMesh(&mesh,&disp) )
@@ -195,7 +197,7 @@ int main(int argc,char *argv[]) {
     }
     else {
         if ( !met.np && !_MMG5_DoSol(&mesh,&met) )
-            _MMG5_RETURN_AND_FREE(&mesh,&met,MMG5_LOWFAILURE);
+        _MMG5_RETURN_AND_FREE(&mesh,&met,MMG5_LOWFAILURE);
     }
 
     /* mesh analysis */
@@ -217,6 +219,7 @@ int main(int argc,char *argv[]) {
     /* renumerotation if available */
     if ( !_MMG5_scotchCall(&mesh,&met) )
         _MMG5_RETURN_AND_FREE(&mesh,&met,MMG5_STRONGFAILURE);
+
 
 #ifdef PATTERN
     if ( !_MMG5_mmg3d1_pattern(&mesh,&met) ) {

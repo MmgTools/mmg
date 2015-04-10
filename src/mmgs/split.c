@@ -30,250 +30,322 @@
  * \author Algiane Froehly (Inria / IMB, Université de Bordeaux)
  * \version 5
  * \copyright GNU Lesser General Public License.
- * \todo Doxygen documentation
  */
 
 #include "mmgs.h"
 
 
-extern Info  info;
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param k index of element to split.
+ * \param i index of edge to split.
+ * \param vx \f$vx[i]\f$ is the index of the point to add on the edge \a i.
+ * \return 1.
+ *
+ * Split element \a k along edge \a i.
+ *
+ */
+int split1(MMG5_pMesh mesh,MMG5_pSol met,int k,int i,int *vx) {
+  MMG5_pTria      pt,pt1;
+  MMG5_pPoint     ppt;
+  int             iel;
+  char            i1,i2;
+
+  iel = _MMG5_newElt(mesh);
+  if ( !iel ) {
+    _MMG5_TRIA_REALLOC(mesh,iel,mesh->gap,
+                       printf("  ## Error: unable to allocate a new element.\n");
+                       _MMG5_INCREASE_MEM_MESSAGE();
+                       printf("  Exit program.\n");
+                       exit(EXIT_FAILURE)
+      );
+  }
+
+  pt  = &mesh->tria[k];
+  pt->flag = 0;
+  pt1 = &mesh->tria[iel];
+  pt1 = memcpy(pt1,pt,sizeof(MMG5_Tria));
+
+  i1 = _MMG5_inxt2[i];
+  i2 = _MMG5_inxt2[i1];
 
 
-/* split element k along edge i */
-int split1(pMesh mesh,pSol met,int k,int i,int *vx) {
-    pTria      pt,pt1;
-    pPoint     ppt;
-    int        iel;
-    char       i1,i2;
+  if ( pt->edg[i] > 0 ) {
+    ppt = &mesh->point[vx[i]];
+    ppt->ref = pt->edg[i];
+  }
 
-    iel = newElt(mesh);
-    assert(iel);
+  pt->v[i2]   = pt1->v[i1]   = vx[i];
+  pt->tag[i1] = pt1->tag[i2] = MG_NOTAG;
+  pt->edg[i1] = pt1->edg[i2] = 0;
 
-    pt  = &mesh->tria[k];
-    pt->flag = 0;
-    pt1 = &mesh->tria[iel];
-    pt1 = memcpy(pt1,pt,sizeof(Tria));
-
-    i1 = inxt[i];
-    i2 = inxt[i1];
-
-
-    if ( pt->edg[i] > 0 ) {
-        ppt = &mesh->point[vx[i]];
-        ppt->ref = pt->edg[i];
-    }
-
-    pt->v[i2]   = pt1->v[i1]   = vx[i];
-    pt->tag[i1] = pt1->tag[i2] = MS_NOTAG;
-    pt->edg[i1] = pt1->edg[i2] = 0;
-
-    return(1);
+  return(1);
 }
 
 
-/* Split tria k, along edge i, inserting point ip, updating adjacency relations */
-int split1b(pMesh mesh,int k,char i,int ip) {
-    pTria     pt,pt1;
-    pPoint    ppt;
-    Bezier    b;
-    pGeom     go;
-    double    uv[2],o[3],no[3],to[3];
-    int      *adja,iel,jel,kel,mel,ier;
-    char      i1,i2,j,j1,j2,m;
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param k index of element to split.
+ * \param i index of edge to split.
+ * \param ip index of the new point.
+ * \return 0 if lack of memory, 1 otherwise.
+ *
+ * Split element \a k along edge \a i, inserting point \a ip and updating
+ * the adjacency relations.
+ *
+ */
+int split1b(MMG5_pMesh mesh,int k,char i,int ip) {
+  MMG5_pTria     pt,pt1;
+  MMG5_pPoint    ppt;
+  _MMG5_Bezier   b;
+  MMG5_pxPoint   go;
+  double         uv[2],o[3],no[3],to[3];
+  int            *adja,iel,jel,kel,mel,ier;
+  char           i1,i2,j,j1,j2,m;
 
-    pt = &mesh->tria[k];
+  iel = _MMG5_newElt(mesh);
+  if ( !iel )  {
+    _MMG5_TRIA_REALLOC(mesh,iel,mesh->gap,
+                       _MMG5_INCREASE_MEM_MESSAGE();
+                       return(0));
+  }
+  pt = &mesh->tria[k];
+  pt->flag = 0;
+  pt->base = mesh->base;
+
+  pt1 = &mesh->tria[iel];
+  memcpy(pt1,pt,sizeof(MMG5_Tria));
+  memcpy(&mesh->adja[3*(iel-1)+1],&mesh->adja[3*(k-1)+1],3*sizeof(int));
+
+  ppt = &mesh->point[ip];
+  if ( pt->edg[i] )  ppt->ref = pt->edg[i];
+  if ( pt->tag[i] )  ppt->tag = pt->tag[i];
+
+  adja = &mesh->adja[3*(k-1)+1];
+  jel = adja[i] / 3;
+  j   = adja[i] % 3;
+
+  /* update normal n2 if need be */
+  if ( jel && pt->tag[i] & MG_GEO ) {
+    ier = _MMG5_bezierCP(mesh,&mesh->tria[jel],&b,1);
+    assert(ier);
+    uv[0] = 0.5;
+    uv[1] = 0.5;
+    if ( j == 1 )       uv[0] = 0.0;
+    else if ( j == 2 )  uv[1] = 0.0;
+
+    ier = _MMG5_bezierInt(&b,uv,o,no,to);
+    assert(ier);
+    go = &mesh->xpoint[ppt->ig];
+    memcpy(go->n2,no,3*sizeof(double));
+  }
+
+  /* update two triangles */
+  i1  = _MMG5_inxt2[i];
+  i2  = _MMG5_iprv2[i];
+  pt->v[i2]   = ip;
+  pt->tag[i1] = MG_NOTAG;
+  pt->edg[i1] = 0;
+  pt1->v[i1]   = ip;
+  pt1->tag[i2] = MG_NOTAG;
+  pt1->edg[i2] = 0;
+
+  /* update adjacency relations */
+  mel = adja[i1] / 3;
+  m   = adja[i1] % 3;
+  mesh->adja[3*(k-1)+1+i1]   = 3*iel+i2;
+  mesh->adja[3*(iel-1)+1+i2] = 3*k+i1;
+  mesh->adja[3*(iel-1)+1+i1] = 3*mel+m;
+  if(mel)
+    mesh->adja[3*(mel-1)+1+m]  = 3*iel+i1;
+
+  if ( jel ) {
+    kel = _MMG5_newElt(mesh);
+    if ( !kel )  {
+      _MMG5_TRIA_REALLOC(mesh,kel,mesh->gap,
+                         _MMG5_INCREASE_MEM_MESSAGE();
+                         _MMG5_delElt(mesh,iel);
+                         return(0));
+    }
+    pt  = &mesh->tria[jel];
+    pt1 = &mesh->tria[kel];
     pt->flag = 0;
     pt->base = mesh->base;
+    memcpy(pt1,pt,sizeof(MMG5_Tria));
+    memcpy(&mesh->adja[3*(kel-1)+1],&mesh->adja[3*(jel-1)+1],3*sizeof(int));
 
-    iel = newElt(mesh);
-    if ( !iel )  return(0);
+    j1 = _MMG5_inxt2[j];
+    j2 = _MMG5_iprv2[j];
+    pt->v[j1]    = ip;
+    pt->tag[j2]  = MG_NOTAG;
+    pt->edg[j2]  = 0;
+    pt1->v[j2]   = ip;
+    pt1->tag[j1] = MG_NOTAG;
+    pt1->edg[j1] = 0;
 
-    pt1 = &mesh->tria[iel];
-    memcpy(pt1,pt,sizeof(Tria));
-    memcpy(&mesh->adja[3*(iel-1)+1],&mesh->adja[3*(k-1)+1],3*sizeof(int));
-
-    ppt = &mesh->point[ip];
-    if ( pt->edg[i] )  ppt->ref = pt->edg[i];
-    if ( pt->tag[i] )  ppt->tag = pt->tag[i];
-
-    adja = &mesh->adja[3*(k-1)+1];
-    jel = adja[i] / 3;
-    j   = adja[i] % 3;
-
-    /* update normal n2 if need be */
-    if ( jel && pt->tag[i] & MS_GEO ) {
-        ier = bezierCP(mesh,jel,&b);
-        assert(ier);
-        uv[0] = 0.5;
-        uv[1] = 0.5;
-        if ( j == 1 )       uv[0] = 0.0;
-        else if ( j == 2 )  uv[1] = 0.0;
-
-        ier = bezierInt(&b,uv,o,no,to);
-        assert(ier);
-        go = &mesh->geom[ppt->ig];
-        memcpy(go->n2,no,3*sizeof(double));
-    }
-
-    /* update two triangles */
-    i1  = inxt[i];
-    i2  = iprv[i];
-    pt->v[i2]   = ip;
-    pt->tag[i1] = MS_NOTAG;
-    pt->edg[i1] = 0;
-    pt1->v[i1]   = ip;
-    pt1->tag[i2] = MS_NOTAG;
-    pt1->edg[i2] = 0;
-
-    /* update adjacency relations */
-    mel = adja[i1] / 3;
-    m   = adja[i1] % 3;
-    mesh->adja[3*(k-1)+1+i1]   = 3*iel+i2;
-    mesh->adja[3*(iel-1)+1+i2] = 3*k+i1;
-    mesh->adja[3*(iel-1)+1+i1] = 3*mel+m;
+    /* update adjacency */
+    adja = &mesh->adja[3*(jel-1)+1];
+    mel  = adja[j2] / 3;
+    m    = adja[j2] % 3;
+    mesh->adja[3*(jel-1)+1+j2] = 3*kel+j1;
+    mesh->adja[3*(kel-1)+1+j1] = 3*jel+j2;
+    mesh->adja[3*(kel-1)+1+j2] = 3*mel+m;
     if(mel)
-        mesh->adja[3*(mel-1)+1+m]  = 3*iel+i1;
+      mesh->adja[3*(mel-1)+1+m]  = 3*kel+j2;
 
-    if ( jel ) {
-        kel = newElt(mesh);
-        assert(kel);
-        pt  = &mesh->tria[jel];
-        pt1 = &mesh->tria[kel];
-        pt->flag = 0;
-        pt->base = mesh->base;
-        memcpy(pt1,pt,sizeof(Tria));
-        memcpy(&mesh->adja[3*(kel-1)+1],&mesh->adja[3*(jel-1)+1],3*sizeof(int));
+    mesh->adja[3*(iel-1)+1+i]  = 3*kel+j;
+    mesh->adja[3*(kel-1)+1+j]  = 3*iel+i;
+  }
 
-        j1 = inxt[j];
-        j2 = iprv[j];
-        pt->v[j1]    = ip;
-        pt->tag[j2]  = MS_NOTAG;
-        pt->edg[j2]  = 0;
-        pt1->v[j2]   = ip;
-        pt1->tag[j1] = MS_NOTAG;
-        pt1->edg[j1] = 0;
-
-        /* update adjacency */
-        adja = &mesh->adja[3*(jel-1)+1];
-        mel  = adja[j2] / 3;
-        m    = adja[j2] % 3;
-        mesh->adja[3*(jel-1)+1+j2] = 3*kel+j1;
-        mesh->adja[3*(kel-1)+1+j1] = 3*jel+j2;
-        mesh->adja[3*(kel-1)+1+j2] = 3*mel+m;
-        if(mel)
-            mesh->adja[3*(mel-1)+1+m]  = 3*kel+j2;
-
-        mesh->adja[3*(iel-1)+1+i]  = 3*kel+j;
-        mesh->adja[3*(kel-1)+1+j]  = 3*iel+i;
-    }
-
-    return(1);
+  return(1);
 }
 
 
-/* split element k along 2 edges i1 and i2 */
-int split2(pMesh mesh,pSol met,int k,int *vx) {
-    pTria    pt,pt1,pt2;
-    pPoint   p0,p1,p2,p3,p4;
-    int      iel,jel;
-    char     i,i1,i2;
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param k index of element to split.
+ * \param vx \f$vx[i]\f$ is the index of the point to add on the edge \a i.
+ * \return 1.
+ *
+ * Split element \a k along the 2 edges \a i1 and \a i2.
+ *
+ */
+int split2(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
+  MMG5_pTria    pt,pt1,pt2;
+  MMG5_pPoint   p3,p4;
+  int           iel,jel;
+  char          i,i1,i2;
 
-    /* create 2 elements */
-    iel = newElt(mesh);
-    assert(iel);
-    jel = newElt(mesh);
-    assert(jel);
+  /* create 2 elements */
+  iel = _MMG5_newElt(mesh);
+  if ( !iel ) {
+    _MMG5_TRIA_REALLOC(mesh,iel,mesh->gap,
+                       printf("  ## Error: unable to allocate a new element.\n");
+                       _MMG5_INCREASE_MEM_MESSAGE();
+                       printf("  Exit program.\n");
+                       exit(EXIT_FAILURE));
+  }
+  jel = _MMG5_newElt(mesh);
+  if ( !jel ) {
+    _MMG5_TRIA_REALLOC(mesh,jel,mesh->gap,
+                       printf("  ## Error: unable to allocate a new element.\n");
+                       _MMG5_INCREASE_MEM_MESSAGE();
+                       printf("  Exit program.\n");
+                       exit(EXIT_FAILURE));
+  }
 
-    pt  = &mesh->tria[k];
-    pt->flag = 0;
-    pt1 = &mesh->tria[iel];
-    pt2 = &mesh->tria[jel];
-    pt1 = memcpy(pt1,pt,sizeof(Tria));
-    pt2 = memcpy(pt2,pt,sizeof(Tria));
+  pt  = &mesh->tria[k];
+  pt->flag = 0;
+  pt1 = &mesh->tria[iel];
+  pt2 = &mesh->tria[jel];
+  pt1 = memcpy(pt1,pt,sizeof(MMG5_Tria));
+  pt2 = memcpy(pt2,pt,sizeof(MMG5_Tria));
 
-    i = 0;
-    if ( !vx[0] )  i = 1;
-    else if ( !vx[1] )  i = 2;
-    i1 = inxt[i];
-    i2 = inxt[i1];
+  i = 0;
+  if ( !vx[0] )  i = 1;
+  else if ( !vx[1] )  i = 2;
+  i1 = _MMG5_inxt2[i];
+  i2 = _MMG5_inxt2[i1];
 
-    p0 = &mesh->point[pt->v[i]];
-    p1 = &mesh->point[pt->v[i1]];
-    p2 = &mesh->point[pt->v[i2]];
-    p3 = &mesh->point[vx[i]];
-    p4 = &mesh->point[vx[i1]];
+  p3 = &mesh->point[vx[i]];
+  p4 = &mesh->point[vx[i1]];
 
-    /* update refs */
-    if ( pt->edg[i] > 0 )   p3->ref = pt->edg[i];
-    if ( pt->edg[i1] > 0 )  p4->ref = pt->edg[i1];
+  /* update refs */
+  if ( pt->edg[i] > 0 )   p3->ref = pt->edg[i];
+  if ( pt->edg[i1] > 0 )  p4->ref = pt->edg[i1];
 
-    /* check alternate configs */
+  /* check alternate configs */
 
-    if ( 1 ) {
-        pt->v[i1] = pt1->v[i2] = pt2->v[i1] = vx[i];
-        pt->v[i2] = pt2->v[i]  = vx[i1];
+  if ( 1 ) {
+    pt->v[i1] = pt1->v[i2] = pt2->v[i1] = vx[i];
+    pt->v[i2] = pt2->v[i]  = vx[i1];
 
-        pt->tag[i] = pt->tag[i2] = pt1->tag[i1] = pt2->tag[i2] = MS_NOTAG;
-        pt->edg[i] = pt->edg[i2] = pt1->edg[i1] = pt2->edg[i2] = 0;
-    }
-    else {
-        pt->v[i2]  = pt1->v[i]  = pt2->v[i] = vx[i1];
-        pt1->v[i2] = pt2->v[i1] = vx[i];
+    pt->tag[i] = pt->tag[i2] = pt1->tag[i1] = pt2->tag[i2] = MG_NOTAG;
+    pt->edg[i] = pt->edg[i2] = pt1->edg[i1] = pt2->edg[i2] = 0;
+  }
+  else {
+    pt->v[i2]  = pt1->v[i]  = pt2->v[i] = vx[i1];
+    pt1->v[i2] = pt2->v[i1] = vx[i];
 
-        pt->tag[i] = pt1->tag[i1] = pt1->tag[i2] = pt2->tag[i2] = MS_NOTAG;
-        pt->edg[i] = pt1->edg[i1] = pt1->edg[i2] = pt2->edg[i2] = 0;
-    }
+    pt->tag[i] = pt1->tag[i1] = pt1->tag[i2] = pt2->tag[i2] = MG_NOTAG;
+    pt->edg[i] = pt1->edg[i1] = pt1->edg[i2] = pt2->edg[i2] = 0;
+  }
 
-    return(1);
+  return(1);
 }
 
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param k index of element to split.
+ * \param vx \f$vx[i]\f$ is the index of the point to add on the edge \a i.
+ * \return 1.
+ *
+ * Split element \a k along the 2 edges \a i1 and \a i2.
+ *
+ */
+int split3(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
+  MMG5_pTria    pt,pt1,pt2,pt3;
+  MMG5_pPoint   p3,p4,p5;
+  int           iel,jel,kel;
 
-/* split all 3 edges of element k */
-int split3(pMesh mesh,pSol met,int k,int *vx) {
-    pTria    pt,pt1,pt2,pt3;
-    pPoint   p0,p1,p2,p3,p4,p5;
-    int      iel,jel,kel;
+  /* create 3 elements */
+  iel = _MMG5_newElt(mesh);
+  if ( !iel ) {
+    _MMG5_TRIA_REALLOC(mesh,iel,mesh->gap,
+                       printf("  ## Error: unable to allocate a new element.\n");
+                       _MMG5_INCREASE_MEM_MESSAGE();
+                       printf("  Exit program.\n");
+                       exit(EXIT_FAILURE));
+  }
+  jel = _MMG5_newElt(mesh);
+  if ( !jel ) {
+    _MMG5_TRIA_REALLOC(mesh,jel,mesh->gap,
+                       printf("  ## Error: unable to allocate a new element.\n");
+                       _MMG5_INCREASE_MEM_MESSAGE();
+                       printf("  Exit program.\n");
+                       exit(EXIT_FAILURE));
+  }
+  kel = _MMG5_newElt(mesh);
+  if ( !kel ) {
+    _MMG5_TRIA_REALLOC(mesh,kel,mesh->gap,
+                       printf("  ## Error: unable to allocate a new element.\n");
+                       _MMG5_INCREASE_MEM_MESSAGE();
+                       printf("  Exit program.\n");
+                       exit(EXIT_FAILURE));
+  }
 
-    /* create 3 elements */
-    iel = newElt(mesh);
-    assert(iel);
-    jel = newElt(mesh);
-    assert(jel);
-    kel = newElt(mesh);
-    assert(jel);
+  pt  = &mesh->tria[k];
+  pt->flag = 0;
+  pt1 = &mesh->tria[iel];
+  pt2 = &mesh->tria[jel];
+  pt3 = &mesh->tria[kel];
+  pt1 = memcpy(pt1,pt,sizeof(MMG5_Tria));
+  pt2 = memcpy(pt2,pt,sizeof(MMG5_Tria));
+  pt3 = memcpy(pt3,pt,sizeof(MMG5_Tria));
 
-    pt  = &mesh->tria[k];
-    pt->flag = 0;
-    pt1 = &mesh->tria[iel];
-    pt2 = &mesh->tria[jel];
-    pt3 = &mesh->tria[kel];
-    pt1 = memcpy(pt1,pt,sizeof(Tria));
-    pt2 = memcpy(pt2,pt,sizeof(Tria));
-    pt3 = memcpy(pt3,pt,sizeof(Tria));
+  p3 = &mesh->point[vx[0]];
+  p4 = &mesh->point[vx[1]];
+  p5 = &mesh->point[vx[2]];
 
-    p0 = &mesh->point[pt->v[0]];
-    p1 = &mesh->point[pt->v[1]];
-    p2 = &mesh->point[pt->v[2]];
-    p3 = &mesh->point[vx[0]];
-    p4 = &mesh->point[vx[1]];
-    p5 = &mesh->point[vx[2]];
+  /* update refs */
+  if ( pt->edg[0] > 0 )  p3->ref = pt->edg[0];
+  if ( pt->edg[1] > 0 )  p4->ref = pt->edg[1];
+  if ( pt->edg[2] > 0 )  p5->ref = pt->edg[2];
 
-    /* update refs */
-    if ( pt->edg[0] > 0 )  p3->ref = pt->edg[0];
-    if ( pt->edg[1] > 0 )  p4->ref = pt->edg[1];
-    if ( pt->edg[2] > 0 )  p5->ref = pt->edg[2];
+  /* update topo */
+  pt->v[1]  = pt1->v[0] = pt3->v[0] = vx[2];
+  pt->v[2]  = pt2->v[0] = pt3->v[2] = vx[1];
+  pt1->v[2] = pt2->v[1] = pt3->v[1] = vx[0];
 
-    /* update topo */
-    pt->v[1]  = pt1->v[0] = pt3->v[0] = vx[2];
-    pt->v[2]  = pt2->v[0] = pt3->v[2] = vx[1];
-    pt1->v[2] = pt2->v[1] = pt3->v[1] = vx[0];
+  pt->tag[0]  = pt1->tag[1] = pt2->tag[2] = MG_NOTAG;
+  pt->edg[0]  = pt1->edg[1] = pt2->edg[2] = 0;
 
-    pt->tag[0]  = pt1->tag[1] = pt2->tag[2] = MS_NOTAG;
-    pt->edg[0]  = pt1->edg[1] = pt2->edg[2] = 0;
+  pt3->tag[0] = pt3->tag[1] = pt3->tag[2] = MG_NOTAG;
+  pt3->edg[0] = pt3->edg[1] = pt3->edg[2] = 0;
 
-    pt3->tag[0] = pt3->tag[1] = pt3->tag[2] = MS_NOTAG;
-    pt3->edg[0] = pt3->edg[1] = pt3->edg[2] = 0;
-
-    return(1);
+  return(1);
 }
 

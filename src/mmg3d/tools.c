@@ -54,44 +54,6 @@ inline void _MMG5_nsort(int n,double *val,char *perm){
     }
 }
 
-/** Compute rotation matrix that sends vector n to the third vector of canonical basis */
-inline void _MMG5_rotmatrix(double n[3],double r[3][3]) {
-    double   aa,bb,ab,ll,l,cosalpha,sinalpha;
-
-    aa = n[0]*n[0];
-    bb = n[1]*n[1];
-    ab = n[0]*n[1];
-    ll = aa+bb;
-    cosalpha = n[2];
-    sinalpha = sqrt(1.0- MG_MIN(1.0,cosalpha*cosalpha));
-
-    /* No rotation needed in this case */
-    if ( ll < _MMG5_EPS*_MMG5_EPS ) {
-        if ( n[2] > 0.0 ) {
-            r[0][0] = 1.0 ; r[0][1] = 0.0 ; r[0][2] = 0.0;
-            r[1][0] = 0.0 ; r[1][1] = 1.0 ; r[1][2] = 0.0;
-            r[2][0] = 0.0 ; r[2][1] = 0.0 ; r[2][2] = 1.0;
-        }
-        else {
-            r[0][0] = -1.0 ; r[0][1] = 0.0 ; r[0][2] = 0.0;
-            r[1][0] = 0.0 ; r[1][1] = 1.0 ; r[1][2] = 0.0;
-            r[2][0] = 0.0 ; r[2][1] = 0.0 ; r[2][2] = -1.0;
-        }
-    }
-    else {
-        l = sqrt(ll);
-        r[0][0] = (aa*cosalpha + bb)/ll;
-        r[0][1] = ab*(cosalpha-1)/ll;
-        r[0][2] = -n[0]*sinalpha/l;
-        r[1][0] = r[0][1];
-        r[1][1] = (bb*cosalpha + aa)/ll;
-        r[1][2] = -n[1]*sinalpha/l;
-        r[2][0] = n[0]*sinalpha/l;
-        r[2][1] = n[1]*sinalpha/l;
-        r[2][2] = cosalpha;
-    }
-}
-
 /** Compute 3 * 3 determinant : det(c1-c0,c2-c0,v) */
 inline double _MMG5_det3pt1vec(double c0[3],double c1[3],double c2[3],double v[3]) {
     double m00,m10,m20,m01,m11,m21,det;
@@ -106,14 +68,13 @@ inline double _MMG5_det3pt1vec(double c0[3],double c1[3],double c2[3],double v[3
 
 /** Compute 3 * 3 determinant : det(c1-c0,c2-c0,c3-c0) */
 inline double _MMG5_det4pt(double c0[3],double c1[3],double c2[3],double c3[3]) {
-    double m00,m10,m20,m01,m11,m21,m02,m12,m22,det;
+  double m[3];
 
-    m00 = c1[0] - c0[0] ; m01 = c2[0] - c0[0]; m02 = c3[0] - c0[0];
-    m10 = c1[1] - c0[1] ; m11 = c2[1] - c0[1]; m12 = c3[1] - c0[1];
-    m20 = c1[2] - c0[2] ; m21 = c2[2] - c0[2]; m22 = c3[2] - c0[2];
-    det = m02*(m10*m21 - m20*m11) -m12*(m00*m21-m20*m01) + m22*(m00*m11-m10*m01);
+  m[0] = c3[0] - c0[0];
+  m[1] = c3[1] - c0[1];
+  m[2] = c3[2] - c0[2];
 
-    return(det);
+  return( _MMG5_det3pt1vec(c0,c1,c2,m) );
 }
 
 /** Compute oriented volume of a tetrahedron */
@@ -135,153 +96,11 @@ inline int _MMG5_norface(MMG5_pMesh mesh,int k,int iface,double n[3]) {
     double     ux,uy,uz,vx,vy,vz,norm;
 
     pt = &mesh->tetra[k];
-    p0 = &mesh->point[pt->v[_MMG5_idir[iface][0]]];
-    p1 = &mesh->point[pt->v[_MMG5_idir[iface][1]]];
-    p2 = &mesh->point[pt->v[_MMG5_idir[iface][2]]];
 
-    ux = p1->c[0] - p0->c[0];
-    uy = p1->c[1] - p0->c[1];
-    uz = p1->c[2] - p0->c[2];
-
-    vx = p2->c[0] - p0->c[0];
-    vy = p2->c[1] - p0->c[1];
-    vz = p2->c[2] - p0->c[2];
-
-    n[0] = uy*vz - uz*vy;
-    n[1] = uz*vx - ux*vz;
-    n[2] = ux*vy - uy*vx;
-    norm = n[0]*n[0] + n[1]*n[1] + n[2]*n[2];
-    if ( norm < _MMG5_EPSD2 )  return(0);
-
-    norm = 1.0 / sqrt(norm);
-    n[0] *= norm;
-    n[1] *= norm;
-    n[2] *= norm;
-    return(1);
-}
-
-/** compute face normal */
-inline int _MMG5_norpts(MMG5_pMesh mesh,int ip1,int ip2, int ip3,double *n) {
-    MMG5_pPoint   p1,p2,p3;
-    double   dd,abx,aby,abz,acx,acy,acz,det;
-
-    p1 = &mesh->point[ip1];
-    p2 = &mesh->point[ip2];
-    p3 = &mesh->point[ip3];
-
-    /* area */
-    abx = p2->c[0] - p1->c[0];
-    aby = p2->c[1] - p1->c[1];
-    abz = p2->c[2] - p1->c[2];
-
-    acx = p3->c[0] - p1->c[0];
-    acy = p3->c[1] - p1->c[1];
-    acz = p3->c[2] - p1->c[2];
-
-    n[0] = aby*acz - abz*acy;
-    n[1] = abz*acx - abx*acz;
-    n[2] = abx*acy - aby*acx;
-    det  = n[0]*n[0] + n[1]*n[1] + n[2]*n[2];
-    if ( det > _MMG5_EPSD ) {
-        dd = 1.0 / sqrt(det);
-        n[0] *= dd;
-        n[1] *= dd;
-        n[2] *= dd;
-        return(1);
-    }
-    else
-        return(0);
-}
-
-
-/** Solve 3*3 symmetric system A*r = b */
-inline int _MMG5_sys33sym(double a[6], double b[3], double r[3]){
-    double ia[6],as[6],det,m;
-    int    i;
-
-    /* Multiply matrix by a constant coefficient for stability purpose (because of the scaling) */
-    m = fabs(a[0]);
-    for(i=1;i<6;i++){
-        if(fabs(a[i])<m){
-            m = fabs(a[i]);
-        }
-    }
-
-    if(m < _MMG5_EPSD)
-        return(0);
-
-    m = 1.0/m;
-
-    for(i=0;i<6;i++){
-        as[i] = a[i]*m;
-    }
-
-    det = as[0]*(as[3]*as[5]-as[4]*as[4]) - as[1]*(as[1]*as[5]-as[2]*as[4]) \
-        + as[2]*(as[1]*as[4]-as[2]*as[3]);
-
-    if(fabs(det) < _MMG5_EPSD)
-        return(0);
-
-    det = 1.0/det;
-
-    ia[0] = (as[3]*as[5]-as[4]*as[4]);
-    ia[1] = - (as[1]*as[5]-as[2]*as[4]);
-    ia[2] = (as[1]*as[4]-as[2]*as[3]);
-    ia[3] = (as[0]*as[5]-as[2]*as[2]);
-    ia[4] = -(as[0]*as[4]-as[2]*as[1]);
-    ia[5] = (as[0]*as[3]-as[1]*as[1]);
-
-    r[0] = ia[0]*b[0] + ia[1]*b[1] + ia[2]*b[2];
-    r[1] = ia[1]*b[0] + ia[3]*b[1] + ia[4]*b[2];
-    r[2] = ia[2]*b[0] + ia[4]*b[1] + ia[5]*b[2];
-
-    r[0]*=(det*m);
-    r[1]*=(det*m);
-    r[2]*=(det*m);
-
-    return(1);
-}
-
-/** Compute eigenelements of a SYMMETRIC matrix m. Eigenvectors are orthogonal. Return order */
-inline int _MMG5_eigensym(double m[3],double lambda[2],double vp[2][2]) {
-    double   sqDelta,dd,trm,vnorm;
-
-    dd  = m[0]-m[2];
-    trm = m[0]+m[2];
-    sqDelta = sqrt(dd*dd + 4.0*m[1]*m[1]);
-    lambda[0] = 0.5*(trm - sqDelta);
-
-    /* Case when m = lambda[0]*I */
-    if ( sqDelta < _MMG5_EPS ) {
-        lambda[1] = lambda[0];
-        vp[0][0] = 1.0;
-        vp[0][1] = 0.0;
-
-        vp[1][0] = 0.0;
-        vp[1][1] = 1.0;
-        return(2);
-    }
-    vp[0][0] = m[1];
-    vp[0][1] = (lambda[0] - m[0]);
-    vnorm = sqrt(vp[0][0]*vp[0][0] + vp[0][1]*vp[0][1]);
-
-    if ( vnorm < _MMG5_EPS ) {
-        vp[0][0] = (lambda[0] - m[2]);
-        vp[0][1] = m[1];
-        vnorm = sqrt(vp[0][0]*vp[0][0] + vp[0][1]*vp[0][1]);
-    }
-    assert(vnorm > _MMG5_EPSD);
-
-    vnorm = 1.0/vnorm;
-    vp[0][0] *= vnorm;
-    vp[0][1] *= vnorm;
-
-    vp[1][0] = -vp[0][1];
-    vp[1][1] = vp[0][0];
-
-    lambda[1] = m[0]*vp[1][0]*vp[1][0] + 2.0*m[1]*vp[1][0]*vp[1][1] + m[2]*vp[1][1]*vp[1][1];
-
-    return(1);
+  return( _MMG5_norpts(mesh,
+                       pt->v[_MMG5_idir[iface][0]],
+                       pt->v[_MMG5_idir[iface][1]],
+                       pt->v[_MMG5_idir[iface][2]],n) );
 }
 
 /** If need be, invert the travelling sense of surfacic ball so that it is travelled in
@@ -978,7 +797,6 @@ int _MMG5_DoSol(MMG5_pMesh mesh,MMG5_pSol met) {
     int        i,k,ia,ib,ipa,ipb;
     int       *mark;
 
-    puts("ICI SOL");
     _MMG5_SAFE_CALLOC(mark,mesh->np+1,int);
 
     /* Memory alloc */
@@ -1060,28 +878,6 @@ int _MMG5_indPt(MMG5_pMesh mesh, int kp) {
         }
     }
     return(0);
-}
-
-/** Debug function (not use in clean code): print mesh->tria structure */
-void _MMG5_printTria(MMG5_pMesh mesh,char* fileName) {
-    MMG5_pTria ptt;
-    int   k;
-    FILE  *inm;
-
-    inm = fopen(fileName,"w");
-
-    fprintf(inm,"----------> %d TRIANGLES <----------\n",mesh->nt);
-    for(k=1; k<=mesh->nt; k++) {
-        ptt = &mesh->tria[k];
-        fprintf(inm,"num %d -> %d %d %d\n",k,ptt->v[0],ptt->v[1],
-                ptt->v[2]);
-        fprintf(inm,"ref   -> %d\n",ptt->ref);
-        fprintf(inm,"tag   -> %d %d %d\n",ptt->tag[0],ptt->tag[1],ptt->tag[2]);
-        fprintf(inm,"edg   -> %d %d %d\n",ptt->edg[0],ptt->edg[1],ptt->edg[2]);
-        fprintf(inm,"\n");
-    }
-    fprintf(inm,"---------> END TRIANGLES <--------\n");
-    fclose(inm);
 }
 
 /** Debug function (not use in clean code): print mesh->tria structure */
