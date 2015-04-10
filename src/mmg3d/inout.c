@@ -1753,10 +1753,10 @@ int MMG5_loadMet(MMG5_pMesh mesh,MMG5_pSol met) {
         return(-1);
     }
     if ( mesh->info.lag == -1 ) {
-    if(met->size!=1) {
+      if(met->size!=1) {
         fprintf(stdout,"  ** DATA ANISO IGNORED %d \n",met->size);
         return(-1);
-    }
+      }
     }
     else if ( met->size != 2 ) {
         return(-1);
@@ -1829,7 +1829,7 @@ int MMG5_loadMet(MMG5_pMesh mesh,MMG5_pSol met) {
     }
   }
     /* vector displacement only */
-    else {
+    else if(met->size==2) {
         met->size = 3;
         if ( met->ver == 1 ) {
             for (k=1; k<=met->np; k++) {
@@ -1859,7 +1859,8 @@ int MMG5_loadMet(MMG5_pMesh mesh,MMG5_pSol met) {
         }
     }
     /* anisotropic metric */
-    /*else {
+    /*else { //met->size==3
+      met->size=6;
       if ( met->ver == GmfFloat ) {
       for (k=1; k<=met->np; k++) {
       GmfGetLin(inm,GmfSolAtVertices,fbuf);

@@ -162,10 +162,8 @@ static int _MMG5_adpspl(MMG5_pMesh mesh,MMG5_pSol met, int* warn) {
                             break
                             ,o,tag);
       }
-      //CECILE
       if ( met->m )
         met->m[ip] = 0.5 * (met->m[ip1]+met->m[ip2]);
-      //CECILE
       ier = _MMG5_split1b(mesh,met,list,ilist,ip,1);
       /* if we realloc memory in _MMG5_split1b pt and pxt pointers are not valid */
       pt = &mesh->tetra[k];
@@ -225,10 +223,8 @@ static int _MMG5_adpspl(MMG5_pMesh mesh,MMG5_pSol met, int* warn) {
                             break
                             ,o,MG_NOTAG);
       }
-      //CECILE
       if ( met->m )
         met->m[ip] = 0.5 * (met->m[ip1]+met->m[ip2]);
-      //CECILE
       ier = _MMG5_split1b(mesh,met,list,ilist,ip,1);
       if ( ier < 0 ) {
         fprintf(stdout,"  ## Error: unable to split.\n");

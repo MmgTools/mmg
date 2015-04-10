@@ -117,7 +117,12 @@ int _MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met) {
       for (k=1; k<=mesh->np; k++)    met->m[k] *= dd;
     }
     else if ( met->size==3 ){
-//CECILE : a verifier si size==3 ou non (pour disp)
+      for (k=1; k<=mesh->np; k++) {
+        met->m[3*(k-1)+1] *= dd;
+        met->m[3*(k-1)+2] *= dd;
+        met->m[3*(k-1)+3] *= dd;
+      }
+    } else { //met->size==6
       d1 = 1.0 / (dd*dd);
       for (k=1; k<=6*mesh->np; k++)  met->m[k] *= d1;
     }
@@ -160,7 +165,6 @@ int _MMG5_unscaleMesh(MMG5_pMesh mesh,MMG5_pSol met) {
 
   /* unscale sizes */
   if ( met->m ) {
-//CECILE : a mettre d'equerre : pour disp ete aniso
     if ( met->size == 6 ) {
       dd = 1.0 / (dd*dd);
       for (k=1; k<=mesh->np; k++) {

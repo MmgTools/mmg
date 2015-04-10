@@ -84,7 +84,7 @@ int _MMG5_hashTria(MMG5_pMesh mesh) {
 
   ier = _MMG5_mmgHashTria(mesh, mesh->adja, 0);
 
-#warning the following loop seems to be unused (or only in boulchknm)... to check.
+//warning the following loop seems to be unused (or only in boulchknm)... to check.
   /* set seed */
   for (k=1; k<=mesh->nt; k++) {
     pt   = &mesh->tria[k];

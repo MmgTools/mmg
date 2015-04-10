@@ -219,7 +219,7 @@ int chkswp(MMG5_pMesh mesh,MMG5_pSol met,int k,int i,char typchk) {
     calchg = MG_MIN(cal1,cal2);
   }
   else {
-#warning if typchk==1 iso??
+//warning if typchk==1 iso??
     pt0->v[0]= ip0;  pt0->v[1]= ip1;  pt0->v[2]= ip2;
     cal1 = _MMG5_caltri_iso(mesh,NULL,pt0);
     pt0->v[0]= ip1;  pt0->v[1]= iq;   pt0->v[2]= ip2;
