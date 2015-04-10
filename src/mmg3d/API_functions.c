@@ -1020,57 +1020,57 @@ int MMG5_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
     mesh->info.bucket   = val;
     break;
 #endif
-    case MMG5_IPARAM_debug :
-        mesh->info.ddebug   = val;
-        break;
-    case MMG5_IPARAM_angle :
-        /* free table that may contains old ridges */
-        if ( mesh->htab.geom )
-            _MMG5_DEL_MEM(mesh,mesh->htab.geom,(mesh->htab.max+1)*sizeof(MMG5_hgeom));
-        if ( mesh->xpoint )
-            _MMG5_DEL_MEM(mesh,mesh->xpoint,(mesh->xpmax+1)*sizeof(MMG5_xPoint));
-        if ( mesh->xtetra )
-            _MMG5_DEL_MEM(mesh,mesh->xtetra,(mesh->xtmax+1)*sizeof(MMG5_xTetra));
-        if ( !val )
-            mesh->info.dhd    = -1.;
-        else {
-            if ( (mesh->info.imprim > 5) || mesh->info.ddebug )
-                fprintf(stdout,"  ## Warning: angle detection parameter set to default value\n");
-            mesh->info.dhd    = _MMG5_ANGEDG;
-        }
-        break;
-    case MMG5_IPARAM_iso :
-        mesh->info.iso      = val;
-        if ( mesh->info.iso )
-            if ( mesh->nt && !MMG5_skipIso(mesh) )
-             exit(EXIT_FAILURE);
-        break;
-    case MMG5_IPARAM_lag :
-        if ( val < 0 || val > 2 )
-            exit(EXIT_FAILURE);
-        mesh->info.lag = val;
-        break;
-    case MMG5_IPARAM_noinsert :
-        mesh->info.noinsert = val;
-        break;
-    case MMG5_IPARAM_noswap :
-        mesh->info.noswap   = val;
-        break;
-    case MMG5_IPARAM_nomove :
-        mesh->info.nomove   = val;
-        break;
-    case MMG5_IPARAM_numberOfLocalParam :
-        if ( mesh->info.par ) {
-            _MMG5_DEL_MEM(mesh,mesh->info.par,mesh->info.npar*sizeof(MMG5_Par));
-            if ( (mesh->info.imprim > 5) || mesh->info.ddebug )
-                fprintf(stdout,"  ## Warning: new local parameter values\n");
-        }
-        mesh->info.npar  = val;
-        mesh->info.npari = 0;
-        _MMG5_ADD_MEM(mesh,mesh->info.npar*sizeof(MMG5_Par),"parameters",
-                printf("  Exit program.\n");
-                exit(EXIT_FAILURE));
-        _MMG5_SAFE_CALLOC(mesh->info.par,mesh->info.npar,MMG5_Par);
+  case MMG5_IPARAM_debug :
+    mesh->info.ddebug   = val;
+    break;
+  case MMG5_IPARAM_angle :
+    /* free table that may contains old ridges */
+    if ( mesh->htab.geom )
+      _MMG5_DEL_MEM(mesh,mesh->htab.geom,(mesh->htab.max+1)*sizeof(MMG5_hgeom));
+    if ( mesh->xpoint )
+      _MMG5_DEL_MEM(mesh,mesh->xpoint,(mesh->xpmax+1)*sizeof(MMG5_xPoint));
+    if ( mesh->xtetra )
+      _MMG5_DEL_MEM(mesh,mesh->xtetra,(mesh->xtmax+1)*sizeof(MMG5_xTetra));
+    if ( !val )
+      mesh->info.dhd    = -1.;
+    else {
+      if ( (mesh->info.imprim > 5) || mesh->info.ddebug )
+        fprintf(stdout,"  ## Warning: angle detection parameter set to default value\n");
+      mesh->info.dhd    = _MMG5_ANGEDG;
+    }
+    break;
+  case MMG5_IPARAM_iso :
+    mesh->info.iso      = val;
+    if ( mesh->info.iso )
+      if ( mesh->nt && !MMG5_skipIso(mesh) )
+        exit(EXIT_FAILURE);
+    break;
+  case MMG5_IPARAM_lag :
+    if ( val < 0 || val > 2 )
+      exit(EXIT_FAILURE);
+    mesh->info.lag = val;
+    break;
+  case MMG5_IPARAM_noinsert :
+    mesh->info.noinsert = val;
+    break;
+  case MMG5_IPARAM_noswap :
+    mesh->info.noswap   = val;
+    break;
+  case MMG5_IPARAM_nomove :
+    mesh->info.nomove   = val;
+    break;
+  case MMG5_IPARAM_numberOfLocalParam :
+    if ( mesh->info.par ) {
+      _MMG5_DEL_MEM(mesh,mesh->info.par,mesh->info.npar*sizeof(MMG5_Par));
+      if ( (mesh->info.imprim > 5) || mesh->info.ddebug )
+        fprintf(stdout,"  ## Warning: new local parameter values\n");
+    }
+    mesh->info.npar  = val;
+    mesh->info.npari = 0;
+    _MMG5_ADD_MEM(mesh,mesh->info.npar*sizeof(MMG5_Par),"parameters",
+                  printf("  Exit program.\n");
+                  exit(EXIT_FAILURE));
+    _MMG5_SAFE_CALLOC(mesh->info.par,mesh->info.npar,MMG5_Par);
 
     for (k=0; k<mesh->info.npar; k++) {
       mesh->info.par[k].elt   = MMG5_Noentity;
@@ -1102,54 +1102,54 @@ int MMG5_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
  *
  */
 int MMG5_Get_iparameter(MMG5_pMesh mesh, int iparam) {
-    int k;
+  int k;
 
-    switch ( iparam ) {
-        /* Integer parameters */
-    case MMG5_IPARAM_verbose :
-      return ( mesh->info.imprim );
-      break;
-    case MMG5_IPARAM_mem :
-      return ( mesh->info.mem );
-      break;
+  switch ( iparam ) {
+    /* Integer parameters */
+  case MMG5_IPARAM_verbose :
+    return ( mesh->info.imprim );
+    break;
+  case MMG5_IPARAM_mem :
+    return ( mesh->info.mem );
+    break;
 #ifndef PATTERN
-    case MMG5_IPARAM_bucket :
-      return ( mesh->info.bucket );
-      break;
+  case MMG5_IPARAM_bucket :
+    return ( mesh->info.bucket );
+    break;
 #endif
-    case MMG5_IPARAM_debug :
-      return ( mesh->info.ddebug );
-      break;
-    case MMG5_IPARAM_angle :
-      return ( mesh->info.dhd );
-      break;
-    case MMG5_IPARAM_iso :
-      return ( mesh->info.iso );
-      break;
-    case MMG5_IPARAM_lag :
-      return ( mesh->info.lag );
-      break;
-    case MMG5_IPARAM_noinsert :
-      return ( mesh->info.noinsert );
-      break;
-    case MMG5_IPARAM_noswap :
-      return ( mesh->info.noswap );
-      break;
-    case MMG5_IPARAM_nomove :
-      return ( mesh->info.nomove );
-      break;
-    case MMG5_IPARAM_numberOfLocalParam :
-      return ( mesh->info.npar );
-      break;
+  case MMG5_IPARAM_debug :
+    return ( mesh->info.ddebug );
+    break;
+  case MMG5_IPARAM_angle :
+    return ( mesh->info.dhd );
+    break;
+  case MMG5_IPARAM_iso :
+    return ( mesh->info.iso );
+    break;
+  case MMG5_IPARAM_lag :
+    return ( mesh->info.lag );
+    break;
+  case MMG5_IPARAM_noinsert :
+    return ( mesh->info.noinsert );
+    break;
+  case MMG5_IPARAM_noswap :
+    return ( mesh->info.noswap );
+    break;
+  case MMG5_IPARAM_nomove :
+    return ( mesh->info.nomove );
+    break;
+  case MMG5_IPARAM_numberOfLocalParam :
+    return ( mesh->info.npar );
+    break;
 #ifdef USE_SCOTCH
-    case MMG5_IPARAM_renum :
-      return ( mesh->info.renum );
-      break;
+  case MMG5_IPARAM_renum :
+    return ( mesh->info.renum );
+    break;
 #endif
-    default :
-        fprintf(stdout,"  ## Error: unknown type of parameter\n");
-        exit(EXIT_FAILURE);
-    }
+  default :
+    fprintf(stdout,"  ## Error: unknown type of parameter\n");
+    exit(EXIT_FAILURE);
+  }
 }
 
 /**
