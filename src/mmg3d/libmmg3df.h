@@ -122,32 +122,34 @@
 #define     MMG5_IPARAM_angle              3
 ! /*!< [1/0] Level-set meshing */
 #define     MMG5_IPARAM_iso                4
+! /*!< [-1/0/1/2] Lagrangian option */
+#define     MMG5_IPARAM_lag                5
 ! /*!< [1/0] Avoid/allow point insertion */
-#define     MMG5_IPARAM_noinsert           5
+#define     MMG5_IPARAM_noinsert           6
 ! /*!< [1/0] Avoid/allow edge or face flipping */
-#define     MMG5_IPARAM_noswap             6
+#define     MMG5_IPARAM_noswap             7
 ! /*!< [1/0] Avoid/allow point relocation */
-#define     MMG5_IPARAM_nomove             7
+#define     MMG5_IPARAM_nomove             8
 ! /*!< [n] Number of local parameters */
-#define     MMG5_IPARAM_numberOfLocalParam 8
+#define     MMG5_IPARAM_numberOfLocalParam 9
 ! /*!< [1/0] Turn on/off point relocation with Scotch */
-#define     MMG5_IPARAM_renum              9
+#define     MMG5_IPARAM_renum              10
 ! /*!< [n] Specify the size of the bucket per dimension (DELAUNAY) */
-#define     MMG5_IPARAM_bucket             10
+#define     MMG5_IPARAM_bucket             11
 ! /*!< [val] Value for angle detection */
-#define     MMG5_DPARAM_angleDetection     11
+#define     MMG5_DPARAM_angleDetection     12
 ! /*!< [val] Minimal mesh size */
-#define     MMG5_DPARAM_hmin               12
+#define     MMG5_DPARAM_hmin               13
 ! /*!< [val] Maximal mesh size */
-#define     MMG5_DPARAM_hmax               13
+#define     MMG5_DPARAM_hmax               14
 ! /*!< [val] Control global Hausdorff distance (on all the boundary surfaces of the mesh) */
-#define     MMG5_DPARAM_hausd              14
+#define     MMG5_DPARAM_hausd              15
 ! /*!< [val] Control gradation */
-#define     MMG5_DPARAM_hgrad              15
+#define     MMG5_DPARAM_hgrad              16
 ! /*!< [val] Value of level-set (not use for now) */
-#define     MMG5_DPARAM_ls                 16
+#define     MMG5_DPARAM_ls                 17
 ! /*!< [n] Number of parameters */
-#define     MMG5_PARAM_size                17
+#define     MMG5_PARAM_size                18
 
 ! /**
 !  * \struct MMG5_Par
@@ -286,7 +288,7 @@
 !   double        dhd,hmin,hmax,hgrad,hausd,min[3],max[3],delta,ls;
 !   int           mem,sing,npar,npari;
 !   int           renum;
-!   char          imprim,ddebug,badkal,iso,fem;
+!   char          imprim,ddebug,badkal,iso,fem,lag;
 !   unsigned char noinsert, noswap, nomove;
 !   int           bucket;
 !   MMG5_pPar     par;

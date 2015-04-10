@@ -37,8 +37,8 @@
 
 int _MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pPoint    ppt;
-  double    dd;
-  int       i,k;
+  double         dd;
+  int            i,k;
   MMG5_pPar      par;
 
   /* compute bounding box */
@@ -85,6 +85,13 @@ int _MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met) {
     for (k=1; k<=mesh->np; k++)
       met->m[k] *= dd;
   }
+  else if ( met->size == 3 && met->m ) {
+    for (k=1; k<=mesh->np; k++) {
+      met->m[3*(k-1)+1] *= dd;
+      met->m[3*(k-1)+2] *= dd;
+      met->m[3*(k-1)+3] *= dd;
+    }
+  }
 
   /* normalize local parameters */
   for (k=0; k<mesh->info.npar; k++) {
@@ -95,10 +102,11 @@ int _MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met) {
   return(1);
 }
 
+
 int _MMG5_unscaleMesh(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pPoint     ppt;
-  double     dd;
-  int        k;
+  double          dd;
+  int             k;
   MMG5_pPar       par;
 
   /* de-normalize coordinates */
@@ -112,10 +120,9 @@ int _MMG5_unscaleMesh(MMG5_pMesh mesh,MMG5_pSol met) {
   }
 
   /* unscale sizes */
-  if(met->m){
+  if ( met->size == 1 && met->m ) {
     for (k=1; k<=mesh->np; k++) {
-      ppt = &mesh->point[k];
-      if ( MG_VOK(ppt) )	met->m[k] *= dd;
+      met->m[k] *= dd;
     }
   }
 

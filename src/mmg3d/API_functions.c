@@ -127,6 +127,8 @@ void MMG5_Init_parameters(MMG5_pMesh mesh) {
     mesh->info.ddebug   =  0;  /* [0/1]    ,Turn on/off debug mode */
     /** MMG5_IPARAM_iso = 0 */
     mesh->info.iso      =  0;  /* [0/1]    ,Turn on/off levelset meshing */
+    /** MMG5_IPARAM_lag = 0 */
+    mesh->info.lag      = -1;
     /** MMG5_IPARAM_noinsert = 0 */
     mesh->info.noinsert =  0;  /* [0/1]    ,avoid/allow point insertion/deletion */
     /** MMG5_IPARAM_noswap = 0 */
@@ -1347,6 +1349,11 @@ int MMG5_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
         if ( mesh->info.iso )
             if ( mesh->nt && !MMG5_skipIso(mesh) )
                 exit(EXIT_FAILURE);
+        break;
+    case MMG5_IPARAM_lag :
+        if ( val < 0 || val > 2 )
+            exit(EXIT_FAILURE);
+        mesh->info.lag = val;
         break;
     case MMG5_IPARAM_noinsert :
         mesh->info.noinsert = val;

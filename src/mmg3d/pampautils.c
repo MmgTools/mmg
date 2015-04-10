@@ -165,7 +165,8 @@ void _MMG5_usage(char *prog) {
     fprintf(stdout,"-hmax   val  maximal mesh size\n");
     fprintf(stdout,"-hausd  val  control Hausdorff distance\n");
     fprintf(stdout,"-hgrad  val  control gradation\n");
-    fprintf(stdout,"-ls          levelset meshing \n");
+    fprintf(stdout,"-lag [0/1/2] Lagrangian mesh displacement according to mode 0/1/2\n");
+    fprintf(stdout,"-ls     val  create mesh of isovalue val\n");
     fprintf(stdout,"-noswap      no edge or face flipping\n");
     fprintf(stdout,"-nomove      no point relocation\n");
     fprintf(stdout,"-noinsert    no point insertion/deletion \n");
@@ -188,8 +189,7 @@ void _MMG5_usage(char *prog) {
  * Store command line arguments.
  *
  */
-int MMG5_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met
-    ) {
+int MMG5_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
     int     i;
     char    namein[128];
 
@@ -258,7 +258,22 @@ int MMG5_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met
                 }
                 break;
             case 'l':
-                if ( !strcmp(argv[i],"-ls") ) {
+                if ( !strcmp(argv[i],"-lag") ) {
+                  if ( ++i < argc && isdigit(argv[i][0]) ) {
+                      if ( !MMG5_Set_iparameter(mesh,met,MMG5_IPARAM_lag,atoi(argv[i])) )
+                          exit(EXIT_FAILURE);
+                  }
+                  else if ( i == argc ) {
+                      fprintf(stderr,"Missing argument option %s\n",argv[i-1]);
+                      _MMG5_usage(argv[0]);
+                  }
+                  else {
+                      fprintf(stderr,"Missing argument option %s\n",argv[i-1]);
+                      _MMG5_usage(argv[0]);
+                      i--;
+                  }
+                }
+                else if ( !strcmp(argv[i],"-ls") ) {
                     if ( !MMG5_Set_iparameter(mesh,met,MMG5_IPARAM_iso,1) )
                         exit(EXIT_FAILURE);
                     if ( ++i < argc && isdigit(argv[i][0]) ) {

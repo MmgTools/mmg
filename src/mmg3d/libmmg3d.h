@@ -98,6 +98,7 @@ enum MMG5_Param
     MMG5_IPARAM_debug,             /*!< [1/0], Turn on/off debug mode */
     MMG5_IPARAM_angle,             /*!< [1/0], Turn on/off angle detection */
     MMG5_IPARAM_iso,               /*!< [1/0], Level-set meshing */
+    MMG5_IPARAM_lag,               /*!< [-1/0/1/2], Lagrangian option */
     MMG5_IPARAM_noinsert,          /*!< [1/0], Avoid/allow point insertion */
     MMG5_IPARAM_noswap,            /*!< [1/0], Avoid/allow edge or face flipping */
     MMG5_IPARAM_nomove,            /*!< [1/0], Avoid/allow point relocation */
@@ -241,7 +242,7 @@ typedef struct {
   double        dhd,hmin,hmax,hgrad,hausd,min[3],max[3],delta,ls;
   int           mem,sing,npar,npari;
   int           renum;
-  char          imprim,ddebug,badkal,iso,fem;
+  char          imprim,ddebug,badkal,iso,fem,lag;
   unsigned char noinsert, noswap, nomove;
   int           bucket;
   MMG5_pPar     par;

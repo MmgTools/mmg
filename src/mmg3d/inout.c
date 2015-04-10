@@ -91,7 +91,7 @@ static double _MMG5_swapd(double sbin)
 
 /**
  * \param mesh pointer toward the mesh structure.
- * \return 0 if failed, 1 otherwise.
+ * \return -1 data invalid, 0 no file, 1 ok.
  *
  * Read mesh data.
  *
@@ -181,7 +181,7 @@ int MMG5_loadMesh(MMG5_pMesh mesh) {
                 fscanf(inm,"%d",&mesh->dim);
                 if(mesh->dim!=3) {
                     fprintf(stdout,"BAD DIMENSION : %d\n",mesh->dim);
-                    return(0);
+                    return(-1);
                 }
                 continue;
             } else if(!strncmp(chaine,"Vertices",strlen("Vertices"))) {
@@ -249,7 +249,7 @@ int MMG5_loadMesh(MMG5_pMesh mesh) {
                 if(bdim!=3) {
                     fprintf(stdout,"BAD SOL DIMENSION : %d\n",mesh->dim);
                     fprintf(stdout," Exit program.\n");
-                    return(0);
+                    return(-1);
                 }
                 continue;
             } else if(!mesh->npi && binch==4) {  //Vertices
@@ -357,7 +357,7 @@ int MMG5_loadMesh(MMG5_pMesh mesh) {
         fprintf(stdout,"  ** MISSING DATA.\n");
         fprintf(stdout," Check that your mesh contains points and tetrahedra.\n");
         fprintf(stdout," Exit program.\n");
-        return(0);
+        return(-1);
     }
     /* memory allocation */
     mesh->np = mesh->npi;
@@ -366,7 +366,7 @@ int MMG5_loadMesh(MMG5_pMesh mesh) {
     mesh->na = mesh->nai;
     if ( !_MMG5_zaldy(mesh) )  return(0);
     if (mesh->npmax < mesh->np || mesh->ntmax < mesh->nt || mesh->nemax < mesh->ne) {
-        return(0);
+        return(-1);
     }
 
     rewind(inm);
@@ -692,7 +692,6 @@ int MMG5_loadMesh(MMG5_pMesh mesh) {
         }
     }
 
-
     /* stats */
     if ( abs(mesh->info.imprim) > 3 ) {
         fprintf(stdout,"     NUMBER OF VERTICES     %8d\n",mesh->np);
@@ -716,7 +715,7 @@ int MMG5_loadMesh(MMG5_pMesh mesh) {
             if ( nereq )
                 fprintf(stdout,"                  TETRAHEDRAS %8d \n",nereq);
         }
-        if(ncor) fprintf(stdout,"     NUMBER OF CORNERS        %8d \n",ncor);
+        if(ncor) fprintf(stdout,"     NUMBER OF CORNERS      %8d \n",ncor);
     }
     fclose(inm);
     return(1);
@@ -1632,7 +1631,7 @@ int _MMG5_saveLibraryMesh(MMG5_pMesh mesh) {
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the sol structure.
- * \return 0 if failed, 1 otherwise.
+ * \return -1 data invalid, 0 no file, 1 ok.
  *
  * Load metric field.
  *
@@ -1642,10 +1641,9 @@ int MMG5_loadMet(MMG5_pMesh mesh,MMG5_pSol met) {
     float       fbuf[6];
     double      dbuf[6];
     int         binch,bdim,iswp;
-    int         k,bin,bpos;
+    int         i,k,bin,bpos;
     long        posnp;
     char        *ptr,data[128],chaine[128];
-    //  int         i;
 
     if ( !met->namein )  return(0);
     posnp = 0;
@@ -1664,7 +1662,7 @@ int MMG5_loadMet(MMG5_pMesh mesh,MMG5_pSol met) {
             strcat(data,".sol");
             if (!(inm = fopen(data,"r"))  ) {
                 fprintf(stderr,"  ** %s  NOT FOUND. USE DEFAULT METRIC.\n",data);
-                return(-1);
+                return(0);
             }
         } else {
             bin = 1;
@@ -1673,11 +1671,10 @@ int MMG5_loadMet(MMG5_pMesh mesh,MMG5_pSol met) {
     else {
         if (!(inm = fopen(data,"r")) ) {
             fprintf(stderr,"  ** %s  NOT FOUND. USE DEFAULT METRIC.\n",data);
-            return(-1);
+            return(0);
         }
     }
     fprintf(stdout,"  %%%% %s OPENED\n",data);
-
 
     /* read solution or metric */
     if(!bin) {
@@ -1687,7 +1684,7 @@ int MMG5_loadMet(MMG5_pMesh mesh,MMG5_pSol met) {
                 fscanf(inm,"%d",&met->dim);
                 if(met->dim!=3) {
                     fprintf(stdout,"BAD SOL DIMENSION : %d\n",met->dim);
-                    return(1);
+                    return(-1);
                 }
                 continue;
             } else if(!strncmp(chaine,"SolAtVertices",strlen("SolAtVertices"))) {
@@ -1695,7 +1692,7 @@ int MMG5_loadMet(MMG5_pMesh mesh,MMG5_pSol met) {
                 fscanf(inm,"%d",&met->type);
                 if(met->type!=1) {
                     fprintf(stdout,"SEVERAL SOLUTION => IGNORED : %d\n",met->type);
-                    return(1);
+                    return(-1);
                 }
                 fscanf(inm,"%d",&met->size);
                 posnp = ftell(inm);
@@ -1734,7 +1731,7 @@ int MMG5_loadMet(MMG5_pMesh mesh,MMG5_pSol met) {
                 if(iswp) met->type=_MMG5_swapbin(met->type);
                 if(met->type!=1) {
                     fprintf(stdout,"SEVERAL SOLUTION => IGNORED : %d\n",met->type);
-                    return(1);
+                    return(-1);
                 }
                 fread(&met->size,sw,1,inm); //typsol
                 if(iswp) met->size=_MMG5_swapbin(met->size);
@@ -1747,18 +1744,19 @@ int MMG5_loadMet(MMG5_pMesh mesh,MMG5_pSol met) {
                 fseek(inm,bpos,SEEK_SET);
             }
         }
-
     }
-    if ( !met->np ) {
-        fprintf(stdout,"  ** MISSING DATA. No solution.\n");
-        return(1);
-    }
-    if(met->size!=1) {
-        fprintf(stdout,"  ** DATA ANISO IGNORED %d \n",met->size);
-        met->size = 6;
+    if ( mesh->np != met->np ) {
         return(-1);
     }
-
+    if ( mesh->info.lag == -1 ) {
+        if ( met->size != 1 ) {
+            fprintf(stdout,"  ** DATA ANISO IGNORED %d \n",met->size);
+            return(-1);
+        }
+    }
+    else if ( met->size != 2 ) {
+        return(-1);
+    }
 
     met->npi = met->np;
 
@@ -1800,6 +1798,36 @@ int MMG5_loadMet(MMG5_pMesh mesh,MMG5_pSol met) {
             }
         }
     }
+    /* vector displacement only */
+    else {
+        met->size = 3;
+        if ( met->ver == 1 ) {
+            for (k=1; k<=met->np; k++) {
+                for (i=1; i<=3; i++) {
+                    if(!bin){
+                        fscanf(inm,"%f",&fbuf[0]);
+                    } else {
+                        fread(&fbuf[0],sw,1,inm);
+                        if(iswp) fbuf[0]=_MMG5_swapf(fbuf[0]);
+                    }
+                    met->m[3*(k-1)+i] = fbuf[0];
+                }
+            }
+        }
+        else {
+            for (k=1; k<=met->np; k++) {
+                for (i=1; i<=3; i++) {
+                    if(!bin){
+                        fscanf(inm,"%lf",&dbuf[0]);
+                    } else {
+                        fread(&dbuf[0],sd,1,inm);
+                        if(iswp) dbuf[0]=_MMG5_swapd(dbuf[0]);
+                    }
+                    met->m[3*(k-1)+i] = dbuf[0];
+                }
+            }
+        }
+    }
     /* anisotropic metric */
     /*else {
       if ( met->ver == GmfFloat ) {
@@ -1823,6 +1851,16 @@ int MMG5_loadMet(MMG5_pMesh mesh,MMG5_pSol met) {
       }*/
     met->npi = met->np;
     fclose(inm);
+
+    /* stats */
+    if ( abs(mesh->info.imprim) > 3 ) {
+        if ( met->size == 1 ) 
+          fprintf(stdout,"     NUMBER OF SCALAR VALUES %8d\n",met->np);
+        else if ( met->size == 3 )
+          fprintf(stdout,"     NUMBER OF VECTOR VALUES %8d\n",met->np);
+        else
+          fprintf(stdout,"     NUMBER OF TENSOR VALUES %8d\n",met->np);
+    }
     return(1);
 }
 

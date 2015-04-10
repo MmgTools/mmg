@@ -978,6 +978,7 @@ int _MMG5_DoSol(MMG5_pMesh mesh,MMG5_pSol met) {
     int        i,k,ia,ib,ipa,ipb;
     int       *mark;
 
+    puts("ICI SOL");
     _MMG5_SAFE_CALLOC(mark,mesh->np+1,int);
 
     /* Memory alloc */
