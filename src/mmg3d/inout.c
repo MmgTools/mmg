@@ -1927,7 +1927,7 @@ int MMG5_saveMet(MMG5_pMesh mesh,MMG5_pSol met) {
   char        *ptr,data[128],chaine[128];
   int          binch,bpos,bin,np,k,typ;
 
-  if ( !met->m )  return(-1);
+  if ( !met->m || !met->nameout )  return(-1);
   met->ver = 2;
   bin = 0;
   strcpy(data,met->nameout);
