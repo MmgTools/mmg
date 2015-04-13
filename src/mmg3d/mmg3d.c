@@ -151,10 +151,6 @@ int main(int argc,char *argv[]) {
       fprintf(stdout,"  ## ERROR: WRONG DATA TYPE OR WRONG SOLUTION NUMBER.\n");
       _MMG5_RETURN_AND_FREE(&mesh,&met,MMG5_STRONGFAILURE);
     }
-    else if ( met.size != 1 ) {
-      fprintf(stdout,"  ## ERROR: ANISOTROPIC METRIC NOT IMPLEMENTED.\n");
-      _MMG5_RETURN_AND_FREE(&mesh,&met,MMG5_STRONGFAILURE);
-    }
     if ( mesh.info.iso && !ier ) {
       fprintf(stdout,"  ## ERROR: NO ISOVALUE DATA.\n");
       _MMG5_RETURN_AND_FREE(&mesh,&met,MMG5_STRONGFAILURE);

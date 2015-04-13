@@ -152,6 +152,8 @@ inline double _MMG5_caltet_iso(MMG5_pMesh mesh,MMG5_pSol met,int ia,int ib,int i
 
 
 inline double _MMG5_caltet_ani(MMG5_pMesh mesh,MMG5_pSol met,int ia,int ib,int ic,int id) {
+  fprintf(stdout,"NOT IMPLEMENTED\n");
+  exit(0);
   return(0.0);
 }
 

@@ -1639,8 +1639,8 @@ int _MMG5_saveLibraryMesh(MMG5_pMesh mesh) {
  */
 int MMG5_loadMet(MMG5_pMesh mesh,MMG5_pSol met) {
   FILE       *inm;
-  float       fbuf[6];
-  double      dbuf[6];
+  float       fbuf[6],tmpf;
+  double      dbuf[6],tmpd,lambda[3],eigenv[3][3];
   int         binch,bdim,iswp;
   int         i,k,bin,bpos;
   int         compute_hmin, compute_hmax;
@@ -1753,10 +1753,11 @@ int MMG5_loadMet(MMG5_pMesh mesh,MMG5_pSol met) {
     return(-1);
   }
   if ( mesh->info.lag == -1 ) {
-    if(met->size!=1) {
-      fprintf(stdout,"  ** DATA ANISO IGNORED %d \n",met->size);
+    if(met->size!=1 && met->size!=3) {
+      fprintf(stdout,"  ** DATA TYPE IGNORED %d \n",met->size);
       return(-1);
     }
+    if(met->size > 1) met->size = 6;
   }
   else if ( met->size != 2 ) {
     return(-1);
@@ -1859,28 +1860,60 @@ int MMG5_loadMet(MMG5_pMesh mesh,MMG5_pSol met) {
     }
   }
   /* anisotropic metric */
-  /*else { //met->size==3
-    met->size=6;
-    if ( met->ver == GmfFloat ) {
-    for (k=1; k<=met->np; k++) {
-    GmfGetLin(inm,GmfSolAtVertices,fbuf);
-    tmpf    = fbuf[2];
-    fbuf[2] = fbuf[3];
-    fbuf[3] = tmpf;
-    for (i=0; i<6; i++)  met->m[6*k+1+i] = fbuf[i];
-    }
+  else { //met->size==6
+    if ( met->ver == 1 ) {
+      for (k=1; k<=met->np; k++) {
+        if(!bin){
+          for(i=0 ; i<met->size ; i++)
+            fscanf(inm,"%f",&fbuf[i]);
+        } else {
+          for(i=0 ; i<met->size ; i++) {
+            fread(&fbuf[i],sw,1,inm);
+            if(iswp) fbuf[i]=_MMG5_swapf(fbuf[i]);
+          }
+        }
+        tmpf    = fbuf[2];
+        fbuf[2] = fbuf[3];
+        fbuf[3] = tmpf;
+        for (i=0; i<6; i++)  met->m[6*k+1+i] = fbuf[i];
+      }
     }
     else {
+      for (k=1; k<=met->np; k++) {
+        if(!bin){
+          for(i=0 ; i<met->size ; i++)
+            fscanf(inm,"%lf",&dbuf[i]);
+        } else {
+          for(i=0 ; i<met->size ; i++) {
+            fread(&dbuf[i],sw,1,inm);
+            if(iswp) dbuf[i]=_MMG5_swapf(dbuf[i]);
+          }
+        }
+        tmpd    = dbuf[2];
+        dbuf[2] = dbuf[3];
+        dbuf[3] = tmpd;
+        for (i=0; i<met->size; i++)  met->m[6*k+1+i] = dbuf[i];
+      }
+    }
     for (k=1; k<=met->np; k++) {
-    GmfGetLin(inm,GmfSolAtVertices,dbuf);
-    tmpd    = dbuf[2];
-    dbuf[2] = dbuf[3];
-    dbuf[3] = tmpd;
-    for (i=0; i<met->size; i++)  met->m[6*k+1+i] = dbuf[i];
+      if ( ! _MMG5_eigenv(1,&met->m[6*k+1],lambda,eigenv ) ) {
+        printf("Error: metric diagonalisation fail,"
+               " unable to compute the sizes associated to the vertex %d.\n",
+               k);
+        return(0);
+      }
+      if ( compute_hmin ) {
+        mesh->info.hmin = MG_MIN(mesh->info.hmin,1./sqrt(lambda[0]));
+        mesh->info.hmin = MG_MIN(mesh->info.hmin,1./sqrt(lambda[1]));
+        mesh->info.hmin = MG_MIN(mesh->info.hmin,1./sqrt(lambda[2]));
+      }
+      if ( compute_hmax ) {
+        mesh->info.hmax = MG_MAX(mesh->info.hmax,1./sqrt(lambda[0]));
+        mesh->info.hmax = MG_MAX(mesh->info.hmax,1./sqrt(lambda[1]));
+        mesh->info.hmax = MG_MAX(mesh->info.hmax,1./sqrt(lambda[2]));
+      }
     }
-    }
-    }*/
-
+  }
   if ( compute_hmin ) {
     mesh->info.hmin *=.1;
     /* Check that user has not given a hmax value lower that the founded

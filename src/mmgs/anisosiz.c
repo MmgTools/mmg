@@ -1079,7 +1079,7 @@ static int defmetreg(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
  * \return 0 if fail, 1 otherwise.
  *
  * Define size at points by intersecting the surfacic metric and the
- * pysical metric.
+ * physical metric.
  *
  */
 int defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
