@@ -1273,11 +1273,11 @@ int MMG5_loadMet(MMG5_pMesh mesh,MMG5_pSol met) {
             fread(&dbuf[i],sw,1,inm);
             if(iswp) dbuf[i]=swapf(dbuf[i]);
           }
-          tmpd    = dbuf[2];
-          dbuf[2] = dbuf[3];
-          dbuf[3] = tmpd;
-          for (i=0; i<met->size; i++)  met->m[6*k+1+i] = dbuf[i];
         }
+        tmpd    = dbuf[2];
+        dbuf[2] = dbuf[3];
+        dbuf[3] = tmpd;
+        for (i=0; i<met->size; i++)  met->m[6*k+1+i] = dbuf[i];
       }
     }
 
