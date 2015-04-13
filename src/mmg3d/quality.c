@@ -493,7 +493,7 @@ int _MMG5_prilen(MMG5_pMesh mesh, MMG5_pSol met) {
   MMG5_pTetra     pt;
   MMG5_pxTetra    pxt;
   _MMG5_Hash      hash;
-  double          len,avlen,dned,lmin,lmax;
+  double          len,avlen,lmin,lmax;
   int             k,np,nq,amin,bmin,amax,bmax,ned,hl[9];
   char            ia,i0,i1,ier,i;
   static double   bd[9]= {0.0, 0.3, 0.6, 0.7071, 0.9, 1.3, 1.4142, 2.0, 5.0};

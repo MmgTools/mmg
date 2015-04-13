@@ -1102,7 +1102,6 @@ int MMG5_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
  *
  */
 int MMG5_Get_iparameter(MMG5_pMesh mesh, int iparam) {
-  int k;
 
   switch ( iparam ) {
     /* Integer parameters */

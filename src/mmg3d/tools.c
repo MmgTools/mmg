@@ -91,11 +91,9 @@ inline double _MMG5_orvol(MMG5_pPoint point,int *v) {
 
 /** Compute normal to face iface of tetra k, exterior to tetra k */
 inline int _MMG5_norface(MMG5_pMesh mesh,int k,int iface,double n[3]) {
-    MMG5_pTetra     pt;
-    MMG5_pPoint     p0,p1,p2;
-    double     ux,uy,uz,vx,vy,vz,norm;
+  MMG5_pTetra     pt;
 
-    pt = &mesh->tetra[k];
+  pt = &mesh->tetra[k];
 
   return( _MMG5_norpts(mesh,
                        pt->v[_MMG5_idir[iface][0]],

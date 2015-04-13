@@ -136,7 +136,6 @@ int  setref(MMG5_pMesh,int,int,int);
 int  delref(MMG5_pMesh);
 int  chkmet(MMG5_pMesh,MMG5_pSol);
 int  chknor(MMG5_pMesh);
-long long _MMG5_memSize(void);
 void _MMG5_memOption(MMG5_pMesh mesh);
 
 /* function pointers */
@@ -163,7 +162,5 @@ int    (*gradsiz)(MMG5_pMesh mesh,MMG5_pSol met);
 void   (*intmet)(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int ip,double s);
 int    (*movridpt)(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist);
 int    (*movintpt)(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist);
-
-void _MMG5_Set_APIFunc();
 
 #endif

@@ -1247,7 +1247,7 @@ int _MMG5_saveAllMesh(MMG5_pMesh mesh) {
     }
   }
 
-  if ( mesh->info.imprim ) {
+  if ( mesh->info.imprim > 4 ) {
     fprintf(stdout,"     NUMBER OF VERTICES   %8d   CORNERS %8d\n",np,nc+nre);
     if ( na )
       fprintf(stdout,"     NUMBER OF EDGES      %8d   RIDGES  %8d\n",na,nr);

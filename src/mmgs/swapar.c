@@ -294,7 +294,6 @@ int swapar(MMG5_pMesh mesh,int k,int i) {
 /* flip edge i of tria k for isotropic mesh*/
 int litswp(MMG5_pMesh mesh,int k,char i,double kali) {
   MMG5_pTria    pt,pt0,pt1;
-  MMG5_pPoint   a,b,c,d;
   double   kalf,kalt,ps,n1[3],n2[3];
   int     *adja,ia,ib,ic,id,kk;
   char     ii,i1,i2;
@@ -308,9 +307,6 @@ int litswp(MMG5_pMesh mesh,int k,char i,double kali) {
   ia = pt->v[i];
   ib = pt->v[i1];
   ic = pt->v[i2];
-  a  = &mesh->point[ia];
-  b  = &mesh->point[ib];
-  c  = &mesh->point[ic];
 
   adja = &mesh->adja[3*(k-1)+1];
   kk  = adja[i] / 3;
@@ -318,7 +314,6 @@ int litswp(MMG5_pMesh mesh,int k,char i,double kali) {
   pt1 = &mesh->tria[kk];
   if ( MS_SIN(pt1->tag[ii]) )  return(0);
   id = pt1->v[ii];
-  d  = &mesh->point[id];
 
   /* check non convexity */
   _MMG5_norpts(mesh,ia,ib,id,n1);

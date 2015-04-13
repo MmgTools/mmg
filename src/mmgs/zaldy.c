@@ -99,27 +99,6 @@ void _MMG5_delElt(MMG5_pMesh mesh,int iel) {
   }
 }
 
-long long _MMG5_memSize (void) {
-  long long mem;
-
-#if (defined(__APPLE__) && defined(__MACH__))
-  size_t size;
-
-  size = sizeof(mem);
-  if ( sysctlbyname("hw.memsize",&mem,&size,NULL,0) == -1)
-    return(0);
-
-#elif defined(__unix__) || defined(__unix) || defined(unix)
-  mem = ((long long)sysconf(_SC_PHYS_PAGES))*
-    ((long long)sysconf(_SC_PAGE_SIZE));
-#else
-  printf("  ## WARNING: UNKNOWN SYSTEM, RECOVER OF MAXIMAL MEMORY NOT AVAILABLE.\n");
-  return(0);
-#endif
-
-  return(mem);
-}
-
 /** memory repartition for the -m option */
 void _MMG5_memOption(MMG5_pMesh mesh) {
   long long  million = 1048576L;
