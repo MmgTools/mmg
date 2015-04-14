@@ -310,8 +310,8 @@ int bouletrid(MMG5_pMesh mesh,int start,int ip,int *il1,int *l1,int *il2,int *l2
   /* set pointers: first manifold is on side of triangle */
   if ( !_MMG5_nortri(mesh,pt,nt) )  return(0);
 
-  n1 = &(mesh->xpoint[ppt->ig].n1[0]);
-  n2 = &(mesh->xpoint[ppt->ig].n2[0]);
+  n1 = &(mesh->xpoint[ppt->xp].n1[0]);
+  n2 = &(mesh->xpoint[ppt->xp].n2[0]);
   ps1 = n1[0]*nt[0] + n1[1]*nt[1] + n1[2]*nt[2];
   ps2 = n2[0]*nt[0] + n2[1]*nt[1] + n2[2]*nt[2];
 

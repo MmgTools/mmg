@@ -87,17 +87,17 @@ inline void bezierEdge(MMG5_pMesh mesh,int i0,int i1,double b0[3],double b1[3],c
     }
     else {
       if ( MG_GEO & p0->tag ) {
-        n1 = &mesh->xpoint[p0->ig].n1[0];
-        n2 = &mesh->xpoint[p0->ig].n2[0];
+        n1 = &mesh->xpoint[p0->xp].n1[0];
+        n2 = &mesh->xpoint[p0->xp].n2[0];
         ps1 = v[0]*n1[0] + v[1]*n1[1] + v[2]*n1[2];
         ps2 = v[0]*n2[0] + v[1]*n2[1] + v[2]*n2[2];
         if ( ps1 < ps2 ) {
-          n1 = &mesh->xpoint[p0->ig].n2[0];
+          n1 = &mesh->xpoint[p0->xp].n2[0];
           ps1 = ps2;
         }
       }
       else if ( MG_REF & p0->tag ) {
-        n1 = &mesh->xpoint[p0->ig].n1[0];
+        n1 = &mesh->xpoint[p0->xp].n1[0];
         ps1 = ux*n1[0] + uy*n1[1] + uz*n1[2];
       }
       else {
@@ -116,17 +116,17 @@ inline void bezierEdge(MMG5_pMesh mesh,int i0,int i1,double b0[3],double b1[3],c
     }
     else {
       if ( MG_GEO & p1->tag ) {
-        n1 = &mesh->xpoint[p1->ig].n1[0];
-        n2 = &mesh->xpoint[p1->ig].n2[0];
+        n1 = &mesh->xpoint[p1->xp].n1[0];
+        n2 = &mesh->xpoint[p1->xp].n2[0];
         ps1 = -(v[0]*n1[0] + v[1]*n1[1] + v[2]*n1[2]);
         ps2 = -(v[0]*n2[0] + v[1]*n2[1] + v[2]*n2[2]);
         if ( fabs(ps2) < fabs(ps1) ) {
-          n1 = &mesh->xpoint[p1->ig].n2[0];
+          n1 = &mesh->xpoint[p1->xp].n2[0];
           ps1 = ps2;
         }
       }
       else if ( MG_REF & p1->tag ) {
-        n1 = &mesh->xpoint[p1->ig].n1[0];
+        n1 = &mesh->xpoint[p1->xp].n1[0];
         ps1 = -(ux*n1[0] + uy*n1[1] + uz*n1[2]);
       }
       else {
@@ -181,8 +181,8 @@ int _MMG5_mmgsBezierCP(MMG5_pMesh mesh,MMG5_Tria *pt,_MMG5_pBezier pb,
     else if ( MG_EDG(p[i]->tag) ) {
       _MMG5_nortri(mesh,pt,nt);
 
-      n1 = &mesh->xpoint[p[i]->ig].n1[0];
-      n2 = &mesh->xpoint[p[i]->ig].n2[0];
+      n1 = &mesh->xpoint[p[i]->xp].n1[0];
+      n2 = &mesh->xpoint[p[i]->xp].n2[0];
 
       ps  = n1[0]*nt[0] + n1[1]*nt[1] + n1[2]*nt[2];
       ps2 = n2[0]*nt[0] + n2[1]*nt[1] + n2[2]*nt[2];

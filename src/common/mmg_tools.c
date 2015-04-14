@@ -58,9 +58,9 @@ int _MMG5_buildridmet(MMG5_pMesh mesh,MMG5_pSol met,int np0,
   p0 = &mesh->point[np0];
   if ( !(MG_GEO & p0->tag) )  return(0);
   m = &met->m[6*(np0)+1];
+  go = &mesh->xpoint[p0->xp];
   t = &p0->n[0];
-  go = &mesh->xpoint[p0->ig];
-
+  // t = &go->t[0];
   /* Decide between the two possible configurations */
   n1 = &go->n1[0];
   n2 = &go->n2[0];

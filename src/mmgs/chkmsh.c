@@ -180,7 +180,7 @@ int chkeigen(MMG5_pMesh mesh,MMG5_pSol met,int k,double lambda[3]) {
     }
     else {
         if ( p0->tag & MG_REF ) {
-            go = &mesh->xpoint[p0->ig];
+            go = &mesh->xpoint[p0->xp];
             n = &go->n1[0];
         }
         else
@@ -245,7 +245,7 @@ int chkmet(MMG5_pMesh mesh,MMG5_pSol met) {
         else {
             m = &met->m[6*k+1];
             if ( MG_EDG(p0->tag) ) {
-                go = &mesh->xpoint[p0->ig];
+                go = &mesh->xpoint[p0->xp];
                 n = &go->n1[0];
             }
             else{
@@ -297,8 +297,8 @@ int chknor(MMG5_pMesh mesh) {
         if ( MS_SIN(p0->tag) ) continue;
         if ( !(p0->tag & MG_GEO) ) continue;
 
-        assert( p0->ig );
-        go = &mesh->xpoint[p0->ig];
+        assert( p0->xp );
+        go = &mesh->xpoint[p0->xp];
         n = &go->n1[0];
 
         dd = n[0]*n[0] + n[1]*n[1] + n[2]*n[2];
@@ -327,8 +327,8 @@ int chknor(MMG5_pMesh mesh) {
             p0 = &mesh->point[pt->v[i]];
             if ( MS_SIN(p0->tag) ) continue;
             else if ( MG_EDG(p0->tag) ) {
-                assert ( p0->ig );
-                go = &mesh->xpoint[p0->ig];
+                assert ( p0->xp );
+                go = &mesh->xpoint[p0->xp];
                 if ( p0->tag & MG_GEO ) {
                     n = &go->n1[0];
                     ps = n[0]*nt[0] + n[1]*nt[1] + n[2]*nt[2];

@@ -82,8 +82,8 @@ int defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
       }
       else if ( MG_EDG(p[i]->tag) ) {
         _MMG5_nortri(mesh,pt,nt);
-        n1  = &mesh->xpoint[p[i]->ig].n1[0];
-        n2  = &mesh->xpoint[p[i]->ig].n2[0];
+        n1  = &mesh->xpoint[p[i]->xp].n1[0];
+        n2  = &mesh->xpoint[p[i]->xp].n2[0];
         ps  = n1[0]*nt[0] + n1[1]*nt[1] + n1[2]*nt[2];
         ps2 = n2[0]*nt[0] + n2[1]*nt[1] + n2[2]*nt[2];
         if ( fabs(ps) > fabs(ps2) )

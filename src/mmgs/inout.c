@@ -915,7 +915,7 @@ int MMG5_saveMesh(MMG5_pMesh mesh) {
       if ( !MG_VOK(ppt) )  continue;
       else if ( !(ppt->tag & MG_GEO) ) {
         if ( ppt->tag & MG_REF ) {
-          go = &mesh->xpoint[ppt->ig];
+          go = &mesh->xpoint[ppt->xp];
           if(!bin) {
             fprintf(inm,"%.15lg %.15lg %.15lg \n",go->n1[0],go->n1[1],go->n1[2]);
           } else {

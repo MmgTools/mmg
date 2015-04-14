@@ -134,7 +134,7 @@ int buildridmetnor(MMG5_pMesh mesh,MMG5_pSol met,int np0,double nt[3],double mr[
   if ( !(MG_GEO & p0->tag) )  return(0);
   m = &met->m[6*(np0)+1];
   t = &p0->n[0];
-  go = &mesh->xpoint[p0->ig];
+  go = &mesh->xpoint[p0->xp];
 
   /* Decide between the two possible configurations */
   n1 = &go->n1[0];
@@ -380,8 +380,8 @@ int intextmet(MMG5_pMesh mesh,MMG5_pSol met,int np,double me[6]) {
     m[0] = MG_MAX(m[0],hu);
 
     /* Size prescribed by metric me in direction u1 = n1 ^ t */
-    assert ( p0->ig );
-    go = &mesh->xpoint[p0->ig];
+    assert ( p0->xp );
+    go = &mesh->xpoint[p0->xp];
     n1 = &go->n1[0];
     n2 = &go->n2[0];
 

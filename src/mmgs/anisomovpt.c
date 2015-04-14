@@ -174,8 +174,8 @@ int movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
           if ( !buildridmetfic(mesh,to,no,mo[0],mo[0],m) )  return(0);
         }
         else if ( !MS_SIN(p1->tag) ) {
-          n1 = &mesh->xpoint[p1->ig].n1[0];
-          n2 = &mesh->xpoint[p1->ig].n2[0];
+          n1 = &mesh->xpoint[p1->xp].n1[0];
+          n2 = &mesh->xpoint[p1->xp].n2[0];
           ps1 = n1[0]*no[0] + n1[1]*no[1] + n1[2]*no[2];
           ps2 = n2[0]*no[0] + n2[1]*no[1] + n2[2]*no[2];
           if ( fabs(ps1) > fabs(ps2) ) {
@@ -187,8 +187,8 @@ int movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
         }
         else {
           assert(!MS_SIN(p2->tag));
-          n1 = &mesh->xpoint[p2->ig].n1[0];
-          n2 = &mesh->xpoint[p2->ig].n2[0];
+          n1 = &mesh->xpoint[p2->xp].n1[0];
+          n2 = &mesh->xpoint[p2->xp].n2[0];
           ps1 = n1[0]*no[0] + n1[1]*no[1] + n1[2]*no[2];
           ps2 = n2[0]*no[0] + n2[1]*no[1] + n2[2]*no[2];
           if ( fabs(ps1) > fabs(ps2) ) {
@@ -544,16 +544,16 @@ int movridpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
 
   /* Move is made towards p2 */
   if ( l2old > l1old ) {
-    no1 = &mesh->xpoint[p0->ig].n1[0];
-    no2 = &mesh->xpoint[p0->ig].n2[0];
+    no1 = &mesh->xpoint[p0->xp].n1[0];
+    no2 = &mesh->xpoint[p0->xp].n2[0];
 
     if ( MS_SIN(p2->tag) ) {
-      np1 = &mesh->xpoint[p0->ig].n1[0];
-      np2 = &mesh->xpoint[p0->ig].n2[0];
+      np1 = &mesh->xpoint[p0->xp].n1[0];
+      np2 = &mesh->xpoint[p0->xp].n2[0];
     }
     else {
-      np1 = &mesh->xpoint[p2->ig].n1[0];
-      np2 = &mesh->xpoint[p2->ig].n2[0];
+      np1 = &mesh->xpoint[p2->xp].n1[0];
+      np2 = &mesh->xpoint[p2->xp].n2[0];
     }
     psn11 = no1[0]*np1[0] + no1[1]*np1[1] + no1[2]*np1[2];
     psn12 = no1[0]*np2[0] + no1[1]*np2[1] + no1[2]*np2[2];
@@ -711,15 +711,15 @@ int movridpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
 
   /* Move along p1 */
   else {
-    no1 = &mesh->xpoint[p0->ig].n1[0];
-    no2 = &mesh->xpoint[p0->ig].n2[0];
+    no1 = &mesh->xpoint[p0->xp].n1[0];
+    no2 = &mesh->xpoint[p0->xp].n2[0];
     if ( MS_SIN(p1->tag) ) {
-      np1 = &mesh->xpoint[p0->ig].n1[0];
-      np2 = &mesh->xpoint[p0->ig].n2[0];
+      np1 = &mesh->xpoint[p0->xp].n1[0];
+      np2 = &mesh->xpoint[p0->xp].n2[0];
     }
     else {
-      np1 = &mesh->xpoint[p1->ig].n1[0];
-      np2 = &mesh->xpoint[p1->ig].n2[0];
+      np1 = &mesh->xpoint[p1->xp].n1[0];
+      np2 = &mesh->xpoint[p1->xp].n2[0];
     }
     psn11 = no1[0]*np1[0] + no1[1]*np1[1] + no1[2]*np1[2];
     psn12 = no1[0]*np2[0] + no1[1]*np2[1] + no1[2]*np2[2];
@@ -876,7 +876,7 @@ int movridpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
 
   /* Check proposed motion */
   ppt0 = &mesh->point[0];
-  ppt0->ig = 0;
+  ppt0->xp = 0;
   ppt0->tag = p0->tag;
 
   go = &mesh->xpoint[0];

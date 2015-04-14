@@ -150,8 +150,8 @@ static int defmetrid(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
   isqhmin = 1.0 / (mesh->info.hmin*mesh->info.hmin);
   isqhmax = 1.0 / (mesh->info.hmax*mesh->info.hmax);
 
-  n1 = &mesh->xpoint[p0->ig].n1[0];
-  n2 = &mesh->xpoint[p0->ig].n2[0];
+  n1 = &mesh->xpoint[p0->xp].n1[0];
+  n2 = &mesh->xpoint[p0->xp].n2[0];
   t  = p0->n;
 
   m = &met->m[6*(idp)+1];
@@ -437,7 +437,7 @@ static int defmetref(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
   isqhmax = 1.0 / (mesh->info.hmax*mesh->info.hmax);
 
   /* Computation of the rotation matrix T_p0 S -> [z = 0] */
-  n  = &mesh->xpoint[p0->ig].n1[0];
+  n  = &mesh->xpoint[p0->xp].n1[0];
   _MMG5_rotmatrix(n,r);
   m = &met->m[6*(idp)+1];
 
@@ -1155,7 +1155,7 @@ int defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
       m[0] = m[1] = m[2] = isqhmax;
     }
     else {
-      n = ppt->tag & MG_REF ? &mesh->xpoint[ppt->ig].n1[0] : ppt->n;
+      n = ppt->tag & MG_REF ? &mesh->xpoint[ppt->xp].n1[0] : ppt->n;
       _MMG5_rotmatrix(n,r);
       m[0] = isqhmax*(r[0][0]*r[0][0]+r[1][0]*r[1][0]+r[2][0]*r[2][0]);
       m[1] = isqhmax*(r[0][0]*r[0][1]+r[1][0]*r[1][1]+r[2][0]*r[2][1]);
@@ -1208,8 +1208,8 @@ static int grad2met(MMG5_pMesh mesh, MMG5_pSol met, int iel, int i){
     memcpy(m1,mm1,6*sizeof(double));
   }
   else if( MG_GEO & p1->tag ){
-    nn1 = &mesh->xpoint[p1->ig].n1[0];
-    nn2 = &mesh->xpoint[p1->ig].n2[0];
+    nn1 = &mesh->xpoint[p1->xp].n1[0];
+    nn2 = &mesh->xpoint[p1->xp].n2[0];
     ps1 = nt[0]*nn1[0] + nt[1]*nn1[1] + nt[2]*nn1[2];
     ps2 = nt[0]*nn2[0] + nt[1]*nn2[1] + nt[2]*nn2[2];
 
@@ -1222,7 +1222,7 @@ static int grad2met(MMG5_pMesh mesh, MMG5_pSol met, int iel, int i){
       return(-1);
   }
   else if( MG_REF & p1->tag ){
-    memcpy(n1,&(mesh->xpoint[p1->ig].n1[0]),3*sizeof(double));
+    memcpy(n1,&(mesh->xpoint[p1->xp].n1[0]),3*sizeof(double));
     memcpy(m1,mm1,6*sizeof(double));
   }
   else{
@@ -1236,8 +1236,8 @@ static int grad2met(MMG5_pMesh mesh, MMG5_pSol met, int iel, int i){
     memcpy(m2,mm2,6*sizeof(double));
   }
   else if ( MG_GEO & p2->tag ) {
-    nn1 = &mesh->xpoint[p2->ig].n1[0];
-    nn2 = &mesh->xpoint[p2->ig].n2[0];
+    nn1 = &mesh->xpoint[p2->xp].n1[0];
+    nn2 = &mesh->xpoint[p2->xp].n2[0];
     ps1 = nt[0]*nn1[0] + nt[1]*nn1[1] + nt[2]*nn1[2];
     ps2 = nt[0]*nn2[0] + nt[1]*nn2[1] + nt[2]*nn2[2];
 
@@ -1250,7 +1250,7 @@ static int grad2met(MMG5_pMesh mesh, MMG5_pSol met, int iel, int i){
       return(-1);
   }
   else if( MG_REF & p2->tag ){
-    memcpy(n2,&(mesh->xpoint[p2->ig].n1[0]),3*sizeof(double));
+    memcpy(n2,&(mesh->xpoint[p2->xp].n1[0]),3*sizeof(double));
     memcpy(m2,mm2,6*sizeof(double));
   }
   else{

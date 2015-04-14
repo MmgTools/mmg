@@ -73,19 +73,19 @@ double _MMG5_lenedg_ani(MMG5_pMesh mesh,MMG5_pSol met,int np0,int np1,char isedg
   }
   else {
     if ( MG_GEO & p0->tag ) {
-      //assert(p0->ig);
-      n1 = &mesh->xpoint[p0->ig].n1[0];
-      n2 = &mesh->xpoint[p0->ig].n2[0];
+      //assert(p0->xp);
+      n1 = &mesh->xpoint[p0->xp].n1[0];
+      n2 = &mesh->xpoint[p0->xp].n2[0];
       ps1 = ux*n1[0] + uy*n1[1] + uz*n1[2];
       ps2 = ux*n2[0] + uy*n2[1] + uz*n2[2];
 
       if ( fabs(ps2) < fabs(ps1) ) {
-        n1  = &mesh->xpoint[p0->ig].n2[0];
+        n1  = &mesh->xpoint[p0->xp].n2[0];
         ps1 = ps2;
       }
     }
     else if ( MG_REF & p0->tag ) {
-      n1  = &mesh->xpoint[p0->ig].n1[0];
+      n1  = &mesh->xpoint[p0->xp].n1[0];
       ps1 = ux*n1[0] + uy*n1[1] + uz*n1[2];
     }
     else {
@@ -111,18 +111,18 @@ double _MMG5_lenedg_ani(MMG5_pMesh mesh,MMG5_pSol met,int np0,int np1,char isedg
   }
   else {
     if ( MG_GEO & p1->tag ) {
-      n1 = &mesh->xpoint[p1->ig].n1[0];
-      n2 = &mesh->xpoint[p1->ig].n2[0];
+      n1 = &mesh->xpoint[p1->xp].n1[0];
+      n2 = &mesh->xpoint[p1->xp].n2[0];
       ps1 = -ux*n1[0] - uy*n1[1] - uz*n1[2];
       ps2 = -ux*n2[0] - uy*n2[1] - uz*n2[2];
 
       if ( fabs(ps2) < fabs(ps1) ) {
-        n1  = &mesh->xpoint[p1->ig].n2[0];
+        n1  = &mesh->xpoint[p1->xp].n2[0];
         ps1 = ps2;
       }
     }
     else if ( MG_REF & p1->tag ) {
-      n1  = &mesh->xpoint[p1->ig].n1[0];
+      n1  = &mesh->xpoint[p1->xp].n1[0];
       ps1 = - ux*n1[0] - uy*n1[1] - uz*n1[2];
     }
     else {

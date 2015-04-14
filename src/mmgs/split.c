@@ -137,7 +137,7 @@ int split1b(MMG5_pMesh mesh,int k,char i,int ip) {
 
     ier = _MMG5_bezierInt(&b,uv,o,no,to);
     assert(ier);
-    go = &mesh->xpoint[ppt->ig];
+    go = &mesh->xpoint[ppt->xp];
     memcpy(go->n2,no,3*sizeof(double));
   }
 

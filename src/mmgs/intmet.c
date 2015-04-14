@@ -191,7 +191,7 @@ int intridmet(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,double s,double v[3],do
   }
   /* vertex p1 is singular, p2 is regular */
   else if ( MS_SIN(p1->tag) && (!MS_SIN(p2->tag)) ) {
-    go2 = &mesh->xpoint[p2->ig];
+    go2 = &mesh->xpoint[p2->xp];
     n21 = &go2->n1[0];
     n22 = &go2->n2[0];
 
@@ -236,7 +236,7 @@ int intridmet(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,double s,double v[3],do
   }
   /* vertex p2 is singular, p1 is regular */
   else if ( MS_SIN(p2->tag) && (!MS_SIN(p1->tag)) ) {
-    go1 = &mesh->xpoint[p2->ig];
+    go1 = &mesh->xpoint[p2->xp];
     n11 = &go1->n1[0];
     n12 = &go1->n2[0];
 
@@ -281,8 +281,8 @@ int intridmet(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,double s,double v[3],do
   }
   /* p1,p2 : nonsingular vertices */
   else {
-    go1 = &mesh->xpoint[p1->ig];
-    go2 = &mesh->xpoint[p2->ig];
+    go1 = &mesh->xpoint[p1->xp];
+    go2 = &mesh->xpoint[p2->xp];
 
     /* Interpolation of the eigenvalue associated to tangent vector */
     dd  = (1-s)*sqrt(m2[0]) + s*sqrt(m1[0]);
@@ -564,8 +564,8 @@ void intmet_ani(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int ip,double s) {
   m  = &met->m[6*(ip)+1];
   if ( pt->tag[i] & MG_GEO ) {
     ppt = &mesh->point[ip];
-    assert(ppt->ig);
-    go = &mesh->xpoint[ppt->ig];
+    assert(ppt->xp);
+    go = &mesh->xpoint[ppt->xp];
     intridmet(mesh,met,k,i,s,go->n1,m);
   }
   else {

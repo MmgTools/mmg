@@ -56,7 +56,7 @@ typedef MMG5_Par * MMG5_pPar;
 /**
  * \struct MMG5_Point
  * \brief Structure to store points of a MMG mesh.
- * \todo What to do with n[3], try to remove ig,s.
+ * \todo What to do with n[3], try to remove,s.
  */
 typedef struct {
   double   c[3]; /*!< Coordinates of point */
@@ -69,7 +69,7 @@ typedef struct {
   char     tag; /*!< Contains binary flags : if \f$tag=23=16+4+2+1\f$, then
                   the point is \a MG_REF, \a MG_GEO, \a MG_REQ and \a MG_BDY */
   char     tagdel; /*!< Tag for delaunay */
-  int      ig,s;
+  int      s;
 } MMG5_Point;
 typedef MMG5_Point * MMG5_pPoint;
 
