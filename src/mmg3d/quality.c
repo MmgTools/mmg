@@ -625,6 +625,7 @@ int _MMG5_prilen(MMG5_pMesh mesh, MMG5_pSol met) {
     }
   }
 
+
   /* Pop edges from hash table, and analyze their length */
   for(k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];

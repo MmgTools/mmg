@@ -384,7 +384,7 @@ _MMG5_defsizreg(MMG5_pMesh mesh,MMG5_pSol met,int nump,int *lists,
       p1  = &mesh->point[ip0];
       if( !(p1->tag & MG_NOM) || MG_SIN(p1->tag) ) continue;
       assert(p1->xp);
-      t = &mesh->xpoint[p1->xp].t[0];
+      t = &p1->n[0];
       memcpy(c,t,3*sizeof(double));
 
       d[0] =  r[0][0]*c[0] + r[0][1]*c[1] + r[0][2]*c[2];

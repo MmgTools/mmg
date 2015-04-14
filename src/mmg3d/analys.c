@@ -459,15 +459,15 @@ static int _MMG5_norver(MMG5_pMesh mesh) {
         memcpy(pxp->n2,n,3*sizeof(double));
 
         /* compute tangent as intersection of n1 + n2 */
-        pxp->t[0] = pxp->n1[1]*pxp->n2[2] - pxp->n1[2]*pxp->n2[1];
-        pxp->t[1] = pxp->n1[2]*pxp->n2[0] - pxp->n1[0]*pxp->n2[2];
-        pxp->t[2] = pxp->n1[0]*pxp->n2[1] - pxp->n1[1]*pxp->n2[0];
-        dd = pxp->t[0]*pxp->t[0] + pxp->t[1]*pxp->t[1] + pxp->t[2]*pxp->t[2];
+        ppt->n[0] = pxp->n1[1]*pxp->n2[2] - pxp->n1[2]*pxp->n2[1];
+        ppt->n[1] = pxp->n1[2]*pxp->n2[0] - pxp->n1[0]*pxp->n2[2];
+        ppt->n[2] = pxp->n1[0]*pxp->n2[1] - pxp->n1[1]*pxp->n2[0];
+        dd = ppt->n[0]*ppt->n[0] + ppt->n[1]*ppt->n[1] + ppt->n[2]*ppt->n[2];
         if ( dd > _MMG5_EPSD2 ) {
           dd = 1.0 / sqrt(dd);
-          pxp->t[0] *= dd;
-          pxp->t[1] *= dd;
-          pxp->t[2] *= dd;
+          ppt->n[0] *= dd;
+          ppt->n[1] *= dd;
+          ppt->n[2] *= dd;
         }
         ppt->flag = mesh->base;
         ++nt;
@@ -477,20 +477,20 @@ static int _MMG5_norver(MMG5_pMesh mesh) {
       /* compute tgte */
       ppt->flag = mesh->base;
       ++nt;
-      if ( !_MMG5_boulec(mesh,mesh->adjt,k,i,pxp->t) ) {
+      if ( !_MMG5_boulec(mesh,mesh->adjt,k,i,ppt->n) ) {
         ++nf;
         continue;
       }
-      dd = pxp->n1[0]*pxp->t[0] + pxp->n1[1]*pxp->t[1] + pxp->n1[2]*pxp->t[2];
-      pxp->t[0] -= dd*pxp->n1[0];
-      pxp->t[1] -= dd*pxp->n1[1];
-      pxp->t[2] -= dd*pxp->n1[2];
-      dd = pxp->t[0]*pxp->t[0] + pxp->t[1]*pxp->t[1] + pxp->t[2]*pxp->t[2];
+      dd = pxp->n1[0]*ppt->n[0] + pxp->n1[1]*ppt->n[1] + pxp->n1[2]*ppt->n[2];
+      ppt->n[0] -= dd*pxp->n1[0];
+      ppt->n[1] -= dd*pxp->n1[1];
+      ppt->n[2] -= dd*pxp->n1[2];
+      dd = ppt->n[0]*ppt->n[0] + ppt->n[1]*ppt->n[1] + ppt->n[2]*ppt->n[2];
       if ( dd > _MMG5_EPSD2 ) {
         dd = 1.0 / sqrt(dd);
-        pxp->t[0] *= dd;
-        pxp->t[1] *= dd;
-        pxp->t[2] *= dd;
+        ppt->n[0] *= dd;
+        ppt->n[1] *= dd;
+        ppt->n[2] *= dd;
       }
     }
   }
@@ -546,7 +546,7 @@ static void _MMG5_nmgeom(MMG5_pMesh mesh){
           }
           pxp = &mesh->xpoint[p0->xp];
           memcpy(pxp->n1,n,3*sizeof(double));
-          memcpy(pxp->t,t,3*sizeof(double));
+          memcpy(p0->n,t,3*sizeof(double));
         }
       }
     }

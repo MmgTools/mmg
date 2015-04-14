@@ -196,7 +196,7 @@ _MMG5_BezierEdge(MMG5_pMesh mesh,int ip0,int ip1,double b0[3],double b1[3],char 
       t0[2] = uz * il;
     }
     else {
-      memcpy(t0,&(pxp0->t[0]),3*sizeof(double));
+      memcpy(t0,&(p0->n[0]),3*sizeof(double));
       ps = t0[0]*ux + t0[1]*uy + t0[2]*uz;
       if ( ps < 0.0 ) {
         t0[0] *= -1.0;
@@ -210,7 +210,7 @@ _MMG5_BezierEdge(MMG5_pMesh mesh,int ip0,int ip1,double b0[3],double b1[3],char 
       t1[2] = - uz * il;
     }
     else {
-      memcpy(t1,&(pxp1->t[0]),3*sizeof(double));
+      memcpy(t1,&(p1->n[0]),3*sizeof(double));
       ps = -( t1[0]*ux + t1[1]*uy + t1[2]*uz );
       if ( ps < 0.0 ) {
         t1[0] *= -1.0;
@@ -357,7 +357,7 @@ int _MMG5_mmg3dBezierCP(MMG5_pMesh mesh,MMG5_Tria *pt,_MMG5_pBezier pb,char ori)
       }
       assert(p[i]->xp);
       pxp = &mesh->xpoint[p[i]->xp];
-      memcpy(&pb->t[i],pxp->t,3*sizeof(double));
+      memcpy(&pb->t[i],p[i]->n,3*sizeof(double));
     }
     else {
       assert(p[i]->xp);
@@ -375,7 +375,7 @@ int _MMG5_mmg3dBezierCP(MMG5_pMesh mesh,MMG5_Tria *pt,_MMG5_pBezier pb,char ori)
           memcpy(&pb->n[i],pxp->n1,3*sizeof(double));
         else
           memcpy(&pb->n[i],pxp->n2,3*sizeof(double));
-        memcpy(&pb->t[i],pxp->t,3*sizeof(double));
+        memcpy(&pb->t[i],p[i]->n,3*sizeof(double));
       }
       else
         memcpy(&pb->n[i],pxp->n1,3*sizeof(double));

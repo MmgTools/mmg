@@ -965,11 +965,11 @@ int _MMG5_saveAllMesh(MMG5_pMesh mesh) {
         else if ( MG_EDG(ppt->tag) || (ppt->tag & MG_NOM) ) {
           pxp = &mesh->xpoint[ppt->xp];
           if(!bin) {
-            fprintf(inm,"%.15lg %.15lg %.15lg \n",pxp->t[0],pxp->t[1],pxp->t[2]);
+            fprintf(inm,"%.15lg %.15lg %.15lg \n",ppt->n[0],ppt->n[1],ppt->n[2]);
           } else {
-            fwrite((unsigned char*)&pxp->t[0],sd,1,inm);
-            fwrite((unsigned char*)&pxp->t[1],sd,1,inm);
-            fwrite((unsigned char*)&pxp->t[2],sd,1,inm);
+            fwrite((unsigned char*)&ppt->n[0],sd,1,inm);
+            fwrite((unsigned char*)&ppt->n[1],sd,1,inm);
+            fwrite((unsigned char*)&ppt->n[2],sd,1,inm);
           }
         }
       }

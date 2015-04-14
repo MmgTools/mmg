@@ -60,7 +60,7 @@ int _MMG5_buildridmet(MMG5_pMesh mesh,MMG5_pSol met,int np0,
   m = &met->m[6*(np0)+1];
   go = &mesh->xpoint[p0->xp];
   t = &p0->n[0];
-  // t = &go->t[0];
+
   /* Decide between the two possible configurations */
   n1 = &go->n1[0];
   n2 = &go->n2[0];
@@ -91,7 +91,6 @@ int _MMG5_buildridmet(MMG5_pMesh mesh,MMG5_pSol met,int np0,
   mr[3] = m[0]*r[1][0]*r[1][0] + dv*r[1][1]*r[1][1];
   mr[4] = m[0]*r[1][0]*r[2][0] + dv*r[1][1]*r[2][1];
   mr[5] = m[0]*r[2][0]*r[2][0] + dv*r[2][1]*r[2][1];
-
   return(1);
 }
 

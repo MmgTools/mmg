@@ -231,16 +231,16 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
           pxp = &mesh->xpoint[ppt->xp];
           if ( tag & MG_NOM ){
             memcpy(pxp->n1,no1,3*sizeof(double));
-            memcpy(pxp->t,to,3*sizeof(double));
+            memcpy(ppt->n,to,3*sizeof(double));
           }
           else if ( tag & MG_GEO ) {
             memcpy(pxp->n1,no1,3*sizeof(double));
             memcpy(pxp->n2,no2,3*sizeof(double));
-            memcpy(pxp->t,to,3*sizeof(double));
+            memcpy(ppt->n,to,3*sizeof(double));
           }
           else if ( tag & MG_REF ) {
             memcpy(pxp->n1,no1,3*sizeof(double));
-            memcpy(pxp->t,to,3*sizeof(double));
+            memcpy(ppt->n,to,3*sizeof(double));
           }
           else
             memcpy(pxp->n1,no1,3*sizeof(double));
@@ -549,16 +549,16 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
             pxp = &mesh->xpoint[ppt->xp];
             if ( tag & MG_NOM ){
               memcpy(pxp->n1,no1,3*sizeof(double));
-              memcpy(pxp->t,to,3*sizeof(double));
+              memcpy(ppt->n,to,3*sizeof(double));
             }
             else if ( tag & MG_GEO ) {
               memcpy(pxp->n1,no1,3*sizeof(double));
               memcpy(pxp->n2,no2,3*sizeof(double));
-              memcpy(pxp->t,to,3*sizeof(double));
+              memcpy(ppt->n,to,3*sizeof(double));
             }
             else if ( tag & MG_REF ) {
               memcpy(pxp->n1,no1,3*sizeof(double));
-              memcpy(pxp->t,to,3*sizeof(double));
+              memcpy(ppt->n,to,3*sizeof(double));
             }
             else
               memcpy(pxp->n1,no1,3*sizeof(double));

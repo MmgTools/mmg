@@ -60,7 +60,7 @@ typedef MMG5_Par * MMG5_pPar;
  */
 typedef struct {
   double   c[3]; /*!< Coordinates of point */
-  double   n[3]; /*!< Tangeant for mmgs */
+  double   n[3]; /*!< Normal or Tangent for mmgs and Tangent (if needed) for mmg3d */
   int      ref; /*!< Reference of point */
   int      xp; /*!< Surface point number */
   int      tmp; /*!< Index of point in the saved mesh (we don't count
@@ -80,7 +80,6 @@ typedef MMG5_Point * MMG5_pPoint;
 typedef struct {
   double   n1[3],n2[3]; /*!< Normals at boundary vertex;
                           n1!=n2 if the vertex belong to a ridge */
-  double   t[3]; /*!< Tangeant at vertex */
 } MMG5_xPoint;
 typedef MMG5_xPoint * MMG5_pxPoint;
 

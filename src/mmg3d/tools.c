@@ -190,13 +190,13 @@ inline int _MMG5_BezierRidge(MMG5_pMesh mesh,int ip0,int ip1,double s,double *o,
         t0[2] = uz * il;
     }
     else {
-        memcpy(t0,&(mesh->xpoint[p0->xp].t[0]),3*sizeof(double));
-        ps = t0[0]*ux + t0[1]*uy + t0[2]*uz;
-        if ( ps < 0.0 ) {
-            t0[0] *= -1.0;
-            t0[1] *= -1.0;
-            t0[2] *= -1.0;
-        }
+      memcpy(t0,&(p0->n[0]),3*sizeof(double));
+      ps = t0[0]*ux + t0[1]*uy + t0[2]*uz;
+      if ( ps < 0.0 ) {
+        t0[0] *= -1.0;
+        t0[1] *= -1.0;
+        t0[2] *= -1.0;
+      }
     }
     if ( MG_SIN(p1->tag) ) {
         t1[0] = -ux * il;
@@ -204,7 +204,7 @@ inline int _MMG5_BezierRidge(MMG5_pMesh mesh,int ip0,int ip1,double s,double *o,
         t1[2] = -uz * il;
     }
     else {
-        memcpy(t1,&(mesh->xpoint[p1->xp].t[0]),3*sizeof(double));
+        memcpy(t1,&(p1->n[0]),3*sizeof(double));
         ps = - ( t1[0]*ux + t1[1]*uy + t1[2]*uz );
         if ( ps < 0.0 ) {
             t1[0] *= -1.0;
@@ -354,7 +354,7 @@ inline int _MMG5_BezierRef(MMG5_pMesh mesh,int ip0,int ip1,double s,double *o,do
         t0[2] = uz * il;
     }
     else {
-        memcpy(t0,&(mesh->xpoint[p0->xp].t[0]),3*sizeof(double));
+        memcpy(t0,&(p0->n[0]),3*sizeof(double));
         ps = t0[0]*ux + t0[1]*uy + t0[2]*uz;
         if ( ps < 0.0 ) {
             t0[0] *= -1.0;
@@ -368,7 +368,7 @@ inline int _MMG5_BezierRef(MMG5_pMesh mesh,int ip0,int ip1,double s,double *o,do
         t1[2] = -uz * il;
     }
     else {
-        memcpy(t1,&(mesh->xpoint[p1->xp].t[0]),3*sizeof(double));
+        memcpy(t1,&(p1->n[0]),3*sizeof(double));
         ps = - ( t1[0]*ux + t1[1]*uy + t1[2]*uz );
         if ( ps < 0.0 ) {
             t1[0] *= -1.0;
@@ -511,7 +511,7 @@ inline int _MMG5_BezierNom(MMG5_pMesh mesh,int ip0,int ip1,double s,double *o,do
         t0[2] = uz * il;
     }
     else {
-        memcpy(t0,&(mesh->xpoint[p0->xp].t[0]),3*sizeof(double));
+        memcpy(t0,&(p0->n[0]),3*sizeof(double));
         ps = t0[0]*ux + t0[1]*uy + t0[2]*uz;
         if ( ps < 0.0 ) {
             t0[0] *= -1.0;
@@ -525,7 +525,7 @@ inline int _MMG5_BezierNom(MMG5_pMesh mesh,int ip0,int ip1,double s,double *o,do
         t1[2] = -uz * il;
     }
     else {
-        memcpy(t1,&(mesh->xpoint[p1->xp].t[0]),3*sizeof(double));
+        memcpy(t1,&(p1->n[0]),3*sizeof(double));
         ps = - ( t1[0]*ux + t1[1]*uy + t1[2]*uz );
         if ( ps < 0.0 ) {
             t1[0] *= -1.0;

@@ -272,13 +272,13 @@ char _MMG5_chkedg(MMG5_pMesh mesh,MMG5_Tria *pt,char ori) {
       }
       assert(p[i]->xp);
       pxp = &mesh->xpoint[p[i]->xp];
-      memcpy(&t[i],pxp->t,3*sizeof(double));
+      memcpy(&t[i],p[i]->n,3*sizeof(double));
     }
     else {
       assert(p[i]->xp);
       pxp = &mesh->xpoint[p[i]->xp];
       if ( MG_EDG(p[i]->tag) ) {
-        memcpy(&t[i],pxp->t,3*sizeof(double));
+        memcpy(&t[i],p[i]->n,3*sizeof(double));
         _MMG5_nortri(mesh,pt,nt);
         if(!ori) {
           nt[0] *= -1.0;
@@ -1060,7 +1060,7 @@ _MMG5_anatets(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
         ppt->tag |= ptt.tag[j];
         pxp = &mesh->xpoint[ppt->xp];
         memcpy(pxp->n1,no,3*sizeof(double));
-        memcpy(pxp->t,to,3*sizeof(double));
+        memcpy(ppt->n,to,3*sizeof(double));
         nap++;
       }
       else if ( MG_EDG(ptt.tag[j]) && !(ptt.tag[j] & MG_NOM) ) {
@@ -1073,15 +1073,15 @@ _MMG5_anatets(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
 
         memcpy(pxp->n2,no,3*sizeof(double));
         /* a computation of the tangent with respect to these two normals is possible */
-        pxp->t[0] = pxp->n1[1]*pxp->n2[2] - pxp->n1[2]*pxp->n2[1];
-        pxp->t[1] = pxp->n1[2]*pxp->n2[0] - pxp->n1[0]*pxp->n2[2];
-        pxp->t[2] = pxp->n1[0]*pxp->n2[1] - pxp->n1[1]*pxp->n2[0];
-        dd = pxp->t[0]*pxp->t[0] + pxp->t[1]*pxp->t[1] + pxp->t[2]*pxp->t[2];
+        ppt->n[0] = pxp->n1[1]*pxp->n2[2] - pxp->n1[2]*pxp->n2[1];
+        ppt->n[1] = pxp->n1[2]*pxp->n2[0] - pxp->n1[0]*pxp->n2[2];
+        ppt->n[2] = pxp->n1[0]*pxp->n2[1] - pxp->n1[1]*pxp->n2[0];
+        dd = ppt->n[0]*ppt->n[0] + ppt->n[1]*ppt->n[1] + ppt->n[2]*ppt->n[2];
         if ( dd > _MMG5_EPSD2 ) {
           dd = 1.0 / sqrt(dd);
-          pxp->t[0] *= dd;
-          pxp->t[1] *= dd;
-          pxp->t[2] *= dd;
+          ppt->n[0] *= dd;
+          ppt->n[1] *= dd;
+          ppt->n[2] *= dd;
         }
       }
     }

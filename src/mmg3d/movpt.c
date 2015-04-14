@@ -686,9 +686,9 @@ int _MMG5_movbdyrefpt(MMG5_pMesh mesh, MMG5_pSol met, int *listv,
   pxp = &mesh->xpoint[nxp];
   memcpy(pxp,&(mesh->xpoint[p0->xp]),sizeof(MMG5_xPoint));
 
-  pxp->t[0] = to[0];
-  pxp->t[1] = to[1];
-  pxp->t[2] = to[2];
+  p0->n[0] = to[0];
+  p0->n[1] = to[1];
+  p0->n[2] = to[2];
 
   pxp->n1[0] = no[0];
   pxp->n1[1] = no[1];
@@ -750,9 +750,9 @@ int _MMG5_movbdyrefpt(MMG5_pMesh mesh, MMG5_pSol met, int *listv,
   pxp->n1[1] = no[1];
   pxp->n1[2] = no[2];
 
-  pxp->t[0] = to[0];
-  pxp->t[1] = to[1];
-  pxp->t[2] = to[2];
+  p0->n[0] = to[0];
+  p0->n[1] = to[1];
+  p0->n[2] = to[2];
 
   for( l=0 ; l<ilistv ; l++ ){
     (&mesh->tetra[listv[l]/4])->qual = callist[l];
@@ -978,9 +978,9 @@ int _MMG5_movbdynompt(MMG5_pMesh mesh,MMG5_pSol met, int *listv,
   pxp = &mesh->xpoint[nxp];
   memcpy(pxp,&(mesh->xpoint[p0->xp]),sizeof(MMG5_xPoint));
 
-  pxp->t[0] = to[0];
-  pxp->t[1] = to[1];
-  pxp->t[2] = to[2];
+  p0->n[0] = to[0];
+  p0->n[1] = to[1];
+  p0->n[2] = to[2];
 
   pxp->n1[0] = no[0];
   pxp->n1[1] = no[1];
@@ -1044,9 +1044,9 @@ int _MMG5_movbdynompt(MMG5_pMesh mesh,MMG5_pSol met, int *listv,
   pxp->n1[1] = no[1];
   pxp->n1[2] = no[2];
 
-  pxp->t[0] = to[0];
-  pxp->t[1] = to[1];
-  pxp->t[2] = to[2];
+  p0->n[0] = to[0];
+  p0->n[1] = to[1];
+  p0->n[2] = to[2];
 
   for(l=0; l<ilistv; l++){
     (&mesh->tetra[listv[l]/4])->qual = callist[l];
@@ -1276,9 +1276,9 @@ int _MMG5_movbdyridpt(MMG5_pMesh mesh, MMG5_pSol met, int *listv,
   pxp = &mesh->xpoint[nxp];
   memcpy(pxp,&(mesh->xpoint[p0->xp]),sizeof(MMG5_xPoint));
 
-  pxp->t[0] = to[0];
-  pxp->t[1] = to[1];
-  pxp->t[2] = to[2];
+  p0->n[0] = to[0];
+  p0->n[1] = to[1];
+  p0->n[2] = to[2];
 
   pxp->n1[0] = no1[0];
   pxp->n1[1] = no1[1];
@@ -1349,9 +1349,9 @@ int _MMG5_movbdyridpt(MMG5_pMesh mesh, MMG5_pSol met, int *listv,
   pxp->n2[1] = no2[1];
   pxp->n2[2] = no2[2];
 
-  pxp->t[0] = to[0];
-  pxp->t[1] = to[1];
-  pxp->t[2] = to[2];
+  p0->n[0] = to[0];
+  p0->n[1] = to[1];
+  p0->n[2] = to[2];
 
   for(l=0; l<ilistv; l++){
     (&mesh->tetra[listv[l]/4])->qual = callist[l];
