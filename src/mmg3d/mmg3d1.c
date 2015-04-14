@@ -173,7 +173,7 @@ int _MMG5_dichoto(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
  * considered edge, starting from o point.
  *
  */
-int _MMG5_dichoto1b(MMG5_pMesh mesh,int *list,int ret,double o[3],double ro[3]) {
+int _MMG5_dichoto1b(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,double o[3],double ro[3]) {
   MMG5_pTetra  pt;
   MMG5_pPoint  p0,p1;
   int     iel,np,nq,it,maxit;
@@ -205,7 +205,7 @@ int _MMG5_dichoto1b(MMG5_pMesh mesh,int *list,int ret,double o[3],double ro[3]) 
     c[1] = m[1] + t*(o[1]-m[1]);
     c[2] = m[2] + t*(o[2]-m[2]);
 
-    ier = _MMG5_simbulgept(mesh,list,ret,c);
+    ier = _MMG5_simbulgept(mesh,met,list,ret,c);
     if ( ier )
       to = t;
     else
@@ -486,7 +486,7 @@ int _MMG5_swptet(MMG5_pMesh mesh,MMG5_pSol met,double crit,_MMG5_pBucket bucket)
           if ( pxt->edg[i] || pxt->tag[i] ) continue;
         }
 
-        nconf = _MMG5_chkswpgen(mesh,k,i,&ilist,list,crit);
+        nconf = _MMG5_chkswpgen(mesh,met,k,i,&ilist,list,crit);
         if ( nconf ) {
           ier = _MMG5_swpgen(mesh,met,nconf,ilist,list,bucket);
           if ( ier > 0 )  ns++;
@@ -610,7 +610,7 @@ int _MMG5_movtet(MMG5_pMesh mesh,MMG5_pSol met,int maxitin) {
           else if ( internal ) {
             ilistv = _MMG5_boulevolp(mesh,k,i0,listv);
             if ( !ilistv )  continue;
-            ier = _MMG5_movintpt(mesh,listv,ilistv,improve);
+            ier = _MMG5_movintpt(mesh,met,listv,ilistv,improve);
           }
           if ( ier ) {
             nm++;
@@ -703,7 +703,7 @@ static int _MMG5_coltet(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
             if ( mesh->adja[4*(k-1)+1+i] )  continue;
           }
           if ( (tag & MG_REQ) || p0->tag > tag )  continue;
-          ilist = _MMG5_chkcol_bdy(mesh,k,i,j,list);
+          ilist = _MMG5_chkcol_bdy(mesh,met,k,i,j,list);
         }
         /* internal face */
         else {
@@ -713,7 +713,7 @@ static int _MMG5_coltet(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
         }
 
         if ( ilist > 0 ) {
-          ier = _MMG5_colver(mesh,list,ilist,iq);
+          ier = _MMG5_colver(mesh,met,list,ilist,iq);
           if ( ier < 0 ) return(-1);
           else if ( ier ) {
             _MMG5_delPt(mesh,ier);

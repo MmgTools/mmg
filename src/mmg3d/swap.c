@@ -215,19 +215,19 @@ int _MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, int *list,int ilist,int it1,
 
     /* 2 elts resulting from split and collapse */
     pt0->v[ip] = 0;
-    if ( _MMG5_orcal(mesh,0) < _MMG5_NULKAL )  return(0);
+    if ( _MMG5_orcal(mesh,met,0) < _MMG5_NULKAL )  return(0);
     if ( !isshell ) {
       pt0->v[ip] = na1;
-      caltmp = _MMG5_orcal(mesh,0);
+      caltmp = _MMG5_orcal(mesh,met,0);
       calnew = MG_MIN(calnew,caltmp);
     }
     memcpy(pt0,pt,sizeof(MMG5_Tetra));
     pt0->v[iq] = 0;
-    if ( _MMG5_orcal(mesh,0) < _MMG5_NULKAL )  return(0);
+    if ( _MMG5_orcal(mesh,met,0) < _MMG5_NULKAL )  return(0);
 
     if ( !isshell ) {
       pt0->v[iq] = na1;
-      caltmp = _MMG5_orcal(mesh,0);
+      caltmp = _MMG5_orcal(mesh,met,0);
       calnew = MG_MIN(calnew,caltmp);
     }
   }
@@ -339,7 +339,7 @@ int _MMG5_swpbdy(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int it1,_MMG5_p
   assert(list[0]/4 == iel1);
   assert(pt1->v[ipa] == na);
 
-  ier = _MMG5_colver(mesh,list,ilist,ipa);
+  ier = _MMG5_colver(mesh,met,list,ilist,ipa);
   if ( ier < 0 ) {
     fprintf(stdout,"  ## Warning: unable to swap boundary edge.\n");
     return(-1);

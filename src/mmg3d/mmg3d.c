@@ -167,7 +167,7 @@ int main(int argc,char *argv[]) {
   _MMG5_setfunc(&mesh,&met);
   MMG5_Set_saveFunc(&mesh);
 
-  if ( abs(mesh.info.imprim) > 0 )  _MMG5_outqua(&mesh,&met);
+  _MMG5_outqua(&mesh,&met);
   fprintf(stdout,"\n  %s\n   MODULE MMG3D: IMB-LJLL : %s (%s)\n  %s\n",
           MG_STR,MG_VER,MG_REL,MG_STR);
   if ( mesh.info.imprim )  fprintf(stdout,"\n  -- PHASE 1 : ANALYSIS\n");

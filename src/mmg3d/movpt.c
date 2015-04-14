@@ -37,7 +37,7 @@
 
 
 /** Move internal point */
-int _MMG5_movintpt(MMG5_pMesh mesh,int *list,int ilist,int improve) {
+int _MMG5_movintpt(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,int improve) {
   MMG5_pTetra               pt,pt0;
   MMG5_pPoint               p0,p1,p2,p3,ppt0;
   double               vol,totvol;
@@ -80,7 +80,7 @@ int _MMG5_movintpt(MMG5_pMesh mesh,int *list,int ilist,int improve) {
     pt  = &mesh->tetra[iel];
     memcpy(pt0,pt,sizeof(MMG5_Tetra));
     pt0->v[i0] = 0;
-    callist[k] = _MMG5_orcal(mesh,0);
+    callist[k] = _MMG5_orcal(mesh,met,0);
     if ( callist[k] < _MMG5_EPSD2 )        return(0);
     calnew = MG_MIN(calnew,callist[k]);
   }
@@ -444,7 +444,7 @@ int _MMG5_movbdyregpt(MMG5_pMesh mesh, MMG5_pSol met,int *listv,
     memcpy(pt0,pt,sizeof(MMG5_Tetra));
     pt0->v[i0] = 0;
     calold = MG_MIN(calold, pt->qual);
-    callist[l]=_MMG5_orcal(mesh,0);
+    callist[l]=_MMG5_orcal(mesh,met,0);
     if ( callist[l] < _MMG5_EPSD )        return(0);
     calnew = MG_MIN(calnew,callist[l]);
   }
@@ -732,7 +732,7 @@ int _MMG5_movbdyrefpt(MMG5_pMesh mesh, MMG5_pSol met, int *listv,
     memcpy(pt0,pt,sizeof(MMG5_Tetra));
     pt0->v[i0] = 0;
     calold = MG_MIN(calold, pt->qual);
-    callist[l] = _MMG5_orcal(mesh,0);
+    callist[l] = _MMG5_orcal(mesh,met,0);
     if ( callist[l] < _MMG5_EPSD )        return(0);
     calnew = MG_MIN(calnew,callist[l]);
   }
@@ -1026,7 +1026,7 @@ int _MMG5_movbdynompt(MMG5_pMesh mesh,MMG5_pSol met, int *listv,
     memcpy(pt0,pt,sizeof(MMG5_Tetra));
     pt0->v[i0] = 0;
     calold = MG_MIN(calold, pt->qual);
-    callist[l]= _MMG5_orcal(mesh,0);
+    callist[l]= _MMG5_orcal(mesh,met,0);
     if ( callist[l] < _MMG5_EPSD )        return(0);
     calnew = MG_MIN(calnew,callist[l]);
   }
@@ -1327,7 +1327,7 @@ int _MMG5_movbdyridpt(MMG5_pMesh mesh, MMG5_pSol met, int *listv,
     memcpy(pt0,pt,sizeof(MMG5_Tetra));
     pt0->v[i0] = 0;
     calold = MG_MIN(calold, pt->qual);
-    callist[l]=_MMG5_orcal(mesh,0);
+    callist[l]=_MMG5_orcal(mesh,met,0);
     if ( callist[l] < _MMG5_EPSD )        return(0);
     calnew = MG_MIN(calnew,callist[l]);
   }

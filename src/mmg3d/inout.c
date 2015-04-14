@@ -649,7 +649,6 @@ int MMG5_loadMesh(MMG5_pMesh mesh) {
       if(iswp) ref=_MMG5_swapbin(ref);
     }
     pt->ref  = ref;//0;//ref ;
-    pt->qual = _MMG5_orcal(mesh,k);
     for (i=0; i<4; i++) {
       ppt = &mesh->point[pt->v[i]];
       ppt->tag &= ~MG_NUL;

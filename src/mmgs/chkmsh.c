@@ -187,7 +187,7 @@ int chkeigen(MMG5_pMesh mesh,MMG5_pSol met,int k,double lambda[3]) {
             n = &p0->n[0];
 
         if ( !_MMG5_rotmatrix(n,r) )  return(0);
-        rmtr(r,m,mr);
+        _MMG5_rmtr(r,m,mr);
         mtan[0] = mr[0];
         mtan[1] = mr[1];
         mtan[2] = mr[3];
@@ -254,7 +254,7 @@ int chkmet(MMG5_pMesh mesh,MMG5_pSol met) {
 
             /* Recovery of the eigenvalues of m */
             if ( !_MMG5_rotmatrix(n,r) )  return(0);
-            rmtr(r,m,mr);
+            _MMG5_rmtr(r,m,mr);
             mtan[0] = mr[0];
             mtan[1] = mr[1];
             mtan[2] = mr[3];

@@ -126,9 +126,7 @@ int  invmatg(double m[9],double mi[9]);
 int  rootDeg2(double complex a[3], double complex r[2]);
 int  rootDeg3(double a[4],double complex r[3]);
 
-int  buildridmetnor(MMG5_pMesh mesh,MMG5_pSol met,int np0,double nt[3],double mr[6]);
 int  buildridmetfic(MMG5_pMesh mesh,double t[3],double n[3],double dtan,double dv,double m[6]);
-int  rmtr(double r[3][3],double m[6], double mr[6]);
 int  paratmet(double c0[3],double n0[3],double m[6],double c1[3],double n1[3],double mt[6]);
 int  intregmet(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,double s,double mr[6]);
 int  intridmet(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,double s,double v[3],double mr[6]);

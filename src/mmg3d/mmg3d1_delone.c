@@ -71,9 +71,10 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
   MMG5_pPoint     p0,p1,ppt;
   MMG5_pxPoint    pxp;
   double     dd,len,lmax,o[3],to[3],ro[3],no1[3],no2[3],v[3];
+  double     *m1,*m2,*mp;
   int        k,ip,ip1,ip2,list[_MMG5_LMAX+2],ilist,ref;
   char       imax,tag,j,i,i1,i2,ifa0,ifa1;
-  int        lon,ret,ier;
+  int        lon,ret,ier,iadr;
   double     lmin;
   int        imin,iq;
   int        ii;
@@ -178,9 +179,9 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
           if ( !_MMG5_BezierReg(mesh,ip1,ip2,0.5,v,o,no1) ) goto collapse;
 
         }
-        ier = _MMG5_simbulgept(mesh,list,ilist,o);
+        ier = _MMG5_simbulgept(mesh,met,list,ilist,o);
         if ( !ier ) {
-          ier = _MMG5_dichoto1b(mesh,list,ilist,o,ro);
+          ier = _MMG5_dichoto1b(mesh,met,list,ilist,o,ro);
           memcpy(o,ro,3*sizeof(double));
         }
         ip = _MMG5_newPt(mesh,o,tag);
@@ -319,10 +320,16 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
             exit(EXIT_FAILURE);
           }
         }
+        if ( met->m ) {
+          iadr = met->size*ip1 + 1;
+          m1 = &met->m[iadr];
+          iadr = met->size*ip2 + 1;
+          m2 = &met->m[iadr];
+          iadr = met->size*ip + 1;
+          mp = &met->m[iadr];
 
-        if ( met->m )
-          met->m[ip] = 0.5 * (met->m[ip1]+met->m[ip2]);
-
+          _MMG5_intmetvol(m1,m2,mp,0.5);
+        }
         /* Delaunay */
         if ( !_MMG5_buckin_iso(mesh,met,bucket,ip) ) {
           _MMG5_delPt(mesh,ip);
@@ -380,9 +387,9 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
         tag |= MG_BDY;
         if ( p0->tag > tag )   continue;
         if ( ( tag & MG_NOM ) && (mesh->adja[4*(k-1)+1+i]) ) continue;
-        ilist = _MMG5_chkcol_bdy(mesh,k,i,j,list);
+        ilist = _MMG5_chkcol_bdy(mesh,met,k,i,j,list);
         if ( ilist > 0 ) {
-          ier = _MMG5_colver(mesh,list,ilist,i2);
+          ier = _MMG5_colver(mesh,met,list,ilist,i2);
 
           if ( ier < 0 ) return(-1);
           else if(ier) {
@@ -398,7 +405,7 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
         if ( p0->tag & MG_BDY )  continue;
         ilist = _MMG5_chkcol_int(mesh,met,k,i,j,list,2);
         if ( ilist > 0 ) {
-          ier = _MMG5_colver(mesh,list,ilist,i2);
+          ier = _MMG5_colver(mesh,met,list,ilist,i2);
           if ( ilist < 0 ) continue;
           if ( ier < 0 ) return(-1);
           else if(ier) {
@@ -497,9 +504,9 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
             if ( !_MMG5_BezierReg(mesh,ip1,ip2,0.5,v,o,no1) ) goto collapse2;
 
           }
-          ier = _MMG5_simbulgept(mesh,list,ilist,o);
+          ier = _MMG5_simbulgept(mesh,met,list,ilist,o);
           if ( !ier ) {
-            ier = _MMG5_dichoto1b(mesh,list,ilist,o,ro);
+            ier = _MMG5_dichoto1b(mesh,met,list,ilist,o,ro);
             memcpy(o,ro,3*sizeof(double));
           }
           ip = _MMG5_newPt(mesh,o,tag);
@@ -695,9 +702,9 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
         tag |= MG_BDY;
         if ( p0->tag > tag )   continue;
         if ( ( tag & MG_NOM ) && (mesh->adja[4*(k-1)+1+i]) ) continue;
-        ilist = _MMG5_chkcol_bdy(mesh,k,i,j,list);
+        ilist = _MMG5_chkcol_bdy(mesh,met,k,i,j,list);
         if ( ilist > 0 ) {
-          ier = _MMG5_colver(mesh,list,ilist,i2);
+          ier = _MMG5_colver(mesh,met,list,ilist,i2);
           if ( ier < 0 ) return(-1);
           else if(ier) {
             _MMG5_delPt(mesh,ier);
@@ -712,7 +719,7 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
         if ( p0->tag & MG_BDY )  continue;
         ilist = _MMG5_chkcol_int(mesh,met,k,i,j,list,2);
         if ( ilist > 0 ) {
-          ier = _MMG5_colver(mesh,list,ilist,i2);
+          ier = _MMG5_colver(mesh,met,list,ilist,i2);
           if ( ilist < 0 ) continue;
           if ( ier < 0 ) return(-1);
           else if(ier) {

@@ -350,7 +350,7 @@ int movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
   }
 
   /* Finally, update coordinates and normals of point, if new position is accepted :*/
-  paratmet(p0->c,p0->n,m0,o,no,m); // parallel transport of metric at p0 to new point
+  _MMG5_paratmet(p0->c,p0->n,m0,o,no,m); // parallel transport of metric at p0 to new point
 
   p0->c[0] = o[0];
   p0->c[1] = o[1];
@@ -705,7 +705,7 @@ int movridpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
     if ( isrid )
       intridmet(mesh,met,it2,voy2,(1.0-step),nn1,mo);
     else {
-      if ( !paratmet(p0->c,p0->n,m0,o,nn1,mo) )  return(0);
+      if ( !_MMG5_paratmet(p0->c,p0->n,m0,o,nn1,mo) )  return(0);
     }
   }
 
@@ -870,7 +870,7 @@ int movridpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
       intridmet(mesh,met,it1,voy1,(1.0-step),nn1,mo);
     }
     else {
-      if ( !paratmet(p0->c,p0->n,m0,o,nn1,mo) )  return(0);
+      if ( !_MMG5_paratmet(p0->c,p0->n,m0,o,nn1,mo) )  return(0);
     }
   }
 

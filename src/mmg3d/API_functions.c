@@ -460,8 +460,6 @@ int MMG5_Set_tetrahedron(MMG5_pMesh mesh, int v0, int v1, int v2, int v3, int re
     mesh->xt++;
   }
 
-  pt->qual = _MMG5_orcal(mesh,pos);
-
   return(1);
 }
 

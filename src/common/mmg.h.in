@@ -60,6 +60,7 @@
 #define _MMG5_EPSD2     1.0e-200
 #define _MMG5_EPS       1.e-06
 #define _MMG5_EPSOK     1.e-18
+#define _MMG5_EPS3      1.e-42
 
 #define _MMG5_SQR32     0.866025403784439
 
@@ -335,6 +336,9 @@ typedef struct {
 
 /* Functions declarations */
 int    _MMG5_buildridmet(MMG5_pMesh,MMG5_pSol,int,double,double,double,double*);
+int    _MMG5_buildridmetnor(MMG5_pMesh mesh,MMG5_pSol met,int np0,double nt[3],double mr[6]);
+int    _MMG5_paratmet(double c0[3],double n0[3],double m[6],double c1[3],double n1[3],double mt[6]);
+int    _MMG5_rmtr(double r[3][3],double m[6], double mr[6]);
 int    _MMG5_boundingBox(MMG5_pMesh mesh);
 int    _MMG5_boulec(MMG5_pMesh, int*, int, int i,double *tt);
 int    _MMG5_boulen(MMG5_pMesh, int*, int, int i,double *nn);
@@ -356,11 +360,15 @@ int    _MMG5_norpts(MMG5_pMesh,int,int,int,double *);
 int    _MMG5_nortri(MMG5_pMesh mesh,MMG5_pTria pt,double *n);
 void   _MMG5_printTria(MMG5_pMesh mesh,char* fileName);
 int    _MMG5_rotmatrix(double n[3],double r[3][3]);
+int    _MMG5_invmat(double *m,double *mi);
 int    _MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met);
 double _MMG5_surftri_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt);
 double _MMG5_surftri_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt);
 int    _MMG5_sys33sym(double a[6], double b[3], double r[3]);
 int    _MMG5_unscaleMesh(MMG5_pMesh mesh,MMG5_pSol met);
+
+int    _MMG5_interpreg_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt,char i,double s,double mr[6]);
+int    _MMG5_interp_iso(double *ma,double *mb,double *mp,double t);
 
 /* function pointers */
 int    (*_MMG5_bezierCP)(MMG5_pMesh ,MMG5_Tria *,_MMG5_pBezier ,char );

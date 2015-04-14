@@ -1282,7 +1282,7 @@ static int grad2met(MMG5_pMesh mesh, MMG5_pSol met, int iel, int i){
   l = sqrt(ux*ux+uy*uy+uz*uz);
 
   /* Characteristic sizes in direction of support curve */
-  rmtr(r1,m1,mr);
+  _MMG5_rmtr(r1,m1,mr);
   mtan1[0] = mr[0];
   mtan1[1] = mr[1];
   mtan1[2] = mr[3];
@@ -1300,7 +1300,7 @@ static int grad2met(MMG5_pMesh mesh, MMG5_pSol met, int iel, int i){
   ps1 = mtan1[0]*t1[0]*t1[0] + 2.0*mtan1[1]*t1[0]*t1[1] + mtan1[2]*t1[1]*t1[1];
   ps1 = sqrt(ps1);
 
-  rmtr(r2,m2,mr);
+  _MMG5_rmtr(r2,m2,mr);
   mtan2[0] = mr[0];
   mtan2[1] = mr[1];
   mtan2[2] = mr[3];

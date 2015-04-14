@@ -38,61 +38,14 @@
 extern char ddb;
 
 /** compute tetra oriented quality of iel (return 0.0 when element is inverted) */
-inline double _MMG5_orcal(MMG5_pMesh mesh,int iel) {
+inline double _MMG5_orcal(MMG5_pMesh mesh,MMG5_pSol met,int iel) {
   MMG5_pTetra     pt;
   double     abx,aby,abz,acx,acy,acz,adx,ady,adz,bcx,bcy,bcz,bdx,bdy,bdz,cdx,cdy,cdz;
   double     vol,v1,v2,v3,rap;
   double     *a,*b,*c,*d;
 
   pt = &mesh->tetra[iel];
-  a = mesh->point[pt->v[0]].c;
-  b = mesh->point[pt->v[1]].c;
-  c = mesh->point[pt->v[2]].c;
-  d = mesh->point[pt->v[3]].c;
-
-  /* volume */
-  abx = b[0] - a[0];
-  aby = b[1] - a[1];
-  abz = b[2] - a[2];
-  rap = abx*abx + aby*aby + abz*abz;
-
-  acx = c[0] - a[0];
-  acy = c[1] - a[1];
-  acz = c[2] - a[2];
-  rap += acx*acx + acy*acy + acz*acz;
-
-  adx = d[0] - a[0];
-  ady = d[1] - a[1];
-  adz = d[2] - a[2];
-  rap += adx*adx + ady*ady + adz*adz;
-
-  v1  = acy*adz - acz*ady;
-  v2  = acz*adx - acx*adz;
-  v3  = acx*ady - acy*adx;
-  vol = abx * v1 + aby * v2 + abz * v3;
-
-  if ( vol < _MMG5_EPSD2 )  return(0.0);
-
-  bcx = c[0] - b[0];
-  bcy = c[1] - b[1];
-  bcz = c[2] - b[2];
-  rap += bcx*bcx + bcy*bcy + bcz*bcz;
-
-  bdx = d[0] - b[0];
-  bdy = d[1] - b[1];
-  bdz = d[2] - b[2];
-  rap += bdx*bdx + bdy*bdy + bdz*bdz;
-
-  cdx = d[0] - c[0];
-  cdy = d[1] - c[1];
-  cdz = d[2] - c[2];
-  rap += cdx*cdx + cdy*cdy + cdz*cdz;
-  if ( rap < _MMG5_EPSD2 )  return(0.0);
-
-  /* quality = vol / len^3/2 */
-  rap = rap * sqrt(rap);
-
-  return(vol / rap);
+  return(_MMG5_caltet(mesh,met,pt->v[0],pt->v[1],pt->v[2],pt->v[3]));
 }
 
 
@@ -174,13 +127,13 @@ inline double _MMG5_caltet_ani(MMG5_pMesh mesh,MMG5_pSol met,int ia,int ib,int i
 
   /* average metric */
   memset(mm,0,6*sizeof(double));
-  iadr = (ia-1)*met->size + 1;
+  iadr = (ia)*met->size + 1;
   ma   = &met->m[iadr];
-  iadr = (ib-1)*met->size + 1;
+  iadr = (ib)*met->size + 1;
   mb   = &met->m[iadr];
-  iadr = (ic-1)*met->size + 1;
+  iadr = (ic)*met->size + 1;
   mc   = &met->m[iadr];
-  iadr = (id-1)*met->size + 1;
+  iadr = (id)*met->size + 1;
   md   = &met->m[iadr];
   for (j=0; j<6; j++)
     mm[j] = 0.25 * (ma[j]+mb[j]+mc[j]+md[j]);
@@ -247,8 +200,11 @@ inline double _MMG5_caltet_ani(MMG5_pMesh mesh,MMG5_pSol met,int ia,int ib,int i
   num = sqrt(rap) * rap;  
 
   cal = det / num;  
-  if(cal <= _MMG5_NULKAL) printf(" TOO BAD QUALITY %e %e %e %e\n",cal,num,det,vol);  
-  
+  if(cal <= _MMG5_NULKAL) {
+    printf(" TOO BAD QUALITY %e %e %e %e\n",cal,num,det,vol);  
+    return(_MMG5_NULKAL);
+  }
+  //printf("cal %e %e %e\n",cal,num,det);
   assert(cal > _MMG5_NULKAL);
   return(cal); 
 }
@@ -560,7 +516,7 @@ int _MMG5_badelt(MMG5_pMesh mesh,MMG5_pSol met) {
       /*treat bad elt*/
       /*1) try to swp one edge*/
       for(i=0 ; i<6 ; i++) {
-        nconf = _MMG5_chkswpgen(mesh,k,i,&ilist,list,1.01);
+        nconf = _MMG5_chkswpgen(mesh,met,k,i,&ilist,list,1.01);
         if ( nconf ) {
           ns++;
           if(!_MMG5_swpgen(mesh,met,nconf,ilist,list,NULL)) return(-1);
@@ -693,6 +649,14 @@ void _MMG5_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
   double   rap,rapmin,rapmax,rapavg,med,good;
   int      i,k,iel,ok,ir,imax,nex,his[5];
 
+  /*compute tet quality*/
+  for (k=1; k<=mesh->ne; k++) {
+    pt = &mesh->tetra[k];
+     if( !MG_EOK(pt) )   continue;
+     pt->qual = _MMG5_orcal(mesh,met,k);
+  }
+  if ( abs(mesh->info.imprim) <= 0 ) return;
+
   rapmin  = 2.0;
   rapmax  = 0.0;
   rapavg  = med = good = 0.0;
@@ -711,8 +675,7 @@ void _MMG5_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
     if ( _MMG5_orvol(mesh->point,pt->v) < 0.0 ) {
       fprintf(stdout,"dans quality vol negatif\n");
     }
-    rap = _MMG5_ALPHAD *
-      _MMG5_caltet(mesh,met,pt->v[0],pt->v[1],pt->v[2],pt->v[3]);
+    rap = _MMG5_ALPHAD * pt->qual;
     if ( rap < rapmin ) {
       rapmin = rap;
       iel    = ok;
