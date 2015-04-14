@@ -59,6 +59,7 @@
 #define _MMG5_EPSD      1.e-30
 #define _MMG5_EPSD2     1.0e-200
 #define _MMG5_EPS       1.e-06
+#define _MMG5_EPSOK     1.e-18
 
 #define _MMG5_SQR32     0.866025403784439
 
