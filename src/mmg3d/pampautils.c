@@ -150,9 +150,10 @@ void _MMG5_usage(char *prog) {
 
   fprintf(stdout,"-lag [0/1/2] Lagrangian mesh displacement according to mode 0/1/2\n");
   fprintf(stdout,"-ls     val  create mesh of isovalue val\n");
+  fprintf(stdout,"-noinsert    no point insertion/deletion \n");
   fprintf(stdout,"-noswap      no edge or face flipping\n");
   fprintf(stdout,"-nomove      no point relocation\n");
-  fprintf(stdout,"-noinsert    no point insertion/deletion \n");
+  fprintf(stdout,"-nsurf       no surfacic modifications\n");
 #ifndef PATTERN
   fprintf(stdout,"-bucket val  Specify the size of bucket per dimension \n");
 #endif
@@ -322,6 +323,10 @@ int MMG5_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
         }
         else if( !strcmp(argv[i],"-nomove") ) {
           if ( !MMG5_Set_iparameter(mesh,met,MMG5_IPARAM_nomove,1) )
+            exit(EXIT_FAILURE);
+        }
+        else if( !strcmp(argv[i],"-nosurf") ) {
+          if ( !MMG5_Set_iparameter(mesh,met,MMG5_IPARAM_nosurf,1) )
             exit(EXIT_FAILURE);
         }
         break;

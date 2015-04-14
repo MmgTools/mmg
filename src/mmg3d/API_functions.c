@@ -61,6 +61,8 @@ void _MMG5_Init_parameters(MMG5_pMesh mesh) {
   mesh->info.noswap   =  0;  /* [0/1]    ,avoid/allow edge or face flipping */
   /** MMG5_IPARAM_nomove = 0 */
   mesh->info.nomove   =  0;  /* [0/1]    ,avoid/allow point relocation */
+  /** MMG5_IPARAM_nosurf = 0 */
+  mesh->info.nosurf   =  0;  /* [0/1]    ,avoid/allow surface modifications */
 #ifdef USE_SCOTCH
   mesh->info.renum    = 1;   /* [1/0]    , Turn on/off the renumbering using SCOTCH; */
 #else
@@ -1059,6 +1061,9 @@ int MMG5_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
   case MMG5_IPARAM_nomove :
     mesh->info.nomove   = val;
     break;
+  case MMG5_IPARAM_nosurf :
+    mesh->info.nosurf   = val;
+    break;
   case MMG5_IPARAM_numberOfLocalParam :
     if ( mesh->info.par ) {
       _MMG5_DEL_MEM(mesh,mesh->info.par,mesh->info.npar*sizeof(MMG5_Par));
@@ -1137,6 +1142,9 @@ int MMG5_Get_iparameter(MMG5_pMesh mesh, int iparam) {
     break;
   case MMG5_IPARAM_nomove :
     return ( mesh->info.nomove );
+    break;
+  case MMG5_IPARAM_nosurf :
+    return ( mesh->info.nosurf );
     break;
   case MMG5_IPARAM_numberOfLocalParam :
     return ( mesh->info.npar );

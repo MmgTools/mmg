@@ -102,6 +102,7 @@ enum MMG5_Param
   MMG5_IPARAM_noinsert,          /*!< [1/0], Avoid/allow point insertion */
   MMG5_IPARAM_noswap,            /*!< [1/0], Avoid/allow edge or face flipping */
   MMG5_IPARAM_nomove,            /*!< [1/0], Avoid/allow point relocation */
+  MMG5_IPARAM_nosurf,            /*!< [1/0], Avoid/allow surface modifications */
   MMG5_IPARAM_numberOfLocalParam,/*!< [n], Number of local parameters */
   MMG5_IPARAM_renum,             /*!< [1/0], Turn on/off point relocation with Scotch */
   MMG5_IPARAM_bucket,            /*!< [n], Specify the size of the bucket per dimension (DELAUNAY) */

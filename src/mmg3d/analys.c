@@ -37,6 +37,26 @@
 
 /**
  * \param mesh pointer towarad the mesh structure.
+ *
+ * Set all boundary triangles to required.
+ *
+ */
+static inline void _MMG5_reqBoundaries(MMG5_pMesh mesh) {
+  MMG5_pTria     ptt;
+  int            k;
+
+  for (k=1; k<=mesh->nt; k++) {
+    ptt = &mesh->tria[k];
+    ptt->tag[0] |= MG_REQ;
+    ptt->tag[1] |= MG_REQ;
+    ptt->tag[2] |= MG_REQ;
+  }
+  return;
+}
+
+
+/**
+ * \param mesh pointer towarad the mesh structure.
  * \return 0 if fail, 1 otherwise.
  *
  * topology: set adjacent, detect Moebius, flip faces, count connected comp.
@@ -559,6 +579,11 @@ int _MMG5_analys(MMG5_pMesh mesh) {
   else if ( !_MMG5_bdryPerm(mesh) ) {
     fprintf(stdout,"  ## Boundary orientation problem. Exit program.\n");
     return(0);
+  }
+
+  if ( mesh->info.nosurf ) {
+    /* Set all boundary triangles to required */
+    _MMG5_reqBoundaries(mesh);
   }
 
   /* create surface adjacency */

@@ -45,14 +45,15 @@
  * physical metric.
  *
  */
-int defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
+int _MMG5_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   printf("defsiz_ani\n");
   exit(0);
 
   return(1);
 }
+
 /* Enforces mesh gradation by truncating metric field */
-int gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
+int _MMG5_gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   printf("gradsize_ani not implemented\n");
   return(1);
 }

@@ -124,11 +124,11 @@ void _MMG5_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
     _MMG5_gradsiz = _MMG5_gradsiz_iso;
   }
   else if ( met->size == 6 ) {
-    _MMG5_caltet = _MMG5_caltet_ani;
+    _MMG5_caltet  = _MMG5_caltet_ani;
     _MMG5_caltri  = _MMG5_caltri_ani;
-    _MMG5_lenedg = _MMG5_lenedg_ani;
-    _MMG5_defsiz = _MMG5_defsiz_ani;
-    _MMG5_gradsiz = gradsiz_ani;
+    _MMG5_lenedg  = _MMG5_lenedg_ani;
+    _MMG5_defsiz  = _MMG5_defsiz_ani;
+    _MMG5_gradsiz = _MMG5_gradsiz_ani;
   }
 }
 
