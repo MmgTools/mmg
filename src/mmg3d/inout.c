@@ -1398,7 +1398,9 @@ int _MMG5_saveLibraryMesh(MMG5_pMesh mesh) {
       }
     }
   }
-  if ( nre ) {
+  if ( nre  && !mesh->info.nosurf ) {
+    /* Don't save the required vertices when no surface remeshing (because all
+     * the surface vertices are required). */
     if(!bin) {
       strcpy(&chaine[0],"\n\nRequiredVertices\n");
       fprintf(inm,"%s",chaine);
@@ -1449,7 +1451,9 @@ int _MMG5_saveLibraryMesh(MMG5_pMesh mesh) {
         fwrite(&ptt->ref,sw,1,inm);
       }
     }
-    if ( ntreq ) {
+    if ( ntreq && !mesh->info.nosurf ) {
+      /* Don't save the required triangles when no surface remeshing (because
+       * all the surface triangles are required). */
       if(!bin) {
         strcpy(&chaine[0],"\n\nRequiredTriangles\n");
         fprintf(inm,"%s",chaine);
@@ -1524,7 +1528,9 @@ int _MMG5_saveLibraryMesh(MMG5_pMesh mesh) {
         }
       }
     }
-    if ( nedreq ) {
+    if ( nedreq && !mesh->info.nosurf ) {
+      /* Don't save the required edges when no surface remeshing (because
+       * all the surface edges are required). */
       if(!bin) {
         strcpy(&chaine[0],"\n\nRequiredEdges\n");
         fprintf(inm,"%s",chaine);
