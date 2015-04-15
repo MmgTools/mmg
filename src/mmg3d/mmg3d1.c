@@ -752,8 +752,8 @@ _MMG5_anatetv(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
   MMG5_pPoint   p1,p2;
   MMG5_xTetra  *pxt;
   _MMG5_Hash     hash;
-  double   ll,o[3],ux,uy,uz,hma2;
-  int      vx[6],k,ip,ip1,ip2,nap,ns,ne,memlack;
+  double   ll,o[3],ux,uy,uz,hma2,*m1,*m2,*mp;
+  int      vx[6],k,ip,ip1,ip2,nap,ns,ne,memlack,iadr;
   char     i,j,ia;
 
   /** 1. analysis */
@@ -848,9 +848,16 @@ _MMG5_anatetv(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
           p1  = &mesh->point[ip1];
           p2  = &mesh->point[ip2];
         }
+        if ( met->m ) {
+          iadr = met->size*ip1 + 1;
+          m1 = &met->m[iadr];
+          iadr = met->size*ip2 + 1;
+          m2 = &met->m[iadr];
+          iadr = met->size*ip + 1;
+          mp = &met->m[iadr];
 
-        if ( met->m )
-          met->m[ip] = 0.5 * (met->m[ip1]+met->m[ip2]);
+          _MMG5_intmetvol(m1,m2,mp,0.5);
+        }
         if ( !_MMG5_hashEdge(mesh,&hash,ip1,ip2,ip) )  return(-1);
         MG_SET(pt->flag,i);
         nap++;
@@ -1051,6 +1058,7 @@ _MMG5_anatets(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
         ppt = &mesh->point[ip];
         p1  = &mesh->point[ip1];
         p2  = &mesh->point[ip2];
+#warning interpolation
         if ( met->m )
           met->m[ip] = 0.5 * (met->m[ip1]+met->m[ip2]);
         if ( MG_EDG(ptt.tag[j]) || (ptt.tag[j] & MG_NOM) )
