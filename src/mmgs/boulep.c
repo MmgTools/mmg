@@ -290,15 +290,15 @@ int boulep(MMG5_pMesh mesh,int start,int ip,int *list) {
   return(ilist);
 }
 
-/* Computation of the two balls of a ridge point : list1 is associated to normal n1's side
+/** Computation of the two balls of a ridge point : list1 is associated to normal n1's side
    ip0, ip1 = indices of the 2 ending point of the ridge
    Both lists are returned enumerated in direct order  */
 int bouletrid(MMG5_pMesh mesh,int start,int ip,int *il1,int *l1,int *il2,int *l2,int *ip0,int *ip1) {
   MMG5_pTria           pt;
   MMG5_pPoint          ppt;
-  int             idp,k,kold,*adja,iel,*ilist1,*ilist2,*list1,*list2,aux;
-  unsigned char   i,iold,i1,i2,ipn;
-  double          *n1,*n2,nt[3],ps1,ps2;
+  int                  idp,k,kold,*adja,iel,*ilist1,*ilist2,*list1,*list2,aux;
+  unsigned char        i,iold,i1,i2,ipn;
+  double               *n1,*n2,nt[3],ps1,ps2;
 
   pt = &mesh->tria[start];
   if ( !MG_EOK(pt) )  return(0);

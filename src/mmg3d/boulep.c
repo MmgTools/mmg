@@ -249,8 +249,11 @@ int _MMG5_boulenm(MMG5_pMesh mesh,int start,int ip,int iface,
 
 /** Return volumic ball of a surfacic point p, as well as the part of its surfacic ball
     supported in the outer boundary starting from tet start, with point ip, and face if in tetra
-    volumic ball ; list[k] = 4*number of tet + index of point
-    surfacic ball : list[k] = 4*number of tet + index of FACE */
+    volumic ball ; listv[k] = 4*number of tet + index of point
+    surfacic ball : lists[k] = 4*number of tet + index of FACE
+
+    \todo quasi identic to _MMG5_boulesurfvolp: try to remove one of the 2 funcs.
+ */
 int _MMG5_bouleext(MMG5_pMesh mesh, int start, int ip, int iface, int *listv, int *ilistv, int *lists, int*ilists){
   MMG5_pTetra pt,pt1;
   int base,nump,k,k1,*adja,piv,na,nb,adj,cur,nvstart,fstart,aux;
@@ -370,8 +373,11 @@ int _MMG5_bouleext(MMG5_pMesh mesh, int start, int ip, int iface, int *listv, in
 
 /** Return volumic ball of a SURFACE point p, as well as its surfacic ball, starting from tetra
     start, with point ip, and face if in tetra
-    volumic ball ; list[k] = 4*number of tet + index of point
-    surfacic ball : list[k] = 4*number of tet + index of FACE */
+    volumic ball ; listv[k] = 4*number of tet + index of point
+    surfacic ball : lists[k] = 4*number of tet + index of FAC
+
+    \todo quasi identic to _MMG5_bouleext: try to remove one of the 2 funcs.
+ */
 int _MMG5_boulesurfvolp(MMG5_pMesh mesh,int start,int ip,int iface,
                         int *listv,int *ilistv,int *lists,int*ilists) {
   MMG5_pTetra  pt,pt1;

@@ -267,3 +267,298 @@ double _MMG5_surftri_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt) {
   surf *= _MMG5_ATHIRD;
   return(surf);
 }
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param ismet has the user provided a metric?
+ * \param mm metric 
+ *
+ * Search for points with unintialized metric and define anisotropic size at
+ * this points.
+ *
+ */
+void _MMG5_defUninitSize(MMG5_pMesh mesh,MMG5_pSol met,char ismet)
+{
+  MMG5_pPoint   ppt;
+  double        *m,*n,r[3][3],isqhmax;
+  int           k,i;
+
+  isqhmax = 1.0 / (mesh->info.hmax*mesh->info.hmax);
+  for (k=1; k<=mesh->np; k++) {
+    ppt = &mesh->point[k];
+    if ( !MG_VOK(ppt) || ppt->flag == 1 )  continue;
+
+    m = &met->m[6*(k)+1];
+    if(ismet) {
+      ppt->flag = 1;
+      continue;
+    }
+    memset(m,0,6*sizeof(double));
+    if ( MS_SIN(ppt->tag) ) {
+      m[0] = m[3] = m[5] = isqhmax;
+    }
+    else if ( ppt->tag & MG_GEO ) {
+      m[0] = m[1] = m[2] = isqhmax;
+    }
+    else {
+      n = ppt->tag & MG_REF ? &mesh->xpoint[ppt->xp].n1[0] : ppt->n;
+      _MMG5_rotmatrix(n,r);
+      m[0] = isqhmax*(r[0][0]*r[0][0]+r[1][0]*r[1][0]+r[2][0]*r[2][0]);
+      m[1] = isqhmax*(r[0][0]*r[0][1]+r[1][0]*r[1][1]+r[2][0]*r[2][1]);
+      m[2] = isqhmax*(r[0][0]*r[0][2]+r[1][0]*r[1][2]+r[2][0]*r[2][2]);
+      m[3] = isqhmax*(r[0][1]*r[0][1]+r[1][1]*r[1][1]+r[2][1]*r[2][1]);
+      m[4] = isqhmax*(r[0][1]*r[0][2]+r[1][1]*r[1][2]+r[2][1]*r[2][2]);
+      m[5] = isqhmax*(r[0][2]*r[0][2]+r[1][2]*r[1][2]+r[2][2]*r[2][2]);
+    }
+    ppt->flag = 1;
+  }
+}
+
+/**
+ * \param k index of the tetrahedra from which we come.
+ * \param p0 pointer toward the point on which we want to def the metric.
+ * \param i0 pointer toward the local index of the point in tria.
+ * \param b control polygon of triangle.
+ * \param r rotation matrix.
+ * \param c physical coordinates of the curve edge mid-point.
+ * \param lispoi list of incident vertices to p0
+ * \param tAA matrix to fill
+ * \param tAb second member
+ *
+ * Fill matrice tAA and second member tAb with A=(\sum X_{P_i}^2 \sum
+ * Y_{P_i}^2 \sum X_{P_i}Y_{P_i}) and b=\sum Z_{P_i} with P_i the physical
+ * points at edge [i0;i1] extremities and middle.
+ * Compute the physical coor \a c of the curve edge's
+ * mid-point.
+ *
+ */
+void _MMG5_fillDefmetregSys( int k, MMG5_pPoint p0, int i0, _MMG5_Bezier b,
+                             double r[3][3], double c[3],
+                             double *lispoi,
+                             double tAA[6], double tAb[3] )
+{
+  double b0[3],b1[3],d[3];
+  int    j;
+
+  for(j=0; j<10; j++){
+    c[0] = b.b[j][0] - p0->c[0];
+    c[1] = b.b[j][1] - p0->c[1];
+    c[2] = b.b[j][2] - p0->c[2];
+
+    b.b[j][0] =  r[0][0]*c[0] + r[0][1]*c[1] + r[0][2]*c[2];
+    b.b[j][1] =  r[1][0]*c[0] + r[1][1]*c[1] + r[1][2]*c[2];
+    b.b[j][2] =  r[2][0]*c[0] + r[2][1]*c[1] + r[2][2]*c[2];
+  }
+
+/* Mid-point along edge [i0;i1] and endpoint in the rotated frame */
+  if(i0 == 0){
+    memcpy(b0,&(b.b[7][0]),3*sizeof(double));
+    memcpy(b1,&(b.b[8][0]),3*sizeof(double));
+  }
+  else if(i0 == 1){
+    memcpy(b0,&(b.b[3][0]),3*sizeof(double));
+    memcpy(b1,&(b.b[4][0]),3*sizeof(double));
+  }
+  else{
+    memcpy(b0,&(b.b[5][0]),3*sizeof(double));
+    memcpy(b1,&(b.b[6][0]),3*sizeof(double));
+  }
+
+/* At this point, the two control points b0 and b1 are expressed in the
+ * rotated frame. We compute the physical coor of the curve edge's
+ * mid-point. */
+  c[0] = 3.0/8.0*b0[0] + 3.0/8.0*b1[0] + 1.0/8.0*lispoi[3*k+1];
+  c[1] = 3.0/8.0*b0[1] + 3.0/8.0*b1[1] + 1.0/8.0*lispoi[3*k+2];
+  c[2] = 3.0/8.0*b0[2] + 3.0/8.0*b1[2] + 1.0/8.0*lispoi[3*k+3];
+
+/* Fill matrice tAA and second member tAb with A=(\sum X_{P_i}^2 \sum
+ * Y_{P_i}^2 \sum X_{P_i}Y_{P_i}) and b=\sum Z_{P_i} with P_i the physical
+ * points at edge [i0;i1] extremities and middle. */
+  tAA[0] += c[0]*c[0]*c[0]*c[0];
+  tAA[1] += c[0]*c[0]*c[1]*c[1];
+  tAA[2] += c[0]*c[0]*c[0]*c[1];
+  tAA[3] += c[1]*c[1]*c[1]*c[1];
+  tAA[4] += c[0]*c[1]*c[1]*c[1];
+  tAA[5] += c[0]*c[0]*c[1]*c[1];
+
+  tAb[0] += c[0]*c[0]*c[2];
+  tAb[1] += c[1]*c[1]*c[2];
+  tAb[2] += c[0]*c[1]*c[2];
+
+  tAA[0] += lispoi[3*k+1]*lispoi[3*k+1]*lispoi[3*k+1]*lispoi[3*k+1];
+  tAA[1] += lispoi[3*k+1]*lispoi[3*k+1]*lispoi[3*k+2]*lispoi[3*k+2];
+  tAA[2] += lispoi[3*k+1]*lispoi[3*k+1]*lispoi[3*k+1]*lispoi[3*k+2];
+  tAA[3] += lispoi[3*k+2]*lispoi[3*k+2]*lispoi[3*k+2]*lispoi[3*k+2];
+  tAA[4] += lispoi[3*k+1]*lispoi[3*k+2]*lispoi[3*k+2]*lispoi[3*k+2];
+  tAA[5] += lispoi[3*k+1]*lispoi[3*k+1]*lispoi[3*k+2]*lispoi[3*k+2];
+
+  tAb[0] += lispoi[3*k+1]*lispoi[3*k+1]*lispoi[3*k+3];
+  tAb[1] += lispoi[3*k+2]*lispoi[3*k+2]*lispoi[3*k+3];
+  tAb[2] += lispoi[3*k+1]*lispoi[3*k+2]*lispoi[3*k+3];
+
+/* Mid-point along median edge (coor of mid-point in parametric space : (1/4
+ * 1/4)) and endpoint in the rotated frame (coor of end-point in parametric
+ * space (1/2 1/2)). */
+  if(i0 == 0){
+    c[0] = A64TH*(b.b[1][0] + b.b[2][0] + 3.0*(b.b[3][0] + b.b[4][0])) \
+      + 3.0*A16TH*(b.b[6][0] + b.b[7][0] + b.b[9][0]) + A32TH*(b.b[5][0] + b.b[8][0]);
+    c[1] = A64TH*(b.b[1][1] + b.b[2][1] + 3.0*(b.b[3][1] + b.b[4][1])) \
+      + 3.0*A16TH*(b.b[6][1] + b.b[7][1] + b.b[9][1]) + A32TH*(b.b[5][1] + b.b[8][1]);
+    c[2] = A64TH*(b.b[1][2] + b.b[2][2] + 3.0*(b.b[3][2] + b.b[4][2])) \
+      + 3.0*A16TH*(b.b[6][2] + b.b[7][2] + b.b[9][2]) + A32TH*(b.b[5][2] + b.b[8][2]);
+
+    d[0] = 0.125*b.b[1][0] + 0.375*(b.b[3][0] + b.b[4][0]) + 0.125*b.b[2][0];
+    d[1] = 0.125*b.b[1][1] + 0.375*(b.b[3][1] + b.b[4][1]) + 0.125*b.b[2][1];
+    d[2] = 0.125*b.b[1][2] + 0.375*(b.b[3][2] + b.b[4][2]) + 0.125*b.b[2][2];
+  }
+  else if(i0 == 1){
+    c[0] = A64TH*(b.b[0][0] + b.b[2][0] + 3.0*(b.b[5][0] + b.b[6][0])) \
+      + 3.0*A16TH*(b.b[3][0] + b.b[8][0] + b.b[9][0]) + A32TH*(b.b[4][0] + b.b[7][0]);
+    c[1] = A64TH*(b.b[0][1] + b.b[2][1] + 3.0*(b.b[5][1] + b.b[6][1])) \
+      + 3.0*A16TH*(b.b[3][1] + b.b[8][1] + b.b[9][1]) + A32TH*(b.b[4][1] + b.b[7][1]);
+    c[2] = A64TH*(b.b[0][2] + b.b[2][2] + 3.0*(b.b[5][2] + b.b[6][2])) \
+      + 3.0*A16TH*(b.b[3][2] + b.b[8][2] + b.b[9][2]) + A32TH*(b.b[4][2] + b.b[7][2]);
+
+    d[0] = 0.125*b.b[2][0] + 0.375*(b.b[5][0] + b.b[6][0]) + 0.125*b.b[0][0];
+    d[1] = 0.125*b.b[2][1] + 0.375*(b.b[5][1] + b.b[6][1]) + 0.125*b.b[0][1];
+    d[2] = 0.125*b.b[2][2] + 0.375*(b.b[5][2] + b.b[6][2]) + 0.125*b.b[0][2];
+  }
+  else{
+    c[0] = A64TH*(b.b[0][0] + b.b[1][0] + 3.0*(b.b[7][0] + b.b[8][0])) \
+      + 3.0*A16TH*(b.b[4][0] + b.b[5][0] + b.b[9][0]) + A32TH*(b.b[3][0] + b.b[6][0]);
+    c[1] = A64TH*(b.b[0][1] + b.b[1][1] + 3.0*(b.b[7][1] + b.b[8][1])) \
+      + 3.0*A16TH*(b.b[4][1] + b.b[5][1] + b.b[9][1]) + A32TH*(b.b[3][1] + b.b[6][1]);
+    c[2] = A64TH*(b.b[0][2] + b.b[1][2] + 3.0*(b.b[7][2] + b.b[8][2])) \
+      + 3.0*A16TH*(b.b[4][2] + b.b[5][2] + b.b[9][2]) + A32TH*(b.b[3][2] + b.b[6][2]);
+
+    d[0] = 0.125*b.b[0][0] + 0.375*(b.b[7][0] + b.b[8][0]) + 0.125*b.b[1][0];
+    d[1] = 0.125*b.b[0][1] + 0.375*(b.b[7][1] + b.b[8][1]) + 0.125*b.b[1][1];
+    d[2] = 0.125*b.b[0][2] + 0.375*(b.b[7][2] + b.b[8][2]) + 0.125*b.b[1][2];
+  }
+
+/* Fill matrice tAA and second member tAb*/
+  tAA[0] += c[0]*c[0]*c[0]*c[0];
+  tAA[1] += c[0]*c[0]*c[1]*c[1];
+  tAA[2] += c[0]*c[0]*c[0]*c[1];
+  tAA[3] += c[1]*c[1]*c[1]*c[1];
+  tAA[4] += c[0]*c[1]*c[1]*c[1];
+  tAA[5] += c[0]*c[0]*c[1]*c[1];
+
+  tAb[0] += c[0]*c[0]*c[2];
+  tAb[1] += c[1]*c[1]*c[2];
+  tAb[2] += c[0]*c[1]*c[2];
+
+  tAA[0] += d[0]*d[0]*d[0]*d[0];
+  tAA[1] += d[0]*d[0]*d[1]*d[1];
+  tAA[2] += d[0]*d[0]*d[0]*d[1];
+  tAA[3] += d[1]*d[1]*d[1]*d[1];
+  tAA[4] += d[0]*d[1]*d[1]*d[1];
+  tAA[5] += d[0]*d[0]*d[1]*d[1];
+
+  tAb[0] += d[0]*d[0]*d[2];
+  tAb[1] += d[1]*d[1]*d[2];
+  tAb[2] += d[0]*d[1]*d[2];
+
+  return;
+}
+
+/**
+ * \param c physical coordinates of the curve edge mid-point.
+ * \param tAA matrix of the system to solve.
+ * \param tAb second member.
+ * \param m pointer toward the metric.
+ * \param isqhmax maximum size for edge.
+ * \param isqhmin minimum size for edge.
+ * \param hausd hausdorff value at point.
+ * \return 1 if success, 0 if fail.
+ *
+ * Solve tAA * tmp_m = tAb and fill m with tmp_m (after rotation).
+ *
+ */
+int _MMG5_solveDefmetregSys( MMG5_pMesh mesh, double c[3], double tAA[6],
+                             double tAb[3], double *m,
+                             double isqhmin, double isqhmax, double hausd)
+{
+  double intm[3], kappa[2], vp[2][2], r[3][3], b0[3], b1[3];
+
+  memset(intm,0.0,3*sizeof(double));
+
+  /* case planar surface : tAb = 0 => no curvature */
+  /* isotropic metric with hmax size*/
+  if((tAb[0]*tAb[0] + tAb[1]*tAb[1] + tAb[2]*tAb[2]) < _MMG5_EPSD) {
+    m[0] = isqhmax;
+    m[1] = 0;
+    m[2] = 0;
+    m[3] = isqhmax;
+    m[4] = 0;
+    m[5] = isqhmax;
+    return(1);
+  }
+
+  /* solve now (a b c) = tAA^{-1} * tAb */
+  if ( !_MMG5_sys33sym(tAA,tAb,c) ) {
+    printf(" La matrice %f %f %f %f %f %f \n",tAA[0],tAA[1],tAA[2],tAA[3],tAA[4],tAA[5]);
+    return(0);
+  }
+  intm[0] = 2.0*c[0];
+  intm[1] = c[2];
+  intm[2] = 2.0*c[1];
+
+  /* At this point, intm stands for the integral matrix of Taubin's approach : vp[0] and vp[1]
+     are the two pr. directions of curvature, and the two curvatures can be inferred from lambdas*/
+  _MMG5_eigensym(intm,kappa,vp);
+
+  /* Truncation of eigenvalues */
+  kappa[0] = 2.0/9.0 * fabs(kappa[0])/hausd;
+  kappa[0] = MG_MIN(kappa[0],isqhmin);
+  kappa[0] = MG_MAX(kappa[0],isqhmax);
+
+  kappa[1] = 2.0/9.0 * fabs(kappa[1])/hausd;
+  kappa[1] = MG_MIN(kappa[1],isqhmin);
+  kappa[1] = MG_MAX(kappa[1],isqhmax);
+
+  /* Send back the metric to the canonical basis of tangent plane :
+     diag(lambda) = {^t}vp * M * vp, M = vp * diag(lambda) * {^t}vp */
+  intm[0] = kappa[0]*vp[0][0]*vp[0][0] + kappa[1]*vp[1][0]*vp[1][0];
+  intm[1] = kappa[0]*vp[0][0]*vp[0][1] + kappa[1]*vp[1][0]*vp[1][1];
+  intm[2] = kappa[0]*vp[0][1]*vp[0][1] + kappa[1]*vp[1][1]*vp[1][1];
+
+  /* At this point, intm (with 0 in the z direction)  is the desired metric, except
+     it is expressed in the rotated bc, that is intm = R * metric in bc * ^t R,
+     so metric in bc = ^tR*intm*R */
+
+  /* b0 and b1 are the lines of matrix intm*R  */
+  b0[0] = intm[0]*r[0][0] + intm[1]*r[1][0] ;   b0[1] = intm[0]*r[0][1] + intm[1]*r[1][1] ;    b0[2] = intm[0]*r[0][2] + intm[1]*r[1][2] ;
+  b1[0] = intm[1]*r[0][0] + intm[2]*r[1][0] ;   b1[1] = intm[1]*r[0][1] + intm[2]*r[1][1] ;    b1[2] = intm[1]*r[0][2] + intm[2]*r[1][2] ;
+  //last line = 0.0;
+
+  m[0] = r[0][0] * b0[0] + r[1][0] * b1[0];
+  m[1] = r[0][0] * b0[1] + r[1][0] * b1[1];
+  m[2] = r[0][0] * b0[2] + r[1][0] * b1[2];
+
+  m[3] = r[0][1] * b0[1] + r[1][1] * b1[1];
+  m[4] = r[0][1] * b0[2] + r[1][1] * b1[2];
+
+  m[5] = r[0][2] * b0[2] + r[1][2] * b1[2];
+
+  /* Security check : normal in the kernel */
+  /*if((fabs(p0->m[0]*n[0] + p0->m[1]*n[1] + p0->m[2]*n[2] ) > 1.0e-4)){
+    printf("VALEUR ETRANGE... %f \n",fabs(p0->m[0]*n[0] + p0->m[1]*n[1] + p0->m[2]*n[2] ));
+    }
+    if((fabs(p0->m[1]*n[0] + p0->m[3]*n[1] + p0->m[4]*n[2] ) > 1.0e-4)){
+    printf("VALEUR ETRANGE... %f \n",fabs(p0->m[1]*n[0] + p0->m[3]*n[1] + p0->m[4]*n[2] ));
+    }
+
+    if((fabs(p0->m[2]*n[0] + p0->m[4]*n[1] + p0->m[5]*n[2] ) > 1.0e-4)){
+    printf("VALEUR ETRANGE... %f \n",fabs(p0->m[2]*n[0] + p0->m[4]*n[1] + p0->m[5]*n[2]));
+    } */
+
+  /*if(ddb) {
+    printf("La matrice %f %f %f\n",p0->m[0],p0->m[1],p0->m[2]);
+    printf("            %f %f %f\n",p0->m[1],p0->m[3],p0->m[4]);
+    printf("            %f %f %f\n",p0->m[2],p0->m[4],p0->m[5]);
+
+    }*/
+  return(1);
+}

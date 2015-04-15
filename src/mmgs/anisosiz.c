@@ -81,9 +81,9 @@ static int defmetsin(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
      * p1=mesh->point[pt->v[i1]]: p0 is singular */
     _MMG5_nortri(mesh,pt,n);
     if ( MG_EDG(pt->tag[i2]) )
-      bezierEdge(mesh,idp,pt->v[i1],b0,b1,1,n);
+      _MMG5_bezierEdge(mesh,idp,pt->v[i1],b0,b1,1,n);
     else
-      bezierEdge(mesh,idp,pt->v[i1],b0,b1,0,n);
+      _MMG5_bezierEdge(mesh,idp,pt->v[i1],b0,b1,0,n);
 
     /* tangent vector */
     tau[0] = 3.0*(b0[0] - p0->c[0]);
@@ -170,7 +170,7 @@ static int defmetrid(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
   /* Specific size in direction of t */
   for (i=0; i<2; i++) {
     kappacur = 0.0;
-    bezierEdge(mesh,idp,iprid[i],b0,b1,1,n0);
+    _MMG5_bezierEdge(mesh,idp,iprid[i],b0,b1,1,n0);
 
     tau[0] = 3.0*(b0[0] - p0->c[0]);
     tau[1] = 3.0*(b0[1] - p0->c[1]);
@@ -874,203 +874,18 @@ static int defmetreg(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
     pt = &mesh->tria[iel];
     _MMG5_bezierCP(mesh,pt,&b,1);
 
-    for(j=0; j<10; j++){
-      c[0] = b.b[j][0] - p0->c[0];
-      c[1] = b.b[j][1] - p0->c[1];
-      c[2] = b.b[j][2] - p0->c[2];
-
-      b.b[j][0] =  r[0][0]*c[0] + r[0][1]*c[1] + r[0][2]*c[2];
-      b.b[j][1] =  r[1][0]*c[0] + r[1][1]*c[1] + r[1][2]*c[2];
-      b.b[j][2] =  r[2][0]*c[0] + r[2][1]*c[1] + r[2][2]*c[2];
-    }
-
-    /* Mid-point along edge [i0;i1] and endpoint in the rotated frame */
-    if(i0 == 0){
-      memcpy(b0,&(b.b[7][0]),3*sizeof(double));
-      memcpy(b1,&(b.b[8][0]),3*sizeof(double));
-    }
-    else if(i0 == 1){
-      memcpy(b0,&(b.b[3][0]),3*sizeof(double));
-      memcpy(b1,&(b.b[4][0]),3*sizeof(double));
-    }
-    else{
-      memcpy(b0,&(b.b[5][0]),3*sizeof(double));
-      memcpy(b1,&(b.b[6][0]),3*sizeof(double));
-    }
-
-    /* At this point, the two control points b0 and b1 are expressed in the
-     * rotated frame. We compute the physical coor of the curve edge's
-     * mid-point. */
-    c[0] = 3.0/8.0*b0[0] + 3.0/8.0*b1[0] + 1.0/8.0*lispoi[3*k+1];
-    c[1] = 3.0/8.0*b0[1] + 3.0/8.0*b1[1] + 1.0/8.0*lispoi[3*k+2];
-    c[2] = 3.0/8.0*b0[2] + 3.0/8.0*b1[2] + 1.0/8.0*lispoi[3*k+3];
-
-    /* Fill matrice tAA and second member tAb with A=(\sum X_{P_i}^2 \sum
+    /* 1. Fill matrice tAA and second member tAb with A=(\sum X_{P_i}^2 \sum
      * Y_{P_i}^2 \sum X_{P_i}Y_{P_i}) and b=\sum Z_{P_i} with P_i the physical
-     * points at edge [i0;i1] extremities and middle. */
-    tAA[0] += c[0]*c[0]*c[0]*c[0];
-    tAA[1] += c[0]*c[0]*c[1]*c[1];
-    tAA[2] += c[0]*c[0]*c[0]*c[1];
-    tAA[3] += c[1]*c[1]*c[1]*c[1];
-    tAA[4] += c[0]*c[1]*c[1]*c[1];
-    tAA[5] += c[0]*c[0]*c[1]*c[1];
-
-    tAb[0] += c[0]*c[0]*c[2];
-    tAb[1] += c[1]*c[1]*c[2];
-    tAb[2] += c[0]*c[1]*c[2];
-
-    tAA[0] += lispoi[3*k+1]*lispoi[3*k+1]*lispoi[3*k+1]*lispoi[3*k+1];
-    tAA[1] += lispoi[3*k+1]*lispoi[3*k+1]*lispoi[3*k+2]*lispoi[3*k+2];
-    tAA[2] += lispoi[3*k+1]*lispoi[3*k+1]*lispoi[3*k+1]*lispoi[3*k+2];
-    tAA[3] += lispoi[3*k+2]*lispoi[3*k+2]*lispoi[3*k+2]*lispoi[3*k+2];
-    tAA[4] += lispoi[3*k+1]*lispoi[3*k+2]*lispoi[3*k+2]*lispoi[3*k+2];
-    tAA[5] += lispoi[3*k+1]*lispoi[3*k+1]*lispoi[3*k+2]*lispoi[3*k+2];
-
-    tAb[0] += lispoi[3*k+1]*lispoi[3*k+1]*lispoi[3*k+3];
-    tAb[1] += lispoi[3*k+2]*lispoi[3*k+2]*lispoi[3*k+3];
-    tAb[2] += lispoi[3*k+1]*lispoi[3*k+2]*lispoi[3*k+3];
-
-    /* Mid-point along median edge (coor of mid-point in parametric space : (1/4
-     * 1/4)) and endpoint in the rotated frame (coor of end-point in parametric
-     * space (1/2 1/2)). */
-    if(i0 == 0){
-      c[0] = A64TH*(b.b[1][0] + b.b[2][0] + 3.0*(b.b[3][0] + b.b[4][0])) \
-        + 3.0*A16TH*(b.b[6][0] + b.b[7][0] + b.b[9][0]) + A32TH*(b.b[5][0] + b.b[8][0]);
-      c[1] = A64TH*(b.b[1][1] + b.b[2][1] + 3.0*(b.b[3][1] + b.b[4][1])) \
-        + 3.0*A16TH*(b.b[6][1] + b.b[7][1] + b.b[9][1]) + A32TH*(b.b[5][1] + b.b[8][1]);
-      c[2] = A64TH*(b.b[1][2] + b.b[2][2] + 3.0*(b.b[3][2] + b.b[4][2])) \
-        + 3.0*A16TH*(b.b[6][2] + b.b[7][2] + b.b[9][2]) + A32TH*(b.b[5][2] + b.b[8][2]);
-
-      d[0] = 0.125*b.b[1][0] + 0.375*(b.b[3][0] + b.b[4][0]) + 0.125*b.b[2][0];
-      d[1] = 0.125*b.b[1][1] + 0.375*(b.b[3][1] + b.b[4][1]) + 0.125*b.b[2][1];
-      d[2] = 0.125*b.b[1][2] + 0.375*(b.b[3][2] + b.b[4][2]) + 0.125*b.b[2][2];
-    }
-    else if(i0 == 1){
-      c[0] = A64TH*(b.b[0][0] + b.b[2][0] + 3.0*(b.b[5][0] + b.b[6][0])) \
-        + 3.0*A16TH*(b.b[3][0] + b.b[8][0] + b.b[9][0]) + A32TH*(b.b[4][0] + b.b[7][0]);
-      c[1] = A64TH*(b.b[0][1] + b.b[2][1] + 3.0*(b.b[5][1] + b.b[6][1])) \
-        + 3.0*A16TH*(b.b[3][1] + b.b[8][1] + b.b[9][1]) + A32TH*(b.b[4][1] + b.b[7][1]);
-      c[2] = A64TH*(b.b[0][2] + b.b[2][2] + 3.0*(b.b[5][2] + b.b[6][2])) \
-        + 3.0*A16TH*(b.b[3][2] + b.b[8][2] + b.b[9][2]) + A32TH*(b.b[4][2] + b.b[7][2]);
-
-      d[0] = 0.125*b.b[2][0] + 0.375*(b.b[5][0] + b.b[6][0]) + 0.125*b.b[0][0];
-      d[1] = 0.125*b.b[2][1] + 0.375*(b.b[5][1] + b.b[6][1]) + 0.125*b.b[0][1];
-      d[2] = 0.125*b.b[2][2] + 0.375*(b.b[5][2] + b.b[6][2]) + 0.125*b.b[0][2];
-    }
-    else{
-      c[0] = A64TH*(b.b[0][0] + b.b[1][0] + 3.0*(b.b[7][0] + b.b[8][0])) \
-        + 3.0*A16TH*(b.b[4][0] + b.b[5][0] + b.b[9][0]) + A32TH*(b.b[3][0] + b.b[6][0]);
-      c[1] = A64TH*(b.b[0][1] + b.b[1][1] + 3.0*(b.b[7][1] + b.b[8][1])) \
-        + 3.0*A16TH*(b.b[4][1] + b.b[5][1] + b.b[9][1]) + A32TH*(b.b[3][1] + b.b[6][1]);
-      c[2] = A64TH*(b.b[0][2] + b.b[1][2] + 3.0*(b.b[7][2] + b.b[8][2])) \
-        + 3.0*A16TH*(b.b[4][2] + b.b[5][2] + b.b[9][2]) + A32TH*(b.b[3][2] + b.b[6][2]);
-
-      d[0] = 0.125*b.b[0][0] + 0.375*(b.b[7][0] + b.b[8][0]) + 0.125*b.b[1][0];
-      d[1] = 0.125*b.b[0][1] + 0.375*(b.b[7][1] + b.b[8][1]) + 0.125*b.b[1][1];
-      d[2] = 0.125*b.b[0][2] + 0.375*(b.b[7][2] + b.b[8][2]) + 0.125*b.b[1][2];
-    }
-
-    /* Fill matrice tAA and second member tAb*/
-    tAA[0] += c[0]*c[0]*c[0]*c[0];
-    tAA[1] += c[0]*c[0]*c[1]*c[1];
-    tAA[2] += c[0]*c[0]*c[0]*c[1];
-    tAA[3] += c[1]*c[1]*c[1]*c[1];
-    tAA[4] += c[0]*c[1]*c[1]*c[1];
-    tAA[5] += c[0]*c[0]*c[1]*c[1];
-
-    tAb[0] += c[0]*c[0]*c[2];
-    tAb[1] += c[1]*c[1]*c[2];
-    tAb[2] += c[0]*c[1]*c[2];
-
-    tAA[0] += d[0]*d[0]*d[0]*d[0];
-    tAA[1] += d[0]*d[0]*d[1]*d[1];
-    tAA[2] += d[0]*d[0]*d[0]*d[1];
-    tAA[3] += d[1]*d[1]*d[1]*d[1];
-    tAA[4] += d[0]*d[1]*d[1]*d[1];
-    tAA[5] += d[0]*d[0]*d[1]*d[1];
-
-    tAb[0] += d[0]*d[0]*d[2];
-    tAb[1] += d[1]*d[1]*d[2];
-    tAb[2] += d[0]*d[1]*d[2];
+     * points at edge [i0;i1] extremities and middle.
+     * 2. Compute the physical coor \a c of the curve edge's
+     * mid-point.
+     */
+    _MMG5_fillDefmetregSys(k,p0,i0,b,r,c,lispoi,tAA,tAb);
   }
 
-  /* case planar surface : tAb = 0 => no curvature */
-  /* isotropic metric with hmax size*/
-  if((tAb[0]*tAb[0] + tAb[1]*tAb[1] + tAb[2]*tAb[2]) < _MMG5_EPSD) {
-    m[0] = isqhmax; 
-    m[1] = 0;
-    m[2] = 0;
-    m[3] = isqhmax; 
-    m[4] = 0;
-    m[5] = isqhmax; 
-    return(1);
-  } 
-
-  /* solve now (a b c) = tAA^{-1} * tAb */
-  if ( !_MMG5_sys33sym(tAA,tAb,c) ) {
-    printf(" La matrice %f %f %f %f %f %f \n",tAA[0],tAA[1],tAA[2],tAA[3],tAA[4],tAA[5]);
-    return(0);
-  }
-  intm[0] = 2.0*c[0];
-  intm[1] = c[2];
-  intm[2] = 2.0*c[1];
-
-  /* At this point, intm stands for the integral matrix of Taubin's approach : vp[0] and vp[1]
-     are the two pr. directions of curvature, and the two curvatures can be inferred from lambdas*/
-  _MMG5_eigensym(intm,kappa,vp);
-
-  /* Truncation of eigenvalues */
-  kappa[0] = 2.0/9.0 * fabs(kappa[0])/mesh->info.hausd;
-  kappa[0] = MG_MIN(kappa[0],isqhmin);
-  kappa[0] = MG_MAX(kappa[0],isqhmax);
-
-  kappa[1] = 2.0/9.0 * fabs(kappa[1])/mesh->info.hausd;
-  kappa[1] = MG_MIN(kappa[1],isqhmin);
-  kappa[1] = MG_MAX(kappa[1],isqhmax);
-
-  /* Send back the metric to the canonical basis of tangent plane :
-     diag(lambda) = {^t}vp * M * vp, M = vp * diag(lambda) * {^t}vp */
-  intm[0] = kappa[0]*vp[0][0]*vp[0][0] + kappa[1]*vp[1][0]*vp[1][0];
-  intm[1] = kappa[0]*vp[0][0]*vp[0][1] + kappa[1]*vp[1][0]*vp[1][1];
-  intm[2] = kappa[0]*vp[0][1]*vp[0][1] + kappa[1]*vp[1][1]*vp[1][1];
-
-  /* At this point, intm (with 0 in the z direction)  is the desired metric, except
-     it is expressed in the rotated bc, that is intm = R * metric in bc * ^t R,
-     so metric in bc = ^tR*intm*R */
-
-  /* b0 and b1 serve now for nothing : let them be the lines of matrix intm*R  */
-  b0[0] = intm[0]*r[0][0] + intm[1]*r[1][0] ;   b0[1] = intm[0]*r[0][1] + intm[1]*r[1][1] ;    b0[2] = intm[0]*r[0][2] + intm[1]*r[1][2] ;
-  b1[0] = intm[1]*r[0][0] + intm[2]*r[1][0] ;   b1[1] = intm[1]*r[0][1] + intm[2]*r[1][1] ;    b1[2] = intm[1]*r[0][2] + intm[2]*r[1][2] ;
-  //last line = 0.0;
-
-  m[0] = r[0][0] * b0[0] + r[1][0] * b1[0];
-  m[1] = r[0][0] * b0[1] + r[1][0] * b1[1];
-  m[2] = r[0][0] * b0[2] + r[1][0] * b1[2];
-
-  m[3] = r[0][1] * b0[1] + r[1][1] * b1[1];
-  m[4] = r[0][1] * b0[2] + r[1][1] * b1[2];
-
-  m[5] = r[0][2] * b0[2] + r[1][2] * b1[2];
-
-  /* Security check : normal in the kernel */
-  /*if((fabs(p0->m[0]*n[0] + p0->m[1]*n[1] + p0->m[2]*n[2] ) > 1.0e-4)){
-    printf("VALEUR ETRANGE... %f \n",fabs(p0->m[0]*n[0] + p0->m[1]*n[1] + p0->m[2]*n[2] ));
-    }
-    if((fabs(p0->m[1]*n[0] + p0->m[3]*n[1] + p0->m[4]*n[2] ) > 1.0e-4)){
-    printf("VALEUR ETRANGE... %f \n",fabs(p0->m[1]*n[0] + p0->m[3]*n[1] + p0->m[4]*n[2] ));
-    }
-
-    if((fabs(p0->m[2]*n[0] + p0->m[4]*n[1] + p0->m[5]*n[2] ) > 1.0e-4)){
-    printf("VALEUR ETRANGE... %f \n",fabs(p0->m[2]*n[0] + p0->m[4]*n[1] + p0->m[5]*n[2]));
-    } */
-
-  /*if(ddb) {
-    printf("La matrice %f %f %f\n",p0->m[0],p0->m[1],p0->m[2]);
-    printf("            %f %f %f\n",p0->m[1],p0->m[3],p0->m[4]);
-    printf("            %f %f %f\n",p0->m[2],p0->m[4],p0->m[5]);
-
-    }*/
-  return(1);
+  /* Solve tAA * tmp_m = tAb and fill m with tmp_m (after rotation) */
+  return(_MMG5_solveDefmetregSys( mesh, c, tAA, tAb, m, isqhmin, isqhmax,
+                                  mesh->info.hausd));
 }
 
 /**
@@ -1085,21 +900,29 @@ static int defmetreg(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
 int defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTria    pt;
   MMG5_pPoint   ppt;
-  double  *m,*n,mm[6],r[3][3],isqhmax;
-  int      k;
-  char     i,ismet;
+  double        mm[6];
+  int           k;
+  char          i,ismet;
 
   if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug )
-    fprintf(stdout,"  ** Defining map\n");
+    fprintf(stdout,"  ** Defining anisotropic map\n");
+
+  if ( mesh->info.hmax < 0.0 ) {
+    //  mesh->info.hmax = 0.5 * mesh->info.delta;
+    fprintf(stdout,"%s:%d:Error: negative hmax value.\n",__FILE__,__LINE__);
+    return(0);
+  }
 
   ismet = (met->m > 0);
+
   if ( !met->m ) {
     met->np    = mesh->np;
     met->npmax = mesh->npmax;
+    met->size  = 6;
+    met->dim   = 3;
     _MMG5_ADD_MEM(mesh,(6*met->npmax+1)*sizeof(double),"solution",return(0));
     _MMG5_SAFE_CALLOC(met->m,6*(mesh->npmax+1)+1,double);
   }
-  if ( mesh->info.hmax < 0.0 )  mesh->info.hmax = 0.5 * mesh->info.delta;
 
   for (k=1; k<=mesh->np; k++) {
     ppt = &mesh->point[k];
@@ -1126,7 +949,7 @@ int defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
       }
       else if ( ppt->tag )  continue;
       else {
-        if ( 1 || !defmetreg(mesh,met,k,i) )  continue;
+        if ( !defmetreg(mesh,met,k,i) )  continue;
       }
 /* A FAIRE */
       // if ( ismet )  intextmet(mesh,met,pt->v[i],mm);
@@ -1135,38 +958,10 @@ int defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   }
 
   /* search for unintialized metric */
-  isqhmax = 1.0 / (mesh->info.hmax*mesh->info.hmax);
-  for (k=1; k<=mesh->np; k++) {
-    ppt = &mesh->point[k];
-    if ( !MG_VOK(ppt) || ppt->flag == 1 )  continue;
+  _MMG5_defUninitSize(mesh,met,ismet);
 
-    m = &met->m[6*(k)+1];
-    if(ismet) {
-      for(i=0;i<6;i++) m[i] = mm[i];
-      ppt->flag = 1;
-      continue;
-    }
-    memset(m,0,6*sizeof(double));
-    if ( MS_SIN(ppt->tag) ) {
-      m[0] = m[3] = m[5] = isqhmax;
-    }
-    else if ( ppt->tag & MG_GEO ) {
-      puts("plop0");
-      m[0] = m[1] = m[2] = isqhmax;
-    }
-    else {
-      n = ppt->tag & MG_REF ? &mesh->xpoint[ppt->xp].n1[0] : ppt->n;
-      _MMG5_rotmatrix(n,r);
-      m[0] = isqhmax*(r[0][0]*r[0][0]+r[1][0]*r[1][0]+r[2][0]*r[2][0]);
-      m[1] = isqhmax*(r[0][0]*r[0][1]+r[1][0]*r[1][1]+r[2][0]*r[2][1]);
-      m[2] = isqhmax*(r[0][0]*r[0][2]+r[1][0]*r[1][2]+r[2][0]*r[2][2]);
-      m[3] = isqhmax*(r[0][1]*r[0][1]+r[1][1]*r[1][1]+r[2][1]*r[2][1]);
-      m[4] = isqhmax*(r[0][1]*r[0][2]+r[1][1]*r[1][2]+r[2][1]*r[2][2]);
-      m[5] = isqhmax*(r[0][2]*r[0][2]+r[1][2]*r[1][2]+r[2][2]*r[2][2]);
-    }
-    ppt->flag = 1;
-  }
-
+  #warning remove when mmg3d defaniso ok
+  //_MMG5_unscaleMesh(mesh, met); MMG5_saveMesh(mesh); saveMet(mesh,met);exit(EXIT_FAILURE);
   return(1);
 }
 

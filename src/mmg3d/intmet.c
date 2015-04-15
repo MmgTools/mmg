@@ -67,5 +67,5 @@ int _MMG5_intmetvol_ani(double *ma,double *mb,double *mp,double t) {
 
   for (i=0; i<6; i++)  mp[i] = mai[i];
 
-
+  return 1;
 }

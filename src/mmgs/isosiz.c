@@ -50,7 +50,7 @@ int defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
   char     i,i1,i2;
 
   if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug )
-    fprintf(stdout,"  ** Defining map\n");
+    fprintf(stdout,"  ** Defining isotropic map\n");
 
   if ( mesh->info.hmax < 0.0 )  mesh->info.hmax = 0.5 * mesh->info.delta;
 

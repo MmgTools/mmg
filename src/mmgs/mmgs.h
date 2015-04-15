@@ -104,7 +104,6 @@ void _MMG5_delElt(MMG5_pMesh mesh,int iel);
 int  chkedg(MMG5_pMesh ,int );
 int  _MMG5_mmgsBezierCP(MMG5_pMesh ,MMG5_Tria*, _MMG5_pBezier, char ori);
 int  _MMG5_bezierInt(_MMG5_pBezier ,double *,double *,double *,double *);
-void bezierEdge(MMG5_pMesh mesh,int i0,int i1,double b0[3],double b1[3],char isrid,double v[3]);
 int  split1(MMG5_pMesh mesh,MMG5_pSol met,int k,int i,int *vx);
 int  split2(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx);
 int  split3(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx);
