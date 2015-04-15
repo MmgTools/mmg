@@ -48,7 +48,7 @@
  * size.
  *
  */
-static int defmetsin(MMG5_pMesh mesh,MMG5_pSol met,int kel, int iface, int ip) {
+static int _MMG5_defmetsin(MMG5_pMesh mesh,MMG5_pSol met,int kel, int iface, int ip) {
   MMG5_pTetra        pt;
   MMG5_pxTetra       pxt;
   MMG5_pPoint        p0;
@@ -161,7 +161,7 @@ static int defmetsin(MMG5_pMesh mesh,MMG5_pSol met,int kel, int iface, int ip) {
  * and at each time, metric tensor has to be recomputed, depending on the side.
  *
  */
-static int defmetrid(MMG5_pMesh mesh,MMG5_pSol met,int kel, int iface, int ip) {
+static int _MMG5_defmetrid(MMG5_pMesh mesh,MMG5_pSol met,int kel, int iface, int ip) {
   MMG5_pTetra    pt;
   MMG5_pPoint    p0,p1,p2;
   _MMG5_Bezier   b;
@@ -209,7 +209,7 @@ static int defmetrid(MMG5_pMesh mesh,MMG5_pSol met,int kel, int iface, int ip) {
  * geometric approx of the surface.
  *
  */
-static int defmetref(MMG5_pMesh mesh,MMG5_pSol met,int kel, int iface, int ip) {
+static int _MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,int kel, int iface, int ip) {
   MMG5_pTetra   pt;
   MMG5_pPoint   p0,p1;
   _MMG5_Bezier  b;
@@ -241,7 +241,7 @@ static int defmetref(MMG5_pMesh mesh,MMG5_pSol met,int kel, int iface, int ip) {
  * the geometric approx of the surface.
  *
  */
-static int defmetreg(MMG5_pMesh mesh,MMG5_pSol met,int kel,int iface, int ip) {
+static int _MMG5_defmetreg(MMG5_pMesh mesh,MMG5_pSol met,int kel,int iface, int ip) {
   MMG5_pTetra    pt;
   MMG5_pxTetra   pxt;
   MMG5_pTria     ptt;
@@ -429,18 +429,17 @@ int _MMG5_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
         if ( ismet )  memcpy(mm,&met->m[6*(pt->v[iploc])+1],6*sizeof(double));
 
         if ( MG_SIN(ppt->tag) || (ppt->tag & MG_NOM) ) {
-          puts("CALL defmetsin");
-          if ( !defmetsin(mesh,met,k,l,iploc) )  continue;
+          if ( !_MMG5_defmetsin(mesh,met,k,l,iploc) ) continue;
         }
         else if ( ppt->tag & MG_GEO ) {
-          if ( 1 || !defmetrid(mesh,met,k,l,iploc))  continue;
+          if ( 1 || !_MMG5_defmetrid(mesh,met,k,l,iploc))  continue;
         }
         else if ( (ppt->tag & MG_REF) && (!(ppt->tag & MG_GEO)) ) {
-          if ( 1 || !defmetref(mesh,met,k,l,iploc) )  continue;
+          if ( 1 || !_MMG5_defmetref(mesh,met,k,l,iploc) )  continue;
         }
         else if ( ppt->tag )  continue;
         else {
-          if ( 1 || !defmetreg(mesh,met,k,l,iploc) )  continue;
+          if ( 1 || !_MMG5_defmetreg(mesh,met,k,l,iploc) )  continue;
         }
 /* A FAIRE */
         // if ( ismet )  intextmet(mesh,met,pt->v[iploc],mm);

@@ -1968,8 +1968,9 @@ int MMG5_loadMet(MMG5_pMesh mesh,MMG5_pSol met) {
 int MMG5_saveMet(MMG5_pMesh mesh,MMG5_pSol met) {
   FILE*        inm;
   MMG5_pPoint  ppt;
+  double       dbuf[6],tmp;
   char        *ptr,data[128],chaine[128];
-  int          binch,bpos,bin,np,k,typ;
+  int          binch,bpos,bin,np,k,typ,i;
 
   if ( !met->m || !met->nameout )  return(-1);
   met->ver = 2;
@@ -2049,21 +2050,26 @@ int MMG5_saveMet(MMG5_pMesh mesh,MMG5_pSol met) {
     }
   }
   /* write anisotropic metric */
-  /*else {
-    typtab[0] = 3;
-    nbm = 1;
-    GmfSetKwd(outm,GmfSolAtVertices,np,nbm,typtab);
+  else {
     for (k=1; k<=mesh->np; k++) {
-    ppt = &mesh->point[k];
-    if ( MG_VOK(ppt) ) {
-    for (i=0; i<met->size; i++)  dbuf[i] = met->m[met->size*(k)+1+i];
-    tmp = dbuf[2];
-    dbuf[2] = dbuf[3];
-    dbuf[3] = tmp;
-    GmfSetLin(outm,GmfSolAtVertices,dbuf);
+      ppt = &mesh->point[k];
+      if ( MG_VOK(ppt) ) {
+        for (i=0; i<met->size; i++)  dbuf[i] = met->m[met->size*(k)+1+i];
+        tmp = dbuf[2];
+        dbuf[2] = dbuf[3];
+        dbuf[3] = tmp;
+        if(!bin) {
+          for(i=0; i<met->size; i++)
+            fprintf(inm,"%.15lg  ",dbuf[i]);
+          fprintf(inm,"\n");
+        } else {
+          for(i=0; i<met->size; i++)
+            fwrite((unsigned char*)&dbuf[i],sd,1,inm);
+        }
+      }
     }
-    }
-    }*/
+  }
+
   /*fin fichier*/
   if(!bin) {
     strcpy(&chaine[0],"\n\nEnd\n");

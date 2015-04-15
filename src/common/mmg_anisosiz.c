@@ -272,7 +272,6 @@ double _MMG5_surftri_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt) {
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
  * \param ismet has the user provided a metric?
- * \param mm metric 
  *
  * Search for points with unintialized metric and define anisotropic size at
  * this points.
