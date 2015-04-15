@@ -225,6 +225,16 @@ static int _MMG5_adpspl(MMG5_pMesh mesh,MMG5_pSol met, int* warn) {
                             break
                             ,o,MG_NOTAG);
       }
+       ier = _MMG5_split1b(mesh,met,list,ilist,ip,1);
+      if ( ier < 0 ) {
+        fprintf(stdout,"  ## Error: unable to split.\n");
+        return(-1);
+      }
+      else if ( !ier ) {
+        _MMG5_delPt(mesh,ip);
+      }
+      else {
+        ppt = &mesh->point[ip];
         if ( met->m ) {
           iadr = met->size*ip1 + 1;
           m1 = &met->m[iadr];
@@ -235,18 +245,7 @@ static int _MMG5_adpspl(MMG5_pMesh mesh,MMG5_pSol met, int* warn) {
 
           _MMG5_intmetvol(m1,m2,mp,0.5);
         }
-      ier = _MMG5_split1b(mesh,met,list,ilist,ip,1);
-      if ( ier < 0 ) {
-        fprintf(stdout,"  ## Error: unable to split.\n");
-        return(-1);
-      }
-      else if ( !ier ) {
-        _MMG5_delPt(mesh,ip);
-      }
-      else {
-        ppt = &mesh->point[ip];
-        met->m[ip] = 0.5 * (met->m[ip1] + met->m[ip2]);
-        ns++;
+       ns++;
       }
     }
   }
