@@ -220,7 +220,7 @@ static int _MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,int kel, int iface, int
   unsigned char i0,i1,i2,i,j;
 
 #warning not yet implemented
-  printf("defmetrid not yet implemented\n");
+  printf("defmetref not yet implemented\n");
   exit(EXIT_FAILURE);
 
   pt  = &mesh->tetra[kel];
@@ -244,8 +244,9 @@ static int _MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,int kel, int iface, int
 static int _MMG5_defmetreg(MMG5_pMesh mesh,MMG5_pSol met,int kel,int iface, int ip) {
   MMG5_pTetra    pt;
   MMG5_pxTetra   pxt;
-  MMG5_pTria     ptt;
+  MMG5_Tria      ptt;
   MMG5_pPoint    p0,p1;
+  MMG5_pxPoint   px0;
   _MMG5_Bezier   b;
   int            lists[_MMG5_LMAX+2],listv[_MMG5_LMAX+2],ilists,ilistv,ilist;
   int            k,iel,idp,ifac;
@@ -253,10 +254,6 @@ static int _MMG5_defmetreg(MMG5_pMesh mesh,MMG5_pSol met,int kel,int iface, int 
   double         det2d,c[3],isqhmin,isqhmax;
   double         tAA[6],tAb[3];
   unsigned char  i0,i1,j,i;
-
-#warning not yet implemented
-  printf("defmetrid not yet implemented\n");
-  exit(EXIT_FAILURE);
 
   pt  = &mesh->tetra[kel];
   idp = pt->v[ip];
@@ -274,7 +271,10 @@ static int _MMG5_defmetreg(MMG5_pMesh mesh,MMG5_pSol met,int kel,int iface, int 
   isqhmax = 1.0 / (mesh->info.hmax*mesh->info.hmax);
 
   /* Computation of the rotation matrix T_p0 S -> [z = 0] */
-  n  = &p0->n[0];
+  assert( p0->xp && !MG_SIN(p0->tag) && !MG_EDG(p0->tag) && !(MG_NOM & p0->tag) );
+  px0 = &mesh->xpoint[p0->xp];
+
+  n  = &px0->n1[0];
   _MMG5_rotmatrix(n,r);
   m = &met->m[6*(idp)+1];
 
@@ -304,19 +304,21 @@ static int _MMG5_defmetreg(MMG5_pMesh mesh,MMG5_pSol met,int kel,int iface, int 
   }
 
   /* list goes modulo ilist */
-  lispoi[3*ilist+1] =  lispoi[1];
-  lispoi[3*ilist+2] =  lispoi[2];
-  lispoi[3*ilist+3] =  lispoi[3];
+  lispoi[3*ilists+1] =  lispoi[1];
+  lispoi[3*ilists+2] =  lispoi[2];
+  lispoi[3*ilists+3] =  lispoi[3];
 
   /* Check all projections over tangent plane. */
-  for (k=0; k<ilist-1; k++) {
+  for (k=0; k<ilists-1; k++) {
     det2d = lispoi[3*k+1]*lispoi[3*(k+1)+2] - lispoi[3*k+2]*lispoi[3*(k+1)+1];
+    assert(det2d);
     if ( det2d <= 0.0 ) {
       printf("PROBLEM : BAD PROJECTION OVER TANGENT PLANE %f \n", det2d);
       return(0);
     }
   }
-  det2d = lispoi[3*(ilist-1)+1]*lispoi[3*0+2] - lispoi[3*(ilist-1)+2]*lispoi[3*0+1];
+  det2d = lispoi[3*(ilists-1)+1]*lispoi[3*0+2] - lispoi[3*(ilists-1)+2]*lispoi[3*0+1];
+  assert(det2d);
   if ( det2d <= 0.0 ) {
     printf("PROBLEM : BAD PROJECTION OVER TANGENT PLANE %f \n", det2d);
     return(0);
@@ -335,20 +337,21 @@ static int _MMG5_defmetreg(MMG5_pMesh mesh,MMG5_pSol met,int kel,int iface, int 
        p1 is either regular, either on a ridge (or a singularity), but p0p1 is not ridge*/
     iel  = lists[k] / 4;
     ifac = lists[k] % 4;
+    pt  = &mesh->tetra[iel];
+    assert(pt->xt);
+    pxt = &mesh->xtetra[pt->xt];
+
     for ( i = 0; i < 3; i++ ) {
-      if ( _MMG5_idir[ifac][i] == idp ) break;
+      if ( pt->v[_MMG5_idir[ifac][i]] == idp ) break;
     }
     assert(i<3);
 
     i0  = _MMG5_idir[ifac][i];
     i1  = _MMG5_idir[ifac][_MMG5_inxt2[i]];
-    pt  = &mesh->tetra[iel];
-    assert(pt->xt);
-    pxt = &mesh->xtetra[pt->xt];
 
-    _MMG5_tet2tri(mesh,iel,ifac,ptt);
+    _MMG5_tet2tri(mesh,iel,ifac,&ptt);
 
-    _MMG5_bezierCP(mesh,ptt,&b,MG_GET(pxt->ori,ifac));
+    _MMG5_bezierCP(mesh,&ptt,&b,MG_GET(pxt->ori,ifac));
 
     /* 1. Fill matrice tAA and second member tAb with A=(\sum X_{P_i}^2 \sum
      * Y_{P_i}^2 \sum X_{P_i}Y_{P_i}) and b=\sum Z_{P_i} with P_i the physical
@@ -434,12 +437,11 @@ int _MMG5_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
         else if ( ppt->tag & MG_GEO ) {
           if ( 1 || !_MMG5_defmetrid(mesh,met,k,l,iploc))  continue;
         }
-        else if ( (ppt->tag & MG_REF) && (!(ppt->tag & MG_GEO)) ) {
+        else if ( ppt->tag & MG_REF ) {
           if ( 1 || !_MMG5_defmetref(mesh,met,k,l,iploc) )  continue;
         }
-        else if ( ppt->tag )  continue;
         else {
-          if ( 1 || !_MMG5_defmetreg(mesh,met,k,l,iploc) )  continue;
+          if ( !_MMG5_defmetreg(mesh,met,k,l,iploc) )  continue;
         }
 /* A FAIRE */
         // if ( ismet )  intextmet(mesh,met,pt->v[iploc],mm);

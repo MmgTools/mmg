@@ -944,7 +944,7 @@ int defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
       else if ( ppt->tag & MG_GEO ) {
         if ( !defmetrid(mesh,met,k,i))  continue;
       }
-      else if ( (ppt->tag & MG_REF) && (!(ppt->tag & MG_GEO)) ) {
+      else if ( ppt->tag & MG_REF ) {
         if ( 1 || !defmetref(mesh,met,k,i) )  continue;
       }
       else if ( ppt->tag )  continue;
