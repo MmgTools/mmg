@@ -312,8 +312,8 @@ void _MMG5_swapNod(MMG5_pPoint points, double* sols, int* perm,
 
   /* swap the sols */
   if ( sols ) {
-    addr1 = (ind1-1)*solsiz + 1;
-    addr2 = (ind2-1)*solsiz + 1;
+    addr1 = ind1*solsiz + 1;
+    addr2 = ind2*solsiz + 1;
     memcpy(&soltmp     ,&sols[addr2],solsiz*sizeof(double));
     memcpy(&sols[addr2],&sols[addr1],solsiz*sizeof(double));
     memcpy(&sols[addr1],&soltmp     ,solsiz*sizeof(double));
