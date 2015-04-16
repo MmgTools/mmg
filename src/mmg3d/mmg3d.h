@@ -127,6 +127,7 @@
 
 #define _MMG5_BOXSIZE 500
 
+#define _MMG5_SHORTMAX     0x7fff
 
 /* Domain refs in iso mode */
 #define MG_PLUS    2

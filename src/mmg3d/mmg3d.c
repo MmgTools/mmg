@@ -170,7 +170,7 @@ int main(int argc,char *argv[]) {
   chrono(ON,&MMG5_ctim[2]);
   _MMG5_setfunc(&mesh,&met);
   MMG5_Set_saveFunc(&mesh);
-
+  
   if ( abs(mesh.info.imprim) > 0 )  _MMG5_outqua(&mesh,&met);
   fprintf(stdout,"\n  %s\n   MODULE MMG3D: IMB-LJLL : %s (%s)\n  %s\n",
           MG_STR,MG_VER,MG_REL,MG_STR);
@@ -220,7 +220,8 @@ int main(int argc,char *argv[]) {
   if ( !_MMG5_scotchCall(&mesh,&met) )
     _MMG5_RETURN_AND_FREE(&mesh,&met,MMG5_STRONGFAILURE);
 
-
+/* *************************************** Part to skip in lag mode ? *************************** */
+  
 #ifdef PATTERN
   if ( !_MMG5_mmg3d1_pattern(&mesh,&met) ) {
     if ( !(mesh.adja) && !_MMG5_hashTetra(&mesh,1) ) {
@@ -268,13 +269,18 @@ int main(int argc,char *argv[]) {
     }
   }
 #endif
-
+  
+/* *************************************** End of part to skip in lag mode ? *************************** */
+  
   chrono(OFF,&MMG5_ctim[3]);
   printim(MMG5_ctim[3].gdif,stim);
   if ( mesh.info.imprim )
     fprintf(stdout,"  -- PHASE 2 COMPLETED.     %s\n",stim);
   fprintf(stdout,"\n  %s\n   END OF MODULE MMG3d: IMB-LJLL \n  %s\n",MG_STR,MG_STR);
-
+  
+/* ********************************* Update to take into account disp structure ************************ */
+/* Especially prilen bugs in the Lagrangian mode (no metric is supplied) */
+  
   /* save file */
   _MMG5_outqua(&mesh,&met);
 
