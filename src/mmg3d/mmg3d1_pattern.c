@@ -185,6 +185,7 @@ static int _MMG5_adpspl(MMG5_pMesh mesh,MMG5_pSol met, int* warn) {
         ppt->ref = ref;
       else
         ppt->ref = pxt->ref[i];
+#warning interpolation
       if ( met->m )
         met->m[ip] = 0.5 * (met->m[ip1]+met->m[ip2]);
 
@@ -236,11 +237,11 @@ static int _MMG5_adpspl(MMG5_pMesh mesh,MMG5_pSol met, int* warn) {
       else {
         ppt = &mesh->point[ip];
         if ( met->m ) {
-          iadr = met->size*ip1 + 1;
+          iadr = met->size*ip1;
           m1 = &met->m[iadr];
-          iadr = met->size*ip2 + 1;
+          iadr = met->size*ip2;
           m2 = &met->m[iadr];
-          iadr = met->size*ip + 1;
+          iadr = met->size*ip;
           mp = &met->m[iadr];
 
           _MMG5_intmetvol(m1,m2,mp,0.5);

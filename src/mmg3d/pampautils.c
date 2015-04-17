@@ -579,7 +579,7 @@ int MMG5_mmg3dcheck(MMG5_pMesh mesh,MMG5_pSol met,
 
   if ( met->np && (met->np != mesh->np) ) {
     fprintf(stdout,"  ## WARNING: WRONG SOLUTION NUMBER. IGNORED\n");
-    _MMG5_DEL_MEM(mesh,met->m,(met->size*met->npmax+1)*sizeof(double));
+    _MMG5_DEL_MEM(mesh,met->m,(met->size*(met->npmax+1))*sizeof(double));
     met->np = 0;
   }
   else if ( met->size!=1 ) {

@@ -311,7 +311,8 @@ int _MMG5_swpbdy(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int it1,_MMG5_p
                           ,c,MG_BDY);
     }
   }
-  if ( met->m )  met->m[nm] = 0.5 *(met->m[np]+met->m[nq]);
+  if ( met->m )  met->m[met->size*nm] =
+                   0.5 *(met->m[np*met->size]+met->m[nq*met->size]);
   ier = _MMG5_split1b(mesh,met,list,ret,nm,0);
   /* pointer adress may change if we need to realloc memory during split */
   pt  = &mesh->tetra[iel];

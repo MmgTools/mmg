@@ -127,13 +127,13 @@ inline double _MMG5_caltet_ani(MMG5_pMesh mesh,MMG5_pSol met,int ia,int ib,int i
 
   /* average metric */
   memset(mm,0,6*sizeof(double));
-  iadr = (ia)*met->size + 1;
+  iadr = (ia)*met->size;
   ma   = &met->m[iadr];
-  iadr = (ib)*met->size + 1;
+  iadr = (ib)*met->size;
   mb   = &met->m[iadr];
-  iadr = (ic)*met->size + 1;
+  iadr = (ic)*met->size;
   mc   = &met->m[iadr];
-  iadr = (id)*met->size + 1;
+  iadr = (id)*met->size;
   md   = &met->m[iadr];
   for (j=0; j<6; j++)
     mm[j] = 0.25 * (ma[j]+mb[j]+mc[j]+md[j]);

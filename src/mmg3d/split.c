@@ -2488,7 +2488,8 @@ int _MMG5_split4bar(MMG5_pMesh mesh, MMG5_pSol met, int k) {
     o[0] += ppt->c[0];
     o[1] += ppt->c[1];
     o[2] += ppt->c[2];
-    if ( met->m )  hnew += met->m[ib];
+#warning hnew must be of size met->size
+    if ( met->m )  hnew += met->m[met->size*ib];
   }
   o[0] *= 0.25;
   o[1] *= 0.25;
@@ -2508,10 +2509,10 @@ int _MMG5_split4bar(MMG5_pMesh mesh, MMG5_pSol met, int k) {
           if(met->size==1)
             met->m[ib] = hnew;
           else {
-            iadr = met->size*pt[0]->v[0] + 1;
+            iadr = met->size*pt[0]->v[0];
             m1 = &met->m[iadr];
             for(kk=0 ; kk<6 ; kk++) {
-              met->m[6*ib+1+kk] = m1[kk];
+              met->m[6*ib+kk] = m1[kk];
             }
           }
         }

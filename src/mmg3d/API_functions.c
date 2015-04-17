@@ -110,13 +110,13 @@ int MMG5_Set_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int typEntity, int np, int 
     sol->np  = np;
     sol->npi = np;
     if ( sol->m )
-      _MMG5_DEL_MEM(mesh,sol->m,(sol->size*sol->npmax+1)*sizeof(double));
+      _MMG5_DEL_MEM(mesh,sol->m,(sol->size*(sol->npmax+1))*sizeof(double));
 
     sol->npmax = mesh->npmax;
-    _MMG5_ADD_MEM(mesh,(sol->size*sol->npmax+1)*sizeof(double),"initial solution",
+    _MMG5_ADD_MEM(mesh,(sol->size*(sol->npmax+1))*sizeof(double),"initial solution",
                   printf("  Exit program.\n");
                   exit(EXIT_FAILURE));
-    _MMG5_SAFE_CALLOC(sol->m,(sol->npmax*sol->size+1),double);
+    _MMG5_SAFE_CALLOC(sol->m,(sol->size*(sol->npmax+1)),double);
   }
   return(1);
 }
@@ -1307,7 +1307,7 @@ void MMG5_Free_structures(MMG5_pMesh mesh,MMG5_pSol met
 
   /* met */
   if ( /*!mesh->info.iso &&*/ met && met->m )
-    _MMG5_DEL_MEM(mesh,met->m,(met->size*met->npmax+1)*sizeof(double));
+    _MMG5_DEL_MEM(mesh,met->m,(met->size*(met->npmax+1))*sizeof(double));
 
   /* mesh->info */
   if ( mesh->info.npar && mesh->info.par )

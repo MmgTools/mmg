@@ -39,15 +39,16 @@ extern char ddb;
 
 
 
-/* Metric interpolation between two points p1 and p2 such that edge 0 = (p1p2) is ridge.
-   v is a direction vector, aimed at pointing towards direction of n1 at interpolated point */
+/* Anisotropic metric interpolation between two points p1 and p2 such that edge
+   0 = (p1p2) is ridge.  v is a direction vector, aimed at pointing towards
+   direction of n1 at interpolated point */
 int intridmet(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,double s,double v[3],double mr[6]) {
   MMG5_pTria     pt;
-  MMG5_pxPoint     go1,go2;
+  MMG5_pxPoint   go1,go2;
   MMG5_pPoint    p1,p2;
-  double   *m1,*m2,*n11,*n12,*n21,*n22,ps11,ps12,dd,hn1,hn2;
-  int       ip1,ip2;
-  char      i1,i2;
+  double         *m1,*m2,*n11,*n12,*n21,*n22,ps11,ps12,dd,hn1,hn2;
+  int            ip1,ip2;
+  char           i1,i2;
 
   pt  = &mesh->tria[k];
   i1  = _MMG5_inxt2[i];
@@ -56,8 +57,8 @@ int intridmet(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,double s,double v[3],do
   ip2 = pt->v[i2];
   p1  = &mesh->point[ip1];
   p2  = &mesh->point[ip2];
-  m1  = &met->m[6*(ip1)+1];
-  m2  = &met->m[6*(ip2)+1];
+  m1  = &met->m[6*ip1];
+  m2  = &met->m[6*ip2];
 
   /* Case when both endpoints are singular */
   if ( MS_SIN(p1->tag) && MS_SIN(p2->tag) ) {
@@ -282,7 +283,7 @@ void intmet_ani(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int ip,double s) {
   double  *m;
 
   pt = &mesh->tria[k];
-  m  = &met->m[6*(ip)+1];
+  m  = &met->m[6*ip];
   if ( pt->tag[i] & MG_GEO ) {
     ppt = &mesh->point[ip];
     assert(ppt->xp);
@@ -301,9 +302,9 @@ int intmet33(MMG5_pMesh mesh,MMG5_pSol met,int np,int nq,int ip,double s) {
   double  *m,*n,*mr,lambda[3],vp[3][3],mu[3],is[6],isnis[6],mt[9],P[9],dd;
   char    i;
 
-  m  = &met->m[6*np+1];
-  n  = &met->m[6*nq+1];
-  mr = &met->m[6*ip+1];
+  m  = &met->m[6*np];
+  n  = &met->m[6*nq];
+  mr = &met->m[6*ip];
 
   /* Compute inverse of square root of matrix M : is = P*diag(1/sqrt(lambda))*{^t}P */
   order = _MMG5_eigenv(1,m,lambda,vp);

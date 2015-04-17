@@ -849,11 +849,11 @@ _MMG5_anatetv(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
           p2  = &mesh->point[ip2];
         }
         if ( met->m ) {
-          iadr = met->size*ip1 + 1;
+          iadr = met->size*ip1;
           m1 = &met->m[iadr];
-          iadr = met->size*ip2 + 1;
+          iadr = met->size*ip2;
           m2 = &met->m[iadr];
-          iadr = met->size*ip + 1;
+          iadr = met->size*ip;
           mp = &met->m[iadr];
 
           _MMG5_intmetvol(m1,m2,mp,0.5);

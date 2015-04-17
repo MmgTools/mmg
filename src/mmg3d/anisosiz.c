@@ -138,7 +138,7 @@ static int _MMG5_defmetsin(MMG5_pMesh mesh,MMG5_pSol met,int kel, int iface, int
   alpha = MG_MIN(alpha,isqhmin);
   alpha = MG_MAX(alpha,isqhmax);
 
-  m = &met->m[6*(idp)+1];
+  m = &met->m[6*idp];
   memset(m,0,6*sizeof(double));
   m[0] = m[3] = m[5] = alpha;
 
@@ -186,7 +186,7 @@ static int _MMG5_defmetrid(MMG5_pMesh mesh,MMG5_pSol met,int kel, int iface, int
   n2 = &mesh->xpoint[p0->xp].n2[0];
   t  = p0->n;
 
-  m = &met->m[6*(idp)+1];
+  m = &met->m[6*idp];
   memset(m,0,6*sizeof(double));
   m[0] = isqhmax;
   m[1] = isqhmax;
@@ -276,7 +276,7 @@ static int _MMG5_defmetreg(MMG5_pMesh mesh,MMG5_pSol met,int kel,int iface, int 
 
   n  = &px0->n1[0];
   _MMG5_rotmatrix(n,r);
-  m = &met->m[6*(idp)+1];
+  m = &met->m[6*idp];
 
   /* Apply rotation \circ translation to the whole ball */
   for (k=0; k<ilists; k++) {
@@ -404,8 +404,8 @@ int _MMG5_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
     met->npmax = mesh->npmax;
     met->size  = 6;
     met->dim   = 3;
-    _MMG5_ADD_MEM(mesh,(6*met->npmax+1)*sizeof(double),"solution",return(0));
-    _MMG5_SAFE_MALLOC(met->m,(6*mesh->npmax+1),double);
+    _MMG5_ADD_MEM(mesh,(6*(met->npmax+1))*sizeof(double),"solution",return(0));
+    _MMG5_SAFE_MALLOC(met->m,(6*(mesh->npmax+1)),double);
 
   }
 
@@ -429,7 +429,7 @@ int _MMG5_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
         ppt   = &mesh->point[pt->v[iploc]];
 
         if ( ppt->flag || !MG_VOK(ppt) )  continue;
-        if ( ismet )  memcpy(mm,&met->m[6*(pt->v[iploc])+1],6*sizeof(double));
+        if ( ismet )  memcpy(mm,&met->m[6*(pt->v[iploc])],6*sizeof(double));
 
         if ( MG_SIN(ppt->tag) || (ppt->tag & MG_NOM) ) {
           if ( !_MMG5_defmetsin(mesh,met,k,l,iploc) ) continue;

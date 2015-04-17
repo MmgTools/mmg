@@ -136,25 +136,25 @@ double _MMG5_lenedg_ani(MMG5_pMesh mesh,MMG5_pSol met,int np0,int np1,char isedg
 
   /* Set metrics */
   if ( MS_SIN(p0->tag) ) {
-    m0 = &met->m[6*(np0)+1];
+    m0 = &met->m[6*np0];
   }
   else if ( MG_GEO & p0->tag ) {
     if ( !_MMG5_buildridmet(mesh,met,np0,ux,uy,uz,met0) )  return(-1.0);
     m0 = met0;
   }
   else {
-    m0 = &met->m[6*(np0)+1];
+    m0 = &met->m[6*np0];
   }
 
   if ( MS_SIN(p1->tag) ) {
-    m1 = &met->m[6*(np1)+1];
+    m1 = &met->m[6*np1];
   }
   else if ( MG_GEO & p1->tag ) {
     if ( !_MMG5_buildridmet(mesh,met,np1,ux,uy,uz,met1) )  return(-1.0);
     m1 = met1;
   }
   else {
-    m1 = &met->m[6*(np1)+1];
+    m1 = &met->m[6*np1];
   }
 
   /* computation of the length of the two tangent vectors in their respective tangent plane */
@@ -214,13 +214,13 @@ double _MMG5_surftri_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt) {
     uz = 0.5*(p[i1]->c[2]+p[i2]->c[2]) - p[i]->c[2];
 
     if ( MS_SIN(p[i]->tag) ) {
-      memcpy(&m[i][0],&met->m[6*np[i]+1],6*sizeof(double));
+      memcpy(&m[i][0],&met->m[6*np[i]],6*sizeof(double));
     }
     else if ( p[i]->tag & MG_GEO ) {
       if ( !_MMG5_buildridmet(mesh,met,np[i],ux,uy,uz,&m[i][0]) )  return(0.0);
     }
     else {
-      memcpy(&m[i][0],&met->m[6*np[i]+1],6*sizeof(double));
+      memcpy(&m[i][0],&met->m[6*np[i]],6*sizeof(double));
     }
   }
 
@@ -288,7 +288,7 @@ void _MMG5_defUninitSize(MMG5_pMesh mesh,MMG5_pSol met,char ismet)
     ppt = &mesh->point[k];
     if ( !MG_VOK(ppt) || ppt->flag == 1 )  continue;
 
-    m = &met->m[6*(k)+1];
+    m = &met->m[6*k];
     if(ismet) {
       ppt->flag = 1;
       continue;

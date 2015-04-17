@@ -236,7 +236,7 @@ int intextmet(MMG5_pMesh mesh,MMG5_pSol met,int np,double me[6]) {
   isqhmax = 1.0 / (mesh->info.hmax*mesh->info.hmax);
 
   p0 = &mesh->point[np];
-  m  = &met->m[6*np+1];
+  m  = &met->m[6*np];
 
   /* Case of a singular point : take smallest size prescribed by met, or me in every direction */
   if ( MS_SIN(p0->tag) ) {

@@ -58,7 +58,7 @@ int movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
   nump = pt->v[i0];
   nbeg = pt->v[i1];
   p0   = &mesh->point[nump];
-  m0   = &met->m[6*(nump)+1];
+  m0   = &met->m[6*nump];
   assert( !p0->tag );
 
   iel = list[ilist-1] / 3;
@@ -443,7 +443,7 @@ int movridpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
   p0  = &mesh->point[ip0];
   p1  = &mesh->point[ip1];
   p2  = &mesh->point[ip2];
-  m0  = &met->m[6*(ip0)+1];
+  m0  = &met->m[6*ip0];
 
   l1old = _MMG5_lenedg(mesh,met,ip0,ip1,1);
   l2old = _MMG5_lenedg(mesh,met,ip0,ip2,1);
@@ -898,7 +898,7 @@ int movridpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
   ppt0->n[1] = to[1];
   ppt0->n[2] = to[2];
 
-  m00 = &met->m[6*0+1];
+  m00 = &met->m[0];
   memcpy(m00,mo,6*sizeof(double));
 
   /* Check whether proposed move is admissible under consideration of distances */

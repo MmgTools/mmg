@@ -293,7 +293,7 @@ void _MMG5_swapTet(MMG5_pTetra tetras/*, int* adja*/, int* perm, int ind1, int i
  * permutations).
  * \param ind1 index of the first tetra to swap.
  * \param ind2 index of the second tetra to swap.
- * \param solsize size of the solution.
+ * \param solsiz size of the solution.
  *
  * Swap two nodes in the table of vertices.
  *
@@ -312,8 +312,8 @@ void _MMG5_swapNod(MMG5_pPoint points, double* sols, int* perm,
 
   /* swap the sols */
   if ( sols ) {
-    addr1 = ind1*solsiz + 1;
-    addr2 = ind2*solsiz + 1;
+    addr1 = ind1*solsiz;
+    addr2 = ind2*solsiz;
     memcpy(&soltmp     ,&sols[addr2],solsiz*sizeof(double));
     memcpy(&sols[addr2],&sols[addr1],solsiz*sizeof(double));
     memcpy(&sols[addr1],&soltmp     ,solsiz*sizeof(double));

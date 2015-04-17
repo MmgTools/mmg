@@ -391,7 +391,7 @@ int main(int argc,char *argv[]) {
     return(1);
   else if ( ier > 0 && met.np != mesh.np ) {
     fprintf(stdout,"  ## WARNING: WRONG SOLUTION NUMBER. IGNORED\n");
-    _MMG5_DEL_MEM(&mesh,met.m,(met.size*met.npmax+1)*sizeof(double));
+    _MMG5_DEL_MEM(&mesh,met.m,(met.size*(met.npmax+1))*sizeof(double));
   }
   if ( !parsop(&mesh,&met) )     return(1);
   if ( !_MMG5_scaleMesh(&mesh,&met) )  return(1);
@@ -450,7 +450,7 @@ int main(int argc,char *argv[]) {
   if ( mesh.edge )
     _MMG5_DEL_MEM(&mesh,mesh.edge,(mesh.na+1)*sizeof(MMG5_Edge));
   if ( met.m )
-    _MMG5_DEL_MEM(&mesh,met.m,(met.size*met.npmax+1)*sizeof(double));
+    _MMG5_DEL_MEM(&mesh,met.m,(met.size*(met.npmax+1))*sizeof(double));
   if ( mesh.info.par )
     _MMG5_DEL_MEM(&mesh,mesh.info.par,mesh.info.npar*sizeof(MMG5_Par));
   if ( mesh.xpoint )

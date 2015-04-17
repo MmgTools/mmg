@@ -111,7 +111,7 @@ static int defmetsin(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
   alpha = MG_MIN(alpha,isqhmin);
   alpha = MG_MAX(alpha,isqhmax);
 
-  m = &met->m[6*(idp)+1];
+  m = &met->m[6*idp];
   memset(m,0,6*sizeof(double));
   m[0] = m[3] = m[5] = alpha;
 
@@ -154,7 +154,7 @@ static int defmetrid(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
   n2 = &mesh->xpoint[p0->xp].n2[0];
   t  = p0->n;
 
-  m = &met->m[6*(idp)+1];
+  m = &met->m[6*idp];
   memset(m,0,6*sizeof(double));
   m[0] = isqhmax;
   m[1] = isqhmax;
@@ -439,7 +439,7 @@ static int defmetref(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
   /* Computation of the rotation matrix T_p0 S -> [z = 0] */
   n  = &mesh->xpoint[p0->xp].n1[0];
   _MMG5_rotmatrix(n,r);
-  m = &met->m[6*(idp)+1];
+  m = &met->m[6*idp];
 
   /* Apply rotation \circ translation to the whole ball */
   for (k=0; k<ilist; k++) {
@@ -817,8 +817,8 @@ static int defmetreg(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
 
   /* Computation of the rotation matrix T_p0 S -> [z = 0] */
   n  = &p0->n[0];
-  _MMG5_rotmatrix(n,r);
-  m = &met->m[6*(idp)+1];
+  if ( !_MMG5_rotmatrix(n,r) ) return(0);
+  m = &met->m[6*idp];
 
   /* Apply rotation \circ translation to the whole ball */
   for (k=0; k<ilist; k++) {
@@ -920,8 +920,8 @@ int defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
     met->npmax = mesh->npmax;
     met->size  = 6;
     met->dim   = 3;
-    _MMG5_ADD_MEM(mesh,(6*met->npmax+1)*sizeof(double),"solution",return(0));
-    _MMG5_SAFE_CALLOC(met->m,6*(mesh->npmax+1)+1,double);
+    _MMG5_ADD_MEM(mesh,(6*(met->npmax+1))*sizeof(double),"solution",return(0));
+    _MMG5_SAFE_CALLOC(met->m,6*(mesh->npmax+1),double);
   }
 
   for (k=1; k<=mesh->np; k++) {
@@ -936,7 +936,7 @@ int defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
     for (i=0; i<3; i++) {
       ppt = &mesh->point[pt->v[i]];
       if ( ppt->flag || !MG_VOK(ppt) )  continue;
-      if ( ismet )  memcpy(mm,&met->m[6*(pt->v[i])+1],6*sizeof(double));
+      if ( ismet )  memcpy(mm,&met->m[6*(pt->v[i])],6*sizeof(double));
 
       if ( MS_SIN(ppt->tag) ) {
         if ( !defmetsin(mesh,met,k,i) )  continue;
@@ -991,8 +991,8 @@ static int grad2met(MMG5_pMesh mesh, MMG5_pSol met, int iel, int i){
   uy = p2->c[1] - p1->c[1];
   uz = p2->c[2] - p1->c[2];
 
-  mm1 = &met->m[6*(np1)+1];
-  mm2 = &met->m[6*(np2)+1];
+  mm1 = &met->m[6*np1];
+  mm2 = &met->m[6*np2];
 
   if( !_MMG5_nortri(mesh,pt,nt) )
     return(-1);
@@ -1279,7 +1279,7 @@ int gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
     if ( MS_SIN(p1->tag) ) continue;
     if ( !(p1->tag & MG_GEO) ) continue;
 
-    m = &met->m[6*k+1];
+    m = &met->m[6*k];
     mv = MG_MAX(m[0],MG_MAX(m[1],m[2]));
     m[0] = mv;
     m[1] = mv;

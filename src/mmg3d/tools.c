@@ -805,8 +805,8 @@ int _MMG5_DoSol(MMG5_pMesh mesh,MMG5_pSol met) {
     met->size   = 1;
     met->dim    = mesh->dim;
 
-    _MMG5_ADD_MEM(mesh,(met->npmax*met->size+1)*sizeof(double),"solution",return(0));
-    _MMG5_SAFE_CALLOC(met->m,met->npmax*met->size+1,double);
+    _MMG5_ADD_MEM(mesh,(met->size*(met->npmax+1))*sizeof(double),"solution",return(0));
+    _MMG5_SAFE_CALLOC(met->m,met->size*(met->npmax+1),double);
 
     /* internal edges */
     for (k=1; k<=mesh->ne; k++) {

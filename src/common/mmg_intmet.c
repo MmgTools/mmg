@@ -221,14 +221,14 @@ int _MMG5_interpreg_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt,char i,doubl
   nold[2] = n1[2];
 
   if ( MG_SIN(p1->tag) || (p1->tag & MG_NOM)) {
-    memcpy(m1,&met->m[6*(ip1)+1],6*sizeof(double));
+    memcpy(m1,&met->m[6*ip1],6*sizeof(double));
   }
   else {
     if ( MG_GEO & p1->tag ) {
       if ( !_MMG5_buildridmetnor(mesh,met,pt->v[i1],nt,m1) )  return(0);
     }
     else {
-      memcpy(m1,&met->m[6*(ip1)+1],6*sizeof(double));
+      memcpy(m1,&met->m[6*ip1],6*sizeof(double));
     }
     memcpy(mold,m1,6*sizeof(double));
 
@@ -271,7 +271,7 @@ int _MMG5_interpreg_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt,char i,doubl
   nold[2] = n2[2];
 
   if ( MG_SIN(p2->tag) || (p2->tag & MG_NOM)) {
-    memcpy(m2,&met->m[6*(ip2)+1],6*sizeof(double));
+    memcpy(m2,&met->m[6*ip2],6*sizeof(double));
 
     /* In this pathological case, n is empty */
     if ( MG_SIN(p1->tag) || (p1->tag & MG_NOM))
@@ -282,7 +282,7 @@ int _MMG5_interpreg_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt,char i,doubl
       if ( !_MMG5_buildridmetnor(mesh,met,pt->v[i2],nt,m2))  return(0);
     }
     else {
-      memcpy(m2,&met->m[6*(ip2)+1],6*sizeof(double));
+      memcpy(m2,&met->m[6*ip2],6*sizeof(double));
     }
     memcpy(mold,m2,6*sizeof(double));
 

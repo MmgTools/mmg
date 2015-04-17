@@ -156,7 +156,12 @@ int chkmsh(MMG5_pMesh mesh,int severe) {
     return(1);
 }
 
-/* Check size prescriptions at point k */
+/**
+ *
+ * Check size prescriptions at point k.
+ *
+ * \warning not used
+ */
 int chkeigen(MMG5_pMesh mesh,MMG5_pSol met,int k,double lambda[3]) {
     MMG5_pPoint    p0;
     MMG5_pxPoint   go;
@@ -166,7 +171,7 @@ int chkeigen(MMG5_pMesh mesh,MMG5_pSol met,int k,double lambda[3]) {
     p0 = &mesh->point[k];
     assert( MG_VOK(p0) );
 
-    m = &met->m[6*k+1];
+    m = &met->m[6*k];
 
     if ( MS_SIN(p0->tag) ) {
         lambda[0] = m[0];
@@ -202,7 +207,12 @@ int chkeigen(MMG5_pMesh mesh,MMG5_pSol met,int k,double lambda[3]) {
     return(1);
 }
 
-/* Check metric consistency */
+/**
+ *
+ * Check metric consistency.
+ *
+ * \warning not used.
+ */
 int chkmet(MMG5_pMesh mesh,MMG5_pSol met) {
     MMG5_pPoint    p0;
     MMG5_pxPoint   go;
@@ -220,7 +230,7 @@ int chkmet(MMG5_pMesh mesh,MMG5_pSol met) {
         if ( !MG_VOK(p0) ) continue;
 
         if( MS_SIN(p0->tag) ) {
-            m = &met->m[6*k+1];
+            m = &met->m[6*k];
             if( m[1] != 0.0 || m[2] != 0.0 || m[4] != 0.0 ){
                 printf("   ### Error in definition of singular metric point %d,\
                      met %f %f %f %f %f %f  \n",k,m[0],m[1],m[2],m[3],m[4],m[5]);
@@ -233,7 +243,7 @@ int chkmet(MMG5_pMesh mesh,MMG5_pSol met) {
             }
         }
         else if ( p0->tag & MG_GEO ) {
-            m = &met->m[6*k+1];
+            m = &met->m[6*k];
             for (i=0; i<3; i++) {
                 if ( m[i] > isqhmin + 1.e-6 || m[i] < isqhmax - 1.e-6 ){
                     printf("   ### Error in definition of metric at ridge point %d,\
@@ -243,7 +253,7 @@ int chkmet(MMG5_pMesh mesh,MMG5_pSol met) {
             }
         }
         else {
-            m = &met->m[6*k+1];
+            m = &met->m[6*k];
             if ( MG_EDG(p0->tag) ) {
                 go = &mesh->xpoint[p0->xp];
                 n = &go->n1[0];

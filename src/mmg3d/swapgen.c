@@ -239,11 +239,11 @@ int _MMG5_swpgen(MMG5_pMesh mesh,MMG5_pSol met,int nconf,int ilist,int *list,_MM
     }
   }
   if ( met->m ) {
-    iadr = met->size*na + 1;
+    iadr = met->size*na;
     m1 = &met->m[iadr];
-    iadr = met->size*nb + 1;
+    iadr = met->size*nb;
     m2 = &met->m[iadr];
-    iadr = met->size*np + 1;
+    iadr = met->size*np;
     mp = &met->m[iadr];
 
     _MMG5_intmetvol(m1,m2,mp,0.5);
