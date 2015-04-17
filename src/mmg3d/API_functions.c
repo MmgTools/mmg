@@ -55,6 +55,8 @@ void _MMG5_Init_parameters(MMG5_pMesh mesh) {
   mesh->info.iso      =  0;  /* [0/1]    ,Turn on/off levelset meshing */
   /** MMG5_IPARAM_lag = -1 */
   mesh->info.lag      = -1;
+  /** MMG5_IPARAM_optim = 0 */
+  mesh->info.optim    =  0;
   /** MMG5_IPARAM_noinsert = 0 */
   mesh->info.noinsert =  0;  /* [0/1]    ,avoid/allow point insertion/deletion */
   /** MMG5_IPARAM_noswap = 0 */
@@ -1050,6 +1052,9 @@ int MMG5_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
       exit(EXIT_FAILURE);
     mesh->info.lag = val;
     break;
+  case MMG5_IPARAM_optim :
+    mesh->info.optim = val;
+    break;
   case MMG5_IPARAM_noinsert :
     mesh->info.noinsert = val;
     break;
@@ -1127,6 +1132,9 @@ int MMG5_Get_iparameter(MMG5_pMesh mesh, int iparam) {
     break;
   case MMG5_IPARAM_lag :
     return ( mesh->info.lag );
+    break;
+  case MMG5_IPARAM_optim :
+    return ( mesh->info.optim );
     break;
   case MMG5_IPARAM_noinsert :
     return ( mesh->info.noinsert );

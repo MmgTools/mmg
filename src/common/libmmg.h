@@ -160,7 +160,7 @@ typedef struct {
   char          nreg;
   int           renum;
   char          imprim,ddebug,badkal,iso,fem,lag;
-  unsigned char noinsert, noswap, nomove;
+  unsigned char optim,noinsert, noswap, nomove;
   int           bucket;
   MMG5_pPar     par;
 } MMG5_Info;
