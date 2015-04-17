@@ -20,7 +20,8 @@
 ##  use this copy of the mmg distribution only if you accept them.
 ## =============================================================================
 
-CMAKE_MINIMUM_REQUIRED(VERSION 3.0.0)
+CMAKE_MINIMUM_REQUIRED(VERSION 2.8.0)
+
 PROJECT (mmg)
 
 ###############################################################################
@@ -105,7 +106,10 @@ ENDIF(NOT CMAKE_COMPILER_IS_CLANG)
 #####         Choose executable target to compile
 #####
 ###############################################################################
-SET ( CMAKE_BUILD_TYPE CACHE STRING "Release" )
+IF(NOT CMAKE_BUILD_TYPE)
+  SET ( CMAKE_BUILD_TYPE "Release" CACHE STRING "Release")
+  SET(CMAKE_CONFIGURATION_TYPES ${CMAKE_BUILD_TYPE})
+ENDIF ()
 
 SET ( BUILD "MMG" CACHE STRING
   "\"MMG3D\", \"MMGS\" or \"MMG\" to compile both MMGS and MMG3D" )
@@ -735,23 +739,23 @@ SET(CPACK_SOURCE_IGNORE_FILES ";build*" ${CPACK_SOURCE_IGNORE_FILES}  )
 SET(CPACK_SOURCE_IGNORE_FILES ";doc/doxygen/.*/html;doc/doxygen/.*/Doxyfile$"
   ${CPACK_SOURCE_IGNORE_FILES}  )
 
-IF ((WIN32 OR WIN64) AND NOT UNIX)
-  # Warning compilation under windows not tested
-  #SET(CPACK_PACKAGE_ICON "${CMAKE_SOURCE_DIR}/logo.pdf")
-  SET(CPACK_NSIS_INSTALLED_ICON_NAME "bin\\\\${PROJECT_NAME}.exe")
-  SET(CPACK_NSIS_DISPLAY_NAME
-    "${CPACK_PACKAGE_INSTALL_DIRECTORY} mmg: surface and volume remeshers")
-  SET(CPACK_NSIS_HELP_LINK "http:\\\\\\\\www.mmgtools.org‎")
-  SET(CPACK_NSIS_URL_INFO_ABOUT
-    "http:\\\\\\\\www.math.u-bordeaux1.fr/~dobrzyns/.../mmg3d.php‎")
-  SET(CPACK_NSIS_CONTACT ${CPACK_PACKAGE_CONTACT})
-  SET(CPACK_NSIS_MODIFY_PATH ON) # Choice to add prog dir to the system PATH
-  SET(CPACK_PACKAGING_INSTALL_PREFIX "${PROJECT_NAME}" CACHE PATH
-    "Where you want to install your package")
-  MARK_AS_ADVANCED(CPACK_PACKAGING_INSTALL_PREFIX)
-ELSEIF (APPLE )
-  SET(CPACK_BINARY_OSX11 "ON")
-ELSEIF ( UNIX )
-ENDIF()
+IF ( (WIN32 OR WIN64) AND (NOT UNIX) )
+#  # Warning compilation under windows not tested
+#  #SET(CPACK_PACKAGE_ICON "${CMAKE_SOURCE_DIR}/logo.pdf")
+#  SET(CPACK_NSIS_INSTALLED_ICON_NAME "bin\\\\${PROJECT_NAME}.exe")
+#  SET(CPACK_NSIS_DISPLAY_NAME
+#    "${CPACK_PACKAGE_INSTALL_DIRECTORY} mmg: surface and volume remeshers")
+#  SET(CPACK_NSIS_HELP_LINK "http:\\\\\\\\www.mmgtools.org‎")
+#  SET(CPACK_NSIS_URL_INFO_ABOUT
+#    "http:\\\\\\\\www.math.u-bordeaux1.fr/~dobrzyns/.../mmg3d.php‎")
+#  SET(CPACK_NSIS_CONTACT ${CPACK_PACKAGE_CONTACT})
+#  SET(CPACK_NSIS_MODIFY_PATH ON) # Choice to add prog dir to the system PATH
+#  SET(CPACK_PACKAGING_INSTALL_PREFIX "${PROJECT_NAME}" CACHE PATH
+#    "Where you want to install your package")
+#  MARK_AS_ADVANCED(CPACK_PACKAGING_INSTALL_PREFIX)
+#ELSEIF (APPLE )
+#  SET(CPACK_BINARY_OSX11 "ON")
+#ELSEIF ( UNIX )
+ENDIF (  (WIN32 OR WIN64) AND (NOT UNIX) )
 
 INCLUDE(CPack)
