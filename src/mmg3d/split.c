@@ -2473,6 +2473,8 @@ int _MMG5_split4bar(MMG5_pMesh mesh, MMG5_pSol met, int k) {
   int      i,ib,iel;
   int      newtet[4];
   unsigned char isxt[4],firstxt;
+  int kk,iadr;
+  double *m1;
 
   pt[0] = &mesh->tetra[k];
   pt[0]->flag = 0;
@@ -2501,7 +2503,18 @@ int _MMG5_split4bar(MMG5_pMesh mesh, MMG5_pSol met, int k) {
                         return(0)
                         ,o,0);
   }
-  if ( met->m )  met->m[ib] = hnew;
+#warning todo interpolation metric
+        if ( met->m ) {
+          if(met->size==1)
+            met->m[ib] = hnew;
+          else {
+            iadr = met->size*pt[0]->v[0] + 1;
+            m1 = &met->m[iadr];
+            for(kk=0 ; kk<6 ; kk++) {
+              met->m[6*ib+1+kk] = m1[kk];
+            }
+          }
+        }
 
   /* create 3 new tetras */
   iel = _MMG5_newElt(mesh);
