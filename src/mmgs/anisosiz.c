@@ -133,6 +133,7 @@ static int _MMG5_defmetsin(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
  * and at each time, metric tensor has to be recomputed, depending on the side.
  *
  */
+#warning check defmetrid, results seems weird.
 static int _MMG5_defmetrid(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
   MMG5_pTria     pt;
   MMG5_pPoint    p0,p1,p2;
@@ -412,6 +413,7 @@ static int _MMG5_defmetrid(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
  * geometric approx of the surface.
  *
  */
+#warning check defmetref, results seems weird.
 static int _MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
   MMG5_pTria         pt;
   MMG5_pPoint        p0,p1;
@@ -699,7 +701,7 @@ int _MMG5_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
       if ( ismet )  memcpy(mm,&met->m[6*(pt->v[i])],6*sizeof(double));
 
       if ( MS_SIN(ppt->tag) ) {
-        if ( 1 || !_MMG5_defmetsin(mesh,met,k,i) )  continue;
+        if ( !_MMG5_defmetsin(mesh,met,k,i) )  continue;
       }
       else if ( ppt->tag & MG_GEO ) {
         if ( !_MMG5_defmetrid(mesh,met,k,i))  continue;
@@ -834,6 +836,7 @@ static int grad2met(MMG5_pMesh mesh, MMG5_pSol met, int iel, int i){
     + 2.0 * ( m2[1]*t2[0]*t2[1] + m2[2]*t2[0]*t2[2] + m2[4]*t2[1]*t2[2] ) ;
   l = 0.5* ( sqrt(l1) + sqrt(l2) ) ;
 
+#warning the previously computed l is unused...
   l = sqrt(ux*ux+uy*uy+uz*uz);
 
   /* Characteristic sizes in direction of support curve */

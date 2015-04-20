@@ -298,7 +298,7 @@ void _MMG5_defUninitSize(MMG5_pMesh mesh,MMG5_pSol met,char ismet)
       m[0] = m[3] = m[5] = isqhmax;
     }
     else if ( ppt->tag & MG_GEO ) {
-      m[0] = m[1] = m[2] = isqhmax;
+      m[0] = m[3] = m[5] = isqhmax;
     }
     else {
       n = ppt->tag & MG_REF ? &mesh->xpoint[ppt->xp].n1[0] : ppt->n;
