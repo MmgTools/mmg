@@ -463,6 +463,8 @@ void _MMG5_fillDefmetregSys( int k, MMG5_pPoint p0, int i0, _MMG5_Bezier b,
 }
 
 /**
+ * \param mesh pointer toward the mesh structure.
+ * \param r pointer toward the rotation matrix.
  * \param c physical coordinates of the curve edge mid-point.
  * \param tAA matrix of the system to solve.
  * \param tAb second member.
@@ -480,12 +482,13 @@ int _MMG5_solveDefmetregSys( MMG5_pMesh mesh, double r[3][3], double c[3],
                              double tAA[6], double tAb[3], double *m,
                              double isqhmin, double isqhmax, double hausd)
 {
-  double intm[3], kappa[2], vp[2][2], b0[3], b1[3];
+  double intm[3], kappa[2], vp[2][2], b0[3], b1[3], b2[3];
 
   memset(intm,0.0,3*sizeof(double));
 
   /* case planar surface : tAb = 0 => no curvature */
   /* isotropic metric with hmax size*/
+
   if((tAb[0]*tAb[0] + tAb[1]*tAb[1] + tAb[2]*tAb[2]) < _MMG5_EPSD) {
     m[0] = isqhmax;
     m[1] = 0;
@@ -524,23 +527,33 @@ int _MMG5_solveDefmetregSys( MMG5_pMesh mesh, double r[3][3], double c[3],
   intm[1] = kappa[0]*vp[0][0]*vp[0][1] + kappa[1]*vp[1][0]*vp[1][1];
   intm[2] = kappa[0]*vp[0][1]*vp[0][1] + kappa[1]*vp[1][1]*vp[1][1];
 
-  /* At this point, intm (with 0 in the z direction)  is the desired metric, except
-     it is expressed in the rotated bc, that is intm = R * metric in bc * ^t R,
-     so metric in bc = ^tR*intm*R */
+  /* At this point, intm (with 0 replaced by isqhmax in the z direction) is the
+     desired metric, except it is expressed in the rotated bc, that is intm = R
+     * metric in bc * ^t R, so metric in bc = ^tR*intm*R */
 
-  /* b0 and b1 are the lines of matrix intm*R  */
-  b0[0] = intm[0]*r[0][0] + intm[1]*r[1][0] ;   b0[1] = intm[0]*r[0][1] + intm[1]*r[1][1] ;    b0[2] = intm[0]*r[0][2] + intm[1]*r[1][2] ;
-  b1[0] = intm[1]*r[0][0] + intm[2]*r[1][0] ;   b1[1] = intm[1]*r[0][1] + intm[2]*r[1][1] ;    b1[2] = intm[1]*r[0][2] + intm[2]*r[1][2] ;
-  //last line of the matrix = 0.0;
+  /* b0, b1 and b2 are the lines of matrix intm*R  */
+  // intm = intm[0]  intm[1]    0
+  //        intm[1]  intm[2]    0
+  //           0       0     isqhmax
 
-  m[0] = r[0][0] * b0[0] + r[1][0] * b1[0];
-  m[1] = r[0][0] * b0[1] + r[1][0] * b1[1];
-  m[2] = r[0][0] * b0[2] + r[1][0] * b1[2];
+  b0[0] = intm[0]*r[0][0] + intm[1]*r[1][0];
+  b0[1] = intm[0]*r[0][1] + intm[1]*r[1][1];
+  b0[2] = intm[0]*r[0][2] + intm[1]*r[1][2];
+  b1[0] = intm[1]*r[0][0] + intm[2]*r[1][0];
+  b1[1] = intm[1]*r[0][1] + intm[2]*r[1][1];
+  b1[2] = intm[1]*r[0][2] + intm[2]*r[1][2];
+  b2[0] = isqhmax*r[2][0];
+  b2[1] = isqhmax*r[2][1];
+  b2[2] = isqhmax*r[2][2];
 
-  m[3] = r[0][1] * b0[1] + r[1][1] * b1[1];
-  m[4] = r[0][1] * b0[2] + r[1][1] * b1[2];
+  m[0] = r[0][0] * b0[0] + r[1][0] * b1[0] + r[2][0] * b2[0];
+  m[1] = r[0][0] * b0[1] + r[1][0] * b1[1] + r[2][0] * b2[1];
+  m[2] = r[0][0] * b0[2] + r[1][0] * b1[2] + r[2][0] * b2[2];
 
-  m[5] = r[0][2] * b0[2] + r[1][2] * b1[2];
+  m[3] = r[0][1] * b0[1] + r[1][1] * b1[1] + r[2][1] * b2[1];
+  m[4] = r[0][1] * b0[2] + r[1][1] * b1[2] + r[2][1] * b2[2];
+
+  m[5] = r[0][2] * b0[2] + r[1][2] * b1[2] + r[2][2] * b2[2];
 
   /* Security check : normal in the kernel */
   /*if((fabs(p0->m[0]*n[0] + p0->m[1]*n[1] + p0->m[2]*n[2] ) > 1.0e-4)){
@@ -564,6 +577,10 @@ int _MMG5_solveDefmetregSys( MMG5_pMesh mesh, double r[3][3], double c[3],
 }
 
 /**
+ * \param mesh pointer toward the mesh structure.
+ * \param p0 pointer toward the point on which we want to define the metric.
+ * \param ipref table containing the indices of the edge extremities.
+ * \param r pointer toward the rotation matrix.
  * \param c physical coordinates of the curve edge mid-point.
  * \param tAA matrix of the system to solve.
  * \param tAb second member.
@@ -583,8 +600,8 @@ int _MMG5_solveDefmetrefSys( MMG5_pMesh mesh, MMG5_pPoint p0, int ipref[2],
                              double isqhmin, double isqhmax, double hausd)
 {
   MMG5_pPoint  p1;
-  double       intm[3], kappa[2], vp[2][2], b0[3], b1[3], kappacur, *t, *t1;
-  double       gammasec[3],tau[2], ux, uy, uz, ps1, l, ll;
+  double       intm[3], kappa[2], vp[2][2], b0[3], b1[3], b2[3], kappacur;
+  double       gammasec[3],tau[2], ux, uy, uz, ps1, l, ll, *t, *t1;
   int          i;
 
   memset(intm,0.0,3*sizeof(double));
@@ -714,9 +731,12 @@ int _MMG5_solveDefmetrefSys( MMG5_pMesh mesh, MMG5_pPoint p0, int ipref[2],
   _MMG5_intmetsavedir(mesh,c,intm,b0);
   memcpy(intm,b0,3*sizeof(double));
 
-  /* At this point, intm (with 0 in the z direction) is the desired metric,
-     except it is expressed in the rotated bc, that is intm = R * metric in
-     bc * ^t R, so metric in bc = ^tR*intm*R */
+  /* At this point, intm (with 0 replaced by isqhmax in the z direction) is the
+     desired metric, except it is expressed in the rotated bc, that is intm = R
+     * metric in bc * ^t R, so metric in bc = ^tR*intm*R */
+  // intm = intm[0]  intm[1]    0
+  //        intm[1]  intm[2]    0
+  //           0       0     isqhmax
 
   /* b0 and b1 serve now for nothing : let them be the lines of matrix intm*R */
   b0[0] = intm[0]*r[0][0] + intm[1]*r[1][0];
@@ -725,15 +745,18 @@ int _MMG5_solveDefmetrefSys( MMG5_pMesh mesh, MMG5_pPoint p0, int ipref[2],
   b1[0] = intm[1]*r[0][0] + intm[2]*r[1][0];
   b1[1] = intm[1]*r[0][1] + intm[2]*r[1][1];
   b1[2] = intm[1]*r[0][2] + intm[2]*r[1][2];
+  b2[0] = isqhmax*r[2][0];
+  b2[1] = isqhmax*r[2][1];
+  b2[2] = isqhmax*r[2][2];
 
-  m[0] = r[0][0] * b0[0] + r[1][0] * b1[0];
-  m[1] = r[0][0] * b0[1] + r[1][0] * b1[1];
-  m[2] = r[0][0] * b0[2] + r[1][0] * b1[2];
+  m[0] = r[0][0] * b0[0] + r[1][0] * b1[0] + r[2][0] * b2[0];
+  m[1] = r[0][0] * b0[1] + r[1][0] * b1[1] + r[2][0] * b2[1];
+  m[2] = r[0][0] * b0[2] + r[1][0] * b1[2] + r[2][0] * b2[2];
 
-  m[3] = r[0][1] * b0[1] + r[1][1] * b1[1];
-  m[4] = r[0][1] * b0[2] + r[1][1] * b1[2];
+  m[3] = r[0][1] * b0[1] + r[1][1] * b1[1] + r[2][1] * b2[1];
+  m[4] = r[0][1] * b0[2] + r[1][1] * b1[2] + r[2][1] * b2[2];
 
-  m[5] = r[0][2] * b0[2] + r[1][2] * b1[2];
+  m[5] = r[0][2] * b0[2] + r[1][2] * b1[2] + r[2][2] * b2[2];
 
   return(1);
 }

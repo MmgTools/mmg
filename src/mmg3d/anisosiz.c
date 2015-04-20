@@ -602,7 +602,7 @@ int _MMG5_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
         if ( ismet )  memcpy(mm,&met->m[6*(pt->v[iploc])],6*sizeof(double));
 
         if ( MG_SIN(ppt->tag) || (ppt->tag & MG_NOM) ) {
-          if ( 1 || !_MMG5_defmetsin(mesh,met,k,l,iploc) ) continue;
+          if ( !_MMG5_defmetsin(mesh,met,k,l,iploc) )  continue;
         }
         else if ( ppt->tag & MG_GEO ) {
           if ( 1 || !_MMG5_defmetrid(mesh,met,k,l,iploc))  continue;
