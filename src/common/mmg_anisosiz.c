@@ -475,11 +475,11 @@ void _MMG5_fillDefmetregSys( int k, MMG5_pPoint p0, int i0, _MMG5_Bezier b,
  * Solve tAA * tmp_m = tAb and fill m with tmp_m (after rotation).
  *
  */
-int _MMG5_solveDefmetregSys( MMG5_pMesh mesh, double c[3], double tAA[6],
+int _MMG5_solveDefmetregSys( MMG5_pMesh mesh, double r[3][3], double c[3], double tAA[6],
                              double tAb[3], double *m,
                              double isqhmin, double isqhmax, double hausd)
 {
-  double intm[3], kappa[2], vp[2][2], r[3][3], b0[3], b1[3];
+  double intm[3], kappa[2], vp[2][2], b0[3], b1[3];
 
   memset(intm,0.0,3*sizeof(double));
 

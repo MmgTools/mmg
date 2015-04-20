@@ -364,7 +364,7 @@ static int _MMG5_defmetreg(MMG5_pMesh mesh,MMG5_pSol met,int kel,int iface, int 
 
   /* Solve tAA * tmp_m = tAb and fill m with tmp_m (after rotation) */
 #warning treat local hausd when ok
-  return(_MMG5_solveDefmetregSys( mesh, c, tAA, tAb, m, isqhmin, isqhmax,
+  return(_MMG5_solveDefmetregSys( mesh,r, c, tAA, tAb, m, isqhmin, isqhmax,
                                   mesh->info.hausd));
 }
 

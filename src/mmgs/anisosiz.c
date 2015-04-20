@@ -884,7 +884,7 @@ static int defmetreg(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
   }
 
   /* Solve tAA * tmp_m = tAb and fill m with tmp_m (after rotation) */
-  return(_MMG5_solveDefmetregSys( mesh, c, tAA, tAb, m, isqhmin, isqhmax,
+  return(_MMG5_solveDefmetregSys( mesh,r, c, tAA, tAb, m, isqhmin, isqhmax,
                                   mesh->info.hausd));
 }
 
