@@ -351,7 +351,7 @@ int MMG5_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met
     if ( !_MMG5_mmg3d2(mesh,met) ) return(MMG5_STRONGFAILURE);
   }
   else {
-    if ( mesh->info.optim && !met->np && !_MMG5_DoSol(mesh,met,&mesh->info) ) {
+    if ( mesh->info.optim && !met->np && !_MMG5_DoSol(mesh,met) ) {
       if ( !_MMG5_unscaleMesh(mesh,met) )  return(MMG5_STRONGFAILURE);
       _MMG5_RETURN_AND_PACK(mesh,met,MMG5_LOWFAILURE);
     }
