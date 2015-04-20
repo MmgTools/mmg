@@ -37,6 +37,37 @@
 
 /**
  * \param mesh pointer toward the mesh structure.
+ * \param m pointer toward the first metric to intersect.
+ * \param n pointer toward the second metric to intersect.
+ * \param mr pointer toward the computed intersected metric.
+ * \return 1.
+ *
+ * Compute the intersected (2 x 2) metric between metrics \a m and \a n,
+ * PRESERVING the directions of \a m. Result is stored in \a mr.
+ *
+ */
+int _MMG5_intmetsavedir(MMG5_pMesh mesh, double *m,double *n,double *mr) {
+  int    i;
+  double lambda[2],vp[2][2],siz,isqhmin;
+
+  isqhmin = 1.0 / (mesh->info.hmin * mesh->info.hmin);
+  _MMG5_eigensym(m,lambda,vp);
+
+  for (i=0; i<2; i++) {
+    siz = n[0]*vp[i][0]*vp[i][0] + 2.0*n[1]*vp[i][0]*vp[i][1]
+      + n[2]*vp[i][1]*vp[i][1];
+    lambda[i] = MG_MAX(lambda[i],siz);
+    lambda[i] = MG_MIN(lambda[i],isqhmin);
+  }
+  mr[0] = lambda[0]*vp[0][0]*vp[0][0] + lambda[1]*vp[1][0]*vp[1][0];
+  mr[1] = lambda[0]*vp[0][0]*vp[0][1] + lambda[1]*vp[1][0]*vp[1][1];
+  mr[2] = lambda[0]*vp[0][1]*vp[0][1] + lambda[1]*vp[1][1]*vp[1][1];
+
+  return(1);
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the sol structure.
  * \param np0 index of edge's extremity.
  * \param ux distance \f$[p0;p1]\f$ along x axis.
@@ -423,7 +454,7 @@ void _MMG5_printTria(MMG5_pMesh mesh,char* fileName) {
 }
 
 /**
- * 
+ *
  *
  * Parallel transport of a metric tensor field, attached to point c0, with normal n0,
  *  to point c1, with normal n1

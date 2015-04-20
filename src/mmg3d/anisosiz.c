@@ -211,23 +211,180 @@ static int _MMG5_defmetrid(MMG5_pMesh mesh,MMG5_pSol met,int kel, int iface, int
  */
 static int _MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,int kel, int iface, int ip) {
   MMG5_pTetra   pt;
+  MMG5_pxTetra  pxt;
+  MMG5_Tria     ptt;
   MMG5_pPoint   p0,p1;
+  MMG5_pxPoint  px0;
   _MMG5_Bezier  b;
-  int           ilist,list[_MMG5_LMAX+2],k,iel,ipref[2],idp;
-  double        *m,isqhmin,isqhmax,*n,*t,l,ll,r[3][3],lispoi[3*_MMG5_LMAX+1];
-  double        ux,uy,uz,det2d,intm[3],tau[2],b0[3],b1[3],kappa[2],vp[2][2],c[3];
-  double        ps1,gammasec[3],kappacur,*t1,tAA[6],tAb[3],d[3];
-  unsigned char i0,i1,i2,i,j;
+  int           lists[_MMG5_LMAX+2],listv[_MMG5_LMAX+2],ilists,ilistv,ilist;
+  int           k,iel,ipref[2],idp,ifac;
+  double        *m,isqhmin,isqhmax,*n,r[3][3],lispoi[3*_MMG5_LMAX+1];
+  double        ux,uy,uz,det2d,c[3];
+  double        tAA[6],tAb[3];
+  unsigned char i0,i1,i2,itri1,itri2,i;
 
-#warning not yet implemented
-  printf("defmetref not yet implemented\n");
-  exit(EXIT_FAILURE);
-
+  ipref[0] = ipref[1] = 0;
   pt  = &mesh->tetra[kel];
   idp = pt->v[ip];
   p0  = &mesh->point[idp];
 
-  return(1);
+   ilist = _MMG5_boulesurfvolp(mesh,kel,ip,iface,listv,&ilistv,lists,&ilists);
+
+  if ( ilist!=1 ) {
+    printf("Error; unable to compute the ball af the point %d.\n", idp);
+    printf("Exit program.\n");
+    exit(EXIT_FAILURE);
+  }
+
+  isqhmin = 1.0 / (mesh->info.hmin*mesh->info.hmin);
+  isqhmax = 1.0 / (mesh->info.hmax*mesh->info.hmax);
+
+  /* Computation of the rotation matrix T_p0 S -> [z = 0] */
+  assert( p0->xp && !MG_SIN(p0->tag) && MG_EDG(p0->tag) && !(MG_NOM & p0->tag) );
+  px0 = &mesh->xpoint[p0->xp];
+
+  n  = &px0->n1[0];
+  assert ( n[0]*n[0] + n[1]*n[1] + n[2]*n[2] > _MMG5_EPSD2 );
+
+  _MMG5_rotmatrix(n,r);
+  m = &met->m[6*idp];
+
+  /* Apply rotation \circ translation to the whole ball */
+  for (k=0; k<ilists; k++) {
+    iel   = lists[k] / 4;
+    ifac  = lists[k] % 4;
+    pt    = &mesh->tetra[iel];
+    assert(pt->xt && (mesh->xtetra[pt->xt].ftag[ifac] & MG_BDY) );
+    pxt   = &mesh->xtetra[pt->xt];
+
+    for ( i = 0; i < 3; i++ ) {
+      if ( pt->v[_MMG5_idir[ifac][i]] == idp ) break;
+    }
+    assert(i<3);
+
+    i0    = _MMG5_idir[ifac][i];
+    itri1 = _MMG5_inxt2[i];
+    i1    = _MMG5_idir[ifac][itri1];
+    itri2 = _MMG5_iprv2[i];
+    i2    = _MMG5_idir[ifac][itri2];
+    p1    = &mesh->point[pt->v[i1]];
+
+    /* Store the two ending points of ref curves */
+    if ( MG_REF & pxt->tag[_MMG5_iarf[ifac][itri1]] ) {
+      if ( !ipref[0] ) {
+        ipref[0] = pt->v[i2];
+      }
+      else if ( !ipref[1] && (pt->v[i2] != ipref[0]) ) {
+        ipref[1] = pt->v[i2];
+      }
+      else if ( (pt->v[i2] != ipref[0]) && (pt->v[i2] != ipref[1]) ) {
+        printf("Problem (func defmetref) : three adjacent ref at a non singular point\n");
+        exit(EXIT_FAILURE);
+      }
+    }
+
+    if ( MG_REF & pxt->tag[_MMG5_iarf[ifac][itri2]] ) {
+      if ( !ipref[0] ) {
+        ipref[0] = pt->v[i1];
+      }
+      else if ( !ipref[1] && (pt->v[i1] != ipref[0]) ) {
+        ipref[1] = pt->v[i1];
+      }
+      else if ( (pt->v[i1] != ipref[0]) && (pt->v[i1] != ipref[1]) ) {
+        printf("Problem (func defmetref) : three adjacent ref at a non singular point\n");
+        exit(EXIT_FAILURE);
+      }
+    }
+
+    ux = p1->c[0] - p0->c[0];
+    uy = p1->c[1] - p0->c[1];
+    uz = p1->c[2] - p0->c[2];
+
+    lispoi[3*k+1] =  r[0][0]*ux + r[0][1]*uy + r[0][2]*uz;
+    lispoi[3*k+2] =  r[1][0]*ux + r[1][1]*uy + r[1][2]*uz;
+    lispoi[3*k+3] =  r[2][0]*ux + r[2][1]*uy + r[2][2]*uz;
+  }
+
+  /* list goes modulo ilist */
+  lispoi[3*ilists+1] =  lispoi[1];
+  lispoi[3*ilists+2] =  lispoi[2];
+  lispoi[3*ilists+3] =  lispoi[3];
+
+  /* Check all projections over tangent plane. */
+  for (k=0; k<ilists-1; k++) {
+    det2d = lispoi[3*k+1]*lispoi[3*(k+1)+2] - lispoi[3*k+2]*lispoi[3*(k+1)+1];
+    assert(det2d);
+    if ( det2d <= 0.0 ) {
+      printf("PROBLEM : BAD PROJECTION OVER TANGENT PLANE %f \n", det2d);
+      return(0);
+    }
+  }
+  det2d = lispoi[3*(ilists-1)+1]*lispoi[3*0+2] - lispoi[3*(ilists-1)+2]*lispoi[3*0+1];
+  assert(det2d);
+  if ( det2d <= 0.0 ) {
+    printf("PROBLEM : BAD PROJECTION OVER TANGENT PLANE %f \n", det2d);
+    return(0);
+  }
+  assert(ipref[0] && ipref[1]);
+
+  /* At this point, lispoi contains all the points of the ball of p0, rotated so
+     that t_{p_0}S = [z = 0], ipref1 and ipref2 are the indices of other ref
+     points. */
+
+  /* Second step : reconstitution of the curvature tensor at p0 in the tangent
+     plane, with a quadric fitting approach */
+  memset(tAA,0.0,6*sizeof(double));
+  memset(tAb,0.0,3*sizeof(double));
+
+  hausd = -1.;
+  for (k=0; k<ilists; k++) {
+    /* Approximation of the curvature in the normal section associated to tau :
+       by assumption, p1 is either regular, either on a ridge (or a
+       singularity), but p0p1 is not ridge*/
+    iel  = lists[k] / 4;
+    ifac = lists[k] % 4;
+    pt  = &mesh->tetra[iel];
+    assert(pt->xt);
+    pxt = &mesh->xtetra[pt->xt];
+
+    for ( i = 0; i < 3; i++ ) {
+      if ( pt->v[_MMG5_idir[ifac][i]] == idp ) break;
+    }
+    assert(i<3);
+
+    i0  = _MMG5_idir[ifac][i];
+    i1  = _MMG5_idir[ifac][_MMG5_inxt2[i]];
+
+    _MMG5_tet2tri(mesh,iel,ifac,&ptt);
+
+    _MMG5_bezierCP(mesh,&ptt,&b,MG_GET(pxt->ori,ifac));
+
+    /* 1. Fill matrice tAA and second member tAb with A=(\sum X_{P_i}^2 \sum
+     * Y_{P_i}^2 \sum X_{P_i}Y_{P_i}) and b=\sum Z_{P_i} with P_i the physical
+     * points at edge [i0;i1] extremities and middle.
+     * 2. Compute the physical coor \a c of the curve edge's
+     * mid-point.
+     */
+    _MMG5_fillDefmetregSys(k,p0,i,b,r,c,lispoi,tAA,tAb);
+
+    /* local hausdorff */
+    /* hausdloc = -1.; */
+    /* for (l=0; l<mesh->info.npar; l++) { */
+    /*   par = &mesh->info.par[l]; */
+    /*   if ( (par->elt == MMG5_Triangle) && (pxt->ref[ifac] == par->ref ) ) */
+    /*     hausdloc = par->hausd; */
+    /* } */
+    /* if ( hausdloc > 0. ) { */
+    /*   if ( hausdloc < fabs(hausd) )  hausd = hausdloc; */
+    /* } */
+  }
+
+//  if ( hausd <= 0. ) hausd = mesh->info.hausd;
+
+  /* Solve tAA * tmp_m = tAb and fill m with tmp_m (after rotation) */
+#warning treat local hausd when ok
+  return(_MMG5_solveDefmetrefSys( mesh, p0, ipref, r, c, tAA, tAb, m,
+                                  isqhmin, isqhmax, mesh->info.hausd));
 }
 
 /**
@@ -275,6 +432,8 @@ static int _MMG5_defmetreg(MMG5_pMesh mesh,MMG5_pSol met,int kel,int iface, int 
   px0 = &mesh->xpoint[p0->xp];
 
   n  = &px0->n1[0];
+  assert ( n[0]*n[0] + n[1]*n[1] + n[2]*n[2] > _MMG5_EPSD2 );
+
   _MMG5_rotmatrix(n,r);
   m = &met->m[6*idp];
 
@@ -386,8 +545,6 @@ int _MMG5_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   int           k,l,iploc,ip;
   char          i,ismet;
 
-#warning: local hausdorff??
-
  if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug )
     fprintf(stdout,"  ** Defining anisotropic map\n");
 
@@ -432,13 +589,13 @@ int _MMG5_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
         if ( ismet )  memcpy(mm,&met->m[6*(pt->v[iploc])],6*sizeof(double));
 
         if ( MG_SIN(ppt->tag) || (ppt->tag & MG_NOM) ) {
-          if ( !_MMG5_defmetsin(mesh,met,k,l,iploc) ) continue;
+          if ( 1 || !_MMG5_defmetsin(mesh,met,k,l,iploc) ) continue;
         }
         else if ( ppt->tag & MG_GEO ) {
           if ( 1 || !_MMG5_defmetrid(mesh,met,k,l,iploc))  continue;
         }
         else if ( ppt->tag & MG_REF ) {
-          if ( 1 || !_MMG5_defmetref(mesh,met,k,l,iploc) )  continue;
+          if ( !_MMG5_defmetref(mesh,met,k,l,iploc) )  continue;
         }
         else {
           if ( !_MMG5_defmetreg(mesh,met,k,l,iploc) )  continue;

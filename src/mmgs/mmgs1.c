@@ -888,7 +888,7 @@ int mmgs1(MMG5_pMesh mesh,MMG5_pSol met) {
     fprintf(stdout,"  ** COMPUTATIONAL MESH\n");
 
   /* define metric map */
-  if ( !defsiz(mesh,met) ) {
+  if ( !_MMG5_defsiz(mesh,met) ) {
     fprintf(stdout,"  ## Metric undefined. Exit program.\n");
     return(0);
   }

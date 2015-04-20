@@ -35,28 +35,6 @@
 #include "mmgs.h"
 
 
-
-/* Compute the intersected (2 x 2) metric between metrics m and n, PRESERVING the directions
-   of m. Result is stored in mr*/
-int intmetsavedir(MMG5_pMesh mesh, double *m,double *n,double *mr) {
-  int    i;
-  double lambda[2],vp[2][2],siz,isqhmin;
-
-  isqhmin = 1.0 / (mesh->info.hmin * mesh->info.hmin);
-  _MMG5_eigensym(m,lambda,vp);
-
-  for (i=0; i<2; i++) {
-    siz = n[0]*vp[i][0]*vp[i][0] + 2.0*n[1]*vp[i][0]*vp[i][1] + n[2]*vp[i][1]*vp[i][1];
-    lambda[i] = MG_MAX(lambda[i],siz);
-    lambda[i] = MG_MIN(lambda[i],isqhmin);
-  }
-  mr[0] = lambda[0]*vp[0][0]*vp[0][0] + lambda[1]*vp[1][0]*vp[1][0];
-  mr[1] = lambda[0]*vp[0][0]*vp[0][1] + lambda[1]*vp[1][0]*vp[1][1];
-  mr[2] = lambda[0]*vp[0][1]*vp[0][1] + lambda[1]*vp[1][1]*vp[1][1];
-
-  return(1);
-}
-
 /* Delete all triangle references in mesh */
 int delref(MMG5_pMesh mesh) {
   MMG5_pTria    pt;

@@ -40,7 +40,7 @@
 
 /* Define isotropic size map at all vertices of the mesh, associated with geometric approx ;
    by convention, p0->h stores desired length at point p0 */
-int defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
+int _MMG5_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTria    pt;
   MMG5_pPoint   ppt,p[3];
   MMG5_pPar     par;

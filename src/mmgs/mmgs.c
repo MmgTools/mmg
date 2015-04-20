@@ -318,7 +318,7 @@ static void endcod() {
 static void setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
   if ( met->size < 6 ) {
     _MMG5_calelt  = _MMG5_caltri_iso;
-    defsiz  = defsiz_iso;
+    _MMG5_defsiz  = _MMG5_defsiz_iso;
     gradsiz = gradsiz_iso;
     _MMG5_lenedg  = _MMG5_lenedg_iso;
     intmet  = intmet_iso;
@@ -327,7 +327,7 @@ static void setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
   }
   else {
     _MMG5_calelt  = _MMG5_caltri_ani;
-    defsiz  = defsiz_ani;
+    _MMG5_defsiz  = _MMG5_defsiz_ani;
     gradsiz = gradsiz_ani;
     _MMG5_lenedg  = _MMG5_lenedg_ani;
     intmet  = intmet_ani;

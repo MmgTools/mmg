@@ -118,7 +118,6 @@ int  swpedg(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,char typchk);
 char typelt(MMG5_pPoint p[3],char *ia);
 int  litswp(MMG5_pMesh mesh,int k,char i,double kal);
 int  litcol(MMG5_pMesh mesh,int k,char i,double kal);
-int  intmetsavedir(MMG5_pMesh mesh, double *m,double *n,double *mr);
 int  intmet33(MMG5_pMesh mesh,MMG5_pSol met,int np,int nq,int ip,double s);
 int  intextmet(MMG5_pMesh mesh,MMG5_pSol met,int np,double me[6]);
 int  invmatg(double m[9],double mi[9]);
@@ -142,8 +141,8 @@ void  _MMG5_Init_parameters(MMG5_pMesh mesh);
 /* iso/aniso computations */
 double caleltsig_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel);
 double caleltsig_iso(MMG5_pMesh mesh,MMG5_pSol met,int iel);
-int    defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met);
-int    defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met);
+int    _MMG5_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met);
+int    _MMG5_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met);
 int    gradsiz_iso(MMG5_pMesh mesh,MMG5_pSol met);
 int    gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met);
 void   intmet_iso(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int ip,double s);
@@ -155,7 +154,7 @@ int    movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist);
 int    _MMG5_prilen(MMG5_pMesh mesh,MMG5_pSol met);
 
 double (*_MMG5_calelt)(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt);
-int    (*defsiz)(MMG5_pMesh mesh,MMG5_pSol met);
+int    (*_MMG5_defsiz)(MMG5_pMesh mesh,MMG5_pSol met);
 int    (*gradsiz)(MMG5_pMesh mesh,MMG5_pSol met);
 void   (*intmet)(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int ip,double s);
 int    (*movridpt)(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist);
