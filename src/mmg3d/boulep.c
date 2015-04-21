@@ -399,6 +399,7 @@ int _MMG5_boulesurfvolp(MMG5_pMesh mesh,int start,int ip,int iface,
  * \param mesh pointer toward the mesh structure.
  * \param start index of the starting tetrahedron.
  * \param ip index of the looked ridge point.
+ * \param iface index in \a start of the starting face.
  * \param il1 pointer toward the first ball size.
  * \param l1 pointer toward the first computed ball (associated to \a n_1's
  * side).

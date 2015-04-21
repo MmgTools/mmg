@@ -859,7 +859,7 @@ _MMG5_anatetv(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
           iadr = met->size*ip;
           mp = &met->m[iadr];
 
-          _MMG5_intmetvol(m1,m2,mp,0.5);
+          if ( !_MMG5_intmetvol(m1,m2,mp,0.5) ) return(-1);
         }
         if ( !_MMG5_hashEdge(mesh,&hash,ip1,ip2,ip) )  return(-1);
         MG_SET(pt->flag,i);
@@ -972,9 +972,9 @@ _MMG5_anatets(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
   MMG5_xPoint  *pxp;
   _MMG5_Bezier  pb;
   _MMG5_Hash    hash;
-  double   o[3],no[3],to[3],dd,len;
-  int      vx[6],k,ip,ic,it,nap,nc,ni,ne,npinit,ns,ip1,ip2,ier;
-  char     i,j,ia,i1,i2;
+  double        o[3],no[3],to[3],dd,len, *m1, *m2, *mp;
+  int           vx[6],k,ip,ic,it,nap,nc,ni,ne,npinit,ns,ip1,ip2,ier,iadr;
+  char          i,j,ia,i1,i2;
   static double uv[3][2] = { {0.5,0.5}, {0.,0.5}, {0.5,0.} };
 
   /** 1. analysis of boundary elements */
@@ -1061,9 +1061,17 @@ _MMG5_anatets(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
         ppt = &mesh->point[ip];
         p1  = &mesh->point[ip1];
         p2  = &mesh->point[ip2];
-#warning interpolation
-        if ( met->m )
-          met->m[ip] = 0.5 * (met->m[ip1]+met->m[ip2]);
+
+        if ( met->m ) {
+          iadr = met->size*ip1;
+          m1 = &met->m[iadr];
+          iadr = met->size*ip2;
+          m2 = &met->m[iadr];
+          iadr = met->size*ip;
+          mp = &met->m[iadr];
+          if ( !_MMG5_intmetvol(m1,m2,mp,0.5) )  return(-1);
+        }
+
         if ( MG_EDG(ptt.tag[j]) || (ptt.tag[j] & MG_NOM) )
           ppt->ref = ptt.edg[j] ? ptt.edg[j] : ptt.ref;
         else

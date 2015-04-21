@@ -359,7 +359,10 @@ int bouletrid(MMG5_pMesh mesh,int start,int ip,int *il1,int *l1,int *il2,int *l2
     i = adja[i1] % 3;
     i = _MMG5_inxt2[i];
   }
-  while ( k && k != start && !(pt->tag[i1] & MG_GEO) );
+  // Remark: here the test k!=start is a security bound: theorically it is
+  // useless but in case of bad edge tag, it ensure that the loop is not
+  // infinite.
+  while ( k && !(pt->tag[i1] & MG_GEO) && k != start );
   *ip0 = pt->v[i2];
 
   /* Store the needed elements to start back in the new area,

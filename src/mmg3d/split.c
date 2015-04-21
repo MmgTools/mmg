@@ -2469,11 +2469,11 @@ int _MMG5_split4bar(MMG5_pMesh mesh, MMG5_pSol met, int k) {
   MMG5_pPoint   ppt;
   MMG5_xTetra   xt[4];
   MMG5_pxTetra  pxt0;
-  double   o[3],hnew;
+  double   o[3],hnew1[6], hnew2[6];
   int      i,ib,iel;
   int      newtet[4];
   unsigned char isxt[4],firstxt;
-  int kk,iadr;
+  int kk,iadr1,iadr2;
   double *m1;
 
   pt[0] = &mesh->tetra[k];
@@ -2481,20 +2481,17 @@ int _MMG5_split4bar(MMG5_pMesh mesh, MMG5_pSol met, int k) {
   newtet[0]=k;
 
   o[0] = o[1] = o[2] = 0.0;
-  hnew = 0.0;
+
   for (i=0; i<4; i++) {
     ib    = pt[0]->v[i];
     ppt   = &mesh->point[ib];
     o[0] += ppt->c[0];
     o[1] += ppt->c[1];
     o[2] += ppt->c[2];
-#warning hnew must be of size met->size
-    if ( met->m )  hnew += met->m[met->size*ib];
   }
   o[0] *= 0.25;
   o[1] *= 0.25;
   o[2] *= 0.25;
-  hnew *= 0.25;
 
   ib = _MMG5_newPt(mesh,o,0);
   if ( !ib ) {
@@ -2504,19 +2501,20 @@ int _MMG5_split4bar(MMG5_pMesh mesh, MMG5_pSol met, int k) {
                         return(0)
                         ,o,0);
   }
-#warning todo interpolation metric
-        if ( met->m ) {
-          if(met->size==1)
-            met->m[ib] = hnew;
-          else {
-            iadr = met->size*pt[0]->v[0];
-            m1 = &met->m[iadr];
-            for(kk=0 ; kk<6 ; kk++) {
-              met->m[6*ib+kk] = m1[kk];
-            }
-          }
-        }
-
+  if ( met->m ) {
+    if ( met->size == 1 )
+      met->m[ib] = 0.25*(met->m[pt[0]->v[0]]+met->m[pt[0]->v[1]]+
+                         met->m[pt[0]->v[2]]+met->m[pt[0]->v[3]]);
+    else {
+      iadr1 = met->size*pt[0]->v[0];
+      iadr2 = met->size*pt[0]->v[1];
+      _MMG5_intmetvol(&met->m[iadr1],&met->m[iadr2],hnew1,0.5);
+      iadr1 = met->size*pt[0]->v[2];
+      iadr2 = met->size*pt[0]->v[3];
+      _MMG5_intmetvol(&met->m[iadr1],&met->m[iadr2],hnew2,0.5);
+      _MMG5_intmetvol(hnew1,hnew2,&met->m[met->size*ib],0.5);
+    }
+  }
   /* create 3 new tetras */
   iel = _MMG5_newElt(mesh);
   if ( !iel ) {

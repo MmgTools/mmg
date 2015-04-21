@@ -163,9 +163,6 @@ static int _MMG5_adpspl(MMG5_pMesh mesh,MMG5_pSol met, int* warn) {
                             break
                             ,o,tag);
       }
-#warning interpolation
-      if ( met->m )
-        met->m[ip] = 0.5 * (met->m[ip1]+met->m[ip2]);
       ier = _MMG5_split1b(mesh,met,list,ilist,ip,1);
       /* if we realloc memory in _MMG5_split1b pt and pxt pointers are not valid */
       pt = &mesh->tetra[k];
@@ -185,9 +182,19 @@ static int _MMG5_adpspl(MMG5_pMesh mesh,MMG5_pSol met, int* warn) {
         ppt->ref = ref;
       else
         ppt->ref = pxt->ref[i];
-#warning interpolation
-      if ( met->m )
-        met->m[ip] = 0.5 * (met->m[ip1]+met->m[ip2]);
+
+      if ( met->m ) {
+        iadr = met->size*ip1;
+        m1 = &met->m[iadr];
+        iadr = met->size*ip2;
+        m2 = &met->m[iadr];
+        iadr = met->size*ip;
+        mp = &met->m[iadr];
+        if ( !_MMG5_intmetvol(m1,m2,mp,0.5) ) {
+          _MMG5_delPt(mesh,ip);
+          return(-1);
+        }
+      }
 
       pxp = &mesh->xpoint[ppt->xp];
       if ( tag & MG_NOM ){
@@ -244,7 +251,10 @@ static int _MMG5_adpspl(MMG5_pMesh mesh,MMG5_pSol met, int* warn) {
           iadr = met->size*ip;
           mp = &met->m[iadr];
 
-          _MMG5_intmetvol(m1,m2,mp,0.5);
+          if ( !_MMG5_intmetvol(m1,m2,mp,0.5) ) {
+            _MMG5_delPt(mesh,ip);
+            return(-1);
+          }
         }
        ns++;
       }

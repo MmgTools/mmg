@@ -163,7 +163,7 @@ static int _MMG5_defmetrid(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
 
   ier = bouletrid(mesh,it,ip,&ilist1,list1,&ilist2,list2,&iprid[0],&iprid[1]);
   if ( !ier ) {
-    printf("Error; unable to compute the two balls af the ridge point %d.\n", idp);
+    printf("Error; unable to compute the two balls at the ridge point %d.\n", idp);
     printf("Exit program.\n");
     exit(EXIT_FAILURE);
   }
@@ -171,6 +171,8 @@ static int _MMG5_defmetrid(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
   /* Specific size in direction of t */
   for (i=0; i<2; i++) {
     kappacur = 0.0;
+    // Remark: bezierEdge don't use n0 in case of a ridge so it's ok to call it
+    // with an undefined n0.
     _MMG5_bezierEdge(mesh,idp,iprid[i],b0,b1,1,n0);
 
     tau[0] = 3.0*(b0[0] - p0->c[0]);
