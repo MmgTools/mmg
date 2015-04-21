@@ -128,8 +128,8 @@ static int _MMG5_defmetsin(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
  * Compute metric tensor associated to a ridge point : convention is a bit weird
  * here :
  * \a p->m[0] is the specific size in direction \a t,
- * \a p->m[1] is the specific size in direction \f$ u1 = n1 ^ t\f$
- * \a p->m[2] is the specific size in direction \f$ u2 = n2 ^ t\f$,
+ * \a p->m[1] is the specific size in direction \f$ u_1 = n_1^t\f$
+ * \a p->m[2] is the specific size in direction \f$ u_2 = n_2^t\f$,
  * and at each time, metric tensor has to be recomputed, depending on the side.
  *
  */

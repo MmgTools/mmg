@@ -40,7 +40,8 @@
  * \param met pointer toward the metric structure.
  * \param kel index of the tetra in which we work.
  * \param iface face of the tetra on which we work.
- * \param ip index of the point on which we want to compute the metric in \a it.
+ * \param ip index of the point on which we want to compute the metric
+ * (in tetra \a kel).
  * \return 1 if success, 0 otherwise.
  *
  * Define metric map at a SINGULARITY of the geometry, associated to
@@ -146,30 +147,31 @@ static int _MMG5_defmetsin(MMG5_pMesh mesh,MMG5_pSol met,int kel, int iface, int
  * \param met pointer toward the metric structure.
  * \param kel index of the tetra in which we work.
  * \param iface face of the tetra on which we work.
- * \param ip index of the point on which we want to compute the metric in \a it.
+ * \param ip index of the point on which we want to compute the metric
+ * (in tetra \a kel).
  * \return 1 if success, 0 otherwise.
  *
  * Compute metric tensor associated to a ridge point : convention is a bit weird
  * here :
  * \a p->m[0] is the specific size in direction \a t,
- * \a p->m[1] is the specific size in direction \f$ u1 = n1 ^ t\f$
- * \a p->m[2] is the specific size in direction \f$ u2 = n2 ^ t\f$,
+ * \a p->m[1] is the specific size in direction \f$ u_1 = n_1^t\f$
+ * \a p->m[2] is the specific size in direction \f$ u_2 = n_2^t\f$,
  * and at each time, metric tensor has to be recomputed, depending on the side.
  *
  */
-static int _MMG5_defmetrid(MMG5_pMesh mesh,MMG5_pSol met,int kel, int iface, int ip) {
+static int _MMG5_defmetrid(MMG5_pMesh mesh,MMG5_pSol met,int kel,
+                           int iface, int ip)
+{
   MMG5_pTetra    pt;
   MMG5_pPoint    p0,p1,p2;
   _MMG5_Bezier   b;
-  int            k,iel,idp,ilist1,ilist2,ilist,*list,list1[_MMG5_LMAX+2],list2[_MMG5_LMAX+2],iprid[2],ier;
-  double        *m,isqhmin,isqhmax,*n1,*n2,*n,*t,kappacur,b0[3],b1[3],n0[3],tau[3],trot[2],u[2];
-  double         l,ll,ps,gammasec[3],c[3],r[3][3],lispoi[3*_MMG5_LMAX+1],ux,uy,uz,det,bcu[3];
+  int            k,iel,idp,ilist1,ilist2,ilist,*list;
+  int            list1[_MMG5_LMAX+2],list2[_MMG5_LMAX+2],iprid[2],ier;
+  double         *m,isqhmin,isqhmax,*n1,*n2,*n,*t,kappacur,b0[3],b1[3],n0[3];
+  double         tau[3],trot[2],u[2],ux,uy,uz,det,bcu[3];
+  double         l,ll,ps,gammasec[3],c[3],r[3][3],lispoi[3*_MMG5_LMAX+1];
   double         detg,detd,Jacb[3][2],Hb[3][3],lambda[2];
   unsigned char  i,i0,i1,i2;
-
-#warning not yet implemented
-  printf("defmetrid not yet implemented\n");
-  exit(EXIT_FAILURE);
 
   pt  = &mesh->tetra[kel];
   idp = pt->v[ip];
@@ -198,7 +200,8 @@ static int _MMG5_defmetrid(MMG5_pMesh mesh,MMG5_pSol met,int kel, int iface, int
  * \param met pointer toward the metric structure.
  * \param kel index of the triangle in which we work.
  * \param iface face of the tetra on which we work.
- * \param ip index of the point on which we want to compute the metric in \a k.
+ * \param ip index of the point on which we want to compute the metric
+ * (in tetra \a kel).
  * \return 1 if success, 0 otherwise.
  *
  * Define metric map at a REF vertex of the mesh, associated to the
@@ -389,7 +392,8 @@ static int _MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,int kel, int iface, int
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
  * \param kel index of the triangle in which we work.
- * \param ip index of the point on which we want to compute the metric in \a it.
+ * \param ip index of the point on which we want to compute the metric
+ * in (tetra \a kel).
  * \return 1 if success, 0 otherwise.
  *
  * Define metric map at a REGULAR vertex of the mesh, associated to
@@ -485,15 +489,16 @@ static int _MMG5_defmetreg(MMG5_pMesh mesh,MMG5_pSol met,int kel,int iface, int 
   /* At this point, lispoi contains all the points of the ball of p0, rotated
      so that t_{p_0}S = [z = 0] */
 
-  /* Second step : reconstitution of the curvature tensor at p0 in the tangent plane,
-     with a quadric fitting approach */
+  /* Second step : reconstitution of the curvature tensor at p0 in the tangent
+     plane, with a quadric fitting approach */
   memset(tAA,0.0,6*sizeof(double));
   memset(tAb,0.0,3*sizeof(double));
 
   hausd = -1.;
   for (k=0; k<ilists; k++) {
-    /* Approximation of the curvature in the normal section associated to tau : by assumption,
-       p1 is either regular, either on a ridge (or a singularity), but p0p1 is not ridge*/
+    /* Approximation of the curvature in the normal section associated to tau :
+       by assumption, p1 is either regular, either on a ridge (or a
+       singularity), but p0p1 is not ridge*/
     iel  = lists[k] / 4;
     ifac = lists[k] % 4;
     pt  = &mesh->tetra[iel];

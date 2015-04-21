@@ -324,7 +324,7 @@ inline int _MMG5_rotmatrix(double n[3],double r[3][3]) {
  *
  * Invert \a m (3x3 matrix) and store the result on \a mi
  *
- */				    /* invert 3x3 symmetric matrix */
+ */
 int _MMG5_invmat(double *m,double *mi) {
   double  aa,bb,cc,det,vmin,vmax,maxx;
   int     k;
@@ -454,10 +454,16 @@ void _MMG5_printTria(MMG5_pMesh mesh,char* fileName) {
 }
 
 /**
+ * \param c0 table of the coordinates of the starting point.
+ * \param n0 normal at the starting point.
+ * \param m metric to be transported.
+ * \param c1 table of the coordinates of the ending point.
+ * \param n1 normal at the ending point.
+ * \param mt computed metric.
+ * \return 0 if fail, 1 otherwise.
  *
- *
- * Parallel transport of a metric tensor field, attached to point c0, with normal n0,
- *  to point c1, with normal n1
+ * Parallel transport of a metric tensor field, attached to point \a c0, with
+ * normal \a n0, to point \a c1, with normal \a n1.
  *
  */
 

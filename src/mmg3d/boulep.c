@@ -37,7 +37,6 @@
 
 extern MMG5_Info  info;
 
-
 /** Return volumic ball (i.e. filled with tetrahedra) of point ip in tetra start.
     Results are stored under the form 4*kel + jel , kel = number of the tetra, jel = local
     index of p within kel */
@@ -371,10 +370,10 @@ int _MMG5_bouleext(MMG5_pMesh mesh, int start, int ip, int iface, int *listv, in
   return(1);
 }
 
-/** Return volumic ball of a SURFACE point p, as well as its surfacic ball, starting from tetra
-    start, with point ip, and face if in tetra
-    volumic ball ; listv[k] = 4*number of tet + index of point
-    surfacic ball : lists[k] = 4*number of tet + index of FAC
+/** Return volumic ball of a SURFACE point p, as well as its surfacic ball,
+    starting from tetra start, with point ip, and face if in tetra volumic ball
+    ; listv[k] = 4*number of tet + index of point surfacic ball : lists[k] =
+    4*number of tet + index of FAC
 
     \todo quasi identic to _MMG5_bouleext: try to remove one of the 2 funcs.
  */
@@ -498,6 +497,45 @@ int _MMG5_boulesurfvolp(MMG5_pMesh mesh,int start,int ip,int iface,
     }
     cur++;
   }
+
+  return(1);
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param start index of the starting tetrahedron.
+ * \param ip index of the looked ridge point.
+ * \param il1 pointer toward the first ball size.
+ * \param l1 pointer toward the first computed ball (associated to \a n_1's
+ * side).
+ * \param il2 pointer toward the second ball size.
+ * \param l2 pointer toward the second computed ball (associated to \a n_2's
+ * side).
+ * \param ip1 index of the first extremity of the ridge.
+ * \param ip2 index of the second extremity of the ridge.
+ * \return 0 if fail, 1 otherwise.
+ *
+ * Computation of the two balls of a ridge point: the list \a l1 is associated
+ * to normal \a n1's side. \a ip0 and \a ip1 are the indices of the 2 ending
+ * point of the ridge. Both lists are returned enumerated in direct order.
+ *
+ */
+int bouletrid(MMG5_pMesh mesh,int start,int ip,int *il1,int *l1,
+              int *il2,int *l2,int *ip0,int *ip1)
+{
+  MMG5_pTetra          pt;
+  MMG5_pTria           ptt;
+  MMG5_pPoint          ppt;
+  int                  idp,k,kold,*adja,iel,*ilist1,*ilist2,*list1,*list2,aux;
+  unsigned char        i,iold,i1,i2,ipn;
+  double               *n1,*n2,nt[3],ps1,ps2;
+
+  pt = &mesh->tetra[start];
+  if ( !MG_EOK(pt) )  return(0);
+
+  idp = pt->v[ip];
+  ppt = &mesh->point[idp];
+  assert( ppt->tag & MG_GEO );
 
   return(1);
 }
@@ -898,9 +936,9 @@ _MMG5_errorMessage(MMG5_pMesh mesh, int k1, int k2) {
   fprintf(stdout," the final mesh will have poor quality.\n");
 }
 
-/** Find all tets sharing edge ia of tetra start, and stores boundary faces when met
-    it1 & it2 = 6*iel + iface, iel = index of tetra, iface = index of face in tetra
-    return 2*ilist if shell is closed, 2*ilist +1 otherwise */
+/** Find all tets sharing edge ia of tetra start, and stores boundary faces when
+    met it1 & it2 = 6*iel + iface, iel = index of tetra, iface = index of face
+    in tetra return 2*ilist if shell is closed, 2*ilist +1 otherwise */
 int _MMG5_coquilface(MMG5_pMesh mesh,int start,int ia,int *list,int *it1,int *it2) {
   MMG5_pTetra   pt;
   MMG5_pxTetra  pxt;
