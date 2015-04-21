@@ -332,15 +332,15 @@ int _MMG5_boulesurfvolp(MMG5_pMesh mesh,int start,int ip,int iface,
 
       /* set sense of travel */
       if ( pt->v[ _MMG5_ifar[i][0] ] == piv ) {
-        adj = adja[ _MMG5_ifar[i][0] ] / 4;
-        ipiv = _MMG5_ifar[i][1];
         iopp = _MMG5_ifar[i][0];
+        ipiv = _MMG5_ifar[i][1];
+        adj = adja[ iopp ] / 4;
         piv = pt->v[ipiv];
       }
       else {
-        adj = adja[ _MMG5_ifar[i][1] ] / 4;
         ipiv = _MMG5_ifar[i][0];
         iopp = _MMG5_ifar[i][1];
+        adj = adja[ iopp ] / 4;
         piv = pt->v[ipiv];
       }
       if ( isnm ) {
