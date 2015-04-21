@@ -414,14 +414,9 @@ int _MMG5_chkcol_bdy(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,char iedg,in
   isminp  = isplp = 0;
 
   /* collect triangles and tetras around ip */
-  if ( p0->tag & MG_NOM ) {
-    if ( _MMG5_bouleext(mesh,k,ip,iface,listv,&ilistv,lists,&ilists) < 0 )
-      return(-1);
-  }
-  else {
-    if ( _MMG5_boulesurfvolp(mesh,k,ip,iface,listv,&ilistv,lists,&ilists) < 0 )
-      return(-1);
-  }
+  if (_MMG5_boulesurfvolp(mesh,k,ip,iface,
+                          listv,&ilistv,lists,&ilists,(p0->tag & MG_NOM)) < 0 )
+    return(-1);
 
   /* prevent collapse in case surface ball has 3 triangles */
   if ( ilists <= 2 )  return(0);  // ATTENTION, Normalement, avec 2 c est bon !

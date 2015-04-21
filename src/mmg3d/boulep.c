@@ -246,139 +246,28 @@ int _MMG5_boulenm(MMG5_pMesh mesh,int start,int ip,int iface,
   return(1);
 }
 
-/** Return volumic ball of a surfacic point p, as well as the part of its surfacic ball
-    supported in the outer boundary starting from tet start, with point ip, and face if in tetra
-    volumic ball ; listv[k] = 4*number of tet + index of point
-    surfacic ball : lists[k] = 4*number of tet + index of FACE
-
-    \todo quasi identic to _MMG5_boulesurfvolp: try to remove one of the 2 funcs.
- */
-int _MMG5_bouleext(MMG5_pMesh mesh, int start, int ip, int iface, int *listv, int *ilistv, int *lists, int*ilists){
-  MMG5_pTetra pt,pt1;
-  int base,nump,k,k1,*adja,piv,na,nb,adj,cur,nvstart,fstart,aux;
-  char iopp,ipiv,i,j,l,ipa,ipb,isface;
-
-  base = ++mesh->base;
-  *ilists = 0;
-  *ilistv = 0;
-
-  pt = &mesh->tetra[start];
-  nump = pt->v[ip];
-  k = start;
-
-  na = pt->v[ip];
-  nb = pt->v[_MMG5_idir[iface][_MMG5_inxt2[_MMG5_idirinv[iface][ip]]]];
-  piv = pt->v[_MMG5_idir[iface][_MMG5_iprv2[_MMG5_idirinv[iface][ip]]]];
-
-  iopp = iface;
-  fstart = 4*k+iopp;
-
-  do {
-    /* A boundary face has been hit : change travel edge */
-    lists[(*ilists)] = 4*k+iopp;
-    (*ilists)++;
-    if ( *ilists >= _MMG5_LMAX ) {
-      fprintf(stdout,"  ## Warning: problem in surface remesh process.");
-      fprintf(stdout," Surface ball of point %d contains too many elts.\n",
-              _MMG5_indPt(mesh,nump));
-      fprintf(stdout,"  ##          Try to modify the hausdorff number,");
-      fprintf(stdout," or/and the maximum mesh.\n");
-      return(-1);
-    }
-
-    aux = nb;
-    nb = piv;
-    piv = aux;
-    nvstart = k;
-    adj = k;
-
-    /* Now unfold shell of edge (na,nb) starting from k (included)*/
-    do {
-      k = adj;
-      pt = &mesh->tetra[k];
-      adja = &mesh->adja[4*(k-1)+1];
-      if ( pt->flag != base ) {
-        for (i=0; i<4; i++)
-          if ( pt->v[i] == nump )  break;
-        assert(i<4);
-        listv[(*ilistv)] = 4*k+i;
-        (*ilistv)++;
-        pt->flag = base;
-      }
-
-      /* identification of edge number in tetra k */
-      for (i=0; i<6; i++) {
-        ipa = _MMG5_iare[i][0];
-        ipb = _MMG5_iare[i][1];
-        if ( (pt->v[ipa] == na && pt->v[ipb] == nb) ||
-             (pt->v[ipa] == nb && pt->v[ipb] == na))  break;
-      }
-      assert(i<6);
-
-      /* set sense of travel */
-      if ( pt->v[ _MMG5_ifar[i][0] ] == piv ) {
-        adj = adja[ _MMG5_ifar[i][0] ] / 4;
-        ipiv = _MMG5_ifar[i][1];
-        iopp = _MMG5_ifar[i][0];
-        piv = pt->v[ipiv];
-      }
-      else {
-        adj = adja[ _MMG5_ifar[i][1] ] / 4;
-        ipiv = _MMG5_ifar[i][0];
-        iopp = _MMG5_ifar[i][1];
-        piv = pt->v[ipiv];
-      }
-      isface = (adja[iopp] == 0);
-    }
-    while ( adj && (adj != nvstart) && !isface );
-  }
-  while ( 4*k+iopp != fstart );
-
-  /** Now, surfacic ball is complete ; finish travel of volumic ball */
-  cur = 0;
-  while ( cur < (*ilistv) ) {
-    k = listv[cur]/4;
-    i = listv[cur]%4;
-    adja = &mesh->adja[4*(k-1)+1];
-
-    for (l=0; l<3; l++) {
-      i  = _MMG5_inxt3[i];
-      k1 = adja[i]/4;
-      if ( !k1 )  continue;
-      pt1 = &mesh->tetra[k1];
-      if ( pt1->flag == base )  continue;
-      pt1->flag = base;
-
-      for (j=0; j<4; j++)
-        if ( pt1->v[j] == nump )  break;
-      assert(j<4);
-      /* overflow */
-      if ( *ilistv > _MMG5_LMAX-3 ) {
-        fprintf(stdout,"  ## Warning: problem in remesh process.");
-        fprintf(stdout," Volumic ball of point %d contains too many elts.\n",
-                _MMG5_indPt(mesh,nump));
-        fprintf(stdout,"  ##          Try to modify the hausdorff number,");
-        fprintf(stdout," or/and the maximum mesh.\n");
-        return(-1);
-      }
-      listv[(*ilistv)] = 4*k1+j;
-      (*ilistv)++;
-    }
-    cur++;
-  }
-
-  return(1);
-}
-
-/** Return volumic ball of a SURFACE point p, as well as its surfacic ball,
-    starting from tetra start, with point ip, and face if in tetra volumic ball
-    ; listv[k] = 4*number of tet + index of point surfacic ball : lists[k] =
-    4*number of tet + index of FAC
-
-    \todo quasi identic to _MMG5_bouleext: try to remove one of the 2 funcs.
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param start index of the starting tetra.
+ * \param ip index in \a start of the looked point.
+ * \param iface index in \a start of the starting face.
+ * \param listv pointer toward the computed volumic ball.
+ * \param ilistv pointer toward the computed volumic ball size.
+ * \param lists pointer toward the computed surfacic ball.
+ * \param ilists pointer toward the computed surfacic ball size.
+ * \param isnm is the looked point \a ip non-manifold?
+ * \return -1 if fail, 1 otherwise.
+ *
+ * Compute the volumic ball of a SURFACE point \a p, as well as its surfacic
+ * ball, starting from tetra \a start, with point \a ip, and face \a if in tetra
+ * volumic ball.
+ * \a listv[k] = 4*number of tet + index of point surfacic ball.
+ * \a lists[k] = 4*number of tet + index of FAC.
+ *
  */
 int _MMG5_boulesurfvolp(MMG5_pMesh mesh,int start,int ip,int iface,
-                        int *listv,int *ilistv,int *lists,int*ilists) {
+                        int *listv,int *ilistv,int *lists,int*ilists, int isnm)
+{
   MMG5_pTetra  pt,pt1;
   MMG5_pxTetra pxt;
   int base,nump,k,k1,*adja,piv,na,nb,adj,cur,nvstart,fstart,aux;
@@ -454,10 +343,15 @@ int _MMG5_boulesurfvolp(MMG5_pMesh mesh,int start,int ip,int iface,
         iopp = _MMG5_ifar[i][1];
         piv = pt->v[ipiv];
       }
-      isface = 0;
-      if(pt->xt){
-        pxt = &mesh->xtetra[pt->xt];
-        isface = (MG_BDY & pxt->ftag[iopp]);
+      if ( isnm ) {
+        isface = (adja[iopp] == 0);
+      }
+      else {
+        isface = 0;
+        if(pt->xt){
+          pxt = &mesh->xtetra[pt->xt];
+          isface = (MG_BDY & pxt->ftag[iopp]);
+        }
       }
     }
     while ( adj && (adj != nvstart) && !isface );

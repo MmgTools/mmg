@@ -183,7 +183,8 @@ int  _MMG5_BezierNom(MMG5_pMesh mesh,int ip0,int ip1,double s,double *o,double *
 int  _MMG5_norface(MMG5_pMesh mesh ,int k, int iface, double v[3]);
 int  _MMG5_boulenm(MMG5_pMesh mesh, int start, int ip, int iface, double n[3],double t[3]);
 int  _MMG5_boulevolp(MMG5_pMesh mesh, int start, int ip, int * list);
-int  _MMG5_boulesurfvolp(MMG5_pMesh mesh,int start,int ip,int iface,int *listv,int *ilistv,int *lists,int*ilists);
+int  _MMG5_boulesurfvolp(MMG5_pMesh mesh,int start,int ip,int iface,int *listv,
+                         int *ilistv,int *lists,int*ilists, int isnm);
 int  _MMG5_startedgsurfball(MMG5_pMesh mesh,int nump,int numq,int *list,int ilist);
 int  _MMG5_srcbdy(MMG5_pMesh mesh,int start,int ia);
 int  _MMG5_coquil(MMG5_pMesh mesh, int start, int ia, int * list);
@@ -247,7 +248,6 @@ int  _MMG5_swpbdy(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int it1,_MMG5_
 int  _MMG5_swpgen(MMG5_pMesh mesh,MMG5_pSol met,int nconf, int ilist, int *list,_MMG5_pBucket bucket);
 int  _MMG5_chkswpgen(MMG5_pMesh mesh,MMG5_pSol met, int start, int ia, int *ilist, int *list,double crit);
 int  _MMG5_srcface(MMG5_pMesh mesh,int n0,int n1,int n2);
-int  _MMG5_bouleext(MMG5_pMesh mesh, int start, int ip, int iface, int *listv, int *ilistv, int *lists, int*ilists);
 int _MMG5_chkptonbdy(MMG5_pMesh,int);
 double _MMG5_orcal_poi(double a[3],double b[3],double c[3],double d[3]);
 int _MMG5_countelt(MMG5_pMesh mesh,MMG5_pSol sol, double *weightelt, long *npcible);

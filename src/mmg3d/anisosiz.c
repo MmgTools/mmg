@@ -65,7 +65,7 @@ static int _MMG5_defmetsin(MMG5_pMesh mesh,MMG5_pSol met,int kel, int iface, int
   idp = pt->v[ip];
   p0  = &mesh->point[idp];
 
-  ilist = _MMG5_boulesurfvolp(mesh,kel,ip,iface,listv,&ilistv,lists,&ilists);
+  ilist = _MMG5_boulesurfvolp(mesh,kel,ip,iface,listv,&ilistv,lists,&ilists,0);
 
   if ( ilist!=1 ) {
     printf("Error; unable to compute the ball af the point %d.\n", idp);
@@ -228,7 +228,7 @@ static int _MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,int kel, int iface, int
   idp = pt->v[ip];
   p0  = &mesh->point[idp];
 
-   ilist = _MMG5_boulesurfvolp(mesh,kel,ip,iface,listv,&ilistv,lists,&ilists);
+  ilist = _MMG5_boulesurfvolp(mesh,kel,ip,iface,listv,&ilistv,lists,&ilists,0);
 
   if ( ilist!=1 ) {
     printf("Error; unable to compute the ball af the point %d.\n", idp);
@@ -419,7 +419,7 @@ static int _MMG5_defmetreg(MMG5_pMesh mesh,MMG5_pSol met,int kel,int iface, int 
   idp = pt->v[ip];
   p0  = &mesh->point[idp];
 
-  ilist = _MMG5_boulesurfvolp(mesh,kel,ip,iface,listv,&ilistv,lists,&ilists);
+  ilist = _MMG5_boulesurfvolp(mesh,kel,ip,iface,listv,&ilistv,lists,&ilists,0);
 
   if ( ilist!=1 ) {
     printf("Error; unable to compute the ball af the point %d.\n", idp);

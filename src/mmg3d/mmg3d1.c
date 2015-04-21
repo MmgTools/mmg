@@ -573,22 +573,24 @@ int _MMG5_movtet(MMG5_pMesh mesh,MMG5_pSol met,int maxitin) {
             if ( !pt->xt || !(MG_BDY & pxt->ftag[i]) )  continue;
             else if( ppt->tag & MG_NOM ){
               if( mesh->adja[4*(k-1)+1+i] ) continue;
-              if( !(ier=_MMG5_bouleext(mesh,k,i0,i,listv,&ilistv,lists,&ilists)) )  continue;
+              ier=_MMG5_boulesurfvolp(mesh,k,i0,i,listv,&ilistv,lists,&ilists,1);
+              if( !ier )  continue;
               else if ( ier>0 )
                 ier = _MMG5_movbdynompt(mesh,met,listv,ilistv,lists,ilists);
               else
                 return(-1);
             }
             else if ( ppt->tag & MG_GEO ) {
-              if ( !(ier=_MMG5_boulesurfvolp(mesh,k,i0,i,listv,&ilistv,lists,&ilists)) )
-                continue;
+              ier=_MMG5_boulesurfvolp(mesh,k,i0,i,listv,&ilistv,lists,&ilists,0);
+              if ( !ier )  continue;
               else if ( ier>0 )
                 ier = _MMG5_movbdyridpt(mesh,met,listv,ilistv,lists,ilists);
               else
                 return(-1);
             }
             else if ( ppt->tag & MG_REF ) {
-              if ( !(ier=_MMG5_boulesurfvolp(mesh,k,i0,i,listv,&ilistv,lists,&ilists)) )
+              ier=_MMG5_boulesurfvolp(mesh,k,i0,i,listv,&ilistv,lists,&ilists,0);
+              if ( !ier )
                 continue;
               else if ( ier>0 )
                 ier = _MMG5_movbdyrefpt(mesh,met,listv,ilistv,lists,ilists);
@@ -596,7 +598,8 @@ int _MMG5_movtet(MMG5_pMesh mesh,MMG5_pSol met,int maxitin) {
                 return(-1);
             }
             else {
-              if ( !(ier=_MMG5_boulesurfvolp(mesh,k,i0,i,listv,&ilistv,lists,&ilists)) )
+              ier=_MMG5_boulesurfvolp(mesh,k,i0,i,listv,&ilistv,lists,&ilists,0);
+              if ( !ier )
                 continue;
               else if ( ier<0 )
                 return(-1);

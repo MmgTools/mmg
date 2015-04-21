@@ -473,7 +473,8 @@ int _MMG5_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
         p0  = &mesh->point[ip0];
 
         if ( MG_SIN(p0->tag) || MG_EDG(p0->tag) || (p0->tag & MG_NOM) ) continue;
-        if ( !_MMG5_boulesurfvolp(mesh,k,i0,i,listv,&ilistv,lists,&ilists) )  continue;
+        if ( !_MMG5_boulesurfvolp(mesh,k,i0,i,listv,&ilistv,lists,&ilists,0) )
+          continue;
 
         n   = &mesh->xpoint[p0->xp].n1[0];
         _MMG5_directsurfball(mesh,ip0,lists,ilists,n);
