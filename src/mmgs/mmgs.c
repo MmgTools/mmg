@@ -102,6 +102,9 @@ static int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
           mesh->info.dhd = cos(mesh->info.dhd*M_PI/180.0);
         }
         break;
+      case 'A': /* anisotropy */
+        met->size = 6;
+        break;
       case 'h':
         if ( !strcmp(argv[i],"-hmin") && ++i < argc )
           mesh->info.hmin = atof(argv[i]);

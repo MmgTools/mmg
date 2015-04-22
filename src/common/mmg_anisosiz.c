@@ -281,7 +281,7 @@ void _MMG5_defUninitSize(MMG5_pMesh mesh,MMG5_pSol met,char ismet)
 {
   MMG5_pPoint   ppt;
   double        *m,*n,r[3][3],isqhmax;
-  int           k,i;
+  int           k;
 
   isqhmax = 1.0 / (mesh->info.hmax*mesh->info.hmax);
   for (k=1; k<=mesh->np; k++) {

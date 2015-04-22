@@ -176,15 +176,32 @@ int _MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, int *list,int ilist,int it1,
   dischg = MG_MAX(dischg,hausd * hausd);
 
   if ( dischg > disnat )   return(0);
-  cal1 = _MMG5_caltri(mesh,met,&tt1);
-  cal2 = _MMG5_caltri(mesh,met,&tt2);
+  if ( met->m ) {
+    cal1 = _MMG5_caltri(mesh,met,&tt1);
+    cal2 = _MMG5_caltri(mesh,met,&tt2);
+  }
+  else { // with -A option we don't have the metric here so we always use the
+         // iso func.
+    cal1 = _MMG5_caltri_iso(mesh,met,&tt1);
+    cal2 = _MMG5_caltri_iso(mesh,met,&tt2);
+  }
+
   calnat = MG_MIN(cal1,cal2);
   for (j=0; j<3; j++) {
     if ( tt1.v[j] == nq )  tt1.v[j] = na2;
     if ( tt2.v[j] == np )  tt2.v[j] = na1;
   }
-  cal1 = _MMG5_caltri(mesh,met,&tt1);
-  cal2 = _MMG5_caltri(mesh,met,&tt2);
+
+  if ( met->m ) {
+    cal1 = _MMG5_caltri(mesh,met,&tt1);
+    cal2 = _MMG5_caltri(mesh,met,&tt2);
+  }
+  else { // with -A option we don't have the metric here so we always use the
+         // iso func.
+    cal1 = _MMG5_caltri_iso(mesh,met,&tt1);
+    cal2 = _MMG5_caltri_iso(mesh,met,&tt2);
+  }
+
   calchg = MG_MIN(cal1,cal2);
   if ( calchg < 1.01 * calnat )  return(0);
 

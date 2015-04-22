@@ -2473,8 +2473,7 @@ int _MMG5_split4bar(MMG5_pMesh mesh, MMG5_pSol met, int k) {
   int      i,ib,iel;
   int      newtet[4];
   unsigned char isxt[4],firstxt;
-  int kk,iadr1,iadr2;
-  double *m1;
+  int iadr1,iadr2;
 
   pt[0] = &mesh->tetra[k];
   pt[0]->flag = 0;

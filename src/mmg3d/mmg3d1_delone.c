@@ -237,19 +237,6 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
             ppt->ref = pxt->ref[i];
           ppt->tag = tag;
 
-          if ( met->m ) {
-            iadr = met->size*ip1;
-            m1 = &met->m[iadr];
-            iadr = met->size*ip2;
-            m2 = &met->m[iadr];
-            iadr = met->size*ip;
-            mp = &met->m[iadr];
-            if ( !_MMG5_intmetvol(m1,m2,mp,0.5) ) {
-              _MMG5_delPt(mesh,ip);
-              goto collapse;
-            }
-          }
-
           pxp = &mesh->xpoint[ppt->xp];
           if ( tag & MG_NOM ){
             memcpy(pxp->n1,no1,3*sizeof(double));
@@ -295,7 +282,19 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
           }
 
         }
-
+        ppt = &mesh->point[ip];
+        if ( met->m ) {
+          iadr = met->size*ip1;
+          m1 = &met->m[iadr];
+          iadr = met->size*ip2;
+          m2 = &met->m[iadr];
+          iadr = met->size*ip;
+          mp = &met->m[iadr];
+          if ( !_MMG5_intmetvol(m1,m2,mp,0.5) ) {
+            _MMG5_delPt(mesh,ip);
+            goto collapse;
+          }
+        }
         ier = _MMG5_split1b(mesh,met,list,ilist,ip,1);
         if ( ier < 0 ) {
           fprintf(stdout,"  ## Error: unable to split.\n");
@@ -307,19 +306,6 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
           goto collapse;
         }
         else {
-          ppt = &mesh->point[ip];
-          if ( met->m ) {
-            iadr = met->size*ip1;
-            m1 = &met->m[iadr];
-            iadr = met->size*ip2;
-            m2 = &met->m[iadr];
-            iadr = met->size*ip;
-            mp = &met->m[iadr];
-            if ( !_MMG5_intmetvol(m1,m2,mp,0.5) ) {
-              _MMG5_delPt(mesh,ip);
-              goto collapse;
-            }
-          }
           _MMG5_addBucket(mesh,bucket,ip);
           (*ns)++;
           continue;
@@ -349,6 +335,21 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
             exit(EXIT_FAILURE);
           }
         }
+        ppt = &mesh->point[ip];
+        if ( met->m ) {
+          iadr = met->size*ip1;
+          m1 = &met->m[iadr];
+          iadr = met->size*ip2;
+          m2 = &met->m[iadr];
+          iadr = met->size*ip;
+          mp = &met->m[iadr];
+
+          if ( !_MMG5_intmetvol(m1,m2,mp,0.5) ) {
+            _MMG5_delPt(mesh,ip);
+            goto collapse;
+          };
+        }
+
         /* Delaunay */
 #warning aniso
         if ( !_MMG5_buckin_iso(mesh,met,bucket,ip) ) {
@@ -364,21 +365,6 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
           } else {
             ret = _MMG5_delone(mesh,met,ip,list,lon);
             if ( ret > 0 ) {
-              ppt = &mesh->point[ip];
-              if ( met->m ) {
-                iadr = met->size*ip1;
-                m1 = &met->m[iadr];
-                iadr = met->size*ip2;
-                m2 = &met->m[iadr];
-                iadr = met->size*ip;
-                mp = &met->m[iadr];
-
-                if ( !_MMG5_intmetvol(m1,m2,mp,0.5) ) {
-                  _MMG5_delPt(mesh,ip);
-                  goto collapse;
-                };
-              }
-
               _MMG5_addBucket(mesh,bucket,ip);
               (*ns)++;
               continue;
@@ -556,7 +542,19 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
               exit(EXIT_FAILURE);
             }
           }
-
+          ppt = &mesh->point[ip];
+          if ( met->m ) {
+            iadr = met->size*ip1;
+            m1 = &met->m[iadr];
+            iadr = met->size*ip2;
+            m2 = &met->m[iadr];
+            iadr = met->size*ip;
+            mp = &met->m[iadr];
+            if ( !_MMG5_intmetvol(m1,m2,mp,0.5) ) {
+              _MMG5_delPt(mesh,ip);
+              goto collapse2;
+            }
+          }
           ier = _MMG5_split1b(mesh,met,list,ilist,ip,1);
           /* if we realloc memory in _MMG5_split1b pt and pxt pointers are not valid */
           pt = &mesh->tetra[k];
@@ -580,19 +578,6 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
             else
               ppt->ref = pxt->ref[i];
             ppt->tag = tag;
-
-            if ( met->m ) {
-              iadr = met->size*ip1;
-              m1 = &met->m[iadr];
-              iadr = met->size*ip2;
-              m2 = &met->m[iadr];
-              iadr = met->size*ip;
-              mp = &met->m[iadr];
-              if ( !_MMG5_intmetvol(m1,m2,mp,0.5) ) {
-                _MMG5_delPt(mesh,ip);
-                goto collapse2;
-              }
-            }
 
             pxp = &mesh->xpoint[ppt->xp];
             if ( tag & MG_NOM ){
@@ -638,7 +623,19 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
               exit(EXIT_FAILURE);
             }
           }
-
+          ppt = &mesh->point[ip];
+          if ( met->m ) {
+            iadr = met->size*ip1;
+            m1 = &met->m[iadr];
+            iadr = met->size*ip2;
+            m2 = &met->m[iadr];
+            iadr = met->size*ip;
+            mp = &met->m[iadr];
+            if ( !_MMG5_intmetvol(m1,m2,mp,0.5) ) {
+              _MMG5_delPt(mesh,ip);
+              goto collapse2;
+            }
+          }
           ier = _MMG5_split1b(mesh,met,list,ilist,ip,1);
           if ( ier < 0 ) {
             fprintf(stdout,"  ## Error: unable to split.\n");
@@ -650,19 +647,6 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
             goto collapse2;
           }
           else {
-            ppt = &mesh->point[ip];
-            if ( met->m ) {
-              iadr = met->size*ip1;
-              m1 = &met->m[iadr];
-              iadr = met->size*ip2;
-              m2 = &met->m[iadr];
-              iadr = met->size*ip;
-              mp = &met->m[iadr];
-              if ( !_MMG5_intmetvol(m1,m2,mp,0.5) ) {
-                _MMG5_delPt(mesh,ip);
-                goto collapse2;
-              }
-            }
             _MMG5_addBucket(mesh,bucket,ip);
             (*ns)++;
             break;//imax continue;
@@ -691,7 +675,19 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
               exit(EXIT_FAILURE);
             }
           }
-
+          ppt = &mesh->point[ip];
+          if ( met->m ) {
+            iadr = met->size*ip1;
+            m1 = &met->m[iadr];
+            iadr = met->size*ip2;
+            m2 = &met->m[iadr];
+            iadr = met->size*ip;
+            mp = &met->m[iadr];
+            if ( !_MMG5_intmetvol(m1,m2,mp,0.5) ) {
+              _MMG5_delPt(mesh,ip);
+              goto collapse2;
+            }
+          }
           if ( /*lmax>4 &&*/ /*it &&*/  !_MMG5_buckin_iso(mesh,met,bucket,ip) ) {
             _MMG5_delPt(mesh,ip);
             (*ifilt)++;
@@ -705,20 +701,6 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
             } else {
               ret = _MMG5_delone(mesh,met,ip,list,lon);
               if ( ret > 0 ) {
-                ppt = &mesh->point[ip];
-                if ( met->m ) {
-                  iadr = met->size*ip1;
-                  m1 = &met->m[iadr];
-                  iadr = met->size*ip2;
-                  m2 = &met->m[iadr];
-                  iadr = met->size*ip;
-                  mp = &met->m[iadr];
-                  if ( !_MMG5_intmetvol(m1,m2,mp,0.5) ) {
-                    _MMG5_delPt(mesh,ip);
-                    goto collapse2;
-                  }
-                }
-
                 _MMG5_addBucket(mesh,bucket,ip);
                 (*ns)++;
                 break;//imax continue;

@@ -218,6 +218,11 @@ int MMG5_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
                                     atof(argv[i])) )
             exit(EXIT_FAILURE);
         break;
+      case 'A': /* anisotropy */
+        if ( !MMG5_Set_solSize(mesh,met,MMG5_Vertex,0,MMG5_Tensor) )
+          exit(EXIT_FAILURE);
+        break;
+
 #ifndef PATTERN
       case 'b':
         if ( !strcmp(argv[i],"-bucket") && ++i < argc )

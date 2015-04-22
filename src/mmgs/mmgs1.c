@@ -585,7 +585,7 @@ int chkspl(MMG5_pMesh mesh,MMG5_pSol met,int k,int i) {
   if( (met->size>1) )
     intmet33(mesh,met,pt->v[i1],pt->v[i2],ip,s);
   else
-    intmet(mesh,met,k,i,ip,s); 
+    intmet(mesh,met,k,i,ip,s);
 
   return(ip);
 }

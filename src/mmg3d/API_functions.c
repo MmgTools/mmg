@@ -99,11 +99,16 @@ int MMG5_Set_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int typEntity, int np, int 
     fprintf(stdout,"  ## Error: MMG3D5 need a solution imposed on vertices\n");
     return(0);
   }
-  if ( typSol != MMG5_Scalar ) {
-    fprintf(stdout,"  ## Error: anisotropic adaptation not yet implemented\n");
+  if ( typSol == MMG5_Scalar ) {
+    sol->size = 1;
+  }
+  else if ( typSol == MMG5_Tensor ) {
+    sol->size = 6;
+  }
+  else {
+    fprintf(stdout,"  ## Error: type of solution not yet implemented\n");
     return(0);
   }
-  else sol->size = 1;
 
   sol->dim = 3;
   if ( np ) {

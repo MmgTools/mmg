@@ -237,7 +237,6 @@ inline int _MMG5_norpts(MMG5_pMesh mesh,int ip1,int ip2, int ip3,double *n) {
  *
  */
 inline int _MMG5_nortri(MMG5_pMesh mesh,MMG5_pTria pt,double *n) {
-  double   *a,*b,*c,dd,abx,aby,abz,acx,acy,acz,det;
 
   return(_MMG5_norpts(mesh,pt->v[0],pt->v[1],pt->v[2],n));
 

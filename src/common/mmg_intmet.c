@@ -164,11 +164,9 @@ static int MMG5_intmet22(double *m,double *n,double *mr,double s) {
  *
  */
 int _MMG5_interp_iso(double *ma,double *mb,double *mp,double t) {
-  MMG5_pTria  pt;
-  int    ip1,ip2;
-  char   i1,i2;
 
   *mp = (1.0-t)*(*ma) + t*(*mb);
+
   return(1);
 
 }

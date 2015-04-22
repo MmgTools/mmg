@@ -40,12 +40,13 @@ extern char ddb;
 /** compute tetra oriented quality of iel (return 0.0 when element is inverted) */
 inline double _MMG5_orcal(MMG5_pMesh mesh,MMG5_pSol met,int iel) {
   MMG5_pTetra     pt;
-  double     abx,aby,abz,acx,acy,acz,adx,ady,adz,bcx,bcy,bcz,bdx,bdy,bdz,cdx,cdy,cdz;
-  double     vol,v1,v2,v3,rap;
-  double     *a,*b,*c,*d;
 
   pt = &mesh->tetra[iel];
-  return(_MMG5_caltet(mesh,met,pt->v[0],pt->v[1],pt->v[2],pt->v[3]));
+
+  if ( met->m )
+    return(_MMG5_caltet(mesh,met,pt->v[0],pt->v[1],pt->v[2],pt->v[3]));
+  else // with -A option we are in aniso but without metric.
+    return(_MMG5_caltet_iso(mesh,met,pt->v[0],pt->v[1],pt->v[2],pt->v[3]));
 }
 
 
