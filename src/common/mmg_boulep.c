@@ -253,7 +253,7 @@ int _MMG5_bouler(MMG5_pMesh mesh,int *adjt,int start,int ip,
         i1 = _MMG5_inxt2[i];
         if ( pt->tag[i2] & MG_GEO )
           *ng = *ng + 1;
-        else if ( pt->tag[i1] & MG_REF )
+        else if ( pt->tag[i2] & MG_REF )
           *nr = *nr + 1;
         ns++;
         list[ns] = pt->v[i1];
