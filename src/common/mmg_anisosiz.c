@@ -298,7 +298,9 @@ void _MMG5_defUninitSize(MMG5_pMesh mesh,MMG5_pSol met,char ismet)
       m[0] = m[3] = m[5] = isqhmax;
     }
     else if ( ppt->tag & MG_GEO ) {
-      m[0] = m[3] = m[5] = isqhmax;
+      /* We store the size in the tangent dir in m[0], in the n1 dir in m[1] and
+       * in the n2 dir in m[2]. */
+      m[0] = m[1] = m[2] = isqhmax;
     }
     else {
       n = ppt->tag & MG_REF ? &mesh->xpoint[ppt->xp].n1[0] : ppt->n;

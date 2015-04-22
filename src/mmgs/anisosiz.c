@@ -139,7 +139,7 @@ static int _MMG5_defmetrid(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
   MMG5_pPoint    p0,p1,p2;
   _MMG5_Bezier   b;
   int            k,iel,idp,ilist1,ilist2,ilist,*list,list1[_MMG5_LMAX+2],list2[_MMG5_LMAX+2],iprid[2],ier;
-  double        *m,isqhmin,isqhmax,*n1,*n2,*n,*t,kappacur,b0[3],b1[3],n0[3],tau[3],trot[2],u[2];
+  double        *m,isqhmin,isqhmax,*n1,*n2,*n,*t,kappacur,b0[3],b1[3],n0[3],tau[3],u[2];
   double         l,ll,ps,gammasec[3],c[3],r[3][3],lispoi[3*_MMG5_LMAX+1],ux,uy,uz,det,bcu[3];
   double         detg,detd,Jacb[3][2],Hb[3][3],lambda[2];
   unsigned char  i,i0,i1,i2;
@@ -175,6 +175,7 @@ static int _MMG5_defmetrid(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
     // with an undefined n0.
     _MMG5_bezierEdge(mesh,idp,iprid[i],b0,b1,1,n0);
 
+    /* tau is the bezier curve derivative in p0 (parametric coor t=0) */
     tau[0] = 3.0*(b0[0] - p0->c[0]);
     tau[1] = 3.0*(b0[1] - p0->c[1]);
     tau[2] = 3.0*(b0[2] - p0->c[2]);
@@ -415,7 +416,6 @@ static int _MMG5_defmetrid(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
  * geometric approx of the surface.
  *
  */
-#warning check defmetref, results seems weird.
 static int _MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
   MMG5_pTria         pt;
   MMG5_pPoint        p0,p1;
