@@ -394,7 +394,9 @@ void _MMG5_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
   if ( abs(mesh->info.imprim) < 4 ){
     if (rapmin == 0){
       fprintf(stdout,"  ## WARNING: TOO BAD QUALITY FOR THE WORST ELEMENT\n");
+      _MMG5_unscaleMesh(mesh,met);
       MMG5_saveMesh(mesh);
+      saveMet(mesh,met);
       exit(EXIT_FAILURE);
     }
     return;
