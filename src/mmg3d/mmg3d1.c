@@ -605,7 +605,14 @@ int _MMG5_movtet(MMG5_pMesh mesh,MMG5_pSol met,int maxitin) {
                 return(-1);
 
               n = &(mesh->xpoint[ppt->xp].n1[0]);
-              if ( !_MMG5_directsurfball(mesh, pt->v[i0],lists,ilists,n) )  continue;
+              if ( MG_GET(pxt->ori,i) )
+                // If _MMG5_directsurfball return 1 it is useless to call this function,
+                // thus it is valid here to call it inside the assert.
+                assert(_MMG5_directsurfball(mesh, pt->v[i0],lists,ilists,n) == 1);
+              else {
+                if ( !_MMG5_directsurfball(mesh, pt->v[i0],lists,ilists,n) )
+                  continue;
+              }
               ier = _MMG5_movbdyregpt(mesh,met,listv,ilistv,lists,ilists);
               if ( ier )  ns++;
             }

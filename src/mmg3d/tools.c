@@ -112,7 +112,7 @@ inline int _MMG5_directsurfball(MMG5_pMesh mesh, int ip, int *list, int ilist, d
     iel   = list[0] / 4;
     iface = list[0] % 4;
 
-    _MMG5_norface(mesh,iel,iface,nt);
+    if ( !_MMG5_norface(mesh,iel,iface,nt) ) return(0);
     ps = nt[0]*n[0] +  nt[1]*n[1] +  nt[2]*n[2];
     if ( ps > 0.0 )  return(1);
 

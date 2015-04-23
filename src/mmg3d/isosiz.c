@@ -459,6 +459,8 @@ int _MMG5_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
     pxt = &mesh->xtetra[pt->xt];
     for (i=0; i<4; i++) {
       if ( !(pxt->ftag[i] & MG_BDY) ) continue;
+      if ( !MG_GET(mesh->xtetra[mesh->tetra[k].xt].ori,i) ) continue;
+
       /* local hausdorff for triangle */
       hausd = mesh->info.hausd;
       for (l=0; l<mesh->info.npar; l++) {
@@ -477,7 +479,11 @@ int _MMG5_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
           continue;
 
         n   = &mesh->xpoint[p0->xp].n1[0];
-        _MMG5_directsurfball(mesh,ip0,lists,ilists,n);
+
+        // If _MMG5_directsurfball return 1 it is useless to call this function,
+        // thus it is valid here to call it inside the assert.
+        assert( _MMG5_directsurfball(mesh,ip0,lists,ilists,n) == 1 );
+
         hp  = _MMG5_defsizreg(mesh,met,ip0,lists,ilists,hausd);
         met->m[ip0] = MG_MIN(met->m[ip0],hp);
       }

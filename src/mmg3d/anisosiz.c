@@ -191,6 +191,13 @@ static int _MMG5_defmetrid(MMG5_pMesh mesh,MMG5_pSol met,int kel,
   m[1] = isqhmax;
   m[2] = isqhmax;
 
+  // Call bouletrid that construct the surfacic ball
+
+  // Check the ball orientation
+  assert( MG_GET(pxt->ori,i) );
+  // If _MMG5_directsurfball return 1 it is useless to call this function,
+  // thus it is valid here to call it inside the assert.
+  assert(_MMG5_directsurfball(mesh, pt->v[i0],lists,ilists,n) == 1);
 
 
   return(1);
@@ -599,6 +606,9 @@ int _MMG5_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
     pxt = &mesh->xtetra[pt->xt];
     for (l=0; l<4; l++) {
       if ( !(pxt->ftag[l] & MG_BDY) ) continue;
+      // In multidomain case, acces the face through a tetra for which it is
+      // well oriented.
+      if ( !(MG_GET(pxt->ori,l)) ) continue;
 
       for (i=0; i<3; i++) {
         iploc = _MMG5_idir[l][i];
