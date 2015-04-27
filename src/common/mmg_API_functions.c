@@ -114,7 +114,6 @@ void _MMG5_mmgInit_parameters(MMG5_pMesh mesh) {
 
 
   /* default values for doubles */
-  /* default values for doubles */
   /** MMG5_DPARAM_angleDetection = \ref _MMG5_ANGEDG */
   mesh->info.dhd      = _MMG5_ANGEDG;   /* angle detection; */
   /** MMG5_DPARAM_hmin = 0.01 \f$\times\f$ bounding box size; */

@@ -1783,13 +1783,15 @@ int MMG5_loadMet(MMG5_pMesh mesh,MMG5_pSol met) {
    *    - for hmax we take 10 \times the max of the metric sizes. */
   compute_hmin = compute_hmax = 0;
 
-  if ( mesh->info.hmin < 0. ) {
-    compute_hmin=1;
-    mesh->info.hmin = FLT_MAX;
-  }
-  if ( mesh->info.hmax < 0. ){
-    compute_hmax=1;
-    mesh->info.hmax = 0.;
+  if ( !mesh->info.iso ) {
+    if ( mesh->info.hmin < 0. ) {
+      compute_hmin=1;
+      mesh->info.hmin = FLT_MAX;
+    }
+    if ( mesh->info.hmax < 0. ){
+      compute_hmax=1;
+      mesh->info.hmax = 0.;
+    }
   }
 
   /* isotropic metric */

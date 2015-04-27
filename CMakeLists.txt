@@ -106,10 +106,14 @@ ENDIF(NOT CMAKE_COMPILER_IS_CLANG)
 #####         Choose executable target to compile
 #####
 ###############################################################################
-IF(NOT CMAKE_BUILD_TYPE)
-  SET ( CMAKE_BUILD_TYPE "Release" CACHE STRING "Release")
-  SET(CMAKE_CONFIGURATION_TYPES ${CMAKE_BUILD_TYPE})
-ENDIF ()
+IF(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+  MESSAGE(STATUS "Setting build type to 'Release' as none was specified.")
+  seT(CMAKE_BUILD_TYPE Release CACHE STRING "Choose the type of build." FORCE)
+  # Set the possible values of build type for cmake-gui
+  SET_PROPERTY(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release"
+    "MinSizeRel" "RelWithDebInfo")
+  SET(CMAKE_CONFIGURATION_TYPES ${CMAKE_BUILD_TYPE} )
+ENDIF()
 
 SET ( BUILD "MMG" CACHE STRING
   "\"MMG3D\", \"MMGS\" or \"MMG\" to compile both MMGS and MMG3D" )

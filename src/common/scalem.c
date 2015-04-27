@@ -85,7 +85,7 @@ int _MMG5_boundingBox(MMG5_pMesh mesh) {
 int _MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pPoint    ppt;
   double         dd,d1;
-  int            k;
+  int            k,sethmin,sethmax;
   MMG5_pPar      par;
 
 
@@ -103,11 +103,33 @@ int _MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met) {
   }
 
   /* normalize values */
-  if ( mesh->info.hmin > 0. )  mesh->info.hmin  *= dd;
-  else  mesh->info.hmin = 0.01;
+  sethmin = 0;
+  sethmax = 0;
+  if ( mesh->info.hmin > 0. ) {
+    mesh->info.hmin  *= dd;
+    sethmin = 1;
+  }
+  else mesh->info.hmin  = 0.01;
 
-  if ( mesh->info.hmax > 0. )  mesh->info.hmax  *= dd;
+  if ( mesh->info.hmax > 0. ) {
+    mesh->info.hmax  *= dd;
+    sethmax = 1;
+  }
   else mesh->info.hmax  = 1.;
+
+  if ( mesh->info.hmax < mesh->info.hmin ) {
+    if ( sethmin && sethmax ) {
+      fprintf(stdout,"  ## ERROR: MISMATCH PARAMETERS:"
+              "MINIMAL MESH SIZE LARGER THAN MAXIMAL ONE.\n");
+      fprintf(stdout,"  Exit program.\n");
+      exit(EXIT_FAILURE);
+    }
+    else if ( sethmin )
+      mesh->info.hmax = 100. * mesh->info.hmin;
+    else
+      mesh->info.hmin = 0.01 * mesh->info.hmax;
+  }
+
 
   mesh->info.hausd *= dd;
 
