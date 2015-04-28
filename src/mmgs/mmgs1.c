@@ -585,7 +585,7 @@ int chkspl(MMG5_pMesh mesh,MMG5_pSol met,int k,int i) {
   if( (met->size>1) )
     intmet33(mesh,met,pt->v[i1],pt->v[i2],ip,s);
   else
-    intmet(mesh,met,k,i,ip,s); 
+    intmet(mesh,met,k,i,ip,s);
 
   return(ip);
 }
@@ -692,6 +692,9 @@ static int adpspl(MMG5_pMesh mesh,MMG5_pSol met) {
       return (ns);
     }
     else if ( ip > 0 ) {
+      if ( ! _MMG5_simbulgept(mesh,met,k,imax,ip) ) {
+        continue;
+      }
       ier = split1b(mesh,k,imax,ip);
       if ( !ier ) {
         /* Lack of memory, go to collapse step. */

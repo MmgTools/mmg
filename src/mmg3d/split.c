@@ -240,15 +240,23 @@ nextstep1:
   pt1->qual=_MMG5_orcal(mesh,iel);
 }
 
-/** Simulate at the same time creation and bulging of one point, with new position o,
-    to be inserted at an edge, whose shell is passed :
-    return 0 if final position is invalid, 1 if all checks are ok */
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param list pointer toward the edge shell.
+ * \param ret size of the edge shell.
+ * \param o table of the new point coordinates.
+ * \return 0 if final position is invalid, 1 if all checks are ok.
+ *
+ * Simulate at the same time creation and bulging of one point, with new position o,
+ * to be inserted at an edge, whose shell is passed.
+ *
+ */
 int _MMG5_simbulgept(MMG5_pMesh mesh,int *list,int ret,double o[3]) {
   MMG5_pTetra    pt,pt0;
   MMG5_pPoint    ppt0;
-  double    calold,calnew,caltmp;
-  int       k,iel,ilist;
-  char      ie,ia,ib;
+  double         calold,calnew,caltmp;
+  int            k,iel,ilist;
+  char           ie,ia,ib;
 
   ilist = ret / 2;
   pt0  = &mesh->tetra[0];

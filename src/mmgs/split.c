@@ -83,6 +83,65 @@ int split1(MMG5_pMesh mesh,MMG5_pSol met,int k,int i,int *vx) {
   return(1);
 }
 
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param k index of the starting triangle.
+ * \param i local index of the edge to split in \a k.
+ * \param ip index of the point that we try to create.
+ * \return 0 if final position is invalid, 1 if all checks are ok.
+ *
+ * Simulate the creation of one point, with new position o, to be inserted at an
+ * edge. Check that the new triangles are not empty (otherwise we can create a 0
+ * surface triangle).
+ *
+ * \remark Don't work for non-manifold edge.
+ */
+int _MMG5_simbulgept(MMG5_pMesh mesh,MMG5_pSol met, int k,int i,int ip) {
+  MMG5_pTria     pt,pt0;
+  MMG5_pPoint    ppt0;
+  double         caltmp;
+  int            kadja,iadja,is;
+
+  pt0  = &mesh->tria[0];
+  ppt0 = &mesh->point[0];
+  memcpy(ppt0->c,&mesh->point[ip].c, 3*sizeof(double));
+
+  memcpy(&met->m[0],&met->m[met->size*ip], met->size*sizeof(double));
+
+  // Check the validity of the two triangles created from k.
+  pt = &mesh->tria[k];
+  memcpy(pt0,pt,sizeof(MMG5_Tria));
+  is         = _MMG5_iprv2[i];
+  pt0->v[is] = 0;
+  caltmp     = _MMG5_calelt(mesh,met,pt0);
+  if ( caltmp < _MMG5_EPSD )  return(0);
+
+  pt0->v[is] = pt->v[is];
+  is         = _MMG5_inxt2[i];
+  pt0->v[is] = 0;
+  caltmp = _MMG5_calelt(mesh,met,pt0);
+  if ( caltmp < _MMG5_EPSD )  return(0);
+
+  // Check the validity of the two triangles created from the triangle adjacent
+  // to k by edge i.
+  kadja = mesh->adja[3*(k-1)+i+1]/3;
+  iadja = mesh->adja[3*(k-1)+i+1]%3;
+
+  pt = &mesh->tria[kadja];
+  memcpy(pt0,pt,sizeof(MMG5_Tria));
+  is         = _MMG5_iprv2[iadja];
+  pt0->v[is] = 0;
+  caltmp     = _MMG5_calelt(mesh,met,pt0);
+  if ( caltmp < _MMG5_EPSD )  return(0);
+
+  pt0->v[is] = pt->v[is];
+  is         = _MMG5_inxt2[iadja];
+  pt0->v[is] = 0;
+  caltmp = _MMG5_calelt(mesh,met,pt0);
+  if ( caltmp < _MMG5_EPSD )  return(0);
+
+  return(1);
+}
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -94,6 +153,7 @@ int split1(MMG5_pMesh mesh,MMG5_pSol met,int k,int i,int *vx) {
  * Split element \a k along edge \a i, inserting point \a ip and updating
  * the adjacency relations.
  *
+ * \remark do not call this function in non-manifold case.
  */
 int split1b(MMG5_pMesh mesh,int k,char i,int ip) {
   MMG5_pTria     pt,pt1;
