@@ -1193,8 +1193,8 @@ int MMG5_Set_dparameter(MMG5_pMesh mesh, MMG5_pSol sol, int dparam, double val){
     break;
   case MMG5_DPARAM_hausd :
     if ( val <=0 ) {
-      fprintf(stdout,"  ## Warning: hausdorff number must be strictly positive.\n");
-      fprintf(stdout,"  Reset to default value.\n");
+      fprintf(stdout,"  ## Error: hausdorff number must be strictly positive.\n");
+      return(0);
     }
     else
       mesh->info.hausd    = val;

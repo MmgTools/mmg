@@ -109,6 +109,10 @@ static int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
           mesh->info.hmax = atof(argv[i]);
         else if ( !strcmp(argv[i],"-hausd") && ++i <= argc ) {
           mesh->info.hausd = atof(argv[i]);
+          if ( mesh->info.hausd <= 0.0 ) {
+            fprintf(stdout,"  ## Error: hausdorff number must be strictly positive.\n");
+            return(0);
+          }
         }
         else if ( !strcmp(argv[i],"-hgrad") && ++i <= argc ) {
           mesh->info.hgrad = atof(argv[i]);
