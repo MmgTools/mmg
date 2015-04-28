@@ -163,43 +163,43 @@ static int _MMG5_defmetsin(MMG5_pMesh mesh,MMG5_pSol met,int kel, int iface, int
 static int _MMG5_defmetrid(MMG5_pMesh mesh,MMG5_pSol met,int kel,
                            int iface, int ip)
 {
-  MMG5_pTetra    pt;
-  MMG5_pPoint    p0,p1,p2;
-  _MMG5_Bezier   b;
-  int            k,iel,idp,ilist1,ilist2,ilist,*list;
-  int            list1[_MMG5_LMAX+2],list2[_MMG5_LMAX+2],iprid[2],ier;
-  double         *m,isqhmin,isqhmax,*n1,*n2,*n,*t,kappacur,b0[3],b1[3],n0[3];
-  double         tau[3],trot[2],u[2],ux,uy,uz,det,bcu[3];
-  double         l,ll,ps,gammasec[3],c[3],r[3][3],lispoi[3*_MMG5_LMAX+1];
-  double         detg,detd,Jacb[3][2],Hb[3][3],lambda[2];
-  unsigned char  i,i0,i1,i2;
+  /* MMG5_pTetra    pt; */
+  /* MMG5_pPoint    p0,p1,p2; */
+  /* _MMG5_Bezier   b; */
+  /* int            k,iel,idp,ilist1,ilist2,ilist,*list; */
+  /* int            list1[_MMG5_LMAX+2],list2[_MMG5_LMAX+2],iprid[2],ier; */
+  /* double         *m,isqhmin,isqhmax,*n1,*n2,*n,*t,kappacur,b0[3],b1[3],n0[3]; */
+  /* double         tau[3],trot[2],u[2],ux,uy,uz,det,bcu[3]; */
+  /* double         l,ll,ps,gammasec[3],c[3],r[3][3],lispoi[3*_MMG5_LMAX+1]; */
+  /* double         detg,detd,Jacb[3][2],Hb[3][3],lambda[2]; */
+  /* unsigned char  i,i0,i1,i2; */
 
-  pt  = &mesh->tetra[kel];
-  idp = pt->v[ip];
-  p0  = &mesh->point[idp];
+  /* pt  = &mesh->tetra[kel]; */
+  /* idp = pt->v[ip]; */
+  /* p0  = &mesh->point[idp]; */
 
-  isqhmin = 1.0 / (mesh->info.hmin*mesh->info.hmin);
-  isqhmax = 1.0 / (mesh->info.hmax*mesh->info.hmax);
+  /* isqhmin = 1.0 / (mesh->info.hmin*mesh->info.hmin); */
+  /* isqhmax = 1.0 / (mesh->info.hmax*mesh->info.hmax); */
 
-  n1 = &mesh->xpoint[p0->xp].n1[0];
-  n2 = &mesh->xpoint[p0->xp].n2[0];
-  t  = p0->n;
+  /* n1 = &mesh->xpoint[p0->xp].n1[0]; */
+  /* n2 = &mesh->xpoint[p0->xp].n2[0]; */
+  /* t  = p0->n; */
 
-  m = &met->m[6*idp];
-  memset(m,0,6*sizeof(double));
-  m[0] = isqhmax;
-  m[1] = isqhmax;
-  m[2] = isqhmax;
+  /* m = &met->m[6*idp]; */
+  /* memset(m,0,6*sizeof(double)); */
+  /* m[0] = isqhmax; */
+  /* m[1] = isqhmax; */
+  /* m[2] = isqhmax; */
 
-  // Call bouletrid that construct the surfacic ball
+  /* // Call bouletrid that construct the surfacic ball */
 
-  // Check the ball orientation
-  assert( MG_GET(pxt->ori,i) );
-  // If _MMG5_directsurfball return 1 it is useless to call this function,
-  // thus it is valid here to call it inside the assert.
-  assert(_MMG5_directsurfball(mesh, pt->v[i0],lists,ilists,n) == 1);
+  /* // Check the ball orientation */
+  /* assert( MG_GET(pxt->ori,i) ); */
+  /* // If _MMG5_directsurfball return 1 it is useless to call this function, */
+  /* // thus it is valid here to call it inside the assert. */
+  /* assert(_MMG5_directsurfball(mesh, pt->v[i0],lists,ilists,n) == 1); */
 
-
+  exit(100);
   return(1);
 }
 
