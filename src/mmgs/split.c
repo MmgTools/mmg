@@ -34,6 +34,43 @@
 
 #include "mmgs.h"
 
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param k index of element to split.
+ * \param i index of edge to split.
+ * \param vx \f$vx[i]\f$ is the index of the point to add on the edge \a i.
+ * \param k index of element to split.
+ * \return 0 if split leads to invalid element, else 1.
+ *
+ * Simulate the splitting of element \a k along edge \a i. Check that the new
+ * triangles are not empty (otherwise we can create a 0 surface triangle).
+ *
+ */
+int _MMG5_split1_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int i,int *vx) {
+  MMG5_pTria      pt,pt0;
+  int             is;
+  double          cal;
+
+  pt  = &mesh->tria[k];
+  pt0 = &mesh->tria[0];
+
+  /* Test volume of the two created triangles */
+  memcpy(pt0,pt,sizeof(MMG5_Tria));
+
+  is         = _MMG5_iprv2[i];
+  pt0->v[is] = vx[i];
+  cal        = _MMG5_calelt(mesh,met,pt0);
+  if ( cal < _MMG5_EPSD )  return(0);
+
+  pt0->v[is] = pt->v[is];
+  is         = _MMG5_inxt2[i];
+  pt0->v[is] = vx[i];
+  cal        = _MMG5_calelt(mesh,met,pt0);
+  if ( cal < _MMG5_EPSD )  return(0);
+
+  return(1);
+}
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -85,12 +122,13 @@ int split1(MMG5_pMesh mesh,MMG5_pSol met,int k,int i,int *vx) {
 
 /**
  * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
  * \param k index of the starting triangle.
  * \param i local index of the edge to split in \a k.
  * \param ip index of the point that we try to create.
  * \return 0 if final position is invalid, 1 if all checks are ok.
  *
- * Simulate the creation of one point, with new position o, to be inserted at an
+ * Simulate the creation of the point \a ip, to be inserted at an
  * edge. Check that the new triangles are not empty (otherwise we can create a 0
  * surface triangle).
  *
@@ -99,7 +137,7 @@ int split1(MMG5_pMesh mesh,MMG5_pSol met,int k,int i,int *vx) {
 int _MMG5_simbulgept(MMG5_pMesh mesh,MMG5_pSol met, int k,int i,int ip) {
   MMG5_pTria     pt,pt0;
   MMG5_pPoint    ppt0;
-  double         caltmp;
+  double         cal;
   int            kadja,iadja,is;
 
   pt0  = &mesh->tria[0];
@@ -113,14 +151,14 @@ int _MMG5_simbulgept(MMG5_pMesh mesh,MMG5_pSol met, int k,int i,int ip) {
   memcpy(pt0,pt,sizeof(MMG5_Tria));
   is         = _MMG5_iprv2[i];
   pt0->v[is] = 0;
-  caltmp     = _MMG5_calelt(mesh,met,pt0);
-  if ( caltmp < _MMG5_EPSD )  return(0);
+  cal        = _MMG5_calelt(mesh,met,pt0);
+  if ( cal < _MMG5_EPSD )  return(0);
 
   pt0->v[is] = pt->v[is];
   is         = _MMG5_inxt2[i];
   pt0->v[is] = 0;
-  caltmp = _MMG5_calelt(mesh,met,pt0);
-  if ( caltmp < _MMG5_EPSD )  return(0);
+  cal        = _MMG5_calelt(mesh,met,pt0);
+  if ( cal < _MMG5_EPSD )  return(0);
 
   // Check the validity of the two triangles created from the triangle adjacent
   // to k by edge i.
@@ -131,14 +169,14 @@ int _MMG5_simbulgept(MMG5_pMesh mesh,MMG5_pSol met, int k,int i,int ip) {
   memcpy(pt0,pt,sizeof(MMG5_Tria));
   is         = _MMG5_iprv2[iadja];
   pt0->v[is] = 0;
-  caltmp     = _MMG5_calelt(mesh,met,pt0);
-  if ( caltmp < _MMG5_EPSD )  return(0);
+  cal        = _MMG5_calelt(mesh,met,pt0);
+  if ( cal < _MMG5_EPSD )  return(0);
 
   pt0->v[is] = pt->v[is];
   is         = _MMG5_inxt2[iadja];
   pt0->v[is] = 0;
-  caltmp = _MMG5_calelt(mesh,met,pt0);
-  if ( caltmp < _MMG5_EPSD )  return(0);
+  cal        = _MMG5_calelt(mesh,met,pt0);
+  if ( cal < _MMG5_EPSD )  return(0);
 
   return(1);
 }
@@ -261,6 +299,52 @@ int split1b(MMG5_pMesh mesh,int k,char i,int ip) {
   return(1);
 }
 
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param k index of element to split.
+ * \param vx \f$vx[i]\f$ is the index of the point to add on the edge \a i.
+ * \return 0 if split leads to invalid element, else 1.
+ *
+ * Simulate the splitting of element \a k along the 2 edges \a i1 and \a i2.
+ * Check that the new triangles are not empty (otherwise we can create a 0
+ * surface triangle).
+ *
+ */
+int _MMG5_split2_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
+  MMG5_pTria    pt,pt0;
+  int           i1,i2,i;
+  double        cal;
+
+  pt  = &mesh->tria[k];
+  pt0 = &mesh->tria[0];
+
+  memcpy(pt0,pt,sizeof(MMG5_Tria));
+
+  i = 0;
+  if ( !vx[0] )  i = 1;
+  else if ( !vx[1] )  i = 2;
+  i1 = _MMG5_inxt2[i];
+  i2 = _MMG5_inxt2[i1];
+
+  /* Check the quality of the 3 new triangles */
+  pt0->v[i2] = vx[i];
+  cal        = _MMG5_calelt(mesh,met,pt0);
+  if ( cal < _MMG5_EPSD )  return(0);
+
+  pt0->v[i1] = vx[i];
+  pt0->v[i2] = vx[i1];
+  cal        = _MMG5_calelt(mesh,met,pt0);
+  if ( cal < _MMG5_EPSD )  return(0);
+
+  pt0->v[i2] = pt->v[i2];
+  pt0->v[i1] = vx[i];
+  pt0->v[i]  = vx[i1];
+  cal        = _MMG5_calelt(mesh,met,pt0);
+  if ( cal < _MMG5_EPSD )  return(0);
+
+  return(1);
+}
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -316,22 +400,65 @@ int split2(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
   if ( pt->edg[i] > 0 )   p3->ref = pt->edg[i];
   if ( pt->edg[i1] > 0 )  p4->ref = pt->edg[i1];
 
-  /* check alternate configs */
+  pt->v[i1] = pt1->v[i2] = pt2->v[i1] = vx[i];
+  pt->v[i2] = pt2->v[i]  = vx[i1];
 
-  if ( 1 ) {
-    pt->v[i1] = pt1->v[i2] = pt2->v[i1] = vx[i];
-    pt->v[i2] = pt2->v[i]  = vx[i1];
+  pt->tag[i] = pt->tag[i2] = pt1->tag[i1] = pt2->tag[i2] = MG_NOTAG;
+  pt->edg[i] = pt->edg[i2] = pt1->edg[i1] = pt2->edg[i2] = 0;
 
-    pt->tag[i] = pt->tag[i2] = pt1->tag[i1] = pt2->tag[i2] = MG_NOTAG;
-    pt->edg[i] = pt->edg[i2] = pt1->edg[i1] = pt2->edg[i2] = 0;
-  }
-  else {
-    pt->v[i2]  = pt1->v[i]  = pt2->v[i] = vx[i1];
-    pt1->v[i2] = pt2->v[i1] = vx[i];
+  /* alternate configs */
+  /* pt->v[i2]  = pt1->v[i]  = pt2->v[i] = vx[i1]; */
+  /* pt1->v[i2] = pt2->v[i1] = vx[i]; */
 
-    pt->tag[i] = pt1->tag[i1] = pt1->tag[i2] = pt2->tag[i2] = MG_NOTAG;
-    pt->edg[i] = pt1->edg[i1] = pt1->edg[i2] = pt2->edg[i2] = 0;
-  }
+  /* pt->tag[i] = pt1->tag[i1] = pt1->tag[i2] = pt2->tag[i2] = MG_NOTAG; */
+  /* pt->edg[i] = pt1->edg[i1] = pt1->edg[i2] = pt2->edg[i2] = 0; */
+
+  return(1);
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param k index of element to split.
+ * \param vx \f$vx[i]\f$ is the index of the point to add on the edge \a i.
+ * \return 0 if split leads to invalid element, else 1.
+ *
+ * Simulate the splitting of element \a k along the 3 edges. Check that the new
+ * triangles are not empty (otherwise we can create a 0 surface triangle).
+ *
+ */
+int _MMG5_split3_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
+  MMG5_pTria    pt,pt0;
+  double        cal;
+
+  pt   = &mesh->tria[k];
+  pt0  = &mesh->tria[0];
+
+  memcpy(pt0,pt,sizeof(MMG5_Tria));
+
+  /* Check the 4 new triangles */
+  pt0->v[1]  = vx[2];
+  pt0->v[2]  = vx[1];
+  cal        = _MMG5_calelt(mesh,met,pt0);
+  if ( cal < _MMG5_EPSD )  return(0);
+
+  pt0->v[1]  = pt->v[1];
+  pt0->v[0]  = vx[2];
+  pt0->v[2]  = vx[0];
+  cal        = _MMG5_calelt(mesh,met,pt0);
+  if ( cal < _MMG5_EPSD )  return(0);
+
+  pt0->v[2]  = pt->v[2];
+  pt0->v[0]  = vx[1];
+  pt0->v[1]  = vx[0];
+  cal        = _MMG5_calelt(mesh,met,pt0);
+  if ( cal < _MMG5_EPSD )  return(0);
+
+  pt0->v[0]  = vx[2];
+  pt0->v[1]  = vx[0];
+  pt0->v[2]  = vx[1];
+  cal        = _MMG5_calelt(mesh,met,pt0);
+  if ( cal < _MMG5_EPSD )  return(0);
 
   return(1);
 }
@@ -343,7 +470,7 @@ int split2(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
  * \param vx \f$vx[i]\f$ is the index of the point to add on the edge \a i.
  * \return 1.
  *
- * Split element \a k along the 2 edges \a i1 and \a i2.
+ * Split element \a k along the 3 edges.
  *
  */
 int split3(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
