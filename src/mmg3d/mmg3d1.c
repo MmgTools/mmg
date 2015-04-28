@@ -79,7 +79,7 @@ void _MMG5_tet2tri(MMG5_pMesh mesh,int k,char ie,MMG5_Tria *ptt) {
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
  * \param k tetrahedron index.
- * \param *vx pointer toward table of edges to split.
+ * \param vx pointer toward table of edges to split.
  * \return 1.
  *
  * Find acceptable position for splitting.
@@ -88,10 +88,10 @@ void _MMG5_tet2tri(MMG5_pMesh mesh,int k,char ie,MMG5_Tria *ptt) {
 int _MMG5_dichoto(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
   MMG5_pTetra  pt;
   MMG5_pPoint  pa,pb,ps;
-  double  o[6][3],p[6][3];
-  float   to,tp,t;
-  int     ia,ib,ier,it,maxit;
-  char    i;
+  double       o[6][3],p[6][3];
+  float        to,tp,t;
+  int          ia,ib,ier,it,maxit;
+  char         i;
 
   pt = &mesh->tetra[k];
   /* get point on surface and along segment for edge split */
@@ -142,8 +142,6 @@ int _MMG5_dichoto(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
       to = t;
     else
       tp = t;
-    /* if we realloc mem in the split function, pt is not valid anymore */
-    pt = &mesh->tetra[k];
   }
   while ( ++it < maxit );
   /* restore coords of last valid pos. */
@@ -176,9 +174,9 @@ int _MMG5_dichoto(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
 int _MMG5_dichoto1b(MMG5_pMesh mesh,int *list,int ret,double o[3],double ro[3]) {
   MMG5_pTetra  pt;
   MMG5_pPoint  p0,p1;
-  int     iel,np,nq,it,maxit;
-  double  m[3],c[3],tp,to,t;
-  char    ia,ier;
+  int          iel,np,nq,it,maxit;
+  double       m[3],c[3],tp,to,t;
+  char         ia,ier;
 
   iel = list[0] / 6;
   ia  = list[0] % 6;
@@ -1145,8 +1143,9 @@ _MMG5_anatets(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
     mesh->point[k].flag = 0;
 
   it = 1;
+  nc = 0;
   do {
-    ni = nc = 0;
+    ni = 0;
     for (k=1; k<=mesh->ne; k++) {
       pt = &mesh->tetra[k];
       if ( !MG_EOK(pt) || (pt->tag & MG_REQ) || !pt->flag )  continue;
@@ -1176,7 +1175,7 @@ _MMG5_anatets(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
       }
       if ( ier )  continue;
 
-      nc++;
+      ni++;
       if ( ic == 0 && _MMG5_dichoto(mesh,met,k,vx) ) {
         for (ia=0; ia<6; ia++)
           if ( vx[ia] > 0 )  mesh->point[vx[ia]].flag++;
@@ -1196,8 +1195,9 @@ _MMG5_anatets(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
         }
       }
     }
+    nc += ni;
   }
-  while( nc > 0 && ++it < 20 );
+  while( ni > 0 && ++it < 20 );
   if ( mesh->info.ddebug && nc ) {
     fprintf(stdout,"     %d corrected, %d invalid\n",nc,ni);
     fflush(stdout);
