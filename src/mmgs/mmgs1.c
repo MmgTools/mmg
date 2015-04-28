@@ -911,7 +911,6 @@ static int adpspl(MMG5_pMesh mesh,MMG5_pSol met) {
     }
     else if ( ip > 0 ) {
       if ( !_MMG5_simbulgept(mesh,met,k,imax,ip) ) {
-        printf("simbul error \n");
         _MMG5_dichoto1b(mesh,met,k,imax,ip);
       }
       ier = split1b(mesh,k,imax,ip);
