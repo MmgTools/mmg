@@ -204,7 +204,6 @@ int chkswp(MMG5_pMesh mesh,MMG5_pSol met,int k,int i,char typchk) {
 
   /* swap if Hausdorff contribution of the swapped edge is less than existing one */
   if ( coschg > mesh->info.hausd*mesh->info.hausd )  return(0);
-  else if ( coschg < mesh->info.hausd*mesh->info.hausd && cosnat > mesh->info.hausd*mesh->info.hausd )  return(1);
 
   if ( typchk == 2 && met->m ) {
     pt0->v[0]= ip0;  pt0->v[1]= ip1;  pt0->v[2]= ip2;
@@ -219,7 +218,7 @@ int chkswp(MMG5_pMesh mesh,MMG5_pSol met,int k,int i,char typchk) {
     calchg = MG_MIN(cal1,cal2);
   }
   else {
-//warning if typchk==1 iso??
+    // warning if typchk==1 iso??
     pt0->v[0]= ip0;  pt0->v[1]= ip1;  pt0->v[2]= ip2;
     cal1 = _MMG5_caltri_iso(mesh,NULL,pt0);
     pt0->v[0]= ip1;  pt0->v[1]= iq;   pt0->v[2]= ip2;
@@ -231,6 +230,14 @@ int chkswp(MMG5_pMesh mesh,MMG5_pSol met,int k,int i,char typchk) {
     cal2 = _MMG5_caltri_iso(mesh,NULL,pt0);
     calchg = MG_MIN(cal1,cal2);
   }
+
+  /* if the quality is very bad, don't degrade it, even to improve the surface
+   * approx. */
+  if ( calchg < _MMG5_EPS && calnat >= calchg ) return(0);
+
+  /* else we can degrade the quality to improve the surface approx. */
+  if ( coschg < mesh->info.hausd*mesh->info.hausd && cosnat > mesh->info.hausd*mesh->info.hausd )  return(1);
+
   return(calchg > 1.01 * calnat);
 }
 
