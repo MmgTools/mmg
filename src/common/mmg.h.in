@@ -48,6 +48,9 @@
 #define MG_CPY   "Copyright (c) IMB-LJLL, 2004-"
 #define MG_STR   "&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&"
 
+/** size of box for renumbering with scotch. */
+#define _MMG5_BOXSIZE 500
+
 /** Maximal memory used if available memory compitation fail. */
 #define _MMG5_MEMMAX  800
 

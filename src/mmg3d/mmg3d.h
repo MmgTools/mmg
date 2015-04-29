@@ -125,8 +125,6 @@
 #define _MMG5_NTMAX  2000000 //400000
 #define _MMG5_NEMAX  6000000 //1200000
 
-#define _MMG5_BOXSIZE 500
-
 
 /* Domain refs in iso mode */
 #define MG_PLUS    2

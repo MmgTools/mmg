@@ -37,7 +37,7 @@
 
 
 
-int chkmsh(MMG5_pMesh mesh,int severe) {
+int _MMG5_chkmsh(MMG5_pMesh mesh,int severe) {
     MMG5_pPoint         ppt;
     MMG5_pTria          pt1,pt2;
     int              adj,adj1,k,kk,l,nk,i,j,ip,lon,len;

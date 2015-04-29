@@ -64,7 +64,10 @@ static void usage(char *prog) {
 
   _MMG5_mmgUsage(prog);
 
-  fprintf(stdout,"-nreg      normal regul.\n");
+  fprintf(stdout,"-nreg        normal regul.\n");
+#ifdef USE_SCOTCH
+  fprintf(stdout,"-rn [n]      Turn on or off the renumbering using SCOTCH [0/1] \n");
+#endif
 
   exit(EXIT_FAILURE);
 }
@@ -159,6 +162,25 @@ static int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
           }
         }
         break;
+#ifdef USE_SCOTCH
+      case 'r':
+        if ( !strcmp(argv[i],"-rn") ) {
+          if ( ++i < argc ) {
+            if ( isdigit(argv[i][0]) ) {
+              mesh->info.renum = atoi(argv[i]);
+            }
+            else {
+              fprintf(stderr,"Missing argument option %s\n",argv[i-1]);
+              usage(argv[0]);
+            }
+          }
+          else {
+            fprintf(stderr,"Missing argument option %s\n",argv[i-1]);
+            usage(argv[0]);
+          }
+        }
+        break;
+#endif
       case 's':
         if ( !strcmp(argv[i],"-sol") ) {
           if ( ++i < argc && isascii(argv[i][0]) && argv[i][0]!='-' ) {
@@ -416,6 +438,30 @@ int main(int argc,char *argv[]) {
     printim(MMG5_ctim[2].gdif,stim);
     fprintf(stdout,"  -- PHASE 1 COMPLETED.     %s\n",stim);
   }
+
+  /* renumbering if available */
+#ifdef USE_SCOTCH
+  /*check enough vertex to renum*/
+  if ( mesh.info.renum && (mesh.np/2. > _MMG5_BOXSIZE) && mesh.np>100000 ) {
+    /* renumbering begin */
+    if ( mesh.info.imprim > 5 )
+      fprintf(stdout,"  -- RENUMBERING. \n");
+
+    if ( !_MMG5_renumbering(_MMG5_BOXSIZE,&mesh, &met) ) {
+      fprintf(stdout,"  ## Unable to renumbering mesh. \n");
+      fprintf(stdout,"  ## Try to run without renumbering option (-rn 0)\n");
+      return(0);
+    }
+
+    if ( mesh.info.imprim > 5) {
+      fprintf(stdout,"  -- PHASE RENUMBERING COMPLETED. \n");
+    }
+
+    if ( mesh.info.ddebug )  _MMG5_chkmsh(&mesh,1);
+    /* renumbering end */
+  }
+#endif
+
   /* solve */
   chrono(ON,&MMG5_ctim[3]);
   if ( mesh.info.imprim )

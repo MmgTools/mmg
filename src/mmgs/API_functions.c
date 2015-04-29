@@ -51,4 +51,6 @@ void _MMG5_Init_parameters(MMG5_pMesh mesh) {
   /* Init common parameters for mmgs and mmg3d. */
   _MMG5_mmgInit_parameters(mesh);
 
+  mesh->info.renum    = 0;   /* [0/1], Turn off/on the renumbering using SCOTCH; */
+
 }
