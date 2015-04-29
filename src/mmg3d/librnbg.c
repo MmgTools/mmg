@@ -397,7 +397,7 @@ int _MMG5_renumbering(int boxVertNbr, MMG5_pMesh mesh, MMG5_pSol sol) {
   _MMG5_DEL_MEM(mesh,vertOldTab,(mesh->ne+1)*sizeof(int));
 
   /* Modify the numbering of the nodes of each tetra */
-  for( tetraIdx = 1; tetraIdx < mesh->ne + 1; tetraIdx++) {
+  for( tetraIdx = 1; tetraIdx < nereal + 1; tetraIdx++) {
     for(j = 0 ; j <= 3 ; j++) {
       mesh->tetra[tetraIdx].v[j] = permNodTab[mesh->tetra[tetraIdx].v[j]];
     }

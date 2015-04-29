@@ -281,7 +281,7 @@ int _MMG5_renumbering(int boxVertNbr, MMG5_pMesh mesh, MMG5_pSol sol) {
 
   /* Create the final permutation table for trias (stored in vertOldTab) and *
      modify the numbering of the nodes of each tria */
-  for( triaIdx = 1; triaIdx < mesh->nt + 1; triaIdx++) {
+  for( triaIdx = 1; triaIdx < ntreal + 1; triaIdx++) {
     for(j = 0 ; j <= 3 ; j++) {
       mesh->tria[triaIdx].v[j] = permNodTab[mesh->tria[triaIdx].v[j]];
     }
