@@ -193,7 +193,7 @@ void _MMG5_swapTet(MMG5_pTetra tetras/*, int* adja*/, int* perm, int ind1, int i
  * Modifies the node indicies to prevent from cache missing.
  *
  */
-int _MMG5_renumbering(int boxVertNbr, MMG5_pMesh mesh, MMG5_pSol sol) {
+int _MMG5_mmg3dRenumbering(int boxVertNbr, MMG5_pMesh mesh, MMG5_pSol sol) {
   MMG5_pPoint ppt;
   MMG5_pTetra ptet;
   SCOTCH_Num  edgeNbr;
@@ -437,40 +437,3 @@ int _MMG5_renumbering(int boxVertNbr, MMG5_pMesh mesh, MMG5_pSol sol) {
 }
 #endif
 
-/**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the solution structure.
- * \return 0 if \ref _MMG5_renumbering fail (non conformal mesh), 1 otherwise
- * (renumerotation success of renumerotation fail but the mesh is still
- *  conformal).
- *
- * Call scotch renumbering.
- *
- **/
-int _MMG5_scotchCall(MMG5_pMesh mesh, MMG5_pSol met)
-{
-#ifdef USE_SCOTCH
-  /*check enough vertex to renum*/
-  if ( mesh->info.renum && (mesh->np/2. > _MMG5_BOXSIZE) && mesh->np>100000 ) {
-    /* renumbering begin */
-    if ( mesh->info.imprim > 5 )
-      fprintf(stdout,"  -- RENUMBERING. \n");
-
-    if ( !_MMG5_renumbering(_MMG5_BOXSIZE,mesh, met) ) {
-      fprintf(stdout,"  ## Unable to renumbering mesh. \n");
-      fprintf(stdout,"  ## Try to run without renumbering option (-rn 0)\n");
-      return(0);
-    }
-
-    if ( mesh->info.imprim > 5) {
-      fprintf(stdout,"  -- PHASE RENUMBERING COMPLETED. \n");
-    }
-
-    if ( mesh->info.ddebug )  _MMG5_chkmsh(mesh,1,0);
-    /* renumbering end */
-  }
-  return(1);
-#else
-  return(1);
-#endif
-}

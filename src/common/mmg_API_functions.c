@@ -76,7 +76,7 @@ static inline
 void MMG5_Init_woalloc_mesh(MMG5_pMesh mesh, MMG5_pSol sol
   ) {
 
-  _MMG5_Set_APIFunc();
+  _MMG5_Set_commonFunc();
 
   (mesh)->dim = 3;
   (mesh)->ver = 2;
