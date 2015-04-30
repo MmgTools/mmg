@@ -96,12 +96,12 @@ int _MMG5_chkmshsurf(MMG5_pMesh mesh){
   return(1);
 }
 
-int _MMG5_chkmsh(MMG5_pMesh mesh,int severe,int base) {
+int _MMG5_mmg3dChkmsh(MMG5_pMesh mesh,int severe,int base) {
   MMG5_pTetra    pt,pt1,pt2;
   MMG5_pxTetra   pxt;
-  int       *adja,*adja1,adj,adj1,k,i,iadr;
-  int       iel,a0,a1,a2,b0,b1,b2;
-  unsigned char voy,voy1;
+  int            *adja,*adja1,adj,adj1,k,i,iadr;
+  int            iel,a0,a1,a2,b0,b1,b2;
+  unsigned char  voy,voy1;
   /* commentated part variables
      MMG5_pTetra        pt0;
      MMG5_xTetra       pxt0,pxt1,pxt2;

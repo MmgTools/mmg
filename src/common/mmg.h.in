@@ -48,6 +48,9 @@
 #define MG_CPY   "Copyright (c) IMB-LJLL, 2004-"
 #define MG_STR   "&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&"
 
+/** size of box for renumbering with scotch. */
+#define _MMG5_BOXSIZE 500
+
 /** Maximal memory used if available memory compitation fail. */
 #define _MMG5_MEMMAX  800
 
@@ -356,14 +359,19 @@ int    _MMG5_nortri(MMG5_pMesh mesh,MMG5_pTria pt,double *n);
 void   _MMG5_printTria(MMG5_pMesh mesh,char* fileName);
 int    _MMG5_rotmatrix(double n[3],double r[3][3]);
 int    _MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met);
+int    _MMG5_scotchCall(MMG5_pMesh mesh, MMG5_pSol sol);
 double _MMG5_surftri_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt);
 double _MMG5_surftri_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt);
 int    _MMG5_sys33sym(double a[6], double b[3], double r[3]);
 int    _MMG5_unscaleMesh(MMG5_pMesh mesh,MMG5_pSol met);
 
 /* function pointers */
+int    (*_MMG5_chkmsh)(MMG5_pMesh,int,int);
 int    (*_MMG5_bezierCP)(MMG5_pMesh ,MMG5_Tria *,_MMG5_pBezier ,char );
 double (*_MMG5_lenedg)(MMG5_pMesh mesh,MMG5_pSol sol ,int ,int, char );
 
+#ifdef USE_SCOTCH
+int    (*_MMG5_renumbering)(int vertBoxNbr, MMG5_pMesh mesh, MMG5_pSol sol);
+#endif
 
 #endif

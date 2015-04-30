@@ -64,7 +64,10 @@ static void usage(char *prog) {
 
   _MMG5_mmgUsage(prog);
 
-  fprintf(stdout,"-nreg      normal regul.\n");
+  fprintf(stdout,"-nreg        normal regul.\n");
+#ifdef USE_SCOTCH
+  fprintf(stdout,"-rn [n]      Turn on or off the renumbering using SCOTCH [0/1] \n");
+#endif
 
   exit(EXIT_FAILURE);
 }
@@ -159,6 +162,25 @@ static int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
           }
         }
         break;
+#ifdef USE_SCOTCH
+      case 'r':
+        if ( !strcmp(argv[i],"-rn") ) {
+          if ( ++i < argc ) {
+            if ( isdigit(argv[i][0]) ) {
+              mesh->info.renum = atoi(argv[i]);
+            }
+            else {
+              fprintf(stderr,"Missing argument option %s\n",argv[i-1]);
+              usage(argv[0]);
+            }
+          }
+          else {
+            fprintf(stderr,"Missing argument option %s\n",argv[i-1]);
+            usage(argv[0]);
+          }
+        }
+        break;
+#endif
       case 's':
         if ( !strcmp(argv[i],"-sol") ) {
           if ( ++i < argc && isascii(argv[i][0]) && argv[i][0]!='-' ) {
@@ -337,11 +359,14 @@ static void setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
 }
 
 /**
- * Set API pointer functions to the matching mmgs function.
+ * Set common pointer functions between mmgs and mmg3d to the matching mmg3d
+ * functions.
  */
-void _MMG5_Set_APIFunc() {
-  MMG5_Init_parameters = _MMG5_Init_parameters;
-  _MMG5_bezierCP       = _MMG5_mmgsBezierCP;
+void _MMG5_Set_commonFunc() {
+  MMG5_Init_parameters    = _MMG5_Init_parameters;
+  _MMG5_bezierCP          = _MMG5_mmgsBezierCP;
+  _MMG5_chkmsh            = _MMG5_mmgsChkmsh;
+  _MMG5_renumbering       = _MMG5_mmgsRenumbering;
 }
 
 int main(int argc,char *argv[]) {
@@ -354,7 +379,7 @@ int main(int argc,char *argv[]) {
   fprintf(stdout,"     %s\n",MG_CPY);
   fprintf(stdout,"     %s %s\n",__DATE__,__TIME__);
 
-  _MMG5_Set_APIFunc();
+  _MMG5_Set_commonFunc();
 
   /* trap exceptions */
   signal(SIGABRT,excfun);
@@ -416,6 +441,7 @@ int main(int argc,char *argv[]) {
     printim(MMG5_ctim[2].gdif,stim);
     fprintf(stdout,"  -- PHASE 1 COMPLETED.     %s\n",stim);
   }
+
   /* solve */
   chrono(ON,&MMG5_ctim[3]);
   if ( mesh.info.imprim )
