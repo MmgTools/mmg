@@ -374,7 +374,7 @@ int bouletrid(MMG5_pMesh mesh,int start,int ip,int *il1,int *l1,int *il2,int *l2
   do {
     pt   = &mesh->tria[k];
     adja = &mesh->adja[3*(k-1)+1];
-    if ( (*ilist1) > _MMG5_LMAX-2 )  return(-(*ilist1));
+    if ( (*ilist1) > _MMG5_LMAX-2 )  return(0);
     list1[(*ilist1)] = 3*k+i;
     (*ilist1)++;
     i1 = _MMG5_inxt2[i];
@@ -402,7 +402,7 @@ int bouletrid(MMG5_pMesh mesh,int start,int ip,int *il1,int *l1,int *il2,int *l2
   do {
     pt   = &mesh->tria[k];
     adja = &mesh->adja[3*(k-1)+1];
-    if ( *ilist2 > _MMG5_LMAX-2 )  return(-(*ilist2));
+    if ( *ilist2 > _MMG5_LMAX-2 )  return(0);
     list2[*ilist2] = 3*k+i;
     (*ilist2)++;
     i1 = _MMG5_inxt2[i];

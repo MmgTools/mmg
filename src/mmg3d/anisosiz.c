@@ -163,43 +163,166 @@ static int _MMG5_defmetsin(MMG5_pMesh mesh,MMG5_pSol met,int kel, int iface, int
 static int _MMG5_defmetrid(MMG5_pMesh mesh,MMG5_pSol met,int kel,
                            int iface, int ip)
 {
-  /* MMG5_pTetra    pt; */
-  /* MMG5_pPoint    p0,p1,p2; */
-  /* _MMG5_Bezier   b; */
-  /* int            k,iel,idp,ilist1,ilist2,ilist,*list; */
-  /* int            list1[_MMG5_LMAX+2],list2[_MMG5_LMAX+2],iprid[2],ier; */
-  /* double         *m,isqhmin,isqhmax,*n1,*n2,*n,*t,kappacur,b0[3],b1[3],n0[3]; */
-  /* double         tau[3],trot[2],u[2],ux,uy,uz,det,bcu[3]; */
-  /* double         l,ll,ps,gammasec[3],c[3],r[3][3],lispoi[3*_MMG5_LMAX+1]; */
-  /* double         detg,detd,Jacb[3][2],Hb[3][3],lambda[2]; */
-  /* unsigned char  i,i0,i1,i2; */
+  MMG5_pTetra    pt;
+  MMG5_pxTetra   pxt;
+  MMG5_Tria      ptt;
+  MMG5_pPoint    p0,p1,p2;
+  _MMG5_Bezier   b;
+  int            k,iel,idp,ilist1,ilist2,ilist,*list;
+  int            list1[_MMG5_LMAX+2],list2[_MMG5_LMAX+2],iprid[2],ier;
+  double         *m,isqhmin,isqhmax,*n1,*n2,*n,*t,n0[3];
+  double         trot[2],u[2],ux,uy,uz,det,bcu[3];
+  double         r[3][3],lispoi[3*_MMG5_LMAX+1];
+  double         detg,detd;
+  int            i,i0,i1,i2,ifac;
 
-  /* pt  = &mesh->tetra[kel]; */
-  /* idp = pt->v[ip]; */
-  /* p0  = &mesh->point[idp]; */
+  pt  = &mesh->tetra[kel];
+  idp = pt->v[ip];
+  p0  = &mesh->point[idp];
 
-  /* isqhmin = 1.0 / (mesh->info.hmin*mesh->info.hmin); */
-  /* isqhmax = 1.0 / (mesh->info.hmax*mesh->info.hmax); */
+  isqhmin = 1.0 / (mesh->info.hmin*mesh->info.hmin);
+  isqhmax = 1.0 / (mesh->info.hmax*mesh->info.hmax);
 
-  /* n1 = &mesh->xpoint[p0->xp].n1[0]; */
-  /* n2 = &mesh->xpoint[p0->xp].n2[0]; */
-  /* t  = p0->n; */
+  n1 = &mesh->xpoint[p0->xp].n1[0];
+  n2 = &mesh->xpoint[p0->xp].n2[0];
+  t  = p0->n;
 
-  /* m = &met->m[6*idp]; */
-  /* memset(m,0,6*sizeof(double)); */
-  /* m[0] = isqhmax; */
-  /* m[1] = isqhmax; */
-  /* m[2] = isqhmax; */
+  m = &met->m[6*idp];
+  memset(m,0,6*sizeof(double));
+  m[0] = isqhmax;
+  m[1] = isqhmax;
+  m[2] = isqhmax;
 
-  /* // Call bouletrid that construct the surfacic ball */
+  // Call bouletrid that construct the surfacic ball
+  ier = _MMG5_bouletrid(mesh,kel,iface,ip,&ilist1,list1,&ilist2,list2,
+                        &iprid[0],&iprid[1] );
+  if ( !ier ) {
+    printf("Error: unable to compute the two balls at the ridge point %d.\n", idp);
+    return(0);
+  }
 
-  /* // Check the ball orientation */
-  /* assert( MG_GET(pxt->ori,i) ); */
-  /* // If _MMG5_directsurfball return 1 it is useless to call this function, */
-  /* // thus it is valid here to call it inside the assert. */
-  /* assert(_MMG5_directsurfball(mesh, pt->v[i0],lists,ilists,n) == 1); */
+  // Check the ball orientation
+  // If _MMG5_directsurfball return 1 it is useless to call this function,
+  // thus it is valid here to call it inside the assert.
+  assert(_MMG5_directsurfball(mesh, idp,list1,ilist1,n1) == 1);
+  assert(_MMG5_directsurfball(mesh, idp,list2,ilist2,n2) == 1);
 
-  exit(100);
+  /* Specific size in direction of t */
+  m[0] = _MMG5_ridSizeInTangentDir(mesh,p0,idp,iprid,isqhmin,isqhmax);
+
+  /* Characteristic sizes in directions u1 and u2 */
+  for (i=0; i<2; i++) {
+    if ( i==0 ) {
+      n = n1;
+      ilist = ilist1;
+      list  = &list1[0];
+    }
+    else {
+      n = n2;
+      ilist = ilist2;
+      list  = &(list2[0]);
+    }
+    _MMG5_rotmatrix(n,r);
+
+    /* Apply rotation to the half-ball under consideration */
+    i1 = 0;
+    for (k=0; k<ilist; k++) {
+      iel  = list[k] / 4;
+      ifac = list[k] % 4;
+      pt = &mesh->tetra[iel];
+      for ( i0=0; i0!=3; ++i0 ) {
+        if ( pt->v[_MMG5_idir[ifac][i0]]==idp ) break;
+      }
+      assert(i0!=3);
+      i1   = _MMG5_inxt2[i0];
+      p1 = &mesh->point[pt->v[_MMG5_idir[ifac][i1]]];
+
+      ux = p1->c[0] - p0->c[0];
+      uy = p1->c[1] - p0->c[1];
+      uz = p1->c[2] - p0->c[2];
+
+      lispoi[3*k+1] =  r[0][0]*ux + r[0][1]*uy + r[0][2]*uz;
+      lispoi[3*k+2] =  r[1][0]*ux + r[1][1]*uy + r[1][2]*uz;
+      lispoi[3*k+3] =  r[2][0]*ux + r[2][1]*uy + r[2][2]*uz;
+    }
+
+    /* last point : the half-ball is open : ilist tria, and ilist +1 points ;
+       lists are enumerated in direct order */
+    i2 = _MMG5_inxt2[i1];
+    p2 = &mesh->point[pt->v[_MMG5_idir[ifac][i2]]];
+
+    ux = p2->c[0] - p0->c[0];
+    uy = p2->c[1] - p0->c[1];
+    uz = p2->c[2] - p0->c[2];
+
+    lispoi[3*ilist+1] =  r[0][0]*ux + r[0][1]*uy + r[0][2]*uz;
+    lispoi[3*ilist+2] =  r[1][0]*ux + r[1][1]*uy + r[1][2]*uz;
+    lispoi[3*ilist+3] =  r[2][0]*ux + r[2][1]*uy + r[2][2]*uz;
+
+    /* At this point, lispoi contains all the points of the half-ball of p0, rotated
+       so that t_{p_0}S = [z = 0] */
+
+    /* Rotated tangent vector (trot[2] = 0), and third direction */
+    trot[0] = r[0][0]*t[0] + r[0][1]*t[1] + r[0][2]*t[2];
+    trot[1] = r[1][0]*t[0] + r[1][1]*t[1] + r[1][2]*t[2];
+
+    u[0] = -trot[1];
+    u[1] =  trot[0];
+
+    /* Travel half-ball at p0 and stop at first triangle containing u */
+    for (k=0; k<ilist; k++) {
+      detg = lispoi[3*k+1]*u[1] - lispoi[3*k+2]*u[0];
+      detd = u[0]*lispoi[3*(k+1)+2] - u[1]*lispoi[3*(k+1)+1];
+      if ( detg > 0.0 && detd > 0.0 )  break;
+    }
+
+    /* If triangle not found, try with -u */
+    if ( k == ilist ) {
+      u[0] *= -1.0;
+      u[1] *= -1.0;
+
+      for (k=0; k<ilist; k++) {
+        detg = lispoi[3*k+1]*u[1] - lispoi[3*k+2]*u[0];
+        detd = u[0]*lispoi[3*(k+1)+2] - u[1]*lispoi[3*(k+1)+1];
+        if ( detg > 0.0 && detd > 0.0 )  break;
+      }
+    }
+    if ( k == ilist )  continue;
+
+    iel  = list[k] / 4;
+    ifac = list[k] % 4;
+    pt = &mesh->tetra[iel];
+    for ( i0=0; i0!=3; ++i0 ) {
+      if ( pt->v[_MMG5_idir[ifac][i0]]==idp ) break;
+    }
+    assert(i0!=3);
+    i1  = _MMG5_inxt2[i0];
+    i2  = _MMG5_iprv2[i0];
+
+    _MMG5_tet2tri(mesh,iel,ifac,&ptt);
+    assert(pt->xt);
+    pxt = &mesh->xtetra[pt->xt];
+    if ( !_MMG5_bezierCP(mesh,&ptt,&b,MG_GET(pxt->ori,i)) )  continue;
+
+    /* Barycentric coordinates of vector u in tria iel */
+    detg = lispoi[3*k+1]*u[1] - lispoi[3*k+2]*u[0];
+    detd = u[0]*lispoi[3*(k+1)+2] - u[1]*lispoi[3*(k+1)+1];
+    det = detg + detd;
+    if ( det < _MMG5_EPSD )  continue;
+
+    det = 1.0 / det;
+    bcu[0] = 0.0;
+    bcu[1] = u[0]*lispoi[3*(k+1)+2] - u[1]*lispoi[3*(k+1)+1];
+    bcu[1] *= det;
+    assert(bcu[1] <= 1.0);
+    bcu[2] = 1.0 - bcu[1];
+
+    /* Computation of tangent vector and second derivative of curve t \mapsto
+       b(tbcu) (not in rotated frame) */
+    m[i+1] = MG_MAX(m[i+1],
+                    _MMG5_ridSizeInNormalDir(mesh,i0,bcu,&b,isqhmin,isqhmax));
+  }
+
   return(1);
 }
 

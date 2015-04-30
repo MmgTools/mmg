@@ -185,6 +185,7 @@ int  _MMG5_boulenm(MMG5_pMesh mesh, int start, int ip, int iface, double n[3],do
 int  _MMG5_boulevolp(MMG5_pMesh mesh, int start, int ip, int * list);
 int  _MMG5_boulesurfvolp(MMG5_pMesh mesh,int start,int ip,int iface,int *listv,
                          int *ilistv,int *lists,int*ilists, int isnm);
+int  _MMG5_bouletrid(MMG5_pMesh,int,int,int,int *,int *,int *,int *,int *,int *);
 int  _MMG5_startedgsurfball(MMG5_pMesh mesh,int nump,int numq,int *list,int ilist);
 int  _MMG5_srcbdy(MMG5_pMesh mesh,int start,int ia);
 int  _MMG5_coquil(MMG5_pMesh mesh, int start, int ia, int * list);

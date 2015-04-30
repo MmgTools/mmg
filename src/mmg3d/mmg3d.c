@@ -192,7 +192,7 @@ int main(int argc,char *argv[]) {
       _MMG5_RETURN_AND_FREE(&mesh,&disp,MMG5_STRONGFAILURE);
   }
   else {
-    if ( !met.np && !_MMG5_DoSol(&mesh,&met) )
+    if ( 0 &&  !met.np && !_MMG5_DoSol(&mesh,&met) )
       _MMG5_RETURN_AND_FREE(&mesh,&met,MMG5_LOWFAILURE);
   }
 

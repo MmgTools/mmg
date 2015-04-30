@@ -762,3 +762,183 @@ int _MMG5_solveDefmetrefSys( MMG5_pMesh mesh, MMG5_pPoint p0, int ipref[2],
 
   return(1);
 }
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param p0 pointer toward the point at which we define the metric.
+ * \param idp global index of the point at which we define the metric.
+ * \param iprid pointer toward the two extremities of the ridge.
+ * \param isqhmin minimum edge size.
+ * \param isqhmax maximum edge size.
+ * \return the computed ridge size in the tangent direction.
+ *
+ * Compute the specific size of a ridge in the direction of the tangent of the
+ * ridge.
+ *
+ **/
+double _MMG5_ridSizeInTangentDir(MMG5_pMesh mesh, MMG5_pPoint p0, int idp,
+                                 int* iprid, double isqhmin,double isqhmax)
+{
+  int    i;
+  double n0[3],tau[3],gammasec[3],c[3],ps,ll,l,m;
+  double b0[3],b1[3],kappacur;
+
+  for (i=0; i<2; i++) {
+    kappacur = 0.0;
+    // Remark: bezierEdge don't use n0 in case of a ridge so it's ok to call it
+    // with an undefined n0.
+    _MMG5_bezierEdge(mesh,idp,iprid[i],b0,b1,1,n0);
+
+    /* tau is the bezier curve derivative in p0 (parametric coor t=0) */
+    tau[0] = 3.0*(b0[0] - p0->c[0]);
+    tau[1] = 3.0*(b0[1] - p0->c[1]);
+    tau[2] = 3.0*(b0[2] - p0->c[2]);
+    ll = tau[0]*tau[0] + tau[1]*tau[1] + tau[2]*tau[2];
+    if ( ll < _MMG5_EPSD )  continue;
+    l = 1.0 / sqrt(ll);
+    tau[0] *= l;
+    tau[1] *= l;
+    tau[2] *= l;
+
+    gammasec[0] = 6.0*p0->c[0] -12.0*b0[0] + 6.0*b1[0];
+    gammasec[1] = 6.0*p0->c[1] -12.0*b0[1] + 6.0*b1[1];
+    gammasec[2] = 6.0*p0->c[2] -12.0*b0[2] + 6.0*b1[2];
+
+    ps = tau[0]*gammasec[0] + tau[1]*gammasec[1] + tau[2]*gammasec[2];
+    c[0] = gammasec[0] - ps*tau[0];
+    c[1] = gammasec[1] - ps*tau[1];
+    c[2] = gammasec[2] - ps*tau[2];
+
+    kappacur = MG_MAX(0.0,1.0/ll*sqrt(c[0]*c[0] + c[1]*c[1] + c[2]*c[2]));
+    kappacur = 1.0/8.0*kappacur/mesh->info.hausd;
+    kappacur = MG_MIN(kappacur,isqhmin);
+    kappacur = MG_MAX(kappacur,isqhmax);
+    m = MG_MAX(m,kappacur);
+  }
+  return(m);
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param i0 local index in the face of the point on which we want to compute
+ * the metric
+ * \param bcu pointer toward the barycentric coordinates of vector \a u in the
+ * looked face.
+ * \param b bezier control polygon for the looked face.
+ * \param isqhmin minimum edge size.
+ * \param isqhmax maximum edge size.
+ * \return the computed ridge size in first or second normal direction
+ * (depending of i0).
+ *
+ * Compute the specific size of a ridge in the direction of the normal of the
+ * looked face.
+ *
+ **/
+double _MMG5_ridSizeInNormalDir(MMG5_pMesh mesh,int i0,double* bcu,
+                                _MMG5_Bezier *b,int isqhmin,int isqhmax)
+{
+  double lambda[2],Jacb[3][2],Hb[3][3],tau[3],ll,l,gammasec[3],c[3];
+  double ps,kappacur;
+
+  if ( i0 == 0 ) { // w = 1, u,v = 0
+    lambda[0] = bcu[1];
+    lambda[1] = bcu[2];
+
+    Jacb[0][0] = 3.0*(b->b[7][0]-b->b[0][0]);
+    Jacb[1][0] = 3.0*(b->b[7][1]-b->b[0][1]);
+    Jacb[2][0] = 3.0*(b->b[7][2]-b->b[0][2]);
+
+    Jacb[0][1] = 3.0*(b->b[6][0]-b->b[0][0]);
+    Jacb[1][1] = 3.0*(b->b[6][1]-b->b[0][1]);
+    Jacb[2][1] = 3.0*(b->b[6][2]-b->b[0][2]);
+
+    /* Hb[i] = hessian matrix of i-th component of b at point p0 */
+    Hb[0][0] = 6.0*(b->b[0][0] - 2.0*b->b[7][0] + b->b[8][0]);
+    Hb[1][0] = 6.0*(b->b[0][1] - 2.0*b->b[7][1] + b->b[8][1]);
+    Hb[2][0] = 6.0*(b->b[0][2] - 2.0*b->b[7][2] + b->b[8][2]);
+
+    Hb[0][1] = 6.0*(b->b[0][0] - b->b[7][0] - b->b[6][0] + b->b[9][0]);
+    Hb[1][1] = 6.0*(b->b[0][1] - b->b[7][1] - b->b[6][1] + b->b[9][1]);
+    Hb[2][1] = 6.0*(b->b[0][2] - b->b[7][2] - b->b[6][2] + b->b[9][2]);
+
+    Hb[0][2] = 6.0*(b->b[0][0] - 2.0*b->b[6][0] + b->b[5][0]);
+    Hb[1][2] = 6.0*(b->b[0][1] - 2.0*b->b[6][1] + b->b[5][1]);
+    Hb[2][2] = 6.0*(b->b[0][2] - 2.0*b->b[6][2] + b->b[5][2]);
+  }
+  else if ( i0 == 1 ) {  //w = v = 0, u = 1;
+    lambda[0] = bcu[0];
+    lambda[1] = bcu[1];
+
+    Jacb[0][0] = 3.0*(b->b[1][0]-b->b[8][0]);
+    Jacb[1][0] = 3.0*(b->b[1][1]-b->b[8][1]);
+    Jacb[2][0] = 3.0*(b->b[1][2]-b->b[8][2]);
+
+    Jacb[0][1] = 3.0*(b->b[3][0]-b->b[8][0]);
+    Jacb[1][1] = 3.0*(b->b[3][1]-b->b[8][1]);
+    Jacb[2][1] = 3.0*(b->b[3][2]-b->b[8][2]);
+
+    Hb[0][0] = 6.0*(b->b[1][0] - 2.0*b->b[8][0] + b->b[7][0]);
+    Hb[1][0] = 6.0*(b->b[1][1] - 2.0*b->b[8][1] + b->b[7][1]);
+    Hb[2][0] = 6.0*(b->b[1][2] - 2.0*b->b[8][2] + b->b[7][2]);
+
+    Hb[0][1] = 6.0*(b->b[7][0] - b->b[8][0] - b->b[9][0] + b->b[3][0]);
+    Hb[1][1] = 6.0*(b->b[7][1] - b->b[8][1] - b->b[9][1] + b->b[3][1]);
+    Hb[2][1] = 6.0*(b->b[7][2] - b->b[8][2] - b->b[9][2] + b->b[3][2]);
+
+    Hb[0][2] = 6.0*(b->b[4][0] - 2.0*b->b[9][0] + b->b[7][0]);
+    Hb[1][2] = 6.0*(b->b[4][1] - 2.0*b->b[9][1] + b->b[7][1]);
+    Hb[2][2] = 6.0*(b->b[4][2] - 2.0*b->b[9][2] + b->b[7][2]);
+  }
+  else {   //w =u = 0, v =1
+    lambda[0] = bcu[2];
+    lambda[1] = bcu[0];
+
+    Jacb[0][0] = 3.0*(b->b[4][0]-b->b[5][0]);
+    Jacb[1][0] = 3.0*(b->b[4][1]-b->b[5][1]);
+    Jacb[2][0] = 3.0*(b->b[4][2]-b->b[5][2]);
+
+    Jacb[0][1] = 3.0*(b->b[2][0]-b->b[5][0]);
+    Jacb[1][1] = 3.0*(b->b[2][1]-b->b[5][1]);
+    Jacb[2][1] = 3.0*(b->b[2][2]-b->b[5][2]);
+
+    Hb[0][0] = 6.0*(b->b[3][0] - 2.0*b->b[9][0] + b->b[6][0]);
+    Hb[1][0] = 6.0*(b->b[3][1] - 2.0*b->b[9][1] + b->b[6][1]);
+    Hb[2][0] = 6.0*(b->b[3][2] - 2.0*b->b[9][2] + b->b[6][2]);
+
+    Hb[0][1] = 6.0*(b->b[4][0] - b->b[5][0] - b->b[9][0] + b->b[6][0]);
+    Hb[1][1] = 6.0*(b->b[4][1] - b->b[5][1] - b->b[9][1] + b->b[6][1]);
+    Hb[2][1] = 6.0*(b->b[4][2] - b->b[5][2] - b->b[9][2] + b->b[6][2]);
+
+    Hb[0][2] = 6.0*(b->b[2][0] - 2.0*b->b[5][0] + b->b[6][0]);
+    Hb[1][2] = 6.0*(b->b[2][1] - 2.0*b->b[5][1] + b->b[6][1]);
+    Hb[2][2] = 6.0*(b->b[2][2] - 2.0*b->b[5][2] + b->b[6][2]);
+  }
+
+  /* tau = jacb *(lambda0,lambda1)*/
+  tau[0] = Jacb[0][0]*lambda[0] + Jacb[0][1]*lambda[1];
+  tau[1] = Jacb[1][0]*lambda[0] + Jacb[1][1]*lambda[1];
+  tau[2] = Jacb[2][0]*lambda[0] + Jacb[2][1]*lambda[1];
+  ll = tau[0]*tau[0] + tau[1]*tau[1] + tau[2]*tau[2];
+  if ( ll < _MMG5_EPSD )  return(0);
+
+  l = 1.0 / sqrt(ll);
+  tau[0] *= l;
+  tau[1] *= l;
+  tau[2] *= l;
+
+  gammasec[0] = Hb[0][0]*lambda[0]*lambda[0] + 2.0*Hb[0][1]*lambda[0]*lambda[1] + Hb[0][2]*lambda[1]*lambda[1];
+  gammasec[1] = Hb[1][0]*lambda[0]*lambda[0] + 2.0*Hb[1][1]*lambda[0]*lambda[1] + Hb[1][2]*lambda[1]*lambda[1];
+  gammasec[2] = Hb[2][0]*lambda[0]*lambda[0] + 2.0*Hb[2][1]*lambda[0]*lambda[1] + Hb[2][2]*lambda[1]*lambda[1];
+
+  ps = tau[0]*gammasec[0] + tau[1]*gammasec[1] + tau[2]*gammasec[2];
+  c[0] = gammasec[0] - ps*tau[0];
+  c[1] = gammasec[1] - ps*tau[1];
+  c[2] = gammasec[2] - ps*tau[2];
+
+  kappacur = MG_MAX(0.0,1.0/ll*sqrt(c[0]*c[0] + c[1]*c[1] + c[2]*c[2]));
+  kappacur = 1.0/8.0 * kappacur/mesh->info.hausd;
+  kappacur = MG_MIN(kappacur,isqhmin);
+  kappacur = MG_MAX(kappacur,isqhmax);
+
+  return(kappacur);
+}

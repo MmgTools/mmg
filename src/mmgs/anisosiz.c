@@ -62,9 +62,8 @@ static int _MMG5_defmetsin(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
 
   ilist = boulet(mesh,it,ip,list);
   if ( !ilist ) {
-    printf("Error; unable to compute the ball af the point %d.\n", idp);
-    printf("Exit program.\n");
-    exit(EXIT_FAILURE);
+    printf("Error: unable to compute the ball af the point %d.\n", idp);
+    return(0);
   }
 
   isqhmin  = 1.0 / (mesh->info.hmin*mesh->info.hmin);
@@ -137,10 +136,11 @@ static int _MMG5_defmetrid(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
   MMG5_pTria     pt;
   MMG5_pPoint    p0,p1,p2;
   _MMG5_Bezier   b;
-  int            k,iel,idp,ilist1,ilist2,ilist,*list,list1[_MMG5_LMAX+2],list2[_MMG5_LMAX+2],iprid[2],ier;
-  double        *m,isqhmin,isqhmax,*n1,*n2,*n,*t,kappacur,b0[3],b1[3],n0[3],tau[3],trot[2],u[2];
-  double         l,ll,ps,gammasec[3],c[3],r[3][3],lispoi[3*_MMG5_LMAX+1],ux,uy,uz,det,bcu[3];
-  double         detg,detd,Jacb[3][2],Hb[3][3],lambda[2];
+  int            k,iel,idp,ilist1,ilist2,ilist,*list,list1[_MMG5_LMAX+2];
+  int            list2[_MMG5_LMAX+2],iprid[2],ier;
+  double         *m,isqhmin,isqhmax,*n1,*n2,*n,*t,n0[3],trot[2],u[2];
+  double         r[3][3],lispoi[3*_MMG5_LMAX+1],ux,uy,uz,det,bcu[3];
+  double         detg,detd;
   unsigned char  i,i0,i1,i2;
 
   pt  = &mesh->tria[it];
@@ -162,44 +162,12 @@ static int _MMG5_defmetrid(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
 
   ier = bouletrid(mesh,it,ip,&ilist1,list1,&ilist2,list2,&iprid[0],&iprid[1]);
   if ( !ier ) {
-    printf("Error; unable to compute the two balls at the ridge point %d.\n", idp);
-    printf("Exit program.\n");
-    exit(EXIT_FAILURE);
+    printf("Error: unable to compute the two balls at the ridge point %d.\n", idp);
+    return(0);
   }
 
   /* Specific size in direction of t */
-  for (i=0; i<2; i++) {
-    kappacur = 0.0;
-    // Remark: bezierEdge don't use n0 in case of a ridge so it's ok to call it
-    // with an undefined n0.
-    _MMG5_bezierEdge(mesh,idp,iprid[i],b0,b1,1,n0);
-
-    /* tau is the bezier curve derivative in p0 (parametric coor t=0) */
-    tau[0] = 3.0*(b0[0] - p0->c[0]);
-    tau[1] = 3.0*(b0[1] - p0->c[1]);
-    tau[2] = 3.0*(b0[2] - p0->c[2]);
-    ll = tau[0]*tau[0] + tau[1]*tau[1] + tau[2]*tau[2];
-    if ( ll < _MMG5_EPSD )  continue;
-    l = 1.0 / sqrt(ll);
-    tau[0] *= l;
-    tau[1] *= l;
-    tau[2] *= l;
-
-    gammasec[0] = 6.0*p0->c[0] -12.0*b0[0] + 6.0*b1[0];
-    gammasec[1] = 6.0*p0->c[1] -12.0*b0[1] + 6.0*b1[1];
-    gammasec[2] = 6.0*p0->c[2] -12.0*b0[2] + 6.0*b1[2];
-
-    ps = tau[0]*gammasec[0] + tau[1]*gammasec[1] + tau[2]*gammasec[2];
-    c[0] = gammasec[0] - ps*tau[0];
-    c[1] = gammasec[1] - ps*tau[1];
-    c[2] = gammasec[2] - ps*tau[2];
-
-    kappacur = MG_MAX(0.0,1.0/ll*sqrt(c[0]*c[0] + c[1]*c[1] + c[2]*c[2]));
-    kappacur = 1.0/8.0*kappacur/mesh->info.hausd;
-    kappacur = MG_MIN(kappacur,isqhmin);
-    kappacur = MG_MAX(kappacur,isqhmax);
-    m[0] = MG_MAX(m[0],kappacur);
-  }
+  m[0] = MG_MAX(m[0],_MMG5_ridSizeInTangentDir(mesh,p0,idp,iprid,isqhmin,isqhmax));
 
   /* Characteristic sizes in directions u1 and u2 */
   for (i=0; i<2; i++) {
@@ -296,109 +264,10 @@ static int _MMG5_defmetrid(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
     assert(bcu[1] <= 1.0);
     bcu[2] = 1.0 - bcu[1];
 
-    /* Computation of tangent vector and second derivative of curve t \mapsto b(tbcu)
-       (not in rotated frame) */
-    if ( i0 == 0 ) { // w = 1, u,v = 0
-      lambda[0] = bcu[1];
-      lambda[1] = bcu[2];
-
-      Jacb[0][0] = 3.0*(b.b[7][0]-b.b[0][0]);
-      Jacb[1][0] = 3.0*(b.b[7][1]-b.b[0][1]);
-      Jacb[2][0] = 3.0*(b.b[7][2]-b.b[0][2]);
-
-      Jacb[0][1] = 3.0*(b.b[6][0]-b.b[0][0]);
-      Jacb[1][1] = 3.0*(b.b[6][1]-b.b[0][1]);
-      Jacb[2][1] = 3.0*(b.b[6][2]-b.b[0][2]);
-
-      /* Hb[i] = hessian matrix of i-th component of b at point p0 */
-      Hb[0][0] = 6.0*(b.b[0][0] - 2.0*b.b[7][0] + b.b[8][0]);
-      Hb[1][0] = 6.0*(b.b[0][1] - 2.0*b.b[7][1] + b.b[8][1]);
-      Hb[2][0] = 6.0*(b.b[0][2] - 2.0*b.b[7][2] + b.b[8][2]);
-
-      Hb[0][1] = 6.0*(b.b[0][0] - b.b[7][0] - b.b[6][0] + b.b[9][0]);
-      Hb[1][1] = 6.0*(b.b[0][1] - b.b[7][1] - b.b[6][1] + b.b[9][1]);
-      Hb[2][1] = 6.0*(b.b[0][2] - b.b[7][2] - b.b[6][2] + b.b[9][2]);
-
-      Hb[0][2] = 6.0*(b.b[0][0] - 2.0*b.b[6][0] + b.b[5][0]);
-      Hb[1][2] = 6.0*(b.b[0][1] - 2.0*b.b[6][1] + b.b[5][1]);
-      Hb[2][2] = 6.0*(b.b[0][2] - 2.0*b.b[6][2] + b.b[5][2]);
-    }
-    else if ( i0 == 1 ) {  //w = v = 0, u = 1;
-      lambda[0] = bcu[0];
-      lambda[1] = bcu[1];
-
-      Jacb[0][0] = 3.0*(b.b[1][0]-b.b[8][0]);
-      Jacb[1][0] = 3.0*(b.b[1][1]-b.b[8][1]);
-      Jacb[2][0] = 3.0*(b.b[1][2]-b.b[8][2]);
-
-      Jacb[0][1] = 3.0*(b.b[3][0]-b.b[8][0]);
-      Jacb[1][1] = 3.0*(b.b[3][1]-b.b[8][1]);
-      Jacb[2][1] = 3.0*(b.b[3][2]-b.b[8][2]);
-
-      Hb[0][0] = 6.0*(b.b[1][0] - 2.0*b.b[8][0] + b.b[7][0]);
-      Hb[1][0] = 6.0*(b.b[1][1] - 2.0*b.b[8][1] + b.b[7][1]);
-      Hb[2][0] = 6.0*(b.b[1][2] - 2.0*b.b[8][2] + b.b[7][2]);
-
-      Hb[0][1] = 6.0*(b.b[7][0] - b.b[8][0] - b.b[9][0] + b.b[3][0]);
-      Hb[1][1] = 6.0*(b.b[7][1] - b.b[8][1] - b.b[9][1] + b.b[3][1]);
-      Hb[2][1] = 6.0*(b.b[7][2] - b.b[8][2] - b.b[9][2] + b.b[3][2]);
-
-      Hb[0][2] = 6.0*(b.b[4][0] - 2.0*b.b[9][0] + b.b[7][0]);
-      Hb[1][2] = 6.0*(b.b[4][1] - 2.0*b.b[9][1] + b.b[7][1]);
-      Hb[2][2] = 6.0*(b.b[4][2] - 2.0*b.b[9][2] + b.b[7][2]);
-    }
-    else {   //w =u = 0, v =1
-      lambda[0] = bcu[2];
-      lambda[1] = bcu[0];
-
-      Jacb[0][0] = 3.0*(b.b[4][0]-b.b[5][0]);
-      Jacb[1][0] = 3.0*(b.b[4][1]-b.b[5][1]);
-      Jacb[2][0] = 3.0*(b.b[4][2]-b.b[5][2]);
-
-      Jacb[0][1] = 3.0*(b.b[2][0]-b.b[5][0]);
-      Jacb[1][1] = 3.0*(b.b[2][1]-b.b[5][1]);
-      Jacb[2][1] = 3.0*(b.b[2][2]-b.b[5][2]);
-
-      Hb[0][0] = 6.0*(b.b[3][0] - 2.0*b.b[9][0] + b.b[6][0]);
-      Hb[1][0] = 6.0*(b.b[3][1] - 2.0*b.b[9][1] + b.b[6][1]);
-      Hb[2][0] = 6.0*(b.b[3][2] - 2.0*b.b[9][2] + b.b[6][2]);
-
-      Hb[0][1] = 6.0*(b.b[4][0] - b.b[5][0] - b.b[9][0] + b.b[6][0]);
-      Hb[1][1] = 6.0*(b.b[4][1] - b.b[5][1] - b.b[9][1] + b.b[6][1]);
-      Hb[2][1] = 6.0*(b.b[4][2] - b.b[5][2] - b.b[9][2] + b.b[6][2]);
-
-      Hb[0][2] = 6.0*(b.b[2][0] - 2.0*b.b[5][0] + b.b[6][0]);
-      Hb[1][2] = 6.0*(b.b[2][1] - 2.0*b.b[5][1] + b.b[6][1]);
-      Hb[2][2] = 6.0*(b.b[2][2] - 2.0*b.b[5][2] + b.b[6][2]);
-    }
-
-    /* tau = jacb *(lambda0,lambda1)*/
-    tau[0] = Jacb[0][0]*lambda[0] + Jacb[0][1]*lambda[1];
-    tau[1] = Jacb[1][0]*lambda[0] + Jacb[1][1]*lambda[1];
-    tau[2] = Jacb[2][0]*lambda[0] + Jacb[2][1]*lambda[1];
-    ll = tau[0]*tau[0] + tau[1]*tau[1] + tau[2]*tau[2];
-    if ( ll < _MMG5_EPSD )  continue;
-
-    l = 1.0 / sqrt(ll);
-    tau[0] *= l;
-    tau[1] *= l;
-    tau[2] *= l;
-
-    gammasec[0] = Hb[0][0]*lambda[0]*lambda[0] + 2.0*Hb[0][1]*lambda[0]*lambda[1] + Hb[0][2]*lambda[1]*lambda[1];
-    gammasec[1] = Hb[1][0]*lambda[0]*lambda[0] + 2.0*Hb[1][1]*lambda[0]*lambda[1] + Hb[1][2]*lambda[1]*lambda[1];
-    gammasec[2] = Hb[2][0]*lambda[0]*lambda[0] + 2.0*Hb[2][1]*lambda[0]*lambda[1] + Hb[2][2]*lambda[1]*lambda[1];
-
-    ps = tau[0]*gammasec[0] + tau[1]*gammasec[1] + tau[2]*gammasec[2];
-    c[0] = gammasec[0] - ps*tau[0];
-    c[1] = gammasec[1] - ps*tau[1];
-    c[2] = gammasec[2] - ps*tau[2];
-
-    kappacur = MG_MAX(0.0,1.0/ll*sqrt(c[0]*c[0] + c[1]*c[1] + c[2]*c[2]));
-    kappacur = 1.0/8.0 * kappacur/mesh->info.hausd;
-    kappacur = MG_MIN(kappacur,isqhmin);
-    kappacur = MG_MAX(kappacur,isqhmax);
-
-    m[i+1] = MG_MAX(m[i+1],kappacur);
+    /* Computation of tangent vector and second derivative of curve t \mapsto
+       b(tbcu) (not in rotated frame) */
+    m[i+1] = MG_MAX(m[i+1],
+                    _MMG5_ridSizeInNormalDir(mesh,i0,bcu,&b,isqhmin,isqhmax));
   }
 
   return(1);
@@ -431,9 +300,8 @@ static int _MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
   p0  = &mesh->point[idp];
   ilist = boulet(mesh,it,ip,list);
   if ( !ilist ) {
-    printf("Error; unable to compute the ball af the point %d.\n", idp);
-    printf("Exit program.\n");
-    exit(EXIT_FAILURE);
+    printf("Error: unable to compute the ball af the point %d.\n", idp);
+    return(0);
   }
 
   isqhmin = 1.0 / (mesh->info.hmin*mesh->info.hmin);
@@ -465,7 +333,7 @@ static int _MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
       }
       else if ( (pt->v[i2] != ipref[0]) && (pt->v[i2] != ipref[1]) ) {
         printf("Problem (func defmetref) : three adjacent ref at a non singular point\n");
-        exit(0);
+        exit(EXIT_FAILURE);
       }
     }
 
@@ -478,7 +346,7 @@ static int _MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
       }
       else if ( (pt->v[i1] != ipref[0]) && (pt->v[i1] != ipref[1]) ) {
         printf("Problem (func defmetref) : three adjacent ref at a non singular point\n");
-        exit(0);
+        exit(EXIT_FAILURE);
       }
     }
 
@@ -569,9 +437,8 @@ static int _MMG5_defmetreg(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
 
   ilist = boulet(mesh,it,ip,list);
   if ( !ilist ) {
-    printf("Error; unable to compute the ball af the point %d.\n", idp);
-    printf("Exit program.\n");
-    exit(EXIT_FAILURE);
+    printf("Error: unable to compute the ball af the point %d.\n", idp);
+    return(0);
   }
 
   isqhmin = 1.0 / (mesh->info.hmin*mesh->info.hmin);

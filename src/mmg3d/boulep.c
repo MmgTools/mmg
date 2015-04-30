@@ -410,27 +410,207 @@ int _MMG5_boulesurfvolp(MMG5_pMesh mesh,int start,int ip,int iface,
  * \param ip2 index of the second extremity of the ridge.
  * \return 0 if fail, 1 otherwise.
  *
- * Computation of the two balls of a ridge point: the list \a l1 is associated
- * to normal \a n1's side. \a ip0 and \a ip1 are the indices of the 2 ending
- * point of the ridge. Both lists are returned enumerated in direct order.
+ * Computation of the two surface balls of a ridge point: the list \a l1 is
+ * associated to the normal of face \a iface. \a ip0 and \a ip1 are the indices
+ * of the 2 ending point of the ridge. Both lists are returned enumerated in
+ * direct order.
  *
  */
-int bouletrid(MMG5_pMesh mesh,int start,int ip,int *il1,int *l1,
-              int *il2,int *l2,int *ip0,int *ip1)
+int _MMG5_bouletrid(MMG5_pMesh mesh,int start,int iface,int ip,int *il1,int *l1,
+                    int *il2,int *l2,int *ip0,int *ip1)
 {
   MMG5_pTetra          pt;
-  MMG5_pTria           ptt;
+  MMG5_pxTetra         pxt;
   MMG5_pPoint          ppt;
-  int                  idp,k,kold,*adja,iel,*ilist1,*ilist2,*list1,*list2,aux;
-  unsigned char        i,iold,i1,i2,ipn;
+  int                  k,*adja,*ilist1,*ilist2,*list1,*list2,aux;
+  int                  lists[_MMG5_LMAX+2], ilists;
+  int                  idp,na, nb, base, iopp, ipiv, piv, fstart, nvstart, adj;
+  int                  i,ifac,idx,idx2,idx_tmp,i1,ipa,ipb,ipv, isface;
   double               *n1,*n2,nt[3],ps1,ps2;
 
   pt = &mesh->tetra[start];
   if ( !MG_EOK(pt) )  return(0);
 
+  assert(pt->xt);
+  pxt = &mesh->xtetra[pt->xt];
+  // We must call this function on a well orientated boundary face (to build the
+  // direct surfacic ball).
+  assert(pxt->ftag[iface] & MG_BDY);
+  assert( MG_GET(pxt->ori,iface) );
+
   idp = pt->v[ip];
+  k = start;
+
   ppt = &mesh->point[idp];
   assert( ppt->tag & MG_GEO );
+
+  na  = pt->v[ip];
+  nb  = pt->v[_MMG5_idir[iface][_MMG5_inxt2[_MMG5_idirinv[iface][ip]]]];
+  piv = pt->v[_MMG5_idir[iface][_MMG5_iprv2[_MMG5_idirinv[iface][ip]]]];
+
+  iopp = iface;
+  fstart = 4*k+iopp;
+
+  base = ++mesh->base;
+
+  /* Set pointers on lists il1 and il2 to have il1 associated to the normal of
+     the face iface.*/
+  _MMG5_norpts(mesh, pt->v[_MMG5_idir[iface][0]],pt->v[_MMG5_idir[iface][1]],
+               pt->v[_MMG5_idir[iface][2]],nt);
+
+  n1 = &(mesh->xpoint[ppt->xp].n1[0]);
+  n2 = &(mesh->xpoint[ppt->xp].n2[0]);
+  ps1 = n1[0]*nt[0] + n1[1]*nt[1] + n1[2]*nt[2];
+  ps2 = n2[0]*nt[0] + n2[1]*nt[1] + n2[2]*nt[2];
+
+  if ( fabs(ps1) < fabs(ps2) ) {
+    list1  = l2;
+    list2  = l1;
+    ilist1 = il2;
+    ilist2 = il1;
+  }
+  else {
+    list1  = l1;
+    list2  = l2;
+    ilist1 = il1;
+    ilist2 = il2;
+  }
+  *ilist1 = 0;
+  *ilist2 = 0;
+
+  /* First: fill the surfacic ball. */
+  ilists = 0;
+  do {
+    /* A boundary face has been hit : change travel edge */
+    lists[ilists] = 4*k+iopp;
+    ilists++;
+    if ( ilists >= _MMG5_LMAX ) {
+      fprintf(stdout,"  ## Warning: problem in surface remesh process.");
+      fprintf(stdout," Surface ball of point %d contains too many elts.\n",
+              _MMG5_indPt(mesh,idp));
+      fprintf(stdout,"  ##          Try to modify the hausdorff number,");
+      fprintf(stdout," or/and the maximum mesh.\n");
+      return(-1);
+    }
+
+    aux = nb;
+    nb = piv;
+    piv = aux;
+    nvstart = k;
+    adj = k;
+
+    /* Now unfold shell of edge (na,nb) starting from k (included) */
+    do {
+      k = adj;
+      pt = &mesh->tetra[k];
+      adja = &mesh->adja[4*(k-1)+1];
+      pt->flag = base;
+
+      /* identification of edge number in tetra k */
+      for (i=0; i<6; i++) {
+        ipa = _MMG5_iare[i][0];
+        ipb = _MMG5_iare[i][1];
+        if ( (pt->v[ipa] == na && pt->v[ipb] == nb) ||
+             (pt->v[ipa] == nb && pt->v[ipb] == na))  break;
+      }
+      assert(i<6);
+
+      /* set sense of travel */
+      if ( pt->v[ _MMG5_ifar[i][0] ] == piv ) {
+        iopp = _MMG5_ifar[i][0];
+        ipiv = _MMG5_ifar[i][1];
+        adj = adja[ iopp ] / 4;
+        piv = pt->v[ipiv];
+      }
+      else {
+        ipiv = _MMG5_ifar[i][0];
+        iopp = _MMG5_ifar[i][1];
+        adj = adja[ iopp ] / 4;
+        piv = pt->v[ipiv];
+      }
+      isface = 0;
+      if(pt->xt){
+        pxt = &mesh->xtetra[pt->xt];
+        isface = (MG_BDY & pxt->ftag[iopp]);
+      }
+    }
+    while ( adj && (adj != nvstart) && !isface );
+  }
+  // Remark: here the test k!=start is a security bound: theorically it is
+  // useless but in case of bad edge tag, it ensure that the loop is not
+  // infinite.
+  while ( 4*k+iopp != fstart );
+
+  /* Second: travel through the surface ball until meeting a ridge. */
+  for (idx=0; idx!=ilists; ++idx) {
+    k    = lists[idx]/4;
+    ifac = lists[idx]%4;
+    pt   = &mesh->tetra[k];
+    assert(pt->xt);
+    pxt = &mesh->xtetra[pt->xt];
+
+    for ( i=0; i<3; ++i ) {
+      if ( pt->v[_MMG5_idir[ifac][i]] == idp ) break;
+    }
+    assert(i<3);
+
+    i1 = _MMG5_inxt2[i];
+    if ( pxt->tag[_MMG5_iarf[ifac][i1]]  & MG_GEO ) break;
+  }
+  assert(idx < ilists);
+  *ip0 = pt->v[_MMG5_idir[ifac][_MMG5_iprv2[i]]];
+
+  /* Start from the hit boundary, until another boundary is hit and complete the
+   * second ball */
+  idx = (idx+1)%ilists;
+  for (idx2=idx; idx2!=ilists+idx; ++idx2) {
+    idx_tmp = idx2%ilists;
+    k       = lists[idx_tmp]/4;
+    ifac    = lists[idx_tmp]%4;
+    pt      = &mesh->tetra[k];
+    assert(pt->xt);
+    pxt     = &mesh->xtetra[pt->xt];
+
+    if ( (*ilist2) > _MMG5_LMAX-2 )  return(0);
+    list2[(*ilist2)] = 4*k+ifac;
+    (*ilist2)++;
+
+    for ( i=0; i<3; ++i ) {
+      if ( pt->v[_MMG5_idir[ifac][i]] == idp ) break;
+    }
+    assert(i<3);
+
+    i1 = _MMG5_inxt2[i];
+    if ( pxt->tag[_MMG5_iarf[ifac][i1]]  & MG_GEO ) break;
+  }
+  assert(idx2 != ilists+idx);
+  assert(*ip0 == pt->v[_MMG5_idir[ifac][_MMG5_iprv2[i]]]);
+
+  /* Start again from the newly hit boundary, until another boundary is hit and
+   * complete the first ball */
+  idx = (idx2+1)%ilists;
+  for (idx2=idx; idx2 != idx+ilists; ++idx2) {
+    idx_tmp = idx2%ilists;
+    k       = lists[idx_tmp]/4;
+    ifac    = lists[idx_tmp]%4;
+    pt      = &mesh->tetra[k];
+    assert(pt->xt);
+    pxt     = &mesh->xtetra[pt->xt];
+
+    if ( (*ilist1) > _MMG5_LMAX-2 )  return(0);
+    list1[(*ilist1)] = 4*k+ifac;
+    (*ilist1)++;
+
+    for ( i=0; i<3; ++i ) {
+      if ( pt->v[_MMG5_idir[ifac][i]] == idp ) break;
+    }
+    assert(i<3);
+
+    i1 = _MMG5_inxt2[i];
+    if ( pxt->tag[_MMG5_iarf[ifac][i1]]  & MG_GEO ) break;
+  }
+  assert(idx2 != ilists+idx);
+  *ip1 = pt->v[_MMG5_idir[ifac][_MMG5_iprv2[i]]];
 
   return(1);
 }
