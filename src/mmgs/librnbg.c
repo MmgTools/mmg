@@ -252,7 +252,7 @@ int _MMG5_renumbering(int boxVertNbr, MMG5_pMesh mesh, MMG5_pSol sol) {
 
   /* Permute triangles */
   for(triaIdx = 1 ; triaIdx < mesh->nt + 1 ; triaIdx++) {
-    while ( vertOldTab[triaIdx] != triaIdx )
+    while ( vertOldTab[triaIdx] != triaIdx  && vertOldTab[triaIdx] )
       _MMG5_swapTri(mesh->tria,vertOldTab,triaIdx,vertOldTab[triaIdx]);
   }
 
