@@ -21,7 +21,7 @@
 ** =============================================================================
 */
 
- /**
+/**
  * \file mmg3d/libmmg3d.h
  * \brief C API for MMG3D library.
  * \author Algiane Froehly (Inria / IMB, Université de Bordeaux)
@@ -33,7 +33,7 @@
 #ifndef _MMG3DLIB_H
 #define _MMG3DLIB_H
 
-#include "chrono.h"
+#include "mmg.h"
 
 /**
  * \def MMG5_SUCCESS
@@ -64,23 +64,23 @@
  * \brief Type of solutions.
  */
 enum MMG5_type
-  {
-    MMG5_Notype, /*!< Undefined type (unusable) */
-    MMG5_Scalar, /*!< Scalar solution */
-    MMG5_Vector, /*!< Vectorial solution */
-    MMG5_Tensor  /*!< Tensorial solution */
-  };
+{
+  MMG5_Notype, /*!< Undefined type (unusable) */
+  MMG5_Scalar, /*!< Scalar solution */
+  MMG5_Vector, /*!< Vectorial solution */
+  MMG5_Tensor  /*!< Tensorial solution */
+};
 
 /**
  * \enum MMG5_entities
  * \brief Type of mesh entities to which solutions are applied.
  */
 enum MMG5_entities
-  {
-    MMG5_Noentity, /*!< Undefined type (unusable) */
-    MMG5_Vertex, /*!< Vertex entity */
-    MMG5_Triangle, /*!< Triangle entity */
-  };
+{
+  MMG5_Noentity, /*!< Undefined type (unusable) */
+  MMG5_Vertex, /*!< Vertex entity */
+  MMG5_Triangle, /*!< Triangle entity */
+};
 
 /**
  * \enum MMG5_Param
@@ -92,289 +92,32 @@ enum MMG5_entities
  *
  */
 enum MMG5_Param
-  {
-    MMG5_IPARAM_verbose,           /*!< [-10..10], Tune level of verbosity */
-    MMG5_IPARAM_mem,               /*!< [n/-1], Set memory size to n Mbytes or keep the default value */
-    MMG5_IPARAM_debug,             /*!< [1/0], Turn on/off debug mode */
-    MMG5_IPARAM_angle,             /*!< [1/0], Turn on/off angle detection */
-    MMG5_IPARAM_iso,               /*!< [1/0], Level-set meshing */
-    MMG5_IPARAM_noinsert,          /*!< [1/0], Avoid/allow point insertion */
-    MMG5_IPARAM_noswap,            /*!< [1/0], Avoid/allow edge or face flipping */
-    MMG5_IPARAM_nomove,            /*!< [1/0], Avoid/allow point relocation */
-    MMG5_IPARAM_numberOfLocalParam,/*!< [n], Number of local parameters */
-    MMG5_IPARAM_renum,             /*!< [1/0], Turn on/off point relocation with Scotch */
-    MMG5_IPARAM_bucket,            /*!< [n], Specify the size of the bucket per dimension (DELAUNAY) */
-    MMG5_DPARAM_angleDetection,    /*!< [val], Value for angle detection */
-    MMG5_DPARAM_hmin,              /*!< [val], Minimal mesh size */
-    MMG5_DPARAM_hmax,              /*!< [val], Maximal mesh size */
-    MMG5_DPARAM_hausd,             /*!< [val], Control global Hausdorff distance (on all the boundary surfaces of the mesh) */
-    MMG5_DPARAM_hgrad,             /*!< [val], Control gradation */
-    MMG5_DPARAM_ls,                /*!< [val], Value of level-set (not use for now) */
-    MMG5_PARAM_size,               /*!< [n], Number of parameters */
-  };
+{
+  MMG5_IPARAM_verbose,           /*!< [-10..10], Tune level of verbosity */
+  MMG5_IPARAM_mem,               /*!< [n/-1], Set memory size to n Mbytes or keep the default value */
+  MMG5_IPARAM_debug,             /*!< [1/0], Turn on/off debug mode */
+  MMG5_IPARAM_angle,             /*!< [1/0], Turn on/off angle detection */
+  MMG5_IPARAM_iso,               /*!< [1/0], Level-set meshing */
+  MMG5_IPARAM_lag,               /*!< [-1/0/1/2], Lagrangian option */
+  MMG5_IPARAM_optim,             /*!< [1/0], Optimize mesh keeping its initial edge sizes */
+  MMG5_IPARAM_noinsert,          /*!< [1/0], Avoid/allow point insertion */
+  MMG5_IPARAM_noswap,            /*!< [1/0], Avoid/allow edge or face flipping */
+  MMG5_IPARAM_nomove,            /*!< [1/0], Avoid/allow point relocation */
+  MMG5_IPARAM_numberOfLocalParam,/*!< [n], Number of local parameters */
+  MMG5_IPARAM_renum,             /*!< [1/0], Turn on/off point relocation with Scotch */
+  MMG5_IPARAM_bucket,            /*!< [n], Specify the size of the bucket per dimension (DELAUNAY) */
+  MMG5_DPARAM_angleDetection,    /*!< [val], Value for angle detection */
+  MMG5_DPARAM_hmin,              /*!< [val], Minimal mesh size */
+  MMG5_DPARAM_hmax,              /*!< [val], Maximal mesh size */
+  MMG5_DPARAM_hausd,             /*!< [val], Control global Hausdorff distance (on all the boundary surfaces of the mesh) */
+  MMG5_DPARAM_hgrad,             /*!< [val], Control gradation */
+  MMG5_DPARAM_ls,                /*!< [val], Value of level-set (not use for now) */
+  MMG5_PARAM_size,               /*!< [n], Number of parameters */
+};
 
-/**
- * \struct MMG5_Par
- * \brief Local Hausdorff number associated to a specific reference.
- *
- * Store the local Hausdorff number associated to the given reference
- * of an element of type \a elt (point, edge... ).
- *
- */
-typedef struct {
-  double   hausd; /*!< Hausdorff value */
-  int      ref; /*!< Reference value */
-  char     elt; /*!< Element type */
-} MMG5_Par;
-typedef MMG5_Par * MMG5_pPar;
-
-/**
- * \struct MMG5_Point
- * \brief Structure to store points of a MMG3D mesh.
- */
-typedef struct {
-  double   c[3]; /*!< Coordinates of point */
-  int      ref; /*!< Reference of point */
-  int      xp; /*!< Surface point number */
-  int      tmp; /*!< Index of point in the saved mesh (we don't count
-                   the unused points)*/
-  int      flag; /*!< Flag to know if we have already treated the point */
-  char     tag; /*!< Contains binary flags : if \f$tag=23=16+4+2+1\f$, then
-                   the point is \a MG_REF, \a MG_GEO, \a MG_REQ and \a MG_BDY */
-  char     tagdel; /*!< Tag for delaunay */
-} MMG5_Point;
-typedef MMG5_Point * MMG5_pPoint;
-
-/**
- * \struct MMG5_xPoint
- * \brief Structure to store surface points of a MMG3D mesh.
- */
-typedef struct {
-  double   n1[3],n2[3]; /*!< Normals at boundary vertex;
-                           n1!=n2 if the vertex belong to a ridge */
-  double   t[3]; /*!< Tangeant at vertex */
-} MMG5_xPoint;
-typedef MMG5_xPoint * MMG5_pxPoint;
-
-/**
- * \struct MMG5_Edge
- * \brief Structure to store edges of a MMG3D mesh.
- */
-typedef struct {
-  int      a,b; /*!< Extremities of the edge */
-  int      ref; /*!< Reference of the edge */
-  char     tag; /*!< Binary flags */
-} MMG5_Edge;
-typedef MMG5_Edge * MMG5_pEdge;
-
-/**
- * \struct MMG5_Tria
- * \brief Structure to store triangles of a MMG3D mesh.
- */
-typedef struct {
-  int      v[3]; /*!< Vertices of the triangle */
-  int      ref; /*!< Reference of the triangle */
-  int      base;
-  int      edg[3]; /*!< edg[i] contains the ref of the \f$i^{th}\f$ edge
-                      of triangle */
-  int      flag;
-  char     tag[3]; /*!< tag[i] contains the tag associated to the
-                      \f$i^{th}\f$ edge of triangle */
-} MMG5_Tria;
-typedef MMG5_Tria * MMG5_pTria;
-
-/**
- * \struct MMG5_Tetra
- * \brief Structure to store tetrahedra of a MMG3D mesh.
- */
-typedef struct {
-  int      v[4]; /*!< Vertices of the tetrahedron */
-  int      ref; /*!< Reference of the tetrahedron */
-  int      base;
-  int      mark; /*!< Used for delaunay */
-  int      xt; /*!< Index of the surface \ref MMG5_xTetra associated to
-                  the tetrahedron*/
-  int      flag;
-  char     tag;
-  double   qual; /*!< Quality of the element */
-} MMG5_Tetra;
-typedef MMG5_Tetra * MMG5_pTetra;
-
-/**
- * \struct MMG5_xTetra
- * \brief Structure to store the surface tetrahedra of a MMG3D mesh.
- */
-typedef struct {
-  int      ref[4]; /*!< ref[i] is the reference of the opposite triangle to the
-                     \f$i^{th}\f$ vertex of the tetrahedron;*/
-  int      edg[6]; /*!< edg[i] contains the reference of the
-                      \f$i^{th}\f$ edge of the tetrahedron */
-  char     ftag[4]; /*!< ftag[i] contains the tag associated to the
-                       \f$i^{th}\f$ face of the tetrahedron */
-  char     tag[6]; /*!< tag[i] contains the tag associated to the
-                      \f$i^{th}\f$ edge of the tetrahedron */
-  char     ori; /*!< Orientation of the triangles of the tetrahedron:
-                  the $\f$i^{th}\f$ bit of ori is set to 0 when the
-                  \f$i^{th}\f$ face is bad orientated */
-} MMG5_xTetra;
-typedef MMG5_xTetra * MMG5_pxTetra;
-
-/**
- * \struct MMG5_hgeom
- * \brief To store geometric edges.
- */
-typedef struct {
-  int   a,b,ref,nxt;
-  char  tag;
-} MMG5_hgeom;
-
-typedef struct {
-  int         siz,max,nxt;
-  MMG5_hgeom  *geom;
-} MMG5_HGeom;
-
-/**
- * \struct MMG5_Info
- * \brief Store input parameters of the run.
- */
-typedef struct {
-  double        dhd,hmin,hmax,hgrad,hausd,min[3],max[3],delta,ls;
-  int           mem,sing,npar,npari;
-  int           renum;
-  char          imprim,ddebug,badkal,iso,fem;
-  unsigned char noinsert, noswap, nomove;
-  int           bucket;
-  MMG5_pPar     par;
-} MMG5_Info;
-
-/**
- * \struct MMG5_Mesh
- * \brief MMG3D mesh structure.
- */
-typedef struct {
-  int       ver; /*!< Version of the mesh file */
-  int       dim; /*!< Dimension of the mesh */
-  int       type; /*!< Type of the mesh */
-  long long memMax; /*!< Maximum memory available */
-  long long memCur; /*!< Current memory used */
-  double    gap; /*!< Gap for table reallocation */
-  int       npi,nti,nai,nei,np,na,nt,ne,npmax,namax,ntmax,nemax,xpmax,xtmax;
-  int       base; /*!< Used with \a flag to know if an entity has been
-                     treated */
-  int       mark; /*!< Flag for delaunay (to know if an entity has
-                     been treated) */
-  int       xp,xt; /*!< Number of surfaces points/triangles */
-  int       npnil; /*!< Index of first unused point */
-  int       nenil; /*!< Index of first unused element */
-  int      *adja; /*!< Table of tetrahedron adjacency: if
-                     \f$adjt[4*i+1+j]=4*k+l\f$ then the \f$i^{th}\f$ and
-                     \f$k^th\f$ tetrahedra are adjacent and share their
-                     faces \a j and \a l (resp.) */
-  int      *adjt; /*!< Table of triangles adjacency: if
-                     \f$adjt[3*i+1+j]=3*k+l\f$ then the \f$i^{th}\f$ and
-                     \f$k^th\f$ triangles are adjacent and share their
-                     edges \a j and \a l (resp.) */
-  char     *namein; /*!< Input mesh name */
-  char     *nameout; /*!< Output mesh name */
-
-  MMG5_pPoint    point; /*!< Pointer toward the \ref MMG5_Point structure */
-  MMG5_pxPoint   xpoint; /*!< Pointer toward the \ref MMG5_xPoint structure */
-  MMG5_pTetra    tetra; /*!< Pointer toward the \ref MMG5_Tetra structure */
-  MMG5_pxTetra   xtetra; /*!< Pointer toward the \ref MMG5_xTetra structure */
-  MMG5_pTria     tria; /*!< Pointer toward the \ref MMG5_Tria structure */
-  MMG5_pEdge     edge; /*!< Pointer toward the \ref MMG5_Edge structure */
-  MMG5_HGeom     htab; /*!< \ref MMG5_HGeom structure */
-  MMG5_Info      info; /*!< \ref MMG5_Info structure */
-} MMG5_Mesh;
-typedef MMG5_Mesh  * MMG5_pMesh;
-
-/**
- * \struct MMG5_sol
- * \brief MMG3D Solution structure (for solution or metric).
- */
-typedef struct {
-  int       ver; /* Version of the solution file */
-  int       dim; /* Dimension of the solution file*/
-  int       np; /* Number of points of the solution */
-  int       npmax; /* Maximum number of points */
-  int       npi; /* Temporary number of points (internal use only) */
-  int       size; /* Number of solutions per entity */
-  int       type; /* Type of the solution (scalar, vectorial of tensorial) */
-  double   *m; /*!< Solution values */
-  char     *namein; /*!< Input solution file name */
-  char     *nameout; /*!< Output solution file name */
-} MMG5_Sol;
-typedef MMG5_Sol * MMG5_pSol;
 
 /*----------------------------- functions header -----------------------------*/
-/** Initialization functions */
-/* init structures */
-
-/**
- * \param mesh pointer toward a pointer toward the mesh structure.
- * \param sol pointer toward a pointer toward the sol structure.
- *
- * Allocate the mesh and solution structures and initialize it to
- * their default values.
- *
- */
-void  MMG5_Init_mesh(MMG5_pMesh *mesh, MMG5_pSol *sol);
-/**
- * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the sol structure.
- * singularities mode).
- *
- * Initialize file names to their default values.
- *
- */
-void  MMG5_Init_fileNames(MMG5_pMesh mesh, MMG5_pSol sol);
-/**
- * \param mesh pointer toward the mesh structure.
- *
- * Initialization of the input parameters (stored in the Info structure).
- *
- */
-void  MMG5_Init_parameters(MMG5_pMesh mesh);
-
-/* init file names */
-/**
- * \param mesh pointer toward the mesh structure.
- * \param meshin input mesh name.
- * \return 1.
- *
- * Set the name of input mesh.
- *
- */
-int  MMG5_Set_inputMeshName(MMG5_pMesh mesh, char* meshin);
-/**
- * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the sol structure.
- * \param solin name of the input solution file.
- * \return 1.
- *
- * Set the name of input solution file.
- *
- */
-int  MMG5_Set_inputSolName(MMG5_pMesh mesh,MMG5_pSol sol, char* solin);
-/**
- * \param mesh pointer toward the mesh structure.
- * \param meshout name of the output mesh file.
- * \return 1.
- *
- * Set the name of output mesh file.
- *
- */
-int  MMG5_Set_outputMeshName(MMG5_pMesh mesh, char* meshout);
-/**
- * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the sol structure.
- * \param solout name of the output solution file.
- * \return 0 if failed, 1 otherwise.
- *
- *  Set the name of output solution file.
- *
- */
-int  MMG5_Set_outputSolName(MMG5_pMesh mesh,MMG5_pSol sol, char* solout);
+/* Initialization functions */
 
 /* init structure sizes */
 /**
@@ -682,8 +425,17 @@ int  MMG5_Get_edge(MMG5_pMesh mesh, int* e0, int* e1, int* ref,
  *
  */
 int  MMG5_Get_scalarSol(MMG5_pSol met, double* s);
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param iparam integer parameter to set (see \a MMG5_Param structure).
+ * \return The value of integer parameter.
+ *
+ * Get the value of integer parameter \a iparam.
+ *
+ */
+int MMG5_Get_iparameter(MMG5_pMesh mesh, int iparam);
 
-/** input/output functions */
+/* input/output functions */
 /**
  * \param mesh pointer toward the mesh structure.
  * \return 0 if failed, 1 otherwise.
@@ -719,7 +471,7 @@ int  MMG5_loadMet(MMG5_pMesh mesh,MMG5_pSol met);
  */
 int  MMG5_saveMet(MMG5_pMesh mesh, MMG5_pSol met);
 
-/** deallocations */
+/* deallocations */
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the sol structure.
@@ -737,16 +489,8 @@ void MMG5_Free_all(MMG5_pMesh mesh, MMG5_pSol met);
  *
  */
 void MMG5_Free_structures(MMG5_pMesh mesh, MMG5_pSol met);
-/**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the sol structure.
- *
- * File name deallocations before return.
- *
- */
-void MMG5_Free_names(MMG5_pMesh mesh, MMG5_pSol met);
 
-/** library */
+/* library */
 /**
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the sol structure.
@@ -759,7 +503,7 @@ void MMG5_Free_names(MMG5_pMesh mesh, MMG5_pSol met);
  */
 int  MMG5_mmg3dlib(MMG5_pMesh mesh, MMG5_pSol sol);
 
-/** for PAMPA library */
+/* for PAMPA library */
 /** Options management */
 /**
  * \param argc number of command line arguments.

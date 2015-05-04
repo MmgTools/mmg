@@ -37,11 +37,6 @@ ADD_TEST(NAME CubeAni
   ${MMGS_CI_TESTS}/CubeAni/cube
   -out ${MMGS_CI_TESTS}/CubeAni/cube.d.meshb)
 
-ADD_TEST(NAME CubeVolAni
-  COMMAND ${EXECUT_MMGS} -v 6 -d
-  ${MMGS_CI_TESTS}/CubeVolAni/cube
-  -out ${MMGS_CI_TESTS}/CubeVolAni/cube.d.meshb)
-
 ADD_TEST(NAME SphereAni
   COMMAND ${EXECUT_MMGS} -v 6 -d
   ${MMGS_CI_TESTS}/SphereAni/sphere
@@ -49,7 +44,43 @@ ADD_TEST(NAME SphereAni
 
 ###############################################################################
 #####
-#####         Check Memory Leak
+#####         Check Memory Leaks
 #####
 ###############################################################################
+
+
+###############################################################################
 #####
+#####         Manifold cases
+#####
+###############################################################################
+ADD_TEST(NAME Rhino_M
+  COMMAND ${EXECUT_MMGS}
+  ${MMGS_CI_TESTS}/Rhino_M/rhino -hausd 1
+  -out ${MMGS_CI_TESTS}/Rhino_M/rhino.d.meshb)
+
+###############################################################################
+#####
+#####         Non manifold cases
+#####
+###############################################################################
+ADD_TEST(NAME Cow_NM_hausd10
+  COMMAND ${EXECUT_MMGS}
+  ${MMGS_CI_TESTS}/Cow_NM/cow -hausd 10
+  -out ${MMGS_CI_TESTS}/Cow_NM/cow.d.meshb)
+
+
+###############################################################################
+#####
+#####         Detected Bugs
+#####
+###############################################################################
+ADD_TEST(NAME Car_NM
+  COMMAND ${EXECUT_MMGS}
+  ${MMGS_CI_TESTS}/Car_NM/car
+  -out ${MMGS_CI_TESTS}/Car_NM/car.d.meshb)
+
+ADD_TEST(NAME Cow_NM_hausd20
+  COMMAND ${EXECUT_MMGS}
+  ${MMGS_CI_TESTS}/Cow_NM/cow -hausd 20
+  -out ${MMGS_CI_TESTS}/Cow_NM/cow.d.meshb)

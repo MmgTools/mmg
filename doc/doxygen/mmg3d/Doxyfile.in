@@ -803,7 +803,7 @@ EXCLUDE_SYMBOLS        =
 # that contain example code fragments that are included (see the \include
 # command).
 
-EXAMPLE_PATH           =../libexamples/example1 ../libexamples/example2
+EXAMPLE_PATH           =../libexamples/mmg3d/example0 ../libexamples/mmg3d/example0_fortran ../libexamples/mmg3d/example1 ../libexamples/mmg3d/example2 ../libexamples/mmg3d/example3
 
 # If the value of the EXAMPLE_PATH tag contains directories, you can use the
 # EXAMPLE_PATTERNS tag to specify one or more wildcard pattern (like *.cpp and

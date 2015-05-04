@@ -53,12 +53,12 @@ unsigned char _MMG5_arpt[4][3] = { {0,1,2}, {0,4,3}, {1,3,5}, {2,5,4} };
 /** Warn user that we overflow asked memory during scotch call */
 static inline
 void _MMG5_warnScotch(MMG5_pMesh mesh) {
-    if ( mesh->info.imprim > 4 || mesh->info.ddebug ) {
-        if ( mesh->info.mem >= 0 ) {
-            fprintf(stdout,"  ## Warning: we will overflow the memory asked with \"-m\"");
-            fprintf(stdout," option during Scotch call.\n" );
-        }
+  if ( mesh->info.imprim > 4 || mesh->info.ddebug ) {
+    if ( mesh->info.mem >= 0 ) {
+      fprintf(stdout,"  ## Warning: we will overflow the memory asked with \"-m\"");
+      fprintf(stdout," option during Scotch call.\n" );
     }
+  }
 }
 #endif
 
@@ -70,17 +70,17 @@ void _MMG5_warnScotch(MMG5_pMesh mesh) {
  */
 static inline
 void _MMG5_warnOrientation(MMG5_pMesh mesh) {
-    if ( mesh->xt ) {
-        if ( mesh->xt != mesh->ne ) {
-            fprintf(stdout,"  ## Warning: %d tetra on %d reoriented.\n",
-                    mesh->xt,mesh->ne);
-            fprintf(stdout,"  Your mesh may be non-conform.\n");
-        }
-        else {
-            fprintf(stdout,"  ## Warning: all tetra reoriented.\n");
-        }
+  if ( mesh->xt ) {
+    if ( mesh->xt != mesh->ne ) {
+      fprintf(stdout,"  ## Warning: %d tetra on %d reoriented.\n",
+              mesh->xt,mesh->ne);
+      fprintf(stdout,"  Your mesh may be non-conform.\n");
     }
-    mesh->xt = 0;
+    else {
+      fprintf(stdout,"  ## Warning: all tetra reoriented.\n");
+    }
+  }
+  mesh->xt = 0;
 }
 
 /**
@@ -91,21 +91,21 @@ void _MMG5_warnOrientation(MMG5_pMesh mesh) {
  */
 static inline
 void _MMG5_excfun(int sigid) {
-    fprintf(stdout,"\n Unexpected error:");  fflush(stdout);
-    switch(sigid) {
-    case SIGABRT:
-        fprintf(stdout,"  *** potential lack of memory.\n");  break;
-    case SIGFPE:
-        fprintf(stdout,"  Floating-point exception\n"); break;
-    case SIGILL:
-        fprintf(stdout,"  Illegal instruction\n"); break;
-    case SIGSEGV:
-        fprintf(stdout,"  Segmentation fault\n");  break;
-    case SIGTERM:
-    case SIGINT:
-        fprintf(stdout,"  Program killed\n");  break;
-    }
-    exit(EXIT_FAILURE);
+  fprintf(stdout,"\n Unexpected error:");  fflush(stdout);
+  switch(sigid) {
+  case SIGABRT:
+    fprintf(stdout,"  *** potential lack of memory.\n");  break;
+  case SIGFPE:
+    fprintf(stdout,"  Floating-point exception\n"); break;
+  case SIGILL:
+    fprintf(stdout,"  Illegal instruction\n"); break;
+  case SIGSEGV:
+    fprintf(stdout,"  Segmentation fault\n");  break;
+  case SIGTERM:
+  case SIGINT:
+    fprintf(stdout,"  Program killed\n");  break;
+  }
+  exit(EXIT_FAILURE);
 }
 
 /**
@@ -116,16 +116,26 @@ void _MMG5_excfun(int sigid) {
  *
  */
 void _MMG5_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
-    if ( met->size < 6 ) {
-        _MMG5_caltet  = _MMG5_caltet_iso;
-        _MMG5_lenedg  = _MMG5_lenedg_iso;
-        _MMG5_defsiz  = _MMG5_defsiz_iso;
-        _MMG5_gradsiz = _MMG5_gradsiz_iso;
-    }
-    else {
-        _MMG5_caltet = _MMG5_caltet_ani;
-        _MMG5_lenedg = _MMG5_lenedg_ani;
-        /*defsiz = defsiz_ani;
-          gradsiz = gradsiz_ani;*/
-    }
+  if ( met->size == 1 || ( met->size == 3 && mesh->info.lag >= 0 ) ) {
+    _MMG5_caltet  = _MMG5_caltet_iso;
+    _MMG5_caltri  = _MMG5_caltri_iso;
+    _MMG5_lenedg  = _MMG5_lenedg_iso;
+    _MMG5_defsiz  = _MMG5_defsiz_iso;
+    _MMG5_gradsiz = _MMG5_gradsiz_iso;
+  }
+  else if ( met->size == 6 ) {
+    _MMG5_caltet = _MMG5_caltet_ani;
+    // _MMG5_caltri  = _MMG5_caltri_ani;
+    _MMG5_lenedg = _MMG5_lenedg_ani;
+    /*defsiz = defsiz_ani;
+      gradsiz = gradsiz_ani;*/
+  }
+}
+
+/**
+ * Set API pointer functions to the matching mmg3d functions.
+ */
+void _MMG5_Set_APIFunc() {
+  MMG5_Init_parameters    = _MMG5_Init_parameters;
+  _MMG5_bezierCP          = _MMG5_mmg3dBezierCP;
 }

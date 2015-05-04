@@ -9,7 +9,9 @@ It provides two applications:
 
 ## Get and compile the mmg project
   1. Get the repository:  
-      `git clone https://github.com/MmgTools/mmg.git`
+      ```Shell
+      git clone https://github.com/MmgTools/mmg.git
+      ```
 
     The project sources are available under the **_src/_** directory, see:
       * **_src/mmgs/_**   for files related to the mmgs application;
@@ -17,12 +19,16 @@ It provides two applications:
       * **_src/common/_** for files related to the both.
 
   2. Fast compilation (build both **mmgs**, **mmg3d** and the mmg3d static library **libmmg3d.a**):  
-      `cd mmg`  
-      `mkdir build`  
-      `cd build`  
-      `cmake ..`  
-      `make`  
-      `make install` or `sudo make install` if needed.
+      ```Shell
+      cd mmg  
+      mkdir build  
+      cd build  
+      cmake ..  
+      make  
+      make install
+      ```
+    If the `make install` command fail, try to run the `sudo make install` command.
+    If you don't have root access, please refers to the [Installation] section(https://github.com/MmgTools/Mmg/wiki/Setup-guide#iii-installation) of the [setup guide](https://github.com/MmgTools/Mmg/wiki/Setup-guide#setup-guide).
 
     The **mmgs** and **mmg3d** applications are available under the `mmgs_O3` and `mmg3d_O3` commands. 
 
@@ -41,12 +47,14 @@ The **mmg** applications are validated on OS X and on most of the Linux platform
 ## Contributing
 Your contributions to the **mmg** project are welcomed. You can help us to improve
 our code by many means:
-  * pull requests: please follow the wiki's guideline;
+  * pull requests: please follow the [wiki's guideline](https://github.com/MmgTools/Mmg/wiki/Developers-wiki#pull-requests);
   * feature requests: please use the [GitHub issue tracker](https://github.com/MmgTools/mmg/issues/new) with the **_enhancement_** label;
   * bug reports: please use the [GitHub issue tracker](https://github.com/MmgTools/mmg/issues/new) with the **_bug_** label.
 
 ## About the team
 mmg's current developers and maintainers are Charles Dapogny, Cécile Dobrzynski, Pascal Frey and Algiane Froehly.
+
+Contact: contact@mmgtools.org
 
 ## License and copyright
 Code is under the [terms of the GNU Lesser General Public License](https://raw.githubusercontent.com/MmgTools/mmg/master/LICENSE).

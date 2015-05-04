@@ -35,293 +35,113 @@
 
 #include "mmgs.h"
 
-#define KA     7
-#define KB     11
-
-extern Info   info;
-
 /* tria packing */
-static void paktri(pMesh mesh) {
-    pTria   pt,pt1;
-    int     k;
+static void paktri(MMG5_pMesh mesh) {
+  MMG5_pTria   pt,pt1;
+  int     k;
 
-    k = 1;
-    do {
-        pt = &mesh->tria[k];
-        if ( !MS_EOK(pt) ) {
-            pt1 = &mesh->tria[mesh->nt];
-            memcpy(pt,pt1,sizeof(Tria));
-            delElt(mesh,mesh->nt);
-        }
+  k = 1;
+  do {
+    pt = &mesh->tria[k];
+    if ( !MG_EOK(pt) ) {
+      pt1 = &mesh->tria[mesh->nt];
+      memcpy(pt,pt1,sizeof(MMG5_Tria));
+      _MMG5_delElt(mesh,mesh->nt);
     }
-    while ( ++k < mesh->nt );
+  }
+  while ( ++k < mesh->nt );
 
-    /* Recreate nil chain */
-    mesh->ntnil = mesh->nt + 1;
+  /* Recreate nil chain */
+  mesh->nenil = mesh->nt + 1;
 
-    for(k=mesh->ntnil; k<=mesh->ntmax-1; k++){
-        mesh->tria[k].v[2] = k+1;
-    }
+  for(k=mesh->nenil; k<=mesh->ntmax-1; k++){
+    mesh->tria[k].v[2] = k+1;
+  }
 }
 
-/* create adjacency */
-int hashTria(pMesh mesh) {
-    pTria     pt,pt1;
-    Hash      hash;
-    hedge    *ph;
-    int      *adja,k,jel,hmax,dup,nmf,ia,ib;
-    char      i,i1,i2,j,ok;
-    unsigned int key;
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \return 1 if success, 0 if fail.
+ *
+ * Create adjacency table.
+ *
+ */
+int _MMG5_hashTria(MMG5_pMesh mesh) {
+  MMG5_pTria          pt;
+  int                 *adja,k,i,ier;
 
-    if ( mesh->adja )  return(1);
-    if ( abs(info.imprim) > 5 || info.ddebug )
-        fprintf(stdout,"  ** SETTING STRUCTURE\n");
+  if ( mesh->adja )  return(1);
+  if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug )
+    fprintf(stdout,"  ** SETTING STRUCTURE\n");
 
-    /* tassage */
-    paktri(mesh);
+  /* tassage */
+  paktri(mesh);
 
-    mesh->adja = (int*)calloc(3*mesh->ntmax+5,sizeof(int));
-    assert(mesh->adja);
+  _MMG5_ADD_MEM(mesh,(3*mesh->ntmax+5)*sizeof(int),"adjacency table",
+                printf("  Exit program.\n");
+                exit(EXIT_FAILURE));
+  _MMG5_SAFE_CALLOC(mesh->adja,3*mesh->ntmax+5,int);
 
-    /* adjust hash table params */
-    hmax = 3.71*mesh->np;
-    hash.siz  = mesh->np;
-    hash.max  = hmax;
-    hash.nxt  = hash.siz;
-    hash.item = (hedge*)calloc(hash.max+1,sizeof(hedge));
-    assert(hash.item);
+  ier = _MMG5_mmgHashTria(mesh, mesh->adja, 0);
 
-    for (k=hash.siz; k<hash.max-1; k++)
-        hash.item[k].nxt = k+1;
-
-    /* hash triangles */
-    mesh->base = 1;
-    dup = nmf = 0;
-    for (k=1; k<=mesh->nt; k++) {
-        pt = &mesh->tria[k];
-        if ( !MS_EOK(pt) )  continue;
-
-        pt->flag = 0;
-        pt->base = mesh->base;
-        adja = &mesh->adja[3*(k-1)+1];
-        for (i=0; i<3; i++) {
-            i1 = inxt[i];
-            i2 = iprv[i];
-
-            /* compute key */
-            ia  = MS_MIN(pt->v[i1],pt->v[i2]);
-            ib  = MS_MAX(pt->v[i1],pt->v[i2]);
-            key = (KA*ia + KB*ib) % hash.siz;
-            ph  = &hash.item[key];
-
-            /* store edge */
-            if ( ph->a == 0 ) {
-                ph->a = ia;
-                ph->b = ib;
-                ph->k = 3*k + i;
-                ph->nxt = 0;
-                continue;
-            }
-            /* update info about adjacent */
-            ok = 0;
-            while ( ph->a ) {
-                if ( ph->a == ia && ph->b == ib ) {
-                    jel = ph->k / 3;
-                    j   = ph->k % 3;
-                    pt1 = &mesh->tria[jel];
-                    /* discard duplicate face */
-                    if ( pt1->v[j] == pt->v[i] ) {
-                        pt1->v[0] = 0;
-                        dup++;
-                    }
-                    /* update adjacent */
-                    else if ( !mesh->adja[3*(jel-1)+1+j] ) {
-                        adja[i] = 3*jel + j;
-                        mesh->adja[3*(jel-1)+1+j] = 3*k + i;
-                    }
-                    /* non-manifold case */
-                    else if ( adja[i] != 3*jel+j ) {
-                        pt->tag[i] |= MS_GEO + MS_NOM;
-                        pt1->tag[j]|= MS_GEO + MS_NOM;
-                        nmf++;
-                    }
-                    ok = 1;
-                    break;
-                }
-                else if ( !ph->nxt ) {
-                    ph->nxt = hash.nxt;
-                    ph = &hash.item[ph->nxt];
-                    assert(ph);
-                    hash.nxt = ph->nxt;
-                    ph->a = ia;
-                    ph->b = ib;
-                    ph->k = 3*k + i;
-                    ph->nxt = 0;
-                    ok = 1;
-                    break;
-                }
-                else
-                    ph = &hash.item[ph->nxt];
-            }
-            if ( !ok ) {
-                ph->a = ia;
-                ph->b = ib;
-                ph->k = 3*k + i;
-                ph->nxt = 0;
-            }
-        }
+//warning the following loop seems to be unused (or only in boulchknm)... to check.
+  /* set seed */
+  for (k=1; k<=mesh->nt; k++) {
+    pt   = &mesh->tria[k];
+    adja = &mesh->adja[3*(k-1)+1];
+    for (i=0; i<3; i++) {
+      if ( !adja[i] ) {
+        mesh->point[pt->v[_MMG5_inxt2[i]]].s = k;
+      }
     }
-    free(hash.item);
+  }
 
-    /* set tag */
-    for (k=1; k<=mesh->nt; k++) {
-        pt  = &mesh->tria[k];
-        for (i=0; i<3; i++) {
-            if ( pt->tag[i] & MS_NOM ) {
-                mesh->point[pt->v[inxt[i]]].tag |= MS_NOM;
-                mesh->point[pt->v[iprv[i]]].tag |= MS_NOM;
-            }
-        }
-    }
-
-    /* set seed */
-    for (k=1; k<=mesh->nt; k++) {
-        pt   = &mesh->tria[k];
-        adja = &mesh->adja[3*(k-1)+1];
-        for (i=0; i<3; i++) {
-            if ( !adja[i] )  mesh->point[pt->v[inxt[i]]].s = k;
-        }
-    }
-    if ( nmf > 0 )  info.mani = 0;
-
-    if ( (abs(info.imprim) > 5 || info.ddebug) && dup+nmf > 0 ) {
-        fprintf(stdout,"  ## ");  fflush(stdout);
-        if ( nmf > 0 )  fprintf(stdout,"[non-manifold model]  ");
-        if ( dup > 0 )  fprintf(stdout," %d duplicate removed\n",dup);
-        fprintf(stdout,"\n");
-    }
-    if ( info.ddebug )  fprintf(stdout,"  h- completed.\n");
-
-    return(1);
-}
-
-int hashEdge(Hash *hash,int a,int b,int k) {
-    hedge  *ph;
-    int     j,key,ia,ib;
-
-    ia  = MS_MIN(a,b);
-    ib  = MS_MAX(a,b);
-    key = (KA*ia + KB*ib) % hash->siz;
-    ph  = &hash->item[key];
-
-    if ( ph->a ) {
-        if ( ph->a != ia || ph->b != ib ) {
-            while ( ph->nxt && ph->nxt < hash->max ) {
-                ph = &hash->item[ph->nxt];
-                if ( ph->a == ia && ph->b == ib )  return(1);
-            }
-        }
-        ph->nxt = hash->nxt;
-        ph      = &hash->item[hash->nxt];
-        ++hash->nxt;
-        if ( hash->nxt >= hash->max ) {
-            if ( info.ddebug )  fprintf(stdout,"  ## Memory realloc (edge): %d\n",hash->max);
-            hash->max *= 1.2;
-            hash->item  = (hedge*)realloc(hash->item,hash->max*sizeof(hedge));
-            assert(hash->item);
-            for (j=hash->nxt; j<hash->max; j++)
-                hash->item[j].nxt = j+1;
-            return(0);
-        }
-    }
-
-    /* insert new edge */
-    ph->a = ia;
-    ph->b = ib;
-    ph->k = k;
-    ph->nxt = 0;
-
-    return(1);
-}
-
-int hashGet(Hash *hash,int a,int b) {
-    hedge  *ph;
-    int     key,ia,ib;
-
-    ia  = MS_MIN(a,b);
-    ib  = MS_MAX(a,b);
-    key = (KA*ia + KB*ib) % hash->siz;
-    ph  = &hash->item[key];
-
-    if ( !ph->a )  return(0);
-    if ( ph->a == ia && ph->b == ib )  return(ph->k);
-    while ( ph->nxt ) {
-        ph = &hash->item[ph->nxt];
-        if ( ph->a == ia && ph->b == ib )  return(ph->k);
-    }
-    return(0);
+  return(ier);
 }
 
 /* store edges in hash table */
-int assignEdge(pMesh mesh) {
-    Hash   hash;
-    pTria  pt;
-    pEdge  pa;
-    int    k,ia;
-    char   i,i1,i2;
+int assignEdge(MMG5_pMesh mesh) {
+  _MMG5_Hash  hash;
+  MMG5_pTria  pt;
+  MMG5_pEdge  pa;
+  int         k,ia;
+  char        i,i1,i2;
 
-    hash.item = (hedge*)calloc(3*mesh->na+1,sizeof(hedge));
-    assert(hash.item);
 
-    /* adjust hash table params */
-    hash.siz  = mesh->na;
-    hash.max  = 3*mesh->na + 1;
-    hash.nxt  = mesh->na;
-    for (k=mesh->na; k<hash.max; k++)
-        hash.item[k].nxt = k+1;
+  /* adjust hash table params */
+  hash.siz  = mesh->na;
+  hash.max  = 3*mesh->na+1;
+  _MMG5_ADD_MEM(mesh,(hash.max+1)*sizeof(_MMG5_Hash),"hash table",return(0));
+  _MMG5_SAFE_CALLOC(hash.item,hash.max+1,_MMG5_hedge);
 
-    /* hash mesh edges */
-    for (k=1; k<=mesh->na; k++)
-        hashEdge(&hash,mesh->edge[k].a,mesh->edge[k].b,k);
+  hash.nxt  = mesh->na;
+  for (k=mesh->na; k<hash.max; k++)
+    hash.item[k].nxt = k+1;
 
-    /* set references to triangles */
-    for (k=1; k<=mesh->nt; k++) {
-        pt = &mesh->tria[k];
-        if ( !MS_EOK(pt) )  continue;
+  /* hash mesh edges */
+  for (k=1; k<=mesh->na; k++)
+    _MMG5_hashEdge(mesh,&hash,mesh->edge[k].a,mesh->edge[k].b,k);
 
-        for (i=0; i<3; i++) {
-            i1 = inxt[i];
-            ia = hashGet(&hash,pt->v[i],pt->v[i1]);
-            if ( ia ) {
-                i2 = inxt[i1];
-                pa = &mesh->edge[ia];
-                pt->edg[i2] = pa->ref;
-                pt->tag[i2] = pa->tag;
-            }
-        }
+  /* set references to triangles */
+  for (k=1; k<=mesh->nt; k++) {
+    pt = &mesh->tria[k];
+    if ( !MG_EOK(pt) )  continue;
+
+    for (i=0; i<3; i++) {
+      i1 = _MMG5_inxt2[i];
+      ia = _MMG5_hashGet(&hash,pt->v[i],pt->v[i1]);
+      if ( ia ) {
+        i2 = _MMG5_inxt2[i1];
+        pa = &mesh->edge[ia];
+        pt->edg[i2] = pa->ref;
+        pt->tag[i2] = pa->tag;
+      }
     }
+  }
 
-    /* reset edge structure */
-    free(hash.item);
-    free(mesh->edge);
+  /* reset edge structure */
+  _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
+  _MMG5_DEL_MEM(mesh,mesh->edge,(mesh->na+1)*sizeof(MMG5_Edge));
 
-    return(1);
+  return(1);
 }
-
-int hashNew(Hash *hash,int hmax) {
-    int   k;
-
-    hash->item = (hedge*)calloc(3*hmax+1,sizeof(hedge));
-    assert(hash->item);
-
-    /* adjust hash table params */
-    hash->siz  = hmax;
-    hash->max  = 3*hmax + 1;
-    hash->nxt  = hmax;
-    for (k=hmax; k<hash->max; k++)
-        hash->item[k].nxt = k+1;
-
-    return(1);
-}
-
-

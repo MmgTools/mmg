@@ -2,7 +2,6 @@
 
 ((nil . (
          (fill-column              . 80 )
-         #(mode                     . whitespace)
          (indent-tabs-mode         . nil)
          (tab-width                . 2 )
          (show-trailing-whitespace . t  )

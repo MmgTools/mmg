@@ -35,104 +35,164 @@
 
 #include "mmgs.h"
 
-extern Info  info;
-
-
 /* get new point address */
-int newPt(pMesh mesh,double c[3],double n[3]) {
-    pPoint  ppt;
-    int     curpt;
+int _MMG5_newPt(MMG5_pMesh mesh,double c[3],double n[3]) {
+  MMG5_pPoint  ppt;
+  int     curpt;
 
-    if ( !mesh->npnil )  return(0);
+  if ( !mesh->npnil )  return(0);
 
-    curpt = mesh->npnil;
-    if ( mesh->npnil > mesh->np )  mesh->np = mesh->npnil;
-    ppt   = &mesh->point[curpt];
-    memcpy(ppt->c,c,3*sizeof(double));
-    memcpy(ppt->n,n,3*sizeof(double));
-    ppt->tag   &= ~MS_NUL;
-    mesh->npnil = ppt->tmp;
-    ppt->tmp    = 0;
+  curpt = mesh->npnil;
+  if ( mesh->npnil > mesh->np )  mesh->np = mesh->npnil;
+  ppt   = &mesh->point[curpt];
+  memcpy(ppt->c,c,3*sizeof(double));
+  memcpy(ppt->n,n,3*sizeof(double));
+  ppt->tag   &= ~MG_NUL;
+  mesh->npnil = ppt->tmp;
+  ppt->tmp    = 0;
 
-    return(curpt);
+  return(curpt);
 }
 
-void delPt(pMesh mesh,int ip) {
-    pPoint   ppt;
+void _MMG5_delPt(MMG5_pMesh mesh,int ip) {
+  MMG5_pPoint   ppt;
 
-    ppt = &mesh->point[ip];
-    memset(ppt,0,sizeof(Point));
-    ppt->tag    = MS_NUL;
-    ppt->tmp    = mesh->npnil;
-    mesh->npnil = ip;
-    if ( ip == mesh->np ) {
-        while ( !MS_VOK((&mesh->point[mesh->np])) )  mesh->np--;
+  ppt = &mesh->point[ip];
+  memset(ppt,0,sizeof(MMG5_Point));
+  ppt->tag    = MG_NUL;
+  ppt->tmp    = mesh->npnil;
+  mesh->npnil = ip;
+  if ( ip == mesh->np ) {
+    while ( !MG_VOK((&mesh->point[mesh->np])) )  mesh->np--;
+  }
+}
+
+int _MMG5_newElt(MMG5_pMesh mesh) {
+  int     curiel;
+
+  if ( !mesh->nenil )  return(0);
+  curiel = mesh->nenil;
+
+  if ( mesh->nenil > mesh->nt )  mesh->nt = mesh->nenil;
+  mesh->nenil = mesh->tria[curiel].v[2];
+  mesh->tria[curiel].v[2] = 0;
+
+  return(curiel);
+}
+
+
+void _MMG5_delElt(MMG5_pMesh mesh,int iel) {
+  MMG5_pTria    pt;
+
+  pt = &mesh->tria[iel];
+  if ( !MG_EOK(pt) ) {
+    fprintf(stdout,"  ## INVALID ELEMENT %d.\n",iel);
+    exit(EXIT_FAILURE);
+  }
+  memset(pt,0,sizeof(MMG5_Tria));
+  pt->v[2] = mesh->nenil;
+  if ( mesh->adja )
+    memset(&mesh->adja[3*(iel-1)+1],0,3*sizeof(int));
+  mesh->nenil = iel;
+  if ( iel == mesh->nt ) {
+    while ( !MG_EOK((&mesh->tria[mesh->nt])) )  mesh->nt--;
+  }
+}
+
+/** memory repartition for the -m option */
+void _MMG5_memOption(MMG5_pMesh mesh) {
+  long long  million = 1048576L;
+  int        npask,bytes,memtmp;
+
+  mesh->memMax = _MMG5_memSize();
+
+  mesh->npmax = MG_MAX(1.5*mesh->np,_MMG5_NPMAX);
+  mesh->ntmax = MG_MAX(1.5*mesh->nt,_MMG5_NTMAX);
+
+  if ( mesh->info.mem <= 0 ) {
+    if ( mesh->memMax )
+      /* maximal memory = 50% of total physical memory */
+      mesh->memMax = mesh->memMax*50/100;
+    else {
+      /* default value = 800 Mo */
+      printf("  Maximum memory set to default value: %d Mo.\n",_MMG5_MEMMAX);
+      mesh->memMax = _MMG5_MEMMAX*million;
     }
-}
-
-int newElt(pMesh mesh) {
-    int     curiel;
-
-    if ( !mesh->ntnil )  return(0);
-    curiel = mesh->ntnil;
-
-    if ( mesh->ntnil > mesh->nt )  mesh->nt = mesh->ntnil;
-    mesh->ntnil = mesh->tria[curiel].v[2];
-    mesh->tria[curiel].v[2] = 0;
-
-    return(curiel);
-}
-
-void delElt(pMesh mesh,int iel) {
-    pTria    pt;
-
-    pt = &mesh->tria[iel];
-    if ( !MS_EOK(pt) ) {
-        fprintf(stdout,"  ## INVALID ELEMENT: %d.\n",iel);
-        return;
-    }
-    memset(pt,0,sizeof(Tria));
-    pt->v[2] = mesh->ntnil;
-    if ( mesh->adja )
-        memset(&mesh->adja[3*(iel-1)+1],0,3*sizeof(int));
-    mesh->ntnil = iel;
-    if ( iel == mesh->nt ) {
-        while ( !MS_EOK((&mesh->tria[mesh->nt])) )  mesh->nt--;
-    }
-}
-
-
-int zaldy(pMesh mesh) {
-    int     million = 1048576L;
-    int     k,npask,bytes;
-
-    if ( info.mem < 0 ) {
-        mesh->npmax = MS_MAX(1.5*mesh->np,NPMAX);
-        mesh->ntmax = MS_MAX(1.5*mesh->nt,NTMAX);
+  }
+  else {
+    /* memory asked by user if possible, otherwise total physical memory */
+    if ( (long long)mesh->info.mem*million > mesh->memMax && mesh->memMax ) {
+      fprintf(stdout,"  ## Warning: asking for %d Mo of memory ",mesh->info.mem);
+      fprintf(stdout,"when only %lld available.\n",mesh->memMax/million);
     }
     else {
-        /* point+tria+adja */
-        bytes = sizeof(Point) + 2*sizeof(Tria) + 3*sizeof(int);
-
-        npask = (int)((double)info.mem / bytes * million);
-        mesh->npmax = MS_MAX(1.5*mesh->np,npask);
-        mesh->ntmax = MS_MAX(1.5*mesh->nt,2*npask);
+      mesh->memMax= (long long)(mesh->info.mem)*million;
     }
 
-    mesh->point = (pPoint)calloc(mesh->npmax+1,sizeof(Point));
-    assert(mesh->point);
-    mesh->tria  = (pTria)calloc(mesh->ntmax+1,sizeof(Tria));
-    assert(mesh->tria);
+    /* if asked memory is lower than default _MMG5_NPMAX/_MMG5_NTMAX we take lower values */
 
-    /* store empty links */
-    mesh->npnil = mesh->np + 1;
-    mesh->ntnil = mesh->nt + 1;
+    /* point+tria+adja */
+    bytes = sizeof(MMG5_Point) + sizeof(MMG5_xPoint) +
+      2*sizeof(MMG5_Tria) + 3*sizeof(int) + sizeof(MMG5_Sol);
 
-    for (k=mesh->npnil; k<mesh->npmax-1; k++)
-        mesh->point[k].tmp  = k+1;
+    /*init allocation need 38Mo*/
+    npask = (double)(mesh->info.mem-38) / bytes * (int)million;
+    mesh->npmax = MG_MIN(npask,mesh->npmax);
+    mesh->ntmax = MG_MIN(2*npask,mesh->ntmax);
 
-    for (k=mesh->ntnil; k<mesh->ntmax-1; k++)
-        mesh->tria[k].v[2] = k+1;
+    /*check if the memory asked is enough to load the mesh*/
+    if(mesh->np &&
+       (mesh->npmax < mesh->np || mesh->ntmax < mesh->nt )) {
+      memtmp = mesh->np * bytes /(int)million + 38;
+      memtmp = MG_MAX(memtmp, mesh->nt * bytes /(2 * (int)million) + 38);
+      mesh->memMax = (long long) memtmp+1;
+      fprintf(stdout,"  ## ERROR: asking for %d Mo of memory ",mesh->info.mem);
+      fprintf(stdout,"is not enough to load mesh. You need to ask %d Mo minimum\n",
+              memtmp+1);
+    }
+    if(mesh->info.mem < 39) {
+      mesh->memMax = (long long) 39;
+      fprintf(stdout,"  ## ERROR: asking for %d Mo of memory ",mesh->info.mem);
+      fprintf(stdout,"is not enough to load mesh. You need to ask %d Mo minimum\n",
+              39);
+    }
+  }
 
-    return(1);
+  if ( abs(mesh->info.imprim) > 4 || mesh->info.ddebug )
+    fprintf(stdout,"  MAXIMUM MEMORY AUTHORIZED (Mo)    %lld\n",
+            mesh->memMax/million);
+
+  if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug ) {
+    fprintf(stdout,"  _MMG5_NPMAX    %d\n",mesh->npmax);
+    fprintf(stdout,"  _MMG5_NTMAX    %d\n",mesh->ntmax);
+  }
+
+  return;
+}
+
+int zaldy(MMG5_pMesh mesh) {
+  int     k;
+
+  _MMG5_memOption(mesh);
+
+  _MMG5_ADD_MEM(mesh,(mesh->npmax+1)*sizeof(MMG5_Point),"initial vertices",
+                printf("  Exit program.\n");
+                exit(EXIT_FAILURE));
+  _MMG5_SAFE_CALLOC(mesh->point,mesh->npmax+1,MMG5_Point);
+  _MMG5_ADD_MEM(mesh,(mesh->ntmax+1)*sizeof(MMG5_Tria),"initial triangles",
+                printf("  Exit program.\n");
+                exit(EXIT_FAILURE));
+  _MMG5_SAFE_CALLOC(mesh->tria,mesh->ntmax+1,MMG5_Tria);
+
+  /* store empty links */
+  mesh->npnil = mesh->np + 1;
+  mesh->nenil = mesh->nt + 1;
+
+  for (k=mesh->npnil; k<mesh->npmax-1; k++)
+    mesh->point[k].tmp  = k+1;
+
+  for (k=mesh->nenil; k<mesh->ntmax-1; k++)
+    mesh->tria[k].v[2] = k+1;
+
+  return(1);
 }

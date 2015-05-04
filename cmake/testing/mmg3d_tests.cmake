@@ -45,7 +45,7 @@ FOREACH(EXEC ${LISTEXEC_MMG3D})
     ${MMG3D_CI_TESTS}/LeakCheck_AbnormalEnd3/d -sol
     ${MMG3D_CI_TESTS}/LeakCheck_AbnormalEnd3/dsol.sol -ls 2
     -out ${MMG3D_CI_TESTS}/LeakCheck_AbnormalEnd3/d.o.meshb)
-  SET(passRegex "## ERROR: A VALID SOLUTION FILE IS NEEDED")
+  SET(passRegex "## ERROR: WRONG DATA TYPE OR WRONG SOLUTION NUMBER")
   SET_PROPERTY(TEST LeakCheck_AbnormalEnd3_${EXEC}
     PROPERTY PASS_REGULAR_EXPRESSION "${passRegex}")
   #####
