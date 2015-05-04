@@ -264,7 +264,7 @@ inline double diamelt(MMG5_pPoint p0,MMG5_pPoint p1,MMG5_pPoint p2) {
 int _MMG5_prilen(MMG5_pMesh mesh, MMG5_pSol met) {
   MMG5_pTria      pt;
   _MMG5_Hash      hash;
-  double          len,avlen,dned,lmin,lmax;
+  double          len,avlen,lmin,lmax;
   int             k,np,nq,amin,bmin,amax,bmax,ned,hl[9];
   char            ia,i0,i1,i;
   static double   bd[9]= {0.0, 0.3, 0.6, 0.7071, 0.9, 1.3, 1.4142, 2.0, 5.0};
@@ -394,7 +394,9 @@ void _MMG5_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
   if ( abs(mesh->info.imprim) < 4 ){
     if (rapmin == 0){
       fprintf(stdout,"  ## WARNING: TOO BAD QUALITY FOR THE WORST ELEMENT\n");
+      _MMG5_unscaleMesh(mesh,met);
       MMG5_saveMesh(mesh);
+      saveMet(mesh,met);
       exit(EXIT_FAILURE);
     }
     return;

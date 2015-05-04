@@ -196,7 +196,7 @@ int main(int argc,char *argv[]) {
       _MMG5_RETURN_AND_FREE(&mesh,&disp,MMG5_STRONGFAILURE);
   }
   else {
-    if ( !met.np && !_MMG5_DoSol(&mesh,&met) )
+    if ( mesh.info.optim && (!met.np && !_MMG5_DoSol(&mesh,&met)) )
       _MMG5_RETURN_AND_FREE(&mesh,&met,MMG5_LOWFAILURE);
   }
 
@@ -204,7 +204,7 @@ int main(int argc,char *argv[]) {
   if ( !_MMG5_analys(&mesh) )
     _MMG5_RETURN_AND_FREE(&mesh,&met,MMG5_LOWFAILURE);
 
-  if ( mesh.info.imprim > 3 && !mesh.info.iso && met.m ) _MMG5_prilen(&mesh,&met);
+  if ( mesh.info.imprim > 1 && !mesh.info.iso && met.m ) _MMG5_prilen(&mesh,&met);
 
   chrono(OFF,&MMG5_ctim[2]);
   printim(MMG5_ctim[2].gdif,stim);
@@ -278,7 +278,7 @@ int main(int argc,char *argv[]) {
   /* save file */
   _MMG5_outqua(&mesh,&met);
 
-  if ( mesh.info.imprim > 3 && !mesh.info.iso )
+  if ( mesh.info.imprim > 1 && !mesh.info.iso )
     _MMG5_prilen(&mesh,&met);
 
   chrono(ON,&MMG5_ctim[1]);

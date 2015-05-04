@@ -515,8 +515,10 @@ int intregmet(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,double s,double mr[6]) 
     printf("mt1 : %E %E %E et det %E \n",mt1[0],mt1[1],mt1[2],mt1[0]*mt1[2]-mt1[1]*mt1[1]);
     printf("mt2 : %E %E %E et det : %E \n",mt2[0],mt2[1],mt2[2],mt2[0]*mt2[2]-mt2[1]*mt2[1]);
     _MMG5_hashTria(mesh);
+    _MMG5_unscaleMesh(mesh,met);
     MMG5_saveMesh(mesh);
-    exit(0);
+    saveMet(mesh,met);
+    exit(EXIT_FAILURE);
     return(0);
   }
 

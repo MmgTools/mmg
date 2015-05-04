@@ -204,7 +204,6 @@ int chkswp(MMG5_pMesh mesh,MMG5_pSol met,int k,int i,char typchk) {
 
   /* swap if Hausdorff contribution of the swapped edge is less than existing one */
   if ( coschg > mesh->info.hausd*mesh->info.hausd )  return(0);
-  else if ( coschg < mesh->info.hausd*mesh->info.hausd && cosnat > mesh->info.hausd*mesh->info.hausd )  return(1);
 
   if ( typchk == 2 && met->m ) {
     pt0->v[0]= ip0;  pt0->v[1]= ip1;  pt0->v[2]= ip2;
@@ -219,7 +218,7 @@ int chkswp(MMG5_pMesh mesh,MMG5_pSol met,int k,int i,char typchk) {
     calchg = MG_MIN(cal1,cal2);
   }
   else {
-//warning if typchk==1 iso??
+    // warning if typchk==1 iso??
     pt0->v[0]= ip0;  pt0->v[1]= ip1;  pt0->v[2]= ip2;
     cal1 = _MMG5_caltri_iso(mesh,NULL,pt0);
     pt0->v[0]= ip1;  pt0->v[1]= iq;   pt0->v[2]= ip2;
@@ -231,6 +230,14 @@ int chkswp(MMG5_pMesh mesh,MMG5_pSol met,int k,int i,char typchk) {
     cal2 = _MMG5_caltri_iso(mesh,NULL,pt0);
     calchg = MG_MIN(cal1,cal2);
   }
+
+  /* if the quality is very bad, don't degrade it, even to improve the surface
+   * approx. */
+  if ( calchg < _MMG5_EPS && calnat >= calchg ) return(0);
+
+  /* else we can degrade the quality to improve the surface approx. */
+  if ( coschg < mesh->info.hausd*mesh->info.hausd && cosnat > mesh->info.hausd*mesh->info.hausd )  return(1);
+
   return(calchg > 1.01 * calnat);
 }
 
@@ -294,7 +301,6 @@ int swapar(MMG5_pMesh mesh,int k,int i) {
 /* flip edge i of tria k for isotropic mesh*/
 int litswp(MMG5_pMesh mesh,int k,char i,double kali) {
   MMG5_pTria    pt,pt0,pt1;
-  MMG5_pPoint   a,b,c,d;
   double   kalf,kalt,ps,n1[3],n2[3];
   int     *adja,ia,ib,ic,id,kk;
   char     ii,i1,i2;
@@ -308,9 +314,6 @@ int litswp(MMG5_pMesh mesh,int k,char i,double kali) {
   ia = pt->v[i];
   ib = pt->v[i1];
   ic = pt->v[i2];
-  a  = &mesh->point[ia];
-  b  = &mesh->point[ib];
-  c  = &mesh->point[ic];
 
   adja = &mesh->adja[3*(k-1)+1];
   kk  = adja[i] / 3;
@@ -318,7 +321,6 @@ int litswp(MMG5_pMesh mesh,int k,char i,double kali) {
   pt1 = &mesh->tria[kk];
   if ( MS_SIN(pt1->tag[ii]) )  return(0);
   id = pt1->v[ii];
-  d  = &mesh->point[id];
 
   /* check non convexity */
   _MMG5_norpts(mesh,ia,ib,id,n1);

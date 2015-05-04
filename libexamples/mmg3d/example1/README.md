@@ -5,9 +5,6 @@
 
 It is strongly advised to use the mmg3d5 API functions instead of hard setting your mesh as it was required by the mmg3d4 library.
 
-Remark: you will find the same example (with additionnal boundary triangles) in the **_example0_** directory.
-
-
-
-
-
+**Remarks:**
+  * You will find the same example (with additionnal boundary triangles) in the **_example0_** directory;
+  * please, refer to the **_example0_** directory to have an example of _"clean"_ call of the new **mmg3d** library and to see how to build the example executable.

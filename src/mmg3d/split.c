@@ -59,7 +59,16 @@ unsigned char permedge[12][6] = {
   {3,0,4,1,5,2}, {4,3,0,5,2,1}, {1,3,5,0,2,4}, {3,5,1,4,0,2},
   {5,1,3,2,4,0}, {2,5,4,1,0,3}, {4,2,5,0,3,1}, {5,4,2,3,1,0} };
 
-/** simulate split 1 edge of tetra : return 0 if split leads to invalid situation, else 1 */
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param k index of element to split.
+ * \param vx \f$vx[i]\f$ is the index of the point to add on the edge \a i.
+ * \return 0 if split leads to invalid situation, else 1.
+ *
+ * Simulate the splitting of 1 edge of element
+ *
+ */
 int _MMG5_split1_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
   MMG5_pTetra   pt,pt0;
   double   vold,vnew;
@@ -240,15 +249,23 @@ nextstep1:
   pt1->qual=_MMG5_orcal(mesh,iel);
 }
 
-/** Simulate at the same time creation and bulging of one point, with new position o,
-    to be inserted at an edge, whose shell is passed :
-    return 0 if final position is invalid, 1 if all checks are ok */
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param list pointer toward the edge shell.
+ * \param ret size of the edge shell.
+ * \param o table of the new point coordinates.
+ * \return 0 if final position is invalid, 1 if all checks are ok.
+ *
+ * Simulate at the same time creation and bulging of one point, with new position o,
+ * to be inserted at an edge, whose shell is passed.
+ *
+ */
 int _MMG5_simbulgept(MMG5_pMesh mesh,int *list,int ret,double o[3]) {
   MMG5_pTetra    pt,pt0;
   MMG5_pPoint    ppt0;
-  double    calold,calnew,caltmp;
-  int       k,iel,ilist;
-  char      ie,ia,ib;
+  double         calold,calnew,caltmp;
+  int            k,iel,ilist;
+  char           ie,ia,ib;
 
   ilist = ret / 2;
   pt0  = &mesh->tetra[0];

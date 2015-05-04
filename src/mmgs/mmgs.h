@@ -105,6 +105,10 @@ int  chkedg(MMG5_pMesh ,int );
 int  _MMG5_mmgsBezierCP(MMG5_pMesh ,MMG5_Tria*, _MMG5_pBezier, char ori);
 int  _MMG5_bezierInt(_MMG5_pBezier ,double *,double *,double *,double *);
 void bezierEdge(MMG5_pMesh mesh,int i0,int i1,double b0[3],double b1[3],char isrid,double v[3]);
+int  _MMG5_simbulgept(MMG5_pMesh mesh,MMG5_pSol met, int k,int i,int ip);
+int  _MMG5_split1_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int i, int *vx);
+int  _MMG5_split2_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx);
+int  _MMG5_split3_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx);
 int  split1(MMG5_pMesh mesh,MMG5_pSol met,int k,int i,int *vx);
 int  split2(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx);
 int  split3(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx);
@@ -143,7 +147,6 @@ void _MMG5_memOption(MMG5_pMesh mesh);
 #ifdef USE_SCOTCH
 int _MMG5_mmgsRenumbering(int vertBoxNbr, MMG5_pMesh mesh, MMG5_pSol sol);
 #endif
-
 /* function pointers */
 /* init structures */
 void  _MMG5_Init_parameters(MMG5_pMesh mesh);

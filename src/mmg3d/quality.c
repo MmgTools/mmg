@@ -493,7 +493,7 @@ int _MMG5_prilen(MMG5_pMesh mesh, MMG5_pSol met) {
   MMG5_pTetra     pt;
   MMG5_pxTetra    pxt;
   _MMG5_Hash      hash;
-  double          len,avlen,dned,lmin,lmax;
+  double          len,avlen,lmin,lmax;
   int             k,np,nq,amin,bmin,amax,bmax,ned,hl[9];
   char            ia,i0,i1,ier,i;
   static double   bd[9]= {0.0, 0.3, 0.6, 0.7071, 0.9, 1.3, 1.4142, 2.0, 5.0};
@@ -637,10 +637,12 @@ void _MMG5_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
           _MMG5_indPt(mesh,mesh->tetra[iel].v[0]),_MMG5_indPt(mesh,mesh->tetra[iel].v[1]),
           _MMG5_indPt(mesh,mesh->tetra[iel].v[2]),_MMG5_indPt(mesh,mesh->tetra[iel].v[3]));
 #endif
-  if ( abs(mesh->info.imprim) < 4 ){
+  if ( abs(mesh->info.imprim) < 3 ){
     if (rapmin == 0){
       fprintf(stdout,"  ## WARNING: TOO BAD QUALITY FOR THE WORST ELEMENT\n");
+      _MMG5_unscaleMesh(mesh,met);
       MMG5_saveMesh(mesh);
+      MMG5_saveMet(mesh,met);
       exit(EXIT_FAILURE);
     }
     return;
@@ -649,7 +651,7 @@ void _MMG5_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
   /* print histo */
   fprintf(stdout,"     HISTOGRAMM:");
   fprintf(stdout,"  %6.2f %% > 0.12\n",100.0*(good/(float)(mesh->ne-nex)));
-  if ( abs(mesh->info.imprim) > 4 ) {
+  if ( abs(mesh->info.imprim) > 3 ) {
     fprintf(stdout,"                  %6.2f %% >  0.5\n",100.0*( med/(float)(mesh->ne-nex)));
     imax = MG_MIN(4,(int)(5.*rapmax));
     for (i=imax; i>=(int)(5*rapmin); i--) {
@@ -659,7 +661,9 @@ void _MMG5_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
   }
   if (rapmin == 0){
     fprintf(stdout,"  ## WARNING: TOO BAD QUALITY FOR THE WORST ELEMENT\n");
+    _MMG5_unscaleMesh(mesh,met);
     MMG5_saveMesh(mesh);
+    MMG5_saveMet(mesh,met);
     exit(EXIT_FAILURE);
   }
 }
