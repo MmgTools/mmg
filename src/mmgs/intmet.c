@@ -44,11 +44,11 @@ extern char ddb;
    direction of n1 at interpolated point */
 int intridmet(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,double s,double v[3],double mr[6]) {
   MMG5_pTria     pt;
-  MMG5_pxPoint   go1,go2;
+  MMG5_pxPoint     go1,go2;
   MMG5_pPoint    p1,p2;
-  double         *m1,*m2,*n11,*n12,*n21,*n22,ps11,ps12,dd,hn1,hn2;
-  int            ip1,ip2;
-  char           i1,i2;
+  double   *m1,*m2,*n11,*n12,*n21,*n22,ps11,ps12,dd,hn1,hn2;
+  int       ip1,ip2;
+  char      i1,i2;
 
   pt  = &mesh->tria[k];
   i1  = _MMG5_inxt2[i];
@@ -258,7 +258,7 @@ int intregmet(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,double s,double mr[6]) 
 
   pt  = &mesh->tria[k];
   return(_MMG5_interpreg_ani(mesh,met,pt,i,s,mr));
- 
+
   return(1);
 }
 

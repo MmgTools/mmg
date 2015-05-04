@@ -37,6 +37,157 @@
 
 char ddb;
 
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param k element index.
+ * \param vx pointer toward table of edges to split.
+ * \return 1.
+ *
+ * Find acceptable position for splitting.
+ *
+ */
+int _MMG5_dichoto(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
+  MMG5_pTria   pt;
+  MMG5_pPoint  pa,pb,ps;
+  double       o[3][3],p[3][3];
+  float        to,tp,t;
+  int          i1,i2,ia,ib,ier,it,maxit;
+  char         i,j;
+
+  pt = &mesh->tria[k];
+  /* get point on surface and along segment for edge split */
+  for (i=0; i<3; i++) {
+    memset(p[i],0,3*sizeof(double));
+    memset(o[i],0,3*sizeof(double));
+    if ( vx[i] > 0 ) {
+      i1 = _MMG5_inxt2[i];
+      i2 = _MMG5_inxt2[i1];
+      ia = pt->v[i1];
+      ib = pt->v[i2];
+      pa = &mesh->point[ia];
+      pb = &mesh->point[ib];
+      ps = &mesh->point[vx[i]];
+      o[i][0] = 0.5 * (pa->c[0] + pb->c[0]);
+      o[i][1] = 0.5 * (pa->c[1] + pb->c[1]);
+      o[i][2] = 0.5 * (pa->c[2] + pb->c[2]);
+      p[i][0] = ps->c[0];
+      p[i][1] = ps->c[1];
+      p[i][2] = ps->c[2];
+    }
+  }
+  maxit = 4;
+  it = 0;
+  tp = 1.0;
+  to = 0.0;
+  do {
+    /* compute new position */
+    t = 0.5 * (tp + to);
+    for (i=0; i<3; i++) {
+      if ( vx[i] > 0 ) {
+        ps = &mesh->point[vx[i]];
+        ps->c[0] = o[i][0] + t*(p[i][0] - o[i][0]);
+        ps->c[1] = o[i][1] + t*(p[i][1] - o[i][1]);
+        ps->c[2] = o[i][2] + t*(p[i][2] - o[i][2]);
+        j=i;
+      }
+    }
+    switch (pt->flag) {
+    case 1: case 2: case 4:
+      ier = _MMG5_split1_sim(mesh,met,k,j,vx);
+      break;
+    case 7:
+      ier = _MMG5_split3_sim(mesh,met,k,vx);
+      break;
+    default:
+      ier = _MMG5_split2_sim(mesh,met,k,vx);
+      break;
+    }
+    if ( ier )
+      to = t;
+    else
+      tp = t;
+  }
+  while ( ++it < maxit );
+  /* restore coords of last valid pos. */
+  if ( !ier ) {
+    t = to;
+    for (i=0; i<3; i++) {
+      if ( vx[i] > 0 ) {
+        ps = &mesh->point[vx[i]];
+        ps->c[0] = o[i][0] + t*(p[i][0] - o[i][0]);
+        ps->c[1] = o[i][1] + t*(p[i][1] - o[i][1]);
+        ps->c[2] = o[i][2] + t*(p[i][2] - o[i][2]);
+      }
+    }
+  }
+  return(1);
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param iel index of the starting triangle.
+ * \param ia local index of the edge to split in \a k.
+ * \param ip index of the point that we try to create.
+ * \return 1.
+ *
+ * Find acceptable position for _MMG5_split1b, starting from point ip.
+ *
+ */
+int _MMG5_dichoto1b(MMG5_pMesh mesh, MMG5_pSol met, int iel, int ia, int ip) {
+  MMG5_pTria   pt;
+  MMG5_pPoint  p0,p1,ppt;
+  int          np,nq,it,maxit,i1,i2;
+  double       m[3],o[3],tp,to,t;
+  char         ier;
+
+  pt  = &mesh->tria[iel];
+
+  i1 = _MMG5_inxt2[ia];
+  i2 = _MMG5_inxt2[i1];
+  np = pt->v[i1];
+  nq = pt->v[i2];
+  p0 = &mesh->point[np];
+  p1 = &mesh->point[nq];
+
+  /* initial coordinates for new point */
+  ppt = &mesh->point[ip];
+  o[0] = ppt->c[0];
+  o[1] = ppt->c[1];
+  o[2] = ppt->c[2];
+
+  /* midpoint along edge */
+  m[0] = 0.5*(p0->c[0] + p1->c[0]);
+  m[1] = 0.5*(p0->c[1] + p1->c[1]);
+  m[2] = 0.5*(p0->c[2] + p1->c[2]);
+
+  maxit = 4;
+  it    = 0;
+  ier   = 0;
+  tp    = 1.0;
+  to    = 0.0;
+  do {
+    t = 0.5*(to + tp);
+    ppt->c[0] = m[0] + t*(o[0]-m[0]);
+    ppt->c[1] = m[1] + t*(o[1]-m[1]);
+    ppt->c[2] = m[2] + t*(o[2]-m[2]);
+
+    ier = _MMG5_simbulgept(mesh,met,iel,ia,ip);
+    if ( ier )
+      to = t;
+    else
+      tp = t;
+  }
+  while ( ++it < maxit );
+  if ( !ier )  t = to;
+
+  ppt->c[0] = m[0] + t*(o[0]-m[0]);
+  ppt->c[1] = m[1] + t*(o[1]-m[1]);
+  ppt->c[2] = m[2] + t*(o[2]-m[2]);
+
+  return(1);
+}
 
 /* check if edge need to be split and return a binary coding the numbers of the edges of tria iel
    that should be split according to a hausdorff distance criterion */
@@ -283,7 +434,7 @@ static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
   _MMG5_Bezier  pb;
   MMG5_pxPoint  go;
   double        s,o[3],no[3],to[3],dd,len;
-  int           vx[3],i,j,ip,ip1,ip2,ier,k,ns,nc,nt,npinit;
+  int           vx[3],i,j,ip,ip1,ip2,ier,k,ns,nc,ni,ic,nt,npinit,it;
   char          i1,i2;
   static double uv[3][2] = { {0.5,0.5}, {0.,0.5}, {0.5,0.} };
 
@@ -473,7 +624,74 @@ static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
     fflush(stdout);
   }
 
-  /* step 3. splitting */
+  /** 3. Simulate splitting and delete points leading to invalid configurations */
+  for (k=1; k<=mesh->np; k++)
+    mesh->point[k].flag = 0;
+
+  it = 1;
+  nc = 0;
+  do {
+    ni = 0;
+    for (k=1; k<=mesh->nt; k++) {
+      pt = &mesh->tria[k];
+      if ( !MG_EOK(pt) || pt->ref < 0 ) continue;
+      else if ( pt->flag == 0 )  continue;
+
+      vx[0] = vx[1] = vx[2] = 0;
+      pt->flag = ic = 0;
+
+      for (i=0; i<3; i++) {
+        i1 = _MMG5_inxt2[i];
+        i2 = _MMG5_inxt2[i1];
+        vx[i] = _MMG5_hashGet(&hash,pt->v[i1],pt->v[i2]);
+        if ( vx[i] > 0 ) {
+          MG_SET(pt->flag,i);
+          if ( mesh->point[vx[i]].flag > 2 )  ic = 1;
+          j = i;
+        }
+      }
+      if ( !pt->flag )  continue;
+      switch (pt->flag) {
+      case 1: case 2: case 4:
+        ier = _MMG5_split1_sim(mesh,met,k,j,vx);
+        break;
+      case 7:
+        ier = _MMG5_split3_sim(mesh,met,k,vx);
+        break;
+      default:
+        ier = _MMG5_split2_sim(mesh,met,k,vx);
+        break;
+      }
+      if ( ier )  continue;
+
+      ni++;
+      if ( ic == 0 && _MMG5_dichoto(mesh,met,k,vx) ) {
+        for (i=0; i<3; i++)
+          if ( vx[i] > 0 )  mesh->point[vx[i]].flag++;
+      }
+      else {
+        for (i=0; i<3; i++) {
+          if ( vx[i] > 0 ) {
+            p1 = &mesh->point[pt->v[_MMG5_iprv2[i]]];
+            p2 = &mesh->point[pt->v[_MMG5_inxt2[i]]];
+            ppt = &mesh->point[vx[i]];
+            ppt->c[0] = 0.5 * (p1->c[0] + p2->c[0]);
+            ppt->c[1] = 0.5 * (p1->c[1] + p2->c[1]);
+            ppt->c[2] = 0.5 * (p1->c[2] + p2->c[2]);
+          }
+        }
+      }
+    }
+    nc += ni;
+  }
+  while( ni > 0 && ++it < 20 );
+
+  if ( mesh->info.ddebug && nc ) {
+    fprintf(stdout,"     %d corrected,  %d invalid\n",nc,ni);
+    fflush(stdout);
+  }
+
+  /* step 4. splitting */
   ns = 0;
   nt = mesh->nt;
   for (k=1; k<=nt; k++) {
@@ -692,6 +910,9 @@ static int adpspl(MMG5_pMesh mesh,MMG5_pSol met) {
       return (ns);
     }
     else if ( ip > 0 ) {
+      if ( !_MMG5_simbulgept(mesh,met,k,imax,ip) ) {
+        _MMG5_dichoto1b(mesh,met,k,imax,ip);
+      }
       ier = split1b(mesh,k,imax,ip);
       if ( !ier ) {
         /* Lack of memory, go to collapse step. */
@@ -773,6 +994,10 @@ static int adptri(MMG5_pMesh mesh,MMG5_pSol met) {
       return(0);
     }
 
+    /* renumbering if available and needed */
+    if ( it==1 && !_MMG5_scotchCall(mesh,met) )
+      return(0);
+
     nc = adpcol(mesh,met);
     if ( nc < 0 ) {
       fprintf(stdout,"  ## Unable to complete mesh. Exit program.\n");
@@ -802,6 +1027,10 @@ static int adptri(MMG5_pMesh mesh,MMG5_pSol met) {
     else if ( it > 3 && abs(nc-ns) < 0.3 * MG_MAX(nc,ns) )  break;
   }
   while( ++it < maxit && nc+ns > 0 );
+
+  /* renumbering if available */
+  if ( !_MMG5_scotchCall(mesh,met) )
+    return(0);
 
   nm = 0;
   nm = movtri(mesh,met,5);
@@ -871,6 +1100,8 @@ static int anatri(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
 
 int mmgs1(MMG5_pMesh mesh,MMG5_pSol met) {
 
+  /* renumbering if available */
+
   if ( abs(mesh->info.imprim) > 4 )
     fprintf(stdout,"  ** MESH ANALYSIS\n");
 
@@ -879,9 +1110,13 @@ int mmgs1(MMG5_pMesh mesh,MMG5_pSol met) {
     fprintf(stdout,"  ** GEOMETRIC MESH\n");
 
   if ( !anatri(mesh,met,1) ) {
-    fprintf(stdout,"  ## Unable to split mesh. Exiting.\n");
+    fprintf(stdout,"  ## Unable to split mesh-> Exiting.\n");
     return(0);
   }
+
+  /* renumbering if available */
+  if ( !_MMG5_scotchCall(mesh,met) )
+    return(0);
 
   /*--- stage 2: computational mesh */
   if ( abs(mesh->info.imprim) > 4 || mesh->info.ddebug )
@@ -901,6 +1136,10 @@ int mmgs1(MMG5_pMesh mesh,MMG5_pSol met) {
     fprintf(stdout,"  ## Unable to proceed adaptation. Exit program.\n");
     return(0);
   }
+
+  /* renumbering if available */
+  if ( !_MMG5_scotchCall(mesh,met) )
+    return(0);
 
   if ( !adptri(mesh,met) ) {
     fprintf(stdout,"  ## Unable to adapt. Exit program.\n");

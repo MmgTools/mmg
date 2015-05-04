@@ -299,7 +299,7 @@ int MMG5_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met
   fprintf(stdout,"     %s\n",MG_CPY);
   fprintf(stdout,"     %s %s\n",__DATE__,__TIME__);
 
-  _MMG5_Set_APIFunc();
+  _MMG5_Set_commonFunc();
 
   signal(SIGABRT,_MMG5_excfun);
   signal(SIGFPE,_MMG5_excfun);
@@ -350,13 +350,13 @@ int MMG5_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met
     }
     if ( !_MMG5_mmg3d2(mesh,met) ) return(MMG5_STRONGFAILURE);
   }
-
-#ifdef DEBUG
-  if ( !met->np && !_MMG5_DoSol(mesh,met,&mesh->info) ) {
-    if ( !_MMG5_unscaleMesh(mesh,met) )  return(MMG5_STRONGFAILURE);
-    _MMG5_RETURN_AND_PACK(mesh,met,MMG5_LOWFAILURE);
+  else {
+    if ( mesh->info.optim && !met->np && !_MMG5_DoSol(mesh,met) ) {
+      if ( !_MMG5_unscaleMesh(mesh,met) )  return(MMG5_STRONGFAILURE);
+      _MMG5_RETURN_AND_PACK(mesh,met,MMG5_LOWFAILURE);
+    }
   }
-#endif
+
   if ( !_MMG5_analys(mesh) ) {
     if ( !_MMG5_unscaleMesh(mesh,met) )  return(MMG5_STRONGFAILURE);
     _MMG5_RETURN_AND_PACK(mesh,met,MMG5_LOWFAILURE);

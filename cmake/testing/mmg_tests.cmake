@@ -21,6 +21,12 @@
 ## =============================================================================
 
 FOREACH(EXEC ${LISTEXEC_MMG})
+
+  ADD_TEST(NAME CubeVolAni_${EXEC}
+  COMMAND ${EXEC} -v 6 -d
+  ${MMG_CI_TESTS}/CubeVolAni/cube
+  -out ${MMG_CI_TESTS}/CubeVolAni/cube.o.meshb)
+
   ##############################################################################
   #####
   #####         Aniso test case

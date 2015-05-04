@@ -269,12 +269,12 @@ int _MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, int *list,int ilist,int it1,
 int _MMG5_swpbdy(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int it1,_MMG5_pBucket bucket) {
   MMG5_pTetra   pt,pt1;
   MMG5_pPoint   p0,p1;
-  int      iel,iel1,ilist,np,nq,nm;
-  double   c[3];
-  char     ia,iface1,j,ipa,im;
-  int      ier;
+  int           iel,iel1,ilist,np,nq,nm;
+  double        c[3],*mp, *mq, *mm;
+  char          ia,iface1,j,ipa,im;
+  int           ier;
 #ifndef NDEBUG
-  int      na;
+  int           na;
 #endif
 
   iel = list[0] / 6;
@@ -328,8 +328,13 @@ int _MMG5_swpbdy(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int it1,_MMG5_p
                           ,c,MG_BDY);
     }
   }
-  if ( met->m )  met->m[met->size*nm] =
-                   0.5 *(met->m[np*met->size]+met->m[nq*met->size]);
+  if ( met->m ) {
+    mp = &met->m[met->size*np];
+    mq = &met->m[met->size*nq];
+    mm = &met->m[met->size*nm];
+    if ( !_MMG5_intmetvol(mq,mp,mm,0.5) )  return(0);
+  }
+
   ier = _MMG5_split1b(mesh,met,list,ret,nm,0);
   /* pointer adress may change if we need to realloc memory during split */
   pt  = &mesh->tetra[iel];

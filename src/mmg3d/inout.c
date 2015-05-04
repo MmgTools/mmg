@@ -1252,7 +1252,7 @@ int _MMG5_saveAllMesh(MMG5_pMesh mesh) {
     }
   }
 
-  if ( mesh->info.imprim ) {
+  if ( mesh->info.imprim > 4 ) {
     fprintf(stdout,"     NUMBER OF VERTICES   %8d   CORNERS %8d\n",np,nc+nre);
     if ( na )
       fprintf(stdout,"     NUMBER OF EDGES      %8d   RIDGES  %8d\n",na,nr);
@@ -1795,13 +1795,15 @@ int MMG5_loadMet(MMG5_pMesh mesh,MMG5_pSol met) {
    *    - for hmax we take 10 \times the max of the metric sizes. */
   compute_hmin = compute_hmax = 0;
 
-  if ( mesh->info.hmin < 0. ) {
-    compute_hmin=1;
-    mesh->info.hmin = FLT_MAX;
-  }
-  if ( mesh->info.hmax < 0. ){
-    compute_hmax=1;
-    mesh->info.hmax = 0.;
+  if ( !mesh->info.iso ) {
+    if ( mesh->info.hmin < 0. ) {
+      compute_hmin=1;
+      mesh->info.hmin = FLT_MAX;
+    }
+    if ( mesh->info.hmax < 0. ){
+      compute_hmax=1;
+      mesh->info.hmax = 0.;
+    }
   }
 
   /* isotropic metric */

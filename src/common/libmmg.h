@@ -56,7 +56,7 @@ typedef MMG5_Par * MMG5_pPar;
 /**
  * \struct MMG5_Point
  * \brief Structure to store points of a MMG mesh.
- * \todo What to do with n[3], try to remove,s.
+ * \todo What to do with n[3], try to remove s.
  */
 typedef struct {
   double   c[3]; /*!< Coordinates of point */
@@ -159,7 +159,7 @@ typedef struct {
   char          nreg;
   int           renum;
   char          imprim,ddebug,badkal,iso,fem,lag;
-  unsigned char noinsert, noswap, nomove, nosurf;
+  unsigned char optim, noinsert, noswap, nomove, nosurf;
   int           bucket;
   MMG5_pPar     par;
 } MMG5_Info;

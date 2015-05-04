@@ -99,6 +99,7 @@ enum MMG5_Param
   MMG5_IPARAM_angle,             /*!< [1/0], Turn on/off angle detection */
   MMG5_IPARAM_iso,               /*!< [1/0], Level-set meshing */
   MMG5_IPARAM_lag,               /*!< [-1/0/1/2], Lagrangian option */
+  MMG5_IPARAM_optim,             /*!< [1/0], Optimize mesh keeping its initial edge sizes */
   MMG5_IPARAM_noinsert,          /*!< [1/0], Avoid/allow point insertion */
   MMG5_IPARAM_noswap,            /*!< [1/0], Avoid/allow edge or face flipping */
   MMG5_IPARAM_nomove,            /*!< [1/0], Avoid/allow point relocation */

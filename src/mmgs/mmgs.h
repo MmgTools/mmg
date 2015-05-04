@@ -104,6 +104,10 @@ void _MMG5_delElt(MMG5_pMesh mesh,int iel);
 int  chkedg(MMG5_pMesh ,int );
 int  _MMG5_mmgsBezierCP(MMG5_pMesh ,MMG5_Tria*, _MMG5_pBezier, char ori);
 int  _MMG5_bezierInt(_MMG5_pBezier ,double *,double *,double *,double *);
+int  _MMG5_simbulgept(MMG5_pMesh mesh,MMG5_pSol met, int k,int i,int ip);
+int  _MMG5_split1_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int i, int *vx);
+int  _MMG5_split2_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx);
+int  _MMG5_split3_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx);
 int  split1(MMG5_pMesh mesh,MMG5_pSol met,int k,int i,int *vx);
 int  split2(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx);
 int  split3(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx);
@@ -125,6 +129,7 @@ int  rootDeg2(double complex a[3], double complex r[2]);
 int  rootDeg3(double a[4],double complex r[3]);
 
 int  buildridmetfic(MMG5_pMesh mesh,double t[3],double n[3],double dtan,double dv,double m[6]);
+int  _MMG5_mmgsChkmsh(MMG5_pMesh,int,int);
 int  paratmet(double c0[3],double n0[3],double m[6],double c1[3],double n1[3],double mt[6]);
 int  intregmet(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,double s,double mr[6]);
 int  intridmet(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,double s,double v[3],double mr[6]);
@@ -135,6 +140,9 @@ int  chknor(MMG5_pMesh);
 long long _MMG5_memSize(void);
 void _MMG5_memOption(MMG5_pMesh mesh);
 
+#ifdef USE_SCOTCH
+int _MMG5_mmgsRenumbering(int vertBoxNbr, MMG5_pMesh mesh, MMG5_pSol sol);
+#endif
 /* function pointers */
 /* init structures */
 void  _MMG5_Init_parameters(MMG5_pMesh mesh);
@@ -160,6 +168,6 @@ void   (*intmet)(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int ip,double s);
 int    (*movridpt)(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist);
 int    (*movintpt)(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist);
 
-void _MMG5_Set_APIFunc();
+void _MMG5_Set_commonFunc();
 
 #endif

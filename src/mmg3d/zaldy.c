@@ -64,8 +64,10 @@ int _MMG5_newPt(MMG5_pMesh mesh,double c[3],char tag) {
   }
   assert(tag < 127);
   assert(tag >= 0);
-  ppt->n   = 0;
-  ppt->tag = tag;
+  ppt->n[0]   = 0;
+  ppt->n[1]   = 0;
+  ppt->n[2]   = 0;
+  ppt->tag    = tag;
   ppt->tagdel = 0;
   return(curpt);
 }
@@ -122,27 +124,6 @@ void _MMG5_delElt(MMG5_pMesh mesh,int iel) {
   if ( iel == mesh->ne ) {
     while ( !MG_EOK((&mesh->tetra[mesh->ne])) )  mesh->ne--;
   }
-}
-
-long long _MMG5_memSize (void) {
-  long long mem;
-
-#if (defined(__APPLE__) && defined(__MACH__))
-  size_t size;
-
-  size = sizeof(mem);
-  if ( sysctlbyname("hw.memsize",&mem,&size,NULL,0) == -1)
-    return(0);
-
-#elif defined(__unix__) || defined(__unix) || defined(unix)
-  mem = ((long long)sysconf(_SC_PHYS_PAGES))*
-    ((long long)sysconf(_SC_PAGE_SIZE));
-#else
-  printf("  ## WARNING: UNKNOWN SYSTEM, RECOVER OF MAXIMAL MEMORY NOT AVAILABLE.\n");
-  return(0);
-#endif
-
-  return(mem);
 }
 
 /** memory repartition for the -m option */

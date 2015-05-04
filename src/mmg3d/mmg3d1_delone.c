@@ -829,7 +829,6 @@ _MMG5_adpsplcol(MMG5_pMesh mesh,MMG5_pSol met,_MMG5_pBucket bucket, int* warn) {
       }
     }
     else  nf = 0;
-    nnf+=nf;
 
     if ( !mesh->info.nomove ) {
       nm = _MMG5_movtet(mesh,met,-1);
@@ -842,6 +841,7 @@ _MMG5_adpsplcol(MMG5_pMesh mesh,MMG5_pSol met,_MMG5_pBucket bucket, int* warn) {
     nnm += nm;
     nnc += nc;
     nns += ns;
+    nnf+=nf;
 
     /* decrease size of gap for reallocation */
 
@@ -851,13 +851,20 @@ _MMG5_adpsplcol(MMG5_pMesh mesh,MMG5_pSol met,_MMG5_pBucket bucket, int* warn) {
       mesh->gap -= mesh->gap/(double)maxit;
 
 
-    if ( ((abs(mesh->info.imprim) > 3 || mesh->info.ddebug) && ns+nc > 0) )
-      fprintf(stdout,"     %8d filtered %8d splitted, %8d collapsed, %8d swapped, %8d moved\n",ifilt,ns,nc,nf,nm);
+    if ( (abs(mesh->info.imprim) > 4 || mesh->info.ddebug) && ns+nc+nm+nf > 0)
+      fprintf(stdout,"     %8d filtered, %8d splitted, %8d collapsed,"
+              " %8d swapped, %8d moved\n",ifilt,ns,nc,nf,nm);
+
     if ( ns < 10 && abs(nc-ns) < 3 )  break;
     else if ( it > 3 && abs(nc-ns) < 0.3 * MG_MAX(nc,ns) )  break;
 
   }
   while( ++it < maxit && nc+ns > 0 );
+
+  if ( (abs(mesh->info.imprim) < 5) && ( nnc || nns ) ) {
+    fprintf(stdout,"     %8d filtered, %8d splitted, %8d collapsed,"
+            " %8d swapped, %8d moved, %d iter.\n",ifilt,nns,nnc,nnf,nnm, it);
+  }
 
   return(1);
 }
@@ -914,9 +921,9 @@ _MMG5_optet(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket) {
        return(0);
        }*/
 
-    if ( (abs(mesh->info.imprim) > 3 || mesh->info.ddebug) && nf+nm > 0 ){
-      fprintf(stdout,"                                            ");
-      fprintf(stdout,"%8d swapped, %8d moved\n",nf,nm);
+    if ( (abs(mesh->info.imprim) > 4 || mesh->info.ddebug) && nf+nm > 0 ){
+      fprintf(stdout,"                                                   ");
+      fprintf(stdout,"      ""      %8d swapped, %8d moved\n",nf,nm);
     }
   }
   while( ++it < maxit && nm+nf > 0 );
@@ -930,9 +937,16 @@ _MMG5_optet(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket) {
   }
   else  nm = 0;
   nnm += nm;
-  if ( (abs(mesh->info.imprim) > 3 || mesh->info.ddebug) && nm > 0 )
-    fprintf(stdout,"                                            ");
-  fprintf(stdout,"                  %8d moved\n",nm);
+  if ( (abs(mesh->info.imprim) > 4 || mesh->info.ddebug) && nm > 0 ) {
+    fprintf(stdout,"                                            "
+            "                                ");
+    fprintf(stdout,"     %8d moved\n",nm);
+  }
+
+  if ( abs(mesh->info.imprim) < 5 && (nnf > 0 || nnm > 0) )
+    fprintf(stdout,"                                                 "
+            "        "
+            "      %8d swapped, %8d moved, %d iter. \n",nnf,nnm,it);
 
   return(1);
 }
@@ -1012,7 +1026,7 @@ _MMG5_adptet_delone(MMG5_pMesh mesh,MMG5_pSol met,_MMG5_pBucket bucket) {
 int _MMG5_mmg3d1_delone(MMG5_pMesh mesh,MMG5_pSol met) {
   _MMG5_pBucket bucket;
 
-  if ( abs(mesh->info.imprim) > 3 )
+  if ( abs(mesh->info.imprim) > 4 )
     fprintf(stdout,"  ** MESH ANALYSIS\n");
 
   if ( mesh->info.iso && !_MMG5_chkmani(mesh) ) {
@@ -1021,7 +1035,7 @@ int _MMG5_mmg3d1_delone(MMG5_pMesh mesh,MMG5_pSol met) {
   }
 
   /**--- stage 1: geometric mesh */
-  if ( abs(mesh->info.imprim) > 3 || mesh->info.ddebug )
+  if ( abs(mesh->info.imprim) > 4 || mesh->info.ddebug )
     fprintf(stdout,"  ** GEOMETRIC MESH\n");
 
   if ( !_MMG5_anatet(mesh,met,1,0) ) {
@@ -1034,7 +1048,7 @@ int _MMG5_mmg3d1_delone(MMG5_pMesh mesh,MMG5_pSol met) {
 #endif
 
   /**--- stage 2: computational mesh */
-  if ( abs(mesh->info.imprim) > 3 || mesh->info.ddebug )
+  if ( abs(mesh->info.imprim) > 4 || mesh->info.ddebug )
     fprintf(stdout,"  ** COMPUTATIONAL MESH\n");
 
   /* define metric map */

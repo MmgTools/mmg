@@ -23,7 +23,7 @@
 
 /**
  * \file common/mmg_tools.c
- * \brief Fonctions for anisotropic size map computation.
+ * \brief Various tools for the mmg applications.
  * \author Charles Dapogny (LJLL, UPMC)
  * \author Cécile Dobrzynski (Inria / IMB, Université de Bordeaux)
  * \author Pascal Frey (LJLL, UPMC)
@@ -34,7 +34,6 @@
  */
 
 #include "mmgs.h"
-
 /**
  * \param mesh pointer toward the mesh structure.
  * \param m pointer toward the first metric to intersect.
@@ -183,7 +182,6 @@ int _MMG5_buildridmetnor(MMG5_pMesh mesh,MMG5_pSol met,int np0,double nt[3],doub
   return(1);
 }
 
-
 /**
  * \param mesh pointer toward the mesh stucture.
  * \param ip1 first point of face.
@@ -316,7 +314,6 @@ inline int _MMG5_rotmatrix(double n[3],double r[3][3]) {
   return(1);
 }
 
-
 /**
  * \param m pointer toward a 3x3 matrix
  * \param mi pointer toward the computed 3x3 matrix.
@@ -367,7 +364,6 @@ int _MMG5_invmat(double *m,double *mi) {
 
   return(1);
 }
-
 /**
  * \param a matrix to invert.
  * \param b last member.
@@ -525,4 +521,31 @@ int _MMG5_paratmet(double c0[3],double n0[3],double m[6],double c1[3],double n1[
   mt[5] = lambda[0]*r[2][0]*r[2][0] + lambda[1]*r[2][1]*r[2][1];
 
   return(1);
+}
+
+/**
+ * \return the available memory size of the computer.
+ *
+ * Compute the available memory size of the computer.
+ *
+ */
+long long _MMG5_memSize (void) {
+  long long mem;
+
+#if (defined(__APPLE__) && defined(__MACH__))
+  size_t size;
+
+  size = sizeof(mem);
+  if ( sysctlbyname("hw.memsize",&mem,&size,NULL,0) == -1)
+    return(0);
+
+#elif defined(__unix__) || defined(__unix) || defined(unix)
+  mem = ((long long)sysconf(_SC_PHYS_PAGES))*
+    ((long long)sysconf(_SC_PAGE_SIZE));
+#else
+  printf("  ## WARNING: UNKNOWN SYSTEM, RECOVER OF MAXIMAL MEMORY NOT AVAILABLE.\n");
+  return(0);
+#endif
+
+  return(mem);
 }

@@ -125,34 +125,36 @@
 #define   MMG5_IPARAM_iso                4
 ! /*!< [-1/0/1/2] Lagrangian option */
 #define   MMG5_IPARAM_lag                5
+! /*!< [1/0] Optimize mesh keeping its initial edge sizes */
+#define   MMG5_IPARAM_optim              6
 ! /*!< [1/0] Avoid/allow point insertion */
-#define   MMG5_IPARAM_noinsert           6
+#define   MMG5_IPARAM_noinsert           7
 ! /*!< [1/0] Avoid/allow edge or face flipping */
-#define   MMG5_IPARAM_noswap             7
+#define   MMG5_IPARAM_noswap             8
 ! /*!< [1/0] Avoid/allow point relocation */
-#define   MMG5_IPARAM_nomove             8
+#define   MMG5_IPARAM_nomove             9
 ! /*!< [1/0] Avoid/allow surface modifications */
-#define   MMG5_IPARAM_nosurf             9
+#define   MMG5_IPARAM_nosurf             10
 ! /*!< [n] Number of local parameters */
-#define   MMG5_IPARAM_numberOfLocalParam 10
+#define   MMG5_IPARAM_numberOfLocalParam 11
 ! /*!< [1/0] Turn on/off point relocation with Scotch */
-#define   MMG5_IPARAM_renum              11
+#define   MMG5_IPARAM_renum              12
 ! /*!< [n] Specify the size of the bucket per dimension (DELAUNAY) */
-#define   MMG5_IPARAM_bucket             12
+#define   MMG5_IPARAM_bucket             13
 ! /*!< [val] Value for angle detection */
-#define   MMG5_DPARAM_angleDetection     13
+#define   MMG5_DPARAM_angleDetection     14
 ! /*!< [val] Minimal mesh size */
-#define   MMG5_DPARAM_hmin               14
+#define   MMG5_DPARAM_hmin               15
 ! /*!< [val] Maximal mesh size */
-#define   MMG5_DPARAM_hmax               15
+#define   MMG5_DPARAM_hmax               16
 ! /*!< [val] Control global Hausdorff distance (on all the boundary surfaces of the mesh) */
-#define   MMG5_DPARAM_hausd              16
+#define   MMG5_DPARAM_hausd              17
 ! /*!< [val] Control gradation */
-#define   MMG5_DPARAM_hgrad              17
+#define   MMG5_DPARAM_hgrad              18
 ! /*!< [val] Value of level-set (not use for now) */
-#define   MMG5_DPARAM_ls                 18
+#define   MMG5_DPARAM_ls                 19
 ! /*!< [n] Number of parameters */
-#define   MMG5_PARAM_size                19
+#define   MMG5_PARAM_size                20
 
 
 ! /*----------------------------- functions header -----------------------------*/

@@ -362,7 +362,7 @@ static int _MMG5_adpcol(MMG5_pMesh mesh,MMG5_pSol met) {
  *
  */
 static int _MMG5_adptet(MMG5_pMesh mesh,MMG5_pSol met) {
-  int      it,nnc,nns,nnf,nnm,maxit,nc,ns,nf,nm;
+  int      it1,it,nnc,nns,nnf,nnm,maxit,nc,ns,nf,nm;
   int      warn;
   double   maxgap;
 
@@ -433,7 +433,7 @@ static int _MMG5_adptet(MMG5_pMesh mesh,MMG5_pSol met) {
     else
       mesh->gap -= mesh->gap/(double)maxit;
 
-    if ( (abs(mesh->info.imprim) > 3 || mesh->info.ddebug) && ns+nc > 0 )
+    if ( (abs(mesh->info.imprim) > 4 || mesh->info.ddebug) && ns+nc > 0 )
       fprintf(stdout,"     %8d splitted, %8d collapsed, %8d swapped, %8d moved\n",ns,nc,nf,nm);
     if ( ns < 10 && abs(nc-ns) < 3 )  break;
     else if ( it > 3 && abs(nc-ns) < 0.3 * MG_MAX(nc,ns) )  break;
@@ -454,7 +454,8 @@ static int _MMG5_adptet(MMG5_pMesh mesh,MMG5_pSol met) {
     return(0);
 
   /*shape optim*/
-  it = 0;
+  it1 = it;
+  it  = 0;
   maxit = 2;
   do {
     /* badly shaped process */
@@ -490,7 +491,7 @@ static int _MMG5_adptet(MMG5_pMesh mesh,MMG5_pSol met) {
     }
     else  nf = 0;
 
-    if ( (abs(mesh->info.imprim) > 3 || mesh->info.ddebug) && nf+nm > 0 ){
+    if ( (abs(mesh->info.imprim) > 4 || mesh->info.ddebug) && nf+nm > 0 ){
       fprintf(stdout,"                                            ");
       fprintf(stdout,"%8d swapped, %8d moved\n",nf,nm);
     }
@@ -507,15 +508,15 @@ static int _MMG5_adptet(MMG5_pMesh mesh,MMG5_pSol met) {
   }
   else  nm = 0;
 
-  if ( (abs(mesh->info.imprim) > 3 || mesh->info.ddebug) && nm > 0 ){
+  if ( (abs(mesh->info.imprim) > 4 || mesh->info.ddebug) && nm > 0 ){
     fprintf(stdout,"                                            ");
     fprintf(stdout,"                  %8d moved\n",nm);
   }
 
 
-  if ( abs(mesh->info.imprim) < 4 && (nnc > 0 || nns > 0) )
+  if ( abs(mesh->info.imprim) < 5 && (nnc > 0 || nns > 0) )
     fprintf(stdout,"     %8d splitted, %8d collapsed, %8d swapped, %8d moved, %d iter. \n",
-            nns,nnc,nnf,nnm,it);
+            nns,nnc,nnf,nnm,it+it1);
 
   return(1);
 }
@@ -530,7 +531,7 @@ static int _MMG5_adptet(MMG5_pMesh mesh,MMG5_pSol met) {
  */
 int _MMG5_mmg3d1_pattern(MMG5_pMesh mesh,MMG5_pSol met) {
 
-  if ( abs(mesh->info.imprim) > 3 )
+  if ( abs(mesh->info.imprim) > 4 )
     fprintf(stdout,"  ** MESH ANALYSIS\n");
 
   if ( mesh->info.iso && !_MMG5_chkmani(mesh) ) {
@@ -539,7 +540,7 @@ int _MMG5_mmg3d1_pattern(MMG5_pMesh mesh,MMG5_pSol met) {
   }
 
   /**--- stage 1: geometric mesh */
-  if ( abs(mesh->info.imprim) > 3 || mesh->info.ddebug )
+  if ( abs(mesh->info.imprim) > 4 || mesh->info.ddebug )
     fprintf(stdout,"  ** GEOMETRIC MESH\n");
 
   if ( !_MMG5_anatet(mesh,met,1,1) ) {
@@ -552,7 +553,7 @@ int _MMG5_mmg3d1_pattern(MMG5_pMesh mesh,MMG5_pSol met) {
     return(0);
 
   /**--- Stage 2: computational mesh */
-  if ( abs(mesh->info.imprim) > 3 || mesh->info.ddebug )
+  if ( abs(mesh->info.imprim) > 4 || mesh->info.ddebug )
     fprintf(stdout,"  ** COMPUTATIONAL MESH\n");
 
   /* define metric map */

@@ -55,6 +55,8 @@ void _MMG5_Init_parameters(MMG5_pMesh mesh) {
   mesh->info.iso      =  0;  /* [0/1]    ,Turn on/off levelset meshing */
   /** MMG5_IPARAM_lag = -1 */
   mesh->info.lag      = -1;
+  /** MMG5_IPARAM_optim = 0 */
+  mesh->info.optim    =  0;
   /** MMG5_IPARAM_noinsert = 0 */
   mesh->info.noinsert =  0;  /* [0/1]    ,avoid/allow point insertion/deletion */
   /** MMG5_IPARAM_noswap = 0 */
@@ -66,7 +68,7 @@ void _MMG5_Init_parameters(MMG5_pMesh mesh) {
 #ifdef USE_SCOTCH
   mesh->info.renum    = 1;   /* [1/0]    , Turn on/off the renumbering using SCOTCH; */
 #else
-  mesh->info.renum    = 0;   /* [1/0]    , Turn on/off the renumbering using SCOTCH; */
+  mesh->info.renum    = 0;   /* [0]    , Turn on/off the renumbering using SCOTCH; */
 #endif
 
   /* default values for doubles */
@@ -1055,6 +1057,9 @@ int MMG5_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
       exit(EXIT_FAILURE);
     mesh->info.lag = val;
     break;
+  case MMG5_IPARAM_optim :
+    mesh->info.optim = val;
+    break;
   case MMG5_IPARAM_noinsert :
     mesh->info.noinsert = val;
     break;
@@ -1110,7 +1115,6 @@ int MMG5_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
  *
  */
 int MMG5_Get_iparameter(MMG5_pMesh mesh, int iparam) {
-  int k;
 
   switch ( iparam ) {
     /* Integer parameters */
@@ -1197,8 +1201,8 @@ int MMG5_Set_dparameter(MMG5_pMesh mesh, MMG5_pSol sol, int dparam, double val){
     break;
   case MMG5_DPARAM_hausd :
     if ( val <=0 ) {
-      fprintf(stdout,"  ## Warning: hausdorff number must be strictly positive.\n");
-      fprintf(stdout,"  Reset to default value.\n");
+      fprintf(stdout,"  ## Error: hausdorff number must be strictly positive.\n");
+      return(0);
     }
     else
       mesh->info.hausd    = val;

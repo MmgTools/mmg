@@ -135,9 +135,12 @@ void _MMG5_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
 }
 
 /**
- * Set API pointer functions to the matching mmg3d functions.
+ * Set common pointer functions between mmgs and mmg3d to the matching mmg3d
+ * functions.
  */
-void _MMG5_Set_APIFunc() {
+void _MMG5_Set_commonFunc() {
   MMG5_Init_parameters    = _MMG5_Init_parameters;
   _MMG5_bezierCP          = _MMG5_mmg3dBezierCP;
+  _MMG5_chkmsh            = _MMG5_mmg3dChkmsh;
+  _MMG5_renumbering       = _MMG5_mmg3dRenumbering;
 }

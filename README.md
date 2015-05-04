@@ -47,7 +47,7 @@ The **mmg** applications are validated on OS X and on most of the Linux platform
 ## Contributing
 Your contributions to the **mmg** project are welcomed. You can help us to improve
 our code by many means:
-  * pull requests: please follow the [wiki's guideline](https://github.com/MmgTools/mmg/wiki/Developpers-wiki#software-contribution);
+  * pull requests: please follow the [wiki's guideline](https://github.com/MmgTools/Mmg/wiki/Developers-wiki#pull-requests);
   * feature requests: please use the [GitHub issue tracker](https://github.com/MmgTools/mmg/issues/new) with the **_enhancement_** label;
   * bug reports: please use the [GitHub issue tracker](https://github.com/MmgTools/mmg/issues/new) with the **_bug_** label.
 

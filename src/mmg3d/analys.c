@@ -303,7 +303,7 @@ static int _MMG5_singul(MMG5_pMesh mesh) {
       ppt = &mesh->point[pt->v[i]];
       if ( !MG_VOK(ppt) || MG_SIN(ppt->tag) || ppt->tag & MG_NOM ) continue;
       else if ( MG_EDG(ppt->tag) ) {
-        ns = _MMG5_bouler(mesh,mesh->adjt,k,i,list,&xp,&nr);
+        ns = _MMG5_bouler(mesh,mesh->adjt,k,i,list,&xp,&nr,_MMG5_LMAX);
 
         if ( !ns )  continue;
         if ( (xp+nr) > 2 ) {

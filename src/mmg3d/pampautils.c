@@ -150,6 +150,7 @@ void _MMG5_usage(char *prog) {
 
   fprintf(stdout,"-lag [0/1/2] Lagrangian mesh displacement according to mode 0/1/2\n");
   fprintf(stdout,"-ls     val  create mesh of isovalue val\n");
+  fprintf(stdout,"-optim       mesh optimization\n");
   fprintf(stdout,"-noinsert    no point insertion/deletion \n");
   fprintf(stdout,"-noswap      no edge or face flipping\n");
   fprintf(stdout,"-nomove      no point relocation\n");
@@ -222,7 +223,6 @@ int MMG5_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
         if ( !MMG5_Set_solSize(mesh,met,MMG5_Vertex,0,MMG5_Tensor) )
           exit(EXIT_FAILURE);
         break;
-
 #ifndef PATTERN
       case 'b':
         if ( !strcmp(argv[i],"-bucket") && ++i < argc )
@@ -345,6 +345,10 @@ int MMG5_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
                     argv[i-1][1],argv[i-1][2],argv[i-1][3]);
             _MMG5_usage(argv[0]);
           }
+        }
+        else if( !strcmp(argv[i],"-optim") ) {
+          if ( !MMG5_Set_iparameter(mesh,met,MMG5_IPARAM_optim,1) )
+            exit(EXIT_FAILURE);
         }
         break;
 #ifdef USE_SCOTCH
