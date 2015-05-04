@@ -64,6 +64,7 @@ int _MMG5_newPt(MMG5_pMesh mesh,double c[3],char tag) {
   }
   assert(tag < 127);
   assert(tag >= 0);
+  ppt->n   = 0;
   ppt->tag = tag;
   ppt->tagdel = 0;
   return(curpt);
@@ -258,8 +259,14 @@ int _MMG5_zaldy(MMG5_pMesh mesh) {
   mesh->npnil = mesh->np + 1;
   mesh->nenil = mesh->ne + 1;
 
-  for (k=mesh->npnil; k<mesh->npmax-1; k++)
+  for (k=mesh->npnil; k<mesh->npmax-1; k++) {
+    /* Set tangent field of point to 0 */
+    mesh->point[k].n[0] = 0;
+    mesh->point[k].n[1] = 0;
+    mesh->point[k].n[2] = 0;
+    /* link */
     mesh->point[k].tmp  = k+1;
+  }
 
   for (k=mesh->nenil; k<mesh->nemax-1; k++)
     mesh->tetra[k].v[3] = k+1;

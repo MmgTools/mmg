@@ -584,7 +584,7 @@ int _MMG5_bouletrid(MMG5_pMesh mesh,int start,int iface,int ip,int *il1,int *l1,
     if ( pxt->tag[_MMG5_iarf[ifac][i1]]  & MG_GEO ) break;
   }
   assert(idx2 != ilists+idx);
-  assert(*ip0 == pt->v[_MMG5_idir[ifac][_MMG5_iprv2[i]]]);
+  *ip1 = pt->v[_MMG5_idir[ifac][_MMG5_iprv2[i]]];
 
   /* Start again from the newly hit boundary, until another boundary is hit and
    * complete the first ball */
@@ -610,7 +610,7 @@ int _MMG5_bouletrid(MMG5_pMesh mesh,int start,int iface,int ip,int *il1,int *l1,
     if ( pxt->tag[_MMG5_iarf[ifac][i1]]  & MG_GEO ) break;
   }
   assert(idx2 != ilists+idx);
-  *ip1 = pt->v[_MMG5_idir[ifac][_MMG5_iprv2[i]]];
+  assert(*ip0 == pt->v[_MMG5_idir[ifac][_MMG5_iprv2[i]]]);
 
   return(1);
 }
