@@ -482,7 +482,11 @@ int _MMG5_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
 
         // If _MMG5_directsurfball return 1 it is useless to call this function,
         // thus it is valid here to call it inside the assert.
-        assert( _MMG5_directsurfball(mesh,ip0,lists,ilists,n) == 1 );
+        //assert( _MMG5_directsurfball(mesh,ip0,lists,ilists,n) == 1 );
+        /* if ( ! (_MMG5_directsurfball(mesh,ip0,lists,ilists,n) == 1) ) */
+        /* { */
+        /*   printf("1! elt k %d %d \n",lists[0]/4, lists[0]%4); */
+        /* } */
 
         hp  = _MMG5_defsizreg(mesh,met,ip0,lists,ilists,hausd);
         met->m[ip0] = MG_MIN(met->m[ip0],hp);

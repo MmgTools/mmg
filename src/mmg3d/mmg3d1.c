@@ -603,13 +603,25 @@ int _MMG5_movtet(MMG5_pMesh mesh,MMG5_pSol met,int maxitin) {
                 return(-1);
 
               n = &(mesh->xpoint[ppt->xp].n1[0]);
-              if ( MG_GET(pxt->ori,i) )
+              if ( MG_GET(pxt->ori,i) ) {
                 // If _MMG5_directsurfball return 1 it is useless to call this function,
                 // thus it is valid here to call it inside the assert.
-                assert(_MMG5_directsurfball(mesh, pt->v[i0],lists,ilists,n) == 1);
+                // assert(_MMG5_directsurfball(mesh, pt->v[i0],lists,ilists,n) == 1);
+                /* if ( ! (_MMG5_directsurfball(mesh,pt->v[i0],lists,ilists,n) == 1) ) */
+                /* { */
+                /*   puts("\n"); */
+                /*   printf("2! elt k %d %d, pt->v %d \n",lists[0]/4, lists[0]%4, pt->v[i0]); */
+                /*   printf("2! n %e %e %e \n",n[0], n[1], n[2]); */
+                /* } */
+              }
               else {
-                if ( !_MMG5_directsurfball(mesh, pt->v[i0],lists,ilists,n) )
-                  continue;
+                if ( ! (_MMG5_directsurfball(mesh,pt->v[i0],lists,ilists,n) == 2) )
+                {
+                  /* puts("\n"); */
+                  /* printf("3! elt k %d %d, pt->v %d \n",lists[0]/4, lists[0]%4, pt->v[i0]); */
+                  /* printf("3! n %e %e %e \n",n[0], n[1], n[2]); */
+                }
+                // assert(_MMG5_directsurfball(mesh, pt->v[i0],lists,ilists,n)==2);
               }
               ier = _MMG5_movbdyregpt(mesh,met,listv,ilistv,lists,ilists);
               if ( ier )  ns++;

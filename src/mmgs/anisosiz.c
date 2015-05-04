@@ -590,8 +590,6 @@ int _MMG5_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   /* search for unintialized metric */
   _MMG5_defUninitSize(mesh,met,ismet);
 
-  #warning remove when mmg3d defaniso ok
-  //_MMG5_unscaleMesh(mesh, met); MMG5_saveMesh(mesh); saveMet(mesh,met);exit(EXIT_FAILURE);
   return(1);
 }
 
