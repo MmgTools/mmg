@@ -41,7 +41,6 @@
  */
 
 #include "mmg.h"
-#include "mmg3d.h"
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -104,8 +103,8 @@ void _MMG5_mmgInit_parameters(MMG5_pMesh mesh) {
   memset(&mesh->info,0, sizeof(MMG5_Info));
 
   /* default values for integers */
-  /** MMG5_IPARAM_verbose = 4 */
-  mesh->info.imprim   =  4;  /* [-10..10],Tune level of imprim */
+  /** MMG5_IPARAM_verbose = 1 */
+  mesh->info.imprim   =  1;  /* [-10..10],Tune level of imprim */
   /** MMG5_IPARAM_mem = -1 */
   mesh->info.mem      = -1;  /* [n/-1]   ,Set memory size to n Mbytes/keep the default value */
   /** MMG5_IPARAM_debug = 0 */
@@ -114,7 +113,6 @@ void _MMG5_mmgInit_parameters(MMG5_pMesh mesh) {
   mesh->info.npar     =  0;  /* [n]      ,number of local parameters */
 
 
-  /* default values for doubles */
   /* default values for doubles */
   /** MMG5_DPARAM_angleDetection = \ref _MMG5_ANGEDG */
   mesh->info.dhd      = _MMG5_ANGEDG;   /* angle detection; */

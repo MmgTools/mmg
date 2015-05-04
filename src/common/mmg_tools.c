@@ -23,7 +23,7 @@
 
 /**
  * \file common/mmg_tools.c
- * \brief Fonctions for anisotropic size map computation.
+ * \brief Various tools for the mmg applications.
  * \author Charles Dapogny (LJLL, UPMC)
  * \author Cécile Dobrzynski (Inria / IMB, Université de Bordeaux)
  * \author Pascal Frey (LJLL, UPMC)
@@ -148,7 +148,6 @@ inline int _MMG5_norpts(MMG5_pMesh mesh,int ip1,int ip2, int ip3,double *n) {
  *
  */
 inline int _MMG5_nortri(MMG5_pMesh mesh,MMG5_pTria pt,double *n) {
-  double   *a,*b,*c,dd,abx,aby,abz,acx,acy,acz,det;
 
   return(_MMG5_norpts(mesh,pt->v[0],pt->v[1],pt->v[2],n));
 
@@ -284,4 +283,31 @@ void _MMG5_printTria(MMG5_pMesh mesh,char* fileName) {
   }
   fprintf(inm,"---------> END TRIANGLES <--------\n");
   fclose(inm);
+}
+
+/**
+ * \return the available memory size of the computer.
+ *
+ * Compute the available memory size of the computer.
+ *
+ */
+long long _MMG5_memSize (void) {
+  long long mem;
+
+#if (defined(__APPLE__) && defined(__MACH__))
+  size_t size;
+
+  size = sizeof(mem);
+  if ( sysctlbyname("hw.memsize",&mem,&size,NULL,0) == -1)
+    return(0);
+
+#elif defined(__unix__) || defined(__unix) || defined(unix)
+  mem = ((long long)sysconf(_SC_PHYS_PAGES))*
+    ((long long)sysconf(_SC_PAGE_SIZE));
+#else
+  printf("  ## WARNING: UNKNOWN SYSTEM, RECOVER OF MAXIMAL MEMORY NOT AVAILABLE.\n");
+  return(0);
+#endif
+
+  return(mem);
 }

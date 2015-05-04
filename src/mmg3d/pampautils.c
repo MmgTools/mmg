@@ -148,8 +148,9 @@ void _MMG5_usage(char *prog) {
 
   _MMG5_mmgUsage(prog);
 
-  fprintf(stdout,"-lag [0/1/2] Lagrangian mesh displacement according to mode 0/1/2\n");
+  // fprintf(stdout,"-lag [0/1/2] Lagrangian mesh displacement according to mode 0/1/2\n");
   fprintf(stdout,"-ls     val  create mesh of isovalue val\n");
+  fprintf(stdout,"-optim       mesh optimization\n");
   fprintf(stdout,"-noswap      no edge or face flipping\n");
   fprintf(stdout,"-nomove      no point relocation\n");
   fprintf(stdout,"-noinsert    no point insertion/deletion \n");
@@ -335,6 +336,10 @@ int MMG5_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
                     argv[i-1][1],argv[i-1][2],argv[i-1][3]);
             _MMG5_usage(argv[0]);
           }
+        }
+        else if( !strcmp(argv[i],"-optim") ) {
+          if ( !MMG5_Set_iparameter(mesh,met,MMG5_IPARAM_optim,1) )
+            exit(EXIT_FAILURE);
         }
         break;
 #ifdef USE_SCOTCH
@@ -639,6 +644,24 @@ void MMG5_searchqua(MMG5_pMesh mesh,MMG5_pSol met,double critmin, int *eltab) {
 }
 
 /**
+ * \brief Compute edge length from edge's coordinates.
+ * \param *ca pointer toward the coordinates of the first edge's extremity.
+ * \param *cb pointer toward the coordinates of the second edge's extremity.
+ * \param *ma pointer toward the metric associated to the first edge's extremity.
+ * \param *mb pointer toward the metric associated to the second edge's extremity.
+ * \return edge length.
+ *
+ * Compute length of edge \f$[ca,cb]\f$ (with \a ca and \a cb
+ * coordinates of edge extremities) according to the anisotropic size
+ * prescription.
+ *
+ */
+inline double _MMG5_lenedgCoor_ani(double *ca,double *cb,double *sa,double *sb) {
+  fprintf(stdout,"under develop : first thing to do\n");
+  return(0.0);
+}
+
+/**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the sol structure.
  * \param lmin minimum edge length.
@@ -736,22 +759,4 @@ inline double _MMG5_lenedgCoor_iso(double *ca,double *cb,double *ma,double *mb) 
   len = fabs(r) < _MMG5_EPS ? l / h1 : l / (h2-h1) * log(r+1.0);
 
   return(len);
-}
-
-/**
- * \brief Compute edge length from edge's coordinates.
- * \param *ca pointer toward the coordinates of the first edge's extremity.
- * \param *cb pointer toward the coordinates of the second edge's extremity.
- * \param *ma pointer toward the metric associated to the first edge's extremity.
- * \param *mb pointer toward the metric associated to the second edge's extremity.
- * \return edge length.
- *
- * Compute length of edge \f$[ca,cb]\f$ (with \a ca and \a cb
- * coordinates of edge extremities) according to the anisotropic size
- * prescription.
- *
- */
-inline double _MMG5_lenedgCoor_ani(double *ca,double *cb,double *sa,double *sb) {
-  fprintf(stdout,"under develop : first thing to do\n");
-  return(0.0);
 }

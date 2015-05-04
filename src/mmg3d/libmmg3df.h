@@ -125,32 +125,34 @@
 #define   MMG5_IPARAM_iso                4
 ! /*!< [-1/0/1/2] Lagrangian option */
 #define   MMG5_IPARAM_lag                5
+! /*!< [1/0] Optimize mesh keeping its initial edge sizes */
+#define   MMG5_IPARAM_optim              6
 ! /*!< [1/0] Avoid/allow point insertion */
-#define   MMG5_IPARAM_noinsert           6
+#define   MMG5_IPARAM_noinsert           7
 ! /*!< [1/0] Avoid/allow edge or face flipping */
-#define   MMG5_IPARAM_noswap             7
+#define   MMG5_IPARAM_noswap             8
 ! /*!< [1/0] Avoid/allow point relocation */
-#define   MMG5_IPARAM_nomove             8
+#define   MMG5_IPARAM_nomove             9
 ! /*!< [n] Number of local parameters */
-#define   MMG5_IPARAM_numberOfLocalParam 9
+#define   MMG5_IPARAM_numberOfLocalParam 10
 ! /*!< [1/0] Turn on/off point relocation with Scotch */
-#define   MMG5_IPARAM_renum              10
+#define   MMG5_IPARAM_renum              11
 ! /*!< [n] Specify the size of the bucket per dimension (DELAUNAY) */
-#define   MMG5_IPARAM_bucket             11
+#define   MMG5_IPARAM_bucket             12
 ! /*!< [val] Value for angle detection */
-#define   MMG5_DPARAM_angleDetection     12
+#define   MMG5_DPARAM_angleDetection     13
 ! /*!< [val] Minimal mesh size */
-#define   MMG5_DPARAM_hmin               13
+#define   MMG5_DPARAM_hmin               14
 ! /*!< [val] Maximal mesh size */
-#define   MMG5_DPARAM_hmax               14
+#define   MMG5_DPARAM_hmax               15
 ! /*!< [val] Control global Hausdorff distance (on all the boundary surfaces of the mesh) */
-#define   MMG5_DPARAM_hausd              15
+#define   MMG5_DPARAM_hausd              16
 ! /*!< [val] Control gradation */
-#define   MMG5_DPARAM_hgrad              16
+#define   MMG5_DPARAM_hgrad              17
 ! /*!< [val] Value of level-set (not use for now) */
-#define   MMG5_DPARAM_ls                 17
+#define   MMG5_DPARAM_ls                 18
 ! /*!< [n] Number of parameters */
-#define   MMG5_PARAM_size                18
+#define   MMG5_PARAM_size                19
 
 
 ! /*----------------------------- functions header -----------------------------*/
