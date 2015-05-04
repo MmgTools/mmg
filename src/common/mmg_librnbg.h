@@ -21,36 +21,25 @@
 ** =============================================================================
 */
 
-/**
- * \file mmgs/API_functions.c
- * \brief C API functions definitions for MMGS library.
- * \author Algiane Froehly (Inria / IMB, Université de Bordeaux)
- * \version 5
- * \date 01 2014
- * \copyright GNU Lesser General Public License.
- *
- * \note This file contains some internal functions for the API, see
- * the \ref mmgs/libmmgs.h header file for the documentation of all
- * the usefull user's API functions.
- *
- * C API for MMGS library.
- *
- */
+#ifdef USE_SCOTCH
 
-#include "mmgs.h"
+#ifndef __RENUM__
+#define __RENUM__
 
-/**
- * \param mesh pointer toward the mesh structure.
- *
- * Initialization of the input parameters (stored in the Info structure).
- *
- * \todo try to remove paramters that do not coincide with mmg3d.
- */
-void _MMG5_Init_parameters(MMG5_pMesh mesh) {
+#include <scotch.h>
 
-  /* Init common parameters for mmgs and mmg3d. */
-  _MMG5_mmgInit_parameters(mesh);
+#define HASHPRIME 37
 
-  mesh->info.renum    = 0;   /* [0/1], Turn off/on the renumbering using SCOTCH; */
+#define CHECK_SCOTCH(t,m,e) if(0!=t){perror(m);return(e);}
 
-}
+typedef struct MeshGraphHash_ {
+  int vertNum;
+  int vertEnd;
+} MeshGraphHash;
+
+int    _SCOTCHintSort2asc1(SCOTCH_Num * sortPartTb, int vertNbr);
+int    _MMG5_kPartBoxCompute(SCOTCH_Graph, int, int, SCOTCH_Num*,MMG5_pMesh);
+void   _MMG5_swapNod(MMG5_pPoint, double*, int*, int, int, int);
+
+#endif /* __RENUM__ */
+#endif

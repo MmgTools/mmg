@@ -63,15 +63,14 @@ void _MMG5_Init_parameters(MMG5_pMesh mesh) {
   mesh->info.noswap   =  0;  /* [0/1]    ,avoid/allow edge or face flipping */
   /** MMG5_IPARAM_nomove = 0 */
   mesh->info.nomove   =  0;  /* [0/1]    ,avoid/allow point relocation */
-#ifdef USE_SCOTCH
-  mesh->info.renum    = 1;   /* [1/0]    , Turn on/off the renumbering using SCOTCH; */
-#else
-  mesh->info.renum    = 0;   /* [1/0]    , Turn on/off the renumbering using SCOTCH; */
-#endif
-
   /* default values for doubles */
   mesh->info.ls       = 0.0;      /* level set value */
 
+#ifdef USE_SCOTCH
+  mesh->info.renum    = 1;   /* [1/0]    , Turn on/off the renumbering using SCOTCH; */
+#else
+  mesh->info.renum    = 0;   /* [0]    , Turn on/off the renumbering using SCOTCH; */
+#endif
 
 #ifndef PATTERN
   /** MMG5_IPARAM_bucket = 64 */

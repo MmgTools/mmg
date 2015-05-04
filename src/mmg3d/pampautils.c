@@ -160,6 +160,7 @@ void _MMG5_usage(char *prog) {
 #ifdef USE_SCOTCH
   fprintf(stdout,"-rn [n]      Turn on or off the renumbering using SCOTCH [1/0] \n");
 #endif
+
   exit(EXIT_FAILURE);
 }
 

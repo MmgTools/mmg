@@ -994,6 +994,10 @@ static int adptri(MMG5_pMesh mesh,MMG5_pSol met) {
       return(0);
     }
 
+    /* renumbering if available and needed */
+    if ( it==1 && !_MMG5_scotchCall(mesh,met) )
+      return(0);
+
     nc = adpcol(mesh,met);
     if ( nc < 0 ) {
       fprintf(stdout,"  ## Unable to complete mesh. Exit program.\n");
@@ -1023,6 +1027,10 @@ static int adptri(MMG5_pMesh mesh,MMG5_pSol met) {
     else if ( it > 3 && abs(nc-ns) < 0.3 * MG_MAX(nc,ns) )  break;
   }
   while( ++it < maxit && nc+ns > 0 );
+
+  /* renumbering if available */
+  if ( !_MMG5_scotchCall(mesh,met) )
+    return(0);
 
   nm = 0;
   nm = movtri(mesh,met,5);
@@ -1092,6 +1100,8 @@ static int anatri(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
 
 int mmgs1(MMG5_pMesh mesh,MMG5_pSol met) {
 
+  /* renumbering if available */
+
   if ( abs(mesh->info.imprim) > 4 )
     fprintf(stdout,"  ** MESH ANALYSIS\n");
 
@@ -1100,9 +1110,13 @@ int mmgs1(MMG5_pMesh mesh,MMG5_pSol met) {
     fprintf(stdout,"  ** GEOMETRIC MESH\n");
 
   if ( !anatri(mesh,met,1) ) {
-    fprintf(stdout,"  ## Unable to split mesh. Exiting.\n");
+    fprintf(stdout,"  ## Unable to split mesh-> Exiting.\n");
     return(0);
   }
+
+  /* renumbering if available */
+  if ( !_MMG5_scotchCall(mesh,met) )
+    return(0);
 
   /*--- stage 2: computational mesh */
   if ( abs(mesh->info.imprim) > 4 || mesh->info.ddebug )
@@ -1122,6 +1136,10 @@ int mmgs1(MMG5_pMesh mesh,MMG5_pSol met) {
     fprintf(stdout,"  ## Unable to proceed adaptation. Exit program.\n");
     return(0);
   }
+
+  /* renumbering if available */
+  if ( !_MMG5_scotchCall(mesh,met) )
+    return(0);
 
   if ( !adptri(mesh,met) ) {
     fprintf(stdout,"  ## Unable to adapt. Exit program.\n");

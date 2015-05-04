@@ -209,14 +209,15 @@ int  _MMG5_bdryIso(MMG5_pMesh );
 int  _MMG5_bdrySet(MMG5_pMesh );
 int  _MMG5_bdryUpdate(MMG5_pMesh );
 int  _MMG5_bdryPerm(MMG5_pMesh );
-int  _MMG5_chkmsh(MMG5_pMesh,int,int);
 int  _MMG5_chkfemtopo(MMG5_pMesh mesh);
 int  _MMG5_cntbdypt(MMG5_pMesh mesh, int nump);
+long long _MMG5_memSize(void);
 void _MMG5_memOption(MMG5_pMesh mesh);
 int  _MMG5_mmg3d1_pattern(MMG5_pMesh ,MMG5_pSol );
 int  _MMG5_mmg3d1_delone(MMG5_pMesh ,MMG5_pSol );
 int  _MMG5_mmg3d2(MMG5_pMesh ,MMG5_pSol );
 int  _MMG5_mmg3d3(MMG5_pMesh ,MMG5_pSol );
+int  _MMG5_mmg3dChkmsh(MMG5_pMesh,int,int);
 int  _MMG5_split1_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]);
 void _MMG5_split1(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]);
 int  _MMG5_split1b(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int ip,int cas);
@@ -269,9 +270,8 @@ int  _MMG5_saveAllMesh(MMG5_pMesh mesh);
 int  _MMG5_saveLibraryMesh(MMG5_pMesh mesh);
 
 #ifdef USE_SCOTCH
-int _MMG5_renumbering(int vertBoxNbr, MMG5_pMesh mesh, MMG5_pSol sol);
+int _MMG5_mmg3dRenumbering(int vertBoxNbr, MMG5_pMesh mesh, MMG5_pSol sol);
 #endif
-int _MMG5_scotchCall(MMG5_pMesh mesh, MMG5_pSol sol);
 
 int    _MMG5_meancur(MMG5_pMesh mesh,int np,double c[3],int ilist,int *list,double h[3]);
 double _MMG5_surftri(MMG5_pMesh,int,int);
@@ -313,5 +313,7 @@ double (*_MMG5_caltet)(MMG5_pMesh mesh,MMG5_pSol met,int ia,int ib,int ic,int id
 double (*_MMG5_caltri)(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt);
 int    (*_MMG5_defsiz)(MMG5_pMesh ,MMG5_pSol );
 int    (*_MMG5_gradsiz)(MMG5_pMesh ,MMG5_pSol );
+
+void   _MMG5_Set_commonFunc();
 
 #endif
