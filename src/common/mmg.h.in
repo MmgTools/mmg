@@ -223,7 +223,7 @@
       }                                                                 \
     }                                                                   \
     else                                                                \
-      gap = wantedGap*initSize;                                         \
+      gap = (int)(wantedGap*initSize);                                  \
                                                                         \
     _MMG5_ADD_MEM(mesh,gap*sizeof(type),message,law);                   \
     _MMG5_SAFE_RECALLOC((ptr),initSize+1,initSize+gap+1,type,message);  \

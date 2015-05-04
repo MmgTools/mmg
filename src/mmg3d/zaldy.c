@@ -193,7 +193,7 @@ void _MMG5_memOption(MMG5_pMesh mesh) {
 #endif
 
     /*init allocation need 38Mo*/
-    npask = (double)(mesh->info.mem-38) / bytes * (int)million;
+    npask = (int)((double)(mesh->info.mem-38) / bytes) * (int)million;
     mesh->npmax = MG_MIN(npask,mesh->npmax);
     mesh->ntmax = MG_MIN(ctri*npask,mesh->ntmax);
     mesh->nemax = MG_MIN(6*npask,mesh->nemax);

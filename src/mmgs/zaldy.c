@@ -157,7 +157,7 @@ void _MMG5_memOption(MMG5_pMesh mesh) {
       2*sizeof(MMG5_Tria) + 3*sizeof(int) + sizeof(MMG5_Sol);
 
     /*init allocation need 38Mo*/
-    npask = (double)(mesh->info.mem-38) / bytes * (int)million;
+    npask = (int)((double)(mesh->info.mem-38) / bytes) * (int)million;
     mesh->npmax = MG_MIN(npask,mesh->npmax);
     mesh->ntmax = MG_MIN(2*npask,mesh->ntmax);
 
