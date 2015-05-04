@@ -425,7 +425,7 @@ int _MMG5_bouletrid(MMG5_pMesh mesh,int start,int iface,int ip,int *il1,int *l1,
   int                  k,*adja,*ilist1,*ilist2,*list1,*list2,aux;
   int                  lists[_MMG5_LMAX+2], ilists;
   int                  idp,na, nb, base, iopp, ipiv, piv, fstart, nvstart, adj;
-  int                  i,ifac,idx,idx2,idx_tmp,i1,ipa,ipb,ipv, isface;
+  int                  i,ifac,idx,idx2,idx_tmp,i1,ipa,ipb, isface;
   double               *n1,*n2,nt[3],ps1,ps2;
 
   pt = &mesh->tetra[start];

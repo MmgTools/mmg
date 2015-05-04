@@ -170,7 +170,7 @@ static int _MMG5_defmetrid(MMG5_pMesh mesh,MMG5_pSol met,int kel,
   _MMG5_Bezier   b;
   int            k,iel,idp,ilist1,ilist2,ilist,*list;
   int            list1[_MMG5_LMAX+2],list2[_MMG5_LMAX+2],iprid[2],ier;
-  double         *m,isqhmin,isqhmax,*n1,*n2,*n,*t,n0[3];
+  double         *m,isqhmin,isqhmax,*n1,*n2,*n,*t;
   double         trot[2],u[2],ux,uy,uz,det,bcu[3];
   double         r[3][3],lispoi[3*_MMG5_LMAX+1];
   double         detg,detd;
@@ -352,7 +352,7 @@ static int _MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,int kel, int iface, int
   double        *m,isqhmin,isqhmax,*n,r[3][3],lispoi[3*_MMG5_LMAX+1];
   double        ux,uy,uz,det2d,c[3];
   double        tAA[6],tAb[3], hausd, hausdloc;
-  unsigned char i0,i1,i2,itri1,itri2,i;
+  unsigned char i1,i2,itri1,itri2,i;
 
   ipref[0] = ipref[1] = 0;
   pt  = &mesh->tetra[kel];
@@ -393,7 +393,7 @@ static int _MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,int kel, int iface, int
     }
     assert(i<3);
 
-    i0    = _MMG5_idir[ifac][i];
+    // i0    = _MMG5_idir[ifac][i];
     itri1 = _MMG5_inxt2[i];
     i1    = _MMG5_idir[ifac][itri1];
     itri2 = _MMG5_iprv2[i];
@@ -483,8 +483,8 @@ static int _MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,int kel, int iface, int
     }
     assert(i<3);
 
-    i0  = _MMG5_idir[ifac][i];
-    i1  = _MMG5_idir[ifac][_MMG5_inxt2[i]];
+    // i0  = _MMG5_idir[ifac][i];
+    // i1  = _MMG5_idir[ifac][_MMG5_inxt2[i]];
 
     _MMG5_tet2tri(mesh,iel,ifac,&ptt);
 
@@ -544,7 +544,7 @@ static int _MMG5_defmetreg(MMG5_pMesh mesh,MMG5_pSol met,int kel,int iface, int 
   double         *n,*m,r[3][3],ux,uy,uz,lispoi[3*_MMG5_LMAX+1];
   double         det2d,c[3],isqhmin,isqhmax;
   double         tAA[6],tAb[3],hausd, hausdloc;
-  unsigned char  i0,i1,j,i;
+  unsigned char  i1,i;
 
   pt  = &mesh->tetra[kel];
   idp = pt->v[ip];
@@ -583,7 +583,7 @@ static int _MMG5_defmetreg(MMG5_pMesh mesh,MMG5_pSol met,int kel,int iface, int 
     }
     assert(i<3);
 
-    i0 = _MMG5_idir[ifac][i];
+    // i0 = _MMG5_idir[ifac][i];
     i1 = _MMG5_idir[ifac][_MMG5_inxt2[i]];
     p1 = &mesh->point[pt->v[i1]];
 
@@ -641,8 +641,8 @@ static int _MMG5_defmetreg(MMG5_pMesh mesh,MMG5_pSol met,int kel,int iface, int 
     }
     assert(i<3);
 
-    i0  = _MMG5_idir[ifac][i];
-    i1  = _MMG5_idir[ifac][_MMG5_inxt2[i]];
+    // i0  = _MMG5_idir[ifac][i];
+    // i1  = _MMG5_idir[ifac][_MMG5_inxt2[i]];
 
     _MMG5_tet2tri(mesh,iel,ifac,&ptt);
 
@@ -690,8 +690,8 @@ int _MMG5_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTetra   pt;
   MMG5_pxTetra  pxt;
   MMG5_pPoint   ppt;
-  double        *m,*n,mm[6],r[3][3],isqhmax;
-  int           k,l,iploc,ip;
+  double        mm[6];
+  int           k,l,iploc;
   char          i,ismet;
 
  if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug )

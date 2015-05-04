@@ -249,12 +249,6 @@ int intridmet(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,double s,double v[3],do
    result is stored in mr. edge p1p2 must not be a ridge */
 int intregmet(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,double s,double mr[6]) {
   MMG5_pTria     pt;
-  MMG5_pPoint    p1,p2;
-  _MMG5_Bezier    b;
-  double    b1[3],b2[3],bn[3],c[3],nt[3],cold[3],n[3],nold[3],mold[6],m1[6],m2[6];
-  double   *n1,*n2,step,u,r[3][3],mt1[3],mt2[3],dd;
-  int       ip1,ip2,nstep,l;
-  char      i1,i2;
 
   pt  = &mesh->tria[k];
   return(_MMG5_interpreg_ani(mesh,met,pt,i,s,mr));

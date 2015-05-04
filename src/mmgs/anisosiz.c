@@ -138,7 +138,7 @@ static int _MMG5_defmetrid(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
   _MMG5_Bezier   b;
   int            k,iel,idp,ilist1,ilist2,ilist,*list,list1[_MMG5_LMAX+2];
   int            list2[_MMG5_LMAX+2],iprid[2],ier;
-  double         *m,isqhmin,isqhmax,*n1,*n2,*n,*t,n0[3],trot[2],u[2];
+  double         *m,isqhmin,isqhmax,*n1,*n2,*n,*t,trot[2],u[2];
   double         r[3][3],lispoi[3*_MMG5_LMAX+1],ux,uy,uz,det,bcu[3];
   double         detg,detd;
   unsigned char  i,i0,i1,i2;
@@ -292,7 +292,7 @@ static int _MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
   double             *m,isqhmin,isqhmax,*n,r[3][3],lispoi[3*_MMG5_LMAX+1];
   double             ux,uy,uz,det2d,intm[3],c[3];
   double             tAA[6],tAb[3];
-  unsigned char      i0,i1,i2,i;
+  unsigned char      i0,i1,i2;
 
   ipref[0] = ipref[1] = 0;
   pt  = &mesh->tria[it];
@@ -602,7 +602,7 @@ static int grad2met(MMG5_pMesh mesh, MMG5_pSol met, int iel, int i){
   MMG5_pTria    pt;
   MMG5_pPoint   p1,p2;
   double   *mm1,*mm2,*nn1,*nn2,ps1,ps2,ux,uy,uz,m1[6],m2[6],n1[3],n2[3],nt[3];
-  double   r1[3][3],r2[3][3],t1[3],t2[3],c[3],mtan1[3],mtan2[3],mr[6],l1,l2,l,dd;
+  double   r1[3][3],r2[3][3],t1[3],t2[3],c[3],mtan1[3],mtan2[3],mr[6]/*,l1,l2*/,l,dd;
   double   lambda[2],vp[2][2],alpha,beta,mu;
   int      np1,np2;
   char     i1,i2,ichg;
@@ -698,13 +698,13 @@ static int grad2met(MMG5_pMesh mesh, MMG5_pSol met, int iel, int i){
   t2[1] = -uy - ps1*n2[1];
   t2[2] = -uz - ps1*n2[2];
 
-  l1 = m1[0]*t1[0]*t1[0] + m1[3]*t1[1]*t1[1] + m1[5]*t1[2]*t1[2] \
-    + 2.0 * ( m1[1]*t1[0]*t1[1] + m1[2]*t1[0]*t1[2] + m1[4]*t1[1]*t1[2] ) ;
-  l2 = m2[0]*t2[0]*t2[0] + m2[3]*t2[1]*t2[1] + m2[5]*t2[2]*t2[2] \
-    + 2.0 * ( m2[1]*t2[0]*t2[1] + m2[2]*t2[0]*t2[2] + m2[4]*t2[1]*t2[2] ) ;
-  l = 0.5* ( sqrt(l1) + sqrt(l2) ) ;
+  // Commentated because the next line overwrite it... to check!
+  /* l1 = m1[0]*t1[0]*t1[0] + m1[3]*t1[1]*t1[1] + m1[5]*t1[2]*t1[2] \ */
+  /*   + 2.0 * ( m1[1]*t1[0]*t1[1] + m1[2]*t1[0]*t1[2] + m1[4]*t1[1]*t1[2] ) ; */
+  /* l2 = m2[0]*t2[0]*t2[0] + m2[3]*t2[1]*t2[1] + m2[5]*t2[2]*t2[2] \ */
+  /*   + 2.0 * ( m2[1]*t2[0]*t2[1] + m2[2]*t2[0]*t2[2] + m2[4]*t2[1]*t2[2] ) ; */
+  /* l = 0.5* ( sqrt(l1) + sqrt(l2) ) ; */
 
-#warning the previously computed l is unused...
   l = sqrt(ux*ux+uy*uy+uz*uz);
 
   /* Characteristic sizes in direction of support curve */
