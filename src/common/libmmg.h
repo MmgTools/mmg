@@ -56,11 +56,11 @@ typedef MMG5_Par * MMG5_pPar;
 /**
  * \struct MMG5_Point
  * \brief Structure to store points of a MMG mesh.
- * \todo What to do with n[3], try to remove ig,s.
+ * \todo What to do with n[3], try to remove s.
  */
 typedef struct {
   double   c[3]; /*!< Coordinates of point */
-  double   n[3]; /*!< Tangeant for mmgs */
+  double   n[3]; /*!< Normal or Tangent for mmgs and Tangent (if needed) for mmg3d */
   int      ref; /*!< Reference of point */
   int      xp; /*!< Surface point number */
   int      tmp; /*!< Index of point in the saved mesh (we don't count
@@ -69,7 +69,7 @@ typedef struct {
   char     tag; /*!< Contains binary flags : if \f$tag=23=16+4+2+1\f$, then
                   the point is \a MG_REF, \a MG_GEO, \a MG_REQ and \a MG_BDY */
   char     tagdel; /*!< Tag for delaunay */
-  int      ig,s;
+  int      s;
 } MMG5_Point;
 typedef MMG5_Point * MMG5_pPoint;
 
@@ -80,7 +80,6 @@ typedef MMG5_Point * MMG5_pPoint;
 typedef struct {
   double   n1[3],n2[3]; /*!< Normals at boundary vertex;
                           n1!=n2 if the vertex belong to a ridge */
-  double   t[3]; /*!< Tangeant at vertex */
 } MMG5_xPoint;
 typedef MMG5_xPoint * MMG5_pxPoint;
 
@@ -160,7 +159,7 @@ typedef struct {
   char          nreg;
   int           renum;
   char          imprim,ddebug,badkal,iso,fem,lag;
-  unsigned char optim,noinsert, noswap, nomove;
+  unsigned char optim, noinsert, noswap, nomove, nosurf;
   int           bucket;
   MMG5_pPar     par;
 } MMG5_Info;

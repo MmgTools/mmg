@@ -91,9 +91,9 @@ inline double caleltsig_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel) {
     ps1 *= dd;
   }
   else {
-    memcpy(n,&mesh->xpoint[pa->ig].n1[0],3*sizeof(double));
+    memcpy(n,&mesh->xpoint[pa->xp].n1[0],3*sizeof(double));
     if ( !(pa->tag & MG_REF) ) {
-      ncomp = &mesh->xpoint[pa->ig].n2[0];
+      ncomp = &mesh->xpoint[pa->xp].n2[0];
       ps1 = n[0]*pv[0]+n[1]*pv[1]+n[2]*pv[2];
       ps1 *= dd;
       ps2 = ncomp[0]*pv[0]+ncomp[1]*pv[1]+ncomp[2]*pv[2];
@@ -179,9 +179,9 @@ inline double caleltsig_iso(MMG5_pMesh mesh,MMG5_pSol met,int iel) {
     ps1 *= invsqcal;
   }
   else {
-    memcpy(n,&mesh->xpoint[pa->ig].n1[0],3*sizeof(double));
+    memcpy(n,&mesh->xpoint[pa->xp].n1[0],3*sizeof(double));
     if ( !(pa->tag & MG_REF) ) {
-      ncomp = &mesh->xpoint[pa->ig].n2[0];
+      ncomp = &mesh->xpoint[pa->xp].n2[0];
       ps1 = n[0]*pv[0]+n[1]*pv[1]+n[2]*pv[2];
       ps1 *= invsqcal;
       ps2 = ncomp[0]*pv[0]+ncomp[1]*pv[1]+ncomp[2]*pv[2];
@@ -374,7 +374,11 @@ void _MMG5_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
     }
     ok++;
 
-    rap = ALPHAD * _MMG5_calelt(mesh,met,pt);
+    if ( met->m )
+      rap = ALPHAD * _MMG5_calelt(mesh,met,pt);
+    else // with -A option we are in aniso but without metric.
+      rap = ALPHAD * _MMG5_caltri_iso(mesh,met,pt);
+
     if ( rap < rapmin ) {
       rapmin = rap;
       iel    = ok;

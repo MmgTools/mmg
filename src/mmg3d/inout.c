@@ -649,7 +649,6 @@ int MMG5_loadMesh(MMG5_pMesh mesh) {
       if(iswp) ref=_MMG5_swapbin(ref);
     }
     pt->ref  = ref;//0;//ref ;
-    pt->qual = _MMG5_orcal(mesh,k);
     for (i=0; i<4; i++) {
       ppt = &mesh->point[pt->v[i]];
       ppt->tag &= ~MG_NUL;
@@ -851,7 +850,9 @@ int _MMG5_saveAllMesh(MMG5_pMesh mesh) {
       }
     }
   }
-  if ( nre ) {
+  if ( nre && !mesh->info.nosurf ) {
+    /* Don't save the required vertices when no surface remeshing (because all
+     * the surface vertices are required). */
     if(!bin) {
       strcpy(&chaine[0],"\n\nRequiredVertices\n");
       fprintf(inm,"%s",chaine);
@@ -963,11 +964,11 @@ int _MMG5_saveAllMesh(MMG5_pMesh mesh) {
         else if ( MG_EDG(ppt->tag) || (ppt->tag & MG_NOM) ) {
           pxp = &mesh->xpoint[ppt->xp];
           if(!bin) {
-            fprintf(inm,"%.15lg %.15lg %.15lg \n",pxp->t[0],pxp->t[1],pxp->t[2]);
+            fprintf(inm,"%.15lg %.15lg %.15lg \n",ppt->n[0],ppt->n[1],ppt->n[2]);
           } else {
-            fwrite((unsigned char*)&pxp->t[0],sd,1,inm);
-            fwrite((unsigned char*)&pxp->t[1],sd,1,inm);
-            fwrite((unsigned char*)&pxp->t[2],sd,1,inm);
+            fwrite((unsigned char*)&ppt->n[0],sd,1,inm);
+            fwrite((unsigned char*)&ppt->n[1],sd,1,inm);
+            fwrite((unsigned char*)&ppt->n[2],sd,1,inm);
           }
         }
       }
@@ -1035,7 +1036,9 @@ int _MMG5_saveAllMesh(MMG5_pMesh mesh) {
         fwrite(&ptt->ref,sw,1,inm);
       }
     }
-    if ( ntreq ) {
+    if ( ntreq  && !mesh->info.nosurf ) {
+      /* Don't save the required triangles when no surface remeshing (because
+       * all the surface triangles are required). */
       if(!bin) {
         strcpy(&chaine[0],"\n\nRequiredTriangles\n");
         fprintf(inm,"%s",chaine);
@@ -1148,7 +1151,9 @@ int _MMG5_saveAllMesh(MMG5_pMesh mesh) {
             }
           }
         }
-        if ( nedreq ) {
+        if ( nedreq  && !mesh->info.nosurf ) {
+          /* Don't save the required edges when no surface remeshing (because
+           * all the surface edges are required). */
           if(!bin) {
             strcpy(&chaine[0],"\n\nRequiredEdges\n");
             fprintf(inm,"%s",chaine);
@@ -1392,7 +1397,9 @@ int _MMG5_saveLibraryMesh(MMG5_pMesh mesh) {
       }
     }
   }
-  if ( nre ) {
+  if ( nre  && !mesh->info.nosurf ) {
+    /* Don't save the required vertices when no surface remeshing (because all
+     * the surface vertices are required). */
     if(!bin) {
       strcpy(&chaine[0],"\n\nRequiredVertices\n");
       fprintf(inm,"%s",chaine);
@@ -1443,7 +1450,9 @@ int _MMG5_saveLibraryMesh(MMG5_pMesh mesh) {
         fwrite(&ptt->ref,sw,1,inm);
       }
     }
-    if ( ntreq ) {
+    if ( ntreq && !mesh->info.nosurf ) {
+      /* Don't save the required triangles when no surface remeshing (because
+       * all the surface triangles are required). */
       if(!bin) {
         strcpy(&chaine[0],"\n\nRequiredTriangles\n");
         fprintf(inm,"%s",chaine);
@@ -1518,7 +1527,9 @@ int _MMG5_saveLibraryMesh(MMG5_pMesh mesh) {
         }
       }
     }
-    if ( nedreq ) {
+    if ( nedreq && !mesh->info.nosurf ) {
+      /* Don't save the required edges when no surface remeshing (because
+       * all the surface edges are required). */
       if(!bin) {
         strcpy(&chaine[0],"\n\nRequiredEdges\n");
         fprintf(inm,"%s",chaine);
@@ -1639,8 +1650,8 @@ int _MMG5_saveLibraryMesh(MMG5_pMesh mesh) {
  */
 int MMG5_loadMet(MMG5_pMesh mesh,MMG5_pSol met) {
   FILE       *inm;
-  float       fbuf[6];
-  double      dbuf[6];
+  float       fbuf[6],tmpf;
+  double      dbuf[6],tmpd,lambda[3],eigenv[3][3];
   int         binch,bdim,iswp;
   int         i,k,bin,bpos;
   int         compute_hmin, compute_hmax;
@@ -1753,10 +1764,11 @@ int MMG5_loadMet(MMG5_pMesh mesh,MMG5_pSol met) {
     return(-1);
   }
   if ( mesh->info.lag == -1 ) {
-    if(met->size!=1) {
-      fprintf(stdout,"  ** DATA ANISO IGNORED %d \n",met->size);
+    if(met->size!=1 && met->size!=3) {
+      fprintf(stdout,"  ** DATA TYPE IGNORED %d \n",met->size);
       return(-1);
     }
+    if(met->size > 1) met->size = 6;
   }
   else if ( met->size != 2 ) {
     return(-1);
@@ -1765,13 +1777,13 @@ int MMG5_loadMet(MMG5_pMesh mesh,MMG5_pSol met) {
   met->npi = met->np;
 
   /* mem alloc */
-  if ( met->m )  _MMG5_DEL_MEM(mesh,met->m,(met->size*met->npmax+1)*sizeof(double));
+  if ( met->m )  _MMG5_DEL_MEM(mesh,met->m,(met->size*(met->npmax+1))*sizeof(double));
   met->npmax = mesh->npmax;
 
-  _MMG5_ADD_MEM(mesh,(met->size*met->npmax+1)*sizeof(double),"initial solution",
+  _MMG5_ADD_MEM(mesh,(met->size*(met->npmax+1))*sizeof(double),"initial solution",
                 printf("  Exit program.\n");
                 exit(EXIT_FAILURE));
-  _MMG5_SAFE_CALLOC(met->m,met->size*met->npmax+1,double);
+  _MMG5_SAFE_CALLOC(met->m,met->size*(met->npmax+1),double);
 
   /* read mesh solutions */
   rewind(inm);
@@ -1835,54 +1847,86 @@ int MMG5_loadMet(MMG5_pMesh mesh,MMG5_pSol met) {
     met->size = 3;
     if ( met->ver == 1 ) {
       for (k=1; k<=met->np; k++) {
-        for (i=1; i<=3; i++) {
+        for (i=0; i<3; i++) {
           if(!bin){
             fscanf(inm,"%f",&fbuf[0]);
           } else {
             fread(&fbuf[0],sw,1,inm);
             if(iswp) fbuf[0]=_MMG5_swapf(fbuf[0]);
           }
-          met->m[3*(k-1)+i] = fbuf[0];
+          met->m[3*k+i] = fbuf[0];
         }
       }
     }
     else {
       for (k=1; k<=met->np; k++) {
-        for (i=1; i<=3; i++) {
+        for (i=0; i<3; i++) {
           if(!bin){
             fscanf(inm,"%lf",&dbuf[0]);
           } else {
             fread(&dbuf[0],sd,1,inm);
             if(iswp) dbuf[0]=_MMG5_swapd(dbuf[0]);
           }
-          met->m[3*(k-1)+i] = dbuf[0];
+          met->m[3*k+i] = dbuf[0];
         }
       }
     }
   }
   /* anisotropic metric */
-  /*else { //met->size==3
-    met->size=6;
-    if ( met->ver == GmfFloat ) {
-    for (k=1; k<=met->np; k++) {
-    GmfGetLin(inm,GmfSolAtVertices,fbuf);
-    tmpf    = fbuf[2];
-    fbuf[2] = fbuf[3];
-    fbuf[3] = tmpf;
-    for (i=0; i<6; i++)  met->m[6*k+1+i] = fbuf[i];
-    }
+  else { //met->size==6
+    if ( met->ver == 1 ) {
+      for (k=1; k<=met->np; k++) {
+        if(!bin){
+          for(i=0 ; i<met->size ; i++)
+            fscanf(inm,"%f",&fbuf[i]);
+        } else {
+          for(i=0 ; i<met->size ; i++) {
+            fread(&fbuf[i],sw,1,inm);
+            if(iswp) fbuf[i]=_MMG5_swapf(fbuf[i]);
+          }
+        }
+        tmpf    = fbuf[2];
+        fbuf[2] = fbuf[3];
+        fbuf[3] = tmpf;
+        for (i=0; i<6; i++)  met->m[6*k+i] = fbuf[i];
+      }
     }
     else {
+      for (k=1; k<=met->np; k++) {
+        if(!bin){
+          for(i=0 ; i<met->size ; i++)
+            fscanf(inm,"%lf",&dbuf[i]);
+        } else {
+          for(i=0 ; i<met->size ; i++) {
+            fread(&dbuf[i],sw,1,inm);
+            if(iswp) dbuf[i]=_MMG5_swapf(dbuf[i]);
+          }
+        }
+        tmpd    = dbuf[2];
+        dbuf[2] = dbuf[3];
+        dbuf[3] = tmpd;
+        for (i=0; i<met->size; i++)  met->m[6*k+i] = dbuf[i];
+      }
+    }
     for (k=1; k<=met->np; k++) {
-    GmfGetLin(inm,GmfSolAtVertices,dbuf);
-    tmpd    = dbuf[2];
-    dbuf[2] = dbuf[3];
-    dbuf[3] = tmpd;
-    for (i=0; i<met->size; i++)  met->m[6*k+1+i] = dbuf[i];
+      if ( ! _MMG5_eigenv(1,&met->m[6*k],lambda,eigenv ) ) {
+        printf("Error: metric diagonalisation fail,"
+               " unable to compute the sizes associated to the vertex %d.\n",
+               k);
+        return(0);
+      }
+      if ( compute_hmin ) {
+        mesh->info.hmin = MG_MIN(mesh->info.hmin,1./sqrt(lambda[0]));
+        mesh->info.hmin = MG_MIN(mesh->info.hmin,1./sqrt(lambda[1]));
+        mesh->info.hmin = MG_MIN(mesh->info.hmin,1./sqrt(lambda[2]));
+      }
+      if ( compute_hmax ) {
+        mesh->info.hmax = MG_MAX(mesh->info.hmax,1./sqrt(lambda[0]));
+        mesh->info.hmax = MG_MAX(mesh->info.hmax,1./sqrt(lambda[1]));
+        mesh->info.hmax = MG_MAX(mesh->info.hmax,1./sqrt(lambda[2]));
+      }
     }
-    }
-    }*/
-
+  }
   if ( compute_hmin ) {
     mesh->info.hmin *=.1;
     /* Check that user has not given a hmax value lower that the founded
@@ -1926,8 +1970,9 @@ int MMG5_loadMet(MMG5_pMesh mesh,MMG5_pSol met) {
 int MMG5_saveMet(MMG5_pMesh mesh,MMG5_pSol met) {
   FILE*        inm;
   MMG5_pPoint  ppt;
+  double       dbuf[6],tmp;
   char        *ptr,data[128],chaine[128];
-  int          binch,bpos,bin,np,k,typ;
+  int          binch,bpos,bin,np,k,typ,i;
 
   if ( !met->m || !met->nameout )  return(-1);
   met->ver = 2;
@@ -2007,21 +2052,26 @@ int MMG5_saveMet(MMG5_pMesh mesh,MMG5_pSol met) {
     }
   }
   /* write anisotropic metric */
-  /*else {
-    typtab[0] = 3;
-    nbm = 1;
-    GmfSetKwd(outm,GmfSolAtVertices,np,nbm,typtab);
+  else {
     for (k=1; k<=mesh->np; k++) {
-    ppt = &mesh->point[k];
-    if ( MG_VOK(ppt) ) {
-    for (i=0; i<met->size; i++)  dbuf[i] = met->m[met->size*(k)+1+i];
-    tmp = dbuf[2];
-    dbuf[2] = dbuf[3];
-    dbuf[3] = tmp;
-    GmfSetLin(outm,GmfSolAtVertices,dbuf);
+      ppt = &mesh->point[k];
+      if ( MG_VOK(ppt) ) {
+        for (i=0; i<met->size; i++)  dbuf[i] = met->m[met->size*k+i];
+        tmp = dbuf[2];
+        dbuf[2] = dbuf[3];
+        dbuf[3] = tmp;
+        if(!bin) {
+          for(i=0; i<met->size; i++)
+            fprintf(inm,"%.15lg  ",dbuf[i]);
+          fprintf(inm,"\n");
+        } else {
+          for(i=0; i<met->size; i++)
+            fwrite((unsigned char*)&dbuf[i],sd,1,inm);
+        }
+      }
     }
-    }
-    }*/
+  }
+
   /*fin fichier*/
   if(!bin) {
     strcpy(&chaine[0],"\n\nEnd\n");

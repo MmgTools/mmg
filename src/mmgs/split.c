@@ -235,7 +235,7 @@ int split1b(MMG5_pMesh mesh,int k,char i,int ip) {
 
     ier = _MMG5_bezierInt(&b,uv,o,no,to);
     assert(ier);
-    go = &mesh->xpoint[ppt->ig];
+    go = &mesh->xpoint[ppt->xp];
     memcpy(go->n2,no,3*sizeof(double));
   }
 
@@ -400,11 +400,11 @@ int split2(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
   if ( pt->edg[i] > 0 )   p3->ref = pt->edg[i];
   if ( pt->edg[i1] > 0 )  p4->ref = pt->edg[i1];
 
-  pt->v[i1] = pt1->v[i2] = pt2->v[i1] = vx[i];
-  pt->v[i2] = pt2->v[i]  = vx[i1];
+    pt->v[i1] = pt1->v[i2] = pt2->v[i1] = vx[i];
+    pt->v[i2] = pt2->v[i]  = vx[i1];
 
-  pt->tag[i] = pt->tag[i2] = pt1->tag[i1] = pt2->tag[i2] = MG_NOTAG;
-  pt->edg[i] = pt->edg[i2] = pt1->edg[i1] = pt2->edg[i2] = 0;
+    pt->tag[i] = pt->tag[i2] = pt1->tag[i1] = pt2->tag[i2] = MG_NOTAG;
+    pt->edg[i] = pt->edg[i2] = pt1->edg[i1] = pt2->edg[i2] = 0;
 
   /* alternate configs */
   /* pt->v[i2]  = pt1->v[i]  = pt2->v[i] = vx[i1]; */

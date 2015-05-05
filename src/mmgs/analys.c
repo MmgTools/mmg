@@ -595,7 +595,7 @@ static int norver(MMG5_pMesh mesh) {
                              mesh->xp--;
                              return(0));
         }
-        ppt->ig = mesh->xp;
+        ppt->xp = mesh->xp;
         go = &mesh->xpoint[mesh->xp];
         memcpy(go->n1,n,3*sizeof(double));
 

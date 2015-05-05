@@ -112,7 +112,7 @@ inline int _MMG5_directsurfball(MMG5_pMesh mesh, int ip, int *list, int ilist, d
     iel   = list[0] / 4;
     iface = list[0] % 4;
 
-    _MMG5_norface(mesh,iel,iface,nt);
+    if ( !_MMG5_norface(mesh,iel,iface,nt) ) return(0);
     ps = nt[0]*n[0] +  nt[1]*n[1] +  nt[2]*n[2];
     if ( ps > 0.0 )  return(1);
 
@@ -188,13 +188,13 @@ inline int _MMG5_BezierRidge(MMG5_pMesh mesh,int ip0,int ip1,double s,double *o,
         t0[2] = uz * il;
     }
     else {
-        memcpy(t0,&(mesh->xpoint[p0->xp].t[0]),3*sizeof(double));
-        ps = t0[0]*ux + t0[1]*uy + t0[2]*uz;
-        if ( ps < 0.0 ) {
-            t0[0] *= -1.0;
-            t0[1] *= -1.0;
-            t0[2] *= -1.0;
-        }
+      memcpy(t0,&(p0->n[0]),3*sizeof(double));
+      ps = t0[0]*ux + t0[1]*uy + t0[2]*uz;
+      if ( ps < 0.0 ) {
+        t0[0] *= -1.0;
+        t0[1] *= -1.0;
+        t0[2] *= -1.0;
+      }
     }
     if ( MG_SIN(p1->tag) ) {
         t1[0] = -ux * il;
@@ -202,7 +202,7 @@ inline int _MMG5_BezierRidge(MMG5_pMesh mesh,int ip0,int ip1,double s,double *o,
         t1[2] = -uz * il;
     }
     else {
-        memcpy(t1,&(mesh->xpoint[p1->xp].t[0]),3*sizeof(double));
+        memcpy(t1,&(p1->n[0]),3*sizeof(double));
         ps = - ( t1[0]*ux + t1[1]*uy + t1[2]*uz );
         if ( ps < 0.0 ) {
             t1[0] *= -1.0;
@@ -352,7 +352,7 @@ inline int _MMG5_BezierRef(MMG5_pMesh mesh,int ip0,int ip1,double s,double *o,do
         t0[2] = uz * il;
     }
     else {
-        memcpy(t0,&(mesh->xpoint[p0->xp].t[0]),3*sizeof(double));
+        memcpy(t0,&(p0->n[0]),3*sizeof(double));
         ps = t0[0]*ux + t0[1]*uy + t0[2]*uz;
         if ( ps < 0.0 ) {
             t0[0] *= -1.0;
@@ -366,7 +366,7 @@ inline int _MMG5_BezierRef(MMG5_pMesh mesh,int ip0,int ip1,double s,double *o,do
         t1[2] = -uz * il;
     }
     else {
-        memcpy(t1,&(mesh->xpoint[p1->xp].t[0]),3*sizeof(double));
+        memcpy(t1,&(p1->n[0]),3*sizeof(double));
         ps = - ( t1[0]*ux + t1[1]*uy + t1[2]*uz );
         if ( ps < 0.0 ) {
             t1[0] *= -1.0;
@@ -509,7 +509,7 @@ inline int _MMG5_BezierNom(MMG5_pMesh mesh,int ip0,int ip1,double s,double *o,do
         t0[2] = uz * il;
     }
     else {
-        memcpy(t0,&(mesh->xpoint[p0->xp].t[0]),3*sizeof(double));
+        memcpy(t0,&(p0->n[0]),3*sizeof(double));
         ps = t0[0]*ux + t0[1]*uy + t0[2]*uz;
         if ( ps < 0.0 ) {
             t0[0] *= -1.0;
@@ -523,7 +523,7 @@ inline int _MMG5_BezierNom(MMG5_pMesh mesh,int ip0,int ip1,double s,double *o,do
         t1[2] = -uz * il;
     }
     else {
-        memcpy(t1,&(mesh->xpoint[p1->xp].t[0]),3*sizeof(double));
+        memcpy(t1,&(p1->n[0]),3*sizeof(double));
         ps = - ( t1[0]*ux + t1[1]*uy + t1[2]*uz );
         if ( ps < 0.0 ) {
             t1[0] *= -1.0;
@@ -803,8 +803,8 @@ int _MMG5_DoSol(MMG5_pMesh mesh,MMG5_pSol met) {
     met->size   = 1;
     met->dim    = mesh->dim;
 
-    _MMG5_ADD_MEM(mesh,(met->npmax*met->size+1)*sizeof(double),"solution",return(0));
-    _MMG5_SAFE_CALLOC(met->m,met->npmax*met->size+1,double);
+    _MMG5_ADD_MEM(mesh,(met->size*(met->npmax+1))*sizeof(double),"solution",return(0));
+    _MMG5_SAFE_CALLOC(met->m,met->size*(met->npmax+1),double);
 
     /* internal edges */
     for (k=1; k<=mesh->ne; k++) {

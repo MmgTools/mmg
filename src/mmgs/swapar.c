@@ -92,8 +92,8 @@ int chkswp(MMG5_pMesh mesh,MMG5_pSol met,int k,int i,char typchk) {
     }
     else if ( MG_EDG(p[j]->tag) ) {
       _MMG5_nortri(mesh,pt,nt);
-      nr1  = &mesh->xpoint[p[j]->ig].n1[0];
-      nr2  = &mesh->xpoint[p[j]->ig].n2[0];
+      nr1  = &mesh->xpoint[p[j]->xp].n1[0];
+      nr2  = &mesh->xpoint[p[j]->xp].n2[0];
       ps  = nr1[0]*nt[0] + nr1[1]*nt[1] + nr1[2]*nt[2];
       ps2 = nr2[0]*nt[0] + nr2[1]*nt[1] + nr2[2]*nt[2];
       if ( fabs(ps) > fabs(ps2) )
@@ -110,8 +110,8 @@ int chkswp(MMG5_pMesh mesh,MMG5_pSol met,int k,int i,char typchk) {
   }
   else if ( MG_EDG(q->tag) ) {
     _MMG5_nortri(mesh,pt,nt);
-    nr1  = &mesh->xpoint[q->ig].n1[0];
-    nr2  = &mesh->xpoint[q->ig].n2[0];
+    nr1  = &mesh->xpoint[q->xp].n1[0];
+    nr2  = &mesh->xpoint[q->xp].n2[0];
     ps  = nr1[0]*nt[0] + nr1[1]*nt[1] + nr1[2]*nt[2];
     ps2 = nr2[0]*nt[0] + nr2[1]*nt[1] + nr2[2]*nt[2];
     if ( fabs(ps) > fabs(ps2) )

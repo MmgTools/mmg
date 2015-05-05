@@ -161,8 +161,8 @@ int MMG5_packMesh(MMG5_pMesh mesh,MMG5_pSol met) {
     for (k=1; k<=mesh->np; k++) {
       ppt = &mesh->point[k];
       if ( !MG_VOK(ppt) )  continue;
-      imet    = (k-1) * met->size + 1;
-      imetnew = (nbl-1) * met->size + 1;
+      imet    = k   * met->size;
+      imetnew = nbl * met->size;
 
       for (i=0; i<met->size; i++)
         met->m[imetnew + i] = met->m[imet + i];
@@ -322,7 +322,7 @@ int MMG5_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met
 
   if ( met->np && (met->np != mesh->np) ) {
     fprintf(stdout,"  ## WARNING: WRONG SOLUTION NUMBER. IGNORED\n");
-    _MMG5_DEL_MEM(mesh,met->m,(met->size*met->npmax+1)*sizeof(double));
+    _MMG5_DEL_MEM(mesh,met->m,(met->size*(met->npmax+1))*sizeof(double));
     met->np = 0;
   }
   else if ( met->size!=1 ) {
@@ -338,7 +338,7 @@ int MMG5_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met
   chrono(ON,&(ctim[2]));
   _MMG5_setfunc(mesh,met);
   MMG5_Set_saveFunc(mesh);
-  if ( abs(mesh->info.imprim) > 0 )  _MMG5_outqua(mesh,met);
+  _MMG5_outqua(mesh,met);
   fprintf(stdout,"\n  %s\n   MODULE MMG3D: IMB-LJLL : %s (%s)\n  %s\n",MG_STR,MG_VER,MG_REL,MG_STR);
   if ( mesh->info.imprim )  fprintf(stdout,"\n  -- PHASE 1 : ANALYSIS\n");
 

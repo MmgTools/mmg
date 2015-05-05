@@ -105,6 +105,9 @@ static int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
           mesh->info.dhd = cos(mesh->info.dhd*M_PI/180.0);
         }
         break;
+      case 'A': /* anisotropy */
+        met->size = 6;
+        break;
       case 'h':
         if ( !strcmp(argv[i],"-hmin") && ++i < argc )
           mesh->info.hmin = atof(argv[i]);
@@ -344,7 +347,7 @@ static void endcod() {
 static void setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
   if ( met->size < 6 ) {
     _MMG5_calelt  = _MMG5_caltri_iso;
-    defsiz  = defsiz_iso;
+    _MMG5_defsiz  = _MMG5_defsiz_iso;
     gradsiz = gradsiz_iso;
     _MMG5_lenedg  = _MMG5_lenedg_iso;
     intmet  = intmet_iso;
@@ -354,7 +357,7 @@ static void setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
   else {
     fprintf(stdout,"\n  ## WARNING: ANISOTROPIC REMESHING NOT STABLE FOR NOW.\n\n");
     _MMG5_calelt  = _MMG5_caltri_ani;
-    defsiz  = defsiz_ani;
+    _MMG5_defsiz  = _MMG5_defsiz_ani;
     gradsiz = gradsiz_ani;
     _MMG5_lenedg  = _MMG5_lenedg_ani;
     intmet  = intmet_ani;
@@ -421,7 +424,7 @@ int main(int argc,char *argv[]) {
     return(1);
   else if ( ier > 0 && met.np != mesh.np ) {
     fprintf(stdout,"  ## WARNING: WRONG SOLUTION NUMBER. IGNORED\n");
-    _MMG5_DEL_MEM(&mesh,met.m,(met.size*met.npmax+1)*sizeof(double));
+    _MMG5_DEL_MEM(&mesh,met.m,(met.size*(met.npmax+1))*sizeof(double));
   }
   if ( !parsop(&mesh,&met) )     return(1);
   if ( !_MMG5_scaleMesh(&mesh,&met) )  return(1);
@@ -481,7 +484,7 @@ int main(int argc,char *argv[]) {
   if ( mesh.edge )
     _MMG5_DEL_MEM(&mesh,mesh.edge,(mesh.na+1)*sizeof(MMG5_Edge));
   if ( met.m )
-    _MMG5_DEL_MEM(&mesh,met.m,(met.size*met.npmax+1)*sizeof(double));
+    _MMG5_DEL_MEM(&mesh,met.m,(met.size*(met.npmax+1))*sizeof(double));
   if ( mesh.info.par )
     _MMG5_DEL_MEM(&mesh,mesh.info.par,mesh.info.npar*sizeof(MMG5_Par));
   if ( mesh.xpoint )

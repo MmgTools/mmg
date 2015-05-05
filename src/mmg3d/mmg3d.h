@@ -71,9 +71,9 @@
                                                                         \
     /* solution */                                                      \
     if ( sol->m ) {                                                     \
-      _MMG5_ADD_MEM(mesh,(mesh->npmax-sol->npmax)*sizeof(double),       \
+      _MMG5_ADD_MEM(mesh,(sol->size*(mesh->npmax-sol->npmax))*sizeof(double), \
                     "larger solution",law);                             \
-      _MMG5_SAFE_REALLOC(sol->m,mesh->npmax+1,double,"larger solution"); \
+      _MMG5_SAFE_REALLOC(sol->m,sol->size*(mesh->npmax+1),double,"larger solution"); \
     }                                                                   \
     sol->npmax = mesh->npmax;                                           \
                                                                         \
@@ -183,17 +183,19 @@ int  _MMG5_BezierNom(MMG5_pMesh mesh,int ip0,int ip1,double s,double *o,double *
 int  _MMG5_norface(MMG5_pMesh mesh ,int k, int iface, double v[3]);
 int  _MMG5_boulenm(MMG5_pMesh mesh, int start, int ip, int iface, double n[3],double t[3]);
 int  _MMG5_boulevolp(MMG5_pMesh mesh, int start, int ip, int * list);
-int  _MMG5_boulesurfvolp(MMG5_pMesh mesh,int start,int ip,int iface,int *listv,int *ilistv,int *lists,int*ilists);
+int  _MMG5_boulesurfvolp(MMG5_pMesh mesh,int start,int ip,int iface,int *listv,
+                         int *ilistv,int *lists,int*ilists, int isnm);
+int  _MMG5_bouletrid(MMG5_pMesh,int,int,int,int *,int *,int *,int *,int *,int *);
 int  _MMG5_startedgsurfball(MMG5_pMesh mesh,int nump,int numq,int *list,int ilist);
 int  _MMG5_srcbdy(MMG5_pMesh mesh,int start,int ia);
 int  _MMG5_coquil(MMG5_pMesh mesh, int start, int ia, int * list);
 int  _MMG5_coquilface(MMG5_pMesh mesh, int start, int ia, int * list, int * it1, int *it2);
 int  _MMG5_settag(MMG5_pMesh,int,int,int,int);
 int  _MMG5_chkcol_int(MMG5_pMesh ,MMG5_pSol met,int,char,char,int *,char typchk);
-int  _MMG5_chkcol_bdy(MMG5_pMesh,int,char,char,int *);
+int  _MMG5_chkcol_bdy(MMG5_pMesh,MMG5_pSol met,int,char,char,int *);
 int  _MMG5_chkmanicoll(MMG5_pMesh mesh,int k,int iface,int iedg,int ndepmin,int ndepplus,char isminp,char isplp);
 int  _MMG5_chkmani(MMG5_pMesh mesh);
-int  _MMG5_colver(MMG5_pMesh,int *,int,char);
+int  _MMG5_colver(MMG5_pMesh,MMG5_pSol,int *,int,char);
 int  _MMG5_analys(MMG5_pMesh mesh);
 int  _MMG5_hashTetra(MMG5_pMesh mesh, int pack);
 int  _MMG5_hashTria(MMG5_pMesh mesh);
@@ -233,11 +235,11 @@ void _MMG5_split4op(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]);
 void _MMG5_split5(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]);
 void _MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]);
 int  _MMG5_split4bar(MMG5_pMesh mesh,MMG5_pSol met,int k);
-int  _MMG5_simbulgept(MMG5_pMesh mesh, int *list, int ilist, double o[3]);
-int  _MMG5_dichoto1b(MMG5_pMesh mesh,int *list,int ret,double o[3],double ro[3]);
+int  _MMG5_simbulgept(MMG5_pMesh mesh,MMG5_pSol met, int *list, int ilist, double o[3]);
+int  _MMG5_dichoto1b(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,double o[3],double ro[3]);
 void _MMG5_nsort(int ,double *,char *);
-double _MMG5_orcal(MMG5_pMesh mesh,int iel);
-int    _MMG5_movintpt(MMG5_pMesh mesh, int *list, int ilist, int improve);
+double _MMG5_orcal(MMG5_pMesh mesh,MMG5_pSol met,int iel);
+int    _MMG5_movintpt(MMG5_pMesh ,MMG5_pSol, int *, int , int );
 int    _MMG5_movbdyregpt(MMG5_pMesh, MMG5_pSol, int*, int, int*, int);
 int    _MMG5_movbdyrefpt(MMG5_pMesh, MMG5_pSol, int*, int, int*, int);
 int    _MMG5_movbdynompt(MMG5_pMesh, MMG5_pSol, int*, int, int*, int);
@@ -245,9 +247,8 @@ int    _MMG5_movbdyridpt(MMG5_pMesh, MMG5_pSol, int*, int, int*, int);
 int  _MMG5_chkswpbdy(MMG5_pMesh, MMG5_pSol,int*, int, int, int);
 int  _MMG5_swpbdy(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int it1,_MMG5_pBucket bucket);
 int  _MMG5_swpgen(MMG5_pMesh mesh,MMG5_pSol met,int nconf, int ilist, int *list,_MMG5_pBucket bucket);
-int  _MMG5_chkswpgen(MMG5_pMesh mesh, int start, int ia, int *ilist, int *list,double crit);
+int  _MMG5_chkswpgen(MMG5_pMesh mesh,MMG5_pSol met, int start, int ia, int *ilist, int *list,double crit);
 int  _MMG5_srcface(MMG5_pMesh mesh,int n0,int n1,int n2);
-int  _MMG5_bouleext(MMG5_pMesh mesh, int start, int ip, int iface, int *listv, int *ilistv, int *lists, int*ilists);
 int _MMG5_chkptonbdy(MMG5_pMesh,int);
 double _MMG5_orcal_poi(double a[3],double b[3],double c[3],double d[3]);
 int _MMG5_countelt(MMG5_pMesh mesh,MMG5_pSol sol, double *weightelt, long *npcible);
@@ -288,7 +289,8 @@ int _MMG5_cenrad_iso(MMG5_pMesh mesh,double *ct,double *c,double *rad);
 void _MMG5_tet2tri(MMG5_pMesh mesh,int k,char ie,MMG5_Tria *ptt);
 int  _MMG5_dichoto(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx);
 /** Find acceptable position for split1b, passing the shell of considered edge, starting from o */
-int _MMG5_dichoto1b(MMG5_pMesh mesh,int *list,int ret,double o[3],double ro[3]);
+int  _MMG5_dichoto1b(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,double o[3],double ro[3]);
+
 /** return edges of (virtual) triangle pt that need to be split w/r Hausdorff criterion */
 char _MMG5_chkedg(MMG5_pMesh mesh,MMG5_Tria *pt,char ori);
 int  _MMG5_anatet(MMG5_pMesh mesh,MMG5_pSol met,char typchk, int patternMode) ;
@@ -304,6 +306,7 @@ double _MMG5_caltet_ani(MMG5_pMesh mesh,MMG5_pSol met,int ia,int ib,int ic,int i
 double _MMG5_caltet_iso(MMG5_pMesh mesh,MMG5_pSol met,int ia,int ib,int ic,int id);
 double _MMG5_lenedgCoor_ani(double*, double*, double*, double*);
 double _MMG5_lenedgCoor_iso(double*, double*, double*, double*);
+int    _MMG5_intmetvol_ani(double*,double*,double*,double );
 int    _MMG5_defsiz_iso(MMG5_pMesh,MMG5_pSol );
 int    _MMG5_defsiz_ani(MMG5_pMesh ,MMG5_pSol );
 int    _MMG5_gradsiz_iso(MMG5_pMesh ,MMG5_pSol );
@@ -313,6 +316,7 @@ double (*_MMG5_caltet)(MMG5_pMesh mesh,MMG5_pSol met,int ia,int ib,int ic,int id
 double (*_MMG5_caltri)(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt);
 int    (*_MMG5_defsiz)(MMG5_pMesh ,MMG5_pSol );
 int    (*_MMG5_gradsiz)(MMG5_pMesh ,MMG5_pSol );
+int    (*_MMG5_intmetvol)(double*,double*,double*,double );
 
 void   _MMG5_Set_commonFunc();
 

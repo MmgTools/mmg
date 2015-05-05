@@ -915,7 +915,7 @@ int MMG5_saveMesh(MMG5_pMesh mesh) {
       if ( !MG_VOK(ppt) )  continue;
       else if ( !(ppt->tag & MG_GEO) ) {
         if ( ppt->tag & MG_REF ) {
-          go = &mesh->xpoint[ppt->ig];
+          go = &mesh->xpoint[ppt->xp];
           if(!bin) {
             fprintf(inm,"%.15lg %.15lg %.15lg \n",go->n1[0],go->n1[1],go->n1[2]);
           } else {
@@ -1183,11 +1183,11 @@ int MMG5_loadMet(MMG5_pMesh mesh,MMG5_pSol met) {
 
   /* mem alloc */
   if ( met->m )
-    _MMG5_DEL_MEM(mesh,met->m,(met->size*met->npmax+1)*sizeof(double));
+    _MMG5_DEL_MEM(mesh,met->m,(met->size*(met->npmax+1))*sizeof(double));
 
-  _MMG5_ADD_MEM(mesh,(met->size*met->npmax+1)*sizeof(double),
+  _MMG5_ADD_MEM(mesh,(met->size*(met->npmax+1))*sizeof(double),
                 "initial solution",return(0));
-  _MMG5_SAFE_CALLOC(met->m,met->size*met->npmax+1,double);
+  _MMG5_SAFE_CALLOC(met->m,met->size*(met->npmax+1),double);
 
   rewind(inm);
   fseek(inm,posnp,SEEK_SET);
@@ -1260,7 +1260,7 @@ int MMG5_loadMet(MMG5_pMesh mesh,MMG5_pSol met) {
         tmpf    = fbuf[2];
         fbuf[2] = fbuf[3];
         fbuf[3] = tmpf;
-        for (i=0; i<6; i++)  met->m[6*k+1+i] = fbuf[i];
+        for (i=0; i<6; i++)  met->m[6*k+i] = fbuf[i];
       }
     }
     else {
@@ -1273,16 +1273,16 @@ int MMG5_loadMet(MMG5_pMesh mesh,MMG5_pSol met) {
             fread(&dbuf[i],sw,1,inm);
             if(iswp) dbuf[i]=swapf(dbuf[i]);
           }
-          tmpd    = dbuf[2];
-          dbuf[2] = dbuf[3];
-          dbuf[3] = tmpd;
-          for (i=0; i<met->size; i++)  met->m[6*k+1+i] = dbuf[i];
         }
+        tmpd    = dbuf[2];
+        dbuf[2] = dbuf[3];
+        dbuf[3] = tmpd;
+        for (i=0; i<met->size; i++)  met->m[6*k+i] = dbuf[i];
       }
     }
 
     for (k=1; k<=met->np; k++) {
-      if ( ! _MMG5_eigenv(1,&met->m[6*k+1],lambda,eigenv ) ) {
+      if ( ! _MMG5_eigenv(1,&met->m[6*k],lambda,eigenv ) ) {
         printf("Error: metric diagonalisation fail,"
                " unable to compute the sizes associated to the vertex %d.\n",
                k);
@@ -1412,7 +1412,7 @@ int saveMet(MMG5_pMesh mesh,MMG5_pSol met) {
     for (k=1; k<=mesh->np; k++) {
       ppt = &mesh->point[k];
       if ( MG_VOK(ppt) ) {
-        for (i=0; i<met->size; i++)  dbuf[i] = met->m[met->size*(k)+1+i];
+        for (i=0; i<met->size; i++)  dbuf[i] = met->m[met->size*(k)+i];
         tmp = dbuf[2];
         dbuf[2] = dbuf[3];
         dbuf[3] = tmp;

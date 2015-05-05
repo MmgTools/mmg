@@ -290,15 +290,31 @@ int boulep(MMG5_pMesh mesh,int start,int ip,int *list) {
   return(ilist);
 }
 
-/* Computation of the two balls of a ridge point : list1 is associated to normal n1's side
-   ip0, ip1 = indices of the 2 ending point of the ridge
-   Both lists are returned enumerated in direct order  */
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param start index of the starting triangle.
+ * \param ip index of the looked ridge point.
+ * \param il1 pointer toward the first ball size.
+ * \param l1 pointer toward the first computed ball (associated to \a n1's
+ * side).
+ * \param il2 pointer toward the second ball size.
+ * \param l2 pointer toward the second computed ball (associated to \a n2's
+ * side).
+ * \param ip1 index of the first extremity of the ridge.
+ * \param ip2 index of the second extremity of the ridge.
+ * \return 0 if fail, 1 otherwise.
+ *
+ * Computation of the two balls of a ridge point: the list \a l1 is associated
+ * to normal \a n1's side. \a ip0 and \a ip1 are the indices of the 2 ending
+ * point of the ridge. Both lists are returned enumerated in direct order.
+ *
+ */
 int bouletrid(MMG5_pMesh mesh,int start,int ip,int *il1,int *l1,int *il2,int *l2,int *ip0,int *ip1) {
   MMG5_pTria           pt;
   MMG5_pPoint          ppt;
-  int             idp,k,kold,*adja,iel,*ilist1,*ilist2,*list1,*list2,aux;
-  unsigned char   i,iold,i1,i2,ipn;
-  double          *n1,*n2,nt[3],ps1,ps2;
+  int                  idp,k,kold,*adja,iel,*ilist1,*ilist2,*list1,*list2,aux;
+  unsigned char        i,iold,i1,i2,ipn;
+  double               *n1,*n2,nt[3],ps1,ps2;
 
   pt = &mesh->tria[start];
   if ( !MG_EOK(pt) )  return(0);
@@ -310,8 +326,8 @@ int bouletrid(MMG5_pMesh mesh,int start,int ip,int *il1,int *l1,int *il2,int *l2
   /* set pointers: first manifold is on side of triangle */
   if ( !_MMG5_nortri(mesh,pt,nt) )  return(0);
 
-  n1 = &(mesh->xpoint[ppt->ig].n1[0]);
-  n2 = &(mesh->xpoint[ppt->ig].n2[0]);
+  n1 = &(mesh->xpoint[ppt->xp].n1[0]);
+  n2 = &(mesh->xpoint[ppt->xp].n2[0]);
   ps1 = n1[0]*nt[0] + n1[1]*nt[1] + n1[2]*nt[2];
   ps2 = n2[0]*nt[0] + n2[1]*nt[1] + n2[2]*nt[2];
 
@@ -343,7 +359,10 @@ int bouletrid(MMG5_pMesh mesh,int start,int ip,int *il1,int *l1,int *il2,int *l2
     i = adja[i1] % 3;
     i = _MMG5_inxt2[i];
   }
-  while ( k && k != start && !(pt->tag[i1] & MG_GEO) );
+  // Remark: here the test k!=start is a security bound: theorically it is
+  // useless but in case of bad edge tag, it ensure that the loop is not
+  // infinite.
+  while ( k && !(pt->tag[i1] & MG_GEO) && k != start );
   *ip0 = pt->v[i2];
 
   /* Store the needed elements to start back in the new area,
@@ -355,7 +374,7 @@ int bouletrid(MMG5_pMesh mesh,int start,int ip,int *il1,int *l1,int *il2,int *l2
   do {
     pt   = &mesh->tria[k];
     adja = &mesh->adja[3*(k-1)+1];
-    if ( (*ilist1) > _MMG5_LMAX-2 )  return(-(*ilist1));
+    if ( (*ilist1) > _MMG5_LMAX-2 )  return(0);
     list1[(*ilist1)] = 3*k+i;
     (*ilist1)++;
     i1 = _MMG5_inxt2[i];
@@ -383,7 +402,7 @@ int bouletrid(MMG5_pMesh mesh,int start,int ip,int *il1,int *l1,int *il2,int *l2
   do {
     pt   = &mesh->tria[k];
     adja = &mesh->adja[3*(k-1)+1];
-    if ( *ilist2 > _MMG5_LMAX-2 )  return(-(*ilist2));
+    if ( *ilist2 > _MMG5_LMAX-2 )  return(0);
     list2[*ilist2] = 3*k+i;
     (*ilist2)++;
     i1 = _MMG5_inxt2[i];

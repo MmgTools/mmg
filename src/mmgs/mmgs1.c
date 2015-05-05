@@ -216,8 +216,8 @@ int chkedg(MMG5_pMesh mesh,int iel) {
     }
     else if ( MG_EDG(p[i]->tag) ) {
       _MMG5_nortri(mesh,pt,nt);
-      n1  = &mesh->xpoint[p[i]->ig].n1[0];
-      n2  = &mesh->xpoint[p[i]->ig].n2[0];
+      n1  = &mesh->xpoint[p[i]->xp].n1[0];
+      n2  = &mesh->xpoint[p[i]->xp].n2[0];
       ps  = n1[0]*nt[0] + n1[1]*nt[1] + n1[2]*nt[2];
       ps2 = n2[0]*nt[0] + n2[1]*nt[1] + n2[2]*nt[2];
       if ( fabs(ps) > fabs(ps2) )
@@ -514,7 +514,7 @@ static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
           ppt->tag = pt->tag[i];
           if ( p1->ref == pt->edg[i] || p2->ref == pt->edg[i] )
             ppt->ref = pt->edg[i];
-          ppt->ig  = mesh->xp;
+          ppt->xp  = mesh->xp;
           go = &mesh->xpoint[mesh->xp];
           memcpy(go->n1,no,3*sizeof(double));
 
@@ -539,7 +539,7 @@ static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
       }
       else if ( pt->tag[i] & MG_GEO ) {
         ppt = &mesh->point[ip];
-        go  = &mesh->xpoint[ppt->ig];
+        go  = &mesh->xpoint[ppt->xp];
         memcpy(go->n2,no,3*sizeof(double));
 
         /* a computation of the tangent with respect to these two normals is possible */
@@ -599,7 +599,7 @@ static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
             assert(ier);
 
             ppt = &mesh->point[ip];
-            go  = &mesh->xpoint[ppt->ig];
+            go  = &mesh->xpoint[ppt->xp];
             memcpy(go->n2,no,3*sizeof(double));
 
             /* a computation of the tangent with respect to these two normals is possible */
@@ -795,7 +795,7 @@ int chkspl(MMG5_pMesh mesh,MMG5_pSol met,int k,int i) {
     ++mesh->xp;
     ppt = &mesh->point[ip];
     ppt->tag = pt->tag[i];
-    ppt->ig  = mesh->xp;
+    ppt->xp  = mesh->xp;
     go = &mesh->xpoint[mesh->xp];
     memcpy(go->n1,no,3*sizeof(double));
   }
@@ -1123,7 +1123,7 @@ int mmgs1(MMG5_pMesh mesh,MMG5_pSol met) {
     fprintf(stdout,"  ** COMPUTATIONAL MESH\n");
 
   /* define metric map */
-  if ( !defsiz(mesh,met) ) {
+  if ( !_MMG5_defsiz(mesh,met) ) {
     fprintf(stdout,"  ## Metric undefined. Exit program.\n");
     return(0);
   }

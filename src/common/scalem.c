@@ -140,13 +140,13 @@ int _MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met) {
     }
     else if ( met->size==3 ){
       for (k=1; k<=mesh->np; k++) {
-        met->m[3*(k-1)+1] *= dd;
-        met->m[3*(k-1)+2] *= dd;
-        met->m[3*(k-1)+3] *= dd;
+        met->m[3*k]   *= dd;
+        met->m[3*k+1] *= dd;
+        met->m[3*k+2] *= dd;
       }
     } else { //met->size==6
       d1 = 1.0 / (dd*dd);
-      for (k=1; k<=6*mesh->np; k++)  met->m[k] *= d1;
+      for (k=6; k<6*(mesh->np+1); k++)  met->m[k] *= d1;
     }
   }
 
@@ -192,7 +192,7 @@ int _MMG5_unscaleMesh(MMG5_pMesh mesh,MMG5_pSol met) {
       for (k=1; k<=mesh->np; k++) {
         ppt = &mesh->point[k];
         if ( !MG_VOK(ppt) )  continue;
-        for (i=0; i<6; i++)  met->m[6*(k)+1+i] *= dd;
+        for (i=0; i<6; i++)  met->m[6*k+i] *= dd;
       }
     }
     else {

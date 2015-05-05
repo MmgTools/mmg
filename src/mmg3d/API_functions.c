@@ -63,14 +63,17 @@ void _MMG5_Init_parameters(MMG5_pMesh mesh) {
   mesh->info.noswap   =  0;  /* [0/1]    ,avoid/allow edge or face flipping */
   /** MMG5_IPARAM_nomove = 0 */
   mesh->info.nomove   =  0;  /* [0/1]    ,avoid/allow point relocation */
-  /* default values for doubles */
-  mesh->info.ls       = 0.0;      /* level set value */
-
+  /** MMG5_IPARAM_nosurf = 0 */
+  mesh->info.nosurf   =  0;  /* [0/1]    ,avoid/allow surface modifications */
 #ifdef USE_SCOTCH
   mesh->info.renum    = 1;   /* [1/0]    , Turn on/off the renumbering using SCOTCH; */
 #else
   mesh->info.renum    = 0;   /* [0]    , Turn on/off the renumbering using SCOTCH; */
 #endif
+
+  /* default values for doubles */
+  mesh->info.ls       = 0.0;      /* level set value */
+
 
 #ifndef PATTERN
   /** MMG5_IPARAM_bucket = 64 */
@@ -98,24 +101,29 @@ int MMG5_Set_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int typEntity, int np, int 
     fprintf(stdout,"  ## Error: MMG3D5 need a solution imposed on vertices\n");
     return(0);
   }
-  if ( typSol != MMG5_Scalar ) {
-    fprintf(stdout,"  ## Error: anisotropic adaptation not yet implemented\n");
+  if ( typSol == MMG5_Scalar ) {
+    sol->size = 1;
+  }
+  else if ( typSol == MMG5_Tensor ) {
+    sol->size = 6;
+  }
+  else {
+    fprintf(stdout,"  ## Error: type of solution not yet implemented\n");
     return(0);
   }
-  else sol->size = 1;
 
   sol->dim = 3;
   if ( np ) {
     sol->np  = np;
     sol->npi = np;
     if ( sol->m )
-      _MMG5_DEL_MEM(mesh,sol->m,(sol->size*sol->npmax+1)*sizeof(double));
+      _MMG5_DEL_MEM(mesh,sol->m,(sol->size*(sol->npmax+1))*sizeof(double));
 
     sol->npmax = mesh->npmax;
-    _MMG5_ADD_MEM(mesh,(sol->size*sol->npmax+1)*sizeof(double),"initial solution",
+    _MMG5_ADD_MEM(mesh,(sol->size*(sol->npmax+1))*sizeof(double),"initial solution",
                   printf("  Exit program.\n");
                   exit(EXIT_FAILURE));
-    _MMG5_SAFE_CALLOC(sol->m,(sol->npmax*sol->size+1),double);
+    _MMG5_SAFE_CALLOC(sol->m,(sol->size*(sol->npmax+1)),double);
   }
   return(1);
 }
@@ -458,8 +466,6 @@ int MMG5_Set_tetrahedron(MMG5_pMesh mesh, int v0, int v1, int v2, int v3, int re
     /* mesh->xt temporary used to count reoriented tetra */
     mesh->xt++;
   }
-
-  pt->qual = _MMG5_orcal(mesh,pos);
 
   return(1);
 }
@@ -1063,6 +1069,9 @@ int MMG5_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
   case MMG5_IPARAM_nomove :
     mesh->info.nomove   = val;
     break;
+  case MMG5_IPARAM_nosurf :
+    mesh->info.nosurf   = val;
+    break;
   case MMG5_IPARAM_numberOfLocalParam :
     if ( mesh->info.par ) {
       _MMG5_DEL_MEM(mesh,mesh->info.par,mesh->info.npar*sizeof(MMG5_Par));
@@ -1132,9 +1141,6 @@ int MMG5_Get_iparameter(MMG5_pMesh mesh, int iparam) {
   case MMG5_IPARAM_lag :
     return ( mesh->info.lag );
     break;
-  case MMG5_IPARAM_optim :
-    return ( mesh->info.optim );
-    break;
   case MMG5_IPARAM_noinsert :
     return ( mesh->info.noinsert );
     break;
@@ -1143,6 +1149,9 @@ int MMG5_Get_iparameter(MMG5_pMesh mesh, int iparam) {
     break;
   case MMG5_IPARAM_nomove :
     return ( mesh->info.nomove );
+    break;
+  case MMG5_IPARAM_nosurf :
+    return ( mesh->info.nosurf );
     break;
   case MMG5_IPARAM_numberOfLocalParam :
     return ( mesh->info.npar );
@@ -1307,7 +1316,7 @@ void MMG5_Free_structures(MMG5_pMesh mesh,MMG5_pSol met
 
   /* met */
   if ( /*!mesh->info.iso &&*/ met && met->m )
-    _MMG5_DEL_MEM(mesh,met->m,(met->size*met->npmax+1)*sizeof(double));
+    _MMG5_DEL_MEM(mesh,met->m,(met->size*(met->npmax+1))*sizeof(double));
 
   /* mesh->info */
   if ( mesh->info.npar && mesh->info.par )

@@ -55,7 +55,8 @@ static int _MMG5_adpspl(MMG5_pMesh mesh,MMG5_pSol met, int* warn) {
   MMG5_pPoint     p0,p1,ppt;
   MMG5_pxPoint    pxp;
   double     dd,len,lmax,o[3],to[3],ro[3],no1[3],no2[3],v[3];
-  int        k,ip,ip1,ip2,list[_MMG5_LMAX+2],ilist,ns,ref,ier;
+  double    *m1,*m2,*mp;
+  int        k,ip,ip1,ip2,list[_MMG5_LMAX+2],ilist,ns,ref,ier,iadr;
   char       imax,tag,j,i,i1,i2,ifa0,ifa1;
 
   *warn=0;
@@ -149,9 +150,9 @@ static int _MMG5_adpspl(MMG5_pMesh mesh,MMG5_pSol met, int* warn) {
         if ( !_MMG5_BezierReg(mesh,ip1,ip2,0.5,v,o,no1) )
           continue;
       }
-      ier = _MMG5_simbulgept(mesh,list,ilist,o);
+      ier = _MMG5_simbulgept(mesh,met,list,ilist,o);
       if ( !ier ) {
-        ier = _MMG5_dichoto1b(mesh,list,ilist,o,ro);
+        ier = _MMG5_dichoto1b(mesh,met,list,ilist,o,ro);
         memcpy(o,ro,3*sizeof(double));
       }
       ip = _MMG5_newPt(mesh,o,tag);
@@ -162,8 +163,18 @@ static int _MMG5_adpspl(MMG5_pMesh mesh,MMG5_pSol met, int* warn) {
                             break
                             ,o,tag);
       }
-      if ( met->m )
-        met->m[ip] = 0.5 * (met->m[ip1]+met->m[ip2]);
+      if ( met->m ) {
+        iadr = met->size*ip1;
+        m1 = &met->m[iadr];
+        iadr = met->size*ip2;
+        m2 = &met->m[iadr];
+        iadr = met->size*ip;
+        mp = &met->m[iadr];
+        if ( !_MMG5_intmetvol(m1,m2,mp,0.5) ) {
+          _MMG5_delPt(mesh,ip);
+          return(-1);
+        }
+      }
       ier = _MMG5_split1b(mesh,met,list,ilist,ip,1);
       /* if we realloc memory in _MMG5_split1b pt and pxt pointers are not valid */
       pt = &mesh->tetra[k];
@@ -183,22 +194,20 @@ static int _MMG5_adpspl(MMG5_pMesh mesh,MMG5_pSol met, int* warn) {
         ppt->ref = ref;
       else
         ppt->ref = pxt->ref[i];
-      if ( met->m )
-        met->m[ip] = 0.5 * (met->m[ip1]+met->m[ip2]);
 
       pxp = &mesh->xpoint[ppt->xp];
       if ( tag & MG_NOM ){
         memcpy(pxp->n1,no1,3*sizeof(double));
-        memcpy(pxp->t,to,3*sizeof(double));
+        memcpy(ppt->n,to,3*sizeof(double));
       }
       else if ( tag & MG_GEO ) {
         memcpy(pxp->n1,no1,3*sizeof(double));
         memcpy(pxp->n2,no2,3*sizeof(double));
-        memcpy(pxp->t,to,3*sizeof(double));
+        memcpy(ppt->n,to,3*sizeof(double));
       }
       else if ( tag & MG_REF ) {
         memcpy(pxp->n1,no1,3*sizeof(double));
-        memcpy(pxp->t,to,3*sizeof(double));
+        memcpy(ppt->n,to,3*sizeof(double));
       }
       else
         memcpy(pxp->n1,no1,3*sizeof(double));
@@ -223,8 +232,20 @@ static int _MMG5_adpspl(MMG5_pMesh mesh,MMG5_pSol met, int* warn) {
                             break
                             ,o,MG_NOTAG);
       }
-      if ( met->m )
-        met->m[ip] = 0.5 * (met->m[ip1]+met->m[ip2]);
+      ppt = &mesh->point[ip];
+      if ( met->m ) {
+        iadr = met->size*ip1;
+        m1 = &met->m[iadr];
+        iadr = met->size*ip2;
+        m2 = &met->m[iadr];
+        iadr = met->size*ip;
+        mp = &met->m[iadr];
+
+        if ( !_MMG5_intmetvol(m1,m2,mp,0.5) ) {
+          _MMG5_delPt(mesh,ip);
+          return(-1);
+        }
+      }
       ier = _MMG5_split1b(mesh,met,list,ilist,ip,1);
       if ( ier < 0 ) {
         fprintf(stdout,"  ## Error: unable to split.\n");
@@ -234,9 +255,7 @@ static int _MMG5_adpspl(MMG5_pMesh mesh,MMG5_pSol met, int* warn) {
         _MMG5_delPt(mesh,ip);
       }
       else {
-        ppt = &mesh->point[ip];
-        met->m[ip] = 0.5 * (met->m[ip1] + met->m[ip2]);
-        ns++;
+       ns++;
       }
     }
   }
@@ -312,7 +331,7 @@ static int _MMG5_adpcol(MMG5_pMesh mesh,MMG5_pSol met) {
       tag |= MG_BDY;
       if ( p0->tag > tag )   continue;
       if ( ( tag & MG_NOM ) && (mesh->adja[4*(k-1)+1+i]) ) continue;
-      ilist = _MMG5_chkcol_bdy(mesh,k,i,j,list);
+      ilist = _MMG5_chkcol_bdy(mesh,met,k,i,j,list);
     }
     /* Case of an internal face */
     else {
@@ -320,7 +339,7 @@ static int _MMG5_adpcol(MMG5_pMesh mesh,MMG5_pSol met) {
       ilist = _MMG5_chkcol_int(mesh,met,k,i,j,list,2);
     }
     if ( ilist > 0 ) {
-      ier = _MMG5_colver(mesh,list,ilist,i2);
+      ier = _MMG5_colver(mesh,met,list,ilist,i2);
       if ( ier < 0 )  return(-1);
       else if ( ier ) {
         _MMG5_delPt(mesh,ier);

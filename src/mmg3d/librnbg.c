@@ -37,6 +37,7 @@
 
 #include "mmg_librnbg.h"
 
+
 /**
  * \param graf the input graph structure.
  * \param vertNbr the number of vertices.
@@ -181,6 +182,8 @@ void _MMG5_swapTet(MMG5_pTetra tetras/*, int* adja*/, int* perm, int ind1, int i
   perm[ind2] = perm[ind1];
   perm[ind1] = tmp;
 }
+
+
 
 /**
  * \param boxVertNbr number of vertices by box.
@@ -329,7 +332,6 @@ int _MMG5_mmg3dRenumbering(int boxVertNbr, MMG5_pMesh mesh, MMG5_pSol sol) {
   /* don't check in release mode */
   if ( mesh->info.imprim > 6 || mesh->info.ddebug )
     fprintf(stdout,"** Checking scotch graph.\n");
-
   CHECK_SCOTCH(SCOTCH_graphCheck(&graf), "scotch_graphcheck", 0);
 #endif
 
@@ -361,7 +363,6 @@ int _MMG5_mmg3dRenumbering(int boxVertNbr, MMG5_pMesh mesh, MMG5_pSol sol) {
 
   nereal = 0;
   npreal = 0;
-
   /* Create the final permutation table for tetras (stored in vertOldTab) */
   for(tetraIdx = 1 ; tetraIdx < mesh->ne + 1 ; tetraIdx++) {
     if ( !mesh->tetra[tetraIdx].v[0] )  continue;
@@ -381,6 +382,7 @@ int _MMG5_mmg3dRenumbering(int boxVertNbr, MMG5_pMesh mesh, MMG5_pSol sol) {
     if (!ptet->v[0]) continue;
 
     nereal++;
+
     for(j = 0 ; j <= 3 ; j++) {
 
       nodeGlbIdx = ptet->v[j];
@@ -409,6 +411,7 @@ int _MMG5_mmg3dRenumbering(int boxVertNbr, MMG5_pMesh mesh, MMG5_pSol sol) {
       _MMG5_swapNod(mesh->point,sol->m,permNodTab,j,permNodTab[j],sol->size);
   }
   _MMG5_DEL_MEM(mesh,permNodTab,(mesh->np+1)*sizeof(int));
+
 
   mesh->ne = nereal;
   mesh->np = npreal;

@@ -148,19 +148,19 @@ void _MMG5_usage(char *prog) {
 
   _MMG5_mmgUsage(prog);
 
-  // fprintf(stdout,"-lag [0/1/2] Lagrangian mesh displacement according to mode 0/1/2\n");
+  fprintf(stdout,"-lag [0/1/2] Lagrangian mesh displacement according to mode 0/1/2\n");
   fprintf(stdout,"-ls     val  create mesh of isovalue val\n");
   fprintf(stdout,"-optim       mesh optimization\n");
+  fprintf(stdout,"-noinsert    no point insertion/deletion \n");
   fprintf(stdout,"-noswap      no edge or face flipping\n");
   fprintf(stdout,"-nomove      no point relocation\n");
-  fprintf(stdout,"-noinsert    no point insertion/deletion \n");
+  fprintf(stdout,"-nsurf       no surfacic modifications\n");
 #ifndef PATTERN
   fprintf(stdout,"-bucket val  Specify the size of bucket per dimension \n");
 #endif
 #ifdef USE_SCOTCH
   fprintf(stdout,"-rn [n]      Turn on or off the renumbering using SCOTCH [1/0] \n");
 #endif
-
   exit(EXIT_FAILURE);
 }
 
@@ -218,6 +218,10 @@ int MMG5_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
           if ( !MMG5_Set_dparameter(mesh,met,MMG5_DPARAM_angleDetection,
                                     atof(argv[i])) )
             exit(EXIT_FAILURE);
+        break;
+      case 'A': /* anisotropy */
+        if ( !MMG5_Set_solSize(mesh,met,MMG5_Vertex,0,MMG5_Tensor) )
+          exit(EXIT_FAILURE);
         break;
 #ifndef PATTERN
       case 'b':
@@ -324,6 +328,10 @@ int MMG5_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
         }
         else if( !strcmp(argv[i],"-nomove") ) {
           if ( !MMG5_Set_iparameter(mesh,met,MMG5_IPARAM_nomove,1) )
+            exit(EXIT_FAILURE);
+        }
+        else if( !strcmp(argv[i],"-nosurf") ) {
+          if ( !MMG5_Set_iparameter(mesh,met,MMG5_IPARAM_nosurf,1) )
             exit(EXIT_FAILURE);
         }
         break;
@@ -580,7 +588,7 @@ int MMG5_mmg3dcheck(MMG5_pMesh mesh,MMG5_pSol met,
 
   if ( met->np && (met->np != mesh->np) ) {
     fprintf(stdout,"  ## WARNING: WRONG SOLUTION NUMBER. IGNORED\n");
-    _MMG5_DEL_MEM(mesh,met->m,(met->size*met->npmax+1)*sizeof(double));
+    _MMG5_DEL_MEM(mesh,met->m,(met->size*(met->npmax+1))*sizeof(double));
     met->np = 0;
   }
   else if ( met->size!=1 ) {
@@ -642,24 +650,6 @@ void MMG5_searchqua(MMG5_pMesh mesh,MMG5_pSol met,double critmin, int *eltab) {
     }
   }
   return;
-}
-
-/**
- * \brief Compute edge length from edge's coordinates.
- * \param *ca pointer toward the coordinates of the first edge's extremity.
- * \param *cb pointer toward the coordinates of the second edge's extremity.
- * \param *ma pointer toward the metric associated to the first edge's extremity.
- * \param *mb pointer toward the metric associated to the second edge's extremity.
- * \return edge length.
- *
- * Compute length of edge \f$[ca,cb]\f$ (with \a ca and \a cb
- * coordinates of edge extremities) according to the anisotropic size
- * prescription.
- *
- */
-inline double _MMG5_lenedgCoor_ani(double *ca,double *cb,double *sa,double *sb) {
-  fprintf(stdout,"under develop : first thing to do\n");
-  return(0.0);
 }
 
 /**
@@ -760,4 +750,22 @@ inline double _MMG5_lenedgCoor_iso(double *ca,double *cb,double *ma,double *mb) 
   len = fabs(r) < _MMG5_EPS ? l / h1 : l / (h2-h1) * log(r+1.0);
 
   return(len);
+}
+
+/**
+ * \brief Compute edge length from edge's coordinates.
+ * \param *ca pointer toward the coordinates of the first edge's extremity.
+ * \param *cb pointer toward the coordinates of the second edge's extremity.
+ * \param *ma pointer toward the metric associated to the first edge's extremity.
+ * \param *mb pointer toward the metric associated to the second edge's extremity.
+ * \return edge length.
+ *
+ * Compute length of edge \f$[ca,cb]\f$ (with \a ca and \a cb
+ * coordinates of edge extremities) according to the anisotropic size
+ * prescription.
+ *
+ */
+inline double _MMG5_lenedgCoor_ani(double *ca,double *cb,double *sa,double *sb) {
+  fprintf(stdout,"under develop : first thing to do\n");
+  return(0.0);
 }

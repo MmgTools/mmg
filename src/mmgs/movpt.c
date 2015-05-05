@@ -507,16 +507,16 @@ int movridpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
   lam2 = step*step;
 
   if ( ll2old > ll1old ) {  //move is made towards p2
-    no1 = &mesh->xpoint[p0->ig].n1[0];
-    no2 = &mesh->xpoint[p0->ig].n2[0];
+    no1 = &mesh->xpoint[p0->xp].n1[0];
+    no2 = &mesh->xpoint[p0->xp].n2[0];
 
     if ( MS_SIN(p2->tag) ) {
-      np1 = &mesh->xpoint[p0->ig].n1[0];
-      np2 = &mesh->xpoint[p0->ig].n2[0];
+      np1 = &mesh->xpoint[p0->xp].n1[0];
+      np2 = &mesh->xpoint[p0->xp].n2[0];
     }
     else {
-      np1 = &mesh->xpoint[p2->ig].n1[0];
-      np2 = &mesh->xpoint[p2->ig].n2[0];
+      np1 = &mesh->xpoint[p2->xp].n1[0];
+      np2 = &mesh->xpoint[p2->xp].n2[0];
     }
     psn11 = no1[0]*np1[0] + no1[1]*np1[1] + no1[2]*np1[2];
     psn12 = no1[0]*np2[0] + no1[1]*np2[1] + no1[2]*np2[2];
@@ -660,15 +660,15 @@ int movridpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
     }
   }
   else {   /* move along p1 */
-    no1 = &mesh->xpoint[p0->ig].n1[0];
-    no2 = &mesh->xpoint[p0->ig].n2[0];
+    no1 = &mesh->xpoint[p0->xp].n1[0];
+    no2 = &mesh->xpoint[p0->xp].n2[0];
     if ( MS_SIN(p1->tag) ) {
-      np1 = &mesh->xpoint[p0->ig].n1[0];
-      np2 = &mesh->xpoint[p0->ig].n2[0];
+      np1 = &mesh->xpoint[p0->xp].n1[0];
+      np2 = &mesh->xpoint[p0->xp].n2[0];
     }
     else {
-      np1 = &mesh->xpoint[p1->ig].n1[0];
-      np2 = &mesh->xpoint[p1->ig].n2[0];
+      np1 = &mesh->xpoint[p1->xp].n1[0];
+      np2 = &mesh->xpoint[p1->xp].n2[0];
     }
     psn11 = no1[0]*np1[0] + no1[1]*np1[1] + no1[2]*np1[2];
     psn12 = no1[0]*np2[0] + no1[1]*np2[1] + no1[2]*np2[2];
@@ -815,7 +815,7 @@ int movridpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
 
   /* check proposed motion */
   ppt0 = &mesh->point[0];
-  ppt0->ig = 0;
+  ppt0->xp = 0;
   ppt0->tag = p0->tag;
 
   go = &mesh->xpoint[0];
