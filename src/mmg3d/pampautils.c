@@ -150,9 +150,11 @@ void _MMG5_usage(char *prog) {
 
   fprintf(stdout,"-lag [0/1/2] Lagrangian mesh displacement according to mode 0/1/2\n");
   fprintf(stdout,"-ls     val  create mesh of isovalue val\n");
+  fprintf(stdout,"-optim       mesh optimization\n");
+  fprintf(stdout,"-noinsert    no point insertion/deletion \n");
   fprintf(stdout,"-noswap      no edge or face flipping\n");
   fprintf(stdout,"-nomove      no point relocation\n");
-  fprintf(stdout,"-noinsert    no point insertion/deletion \n");
+  fprintf(stdout,"-nsurf       no surfacic modifications\n");
 #ifndef PATTERN
   fprintf(stdout,"-bucket val  Specify the size of bucket per dimension \n");
 #endif
@@ -216,6 +218,10 @@ int MMG5_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
           if ( !MMG5_Set_dparameter(mesh,met,MMG5_DPARAM_angleDetection,
                                     atof(argv[i])) )
             exit(EXIT_FAILURE);
+        break;
+      case 'A': /* anisotropy */
+        if ( !MMG5_Set_solSize(mesh,met,MMG5_Vertex,0,MMG5_Tensor) )
+          exit(EXIT_FAILURE);
         break;
 #ifndef PATTERN
       case 'b':
@@ -324,6 +330,10 @@ int MMG5_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
           if ( !MMG5_Set_iparameter(mesh,met,MMG5_IPARAM_nomove,1) )
             exit(EXIT_FAILURE);
         }
+        else if( !strcmp(argv[i],"-nosurf") ) {
+          if ( !MMG5_Set_iparameter(mesh,met,MMG5_IPARAM_nosurf,1) )
+            exit(EXIT_FAILURE);
+        }
         break;
       case 'o':
         if ( !strcmp(argv[i],"-out") ) {
@@ -335,6 +345,10 @@ int MMG5_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
                     argv[i-1][1],argv[i-1][2],argv[i-1][3]);
             _MMG5_usage(argv[0]);
           }
+        }
+        else if( !strcmp(argv[i],"-optim") ) {
+          if ( !MMG5_Set_iparameter(mesh,met,MMG5_IPARAM_optim,1) )
+            exit(EXIT_FAILURE);
         }
         break;
 #ifdef USE_SCOTCH
@@ -574,7 +588,7 @@ int MMG5_mmg3dcheck(MMG5_pMesh mesh,MMG5_pSol met,
 
   if ( met->np && (met->np != mesh->np) ) {
     fprintf(stdout,"  ## WARNING: WRONG SOLUTION NUMBER. IGNORED\n");
-    _MMG5_DEL_MEM(mesh,met->m,(met->size*met->npmax+1)*sizeof(double));
+    _MMG5_DEL_MEM(mesh,met->m,(met->size*(met->npmax+1))*sizeof(double));
     met->np = 0;
   }
   else if ( met->size!=1 ) {

@@ -61,114 +61,7 @@ inline int buildridmetfic(MMG5_pMesh mesh,double t[3],double n[3],double dtan,do
   return(1);
 }
 
-/* Parallel transport of a metric tensor field, attached to point c0, with normal n0,
-   to point c1, with normal n1 */
-int paratmet(double c0[3],double n0[3],double m[6],double c1[3],double n1[3],double mt[6]) {
-  double  r[3][3],mrot[6],mtan[3],lambda[2],vp[2][2],u[3],ps,ll;
 
-  /* Take the induced metric tensor in the tangent plane by change of basis : R * M * {^t}R*/
-  if ( !_MMG5_rotmatrix(n0,r) )  return(0);
-  rmtr(r,m,mrot);
-  mtan[0] = mrot[0];
-  mtan[1] = mrot[1];
-  mtan[2] = mrot[3];
-
-  /* Take eigenvectors of metric tensor in tangent plane */
-  _MMG5_eigensym(mtan,lambda,vp);
-
-  /* Eigenvector in canonical basis = {t}R*vp[0] */
-  u[0] = r[0][0]*vp[0][0] + r[1][0]*vp[0][1];
-  u[1] = r[0][1]*vp[0][0] + r[1][1]*vp[0][1];
-  u[2] = r[0][2]*vp[0][0] + r[1][2]*vp[0][1];
-
-  /* Projection in the tangent plane of c1 */
-  ps = u[0]*n1[0] + u[1]*n1[1] + u[2]*n1[2];
-  u[0] -= ps*n1[0];
-  u[1] -= ps*n1[1];
-  u[2] -= ps*n1[2];
-  ll = u[0]*u[0] + u[1]*u[1] + u[2]*u[2];
-  if ( ll < _MMG5_EPSD )  return(0);
-  ll = 1.0 / sqrt(ll);
-  u[0] *= ll;
-  u[1] *= ll;
-  u[2] *= ll;
-
-  /* And the transported metric is diag(lambda[0], lambda[1], 0) in basis (u,n1^u,n1) */
-  r[0][0] = u[0];
-  r[1][0] = u[1];
-  r[2][0] = u[2];
-
-  r[0][1] = n1[1]*u[2] - n1[2]*u[1];
-  r[1][1] = n1[2]*u[0] - n1[0]*u[2];
-  r[2][1] = n1[0]*u[1] - n1[1]*u[0];
-
-  ll = r[0][1]*r[0][1] + r[1][1]*r[1][1] + r[2][1]*r[2][1];
-  if ( ll < _MMG5_EPSD )  return(0);
-  ll = 1.0 / sqrt(ll);
-  r[0][1] *= ll;
-  r[1][1] *= ll;
-  r[2][1] *= ll;
-
-  r[0][2] = n1[0];
-  r[1][2] = n1[1];
-  r[2][2] = n1[2];
-
-  /*mt = R * diag(lambda[0], lambda[1], 0)*{^t}R */
-  mt[0] = lambda[0]*r[0][0]*r[0][0] + lambda[1]*r[0][1]*r[0][1];
-  mt[1] = lambda[0]*r[0][0]*r[1][0] + lambda[1]*r[0][1]*r[1][1];
-  mt[2] = lambda[0]*r[0][0]*r[2][0] + lambda[1]*r[0][1]*r[2][1];
-  mt[3] = lambda[0]*r[1][0]*r[1][0] + lambda[1]*r[1][1]*r[1][1];
-  mt[4] = lambda[0]*r[2][0]*r[1][0] + lambda[1]*r[2][1]*r[1][1];
-  mt[5] = lambda[0]*r[2][0]*r[2][0] + lambda[1]*r[2][1]*r[2][1];
-
-  return(1);
-}
-
-/* Build metric tensor at ridge point p0, when the 'good' normal direction is given by nt */
-int buildridmetnor(MMG5_pMesh mesh,MMG5_pSol met,int np0,double nt[3],double mr[6]) {
-  MMG5_pPoint p0;
-  MMG5_pxPoint  go;
-  double ps1,ps2,*n1,*n2,*t,*m,dv,u[3],r[3][3];
-
-  p0 = &mesh->point[np0];
-  if ( !(MG_GEO & p0->tag) )  return(0);
-  m = &met->m[6*(np0)+1];
-  t = &p0->n[0];
-  go = &mesh->xpoint[p0->ig];
-
-  /* Decide between the two possible configurations */
-  n1 = &go->n1[0];
-  n2 = &go->n2[0];
-
-  ps1 = nt[0]*n1[0] + nt[1]*n1[1] + nt[2]*n1[2];
-  ps2 = nt[0]*n2[0] + nt[1]*n2[1] + nt[2]*n2[2];
-
-  if ( fabs(ps2) > fabs(ps1) ) {
-    n1 = &go->n2[0];
-    dv = m[2];
-  }
-  else{
-    dv = m[1];
-  }
-
-  u[0] = n1[1]*t[2] - n1[2]*t[1];
-  u[1] = n1[2]*t[0] - n1[0]*t[2];
-  u[2] = n1[0]*t[1] - n1[1]*t[0];
-
-  /* If u = n1 ^ t, matrix of the desired metric in (t,u,n1) = diag(m[0],dv,0)*/
-  r[0][0] = t[0];  r[0][1] = u[0];  r[0][2] = n1[0];
-  r[1][0] = t[1];  r[1][1] = u[1];  r[1][2] = n1[1];
-  r[2][0] = t[2];  r[2][1] = u[2];  r[2][2] = n1[2];
-
-  mr[0] = m[0]*r[0][0]*r[0][0] + dv*r[0][1]*r[0][1];
-  mr[1] = m[0]*r[0][0]*r[1][0] + dv*r[0][1]*r[1][1];
-  mr[2] = m[0]*r[0][0]*r[2][0] + dv*r[0][1]*r[2][1];
-  mr[3] = m[0]*r[1][0]*r[1][0] + dv*r[1][1]*r[1][1];
-  mr[4] = m[0]*r[1][0]*r[2][0] + dv*r[1][1]*r[2][1];
-  mr[5] = m[0]*r[2][0]*r[2][0] + dv*r[2][1]*r[2][1];
-
-  return(1);
-}
 
 
 /* Compute the intersected (2 x 2) metric from metrics m and n : take simultaneous reduction,
@@ -343,7 +236,7 @@ int intextmet(MMG5_pMesh mesh,MMG5_pSol met,int np,double me[6]) {
   isqhmax = 1.0 / (mesh->info.hmax*mesh->info.hmax);
 
   p0 = &mesh->point[np];
-  m  = &met->m[6*np+1];
+  m  = &met->m[6*np];
 
   /* Case of a singular point : take smallest size prescribed by met, or me in every direction */
   if ( MS_SIN(p0->tag) ) {
@@ -380,8 +273,8 @@ int intextmet(MMG5_pMesh mesh,MMG5_pSol met,int np,double me[6]) {
     m[0] = MG_MAX(m[0],hu);
 
     /* Size prescribed by metric me in direction u1 = n1 ^ t */
-    assert ( p0->ig );
-    go = &mesh->xpoint[p0->ig];
+    assert ( p0->xp );
+    go = &mesh->xpoint[p0->xp];
     n1 = &go->n1[0];
     n2 = &go->n2[0];
 
@@ -428,13 +321,13 @@ int intextmet(MMG5_pMesh mesh,MMG5_pSol met,int np,double me[6]) {
     _MMG5_rotmatrix(n,r);
 
     /* Expression of both metrics in tangent plane */
-    rmtr(r,m,mrot);
+    _MMG5_rmtr(r,m,mrot);
     mtan[0] = mrot[0];
     mtan[1] = mrot[1];
     mtan[2] = mrot[3];
 
 
-    rmtr(r,me,mrot);
+    _MMG5_rmtr(r,me,mrot);
     metan[0] = mrot[0];
     metan[1] = mrot[1];
     metan[2] = mrot[3];

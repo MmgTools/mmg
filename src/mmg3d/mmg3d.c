@@ -93,7 +93,7 @@ int main(int argc,char *argv[]) {
   fprintf(stdout,"     %s\n",MG_CPY);
   fprintf(stdout,"     %s %s\n",__DATE__,__TIME__);
 
-  _MMG5_Set_APIFunc();
+  _MMG5_Set_commonFunc();
 
   signal(SIGABRT,_MMG5_excfun);
   signal(SIGFPE,_MMG5_excfun);
@@ -151,10 +151,6 @@ int main(int argc,char *argv[]) {
       fprintf(stdout,"  ## ERROR: WRONG DATA TYPE OR WRONG SOLUTION NUMBER.\n");
       _MMG5_RETURN_AND_FREE(&mesh,&met,MMG5_STRONGFAILURE);
     }
-    else if ( met.size != 1 ) {
-      fprintf(stdout,"  ## ERROR: ANISOTROPIC METRIC NOT IMPLEMENTED.\n");
-      _MMG5_RETURN_AND_FREE(&mesh,&met,MMG5_STRONGFAILURE);
-    }
     if ( mesh.info.iso && !ier ) {
       fprintf(stdout,"  ## ERROR: NO ISOVALUE DATA.\n");
       _MMG5_RETURN_AND_FREE(&mesh,&met,MMG5_STRONGFAILURE);
@@ -172,6 +168,7 @@ int main(int argc,char *argv[]) {
   MMG5_Set_saveFunc(&mesh);
   
   if ( abs(mesh.info.imprim) > 0 )  _MMG5_outqua(&mesh,&met);
+
   fprintf(stdout,"\n  %s\n   MODULE MMG3D: IMB-LJLL : %s (%s)\n  %s\n",
           MG_STR,MG_VER,MG_REL,MG_STR);
   if ( mesh.info.imprim )  fprintf(stdout,"\n  -- PHASE 1 : ANALYSIS\n");
@@ -199,7 +196,7 @@ int main(int argc,char *argv[]) {
     _MMG5_RETURN_AND_FREE(&mesh,&met,MMG5_LOWFAILURE);
   }
   else {
-    if ( !met.np && !_MMG5_DoSol(&mesh,&met) )
+    if ( mesh.info.optim && (!met.np && !_MMG5_DoSol(&mesh,&met)) )
       _MMG5_RETURN_AND_FREE(&mesh,&met,MMG5_LOWFAILURE);
   }
 
@@ -207,7 +204,7 @@ int main(int argc,char *argv[]) {
   if ( !_MMG5_analys(&mesh) )
     _MMG5_RETURN_AND_FREE(&mesh,&met,MMG5_LOWFAILURE);
 
-  if ( mesh.info.imprim > 3 && !mesh.info.iso && met.m ) _MMG5_prilen(&mesh,&met);
+  if ( mesh.info.imprim > 1 && !mesh.info.iso && met.m ) _MMG5_prilen(&mesh,&met);
 
   chrono(OFF,&MMG5_ctim[2]);
   printim(MMG5_ctim[2].gdif,stim);
@@ -286,7 +283,7 @@ int main(int argc,char *argv[]) {
   /* save file */
   _MMG5_outqua(&mesh,&met);
 
-  if ( mesh.info.imprim > 3 && !mesh.info.iso )
+  if ( mesh.info.imprim > 1 && !mesh.info.iso )
     _MMG5_prilen(&mesh,&met);
 
   chrono(ON,&MMG5_ctim[1]);

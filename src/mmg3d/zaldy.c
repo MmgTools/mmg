@@ -64,7 +64,10 @@ int _MMG5_newPt(MMG5_pMesh mesh,double c[3],char tag) {
   }
   assert(tag < 127);
   assert(tag >= 0);
-  ppt->tag = tag;
+  ppt->n[0]   = 0;
+  ppt->n[1]   = 0;
+  ppt->n[2]   = 0;
+  ppt->tag    = tag;
   ppt->tagdel = 0;
   return(curpt);
 }
@@ -123,27 +126,6 @@ void _MMG5_delElt(MMG5_pMesh mesh,int iel) {
   }
 }
 
-long long _MMG5_memSize (void) {
-  long long mem;
-
-#if (defined(__APPLE__) && defined(__MACH__))
-  size_t size;
-
-  size = sizeof(mem);
-  if ( sysctlbyname("hw.memsize",&mem,&size,NULL,0) == -1)
-    return(0);
-
-#elif defined(__unix__) || defined(__unix) || defined(unix)
-  mem = ((long long)sysconf(_SC_PHYS_PAGES))*
-    ((long long)sysconf(_SC_PAGE_SIZE));
-#else
-  printf("  ## WARNING: UNKNOWN SYSTEM, RECOVER OF MAXIMAL MEMORY NOT AVAILABLE.\n");
-  return(0);
-#endif
-
-  return(mem);
-}
-
 /** memory repartition for the -m option */
 void _MMG5_memOption(MMG5_pMesh mesh) {
   long long  million = 1048576L;
@@ -192,7 +174,7 @@ void _MMG5_memOption(MMG5_pMesh mesh) {
 #endif
 
     /*init allocation need 38Mo*/
-    npask = (double)(mesh->info.mem-38) / bytes * (int)million;
+    npask = (int)((double)(mesh->info.mem-38) / bytes) * (int)million;
     mesh->npmax = MG_MIN(npask,mesh->npmax);
     mesh->ntmax = MG_MIN(ctri*npask,mesh->ntmax);
     mesh->nemax = MG_MIN(6*npask,mesh->nemax);
@@ -258,8 +240,14 @@ int _MMG5_zaldy(MMG5_pMesh mesh) {
   mesh->npnil = mesh->np + 1;
   mesh->nenil = mesh->ne + 1;
 
-  for (k=mesh->npnil; k<mesh->npmax-1; k++)
+  for (k=mesh->npnil; k<mesh->npmax-1; k++) {
+    /* Set tangent field of point to 0 */
+    mesh->point[k].n[0] = 0;
+    mesh->point[k].n[1] = 0;
+    mesh->point[k].n[2] = 0;
+    /* link */
     mesh->point[k].tmp  = k+1;
+  }
 
   for (k=mesh->nenil; k<mesh->nemax-1; k++)
     mesh->tetra[k].v[3] = k+1;

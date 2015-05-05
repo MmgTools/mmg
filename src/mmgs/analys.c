@@ -460,7 +460,7 @@ static int _MMG5_singul(MMG5_pMesh mesh) {
       ppt->s++;
       if ( !MG_VOK(ppt) || MS_SIN(ppt->tag) )  continue;
       else if ( MG_EDG(ppt->tag) ) {
-        ns = _MMG5_bouler(mesh,mesh->adja,k,i,list,&xp,&nr);
+        ns = _MMG5_bouler(mesh,mesh->adja,k,i,list,&xp,&nr, _MMG5_LMAX);
 
         if ( !ns )  continue;
         if ( (xp+nr) > 2 ) {
@@ -595,7 +595,7 @@ static int norver(MMG5_pMesh mesh) {
                              mesh->xp--;
                              return(0));
         }
-        ppt->ig = mesh->xp;
+        ppt->xp = mesh->xp;
         go = &mesh->xpoint[mesh->xp];
         memcpy(go->n1,n,3*sizeof(double));
 

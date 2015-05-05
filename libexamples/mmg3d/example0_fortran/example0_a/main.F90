@@ -15,11 +15,11 @@ PROGRAM main
   CHARACTER(len=255) :: pwd
   CHARACTER(len=300) :: filename
 
-  WRITE(*,*) "  -- TEST MMG3DLIB \n"
+  WRITE(*,*) "  -- TEST MMG3DLIB"
 
   ! Name and path of the mesh file
   CALL getenv("PWD",pwd)
-  WRITE(filename,*) TRIM(pwd),"/../libexamples/mmg3d/example0/example0_a/cube"
+  WRITE(filename,*) TRIM(pwd),"/../libexamples/mmg3d/example0_fortran/example0_a/cube"
 
   !> ------------------------------ STEP   I --------------------------
   !! 1) Initialisation of mesh and sol structures

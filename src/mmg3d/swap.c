@@ -176,15 +176,32 @@ int _MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, int *list,int ilist,int it1,
   dischg = MG_MAX(dischg,hausd * hausd);
 
   if ( dischg > disnat )   return(0);
-  cal1 = _MMG5_caltri(mesh,met,&tt1);
-  cal2 = _MMG5_caltri(mesh,met,&tt2);
+  if ( met->m ) {
+    cal1 = _MMG5_caltri(mesh,met,&tt1);
+    cal2 = _MMG5_caltri(mesh,met,&tt2);
+  }
+  else { // with -A option we don't have the metric here so we always use the
+         // iso func.
+    cal1 = _MMG5_caltri_iso(mesh,met,&tt1);
+    cal2 = _MMG5_caltri_iso(mesh,met,&tt2);
+  }
+
   calnat = MG_MIN(cal1,cal2);
   for (j=0; j<3; j++) {
     if ( tt1.v[j] == nq )  tt1.v[j] = na2;
     if ( tt2.v[j] == np )  tt2.v[j] = na1;
   }
-  cal1 = _MMG5_caltri(mesh,met,&tt1);
-  cal2 = _MMG5_caltri(mesh,met,&tt2);
+
+  if ( met->m ) {
+    cal1 = _MMG5_caltri(mesh,met,&tt1);
+    cal2 = _MMG5_caltri(mesh,met,&tt2);
+  }
+  else { // with -A option we don't have the metric here so we always use the
+         // iso func.
+    cal1 = _MMG5_caltri_iso(mesh,met,&tt1);
+    cal2 = _MMG5_caltri_iso(mesh,met,&tt2);
+  }
+
   calchg = MG_MIN(cal1,cal2);
   if ( calchg < 1.01 * calnat )  return(0);
 
@@ -215,19 +232,19 @@ int _MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, int *list,int ilist,int it1,
 
     /* 2 elts resulting from split and collapse */
     pt0->v[ip] = 0;
-    if ( _MMG5_orcal(mesh,0) < _MMG5_NULKAL )  return(0);
+    if ( _MMG5_orcal(mesh,met,0) < _MMG5_NULKAL )  return(0);
     if ( !isshell ) {
       pt0->v[ip] = na1;
-      caltmp = _MMG5_orcal(mesh,0);
+      caltmp = _MMG5_orcal(mesh,met,0);
       calnew = MG_MIN(calnew,caltmp);
     }
     memcpy(pt0,pt,sizeof(MMG5_Tetra));
     pt0->v[iq] = 0;
-    if ( _MMG5_orcal(mesh,0) < _MMG5_NULKAL )  return(0);
+    if ( _MMG5_orcal(mesh,met,0) < _MMG5_NULKAL )  return(0);
 
     if ( !isshell ) {
       pt0->v[iq] = na1;
-      caltmp = _MMG5_orcal(mesh,0);
+      caltmp = _MMG5_orcal(mesh,met,0);
       calnew = MG_MIN(calnew,caltmp);
     }
   }
@@ -252,12 +269,12 @@ int _MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, int *list,int ilist,int it1,
 int _MMG5_swpbdy(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int it1,_MMG5_pBucket bucket) {
   MMG5_pTetra   pt,pt1;
   MMG5_pPoint   p0,p1;
-  int      iel,iel1,ilist,np,nq,nm;
-  double   c[3];
-  char     ia,iface1,j,ipa,im;
-  int      ier;
+  int           iel,iel1,ilist,np,nq,nm;
+  double        c[3],*mp, *mq, *mm;
+  char          ia,iface1,j,ipa,im;
+  int           ier;
 #ifndef NDEBUG
-  int      na;
+  int           na;
 #endif
 
   iel = list[0] / 6;
@@ -311,7 +328,13 @@ int _MMG5_swpbdy(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int it1,_MMG5_p
                           ,c,MG_BDY);
     }
   }
-  if ( met->m )  met->m[nm] = 0.5 *(met->m[np]+met->m[nq]);
+  if ( met->m ) {
+    mp = &met->m[met->size*np];
+    mq = &met->m[met->size*nq];
+    mm = &met->m[met->size*nm];
+    if ( !_MMG5_intmetvol(mq,mp,mm,0.5) )  return(0);
+  }
+
   ier = _MMG5_split1b(mesh,met,list,ret,nm,0);
   /* pointer adress may change if we need to realloc memory during split */
   pt  = &mesh->tetra[iel];
@@ -339,7 +362,7 @@ int _MMG5_swpbdy(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int it1,_MMG5_p
   assert(list[0]/4 == iel1);
   assert(pt1->v[ipa] == na);
 
-  ier = _MMG5_colver(mesh,list,ilist,ipa);
+  ier = _MMG5_colver(mesh,met,list,ilist,ipa);
   if ( ier < 0 ) {
     fprintf(stdout,"  ## Warning: unable to swap boundary edge.\n");
     return(-1);

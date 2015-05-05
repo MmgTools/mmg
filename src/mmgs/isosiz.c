@@ -40,7 +40,7 @@
 
 /* Define isotropic size map at all vertices of the mesh, associated with geometric approx ;
    by convention, p0->h stores desired length at point p0 */
-int defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
+int _MMG5_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTria    pt;
   MMG5_pPoint   ppt,p[3];
   MMG5_pPar     par;
@@ -50,7 +50,7 @@ int defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
   char     i,i1,i2;
 
   if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug )
-    fprintf(stdout,"  ** Defining map\n");
+    fprintf(stdout,"  ** Defining isotropic map\n");
 
   if ( mesh->info.hmax < 0.0 )  mesh->info.hmax = 0.5 * mesh->info.delta;
 
@@ -82,8 +82,8 @@ int defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
       }
       else if ( MG_EDG(p[i]->tag) ) {
         _MMG5_nortri(mesh,pt,nt);
-        n1  = &mesh->xpoint[p[i]->ig].n1[0];
-        n2  = &mesh->xpoint[p[i]->ig].n2[0];
+        n1  = &mesh->xpoint[p[i]->xp].n1[0];
+        n2  = &mesh->xpoint[p[i]->xp].n2[0];
         ps  = n1[0]*nt[0] + n1[1]*nt[1] + n1[2]*nt[2];
         ps2 = n2[0]*nt[0] + n2[1]*nt[1] + n2[2]*nt[2];
         if ( fabs(ps) > fabs(ps2) )

@@ -49,7 +49,7 @@
  * configuration. The shell of edge is built during the process.
  *
  */
-int _MMG5_chkswpgen(MMG5_pMesh mesh,int start,int ia,int *ilist,int *list,double crit) {
+int _MMG5_chkswpgen(MMG5_pMesh mesh,MMG5_pSol met,int start,int ia,int *ilist,int *list,double crit) {
   MMG5_pTetra    pt,pt0;
   MMG5_pPoint    p0;
   double    calold,calnew,caltmp;
@@ -170,12 +170,12 @@ int _MMG5_chkswpgen(MMG5_pMesh mesh,int start,int ia,int *ilist,int *list,double
       /* First tetra obtained from iel */
       memcpy(pt0,pt,sizeof(MMG5_Tetra));
       pt0->v[_MMG5_iare[i][0]] = np;
-      caltmp = _MMG5_orcal(mesh,0);
+      caltmp = _MMG5_orcal(mesh,met,0);
       calnew = MG_MIN(calnew,caltmp);
       /* Second tetra obtained from iel */
       memcpy(pt0,pt,sizeof(MMG5_Tetra));
       pt0->v[_MMG5_iare[i][1]] = np;
-      caltmp = _MMG5_orcal(mesh,0);
+      caltmp = _MMG5_orcal(mesh,met,0);
       calnew = MG_MIN(calnew,caltmp);
       ier = (calnew > crit*calold);
       if ( !ier )  break;
@@ -203,9 +203,9 @@ int _MMG5_swpgen(MMG5_pMesh mesh,MMG5_pSol met,int nconf,int ilist,int *list,_MM
   MMG5_pTetra    pt;
   MMG5_pPoint    p0,p1;
   int       iel,na,nb,np,nball,ret,start;
-  double    m[3];
+  double    m[3],*m1,*m2,*mp;
   char      ia,ip,iq;
-  int       ier;
+  int       ier,iadr;
 
   iel = list[0] / 6;
   ia  = list[0] % 6;
@@ -238,7 +238,16 @@ int _MMG5_swpgen(MMG5_pMesh mesh,MMG5_pSol met,int nconf,int ilist,int *list,_MM
                           ,m,0);
     }
   }
-  if ( met->m )  met->m[np] = 0.5*(met->m[na]+met->m[nb]);
+  if ( met->m ) {
+    iadr = met->size*na;
+    m1 = &met->m[iadr];
+    iadr = met->size*nb;
+    m2 = &met->m[iadr];
+    iadr = met->size*np;
+    mp = &met->m[iadr];
+
+    _MMG5_intmetvol(m1,m2,mp,0.5);
+  }
 
   /** First step : split of edge (na,nb) */
   ret = 2*ilist + 0;
@@ -265,7 +274,7 @@ int _MMG5_swpgen(MMG5_pMesh mesh,MMG5_pSol met,int nconf,int ilist,int *list,_MM
   memset(list,0,(_MMG5_LMAX+2)*sizeof(int));
   nball = _MMG5_boulevolp(mesh,start,ip,list);
 
-  ier = _MMG5_colver(mesh,list,nball,iq);
+  ier = _MMG5_colver(mesh,met,list,nball,iq);
   if ( ier < 0 ) {
     fprintf(stdout,"  ## Warning: unable to swap internal edge.\n");
     return(-1);

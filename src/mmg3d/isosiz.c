@@ -384,7 +384,7 @@ _MMG5_defsizreg(MMG5_pMesh mesh,MMG5_pSol met,int nump,int *lists,
       p1  = &mesh->point[ip0];
       if( !(p1->tag & MG_NOM) || MG_SIN(p1->tag) ) continue;
       assert(p1->xp);
-      t = &mesh->xpoint[p1->xp].t[0];
+      t = &p1->n[0];
       memcpy(c,t,3*sizeof(double));
 
       d[0] =  r[0][0]*c[0] + r[0][1]*c[1] + r[0][2]*c[2];
@@ -401,23 +401,34 @@ _MMG5_defsizreg(MMG5_pMesh mesh,MMG5_pSol met,int nump,int *lists,
   return(h);
 }
 
-/** Define isotropic size map at all boundary vertices of the mesh,
-    associated with geometric approx, and prescribe hmax at the internal vertices
-    Field h of Point is used, to store the prescribed size (not inverse, squared,...) */
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \return 0 if fail, 1 otherwise.
+ *
+ * Define isotropic size map at all boundary vertices of the mesh, associated
+ * with geometric approx, and prescribe hmax at the internal vertices Field h of
+ * Point is used, to store the prescribed size (not inverse, squared,...)
+ *
+ */
 int _MMG5_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTetra    pt;
   MMG5_pxTetra   pxt;
   MMG5_pPoint    p0,p1;
-  double    hp,v[3],b0[3],b1[3],b0p0[3],b1b0[3],p1b1[3],hausd;
-  double    secder0[3],secder1[3],kappa,tau[3],gammasec[3],ntau2,intau,ps,lm,*n;
-  int       lists[_MMG5_LMAX+2],listv[_MMG5_LMAX+2],ilists,ilistv,k,ip0,ip1,l;
-  char      i,j,ia,ised,i0,i1;
+  double         hp,v[3],b0[3],b1[3],b0p0[3],b1b0[3],p1b1[3],hausd;
+  double         secder0[3],secder1[3],kappa,tau[3],gammasec[3],ntau2,intau,ps,lm,*n;
+  int            lists[_MMG5_LMAX+2],listv[_MMG5_LMAX+2],ilists,ilistv,k,ip0,ip1,l;
+  char           i,j,ia,ised,i0,i1;
   MMG5_pPar      par;
 
   if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug )
-    fprintf(stdout,"  ** Defining map\n");
+    fprintf(stdout,"  ** Defining isotropic map\n");
 
-  if ( mesh->info.hmax < 0.0 )  mesh->info.hmax = 0.5 * mesh->info.delta;
+  if ( mesh->info.hmax < 0.0 ) {
+    //  mesh->info.hmax = 0.5 * mesh->info.delta;
+    fprintf(stdout,"%s:%d:Error: negative hmax value.\n",__FILE__,__LINE__);
+    return(0);
+  }
 
   /* alloc structure */
   if ( !met->m ) {
@@ -441,12 +452,15 @@ int _MMG5_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
   /* size at regular surface points */
   for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
+    // Warning: why are we skipped the tetra with negative refs ?
     if ( !MG_EOK(pt) || pt->ref < 0 || (pt->tag & MG_REQ) )   continue;
     else if ( !pt->xt )  continue;
 
     pxt = &mesh->xtetra[pt->xt];
     for (i=0; i<4; i++) {
       if ( !(pxt->ftag[i] & MG_BDY) ) continue;
+      if ( !MG_GET(mesh->xtetra[mesh->tetra[k].xt].ori,i) ) continue;
+
       /* local hausdorff for triangle */
       hausd = mesh->info.hausd;
       for (l=0; l<mesh->info.npar; l++) {
@@ -461,10 +475,19 @@ int _MMG5_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
         p0  = &mesh->point[ip0];
 
         if ( MG_SIN(p0->tag) || MG_EDG(p0->tag) || (p0->tag & MG_NOM) ) continue;
-        if ( !_MMG5_boulesurfvolp(mesh,k,i0,i,listv,&ilistv,lists,&ilists) )  continue;
+        if ( !_MMG5_boulesurfvolp(mesh,k,i0,i,listv,&ilistv,lists,&ilists,0) )
+          continue;
 
         n   = &mesh->xpoint[p0->xp].n1[0];
-        _MMG5_directsurfball(mesh,ip0,lists,ilists,n);
+
+        // If _MMG5_directsurfball return 1 it is useless to call this function,
+        // thus it is valid here to call it inside the assert.
+        //assert( _MMG5_directsurfball(mesh,ip0,lists,ilists,n) == 1 );
+        /* if ( ! (_MMG5_directsurfball(mesh,ip0,lists,ilists,n) == 1) ) */
+        /* { */
+        /*   printf("1! elt k %d %d \n",lists[0]/4, lists[0]%4); */
+        /* } */
+
         hp  = _MMG5_defsizreg(mesh,met,ip0,lists,ilists,hausd);
         met->m[ip0] = MG_MIN(met->m[ip0],hp);
       }
@@ -630,7 +653,7 @@ int _MMG5_gradsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
   }
   while( ++it < maxit && nu > 0 );
 
-  if ( abs(mesh->info.imprim) > 3 )
+  if ( abs(mesh->info.imprim) > 4 )
     fprintf(stdout,"     gradation: %7d updated, %d iter.\n",nup,it);
   return(1);
 }

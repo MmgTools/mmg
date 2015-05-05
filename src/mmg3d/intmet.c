@@ -22,35 +22,50 @@
 */
 
 /**
- * \file mmgs/API_functions.c
- * \brief C API functions definitions for MMGS library.
+ * \file mmg3d/intmet.c
+ * \brief Metric interpolations.
+ * \author Charles Dapogny (LJLL, UPMC)
+ * \author Cécile Dobrzynski (Inria / IMB, Université de Bordeaux)
+ * \author Pascal Frey (LJLL, UPMC)
  * \author Algiane Froehly (Inria / IMB, Université de Bordeaux)
  * \version 5
- * \date 01 2014
  * \copyright GNU Lesser General Public License.
- *
- * \note This file contains some internal functions for the API, see
- * the \ref mmgs/libmmgs.h header file for the documentation of all
- * the usefull user's API functions.
- *
- * C API for MMGS library.
- *
+ * \todo doxygen documentation.
  */
 
-#include "mmgs.h"
+#include "mmg3d.h"
 
 /**
- * \param mesh pointer toward the mesh structure.
+ * \param ma pointer on a metric
+ * \param mb pointer on a metric
+ * \param mp pointer on the computed interpolated metric
+ * \param t interpolation parameter (comprise between 0 and 1)
  *
- * Initialization of the input parameters (stored in the Info structure).
  *
- * \todo try to remove paramters that do not coincide with mmg3d.
+ * Linear interpolation of anisotropic sizemap along an internal edge
+ *
  */
-void _MMG5_Init_parameters(MMG5_pMesh mesh) {
+int _MMG5_intmetvol_ani(double *ma,double *mb,double *mp,double t) {
+  double        dma[6],dmb[6],mai[6],mbi[6],mi[6];
+  int           i;
 
-  /* Init common parameters for mmgs and mmg3d. */
-  _MMG5_mmgInit_parameters(mesh);
+  for (i=0; i<6; i++) {
+    dma[i] = ma[i];
+    dmb[i] = mb[i];
+  }
+  if ( !_MMG5_invmat(dma,mai) || !_MMG5_invmat(dmb,mbi) ) {
+    fprintf(stderr,"  ## INTERP INVALID METRIC.\n");
+    return(0);
+  }
+  for (i=0; i<6; i++)
+    mi[i] = (1.0-t)*mai[i] + t*mbi[i];
 
-  mesh->info.renum    = 0;   /* [0/1], Turn off/on the renumbering using SCOTCH; */
+  if ( !_MMG5_invmat(mi,mai) ) {
+    fprintf(stderr,"  ## INTERP INVALID METRIC.\n");
+    return(0);
+  }
 
+  for (i=0; i<6; i++)  mp[i] = mai[i];
+
+  return 1;
 }

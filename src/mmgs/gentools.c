@@ -34,52 +34,6 @@
 
 #include "mmgs.h"
 
-/* Compute product R*M*tR when M is symmetric */
-inline int rmtr(double r[3][3],double m[6], double mr[6]){
-  double n[3][3];
-
-  n[0][0] = m[0]*r[0][0] + m[1]*r[0][1] + m[2]*r[0][2];
-  n[1][0] = m[1]*r[0][0] + m[3]*r[0][1] + m[4]*r[0][2];
-  n[2][0] = m[2]*r[0][0] + m[4]*r[0][1] + m[5]*r[0][2];
-
-  n[0][1] = m[0]*r[1][0] + m[1]*r[1][1] + m[2]*r[1][2];
-  n[1][1] = m[1]*r[1][0] + m[3]*r[1][1] + m[4]*r[1][2];
-  n[2][1] = m[2]*r[1][0] + m[4]*r[1][1] + m[5]*r[1][2];
-
-  n[0][2] = m[0]*r[2][0] + m[1]*r[2][1] + m[2]*r[2][2];
-  n[1][2] = m[1]*r[2][0] + m[3]*r[2][1] + m[4]*r[2][2];
-  n[2][2] = m[2]*r[2][0] + m[4]*r[2][1] + m[5]*r[2][2];
-
-  mr[0] = r[0][0]*n[0][0] + r[0][1]*n[1][0] + r[0][2]*n[2][0];
-  mr[1] = r[0][0]*n[0][1] + r[0][1]*n[1][1] + r[0][2]*n[2][1];
-  mr[2] = r[0][0]*n[0][2] + r[0][1]*n[1][2] + r[0][2]*n[2][2];
-  mr[3] = r[1][0]*n[0][1] + r[1][1]*n[1][1] + r[1][2]*n[2][1];
-  mr[4] = r[1][0]*n[0][2] + r[1][1]*n[1][2] + r[1][2]*n[2][2];
-  mr[5] = r[2][0]*n[0][2] + r[2][1]*n[1][2] + r[2][2]*n[2][2];
-
-  return(1);
-}
-
-/* Compute the intersected (2 x 2) metric between metrics m and n, PRESERVING the directions
-   of m. Result is stored in mr*/
-int intmetsavedir(MMG5_pMesh mesh, double *m,double *n,double *mr) {
-  int    i;
-  double lambda[2],vp[2][2],siz,isqhmin;
-
-  isqhmin = 1.0 / (mesh->info.hmin * mesh->info.hmin);
-  _MMG5_eigensym(m,lambda,vp);
-
-  for (i=0; i<2; i++) {
-    siz = n[0]*vp[i][0]*vp[i][0] + 2.0*n[1]*vp[i][0]*vp[i][1] + n[2]*vp[i][1]*vp[i][1];
-    lambda[i] = MG_MAX(lambda[i],siz);
-    lambda[i] = MG_MIN(lambda[i],isqhmin);
-  }
-  mr[0] = lambda[0]*vp[0][0]*vp[0][0] + lambda[1]*vp[1][0]*vp[1][0];
-  mr[1] = lambda[0]*vp[0][0]*vp[0][1] + lambda[1]*vp[1][0]*vp[1][1];
-  mr[2] = lambda[0]*vp[0][1]*vp[0][1] + lambda[1]*vp[1][1]*vp[1][1];
-
-  return(1);
-}
 
 /* Delete all triangle references in mesh */
 int delref(MMG5_pMesh mesh) {

@@ -37,109 +37,6 @@
 
 extern char ddb;
 
-/* Computes the Bezier coefficients associated to the underlying curve to [p0p1].
-   isrid = 0 if p0p1 is not a special edge, 1 otherwise */
-inline void bezierEdge(MMG5_pMesh mesh,int i0,int i1,double b0[3],double b1[3],char isrid,double v[3]) {
-  MMG5_pPoint    p0,p1;
-  double    ux,uy,uz,*n1,*n2,*t,ps1,ps2;
-
-  p0 = &mesh->point[i0];
-  p1 = &mesh->point[i1];
-
-  ux = p1->c[0] - p0->c[0];
-  uy = p1->c[1] - p0->c[1];
-  uz = p1->c[2] - p0->c[2];
-
-  if ( isrid ) {
-    if ( MS_SIN(p0->tag) ) {
-      b0[0] = p0->c[0] + _MMG5_ATHIRD*ux;
-      b0[1] = p0->c[1] + _MMG5_ATHIRD*uy;
-      b0[2] = p0->c[2] + _MMG5_ATHIRD*uz;
-    }
-    else {
-      t = &p0->n[0];
-      ps1 = t[0]*ux + t[1]*uy + t[2]*uz;
-      b0[0] = p0->c[0] + _MMG5_ATHIRD*ps1*t[0];
-      b0[1] = p0->c[1] + _MMG5_ATHIRD*ps1*t[1];
-      b0[2] = p0->c[2] + _MMG5_ATHIRD*ps1*t[2];
-    }
-
-    if (MS_SIN(p1->tag) ) {
-      b1[0] = p1->c[0] - _MMG5_ATHIRD*ux;
-      b1[1] = p1->c[1] - _MMG5_ATHIRD*uy;
-      b1[2] = p1->c[2] - _MMG5_ATHIRD*uz;
-    }
-    else {
-      t = &p1->n[0];
-      ps1 = -(t[0]*ux + t[1]*uy + t[2]*uz);
-      b1[0] = p1->c[0] + _MMG5_ATHIRD*ps1*t[0];
-      b1[1] = p1->c[1] + _MMG5_ATHIRD*ps1*t[1];
-      b1[2] = p1->c[2] + _MMG5_ATHIRD*ps1*t[2];
-    }
-  }
-
-  /* regular edge */
-  else {
-    if ( MS_SIN(p0->tag) ) {
-      b0[0] = p0->c[0] + _MMG5_ATHIRD*ux;
-      b0[1] = p0->c[1] + _MMG5_ATHIRD*uy;
-      b0[2] = p0->c[2] + _MMG5_ATHIRD*uz;
-    }
-    else {
-      if ( MG_GEO & p0->tag ) {
-        n1 = &mesh->xpoint[p0->ig].n1[0];
-        n2 = &mesh->xpoint[p0->ig].n2[0];
-        ps1 = v[0]*n1[0] + v[1]*n1[1] + v[2]*n1[2];
-        ps2 = v[0]*n2[0] + v[1]*n2[1] + v[2]*n2[2];
-        if ( ps1 < ps2 ) {
-          n1 = &mesh->xpoint[p0->ig].n2[0];
-          ps1 = ps2;
-        }
-      }
-      else if ( MG_REF & p0->tag ) {
-        n1 = &mesh->xpoint[p0->ig].n1[0];
-        ps1 = ux*n1[0] + uy*n1[1] + uz*n1[2];
-      }
-      else {
-        n1 = &p0->n[0];
-        ps1 = ux*n1[0] + uy*n1[1] + uz*n1[2];
-      }
-      b0[0] = _MMG5_ATHIRD*(2.0*p0->c[0] + p1->c[0] - ps1*n1[0]);
-      b0[1] = _MMG5_ATHIRD*(2.0*p0->c[1] + p1->c[1] - ps1*n1[1]);
-      b0[2] = _MMG5_ATHIRD*(2.0*p0->c[2] + p1->c[2] - ps1*n1[2]);
-    }
-
-    if ( MS_SIN(p1->tag) ) {
-      b1[0] = p1->c[0] - _MMG5_ATHIRD*ux;
-      b1[1] = p1->c[1] - _MMG5_ATHIRD*uy;
-      b1[2] = p1->c[2] - _MMG5_ATHIRD*uz;
-    }
-    else {
-      if ( MG_GEO & p1->tag ) {
-        n1 = &mesh->xpoint[p1->ig].n1[0];
-        n2 = &mesh->xpoint[p1->ig].n2[0];
-        ps1 = -(v[0]*n1[0] + v[1]*n1[1] + v[2]*n1[2]);
-        ps2 = -(v[0]*n2[0] + v[1]*n2[1] + v[2]*n2[2]);
-        if ( fabs(ps2) < fabs(ps1) ) {
-          n1 = &mesh->xpoint[p1->ig].n2[0];
-          ps1 = ps2;
-        }
-      }
-      else if ( MG_REF & p1->tag ) {
-        n1 = &mesh->xpoint[p1->ig].n1[0];
-        ps1 = -(ux*n1[0] + uy*n1[1] + uz*n1[2]);
-      }
-      else {
-        n1 = &p1->n[0];
-        ps1 = -(ux*n1[0] + uy*n1[1] + uz*n1[2]);
-      }
-      b1[0] = _MMG5_ATHIRD*(2.0*p1->c[0] + p0->c[0] - ps1*n1[0]);
-      b1[1] = _MMG5_ATHIRD*(2.0*p1->c[1] + p0->c[1] - ps1*n1[1]);
-      b1[2] = _MMG5_ATHIRD*(2.0*p1->c[2] + p0->c[2] - ps1*n1[2]);
-    }
-  }
-}
-
 /**
  * \param mesh pointer toward the mesh structure.
  * \param pt pointer toward the triangle structure.
@@ -181,8 +78,8 @@ int _MMG5_mmgsBezierCP(MMG5_pMesh mesh,MMG5_Tria *pt,_MMG5_pBezier pb,
     else if ( MG_EDG(p[i]->tag) ) {
       _MMG5_nortri(mesh,pt,nt);
 
-      n1 = &mesh->xpoint[p[i]->ig].n1[0];
-      n2 = &mesh->xpoint[p[i]->ig].n2[0];
+      n1 = &mesh->xpoint[p[i]->xp].n1[0];
+      n2 = &mesh->xpoint[p[i]->xp].n2[0];
 
       ps  = n1[0]*nt[0] + n1[1]*nt[1] + n1[2]*nt[2];
       ps2 = n2[0]*nt[0] + n2[1]*nt[1] + n2[2]*nt[2];

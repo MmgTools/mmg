@@ -87,7 +87,7 @@ int _MMG5_buckin_ani(MMG5_pMesh mesh,MMG5_pSol sol,_MMG5_pBucket bucket,int ip) 
   siz = bucket->size;
   dd  = siz / (double)PRECI;
 
-  iadr = (ip-1)*sol->size + 1;
+  iadr = ip*sol->size;
   ma   = &sol->m[iadr];
   dmi  = LFILT*LFILT;
 
@@ -106,7 +106,7 @@ int _MMG5_buckin_ani(MMG5_pMesh mesh,MMG5_pSol sol,_MMG5_pBucket bucket,int ip) 
     d2 =      ma[0]*ux*ux + ma[3]*uy*uy + ma[5]*uz*uz \
       + 2.0*(ma[1]*ux*uy + ma[2]*ux*uz + ma[4]*uy*uz);
     if ( d2 < dmi ) {
-      iadr = (ip1-1)*sol->size + 1;
+      iadr = ip1*sol->size;
       mb = &sol->m[iadr];
       d2 =      mb[0]*ux*ux + mb[3]*uy*uy + mb[5]*uz*uz \
         + 2.0*(mb[1]*ux*uy + mb[2]*ux*uz + mb[4]*uy*uz);
@@ -122,7 +122,7 @@ int _MMG5_buckin_ani(MMG5_pMesh mesh,MMG5_pSol sol,_MMG5_pBucket bucket,int ip) 
       d2 =      ma[0]*ux*ux + ma[3]*uy*uy + ma[5]*uz*uz \
         + 2.0*(ma[1]*ux*uy + ma[2]*ux*uz + ma[4]*uy*uz);
       if ( d2 < dmi ) {
-        iadr = (ip1-1)*sol->size + 1;
+        iadr = ip1*sol->size;
         mb = &sol->m[iadr];
         d2 =      mb[0]*ux*ux + mb[3]*uy*uy + mb[5]*uz*uz \
           + 2.0*(mb[1]*ux*uy + mb[2]*ux*uz + mb[4]*uy*uz);
@@ -176,7 +176,7 @@ int _MMG5_buckin_ani(MMG5_pMesh mesh,MMG5_pSol sol,_MMG5_pBucket bucket,int ip) 
         d2 =      ma[0]*ux*ux + ma[3]*uy*uy + ma[5]*uz*uz \
           + 2.0*(ma[1]*ux*uy + ma[2]*ux*uz + ma[4]*uy*uz);
         if ( d2 < dmi ) {
-          iadr = (ip1-1)*sol->size + 1;
+          iadr = ip1*sol->size;
           mb = &sol->m[iadr];
           d2 =      mb[0]*ux*ux + mb[3]*uy*uy + mb[5]*uz*uz \
             + 2.0*(mb[1]*ux*uy + mb[2]*ux*uz + mb[4]*uy*uz);
@@ -192,7 +192,7 @@ int _MMG5_buckin_ani(MMG5_pMesh mesh,MMG5_pSol sol,_MMG5_pBucket bucket,int ip) 
           d2 =      ma[0]*ux*ux + ma[3]*uy*uy + ma[5]*uz*uz \
             + 2.0*(ma[1]*ux*uy + ma[2]*ux*uz + ma[4]*uy*uz);
           if ( d2 < dmi ) {
-            iadr = (ip1-1)*sol->size + 1;
+            iadr = ip1*sol->size;
             mb = &sol->m[iadr];
             d2 =      mb[0]*ux*ux + mb[3]*uy*uy + mb[5]*uz*uz \
               + 2.0*(mb[1]*ux*uy + mb[2]*ux*uz + mb[4]*uy*uz);

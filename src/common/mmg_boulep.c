@@ -32,7 +32,7 @@
  * \copyright GNU Lesser General Public License.
  */
 
-#include "mmg3d.h"
+#include "mmg.h"
 
 extern MMG5_Info  info;
 
@@ -203,6 +203,7 @@ int _MMG5_boulec(MMG5_pMesh mesh,int *adjt,int start,int ip,double *tt) {
  * \param list pointer toward the computed list of edges incident to \a ip.
  * \param ng pointer toward the number of ridges.
  * \param nr pointer toward the number of reference edges.
+ * \param lmax maxmum size for the ball of the point \a ip.
  * \return The number of edges incident to the vertex \a ip.
  *
  * Store edges and count the number of ridges and reference edges incident to
@@ -210,7 +211,7 @@ int _MMG5_boulec(MMG5_pMesh mesh,int *adjt,int start,int ip,double *tt) {
  *
  */
 int _MMG5_bouler(MMG5_pMesh mesh,int *adjt,int start,int ip,
-                 int *list,int *ng,int *nr) {
+                 int *list,int *ng,int *nr,int lmax) {
   MMG5_pTria    pt;
   int           *adja,k,ns;
   char          i,i1,i2;
@@ -232,7 +233,7 @@ int _MMG5_bouler(MMG5_pMesh mesh,int *adjt,int start,int ip,
         *nr = *nr + 1;
       ns++;
       list[ns] = pt->v[i2];
-      if ( ns > _MMG5_LMAX-2 )  return(-ns);
+      if ( ns > lmax-2 )  return(-ns);
     }
     adja = &adjt[3*(k-1)+1];
     k  = adja[i1] / 3;
@@ -253,11 +254,11 @@ int _MMG5_bouler(MMG5_pMesh mesh,int *adjt,int start,int ip,
         i1 = _MMG5_inxt2[i];
         if ( pt->tag[i2] & MG_GEO )
           *ng = *ng + 1;
-        else if ( pt->tag[i1] & MG_REF )
+        else if ( pt->tag[i2] & MG_REF )
           *nr = *nr + 1;
         ns++;
         list[ns] = pt->v[i1];
-        if ( ns > _MMG5_LMAX-2 )  return(-ns);
+        if ( ns > lmax-2 )  return(-ns);
       }
       adja = &adjt[3*(k-1)+1];
       k = adja[i2] / 3;

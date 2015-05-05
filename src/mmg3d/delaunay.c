@@ -236,7 +236,7 @@ int _MMG5_delone(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist) {
         pt1 = &mesh->tetra[iel];
         memcpy(pt1,pt,sizeof(MMG5_Tetra));
         pt1->v[i] = ip;
-        pt1->qual = _MMG5_orcal(mesh,iel);
+        pt1->qual = _MMG5_orcal(mesh,sol,iel);
         pt1->ref = mesh->tetra[old].ref;
         if(pt1->qual < 1e-10) {printf("argggg (%d) %d : %e\n",ip,iel,pt1->qual);
           printf("pt1 : %d %d %d %d\n",pt1->v[0],pt1->v[1],pt1->v[2],pt1->v[3]);/*exit(0);*/}
@@ -626,7 +626,7 @@ int _MMG5_cavity(MMG5_pMesh mesh,MMG5_pSol sol,int iel,int ip,int *list,int lon)
 
   ilist = _MMG5_correction_iso(mesh,ip,list,ilist,lon);
 
-  if ( isreq ) ilist = -fabs(ilist);
+  if ( isreq ) ilist = -abs(ilist);
 
   if(MMG_cas==1) MMG_nvol++;
   else if(MMG_cas==2 || MMG_cas>20) {

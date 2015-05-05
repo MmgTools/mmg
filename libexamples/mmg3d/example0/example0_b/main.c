@@ -36,7 +36,7 @@
 #include "libmmg3d.h"
 
 #define MAX0(a,b)     (((a) > (b)) ? (a) : (b))
-#define MAX(a,b,c,d)  (((MAX0(a,b)) > (MAX0(c,d))) ? (MAX0(a,b)) : (MAX0(c,d)))
+#define MAX4(a,b,c,d)  (((MAX0(a,b)) > (MAX0(c,d))) ? (MAX0(a,b)) : (MAX0(c,d)))
 
 int main(int argc,char *argv[]) {
   MMG5_pMesh      mmgMesh;
@@ -174,7 +174,7 @@ int main(int argc,char *argv[]) {
     exit(EXIT_FAILURE);
   }
   /* Table to know if a vertex/tetra/tria/edge is required */
-  required = (int*)calloc(MAX(np,ne,nt,na)+1 ,sizeof(int));
+  required = (int*)calloc(MAX4(np,ne,nt,na)+1 ,sizeof(int));
   if ( !required ) {
     perror("  ## Memory problem: calloc");
     exit(EXIT_FAILURE);

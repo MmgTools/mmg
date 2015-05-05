@@ -59,7 +59,16 @@ unsigned char permedge[12][6] = {
   {3,0,4,1,5,2}, {4,3,0,5,2,1}, {1,3,5,0,2,4}, {3,5,1,4,0,2},
   {5,1,3,2,4,0}, {2,5,4,1,0,3}, {4,2,5,0,3,1}, {5,4,2,3,1,0} };
 
-/** simulate split 1 edge of tetra : return 0 if split leads to invalid situation, else 1 */
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param k index of element to split.
+ * \param vx \f$vx[i]\f$ is the index of the point to add on the edge \a i.
+ * \return 0 if split leads to invalid situation, else 1.
+ *
+ * Simulate the splitting of 1 edge of element
+ *
+ */
 int _MMG5_split1_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
   MMG5_pTetra   pt,pt0;
   double   vold,vnew;
@@ -236,14 +245,22 @@ nextstep1:
     }
   }
   /* Quality update */
-  pt->qual=_MMG5_orcal(mesh,k);
-  pt1->qual=_MMG5_orcal(mesh,iel);
+  pt->qual=_MMG5_orcal(mesh,met,k);
+  pt1->qual=_MMG5_orcal(mesh,met,iel);
 }
 
-/** Simulate at the same time creation and bulging of one point, with new position o,
-    to be inserted at an edge, whose shell is passed :
-    return 0 if final position is invalid, 1 if all checks are ok */
-int _MMG5_simbulgept(MMG5_pMesh mesh,int *list,int ret,double o[3]) {
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param list pointer toward the edge shell.
+ * \param ret size of the edge shell.
+ * \param o table of the new point coordinates.
+ * \return 0 if final position is invalid, 1 if all checks are ok.
+ *
+ * Simulate at the same time creation and bulging of one point, with new position o,
+ * to be inserted at an edge, whose shell is passed.
+ *
+ */
+int _MMG5_simbulgept(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,double o[3]) {
   MMG5_pTetra    pt,pt0;
   MMG5_pPoint    ppt0;
   double    calold,calnew,caltmp;
@@ -268,13 +285,13 @@ int _MMG5_simbulgept(MMG5_pMesh mesh,int *list,int ret,double o[3]) {
     memcpy(pt0,pt,sizeof(MMG5_Tetra));
     pt0->v[ia] = 0;
     calold = MG_MIN(calold,pt->qual);
-    caltmp = _MMG5_orcal(mesh,0);
+    caltmp = _MMG5_orcal(mesh,met,0);
     if ( caltmp < _MMG5_EPSD )  return(0);
     calnew = MG_MIN(calnew,caltmp);
 
     memcpy(pt0,pt,sizeof(MMG5_Tetra));
     pt0->v[ib] = 0;
-    caltmp = _MMG5_orcal(mesh,0);
+    caltmp = _MMG5_orcal(mesh,met,0);
     if ( caltmp < _MMG5_EPSD )  return(0);
     calnew = MG_MIN(calnew,caltmp);
   }
@@ -402,7 +419,7 @@ int _MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,int 
     iel = list[0] / 6;
     ie  = list[0] % 6;
     pt = &mesh->tetra[iel];
-    jel = fabs(newtet[0]);
+    jel = abs(newtet[0]);
     pt1 = &mesh->tetra[jel];
 
     pxt0 = 0;
@@ -517,8 +534,8 @@ int _MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,int 
       adjan[voy] = 4*jel + tau[0];
     }
     /* Quality update */
-    pt->qual=_MMG5_orcal(mesh,iel);
-    pt1->qual=_MMG5_orcal(mesh,jel);
+    pt->qual=_MMG5_orcal(mesh,met,iel);
+    pt1->qual=_MMG5_orcal(mesh,met,jel);
 
     _MMG5_SAFE_FREE(newtet);
     return(1);
@@ -529,7 +546,7 @@ int _MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,int 
     iel = list[k] / 6;
     ie  = list[k] % 6;
     pt = &mesh->tetra[iel];
-    jel = fabs(newtet[k]);
+    jel = abs(newtet[k]);
     pt1 = &mesh->tetra[jel];
 
     pxt0 = 0;
@@ -636,10 +653,10 @@ int _MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,int 
       if ( (list[1] / 6) == (nei2 / 4) ) {
         if ( MG_SMSGN(newtet[0],newtet[1]) ) {  //new elt of list[0] goes with new elt of list[1]
           adja[tau[2]] = nei2;
-          adjan[tau[2]] = 4*fabs(newtet[1])+(nei2 %4);
+          adjan[tau[2]] = 4*abs(newtet[1])+(nei2 %4);
         }
         else {
-          adja[tau[2]] = 4*fabs(newtet[1])+(nei2 %4);
+          adja[tau[2]] = 4*abs(newtet[1])+(nei2 %4);
           adjan[tau[2]] = nei2;
         }
 
@@ -652,10 +669,10 @@ int _MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,int 
           assert((list[ilist-1] / 6) == (nei3 / 4));
           if ( MG_SMSGN(newtet[0],newtet[ilist-1]) ) {
             adja[tau[3]] = nei3;
-            adjan[tau[3]] = 4*fabs(newtet[ilist-1])+(nei3 %4);
+            adjan[tau[3]] = 4*abs(newtet[ilist-1])+(nei3 %4);
           }
           else {
-            adja[tau[3]] = 4*fabs(newtet[ilist-1])+(nei3 %4);
+            adja[tau[3]] = 4*abs(newtet[ilist-1])+(nei3 %4);
             adjan[tau[3]] = nei3;
           }
         }
@@ -665,10 +682,10 @@ int _MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,int 
         assert((list[1] / 6) == (nei3 / 4));
         if ( MG_SMSGN(newtet[0],newtet[1]) ) {
           adja[tau[3]] = nei3;
-          adjan[tau[3]] = 4*fabs(newtet[1])+(nei3 %4);
+          adjan[tau[3]] = 4*abs(newtet[1])+(nei3 %4);
         }
         else {
-          adja[tau[3]] = 4*fabs(newtet[1])+(nei3 %4);
+          adja[tau[3]] = 4*abs(newtet[1])+(nei3 %4);
           adjan[tau[3]] = nei3;
         }
 
@@ -681,10 +698,10 @@ int _MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,int 
           assert((list[ilist-1]) / 6 == (nei2 / 4));
           if ( MG_SMSGN(newtet[0],newtet[ilist-1]) ) {
             adja[tau[2]] = nei2;
-            adjan[tau[2]] = 4*fabs(newtet[ilist-1])+(nei2 %4);
+            adjan[tau[2]] = 4*abs(newtet[ilist-1])+(nei2 %4);
           }
           else {
-            adja[tau[2]] = 4*fabs(newtet[ilist-1])+(nei2 %4);
+            adja[tau[2]] = 4*abs(newtet[ilist-1])+(nei2 %4);
             adjan[tau[2]] = nei2;
           }
         }
@@ -695,10 +712,10 @@ int _MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,int 
       if ( (list[ilist-2] / 6) == (nei2 / 4) ) {
         if ( MG_SMSGN(newtet[ilist-1],newtet[ilist-2]) ) {
           adja[tau[2]] = nei2;
-          adjan[tau[2]] = 4*fabs(newtet[ilist-2])+(nei2 %4);
+          adjan[tau[2]] = 4*abs(newtet[ilist-2])+(nei2 %4);
         }
         else {
-          adja[tau[2]] = 4*fabs(newtet[ilist-2])+(nei2 %4);
+          adja[tau[2]] = 4*abs(newtet[ilist-2])+(nei2 %4);
           adjan[tau[2]] = nei2;
         }
 
@@ -711,10 +728,10 @@ int _MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,int 
           assert((list[0]) / 6 == (nei3 / 4));
           if ( MG_SMSGN(newtet[ilist-1],newtet[0]) ) {
             adja[tau[3]] = nei3;
-            adjan[tau[3]] = 4*fabs(newtet[0])+(nei3 %4);
+            adjan[tau[3]] = 4*abs(newtet[0])+(nei3 %4);
           }
           else {
-            adja[tau[3]] = 4*fabs(newtet[0])+(nei3 %4);
+            adja[tau[3]] = 4*abs(newtet[0])+(nei3 %4);
             adjan[tau[3]] = nei3;
           }
         }
@@ -724,10 +741,10 @@ int _MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,int 
         assert((list[ilist-2] / 6) == (nei3 / 4));
         if ( MG_SMSGN(newtet[ilist-1],newtet[ilist-2]) ) {
           adja[tau[3]] = nei3;
-          adjan[tau[3]] = 4*fabs(newtet[ilist-2])+(nei3 %4);
+          adjan[tau[3]] = 4*abs(newtet[ilist-2])+(nei3 %4);
         }
         else {
-          adja[tau[3]] = 4*fabs(newtet[ilist-2])+(nei3 %4);
+          adja[tau[3]] = 4*abs(newtet[ilist-2])+(nei3 %4);
           adjan[tau[3]] = nei3;
         }
 
@@ -740,10 +757,10 @@ int _MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,int 
           assert((list[0]) / 6 == (nei2 / 4));
           if ( MG_SMSGN(newtet[ilist-1],newtet[0]) ) {
             adja[tau[2]] = nei2;
-            adjan[tau[2]] = 4*fabs(newtet[0])+(nei2 %4);
+            adjan[tau[2]] = 4*abs(newtet[0])+(nei2 %4);
           }
           else {
-            adja[tau[2]] = 4*fabs(newtet[0])+(nei2 %4);
+            adja[tau[2]] = 4*abs(newtet[0])+(nei2 %4);
             adjan[tau[2]] = nei2;
           }
         }
@@ -754,20 +771,20 @@ int _MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,int 
       if ( (list[k-1] / 6) == (nei2 / 4) ) {
         if ( MG_SMSGN(newtet[k],newtet[k-1]) ) {
           adja[tau[2]] = nei2;
-          adjan[tau[2]] = 4*fabs(newtet[k-1])+(nei2 %4);
+          adjan[tau[2]] = 4*abs(newtet[k-1])+(nei2 %4);
         }
         else {
-          adja[tau[2]] = 4*fabs(newtet[k-1])+(nei2 %4);
+          adja[tau[2]] = 4*abs(newtet[k-1])+(nei2 %4);
           adjan[tau[2]] = nei2;
         }
 
         assert((list[k+1]) / 6 == (nei3 / 4));
         if ( MG_SMSGN(newtet[k],newtet[k+1]) ) {
           adja[tau[3]] = nei3;
-          adjan[tau[3]] = 4*fabs(newtet[k+1])+(nei3 %4);
+          adjan[tau[3]] = 4*abs(newtet[k+1])+(nei3 %4);
         }
         else {
-          adja[tau[3]] = 4*fabs(newtet[k+1])+(nei3 %4);
+          adja[tau[3]] = 4*abs(newtet[k+1])+(nei3 %4);
           adjan[tau[3]] = nei3;
         }
       }
@@ -776,20 +793,20 @@ int _MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,int 
         assert((list[k-1] / 6) == (nei3 / 4));
         if ( MG_SMSGN(newtet[k],newtet[k-1]) ) {
           adja[tau[3]] = nei3;
-          adjan[tau[3]] = 4*fabs(newtet[k-1])+(nei3 %4);
+          adjan[tau[3]] = 4*abs(newtet[k-1])+(nei3 %4);
         }
         else {
-          adja[tau[3]] = 4*fabs(newtet[k-1])+(nei3 %4);
+          adja[tau[3]] = 4*abs(newtet[k-1])+(nei3 %4);
           adjan[tau[3]] = nei3;
         }
 
         assert((list[k+1]) / 6 == (nei2 / 4));
         if ( MG_SMSGN(newtet[k],newtet[k+1]) ) {
           adja[tau[2]] = nei2;
-          adjan[tau[2]] = 4*fabs(newtet[k+1])+(nei2 %4);
+          adjan[tau[2]] = 4*abs(newtet[k+1])+(nei2 %4);
         }
         else {
-          adja[tau[2]] = 4*fabs(newtet[k+1])+(nei2 %4);
+          adja[tau[2]] = 4*abs(newtet[k+1])+(nei2 %4);
           adjan[tau[2]] = nei2;
         }
       }
@@ -807,8 +824,8 @@ int _MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,int 
       adjan[voy] = 4*jel + tau[0];
     }
     /* Quality update */
-    pt->qual=_MMG5_orcal(mesh,iel);
-    pt1->qual=_MMG5_orcal(mesh,jel);
+    pt->qual=_MMG5_orcal(mesh,met,iel);
+    pt1->qual=_MMG5_orcal(mesh,met,jel);
   }
 
   _MMG5_SAFE_FREE(newtet);
@@ -1121,9 +1138,9 @@ void _MMG5_split2sf(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]){
     }
   }
   /* Quality update */
-  pt[0]->qual=_MMG5_orcal(mesh,newtet[0]);
-  pt[1]->qual=_MMG5_orcal(mesh,newtet[1]);
-  pt[2]->qual=_MMG5_orcal(mesh,newtet[2]);
+  pt[0]->qual=_MMG5_orcal(mesh,met,newtet[0]);
+  pt[1]->qual=_MMG5_orcal(mesh,met,newtet[1]);
+  pt[2]->qual=_MMG5_orcal(mesh,met,newtet[2]);
 
 }
 
@@ -1311,10 +1328,10 @@ void _MMG5_split2(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
     }
   }
   /* Quality update */
-  pt[0]->qual=_MMG5_orcal(mesh,newtet[0]);
-  pt[1]->qual=_MMG5_orcal(mesh,newtet[1]);
-  pt[2]->qual=_MMG5_orcal(mesh,newtet[2]);
-  pt[3]->qual=_MMG5_orcal(mesh,newtet[3]);
+  pt[0]->qual=_MMG5_orcal(mesh,met,newtet[0]);
+  pt[1]->qual=_MMG5_orcal(mesh,met,newtet[1]);
+  pt[2]->qual=_MMG5_orcal(mesh,met,newtet[2]);
+  pt[3]->qual=_MMG5_orcal(mesh,met,newtet[3]);
 
 }
 
@@ -1562,10 +1579,10 @@ void _MMG5_split3(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
     }
   }
   /* Quality update */
-  pt[0]->qual=_MMG5_orcal(mesh,newtet[0]);
-  pt[1]->qual=_MMG5_orcal(mesh,newtet[1]);
-  pt[2]->qual=_MMG5_orcal(mesh,newtet[2]);
-  pt[3]->qual=_MMG5_orcal(mesh,newtet[3]);
+  pt[0]->qual=_MMG5_orcal(mesh,met,newtet[0]);
+  pt[1]->qual=_MMG5_orcal(mesh,met,newtet[1]);
+  pt[2]->qual=_MMG5_orcal(mesh,met,newtet[2]);
+  pt[3]->qual=_MMG5_orcal(mesh,met,newtet[3]);
 
 }
 
@@ -1904,10 +1921,10 @@ void _MMG5_split3cone(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
     }
   }
   /* Quality update */
-  pt[0]->qual=_MMG5_orcal(mesh,newtet[0]);
-  pt[1]->qual=_MMG5_orcal(mesh,newtet[1]);
-  pt[2]->qual=_MMG5_orcal(mesh,newtet[2]);
-  pt[3]->qual=_MMG5_orcal(mesh,newtet[3]);
+  pt[0]->qual=_MMG5_orcal(mesh,met,newtet[0]);
+  pt[1]->qual=_MMG5_orcal(mesh,met,newtet[1]);
+  pt[2]->qual=_MMG5_orcal(mesh,met,newtet[2]);
+  pt[3]->qual=_MMG5_orcal(mesh,met,newtet[3]);
 
 }
 
@@ -2452,12 +2469,12 @@ void _MMG5_split3op(MMG5_pMesh mesh, MMG5_pSol met, int k, int vx[6]){
     }
   }
   /* Quality update */
-  pt[0]->qual=_MMG5_orcal(mesh,newtet[0]);
-  pt[1]->qual=_MMG5_orcal(mesh,newtet[1]);
-  pt[2]->qual=_MMG5_orcal(mesh,newtet[2]);
-  pt[3]->qual=_MMG5_orcal(mesh,newtet[3]);
+  pt[0]->qual=_MMG5_orcal(mesh,met,newtet[0]);
+  pt[1]->qual=_MMG5_orcal(mesh,met,newtet[1]);
+  pt[2]->qual=_MMG5_orcal(mesh,met,newtet[2]);
+  pt[3]->qual=_MMG5_orcal(mesh,met,newtet[3]);
   if ( !((imin12 == ip1) && (imin03 == ip3)) ) {
-    pt[4]->qual=_MMG5_orcal(mesh,newtet[4]);
+    pt[4]->qual=_MMG5_orcal(mesh,met,newtet[4]);
   }
 
 }
@@ -2469,29 +2486,27 @@ int _MMG5_split4bar(MMG5_pMesh mesh, MMG5_pSol met, int k) {
   MMG5_pPoint   ppt;
   MMG5_xTetra   xt[4];
   MMG5_pxTetra  pxt0;
-  double   o[3],hnew;
+  double   o[3],hnew1[6], hnew2[6];
   int      i,ib,iel;
   int      newtet[4];
   unsigned char isxt[4],firstxt;
+  int iadr1,iadr2;
 
   pt[0] = &mesh->tetra[k];
   pt[0]->flag = 0;
   newtet[0]=k;
 
   o[0] = o[1] = o[2] = 0.0;
-  hnew = 0.0;
   for (i=0; i<4; i++) {
     ib    = pt[0]->v[i];
     ppt   = &mesh->point[ib];
     o[0] += ppt->c[0];
     o[1] += ppt->c[1];
     o[2] += ppt->c[2];
-    if ( met->m )  hnew += met->m[ib];
   }
   o[0] *= 0.25;
   o[1] *= 0.25;
   o[2] *= 0.25;
-  hnew *= 0.25;
 
   ib = _MMG5_newPt(mesh,o,0);
   if ( !ib ) {
@@ -2501,7 +2516,20 @@ int _MMG5_split4bar(MMG5_pMesh mesh, MMG5_pSol met, int k) {
                         return(0)
                         ,o,0);
   }
-  if ( met->m )  met->m[ib] = hnew;
+  if ( met->m ) {
+    if ( met->size == 1 )
+      met->m[ib] = 0.25*(met->m[pt[0]->v[0]]+met->m[pt[0]->v[1]]+
+                         met->m[pt[0]->v[2]]+met->m[pt[0]->v[3]]);
+    else {
+      iadr1 = met->size*pt[0]->v[0];
+      iadr2 = met->size*pt[0]->v[1];
+      _MMG5_intmetvol(&met->m[iadr1],&met->m[iadr2],hnew1,0.5);
+      iadr1 = met->size*pt[0]->v[2];
+      iadr2 = met->size*pt[0]->v[3];
+      _MMG5_intmetvol(&met->m[iadr1],&met->m[iadr2],hnew2,0.5);
+      _MMG5_intmetvol(hnew1,hnew2,&met->m[met->size*ib],0.5);
+    }
+  }
 
   /* create 3 new tetras */
   iel = _MMG5_newElt(mesh);
@@ -2656,10 +2684,10 @@ int _MMG5_split4bar(MMG5_pMesh mesh, MMG5_pSol met, int k) {
     }
   }
   /* Quality update */
-  pt[0]->qual=_MMG5_orcal(mesh,newtet[0]);
-  pt[1]->qual=_MMG5_orcal(mesh,newtet[1]);
-  pt[2]->qual=_MMG5_orcal(mesh,newtet[2]);
-  pt[3]->qual=_MMG5_orcal(mesh,newtet[3]);
+  pt[0]->qual=_MMG5_orcal(mesh,met,newtet[0]);
+  pt[1]->qual=_MMG5_orcal(mesh,met,newtet[1]);
+  pt[2]->qual=_MMG5_orcal(mesh,met,newtet[2]);
+  pt[3]->qual=_MMG5_orcal(mesh,met,newtet[3]);
 
   return(1);
 }
@@ -2937,7 +2965,7 @@ void _MMG5_split4sf(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
     }
   }
   for (i=0; i<6; i++) {
-    pt[i]->qual=_MMG5_orcal(mesh,newtet[i]);
+    pt[i]->qual=_MMG5_orcal(mesh,met,newtet[i]);
   }
 }
 
@@ -3187,7 +3215,7 @@ void _MMG5_split4op(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
     }
   }
   for (i=0; i<6; i++) {
-    pt[i]->qual=_MMG5_orcal(mesh,newtet[i]);
+    pt[i]->qual=_MMG5_orcal(mesh,met,newtet[i]);
   }
 }
 
@@ -3436,7 +3464,7 @@ void _MMG5_split5(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
     }
   }
   for (i=0; i<7; i++) {
-    pt[i]->qual=_MMG5_orcal(mesh,newtet[i]);
+    pt[i]->qual=_MMG5_orcal(mesh,met,newtet[i]);
   }
 }
 
@@ -3793,6 +3821,6 @@ void _MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
     }
   }
   for (i=0; i<8; i++) {
-    pt[i]->qual=_MMG5_orcal(mesh,newtet[i]);
+    pt[i]->qual=_MMG5_orcal(mesh,met,newtet[i]);
   }
 }

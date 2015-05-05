@@ -64,7 +64,10 @@ static void usage(char *prog) {
 
   _MMG5_mmgUsage(prog);
 
-  fprintf(stdout,"-nreg      normal regul.\n");
+  fprintf(stdout,"-nreg        normal regul.\n");
+#ifdef USE_SCOTCH
+  fprintf(stdout,"-rn [n]      Turn on or off the renumbering using SCOTCH [0/1] \n");
+#endif
 
   exit(EXIT_FAILURE);
 }
@@ -102,6 +105,9 @@ static int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
           mesh->info.dhd = cos(mesh->info.dhd*M_PI/180.0);
         }
         break;
+      case 'A': /* anisotropy */
+        met->size = 6;
+        break;
       case 'h':
         if ( !strcmp(argv[i],"-hmin") && ++i < argc )
           mesh->info.hmin = atof(argv[i]);
@@ -109,6 +115,10 @@ static int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
           mesh->info.hmax = atof(argv[i]);
         else if ( !strcmp(argv[i],"-hausd") && ++i <= argc ) {
           mesh->info.hausd = atof(argv[i]);
+          if ( mesh->info.hausd <= 0.0 ) {
+            fprintf(stdout,"  ## Error: hausdorff number must be strictly positive.\n");
+            return(0);
+          }
         }
         else if ( !strcmp(argv[i],"-hgrad") && ++i <= argc ) {
           mesh->info.hgrad = atof(argv[i]);
@@ -159,6 +169,25 @@ static int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
           }
         }
         break;
+#ifdef USE_SCOTCH
+      case 'r':
+        if ( !strcmp(argv[i],"-rn") ) {
+          if ( ++i < argc ) {
+            if ( isdigit(argv[i][0]) ) {
+              mesh->info.renum = atoi(argv[i]);
+            }
+            else {
+              fprintf(stderr,"Missing argument option %s\n",argv[i-1]);
+              usage(argv[0]);
+            }
+          }
+          else {
+            fprintf(stderr,"Missing argument option %s\n",argv[i-1]);
+            usage(argv[0]);
+          }
+        }
+        break;
+#endif
       case 's':
         if ( !strcmp(argv[i],"-sol") ) {
           if ( ++i < argc && isascii(argv[i][0]) && argv[i][0]!='-' ) {
@@ -318,7 +347,7 @@ static void endcod() {
 static void setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
   if ( met->size < 6 ) {
     _MMG5_calelt  = _MMG5_caltri_iso;
-    defsiz  = defsiz_iso;
+    _MMG5_defsiz  = _MMG5_defsiz_iso;
     gradsiz = gradsiz_iso;
     _MMG5_lenedg  = _MMG5_lenedg_iso;
     intmet  = intmet_iso;
@@ -326,8 +355,9 @@ static void setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
     movridpt= movridpt_iso;
   }
   else {
+    fprintf(stdout,"\n  ## WARNING: ANISOTROPIC REMESHING NOT STABLE FOR NOW.\n\n");
     _MMG5_calelt  = _MMG5_caltri_ani;
-    defsiz  = defsiz_ani;
+    _MMG5_defsiz  = _MMG5_defsiz_ani;
     gradsiz = gradsiz_ani;
     _MMG5_lenedg  = _MMG5_lenedg_ani;
     intmet  = intmet_ani;
@@ -337,11 +367,14 @@ static void setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
 }
 
 /**
- * Set API pointer functions to the matching mmgs function.
+ * Set common pointer functions between mmgs and mmg3d to the matching mmg3d
+ * functions.
  */
-void _MMG5_Set_APIFunc() {
-  MMG5_Init_parameters = _MMG5_Init_parameters;
-  _MMG5_bezierCP       = _MMG5_mmgsBezierCP;
+void _MMG5_Set_commonFunc() {
+  MMG5_Init_parameters    = _MMG5_Init_parameters;
+  _MMG5_bezierCP          = _MMG5_mmgsBezierCP;
+  _MMG5_chkmsh            = _MMG5_mmgsChkmsh;
+  _MMG5_renumbering       = _MMG5_mmgsRenumbering;
 }
 
 int main(int argc,char *argv[]) {
@@ -354,7 +387,7 @@ int main(int argc,char *argv[]) {
   fprintf(stdout,"     %s\n",MG_CPY);
   fprintf(stdout,"     %s %s\n",__DATE__,__TIME__);
 
-  _MMG5_Set_APIFunc();
+  _MMG5_Set_commonFunc();
 
   /* trap exceptions */
   signal(SIGABRT,excfun);
@@ -391,7 +424,7 @@ int main(int argc,char *argv[]) {
     return(1);
   else if ( ier > 0 && met.np != mesh.np ) {
     fprintf(stdout,"  ## WARNING: WRONG SOLUTION NUMBER. IGNORED\n");
-    _MMG5_DEL_MEM(&mesh,met.m,(met.size*met.npmax+1)*sizeof(double));
+    _MMG5_DEL_MEM(&mesh,met.m,(met.size*(met.npmax+1))*sizeof(double));
   }
   if ( !parsop(&mesh,&met) )     return(1);
   if ( !_MMG5_scaleMesh(&mesh,&met) )  return(1);
@@ -416,6 +449,7 @@ int main(int argc,char *argv[]) {
     printim(MMG5_ctim[2].gdif,stim);
     fprintf(stdout,"  -- PHASE 1 COMPLETED.     %s\n",stim);
   }
+
   /* solve */
   chrono(ON,&MMG5_ctim[3]);
   if ( mesh.info.imprim )
@@ -450,7 +484,7 @@ int main(int argc,char *argv[]) {
   if ( mesh.edge )
     _MMG5_DEL_MEM(&mesh,mesh.edge,(mesh.na+1)*sizeof(MMG5_Edge));
   if ( met.m )
-    _MMG5_DEL_MEM(&mesh,met.m,(met.size*met.npmax+1)*sizeof(double));
+    _MMG5_DEL_MEM(&mesh,met.m,(met.size*(met.npmax+1))*sizeof(double));
   if ( mesh.info.par )
     _MMG5_DEL_MEM(&mesh,mesh.info.par,mesh.info.npar*sizeof(MMG5_Par));
   if ( mesh.xpoint )
