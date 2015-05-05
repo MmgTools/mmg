@@ -142,5 +142,7 @@ void _MMG5_Set_commonFunc() {
   MMG5_Init_parameters    = _MMG5_Init_parameters;
   _MMG5_bezierCP          = _MMG5_mmg3dBezierCP;
   _MMG5_chkmsh            = _MMG5_mmg3dChkmsh;
+#ifdef USE_SCOTCH
   _MMG5_renumbering       = _MMG5_mmg3dRenumbering;
+#endif
 }
