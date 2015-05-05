@@ -138,21 +138,45 @@ int _MMG5_dispmesh(MMG5_pMesh mesh,MMG5_pSol disp,short t) {
 
 /** Lagrangian node displacement and meshing */
 int _MMG5_mmg3d3(MMG5_pMesh mesh,MMG5_pSol disp) {
+  double  tau;
+  int     it,maxit;
   short   t;
   char    ier;
+  
+  tau = 0.0;
+  maxit = 30;
+  it = 0;
+  t  = 0;
   
   if ( abs(mesh->info.imprim) > 3 )
     fprintf(stdout,"  ** LAGRANGIAN MOTION\n");
   
-  t = _MMG5_dikomv(mesh,disp);
-  printf("Greatest possible displacement : %d \n",t);
+  while ( it < maxit && t != _MMG5_SHORTMAX ) {
   
-  ier = _MMG5_dispmesh(mesh,disp,t);
-  if ( !ier ) {
-    fprintf(stdout,"  ** Impossible motion\n");
-    return(0);
+    t = _MMG5_dikomv(mesh,disp);
+    if ( t == 0 ) {
+      printf("   *** Stop: impossible to proceed further");
+      break;
+    }
+    
+  
+    ier = _MMG5_dispmesh(mesh,disp,t);
+    if ( !ier ) {
+      fprintf(stdout,"  ** Impossible motion\n");
+      return(0);
+    }
+    
+    tau = tau + ((double)t /_MMG5_SHORTMAX)*(1.0-tau);
+    printf("   ---> Realized displacement: %f\n",tau);
+    
+    /* Local remeshing depending on the options */
+    if ( mesh->info.lag > 0 ) {
+      
+    }
+    
+    it++;
   }
-  
+    
   /* Clean memory (but not pointer) */
   /* Doing this, memcur of mesh is decreased by size of displacement... ????? */
   _MMG5_DEL_MEM(mesh,disp->m,(disp->size*disp->npmax+1)*sizeof(double));
