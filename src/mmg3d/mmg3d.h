@@ -43,9 +43,9 @@
                                                                         \
     if ( (mesh->memMax-mesh->memCur) <                                  \
          (long long) (wantedGap*mesh->npmax*                            \
-                      (sizeof(MMG5_Point)+sizeof(int))) ) {             \
-      gap = (int)(mesh->memMax-mesh->memCur)/                           \
-        (sizeof(MMG5_Point)+sizeof(int));                               \
+                      (sizeof(MMG5_Point)+sol->size*sizeof(int))) ) {   \
+      gap = (int)((mesh->memMax-mesh->memCur)/                          \
+                  (sizeof(MMG5_Point)+sol->size*sizeof(int)));          \
       if(gap < 1) {                                                     \
         fprintf(stdout,"  ## Error:");                                  \
         fprintf(stdout," unable to allocate %s.\n","larger point/bucket table"); \
