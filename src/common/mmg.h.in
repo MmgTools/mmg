@@ -216,7 +216,7 @@
                                                                         \
     if ( (mesh->memMax-mesh->memCur) <                                  \
          (long long) (wantedGap*initSize*sizeof(type)) ) {              \
-      gap = (int)(mesh->memMax-mesh->memCur)/sizeof(type);              \
+      gap = (int)((mesh->memMax-mesh->memCur)/sizeof(type));            \
       if(gap<1) {                                                       \
         fprintf(stdout,"  ## Error:");                                  \
         fprintf(stdout," unable to allocate %s.\n",message);            \
