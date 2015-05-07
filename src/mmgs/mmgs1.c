@@ -1123,7 +1123,6 @@ static int anatri(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
 int mmgs1(MMG5_pMesh mesh,MMG5_pSol met) {
 
   /* renumbering if available */
-
   if ( abs(mesh->info.imprim) > 4 )
     fprintf(stdout,"  ** MESH ANALYSIS\n");
 

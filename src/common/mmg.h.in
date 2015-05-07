@@ -33,6 +33,7 @@
 #include <ctype.h>
 #include <float.h>
 #include <math.h>
+#include <complex.h>
 
 #if (defined(__APPLE__) && defined(__MACH__))
 #include <sys/sysctl.h>
@@ -358,6 +359,7 @@ int    _MMG5_hashEdge(MMG5_pMesh mesh,_MMG5_Hash *hash,int a,int b,int k);
 int    _MMG5_hashGet(_MMG5_Hash *hash,int a,int b);
 int    _MMG5_hashNew(MMG5_pMesh mesh, _MMG5_Hash *hash,int hsiz,int hmax);
 int    _MMG5_intmetsavedir(MMG5_pMesh mesh, double *m,double *n,double *mr);
+int    _MMG5_intextmet(MMG5_pMesh,MMG5_pSol,int,double *);
 double _MMG5_lenedg_ani(MMG5_pMesh mesh,MMG5_pSol met,int ip1,int ip2,char);
 double _MMG5_lenedg_iso(MMG5_pMesh ,MMG5_pSol ,int ,int, char );
 long long _MMG5_memSize(void);
@@ -372,6 +374,7 @@ int    _MMG5_rotmatrix(double n[3],double r[3][3]);
 int    _MMG5_invmat(double *m,double *mi);
 double _MMG5_ridSizeInNormalDir(MMG5_pMesh,int,double*,_MMG5_pBezier,int,int);
 double _MMG5_ridSizeInTangentDir(MMG5_pMesh, MMG5_pPoint,int,int*,double,double);
+int    _MMG5_rootDeg3(double a[4],double complex r[3]);
 int    _MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met);
 int    _MMG5_scotchCall(MMG5_pMesh mesh, MMG5_pSol sol);
 int    _MMG5_solveDefmetregSys( MMG5_pMesh, double r[3][3], double *, double *,

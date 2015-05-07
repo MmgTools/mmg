@@ -24,9 +24,6 @@
 #ifndef _MMGS_H
 #define _MMGS_H
 
-#include <complex.h>
-
-//#include "memory.h"
 #include "libmmgs.h"
 
 /* numerical accuracy */
@@ -123,10 +120,8 @@ char typelt(MMG5_pPoint p[3],char *ia);
 int  litswp(MMG5_pMesh mesh,int k,char i,double kal);
 int  litcol(MMG5_pMesh mesh,int k,char i,double kal);
 int  intmet33(MMG5_pMesh mesh,MMG5_pSol met,int np,int nq,int ip,double s);
-int  intextmet(MMG5_pMesh mesh,MMG5_pSol met,int np,double me[6]);
 int  invmatg(double m[9],double mi[9]);
 int  rootDeg2(double complex a[3], double complex r[2]);
-int  rootDeg3(double a[4],double complex r[3]);
 
 int  buildridmetfic(MMG5_pMesh mesh,double t[3],double n[3],double dtan,double dv,double m[6]);
 int  _MMG5_mmgsChkmsh(MMG5_pMesh,int,int);
