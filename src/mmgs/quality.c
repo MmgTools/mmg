@@ -38,13 +38,23 @@
 extern char  ddb;
 
 
-/* Same quality function but puts a sign according to deviation to normal to vertices */
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param iel element index
+ * \return 0 if fail, -1 if orientation is reversed with regards to orientation
+ * of vertices, the computed quality otherwise.
+ *
+ * Quality function identic to caltri_ani but puts a sign according to deviation
+ * to normal to vertices.
+ *
+ */
 inline double caleltsig_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel) {
   MMG5_pTria    pt;
   MMG5_pPoint   pa,pb,pc;
-  double   ps1,ps2,abx,aby,abz,acx,acy,acz,dd,rap,anisurf;
-  double   n[3],pv[3],l[3],*ncomp,*a,*b,*c;
-  int      ia,ib,ic;
+  double        ps1,ps2,abx,aby,abz,acx,acy,acz,dd,rap,anisurf;
+  double        n[3],pv[3],l[3],*ncomp,*a,*b,*c;
+  int           ia,ib,ic;
 
   pt = &mesh->tria[iel];
   ia = pt->v[0];
@@ -75,6 +85,8 @@ inline double caleltsig_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel) {
   if ( dd < _MMG5_EPSD )  return(0.0);
   dd = 1.0 / sqrt(dd);
 
+  // If one of the triangle vertex is not REF or GEO, it contains the normal at
+  // the C1 surface.
   if ( !MG_EDG(pa->tag) ) {
     memcpy(n,&pa->n[0],3*sizeof(double));
     ps1 = n[0]*pv[0]+n[1]*pv[1]+n[2]*pv[2];
@@ -91,11 +103,14 @@ inline double caleltsig_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel) {
     ps1 *= dd;
   }
   else {
+    // We must find the normal at the surface elsewhere. Arbitrary, we take it
+    // at point pa.
     memcpy(n,&mesh->xpoint[pa->xp].n1[0],3*sizeof(double));
-    if ( !(pa->tag & MG_REF) ) {
+    ps1 = n[0]*pv[0]+n[1]*pv[1]+n[2]*pv[2];
+    ps1 *= dd;
+
+    if ( (pa->tag & MG_GEO) ) {
       ncomp = &mesh->xpoint[pa->xp].n2[0];
-      ps1 = n[0]*pv[0]+n[1]*pv[1]+n[2]*pv[2];
-      ps1 *= dd;
       ps2 = ncomp[0]*pv[0]+ncomp[1]*pv[1]+ncomp[2]*pv[2];
       ps2 *= dd;
       if ( fabs(1.0-fabs(ps1)) > fabs(1.0-fabs(ps2)) ) {
@@ -180,10 +195,11 @@ inline double caleltsig_iso(MMG5_pMesh mesh,MMG5_pSol met,int iel) {
   }
   else {
     memcpy(n,&mesh->xpoint[pa->xp].n1[0],3*sizeof(double));
-    if ( !(pa->tag & MG_REF) ) {
+    ps1 = n[0]*pv[0]+n[1]*pv[1]+n[2]*pv[2];
+    ps1 *= invsqcal;
+
+    if ( (pa->tag & MG_GEO) ) {
       ncomp = &mesh->xpoint[pa->xp].n2[0];
-      ps1 = n[0]*pv[0]+n[1]*pv[1]+n[2]*pv[2];
-      ps1 *= invsqcal;
       ps2 = ncomp[0]*pv[0]+ncomp[1]*pv[1]+ncomp[2]*pv[2];
       ps2 *= invsqcal;
       if ( fabs(1.0-fabs(ps1)) > fabs(1.0-fabs(ps2)) ) {
