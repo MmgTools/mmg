@@ -603,25 +603,16 @@ int _MMG5_movtet(MMG5_pMesh mesh,MMG5_pSol met,int maxitin) {
                 return(-1);
 
               n = &(mesh->xpoint[ppt->xp].n1[0]);
-              if ( MG_GET(pxt->ori,i) ) {
-                // If _MMG5_directsurfball return 1 it is useless to call this function,
-                // thus it is valid here to call it inside the assert.
-                // assert(_MMG5_directsurfball(mesh, pt->v[i0],lists,ilists,n) == 1);
-                /* if ( ! (_MMG5_directsurfball(mesh,pt->v[i0],lists,ilists,n) == 1) ) */
-                /* { */
-                /*   puts("\n"); */
-                /*   printf("2! elt k %d %d, pt->v %d \n",lists[0]/4, lists[0]%4, pt->v[i0]); */
-                /*   printf("2! n %e %e %e \n",n[0], n[1], n[2]); */
-                /* } */
-              }
-              else {
-                if ( ! (_MMG5_directsurfball(mesh,pt->v[i0],lists,ilists,n) == 2) )
-                {
-                  /* puts("\n"); */
-                  /* printf("3! elt k %d %d, pt->v %d \n",lists[0]/4, lists[0]%4, pt->v[i0]); */
-                  /* printf("3! n %e %e %e \n",n[0], n[1], n[2]); */
-                }
-                // assert(_MMG5_directsurfball(mesh, pt->v[i0],lists,ilists,n)==2);
+              // if ( MG_GET(pxt->ori,i) ) {
+              /* Useless because if the orientation of the tetra face is
+               * compatible with the triangle (MG_GET(ori,i)) we know that we
+               * are well orientated. Morever, may introduce numerical errors
+               * with wrinkled surfaces. */
+                // if ( !_MMG5_directsurfball(mesh, pt->v[i0],lists,ilists,n) )  continue;
+              // }
+              if ( !MG_GET(pxt->ori,i) ) {
+                if ( !_MMG5_directsurfball(mesh,pt->v[i0],lists,ilists,n) )
+                  continue;
               }
               ier = _MMG5_movbdyregpt(mesh,met,listv,ilistv,lists,ilists);
               if ( ier )  ns++;

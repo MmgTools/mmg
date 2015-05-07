@@ -201,12 +201,6 @@ static int _MMG5_defmetrid(MMG5_pMesh mesh,MMG5_pSol met,int kel,
     return(0);
   }
 
-  // Check the ball orientation
-  // If _MMG5_directsurfball return 1 it is useless to call this function,
-  // thus it is valid here to call it inside the assert.
-  assert(_MMG5_directsurfball(mesh, idp,list1,ilist1,n1) == 1);
-  assert(_MMG5_directsurfball(mesh, idp,list2,ilist2,n2) == 1);
-
   /* Specific size in direction of t */
   m[0] = _MMG5_ridSizeInTangentDir(mesh,p0,idp,iprid,isqhmin,isqhmax);
 
