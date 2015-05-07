@@ -156,6 +156,15 @@ static int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
           mesh->info.dhd = -1.0;
         else if ( !strcmp(argv[i],"-nreg") )
           mesh->info.nreg = 1;
+        else if( !strcmp(argv[i],"-noinsert") ) {
+          mesh->info.noinsert = 1;
+        }
+        else if ( !strcmp(argv[i],"-noswap") ) {
+          mesh->info.noswap = 1;
+        }
+        else if( !strcmp(argv[i],"-nomove") ) {
+          mesh->info.nomove = 1;
+        }
         break;
       case 'o':
         if ( !strcmp(argv[i],"-out") ) {

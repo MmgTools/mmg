@@ -988,34 +988,46 @@ static int adptri(MMG5_pMesh mesh,MMG5_pSol met) {
   it = nnc = nns = nnf = nnm = 0;
   maxit = 10;
   do {
-    ns = adpspl(mesh,met);
-    if ( ns < 0 ) {
-      fprintf(stdout,"  ## Unable to complete mesh. Exit program.\n");
-      return(0);
+    if ( !mesh->info.noinsert ) {
+      ns = adpspl(mesh,met);
+      if ( ns < 0 ) {
+        fprintf(stdout,"  ## Unable to complete mesh. Exit program.\n");
+        return(0);
+      }
+
+      /* renumbering if available and needed */
+      if ( it==1 && !_MMG5_scotchCall(mesh,met) )
+        return(0);
+
+      nc = adpcol(mesh,met);
+      if ( nc < 0 ) {
+        fprintf(stdout,"  ## Unable to complete mesh. Exit program.\n");
+        return(0);
+      }
     }
-
-    /* renumbering if available and needed */
-    if ( it==1 && !_MMG5_scotchCall(mesh,met) )
-      return(0);
-
-    nc = adpcol(mesh,met);
-    if ( nc < 0 ) {
-      fprintf(stdout,"  ## Unable to complete mesh. Exit program.\n");
-      return(0);
+    else {
+      ns = 0;
+      nc = 0;
     }
     nf = nm = 0;
 
-    nf = swpmsh(mesh,met,2);
-    if ( nf < 0 ) {
-      fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
-      return(0);
+    if ( !mesh->info.noswap ) {
+      nf = swpmsh(mesh,met,2);
+      if ( nf < 0 ) {
+        fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
+        return(0);
+      }
     }
+    else  nf = 0;
 
-    nm = movtri(mesh,met,1);
-    if ( nm < 0 ) {
-      fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
-      return(0);
+    if ( !mesh->info.nomove ) {
+      nm = movtri(mesh,met,1);
+      if ( nm < 0 ) {
+        fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
+        return(0);
+      }
     }
+    else  nm = 0;
 
     nnc += nc;
     nns += ns;
@@ -1032,13 +1044,14 @@ static int adptri(MMG5_pMesh mesh,MMG5_pSol met) {
   if ( !_MMG5_scotchCall(mesh,met) )
     return(0);
 
-  nm = 0;
-  nm = movtri(mesh,met,5);
-  if ( nm < 0 ) {
-    fprintf(stdout,"  ## Unable to improve mesh.\n");
-    return(0);
+  if ( !mesh->info.nomove ) {
+    nm = movtri(mesh,met,5);
+    if ( nm < 0 ) {
+      fprintf(stdout,"  ## Unable to improve mesh.\n");
+      return(0);
+    }
+    nnm += nm;
   }
-  nnm += nm;
 
   if ( abs(mesh->info.imprim) < 5 && (nnc > 0 || nns > 0) )
     fprintf(stdout,"     %8d splitted, %8d collapsed, %8d swapped, %8d moved, %d iter. \n",nns,nnc,nnf,nnm,it);
@@ -1053,35 +1066,44 @@ static int anatri(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
   nns = nnc = nnf = it = 0;
   maxit = 5;
   do {
-    /* memory free */
-    _MMG5_DEL_MEM(mesh,mesh->adja,(3*mesh->ntmax+5)*sizeof(int));
-    mesh->adja = 0;
+    if ( !mesh->info.noinsert ) {
+      /* memory free */
+      _MMG5_DEL_MEM(mesh,mesh->adja,(3*mesh->ntmax+5)*sizeof(int));
+      mesh->adja = 0;
 
-    /* analyze surface */
-    ns = anaelt(mesh,met,typchk);
-    if ( ns < 0 ) {
-      fprintf(stdout,"  ## Unable to complete surface mesh. Exit program.\n");
-      return(0);
+      /* analyze surface */
+      ns = anaelt(mesh,met,typchk);
+      if ( ns < 0 ) {
+        fprintf(stdout,"  ## Unable to complete surface mesh. Exit program.\n");
+        return(0);
+      }
+
+      if ( !_MMG5_hashTria(mesh) ) {
+        fprintf(stdout,"  ## Hashing problem. Exit program.\n");
+        return(0);
+      }
+
+      /* collapse short edges */
+      nc = colelt(mesh,met,typchk);
+      if ( nc < 0 ) {
+        fprintf(stdout,"  ## Unable to collapse mesh. Exiting.\n");
+        return(0);
+      }
     }
-
-    if ( !_MMG5_hashTria(mesh) ) {
-      fprintf(stdout,"  ## Hashing problem. Exit program.\n");
-      return(0);
-    }
-
-    /* collapse short edges */
-    nc = colelt(mesh,met,typchk);
-    if ( nc < 0 ) {
-      fprintf(stdout,"  ## Unable to collapse mesh. Exiting.\n");
-      return(0);
+    else {
+      ns = 0;
+      nc = 0;
     }
 
     /* attempt to swap */
-    nf = swpmsh(mesh,met,typchk);
-    if ( nf < 0 ) {
-      fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
-      return(0);
+    if ( !mesh->info.noswap ) {
+      nf = swpmsh(mesh,met,typchk);
+      if ( nf < 0 ) {
+        fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
+        return(0);
+      }
     }
+    else nf = 0;
 
     nnc += nc;
     nns += ns;

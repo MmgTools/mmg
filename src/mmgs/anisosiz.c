@@ -582,7 +582,7 @@ int _MMG5_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
         if ( !_MMG5_defmetreg(mesh,met,k,i) )  continue;
       }
 /* A FAIRE */
-      // if ( ismet )  intextmet(mesh,met,pt->v[i],mm);
+      if ( ismet )  intextmet(mesh,met,pt->v[i],mm);
       ppt->flag = 1;
     }
   }

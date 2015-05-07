@@ -57,12 +57,6 @@ void _MMG5_Init_parameters(MMG5_pMesh mesh) {
   mesh->info.lag      = -1;
   /** MMG5_IPARAM_optim = 0 */
   mesh->info.optim    =  0;
-  /** MMG5_IPARAM_noinsert = 0 */
-  mesh->info.noinsert =  0;  /* [0/1]    ,avoid/allow point insertion/deletion */
-  /** MMG5_IPARAM_noswap = 0 */
-  mesh->info.noswap   =  0;  /* [0/1]    ,avoid/allow edge or face flipping */
-  /** MMG5_IPARAM_nomove = 0 */
-  mesh->info.nomove   =  0;  /* [0/1]    ,avoid/allow point relocation */
   /** MMG5_IPARAM_nosurf = 0 */
   mesh->info.nosurf   =  0;  /* [0/1]    ,avoid/allow surface modifications */
 #ifdef USE_SCOTCH

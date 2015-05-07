@@ -111,7 +111,12 @@ void _MMG5_mmgInit_parameters(MMG5_pMesh mesh) {
   mesh->info.ddebug   =  0;  /* [0/1]    ,Turn on/off debug mode */
   /** MMG5_IPARAM_npar = 0 */
   mesh->info.npar     =  0;  /* [n]      ,number of local parameters */
-
+  /** MMG5_IPARAM_noinsert = 0 */
+  mesh->info.noinsert =  0;  /* [0/1]    ,avoid/allow point insertion/deletion */
+  /** MMG5_IPARAM_noswap = 0 */
+  mesh->info.noswap   =  0;  /* [0/1]    ,avoid/allow edge or face flipping */
+  /** MMG5_IPARAM_nomove = 0 */
+  mesh->info.nomove   =  0;  /* [0/1]    ,avoid/allow point relocation */
 
   /* default values for doubles */
   /** MMG5_DPARAM_angleDetection = \ref _MMG5_ANGEDG */

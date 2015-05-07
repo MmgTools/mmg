@@ -46,7 +46,6 @@ int movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
   double         ll,*n1,*n2,ps1,ps2,calold,calnew,caltmp;
   int            k,iel,kel,nump,nbeg,nend;
   char           i0,i1,i2,j,ier;
-
   step = 0.1;
 
   /* Make sure ball of point is closed */
