@@ -2479,18 +2479,26 @@ void _MMG5_split3op(MMG5_pMesh mesh, MMG5_pSol met, int k, int vx[6]){
 
 }
 
-/** Split a tetra in 4 tetras by introducing its barycenter
-    FOR NOW : flags, that tell which edge should be split, are not updated (erased) : UPDATE NEEDED ?*/
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param k tetra index.
+ *
+ * Split a tetra in 4 tetras by introducing its barycenter. FOR NOW : flags,
+ * that tell which edge should be split, are not updated (erased) : UPDATE
+ * NEEDED ?
+ *
+ */
 int _MMG5_split4bar(MMG5_pMesh mesh, MMG5_pSol met, int k) {
   MMG5_pTetra   pt[4];
   MMG5_pPoint   ppt;
   MMG5_xTetra   xt[4];
   MMG5_pxTetra  pxt0;
-  double   o[3],hnew1[6], hnew2[6];
-  int      i,ib,iel;
-  int      newtet[4];
+  double        o[3],cb[4];
+  int           i,ib,iel;
+  int           newtet[4];
   unsigned char isxt[4],firstxt;
-  int iadr1,iadr2;
 
   pt[0] = &mesh->tetra[k];
   pt[0]->flag = 0;
@@ -2508,6 +2516,7 @@ int _MMG5_split4bar(MMG5_pMesh mesh, MMG5_pSol met, int k) {
   o[1] *= 0.25;
   o[2] *= 0.25;
 
+  cb[0] = 0.25; cb[1] = 0.25;  cb[2] = 0.25;  cb[3] = 0.25;
   ib = _MMG5_newPt(mesh,o,0);
   if ( !ib ) {
     _MMG5_POINT_REALLOC(mesh,met,ib,mesh->gap,
@@ -2517,18 +2526,7 @@ int _MMG5_split4bar(MMG5_pMesh mesh, MMG5_pSol met, int k) {
                         ,o,0);
   }
   if ( met->m ) {
-    if ( met->size == 1 )
-      met->m[ib] = 0.25*(met->m[pt[0]->v[0]]+met->m[pt[0]->v[1]]+
-                         met->m[pt[0]->v[2]]+met->m[pt[0]->v[3]]);
-    else {
-      iadr1 = met->size*pt[0]->v[0];
-      iadr2 = met->size*pt[0]->v[1];
-      _MMG5_intmetvol(&met->m[iadr1],&met->m[iadr2],hnew1,0.5);
-      iadr1 = met->size*pt[0]->v[2];
-      iadr2 = met->size*pt[0]->v[3];
-      _MMG5_intmetvol(&met->m[iadr1],&met->m[iadr2],hnew2,0.5);
-      _MMG5_intmetvol(hnew1,hnew2,&met->m[met->size*ib],0.5);
-    }
+    _MMG5_interp4bar(mesh,met,k,ib,cb);
   }
 
   /* create 3 new tetras */

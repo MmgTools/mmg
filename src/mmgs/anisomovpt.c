@@ -154,7 +154,7 @@ int movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
       }
       else {
         if ( !_MMG5_nortri(mesh,pt,no) )  return(0);
-        if ( !intridmet(mesh,met,iel,i2,0.5,no,mo) )  return(0);
+        if ( !_MMG5_intridmet(mesh,met,pt->v[i0],pt->v[i1],0.5,no,mo) )  return(0);
 
         p1 = &mesh->point[pt->v[i0]];
         p2 = &mesh->point[pt->v[i1]];
@@ -703,7 +703,8 @@ int movridpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
 
     /* Interpolation of metric between ip0 and ip2 */
     if ( isrid )
-      intridmet(mesh,met,it2,voy2,(1.0-step),nn1,mo);
+      _MMG5_intridmet(mesh,met,mesh->tria[it2].v[_MMG5_inxt2[voy2]],
+                      mesh->tria[it2].v[_MMG5_iprv2[voy2]],(1.0-step),nn1,mo);
     else {
       if ( !_MMG5_paratmet(p0->c,p0->n,m0,o,nn1,mo) )  return(0);
     }
@@ -867,7 +868,8 @@ int movridpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
 
     /* Interpolation of metric between ip0 and ip1 */
     if ( isrid ) {
-      intridmet(mesh,met,it1,voy1,(1.0-step),nn1,mo);
+      _MMG5_intridmet(mesh,met,mesh->tria[it1].v[_MMG5_inxt2[voy1]],
+                      mesh->tria[it1].v[_MMG5_iprv2[voy1]],(1.0-step),nn1,mo);
     }
     else {
       if ( !_MMG5_paratmet(p0->c,p0->n,m0,o,nn1,mo) )  return(0);

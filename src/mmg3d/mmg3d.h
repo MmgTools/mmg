@@ -307,6 +307,8 @@ double _MMG5_caltet_iso(MMG5_pMesh mesh,MMG5_pSol met,int ia,int ib,int ic,int i
 double _MMG5_lenedgCoor_ani(double*, double*, double*, double*);
 double _MMG5_lenedgCoor_iso(double*, double*, double*, double*);
 int    _MMG5_intmetvol_ani(double*,double*,double*,double );
+int    _MMG5_interp4bar_ani(MMG5_pMesh,MMG5_pSol,int,int,double *);
+int    _MMG5_interp4bar_iso(MMG5_pMesh,MMG5_pSol,int,int,double *);
 int    _MMG5_defsiz_iso(MMG5_pMesh,MMG5_pSol );
 int    _MMG5_defsiz_ani(MMG5_pMesh ,MMG5_pSol );
 int    _MMG5_gradsiz_iso(MMG5_pMesh ,MMG5_pSol );
@@ -317,6 +319,7 @@ double (*_MMG5_caltri)(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt);
 int    (*_MMG5_defsiz)(MMG5_pMesh ,MMG5_pSol );
 int    (*_MMG5_gradsiz)(MMG5_pMesh ,MMG5_pSol );
 int    (*_MMG5_intmetvol)(double*,double*,double*,double );
+int    (*_MMG5_interp4bar)(MMG5_pMesh,MMG5_pSol,int,int,double *);
 
 void   _MMG5_Set_commonFunc();
 

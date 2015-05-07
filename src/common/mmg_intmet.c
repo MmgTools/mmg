@@ -179,16 +179,16 @@ int _MMG5_interp_iso(double *ma,double *mb,double *mp,double t) {
  * \param s interpolated parameter (comprise between 0 and 1)
  * \param mr computed interpolated metric
  *
- * Metric interpolation between points p1 and p2, in tria \a pt at parameter 0 <= \a s <= 1 from p1
- * result is stored in \a mr. edge p1p2 must not be a ridge 
+ * Metric interpolation between points p1 and p2, in tria \a pt at parameter 0
+ * <= \a s <= 1 from p1 result is stored in \a mr. edge p1p2 must not be a ridge
  */
 int _MMG5_interpreg_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt,char i,double s,double mr[6]) {
   MMG5_pPoint    p1,p2;
-  _MMG5_Bezier    b;
-  double    b1[3],b2[3],bn[3],c[3],nt[3],cold[3],n[3],nold[3],mold[6],m1[6],m2[6];
-  double   *n1,*n2,step,u,r[3][3],mt1[3],mt2[3],dd;
-  int       ip1,ip2,nstep,l;
-  char      i1,i2;
+  _MMG5_Bezier   b;
+  double         b1[3],b2[3],bn[3],c[3],nt[3],cold[3],n[3],nold[3],mold[6],m1[6],m2[6];
+  double        *n1,*n2,step,u,r[3][3],mt1[3],mt2[3],dd;
+  int            ip1,ip2,nstep,l;
+  char           i1,i2;
 
   /* Number of steps for parallel transport */
   nstep = 4;

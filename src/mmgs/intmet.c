@@ -39,22 +39,27 @@ extern char ddb;
 
 
 
-/* Anisotropic metric interpolation between two points p1 and p2 such that edge
-   0 = (p1p2) is ridge.  v is a direction vector, aimed at pointing towards
-   direction of n1 at interpolated point */
-int intridmet(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,double s,double v[3],double mr[6]) {
-  MMG5_pTria     pt;
-  MMG5_pxPoint     go1,go2;
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param ip1 global index of ridge extremity.
+ * \param ip2 global index of ridge extremity.
+ * \param s interpolation parameter (between 0 and 1).
+ * \param v normal at the point at which we want to compute the metric.
+ * \param mr computed anisotropic size.
+ * \return 1 if success, 0 otherwise.
+ *
+ * Anisotropic metric interpolation between two points \f$p_1\f$ and \f$p_2\f$
+ * such that \f$edge_0 = (p_1p_2)\f$ is ridge. \a v is a direction vector, aimed
+ * at pointing towards direction of n1 at interpolated point.
+ *
+ */
+int _MMG5_intridmet(MMG5_pMesh mesh,MMG5_pSol met,int ip1, int ip2,double s,
+                    double v[3],double mr[6]) {
+  MMG5_pxPoint   go1,go2;
   MMG5_pPoint    p1,p2;
-  double   *m1,*m2,*n11,*n12,*n21,*n22,ps11,ps12,dd,hn1,hn2;
-  int       ip1,ip2;
-  char      i1,i2;
+  double         *m1,*m2,*n11,*n12,*n21,*n22,ps11,ps12,dd,hn1,hn2;
 
-  pt  = &mesh->tria[k];
-  i1  = _MMG5_inxt2[i];
-  i2  = _MMG5_iprv2[i];
-  ip1 = pt->v[i1];
-  ip2 = pt->v[i2];
   p1  = &mesh->point[ip1];
   p2  = &mesh->point[ip2];
   m1  = &met->m[6*ip1];
@@ -270,19 +275,38 @@ void intmet_iso(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int ip,double s) {
   met->m[ip] = s * (met->m[ip1] + met->m[ip2]);
 }
 
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param k element index.
+ * \param i local index of edge in \a k.
+ * \param ip global index of the new point in which we want to compute the metric.
+ * \param s interpolation parameter (between 0 and 1).
+ * \return 0 if fail, 1 otherwise.
+ *
+ * Interpolation of anisotropic sizemap at parameter \a s along edge \a i of elt
+ * \a k.
+ *
+ */
 void intmet_ani(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int ip,double s) {
   MMG5_pTria    pt;
   MMG5_pPoint   ppt;
-  MMG5_pxPoint    go;
-  double  *m;
+  MMG5_pxPoint  go;
+  double        *m;
+  int           ip1, ip2, i1, i2;
 
-  pt = &mesh->tria[k];
+  pt  = &mesh->tria[k];
+  i1  = _MMG5_inxt2[i];
+  i2  = _MMG5_iprv2[i];
+  ip1 = pt->v[i1];
+  ip2 = pt->v[i2];
+
   m  = &met->m[6*ip];
   if ( pt->tag[i] & MG_GEO ) {
     ppt = &mesh->point[ip];
     assert(ppt->xp);
     go = &mesh->xpoint[ppt->xp];
-    intridmet(mesh,met,k,i,s,go->n1,m);
+    _MMG5_intridmet(mesh,met,ip1,ip2,s,go->n1,m);
   }
   else {
     intregmet(mesh,met,k,i,s,m);
