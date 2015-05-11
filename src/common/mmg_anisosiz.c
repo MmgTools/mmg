@@ -139,7 +139,11 @@ double _MMG5_lenedg_ani(MMG5_pMesh mesh,MMG5_pSol met,int np0,int np1,char isedg
     m0 = &met->m[6*np0];
   }
   else if ( MG_GEO & p0->tag ) {
-    if ( !_MMG5_buildridmet(mesh,met,np0,ux,uy,uz,met0) )  return(-1.0);
+    if ( !_MMG5_buildridmet(mesh,met,np0,ux,uy,uz,met0) )  {
+      printf("%s:%d: Unable to compute the metric along the ridge.\n "
+             "Exit program.\n",__FILE__,__LINE__);
+      exit(EXIT_FAILURE);
+    }
     m0 = met0;
   }
   else {
@@ -150,7 +154,11 @@ double _MMG5_lenedg_ani(MMG5_pMesh mesh,MMG5_pSol met,int np0,int np1,char isedg
     m1 = &met->m[6*np1];
   }
   else if ( MG_GEO & p1->tag ) {
-    if ( !_MMG5_buildridmet(mesh,met,np1,ux,uy,uz,met1) )  return(-1.0);
+    if ( !_MMG5_buildridmet(mesh,met,np1,ux,uy,uz,met1) )  {
+      printf("%s:%d: Unable to compute the metric along the ridge.\n "
+             "Exit program.\n",__FILE__,__LINE__);
+      exit(EXIT_FAILURE);
+    }
     m1 = met1;
   }
   else {
