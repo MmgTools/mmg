@@ -376,7 +376,7 @@ int _MMG5_prilen(MMG5_pMesh mesh, MMG5_pSol met) {
 static double _MMG5_caltri33_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel) {
   MMG5_pTria    pt;
   double        cal,dd,abx,aby,abz,acx,acy,acz,bcx,bcy,bcz,rap,det;
-  double        *a,*b,*c,*ma,*mb,*mc,n[3],m[6];
+  double        *a,*b,*c,*ma,*mb,*mc,n[3],m[6],l1,l2,l3,p;
   int           ia,ib,ic;
   char          i;
 
@@ -410,22 +410,30 @@ static double _MMG5_caltri33_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel) {
   bcy = c[1] - b[1];
   bcz = c[2] - b[2];
 
-  n[0] = (aby*acz - abz*acy) * (aby*acz - abz*acy);
-  n[1] = (abz*acx - abx*acz) * (abz*acx - abx*acz);
-  n[2] = (abx*acy - aby*acx) * (abx*acy - aby*acx);
+  n[0] = (aby*acz - abz*acy);
+  n[1] = (abz*acx - abx*acz);
+  n[2] = (abx*acy - aby*acx);
+  n[0] *= n[0];
+  n[1] *= n[1];
+  n[2] *= n[2];
   cal  = sqrt(n[0] + n[1] + n[2]);
   if ( cal > _MMG5_EPSD ) {
-    dd    = 1.0 / cal;
-    n[0] *= dd;
-    n[1] *= dd;
-    n[2] *= dd;
     /* length */
-    rap  = m[0]*abx*abx + m[3]*aby*aby + m[5]*abz*abz + 2.0*(m[1]*abx*aby + m[2]*abx*abz + m[4]*aby*abz);
-    rap += m[0]*acx*acx + m[3]*acy*acy + m[5]*acz*acz + 2.0*(m[1]*acx*acy + m[2]*acx*acz + m[4]*acy*acz);
-    rap += m[0]*bcx*bcx + m[3]*bcy*bcy + m[5]*bcz*bcz + 2.0*(m[1]*bcx*bcy + m[2]*bcx*bcz + m[4]*bcy*bcz);
+    l1 = m[0]*abx*abx + m[3]*aby*aby + m[5]*abz*abz + 2.0*(m[1]*abx*aby + m[2]*abx*abz + m[4]*aby*abz);
+    l2 = m[0]*acx*acx + m[3]*acy*acy + m[5]*acz*acz + 2.0*(m[1]*acx*acy + m[2]*acx*acz + m[4]*acy*acz);
+    l3 = m[0]*bcx*bcx + m[3]*bcy*bcy + m[5]*bcz*bcz + 2.0*(m[1]*bcx*bcy + m[2]*bcx*bcz + m[4]*bcy*bcz);
+    rap = l1+l2+l3;
     /* quality */
-    if ( rap > _MMG5_EPSD )
-      return(sqrt(det)*cal / rap);
+    if ( rap > _MMG5_EPSD ) {
+      l1 = sqrt(l1);
+      l2 = sqrt(l2);
+      l3 = sqrt(l3);
+      p = 0.5*(l1+l2+l3);
+      cal = p*(p-l1)*(p-l2)*(p-l3);
+
+      /* qual = 2.*surf / length */
+      return(2.*sqrt(cal) / rap);
+    }
     else
       return(0.0);
   }
@@ -463,8 +471,9 @@ void _MMG5_outqua(MMG5_pMesh mesh,MMG5_pSol met, int init) {
     ok++;
 
     if ( met->m ) {
-      if ( init && met->size==6 )
+      if ( init && met->size==6 ) {
         rap = ALPHAD * _MMG5_caltri33_ani(mesh,met,k);
+      }
       else
         rap = ALPHAD * _MMG5_calelt(mesh,met,pt);
     }
