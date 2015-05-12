@@ -392,7 +392,7 @@ int main(int argc,char *argv[]) {
   mesh.info.nreg = 0;
   sol.type = 1;
 
-  if ( !parsar(argc,argv,&mesh,&sol,&qdegrad) )  return(1);
+  if ( !parsar(argc,argv,&mesh,&sol,qdegrad) )  return(1);
 
   /* load data */
   fprintf(stdout,"\n  -- INPUT DATA\n");
@@ -441,7 +441,7 @@ int main(int argc,char *argv[]) {
     fprintf(stdout,"  ** SETTING ADJACENCIES\n");
   if ( !MMG2_scaleMesh(&mesh,&sol) )  return(1);
   if ( mesh.nt && !MMG2_hashel(&mesh) )  return(1);
-  if ( !mesh.info.renum && !MMG2_chmsh(&mesh,1) )        return(1);
+  if ( !mesh.info.renum && !MMG2_chkmsh(&mesh,1) )        return(1);
   /*geom : corner detection*/    
   if ( mesh.info.dhd<0 )
     if( !MMG2_evalgeom(&mesh) ) return(1);

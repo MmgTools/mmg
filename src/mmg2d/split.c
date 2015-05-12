@@ -284,6 +284,7 @@ int MMG2_split(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int k1,int adj1) {
 int MMG2_splitbdry(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int k1,int voy1,double *tang) {
   MMG5_pTria     pt1,pt2,pt3,pt4,ptmp;
   MMG5_pEdge     ped,ped1;
+  MMG5_pPoint    ppt;
   int       jel,iar1,iar2,iara1,iara2,k,i,num,newed,num1,num2; 
   int       *adja,*adja1,tmp1,piar1,piar2,pvoy1,ref1,ref2;
   double    air,cal1,cal2,coe,d1;
@@ -383,15 +384,12 @@ int MMG2_splitbdry(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int k1,int voy1,double *
   ped1 = &mesh->edge[newed];
   memcpy(ped1,ped,sizeof(MMG5_Edge));
   ped1->a = ip;
-  #warning to do because the merge
-  /* for(i=0 ; i<2 ; i++) */
-  /*   ped1->t0[i] = tang[i]; */
+  ppt = &mesh->point[ip];
+  for(i=0 ; i<2 ; i++) 
+    ppt->n[i] = tang[i]; 
   if(ddebug)printf("ped1 %d %d\n",ped1->a,ped1->b);
   ped->b = ip;
   if(ddebug)printf("pedcut %d %d\n",ped->a,ped->b);
-   #warning to do because the merge
- /* for(i=0 ; i<2 ; i++) */
- /*    ped->t1[i] = tang[i]; */
  
   num1 = pt1->edg[iar1];
   num2 = pt1->edg[iar2];
@@ -409,7 +407,7 @@ int MMG2_splitbdry(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int k1,int voy1,double *
 
   pt1->edg[0]  = 0;
   //end add edge
-  //MMG2_ch.nreg(mesh,0);  
+  //MMG2_chkmsh(mesh,0);  
   
   return(1);  
 }

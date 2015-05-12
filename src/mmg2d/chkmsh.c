@@ -23,7 +23,7 @@
 #include "mmg2d.h"
 
 
-int MMG2_chmsh(MMG5_pMesh mesh, int severe) {
+int MMG2_chkmsh(MMG5_pMesh mesh, int severe) {
   MMG5_pPoint	ppt;
   MMG5_pTria 	pt1,pt2;
   MMG5_pEdge         ped;

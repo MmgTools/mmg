@@ -142,7 +142,7 @@ MMG2_saveMesh(mesh,"toto.mesh");
 	adja = &mesh->adja[iadr];
 	printf("adja %d %d %d\n",adja[0]/3, adja[1]/3,adja[2]/3);
       }
-        MMG2_chmsh(mesh,1);
+        MMG2_chkmsh(mesh,1);
 	// MMG2_saveMesh(mesh,"toto.mesh");
 	//exit(0);
     }
@@ -414,7 +414,7 @@ int MMG2_insertpoint(MMG5_pMesh mesh,MMG5_pSol sol) {
     if(ddebug) {
       printf("on rechk\n");
       MMG2_saveMesh(mesh,"titi.mesh");
-      MMG2_chmsh(mesh,0);
+      MMG2_chkmsh(mesh,0);
     }
 
   }

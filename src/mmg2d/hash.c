@@ -32,11 +32,11 @@ int MMG2_hashNew(HashTable *hash,int hsize,int hmax) {
   hash->nxtmax =hmax+1;
   hash->hnxt  = hsize;
   hash->item  = (Hedge*)M_calloc(hash->nxtmax,sizeof(MMG5_Edge),"hashNew"); 
-    memset(hash->item,0,hash->nxtmax*sizeof(Hedge));
-    for (k=hash->size; k<hash->nxtmax; k++)
-      hash->item[k].nxt = k+1; 
+  memset(hash->item,0,hash->nxtmax*sizeof(Hedge));
+  for (k=hash->size; k<hash->nxtmax; k++)
+    hash->item[k].nxt = k+1; 
 
-    return(1);
+  return(1);
 }
 int MMG2_hashel(MMG5_pMesh mesh) {
   MMG5_pTria     pt,pt1;
@@ -135,6 +135,14 @@ int MMG2_hashel(MMG5_pMesh mesh) {
   return(1);
 }
 
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param ip1,ip2,ip3 integer
+ * \param t  : computed tangent at vertex ip2
+ *
+ * Compute the tangent at vertex ip2 
+ *
+ */
 int MMG2_computetangent(MMG5_pMesh mesh,int ip1,int ip2,int ip3,double *t) {
   double t1[2],t2[2],c2[2],c1[2],c3[2],dd1,dd2;
   double theta,dd,kappa,n1[2],n2[2],n[2];
@@ -146,6 +154,8 @@ int MMG2_computetangent(MMG5_pMesh mesh,int ip1,int ip2,int ip3,double *t) {
     c3[i] =  mesh->point[ip3].c[i];
   }
   if(mesh->point[ip2].tag & M_CORNER) {
+    printf("warning corner : allocate xpoint.........\n");
+#warning treat corner case
     t[0] = c2[0]-c1[0];
     t[1] = c2[1]-c1[1];
   }
@@ -226,89 +236,98 @@ int MMG2_computetangent(MMG5_pMesh mesh,int ip1,int ip2,int ip3,double *t) {
 int MMG2_tangent(MMG5_pMesh mesh,MMG5_pEdge ped,int k,int ik,int i2,int nv) {
   MMG5_pTria pt,ptiel;
   MMG5_pEdge pediel;
-  int iadj,ip,i,iadr,*adja,iel,voyiel,vi1,vi2,num,vp;
-  printf("fonction commentee suite a la fusion des data structures\n");
-  exit(0);
-  /* pt = &mesh->tria[k]; */
-  /* iadr = 3*(k-1)+1; */
-  /* adja = &mesh->adja[iadr]; */
-  /* iadj = i2; */
-  /* ip = pt->v[ik]; */
-  /* if(!adja[iadj]) { */
-  /*   if(nv) { */
-  /*     MMG2_computetangent(mesh,pt->v[i2],ped->b,ip,ped->t1); */
-  /*   } */
-  /*   else { */
-  /*     MMG2_computetangent(mesh,pt->v[i2],ped->a,ip,ped->t0); */
-  /*   } */
-  /*   num = pt->edg[i2]; */
-  /*   assert(num); */
-  /*   pediel = &mesh->edge[num]; */
-  /*   if(pediel->v[0]==ped->v[nv]){ */
-  /*     for(i=0 ; i<2 ; i++) { */
-  /* 	if(nv) */
-  /* 	  pediel->t0[i] = ped->t1[i]; */
-  /* 	else */
-  /* 	  pediel->t0[i] = ped->t0[i]; */
-  /*     } */
-  /*   } else { */
-  /*     assert(pediel->v[1]==ped->v[nv]); */
-  /*     for(i=0 ; i<2 ; i++) { */
-  /* 	if(nv) */
-  /* 	  pediel->t1[i] = ped->t1[i]; */
-  /* 	else  */
-  /* 	  pediel->t1[i] = ped->t0[i]; */
-  /*     } */
-  /*   } */
-  /*   return(1); */
+  MMG5_pPoint pta,ptb,ptaiel,ptbiel;
 
-  /* } */
-  /* do { */
-  /*   iel = adja[iadj]/3; */
-  /*   ptiel = &mesh->tria[iel]; */
-  /*   voyiel = adja[iadj]%3; */
-  /*   /\*find ptiel*\/ */
-  /*   iadr = 3*(iel-1) + 1; */
-  /*   adja = &mesh->adja[iadr]; */
+  int iadj,ip,i,iadr,*adja,iel,voyiel,vi1,vi2,num,vp,ipnv;
+
+  pt = &mesh->tria[k];
+  iadr = 3*(k-1)+1;
+  adja = &mesh->adja[iadr];
+  iadj = i2;
+  ip = pt->v[ik];
+  
+  pta = &mesh->point[ped->a];
+  ptb = &mesh->point[ped->b];
+
+  if(!adja[iadj]) {
+    if(nv) {
+      MMG2_computetangent(mesh,pt->v[i2],ped->b,ip,ptb->n);
+    }
+    else {
+      MMG2_computetangent(mesh,pt->v[i2],ped->a,ip,pta->n);
+    }
+    num = pt->edg[i2];
+    assert(num);
+    pediel = &mesh->edge[num];
+    ptaiel = &mesh->point[pediel->a];
+    ptbiel = &mesh->point[pediel->b];
+    ipnv = (nv==0)?ped->a:ped->b;
+    if(pediel->a==ipnv){
+      for(i=0 ; i<2 ; i++) {
+        if(nv)
+          ptaiel->n[i] = ptb->n[i];
+        else
+          ptaiel->n[i] = pta->n[i];
+      }
+    } else {
+      assert(pediel->b==ipnv);
+      for(i=0 ; i<2 ; i++) {
+        if(nv)
+          ptbiel->n[i] = ptb->n[i];
+        else
+          ptbiel->n[i] = pta->n[i];
+      }
+    }
+    return(1);
+
+  }
+  do {
+    iel = adja[iadj]/3;
+    ptiel = &mesh->tria[iel];
+    voyiel = adja[iadj]%3;
+    /*find ptiel*/
+    iadr = 3*(iel-1) + 1;
+    adja = &mesh->adja[iadr];
     
-  /*   vi1 = MMG2_idir[voyiel+1]; */
-  /*   vi2 = MMG2_idir[voyiel+2]; */
-  /*   if(ptiel->v[vi2]==ip) { */
-  /*     num = ptiel->edg[vi2]; */
-  /*     iadj = vi2; */
-  /*   } else { */
-  /*     num = ptiel->edg[vi1]; */
-  /*     iadj = vi1; */
-  /*   } */
-  /*   ip = ptiel->v[voyiel]; */
-  /* } while (!num && iel); */
-  /* if(nv)  */
-  /*   MMG2_computetangent(mesh,pt->v[i2],ped->b,ptiel->v[voyiel],ped->t1); */
-  /* else */
-  /*   MMG2_computetangent(mesh,pt->v[i2],ped->a,ptiel->v[voyiel],ped->t0); */
-  /* assert(num); */
-  /* pediel = &mesh->edge[num]; */
-  /* //printf("num %d -- %d %d -- %d %d\n",num,pediel->v[1],pediel->v[0],ped->a,ped->b); */
-  /* //printf("ptiel %d %d %d -- %d\n",ptiel->v[0],ptiel->v[1],ptiel->v[2],voyiel); */
-  /* vp = (nv==0)?ped->a:ped->b */
-  /* if(pediel->v[0]==ip){ */
-  /*   //assert(pediel->v[1]==ptiel->v[voyiel]); */
-  /*   for(i=0 ; i<2 ; i++) { */
-  /*     if(nv) */
-  /* 	pediel->t0[i] = ped->t1[i]; */
-  /*     else */
-  /* 	pediel->t0[i] = ped->t0[i]; */
-  /*   } */
-  /* } else { */
-  /*   //assert(pediel->v[1]==ped->v[nv]); */
-  /*   //assert(pediel->v[0]==ptiel->v[voyiel]); */
-  /*   for(i=0 ; i<2 ; i++) { */
-  /*     if(nv) */
-  /* 	pediel->t1[i] = ped->t1[i]; */
-  /*      else  */
-  /* 	pediel->t1[i] = ped->t0[i]; */
-  /*   } */
-  /* } */
+    vi1 = MMG2_idir[voyiel+1];
+    vi2 = MMG2_idir[voyiel+2];
+    if(ptiel->v[vi2]==ip) {
+      num = ptiel->edg[vi2];
+      iadj = vi2;
+    } else {
+      num = ptiel->edg[vi1];
+      iadj = vi1;
+    }
+    ip = ptiel->v[voyiel];
+  } while (!num && iel);
+  if(nv)
+    MMG2_computetangent(mesh,pt->v[i2],ped->b,ptiel->v[voyiel],ptb->n);
+  else
+    MMG2_computetangent(mesh,pt->v[i2],ped->a,ptiel->v[voyiel],pta->n);
+  assert(num);
+  pediel = &mesh->edge[num];
+  ptaiel = &mesh->point[pediel->a];
+  ptbiel = &mesh->point[pediel->b];
+  //printf("num %d -- %d %d -- %d %d\n",num,pediel->v[1],pediel->v[0],ped->a,ped->b);
+  //printf("ptiel %d %d %d -- %d\n",ptiel->v[0],ptiel->v[1],ptiel->v[2],voyiel);
+  vp = (nv==0)?ped->a:ped->b;
+    if(pediel->a==ip){
+      for(i=0 ; i<2 ; i++) {
+        if(nv)
+          ptaiel->n[i] = ptb->n[i];
+        else
+          ptaiel->n[i] = pta->n[i];
+      }
+    } else {
+      //assert(pediel->v[1]==ped->v[nv]);
+      //assert(pediel->v[0]==ptiel->v[voyiel]);
+      for(i=0 ; i<2 ; i++) {
+        if(nv)
+          ptbiel->n[i] = ptb->n[i];
+        else
+          ptbiel->n[i] = pta->n[i];
+      }
+    }
   
   return(1);
 }
@@ -348,41 +367,41 @@ int MMG2_baseBdry(MMG5_pMesh mesh) {
       adj = adja[i]/3;
       pt1 = &mesh->tria[adj];
       if ( !adj  ) {
-  	num = 0;
-  	if(ned) {
-  	  num = MMG2_hashEdge(&edgeT,k,pt->v[MMG2_iopp[i][0]],pt->v[MMG2_iopp[i][1]]);
-  	}
-  	ip  = pt->v[MMG2_iopp[i][0]];
-  	mesh->point[ip].tag |= M_BDRY;
-  	ip  = pt->v[MMG2_iopp[i][1]];
-  	mesh->point[ip].tag |= M_BDRY;
-  	if(num) {
-  	  pt->edg[i] = num;
-  	} else {
-  	  num = MMG2_newEdge(mesh);
-  	  pt->edg[i] = num;
-  	  ped = &mesh->edge[num];
-  	  ped->a = pt->v[MMG2_iopp[i][0]];
-  	  ped->b = pt->v[MMG2_iopp[i][1]];
-  	}
+        num = 0;
+        if(ned) {
+          num = MMG2_hashEdge(&edgeT,k,pt->v[MMG2_iopp[i][0]],pt->v[MMG2_iopp[i][1]]);
+        }
+        ip  = pt->v[MMG2_iopp[i][0]];
+        mesh->point[ip].tag |= M_BDRY;
+        ip  = pt->v[MMG2_iopp[i][1]];
+        mesh->point[ip].tag |= M_BDRY;
+        if(num) {
+          pt->edg[i] = num;
+        } else {
+          num = MMG2_newEdge(mesh);
+          pt->edg[i] = num;
+          ped = &mesh->edge[num];
+          ped->a = pt->v[MMG2_iopp[i][0]];
+          ped->b = pt->v[MMG2_iopp[i][1]];
+        }
       } else if(pt->ref != pt1->ref) {
-  	num = 0;
-  	if(ned) {
-  	  num = MMG2_hashEdge(&edgeT,k,ped->a,ped->b);
-  	}
-  	ip  = pt->v[MMG2_iopp[i][0]];
-  	mesh->point[ip].tag |= M_SD;
-  	ip  = pt->v[MMG2_iopp[i][1]];
-  	mesh->point[ip].tag |= M_SD;
-  	if(num) {
-  	  pt->edg[i] = num;
-  	} else {
-  	  num = MMG2_newEdge(mesh);
-  	  pt->edg[i] = num;
-  	  ped = &mesh->edge[num];
-  	  ped->a = pt->v[MMG2_iopp[i][0]];
-  	  ped->b = pt->v[MMG2_iopp[i][1]];
-  	}
+        num = 0;
+        if(ned) {
+          num = MMG2_hashEdge(&edgeT,k,ped->a,ped->b);
+        }
+        ip  = pt->v[MMG2_iopp[i][0]];
+        mesh->point[ip].tag |= M_SD;
+        ip  = pt->v[MMG2_iopp[i][1]];
+        mesh->point[ip].tag |= M_SD;
+        if(num) {
+          pt->edg[i] = num;
+        } else {
+          num = MMG2_newEdge(mesh);
+          pt->edg[i] = num;
+          ped = &mesh->edge[num];
+          ped->a = pt->v[MMG2_iopp[i][0]];
+          ped->b = pt->v[MMG2_iopp[i][1]];
+        }
       }
     }
   }
@@ -390,59 +409,58 @@ int MMG2_baseBdry(MMG5_pMesh mesh) {
   if(ned && edgeT.item) free(edgeT.item);
 
   /*compute tangents*/
-  printf("no tangent\n");
-  /* mesh->flag++; */
-  /* for (k=1; k<=mesh->nt; k++) { */
-  /*   pt = &mesh->tria[k]; */
-  /*   if ( !M_EOK(pt) )  continue; */
-  /*   iadr = 3*(k-1) + 1; */
-  /*   adja = &mesh->adja[iadr]; */
-  /*   for (i=0; i<3; i++) { */
-  /*     num = pt->edg[i]; */
-  /*     if(!num) continue; */
-  /*     ped = &mesh->edge[num]; */
+  mesh->base++;
+  for (k=1; k<=mesh->nt; k++) {
+    pt = &mesh->tria[k];
+    if ( !M_EOK(pt) )  continue;
+    iadr = 3*(k-1) + 1;
+    adja = &mesh->adja[iadr];
+    for (i=0; i<3; i++) {
+      num = pt->edg[i];
+      if(!num) continue;
+      ped = &mesh->edge[num];
       
-  /*     i1 = MMG2_idir[i+1]; */
-  /*     i2 = MMG2_idir[i+2]; */
-  /*     ppt = &mesh->point[ped->a]; */
-  /*     /\*tangent on ped->a*\/ */
-  /*     if(ppt->flag != mesh->flag) { */
-  /* 	if(pt->v[i1]==ped->a) { */
-  /* 	  MMG2_tangent(mesh,ped,k,i,i2,0); */
-  /* 	  ppt->flag = mesh->flag; */
-  /* 	} else { */
-  /* 	  MMG2_tangent(mesh,ped,k,i,i1,0); */
-  /* 	  ppt->flag = mesh->flag; */
-  /* 	} */
+      i1 = MMG2_idir[i+1];
+      i2 = MMG2_idir[i+2];
+      ppt = &mesh->point[ped->a];
+      /*tangent on ped->a*/
+      if(ppt->flag != mesh->base) {
+        if(pt->v[i1]==ped->a) {
+          MMG2_tangent(mesh,ped,k,i,i2,0);
+          ppt->flag = mesh->base;
+        } else {
+          MMG2_tangent(mesh,ped,k,i,i1,0);
+          ppt->flag = mesh->base;
+        }
 	
-  /*     } else { */
-  /* 	//printf("on a deja calcule pour %d %e %e\n",ped->a,ped->t0[0],ped->t0[1]); */
-  /*     } */
+      } else {
+        //printf("on a deja calcule pour %d %e %e\n",ped->a,ped->t0[0],ped->t0[1]);
+      }
       
       
       
-  /*     /\* ppt = &mesh->point[ped->b]; *\/ */
-  /*     /\* /\\*tangent on ped->b*\\/ *\/ */
-  /*     /\* if(ppt->flag != mesh->flag) { *\/ */
-  /*     /\* 	if(pt->v[i1]==ped->b) { *\/ */
-  /*     /\* 	  MMG2_tangent(mesh,ped,k,i,i2,1); *\/ */
-  /*     /\* 	} else { *\/ */
-  /*     /\* 	  MMG2_tangent(mesh,ped,k,i,i1,1);	   *\/ */
-  /*     /\* 	} *\/ */
-  /*     /\* 	ppt->flag = mesh->flag; *\/ */
+      /* ppt = &mesh->point[ped->b]; */
+      /* /\*tangent on ped->b*\/ */
+      /* if(ppt->flag != mesh->flag) { */
+      /* 	if(pt->v[i1]==ped->b) { */
+      /* 	  MMG2_tangent(mesh,ped,k,i,i2,1); */
+      /* 	} else { */
+      /* 	  MMG2_tangent(mesh,ped,k,i,i1,1);	   */
+      /* 	} */
+      /* 	ppt->flag = mesh->flag; */
 		
-  /*     /\* } else { *\/ */
-  /*     /\* 	//printf("on a deja calcule pour %d %e %e\n",ped->b,ped->t1[0],ped->t1[1]); *\/ */
-  /*     /\* } *\/ */
+      /* } else { */
+      /* 	//printf("on a deja calcule pour %d %e %e\n",ped->b,ped->t1[0],ped->t1[1]); */
+      /* } */
       
-  /*   } */
-  /* } */
+    }
+  }
   return(1);
 }  
 
 
 /*hash edge :
-return 1 if edge exist in the table*/  
+  return 1 if edge exist in the table*/  
 int MMG2_hashEdge(pHashTable edgeTable,int iel,int ia, int ib) {
   int       key,mins,maxs;
   Hedge     *ha;
@@ -463,7 +481,7 @@ int MMG2_hashEdge(pHashTable edgeTable,int iel,int ia, int ib) {
   if ( ha->min ) {
     /* edge exist*/
     if ( ha->min == mins && ha->max == maxs ) {
-       return(ha->iel);
+      return(ha->iel);
     }
     else {
       while ( ha->nxt && ha->nxt < edgeTable->nxtmax ) {

@@ -226,6 +226,7 @@ int  MMG2_delBucket(MMG5_pMesh mesh,pBucket bucket,int ip);
 int MMG2_hashEdge(pHashTable edgeTable,int iel,int ia, int ib);
 int MMG2_hashel(MMG5_pMesh mesh);
 int MMG2_hashNew(HashTable *hash,int hsize,int hmax);
+int MMG2_baseBdry(MMG5_pMesh mesh);
 
 int MMG2_invmat(double *m,double *minv);
 int simred(double *m1,double *m2,double *m);

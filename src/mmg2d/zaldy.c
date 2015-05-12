@@ -37,6 +37,7 @@ int MMG2_newPt(MMG5_pMesh mesh,double c[2]) {
   ppt->tag   &= ~M_NUL;
   mesh->npnil = ppt->tmp;
   ppt->tmp    = 0;
+  ppt->xp     = 0;
   //ppt->fla   = mesh->flag;
 
   return(curpt);
@@ -45,11 +46,18 @@ int MMG2_newPt(MMG5_pMesh mesh,double c[2]) {
 
 void MMG2_delPt(MMG5_pMesh mesh,int ip) {
   MMG5_pPoint   ppt;
+  MMG5_pxPoint  pxp;
 
   ppt = &mesh->point[ip];
+  if ( ppt->xp ) {
+    pxp = &mesh->xpoint[ppt->xp];
+    memset(pxp,0,sizeof(MMG5_xPoint));
+  }
+
   memset(ppt,0,sizeof(MMG5_Point));
   ppt->tag    = M_NUL;
   ppt->tmp    = mesh->npnil; 
+  
   mesh->npnil = ip;
   if ( ip == mesh->np )  mesh->np--;
 }
@@ -147,21 +155,25 @@ int MMG2_zaldy(MMG5_pMesh mesh) {
 
   if ( mesh->info.mem < 0 ) {
     mesh->npmax  = M_MAX(1.5*mesh->np,NPMAX);
+    mesh->xpmax  = M_MAX(0.1*mesh->xp,0.1*NPMAX);
     mesh->namax = M_MAX(1.5*mesh->na,NEDMAX);
     mesh->ntmax  = M_MAX(1.5*mesh->nt,NEMAX);
   }
   else {
     /* point+tria+adja+sol+bucket+queue */
-    int bytes = sizeof(MMG5_Point) + 2*sizeof(MMG5_Tria) + 3*sizeof(int)
+    int bytes = sizeof(MMG5_Point) +  0.1*sizeof(MMG5_xPoint) + 2*sizeof(MMG5_Tria) + 3*sizeof(int)
       + sizeof(MMG5_Sol) /*+ sizeof(Displ)*/
                 + sizeof(int) + 5*sizeof(int);
 
     npask = (double)mesh->info.mem / bytes * million;
     mesh->npmax = M_MAX(1.5*mesh->np,npask);
+    mesh->xpmax = M_MAX(0.1*mesh->xp,0.1*npask);
     mesh->namax = M_MAX(1.5*mesh->na,2*npask);
     mesh->ntmax = M_MAX(1.5*mesh->nt,2*npask);
   }
   mesh->point = (MMG5_pPoint)M_calloc(mesh->npmax+1,sizeof(MMG5_Point),"zaldy.point");
+  assert(mesh->point);
+  mesh->xpoint = (MMG5_pxPoint)M_calloc(mesh->npmax+1,sizeof(MMG5_xPoint),"zaldy.xpoint");
   assert(mesh->point);
   mesh->tria  = (MMG5_pTria)M_calloc(mesh->ntmax+1,sizeof(MMG5_Tria),"zaldy.tria");
   assert(mesh->tria);

@@ -35,8 +35,8 @@ int MMG2_invmat(double *m,double *minv) {
     minv[1] = 0;
     minv[2] = 1./m[2];  
     if(ddebug) printf("Idd : %e %e %e \n",m[0]*minv[0]+m[1]*minv[1],
-		      m[1]*minv[0]+m[2]*minv[1],
-		      m[1]*minv[1]+m[2]*minv[2]);       
+                      m[1]*minv[0]+m[2]*minv[1],
+                      m[1]*minv[1]+m[2]*minv[2]);       
   } else {      
     det = m[0]*m[2] - m[1]*m[1];
     det = 1. / det;
@@ -44,8 +44,8 @@ int MMG2_invmat(double *m,double *minv) {
     minv[1] = - det * m[1];
     minv[2] = det * m[0];
     if(ddebug) printf("Id : %e %e %e -- %e\n",m[0]*minv[0]+m[1]*minv[1],
-		      m[1]*minv[0]+m[2]*minv[1],
-		      m[1]*minv[1]+m[2]*minv[2],det);       
+                      m[1]*minv[0]+m[2]*minv[1],
+                      m[1]*minv[1]+m[2]*minv[2],det);       
   } 
   return(1);  
 }
@@ -143,167 +143,173 @@ static int cassarbdry(MMG5_pMesh mesh,MMG5_pSol sol,int ied,int ia,int ib,double
   double   c[2],pc1[2],pc2[2],t0[2],t1[2],t_1,*ma,*mb,*mp,dx,dy;
   int      ip,iadr,i,inv;
   printf("comment because of merge needs : cassarbdry\n");
-  return(-1);
- /*  p0 = &mesh->point[ia]; */
-/*   p1 = &mesh->point[ib]; */
-/*   ped = &mesh->edge[ied]; */
-/*   if(ia != ped->a) { */
-/*     assert(ib == ped->a); */
-/*     for(i=0 ; i<2 ; i++) { */
-/*       t0[i] = ped->t1[i]; */
-/*       t1[i] = ped->t0[i]; */
-/*     } */
-/*     /\*if corner, recompute the tangent*\/ */
-/*     if(p0->tag & M_CORNER) { */
-/*       for(i=0 ; i<2 ; i++) */
-/* 	t0[i] = p0->c[i] - p1->c[i]; */
-/*     } */
-/*     if(p1->tag & M_CORNER) { */
-/*       for(i=0 ; i<2 ; i++) */
-/* 	t1[i] = p0->c[i] - p1->c[i]; */
-/*     } */
-/*   } else { */
-/*     assert(ib == ped->b); */
-/*     for(i=0 ; i<2 ; i++) { */
-/*       t0[i] = ped->t0[i]; */
-/*       t1[i] = ped->t1[i]; */
-/*     } */
-/*     /\*if corner, recompute the tangent*\/ */
-/*     if(p0->tag & M_CORNER) { */
-/*       for(i=0 ; i<2 ; i++) */
-/* 	t0[i] = p1->c[i] - p0->c[i]; */
-/*     } */
-/*     if(p1->tag & M_CORNER) { */
-/*       for(i=0 ; i<2 ; i++) */
-/* 	t1[i] = p1->c[i] - p0->c[i]; */
-/*     } */
+#warning cassarbdry
+
+  p0 = &mesh->point[ia];
+  p1 = &mesh->point[ib];
+ 
+  
+  ped = &mesh->edge[ied];
+  if(ia != ped->a) {
+    assert(ib == ped->a);
+    for(i=0 ; i<2 ; i++) {
+      t0[i] = p0->n[i];
+      t1[i] = p1->n[i];
+    }
+    /*if corner, recompute the tangent*/
+    if(p0->tag & M_CORNER) {
+      for(i=0 ; i<2 ; i++)
+        t0[i] = p0->c[i] - p1->c[i];
+    }
+    if(p1->tag & M_CORNER) {
+      for(i=0 ; i<2 ; i++)
+        t1[i] = p0->c[i] - p1->c[i];
+    }
+  } else {
+    assert(ib == ped->b);
+    for(i=0 ; i<2 ; i++) {
+      t0[i] = p0->n[i];
+      t1[i] = p1->n[i];
+    }
+    /*if corner, recompute the tangent*/
+    if(p0->tag & M_CORNER) {
+      for(i=0 ; i<2 ; i++)
+        t0[i] = p1->c[i] - p0->c[i];
+    }
+    if(p1->tag & M_CORNER) {
+      for(i=0 ; i<2 ; i++)
+        t1[i] = p1->c[i] - p0->c[i];
+    }
     
-/*   } */
+  }
   
 
-/*   /\*check if t0 has the same sens of vect(P0P1)*\/ */
-/*   if(t0[0]/(p1->c[0]-p0->c[0]) < 0 || t0[1]/(p1->c[1]-p0->c[1])<0) { */
-/*     //printf("t0/pOp1 %e %e\n",t0[0]/(p1->c[0]-p0->c[0]),t0[1]/(p1->c[1]-p0->c[1])); */
-/*     for(i=0 ; i<2 ; i++) { */
-/*       t0[i] *= -1; */
-/*     } */
-/*     inv = 1; */
-/*   }  */
-/*   /\*check if t1 has the opposite sens of vect(P0P1)*\/ */
-/*   if(t1[0]/(p1->c[0]-p0->c[0]) > 0 || t1[1]/(p1->c[1]-p0->c[1])>0) { */
-/*     //printf("t1/pOp1 %e %e\n",t0[0]/(p1->c[0]-p0->c[0]),t0[1]/(p1->c[1]-p0->c[1])); */
-/*     for(i=0 ; i<2 ; i++) { */
-/*       t1[i] *= -1; */
-/*     } */
-/*   }  */
-/*   /\*control points*\/ */
-/*   for(i=0 ; i<2 ; i++) { */
-/*     pc1[i] = (t0[i]+3*p0->c[i])/3.; */
-/*     pc2[i] = (t1[i]+3*p1->c[i])/3.; */
-/*   } */
+  /*check if t0 has the same sens of vect(P0P1)*/
+  if(t0[0]/(p1->c[0]-p0->c[0]) < 0 || t0[1]/(p1->c[1]-p0->c[1])<0) {
+    //printf("t0/pOp1 %e %e\n",t0[0]/(p1->c[0]-p0->c[0]),t0[1]/(p1->c[1]-p0->c[1]));
+    for(i=0 ; i<2 ; i++) {
+      t0[i] *= -1;
+    }
+    inv = 1;
+  }
+  /*check if t1 has the opposite sens of vect(P0P1)*/
+  if(t1[0]/(p1->c[0]-p0->c[0]) > 0 || t1[1]/(p1->c[1]-p0->c[1])>0) {
+    //printf("t1/pOp1 %e %e\n",t0[0]/(p1->c[0]-p0->c[0]),t0[1]/(p1->c[1]-p0->c[1]));
+    for(i=0 ; i<2 ; i++) {
+      t1[i] *= -1;
+    }
+  }
+  /*control points*/
+  for(i=0 ; i<2 ; i++) {
+    pc1[i] = (t0[i]+3*p0->c[i])/3.;
+    pc2[i] = (t1[i]+3*p1->c[i])/3.;
+  }
 
-/*   /\*coor new point*\/ */
-/*   t_1 = 1.0 - t; */
-/*   for(i=0 ; i<2 ; i++) { */
-/*     c[i] = t_1*t_1*t_1*p0->c[i] + 3*t*t_1*t_1*pc1[i] + 3*t*t*t_1*pc2[i] +  t*t*t*p1->c[i]; */
-/*   } */
-/*   // printf("c %e %e -- mid %e %e\n",c[0],c[1],0.5*(p0->c[0]+p1->c[0]),0.5*(p0->c[1]+p1->c[1])); */
-/*   ip   = MMG2_newPt(mesh,c); */
-/*   if ( ip < 1 )  return(-1);   */
+  /*coor new point*/
+  t_1 = 1.0 - t;
+  for(i=0 ; i<2 ; i++) {
+    c[i] = t_1*t_1*t_1*p0->c[i] + 3*t*t_1*t_1*pc1[i] + 3*t*t*t_1*pc2[i] +  t*t*t*p1->c[i];
+  }
+  // printf("c %e %e -- mid %e %e\n",c[0],c[1],0.5*(p0->c[0]+p1->c[0]),0.5*(p0->c[1]+p1->c[1]));
+  ip   = MMG2_newPt(mesh,c);
+  if ( ip < 1 )  return(-1);
 
-/*   /\*tangent new point*\/ */
-/*   ppt = &mesh->point[ip]; */
-/*   for(i=0 ; i<2 ; i++) { */
-/*     // tang[i] = -(-3*t_1*t_1*p0->c[i] +(3*t_1*(1-3*t))*pc1[i]  */
-/*     //		+ (3*t*(2-3*t))*pc2[i] +  3*t*t*p1->c[i]); */
-/*     // printf("tang %e %e diff %e\n",tang[i],(3./8.)*(p1->c[i]+pc2[i]-pc1[i]-p0->c[i]), */
-/*     //	   fabs(tang[i]-(3./8.)*(p1->c[i]+pc2[i]-pc1[i]-p0->c[i]))); */
-/*     tang[i] = (3./8.)*(p1->c[i]+pc2[i]-pc1[i]-p0->c[i]); */
-/*   } */
-/*   /\*check if tang has the same sens than P0P*\/ */
-/*   if(inv) { */
-/*     if ((tang[0]/(ppt->c[0]-p0->c[0]) > 0 || tang[1]/(ppt->c[1]-p0->c[1])>0)) { */
-/*       //printf("tang/pOp1 %e %e\n",t0[0]/(p1->c[0]-p0->c[0]),t0[1]/(p1->c[1]-p0->c[1])); */
-/*       for(i=0 ; i<2 ; i++) { */
-/* 	tang[i] *= -1; */
-/*       } */
-/*     } */
-/*   } else if((tang[0]/(ppt->c[0]-p0->c[0]) < 0 || tang[1]/(ppt->c[1]-p0->c[1])<0)) { */
-/*     //printf("tang/pOp1 %e %e\n",t0[0]/(p1->c[0]-p0->c[0]),t0[1]/(p1->c[1]-p0->c[1])); */
-/*     for(i=0 ; i<2 ; i++) { */
-/*       tang[i] *= -1; */
-/*     } */
-/*   } */
-/*   /\*change the two other tangent*\/ */
-/*   if(ia != ped->a) { */
-/*     assert(ib == ped->a); */
-/*     for(i=0 ; i<2 ; i++) { */
-/*       /\*t0*\/ */
-/*       ped->t1[i] = -(3./2.)*(pc1[i]-p0->c[i]); */
-/*       /\*t1*\/ */
-/*       ped->t0[i] = -(3./2.)*(p1->c[i]-pc2[i]); */
-/*     } */
-/*     /\*check tangent orientation*\/ */
-/* #warning remove ? check orientation tangent */
-/*     dx = t1[0]/ped->t0[0]; */
-/*     dy = t1[1]/ped->t0[1]; */
-/*     if(dy < 0 || dx <0) { */
-/*       //printf("1) pbs de colinearite %e\n",fabs(dx-dy)); */
-/*     } */
-/*     dx = t0[0]/ped->t1[0]; */
-/*     dy = t0[1]/ped->t1[1]; */
-/*     if(dx < 0 || dy <0) { */
-/*       //printf("3) pbs de colinearite %e %e %e\n",fabs(dx-dy),dx,dy); */
-/*     } */
-/*   } else { */
-/*     assert(ib == ped->b); */
-/*     for(i=0 ; i<2 ; i++) { */
-/*      /\*t0*\/ */
-/*       ped->t0[i] = -(3./2.)*(pc1[i]-p0->c[i]); */
-/*       /\*t1*\/    */
-/*       ped->t1[i] = -(3./2.)*(p1->c[i]-pc2[i]); */
-/*     } */
-/*     /\*check tangent orientation*\/ */
-/* #warning remove ? check orientation tangent */
-/*     dx = t1[0]/ped->t1[0]; */
-/*     dy = t1[1]/ped->t1[1]; */
-/*     if(dx < 0 || dy <0) { */
-/*       //printf("2) pbs de colinearite %e %e %e\n",fabs(dx-dy),dx,dy); */
-/*     } */
-/*     dx = t0[0]/ped->t0[0]; */
-/*     dy = t0[1]/ped->t0[1]; */
-/*     if(dx < 0 || dy <0) { */
-/*       //printf("4) pbs de colinearite pts %d %e %e %e\n",ia,fabs(dx-dy),dx,dy); */
-/*       for(i=0 ; i<2 ; i++) { */
-/* 	ped->t0[i] *= -1; */
-/*     } */
+  /*tangent new point*/
+  ppt = &mesh->point[ip];
+  for(i=0 ; i<2 ; i++) {
+    // tang[i] = -(-3*t_1*t_1*p0->c[i] +(3*t_1*(1-3*t))*pc1[i]
+    //		+ (3*t*(2-3*t))*pc2[i] +  3*t*t*p1->c[i]);
+    // printf("tang %e %e diff %e\n",tang[i],(3./8.)*(p1->c[i]+pc2[i]-pc1[i]-p0->c[i]),
+    //	   fabs(tang[i]-(3./8.)*(p1->c[i]+pc2[i]-pc1[i]-p0->c[i])));
+    tang[i] = (3./8.)*(p1->c[i]+pc2[i]-pc1[i]-p0->c[i]);
+  }
+  /*check if tang has the same sens than P0P*/
+  if(inv) {
+    if ((tang[0]/(ppt->c[0]-p0->c[0]) > 0 || tang[1]/(ppt->c[1]-p0->c[1])>0)) {
+      //printf("tang/pOp1 %e %e\n",t0[0]/(p1->c[0]-p0->c[0]),t0[1]/(p1->c[1]-p0->c[1]));
+      for(i=0 ; i<2 ; i++) {
+        tang[i] *= -1;
+      }
+    }
+  } else if((tang[0]/(ppt->c[0]-p0->c[0]) < 0 || tang[1]/(ppt->c[1]-p0->c[1])<0)) {
+    //printf("tang/pOp1 %e %e\n",t0[0]/(p1->c[0]-p0->c[0]),t0[1]/(p1->c[1]-p0->c[1]));
+    for(i=0 ; i<2 ; i++) {
+      tang[i] *= -1;
+    }
+  }
+  /*change the two other tangents*/
+  if(ia != ped->a) {
+    assert(ib == ped->a);
+    for(i=0 ; i<2 ; i++) {
+      /*t0*/
+      p0->n[i] = -(3./2.)*(pc1[i]-p0->c[i]);
+      /*t1*/
+      p1->n[i] = -(3./2.)*(p1->c[i]-pc2[i]);
+    }
+    /*check tangent orientation*/
+#warning remove ? check orientation tangent
+    dx = t1[0]/p0->n[0];
+    dy = t1[1]/p0->n[1];
+    if(dy < 0 || dx <0) {
+      //printf("1) pbs de colinearite %e\n",fabs(dx-dy));
+    }
+    dx = t0[0]/p1->n[0];
+    dy = t0[1]/p1->n[1];
+    if(dx < 0 || dy <0) {
+      //printf("3) pbs de colinearite %e %e %e\n",fabs(dx-dy),dx,dy);
+    }
+  } else {
+    assert(ib == ped->b);
+    for(i=0 ; i<2 ; i++) {
+      /*t0*/
+      p0->n[i] = -(3./2.)*(pc1[i]-p0->c[i]);
+      /*t1*/
+      p1->n[i] = -(3./2.)*(p1->c[i]-pc2[i]);
+    }
+    /*check tangent orientation*/
+#warning remove ? check orientation tangent
+    dx = t1[0]/p1->n[0];
+    dy = t1[1]/p1->n[1];
+    if(dx < 0 || dy <0) {
+      //printf("2) pbs de colinearite %e %e %e\n",fabs(dx-dy),dx,dy);
+    }
+    dx = t0[0]/p0->n[0];
+    dy = t0[1]/p0->n[1];
+    if(dx < 0 || dy <0) {
+      //printf("4) pbs de colinearite pts %d %e %e %e\n",ia,fabs(dx-dy),dx,dy);
+      for(i=0 ; i<2 ; i++) {
+        p0->n[i] *= -1;
+      }
 
-/*     } */
-/*   } */
+    }
+  }
 
-/*   /\*interpol metric*\/  */
-/*   iadr = (ia-1)*sol->size + 1; */
-/*   ma  = &sol->m[iadr]; */
+  /*interpol metric*/
+  iadr = (ia-1)*sol->size + 1;
+  ma  = &sol->m[iadr];
 
-/*   iadr = (ib-1)*sol->size + 1; */
-/*   mb  = &sol->m[iadr];         */
+  iadr = (ib-1)*sol->size + 1;
+  mb  = &sol->m[iadr];
   
-/*   iadr = (ip-1)*sol->size + 1; */
-/*   mp  = &sol->m[iadr];         */
+  iadr = (ip-1)*sol->size + 1;
+  mp  = &sol->m[iadr];
   
-/*   if ( sol->size==1 ) {    */
-/*     if(!interp_iso(ma,mb,mp,t_1) ) return(-1); */
-/*   }     */
-/*   else { */
-/*     if(!interp_ani(ma,mb,mp,t_1) ) return(-1); */
-/*   } */
+  if ( sol->size==1 ) {
+    if(!interp_iso(ma,mb,mp,t_1) ) return(-1);
+  }
+  else {
+    if(!interp_ani(ma,mb,mp,t_1) ) return(-1);
+  }
   
-/*   /\*interpol dep si option 9*\/ */
-/*   if( abs(mesh->info.option) == 9) { */
-/*     pd = mesh->disp; */
-/*     pd.mv[2*(ip-1) + 1 + 0] = t_1*pd.mv[2*(ia-1) + 1 + 0] + t*pd.mv[2*(ib-1) + 1 + 0]; */
-/*     pd.mv[2*(ip-1) + 1 + 1] = t_1*pd.mv[2*(ia-1) + 1 + 1] + t*pd.mv[2*(ib-1) + 1 + 1];      */
-/*   } */
+  /*interpol dep si option 9*/
+  if( mesh->info.lag >= 0) {
+#warning option 9
+    printf("option 9..........\n");
+    exit(0);
+    /* pd = mesh->disp; */
+    /* pd.mv[2*(ip-1) + 1 + 0] = t_1*pd.mv[2*(ia-1) + 1 + 0] + t*pd.mv[2*(ib-1) + 1 + 0]; */
+    /* pd.mv[2*(ip-1) + 1 + 1] = t_1*pd.mv[2*(ia-1) + 1 + 1] + t*pd.mv[2*(ib-1) + 1 + 1]; */
+  }
   return(ip);
 }
 int MMG2_ni,MMG2_nc;
@@ -326,7 +332,7 @@ static int analar(MMG5_pMesh mesh,MMG5_pSol sol,pBucket bucket,double declic,int
     //else if ( /*pt->flag = base-1 || pt->qual < declic*/ )  continue;
  
     if(0 && k==11385) ddebug =1; 
-      else ddebug = 0;
+    else ddebug = 0;
     if(ddebug) printf("k %d parti\n",k);
     /* base internal edges */
     iadr  = 3*(k-1) + 1;
@@ -359,148 +365,148 @@ static int analar(MMG5_pMesh mesh,MMG5_pSol sol,pBucket bucket,double declic,int
       mb   = &sol->m[iadr];
       tail = MMG2_length(ca,cb,ma,mb);   
       if(ddebug) printf("edge %d -- %d %d: %f tr : %d %d %d\n",
-			i,i1,i2,tail,pt->v[0],pt->v[1],pt->v[2]);
-     if ( tail > M_LONG && *alert <= 1 ) {
-       if(ddebug) {
-	 printf("too long %d\n",adj);
-       }
+                        i,i1,i2,tail,pt->v[0],pt->v[1],pt->v[2]);
+      if ( tail > M_LONG && *alert <= 1 ) {
+        if(ddebug) {
+          printf("too long %d\n",adj);
+        }
         npp++;
         nbp = tail + 0.5;
         if ( nbp*(nbp+1) < 0.99*tail*tail )  nbp++;
-	t = 1.0 / (float)nbp;
+        t = 1.0 / (float)nbp;
         if ( nbp < 3 || nbp > 15 )  t = 0.5; 
-	if ( !adj || pt->ref != mesh->tria[adj].ref )  {
-	  /*add bdry*/
-	  if(!pt->edg[i])  {
-	    printf("tr %d : %d %d %d mais %d\n",k,pt->edg[0],pt->edg[1],pt->edg[2],i);
-	    printf("%d %d %d\n",pt->v[0],pt->v[1],pt->v[2]);
-	    MMG2_saveMesh(mesh,"titii.mesh");
-	  }
-	  assert(pt->edg[i]);
-	  ip = cassarbdry(mesh,sol,pt->edg[i],i1,i2,0.5,tang); 
+        if ( !adj || pt->ref != mesh->tria[adj].ref )  {
+          /*add bdry*/
+          if(!pt->edg[i])  {
+            printf("tr %d : %d %d %d mais %d\n",k,pt->edg[0],pt->edg[1],pt->edg[2],i);
+            printf("%d %d %d\n",pt->v[0],pt->v[1],pt->v[2]);
+            MMG2_saveMesh(mesh,"titii.mesh");
+          }
+          assert(pt->edg[i]);
+          ip = cassarbdry(mesh,sol,pt->edg[i],i1,i2,0.5,tang); 
 #warning a enlever apres le codage des tangents
-	  if(ip==-1) continue;
-	  //ip = cassar(mesh,sol,i1,i2,t);   
-	} else {
-	  ip = cassar(mesh,sol,i1,i2,t);   
-	}
+          if(ip==-1) continue;
+          //ip = cassar(mesh,sol,i1,i2,t);   
+        } else {
+          ip = cassar(mesh,sol,i1,i2,t);   
+        }
         if(ddebug) printf("try cut %d %f \n",ip,t);
-	if(ddebug) {
-	  printf("on essaie\n");
-	  MMG2_saveMesh(mesh,"in.mesh");
-	}
+        if(ddebug) {
+          printf("on essaie\n");
+          MMG2_saveMesh(mesh,"in.mesh");
+        }
         if(ip < 0) {
-	  printf("IMPOSSIBLE TO CREATE NEW VERTEX\n");
-	  //return(0);
-	  //printf("ahhhhhhhhhhhhhhhh\n");
+          printf("IMPOSSIBLE TO CREATE NEW VERTEX\n");
+          //return(0);
+          //printf("ahhhhhhhhhhhhhhhh\n");
           *alert = 2;  
         } else { 
-	  if ( !adj || pt->ref != mesh->tria[adj].ref )  {
-	    /*boundary edge*/
-	    if(!adj) {
-	      ins = MMG2_splitbdry(mesh,sol,ip,k,i,tang);
-	      if(!ins) { 
-		if (1 || ddebug) printf("k= %d on insere pas bdry : %d %d\n",k,i1,i2);
-		//mesh->point[ip].tag = M_CORNER;
-		//mesh->point[ip].ref = 5;
-		//	MMG2_saveMesh(mesh,"del.mesh");
-		//exit(0);
-	        MMG2_delPt(mesh,ip);
-		continue;  
-	      } 
-	      mesh->point[ip].tag |= M_BDRY;
-	      MMG2_ni += 1; 	     
-	      break; 
-	    } else {
-	      mesh->point[ip].tag |= M_SD;
-	      ins = MMG2_split(mesh,sol,ip,k,voi[i]); 
-	      if(!ins) { 
-		if (ddebug) printf("on insere pas sd\n");
-		MMG2_delPt(mesh,ip);
-		continue;  
-	      } 
-	      MMG2_ni += 1; 
-	      break; 
-	    }
-	    continue;
-	  } else {
-	    if(ddebug) {
-	      printf("on insere la\n");
-	      MMG2_saveMesh(mesh,"cut.o.mesh");
-	    }
-	    ins = MMG2_split(mesh,sol,ip,k,voi[i]);
-	    if(ddebug) printf("cut ? %d\n",ins);   
-	    if(!ins) {        
-	      if (ddebug) printf("on insere pas :::\n");
-	      MMG2_delPt(mesh,ip);
-	      continue;  
-	    }
-	    MMG2_ni += 1;    
-	    break; 
-	  }
+          if ( !adj || pt->ref != mesh->tria[adj].ref )  {
+            /*boundary edge*/
+            if(!adj) {
+              ins = MMG2_splitbdry(mesh,sol,ip,k,i,tang);
+              if(!ins) { 
+                if (1 || ddebug) printf("k= %d on insere pas bdry : %d %d\n",k,i1,i2);
+                //mesh->point[ip].tag = M_CORNER;
+                //mesh->point[ip].ref = 5;
+                //	MMG2_saveMesh(mesh,"del.mesh");
+                //exit(0);
+                MMG2_delPt(mesh,ip);
+                continue;  
+              } 
+              mesh->point[ip].tag |= M_BDRY;
+              MMG2_ni += 1; 	     
+              break; 
+            } else {
+              mesh->point[ip].tag |= M_SD;
+              ins = MMG2_split(mesh,sol,ip,k,voi[i]); 
+              if(!ins) { 
+                if (ddebug) printf("on insere pas sd\n");
+                MMG2_delPt(mesh,ip);
+                continue;  
+              } 
+              MMG2_ni += 1; 
+              break; 
+            }
+            continue;
+          } else {
+            if(ddebug) {
+              printf("on insere la\n");
+              MMG2_saveMesh(mesh,"cut.o.mesh");
+            }
+            ins = MMG2_split(mesh,sol,ip,k,voi[i]);
+            if(ddebug) printf("cut ? %d\n",ins);   
+            if(!ins) {        
+              if (ddebug) printf("on insere pas :::\n");
+              MMG2_delPt(mesh,ip);
+              continue;  
+            }
+            MMG2_ni += 1;    
+            break; 
+          }
         }
       }
 
       else if ( tail < M_SHORT ) {
-    if(ddebug) {
-      printf("too short %d \n",adj);
-      MMG2_saveMesh(mesh,"ttttt.mesh");
-    }
- 	if ( !adj || pt->ref != mesh->tria[adj].ref )  { 
-	  if(!adj) {
-	    if(ddebug) printf("edge %d -- %d %d\n",pt->edg[i],mesh->edge[pt->edg[i]].a,mesh->edge[pt->edg[i]].b);
-	    if (!MMG2_colpoibdry(mesh,sol,k,i,MMG2_iare[i][0],MMG2_iare[i][1],2.75)){
-	      if (!MMG2_colpoibdry(mesh,sol,k,i,MMG2_iare[i][1],MMG2_iare[i][0],2.75)){
-		continue;
-	      } else { 
-		MMG2_nc++;     
-		MMG2_delPt(mesh,i1);   
-		break;
-	      }
-	    } 
-	    MMG2_nc++;
-	    MMG2_delPt(mesh,i2);   
-	    break;    
-	  } else {
-	    if(!MMG2_colpoi(mesh,sol,k,i,MMG2_iare[i][0],MMG2_iare[i][1],2.75)) {
-	      if(!MMG2_colpoi(mesh,sol,k,i,MMG2_iare[i][1],MMG2_iare[i][0],2.75)) {
-		continue;
-	      } else {
-		MMG2_nc++; 
-		MMG2_delPt(mesh,i1);
-		break;   
-	      }  
-	    }
-	    MMG2_delPt(mesh,i2);
-	    MMG2_nc++; 
-	    break;    
-	  }
-	} else {
-	  if(!MMG2_colpoi(mesh,sol,k,i,MMG2_iare[i][0],MMG2_iare[i][1],2.75)) {
-	    if(!MMG2_colpoi(mesh,sol,k,i,MMG2_iare[i][1],MMG2_iare[i][0],2.75)) {
-	      continue;
-	    } else {
-	      MMG2_nc++; 
-	      MMG2_delPt(mesh,i1);
-	      if(ddebug) {
-		printf("del ok\n");
-		//MMG2_saveMesh(mesh,"del.mesh");
-		//exit(0);
-	      }
-	      break;   
+        if(ddebug) {
+          printf("too short %d \n",adj);
+          MMG2_saveMesh(mesh,"ttttt.mesh");
+        }
+        if ( !adj || pt->ref != mesh->tria[adj].ref )  { 
+          if(!adj) {
+            if(ddebug) printf("edge %d -- %d %d\n",pt->edg[i],mesh->edge[pt->edg[i]].a,mesh->edge[pt->edg[i]].b);
+            if (!MMG2_colpoibdry(mesh,sol,k,i,MMG2_iare[i][0],MMG2_iare[i][1],2.75)){
+              if (!MMG2_colpoibdry(mesh,sol,k,i,MMG2_iare[i][1],MMG2_iare[i][0],2.75)){
+                continue;
+              } else { 
+                MMG2_nc++;     
+                MMG2_delPt(mesh,i1);   
+                break;
+              }
+            } 
+            MMG2_nc++;
+            MMG2_delPt(mesh,i2);   
+            break;    
+          } else {
+            if(!MMG2_colpoi(mesh,sol,k,i,MMG2_iare[i][0],MMG2_iare[i][1],2.75)) {
+              if(!MMG2_colpoi(mesh,sol,k,i,MMG2_iare[i][1],MMG2_iare[i][0],2.75)) {
+                continue;
+              } else {
+                MMG2_nc++; 
+                MMG2_delPt(mesh,i1);
+                break;   
+              }  
+            }
+            MMG2_delPt(mesh,i2);
+            MMG2_nc++; 
+            break;    
+          }
+        } else {
+          if(!MMG2_colpoi(mesh,sol,k,i,MMG2_iare[i][0],MMG2_iare[i][1],2.75)) {
+            if(!MMG2_colpoi(mesh,sol,k,i,MMG2_iare[i][1],MMG2_iare[i][0],2.75)) {
+              continue;
+            } else {
+              MMG2_nc++; 
+              MMG2_delPt(mesh,i1);
+              if(ddebug) {
+                printf("del ok\n");
+                //MMG2_saveMesh(mesh,"del.mesh");
+                //exit(0);
+              }
+              break;   
                    
-	    }  
-	  }
-	  MMG2_nc++; 
-	  MMG2_delPt(mesh,i2);
-	      if(ddebug) {
-		printf("del2 ok\n");
-		//MMG2_saveMesh(mesh,"del.mesh");
-		//exit(0);
-	      }
+            }  
+          }
+          MMG2_nc++; 
+          MMG2_delPt(mesh,i2);
+          if(ddebug) {
+            printf("del2 ok\n");
+            //MMG2_saveMesh(mesh,"del.mesh");
+            //exit(0);
+          }
 
-	  break;   
-	}
+          break;   
+        }
       }
     }
   }
@@ -515,63 +521,6 @@ int MMG2_mmg2d1(MMG5_pMesh mesh,MMG5_pSol sol) {
   pBucket  bucket;
   double   declic;
   int      ns,base,alert,it,maxtou;
-
-  /* MMG5_pTria pt; */
-  /* MMG5_pPoint ppt; */
-  /* MMG5_pEdge ped; */
-  /* int k,i,iel,*adja,iadr,ncompt; */
-  /* //HACK WARNING ENLEVER LA NORMALISATION*/
-  /* for(k=1;k<=mesh->nt;k++) { */
-  /*   pt = &mesh->tria[k]; */
-  /*   for(i=0; i<3 ; i++) { */
-  /*     if(pt->v[i]==4053) printf("%e\n",(&mesh->point[pt->v[i]])->c[1]); */
-  /*     if((mesh->point[pt->v[i]].c[1])<0) break; */
-  /*   } */
-  /*   if(i<3) {MMG2_delElt(mesh,k);} */
-  /* } */
-  /* for(k=1;k<=mesh->np;k++) { */
-  /*   ppt = &mesh->point[k]; */
-  /*   if(ppt->c[1]<0) MMG2_delPt(mesh,k); */
-  /* } */
-  /* for(k=1;k<=mesh->nt;k++) { */
-  /*   pt = &mesh->tria[k]; */
-  /*   if(!pt->v[0]) continue; */
-  /*   iadr=3*(k-1)+1; */
-  /*   adja = &mesh->adja[iadr]; */
-  /*   for(i=0; i<3 ; i++) { */
-  /*     if(!adja[i]) continue; */
-  /*     iel = adja[i]/3; */
-  /*     if(!((mesh->tria[iel]).v[0])) { */
-  /* 	break; */
-  /*     } */
-  /*   } */
-  /*   if(i<3) { */
-  /*     mesh->point[pt->v[MMG2_iare[i][0]]].c[1]=0; */
-  /*     mesh->point[pt->v[MMG2_iare[i][1]]].c[1]=0; */
-  /*     ped = &mesh->edge[++mesh->na]; */
-  /*     ped->a=pt->v[MMG2_iare[i][0]]; */
-  /*     ped->b=pt->v[MMG2_iare[i][1]]; */
-  /*     ped->ref = 5; */
-
-  /*   } */
-  /* } */
-  /* for(k=1;k<=mesh->na;k++) { */
-  /*   ped = &mesh->edge[k]; */
-  /*   iel = ped->a; */
-  /*   if(mesh->point[iel].tag & M_NUL) { */
-  /*     ped->a = 0; */
-  /*     continue; */
-  /*   } */
-  /*   iel = ped->b; */
-  /*   if(mesh->point[iel].tag & M_NUL) { */
-  /*     ped->a = 0; */
-  /*     continue; */
-  /*   } */
-  /* } */
-
-  /* MMG2_saveMesh(mesh,"tt.mesh"); */
-  /* exit(0); */
-  /* //END HACK */
 
   if ( mesh->info.imprim < 0 ) {
     MMG2_outqua(mesh,sol);
@@ -608,7 +557,7 @@ int MMG2_mmg2d1(MMG5_pMesh mesh,MMG5_pSol sol) {
     if(!mesh->info.noswap) {
       ns = MMG2_cendel(mesh,sol,declic,mesh->base); 
       if ( mesh->info.imprim > 3 )
-	fprintf(stdout,"  -- %8d SWAPPED\n",ns); 
+        fprintf(stdout,"  -- %8d SWAPPED\n",ns); 
     }
     //MMG2_outqua(mesh,sol);  
     //MMG2_saveMesh(mesh,"swap.mesh"); 
