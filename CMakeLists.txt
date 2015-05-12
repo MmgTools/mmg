@@ -54,6 +54,7 @@ CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/src/common/mmg.h.in
 SET(EXECUTABLE_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/bin)
 SET(MMG3D_SOURCE_DIR ${CMAKE_SOURCE_DIR}/src/mmg3d)
 SET(MMGS_SOURCE_DIR ${CMAKE_SOURCE_DIR}/src/mmgs)
+SET(MMG2D_SOURCE_DIR ${CMAKE_SOURCE_DIR}/src/mmg2d)
 SET(COMMON_SOURCE_DIR ${CMAKE_SOURCE_DIR}/src/common)
 
 # Find "exotic" compilers
@@ -116,20 +117,28 @@ IF(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
 ENDIF()
 
 SET ( BUILD "MMG" CACHE STRING
-  "\"MMG3D\", \"MMGS\" or \"MMG\" to compile both MMGS and MMG3D" )
+  "\"MMG3D\", \"MMGS\",\"MMG2D\", or \"MMG\" to compile both MMGS, MMG3D and MMG2D" )
 
 IF ( BUILD MATCHES "MMGS" )
   SET(BUILD_MMG        OFF )
   SET(BUILD_MMG3D      OFF )
   SET(BUILD_MMGS       ON  )
+  SET(BUILD_MMG2D       OFF  )
 ELSEIF ( BUILD MATCHES "MMG3D" )
   SET(BUILD_MMG3D      ON  )
   SET(BUILD_MMGS       OFF )
   SET(BUILD_MMG        OFF )
+  SET(BUILD_MMG2D       OFF  )
+ELSEIF ( BUILD MATCHES "MMG2D" )
+  SET(BUILD_MMG        OFF )
+  SET(BUILD_MMG3D      OFF )
+  SET(BUILD_MMGS       OFF  )
+  SET(BUILD_MMG2D       ON  )
 ELSEIF ( BUILD MATCHES "MMG" )
   SET(BUILD_MMG        ON  )
   SET(BUILD_MMGS       OFF )
   SET(BUILD_MMG3D      OFF )
+  SET(BUILD_MMG2D       OFF  )
 ELSE ( )
   MESSAGE (WARNING "Nothing to build")
 ENDIF()
@@ -182,6 +191,7 @@ ENDIF()
 # Header files
 INCLUDE_DIRECTORIES(${MMG3D_SOURCE_DIR})
 INCLUDE_DIRECTORIES(${MMGS_SOURCE_DIR})
+INCLUDE_DIRECTORIES(${MMG2D_SOURCE_DIR})
 
 # Source files
 FILE(
@@ -210,6 +220,12 @@ FILE(
   GLOB
   sourcemmgs_files
   ${MMGS_SOURCE_DIR}/*.c   ${MMGS_SOURCE_DIR}/*.h
+  ${COMMON_SOURCE_DIR}/*.c ${COMMON_SOURCE_DIR}/*.h
+  )
+FILE(
+  GLOB
+  sourcemmg2d_files
+  ${MMG2D_SOURCE_DIR}/*.c   ${MMG2D_SOURCE_DIR}/*.h
   ${COMMON_SOURCE_DIR}/*.c ${COMMON_SOURCE_DIR}/*.h
   )
 
@@ -457,14 +473,35 @@ ENDIF()
 
 ###############################################################################
 #####
+#####         Compile MMG2D executable
+#####
+###############################################################################
+IF ( BUILD_MMG2D OR BUILD_MMG )
+  ADD_EXECUTABLE(${PROJECT_NAME}2d    ${sourcemmg2d_files} )
+  TARGET_LINK_LIBRARIES(${PROJECT_NAME}2d ${LIBRARIES})
+  INSTALL(TARGETS ${PROJECT_NAME}2d RUNTIME DESTINATION bin)
+
+  # in debug mode we name the executable mmg2d_debug
+  SET_TARGET_PROPERTIES(${PROJECT_NAME}2d PROPERTIES DEBUG_POSTFIX _debug)
+  # in Release mode we name the executable mmg2d_O3
+  SET_TARGET_PROPERTIES(${PROJECT_NAME}2d PROPERTIES RELEASE_POSTFIX _O3)
+  # in RelWithDebInfo mode we name the executable mmg2d_O3d
+  SET_TARGET_PROPERTIES(${PROJECT_NAME}2d PROPERTIES RELWITHDEBINFO_POSTFIX _O3d)
+  # in MinSizeRel mode we name the executable mmg2d_O3
+  SET_TARGET_PROPERTIES(${PROJECT_NAME}2d PROPERTIES MINSIZEREL_POSTFIX _Os)
+ENDIF()
+
+###############################################################################
+#####
 #####         Continuous integration
 #####
 ###############################################################################
-IF ( BUILD_MMG3D OR BUILD_MMGS OR BUILD_MMG )
+IF ( BUILD_MMG3D OR BUILD_MMGS OR BUILD_MMG2D OR BUILD_MMG )
 
   OPTION ( BUILD_TESTING "Enable/Disable continuous integration" OFF )
 
   IF( BUILD_TESTING )
+    OPTION(MMG2D_CI "Enable/Disable continuous integration for mmg2d" ON )
     OPTION(MMGS_CI "Enable/Disable continuous integration for mmgs" ON )
     OPTION(MMG3D_CI "Enable/Disable continuous integration for mmg3d" ON )
     OPTION(LONG_TESTS "Enable/Disable time consuming tests for the project" OFF )
@@ -481,6 +518,7 @@ IF ( BUILD_MMG3D OR BUILD_MMGS OR BUILD_MMG )
     SET(MMG_CI_TESTS ${CMAKE_SOURCE_DIR}/ci_tests/mmg )
     SET(MMGS_CI_TESTS ${CMAKE_SOURCE_DIR}/ci_tests/mmgs )
     SET(MMG3D_CI_TESTS ${CMAKE_SOURCE_DIR}/ci_tests/mmg3d )
+    SET(MMG2D_CI_TESTS ${CMAKE_SOURCE_DIR}/ci_tests/mmg2d )
 
     # Remove the --show-reachable=yes option from the default valgrind command
     SET(VALGRIND_COMMAND_OPTIONS "-q --tool=memcheck ")
@@ -634,7 +672,7 @@ IF ( BUILD_MMG3D OR BUILD_MMGS OR BUILD_MMG )
 
   ENDIF ( BUILD_TESTING )
 
-ENDIF ( BUILD_MMG3D OR BUILD_MMGS OR BUILD_MMG )
+ENDIF ( BUILD_MMG3D OR BUILD_MMGS OR BUILD_MMG2D OR BUILD_MMG)
 
 ###############################################################################
 #####
@@ -673,13 +711,13 @@ IF(DOXYGEN_FOUND)
     )
   # MMGS and MMG3D Documentation
   ADD_CUSTOM_TARGET(doc
-    DEPENDS mmgs_doc mmg3d_doc
-    COMMENT "Generating MMGS and MMG3D API documentation with Doxygen.
+    DEPENDS mmgs_doc mmg3d_doc mmg2d_doc
+    COMMENT "Generating MMGS, MMG3D and MMG2D API documentation with Doxygen.
     To see the MMGS documentation,"
     " open up the doc/doxygen/mmgs/html/index.html file.
     To see the MMG3D documentation,"
     " open up the doc/doxygen/mmg3d/html/index.html file."
-    VERBATIM
+   VERBATIM
     )
 ENDIF(DOXYGEN_FOUND)
 
@@ -714,6 +752,7 @@ SET(CPACK_IGNORE_FILES ";.\\\\\\\\.#;/\\\\\\\\.git;.~;.#;.-e;.DS_Store"
   ${CPACK_IGNORE_FILES})
 SET(CPACK_IGNORE_FILES ";libmmg3d.*" ${CPACK_IGNORE_FILES})
 SET(CPACK_IGNORE_FILES ";libmmgs.*" ${CPACK_IGNORE_FILES})
+SET(CPACK_IGNORE_FILES ";libmmg2d.*" ${CPACK_IGNORE_FILES})
 
 SET(CPACK_SOURCE_IGNORE_FILES ";src/mmg3d/mmg3d.h$" ${CPACK_SOURCE_IGNORE_FILE})
 SET(CPACK_SOURCE_IGNORE_FILES ";.\\\\\\\\.#;/\\\\\\\\.git;.~;.#;.-e;.DS_Store"
