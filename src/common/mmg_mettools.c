@@ -36,6 +36,43 @@
 
 /**
  * \param mesh pointer toward the mesh structure.
+ * \param t tangent at the ridge point.
+ * \param n normal at the ridge point.
+ * \param dtan metric size along the tangent direction.
+ * \param dv metric size along the normal direction.
+ * \param m computed metric at the ridge point.
+ * \return 1
+ *
+ * Build metric tensor at a fictitious ridge point, whose normal and tangent are
+ * provided.
+ *
+ */
+inline int
+_MMG5_buildridmetfic(MMG5_pMesh mesh,double t[3],double n[3],double dtan,
+                     double dv,double m[6]) {
+  double u[3],r[3][3];
+
+  u[0] = n[1]*t[2] - n[2]*t[1];
+  u[1] = n[2]*t[0] - n[0]*t[2];
+  u[2] = n[0]*t[1] - n[1]*t[0];
+
+  /* If u = n1 ^ t, matrix of the desired metric in (t,u,n1) = diag(p0->m[0],dv,0)*/
+  r[0][0] = t[0];  r[0][1] = u[0];  r[0][2] = n[0];
+  r[1][0] = t[1];  r[1][1] = u[1];  r[1][2] = n[1];
+  r[2][0] = t[2];  r[2][1] = u[2];  r[2][2] = n[2];
+
+  m[0] = dtan*r[0][0]*r[0][0] + dv*r[0][1]*r[0][1];
+  m[1] = dtan*r[0][0]*r[1][0] + dv*r[0][1]*r[1][1];
+  m[2] = dtan*r[0][0]*r[2][0] + dv*r[0][1]*r[2][1];
+  m[3] = dtan*r[1][0]*r[1][0] + dv*r[1][1]*r[1][1];
+  m[4] = dtan*r[1][0]*r[2][0] + dv*r[1][1]*r[2][1];
+  m[5] = dtan*r[2][0]*r[2][0] + dv*r[2][1]*r[2][1];
+
+  return(1);
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
  * \param m pointer toward the first metric to intersect.
  * \param n pointer toward the second metric to intersect.
  * \param mr pointer toward the computed intersected metric.
@@ -549,7 +586,8 @@ int _MMG5_paratmet(double c0[3],double n0[3],double m[6],double c1[3],double n1[
   u[1] *= ll;
   u[2] *= ll;
 
-  /* And the transported metric is diag(lambda[0], lambda[1], 0) in basis (u,n1^u,n1) */
+  /* And the transported metric is diag(lambda[0], lambda[1], mrot[5]) in basis
+   * (u,n1^u,n1) */
   r[0][0] = u[0];
   r[1][0] = u[1];
   r[2][0] = u[2];
@@ -569,13 +607,24 @@ int _MMG5_paratmet(double c0[3],double n0[3],double m[6],double c1[3],double n1[
   r[1][2] = n1[1];
   r[2][2] = n1[2];
 
-  /*mt = R * diag(lambda[0], lambda[1], 0)*{^t}R */
-  mt[0] = lambda[0]*r[0][0]*r[0][0] + lambda[1]*r[0][1]*r[0][1];
-  mt[1] = lambda[0]*r[0][0]*r[1][0] + lambda[1]*r[0][1]*r[1][1];
-  mt[2] = lambda[0]*r[0][0]*r[2][0] + lambda[1]*r[0][1]*r[2][1];
-  mt[3] = lambda[0]*r[1][0]*r[1][0] + lambda[1]*r[1][1]*r[1][1];
-  mt[4] = lambda[0]*r[2][0]*r[1][0] + lambda[1]*r[2][1]*r[1][1];
-  mt[5] = lambda[0]*r[2][0]*r[2][0] + lambda[1]*r[2][1]*r[2][1];
+  /*mt = R * diag(lambda[0], lambda[1], mrot[5])*{^t}R */
+  mt[0] = lambda[0]*r[0][0]*r[0][0] + lambda[1]*r[0][1]*r[0][1]
+    + mrot[5]*r[0][2]*r[0][2];
+
+  mt[1] = lambda[0]*r[0][0]*r[1][0]
+    + lambda[1]*r[0][1]*r[1][1] + mrot[5]*r[0][2]*r[1][2];
+
+  mt[2] = lambda[0]*r[0][0]*r[2][0]
+    + lambda[1]*r[0][1]*r[2][1] + mrot[5]*r[0][2]*r[2][2];
+
+  mt[3] = lambda[0]*r[1][0]*r[1][0] + lambda[1]*r[1][1]*r[1][1]
+    + mrot[5]*r[1][2]*r[1][2];
+
+  mt[4] = lambda[0]*r[2][0]*r[1][0]
+    + lambda[1]*r[2][1]*r[1][1] + mrot[5]*r[2][2]*r[1][2];
+
+  mt[5] = lambda[0]*r[2][0]*r[2][0] + lambda[1]*r[2][1]*r[2][1]
+    + mrot[5]*r[2][2]*r[2][2];
 
   return(1);
 }

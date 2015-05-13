@@ -200,10 +200,10 @@ double _MMG5_lenedg_ani(MMG5_pMesh mesh,MMG5_pSol met,int np0,int np1,char isedg
  */
 double _MMG5_surftri_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt) {
   MMG5_pPoint    p[3];
-  _MMG5_Bezier    b;
-  int       np[3];
-  double    surf,ux,uy,uz,dens,m[3][6],J[3][2],mJ[3][2],tJmJ[2][2];
-  char      i,i1,i2;
+  _MMG5_Bezier   b;
+  int            np[3];
+  double         surf,ux,uy,uz,dens,m[3][6],J[3][2],mJ[3][2],tJmJ[2][2];
+  char           i,i1,i2;
 
   surf = 0.0;
 
