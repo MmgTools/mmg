@@ -21,13 +21,11 @@
 ** =============================================================================
 */
 #include "mmg2d.h"
-#include "compil.date"
-
 
 mytime   ctim[TIMEMAX];
 
 int MMG2_iare[3][2] = {{1,2},{2,0},{0,1}};
-int MMG2_iopp[3][2] = {{1,2},{0,2},{0,1}};  
+int MMG2_iopp[3][2] = {{1,2},{0,2},{0,1}};
 unsigned int MMG2_idir[5] = {0,1,2,0,1};
 
 static void excfun(int sigid) {
@@ -61,13 +59,13 @@ static void endcod() {
   /* ttim[0] = M_MAX(ttim[0],ttot); */
 
   /* fprintf(stdout,"\n  -- CPU REQUIREMENTS\n"); */
-  /* fprintf(stdout,"  in/out	%8.2f %%    %3d. calls,   %7.2f sec/call\n", */
+  /* fprintf(stdout,"  in/out %8.2f %%    %3d. calls,   %7.2f sec/call\n", */
   /*         100.*ttim[1]/ttim[0],call[1],ttim[1]/(float)call[1]); */
-  /* fprintf(stdout,"  analysis	%8.2f %%    %3d. calls,   %7.2f sec/call\n", */
+  /* fprintf(stdout,"  analysis %8.2f %%    %3d. calls,   %7.2f sec/call\n", */
   /*         100.*ttim[2]/ttim[0],call[2],ttim[2]/(float)call[2]); */
-  /* fprintf(stdout,"  remeshing	%8.2f %%    %3d. calls,   %7.2f sec/call\n", */
+  /* fprintf(stdout,"  remeshing  %8.2f %%    %3d. calls,   %7.2f sec/call\n", */
   /*         100.*ttim[3]/ttim[0],call[3],ttim[3]/(float)call[3]); */
-  /* fprintf(stdout,"  total     %8.2f %%    %3d. calls,	%7.2f sec/call\n", */
+  /* fprintf(stdout,"  total     %8.2f %%    %3d. calls,  %7.2f sec/call\n", */
   /*         100.*ttot/ttim[0],call[0],ttot/(float)call[0]); */
 
   /* fprintf(stdout,"\n   ELAPSED TIME  %.2f SEC.  (%.2f)\n",ttim[0],ttot); */
@@ -100,10 +98,10 @@ int setfunc(int type) {
 }
 
 int MMG2_inputdata(MMG5_pMesh mesh,MMG5_pSol sol) {
-  MMG5_pPoint 	ppt;
-  int		k;
-  
-  
+  MMG5_pPoint   ppt;
+  int   k;
+
+
 
   /* keep track of empty links */
   mesh->npnil = mesh->np + 1;
@@ -129,11 +127,11 @@ int MMG2_inputdata(MMG5_pMesh mesh,MMG5_pSol sol) {
 
 int MMG2_tassage(MMG5_pMesh mesh,MMG5_pSol sol) {
   MMG5_pEdge         ped;
-  MMG5_pTria		pt,ptnew;
-  MMG5_pPoint	ppt,pptnew;
-  int 		np,nt,k,nbl,isol,isolnew,i;
+  MMG5_pTria    pt,ptnew;
+  MMG5_pPoint ppt,pptnew;
+  int     np,nt,k,nbl,isol,isolnew,i;
   int     iadr,iadrnew,iadrv,*adjav,*adja,*adjanew,voy;
-  
+
 
   /* compact vertices */
   np=0;
@@ -142,15 +140,15 @@ int MMG2_tassage(MMG5_pMesh mesh,MMG5_pSol sol) {
     if ( ppt->tag & M_NUL )  continue;
     ppt->tmp = ++np;
   }
-  
- 
+
+
   /* compact edges */
   for (k=1; k<=mesh->na; k++) {
     ped  = &mesh->edge[k];
     ped->a = mesh->point[ped->a].tmp;
     ped->b = mesh->point[ped->b].tmp;
   }
- 
+
   /* compact triangle */
   nt  = 0;
   nbl = 1;
@@ -159,50 +157,50 @@ int MMG2_tassage(MMG5_pMesh mesh,MMG5_pSol sol) {
     pt = &mesh->tria[k];
     if ( !pt->v[0] )  {
       continue;
-    }  
- 		
+    }
+
     pt->v[0] = mesh->point[pt->v[0]].tmp;
     pt->v[1] = mesh->point[pt->v[1]].tmp;
     pt->v[2] = mesh->point[pt->v[2]].tmp;
-    nt++; 
+    nt++;
     if(k!=nbl) {
       //printf("on voudrait.tmpser\n");
       ptnew = &mesh->tria[nbl];
-      memcpy(ptnew,pt,sizeof(MMG5_Tria)); 
-		
+      memcpy(ptnew,pt,sizeof(MMG5_Tria));
+
       //and the adjacency
       iadr = 3*(k-1) + 1;
-      adja = &mesh->adja[iadr]; 
+      adja = &mesh->adja[iadr];
       iadrnew = 3*(nbl-1) + 1;
-      adjanew = &mesh->adja[iadrnew]; 
-      for(i=0 ; i<2 ; i++) { 
-	adjanew[i] = adja[i]; 
-	if(!adja[i]) continue;
-	iadrv = 3*(adja[i]/3-1) +1;
-	adjav = &mesh->adja[iadrv];
-	voy = i;
-	adjav[adja[i]%3] = 3*nbl + voy;
+      adjanew = &mesh->adja[iadrnew];
+      for(i=0 ; i<2 ; i++) {
+        adjanew[i] = adja[i];
+        if(!adja[i]) continue;
+        iadrv = 3*(adja[i]/3-1) +1;
+        adjav = &mesh->adja[iadrv];
+        voy = i;
+        adjav[adja[i]%3] = 3*nbl + voy;
       }
-    }               
-    nbl++;	
+    }
+    nbl++;
   }
   mesh->nt = nt;
-    printf("apres.tmpsage on a %d triangle \n",mesh->nt);
+  printf("apres.tmpsage on a %d triangle \n",mesh->nt);
 
   /* compact metric */
   nbl = 1;
   for (k=1; k<=mesh->np; k++) {
     ppt = &mesh->point[k];
     if ( ppt->tag & M_NUL )  continue;
-    isol    = (k-1) * sol->size + 1;    
+    isol    = (k-1) * sol->size + 1;
     isolnew = (nbl-1) * sol->size + 1;
-    
+
     for (i=0; i<sol->size; i++)
       sol->m[isolnew + i] = sol->m[isol + i];
     ++nbl;
   }
-  
-   
+
+
   /*compact vertices*/
   np  = 0;
   nbl = 1;
@@ -225,22 +223,22 @@ int MMG2_tassage(MMG5_pMesh mesh,MMG5_pSol sol) {
   }
   mesh->np = np;
   sol->np  = np;
-   
+
   for(k=1 ; k<=mesh->np ; k++)
     mesh->point[k].tmp = 0;
-    
+
   mesh->npnil = mesh->np + 1;
   for (k=mesh->npnil; k<mesh->npmax-1; k++)
     mesh->point[k].tmp  = k+1;
-  
+
   mesh->nanil = mesh->na + 1;
   for (k=mesh->nanil; k<mesh->namax-1; k++)
     mesh->edge[k].b = k+1;
- 
+
   mesh->nenil = mesh->nt + 1;
   for (k=mesh->nenil; k<mesh->ntmax-1; k++)
     mesh->tria[k].v[2] = k+1;
-    
+
   return(1);
 }
 
@@ -251,18 +249,19 @@ int MMG2_tassage(MMG5_pMesh mesh,MMG5_pSol sol) {
   opt[3] = noinsert
   opt[4] = nomove
   opt[5] = imprim
-  opt[6] = nr 
+  opt[6] = nr
 
   optdbl[0] = hgrad
-  optdbl[1] =.dhd 
+  optdbl[1] =.dhd
 */
 int MMG2_mmg2dlib(int opt[7],double optdbl[2],MMG5_pMesh mesh,MMG5_pSol sol,void (*titi)(int ,int ,int,int,int)) {
-  double declic;  
+  double declic;
   int    nsiter;
 
   fprintf(stdout,"  -- MMG2D, Release %s (%s) \n",M_VER,M_REL);
   fprintf(stdout,"     %s\n",M_CPY);
-  fprintf(stdout,"    %s\n",COMPIL);
+  fprintf(stdout,"     %s %s\n",__DATE__,__TIME__);
+
   MMG2_callbackinsert = titi;
   /* interrupts */
   signal(SIGABRT,excfun);
@@ -309,9 +308,9 @@ int MMG2_mmg2dlib(int opt[7],double optdbl[2],MMG5_pMesh mesh,MMG5_pSol sol,void
     mesh->info.dhd  = optdbl[1];
   /*this options are not used inside library version*/
   //qdegrad[0] = 10./ALPHA;
-  //qdegrad[1] = 1.3;   
+  //qdegrad[1] = 1.3;
   mesh->info.renum = 0;
-  
+
   sol->type = 1;
 
 
@@ -325,13 +324,13 @@ int MMG2_mmg2dlib(int opt[7],double optdbl[2],MMG5_pMesh mesh,MMG5_pSol sol,void
   }
 
   setfunc(sol->size);//setfunc(sol.type);
-  
-   
+
+
   if(mesh->info.lag >= 0) {
     /*alloc Disp*/
     fprintf(stdout,"OPTION LAG NOT AVAILABLE WITH THE LIBRARY   \n");
     return(1);
-  } 
+  }
   //chrono(OFF,&ctim[1]);
   //fprintf(stdout,"  -- DATA READING COMPLETED.     %.2f sec.\n",
   //       gttime(ctim[1]));
@@ -348,41 +347,41 @@ int MMG2_mmg2dlib(int opt[7],double optdbl[2],MMG5_pMesh mesh,MMG5_pSol sol,void
   if ( abs(mesh->info.imprim) > 4 )
     fprintf(stdout,"  ** SETTING ADJACENCIES\n");
   if ( !MMG2_scaleMesh(mesh,sol) )  return(1);
-MMG2_saveMesh(mesh,"tata.mesh");
+  MMG2_saveMesh(mesh,"tata.mesh");
   if ( mesh->nt && !MMG2_hashel(mesh) )  return(1);
-  if ( !mesh->info.renum && !MMG2_chmsh(mesh,1) )        return(1);
-  /*geom : corner detection*/    
+  if ( !mesh->info.renum && !MMG2_chkmsh(mesh,1) )        return(1);
+  /*geom : corner detection*/
   if ( mesh->info.dhd<0 )
     if( !MMG2_evalgeom(mesh) ) return(1);
 
   /*mesh gradation*/
   if( mesh->nt && mesh->info.hgrad > 0 ) {
     if ( mesh->info.imprim )   fprintf(stdout,"\n  -- GRADATION : %8f\n",mesh->info.hgrad);
-    MMG2_lissmet(mesh,sol); 
+    MMG2_lissmet(mesh,sol);
   }
   if ( mesh->nt && abs(mesh->info.imprim) > 3 )  MMG2_outqua(mesh,sol);
-  
+
   if ( mesh->nt && abs(mesh->info.imprim) > 4 )  {
     MMG2_prilen(mesh,sol);
-  }                       
-  
+  }
+
   //chrono(OFF,&ctim[2]);
   //fprintf(stdout,"  -- PHASE 1 COMPLETED.     %.2f sec.\n",gttime(ctim[2]));
 
   /* remeshing */
   //chrono(ON,&ctim[3]);
- if ( mesh->info.iso ) {
+  if ( mesh->info.iso ) {
     fprintf(stdout,"Fit an embedded mesh\n");
     MMG2_mmg2d6(mesh,sol);
     MMG2_saveMesh(mesh,mesh->nameout);
     return(0);
   } else if ( mesh->info.lag >= 0 ) {
 
-   #warning option 9
+#warning option 9
     printf("exit option 9 not implemented\n");
     exit(1);
   } else {
- 
+
     if(!mesh->nt) {
       fprintf(stdout,"\n  -- PHASE 2 : MESH GENERATION\n");
       if ( !MMG2_mmg2d2(mesh,sol) )  return(1);
@@ -390,34 +389,34 @@ MMG2_saveMesh(mesh,"tata.mesh");
       fprintf(stdout,"\n  -- PHASE 2 : MESH ADAPTATION\n");
       if ( (!mesh->info.noinsert) && !MMG2_mmg2d1(mesh,sol) )  return(1);
     }
-    
+
     /* optimisation */
-      //chrono(ON,&ctim[4]);
-      fprintf(stdout,"\n  -- PHASE 3 : MESH OPTIMISATION\n");
-      //if ( !optlap(&mesh,&sol) ) return(1);
-      if ( !MMG2_mmg2d0(mesh,sol) )  return(1);  
-      // chrono(OFF,&ctim[4]);
-      //fprintf(stdout,"  -- PHASE 3 COMPLETED.     %.2f sec.\n",gttime(ctim[4]));
-      
+    //chrono(ON,&ctim[4]);
+    fprintf(stdout,"\n  -- PHASE 3 : MESH OPTIMISATION\n");
+    //if ( !optlap(&mesh,&sol) ) return(1);
+    if ( !MMG2_mmg2d0(mesh,sol) )  return(1);
+    // chrono(OFF,&ctim[4]);
+    //fprintf(stdout,"  -- PHASE 3 COMPLETED.     %.2f sec.\n",gttime(ctim[4]));
+
   }
   //chrono(OFF,&ctim[3]);
   // fprintf(stdout,"  -- PHASE 2 COMPLETED.     %.2f sec.\n",gttime(ctim[3]));
 
- 
+
   if ( !MMG2_unscaleMesh(mesh,sol) )  return(1);
- 
+
   if ( abs(mesh->info.imprim) > 3 )  {
     MMG2_outqua(mesh,sol);
-    MMG2_prilen(mesh,sol); 
+    MMG2_prilen(mesh,sol);
   }
   //chrono(ON,&ctim[1]);
-MMG2_saveMesh(mesh,"toto.mesh");
+  MMG2_saveMesh(mesh,"toto.mesh");
   MMG2_tassage(mesh,sol);
   //chrono(OFF,&ctim[1]);
 
- 
-  if ( mesh->info.imprim < -4 ) M_memDump();   
+
+  if ( mesh->info.imprim < -4 ) M_memDump();
   return(0);
 }
-  
+
 

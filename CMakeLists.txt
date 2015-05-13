@@ -194,6 +194,7 @@ INCLUDE_DIRECTORIES(${MMGS_SOURCE_DIR})
 INCLUDE_DIRECTORIES(${MMG2D_SOURCE_DIR})
 
 # Source files
+## mmg3d
 FILE(
   GLOB
   source_files
@@ -216,17 +217,35 @@ FILE(
   ${MMG3D_SOURCE_DIR}/lib${PROJECT_NAME}3d.c
   ${MMG3D_SOURCE_DIR}/lib${PROJECT_NAME}3df.c
   )
+
+## mmgs
 FILE(
   GLOB
   sourcemmgs_files
   ${MMGS_SOURCE_DIR}/*.c   ${MMGS_SOURCE_DIR}/*.h
   ${COMMON_SOURCE_DIR}/*.c ${COMMON_SOURCE_DIR}/*.h
   )
+
+## mmg2d
 FILE(
   GLOB
   sourcemmg2d_files
   ${MMG2D_SOURCE_DIR}/*.c   ${MMG2D_SOURCE_DIR}/*.h
   ${COMMON_SOURCE_DIR}/*.c ${COMMON_SOURCE_DIR}/*.h
+  )
+LIST(REMOVE_ITEM sourcemmg2d_files
+  ${MMG2D_SOURCE_DIR}/mmg2d.c
+  ${MMG2D_SOURCE_DIR}/lib${PROJECT_NAME}2d.c
+  ${REMOVE_FILE})
+FILE(
+  GLOB
+  mainmmg2d_file
+  ${MMG2D_SOURCE_DIR}/mmg2d.c
+  )
+FILE(
+  GLOB
+  libmmg2d_file
+  ${MMG2D_SOURCE_DIR}/lib${PROJECT_NAME}2d.c
   )
 
 INCLUDE_DIRECTORIES(${COMMON_SOURCE_DIR})
@@ -301,6 +320,60 @@ IF ( BUILD_MMG3D OR BUILD_MMG )
   IF("${isSystemDir}" STREQUAL "-1")
     SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
   ENDIF("${isSystemDir}" STREQUAL "-1")
+
+  ############################################################################
+  #####
+  #####         Compile mmg2d libraries
+  #####
+  ############################################################################
+  SET(LIBRARY_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/lib)
+
+  OPTION ( LIBMMG2D_STATIC "Compile static library" ON)
+  IF ( LIBMMG2D_STATIC )
+    ADD_LIBRARY(${PROJECT_NAME}2d_a  STATIC
+      ${sourcemmg2d_files} ${libmmg2d_file} )
+    SET_TARGET_PROPERTIES(${PROJECT_NAME}2d_a PROPERTIES OUTPUT_NAME
+      ${PROJECT_NAME}2d)
+    TARGET_LINK_LIBRARIES(${PROJECT_NAME}2d_a ${LIBRARIES})
+    INSTALL(FILES ${MMG2D_SOURCE_DIR}/mmg2d.h DESTINATION
+      include)
+    INSTALL(FILES ${MMG2D_SOURCE_DIR}/memory.h DESTINATION
+      include)
+    INSTALL(FILES ${COMMON_SOURCE_DIR}/libmmg.h DESTINATION
+      include)
+    INSTALL(FILES ${COMMON_SOURCE_DIR}/mmg.h DESTINATION
+      include)
+    INSTALL(FILES ${COMMON_SOURCE_DIR}/eigenv.h DESTINATION
+      include)
+    INSTALL(FILES ${COMMON_SOURCE_DIR}/chrono.h DESTINATION include)
+    INSTALL(TARGETS ${PROJECT_NAME}2d_a
+      ARCHIVE DESTINATION lib
+      LIBRARY DESTINATION lib)
+  ENDIF()
+
+  # Compile shared library
+  OPTION ( LIBMMG2D_SHARED "Compile dynamic library" OFF)
+  IF ( LIBMMG2D_SHARED )
+    ADD_LIBRARY(${PROJECT_NAME}2d_so SHARED
+      ${sourcemmg2d_files} ${libmmg2d_file})
+    SET_TARGET_PROPERTIES(${PROJECT_NAME}2d_so PROPERTIES
+      OUTPUT_NAME ${PROJECT_NAME}2d)
+    TARGET_LINK_LIBRARIES(${PROJECT_NAME}2d_so ${LIBRARIES})
+    INSTALL(FILES ${MMG2D_SOURCE_DIR}/mmg2d.h
+      DESTINATION include)
+    INSTALL(FILES ${MMG2D_SOURCE_DIR}/memory.h
+      DESTINATION include)
+    INSTALL(FILES ${COMMON_SOURCE_DIR}/libmmg.h DESTINATION
+      include)
+    INSTALL(FILES ${COMMON_SOURCE_DIR}/mmg.h DESTINATION
+      include)
+    INSTALL(FILES ${COMMON_SOURCE_DIR}/eigenv.h DESTINATION
+      include)
+    INSTALL(FILES ${COMMON_SOURCE_DIR}/chrono.h DESTINATION include)
+    INSTALL(TARGETS ${PROJECT_NAME}2d_so
+      ARCHIVE DESTINATION
+      LIBRARY DESTINATION lib)
+  ENDIF()
 
   ############################################################################
   #####
@@ -477,7 +550,7 @@ ENDIF()
 #####
 ###############################################################################
 IF ( BUILD_MMG2D OR BUILD_MMG )
-  ADD_EXECUTABLE(${PROJECT_NAME}2d    ${sourcemmg2d_files} )
+  ADD_EXECUTABLE(${PROJECT_NAME}2d    ${sourcemmg2d_files} ${mainmmg2d_file} )
   TARGET_LINK_LIBRARIES(${PROJECT_NAME}2d ${LIBRARIES})
   INSTALL(TARGETS ${PROJECT_NAME}2d RUNTIME DESTINATION bin)
 

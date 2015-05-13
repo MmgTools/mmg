@@ -1,6 +1,6 @@
 #ifndef _MMG2D_H
 #define _MMG2D_H
-#include "mmg2dConfig.h"
+
 #include <assert.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -12,7 +12,6 @@
 #include <float.h>
 
 #include "memory.h"
-//#include "libmesh5.h"
 #include "mmg.h"
 /* constantes */
 #define M_VER   "2.0"
