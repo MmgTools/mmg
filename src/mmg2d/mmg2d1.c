@@ -381,9 +381,6 @@ static int analar(MMG5_pMesh mesh,MMG5_pSol sol,pBucket bucket,double declic,int
           }
           assert(pt->edg[i]);
           ip = cassarbdry(mesh,sol,pt->edg[i],i1,i2,0.5,tang); 
-#warning a enlever apres le codage des tangents
-          if(ip==-1) continue;
-          //ip = cassar(mesh,sol,i1,i2,t);   
         } else {
           ip = cassar(mesh,sol,i1,i2,t);   
         }

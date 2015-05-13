@@ -74,24 +74,24 @@ int MMG2_colpoi(MMG5_pMesh mesh, MMG5_pSol sol,int iel,int iar,int ia,int ib,dou
       iadri = 3*(kel-1) + 1;
       adjai =  &mesh->adja[iadri];
       if(pt1->ref!=ref) {
-	it1 = (i==1)?lon:i-1;
-	if(adjai[MMG2_iopp[ip][0]]/3 == list[it1]/3 ) {
-	  //assert(nbdry<2); 
-	  if(MMG2_iare[MMG2_iopp[ip][0]][0]==ip)
-	    ibdry[nbdry++] = pt1->v[MMG2_iare[MMG2_iopp[ip][0]][1]];
-	  else {
-	    assert(MMG2_iare[MMG2_iopp[ip][0]][1]==ip) ;
-	    ibdry[nbdry++] = pt1->v[MMG2_iare[MMG2_iopp[ip][0]][0]];
-	  }             
-	} else {
-	  assert(adjai[MMG2_iopp[ip][1]]/3 == list[it1]/3);
-	  if(MMG2_iare[MMG2_iopp[ip][1]][0]==ip)
-	    ibdry[nbdry++] = pt1->v[MMG2_iare[MMG2_iopp[ip][1]][1]];
-	  else {
-	    assert(MMG2_iare[MMG2_iopp[ip][1]][1]==ip) ;
-	    ibdry[nbdry++] = pt1->v[MMG2_iare[MMG2_iopp[ip][1]][0]];
-	  }
-	}
+        it1 = (i==1)?lon:i-1;
+        if(adjai[MMG2_iopp[ip][0]]/3 == list[it1]/3 ) {
+          //assert(nbdry<2); 
+          if(MMG2_iare[MMG2_iopp[ip][0]][0]==ip)
+            ibdry[nbdry++] = pt1->v[MMG2_iare[MMG2_iopp[ip][0]][1]];
+          else {
+            assert(MMG2_iare[MMG2_iopp[ip][0]][1]==ip) ;
+            ibdry[nbdry++] = pt1->v[MMG2_iare[MMG2_iopp[ip][0]][0]];
+          }             
+        } else {
+          assert(adjai[MMG2_iopp[ip][1]]/3 == list[it1]/3);
+          if(MMG2_iare[MMG2_iopp[ip][1]][0]==ip)
+            ibdry[nbdry++] = pt1->v[MMG2_iare[MMG2_iopp[ip][1]][1]];
+          else {
+            assert(MMG2_iare[MMG2_iopp[ip][1]][1]==ip) ;
+            ibdry[nbdry++] = pt1->v[MMG2_iare[MMG2_iopp[ip][1]][0]];
+          }
+        }
       }
       ref = pt1->ref;
     }
@@ -251,10 +251,10 @@ int MMG2_colpoi(MMG5_pMesh mesh, MMG5_pSol sol,int iel,int iar,int ia,int ib,dou
   if(num) {
     assert(!mesh->tria[a1].edg[v1]);
     if(!((mesh->edge[num].a==mesh->tria[a1].v[MMG2_iare[v1][0]] || mesh->edge[num].a==mesh->tria[a1].v[MMG2_iare[v1][1]])
-	 && (mesh->edge[num].b==mesh->tria[a1].v[MMG2_iare[v1][0]] || mesh->edge[num].b==mesh->tria[a1].v[MMG2_iare[v1][1]]))) {
+         && (mesh->edge[num].b==mesh->tria[a1].v[MMG2_iare[v1][0]] || mesh->edge[num].b==mesh->tria[a1].v[MMG2_iare[v1][1]]))) {
       printf("on a un soucis 0\n");
-     printf("pnum %d %d dans %d %d %d\n",mesh->edge[num].a,mesh->edge[num].b,pt1->v[0],pt1->v[1],pt1->v[2]); 
-     printf("edgea %d %d\n",mesh->tria[a2].v[MMG2_iare[v2][0]],mesh->tria[a2].v[MMG2_iare[v2][1]]); 
+      printf("pnum %d %d dans %d %d %d\n",mesh->edge[num].a,mesh->edge[num].b,pt1->v[0],pt1->v[1],pt1->v[2]); 
+      printf("edgea %d %d\n",mesh->tria[a2].v[MMG2_iare[v2][0]],mesh->tria[a2].v[MMG2_iare[v2][1]]); 
      
     }
     mesh->tria[a1].edg[v1] = num;
@@ -280,12 +280,12 @@ int MMG2_colpoi(MMG5_pMesh mesh, MMG5_pSol sol,int iel,int iar,int ia,int ib,dou
   if(a2 && num) {
     //printf("tr %d : %d %d %d\n",a2,mesh->tria[a2].edg[0],mesh->tria[a2].edg[1],mesh->tria[a2].edg[2]);
     if(!((mesh->edge[num].a==mesh->tria[a2].v[MMG2_iare[v2][0]] || mesh->edge[num].a==mesh->tria[a2].v[MMG2_iare[v2][1]])
-	 && (mesh->edge[num].b==mesh->tria[a2].v[MMG2_iare[v2][0]] ||mesh->edge[num].b==mesh->tria[a2].v[MMG2_iare[v2][1]]))) {
+         && (mesh->edge[num].b==mesh->tria[a2].v[MMG2_iare[v2][0]] ||mesh->edge[num].b==mesh->tria[a2].v[MMG2_iare[v2][1]]))) {
       printf("on a un soucis 1\n");
-     printf("pnum %d %d dans %d %d %d\n",mesh->edge[num].a,mesh->edge[num].b,pt1->v[0],pt1->v[1],pt1->v[2]); 
-     printf("edgea %d %d\n",mesh->tria[a2].v[MMG2_iare[v2][0]],mesh->tria[a2].v[MMG2_iare[v2][1]]); 
+      printf("pnum %d %d dans %d %d %d\n",mesh->edge[num].a,mesh->edge[num].b,pt1->v[0],pt1->v[1],pt1->v[2]); 
+      printf("edgea %d %d\n",mesh->tria[a2].v[MMG2_iare[v2][0]],mesh->tria[a2].v[MMG2_iare[v2][1]]); 
     }
-     assert(!mesh->tria[a2].edg[v2]);
+    assert(!mesh->tria[a2].edg[v2]);
     mesh->tria[a2].edg[v2] = num;
   }
   num = pt1->edg[iaa];
@@ -294,10 +294,10 @@ int MMG2_colpoi(MMG5_pMesh mesh, MMG5_pSol sol,int iel,int iar,int ia,int ib,dou
     /* printf("pnum %d %d dans %d %d %d\n",mesh->edge[num].a,mesh->edge[num].b,pt1->v[0],pt1->v[1],pt1->v[2]); */
     /* printf("edgea %d %d\n",mesh->tria[a].v[MMG2_iare[voy][0]],mesh->tria[a].v[MMG2_iare[voy][1]]); */
     if(!((mesh->edge[num].a==mesh->tria[a].v[MMG2_iare[voy][0]] || mesh->edge[num].a==mesh->tria[a].v[MMG2_iare[voy][1]])
-	 && (mesh->edge[num].b==mesh->tria[a].v[MMG2_iare[voy][0]] || mesh->edge[num].b==mesh->tria[a].v[MMG2_iare[voy][1]]))) {
+         && (mesh->edge[num].b==mesh->tria[a].v[MMG2_iare[voy][0]] || mesh->edge[num].b==mesh->tria[a].v[MMG2_iare[voy][1]]))) {
       printf("on a un soucis\n");
-     printf("pnum %d %d dans %d %d %d\n",mesh->edge[num].a,mesh->edge[num].b,pt1->v[0],pt1->v[1],pt1->v[2]); 
-     printf("edgea %d %d\n",mesh->tria[a].v[MMG2_iare[voy][0]],mesh->tria[a].v[MMG2_iare[voy][1]]); 
+      printf("pnum %d %d dans %d %d %d\n",mesh->edge[num].a,mesh->edge[num].b,pt1->v[0],pt1->v[1],pt1->v[2]); 
+      printf("edgea %d %d\n",mesh->tria[a].v[MMG2_iare[voy][0]],mesh->tria[a].v[MMG2_iare[voy][1]]); 
     }
     assert(!mesh->tria[a].edg[voy]);
     mesh->tria[a].edg[voy] = num;
@@ -354,7 +354,7 @@ int MMG2_colpoibdry(MMG5_pMesh mesh, MMG5_pSol sol,int iel,int iar,int ia,int ib
   }  
 
   /*check geom*/           
-  cbound = (mesh->info.dhd)*M_PI/180.;  
+  cbound = (mesh->info.hausd)*M_PI/180.;  
   nbdry = 0;
   for(i=1 ; i<=lon ; i++) {  
     kel = list[i]/3; 
@@ -374,10 +374,10 @@ int MMG2_colpoibdry(MMG5_pMesh mesh, MMG5_pSol sol,int iel,int iar,int ia,int ib
     if(!adjai[MMG2_iopp[ip][1]]) {     
       assert(nbdry<2); //sinon non manifold
       if(MMG2_iare[MMG2_iopp[ip][1]][0]==ip)
-	ibdry[nbdry++] = pt1->v[MMG2_iare[MMG2_iopp[ip][1]][1]];
+        ibdry[nbdry++] = pt1->v[MMG2_iare[MMG2_iopp[ip][1]][1]];
       else {
-	assert(MMG2_iare[MMG2_iopp[ip][1]][1]==ip) ;
-	ibdry[nbdry++] = pt1->v[MMG2_iare[MMG2_iopp[ip][1]][0]];
+        assert(MMG2_iare[MMG2_iopp[ip][1]][1]==ip) ;
+        ibdry[nbdry++] = pt1->v[MMG2_iare[MMG2_iopp[ip][1]][0]];
       }
     }
   }
@@ -544,7 +544,7 @@ int MMG2_colpoibdry(MMG5_pMesh mesh, MMG5_pSol sol,int iel,int iar,int ia,int ib
   memcpy(ppb->c,coor,3*sizeof(double));
   memcpy(&sol->m[sol->size*(pib-1) + 1],solu,sol->size*sizeof(double));  
   
-  //MMG2_ch.nreg(mesh,0); 
+  //MMG2_chkmsh(mesh,0); 
   free(cal);
   free(list);  
   return(1);

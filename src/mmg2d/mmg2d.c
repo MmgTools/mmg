@@ -43,17 +43,17 @@ void _MMG5_Set_commonFunc() {
 static void excfun(int sigid) {
   fprintf(stdout,"\n Unexpected error:");  fflush(stdout);
   switch(sigid) {
-    case SIGABRT:
-      fprintf(stdout,"  Abnormal stop\n");  exit(1);
-    case SIGFPE:
-      fprintf(stdout,"  Floating-point exception\n"); exit(1);
-    case SIGILL:
-      fprintf(stdout,"  Illegal instruction\n"); exit(1);
-    case SIGSEGV:
-      fprintf(stdout,"  Segmentation fault\n");  exit(1);
-    case SIGTERM:
-    case SIGINT:
-      fprintf(stdout,"  Program killed\n");  exit(1);
+  case SIGABRT:
+    fprintf(stdout,"  Abnormal stop\n");  exit(1);
+  case SIGFPE:
+    fprintf(stdout,"  Floating-point exception\n"); exit(1);
+  case SIGILL:
+    fprintf(stdout,"  Illegal instruction\n"); exit(1);
+  case SIGSEGV:
+    fprintf(stdout,"  Segmentation fault\n");  exit(1);
+  case SIGTERM:
+  case SIGINT:
+    fprintf(stdout,"  Program killed\n");  exit(1);
   }
   exit(1);
 }
@@ -68,32 +68,37 @@ static void usage(char *name) {
   fprintf(stdout,"-m [n]  Set memory size to n Mbytes\n");
 
   fprintf(stdout,"\n");
-  fprintf(stdout,"-lag [0/1/2] Lagrangian mesh displacement according to mode 0/1/2\n");
-  fprintf(stdout,"-ls     create mesh of isovalue 0\n");
 
+
+  fprintf(stdout,"-ar    val    angle detection (default 45.)\n");
+  fprintf(stdout,"-nr           no ridge/corners detection \n");
+#warning hmax hmin to do
+  fprintf(stdout,"-hmin  val    minimal mesh size\n");
+  fprintf(stdout,"-hmax  val    maximal mesh size\n");
+  fprintf(stdout,"-hausd val    angle used for boundary collapses (default 135 degrees)\n");
+  fprintf(stdout,"-hgrad val    mesh gradation (-1 = no gradation)\n");
+
+  fprintf(stdout,"-noinsert     no insertion/suppression point\n");
+  fprintf(stdout,"-noswap       no edge flipping\n");
+  fprintf(stdout,"-nomove       no point relocation\n");
 
   fprintf(stdout,"\n");
-  fprintf(stdout,"-noswap       No edge flipping\n");
-  fprintf(stdout,"-nomove       No point relocation\n");
-  fprintf(stdout,"-noinsert     No insertion/suppression point\n");
-  fprintf(stdout,"-mov filedep  (with -lag option)\n");
-  fprintf(stdout,"-degrad Qworst Qdegrad  (with -lag option) : threshold for optimisation (default 10. 1.3)\n");
-  fprintf(stdout,"-hgrad siz    mesh gradation (-1 = no gradation)\n");
-  fprintf(stdout,"-rid angle  angular value for the detection of ridges and corners (default 45.)\n");
-  fprintf(stdout,"-nr           no ridge/corners detection \n");
-  fprintf(stdout,"-nsubdomain nb  only if no given triangle, save the subdomain nb (0==all subdomain)\n");
-  fprintf(stdout,"-geom alpha  angle used for boundary collapses (default 178 degrees)\n");
-  fprintf(stdout,"-msh num read and write to gmsh visu if num = 1 (out) if num=2 (in and out)\n");
+  fprintf(stdout,"-ls             create mesh of isovalue 0\n");
+  fprintf(stdout,"-lag [0/1/2]    Lagrangian mesh displacement according to mode 0/1/2\n");
+  fprintf(stdout,"-mov filedep    (with -lag option)\n");
+  fprintf(stdout,"-nsd val        only if no given triangle, save the subdomain nb (0==all subdomain)\n");
+  fprintf(stdout,"-msh val        read and write to gmsh visu if val = 1 (out) if val=2 (in and out)\n");
+  fprintf(stdout,"-degrad Qw Qdeg (with -lag option) : threshold for optimisation (default 10. 1.3)\n");
  
   /* fprintf(stdout,"-per          obsolete : to deal with periodic mesh on a square\n");*/
 
-
+  fprintf(stdout,"\n\n");
   /* 
   
-  fprintf(stdout,"-optim       mesh optimization\n");
-  fprintf(stdout,"-nsurf       no surfacic modifications\n");
+     fprintf(stdout,"-optim       mesh optimization\n");
+     fprintf(stdout,"-nsurf       no surfacic modifications\n");
   */
- exit(1);
+  exit(1);
 }
 
 
@@ -111,11 +116,19 @@ int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol sol,double *qdegrad) 
           ++i;
           mesh->info.hgrad   = atof(argv[i]);
         }
-        else {
-	  fprintf(stderr,"  Unrecognized option %s\n",argv[i]);
-	  usage(argv[0]);
-	}
-
+        else if ( !strcmp(argv[i],"-hausd") ) {
+          ++i;
+          mesh->info.hausd   = atof(argv[i]);
+        } else {
+          fprintf(stderr,"  Unrecognized option %s\n",argv[i]);
+          usage(argv[0]);
+        }
+      case 'a':
+        if ( !strcmp(argv[i],"-ar") ) { 
+          ++i;
+          mesh->info.dhd = 180. - atof(argv[i]);
+        }
+        break;
       case 'd':
         if ( !strcmp(argv[i],"-degrad") ) {
           ++i;
@@ -125,14 +138,6 @@ int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol sol,double *qdegrad) 
           mesh->info.ddebug = 1;
           break;
         }
-      case 'g':
-	if ( !strcmp(argv[i],"-geom") ) {
-          ++i;
-          mesh->info.dhd   = atof(argv[i]);
-        } else {
-	  fprintf(stderr,"  Unrecognized option %s\n",argv[i]);
-	  usage(argv[0]);
-	}
       case 'i':
         if ( !strcmp(argv[i],"-in") ) {
           ++i;
@@ -141,43 +146,43 @@ int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol sol,double *qdegrad) 
         }
         break;
       case 'l':
-	if ( !strcmp(argv[i],"-lag") ) {
+        if ( !strcmp(argv[i],"-lag") ) {
           ++i;
-	  mesh->info.lag  = atoi(argv[i]);
+          mesh->info.lag  = atoi(argv[i]);
         } else if ( !strcmp(argv[i],"-ls") ) {
           ++i;
-	  mesh->info.iso  = atoi(argv[i]);
+          mesh->info.iso  = atoi(argv[i]);
         }
         break;
       case 'm':
-          if ( !strcmp(argv[i],"-mov") ) {
-            ++i;
+        if ( !strcmp(argv[i],"-mov") ) {
+          ++i;
 #warning todo potion 9
-	    // mesh->namedep = argv[i];
-          } else if ( !strcmp(argv[i],"-msh") ) {
-                ++i;
-                mesh->info.nreg = atoi(argv[i]);
-          }else if ( !strcmp(argv[i],"-m") ) {
-                ++i;
-                mesh->info.mem = atoi(argv[i]);
-          }
-          break;
+          // mesh->namedep = argv[i];
+        } else if ( !strcmp(argv[i],"-msh") ) {
+          ++i;
+          mesh->info.nreg = atoi(argv[i]);
+        }else if ( !strcmp(argv[i],"-m") ) {
+          ++i;
+          mesh->info.mem = atoi(argv[i]);
+        }
+        break;
       case 'n':
         if ( !strcmp(argv[i],"-noswap") ) {
           mesh->info.noswap  = 1;
         } else if ( !strcmp(argv[i],"-nomove") ) {
           mesh->info.nomove  = 1;
         } else if ( !strcmp(argv[i],"-nr") ) {
-            mesh->info.dhd  = -1;
+          mesh->info.dhd  = -1;
         } else if ( !strcmp(argv[i],"-noinsert") ) {
-            mesh->info.noinsert  = 1;
+          mesh->info.noinsert  = 1;
         } else if ( !strcmp(argv[i],"-nsubdomain") ) {
-	  ++i;
-	  mesh->info.renum = atoi(argv[i]);		    
+          ++i;
+          mesh->info.renum = atoi(argv[i]);		    
         } else {
-	  printf("wrong option %s \n",argv[i]);
-	  usage(argv[0]);
-	}
+          printf("wrong option %s \n",argv[i]);
+          usage(argv[0]);
+        }
         break;
       case 'o':
         if ( !strcmp(argv[i],"-out") ) {
@@ -186,19 +191,12 @@ int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol sol,double *qdegrad) 
           mesh->info.imprim = 5;
         }
         break;
-        case 'p':
-          if ( !strcmp(argv[i],"-per") ) {
-	    fprintf(stdout,"WARNING OBSOLETE OPTION\n");
-            mesh->info.renum = 1;
-          }
-          break;
-      case 'r':
-      if ( !strcmp(argv[i],"-rid") ) { 
-        ++i;
-        mesh->info.dhd = 180. - atof(argv[i]);
-      }
-      break;
-
+      case 'p':
+        if ( !strcmp(argv[i],"-per") ) {
+          fprintf(stdout,"WARNING OBSOLETE OPTION\n");
+          mesh->info.renum = 1;
+        }
+        break;
       case 's':
         if ( !strcmp(argv[i],"-sol") ) {
           ++i;
@@ -208,20 +206,20 @@ int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol sol,double *qdegrad) 
 
       case 'v':
         if ( ++i < argc ) {
-	  if ( argv[i][0] == '-' || isdigit(argv[i][0]) )
-	    mesh->info.imprim = atoi(argv[i]);
-	  else 
-	    i--;
-	}
-	else {
-	  fprintf(stderr,"Missing argument option %c\n",argv[i-1][1]);
-	  usage(argv[0]);
-	}
-	break;
+          if ( argv[i][0] == '-' || isdigit(argv[i][0]) )
+            mesh->info.imprim = atoi(argv[i]);
+          else 
+            i--;
+        }
+        else {
+          fprintf(stderr,"Missing argument option %c\n",argv[i-1][1]);
+          usage(argv[0]);
+        }
+        break;
 
       default:
-	fprintf(stderr,"  Unrecognized option %s\n",argv[i]);
-	usage(argv[0]);
+        fprintf(stderr,"  Unrecognized option %s\n",argv[i]);
+        usage(argv[0]);
       }
     }
 
@@ -235,7 +233,7 @@ int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol sol,double *qdegrad) 
       }
       else {
         fprintf(stdout,"  Argument %s ignored\n",argv[i]);
-	usage(argv[0]);
+        usage(argv[0]);
       }
     }
     i++;
@@ -262,8 +260,8 @@ int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol sol,double *qdegrad) 
     strcpy(mesh->nameout,mesh->namein);
     ptr = strstr(mesh->nameout,".mesh");
     if ( ptr ) {
-        *ptr = '\0';  
-         strcat(mesh->nameout,".o.mesh");
+      *ptr = '\0';  
+      strcat(mesh->nameout,".o.mesh");
     } else {
       ptr = strstr(mesh->nameout,".mesh");
       //ptr = strstr(mesh->nameout,".meshb");
@@ -272,7 +270,7 @@ int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol sol,double *qdegrad) 
         //strcat(mesh->nameout,".o.meshb");        
         strcat(mesh->nameout,".o.mesh");        
       } else { 
-         strcat(mesh->nameout,".o.mesh");     
+        strcat(mesh->nameout,".o.mesh");     
       }
     }
   }
@@ -300,7 +298,7 @@ static void endcod() {
   int      k,call[TIMEMAX];
 
   //chrono(OFF,&ctim[0]);
-  printf("comment for merge\n");
+#warning endcod : comment for merge
   /* for (k=0; k<TIMEMAX; k++) { */
   /*   call[k] = ctim[k].call; */
   /*   ttim[k] = ctim[k].call ? gttime(ctim[k]) : 0.0; */
@@ -331,7 +329,7 @@ int setfunc(int type) {
     MMG2_lissmet = lissmet_ani;
     MMG2_optlen     = optlen_ani;
 /*    interp     = interp_ani;
-*/
+ */
   }
   else {
     MMG2_length  = long_iso;
@@ -341,7 +339,7 @@ int setfunc(int type) {
 
     MMG2_optlen     = optlen_iso;
 /*    interp     = interp_iso;
-*/
+ */
   }
 
   return(1);
@@ -383,11 +381,12 @@ int main(int argc,char *argv[]) {
   mesh.info.noinsert = 0;
   mesh.info.hgrad  = 1.3;
   mesh.info.renum  = 0;
-  mesh.info.dhd  = 135.;
+  mesh.info.hausd  = 135.;
+  mesh.info.dhd  = 45.;
+
   qdegrad[0] = 10./ALPHA;
   qdegrad[1] = 1.3;   
   mesh.info.renum = 0;
-  mesh.info.dhd = 178.;
   mesh.info.nreg = 0;
   sol.type = 1;
 
@@ -408,9 +407,9 @@ int main(int argc,char *argv[]) {
     //sol.np = 0;
     if (!MMG2_doSol(&mesh,&sol) )  return(1);
   } else   if ( sol.np && (sol.np != mesh.np) ) {
-      fprintf(stdout,"  ## WARNING: WRONG SOLUTION NUMBER : %d != %d\n",sol.np,mesh.np);
-      //exit(1);
-    }
+    fprintf(stdout,"  ## WARNING: WRONG SOLUTION NUMBER : %d != %d\n",sol.np,mesh.np);
+    //exit(1);
+  }
   setfunc(sol.size);//setfunc(sol.type);
   
  
@@ -442,18 +441,18 @@ int main(int argc,char *argv[]) {
   if ( mesh.nt && !MMG2_hashel(&mesh) )  return(1);
   if ( !mesh.info.renum && !MMG2_chkmsh(&mesh,1) )        return(1);
   /*geom : corner detection*/    
-  if ( mesh.info.dhd<0 )
+  if ( mesh.info.dhd>0. )
     if( !MMG2_evalgeom(&mesh) ) return(1);
 
   /*mesh gradation*/
   if( mesh.nt && mesh.info.hgrad > 0 ) {
-       if ( mesh.info.imprim )   fprintf(stdout,"\n  -- GRADATION : %8f\n",mesh.info.hgrad);
-       MMG2_lissmet(&mesh,&sol); 
+    if ( mesh.info.imprim )   fprintf(stdout,"\n  -- GRADATION : %8f\n",mesh.info.hgrad);
+    MMG2_lissmet(&mesh,&sol); 
   }
   if ( mesh.nt && abs(mesh.info.imprim) > 3 )  MMG2_outqua(&mesh,&sol);
   
   if ( mesh.nt && abs(mesh.info.imprim) > 4 )  {
-	   MMG2_prilen(&mesh,&sol);
+    MMG2_prilen(&mesh,&sol);
   }                       
   
   //chrono(OFF,&ctim[2]);
@@ -461,39 +460,39 @@ int main(int argc,char *argv[]) {
 
   /* remeshing */
   //chrono(ON,&ctim[3]);
- /* specific meshing */
+  /* specific meshing */
   if ( mesh.info.iso ) {
     fprintf(stdout,"Fit an embedded mesh\n");
     MMG2_mmg2d6(&mesh,&sol);
     MMG2_saveMesh(&mesh,mesh.nameout);
     return(0);
   } else if ( mesh.info.lag >= 0 ) {
-      /* if ( !MMG2_mmg2d9(&mesh,&sol,&qdegrad) ) { */
-      /*   M_free(mesh.disp.mv); */
-      /*   M_free(mesh.disp.alpha); */
+    /* if ( !MMG2_mmg2d9(&mesh,&sol,&qdegrad) ) { */
+    /*   M_free(mesh.disp.mv); */
+    /*   M_free(mesh.disp.alpha); */
         
-      /*   if ( abs(mesh.info.imprim) > 3 )  { */
-      /*       MMG2_outqua(&mesh,&sol); */
-      /*       MMG2_prilen(&mesh,&sol);  */
-      /*   } */
-      /*   chrono(ON,&ctim[1]); */
-      /*   fprintf(stdout,"\n  -- WRITING DATA FILE %s\n",mesh.nameout); */
-      /*   MMG2_saveMesh(&mesh,mesh.nameout); */
-      /*   MMG2_saveSol(&mesh,&sol,mesh.nameout); */
-      /*   fprintf(stdout,"  -- WRITING COMPLETED\n"); */
-      /*   chrono(OFF,&ctim[1]); */
+    /*   if ( abs(mesh.info.imprim) > 3 )  { */
+    /*       MMG2_outqua(&mesh,&sol); */
+    /*       MMG2_prilen(&mesh,&sol);  */
+    /*   } */
+    /*   chrono(ON,&ctim[1]); */
+    /*   fprintf(stdout,"\n  -- WRITING DATA FILE %s\n",mesh.nameout); */
+    /*   MMG2_saveMesh(&mesh,mesh.nameout); */
+    /*   MMG2_saveSol(&mesh,&sol,mesh.nameout); */
+    /*   fprintf(stdout,"  -- WRITING COMPLETED\n"); */
+    /*   chrono(OFF,&ctim[1]); */
         
-      /*   /\* free memory*\/ */
-      /*   M_free(mesh.point); */
-      /*   M_free(mesh.tria); */
-      /*   M_free(mesh.edge); */
-      /*   //M_free(mesh.adja); */
-      /*   M_free(sol.met);     */
-      /*   return(1);    */
-      /* }  */
-      /* M_free(mesh.disp.mv); */
-      /* M_free(mesh.disp.alpha); */
-     #warning option 9
+    /*   /\* free memory*\/ */
+    /*   M_free(mesh.point); */
+    /*   M_free(mesh.tria); */
+    /*   M_free(mesh.edge); */
+    /*   //M_free(mesh.adja); */
+    /*   M_free(sol.met);     */
+    /*   return(1);    */
+    /* }  */
+    /* M_free(mesh.disp.mv); */
+    /* M_free(mesh.disp.alpha); */
+#warning option 9
     printf("exit option 9 not implemented\n");
     exit(1);
   } else {
@@ -507,12 +506,12 @@ int main(int argc,char *argv[]) {
     }
     
     /* optimisation */
-      //chrono(ON,&ctim[4]);
-      fprintf(stdout,"\n  -- PHASE 3 : MESH OPTIMISATION\n");
-      //if ( !optlap(&mesh,&sol) ) return(1);
-      if ( !MMG2_mmg2d0(&mesh,&sol) )  return(1);  
-      // chrono(OFF,&ctim[4]);
-      //fprintf(stdout,"  -- PHASE 3 COMPLETED.     %.2f sec.\n",gttime(ctim[4]));
+    //chrono(ON,&ctim[4]);
+    fprintf(stdout,"\n  -- PHASE 3 : MESH OPTIMISATION\n");
+    //if ( !optlap(&mesh,&sol) ) return(1);
+    if ( !MMG2_mmg2d0(&mesh,&sol) )  return(1);  
+    // chrono(OFF,&ctim[4]);
+    //fprintf(stdout,"  -- PHASE 3 COMPLETED.     %.2f sec.\n",gttime(ctim[4]));
       
   }
   // chrono(OFF,&ctim[3]);
@@ -523,8 +522,8 @@ int main(int argc,char *argv[]) {
   if ( !MMG2_unscaleMesh(&mesh,&sol) )  return(1);
  
   if ( abs(mesh.info.imprim) > 3 )  {
-      MMG2_outqua(&mesh,&sol);
-      MMG2_prilen(&mesh,&sol); 
+    MMG2_outqua(&mesh,&sol);
+    MMG2_prilen(&mesh,&sol); 
   }
   //chrono(ON,&ctim[1]);
   fprintf(stdout,"\n  -- WRITING DATA FILE %s\n",mesh.nameout);
