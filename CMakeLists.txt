@@ -436,7 +436,7 @@ IF ( BUILD_MMG3D OR BUILD_MMG )
   #####         Compile program to test library
   #####
   ############################################################################
-  OPTION ( TEST_LIBMMG3D "Compile tests of library" OFF)
+  OPTION ( TEST_LIBMMG3D "Compile tests for the mmg3d library" OFF)
   IF ( TEST_LIBMMG3D )
     IF ( LIBMMG3D_STATIC )
       ADD_EXECUTABLE(libmmg3d_example0_a
@@ -496,6 +496,25 @@ IF ( BUILD_MMG3D OR BUILD_MMG )
         ${CMAKE_SOURCE_DIR}/libexamples/mmg3d/example3/mmg3d.c)
       TARGET_LINK_LIBRARIES(libmmg3d_example3 ${PROJECT_NAME}3d_so)
       INSTALL(TARGETS libmmg3d_example3 RUNTIME DESTINATION bin )
+    ELSE ()
+      MESSAGE(WARNING "You must activate the compilation of the static or"
+        " shared ${PROJECT_NAME} library to compile this tests." )
+    ENDIF ()
+  ENDIF()
+
+  OPTION ( TEST_LIBMMG2D "Compile tests for the mmg2d library" OFF)
+  IF ( TEST_LIBMMG2D )
+    IF ( LIBMMG2D_STATIC )
+      ADD_EXECUTABLE(libmmg2d_example0
+        ${CMAKE_SOURCE_DIR}/libexamples/mmg2d/example0/main.c)
+      TARGET_LINK_LIBRARIES(libmmg2d_example0 ${PROJECT_NAME}2d_a)
+      INSTALL(TARGETS libmmg2d_example0 RUNTIME DESTINATION bin )
+
+    ELSEIF ( LIBMMG2D_SHARED )
+      ADD_EXECUTABLE(libmmg2d_example0
+        ${CMAKE_SOURCE_DIR}/libexamples/mmg2d/example0/main.c)
+      TARGET_LINK_LIBRARIES(libmmg2d_example0 ${PROJECT_NAME}2d_so)
+      INSTALL(TARGETS libmmg2d_example0 RUNTIME DESTINATION bin )
     ELSE ()
       MESSAGE(WARNING "You must activate the compilation of the static or"
         " shared ${PROJECT_NAME} library to compile this tests." )

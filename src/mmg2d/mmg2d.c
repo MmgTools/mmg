@@ -26,8 +26,9 @@
 mytime   ctim[TIMEMAX];
 
 int MMG2_iare[3][2] = {{1,2},{2,0},{0,1}};
-int MMG2_iopp[3][2] = {{1,2},{0,2},{0,1}};  
+int MMG2_iopp[3][2] = {{1,2},{0,2},{0,1}};
 unsigned int MMG2_idir[5] = {0,1,2,0,1};
+
 unsigned char _MMG5_iprv2[3] = {2,0,1};
 unsigned char _MMG5_inxt2[3] = {1,2,0};
 /**

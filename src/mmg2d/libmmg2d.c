@@ -27,6 +27,8 @@ mytime   ctim[TIMEMAX];
 int MMG2_iare[3][2] = {{1,2},{2,0},{0,1}};
 int MMG2_iopp[3][2] = {{1,2},{0,2},{0,1}};
 unsigned int MMG2_idir[5] = {0,1,2,0,1};
+unsigned char _MMG5_iprv2[3] = {2,0,1};
+unsigned char _MMG5_inxt2[3] = {1,2,0};
 
 static void excfun(int sigid) {
   fprintf(stdout,"\n Unexpected error:");  fflush(stdout);
@@ -281,6 +283,9 @@ int MMG2_mmg2dlib(int opt[7],double optdbl[2],MMG5_pMesh mesh,MMG5_pSol sol,void
   mesh->info.ddebug = opt[1];
   mesh->info.iso = 0;
   mesh->info.lag = -1;
+  mesh->info.hmin = -1;
+  mesh->info.hmax = -1;
+  mesh->info.hausd = 135.;
   switch(opt[0]) {
   case 0:
   case 1:
