@@ -29,7 +29,7 @@ int MMG2_scaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
   MMG5_pPoint    ppt;
   MMG5_Info     *info;
   double    dd;
-  int       i,k,iadr;
+  int       i,k,iadr,sethmin,sethmax;
 
   // pd  = mesh->disp;
 
@@ -79,6 +79,35 @@ int MMG2_scaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
   /* normalize coordinates */
   dd = PRECI / info->delta; 
     
+
+  sethmin = 0;
+  sethmax = 0;
+  if ( mesh->info.hmin > 0. ) {
+    mesh->info.hmin  *= dd;
+    sethmin = 1;
+  }
+  else
+    mesh->info.hmin  = 0.01;
+
+  if ( mesh->info.hmax > 0. ) {
+    mesh->info.hmax  *= dd;
+    sethmax = 1;
+  }
+  else 
+    mesh->info.hmax  = 1.;
+  if ( mesh->info.hmax < mesh->info.hmin ) {
+    if ( sethmin && sethmax ) {
+      fprintf(stdout,"  ## ERROR: MISMATCH PARAMETERS:"
+              "MINIMAL MESH SIZE LARGER THAN MAXIMAL ONE.\n");
+      fprintf(stdout,"  Exit program.\n");
+      exit(EXIT_FAILURE);
+    }
+    else if ( sethmin )
+      mesh->info.hmax = 100. * mesh->info.hmin;
+    else
+      mesh->info.hmin = 0.01 * mesh->info.hmax;
+  }
+
   for (k=1; k<=mesh->np; k++) {
     ppt = &mesh->point[k];
     if ( !M_VOK(ppt) )  continue;
@@ -87,7 +116,7 @@ int MMG2_scaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
   }
 
   /* normalize metric */
-  if ( !sol->np )  return(0);
+  if ( !sol->np )  return(1);
   switch (sol->size) {
   case 1:
     for (k=1; k<=mesh->np; k++)  sol->m[k] *= dd;
@@ -98,7 +127,7 @@ int MMG2_scaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
     for (k=1; k<=mesh->np; k++) {
       iadr = (k-1)*sol->size + 1; 
       for (i=0; i<sol->size; i++)  sol->m[iadr+i] *= dd;
-   }
+    }
     break;
   }
 

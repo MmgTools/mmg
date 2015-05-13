@@ -72,7 +72,6 @@ static void usage(char *name) {
 
   fprintf(stdout,"-ar    val    angle detection (default 45.)\n");
   fprintf(stdout,"-nr           no ridge/corners detection \n");
-#warning hmax hmin to do
   fprintf(stdout,"-hmin  val    minimal mesh size\n");
   fprintf(stdout,"-hmax  val    maximal mesh size\n");
   fprintf(stdout,"-hausd val    angle used for boundary collapses (default 135 degrees)\n");
@@ -119,6 +118,12 @@ int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol sol,double *qdegrad) 
         else if ( !strcmp(argv[i],"-hausd") ) {
           ++i;
           mesh->info.hausd   = atof(argv[i]);
+        } else if ( !strcmp(argv[i],"-hmin") ) {
+          ++i;
+          mesh->info.hmin   = atof(argv[i]);
+        } else if ( !strcmp(argv[i],"-hmax") ) {
+          ++i;
+          mesh->info.hmax   = atof(argv[i]);
         } else {
           fprintf(stderr,"  Unrecognized option %s\n",argv[i]);
           usage(argv[0]);
@@ -383,7 +388,9 @@ int main(int argc,char *argv[]) {
   mesh.info.renum  = 0;
   mesh.info.hausd  = 135.;
   mesh.info.dhd  = 45.;
-
+  mesh.info.hmin     = -1.;    
+  mesh.info.hmax     = -1.;    
+  
   qdegrad[0] = 10./ALPHA;
   qdegrad[1] = 1.3;   
   mesh.info.renum = 0;
@@ -403,9 +410,7 @@ int main(int argc,char *argv[]) {
     /* mem alloc */
     sol.m = (double*)M_calloc((sol.size*mesh.npmax)+1,sizeof(double),"mmg");
     assert(sol.m);  
-    //for (k=1; k<=sol.np; k++) sol.met[k] = 0.1;
-    //sol.np = 0;
-    if (!MMG2_doSol(&mesh,&sol) )  return(1);
+    sol.np = 0;
   } else   if ( sol.np && (sol.np != mesh.np) ) {
     fprintf(stdout,"  ## WARNING: WRONG SOLUTION NUMBER : %d != %d\n",sol.np,mesh.np);
     //exit(1);
@@ -438,6 +443,8 @@ int main(int argc,char *argv[]) {
   if ( abs(mesh.info.imprim) > 4 )
     fprintf(stdout,"  ** SETTING ADJACENCIES\n");
   if ( !MMG2_scaleMesh(&mesh,&sol) )  return(1);
+  if ( !sol.np && !MMG2_doSol(&mesh,&sol) )  return(1);
+
   if ( mesh.nt && !MMG2_hashel(&mesh) )  return(1);
   if ( !mesh.info.renum && !MMG2_chkmsh(&mesh,1) )        return(1);
   /*geom : corner detection*/    

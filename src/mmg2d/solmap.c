@@ -27,7 +27,7 @@ static int MMG_inxtt[5] = {0,1,2,0,1};
 
 /* compute iso size map */
 int MMG2_doSol(MMG5_pMesh mesh,MMG5_pSol sol) {
-  MMG5_pTria      ptt;
+  MMG5_pTria      ptt,pt;
   MMG5_pPoint     p1,p2;
   double     ux,uy,uz,dd;
   int        i,k,ib,ipa,ipb;
@@ -56,20 +56,21 @@ int MMG2_doSol(MMG5_pMesh mesh,MMG5_pSol sol) {
   }
 
   /* vertex size */
-  mesh->info.hmin = 1.e20;
-  mesh->info.hmax = 0.0;
   for (k=1; k<=mesh->np; k++) {
     p1 = &mesh->point[k];
-    if ( !p1->tagdel )  continue;
+    if ( !p1->tagdel )  {
+       sol->m[k] = mesh->info.hmax;
+      continue;
+    }
 
-    sol->m[k] = sol->m[k] / (double)p1->tagdel;
- 
-    if ( sol->m[k] < mesh->info.hmin )
-      mesh->info.hmin = sol->m[k];
-    else if ( sol->m[k] > mesh->info.hmax )
-      mesh->info.hmax = sol->m[k];
-
+    sol->m[k] = MG_MIN(mesh->info.hmax,MG_MAX(mesh->info.hmin,sol->m[k] / (double)p1->tagdel));
     p1->tagdel = 0;
+  }
+
+/* compute quality */
+  for (k=1; k<=mesh->nt; k++) {
+    pt = &mesh->tria[k];
+    pt->qual = MMG2_caltri(mesh,sol,pt);        
   }
 
   if ( mesh->info.imprim < -4 )
