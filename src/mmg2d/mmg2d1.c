@@ -142,9 +142,6 @@ static int cassarbdry(MMG5_pMesh mesh,MMG5_pSol sol,int ied,int ia,int ib,double
   // Displ      pd;
   double   c[2],pc1[2],pc2[2],t0[2],t1[2],t_1,*ma,*mb,*mp,dx,dy;
   int      ip,iadr,i,inv;
-  printf("comment because of merge needs : cassarbdry\n");
-#warning cassarbdry
-
   p0 = &mesh->point[ia];
   p1 = &mesh->point[ib];
  

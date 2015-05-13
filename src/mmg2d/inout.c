@@ -833,31 +833,38 @@ int MMG2_saveMesh(MMG5_pMesh mesh,char *filename) {
   }
   /*savetangent*/
   ntang=0;
-  for(k=1 ; k<=mesh->na ; k++) {
-    ped = &mesh->edge[k];
-    if(!ped->a) continue;
-    ntang +=2;
+  for(k=1 ; k<=mesh->np ; k++) {
+    ppt = &mesh->point[k];
+    if ( M_VOK(ppt) ) {
+      if(!(ppt->tag & M_BDRY)) continue;
+      if(ppt->tag & M_CORNER) continue;
+      ntang++;
+    }
   }
-#warning comment for merge data structure needs
-  /* strcpy(&chaine[0],"\n\nNormals\n"); //c'est des tangentes!! */
-  /* fprintf(inm,"%s",chaine); */
-  /* fprintf(inm,"%d\n",ntang); */
-  /* for(k=1 ; k<=mesh->na ; k++) { */
-  /*   ped = &mesh->edge[k]; */
-  /*   if(!ped->a) continue; */
-  /*   fprintf(inm,"%lf %lf \n",ped->t0[0],ped->t0[1]); */
-  /*   fprintf(inm,"%lf %lf \n",ped->t1[0],ped->t1[1]); */
-  /* } */
-  /* strcpy(&chaine[0],"\n\nNormalAtVertices\n"); */
-  /* fprintf(inm,"%s",chaine); */
-  /* fprintf(inm,"%d\n",ntang); */
-  /* nn=1; */
-  /* for(k=1 ; k<=mesh->na ; k++) { */
-  /*   ped = &mesh->edge[k]; */
-  /*   if(!ped->a) continue; */
-  /*   fprintf(inm,"%d %d \n",mesh->point[ped->a].tmp,nn++); */
-  /*   fprintf(inm,"%d %d \n",mesh->point[ped->b].tmp,nn++); */
-  /* } */
+  strcpy(&chaine[0],"\n\nNormals\n"); //be careful it is tangent!!
+  fprintf(inm,"%s",chaine);
+  fprintf(inm,"%d\n",ntang);
+  for(k=1 ; k<=mesh->np ; k++) {
+    ppt = &mesh->point[k];
+    if(!M_VOK(ppt)) continue;
+    if(!(ppt->tag & M_BDRY)) continue;
+    if(ppt->tag & M_CORNER) continue;
+    if(mesh->info.nreg)
+      fprintf(inm,"%lf %lf %lf\n",ppt->n[0],ppt->n[1],0.e0);
+    else
+      fprintf(inm,"%lf %lf \n",ppt->n[0],ppt->n[1]);
+  }
+  strcpy(&chaine[0],"\n\nNormalAtVertices\n");
+  fprintf(inm,"%s",chaine);
+  fprintf(inm,"%d\n",ntang);
+  nn=1;
+  for(k=1 ; k<=mesh->np ; k++) {
+    ppt = &mesh->point[k];
+    if ( !M_VOK(ppt) ) continue;
+    if(!(ppt->tag & M_BDRY)) continue;
+    if(ppt->tag & M_CORNER) continue;
+    fprintf(inm,"%d %d \n",ppt->tmp,nn++);
+  }
   
   strcpy(&chaine[0],"\n\nEnd\n");
   fprintf(inm,"%s",chaine);

@@ -154,8 +154,6 @@ int MMG2_computetangent(MMG5_pMesh mesh,int ip1,int ip2,int ip3,double *t) {
     c3[i] =  mesh->point[ip3].c[i];
   }
   if(mesh->point[ip2].tag & M_CORNER) {
-    printf("warning corner : allocate xpoint.........\n");
-#warning treat corner case
     t[0] = c2[0]-c1[0];
     t[1] = c2[1]-c1[1];
   }
@@ -245,7 +243,6 @@ int MMG2_tangent(MMG5_pMesh mesh,MMG5_pEdge ped,int k,int ik,int i2,int nv) {
   adja = &mesh->adja[iadr];
   iadj = i2;
   ip = pt->v[ik];
-  
   pta = &mesh->point[ped->a];
   ptb = &mesh->point[ped->b];
 
@@ -300,34 +297,12 @@ int MMG2_tangent(MMG5_pMesh mesh,MMG5_pEdge ped,int k,int ik,int i2,int nv) {
     }
     ip = ptiel->v[voyiel];
   } while (!num && iel);
-  if(nv)
+  if(nv) {
     MMG2_computetangent(mesh,pt->v[i2],ped->b,ptiel->v[voyiel],ptb->n);
-  else
+  }
+  else {
     MMG2_computetangent(mesh,pt->v[i2],ped->a,ptiel->v[voyiel],pta->n);
-  assert(num);
-  pediel = &mesh->edge[num];
-  ptaiel = &mesh->point[pediel->a];
-  ptbiel = &mesh->point[pediel->b];
-  //printf("num %d -- %d %d -- %d %d\n",num,pediel->v[1],pediel->v[0],ped->a,ped->b);
-  //printf("ptiel %d %d %d -- %d\n",ptiel->v[0],ptiel->v[1],ptiel->v[2],voyiel);
-  vp = (nv==0)?ped->a:ped->b;
-    if(pediel->a==ip){
-      for(i=0 ; i<2 ; i++) {
-        if(nv)
-          ptaiel->n[i] = ptb->n[i];
-        else
-          ptaiel->n[i] = pta->n[i];
-      }
-    } else {
-      //assert(pediel->v[1]==ped->v[nv]);
-      //assert(pediel->v[0]==ptiel->v[voyiel]);
-      for(i=0 ; i<2 ; i++) {
-        if(nv)
-          ptbiel->n[i] = ptb->n[i];
-        else
-          ptbiel->n[i] = pta->n[i];
-      }
-    }
+  }
   
   return(1);
 }
@@ -426,9 +401,11 @@ int MMG2_baseBdry(MMG5_pMesh mesh) {
       /*tangent on ped->a*/
       if(ppt->flag != mesh->base) {
         if(pt->v[i1]==ped->a) {
+          assert(pt->v[i2]==ped->b);
           MMG2_tangent(mesh,ped,k,i,i2,0);
           ppt->flag = mesh->base;
         } else {
+          assert(pt->v[i2]==ped->a);
           MMG2_tangent(mesh,ped,k,i,i1,0);
           ppt->flag = mesh->base;
         }
