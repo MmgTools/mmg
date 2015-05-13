@@ -1,8 +1,4 @@
-#include "mmg2d.h"
-#include "compil.date"
-
-
-mytime   ctim[TIMEMAX];/* =============================================================================
+/* =============================================================================
 **  This file is part of the mmg software package for the tetrahedral
 **  mesh modification.
 **  Copyright (c) Inria - IMB (Université de Bordeaux) - LJLL (UPMC), 2004- .
@@ -25,6 +21,9 @@ mytime   ctim[TIMEMAX];/* ======================================================
 ** =============================================================================
 */
 
+#include "mmg2d.h"
+
+mytime   ctim[TIMEMAX];
 
 int MMG2_iare[3][2] = {{1,2},{2,0},{0,1}};
 int MMG2_iopp[3][2] = {{1,2},{0,2},{0,1}};  
@@ -357,7 +356,7 @@ int main(int argc,char *argv[]) {
 
   fprintf(stdout,"  -- MMG2D, Release %s (%s) \n",M_VER,M_REL);
   fprintf(stdout,"     %s\n",M_CPY);
-  fprintf(stdout,"    %s\n",COMPIL);
+  fprintf(stdout,"     %s %s\n",__DATE__,__TIME__);
 
   /* interrupts */
   signal(SIGABRT,excfun);
