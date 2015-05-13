@@ -199,18 +199,14 @@ void MMG2_outqua(MMG5_pMesh mesh,MMG5_pSol sol) {
 
   /* print histo */
   fprintf(stdout,"\n  -- MESH QUALITY   %d\n",rapnum);
-  if ( rapavg / rapnum < 100.0 )
-    fprintf(stdout,"     AVERAGE QUALITY        %12.4f\n",rapavg / rapnum);
-  fprintf(stdout,"     BEST  ELEMENT QUALITY  %12.4f\n",rapmin);
-  if ( rapmax < 1.e7 )
-    fprintf(stdout,"     WORST ELEMENT QUALITY  %12.4f\n",rapmax);
-  else
-    fprintf(stdout,"     WORST ELEMENT QUALITY  %12.4E\n",rapmax);
-  pt = &mesh->tria[iel];
-  fprintf(stdout,"     WORST ELEMENT   %d (%d)   %d %d %d\n",
-	  iel,ielreal,pt->v[0],pt->v[1],pt->v[2]);
+  if ( rapavg / rapnum < 100.0 ) {
+    pt = &mesh->tria[iel];
+    fprintf(stdout,"     BEST   %e  AVRG.   %e  WRST.   %e (%d)\n",
+            rapmin,rapavg / rapnum,rapmax,ielreal);
+  }
 
-  if ( abs(mesh->info.imprim) < 5 )  return;
+
+  if ( abs(mesh->info.imprim) < 4 )  return;
 
   fprintf(stdout,"\n     HISTOGRAMM\n");
   j = 0;

@@ -142,7 +142,7 @@ int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol sol,double *qdegrad) 
         if ( !strcmp(argv[i],"-in") ) {
           ++i;
           mesh->namein = argv[i];
-          mesh->info.imprim   = 5;
+          mesh->info.imprim   = 3;
         }
         break;
       case 'l':
@@ -226,7 +226,7 @@ int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol sol,double *qdegrad) 
     else {
       if ( mesh->namein == NULL ) {
         mesh->namein = argv[i];
-        if ( mesh->info.imprim == -99 )  mesh->info.imprim = 5;
+        if ( mesh->info.imprim == -99 )  mesh->info.imprim = 3;
       }
       else if ( mesh->nameout == NULL ) {
         mesh->nameout = argv[i];
@@ -449,9 +449,9 @@ int main(int argc,char *argv[]) {
     if ( mesh.info.imprim )   fprintf(stdout,"\n  -- GRADATION : %8f\n",mesh.info.hgrad);
     MMG2_lissmet(&mesh,&sol); 
   }
-  if ( mesh.nt && abs(mesh.info.imprim) > 3 )  MMG2_outqua(&mesh,&sol);
+  if ( mesh.nt && abs(mesh.info.imprim) > 1 )  MMG2_outqua(&mesh,&sol);
   
-  if ( mesh.nt && abs(mesh.info.imprim) > 4 )  {
+  if ( mesh.nt && abs(mesh.info.imprim) > 1 )  {
     MMG2_prilen(&mesh,&sol);
   }                       
   
@@ -521,7 +521,7 @@ int main(int argc,char *argv[]) {
   
   if ( !MMG2_unscaleMesh(&mesh,&sol) )  return(1);
  
-  if ( abs(mesh.info.imprim) > 3 )  {
+  if ( abs(mesh.info.imprim) > 1 )  {
     MMG2_outqua(&mesh,&sol);
     MMG2_prilen(&mesh,&sol); 
   }

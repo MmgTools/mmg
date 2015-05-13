@@ -504,7 +504,7 @@ static int analar(MMG5_pMesh mesh,MMG5_pSol sol,pBucket bucket,double declic,int
       }
     }
   }
-  if ( mesh->info.imprim > 3 ) {
+  if ( mesh->info.imprim > 5 ) {
     fprintf(stdout,"    %8d INSERTED %8d COLLAPSED\n",MMG2_ni,MMG2_nc);
   }
   return(1);
@@ -515,6 +515,9 @@ int MMG2_mmg2d1(MMG5_pMesh mesh,MMG5_pSol sol) {
   pBucket  bucket;
   double   declic;
   int      ns,base,alert,it,maxtou;
+  int      nadd,ndel,nswp;
+
+  nadd = ndel = nswp = 0;
 
   if ( mesh->info.imprim < 0 ) {
     MMG2_outqua(mesh,sol);
@@ -530,7 +533,8 @@ int MMG2_mmg2d1(MMG5_pMesh mesh,MMG5_pSol sol) {
     declic = 1.1 / ALPHA;
     base   = mesh->base;
     ns = MMG2_cendel(mesh,sol,declic,base);
-    if ( mesh->info.imprim > 3 )
+    nswp += ns;
+    if ( mesh->info.imprim > 5 )
       fprintf(stdout,"  -- %8d SWAPPED\n",ns);
   }
 
@@ -543,23 +547,23 @@ int MMG2_mmg2d1(MMG5_pMesh mesh,MMG5_pSol sol) {
   alert  = 0;
   do { 
       
-    //MMG2_saveMesh(mesh,"avt.mesh");
-    //MMG2_outqua(mesh,sol);  
     analar(mesh,sol,bucket,declic,&alert); 
-    //MMG2_outqua(mesh,sol);  
-    //MMG2_saveMesh(mesh,"insert.mesh");
+    nadd += MMG2_ni;
+    ndel += MMG2_nc;
     if(!mesh->info.noswap) {
       ns = MMG2_cendel(mesh,sol,declic,mesh->base); 
-      if ( mesh->info.imprim > 3 )
+      nswp += ns;
+      if ( mesh->info.imprim > 5 )
         fprintf(stdout,"  -- %8d SWAPPED\n",ns); 
-    }
-    //MMG2_outqua(mesh,sol);  
-    //MMG2_saveMesh(mesh,"swap.mesh"); 
-    //if(it==6) exit(0);  
-     
+    }     
   }
   while ( ++it < maxtou && (MMG2_ni+MMG2_nc > 0));
   //while ( ++it < maxtou && (MMG2_ni+MMG2_nc > 0));//> 0.05*mesh->np));
+
+  if ( (abs(mesh->info.imprim) < 6) && ( nadd || ndel ) ) {
+    fprintf(stdout,"     %8d splitted, %8d collapsed,"
+            " %8d swapped.\n",nadd,ndel,nswp);
+  }
 
   if ( mesh->info.imprim < 0 ) {
     MMG2_outqua(mesh,sol);

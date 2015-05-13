@@ -63,9 +63,10 @@ double long_ani(double *ca,double *cb,double *ma,double *mb) {
 int MMG2_prilen(MMG5_pMesh mesh,MMG5_pSol sol) {
   MMG5_pTria       pt;
   double      lavg,len,ecart,som,lmin,lmax,*ca,*cb,*ma,*mb;
-  int         k,l,lon,navg,ia,ipa,ipb,iamin,ibmin,iamax,ibmax,dep,hl[10];
+  int         k,l,lon,navg,ia,ipa,ipb,iamin,ibmin,iamax,ibmax,dep,hl[9];
   int	      iadr;
-  static double bd[9] = {0.0, 0.2, 0.5, 0.7071, 0.9, 1.111, 1.4142, 2.0, 5.0 };
+  static double bd[9] = {0.0, 0.3, 0.6, 0.7071, 0.9, 1.3, 1.4142, 2.0, 5.0};
+//{0.0, 0.2, 0.5, 0.7071, 0.9, 1.111, 1.4142, 2.0, 5.0 };
   navg  = 0;
   lavg  = 0.0;
   lmin  = 1.e20;
@@ -77,7 +78,7 @@ int MMG2_prilen(MMG5_pMesh mesh,MMG5_pSol sol) {
   iamax = 0;
   ibmax = 0;
 
-  for (k=1; k<10; k++)  hl[k] = 0;
+  for (k=0; k<9; k++)  hl[k] = 0;
 
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
@@ -123,48 +124,23 @@ int MMG2_prilen(MMG5_pMesh mesh,MMG5_pSol sol) {
       printf("met : %e %e %e\n",mb[0],mb[1],mb[2]); }
       /* update histogram */
       if (len < bd[3]) {
-		if (len > bd[2])       hl[3]++;
-		else if (len > bd[1])  hl[2]++;
-		else                   hl[1]++;
+		if (len > bd[2])       hl[2]++;
+		else if (len > bd[1])  hl[1]++;
+		else                   hl[0]++;
       }
       else if (len < bd[5]) {
-		if (len > bd[4])       hl[5]++;
-		else if (len > bd[3])  hl[4]++;
+		if (len > bd[4])       hl[4]++;
+		else if (len > bd[3])  hl[3]++;
       }
-      else if (len < bd[6])    hl[6]++;
-      else if (len < bd[7])    hl[7]++;
-      else if (len < bd[8])    hl[8]++;
-      else                     hl[9]++;
+      else if (len < bd[6])    hl[5]++;
+      else if (len < bd[7])    hl[6]++;
+      else if (len < bd[8])    hl[7]++;
+      else                     hl[8]++;
     }
   }
-  
-  fprintf(stdout,"\n  -- RESULTING EDGE LENGTHS  %d\n",navg);
-  fprintf(stdout,"     AVERAGE LENGTH         %12.4f\n",lavg / (double)navg);
-  fprintf(stdout,"     SMALLEST EDGE LENGTH   %12.4f   %6d %6d\n",
-  	  lmin,iamin,ibmin);
-  fprintf(stdout,"     LARGEST  EDGE LENGTH   %12.4f   %6d %6d \n",
-  	  lmax,iamax,ibmax);
-  fprintf(stdout,"     EFFICIENCY INDEX       %12.4f\n",exp(som/(double)navg));
-  if ( hl[4]+hl[5]+hl[6] )
-    fprintf(stdout,"   %6.2f < L <%5.2f  %8d   %5.2f %%  \n",
-      bd[3],bd[6],hl[4]+hl[5]+hl[6],100.*(hl[4]+hl[5]+hl[6])/(double)navg);
+   _MMG5_displayHisto(mesh, navg, &lavg, iamin, ibmin, lmin,
+                     iamax, ibmax, lmax, &bd[0], &hl[0]);
 
-  if ( abs(mesh->info.imprim) > 4 ) {
-    fprintf(stdout,"\n     HISTOGRAMM\n");
-    if ( hl[1] )
-      fprintf(stdout,"     0.00 < L < 0.20  %8d   %5.2f %%  \n",
-	      hl[1],100.*(hl[1]/(float)navg));
-    if ( lmax > 0.2 ) {
-      for (k=2; k<9; k++) {
-        if ( hl[k] > 0 )
-  	  fprintf(stdout,"   %6.2f < L <%5.2f  %8d   %5.2f %%  \n",
-		  bd[k-1],bd[k],hl[k],100.*(hl[k]/(float)navg));
-      }
-      if ( hl[9] )
-        fprintf(stdout,"     5.   < L         %8d   %5.2f %%  \n",
-	        hl[9],100.*(hl[9]/(float)navg));
-    }
-  }
-  
+
   return(1);
 }
