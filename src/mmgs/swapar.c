@@ -72,8 +72,8 @@ int chkswp(MMG5_pMesh mesh,MMG5_pSol met,int k,int i,char typchk) {
 
   /* check length */
   if ( typchk == 2 && met->m ) {
-    loni = _MMG5_lenedg(mesh,met,ip1,ip2,0);
-    lona = _MMG5_lenedg(mesh,met,ip0,iq,0);
+    loni = _MMG5_lenedg(mesh,met,ip1,ip2,0,0);
+    lona = _MMG5_lenedg(mesh,met,ip0,iq,0,0);
     if ( loni > 1.0 )  loni = MG_MIN(1.0 / loni,LSHRT);
     if ( lona > 1.0 )  lona = 1.0 / lona;
     if ( lona < loni )  return(0);
@@ -207,27 +207,27 @@ int chkswp(MMG5_pMesh mesh,MMG5_pSol met,int k,int i,char typchk) {
 
   if ( typchk == 2 && met->m ) {
     pt0->v[0]= ip0;  pt0->v[1]= ip1;  pt0->v[2]= ip2;
-    cal1 = _MMG5_calelt(mesh,met,pt0);
+    cal1 = _MMG5_calelt(mesh,met,pt0,0);
     pt0->v[0]= ip1;  pt0->v[1]= iq;   pt0->v[2]= ip2;
-    cal2 = _MMG5_calelt(mesh,met,pt0);
+    cal2 = _MMG5_calelt(mesh,met,pt0,0);
     calnat = MG_MIN(cal1,cal2);
     pt0->v[0]= ip0;  pt0->v[1]= ip1;  pt0->v[2]= iq;
-    cal1 = _MMG5_calelt(mesh,met,pt0);
+    cal1 = _MMG5_calelt(mesh,met,pt0,0);
     pt0->v[0]= ip0;  pt0->v[1]= iq;   pt0->v[2]= ip2;
-    cal2 = _MMG5_calelt(mesh,met,pt0);
+    cal2 = _MMG5_calelt(mesh,met,pt0,0);
     calchg = MG_MIN(cal1,cal2);
   }
   else {
     // warning if typchk==1 iso??
     pt0->v[0]= ip0;  pt0->v[1]= ip1;  pt0->v[2]= ip2;
-    cal1 = _MMG5_caltri_iso(mesh,NULL,pt0);
+    cal1 = _MMG5_caltri_iso(mesh,NULL,pt0,0);
     pt0->v[0]= ip1;  pt0->v[1]= iq;   pt0->v[2]= ip2;
-    cal2 = _MMG5_caltri_iso(mesh,NULL,pt0);
+    cal2 = _MMG5_caltri_iso(mesh,NULL,pt0,0);
     calnat = MG_MIN(cal1,cal2);
     pt0->v[0]= ip0;  pt0->v[1]= ip1;  pt0->v[2]= iq;
-    cal1 = _MMG5_caltri_iso(mesh,NULL,pt0);
+    cal1 = _MMG5_caltri_iso(mesh,NULL,pt0,0);
     pt0->v[0]= ip0;  pt0->v[1]= iq;   pt0->v[2]= ip2;
-    cal2 = _MMG5_caltri_iso(mesh,NULL,pt0);
+    cal2 = _MMG5_caltri_iso(mesh,NULL,pt0,0);
     calchg = MG_MIN(cal1,cal2);
   }
 
@@ -330,12 +330,12 @@ int litswp(MMG5_pMesh mesh,int k,char i,double kali) {
 
   /* check quality */
   pt0->v[0] = id;  pt0->v[1] = ic;  pt0->v[2] = ib;
-  kalt = _MMG5_calelt(mesh,NULL,pt0);
+  kalt = _MMG5_calelt(mesh,NULL,pt0,0);
   kali = MG_MIN(kali,kalt);
   pt0->v[0] = ia;  pt0->v[1] = id;  pt0->v[2] = ic;
-  kalt = _MMG5_calelt(mesh,NULL,pt0);
+  kalt = _MMG5_calelt(mesh,NULL,pt0,0);
   pt0->v[0] = ia;  pt0->v[1] = ib;  pt0->v[2] = id;
-  kalf = _MMG5_calelt(mesh,NULL,pt0);
+  kalf = _MMG5_calelt(mesh,NULL,pt0,0);
   kalf = MG_MIN(kalf,kalt);
   if ( kalf > 1.02 * kali ) {
     swapar(mesh,k,i);

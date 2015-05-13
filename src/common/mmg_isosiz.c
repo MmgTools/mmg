@@ -34,14 +34,17 @@
  * \param met pointer toward the sol structure.
  * \param ip1 index of edge's extremity.
  * \param ip2 index of edge's extremity.
- * \param isedg 1 if the edge is a ridge, 0 otherwise.
+ * \param isedg 1 if the edge is a ridge, 0 otherwise (dummy arg for
+ * compatibility with \a lenedg_ani).
+ * \param init dummy argument for compatibility with \a lenedg_ani.
  * \return length of edge according to the prescribed metric.
  *
  * Compute length of edge \f$[i0;i1]\f$ according to the prescribed iso.
  * metric.
  *
  */
-inline double _MMG5_lenedg_iso(MMG5_pMesh mesh,MMG5_pSol met,int ip1,int ip2, char isedg) {
+inline double _MMG5_lenedg_iso(MMG5_pMesh mesh,MMG5_pSol met,int ip1,int ip2,
+                               char isedg, int init) {
   MMG5_pPoint   p1,p2;
   double   h1,h2,l,r,len;
 

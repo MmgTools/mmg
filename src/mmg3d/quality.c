@@ -539,12 +539,13 @@ int _MMG5_badelt(MMG5_pMesh mesh,MMG5_pSol met) {
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
+ * \param init 1 if we call prilen before any metric modification.
  * \return 0 if fail, 1 otherwise.
  *
  * Compute sizes of edges of the mesh, and displays histo.
  *
  */
-int _MMG5_prilen(MMG5_pMesh mesh, MMG5_pSol met) {
+int _MMG5_prilen(MMG5_pMesh mesh, MMG5_pSol met, int init) {
   MMG5_pTetra     pt;
   MMG5_pxTetra    pxt;
   _MMG5_Hash      hash;
@@ -600,9 +601,9 @@ int _MMG5_prilen(MMG5_pMesh mesh, MMG5_pSol met) {
       if( ier ) {
         ned ++;
         if ( pt->xt )
-          len = _MMG5_lenedg(mesh,met,np,nq,(pxt->tag[ia] & MG_GEO));
+          len = _MMG5_lenedg(mesh,met,np,nq,(pxt->tag[ia] & MG_GEO),init);
         else
-          len = _MMG5_lenedg(mesh,met,np,nq,0);
+          len = _MMG5_lenedg(mesh,met,np,nq,0,init);
 
         avlen += len;
 
@@ -778,10 +779,13 @@ int _MMG5_countelt(MMG5_pMesh mesh,MMG5_pSol sol, double *weightelt, long *npcib
       ipa = _MMG5_iare[ib][0];
       ipb = _MMG5_iare[ib][1];
       if ( pt->xt )
+        // to check: last argument is 0 or 1? (if searchlen is called at the
+        // procedure begining it is 1, it is 0 otherwise (the metric at the
+        // ridge point is not the real metric anymore)).
         lent[ib] = _MMG5_lenedg(mesh,sol,pt->v[ipa],pt->v[ipb],
-                                (pxt->tag[ib] & MG_GEO ));
+                                (pxt->tag[ib] & MG_GEO ),1);
       else
-        lent[ib] = _MMG5_lenedg(mesh,sol,pt->v[ipa],pt->v[ipb],0);
+        lent[ib] = _MMG5_lenedg(mesh,sol,pt->v[ipa],pt->v[ipb],0,1);
       lenavg+=lent[ib];
     }
     lenavg /= 6.;

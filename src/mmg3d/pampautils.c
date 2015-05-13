@@ -710,9 +710,12 @@ int MMG5_searchlen(MMG5_pMesh mesh, MMG5_pSol met, double lmin,
       ier = _MMG5_hashPop(&hash,np,nq);
       if( ier ) {
         if ( pt->xt )
-          len = _MMG5_lenedg(mesh,met,np,nq,(pxt->tag[ia] & MG_GEO));
+          // to check: last argument is 0 or 1? (if searchlen is called at the
+          // procedure begining it is 1, it is 0 otherwise (the metric at the
+          // ridge point is not the real metric anymore)).
+          len = _MMG5_lenedg(mesh,met,np,nq,(pxt->tag[ia] & MG_GEO),1);
         else
-          len = _MMG5_lenedg(mesh,met,np,nq,0);
+          len = _MMG5_lenedg(mesh,met,np,nq,0,1);
 
         if( (len < lmin) || (len > lmax) ) {
           eltab[k] = 1;

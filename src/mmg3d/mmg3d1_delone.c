@@ -96,9 +96,9 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
       ip2  = _MMG5_iare[ii][1];
       if ( pt->xt )
         len = _MMG5_lenedg(mesh,met,pt->v[ip1],pt->v[ip2],
-                           (pxt->tag[ii] & MG_GEO));
+                           (pxt->tag[ii] & MG_GEO),0);
       else
-        len = _MMG5_lenedg(mesh,met,pt->v[ip1],pt->v[ip2],0);
+        len = _MMG5_lenedg(mesh,met,pt->v[ip1],pt->v[ip2],0,0);
 
       if ( len > lmax ) {
         lmax = len;
@@ -451,9 +451,9 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
       ip2  = _MMG5_iare[ii][1];
       if ( pt->xt )
         len = _MMG5_lenedg(mesh,met,pt->v[ip1],pt->v[ip2],
-                           (pxt->tag[ii] & MG_GEO));
+                           (pxt->tag[ii] & MG_GEO),0);
       else
-        len = _MMG5_lenedg(mesh,met,pt->v[ip1],pt->v[ip2],0);
+        len = _MMG5_lenedg(mesh,met,pt->v[ip1],pt->v[ip2],0,0);
 
       imax = ii;
       lmax = len;

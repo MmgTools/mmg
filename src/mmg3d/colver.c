@@ -55,7 +55,7 @@ int _MMG5_chkcol_int(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
   ilist = _MMG5_boulevolp(mesh,k,ip,list);
   lon = 1.e20;
   if ( typchk == 2 && met->m ) {
-    lon = _MMG5_lenedg(mesh,met,pt->v[ip],nq,0);
+    lon = _MMG5_lenedg(mesh,met,pt->v[ip],nq,0,0);
     lon = MG_MIN(lon,_MMG5_LSHRT);
     lon = MG_MAX(1.0/lon,_MMG5_LLONG);
   }
@@ -91,7 +91,7 @@ int _MMG5_chkcol_int(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
     if ( typchk == 2 && met->m ) {
       for (jj=0; jj<6; jj++) {
         if ( _MMG5_lenedg(mesh,met,pt0->v[_MMG5_iare[jj][0]],
-                          pt0->v[_MMG5_iare[jj][1]],0) > lon )
+                          pt0->v[_MMG5_iare[jj][1]],0,0) > lon )
           return(0);
       }
     }

@@ -38,13 +38,16 @@
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the meric structure.
  * \param ptt pointer toward the triangle structure.
+ * \param init 1 if the metric at ridge point is the initial metric, 0 if it
+ * use our storage convention.
  * \return The computed quality.
  *
  * Compute the quality of the surface triangle \a ptt with respect to
  * an anisotropic metric.
  *
  */
-inline double _MMG5_caltri_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt) {
+inline double _MMG5_caltri_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt,
+                               int init) {
   double        rap,anisurf,l[3];
   int           ia,ib,ic;
 
@@ -54,9 +57,9 @@ inline double _MMG5_caltri_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt) {
 
   anisurf = _MMG5_surftri_ani(mesh,met,ptt);
 
-  l[0] = _MMG5_lenedg_ani(mesh,met,ib,ic,( ptt->tag[0] & MG_GEO ));
-  l[1] = _MMG5_lenedg_ani(mesh,met,ia,ic,( ptt->tag[1] & MG_GEO ));
-  l[2] = _MMG5_lenedg_ani(mesh,met,ia,ib,( ptt->tag[2] & MG_GEO ));
+  l[0] = _MMG5_lenedg_ani(mesh,met,ib,ic,( ptt->tag[0] & MG_GEO ),init);
+  l[1] = _MMG5_lenedg_ani(mesh,met,ia,ic,( ptt->tag[1] & MG_GEO ),init);
+  l[2] = _MMG5_lenedg_ani(mesh,met,ia,ib,( ptt->tag[2] & MG_GEO ),init);
 
   rap = l[0]*l[0] + l[1]*l[1] + l[2]*l[2];
 
@@ -69,13 +72,15 @@ inline double _MMG5_caltri_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt) {
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the meric structure.
  * \param ptt pointer toward the triangle structure.
+ * \param init dummy argument for compatibility with caltri_ani
  * \return The computed quality.
  *
  * Compute the quality of the surface triangle \a ptt with respect to
  * an isotropic metric.
  *
  */
-inline double _MMG5_caltri_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt) {
+inline double _MMG5_caltri_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt,
+                               int init) {
   double   *a,*b,*c,cal,abx,aby,abz,acx,acy,acz,bcx,bcy,bcz,rap;
 
   a = &mesh->point[ptt->v[0]].c[0];

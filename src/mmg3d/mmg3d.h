@@ -259,7 +259,7 @@ int _MMG5_ppgdisp(MMG5_pMesh,double *);
 int _MMG5_denoisbdy(MMG5_pMesh);
 void _MMG5_outqua(MMG5_pMesh mesh,MMG5_pSol met);
 int  _MMG5_badelt(MMG5_pMesh mesh,MMG5_pSol met);
-int _MMG5_prilen(MMG5_pMesh mesh,MMG5_pSol met);
+int _MMG5_prilen(MMG5_pMesh mesh,MMG5_pSol met,int);
 int _MMG5_DoSol(MMG5_pMesh mesh,MMG5_pSol met);
 void _MMG5_defaultValues(MMG5_pMesh);
 
@@ -315,7 +315,7 @@ int    _MMG5_gradsiz_iso(MMG5_pMesh ,MMG5_pSol );
 int    _MMG5_gradsiz_ani(MMG5_pMesh ,MMG5_pSol );
 
 double (*_MMG5_caltet)(MMG5_pMesh mesh,MMG5_pSol met,int ia,int ib,int ic,int id);
-double (*_MMG5_caltri)(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt);
+double (*_MMG5_caltri)(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt,int);
 int    (*_MMG5_defsiz)(MMG5_pMesh ,MMG5_pSol );
 int    (*_MMG5_gradsiz)(MMG5_pMesh ,MMG5_pSol );
 int    (*_MMG5_intmetvol)(double*,double*,double*,double );

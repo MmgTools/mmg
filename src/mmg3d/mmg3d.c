@@ -200,7 +200,7 @@ int main(int argc,char *argv[]) {
   if ( !_MMG5_analys(&mesh) )
     _MMG5_RETURN_AND_FREE(&mesh,&met,MMG5_LOWFAILURE);
 
-  if ( mesh.info.imprim > 1 && !mesh.info.iso && met.m ) _MMG5_prilen(&mesh,&met);
+  if ( mesh.info.imprim > 1 && !mesh.info.iso && met.m ) _MMG5_prilen(&mesh,&met,1);
 
   chrono(OFF,&MMG5_ctim[2]);
   printim(MMG5_ctim[2].gdif,stim);
@@ -275,7 +275,7 @@ int main(int argc,char *argv[]) {
   _MMG5_outqua(&mesh,&met);
 
   if ( mesh.info.imprim > 1 && !mesh.info.iso )
-    _MMG5_prilen(&mesh,&met);
+    _MMG5_prilen(&mesh,&met,0);
 
   chrono(ON,&MMG5_ctim[1]);
   if ( mesh.info.imprim )  fprintf(stdout,"\n  -- WRITING DATA FILE %s\n",mesh.nameout);

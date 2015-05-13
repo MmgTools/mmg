@@ -453,7 +453,7 @@ int main(int argc,char *argv[]) {
 
   _MMG5_outqua(&mesh,&met,1);
 
-  if ( mesh.info.imprim > 3 && met.m ) _MMG5_prilen(&mesh,&met);
+  if ( mesh.info.imprim > 3 && met.m ) _MMG5_prilen(&mesh,&met,1);
 
   chrono(OFF,&MMG5_ctim[2]);
   if ( mesh.info.imprim ) {
@@ -475,7 +475,7 @@ int main(int argc,char *argv[]) {
 
   /* save file */
   _MMG5_outqua(&mesh,&met,0);
-  if ( mesh.info.imprim > 3 )  _MMG5_prilen(&mesh,&met);
+  if ( mesh.info.imprim > 3 )  _MMG5_prilen(&mesh,&met,0);
 
   chrono(ON,&MMG5_ctim[1]);
   if ( mesh.info.imprim )  fprintf(stdout,"\n  -- WRITING DATA FILE %s\n",mesh.nameout);

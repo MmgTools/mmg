@@ -362,7 +362,7 @@ int MMG5_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met
     _MMG5_RETURN_AND_PACK(mesh,met,MMG5_LOWFAILURE);
   }
 
-  if ( mesh->info.imprim > 4 && !mesh->info.iso && met->m ) _MMG5_prilen(mesh,met);
+  if ( mesh->info.imprim > 4 && !mesh->info.iso && met->m ) _MMG5_prilen(mesh,met,1);
 
   chrono(OFF,&(ctim[2]));
   printim(ctim[2].gdif,stim);
@@ -425,7 +425,7 @@ int MMG5_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met
   /* save file */
   _MMG5_outqua(mesh,met);
   if ( mesh->info.imprim > 4 && !mesh->info.iso )
-    _MMG5_prilen(mesh,met);
+    _MMG5_prilen(mesh,met,0);
 
   chrono(ON,&(ctim[1]));
   if ( mesh->info.imprim )  fprintf(stdout,"\n  -- MESH PACKED UP\n");
