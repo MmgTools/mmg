@@ -36,5 +36,3 @@
 #include "mmgs.h"
 
 extern char ddb;
-
-

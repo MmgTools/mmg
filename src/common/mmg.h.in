@@ -349,8 +349,8 @@ int    _MMG5_boundingBox(MMG5_pMesh mesh);
 int    _MMG5_boulec(MMG5_pMesh, int*, int, int i,double *tt);
 int    _MMG5_boulen(MMG5_pMesh, int*, int, int i,double *nn);
 int    _MMG5_bouler(MMG5_pMesh, int*, int, int i,int *,int *,int *, int);
-double _MMG5_caltri_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt,int);
-double _MMG5_caltri_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt,int);
+double _MMG5_caltri_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt);
+double _MMG5_caltri_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt);
 void   _MMG5_defUninitSize(MMG5_pMesh mesh,MMG5_pSol met, char ismet);
 void   _MMG5_displayHisto(MMG5_pMesh,int, double*, int, int, double, int, int,
                           double, double*, int*);
@@ -361,8 +361,8 @@ int    _MMG5_hashGet(_MMG5_Hash *hash,int a,int b);
 int    _MMG5_hashNew(MMG5_pMesh mesh, _MMG5_Hash *hash,int hsiz,int hmax);
 int    _MMG5_intmetsavedir(MMG5_pMesh mesh, double *m,double *n,double *mr);
 int    _MMG5_intextmet(MMG5_pMesh,MMG5_pSol,int,double *);
-double _MMG5_lenedg_ani(MMG5_pMesh mesh,MMG5_pSol met,int ip1,int ip2,char,int);
-double _MMG5_lenedg_iso(MMG5_pMesh ,MMG5_pSol ,int ,int, char,int );
+double _MMG5_lenedg_ani(MMG5_pMesh mesh,MMG5_pSol met,int ip1,int ip2,char);
+double _MMG5_lenedg_iso(MMG5_pMesh ,MMG5_pSol ,int ,int, char );
 long long _MMG5_memSize(void);
 void   _MMG5_mmgDefaultValues(MMG5_pMesh mesh);
 int    _MMG5_mmgHashTria(MMG5_pMesh mesh, int *adja, int chkISO);
@@ -395,7 +395,7 @@ void _MMG5_Set_commonFunc();
 /* function pointers */
 int    (*_MMG5_chkmsh)(MMG5_pMesh,int,int);
 int    (*_MMG5_bezierCP)(MMG5_pMesh ,MMG5_Tria *,_MMG5_pBezier ,char );
-double (*_MMG5_lenedg)(MMG5_pMesh mesh,MMG5_pSol sol ,int ,int, char, int );
+double (*_MMG5_lenedg)(MMG5_pMesh mesh,MMG5_pSol sol ,int ,int, char );
 
 #ifdef USE_SCOTCH
 int    (*_MMG5_renumbering)(int vertBoxNbr, MMG5_pMesh mesh, MMG5_pSol sol);

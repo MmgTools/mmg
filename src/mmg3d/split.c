@@ -260,6 +260,7 @@ nextstep1:
  * to be inserted at an edge, whose shell is passed.
  *
  */
+#warning we need the point tag too here (to detect ridge metric)
 int _MMG5_simbulgept(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,double o[3]) {
   MMG5_pTetra    pt,pt0;
   MMG5_pPoint    ppt0;
@@ -337,7 +338,7 @@ int _MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,int 
         pt   = &mesh->tetra[list[j]/6];
         tag  = pt->xt ? (mesh->xtetra[pt->xt].tag[i]) : 0;
         len  = _MMG5_lenedg(mesh,met, pt->v[_MMG5_iare[i][0]],
-                            pt->v[_MMG5_iare[i][1]],tag,0);
+                            pt->v[_MMG5_iare[i][1]],tag);
         if ( len < lmin) {
           lmin = len;
         }
@@ -351,9 +352,9 @@ int _MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,int 
       iel = list[j] / 6;
       pt  = &mesh->tetra[iel];
       ie  = list[j] % 6;
-      len = _MMG5_lenedg(mesh,met, pt->v[_MMG5_isar[ie][0]],ip,0,0);
+      len = _MMG5_lenedg(mesh,met, pt->v[_MMG5_isar[ie][0]],ip,0);
       if ( len < lmin )  break;
-      len = _MMG5_lenedg(mesh,met, pt->v[_MMG5_isar[ie][1]],ip,0,0);
+      len = _MMG5_lenedg(mesh,met, pt->v[_MMG5_isar[ie][1]],ip,0);
       if ( len < lmin )  break;
     }
     if ( j < ilist )  return(0);

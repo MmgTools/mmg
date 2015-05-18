@@ -420,12 +420,12 @@ int _MMG5_movbdyregpt(MMG5_pMesh mesh, MMG5_pSol met,int *listv,
     iface = lists[l] % 4;
     pt          = &mesh->tetra[k];
     _MMG5_tet2tri(mesh,k,iface,&tt);
-    calold = MG_MIN(calold,_MMG5_caltri(mesh,met,&tt,0));
+    calold = MG_MIN(calold,_MMG5_caltri(mesh,met,&tt));
     for( i=0 ; i<3 ; i++ )
       if ( tt.v[i] == n0 )      break;
     assert(i<3);
     tt.v[i] = 0;
-    caltmp = _MMG5_caltri(mesh,met,&tt,0);
+    caltmp = _MMG5_caltri(mesh,met,&tt);
     if ( caltmp < _MMG5_EPSD )        return(0.0);
     calnew = MG_MIN(calnew,caltmp);
   }
@@ -702,12 +702,12 @@ int _MMG5_movbdyrefpt(MMG5_pMesh mesh, MMG5_pSol met, int *listv,
     pt          = &mesh->tetra[iel];
     pxt         = &mesh->xtetra[pt->xt];
     _MMG5_tet2tri(mesh,iel,iface,&tt);
-    calold = MG_MIN(calold,_MMG5_caltri(mesh,met,&tt,0));
+    calold = MG_MIN(calold,_MMG5_caltri(mesh,met,&tt));
     for( i=0 ; i<3 ; i++ )
       if ( tt.v[i] == ip0 )      break;
     assert(i<3);
     tt.v[i] = 0;
-    caltmp = _MMG5_caltri(mesh,met,&tt,0);
+    caltmp = _MMG5_caltri(mesh,met,&tt);
     if ( caltmp < _MMG5_EPSD )        return(0);
     calnew = MG_MIN(calnew,caltmp);
     if ( _MMG5_chkedg(mesh,&tt,MG_GET(pxt->ori,iface)) ) {
@@ -994,14 +994,14 @@ int _MMG5_movbdynompt(MMG5_pMesh mesh,MMG5_pSol met, int *listv,
     pt          = &mesh->tetra[iel];
     pxt         = &mesh->xtetra[pt->xt];
     _MMG5_tet2tri(mesh,iel,iface,&tt);
-    caltmp = _MMG5_caltri(mesh,met,&tt,0);
+    caltmp = _MMG5_caltri(mesh,met,&tt);
     calold = MG_MIN(calold,caltmp);
     for( i=0 ; i<3 ; i++ )
       if ( tt.v[i] == ip0 )      break;
     assert(i<3);
 
     tt.v[i] = 0;
-    caltmp = _MMG5_caltri(mesh,met,&tt,0);
+    caltmp = _MMG5_caltri(mesh,met,&tt);
     if ( caltmp < _MMG5_EPSD )        return(0);
     calnew = MG_MIN(calnew,caltmp);
     if ( _MMG5_chkedg(mesh,&tt,MG_GET(pxt->ori,iface)) ) {
@@ -1296,13 +1296,13 @@ int _MMG5_movbdyridpt(MMG5_pMesh mesh, MMG5_pSol met, int *listv,
     pt          = &mesh->tetra[iel];
     pxt         = &mesh->xtetra[pt->xt];
     _MMG5_tet2tri(mesh,iel,iface,&tt);
-    calold = MG_MIN(calold,_MMG5_caltri(mesh,met,&tt,0));
+    calold = MG_MIN(calold,_MMG5_caltri(mesh,met,&tt));
     for (i=0; i<3; i++) {
       if ( tt.v[i] == ip0 )      break;
     }
     assert(i<3);
     tt.v[i] = 0;
-    caltmp = _MMG5_caltri(mesh,met,&tt,0);
+    caltmp = _MMG5_caltri(mesh,met,&tt);
     if ( caltmp < _MMG5_EPSD )        return(0);
     calnew = MG_MIN(calnew,caltmp);
     if ( _MMG5_chkedg(mesh,&tt,MG_GET(pxt->ori,iface)) ) {            //MAYBE CHECKEDG ASKS STH FOR _MMG5_POINTS !!!!!

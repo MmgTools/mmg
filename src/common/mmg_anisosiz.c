@@ -40,16 +40,13 @@
  * \param np0 index of edge's extremity.
  * \param np1 index of edge's extremity.
  * \param isedg 1 if the edge is a ridge, 0 otherwise.
- * \param init 1 if the metric at ridge point is the initial metric, 0 if it
- * use our storage convention.
  * \return length of edge according to the prescribed metric.
  *
  * Compute length of edge \f$[i0;i1]\f$ according to the prescribed aniso.
  * metric.
  *
  */
-double _MMG5_lenedg_ani(MMG5_pMesh mesh,MMG5_pSol met,int np0,int np1,
-                        char isedg, int init) {
+double _MMG5_lenedg_ani(MMG5_pMesh mesh,MMG5_pSol met,int np0,int np1,char isedg) {
   MMG5_pPoint   p0,p1;
   double        gammaprim0[3],gammaprim1[3],t[3],*n1,*n2,ux,uy,uz,ps1,ps2,l0,l1;
   double        *m0,*m1,met0[6],met1[6];
@@ -141,7 +138,7 @@ double _MMG5_lenedg_ani(MMG5_pMesh mesh,MMG5_pSol met,int np0,int np1,
   if ( MS_SIN(p0->tag) ) {
     m0 = &met->m[6*np0];
   }
-  else if ( MG_GEO & p0->tag && !init ) {
+  else if ( MG_GEO & p0->tag ) {
     if ( !_MMG5_buildridmet(mesh,met,np0,ux,uy,uz,met0) )  {
       printf("%s:%d: Unable to compute the metric along the ridge.\n "
              "Exit program.\n",__FILE__,__LINE__);
@@ -156,7 +153,7 @@ double _MMG5_lenedg_ani(MMG5_pMesh mesh,MMG5_pSol met,int np0,int np1,
   if ( MS_SIN(p1->tag) ) {
     m1 = &met->m[6*np1];
   }
-  else if ( MG_GEO & p1->tag && !init ) {
+  else if ( MG_GEO & p1->tag ) {
     if ( !_MMG5_buildridmet(mesh,met,np1,ux,uy,uz,met1) )  {
       printf("%s:%d: Unable to compute the metric along the ridge.\n "
              "Exit program.\n",__FILE__,__LINE__);
@@ -190,42 +187,6 @@ double _MMG5_lenedg_ani(MMG5_pMesh mesh,MMG5_pSol met,int np0,int np1,
   l0 = 0.5*(sqrt(l0) + sqrt(l1));
   return(l0);
 }
-
-/* /\** */
-/*  * \param mesh pointer toward the mesh structure. */
-/*  * \param met pointer toward the sol structure. */
-/*  * \param np0 index of edge's extremity. */
-/*  * \param np1 index of edge's extremity. */
-/*  * \return length of edge according to the prescribed metric. */
-/*  * */
-/*  * Compute length of edge \f$[i0;i1]\f$ according to the prescribed aniso. */
-/*  * metric when the metric at ridge point is a classical metric. */
-/*  * */
-/*  *\/ */
-/* double MMG_lenedg_ani_init(MMG5_pMesh mesh,MMG5_pSol met, int np0, int np1) { */
-/*   MMG5_pPoint p0,p1; */
-/*   double      ux,uy,uz,dd1,dd2,len,*s1,*s2; */
-
-/*   p0 = &mesh->point[np0]; */
-/*   p1 = &mesh->point[np1]; */
-
-/*   ux = p1->c[0] - p0->c[0]; */
-/*   uy = p1->c[1] - p0->c[1]; */
-/*   uz = p1->c[2] - p0->c[2]; */
-
-/*   dd1 =      sa[0]*ux*ux + sa[3]*uy*uy + sa[5]*uz*uz \ */
-/*     + 2.0*(sa[1]*ux*uy + sa[2]*ux*uz + sa[4]*uy*uz); */
-/*   if ( dd1 <= 0.0 )  dd1 = 0.0; */
-
-/*   dd2 =      sb[0]*ux*ux + sb[3]*uy*uy + sb[5]*uz*uz \ */
-/*     + 2.0*(sb[1]*ux*uy + sb[2]*ux*uz + sb[4]*uy*uz); */
-/*   if ( dd2 <= 0.0 )  dd2 = 0.0; */
-
-/*   len = (sqrt(dd1)+sqrt(dd2)+4.0*sqrt(0.5*(dd1+dd2))) / 6.0; */
-
-/*   return(len); */
-/* } */
-
 
 /**
  * \param mesh pointer toward the mesh structure.

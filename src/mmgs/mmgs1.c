@@ -456,7 +456,7 @@ static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
       for (i=0; i<3; i++) {
         i1 = _MMG5_inxt2[i];
         i2 = _MMG5_iprv2[i];
-        len = _MMG5_lenedg(mesh,met,pt->v[i1],pt->v[i2],0,0);
+        len = _MMG5_lenedg(mesh,met,pt->v[i1],pt->v[i2],0);
         if ( len > LLONG )  MG_SET(pt->flag,i);
       }
       if ( !pt->flag )  continue;
@@ -531,11 +531,8 @@ static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
           }
         }
         if ( met->m ) {
-          if ( /*typchk == 1 &&*/ (met->size>1))
-            intmet33(mesh,met,ip1,ip2,ip,s);
-          else
-            intmet(mesh,met,k,i,ip,s);
-       }
+          intmet(mesh,met,k,i,ip,s);
+        }
       }
       else if ( pt->tag[i] & MG_GEO ) {
         ppt = &mesh->point[ip];
@@ -554,16 +551,10 @@ static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
           ppt->n[2] *= dd;
         }
         if ( met->m ) {
-          if ( /*typchk == 1 &&*/ (met->size>1))
-           intmet33(mesh,met,ip1,ip2,ip,s);
-         else
            intmet(mesh,met,k,i,ip,s);
         }
       } else {
          if ( met->m ) {
-           if ( /*typchk == 1 &&*/ (met->size>1))
-           intmet33(mesh,met,ip1,ip2,ip,s);
-         else
            intmet(mesh,met,k,i,ip,s);
         }
       }
@@ -800,10 +791,7 @@ int chkspl(MMG5_pMesh mesh,MMG5_pSol met,int k,int i) {
     memcpy(go->n1,no,3*sizeof(double));
   }
   s = 0.5;
-  if( (met->size>1) )
-    intmet33(mesh,met,pt->v[i1],pt->v[i2],ip,s);
-  else
-    intmet(mesh,met,k,i,ip,s);
+  intmet(mesh,met,k,i,ip,s);
 
   return(ip);
 }
@@ -843,7 +831,7 @@ static int colelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
         if ( ll > mesh->info.hmin*mesh->info.hmin )  continue;
       }
       else {
-        ll = _MMG5_lenedg(mesh,met,pt->v[i1],pt->v[i2],0,0);
+        ll = _MMG5_lenedg(mesh,met,pt->v[i1],pt->v[i2],0);
         if ( ll > LSHRT )  continue;
       }
 
@@ -888,7 +876,7 @@ static int adpspl(MMG5_pMesh mesh,MMG5_pSol met) {
     for (i=0; i<3; i++) {
       i1  = _MMG5_inxt2[i];
       i2  = _MMG5_iprv2[i];
-      len = _MMG5_lenedg(mesh,met,pt->v[i1],pt->v[i2],0,0);
+      len = _MMG5_lenedg(mesh,met,pt->v[i1],pt->v[i2],0);
       if ( len > lmax ) {
         lmax = len;
         imax = i;
@@ -952,7 +940,7 @@ static int adpcol(MMG5_pMesh mesh,MMG5_pSol met) {
       p2 = &mesh->point[pt->v[i2]];
       if ( p1->tag & MG_NOM || p2->tag & MG_NOM )  continue;
 
-      len = _MMG5_lenedg(mesh,met,pt->v[i1],pt->v[i2],0,0);
+      len = _MMG5_lenedg(mesh,met,pt->v[i1],pt->v[i2],0);
       if ( len > LOPTS )  continue;
 
       p1 = &mesh->point[pt->v[i1]];
@@ -1143,11 +1131,6 @@ int mmgs1(MMG5_pMesh mesh,MMG5_pSol met) {
   if ( abs(mesh->info.imprim) > 4 || mesh->info.ddebug )
     fprintf(stdout,"  ** COMPUTATIONAL MESH\n");
 
-  /* define metric map */
-  if ( !_MMG5_defsiz(mesh,met) ) {
-    fprintf(stdout,"  ## Metric undefined. Exit program.\n");
-    return(0);
-  }
   if ( mesh->info.hgrad > 0. && !gradsiz(mesh,met) ) {
     fprintf(stdout,"  ## Gradation problem. Exit program.\n");
     return(0);
@@ -1169,4 +1152,3 @@ int mmgs1(MMG5_pMesh mesh,MMG5_pSol met) {
 
   return(1);
 }
-

@@ -54,7 +54,7 @@ int chkcol(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int *list,char typchk) {
   ip1 = pt->v[i1];
   ip2 = pt->v[i2];
   if ( typchk == 2 && met->m ) {
-    lon = _MMG5_lenedg(mesh,met,ip1,ip2,0,0);
+    lon = _MMG5_lenedg(mesh,met,ip1,ip2,0);
     lon = MG_MIN(lon,LSHRT);
     lon = MG_MAX(1.0/lon,LLONG);
   }
@@ -86,7 +86,7 @@ int chkcol(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int *list,char typchk) {
       /* check length */
       if ( typchk == 2 && met->m && !MG_EDG(mesh->point[ip2].tag) ) {
         ip1 = pt1->v[j2];
-        len = _MMG5_lenedg(mesh,met,ip1,ip2,0,0);
+        len = _MMG5_lenedg(mesh,met,ip1,ip2,0);
         if ( len > lon )  return(0);
       }
 
@@ -131,9 +131,9 @@ int chkcol(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int *list,char typchk) {
 
       /* check quality */
       if ( typchk == 2 && met->m )
-        kal = ALPHAD*_MMG5_calelt(mesh,met,pt0,0);
+        kal = ALPHAD*_MMG5_calelt(mesh,met,pt0);
       else
-        kal = ALPHAD*_MMG5_caltri_iso(mesh,NULL,pt0,0);
+        kal = ALPHAD*_MMG5_caltri_iso(mesh,NULL,pt0);
       if ( kal < NULKAL )  return(0);
        
       memcpy(n0old,n1old,3*sizeof(double));
@@ -477,7 +477,7 @@ int litcol(MMG5_pMesh mesh,int k,char i,double kali) {
         memcpy(n0new,n1new,3*sizeof(double));
       }
       /* check quality */
-      kal = ALPHAD*_MMG5_caltri_iso(mesh,NULL,pt0,0);
+      kal = ALPHAD*_MMG5_caltri_iso(mesh,NULL,pt0);
       if ( kal < NULKAL )  return(0);
     }
 

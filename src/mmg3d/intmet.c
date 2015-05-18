@@ -139,6 +139,7 @@ int _MMG5_interp4bar_iso(MMG5_pMesh mesh, MMG5_pSol met, int k, int ip,
  * coordinates of the new point in \a k.
  *
  */
+#warning add test for the ridge point metric
 int _MMG5_interp4bar_ani(MMG5_pMesh mesh, MMG5_pSol met, int k, int ip,
                          double cb[4]) {
   MMG5_pTetra   pt;

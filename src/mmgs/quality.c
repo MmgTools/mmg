@@ -126,9 +126,9 @@ inline double caleltsig_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel) {
   anisurf = _MMG5_surftri_ani(mesh,met,pt);
   if ( anisurf == 0.0 )  return(-1.0);
 
-  l[0] = _MMG5_lenedg_ani(mesh,met,ib,ic,( pt->tag[0] & MG_GEO ),0);
-  l[1] = _MMG5_lenedg_ani(mesh,met,ia,ic,( pt->tag[1] & MG_GEO ),0);
-  l[2] = _MMG5_lenedg_ani(mesh,met,ia,ib,( pt->tag[2] & MG_GEO ),0);
+  l[0] = _MMG5_lenedg_ani(mesh,met,ib,ic,( pt->tag[0] & MG_GEO ));
+  l[1] = _MMG5_lenedg_ani(mesh,met,ia,ic,( pt->tag[1] & MG_GEO ));
+  l[2] = _MMG5_lenedg_ani(mesh,met,ia,ib,( pt->tag[2] & MG_GEO ));
 
   rap = l[0]*l[0] + l[1]*l[1] + l[2]*l[2];
   if ( rap < _MMG5_EPSD )  return(0.0);
@@ -272,13 +272,12 @@ inline double diamelt(MMG5_pPoint p0,MMG5_pPoint p1,MMG5_pPoint p2) {
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
- * \param init 1 if we call prilen before any metric modification.
  * \return 0 if fail, 1 otherwise.
  *
  * Compute sizes of edges of the mesh, and displays histo.
  *
  */
-int _MMG5_prilen(MMG5_pMesh mesh, MMG5_pSol met, int init) {
+int _MMG5_prilen(MMG5_pMesh mesh, MMG5_pSol met) {
   MMG5_pTria      pt;
   _MMG5_Hash      hash;
   double          len,avlen,lmin,lmax;
@@ -329,7 +328,7 @@ int _MMG5_prilen(MMG5_pMesh mesh, MMG5_pSol met, int init) {
       /* Remove edge from hash */
       _MMG5_hashGet(&hash,np,nq);
       ned ++;
-      len = _MMG5_lenedg(mesh,met,np,nq,(pt->tag[ia] & MG_GEO),init);
+      len = _MMG5_lenedg(mesh,met,np,nq,(pt->tag[ia] & MG_GEO));
       avlen += len;
 
       if( len < lmin ) {
@@ -445,12 +444,11 @@ static double _MMG5_caltri33_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel) {
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
- * \param init is the metric a `classic` metric initially given by the user.
  *
  * Print histogram of mesh qualities.
  *
  */
-void _MMG5_outqua(MMG5_pMesh mesh,MMG5_pSol met, int init) {
+void _MMG5_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTria    pt;
   double        rap,rapmin,rapmax,rapavg,med;
   int           i,k,iel,ok,ir,imax,nex,his[5];
@@ -472,14 +470,10 @@ void _MMG5_outqua(MMG5_pMesh mesh,MMG5_pSol met, int init) {
     ok++;
 
     if ( met->m ) {
-//      if ( init && met->size==6 ) {
-//        rap = ALPHAD * _MMG5_caltri33_ani(mesh,met,k);
-//      }
-//      else
-      rap = ALPHAD * _MMG5_calelt(mesh,met,pt,init);
+      rap = ALPHAD * _MMG5_calelt(mesh,met,pt);
     }
     else // with -A option we are in aniso but without metric.
-      rap = ALPHAD * _MMG5_caltri_iso(mesh,met,pt,init);
+      rap = ALPHAD * _MMG5_caltri_iso(mesh,met,pt);
 
     if ( rap < rapmin ) {
       rapmin = rap;

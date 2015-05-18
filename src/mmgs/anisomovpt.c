@@ -334,6 +334,7 @@ int movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
   ppt0->n[0] = no[0];
   ppt0->n[1] = no[1];
   ppt0->n[2] = no[2];
+  ppt0->tag  = 0;
 
   // parallel transport of metric at p0 to new point
   _MMG5_paratmet(p0->c,p0->n,m0,o,no,&met->m[0]);
@@ -453,8 +454,8 @@ int movridpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
   p2  = &mesh->point[ip2];
   m0  = &met->m[6*ip0];
 
-  l1old = _MMG5_lenedg(mesh,met,ip0,ip1,1,0);
-  l2old = _MMG5_lenedg(mesh,met,ip0,ip2,1,0);
+  l1old = _MMG5_lenedg(mesh,met,ip0,ip1,1);
+  l2old = _MMG5_lenedg(mesh,met,ip0,ip2,1);
   ll1old = l1old*l1old;
   ll2old = l2old*l2old;
 
@@ -912,8 +913,8 @@ int movridpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
   memcpy(m00,mo,6*sizeof(double));
 
   /* Check whether proposed move is admissible under consideration of distances */
-  l1new = _MMG5_lenedg(mesh,met,0,ip1,1,0);
-  l2new = _MMG5_lenedg(mesh,met,0,ip2,1,0);
+  l1new = _MMG5_lenedg(mesh,met,0,ip1,1);
+  l2new = _MMG5_lenedg(mesh,met,0,ip2,1);
   if ( fabs(l2new -l1new) >= fabs(l2old -l1old) ) {
     ppt0->tag = 0;
     return(0);
