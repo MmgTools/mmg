@@ -35,9 +35,18 @@
 #include "mmg.h"
 
 
-/* Compute the interpolated (2 x 2) metric from metrics m and n, at parameter s :
-   mr = (1-s)*m +s*n, both metrics being expressed in the simultaneous reduction basis:
-   linear interpolation of sizes */
+/**
+ * \param m input metric.
+ * \param n input metric.
+ * \param mr computed output metric.
+ * \param s parameter coordinate for the interpolation of metrics \a m and \a n.
+ * \return 0 if fail, 1 otherwise.
+ *
+ * Compute the interpolated \f$(2 x 2)\f$ metric from metrics \a m and \a n, at
+ * parameter \a s : \f$ mr = (1-s)*m +s*n \f$, both metrics being expressed in
+ * the simultaneous reduction basis: linear interpolation of sizes.
+ *
+ */
 static int MMG5_intmet22(double *m,double *n,double *mr,double s) {
   double  det,imn[4],dd,sqDelta,trimn,lambda[2],vp0[2],vp1[2],dm[2],dn[2],vnorm,d0,d1,ip[4];
 
@@ -63,7 +72,7 @@ static int MMG5_intmet22(double *m,double *n,double *mr,double s) {
     return(0);
   }
 
-  /* First case : matrices m and n are homothetic = n = lambda0*m */
+  /** First case : matrices m and n are homothetic = n = lambda0*m */
   if ( sqDelta < _MMG5_EPS ) {
     dd  = (1.0-s)*sqrt(lambda[0]) + s;
     dd *= dd;
@@ -80,8 +89,9 @@ static int MMG5_intmet22(double *m,double *n,double *mr,double s) {
     return(1);
   }
 
-  /* Second case : both eigenvalues of imn are distinct ; theory says qf associated to m and n
-     are diagonalizable in basis (vp0, vp1) - the coreduction basis */
+  /** Second case : both eigenvalues of imn are distinct ; theory says qf
+     associated to m and n are diagonalizable in basis (vp0, vp1) - the
+     coreduction basis */
   else {
     lambda[1] = 0.5 * (trimn + sqDelta);
     assert(lambda[1] >= 0.0);
@@ -339,8 +349,12 @@ int _MMG5_interpreg_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt,char i,doubl
 
   /* End rotating back tangent metric into canonical basis of R^3 : mr = {^t}R*cold*R
      mt1 and mt2 serve for nothing ; let them be the lines of cold * R  */
-  mt1[0] = cold[0]*r[0][0] + cold[1]*r[1][0];  mt1[1] = cold[0]*r[0][1] + cold[1]*r[1][1];   mt1[2] = cold[0]*r[0][2] + cold[1]*r[1][2] ;
-  mt2[0] = cold[1]*r[0][0] + cold[2]*r[1][0];  mt2[1] = cold[1]*r[0][1] + cold[2]*r[1][1];   mt2[2] = cold[1]*r[0][2] + cold[2]*r[1][2] ;
+  mt1[0] = cold[0]*r[0][0] + cold[1]*r[1][0];
+  mt1[1] = cold[0]*r[0][1] + cold[1]*r[1][1];
+  mt1[2] = cold[0]*r[0][2] + cold[1]*r[1][2];
+  mt2[0] = cold[1]*r[0][0] + cold[2]*r[1][0];
+  mt2[1] = cold[1]*r[0][1] + cold[2]*r[1][1];
+  mt2[2] = cold[1]*r[0][2] + cold[2]*r[1][2];
 
   mr[0] = r[0][0] * mt1[0] + r[1][0] * mt2[0];
   mr[1] = r[0][0] * mt1[1] + r[1][0] * mt2[1];
