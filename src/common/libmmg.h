@@ -91,6 +91,7 @@ typedef struct {
   int      a,b; /*!< Extremities of the edge */
   int      ref; /*!< Reference of the edge */
   char     tag; /*!< Binary flags */
+  int      base;//2Donly
 } MMG5_Edge;
 typedef MMG5_Edge * MMG5_pEdge;
 
@@ -109,6 +110,7 @@ typedef struct {
   int      flag;
   char     tag[3]; /*!< tag[i] contains the tag associated to the
                      \f$i^{th}\f$ edge of triangle */
+  double   qual;   /*Quality of the triangle*/
 } MMG5_Tria;
 typedef MMG5_Tria * MMG5_pTria;
 
@@ -203,6 +205,7 @@ typedef struct {
   int       xp,xt; /*!< Number of surfaces points/triangles */
   int       npnil; /*!< Index of first unused point */
   int       nenil; /*!< Index of first unused element */
+  int       nanil; /*!< Index of first unused edge (2d only)*/
   int      *adja; /*!< Table of tetrahedron adjacency: if
                     \f$adjt[4*i+1+j]=4*k+l\f$ then the \f$i^{th}\f$ and
                     \f$k^th\f$ tetrahedra are adjacent and share their
