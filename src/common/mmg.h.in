@@ -373,6 +373,7 @@ int    _MMG5_nortri(MMG5_pMesh mesh,MMG5_pTria pt,double *n);
 void   _MMG5_printTria(MMG5_pMesh mesh,char* fileName);
 int    _MMG5_rotmatrix(double n[3],double r[3][3]);
 int    _MMG5_invmat(double *m,double *mi);
+int    _MMG5_invmatg(double m[9],double mi[9]);
 double _MMG5_ridSizeInNormalDir(MMG5_pMesh,int,double*,_MMG5_pBezier,int,int);
 double _MMG5_ridSizeInTangentDir(MMG5_pMesh, MMG5_pPoint,int,int*,double,double);
 int    _MMG5_rootDeg3(double a[4],double complex r[3]);

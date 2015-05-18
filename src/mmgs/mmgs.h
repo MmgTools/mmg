@@ -119,8 +119,6 @@ int  swpedg(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,char typchk);
 char typelt(MMG5_pPoint p[3],char *ia);
 int  litswp(MMG5_pMesh mesh,int k,char i,double kal);
 int  litcol(MMG5_pMesh mesh,int k,char i,double kal);
-int  intmet33(MMG5_pMesh mesh,MMG5_pSol met,int np,int nq,int ip,double s);
-int  invmatg(double m[9],double mi[9]);
 int  rootDeg2(double complex a[3], double complex r[2]);
 
 int  _MMG5_mmgsChkmsh(MMG5_pMesh,int,int);

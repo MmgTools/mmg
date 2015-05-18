@@ -169,10 +169,10 @@ inline int _MMG5_rotmatrix(double n[3],double r[3][3]) {
 }
 
 /**
- * \param m pointer toward a 3x3 matrix
+ * \param m pointer toward a 3x3 symetric matrix
  * \param mi pointer toward the computed 3x3 matrix.
  *
- * Invert \a m (3x3 matrix) and store the result on \a mi
+ * Invert \a m (3x3 symetric matrix) and store the result on \a mi
  *
  */
 int _MMG5_invmat(double *m,double *mi) {
@@ -218,6 +218,48 @@ int _MMG5_invmat(double *m,double *mi) {
 
   return(1);
 }
+
+/**
+ * \param m initial matrix.
+ * \param mi inverted matrix.
+ *
+ * Invert 3x3 non-symmetric matrix.
+ *
+ */
+int _MMG5_invmatg(double m[9],double mi[9]) {
+  double  aa,bb,cc,det,vmin,vmax,maxx;
+  int     k;
+
+  /* check ill-conditionned matrix */
+  vmin = vmax = fabs(m[0]);
+  for (k=1; k<9; k++) {
+    maxx = fabs(m[k]);
+    if ( maxx < vmin )  vmin = maxx;
+    else if ( maxx > vmax )  vmax = maxx;
+  }
+  if ( vmax == 0.0 )  return(0);
+
+  /* compute sub-dets */
+  aa = m[4]*m[8] - m[5]*m[7];
+  bb = m[5]*m[6] - m[3]*m[8];
+  cc = m[3]*m[7] - m[4]*m[6];
+  det = m[0]*aa + m[1]*bb + m[2]*cc;
+  if ( fabs(det) < _MMG5_EPSD )  return(0);
+  det = 1.0 / det;
+
+  mi[0] = aa*det;
+  mi[3] = bb*det;
+  mi[6] = cc*det;
+  mi[1] = (m[2]*m[7] - m[1]*m[8])*det;
+  mi[4] = (m[0]*m[8] - m[2]*m[6])*det;
+  mi[7] = (m[1]*m[6] - m[0]*m[7])*det;
+  mi[2] = (m[1]*m[5] - m[2]*m[4])*det;
+  mi[5] = (m[2]*m[3] - m[0]*m[5])*det;
+  mi[8] = (m[0]*m[4] - m[1]*m[3])*det;
+
+  return(1);
+}
+
 /**
  * \param a matrix to invert.
  * \param b last member.
