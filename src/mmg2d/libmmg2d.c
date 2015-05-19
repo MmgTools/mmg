@@ -285,7 +285,7 @@ int MMG2_mmg2dlib(int opt[7],double optdbl[2],MMG5_pMesh mesh,MMG5_pSol sol,void
   mesh->info.lag = -1;
   mesh->info.hmin = -1;
   mesh->info.hmax = -1;
-  mesh->info.hausd = 135.;
+  mesh->info.hausd = 175.;
   switch(opt[0]) {
   case 0:
   case 1:

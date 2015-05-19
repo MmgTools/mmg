@@ -273,7 +273,7 @@ int MMG2_split(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int k1,int adj1) {
 
  
 
-  //MMG2_ch.nreg(mesh,0);  
+  //MMG2_chkmsh(mesh,0);  
   if(MMG2_callbackinsert)
     MMG2_callbackinsert((int) ip,(int) k1,(int) k2,(int)jel,(int) kel);
 	    

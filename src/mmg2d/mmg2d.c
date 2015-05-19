@@ -75,7 +75,7 @@ static void usage(char *name) {
   fprintf(stdout,"-nr           no ridge/corners detection \n");
   fprintf(stdout,"-hmin  val    minimal mesh size\n");
   fprintf(stdout,"-hmax  val    maximal mesh size\n");
-  fprintf(stdout,"-hausd val    angle used for boundary collapses (default 135 degrees)\n");
+  fprintf(stdout,"-hausd val    angle used for boundary collapses (default 175 degrees)\n");
   fprintf(stdout,"-hgrad val    mesh gradation (-1 = no gradation)\n");
 
   fprintf(stdout,"-noinsert     no insertion/suppression point\n");
@@ -387,7 +387,7 @@ int main(int argc,char *argv[]) {
   mesh.info.noinsert = 0;
   mesh.info.hgrad  = 1.3;
   mesh.info.renum  = 0;
-  mesh.info.hausd  = 135.;
+  mesh.info.hausd  = 175.;
   mesh.info.dhd  = 45.;
   mesh.info.hmin     = -1.;    
   mesh.info.hmax     = -1.;    
