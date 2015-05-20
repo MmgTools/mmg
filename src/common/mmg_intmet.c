@@ -457,7 +457,7 @@ int _MMG5_interpreg_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt,char i,doubl
     + mr[1]*r[1][1]*r[0][2] + mr[3]*r[1][1]*r[1][2] + mr[4]*r[1][1]*r[2][2]
     + mr[2]*r[2][1]*r[0][2] + mr[4]*r[2][1]*r[1][2] + mr[5]*r[2][1]*r[2][2];
 
-  memcpy(m1old,mr,6*sizeof(double));
+  memcpy(mr,m1old,6*sizeof(double));
 
   return(1);
 
