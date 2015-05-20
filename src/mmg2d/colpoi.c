@@ -324,6 +324,16 @@ int MMG2_colpoi(MMG5_pMesh mesh, MMG5_pSol sol,int iel,int iar,int ia,int ib,dou
   return(1);
 }   
 
+/**
+ * \brief return 1 if the edge does not verify hausd criterion
+*/
+int MMG2_chkedg(MMG5_pMesh mesh, MMG5_pPoint ppa,MMG5_pPoint ppb) {
+
+
+
+  return(0);
+}
+
 /*collapse edge ppb-->ppa and ppbppa is boundary edge*/
 int MMG2_colpoibdry(MMG5_pMesh mesh, MMG5_pSol sol,int iel,int iar,int ia,int ib,double coe) {
   MMG5_pTria     pt,pt1;
@@ -382,9 +392,17 @@ int MMG2_colpoibdry(MMG5_pMesh mesh, MMG5_pSol sol,int iel,int iar,int ia,int ib
     }
   }
   assert(nbdry==2); //sinon non manifold 
-  //calcul de l'angle forme par les 3 points 
+  /*first check that the two edges verify the hausd criterion*/
   ppa1  = &mesh->point[ibdry[0]];
   ppb1  = &mesh->point[ibdry[1]]; 
+
+  if(MMG2_chkedg(mesh,ppb,ppa1)) return(0);
+  if(MMG2_chkedg(mesh,ppb,ppb1)) return(0);
+
+  /*second check that the new edge verify the hausd criteron*/
+  if(MMG2_chkedg(mesh,ppb1,ppa1)) return(0);
+//comment from here
+  //calcul de l'angle forme par les 3 points 
   capx = ppb->c[0] - ppa1->c[0]; 
   capy = ppb->c[1] - ppa1->c[1]; 
   cbpx = ppb->c[0] - ppb1->c[0]; 
@@ -397,6 +415,7 @@ int MMG2_colpoibdry(MMG5_pMesh mesh, MMG5_pSol sol,int iel,int iar,int ia,int ib
   if(alpha < cbound ) {
     free(list);
     return(0);
+    //to here
   } else if(lon > 100) {
     free(list);
     return(0);
