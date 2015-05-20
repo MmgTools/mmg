@@ -170,7 +170,7 @@ int _MMG5_intridmet(MMG5_pMesh mesh,MMG5_pSol met,int ip1, int ip2,double s,
   else if ( MS_SIN(p2->tag) && (!MS_SIN(p1->tag)) ) {
     /* m2 is an isotropic metric and m1 is a "ridge" metric that respect our
      * storage convention. */
-    go1 = &mesh->xpoint[p2->xp];
+    go1 = &mesh->xpoint[p1->xp];
     n11 = &go1->n1[0];
     n12 = &go1->n2[0];
 

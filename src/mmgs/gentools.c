@@ -128,7 +128,7 @@ int _MMG5_indElt(MMG5_pMesh mesh, int kel) {
 /** find the point number in packed numerotation */
 int _MMG5_indPt(MMG5_pMesh mesh, int kp) {
   MMG5_pPoint ppt;
-  int    np, k;
+  int         np, k;
 
   np = 0;
   for (k=1; k<=mesh->nt; k++) {

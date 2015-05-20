@@ -135,6 +135,11 @@ void _MMG5_memOption(MMG5_pMesh mesh);
 #ifdef USE_SCOTCH
 int _MMG5_mmgsRenumbering(int vertBoxNbr, MMG5_pMesh mesh, MMG5_pSol sol);
 #endif
+
+/* useful functions to debug */
+int  _MMG5_indElt(MMG5_pMesh mesh,int kel);
+int  _MMG5_indPt(MMG5_pMesh mesh,int kp);
+
 /* function pointers */
 /* init structures */
 void  _MMG5_Init_parameters(MMG5_pMesh mesh);
