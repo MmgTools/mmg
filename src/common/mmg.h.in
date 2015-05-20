@@ -341,7 +341,7 @@ typedef struct {
 /* Functions declarations */
 void   _MMG5_bezierEdge(MMG5_pMesh, int, int, double*, double*, char,double*);
 int    _MMG5_buildridmet(MMG5_pMesh,MMG5_pSol,int,double,double,double,double*);
-int    _MMG5_buildridmetfic(MMG5_pMesh,double*,double*,double,double,double*);
+int    _MMG5_buildridmetfic(MMG5_pMesh,double*,double*,double,double,double,double*);
 int    _MMG5_buildridmetnor(MMG5_pMesh, MMG5_pSol, int,double*, double*);
 int    _MMG5_paratmet(double c0[3],double n0[3],double m[6],double c1[3],double n1[3],double mt[6]);
 int    _MMG5_rmtr(double r[3][3],double m[6], double mr[6]);

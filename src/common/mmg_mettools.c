@@ -39,7 +39,8 @@
  * \param t tangent at the ridge point.
  * \param n normal at the ridge point.
  * \param dtan metric size along the tangent direction.
- * \param dv metric size along the normal direction.
+ * \param dv metric size along the \f$t^{}n\f$ direction.
+ * \param dn metric size along the normal direction.
  * \param m computed metric at the ridge point.
  * \return 1
  *
@@ -49,24 +50,24 @@
  */
 inline int
 _MMG5_buildridmetfic(MMG5_pMesh mesh,double t[3],double n[3],double dtan,
-                     double dv,double m[6]) {
+                     double dv,double dn,double m[6]) {
   double u[3],r[3][3];
 
   u[0] = n[1]*t[2] - n[2]*t[1];
   u[1] = n[2]*t[0] - n[0]*t[2];
   u[2] = n[0]*t[1] - n[1]*t[0];
 
-  /* If u = n1 ^ t, matrix of the desired metric in (t,u,n1) = diag(p0->m[0],dv,0)*/
+  /* If u = n1 ^ t, matrix of the desired metric in (t,u,n1) = diag(dtan,dv,dn)*/
   r[0][0] = t[0];  r[0][1] = u[0];  r[0][2] = n[0];
   r[1][0] = t[1];  r[1][1] = u[1];  r[1][2] = n[1];
   r[2][0] = t[2];  r[2][1] = u[2];  r[2][2] = n[2];
 
-  m[0] = dtan*r[0][0]*r[0][0] + dv*r[0][1]*r[0][1];
-  m[1] = dtan*r[0][0]*r[1][0] + dv*r[0][1]*r[1][1];
-  m[2] = dtan*r[0][0]*r[2][0] + dv*r[0][1]*r[2][1];
-  m[3] = dtan*r[1][0]*r[1][0] + dv*r[1][1]*r[1][1];
-  m[4] = dtan*r[1][0]*r[2][0] + dv*r[1][1]*r[2][1];
-  m[5] = dtan*r[2][0]*r[2][0] + dv*r[2][1]*r[2][1];
+  m[0] = dtan*r[0][0]*r[0][0] + dv*r[0][1]*r[0][1] + dn*r[0][2]*r[0][2];
+  m[1] = dtan*r[0][0]*r[1][0] + dv*r[0][1]*r[1][1] + dn*r[0][2]*r[1][2];
+  m[2] = dtan*r[0][0]*r[2][0] + dv*r[0][1]*r[2][1] + dn*r[0][2]*r[2][2];
+  m[3] = dtan*r[1][0]*r[1][0] + dv*r[1][1]*r[1][1] + dn*r[1][2]*r[1][2];
+  m[4] = dtan*r[1][0]*r[2][0] + dv*r[1][1]*r[2][1] + dn*r[1][2]*r[2][2];
+  m[5] = dtan*r[2][0]*r[2][0] + dv*r[2][1]*r[2][1] + dn*r[2][2]*r[2][2];
 
   return(1);
 }
@@ -118,15 +119,15 @@ int _MMG5_intmetsavedir(MMG5_pMesh mesh, double *m,double *n,double *mr) {
  */
 int _MMG5_buildridmet(MMG5_pMesh mesh,MMG5_pSol met,int np0,
                       double ux,double uy,double uz,double mr[6]) {
-  MMG5_pPoint p0;
-  MMG5_pxPoint  go;
-  double ps1,ps2,*n1,*n2,*t,*m,dv,u[3],r[3][3];
+  MMG5_pPoint  p0;
+  MMG5_pxPoint go;
+  double       ps1,ps2,*n1,*n2,*t,*m,dv,dn,u[3],r[3][3];
 
   p0 = &mesh->point[np0];
   if ( !(MG_GEO & p0->tag) )  return(0);
   m = &met->m[6*np0];
-  go = &mesh->xpoint[p0->xp];
   t = &p0->n[0];
+  go = &mesh->xpoint[p0->xp];
 
   /* Decide between the two possible configurations */
   n1 = &go->n1[0];
@@ -138,26 +139,28 @@ int _MMG5_buildridmet(MMG5_pMesh mesh,MMG5_pSol met,int np0,
   if ( fabs(ps2)<fabs(ps1) ) {
     n1 = &go->n2[0];
     dv = m[2];
+    dn = m[4];
   }
   else{
     dv = m[1];
+    dn = m[3];
   }
 
   u[0] = n1[1]*t[2] - n1[2]*t[1];
   u[1] = n1[2]*t[0] - n1[0]*t[2];
   u[2] = n1[0]*t[1] - n1[1]*t[0];
 
-  /* If u = n1 ^ t, matrix of the desired metric in (t,u,n1) = diag(m[0],dv,0)*/
+  /* If u = n1 ^ t, matrix of the desired metric in (t,u,n1) = diag(m[0],dv,dn)*/
   r[0][0] = t[0];  r[0][1] = u[0];  r[0][2] = n1[0];
   r[1][0] = t[1];  r[1][1] = u[1];  r[1][2] = n1[1];
   r[2][0] = t[2];  r[2][1] = u[2];  r[2][2] = n1[2];
 
-  mr[0] = m[0]*r[0][0]*r[0][0] + dv*r[0][1]*r[0][1];
-  mr[1] = m[0]*r[0][0]*r[1][0] + dv*r[0][1]*r[1][1];
-  mr[2] = m[0]*r[0][0]*r[2][0] + dv*r[0][1]*r[2][1];
-  mr[3] = m[0]*r[1][0]*r[1][0] + dv*r[1][1]*r[1][1];
-  mr[4] = m[0]*r[1][0]*r[2][0] + dv*r[1][1]*r[2][1];
-  mr[5] = m[0]*r[2][0]*r[2][0] + dv*r[2][1]*r[2][1];
+  mr[0] = m[0]*r[0][0]*r[0][0] + dv*r[0][1]*r[0][1] + dn*r[0][2]*r[0][2];
+  mr[1] = m[0]*r[0][0]*r[1][0] + dv*r[0][1]*r[1][1] + dn*r[0][2]*r[1][2];
+  mr[2] = m[0]*r[0][0]*r[2][0] + dv*r[0][1]*r[2][1] + dn*r[0][2]*r[2][2];
+  mr[3] = m[0]*r[1][0]*r[1][0] + dv*r[1][1]*r[1][1] + dn*r[1][2]*r[1][2];
+  mr[4] = m[0]*r[1][0]*r[2][0] + dv*r[1][1]*r[2][1] + dn*r[1][2]*r[2][2];
+  mr[5] = m[0]*r[2][0]*r[2][0] + dv*r[2][1]*r[2][1] + dn*r[2][2]*r[2][2];
   return(1);
 }
 
@@ -166,17 +169,18 @@ int _MMG5_buildridmet(MMG5_pMesh mesh,MMG5_pSol met,int np0,
  * \param met pointer toward the sol structure.
  * \param np0 index of edge's extremity.
  * \param nt.
- * \param mr.
+ * \param mr computed metric tensor.
  *
  * \return 1.
  *
- * Build metric tensor at ridge point \a p0, when the 'good' normal direction is given by \a nt
+ * Build metric tensor at ridge point \a p0, when the 'good' normal direction is
+ * given by \a nt.
  *
  */
 int _MMG5_buildridmetnor(MMG5_pMesh mesh,MMG5_pSol met,int np0,double nt[3],double mr[6]) {
-  MMG5_pPoint p0;
-  MMG5_pxPoint  go;
-  double ps1,ps2,*n1,*n2,*t,*m,dv,u[3],r[3][3];
+  MMG5_pPoint  p0;
+  MMG5_pxPoint go;
+  double       ps1,ps2,*n1,*n2,*t,*m,dv,dn,u[3],r[3][3];
 
   p0 = &mesh->point[np0];
   if ( !(MG_GEO & p0->tag) )  return(0);
@@ -194,9 +198,11 @@ int _MMG5_buildridmetnor(MMG5_pMesh mesh,MMG5_pSol met,int np0,double nt[3],doub
   if ( fabs(ps2) > fabs(ps1) ) {
     n1 = &go->n2[0];
     dv = m[2];
+    dn = m[4];
   }
   else{
     dv = m[1];
+    dn = m[3];
   }
 
   u[0] = n1[1]*t[2] - n1[2]*t[1];
@@ -208,12 +214,12 @@ int _MMG5_buildridmetnor(MMG5_pMesh mesh,MMG5_pSol met,int np0,double nt[3],doub
   r[1][0] = t[1];  r[1][1] = u[1];  r[1][2] = n1[1];
   r[2][0] = t[2];  r[2][1] = u[2];  r[2][2] = n1[2];
 
-  mr[0] = m[0]*r[0][0]*r[0][0] + dv*r[0][1]*r[0][1];
-  mr[1] = m[0]*r[0][0]*r[1][0] + dv*r[0][1]*r[1][1];
-  mr[2] = m[0]*r[0][0]*r[2][0] + dv*r[0][1]*r[2][1];
-  mr[3] = m[0]*r[1][0]*r[1][0] + dv*r[1][1]*r[1][1];
-  mr[4] = m[0]*r[1][0]*r[2][0] + dv*r[1][1]*r[2][1];
-  mr[5] = m[0]*r[2][0]*r[2][0] + dv*r[2][1]*r[2][1];
+  mr[0] = m[0]*r[0][0]*r[0][0] + dv*r[0][1]*r[0][1] + dn*r[0][2]*r[0][2];
+  mr[1] = m[0]*r[0][0]*r[1][0] + dv*r[0][1]*r[1][1] + dn*r[0][2]*r[1][2];
+  mr[2] = m[0]*r[0][0]*r[2][0] + dv*r[0][1]*r[2][1] + dn*r[0][2]*r[2][2];
+  mr[3] = m[0]*r[1][0]*r[1][0] + dv*r[1][1]*r[1][1] + dn*r[1][2]*r[1][2];
+  mr[4] = m[0]*r[1][0]*r[2][0] + dv*r[1][1]*r[2][1] + dn*r[1][2]*r[2][2];
+  mr[5] = m[0]*r[2][0]*r[2][0] + dv*r[2][1]*r[2][1] + dn*r[2][2]*r[2][2];
 
   return(1);
 }
@@ -394,7 +400,9 @@ static int _MMG5_intersecmet22(MMG5_pMesh mesh, double *m,double *n,double *mr) 
  * \return 0 if fail, 1 otherwise.
  *
  * Intersect the surface metric held in np (supported in tangent plane of \a np)
- * with 3*3 physical metric in \a me.
+ * with 3*3 physical metric in \a me. For ridge points, this function fill the
+ * \f$ p_0->m[3]\f$ and \f$ p_0->m[4]\f$ fields that contains respectively the
+ * specific sizes in the \f$n_1\f$ and \f$n_2\f$ directions.
  *
  */
 int _MMG5_intextmet(MMG5_pMesh mesh,MMG5_pSol met,int np,double me[6]) {
@@ -455,38 +463,55 @@ int _MMG5_intextmet(MMG5_pMesh mesh,MMG5_pSol met,int np,double me[6]) {
     u[1] = n1[2]*t[0] - n1[0]*t[2];
     u[2] = n1[0]*t[1] - n1[1]*t[0];
     dd = u[0]*u[0] + u[1]*u[1] + u[2]*u[2];
-    if ( dd < _MMG5_EPSD ) return(0);
-    dd = 1.0 / sqrt(dd);
+    if ( dd > _MMG5_EPSD ) {
+      dd = 1.0 / sqrt(dd);
 
-    u[0] *= dd;
-    u[1] *= dd;
-    u[2] *= dd;
+      u[0] *= dd;
+      u[1] *= dd;
+      u[2] *= dd;
 
-    hu = me[0]*u[0]*u[0] + me[3]*u[1]*u[1] + me[5]*u[2]*u[2] \
-      + 2.0*me[1]*u[0]*u[1] + 2.0*me[2]*u[0]*u[2] + 2.0*me[4]*u[1]*u[2];
+      hu = me[0]*u[0]*u[0] + me[3]*u[1]*u[1] + me[5]*u[2]*u[2]          \
+        + 2.0*me[1]*u[0]*u[1] + 2.0*me[2]*u[0]*u[2] + 2.0*me[4]*u[1]*u[2];
 
-    hu = MG_MIN(isqhmin,hu);
-    hu = MG_MAX(isqhmax,hu);
-    m[1] = MG_MAX(m[1],hu);
-
-    /* Size prescribed by metric me in direction u1 = n1 ^ t */
+      hu = MG_MIN(isqhmin,hu);
+      hu = MG_MAX(isqhmax,hu);
+      m[1] = MG_MAX(m[1],hu);
+    }
+    /* Size prescribed by metric me in direction u2 = n2 ^ t */
     u[0] = n2[1]*t[2] - n2[2]*t[1];
     u[1] = n2[2]*t[0] - n2[0]*t[2];
     u[2] = n2[0]*t[1] - n2[1]*t[0];
     dd = u[0]*u[0] + u[1]*u[1] + u[2]*u[2];
-    if ( dd < _MMG5_EPSD ) return(0);
-    dd = 1.0 / sqrt(dd);
+    if ( dd > _MMG5_EPSD ) {
+      dd = 1.0 / sqrt(dd);
 
-    u[0] *= dd;
-    u[1] *= dd;
-    u[2] *= dd;
+      u[0] *= dd;
+      u[1] *= dd;
+      u[2] *= dd;
 
-    hu =     me[0]*u[0]*u[0] +     me[3]*u[1]*u[1] +     me[5]*u[2]*u[2] \
-      + 2.0*me[1]*u[0]*u[1] + 2.0*me[2]*u[0]*u[2] + 2.0*me[4]*u[1]*u[2];
+      hu =     me[0]*u[0]*u[0] +     me[3]*u[1]*u[1] +     me[5]*u[2]*u[2] \
+        + 2.0*me[1]*u[0]*u[1] + 2.0*me[2]*u[0]*u[2] + 2.0*me[4]*u[1]*u[2];
+
+      hu = MG_MIN(isqhmin,hu);
+      hu = MG_MAX(isqhmax,hu);
+      m[2] = MG_MAX(m[2],hu);
+    }
+
+    /* Size prescribed by metric me in direction n1 */
+    hu = me[0]*n1[0]*n1[0] + me[3]*n1[1]*n1[1] + me[5]*n1[2]*n1[2]
+      + 2.0*me[1]*n1[0]*n1[1] + 2.0*me[2]*n1[0]*n1[2] + 2.0*me[4]*n1[1]*n1[2];
 
     hu = MG_MIN(isqhmin,hu);
     hu = MG_MAX(isqhmax,hu);
-    m[2] = MG_MAX(m[2],hu);
+    m[3] = hu;
+
+    /* Size prescribed by metric me in direction n2 */
+    hu = me[0]*n2[0]*n2[0] + me[3]*n2[1]*n2[1] + me[5]*n2[2]*n2[2]
+      + 2.0*me[1]*n2[0]*n2[1] + 2.0*me[2]*n2[0]*n2[2] + 2.0*me[4]*n2[1]*n2[2];
+
+    hu = MG_MIN(isqhmin,hu);
+    hu = MG_MAX(isqhmax,hu);
+    m[4] = hu;
   }
   /* Case of a ref, or regular point : intersect metrics in tangent plane */
   else {

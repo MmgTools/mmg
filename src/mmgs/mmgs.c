@@ -455,6 +455,7 @@ int main(int argc,char *argv[]) {
     fprintf(stdout,"  ## Metric undefined. Exit program.\n");
     return(1);
   }
+
   _MMG5_outqua(&mesh,&met);
 
   if ( mesh.info.imprim > 3 && met.m ) _MMG5_prilen(&mesh,&met);

@@ -424,83 +424,17 @@ int _MMG5_interpreg_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt,char i,doubl
   _MMG5_rmtr(r,m1,m1old);
   _MMG5_rmtr(r,m2,m2old);
 
-  if ( p1->tag & MG_GEO || p2->tag & MG_GEO ) {
-    /* Interpolation of the metrics for the two directions belonging to the
-     * tangent plane. */
-    mt1[0] = m1old[0];
-    mt1[1] = m1old[1];
-    mt1[2] = m1old[3];
-
-    mt2[0] = m2old[0];
-    mt2[1] = m2old[1];
-    mt2[2] = m2old[3];
-
-    /* Interpolate both metrics expressed in the same tangent plane : cold is
-     * reused. */
-    if ( !_MMG5_intmet22(mt1,mt2,cold,s) ) {
-      printf("Impossible interpolation between points : %d %d\n",pt->v[i1],pt->v[i2]);
-      printf("m1 : %E %E %E %E %E %E \n",m1[0],m1[1],m1[2],m1[3],m1[4],m1[5]);
-      printf("m2 : %E %E %E %E %E %E \n",m2[0],m2[1],m2[2],m2[3],m2[4],m2[5]);
-      printf("mt1 : %E %E %E et det : %E \n",mt1[0],mt1[1],mt1[2],mt1[0]*mt1[2]-mt1[1]*mt1[1]);
-      printf("mt2 : %E %E %E et det : %E \n",mt2[0],mt2[1],mt2[2],mt2[0]*mt2[2]-mt2[1]*mt2[1]);
-      exit(EXIT_FAILURE);
-      return(0);
-    }
-
-    mr[0] = cold[0];
-    mr[1] = cold[1];
-    mr[2] = 0.;
-    mr[3] = cold[2];
-    mr[4] = 0.;
-    /* We don't have size for the normal direction to the tangent plane. */
-    if ( p1->tag & MG_GEO && (!p2->tag & MG_GEO) ) {
-      /* Take the size of p2 for the normal dir. */
-      mr[5] = m2old[5];
-    }
-    else if (p2->tag & MG_GEO && (!p1->tag & MG_GEO) ) {
-      /* Take the size of p1 for the normal dir. */
-      mr[5] = m1old[5];
-    }
-    else {
-      ip3 = pt->v[i];
-      p3 = &mesh->point[ip3];
-      if ( !(p3->tag & MG_GEO) ) {
-        /* Try to put the size of the last vertex of the triangle. */
-        n3 = &b.n[i][0];
-        cold[0] = p3->c[0];
-        cold[1] = p3->c[1];
-        cold[2] = p3->c[2];
-        memcpy(m3old,&met->m[6*ip3],6*sizeof(double));
-
-        /* Rhough transport of the metric. */
-        if ( !_MMG5_paratmet(cold,n3,m3old,c,n,m3) )  return(0);
-        mr[5] = m3[5];
-        printf("Coucou, on passe ici %s:%d : pt %d\n",__FILE__,__LINE__,ip3 );
-      }
-      else {
-        printf(" To implement: all vertices of the triangle are"
-               " MG_GEO. Which size to put along the normal direction to the"
-               " tangent plane?\n");
-        exit(EXIT_FAILURE);
-      }
-    }
-  }
-  else
-  {
-    /* Interpolation of the metrics for in all directions */
-    /* Interpolate both metrics expressed in the same tangent plane : cold is
-     * reused. */
-    if ( !_MMG5_intmet33(m1old,m2old,mr,s) ) {
-      printf("Impossible interpolation between points : %d %d\n",pt->v[i1],pt->v[i2]);
-      printf("m1 : %E %E %E %E %E %E \n",m1[0],m1[1],m1[2],m1[3],m1[4],m1[5]);
-      printf("m2 : %E %E %E %E %E %E \n",m2[0],m2[1],m2[2],m2[3],m2[4],m2[5]);
-      printf("m1old : %E %E %E %E %E %E \n",m1old[0],m1old[1],
-             m1old[2],m1old[3],m1old[4],m1old[5]);
-      printf("m2old : %E %E %E %E %E %E \n",m2old[0],m2old[1],
-             m2old[2],m1old[3],m2old[4],m2old[5]);
-      exit(EXIT_FAILURE);
-      return(0);
-    }
+  /* Interpolate both metrics expressed in the same tangent plane. */
+  if ( !_MMG5_intmet33(m1old,m2old,mr,s) ) {
+    printf("Impossible interpolation between points : %d %d\n",pt->v[i1],pt->v[i2]);
+    printf("m1 : %E %E %E %E %E %E \n",m1[0],m1[1],m1[2],m1[3],m1[4],m1[5]);
+    printf("m2 : %E %E %E %E %E %E \n",m2[0],m2[1],m2[2],m2[3],m2[4],m2[5]);
+    printf("m1old : %E %E %E %E %E %E \n",m1old[0],m1old[1],
+           m1old[2],m1old[3],m1old[4],m1old[5]);
+    printf("m2old : %E %E %E %E %E %E \n",m2old[0],m2old[1],
+           m2old[2],m1old[3],m2old[4],m2old[5]);
+    exit(EXIT_FAILURE);
+    return(0);
   }
 
   /* End rotating back tangent metric into canonical basis of R^3 : mr =
@@ -522,6 +456,8 @@ int _MMG5_interpreg_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt,char i,doubl
   m1old[4] = mr[0]*r[0][1]*r[0][2] + mr[1]*r[0][1]*r[1][2] + mr[2]*r[0][1]*r[2][2]
     + mr[1]*r[1][1]*r[0][2] + mr[3]*r[1][1]*r[1][2] + mr[4]*r[1][1]*r[2][2]
     + mr[2]*r[2][1]*r[0][2] + mr[4]*r[2][1]*r[1][2] + mr[5]*r[2][1]*r[2][2];
+
+  memcpy(m1old,mr,6*sizeof(double));
 
   return(1);
 

@@ -178,7 +178,7 @@ int movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
         to[2] *= ll;
 
         if ( MS_SIN(p1->tag) && MS_SIN(p2->tag) ) {
-          if ( !_MMG5_buildridmetfic(mesh,to,no,mo[0],mo[0],m) )  return(0);
+          if ( !_MMG5_buildridmetfic(mesh,to,no,mo[0],mo[0],mo[0],m) )  return(0);
         }
         else if ( !MS_SIN(p1->tag) ) {
           n1 = &mesh->xpoint[p1->xp].n1[0];
@@ -186,10 +186,10 @@ int movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
           ps1 = n1[0]*no[0] + n1[1]*no[1] + n1[2]*no[2];
           ps2 = n2[0]*no[0] + n2[1]*no[1] + n2[2]*no[2];
           if ( fabs(ps1) > fabs(ps2) ) {
-            if ( !_MMG5_buildridmetfic(mesh,to,no,mo[0],mo[1],m) )  return(0);
+            if ( !_MMG5_buildridmetfic(mesh,to,no,mo[0],mo[1],mo[3],m) )  return(0);
           }
           else {
-            if ( !_MMG5_buildridmetfic(mesh,to,no,mo[0],mo[2],m) )  return(0);
+            if ( !_MMG5_buildridmetfic(mesh,to,no,mo[0],mo[2],mo[4],m) )  return(0);
           }
         }
         else {
@@ -199,10 +199,10 @@ int movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
           ps1 = n1[0]*no[0] + n1[1]*no[1] + n1[2]*no[2];
           ps2 = n2[0]*no[0] + n2[1]*no[1] + n2[2]*no[2];
           if ( fabs(ps1) > fabs(ps2) ) {
-            if ( !_MMG5_buildridmetfic(mesh,to,no,mo[0],mo[1],m) )  return(0);
+            if ( !_MMG5_buildridmetfic(mesh,to,no,mo[0],mo[1],mo[3],m) )  return(0);
           }
           else {
-            if ( !_MMG5_buildridmetfic(mesh,to,no,mo[0],mo[2],m) )  return(0);
+            if ( !_MMG5_buildridmetfic(mesh,to,no,mo[0],mo[2],mo[4],m) )  return(0);
           }
         }
       }

@@ -58,7 +58,8 @@ int _MMG5_intridmet(MMG5_pMesh mesh,MMG5_pSol met,int ip1, int ip2,double s,
                     double v[3],double mr[6]) {
   MMG5_pxPoint   go1,go2;
   MMG5_pPoint    p1,p2;
-  double         *m1,*m2,*n11,*n12,*n21,*n22,ps11,ps12,dd,hn1,hn2;
+  double         *m1,*m2,*n11,*n12,*n21,*n22,ps11,ps12,dd;
+  double         hu1,hu2,hn1,hn2;
 
   p1  = &mesh->point[ip1];
   p2  = &mesh->point[ip2];
@@ -67,21 +68,37 @@ int _MMG5_intridmet(MMG5_pMesh mesh,MMG5_pSol met,int ip1, int ip2,double s,
 
   /* Case when both endpoints are singular */
   if ( MS_SIN(p1->tag) && MS_SIN(p2->tag) ) {
+    /* m1 and m2 are isotropic metrics */
     dd  = (1-s)*sqrt(m2[0]) + s*sqrt(m1[0]);
     dd *= dd;
     if ( dd < _MMG5_EPSD ) {
-      mr[0] = s < 0.5 ? m1[0] : m2[0];
-      mr[1] = s < 0.5 ? m1[0] : m2[0];
-      mr[2] = s < 0.5 ? m1[0] : m2[0];
+      if ( s < 0.5 ) {
+        mr[0] = m1[0];
+        mr[1] = m1[0];
+        mr[2] = m1[0];
+        mr[3] = m1[0];
+        mr[4] = m1[0];
+      }
+      else {
+        mr[0] = m2[0];
+        mr[1] = m2[0];
+        mr[2] = m2[0];
+        mr[3] = m2[0];
+        mr[4] = m2[0];
+      }
     }
     else {
       mr[0] = m1[0]*m2[0] / dd;
-      mr[1] = m1[0]*m2[0] / dd;
-      mr[2] = m1[0]*m2[0] / dd;
+      mr[1] = mr[0];
+      mr[2] = mr[0];
+      mr[3] = mr[0];
+      mr[4] = mr[0];
     }
   }
   /* vertex p1 is singular, p2 is regular */
   else if ( MS_SIN(p1->tag) && (!MS_SIN(p2->tag)) ) {
+    /* m1 is an isotropic metric and m2 is a "ridge" metric that respect our
+     * storage convention. */
     go2 = &mesh->xpoint[p2->xp];
     n21 = &go2->n1[0];
     n22 = &go2->n2[0];
@@ -95,38 +112,64 @@ int _MMG5_intridmet(MMG5_pMesh mesh,MMG5_pSol met,int ip1, int ip2,double s,
     else {
       mr[0] = m1[0]*m2[0] / dd;
     }
-    /* Interpolation of the two other eigenvalues */
+
+    /* Interpolation of the two other eigenvalues for each configuration. */
+    /* 1. For the surface ruled by n1. */
     dd  = (1-s)*sqrt(m2[1]) + s*sqrt(m1[0]);
     dd *= dd;
     if ( dd < _MMG5_EPSD ) {
-      hn1 = s < 0.5 ? m1[0] : m2[1];
+      hu1 = s < 0.5 ? m1[0] : m2[1];
     }
     else {
-      hn1 = m1[0]*m2[1] / dd;
+      hu1 = m1[0]*m2[1] / dd;
     }
+    dd  = (1-s)*sqrt(m2[3]) + s*sqrt(m1[0]);
+    dd *= dd;
+    if ( dd < _MMG5_EPSD ) {
+      hn1 = s < 0.5 ? m1[0] : m2[3];
+    }
+    else {
+      hn1 = m1[0]*m2[3] / dd;
+    }
+
+    /* 2. For the surface ruled by n2. */
     dd = (1-s)*sqrt(m2[2]) + s*sqrt(m1[0]);
     dd *= dd;
     if ( dd < _MMG5_EPSD ) {
-      hn2 = s < 0.5 ? m1[0] : m2[2];
+      hu2 = s < 0.5 ? m1[0] : m2[2];
     }
     else {
-      hn2 = m1[0]*m2[2] / dd;
+      hu2 = m1[0]*m2[2] / dd;
+    }
+    dd  = (1-s)*sqrt(m2[4]) + s*sqrt(m1[0]);
+    dd *= dd;
+    if ( dd < _MMG5_EPSD ) {
+      hn2 = s < 0.5 ? m1[0] : m2[4];
+    }
+    else {
+      hn2 = m1[0]*m2[4] / dd;
     }
 
-    /* Decision of the ordering of hn1 and hn2 */
+    /* Decision of the ordering of hu1 and hu2 */
     ps11 = n21[0]*v[0] + n21[1]*v[1] + n21[2]*v[2];
     ps12 = n22[0]*v[0] + n22[1]*v[1] + n22[2]*v[2];
     if ( fabs(ps11) > fabs(ps12) ) {
-      mr[1] = hn1;
-      mr[2] = hn2;
+      mr[1] = hu1;
+      mr[2] = hu2;
+      mr[3] = hn1;
+      mr[4] = hn2;
     }
     else {
-      mr[1] = hn2;
-      mr[2] = hn1;
+      mr[1] = hu2;
+      mr[2] = hu1;
+      mr[3] = hn2;
+      mr[4] = hn1;
     }
   }
   /* vertex p2 is singular, p1 is regular */
   else if ( MS_SIN(p2->tag) && (!MS_SIN(p1->tag)) ) {
+    /* m2 is an isotropic metric and m1 is a "ridge" metric that respect our
+     * storage convention. */
     go1 = &mesh->xpoint[p2->xp];
     n11 = &go1->n1[0];
     n12 = &go1->n2[0];
@@ -140,34 +183,57 @@ int _MMG5_intridmet(MMG5_pMesh mesh,MMG5_pSol met,int ip1, int ip2,double s,
     else {
       mr[0] = m1[0]*m2[0] / dd;
     }
-    /* Interpolation of the two other eigenvalues */
+    /* Interpolation of the two other eigenvalues for each configuration. */
+    /* 1. For the surface ruled by n1. */
     dd = (1-s)*sqrt(m2[0]) + s*sqrt(m1[1]);
     dd *= dd;
     if ( dd < _MMG5_EPSD ) {
-      hn1 = s < 0.5 ? m1[1] : m2[0];
+      hu1 = s < 0.5 ? m1[1] : m2[0];
     }
     else {
-      hn1 = m1[1]*m2[0] / dd;
+      hu1 = m1[1]*m2[0] / dd;
     }
+    dd = (1-s)*sqrt(m2[0]) + s*sqrt(m1[3]);
+    dd *= dd;
+    if ( dd < _MMG5_EPSD ) {
+      hn1 = s < 0.5 ? m1[3] : m2[0];
+    }
+    else {
+      hn1 = m1[3]*m2[0] / dd;
+    }
+
+    /* 2. For the surface ruled by n2. */
     dd  = (1-s)*sqrt(m2[0]) + s*sqrt(m1[2]);
     dd *= dd;
     if ( dd < _MMG5_EPSD ) {
-      hn2 = s < 0.5 ? m1[2] : m2[0];
+      hu2 = s < 0.5 ? m1[2] : m2[0];
     }
     else {
-      hn2 = m1[2]*m2[0] / dd;
+      hu2 = m1[2]*m2[0] / dd;
+    }
+    dd  = (1-s)*sqrt(m2[0]) + s*sqrt(m1[4]);
+    dd *= dd;
+    if ( dd < _MMG5_EPSD ) {
+      hn2 = s < 0.5 ? m1[4] : m2[0];
+    }
+    else {
+      hn2 = m1[4]*m2[0] / dd;
     }
 
-    /* Decision of the ordering of hn1 and hn2 */
+    /* Decision of the ordering of hu1 and hu2 */
     ps11 = n11[0]*v[0] + n11[1]*v[1] + n11[2]*v[2];
     ps12 = n12[0]*v[0] + n12[1]*v[1] + n12[2]*v[2];
     if ( fabs(ps11) > fabs(ps12) ) {
-      mr[1] = hn1;
-      mr[2] = hn2;
+      mr[1] = hu1;
+      mr[2] = hu2;
+      mr[3] = hn1;
+      mr[4] = hn2;
     }
     else {
-      mr[1] = hn2;
-      mr[2] = hn1;
+      mr[1] = hu2;
+      mr[2] = hu1;
+      mr[3] = hn2;
+      mr[4] = hn1;
     }
   }
   /* p1,p2 : nonsingular vertices */
@@ -193,58 +259,99 @@ int _MMG5_intridmet(MMG5_pMesh mesh,MMG5_pSol met,int ip1, int ip2,double s,
     ps11 = n11[0]*n21[0] + n11[1]*n21[1] + n11[2]*n21[2];
     ps12 = n11[0]*n22[0] + n11[1]*n22[1] + n11[2]*n22[2];
     if ( fabs(ps11) > fabs(ps12) ) {   //n11 and n21 go together
+      /* 1. For the surface ruled by n1. */
       dd  = (1-s)*sqrt(m2[1]) + s*sqrt(m1[1]);
       dd *= dd;
       if ( dd < _MMG5_EPSD ) {
-        hn1 = s < 0.5 ? m1[1] : m2[1];
+        hu1 = s < 0.5 ? m1[1] : m2[1];
       }
       else {
-        hn1 = m1[1]*m2[1] / dd;
+        hu1 = m1[1]*m2[1] / dd;
       }
+      dd  = (1-s)*sqrt(m2[3]) + s*sqrt(m1[3]);
+      dd *= dd;
+      if ( dd < _MMG5_EPSD ) {
+        hn1 = s < 0.5 ? m1[3] : m2[3];
+      }
+      else {
+        hn1 = m1[3]*m2[3] / dd;
+      }
+      /* 2. For the surface ruled by n2. */
       dd = (1-s)*sqrt(m2[2]) + s*sqrt(m1[2]);
       dd *= dd;
       if ( dd < _MMG5_EPSD ) {
-        hn2 = s < 0.5 ? m1[2] : m2[2];
+        hu2 = s < 0.5 ? m1[2] : m2[2];
       }
       else {
-        hn2 = m1[2]*m2[2] / dd;
+        hu2 = m1[2]*m2[2] / dd;
       }
+      dd = (1-s)*sqrt(m2[4]) + s*sqrt(m1[4]);
+      dd *= dd;
+      if ( dd < _MMG5_EPSD ) {
+        hn2 = s < 0.5 ? m1[4] : m2[4];
+      }
+      else {
+        hn2 = m1[4]*m2[4] / dd;
+      }
+
     }
     else {
+      /* 1. */
       dd  = (1-s)*sqrt(m2[2]) + s*sqrt(m1[1]);
       dd *= dd;
       if ( dd < _MMG5_EPSD ) {
-        hn1 = s < 0.5 ? m1[1] : m2[2];
+        hu1 = s < 0.5 ? m1[1] : m2[2];
       }
       else {
-        hn1 = m1[1]*m2[2] / dd;
+        hu1 = m1[1]*m2[2] / dd;
       }
+      dd  = (1-s)*sqrt(m2[4]) + s*sqrt(m1[3]);
+      dd *= dd;
+      if ( dd < _MMG5_EPSD ) {
+        hn1 = s < 0.5 ? m1[3] : m2[4];
+      }
+      else {
+        hn1 = m1[3]*m2[4] / dd;
+      }
+
+      /* 2. */
       dd  = (1-s)*sqrt(m2[1]) + s*sqrt(m1[2]);
       dd *= dd;
       if ( dd < _MMG5_EPSD ) {
-        hn2 = s < 0.5 ? m1[2] : m2[1];
+        hu2 = s < 0.5 ? m1[2] : m2[1];
       }
       else {
-        hn2 = m1[2]*m2[1] / dd;
+        hu2 = m1[2]*m2[1] / dd;
+      }
+      dd  = (1-s)*sqrt(m2[3]) + s*sqrt(m1[4]);
+      dd *= dd;
+      if ( dd < _MMG5_EPSD ) {
+        hn2 = s < 0.5 ? m1[4] : m2[3];
+      }
+      else {
+        hn2 = m1[4]*m2[3] / dd;
       }
     }
 
-    /* Now, hn1 is the eigenvalue associated to the direction at interpolated point,
-       closest to n11 (hn2 -> n12) ; one may need a different orientation, and put eigenvalue of
-       direction closest to v (= interpolated normal) first */
+    /* Now, hu1 is the eigenvalue associated to the direction at interpolated
+       point, closest to n11 (hu2 -> n12) ; one may need a different
+       orientation, and put eigenvalue of direction closest to v (= interpolated
+       normal) first */
     ps11 = n11[0]*v[0] + n11[1]*v[1] + n11[2]*v[2];
     ps12 = n12[0]*v[0] + n12[1]*v[1] + n12[2]*v[2];
     if ( fabs(ps11) > fabs(ps12) ) {
-      mr[1] = hn1;
-      mr[2] = hn2;
+      mr[1] = hu1;
+      mr[2] = hu2;
+      mr[3] = hn1;
+      mr[4] = hn2;
     }
     else {
-      mr[1] = hn2;
-      mr[2] = hn1;
+      mr[1] = hu2;
+      mr[2] = hu1;
+      mr[3] = hn2;
+      mr[4] = hn1;
     }
   }
-  mr[3] = 0.0;
-  mr[4] = 0.0;
   mr[5] = 0.0;
 
   return(1);

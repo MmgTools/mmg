@@ -127,8 +127,12 @@ static int _MMG5_defmetsin(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
  * Compute metric tensor associated to a ridge point : convention is a bit weird
  * here :
  * \a p->m[0] is the specific size in direction \a t,
- * \a p->m[1] is the specific size in direction \f$ u_1 = n_1^t\f$
- * \a p->m[2] is the specific size in direction \f$ u_2 = n_2^t\f$,
+ * \a p->m[1] is the specific size in direction \f$ u_1 = n_1^{}t\f$,
+ * \a p->m[2] is the specific size in direction \f$ u_2 = n_2^{}t\f$,
+ * \a p->m[3] is the specific size in direction \f$ n_1\f$
+ * (computed by the \ref _MMG5_intextmet function),
+ * \a p->m[4] is the specific size in direction \f$ n_2\f$,
+ * (computed by the \ref _MMG5_intextmet function),
  * and at each time, metric tensor has to be recomputed, depending on the side.
  *
  */
@@ -581,7 +585,13 @@ int _MMG5_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
       else {
         if ( !_MMG5_defmetreg(mesh,met,k,i) )  continue;
       }
-      if ( ismet )  _MMG5_intextmet(mesh,met,pt->v[i],mm);
+      if ( ismet ) {
+        if ( !_MMG5_intextmet(mesh,met,pt->v[i],mm) ) {
+          fprintf(stdout,"%s:%d:Error: unable to intersect metrics"
+                  " at point %d.\n",__FILE__,__LINE__, pt->v[i]);
+          return(0);
+        }
+      }
       ppt->flag = 1;
     }
   }
