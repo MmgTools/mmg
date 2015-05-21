@@ -752,9 +752,9 @@ int _MMG5_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
           if ( !_MMG5_defmetreg(mesh,met,k,l,iploc) )  continue;
         }
         if ( ismet ) {
-          if ( !_MMG5_intextmet(mesh,met,pt->v[i],mm) ) {
+          if ( !_MMG5_intextmet(mesh,met,pt->v[iploc],mm) ) {
             fprintf(stdout,"%s:%d:Error: unable to intersect metrics"
-                    " at point %d.\n",__FILE__,__LINE__, pt->v[i]);
+                    " at point %d.\n",__FILE__,__LINE__, pt->v[iploc]);
             return(0);
           }
         }
