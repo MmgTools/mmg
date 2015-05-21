@@ -551,11 +551,12 @@ static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
           ppt->n[2] *= dd;
         }
         if ( met->m ) {
-           intmet(mesh,met,k,i,ip,s);
+#warning Algiane: seems to be useless... to watch
+          // intmet(mesh,met,k,i,ip,s);
         }
       } else {
          if ( met->m ) {
-           intmet(mesh,met,k,i,ip,s);
+           // intmet(mesh,met,k,i,ip,s);
         }
       }
     }
