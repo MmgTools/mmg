@@ -108,6 +108,8 @@ int MMG2_scaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
       mesh->info.hmin = 0.01 * mesh->info.hmax;
   }
 
+  mesh->info.hausd *= dd;
+
   for (k=1; k<=mesh->np; k++) {
     ppt = &mesh->point[k];
     if ( !M_VOK(ppt) )  continue;

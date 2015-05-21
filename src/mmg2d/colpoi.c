@@ -328,6 +328,60 @@ int MMG2_colpoi(MMG5_pMesh mesh, MMG5_pSol sol,int iel,int iar,int ia,int ib,dou
  * \brief return 1 if the edge does not verify hausd criterion
 */
 int MMG2_chkedg(MMG5_pMesh mesh, MMG5_pPoint ppa,MMG5_pPoint ppb) {
+  double t0[2],t1[2],pc1[2],pc2[2];
+  double da,db,l;
+  int    i;
+  
+  l = (ppa->c[0] - ppb->c[0])*(ppa->c[0] - ppb->c[0]) + 
+    (ppa->c[1] - ppb->c[1])*(ppa->c[1] - ppb->c[1]);
+  l = sqrt(l);
+  //with tangent, compute control point
+  for(i=0 ; i<2 ; i++) {
+    t0[i] = l*ppa->n[i];
+    t1[i] = l*ppb->n[i];
+  }
+  if(ppa->tag & M_CORNER) {
+    for(i=0 ; i<2 ; i++)
+      t0[i] = ppa->c[i] - ppb->c[i];
+  }
+  if(ppb->tag & M_CORNER) {
+    for(i=0 ; i<2 ; i++)
+      t1[i] = ppa->c[i] - ppb->c[i];
+  }
+  /*check if t0 has the same sens of vect(P0P1)*/
+  if(t0[0]/(ppb->c[0]-ppa->c[0]) < 0 || t0[1]/(ppb->c[1]-ppa->c[1])<0) {
+    //printf("t0/pOp1 %e %e\n",t0[0]/(p1->c[0]-p0->c[0]),t0[1]/(p1->c[1]-p0->c[1]));
+    for(i=0 ; i<2 ; i++) {
+      t0[i] *= -1;
+    }
+  }
+  /*check if t1 has the opposite sens of vect(P0P1)*/
+  if(t1[0]/(ppb->c[0]-ppa->c[0]) > 0 || t1[1]/(ppa->c[1]-ppb->c[1])>0) {
+    //printf("t1/pOp1 %e %e\n",t0[0]/(p1->c[0]-p0->c[0]),t0[1]/(p1->c[1]-p0->c[1]));
+    for(i=0 ; i<2 ; i++) {
+      t1[i] *= -1;
+    }
+  }
+  /*control points*/
+  for(i=0 ; i<2 ; i++) {
+    pc1[i] = (t0[i]+3*ppa->c[i])/3.;
+    pc2[i] = (t1[i]+3*ppb->c[i])/3.;
+  }
+  //compute the max distance between ppa and all the control point
+  da =sqrt((ppa->c[0]-pc1[0])*(ppa->c[0]-pc1[0]) +
+           (ppa->c[1]-pc1[1])* (ppa->c[1]-pc1[1]));
+  da = MG_MIN(da,sqrt((ppa->c[0]-pc2[0])*(ppa->c[0]-pc2[0]) +
+                      (ppa->c[1]-pc2[1])* (ppa->c[1]-pc2[1])));
+  //printf("da %e %e\n",da,mesh->info.hausd);
+  if(da > mesh->info.hausd) return(1);
+              
+  //idem for ppb
+  db =sqrt((ppb->c[0]-pc1[0])*(ppb->c[0]-pc1[0]) +
+          (ppb->c[1]-pc1[1])* (ppb->c[1]-pc1[1]));
+  db = MG_MIN(da,sqrt((ppb->c[0]-pc2[0])*(ppb->c[0]-pc2[0]) +
+                      (ppb->c[1]-pc2[1])* (ppb->c[1]-pc2[1])));
+  //printf("db %e %e\n",db,mesh->info.hausd);
+  if(db > mesh->info.hausd) return(1);
 
 
 
@@ -349,6 +403,7 @@ int MMG2_colpoibdry(MMG5_pMesh mesh, MMG5_pSol sol,int iel,int iar,int ia,int ib
   pia = pt->v[ia];
   ppa = &mesh->point[pia];
   ppb = &mesh->point[pib]; 
+  
   if (ppb->tag & M_CORNER) return(0); 
   iadr = 3*(iel-1) + 1;
   adja = &mesh->adja[iadr];
@@ -364,7 +419,6 @@ int MMG2_colpoibdry(MMG5_pMesh mesh, MMG5_pSol sol,int iel,int iar,int ia,int ib
   }  
 
   /*check geom*/           
-  cbound = (mesh->info.hausd)*M_PI/180.;  
   nbdry = 0;
   for(i=1 ; i<=lon ; i++) {  
     kel = list[i]/3; 
@@ -396,27 +450,29 @@ int MMG2_colpoibdry(MMG5_pMesh mesh, MMG5_pSol sol,int iel,int iar,int ia,int ib
   ppa1  = &mesh->point[ibdry[0]];
   ppb1  = &mesh->point[ibdry[1]]; 
 
-  if(MMG2_chkedg(mesh,ppb,ppa1)) return(0);
+  if(MMG2_chkedg(mesh,ppb,ppa1))  return(0);
   if(MMG2_chkedg(mesh,ppb,ppb1)) return(0);
 
   /*second check that the new edge verify the hausd criteron*/
   if(MMG2_chkedg(mesh,ppb1,ppa1)) return(0);
-//comment from here
-  //calcul de l'angle forme par les 3 points 
-  capx = ppb->c[0] - ppa1->c[0]; 
-  capy = ppb->c[1] - ppa1->c[1]; 
-  cbpx = ppb->c[0] - ppb1->c[0]; 
-  cbpy = ppb->c[1] - ppb1->c[1]; 
-  alpha = capx*cbpx + capy*cbpy;
-  alpha /= sqrt(capx*capx+capy*capy)*sqrt(cbpx*cbpx+cbpy*cbpy);  
-  alpha = acos(alpha);
-  //printf("point %d : %e (= %e)-- %e %e\n",pt->v[j],alpha,alpha*180./M_PI,capx,capy);
+
+/* //comment from here */
+/*   //calcul de l'angle forme par les 3 points  */
+/*   capx = ppb->c[0] - ppa1->c[0];  */
+/*   capy = ppb->c[1] - ppa1->c[1];  */
+/*   cbpx = ppb->c[0] - ppb1->c[0];  */
+/*   cbpy = ppb->c[1] - ppb1->c[1];  */
+/*   alpha = capx*cbpx + capy*cbpy; */
+/*   alpha /= sqrt(capx*capx+capy*capy)*sqrt(cbpx*cbpx+cbpy*cbpy);   */
+/*   alpha = acos(alpha); */
+/*   //printf("point %d : %e (= %e)-- %e %e\n",pt->v[j],alpha,alpha*180./M_PI,capx,capy); */
   
-  if(alpha < cbound ) {
-    free(list);
-    return(0);
-    //to here
-  } else if(lon > 100) {
+/*   if(alpha < cbound ) { */
+/*     free(list); */
+/*     return(0); */
+/*     //to here */
+/*   } else */ 
+  if(lon > 100) {
     free(list);
     return(0);
   }

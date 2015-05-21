@@ -141,17 +141,20 @@ static int cassarbdry(MMG5_pMesh mesh,MMG5_pSol sol,int ied,int ia,int ib,double
   MMG5_pEdge    ped;
   // Displ      pd;
   double   c[2],pc1[2],pc2[2],t0[2],t1[2],t_1,*ma,*mb,*mp,dx,dy;
+  double   l;
   int      ip,iadr,i,inv;
   p0 = &mesh->point[ia];
   p1 = &mesh->point[ib];
  
-  
+  l = (p0->c[0] - p1->c[0])*(p0->c[0] - p1->c[0]) + 
+    (p0->c[1] - p1->c[1])*(p0->c[1] - p1->c[1]);
+  l = sqrt(l);
   ped = &mesh->edge[ied];
   if(ia != ped->a) {
     assert(ib == ped->a);
     for(i=0 ; i<2 ; i++) {
-      t0[i] = p0->n[i];
-      t1[i] = p1->n[i];
+      t0[i] = l*p0->n[i];
+      t1[i] = l*p1->n[i];
     }
     /*if corner, recompute the tangent*/
     if(p0->tag & M_CORNER) {
@@ -165,8 +168,8 @@ static int cassarbdry(MMG5_pMesh mesh,MMG5_pSol sol,int ied,int ia,int ib,double
   } else {
     assert(ib == ped->b);
     for(i=0 ; i<2 ; i++) {
-      t0[i] = p0->n[i];
-      t1[i] = p1->n[i];
+      t0[i] = l*p0->n[i];
+      t1[i] = l*p1->n[i];
     }
     /*if corner, recompute the tangent*/
     if(p0->tag & M_CORNER) {
@@ -220,6 +223,10 @@ static int cassarbdry(MMG5_pMesh mesh,MMG5_pSol sol,int ied,int ia,int ib,double
     //	   fabs(tang[i]-(3./8.)*(p1->c[i]+pc2[i]-pc1[i]-p0->c[i])));
     tang[i] = (3./8.)*(p1->c[i]+pc2[i]-pc1[i]-p0->c[i]);
   }
+  l = tang[0]*tang[0] + tang[1]*tang[1];
+  l = 1./sqrt(l);
+  tang[0] *= l;
+  tang[1] *= l;
   /*check if tang has the same sens than P0P*/
   if(inv) {
     if ((tang[0]/(ppt->c[0]-p0->c[0]) > 0 || tang[1]/(ppt->c[1]-p0->c[1])>0)) {
@@ -234,52 +241,53 @@ static int cassarbdry(MMG5_pMesh mesh,MMG5_pSol sol,int ied,int ia,int ib,double
       tang[i] *= -1;
     }
   }
-  /*change the two other tangents*/
-  if(ia != ped->a) {
-    assert(ib == ped->a);
-    for(i=0 ; i<2 ; i++) {
-      /*t0*/
-      p0->n[i] = -(3./2.)*(pc1[i]-p0->c[i]);
-      /*t1*/
-      p1->n[i] = -(3./2.)*(p1->c[i]-pc2[i]);
-    }
-    /*check tangent orientation*/
-#warning remove ? check orientation tangent
-    dx = t1[0]/p0->n[0];
-    dy = t1[1]/p0->n[1];
-    if(dy < 0 || dx <0) {
-      //printf("1) pbs de colinearite %e\n",fabs(dx-dy));
-    }
-    dx = t0[0]/p1->n[0];
-    dy = t0[1]/p1->n[1];
-    if(dx < 0 || dy <0) {
-      //printf("3) pbs de colinearite %e %e %e\n",fabs(dx-dy),dx,dy);
-    }
-  } else {
-    assert(ib == ped->b);
-    for(i=0 ; i<2 ; i++) {
-      /*t0*/
-      p0->n[i] = -(3./2.)*(pc1[i]-p0->c[i]);
-      /*t1*/
-      p1->n[i] = -(3./2.)*(p1->c[i]-pc2[i]);
-    }
-    /*check tangent orientation*/
-#warning remove ? check orientation tangent
-    dx = t1[0]/p1->n[0];
-    dy = t1[1]/p1->n[1];
-    if(dx < 0 || dy <0) {
-      //printf("2) pbs de colinearite %e %e %e\n",fabs(dx-dy),dx,dy);
-    }
-    dx = t0[0]/p0->n[0];
-    dy = t0[1]/p0->n[1];
-    if(dx < 0 || dy <0) {
-      //printf("4) pbs de colinearite pts %d %e %e %e\n",ia,fabs(dx-dy),dx,dy);
-      for(i=0 ; i<2 ; i++) {
-        p0->n[i] *= -1;
-      }
+  
+/*   /\*change the two other tangents*\/ */
+/*   if(ia != ped->a) { */
+/*     assert(ib == ped->a); */
+/*     for(i=0 ; i<2 ; i++) { */
+/*       /\*t0*\/ */
+/*       p0->n[i] = -(3./2.)*(pc1[i]-p0->c[i]); */
+/*       /\*t1*\/ */
+/*       p1->n[i] = -(3./2.)*(p1->c[i]-pc2[i]); */
+/*     } */
+/*     /\*check tangent orientation*\/ */
+/* #warning remove ? check orientation tangent */
+/*     dx = t1[0]/p0->n[0]; */
+/*     dy = t1[1]/p0->n[1]; */
+/*     if(dy < 0 || dx <0) { */
+/*       //printf("1) pbs de colinearite %e\n",fabs(dx-dy)); */
+/*     } */
+/*     dx = t0[0]/p1->n[0]; */
+/*     dy = t0[1]/p1->n[1]; */
+/*     if(dx < 0 || dy <0) { */
+/*       //printf("3) pbs de colinearite %e %e %e\n",fabs(dx-dy),dx,dy); */
+/*     } */
+/*   } else { */
+/*     assert(ib == ped->b); */
+/*     for(i=0 ; i<2 ; i++) { */
+/*       /\*t0*\/ */
+/*       p0->n[i] = -(3./2.)*(pc1[i]-p0->c[i]); */
+/*       /\*t1*\/ */
+/*       p1->n[i] = -(3./2.)*(p1->c[i]-pc2[i]); */
+/*     } */
+/*     /\*check tangent orientation*\/ */
+/* #warning remove ? check orientation tangent */
+/*     dx = t1[0]/p1->n[0]; */
+/*     dy = t1[1]/p1->n[1]; */
+/*     if(dx < 0 || dy <0) { */
+/*       //printf("2) pbs de colinearite %e %e %e\n",fabs(dx-dy),dx,dy); */
+/*     } */
+/*     dx = t0[0]/p0->n[0]; */
+/*     dy = t0[1]/p0->n[1]; */
+/*     if(dx < 0 || dy <0) { */
+/*       //printf("4) pbs de colinearite pts %d %e %e %e\n",ia,fabs(dx-dy),dx,dy); */
+/*       for(i=0 ; i<2 ; i++) { */
+/*         p0->n[i] *= -1; */
+/*       } */
 
-    }
-  }
+/*     } */
+/*   } */
 
   /*interpol metric*/
   iadr = (ia-1)*sol->size + 1;
@@ -509,13 +517,100 @@ static int analar(MMG5_pMesh mesh,MMG5_pSol sol,pBucket bucket,double declic,int
   }
   return(1);
 }
+static int analargeom(MMG5_pMesh mesh,MMG5_pSol sol,int *alert) {
+  MMG5_pTria    pt,pp; 
+  MMG5_pPoint   ppa,ppb;
+  double  *ca,*cb,*ma,*mb,tail,t,tang[2];
+  int     *adja,voi[3],k,iadr,adj,base,npp,nbp,ip;  
+  int     nt;
+  int     i,i1,i2,ni,maxtou,it;
+  int     ins,ii,i0,ii0,nitot;
+  maxtou = 30;
+  it     = 0;
+  nitot = 0;
+  do { 
+    ni  = 0; 
+    base  = ++mesh->base;  
+    nt    = mesh->nt;
 
+    for (k=1; k<=nt; k++) {
+      pt = &mesh->tria[k];
+      if ( !M_EOK(pt) )  continue;
+      //else if ( /*pt->flag = base-1 || pt->qual < declic*/ )  continue;
+      
+      /* base internal edges */
+      iadr  = 3*(k-1) + 1;
+      adja  = &mesh->adja[iadr];
+      voi[0] = adja[0];
+      voi[1] = adja[1];
+      voi[2] = adja[2]; 
+      i0 = 0;
+      if (!voi[1]) i0 = 1;
+      if (!voi[2]) i0 = 2;
+      for (ii0=i0; ii0<i0+3; ii0++) {
+        i = ii0%3;
+        adj = voi[i] / 3;
+
+        i1   = pt->v[MMG2_idir[i+1]];
+        i2   = pt->v[MMG2_idir[i+2]];
+      
+        ppa  = &mesh->point[i1];
+        ppb  = &mesh->point[i2];
+        //#warning bad test for edge required
+        if((ppa->tag & M_REQUIRED) && (ppb->tag & M_REQUIRED)) {
+          //printf("edge required %d %d\n",i1,i2);
+          continue; 
+        } 
+        if ( adj )  continue;
+                
+        ca   = &ppa->c[0];
+        cb   = &ppb->c[0];
+        iadr = (i1-1)*sol->size + 1; 
+        ma   = &sol->m[iadr];
+        iadr = (i2-1)*sol->size + 1; 
+        mb   = &sol->m[iadr];
+
+        tail = MMG2_chkedg(mesh,ppa,ppb);   
+        if(!tail) continue;
+        if ( *alert <= 1 ) {
+          npp++;
+          if(!pt->edg[i])  {
+            printf("tr %d : %d %d %d mais %d\n",k,pt->edg[0],pt->edg[1],pt->edg[2],i);
+            printf("%d %d %d\n",pt->v[0],pt->v[1],pt->v[2]);
+            MMG2_saveMesh(mesh,"titii.mesh");
+          }
+          assert(pt->edg[i]);
+          ip = cassarbdry(mesh,sol,pt->edg[i],i1,i2,0.5,tang); 
+       
+          if(ip < 0) {
+            printf("IMPOSSIBLE TO CREATE NEW VERTEX\n");
+            *alert = 2;  
+          }
+          ins = MMG2_splitbdry(mesh,sol,ip,k,i,tang);
+          if(!ins) { 
+            if (ddebug) printf("k= %d on insere pas bdry : %d %d\n",k,i1,i2);
+            MMG2_delPt(mesh,ip);
+            continue;  
+          } 
+          mesh->point[ip].tag |= M_BDRY;
+          ni += 1; 	     
+          break; 
+        } 
+      }
+    }
+    if ( mesh->info.imprim > 5 ) {
+      fprintf(stdout,"    %8d INSERTED \n",ni);
+    }
+    nitot +=ni;
+  } while(ni > 0 && it++ < maxtou);
+  return(nitot);
+}
 
 int MMG2_mmg2d1(MMG5_pMesh mesh,MMG5_pSol sol) {
   pBucket  bucket;
   double   declic;
   int      ns,base,alert,it,maxtou;
-  int      nadd,ndel,nswp;
+  int      nadd,ndel,nswp,ngeom;
 
   nadd = ndel = nswp = 0;
 
@@ -537,6 +632,14 @@ int MMG2_mmg2d1(MMG5_pMesh mesh,MMG5_pSol sol) {
     if ( mesh->info.imprim > 5 )
       fprintf(stdout,"  -- %8d SWAPPED\n",ns);
   }
+  alert  = 0;
+
+  /* 1. Geometric mesh */
+  if ( mesh->info.imprim > 3 )
+    fprintf(stdout,"  -- GEOMETRIC MESH\n");
+  ngeom = analargeom(mesh,sol,&alert); 
+  if ( (abs(mesh->info.imprim) < 6) )
+      fprintf(stdout,"     %8d splitted\n",ngeom);
 
   /* 2. field points */
   bucket = MMG2_newBucket(mesh,M_MAX(mesh->info.bucket,BUCKSIZ));
@@ -544,7 +647,6 @@ int MMG2_mmg2d1(MMG5_pMesh mesh,MMG5_pSol sol) {
   declic = 1.5 / ALPHA;
   maxtou = 30;
   it     = 0;
-  alert  = 0;
   do { 
       
     analar(mesh,sol,bucket,declic,&alert); 
