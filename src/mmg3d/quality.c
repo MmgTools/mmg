@@ -151,7 +151,7 @@ inline double _MMG5_caltet_ani(MMG5_pMesh mesh,MMG5_pSol met,int ia,int ib,int i
   acx = c[0] - a[0];
   acy = c[1] - a[1];
   acz = c[2] - a[2];
-  
+
   adx = d[0] - a[0];
   ady = d[1] - a[1];
   adz = d[2] - a[2];
@@ -159,11 +159,11 @@ inline double _MMG5_caltet_ani(MMG5_pMesh mesh,MMG5_pSol met,int ia,int ib,int i
   v1  = acy*adz - acz*ady;
   v2  = acz*adx - acx*adz;
   v3  = acx*ady - acy*adx;
-  vol = abx * v1 + aby * v2 + abz * v3;            
+  vol = abx * v1 + aby * v2 + abz * v3;
   if ( vol <= 0. )  return(cal);
   det = mm[0] * ( mm[3]*mm[5] - mm[4]*mm[4]) \
       - mm[1] * ( mm[1]*mm[5] - mm[2]*mm[4]) \
-      + mm[2] * ( mm[1]*mm[4] - mm[2]*mm[3]);   
+      + mm[2] * ( mm[1]*mm[4] - mm[2]*mm[3]);
   if ( det < _MMG5_EPSOK )   {
     //printf("--- INVALID METRIC : DET (%d) %e\n",iel,det);
     return(cal);
@@ -198,16 +198,16 @@ inline double _MMG5_caltet_ani(MMG5_pMesh mesh,MMG5_pSol met,int ia,int ib,int i
 
   /* quality */
   rap = h1 + h2 + h3 + h4 + h5 + h6;
-  num = sqrt(rap) * rap;  
+  num = sqrt(rap) * rap;
 
-  cal = det / num;  
+  cal = det / num;
   if(cal <= _MMG5_NULKAL) {
-    printf(" TOO BAD QUALITY %e %e %e %e\n",cal,num,det,vol);  
+    printf(" TOO BAD QUALITY %e %e %e %e\n",cal,num,det,vol);
     return(_MMG5_NULKAL);
   }
   //printf("cal %e %e %e\n",cal,num,det);
   assert(cal > _MMG5_NULKAL);
-  return(cal); 
+  return(cal);
 }
 
 /* identify type of element :
