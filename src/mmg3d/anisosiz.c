@@ -197,7 +197,8 @@ static int _MMG5_defmetrid(MMG5_pMesh mesh,MMG5_pSol met,int kel,
   ier = _MMG5_bouletrid(mesh,kel,iface,ip,&ilist1,list1,&ilist2,list2,
                         &iprid[0],&iprid[1] );
   if ( !ier ) {
-    printf("Error: unable to compute the two balls at the ridge point %d.\n", idp);
+    printf("%s:%d:Error: unable to compute the two balls at the ridge"
+           " point %d.\n",__FILE__,__LINE__, idp);
     return(0);
   }
 
@@ -356,7 +357,8 @@ static int _MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,int kel, int iface, int
   ilist = _MMG5_boulesurfvolp(mesh,kel,ip,iface,listv,&ilistv,lists,&ilists,0);
 
   if ( ilist!=1 ) {
-    printf("Error; unable to compute the ball af the point %d.\n", idp);
+    printf("%s:%d:Error: unable to compute the ball af the point %d.\n",
+           __FILE__,__LINE__, idp);
     printf("Exit program.\n");
     exit(EXIT_FAILURE);
   }
@@ -403,7 +405,8 @@ static int _MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,int kel, int iface, int
         ipref[1] = pt->v[i2];
       }
       else if ( (pt->v[i2] != ipref[0]) && (pt->v[i2] != ipref[1]) ) {
-        printf("Problem (func defmetref) : three adjacent ref at a non singular point\n");
+        printf("%s:%d:Error: three adjacent ref at a non singular point.\n",
+               __FILE__,__LINE__);
         exit(EXIT_FAILURE);
       }
     }
@@ -416,7 +419,8 @@ static int _MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,int kel, int iface, int
         ipref[1] = pt->v[i1];
       }
       else if ( (pt->v[i1] != ipref[0]) && (pt->v[i1] != ipref[1]) ) {
-        printf("Problem (func defmetref) : three adjacent ref at a non singular point\n");
+        printf("%s:%d:Error: three adjacent ref at a non singular point.\n",
+               __FILE__,__LINE__);
         exit(EXIT_FAILURE);
       }
     }
@@ -440,14 +444,14 @@ static int _MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,int kel, int iface, int
     det2d = lispoi[3*k+1]*lispoi[3*(k+1)+2] - lispoi[3*k+2]*lispoi[3*(k+1)+1];
     assert(det2d);
     if ( det2d <= 0.0 ) {
-      printf("PROBLEM : BAD PROJECTION OVER TANGENT PLANE %f \n", det2d);
+      //printf("PROBLEM : BAD PROJECTION OVER TANGENT PLANE %f \n", det2d);
       return(0);
     }
   }
   det2d = lispoi[3*(ilists-1)+1]*lispoi[3*0+2] - lispoi[3*(ilists-1)+2]*lispoi[3*0+1];
   assert(det2d);
   if ( det2d <= 0.0 ) {
-    printf("PROBLEM : BAD PROJECTION OVER TANGENT PLANE %f \n", det2d);
+    //printf("PROBLEM : BAD PROJECTION OVER TANGENT PLANE %f \n", det2d);
     return(0);
   }
   assert(ipref[0] && ipref[1]);
@@ -547,7 +551,8 @@ static int _MMG5_defmetreg(MMG5_pMesh mesh,MMG5_pSol met,int kel,int iface, int 
   ilist = _MMG5_boulesurfvolp(mesh,kel,ip,iface,listv,&ilistv,lists,&ilists,0);
 
   if ( ilist!=1 ) {
-    printf("Error; unable to compute the ball af the point %d.\n", idp);
+    printf("%s:%d:Error: unable to compute the ball af the point %d.\n",
+           __FILE__,__LINE__, idp);
     printf("Exit program.\n");
     exit(EXIT_FAILURE);
   }
@@ -600,14 +605,14 @@ static int _MMG5_defmetreg(MMG5_pMesh mesh,MMG5_pSol met,int kel,int iface, int 
     det2d = lispoi[3*k+1]*lispoi[3*(k+1)+2] - lispoi[3*k+2]*lispoi[3*(k+1)+1];
     assert(det2d);
     if ( det2d <= 0.0 ) {
-      printf("PROBLEM : BAD PROJECTION OVER TANGENT PLANE %f \n", det2d);
+      //printf("PROBLEM : BAD PROJECTION OVER TANGENT PLANE %f \n", det2d);
       return(0);
     }
   }
   det2d = lispoi[3*(ilists-1)+1]*lispoi[3*0+2] - lispoi[3*(ilists-1)+2]*lispoi[3*0+1];
   assert(det2d);
   if ( det2d <= 0.0 ) {
-    printf("PROBLEM : BAD PROJECTION OVER TANGENT PLANE %f \n", det2d);
+    //printf("PROBLEM : BAD PROJECTION OVER TANGENT PLANE %f \n", det2d);
     return(0);
   }
 

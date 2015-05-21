@@ -62,7 +62,8 @@ static int _MMG5_defmetsin(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
 
   ilist = boulet(mesh,it,ip,list);
   if ( !ilist ) {
-    printf("Error: unable to compute the ball af the point %d.\n", idp);
+    printf("%s:%d:Error: unable to compute the ball af the point %d.\n",
+           __FILE__,__LINE__, idp);
     return(0);
   }
 
@@ -166,7 +167,8 @@ static int _MMG5_defmetrid(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
 
   ier = bouletrid(mesh,it,ip,&ilist1,list1,&ilist2,list2,&iprid[0],&iprid[1]);
   if ( !ier ) {
-    printf("Error: unable to compute the two balls at the ridge point %d.\n", idp);
+    printf("%s:%d:Error: unable to compute the two balls at the ridge"
+           " point %d.\n",__FILE__,__LINE__, idp);
     return(0);
   }
 
@@ -304,7 +306,8 @@ static int _MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
   p0  = &mesh->point[idp];
   ilist = boulet(mesh,it,ip,list);
   if ( !ilist ) {
-    printf("Error: unable to compute the ball af the point %d.\n", idp);
+    printf("%s:%d:Error: unable to compute the ball af the point %d.\n",
+           __FILE__,__LINE__, idp);
     return(0);
   }
 
@@ -336,7 +339,8 @@ static int _MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
         ipref[1] = pt->v[i2];
       }
       else if ( (pt->v[i2] != ipref[0]) && (pt->v[i2] != ipref[1]) ) {
-        printf("Problem (func defmetref) : three adjacent ref at a non singular point\n");
+        printf("%s:%d:Error: three adjacent ref at a non singular point\n",
+               __FILE__,__LINE__);
         exit(EXIT_FAILURE);
       }
     }
@@ -349,7 +353,8 @@ static int _MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
         ipref[1] = pt->v[i1];
       }
       else if ( (pt->v[i1] != ipref[0]) && (pt->v[i1] != ipref[1]) ) {
-        printf("Problem (func defmetref) : three adjacent ref at a non singular point\n");
+        printf("%s:%d:Error: three adjacent ref at a non singular point\n",
+               __FILE__,__LINE__);
         exit(EXIT_FAILURE);
       }
     }
@@ -372,13 +377,13 @@ static int _MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
   for (k=0; k<ilist-1; k++) {
     det2d = lispoi[3*k+1]*lispoi[3*(k+1)+2] - lispoi[3*k+2]*lispoi[3*(k+1)+1];
     if ( det2d < 0.0 ) {
-      printf("PROBLEM : BAD PROJECTION OVER TANGENT PLANE %f \n", det2d);
+      //printf("PROBLEM : BAD PROJECTION OVER TANGENT PLANE %f \n", det2d);
       return(0);
     }
   }
   det2d = lispoi[3*(ilist-1)+1]*lispoi[3*0+2] - lispoi[3*(ilist-1)+2]*lispoi[3*0+1];
   if ( det2d < 0.0 ) {
-    printf("PROBLEM : BAD PROJECTION OVER TANGENT PLANE %f \n", det2d);
+    //printf("PROBLEM : BAD PROJECTION OVER TANGENT PLANE %f \n", det2d);
     return(0);
   }
   assert(ipref[0] && ipref[1]);
@@ -441,7 +446,8 @@ static int _MMG5_defmetreg(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
 
   ilist = boulet(mesh,it,ip,list);
   if ( !ilist ) {
-    printf("Error: unable to compute the ball af the point %d.\n", idp);
+    printf("%s:%d:Error: unable to compute the ball af the point %d.\n",
+           __FILE__,__LINE__, idp);
     return(0);
   }
 
@@ -481,27 +487,28 @@ static int _MMG5_defmetreg(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
   for (k=0; k<ilist-1; k++) {
     det2d = lispoi[3*k+1]*lispoi[3*(k+1)+2] - lispoi[3*k+2]*lispoi[3*(k+1)+1];
     if ( det2d <= 0.0 ) {
-      printf("PROBLEM : BAD PROJECTION OVER TANGENT PLANE %f \n", det2d);
+      //printf("PROBLEM : BAD PROJECTION OVER TANGENT PLANE %f \n", det2d);
       return(0);
     }
   }
   det2d = lispoi[3*(ilist-1)+1]*lispoi[3*0+2] - lispoi[3*(ilist-1)+2]*lispoi[3*0+1];
   if ( det2d <= 0.0 ) {
-    printf("PROBLEM : BAD PROJECTION OVER TANGENT PLANE %f \n", det2d);
+    //printf("PROBLEM : BAD PROJECTION OVER TANGENT PLANE %f \n", det2d);
     return(0);
   }
 
   /* At this point, lispoi contains all the points of the ball of p0, rotated
      so that t_{p_0}S = [z = 0] */
 
-  /* Second step : reconstitution of the curvature tensor at p0 in the tangent plane,
-     with a quadric fitting approach */
+  /* Second step : reconstitution of the curvature tensor at p0 in the tangent
+     plane, with a quadric fitting approach */
   memset(tAA,0.0,6*sizeof(double));
   memset(tAb,0.0,3*sizeof(double));
 
   for (k=0; k<ilist; k++) {
-    /* Approximation of the curvature in the normal section associated to tau : by assumption,
-       p1 is either regular, either on a ridge (or a singularity), but p0p1 is not ridge*/
+    /* Approximation of the curvature in the normal section associated to tau :
+       by assumption, p1 is either regular, either on a ridge (or a
+       singularity), but p0p1 is not ridge*/
     iel = list[k] / 3;
     i0  = list[k] % 3;
     i1  = _MMG5_inxt2[i0];
