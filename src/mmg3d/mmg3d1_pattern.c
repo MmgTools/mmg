@@ -556,12 +556,6 @@ int _MMG5_mmg3d1_pattern(MMG5_pMesh mesh,MMG5_pSol met) {
   if ( abs(mesh->info.imprim) > 4 || mesh->info.ddebug )
     fprintf(stdout,"  ** COMPUTATIONAL MESH\n");
 
-  /* define metric map */
-  if ( !_MMG5_defsiz(mesh,met) ) {
-    fprintf(stdout,"  ## Metric undefined. Exit program.\n");
-    return(0);
-  }
-
   if ( mesh->info.hgrad > 0. && !_MMG5_gradsiz(mesh,met) ) {
     fprintf(stdout,"  ## Gradation problem. Exit program.\n");
     return(0);
