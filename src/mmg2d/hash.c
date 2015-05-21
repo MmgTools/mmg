@@ -172,7 +172,7 @@ int MMG2_computetangent(MMG5_pMesh mesh,int ip1,int ip2,int ip3,double *t) {
     n[i] = 0.5*(n1[i]/dd1+n2[i]/dd2);
     dd += n[i]*n[i];
   }
-  dd = 1;//sqrt(dd);
+  dd = sqrt(dd);
   n[0] /= dd;
   n[1]/=dd;
   t[0] = n[1]; 

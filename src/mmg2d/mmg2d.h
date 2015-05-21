@@ -252,6 +252,7 @@ int    buckin_ani(MMG5_pMesh mesh,MMG5_pSol sol,pBucket bucket,int ip);
 int    lissmet_iso(MMG5_pMesh mesh,MMG5_pSol sol);
 int    lissmet_ani(MMG5_pMesh mesh,MMG5_pSol sol);
 
+int MMG2_chkedg(MMG5_pMesh mesh, MMG5_pPoint ppa,MMG5_pPoint ppb) ;
 
 double (*MMG2_length)(double *,double *,double *,double *);
 double (*MMG2_caltri)(MMG5_pMesh ,MMG5_pSol ,MMG5_pTria );

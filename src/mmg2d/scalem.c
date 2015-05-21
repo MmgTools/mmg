@@ -108,6 +108,8 @@ int MMG2_scaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
       mesh->info.hmin = 0.01 * mesh->info.hmax;
   }
 
+  mesh->info.hausd *= dd;
+
   for (k=1; k<=mesh->np; k++) {
     ppt = &mesh->point[k];
     if ( !M_VOK(ppt) )  continue;
@@ -119,14 +121,24 @@ int MMG2_scaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
   if ( !sol->np )  return(1);
   switch (sol->size) {
   case 1:
-    for (k=1; k<=mesh->np; k++)  sol->m[k] *= dd;
+    for (k=1; k<=mesh->np; k++)  {
+      sol->m[k] *= dd;
+      if(sethmin) sol->m[k]=MG_MAX(mesh->info.hmin,sol->m[k]);
+      if(sethmax) sol->m[k]=MG_MIN(mesh->info.hmax,sol->m[k]);
+    }
     break;
 
   case 3:
+    if(sethmin || sethmax) {
+      printf("warning imposed hmin and/or hmax ignored\n");
+    }
     dd = 1.0 / (dd*dd);
     for (k=1; k<=mesh->np; k++) {
       iadr = (k-1)*sol->size + 1; 
       for (i=0; i<sol->size; i++)  sol->m[iadr+i] *= dd;
+      if(sethmin || sethmax) {
+#warning todo : metric troncature
+      }
     }
     break;
   }
