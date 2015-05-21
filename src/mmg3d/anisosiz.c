@@ -752,12 +752,11 @@ int _MMG5_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
           if ( !_MMG5_defmetreg(mesh,met,k,l,iploc) )  continue;
         }
         if ( ismet ) {
-/* A FAIRE */
-          /* if ( !_MMG5_intextmet(mesh,met,pt->v[i],mm) ) { */
-          /*   fprintf(stdout,"%s:%d:Error: unable to intersect metrics" */
-          /*           " at point %d.\n",__FILE__,__LINE__, pt->v[i]); */
-          /*   return(0); */
-          /* } */
+          if ( !_MMG5_intextmet(mesh,met,pt->v[i],mm) ) {
+            fprintf(stdout,"%s:%d:Error: unable to intersect metrics"
+                    " at point %d.\n",__FILE__,__LINE__, pt->v[i]);
+            return(0);
+          }
         }
         ppt->flag = 1;
       }
