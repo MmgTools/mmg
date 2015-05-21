@@ -1001,8 +1001,6 @@ int _MMG5_saveAllMesh(MMG5_pMesh mesh) {
       }
     }
   }
-  _MMG5_DEL_MEM(mesh,mesh->xpoint,(mesh->xpmax+1)*sizeof(MMG5_xPoint));
-  mesh->xp = 0;
 
   /* boundary mesh */
   /* tria + required tria */
@@ -1970,7 +1968,7 @@ int MMG5_loadMet(MMG5_pMesh mesh,MMG5_pSol met) {
 int MMG5_saveMet(MMG5_pMesh mesh,MMG5_pSol met) {
   FILE*        inm;
   MMG5_pPoint  ppt;
-  double       dbuf[6],tmp;
+  double       dbuf[6],mtmp[3],r[3][3],tmp;
   char        *ptr,data[128],chaine[128];
   int          binch,bpos,bin,np,k,typ,i;
 
@@ -2056,7 +2054,38 @@ int MMG5_saveMet(MMG5_pMesh mesh,MMG5_pSol met) {
     for (k=1; k<=mesh->np; k++) {
       ppt = &mesh->point[k];
       if ( MG_VOK(ppt) ) {
-        for (i=0; i<met->size; i++)  dbuf[i] = met->m[met->size*k+i];
+        if ( !(MG_SIN(ppt->tag) || (ppt->tag & MG_NOM)) && (ppt->tag & MG_GEO) ) {
+          // Arbitrary, we take the metric associated to the surface ruled by n_1
+          mtmp[0] = met->m[met->size*(k)];
+          mtmp[1] = met->m[met->size*(k)+1];
+          mtmp[2] = met->m[met->size*(k)+3];
+
+          // Rotation matrix.
+          r[0][0] = ppt->n[0];
+          r[1][0] = ppt->n[1];
+          r[2][0] = ppt->n[2];
+          r[0][1] = mesh->xpoint[ppt->xp].n1[1]*ppt->n[2]
+            - mesh->xpoint[ppt->xp].n1[2]*ppt->n[1];
+          r[1][1] = mesh->xpoint[ppt->xp].n1[2]*ppt->n[0]
+            - mesh->xpoint[ppt->xp].n1[0]*ppt->n[2];
+          r[2][1] = mesh->xpoint[ppt->xp].n1[0]*ppt->n[1]
+            - mesh->xpoint[ppt->xp].n1[1]*ppt->n[0];
+          r[0][2] = mesh->xpoint[ppt->xp].n1[0];
+          r[1][2] = mesh->xpoint[ppt->xp].n1[1];
+          r[2][2] = mesh->xpoint[ppt->xp].n1[2];
+
+          // Metric in the canonic space
+          dbuf[0] = mtmp[0]*r[0][0]*r[0][0] + mtmp[1]*r[0][1]*r[0][1] + mtmp[2]*r[0][2]*r[0][2];
+          dbuf[1] = mtmp[0]*r[0][0]*r[1][0] + mtmp[1]*r[0][1]*r[1][1] + mtmp[2]*r[0][2]*r[1][2];
+          dbuf[2] = mtmp[0]*r[0][0]*r[2][0] + mtmp[1]*r[0][1]*r[2][1] + mtmp[2]*r[0][2]*r[2][2];
+          dbuf[3] = mtmp[0]*r[1][0]*r[1][0] + mtmp[1]*r[1][1]*r[1][1] + mtmp[2]*r[1][2]*r[1][2];
+          dbuf[4] = mtmp[0]*r[1][0]*r[2][0] + mtmp[1]*r[1][1]*r[2][1] + mtmp[2]*r[1][2]*r[2][2];
+          dbuf[5] = mtmp[0]*r[2][0]*r[2][0] + mtmp[1]*r[2][1]*r[2][1] + mtmp[2]*r[2][2]*r[2][2];
+
+        }
+        else {
+          for (i=0; i<met->size; i++)  dbuf[i] = met->m[met->size*k+i];
+        }
         tmp = dbuf[2];
         dbuf[2] = dbuf[3];
         dbuf[3] = tmp;
