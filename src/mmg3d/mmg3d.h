@@ -156,6 +156,8 @@ _MMG5_pBucket _MMG5_newBucket(MMG5_pMesh ,int );
 int     _MMG5_addBucket(MMG5_pMesh ,_MMG5_pBucket ,int );
 int     _MMG5_delBucket(MMG5_pMesh ,_MMG5_pBucket ,int );
 int     _MMG5_buckin_iso(MMG5_pMesh mesh,MMG5_pSol sol,_MMG5_pBucket bucket,int ip);
+int     _MMG5_buckin_ani(MMG5_pMesh mesh,MMG5_pSol sol,_MMG5_pBucket bucket,int ip);
+
 /* prototypes */
 double _MMG5_det3pt1vec(double c0[3],double c1[3],double c2[3],double v[3]);
 double _MMG5_det4pt(double c0[3],double c1[3],double c2[3],double c3[3]);
@@ -282,8 +284,10 @@ double _MMG5_volint(MMG5_pMesh);
 
 /* Delaunay functions*/
 int _MMG5_delone(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist);
-int _MMG5_cavity(MMG5_pMesh mesh,MMG5_pSol sol,int iel,int ip,int *list,int lon);
+int _MMG5_cavity_iso(MMG5_pMesh mesh,MMG5_pSol sol,int iel,int ip,int *list,int lon);
+int _MMG5_cavity_ani(MMG5_pMesh mesh,MMG5_pSol sol,int iel,int ip,int *list,int lon);
 int _MMG5_cenrad_iso(MMG5_pMesh mesh,double *ct,double *c,double *rad);
+int _MMG5_cenrad_ani(MMG5_pMesh mesh,double *ct,double *m,double *c,double *rad);
 
 /*mmg3d1.c*/
 void _MMG5_tet2tri(MMG5_pMesh mesh,int k,char ie,MMG5_Tria *ptt);
@@ -320,6 +324,8 @@ int    (*_MMG5_defsiz)(MMG5_pMesh ,MMG5_pSol );
 int    (*_MMG5_gradsiz)(MMG5_pMesh ,MMG5_pSol );
 int    (*_MMG5_intmetvol)(double*,double*,double*,double );
 int    (*_MMG5_interp4bar)(MMG5_pMesh,MMG5_pSol,int,int,double *);
+int    (*_MMG5_cavity)(MMG5_pMesh ,MMG5_pSol ,int ,int ,int *,int );
+int    (*_MMG5_buckin)(MMG5_pMesh ,MMG5_pSol ,_MMG5_pBucket ,int );
 
 void   _MMG5_Set_commonFunc();
 

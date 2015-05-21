@@ -211,6 +211,7 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
             _MMG5_delPt(mesh,ip);
             goto collapse;
           }
+#warning put the good metric
         }
 
         ier = _MMG5_split1b(mesh,met,list,ilist,ip,1);
@@ -294,6 +295,7 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
             _MMG5_delPt(mesh,ip);
             goto collapse;
           }
+#warning put the good metric
         }
         ier = _MMG5_split1b(mesh,met,list,ilist,ip,1);
         if ( ier < 0 ) {
@@ -348,11 +350,11 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
             _MMG5_delPt(mesh,ip);
             goto collapse;
           };
+#warning put the good metric
         }
 
         /* Delaunay */
-#warning aniso
-        if ( !_MMG5_buckin_iso(mesh,met,bucket,ip) ) {
+        if ( !_MMG5_buckin(mesh,met,bucket,ip) ) {
           _MMG5_delPt(mesh,ip);
           (*ifilt)++;
           goto collapse;

@@ -167,6 +167,7 @@ int _MMG5_interp4bar_ani(MMG5_pMesh mesh, MMG5_pSol met, int k, int ip,
     fprintf(stderr,"  ## INTERP INVALID METRIC.\n");
     return(0);
   }
+#warning put the good metric
 
   for (i=0; i<6; i++)  met->m[met->size*ip] = m0i[i];
 

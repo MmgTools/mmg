@@ -124,6 +124,8 @@ void _MMG5_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
     _MMG5_interp4bar = _MMG5_interp4bar_iso;
     _MMG5_defsiz     = _MMG5_defsiz_iso;
     _MMG5_gradsiz    = _MMG5_gradsiz_iso;
+    _MMG5_cavity     = _MMG5_cavity_iso;
+    _MMG5_buckin     = _MMG5_buckin_iso;
   }
   else if ( met->size == 6 ) {
     _MMG5_caltet     = _MMG5_caltet_ani;
@@ -133,6 +135,8 @@ void _MMG5_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
     _MMG5_interp4bar = _MMG5_interp4bar_ani;
     _MMG5_defsiz     = _MMG5_defsiz_ani;
     _MMG5_gradsiz    = _MMG5_gradsiz_ani;
+    _MMG5_cavity     = _MMG5_cavity_ani;
+    _MMG5_buckin     = _MMG5_buckin_ani;
   }
 }
 
