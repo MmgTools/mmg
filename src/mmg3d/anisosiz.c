@@ -35,6 +35,29 @@
 
 #include "mmg3d.h"
 
+inline int _MMG5_moymet(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,double *m1) {
+  MMG5_pPoint  ppt;
+  double  mm[6],*mp;
+  double  dd;
+  int     i,k,n;
+  
+  n = 0;
+  for (k=0; k<6; ++k) mm[k] = 0.;
+  for(i=0 ; i<4 ; i++) {
+    ppt = &mesh->point[pt->v[i]];
+    if(!(MG_SIN(ppt->tag) || MG_NOM & ppt->tag) && (ppt->tag & MG_GEO)) continue;
+    n++;
+    mp = &met->m[6*pt->v[i]];
+    for (k=0; k<6; ++k) {
+      mm[k] += mp[k];
+    }
+  }
+  
+  if(!n) {printf("warning 4 points ridges.....\n");exit(0);}
+  dd = 1./n;
+  for (k=0; k<6; ++k) m1[k] = mm[k]*dd;
+  return(n);
+}
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the sol structure.
@@ -54,16 +77,61 @@ inline double _MMG5_lenedg_ani(MMG5_pMesh mesh ,MMG5_pSol met, int ia,
 
   ip1 = pt->v[_MMG5_iare[ia][0]];
   ip2 = pt->v[_MMG5_iare[ia][1]];
-  if ( pt->xt ) {
-    isedg = ( mesh->xtetra[pt->xt].tag[ia] & MG_GEO);
+  
+  if ( pt->xt && (mesh->xtetra[pt->xt].tag[ia] & MG_BDY)) {
+      isedg = ( mesh->xtetra[pt->xt].tag[ia] & MG_GEO);
+      return(_MMG5_lenSurfEdg_ani(mesh, met, ip1, ip2, isedg));
+  } else {
+    return(_MMG5_lenedgspl_ani(mesh ,met, ia, pt));
   }
-  else isedg = 0;
-
-  printf("TO IMPLEMENT\n");
-
-  return(_MMG5_lenSurfEdg_ani(mesh, met, ip1, ip2, isedg));
+  printf("tutututtu\n");
+  exit(0);
 }
 
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the sol structure.
+ * \param ia index of edge in tetra \a pt .
+ * \param pt pointer toward the tetra from which we come.
+ * \return length of edge according to the prescribed metric.
+ *
+ * Compute length of edge \f$[i0;i1]\f$ according to the prescribed aniso
+ * metric.
+ *
+ */
+inline double _MMG5_lenedgspl_ani(MMG5_pMesh mesh ,MMG5_pSol met, int ia,
+                               MMG5_pTetra pt)
+{
+  MMG5_pPoint pp1,pp2;
+  double      *m1,*m2,mm;
+  int         ip1,ip2;
+  char        isedg;
+
+  ip1 = pt->v[_MMG5_iare[ia][0]];
+  ip2 = pt->v[_MMG5_iare[ia][1]];
+  
+  pp1 = &mesh->point[ip1];
+  pp2 = &mesh->point[ip2];
+
+  if(MG_SIN(pp1->tag) || (MG_NOM & pp1->tag))
+    m1 = &met->m[6*ip1];
+  else if(pp1->tag & MG_GEO) {
+    m1 = (double*)malloc(6*sizeof(double));
+    _MMG5_moymet(mesh,met,pt,m1);
+  } else
+    m1 = &met->m[6*ip1];
+
+  if(MG_SIN(pp2->tag)|| (MG_NOM & pp2->tag))
+    m2 = &met->m[6*ip2];
+  else if(pp2->tag & MG_GEO) {
+    m2 = (double*)malloc(6*sizeof(double));
+    _MMG5_moymet(mesh,met,pt,m2);
+  } else
+    m2 = &met->m[6*ip2];
+
+  return(_MMG5_lenedgCoor_ani(pp1->c,pp2->c,m1,m2));
+}
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.

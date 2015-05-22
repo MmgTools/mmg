@@ -63,6 +63,18 @@ inline double _MMG5_lenedg_iso(MMG5_pMesh mesh,MMG5_pSol met,int ia,
   return(_MMG5_lenSurfEdg_iso(mesh,met,ip1,ip2,0));
 }
 
+inline double _MMG5_lenedgspl_iso(MMG5_pMesh mesh ,MMG5_pSol met, int ia,
+                                  MMG5_pTetra pt) {
+  int ip1,ip2;
+  
+  ip1 = pt->v[_MMG5_iare[ia][0]];
+  ip2 = pt->v[_MMG5_iare[ia][1]];
+
+  return(_MMG5_lenSurfEdg_iso(mesh,met,ip1,ip2,0));
+
+}
+
+
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
