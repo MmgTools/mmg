@@ -139,35 +139,9 @@ int _MMG5_intregmet(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,double s,
   return(0);
 }
 
-/**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
- * \param k element index.
- * \param i local index of edge in \a k.
- * \param s interpolation parameter.
- * \param mr computed metric.
- * \return  0 if fail, 1 otherwise.
- *
- * Metric interpolation on edge \a i in elt \a it at
- * parameter \f$ 0 <= s0 <= 1 \f$ from \a p1 result is stored in \a mr. edge
- * \f$ p_1-p_2 \f$ is an internal edge.
- *
- * */
-int _MMG5_intvolmet(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,double s,
-                    double mr[6]) {
-  MMG5_pTetra     pt;
-
-  pt  = &mesh->tetra[k];
-
-  printf("To IMPLEMENT");
-  exit(EXIT_FAILURE);
-// build metric at ma and mb points (Warn for ridge points) mp points and
-  // _MMG5_intregvolmet(ma, mb,mr,s);
-
-  return(0);
-}
 
 
+ 
 /**
  * \param ma pointer on a metric
  * \param mb pointer on a metric
@@ -206,6 +180,69 @@ _MMG5_intregvolmet(double *ma,double *mb,double *mp,double t) {
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
+ * \param k element index.
+ * \param i local index of edge in \a k.
+ * \param s interpolation parameter.
+ * \param mr computed metric.
+ * \return  0 if fail, 1 otherwise.
+ *
+ * Metric interpolation on edge \a i in elt \a it at
+ * parameter \f$ 0 <= s0 <= 1 \f$ from \a p1 result is stored in \a mr. edge
+ * \f$ p_1-p_2 \f$ is an internal edge.
+ *
+ * */
+int _MMG5_intvolmet(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,double s,
+                    double mr[6]) {
+  MMG5_pTetra     pt;
+  MMG5_pPoint     pp1,pp2;
+  double          *m1,*m2;
+  int             ip1,ip2;
+
+  pt  = &mesh->tetra[k];
+  
+  ip1 = pt->v[_MMG5_iare[i][0]];
+  ip2 = pt->v[_MMG5_iare[i][1]];
+  
+  pp1 = &mesh->point[ip1];
+  pp2 = &mesh->point[ip2];
+  
+// build metric at ma and mb points (Warn for ridge points) mp points and
+ if(MG_SIN(pp1->tag) || (MG_NOM & pp1->tag))
+    m1 = &met->m[6*ip1];
+  else if(pp1->tag & MG_GEO) {
+    m1 = (double*)malloc(6*sizeof(double));
+    _MMG5_moymet(mesh,met,pt,m1);
+ } else {
+    m1 = &met->m[6*ip1]; 
+    //printf("\n\nm1 %e %e %e %e %e %e\n",m1[0],m1[1],m1[2],m1[3],m1[4],m1[5]);
+  }
+  if(MG_SIN(pp2->tag)|| (MG_NOM & pp2->tag))
+    m2 = &met->m[6*ip2];
+  else if(pp2->tag & MG_GEO) {
+    m2 = (double*)malloc(6*sizeof(double));
+    _MMG5_moymet(mesh,met,pt,m2);
+  } else {
+    m2 = &met->m[6*ip2];
+    // printf("m2 %e %e %e %e %e %e\n",m2[0],m2[1],m2[2],m2[3],m2[4],m2[5]);
+
+  }
+
+  _MMG5_intregvolmet(m1,m2,mr,s);
+  if(fabs(mr[5]) < 1e-6) {
+    printf("pp1 : %d %d \n",MG_SIN(pp1->tag) || (MG_NOM & pp1->tag),pp1->tag & MG_GEO);
+printf("\n\nm1 %e %e %e %e %e %e\n",m1[0],m1[1],m1[2],m1[3],m1[4],m1[5]);
+    printf("pp2 : %d %d \n",MG_SIN(pp2->tag) || (MG_NOM & pp2->tag),pp2->tag & MG_GEO);
+ printf("m2 %e %e %e %e %e %e\n",m2[0],m2[1],m2[2],m2[3],m2[4],m2[5]);
+    printf("mr %e %e %e %e %e %e\n",mr[0],mr[1],mr[2],mr[3],mr[4],mr[5]);
+    exit(0);
+  }
+ 
+
+  return(1);
+}
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
  * \param k index of the tetra.
  * \param ip index of the point on which we compute the metric.
  * \param cb barycentric coordinates of \a ip in \a k.
@@ -240,22 +277,64 @@ int _MMG5_interp4bar_iso(MMG5_pMesh mesh, MMG5_pSol met, int k, int ip,
  * coordinates of the new point in \a k.
  *
  */
-#warning add test for the ridge point metric
 int _MMG5_interp4bar_ani(MMG5_pMesh mesh, MMG5_pSol met, int k, int ip,
                          double cb[4]) {
   MMG5_pTetra   pt;
+  MMG5_pPoint   pp1,pp2,pp3,pp4;
   double        dm0[6],dm1[6],dm2[6],dm3[6];
   double        m0i[6],m1i[6],m2i[6],m3i[6],mi[6];
   int           i;
 
-  pt = &mesh->tetra[k];
-
-  for (i=0; i<6; i++) {
-    dm0[i] = met->m[met->size*pt->v[0]+i];
-    dm1[i] = met->m[met->size*pt->v[1]+i];
-    dm2[i] = met->m[met->size*pt->v[2]+i];
-    dm3[i] = met->m[met->size*pt->v[3]+i];
+  pt  = &mesh->tetra[k];
+  pp1 = &mesh->point[pt->v[0]];
+  if(MG_SIN(pp1->tag) || (MG_NOM & pp1->tag)) {
+    for (i=0; i<6; i++) {
+      dm0[i] = met->m[met->size*pt->v[0]+i]; 
+    } 
+  } else if(pp1->tag & MG_GEO) {
+    _MMG5_moymet(mesh,met,pt,&dm0[0]);
+  } else{
+    for (i=0; i<6; i++) {
+      dm0[i] = met->m[met->size*pt->v[0]+i]; 
+    } 
   }
+  pp2 = &mesh->point[pt->v[1]];
+  if(MG_SIN(pp2->tag) || (MG_NOM & pp2->tag)) {
+    for (i=0; i<6; i++) {
+      dm1[i] = met->m[met->size*pt->v[1]+i]; 
+    } 
+  } else if(pp2->tag & MG_GEO) {
+    _MMG5_moymet(mesh,met,pt,&dm1[0]);
+  } else{
+    for (i=0; i<6; i++) {
+      dm1[i] = met->m[met->size*pt->v[1]+i]; 
+    } 
+  }
+  pp3 = &mesh->point[pt->v[2]];
+  if(MG_SIN(pp3->tag) || (MG_NOM & pp3->tag)) {
+    for (i=0; i<6; i++) {
+      dm2[i] = met->m[met->size*pt->v[2]+i]; 
+    } 
+  } else if(pp3->tag & MG_GEO) {
+    _MMG5_moymet(mesh,met,pt,&dm2[0]);
+  } else{
+    for (i=0; i<6; i++) {
+      dm2[i] = met->m[met->size*pt->v[2]+i]; 
+    } 
+  }
+  pp4 = &mesh->point[pt->v[3]];
+  if(MG_SIN(pp4->tag) || (MG_NOM & pp4->tag)) {
+    for (i=0; i<6; i++) {
+      dm3[i] = met->m[met->size*pt->v[3]+i]; 
+    } 
+  } else if(pp4->tag & MG_GEO) {
+    _MMG5_moymet(mesh,met,pt,&dm3[0]);
+  } else{
+    for (i=0; i<6; i++) {
+      dm3[i] = met->m[met->size*pt->v[3]+i]; 
+    } 
+  }
+
   if ( !_MMG5_invmat(dm0,m0i) || !_MMG5_invmat(dm1,m1i) ||
        !_MMG5_invmat(dm2,m2i) || !_MMG5_invmat(dm3,m3i) ) {
     fprintf(stderr,"  ## INTERP INVALID METRIC.\n");
@@ -268,9 +347,8 @@ int _MMG5_interp4bar_ani(MMG5_pMesh mesh, MMG5_pSol met, int k, int ip,
     fprintf(stderr,"  ## INTERP INVALID METRIC.\n");
     return(0);
   }
-#warning put the good metric
 
-  for (i=0; i<6; i++)  met->m[met->size*ip] = m0i[i];
+  for (i=0; i<6; i++)  met->m[met->size*ip+i] = m0i[i];
 
   return 1;
 }
