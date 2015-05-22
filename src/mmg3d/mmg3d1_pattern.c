@@ -165,9 +165,14 @@ static int _MMG5_adpspl(MMG5_pMesh mesh,MMG5_pSol met, int* warn) {
         m2 = &met->m[iadr];
         iadr = met->size*ip;
         mp = &met->m[iadr];
-        if ( !_MMG5_intmet(mesh,met,k,imax,ip,0.5) ) {
+        ier = _MMG5_intmet(mesh,met,k,imax,ip,0.5);
+        if ( !ier ) {
           _MMG5_delPt(mesh,ip);
           return(-1);
+        }
+        else if (ier < 0) {
+          _MMG5_delPt(mesh,ip);
+          continue;
         }
       }
       ier = _MMG5_split1b(mesh,met,list,ilist,ip,1);
@@ -236,9 +241,14 @@ static int _MMG5_adpspl(MMG5_pMesh mesh,MMG5_pSol met, int* warn) {
         iadr = met->size*ip;
         mp = &met->m[iadr];
 
-        if ( !_MMG5_intmet(mesh,met,k,imax,ip,0.5) ) {
+        ier = _MMG5_intmet(mesh,met,k,imax,ip,0.5);
+        if ( !ier ) {
           _MMG5_delPt(mesh,ip);
           return(-1);
+        }
+        else if (ier < 0 ) {
+          _MMG5_delPt(mesh,ip);
+          continue;
         }
       }
       ier = _MMG5_split1b(mesh,met,list,ilist,ip,1);

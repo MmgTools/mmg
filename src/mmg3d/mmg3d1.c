@@ -763,7 +763,7 @@ _MMG5_anatetv(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
   MMG5_xTetra  *pxt;
   _MMG5_Hash     hash;
   double   ll,o[3],ux,uy,uz,hma2,*m1,*m2,*mp;
-  int      vx[6],k,ip,ip1,ip2,nap,ns,ne,memlack,iadr;
+  int      vx[6],k,ip,ip1,ip2,nap,ns,ne,memlack,iadr,ier;
   char     i,j,ia;
 
   /** 1. analysis */
@@ -866,7 +866,12 @@ _MMG5_anatetv(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
           iadr = met->size*ip;
           mp = &met->m[iadr];
 
-          if ( !_MMG5_intmet(mesh,met,k,i,ip,0.5) ) return(-1);
+          ier = _MMG5_intmet(mesh,met,k,i,ip,0.5);
+          if (!ier) return(-1);
+          else if ( ier < 0 ) {
+            _MMG5_delPt(mesh,ip);
+            continue;
+          }
 #warning put the good metric
         }
         if ( !_MMG5_hashEdge(mesh,&hash,ip1,ip2,ip) )  return(-1);
@@ -1077,7 +1082,13 @@ _MMG5_anatets(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
           m2 = &met->m[iadr];
           iadr = met->size*ip;
           mp = &met->m[iadr];
-          if ( !_MMG5_intmet(mesh,met,k,ia,ip,0.5) )  return(-1);
+
+          ier = _MMG5_intmet(mesh,met,k,ia,ip,0.5);
+          if ( !ier )  return(-1);
+          else if ( ier < 0 ) {
+            _MMG5_delPt(mesh,ip);
+            continue;
+          }
 #warning put the good metric
         }
 

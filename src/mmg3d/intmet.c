@@ -145,16 +145,15 @@ int _MMG5_intregmet(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,double s,
     return(_MMG5_interpreg_ani(mesh,met,&ptt,iloc,s,mr));
   }
   else if ( pxt->ftag[ifa1] & MG_BDY ) {
-    _MMG5_tet2tri( mesh,k,ifa0,&ptt);
-    iloc = _MMG5_iarfinv[ifa0][i];
+    _MMG5_tet2tri( mesh,k,ifa1,&ptt);
+    iloc = _MMG5_iarfinv[ifa1][i];
     assert(iloc >= 0);
     return(_MMG5_interpreg_ani(mesh,met,&ptt,iloc,s,mr));
   }
-  else {
-    /* i is a boundary edge but the tet has no bdy face. */
-    return(_MMG5_interpreg_ani(mesh,met,NULL,iloc,s,mr));
-  }
-  return(0);
+
+  /* if we pass here, then i is a boundary edge but the tet has no bdy
+   * face. Don't do anything, the edge will be split via a boundary tetra. */
+  return(-1);
 }
 
 

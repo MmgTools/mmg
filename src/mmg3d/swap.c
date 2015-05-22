@@ -329,10 +329,7 @@ int _MMG5_swpbdy(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int it1,_MMG5_p
     }
   }
   if ( met->m ) {
-    mp = &met->m[met->size*np];
-    mq = &met->m[met->size*nq];
-    mm = &met->m[met->size*nm];
-    if ( !_MMG5_intmet(mesh,met,iel,ia,nm,0.5) )  return(0);
+     if ( _MMG5_intmet(mesh,met,iel,ia,nm,0.5)<=0 )  return(0);
 #warning put the good metric
   }
 

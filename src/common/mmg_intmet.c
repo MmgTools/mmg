@@ -650,16 +650,8 @@ int _MMG5_interpreg_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt,char i,
   }
   else {
     if ( MG_GEO & p1->tag ) {
-      if ( pt ) {
-        _MMG5_nortri(mesh,pt,nt);
-        if ( !_MMG5_buildridmetnor(mesh,met,pt->v[i1],nt,m1) )  return(0);
-      }
-      else {
-        // Append only in mmg3d: the edge is boundary but the tet from which we
-        // come has no boundary face.
-        printf("%s:%d\n",__FILE__,__LINE__);
-        exit(EXIT_FAILURE);
-      }
+      _MMG5_nortri(mesh,pt,nt);
+      if ( !_MMG5_buildridmetnor(mesh,met,pt->v[i1],nt,m1) )  return(0);
     }
     else {
       memcpy(m1,&met->m[6*ip1],6*sizeof(double));
@@ -713,16 +705,8 @@ int _MMG5_interpreg_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt,char i,
   }
   else {
     if ( p2->tag & MG_GEO ) {
-     if ( pt ) {
-        _MMG5_nortri(mesh,pt,nt);
-        if ( !_MMG5_buildridmetnor(mesh,met,pt->v[i2],nt,m2))  return(0);
-      }
-      else {
-        // Append only in mmg3d: the edge is boundary but the tet from which we
-        // come has no boundary face.
-        printf("%s:%d\n",__FILE__,__LINE__);
-        exit(EXIT_FAILURE);
-      }
+      _MMG5_nortri(mesh,pt,nt);
+      if ( !_MMG5_buildridmetnor(mesh,met,pt->v[i2],nt,m2))  return(0);
     }
     else {
       memcpy(m2,&met->m[6*ip2],6*sizeof(double));

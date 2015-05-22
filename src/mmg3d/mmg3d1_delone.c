@@ -201,7 +201,7 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
           m2 = &met->m[iadr];
           iadr = met->size*ip;
           mp = &met->m[iadr];
-          if ( !_MMG5_intmet(mesh,met,k,imax,ip,0.5) ) {
+          if ( _MMG5_intmet(mesh,met,k,imax,ip,0.5) <=0 ) {
             _MMG5_delPt(mesh,ip);
             goto collapse;
           }
@@ -285,7 +285,7 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
           m2 = &met->m[iadr];
           iadr = met->size*ip;
           mp = &met->m[iadr];
-          if ( !_MMG5_intmet(mesh,met,k,imax,ip,0.5) ) {
+          if ( _MMG5_intmet(mesh,met,k,imax,ip,0.5)<=0 ) {
             _MMG5_delPt(mesh,ip);
             goto collapse;
           }
@@ -333,7 +333,7 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
         }
         ppt = &mesh->point[ip];
         if ( met->m ) {
-          if ( !_MMG5_intmet(mesh,met,k,imax,ip,0.5) ) {
+          if ( _MMG5_intmet(mesh,met,k,imax,ip,0.5)<=0 ) {
             _MMG5_delPt(mesh,ip);
             goto collapse;
           };
@@ -535,7 +535,7 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
             m2 = &met->m[iadr];
             iadr = met->size*ip;
             mp = &met->m[iadr];
-            if ( !_MMG5_intmet(mesh,met,k,imax,ip,0.5) ) {
+            if ( _MMG5_intmet(mesh,met,k,imax,ip,0.5)<=0 ) {
               _MMG5_delPt(mesh,ip);
               goto collapse2;
             }
@@ -616,7 +616,7 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
             m2 = &met->m[iadr];
             iadr = met->size*ip;
             mp = &met->m[iadr];
-            if ( !_MMG5_intmet(mesh,met,k,imax,ip,0.5) ) {
+            if ( _MMG5_intmet(mesh,met,k,imax,ip,0.5)<=0 ) {
               _MMG5_delPt(mesh,ip);
               goto collapse2;
             }
@@ -668,7 +668,7 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
             m2 = &met->m[iadr];
             iadr = met->size*ip;
             mp = &met->m[iadr];
-            if ( !_MMG5_intmet(mesh,met,k,imax,ip,0.5) ) {
+            if ( _MMG5_intmet(mesh,met,k,imax,ip,0.5)<=0 ) {
               _MMG5_delPt(mesh,ip);
               goto collapse2;
             }
