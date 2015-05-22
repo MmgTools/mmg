@@ -40,15 +40,25 @@ extern char ddb;
 
 
 
-/* Metric interpolation between points p1 and p2, in tria it at parameter 0 <= s0 <= 1 from p1
-   result is stored in mr. edge p1p2 must not be a ridge */
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param k element index.
+ * \param i local index of edge in \a k.
+ * \param s interpolation parameter.
+ * \param mr computed metric.
+ * \return call to _MMG5_interpreg_ani (thus, 0 if fail, 1 otherwise).
+ *
+ * Metric interpolation on edge \a i in elt \a it at
+ * parameter \f$ 0 <= s0 <= 1 \f$ from \a p1 result is stored in \a mr. edge
+ * \f$ p_1-p_2 \f$ must not be a ridge.
+ *
+ * */
 int intregmet(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,double s,double mr[6]) {
   MMG5_pTria     pt;
 
   pt  = &mesh->tria[k];
   return(_MMG5_interpreg_ani(mesh,met,pt,i,s,mr));
-
-  return(1);
 }
 
 /* linear interpolation of sizemap along edge i of tria k */

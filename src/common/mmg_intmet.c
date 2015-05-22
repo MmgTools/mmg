@@ -603,6 +603,7 @@ int _MMG5_interp_iso(double *ma,double *mb,double *mp,double t) {
  * \param i char : edge of the triangle pt
  * \param s interpolated parameter (comprise between 0 and 1)
  * \param mr computed interpolated metric
+ * \param return 0 if fail, 1 otherwise.
  *
  * Metric interpolation between points p1 and p2, in tria \a pt at parameter 0
  * <= \a s <= 1 from p1 result is stored in \a mr. edge p1p2 must not be a ridge

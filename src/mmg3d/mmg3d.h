@@ -266,6 +266,9 @@ int  _MMG5_badelt(MMG5_pMesh mesh,MMG5_pSol met);
 int _MMG5_prilen(MMG5_pMesh mesh,MMG5_pSol met);
 int _MMG5_DoSol(MMG5_pMesh mesh,MMG5_pSol met);
 void _MMG5_defaultValues(MMG5_pMesh);
+int  _MMG5_intridmet(MMG5_pMesh,MMG5_pSol,int,int,double,double*,double*);
+int  _MMG5_intregmet(MMG5_pMesh,MMG5_pSol,int,char,double, double*);
+int _MMG5_intvolmet(MMG5_pMesh,MMG5_pSol,int,char,double, double*);
 
 /* useful functions to debug */
 int  _MMG5_indElt(MMG5_pMesh mesh,int kel);
@@ -312,7 +315,8 @@ double _MMG5_caltet_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt);
 double _MMG5_caltet_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt);
 double _MMG5_lenedgCoor_ani(double*, double*, double*, double*);
 double _MMG5_lenedgCoor_iso(double*, double*, double*, double*);
-int    _MMG5_intmetvol_ani(double*,double*,double*,double );
+int    _MMG5_intmet_iso(MMG5_pMesh,MMG5_pSol,int,char,int, double);
+int    _MMG5_intmet_ani(MMG5_pMesh,MMG5_pSol,int,char,int, double);
 int    _MMG5_interp4bar_ani(MMG5_pMesh,MMG5_pSol,int,int,double *);
 int    _MMG5_interp4bar_iso(MMG5_pMesh,MMG5_pSol,int,int,double *);
 int    _MMG5_defsiz_iso(MMG5_pMesh,MMG5_pSol );
@@ -325,7 +329,7 @@ double (*_MMG5_caltet)(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt);
 double (*_MMG5_caltri)(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt);
 int    (*_MMG5_defsiz)(MMG5_pMesh ,MMG5_pSol );
 int    (*_MMG5_gradsiz)(MMG5_pMesh ,MMG5_pSol );
-int    (*_MMG5_intmetvol)(double*,double*,double*,double );
+int    (*_MMG5_intmet)(MMG5_pMesh,MMG5_pSol,int,char,int, double);
 int    (*_MMG5_interp4bar)(MMG5_pMesh,MMG5_pSol,int,int,double *);
 int    (*_MMG5_cavity)(MMG5_pMesh ,MMG5_pSol ,int ,int ,int *,int );
 int    (*_MMG5_buckin)(MMG5_pMesh ,MMG5_pSol ,_MMG5_pBucket ,int );

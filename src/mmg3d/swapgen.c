@@ -246,7 +246,7 @@ int _MMG5_swpgen(MMG5_pMesh mesh,MMG5_pSol met,int nconf,int ilist,int *list,_MM
     iadr = met->size*np;
     mp = &met->m[iadr];
 
-    _MMG5_intmetvol(m1,m2,mp,0.5);
+    _MMG5_intmet(mesh,met,iel,ia,np,0.5);
 #warning todo : put the good metric
   }
 

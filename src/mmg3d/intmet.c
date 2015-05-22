@@ -48,25 +48,125 @@
  * \a k.
  *
  */
-/* void _MMG5_intmet_ani(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int ip, */
-/*                       double s) { */
-/*   MMG5_pTetra   pt; */
-/*   MMG5_pPoint   ppt; */
-/*   MMG5_pxPoint  pxp; */
-/*   double        *m; */
+int _MMG5_intmet_ani(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int ip,
+                      double s) {
+  MMG5_pTetra   pt;
+  MMG5_pxTetra  pxt;
+  MMG5_pPoint   ppt;
+  MMG5_pxPoint  pxp;
+  double        *m;
 
-/*   pt = &mesh->tetra[k]; */
-/*   m  = &met->m[6*ip]; */
-/*   if ( pt->tag[i] & MG_GEO ) { */
-/*     ppt = &mesh->point[ip]; */
-/*     assert(ppt->xp); */
-/*     pxp = &mesh->xpoint[ppt->xp]; */
-/*     _MMG5_intridmet(mesh,met,k,i,s,pxp->n1,m); */
-/*   } */
-/*   else { */
-/*     _MMG5_intregmet(mesh,met,k,i,s,m); */
-/*   } */
-/* } */
+  pt = &mesh->tetra[k];
+  m  = &met->m[6*ip];
+
+  if ( pt->xt ) {
+    pxt = &mesh->xtetra[pt->xt];
+    if ( pxt->tag[i] & MG_GEO ) {
+      ppt = &mesh->point[ip];
+      assert(ppt->xp);
+      pxp = &mesh->xpoint[ppt->xp];
+      return(_MMG5_intridmet(mesh,met,k,i,s,pxp->n1,m));
+    }
+    else if ( pxt->tag[i] & MG_BDY ) {
+      return(_MMG5_intregmet(mesh,met,k,i,s,m));
+    }
+    else {
+      /* The edge is an internal edge. */
+      return(_MMG5_intvolmet(mesh,met,k,i,s,m));
+    }
+  }
+  else {
+    /* The edge is an internal edge. */
+    return(_MMG5_intvolmet(mesh,met,k,i,s,m));
+  }
+  return(0);
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param k element index.
+ * \param i local index of edge in \a k.
+ * \param ip global index of the new point in which we want to compute the metric.
+ * \param s interpolation parameter (between 0 and 1).
+ * \return 0 if fail, 1 otherwise.
+ *
+ * Interpolation of anisotropic sizemap at parameter \a s along edge \a i of elt
+ * \a k.
+ *
+ */
+int _MMG5_intmet_iso(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int ip,
+                      double s) {
+  MMG5_pTetra   pt;
+  int           ip1, ip2;
+  double        *m1,*m2,*mm;
+
+  pt = &mesh->tetra[k];
+  ip1 = pt->v[_MMG5_iare[i][0]];
+  ip2 = pt->v[_MMG5_iare[i][1]];
+
+  m1 = &met->m[met->size*ip1];
+  m2 = &met->m[met->size*ip2];
+  mm = &met->m[met->size*ip];
+
+  return(_MMG5_interp_iso(m1,m2,mm,s));
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param k element index.
+ * \param i local index of edge in \a k.
+ * \param s interpolation parameter.
+ * \param mr computed metric.
+ * \return  0 if fail, 1 otherwise.
+ *
+ * Metric interpolation on edge \a i in elt \a it at
+ * parameter \f$ 0 <= s0 <= 1 \f$ from \a p1 result is stored in \a mr. edge
+ * \f$ p_1-p_2 \f$ must not be a ridge.
+ *
+ * */
+int _MMG5_intregmet(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,double s,
+                    double mr[6]) {
+  MMG5_pTetra     pt;
+
+  pt  = &mesh->tetra[k];
+
+  printf("To IMPLEMENT");
+  exit(EXIT_FAILURE);
+  //return(_MMG5_interpreg_ani(mesh,met,pt,i,s,mr));
+
+  return(0);
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param k element index.
+ * \param i local index of edge in \a k.
+ * \param s interpolation parameter.
+ * \param mr computed metric.
+ * \return  0 if fail, 1 otherwise.
+ *
+ * Metric interpolation on edge \a i in elt \a it at
+ * parameter \f$ 0 <= s0 <= 1 \f$ from \a p1 result is stored in \a mr. edge
+ * \f$ p_1-p_2 \f$ is an internal edge.
+ *
+ * */
+int _MMG5_intvolmet(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,double s,
+                    double mr[6]) {
+  MMG5_pTetra     pt;
+
+  pt  = &mesh->tetra[k];
+
+  printf("To IMPLEMENT");
+  exit(EXIT_FAILURE);
+// build metric at ma and mb points (Warn for ridge points) mp points and
+  // _MMG5_intregvolmet(ma, mb,mr,s);
+
+  return(0);
+}
+
 
 /**
  * \param ma pointer on a metric
@@ -75,10 +175,11 @@
  * \param t interpolation parameter (comprise between 0 and 1)
  * \return 1 if success, 0 if fail.
  *
- * Linear interpolation of anisotropic sizemap along an internal edge
+ * Linear interpolation of anisotropic sizemap along an internal edge.
  *
  */
-int _MMG5_intmetvol_ani(double *ma,double *mb,double *mp,double t) {
+static inline int
+_MMG5_intregvolmet(double *ma,double *mb,double *mp,double t) {
   double        dma[6],dmb[6],mai[6],mbi[6],mi[6];
   int           i;
 
