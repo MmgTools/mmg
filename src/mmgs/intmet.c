@@ -67,7 +67,8 @@ int _MMG5_intridmet(MMG5_pMesh mesh,MMG5_pSol met,int ip1, int ip2,double s,
   m2  = &met->m[6*ip2];
 
   /* Case when both endpoints are singular */
-  if ( MS_SIN(p1->tag) && MS_SIN(p2->tag) ) {
+  if ( (MG_SIN(p1->tag) || (p1->tag & MG_NOM)) &&
+       (MG_SIN(p2->tag) || (p2->tag & MG_NOM)) ) {
     /* m1 and m2 are isotropic metrics */
     dd  = (1-s)*sqrt(m2[0]) + s*sqrt(m1[0]);
     dd *= dd;
@@ -96,7 +97,8 @@ int _MMG5_intridmet(MMG5_pMesh mesh,MMG5_pSol met,int ip1, int ip2,double s,
     }
   }
   /* vertex p1 is singular, p2 is regular */
-  else if ( MS_SIN(p1->tag) && (!MS_SIN(p2->tag)) ) {
+  else if (  (MG_SIN(p1->tag) || (p1->tag & MG_NOM)) &&
+            !(MG_SIN(p2->tag) || (p2->tag & MG_NOM)) ) {
     /* m1 is an isotropic metric and m2 is a "ridge" metric that respect our
      * storage convention. */
     go2 = &mesh->xpoint[p2->xp];
@@ -167,7 +169,8 @@ int _MMG5_intridmet(MMG5_pMesh mesh,MMG5_pSol met,int ip1, int ip2,double s,
     }
   }
   /* vertex p2 is singular, p1 is regular */
-  else if ( MS_SIN(p2->tag) && (!MS_SIN(p1->tag)) ) {
+  else if ( ( MG_SIN(p2->tag) || (p2->tag & MG_NOM)) &&
+            !(MG_SIN(p1->tag) || (p1->tag & MG_NOM)) ) {
     /* m2 is an isotropic metric and m1 is a "ridge" metric that respect our
      * storage convention. */
     go1 = &mesh->xpoint[p1->xp];
