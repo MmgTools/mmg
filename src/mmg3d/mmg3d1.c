@@ -36,6 +36,8 @@
  *
  */
 
+#warning now we have always a metric here so we can remove all the if ( met->m ) tests
+
 #include "mmg3d.h"
 
 char  ddb;

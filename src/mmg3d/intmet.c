@@ -129,13 +129,31 @@ int _MMG5_intmet_iso(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int ip,
 int _MMG5_intregmet(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,double s,
                     double mr[6]) {
   MMG5_pTetra     pt;
+  MMG5_pxTetra    pxt;
+  MMG5_Tria       ptt;
+  int             ifa0, ifa1, iloc;
 
-  pt  = &mesh->tetra[k];
+  pt   = &mesh->tetra[k];
+  pxt  = &mesh->xtetra[pt->xt];
+  ifa0 = _MMG5_ifar[i][0];
+  ifa1 = _MMG5_ifar[i][1];
 
-  printf("To IMPLEMENT");
-  exit(EXIT_FAILURE);
-  //return(_MMG5_interpreg_ani(mesh,met,pt,i,s,mr));
-
+  if ( pxt->ftag[ifa0] & MG_BDY ) {
+    _MMG5_tet2tri( mesh,k,ifa0,&ptt);
+    iloc = _MMG5_iarfinv[ifa0][i];
+    assert(iloc >= 0);
+    return(_MMG5_interpreg_ani(mesh,met,&ptt,iloc,s,mr));
+  }
+  else if ( pxt->ftag[ifa1] & MG_BDY ) {
+    _MMG5_tet2tri( mesh,k,ifa0,&ptt);
+    iloc = _MMG5_iarfinv[ifa0][i];
+    assert(iloc >= 0);
+    return(_MMG5_interpreg_ani(mesh,met,&ptt,iloc,s,mr));
+  }
+  else {
+    /* i is a boundary edge but the tet has no bdy face. */
+    return(_MMG5_interpreg_ani(mesh,met,NULL,iloc,s,mr));
+  }
   return(0);
 }
 

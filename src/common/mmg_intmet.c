@@ -608,7 +608,8 @@ int _MMG5_interp_iso(double *ma,double *mb,double *mp,double t) {
  * Metric interpolation between points p1 and p2, in tria \a pt at parameter 0
  * <= \a s <= 1 from p1 result is stored in \a mr. edge p1p2 must not be a ridge
  */
-int _MMG5_interpreg_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt,char i,double s,double mr[6]) {
+int _MMG5_interpreg_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt,char i,
+                        double s,double mr[6]) {
   MMG5_pPoint    p1,p2,p3;
   _MMG5_Bezier   b;
   double         b1[3],b2[3],bn[3],c[3],nt[3],cold[3],n[3],nold[3];
@@ -619,7 +620,6 @@ int _MMG5_interpreg_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt,char i,doubl
 
   /* Number of steps for parallel transport */
   nstep = 4;
-  _MMG5_nortri(mesh,pt,nt);
   i1  = _MMG5_inxt2[i];
   i2  = _MMG5_iprv2[i];
   ip1 = pt->v[i1];
@@ -650,7 +650,16 @@ int _MMG5_interpreg_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt,char i,doubl
   }
   else {
     if ( MG_GEO & p1->tag ) {
-      if ( !_MMG5_buildridmetnor(mesh,met,pt->v[i1],nt,m1) )  return(0);
+      if ( pt ) {
+        _MMG5_nortri(mesh,pt,nt);
+        if ( !_MMG5_buildridmetnor(mesh,met,pt->v[i1],nt,m1) )  return(0);
+      }
+      else {
+        // Append only in mmg3d: the edge is boundary but the tet from which we
+        // come has no boundary face.
+        printf("%s:%d\n",__FILE__,__LINE__);
+        exit(EXIT_FAILURE);
+      }
     }
     else {
       memcpy(m1,&met->m[6*ip1],6*sizeof(double));
@@ -704,7 +713,16 @@ int _MMG5_interpreg_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt,char i,doubl
   }
   else {
     if ( p2->tag & MG_GEO ) {
-      if ( !_MMG5_buildridmetnor(mesh,met,pt->v[i2],nt,m2))  return(0);
+     if ( pt ) {
+        _MMG5_nortri(mesh,pt,nt);
+        if ( !_MMG5_buildridmetnor(mesh,met,pt->v[i2],nt,m2))  return(0);
+      }
+      else {
+        // Append only in mmg3d: the edge is boundary but the tet from which we
+        // come has no boundary face.
+        printf("%s:%d\n",__FILE__,__LINE__);
+        exit(EXIT_FAILURE);
+      }
     }
     else {
       memcpy(m2,&met->m[6*ip2],6*sizeof(double));
