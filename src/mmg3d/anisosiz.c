@@ -104,7 +104,7 @@ inline double _MMG5_lenedgspl_ani(MMG5_pMesh mesh ,MMG5_pSol met, int ia,
                                MMG5_pTetra pt)
 {
   MMG5_pPoint pp1,pp2;
-  double      *m1,*m2,mm;
+  double      *m1,*m2;
   int         ip1,ip2;
   char        isedg;
 

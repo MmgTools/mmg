@@ -333,13 +333,6 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
         }
         ppt = &mesh->point[ip];
         if ( met->m ) {
-          iadr = met->size*ip1;
-          m1 = &met->m[iadr];
-          iadr = met->size*ip2;
-          m2 = &met->m[iadr];
-          iadr = met->size*ip;
-          mp = &met->m[iadr];
-
           if ( !_MMG5_intmet(mesh,met,k,imax,ip,0.5) ) {
             _MMG5_delPt(mesh,ip);
             goto collapse;
