@@ -70,13 +70,8 @@ static int _MMG5_adpspl(MMG5_pMesh mesh,MMG5_pSol met, int* warn) {
     imax = -1; lmax = 0.0;
     for (i=0; i<6; i++) {
       if ( pt->xt && (pxt->tag[i] & MG_REQ) )  continue;
-      ip1  = _MMG5_iare[i][0];
-      ip2  = _MMG5_iare[i][1];
-      if ( pt->xt )
-        len = _MMG5_lenedg(mesh,met,pt->v[ip1],pt->v[ip2],
-                           (pxt->tag[i] & MG_GEO));
-      else
-        len = _MMG5_lenedg(mesh,met,pt->v[ip1],pt->v[ip2],0);
+      len = _MMG5_lenedg(mesh,met,i,pt);
+
       if ( len > lmax ) {
         lmax = len;
         imax = i;
@@ -293,13 +288,8 @@ static int _MMG5_adpcol(MMG5_pMesh mesh,MMG5_pSol met) {
     imin = -1; lmin = DBL_MAX;
     for (i=0; i<6; i++) {
       if ( pt->xt && (pxt->tag[i] & MG_REQ) )  continue;
-      i1  = _MMG5_iare[i][0];
-      i2  = _MMG5_iare[i][1];
-      if ( pt->xt )
-        len = _MMG5_lenedg(mesh,met,pt->v[i1],pt->v[i2],
-                           (pxt->tag[i] & MG_GEO));
-      else
-        len = _MMG5_lenedg(mesh,met,pt->v[i1],pt->v[i2],0);
+      len = _MMG5_lenedg(mesh,met,i,pt);
+
       if ( len < lmin ) {
         lmin = len;
         imin = i;

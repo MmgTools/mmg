@@ -696,11 +696,8 @@ static int _MMG5_coltet(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
           if ( ll > hmi2 )  continue;
         }
         else if ( typchk == 2 ) {
-          if ( pt->xt )
-            ll = _MMG5_lenedg(mesh,met,pt->v[ip],pt->v[iq],
-                              (pxt->tag[_MMG5_iarf[i][j]] & MG_GEO));
-          else
-            ll = _MMG5_lenedg(mesh,met,pt->v[ip],pt->v[iq],0);
+          ll = _MMG5_lenedg(mesh,met,_MMG5_iarf[i][j],pt);
+
           if ( ll > _MMG5_LSHRT )  continue;
         }
 
@@ -833,7 +830,7 @@ _MMG5_anatetv(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
             ip = _MMG5_hashGet(&hash,ip1,ip2);
         }
         else if ( typchk == 2 ) {
-          ll = _MMG5_lenedg(mesh,met,ip1,ip2,0);
+          ll = _MMG5_lenedg(mesh,met,i,pt);
 
           if ( ll > _MMG5_LLONG )
             ip = _MMG5_hashGet(&hash,ip1,ip2);
@@ -1023,7 +1020,7 @@ _MMG5_anatets(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
         i2  = _MMG5_iare[ia][1];
         ip1 = pt->v[i1];
         ip2 = pt->v[i2];
-        len = _MMG5_lenedg(mesh,met,ip1,ip2, (pxt->tag[ia] & MG_GEO));
+        len = _MMG5_lenedg(mesh,met,ia,pt);
         if ( len > _MMG5_LLONG )  MG_SET(pt->flag,ia);
       }
     }

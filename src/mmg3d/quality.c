@@ -214,23 +214,12 @@ inline double _MMG5_caltet_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt) {
   det = sqrt(det) * vol;
 
   /* edge lengths */
-  if ( pt->xt ) {
-    pxt = &mesh->xtetra[pt->xt];
-    h1 = _MMG5_lenedg_ani(mesh,met,ip[0],ip[1],( pxt->tag[0] & MG_GEO ));
-    h2 = _MMG5_lenedg_ani(mesh,met,ip[0],ip[2],( pxt->tag[1] & MG_GEO ));
-    h3 = _MMG5_lenedg_ani(mesh,met,ip[0],ip[3],( pxt->tag[2] & MG_GEO ));
-    h4 = _MMG5_lenedg_ani(mesh,met,ip[1],ip[2],( pxt->tag[3] & MG_GEO ));
-    h5 = _MMG5_lenedg_ani(mesh,met,ip[1],ip[3],( pxt->tag[4] & MG_GEO ));
-    h6 = _MMG5_lenedg_ani(mesh,met,ip[2],ip[3],( pxt->tag[5] & MG_GEO ));
-  }
-  else {
-    h1 = _MMG5_lenedg_ani(mesh,met,ip[0],ip[1],0);
-    h2 = _MMG5_lenedg_ani(mesh,met,ip[0],ip[2],0);
-    h3 = _MMG5_lenedg_ani(mesh,met,ip[0],ip[3],0);
-    h4 = _MMG5_lenedg_ani(mesh,met,ip[1],ip[2],0);
-    h5 = _MMG5_lenedg_ani(mesh,met,ip[1],ip[3],0);
-    h6 = _MMG5_lenedg_ani(mesh,met,ip[2],ip[3],0);
-  }
+  h6 = _MMG5_lenedg_ani(mesh,met,0,pt);
+  h1 = _MMG5_lenedg_ani(mesh,met,1,pt);
+  h2 = _MMG5_lenedg_ani(mesh,met,2,pt);
+  h3 = _MMG5_lenedg_ani(mesh,met,3,pt);
+  h4 = _MMG5_lenedg_ani(mesh,met,4,pt);
+  h5 = _MMG5_lenedg_ani(mesh,met,5,pt);
 
   /* quality */
   rap = h1 + h2 + h3 + h4 + h5 + h6;
@@ -635,10 +624,7 @@ int _MMG5_prilen(MMG5_pMesh mesh, MMG5_pSol met) {
       ier = _MMG5_hashPop(&hash,np,nq);
       if( ier ) {
         ned ++;
-        if ( pt->xt )
-          len = _MMG5_lenedg(mesh,met,np,nq,(pxt->tag[ia] & MG_GEO));
-        else
-          len = _MMG5_lenedg(mesh,met,np,nq,0);
+        len = _MMG5_lenedg(mesh,met,ia,pt);
 
         avlen += len;
 
@@ -813,11 +799,8 @@ int _MMG5_countelt(MMG5_pMesh mesh,MMG5_pSol sol, double *weightelt, long *npcib
     for(ib=0 ; ib<6 ; ib++) {
       ipa = _MMG5_iare[ib][0];
       ipb = _MMG5_iare[ib][1];
-      if ( pt->xt )
-        lent[ib] = _MMG5_lenedg(mesh,sol,pt->v[ipa],pt->v[ipb],
-                                (pxt->tag[ib] & MG_GEO ));
-      else
-        lent[ib] = _MMG5_lenedg(mesh,sol,pt->v[ipa],pt->v[ipb],0);
+      lent[ib] = _MMG5_lenedg(mesh,sol,ib,pt);
+
       lenavg+=lent[ib];
     }
     lenavg /= 6.;

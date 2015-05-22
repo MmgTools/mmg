@@ -38,11 +38,11 @@
  * compatibility with \a lenedg_ani).
  * \return length of edge according to the prescribed metric.
  *
- * Compute length of edge \f$[i0;i1]\f$ according to the prescribed iso.
+ * Compute length of surface edge \f$[i0;i1]\f$ according to the prescribed iso
  * metric.
  *
  */
-inline double _MMG5_lenedg_iso(MMG5_pMesh mesh,MMG5_pSol met,int ip1,int ip2, char isedg) {
+inline double _MMG5_lenSurfEdg_iso(MMG5_pMesh mesh,MMG5_pSol met,int ip1,int ip2, char isedg) {
   MMG5_pPoint   p1,p2;
   double   h1,h2,l,r,len;
 

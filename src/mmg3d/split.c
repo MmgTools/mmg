@@ -323,7 +323,7 @@ int _MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,int 
   MMG5_pxTetra        pxt0;
   int            ilist,k,open,iel,jel,*newtet,nump,*adja,j;
   int            *adjan,nei2,nei3,mel;
-  char           ie,tau[4],isxt,isxt1,i,voy,tag;
+  char           ie,tau[4],isxt,isxt1,i,voy;
   unsigned char  *taued;
   double         lmin,lmax,len;
 
@@ -336,9 +336,7 @@ int _MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,int 
     for (j=0; j<ilist; j++) {
       for (i=0; i<6; i++) {
         pt   = &mesh->tetra[list[j]/6];
-        tag  = pt->xt ? (mesh->xtetra[pt->xt].tag[i]) : 0;
-        len  = _MMG5_lenedg(mesh,met, pt->v[_MMG5_iare[i][0]],
-                            pt->v[_MMG5_iare[i][1]],tag);
+        len  = _MMG5_lenedg(mesh,met,i,pt);
         if ( len < lmin) {
           lmin = len;
         }
@@ -352,9 +350,10 @@ int _MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,int 
       iel = list[j] / 6;
       pt  = &mesh->tetra[iel];
       ie  = list[j] % 6;
-      len = _MMG5_lenedg(mesh,met, pt->v[_MMG5_isar[ie][0]],ip,0);
+#warning todo : change args put ie for edge _MMG5_isar[ie][0],ip but it is not that 
+      len = _MMG5_lenedg(mesh,met, ie,pt);
       if ( len < lmin )  break;
-      len = _MMG5_lenedg(mesh,met, pt->v[_MMG5_isar[ie][1]],ip,0);
+      len = _MMG5_lenedg(mesh,met, ie,pt);
       if ( len < lmin )  break;
     }
     if ( j < ilist )  return(0);

@@ -126,9 +126,9 @@ inline double caleltsig_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel) {
   anisurf = _MMG5_surftri_ani(mesh,met,pt);
   if ( anisurf == 0.0 )  return(-1.0);
 
-  l[0] = _MMG5_lenedg_ani(mesh,met,ib,ic,( pt->tag[0] & MG_GEO ));
-  l[1] = _MMG5_lenedg_ani(mesh,met,ia,ic,( pt->tag[1] & MG_GEO ));
-  l[2] = _MMG5_lenedg_ani(mesh,met,ia,ib,( pt->tag[2] & MG_GEO ));
+  l[0] = _MMG5_lenSurfEdg_ani(mesh,met,ib,ic,( pt->tag[0] & MG_GEO ));
+  l[1] = _MMG5_lenSurfEdg_ani(mesh,met,ia,ic,( pt->tag[1] & MG_GEO ));
+  l[2] = _MMG5_lenSurfEdg_ani(mesh,met,ia,ib,( pt->tag[2] & MG_GEO ));
 
   rap = l[0]*l[0] + l[1]*l[1] + l[2]*l[2];
   if ( rap < _MMG5_EPSD )  return(0.0);
@@ -328,7 +328,7 @@ int _MMG5_prilen(MMG5_pMesh mesh, MMG5_pSol met) {
       /* Remove edge from hash */
       _MMG5_hashGet(&hash,np,nq);
       ned ++;
-      len = _MMG5_lenedg(mesh,met,np,nq,(pt->tag[ia] & MG_GEO));
+      len = _MMG5_lenSurfEdg(mesh,met,np,nq,(pt->tag[ia] & MG_GEO));
       avlen += len;
 
       if( len < lmin ) {

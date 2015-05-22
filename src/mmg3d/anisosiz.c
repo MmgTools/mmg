@@ -37,6 +37,35 @@
 
 /**
  * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the sol structure.
+ * \param ia index of edge in tetra \a pt .
+ * \param pt pointer toward the tetra from which we come.
+ * \return length of edge according to the prescribed metric.
+ *
+ * Compute length of edge \f$[i0;i1]\f$ according to the prescribed aniso
+ * metric.
+ *
+ */
+inline double _MMG5_lenedg_ani(MMG5_pMesh mesh ,MMG5_pSol met, int ia,
+                               MMG5_pTetra pt)
+{
+  int ip1,ip2;
+  char isedg;
+
+  ip1 = pt->v[_MMG5_iare[ia][0]];
+  ip2 = pt->v[_MMG5_iare[ia][1]];
+  if ( pt->xt ) {
+    isedg = ( mesh->xtetra[pt->xt].tag[ia] & MG_GEO);
+  }
+  else isedg = 0;
+
+  printf("TO IMPLEMENT\n");
+
+  return(_MMG5_lenSurfEdg_ani(mesh, met, ip1, ip2, isedg));
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
  * \param kel index of the tetra in which we work.
  * \param iface face of the tetra on which we work.

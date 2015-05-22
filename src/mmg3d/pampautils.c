@@ -709,10 +709,7 @@ int MMG5_searchlen(MMG5_pMesh mesh, MMG5_pSol met, double lmin,
       /* Remove edge from hash ; ier = 1 if edge has been found */
       ier = _MMG5_hashPop(&hash,np,nq);
       if( ier ) {
-        if ( pt->xt )
-          len = _MMG5_lenedg(mesh,met,np,nq,(pxt->tag[ia] & MG_GEO));
-        else
-          len = _MMG5_lenedg(mesh,met,np,nq,0);
+        len = _MMG5_lenedg(mesh,met,ia,pt);
 
         if( (len < lmin) || (len > lmax) ) {
           eltab[k] = 1;

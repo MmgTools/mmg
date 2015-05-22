@@ -54,9 +54,9 @@ inline double _MMG5_caltri_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt) {
 
   anisurf = _MMG5_surftri_ani(mesh,met,ptt);
 
-  l[0] = _MMG5_lenedg_ani(mesh,met,ib,ic,( ptt->tag[0] & MG_GEO ));
-  l[1] = _MMG5_lenedg_ani(mesh,met,ia,ic,( ptt->tag[1] & MG_GEO ));
-  l[2] = _MMG5_lenedg_ani(mesh,met,ia,ib,( ptt->tag[2] & MG_GEO ));
+  l[0] = _MMG5_lenSurfEdg_ani(mesh,met,ib,ic,( ptt->tag[0] & MG_GEO ));
+  l[1] = _MMG5_lenSurfEdg_ani(mesh,met,ia,ic,( ptt->tag[1] & MG_GEO ));
+  l[2] = _MMG5_lenSurfEdg_ani(mesh,met,ia,ib,( ptt->tag[2] & MG_GEO ));
 
   rap = l[0]*l[0] + l[1]*l[1] + l[2]*l[2];
 

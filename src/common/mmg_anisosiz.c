@@ -42,11 +42,11 @@
  * \param isedg 1 if the edge is a ridge, 0 otherwise.
  * \return length of edge according to the prescribed metric.
  *
- * Compute length of edge \f$[i0;i1]\f$ according to the prescribed aniso.
- * metric.
+ * Compute length of surface edge \f$[i0;i1]\f$ according to the prescribed
+ * aniso.  metric.
  *
  */
-double _MMG5_lenedg_ani(MMG5_pMesh mesh,MMG5_pSol met,int np0,int np1,char isedg) {
+double _MMG5_lenSurfEdg_ani(MMG5_pMesh mesh,MMG5_pSol met,int np0,int np1,char isedg) {
   MMG5_pPoint   p0,p1;
   double        gammaprim0[3],gammaprim1[3],t[3],*n1,*n2,ux,uy,uz,ps1,ps2,l0,l1;
   double        *m0,*m1,met0[6],met1[6];
@@ -84,11 +84,14 @@ double _MMG5_lenedg_ani(MMG5_pMesh mesh,MMG5_pSol met,int np0,int np1,char isedg
         ps1 = ps2;
       }
     }
-    else if ( MG_REF & p0->tag ) {
+    else if ( MG_REF & p0->tag || MG_BDY & p0->tag ) {
+      // ( MG_BDY  & p0->tag ) => mmg3d
       n1  = &mesh->xpoint[p0->xp].n1[0];
       ps1 = ux*n1[0] + uy*n1[1] + uz*n1[2];
     }
     else {
+      // we come from mmgs because in mmg3d the boundary points are tagged
+      // MG_BDY.
       n1  = &(p0->n[0]);
       ps1 = ux*n1[0] + uy*n1[1] + uz*n1[2];
     }
@@ -121,11 +124,14 @@ double _MMG5_lenedg_ani(MMG5_pMesh mesh,MMG5_pSol met,int np0,int np1,char isedg
         ps1 = ps2;
       }
     }
-    else if ( MG_REF & p1->tag ) {
+    else if ( MG_REF & p1->tag || MG_BDY & p1->tag ) {
+      // ( MG_BDY  & p1->tag ) => mmg3d )
       n1  = &mesh->xpoint[p1->xp].n1[0];
       ps1 = - ux*n1[0] - uy*n1[1] - uz*n1[2];
     }
     else {
+      // we come from mmgs because in mmg3d the boundary points are tagged
+      // MG_BDY.
       n1  = &(p1->n[0]);
       ps1 = -ux*n1[0] - uy*n1[1] - uz*n1[2];
     }

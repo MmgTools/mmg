@@ -215,6 +215,8 @@ int  _MMG5_bdryUpdate(MMG5_pMesh );
 int  _MMG5_bdryPerm(MMG5_pMesh );
 int  _MMG5_chkfemtopo(MMG5_pMesh mesh);
 int  _MMG5_cntbdypt(MMG5_pMesh mesh, int nump);
+double _MMG5_lenedg_ani(MMG5_pMesh ,MMG5_pSol ,int,  MMG5_pTetra);
+double _MMG5_lenedg_iso(MMG5_pMesh ,MMG5_pSol ,int,  MMG5_pTetra);
 long long _MMG5_memSize(void);
 void _MMG5_memOption(MMG5_pMesh mesh);
 int  _MMG5_mmg3d1_pattern(MMG5_pMesh ,MMG5_pSol );
@@ -318,6 +320,7 @@ int    _MMG5_defsiz_ani(MMG5_pMesh ,MMG5_pSol );
 int    _MMG5_gradsiz_iso(MMG5_pMesh ,MMG5_pSol );
 int    _MMG5_gradsiz_ani(MMG5_pMesh ,MMG5_pSol );
 
+double (*_MMG5_lenedg)(MMG5_pMesh ,MMG5_pSol ,int, MMG5_pTetra );
 double (*_MMG5_caltet)(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt);
 double (*_MMG5_caltri)(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt);
 int    (*_MMG5_defsiz)(MMG5_pMesh ,MMG5_pSol );
