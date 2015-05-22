@@ -130,46 +130,60 @@ inline double _MMG5_caltet_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra  pt) {
  * \todo test with the square of this measure
  */
 inline double _MMG5_caltet_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt) {
+  MMG5_pxTetra pxt;
   double       cal,abx,aby,abz,acx,acy,acz,adx,ady,adz;
-  double       bcx,bcy,bcz,bdx,bdy,bdz,cdx,cdy,cdz;
   double       h1,h2,h3,h4,h5,h6,det,vol,rap,v1,v2,v3,num;
-  double       *a,*b,*c,*d;
-  double       *ma,*mb,*mc,*md,mm[6];
-  int          ia,ib,ic,id,j,iadr;
+  double       ux,uy,uz,*a,*b,*c,*d;
+  double       m[4][6],mm[6];
+  int          ip[4],ip1,ip2,i,j,k,iadr;
 
-  ia = pt->v[0];
-  ib = pt->v[1];
-  ic = pt->v[2];
-  id = pt->v[3];
+  ip[0] = pt->v[0];
+  ip[1] = pt->v[1];
+  ip[2] = pt->v[2];
+  ip[3] = pt->v[3];
 
   cal = _MMG5_NULKAL;
 
   /* average metric */
-  memset(mm,0,6*sizeof(double));
 
-  iadr = (ia)*met->size;
-  /* if ( !(MG_SIN(mesh->point[ia].tag) || (mesh->point[ia].tag & MG_NOM)) */
-  /*      && (mesh->point[ia].tag & MG_GEO) ) { */
-  /*    // ia is not singular but is on a ridge: build a classic metric from our */
-  /*    // convention storage. */
-  /*  } */
-  /* else { */
-    // Classic metric.
-    ma   = &met->m[iadr];
-  /* } */
+  for (j=0; j<4; ++j ) {
+    if ( !(MG_SIN(mesh->point[ip[j]].tag) || (mesh->point[ip[j]].tag & MG_NOM))
+         && (mesh->point[ip[j]].tag & MG_GEO) ) {
+      /* ip[j] is not singular but is on a ridge: build a classic metric from our
+         convention storage. */
+      memset(m[j],0.,6*sizeof(double));
 
-  iadr = (ib)*met->size;
-  mb   = &met->m[iadr];
-  iadr = (ic)*met->size;
-  mc   = &met->m[iadr];
-  iadr = (id)*met->size;
-  md   = &met->m[iadr];
-  for (j=0; j<6; j++)
-    mm[j] = 0.25 * (ma[j]+mb[j]+mc[j]+md[j]);
-  a = mesh->point[ia].c;
-  b = mesh->point[ib].c;
-  c = mesh->point[ic].c;
-  d = mesh->point[id].c;
+      // m[j] = 1/3 ( sum_{k=1,3} met->m[iadr]_{rid,f_k} ) with
+      // met->m[iadr]_{rid,f_k} the ridge metric at point ip[j] reconstructed
+      // from face f_k that pass through vertex i.
+      for (i=0; i<3; ++i) {
+        ip1 = pt->v[_MMG5_idir[j][i]];
+        ip2 = pt->v[_MMG5_idir[j][(i+1)%3]];
+        ux = 0.5*(mesh->point[ip1].c[0]+mesh->point[ip2].c[0])
+          - mesh->point[ip[j]].c[0];
+        uy = 0.5*(mesh->point[ip1].c[1]+mesh->point[ip2].c[1])
+          - mesh->point[ip[j]].c[1];
+        uz = 0.5*(mesh->point[ip1].c[2]+mesh->point[ip2].c[2])
+          - mesh->point[ip[j]].c[2];
+        if ( !_MMG5_buildridmet(mesh,met,ip[j],ux,uy,uz,mm) )  return(0.0);
+        for (k=0; k<6; ++k) m[j][k]+=mm[k];
+      }
+
+      for (k=0; k<6; ++k) m[j][k] *= _MMG5_ATHIRD;
+    }
+    else {
+      // Classic metric.
+      iadr = ip[j]*met->size;
+      memcpy(m[j],&met->m[iadr],6*sizeof(double));
+    }
+  }
+
+  for (k=0; k<6; k++)
+    mm[k] = 0.25 * (m[0][k]+m[1][k]+m[2][k]+m[3][k]);
+  a = mesh->point[ip[0]].c;
+  b = mesh->point[ip[1]].c;
+  c = mesh->point[ip[2]].c;
+  d = mesh->point[ip[3]].c;
 
   /* volume */
   abx = b[0] - a[0];
@@ -189,6 +203,7 @@ inline double _MMG5_caltet_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt) {
   v3  = acx*ady - acy*adx;
   vol = abx * v1 + aby * v2 + abz * v3;
   if ( vol <= 0. )  return(cal);
+
   det = mm[0] * ( mm[3]*mm[5] - mm[4]*mm[4]) \
       - mm[1] * ( mm[1]*mm[5] - mm[2]*mm[4]) \
       + mm[2] * ( mm[1]*mm[4] - mm[2]*mm[3]);
@@ -197,32 +212,25 @@ inline double _MMG5_caltet_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt) {
     return(cal);
   }
   det = sqrt(det) * vol;
+
   /* edge lengths */
-  h1 =      mm[0]*abx*abx + mm[3]*aby*aby + mm[5]*abz*abz \
-     + 2.0*(mm[1]*abx*aby + mm[2]*abx*abz + mm[4]*aby*abz);
-  h2 =      mm[0]*acx*acx + mm[3]*acy*acy + mm[5]*acz*acz \
-     + 2.0*(mm[1]*acx*acy + mm[2]*acx*acz + mm[4]*acy*acz);
-  h3 =      mm[0]*adx*adx + mm[3]*ady*ady + mm[5]*adz*adz \
-     + 2.0*(mm[1]*adx*ady + mm[2]*adx*adz + mm[4]*ady*adz);
-
-  bcx = c[0] - b[0];
-  bcy = c[1] - b[1];
-  bcz = c[2] - b[2];
-
-  bdx = d[0] - b[0];
-  bdy = d[1] - b[1];
-  bdz = d[2] - b[2];
-
-  cdx = d[0] - c[0];
-  cdy = d[1] - c[1];
-  cdz = d[2] - c[2];
-
-  h4 =      mm[0]*bdx*bdx + mm[3]*bdy*bdy + mm[5]*bdz*bdz \
-     + 2.0*(mm[1]*bdx*bdy + mm[2]*bdx*bdz + mm[4]*bdy*bdz);
-  h5 =      mm[0]*cdx*cdx + mm[3]*cdy*cdy + mm[5]*cdz*cdz \
-     + 2.0*(mm[1]*cdx*cdy + mm[2]*cdx*cdz + mm[4]*cdy*cdz);
-  h6 =      mm[0]*bcx*bcx + mm[3]*bcy*bcy + mm[5]*bcz*bcz \
-     + 2.0*(mm[1]*bcx*bcy + mm[2]*bcx*bcz + mm[4]*bcy*bcz);
+  if ( pt->xt ) {
+    pxt = &mesh->xtetra[pt->xt];
+    h1 = _MMG5_lenedg_ani(mesh,met,ip[0],ip[1],( pxt->tag[0] & MG_GEO ));
+    h2 = _MMG5_lenedg_ani(mesh,met,ip[0],ip[2],( pxt->tag[1] & MG_GEO ));
+    h3 = _MMG5_lenedg_ani(mesh,met,ip[0],ip[3],( pxt->tag[2] & MG_GEO ));
+    h4 = _MMG5_lenedg_ani(mesh,met,ip[1],ip[2],( pxt->tag[3] & MG_GEO ));
+    h5 = _MMG5_lenedg_ani(mesh,met,ip[1],ip[3],( pxt->tag[4] & MG_GEO ));
+    h6 = _MMG5_lenedg_ani(mesh,met,ip[2],ip[3],( pxt->tag[5] & MG_GEO ));
+  }
+  else {
+    h1 = _MMG5_lenedg_ani(mesh,met,ip[0],ip[1],0);
+    h2 = _MMG5_lenedg_ani(mesh,met,ip[0],ip[2],0);
+    h3 = _MMG5_lenedg_ani(mesh,met,ip[0],ip[3],0);
+    h4 = _MMG5_lenedg_ani(mesh,met,ip[1],ip[2],0);
+    h5 = _MMG5_lenedg_ani(mesh,met,ip[1],ip[3],0);
+    h6 = _MMG5_lenedg_ani(mesh,met,ip[2],ip[3],0);
+  }
 
   /* quality */
   rap = h1 + h2 + h3 + h4 + h5 + h6;

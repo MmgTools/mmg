@@ -215,16 +215,16 @@ double _MMG5_surftri_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt) {
 
   /* Set metric tensors at vertices of tria iel */
   for(i=0; i<3; i++) {
-    i1 = _MMG5_inxt2[i];
-    i2 = _MMG5_iprv2[i];
-    ux = 0.5*(p[i1]->c[0]+p[i2]->c[0]) - p[i]->c[0];
-    uy = 0.5*(p[i1]->c[1]+p[i2]->c[1]) - p[i]->c[1];
-    uz = 0.5*(p[i1]->c[2]+p[i2]->c[2]) - p[i]->c[2];
 
     if ( MS_SIN(p[i]->tag) ) {
       memcpy(&m[i][0],&met->m[6*np[i]],6*sizeof(double));
     }
     else if ( p[i]->tag & MG_GEO ) {
+      i1 = _MMG5_inxt2[i];
+      i2 = _MMG5_iprv2[i];
+      ux = 0.5*(p[i1]->c[0]+p[i2]->c[0]) - p[i]->c[0];
+      uy = 0.5*(p[i1]->c[1]+p[i2]->c[1]) - p[i]->c[1];
+      uz = 0.5*(p[i1]->c[2]+p[i2]->c[2]) - p[i]->c[2];
       if ( !_MMG5_buildridmet(mesh,met,np[i],ux,uy,uz,&m[i][0]) )  return(0.0);
     }
     else {
