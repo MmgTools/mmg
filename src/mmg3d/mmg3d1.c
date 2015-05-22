@@ -868,6 +868,7 @@ _MMG5_anatetv(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
           mp = &met->m[iadr];
 
           if ( !_MMG5_intmetvol(m1,m2,mp,0.5) ) return(-1);
+#warning put the good metric
         }
         if ( !_MMG5_hashEdge(mesh,&hash,ip1,ip2,ip) )  return(-1);
         MG_SET(pt->flag,i);
@@ -1078,6 +1079,7 @@ _MMG5_anatets(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
           iadr = met->size*ip;
           mp = &met->m[iadr];
           if ( !_MMG5_intmetvol(m1,m2,mp,0.5) )  return(-1);
+#warning put the good metric
         }
 
         if ( MG_EDG(ptt.tag[j]) || (ptt.tag[j] & MG_NOM) )

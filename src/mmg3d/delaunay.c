@@ -329,6 +329,155 @@ int _MMG5_delone(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist) {
   return(1);
 }
 
+/* cavity correction for quality */
+static int _MMG5_correction_ani(MMG5_pMesh mesh,MMG5_pSol met,int ip,int* list,int ilist,int nedep) {
+  MMG5_pPoint        ppt,p1,p2,p3;
+  MMG5_pTetra        pt;
+  double        dd,det,nn,eps,eps2,ux,uy,uz,vx,vy,vz,v1,v2,v3;
+  double        *ma,*mb,*mc,*md,mm[6],h1,h2,h3;
+  int           *adja,i,j,ipil,iel,lon,iadr,adj,ib,ic,id,base,ncor;
+  int           vois[4];
+
+  ppt  = &mesh->point[ip];
+  if ( ppt->tag & MG_NUL )  return(ilist);
+  base = mesh->mark;
+  lon  = ilist;
+  eps  = _MMG5_EPSCON;
+  eps2 = eps*eps;
+
+  /* average metric */
+  memset(mm,0,6*sizeof(double));
+  ma   = &met->m[6*ip];
+
+  do {
+    ipil = lon-1;
+    ncor = 0;
+
+    while ( ipil >= 0 ) {
+      iel  = list[ipil];
+      iadr = (iel-1)*4 + 1;
+      adja = &mesh->adja[iadr];
+      vois[0]  = adja[0] >> 2;
+      vois[1]  = adja[1] >> 2;
+      vois[2]  = adja[2] >> 2;
+      vois[3]  = adja[3] >> 2;
+      pt   = &mesh->tetra[iel];
+
+      MMG_cas=0;
+      for (i=0; i<4; i++) {
+        adj = vois[i];
+        MMG_cas = 0;
+        if ( adj && mesh->tetra[adj].mark == base)  continue;
+
+        ib = pt->v[ _MMG5_idir[i][0] ];
+        ic = pt->v[ _MMG5_idir[i][1] ];
+        id = pt->v[ _MMG5_idir[i][2] ];
+
+        p1 = &mesh->point[ib];
+        p2 = &mesh->point[ic];
+        p3 = &mesh->point[id];
+
+        ux = p2->c[0] - p1->c[0];
+        uy = p2->c[1] - p1->c[1];
+        uz = p2->c[2] - p1->c[2];
+
+        vx = p3->c[0] - p1->c[0];
+        vy = p3->c[1] - p1->c[1];
+        vz = p3->c[2] - p1->c[2];
+
+        /* volume PABC */
+        v1 = uz*vy - uy*vz;
+        v2 = ux*vz - uz*vx;
+        v3 = uy*vx - ux*vy;
+        dd = v1*(ppt->c[0]-p1->c[0]) + v2*(ppt->c[1]-p1->c[1]) \
+          + v3*(ppt->c[2]-p1->c[2]);
+        MMG_cas=1;
+        //if ( dd < VOLMIN )  break;
+        /*test sur le volume avec un eps local*/
+        h1 = ux*ux + uy*uy + uz*uz;
+        h2 = vx*vx + vy*vy + vz*vz;
+        h3 = (p2->c[0] - p3->c[0])*(p2->c[0] - p3->c[0]) + (p2->c[1] - p3->c[1])*(p2->c[1] - p3->c[1])
+          + (p2->c[2] - p3->c[2])*(p2->c[2] - p3->c[2]);
+        if ( dd < VOLMIN*sqrt(h1*h2*h3) )  break;
+
+        /* average metric */
+        mb   = &met->m[6*ib];
+        mc   = &met->m[6*ic];
+        md   = &met->m[6*id];
+        for (j=0; j<6; j++)
+          mm[j] = 0.25 * (ma[j]+mb[j]+mc[j]+md[j]);
+
+        det = mm[0] * ( mm[3]*mm[5] - mm[4]*mm[4]) \
+          - mm[1] * ( mm[1]*mm[5] - mm[2]*mm[4]) \
+          + mm[2] * ( mm[1]*mm[4] - mm[2]*mm[3]);
+        if ( det < _MMG5_EPSOK )  break;
+
+        /* point close to face */
+        /*nn = (v1*v1 + v2*v2 + v3*v3);*/
+        MMG_cas=2;
+        nn = mm[0]*v1*v1 + mm[3]*v2*v2 + mm[5]*v3*v3 \
+          + 2.0*(mm[1]*v1*v2 + mm[2]*v1*v3 + mm[4]*v2*v3);
+        /*if ( det*dd*dd*dd*dd*dd*dd < nn * nn * nn * eps2 * eps2 * eps2 )  break;*/
+        /*//prendre le min des valeurs propres
+          eigenv(1,mm,lambda,vv);
+          det = max(lambda[0],max(lambda[1],lambda[2]));
+          if ( det*dd*dd < nn * eps2 )  break;
+        *//*if ( pow(det,1./3.)*dd*dd < nn * eps2 )  break;*/
+        if ( det*dd*dd < nn * eps2 )  break;
+        /*if ( dd*dd < nn * eps2 ) {
+          printf("en iso      : %e %e    %e %e\n",dd,nn,dd*dd,nn*eps2);
+          printf("en iso sqrt : %e %e    %e %e\n",dd,nn,dd/sqrt(nn),(sqrt(mm[0]))*(dd/sqrt(nn)));
+
+          dd1 = mm[0]*v1*v1 + mm[3]*v2*v2 + mm[5]*v3*v3 \
+          + 2.0*(mm[1]*v1*v2 + mm[2]*v1*v3 + mm[4]*v2*v3);
+          //len carre = (dd*dd/norm(v1v2v3)^2)*dd1/(norm(v1v2v3)^2
+          printf("aniso      : %e %e %e %e %e\n",(dd*dd/nn)*dd1/(nn),sqrt(dd*dd*dd1/(nn*sqrt(nn))),det,det*dd*dd,dd1*eps2);
+
+          nn = sqrt(nn);
+          ph = dd/nn;
+          v1 /= nn;
+          v2 /= nn;
+          v3 /= nn;
+          xh = ph*v1 + ppt->c[0];
+          yh = ph*v2 + ppt->c[1];
+          zh = ph*v3 + ppt->c[2];
+
+          //dist PH dans la met/
+          ux = xh - ppt->c[0];
+          uy = yh - ppt->c[1];
+          uz = zh - ppt->c[2];
+          dd = ux*ux + uy*uy + uz*uz;
+
+          dd2 =      mm[0]*ux*ux + mm[3]*uy*uy + mm[5]*uz*uz \
+          + 2.0*(mm[1]*ux*uy + mm[2]*ux*uz + mm[4]*uy*uz);
+          if ( dd2 <= 0.0 )  dd2 = 0.0;
+
+          len = sqrt(dd2);
+
+          printf("on trouve len : %e %e %e\n",len,sqrt(eps2)*sqrt(mm[0]),pow(sqrt(eps2)*sqrt(det),1./3.));
+          printf("len carre %e %e\n",mm[0]*v1*v1*ph*ph + mm[3]*v2*v2*ph*ph + mm[5]*v3*v3*ph*ph,dd2);
+          exit(0);
+          break;
+          }*/
+        MMG_cas=0;
+      }
+      if ( i < 4 || pt->tag & MG_REQ ) {
+        if ( ipil <= nedep )   {/*printf("on veut tout retirer ? %d %d\n",ipil,nedep);*/return(0);   }
+        /* remove iel from list */
+        pt->mark = base-1;
+        list[ipil] = list[--lon];
+        ncor = 1;
+        break;
+      }
+      else
+        ipil--;
+    }
+  }
+  while ( ncor > 0 && lon >= nedep );
+
+  return(lon);
+}
+
 
 /* cavity correction for quality */
 static int
@@ -417,122 +566,135 @@ _MMG5_correction_iso(MMG5_pMesh mesh,int ip,int *list,int ilist,int nedep) {
 
 
 /* /\* mark elements in cavity *\/ */
-/* int _MMG5_cavity_ani(MMG5_pMesh mesh,MMG5_pSol sol,int iel,int ip,pList list,int lon) { */
-/*   MMG5_pPoint    ppt; */
-/*   MMG5_pTetra    pt,pt1,ptc; */
-/*   double    c[3],eps,dd,ray,ux,uy,uz,crit; */
-/*   double    *mj,*mp,ct[12]; */
-/*   int       *adja,*adjb,k,adj,adi,voy,i,j,ia,ilist,ipil,jel,iadr,base; */
-/*   int       vois[4],l; */
+int _MMG5_cavity_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel,int ip,int* list,int lon) { 
+  MMG5_pPoint    ppt;
+  MMG5_pTetra    pt,pt1,ptc;
+  double    c[3],eps,dd,ray,ux,uy,uz,crit;
+  double    *mj,*mp,ct[12];
+  int       *adja,*adjb,k,adj,adi,voy,i,j,ia,ilist,ipil,jel,iadr,base;
+  int       vois[4],l,isreq,tref;
 
-/*   if ( lon < 1 )  return(0); */
-/*   ppt = &mesh->point[ip]; */
-/*   if ( ppt->tag & M_UNUSED )  return(0); */
+  if ( lon < 1 )  return(0);
+  ppt = &mesh->point[ip];
+  if ( ppt->tag & MG_NUL )  return(0);
+  base  = ++mesh->mark;
 
-/*   for (k=1; k<=lon; k++) */
-/*     list->tetra[k] = list->tetra[k] / 6; */
+  isreq = 0;
 
-/*   /\* grow cavity by adjacency *\/ */
-/*   base  = mesh->mark; */
-/*   eps   = _MMG5_EPSRAD * _MMG5_EPSRAD; */
-/*   ilist = lon; */
-/*   ipil  = 1; */
-/*   iadr  = (ip-1)*sol->offset + 1; */
-/*   mp    = &sol->met[iadr]; */
+  tref = mesh->tetra[list[0]/6].ref;
+  for (k=0; k<lon; k++) {
+    mesh->tetra[list[k]/6].mark = base;
 
-/*   do { */
-/*     jel  = list->tetra[ipil]; */
-/*     iadr = (jel-1)*4 + 1; */
-/*     adja = &mesh->adja[iadr]; */
-/*     vois[0]  = adja[0]; */
-/*     vois[1]  = adja[1]; */
-/*     vois[2]  = adja[2]; */
-/*     vois[3]  = adja[3]; */
-/*     ptc  = &mesh->tetra[jel]; */
+    if (tref!=mesh->tetra[list[k]/6].ref) {
+      //printf("pbs coquil %d %d tet %d\n",tref,mesh->tetra[list[k]/6].ref,list[k]/6);
+      return(0);
+    }
+  }
+  for (k=0; k<lon; k++)
+    list[k] = list[k] / 6;
+  
+  /* grow cavity by adjacency */
+  eps   = _MMG5_EPSRAD * _MMG5_EPSRAD;
+  ilist = lon;
+  ipil  = 0;
+  iadr  = ip*6;
+  mp    = &met->m[iadr];
 
-/*     for (i=0; i<4; i++) { */
-/*       adj = vois[i] >> 2; */
-/*       voy = vois[i] % 4; */
-/*       if ( !adj )  continue; */
-/*       pt  = &mesh->tetra[adj]; */
-/*       /\* boundary face *\/ */
-/*       if ( pt->mark == base || pt->ref != ptc->ref )  continue; */
-/*       for (j=0,l=0; j<4; j++,l+=3) { */
-/*      memcpy(&ct[l],mesh->point[pt->v[j]].c,3*sizeof(double)); */
-/*       } */
+  do {
+    jel  = list[ipil];
+    iadr = (jel-1)*4 + 1;
+    adja = &mesh->adja[iadr];
+    vois[0]  = adja[0];
+    vois[1]  = adja[1];
+    vois[2]  = adja[2];
+    vois[3]  = adja[3];
+    ptc  = &mesh->tetra[jel];
+
+    for (i=0; i<4; i++) {
+      adj = vois[i] >> 2;
+      voy = vois[i] % 4;
+      if ( !adj )  continue;
+      pt  = &mesh->tetra[adj];
+      /* boundary face */
+      if ( pt->mark == base || pt->ref != ptc->ref )  continue;
+      for (j=0,l=0; j<4; j++,l+=3) {
+        memcpy(&ct[l],mesh->point[pt->v[j]].c,3*sizeof(double));
+      }
 
 
-/*       /\* Delaunay kernel *\/ */
-/*       if ( !_MMG5_cenrad_ani(mesh,ct,mp,c,&ray) )  continue; */
+      /* Delaunay kernel */
+      if ( !_MMG5_cenrad_ani(mesh,ct,mp,c,&ray) )  continue;
 
-/*       ux = ppt->c[0] - c[0]; */
-/*       uy = ppt->c[1] - c[1]; */
-/*       uz = ppt->c[2] - c[2]; */
-/*       dd =      mp[0]*ux*ux + mp[3]*uy*uy + mp[5]*uz*uz \ */
-/*      + 2.0*(mp[1]*ux*uy + mp[2]*ux*uz + mp[4]*uy*uz); */
-/*       crit = eps * ray; */
-/*       if ( dd > crit )  continue; */
+      ux = ppt->c[0] - c[0];
+      uy = ppt->c[1] - c[1];
+      uz = ppt->c[2] - c[2];
+      dd =      mp[0]*ux*ux + mp[3]*uy*uy + mp[5]*uz*uz \
+        + 2.0*(mp[1]*ux*uy + mp[2]*ux*uz + mp[4]*uy*uz);
+      crit = eps * ray;
+      if ( dd > crit )  continue;
 
-/*       /\* mixed metrics *\/ */
-/*       crit = sqrt(dd/ray); */
-/*       for (j=0; j<4; j++) { */
-/*      ia   = pt->v[j]; */
-/*      iadr = (ia-1)*sol->offset + 1; */
-/*      mj   = &sol->met[iadr]; */
-/*      if ( !_MMG5_cenrad_ani(mesh,ct,mj,c,&ray) )  continue; */
-/*      ux = ppt->c[0] - c[0]; */
-/*      uy = ppt->c[1] - c[1]; */
-/*      uz = ppt->c[2] - c[2]; */
-/*      dd =      mj[0]*ux*ux + mj[3]*uy*uy + mj[5]*uz*uz \ */
-/*        + 2.0*(mj[1]*ux*uy + mj[2]*ux*uz + mj[4]*uy*uz); */
-/*      crit += sqrt(dd/ray); */
-/*       } */
-/*       crit *= _MMG5_EPSRAD; */
-/*       if ( crit > 5.0 ) continue; */
+      /* mixed metrics */
+      crit = sqrt(dd/ray);
+      for (j=0; j<4; j++) {
+        ia   = pt->v[j];
+        iadr = 6*ia;
+        mj   = &met->m[iadr];
+        if ( !_MMG5_cenrad_ani(mesh,ct,mj,c,&ray) )  continue;
+        ux = ppt->c[0] - c[0];
+        uy = ppt->c[1] - c[1];
+        uz = ppt->c[2] - c[2];
+        dd =      mj[0]*ux*ux + mj[3]*uy*uy + mj[5]*uz*uz \
+          + 2.0*(mj[1]*ux*uy + mj[2]*ux*uz + mj[4]*uy*uz);
+        crit += sqrt(dd/ray);
+      }
+      crit *= _MMG5_EPSRAD;
+      if ( crit > 5.0 ) continue;
 
-/*       /\* lost face(s) *\/ */
-/*       iadr = (adj-1)*4 + 1; */
-/*       adjb = &mesh->adja[iadr]; */
+      /* lost face(s) */
+      iadr = (adj-1)*4 + 1;
+      adjb = &mesh->adja[iadr];
 
-/*       for (j=0; j<4; j++) { */
-/*      if ( j == voy )  continue; */
-/*      adi = adjb[j] >> 2; */
-/*      if ( !adi )  continue; */
-/*      pt1 = &mesh->tetra[adi]; */
-/*      if ( pt1->mark == base && adi != jel ) { */
-/*        if ( !adi || pt1->ref != mesh->tetra[adi].ref )  break; */
-/*      } */
-/*       } */
-/*       /\* store tetra *\/ */
-/*       if ( j == 4 ) { */
-/*      pt->mark = base; */
-/*      ++ilist; */
-/*      list->tetra[ilist] = adj; */
-/*       } */
-/*     } */
-/*     if ( ilist > LONMAX - 3 )  return(-1); */
-/*     ++ipil; */
-/*   } */
-/*   while ( ipil <= ilist ); */
+      for (j=0; j<4; j++) {
+        if ( j == voy )  continue;
+        adi = adjb[j] >> 2;
+        if ( !adi )  continue;
+        pt1 = &mesh->tetra[adi];
+        if ( pt1->mark == base && adi != jel ) {
+          if ( !adi || pt1->ref != mesh->tetra[adi].ref )  break;
+        }
+      }
+      /* store tetra */
+      if ( j == 4 ) {
+        if ( pt->tag & MG_REQ ) isreq = 1;        
+        pt->mark = base;
+        list[ilist++] = adj;
+      }
+    }
+    if ( ilist > LONMAX - 3 )  return(-1);
+    ++ipil;
+  }
+  while ( ipil < ilist );
 
-/*   /\* global overflow *\/ */
-/*   if ( mesh->ne + 2*ilist >= mesh->nemax ) */
-/*     ilist = -ilist; */
-/*   else */
-/*     ilist = _MMG5_correction_ani(mesh,sol,ip,list,ilist,lon); */
+  /* global overflow */
+  if ( mesh->ne + 2*ilist >= mesh->nemax )
+    ilist = -ilist;
+  else
+    ilist = _MMG5_correction_ani(mesh,met,ip,list,ilist,lon);
 
-/*   if(MMG_cas==1) MMG_nvol++; */
-/*   else if(MMG_cas==2 || MMG_cas>20) { */
-/*     MMG_npuiss++; */
-/*     if(MMG_cas>20) MMG_npres++; */
-/*   } */
+  if ( isreq ) ilist = -abs(ilist);
 
-/*   return(ilist); */
-/* } */
+  if(MMG_cas==1) MMG_nvol++;
+  else if(MMG_cas==2 || MMG_cas>20) {
+    MMG_npuiss++;
+    if(MMG_cas>20) MMG_npres++;
+  }
+
+  return(ilist);
+} 
 
 
 /** Return a negative value for ilist if one of the tet of the cavity is required */
-int _MMG5_cavity(MMG5_pMesh mesh,MMG5_pSol sol,int iel,int ip,int *list,int lon) {
+int _MMG5_cavity_iso(MMG5_pMesh mesh,MMG5_pSol sol,int iel,int ip,int *list,int lon) {
   MMG5_pPoint ppt;
   MMG5_pTetra      pt,pt1,ptc;
   double           c[3],crit,dd,eps,ray,ct[12];

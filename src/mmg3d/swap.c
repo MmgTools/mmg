@@ -333,6 +333,7 @@ int _MMG5_swpbdy(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int it1,_MMG5_p
     mq = &met->m[met->size*nq];
     mm = &met->m[met->size*nm];
     if ( !_MMG5_intmetvol(mq,mp,mm,0.5) )  return(0);
+#warning put the good metric
   }
 
   ier = _MMG5_split1b(mesh,met,list,ret,nm,0);
