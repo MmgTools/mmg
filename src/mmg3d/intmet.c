@@ -55,9 +55,12 @@ int _MMG5_intmet_ani(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int ip,
   MMG5_pPoint   ppt;
   MMG5_pxPoint  pxp;
   double        *m;
+  int           ip1,ip2;
 
   pt = &mesh->tetra[k];
   m  = &met->m[6*ip];
+  ip1 = pt->v[_MMG5_iare[i][0]];
+  ip2 = pt->v[_MMG5_iare[i][1]];
 
   if ( pt->xt ) {
     pxt = &mesh->xtetra[pt->xt];
@@ -65,10 +68,10 @@ int _MMG5_intmet_ani(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int ip,
       ppt = &mesh->point[ip];
       assert(ppt->xp);
       pxp = &mesh->xpoint[ppt->xp];
-      return(_MMG5_intridmet(mesh,met,k,i,s,pxp->n1,m));
+      return(_MMG5_intridmet(mesh,met,ip1,ip2,s,pxp->n1,m));
     }
     else if ( pxt->tag[i] & MG_BDY ) {
-      return(_MMG5_intregmet(mesh,met,k,i,s,m));
+     return(_MMG5_intregmet(mesh,met,k,i,s,m));
     }
     else {
       /* The edge is an internal edge. */
