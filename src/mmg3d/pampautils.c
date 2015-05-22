@@ -644,7 +644,7 @@ void MMG5_searchqua(MMG5_pMesh mesh,MMG5_pSol met,double critmin, int *eltab) {
       continue;
 
     rap = _MMG5_ALPHAD *
-      _MMG5_caltet(mesh,met,pt->v[0],pt->v[1],pt->v[2],pt->v[3]);
+      _MMG5_caltet(mesh,met,pt);
     if ( rap == 0.0 || rap < critmin ) {
       eltab[k] = 1;
     }

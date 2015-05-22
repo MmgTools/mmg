@@ -44,17 +44,31 @@ inline double _MMG5_orcal(MMG5_pMesh mesh,MMG5_pSol met,int iel) {
   pt = &mesh->tetra[iel];
 
   if ( met->m )
-    return(_MMG5_caltet(mesh,met,pt->v[0],pt->v[1],pt->v[2],pt->v[3]));
+    return(_MMG5_caltet(mesh,met,pt));
   else // with -A option we are in aniso but without metric.
-    return(_MMG5_caltet_iso(mesh,met,pt->v[0],pt->v[1],pt->v[2],pt->v[3]));
+    return(_MMG5_caltet_iso(mesh,met,pt));
 }
 
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the meric structure.
+ * \param pt pointer toward a tetrahedra.
+ * \return The isotropic quality of the tet.
+ *
+ * Compute the quality of the tet pt with respect to the isotropic metric \a
+ * met.
+ *
+ */
+inline double _MMG5_caltet_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra  pt) {
+  double       abx,aby,abz,acx,acy,acz,adx,ady,adz,bcx,bcy,bcz,bdx,bdy,bdz,cdx,cdy,cdz;
+  double       vol,v1,v2,v3,rap;
+  double       *a,*b,*c,*d;
+  int          ia, ib, ic, id;
 
-/** compute tetra quality iso */
-inline double _MMG5_caltet_iso(MMG5_pMesh mesh,MMG5_pSol met,int ia,int ib,int ic,int id) {
-  double     abx,aby,abz,acx,acy,acz,adx,ady,adz,bcx,bcy,bcz,bdx,bdy,bdz,cdx,cdy,cdz;
-  double     vol,v1,v2,v3,rap;
-  double    *a,*b,*c,*d;
+  ia = pt->v[0];
+  ib = pt->v[1];
+  ic = pt->v[2];
+  id = pt->v[3];
 
   a = mesh->point[ia].c;
   b = mesh->point[ib].c;
@@ -107,29 +121,43 @@ inline double _MMG5_caltet_iso(MMG5_pMesh mesh,MMG5_pSol met,int ia,int ib,int i
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the meric structure.
- * \param ia, ib, ic, id point index
- * \return The anisotropic quality of the tet (ia,ib,ic,id).
+ * \param pt pointer toward a tetrahedra.
+ * \return The anisotropic quality of the tet.
  *
- * Compute the quality of the tet K (\a ia,\a ib,\a ic,\a id) with respect to
- * the anisotropic metric \a met.
- *    Q = V_met(K) / (sum(len(edge_K)^2)^(3/2)
+ * Compute the quality of the tet pt with respect to the anisotropic metric \a
+ * met. \f$ Q = V_met(K) / (sum(len(edge_K)^2)^(3/2) \f$.
  *
  * \todo test with the square of this measure
  */
-inline double _MMG5_caltet_ani(MMG5_pMesh mesh,MMG5_pSol met,int ia,int ib,int ic,int id) {
-  double     cal,abx,aby,abz,acx,acy,acz,adx,ady,adz;
-  double     bcx,bcy,bcz,bdx,bdy,bdz,cdx,cdy,cdz;
-  double     h1,h2,h3,h4,h5,h6,det,vol,rap,v1,v2,v3,num;
-  double    *a,*b,*c,*d;
-  double     *ma,*mb,*mc,*md,mm[6];
-  int        j,iadr;
+inline double _MMG5_caltet_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt) {
+  double       cal,abx,aby,abz,acx,acy,acz,adx,ady,adz;
+  double       bcx,bcy,bcz,bdx,bdy,bdz,cdx,cdy,cdz;
+  double       h1,h2,h3,h4,h5,h6,det,vol,rap,v1,v2,v3,num;
+  double       *a,*b,*c,*d;
+  double       *ma,*mb,*mc,*md,mm[6];
+  int          ia,ib,ic,id,j,iadr;
+
+  ia = pt->v[0];
+  ib = pt->v[1];
+  ic = pt->v[2];
+  id = pt->v[3];
 
   cal = _MMG5_NULKAL;
 
   /* average metric */
   memset(mm,0,6*sizeof(double));
+
   iadr = (ia)*met->size;
-  ma   = &met->m[iadr];
+  /* if ( !(MG_SIN(mesh->point[ia].tag) || (mesh->point[ia].tag & MG_NOM)) */
+  /*      && (mesh->point[ia].tag & MG_GEO) ) { */
+  /*    // ia is not singular but is on a ridge: build a classic metric from our */
+  /*    // convention storage. */
+  /*  } */
+  /* else { */
+    // Classic metric.
+    ma   = &met->m[iadr];
+  /* } */
+
   iadr = (ib)*met->size;
   mb   = &met->m[iadr];
   iadr = (ic)*met->size;
