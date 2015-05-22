@@ -763,6 +763,28 @@ inline double _MMG5_lenedgCoor_iso(double *ca,double *cb,double *ma,double *mb) 
  *
  */
 inline double _MMG5_lenedgCoor_ani(double *ca,double *cb,double *sa,double *sb) {
-  fprintf(stdout,"under develop : first thing to do\n");
-  return(0.0);
+ double   ux,uy,uz,dd1,dd2,len;
+
+  ux = cb[0] - ca[0];
+  uy = cb[1] - ca[1];
+  uz = cb[2] - ca[2];
+
+  dd1 =      sa[0]*ux*ux + sa[3]*uy*uy + sa[5]*uz*uz \
+    + 2.0*(sa[1]*ux*uy + sa[2]*ux*uz + sa[4]*uy*uz);
+  if ( dd1 <= 0.0 )  dd1 = 0.0;
+
+  dd2 =      sb[0]*ux*ux + sb[3]*uy*uy + sb[5]*uz*uz \
+    + 2.0*(sb[1]*ux*uy + sb[2]*ux*uz + sb[4]*uy*uz);
+  if ( dd2 <= 0.0 )  dd2 = 0.0;
+
+  /*longueur approchee*/
+  /*precision a 3.5 10e-3 pres*/
+  if(fabs(dd1-dd2) < 0.05 ) {
+    //printf("bonne precision %e \n",sqrt(0.5*(dd1+dd2)) - (sqrt(dd1)+sqrt(dd2)+4.0*sqrt(0.5*(dd1+dd2))) / 6.0 );
+    len = sqrt(0.5*(dd1+dd2));
+    return(len);
+  }
+  len = (sqrt(dd1)+sqrt(dd2)+4.0*sqrt(0.5*(dd1+dd2))) / 6.0;
+
+  return(len); 
 }

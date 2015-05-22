@@ -318,7 +318,7 @@ int _MMG5_simbulgept(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,double o[3]
  *
  */
 int _MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,int cas){
-  MMG5_pTetra         pt,pt1;
+  MMG5_pTetra         pt,pt1,pt0;
   MMG5_xTetra         xt,xt1;
   MMG5_pxTetra        pxt0;
   int            ilist,k,open,iel,jel,*newtet,nump,*adja,j;
@@ -350,10 +350,39 @@ int _MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,int 
       iel = list[j] / 6;
       pt  = &mesh->tetra[iel];
       ie  = list[j] % 6;
-#warning todo : change args put ie for edge _MMG5_isar[ie][0],ip but it is not that 
-      len = _MMG5_lenedg(mesh,met, ie,pt);
+      pt0 = &mesh->tetra[0];
+      memcpy(pt0,pt,sizeof(MMG5_Tetra));
+      /* tau = sigma^-1 = permutation that sends the ref config (edge 01 split) to current */
+      tau[0] = 0; tau[1] = 1; tau[2] = 2; tau[3] = 3;
+      taued = &permedge[0][0];
+      switch(ie){
+      case 1:
+        tau[0] = 2; tau[1] = 0; tau[2] = 1; tau[3] = 3;
+        taued = &permedge[6][0];
+        break;
+      case 2:
+        tau[0] = 0; tau[1] = 3; tau[2] = 1; tau[3] = 2;
+        taued = &permedge[2][0];
+        break;
+      case 3:
+        tau[0] = 1; tau[1] = 2; tau[2] = 0; tau[3] = 3;
+        taued = &permedge[4][0];
+        break;
+      case 4:
+        tau[0] = 3; tau[1] = 1; tau[2] = 0; tau[3] = 2;
+        taued = &permedge[10][0];
+        break;
+      case 5:
+        tau[0] = 3; tau[1] = 2; tau[2] = 1; tau[3] = 0;
+        taued = &permedge[11][0];
+        break;
+      }
+      pt0->v[tau[0]] = ip;
+      len = _MMG5_lenedgspl(mesh,met,taued[0],pt0);
       if ( len < lmin )  break;
-      len = _MMG5_lenedg(mesh,met, ie,pt);
+      memcpy(pt0,pt,sizeof(MMG5_Tetra));
+      pt0->v[tau[1]] = ip;
+      len = _MMG5_lenedgspl(mesh,met,taued[0],pt0);
       if ( len < lmin )  break;
     }
     if ( j < ilist )  return(0);

@@ -120,6 +120,7 @@ void _MMG5_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
     _MMG5_caltet     = _MMG5_caltet_iso;
     _MMG5_caltri     = _MMG5_caltri_iso;
     _MMG5_lenedg     = _MMG5_lenedg_iso;
+    _MMG5_lenedgspl  = _MMG5_lenedg_iso;
     _MMG5_intmetvol  = _MMG5_interp_iso;
     _MMG5_interp4bar = _MMG5_interp4bar_iso;
     _MMG5_defsiz     = _MMG5_defsiz_iso;
@@ -131,6 +132,7 @@ void _MMG5_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
     _MMG5_caltet     = _MMG5_caltet_ani;
     _MMG5_caltri     = _MMG5_caltri_ani;
     _MMG5_lenedg     = _MMG5_lenedg_ani;
+    _MMG5_lenedgspl  = _MMG5_lenedg_ani;
     _MMG5_intmetvol  = _MMG5_intmetvol_ani;
     _MMG5_interp4bar = _MMG5_interp4bar_ani;
     _MMG5_defsiz     = _MMG5_defsiz_ani;

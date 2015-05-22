@@ -145,41 +145,10 @@ inline double _MMG5_caltet_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt) {
   cal = _MMG5_NULKAL;
 
   /* average metric */
-
-  for (j=0; j<4; ++j ) {
-    if ( !(MG_SIN(mesh->point[ip[j]].tag) || (mesh->point[ip[j]].tag & MG_NOM))
-         && (mesh->point[ip[j]].tag & MG_GEO) ) {
-      /* ip[j] is not singular but is on a ridge: build a classic metric from our
-         convention storage. */
-      memset(m[j],0.,6*sizeof(double));
-
-      // m[j] = 1/3 ( sum_{k=1,3} met->m[iadr]_{rid,f_k} ) with
-      // met->m[iadr]_{rid,f_k} the ridge metric at point ip[j] reconstructed
-      // from face f_k that pass through vertex i.
-      for (i=0; i<3; ++i) {
-        ip1 = pt->v[_MMG5_idir[j][i]];
-        ip2 = pt->v[_MMG5_idir[j][(i+1)%3]];
-        ux = 0.5*(mesh->point[ip1].c[0]+mesh->point[ip2].c[0])
-          - mesh->point[ip[j]].c[0];
-        uy = 0.5*(mesh->point[ip1].c[1]+mesh->point[ip2].c[1])
-          - mesh->point[ip[j]].c[1];
-        uz = 0.5*(mesh->point[ip1].c[2]+mesh->point[ip2].c[2])
-          - mesh->point[ip[j]].c[2];
-        if ( !_MMG5_buildridmet(mesh,met,ip[j],ux,uy,uz,mm) )  return(0.0);
-        for (k=0; k<6; ++k) m[j][k]+=mm[k];
-      }
-
-      for (k=0; k<6; ++k) m[j][k] *= _MMG5_ATHIRD;
-    }
-    else {
-      // Classic metric.
-      iadr = ip[j]*met->size;
-      memcpy(m[j],&met->m[iadr],6*sizeof(double));
-    }
-  }
-
-  for (k=0; k<6; k++)
-    mm[k] = 0.25 * (m[0][k]+m[1][k]+m[2][k]+m[3][k]);
+#warning : treat ridge case
+  _MMG5_moymet(mesh,met,pt,&mm[0]);
+  // for (k=0; k<6; k++)
+  //  mm[k] = 0.25 * (m[0][k]+m[1][k]+m[2][k]+m[3][k]);
   a = mesh->point[ip[0]].c;
   b = mesh->point[ip[1]].c;
   c = mesh->point[ip[2]].c;
