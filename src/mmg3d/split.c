@@ -253,15 +253,14 @@ nextstep1:
  * \param mesh pointer toward the mesh structure.
  * \param list pointer toward the edge shell.
  * \param ret size of the edge shell.
- * \param o table of the new point coordinates.
+ * \param ip new point index.
  * \return 0 if final position is invalid, 1 if all checks are ok.
  *
- * Simulate at the same time creation and bulging of one point, with new position o,
- * to be inserted at an edge, whose shell is passed.
+ * Simulate at the same time creation and bulging of one point, with new
+ * position o and tag \tag, to be inserted at an edge, whose shell is passed.
  *
  */
-#warning we need the point tag too here (to detect ridge metric)
-int _MMG5_simbulgept(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,double o[3]) {
+int _MMG5_simbulgept(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int ip) {
   MMG5_pTetra    pt,pt0;
   MMG5_pPoint    ppt0;
   double         calold,calnew,caltmp;
@@ -271,9 +270,10 @@ int _MMG5_simbulgept(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,double o[3]
   ilist = ret / 2;
   pt0  = &mesh->tetra[0];
   ppt0 = &mesh->point[0];
-  ppt0->c[0] = o[0];
-  ppt0->c[1] = o[1];
-  ppt0->c[2] = o[2];
+  memcpy(ppt0->c  ,&mesh->point[ip].c  , 3*sizeof(double));
+  ppt0->tag = mesh->point[ip].tag;
+
+  memcpy(&met->m[0],&met->m[met->size*ip], met->size*sizeof(double));
 
   calold = calnew = DBL_MAX;
   for (k=0; k<ilist; k++) {

@@ -172,13 +172,7 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
           if ( !_MMG5_BezierReg(mesh,ip1,ip2,0.5,v,o,no1) ) goto collapse;
 
         }
-        ier = _MMG5_simbulgept(mesh,met,list,ilist,o);
-        if ( !ier ) {
-          ier = _MMG5_dichoto1b(mesh,met,list,ilist,o,ro);
-          memcpy(o,ro,3*sizeof(double));
-        }
         ip = _MMG5_newPt(mesh,o,tag);
-
         if ( !ip ) {
           /* reallocation of point table */
           if ( bucket ) {
@@ -192,13 +186,16 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
             exit(EXIT_FAILURE);
           }
         }
-
         // if ( met->m ) {
         if ( _MMG5_intmet(mesh,met,k,imax,ip,0.5) <=0 ) {
           _MMG5_delPt(mesh,ip);
           goto collapse;
         }
         // }
+        ier = _MMG5_simbulgept(mesh,met,list,ilist,ip);
+        if ( !ier ) {
+          ier = _MMG5_dichoto1b(mesh,met,list,ilist,ip);
+        }
 
         ier = _MMG5_split1b(mesh,met,list,ilist,ip,1);
 
@@ -491,13 +488,7 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
             if ( !_MMG5_BezierReg(mesh,ip1,ip2,0.5,v,o,no1) ) goto collapse2;
 
           }
-          ier = _MMG5_simbulgept(mesh,met,list,ilist,o);
-          if ( !ier ) {
-            ier = _MMG5_dichoto1b(mesh,met,list,ilist,o,ro);
-            memcpy(o,ro,3*sizeof(double));
-          }
           ip = _MMG5_newPt(mesh,o,tag);
-
           if ( !ip ){
             /* reallocation of point table */
             if ( bucket ) {
@@ -511,13 +502,17 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
               exit(EXIT_FAILURE);
             }
           }
-          ppt = &mesh->point[ip];
           // if ( met->m ) {
           if ( _MMG5_intmet(mesh,met,k,imax,ip,0.5)<=0 ) {
             _MMG5_delPt(mesh,ip);
             goto collapse2;
           }
           // }
+          ier = _MMG5_simbulgept(mesh,met,list,ilist,ip);
+          if ( !ier ) {
+            ier = _MMG5_dichoto1b(mesh,met,list,ilist,ip);
+          }
+
           ier = _MMG5_split1b(mesh,met,list,ilist,ip,1);
           /* if we realloc memory in _MMG5_split1b pt and pxt pointers are not valid */
           pt = &mesh->tetra[k];

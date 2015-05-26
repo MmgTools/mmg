@@ -239,8 +239,7 @@ void _MMG5_split4op(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]);
 void _MMG5_split5(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]);
 void _MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]);
 int  _MMG5_split4bar(MMG5_pMesh mesh,MMG5_pSol met,int k);
-int  _MMG5_simbulgept(MMG5_pMesh mesh,MMG5_pSol met, int *list, int ilist, double o[3]);
-int  _MMG5_dichoto1b(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,double o[3],double ro[3]);
+int  _MMG5_simbulgept(MMG5_pMesh mesh,MMG5_pSol met, int *list, int ilist,int);
 void _MMG5_nsort(int ,double *,char *);
 double _MMG5_orcal(MMG5_pMesh mesh,MMG5_pSol met,int iel);
 int    _MMG5_movintpt(MMG5_pMesh ,MMG5_pSol, int *, int , int );
@@ -297,10 +296,7 @@ int _MMG5_cenrad_ani(MMG5_pMesh mesh,double *ct,double *m,double *c,double *rad)
 /*mmg3d1.c*/
 void _MMG5_tet2tri(MMG5_pMesh mesh,int k,char ie,MMG5_Tria *ptt);
 int  _MMG5_dichoto(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx);
-/** Find acceptable position for split1b, passing the shell of considered edge, starting from o */
-int  _MMG5_dichoto1b(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,double o[3],double ro[3]);
-
-/** return edges of (virtual) triangle pt that need to be split w/r Hausdorff criterion */
+int  _MMG5_dichoto1b(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int);
 char _MMG5_chkedg(MMG5_pMesh mesh,MMG5_Tria *pt,char ori);
 int  _MMG5_anatet(MMG5_pMesh mesh,MMG5_pSol met,char typchk, int patternMode) ;
 int  _MMG5_movtet(MMG5_pMesh mesh,MMG5_pSol met,int maxitin);

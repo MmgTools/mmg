@@ -163,19 +163,18 @@ int _MMG5_dichoto(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
  * \param mesh pointer toward the mesh structure.
  * \param *list pointer toward the shell of edge.
  * \param ret double of the number of tetrahedra in the shell.
- * \param o[3] initial guess for coordinates of new point.
- * \param ro[3] output coordinates for the new point.
+ * \param ip new point index.
  * \return 1.
  *
  * Find acceptable position for _MMG5_split1b, passing the shell of
  * considered edge, starting from o point.
  *
  */
-int _MMG5_dichoto1b(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,double o[3],double ro[3]) {
+int _MMG5_dichoto1b(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int ip) {
   MMG5_pTetra  pt;
-  MMG5_pPoint  p0,p1;
+  MMG5_pPoint  p0,p1,ppt;
   int          iel,np,nq,it,maxit;
-  double       m[3],c[3],tp,to,t;
+  double       m[3],o[3],c[3],tp,to,t;
   char         ia,ier;
 
   iel = list[0] / 6;
@@ -186,6 +185,12 @@ int _MMG5_dichoto1b(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,double o[3],
   nq = pt->v[_MMG5_iare[ia][1]];
   p0 = &mesh->point[np];
   p1 = &mesh->point[nq];
+
+  /* initial coordinates for new point */
+  ppt = &mesh->point[ip];
+  o[0] = ppt->c[0];
+  o[1] = ppt->c[1];
+  o[2] = ppt->c[2];
 
   /* midpoint along edge */
   m[0] = 0.5*(p0->c[0] + p1->c[0]);
@@ -199,11 +204,11 @@ int _MMG5_dichoto1b(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,double o[3],
   to    = 0.0;
   do {
     t = 0.5*(to + tp);
-    c[0] = m[0] + t*(o[0]-m[0]);
-    c[1] = m[1] + t*(o[1]-m[1]);
-    c[2] = m[2] + t*(o[2]-m[2]);
+    ppt->c[0] = m[0] + t*(o[0]-m[0]);
+    ppt->c[1] = m[1] + t*(o[1]-m[1]);
+    ppt->c[2] = m[2] + t*(o[2]-m[2]);
 
-    ier = _MMG5_simbulgept(mesh,met,list,ret,c);
+    ier = _MMG5_simbulgept(mesh,met,list,ret,ip);
     if ( ier )
       to = t;
     else
@@ -211,9 +216,10 @@ int _MMG5_dichoto1b(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,double o[3],
   }
   while ( ++it < maxit );
   if ( !ier )  t = to;
-  ro[0] = m[0] + t*(o[0]-m[0]);
-  ro[1] = m[1] + t*(o[1]-m[1]);
-  ro[2] = m[2] + t*(o[2]-m[2]);
+
+  ppt->c[0] = m[0] + t*(o[0]-m[0]);
+  ppt->c[1] = m[1] + t*(o[1]-m[1]);
+  ppt->c[2] = m[2] + t*(o[2]-m[2]);
 
   return(1);
 }

@@ -144,11 +144,6 @@ static int _MMG5_adpspl(MMG5_pMesh mesh,MMG5_pSol met, int* warn) {
         if ( !_MMG5_BezierReg(mesh,ip1,ip2,0.5,v,o,no1) )
           continue;
       }
-      ier = _MMG5_simbulgept(mesh,met,list,ilist,o);
-      if ( !ier ) {
-        ier = _MMG5_dichoto1b(mesh,met,list,ilist,o,ro);
-        memcpy(o,ro,3*sizeof(double));
-      }
       ip = _MMG5_newPt(mesh,o,tag);
       if ( !ip ) {
         /* reallocation of point table */
@@ -168,6 +163,10 @@ static int _MMG5_adpspl(MMG5_pMesh mesh,MMG5_pSol met, int* warn) {
         continue;
       }
       // }
+      ier = _MMG5_simbulgept(mesh,met,list,ilist,ip);
+      if ( !ier ) {
+        ier = _MMG5_dichoto1b(mesh,met,list,ilist,ip);
+      }
       ier = _MMG5_split1b(mesh,met,list,ilist,ip,1);
       /* if we realloc memory in _MMG5_split1b pt and pxt pointers are not valid */
       pt = &mesh->tetra[k];
