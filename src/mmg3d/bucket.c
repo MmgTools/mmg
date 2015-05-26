@@ -33,6 +33,9 @@
  */
 
 #include "mmg3d.h"
+
+#ifndef PATTERN
+
 #define PRECI 1
 #define LFILT    0.2//0.7
 
@@ -370,3 +373,5 @@ int _MMG5_delBucket(MMG5_pMesh mesh,_MMG5_pBucket bucket,int ip) {
 
   return(1);
 }
+
+#endif

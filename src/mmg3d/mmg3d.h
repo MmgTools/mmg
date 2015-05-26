@@ -307,10 +307,10 @@ int  _MMG5_swptet(MMG5_pMesh mesh,MMG5_pSol met,double crit,_MMG5_pBucket bucket
 /* init structures */
 void  _MMG5_Init_parameters(MMG5_pMesh mesh);
 /* iso/aniso computations */
-inline double _MMG5_caltet_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt);
-inline double _MMG5_caltet_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt);
-inline double _MMG5_lenedgCoor_ani(double*, double*, double*, double*);
-inline double _MMG5_lenedgCoor_iso(double*, double*, double*, double*);
+double _MMG5_caltet_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt);
+double _MMG5_caltet_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt);
+double _MMG5_lenedgCoor_ani(double*, double*, double*, double*);
+double _MMG5_lenedgCoor_iso(double*, double*, double*, double*);
 int    _MMG5_intmet_iso(MMG5_pMesh,MMG5_pSol,int,char,int, double);
 int    _MMG5_intmet_ani(MMG5_pMesh,MMG5_pSol,int,char,int, double);
 int    _MMG5_interp4bar_ani(MMG5_pMesh,MMG5_pSol,int,int,double *);
@@ -320,8 +320,8 @@ int    _MMG5_defsiz_ani(MMG5_pMesh ,MMG5_pSol );
 int    _MMG5_gradsiz_iso(MMG5_pMesh ,MMG5_pSol );
 int    _MMG5_gradsiz_ani(MMG5_pMesh ,MMG5_pSol );
 int    _MMG5_moymet(MMG5_pMesh ,MMG5_pSol ,MMG5_pTetra ,double *);
-inline double _MMG5_lenedgspl_ani(MMG5_pMesh  ,MMG5_pSol , int , MMG5_pTetra );
-inline double _MMG5_lenedgspl_iso(MMG5_pMesh  ,MMG5_pSol , int , MMG5_pTetra );
+double _MMG5_lenedgspl_ani(MMG5_pMesh  ,MMG5_pSol , int , MMG5_pTetra );
+double _MMG5_lenedgspl_iso(MMG5_pMesh  ,MMG5_pSol , int , MMG5_pTetra );
 
 double (*_MMG5_lenedg)(MMG5_pMesh ,MMG5_pSol ,int, MMG5_pTetra );
 double (*_MMG5_lenedgspl)(MMG5_pMesh ,MMG5_pSol ,int, MMG5_pTetra );

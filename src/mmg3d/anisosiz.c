@@ -130,6 +130,47 @@ inline double _MMG5_lenedgspl_ani(MMG5_pMesh mesh ,MMG5_pSol met, int ia,
 
   return(_MMG5_lenedgCoor_ani(pp1->c,pp2->c,m1,m2));
 }
+
+/**
+ * \brief Compute edge length from edge's coordinates.
+ * \param *ca pointer toward the coordinates of the first edge's extremity.
+ * \param *cb pointer toward the coordinates of the second edge's extremity.
+ * \param *ma pointer toward the metric associated to the first edge's extremity.
+ * \param *mb pointer toward the metric associated to the second edge's extremity.
+ * \return edge length.
+ *
+ * Compute length of edge \f$[ca,cb]\f$ (with \a ca and \a cb
+ * coordinates of edge extremities) according to the anisotropic size
+ * prescription.
+ *
+ */
+inline double _MMG5_lenedgCoor_ani(double *ca,double *cb,double *sa,double *sb) {
+ double   ux,uy,uz,dd1,dd2,len;
+
+  ux = cb[0] - ca[0];
+  uy = cb[1] - ca[1];
+  uz = cb[2] - ca[2];
+
+  dd1 =      sa[0]*ux*ux + sa[3]*uy*uy + sa[5]*uz*uz \
+    + 2.0*(sa[1]*ux*uy + sa[2]*ux*uz + sa[4]*uy*uz);
+  if ( dd1 <= 0.0 )  dd1 = 0.0;
+
+  dd2 =      sb[0]*ux*ux + sb[3]*uy*uy + sb[5]*uz*uz \
+    + 2.0*(sb[1]*ux*uy + sb[2]*ux*uz + sb[4]*uy*uz);
+  if ( dd2 <= 0.0 )  dd2 = 0.0;
+
+  /*longueur approchee*/
+  /*precision a 3.5 10e-3 pres*/
+  if(fabs(dd1-dd2) < 0.05 ) {
+    //printf("bonne precision %e \n",sqrt(0.5*(dd1+dd2)) - (sqrt(dd1)+sqrt(dd2)+4.0*sqrt(0.5*(dd1+dd2))) / 6.0 );
+    len = sqrt(0.5*(dd1+dd2));
+    return(len);
+  }
+  len = (sqrt(dd1)+sqrt(dd2)+4.0*sqrt(0.5*(dd1+dd2))) / 6.0;
+
+  return(len);
+}
+
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.

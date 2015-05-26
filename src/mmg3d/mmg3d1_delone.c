@@ -36,6 +36,8 @@
  */
 #include "mmg3d.h"
 
+#ifndef PATTERN
+
 char  ddb;
 
 #define _MMG5_LOPTL_MMG5_DEL     1.41
@@ -1046,3 +1048,5 @@ int _MMG5_mmg3d1_delone(MMG5_pMesh mesh,MMG5_pSol met) {
 
   return(1);
 }
+
+#endif

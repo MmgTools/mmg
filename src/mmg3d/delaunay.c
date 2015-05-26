@@ -34,6 +34,8 @@
 
 #include "mmg3d.h"
 
+#ifndef PATTERN
+
 #define  _MMG5_EPSRAD       1.00005
 //For Various_adpsol_hgrad1_M6Mach_Eps0.001_hmin0.001_hmax2 test case:
 //pbs with _MMG5_EPSCON=5e-4 and VOLMIN=1e-15 (MMG3D does not insert enough vertex...)
@@ -42,7 +44,9 @@
 #define LONMAX     4096
 
 int MMG_cas;
+
 extern int MMG_npuiss,MMG_nvol,MMG_npres;
+
 #define KTA     7
 #define KTB    11
 #define KTC    13
@@ -797,3 +801,5 @@ int _MMG5_cavity_iso(MMG5_pMesh mesh,MMG5_pSol sol,int iel,int ip,int *list,int 
   }
   return(ilist);
 }
+
+#endif

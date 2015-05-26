@@ -1071,7 +1071,6 @@ _MMG5_anatets(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
         p1  = &mesh->point[ip1];
         p2  = &mesh->point[ip2];
 
-        // if ( met->m ) {
         ier = _MMG5_intmet(mesh,met,k,ia,ip,0.5);
         if ( !ier )  return(-1);
         else if ( ier < 0 ) {

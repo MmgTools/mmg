@@ -66,7 +66,7 @@ inline double _MMG5_lenedg_iso(MMG5_pMesh mesh,MMG5_pSol met,int ia,
 inline double _MMG5_lenedgspl_iso(MMG5_pMesh mesh ,MMG5_pSol met, int ia,
                                   MMG5_pTetra pt) {
   int ip1,ip2;
-  
+
   ip1 = pt->v[_MMG5_iare[ia][0]];
   ip2 = pt->v[_MMG5_iare[ia][1]];
 
@@ -74,6 +74,32 @@ inline double _MMG5_lenedgspl_iso(MMG5_pMesh mesh ,MMG5_pSol met, int ia,
 
 }
 
+/**
+ * \brief Compute edge length from edge's coordinates.
+ * \param *ca pointer toward the coordinates of the first edge's extremity.
+ * \param *cb pointer toward the coordinates of the second edge's extremity.
+ * \param *ma pointer toward the metric associated to the first edge's extremity.
+ * \param *mb pointer toward the metric associated to the second edge's extremity.
+ * \return edge length.
+ *
+ * Compute length of edge \f$[ca,cb]\f$ (with \a ca and \a cb
+ * coordinates of edge extremities) according to the isotropic size
+ * prescription.
+ *
+ */
+inline double _MMG5_lenedgCoor_iso(double *ca,double *cb,double *ma,double *mb) {
+  double   h1,h2,l,r,len;
+
+  h1 = *ma;
+  h2 = *mb;
+  l = (cb[0]-ca[0])*(cb[0]-ca[0]) + (cb[1]-ca[1])*(cb[1]-ca[1]) \
+    + (cb[2]-ca[2])*(cb[2]-ca[2]);
+  l = sqrt(l);
+  r = h2 / h1 - 1.0;
+  len = fabs(r) < _MMG5_EPS ? l / h1 : l / (h2-h1) * log(r+1.0);
+
+  return(len);
+}
 
 /**
  * \param mesh pointer toward the mesh structure.
