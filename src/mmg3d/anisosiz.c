@@ -40,7 +40,7 @@ inline int _MMG5_moymet(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,double *m1)
   double  mm[6],*mp;
   double  dd;
   int     i,k,n;
-  
+
   n = 0;
   for (k=0; k<6; ++k) mm[k] = 0.;
   for(i=0 ; i<4 ; i++) {
@@ -52,8 +52,8 @@ inline int _MMG5_moymet(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,double *m1)
       mm[k] += mp[k];
     }
   }
-  
-  if(!n) {printf("warning 4 points ridges.....\n");exit(0);}
+
+  if(!n) {printf("warning 4 points ridges.....\n");exit(EXIT_FAILURE);}
   dd = 1./n;
   for (k=0; k<6; ++k) m1[k] = mm[k]*dd;
   return(n);

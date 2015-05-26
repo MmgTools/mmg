@@ -68,6 +68,7 @@ int _MMG5_chkcol_int(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
     for (jj=0; jj<4; jj++)  if ( pt->v[jj] == nq )  break;
     if ( jj < 4 )  continue;
     memcpy(pt0,pt,sizeof(MMG5_Tetra));
+    /* Update edges tag for pt0 (needed by lenedg). */
 
     /* prevent from recreating internal edge between boundaries */
     if ( mesh->info.fem ) {
@@ -90,8 +91,10 @@ int _MMG5_chkcol_int(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
     /* check length */
     if ( typchk == 2 && met->m ) {
       for (jj=0; jj<6; jj++) {
-#warning chk tags of pt0 (edges tags and points tags)
-        if ( _MMG5_lenedg(mesh,met,jj,pt0) > lon )
+        /* Rough evaluation of edge length (doesn't take into account if some of
+         * the modified edges of pt0 are boundaries): for a more precise
+         * computation, we need to update the edge tags of pt0.  */
+        if ( _MMG5_lenedgspl(mesh,met,jj,pt0) > lon )
           return(0);
       }
     }

@@ -36,8 +36,6 @@
  *
  */
 
-#warning now we have always a metric here so we can remove all the if ( met->m ) tests
-
 #include "mmg3d.h"
 
 char  ddb;
@@ -858,14 +856,14 @@ _MMG5_anatetv(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
           p1  = &mesh->point[ip1];
           p2  = &mesh->point[ip2];
         }
-        if ( met->m ) {
-          ier = _MMG5_intmet(mesh,met,k,i,ip,0.5);
-          if (!ier) return(-1);
-          else if ( ier < 0 ) {
-            _MMG5_delPt(mesh,ip);
-            continue;
-          }
+        // if ( met->m ) {
+        ier = _MMG5_intmet(mesh,met,k,i,ip,0.5);
+        if (!ier) return(-1);
+        else if ( ier < 0 ) {
+          _MMG5_delPt(mesh,ip);
+          continue;
         }
+        // }
         if ( !_MMG5_hashEdge(mesh,&hash,ip1,ip2,ip) )  return(-1);
         MG_SET(pt->flag,i);
         nap++;
@@ -1067,14 +1065,14 @@ _MMG5_anatets(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
         p1  = &mesh->point[ip1];
         p2  = &mesh->point[ip2];
 
-        if ( met->m ) {
-          ier = _MMG5_intmet(mesh,met,k,ia,ip,0.5);
-          if ( !ier )  return(-1);
-          else if ( ier < 0 ) {
-            _MMG5_delPt(mesh,ip);
-            continue;
-          }
+        // if ( met->m ) {
+        ier = _MMG5_intmet(mesh,met,k,ia,ip,0.5);
+        if ( !ier )  return(-1);
+        else if ( ier < 0 ) {
+          _MMG5_delPt(mesh,ip);
+          continue;
         }
+        // }
 
         if ( MG_EDG(ptt.tag[j]) || (ptt.tag[j] & MG_NOM) )
           ppt->ref = ptt.edg[j] ? ptt.edg[j] : ptt.ref;

@@ -135,7 +135,7 @@ int chkcol(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int *list,char typchk) {
       else
         kal = ALPHAD*_MMG5_caltri_iso(mesh,NULL,pt0);
       if ( kal < NULKAL )  return(0);
-       
+
       memcpy(n0old,n1old,3*sizeof(double));
       memcpy(n0new,n1new,3*sizeof(double));
     }

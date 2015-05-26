@@ -193,12 +193,12 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
           }
         }
 
-        if ( met->m ) {
-          if ( _MMG5_intmet(mesh,met,k,imax,ip,0.5) <=0 ) {
-            _MMG5_delPt(mesh,ip);
-            goto collapse;
-          }
+        // if ( met->m ) {
+        if ( _MMG5_intmet(mesh,met,k,imax,ip,0.5) <=0 ) {
+          _MMG5_delPt(mesh,ip);
+          goto collapse;
         }
+        // }
 
         ier = _MMG5_split1b(mesh,met,list,ilist,ip,1);
 
@@ -270,12 +270,12 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
 
         }
         ppt = &mesh->point[ip];
-        if ( met->m ) {
-          if ( _MMG5_intmet(mesh,met,k,imax,ip,0.5)<=0 ) {
-            _MMG5_delPt(mesh,ip);
-            goto collapse;
-          }
+        // if ( met->m ) {
+        if ( _MMG5_intmet(mesh,met,k,imax,ip,0.5)<=0 ) {
+          _MMG5_delPt(mesh,ip);
+          goto collapse;
         }
+        // }
         ier = _MMG5_split1b(mesh,met,list,ilist,ip,1);
         if ( ier < 0 ) {
           fprintf(stdout,"  ## Error: unable to split.\n");
@@ -317,13 +317,12 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
           }
         }
         ppt = &mesh->point[ip];
-        if ( met->m ) {
-          if ( _MMG5_intmet(mesh,met,k,imax,ip,0.5)<=0 ) {
-            _MMG5_delPt(mesh,ip);
-            goto collapse;
-          };
-#warning put the good metric
-        }
+        // if ( met->m ) {
+        if ( _MMG5_intmet(mesh,met,k,imax,ip,0.5)<=0 ) {
+          _MMG5_delPt(mesh,ip);
+          goto collapse;
+        };
+        // }
 
         /* Delaunay */
         if ( !_MMG5_buckin(mesh,met,bucket,ip) ) {
@@ -513,12 +512,12 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
             }
           }
           ppt = &mesh->point[ip];
-          if ( met->m ) {
-            if ( _MMG5_intmet(mesh,met,k,imax,ip,0.5)<=0 ) {
-              _MMG5_delPt(mesh,ip);
-              goto collapse2;
-            }
+          // if ( met->m ) {
+          if ( _MMG5_intmet(mesh,met,k,imax,ip,0.5)<=0 ) {
+            _MMG5_delPt(mesh,ip);
+            goto collapse2;
           }
+          // }
           ier = _MMG5_split1b(mesh,met,list,ilist,ip,1);
           /* if we realloc memory in _MMG5_split1b pt and pxt pointers are not valid */
           pt = &mesh->tetra[k];
@@ -588,12 +587,12 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
             }
           }
           ppt = &mesh->point[ip];
-          if ( met->m ) {
-            if ( _MMG5_intmet(mesh,met,k,imax,ip,0.5)<=0 ) {
-              _MMG5_delPt(mesh,ip);
-              goto collapse2;
-            }
+          // if ( met->m ) {
+          if ( _MMG5_intmet(mesh,met,k,imax,ip,0.5)<=0 ) {
+            _MMG5_delPt(mesh,ip);
+            goto collapse2;
           }
+          // }
           ier = _MMG5_split1b(mesh,met,list,ilist,ip,1);
           if ( ier < 0 ) {
             fprintf(stdout,"  ## Error: unable to split.\n");
@@ -634,12 +633,12 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
             }
           }
           ppt = &mesh->point[ip];
-          if ( met->m ) {
-            if ( _MMG5_intmet(mesh,met,k,imax,ip,0.5)<=0 ) {
-              _MMG5_delPt(mesh,ip);
-              goto collapse2;
-            }
+          // if ( met->m ) {
+          if ( _MMG5_intmet(mesh,met,k,imax,ip,0.5)<=0 ) {
+            _MMG5_delPt(mesh,ip);
+            goto collapse2;
           }
+          // }
           if ( /*lmax>4 &&*/ /*it &&*/  !_MMG5_buckin_iso(mesh,met,bucket,ip) ) {
             _MMG5_delPt(mesh,ip);
             (*ifilt)++;

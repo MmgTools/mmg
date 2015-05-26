@@ -157,17 +157,17 @@ static int _MMG5_adpspl(MMG5_pMesh mesh,MMG5_pSol met, int* warn) {
                             break
                             ,o,tag);
       }
-      if ( met->m ) {
-        ier = _MMG5_intmet(mesh,met,k,imax,ip,0.5);
-        if ( !ier ) {
-          _MMG5_delPt(mesh,ip);
-          return(-1);
-        }
-        else if (ier < 0) {
-          _MMG5_delPt(mesh,ip);
-          continue;
-        }
+      // if ( met->m ) {
+      ier = _MMG5_intmet(mesh,met,k,imax,ip,0.5);
+      if ( !ier ) {
+        _MMG5_delPt(mesh,ip);
+        return(-1);
       }
+      else if (ier < 0) {
+        _MMG5_delPt(mesh,ip);
+        continue;
+      }
+      // }
       ier = _MMG5_split1b(mesh,met,list,ilist,ip,1);
       /* if we realloc memory in _MMG5_split1b pt and pxt pointers are not valid */
       pt = &mesh->tetra[k];
@@ -226,17 +226,17 @@ static int _MMG5_adpspl(MMG5_pMesh mesh,MMG5_pSol met, int* warn) {
                             ,o,MG_NOTAG);
       }
       ppt = &mesh->point[ip];
-      if ( met->m ) {
-        ier = _MMG5_intmet(mesh,met,k,imax,ip,0.5);
-        if ( !ier ) {
-          _MMG5_delPt(mesh,ip);
-          return(-1);
-        }
-        else if (ier < 0 ) {
-          _MMG5_delPt(mesh,ip);
-          continue;
-        }
+      // if ( met->m ) {
+      ier = _MMG5_intmet(mesh,met,k,imax,ip,0.5);
+      if ( !ier ) {
+        _MMG5_delPt(mesh,ip);
+        return(-1);
       }
+      else if (ier < 0 ) {
+        _MMG5_delPt(mesh,ip);
+        continue;
+      }
+      // }
       ier = _MMG5_split1b(mesh,met,list,ilist,ip,1);
       if ( ier < 0 ) {
         fprintf(stdout,"  ## Error: unable to split.\n");
