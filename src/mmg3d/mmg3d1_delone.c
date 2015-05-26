@@ -72,7 +72,7 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
   MMG5_Tria       ptt;
   MMG5_pPoint     p0,p1,ppt;
   MMG5_pxPoint    pxp;
-  double     dd,len,lmax,o[3],to[3],ro[3],no1[3],no2[3],v[3];
+  double     dd,len,lmax,o[3],to[3],no1[3],no2[3],v[3];
   int        k,ip,ip1,ip2,list[_MMG5_LMAX+2],ilist,ref;
   char       imax,tag,j,i,i1,i2,ifa0,ifa1;
   int        lon,ret,ier;

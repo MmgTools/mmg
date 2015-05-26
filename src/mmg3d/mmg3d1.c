@@ -174,7 +174,7 @@ int _MMG5_dichoto1b(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int ip) {
   MMG5_pTetra  pt;
   MMG5_pPoint  p0,p1,ppt;
   int          iel,np,nq,it,maxit;
-  double       m[3],o[3],c[3],tp,to,t;
+  double       m[3],o[3],tp,to,t;
   char         ia,ier;
 
   iel = list[0] / 6;

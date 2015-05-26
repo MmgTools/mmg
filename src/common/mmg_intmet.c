@@ -614,7 +614,7 @@ int _MMG5_interpreg_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt,char i,
   _MMG5_Bezier   b;
   double         b1[3],b2[3],bn[3],c[3],nt[3],cold[3],nold[3],n[3];
   double         m1old[6],m2old[6],m1[6],m2[6];
-  double         *n1,*n2,*n3,step,u,r[3][3],dd;
+  double         *n1,*n2,step,u,r[3][3],dd;
   int            ip1,ip2,nstep,l;
   char           i1,i2;
 
