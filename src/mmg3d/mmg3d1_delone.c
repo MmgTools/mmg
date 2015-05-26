@@ -71,13 +71,12 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
   MMG5_pPoint     p0,p1,ppt;
   MMG5_pxPoint    pxp;
   double     dd,len,lmax,o[3],to[3],ro[3],no1[3],no2[3],v[3];
-  double     *m1,*m2,*mp;
   int        k,ip,ip1,ip2,list[_MMG5_LMAX+2],ilist,ref;
   char       imax,tag,j,i,i1,i2,ifa0,ifa1;
   int        lon,ret,ier;
   double     lmin;
   int        imin,iq;
-  int        ii,iadr;
+  int        ii;
   double     lmaxtet,lmintet;
   int        imaxtet,imintet;
 
@@ -195,17 +194,10 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
         }
 
         if ( met->m ) {
-          iadr = met->size*ip1;
-          m1 = &met->m[iadr];
-          iadr = met->size*ip2;
-          m2 = &met->m[iadr];
-          iadr = met->size*ip;
-          mp = &met->m[iadr];
           if ( _MMG5_intmet(mesh,met,k,imax,ip,0.5) <=0 ) {
             _MMG5_delPt(mesh,ip);
             goto collapse;
           }
-#warning put the good metric
         }
 
         ier = _MMG5_split1b(mesh,met,list,ilist,ip,1);
@@ -279,17 +271,10 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
         }
         ppt = &mesh->point[ip];
         if ( met->m ) {
-          iadr = met->size*ip1;
-          m1 = &met->m[iadr];
-          iadr = met->size*ip2;
-          m2 = &met->m[iadr];
-          iadr = met->size*ip;
-          mp = &met->m[iadr];
           if ( _MMG5_intmet(mesh,met,k,imax,ip,0.5)<=0 ) {
             _MMG5_delPt(mesh,ip);
             goto collapse;
           }
-#warning put the good metric
         }
         ier = _MMG5_split1b(mesh,met,list,ilist,ip,1);
         if ( ier < 0 ) {
@@ -529,12 +514,6 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
           }
           ppt = &mesh->point[ip];
           if ( met->m ) {
-            iadr = met->size*ip1;
-            m1 = &met->m[iadr];
-            iadr = met->size*ip2;
-            m2 = &met->m[iadr];
-            iadr = met->size*ip;
-            mp = &met->m[iadr];
             if ( _MMG5_intmet(mesh,met,k,imax,ip,0.5)<=0 ) {
               _MMG5_delPt(mesh,ip);
               goto collapse2;
@@ -610,12 +589,6 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
           }
           ppt = &mesh->point[ip];
           if ( met->m ) {
-            iadr = met->size*ip1;
-            m1 = &met->m[iadr];
-            iadr = met->size*ip2;
-            m2 = &met->m[iadr];
-            iadr = met->size*ip;
-            mp = &met->m[iadr];
             if ( _MMG5_intmet(mesh,met,k,imax,ip,0.5)<=0 ) {
               _MMG5_delPt(mesh,ip);
               goto collapse2;
@@ -662,12 +635,6 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
           }
           ppt = &mesh->point[ip];
           if ( met->m ) {
-            iadr = met->size*ip1;
-            m1 = &met->m[iadr];
-            iadr = met->size*ip2;
-            m2 = &met->m[iadr];
-            iadr = met->size*ip;
-            mp = &met->m[iadr];
             if ( _MMG5_intmet(mesh,met,k,imax,ip,0.5)<=0 ) {
               _MMG5_delPt(mesh,ip);
               goto collapse2;

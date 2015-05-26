@@ -203,9 +203,9 @@ int _MMG5_swpgen(MMG5_pMesh mesh,MMG5_pSol met,int nconf,int ilist,int *list,_MM
   MMG5_pTetra    pt;
   MMG5_pPoint    p0,p1;
   int       iel,na,nb,np,nball,ret,start;
-  double    m[3],*m1,*m2,*mp;
+  double    m[3];
   char      ia,ip,iq;
-  int       ier,iadr;
+  int       ier;
 
   iel = list[0] / 6;
   ia  = list[0] % 6;
@@ -239,15 +239,8 @@ int _MMG5_swpgen(MMG5_pMesh mesh,MMG5_pSol met,int nconf,int ilist,int *list,_MM
     }
   }
   if ( met->m ) {
-    iadr = met->size*na;
-    m1 = &met->m[iadr];
-    iadr = met->size*nb;
-    m2 = &met->m[iadr];
-    iadr = met->size*np;
-    mp = &met->m[iadr];
 
     if ( _MMG5_intmet(mesh,met,iel,ia,np,0.5)<=0 ) return(0);
-#warning todo : put the good metric
   }
 
   /** First step : split of edge (na,nb) */

@@ -264,9 +264,9 @@ nextstep1:
 int _MMG5_simbulgept(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,double o[3]) {
   MMG5_pTetra    pt,pt0;
   MMG5_pPoint    ppt0;
-  double    calold,calnew,caltmp;
-  int       k,iel,ilist;
-  char      ie,ia,ib;
+  double         calold,calnew,caltmp;
+  int            k,iel,ilist;
+  char           ie,ia,ib;
 
   ilist = ret / 2;
   pt0  = &mesh->tetra[0];

@@ -55,8 +55,7 @@ static int _MMG5_adpspl(MMG5_pMesh mesh,MMG5_pSol met, int* warn) {
   MMG5_pPoint     p0,p1,ppt;
   MMG5_pxPoint    pxp;
   double     dd,len,lmax,o[3],to[3],ro[3],no1[3],no2[3],v[3];
-  double    *m1,*m2,*mp;
-  int        k,ip,ip1,ip2,list[_MMG5_LMAX+2],ilist,ns,ref,ier,iadr;
+  int        k,ip,ip1,ip2,list[_MMG5_LMAX+2],ilist,ns,ref,ier;
   char       imax,tag,j,i,i1,i2,ifa0,ifa1;
 
   *warn=0;
@@ -159,12 +158,6 @@ static int _MMG5_adpspl(MMG5_pMesh mesh,MMG5_pSol met, int* warn) {
                             ,o,tag);
       }
       if ( met->m ) {
-        iadr = met->size*ip1;
-        m1 = &met->m[iadr];
-        iadr = met->size*ip2;
-        m2 = &met->m[iadr];
-        iadr = met->size*ip;
-        mp = &met->m[iadr];
         ier = _MMG5_intmet(mesh,met,k,imax,ip,0.5);
         if ( !ier ) {
           _MMG5_delPt(mesh,ip);
@@ -234,13 +227,6 @@ static int _MMG5_adpspl(MMG5_pMesh mesh,MMG5_pSol met, int* warn) {
       }
       ppt = &mesh->point[ip];
       if ( met->m ) {
-        iadr = met->size*ip1;
-        m1 = &met->m[iadr];
-        iadr = met->size*ip2;
-        m2 = &met->m[iadr];
-        iadr = met->size*ip;
-        mp = &met->m[iadr];
-
         ier = _MMG5_intmet(mesh,met,k,imax,ip,0.5);
         if ( !ier ) {
           _MMG5_delPt(mesh,ip);

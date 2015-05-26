@@ -448,7 +448,7 @@ int _MMG5_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pxTetra   pxt;
   MMG5_pPoint    p0,p1;
   double         hp,v[3],b0[3],b1[3],b0p0[3],b1b0[3],p1b1[3],hausd;
-  double         secder0[3],secder1[3],kappa,tau[3],gammasec[3],ntau2,intau,ps,lm,*n;
+  double         secder0[3],secder1[3],kappa,tau[3],gammasec[3],ntau2,intau,ps,lm;
   int            lists[_MMG5_LMAX+2],listv[_MMG5_LMAX+2],ilists,ilistv,k,ip0,ip1,l;
   char           i,j,ia,ised,i0,i1;
   MMG5_pPar      par;

@@ -270,7 +270,7 @@ int _MMG5_swpbdy(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int it1,_MMG5_p
   MMG5_pTetra   pt,pt1;
   MMG5_pPoint   p0,p1;
   int           iel,iel1,ilist,np,nq,nm;
-  double        c[3],*mp, *mq, *mm;
+  double        c[3];
   char          ia,iface1,j,ipa,im;
   int           ier;
 #ifndef NDEBUG
@@ -330,7 +330,6 @@ int _MMG5_swpbdy(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int it1,_MMG5_p
   }
   if ( met->m ) {
      if ( _MMG5_intmet(mesh,met,iel,ia,nm,0.5)<=0 )  return(0);
-#warning put the good metric
   }
 
   ier = _MMG5_split1b(mesh,met,list,ret,nm,0);

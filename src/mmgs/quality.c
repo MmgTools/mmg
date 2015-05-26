@@ -362,84 +362,84 @@ int _MMG5_prilen(MMG5_pMesh mesh, MMG5_pSol met) {
   return(1);
 }
 
-/**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the met structure.
- * \param iel index of element on which we compute the quality.
- * \return the computed quality.
- *
- * Quality of a triangle for the initial given metric (which means that the
- * metric on a ridge point is a `classic` metric and not the sizes in dir
- * \f$t\f$, \f$n_1^t\f$,\f$n2^t\f$)
- *
- */
-static double _MMG5_caltri33_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel) {
-  MMG5_pTria    pt;
-  double        cal,dd,abx,aby,abz,acx,acy,acz,bcx,bcy,bcz,rap,det;
-  double        *a,*b,*c,*ma,*mb,*mc,n[3],m[6],l1,l2,l3,p;
-  int           ia,ib,ic;
-  char          i;
+/* /\** */
+/*  * \param mesh pointer toward the mesh structure. */
+/*  * \param met pointer toward the met structure. */
+/*  * \param iel index of element on which we compute the quality. */
+/*  * \return the computed quality. */
+/*  * */
+/*  * Quality of a triangle for the initial given metric (which means that the */
+/*  * metric on a ridge point is a `classic` metric and not the sizes in dir */
+/*  * \f$t\f$, \f$n_1^t\f$,\f$n2^t\f$) */
+/*  * */
+/*  *\/ */
+/* static double _MMG5_caltri33_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel) { */
+/*   MMG5_pTria    pt; */
+/*   double        cal,dd,abx,aby,abz,acx,acy,acz,bcx,bcy,bcz,rap,det; */
+/*   double        *a,*b,*c,*ma,*mb,*mc,n[3],m[6],l1,l2,l3,p; */
+/*   int           ia,ib,ic; */
+/*   char          i; */
 
-  pt = &mesh->tria[iel];
-  ia = pt->v[0];
-  ib = pt->v[1];
-  ic = pt->v[2];
+/*   pt = &mesh->tria[iel]; */
+/*   ia = pt->v[0]; */
+/*   ib = pt->v[1]; */
+/*   ic = pt->v[2]; */
 
-  ma = &met->m[6*ia];
-  mb = &met->m[6*ib];
-  mc = &met->m[6*ic];
+/*   ma = &met->m[6*ia]; */
+/*   mb = &met->m[6*ib]; */
+/*   mc = &met->m[6*ic]; */
 
-  dd  = 1.0 / 3.0;
-  for (i=0; i<6; i++)
-    m[i] = dd * (ma[i] + mb[i] + mc[i]);
-  det = m[0]*(m[3]*m[5] - m[4]*m[4]) - m[1]*(m[1]*m[5] - m[2]*m[4]) + m[2]*(m[1]*m[4] - m[2]*m[3]);
-  if ( det < _MMG5_EPSD2 )  return(0.0);
+/*   dd  = 1.0 / 3.0; */
+/*   for (i=0; i<6; i++) */
+/*     m[i] = dd * (ma[i] + mb[i] + mc[i]); */
+/*   det = m[0]*(m[3]*m[5] - m[4]*m[4]) - m[1]*(m[1]*m[5] - m[2]*m[4]) + m[2]*(m[1]*m[4] - m[2]*m[3]); */
+/*   if ( det < _MMG5_EPSD2 )  return(0.0); */
 
-  a = &mesh->point[ia].c[0];
-  b = &mesh->point[ib].c[0];
-  c = &mesh->point[ic].c[0];
+/*   a = &mesh->point[ia].c[0]; */
+/*   b = &mesh->point[ib].c[0]; */
+/*   c = &mesh->point[ic].c[0]; */
 
-  /* area */
-  abx = b[0] - a[0];
-  aby = b[1] - a[1];
-  abz = b[2] - a[2];
-  acx = c[0] - a[0];
-  acy = c[1] - a[1];
-  acz = c[2] - a[2];
-  bcx = c[0] - b[0];
-  bcy = c[1] - b[1];
-  bcz = c[2] - b[2];
+/*   /\* area *\/ */
+/*   abx = b[0] - a[0]; */
+/*   aby = b[1] - a[1]; */
+/*   abz = b[2] - a[2]; */
+/*   acx = c[0] - a[0]; */
+/*   acy = c[1] - a[1]; */
+/*   acz = c[2] - a[2]; */
+/*   bcx = c[0] - b[0]; */
+/*   bcy = c[1] - b[1]; */
+/*   bcz = c[2] - b[2]; */
 
-  n[0] = (aby*acz - abz*acy);
-  n[1] = (abz*acx - abx*acz);
-  n[2] = (abx*acy - aby*acx);
-  n[0] *= n[0];
-  n[1] *= n[1];
-  n[2] *= n[2];
-  cal  = sqrt(n[0] + n[1] + n[2]);
-  if ( cal > _MMG5_EPSD ) {
-    /* length */
-    l1 = m[0]*abx*abx + m[3]*aby*aby + m[5]*abz*abz + 2.0*(m[1]*abx*aby + m[2]*abx*abz + m[4]*aby*abz);
-    l2 = m[0]*acx*acx + m[3]*acy*acy + m[5]*acz*acz + 2.0*(m[1]*acx*acy + m[2]*acx*acz + m[4]*acy*acz);
-    l3 = m[0]*bcx*bcx + m[3]*bcy*bcy + m[5]*bcz*bcz + 2.0*(m[1]*bcx*bcy + m[2]*bcx*bcz + m[4]*bcy*bcz);
-    rap = l1+l2+l3;
-    /* quality */
-    if ( rap > _MMG5_EPSD ) {
-      l1 = sqrt(l1);
-      l2 = sqrt(l2);
-      l3 = sqrt(l3);
-      p = 0.5*(l1+l2+l3);
-      cal = p*(p-l1)*(p-l2)*(p-l3);
+/*   n[0] = (aby*acz - abz*acy); */
+/*   n[1] = (abz*acx - abx*acz); */
+/*   n[2] = (abx*acy - aby*acx); */
+/*   n[0] *= n[0]; */
+/*   n[1] *= n[1]; */
+/*   n[2] *= n[2]; */
+/*   cal  = sqrt(n[0] + n[1] + n[2]); */
+/*   if ( cal > _MMG5_EPSD ) { */
+/*     /\* length *\/ */
+/*     l1 = m[0]*abx*abx + m[3]*aby*aby + m[5]*abz*abz + 2.0*(m[1]*abx*aby + m[2]*abx*abz + m[4]*aby*abz); */
+/*     l2 = m[0]*acx*acx + m[3]*acy*acy + m[5]*acz*acz + 2.0*(m[1]*acx*acy + m[2]*acx*acz + m[4]*acy*acz); */
+/*     l3 = m[0]*bcx*bcx + m[3]*bcy*bcy + m[5]*bcz*bcz + 2.0*(m[1]*bcx*bcy + m[2]*bcx*bcz + m[4]*bcy*bcz); */
+/*     rap = l1+l2+l3; */
+/*     /\* quality *\/ */
+/*     if ( rap > _MMG5_EPSD ) { */
+/*       l1 = sqrt(l1); */
+/*       l2 = sqrt(l2); */
+/*       l3 = sqrt(l3); */
+/*       p = 0.5*(l1+l2+l3); */
+/*       cal = p*(p-l1)*(p-l2)*(p-l3); */
 
-      /* qual = 2.*surf / length */
-      return(2.*sqrt(cal) / rap);
-    }
-    else
-      return(0.0);
-  }
-  else
-    return(0.0);
-}
+/*       /\* qual = 2.*surf / length *\/ */
+/*       return(2.*sqrt(cal) / rap); */
+/*     } */
+/*     else */
+/*       return(0.0); */
+/*   } */
+/*   else */
+/*     return(0.0); */
+/* } */
 
 /**
  * \param mesh pointer toward the mesh structure.

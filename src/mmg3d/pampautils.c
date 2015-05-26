@@ -667,7 +667,6 @@ void MMG5_searchqua(MMG5_pMesh mesh,MMG5_pSol met,double critmin, int *eltab) {
 int MMG5_searchlen(MMG5_pMesh mesh, MMG5_pSol met, double lmin,
                    double lmax, int *eltab) {
   MMG5_pTetra          pt;
-  MMG5_pxTetra    pxt;
   _MMG5_Hash           hash;
   double          len;
   int             k,np,nq;
@@ -698,7 +697,6 @@ int MMG5_searchlen(MMG5_pMesh mesh, MMG5_pSol met, double lmin,
   for(k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
     if ( !MG_EOK(pt) ) continue;
-    pxt = pt->xt ? &mesh->xtetra[pt->xt] : 0;
 
     for(ia=0; ia<6; ia++) {
       i0 = _MMG5_iare[ia][0];

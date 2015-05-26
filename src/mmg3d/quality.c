@@ -37,7 +37,15 @@
 
 extern char ddb;
 
-/** compute tetra oriented quality of iel (return 0.0 when element is inverted) */
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the meric structure.
+ * \param iel index of element.
+ * \return The oriented quality of element \a iel or 0.0 if \a iel is inverted.
+ *
+ * Compute tetra oriented quality of iel.
+ *
+ */
 inline double _MMG5_orcal(MMG5_pMesh mesh,MMG5_pSol met,int iel) {
   MMG5_pTetra     pt;
 
@@ -130,12 +138,11 @@ inline double _MMG5_caltet_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra  pt) {
  * \todo test with the square of this measure
  */
 inline double _MMG5_caltet_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt) {
-  MMG5_pxTetra pxt;
   double       cal,abx,aby,abz,acx,acy,acz,adx,ady,adz;
   double       h1,h2,h3,h4,h5,h6,det,vol,rap,v1,v2,v3,num;
-  double       ux,uy,uz,*a,*b,*c,*d;
-  double       m[4][6],mm[6];
-  int          ip[4],ip1,ip2,i,j,k,iadr;
+  double       *a,*b,*c,*d;
+  double       mm[6];
+  int          ip[4];
 
   ip[0] = pt->v[0];
   ip[1] = pt->v[1];
@@ -145,7 +152,6 @@ inline double _MMG5_caltet_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt) {
   cal = _MMG5_NULKAL;
 
   /* average metric */
-#warning : treat ridge case
   _MMG5_moymet(mesh,met,pt,&mm[0]);
   // for (k=0; k<6; k++)
   //  mm[k] = 0.25 * (m[0][k]+m[1][k]+m[2][k]+m[3][k]);
@@ -540,7 +546,6 @@ int _MMG5_badelt(MMG5_pMesh mesh,MMG5_pSol met) {
  */
 int _MMG5_prilen(MMG5_pMesh mesh, MMG5_pSol met) {
   MMG5_pTetra     pt;
-  MMG5_pxTetra    pxt;
   _MMG5_Hash      hash;
   double          len,avlen,lmin,lmax;
   int             k,np,nq,amin,bmin,amax,bmax,ned,hl[9];
@@ -581,7 +586,6 @@ int _MMG5_prilen(MMG5_pMesh mesh, MMG5_pSol met) {
   for(k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
     if ( !MG_EOK(pt) ) continue;
-    pxt = pt->xt ? &mesh->xtetra[pt->xt] : 0;
 
     for(ia=0; ia<6; ia++) {
       i0 = _MMG5_iare[ia][0];
@@ -730,7 +734,6 @@ void _MMG5_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
  */
 int _MMG5_countelt(MMG5_pMesh mesh,MMG5_pSol sol, double *weightelt, long *npcible) {
   MMG5_pTetra pt;
-  MMG5_pxTetra pxt;
   double      len;
   int         k,ia,ipa,ipb,lon,l;
   //int   npbdry;
@@ -761,7 +764,6 @@ int _MMG5_countelt(MMG5_pMesh mesh,MMG5_pSol sol, double *weightelt, long *npcib
   for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
     if ( !pt->v[0] )  continue;
-    pxt = pt->xt ? &mesh->xtetra[pt->xt] : 0;
 
     /*longueur moyenne*/
     lenavg = 0;

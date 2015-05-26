@@ -762,8 +762,8 @@ _MMG5_anatetv(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
   MMG5_pPoint   p1,p2;
   MMG5_xTetra  *pxt;
   _MMG5_Hash     hash;
-  double   ll,o[3],ux,uy,uz,hma2,*m1,*m2,*mp;
-  int      vx[6],k,ip,ip1,ip2,nap,ns,ne,memlack,iadr,ier;
+  double   ll,o[3],ux,uy,uz,hma2;
+  int      vx[6],k,ip,ip1,ip2,nap,ns,ne,memlack,ier;
   char     i,j,ia;
 
   /** 1. analysis */
@@ -859,20 +859,12 @@ _MMG5_anatetv(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
           p2  = &mesh->point[ip2];
         }
         if ( met->m ) {
-          iadr = met->size*ip1;
-          m1 = &met->m[iadr];
-          iadr = met->size*ip2;
-          m2 = &met->m[iadr];
-          iadr = met->size*ip;
-          mp = &met->m[iadr];
-
           ier = _MMG5_intmet(mesh,met,k,i,ip,0.5);
           if (!ier) return(-1);
           else if ( ier < 0 ) {
             _MMG5_delPt(mesh,ip);
             continue;
           }
-#warning put the good metric
         }
         if ( !_MMG5_hashEdge(mesh,&hash,ip1,ip2,ip) )  return(-1);
         MG_SET(pt->flag,i);
@@ -985,8 +977,8 @@ _MMG5_anatets(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
   MMG5_xPoint  *pxp;
   _MMG5_Bezier  pb;
   _MMG5_Hash    hash;
-  double        o[3],no[3],to[3],dd,len, *m1, *m2, *mp;
-  int           vx[6],k,ip,ic,it,nap,nc,ni,ne,npinit,ns,ip1,ip2,ier,iadr;
+  double        o[3],no[3],to[3],dd,len;
+  int           vx[6],k,ip,ic,it,nap,nc,ni,ne,npinit,ns,ip1,ip2,ier;
   char          i,j,ia,i1,i2;
   static double uv[3][2] = { {0.5,0.5}, {0.,0.5}, {0.5,0.} };
 
@@ -1076,20 +1068,12 @@ _MMG5_anatets(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
         p2  = &mesh->point[ip2];
 
         if ( met->m ) {
-          iadr = met->size*ip1;
-          m1 = &met->m[iadr];
-          iadr = met->size*ip2;
-          m2 = &met->m[iadr];
-          iadr = met->size*ip;
-          mp = &met->m[iadr];
-
           ier = _MMG5_intmet(mesh,met,k,ia,ip,0.5);
           if ( !ier )  return(-1);
           else if ( ier < 0 ) {
             _MMG5_delPt(mesh,ip);
             continue;
           }
-#warning put the good metric
         }
 
         if ( MG_EDG(ptt.tag[j]) || (ptt.tag[j] & MG_NOM) )

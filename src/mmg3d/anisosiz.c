@@ -77,15 +77,14 @@ inline double _MMG5_lenedg_ani(MMG5_pMesh mesh ,MMG5_pSol met, int ia,
 
   ip1 = pt->v[_MMG5_iare[ia][0]];
   ip2 = pt->v[_MMG5_iare[ia][1]];
-  
+
   if ( pt->xt && (mesh->xtetra[pt->xt].tag[ia] & MG_BDY)) {
       isedg = ( mesh->xtetra[pt->xt].tag[ia] & MG_GEO);
       return(_MMG5_lenSurfEdg_ani(mesh, met, ip1, ip2, isedg));
   } else {
     return(_MMG5_lenedgspl_ani(mesh ,met, ia, pt));
   }
-  printf("tutututtu\n");
-  exit(0);
+  exit(EXIT_FAILURE);
 }
 
 
@@ -106,11 +105,10 @@ inline double _MMG5_lenedgspl_ani(MMG5_pMesh mesh ,MMG5_pSol met, int ia,
   MMG5_pPoint pp1,pp2;
   double      *m1,*m2;
   int         ip1,ip2;
-  char        isedg;
 
   ip1 = pt->v[_MMG5_iare[ia][0]];
   ip2 = pt->v[_MMG5_iare[ia][1]];
-  
+
   pp1 = &mesh->point[ip1];
   pp2 = &mesh->point[ip2];
 
