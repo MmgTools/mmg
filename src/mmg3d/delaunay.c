@@ -626,7 +626,7 @@ int _MMG5_cavity(MMG5_pMesh mesh,MMG5_pSol sol,int iel,int ip,int *list,int lon)
 
   ilist = _MMG5_correction_iso(mesh,ip,list,ilist,lon);
 
-  if ( isreq ) ilist = -fabs(ilist);
+  if ( isreq ) ilist = -abs(ilist);
 
   if(MMG_cas==1) MMG_nvol++;
   else if(MMG_cas==2 || MMG_cas>20) {

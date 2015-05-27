@@ -419,7 +419,7 @@ int _MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,int 
     iel = list[0] / 6;
     ie  = list[0] % 6;
     pt = &mesh->tetra[iel];
-    jel = fabs(newtet[0]);
+    jel = abs(newtet[0]);
     pt1 = &mesh->tetra[jel];
 
     pxt0 = 0;
@@ -546,7 +546,7 @@ int _MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,int 
     iel = list[k] / 6;
     ie  = list[k] % 6;
     pt = &mesh->tetra[iel];
-    jel = fabs(newtet[k]);
+    jel = abs(newtet[k]);
     pt1 = &mesh->tetra[jel];
 
     pxt0 = 0;
@@ -653,10 +653,10 @@ int _MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,int 
       if ( (list[1] / 6) == (nei2 / 4) ) {
         if ( MG_SMSGN(newtet[0],newtet[1]) ) {  //new elt of list[0] goes with new elt of list[1]
           adja[tau[2]] = nei2;
-          adjan[tau[2]] = 4*fabs(newtet[1])+(nei2 %4);
+          adjan[tau[2]] = 4*abs(newtet[1])+(nei2 %4);
         }
         else {
-          adja[tau[2]] = 4*fabs(newtet[1])+(nei2 %4);
+          adja[tau[2]] = 4*abs(newtet[1])+(nei2 %4);
           adjan[tau[2]] = nei2;
         }
 
@@ -669,10 +669,10 @@ int _MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,int 
           assert((list[ilist-1] / 6) == (nei3 / 4));
           if ( MG_SMSGN(newtet[0],newtet[ilist-1]) ) {
             adja[tau[3]] = nei3;
-            adjan[tau[3]] = 4*fabs(newtet[ilist-1])+(nei3 %4);
+            adjan[tau[3]] = 4*abs(newtet[ilist-1])+(nei3 %4);
           }
           else {
-            adja[tau[3]] = 4*fabs(newtet[ilist-1])+(nei3 %4);
+            adja[tau[3]] = 4*abs(newtet[ilist-1])+(nei3 %4);
             adjan[tau[3]] = nei3;
           }
         }
@@ -682,10 +682,10 @@ int _MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,int 
         assert((list[1] / 6) == (nei3 / 4));
         if ( MG_SMSGN(newtet[0],newtet[1]) ) {
           adja[tau[3]] = nei3;
-          adjan[tau[3]] = 4*fabs(newtet[1])+(nei3 %4);
+          adjan[tau[3]] = 4*abs(newtet[1])+(nei3 %4);
         }
         else {
-          adja[tau[3]] = 4*fabs(newtet[1])+(nei3 %4);
+          adja[tau[3]] = 4*abs(newtet[1])+(nei3 %4);
           adjan[tau[3]] = nei3;
         }
 
@@ -698,10 +698,10 @@ int _MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,int 
           assert((list[ilist-1]) / 6 == (nei2 / 4));
           if ( MG_SMSGN(newtet[0],newtet[ilist-1]) ) {
             adja[tau[2]] = nei2;
-            adjan[tau[2]] = 4*fabs(newtet[ilist-1])+(nei2 %4);
+            adjan[tau[2]] = 4*abs(newtet[ilist-1])+(nei2 %4);
           }
           else {
-            adja[tau[2]] = 4*fabs(newtet[ilist-1])+(nei2 %4);
+            adja[tau[2]] = 4*abs(newtet[ilist-1])+(nei2 %4);
             adjan[tau[2]] = nei2;
           }
         }
@@ -712,10 +712,10 @@ int _MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,int 
       if ( (list[ilist-2] / 6) == (nei2 / 4) ) {
         if ( MG_SMSGN(newtet[ilist-1],newtet[ilist-2]) ) {
           adja[tau[2]] = nei2;
-          adjan[tau[2]] = 4*fabs(newtet[ilist-2])+(nei2 %4);
+          adjan[tau[2]] = 4*abs(newtet[ilist-2])+(nei2 %4);
         }
         else {
-          adja[tau[2]] = 4*fabs(newtet[ilist-2])+(nei2 %4);
+          adja[tau[2]] = 4*abs(newtet[ilist-2])+(nei2 %4);
           adjan[tau[2]] = nei2;
         }
 
@@ -728,10 +728,10 @@ int _MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,int 
           assert((list[0]) / 6 == (nei3 / 4));
           if ( MG_SMSGN(newtet[ilist-1],newtet[0]) ) {
             adja[tau[3]] = nei3;
-            adjan[tau[3]] = 4*fabs(newtet[0])+(nei3 %4);
+            adjan[tau[3]] = 4*abs(newtet[0])+(nei3 %4);
           }
           else {
-            adja[tau[3]] = 4*fabs(newtet[0])+(nei3 %4);
+            adja[tau[3]] = 4*abs(newtet[0])+(nei3 %4);
             adjan[tau[3]] = nei3;
           }
         }
@@ -741,10 +741,10 @@ int _MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,int 
         assert((list[ilist-2] / 6) == (nei3 / 4));
         if ( MG_SMSGN(newtet[ilist-1],newtet[ilist-2]) ) {
           adja[tau[3]] = nei3;
-          adjan[tau[3]] = 4*fabs(newtet[ilist-2])+(nei3 %4);
+          adjan[tau[3]] = 4*abs(newtet[ilist-2])+(nei3 %4);
         }
         else {
-          adja[tau[3]] = 4*fabs(newtet[ilist-2])+(nei3 %4);
+          adja[tau[3]] = 4*abs(newtet[ilist-2])+(nei3 %4);
           adjan[tau[3]] = nei3;
         }
 
@@ -757,10 +757,10 @@ int _MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,int 
           assert((list[0]) / 6 == (nei2 / 4));
           if ( MG_SMSGN(newtet[ilist-1],newtet[0]) ) {
             adja[tau[2]] = nei2;
-            adjan[tau[2]] = 4*fabs(newtet[0])+(nei2 %4);
+            adjan[tau[2]] = 4*abs(newtet[0])+(nei2 %4);
           }
           else {
-            adja[tau[2]] = 4*fabs(newtet[0])+(nei2 %4);
+            adja[tau[2]] = 4*abs(newtet[0])+(nei2 %4);
             adjan[tau[2]] = nei2;
           }
         }
@@ -771,20 +771,20 @@ int _MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,int 
       if ( (list[k-1] / 6) == (nei2 / 4) ) {
         if ( MG_SMSGN(newtet[k],newtet[k-1]) ) {
           adja[tau[2]] = nei2;
-          adjan[tau[2]] = 4*fabs(newtet[k-1])+(nei2 %4);
+          adjan[tau[2]] = 4*abs(newtet[k-1])+(nei2 %4);
         }
         else {
-          adja[tau[2]] = 4*fabs(newtet[k-1])+(nei2 %4);
+          adja[tau[2]] = 4*abs(newtet[k-1])+(nei2 %4);
           adjan[tau[2]] = nei2;
         }
 
         assert((list[k+1]) / 6 == (nei3 / 4));
         if ( MG_SMSGN(newtet[k],newtet[k+1]) ) {
           adja[tau[3]] = nei3;
-          adjan[tau[3]] = 4*fabs(newtet[k+1])+(nei3 %4);
+          adjan[tau[3]] = 4*abs(newtet[k+1])+(nei3 %4);
         }
         else {
-          adja[tau[3]] = 4*fabs(newtet[k+1])+(nei3 %4);
+          adja[tau[3]] = 4*abs(newtet[k+1])+(nei3 %4);
           adjan[tau[3]] = nei3;
         }
       }
@@ -793,20 +793,20 @@ int _MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,int 
         assert((list[k-1] / 6) == (nei3 / 4));
         if ( MG_SMSGN(newtet[k],newtet[k-1]) ) {
           adja[tau[3]] = nei3;
-          adjan[tau[3]] = 4*fabs(newtet[k-1])+(nei3 %4);
+          adjan[tau[3]] = 4*abs(newtet[k-1])+(nei3 %4);
         }
         else {
-          adja[tau[3]] = 4*fabs(newtet[k-1])+(nei3 %4);
+          adja[tau[3]] = 4*abs(newtet[k-1])+(nei3 %4);
           adjan[tau[3]] = nei3;
         }
 
         assert((list[k+1]) / 6 == (nei2 / 4));
         if ( MG_SMSGN(newtet[k],newtet[k+1]) ) {
           adja[tau[2]] = nei2;
-          adjan[tau[2]] = 4*fabs(newtet[k+1])+(nei2 %4);
+          adjan[tau[2]] = 4*abs(newtet[k+1])+(nei2 %4);
         }
         else {
-          adja[tau[2]] = 4*fabs(newtet[k+1])+(nei2 %4);
+          adja[tau[2]] = 4*abs(newtet[k+1])+(nei2 %4);
           adjan[tau[2]] = nei2;
         }
       }
