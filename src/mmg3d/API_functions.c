@@ -38,6 +38,74 @@
  */
 
 #include "mmg3d.h"
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param sol pointer toward the sol structure.
+ *
+ * Allocate the mesh and solutions structures at \a MMG3D format.
+ *
+ */
+static inline
+void MMG5_Alloc_mesh(MMG5_pMesh *mesh, MMG5_pSol *sol
+  ) {
+
+  /* mesh allocation */
+  if ( *mesh )  _MMG5_SAFE_FREE(*mesh);
+  _MMG5_SAFE_CALLOC(*mesh,1,MMG5_Mesh);
+
+  /* sol allocation */
+  if ( *sol )  _MMG5_DEL_MEM(*mesh,*sol,sizeof(MMG5_Sol));
+  _MMG5_SAFE_CALLOC(*sol,1,MMG5_Sol);
+
+  return;
+}
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param sol pointer toward the sol structure.
+ *
+ * Initialization of mesh and solution structures to their default
+ * values (default names, versions, dimensions...).
+ *
+ */
+static inline
+void MMG5_Init_woalloc_mesh(MMG5_pMesh mesh, MMG5_pSol sol
+  ) {
+
+  _MMG5_Set_APIFunc();
+
+  (mesh)->dim = 3;
+  (mesh)->ver = 2;
+  (sol)->dim  = 3;
+  (sol)->ver  = 2;
+  (sol)->size = 1;
+
+  /* Default parameters values */
+  MMG5_Init_parameters(mesh);
+
+  /* Default vaules for file names */
+  MMG5_Init_fileNames(mesh,sol);
+
+  return;
+}
+/**
+ * \param mesh pointer toward a pointer toward the mesh structure.
+ * \param sol pointer toward a pointer toward the sol structure.
+ *
+ * Allocate the mesh and solution structures and initialize it to
+ * their default values.
+ *
+ */
+void MMG5_Init_mesh(MMG5_pMesh *mesh, MMG5_pSol *sol
+  ) {
+
+  /* allocations */
+  MMG5_Alloc_mesh(mesh,sol);
+  /* initialisations */
+  MMG5_Init_woalloc_mesh(*mesh,*sol);
+  /* set pointer to save the mesh*/
+  MMG5_saveMesh = _MMG5_saveLibraryMesh;
+  return;
+}
 
 /**
  * \param mesh pointer toward the mesh structure.
