@@ -248,16 +248,6 @@ typedef MMG5_Sol * MMG5_pSol;
 
 /*----------------------------- functions header -----------------------------*/
 /* Initialization functions */
-/* init structures */
-/**
- * \param mesh pointer toward a pointer toward the mesh structure.
- * \param sol pointer toward a pointer toward the sol structure.
- *
- * Allocate the mesh and solution structures and initialize it to
- * their default values.
- *
- */
-void  MMG5_Init_mesh(MMG5_pMesh *mesh, MMG5_pSol *sol);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the sol structure.

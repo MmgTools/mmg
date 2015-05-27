@@ -329,12 +329,14 @@ int MMG2_colpoi(MMG5_pMesh mesh, MMG5_pSol sol,int iel,int iar,int ia,int ib,dou
 */
 int MMG2_chkedg(MMG5_pMesh mesh, MMG5_pPoint ppa,MMG5_pPoint ppb) {
   double t0[2],t1[2],pc1[2],pc2[2];
-  double da,db,l;
+  double da,db,l,ux,uy,cosn,ps;
   int    i;
   
-  l = (ppa->c[0] - ppb->c[0])*(ppa->c[0] - ppb->c[0]) + 
-    (ppa->c[1] - ppb->c[1])*(ppa->c[1] - ppb->c[1]);
+  ux = ppa->c[0] - ppb->c[0];
+  uy = ppa->c[1] - ppb->c[1];
+  l = ux*ux + uy*uy;
   l = sqrt(l);
+
   //with tangent, compute control point
   for(i=0 ; i<2 ; i++) {
     t0[i] = l*ppa->n[i];
@@ -367,21 +369,21 @@ int MMG2_chkedg(MMG5_pMesh mesh, MMG5_pPoint ppa,MMG5_pPoint ppb) {
     pc1[i] = (t0[i]+3*ppa->c[i])/3.;
     pc2[i] = (t1[i]+3*ppb->c[i])/3.;
   }
-  //compute the max distance between ppa and all the control point
-  da =sqrt((ppa->c[0]-pc1[0])*(ppa->c[0]-pc1[0]) +
-           (ppa->c[1]-pc1[1])* (ppa->c[1]-pc1[1]));
-  da = MG_MIN(da,sqrt((ppa->c[0]-pc2[0])*(ppa->c[0]-pc2[0]) +
-                      (ppa->c[1]-pc2[1])* (ppa->c[1]-pc2[1])));
-  //printf("da %e %e\n",da,mesh->info.hausd);
-  if(da > mesh->info.hausd) return(1);
-              
+  //compute the distance between mid point and curve (with angle between edge and tang)
+  ps = t0[0]*ux + t0[1]*uy;
+  ps /= l*l;
+  cosn = ps*ps ;
+  cosn *= fabs(1.0-cosn);
+  
+  cosn *= (0.25*l);
+  if(cosn > mesh->info.hausd*mesh->info.hausd) return(1);
   //idem for ppb
-  db =sqrt((ppb->c[0]-pc1[0])*(ppb->c[0]-pc1[0]) +
-          (ppb->c[1]-pc1[1])* (ppb->c[1]-pc1[1]));
-  db = MG_MIN(da,sqrt((ppb->c[0]-pc2[0])*(ppb->c[0]-pc2[0]) +
-                      (ppb->c[1]-pc2[1])* (ppb->c[1]-pc2[1])));
-  //printf("db %e %e\n",db,mesh->info.hausd);
-  if(db > mesh->info.hausd) return(1);
+  ps = -(t1[0]*ux + t1[1]*uy);
+  ps /= l*l;
+  cosn = ps*ps ;
+  cosn *= fabs(1.0-cosn);
+  cosn *= (0.25*l);
+  if(cosn > mesh->info.hausd*mesh->info.hausd) return(1);
 
 
 
