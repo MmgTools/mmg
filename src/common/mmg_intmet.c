@@ -191,17 +191,17 @@ static int _MMG5_intmet33(double *m,double *n,double *mr,double s) {
   }
 
   is[0] = lambda[0]*vp[0][0]*vp[0][0] + lambda[1]*vp[1][0]*vp[1][0]
-    + lambda[1]*vp[2][0]*vp[2][0];
+    + lambda[2]*vp[2][0]*vp[2][0];
   is[1] = lambda[0]*vp[0][0]*vp[0][1] + lambda[1]*vp[1][0]*vp[1][1]
-    + lambda[1]*vp[2][0]*vp[2][1];
+    + lambda[2]*vp[2][0]*vp[2][1];
   is[2] = lambda[0]*vp[0][0]*vp[0][2] + lambda[1]*vp[1][0]*vp[1][2]
-    + lambda[1]*vp[2][0]*vp[2][2];
+    + lambda[2]*vp[2][0]*vp[2][2];
   is[3] = lambda[0]*vp[0][1]*vp[0][1] + lambda[1]*vp[1][1]*vp[1][1]
-    + lambda[1]*vp[2][1]*vp[2][1];
+    + lambda[2]*vp[2][1]*vp[2][1];
   is[4] = lambda[0]*vp[0][1]*vp[0][2] + lambda[1]*vp[1][1]*vp[1][2]
-    + lambda[1]*vp[2][1]*vp[2][2];
+    + lambda[2]*vp[2][1]*vp[2][2];
   is[5] = lambda[0]*vp[0][2]*vp[0][2] + lambda[1]*vp[1][2]*vp[1][2]
-    + lambda[1]*vp[2][2]*vp[2][2];
+    + lambda[2]*vp[2][2]*vp[2][2];
 
   mt[0] = n[0]*is[0] + n[1]*is[1] + n[2]*is[2];
   mt[1] = n[0]*is[1] + n[1]*is[3] + n[2]*is[4];
