@@ -66,16 +66,6 @@ void MMG5_Free_all(MMG5_pMesh mesh,MMG5_pSol met
   _MMG5_SAFE_FREE(mesh);
 }
 
-/**
- * \param mesh pointer toward the mesh structure (unused).
- *
- * Set pointer for MMG5_saveMesh function.
- *
- */
-void MMG5_Set_saveFunc(MMG5_pMesh mesh) {
-  MMG5_saveMesh = _MMG5_saveLibraryMesh;
-}
-
 /** Free adja, xtetra and xpoint tables */
 static inline
 void MMG5_Free_topoTables(MMG5_pMesh mesh) {
@@ -337,8 +327,7 @@ int MMG5_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met
   /* analysis */
   chrono(ON,&(ctim[2]));
   _MMG5_setfunc(mesh,met);
-  MMG5_Set_saveFunc(mesh);
-  _MMG5_outqua(mesh,met);
+  if ( abs(mesh->info.imprim) > 0 )  _MMG5_outqua(mesh,met);
   fprintf(stdout,"\n  %s\n   MODULE MMG3D: IMB-LJLL : %s (%s)\n  %s\n",MG_STR,MG_VER,MG_REL,MG_STR);
   if ( mesh->info.imprim )  fprintf(stdout,"\n  -- PHASE 1 : ANALYSIS\n");
 
