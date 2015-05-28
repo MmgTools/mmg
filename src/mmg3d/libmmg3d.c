@@ -327,18 +327,34 @@ int MMG5_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met
   /* analysis */
   chrono(ON,&(ctim[2]));
   _MMG5_setfunc(mesh,met);
-  if ( abs(mesh->info.imprim) > 0 )  _MMG5_outqua(mesh,met);
+
   fprintf(stdout,"\n  %s\n   MODULE MMG3D: IMB-LJLL : %s (%s)\n  %s\n",MG_STR,MG_VER,MG_REL,MG_STR);
   if ( mesh->info.imprim )  fprintf(stdout,"\n  -- PHASE 1 : ANALYSIS\n");
 
-  if ( !_MMG5_scaleMesh(mesh,met) ) return(MMG5_STRONGFAILURE);
+  /* scaling mesh */
+  if ( mesh->info.lag == -1 ) {
+    if ( !_MMG5_scaleMesh(mesh,met) )
+      return(MMG5_STRONGFAILURE);
+  }
+  /* else { */
+  /*   if ( !_MMG5_scaleMesh(mesh,disp) ) */
+  /*     return(MMG5_STRONGFAILURE); */
+  /* } */
+
+  /* specific meshing */
   if ( mesh->info.iso ) {
     if ( !met->np ) {
       fprintf(stdout,"\n  ## ERROR: A VALID SOLUTION FILE IS NEEDED \n");
       return(MMG5_STRONGFAILURE);
     }
+    _MMG5_outqua(mesh,met);
     if ( !_MMG5_mmg3d2(mesh,met) ) return(MMG5_STRONGFAILURE);
   }
+  /* else if ( mesh->info.lag >= 0 ) { */
+  /*   _MMG5_outqua(mesh,met); */
+  /*   if ( !_MMG5_mmg3d3(mesh,disp) ) */
+  /*     _MMG5_RETURN_AND_PACK(mesh,disp,MMG5_LOWFAILURE); */
+  /* } */
   else {
     if ( mesh->info.optim && !met->np && !_MMG5_DoSol(mesh,met) ) {
       if ( !_MMG5_unscaleMesh(mesh,met) )  return(MMG5_STRONGFAILURE);
@@ -349,6 +365,16 @@ int MMG5_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met
   if ( !_MMG5_analys(mesh) ) {
     if ( !_MMG5_unscaleMesh(mesh,met) )  return(MMG5_STRONGFAILURE);
     _MMG5_RETURN_AND_PACK(mesh,met,MMG5_LOWFAILURE);
+  }
+  /* define metric map */
+  if ( !_MMG5_defsiz(mesh,met) ) {
+    fprintf(stdout,"  ## Metric undefined. Exit program.\n");
+    _MMG5_RETURN_AND_PACK(mesh,met,MMG5_LOWFAILURE);
+  }
+  if ( (!mesh->info.iso) && mesh->info.lag < 0 ) {
+    // Compute the quality here because in aniso the defsiz function modify the
+    // metric storage on ridge points.
+    _MMG5_outqua(mesh,met);
   }
 
   if ( mesh->info.imprim > 4 && !mesh->info.iso && met->m ) _MMG5_prilen(mesh,met);
