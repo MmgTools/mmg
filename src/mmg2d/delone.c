@@ -125,7 +125,7 @@ int _MMG2_cavity(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list) {
 
   do {
     jel  = list[ipil];
-    printf("on depile %d\n",jel);
+    //printf("on depile %d\n",jel);
     iadr = (jel-1)*3 + 1;
     adja = &mesh->adja[iadr];
     vois[0]  = adja[0];
@@ -184,7 +184,7 @@ int _MMG2_cavity(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list) {
     fprintf(stdout,"OVERFLOW HERE\n");
     return(0);
   }
-  printf("here %d in the cavity\n",ilist);
+  //printf("here %d in the cavity\n",ilist);
   ilist = _MMG2_correction_iso(mesh,ip,list,ilist,1);
 
   //if ( isreq ) ilist = -fabs(ilist);
@@ -202,7 +202,7 @@ int _MMG2_delone(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist) {
   int         tref,isused=0,ixt,ielnum[3*MMG2_LONMAX+1],ll;
   HashTable   hedg;
 
-  printf("--------------------------------- delone ----------\n");
+  //printf("--------------------------------- delone ----------\n");
 
   if ( mesh->nt + 2*ilist > mesh->ntmax )  {printf("OVERFLOW\n");return(0);}
   base = mesh->base;
@@ -211,7 +211,7 @@ int _MMG2_delone(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist) {
   for (k=0; k<ilist; k++) {
     old  = list[k];
     pt1  = &mesh->tria[old];
-    printf("tria %d : %d %d %d\n",old,pt1->v[0],pt1->v[1],pt1->v[2]);
+    //printf("tria %d : %d %d %d\n",old,pt1->v[0],pt1->v[1],pt1->v[2]);
     iadr = (old-1)*3 + 1;
     adja = &mesh->adja[iadr];
     vois[0]  = adja[0]/3 ;
@@ -290,7 +290,7 @@ int _MMG2_delone(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist) {
         pt1 = &mesh->tria[iel];
         memcpy(pt1,pt,sizeof(MMG5_Tria));
         pt1->v[i] = ip;
-        printf("on cree %d : %d %d %d\n",iel,pt1->v[0],pt1->v[1],pt1->v[2]);
+        //printf("on cree %d : %d %d %d\n",iel,pt1->v[0],pt1->v[1],pt1->v[2]);
         pt1->qual = MMG2_caltri(mesh,sol,pt1);
         pt1->ref = mesh->tria[old].ref;
         if(pt1->qual < 1e-10) {printf("argggg (%d) %d : %e\n",ip,iel,pt1->qual);
@@ -301,7 +301,7 @@ int _MMG2_delone(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist) {
 	    
 	  
         if ( jel ) {
-          printf("on a jel %d, MAJ\n",jel);
+          //printf("on a jel %d, MAJ\n",jel);
           iadr = (jel-1)*3 + 1;
           adjb = &mesh->adja[iadr];
           adjb[j] = iel*3 + i;
@@ -313,7 +313,7 @@ int _MMG2_delone(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist) {
             v[0] = pt1->v[ MMG2_iare[j][0] ];
             v[1] = pt1->v[ MMG2_iare[j][1] ];
 	      
-            printf("on hash %d %d -- %d %d\n",v[0],v[1],iel,j);
+            //printf("on hash %d %d -- %d %d\n",v[0],v[1],iel,j);
             _MMG2_hashEdgeDelone(mesh,&hedg,iel,j,v);
           }
         }
@@ -381,7 +381,7 @@ _MMG2_correction_iso(MMG5_pMesh mesh,int ip,int *list,int ilist,int nedep) {
 
         /* area PBC */
         dd =  ux*vy - uy*vx;
-        printf("on trouve vol %e <? %e\n",dd,_MMG2_AREAMIN);
+        //printf("on trouve vol %e <? %e\n",dd,_MMG2_AREAMIN);
         if ( dd < _MMG2_AREAMIN )  break;
 
       }

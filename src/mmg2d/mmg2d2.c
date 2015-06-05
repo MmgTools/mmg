@@ -128,7 +128,7 @@ int MMG2_insertpointdelone(MMG5_pMesh mesh,MMG5_pSol sol) {
     ilist = 1;
 
     lon = _MMG2_cavity(mesh,sol,k,list);
-    printf("on trouve %d tria dans la cavity\n",lon);
+    //printf("on trouve %d tria dans la cavity\n",lon);
     if ( lon < 1 ) {
       fprintf(stdout,"impossible d'inserer le point\n");
       MMG2_saveMesh(mesh,"toto.mesh");
@@ -136,19 +136,19 @@ int MMG2_insertpointdelone(MMG5_pMesh mesh,MMG5_pSol sol) {
     } else {
       ret = _MMG2_delone(mesh,sol,k,list,lon);
     }
-    if(k==5) {
-      for(kk=1 ; kk<=mesh->nt ; kk++) {
-        pt = &mesh->tria[kk];
-        if(!pt->v[0]) continue;
-        printf("tr %d : %d %d %d\n",kk,pt->v[0],pt->v[1],pt->v[2]);
-        iadr = 3*(kk-1)+1;
-        adja = &mesh->adja[iadr];
-        printf("adja %d %d %d\n",adja[0]/3, adja[1]/3,adja[2]/3);
-      }
-      MMG2_chkmsh(mesh,1);
+    /* if(k==5) { */
+    /*   for(kk=1 ; kk<=mesh->nt ; kk++) { */
+    /*     pt = &mesh->tria[kk]; */
+    /*     if(!pt->v[0]) continue; */
+    /*     //printf("tr %d : %d %d %d\n",kk,pt->v[0],pt->v[1],pt->v[2]); */
+    /*     iadr = 3*(kk-1)+1; */
+    /*     adja = &mesh->adja[iadr]; */
+    /*     //printf("adja %d %d %d\n",adja[0]/3, adja[1]/3,adja[2]/3); */
+    /*   } */
+    /*   MMG2_chkmsh(mesh,1); */
       // MMG2_saveMesh(mesh,"toto.mesh");
       //exit(0);
-    }
+    /*}*/
 
   }
 
@@ -162,6 +162,8 @@ int MMG2_insertpoint(MMG5_pMesh mesh,MMG5_pSol sol) {
   double  declic;
   int     k,nsiter,lel,iel,mel,nel,ia,ib,ic,aext0,aext1,aext2;
   int     iadr,*adja,nflat,ie1,ie2,ie3,voy,text,atext1,atext2;
+
+  ddebug = 0;
   for(k=1 ; k<=mesh->np - 4 ; k++) {  
     if(1){ 
       if(ddebug) printf("------------------------------------try swap to increase mesh quality\n");     
