@@ -455,7 +455,7 @@ int MMG2_loadMesh(MMG5_pMesh mesh,char *filename) {
   fclose(inm);   
 
   /*maill periodique : remettre toutes les coord entre 0 et 1*/
-  if(mesh->info.renum) { 
+  if(mesh->info.renum==-10) { 
     printf("on passe la , on a %d points %d triangles\n",mesh->np,mesh->nt);
     for (k=1; k<=mesh->np; k++) {
       ppt = &mesh->point[k];  

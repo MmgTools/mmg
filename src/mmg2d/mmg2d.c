@@ -182,7 +182,7 @@ int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol sol,double *qdegrad) 
           mesh->info.dhd  = -1;
         } else if ( !strcmp(argv[i],"-noinsert") ) {
           mesh->info.noinsert  = 1;
-        } else if ( !strcmp(argv[i],"-nsubdomain") ) {
+        } else if ( !strcmp(argv[i],"-nsd") ) {
           ++i;
           mesh->info.renum = atoi(argv[i]);		    
         } else {
@@ -200,7 +200,7 @@ int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol sol,double *qdegrad) 
       case 'p':
         if ( !strcmp(argv[i],"-per") ) {
           fprintf(stdout,"WARNING OBSOLETE OPTION\n");
-          mesh->info.renum = 1;
+          mesh->info.renum = -10;
         }
         break;
       case 's':
@@ -386,7 +386,6 @@ int main(int argc,char *argv[]) {
   mesh.info.nomove = 0;
   mesh.info.noinsert = 0;
   mesh.info.hgrad  = 1.3;
-  mesh.info.renum  = 0;
   mesh.info.hausd  = 0.01;
   mesh.info.dhd  = 45.;
   mesh.info.hmin     = -1.;    
@@ -399,7 +398,6 @@ int main(int argc,char *argv[]) {
   sol.type = 1;
 
   if ( !parsar(argc,argv,&mesh,&sol,qdegrad) )  return(1);
-  
   /* load data */
   fprintf(stdout,"\n  -- INPUT DATA\n");
   //chrono(ON,&ctim[1]);
@@ -447,7 +445,7 @@ int main(int argc,char *argv[]) {
   if ( !sol.np && !MMG2_doSol(&mesh,&sol) )  return(1);
 
   if ( mesh.nt && !MMG2_hashel(&mesh) )  return(1);
-  if ( !mesh.info.renum && !MMG2_chkmsh(&mesh,1) )        return(1);
+  if ( mesh.info.ddebug && !MMG2_chkmsh(&mesh,1) )        return(1);
   /*geom : corner detection*/    
   if ( mesh.info.dhd>0. )
     if( !MMG2_evalgeom(&mesh) ) return(1);

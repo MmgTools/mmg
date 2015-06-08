@@ -114,10 +114,11 @@ int MMG2_insertpointdelone(MMG5_pMesh mesh,MMG5_pSol sol) {
   double  declic;
   int     list[MMG2_LONMAX],ilist,lon;
   int     k,ret;
-  int kk, iadr,*adja;
+  int kk, iadr,*adja,nsiter;
+  
 
   for(k=1 ; k<=mesh->np - 4 ; k++) {  
-
+    
     ppt = &mesh->point[k];
     /*recherche du triangle contenant le point : lel*/
     list[0] = MMG2_findTria(mesh,k);  
@@ -130,7 +131,7 @@ int MMG2_insertpointdelone(MMG5_pMesh mesh,MMG5_pSol sol) {
     lon = _MMG2_cavity(mesh,sol,k,list);
     //printf("on trouve %d tria dans la cavity\n",lon);
     if ( lon < 1 ) {
-      fprintf(stdout,"impossible d'inserer le point\n");
+      fprintf(stdout,"impossible d'inserer le point %d\n",k);
       MMG2_saveMesh(mesh,"toto.mesh");
       exit(0);
     } else {
@@ -429,8 +430,9 @@ int MMG2_insertpoint(MMG5_pMesh mesh,MMG5_pSol sol) {
 int MMG2_markSD(MMG5_pMesh mesh) {
   MMG5_pTria   pt,pt1;                   
   MMG5_pEdge   ped;
+  MMG5_pPoint  ppt;
   int     k,i,j,iadr,*adja,ped0,ped1,kcor,*list,ipil,ncurc,nref;
-  int     kinit,nt,nsd;
+  int     kinit,nt,nsd,ip1,ip2,ip3,ip4,ned;
   
   if ( !MMG2_hashel(mesh) )  return(0);
   
@@ -439,12 +441,14 @@ int MMG2_markSD(MMG5_pMesh mesh) {
   assert(list);
   kinit = 0;
   nref  = 0;
+  ip1=(mesh->np);
   for(k=1 ; k<=mesh->nt ; k++) {
     if ( !mesh->tria[k].v[0] ) continue;
-    mesh->tria[k].flag = mesh->mark;
-    mesh->tria[k].ref  = 0;
+    pt = &mesh->tria[k];
+    pt->flag = mesh->mark;
+    pt->ref  = 0;
     list[k-1] = 0;    
-    if((!kinit) && !(mesh->tria[k].ref)) kinit = k;  
+    if((!kinit) && (pt->v[0]==ip1 || pt->v[1]==ip1 || pt->v[2]==ip1)) kinit = k;  
     if(ddebug) printf("tr %d : %d %d %d\n",k,mesh->tria[k].v[0],mesh->tria[k].v[1],mesh->tria[k].v[2]);
   }  
   do {
@@ -466,6 +470,7 @@ int MMG2_markSD(MMG5_pMesh mesh) {
         if(pt1->ref==nref) continue;
         ped0 = pt->v[MMG2_iare[i][0]];
         ped1 = pt->v[MMG2_iare[i][1]];
+#warning optimize th
         for(j=1 ; j<=mesh->na ; j++) {
           ped = &mesh->edge[j];
           if((ped->a == ped0 && ped->b==ped1) || (ped->b == ped0 && ped->a==ped1)) break;  
@@ -488,17 +493,67 @@ int MMG2_markSD(MMG5_pMesh mesh) {
     }
     if(ddebug) printf("kinit ? %d\n",kinit);
   } while (kinit);
-  fprintf(stdout," %8d SUB-DOMAINS\n",nref);   
+  fprintf(stdout," %8d SUB-DOMAINS\n",nref-1); //because we have BB triangles   
   
+  /*remove BB triangles*/
+  nt = mesh->nt;
+  for(k=1 ; k<=nt ; k++) {
+      if ( !mesh->tria[k].v[0] ) continue;
+      pt = &mesh->tria[k];
+      for(i=0 ; i<3 ; i++)
+        mesh->point[pt->v[i]].tag = M_NUL;
+      if(pt->ref != 1) continue;
+      MMG2_delElt(mesh,k); 
+  } 
+ /*BB vertex*/
+  ip1=(mesh->np-3);
+  ip2=(mesh->np-2);
+  ip3=(mesh->np-1);
+  ip4=(mesh->np);
+
+  MMG2_delPt(mesh,ip1);
+  MMG2_delPt(mesh,ip2);
+  MMG2_delPt(mesh,ip3);
+  MMG2_delPt(mesh,ip4); 
+
   if(mesh->info.renum) {  
     nsd = mesh->info.renum;
     nt = mesh->nt;
     for(k=1 ; k<=nt ; k++) {
       if ( !mesh->tria[k].v[0] ) continue;
+      pt = &mesh->tria[k];
+      pt->ref--;
       if(mesh->tria[k].ref == nsd) continue;
       MMG2_delElt(mesh,k); 
-    } 
+    }
   }
+  
+  /*remove vertex*/
+  for (k=1; k<=mesh->nt; k++) {
+    pt = &mesh->tria[k];
+    if ( !M_EOK(pt) )  continue;
+    for (i=0; i<3; i++) {
+      ppt = &mesh->point[ pt->v[i] ];
+      ppt->tag &= ~M_NUL;
+    }
+  }    
+  /*remove edge*/
+  ned = mesh->na;
+  for (k=1; k<=ned; k++) {
+    ped = &mesh->edge[k];
+    if ( !ped->a )  continue;
+    ppt = &mesh->point[ ped->a ];
+    if(!M_VOK(ppt)) {
+      MMG2_delEdge(mesh,k);
+      continue;
+    }
+    ppt = &mesh->point[ ped->b ];
+    if(!M_VOK(ppt)) {
+      MMG2_delEdge(mesh,k);
+      continue;
+    }
+  }     
+ 
   return(1);
 } 
 
@@ -566,7 +621,8 @@ int MMG2_findtrianglestate(MMG5_pMesh mesh,int k,int ip1,int ip2,int ip3,int ip4
         pt1 = &mesh->tria[adj];
         if(!pt1->base) continue;
         if(abs(pt1->base)<mesh->base) continue;
-        if(numed[i]) {
+        if(numed[i]) { //wrong if the edge is an internal boundary
+          printf("c'est bien la qu'on sort %d %d\n",adj,pt1->base);
           pt->base = -pt1->base;
           return(pt->base);
         } else {
@@ -668,7 +724,7 @@ int MMG2_mmg2d2(MMG5_pMesh mesh,MMG5_pSol sol) {
       (&mesh->adja[iadr])[2] = 0; 
     }
   }  
-  if(mesh->info.renum) { 
+  if(mesh->info.renum==-10) { 
     /*traitement des points periodiques*/
     numper = (int*)M_calloc((mesh->np+1),sizeof(int),"mmg2");
     assert(numper);
@@ -697,20 +753,20 @@ int MMG2_mmg2d2(MMG5_pMesh mesh,MMG5_pSol sol) {
     }
   }
   /*add bounding box vertex*/
-  c[0] = -1;//mesh->info.min[0] - 1.;
-  c[1] = -1.;// mesh->info.min[1] - 1.;  
+  c[0] = -0.5;//mesh->info.min[0] - 1.;
+  c[1] = -0.5;// mesh->info.min[1] - 1.;  
   ip1 = MMG2_newPt(mesh,c);
   
-  c[0] = -1.;//mesh->info.min[0] - 1.;
-  c[1] = 2.;//mesh->info.max[1] + 1.;  
+  c[0] = -0.5;//mesh->info.min[0] - 1.;
+  c[1] = mesh->info.max[1]-mesh->info.min[1] + 0.5;//mesh->info.max[1] + 1.;  
   ip2 = MMG2_newPt(mesh,c);
 
-  c[0] = 2.;//mesh->info.max[0] + 1.;
-  c[1] = -1.;//mesh->info.min[1] - 1.;  
+  c[0] = mesh->info.max[0]-mesh->info.min[0] + 0.5;//mesh->info.max[0] + 1.;
+  c[1] = -0.5;//mesh->info.min[1] - 1.;  
   ip3 = MMG2_newPt(mesh,c);
 
-  c[0] = 2.;//mesh->info.max[0] + 1.;
-  c[1] = 2.;//mesh->info.max[1] + 1.;  
+  c[0] =  mesh->info.max[0]-mesh->info.min[0] + 0.5;//mesh->info.max[0] + 1.;
+  c[1] = mesh->info.max[1]-mesh->info.min[1] + 0.5;//mesh->info.max[1] + 1.;  
   ip4 = MMG2_newPt(mesh,c);
   
   assert(ip1==(mesh->np-3));
@@ -743,20 +799,21 @@ int MMG2_mmg2d2(MMG5_pMesh mesh,MMG5_pSol sol) {
   /*vertex insertion*/
   if(!MMG2_insertpointdelone(mesh,sol)) return(0);
   fprintf(stdout,"END OF INSERTION PHASE\n");
-
   /*bdry enforcement*/
   if(!MMG2_bdryenforcement(mesh,sol)) {
     printf("bdry enforcement failed\n");return(0);
   } 
   if(mesh->info.ddebug) MMG2_saveMesh(mesh,"bdyenforcement.mesh");	
 
-  /*tag des triangles : in = base ; out = -base ; indetermine = 0*/
-  if(!MMG2_settagtriangles(mesh,sol)) return(0);
+  /*mark SD and remove BB*/
+  if(mesh->na)
+    MMG2_markSD(mesh);
+  else {
+    /*tag des triangles : in = base ; out = -base ; indetermine = 0*/
+    if(!MMG2_settagtriangles(mesh,sol)) return(0);
+    if(!MMG2_removeBBtriangles(mesh)) return(0);
+  }
 
-  if(!MMG2_removeBBtriangles(mesh)) return(0);
-	
-  /*mark SD*/
-  MMG2_markSD(mesh);
   
   return(1);
 }

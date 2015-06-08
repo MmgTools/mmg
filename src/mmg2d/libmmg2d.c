@@ -306,7 +306,6 @@ int MMG2_mmg2dlib(int opt[7],double optdbl[2],MMG5_pMesh mesh,MMG5_pSol sol,void
   mesh->info.nomove = opt[4];
   mesh->info.noinsert = opt[3];
   mesh->info.hgrad  = optdbl[0];
-  mesh->info.renum    = 0;
   if(opt[6])
     mesh->info.dhd  = -1;
   else
@@ -354,7 +353,7 @@ int MMG2_mmg2dlib(int opt[7],double optdbl[2],MMG5_pMesh mesh,MMG5_pSol sol,void
   if ( !MMG2_scaleMesh(mesh,sol) )  return(1);
   MMG2_saveMesh(mesh,"tata.mesh");
   if ( mesh->nt && !MMG2_hashel(mesh) )  return(1);
-  if ( !mesh->info.renum && !MMG2_chkmsh(mesh,1) )        return(1);
+  if ( mesh->info.ddebug && !MMG2_chkmsh(mesh,1) )        return(1);
   /*geom : corner detection*/
   if ( mesh->info.dhd<0 )
     if( !MMG2_evalgeom(mesh) ) return(1);
