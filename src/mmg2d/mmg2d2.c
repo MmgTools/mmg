@@ -814,6 +814,9 @@ int MMG2_mmg2d2(MMG5_pMesh mesh,MMG5_pSol sol) {
     if(!MMG2_removeBBtriangles(mesh)) return(0);
   }
 
+  /*mark vertex bdry and compute tangent*/
+  MMG2_baseBdry(mesh);
+
   
   return(1);
 }
