@@ -146,7 +146,7 @@ int MMG2_colpoi(MMG5_pMesh mesh, MMG5_pSol sol,int iel,int iar,int ia,int ib,dou
       return(0);  
     }
     declic = coe*pt1->qual;
-    cal[i] = MMG2_caltri(mesh,sol,pt1);
+    cal[i] = MMG2_caltri_in(mesh,sol,pt1);
     if (cal[i] > declic) {   
       memcpy(ppb->c,coor,2*sizeof(double));
       memcpy(&sol->m[sol->size*(pib-1) + 1],solu,sol->size*sizeof(double));  
@@ -502,7 +502,7 @@ int MMG2_colpoibdry(MMG5_pMesh mesh, MMG5_pSol sol,int iel,int iar,int ia,int ib
       return(0);
     }
     declic = coe*pt1->qual;
-    cal[i] = MMG2_caltri(mesh,sol,pt1);
+    cal[i] = MMG2_caltri_in(mesh,sol,pt1);
     if (cal[i] > declic) {
       memcpy(ppb->c,coor,2*sizeof(double));
       memcpy(&sol->m[sol->size*(pib-1) + 1],solu,sol->size*sizeof(double));  

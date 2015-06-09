@@ -84,25 +84,25 @@ int MMG2_split(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int k1,int adj1) {
   ptmp->v[0] = piar2;
   ptmp->v[1] = pvoy1;
   ptmp->v[2] = ip;
-  cal1       = MMG2_caltri(mesh,sol,ptmp);
+  cal1       = MMG2_caltri_in(mesh,sol,ptmp);
   if(cal1 > coe) return(0);
 
   ptmp->v[0] = piara1;
   ptmp->v[1] = ip;
   ptmp->v[2] = pvoy2; 
-  cal2       = MMG2_caltri(mesh,sol,ptmp);
+  cal2       = MMG2_caltri_in(mesh,sol,ptmp);
   if(cal2 > coe) return(0);
   
   ptmp->v[0] = ip;
   ptmp->v[1] = pvoy1;
   ptmp->v[2] = piar1; 
-  cal3       = MMG2_caltri(mesh,sol,ptmp);
+  cal3       = MMG2_caltri_in(mesh,sol,ptmp);
   if(cal3 > coe) return(0);
   
   ptmp->v[0] = ip;
   ptmp->v[1] = piara2;
   ptmp->v[2] = pvoy2;
-  cal4       = MMG2_caltri(mesh,sol,ptmp);
+  cal4       = MMG2_caltri_in(mesh,sol,ptmp);
   if(cal4 > coe) return(0);
   
   /*test length : pvoy1-ip and pvoy2-ip*/
@@ -312,13 +312,13 @@ int MMG2_splitbdry(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int k1,int voy1,double *
   ptmp->v[0] = piar2;
   ptmp->v[1] = pvoy1;
   ptmp->v[2] = ip;
-  cal1 = MMG2_caltri(mesh,sol,ptmp);
+  cal1 = MMG2_caltri_in(mesh,sol,ptmp);
   if(cal1 > coe) return(0);
   
   ptmp->v[0] = ip;
   ptmp->v[1] = pvoy1;
   ptmp->v[2] = piar1; 
-  cal2 = MMG2_caltri(mesh,sol,ptmp);
+  cal2 = MMG2_caltri_in(mesh,sol,ptmp);
   if(cal2 > coe) return(0);
   
   

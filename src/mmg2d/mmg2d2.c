@@ -200,7 +200,7 @@ int MMG2_insertpoint(MMG5_pMesh mesh,MMG5_pSol sol) {
     mel = MMG2_newElt(mesh);
     nel = MMG2_newElt(mesh);  
     pt->v[2] = k; 
-    pt->qual = MMG2_caltri(mesh,sol,pt);     
+    pt->qual = MMG2_caltri_in(mesh,sol,pt);     
     if(pt->qual > EPSDD) {
       if(ddebug) printf("1 : on a un pbs avec le tr %d\n",lel);
       nflat = 1;             
@@ -218,7 +218,7 @@ int MMG2_insertpoint(MMG5_pMesh mesh,MMG5_pSol sol) {
     pt->v[0] = ib;
     pt->v[1] = ic;
     pt->v[2] = k; 
-    pt->qual = MMG2_caltri(mesh,sol,pt);     
+    pt->qual = MMG2_caltri_in(mesh,sol,pt);     
     if(pt->qual > EPSDD) {
       nflat += 2;
       if(ddebug) printf("2 : on a un pbs avec le tr %d\n",nel);
@@ -237,7 +237,7 @@ int MMG2_insertpoint(MMG5_pMesh mesh,MMG5_pSol sol) {
     pt->v[0] = ic;
     pt->v[1] = ia;
     pt->v[2] = k; 
-    pt->qual = MMG2_caltri(mesh,sol,pt);     
+    pt->qual = MMG2_caltri_in(mesh,sol,pt);     
     if(pt->qual > EPSDD) {
       if(ddebug) printf("3 : on a un pbs avec le tr %d nflat : %d\n",mel,nflat); 
       nflat += 4;
@@ -251,12 +251,12 @@ int MMG2_insertpoint(MMG5_pMesh mesh,MMG5_pSol sol) {
       pt1->v[0] = ie1;
       pt1->v[1] = ie2;
       pt1->v[2] = k;
-      pt1->qual = MMG2_caltri(mesh,sol,pt1);  
+      pt1->qual = MMG2_caltri_in(mesh,sol,pt1);  
       if(ddebug) printf("on cree %d : %d %d %d\n",text,ie1,ie2,k);    
       pt->v[0] = ie3;
       pt->v[1] = ie1;
       pt->v[2] = k; 
-      pt->qual = MMG2_caltri(mesh,sol,pt);
+      pt->qual = MMG2_caltri_in(mesh,sol,pt);
       if(ddebug) printf("on cree %d : %d %d %d\n",mel,ie3,ie1,k);    
       /*maj des adj*/
       /*text*/
@@ -316,13 +316,13 @@ int MMG2_insertpoint(MMG5_pMesh mesh,MMG5_pSol sol) {
       pt1->v[0] = ie1;
       pt1->v[1] = ie2;
       pt1->v[2] = k;
-      pt1->qual = MMG2_caltri(mesh,sol,pt1); 
+      pt1->qual = MMG2_caltri_in(mesh,sol,pt1); 
       if(ddebug) printf("on cree %d : %d %d %d\n",text,ie1,ie2,k);     
       pt = &mesh->tria[lel];
       pt->v[0] = ie3;
       pt->v[1] = ie1;
       pt->v[2] = k;
-      pt->qual = MMG2_caltri(mesh,sol,pt); 
+      pt->qual = MMG2_caltri_in(mesh,sol,pt); 
       if(ddebug) printf("on cree %d : %d %d %d\n",lel,ie3,ie1,k);
       /*maj des adj*/
       /*text*/
@@ -378,13 +378,13 @@ int MMG2_insertpoint(MMG5_pMesh mesh,MMG5_pSol sol) {
       pt1->v[0] = ie1;
       pt1->v[1] = ie2;
       pt1->v[2] = k;
-      pt1->qual = MMG2_caltri(mesh,sol,pt1);
+      pt1->qual = MMG2_caltri_in(mesh,sol,pt1);
       if(ddebug) printf("on change %d : %d %d %d\n",text,ie1,ie2,k);      
       pt = &mesh->tria[nel];
       pt->v[0] = ie3;
       pt->v[1] = ie1;
       pt->v[2] = k;  
-      pt->qual = MMG2_caltri(mesh,sol,pt);       
+      pt->qual = MMG2_caltri_in(mesh,sol,pt);       
       if(ddebug) printf("on a      %d : %d %d %d\n",nel,ie3,ie1,k);      
       /*maj des adj*/
       /*text*/

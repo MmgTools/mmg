@@ -77,19 +77,21 @@ static void endcod() {
 /* set function pointers */
 int setfunc(int type) {
   if ( type == 3 ) {
-    MMG2_length = long_ani;
-    MMG2_caltri = caltri_ani;
-    MMG2_buckin = buckin_ani;
-    MMG2_lissmet = lissmet_ani;
-    MMG2_optlen     = optlen_ani;
+    MMG2_length    = long_ani;
+    MMG2_caltri    = caltri_ani;
+    MMG2_caltri_in = caltri_ani_in;
+     MMG2_buckin   = buckin_ani;
+    MMG2_lissmet   = lissmet_ani;
+    MMG2_optlen    = optlen_ani;
     /*    interp     = interp_ani;
      */
   }
   else {
-    MMG2_length  = long_iso;
-    MMG2_caltri  = caltri_iso;
-    MMG2_buckin  = buckin_iso;
-    MMG2_lissmet = lissmet_iso;
+    MMG2_length     = long_iso;
+    MMG2_caltri     = caltri_iso;
+    MMG2_caltri_in  = caltri_iso_in;
+    MMG2_buckin     = buckin_iso;
+    MMG2_lissmet    = lissmet_iso;
 
     MMG2_optlen     = optlen_iso;
     /*    interp     = interp_iso;

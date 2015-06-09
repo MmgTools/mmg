@@ -46,7 +46,7 @@ int MMG2_swapar(MMG5_pMesh mesh,MMG5_pSol sol,int k,int i,double crit,int *list)
   tmp.v[0] = pt->v[i];
   tmp.v[1] = pt->v[i1];
   tmp.v[2] = pt1->v[adj[i] % 3];
-  cal1 = MMG2_caltri(mesh,sol,&tmp); 
+  cal1 = MMG2_caltri_in(mesh,sol,&tmp); 
   airn1 = MMG2_quickarea(mesh->point[tmp.v[0]].c,mesh->point[tmp.v[1]].c,mesh->point[tmp.v[2]].c);   
 	if(ddebug) printf("cal1 %e %e\n",cal1,crit);
   if ( cal1 > crit )  return(0);
@@ -54,7 +54,7 @@ int MMG2_swapar(MMG5_pMesh mesh,MMG5_pSol sol,int k,int i,double crit,int *list)
   tmp.v[0] = pt->v[i];
   tmp.v[1] = pt1->v[adj[i] % 3];
   tmp.v[2] = pt->v[i2];
-  cal2 = MMG2_caltri(mesh,sol,&tmp);
+  cal2 = MMG2_caltri_in(mesh,sol,&tmp);
   airn2 = MMG2_quickarea(mesh->point[tmp.v[0]].c,mesh->point[tmp.v[1]].c,mesh->point[tmp.v[2]].c);
 	if(ddebug) printf("cal2 %e %e\n",cal2,crit);
   if ( cal2 > crit )  return(0);

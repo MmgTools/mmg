@@ -290,7 +290,7 @@ int _MMG2_delone(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist) {
         memcpy(pt1,pt,sizeof(MMG5_Tria));
         pt1->v[i] = ip;
         //printf("on cree %d : %d %d %d\n",iel,pt1->v[0],pt1->v[1],pt1->v[2]);
-        pt1->qual = MMG2_caltri(mesh,sol,pt1);
+        pt1->qual = MMG2_caltri_in(mesh,sol,pt1);
         pt1->ref = mesh->tria[old].ref;
         if(pt1->qual < 1e-10) {printf("argggg (%d) %d : %e\n",ip,iel,pt1->qual);
           printf("pt1 : %d %d %d\n",pt1->v[0],pt1->v[1],pt1->v[2]);/*exit(0);*/}

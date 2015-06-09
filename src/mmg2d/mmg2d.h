@@ -33,7 +33,9 @@
 #define SIZE    0.75
 #define COS90   0.0
 #define ALPHA  0.28867513459
+#define ALPHAD 3.464101615137755   /* 6.0 / sqrt(3.0)  */
 #define MMG2_LONMAX 1024
+#define _MMG5_BADKAL    0.2
 
 #define M_NUL      (1 << 6)
 #define M_BDRY     (1 << 1)
@@ -243,6 +245,8 @@ double long_iso(double *ca,double *cb,double *ma,double *mb);
 double MMG2_quickarea(double a[2],double b[2],double c[2]);
 double caltri_ani(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pTria );
 double caltri_iso(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pTria );
+double caltri_ani_in(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pTria );
+double caltri_iso_in(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pTria );
 int    optlen_ani(MMG5_pMesh mesh,MMG5_pSol sol,double declic,int base);
 int    optlen_iso(MMG5_pMesh mesh,MMG5_pSol sol,double declic,int base);
 int    interp_ani(double *,double *,double * ,double );
@@ -256,6 +260,7 @@ int MMG2_chkedg(MMG5_pMesh mesh, MMG5_pPoint ppa,MMG5_pPoint ppb) ;
 
 double (*MMG2_length)(double *,double *,double *,double *);
 double (*MMG2_caltri)(MMG5_pMesh ,MMG5_pSol ,MMG5_pTria );
+double (*MMG2_caltri_in)(MMG5_pMesh ,MMG5_pSol ,MMG5_pTria );
 int    (*MMG2_optlen)(MMG5_pMesh ,MMG5_pSol ,double ,int );
 int    (*MMG2_interp)(double *,double *,double *,double );
 int    (*MMG2_buckin)(MMG5_pMesh ,MMG5_pSol ,pBucket ,int );

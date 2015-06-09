@@ -124,7 +124,7 @@ int optlen_ani(MMG5_pMesh mesh,MMG5_pSol sol,double declic,int base) {
           nk  = list[l] % 3;
           pt1 = &mesh->tria[iel];
       
-          cal = MMG2_caltri(mesh,sol,pt1);
+          cal = MMG2_caltri_in(mesh,sol,pt1);
           if ( cal > ctg )  {
 	    /*if(k==931) {                                                  
               printf("coord %e %e \n",ppa->c[0],ppa->c[1]);
@@ -291,7 +291,7 @@ int optlen_iso(MMG5_pMesh mesh,MMG5_pSol sol,double declic,int base) {
           nk  = list[l] % 3;
           pt1 = &mesh->tria[iel];
         
-          cal = MMG2_caltri(mesh,sol,pt1);
+          cal = MMG2_caltri_in(mesh,sol,pt1);
           if ( cal > ctg )  {
 	    /*if(k==931) {                                                  
               printf("coord %e %e \n",ppa->c[0],ppa->c[1]);
@@ -460,7 +460,7 @@ int optlen_iso_bar(MMG5_pMesh mesh,MMG5_pSol sol,double declic,int base) {
           nk  = list[l] % 3;
           pt1 = &mesh->tria[iel];
         
-          cal = MMG2_caltri(mesh,sol,pt1);
+          cal = MMG2_caltri_in(mesh,sol,pt1);
           if ( cal > ctg )  {
 	    /*if(k==931) {                                                  
               printf("coord %e %e \n",ppa->c[0],ppa->c[1]);
