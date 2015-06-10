@@ -33,14 +33,17 @@ extern int ddebug;
 void MMG2_coorbary(MMG5_pMesh mesh,MMG5_pTria pt,double c[2],double* det,double* l1,double* l2) {
   MMG5_pPoint      pt1,pt2,pt3;
   double      a11,a12,a21,a22;
+  double      ax,ay,bx,by,cx,cy;
+  double      x,y;
   
   pt1 = &mesh->point[pt->v[0]];
   pt2 = &mesh->point[pt->v[1]];
   pt3 = &mesh->point[pt->v[2]];
   /*calcul des coor bary dans k*/ 
-  *det = (pt1->c[0]-pt3->c[0])*(pt2->c[1]-pt3->c[1]) - 
-    (pt1->c[1]-pt3->c[1])*(pt2->c[0]-pt3->c[0]);
+  *det = (pt1->c[0]-pt2->c[0])*(pt1->c[1]-pt3->c[1]) - 
+    (pt1->c[1]-pt2->c[1])*(pt1->c[0]-pt3->c[0]);
   *det = 1./(*det);
+
   a11 = pt2->c[1]-pt3->c[1];
   a12 = -(pt2->c[0]-pt3->c[0]);
   a21 = -(pt1->c[1]-pt3->c[1]);
@@ -48,16 +51,58 @@ void MMG2_coorbary(MMG5_pMesh mesh,MMG5_pTria pt,double c[2],double* det,double*
   *l1 = a11*(c[0]-pt3->c[0]) + a12*(c[1]-pt3->c[1]);
   *l2 = a21*(c[0]-pt3->c[0]) + a22*(c[1]-pt3->c[1]);  
   
+  
+  ax = pt1->c[0] - c[0];
+  ay = pt1->c[1] - c[1];
+  bx = pt2->c[0] - c[0];
+  by = pt2->c[1] - c[1];
+  cx = pt3->c[0] - c[0];
+  cy = pt3->c[1] - c[1];
+    
+  x = (pt3->c[1] - pt1->c[1])*(c[0]-pt1->c[0]) -  (pt3->c[0] - pt1->c[0])*(c[1]-pt1->c[1]);
+  y = -(pt2->c[1] - pt1->c[1])*(c[0]-pt1->c[0]) +  (pt2->c[0] - pt1->c[0])*(c[1]-pt1->c[1]);
+  x*=(*det);
+  y*=(*det);
+  *l1 = 1-(x+y);
+  *l2 = x;
+  /* printf("coor %e %e\n",c[0],c[1]); */
+  /* printf("coorP2 : %e %e\n",(*det)*((pt3->c[1] - pt1->c[1])*(pt2->c[0]-pt1->c[0])  */
+  /*                                   -  (pt3->c[0] - pt1->c[0])*(pt2->c[1]-pt1->c[1])), */
+  /*        (*det)*(-(pt2->c[1] - pt1->c[1])*(pt2->c[0]-pt1->c[0]) */
+  /*                +  (pt2->c[0] - pt1->c[0])*(pt2->c[1]-pt1->c[1]))); */
+  /* printf("coorP3 : %e %e\n",(*det)*((pt3->c[1] - pt1->c[1])*(pt3->c[0]-pt1->c[0])  */
+  /*                                   -  (pt3->c[0] - pt1->c[0])*(pt3->c[1]-pt1->c[1])), */
+  /*        (*det)*(-(pt2->c[1] - pt1->c[1])*(pt3->c[0]-pt1->c[0]) */
+  /*                +  (pt2->c[0] - pt1->c[0])*(pt3->c[1]-pt1->c[1]))); */
+  /* printf("det %e -- %e %e -- %e %e\n",*det,x,y,*l1,*l2); */
+  /* printf("l3 %e %e\n",y,1. -(*l1+*l2)); */
+
 } 
+
+int MMG2_isInTriangle(MMG5_pMesh mesh,int k,double c[2]) {
+  MMG5_pTria pt;
+  double det,l1,l2,l3;
+
+  pt = &mesh->tria[k];
+  if(!M_EOK(pt)) return(0);
+
+  MMG2_coorbary(mesh,pt,&c[0],&det,&l1,&l2);
+  l3 = 1. - (l1+l2);
+  if(l3>EPST && l1>EPST && l2>EPST) return(k);
+  else 
+    return(0);
+
+}
+
 
 int MMG2_cutEdge(MMG5_pMesh mesh,MMG5_pTria pt,MMG5_pPoint ppa,MMG5_pPoint ppb) { 
   double      la[3],lb[3],det;
   int         icompt,i,ireturn,iadr,*adja;
   
   MMG2_coorbary(mesh,pt,ppa->c,&det,&la[0],&la[1]);  
-  la[2] = 1.-det*(la[0]+la[1]);   
+  la[2] = 1.-(la[0]+la[1]);   
   MMG2_coorbary(mesh,pt,ppb->c,&det,&lb[0],&lb[1]);  
-  lb[2] = 1.-det*(lb[0]+lb[1]); 
+  lb[2] = 1.-(lb[0]+lb[1]); 
   if(ddebug) printf("barya %e %e %e\n",la[0],la[1],la[2]);
   if(ddebug) printf("baryb %e %e %e\n",lb[0],lb[1],lb[2]);
   //if(ddebug) exit(0);
@@ -186,12 +231,16 @@ int MMG2_findTria(MMG5_pMesh mesh,int ip) {
     if ( !M_EOK(pt) )  {
       iel++;
       if(iel > mesh->nt) { 
-	printf("exaustif\n");
-	return(0);
+        //fprintf(stdout,"exaustif search\n");
+        return(0);
       }
       continue;    
     }                      
-    if ( pt->base == base )  {printf("gloups  pour %d base %d\n",iel,base);return(0);}
+    if ( pt->base == base )  {
+      //printf("gloups  pour %d base %d -- %d\n",iel,base,ip);
+      fprintf(stdout,"Warning numerical problem in findTria, please make a bug report\n");
+      return(iel);
+    }
     /*check not vertex*/
     if (pt->v[0]==ip || pt->v[1]==ip || pt->v[2]==ip) return(iel);
     if(ddebug) printf("pt : %d %d %d \n",pt->v[0],pt->v[1],pt->v[2]); 
@@ -235,8 +284,11 @@ int MMG2_findTria(MMG5_pMesh mesh,int ip) {
       continue;
     }
     
-    aire3 = -epsra*EPSR - aire1 - aire2;
-    if(ddebug) printf("tr %d aire3 : %e\n",iel,aire3);
+    //aire3 = -epsra*EPSR - (aire1 + aire2);
+    /*try to be more robust...*/
+    // aire3 = M_MAX(aire3,isign*(bx*ay - by*ax));
+    aire3 = (isign*(ax*by - ay*bx));
+    if(ddebug) printf("tr %d aire3 : %e -- sum %e\n",iel,aire3,aire1+aire2+aire3);
     if ( aire3 < epsra && adja[2]) {
       iel = adja[2] / 3;
       continue;
@@ -255,6 +307,9 @@ int MMG2_findTria(MMG5_pMesh mesh,int ip) {
   } while (!find); 
   return(iel);
 }
+
+
+
 /*list tous les tr intersectes par une arete*/
 int MMG2_locateEdge(MMG5_pMesh mesh,int ia,int ib,int* kdep,int* list) {
   MMG5_pTria     pt; 

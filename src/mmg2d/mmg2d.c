@@ -507,7 +507,11 @@ int main(int argc,char *argv[]) {
  
     if(!mesh.nt) {
       fprintf(stdout,"\n  -- PHASE 2 : MESH GENERATION\n");
-      if ( !MMG2_mmg2d2(&mesh,&sol) )  return(1);
+      if ( !MMG2_mmg2d2(&mesh,&sol) )  {
+        if ( !MMG2_unscaleMesh(&mesh,&sol) )  return(1);
+        MMG2_saveMesh(&mesh,mesh.nameout);
+        return(1);
+      }
     } else {
       fprintf(stdout,"\n  -- PHASE 2 : MESH ADAPTATION\n");
       if ( (!mesh.info.noinsert) && !MMG2_mmg2d1(&mesh,&sol) )  return(1);

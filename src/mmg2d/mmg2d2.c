@@ -113,7 +113,7 @@ int MMG2_insertpointdelone(MMG5_pMesh mesh,MMG5_pSol sol) {
   MMG5_pPoint  ppt;
   double  declic;
   int     list[MMG2_LONMAX],ilist,lon;
-  int     k,ret;
+  int     k,ret,i;
   int kk, iadr,*adja,nsiter;
   
 
@@ -123,8 +123,15 @@ int MMG2_insertpointdelone(MMG5_pMesh mesh,MMG5_pSol sol) {
     /*recherche du triangle contenant le point : lel*/
     list[0] = MMG2_findTria(mesh,k);  
     if(!list[0]) {
-      printf("point not found exit\n");
-      return(0);
+      printf("exhaustive search\n");
+      for(i = 1 ; i<= mesh->nt ; i++) {
+        list[0] = MMG2_isInTriangle(mesh,i,&ppt->c[0]);
+        if(list[0]) break;
+      }
+      if(i>mesh->nt) {
+        fprintf(stdout,"NO TRIANGLE FOUND FOR VERTEX %d\n",k);
+        return(0);
+      }
     }
     ilist = 1;
 
