@@ -28,7 +28,7 @@
 
 # Simple test: must already pass
 ADD_TEST(NAME Circle
-  COMMAND ${EXECUT_MMG2D} -v 6 -d
+  COMMAND ${EXECUT_MMG2D}
   ${MMG2D_CI_TESTS}/Circle/cercle
   -out ${MMG2D_CI_TESTS}/Circle/cercle.o.meshb)
 
@@ -38,7 +38,7 @@ ADD_TEST(NAME Circle
 #####
 ###############################################################################
 ADD_TEST(NAME SquareIso
-  COMMAND ${EXECUT_MMG2D} -v 6 -d
+  COMMAND ${EXECUT_MMG2D}
   ${MMG2D_CI_TESTS}/SquareIso/carretest
   -out ${MMG2D_CI_TESTS}/SquareIso/carretest.o.meshb)
 
@@ -48,6 +48,6 @@ ADD_TEST(NAME SquareIso
 #####
 ###############################################################################
 ADD_TEST(NAME SquareAniso
-  COMMAND ${EXECUT_MMG2D} -v 6 -d
+  COMMAND ${EXECUT_MMG2D}
   ${MMG2D_CI_TESTS}/SquareAniso/adap1
   -out ${MMG2D_CI_TESTS}/SquareAniso/adap1.o.meshb)
