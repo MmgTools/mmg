@@ -202,7 +202,12 @@ inline double _MMG5_caltet_ani(MMG5_pMesh mesh,MMG5_pSol met,int ia,int ib,int i
 
   cal = det / num;  
   if(cal <= _MMG5_NULKAL) {
-    printf(" TOO BAD QUALITY %e %e %e %e\n",cal,num,det,vol);  
+    printf(" TOO BAD QUALITY %e %e %e %e\n",cal,num,det,vol);
+    // exit added to avoid memory consumption in CDash outputs.
+    _MMG5_unscaleMesh(mesh,met);
+    MMG5_saveMesh(mesh);
+    MMG5_saveMet(mesh,met);
+    exit(EXIT_FAILURE);
     return(_MMG5_NULKAL);
   }
   //printf("cal %e %e %e\n",cal,num,det);
