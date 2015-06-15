@@ -404,7 +404,7 @@ int main(int argc,char *argv[]) {
   fprintf(stdout,"\n  -- INPUT DATA\n");
   //chrono(ON,&ctim[1]);
   if ( !MMG2_loadMesh(&mesh,mesh.namein) )  return(1); 
-  if ( !MMG2_loadSol(&sol,sol.namein,mesh.npmax) )  {    
+  if ( !MMG2_loadSol(&sol,sol.namein,mesh.npmax,mesh.info.nreg) )  {    
     sol.np = mesh.np;
     sol.size = 1;
     sol.ver  = mesh.ver;
@@ -541,7 +541,7 @@ int main(int argc,char *argv[]) {
   fprintf(stdout,"\n  -- WRITING DATA FILE %s\n",mesh.nameout);
   MMG2_saveMesh(&mesh,mesh.nameout);
   if( sol.np )
-    MMG2_saveSol(&mesh,&sol,mesh.nameout);
+    MMG2_saveSol(&mesh,&sol,mesh.nameout,mesh.info.nreg);
   fprintf(stdout,"  -- WRITING COMPLETED\n");
   //chrono(OFF,&ctim[1]);
 

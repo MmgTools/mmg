@@ -174,10 +174,10 @@ int MMG2_zaldy(MMG5_pMesh mesh);
 
 
 int MMG2_loadMesh(MMG5_pMesh ,char *);
-int MMG2_loadSol(MMG5_pSol ,char *,int);
+int MMG2_loadSol(MMG5_pSol ,char *,int,int);
 int MMG2_loadVect(MMG5_pMesh ,char *);
 int MMG2_saveMesh(MMG5_pMesh ,char *);
-int MMG2_saveSol(MMG5_pMesh ,MMG5_pSol ,char *);
+int MMG2_saveSol(MMG5_pMesh ,MMG5_pSol ,char *,int);
 int MMG2_saveVect(MMG5_pMesh mesh,MMG5_pSol sol,char *filename,double lambda);
 
 int MMG2_scaleMesh(MMG5_pMesh ,MMG5_pSol );
