@@ -636,7 +636,8 @@ IF ( BUILD_MMG3D OR BUILD_MMGS OR BUILD_MMG2D OR BUILD_MMG )
     ENABLE_TESTING()
     INCLUDE(CTest)
 
-    IF ( NOT APPLE)
+    OPTION ( COVERAGE "Watch code coverage (Linux only)" OFF)
+    IF ( NOT APPLE AND COVERAGE)
       # Add coverage flags
       SET(CMAKE_C_FLAGS_DEBUG " -fprofile-arcs ${CMAKE_C_FLAGS_DEBUG}")
       SET(CMAKE_C_FLAGS_DEBUG " -ftest-coverage ${CMAKE_C_FLAGS_DEBUG}")
