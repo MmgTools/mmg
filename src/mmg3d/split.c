@@ -377,12 +377,12 @@ int _MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,int 
         taued = &permedge[11][0];
         break;
       }
-      pt0->v[tau[0]] = ip;
-      len = _MMG5_lenedgspl(mesh,met,taued[0],pt0);
+      pt0->v[_MMG5_isar[ie][1]] = ip;
+      len = _MMG5_lenedgspl(mesh,met,taued[5],pt0);
       if ( len < lmin )  break;
       memcpy(pt0,pt,sizeof(MMG5_Tetra));
-      pt0->v[tau[1]] = ip;
-      len = _MMG5_lenedgspl(mesh,met,taued[0],pt0);
+      pt0->v[_MMG5_isar[ie][0]] = ip;
+      len = _MMG5_lenedgspl(mesh,met,taued[5],pt0);
       if ( len < lmin )  break;
     }
     if ( j < ilist )  return(0);
