@@ -256,7 +256,7 @@ int MMG2_tassage(MMG5_pMesh mesh,MMG5_pSol sol) {
   opt[6] = nr
 
   optdbl[0] = hgrad
-  optdbl[1] =.dhd
+  optdbl[1] =ar
 */
 int MMG2_mmg2dlib(int opt[7],double optdbl[2],MMG5_pMesh mesh,MMG5_pSol sol,void (*titi)(int ,int ,int,int,int)) {
   double declic;
@@ -311,7 +311,7 @@ int MMG2_mmg2dlib(int opt[7],double optdbl[2],MMG5_pMesh mesh,MMG5_pSol sol,void
   if(opt[6])
     mesh->info.dhd  = -1;
   else
-    mesh->info.dhd  = optdbl[1];
+    mesh->info.dhd  = 180.-optdbl[1];
   /*this options are not used inside library version*/
   //qdegrad[0] = 10./ALPHA;
   //qdegrad[1] = 1.3;

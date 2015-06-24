@@ -389,7 +389,7 @@ int main(int argc,char *argv[]) {
   mesh.info.noinsert = 0;
   mesh.info.hgrad  = 1.3;
   mesh.info.hausd  = 0.01;
-  mesh.info.dhd  = 45.;
+  mesh.info.dhd  = 135.;
   mesh.info.hmin     = -1.;    
   mesh.info.hmax     = -1.;    
   
