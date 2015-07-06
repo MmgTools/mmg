@@ -404,10 +404,6 @@ int MMG5_Get_meshSize(MMG5_pMesh mesh, int* np, int* nt, int* na) {
   if ( na != NULL )
     *na = mesh->na;
 
-  mesh->npi = 0;
-  mesh->nti = 0;
-  mesh->nai = 0;
-
   return(1);
 }
 /**

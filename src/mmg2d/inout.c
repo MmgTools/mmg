@@ -303,9 +303,8 @@ int MMG2_loadMesh(MMG5_pMesh mesh,char *filename) {
   }
 
   mesh->npi  = mesh->np;
-  mesh->nai = mesh->na;
+  mesh->nai  = mesh->na;
   mesh->nti  = mesh->nt;
-
   if ( !mesh->np ) {
     fprintf(stdout,"  ** MISSING DATA\n");
     return(0);
