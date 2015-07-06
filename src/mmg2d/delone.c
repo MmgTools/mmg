@@ -178,11 +178,11 @@ int _MMG2_cavity(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list) {
   }
   while ( ipil < ilist );
 
-  /* global overflow: obsolete avec la reallocation */
-  if ( mesh->nt + 2*ilist >= mesh->ntmax ) {
-    fprintf(stdout,"OVERFLOW HERE\n");
-    return(0);
-  }
+  /* /\* global overflow: obsolete avec la reallocation *\/ */
+  /* if ( mesh->nt + 2*ilist >= mesh->ntmax ) { */
+  /*   fprintf(stdout,"OVERFLOW HERE\n"); */
+  /*   return(0); */
+  /* } */
   //printf("here %d in the cavity\n",ilist);
   ilist = _MMG2_correction_iso(mesh,ip,list,ilist,1);
 
@@ -203,7 +203,7 @@ int _MMG2_delone(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist) {
 
   //printf("--------------------------------- delone ----------\n");
 
-  if ( mesh->nt + 2*ilist > mesh->ntmax )  {printf("OVERFLOW\n");return(0);}
+  //if ( mesh->nt + 2*ilist > mesh->ntmax )  {printf("OVERFLOW\n");return(0);}
   base = mesh->base;
   /* external faces */
   size = 0;
@@ -258,10 +258,14 @@ int _MMG2_delone(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist) {
   /*tria allocation : we create "size" tria*/
   ielnum[0] = size;
   for (k=1 ; k<=size ; k++) {
-    ielnum[k] = MMG2_newElt(mesh);
+    ielnum[k] = _MMG5_newElt(mesh);
     if(!ielnum[k]) {
-      fprintf(stdout,"OVERFLOW delone\n");
-      return(0);
+      _MMG5_TRIA_REALLOC(mesh,ielnum[k],mesh->gap,
+                        printf("  ## Error: unable to allocate a new element.\n");
+                        _MMG5_INCREASE_MEM_MESSAGE();
+                        printf("  Exit program.\n");
+                        exit(EXIT_FAILURE));
+      pt1  = &mesh->tria[old];
     }
   }
 
@@ -325,12 +329,12 @@ int _MMG2_delone(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist) {
   for (k=0; k<ilist; k++) {
     if(tref!=mesh->tria[list[k]].ref)
       printf("arg ref ???? %d %d\n",tref,mesh->tria[list[k]].ref);
-    MMG2_delElt(mesh,list[k]);
+    _MMG5_delElt(mesh,list[k]);
   }
 
   //ppt = &mesh->point[ip];
   //  ppt->flag = mesh->flag;
-  M_free(hedg.item);
+  _MMG5_SAFE_FREE(hedg.item);
   return(1);
 }
 

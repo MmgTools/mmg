@@ -154,10 +154,30 @@ int MMG2_split(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int k1,int adj1) {
   pt2->qual = cal2;
   
    
-  jel  = MMG2_newElt(mesh);
-  assert(jel);
-  kel  = MMG2_newElt(mesh);  
-  assert(kel);
+  jel  = _MMG5_newElt(mesh);
+  if ( !jel ) {
+    _MMG5_TRIA_REALLOC(mesh,jel,mesh->gap,
+                        printf("  ## Error: unable to allocate a new element.\n");
+                        _MMG5_INCREASE_MEM_MESSAGE();
+                        printf("  Exit program.\n");
+                        exit(EXIT_FAILURE));
+    pt1  = &mesh->tria[k1];
+    pt2  = &mesh->tria[k2];
+    ptmp = &mesh->tria[0];
+    adja2 =  &mesh->adja[3*(k2-1) + 1];
+  }
+  kel  = _MMG5_newElt(mesh);  
+  if ( !kel ) {
+    _MMG5_TRIA_REALLOC(mesh,kel,mesh->gap,
+                        printf("  ## Error: unable to allocate a new element.\n");
+                        _MMG5_INCREASE_MEM_MESSAGE();
+                        printf("  Exit program.\n");
+                        exit(EXIT_FAILURE));
+    pt1  = &mesh->tria[k1];
+    pt2  = &mesh->tria[k2];
+    ptmp = &mesh->tria[0];
+    adja2 =  &mesh->adja[3*(k2-1) + 1];
+  }
   pt3  = &mesh->tria[jel]; 
   pt3->v[0] = ip;
   pt3->v[1] = pvoy1;
@@ -201,7 +221,7 @@ int MMG2_split(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int k1,int adj1) {
     assert(num);
     ped = &mesh->edge[num];
  
-    newed = MMG2_newEdge(mesh);
+    newed = _MMG5_newEdge(mesh);
     ped1 = &mesh->edge[newed];
     memcpy(ped1,ped,sizeof(MMG5_Edge));
     ped1->a = ip;
@@ -222,8 +242,10 @@ int MMG2_split(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int k1,int adj1) {
   adja[2] = 3*k1  + 0;
   pt3->edg[2] = 0;
    
+  if(kel) {
   adja = &mesh->adja[3*(kel-1) + 1];
   adja[0] = adja2[iara1];  
+  }
   pt4->edg[0] = pt2->edg[iara1];
 
 
@@ -327,8 +349,17 @@ int MMG2_splitbdry(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int k1,int voy1,double *
   pt1->v[2] = ip;
   pt1->qual = cal1;
      
-  jel  = MMG2_newElt(mesh);
-  assert(jel);
+  jel  = _MMG5_newElt(mesh);
+  if ( !jel ) {
+    _MMG5_TRIA_REALLOC(mesh,jel,mesh->gap,
+                        printf("  ## Error: unable to allocate a new element.\n");
+                        _MMG5_INCREASE_MEM_MESSAGE();
+                        printf("  Exit program.\n");
+                        exit(EXIT_FAILURE));
+    pt1  = &mesh->tria[k1];
+    ptmp = &mesh->tria[0];
+    
+  }
   pt3  = &mesh->tria[jel]; 
   pt3->v[0] = ip;
   pt3->v[1] = pvoy1;
@@ -380,7 +411,16 @@ int MMG2_splitbdry(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int k1,int voy1,double *
   ped = &mesh->edge[num];
   if(ddebug) printf("on coupe ped %d %d\n",ped->a,ped->b);
 
-  newed = MMG2_newEdge(mesh);
+  newed = _MMG5_newEdge(mesh);
+  if ( !newed ) {
+    _MMG5_EDGE_REALLOC(mesh,newed,mesh->gap,
+                        printf("  ## Error: unable to allocate a new edge.\n");
+                        _MMG5_INCREASE_MEM_MESSAGE();
+                        printf("  Exit program.\n");
+                        exit(EXIT_FAILURE));
+    ped = &mesh->edge[num];
+  }
+
   ped1 = &mesh->edge[newed];
   memcpy(ped1,ped,sizeof(MMG5_Edge));
   ped1->a = ip;

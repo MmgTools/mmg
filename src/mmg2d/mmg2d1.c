@@ -98,15 +98,30 @@ static int cassar(MMG5_pMesh mesh,MMG5_pSol sol,int ia,int ib,double t) {
   MMG5_pPoint   p1,p2;
   //Displ      pd;
   double   c[2],t1,*ma,*mb,*mp;
-  int      ip,iadr;
+  int      ip,iadr,memlack;
+
+  memlack = 0;
+
   p1 = &mesh->point[ia];
   p2 = &mesh->point[ib];
   t1 = 1.0 - t;
   
   c[0] = t1*p1->c[0] +  t*p2->c[0];
   c[1] = t1*p1->c[1] +  t*p2->c[1];
-  ip   = MMG2_newPt(mesh,c);
-  if ( ip < 1 )  return(-1);  
+  ip   = _MMG5_newPt(mesh,c,0);
+  if ( !ip ) {
+    /* reallocation of point table */
+    
+    _MMG5_POINT_REALLOC(mesh,sol,ip,mesh->gap,
+                        printf("  ## Error: unable to allocate a new point\n");
+                        _MMG5_INCREASE_MEM_MESSAGE();
+                        memlack=1;
+                        return(-1)
+                        ,c,0);
+    p1  = &mesh->point[ia];
+    p2  = &mesh->point[ib];
+  }
+
   
   /*interpol metric*/ 
   iadr = (ia-1)*sol->size + 1;
@@ -132,6 +147,7 @@ static int cassar(MMG5_pMesh mesh,MMG5_pSol sol,int ia,int ib,double t) {
     //pd.mv[2*(ip-1) + 1 + 0] = t1*pd.mv[2*(ia-1) + 1 + 0] + t*pd.mv[2*(ib-1) + 1 + 0];
     //pd.mv[2*(ip-1) + 1 + 1] = t1*pd.mv[2*(ia-1) + 1 + 1] + t*pd.mv[2*(ib-1) + 1 + 1];     
   }
+  if ( memlack )  return(-1);
   return(ip);
 }
 
@@ -142,7 +158,9 @@ static int cassarbdry(MMG5_pMesh mesh,MMG5_pSol sol,int ied,int ia,int ib,double
   // Displ      pd;
   double   c[2],pc1[2],pc2[2],t0[2],t1[2],t_1,*ma,*mb,*mp,dx,dy;
   double   l;
-  int      ip,iadr,i,inv;
+  int      ip,iadr,i,inv,memlack;
+  inv = 0;
+  memlack = 0;
   p0 = &mesh->point[ia];
   p1 = &mesh->point[ib];
  
@@ -211,9 +229,20 @@ static int cassarbdry(MMG5_pMesh mesh,MMG5_pSol sol,int ied,int ia,int ib,double
     c[i] = t_1*t_1*t_1*p0->c[i] + 3*t*t_1*t_1*pc1[i] + 3*t*t*t_1*pc2[i] +  t*t*t*p1->c[i];
   }
   // printf("c %e %e -- mid %e %e\n",c[0],c[1],0.5*(p0->c[0]+p1->c[0]),0.5*(p0->c[1]+p1->c[1]));
-  ip   = MMG2_newPt(mesh,c);
-  if ( ip < 1 )  return(-1);
-
+  ip   = _MMG5_newPt(mesh,c,0);
+  if ( !ip ) {
+    /* reallocation of point table */
+    
+    _MMG5_POINT_REALLOC(mesh,sol,ip,mesh->gap,
+                        printf("  ## Error: unable to allocate a new bdry point\n");
+                        _MMG5_INCREASE_MEM_MESSAGE();
+                        memlack=1;
+                        return(-1);
+                        ,c,0);
+    p0 = &mesh->point[ia];
+    p1 = &mesh->point[ib];
+  }
+ 
   /*tangent new point*/
   ppt = &mesh->point[ip];
   for(i=0 ; i<2 ; i++) {
@@ -315,6 +344,7 @@ static int cassarbdry(MMG5_pMesh mesh,MMG5_pSol sol,int ied,int ia,int ib,double
     /* pd.mv[2*(ip-1) + 1 + 0] = t_1*pd.mv[2*(ia-1) + 1 + 0] + t*pd.mv[2*(ib-1) + 1 + 0]; */
     /* pd.mv[2*(ip-1) + 1 + 1] = t_1*pd.mv[2*(ia-1) + 1 + 1] + t*pd.mv[2*(ib-1) + 1 + 1]; */
   }
+  if ( memlack )  return(-1);
   return(ip);
 }
 int MMG2_ni,MMG2_nc;
@@ -408,12 +438,12 @@ static int analar(MMG5_pMesh mesh,MMG5_pSol sol,pBucket bucket,double declic,int
             if(!adj) {
               ins = MMG2_splitbdry(mesh,sol,ip,k,i,tang);
               if(!ins) { 
-                if (1 || ddebug) printf("k= %d on insere pas bdry : %d %d\n",k,i1,i2);
+                if (ddebug) printf("k= %d on insere pas bdry : %d %d\n",k,i1,i2);
                 //mesh->point[ip].tag = M_CORNER;
                 //mesh->point[ip].ref = 5;
                 //	MMG2_saveMesh(mesh,"del.mesh");
                 //exit(0);
-                MMG2_delPt(mesh,ip);
+                _MMG5_delPt(mesh,ip);
                 continue;  
               } 
               mesh->point[ip].tag |= M_BDRY;
@@ -424,7 +454,7 @@ static int analar(MMG5_pMesh mesh,MMG5_pSol sol,pBucket bucket,double declic,int
               ins = MMG2_split(mesh,sol,ip,k,voi[i]); 
               if(!ins) { 
                 if (ddebug) printf("on insere pas sd\n");
-                MMG2_delPt(mesh,ip);
+                _MMG5_delPt(mesh,ip);
                 continue;  
               } 
               MMG2_ni += 1; 
@@ -440,7 +470,7 @@ static int analar(MMG5_pMesh mesh,MMG5_pSol sol,pBucket bucket,double declic,int
             if(ddebug) printf("cut ? %d\n",ins);   
             if(!ins) {        
               if (ddebug) printf("on insere pas :::\n");
-              MMG2_delPt(mesh,ip);
+              _MMG5_delPt(mesh,ip);
               continue;  
             }
             MMG2_ni += 1;    
@@ -462,12 +492,12 @@ static int analar(MMG5_pMesh mesh,MMG5_pSol sol,pBucket bucket,double declic,int
                 continue;
               } else { 
                 MMG2_nc++;     
-                MMG2_delPt(mesh,i1);   
+                _MMG5_delPt(mesh,i1);   
                 break;
               }
             } 
             MMG2_nc++;
-            MMG2_delPt(mesh,i2);   
+            _MMG5_delPt(mesh,i2);   
             break;    
           } else {
             if(!MMG2_colpoi(mesh,sol,k,i,MMG2_iare[i][0],MMG2_iare[i][1],2.75)) {
@@ -475,11 +505,11 @@ static int analar(MMG5_pMesh mesh,MMG5_pSol sol,pBucket bucket,double declic,int
                 continue;
               } else {
                 MMG2_nc++; 
-                MMG2_delPt(mesh,i1);
+                _MMG5_delPt(mesh,i1);
                 break;   
               }  
             }
-            MMG2_delPt(mesh,i2);
+            _MMG5_delPt(mesh,i2);
             MMG2_nc++; 
             break;    
           }
@@ -489,7 +519,7 @@ static int analar(MMG5_pMesh mesh,MMG5_pSol sol,pBucket bucket,double declic,int
               continue;
             } else {
               MMG2_nc++; 
-              MMG2_delPt(mesh,i1);
+              _MMG5_delPt(mesh,i1);
               if(ddebug) {
                 printf("del ok\n");
                 //MMG2_saveMesh(mesh,"del.mesh");
@@ -500,7 +530,7 @@ static int analar(MMG5_pMesh mesh,MMG5_pSol sol,pBucket bucket,double declic,int
             }  
           }
           MMG2_nc++; 
-          MMG2_delPt(mesh,i2);
+          _MMG5_delPt(mesh,i2);
           if(ddebug) {
             printf("del2 ok\n");
             //MMG2_saveMesh(mesh,"del.mesh");
@@ -589,7 +619,7 @@ static int analargeom(MMG5_pMesh mesh,MMG5_pSol sol,int *alert) {
           ins = MMG2_splitbdry(mesh,sol,ip,k,i,tang);
           if(!ins) { 
             if (ddebug) printf("k= %d on insere pas bdry : %d %d\n",k,i1,i2);
-            MMG2_delPt(mesh,ip);
+            _MMG5_delPt(mesh,ip);
             continue;  
           } 
           mesh->point[ip].tag |= M_BDRY;
@@ -613,7 +643,6 @@ int MMG2_mmg2d1(MMG5_pMesh mesh,MMG5_pSol sol) {
   int      nadd,ndel,nswp,ngeom;
 
   nadd = ndel = nswp = 0;
-
   if ( mesh->info.imprim < 0 ) {
     MMG2_outqua(mesh,sol);
     MMG2_prilen(mesh,sol);
@@ -673,9 +702,9 @@ int MMG2_mmg2d1(MMG5_pMesh mesh,MMG5_pSol sol) {
   }
 
   /* free memory */
-  M_free(bucket->head);
-  M_free(bucket->link);
-  M_free(bucket);
-
+  _MMG5_SAFE_FREE(bucket->head);
+  _MMG5_SAFE_FREE(bucket->link);
+  _MMG5_SAFE_FREE(bucket);
+  
   return(1);
 }

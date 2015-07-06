@@ -28,10 +28,9 @@ pQueue MMG2_kiuini(MMG5_pMesh mesh,int nbel,double declic,int base) {
   MMG5_pTria    pt;
   int      k;
 
-  q = (Queue*)M_malloc(sizeof(Queue),"kiuini");
-  assert(q);              
-  q->stack = (int*)M_malloc((1+nbel)*sizeof(int),"stack");
-  assert(q->stack);
+  _MMG5_SAFE_CALLOC(q,1,Queue);  
+  _MMG5_SAFE_CALLOC(q->stack,(1+nbel),int);            
+  
   q->cur = 0;
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
@@ -45,8 +44,8 @@ pQueue MMG2_kiuini(MMG5_pMesh mesh,int nbel,double declic,int base) {
 
 
 void MMG2_kiufree(pQueue q) {
-  M_free(q->stack);
-  M_free(q);
+  _MMG5_SAFE_FREE(q->stack);
+  _MMG5_SAFE_FREE(q);
 }
 
 

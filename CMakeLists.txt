@@ -235,7 +235,6 @@ FILE(
   )
 LIST(REMOVE_ITEM sourcemmg2d_files
   ${MMG2D_SOURCE_DIR}/mmg2d.c
-  ${MMG2D_SOURCE_DIR}/lib${PROJECT_NAME}2d.c
   ${REMOVE_FILE})
 FILE(
   GLOB
@@ -335,9 +334,7 @@ IF ( BUILD_MMG3D OR BUILD_MMG )
     SET_TARGET_PROPERTIES(${PROJECT_NAME}2d_a PROPERTIES OUTPUT_NAME
       ${PROJECT_NAME}2d)
     TARGET_LINK_LIBRARIES(${PROJECT_NAME}2d_a ${LIBRARIES})
-    INSTALL(FILES ${MMG2D_SOURCE_DIR}/mmg2d.h DESTINATION
-      include)
-    INSTALL(FILES ${MMG2D_SOURCE_DIR}/memory.h DESTINATION
+    INSTALL(FILES ${MMG2D_SOURCE_DIR}/lib${PROJECT_NAME}2d.h DESTINATION
       include)
     INSTALL(FILES ${COMMON_SOURCE_DIR}/libmmg.h DESTINATION
       include)
@@ -359,11 +356,9 @@ IF ( BUILD_MMG3D OR BUILD_MMG )
     SET_TARGET_PROPERTIES(${PROJECT_NAME}2d_so PROPERTIES
       OUTPUT_NAME ${PROJECT_NAME}2d)
     TARGET_LINK_LIBRARIES(${PROJECT_NAME}2d_so ${LIBRARIES})
-    INSTALL(FILES ${MMG2D_SOURCE_DIR}/mmg2d.h
+    INSTALL(FILES ${MMG2D_SOURCE_DIR}/lib${PROJECT_NAME}2d.h
       DESTINATION include)
-    INSTALL(FILES ${MMG2D_SOURCE_DIR}/memory.h
-      DESTINATION include)
-    INSTALL(FILES ${COMMON_SOURCE_DIR}/libmmg.h DESTINATION
+   INSTALL(FILES ${COMMON_SOURCE_DIR}/libmmg.h DESTINATION
       include)
     INSTALL(FILES ${COMMON_SOURCE_DIR}/mmg.h DESTINATION
       include)
@@ -509,12 +504,20 @@ IF ( BUILD_MMG3D OR BUILD_MMG )
         ${CMAKE_SOURCE_DIR}/libexamples/mmg2d/example0/main.c)
       TARGET_LINK_LIBRARIES(libmmg2d_example0 ${PROJECT_NAME}2d_a)
       INSTALL(TARGETS libmmg2d_example0 RUNTIME DESTINATION bin )
+    ADD_EXECUTABLE(libmmg2d_example1
+        ${CMAKE_SOURCE_DIR}/libexamples/mmg2d/example1/main.c)
+      TARGET_LINK_LIBRARIES(libmmg2d_example1 ${PROJECT_NAME}2d_a)
+      INSTALL(TARGETS libmmg2d_example1 RUNTIME DESTINATION bin )
 
     ELSEIF ( LIBMMG2D_SHARED )
       ADD_EXECUTABLE(libmmg2d_example0
         ${CMAKE_SOURCE_DIR}/libexamples/mmg2d/example0/main.c)
       TARGET_LINK_LIBRARIES(libmmg2d_example0 ${PROJECT_NAME}2d_so)
       INSTALL(TARGETS libmmg2d_example0 RUNTIME DESTINATION bin )
+      ADD_EXECUTABLE(libmmg2d_example1
+        ${CMAKE_SOURCE_DIR}/libexamples/mmg2d/example1/main.c)
+      TARGET_LINK_LIBRARIES(libmmg2d_example1 ${PROJECT_NAME}2d_so)
+      INSTALL(TARGETS libmmg2d_example1 RUNTIME DESTINATION bin )
     ELSE ()
       MESSAGE(WARNING "You must activate the compilation of the static or"
         " shared ${PROJECT_NAME} library to compile this tests." )

@@ -121,7 +121,8 @@ int MMG2_prilen(MMG5_pMesh mesh,MMG5_pSol sol) {
       }
       if(k==6149 && len > bd[7]) {printf("tr %d : %d -- %d %f\n",k,pt->v[ipa],pt->v[ipb],len);
       printf("met : %e %e %e\n",ma[0],ma[1],ma[2]);
-      printf("met : %e %e %e\n",mb[0],mb[1],mb[2]); }
+      printf("met : %e %e %e\n",mb[0],mb[1],mb[2]);
+      printf("sol->size %d\n",sol->size);}
       /* update histogram */
       if (len < bd[3]) {
 		if (len > bd[2])       hl[2]++;

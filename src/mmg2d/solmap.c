@@ -29,10 +29,14 @@ static int MMG_inxtt[5] = {0,1,2,0,1};
 int MMG2_doSol(MMG5_pMesh mesh,MMG5_pSol sol) {
   MMG5_pTria      ptt,pt;
   MMG5_pPoint     p1,p2;
-  double     ux,uy,uz,dd;
+  double          ux,uy,dd;
   int        i,k,ib,ipa,ipb;
   
   sol->np = mesh->np;  
+  for (k=1; k<=mesh->np; k++) {
+    p1 = &mesh->point[k];
+    p1->tagdel = 0;
+  }
   for (k=1; k<=mesh->nt; k++) {
     ptt = &mesh->tria[k];
     if ( !ptt->v[0] )  continue;
@@ -46,7 +50,7 @@ int MMG2_doSol(MMG5_pMesh mesh,MMG5_pSol sol) {
 
       ux  = p1->c[0] - p2->c[0];
       uy  = p1->c[1] - p2->c[1];
-      dd  = sqrt(ux*ux + uy*uy + uz*uz);
+      dd  = sqrt(ux*ux + uy*uy);
 
       sol->m[ipa] += dd;
       p1->tagdel++;

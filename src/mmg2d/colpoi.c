@@ -307,12 +307,12 @@ int MMG2_colpoi(MMG5_pMesh mesh, MMG5_pSol sol,int iel,int iar,int ia,int ib,dou
   if(num) {
     if(ddebug) printf("inside on suppr %d : %d %d\n",num,mesh->edge[num].a,mesh->edge[num].b);
 
-    MMG2_delEdge(mesh,num);
+    _MMG5_delEdge(mesh,num);
   }
 
 
-  MMG2_delElt(mesh,iel);
-  MMG2_delElt(mesh,jel);
+  _MMG5_delElt(mesh,iel);
+  _MMG5_delElt(mesh,jel);
   memcpy(ppb->c,coor,3*sizeof(double));
   memcpy(&sol->m[sol->size*(pib-1) + 1],solu,sol->size*sizeof(double));  
   
@@ -411,12 +411,11 @@ int MMG2_colpoibdry(MMG5_pMesh mesh, MMG5_pSol sol,int iel,int iar,int ia,int ib
   adja = &mesh->adja[iadr];
   jel  = adja[iar]/3;  
   assert(!jel);
-  list  = (int*)malloc(LMAX*sizeof(int));
-  assert(list);
+  _MMG5_SAFE_MALLOC(list,LMAX,int);
    
   lon = MMG2_boulep(mesh,iel,ib,list);  
   if(!lon) {
-    free(list);
+    _MMG5_SAFE_FREE(list);
     return(0);
   }  
 
@@ -475,11 +474,10 @@ int MMG2_colpoibdry(MMG5_pMesh mesh, MMG5_pSol sol,int iel,int iar,int ia,int ib
 /*     //to here */
 /*   } else */ 
   if(lon > 100) {
-    free(list);
+     _MMG5_SAFE_FREE(list);
     return(0);
   }
-  cal  = (double*)malloc((lon+1)*sizeof(double));
-  assert(cal);
+  _MMG5_SAFE_CALLOC(cal,lon+1,double);
 
   /*simu colps ppb-->ppa*/
   memcpy(coor, ppb->c,2*sizeof(double));
@@ -497,8 +495,8 @@ int MMG2_colpoibdry(MMG5_pMesh mesh, MMG5_pSol sol,int iel,int iar,int ia,int ib
     if(air < EPSA) {
       memcpy(ppb->c,coor,2*sizeof(double));
       memcpy(&sol->m[sol->size*(pib-1) + 1],solu,sol->size*sizeof(double));  
-      free(cal);
-      free(list);
+      _MMG5_SAFE_FREE(cal);
+      _MMG5_SAFE_FREE(list);
       return(0);
     }
     declic = coe*pt1->qual;
@@ -506,8 +504,8 @@ int MMG2_colpoibdry(MMG5_pMesh mesh, MMG5_pSol sol,int iel,int iar,int ia,int ib
     if (cal[i] > declic) {
       memcpy(ppb->c,coor,2*sizeof(double));
       memcpy(&sol->m[sol->size*(pib-1) + 1],solu,sol->size*sizeof(double));  
-      free(cal);
-      free(list);
+      _MMG5_SAFE_FREE(cal);
+      _MMG5_SAFE_FREE(list);
       return(0);
     }
   }
@@ -535,9 +533,9 @@ int MMG2_colpoibdry(MMG5_pMesh mesh, MMG5_pSol sol,int iel,int iar,int ia,int ib
     if (len > LLONG1) {
       memcpy(ppb->c,coor,2*sizeof(double));
       memcpy(&sol->m[sol->size*(pib-1) + 1],solu,sol->size*sizeof(double));  
-      free(cal);
-      free(list);
-      return(0);
+     _MMG5_SAFE_FREE(cal);
+     _MMG5_SAFE_FREE(list);
+     return(0);
     }
   }      
   /*update tria*/  
@@ -598,7 +596,7 @@ int MMG2_colpoibdry(MMG5_pMesh mesh, MMG5_pSol sol,int iel,int iar,int ia,int ib
   }
   assert(num);
   if(ddebug) printf("on suppr %d : %d %d\n",num,mesh->edge[num].a,mesh->edge[num].b);
-  MMG2_delEdge(mesh,num);
+  _MMG5_delEdge(mesh,num);
   
   /*check if tr iel has other edge*/
   if(pt->edg[ia]) {
@@ -617,12 +615,12 @@ int MMG2_colpoibdry(MMG5_pMesh mesh, MMG5_pSol sol,int iel,int iar,int ia,int ib
     ped = &mesh->edge[pt->edg[ib]];
     mesh->tria[a1].edg[v1]=pt->edg[ib];
   }
-  MMG2_delElt(mesh,iel);
+  _MMG5_delElt(mesh,iel);
   memcpy(ppb->c,coor,3*sizeof(double));
   memcpy(&sol->m[sol->size*(pib-1) + 1],solu,sol->size*sizeof(double));  
   
   //MMG2_chkmsh(mesh,0); 
-  free(cal);
-  free(list);  
+  _MMG5_SAFE_FREE(cal);
+  _MMG5_SAFE_FREE(list);
   return(1);
 }

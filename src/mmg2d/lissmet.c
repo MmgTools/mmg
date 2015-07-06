@@ -46,7 +46,8 @@ int lissmet_ani(MMG5_pMesh mesh,MMG5_pSol sol) {
   edgeTable.size  = mesh->namax;
   edgeTable.nxtmax = 3*mesh->namax+1;
   edgeTable.hnxt  = mesh->namax;
-  edgeTable.item  = (Hedge*)M_calloc(edgeTable.nxtmax,sizeof(MMG5_Edge),"edgeTable"); 
+  _MMG5_SAFE_CALLOC(edgeTable.item,edgeTable.nxtmax,Hedge);
+ 
   memset(edgeTable.item,0,edgeTable.nxtmax*sizeof(Hedge));
   for (k=edgeTable.size; k<edgeTable.nxtmax; k++)
     edgeTable.item[k].nxt = k+1;
@@ -178,7 +179,7 @@ int lissmet_ani(MMG5_pMesh mesh,MMG5_pSol sol) {
     ncor += nc; 
     //printf("on corrige %d %d %d\n",nc,itour,maxtou);
   } while ( nc && ++itour < maxtou );
-  M_free(edgeTable.item);
+ _MMG5_SAFE_FREE(edgeTable.item);
   return(1);  
 }
 
@@ -202,6 +203,7 @@ int lissmet_iso(MMG5_pMesh mesh,MMG5_pSol sol) {
     hmax = 0.;
     for(k=1 ; k<=mesh->nt; k++) {
       ptt = &mesh->tria[k];
+       if(!M_EOK(ptt)) continue;
       for(i=0 ; i<3 ; i++) {
 	i1 = ptt->v[MMG2_iare[i][0]];
 	i2 = ptt->v[MMG2_iare[i][1]];

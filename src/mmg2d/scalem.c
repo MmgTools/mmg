@@ -33,24 +33,6 @@ int MMG2_scaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
 
   // pd  = mesh->disp;
 
-  /* base used vertices */
-  if (!mesh->nt) {
-    for (k=1; k<=mesh->np; k++) {
-      ppt = &mesh->point[ k ];
-      ppt->tag &= ~M_NUL;
-    }  
-  } else { 
-    for (k=1; k<=mesh->nt; k++) {
-      pt = &mesh->tria[k];
-
-      if ( !M_EOK(pt) )  continue;
-      for (i=0; i<3; i++) {
-        ppt = &mesh->point[ pt->v[i] ];
-        ppt->tag &= ~M_NUL;
-      }
-    }       
-  }
-
   /* compute bounding box */
   info = &mesh->info;
   for (i=0; i<2; i++) {

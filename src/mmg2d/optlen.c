@@ -46,8 +46,7 @@ int optlen_ani(MMG5_pMesh mesh,MMG5_pSol sol,double declic,int base) {
   npp    = 0;
   nrj = 0;  
 
-  list  = (int*)malloc(LMAX*sizeof(int));
-  assert(list);
+  _MMG5_SAFE_CALLOC(list,LMAX,int);
   
   do {
     k = MMG2_kiupop(queue);   
@@ -65,9 +64,8 @@ int optlen_ani(MMG5_pMesh mesh,MMG5_pSol sol,double declic,int base) {
       if ( ppa->tag & M_BDRY || ppa->tag & M_REQUIRED || ppa->tag & M_SD)  continue;
   
       lon   = MMG2_boulep(mesh,k,i,list);
-      qual  = (double*)malloc((lon+1)*sizeof(double));
-      assert(qual);
-  
+      _MMG5_SAFE_MALLOC(qual,lon+1,double);
+ 
       /* optimal point */
       ca   = &ppa->c[0];
       iadr = (ipa-1)*sol->size + 1;
@@ -142,7 +140,7 @@ int optlen_ani(MMG5_pMesh mesh,MMG5_pSol sol,double declic,int base) {
         memcpy(ppa->c,oldc,3*sizeof(double));
         ppa->flag = base - 2;   
         nrj++;	
-	free(qual);
+        _MMG5_SAFE_FREE(qual);
         continue;
       }
       
@@ -164,7 +162,7 @@ int optlen_ani(MMG5_pMesh mesh,MMG5_pSol sol,double declic,int base) {
       /* interpol metric */
       ppa->flag = base + 1;
       nm++;
-      free(qual);
+      _MMG5_SAFE_FREE(qual);
       break;
     }
   }
@@ -173,6 +171,8 @@ int optlen_ani(MMG5_pMesh mesh,MMG5_pSol sol,double declic,int base) {
     fprintf(stdout,"     %7d PROPOSED  %7d MOVED %d REJ \n",npp,nm,nrj);
   
   MMG2_kiufree(queue);
+  _MMG5_SAFE_FREE(list);
+ 
   return(nm);    
 }
 
@@ -196,10 +196,8 @@ int optlen_iso(MMG5_pMesh mesh,MMG5_pSol sol,double declic,int base) {
   nm     = 0;
   npp    = 0;
   nrj = 0;  
-
-  list  = (int*)malloc(LMAX*sizeof(int));
-  assert(list);
-
+  _MMG5_SAFE_MALLOC(list,LMAX,int);
+ 
   do {
     k = MMG2_kiupop(queue);   
     //printf("le tr %d\n",k);
@@ -216,9 +214,8 @@ int optlen_iso(MMG5_pMesh mesh,MMG5_pSol sol,double declic,int base) {
       if ( ppa->tag & M_BDRY || ppa->tag & M_REQUIRED || ppa->tag & M_SD)  continue;
 
       lon   = MMG2_boulep(mesh,k,i,list);
-      qual  = (double*)malloc((lon+1)*sizeof(double));
-      assert(qual);
-
+      _MMG5_SAFE_MALLOC(qual,lon+1,double);
+ 
       /* optimal point */
       ca   = &ppa->c[0];
       iadr = (ipa-1)*sol->size + 1;
@@ -309,7 +306,7 @@ int optlen_iso(MMG5_pMesh mesh,MMG5_pSol sol,double declic,int base) {
         memcpy(ppa->c,oldc,3*sizeof(double));
 	ppa->flag = base - 2;   
         nrj++;	
-	free(qual);
+        _MMG5_SAFE_FREE(qual);
         continue;
       }
 
@@ -331,7 +328,7 @@ int optlen_iso(MMG5_pMesh mesh,MMG5_pSol sol,double declic,int base) {
       /* interpol metric */
       ppa->flag = base + 1;
       nm++;
-      free(qual);
+      _MMG5_SAFE_FREE(qual);
       break;
     }
   }
@@ -341,7 +338,7 @@ int optlen_iso(MMG5_pMesh mesh,MMG5_pSol sol,double declic,int base) {
 
   
   MMG2_kiufree(queue);
-  free(list);
+ _MMG5_SAFE_FREE(list);
   return(nm);
 }
 
@@ -368,9 +365,7 @@ int optlen_iso_bar(MMG5_pMesh mesh,MMG5_pSol sol,double declic,int base) {
   nm     = 0;
   npp    = 0;
   nrj = 0;  
-
-  list  = (int*)malloc(LMAX*sizeof(int));
-  assert(list);
+  _MMG5_SAFE_MALLOC(list,LMAX,int);
 
   do {
     k = MMG2_kiupop(queue);   
@@ -388,9 +383,9 @@ int optlen_iso_bar(MMG5_pMesh mesh,MMG5_pSol sol,double declic,int base) {
       if ( ppa->tag & M_BDRY || ppa->tag & M_REQUIRED || ppa->tag & M_SD)  continue;
 
       lon   = MMG2_boulep(mesh,k,i,list);
-      qual  = (double*)malloc((lon+1)*sizeof(double));
-      assert(qual);
 
+      _MMG5_SAFE_MALLOC(qual,lon+1,double);
+ 
       /* optimal point */
       ca   = &ppa->c[0];
       iadr = (ipa-1)*sol->size + 1;
@@ -478,6 +473,7 @@ int optlen_iso_bar(MMG5_pMesh mesh,MMG5_pSol sol,double declic,int base) {
         memcpy(ppa->c,oldc,3*sizeof(double));
 	ppa->flag = base - 2;   
         nrj++;	
+        _MMG5_SAFE_FREE(qual);
         continue;
       }
 
@@ -499,6 +495,7 @@ int optlen_iso_bar(MMG5_pMesh mesh,MMG5_pSol sol,double declic,int base) {
       /* interpol metric */
       ppa->flag = base + 1;
       nm++;
+      _MMG5_SAFE_FREE(qual);
       break;
     }
   }
@@ -506,7 +503,7 @@ int optlen_iso_bar(MMG5_pMesh mesh,MMG5_pSol sol,double declic,int base) {
   if ( mesh->info.imprim < - 4 )
     fprintf(stdout,"     %7d PROPOSED  %7d MOVED %d REJ \n",npp,nm,nrj);
 
-  free(list);
+  _MMG5_SAFE_FREE(list);
   MMG2_kiufree(queue);
   return(nm);
 }

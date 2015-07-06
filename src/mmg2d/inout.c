@@ -111,9 +111,25 @@ int MMG2_loadMesh(MMG5_pMesh mesh,char *filename) {
       if (!(inm = fopen(data,"r")) ) {
         fprintf(stderr,"  ** %s  NOT FOUND.\n",data);
         return(0);
+      } else {
+        if ( !strstr(mesh->nameout,".mesh") ) {
+          _MMG5_ADD_MEM(mesh,5*sizeof(char),"output file name",
+                        printf("  Exit program.\n");
+                        exit(EXIT_FAILURE));
+          _MMG5_SAFE_REALLOC(mesh->nameout,strlen(mesh->nameout)+6,char,"output mesh name");
+          strcat(mesh->nameout,".mesh");
+        }
+
       }
     } else {
       bin = 1;
+      if ( !strstr(mesh->nameout,".mesh") ) {
+        _MMG5_ADD_MEM(mesh,6*sizeof(char),"input file name",
+                      printf("  Exit program.\n");
+                      exit(EXIT_FAILURE));
+        _MMG5_SAFE_REALLOC(mesh->nameout,strlen(mesh->nameout)+7,char,"input file name");
+        strcat(mesh->nameout,".meshb");
+      }
     }
   }
   else {
@@ -286,9 +302,9 @@ int MMG2_loadMesh(MMG5_pMesh mesh,char *filename) {
     fprintf(stdout,"  **WARNING NO GIVEN TRIANGLE\n");
   }
 
-  //mesh->npfixe  = mesh->np;
-  //mesh->nafixe = mesh->na;
-  //mesh->ntfixe  = mesh->nt;
+  mesh->npi  = mesh->np;
+  mesh->nai = mesh->na;
+  mesh->nti  = mesh->nt;
 
   if ( !mesh->np ) {
     fprintf(stdout,"  ** MISSING DATA\n");
@@ -386,6 +402,10 @@ int MMG2_loadMesh(MMG5_pMesh mesh,char *filename) {
         fread(&pt->ref,sw,1,inm);
         if(iswp) pt->ref=MMG_swapbin(pt->ref);
       } 
+      for (i=0; i<3; i++) {
+        ppt = &mesh->point[ pt->v[i] ];
+        ppt->tag &= ~M_NUL;
+      }
       for(i=0 ; i<3 ; i++)
         pt->edg[i] = 0;
       air = MMG2_quickarea(mesh->point[pt->v[0]].c,mesh->point[pt->v[1]].c,
@@ -399,7 +419,13 @@ int MMG2_loadMesh(MMG5_pMesh mesh,char *filename) {
       } 
     }
     fprintf(stdout," %8d triangles reoriented \n",norient); 
+  } else {
+     for (k=1; k<=mesh->np; k++) {
+      ppt = &mesh->point[ k ];
+      ppt->tag &= ~M_NUL;
+    }  
   }
+ 
   /* read corners*/    
   if (ncor) {
     rewind(inm);
@@ -514,13 +540,13 @@ int MMG2_loadSol(MMG5_pSol sol,char *filename,int npmax,int msh) {
       if(!strncmp(chaine,"Dimension",strlen("Dimension"))) {
         fscanf(inm,"%d",&dim);
         if(dim!=2 && !msh) {
-          fprintf(stdout,"BAD SOL DIMENSION : %d\n",dim);
+          fprintf(stdout,"  -- BAD SOL DIMENSION : %d\n",dim);
           return(0);
         } else if(dim!=2 && msh) {
           if(dim==3) 
-            fprintf(stdout,"READ 3D SOLUTION : %d\n",dim);
+            fprintf(stdout,"  -- READ 3D SOLUTION : %d\n",dim);
           else {
-            fprintf(stdout,"BAD SOL DIMENSION : %d\n",dim);
+            fprintf(stdout,"  -- BAD SOL DIMENSION : %d\n",dim);
             return(0);
           }
         }
@@ -598,8 +624,7 @@ int MMG2_loadSol(MMG5_pSol sol,char *filename,int npmax,int msh) {
   sol->size = btyp;
 
   /* mem alloc */
-  sol->m = (double*)M_calloc((sol->size*npmax)+1,sizeof(double),"inout");
-  assert(sol->m);
+  _MMG5_SAFE_CALLOC(sol->m,(sol->size*npmax)+1,double);
 
   /* read mesh solutions */
   rewind(inm);
@@ -617,7 +642,7 @@ int MMG2_loadSol(MMG5_pSol sol,char *filename,int npmax,int msh) {
           sol->m[isol + i] = (double) fsol;
         }
       }
-      if(msh==2) {
+      if(dim==3 && (sol->size>1)) {
         if(!bin){
           fscanf(inm,"%f",&fsol);
           fscanf(inm,"%f",&fsol);
@@ -638,7 +663,7 @@ int MMG2_loadSol(MMG5_pSol sol,char *filename,int npmax,int msh) {
           if(iswp) sol->m[isol + i]=MMG_swapd(sol->m[isol + i]);
         }
       }
-      if(msh==2) {
+      if(dim==3 && (sol->size>1)) {
        if(!bin){
           fscanf(inm,"%lf",&dsol);
           fscanf(inm,"%lf",&dsol);
@@ -1061,15 +1086,16 @@ int MMG2_loadVect(MMG5_pMesh mesh,char *filename) {
   /* fclose(inm); */
   return(1);
 }
-int MMG2_saveSol(MMG5_pMesh mesh,MMG5_pSol sol,char *filename,int msh) {
+int MMG2_saveSol(MMG5_pMesh mesh,MMG5_pSol sol,char *filename) {
   FILE*        inm;
   MMG5_pPoint       ppt;
   float        fsol;
   double       tmp,dsol;
   int          i,k,nbl,isol,bin,bpos,typ;
   char        *ptr,data[128],chaine[128];
-  int          binch;
+  int          binch,msh;
 
+  msh = mesh->info.nreg;
   if ( !sol->np )  return(1);
   bin = 1;
   strcpy(data,filename);

@@ -23,7 +23,7 @@
 #include "mmg2d.h"
 
 
-int MMG2_chkmsh(MMG5_pMesh mesh, int severe) {
+int _MMG5_mmg2dChkmsh(MMG5_pMesh mesh, int severe,int base) {
   MMG5_pPoint	ppt;
   MMG5_pTria 	pt1,pt2;
   MMG5_pEdge         ped;
@@ -93,8 +93,7 @@ int MMG2_chkmsh(MMG5_pMesh mesh, int severe) {
   
   if ( !severe )  return(1);
   
-  list  = (int*)malloc(LMAX*sizeof(int));
-  assert(list);
+  _MMG5_SAFE_CALLOC(list,LMAX,int);
   
   for (k=1; k<=mesh->nt; k++) {
     pt1 = &mesh->tria[k];
@@ -141,6 +140,6 @@ int MMG2_chkmsh(MMG5_pMesh mesh, int severe) {
       }
     } */
   }
-  free(list);  
+  _MMG5_SAFE_FREE(list);  
   return(1);
 } 

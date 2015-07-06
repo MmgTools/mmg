@@ -33,13 +33,12 @@ pBucket MMG2_newBucket(MMG5_pMesh mesh,int nmax) {
   int      k,ic,ii,jj;
 
   /* memory alloc */
-  bucket = (Bucket*)M_malloc(sizeof(Bucket),"newBucket");
-  assert(bucket);
+  _MMG5_SAFE_CALLOC(bucket,1,Bucket);
+
   bucket->size = nmax;
-  bucket->head = (int*)M_calloc(nmax*nmax*nmax+1,sizeof(int),"newBucket.head");
-  assert(bucket->head);
-  bucket->link = (int*)M_calloc(mesh->npmax+1,sizeof(int),"newBucket.link");
-  assert(bucket->link);
+  _MMG5_SAFE_CALLOC(bucket->head,nmax*nmax*nmax+1,int);
+  _MMG5_SAFE_CALLOC(bucket->link,mesh->npmax+1,int);
+
 
   /* insert vertices */
   dd = nmax / (double)PRECI;
@@ -63,9 +62,9 @@ pBucket MMG2_newBucket(MMG5_pMesh mesh,int nmax) {
 
 
 void MMG2_freeBucket(pBucket bucket) {
-  M_free(bucket->head);
-  M_free(bucket->link);
-  M_free(bucket);
+  _MMG5_SAFE_FREE(bucket->head);
+  _MMG5_SAFE_FREE(bucket->link);
+  _MMG5_SAFE_FREE(bucket);
 }
 
 

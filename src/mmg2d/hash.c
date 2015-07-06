@@ -31,9 +31,9 @@ int MMG2_hashNew(HashTable *hash,int hsize,int hmax) {
   hash->size  = hsize;
   hash->nxtmax =hmax+1;
   hash->hnxt  = hsize;
-  hash->item  = (Hedge*)M_calloc(hash->nxtmax,sizeof(MMG5_Edge),"hashNew"); 
-  memset(hash->item,0,hash->nxtmax*sizeof(Hedge));
-  for (k=hash->size; k<hash->nxtmax; k++)
+  _MMG5_SAFE_CALLOC(hash->item,hash->nxtmax,Hedge);
+
+ for (k=hash->size; k<hash->nxtmax; k++)
     hash->item[k].nxt = k+1; 
 
   return(1);
@@ -47,8 +47,8 @@ int MMG2_hashel(MMG5_pMesh mesh) {
 
   if ( !mesh->nt )  return(0);
   /* memory alloc */
-  hcode = (int*)M_calloc(mesh->nt+1,sizeof(int),"hash");
-  assert(hcode);
+  _MMG5_SAFE_CALLOC(hcode,mesh->nt+1,int);
+
   link  = mesh->adja;
   hsize = mesh->nt;
   hvoy  = (unsigned char*)hcode;
@@ -129,8 +129,8 @@ int MMG2_hashel(MMG5_pMesh mesh) {
       ll = -link[ll];
     }
   }
+  _MMG5_SAFE_FREE(hcode);
 
-  M_free(hcode);
   MMG2_baseBdry(mesh);
   return(1);
 }
@@ -323,7 +323,8 @@ int MMG2_baseBdry(MMG5_pMesh mesh) {
     edgeT.size  = mesh->namax;
     edgeT.nxtmax = 3*mesh->namax+1;
     edgeT.hnxt  = mesh->namax;
-    edgeT.item  = (Hedge*)M_calloc(edgeT.nxtmax,sizeof(MMG5_Edge),"edgeT");
+    _MMG5_SAFE_CALLOC(edgeT.item,edgeT.nxtmax,Hedge);
+ 
     memset(edgeT.item,0,edgeT.nxtmax*sizeof(Hedge));
     for (k=edgeT.size; k<edgeT.nxtmax; k++)
       edgeT.item[k].nxt = k+1;
@@ -353,7 +354,7 @@ int MMG2_baseBdry(MMG5_pMesh mesh) {
         if(num) {
           pt->edg[i] = num;
         } else {
-          num = MMG2_newEdge(mesh);
+          num = _MMG5_newEdge(mesh);
           pt->edg[i] = num;
           ped = &mesh->edge[num];
           ped->a = pt->v[MMG2_iopp[i][0]];
@@ -371,7 +372,7 @@ int MMG2_baseBdry(MMG5_pMesh mesh) {
         if(num) {
           pt->edg[i] = num;
         } else {
-          num = MMG2_newEdge(mesh);
+          num = _MMG5_newEdge(mesh);
           pt->edg[i] = num;
           ped = &mesh->edge[num];
           ped->a = pt->v[MMG2_iopp[i][0]];
@@ -381,7 +382,7 @@ int MMG2_baseBdry(MMG5_pMesh mesh) {
     }
   }
 
-  if(ned && edgeT.item) free(edgeT.item);
+  if(ned && edgeT.item)  _MMG5_SAFE_FREE(edgeT.item);
 
   /*compute tangents*/
   mesh->base++;

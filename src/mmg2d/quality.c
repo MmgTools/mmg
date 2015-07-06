@@ -146,7 +146,7 @@ double caltri_iso(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pTria pt) {
   double     cal,abx,aby,acx,acy,bcx,bcy;
   double    *a,*b,*c,h1,h2,h3,aire,peri,hm;
   
-  cal = 1e+9;
+  cal = 0;
   
   a  = mesh->point[pt->v[0]].c;
   b  = mesh->point[pt->v[1]].c;
@@ -176,7 +176,7 @@ double caltri_iso(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pTria pt) {
     //return(1./MMG2_caltri_in(mesh,sol,pt));
     return(aire/hm);
   } else {
-    return(1e+9);
+    return(0.0);
   }
 }
 
@@ -187,7 +187,7 @@ double caltri_ani(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pTria pt) {
   double    *ma,*mb,*mc,m[6];
   double     aire,h1,h2,h3,peri,hm,a1;
   int        i;
-  cal = 1e+9;	  
+  cal = 0;	  
   a  = mesh->point[pt->v[0]].c;
   b  = mesh->point[pt->v[1]].c;
   c  = mesh->point[pt->v[2]].c;
@@ -226,7 +226,7 @@ double caltri_ani(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pTria pt) {
     return(2*sqrt(aire)/hm);
     //return(1./MMG2_caltri_in(mesh,sol,pt));
   } else {
-    return(1e+9);
+    return(0.0);
   }
  
 }
@@ -267,7 +267,7 @@ void MMG2_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
       continue;
     }
     ok++;
-    rap = ALPHAD * MMG2_caltri(mesh,met,pt);;
+    rap = ALPHAD * MMG2_caltri(mesh,met,pt);
     if ( rap < rapmin ) {
       rapmin = rap;
       iel    = ok;

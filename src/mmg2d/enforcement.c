@@ -34,7 +34,8 @@ int MMG2_bdryenforcement(MMG5_pMesh mesh,MMG5_pSol sol) {
   int				ia,ib,ilon,rnd,idep,*adja,ir,adj,list2[3],iadr,ped0,ped1;  
   int       iadr2,*adja2,ndel;
   
-  list = (int*) calloc(1000,sizeof(int));
+  _MMG5_SAFE_CALLOC(list,LMAX,int);
+ 
   ddebug = 0;
   nex = 0;
   //MMG2_saveMesh(mesh,"enforc.mesh");  
@@ -59,6 +60,11 @@ int MMG2_bdryenforcement(MMG5_pMesh mesh,MMG5_pSol sol) {
     if(lon>1000) {
       printf("TOO MANY TRIANGLES (%d) AROUND THE VERTEX %d\n",lon,ped->a);
       exit(1);
+    } else if(!lon) {
+      printf("PROBLEM WITH POINT %d of TRIANGLE %d\n",mesh->tria[kdep].v[j],kdep);
+      MMG2_saveMesh(mesh,"titi.mesh");
+      _MMG5_SAFE_FREE(list);
+      return(0);
     }
     assert(lon);
     for (j=1 ; j<=lon ; j++) {   
@@ -96,6 +102,7 @@ int MMG2_bdryenforcement(MMG5_pMesh mesh,MMG5_pSol sol) {
       if(1 || ddebug) printf("\n\n\n $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ on force %d %d\n",ia,ib);
       if(!(lon=MMG2_locateEdge(mesh,ia,ib,&kdep,list))) {
 	printf("edge non localisee!!!!!\n");
+        _MMG5_SAFE_FREE(list);
 	return(0);
       }  
       if(!(lon<0 || lon==4)) { 
@@ -190,7 +197,8 @@ int MMG2_bdryenforcement(MMG5_pMesh mesh,MMG5_pSol sol) {
     }/*end k --> mesh->na*/ 
   }
 	
-  free(list); 
+  _MMG5_SAFE_FREE(list);
+
 	
 /*   //check if there are more bdry edges.. and delete tr      */
 /* #warning a optimiser en mettant un pile et un while */

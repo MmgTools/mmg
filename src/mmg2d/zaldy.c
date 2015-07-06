@@ -24,7 +24,7 @@
 
 
 /* get new point address */
-int MMG2_newPt(MMG5_pMesh mesh,double c[2]) {
+int _MMG5_newPt(MMG5_pMesh mesh,double c[2],int tag) {
   MMG5_pPoint  ppt;
   int     curpt;
 
@@ -44,7 +44,7 @@ int MMG2_newPt(MMG5_pMesh mesh,double c[2]) {
 }
 
 
-void MMG2_delPt(MMG5_pMesh mesh,int ip) {
+void _MMG5_delPt(MMG5_pMesh mesh,int ip) {
   MMG5_pPoint   ppt;
   MMG5_pxPoint  pxp;
 
@@ -63,11 +63,10 @@ void MMG2_delPt(MMG5_pMesh mesh,int ip) {
 }
 
 /* get new elt address */
-int MMG2_newEdge(MMG5_pMesh mesh) {
+int _MMG5_newEdge(MMG5_pMesh mesh) {
   int     curiel;
 
   if ( !mesh->nanil ) {
-    fprintf(stdout,"  ## UNABLE TO ALLOCATE NEW ELEMENT.\n");
     return(0);
   }
   curiel = mesh->nanil;
@@ -79,7 +78,7 @@ int MMG2_newEdge(MMG5_pMesh mesh) {
 }
 
 
-void MMG2_delEdge(MMG5_pMesh mesh,int iel) {
+void _MMG5_delEdge(MMG5_pMesh mesh,int iel) {
   MMG5_pEdge    pt;
 
   pt = &mesh->edge[iel];
@@ -94,11 +93,10 @@ void MMG2_delEdge(MMG5_pMesh mesh,int iel) {
 }
 
 /* get new elt address */
-int MMG2_newElt(MMG5_pMesh mesh) {
+int _MMG5_newElt(MMG5_pMesh mesh) {
   int     curiel;
 
   if ( !mesh->nenil ) {
-    fprintf(stdout,"  ## UNABLE TO ALLOCATE NEW ELEMENT.\n");
     return(0);
   }
   curiel = mesh->nenil;
@@ -113,7 +111,7 @@ int MMG2_newElt(MMG5_pMesh mesh) {
 }
 
 
-void MMG2_delElt(MMG5_pMesh mesh,int iel) {
+void _MMG5_delElt(MMG5_pMesh mesh,int iel) {
   MMG5_pTria    pt;
   int      iadr;
 
@@ -134,7 +132,7 @@ void MMG2_delElt(MMG5_pMesh mesh,int iel) {
 
 
 /* check if n elets available */
-int MMG2_getnElt(MMG5_pMesh mesh,int n) {
+int _MMG5_getnElt(MMG5_pMesh mesh,int n) {
   int     curiel;
 
   if ( !mesh->nenil )  return(0);
@@ -147,48 +145,125 @@ int MMG2_getnElt(MMG5_pMesh mesh,int n) {
   return(n == 0);
 }
 
+/** memory repartition for the -m option */
+void _MMG5_memOption(MMG5_pMesh mesh) {
+  long long  million = 1048576L;
+  int        ctri,npask,bytes,memtmp;
+
+  mesh->memMax = _MMG5_memSize();
+ 
+  mesh->npmax = MG_MAX(1.5*mesh->np,_MMG5_NPMAX);
+  mesh->ntmax = MG_MAX(1.5*mesh->nt,_MMG5_NEMAX);
+  mesh->namax = M_MAX(1.5*mesh->na,_MMG5_NEDMAX);
+  mesh->xpmax  = M_MAX(0.1*mesh->xp,0.1*_MMG5_NPMAX);
+
+  if ( mesh->info.mem <= 0 ) {
+    if ( mesh->memMax && (mesh->memMax >2000*million))
+      /* maximal memory = 2Go */
+      mesh->memMax = 2000*million;
+    else {
+      /* default value = 800 Mo */
+      printf("  Maximum memory set to default value: %d Mo.\n",_MMG5_MEMMAX);
+      mesh->memMax = _MMG5_MEMMAX*million;
+    }
+  }
+  else {
+    /* memory asked by user if possible, otherwise total physical memory */
+    if ( (long long)(mesh->info.mem)*million > mesh->memMax && mesh->memMax ) {
+      fprintf(stdout,"  ## Warning: asking for %d Mo of memory ",mesh->info.mem);
+      fprintf(stdout,"when only %lld available.\n",(long long)(mesh->memMax/million));
+    }
+    else {
+      mesh->memMax= (long long)(mesh->info.mem)*million;
+    }
+
+    /* if asked memory is lower than default _MMG5_NPMAX/_MMG5_NTMAX we take lower values */
+    ctri = 2;
+
+    /* Euler-poincare: ne = 6*np; nt = 2*np; na = np/5 *
+     * point+tria+tets+adja+adjt+sol+item *
+     * warning: we exceed memory in saveMesh when we call _MMG5_hNew */
+    bytes = sizeof(MMG5_Point) +  0.1*sizeof(MMG5_xPoint) + 
+      2*sizeof(MMG5_Tria) + 3*sizeof(int)
+      + sizeof(MMG5_Sol) /*+ sizeof(Displ)*/
+      + sizeof(int) + 5*sizeof(int);
+
+    /*init allocation need 38Mo*/
+    npask = (int)((double)(mesh->info.mem-38) / bytes * (int)million);
+    mesh->npmax = MG_MIN(npask,mesh->npmax);
+    mesh->ntmax = MG_MIN(ctri*npask,mesh->ntmax);
+    mesh->namax = MG_MIN(ctri*npask,mesh->namax);
+    mesh->xpmax = MG_MIN(0.1*npask,0.1*mesh->xp);
+
+    /*check if the memory asked is enough to load the mesh*/
+    if(mesh->np &&
+       (mesh->npmax < mesh->np || mesh->ntmax < mesh->nt || mesh->namax < mesh->na) ){
+      memtmp = (int)(mesh->np * bytes /(int)million + 38);
+      memtmp = MG_MAX(memtmp, (int)(mesh->nt * bytes /(ctri* (int)million) + 38));
+      memtmp = MG_MAX(memtmp, (int)(mesh->na * bytes /(ctri*(int)million) + 38));
+      mesh->memMax = (long long) memtmp+1;
+      fprintf(stdout,"  ## ERROR: asking for %d Mo of memory ",mesh->info.mem);
+      fprintf(stdout,"is not enough to load mesh. You need to ask %d Mo minimum\n",
+              memtmp+1);
+    }
+    if(mesh->info.mem < 39) {
+      mesh->memMax = (long long) 39;
+      fprintf(stdout,"  ## ERROR: asking for %d Mo of memory ",mesh->info.mem);
+      fprintf(stdout,"is not enough to load mesh. You need to ask %d Mo minimum\n",
+              39);
+    }
+  }
+
+  if ( abs(mesh->info.imprim) > 4 || mesh->info.ddebug )
+    fprintf(stdout,"  MAXIMUM MEMORY AUTHORIZED (Mo)    %lld\n",
+            (long long)(mesh->memMax/million));
+
+  if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug ) {
+    fprintf(stdout,"  _MMG5_NPMAX    %d\n",mesh->npmax);
+    fprintf(stdout,"  _MMG5_NTMAX    %d\n",mesh->ntmax);
+    fprintf(stdout,"  _MMG5_NAMAX    %d\n",mesh->namax);
+  }
+
+  return;
+}
 
 /* allocate main structure */
 int MMG2_zaldy(MMG5_pMesh mesh) {
   int     million = 1048576L;
   int     k,npask;
 
-  if ( mesh->info.mem < 0 ) {
-    mesh->npmax  = M_MAX(1.5*mesh->np,NPMAX);
-    mesh->xpmax  = M_MAX(0.1*mesh->xp,0.1*NPMAX);
-    mesh->namax = M_MAX(1.5*mesh->na,NEDMAX);
-    mesh->ntmax  = M_MAX(1.5*mesh->nt,NEMAX);
-  }
-  else {
-    /* point+tria+adja+sol+bucket+queue */
-    int bytes = sizeof(MMG5_Point) +  0.1*sizeof(MMG5_xPoint) + 2*sizeof(MMG5_Tria) + 3*sizeof(int)
-      + sizeof(MMG5_Sol) /*+ sizeof(Displ)*/
-                + sizeof(int) + 5*sizeof(int);
+   _MMG5_memOption(mesh);
 
-    npask = (double)mesh->info.mem / bytes * million;
-    mesh->npmax = M_MAX(1.5*mesh->np,npask);
-    mesh->xpmax = M_MAX(0.1*mesh->xp,0.1*npask);
-    mesh->namax = M_MAX(1.5*mesh->na,2*npask);
-    mesh->ntmax = M_MAX(1.5*mesh->nt,2*npask);
+  _MMG5_ADD_MEM(mesh,(mesh->npmax+1)*sizeof(MMG5_Point),"initial vertices",
+                printf("  Exit program.\n");
+                exit(EXIT_FAILURE));
+  _MMG5_SAFE_CALLOC(mesh->point,mesh->npmax+1,MMG5_Point);
+
+  if ( mesh->xp ) {
+    _MMG5_ADD_MEM(mesh,(mesh->xpmax+1)*sizeof(MMG5_xPoint),"initial xpoint",return(0));
+    _MMG5_SAFE_CALLOC(mesh->xpoint,mesh->xpmax+1,MMG5_xPoint);
+    memset(&mesh->xpoint[0],0,sizeof(MMG5_xPoint));
   }
-  mesh->point = (MMG5_pPoint)M_calloc(mesh->npmax+1,sizeof(MMG5_Point),"zaldy.point");
-  assert(mesh->point);
-  mesh->xpoint = (MMG5_pxPoint)M_calloc(mesh->npmax+1,sizeof(MMG5_xPoint),"zaldy.xpoint");
-  assert(mesh->point);
-  mesh->tria  = (MMG5_pTria)M_calloc(mesh->ntmax+1,sizeof(MMG5_Tria),"zaldy.tria");
-  assert(mesh->tria);
-  mesh->edge  = (MMG5_pEdge)M_calloc(mesh->namax+1,sizeof(MMG5_Edge),"zaldy.edge");
-  assert(mesh->edge);
-  mesh->adja = (int*)calloc(3*mesh->ntmax+5,sizeof(int));
-  assert(mesh->adja);
+    _MMG5_ADD_MEM(mesh,(mesh->ntmax+1)*sizeof(MMG5_Tria),"initial triangles",return(0));
+    _MMG5_SAFE_CALLOC(mesh->tria,mesh->ntmax+1,MMG5_Tria);
+    memset(&mesh->tria[0],0,sizeof(MMG5_Tria));
+
+    _MMG5_ADD_MEM(mesh,(mesh->namax+1)*sizeof(MMG5_Edge),"initial edges",return(0));
+    _MMG5_SAFE_CALLOC(mesh->edge,(mesh->namax+1),MMG5_Edge);
 
   /* keep track of empty links */
   mesh->npnil = mesh->np + 1;
-  mesh->nanil = mesh->na + 1;
   mesh->nenil = mesh->nt + 1;
+  mesh->nanil = mesh->na + 1;
 
-  for (k=mesh->npnil; k<mesh->npmax-1; k++)
+  for (k=mesh->npnil; k<mesh->npmax-1; k++) {
+    /* Set tangent field of point to 0 */
+    mesh->point[k].n[0] = 0;
+    mesh->point[k].n[1] = 0;
+    mesh->point[k].n[2] = 0;
+    /* link */
     mesh->point[k].tmp  = k+1;
+  }
 
   for (k=mesh->nanil; k<mesh->namax-1; k++)
     mesh->edge[k].b = k+1;
@@ -196,6 +271,12 @@ int MMG2_zaldy(MMG5_pMesh mesh) {
   for (k=mesh->nenil; k<mesh->ntmax-1; k++)
     mesh->tria[k].v[2] = k+1;
 
+
+   /* memory alloc */
+  _MMG5_ADD_MEM(mesh,(3*mesh->ntmax+5)*sizeof(int),"adjacency table",
+                printf("  Exit program.\n");
+                exit(EXIT_FAILURE));
+  _MMG5_SAFE_CALLOC(mesh->adja,3*mesh->ntmax+5,int);
 
   return(1);
 }
