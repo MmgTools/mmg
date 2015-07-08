@@ -439,10 +439,9 @@ int MMG2_markSD(MMG5_pMesh mesh) {
   MMG5_pEdge   ped;
   MMG5_pPoint  ppt;
   int     k,i,j,iadr,*adja,ped0,ped1,kcor,*list,ipil,ncurc,nref;
-  int     kinit,nt,nsd,ip1,ip2,ip3,ip4,ned;
+  int     kinit,nt,nsd,ip1,ip2,ip3,ip4,ned,iel,voy;
   
   if ( !MMG2_hashel(mesh) )  return(0);
-  
   for(k=1 ; k<=mesh->nt ; k++) mesh->tria[k].flag = mesh->mark;
   _MMG5_SAFE_CALLOC(list,mesh->nt,int);
   kinit = 0;
@@ -510,7 +509,17 @@ int MMG2_markSD(MMG5_pMesh mesh) {
       for(i=0 ; i<3 ; i++)
         mesh->point[pt->v[i]].tag = M_NUL;
       if(pt->ref != 1) continue;
+      /*update adjacencies*/
+      iadr = 3*(k-1)+1;
+      adja = &mesh->adja[iadr];
+      for(i=0 ; i<3 ; i++) {
+        if(!adja[i]) continue;
+        iel = adja[i]/3;
+        voy = adja[i]%3;
+        (&mesh->adja[3*(iel-1)+1])[voy] = 0;
+      }
       _MMG5_delElt(mesh,k); 
+
   } 
  /*BB vertex*/
   ip1=(mesh->np-3);

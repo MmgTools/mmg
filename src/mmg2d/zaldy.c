@@ -105,7 +105,10 @@ int _MMG5_newElt(MMG5_pMesh mesh) {
   mesh->tria[curiel].v[2] = 0;
   mesh->tria[curiel].ref = 0;
   mesh->tria[curiel].base = 0;
-  
+  mesh->tria[curiel].edg[0] = 0;
+  mesh->tria[curiel].edg[1] = 0;
+  mesh->tria[curiel].edg[2] = 0;
+
 
   return(curiel);
 }

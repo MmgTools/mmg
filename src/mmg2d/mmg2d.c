@@ -442,7 +442,6 @@ int main(int argc,char *argv[]) {
 
    /* free mem */
   _MMG5_RETURN_AND_FREE(&mesh,&sol,MMG5_SUCCESS);
-  return(0);
 }
   
 
