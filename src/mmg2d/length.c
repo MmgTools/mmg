@@ -86,7 +86,7 @@ int MMG2_prilen(MMG5_pMesh mesh,MMG5_pSol sol) {
 
     for (ia=0; ia<3; ia++) {
       l = (&mesh->adja[3*(k-1)+1])[ia];
-      if ( l < 3*k )  break;
+      if ( l < 3*k )  continue;
 
       ipa = MMG2_iare[ia][0];
       ipb = MMG2_iare[ia][1];
@@ -110,12 +110,12 @@ int MMG2_prilen(MMG5_pMesh mesh,MMG5_pSol sol) {
       
       /* find largest, smallest edge */
       if (len < lmin) {
-	    lmin  = len;
-		iamin = pt->v[ipa];
-		ibmin = pt->v[ipb];
+        lmin  = len;
+        iamin = pt->v[ipa];
+        ibmin = pt->v[ipb];
       }
-      else if (len > lmax) {
-		lmax  = len;
+      if (len > lmax) {
+        lmax  = len;
         iamax = pt->v[ipa];
         ibmax = pt->v[ipb];
       }

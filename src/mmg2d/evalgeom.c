@@ -38,6 +38,7 @@ int MMG2_evalgeom(MMG5_pMesh mesh) {
   ++mesh->base;
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
+    if(!M_EOK(pt)) continue;
     for(j=0 ; j<3 ; j++) {
       ppt = &mesh->point[pt->v[j]]; 
       if(!(ppt->tag & M_BDRY)) continue;

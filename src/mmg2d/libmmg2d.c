@@ -293,6 +293,23 @@ int MMG2_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol sol,void (*titi)(int ,int ,int,int,i
         MMG2_saveMesh(mesh,mesh->nameout);
         return(MMG5_LOWFAILURE);
       }
+      /*geom : corner detection*/
+      if ( mesh->info.dhd>0 )
+        if( !MMG2_evalgeom(mesh) ) return(MMG5_STRONGFAILURE);
+
+
+      /*mesh gradation*/
+      if( mesh->nt && mesh->info.hgrad > 0 ) {
+        if ( mesh->info.imprim )   fprintf(stdout,"\n  -- GRADATION : %8f\n",mesh->info.hgrad);
+        MMG2_lissmet(mesh,sol);
+      }
+      if ( mesh->nt && abs(mesh->info.imprim) > 4 )  MMG2_outqua(mesh,sol);
+      
+      if ( mesh->nt && abs(mesh->info.imprim) > 5 )  {
+        MMG2_prilen(mesh,sol);
+      }
+      if ( (!mesh->info.noinsert) && !MMG2_mmg2d1(mesh,sol) )  return(MMG5_LOWFAILURE);
+      
     } else {
       fprintf(stdout,"\n  -- PHASE 2 : MESH ADAPTATION\n");
       if ( (!mesh->info.noinsert) && !MMG2_mmg2d1(mesh,sol) )  return(MMG5_LOWFAILURE);
