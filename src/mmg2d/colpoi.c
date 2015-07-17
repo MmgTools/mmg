@@ -202,14 +202,12 @@ int MMG2_colpoi(MMG5_pMesh mesh, MMG5_pSol sol,int iel,int iar,int ia,int ib,dou
       ped = &mesh->edge[num];
       if(ped->a==pib) ped->a = pia;
       if(ped->b==pib) ped->b = pia;
-      if(ped->a==213 || ped->b==213) printf("MAJ1 %d %d\n",ped->a,ped->b);
     }
     num = pt1->edg[ MMG2_iare[voy][1]];
     if(num) {
       ped = &mesh->edge[num];
       if(ped->a==pib) ped->a = pia;
       if(ped->b==pib) ped->b = pia;
-      if(ped->a==213 || ped->b==213)  printf("MAJ2 %d %d\n",ped->a,ped->b);
       
     }    
     pt1->qual = cal[i];  
@@ -249,7 +247,6 @@ int MMG2_colpoi(MMG5_pMesh mesh, MMG5_pSol sol,int iel,int iar,int ia,int ib,dou
   if(ddebug) printf("a %d a1 %d\n",a,a1);
   num = pt->edg[ib];
   if(num) {
-    assert(!mesh->tria[a1].edg[v1]);
     if(!((mesh->edge[num].a==mesh->tria[a1].v[MMG2_iare[v1][0]] || mesh->edge[num].a==mesh->tria[a1].v[MMG2_iare[v1][1]])
          && (mesh->edge[num].b==mesh->tria[a1].v[MMG2_iare[v1][0]] || mesh->edge[num].b==mesh->tria[a1].v[MMG2_iare[v1][1]]))) {
       printf("on a un soucis 0\n");
@@ -285,7 +282,6 @@ int MMG2_colpoi(MMG5_pMesh mesh, MMG5_pSol sol,int iel,int iar,int ia,int ib,dou
       printf("pnum %d %d dans %d %d %d\n",mesh->edge[num].a,mesh->edge[num].b,pt1->v[0],pt1->v[1],pt1->v[2]); 
       printf("edgea %d %d\n",mesh->tria[a2].v[MMG2_iare[v2][0]],mesh->tria[a2].v[MMG2_iare[v2][1]]); 
     }
-    assert(!mesh->tria[a2].edg[v2]);
     mesh->tria[a2].edg[v2] = num;
   }
   num = pt1->edg[iaa];
@@ -299,7 +295,6 @@ int MMG2_colpoi(MMG5_pMesh mesh, MMG5_pSol sol,int iel,int iar,int ia,int ib,dou
       printf("pnum %d %d dans %d %d %d\n",mesh->edge[num].a,mesh->edge[num].b,pt1->v[0],pt1->v[1],pt1->v[2]); 
       printf("edgea %d %d\n",mesh->tria[a].v[MMG2_iare[voy][0]],mesh->tria[a].v[MMG2_iare[voy][1]]); 
     }
-    assert(!mesh->tria[a].edg[voy]);
     mesh->tria[a].edg[voy] = num;
   }
 

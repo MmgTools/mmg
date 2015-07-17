@@ -342,6 +342,7 @@ int MMG2_baseBdry(MMG5_pMesh mesh) {
     for (i=0; i<3; i++) {
       adj = adja[i]/3;
       pt1 = &mesh->tria[adj];
+      pt->edg[i] = 0;
       if ( !adj  ) {
         num = 0;
         if(ned) {
@@ -355,6 +356,13 @@ int MMG2_baseBdry(MMG5_pMesh mesh) {
           pt->edg[i] = num;
         } else {
           num = _MMG5_newEdge(mesh);
+          if ( !num ) {
+            _MMG5_EDGE_REALLOC(mesh,num,mesh->gap,
+                               printf("  ## Error: unable to allocate a new edge.\n");
+                               _MMG5_INCREASE_MEM_MESSAGE();
+                               printf("  Exit program.\n");
+                               exit(EXIT_FAILURE));
+          }
           pt->edg[i] = num;
           ped = &mesh->edge[num];
           ped->a = pt->v[MMG2_iopp[i][0]];
@@ -363,7 +371,7 @@ int MMG2_baseBdry(MMG5_pMesh mesh) {
       } else if(pt->ref != pt1->ref) {
         num = 0;
         if(ned) {
-          num = MMG2_hashEdge(&edgeT,k,ped->a,ped->b);
+          num = MMG2_hashEdge(&edgeT,k,pt->v[MMG2_iopp[i][0]],pt->v[MMG2_iopp[i][1]]);
         }
         ip  = pt->v[MMG2_iopp[i][0]];
         mesh->point[ip].tag |= M_SD;
@@ -373,6 +381,13 @@ int MMG2_baseBdry(MMG5_pMesh mesh) {
           pt->edg[i] = num;
         } else {
           num = _MMG5_newEdge(mesh);
+         if ( !num ) {
+            _MMG5_EDGE_REALLOC(mesh,num,mesh->gap,
+                               printf("  ## Error: unable to allocate a new edge.\n");
+                               _MMG5_INCREASE_MEM_MESSAGE();
+                               printf("  Exit program.\n");
+                               exit(EXIT_FAILURE));
+          }
           pt->edg[i] = num;
           ped = &mesh->edge[num];
           ped->a = pt->v[MMG2_iopp[i][0]];
@@ -472,6 +487,7 @@ int MMG2_hashEdge(pHashTable edgeTable,int iel,int ia, int ib) {
       ++edgeTable->hnxt;
       if ( edgeTable->hnxt == edgeTable->nxtmax ) {
         fprintf(stdout,"  ## Memory alloc problem (edge): %d\n",edgeTable->nxtmax);
+        assert(0);
         return(0);
       } 
     }

@@ -325,7 +325,7 @@ int MMG2_locateEdge(MMG5_pMesh mesh,int ia,int ib,int* kdep,int* list) {
   lon = 0;
   ppa = &mesh->point[ia];
   ppb = &mesh->point[ib]; 
-  ddebug = 1; 
+  ddebug = mesh->info.ddebug; 
   do {
     pt = &mesh->tria[k];
     if(!pt->v[0]) {printf("c ca ? %d\n",k);MMG2_saveMesh(mesh,"locate.mesh");break; }
@@ -500,12 +500,12 @@ int MMG2_locateEdge(MMG5_pMesh mesh,int ia,int ib,int* kdep,int* list) {
 	      iare=MMG2_inxt[i];  
 	    }                    
 	    k = adja[iare]/3;    
-	    printf("on trouve adj %d (%d\n)\n",iare,k);
+	    if(mesh->info.ddebug) printf("on trouve adj %d (%d\n)\n",iare,k);
             ibreak = 1;
 	    break;
 	  }
         } /*end else de if((prod1 < 0) || (prod2 < 0) || (prod3 < 0))*/
-	printf("pourquoi on passe pas la!!!!!!!!!");
+        if(mesh->info.ddebug) printf("pourquoi on passe pas la!!!!!!!!!");
         if(ddebug) printf("iare %d\n",iare);
         if(iare) {
           ktemp = k;
@@ -534,7 +534,7 @@ int MMG2_locateEdge(MMG5_pMesh mesh,int ia,int ib,int* kdep,int* list) {
         break;             
       }/*end if ia || ibreak;*/
     }
-    printf("bon on est la ok! %d\n",ibreak); 
+    if(mesh->info.ddebug) printf("bon on est la ok! %d\n",ibreak); 
     //if(ddebug) exit(0);
     if(ibreak==1 || ibreak==-10) continue;
     if(ibreak>1) break; 

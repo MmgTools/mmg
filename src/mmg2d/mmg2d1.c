@@ -413,9 +413,14 @@ static int analar(MMG5_pMesh mesh,MMG5_pSol sol,pBucket bucket,double declic,int
         if ( !adj || pt->ref != mesh->tria[adj].ref )  {
           /*add bdry*/
           if(!pt->edg[i])  {
-            printf("tr %d : %d %d %d mais %d\n",k,pt->edg[0],pt->edg[1],pt->edg[2],i);
-            printf("%d %d %d\n",pt->v[0],pt->v[1],pt->v[2]);
-            MMG2_saveMesh(mesh,"titii.mesh");
+            if(mesh->info.ddebug) {
+              printf("tr %d : %d %d %d mais %d\n",k,pt->edg[0],pt->edg[1],pt->edg[2],i);
+              printf("%d %d %d\n",pt->v[0],pt->v[1],pt->v[2]);
+            }
+            assert(mesh->tria[adj].ref!=pt->ref);
+            assert((mesh->tria[adj]).edg[voi[i]%3]);
+#warning find why we have to do that
+            pt->edg[i] = (mesh->tria[adj]).edg[voi[i]%3];
           }
           assert(pt->edg[i]);
           ip = cassarbdry(mesh,sol,pt->edg[i],i1,i2,0.5,tang); 
@@ -607,6 +612,7 @@ static int analargeom(MMG5_pMesh mesh,MMG5_pSol sol,int *alert) {
           if(!pt->edg[i])  {
             printf("tr %d : %d %d %d mais %d\n",k,pt->edg[0],pt->edg[1],pt->edg[2],i);
             printf("%d %d %d\n",pt->v[0],pt->v[1],pt->v[2]);
+            printf("adj %d %d %d\n",voi[0]/3,voi[1]/3,voi[2]/3);
             MMG2_saveMesh(mesh,"titii.mesh");
           }
           assert(pt->edg[i]);
@@ -679,7 +685,7 @@ int MMG2_mmg2d1(MMG5_pMesh mesh,MMG5_pSol sol) {
   do { 
       
     analar(mesh,sol,bucket,declic,&alert); 
-    nadd += MMG2_ni;
+   nadd += MMG2_ni;
     ndel += MMG2_nc;
     if(!mesh->info.noswap) {
       ns = MMG2_cendel(mesh,sol,declic,mesh->base); 

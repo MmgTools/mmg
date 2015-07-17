@@ -43,9 +43,9 @@ int lissmet_ani(MMG5_pMesh mesh,MMG5_pSol sol) {
 
   /*alloc hashtable*/  
   //#warning revoir le dimensionnement!!!!    
-  edgeTable.size  = mesh->namax;
-  edgeTable.nxtmax = 3*mesh->namax+1;
-  edgeTable.hnxt  = mesh->namax;
+  edgeTable.size  = mesh->ntmax;
+  edgeTable.nxtmax = 3*mesh->ntmax+1;
+  edgeTable.hnxt  = mesh->ntmax;
   _MMG5_SAFE_CALLOC(edgeTable.item,edgeTable.nxtmax,Hedge);
  
   memset(edgeTable.item,0,edgeTable.nxtmax*sizeof(Hedge));

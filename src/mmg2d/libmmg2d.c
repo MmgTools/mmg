@@ -40,10 +40,10 @@ void MMG5_Free_all(MMG5_pMesh mesh,MMG5_pSol met
 
 int MMG2_tassage(MMG5_pMesh mesh,MMG5_pSol sol) {
   MMG5_pEdge         ped;
-  MMG5_pTria    pt,ptnew;
-  MMG5_pPoint ppt,pptnew;
-  int     np,nt,k,nbl,isol,isolnew,i;
-  int     iadr,iadrnew,iadrv,*adjav,*adja,*adjanew,voy;
+  MMG5_pTria         pt,ptnew;
+  MMG5_pPoint        ppt,pptnew;
+  int                np,nt,k,nbl,isol,isolnew,i;
+  int                iadr,iadrnew,iadrv,*adjav,*adja,*adjanew,voy;
 
 
   /* compact vertices */
@@ -56,11 +56,21 @@ int MMG2_tassage(MMG5_pMesh mesh,MMG5_pSol sol) {
 
 
   /* compact edges */
+  nbl = 0;
   for (k=1; k<=mesh->na; k++) {
     ped  = &mesh->edge[k];
+    if(!ped->a) continue;
     ped->a = mesh->point[ped->a].tmp;
     ped->b = mesh->point[ped->b].tmp;
+    /* impossible to do that without update triangle....*/
+    /* if(k!=nbl) { */
+    /*   pednew = &mesh->edge[nbl]; */
+    /*   memcpy(pednew,ped,sizeof(MMG5_Edge)); */
+    /*   memset(ped,0,sizeof(MMG5_Tria)); */
+    /* } */
+    /*nbl++;*/
   }
+  /* mesh->na = nbl;*/
 
   /* compact triangle */
   nt  = 0;
@@ -70,29 +80,31 @@ int MMG2_tassage(MMG5_pMesh mesh,MMG5_pSol sol) {
     if ( !pt->v[0] )  {
       continue;
     }
-
     pt->v[0] = mesh->point[pt->v[0]].tmp;
     pt->v[1] = mesh->point[pt->v[1]].tmp;
     pt->v[2] = mesh->point[pt->v[2]].tmp;
     nt++;
     if(k!=nbl) {
-      //printf("on voudrait.tmpser\n");
       ptnew = &mesh->tria[nbl];
       memcpy(ptnew,pt,sizeof(MMG5_Tria));
-
       //and the adjacency
       iadr = 3*(k-1) + 1;
       adja = &mesh->adja[iadr];
       iadrnew = 3*(nbl-1) + 1;
       adjanew = &mesh->adja[iadrnew];
-      for(i=0 ; i<2 ; i++) {
+      for(i=0 ; i<3 ; i++) {
         adjanew[i] = adja[i];
         if(!adja[i]) continue;
+        //if(adja[i]/3==2414 || nbl==2414) printf("adja of %d nbl %d : %d\n",k,nbl,adja[i]/3);
         iadrv = 3*(adja[i]/3-1) +1;
         adjav = &mesh->adja[iadrv];
+        //if(k==2414 || nbl==2414) printf("on met %d pour %d\n",nbl,adja[i]/3);
         voy = i;
         adjav[adja[i]%3] = 3*nbl + voy;
+
+        adja[i] = 0;
       }
+      memset(pt,0,sizeof(MMG5_Tria));
     }
     nbl++;
   }
@@ -138,17 +150,30 @@ int MMG2_tassage(MMG5_pMesh mesh,MMG5_pSol sol) {
   for(k=1 ; k<=mesh->np ; k++)
     mesh->point[k].tmp = 0;
 
-  mesh->npnil = mesh->np + 1;
-  for (k=mesh->npnil; k<mesh->npmax-1; k++)
-    mesh->point[k].tmp  = k+1;
+ if(mesh->np < mesh->npmax - 3) {
+    mesh->npnil = mesh->np + 1;
+    for (k=mesh->npnil; k<mesh->npmax-1; k++)
+      mesh->point[k].tmp  = k+1;
+  } else {
+    mesh->npnil = 0;
+  }
+ 
+ /*to do only if the edges are packed*/
+  /* if(mesh->na < mesh->namax - 3) { */
+  /*   mesh->nanil = mesh->na + 1; */
+  /*   for (k=mesh->nanil; k<mesh->namax-1; k++) */
+  /*     mesh->edge[k].b = k+1; */
+  /* } else { */
+  /*   mesh->nanil = 0; */
+  /* } */
 
-  mesh->nanil = mesh->na + 1;
-  for (k=mesh->nanil; k<mesh->namax-1; k++)
-    mesh->edge[k].b = k+1;
-
-  mesh->nenil = mesh->nt + 1;
-  for (k=mesh->nenil; k<mesh->ntmax-1; k++)
-    mesh->tria[k].v[2] = k+1;
+  if(mesh->nt < mesh->ntmax - 3) {
+    mesh->nenil = mesh->nt + 1;
+    for (k=mesh->nenil; k<mesh->ntmax-1; k++)
+      mesh->tria[k].v[2] = k+1;
+  } else {
+    mesh->nenil = 0;
+  }
 
   return(1);
 }

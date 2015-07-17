@@ -220,8 +220,16 @@ int MMG2_split(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int k1,int adj1) {
     num = pt1->edg[voy1];
     assert(num);
     ped = &mesh->edge[num];
- 
     newed = _MMG5_newEdge(mesh);
+    if ( !newed ) {
+      _MMG5_EDGE_REALLOC(mesh,newed,mesh->gap,
+                         printf("  ## Error: unable to allocate a new edge.\n");
+                         _MMG5_INCREASE_MEM_MESSAGE();
+                         printf("  Exit program.\n");
+                         exit(EXIT_FAILURE));
+      ped = &mesh->edge[num];
+    }
+    
     ped1 = &mesh->edge[newed];
     memcpy(ped1,ped,sizeof(MMG5_Edge));
     ped1->a = ip;
@@ -231,8 +239,8 @@ int MMG2_split(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int k1,int adj1) {
     if(ped->a==piar1) {
       pt3->edg[1] = num;
       pt4->edg[2] = num;
-      printf("on met num pt3  %d %d\n",pt3->v[MMG2_iare[1][0]],pt3->v[MMG2_iare[1][1]]);
-      printf("on met num pt4 %d %d\n",pt4->v[MMG2_iare[2][0]],pt4->v[MMG2_iare[2][1]]);
+      // printf("on met num pt3  %d %d\n",pt3->v[MMG2_iare[1][0]],pt3->v[MMG2_iare[1][1]]);
+      //printf("on met num pt4 %d %d\n",pt4->v[MMG2_iare[2][0]],pt4->v[MMG2_iare[2][1]]);
 
     } else {
       pt3->edg[1] = newed;
@@ -284,8 +292,8 @@ int MMG2_split(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int k1,int adj1) {
     } else {
       pt1->edg[1] = num;
       pt2->edg[2] = num;
-      printf("on met num k1 %d %d\n",pt1->v[MMG2_iare[1][0]],pt1->v[MMG2_iare[1][1]]);
-      printf("on met num k2 %d %d\n",pt2->v[MMG2_iare[2][0]],pt2->v[MMG2_iare[2][1]]);
+      //printf("on met num k1 %d %d\n",pt1->v[MMG2_iare[1][0]],pt1->v[MMG2_iare[1][1]]);
+      //printf("on met num k2 %d %d\n",pt2->v[MMG2_iare[2][0]],pt2->v[MMG2_iare[2][1]]);
 
     }    
   } else {
@@ -295,7 +303,6 @@ int MMG2_split(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int k1,int adj1) {
 
  
 
-  //MMG2_chkmsh(mesh,0);  
   if(MMG2_callbackinsert)
     MMG2_callbackinsert((int) ip,(int) k1,(int) k2,(int)jel,(int) kel);
 	    
@@ -447,7 +454,6 @@ int MMG2_splitbdry(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int k1,int voy1,double *
 
   pt1->edg[0]  = 0;
   //end add edge
-  //MMG2_chkmsh(mesh,0);  
   
   return(1);  
 }

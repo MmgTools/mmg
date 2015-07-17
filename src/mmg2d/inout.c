@@ -688,7 +688,7 @@ int MMG2_saveMesh(MMG5_pMesh mesh,char *filename) {
   MMG5_pEdge        ped;
   MMG5_pTria        pt;
   float        fp1,fp2;
-  int          k,outm,ne,ref,j,nn,ntang;
+  int          k,outm,ne,ref,j,nn,ntang,num;
   char        *ptr,data[128],chaine[128];
 
   mesh->ver = 2;
@@ -823,8 +823,16 @@ int MMG2_saveMesh(MMG5_pMesh mesh,char *filename) {
       if (!pt->v[0]) continue;
       for (j=0 ; j<3 ; j++) {
         if (!(&mesh->adja[3*(k-1)+1])[j]) {
-          mesh->na++;
-          ped = &mesh->edge[mesh->na];
+          if(mesh->na == mesh->namax) {
+            _MMG5_EDGE_REALLOC(mesh,num,mesh->gap,
+                               printf("  ## Error: unable to allocate a new edge.\n");
+                               _MMG5_INCREASE_MEM_MESSAGE();
+                               printf("  Exit program.\n");
+                               exit(EXIT_FAILURE));
+          } else {
+            num = mesh->na++;
+          }
+          ped = &mesh->edge[num];
           ped->a = pt->v[MMG2_iare[j][0]];
           ped->b = pt->v[MMG2_iare[j][1]];
           ped->ref  = M_MIN(mesh->point[pt->v[MMG2_iare[j][0]]].ref,

@@ -334,7 +334,7 @@ int    (*MMG2_interp)(double *,double *,double *,double );
 int    (*MMG2_buckin)(MMG5_pMesh ,MMG5_pSol ,pBucket ,int );
 int    (*MMG2_lissmet)(MMG5_pMesh ,MMG5_pSol );
 
-
+int MMG2_tassage(MMG5_pMesh ,MMG5_pSol );
 
 void _MMG2_Set_commonFunc();
 /* init structures */

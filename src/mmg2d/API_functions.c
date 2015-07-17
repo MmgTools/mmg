@@ -300,25 +300,28 @@ int MMG5_Set_meshSize(MMG5_pMesh mesh, int np, int nt, int na) {
                 exit(EXIT_FAILURE));
   _MMG5_SAFE_CALLOC(mesh->point,mesh->npmax+1,MMG5_Point);
 
-    _MMG5_ADD_MEM(mesh,(mesh->ntmax+1)*sizeof(MMG5_Tria),"initial triangles",return(0));
-    _MMG5_SAFE_CALLOC(mesh->tria,mesh->ntmax+1,MMG5_Tria);
+  _MMG5_ADD_MEM(mesh,(mesh->ntmax+1)*sizeof(MMG5_Tria),"initial triangles",return(0));
+  _MMG5_SAFE_CALLOC(mesh->tria,mesh->ntmax+1,MMG5_Tria);
 
-  mesh->namax = mesh->na;
-  if ( mesh->na ) {
-    _MMG5_ADD_MEM(mesh,(mesh->namax+1)*sizeof(MMG5_Edge),"initial edges",return(0));
-    _MMG5_SAFE_CALLOC(mesh->edge,(mesh->namax+1),MMG5_Edge);
-  }
+  mesh->namax =  MG_MAX(mesh->na,_MMG5_NEDMAX);
+  _MMG5_ADD_MEM(mesh,(mesh->namax+1)*sizeof(MMG5_Edge),"initial edges",return(0));
+  _MMG5_SAFE_CALLOC(mesh->edge,(mesh->namax+1),MMG5_Edge);
 
   /* keep track of empty links */
   mesh->npnil = mesh->np + 1;
   mesh->nenil = mesh->nt + 1;
+  mesh->nanil = mesh->na + 1;
+
   for (k=mesh->npnil; k<mesh->npmax-1; k++) {
     mesh->point[k].tmp  = k+1;
   }
   for (k=mesh->nenil; k<mesh->ntmax-1; k++) {
     mesh->tria[k].v[2] = k+1;
   }
-  
+  for (k=mesh->nanil; k<mesh->namax-1; k++) {
+    mesh->edge[k].b = k+1;
+  }
+   
   /* memory alloc */
   _MMG5_ADD_MEM(mesh,(3*mesh->ntmax+5)*sizeof(int),"adjacency table",
                 printf("  Exit program.\n");

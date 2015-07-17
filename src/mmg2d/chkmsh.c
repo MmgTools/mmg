@@ -45,7 +45,7 @@ int _MMG5_mmg2dChkmsh(MMG5_pMesh mesh, int severe,int base) {
       if ( adj == k ) {
         fprintf(stdout,"  1. Wrong adjacency %d %d\n",k,adj);
         printf("k %d: %d %d %d \n",k,pt1->v[0],pt1->v[1],pt1->v[2]);
-        printf("adj (%d): %d %d %d \n",
+        printf("adj of %d: %d %d %d \n",
                 k,adja[0]/3,adja[1]/3,adja[2]/3);
         exit(1);
       }
