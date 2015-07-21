@@ -164,7 +164,7 @@ FORTRAN_NAME(MMG5_FREE_STRUCTURES,mmg5_free_structures,(MMG5_pMesh *mesh,MMG5_pS
 /**
  * See \ref MMG2_loadMesh function in \ref mmg2d/libmmg2d.h file.
  */
-FORTRAN_NAME(MMG2_LOADMESH,mmg5_loadmesh,(MMG5_pMesh *mesh,char* meshin,int* strlen,int* retval),(mesh, meshin,strlen,retval)){
+FORTRAN_NAME(MMG2_LOADMESH,mmg2_loadmesh,(MMG5_pMesh *mesh,char* meshin,int* strlen,int* retval),(mesh, meshin,strlen,retval)){
 
   char *tmp = NULL;
 
