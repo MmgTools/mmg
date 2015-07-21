@@ -147,10 +147,19 @@ IF ( BUILD_MMG3D OR BUILD_MMG )
 
   ############################################################################
   #####
-  #####         Fortran header: libmmg3df.h
+  #####         Fortran header: libmmg3df.h libmmg2df.h
   #####
   ############################################################################
   IF (NOT WIN32)
+    ADD_EXECUTABLE(genheader2d ${CMAKE_SOURCE_DIR}/scripts/genheader.c)
+    ADD_CUSTOM_COMMAND(OUTPUT ${MMG2D_SOURCE_DIR}/libmmg2df.h
+      COMMAND genheader2d ${MMG2D_SOURCE_DIR}/libmmg2df.h
+      ${MMG2D_SOURCE_DIR}/libmmg2d.h ${CMAKE_SOURCE_DIR}/scripts/genfort.pl
+      WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+      DEPENDS genheader2d ${MMG2D_SOURCE_DIR}/libmmg2d.h
+      ${CMAKE_SOURCE_DIR}/scripts/genfort.pl
+      COMMENT "Generating Fortran header"
+      )
     ADD_EXECUTABLE(genheader ${CMAKE_SOURCE_DIR}/scripts/genheader.c)
 
     ADD_CUSTOM_COMMAND(OUTPUT ${MMG3D_SOURCE_DIR}/libmmg3df.h
@@ -235,6 +244,7 @@ FILE(
   )
 LIST(REMOVE_ITEM sourcemmg2d_files
   ${MMG2D_SOURCE_DIR}/mmg2d.c
+  ${MMG2D_SOURCE_DIR}/lib${PROJECT_NAME}2df.c
   ${REMOVE_FILE})
 FILE(
   GLOB
@@ -245,6 +255,8 @@ FILE(
   GLOB
   libmmg2d_file
   ${MMG2D_SOURCE_DIR}/lib${PROJECT_NAME}2d.c
+  ${MMG2D_SOURCE_DIR}/lib${PROJECT_NAME}2df.c
+
   )
 
 INCLUDE_DIRECTORIES(${COMMON_SOURCE_DIR})
@@ -330,11 +342,14 @@ IF ( BUILD_MMG3D OR BUILD_MMG )
   OPTION ( LIBMMG2D_STATIC "Compile static library" ON)
   IF ( LIBMMG2D_STATIC )
     ADD_LIBRARY(${PROJECT_NAME}2d_a  STATIC
+      ${MMG2D_SOURCE_DIR}/lib${PROJECT_NAME}2df.h
       ${sourcemmg2d_files} ${libmmg2d_file} )
     SET_TARGET_PROPERTIES(${PROJECT_NAME}2d_a PROPERTIES OUTPUT_NAME
       ${PROJECT_NAME}2d)
     TARGET_LINK_LIBRARIES(${PROJECT_NAME}2d_a ${LIBRARIES})
-    INSTALL(FILES ${MMG2D_SOURCE_DIR}/lib${PROJECT_NAME}2d.h DESTINATION
+   INSTALL(FILES ${MMG2D_SOURCE_DIR}/lib${PROJECT_NAME}2df.h DESTINATION
+      include)
+     INSTALL(FILES ${MMG2D_SOURCE_DIR}/lib${PROJECT_NAME}2d.h DESTINATION
       include)
     INSTALL(FILES ${COMMON_SOURCE_DIR}/libmmg.h DESTINATION
       include)
@@ -352,11 +367,14 @@ IF ( BUILD_MMG3D OR BUILD_MMG )
   OPTION ( LIBMMG2D_SHARED "Compile dynamic library" OFF)
   IF ( LIBMMG2D_SHARED )
     ADD_LIBRARY(${PROJECT_NAME}2d_so SHARED
+      ${MMG2D_SOURCE_DIR}/lib${PROJECT_NAME}2df.h
       ${sourcemmg2d_files} ${libmmg2d_file})
     SET_TARGET_PROPERTIES(${PROJECT_NAME}2d_so PROPERTIES
       OUTPUT_NAME ${PROJECT_NAME}2d)
     TARGET_LINK_LIBRARIES(${PROJECT_NAME}2d_so ${LIBRARIES})
-    INSTALL(FILES ${MMG2D_SOURCE_DIR}/lib${PROJECT_NAME}2d.h
+      INSTALL(FILES ${MMG2D_SOURCE_DIR}/lib${PROJECT_NAME}2df.h
+      DESTINATION include)
+  INSTALL(FILES ${MMG2D_SOURCE_DIR}/lib${PROJECT_NAME}2d.h
       DESTINATION include)
    INSTALL(FILES ${COMMON_SOURCE_DIR}/libmmg.h DESTINATION
       include)
@@ -508,7 +526,12 @@ IF ( BUILD_MMG3D OR BUILD_MMG )
         ${CMAKE_SOURCE_DIR}/libexamples/mmg2d/example1/main.c)
       TARGET_LINK_LIBRARIES(libmmg2d_example1 ${PROJECT_NAME}2d_a)
       INSTALL(TARGETS libmmg2d_example1 RUNTIME DESTINATION bin )
-
+    ENABLE_LANGUAGE (Fortran)
+      ADD_EXECUTABLE(libmmg2d_fortran_a
+        ${CMAKE_SOURCE_DIR}/libexamples/mmg2d/example0_fortran/main.F90)
+      TARGET_LINK_LIBRARIES(libmmg2d_fortran_a ${PROJECT_NAME}2d_a)
+      INSTALL(TARGETS libmmg2d_fortran_a RUNTIME DESTINATION bin )
+  
     ELSEIF ( LIBMMG2D_SHARED )
       ADD_EXECUTABLE(libmmg2d_example0
         ${CMAKE_SOURCE_DIR}/libexamples/mmg2d/example0/main.c)
@@ -572,7 +595,8 @@ ENDIF()
 #####
 ###############################################################################
 IF ( BUILD_MMG2D OR BUILD_MMG )
-  ADD_EXECUTABLE(${PROJECT_NAME}2d    ${sourcemmg2d_files} ${mainmmg2d_file} )
+  ADD_EXECUTABLE(${PROJECT_NAME}2d    
+ ${MMG2D_SOURCE_DIR}/lib${PROJECT_NAME}2df.h ${sourcemmg2d_files} ${mainmmg2d_file} )
   TARGET_LINK_LIBRARIES(${PROJECT_NAME}2d ${LIBRARIES})
   INSTALL(TARGETS ${PROJECT_NAME}2d RUNTIME DESTINATION bin)
 
@@ -683,7 +707,26 @@ IF ( BUILD_MMG3D OR BUILD_MMGS OR BUILD_MMG2D OR BUILD_MMG )
       ENDIF()
 
       SET ( LISTEXEC_MMG2D ${EXECUT_MMG2D} )
+     IF ( TEST_LIBMMG2D )
+        IF ( LIBMMG2D_STATIC OR LIBMMG2D_SHARED )
+          SET(LIBMMG2D_EXEC0_a ${EXECUTABLE_OUTPUT_PATH}/libmmg2d_example0_a)
+          SET(LIBMMG2D_EXEC0_b ${EXECUTABLE_OUTPUT_PATH}/libmmg2d_example0_b)
+          SET(LIBMMG2D_EXECFORTRAN_a ${EXECUTABLE_OUTPUT_PATH}/libmmg2d_fortran_a)
+          SET(LIBMMG2D_EXECFORTRAN_b ${EXECUTABLE_OUTPUT_PATH}/libmmg2d_fortran_b)
+          SET(LIBMMG2D_EXEC1   ${EXECUTABLE_OUTPUT_PATH}/libmmg2d_example1)
+          SET(LIBMMG2D_EXEC2   ${EXECUTABLE_OUTPUT_PATH}/libmmg2d_example2)
 
+          ADD_TEST(NAME libmmg2d_example0_a COMMAND ${LIBMMG2D_EXEC0_a})
+          ADD_TEST(NAME libmmg2d_example0_b COMMAND ${LIBMMG2D_EXEC0_b})
+          ADD_TEST(NAME libmmg2d_fortran_a  COMMAND ${LIBMMG2D_EXECFORTRAN_a})
+          ADD_TEST(NAME libmmg2d_fortran_b  COMMAND ${LIBMMG2D_EXECFORTRAN_b})
+          ADD_TEST(NAME libmmg2d_example1   COMMAND ${LIBMMG2D_EXEC1})
+          ADD_TEST(NAME libmmg2d_example2   COMMAND ${LIBMMG2D_EXEC2})
+
+          SET(LIBMMG2D_EXEC3 ${EXECUTABLE_OUTPUT_PATH}/libmmg2d_example3)
+          SET( LISTEXEC_MMG2D ${LISTEXEC_MMG2D} ${LIBMMG2D_EXEC3} )
+        ENDIF()
+    ENDIF()
       # Add mmgs tests
       INCLUDE( ${CMAKE_SOURCE_DIR}/cmake/testing/mmg2d_tests.cmake )
     ENDIF()
