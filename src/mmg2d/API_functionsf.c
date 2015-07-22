@@ -197,7 +197,7 @@ FORTRAN_NAME(MMG5_LOADSOL,mmg5_loadSol,(MMG5_pSol *met,char *meshin,int* strlen,
 /**
  * See \ref MMG2_saveSol function in \ref mmg2d/libmmg2d.h file.
  */
-FORTRAN_NAME(MMG2_SAVESOL,mmg2_saveSol,(MMG5_pMesh *mesh,MMG5_pSol *met,char *meshin,int *strlen,int* retval),(mesh,met,meshin,strlen,retval)){
+FORTRAN_NAME(MMG2_SAVESOL,mmg2_savesol,(MMG5_pMesh *mesh,MMG5_pSol *met,char *meshin,int *strlen,int* retval),(mesh,met,meshin,strlen,retval)){
   char *tmp = NULL;
 
   tmp = (char*)malloc((*strlen+1)*sizeof(char));
