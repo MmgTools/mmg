@@ -185,7 +185,22 @@ int MMG5_Set_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int typEntity,
  */
 int  MMG5_Set_vertex(MMG5_pMesh mesh, double c0, double c1,
                      int ref,int pos);
-
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param num integer
+ * \param c0 pointer toward the coordinate of the point along the first dimension.
+ * \param c1 pointer toward the coordinate of the point along the second dimension.
+ * \param ref pointer to the point reference.
+ * \param isCorner pointer toward the flag saying if point is corner.
+ * \param isRequired pointer toward the flag saying if point is required.
+ * \return 1.
+ *
+ * Get coordinates \a c0, \a c1 and reference \a ref of 
+ * vertex num of mesh.
+ *
+ */
+int  MMG5_Get_vertex(MMG5_pMesh mesh, int num,double* c0, double* c1, int* ref,
+                     int* isCorner, int* isRequired);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param v0 first vertex of triangle.

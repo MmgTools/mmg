@@ -95,6 +95,16 @@ FORTRAN_NAME(MMG5_SET_VERTEX,mmg5_set_vertex,
   return;
 }
 /**
+ * See \ref MMG5_Get_vertex function in \ref mmg2d/libmmg2d.h file.
+ */
+FORTRAN_NAME(MMG5_GET_VERTEX,mmg5_get_vertex,
+             (MMG5_pMesh *mesh, int *num,double* c0, double* c1, int* ref,
+              int* isCorner, int* isRequired, int* retval),
+             (mesh,num,c0,c1,ref,isCorner,isRequired, retval)) {
+  *retval = MMG5_Get_vertex(*mesh,*num,c0,c1,ref,isCorner,isRequired);
+  return;
+}
+/**
  * See \ref MMG5_Set_triangle function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG5_SET_TRIANGLE,mmg5_set_triangle,
