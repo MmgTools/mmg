@@ -740,7 +740,7 @@ void _MMG5_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
  *
  * Approximation of the final number of vertex.
  *
- * \warning Not used.
+ * \warning  call _MMG5_hashTetra(mesh,1) or analysis before using
  */
 int _MMG5_countelt(MMG5_pMesh mesh,MMG5_pSol sol, double *weightelt, long *npcible) {
   MMG5_pTetra pt;
@@ -750,7 +750,7 @@ int _MMG5_countelt(MMG5_pMesh mesh,MMG5_pSol sol, double *weightelt, long *npcib
   //int   npbdry;
   int    *pdel,lenint,loc,nedel,longen;
   int      isbdry;
-  double   dned,dnface,dnint/*,dnins*/,w,lenavg,lent[6];
+  double   dned,dnface,dnint,dnins,w,lenavg,lent[6];
   double   dnpdel,dnadd,leninv,dnaddloc,dnpdelloc;
   int      list[_MMG5_LMAX],ddebug=0,ib;
   long     nptot;
@@ -774,7 +774,7 @@ int _MMG5_countelt(MMG5_pMesh mesh,MMG5_pSol sol, double *weightelt, long *npcib
 
   for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
-    if ( !pt->v[0] )  continue;
+    if ( !MG_EOK(pt) )  continue;
     pxt = pt->xt ? &mesh->xtetra[pt->xt] : 0;
 
     /*longueur moyenne*/
@@ -797,7 +797,6 @@ int _MMG5_countelt(MMG5_pMesh mesh,MMG5_pSol sol, double *weightelt, long *npcib
     nedel = 0;
 
     for (ia=0; ia<6; ia++) {
-      //lon = MMG5_coquil(mesh,k,ia,&list);
       longen = _MMG5_coquil(mesh,k,ia,list);
       lon = longen/2;
       isbdry = 0;//longen%2;
@@ -825,8 +824,8 @@ int _MMG5_countelt(MMG5_pMesh mesh,MMG5_pSol sol, double *weightelt, long *npcib
 
       if(ddebug) printf("len %e\n",len);
       if(len > 3) {
-        loc = 0;
-        len = lenavg;
+        loc = 0; //count all edges and divide by lon
+        len = lenavg; //if very long edge, take the mean
         lenint = ((int) len);
         if(fabs(lenint -len) > 0.5) lenint++;
         //POURQUOI SURESTIMER ???lenint++;
@@ -837,7 +836,7 @@ int _MMG5_countelt(MMG5_pMesh mesh,MMG5_pSol sol, double *weightelt, long *npcib
         //nb de point a l'interieur du tetra si toutes les aretes sont coupees le meme nb de fois
         dnint = (lenint+3)*(lenint+2)*(lenint+1) / 6. - 4 - 4*dnface - 6*dned;
         //nb de point a inserer pour cette arete de ce tetra : on divise par lon
-        // dnins = dned*(1./lon) + (dnface/3. + dnint/6.);//(dnface/12. + dnint/6.);
+        dnins = dned*(1./lon) + (dnface/3. + dnint/6.);//(dnface/12. + dnint/6.);
         if(!isbdry) {
           //nb points sur l'arete +
           //lon*(2/3 nb point sur la face (ie 1/3 de face et 2 faces adj a l'arete) + 1/6 nb de point interne)
@@ -858,11 +857,11 @@ int _MMG5_countelt(MMG5_pMesh mesh,MMG5_pSol sol, double *weightelt, long *npcib
           if( (_MMG5_ALPHAD*pt->qual <= 1./50.) )
             dnaddloc = 0;
           else  if((_MMG5_ALPHAD*pt->qual <= 1./10.) )
-            dnaddloc =  0.2*dnaddloc; //CEDRIC : essayer 0.3 0.4
+            dnaddloc =  0.2*dnaddloc; 
           else if((len > 10) && (_MMG5_ALPHAD*pt->qual >= 1./1.5) ) //on sous-estime uniquement pour les tres bons
-            dnaddloc = dnaddloc*0.3 + dnaddloc; //CEDRIC : essayer 0.3 ?
-          else if(len < 6 && len>3) //CEDRIC : essayer len < 3,4, 6,7 mais aussi en commentant le test sur len puis pour la qual > 3, 5,8
-            dnaddloc = 0.7*dnaddloc; //CEDRIC : essayer 0.9 0.7 0.6
+            dnaddloc = dnaddloc*0.3 + dnaddloc; 
+          else if(len < 6 && len>3) 
+            dnaddloc = 0.7*dnaddloc; 
 
 
           dnadd += dnaddloc;
@@ -880,14 +879,14 @@ int _MMG5_countelt(MMG5_pMesh mesh,MMG5_pSol sol, double *weightelt, long *npcib
             dnadd++;
           }
         }
-        // dnins = 2;
+        dnins = 2;
       } else if(len > 1.41) {
         if(!isbdry)
           dnaddloc = 1;
         if(!loc) {
           if(!isbdry) dnadd += 1.;
         }
-        // dnins = 1;
+        dnins = 1;
       } else if(len < 0.6) {
         nedel = 1;
 
@@ -962,7 +961,9 @@ int _MMG5_countelt(MMG5_pMesh mesh,MMG5_pSol sol, double *weightelt, long *npcib
 
   nptot += (long) dnadd - (long) dnpdel;
   *npcible = nptot;
-  fprintf(stdout,"ESTIMATION OF THE FINAL NUMBER OF NODES : %ld  _MMG5_ADD %f  _MMG5_DEL %f\n",nptot,dnadd,dnpdel);
+  fprintf(stdout,"  ** ESTIMATION OF THE FINAL NUMBER OF NODES : %ld   \n",nptot);
+  if(mesh->info.imprim > 6)
+    fprintf(stdout,"  **  %lf ADD DEL %lf\n",dnadd,dnpdel);
 
   free(pdel);
 
