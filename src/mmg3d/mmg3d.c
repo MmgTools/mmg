@@ -188,14 +188,7 @@ int main(int argc,char *argv[]) {
     if ( !_MMG5_mmg3d2(&mesh,&met) )
       _MMG5_RETURN_AND_FREE(&mesh,&met,MMG5_STRONGFAILURE);
   }
-  else if ( mesh.info.lag >= 0 ) {
-    if ( !_MMG5_mmg3d3(&mesh,&disp) )
-      _MMG5_RETURN_AND_FREE(&mesh,&disp,MMG5_STRONGFAILURE);
-    
-    if ( !met.np && !_MMG5_DoSol(&mesh,&met) )
-    _MMG5_RETURN_AND_FREE(&mesh,&met,MMG5_LOWFAILURE);
-  }
-  else {
+  else if ( mesh.info.lag < 0 ) {
     if ( mesh.info.optim && (!met.np && !_MMG5_DoSol(&mesh,&met)) )
       _MMG5_RETURN_AND_FREE(&mesh,&met,MMG5_LOWFAILURE);
   }
@@ -213,15 +206,29 @@ int main(int argc,char *argv[]) {
 
   /* mesh adaptation */
   chrono(ON,&MMG5_ctim[3]);
+  
   if ( mesh.info.imprim )
-    fprintf(stdout,"\n  -- PHASE 2 : %s MESHING\n",met.size < 6 ? "ISOTROPIC" : "ANISOTROPIC");
+    if ( mesh.info.lag < 0 )
+      fprintf(stdout,"\n  -- PHASE 2 : %s MESHING\n",met.size < 6 ? "ISOTROPIC" : "ANISOTROPIC");
+    else
+      fprintf(stdout,"\n  -- PHASE 2 : LAGRANGIAN MOTION\n");
 
   /* renumerotation if available */
   if ( !_MMG5_scotchCall(&mesh,&met) )
     _MMG5_RETURN_AND_FREE(&mesh,&met,MMG5_STRONGFAILURE);
+  
+  /* Lagrangian mode */
+  if ( mesh.info.lag >= 0 ) {
+    if ( !_MMG5_mmg3d3(&mesh,&disp,&met) ) {
+      _MMG5_RETURN_AND_FREE(&mesh,&disp,MMG5_STRONGFAILURE);
+      _MMG5_RETURN_AND_FREE(&mesh,&met,MMG5_STRONGFAILURE);
+    }
+    if ( !met.np && !_MMG5_DoSol(&mesh,&met) )
+      _MMG5_RETURN_AND_FREE(&mesh,&met,MMG5_LOWFAILURE);
+  }
 
 /* *************************************** Part to skip in lag mode ? *************************** */
-//if ( mesh.info.lag == -1 ) {
+if ( mesh.info.lag == -1 ) {
   
 #ifdef PATTERN
   if ( !_MMG5_mmg3d1_pattern(&mesh,&met) ) {
@@ -238,7 +245,7 @@ int main(int argc,char *argv[]) {
     _MMG5_RETURN_AND_FREE(&mesh,&met,MMG5_LOWFAILURE);
   }
 #else
-  /* Pattern in iso mode, delauney otherwise */
+  /* Pattern in iso mode, delaunay otherwise */
   if ( !mesh.info.iso ) {
     if( !_MMG5_mmg3d1_delone(&mesh,&met) ) {
       if ( !(mesh.adja) && !_MMG5_hashTetra(&mesh,1) ) {
@@ -271,7 +278,7 @@ int main(int argc,char *argv[]) {
   }
 #endif
 
-//}
+}
 /* *************************************** End of part to skip in lag mode ? *************************** */
   
   chrono(OFF,&MMG5_ctim[3]);
