@@ -359,6 +359,11 @@ int MMG2_locateEdge(MMG5_pMesh mesh,int ia,int ib,int* kdep,int* list) {
     prod1 = aire1*aire2;
     prod2 = aire3*aire2;
     prod3 = aire3*aire1; 
+
+    a[0] = aire1;
+    a[1] = aire2;
+    a[2] = aire3;
+
     if (ddebug) printf("tr %d : %d %d %d\n",k,pt->v[0],pt->v[1],pt->v[2]);
     if (ddebug) printf("on traite %d : %e %e %e ibreak : %d\n",k,prod1,prod2,prod3,ibreak); 
     if (ddebug) printf("test > 0 : %d %d %d\n",prod1>0,prod2>0,prod3>0);  
@@ -445,65 +450,62 @@ int MMG2_locateEdge(MMG5_pMesh mesh,int ia,int ib,int* kdep,int* list) {
           }
           else if(fabs(prod1)<EPSNULL2 && fabs(prod2)<EPSNULL2 && fabs(prod3)<EPSNULL2) {
             if(ddebug) printf("i= %d : pile sur l'arete!! on rajoute %d : %e %e %e\n",i,k,prod1,prod2,prod3);
-	    a[0] = aire1;
-	    a[1] = aire2;
-	    a[2] = aire3;
-	    if((a[MMG2_inxt[i]]<0 && a[MMG2_inxt[MMG2_inxt[i]]]>0)
-	       || (a[MMG2_inxt[i]]>0 && a[MMG2_inxt[MMG2_inxt[i]]]<0)) {
-	      printf("l'arete coupe le tr %e %e\n",a[MMG2_inxt[i]], a[MMG2_inxt[MMG2_inxt[i]]]);
-	      pt->base = mesh->base+1;
-	      list[lon++] = 3*k;
-	      ibreak = 3;  							
-	    } else if(a[MMG2_inxt[i]]>0 && a[MMG2_inxt[MMG2_inxt[i]]]>0){
-	      k = adja[MMG2_inxt[MMG2_inxt[i]]]/3; 
-	      //ibreak = 1;
-	      break;
-	    } else {  
-	      if(ddebug) printf("on prend le tri voisin par  %d : %d\n",MMG2_inxt[i],adja[MMG2_inxt[i]]/3);   
-	      //calcul de ||iaib|| et de ||ptiib|| avec aire(iaibpti)==0
-	      niaib = sqrt(a11*a11+a21*a21 );  
-	      if(fabs(a[MMG2_inxt[i]])>EPSNULL) {
-		pt4 = &mesh->point[pt->v[MMG2_inxt[MMG2_inxt[i]]]];
-	      } else {
-		pt4 = &mesh->point[pt->v[MMG2_inxt[i]]];
-	      }                  
-	      npti = sqrt((ppb->c[0]-pt4->c[0])*(ppb->c[0]-pt4->c[0])+
-			  (ppb->c[1]-pt4->c[1])*(ppb->c[1]-pt4->c[1])); 
-	      printf("et alors ? %e %e\n",niaib,npti);
-	      if(niaib > npti) {
-		//on rajoute le triangle 
-		printf("eh eh eh on rajoute!! %d\n",k);
-		pt->base = mesh->base+1;
-		list[lon++] = 3*k;
-		// ibreak = 3;  							
-	      }	 
-	      k = adja[MMG2_inxt[i]]/3;
-	      //ibreak = 1;
-	      break;
-	    }
-	    /*            k = adja[ktemp]/3;
-			  if (!k || mesh->tria[k].base>=mesh->base) {
-			  k = adja[(ktemp+1)%3]/3; 
-			  if(!k || mesh->tria[k].base>=mesh->base) {
-			  k = adja[(ktemp+2)%3]/3;
-			  if(mesh->tria[k].base>=mesh->base) k=0;
-			  } 
-			  }
-			  ibreak=-10;*/
+            if((a[MMG2_inxt[i]]<0 && a[MMG2_inxt[MMG2_inxt[i]]]>0)
+               || (a[MMG2_inxt[i]]>0 && a[MMG2_inxt[MMG2_inxt[i]]]<0)) {
+              printf("l'arete coupe le tr %e %e\n",a[MMG2_inxt[i]], a[MMG2_inxt[MMG2_inxt[i]]]);
+              pt->base = mesh->base+1;
+              list[lon++] = 3*k;
+              ibreak = 3;  							
+            } else if(a[MMG2_inxt[i]]>0 && a[MMG2_inxt[MMG2_inxt[i]]]>0){
+              k = adja[MMG2_inxt[MMG2_inxt[i]]]/3; 
+              //ibreak = 1;
+              break;
+            } else {  
+              if(ddebug) printf("on prend le tri voisin par  %d : %d\n",MMG2_inxt[i],adja[MMG2_inxt[i]]/3);   
+              //calcul de ||iaib|| et de ||ptiib|| avec aire(iaibpti)==0
+              niaib = sqrt(a11*a11+a21*a21 );  
+              if(fabs(a[MMG2_inxt[i]])>EPSNULL) {
+                pt4 = &mesh->point[pt->v[MMG2_inxt[MMG2_inxt[i]]]];
+              } else {
+                pt4 = &mesh->point[pt->v[MMG2_inxt[i]]];
+              }                  
+              npti = sqrt((ppb->c[0]-pt4->c[0])*(ppb->c[0]-pt4->c[0])+
+                          (ppb->c[1]-pt4->c[1])*(ppb->c[1]-pt4->c[1])); 
+              printf("et alors ? %e %e\n",niaib,npti);
+              if(niaib > npti) {
+                //on rajoute le triangle 
+                printf("eh eh eh on rajoute!! %d\n",k);
+                pt->base = mesh->base+1;
+                list[lon++] = 3*k;
+                // ibreak = 3;  							
+              }	 
+              k = adja[MMG2_inxt[i]]/3;
+              //ibreak = 1;
+              break;
+            }
+            /*            k = adja[ktemp]/3;
+                          if (!k || mesh->tria[k].base>=mesh->base) {
+                          k = adja[(ktemp+1)%3]/3; 
+                          if(!k || mesh->tria[k].base>=mesh->base) {
+                          k = adja[(ktemp+2)%3]/3;
+                          if(mesh->tria[k].base>=mesh->base) k=0;
+                          } 
+                          }
+                          ibreak=-10;*/
             break;  
           } /*end if(fabs(prod1)<EPSNULL2 && fabs(prod2)<EPSNULL2 && fabs(prod3)<EPSNULL2)*/
           else { /*on choisit de passer par l'arete iaPi si aire(iaibPi) >0*/ 
-	    assert(pt->v[i]==ia); 
-	    if(a[MMG2_inxt[i]] > 0) {
-	      iare=MMG2_inxt[MMG2_inxt[i]];
-	    } else {
-	      iare=MMG2_inxt[i];  
-	    }                    
-	    k = adja[iare]/3;    
-	    if(mesh->info.ddebug) printf("on trouve adj %d (%d\n)\n",iare,k);
+            assert(pt->v[i]==ia); 
+            if(a[MMG2_inxt[i]] > 0) {
+              iare=MMG2_inxt[MMG2_inxt[i]];
+            } else {
+              iare=MMG2_inxt[i];  
+            }                    
+            k = adja[iare]/3;    
+            if(mesh->info.ddebug) printf("on trouve adj %d (%d\n)\n",iare,k);
             ibreak = 1;
-	    break;
-	  }
+            break;
+          }
         } /*end else de if((prod1 < 0) || (prod2 < 0) || (prod3 < 0))*/
         if(mesh->info.ddebug) printf("pourquoi on passe pas la!!!!!!!!!");
         if(ddebug) printf("iare %d\n",iare);
@@ -519,7 +521,7 @@ int MMG2_locateEdge(MMG5_pMesh mesh,int ia,int ib,int* kdep,int* list) {
           }  
         } else {
           ktemp = k;
-	  if(ddebug) printf("pt : on veut continuer par %d : %d %d %d\n",k,adja[i]/3,adja[(i+1)%3]/3,adja[(i+2)%3]/3); 
+          if(ddebug) printf("pt : on veut continuer par %d : %d %d %d\n",k,adja[i]/3,adja[(i+1)%3]/3,adja[(i+2)%3]/3); 
           k = adja[(i+1)%3]/3;
           if (!k || mesh->tria[k].base>=mesh->base || !mesh->tria[k].v[0]) {
             k = adja[(i+2)%3]/3; 
@@ -547,7 +549,7 @@ int MMG2_locateEdge(MMG5_pMesh mesh,int ia,int ib,int* kdep,int* list) {
      
     ktemp = k; 
     printf("adj (base) pour le tri %d : %d(%d) %d(%d) %d(%d)\n",k,adja[0]/3,mesh->tria[adja[0]/3].base>=mesh->base
-	   ,adja[1]/3,mesh->tria[adja[1]/3].base>=mesh->base,adja[2]/3,mesh->tria[adja[2]/3].base>=mesh->base);
+           ,adja[1]/3,mesh->tria[adja[1]/3].base>=mesh->base,adja[2]/3,mesh->tria[adja[2]/3].base>=mesh->base);
     k = adja[0]/3;
     if ((mesh->tria[k].base>=mesh->base) || !k || !mesh->tria[k].v[0]) {
       k = adja[1]/3; 

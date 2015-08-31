@@ -446,11 +446,20 @@ int MMG2_colpoibdry(MMG5_pMesh mesh, MMG5_pSol sol,int iel,int iar,int ia,int ib
   ppa1  = &mesh->point[ibdry[0]];
   ppb1  = &mesh->point[ibdry[1]]; 
 
-  if(MMG2_chkedg(mesh,ppb,ppa1))  return(0);
-  if(MMG2_chkedg(mesh,ppb,ppb1)) return(0);
+  if(MMG2_chkedg(mesh,ppb,ppa1))   {
+    _MMG5_SAFE_FREE(list);
+    return(0);
+  }  
+  if(MMG2_chkedg(mesh,ppb,ppb1))  {
+    _MMG5_SAFE_FREE(list);
+    return(0);
+  }  
 
   /*second check that the new edge verify the hausd criteron*/
-  if(MMG2_chkedg(mesh,ppb1,ppa1)) return(0);
+  if(MMG2_chkedg(mesh,ppb1,ppa1))  {
+    _MMG5_SAFE_FREE(list);
+    return(0);
+  }  
 
 /* //comment from here */
 /*   //calcul de l'angle forme par les 3 points  */
