@@ -163,6 +163,7 @@ int MMG2_unscaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
   case 3:
     dd = 1.0 / (dd*dd);
     for (k=1; k<=mesh->np; k++) {
+      ppt = &mesh->point[k];
       if ( !M_VOK(ppt) )  continue;  
       iadr = (k-1)*sol->size + 1;
       for (i=0; i<sol->size; i++)  sol->m[iadr+i] *= dd;
