@@ -124,30 +124,37 @@ int MMG2_bdryenforcement(MMG5_pMesh mesh,MMG5_pSol sol) {
       lon = -lon;
       ilon = lon;
       if(ddebug) printf("on a %d tr dans la liste\n",lon);
-      if(ddebug) MMG2_saveMesh(mesh,"titi.mesh");  
+      if(mesh->info.ddebug) MMG2_saveMesh(mesh,"titi.mesh");  
 			
       /*retournement d'arêtes aleatoirement dans la liste, tant que */ 
       srand(time(NULL));
       while (ilon>0) {
-        rnd = (rand()%lon)+1;    
-        k = list[rnd-1]/3; 
-        if(ddebug) {
-          printf("pipe : \n");
+        rnd = (rand()%lon);    
+        k = list[rnd]/3; 
+        if(mesh->info.ddebug) {
+          printf("pipe : size %d rnd %d\n",lon,rnd);
           for(i=0 ; i<lon ; i++) {
             if((mesh->tria[list[i]/3]).base == mesh->base+1)
-              printf("%de tr : %d base %d\n",i+1,list[i]/3,mesh->tria[list[i]/3].base);} 
+              printf("%de tr : %d base %d == %d\n",i+1,list[i]/3,mesh->tria[list[i]/3].base,mesh->base+1);
+            else 
+              printf("pas base %de tr %d \n",i+1,list[i]/3);
+            printf("vertex %d %d %d\n",mesh->tria[list[i]/3].v[0],mesh->tria[list[i]/3].v[1],
+                   mesh->tria[list[i]/3].v[2]);
+          } 
         }
 
         /*check k in Pipe*/
         i=0;   
+        k = list[rnd]/3; 
         while(i++<lon) {
           pt = &mesh->tria[k];
           if(pt->base == mesh->base+1) break;
           k = list[(++rnd)%lon]/3;  
         }
+        //printf("k %d i %d lon %d\n",k,i,lon);
         assert(i<=lon);
-        idep = list[rnd-1]%3; 
-        if(ddebug) printf("on demarre avec %d\n",k);
+        idep = list[rnd]%3; 
+        if(mesh->info.ddebug) printf("i= %d < %d ? on demarre avec %d\n",i,lon+1,k);
         adja = &mesh->adja[3*(k-1)+1];
         if(ddebug) 
           printf("vois %d %d %d\n",adja[0]/3,adja[1]/3,adja[2]/3);   
@@ -158,29 +165,31 @@ int MMG2_bdryenforcement(MMG5_pMesh mesh,MMG5_pSol sol) {
           voy = adja[ir]%3;
           pt1 = &mesh->tria[adj];  
           if(ddebug) printf("tr %d pas dans pipe ? %d == %d\n",adj,pt1->base,mesh->base+1);
-          if (pt1->base != (mesh->base+1)) continue;
+          if (pt1->base != (mesh->base+1)) {
+            continue;
+          }
           /************************/
           /********swap***********/
           /************************/ 
           if(!MMG2_swapar(mesh,sol,k,ir,1e+4,list2)) {
-            if(ddebug) printf("swap impossible\n");
+            if(mesh->info.ddebug) printf("swap impossible\n");
             continue;  
           }
-          if(ddebug) printf("on swap !!!!\n");
+          if(mesh->info.ddebug) printf("on swap !!!!\n");
           /*new tr intersecté par ia-ib ??*/
           for(ied=1 ; ied<3 ; ied++) {
-            if(ddebug) printf("tr %d\n",list2[ied]); 
+            if(mesh->info.ddebug) printf("tr %d\n",list2[ied]); 
             iare = MMG2_cutEdgeTriangle(mesh,list2[ied],ia,ib);
             if(!iare) { /*tr not in pipe*/   
               ilon--;
-              if(ddebug) printf("tr %d not intersected ==> %d\n",list2[ied],ilon);
+              if(mesh->info.ddebug) printf("tr %d not intersected ==> %d\n",list2[ied],ilon);
               mesh->tria[list2[ied]].base = mesh->base;
             } else if(iare < 0) {
-              if(ddebug) printf("on a fini ?? %d\n",ilon-2);
+              if(mesh->info.ddebug) printf("on a fini ?? %d\n",ilon-2);
               mesh->tria[list2[ied]].base = mesh->base;
               ilon -= 2;
             } else {
-              if(ddebug) printf("tr intersecté %d \n",list2[ied]);
+              if(mesh->info.ddebug) printf("tr intersecté %d \n",list2[ied]);
               mesh->tria[list2[ied]].base = mesh->base+1;          
             }
           }

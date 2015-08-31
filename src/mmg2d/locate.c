@@ -138,7 +138,10 @@ int MMG2_cutEdgeTriangle(MMG5_pMesh mesh,int k,int ia,int ib) {
   MMG5_pPoint  pt1,pt2,pt3,ppa,ppb;
   double  a11,a21,a12,a22,aire1,aire2,aire3,prod1,prod2,prod3;
   int     iadr,*adja,ibreak,iare,i;
-  
+  int ddebug ;
+
+  /* if(k==8096) ddebug = 1;
+     else*/ ddebug = 0;
   ppa = &mesh->point[ia];
   ppb = &mesh->point[ib];
   
@@ -173,29 +176,32 @@ int MMG2_cutEdgeTriangle(MMG5_pMesh mesh,int k,int ia,int ib) {
   prod2 = aire3*aire2;
   prod3 = aire3*aire1;
      
+  if(ddebug) printf("aire %e %e %e\n",aire1,aire2,aire3);
+  if(ddebug) printf("prod %e %e %e\n",prod1,prod2,prod3);
   if ( prod1 > 0 && ((prod2 < 0 || prod3 < 0))) { /*le tr est coupe par la droite ia-ib*/
     if ((iare = MMG2_cutEdge(mesh,pt,ppa,ppb))) {
-      return(iare-1);
+      return(iare);
     }
   }
   
   if ( prod2 > 0 && ((prod1 < 0 || prod3 < 0))) { 
     if ((iare = MMG2_cutEdge(mesh,pt,ppa,ppb))) {
-      return(iare-1);
+      return(iare);
     }
   }
   if ( prod3 > 0 && ((prod2 < 0 || prod1 < 0))) {
     if ((iare = MMG2_cutEdge(mesh,pt,ppa,ppb))) {
-      return(iare-1);
+      return(iare);
     }
   }
   /*sommet == pt arete*/
   for(i=0 ; i<3 ; i++){  
     if(pt->v[i]==ia || ibreak) {
-      /*      printf("on traite %d : %e %e %e\n",k,prod1,prod2,prod3);
-       */      if((prod1 < 0) || (prod2 < 0) || (prod3 < 0)) {
+      if(ddebug) printf("on traite %d : %e %e %e\n",k,prod1,prod2,prod3);
+      if((prod1 < 0) || (prod2 < 0) || (prod3 < 0)) {
+        if(ddebug) printf("passe-t-on la ?\n");
         if ((iare = MMG2_cutEdge(mesh,pt,ppa,ppb))) {
-          return(iare-1);
+          return(iare);
         }  
       } else {
         /*check if ia-ib edge de pt*/ 
