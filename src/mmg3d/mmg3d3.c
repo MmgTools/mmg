@@ -34,9 +34,46 @@
  */
 
 #include "mmg3d.h"
+#include "ls_calls.h"
+#define _MMG5_DEGTOL  1.e-1
 
 extern char  ddb;
-extern int elasti1_3d_call(void*,void*);
+
+/** Calculate an estimate of the average (isotropic) length of edges in the mesh */
+double _MMG5_estavglen(MMG5_pMesh mesh) {
+  MMG5_pTetra    pt;
+  MMG5_pPoint    p1,p2;
+  int       k,na;
+  double    len,lent,dna;
+  char      i,i1,i2;
+  
+  na = 0;
+  lent = 0.0;
+  
+  for (k=1; k<=mesh->ne; k++) {
+    pt = &mesh->tetra[k];
+    for (i=0; i<6; i++) {
+      i1 = _MMG5_iare[i][0];
+      i2 = _MMG5_iare[i][1];
+      
+      p1 = &mesh->point[pt->v[i1]];
+      p2 = &mesh->point[pt->v[i2]];
+      
+      len = (p2->c[0] - p1->c[0])*(p2->c[0] - p1->c[0])
+      + (p2->c[1] - p1->c[1])*(p2->c[1] - p1->c[1])
+      + (p2->c[2] - p1->c[2])*(p2->c[2] - p1->c[2]);
+      
+      lent += sqrt(len);
+      na++;
+    }
+  }
+  
+  dna = (double)na;
+  dna = 1.0 / dna;
+  lent *= dna;
+  
+  return(lent);
+}
 
 /** Interpolate displacement between v1 and v2 at intermediate position 0<=t<=1 */
 inline int _MMG5_intdispvol(double *v1, double *v2, double *vp, double t) {
@@ -317,9 +354,7 @@ int _MMG5_movtetlag(MMG5_pMesh mesh,MMG5_pSol met,int itdeg) {
           
         if ( ier ) {
           nm++;
-          if(maxit==1){
-            ppt->flag = base;
-          }
+          ppt->flag = base;
           
           /* Somehow interpolate displacement ? */
         }
@@ -534,18 +569,43 @@ int _MMG5_dispmesh(MMG5_pMesh mesh,MMG5_pSol disp,short t,int itdeg) {
   return(1);
 }
 
+/** For debugging purposes: save disp */
+int _MMG5_saveDisp(MMG5_pMesh mesh,MMG5_pSol disp) {
+  FILE        *out;
+  int         k;
+  char        j,data[256],*ptr;
+  
+  strcpy(data,disp->namein);
+  ptr = strstr(data,".sol");
+  *ptr = '\0';
+  strcat(data,".o.disp.sol");
+  
+  out = fopen(data,"w");
+  
+  fprintf(out,"MeshVersionFormatted 1\n\nDimension\n%d\n\n",disp->dim);
+  fprintf(out,"SolAtVertices\n%d\n 1 2\n",disp->np);
+  
+  /* Print solutions */
+  for(k=1; k<= disp->np; k++) {
+    fprintf(out,"%f %f %f\n",disp->m[3*k+0],disp->m[3*k+1],disp->m[3*k+2]);
+  }
+  
+  fprintf(out,"\nEnd");
+  fclose(out);
+  
+  return(1);
+}
+
 /** Lagrangian node displacement and meshing */
 int _MMG5_mmg3d3(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met) {
-  LS_Mesh lsmesh;
-  LS_Sol  lsdisp;
   double  avlen,tau;
-  int     it,maxit,nspl,ns,nm,nc,iit,k,warn;
+  int     itdc,itmn,maxitmn,maxitdc,nspl,ns,nm,nc,iit,k,warn;
   short   t;
   char    ier;
   
   tau = 0.0;
-  maxit = -1;
-  it = 1;
+  maxitmn = 10;
+  maxitdc = 100;
   t  = 0;
   
   //mesh->info.fem = 1;
@@ -557,104 +617,87 @@ int _MMG5_mmg3d3(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met) {
   for (k=1; k<=mesh->ne; k++)
     mesh->tetra[k].mark = 0;
 
-  /* Creation of adjacency relations */
-  if ( mesh->info.lag > 0 ) {
-    if ( !_MMG5_hashTetra(mesh,1) ) {
-      fprintf(stdout,"  ## Hashing problem. Exit program.\n");
-      return(0);
-    }
-  }
-  
   /* Estimates of the minimum and maximum edge lengths in the mesh */
   avlen = _MMG5_estavglen(mesh);
   mesh->info.hmax = _MMG5_LLONG*avlen;
   mesh->info.hmin = _MMG5_LOPTS*avlen;
   
-  printf("Average length: %f ; proceed with hmin = %f, hmax = %f\n",avlen,mesh->info.hmin,mesh->info.hmax);
+  //printf("Average length: %f ; proceed with hmin = %f, hmax = %f\n",avlen,mesh->info.hmin,mesh->info.hmax);
+
+  for (itmn=0; itmn<maxitmn; itmn++) {
   
-  /** Attempts for extending the elasticity field */
-  if ( !_MMG5_packLS(mesh,&lsmesh,disp,&lsdisp) ) {
-    fprintf(stdout,"  ## Problem in func. _MMG5_packLS. Exit program.\n");
-    return(0);
-  }
-  
-  if ( !elasti1_3d_call(&lsmesh,&lsdisp) ) {
-    fprintf(stdout,"  ## Problem in calling LS library. Exit program.\n");
-    return(0);
-  }
-  
-  if ( !_MMG5_unpackLS(mesh,&lsmesh,disp,&lsdisp) ){
-    fprintf(stdout,"  ## Problem in func. _MMG5_unpackLS. Exit program.\n");
-    return(0);
-  }
-  
-  //_MMG5_saveDisp(mesh,disp);
-  
-  /*if ( !_MMG5_elaslag(mesh,disp) ) {
-    printf("fuck !\n");
-  }*/
-  
-  /* Main dichotomy loop */
-  while ( it <= maxit && t != _MMG5_SHORTMAX ) {
-  
-    t = _MMG5_dikomv(mesh,disp);
-    if ( t == 0 ) {
-      printf("   *** Stop: impossible to proceed further");
-      break;
-    }
-  
-    ier = _MMG5_dispmesh(mesh,disp,t,it);
-    if ( !ier ) {
-      fprintf(stdout,"  ** Impossible motion\n");
+    /* Extension of the velocity field */
+    if ( !_MMG5_velextLS(mesh,disp) ) {
+      fprintf(stdout,"  ## Problem in func. _MMG5_packLS. Exit program.\n");
       return(0);
     }
+  
+    //_MMG5_saveDisp(mesh,disp);
+  
+    /* Dichotomy loop */
+    for (itdc=0; itdc<maxitdc; itdc++) {
+  
+      t = _MMG5_dikomv(mesh,disp);
+      if ( t == 0 ) {
+        printf("   *** Stop: impossible to proceed further");
+        break;
+      }
+  
+      ier = _MMG5_dispmesh(mesh,disp,t,itdc);
+      if ( !ier ) {
+        fprintf(stdout,"  ** Impossible motion\n");
+        return(0);
+      }
     
-    tau = tau + ((double)t /_MMG5_SHORTMAX)*(1.0-tau);
-    printf("   ---> Realized displacement: %f\n",tau);
+      tau = tau + ((double)t /_MMG5_SHORTMAX)*(1.0-tau);
+      printf("   ---> Realized displacement: %f\n",tau);
     
-    /* Local remeshing depending on the option */
-    if ( mesh->info.lag > 0 ) {
-      
-for ( iit=0; iit<5; iit++) {
+      /* Local remeshing depending on the option */
+      if ( mesh->info.lag > 0 ) {
+      for ( iit=0; iit<5; iit++) {
   
-      /* Split of points */
-      nspl = _MMG5_spllag(mesh,disp,met,it,&warn);
-      if ( nspl < 0 ) {
-        fprintf(stdout,"  ## Problem in spllag. Exiting.\n");
-        return(0);
-      }
+        nspl = nc = ns = nm = 0;
+    
+        if ( mesh->info.lag > 1 ) {
+          /* Split of points */
+          nspl = _MMG5_spllag(mesh,disp,met,itdc,&warn);
+          if ( nspl < 0 ) {
+            fprintf(stdout,"  ## Problem in spllag. Exiting.\n");
+            return(0);
+          }
   
-      /* Collapse of points */
-      nc = _MMG5_coltetlag(mesh,met,it);
-      if ( nc < 0 ) {
-        fprintf(stdout,"  ## Problem in coltetlag. Exiting.\n");
-        return(0);
-      }
+          /* Collapse of points */
+          nc = _MMG5_coltetlag(mesh,met,itdc);
+          if ( nc < 0 ) {
+            fprintf(stdout,"  ## Problem in coltetlag. Exiting.\n");
+            return(0);
+          }
+        }
+        
+        /* Swap of edges in tetra that have resulted distorted from the process */
+        /* I do not know whether it is safe to put NULL in metric here (a priori ok, since there is no vertex creation or suppression) */
+        ns = _MMG5_swptetlag(mesh,met,1.1,NULL,itdc);
+        if ( ns < 0 ) {
+          fprintf(stdout,"  ## Problem in swaptetlag. Exiting.\n");
+          return(0);
+        }
       
-      /* Swap of edges in tetra that have resulted distorted from the process */
-      /* I do not know whether it is safe to put NULL in metric here (a priori ok, since there is no vertex creation or suppression) */
-      ns = _MMG5_swptetlag(mesh,met,1.1,NULL,it);
-      if ( ns < 0 ) {
-        fprintf(stdout,"  ## Problem in swaptetlag. Exiting.\n");
-        return(0);
-      }
-      
-      /* Relocate vertices of tetra which have been distorted in the displacement process */
-      nm = _MMG5_movtetlag(mesh,met,it);
-      if ( nm < 0 ) {
-        fprintf(stdout,"  ## Problem in movtetlag. Exiting.\n");
-        return(0);
-      }
+        /* Relocate vertices of tetra which have been distorted in the displacement process */
+        nm = _MMG5_movtetlag(mesh,met,itdc);
+        if ( nm < 0 ) {
+          fprintf(stdout,"  ## Problem in movtetlag. Exiting.\n");
+          return(0);
+        }
   
-      printf(" %d edges splitted, %d vertices collapsed, %d elements swapped, %d vertices moved.\n",nspl,nc,ns,nm);
-
-}
-      
+        printf(" %d edges splitted, %d vertices collapsed, %d elements swapped, %d vertices moved.\n",nspl,nc,ns,nm);
+      }
     }
     
-    it++;
+      if ( t == _MMG5_SHORTMAX ) break;
+    }
+    
+    if ( t == _MMG5_SHORTMAX ) break;
   }
-  
   /* Clean memory (but not pointer) */
   /* Doing this, memcur of mesh is decreased by size of displacement... ????? */
   _MMG5_DEL_MEM(mesh,disp->m,(disp->size*disp->npmax+1)*sizeof(double));

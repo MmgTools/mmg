@@ -25,7 +25,6 @@
 #define _MMG3D_H
 
 #include "libmmg3d.h"
-#include "mmg3d3.h"
 
 #define MG_SMSGN(a,b)  (((double)(a)*(double)(b) > (0.0)) ? (1) : (0))
 
@@ -284,13 +283,8 @@ double _MMG5_volint(MMG5_pMesh);
 /* Lagrangian mode functions */
 double _MMG5_estavglen(MMG5_pMesh);
 int   _MMG5_stiffelt(MMG5_pMesh,int,double*,double*);
-int  _MMG5_elaslag(MMG5_pMesh,MMG5_pSol);
 int  _MMG5_mmg3d3(MMG5_pMesh ,MMG5_pSol, MMG5_pSol );
-int  _MMG5_iniLSmesh(MMG5_pMesh ,LS_pMesh ,int ,int* ,int* ,int);
-int _MMG5_creaLSdisp(MMG5_pSol ,LS_pSol ,int ,int* );
-int _MMG5_packLS(MMG5_pMesh ,LS_pMesh ,MMG5_pSol ,LS_pSol );
-int _MMG5_unpackLS(MMG5_pMesh ,LS_pMesh ,MMG5_pSol ,LS_pSol );
-int _MMG5_saveLSmesh(LS_pMesh);
+int  _MMG5_velextLS(MMG5_pMesh ,MMG5_pSol );
 int _MMG5_saveDisp(MMG5_pMesh ,MMG5_pSol );
 
 /* Delaunay functions*/
