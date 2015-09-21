@@ -241,8 +241,6 @@ int MMG5_Set_meshSize(MMG5_pMesh mesh, int np, int ne, int nt, int na) {
                 mesh->ntmax,mesh->nt,mesh->nemax,mesh->ne);
         return(0);
       }
-      else
-        return(1);
     } else if(mesh->info.mem < 39) {
       printf("mem insuffisante %d\n",mesh->info.mem);
       return(0);
