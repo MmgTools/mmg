@@ -647,8 +647,7 @@ int _MMG5_movtet(MMG5_pMesh mesh,MMG5_pSol met,int maxitin) {
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
  * \param typchk type of checking permformed for edge length (hmin or LSHORT criterion).
- * \return -1 if failed.
- * \return number of collapsed points.
+ * \return -1 if failed, number of collapsed points otherwise.
  *
  * Attempt to collapse small edges.
  *

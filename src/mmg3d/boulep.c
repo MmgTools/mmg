@@ -37,9 +37,19 @@
 
 extern MMG5_Info  info;
 
-/** Return volumic ball (i.e. filled with tetrahedra) of point ip in tetra start.
-    Results are stored under the form 4*kel + jel , kel = number of the tetra, jel = local
-    index of p within kel */
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param start index of the starting tetrahedra.
+ * \param ip local index of the point in the tetrahedra \a start.
+ * \param list pointer toward the list of the tetra in the volumic ball of
+ * \a ip.
+ * \return 0 if fail and the number of the tetra in the ball otherwise.
+ *
+ * Fill the volumic ball (i.e. filled with tetrahedra) of point \a ip in tetra
+ * \a start. Results are stored under the form \f$4*kel + jel\f$, kel = number
+ * of the tetra, jel = local index of p within kel.
+ *
+ */
 int _MMG5_boulevolp (MMG5_pMesh mesh, int start, int ip, int * list){
   MMG5_pTetra  pt,pt1;
   int    *adja,nump,ilist,base,cur,k,k1;
@@ -262,7 +272,10 @@ int _MMG5_boulenm(MMG5_pMesh mesh,int start,int ip,int iface,
  * ball, starting from tetra \a start, with point \a ip, and face \a if in tetra
  * volumic ball.
  * \a listv[k] = 4*number of tet + index of point surfacic ball.
- * \a lists[k] = 4*number of tet + index of FAC.
+ * \a lists[k] = 4*number of tet + index of face.
+ *
+ * \warning Don't work for a non-manifold point if \a start has an adjacent
+ * through \a iface (for example : a non-manifold subdomain)
  *
  */
 int _MMG5_boulesurfvolp(MMG5_pMesh mesh,int start,int ip,int iface,
