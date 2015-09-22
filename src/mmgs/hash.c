@@ -84,17 +84,18 @@ int _MMG5_hashTria(MMG5_pMesh mesh) {
 
   ier = _MMG5_mmgHashTria(mesh, mesh->adja, 0);
 
-//warning the following loop seems to be unused (or only in boulchknm)... to check.
+//warning the following loop seems to be unused : commentated because the s
+//field is used (without initialization) in boulechknm and it may lead to errors.
   /* set seed */
-  for (k=1; k<=mesh->nt; k++) {
-    pt   = &mesh->tria[k];
-    adja = &mesh->adja[3*(k-1)+1];
-    for (i=0; i<3; i++) {
-      if ( !adja[i] ) {
-        mesh->point[pt->v[_MMG5_inxt2[i]]].s = k;
-      }
-    }
-  }
+  /* for (k=1; k<=mesh->nt; k++) { */
+  /*   pt   = &mesh->tria[k]; */
+  /*   adja = &mesh->adja[3*(k-1)+1]; */
+  /*   for (i=0; i<3; i++) { */
+  /*     if ( !adja[i] ) { */
+  /*       mesh->point[pt->v[_MMG5_inxt2[i]]].s = k; */
+  /*     } */
+  /*   } */
+  /* } */
 
   return(ier);
 }

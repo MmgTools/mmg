@@ -578,7 +578,7 @@ int _MMG5_chkNumberOfTri(MMG5_pMesh mesh) {
   if ( mesh->nt == nttmp ) return(1);
   else if ( mesh->nt ){
     if ( !mesh->info.iso && (mesh->info.imprim > 3 || mesh->info.ddebug) ) {
-      fprintf(stdout,"  ## WARNING: INITIAL TRIANGLES ARE _MMG5_DELETED.\n");
+      fprintf(stdout,"  ## WARNING: INITIAL TRIANGLES ARE DELETED.\n");
       fprintf(stdout,"  Not enough or too much triangles for geometry (maybe");
       fprintf(stdout," you have 2 domains but only boundary/interface triangles).\n");
       fprintf(stdout," %d given triangles and %d counted triangles.\n",mesh->nt,nttmp);
