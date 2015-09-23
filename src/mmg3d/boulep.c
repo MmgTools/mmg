@@ -275,7 +275,8 @@ int _MMG5_boulenm(MMG5_pMesh mesh,int start,int ip,int iface,
  * \a lists[k] = 4*number of tet + index of face.
  *
  * \warning Don't work for a non-manifold point if \a start has an adjacent
- * through \a iface (for example : a non-manifold subdomain)
+ * through \a iface (for example : a non-manifold subdomain). Thus, if \a ip is
+ * non-manifold, must be called only if \a start has no adjacent through iface.
  *
  */
 int _MMG5_boulesurfvolp(MMG5_pMesh mesh,int start,int ip,int iface,
@@ -1024,9 +1025,24 @@ _MMG5_errorMessage(MMG5_pMesh mesh, int k1, int k2) {
   fprintf(stdout," the final mesh will have poor quality.\n");
 }
 
-/** Find all tets sharing edge ia of tetra start, and stores boundary faces when
-    met it1 & it2 = 6*iel + iface, iel = index of tetra, iface = index of face
-    in tetra return 2*ilist if shell is closed, 2*ilist +1 otherwise */
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param start index of the starting tetrahedron.
+ * \param ia index of edge whose shell is computed.
+ * \param list pointer toward the list of tetra in the shell (to fill).
+ * \param it1 pointer toward the index of the first boundary face sharing \a ia
+ * (to fill).
+ * \param it2 pointer toward the index of the second boundary face sharing \a ia
+ * (to fill).
+ * \return -1 if fail, \f$2*ilist\f$ if shell is closed, \f$2*ilist+1\f$
+ * otherwise.
+ *
+ * Find all tets sharing edge \a ia of tetra \a start, and stores boundary faces
+ * when met. \f$ it1 \f$ and \f$ it2 = 6*iel + iface\f$, \a iel = index of
+ * tetra, \a iface = index of face in tetra.
+ *
+ * \warning Don't work if \a ia has only one boundary face in its shell.
+ */
 int _MMG5_coquilface(MMG5_pMesh mesh,int start,int ia,int *list,int *it1,int *it2) {
   MMG5_pTetra   pt;
   MMG5_pxTetra  pxt;
@@ -1103,7 +1119,11 @@ int _MMG5_coquilface(MMG5_pMesh mesh,int start,int ia,int *list,int *it1,int *it
         *it1 = 4*pradj+iface;
       else {
         if ( *it2 ) {
-          // Algiane: (assert commente) si on a 3 tetras de refs differentes dans la _MMG5_coquille??
+          // Algiane: (commentated assert) for a manifold edge 2 cases :
+          // 1) the shell is open and we have more than 3 tri sharing the edge
+          // (highly non-manifold)
+          // 2) we have a non-manifold shape immersed in a domain (3 triangles
+          // sharing the edge and a closed shell)
           printf("  ## Warning: you have more than 2 boundaries in the shell of your edge.\n");
           printf("  Problem may occur during remesh process.\n");
         }
@@ -1113,8 +1133,8 @@ int _MMG5_coquilface(MMG5_pMesh mesh,int start,int ia,int *list,int *it1,int *it
     }
   }
 
-  /* At this point, the first travel, in one direction, of the shell is complete. Now, analyze why
-     the travel ended. */
+  /* At this point, the first travel, in one direction, of the shell is
+     complete. Now, analyze why the travel ended. */
   if ( adj == start ) {
     if ( (!(*it1) || !(*it2)) || ((*it1) == (*it2)) ) {
       _MMG5_errorMessage(mesh, (*it1)/4, (*it2)/4);

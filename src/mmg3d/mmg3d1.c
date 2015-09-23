@@ -425,7 +425,12 @@ int _MMG5_swpmsh(MMG5_pMesh mesh,MMG5_pSol met,_MMG5_pBucket bucket) {
         if ( !(pxt->ftag[i] & MG_BDY) ) continue;
         for (j=0; j<3; j++) {
           ia  = _MMG5_iarf[i][j];
-          if ( (pxt->tag[ia] & MG_REQ) ) continue;
+
+          /* No swap of geometric edge */
+          if ( MG_EDG(pxt->tag[ia]) || (pxt->tag[ia] & MG_REQ) ||
+               (pxt->tag[ia] & MG_NOM) )
+            continue;
+
           ret = _MMG5_coquilface(mesh,k,ia,list,&it1,&it2);
           ilist = ret / 2;
           if ( ret < 0 )  return(-1);
