@@ -329,7 +329,6 @@ char _MMG5_chkedg(MMG5_pMesh mesh,MMG5_Tria *pt,char ori) {
       }
       else {
         if(!((p[i1]->tag & MG_NOM) ||  MG_EDG(p[i1]->tag) ) ) {
-          //  if(t[i1][0] > 10) {
           fprintf(stdout,"2. warning geometrical problem\n");
           return(0);
         }
@@ -717,7 +716,7 @@ static int _MMG5_coltet(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
           if ( isnm ) {
             if ( mesh->adja[4*(k-1)+1+i] )  continue;
           }
-          if ( (tag & MG_REQ) || p0->tag > tag )  continue;
+          if ( p0->tag > tag )  continue;
           ilist = _MMG5_chkcol_bdy(mesh,met,k,i,j,list);
         }
         /* internal face */

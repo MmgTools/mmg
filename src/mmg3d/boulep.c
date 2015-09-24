@@ -284,8 +284,10 @@ int _MMG5_boulesurfvolp(MMG5_pMesh mesh,int start,int ip,int iface,
 {
   MMG5_pTetra  pt,pt1;
   MMG5_pxTetra pxt;
-  int base,nump,k,k1,*adja,piv,na,nb,adj,cur,nvstart,fstart,aux;
+  int  base,nump,k,k1,*adja,piv,na,nb,adj,cur,nvstart,fstart,aux;
   char iopp,ipiv,i,j,l,ipa,ipb,isface;
+
+  if ( isnm ) assert(!mesh->adja[4*(start-1)+iface+1]);
 
   base = ++mesh->base;
   *ilists = 0;

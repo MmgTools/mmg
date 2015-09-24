@@ -595,6 +595,9 @@ int _MMG5_chkNumberOfTri(MMG5_pMesh mesh) {
  *
  * Identify boundary triangles.
  *
+ * \remark mesh->xtetra is not allocated when \ref _MMG5_bdryTria is called by
+ * \ref _MMG5_analys but it is allocated at save time.
+ *
  */
 int _MMG5_bdryTria(MMG5_pMesh mesh) {
   MMG5_pTetra    pt,pt1;
