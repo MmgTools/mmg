@@ -436,16 +436,15 @@ int _MMG5_setNmTag(MMG5_pMesh mesh, _MMG5_Hash *hash) {
                 fprintf(stdout," or/and the maximum mesh.\n");
                 return(0);
               }
-              ptet = &mesh->tetra[adj];
               if ( ptet->xt ) {
                 pxt = &mesh->xtetra[ptet->xt];
                 if ( pxt->ftag[iface] ) ++count;
               }
+              ptet = &mesh->tetra[adj];
             }
 
             assert(!adj);
             it2 = 4*pradj + iface;
-            ++count;
 
             if ( (!it1 || !it2) || (it1 == it2) ) {
               _MMG5_coquilFaceErrorMessage(mesh, it1/4, it2/4);
