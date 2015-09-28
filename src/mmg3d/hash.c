@@ -820,8 +820,10 @@ int _MMG5_hGeom(MMG5_pMesh mesh) {
         i2  = _MMG5_iprv2[i];
         kk  = adja[i] / 3;
         if ( !kk || pt->tag[i] & MG_NOM ) {
-          if ( pt->tag[i] & MG_NOM )
-            pt->edg[i] = ( mesh->info.iso && pt->edg[i] != 0 ) ?  -abs(pt->edg[i]) : MG_ISO;
+          if ( pt->tag[i] & MG_NOM ) {
+            if ( mesh->info.iso )
+              pt->edg[i] = ( pt->edg[i] != 0 ) ?  -abs(pt->edg[i]) : MG_ISO;
+          }
           _MMG5_hEdge(mesh,pt->v[i1],pt->v[i2],pt->edg[i],pt->tag[i]);
         }
         else if ( k < kk && ( pt->edg[i] || pt->tag[i] ) )
