@@ -551,6 +551,13 @@ static void _MMG5_nmgeom(MMG5_pMesh mesh){
       }
     }
   }
+  /* Mark as required the non-manifold points that do not belong to a surface
+   * tetra (a tetra that have a face without adjacent)*/
+  for (k=1; k<=mesh->np; k++) {
+    p0 = &mesh->point[k];
+    if ( !(p0->tag & MG_NOM) || p0->xp ) continue;
+    p0->tag |= MG_REQ;
+  }
 }
 
 /** preprocessing stage: mesh analysis */

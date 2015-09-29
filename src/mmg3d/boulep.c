@@ -92,9 +92,19 @@ int _MMG5_boulevolp (MMG5_pMesh mesh, int start, int ip, int * list){
   return(ilist);
 }
 
-/** Define normal and tangent vectors at a non manifold point (ip in start, supported by
-    face iface), enumerating its (outer)surfacic ball ; return sng = whether point is singular
-    or not */
+/**
+ * \param mesh pointer toward the mesh  structure.
+ * \param start tetra index.
+ * \param ip point index.
+ * \param iface face index.
+ * \param n computed normal vector.
+ * \param t computed tangent vector.
+ * \return 0 if point is singular, 1 otherwise.
+ *
+ * Define normal and tangent vectors at a non manifold point (\a ip in \a start,
+ * supported by face \a iface), enumerating its (outer)surfacic ball.
+ *
+ */
 int _MMG5_boulenm(MMG5_pMesh mesh,int start,int ip,int iface,
                   double n[3],double t[3]) {
   MMG5_pTetra   pt;
