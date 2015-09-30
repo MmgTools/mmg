@@ -58,12 +58,11 @@ int _MMG5_boulevolp (MMG5_pMesh mesh, int start, int ip, int * list){
   base = ++mesh->base;
   pt   = &mesh->tetra[start];
   nump = pt->v[ip];
-  ilist = 0;
 
   /* Store initial tetrahedron */
   pt->flag = base;
-  list[ilist] = 4*start + ip;
-  ilist++;
+  list[0] = 4*start + ip;
+  ilist=1;
 
   /* Explore list and travel by adjacency through elements sharing p */
   cur = 0;

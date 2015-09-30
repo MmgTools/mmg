@@ -654,7 +654,7 @@ int _MMG5_analys(MMG5_pMesh mesh) {
 
   /* set non-manifold edges sharing non-intersecting multidomains as required */
   if ( abs(mesh->info.imprim) > 5  || mesh->info.ddebug )
-    fprintf(stdout,"  ** UPDATING TOPOLOGY\n");
+    fprintf(stdout,"  ** UPDATING TOPOLOGY AT NON-MANIFOLD POINTS\n");
 
   if ( !_MMG5_setNmTag(mesh,&hash) ) {
     fprintf(stdout,"  ## Non-manifold topology problem. Exit program.\n");
