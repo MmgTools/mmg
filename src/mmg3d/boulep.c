@@ -267,6 +267,140 @@ int _MMG5_boulenm(MMG5_pMesh mesh,int start,int ip,int iface,
 
 /**
  * \param mesh pointer toward the mesh structure.
+ * \param start index of the starting tetrahedra.
+ * \param ip local index of the point in the tetrahedra \a start.
+ * \param ng pointer toward the number of ridges.
+ * \param nr pointer toward the number of reference edges.
+ * \return ns the number of special edges passing through ip.
+ *
+ * Count the numer of ridges and reference edges incident to
+ * the vertex \a ip when ip is non-manifold.
+ *
+ */
+int _MMG5_boulernm(MMG5_pMesh mesh, int start, int ip, int *ng, int *nr){
+  MMG5_pTetra    pt,pt1;
+  MMG5_pxTetra   pxt;
+  _MMG5_Hash     hash;
+  _MMG5_hedge    *ph;
+  int            *adja,nump,ilist,base,cur,k,k1,ns;
+  int            hmax, list[_MMG5_LMAX+2];
+  int            key,ia,ib,jj,a,b;
+  char           j,l,i;
+  unsigned char  ie;
+
+  /* allocate hash table to store the special edges passing through ip */
+  hmax = 3.71*mesh->np;
+  hash.siz  = mesh->np;
+  hash.max  = hmax + 1;
+  hash.nxt  = hash.siz;
+  _MMG5_ADD_MEM(mesh,(hash.max+1)*sizeof(_MMG5_hedge),"hash table",return(0));
+  _MMG5_SAFE_CALLOC(hash.item,hash.max+1,_MMG5_hedge);
+
+  for (k=hash.siz; k<hash.max; k++)
+    hash.item[k].nxt = k+1;
+
+
+  base = ++mesh->base;
+  pt   = &mesh->tetra[start];
+  nump = pt->v[ip];
+
+  /* Store initial tetrahedron */
+  pt->flag = base;
+  list[0] = 4*start + ip;
+  ilist = 1;
+
+  *ng = *nr = ns = 0;
+
+  /* Explore list and travel by adjacency through elements sharing p */
+  cur = 0;
+  while ( cur < ilist ) {
+    k = list[cur] / 4;
+    i = list[cur] % 4; // index of point p in tetra k
+    pt = &mesh->tetra[k];
+
+    /* Count the number of ridge of ref edges passing through ip. */
+    if ( pt->xt ) {
+      pxt = &mesh->xtetra[pt->xt];
+      for (l=0; l<3; ++l) {
+        ie = _MMG5_arpt[i][l];
+
+        if ( MG_EDG(pxt->tag[ie]) ) {
+          /* Seek if we have already seen the edge. If not, hash it and
+           * increment ng or nr.*/
+          a = pt->v[_MMG5_iare[ie][0]];
+          b = pt->v[_MMG5_iare[ie][1]];
+          ia  = MG_MIN(a,b);
+          ib  = MG_MAX(a,b);
+          key = (_MMG5_KA*ia + _MMG5_KB*ib) % hash.siz;
+          ph  = &hash.item[key];
+
+          if ( ph->a == ia && ph->b == ib )
+            continue;
+          else if ( ph->a ) {
+            while ( ph->nxt && ph->nxt < hash.max ) {
+              ph = &hash.item[ph->nxt];
+              if ( ph->a == ia && ph->b == ib )  continue;
+            }
+            ph->nxt   = hash.nxt;
+            ph        = &hash.item[hash.nxt];
+
+            if ( hash.nxt >= hash.max-1 ) {
+              if ( mesh->info.ddebug )
+                fprintf(stdout,"  ## Memory alloc problem (edge): %d\n",
+                        hash.max);
+              _MMG5_TAB_RECALLOC(mesh,hash.item,hash.max,0.2,_MMG5_hedge,
+                                 "_MMG5_edge",return(0));
+              /* ph pointer may be false after realloc */
+              ph        = &hash.item[hash.nxt];
+
+              for (jj=ph->nxt; jj<hash.max; jj++)  hash.item[jj].nxt = jj+1;
+            }
+            hash.nxt = ph->nxt;
+          }
+
+          /* insert new edge */
+          ph->a = ia;
+          ph->b = ib;
+          ph->nxt = 0;
+
+          if ( pxt->tag[ie] & MG_GEO )
+            ++(*ng);
+          else if ( pxt->tag[ie] & MG_REF )
+            ++(*nr);
+          ++ns;
+        }
+      }
+    }
+
+    /* Continue to travel */
+    adja = &mesh->adja[4*(k-1)+1];
+
+    for (l=0; l<3; l++) {
+      i  = _MMG5_inxt3[i];
+      k1 = adja[i] / 4;
+      if ( !k1 )  continue;
+      pt1 = &mesh->tetra[k1];
+      if ( pt1->flag == base )  continue;
+      pt1->flag = base;
+      for (j=0; j<4; j++)
+        if ( pt1->v[j] == nump )  break;
+      assert(j<4);
+      /* overflow */
+      if ( ilist > _MMG5_LMAX-3 )  return(0);
+      list[ilist] = 4*k1+j;
+      ilist++;
+    }
+    cur++;
+  }
+
+  /* Free the edge hash table */
+  _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
+
+  return(ns);
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
  * \param start index of the starting tetra.
  * \param ip index in \a start of the looked point.
  * \param iface index in \a start of the starting face.

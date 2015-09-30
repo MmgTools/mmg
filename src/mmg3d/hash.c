@@ -267,29 +267,33 @@ int _MMG5_hashTetra(MMG5_pMesh mesh, int pack) {
  * \param hash edges hash table.
  * \return 1 if success, 0 if failed.
  *
- * Set non-manifold tag at extremities of a non-manifold edge.
- * Check if a non-manifold edge is at the interface of several domains that
- * have no adjacent tetra (thus we can't travel from a domain through another
- * one by adjacency) and in this case, mark the edge and its extremities as
- * required. Free the edge hash table \a hash if success.
+ * Set non-manifold tag at extremities of a non-manifold edge.  Check if a
+ * non-manifold edge is at the interface of several distinct domains (thus we
+ * can't travel from a domain through another one by adjacency) and in this
+ * case, mark the edge and its extremities as required. Free the edge hash table
+ * \a hash if success.
  *
  * \warning if fail, the edge hash table \a hash is not freed.
  *
  */
-int _MMG5_setNmTag(MMG5_pMesh mesh, _MMG5_Hash *hash) {
+static inline
+int _MMG5_setEdgeNmTag(MMG5_pMesh mesh, _MMG5_Hash *hash) {
   MMG5_pTetra         ptet;
   MMG5_pxTetra        pxt;
   MMG5_pTria          pt;
   _MMG5_Hash          hashF;
   _MMG5_hedge         *ph;
   int                 *adja,adj,pradj,piv,ilist;
-  int                 k,i,i1,i2,ia,ib,l,it1,it2,nr;
+  int                 k,i,i1,i2,ia,ib,l,it1,it2, nr;
   int                 v0,v1,v2,ipa,ipb,ok, kel,count,start;
   unsigned int        key;
   char                isbdy,iface;
 
   ok = 0;
   nr = 0;
+
+  /* First: seek edges at the interface of two distinct domains and mark it as
+   * required */
   for (k=1; k<=mesh->nt; k++) {
     pt  = &mesh->tria[k];
 
@@ -455,10 +459,12 @@ int _MMG5_setNmTag(MMG5_pMesh mesh, _MMG5_Hash *hash) {
           /* If ph->s do not match the number of encountred boundaries we have
              separated domains. */
           if ( count != ph->s ) {
-            pt->tag[i] |= MG_REQ;
+            if ( !pt->tag[i] & MG_REQ ) {
+              pt->tag[i] |= MG_REQ;
+              ++nr;
+            }
             mesh->point[pt->v[_MMG5_inxt2[i]]].tag |= MG_REQ;
             mesh->point[pt->v[_MMG5_iprv2[i]]].tag |= MG_REQ;
-            ++nr;
           }
 
           /* Work done for this edge: reset ph->s/ */
@@ -467,12 +473,95 @@ int _MMG5_setNmTag(MMG5_pMesh mesh, _MMG5_Hash *hash) {
       }
     }
   }
-
   if ( mesh->info.ddebug || abs(mesh->info.imprim) > 3 )
     fprintf(stdout,"     %d required edges added\n",nr);
 
   /* Free the edge hash table */
   _MMG5_DEL_MEM(mesh,hash->item,(hash->max+1)*sizeof(_MMG5_hedge));
+  return(1);
+}
+
+/**
+ * \param mesh pointer towar the mesh structure.
+ *
+ * Seek the non-required non-manifold points and try to analyse whether they are
+ * corner or required.
+ *
+ * \remark We don't know how to travel through the shell of a non-manifold point
+ * by triangle adjacency. Thus the work done here can't be performed in the \ref
+ * _MMG5_singul function.
+ */
+static inline
+void _MMG5_setVertexNmTag(MMG5_pMesh mesh) {
+  MMG5_pTetra         ptet;
+  MMG5_pPoint         ppt;
+  int                 k,i;
+  int                 nc, nre, ng, nrp;
+
+  /* Second: seek the non-required non-manifold points and try to analyse
+   * whether they are corner or required. */
+  nc = nre = 0;
+  ++mesh->base;
+  for (k=1; k<=mesh->ne; ++k) {
+    ptet = &mesh->tetra[k];
+    if ( !MG_EOK(ptet) ) continue;
+
+    for ( i=0; i<4; ++i ) {
+      ppt = &mesh->point[ptet->v[i]];
+      if ( (!MG_VOK(ppt)) || (ppt->flag==mesh->base)  ) continue;
+      ppt->flag = mesh->base;
+
+      if ( (!(ppt->tag & MG_NOM)) || (ppt->tag & MG_REQ) ) continue;
+
+      if ( !_MMG5_boulernm(mesh, k, i, &ng, &nrp) ) continue;
+      if ( (ng+nrp) > 2 ) {
+        ppt->tag |= MG_CRN + MG_REQ;
+        nre++;
+        nc++;
+      }
+      else if ( (ng == 1) && (nrp == 1) ) {
+        ppt->tag |= MG_REQ;
+        nre++;
+      }
+      else if ( ng == 1 && !nrp ){
+        ppt->tag |= MG_CRN + MG_REQ;
+        nre++;
+        nc++;
+      }
+      else if ( ng == 1 && !nrp ){
+        ppt->tag |= MG_CRN + MG_REQ;
+        nre++;
+        nc++;
+      }
+    }
+  }
+
+  if ( mesh->info.ddebug || abs(mesh->info.imprim) > 3 )
+    fprintf(stdout,"     %d corner and %d required vertices added\n",nc,nre);
+
+}
+
+/**
+ * \param mesh pointer towar the mesh structure.
+ * \param hash edges hash table.
+ * \return 1 if success, 0 if failed.
+ *
+ * Set tags to non-manifold edges and vertices. Not done before because we need
+ * the \ref MMG5_xTetra table.
+ *
+ * \warning if fail, the edge hash table \a hash is not freed.
+ *
+ */
+int _MMG5_setNmTag(MMG5_pMesh mesh, _MMG5_Hash *hash) {
+
+  /* First: seek edges at the interface of two distinct domains and mark it as
+   * required */
+  if ( !_MMG5_setEdgeNmTag(mesh,hash) ) return(0);
+
+  /* Second: seek the non-required non-manifold points and try to analyse
+   * whether they are corner or required. */
+  _MMG5_setVertexNmTag(mesh);
+
   return(1);
 }
 
