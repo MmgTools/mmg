@@ -324,7 +324,7 @@ typedef _MMG5_Bezier * _MMG5_pBezier;
  */
 typedef struct {
   int   a,b,nxt;
-  int   s,k; /** k = point along edge a b */
+  int   s,k; /*!< k = point along edge a b or triangle index */
 } _MMG5_hedge;
 
 /**
@@ -365,7 +365,7 @@ double _MMG5_lenSurfEdg_ani(MMG5_pMesh mesh,MMG5_pSol met,int ip1,int ip2,char);
 double _MMG5_lenSurfEdg_iso(MMG5_pMesh ,MMG5_pSol ,int ,int, char );
 long long _MMG5_memSize(void);
 void   _MMG5_mmgDefaultValues(MMG5_pMesh mesh);
-int    _MMG5_mmgHashTria(MMG5_pMesh mesh, int *adja, int chkISO);
+int    _MMG5_mmgHashTria(MMG5_pMesh mesh, int *adja, _MMG5_Hash*, int chkISO);
 void   _MMG5_mmgInit_parameters(MMG5_pMesh mesh);
 void   _MMG5_mmgUsage(char *prog);
 int    _MMG5_norpts(MMG5_pMesh,int,int,int,double *);

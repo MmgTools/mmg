@@ -23,7 +23,7 @@
 #include "mmg2d.h"
 
 
-int MMG2_chkmsh(MMG5_pMesh mesh, int severe) {
+int _MMG5_mmg2dChkmsh(MMG5_pMesh mesh, int severe,int base) {
   MMG5_pPoint	ppt;
   MMG5_pTria 	pt1,pt2;
   MMG5_pEdge         ped;
@@ -45,7 +45,7 @@ int MMG2_chkmsh(MMG5_pMesh mesh, int severe) {
       if ( adj == k ) {
         fprintf(stdout,"  1. Wrong adjacency %d %d\n",k,adj);
         printf("k %d: %d %d %d \n",k,pt1->v[0],pt1->v[1],pt1->v[2]);
-        printf("adj (%d): %d %d %d \n",
+        printf("adj of %d: %d %d %d \n",
                 k,adja[0]/3,adja[1]/3,adja[2]/3);
         exit(1);
       }
@@ -93,8 +93,7 @@ int MMG2_chkmsh(MMG5_pMesh mesh, int severe) {
   
   if ( !severe )  return(1);
   
-  list  = (int*)malloc(LMAX*sizeof(int));
-  assert(list);
+  _MMG5_SAFE_CALLOC(list,LMAX,int);
   
   for (k=1; k<=mesh->nt; k++) {
     pt1 = &mesh->tria[k];
@@ -141,6 +140,6 @@ int MMG2_chkmsh(MMG5_pMesh mesh, int severe) {
       }
     } */
   }
-  free(list);  
+  _MMG5_SAFE_FREE(list);  
   return(1);
 } 

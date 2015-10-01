@@ -201,6 +201,7 @@ static int _MMG5_defmetsin(MMG5_pMesh mesh,MMG5_pSol met,int kel, int iface, int
   idp = pt->v[ip];
   p0  = &mesh->point[idp];
 
+  if ( mesh->adja[4*(kel-1)+iface+1] ) return(0);
   ilist = _MMG5_boulesurfvolp(mesh,kel,ip,iface,
                               listv,&ilistv,lists,&ilists,(p0->tag & MG_NOM));
 

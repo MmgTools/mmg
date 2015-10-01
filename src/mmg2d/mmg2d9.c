@@ -232,7 +232,7 @@ int MMG_dikomv(MMG5_pMesh mesh,MMG5_pSol sol,short t) {
 /*   for (k=1; k<=mesh->nt; k++) { */
 /*     pt = &mesh->tria[k]; */
 /* 	if ( !pt->v[0] ) continue;  */
-/*     pt->qual = MMG2_caltri(mesh,sol,pt); */
+/*     pt->qual = MMG2_caltri_in(mesh,sol,pt); */
 /*   } */
 
 /*   if ( mesh->info.imprim < 0 )  fprintf(stdout,"     %7d NODES UPDATED\n",nm); */

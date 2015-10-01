@@ -241,8 +241,6 @@ int MMG5_Set_meshSize(MMG5_pMesh mesh, int np, int ne, int nt, int na) {
                 mesh->ntmax,mesh->nt,mesh->nemax,mesh->ne);
         return(0);
       }
-      else
-        return(1);
     } else if(mesh->info.mem < 39) {
       printf("mem insuffisante %d\n",mesh->info.mem);
       return(0);
@@ -457,7 +455,7 @@ int MMG5_Get_vertex(MMG5_pMesh mesh, double* c0, double* c1, double* c2, int* re
  * \param v1 second vertex of tetrahedron.
  * \param v2 third vertex of tetrahedron.
  * \param v3 fourth vertex of tetrahedron.
- * \param ref tetrahedron reference.
+ * \param ref tetrahedron reference (must be positive).
  * \param pos tetrahedron position in the mesh.
  * \return 0 if failed, 1 otherwise.
  *
@@ -497,7 +495,7 @@ int MMG5_Set_tetrahedron(MMG5_pMesh mesh, int v0, int v1, int v2, int v3, int re
   pt->v[1] = v1;
   pt->v[2] = v2;
   pt->v[3] = v3;
-  pt->ref  = ref;
+  pt->ref  = abs(ref);
 
   mesh->point[pt->v[0]].tag &= ~MG_NUL;
   mesh->point[pt->v[1]].tag &= ~MG_NUL;

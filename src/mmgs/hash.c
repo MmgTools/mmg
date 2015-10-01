@@ -60,6 +60,31 @@ static void paktri(MMG5_pMesh mesh) {
 }
 
 /**
+ * \param mesh pointer towar the mesh structure.
+ *
+ * Set non-manifold tag at extremities of a non-manifold edge.
+ *
+ */
+static inline
+void _MMG5_setNmTag(MMG5_pMesh mesh) {
+  MMG5_pTria pt;
+  int        k,i;
+
+  for (k=1; k<=mesh->nt; k++) {
+    pt  = &mesh->tria[k];
+
+    for (i=0; i<3; i++) {
+      if ( pt->tag[i] & MG_NOM ) {
+        /* Set point tag to MG_NOM if edge is MG_NOM*/
+        mesh->point[pt->v[_MMG5_inxt2[i]]].tag |= MG_NOM;
+        mesh->point[pt->v[_MMG5_iprv2[i]]].tag |= MG_NOM;
+      }
+    }
+  }
+
+}
+
+/**
  * \param mesh pointer toward the mesh structure.
  * \return 1 if success, 0 if fail.
  *
@@ -68,6 +93,7 @@ static void paktri(MMG5_pMesh mesh) {
  */
 int _MMG5_hashTria(MMG5_pMesh mesh) {
   MMG5_pTria          pt;
+  _MMG5_Hash          hash;
   int                 *adja,k,i,ier;
 
   if ( mesh->adja )  return(1);
@@ -82,19 +108,21 @@ int _MMG5_hashTria(MMG5_pMesh mesh) {
                 exit(EXIT_FAILURE));
   _MMG5_SAFE_CALLOC(mesh->adja,3*mesh->ntmax+5,int);
 
-  ier = _MMG5_mmgHashTria(mesh, mesh->adja, 0);
+  ier = _MMG5_mmgHashTria(mesh, mesh->adja, &hash, 0);
+  _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
 
-//warning the following loop seems to be unused (or only in boulchknm)... to check.
+//warning the following loop seems to be unused : commentated because the s
+//field is used (without initialization) in boulechknm and it may lead to errors.
   /* set seed */
-  for (k=1; k<=mesh->nt; k++) {
-    pt   = &mesh->tria[k];
-    adja = &mesh->adja[3*(k-1)+1];
-    for (i=0; i<3; i++) {
-      if ( !adja[i] ) {
-        mesh->point[pt->v[_MMG5_inxt2[i]]].s = k;
-      }
-    }
-  }
+  /* for (k=1; k<=mesh->nt; k++) { */
+  /*   pt   = &mesh->tria[k]; */
+  /*   adja = &mesh->adja[3*(k-1)+1]; */
+  /*   for (i=0; i<3; i++) { */
+  /*     if ( !adja[i] ) { */
+  /*       mesh->point[pt->v[_MMG5_inxt2[i]]].s = k; */
+  /*     } */
+  /*   } */
+  /* } */
 
   return(ier);
 }

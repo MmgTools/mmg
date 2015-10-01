@@ -111,9 +111,25 @@ int MMG2_loadMesh(MMG5_pMesh mesh,char *filename) {
       if (!(inm = fopen(data,"r")) ) {
         fprintf(stderr,"  ** %s  NOT FOUND.\n",data);
         return(0);
+      } else {
+        if ( !strstr(mesh->nameout,".mesh") ) {
+          _MMG5_ADD_MEM(mesh,5*sizeof(char),"output file name",
+                        printf("  Exit program.\n");
+                        exit(EXIT_FAILURE));
+          _MMG5_SAFE_REALLOC(mesh->nameout,strlen(mesh->nameout)+6,char,"output mesh name");
+          strcat(mesh->nameout,".mesh");
+        }
+
       }
     } else {
       bin = 1;
+      if ( !strstr(mesh->nameout,".mesh") ) {
+        _MMG5_ADD_MEM(mesh,6*sizeof(char),"input file name",
+                      printf("  Exit program.\n");
+                      exit(EXIT_FAILURE));
+        _MMG5_SAFE_REALLOC(mesh->nameout,strlen(mesh->nameout)+7,char,"input file name");
+        strcat(mesh->nameout,".meshb");
+      }
     }
   }
   else {
@@ -144,7 +160,7 @@ int MMG2_loadMesh(MMG5_pMesh mesh,char *filename) {
         fscanf(inm,"%d",&mesh->dim);
         if(mesh->info.nreg==2) {
           if(mesh->dim!=3) {
-            fprintf(stdout,"WRONG USE OF -.nreg \n");
+            fprintf(stdout,"WRONG USE OF -msh \n");
             return(0);
           }
           mesh->dim = 2;
@@ -286,10 +302,9 @@ int MMG2_loadMesh(MMG5_pMesh mesh,char *filename) {
     fprintf(stdout,"  **WARNING NO GIVEN TRIANGLE\n");
   }
 
-  //mesh->npfixe  = mesh->np;
-  //mesh->nafixe = mesh->na;
-  //mesh->ntfixe  = mesh->nt;
-
+  mesh->npi  = mesh->np;
+  mesh->nai  = mesh->na;
+  mesh->nti  = mesh->nt;
   if ( !mesh->np ) {
     fprintf(stdout,"  ** MISSING DATA\n");
     return(0);
@@ -386,6 +401,10 @@ int MMG2_loadMesh(MMG5_pMesh mesh,char *filename) {
         fread(&pt->ref,sw,1,inm);
         if(iswp) pt->ref=MMG_swapbin(pt->ref);
       } 
+      for (i=0; i<3; i++) {
+        ppt = &mesh->point[ pt->v[i] ];
+        ppt->tag &= ~M_NUL;
+      }
       for(i=0 ; i<3 ; i++)
         pt->edg[i] = 0;
       air = MMG2_quickarea(mesh->point[pt->v[0]].c,mesh->point[pt->v[1]].c,
@@ -399,7 +418,13 @@ int MMG2_loadMesh(MMG5_pMesh mesh,char *filename) {
       } 
     }
     fprintf(stdout," %8d triangles reoriented \n",norient); 
+  } else {
+     for (k=1; k<=mesh->np; k++) {
+      ppt = &mesh->point[ k ];
+      ppt->tag &= ~M_NUL;
+    }  
   }
+ 
   /* read corners*/    
   if (ncor) {
     rewind(inm);
@@ -455,7 +480,7 @@ int MMG2_loadMesh(MMG5_pMesh mesh,char *filename) {
   fclose(inm);   
 
   /*maill periodique : remettre toutes les coord entre 0 et 1*/
-  if(mesh->info.renum) { 
+  if(mesh->info.renum==-10) { 
     printf("on passe la , on a %d points %d triangles\n",mesh->np,mesh->nt);
     for (k=1; k<=mesh->np; k++) {
       ppt = &mesh->point[k];  
@@ -480,10 +505,10 @@ int MMG2_loadMesh(MMG5_pMesh mesh,char *filename) {
   
 
 /* load metric */
-int MMG2_loadSol(MMG5_pSol sol,char *filename,int npmax) {
+int MMG2_loadSol(MMG5_pSol sol,char *filename,int npmax,int msh) {
   FILE       *inm;
   float       fsol;
-  double      tmp;
+  double      tmp,dsol;
   int         binch,bdim,iswp;
   int         k,i,isol,type,bin,dim,btyp,bpos;
   long        posnp;
@@ -513,9 +538,16 @@ int MMG2_loadSol(MMG5_pSol sol,char *filename,int npmax) {
     while(fscanf(inm,"%s",&chaine[0])!=EOF && strncmp(chaine,"End",strlen("End")) ) {
       if(!strncmp(chaine,"Dimension",strlen("Dimension"))) {
         fscanf(inm,"%d",&dim);
-        if(dim!=2) {
-          fprintf(stdout,"BAD SOL DIMENSION : %d\n",dim);
+        if(dim!=2 && !msh) {
+          fprintf(stdout,"  -- BAD SOL DIMENSION : %d\n",dim);
           return(0);
+        } else if(dim!=2 && msh) {
+          if(dim==3) 
+            fprintf(stdout,"  -- READ 3D SOLUTION : %d\n",dim);
+          else {
+            fprintf(stdout,"  -- BAD SOL DIMENSION : %d\n",dim);
+            return(0);
+          }
         }
         continue;
       } else if(!strncmp(chaine,"SolAtVertices",strlen("SolAtVertices"))) {
@@ -591,8 +623,7 @@ int MMG2_loadSol(MMG5_pSol sol,char *filename,int npmax) {
   sol->size = btyp;
 
   /* mem alloc */
-  sol->m = (double*)M_calloc((sol->size*npmax)+1,sizeof(double),"inout");
-  assert(sol->m);
+  _MMG5_SAFE_CALLOC(sol->m,(sol->size*npmax)+1,double);
 
   /* read mesh solutions */
   rewind(inm);
@@ -610,6 +641,17 @@ int MMG2_loadSol(MMG5_pSol sol,char *filename,int npmax) {
           sol->m[isol + i] = (double) fsol;
         }
       }
+      if(dim==3 && (sol->size>1)) {
+        if(!bin){
+          fscanf(inm,"%f",&fsol);
+          fscanf(inm,"%f",&fsol);
+          fscanf(inm,"%f",&fsol);
+        } else {
+          fread(&fsol,sw,1,inm);
+          fread(&fsol,sw,1,inm);
+          fread(&fsol,sw,1,inm);
+        }
+      }
     } else {
       for (i=0; i<sol->size; i++) {
         if(!bin){
@@ -618,6 +660,17 @@ int MMG2_loadSol(MMG5_pSol sol,char *filename,int npmax) {
         } else {
           fread(&sol->m[isol + i],sd,1,inm);
           if(iswp) sol->m[isol + i]=MMG_swapd(sol->m[isol + i]);
+        }
+      }
+      if(dim==3 && (sol->size>1)) {
+       if(!bin){
+          fscanf(inm,"%lf",&dsol);
+          fscanf(inm,"%lf",&dsol);
+          fscanf(inm,"%lf",&dsol);
+        } else {
+          fread(&dsol,sw,1,inm);
+          fread(&dsol,sw,1,inm);
+          fread(&dsol,sw,1,inm);
         }
       }
     }
@@ -635,7 +688,7 @@ int MMG2_saveMesh(MMG5_pMesh mesh,char *filename) {
   MMG5_pEdge        ped;
   MMG5_pTria        pt;
   float        fp1,fp2;
-  int          k,outm,ne,ref,j,nn,ntang;
+  int          k,outm,ne,ref,j,nn,ntang,num;
   char        *ptr,data[128],chaine[128];
 
   mesh->ver = 2;
@@ -770,8 +823,16 @@ int MMG2_saveMesh(MMG5_pMesh mesh,char *filename) {
       if (!pt->v[0]) continue;
       for (j=0 ; j<3 ; j++) {
         if (!(&mesh->adja[3*(k-1)+1])[j]) {
-          mesh->na++;
-          ped = &mesh->edge[mesh->na];
+          if(mesh->na == mesh->namax) {
+            _MMG5_EDGE_REALLOC(mesh,num,mesh->gap,
+                               printf("  ## Error: unable to allocate a new edge.\n");
+                               _MMG5_INCREASE_MEM_MESSAGE();
+                               printf("  Exit program.\n");
+                               exit(EXIT_FAILURE));
+          } else {
+            num = mesh->na++;
+          }
+          ped = &mesh->edge[num];
           ped->a = pt->v[MMG2_iare[j][0]];
           ped->b = pt->v[MMG2_iare[j][1]];
           ped->ref  = M_MIN(mesh->point[pt->v[MMG2_iare[j][0]]].ref,
@@ -1036,11 +1097,12 @@ int MMG2_saveSol(MMG5_pMesh mesh,MMG5_pSol sol,char *filename) {
   FILE*        inm;
   MMG5_pPoint       ppt;
   float        fsol;
-  double       tmp;
+  double       tmp,dsol;
   int          i,k,nbl,isol,bin,bpos,typ;
   char        *ptr,data[128],chaine[128];
-  int          binch;
+  int          binch,msh;
 
+  msh = mesh->info.nreg;
   if ( !sol->np )  return(1);
   bin = 1;
   strcpy(data,filename);
@@ -1086,7 +1148,11 @@ int MMG2_saveSol(MMG5_pMesh mesh,MMG5_pSol sol,char *filename) {
   if(!bin) {
     strcpy(&chaine[0],"MeshVersionFormatted 2\n");
     fprintf(inm,"%s",chaine);
-    strcpy(&chaine[0],"\n\nDimension 2\n");
+    if(msh) {
+      strcpy(&chaine[0],"\n\nDimension 3\n");
+    } else {
+      strcpy(&chaine[0],"\n\nDimension 2\n");
+    }
     fprintf(inm,"%s ",chaine);
   } else {
     binch = 1; //MeshVersionFormatted
@@ -1144,25 +1210,63 @@ int MMG2_saveSol(MMG5_pMesh mesh,MMG5_pSol sol,char *filename) {
     isol = (k-1) * sol->size + 1;
     if (sol->ver < 2) {
       if(!bin) {
-        for (i=0; i<sol->size; i++) {
-          fsol = (float) sol->m[isol + i];
-          fprintf(inm,"%f ",fsol);
+        if(msh && sol->size > 1) {
+         for (i=0; i<sol->size; i++) {
+            fsol = (float) sol->m[isol + i];
+            fprintf(inm,"%f ",fsol);
+          }
+         fprintf(inm,"%f %f %f",0.,0.,1.);
+        } else {
+          for (i=0; i<sol->size; i++) {
+            fsol = (float) sol->m[isol + i];
+            fprintf(inm,"%f ",fsol);
+          }
         }
         fprintf(inm,"\n");
       } else {
-        for (i=0; i<sol->size; i++) {
-          fsol = (float) sol->m[isol + i];
+        if(msh && sol->size > 1) {
+          for (i=0; i<sol->size; i++) {
+            fsol = (float) sol->m[isol + i];
+            fwrite(&fsol,sw,1,inm);
+          }
+          fsol = 0;
           fwrite(&fsol,sw,1,inm);
+          fsol = 0;
+          fwrite(&fsol,sw,1,inm);
+          fsol = 1;
+          fwrite(&fsol,sw,1,inm);
+        } else {
+          for (i=0; i<sol->size; i++) {
+            fsol = (float) sol->m[isol + i];
+            fwrite(&fsol,sw,1,inm);
+          }
         }
       }
     } else {
       if(!bin) {
-        for (i=0; i<sol->size; i++)
-          fprintf(inm,"%.15lg ",sol->m[isol + i]);
+        if(msh && sol->size > 1) {
+          for (i=0; i<sol->size; i++)
+            fprintf(inm,"%.15lg ",sol->m[isol + i]);
+          fprintf(inm,"%.15lg %.15lg %.15lg",0.,0.,1.);
+         } else {
+          for (i=0; i<sol->size; i++)
+            fprintf(inm,"%.15lg ",sol->m[isol + i]);
+        }
         fprintf(inm,"\n");
       } else {
-        for (i=0; i<sol->size; i++)
-          fwrite(&sol->m[isol + i],sd,1,inm);
+        if(msh && sol->size > 1) {
+          for (i=0; i<sol->size; i++)
+            fwrite(&sol->m[isol + i],sd,1,inm);
+          dsol = 0.;
+          fwrite(&dsol,sd,1,inm);
+          dsol = 0.;
+          fwrite(&dsol,sd,1,inm);
+          dsol = 0.;
+          fwrite(&dsol,sd,1,inm);
+        } else {
+          for (i=0; i<sol->size; i++)
+            fwrite(&sol->m[isol + i],sd,1,inm);
+        }
       }
 
     }

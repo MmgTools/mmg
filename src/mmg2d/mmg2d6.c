@@ -50,7 +50,7 @@ int MMG2_mmg2d6(MMG5_pMesh mesh, MMG5_pSol sol) {
       maxls = M_MAX(sol->m[pt->v[i]],maxls);
     }
     if(!(maxls > 1e-4)) {
-      MMG2_delElt(mesh,k);
+      _MMG5_delElt(mesh,k);
     }
   }   
 

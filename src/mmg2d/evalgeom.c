@@ -33,12 +33,12 @@ int MMG2_evalgeom(MMG5_pMesh mesh) {
 
   rbound = mesh->info.dhd*M_PI/180.;
   /*corners detection*/
-  list  = (int*)malloc(LMAX*sizeof(int));
-  assert(list); 
+ _MMG5_SAFE_MALLOC(list,LMAX,int);
  
   ++mesh->base;
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
+    if(!M_EOK(pt)) continue;
     for(j=0 ; j<3 ; j++) {
       ppt = &mesh->point[pt->v[j]]; 
       if(!(ppt->tag & M_BDRY)) continue;
@@ -98,7 +98,8 @@ int MMG2_evalgeom(MMG5_pMesh mesh) {
       ppt->tagdel++;
     } 
   }     
-  free(list);
-  
+
+  _MMG5_SAFE_FREE(list);
+   
   return(1); 
 }

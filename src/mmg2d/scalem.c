@@ -33,24 +33,6 @@ int MMG2_scaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
 
   // pd  = mesh->disp;
 
-  /* base used vertices */
-  if (!mesh->nt) {
-    for (k=1; k<=mesh->np; k++) {
-      ppt = &mesh->point[ k ];
-      ppt->tag &= ~M_NUL;
-    }  
-  } else { 
-    for (k=1; k<=mesh->nt; k++) {
-      pt = &mesh->tria[k];
-
-      if ( !M_EOK(pt) )  continue;
-      for (i=0; i<3; i++) {
-        ppt = &mesh->point[ pt->v[i] ];
-        ppt->tag &= ~M_NUL;
-      }
-    }       
-  }
-
   /* compute bounding box */
   info = &mesh->info;
   for (i=0; i<2; i++) {
@@ -146,7 +128,7 @@ int MMG2_scaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
   /* compute quality */
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
-    pt->qual = MMG2_caltri(mesh,sol,pt);        
+    pt->qual = MMG2_caltri_in(mesh,sol,pt);        
   }
 
   return(1);
@@ -181,6 +163,7 @@ int MMG2_unscaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
   case 3:
     dd = 1.0 / (dd*dd);
     for (k=1; k<=mesh->np; k++) {
+      ppt = &mesh->point[k];
       if ( !M_VOK(ppt) )  continue;  
       iadr = (k-1)*sol->size + 1;
       for (i=0; i<sol->size; i++)  sol->m[iadr+i] *= dd;
