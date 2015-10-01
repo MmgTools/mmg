@@ -70,6 +70,81 @@ _MMG5_paktet(MMG5_pMesh mesh) {
   }
 }
 
+static int _MMG5_hashFace(MMG5_pMesh mesh,_MMG5_Hash *hash,int ia,int ib,int ic,int k) {
+  _MMG5_hedge     *ph;
+  int        key,mins,maxs,sum,j;
+
+  mins = MG_MIN(ia,MG_MIN(ib,ic));
+  maxs = MG_MAX(ia,MG_MAX(ib,ic));
+
+  /* compute key */
+  sum = ia + ib + ic;
+  key = (_MMG5_KA*mins + _MMG5_KB*maxs) % hash->siz;
+  ph  = &hash->item[key];
+
+  if ( ph->a ) {
+    if ( ph->a == mins && ph->b == maxs && ph->s == sum )
+      return(ph->k);
+    else {
+      while ( ph->nxt && ph->nxt < hash->max ) {
+        ph = &hash->item[ph->nxt];
+        if ( ph->a == mins && ph->b == maxs && ph->s == sum )  return(ph->k);
+      }
+    }
+    ph->nxt = hash->nxt;
+    ph      = &hash->item[hash->nxt];
+    ph->a   = mins;
+    ph->b   = maxs;
+    ph->s   = sum;
+    ph->k   = k;
+    hash->nxt = ph->nxt;
+    ph->nxt = 0;
+
+    if ( hash->nxt >= hash->max ) {
+      _MMG5_TAB_RECALLOC(mesh,hash->item,hash->max,0.2,_MMG5_hedge,"face",return(0));
+      for (j=hash->nxt; j<hash->max; j++)  hash->item[j].nxt = j+1;
+    }
+    return(1);
+  }
+
+  /* insert new face */
+  ph->a = mins;
+  ph->b = maxs;
+  ph->s = sum;
+  ph->k = k;
+  ph->nxt = 0;
+
+  return(1);
+}
+
+/** return index of triangle ia ib ic */
+static int _MMG5_hashGetFace(_MMG5_Hash *hash,int ia,int ib,int ic) {
+  _MMG5_hedge  *ph;
+  int     key,mins,maxs,sum;
+
+  if ( !hash->item )  return(0);
+  mins = MG_MIN(ia,MG_MIN(ib,ic));
+  maxs = MG_MAX(ia,MG_MAX(ib,ic));
+
+  /* compute key */
+  sum = ia + ib + ic;
+  key = (_MMG5_KA*mins + _MMG5_KB*maxs) % hash->siz;
+  ph  = &hash->item[key];
+
+  if ( ph->a ) {
+    if ( ph->a == mins && ph->b == maxs && ph->s == sum )
+      return(ph->k);
+    else {
+      while ( ph->nxt ) {
+        ph = &hash->item[ph->nxt];
+        if ( ph->a == mins && ph->b == maxs && ph->s == sum )  return(ph->k);
+      }
+    }
+  }
+
+  return(0);
+}
+
 /**
  * \param mesh pointer toward the mesh structure.
  * \param pack we pack the mesh at function begining if \f$pack=1\f$.
@@ -189,17 +264,322 @@ int _MMG5_hashTetra(MMG5_pMesh mesh, int pack) {
 
 /**
  * \param mesh pointer towar the mesh structure.
+ * \param hash edges hash table.
  * \return 1 if success, 0 if failed.
  *
- * Create surface adjacency table.
+ * Set non-manifold tag at extremities of a non-manifold edge.  Check if a
+ * non-manifold edge is at the interface of several distinct domains (thus we
+ * can't travel from a domain through another one by adjacency) and in this
+ * case, mark the edge and its extremities as required. Free the edge hash table
+ * \a hash if success.
+ *
+ * \warning if fail, the edge hash table \a hash is not freed.
  *
  */
-int _MMG5_hashTria(MMG5_pMesh mesh) {
+static inline
+int _MMG5_setEdgeNmTag(MMG5_pMesh mesh, _MMG5_Hash *hash) {
+  MMG5_pTetra         ptet;
+  MMG5_pxTetra        pxt;
+  MMG5_pTria          pt;
+  _MMG5_Hash          hashF;
+  _MMG5_hedge         *ph;
+  int                 *adja,adj,pradj,piv,ilist;
+  int                 k,i,i1,i2,ia,ib,l,it1,it2, nr;
+  int                 v0,v1,v2,ipa,ipb,ok, kel,count,start;
+  unsigned int        key;
+  char                isbdy,iface;
+
+  ok = 0;
+  nr = 0;
+
+  /* First: seek edges at the interface of two distinct domains and mark it as
+   * required */
+  for (k=1; k<=mesh->nt; k++) {
+    pt  = &mesh->tria[k];
+
+    for (i=0; i<3; i++) {
+      if ( pt->tag[i] & MG_NOM ) {
+        i1 = _MMG5_inxt2[i];
+        i2 = _MMG5_iprv2[i];
+
+        /* compute key */
+        ia  = MG_MIN(pt->v[i1],pt->v[i2]);
+        ib  = MG_MAX(pt->v[i1],pt->v[i2]);
+        key = (_MMG5_KA*ia + _MMG5_KB*ib) % hash->siz;
+        ph  = &hash->item[key];
+
+        assert(ph->a);
+        while ( ph->a ) {
+          if ( ph->a == ia && ph->b == ib ) break;
+          assert(ph->nxt);
+          ph = &hash->item[ph->nxt];
+        }
+        /* Set edge tag and point tags to MG_REQ if the non-manifold edge shared
+         * separated domains */
+        if ( ph->s > 3 ) {
+          if ( !ok ) {
+
+            /* If not already done, hash all the boundary tetra faces. */
+            if ( ! _MMG5_hashNew(mesh,&hashF,0.51*mesh->nt,1.51*mesh->nt) )
+              return(0);
+
+            for ( kel=1; kel<=mesh->ne; ++kel ) {
+              ptet = &mesh->tetra[kel];
+              if ( !MG_EOK(ptet) || !ptet->xt ) continue;
+              for ( iface=0; iface<4; ++iface) {
+                v0 = ptet->v[_MMG5_idir[iface][0]];
+                v1 = ptet->v[_MMG5_idir[iface][1]];
+                v2 = ptet->v[_MMG5_idir[iface][2]];
+                if ( !_MMG5_hashFace(mesh,&hashF,v0,v1,v2,kel) ) return(0);
+              }
+            }
+            ok = 1;
+          }
+          /* Find the starting tetra, and the edge [ia,ib] in it. */
+          start = _MMG5_hashGetFace(&hashF,pt->v[i],ia,ib);
+          assert(start);
+          ptet = &mesh->tetra[start];
+          for (l=0; l<6; ++l) {
+            ipa = _MMG5_iare[l][0];
+            ipb = _MMG5_iare[l][1];
+            if ( (ptet->v[ipa] == ia && ptet->v[ipb] == ib) ||
+                 (ptet->v[ipa] == ib && ptet->v[ipb] == ia))  break;
+          }
+          assert(l<6);
+
+
+          count = 0;
+
+          /* Travel through the edge's shell and count the number of founded
+           * boundaries. */
+          ilist = 0;
+
+          it1 = 0;
+          it2 = 0;
+
+          pradj = start;
+          adja = &mesh->adja[4*(start-1)+1];
+          adj = adja[_MMG5_ifar[l][0]] / 4;
+          piv = ptet->v[_MMG5_ifar[l][1]];
+
+          pxt = &mesh->xtetra[ptet->xt];
+
+          iface = _MMG5_ifar[l][1];
+          isbdy = pxt->ftag[iface];
+
+          if ( isbdy ) {
+            it1 = 4*start + iface;
+            ++count;
+          }
+
+          while ( adj && (adj != start) ) {
+            pradj = adj;
+            /* travel through new tetra */
+            if ( _MMG5_coquilTravel(mesh,ia,ib,&adj,&piv,&iface,&l) ) {
+              if ( it1 == 0 ) {
+                it1 = 4*pradj+iface;
+                ++count;
+              }
+              else {
+                it2 = 4*pradj+iface;
+                ++count;
+              }
+            }
+
+            /* overflow */
+            if ( ++ilist > _MMG5_LMAX-2 ) {
+              fprintf(stdout,"  ## Warning: problem in surface remesh process.");
+              fprintf(stdout," Coquil of edge %d-%d contains too many elts.\n",
+                      _MMG5_indPt(mesh,ia),_MMG5_indPt(mesh,ib));
+              fprintf(stdout,"  ##          Try to modify the hausdorff number,");
+              fprintf(stdout," or/and the maximum mesh.\n");
+              return(0);
+            }
+          }
+
+          /* At this point, the first travel, in one direction, of the shell is
+             complete. Now, analyze why the travel ended. */
+          if ( adj == start ) {
+            if ( (!it1 || !it2) || (it1 == it2) ) {
+              _MMG5_coquilFaceErrorMessage(mesh, it1/4, it2/4);
+            }
+          }
+          else {
+            /* A boundary has been detected : slightly different configuration */
+            assert(!adj);
+            adj = pradj;
+            ilist = 0;
+
+            /* Start back everything from this tetra adj */
+            ptet = &mesh->tetra[adj];
+
+            assert(ptet->xt);
+            pxt = &mesh->xtetra[ptet->xt];
+            adja = &mesh->adja[4*(adj-1)+1];
+            if ( ptet->v[ _MMG5_ifar[l][0] ] == piv ) {
+              iface = _MMG5_ifar[l][1];
+            }
+            else {
+              iface = _MMG5_ifar[l][0];
+            }
+            isbdy = pxt->ftag[iface];
+            assert( isbdy );
+            it1 = 4*pradj + iface;
+            count = 1;
+
+            while ( adj ) {
+              pradj = adj;
+              _MMG5_openCoquilTravel( mesh, ia, ib, &adj, &piv, &iface, &l );
+
+              /* overflow */
+              if ( ++ilist > _MMG5_LMAX-2 ) {
+                fprintf(stdout,"  ## Warning: problem in surface remesh process.");
+                fprintf(stdout," Coquil of edge %d-%d contains too many elts.\n",
+                        _MMG5_indPt(mesh,ia),_MMG5_indPt(mesh,ib));
+                fprintf(stdout,"  ##          Try to modify the hausdorff number,");
+                fprintf(stdout," or/and the maximum mesh.\n");
+                return(0);
+              }
+              if ( ptet->xt ) {
+                pxt = &mesh->xtetra[ptet->xt];
+                if ( pxt->ftag[iface] ) ++count;
+              }
+              ptet = &mesh->tetra[adj];
+            }
+
+            assert(!adj);
+            it2 = 4*pradj + iface;
+
+            if ( (!it1 || !it2) || (it1 == it2) ) {
+              _MMG5_coquilFaceErrorMessage(mesh, it1/4, it2/4);
+              return(0);
+            }
+          }
+
+          /* If ph->s do not match the number of encountred boundaries we have
+             separated domains. */
+          if ( count != ph->s ) {
+            if ( !pt->tag[i] & MG_REQ ) {
+              pt->tag[i] |= MG_REQ;
+              ++nr;
+            }
+            mesh->point[pt->v[_MMG5_inxt2[i]]].tag |= MG_REQ;
+            mesh->point[pt->v[_MMG5_iprv2[i]]].tag |= MG_REQ;
+          }
+
+          /* Work done for this edge: reset ph->s/ */
+          ph->s = 0;
+        }
+      }
+    }
+  }
+  if ( mesh->info.ddebug || abs(mesh->info.imprim) > 3 )
+    fprintf(stdout,"     %d required edges added\n",nr);
+
+  /* Free the edge hash table */
+  _MMG5_DEL_MEM(mesh,hash->item,(hash->max+1)*sizeof(_MMG5_hedge));
+  return(1);
+}
+
+/**
+ * \param mesh pointer towar the mesh structure.
+ *
+ * Seek the non-required non-manifold points and try to analyse whether they are
+ * corner or required.
+ *
+ * \remark We don't know how to travel through the shell of a non-manifold point
+ * by triangle adjacency. Thus the work done here can't be performed in the \ref
+ * _MMG5_singul function.
+ */
+static inline
+void _MMG5_setVertexNmTag(MMG5_pMesh mesh) {
+  MMG5_pTetra         ptet;
+  MMG5_pPoint         ppt;
+  int                 k,i;
+  int                 nc, nre, ng, nrp;
+
+  /* Second: seek the non-required non-manifold points and try to analyse
+   * whether they are corner or required. */
+  nc = nre = 0;
+  ++mesh->base;
+  for (k=1; k<=mesh->ne; ++k) {
+    ptet = &mesh->tetra[k];
+    if ( !MG_EOK(ptet) ) continue;
+
+    for ( i=0; i<4; ++i ) {
+      ppt = &mesh->point[ptet->v[i]];
+      if ( (!MG_VOK(ppt)) || (ppt->flag==mesh->base)  ) continue;
+      ppt->flag = mesh->base;
+
+      if ( (!(ppt->tag & MG_NOM)) || (ppt->tag & MG_REQ) ) continue;
+
+      if ( !_MMG5_boulernm(mesh, k, i, &ng, &nrp) ) continue;
+      if ( (ng+nrp) > 2 ) {
+        ppt->tag |= MG_CRN + MG_REQ;
+        nre++;
+        nc++;
+      }
+      else if ( (ng == 1) && (nrp == 1) ) {
+        ppt->tag |= MG_REQ;
+        nre++;
+      }
+      else if ( ng == 1 && !nrp ){
+        ppt->tag |= MG_CRN + MG_REQ;
+        nre++;
+        nc++;
+      }
+      else if ( ng == 1 && !nrp ){
+        ppt->tag |= MG_CRN + MG_REQ;
+        nre++;
+        nc++;
+      }
+    }
+  }
+
+  if ( mesh->info.ddebug || abs(mesh->info.imprim) > 3 )
+    fprintf(stdout,"     %d corner and %d required vertices added\n",nc,nre);
+
+}
+
+/**
+ * \param mesh pointer towar the mesh structure.
+ * \param hash edges hash table.
+ * \return 1 if success, 0 if failed.
+ *
+ * Set tags to non-manifold edges and vertices. Not done before because we need
+ * the \ref MMG5_xTetra table.
+ *
+ * \warning if fail, the edge hash table \a hash is not freed.
+ *
+ */
+int _MMG5_setNmTag(MMG5_pMesh mesh, _MMG5_Hash *hash) {
+
+  /* First: seek edges at the interface of two distinct domains and mark it as
+   * required */
+  if ( !_MMG5_setEdgeNmTag(mesh,hash) ) return(0);
+
+  /* Second: seek the non-required non-manifold points and try to analyse
+   * whether they are corner or required. */
+  _MMG5_setVertexNmTag(mesh);
+
+  return(1);
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param hash Edges hash table.
+ * \return 1 if success, 0 if failed.
+ *
+ * Create surface adjacency table. Allocate the edge hash table \a hash but
+ * don't free it.
+ *
+ */
+int _MMG5_hashTria(MMG5_pMesh mesh, _MMG5_Hash *hash) {
 
   _MMG5_ADD_MEM(mesh,(3*mesh->nt+4)*sizeof(int),"surfacic adjacency table",return(0));
   _MMG5_SAFE_CALLOC(mesh->adjt,3*mesh->nt+4,int);
 
-  return( _MMG5_mmgHashTria(mesh, mesh->adjt, 1) );
+  return( _MMG5_mmgHashTria(mesh, mesh->adjt, hash, 1) );
 }
 
 
@@ -443,7 +823,8 @@ int _MMG5_hNew(MMG5_HGeom *hash,int hsiz,int hmax,int secure) {
 int _MMG5_hGeom(MMG5_pMesh mesh) {
   MMG5_pTria   pt;
   MMG5_pEdge   pa;
-  int         *adja,k,kk,edg;
+  _MMG5_Hash   hash;
+  int         *adja,k,kk,edg,ier;
   char         i,i1,i2,tag;
 
   /* if edges exist in mesh, hash special edges from existing field */
@@ -491,7 +872,12 @@ int _MMG5_hGeom(MMG5_pMesh mesh) {
   }
   /* else, infer special edges from information carried by triangles */
   else {
-    if ( !mesh->adjt && !_MMG5_hashTria(mesh) )  return(0);
+    if ( !mesh->adjt ) {
+      ier = _MMG5_hashTria(mesh,&hash);
+      _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
+      if ( !ier ) return(0);
+    }
+
     for (k=1; k<=mesh->nt; k++) {
       pt   = &mesh->tria[k];
       adja = &mesh->adjt[3*(k-1)+1];
@@ -522,8 +908,10 @@ int _MMG5_hGeom(MMG5_pMesh mesh) {
         i2  = _MMG5_iprv2[i];
         kk  = adja[i] / 3;
         if ( !kk || pt->tag[i] & MG_NOM ) {
-          if ( pt->tag[i] & MG_NOM )
-            pt->edg[i] = ( mesh->info.iso && pt->edg[i] != 0 ) ?  -abs(pt->edg[i]) : MG_ISO;
+          if ( pt->tag[i] & MG_NOM ) {
+            if ( mesh->info.iso )
+              pt->edg[i] = ( pt->edg[i] != 0 ) ?  -abs(pt->edg[i]) : MG_ISO;
+          }
           _MMG5_hEdge(mesh,pt->v[i1],pt->v[i2],pt->edg[i],pt->tag[i]);
         }
         else if ( k < kk && ( pt->edg[i] || pt->tag[i] ) )
@@ -595,6 +983,9 @@ int _MMG5_chkNumberOfTri(MMG5_pMesh mesh) {
  *
  * Identify boundary triangles.
  *
+ * \remark mesh->xtetra is not allocated when \ref _MMG5_bdryTria is called by
+ * \ref _MMG5_analys but it is allocated at save time.
+ *
  */
 int _MMG5_bdryTria(MMG5_pMesh mesh) {
   MMG5_pTetra    pt,pt1;
@@ -655,81 +1046,6 @@ int _MMG5_bdryTria(MMG5_pMesh mesh) {
   }
 
   return(1);
-}
-
-static int _MMG5_hashFace(MMG5_pMesh mesh,_MMG5_Hash *hash,int ia,int ib,int ic,int k) {
-  _MMG5_hedge     *ph;
-  int        key,mins,maxs,sum,j;
-
-  mins = MG_MIN(ia,MG_MIN(ib,ic));
-  maxs = MG_MAX(ia,MG_MAX(ib,ic));
-
-  /* compute key */
-  sum = ia + ib + ic;
-  key = (_MMG5_KA*mins + _MMG5_KB*maxs) % hash->siz;
-  ph  = &hash->item[key];
-
-  if ( ph->a ) {
-    if ( ph->a == mins && ph->b == maxs && ph->s == sum )
-      return(ph->k);
-    else {
-      while ( ph->nxt && ph->nxt < hash->max ) {
-        ph = &hash->item[ph->nxt];
-        if ( ph->a == mins && ph->b == maxs && ph->s == sum )  return(ph->k);
-      }
-    }
-    ph->nxt = hash->nxt;
-    ph      = &hash->item[hash->nxt];
-    ph->a   = mins;
-    ph->b   = maxs;
-    ph->s   = sum;
-    ph->k   = k;
-    hash->nxt = ph->nxt;
-    ph->nxt = 0;
-
-    if ( hash->nxt >= hash->max ) {
-      _MMG5_TAB_RECALLOC(mesh,hash->item,hash->max,0.2,_MMG5_hedge,"face",return(0));
-      for (j=hash->nxt; j<hash->max; j++)  hash->item[j].nxt = j+1;
-    }
-    return(1);
-  }
-
-  /* insert new face */
-  ph->a = mins;
-  ph->b = maxs;
-  ph->s = sum;
-  ph->k = k;
-  ph->nxt = 0;
-
-  return(1);
-}
-
-/** return index of triangle ia ib ic */
-static int _MMG5_hashGetFace(_MMG5_Hash *hash,int ia,int ib,int ic) {
-  _MMG5_hedge  *ph;
-  int     key,mins,maxs,sum;
-
-  if ( !hash->item )  return(0);
-  mins = MG_MIN(ia,MG_MIN(ib,ic));
-  maxs = MG_MAX(ia,MG_MAX(ib,ic));
-
-  /* compute key */
-  sum = ia + ib + ic;
-  key = (_MMG5_KA*mins + _MMG5_KB*maxs) % hash->siz;
-  ph  = &hash->item[key];
-
-  if ( ph->a ) {
-    if ( ph->a == mins && ph->b == maxs && ph->s == sum )
-      return(ph->k);
-    else {
-      while ( ph->nxt ) {
-        ph = &hash->item[ph->nxt];
-        if ( ph->a == mins && ph->b == maxs && ph->s == sum )  return(ph->k);
-      }
-    }
-  }
-
-  return(0);
 }
 
 /**

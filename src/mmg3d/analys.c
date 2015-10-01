@@ -551,10 +551,18 @@ static void _MMG5_nmgeom(MMG5_pMesh mesh){
       }
     }
   }
+  /* Mark as required the non-manifold points that do not belong to a surface
+   * tetra (a tetra that have a face without adjacent)*/
+  for (k=1; k<=mesh->np; k++) {
+    p0 = &mesh->point[k];
+    if ( !(p0->tag & MG_NOM) || p0->xp ) continue;
+    p0->tag |= MG_REQ;
+  }
 }
 
 /** preprocessing stage: mesh analysis */
 int _MMG5_analys(MMG5_pMesh mesh) {
+  _MMG5_Hash hash;
 
   /**--- stage 1: data structures for surface */
   if ( abs(mesh->info.imprim) > 3 )
@@ -587,7 +595,8 @@ int _MMG5_analys(MMG5_pMesh mesh) {
   }
 
   /* create surface adjacency */
-  if ( !_MMG5_hashTria(mesh) ) {
+  if ( !_MMG5_hashTria(mesh,&hash) ) {
+    _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
     fprintf(stdout,"  ## Hashing problem (2). Exit program.\n");
     return(0);
   }
@@ -595,6 +604,7 @@ int _MMG5_analys(MMG5_pMesh mesh) {
   /* build hash table for geometric edges */
   if ( !_MMG5_hGeom(mesh) ) {
     fprintf(stdout,"  ## Hashing problem (0). Exit program.\n");
+    _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
     _MMG5_DEL_MEM(mesh,mesh->htab.geom,(mesh->htab.max+1)*sizeof(MMG5_hgeom));
     return(0);
   }
@@ -606,18 +616,21 @@ int _MMG5_analys(MMG5_pMesh mesh) {
   /* identify connexity */
   if ( !_MMG5_setadj(mesh) ) {
     fprintf(stdout,"  ## Topology problem. Exit program.\n");
+    _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
     return(0);
   }
 
   /* check for ridges */
   if ( mesh->info.dhd > _MMG5_ANGLIM && !_MMG5_setdhd(mesh) ) {
     fprintf(stdout,"  ## Geometry problem. Exit program.\n");
+    _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
     return(0);
   }
 
   /* identify singularities */
   if ( !_MMG5_singul(mesh) ) {
     fprintf(stdout,"  ## MMG5_Singularity problem. Exit program.\n");
+    _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
     return(0);
   }
 
@@ -627,12 +640,25 @@ int _MMG5_analys(MMG5_pMesh mesh) {
   /* define (and regularize) normals */
   if ( !_MMG5_norver(mesh) ) {
     fprintf(stdout,"  ## Normal problem. Exit program.\n");
+    _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
     return(0);
   }
 
   /* set bdry entities to tetra */
   if ( !_MMG5_bdrySet(mesh) ) {
     fprintf(stdout,"  ## Boundary problem. Exit program.\n");
+    _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
+    _MMG5_DEL_MEM(mesh,mesh->xpoint,(mesh->xpmax+1)*sizeof(MMG5_xPoint));
+    return(0);
+  }
+
+  /* set non-manifold edges sharing non-intersecting multidomains as required */
+  if ( abs(mesh->info.imprim) > 5  || mesh->info.ddebug )
+    fprintf(stdout,"  ** UPDATING TOPOLOGY AT NON-MANIFOLD POINTS\n");
+
+  if ( !_MMG5_setNmTag(mesh,&hash) ) {
+    fprintf(stdout,"  ## Non-manifold topology problem. Exit program.\n");
+    _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
     _MMG5_DEL_MEM(mesh,mesh->xpoint,(mesh->xpmax+1)*sizeof(MMG5_xPoint));
     return(0);
   }

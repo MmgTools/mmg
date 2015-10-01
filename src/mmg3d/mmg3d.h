@@ -181,6 +181,7 @@ int  _MMG5_BezierEdge(MMG5_pMesh mesh,int ip0, int ip1, double b0[3], double b1[
 int  _MMG5_BezierRidge(MMG5_pMesh mesh,int ip0, int ip1, double s, double *o, double *no1, double *no2, double *to);
 int  _MMG5_BezierNom(MMG5_pMesh mesh,int ip0,int ip1,double s,double *o,double *no,double *to);
 int  _MMG5_norface(MMG5_pMesh mesh ,int k, int iface, double v[3]);
+int  _MMG5_boulernm (MMG5_pMesh mesh, int start, int ip, int *ng, int *nr);
 int  _MMG5_boulenm(MMG5_pMesh mesh, int start, int ip, int iface, double n[3],double t[3]);
 int  _MMG5_boulevolp(MMG5_pMesh mesh, int start, int ip, int * list);
 int  _MMG5_boulesurfvolp(MMG5_pMesh mesh,int start,int ip,int iface,int *listv,
@@ -190,7 +191,11 @@ int  _MMG5_startedgsurfball(MMG5_pMesh mesh,int nump,int numq,int *list,int ilis
 int  _MMG5_srcbdy(MMG5_pMesh mesh,int start,int ia);
 int  _MMG5_coquil(MMG5_pMesh mesh, int start, int ia, int * list);
 int  _MMG5_coquilface(MMG5_pMesh mesh, int start, int ia, int * list, int * it1, int *it2);
+void _MMG5_coquilFaceErrorMessage(MMG5_pMesh mesh, int k1, int k2);
+char _MMG5_coquilTravel(MMG5_pMesh, int, int, int*, int*, char*, int*);
+void _MMG5_openCoquilTravel(MMG5_pMesh, int, int, int*, int*, char*, int*);
 int  _MMG5_settag(MMG5_pMesh,int,int,int,int);
+int  _MMG5_setNmTag(MMG5_pMesh mesh, _MMG5_Hash *hash);
 int  _MMG5_chkcol_int(MMG5_pMesh ,MMG5_pSol met,int,char,char,int *,char typchk);
 int  _MMG5_chkcol_bdy(MMG5_pMesh,MMG5_pSol met,int,char,char,int *);
 int  _MMG5_chkmanicoll(MMG5_pMesh mesh,int k,int iface,int iedg,int ndepmin,int ndepplus,char isminp,char isplp);
@@ -198,7 +203,7 @@ int  _MMG5_chkmani(MMG5_pMesh mesh);
 int  _MMG5_colver(MMG5_pMesh,MMG5_pSol,int *,int,char);
 int  _MMG5_analys(MMG5_pMesh mesh);
 int  _MMG5_hashTetra(MMG5_pMesh mesh, int pack);
-int  _MMG5_hashTria(MMG5_pMesh mesh);
+int  _MMG5_hashTria(MMG5_pMesh mesh, _MMG5_Hash*);
 int  _MMG5_hashPop(_MMG5_Hash *hash,int a,int b);
 int  _MMG5_hPop(MMG5_HGeom *hash,int a,int b,int *ref,char *tag);
 int  _MMG5_hTag(MMG5_HGeom *hash,int a,int b,int ref,char tag);

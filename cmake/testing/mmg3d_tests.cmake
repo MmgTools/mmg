@@ -346,6 +346,9 @@ IF ( LONG_TESTS )
   ADD_TEST(NAME NM_Cube
     COMMAND ${EXECUT_MMG3D} -hmax 0.05 ${MMG3D_CI_TESTS}/NM_Cube/nm
     -out ${MMG3D_CI_TESTS}/NM_Cube/nm.o.meshb)
+  ADD_TEST(NAME NM_Complex
+    COMMAND ${EXECUT_MMG3D} -v 6 ${MMG3D_CI_TESTS}/NM_Complex/nm4
+    -out ${MMG3D_CI_TESTS}/NM_Complex/nm4.o.mesh)
 
 
   # Compare with a reference result when we run

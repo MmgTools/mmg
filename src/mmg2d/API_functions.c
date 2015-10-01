@@ -472,8 +472,8 @@ int MMG5_Get_vertex(MMG5_pMesh mesh,int num, double* c0, double* c1, int* ref,
 
   if ( num > mesh->np ) {
     fprintf(stdout,"  ## Error: unable to get point.\n");
-    fprintf(stdout,"     The number %d in MMG5_Get_vertex function");
-    fprintf(stdout,"  exceed the max number of points: %d\n ",num,mesh->np);
+    fprintf(stdout,"     The number %d in MMG5_Get_vertex function",num);
+    fprintf(stdout,"  exceed the max number of points: %d\n ",mesh->np);
     return(0);
   }
 
