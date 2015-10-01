@@ -197,7 +197,7 @@ inline double _MMG5_caltet_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt) {
   h5 = _MMG5_lenedg_ani(mesh,met,5,pt);
 
   /* quality */
-  rap = h1 + h2 + h3 + h4 + h5 + h6;
+  rap = h1*h1 + h2*h2 + h3*h3 + h4*h4 + h5*h5 + h6*h6;
   num = sqrt(rap) * rap;
 
   cal = det / num;
