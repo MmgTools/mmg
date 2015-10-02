@@ -124,7 +124,18 @@ int _MMG5_hashEdgeDelone(MMG5_pMesh mesh,_MMG5_Hash *hash,int iel,int i,int *v) 
   return(1);
 }
 
-/* cavity -> ball */
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param sol pointer toward the solution structure.
+ * \param ip index of the point to insert.
+ * \param list pointer toward the list of the tetra in the cavity (computed by
+ * \ref _MMG5_cavity).
+ * \param ilist number of tetra inside the cavity.
+ * \return 1 if sucess, 0 or -1 if fail.
+ *
+ * Insertion of the vertex \a ip. The cavity of \a ip become its ball.
+ *
+ */
 int _MMG5_delone(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist) {
   MMG5_pPoint ppt;
   MMG5_pTetra      pt,pt1;
@@ -569,8 +580,21 @@ _MMG5_correction_iso(MMG5_pMesh mesh,int ip,int *list,int ilist,int nedep) {
 }
 
 
-/* /\* mark elements in cavity *\/ */
-int _MMG5_cavity_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel,int ip,int* list,int lon) { 
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the sol structure.
+ * \param iel tetra index.
+ * \param ip point local index in \a iel.
+ * \param list pointer toward the list of tetra in the shell of edge where
+ * ip will be inserted.
+ * \param lon number of tetra in the list.
+ * \return ilist number of tetra inside the cavity or -ilist if one of the tet
+ * of the cavity is required.
+ *
+ * Mark elements in cavity and update the list of tetra in the cavity.
+ *
+ */
+int _MMG5_cavity_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel,int ip,int* list,int lon) {
   MMG5_pPoint    ppt;
   MMG5_pTetra    pt,pt1,ptc;
   double    c[3],eps,dd,ray,ux,uy,uz,crit;
@@ -694,10 +718,23 @@ int _MMG5_cavity_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel,int ip,int* list,int 
   }
 
   return(ilist);
-} 
+}
 
 
-/** Return a negative value for ilist if one of the tet of the cavity is required */
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the sol structure.
+ * \param iel tetra index.
+ * \param ip point local index in \a iel.
+ * \param list pointer toward the list of tetra in the shell of edge where
+ * ip will be inserted.
+ * \param lon number of tetra in the list.
+ * \return ilist number of tetra inside the cavity or -ilist if one of the tet
+ * of the cavity is required.
+ *
+ * Mark elements in cavity and update the list of tetra in the cavity.
+ *
+ */
 int _MMG5_cavity_iso(MMG5_pMesh mesh,MMG5_pSol sol,int iel,int ip,int *list,int lon) {
   MMG5_pPoint ppt;
   MMG5_pTetra      pt,pt1,ptc;
