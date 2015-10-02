@@ -609,9 +609,18 @@ int _MMG5_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   return(1);
 }
 
-/* Enforces gradation of metric in one extremity of edge i in tria k with respect to the other,
-   along the direction of the associated support curve
-   Return -1 if no gradation is needed, else index of graded point */
+/**
+ * \param mesh pointer toward the mesh.
+ * \param met pointer toward the metric structure.
+ * \param iel element index.
+ * \param i edge index in element \a iel.
+ * \return -1 if no gradation is needed, else index of graded point.
+ *
+ * Enforces gradation of metric in one extremity of edge \a i in tria \a iel
+ * with respect to the other, along the direction of the associated support
+ * curve.
+ *
+ */
 static int grad2met(MMG5_pMesh mesh, MMG5_pSol met, int iel, int i){
   MMG5_pTria    pt;
   MMG5_pPoint   p1,p2;
@@ -702,17 +711,19 @@ static int grad2met(MMG5_pMesh mesh, MMG5_pSol met, int iel, int i){
   _MMG5_rotmatrix(n2,r2);
 
   /* Geodesic length of support curve to edge i */
-  ps1 = ux*n1[0] + uy*n1[1] + uz*n1[2];
-  t1[0] = ux - ps1*n1[0];
-  t1[1] = uy - ps1*n1[1];
-  t1[2] = uz - ps1*n1[2];
-
-  ps2 = - (ux*n2[0] + uy*n2[1] + uz*n2[2]);
-  t2[0] = -ux - ps1*n2[0];
-  t2[1] = -uy - ps1*n2[1];
-  t2[2] = -uz - ps1*n2[2];
 
   // Commentated because the next line overwrite it... to check!
+  /* ps1 = ux*n1[0] + uy*n1[1] + uz*n1[2]; */
+  /* t1[0] = ux - ps1*n1[0]; */
+  /* t1[1] = uy - ps1*n1[1]; */
+  /* t1[2] = uz - ps1*n1[2]; */
+
+  /* // warning : t2 seems to be wrong calculated */
+  /* ps2 = - (ux*n2[0] + uy*n2[1] + uz*n2[2]); */
+  /* t2[0] = -ux - ps1*n2[0]; */
+  /* t2[1] = -uy - ps1*n2[1]; */
+  /* t2[2] = -uz - ps1*n2[2]; */
+
   /* l1 = m1[0]*t1[0]*t1[0] + m1[3]*t1[1]*t1[1] + m1[5]*t1[2]*t1[2] \ */
   /*   + 2.0 * ( m1[1]*t1[0]*t1[1] + m1[2]*t1[0]*t1[2] + m1[4]*t1[1]*t1[2] ) ; */
   /* l2 = m2[0]*t2[0]*t2[0] + m2[3]*t2[1]*t2[1] + m2[5]*t2[2]*t2[2] \ */
@@ -902,7 +913,15 @@ static int grad2met(MMG5_pMesh mesh, MMG5_pSol met, int iel, int i){
   }
 }
 
-/* Enforces mesh gradation by truncating metric field */
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \return 1
+ *
+ *
+ * Enforces mesh gradation by truncating metric field.
+ *
+ */
 int gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTria   pt;
   MMG5_pPoint  p1,p2;
