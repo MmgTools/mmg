@@ -685,10 +685,12 @@ int _MMG5_cavity_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel,int ip,int* list,int 
       for (j=0; j<4; j++) {
         if ( j == voy )  continue;
         adi = adjb[j] >> 2;
+        assert(adi !=jel);
         if ( !adi )  continue;
         pt1 = &mesh->tetra[adi];
-        if ( pt1->mark == base && adi != jel ) {
-          if ( !adi || pt1->ref != mesh->tetra[adi].ref )  break;
+#warning demander a cecile quand ca arrive??
+        if ( pt1->mark == base ) {
+          if ( pt1->ref != tref )  break;
         }
       }
       /* store tetra */
@@ -704,10 +706,9 @@ int _MMG5_cavity_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel,int ip,int* list,int 
   while ( ipil < ilist );
 
   /* global overflow */
-  if ( mesh->ne + 2*ilist >= mesh->nemax )
-    ilist = -ilist;
-  else
-    ilist = _MMG5_correction_ani(mesh,met,ip,list,ilist,lon);
+  assert( mesh->ne + 2*ilist < mesh->nemax );
+
+  ilist = _MMG5_correction_ani(mesh,met,ip,list,ilist,lon);
 
   if ( isreq ) ilist = -abs(ilist);
 
@@ -805,10 +806,11 @@ int _MMG5_cavity_iso(MMG5_pMesh mesh,MMG5_pSol sol,int iel,int ip,int *list,int 
       for (j=0; j<4; j++) {
         if ( j == voy )  continue;
         adi = adjb[j] >> 2;
+        assert(adi !=jel);
         if ( !adi )  continue;
         pt1 = &mesh->tetra[adi];
-        if ( pt1->mark == base && adi != jel ) {
-          if ( !adi || pt1->ref != tref )  break;
+        if ( pt1->mark == base ) {
+          if ( pt1->ref != tref )  break;
         }
       }
       /* store tetra */
@@ -825,7 +827,7 @@ int _MMG5_cavity_iso(MMG5_pMesh mesh,MMG5_pSol sol,int iel,int ip,int *list,int 
   while ( ipil < ilist );
 
   /* global overflow: obsolete avec la reallocation */
-  //if ( mesh->ne + 2*ilist >= mesh->nemax ) {
+  assert( mesh->ne + 2*ilist < mesh->nemax );
 
   ilist = _MMG5_correction_iso(mesh,ip,list,ilist,lon);
 
