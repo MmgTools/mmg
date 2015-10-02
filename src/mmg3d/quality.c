@@ -130,7 +130,7 @@ inline double _MMG5_caltet_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra  pt) {
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the meric structure.
  * \param pt pointer toward a tetrahedra.
- * \return The anisotropic quality of the tet.
+ * \return The anisotropic quality of the tet or 0.0 if fail.
  *
  * Compute the quality of the tet pt with respect to the anisotropic metric \a
  * met. \f$ Q = V_met(K) / (sum(len(edge_K)^2)^(3/2) \f$.
@@ -177,14 +177,14 @@ inline double _MMG5_caltet_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt) {
   v2  = acz*adx - acx*adz;
   v3  = acx*ady - acy*adx;
   vol = abx * v1 + aby * v2 + abz * v3;
-  if ( vol <= 0. )  return(cal);
+  if ( vol <= 0. )  return(0.0);
 
   det = mm[0] * ( mm[3]*mm[5] - mm[4]*mm[4]) \
       - mm[1] * ( mm[1]*mm[5] - mm[2]*mm[4]) \
       + mm[2] * ( mm[1]*mm[4] - mm[2]*mm[3]);
   if ( det < _MMG5_EPSOK )   {
-    //printf("--- INVALID METRIC : DET (%d) %e\n",iel,det);
-    return(cal);
+    //printf("--- INVALID METRIC : DET  %e\n",det);
+    return(0.0);
   }
   det = sqrt(det) * vol;
 
@@ -208,11 +208,9 @@ inline double _MMG5_caltet_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt) {
     MMG5_saveMesh(mesh);
     MMG5_saveMet(mesh,met);
     exit(EXIT_FAILURE);
-
-    return(_MMG5_NULKAL);
+    //  return(0.0);
   }
   //printf("cal %e %e %e\n",cal,num,det);
-  assert(cal > _MMG5_NULKAL);
   return(cal);
 }
 
