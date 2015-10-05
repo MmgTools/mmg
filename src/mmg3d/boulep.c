@@ -1197,7 +1197,7 @@ int _MMG5_srcbdy(MMG5_pMesh mesh,int start,int ia) {
 int _MMG5_coquilface(MMG5_pMesh mesh,int start,int ia,int *list,int *it1,int *it2) {
   MMG5_pTetra   pt;
   MMG5_pxTetra  pxt;
-  int     *adja,piv,adj,na,nb,ipa,ipb,ilist,pradj,i;
+  int     *adja,piv,adj,na,nb,ilist,pradj,i;
   char     iface,isbdy;
 
   pt = &mesh->tetra[start];

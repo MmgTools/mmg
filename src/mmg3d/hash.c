@@ -459,7 +459,7 @@ int _MMG5_setEdgeNmTag(MMG5_pMesh mesh, _MMG5_Hash *hash) {
           /* If ph->s do not match the number of encountred boundaries we have
              separated domains. */
           if ( count != ph->s ) {
-            if ( !pt->tag[i] & MG_REQ ) {
+            if ( !(pt->tag[i] & MG_REQ) ) {
               pt->tag[i] |= MG_REQ;
               ++nr;
             }

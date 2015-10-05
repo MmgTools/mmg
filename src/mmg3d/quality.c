@@ -750,7 +750,7 @@ int _MMG5_countelt(MMG5_pMesh mesh,MMG5_pSol sol, double *weightelt, long *npcib
   //int   npbdry;
   int    *pdel,lenint,loc,nedel,longen;
   int      isbdry;
-  double   dned,dnface,dnint,dnins,w,lenavg,lent[6];
+  double   dned,dnface,dnint/*,dnins*/,w,lenavg,lent[6];
   double   dnpdel,dnadd,leninv,dnaddloc,dnpdelloc;
   int      list[_MMG5_LMAX],ddebug=0,ib;
   long     nptot;
@@ -836,7 +836,7 @@ int _MMG5_countelt(MMG5_pMesh mesh,MMG5_pSol sol, double *weightelt, long *npcib
         //nb de point a l'interieur du tetra si toutes les aretes sont coupees le meme nb de fois
         dnint = (lenint+3)*(lenint+2)*(lenint+1) / 6. - 4 - 4*dnface - 6*dned;
         //nb de point a inserer pour cette arete de ce tetra : on divise par lon
-        dnins = dned*(1./lon) + (dnface/3. + dnint/6.);//(dnface/12. + dnint/6.);
+        //dnins = dned*(1./lon) + (dnface/3. + dnint/6.);//(dnface/12. + dnint/6.);
         if(!isbdry) {
           //nb points sur l'arete +
           //lon*(2/3 nb point sur la face (ie 1/3 de face et 2 faces adj a l'arete) + 1/6 nb de point interne)
@@ -879,14 +879,14 @@ int _MMG5_countelt(MMG5_pMesh mesh,MMG5_pSol sol, double *weightelt, long *npcib
             dnadd++;
           }
         }
-        dnins = 2;
+        //dnins = 2;
       } else if(len > 1.41) {
         if(!isbdry)
           dnaddloc = 1;
         if(!loc) {
           if(!isbdry) dnadd += 1.;
         }
-        dnins = 1;
+        //dnins = 1;
       } else if(len < 0.6) {
         nedel = 1;
 
