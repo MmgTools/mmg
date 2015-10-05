@@ -139,7 +139,11 @@ double _MMG5_lenedg_ani(MMG5_pMesh mesh,MMG5_pSol met,int np0,int np1,char isedg
     m0 = &met->m[6*np0];
   }
   else if ( MG_GEO & p0->tag ) {
-    if ( !_MMG5_buildridmet(mesh,met,np0,ux,uy,uz,met0) )  return(-1.0);
+    if ( !_MMG5_buildridmet(mesh,met,np0,ux,uy,uz,met0) )  {
+      printf("%s:%d:Error: Unable to compute the metric along the ridge.\n "
+             "Exit program.\n",__FILE__,__LINE__);
+      exit(EXIT_FAILURE);
+    }
     m0 = met0;
   }
   else {
@@ -150,7 +154,11 @@ double _MMG5_lenedg_ani(MMG5_pMesh mesh,MMG5_pSol met,int np0,int np1,char isedg
     m1 = &met->m[6*np1];
   }
   else if ( MG_GEO & p1->tag ) {
-    if ( !_MMG5_buildridmet(mesh,met,np1,ux,uy,uz,met1) )  return(-1.0);
+    if ( !_MMG5_buildridmet(mesh,met,np1,ux,uy,uz,met1) )  {
+      printf("%s:%d:Error: Unable to compute the metric along the ridge.\n "
+             "Exit program.\n",__FILE__,__LINE__);
+      exit(EXIT_FAILURE);
+    }
     m1 = met1;
   }
   else {
@@ -169,12 +177,12 @@ double _MMG5_lenedg_ani(MMG5_pMesh mesh,MMG5_pSol met,int np0,int np1,char isedg
     + 2.0*m1[4]*gammaprim1[1]*gammaprim1[2];
 
   if(l0 < 0) {
-    printf("neg %e\n",l0);
-    l0 =1;
+    printf("%s:%d:Error: negative edge length (%e)\n",__FILE__,__LINE__,l0);
+    exit(EXIT_FAILURE);
   }
   if(l1 < 0) {
-    printf("neg1 %e\n",l1);
-    l1 = 1;
+    printf("%s:%d:Error: negative edge length (%e)\n",__FILE__,__LINE__,l1);
+    exit(EXIT_FAILURE);
   }
   l0 = 0.5*(sqrt(l0) + sqrt(l1));
   return(l0);
@@ -192,10 +200,10 @@ double _MMG5_lenedg_ani(MMG5_pMesh mesh,MMG5_pSol met,int np0,int np1,char isedg
  */
 double _MMG5_surftri_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt) {
   MMG5_pPoint    p[3];
-  _MMG5_Bezier    b;
-  int       np[3];
-  double    surf,ux,uy,uz,dens,m[3][6],J[3][2],mJ[3][2],tJmJ[2][2];
-  char      i,i1,i2;
+  _MMG5_Bezier   b;
+  int            np[3];
+  double         surf,ux,uy,uz,dens,m[3][6],J[3][2],mJ[3][2],tJmJ[2][2];
+  char           i,i1,i2;
 
   surf = 0.0;
 
@@ -503,7 +511,7 @@ int _MMG5_solveDefmetregSys( MMG5_pMesh mesh, double r[3][3], double c[3],
 
   /* solve now (a b c) = tAA^{-1} * tAb */
   if ( !_MMG5_sys33sym(tAA,tAb,c) ) {
-    printf(" La matrice %f %f %f %f %f %f \n",tAA[0],tAA[1],tAA[2],tAA[3],tAA[4],tAA[5]);
+    printf("%s:%d: Warning: unable to solve the system.\n",__FILE__,__LINE__);
     return(0);
   }
   intm[0] = 2.0*c[0];
@@ -621,8 +629,10 @@ int _MMG5_solveDefmetrefSys( MMG5_pMesh mesh, MMG5_pPoint p0, int ipref[2],
   }
 
   /* solve now (a b c) = tAA^{-1} * tAb */
-  if ( !_MMG5_sys33sym(tAA,tAb,c) )  return(0);
-
+  if ( !_MMG5_sys33sym(tAA,tAb,c) ) {
+    printf("%s:%d: Warning: unable to solve the system.\n",__FILE__,__LINE__);
+    return(0);
+  }
   intm[0] = 2.0*c[0];
   intm[1] = c[2];
   intm[2] = 2.0*c[1];

@@ -329,7 +329,6 @@ char _MMG5_chkedg(MMG5_pMesh mesh,MMG5_Tria *pt,char ori) {
       }
       else {
         if(!((p[i1]->tag & MG_NOM) ||  MG_EDG(p[i1]->tag) ) ) {
-          //  if(t[i1][0] > 10) {
           fprintf(stdout,"2. warning geometrical problem\n");
           return(0);
         }
@@ -425,7 +424,12 @@ int _MMG5_swpmsh(MMG5_pMesh mesh,MMG5_pSol met,_MMG5_pBucket bucket) {
         if ( !(pxt->ftag[i] & MG_BDY) ) continue;
         for (j=0; j<3; j++) {
           ia  = _MMG5_iarf[i][j];
-          if ( (pxt->tag[ia] & MG_REQ) ) continue;
+
+          /* No swap of geometric edge */
+          if ( MG_EDG(pxt->tag[ia]) || (pxt->tag[ia] & MG_REQ) ||
+               (pxt->tag[ia] & MG_NOM) )
+            continue;
+
           ret = _MMG5_coquilface(mesh,k,ia,list,&it1,&it2);
           ilist = ret / 2;
           if ( ret < 0 )  return(-1);
@@ -603,25 +607,16 @@ int _MMG5_movtet(MMG5_pMesh mesh,MMG5_pSol met,int maxitin) {
                 return(-1);
 
               n = &(mesh->xpoint[ppt->xp].n1[0]);
-              if ( MG_GET(pxt->ori,i) ) {
-                // If _MMG5_directsurfball return 1 it is useless to call this function,
-                // thus it is valid here to call it inside the assert.
-                // assert(_MMG5_directsurfball(mesh, pt->v[i0],lists,ilists,n) == 1);
-                /* if ( ! (_MMG5_directsurfball(mesh,pt->v[i0],lists,ilists,n) == 1) ) */
-                /* { */
-                /*   puts("\n"); */
-                /*   printf("2! elt k %d %d, pt->v %d \n",lists[0]/4, lists[0]%4, pt->v[i0]); */
-                /*   printf("2! n %e %e %e \n",n[0], n[1], n[2]); */
-                /* } */
-              }
-              else {
-                if ( ! (_MMG5_directsurfball(mesh,pt->v[i0],lists,ilists,n) == 2) )
-                {
-                  /* puts("\n"); */
-                  /* printf("3! elt k %d %d, pt->v %d \n",lists[0]/4, lists[0]%4, pt->v[i0]); */
-                  /* printf("3! n %e %e %e \n",n[0], n[1], n[2]); */
-                }
-                // assert(_MMG5_directsurfball(mesh, pt->v[i0],lists,ilists,n)==2);
+              // if ( MG_GET(pxt->ori,i) ) {
+              /* Useless because if the orientation of the tetra face is
+               * compatible with the triangle (MG_GET(ori,i)) we know that we
+               * are well orientated. Morever, may introduce numerical errors
+               * with wrinkled surfaces. */
+                // if ( !_MMG5_directsurfball(mesh, pt->v[i0],lists,ilists,n) )  continue;
+              // }
+              if ( !MG_GET(pxt->ori,i) ) {
+                if ( !_MMG5_directsurfball(mesh,pt->v[i0],lists,ilists,n) )
+                  continue;
               }
               ier = _MMG5_movbdyregpt(mesh,met,listv,ilistv,lists,ilists);
               if ( ier )  ns++;
@@ -656,8 +651,7 @@ int _MMG5_movtet(MMG5_pMesh mesh,MMG5_pSol met,int maxitin) {
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
  * \param typchk type of checking permformed for edge length (hmin or LSHORT criterion).
- * \return -1 if failed.
- * \return number of collapsed points.
+ * \return -1 if failed, number of collapsed points otherwise.
  *
  * Attempt to collapse small edges.
  *
@@ -722,7 +716,7 @@ static int _MMG5_coltet(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
           if ( isnm ) {
             if ( mesh->adja[4*(k-1)+1+i] )  continue;
           }
-          if ( (tag & MG_REQ) || p0->tag > tag )  continue;
+          if ( p0->tag > tag )  continue;
           ilist = _MMG5_chkcol_bdy(mesh,met,k,i,j,list);
         }
         /* internal face */

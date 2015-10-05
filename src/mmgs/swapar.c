@@ -206,15 +206,34 @@ int chkswp(MMG5_pMesh mesh,MMG5_pSol met,int k,int i,char typchk) {
   if ( coschg > mesh->info.hausd*mesh->info.hausd )  return(0);
 
   if ( typchk == 2 && met->m ) {
+    /* initial quality */
     pt0->v[0]= ip0;  pt0->v[1]= ip1;  pt0->v[2]= ip2;
+    pt0->tag[0] = pt->tag[i];
+    pt0->tag[1] = pt->tag[i1];
+    pt0->tag[2] = pt->tag[i2];
     cal1 = _MMG5_calelt(mesh,met,pt0);
+
     pt0->v[0]= ip1;  pt0->v[1]= iq;   pt0->v[2]= ip2;
+    pt0->tag[0] = pt->tag[i1];
+    pt0->tag[1] = pt->tag[ii];
+    pt0->tag[2] = pt->tag[i2];
     cal2 = _MMG5_calelt(mesh,met,pt0);
+
     calnat = MG_MIN(cal1,cal2);
+
+    /* quality after swap */
     pt0->v[0]= ip0;  pt0->v[1]= ip1;  pt0->v[2]= iq;
+    pt0->tag[0] = pt->tag[i];
+    pt0->tag[1] = pt->tag[i1];
+    pt0->tag[2] = pt->tag[ii];
     cal1 = _MMG5_calelt(mesh,met,pt0);
+
     pt0->v[0]= ip0;  pt0->v[1]= iq;   pt0->v[2]= ip2;
+    pt0->tag[0] = pt->tag[i];
+    pt0->tag[1] = pt->tag[ii];
+    pt0->tag[2] = pt->tag[i2];
     cal2 = _MMG5_calelt(mesh,met,pt0);
+
     calchg = MG_MIN(cal1,cal2);
   }
   else {

@@ -33,6 +33,11 @@ FOREACH(EXEC ${LISTEXEC_MMG})
   ${MMG_CI_TESTS}/CubeVolAni/cube
   -out ${MMG_CI_TESTS}/CubeVolAni/cube.o.meshb)
 
+  ADD_TEST(NAME CubeVolAni2_${EXEC}
+  COMMAND ${EXEC} -v 6 -d
+  ${MMG_CI_TESTS}/CubeVolAni2/cube
+  -out ${MMG_CI_TESTS}/CubeVolAni2/cube.o.meshb)
+
   ADD_TEST(NAME SphereVolAni_${EXEC}
   COMMAND ${EXEC} -v 6 -d
   ${MMG_CI_TESTS}/SphereVolAni/sphere

@@ -34,7 +34,8 @@
  * \param met pointer toward the sol structure.
  * \param ip1 index of edge's extremity.
  * \param ip2 index of edge's extremity.
- * \param isedg 1 if the edge is a ridge, 0 otherwise.
+ * \param isedg 1 if the edge is a ridge, 0 otherwise (dummy arg for
+ * compatibility with \a lenedg_ani).
  * \return length of edge according to the prescribed metric.
  *
  * Compute length of edge \f$[i0;i1]\f$ according to the prescribed iso.

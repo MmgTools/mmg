@@ -65,6 +65,7 @@ static int _MMG5_defmetsin(MMG5_pMesh mesh,MMG5_pSol met,int kel, int iface, int
   idp = pt->v[ip];
   p0  = &mesh->point[idp];
 
+  if ( mesh->adja[4*(kel-1)+iface+1] ) return(0);
   ilist = _MMG5_boulesurfvolp(mesh,kel,ip,iface,
                               listv,&ilistv,lists,&ilists,(p0->tag & MG_NOM));
 
@@ -197,15 +198,10 @@ static int _MMG5_defmetrid(MMG5_pMesh mesh,MMG5_pSol met,int kel,
   ier = _MMG5_bouletrid(mesh,kel,iface,ip,&ilist1,list1,&ilist2,list2,
                         &iprid[0],&iprid[1] );
   if ( !ier ) {
-    printf("Error: unable to compute the two balls at the ridge point %d.\n", idp);
+    printf("%s:%d:Error: unable to compute the two balls at the ridge"
+           " point %d.\n",__FILE__,__LINE__, idp);
     return(0);
   }
-
-  // Check the ball orientation
-  // If _MMG5_directsurfball return 1 it is useless to call this function,
-  // thus it is valid here to call it inside the assert.
-  assert(_MMG5_directsurfball(mesh, idp,list1,ilist1,n1) == 1);
-  assert(_MMG5_directsurfball(mesh, idp,list2,ilist2,n2) == 1);
 
   /* Specific size in direction of t */
   m[0] = _MMG5_ridSizeInTangentDir(mesh,p0,idp,iprid,isqhmin,isqhmax);
@@ -362,7 +358,8 @@ static int _MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,int kel, int iface, int
   ilist = _MMG5_boulesurfvolp(mesh,kel,ip,iface,listv,&ilistv,lists,&ilists,0);
 
   if ( ilist!=1 ) {
-    printf("Error; unable to compute the ball af the point %d.\n", idp);
+    printf("%s:%d:Error: unable to compute the ball af the point %d.\n",
+           __FILE__,__LINE__, idp);
     printf("Exit program.\n");
     exit(EXIT_FAILURE);
   }
@@ -409,7 +406,8 @@ static int _MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,int kel, int iface, int
         ipref[1] = pt->v[i2];
       }
       else if ( (pt->v[i2] != ipref[0]) && (pt->v[i2] != ipref[1]) ) {
-        printf("Problem (func defmetref) : three adjacent ref at a non singular point\n");
+        printf("%s:%d:Error: three adjacent ref at a non singular point.\n",
+               __FILE__,__LINE__);
         exit(EXIT_FAILURE);
       }
     }
@@ -422,7 +420,8 @@ static int _MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,int kel, int iface, int
         ipref[1] = pt->v[i1];
       }
       else if ( (pt->v[i1] != ipref[0]) && (pt->v[i1] != ipref[1]) ) {
-        printf("Problem (func defmetref) : three adjacent ref at a non singular point\n");
+        printf("%s:%d:Error: three adjacent ref at a non singular point.\n",
+               __FILE__,__LINE__);
         exit(EXIT_FAILURE);
       }
     }
@@ -446,14 +445,14 @@ static int _MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,int kel, int iface, int
     det2d = lispoi[3*k+1]*lispoi[3*(k+1)+2] - lispoi[3*k+2]*lispoi[3*(k+1)+1];
     assert(det2d);
     if ( det2d <= 0.0 ) {
-      printf("PROBLEM : BAD PROJECTION OVER TANGENT PLANE %f \n", det2d);
+      //printf("PROBLEM : BAD PROJECTION OVER TANGENT PLANE %f \n", det2d);
       return(0);
     }
   }
   det2d = lispoi[3*(ilists-1)+1]*lispoi[3*0+2] - lispoi[3*(ilists-1)+2]*lispoi[3*0+1];
   assert(det2d);
   if ( det2d <= 0.0 ) {
-    printf("PROBLEM : BAD PROJECTION OVER TANGENT PLANE %f \n", det2d);
+    //printf("PROBLEM : BAD PROJECTION OVER TANGENT PLANE %f \n", det2d);
     return(0);
   }
   assert(ipref[0] && ipref[1]);
@@ -553,7 +552,8 @@ static int _MMG5_defmetreg(MMG5_pMesh mesh,MMG5_pSol met,int kel,int iface, int 
   ilist = _MMG5_boulesurfvolp(mesh,kel,ip,iface,listv,&ilistv,lists,&ilists,0);
 
   if ( ilist!=1 ) {
-    printf("Error; unable to compute the ball af the point %d.\n", idp);
+    printf("%s:%d:Error: unable to compute the ball af the point %d.\n",
+           __FILE__,__LINE__, idp);
     printf("Exit program.\n");
     exit(EXIT_FAILURE);
   }
@@ -606,14 +606,14 @@ static int _MMG5_defmetreg(MMG5_pMesh mesh,MMG5_pSol met,int kel,int iface, int 
     det2d = lispoi[3*k+1]*lispoi[3*(k+1)+2] - lispoi[3*k+2]*lispoi[3*(k+1)+1];
     assert(det2d);
     if ( det2d <= 0.0 ) {
-      printf("PROBLEM : BAD PROJECTION OVER TANGENT PLANE %f \n", det2d);
+      //printf("PROBLEM : BAD PROJECTION OVER TANGENT PLANE %f \n", det2d);
       return(0);
     }
   }
   det2d = lispoi[3*(ilists-1)+1]*lispoi[3*0+2] - lispoi[3*(ilists-1)+2]*lispoi[3*0+1];
   assert(det2d);
   if ( det2d <= 0.0 ) {
-    printf("PROBLEM : BAD PROJECTION OVER TANGENT PLANE %f \n", det2d);
+    //printf("PROBLEM : BAD PROJECTION OVER TANGENT PLANE %f \n", det2d);
     return(0);
   }
 
@@ -752,8 +752,14 @@ int _MMG5_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
         else {
           if ( !_MMG5_defmetreg(mesh,met,k,l,iploc) )  continue;
         }
+        if ( ismet ) {
 /* A FAIRE */
-        // if ( ismet )  intextmet(mesh,met,pt->v[iploc],mm);
+          /* if ( !_MMG5_intextmet(mesh,met,pt->v[i],mm) ) { */
+          /*   fprintf(stdout,"%s:%d:Error: unable to intersect metrics" */
+          /*           " at point %d.\n",__FILE__,__LINE__, pt->v[i]); */
+          /*   return(0); */
+          /* } */
+        }
         ppt->flag = 1;
       }
     }

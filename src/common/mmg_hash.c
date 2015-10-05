@@ -43,25 +43,26 @@
  *
  * Create surface adjacency
  *
+ * \remark the ph->s field computation is useless in mmgs.
+ *
  */
-int _MMG5_mmgHashTria(MMG5_pMesh mesh, int *adjt, int chkISO) {
+int _MMG5_mmgHashTria(MMG5_pMesh mesh, int *adjt, _MMG5_Hash *hash, int chkISO) {
   MMG5_pTria     pt,pt1;
-  _MMG5_Hash     hash;
   _MMG5_hedge    *ph;
   int            *adja,k,jel,lel,hmax,dup,nmf,ia,ib;
   char           i,i1,i2,j,l,ok;
   unsigned int   key;
 
-    /* adjust hash table params */
+  /* adjust hash table params */
   hmax = 3.71*mesh->np;
-  hash.siz  = mesh->np;
-  hash.max  = hmax + 1;
-  hash.nxt  = hash.siz;
-  _MMG5_ADD_MEM(mesh,(hash.max+1)*sizeof(_MMG5_hedge),"hash table",return(0));
-  _MMG5_SAFE_CALLOC(hash.item,hash.max+1,_MMG5_hedge);
+  hash->siz  = mesh->np;
+  hash->max  = hmax + 1;
+  hash->nxt  = hash->siz;
+  _MMG5_ADD_MEM(mesh,(hash->max+1)*sizeof(_MMG5_hedge),"hash table",return(0));
+  _MMG5_SAFE_CALLOC(hash->item,hash->max+1,_MMG5_hedge);
 
-  for (k=hash.siz; k<hash.max; k++)
-    hash.item[k].nxt = k+1;
+  for (k=hash->siz; k<hash->max; k++)
+    hash->item[k].nxt = k+1;
 
   if ( mesh->info.ddebug )  fprintf(stdout,"  h- stage 1: init\n");
 
@@ -82,8 +83,8 @@ int _MMG5_mmgHashTria(MMG5_pMesh mesh, int *adjt, int chkISO) {
       /* compute key */
       ia  = MG_MIN(pt->v[i1],pt->v[i2]);
       ib  = MG_MAX(pt->v[i1],pt->v[i2]);
-      key = (_MMG5_KA*ia + _MMG5_KB*ib) % hash.siz;
-      ph  = &hash.item[key];
+      key = (_MMG5_KA*ia + _MMG5_KB*ib) % hash->siz;
+      ph  = &hash->item[key];
 
       /* store edge */
       if ( ph->a == 0 ) {
@@ -91,6 +92,7 @@ int _MMG5_mmgHashTria(MMG5_pMesh mesh, int *adjt, int chkISO) {
         ph->b = ib;
         ph->k = 3*k + i;
         ph->nxt = 0;
+        ++ph->s;
         continue;
       }
       /* update info about adjacent */
@@ -109,6 +111,7 @@ int _MMG5_mmgHashTria(MMG5_pMesh mesh, int *adjt, int chkISO) {
           else if ( !adjt[3*(jel-1)+1+j] ) {
             adja[i] = 3*jel + j;
             adjt[3*(jel-1)+1+j] = 3*k + i;
+            ++ph->s;
           }
           /* non-manifold case */
           else if ( adja[i] != 3*jel+j ) {
@@ -125,34 +128,30 @@ int _MMG5_mmgHashTria(MMG5_pMesh mesh, int *adjt, int chkISO) {
             }
             pt->tag[i] |= MG_GEO + MG_NOM;
             nmf++;
+            ++ph->s;
           }
           ok = 1;
           break;
         }
         else if ( !ph->nxt ) {
-          ph->nxt = hash.nxt;
-          ph = &hash.item[ph->nxt];
+          ph->nxt = hash->nxt;
+          ph = &hash->item[ph->nxt];
           assert(ph);
-          hash.nxt = ph->nxt;
+          hash->nxt = ph->nxt;
           ph->a = ia;
           ph->b = ib;
           ph->k = 3*k + i;
           ph->nxt = 0;
+          ++ph->s;
           ok = 1;
           break;
         }
         else
-          ph = &hash.item[ph->nxt];
+          ph = &hash->item[ph->nxt];
       }
-      if ( !ok ) {
-        ph->a = ia;
-        ph->b = ib;
-        ph->k = 3*k + i;
-        ph->nxt = 0;
-      }
+      assert(ok);
     }
   }
-  _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
 
   /* set tag */
   for (k=1; k<=mesh->nt; k++) {

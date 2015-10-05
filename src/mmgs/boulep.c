@@ -104,8 +104,8 @@ int boulet(MMG5_pMesh mesh,int start,int ip,int *list) {
  * the ball.
  * \list pointer toward the computed ball of point.
  *
- * Find all triangles sharing \a ip, \f$list[0] = start\f$. Do not stop when crossing
- * ridge. Check whether resulting configuration is manifold.
+ * Find all triangles sharing \a ip, \f$list[0] = start\f$. Do not stop when
+ * crossing ridge. Check whether resulting configuration is manifold.
  *
  */
 int boulechknm(MMG5_pMesh mesh,int start,int ip,int *list) {
@@ -193,7 +193,7 @@ int boulechknm(MMG5_pMesh mesh,int start,int ip,int *list) {
     ppt->s = 0;
   }
 
-  /* store neighbors */
+  /* check if a collapse may lead to a non-convex situation */
   k = start;
   i = iq;
   do {
