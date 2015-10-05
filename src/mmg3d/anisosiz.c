@@ -906,8 +906,77 @@ int _MMG5_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   return(1);
 }
 
-/* Enforces mesh gradation by truncating metric field */
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \return 1
+ *
+ *
+ * Enforces mesh gradation by truncating metric field.
+ *
+ */
 int _MMG5_gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
+  MMG5_pTetra   pt;
+  MMG5_pPoint   p1,p2;
+  double        *m,mv;
+  int           k,it,nup,nu,maxit;
+  char          i,ier,i1,i2;
+
   printf("gradsize_ani not implemented\n");
+
+  if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug )
+    fprintf(stdout,"  ** Anisotropic mesh gradation\n");
+
+  mesh->base = 0;
+  for (k=1; k<=mesh->np; k++)
+    mesh->point[k].flag = mesh->base;
+
+  /* First step : make ridges iso */
+  for (k=1; k<= mesh->np; k++) {
+    p1 = &mesh->point[k];
+    if ( !MG_VOK(p1) ) continue;
+    if ( MG_SIN(p1->tag) || (p1->tag & MG_NOM) ) continue;
+    if ( !(p1->tag & MG_GEO) ) continue;
+
+    m = &met->m[6*k];
+    mv = MG_MAX(m[0],MG_MAX(m[1],m[2]));
+    m[0] = mv;
+    m[1] = mv;
+    m[2] = mv;
+  }
+
+  /* Second step : standard gradation procedure */
+  it = nup = 0;
+  maxit = 100;
+  do {
+    mesh->base++;
+    nu = 0;
+    for (k=1; k<=mesh->ne; k++) {
+      pt = &mesh->tetra[k];
+      if ( !MG_EOK(pt) )  continue;
+
+      for (i=0; i<4; i++) {
+        i1 = _MMG5_inxt2[i];
+        i2 = _MMG5_iprv2[i];
+        p1 = &mesh->point[pt->v[i1]];
+        p2 = &mesh->point[pt->v[i2]];
+
+        if ( p1->flag < mesh->base-1 && p2->flag < mesh->base-1 )  continue;
+        //ier = grad2met(mesh,met,k,i);
+        if ( ier == i1 ) {
+          p1->flag = mesh->base;
+          nu++;
+        }
+        else if ( ier == i2 ) {
+          p2->flag = mesh->base;
+          nu++;
+        }
+      }
+    }
+    nup += nu;
+  }
+  while( ++it < maxit && nu > 0 );
+
+  if ( abs(mesh->info.imprim) > 4 )  fprintf(stdout,"     gradation: %7d updated, %d iter.\n",nup,it);
   return(1);
 }
