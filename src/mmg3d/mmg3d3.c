@@ -76,6 +76,7 @@ double _MMG5_estavglen(MMG5_pMesh mesh) {
 }
 
 /** Interpolate displacement between v1 and v2 at intermediate position 0<=t<=1 */
+static
 inline int _MMG5_intdispvol(double *v1, double *v2, double *vp, double t) {
   char i;
   
@@ -86,6 +87,7 @@ inline int _MMG5_intdispvol(double *v1, double *v2, double *vp, double t) {
 }
 
 /** compute quality iso of a tetra given by the 4 points a,b,c,d */
+static
 inline double _MMG5_caltet_iso_4pt(double *a, double *b, double *c, double *d) {
   double     abx,aby,abz,acx,acy,acz,adx,ady,adz,bcx,bcy,bcz,bdx,bdy,bdz,cdx,cdy,cdz;
   double     vol,v1,v2,v3,rap;
