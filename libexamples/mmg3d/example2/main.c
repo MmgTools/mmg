@@ -33,7 +33,11 @@
 #include <math.h>
 #include <float.h>
 
+/** Include the mmg3d library hader file */
+// if the header file is in the "include" directory
 #include "libmmg3d.h"
+// if the header file is in "include/mmg/mmg3d"
+// #include "mmg/mmg3d/libmmg3d.h"
 
 int main(int argc,char *argv[]) {
   MMG5_pMesh      mmgMesh;
