@@ -410,7 +410,8 @@ int MMG2_loadMesh(MMG5_pMesh mesh,char *filename) {
       air = MMG2_quickarea(mesh->point[pt->v[0]].c,mesh->point[pt->v[1]].c,
                            mesh->point[pt->v[2]].c);
       if(air < 0) {
-        printf("Tr %d bad oriented\n",k);
+        if ( mesh->info.ddebug || mesh->info.imprim > 6 )
+          printf("Tr %d bad oriented\n",k);
         norient++;
         tmp = pt->v[2];
         pt->v[2] = pt->v[1];
