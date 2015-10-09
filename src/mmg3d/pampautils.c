@@ -179,6 +179,11 @@ void _MMG5_defaultValues(MMG5_pMesh mesh) {
   fprintf(stdout,"Bucket size per dimension (-bucket) : %d\n",
           mesh->info.bucket);
 #endif
+#ifdef USE_SCOTCH
+  fprintf(stdout,"SCOTCH renumbering                  : enabled\n");
+#else
+  fprintf(stdout,"SCOTCH renumbering                  : disabled\n");
+#endif
 
   exit(EXIT_FAILURE);
 }
