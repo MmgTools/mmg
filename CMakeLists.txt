@@ -301,17 +301,6 @@ IF ( BUILD_MMG3D OR BUILD_MMG )
     SET_TARGET_PROPERTIES(${PROJECT_NAME}3d_a PROPERTIES OUTPUT_NAME
       ${PROJECT_NAME}3d)
     TARGET_LINK_LIBRARIES(${PROJECT_NAME}3d_a ${LIBRARIES})
-    INSTALL(FILES ${MMG3D_SOURCE_DIR}/lib${PROJECT_NAME}3df.h DESTINATION
-      include)
-    INSTALL(FILES ${MMG3D_SOURCE_DIR}/lib${PROJECT_NAME}3d.h DESTINATION
-      include)
-    INSTALL(FILES ${COMMON_SOURCE_DIR}/libmmg.h DESTINATION
-      include)
-    INSTALL(FILES ${COMMON_SOURCE_DIR}/mmg.h DESTINATION
-      include)
-    INSTALL(FILES ${COMMON_SOURCE_DIR}/eigenv.h DESTINATION
-      include)
-    INSTALL(FILES ${COMMON_SOURCE_DIR}/chrono.h DESTINATION include)
     INSTALL(TARGETS ${PROJECT_NAME}3d_a
       ARCHIVE DESTINATION lib
       LIBRARY DESTINATION lib)
@@ -324,22 +313,27 @@ IF ( BUILD_MMG3D OR BUILD_MMG )
       ${MMG3D_SOURCE_DIR}/lib${PROJECT_NAME}3df.h
       ${source_files} ${lib_file})
     SET_TARGET_PROPERTIES(${PROJECT_NAME}3d_so PROPERTIES
+      VERSION 5.0.0 SOVERSION 5)
+    SET_TARGET_PROPERTIES(${PROJECT_NAME}3d_so PROPERTIES
       OUTPUT_NAME ${PROJECT_NAME}3d)
     TARGET_LINK_LIBRARIES(${PROJECT_NAME}3d_so ${LIBRARIES})
-    INSTALL(FILES ${MMG3D_SOURCE_DIR}/lib${PROJECT_NAME}3df.h
-      DESTINATION include)
-    INSTALL(FILES ${MMG3D_SOURCE_DIR}/lib${PROJECT_NAME}3d.h
-      DESTINATION include)
-    INSTALL(FILES ${COMMON_SOURCE_DIR}/libmmg.h DESTINATION
-      include)
-    INSTALL(FILES ${COMMON_SOURCE_DIR}/mmg.h DESTINATION
-      include)
-    INSTALL(FILES ${COMMON_SOURCE_DIR}/eigenv.h DESTINATION
-      include)
-    INSTALL(FILES ${COMMON_SOURCE_DIR}/chrono.h DESTINATION include)
     INSTALL(TARGETS ${PROJECT_NAME}3d_so
       ARCHIVE DESTINATION
       LIBRARY DESTINATION lib)
+  ENDIF()
+
+  IF ( LIBMMG3D_STATIC OR LIBMMG3D_SHARED )
+    # mmg3d header files needed for library
+    SET( mmg3d_headers
+      ${MMG3D_SOURCE_DIR}/libmmg3d.h
+      ${MMG3D_SOURCE_DIR}/libmmg3df.h
+      ${COMMON_SOURCE_DIR}/mmg.h
+      ${COMMON_SOURCE_DIR}/eigenv.h
+      ${COMMON_SOURCE_DIR}/libmmg.h
+      ${COMMON_SOURCE_DIR}/chrono.h
+      )
+
+    INSTALL(FILES ${mmg3d_headers} DESTINATION include/mmg/mmg3d)
   ENDIF()
 
   ############################################################################
