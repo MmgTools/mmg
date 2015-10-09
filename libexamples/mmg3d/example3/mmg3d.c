@@ -33,11 +33,7 @@
 #include <memory.h>
 #include <ctype.h>
 
-/** Include the mmg3d library hader file */
-// if the header file is in the "include" directory
 #include "libmmg3d.h"
-// if the header file is in "include/mmg/mmg3d"
-// #include "mmg/mmg3d/libmmg3d.h"
 
 mytime    ctim[TIMEMAX];
 
@@ -121,9 +117,9 @@ int main(int argc,char *argv[]) {
     else {
       MMG5_Get_solSize( mesh, met, &dummy, &dummy, &typSol);
       if ( typSol != MMG5_Scalar ) {
-	fprintf(stdout,"  ## ERROR: ANISOTROPIC METRIC NOT IMPLEMENTED.\n");
-	MMG5_Free_all(mesh,met);
-	return(MMG5_STRONGFAILURE);
+        fprintf(stdout,"  ## ERROR: ANISOTROPIC METRIC NOT IMPLEMENTED.\n");
+        MMG5_Free_all(mesh,met);
+        return(MMG5_STRONGFAILURE);
       }
     }
     if ( MMG5_Get_iparameter(mesh, MMG5_IPARAM_iso) && !ier ) {

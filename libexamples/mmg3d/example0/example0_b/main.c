@@ -33,11 +33,7 @@
 #include <math.h>
 #include <float.h>
 
-/** Include the mmg3d library hader file */
-// if the header file is in the "include" directory
 #include "libmmg3d.h"
-// if the header file is in "include/mmg/mmg3d"
-// #include "mmg/mmg3d/libmmg3d.h"
 
 #define MAX0(a,b)     (((a) > (b)) ? (a) : (b))
 #define MAX(a,b,c,d)  (((MAX0(a,b)) > (MAX0(c,d))) ? (MAX0(a,b)) : (MAX0(c,d)))
@@ -195,7 +191,7 @@ int main(int argc,char *argv[]) {
   for(k=1; k<=np; k++) {
     /** b) Vertex recovering */
     if ( !MMG5_Get_vertex(mmgMesh,&(Point[0]),&(Point[1]),&(Point[2]),
-			  &ref,&(corner[k]),&(required[k])) )  exit(EXIT_FAILURE);
+                          &ref,&(corner[k]),&(required[k])) )  exit(EXIT_FAILURE);
     fprintf(inm,"%.15lg %.15lg %.15lg %d \n",Point[0],Point[1],Point[2],ref);
     if ( corner[k] )  nc++;
     if ( required[k] )  nreq++;
@@ -216,7 +212,7 @@ int main(int argc,char *argv[]) {
   for(k=1; k<=nt; k++) {
     /** d) Triangles recovering */
     if ( !MMG5_Get_triangle(mmgMesh,&(Tria[0]),&(Tria[1]),&(Tria[2]),
-			    &ref,&(required[k])) )  exit(EXIT_FAILURE);
+                            &ref,&(required[k])) )  exit(EXIT_FAILURE);
     fprintf(inm,"%d %d %d %d \n",Tria[0],Tria[1],Tria[2],ref);
     if ( required[k] )  nreq++;
   }
@@ -230,7 +226,7 @@ int main(int argc,char *argv[]) {
   for(k=1; k<=na; k++) {
     /** e) Edges recovering */
     if ( !MMG5_Get_edge(mmgMesh,&(Edge[0]),&(Edge[1]),&ref,
-			&(ridge[k]),&(required[k])) )  exit(EXIT_FAILURE);
+                        &(ridge[k]),&(required[k])) )  exit(EXIT_FAILURE);
     fprintf(inm,"%d %d %d \n",Edge[0],Edge[1],ref);
     if ( ridge[k] )  nr++;
     if ( required[k] )  nreq++;
@@ -249,7 +245,7 @@ int main(int argc,char *argv[]) {
   for(k=1; k<=ne; k++) {
     /** c) Tetra recovering */
     if ( !MMG5_Get_tetrahedron(mmgMesh,&(Tetra[0]),&(Tetra[1]),&(Tetra[2]),&(Tetra[3]),
-			       &ref,&(required[k])) )  exit(EXIT_FAILURE);
+                               &ref,&(required[k])) )  exit(EXIT_FAILURE);
     fprintf(inm,"%d %d %d %d %d \n",Tetra[0],Tetra[1],Tetra[2],Tetra[3],ref);
     if ( required[k] )  nreq++;
   }

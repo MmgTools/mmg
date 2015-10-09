@@ -3,12 +3,7 @@
 !> @brief
 !>  Example for using mmg3dlib (basic use)
 
-
-!> Include the mmg3d library hader file
-! if the header file is in the "include" directory
-#include "libmmg3d.h"
-! if the header file is in "include/mmg/mmg3d"
-! #include "mmg/mmg3d/libmmg3d.h"
+#include "libmmg3df.h"
 
 PROGRAM main
   MMG5_DATA_PTR_T  :: mmgMesh
