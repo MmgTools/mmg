@@ -32,7 +32,7 @@ int MMG2_split(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int k1,int adj1) {
   MMG5_pEdge     ped,ped1;
   int       k2,adj2,jel,kel,voy1,voy2,iar1,iar2,iara1,iara2; 
   int       *adja,*adja1,*adja2,tmp1,tmp2,piar1,piar2,pvoy1,piara1,piara2,pvoy2;
-  int       iadr,tmp,voy,k,num,newed,i,num1,num2;
+  int       iadr,tmp,voy,num,newed,num1,num2;
   double    air,cal1,cal2,cal3,cal4,coe,*ca,*cb,*ma,*mb,len;
   
   coe = QSEUIL/ALPHA;
@@ -311,12 +311,12 @@ int MMG2_split(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int k1,int adj1) {
 
 /*insert ip on edge in k1 */
 int MMG2_splitbdry(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int k1,int voy1,double *tang) {
-  MMG5_pTria     pt1,pt2,pt3,pt4,ptmp;
+  MMG5_pTria     pt1,pt3,ptmp;
   MMG5_pEdge     ped,ped1;
   MMG5_pPoint    ppt;
-  int       jel,iar1,iar2,iara1,iara2,k,i,num,newed,num1,num2; 
+  int       jel,iar1,iar2,i,num,newed,num1,num2; 
   int       *adja,*adja1,tmp1,piar1,piar2,pvoy1,ref1,ref2;
-  double    air,cal1,cal2,coe,d1;
+  double    air,cal1,cal2,coe;
  
   coe = QSEUIL/ALPHA;
     

@@ -232,8 +232,7 @@ void _MMG5_memOption(MMG5_pMesh mesh) {
 
 /* allocate main structure */
 int MMG2_zaldy(MMG5_pMesh mesh) {
-  int     million = 1048576L;
-  int     k,npask;
+  int     k;
 
    _MMG5_memOption(mesh);
 

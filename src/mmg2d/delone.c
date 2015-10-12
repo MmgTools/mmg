@@ -33,7 +33,7 @@ static int
 _MMG2_correction_iso(MMG5_pMesh mesh,int ip,int *list,int ilist,int nedep) {
   MMG5_pPoint     ppt,p1,p2;
   MMG5_pTria      pt;
-  double           dd,eps,ux,uy,vx,vy;
+  double           dd,ux,uy,vx,vy;
   int             *adja,i,ipil,iel,lon,iadr,adj,ib,ic,base,ncor;
   int              vois[3];
 
@@ -41,7 +41,6 @@ _MMG2_correction_iso(MMG5_pMesh mesh,int ip,int *list,int ilist,int nedep) {
   if ( !M_VOK(ppt) )  return(ilist);
   base = mesh->base;
   lon  = ilist;
-  eps  = EPSD;
   do {
     ipil = lon-1;
     ncor = 0;

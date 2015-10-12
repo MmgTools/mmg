@@ -97,7 +97,7 @@ int MMG2_isInTriangle(MMG5_pMesh mesh,int k,double c[2]) {
 
 int MMG2_cutEdge(MMG5_pMesh mesh,MMG5_pTria pt,MMG5_pPoint ppa,MMG5_pPoint ppb) { 
   double      la[3],lb[3],det;
-  int         icompt,i,ireturn,iadr;
+  int         icompt,i,ireturn;
   
   MMG2_coorbary(mesh,pt,ppa->c,&det,&la[0],&la[1]);  
   la[2] = 1.-(la[0]+la[1]);   
@@ -137,7 +137,7 @@ int MMG2_cutEdgeTriangle(MMG5_pMesh mesh,int k,int ia,int ib) {
   MMG5_pTria   pt; 
   MMG5_pPoint  pt1,pt2,pt3,ppa,ppb;
   double  a11,a21,a12,a22,aire1,aire2,aire3,prod1,prod2,prod3;
-  int     iadr,*adja,ibreak,iare,i;
+  int     ibreak,iare,i;
   int ddebug ;
 
   /* if(k==8096) ddebug = 1;
@@ -147,8 +147,6 @@ int MMG2_cutEdgeTriangle(MMG5_pMesh mesh,int k,int ia,int ib) {
   
   pt = &mesh->tria[k];
   if(!pt->v[0]) return(0);
-  iadr = 3*(k-1)+1;
-  adja = &mesh->adja[iadr];
   ibreak = 0;
   
   if(pt->v[0]==ib || pt->v[1]==ib || pt->v[2]==ib) ibreak = 1;
@@ -322,7 +320,8 @@ int MMG2_locateEdge(MMG5_pMesh mesh,int ia,int ib,int* kdep,int* list) {
   MMG5_pPoint    pt1,pt2,pt3,ppa,ppb,pt4;       
   double    a[3],a11,a21,a12,a22,aire1,aire2,aire3,prod1,prod2,prod3;
   double     niaib,npti;   
-  int       iadr,*adja,k,ktemp,ibreak,i,ncompt,lon,iare;
+  int       iadr,*adja,k,ibreak,i,ncompt,lon,iare;
+  //int       ktemp;
   
   mesh->base += 2; 
   k = *kdep;  

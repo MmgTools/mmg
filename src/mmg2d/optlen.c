@@ -354,7 +354,7 @@ int optlen_iso_bar(MMG5_pMesh mesh,MMG5_pSol sol,double declic,int base) {
   double    oldc[3],cal,ctg,cx,cy,cpx,cpy,coe,dd;
   double    *qual;
   int       i,j,k,l,iel,lon,nm;
-  int       ipa,ipb,nb,nk,npp,iadr,iter,maxtou;
+  int       ipa,ipb,nb,nk,npp,iter,maxtou;
   int nrj;    
 //  double tmp1,tmp2,tmp3;
   /* queue on quality */
@@ -387,7 +387,6 @@ int optlen_iso_bar(MMG5_pMesh mesh,MMG5_pSol sol,double declic,int base) {
       _MMG5_SAFE_MALLOC(qual,lon+1,double);
  
       /* optimal point */
-      iadr = (ipa-1)*sol->size + 1;
       cx   = 0.0;
       cy   = 0.0;
       nb   = 0;
@@ -403,7 +402,6 @@ int optlen_iso_bar(MMG5_pMesh mesh,MMG5_pSol sol,double declic,int base) {
         for (j=1; j<3; j++) {
           ipb  = pt1->v[ MMG2_idir[nk + j] ];
           ppb  = &mesh->point[ipb]; 
-          iadr = (ipb-1)*sol->size + 1;
 
           /* optimal point */
           cx += ppb->c[0] ; 
