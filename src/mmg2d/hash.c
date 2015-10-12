@@ -144,8 +144,9 @@ int MMG2_hashel(MMG5_pMesh mesh) {
  *
  */
 int MMG2_computetangent(MMG5_pMesh mesh,int ip1,int ip2,int ip3,double *t) {
-  double t1[2],t2[2],c2[2],c1[2],c3[2],dd1,dd2;
-  double theta,dd,kappa,n1[2],n2[2],n[2];
+  double c2[2],c1[2],c3[2],dd1,dd2;
+  double dd,n1[2],n2[2],n[2];
+//  double t1[2],t2[2],theta,kappa;
   int    i;
 
   for(i=0 ; i<2 ; i++) {
@@ -236,7 +237,7 @@ int MMG2_tangent(MMG5_pMesh mesh,MMG5_pEdge ped,int k,int ik,int i2,int nv) {
   MMG5_pEdge pediel;
   MMG5_pPoint pta,ptb,ptaiel,ptbiel;
 
-  int iadj,ip,i,iadr,*adja,iel,voyiel,vi1,vi2,num,vp,ipnv;
+  int iadj,ip,i,iadr,*adja,iel,voyiel,vi1,vi2,num,ipnv;
 
   pt = &mesh->tria[k];
   iadr = 3*(k-1)+1;
@@ -309,11 +310,10 @@ int MMG2_tangent(MMG5_pMesh mesh,MMG5_pEdge ped,int k,int ik,int i2,int nv) {
 
 /* base boundary vertices and compute tangents*/
 int MMG2_baseBdry(MMG5_pMesh mesh) {
-  MMG5_pTria     pt,pt1,ptiel;
+  MMG5_pTria     pt,pt1;
   MMG5_pPoint    ppt;
-  MMG5_pEdge     ped,pediel;
-  int      *adja,adj,iadr,k,i,ip,ned,num,i1,i2,iel,voyiel;
-  int      vi1,vi2,iadj;
+  MMG5_pEdge     ped;
+  int      *adja,adj,iadr,k,i,ip,ned,num,i1,i2;
   HashTable edgeT;
 
   ned = 0;

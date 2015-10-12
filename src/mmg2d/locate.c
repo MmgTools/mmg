@@ -33,7 +33,7 @@ extern int ddebug;
 void MMG2_coorbary(MMG5_pMesh mesh,MMG5_pTria pt,double c[2],double* det,double* l1,double* l2) {
   MMG5_pPoint      pt1,pt2,pt3;
   double      a11,a12,a21,a22;
-  double      ax,ay,bx,by,cx,cy;
+//  double      ax,ay,bx,by,cx,cy;
   double      x,y;
   
   pt1 = &mesh->point[pt->v[0]];
@@ -52,12 +52,12 @@ void MMG2_coorbary(MMG5_pMesh mesh,MMG5_pTria pt,double c[2],double* det,double*
   *l2 = a21*(c[0]-pt3->c[0]) + a22*(c[1]-pt3->c[1]);  
   
   
-  ax = pt1->c[0] - c[0];
-  ay = pt1->c[1] - c[1];
-  bx = pt2->c[0] - c[0];
-  by = pt2->c[1] - c[1];
-  cx = pt3->c[0] - c[0];
-  cy = pt3->c[1] - c[1];
+  /* ax = pt1->c[0] - c[0]; */
+  /* ay = pt1->c[1] - c[1]; */
+  /* bx = pt2->c[0] - c[0]; */
+  /* by = pt2->c[1] - c[1]; */
+  /* cx = pt3->c[0] - c[0]; */
+  /* cy = pt3->c[1] - c[1]; */
     
   x = (pt3->c[1] - pt1->c[1])*(c[0]-pt1->c[0]) -  (pt3->c[0] - pt1->c[0])*(c[1]-pt1->c[1]);
   y = -(pt2->c[1] - pt1->c[1])*(c[0]-pt1->c[0]) +  (pt2->c[0] - pt1->c[0])*(c[1]-pt1->c[1]);
@@ -97,7 +97,7 @@ int MMG2_isInTriangle(MMG5_pMesh mesh,int k,double c[2]) {
 
 int MMG2_cutEdge(MMG5_pMesh mesh,MMG5_pTria pt,MMG5_pPoint ppa,MMG5_pPoint ppb) { 
   double      la[3],lb[3],det;
-  int         icompt,i,ireturn,iadr,*adja;
+  int         icompt,i,ireturn,iadr;
   
   MMG2_coorbary(mesh,pt,ppa->c,&det,&la[0],&la[1]);  
   la[2] = 1.-(la[0]+la[1]);   
@@ -322,7 +322,7 @@ int MMG2_locateEdge(MMG5_pMesh mesh,int ia,int ib,int* kdep,int* list) {
   MMG5_pPoint    pt1,pt2,pt3,ppa,ppb,pt4;       
   double    a[3],a11,a21,a12,a22,aire1,aire2,aire3,prod1,prod2,prod3;
   double     niaib,npti;   
-  int       iadr,*adja,k,ktemp,ibreak,i,ncompt,lon,iare,iaa,ibb;
+  int       iadr,*adja,k,ktemp,ibreak,i,ncompt,lon,iare;
   
   mesh->base += 2; 
   k = *kdep;  
@@ -516,7 +516,7 @@ int MMG2_locateEdge(MMG5_pMesh mesh,int ia,int ib,int* kdep,int* list) {
         if(mesh->info.ddebug) printf("pourquoi on passe pas la!!!!!!!!!");
         if(ddebug) printf("iare %d\n",iare);
         if(iare) {
-          ktemp = k;
+          //ktemp = k;
           k = adja[i]/3;
           if (!k || mesh->tria[k].base>=mesh->base || !mesh->tria[k].v[0]) {
             k = adja[(i+1)%3]/3; 
@@ -526,7 +526,7 @@ int MMG2_locateEdge(MMG5_pMesh mesh,int ia,int ib,int* kdep,int* list) {
             } 
           }  
         } else {
-          ktemp = k;
+          //ktemp = k;
           if(ddebug) printf("pt : on veut continuer par %d : %d %d %d\n",k,adja[i]/3,adja[(i+1)%3]/3,adja[(i+2)%3]/3); 
           k = adja[(i+1)%3]/3;
           if (!k || mesh->tria[k].base>=mesh->base || !mesh->tria[k].v[0]) {
@@ -553,7 +553,7 @@ int MMG2_locateEdge(MMG5_pMesh mesh,int ia,int ib,int* kdep,int* list) {
       //exit(0);
     }
      
-    ktemp = k; 
+    //ktemp = k; 
     printf("adj (base) pour le tri %d : %d(%d) %d(%d) %d(%d)\n",k,adja[0]/3,mesh->tria[adja[0]/3].base>=mesh->base
            ,adja[1]/3,mesh->tria[adja[1]/3].base>=mesh->base,adja[2]/3,mesh->tria[adja[2]/3].base>=mesh->base);
     k = adja[0]/3;

@@ -1399,7 +1399,6 @@ void _MMG5_openCoquilTravel(MMG5_pMesh mesh, int na, int nb, int* adj, int *piv,
 {
   MMG5_pTetra  pt;
   int          ipa,ipb,*adja;
-  char         isbdy;
 
     pt = &mesh->tetra[*adj];
 
