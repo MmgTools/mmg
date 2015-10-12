@@ -30,12 +30,12 @@ int optlen_ani(MMG5_pMesh mesh,MMG5_pSol sol,double declic,int base) {
   MMG5_pPoint    ppa,ppb;
   pQueue    queue;
   int      *list;
-  double    oldc[3],cal,ctg,cx,cy,cz,ux,uy,uz,cpx,cpy,cpz,coe,dd,len;
+  double    oldc[3],cal,ctg,cx,cy,ux,uy,cpx,cpy,coe,dd,len;
   double    *mb,*mp,*ca,*cb,*qual;
   int       i,j,k,l,iel,lon,nm;
   int       ipa,ipb,nb,nk,npp,iadr,iter,maxtou;
   int nrj;    
-  double tmp1,tmp2,tmp3;
+//  double tmp1,tmp2,tmp3;
 
   /* queue on quality */
   queue = MMG2_kiuini(mesh,mesh->nt,declic,base - 1);
@@ -79,9 +79,9 @@ int optlen_ani(MMG5_pMesh mesh,MMG5_pSol sol,double declic,int base) {
         nk  = list[l] % 3;
         pt1 = &mesh->tria[iel]; 
         if ( pt1->qual > cal )  cal = pt1->qual;
-    	tmp1 = 0;
-    	tmp2 = 0;
-    	tmp3 = 0;
+    	/* tmp1 = 0; */
+    	/* tmp2 = 0; */
+    	/* tmp3 = 0; */
         for (j=1; j<3; j++) {
           ipb  = pt1->v[ MMG2_idir[nk + j] ];
           ppb  = &mesh->point[ipb]; 
@@ -182,12 +182,12 @@ int optlen_iso(MMG5_pMesh mesh,MMG5_pSol sol,double declic,int base) {
   MMG5_pPoint    ppa,ppb;
   pQueue    queue;
   int      *list;
-  double    oldc[3],cal,ctg,cx,cy,cz,ux,uy,uz,cpx,cpy,cpz,coe,dd,len;
+  double    oldc[3],cal,ctg,cx,cy,ux,uy,cpx,cpy,coe,dd,len;
   double    hb,hp,*ca,*cb,*qual;
   int       i,j,k,l,iel,lon,nm;
   int       ipa,ipb,nb,nk,npp,iadr,iter,maxtou;
   int nrj;    
-  double tmp1,tmp2,tmp3;
+//  double tmp1,tmp2,tmp3;
   /* queue on quality */
   queue = MMG2_kiuini(mesh,mesh->nt,declic,base - 1);
   assert(queue);
@@ -229,9 +229,9 @@ int optlen_iso(MMG5_pMesh mesh,MMG5_pSol sol,double declic,int base) {
         nk  = list[l] % 3;
         pt1 = &mesh->tria[iel];
         if ( pt1->qual > cal )  cal = pt1->qual;
-	tmp1 = 0;
-	tmp2 = 0;
-	tmp3 = 0;
+	/* tmp1 = 0; */
+	/* tmp2 = 0; */
+	/* tmp3 = 0; */
         for (j=1; j<3; j++) {
           ipb  = pt1->v[ MMG2_idir[nk + j] ];
           ppb  = &mesh->point[ipb]; 
@@ -351,12 +351,12 @@ int optlen_iso_bar(MMG5_pMesh mesh,MMG5_pSol sol,double declic,int base) {
   MMG5_pPoint    ppa,ppb;
   pQueue    queue;
   int      *list;
-  double    oldc[3],cal,ctg,cx,cy,cz,ux,uy,uz,cpx,cpy,cpz,coe,dd,len;
-  double    hb,hp,*ca,*cb,*qual;
+  double    oldc[3],cal,ctg,cx,cy,cpx,cpy,coe,dd;
+  double    *qual;
   int       i,j,k,l,iel,lon,nm;
-  int       ipa,ipb,nb,nk,npp,iadr,iter,maxtou;
+  int       ipa,ipb,nb,nk,npp,iter,maxtou;
   int nrj;    
-  double tmp1,tmp2,tmp3;
+//  double tmp1,tmp2,tmp3;
   /* queue on quality */
   queue = MMG2_kiuini(mesh,mesh->nt,declic,base - 1);
   assert(queue);
@@ -387,9 +387,6 @@ int optlen_iso_bar(MMG5_pMesh mesh,MMG5_pSol sol,double declic,int base) {
       _MMG5_SAFE_MALLOC(qual,lon+1,double);
  
       /* optimal point */
-      ca   = &ppa->c[0];
-      iadr = (ipa-1)*sol->size + 1;
-      hp   = sol->m[iadr];
       cx   = 0.0;
       cy   = 0.0;
       nb   = 0;
@@ -399,15 +396,12 @@ int optlen_iso_bar(MMG5_pMesh mesh,MMG5_pSol sol,double declic,int base) {
         nk  = list[l] % 3;
         pt1 = &mesh->tria[iel];
         if ( pt1->qual > cal )  cal = pt1->qual;
-	tmp1 = 0;
-	tmp2 = 0;
-	tmp3 = 0;
+	/* tmp1 = 0; */
+	/* tmp2 = 0; */
+	/* tmp3 = 0; */
         for (j=1; j<3; j++) {
           ipb  = pt1->v[ MMG2_idir[nk + j] ];
           ppb  = &mesh->point[ipb]; 
-	  cb   = &ppb->c[0];
-          iadr = (ipb-1)*sol->size + 1;
-          hb   = sol->m[iadr];
 
           /* optimal point */
           cx += ppb->c[0] ; 

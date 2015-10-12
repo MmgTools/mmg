@@ -45,10 +45,9 @@ double long_iso(double *ca,double *cb,double *ma,double *mb) {
 
 /* compute aniso edge length */
 double long_ani(double *ca,double *cb,double *ma,double *mb) {
-  double   ux,uy,dd,dd1,dd2,len;
+  double   ux,uy,dd1,dd2,len;
   ux = cb[0] - ca[0];
   uy = cb[1] - ca[1];
-  dd = ux*ux + uy*uy;
 
   dd1 = ma[0]*ux*ux + ma[2]*uy*uy + 2.0*ma[1]*ux*uy;
   if ( dd1 <= 0.0 )  dd1 = 0.0;
@@ -63,7 +62,7 @@ double long_ani(double *ca,double *cb,double *ma,double *mb) {
 int MMG2_prilen(MMG5_pMesh mesh,MMG5_pSol sol) {
   MMG5_pTria       pt;
   double      lavg,len,ecart,som,lmin,lmax,*ca,*cb,*ma,*mb;
-  int         k,l,lon,navg,ia,ipa,ipb,iamin,ibmin,iamax,ibmax,dep,hl[9];
+  int         k,l,navg,ia,ipa,ipb,iamin,ibmin,iamax,ibmax,hl[9];
   int	      iadr;
   static double bd[9] = {0.0, 0.3, 0.6, 0.7071, 0.9, 1.3, 1.4142, 2.0, 5.0};
 //{0.0, 0.2, 0.5, 0.7071, 0.9, 1.111, 1.4142, 2.0, 5.0 };
@@ -72,7 +71,6 @@ int MMG2_prilen(MMG5_pMesh mesh,MMG5_pSol sol) {
   lmin  = 1.e20;
   lmax  = 0.0;
   som   = 0.0;
-  dep   = 1;
   iamin = 0;
   ibmin = 0;
   iamax = 0;

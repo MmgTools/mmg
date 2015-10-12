@@ -542,13 +542,6 @@ int _MMG5_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
         if ( !_MMG5_boulesurfvolp(mesh,k,i0,i,listv,&ilistv,lists,&ilists,0) )
           continue;
 
-         /* Useless because if the orientation of the tetra face is
-          * compatible with the triangle (MG_GET(ori,i)) we know that we
-          * are well orientated. Morever, may introduce numerical errors
-          * with wrinkled surfaces. */
-        // n   = &mesh->xpoint[p0->xp].n1[0];
-        // _MMG5_directsurfball(mesh,ip0,lists,ilists,n);
-
         hp  = _MMG5_defsizreg(mesh,met,ip0,lists,ilists,hausd);
         met->m[ip0] = MG_MIN(met->m[ip0],hp);
       }

@@ -31,8 +31,8 @@ int MMG2_bdryenforcement(MMG5_pMesh mesh,MMG5_pSol sol) {
   MMG5_pTria			pt,pt1;
   MMG5_pEdge			ped;  
   int				i,j,k,kk,nex,*list,kdep,lon,voy,iel,iare,ied; 
-  int				ia,ib,ilon,rnd,idep,*adja,ir,adj,list2[3],iadr,ped0,ped1;  
-  int       iadr2,*adja2,ndel;
+  int				ia,ib,ilon,rnd,idep,*adja,ir,adj,list2[3];//,iadr,ped0,ped1;  
+//  int       iadr2,*adja2,ndel;
   
   _MMG5_SAFE_CALLOC(list,LMAX,int);
  

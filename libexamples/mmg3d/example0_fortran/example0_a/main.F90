@@ -5,7 +5,7 @@
 
 !> Include the mmg3d library hader file
 ! if the header file is in the "include" directory
-#include "libmmg3d.h"
+#include "libmmg3df.h"
 ! if the header file is in "include/mmg/mmg3d"
 ! #include "mmg/mmg3d/libmmg3d.h"
 

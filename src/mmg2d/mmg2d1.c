@@ -156,7 +156,7 @@ static int cassarbdry(MMG5_pMesh mesh,MMG5_pSol sol,int ied,int ia,int ib,double
   MMG5_pPoint   p0,p1,ppt;
   MMG5_pEdge    ped;
   // Displ      pd;
-  double   c[2],pc1[2],pc2[2],t0[2],t1[2],t_1,*ma,*mb,*mp,dx,dy;
+  double   c[2],pc1[2],pc2[2],t0[2],t1[2],t_1,*ma,*mb,*mp;//,dx,dy;
   double   l;
   int      ip,iadr,i,inv,memlack;
   inv = 0;
@@ -349,14 +349,14 @@ static int cassarbdry(MMG5_pMesh mesh,MMG5_pSol sol,int ied,int ia,int ib,double
 }
 int MMG2_ni,MMG2_nc;
 static int analar(MMG5_pMesh mesh,MMG5_pSol sol,pBucket bucket,double declic,int *alert) {
-  MMG5_pTria    pt,pp; 
+  MMG5_pTria    pt; 
   MMG5_pPoint   ppa,ppb;
   double  *ca,*cb,*ma,*mb,tail,t,tang[2];
-  int     *adja,voi[3],k,iadr,adj,base,npp,nbp,ip;  
+  int     *adja,voi[3],k,iadr,adj,/*base,*/nbp,npp,ip;  
   int     nt;
   int     i,i1,i2;
-  int ins,ii,i0,ii0;
-  base  = ++mesh->base;  
+  int ins,i0,ii0;
+//  base  = ++mesh->base;  
   MMG2_ni  = 0; 
   MMG2_nc  = 0;  
   nt    = mesh->nt;
@@ -556,7 +556,7 @@ static int analargeom(MMG5_pMesh mesh,MMG5_pSol sol,int *alert) {
   MMG5_pTria    pt,pp; 
   MMG5_pPoint   ppa,ppb;
   double  *ca,*cb,*ma,*mb,tail,t,tang[2];
-  int     *adja,voi[3],k,iadr,adj,base,npp,nbp,ip;  
+  int     *adja,voi[3],k,iadr,adj,base,npp,ip;  
   int     nt;
   int     i,i1,i2,ni,maxtou,it;
   int     ins,ii,i0,ii0,nitot;
