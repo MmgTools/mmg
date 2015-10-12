@@ -33,154 +33,8 @@
  * \todo doxygen documentation.
  */
 
-#include "mmgs.h"
-/**
- * \param mesh pointer toward the mesh structure.
- * \param m pointer toward the first metric to intersect.
- * \param n pointer toward the second metric to intersect.
- * \param mr pointer toward the computed intersected metric.
- * \return 1.
- *
- * Compute the intersected (2 x 2) metric between metrics \a m and \a n,
- * PRESERVING the directions of \a m. Result is stored in \a mr.
- *
- */
-int _MMG5_intmetsavedir(MMG5_pMesh mesh, double *m,double *n,double *mr) {
-  int    i;
-  double lambda[2],vp[2][2],siz,isqhmin;
+#include "mmg.h"
 
-  isqhmin = 1.0 / (mesh->info.hmin * mesh->info.hmin);
-  _MMG5_eigensym(m,lambda,vp);
-
-  for (i=0; i<2; i++) {
-    siz = n[0]*vp[i][0]*vp[i][0] + 2.0*n[1]*vp[i][0]*vp[i][1]
-      + n[2]*vp[i][1]*vp[i][1];
-    lambda[i] = MG_MAX(lambda[i],siz);
-    lambda[i] = MG_MIN(lambda[i],isqhmin);
-  }
-  mr[0] = lambda[0]*vp[0][0]*vp[0][0] + lambda[1]*vp[1][0]*vp[1][0];
-  mr[1] = lambda[0]*vp[0][0]*vp[0][1] + lambda[1]*vp[1][0]*vp[1][1];
-  mr[2] = lambda[0]*vp[0][1]*vp[0][1] + lambda[1]*vp[1][1]*vp[1][1];
-
-  return(1);
-}
-
-/**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the sol structure.
- * \param np0 index of edge's extremity.
- * \param ux distance \f$[p0;p1]\f$ along x axis.
- * \param uy distance \f$[p0;p1]\f$ along y axis.
- * \param uz distance \f$[p0;p1]\f$ along z axis.
- * \param mr computed metric tensor.
- * \return 1.
- *
- * Build metric tensor at ridge point p0, when computations with respect to p1
- * are to be held.
- *
- */
-int _MMG5_buildridmet(MMG5_pMesh mesh,MMG5_pSol met,int np0,
-                      double ux,double uy,double uz,double mr[6]) {
-  MMG5_pPoint p0;
-  MMG5_pxPoint  go;
-  double ps1,ps2,*n1,*n2,*t,*m,dv,u[3],r[3][3];
-
-  p0 = &mesh->point[np0];
-  if ( !(MG_GEO & p0->tag) )  return(0);
-  m = &met->m[6*np0];
-  go = &mesh->xpoint[p0->xp];
-  t = &p0->n[0];
-
-  /* Decide between the two possible configurations */
-  n1 = &go->n1[0];
-  n2 = &go->n2[0];
-
-  ps1 = ux*n1[0] + uy*n1[1] + uz*n1[2];
-  ps2 = ux*n2[0] + uy*n2[1] + uz*n2[2];
-
-  if ( fabs(ps2)<fabs(ps1) ) {
-    n1 = &go->n2[0];
-    dv = m[2];
-  }
-  else{
-    dv = m[1];
-  }
-
-  u[0] = n1[1]*t[2] - n1[2]*t[1];
-  u[1] = n1[2]*t[0] - n1[0]*t[2];
-  u[2] = n1[0]*t[1] - n1[1]*t[0];
-
-  /* If u = n1 ^ t, matrix of the desired metric in (t,u,n1) = diag(m[0],dv,0)*/
-  r[0][0] = t[0];  r[0][1] = u[0];  r[0][2] = n1[0];
-  r[1][0] = t[1];  r[1][1] = u[1];  r[1][2] = n1[1];
-  r[2][0] = t[2];  r[2][1] = u[2];  r[2][2] = n1[2];
-
-  mr[0] = m[0]*r[0][0]*r[0][0] + dv*r[0][1]*r[0][1];
-  mr[1] = m[0]*r[0][0]*r[1][0] + dv*r[0][1]*r[1][1];
-  mr[2] = m[0]*r[0][0]*r[2][0] + dv*r[0][1]*r[2][1];
-  mr[3] = m[0]*r[1][0]*r[1][0] + dv*r[1][1]*r[1][1];
-  mr[4] = m[0]*r[1][0]*r[2][0] + dv*r[1][1]*r[2][1];
-  mr[5] = m[0]*r[2][0]*r[2][0] + dv*r[2][1]*r[2][1];
-  return(1);
-}
-
-/**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the sol structure.
- * \param np0 index of edge's extremity.
- * \param nt.
- * \param mr.
- *
- * \return 1.
- *
- * Build metric tensor at ridge point \a p0, when the 'good' normal direction is given by \a nt
- *
- */
-/*  */
-int _MMG5_buildridmetnor(MMG5_pMesh mesh,MMG5_pSol met,int np0,double nt[3],double mr[6]) {
-  MMG5_pPoint p0;
-  MMG5_pxPoint  go;
-  double ps1,ps2,*n1,*n2,*t,*m,dv,u[3],r[3][3];
-
-  p0 = &mesh->point[np0];
-  if ( !(MG_GEO & p0->tag) )  return(0);
-  m = &met->m[6*np0];
-  t = &p0->n[0];
-  go = &mesh->xpoint[p0->xp];
-
-  /* Decide between the two possible configurations */
-  n1 = &go->n1[0];
-  n2 = &go->n2[0];
-
-  ps1 = nt[0]*n1[0] + nt[1]*n1[1] + nt[2]*n1[2];
-  ps2 = nt[0]*n2[0] + nt[1]*n2[1] + nt[2]*n2[2];
-
-  if ( fabs(ps2) > fabs(ps1) ) {
-    n1 = &go->n2[0];
-    dv = m[2];
-  }
-  else{
-    dv = m[1];
-  }
-
-  u[0] = n1[1]*t[2] - n1[2]*t[1];
-  u[1] = n1[2]*t[0] - n1[0]*t[2];
-  u[2] = n1[0]*t[1] - n1[1]*t[0];
-
-  /* If u = n1 ^ t, matrix of the desired metric in (t,u,n1) = diag(m[0],dv,0)*/
-  r[0][0] = t[0];  r[0][1] = u[0];  r[0][2] = n1[0];
-  r[1][0] = t[1];  r[1][1] = u[1];  r[1][2] = n1[1];
-  r[2][0] = t[2];  r[2][1] = u[2];  r[2][2] = n1[2];
-
-  mr[0] = m[0]*r[0][0]*r[0][0] + dv*r[0][1]*r[0][1];
-  mr[1] = m[0]*r[0][0]*r[1][0] + dv*r[0][1]*r[1][1];
-  mr[2] = m[0]*r[0][0]*r[2][0] + dv*r[0][1]*r[2][1];
-  mr[3] = m[0]*r[1][0]*r[1][0] + dv*r[1][1]*r[1][1];
-  mr[4] = m[0]*r[1][0]*r[2][0] + dv*r[1][1]*r[2][1];
-  mr[5] = m[0]*r[2][0]*r[2][0] + dv*r[2][1]*r[2][1];
-
-  return(1);
-}
 
 /**
  * \param mesh pointer toward the mesh stucture.
@@ -315,10 +169,10 @@ inline int _MMG5_rotmatrix(double n[3],double r[3][3]) {
 }
 
 /**
- * \param m pointer toward a 3x3 matrix
+ * \param m pointer toward a 3x3 symetric matrix
  * \param mi pointer toward the computed 3x3 matrix.
  *
- * Invert \a m (3x3 matrix) and store the result on \a mi
+ * Invert \a m (3x3 symetric matrix) and store the result on \a mi
  *
  */
 int _MMG5_invmat(double *m,double *mi) {
@@ -364,6 +218,48 @@ int _MMG5_invmat(double *m,double *mi) {
 
   return(1);
 }
+
+/**
+ * \param m initial matrix.
+ * \param mi inverted matrix.
+ *
+ * Invert 3x3 non-symmetric matrix.
+ *
+ */
+int _MMG5_invmatg(double m[9],double mi[9]) {
+  double  aa,bb,cc,det,vmin,vmax,maxx;
+  int     k;
+
+  /* check ill-conditionned matrix */
+  vmin = vmax = fabs(m[0]);
+  for (k=1; k<9; k++) {
+    maxx = fabs(m[k]);
+    if ( maxx < vmin )  vmin = maxx;
+    else if ( maxx > vmax )  vmax = maxx;
+  }
+  if ( vmax == 0.0 )  return(0);
+
+  /* compute sub-dets */
+  aa = m[4]*m[8] - m[5]*m[7];
+  bb = m[5]*m[6] - m[3]*m[8];
+  cc = m[3]*m[7] - m[4]*m[6];
+  det = m[0]*aa + m[1]*bb + m[2]*cc;
+  if ( fabs(det) < _MMG5_EPSD )  return(0);
+  det = 1.0 / det;
+
+  mi[0] = aa*det;
+  mi[3] = bb*det;
+  mi[6] = cc*det;
+  mi[1] = (m[2]*m[7] - m[1]*m[8])*det;
+  mi[4] = (m[0]*m[8] - m[2]*m[6])*det;
+  mi[7] = (m[1]*m[6] - m[0]*m[7])*det;
+  mi[2] = (m[1]*m[5] - m[2]*m[4])*det;
+  mi[5] = (m[2]*m[3] - m[0]*m[5])*det;
+  mi[8] = (m[0]*m[4] - m[1]*m[3])*det;
+
+  return(1);
+}
+
 /**
  * \param a matrix to invert.
  * \param b last member.
@@ -449,81 +345,6 @@ void _MMG5_printTria(MMG5_pMesh mesh,char* fileName) {
 }
 
 /**
- * \param c0 table of the coordinates of the starting point.
- * \param n0 normal at the starting point.
- * \param m metric to be transported.
- * \param c1 table of the coordinates of the ending point.
- * \param n1 normal at the ending point.
- * \param mt computed metric.
- * \return 0 if fail, 1 otherwise.
- *
- * Parallel transport of a metric tensor field, attached to point \a c0, with
- * normal \a n0, to point \a c1, with normal \a n1.
- *
- */
-
-int _MMG5_paratmet(double c0[3],double n0[3],double m[6],double c1[3],double n1[3],double mt[6]) {
-  double  r[3][3],mrot[6],mtan[3],lambda[2],vp[2][2],u[3],ps,ll;
-
-  /* Take the induced metric tensor in the tangent plane by change of basis : R * M * {^t}R*/
-  if ( !_MMG5_rotmatrix(n0,r) )  return(0);
-  _MMG5_rmtr(r,m,mrot);
-  mtan[0] = mrot[0];
-  mtan[1] = mrot[1];
-  mtan[2] = mrot[3];
-
-  /* Take eigenvectors of metric tensor in tangent plane */
-  _MMG5_eigensym(mtan,lambda,vp);
-
-  /* Eigenvector in canonical basis = {t}R*vp[0] */
-  u[0] = r[0][0]*vp[0][0] + r[1][0]*vp[0][1];
-  u[1] = r[0][1]*vp[0][0] + r[1][1]*vp[0][1];
-  u[2] = r[0][2]*vp[0][0] + r[1][2]*vp[0][1];
-
-  /* Projection in the tangent plane of c1 */
-  ps = u[0]*n1[0] + u[1]*n1[1] + u[2]*n1[2];
-  u[0] -= ps*n1[0];
-  u[1] -= ps*n1[1];
-  u[2] -= ps*n1[2];
-  ll = u[0]*u[0] + u[1]*u[1] + u[2]*u[2];
-  if ( ll < _MMG5_EPSD )  return(0);
-  ll = 1.0 / sqrt(ll);
-  u[0] *= ll;
-  u[1] *= ll;
-  u[2] *= ll;
-
-  /* And the transported metric is diag(lambda[0], lambda[1], 0) in basis (u,n1^u,n1) */
-  r[0][0] = u[0];
-  r[1][0] = u[1];
-  r[2][0] = u[2];
-
-  r[0][1] = n1[1]*u[2] - n1[2]*u[1];
-  r[1][1] = n1[2]*u[0] - n1[0]*u[2];
-  r[2][1] = n1[0]*u[1] - n1[1]*u[0];
-
-  ll = r[0][1]*r[0][1] + r[1][1]*r[1][1] + r[2][1]*r[2][1];
-  if ( ll < _MMG5_EPSD )  return(0);
-  ll = 1.0 / sqrt(ll);
-  r[0][1] *= ll;
-  r[1][1] *= ll;
-  r[2][1] *= ll;
-
-  r[0][2] = n1[0];
-  r[1][2] = n1[1];
-  r[2][2] = n1[2];
-
-  /*mt = R * diag(lambda[0], lambda[1], 0)*{^t}R */
-  mt[0] = lambda[0]*r[0][0]*r[0][0] + lambda[1]*r[0][1]*r[0][1];
-  mt[1] = lambda[0]*r[0][0]*r[1][0] + lambda[1]*r[0][1]*r[1][1];
-  mt[2] = lambda[0]*r[0][0]*r[2][0] + lambda[1]*r[0][1]*r[2][1];
-  mt[3] = lambda[0]*r[1][0]*r[1][0] + lambda[1]*r[1][1]*r[1][1];
-  mt[4] = lambda[0]*r[2][0]*r[1][0] + lambda[1]*r[2][1]*r[1][1];
-  mt[5] = lambda[0]*r[2][0]*r[2][0] + lambda[1]*r[2][1]*r[2][1];
-
-  return(1);
-}
-
-/**
  * \return the available memory size of the computer.
  *
  * Compute the available memory size of the computer.
@@ -548,4 +369,105 @@ long long _MMG5_memSize (void) {
 #endif
 
   return(mem);
+}
+
+/**
+ * \param a real coefficient of the degree 3 polynomial.
+ * \param r computed complex roots.
+ * \return number of roots, counted with multiplicity.
+ *
+ * Compute the 3 complex roots of a degree 3 polynomial with real coefficients
+ * \f$a[3]T^3 + ... + a[0]\f$ By convention, the real roots are stored first (same
+ * thing for multiple roots): return value = number of roots, counted with
+ * multiplicity.
+ *
+ */
+int _MMG5_rootDeg3(double a[4],double complex r[3]) {
+  double p,q,Delta,u,v,pi,b[4];
+  double complex i,j,t,tbar;
+
+  pi = 3.14159;
+  i = _Complex_I;
+  j = cos(2.0*_MMG5_ATHIRD*pi)+I*sin(2.0*_MMG5_ATHIRD*pi);
+
+  /* Case when the polynomial is actually second order */
+  if( fabs(a[3]) < _MMG5_EPSD ) {
+    /* Case it is first order : return 0.0 when root does not exist */
+    if( fabs(a[2]) < _MMG5_EPSD ) {
+      if( fabs(a[1]) < _MMG5_EPSD ) {
+        r[0] = r[1] = r[2] = 0.0;
+        return(0);
+      }
+      else{
+        r[0] = r[1] = r[2] = -a[0];
+        return(1);
+      }
+    }
+    else{
+      Delta = a[1]*a[1]-4.0*a[2]*a[0];
+      if( Delta > 0.0 ) {
+        r[0] = 0.5/a[2]*(-a[1] - sqrt(Delta));
+        r[1] = r[2] = 0.5/a[2]*(-a[1] + sqrt(Delta));
+      }
+      else if( Delta == 0.0 ) {
+        r[0] = r[1] = -0.5*a[1]/a[2];
+      }
+      else{
+        r[0] = 0.5/a[2]*(-a[1] - i*sqrt(-Delta));
+        r[1] = r[2] = 0.5/a[2]*(-a[1] + i*sqrt(-Delta));
+      }
+      return(2);
+    }
+  }
+
+  /* Normalize coefficients */
+  b[3] = 1.0;
+  b[2] = a[2]/a[3];
+  b[1] = a[1]/a[3];
+  b[0] = a[0]/a[3];
+
+  p = b[1] - _MMG5_ATHIRD*b[2]*b[2];
+  q = b[0] - _MMG5_ATHIRD*b[2]*b[1] + 2.0/27.0*b[2]*b[2]*b[2];
+  Delta = 4.0/27.0*p*p*p+q*q;
+
+  if( Delta>0.0 ) {
+    /* Polynomial T^2 +qT -p^3/27 admits two real roots u and v */
+    u = 0.5*(-q - sqrt(Delta));
+    v = 0.5*(-q + sqrt(Delta));
+
+    u = u < 0.0 ? - pow(fabs(u),_MMG5_ATHIRD) :pow(fabs(u),_MMG5_ATHIRD);
+    v = v < 0.0 ? - pow(fabs(v),_MMG5_ATHIRD) :pow(fabs(v),_MMG5_ATHIRD);
+
+    r[0] = u+v;
+    r[1] = j*j*u + j*v;
+    r[2] = j*u + j*j*v;
+
+  }
+  else if (Delta<0.0){
+    /* Polynomial T^2 +qT -p^3/27 admits two complex conjuguate roots u and v */
+    t = -0.5*q - 0.5*i*sqrt(-Delta);
+    t = cpow(t,_MMG5_ATHIRD);
+    tbar = conj(t);
+
+    /* Theoretically speaking, the 3 roots are real... But to make sure... */
+    r[0] = creal(t+tbar);
+    r[1] = creal(j*t+j*j*tbar);
+    r[2] = creal(j*j*t+j*tbar);
+  }
+  else{
+    /* Polynomial T^2 +qT -p^3/27 admits one double real root */
+    u = -0.5*q;
+    u = pow(u,_MMG5_ATHIRD);
+
+    r[0] = -u;
+    r[1] = -u;
+    r[2] = 2.0*u;
+
+  }
+
+  r[0] -= _MMG5_ATHIRD*b[2];
+  r[1] -= _MMG5_ATHIRD*b[2];
+  r[2] -= _MMG5_ATHIRD*b[2];
+
+  return(3);
 }

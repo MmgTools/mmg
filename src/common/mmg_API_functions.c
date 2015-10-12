@@ -44,56 +44,6 @@
 
 /**
  * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the sol structure.
- *
- * Allocate the mesh and solutions structures at \a MMG3D format.
- *
- */
-static inline
-void MMG5_Alloc_mesh(MMG5_pMesh *mesh, MMG5_pSol *sol
-  ) {
-
-  /* mesh allocation */
-  if ( *mesh )  _MMG5_SAFE_FREE(*mesh);
-  _MMG5_SAFE_CALLOC(*mesh,1,MMG5_Mesh);
-
-  /* sol allocation */
-  if ( *sol )  _MMG5_DEL_MEM(*mesh,*sol,sizeof(MMG5_Sol));
-  _MMG5_SAFE_CALLOC(*sol,1,MMG5_Sol);
-
-  return;
-}
-/**
- * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the sol structure.
- *
- * Initialization of mesh and solution structures to their default
- * values (default names, versions, dimensions...).
- *
- */
-static inline
-void MMG5_Init_woalloc_mesh(MMG5_pMesh mesh, MMG5_pSol sol
-  ) {
-
-  _MMG5_Set_commonFunc();
-
-  (mesh)->dim = 3;
-  (mesh)->ver = 2;
-  (sol)->dim  = 3;
-  (sol)->ver  = 2;
-  (sol)->size = 1;
-
-  /* Default parameters values */
-  MMG5_Init_parameters(mesh);
-
-  /* Default vaules for file names */
-  MMG5_Init_fileNames(mesh,sol);
-
-  return;
-}
-
-/**
- * \param mesh pointer toward the mesh structure.
  *
  * Initialization of the input parameters (stored in the Info structure).
  *
@@ -111,7 +61,12 @@ void _MMG5_mmgInit_parameters(MMG5_pMesh mesh) {
   mesh->info.ddebug   =  0;  /* [0/1]    ,Turn on/off debug mode */
   /** MMG5_IPARAM_npar = 0 */
   mesh->info.npar     =  0;  /* [n]      ,number of local parameters */
-
+  /** MMG5_IPARAM_noinsert = 0 */
+  mesh->info.noinsert =  0;  /* [0/1]    ,avoid/allow point insertion/deletion */
+  /** MMG5_IPARAM_noswap = 0 */
+  mesh->info.noswap   =  0;  /* [0/1]    ,avoid/allow edge or face flipping */
+  /** MMG5_IPARAM_nomove = 0 */
+  mesh->info.nomove   =  0;  /* [0/1]    ,avoid/allow point relocation */
 
   /* default values for doubles */
   /** MMG5_DPARAM_angleDetection = \ref _MMG5_ANGEDG */
@@ -139,24 +94,6 @@ void _MMG5_mmgInit_parameters(MMG5_pMesh mesh) {
 
 }
 
-/**
- * \param mesh pointer toward a pointer toward the mesh structure.
- * \param sol pointer toward a pointer toward the sol structure.
- *
- * Allocate the mesh and solution structures and initialize it to
- * their default values.
- *
- */
-void MMG5_Init_mesh(MMG5_pMesh *mesh, MMG5_pSol *sol
-  ) {
-
-  /* allocations */
-  MMG5_Alloc_mesh(mesh,sol);
-  /* initialisations */
-  MMG5_Init_woalloc_mesh(*mesh,*sol);
-
-  return;
-}
 
 /**
  * \param mesh pointer toward the mesh structure.

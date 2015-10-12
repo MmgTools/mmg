@@ -38,6 +38,74 @@
  */
 
 #include "mmg3d.h"
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param sol pointer toward the sol structure.
+ *
+ * Allocate the mesh and solutions structures at \a MMG3D format.
+ *
+ */
+static inline
+void MMG5_Alloc_mesh(MMG5_pMesh *mesh, MMG5_pSol *sol
+  ) {
+
+  /* mesh allocation */
+  if ( *mesh )  _MMG5_SAFE_FREE(*mesh);
+  _MMG5_SAFE_CALLOC(*mesh,1,MMG5_Mesh);
+
+  /* sol allocation */
+  if ( *sol )  _MMG5_DEL_MEM(*mesh,*sol,sizeof(MMG5_Sol));
+  _MMG5_SAFE_CALLOC(*sol,1,MMG5_Sol);
+
+  return;
+}
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param sol pointer toward the sol structure.
+ *
+ * Initialization of mesh and solution structures to their default
+ * values (default names, versions, dimensions...).
+ *
+ */
+static inline
+void MMG5_Init_woalloc_mesh(MMG5_pMesh mesh, MMG5_pSol sol
+  ) {
+
+  _MMG5_Set_commonFunc();
+
+  (mesh)->dim = 3;
+  (mesh)->ver = 2;
+  (sol)->dim  = 3;
+  (sol)->ver  = 2;
+  (sol)->size = 1;
+
+  /* Default parameters values */
+  MMG5_Init_parameters(mesh);
+
+  /* Default vaules for file names */
+  MMG5_Init_fileNames(mesh,sol);
+
+  return;
+}
+/**
+ * \param mesh pointer toward a pointer toward the mesh structure.
+ * \param sol pointer toward a pointer toward the sol structure.
+ *
+ * Allocate the mesh and solution structures and initialize it to
+ * their default values.
+ *
+ */
+void MMG5_Init_mesh(MMG5_pMesh *mesh, MMG5_pSol *sol
+  ) {
+
+  /* allocations */
+  MMG5_Alloc_mesh(mesh,sol);
+  /* initialisations */
+  MMG5_Init_woalloc_mesh(*mesh,*sol);
+  /* set pointer to save the mesh*/
+  MMG5_saveMesh = _MMG5_saveLibraryMesh;
+  return;
+}
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -57,12 +125,6 @@ void _MMG5_Init_parameters(MMG5_pMesh mesh) {
   mesh->info.lag      = -1;
   /** MMG5_IPARAM_optim = 0 */
   mesh->info.optim    =  0;
-  /** MMG5_IPARAM_noinsert = 0 */
-  mesh->info.noinsert =  0;  /* [0/1]    ,avoid/allow point insertion/deletion */
-  /** MMG5_IPARAM_noswap = 0 */
-  mesh->info.noswap   =  0;  /* [0/1]    ,avoid/allow edge or face flipping */
-  /** MMG5_IPARAM_nomove = 0 */
-  mesh->info.nomove   =  0;  /* [0/1]    ,avoid/allow point relocation */
   /** MMG5_IPARAM_nosurf = 0 */
   mesh->info.nosurf   =  0;  /* [0/1]    ,avoid/allow surface modifications */
 #ifdef USE_SCOTCH
@@ -179,8 +241,6 @@ int MMG5_Set_meshSize(MMG5_pMesh mesh, int np, int ne, int nt, int na) {
                 mesh->ntmax,mesh->nt,mesh->nemax,mesh->ne);
         return(0);
       }
-      else
-        return(1);
     } else if(mesh->info.mem < 39) {
       printf("mem insuffisante %d\n",mesh->info.mem);
       return(0);
@@ -395,7 +455,7 @@ int MMG5_Get_vertex(MMG5_pMesh mesh, double* c0, double* c1, double* c2, int* re
  * \param v1 second vertex of tetrahedron.
  * \param v2 third vertex of tetrahedron.
  * \param v3 fourth vertex of tetrahedron.
- * \param ref tetrahedron reference.
+ * \param ref tetrahedron reference (must be positive).
  * \param pos tetrahedron position in the mesh.
  * \return 0 if failed, 1 otherwise.
  *
@@ -435,7 +495,7 @@ int MMG5_Set_tetrahedron(MMG5_pMesh mesh, int v0, int v1, int v2, int v3, int re
   pt->v[1] = v1;
   pt->v[2] = v2;
   pt->v[3] = v3;
-  pt->ref  = ref;
+  pt->ref  = abs(ref);
 
   mesh->point[pt->v[0]].tag &= ~MG_NUL;
   mesh->point[pt->v[1]].tag &= ~MG_NUL;

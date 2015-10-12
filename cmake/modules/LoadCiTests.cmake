@@ -21,6 +21,7 @@
 ## =============================================================================
 
 SET ( GET_MMG_TESTS "FALSE" )
+SET ( GET_MMG2D_TESTS "FALSE" )
 SET ( GET_MMGS_TESTS "FALSE" )
 SET ( GET_MMG3D_TESTS "FALSE" )
 
@@ -33,6 +34,7 @@ IF ( NOT EXISTS ${CMAKE_SOURCE_DIR}/ci_tests )
   FILE(MAKE_DIRECTORY ${CMAKE_SOURCE_DIR}/ci_tests)
 
   SET ( GET_MMG_TESTS "TRUE" )
+  SET ( GET_MMG2D_TESTS "TRUE" )
   SET ( GET_MMGS_TESTS "TRUE" )
   SET ( GET_MMG3D_TESTS "TRUE" )
 
@@ -64,6 +66,34 @@ ELSE ( )
       " ${MMG_VERSION_STATUS_1}.
  Try to get it at the following link:
         https://www.dropbox.com/s/yevltsxy3hxyv5u/mmg.version?dl=0
+ then untar it in the project directory (mmg/ by default).")
+  ENDIF()
+
+  #--------------> mmg2d
+  IF ( EXISTS ${CMAKE_SOURCE_DIR}/ci_tests/mmg2d.version )
+    FILE(MD5 ${CMAKE_SOURCE_DIR}/ci_tests/mmg2d.version OLD_MMG2D_MD5)
+  ELSE ( )
+    SET ( OLD_MMG2D_MD5 "0" )
+  ENDIF ( )
+
+  FILE(DOWNLOAD https://www.dropbox.com/s/dyu7v04n4v2hgus/mmg2d.version?dl=0
+    ${CMAKE_SOURCE_DIR}/ci_tests/mmg2d.version
+    STATUS MMG2D_VERSION_STATUS
+    INACTIVITY_TIMEOUT 5)
+  LIST(GET MMG2D_VERSION_STATUS 0 MMG2D_VERSION_STATUS_0)
+  LIST(GET MMG2D_VERSION_STATUS 1 MMG2D_VERSION_STATUS_1)
+
+  IF ( MMG2D_VERSION_STATUS_0 MATCHES 0)
+    FILE(MD5 ${CMAKE_SOURCE_DIR}/ci_tests/mmg2d.version MMG2D_MD5)
+
+    IF ( NOT (${OLD_MMG2D_MD5} MATCHES ${MMG2D_MD5}) )
+      SET ( GET_MMG2D_TESTS "TRUE" )
+    ENDIF ()
+  ELSE( )
+    MESSAGE(WARNING "Failed to load a simple text file, download status:"
+      " ${MMG2D_VERSION_STATUS_1}.
+ Try to get it at the following link:
+        https://www.dropbox.com/s/b94gyooe1do6uul/mmg2d.tgz?dl=0
  then untar it in the project directory (mmg/ by default).")
   ENDIF()
 
@@ -152,6 +182,36 @@ Try to untar it by hand in the project directory"
         " (mmg/ci_tests/ by default).")
     ENDIF()
     FILE(REMOVE ${CMAKE_SOURCE_DIR}/ci_tests/mmg.tgz)
+  ENDIF ()
+ENDIF ()
+
+
+#--------------> mmg2d
+IF ( GET_MMG2D_TESTS MATCHES "TRUE" )
+  MESSAGE("-- Download the mmg2d test cases. May be very long...")
+  FILE(DOWNLOAD https://www.dropbox.com/s/b94gyooe1do6uul/mmg2d.tgz?dl=0
+    ${CMAKE_SOURCE_DIR}/ci_tests/mmg2d.tgz
+    SHOW_PROGRESS)
+  IF ( NOT EXISTS ${CMAKE_SOURCE_DIR}/ci_tests/mmg2d.tgz )
+    MESSAGE("\n")
+    MESSAGE(WARNING "Fail to automatically download the mmg2d test cases.
+Try to get it at the following link:
+       https://www.dropbox.com/s/b94gyooe1do6uul/mmg2d.tgz?dl=0
+then untar it in the project directory (mmg/ by default).")
+  ELSE()
+    EXECUTE_PROCESS(
+      COMMAND ${CMAKE_COMMAND} -E tar xzf
+      ${CMAKE_SOURCE_DIR}/ci_tests/mmg2d.tgz
+      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/ci_tests/
+      )
+    IF ( NOT EXISTS ${CMAKE_SOURCE_DIR}/ci_tests/mmg2d.tgz )
+      MESSAGE("\n")
+      MESSAGE(WARNING "Fail to automatically untar the mmg2d "
+        "test cases directory (mmg2d.tgz).
+Try to untar it by hand in the project directory"
+        " (mmg/ci_tests/ by default).")
+    ENDIF()
+    FILE(REMOVE ${CMAKE_SOURCE_DIR}/ci_tests/mmg2d.tgz)
   ENDIF ()
 ENDIF ()
 

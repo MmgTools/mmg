@@ -35,10 +35,19 @@
 #include "mmg.h"
 
 
-/* Compute the interpolated (2 x 2) metric from metrics m and n, at parameter s :
-   mr = (1-s)*m +s*n, both metrics being expressed in the simultaneous reduction basis:
-   linear interpolation of sizes */
-static int MMG5_intmet22(double *m,double *n,double *mr,double s) {
+/**
+ * \param m input metric.
+ * \param n input metric.
+ * \param mr computed output metric.
+ * \param s parameter coordinate for the interpolation of metrics \a m and \a n.
+ * \return 0 if fail, 1 otherwise.
+ *
+ * Compute the interpolated \f$(2 x 2)\f$ metric from metrics \a m and \a n, at
+ * parameter \a s : \f$ mr = (1-s)*m +s*n \f$, both metrics being expressed in
+ * the simultaneous reduction basis: linear interpolation of sizes.
+ *
+ */
+static int _MMG5_intmet22(double *m,double *n,double *mr,double s) {
   double  det,imn[4],dd,sqDelta,trimn,lambda[2],vp0[2],vp1[2],dm[2],dn[2],vnorm,d0,d1,ip[4];
 
   /* Compute imn = M^{-1}N */
@@ -63,7 +72,7 @@ static int MMG5_intmet22(double *m,double *n,double *mr,double s) {
     return(0);
   }
 
-  /* First case : matrices m and n are homothetic = n = lambda0*m */
+  /** First case : matrices m and n are homothetic = n = lambda0*m */
   if ( sqDelta < _MMG5_EPS ) {
     dd  = (1.0-s)*sqrt(lambda[0]) + s;
     dd *= dd;
@@ -80,8 +89,9 @@ static int MMG5_intmet22(double *m,double *n,double *mr,double s) {
     return(1);
   }
 
-  /* Second case : both eigenvalues of imn are distinct ; theory says qf associated to m and n
-     are diagonalizable in basis (vp0, vp1) - the coreduction basis */
+  /** Second case : both eigenvalues of imn are distinct ; theory says qf
+     associated to m and n are diagonalizable in basis (vp0, vp1) - the
+     coreduction basis */
   else {
     lambda[1] = 0.5 * (trimn + sqDelta);
     assert(lambda[1] >= 0.0);
@@ -152,6 +162,100 @@ static int MMG5_intmet22(double *m,double *n,double *mr,double s) {
   return(1);
 }
 
+/**
+ * \param m input metric.
+ * \param n input metric.
+ * \param mr computed output metric.
+ * \param s parameter coordinate for the interpolation of metrics \a m and \a n.
+ * \return 0 if fail, 1 otherwise.
+ *
+ * Compute the interpolated \f$(3 x 3)\f$ metric from metrics \a m and \a n, at
+ * parameter \a s : \f$ mr = (1-s)*m +s*n \f$, both metrics being expressed in
+ * the simultaneous reduction basis: linear interpolation of sizes.
+ *
+ */
+static int _MMG5_intmet33(double *m,double *n,double *mr,double s) {
+  int     order;
+  double  lambda[3],vp[3][3],mu[3],is[6],isnis[6],mt[9],P[9],dd;
+  char    i;
+
+  /* Compute inverse of square root of matrix M : is =
+   * P*diag(1/sqrt(lambda))*{^t}P */
+  order = _MMG5_eigenv(1,m,lambda,vp);
+  if ( !order ) return(0);
+
+  for (i=0; i<3; i++) {
+    if ( lambda[i] < _MMG5_EPSD ) return(0);
+    lambda[i] = sqrt(lambda[i]);
+    lambda[i] = 1.0 / lambda[i];
+  }
+
+  is[0] = lambda[0]*vp[0][0]*vp[0][0] + lambda[1]*vp[1][0]*vp[1][0]
+    + lambda[1]*vp[2][0]*vp[2][0];
+  is[1] = lambda[0]*vp[0][0]*vp[0][1] + lambda[1]*vp[1][0]*vp[1][1]
+    + lambda[1]*vp[2][0]*vp[2][1];
+  is[2] = lambda[0]*vp[0][0]*vp[0][2] + lambda[1]*vp[1][0]*vp[1][2]
+    + lambda[1]*vp[2][0]*vp[2][2];
+  is[3] = lambda[0]*vp[0][1]*vp[0][1] + lambda[1]*vp[1][1]*vp[1][1]
+    + lambda[1]*vp[2][1]*vp[2][1];
+  is[4] = lambda[0]*vp[0][1]*vp[0][2] + lambda[1]*vp[1][1]*vp[1][2]
+    + lambda[1]*vp[2][1]*vp[2][2];
+  is[5] = lambda[0]*vp[0][2]*vp[0][2] + lambda[1]*vp[1][2]*vp[1][2]
+    + lambda[1]*vp[2][2]*vp[2][2];
+
+  mt[0] = n[0]*is[0] + n[1]*is[1] + n[2]*is[2];
+  mt[1] = n[0]*is[1] + n[1]*is[3] + n[2]*is[4];
+  mt[2] = n[0]*is[2] + n[1]*is[4] + n[2]*is[5];
+  mt[3] = n[1]*is[0] + n[3]*is[1] + n[4]*is[2];
+  mt[4] = n[1]*is[1] + n[3]*is[3] + n[4]*is[4];
+  mt[5] = n[1]*is[2] + n[3]*is[4] + n[4]*is[5];
+  mt[6] = n[2]*is[0] + n[4]*is[1] + n[5]*is[2];
+  mt[7] = n[2]*is[1] + n[4]*is[3] + n[5]*is[4];
+  mt[8] = n[2]*is[2] + n[4]*is[4] + n[5]*is[5];
+
+  isnis[0] = is[0]*mt[0] + is[1]*mt[3] + is[2]*mt[6];
+  isnis[1] = is[0]*mt[1] + is[1]*mt[4] + is[2]*mt[7];
+  isnis[2] = is[0]*mt[2] + is[1]*mt[5] + is[2]*mt[8];
+  isnis[3] = is[1]*mt[1] + is[3]*mt[4] + is[4]*mt[7];
+  isnis[4] = is[1]*mt[2] + is[3]*mt[5] + is[4]*mt[8];
+  isnis[5] = is[2]*mt[2] + is[4]*mt[5] + is[5]*mt[8];
+
+  order = _MMG5_eigenv(1,isnis,lambda,vp);
+  if ( !order ) return(0);
+
+  /* P = is * (vp) */
+  P[0] = is[0]*vp[0][0] + is[1]*vp[0][1] + is[2]*vp[0][2];
+  P[1] = is[0]*vp[1][0] + is[1]*vp[1][1] + is[2]*vp[1][2];
+  P[2] = is[0]*vp[2][0] + is[1]*vp[2][1] + is[2]*vp[2][2];
+  P[3] = is[1]*vp[0][0] + is[3]*vp[0][1] + is[4]*vp[0][2];
+  P[4] = is[1]*vp[1][0] + is[3]*vp[1][1] + is[4]*vp[1][2];
+  P[5] = is[1]*vp[2][0] + is[3]*vp[2][1] + is[4]*vp[2][2];
+  P[6] = is[2]*vp[0][0] + is[4]*vp[0][1] + is[5]*vp[0][2];
+  P[7] = is[2]*vp[1][0] + is[4]*vp[1][1] + is[5]*vp[1][2];
+  P[8] = is[2]*vp[2][0] + is[4]*vp[2][1] + is[5]*vp[2][2];
+
+  /* At this point, theory states that ^tPMP = I, {^t}PNP=\Lambda */
+  /* Linear interpolation between sizes */
+  for(i=0; i<3; i++) {
+    if ( lambda[i] < 0.0 ) return(0);
+    dd = s*sqrt(lambda[i]) + (1.0-s);
+    dd = dd*dd;
+    if ( dd < _MMG5_EPSD )  return(0);
+    mu[i] = lambda[i]/dd;
+  }
+
+  if ( !_MMG5_invmatg(P,mt) )  return(0);
+
+  /* Resulting matrix = ^tP^{-1} diag(mu) P^{-1} */
+  mr[0] = mu[0]*mt[0]*mt[0] + mu[1]*mt[3]*mt[3] + mu[2]*mt[6]*mt[6];
+  mr[1] = mu[0]*mt[0]*mt[1] + mu[1]*mt[3]*mt[4] + mu[2]*mt[6]*mt[7];
+  mr[2] = mu[0]*mt[0]*mt[2] + mu[1]*mt[3]*mt[5] + mu[2]*mt[6]*mt[8];
+  mr[3] = mu[0]*mt[1]*mt[1] + mu[1]*mt[4]*mt[4] + mu[2]*mt[7]*mt[7];
+  mr[4] = mu[0]*mt[1]*mt[2] + mu[1]*mt[4]*mt[5] + mu[2]*mt[7]*mt[8];
+  mr[5] = mu[0]*mt[2]*mt[2] + mu[1]*mt[5]*mt[5] + mu[2]*mt[8]*mt[8];
+
+  return(1);
+}
 
 /**
  * \param ma pointer on a metric
@@ -179,16 +283,17 @@ int _MMG5_interp_iso(double *ma,double *mb,double *mp,double t) {
  * \param s interpolated parameter (comprise between 0 and 1)
  * \param mr computed interpolated metric
  *
- * Metric interpolation between points p1 and p2, in tria \a pt at parameter 0 <= \a s <= 1 from p1
- * result is stored in \a mr. edge p1p2 must not be a ridge 
+ * Metric interpolation between points p1 and p2, in tria \a pt at parameter 0
+ * <= \a s <= 1 from p1 result is stored in \a mr. edge p1p2 must not be a ridge
  */
 int _MMG5_interpreg_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt,char i,double s,double mr[6]) {
-  MMG5_pPoint    p1,p2;
-  _MMG5_Bezier    b;
-  double    b1[3],b2[3],bn[3],c[3],nt[3],cold[3],n[3],nold[3],mold[6],m1[6],m2[6];
-  double   *n1,*n2,step,u,r[3][3],mt1[3],mt2[3],dd;
-  int       ip1,ip2,nstep,l;
-  char      i1,i2;
+  MMG5_pPoint    p1,p2,p3;
+  _MMG5_Bezier   b;
+  double         b1[3],b2[3],bn[3],c[3],nt[3],cold[3],n[3],nold[3];
+  double         m1old[6],m2old[6],m3old[6],m1[6],m2[6],m3[6];
+  double         *n1,*n2,*n3,step,u,r[3][3],mt1[3],mt2[3],dd;
+  int            ip1,ip2,ip3,nstep,l;
+  char           i1,i2;
 
   /* Number of steps for parallel transport */
   nstep = 4;
@@ -228,7 +333,7 @@ int _MMG5_interpreg_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt,char i,doubl
     else {
       memcpy(m1,&met->m[6*ip1],6*sizeof(double));
     }
-    memcpy(mold,m1,6*sizeof(double));
+    memcpy(m1old,m1,6*sizeof(double));
 
     /* Go from point (l-1)step, to point l step */
     for (l=1; l<=nstep; l++) {
@@ -250,11 +355,11 @@ int _MMG5_interpreg_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt,char i,doubl
       n[1] *= dd;
       n[2] *= dd;
 
-      if ( !_MMG5_paratmet(cold,nold,mold,c,n,m1) )  return(0);
+      if ( !_MMG5_paratmet(cold,nold,m1old,c,n,m1) )  return(0);
 
       memcpy(cold,c,3*sizeof(double));
       memcpy(nold,n,3*sizeof(double));
-      memcpy(mold,m1,6*sizeof(double));
+      memcpy(m1old,m1,6*sizeof(double));
     }
   }
 
@@ -282,7 +387,7 @@ int _MMG5_interpreg_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt,char i,doubl
     else {
       memcpy(m2,&met->m[6*ip2],6*sizeof(double));
     }
-    memcpy(mold,m2,6*sizeof(double));
+    memcpy(m2old,m2,6*sizeof(double));
 
     /* Go from point (l-1)step, to point l step */
     for (l=1; l<=nstep; l++) {
@@ -304,11 +409,11 @@ int _MMG5_interpreg_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt,char i,doubl
       n[1] *= dd;
       n[2] *= dd;
 
-      if ( !_MMG5_paratmet(cold,nold,mold,c,n,m2) )  return(0);
+      if ( !_MMG5_paratmet(cold,nold,m2old,c,n,m2) )  return(0);
 
       memcpy(cold,c,3*sizeof(double));
       memcpy(nold,n,3*sizeof(double));
-      memcpy(mold,m2,6*sizeof(double));
+      memcpy(m2old,m2,6*sizeof(double));
     }
   }
   /* At this point, c is point p(s), n is the normal at p(s), m1 and m2 are the 3*3
@@ -316,43 +421,43 @@ int _MMG5_interpreg_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt,char i,doubl
 
   /* Rotate both matrices to the tangent plane */
   if ( !_MMG5_rotmatrix(n,r) )  return(0);
-  _MMG5_rmtr(r,m1,mold);
-  mt1[0] = mold[0];
-  mt1[1] = mold[1];
-  mt1[2] = mold[3];
+  _MMG5_rmtr(r,m1,m1old);
+  _MMG5_rmtr(r,m2,m2old);
 
-  _MMG5_rmtr(r,m2,mold);
-  mt2[0] = mold[0];
-  mt2[1] = mold[1];
-  mt2[2] = mold[3];
-
-  /* Interpolate both metrics expressed in the same tangent plane : cold is reused */
-  if ( !MMG5_intmet22(mt1,mt2,cold,s) ) {
+  /* Interpolate both metrics expressed in the same tangent plane. */
+  if ( !_MMG5_intmet33(m1old,m2old,mr,s) ) {
     printf("Impossible interpolation between points : %d %d\n",pt->v[i1],pt->v[i2]);
     printf("m1 : %E %E %E %E %E %E \n",m1[0],m1[1],m1[2],m1[3],m1[4],m1[5]);
     printf("m2 : %E %E %E %E %E %E \n",m2[0],m2[1],m2[2],m2[3],m2[4],m2[5]);
-    printf("mt1 : %E %E %E et det %E \n",mt1[0],mt1[1],mt1[2],mt1[0]*mt1[2]-mt1[1]*mt1[1]);
-    printf("mt2 : %E %E %E et det : %E \n",mt2[0],mt2[1],mt2[2],mt2[0]*mt2[2]-mt2[1]*mt2[1]);
-    exit(0);
+    printf("m1old : %E %E %E %E %E %E \n",m1old[0],m1old[1],
+           m1old[2],m1old[3],m1old[4],m1old[5]);
+    printf("m2old : %E %E %E %E %E %E \n",m2old[0],m2old[1],
+           m2old[2],m1old[3],m2old[4],m2old[5]);
+    exit(EXIT_FAILURE);
     return(0);
   }
 
-  /* End rotating back tangent metric into canonical basis of R^3 : mr = {^t}R*cold*R
-     mt1 and mt2 serve for nothing ; let them be the lines of cold * R  */
-  mt1[0] = cold[0]*r[0][0] + cold[1]*r[1][0];  mt1[1] = cold[0]*r[0][1] + cold[1]*r[1][1];   mt1[2] = cold[0]*r[0][2] + cold[1]*r[1][2] ;
-  mt2[0] = cold[1]*r[0][0] + cold[2]*r[1][0];  mt2[1] = cold[1]*r[0][1] + cold[2]*r[1][1];   mt2[2] = cold[1]*r[0][2] + cold[2]*r[1][2] ;
+  /* End rotating back tangent metric into canonical basis of R^3 : mr =
+     {^t}R*mr*R m1old serve for nothing, let it be the temporary resulting
+     matrix. */
+  m1old[0] = mr[0]*r[0][0]*r[0][0] + mr[3]*r[1][0]*r[1][0] + mr[5]*r[2][0]*r[2][0]
+    + 2.*( mr[1]*r[0][0]*r[1][0] + mr[2]*r[0][0]*r[2][0] + mr[4]*r[1][0]*r[2][0] );
+  m1old[3] = mr[0]*r[0][1]*r[0][1] + mr[3]*r[1][1]*r[1][1] + mr[5]*r[2][1]*r[2][1]
+    + 2.*( mr[1]*r[0][1]*r[1][1] + mr[2]*r[0][1]*r[2][1] + mr[4]*r[1][1]*r[2][1] );
+  m1old[5] = mr[0]*r[0][2]*r[0][2] + mr[3]*r[1][2]*r[1][2] + mr[5]*r[2][2]*r[2][2]
+    + 2.*( mr[1]*r[0][2]*r[1][2] + mr[2]*r[0][2]*r[2][2] + mr[4]*r[1][2]*r[2][2] );
 
-  mr[0] = r[0][0] * mt1[0] + r[1][0] * mt2[0];
-  mr[1] = r[0][0] * mt1[1] + r[1][0] * mt2[1];
-  mr[2] = r[0][0] * mt1[2] + r[1][0] * mt2[2];
-  mr[3] = r[0][1] * mt1[1] + r[1][1] * mt2[1];
-  mr[4] = r[0][1] * mt1[2] + r[1][1] * mt2[2];
-  mr[5] = r[0][2] * mt1[2] + r[1][2] * mt2[2];
+  m1old[1] = mr[0]*r[0][0]*r[0][1] + mr[1]*r[0][0]*r[1][1] + mr[2]*r[0][0]*r[2][1]
+    + mr[1]*r[1][0]*r[0][1] + mr[3]*r[1][0]*r[1][1] + mr[4]*r[1][0]*r[2][1]
+    + mr[2]*r[2][0]*r[0][1] + mr[4]*r[2][0]*r[1][1] + mr[5]*r[2][0]*r[2][1];
+  m1old[2] = mr[0]*r[0][0]*r[0][2] + mr[1]*r[0][0]*r[1][2] + mr[2]*r[0][0]*r[2][2]
+    + mr[1]*r[1][0]*r[0][2] + mr[3]*r[1][0]*r[1][2] + mr[4]*r[1][0]*r[2][2]
+    + mr[2]*r[2][0]*r[0][2] + mr[4]*r[2][0]*r[1][2] + mr[5]*r[2][0]*r[2][2];
+  m1old[4] = mr[0]*r[0][1]*r[0][2] + mr[1]*r[0][1]*r[1][2] + mr[2]*r[0][1]*r[2][2]
+    + mr[1]*r[1][1]*r[0][2] + mr[3]*r[1][1]*r[1][2] + mr[4]*r[1][1]*r[2][2]
+    + mr[2]*r[2][1]*r[0][2] + mr[4]*r[2][1]*r[1][2] + mr[5]*r[2][1]*r[2][2];
 
-//todo : warning false
-//reappliquer la rotation aux deux metriques initiales
-//extraire les vp : 2 devraient etre egales et la troisieme differente
-//prendre le min des vp
+  memcpy(mr,m1old,6*sizeof(double));
 
   return(1);
 

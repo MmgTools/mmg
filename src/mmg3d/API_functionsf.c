@@ -38,6 +38,26 @@
  */
 
 #include "mmg3d.h"
+/**
+ * See \ref MMG5_Init_mesh function in common/libmmg.h file.
+ */
+FORTRAN_NAME(MMG5_INIT_MESH, mmg5_init_mesh,(MMG5_pMesh *mesh, MMG5_pSol *sol
+#ifdef SINGUL
+                                             , MMG5_pSingul *sing
+#endif
+               ),(mesh,sol
+#ifdef SINGUL
+                  ,sing
+#endif
+                 )) {
+#ifdef SINGUL
+  MMG5_Init_mesh(mesh,sol,sing);
+#else
+  MMG5_Init_mesh(mesh,sol);
+#endif
+
+  return;
+}
 
 /**
  * See \ref MMG5_Init_parameters function in \ref mmg3d/libmmg3d.h file.

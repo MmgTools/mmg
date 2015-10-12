@@ -112,7 +112,7 @@ void _MMG5_memOption(MMG5_pMesh mesh) {
   if ( mesh->info.mem <= 0 ) {
     if ( mesh->memMax )
       /* maximal memory = 50% of total physical memory */
-      mesh->memMax = mesh->memMax*50/100;
+      mesh->memMax = (long long)(mesh->memMax*50/100);
     else {
       /* default value = 800 Mo */
       printf("  Maximum memory set to default value: %d Mo.\n",_MMG5_MEMMAX);
@@ -123,7 +123,7 @@ void _MMG5_memOption(MMG5_pMesh mesh) {
     /* memory asked by user if possible, otherwise total physical memory */
     if ( (long long)mesh->info.mem*million > mesh->memMax && mesh->memMax ) {
       fprintf(stdout,"  ## Warning: asking for %d Mo of memory ",mesh->info.mem);
-      fprintf(stdout,"when only %lld available.\n",mesh->memMax/million);
+      fprintf(stdout,"when only %lld available.\n",(long long)(mesh->memMax/million));
     }
     else {
       mesh->memMax= (long long)(mesh->info.mem)*million;
@@ -136,15 +136,15 @@ void _MMG5_memOption(MMG5_pMesh mesh) {
       2*sizeof(MMG5_Tria) + 3*sizeof(int) + sizeof(MMG5_Sol);
 
     /*init allocation need 38Mo*/
-    npask = (int)((double)(mesh->info.mem-38) / bytes) * (int)million;
+    npask = (int)((double)(mesh->info.mem-38) / bytes * (int)million);
     mesh->npmax = MG_MIN(npask,mesh->npmax);
     mesh->ntmax = MG_MIN(2*npask,mesh->ntmax);
 
     /*check if the memory asked is enough to load the mesh*/
     if(mesh->np &&
        (mesh->npmax < mesh->np || mesh->ntmax < mesh->nt )) {
-      memtmp = mesh->np * bytes /(int)million + 38;
-      memtmp = MG_MAX(memtmp, mesh->nt * bytes /(2 * (int)million) + 38);
+      memtmp = (int)(mesh->np * bytes /(int)million + 38);
+      memtmp = MG_MAX(memtmp, (int)(mesh->nt * bytes /(2 * (int)million) + 38));
       mesh->memMax = (long long) memtmp+1;
       fprintf(stdout,"  ## ERROR: asking for %d Mo of memory ",mesh->info.mem);
       fprintf(stdout,"is not enough to load mesh. You need to ask %d Mo minimum\n",
@@ -160,7 +160,7 @@ void _MMG5_memOption(MMG5_pMesh mesh) {
 
   if ( abs(mesh->info.imprim) > 4 || mesh->info.ddebug )
     fprintf(stdout,"  MAXIMUM MEMORY AUTHORIZED (Mo)    %lld\n",
-            mesh->memMax/million);
+            (long long)(mesh->memMax/million));
 
   if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug ) {
     fprintf(stdout,"  _MMG5_NPMAX    %d\n",mesh->npmax);

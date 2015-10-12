@@ -521,6 +521,11 @@ static int _MMG5_singul(MMG5_pMesh mesh) {
     }
   }
 
+  /* reset the ppt->s tag */
+  for (k=1; k<=mesh->np; ++k) {
+    mesh->point[k].s = 0;
+  }
+
   if ( abs(mesh->info.imprim) > 3 && nre > 0 )
     fprintf(stdout,"     %d corners, %d singular points detected\n",nc,nre);
   return(1);
@@ -766,6 +771,12 @@ static int regnor(MMG5_pMesh mesh) {
     }
     if ( it > 1 && res < _MMG5_EPS )  break;
   }
+
+  /* reset the ppt->s tag */
+  for (k=1; k<=mesh->np; ++k) {
+    mesh->point[k].s = 0;
+  }
+
   if ( mesh->info.imprim < 0 || mesh->info.ddebug )  fprintf(stdout,"\n");
 
   if ( abs(mesh->info.imprim) > 4 )
