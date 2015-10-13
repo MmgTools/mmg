@@ -956,8 +956,8 @@ int _MMG5_gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
       if ( !MG_EOK(pt) )  continue;
 
       for (i=0; i<4; i++) {
-        i1 = _MMG5_inxt2[i];
-        i2 = _MMG5_iprv2[i];
+        /* i1 = _MMG5_inxt2[i]; */
+        /* i2 = _MMG5_iprv2[i]; */
         p1 = &mesh->point[pt->v[i1]];
         p2 = &mesh->point[pt->v[i2]];
 

@@ -706,10 +706,7 @@ int _MMG5_cavity_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel,int ip,int* list,int 
   while ( ipil < ilist );
 
   /* global overflow */
-  if ( mesh->ne + 2*ilist >= mesh->nemax )
-    ilist = -ilist;
-  else
-    ilist = _MMG5_correction_ani(mesh,met,ip,list,ilist,lon);
+  ilist = _MMG5_correction_ani(mesh,met,ip,list,ilist,lon);
 
   if ( isreq ) ilist = -abs(ilist);
 
@@ -828,10 +825,7 @@ int _MMG5_cavity_iso(MMG5_pMesh mesh,MMG5_pSol sol,int iel,int ip,int *list,int 
   while ( ipil < ilist );
 
   /* global overflow: obsolete avec la reallocation */
-  if ( mesh->ne + 2*ilist >= mesh->nemax )
-    ilist = -ilist;
-  else
-    ilist = _MMG5_correction_iso(mesh,ip,list,ilist,lon);
+  ilist = _MMG5_correction_iso(mesh,ip,list,ilist,lon);
 
   if ( isreq ) ilist = -abs(ilist);
 
