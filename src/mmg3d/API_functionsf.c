@@ -341,19 +341,31 @@ FORTRAN_NAME(MMG5_SET_LOCALPARAMETER,mmg5_set_localparameter,
  * See \ref MMG5_Free_structures function in \ref mmg3d/libmmg3d.h file.
  */
 FORTRAN_NAME(MMG5_FREE_STRUCTURES,mmg5_free_structures,(MMG5_pMesh *mesh,MMG5_pSol *met
+                                                        ,MMG5_pSol *disp
 #ifdef SINGUL
                                                         ,MMG5_pSingul *singul
 #endif
-               ),(mesh,met
+               ),(mesh,met,disp
 #ifdef SINGUL
                   ,singul
 #endif
                  )){
 #ifdef SINGUL
-  MMG5_Free_structures(*mesh,*met,*singul);
+  MMG5_Free_structures(*mesh,*met,*disp,*singul);
 #else
-  MMG5_Free_structures(*mesh,*met);
+  MMG5_Free_structures(*mesh,*met,*disp);
 #endif
+  return;
+}
+
+/**
+ * See \ref MMG5_Free_names function in \ref mmg3d/libmmg3d.h file.
+ */
+FORTRAN_NAME(MMG5_FREE_NAMES,mmg5_free_names,(MMG5_pMesh *mesh,MMG5_pSol *met,
+                                              MMG5_pSol *disp),
+             (mesh,met,disp))
+{
+  MMG5_Free_names(*mesh,*met,*disp);
   return;
 }
 

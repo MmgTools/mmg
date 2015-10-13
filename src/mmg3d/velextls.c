@@ -32,6 +32,7 @@
  * \copyright GNU Lesser General Public License.
  * \todo Doxygen documentation
  */
+#ifdef USE_SUSCELAS
 
 #include "mmg3d.h"
 #include "ls_calls.h"
@@ -328,3 +329,5 @@ int _MMG5_velextLS(MMG5_pMesh mesh,MMG5_pSol disp) {
   
   return(1);
 }
+
+#endif

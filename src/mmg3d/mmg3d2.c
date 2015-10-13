@@ -1371,7 +1371,7 @@ int _MMG5_mmg3d2(MMG5_pMesh mesh,MMG5_pSol sol) {
     return(0);
   }
 
-  /* Clean memory (but not pointer) */
+  /* Clean memory */
   _MMG5_DEL_MEM(mesh,sol->m,(sol->size*(sol->npmax+1))*sizeof(double));
   memset(sol,0,sizeof(MMG5_Sol));
 

@@ -148,9 +148,11 @@ void _MMG5_usage(char *prog) {
 
   _MMG5_mmgUsage(prog);
   fprintf(stdout,"-A           enable anisotropy (without metric file).\n");
-
-  fprintf(stdout,"-lag [0/1/2] Lagrangian mesh displacement according to mode 0/1/2\n");
   fprintf(stdout,"-ls     val  create mesh of isovalue val\n");
+
+#ifdef USE_SUSCELAS
+  fprintf(stdout,"-lag [0/1/2] Lagrangian mesh displacement according to mode 0/1/2\n");
+#endif
 #ifndef PATTERN
   fprintf(stdout,"-bucket val  Specify the size of bucket per dimension \n");
 #endif

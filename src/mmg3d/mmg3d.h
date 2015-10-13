@@ -29,10 +29,10 @@
 #define MG_SMSGN(a,b)  (((double)(a)*(double)(b) > (0.0)) ? (1) : (0))
 
 /** Free allocated pointers of mesh and sol structure and return value val */
-#define _MMG5_RETURN_AND_FREE(mesh,met,val)do   \
-  {                                             \
-    MMG5_Free_all(mesh,met);                    \
-    return(val);                                \
+#define _MMG5_RETURN_AND_FREE(mesh,met,disp,val)do  \
+  {                                                 \
+    MMG5_Free_all(mesh,met,disp);                   \
+    return(val);                                    \
   }while(0)
 
 /** Reallocation of point table, sol table and bucket table and creation

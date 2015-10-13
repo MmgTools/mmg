@@ -1113,9 +1113,16 @@ int MMG5_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
         exit(EXIT_FAILURE);
     break;
   case MMG5_IPARAM_lag :
+#ifdef USE_SUSCELAS
     if ( val < 0 || val > 2 )
       exit(EXIT_FAILURE);
     mesh->info.lag = val;
+#else
+    fprintf(stout,"  ## Error: \"lagrangian motion\" option unavailable (-lag):"
+            " set the USE_SUSCELAS CMake's flag to ON when compiling the mmg3d"
+            " library to enable this feature.\n");
+    return(0);
+#endif
     break;
   case MMG5_IPARAM_optim :
     mesh->info.optim = val;
@@ -1339,15 +1346,16 @@ int MMG5_Set_localParameter(MMG5_pMesh mesh,MMG5_pSol sol, int typ, int ref, dou
 
 /**
  * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the sol structure.
+ * \param met pointer toward a sol structure (metric or solution).
+ * \param disp pointer toward a sol structure (displacement).
  *
  * Structure deallocations before return.
  *
  */
-void MMG5_Free_structures(MMG5_pMesh mesh,MMG5_pSol met
+void MMG5_Free_structures(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp
   ){
 
-  MMG5_Free_names(mesh,met);
+  MMG5_Free_names(mesh,met,disp);
 
   /* mesh */
   if ( mesh->point )
@@ -1375,7 +1383,11 @@ void MMG5_Free_structures(MMG5_pMesh mesh,MMG5_pSol met
     _MMG5_DEL_MEM(mesh,mesh->xtetra,(mesh->xtmax+1)*sizeof(MMG5_xTetra));
 
   /* met */
-  if ( /*!mesh->info.iso &&*/ met && met->m )
+  if ( met && met->m )
+    _MMG5_DEL_MEM(mesh,met->m,(met->size*(met->npmax+1))*sizeof(double));
+
+  /* disp */
+  if ( disp && disp->m )
     _MMG5_DEL_MEM(mesh,met->m,(met->size*(met->npmax+1))*sizeof(double));
 
   /* mesh->info */
@@ -1384,4 +1396,29 @@ void MMG5_Free_structures(MMG5_pMesh mesh,MMG5_pSol met
 
   if ( mesh->info.imprim>6 || mesh->info.ddebug )
     printf("  MEMORY USED AT END (bytes) %lld\n",mesh->memCur);
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward a sol structure (metric or solution).
+ * \param disp pointer toward a sol structure (displacement).
+ *
+ * Structure deallocations before return.
+ *
+ */
+void MMG5_Free_names(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp){
+
+  /* mesh & met */
+  MMG5_mmgFree_names(mesh,met);
+
+  /* disp */
+  if ( disp ) {
+    if ( disp->namein ) {
+      _MMG5_DEL_MEM(mesh,disp->namein,(strlen(disp->namein)+1)*sizeof(char));
+    }
+
+    if ( disp->nameout ) {
+      _MMG5_DEL_MEM(mesh,disp->nameout,(strlen(disp->nameout)+1)*sizeof(char));
+    }
+  }
 }

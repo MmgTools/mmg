@@ -41,7 +41,7 @@
 
 int main(int argc,char *argv[]) {
   MMG5_pMesh      mmgMesh;
-  MMG5_pSol       mmgSol;
+  MMG5_pSol       mmgSol,mmgDisp;
   int             ier;
   char            *pwd,*filename;
 
@@ -62,6 +62,7 @@ int main(int argc,char *argv[]) {
      output mesh name */
   mmgMesh = NULL;
   mmgSol  = NULL;
+  mmgDisp = NULL; // Useless here: just needed forthe lagrangian motion option
   MMG5_Init_mesh(&mmgMesh,&mmgSol);
 
   /** 2) Build mesh in MMG5 format */
@@ -94,7 +95,7 @@ int main(int argc,char *argv[]) {
 
   /** ------------------------------ STEP  II -------------------------- */
   /** library call */
-  ier = MMG5_mmg3dlib(mmgMesh,mmgSol);
+  ier = MMG5_mmg3dlib(mmgMesh,mmgSol,mmgDisp);
   if ( ier == MMG5_STRONGFAILURE ) {
     fprintf(stdout,"BAD ENDING OF MMG3DLIB: UNABLE TO SAVE MESH\n");
     return(ier);
@@ -123,7 +124,7 @@ int main(int argc,char *argv[]) {
   MMG5_saveMet(mmgMesh,mmgSol);
 
   /** 3) Free the MMG3D5 structures */
-  MMG5_Free_all(mmgMesh,mmgSol);
+  MMG5_Free_all(mmgMesh,mmgSol,mmgDisp);
 
   free(filename);
   filename = NULL;

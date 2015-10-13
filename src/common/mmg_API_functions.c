@@ -310,8 +310,7 @@ int MMG5_Set_outputSolName(MMG5_pMesh mesh,MMG5_pSol sol, char* solout) {
  * File name deallocations before return.
  *
  */
-void MMG5_Free_names(MMG5_pMesh mesh,MMG5_pSol met
-  ){
+void MMG5_mmgFree_names(MMG5_pMesh mesh,MMG5_pSol met){
   /* mesh */
   if ( mesh->nameout ) {
     _MMG5_DEL_MEM(mesh,mesh->nameout,(strlen(mesh->nameout)+1)*sizeof(char));

@@ -74,7 +74,7 @@ int main(int argc,char *argv[]) {
   MMG5_Init_mesh(&mesh,&met);
 
   /* reset default values for file names */
-  MMG5_Free_names(mesh,met);
+  MMG5_Free_names(mesh,met,disp);
 
   /* command line */
   if ( !MMG5_parsar(argc,argv,mesh,met) )  return(1);
@@ -84,19 +84,18 @@ int main(int argc,char *argv[]) {
   chrono(ON,&ctim[1]);
   /* read mesh file */
   if ( MMG5_loadMesh(mesh)<1 ) {
-    MMG5_Free_all(mesh,met );
+    MMG5_Free_all(mesh,met,disp );
     return(MMG5_STRONGFAILURE);
   }
   if ( !MMG5_Set_solSize(mesh,met,MMG5_Vertex,0,MMG5_Scalar) ) {
-    MMG5_Free_all(mesh,met);
+    MMG5_Free_all(mesh,met,disp);
     return(MMG5_STRONGFAILURE);
   }
 
   /* read displacement if any */
   if ( MMG5_Get_iparameter(mesh, MMG5_IPARAM_lag) > -1 ) {
-    fprintf(stdout,"  ## ERROR: LAGRANGIAN MOTION NOT YET IMPLEMENTED IN LIBRARY.\n");
+    fprintf(stdout,"  ## ERROR: LAG. MOTION NOT YET AVAILABLE.\n");
     return(MMG5_STRONGFAILURE);
-
     if ( !MMG5_Set_inputSolName(mesh,disp,met->namein) ) {
       return(MMG5_STRONGFAILURE);
     }
@@ -115,20 +114,20 @@ int main(int argc,char *argv[]) {
     ier = MMG5_loadMet(mesh,met);
     if ( ier == -1 ) {
       fprintf(stdout,"  ## ERROR: WRONG DATA TYPE OR WRONG SOLUTION NUMBER.\n");
-      MMG5_Free_all(mesh,met);
+      MMG5_Free_all(mesh,met,disp);
       return(MMG5_STRONGFAILURE);
     }
     else {
       MMG5_Get_solSize( mesh, met, &dummy, &dummy, &typSol);
       if ( typSol != MMG5_Scalar ) {
 	fprintf(stdout,"  ## ERROR: ANISOTROPIC METRIC NOT IMPLEMENTED.\n");
-	MMG5_Free_all(mesh,met);
+	MMG5_Free_all(mesh,met,disp);
 	return(MMG5_STRONGFAILURE);
       }
     }
     if ( MMG5_Get_iparameter(mesh, MMG5_IPARAM_iso) && !ier ) {
       fprintf(stdout,"  ## ERROR: NO ISOVALUE DATA.\n");
-      MMG5_Free_all(mesh,met);
+      MMG5_Free_all(mesh,met,disp);
       return(MMG5_STRONGFAILURE);
     }
     if ( !MMG5_parsop(mesh,met) )
@@ -139,18 +138,18 @@ int main(int argc,char *argv[]) {
   printim(ctim[1].gdif,stim);
   fprintf(stdout,"  -- DATA READING COMPLETED.     %s\n",stim);
 
-  ier = MMG5_mmg3dlib(mesh,met );
+  ier = MMG5_mmg3dlib(mesh,met,disp );
 
   if ( ier != MMG5_STRONGFAILURE ) {
     chrono(ON,&ctim[1]);
     if ( mesh->info.imprim )
       fprintf(stdout,"\n  -- WRITING DATA FILE %s\n",mesh->nameout);
     if ( !MMG5_saveMesh(mesh) )         {
-      MMG5_Free_all(mesh,met );
+      MMG5_Free_all(mesh,met,disp );
       return(EXIT_FAILURE);
     }
     if ( !MMG5_saveMet(mesh,met) )     {
-      MMG5_Free_all(mesh,met);
+      MMG5_Free_all(mesh,met,disp);
       return(EXIT_FAILURE);
     }
     chrono(OFF,&ctim[1]);
@@ -162,6 +161,6 @@ int main(int argc,char *argv[]) {
   chrono(OFF,&ctim[0]);
   printim(ctim[0].gdif,stim);
   fprintf(stdout,"\n   MMG3D: ELAPSED TIME  %s\n",stim);
-  MMG5_Free_all(mesh,met);
+  MMG5_Free_all(mesh,met,disp);
   return(ier);
 }

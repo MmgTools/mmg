@@ -484,34 +484,47 @@ int  MMG5_saveMet(MMG5_pMesh mesh, MMG5_pSol met);
 /* deallocations */
 /**
  * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the sol structure.
+ * \param met pointer toward the sol structure (metric or solution).
+ * \param disp pointer toward a sol structure (displacement).
  *
  * Deallocations before return.
  *
  */
-void MMG5_Free_all(MMG5_pMesh mesh, MMG5_pSol met);
+void MMG5_Free_all(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pSol disp);
 
 /**
  * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the sol structure.
+ * \param met pointer toward the sol structure (metric or solution).
+ * \param disp pointer toward a sol structure (displacement).
  *
  * Structure deallocations before return.
  *
  */
-void MMG5_Free_structures(MMG5_pMesh mesh, MMG5_pSol met);
+void MMG5_Free_structures(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pSol disp);
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward a sol structure (metric or solution).
+ * \param disp pointer toward a sol structure (displacement).
+ *
+ * File name deallocations before return.
+ *
+ */
+void MMG5_Free_names(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pSol disp);
 
 /* library */
 /**
  * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the sol structure.
- * \return Return \ref MMG5_SUCCESS if success,
- * \ref MMG5_LOWFAILURE if fail but a conform mesh is saved or
- * \ref MMG5_STRONGFAILURE if fail and we can't save the mesh.
+ * \param sol pointer toward the sol (metric or level-set) structure.
+ * \param disp pointer toward the sol (displacement) structure.
+ * \return \ref MMG5_SUCCESS if success, \ref MMG5_LOWFAILURE if fail but a
+ * conform mesh is saved or \ref MMG5_STRONGFAILURE if fail and we can't save
+ * the mesh.
  *
  * Main program for the library.
  *
  */
-int  MMG5_mmg3dlib(MMG5_pMesh mesh, MMG5_pSol sol);
+int  MMG5_mmg3dlib(MMG5_pMesh mesh, MMG5_pSol sol, MMG5_pSol disp);
 
 /* for PAMPA library */
 /** Options management */

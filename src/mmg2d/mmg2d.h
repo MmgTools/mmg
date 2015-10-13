@@ -74,6 +74,13 @@
 #define M_VOK(ppt)    (ppt && (ppt->tag < M_NUL))
 #define M_EOK(pt)     (pt && (pt->v[0] > 0))
 
+/** Free allocated pointers of mesh and sol structure and return value val */
+#define _MMG5_RETURN_AND_FREE(mesh,met,val)do       \
+  {                                                 \
+    MMG5_Free_all(mesh,met);                        \
+    return(val);                                    \
+  }while(0)
+
 /**
  * \param sigid signal number.
  *

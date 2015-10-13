@@ -104,6 +104,20 @@ FOREACH(EXEC ${LISTEXEC_MMG3D})
     -hgrad 2
     )
 
+  ###############################################################################
+  #####
+  #####         Check Lagrangian motion option
+  #####
+  ###############################################################################
+  #####
+  IF ( USE_SUSCELAS )
+    ADD_TEST(NAME LagMotion1_tinyBoxt_${EXEC}
+      COMMAND ${EXEC}  -lag 1
+      -in ${MMG3D_CI_TESTS}/LagMotion1_tinyBoxt/tinyBoxt
+      -sol ${MMG3D_CI_TESTS}/LagMotion1_tinyBoxt/tinyBoxt.sol
+      -out ${MMG3D_CI_TESTS}/LagMotion1_tinyBoxt/tinyBoxt.meshb
+      )
+  ENDIF()
 
 ENDFOREACH(EXEC)
 
@@ -355,6 +369,21 @@ IF ( LONG_TESTS )
   #ADD_TEST(NAME RefCube
   #  COMMAND ${EXECUT_MMG3D}
   #  ${MMG3D_CI_TESTS}/RefCube/cube) marre... a finir
+
+  ###############################################################################
+  #####
+  #####         Check Lagrangian motion option
+  #####
+  ###############################################################################
+  #####
+  IF ( USE_SUSCELAS )
+    ADD_TEST(NAME LagMotion1_boxt_${EXEC}
+      COMMAND ${EXEC}  -lag 1
+      -in ${MMG3D_CI_TESTS}/LagMotion1_boxt/boxt
+      -sol ${MMG3D_CI_TESTS}/LagMotion1_boxt/boxt.sol
+      -out ${MMG3D_CI_TESTS}/LagMotion1_boxt/boxt.meshb
+      )
+  ENDIF()
 
 ENDIF()
 

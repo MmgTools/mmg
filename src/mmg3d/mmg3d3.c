@@ -33,6 +33,8 @@
  * \todo Doxygen documentation
  */
 
+#ifdef USE_SUSCELAS
+
 #include "mmg3d.h"
 #include "ls_calls.h"
 #define _MMG5_DEGTOL  1.e-1
@@ -700,12 +702,12 @@ int _MMG5_mmg3d3(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met) {
     
     if ( t == _MMG5_SHORTMAX ) break;
   }
-  /* Clean memory (but not pointer) */
-  /* Doing this, memcur of mesh is decreased by size of displacement... ????? */
+  /* Clean memory */
+  /* Doing this, memcur of mesh is decreased by size of displacement */
   _MMG5_DEL_MEM(mesh,disp->m,(disp->size*disp->npmax+1)*sizeof(double));
-  
-  /* Generates errors saying that the pointer being freed was not allocated */
-  //_MMG5_DEL_MEM(mesh,disp,sizeof(MMG5_pSol));
+  memset(disp,0,sizeof(MMG5_Sol));
 
   return(1);
 }
+
+#endif
