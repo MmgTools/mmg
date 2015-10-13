@@ -191,10 +191,9 @@ int lissmet_ani(MMG5_pMesh mesh,MMG5_pSol sol) {
 int lissmet_iso(MMG5_pMesh mesh,MMG5_pSol sol) {
   MMG5_pTria     ptt;  
   MMG5_pPoint    p1,p2;
-  double hsiz,logh,logs,ux,uy,d1,d2,dd,rap,dh; 
-  double  *ha,*hb,ha1,hb1;  
-  double    tail,coef,coef1,coef2,ma1[3],mb1[3],m[3],dd1,dd2;
-  int   i,nc,k,itour,maxtou,ncor,a,b,iadr; 
+  double         logh,logs,dd,rap,dh; 
+  double    tail,coef;
+  int   i,nc,k,maxtou; 
   int   it,i1,i2;
   double hmax,ax,ay,lograp;
 	

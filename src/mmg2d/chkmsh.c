@@ -24,10 +24,11 @@
 
 
 int _MMG5_mmg2dChkmsh(MMG5_pMesh mesh, int severe,int base) {
-  MMG5_pPoint	ppt;
+//  MMG5_pPoint	ppt;
   MMG5_pTria 	pt1,pt2;
   MMG5_pEdge         ped;
-  int		*adja,*adja1,adj,adj1,k,kk,l,nk,i,j,ip,iadr,lon,len;
+  int		*adja,*adja1,adj,adj1,k,i,iadr;
+//  int		kk,l,nk,j,ip,lon,len;
   int	    *list;
   unsigned char	voy,voy1;
   
@@ -78,8 +79,8 @@ int _MMG5_mmg2dChkmsh(MMG5_pMesh mesh, int severe,int base) {
       /*chk edge*/
       if(pt1->edg[i]) {
 	ped = &mesh->edge[pt1->edg[i]];
-	if(!((ped->a==pt1->v[MMG2_iare[i][0]] | ped->a==pt1->v[MMG2_iare[i][1]])
-	     || (ped->b==pt1->v[MMG2_iare[i][0]] | ped->b==pt1->v[MMG2_iare[i][1]]))) {
+	if(!(((ped->a==pt1->v[MMG2_iare[i][0]]) || (ped->a==pt1->v[MMG2_iare[i][1]]))
+	     || ((ped->b==pt1->v[MMG2_iare[i][0]]) || (ped->b==pt1->v[MMG2_iare[i][1]])))) {
 	     printf(" Wrong edge in triangle %d\n",k);
 	     printf("tr k %d: %d %d %d \n",k,pt1->v[0],pt1->v[1],pt1->v[2]);
 	     printf("edge %d : %d %d\n",i,ped->a,ped->b);

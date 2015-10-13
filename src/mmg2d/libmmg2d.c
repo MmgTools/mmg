@@ -191,8 +191,6 @@ int MMG2_tassage(MMG5_pMesh mesh,MMG5_pSol sol) {
   optdbl[1] =ar
 */
 int MMG2_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol sol,void (*titi)(int ,int ,int,int,int)) {
-  double declic;
-  int    nsiter;
 
   fprintf(stdout,"  -- MMG2D, Release %s (%s) \n",M_VER,M_REL);
   fprintf(stdout,"     %s\n",M_CPY);

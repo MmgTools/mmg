@@ -25,7 +25,7 @@
 int optlen_iso_bar(MMG5_pMesh mesh,MMG5_pSol sol,double declic,int base);
 
 int MMG2_mmg2d0(MMG5_pMesh mesh,MMG5_pSol sol) {
-  int       ns,nm,nsiter,nmiter,nmbar,it,maxtou,base;
+  int       ns,nm,nsiter,nmiter,nmbar,it,maxtou;
   double    declic;
   
   /*optim*/ 
@@ -48,7 +48,6 @@ int MMG2_mmg2d0(MMG5_pMesh mesh,MMG5_pSol sol) {
     /*point relocation*/
     if(!mesh->info.nomove) { 
       declic = 1.5 / ALPHA;
-      base   = mesh->base;
       nmiter = MMG2_optlen(mesh,sol,declic,-1);
       if(sol->size==1) nmbar =  optlen_iso_bar(mesh,sol,declic,-1);
       else nmbar=0;     

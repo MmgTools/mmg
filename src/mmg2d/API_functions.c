@@ -111,7 +111,6 @@ void _MMG2_Init_parameters(MMG5_pMesh mesh) {
  *
  */
 int MMG5_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
-  int k;
 
   switch ( iparam ) {
     /* Integer parameters */
@@ -514,9 +513,8 @@ int MMG5_Get_vertex(MMG5_pMesh mesh,int num, double* c0, double* c1, int* ref,
  */
 int MMG5_Set_triangle(MMG5_pMesh mesh, int v0, int v1, int v2, int ref, int pos) {
   MMG5_pTria pt;
-  MMG5_pPoint ppt;
   double  vol;
-  int    i,j, ip,tmp;
+  int    i,tmp;
 
   if ( !mesh->nt ) {
     fprintf(stdout,"  ## Error: You must set the number of elements with the");
@@ -579,9 +577,6 @@ int MMG5_Set_triangle(MMG5_pMesh mesh, int v0, int v1, int v2, int ref, int pos)
  */
 int MMG5_Set_edge(MMG5_pMesh mesh, int v0, int v1, int ref, int pos) {
   MMG5_pEdge pt;
-  MMG5_pPoint ppt;
-  double  vol;
-  int    i,j, ip,tmp;
 
   if ( !mesh->na ) {
     fprintf(stdout,"  ## Error: You must set the number of elements with the");

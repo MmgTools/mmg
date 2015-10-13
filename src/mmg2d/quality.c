@@ -144,7 +144,7 @@ double caltri_ani_in(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pTria pt) {
 /* compute tria quality iso */
 double caltri_iso(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pTria pt) {
   double     cal,abx,aby,acx,acy,bcx,bcy;
-  double    *a,*b,*c,h1,h2,h3,aire,peri,hm;
+  double    *a,*b,*c,h1,h2,h3,aire,hm;
   
   cal = 0;
   

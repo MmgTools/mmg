@@ -31,7 +31,7 @@ extern int ddebug;
 int MMG2_removeBBtriangles(MMG5_pMesh mesh) {
   MMG5_pTria   pt;
   int     ip1,ip2,ip3,ip4,k,iadr,*adja,iadr2,*adja2;
-  int     i,nd,base;
+  int     i,nd;
   
   /*BB vertex*/
   ip1=(mesh->np-3);
@@ -77,11 +77,9 @@ int MMG2_removeBBtriangles(MMG5_pMesh mesh) {
 
 /*tag des triangles : in = base ; out = -base ; indetermine = 0*/
 int MMG2_settagtriangles(MMG5_pMesh mesh,MMG5_pSol sol) {
-  MMG5_pTria  pt,pt1;
-  MMG5_Tria   tmp;
-  double crit,cal1,cal2;
-  int    base,nd,ns,iter,maxiter,k,nc,i1,i2,madj;
-  int    ip1,ip2,ip3,ip4,*list,*adja,i,adjj,*adj;
+  MMG5_pTria  pt;
+  int    base,nd,iter,maxiter,k;
+  int    ip1,ip2,ip3,ip4,*adj;
   
   /*BB vertex*/
   ip1=(mesh->np-3);
@@ -90,7 +88,6 @@ int MMG2_settagtriangles(MMG5_pMesh mesh,MMG5_pSol sol) {
   ip4=(mesh->np);
 
   base = ++mesh->base; 
-  ns      = 1;             
   iter    = 0;
   maxiter = 3;
   do {
@@ -109,14 +106,12 @@ int MMG2_settagtriangles(MMG5_pMesh mesh,MMG5_pSol sol) {
 /*insertion of the list of points inside the mesh*/
 /*return 0 if pbs occur*/
 int MMG2_insertpointdelone(MMG5_pMesh mesh,MMG5_pSol sol) {
-  MMG5_pTria   pt,pt1;
   MMG5_pPoint  ppt;
-  double  declic;
-  int     list[MMG2_LONMAX],ilist,lon;
-  int     k,ret,i;
-  int kk, iadr,*adja,nsiter;
+//  MMG5_pTria   pt;
+  int     list[MMG2_LONMAX],lon;
+  int     k,i,ret;
+  // int     kk, iadr,*adja,
   
-
   for(k=1 ; k<=mesh->np - 4 ; k++) {  
     
     ppt = &mesh->point[k];
@@ -133,7 +128,6 @@ int MMG2_insertpointdelone(MMG5_pMesh mesh,MMG5_pSol sol) {
         return(0);
       }
     }
-    ilist = 1;
 
     lon = _MMG2_cavity(mesh,sol,k,list);
     //printf("on trouve %d tria dans la cavity\n",lon);
@@ -168,7 +162,7 @@ int MMG2_insertpoint(MMG5_pMesh mesh,MMG5_pSol sol) {
   MMG5_pTria   pt,pt1;
   MMG5_pPoint  ppt;
   double  declic;
-  int     k,nsiter,lel,iel,mel,nel,ia,ib,ic,aext0,aext1,aext2;
+  int     k,nsiter,lel,mel,nel,ia,ib,ic,aext0,aext1,aext2;
   int     iadr,*adja,nflat,ie1,ie2,ie3,voy,text,atext1,atext2;
 
   ddebug = 0;
@@ -454,7 +448,7 @@ int MMG2_markSD(MMG5_pMesh mesh) {
   MMG5_pTria   pt,pt1;                   
   MMG5_pEdge   ped;
   MMG5_pPoint  ppt;
-  int     k,i,j,iadr,*adja,ped0,ped1,kcor,*list,ipil,ncurc,nref;
+  int     k,i,j,iadr,*adja,ped0,ped1,*list,ipil,ncurc,nref;
   int     kinit,nt,nsd,ip1,ip2,ip3,ip4,ned,iel,voy;
   
   if ( !MMG2_hashel(mesh) )  return(0);
@@ -760,15 +754,12 @@ int MMG2_findpos(MMG5_pMesh mesh,MMG5_pTria pt,int ip1,int ip2,int ip3,int ip4,i
 
 /*create triangulation*/
 int MMG2_mmg2d2(MMG5_pMesh mesh,MMG5_pSol sol) {  
-  MMG5_pTria     pt,pt1; 
-  MMG5_Tria      tmp;
+  MMG5_pTria     pt;
   //MMG5_pEdge     ped;
   MMG5_pPoint    ppt,ppt2;  
-  double    c[2],crit,cal1,cal2,dd,declic;  
-  int       j,i,k,kk,ip1,ip2,ip3,ip4,jel,kel,nt,iadr,*adja,madj;  
-  int       aext0,aext1,aext2,lel,nel,mel,ia,ib,ic,base,nd,iter,maxiter; 
-  int       *adj,adjj,ns,i1,i2,*list,nflat,ie1,ie2,ie3,voy,text,atext1,atext2,nc;
-  int       *numper,nsiter,iadr2,*adja2,memlack;
+  double    c[2],dd;  
+  int       j,k,kk,ip1,ip2,ip3,ip4,jel,kel,nt,iadr,*adja;  
+  int       *numper,memlack;
 	
   mesh->base = 0;
   ddebug = 0;
