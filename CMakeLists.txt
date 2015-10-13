@@ -289,7 +289,7 @@ IF ( BUILD_MMG3D OR BUILD_MMG )
       SET(CMAKE_C_FLAGS "-DUSE_SCOTCH ${CMAKE_C_FLAGS}")
       SET(SCOTCH_LINK_FLAGS "-lpthread")
       MESSAGE(STATUS
-        "Compilation with scotch: ${SCOTCH_DIR}$ENV{SCOTCH_DIR}")
+        "Compilation with scotch: ${SCOTCH_LIBRARY}")
       SET( LIBRARIES ${SCOTCH_LINK_FLAGS} ${LIBRARIES})
       SET( LIBRARIES ${SCOTCHERR_LIBRARY} ${LIBRARIES})
       SET( LIBRARIES ${SCOTCH_LIBRARY} ${LIBRARIES})
@@ -302,6 +302,40 @@ IF ( BUILD_MMG3D OR BUILD_MMG )
       "please set the CMake variable or environment variable SCOTCH_DIR "
       "to your scotch directory.")
     OPTION ( USE_SCOTCH "Use SCOTCH TOOL for renumbering" OFF)
+  ENDIF ( )
+
+  ############################################################################
+  #####
+  #####         Elastic
+  #####
+  ############################################################################
+  # add SUscElas library?
+  SET(SUSCELAS_DIR "" CACHE PATH "Installation directory for SUscElas")
+  INCLUDE(cmake/modules/FindSUscElas.cmake)
+
+  IF(SUSCELAS_FOUND)
+    OPTION ( USE_SUSCELAS "Use the Elas library for lagrangian motion option" ON)
+    IF( USE_SUSCELAS )
+      # Set flags for building test program
+      INCLUDE_DIRECTORIES(${SUSCELAS_INCLUDE_DIR})
+
+      SET(CMAKE_REQUIRED_INCLUDES ${SUSCELAS_INCLUDE_DIR})
+      SET(CMAKE_REQUIRED_LIBRARIES ${SUSCELAS_LIBRARY})
+
+      SET(CMAKE_C_FLAGS "-DUSE_SUSCELAS ${CMAKE_C_FLAGS}")
+      MESSAGE(STATUS
+        "Compilation with the Elas library: ${SUSCELAS_LIBRARY} ")
+      SET( LIBRARIES ${SUSCELAS_LINK_FLAGS} ${LIBRARIES})
+      SET( LIBRARIES ${SUSCELAS_LIBRARY} ${LIBRARIES})
+    ENDIF()
+  ELSE ( )
+    MESSAGE ( WARNING "SUscElas is a library to solve the linear elasticity "
+      "problem (see https://github.com/SUscTools/SUscElas to download it). "
+      "This library is needed to use the lagrangian motion option. "
+      "If you have already installed SUscElas and want to use it, "
+      "please set the CMake variable or environment variable SUSCELAS_DIR "
+      "to your SUscElas directory.")
+    OPTION ( USE_SUSCELAS "Use SUscElas library for lagrangian motion option" OFF)
   ENDIF ( )
 
   ############################################################################
@@ -377,8 +411,10 @@ IF ( BUILD_MMG3D OR BUILD_MMG )
       ${COMMON_SOURCE_DIR}/libmmg.h
       ${COMMON_SOURCE_DIR}/chrono.h
       )
-
+    # Install header files in /usr/local or equivalent
     INSTALL(FILES ${mmg2d_headers} DESTINATION include/mmg/mmg2d)
+    # Install header files in project directory
+    INSTALL(FILES ${mmg2d_headers} DESTINATION ${CMAKE_SOURCE_DIR}/include/mmg/mmg2d)
   ENDIF()
 
 
@@ -428,8 +464,10 @@ IF ( BUILD_MMG3D OR BUILD_MMG )
       ${COMMON_SOURCE_DIR}/libmmg.h
       ${COMMON_SOURCE_DIR}/chrono.h
       )
-
+    # Install header files in /usr/local or equivalent
     INSTALL(FILES ${mmg3d_headers} DESTINATION include/mmg/mmg3d)
+    # Install header files in project directory
+    INSTALL(FILES ${mmg3d_headers} DESTINATION ${CMAKE_SOURCE_DIR}/include/mmg/mmg3d)
   ENDIF()
 
   ############################################################################

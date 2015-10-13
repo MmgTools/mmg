@@ -26,27 +26,30 @@ IF ((NOT WIN32) AND (NOT WIN64))
 ENDIF()
 
 FIND_PATH(SUSCELAS_INCLUDE_DIR
-  NAMES suscelas.h
+  NAMES elastic.h
   HINTS ${SUSCELAS_INCLUDE_DIR}
   $ENV{SUSCELAS_INCLUDE_DIR}
-  ${SUSCELAS_DIR}/include
-  $ENV{SUSCELAS_DIR}/include
-  PATH_SUFFIXES suscelas
-  DOC "Directory of SUSCELAS Header")
+  $ENV{HOME}/include/SUscElas
+  ${SUSCELAS_DIR}/include/SUscElas
+  $ENV{SUSCELAS_DIR}/include/SUscElas
+  PATH_SUFFIXES SUscElas
+  DOC "Directory of SUscElas Header")
 
-# Check for suscelas
+# Check for elas library (search in common locations in order to prevent
+# modifications in SUscElas installation)
 FIND_LIBRARY(SUSCELAS_LIBRARY
-  NAMES suscelas suscelas${SUSCELAS_LIB_SUFFIX}
+  NAMES Elas Elas${SUSCELAS_LIB_SUFFIX}
   HINTS ${SUSCELAS_LIBRARY}
   $ENV{SUSCELAS_LIBRARY}
+  $ENV{HOME}/lib
   ${SUSCELAS_DIR}/lib
   $ENV{SUSCELAS_DIR}/lib
-  DOC "The SUSCELAS library"
+  DOC "The SUscElas library"
   )
 
 INCLUDE(FindPackageHandleStandardArgs)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(SUSCELAS DEFAULT_MSG
-   SUSCELAS_INCLUDE_DIR SUSCELAS_LIBRARY)
+  SUSCELAS_INCLUDE_DIR SUSCELAS_LIBRARY)
 IF ((NOT WIN32) AND (NOT WIN64))
   MARK_AS_ADVANCED(SUSCELAS_INCLUDE_DIR SUSCELAS_LIBRARY)
 ENDIF()

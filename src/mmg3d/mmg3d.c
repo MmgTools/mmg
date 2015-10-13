@@ -207,11 +207,12 @@ int main(int argc,char *argv[]) {
   /* mesh adaptation */
   chrono(ON,&MMG5_ctim[3]);
   
-  if ( mesh.info.imprim )
+  if ( mesh.info.imprim ) {
     if ( mesh.info.lag < 0 )
       fprintf(stdout,"\n  -- PHASE 2 : %s MESHING\n",met.size < 6 ? "ISOTROPIC" : "ANISOTROPIC");
     else
       fprintf(stdout,"\n  -- PHASE 2 : LAGRANGIAN MOTION\n");
+  }
 
   /* renumerotation if available */
   if ( !_MMG5_scotchCall(&mesh,&met) )
