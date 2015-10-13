@@ -3,7 +3,11 @@
 !> @brief
 !>  Example for using mmg2dlib (basic use)
 
+!> Include the mmg2d library hader file */
+! if the header file is in the "include" directory
 #include "libmmg2df.h"
+! if the header file is in "include/mmg/mmg2d"
+! #include "mmg/mmg2d/libmmg2df.h"
 
 PROGRAM main
   MMG5_DATA_PTR_T  :: mmgMesh

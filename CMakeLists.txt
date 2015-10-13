@@ -347,20 +347,6 @@ IF ( BUILD_MMG3D OR BUILD_MMG )
     SET_TARGET_PROPERTIES(${PROJECT_NAME}2d_a PROPERTIES OUTPUT_NAME
       ${PROJECT_NAME}2d)
     TARGET_LINK_LIBRARIES(${PROJECT_NAME}2d_a ${LIBRARIES})
-   INSTALL(FILES ${MMG2D_SOURCE_DIR}/lib${PROJECT_NAME}2df.h DESTINATION
-      include)
-     INSTALL(FILES ${MMG2D_SOURCE_DIR}/lib${PROJECT_NAME}2d.h DESTINATION
-      include)
-    INSTALL(FILES ${COMMON_SOURCE_DIR}/libmmg.h DESTINATION
-      include)
-    INSTALL(FILES ${COMMON_SOURCE_DIR}/mmg.h DESTINATION
-      include)
-    INSTALL(FILES ${COMMON_SOURCE_DIR}/eigenv.h DESTINATION
-      include)
-    INSTALL(FILES ${COMMON_SOURCE_DIR}/chrono.h DESTINATION include)
-    INSTALL(TARGETS ${PROJECT_NAME}2d_a
-      ARCHIVE DESTINATION lib
-      LIBRARY DESTINATION lib)
   ENDIF()
 
   # Compile shared library
@@ -371,22 +357,30 @@ IF ( BUILD_MMG3D OR BUILD_MMG )
       ${sourcemmg2d_files} ${libmmg2d_file})
     SET_TARGET_PROPERTIES(${PROJECT_NAME}2d_so PROPERTIES
       OUTPUT_NAME ${PROJECT_NAME}2d)
+    SET_TARGET_PROPERTIES(${PROJECT_NAME}2d_so PROPERTIES
+      VERSION 5.0.0 SOVERSION 5)
     TARGET_LINK_LIBRARIES(${PROJECT_NAME}2d_so ${LIBRARIES})
       INSTALL(FILES ${MMG2D_SOURCE_DIR}/lib${PROJECT_NAME}2df.h
       DESTINATION include)
-  INSTALL(FILES ${MMG2D_SOURCE_DIR}/lib${PROJECT_NAME}2d.h
-      DESTINATION include)
-   INSTALL(FILES ${COMMON_SOURCE_DIR}/libmmg.h DESTINATION
-      include)
-    INSTALL(FILES ${COMMON_SOURCE_DIR}/mmg.h DESTINATION
-      include)
-    INSTALL(FILES ${COMMON_SOURCE_DIR}/eigenv.h DESTINATION
-      include)
-    INSTALL(FILES ${COMMON_SOURCE_DIR}/chrono.h DESTINATION include)
     INSTALL(TARGETS ${PROJECT_NAME}2d_so
       ARCHIVE DESTINATION
       LIBRARY DESTINATION lib)
   ENDIF()
+
+  IF ( LIBMMG2D_STATIC OR LIBMMG2D_SHARED )
+    # mmg2d header files needed for library
+    SET( mmg2d_headers
+      ${MMG2D_SOURCE_DIR}/libmmg2d.h
+      ${MMG2D_SOURCE_DIR}/libmmg2df.h
+      ${COMMON_SOURCE_DIR}/mmg.h
+      ${COMMON_SOURCE_DIR}/eigenv.h
+      ${COMMON_SOURCE_DIR}/libmmg.h
+      ${COMMON_SOURCE_DIR}/chrono.h
+      )
+
+    INSTALL(FILES ${mmg2d_headers} DESTINATION include/mmg/mmg2d)
+  ENDIF()
+
 
   ############################################################################
   #####

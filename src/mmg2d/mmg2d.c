@@ -23,43 +23,29 @@
 #include "mmg2d.h"
 
 static void usage(char *name) {
-  fprintf(stdout,"\nUsage: %s [-v [n]] [-h] [-m [n]] [opts..] -in filein [-out fileout]\n",name);
+  _MMG5_mmgUsage(name);
 
-  fprintf(stdout,"\n** Generic options :\n");
-  fprintf(stdout,"-h      Print this message\n");
-  fprintf(stdout,"-v [n]  Turn on numerical information, [-10..10]\n");
-  fprintf(stdout,"-m [n]  Set memory size to n Mbytes\n");
-
-  fprintf(stdout,"\n");
-
-
-  fprintf(stdout,"-ar    val    angle detection (default 45.)\n");
-  fprintf(stdout,"-nr           no ridge/corners detection \n");
-  fprintf(stdout,"-hmin  val    minimal mesh size\n");
-  fprintf(stdout,"-hmax  val    maximal mesh size\n");
-  fprintf(stdout,"-hausd val    control Hausdorff distance (default 0.01 of the mesh bb)\n");
-  fprintf(stdout,"-hgrad val    mesh gradation (-1 = no gradation)\n");
-
-  fprintf(stdout,"-noinsert     no insertion/suppression point\n");
-  fprintf(stdout,"-noswap       no edge flipping\n");
-  fprintf(stdout,"-nomove       no point relocation\n");
-
-  fprintf(stdout,"\n");
-  fprintf(stdout,"-ls             create mesh of isovalue 0\n");
+  fprintf(stdout,"-ls     val     create mesh of isovalue 0\n");
   fprintf(stdout,"-lag [0/1/2]    Lagrangian mesh displacement according to mode 0/1/2\n");
   fprintf(stdout,"-mov filedep    (with -lag option)\n");
   fprintf(stdout,"-nsd val        only if no given triangle, save the subdomain nb (0==all subdomain)\n");
   fprintf(stdout,"-msh val        read and write to gmsh visu if val = 1 (out) if val=2 (in and out)\n");
-  fprintf(stdout,"-degrad Qw Qdeg (with -lag option) : threshold for optimisation (default 10. 1.3)\n");
+  fprintf(stdout,"-degrad Qw Qdeg (with -lag option) : threshold for optimization\n");
  
   /* fprintf(stdout,"-per          obsolete : to deal with periodic mesh on a square\n");*/
 
-  fprintf(stdout,"\n\n");
+  fprintf(stdout,"\n");
   /* 
   
      fprintf(stdout,"-optim       mesh optimization\n");
      fprintf(stdout,"-nsurf       no surfacic modifications\n");
   */
+  fprintf(stdout,"-noinsert     no insertion/suppression point\n");
+  fprintf(stdout,"-noswap       no edge flipping\n");
+  fprintf(stdout,"-nomove       no point relocation\n");
+  fprintf(stdout,"-bucket val   Specify the size of bucket per dimension \n");
+  fprintf(stdout,"\n\n");
+
   exit(1);
 }
 
@@ -70,12 +56,16 @@ static void usage(char *name) {
  * Print the default parameters values.
  *
  */
-static inline void _MMG5_defaultValues(MMG5_pMesh mesh) {
+static inline void _MMG5_defaultValues(MMG5_pMesh mesh, double qdegrad[2]) {
   mesh->info.dhd = cos((135.*M_PI)/180.);
+
   _MMG5_mmgDefaultValues(mesh);
 
+  fprintf(stdout,"Optimization threshold "
+          "   (-degrad) : %e %e\n",qdegrad[0],qdegrad[1]);
   fprintf(stdout,"Bucket size per dimension (-bucket) : %d\n",
           mesh->info.bucket);
+  fprintf(stdout,"\n\n");
 
   exit(EXIT_FAILURE);
 }
@@ -88,7 +78,7 @@ int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,double *qdegrad) 
   /* First step: search if user want to see the default parameters values. */
   for ( i=1; i< argc; ++i ) {
     if ( !strcmp(argv[i],"-val") ) {
-      _MMG5_defaultValues(mesh);
+      _MMG5_defaultValues(mesh,qdegrad);
     }
   }
 
