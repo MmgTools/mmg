@@ -26,6 +26,10 @@
  
 int ddebug;
 
+/**
+ * Anisotropic gradation. See:
+ * http://www.ann.jussieu.fr/frey/publications/ijnme4398.pdf
+ */
 int lissmet_ani(MMG5_pMesh mesh,MMG5_pSol sol) {   
   HashTable  edgeTable;  
   Hedge     *pht; 
@@ -122,6 +126,7 @@ int lissmet_ani(MMG5_pMesh mesh,MMG5_pSol sol) {
         dh = rap - 1.0;
         //printf("traite ? %e\n",dh);
         if ( fabs(dh) > EPSD ) {
+          // Edge length in the metric
           tail = (dd1+dd2+4*sqrt(0.5*(d1+d2))) / 6.0;
      	  coef = log(rap) / tail;
           p1->tagdel = mesh->base+1;
@@ -186,10 +191,9 @@ int lissmet_ani(MMG5_pMesh mesh,MMG5_pSol sol) {
 int lissmet_iso(MMG5_pMesh mesh,MMG5_pSol sol) {
   MMG5_pTria     ptt;  
   MMG5_pPoint    p1,p2;
-  double hsiz,logh,logs,ux,uy,d1,d2,dd,rap,dh; 
-  double  *ha,*hb,ha1,hb1;  
-  double    tail,coef,coef1,coef2,ma1[3],mb1[3],m[3],dd1,dd2;
-  int   i,nc,k,itour,maxtou,ncor,a,b,iadr; 
+  double         logh,logs,dd,rap,dh; 
+  double    tail,coef;
+  int   i,nc,k,maxtou; 
   int   it,i1,i2;
   double hmax,ax,ay,lograp;
 	

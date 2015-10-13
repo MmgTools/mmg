@@ -83,13 +83,12 @@ int MMG2_loadMesh(MMG5_pMesh mesh,char *filename) {
   MMG5_pPoint       ppt; 
   MMG5_pEdge        ped;
   MMG5_pTria        pt;
-  float        fp1,fp2,fc; 
-  double       dp1,dp2;
-  int          k,ref,tmp,ncor,num,norient,nreq,nreqed;
+  float             fc; 
+  int          k,ref,tmp,ncor,norient,nreq,nreqed;
   int          posnp,posnt,posncor,posned,posnq,posreq,posreqed,bin,iswp,nq;
   char        *ptr,data[128],chaine[128];
   double       air,dtmp;       
-  int	       nr,isr,i,bdim,binch,bpos;
+  int	         i,bdim,binch,bpos;
 
 
   posnp = posnt = posncor = posned = posnq = posreq = posreqed = 0;
@@ -410,7 +409,8 @@ int MMG2_loadMesh(MMG5_pMesh mesh,char *filename) {
       air = MMG2_quickarea(mesh->point[pt->v[0]].c,mesh->point[pt->v[1]].c,
                            mesh->point[pt->v[2]].c);
       if(air < 0) {
-        printf("Tr %d bad oriented\n",k);
+        if ( mesh->info.ddebug || mesh->info.imprim > 6 )
+          printf("Tr %d bad oriented\n",k);
         norient++;
         tmp = pt->v[2];
         pt->v[2] = pt->v[1];
@@ -508,7 +508,7 @@ int MMG2_loadMesh(MMG5_pMesh mesh,char *filename) {
 int MMG2_loadSol(MMG5_pSol sol,char *filename,int npmax,int msh) {
   FILE       *inm;
   float       fsol;
-  double      tmp,dsol;
+  double      dsol;
   int         binch,bdim,iswp;
   int         k,i,isol,type,bin,dim,btyp,bpos;
   long        posnp;
@@ -688,7 +688,7 @@ int MMG2_saveMesh(MMG5_pMesh mesh,char *filename) {
   MMG5_pEdge        ped;
   MMG5_pTria        pt;
   float        fp1,fp2;
-  int          k,outm,ne,ref,j,nn,ntang,num;
+  int          k,ne,ref,j,nn,ntang,num;
   char        *ptr,data[128],chaine[128];
 
   mesh->ver = 2;
@@ -1097,7 +1097,7 @@ int MMG2_saveSol(MMG5_pMesh mesh,MMG5_pSol sol,char *filename) {
   FILE*        inm;
   MMG5_pPoint       ppt;
   float        fsol;
-  double       tmp,dsol;
+  double       dsol;
   int          i,k,nbl,isol,bin,bpos,typ;
   char        *ptr,data[128],chaine[128];
   int          binch,msh;

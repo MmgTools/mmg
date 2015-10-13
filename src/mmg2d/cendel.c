@@ -29,7 +29,7 @@ int MMG2_cendel(MMG5_pMesh mesh,MMG5_pSol sol,double declic,int base) {
   pQueue     queue;
   double      crit;
   int       *adja,*list,adj,iadr,i,k,ns,np;
-  char       tabar;
+
   /* queue on quality */
   queue = MMG2_kiuini(mesh,mesh->nt,declic,-1);
   assert(queue);
@@ -45,7 +45,6 @@ int MMG2_cendel(MMG5_pMesh mesh,MMG5_pSol sol,double declic,int base) {
     if ( !M_EOK(pt) )  continue;
 
     /* base internal edges */
-    tabar = 0;
     iadr  = 3*(k-1) + 1;
     adja  = &mesh->adja[iadr];
     for (i=0; i<3; i++) {

@@ -217,9 +217,8 @@ extern unsigned int MMG2_inxt[5];
     of edge jel */
 #define _MMG5_EDGE_REALLOC(mesh,jel,wantedGap,law ) do                 \
   {                                                                     \
-    int klink,oldSiz;                                                   \
+    int klink;                                                          \
                                                                         \
-    oldSiz = mesh->namax;                                               \
     _MMG5_TAB_RECALLOC(mesh,mesh->edge,mesh->namax,wantedGap,MMG5_Edge, \
                        "larger edge table",law);                       \
                                                                         \
@@ -304,7 +303,6 @@ int MMG2_evalgeom(MMG5_pMesh mesh);
 
 int _MMG2_cavity(MMG5_pMesh ,MMG5_pSol ,int ,int *);
 int _MMG2_delone(MMG5_pMesh ,MMG5_pSol ,int ,int *,int );
-static int _MMG2_correction_iso(MMG5_pMesh ,int ,int *,int ,int );
 int _MMG2_cenrad_iso(MMG5_pMesh ,double *,double *,double *);
 
 /* functions pointers */

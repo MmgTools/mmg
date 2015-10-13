@@ -28,6 +28,70 @@
 #define KTA     7
 #define KTB    11
 
+/* cavity correction for quality */
+static int
+_MMG2_correction_iso(MMG5_pMesh mesh,int ip,int *list,int ilist,int nedep) {
+  MMG5_pPoint     ppt,p1,p2;
+  MMG5_pTria      pt;
+  double           dd,ux,uy,vx,vy;
+  int             *adja,i,ipil,iel,lon,iadr,adj,ib,ic,base,ncor;
+  int              vois[3];
+
+  ppt  = &mesh->point[ip];
+  if ( !M_VOK(ppt) )  return(ilist);
+  base = mesh->base;
+  lon  = ilist;
+  do {
+    ipil = lon-1;
+    ncor = 0;
+
+    while ( ipil >= 0 ) {
+      iel  = list[ipil];
+      iadr = (iel-1)*3 + 1;
+      adja = &mesh->adja[iadr];
+      vois[0]  = adja[0] /3;
+      vois[1]  = adja[1] /3;
+      vois[2]  = adja[2] /3;
+      pt   = &mesh->tria[iel];
+      for (i=0; i<3; i++) {
+        adj = vois[i];
+        if ( adj && mesh->tria[adj].base == base )  continue;
+
+        ib = pt->v[ MMG2_iare[i][0] ];
+        ic = pt->v[ MMG2_iare[i][1] ];
+
+        p1 = &mesh->point[ib];
+        p2 = &mesh->point[ic];
+
+        ux = p2->c[0] - p1->c[0];
+        uy = p2->c[1] - p1->c[1];
+
+        vx = ppt->c[0] - p1->c[0];
+        vy = ppt->c[1] - p1->c[1];
+
+        /* area PBC */
+        dd =  ux*vy - uy*vx;
+        //printf("on trouve vol %e <? %e\n",dd,_MMG2_AREAMIN);
+        if ( dd < _MMG2_AREAMIN )  break;
+
+      }
+      if ( i < 3 /*||  pt->tag & MG_REQ*/ ) {
+	      if ( ipil < nedep )  
+        {/*printf("on veut tout retirer ? %d %d -- %d\n",ipil,nedep,iel);*/return(0);   }
+        /* remove iel from list */
+        pt->base = base-1;
+        list[ipil] = list[--lon];
+        ncor = 1;
+        break;
+      }
+      else
+        ipil--;
+    }
+  }
+  while ( ncor > 0 && lon >= nedep );
+  return(lon);
+}
+
 /* hash mesh edge v[0],v[1] (face i of iel) */
 int _MMG2_hashEdgeDelone(MMG5_pMesh mesh,HashTable *hash,int iel,int i,int *v) {
   int             *adja,iadr,jel,j,key,mins,maxs;
@@ -106,14 +170,14 @@ int _MMG2_cavity(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list) {
   MMG5_pPoint     ppt;
   MMG5_pTria      pt,pt1,ptc;
   double     c[2],crit,dd,eps,ray,ct[6];
-  int        *adja,*adjb,k,adj,adi,voy,i,j,ilist,ipil,jel,iadr,base;
+  int        *adja,*adjb,adj,adi,voy,i,j,ilist,ipil,jel,iadr,base;
   int         vois[3],l;
-  int         tref,isreq;
+  int         tref;//,isreq;
 
   ppt = &mesh->point[ip];
   base  = ++mesh->base;
 
-  isreq = 0;
+  //isreq = 0;
 
   tref = list[0];
   mesh->tria[list[0]].base = base;
@@ -194,11 +258,11 @@ int _MMG2_cavity(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list) {
 int _MMG2_delone(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist) {
   MMG5_pPoint     ppt;
   MMG5_pTria      pt,pt1;
-  int        *adja,*adjb,i,j,k,l,m,iel,jel,old,v[2],iadr,base,size;
+  int        *adja,*adjb,i,j,k,iel,jel,old,v[2],iadr,base,size;
   int         vois[3],iadrold;
   short       i1;
   char        alert;
-  int         tref,isused=0,ixt,ielnum[3*MMG2_LONMAX+1],ll;
+  int         tref,ielnum[3*MMG2_LONMAX+1];
   HashTable   hedg;
 
   //printf("--------------------------------- delone ----------\n");
@@ -336,71 +400,4 @@ int _MMG2_delone(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist) {
   //  ppt->flag = mesh->flag;
   _MMG5_SAFE_FREE(hedg.item);
   return(1);
-}
-
-
-/* cavity correction for quality */
-static int
-_MMG2_correction_iso(MMG5_pMesh mesh,int ip,int *list,int ilist,int nedep) {
-  MMG5_pPoint     ppt,p1,p2;
-  MMG5_pTria      pt;
-  double           dd,nn,eps,eps2,ux,uy,uz,vx,vy,vz,v1,v2,v3;
-  int             *adja,i,ipil,iel,lon,iadr,adj,ib,ic,base,ncor;
-  int              vois[3];
-
-  ppt  = &mesh->point[ip];
-  if ( !M_VOK(ppt) )  return(ilist);
-  base = mesh->base;
-  lon  = ilist;
-  eps  = EPSD;
-  eps2 = eps*eps;
-  do {
-    ipil = lon-1;
-    ncor = 0;
-
-    while ( ipil >= 0 ) {
-      iel  = list[ipil];
-      iadr = (iel-1)*3 + 1;
-      adja = &mesh->adja[iadr];
-      vois[0]  = adja[0] /3;
-      vois[1]  = adja[1] /3;
-      vois[2]  = adja[2] /3;
-      pt   = &mesh->tria[iel];
-      for (i=0; i<3; i++) {
-        adj = vois[i];
-        if ( adj && mesh->tria[adj].base == base )  continue;
-
-        ib = pt->v[ MMG2_iare[i][0] ];
-        ic = pt->v[ MMG2_iare[i][1] ];
-
-        p1 = &mesh->point[ib];
-        p2 = &mesh->point[ic];
-
-        ux = p2->c[0] - p1->c[0];
-        uy = p2->c[1] - p1->c[1];
-
-        vx = ppt->c[0] - p1->c[0];
-        vy = ppt->c[1] - p1->c[1];
-
-        /* area PBC */
-        dd =  ux*vy - uy*vx;
-        //printf("on trouve vol %e <? %e\n",dd,_MMG2_AREAMIN);
-        if ( dd < _MMG2_AREAMIN )  break;
-
-      }
-      if ( i < 3 /*||  pt->tag & MG_REQ*/ ) {
-	      if ( ipil < nedep )  
-        {/*printf("on veut tout retirer ? %d %d -- %d\n",ipil,nedep,iel);*/return(0);   }
-        /* remove iel from list */
-        pt->base = base-1;
-        list[ipil] = list[--lon];
-        ncor = 1;
-        break;
-      }
-      else
-        ipil--;
-    }
-  }
-  while ( ncor > 0 && lon >= nedep );
-  return(lon);
 }

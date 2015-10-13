@@ -31,7 +31,7 @@ static int iare[3][2] = {{0,1},{0,2},{1,2}};
 int MMG2_optlap(MMG5_pMesh mesh,MMG5_pSol sol) {
   MMG5_pTria   pt;
   MMG5_pPoint  ppt,ppta,pptb;
-  int     k,it,maxtou,lon,i,ipa,ipb,iadr;
+  int     k,it,maxtou,i,ipa,ipb,iadr;
   double  omega,mu,*cnew,*cold,*cini,res,res0,*ncount,len;
   
   cnew = (double*)malloc(2*(mesh->np+1)*sizeof(double));
