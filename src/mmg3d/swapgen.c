@@ -65,7 +65,6 @@ int _MMG5_chkswpgen(MMG5_pMesh mesh,MMG5_pSol met,int start,int ia,int *ilist,in
   nb  = pt->v[_MMG5_iare[ia][1]];
   calold = pt->qual;
 
-
   /* Store shell of ia in list, and associated pseudo polygon in pol */
   (*ilist) = 0;
   npol = 0;
@@ -117,12 +116,12 @@ int _MMG5_chkswpgen(MMG5_pMesh mesh,MMG5_pSol met,int start,int ia,int *ilist,in
   //plus rapide mais du coup on elimine des swap...
   //4/01/14 commentaire
   //if ( calold*_MMG5_ALPHAD > 0.5 )  return(0);
-
+  
   /* Prevent swap of an external boundary edge */
   if ( !adj )  return(0);
-
+  
   assert(npol == (*ilist)); // du coup, apres on pourra virer npol
-
+  
   /* Find a configuration that enhances the worst quality within the shell */
   for (k=0; k<npol; k++) {
     iel = pol[k] / 4;
@@ -166,7 +165,7 @@ int _MMG5_chkswpgen(MMG5_pMesh mesh,MMG5_pSol met,int start,int ia,int *ilist,in
       iel = list[l] / 6;
       i   = list[l] % 6;
       pt  = &mesh->tetra[iel];
-
+    
       /* First tetra obtained from iel */
       memcpy(pt0,pt,sizeof(MMG5_Tetra));
       pt0->v[_MMG5_iare[i][0]] = np;

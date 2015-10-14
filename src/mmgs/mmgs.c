@@ -63,11 +63,13 @@ static void excfun(int sigid) {
 static void usage(char *prog) {
 
   _MMG5_mmgUsage(prog);
+  fprintf(stdout,"-A           enable anisotropy (without metric file).\n");
 
   fprintf(stdout,"-nreg        normal regul.\n");
 #ifdef USE_SCOTCH
   fprintf(stdout,"-rn [n]      Turn on or off the renumbering using SCOTCH [0/1] \n");
 #endif
+  fprintf(stdout,"\n\n");
 
   exit(EXIT_FAILURE);
 }
@@ -75,6 +77,12 @@ static void usage(char *prog) {
 static void _MMG5_defaultValues(MMG5_pMesh mesh) {
 
   _MMG5_mmgDefaultValues(mesh);
+#ifdef USE_SCOTCH
+  fprintf(stdout,"SCOTCH renumbering                  : enabled\n");
+#else
+  fprintf(stdout,"SCOTCH renumbering                  : disabled\n");
+#endif
+  fprintf(stdout,"\n\n");
 
   exit(EXIT_FAILURE);
 }

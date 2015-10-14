@@ -1770,6 +1770,7 @@ int MMG5_loadMet(MMG5_pMesh mesh,MMG5_pSol met) {
   if ( mesh->np != met->np ) {
     return(-1);
   }
+
   if ( mesh->info.lag == -1 ) {
     if(met->size!=1 && met->size!=3) {
       fprintf(stdout,"  ** DATA TYPE IGNORED %d \n",met->size);
@@ -1777,8 +1778,11 @@ int MMG5_loadMet(MMG5_pMesh mesh,MMG5_pSol met) {
     }
     if(met->size > 1) met->size = 6;
   }
-  else if ( met->size != 2 ) {
-    return(-1);
+  else {
+    if ( met->size != 2 ) {
+      return(-1);
+    }
+    met->size = 3;
   }
 
   met->npi = met->np;
@@ -1850,8 +1854,7 @@ int MMG5_loadMet(MMG5_pMesh mesh,MMG5_pSol met) {
     }
   }
   /* vector displacement only */
-  else if(met->size==2) {
-    met->size = 3;
+  else if(met->size==3) {
     if ( met->ver == 1 ) {
       for (k=1; k<=met->np; k++) {
         for (i=0; i<3; i++) {
@@ -1980,8 +1983,9 @@ int MMG5_saveMet(MMG5_pMesh mesh,MMG5_pSol met) {
   double       dbuf[6],mtmp[3],r[3][3],tmp;
   char        *ptr,data[128],chaine[128];
   int          binch,bpos,bin,np,k,typ,i;
-
+  
   if ( !met->m || !met->nameout )  return(-1);
+  
   met->ver = 2;
   bin = 0;
   strcpy(data,met->nameout);
@@ -1994,7 +1998,7 @@ int MMG5_saveMet(MMG5_pMesh mesh,MMG5_pSol met) {
     return(0);
   }
   fprintf(stdout,"  %%%% %s OPENED\n",data);
-
+  
   /*entete fichier*/
   binch=bpos=0;
   if(!bin) {
@@ -2024,7 +2028,11 @@ int MMG5_saveMet(MMG5_pMesh mesh,MMG5_pSol met) {
 
   if(met->size==1) {
     typ = 1;
-  } else {
+  }
+  else if ( met->size == 3 ) {
+    typ = 2;
+  }
+  else {
     typ = 3;
   }
 
@@ -2054,6 +2062,24 @@ int MMG5_saveMet(MMG5_pMesh mesh,MMG5_pSol met) {
           fprintf(inm,"%.15lg \n ",met->m[k]);
         } else {
           fwrite((unsigned char*)&met->m[k],sd,1,inm);
+        }
+      }
+    }
+  }
+  /* write displacement */
+  else if ( met->size == 3 ) {
+    for (k=1; k<=mesh->np; k++) {
+      ppt = &mesh->point[k];
+      if ( MG_VOK(ppt) ) {
+        for (i=0; i<met->size; i++) dbuf[i] = met->m[met->size*k+i];
+        if ( !bin ) {
+          for (i=0; i<met->size; i++)
+            fprintf(inm,"%.15lg  ",dbuf[i]);
+          fprintf(inm,"\n");
+        }
+        else {
+          for(i=0; i<met->size; i++)
+            fwrite((unsigned char*)&dbuf[i],sd,1,inm);
         }
       }
     }

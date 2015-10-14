@@ -51,6 +51,13 @@
 #define MS_Ver       1
 #define MS_Tri       2
 
+/** Free allocated pointers of mesh and sol structure and return value val */
+#define _MMG5_RETURN_AND_FREE(mesh,met,val)do       \
+  {                                                 \
+    MMG5_Free_all(mesh,met);                        \
+    return(val);                                    \
+  }while(0)
+
 /** Reallocation of tria table and creation
     of tria jel */
 #define _MMG5_TRIA_REALLOC( mesh,jel,wantedGap,law ) do                 \

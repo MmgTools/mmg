@@ -235,12 +235,12 @@
   }while(0);
 
 /** Free allocated pointers of mesh and sol structure and return value val */
-#define _MMG5_RETURN_AND_FREE(mesh,met,val)do   \
-  {                                             \
-    MMG5_Free_all(mesh,met);                    \
-    return(val);                                \
-  }while(0)
-
+//#define _MMG5_RETURN_AND_FREE(mesh,met,val)do   \
+//  {                                             \
+//    MMG5_Free_all(mesh,met);                    \
+//    return(val);                                \
+//  }while(0)
+//
 /** Error message when lack of memory */
 #define _MMG5_INCREASE_MEM_MESSAGE() do                     \
   {                                                         \

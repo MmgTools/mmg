@@ -29,10 +29,10 @@
 #define MG_SMSGN(a,b)  (((double)(a)*(double)(b) > (0.0)) ? (1) : (0))
 
 /** Free allocated pointers of mesh and sol structure and return value val */
-#define _MMG5_RETURN_AND_FREE(mesh,met,val)do   \
-  {                                             \
-    MMG5_Free_all(mesh,met);                    \
-    return(val);                                \
+#define _MMG5_RETURN_AND_FREE(mesh,met,disp,val)do  \
+  {                                                 \
+    MMG5_Free_all(mesh,met,disp);                   \
+    return(val);                                    \
   }while(0)
 
 /** Reallocation of point table, sol table and bucket table and creation
@@ -127,6 +127,7 @@
 
 #define _MMG5_BOXSIZE 500
 
+#define _MMG5_SHORTMAX     0x7fff
 
 /* Domain refs in iso mode */
 #define MG_PLUS    2
@@ -227,7 +228,6 @@ void _MMG5_memOption(MMG5_pMesh mesh);
 int  _MMG5_mmg3d1_pattern(MMG5_pMesh ,MMG5_pSol );
 int  _MMG5_mmg3d1_delone(MMG5_pMesh ,MMG5_pSol );
 int  _MMG5_mmg3d2(MMG5_pMesh ,MMG5_pSol );
-int  _MMG5_mmg3d3(MMG5_pMesh ,MMG5_pSol );
 int  _MMG5_mmg3dChkmsh(MMG5_pMesh,int,int);
 int  _MMG5_split1_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]);
 void _MMG5_split1(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]);
@@ -290,6 +290,13 @@ double _MMG5_surftri(MMG5_pMesh,int,int);
 double _MMG5_timestepMCF(MMG5_pMesh,double);
 int    _MMG5_bdyMCF(MMG5_pMesh);
 double _MMG5_volint(MMG5_pMesh);
+
+/* Lagrangian mode functions */
+double _MMG5_estavglen(MMG5_pMesh);
+int   _MMG5_stiffelt(MMG5_pMesh,int,double*,double*);
+int  _MMG5_mmg3d3(MMG5_pMesh ,MMG5_pSol, MMG5_pSol );
+int  _MMG5_velextLS(MMG5_pMesh ,MMG5_pSol );
+int _MMG5_saveDisp(MMG5_pMesh ,MMG5_pSol );
 
 /* Delaunay functions*/
 int _MMG5_delone(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist);

@@ -29,13 +29,13 @@ To call the **mmg3d** library, you must:
 > Example 1  
 >  Command line to link the application with the **mmg3d** static library (we supposed here that the scotch library is installed in the **_$SCOTCH_PATH_** directory):  
 > ```Shell
-> gcc -I$CMAKE_INSTALL_PREFIX/include main.c -L$CMAKE_INSTALL_PREFIX/lib -L$SCOTCH_PATH -lmmg3d -lscotch -lscotcherr -lm
+> gcc -I$CMAKE_INSTALL_PREFIX/include/mmg/mmg3d main.c -L$CMAKE_INSTALL_PREFIX/lib -L$SCOTCH_PATH -lmmg3d -lscotch -lscotcherr -lm
 > ```
 
 > Example 2  
 >  Command line to link the application with the **mmg3d** shared library:  
 > ```Shell
-> gcc -I$CMAKE_INSTALL_PREFIX/include main.c -L$CMAKE_INSTALL_PREFIX/lib -lmmg3d
+> gcc -I$CMAKE_INSTALL_PREFIX/include/mmg/mmg3d main.c -L$CMAKE_INSTALL_PREFIX/lib -lmmg3d
 > export LD_LIBRARY_PATH=$CMAKE_INSTALL_PREFIX/lib:$LD_LIBRARY_PATH
 > ```
 
