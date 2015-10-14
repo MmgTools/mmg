@@ -160,6 +160,9 @@ int* _MMG5_packLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,int *npfin) {
     fprintf(stdout,"  ## Problem in fn LS_mesh. Exiting.\n");
     return(0);
   }
+
+  /* Set verbosity and debug info to 1 and 0 (resp.)  */
+  LS_setPar(lsst,1,0,0);
   
   /* Step 5: fill the LS mesh */
   /* Add vertices */
@@ -227,8 +230,9 @@ int* _MMG5_packLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,int *npfin) {
       }
     }
   }
-  
-  printf("Number of packed tetra %d, points %d, triangles %d\n",ilist,npf,ntf);
+
+  if ( (abs(mesh->info.imprim) > 4 || mesh->info.ddebug) && (ilist+npf+ntf > 0) )
+       printf("Number of packed tetra %d, points %d, triangles %d\n",ilist,npf,ntf);
   
   /* Add boundary conditions */
   if ( !LS_setBC(lsst,Dirichlet,refdirnh,'f',LS_tri,NULL) ) {
