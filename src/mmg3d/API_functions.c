@@ -94,6 +94,9 @@ void MMG5_Init_woalloc_mesh(MMG5_pMesh mesh, MMG5_pSol sol, MMG5_pSol disp
   /* Default vaules for file names */
   MMG5_Init_fileNames(mesh,sol);
 
+  MMG5_Set_inputSolName(mesh,disp,"");
+  MMG5_Set_outputSolName(mesh,disp,"");
+
   return;
 }
 /**
@@ -1295,7 +1298,8 @@ int MMG5_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
       exit(EXIT_FAILURE);
     mesh->info.lag = val;
 #else
-    fprintf(stout,"  ## Error: \"lagrangian motion\" option unavailable (-lag):"
+    fprintf(stdout,"  ## Error:"
+            " \"lagrangian motion\" option unavailable (-lag):\n"
             " set the USE_SUSCELAS CMake's flag to ON when compiling the mmg3d"
             " library to enable this feature.\n");
     return(0);
@@ -1565,7 +1569,7 @@ void MMG5_Free_structures(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp
 
   /* disp */
   if ( disp && disp->m )
-    _MMG5_DEL_MEM(mesh,met->m,(met->size*(met->npmax+1))*sizeof(double));
+    _MMG5_DEL_MEM(mesh,disp->m,(disp->size*(disp->npmax+1))*sizeof(double));
 
   /* mesh->info */
   if ( mesh->info.npar && mesh->info.par )

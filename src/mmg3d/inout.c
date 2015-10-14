@@ -1780,8 +1780,11 @@ int MMG5_loadMet(MMG5_pMesh mesh,MMG5_pSol met) {
     }
     if(met->size > 1) met->size = 6;
   }
-  else if ( met->size != 2 ) {
-    return(-1);
+  else {
+    if ( met->size != 2 ) {
+      return(-1);
+    }
+    met->size = 3;
   }
 
   met->npi = met->np;
@@ -1853,8 +1856,7 @@ int MMG5_loadMet(MMG5_pMesh mesh,MMG5_pSol met) {
     }
   }
   /* vector displacement only */
-  else if(met->size==2) {
-    met->size = 3;
+  else if(met->size==3) {
     if ( met->ver == 1 ) {
       for (k=1; k<=met->np; k++) {
         for (i=0; i<3; i++) {

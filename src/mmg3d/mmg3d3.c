@@ -731,8 +731,7 @@ int _MMG5_mmg3d3(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met) {
   }
   /* Clean memory */
   /* Doing this, memcur of mesh is decreased by size of displacement */
-  _MMG5_DEL_MEM(mesh,disp->m,(disp->size*disp->npmax+1)*sizeof(double));
-  memset(disp,0,sizeof(MMG5_Sol));
+  _MMG5_DEL_MEM(mesh,disp->m,(disp->size*(disp->npmax+1))*sizeof(double));
 
   return(1);
 }
