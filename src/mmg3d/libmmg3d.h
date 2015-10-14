@@ -122,13 +122,14 @@ enum MMG5_Param
 /* init structures */
 /**
  * \param mesh pointer toward a pointer toward the mesh structure.
- * \param sol pointer toward a pointer toward the sol structure.
+ * \param sol pointer toward a sol structure (metric or level-set).
+ * \param sol pointer toward a sol structure (displacement).
  *
  * Allocate the mesh and solution structures and initialize it to
  * their default values.
  *
  */
-void  MMG5_Init_mesh(MMG5_pMesh *mesh, MMG5_pSol *sol);
+void  MMG5_Init_mesh(MMG5_pMesh *mesh, MMG5_pSol *sol, MMG5_pSol *disp);
 /* init structure sizes */
 /**
  * \param mesh pointer toward the mesh structure.
@@ -281,6 +282,36 @@ int  MMG5_Set_requiredEdge(MMG5_pMesh mesh, int pos);
  *
  */
 int  MMG5_Set_scalarSol(MMG5_pSol met, double s,int pos);
+/**
+ * \param met pointer toward the sol structure.
+ * \param vx x value of the vectorial solution.
+ * \param vy y value of the vectorial solution.
+ * \param vz z value of the vectorial solution.
+ * \param pos position of the solution in the mesh (begin to 1).
+ * \return 0 if failed, 1 otherwise.
+ *
+ * Set vectorial value \f$(v_x,v_y,v_z)\f$ at position \a pos in solution
+ * structure.
+ *
+ */
+int MMG5_Set_vectorSol(MMG5_pSol met, double vx,double vy, double vz, int pos);
+/**
+ * \param met pointer toward the sol structure.
+ * \param m11 value of the tensorial solution at position (1,1) in the tensor.
+ * \param m12 value of the tensorial solution at position (1,2) in the tensor.
+ * \param m13 value of the tensorial solution at position (1,3) in the tensor.
+ * \param m22 value of the tensorial solution at position (2,2) in the tensor.
+ * \param m23 value of the tensorial solution at position (2,3) in the tensor.
+ * \param m33 value of the tensorial solution at position (3,3) in the tensor.
+ * \param pos position of the solution in the mesh (begin to 1).
+ * \return 0 if failed, 1 otherwise.
+ *
+ * Set tensorial values at position \a pos in solution
+ * structure.
+ *
+ */
+int MMG5_Set_tensorSol(MMG5_pSol met, double m11,double m12, double m13,
+                       double m22,double m23, double m33, int pos);
 /**
  * \param mesh pointer toward the mesh structure.
  *
@@ -435,6 +466,32 @@ int  MMG5_Get_edge(MMG5_pMesh mesh, int* e0, int* e1, int* ref,
  *
  */
 int  MMG5_Get_scalarSol(MMG5_pSol met, double* s);
+/**
+ * \param met pointer toward the sol structure.
+ * \param vx x value of the vectorial solution.
+ * \param vy y value of the vectorial solution.
+ * \param vz z value of the vectorial solution.
+ * \return 0 if failed, 1 otherwise.
+ *
+ * Get vectorial solution \f$(v_x,v_y,vz)\f$ of next vertex of mesh.
+ *
+ */
+int MMG5_Get_vectorSol(MMG5_pSol met, double* vx, double* vy, double* vz);
+/**
+ * \param met pointer toward the sol structure.
+ * \param m11 pointer toward the position (1,1) in the solution tensor.
+ * \param m12 pointer toward the position (1,2) in the solution tensor.
+ * \param m13 pointer toward the position (1,3) in the solution tensor.
+ * \param m22 pointer toward the position (2,2) in the solution tensor.
+ * \param m23 pointer toward the position (2,3) in the solution tensor.
+ * \param m33 pointer toward the position (3,3) in the solution tensor.
+ * \return 0 if failed, 1 otherwise.
+ *
+ * Get tensorial solution of next vertex of mesh.
+ *
+ */
+int MMG5_Get_tensorSol(MMG5_pSol met, double *m11,double *m12, double *m13,
+                       double *m22,double *m23, double *m33);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param iparam integer parameter to set (see \a MMG5_Param structure).

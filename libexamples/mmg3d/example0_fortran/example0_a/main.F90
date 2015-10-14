@@ -32,7 +32,7 @@ PROGRAM main
   mmgMesh = 0
   mmgSol  = 0
   mmgDisp = 0 !! Useless here: just needed forthe lagrangian motion option
-  CALL MMG5_Init_mesh(mmgMesh,mmgSol)
+  CALL MMG5_Init_mesh(mmgMesh,mmgSol,mmgDisp)
 
   !> 2) Build mesh in MMG5 format
   !! Two solutions: just use the MMG5_loadMesh function that will read a .mesh(b)

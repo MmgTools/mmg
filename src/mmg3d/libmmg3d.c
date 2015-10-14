@@ -150,7 +150,7 @@ int MMG5_packMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
 
   /* compact metric */
   nbl = 1;
-  if ( met->m ) {
+  if ( met && met->m ) {
     for (k=1; k<=mesh->np; k++) {
       ppt = &mesh->point[k];
       if ( !MG_VOK(ppt) )  continue;
@@ -165,7 +165,7 @@ int MMG5_packMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
 
   /* compact displacement */
   nbl = 1;
-  if ( disp->m ) {
+  if ( disp && disp->m ) {
     for (k=1; k<=mesh->np; k++) {
       ppt = &mesh->point[k];
       if ( !MG_VOK(ppt) )  continue;
@@ -194,9 +194,9 @@ int MMG5_packMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
     nbl++;
   }
   mesh->np = np;
-  if ( met->m )
+  if ( met && met->m )
     met->np  = np;
-  if ( disp->m )
+  if ( disp && disp->m )
     disp->np = np;
 
   /* rebuild triangles*/
@@ -339,7 +339,7 @@ int MMG5_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp
       _MMG5_DEL_MEM(mesh,disp->m,(disp->size*(disp->npmax+1))*sizeof(double));
       disp->np = 0;
     }
-    else if (disp->size!=2) {
+    else if (disp->size!=3) {
       fprintf(stdout,"  ## ERROR: LAGRANGIAN MOTION OPTION NEED A VECTORIAL DISPLACEMENT\n");
       return(MMG5_STRONGFAILURE);
     }
@@ -350,7 +350,7 @@ int MMG5_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp
       _MMG5_DEL_MEM(mesh,met->m,(met->size*(met->npmax+1))*sizeof(double));
       met->np = 0;
     }
-    else if ( met->size!=1 && met->size!=3 ) {
+    else if ( met->size!=1 && met->size!=6 ) {
       fprintf(stdout,"  ## ERROR: WRONG DATA TYPE.\n");
       return(MMG5_STRONGFAILURE);
     }

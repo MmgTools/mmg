@@ -1772,6 +1772,7 @@ int MMG5_loadMet(MMG5_pMesh mesh,MMG5_pSol met) {
   if ( mesh->np != met->np ) {
     return(-1);
   }
+
   if ( mesh->info.lag == -1 ) {
     if(met->size!=1 && met->size!=3) {
       fprintf(stdout,"  ** DATA TYPE IGNORED %d \n",met->size);

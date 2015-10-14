@@ -71,7 +71,7 @@ int main(int argc,char *argv[]) {
   met  = NULL;
   disp = NULL;
 
-  MMG5_Init_mesh(&mesh,&met);
+  MMG5_Init_mesh(&mesh,&met,&disp);
 
   /* reset default values for file names */
   MMG5_Free_names(mesh,met,disp);
@@ -91,21 +91,26 @@ int main(int argc,char *argv[]) {
     MMG5_Free_all(mesh,met,disp);
     return(MMG5_STRONGFAILURE);
   }
+  if ( !MMG5_Set_solSize(mesh,disp,MMG5_Vertex,0,MMG5_Vector) ) {
+    MMG5_Free_all(mesh,met,disp);
+    return(MMG5_STRONGFAILURE);
+  }
 
   /* read displacement if any */
   if ( MMG5_Get_iparameter(mesh, MMG5_IPARAM_lag) > -1 ) {
-    fprintf(stdout,"  ## ERROR: LAG. MOTION NOT YET AVAILABLE.\n");
-    return(MMG5_STRONGFAILURE);
     if ( !MMG5_Set_inputSolName(mesh,disp,met->namein) ) {
+      MMG5_Free_all(mesh,met,disp);
       return(MMG5_STRONGFAILURE);
     }
     ier = MMG5_loadMet(mesh,disp);
     if ( ier == 0 ) {
       fprintf(stdout,"  ## ERROR: NO DISPLACEMENT FOUND.\n");
+      MMG5_Free_all(mesh,met,disp);
       return(MMG5_STRONGFAILURE);
     }
     else if ( ier == -1 ) {
       fprintf(stdout,"  ## ERROR: WRONG DATA TYPE OR WRONG SOLUTION NUMBER.\n");
+      MMG5_Free_all(mesh,met,disp);
       return(MMG5_STRONGFAILURE);
     }
   }
@@ -119,10 +124,10 @@ int main(int argc,char *argv[]) {
     }
     else {
       MMG5_Get_solSize( mesh, met, &dummy, &dummy, &typSol);
-      if ( typSol != MMG5_Scalar ) {
-	fprintf(stdout,"  ## ERROR: ANISOTROPIC METRIC NOT IMPLEMENTED.\n");
-	MMG5_Free_all(mesh,met,disp);
-	return(MMG5_STRONGFAILURE);
+      if ( (typSol != MMG5_Scalar) && (typSol != MMG5_Tensor) ) {
+        fprintf(stdout,"  ## ERROR: WRONG DATA TYPE.\n");
+        MMG5_Free_all(mesh,met,disp);
+        return(MMG5_STRONGFAILURE);
       }
     }
     if ( MMG5_Get_iparameter(mesh, MMG5_IPARAM_iso) && !ier ) {
@@ -146,11 +151,11 @@ int main(int argc,char *argv[]) {
       fprintf(stdout,"\n  -- WRITING DATA FILE %s\n",mesh->nameout);
     if ( !MMG5_saveMesh(mesh) )         {
       MMG5_Free_all(mesh,met,disp );
-      return(EXIT_FAILURE);
+      return(MMG5_STRONGFAILURE);
     }
     if ( !MMG5_saveMet(mesh,met) )     {
       MMG5_Free_all(mesh,met,disp);
-      return(EXIT_FAILURE);
+      return(MMG5_STRONGFAILURE);
     }
     chrono(OFF,&ctim[1]);
     if ( mesh->info.imprim )

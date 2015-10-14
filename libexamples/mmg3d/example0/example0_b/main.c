@@ -61,8 +61,8 @@ int main(int argc,char *argv[]) {
      output mesh name */
   mmgMesh = NULL;
   mmgSol  = NULL;
-  mmgDisp = NULL; //Useless here: just needed forthe lagrangian motion option
-  MMG5_Init_mesh(&mmgMesh,&mmgSol);
+  mmgDisp = NULL; //Useless here: just needed for the lagrangian motion option
+  MMG5_Init_mesh(&mmgMesh,&mmgSol,&mmgDisp);
 
   /** 2) Build mesh in MMG5 format */
   /** Two solutions: just use the MMG5_loadMesh function that will read a .mesh(b)

@@ -40,13 +40,14 @@
 #include "mmg3d.h"
 /**
  * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the sol structure.
+ * \param sol pointer toward a sol structure (metric or level-set).
+ * \param sol pointer toward a sol structure (displacement).
  *
  * Allocate the mesh and solutions structures at \a MMG3D format.
  *
  */
 static inline
-void MMG5_Alloc_mesh(MMG5_pMesh *mesh, MMG5_pSol *sol
+void MMG5_Alloc_mesh(MMG5_pMesh *mesh, MMG5_pSol *sol, MMG5_pSol *disp
   ) {
 
   /* mesh allocation */
@@ -57,27 +58,35 @@ void MMG5_Alloc_mesh(MMG5_pMesh *mesh, MMG5_pSol *sol
   if ( *sol )  _MMG5_DEL_MEM(*mesh,*sol,sizeof(MMG5_Sol));
   _MMG5_SAFE_CALLOC(*sol,1,MMG5_Sol);
 
+  /* displacement allocation */
+  if ( *disp )  _MMG5_DEL_MEM(*mesh,*disp,sizeof(MMG5_Sol));
+  _MMG5_SAFE_CALLOC(*disp,1,MMG5_Sol);
+
   return;
 }
 /**
  * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the sol structure.
+ * \param sol pointer toward a sol structure (metric or level-set).
+ * \param sol pointer toward a sol structure (displacement).
  *
  * Initialization of mesh and solution structures to their default
  * values (default names, versions, dimensions...).
  *
  */
 static inline
-void MMG5_Init_woalloc_mesh(MMG5_pMesh mesh, MMG5_pSol sol
+void MMG5_Init_woalloc_mesh(MMG5_pMesh mesh, MMG5_pSol sol, MMG5_pSol disp
   ) {
 
   _MMG5_Set_commonFunc();
 
-  (mesh)->dim = 3;
-  (mesh)->ver = 2;
-  (sol)->dim  = 3;
-  (sol)->ver  = 2;
-  (sol)->size = 1;
+  (mesh)->dim  = 3;
+  (mesh)->ver  = 2;
+  (sol)->dim   = 3;
+  (sol)->ver   = 2;
+  (sol)->size  = 1;
+  (disp)->dim  = 3;
+  (disp)->ver  = 2;
+  (disp)->size = 2;
 
   /* Default parameters values */
   MMG5_Init_parameters(mesh);
@@ -89,19 +98,20 @@ void MMG5_Init_woalloc_mesh(MMG5_pMesh mesh, MMG5_pSol sol
 }
 /**
  * \param mesh pointer toward a pointer toward the mesh structure.
- * \param sol pointer toward a pointer toward the sol structure.
+ * \param sol pointer toward a sol structure (metric or level-set).
+ * \param sol pointer toward a sol structure (displacement).
  *
  * Allocate the mesh and solution structures and initialize it to
  * their default values.
  *
  */
-void MMG5_Init_mesh(MMG5_pMesh *mesh, MMG5_pSol *sol
+void MMG5_Init_mesh(MMG5_pMesh *mesh, MMG5_pSol *sol, MMG5_pSol *disp
   ) {
 
   /* allocations */
-  MMG5_Alloc_mesh(mesh,sol);
+  MMG5_Alloc_mesh(mesh,sol,disp);
   /* initialisations */
-  MMG5_Init_woalloc_mesh(*mesh,*sol);
+  MMG5_Init_woalloc_mesh(*mesh,*sol,*disp);
   /* set pointer to save the mesh*/
   MMG5_saveMesh = _MMG5_saveLibraryMesh;
   return;
@@ -165,6 +175,9 @@ int MMG5_Set_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int typEntity, int np, int 
   }
   if ( typSol == MMG5_Scalar ) {
     sol->size = 1;
+  }
+  else if ( typSol == MMG5_Vector ) {
+    sol->size = 3;
   }
   else if ( typSol == MMG5_Tensor ) {
     sol->size = 6;
@@ -838,7 +851,7 @@ int MMG5_Set_requiredEdge(MMG5_pMesh mesh, int k) {
 /**
  * \param met pointer toward the sol structure.
  * \param s solution scalar value.
- * \param pos position of the solution in the mesh.
+ * \param pos position of the solution in the mesh (begin to 1).
  * \return 0 if failed, 1 otherwise.
  *
  * Set scalar value \a s at position \a pos in solution structure
@@ -852,7 +865,11 @@ int MMG5_Set_scalarSol(MMG5_pSol met, double s, int pos) {
     fprintf(stdout," in solution structure \n");
     return(0);
   }
-
+  if ( pos < 1 ) {
+    fprintf(stdout,"  ## Error: unable to set a new solution.\n");
+    fprintf(stdout,"    Minimal index of the solution position must be 1.\n");
+    return(0);
+  }
   if ( pos >= met->npmax ) {
     fprintf(stdout,"  ## Error: unable to set a new solution.\n");
     fprintf(stdout,"    max number of solutions: %d\n",met->npmax);
@@ -895,6 +912,166 @@ int MMG5_Get_scalarSol(MMG5_pSol met, double* s) {
   return(1);
 }
 
+/**
+ * \param met pointer toward the sol structure.
+ * \param vx x value of the vectorial solution.
+ * \param vy y value of the vectorial solution.
+ * \param vz z value of the vectorial solution.
+ * \param pos position of the solution in the mesh (begin to 1).
+ * \return 0 if failed, 1 otherwise.
+ *
+ * Set vectorial value \f$(v_x,v_y,v_z)\f$ at position \a pos in solution
+ * structure.
+ *
+ */
+int MMG5_Set_vectorSol(MMG5_pSol met, double vx,double vy, double vz, int pos) {
+
+  if ( !met->np ) {
+    fprintf(stdout,"  ## Error: You must set the number of solution with the");
+    fprintf(stdout," MMG5_Set_solSize function before setting values");
+    fprintf(stdout," in solution structure \n");
+    return(0);
+  }
+  if ( pos < 1 ) {
+    fprintf(stdout,"  ## Error: unable to set a new solution.\n");
+    fprintf(stdout,"    Minimal index of the solution position must be 1.\n");
+    return(0);
+  }
+  if ( pos >= met->npmax ) {
+    fprintf(stdout,"  ## Error: unable to set a new solution.\n");
+    fprintf(stdout,"    max number of solutions: %d\n",met->npmax);
+    return(0);
+  }
+
+  if ( pos > met->np ) {
+    fprintf(stdout,"  ## Error: attempt to set new solution at position %d.",pos);
+    fprintf(stdout," Overflow of the given number of solutions: %d\n",met->np);
+    fprintf(stdout,"  ## Check the solution size, its compactness or the position");
+    fprintf(stdout," of the solution.\n");
+    return(0);
+  }
+
+  met->m[3*pos]   = vx;
+  met->m[3*pos+1] = vy;
+  met->m[3*pos+2] = vz;
+
+  return(1);
+}
+
+/**
+ * \param met pointer toward the sol structure.
+ * \param vx x value of the vectorial solution.
+ * \param vy y value of the vectorial solution.
+ * \param vz z value of the vectorial solution.
+ * \return 0 if failed, 1 otherwise.
+ *
+ * Get vectorial solution \f$(v_x,v_y,vz)\f$ of next vertex of mesh.
+ *
+ */
+int MMG5_Get_vectorSol(MMG5_pSol met, double* vx, double* vy, double* vz) {
+
+  met->npi++;
+
+  if ( met->npi > met->np ) {
+    fprintf(stdout,"  ## Error: unable to get solution.\n");
+    fprintf(stdout,"     The number of call of MMG5_Get_scalarSol function");
+    fprintf(stdout," can not exceed the number of points: %d\n ",met->np);
+    return(0);
+  }
+
+  *vx  = met->m[3*met->npi];
+  *vy  = met->m[3*met->npi+1];
+  *vz  = met->m[3*met->npi+2];
+
+  return(1);
+}
+/**
+ * \param met pointer toward the sol structure.
+ * \param m11 value of the tensorial solution at position (1,1) in the tensor.
+ * \param m12 value of the tensorial solution at position (1,2) in the tensor.
+ * \param m13 value of the tensorial solution at position (1,3) in the tensor.
+ * \param m22 value of the tensorial solution at position (2,2) in the tensor.
+ * \param m23 value of the tensorial solution at position (2,3) in the tensor.
+ * \param m33 value of the tensorial solution at position (3,3) in the tensor.
+ * \param pos position of the solution in the mesh (begin to 1).
+ * \return 0 if failed, 1 otherwise.
+ *
+ * Set tensorial values at position \a pos in solution
+ * structure.
+ *
+ */
+int MMG5_Set_tensorSol(MMG5_pSol met, double m11,double m12, double m13,
+                       double m22,double m23, double m33, int pos) {
+
+  if ( !met->np ) {
+    fprintf(stdout,"  ## Error: You must set the number of solution with the");
+    fprintf(stdout," MMG5_Set_solSize function before setting values");
+    fprintf(stdout," in solution structure \n");
+    return(0);
+  }
+  if ( pos < 1 ) {
+    fprintf(stdout,"  ## Error: unable to set a new solution.\n");
+    fprintf(stdout,"    Minimal index of the solution position must be 1.\n");
+    return(0);
+  }
+  if ( pos >= met->npmax ) {
+    fprintf(stdout,"  ## Error: unable to set a new solution.\n");
+    fprintf(stdout,"    max number of solutions: %d\n",met->npmax);
+    return(0);
+  }
+
+  if ( pos > met->np ) {
+    fprintf(stdout,"  ## Error: attempt to set new solution at position %d.",pos);
+    fprintf(stdout," Overflow of the given number of solutions: %d\n",met->np);
+    fprintf(stdout,"  ## Check the solution size, its compactness or the position");
+    fprintf(stdout," of the solution.\n");
+    return(0);
+  }
+
+  met->m[6*pos]   = m11;
+  met->m[6*pos+1] = m12;
+  met->m[6*pos+2] = m13;
+  met->m[6*pos+3] = m22;
+  met->m[6*pos+4] = m23;
+  met->m[6*pos+5] = m33;
+
+  return(1);
+}
+
+/**
+ * \param met pointer toward the sol structure.
+ * \param m11 pointer toward the position (1,1) in the solution tensor.
+ * \param m12 pointer toward the position (1,2) in the solution tensor.
+ * \param m13 pointer toward the position (1,3) in the solution tensor.
+ * \param m22 pointer toward the position (2,2) in the solution tensor.
+ * \param m23 pointer toward the position (2,3) in the solution tensor.
+ * \param m33 pointer toward the position (3,3) in the solution tensor.
+ * \return 0 if failed, 1 otherwise.
+ *
+ * Get tensorial solution of next vertex of mesh.
+ *
+ */
+int MMG5_Get_tensorSol(MMG5_pSol met, double *m11,double *m12, double *m13,
+                       double *m22,double *m23, double *m33) {
+
+  met->npi++;
+
+  if ( met->npi > met->np ) {
+    fprintf(stdout,"  ## Error: unable to get solution.\n");
+    fprintf(stdout,"     The number of call of MMG5_Get_scalarSol function");
+    fprintf(stdout," can not exceed the number of points: %d\n ",met->np);
+    return(0);
+  }
+
+  *m11 = met->m[6*met->npi];
+  *m12 = met->m[6*met->npi+1];
+  *m13 = met->m[6*met->npi+2];
+  *m22 = met->m[6*met->npi+3];
+  *m13 = met->m[6*met->npi+4];
+  *m33 = met->m[6*met->npi+5];
+
+  return(1);
+}
 
 /**
  * \param mesh pointer toward the mesh structure.

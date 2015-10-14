@@ -115,7 +115,7 @@ FOREACH(EXEC ${LISTEXEC_MMG3D})
       COMMAND ${EXEC}  -lag 1
       -in ${MMG3D_CI_TESTS}/LagMotion1_tinyBoxt/tinyBoxt
       -sol ${MMG3D_CI_TESTS}/LagMotion1_tinyBoxt/tinyBoxt.sol
-      -out ${MMG3D_CI_TESTS}/LagMotion1_tinyBoxt/tinyBoxt.meshb
+      -out ${MMG3D_CI_TESTS}/LagMotion1_tinyBoxt/tinyBoxt.o.meshb
       )
   ENDIF()
 
@@ -381,7 +381,7 @@ IF ( LONG_TESTS )
       COMMAND ${EXEC}  -lag 1
       -in ${MMG3D_CI_TESTS}/LagMotion1_boxt/boxt
       -sol ${MMG3D_CI_TESTS}/LagMotion1_boxt/boxt.sol
-      -out ${MMG3D_CI_TESTS}/LagMotion1_boxt/boxt.meshb
+      -out ${MMG3D_CI_TESTS}/LagMotion1_boxt/boxt.o.meshb
       )
   ENDIF()
 

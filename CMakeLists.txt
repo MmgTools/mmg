@@ -477,100 +477,12 @@ IF ( BUILD_MMG3D OR BUILD_MMG )
   ############################################################################
   OPTION ( TEST_LIBMMG3D "Compile tests for the mmg3d library" OFF)
   IF ( TEST_LIBMMG3D )
-    IF ( LIBMMG3D_STATIC )
-      ADD_EXECUTABLE(libmmg3d_example0_a
-        ${CMAKE_SOURCE_DIR}/libexamples/mmg3d/example0/example0_a/main.c)
-      TARGET_LINK_LIBRARIES(libmmg3d_example0_a ${PROJECT_NAME}3d_a)
-      INSTALL(TARGETS libmmg3d_example0_a RUNTIME DESTINATION bin )
-
-      ADD_EXECUTABLE(libmmg3d_example0_b
-        ${CMAKE_SOURCE_DIR}/libexamples/mmg3d/example0/example0_b/main.c)
-      TARGET_LINK_LIBRARIES(libmmg3d_example0_b ${PROJECT_NAME}3d_a)
-      INSTALL(TARGETS libmmg3d_example0_b RUNTIME DESTINATION bin )
-
-      ADD_EXECUTABLE(libmmg3d_example1
-        ${CMAKE_SOURCE_DIR}/libexamples/mmg3d/example1/main.c)
-      TARGET_LINK_LIBRARIES(libmmg3d_example1 ${PROJECT_NAME}3d_a)
-      INSTALL(TARGETS libmmg3d_example1 RUNTIME DESTINATION bin )
-      ADD_EXECUTABLE(libmmg3d_example2
-        ${CMAKE_SOURCE_DIR}/libexamples/mmg3d/example2/main.c)
-      TARGET_LINK_LIBRARIES(libmmg3d_example2 ${PROJECT_NAME}3d_a)
-      INSTALL(TARGETS libmmg3d_example2 RUNTIME DESTINATION bin )
-
-      ENABLE_LANGUAGE (Fortran)
-      ADD_EXECUTABLE(libmmg3d_fortran_a
-        ${CMAKE_SOURCE_DIR}/libexamples/mmg3d/example0_fortran/example0_a/main.F90)
-      TARGET_LINK_LIBRARIES(libmmg3d_fortran_a ${PROJECT_NAME}3d_a)
-      INSTALL(TARGETS libmmg3d_fortran_a RUNTIME DESTINATION bin )
-      ADD_EXECUTABLE(libmmg3d_fortran_b
-        ${CMAKE_SOURCE_DIR}/libexamples/mmg3d/example0_fortran/example0_b/main.F90)
-      TARGET_LINK_LIBRARIES(libmmg3d_fortran_b ${PROJECT_NAME}3d_a)
-      INSTALL(TARGETS libmmg3d_fortran_b RUNTIME DESTINATION bin )
-
-      ADD_EXECUTABLE(libmmg3d_example3
-        ${CMAKE_SOURCE_DIR}/libexamples/mmg3d/example3/mmg3d.c)
-      TARGET_LINK_LIBRARIES(libmmg3d_example3 ${PROJECT_NAME}3d_a)
-      INSTALL(TARGETS libmmg3d_example3 RUNTIME DESTINATION bin )
-    ELSEIF ( LIBMMG3D_SHARED )
-      ADD_EXECUTABLE(libmmg3d_example0_a
-        ${CMAKE_SOURCE_DIR}/libexamples/mmg3d/example0/example0_a/main.c)
-      TARGET_LINK_LIBRARIES(libmmg3d_example0_a ${PROJECT_NAME}3d_so)
-      INSTALL(TARGETS libmmg3d_example0_a RUNTIME DESTINATION bin )
-
-      ADD_EXECUTABLE(libmmg3d_example0_b
-        ${CMAKE_SOURCE_DIR}/libexamples/mmg3d/example0/example0_b/main.c)
-      TARGET_LINK_LIBRARIES(libmmg3d_example0_b ${PROJECT_NAME}3d_so)
-      INSTALL(TARGETS libmmg3d_example0_b RUNTIME DESTINATION bin )
-
-      ADD_EXECUTABLE(libmmg3d_example1
-        ${CMAKE_SOURCE_DIR}/libexamples/mmg3d/example1/main.c)
-      TARGET_LINK_LIBRARIES(libmmg3d_example1 ${PROJECT_NAME}3d_so)
-      INSTALL(TARGETS libmmg3d_example1 RUNTIME DESTINATION bin )
-      ADD_EXECUTABLE(libmmg3d_example2
-        ${CMAKE_SOURCE_DIR}/libexamples/mmg3d/example2/main.c)
-      TARGET_LINK_LIBRARIES(libmmg3d_example2 ${PROJECT_NAME}3d_so)
-      INSTALL(TARGETS libmmg3d_example2 RUNTIME DESTINATION bin )
-
-      ADD_EXECUTABLE(libmmg3d_example3
-        ${CMAKE_SOURCE_DIR}/libexamples/mmg3d/example3/mmg3d.c)
-      TARGET_LINK_LIBRARIES(libmmg3d_example3 ${PROJECT_NAME}3d_so)
-      INSTALL(TARGETS libmmg3d_example3 RUNTIME DESTINATION bin )
-    ELSE ()
-      MESSAGE(WARNING "You must activate the compilation of the static or"
-        " shared ${PROJECT_NAME} library to compile this tests." )
-    ENDIF ()
+    INCLUDE(cmake/testing/libmmg3d_tests.cmake)
   ENDIF()
 
   OPTION ( TEST_LIBMMG2D "Compile tests for the mmg2d library" OFF)
   IF ( TEST_LIBMMG2D )
-    IF ( LIBMMG2D_STATIC )
-      ADD_EXECUTABLE(libmmg2d_example0
-        ${CMAKE_SOURCE_DIR}/libexamples/mmg2d/example0/main.c)
-      TARGET_LINK_LIBRARIES(libmmg2d_example0 ${PROJECT_NAME}2d_a)
-      INSTALL(TARGETS libmmg2d_example0 RUNTIME DESTINATION bin )
-    ADD_EXECUTABLE(libmmg2d_example1
-        ${CMAKE_SOURCE_DIR}/libexamples/mmg2d/example1/main.c)
-      TARGET_LINK_LIBRARIES(libmmg2d_example1 ${PROJECT_NAME}2d_a)
-      INSTALL(TARGETS libmmg2d_example1 RUNTIME DESTINATION bin )
-    ENABLE_LANGUAGE (Fortran)
-      ADD_EXECUTABLE(libmmg2d_fortran_a
-        ${CMAKE_SOURCE_DIR}/libexamples/mmg2d/example0_fortran/main.F90)
-      TARGET_LINK_LIBRARIES(libmmg2d_fortran_a ${PROJECT_NAME}2d_a)
-      INSTALL(TARGETS libmmg2d_fortran_a RUNTIME DESTINATION bin )
-  
-    ELSEIF ( LIBMMG2D_SHARED )
-      ADD_EXECUTABLE(libmmg2d_example0
-        ${CMAKE_SOURCE_DIR}/libexamples/mmg2d/example0/main.c)
-      TARGET_LINK_LIBRARIES(libmmg2d_example0 ${PROJECT_NAME}2d_so)
-      INSTALL(TARGETS libmmg2d_example0 RUNTIME DESTINATION bin )
-      ADD_EXECUTABLE(libmmg2d_example1
-        ${CMAKE_SOURCE_DIR}/libexamples/mmg2d/example1/main.c)
-      TARGET_LINK_LIBRARIES(libmmg2d_example1 ${PROJECT_NAME}2d_so)
-      INSTALL(TARGETS libmmg2d_example1 RUNTIME DESTINATION bin )
-    ELSE ()
-      MESSAGE(WARNING "You must activate the compilation of the static or"
-        " shared ${PROJECT_NAME} library to compile this tests." )
-    ENDIF ()
+    INCLUDE(cmake/testing/libmmg2d_tests.cmake)
   ENDIF()
 
   ###############################################################################
@@ -734,23 +646,17 @@ IF ( BUILD_MMG3D OR BUILD_MMGS OR BUILD_MMG2D OR BUILD_MMG )
 
       SET ( LISTEXEC_MMG2D ${EXECUT_MMG2D} )
      IF ( TEST_LIBMMG2D )
-        IF ( LIBMMG2D_STATIC OR LIBMMG2D_SHARED )
-          SET(LIBMMG2D_EXEC0_a ${EXECUTABLE_OUTPUT_PATH}/libmmg2d_example0_a)
-          SET(LIBMMG2D_EXEC0_b ${EXECUTABLE_OUTPUT_PATH}/libmmg2d_example0_b)
-          SET(LIBMMG2D_EXECFORTRAN_a ${EXECUTABLE_OUTPUT_PATH}/libmmg2d_fortran_a)
-          SET(LIBMMG2D_EXECFORTRAN_b ${EXECUTABLE_OUTPUT_PATH}/libmmg2d_fortran_b)
-          SET(LIBMMG2D_EXEC1   ${EXECUTABLE_OUTPUT_PATH}/libmmg2d_example1)
-          SET(LIBMMG2D_EXEC2   ${EXECUTABLE_OUTPUT_PATH}/libmmg2d_example2)
+       SET(LIBMMG2D_EXEC0 ${EXECUTABLE_OUTPUT_PATH}/libmmg2d_example0)
+       SET(LIBMMG2D_EXECFORTRAN_a ${EXECUTABLE_OUTPUT_PATH}/libmmg2d_fortran_a)
+       SET(LIBMMG2D_EXEC1   ${EXECUTABLE_OUTPUT_PATH}/libmmg2d_example1)
 
-          ADD_TEST(NAME libmmg2d_example0_a COMMAND ${LIBMMG2D_EXEC0_a})
-          ADD_TEST(NAME libmmg2d_example0_b COMMAND ${LIBMMG2D_EXEC0_b})
+        IF ( LIBMMG2D_STATIC )
+          ADD_TEST(NAME libmmg2d_example0   COMMAND ${LIBMMG2D_EXEC0})
           ADD_TEST(NAME libmmg2d_fortran_a  COMMAND ${LIBMMG2D_EXECFORTRAN_a})
-          ADD_TEST(NAME libmmg2d_fortran_b  COMMAND ${LIBMMG2D_EXECFORTRAN_b})
           ADD_TEST(NAME libmmg2d_example1   COMMAND ${LIBMMG2D_EXEC1})
-          ADD_TEST(NAME libmmg2d_example2   COMMAND ${LIBMMG2D_EXEC2})
-
-          SET(LIBMMG2D_EXEC3 ${EXECUTABLE_OUTPUT_PATH}/libmmg2d_example3)
-          SET( LISTEXEC_MMG2D ${LISTEXEC_MMG2D} ${LIBMMG2D_EXEC3} )
+        ELSEIF( LIBMMG2D_SHARED )
+          ADD_TEST(NAME libmmg2d_example0   COMMAND ${LIBMMG2D_EXEC0})
+          ADD_TEST(NAME libmmg2d_example1   COMMAND ${LIBMMG2D_EXEC1})
         ENDIF()
     ENDIF()
       # Add mmgs tests
@@ -812,13 +718,14 @@ IF ( BUILD_MMG3D OR BUILD_MMGS OR BUILD_MMG2D OR BUILD_MMG )
 
       SET ( LISTEXEC_MMG3D ${EXECUT_MMG3D} )
       IF ( TEST_LIBMMG3D )
-        IF ( LIBMMG3D_STATIC OR LIBMMG3D_SHARED )
-          SET(LIBMMG3D_EXEC0_a ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_example0_a)
-          SET(LIBMMG3D_EXEC0_b ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_example0_b)
-          SET(LIBMMG3D_EXECFORTRAN_a ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_fortran_a)
-          SET(LIBMMG3D_EXECFORTRAN_b ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_fortran_b)
-          SET(LIBMMG3D_EXEC1   ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_example1)
-          SET(LIBMMG3D_EXEC2   ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_example2)
+        SET(LIBMMG3D_EXEC0_a ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_example0_a)
+        SET(LIBMMG3D_EXEC0_b ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_example0_b)
+        SET(LIBMMG3D_EXECFORTRAN_a ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_fortran_a)
+        SET(LIBMMG3D_EXECFORTRAN_b ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_fortran_b)
+        SET(LIBMMG3D_EXEC1   ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_example1)
+        SET(LIBMMG3D_EXEC2   ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_example2)
+
+        IF ( LIBMMG3D_STATIC )
 
           ADD_TEST(NAME libmmg3d_example0_a COMMAND ${LIBMMG3D_EXEC0_a})
           ADD_TEST(NAME libmmg3d_example0_b COMMAND ${LIBMMG3D_EXEC0_b})
@@ -826,9 +733,21 @@ IF ( BUILD_MMG3D OR BUILD_MMGS OR BUILD_MMG2D OR BUILD_MMG )
           ADD_TEST(NAME libmmg3d_fortran_b  COMMAND ${LIBMMG3D_EXECFORTRAN_b})
           ADD_TEST(NAME libmmg3d_example1   COMMAND ${LIBMMG3D_EXEC1})
           ADD_TEST(NAME libmmg3d_example2   COMMAND ${LIBMMG3D_EXEC2})
+          ADD_TEST(NAME libmmg3d_example4   COMMAND ${LIBMMG3D_EXEC2})
 
           SET(LIBMMG3D_EXEC3 ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_example3)
           SET( LISTEXEC_MMG3D ${LISTEXEC_MMG3D} ${LIBMMG3D_EXEC3} )
+
+        ELSEIF( LIBMMG3D_SHARED )
+          ADD_TEST(NAME libmmg3d_example0_a COMMAND ${LIBMMG3D_EXEC0_a})
+          ADD_TEST(NAME libmmg3d_example0_b COMMAND ${LIBMMG3D_EXEC0_b})
+          ADD_TEST(NAME libmmg3d_example1   COMMAND ${LIBMMG3D_EXEC1})
+          ADD_TEST(NAME libmmg3d_example2   COMMAND ${LIBMMG3D_EXEC2})
+          ADD_TEST(NAME libmmg3d_example4   COMMAND ${LIBMMG3D_EXEC2})
+
+          SET(LIBMMG3D_EXEC3 ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_example3)
+          SET( LISTEXEC_MMG3D ${LISTEXEC_MMG3D} ${LIBMMG3D_EXEC3} )
+
         ENDIF()
       ENDIF()
 
