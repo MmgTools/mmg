@@ -54,3 +54,7 @@ void _MMG5_Init_parameters(MMG5_pMesh mesh) {
   mesh->info.renum    = 0;   /* [0/1], Turn off/on the renumbering using SCOTCH; */
 
 }
+
+void MMG5_Free_names(MMG5_pMesh mesh,MMG5_pSol met){
+  MMG5_mmgFree_names(mesh,met);
+}

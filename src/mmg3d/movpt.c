@@ -84,6 +84,7 @@ int _MMG5_movintpt(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,int improve
     if ( callist[k] < _MMG5_EPSD2 )        return(0);
     calnew = MG_MIN(calnew,callist[k]);
   }
+    
   if ( calold < _MMG5_NULKAL && calnew <= calold )    return(0);
   else if (calnew < _MMG5_NULKAL) return(0);
   else if ( improve && calnew < 0.9 * calold )     return(0);

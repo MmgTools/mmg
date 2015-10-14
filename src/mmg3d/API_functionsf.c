@@ -42,18 +42,19 @@
  * See \ref MMG5_Init_mesh function in common/libmmg.h file.
  */
 FORTRAN_NAME(MMG5_INIT_MESH, mmg5_init_mesh,(MMG5_pMesh *mesh, MMG5_pSol *sol
+                                             ,MMG5_pSol *disp
 #ifdef SINGUL
                                              , MMG5_pSingul *sing
 #endif
-               ),(mesh,sol
+               ),(mesh,sol,disp
 #ifdef SINGUL
                   ,sing
 #endif
                  )) {
 #ifdef SINGUL
-  MMG5_Init_mesh(mesh,sol,sing);
+  MMG5_Init_mesh(mesh,sol,disp,sing);
 #else
-  MMG5_Init_mesh(mesh,sol);
+  MMG5_Init_mesh(mesh,sol,disp);
 #endif
 
   return;
@@ -277,6 +278,49 @@ FORTRAN_NAME(MMG5_GET_SCALARSOL,mmg5_get_scalarsol,
 }
 
 /**
+ * See \ref MMG5_Set_vectorSol function in \ref mmg3d/libmmg3d.h file.
+ */
+FORTRAN_NAME(MMG5_SET_VECTORSOL,mmg5_set_vectorsol,
+             (MMG5_pSol *met, double *vx, double *vy, double *vz,
+              int *pos, int* retval),
+             (met,vx,vy,vz,pos,retval)) {
+  *retval = MMG5_Set_vectorSol(*met,*vx,*vy,*vz,*pos);
+  return;
+}
+
+/**
+ * See \ref MMG5_Get_vectorSol function in \ref mmg3d/libmmg3d.h file.
+ */
+FORTRAN_NAME(MMG5_GET_VECTORSOL,mmg5_get_vectorsol,
+             (MMG5_pSol *met, double* vx,double *vy, double *vz, int* retval),
+             (met,vx,vy,vz,retval)) {
+  *retval = MMG5_Get_vectorSol(*met,vx,vy,vz);
+  return;
+}
+
+/**
+ * See \ref MMG5_Set_tensorSol function in \ref mmg3d/libmmg3d.h file.
+ */
+FORTRAN_NAME(MMG5_SET_TENSORSOL,mmg5_set_tensorsol,
+             (MMG5_pSol *met, double* m11,double *m12, double *m13,
+              double* m22,double *m23, double *m33, int *pos, int* retval),
+             (met,m11,m12,m13,m22,m23,m33,pos,retval)) {
+  *retval = MMG5_Set_tensorSol(*met,*m11,*m12,*m13,*m22,*m23,*m33,*pos);
+  return;
+}
+
+/**
+ * See \ref MMG5_Get_tensorSol function in \ref mmg3d/libmmg3d.h file.
+ */
+FORTRAN_NAME(MMG5_GET_TENSORSOL,mmg5_get_tensorsol,
+             (MMG5_pSol *met, double* m11,double *m12, double *m13,
+              double* m22,double *m23, double *m33, int* retval),
+             (met,m11,m12,m13,m22,m23,m33,retval)) {
+  *retval = MMG5_Get_tensorSol(*met,m11,m12,m13,m22,m23,m33);
+  return;
+}
+
+/**
  * See \ref MMG5_Set_handGivenMesh function in \ref mmg3d/libmmg3d.h file.
  */
 FORTRAN_NAME(MMG5_SET_HANDGIVENMESH,mmg5_set_handgivenmesh,
@@ -341,19 +385,31 @@ FORTRAN_NAME(MMG5_SET_LOCALPARAMETER,mmg5_set_localparameter,
  * See \ref MMG5_Free_structures function in \ref mmg3d/libmmg3d.h file.
  */
 FORTRAN_NAME(MMG5_FREE_STRUCTURES,mmg5_free_structures,(MMG5_pMesh *mesh,MMG5_pSol *met
+                                                        ,MMG5_pSol *disp
 #ifdef SINGUL
                                                         ,MMG5_pSingul *singul
 #endif
-               ),(mesh,met
+               ),(mesh,met,disp
 #ifdef SINGUL
                   ,singul
 #endif
                  )){
 #ifdef SINGUL
-  MMG5_Free_structures(*mesh,*met,*singul);
+  MMG5_Free_structures(*mesh,*met,*disp,*singul);
 #else
-  MMG5_Free_structures(*mesh,*met);
+  MMG5_Free_structures(*mesh,*met,*disp);
 #endif
+  return;
+}
+
+/**
+ * See \ref MMG5_Free_names function in \ref mmg3d/libmmg3d.h file.
+ */
+FORTRAN_NAME(MMG5_FREE_NAMES,mmg5_free_names,(MMG5_pMesh *mesh,MMG5_pSol *met,
+                                              MMG5_pSol *disp),
+             (mesh,met,disp))
+{
+  MMG5_Free_names(*mesh,*met,*disp);
   return;
 }
 

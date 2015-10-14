@@ -42,7 +42,7 @@ inline double _MMG5_orcal(MMG5_pMesh mesh,MMG5_pSol met,int iel) {
   MMG5_pTetra     pt;
 
   pt = &mesh->tetra[iel];
-
+  
   if ( met->m )
     return(_MMG5_caltet(mesh,met,pt->v[0],pt->v[1],pt->v[2],pt->v[3]));
   else // with -A option we are in aniso but without metric.

@@ -22,7 +22,7 @@
 */
 
 /** Authors Cecile Dobrzynski, Charles Dapogny, Pascal Frey and Algiane Froehly */
-/** \include Example for using mmg3dlib (basic use) */
+/** \include Example for using mmg3dlib (advanced used) */
 
 #include <assert.h>
 #include <stdio.h>
@@ -42,58 +42,78 @@
 int main(int argc,char *argv[]) {
   MMG5_pMesh      mmgMesh;
   MMG5_pSol       mmgSol,mmgDisp;
-  int             ier;
-  char            *pwd,*filename;
+  int             k,ier;
+  char            *pwd,*inname,*outname;
 
   fprintf(stdout,"  -- TEST MMG3DLIB \n");
 
-  /* Name and path of the mesh file */
+  /* Name and path of the mesh files */
   pwd = getenv("PWD");
-  filename = (char *) calloc(strlen(pwd) + 47, sizeof(char));
-  if ( filename == NULL ) {
+  inname = (char *) calloc(strlen(pwd) + 40, sizeof(char));
+  if ( inname == NULL ) {
     perror("  ## Memory problem: calloc");
     exit(EXIT_FAILURE);
   }
-  sprintf(filename, "%s%s%s", pwd, "/../libexamples/mmg3d/example0/example0_a/", "cube");
+  outname = (char *) calloc(strlen(pwd) + 49, sizeof(char));
+  if ( outname == NULL ) {
+    perror("  ## Memory problem: calloc");
+    exit(EXIT_FAILURE);
+  }
+  sprintf(inname, "%s%s%s", pwd, "/../libexamples/mmg3d/example4/", "tinyBoxt");
 
-  /** ------------------------------ STEP   I -------------------------- */
   /** 1) Initialisation of mesh and sol structures */
   /* args of InitMesh: mesh=&mmgMesh, sol=&mmgSol, input mesh name, input sol name,
-     output mesh name */
+   output mesh name */
   mmgMesh = NULL;
   mmgSol  = NULL;
-  mmgDisp = NULL; // Useless here: just needed forthe lagrangian motion option
+  mmgDisp = NULL; //Useless here: just needed forthe lagrangian motion option
   MMG5_Init_mesh(&mmgMesh,&mmgSol,&mmgDisp);
 
   /** 2) Build mesh in MMG5 format */
   /** Two solutions: just use the MMG5_loadMesh function that will read a .mesh(b)
-      file formatted or manually set your mesh using the MMG5_Set* functions */
+     file formatted or manually set your mesh using the MMG5_Set* functions */
 
   /** with MMG5_loadMesh function */
   /** a) (not mandatory): give the mesh name
      (by default, the "mesh.mesh" file is oppened)*/
-  if ( !MMG5_Set_inputMeshName(mmgMesh,filename) )
+  if ( !MMG5_Set_inputMeshName(mmgMesh,inname) )
     exit(EXIT_FAILURE);
   /** b) function calling */
   if ( !MMG5_loadMesh(mmgMesh) )  exit(EXIT_FAILURE);
 
-  /** 3) Build sol in MMG5 format */
+  /** 3) Build displacement in MMG5 format */
   /** Two solutions: just use the MMG5_loadMet function that will read a .sol(b)
       file formatted or manually set your sol using the MMG5_Set* functions */
+
+  /**------------------- Lagrangian motion option ----------------------------*/
+  /* Ask for lagrangian motion (mode 1) */
+  if ( !MMG5_Set_iparameter(mmgMesh,mmgDisp,MMG5_IPARAM_lag, 1) )
+    exit(EXIT_FAILURE);
 
   /** With MMG5_loadMet function */
   /** a) (not mandatory): give the sol name
      (by default, the "mesh.sol" file is oppened)*/
-  if ( !MMG5_Set_inputSolName(mmgMesh,mmgSol,filename) )
+  if ( !MMG5_Set_inputSolName(mmgMesh,mmgDisp,inname) )
     exit(EXIT_FAILURE);
+
   /** b) function calling */
-  if ( !MMG5_loadMet(mmgMesh,mmgSol) )
+  if ( !MMG5_loadMet(mmgMesh,mmgDisp) )
     exit(EXIT_FAILURE);
 
   /** 4) (not mandatory): check if the number of given entities match with mesh size */
-  if ( !MMG5_Chk_meshData(mmgMesh,mmgSol) ) exit(EXIT_FAILURE);
+  if ( !MMG5_Chk_meshData(mmgMesh,mmgDisp) ) exit(EXIT_FAILURE);
 
-  /** ------------------------------ STEP  II -------------------------- */
+  /** 5) (not mandatory): set your global parameters using the
+      MMG5_Set_iparameter and MMG5_Set_dparameter function
+      (resp. for integer parameters and double param)*/
+
+
+  /**------------------- Lagrangian motion computation ---------------------*/
+
+  /* debug mode ON (default value = OFF) */
+  if ( !MMG5_Set_iparameter(mmgMesh,mmgDisp,MMG5_IPARAM_debug, 1) )
+    exit(EXIT_FAILURE);
+
   /** library call */
   ier = MMG5_mmg3dlib(mmgMesh,mmgSol,mmgDisp);
   if ( ier == MMG5_STRONGFAILURE ) {
@@ -102,32 +122,26 @@ int main(int argc,char *argv[]) {
   } else if ( ier == MMG5_LOWFAILURE )
     fprintf(stdout,"BAD ENDING OF MMG3DLIB\n");
 
+  /* (Not mandatory) Automatically save the mesh */
+  sprintf(outname, "%s%s%s", pwd, "/../libexamples/mmg3d/example4/", "tinyBoxt.o.mesh");
+  if ( !MMG5_Set_outputMeshName(mmgMesh,outname) )
+    exit(EXIT_FAILURE);
 
-  /** ------------------------------ STEP III -------------------------- */
-  /** get results */
-  /** Two solutions: just use the MMG5_saveMesh/MMG5_saveMet functions
-      that will write .mesh(b)/.sol formatted files or manually get your mesh/sol
-      using the MMG5_getMesh/MMG5_getSol functions */
-
-  /** 1) Automatically save the mesh */
-  /** a)  (not mandatory): give the ouptut mesh name using MMG5_Set_outputMeshName
-     (by default, the mesh is saved in the "mesh.o.mesh" file */
-  // MMG5_Set_outputMeshName(mmgMesh,"output.mesh");
-  /** b) function calling */
   MMG5_saveMesh(mmgMesh);
 
-  /** 2) Automatically save the solution */
-  /** a)  (not mandatory): give the ouptut sol name using MMG5_Set_outputSolName
-     (by default, the mesh is saved in the "mesh.o.sol" file */
-  // MMG5_Set_outputSolName(mmgSol,"output.sol");
-  /** b) function calling */
+  /* (Not mandatory) Automatically save the solution */
+  if ( !MMG5_Set_outputSolName(mmgMesh,mmgSol,outname) )
+    exit(EXIT_FAILURE);
+
   MMG5_saveMet(mmgMesh,mmgSol);
 
-  /** 3) Free the MMG3D5 structures */
+  /* 9) free the MMG3D5 structures */
   MMG5_Free_all(mmgMesh,mmgSol,mmgDisp);
 
-  free(filename);
-  filename = NULL;
+  free(inname);
+  inname = NULL;
+  free(outname);
+  outname = NULL;
 
   return(ier);
 }
