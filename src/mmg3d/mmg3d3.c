@@ -218,14 +218,7 @@ static int _MMG5_spllag(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int itdeg, 
     
     /* Interpolation of metric, if any */
     if ( met->m ) {
-      iadr = met->size*ip1;
-      m1 = &met->m[iadr];
-      iadr = met->size*ip2;
-      m2 = &met->m[iadr];
-      iadr = met->size*ip;
-      mp = &met->m[iadr];
-      
-      if ( !_MMG5_intmetvol(m1,m2,mp,0.5) ) {
+      if ( !_MMG5_intmet(mesh,met,k,imax,ip,0.5) ) {
         _MMG5_delPt(mesh,ip);
         return(-1);
       }

@@ -176,15 +176,15 @@ int _MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, int *list,int ilist,int it1,
   dischg = MG_MAX(dischg,hausd * hausd);
 
   if ( dischg > disnat )   return(0);
-  // if ( met->m ) {
-  cal1 = _MMG5_caltri(mesh,met,&tt1);
-  cal2 = _MMG5_caltri(mesh,met,&tt2);
-  // }
-  // else { // with -A option we don't have the metric here so we always use the
-  //       // iso func.
-  //  cal1 = _MMG5_caltri_iso(mesh,met,&tt1);
-  //  cal2 = _MMG5_caltri_iso(mesh,met,&tt2);
-  // }
+  if ( met->m ) {
+    cal1 = _MMG5_caltri(mesh,met,&tt1);
+    cal2 = _MMG5_caltri(mesh,met,&tt2);
+  }
+  else { // with -A option we don't have the metric here so we always use the
+         // iso func.
+    cal1 = _MMG5_caltri_iso(mesh,met,&tt1);
+    cal2 = _MMG5_caltri_iso(mesh,met,&tt2);
+  }
 
   calnat = MG_MIN(cal1,cal2);
   for (j=0; j<3; j++) {
@@ -192,15 +192,15 @@ int _MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, int *list,int ilist,int it1,
     if ( tt2.v[j] == np )  tt2.v[j] = na1;
   }
 
-  // if ( met->m ) {
-  cal1 = _MMG5_caltri(mesh,met,&tt1);
-  cal2 = _MMG5_caltri(mesh,met,&tt2);
-  // }
-  // else { // with -A option we don't have the metric here so we always use the
-  //        // iso func.
-  //   cal1 = _MMG5_caltri_iso(mesh,met,&tt1);
-  //   cal2 = _MMG5_caltri_iso(mesh,met,&tt2);
-  // }
+  if ( met->m ) {
+    cal1 = _MMG5_caltri(mesh,met,&tt1);
+    cal2 = _MMG5_caltri(mesh,met,&tt2);
+  }
+  else { // with -A option we don't have the metric here so we always use the
+    // iso func.
+    cal1 = _MMG5_caltri_iso(mesh,met,&tt1);
+    cal2 = _MMG5_caltri_iso(mesh,met,&tt2);
+  }
 
   calchg = MG_MIN(cal1,cal2);
   if ( calchg < 1.01 * calnat )  return(0);
@@ -328,9 +328,9 @@ int _MMG5_swpbdy(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int it1,_MMG5_p
                           ,c,MG_BDY);
     }
   }
-  // if ( met->m ) {
-  if ( _MMG5_intmet(mesh,met,iel,ia,nm,0.5)<=0 )  return(0);
-  // }
+  if ( met->m ) {
+    if ( _MMG5_intmet(mesh,met,iel,ia,nm,0.5)<=0 )  return(0);
+  }
 
   ier = _MMG5_split1b(mesh,met,list,ret,nm,0);
   /* pointer adress may change if we need to realloc memory during split */

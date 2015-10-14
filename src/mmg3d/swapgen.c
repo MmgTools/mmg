@@ -237,9 +237,8 @@ int _MMG5_swpgen(MMG5_pMesh mesh,MMG5_pSol met,int nconf,int ilist,int *list,_MM
                           ,m,0);
     }
   }
-  // if ( met->m ) {
-  if ( _MMG5_intmet(mesh,met,iel,ia,np,0.5)<=0 ) return(0);
-  // }
+  if ( met->m )
+    if ( _MMG5_intmet(mesh,met,iel,ia,np,0.5)<=0 ) return(0);
 
   /** First step : split of edge (na,nb) */
   ret = 2*ilist + 0;

@@ -152,17 +152,17 @@ static int _MMG5_adpspl(MMG5_pMesh mesh,MMG5_pSol met, int* warn) {
                             break
                             ,o,tag);
       }
-      // if ( met->m ) {
-      ier = _MMG5_intmet(mesh,met,k,imax,ip,0.5);
-      if ( !ier ) {
-        _MMG5_delPt(mesh,ip);
-        return(-1);
+      if ( met->m ) {
+        ier = _MMG5_intmet(mesh,met,k,imax,ip,0.5);
+        if ( !ier ) {
+          _MMG5_delPt(mesh,ip);
+          return(-1);
+        }
+        else if (ier < 0) {
+          _MMG5_delPt(mesh,ip);
+          continue;
+        }
       }
-      else if (ier < 0) {
-        _MMG5_delPt(mesh,ip);
-        continue;
-      }
-      // }
       ier = _MMG5_simbulgept(mesh,met,list,ilist,ip);
       if ( !ier ) {
         ier = _MMG5_dichoto1b(mesh,met,list,ilist,ip);
@@ -225,17 +225,17 @@ static int _MMG5_adpspl(MMG5_pMesh mesh,MMG5_pSol met, int* warn) {
                             ,o,MG_NOTAG);
       }
       ppt = &mesh->point[ip];
-      // if ( met->m ) {
-      ier = _MMG5_intmet(mesh,met,k,imax,ip,0.5);
-      if ( !ier ) {
-        _MMG5_delPt(mesh,ip);
-        return(-1);
+      if ( met->m ) {
+        ier = _MMG5_intmet(mesh,met,k,imax,ip,0.5);
+        if ( !ier ) {
+          _MMG5_delPt(mesh,ip);
+          return(-1);
+        }
+        else if (ier < 0 ) {
+          _MMG5_delPt(mesh,ip);
+          continue;
+        }
       }
-      else if (ier < 0 ) {
-        _MMG5_delPt(mesh,ip);
-        continue;
-      }
-      // }
       ier = _MMG5_split1b(mesh,met,list,ilist,ip,1);
       if ( ier < 0 ) {
         fprintf(stdout,"  ## Error: unable to split.\n");
