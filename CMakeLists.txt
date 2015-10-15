@@ -798,6 +798,20 @@ ENDIF ( BUILD_MMG3D OR BUILD_MMGS OR BUILD_MMG2D OR BUILD_MMG)
 ###############################################################################
 FIND_PACKAGE(Doxygen)
 IF(DOXYGEN_FOUND)
+  # MMG2D Documentation
+  CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmg2d/Doxyfile.in
+    ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmg2d/Doxyfile @ONLY)
+  ADD_CUSTOM_TARGET(mmg2d_doc
+    COMMAND ${DOXYGEN_EXECUTABLE}
+    ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmg2d/Doxyfile
+    # COMMAND ${CMAKE_COMMAND} -E chdir
+    # ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmg2d/latex make
+    # COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmg2d/latex/refman.pdf
+    # ${CMAKE_CURRENT_SOURCE_DIR}
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmg2d
+    COMMENT "Generating MMG2D API documentation with Doxygen.
+    Open up the doc/doxygen/mmg2d/html/index.html file to see it." VERBATIM
+    )
   # MMGS Documentation
   CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmgs/Doxyfile.in
     ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmgs/Doxyfile @ONLY)
@@ -826,7 +840,7 @@ IF(DOXYGEN_FOUND)
     COMMENT "Generating MMG3D API documentation with Doxygen.
      Open up the doc/doxygen/mmg3d/html/index.html file to see it" VERBATIM
     )
-  # MMGS and MMG3D Documentation
+  # MMG2D, MMGS and MMG3D Documentation
   ADD_CUSTOM_TARGET(doc
     DEPENDS mmgs_doc mmg3d_doc mmg2d_doc
     COMMENT "Generating MMGS, MMG3D and MMG2D API documentation with Doxygen.
