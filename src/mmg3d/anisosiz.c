@@ -960,13 +960,13 @@ int _MMG5_grad2metVol(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,int ia) {
   l = sqrt(ux*ux+uy*uy+uz*uz);
 
   // edge length in metric m1: t^u * m1 * u.
-  ps1 =  m1[0]*ux*ux + 2.0*m1[1]*ux*uy + m1[2]*uy*uy + 2.0*m1[2]*ux*uz
-    + 2.0*m1[4]*uy*uz + m1[4]*uz*uz;
+  ps1 =  m1[0]*ux*ux + 2.0*m1[1]*ux*uy + m1[3]*uy*uy + 2.0*m1[2]*ux*uz
+    + 2.0*m1[4]*uy*uz + m1[5]*uz*uz;
   ps1 = sqrt(ps1);
 
   // edge length in metric m2: t^u * m2 * u.
-  ps2 =  m2[0]*ux*ux + 2.0*m2[1]*ux*uy + m2[2]*uy*uy + 2.0*m2[2]*ux*uz
-    + 2.0*m2[4]*uy*uz + m2[4]*uz*uz;
+  ps2 =  m2[0]*ux*ux + 2.0*m2[1]*ux*uy + m2[3]*uy*uy + 2.0*m2[2]*ux*uz
+    + 2.0*m2[4]*uy*uz + m2[5]*uz*uz;
   ps2 = sqrt(ps2);
 
   /* Metric in p1 has to be changed */
@@ -1001,10 +1001,10 @@ int _MMG5_grad2metVol(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,int ia) {
 
     m1[0] = mu[0]*vp[0][0]*vp[0][0] + mu[1]*vp[1][0]*vp[1][0] + vp[2][0]*vp[2][0]*mu[2];
     m1[1] = mu[0]*vp[0][0]*vp[0][1] + mu[1]*vp[1][0]*vp[1][1] + vp[2][1]*vp[2][0]*mu[2];
-    m1[2] = vp[0][0]*vp[0][2]*mu[0] + vp[1][0]*vp[1][2]*mu[1] + vp[2][0]*vp[2][2]*mu[2];
+    m1[2] = mu[0]*vp[0][0]*vp[0][2] + mu[1]*vp[1][0]*vp[1][2] + vp[2][0]*vp[2][2]*mu[2];
     m1[3] = mu[0]*vp[0][1]*vp[0][1] + mu[1]*vp[1][1]*vp[1][1] + vp[2][1]*vp[2][1]*mu[2];
-    m1[4] = vp[0][1]*vp[0][2]*mu[0] + vp[1][1]*vp[1][2]*mu[1] + vp[2][1]*vp[2][2]*mu[2];
-    m1[5] = vp[0][2]*vp[0][2]*mu[0] + vp[1][2]*vp[1][2]*mu[1] + vp[2][2]*vp[2][2]*mu[2];
+    m1[4] = mu[0]*vp[0][1]*vp[0][2] + mu[1]*vp[1][1]*vp[1][2] + vp[2][1]*vp[2][2]*mu[2];
+    m1[5] = mu[0]*vp[0][2]*vp[0][2] + mu[1]*vp[1][2]*vp[1][2] + vp[2][2]*vp[2][2]*mu[2];
 
     /* Metric update */
     if( MG_SIN(p1->tag) || (p1->tag & MG_NOM) ){
@@ -1033,6 +1033,16 @@ int _MMG5_grad2metVol(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,int ia) {
     else {
       memcpy(mm1,m1,6*sizeof(double));
     }
+
+#warning remove when ok
+    // test Nan
+    for (i=0; i<6; ++i) {
+      if (m1[i]!=m1[i]) {
+        puts("Nan");
+        assert(0);
+      }
+    }
+
     return(i1);
   }
   /* Metric in p2 has to be changed */
@@ -1068,10 +1078,10 @@ int _MMG5_grad2metVol(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,int ia) {
 
     m2[0] = mu[0]*vp[0][0]*vp[0][0] + mu[1]*vp[1][0]*vp[1][0] + vp[2][0]*vp[2][0]*mu[2];
     m2[1] = mu[0]*vp[0][0]*vp[0][1] + mu[1]*vp[1][0]*vp[1][1] + vp[2][1]*vp[2][0]*mu[2];
-    m2[2] = vp[0][0]*vp[0][2]*mu[0] + vp[1][0]*vp[1][2]*mu[1] + vp[2][0]*vp[2][2]*mu[2];
+    m2[2] = mu[0]*vp[0][0]*vp[0][2] + mu[1]*vp[1][0]*vp[1][2] + vp[2][0]*vp[2][2]*mu[2];
     m2[3] = mu[0]*vp[0][1]*vp[0][1] + mu[1]*vp[1][1]*vp[1][1] + vp[2][1]*vp[2][1]*mu[2];
-    m2[4] = vp[0][1]*vp[0][2]*mu[0] + vp[1][1]*vp[1][2]*mu[1] + vp[2][1]*vp[2][2]*mu[2];
-    m2[5] = vp[0][2]*vp[0][2]*mu[0] + vp[1][2]*vp[1][2]*mu[1] + vp[2][2]*vp[2][2]*mu[2];
+    m2[4] = mu[0]*vp[0][1]*vp[0][2] + mu[1]*vp[1][1]*vp[1][2] + vp[2][1]*vp[2][2]*mu[2];
+    m2[5] = mu[0]*vp[0][2]*vp[0][2] + mu[1]*vp[1][2]*vp[1][2] + vp[2][2]*vp[2][2]*mu[2];
 
     /* Metric update */
     if( MG_SIN(p2->tag) || (p2->tag & MG_NOM) ){
@@ -1100,10 +1110,17 @@ int _MMG5_grad2metVol(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,int ia) {
     else{
       memcpy(mm2,m2,6*sizeof(double));
     }
+#warning remove when ok
+// test Nan
+    for (i=0; i<6; ++i) {
+      if (m2[i]!=m2[i]) {
+        puts("Nan");
+        assert(0);
+      }
+    }
 
     return(i2);
   }
-  return(-1);
 }
 
 /**
@@ -1120,10 +1137,16 @@ int _MMG5_gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pxTetra  pxt;
   MMG5_Tria     ptt;
   MMG5_pPoint   p0,p1;
+ _MMG5_Hash     hash;
   double        *m,mv;
   int           k,it,nup,nu,maxit;
   int           i,j,ia,ias,ip0,ip1;
   char          ier,i0,i1;
+#warning remove
+  /* _MMG5_unscaleMesh(mesh,met); */
+  /* MMG5_saveMesh(mesh); */
+  /* MMG5_saveMet(mesh,met); */
+  /* exit(666); */
 
   if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug )
     fprintf(stdout,"  ** Anisotropic mesh gradation\n");
@@ -1150,6 +1173,30 @@ int _MMG5_gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   }
 
   /* Second step : standard gradation procedure */
+  if ( !_MMG5_hashNew(mesh,&hash,mesh->np,7*mesh->np) )  return(-1);
+
+  /* Hash all boundary edges, and put ip = 1 in hash structure */
+  for (k=1; k<=mesh->ne; k++) {
+    pt = &mesh->tetra[k];
+    if ( !MG_EOK(pt) )  continue;
+    if ( !pt->xt ) continue;
+
+    pxt = &mesh->xtetra[pt->xt];
+    for (i=0; i<4; i++) {
+      if ( pxt->ftag[i] & MG_BDY ) {
+        for (j=0; j<3; j++) {
+          ip0 = pt->v[_MMG5_idir[i][_MMG5_inxt2[j]]];
+          ip1 = pt->v[_MMG5_idir[i][_MMG5_iprv2[j]]];
+          if ( !_MMG5_hashEdge(mesh,&hash,ip0,ip1,1) ) {
+            _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
+            return(0);
+          }
+        }
+        break;
+      }
+    }
+  }
+
   it = nup = 0;
   maxit = 100;
   do {
@@ -1199,7 +1246,10 @@ int _MMG5_gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
               p1  = &mesh->point[ip1];
               if ( p0->flag < mesh->base-1 && p1->flag < mesh->base-1 )  continue;
 
-              //ier = _MMG5_grad2metVol(mesh,met,pt,ia);
+              // Impose gradation from a boundary face if possible
+              if ( _MMG5_hashGet(&hash,ip0,ip1) ) continue;
+
+              ier = -1;//_MMG5_grad2metVol(mesh,met,pt,ia);
               if ( ier == i0 ) {
                 p0->flag = mesh->base;
                 nu++;
@@ -1225,7 +1275,10 @@ int _MMG5_gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
             p1  = &mesh->point[ip1];
             if ( p0->flag < mesh->base-1 && p1->flag < mesh->base-1 )  continue;
 
-            ier = _MMG5_grad2metVol(mesh,met,pt,ia);
+            // Impose gradation from a boundary face if possible
+            if ( _MMG5_hashGet(&hash,ip0,ip1) ) continue;
+
+            ier = -1;//_MMG5_grad2metVol(mesh,met,pt,ia);
             if ( ier == i0 ) {
               p0->flag = mesh->base;
               nu++;
@@ -1243,5 +1296,12 @@ int _MMG5_gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   while( ++it < maxit && nu > 0 );
 
   if ( abs(mesh->info.imprim) > 4 )  fprintf(stdout,"     gradation: %7d updated, %d iter.\n",nup,it);
+#warning remove
+  /* _MMG5_unscaleMesh(mesh,met); */
+  /* MMG5_saveMesh(mesh); */
+  /* MMG5_saveMet(mesh,met); */
+  /* exit(666); */
+
+  _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
   return(1);
 }
