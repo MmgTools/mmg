@@ -625,8 +625,10 @@ static int grad2met(MMG5_pMesh mesh, MMG5_pSol met, int iel, int i){
   MMG5_pTria    pt;
   MMG5_pPoint   p1,p2;
   double   *mm1,*mm2,*nn1,*nn2,ps1,ps2,ux,uy,uz,m1[6],m2[6],n1[3],n2[3],nt[3];
-  double   r1[3][3],r2[3][3],t1[3],t2[3],c[3],mtan1[3],mtan2[3],mr[6]/*,l1,l2*/,l,dd;
-  double   lambda[2],vp[2][2],alpha,beta,mu;
+  double   r1[3][3],r2[3][3],t1[3],t2[3],c[3],mtan1[3],mtan2[3],mr1[6],mr2[6];
+  double   mtan13d[6],mtan23d[6],mtmp[3][3];
+  double   /*,l1,l2*/l,dd;
+  double   lambda[3],vp[3][3],alpha,beta,mu;
   int      np1,np2;
   char     i1,i2,ichg;
 
@@ -637,6 +639,7 @@ static int grad2met(MMG5_pMesh mesh, MMG5_pSol met, int iel, int i){
   np1 = pt->v[i1];
   np2 = pt->v[i2];
 
+//  printf("on traite %d %d\n",np1,np2);
   p1 = &mesh->point[np1];
   p2 = &mesh->point[np2];
 
@@ -733,43 +736,55 @@ static int grad2met(MMG5_pMesh mesh, MMG5_pSol met, int iel, int i){
   l = sqrt(ux*ux+uy*uy+uz*uz);
 
   /* Characteristic sizes in direction of support curve */
-  _MMG5_rmtr(r1,m1,mr);
+  _MMG5_rmtr(r1,m1,mr1);
 
-  mtan1[0] = mr[0];
-  mtan1[1] = mr[1];
-  mtan1[2] = mr[3];
+  mtan1[0] = mr1[0];
+  mtan1[1] = mr1[1];
+  mtan1[2] = mr1[3];
+
   c[0] = r1[0][0]*ux + r1[0][1]*uy + r1[0][2]*uz;
   c[1] = r1[1][0]*ux + r1[1][1]*uy + r1[1][2]*uz;
   c[2] = r1[2][0]*ux + r1[2][1]*uy + r1[2][2]*uz;
+
   memcpy(t1,c,3*sizeof(double));
-  dd = t1[0]*t1[0] + t1[1]*t1[1];
+  dd = t1[0]*t1[0] + t1[1]*t1[1] + t1[2]*t1[2];
   if(dd < _MMG5_EPSD2)
     return(-1);
 
   dd = 1.0/sqrt(dd);
   t1[0] *= dd;
   t1[1] *= dd;
-  // t^(t1) * mtan1 * t1
+  t1[2] *= dd;
+
+  // edge length in metric mtan1: t^(t1) * mtan1 * t1.
+  // neglected terms correspond to the direction orthogonal to the surface
   ps1 = mtan1[0]*t1[0]*t1[0] + 2.0*mtan1[1]*t1[0]*t1[1] + mtan1[2]*t1[1]*t1[1];
+
   ps1 = sqrt(ps1);
 
-  _MMG5_rmtr(r2,m2,mr);
-  mtan2[0] = mr[0];
-  mtan2[1] = mr[1];
-  mtan2[2] = mr[3];
+  _MMG5_rmtr(r2,m2,mr2);
+
+  mtan2[0] = mr2[0];
+  mtan2[1] = mr2[1];
+  mtan2[2] = mr2[3];
+
   c[0] = - ( r2[0][0]*ux + r2[0][1]*uy + r2[0][2]*uz );
   c[1] = - ( r2[1][0]*ux + r2[1][1]*uy + r2[1][2]*uz );
   c[2] = - ( r2[2][0]*ux + r2[2][1]*uy + r2[2][2]*uz );
   memcpy(t2,c,3*sizeof(double));
 
-  dd = t2[0]*t2[0] + t2[1]*t2[1];
+  dd = t2[0]*t2[0] + t2[1]*t2[1] + t2[2]*t2[2];
   if(dd < _MMG5_EPSD2)
     return(-1);
 
   dd = 1.0/sqrt(dd);
   t2[0] *= dd;
   t2[1] *= dd;
+  t2[2] *= dd;
+
+ // edge length: t^(t2) * mtan2 * t2
   ps2 = mtan2[0]*t2[0]*t2[0] + 2.0*mtan2[1]*t2[0]*t2[1] + mtan2[2]*t2[1]*t2[1];
+
   ps2 = sqrt(ps2);
 
   /* Metric in p1 has to be changed */
@@ -778,25 +793,75 @@ static int grad2met(MMG5_pMesh mesh, MMG5_pSol met, int iel, int i){
     if( ps1 >= alpha -_MMG5_EPS )
       return(-1);
 
-    _MMG5_eigensym(mtan1,lambda,vp);
-    c[0] = t1[0]*vp[0][0] + t1[1]*vp[0][1];
-    c[1] = t1[0]*vp[1][0] + t1[1]*vp[1][1];
+    _MMG5_eigenv(1,mr1,lambda,vp);
+    c[0] = t1[0]*vp[0][0] + t1[1]*vp[0][1] + t1[2]*vp[0][2];
+    c[1] = t1[0]*vp[1][0] + t1[1]*vp[1][1] + t1[2]*vp[1][2];
+    c[2] = t1[0]*vp[2][0] + t1[1]*vp[2][1] + t1[2]*vp[2][2];
 
+    // Compute M=P \lambda t^P
     if( fabs(c[0]) > fabs(c[1]) ){
-      ichg  = 0;
-      beta = (alpha*alpha - ps1*ps1)/(c[0]*c[0]);
-      mu = lambda[0] + beta ;
-      mtan1[0] = mu*vp[0][0]*vp[0][0] + lambda[1]*vp[1][0]*vp[1][0];
-      mtan1[1] = mu*vp[0][0]*vp[0][1] + lambda[1]*vp[1][0]*vp[1][1];
-      mtan1[2] = mu*vp[0][1]*vp[0][1] + lambda[1]*vp[1][1]*vp[1][1];
+      if ( fabs(c[0]) > fabs(c[2]) ) {
+        ichg  = 0;
+        assert(c[0]*c[0] > _MMG5_EPS );
+        beta = (alpha*alpha - ps1*ps1)/(c[0]*c[0]);
+        mu = lambda[0] + beta ;
+        mtan1[0] = mu*vp[0][0]*vp[0][0] + lambda[1]*vp[1][0]*vp[1][0];
+        mtan1[1] = mu*vp[0][0]*vp[0][1] + lambda[1]*vp[1][0]*vp[1][1];
+        mtan1[2] = mu*vp[0][1]*vp[0][1] + lambda[1]*vp[1][1]*vp[1][1];
+        mtan1[0] +=vp[2][0]*vp[2][0]*lambda[2];
+        mtan1[1] +=vp[2][1]*vp[2][0]*lambda[2];
+        mtan1[2] +=vp[2][1]*vp[2][1]*lambda[2];
+        mtan13d[2] = vp[0][0]*vp[0][2]*mu+vp[1][0]*vp[1][2]*lambda[1]+vp[2][0]*vp[2][2]*lambda[2];
+        mtan13d[4] = vp[0][1]*vp[0][2]*mu+vp[1][1]*vp[1][2]*lambda[1]+vp[2][1]*vp[2][2]*lambda[2];
+        mtan13d[5] = vp[0][2]*vp[0][2]*mu+vp[1][2]*vp[1][2]*lambda[1]+vp[2][2]*vp[2][2]*lambda[2];
+      }
+      else {
+        ichg  = 2;
+        assert(c[2]*c[2] > _MMG5_EPS );
+        beta = (alpha*alpha - ps1*ps1)/(c[2]*c[2]);
+        mu = lambda[2] + beta ;
+        mtan1[0] = lambda[0]*vp[0][0]*vp[0][0] + lambda[1]*vp[1][0]*vp[1][0];
+        mtan1[1] = lambda[0]*vp[0][0]*vp[0][1] + lambda[1]*vp[1][0]*vp[1][1];
+        mtan1[2] = lambda[0]*vp[0][1]*vp[0][1] + lambda[1]*vp[1][1]*vp[1][1];
+        mtan1[0] +=vp[2][0]*vp[2][0]*mu;
+        mtan1[1] +=vp[2][1]*vp[2][0]*mu;
+        mtan1[2] +=vp[2][1]*vp[2][1]*mu;
+        mtan13d[2] = vp[0][0]*vp[0][2]*lambda[0]+vp[1][0]*vp[1][2]*lambda[1]+vp[2][0]*vp[2][2]*mu;
+        mtan13d[4] = vp[0][1]*vp[0][2]*lambda[0]+vp[1][1]*vp[1][2]*lambda[1]+vp[2][1]*vp[2][2]*mu;
+        mtan13d[5] = vp[0][2]*vp[0][2]*lambda[0]+vp[1][2]*vp[1][2]*lambda[1]+vp[2][2]*vp[2][2]*mu;
+      }
     }
     else{
-      ichg = 1;
-      beta = (alpha*alpha - ps1*ps1)/(c[1]*c[1]);
-      mu = lambda[1] + beta;
-      mtan1[0] = lambda[0]*vp[0][0]*vp[0][0] + mu*vp[1][0]*vp[1][0];
-      mtan1[1] = lambda[0]*vp[0][0]*vp[0][1] + mu*vp[1][0]*vp[1][1];
-      mtan1[2] = lambda[0]*vp[0][1]*vp[0][1] + mu*vp[1][1]*vp[1][1];
+      if ( fabs(c[1]) > fabs(c[2]) ) {
+        ichg = 1;
+        assert(c[1]*c[1] > _MMG5_EPS );
+        beta = (alpha*alpha - ps1*ps1)/(c[1]*c[1]);
+        mu = lambda[1] + beta;
+        mtan1[0] = lambda[0]*vp[0][0]*vp[0][0] + mu*vp[1][0]*vp[1][0];
+        mtan1[1] = lambda[0]*vp[0][0]*vp[0][1] + mu*vp[1][0]*vp[1][1];
+        mtan1[2] = lambda[0]*vp[0][1]*vp[0][1] + mu*vp[1][1]*vp[1][1];
+        mtan1[0] +=vp[2][0]*vp[2][0]*lambda[2];
+        mtan1[1] +=vp[2][1]*vp[2][0]*lambda[2];
+        mtan1[2] +=vp[2][1]*vp[2][1]*lambda[2];
+        mtan13d[2] = vp[0][0]*vp[0][2]*lambda[0]+vp[1][0]*vp[1][2]*mu+vp[2][0]*vp[2][2]*lambda[2];
+        mtan13d[4] = vp[0][1]*vp[0][2]*lambda[0]+vp[1][1]*vp[1][2]*mu+vp[2][1]*vp[2][2]*lambda[2];
+        mtan13d[5] = vp[0][2]*vp[0][2]*lambda[0]+vp[1][2]*vp[1][2]*mu+vp[2][2]*vp[2][2]*lambda[2];
+      }
+      else {
+        ichg  = 2;
+        assert(c[2]*c[2] > _MMG5_EPS );
+        beta = (alpha*alpha - ps1*ps1)/(c[2]*c[2]);
+        mu = lambda[2] + beta ;
+        mtan1[0] = lambda[0]*vp[0][0]*vp[0][0] + lambda[1]*vp[1][0]*vp[1][0];
+        mtan1[1] = lambda[0]*vp[0][0]*vp[0][1] + lambda[1]*vp[1][0]*vp[1][1];
+        mtan1[2] = lambda[0]*vp[0][1]*vp[0][1] + lambda[1]*vp[1][1]*vp[1][1];
+        mtan1[0] +=vp[2][0]*vp[2][0]*mu;
+        mtan1[1] +=vp[2][1]*vp[2][0]*mu;
+        mtan1[2] +=vp[2][1]*vp[2][1]*mu;
+        mtan13d[2] = vp[0][0]*vp[0][2]*lambda[0]+vp[1][0]*vp[1][2]*lambda[1]+vp[2][0]*vp[2][2]*mu;
+        mtan13d[4] = vp[0][1]*vp[0][2]*lambda[0]+vp[1][1]*vp[1][2]*lambda[1]+vp[2][1]*vp[2][2]*mu;
+        mtan13d[5] = vp[0][2]*vp[0][2]*lambda[0]+vp[1][2]*vp[1][2]*lambda[1]+vp[2][2]*vp[2][2]*mu;
+      }
     }
 
     /* Metric update */
@@ -827,16 +892,28 @@ static int grad2met(MMG5_pMesh mesh, MMG5_pSol met, int iel, int i){
       }
     }
     else{
-      /* Reuse t1 and t2 */
-      t1[0] = mtan1[0]*r1[0][0] + mtan1[1]*r1[1][0];  t1[1] = mtan1[0]*r1[0][1] + mtan1[1]*r1[1][1];  t1[2] = mtan1[0]*r1[0][2] + mtan1[1]*r1[1][2];
-      t2[0] = mtan1[1]*r1[0][0] + mtan1[2]*r1[1][0];  t2[1] = mtan1[1]*r1[0][1] + mtan1[2]*r1[1][1];  t2[2] = mtan1[1]*r1[0][2] + mtan1[2]*r1[1][2];
+      /* Return in initial basis */
+      mtmp[0][0] = mtan1[0]*r1[0][0] + mtan1[1]*r1[1][0] + mtan13d[2]*r1[2][0];
+      mtmp[0][1] = mtan1[0]*r1[0][1] + mtan1[1]*r1[1][1] + mtan13d[2]*r1[2][1];
+      mtmp[0][2] = mtan1[0]*r1[0][2] + mtan1[1]*r1[1][2] + mtan13d[2]*r1[2][2];
 
-      m1[0] = r1[0][0]*t1[0] + r1[1][0]*t2[0];
-      m1[1] = r1[0][0]*t1[1] + r1[1][0]*t2[1];
-      m1[2] = r1[0][0]*t1[2] + r1[1][0]*t2[2];
-      m1[3] = r1[0][1]*t1[1] + r1[1][1]*t2[1];
-      m1[4] = r1[0][1]*t1[2] + r1[1][1]*t2[2];
-      m1[5] = r1[0][2]*t1[2] + r1[1][2]*t2[2];
+      mtmp[1][0] = mtan1[1]*r1[0][0] + mtan1[2]*r1[1][0] + mtan13d[4]*r1[2][0];
+      mtmp[1][1] = mtan1[1]*r1[0][1] + mtan1[2]*r1[1][1] + mtan13d[4]*r1[2][1];
+      mtmp[1][2] = mtan1[1]*r1[0][2] + mtan1[2]*r1[1][2] + mtan13d[4]*r1[2][2];
+
+      mtmp[2][0] = mtan13d[2]*r1[0][0] + mtan13d[4]*r1[1][0] + mtan13d[5]*r1[2][0];
+      mtmp[2][1] = mtan13d[2]*r1[0][1] + mtan13d[4]*r1[1][1] + mtan13d[5]*r1[2][1];
+      mtmp[2][2] = mtan13d[2]*r1[0][2] + mtan13d[4]*r1[1][2] + mtan13d[5]*r1[2][2];
+
+
+      m1[0] = r1[0][0]*mtmp[0][0] + r1[1][0]*mtmp[1][0] + r1[2][0]*mtmp[2][0];
+      m1[1] = r1[0][0]*mtmp[0][1] + r1[1][0]*mtmp[1][1] + r1[2][0]*mtmp[2][1];
+      m1[2] = r1[0][0]*mtmp[0][2] + r1[1][0]*mtmp[1][2] + r1[2][0]*mtmp[2][2];
+
+      m1[3] = r1[0][1]*mtmp[0][1] + r1[1][1]*mtmp[1][1] + r1[2][1]*mtmp[2][1];
+      m1[4] = r1[0][1]*mtmp[0][2] + r1[1][1]*mtmp[1][2] + r1[2][1]*mtmp[2][2];
+
+      m1[5] = r1[0][2]*mtmp[0][2] + r1[1][2]*mtmp[1][2] + r1[2][2]*mtmp[2][2];
 
       memcpy(mm1,m1,6*sizeof(double));
     }
@@ -848,25 +925,74 @@ static int grad2met(MMG5_pMesh mesh, MMG5_pSol met, int iel, int i){
     if( ps2 >= alpha - _MMG5_EPS)
       return(-1);
 
-    _MMG5_eigensym(mtan2,lambda,vp);
-    c[0] = t2[0]*vp[0][0] + t2[1]*vp[0][1];
-    c[1] = t2[0]*vp[1][0] + t2[1]*vp[1][1];
+    _MMG5_eigenv(1,mr2,lambda,vp);
+    c[0] = t2[0]*vp[0][0] + t2[1]*vp[0][1] + t2[2]*vp[0][2];
+    c[1] = t2[0]*vp[1][0] + t2[1]*vp[1][1] + t2[2]*vp[1][2];
+    c[2] = t2[0]*vp[2][0] + t2[1]*vp[2][1] + t2[2]*vp[2][2];
 
     if( fabs(c[0]) > fabs(c[1]) ){
-      ichg = 0;
-      beta = (alpha*alpha - ps2*ps2)/(c[0]*c[0]);
-      mu = lambda[0] + beta;
-      mtan2[0] = mu*vp[0][0]*vp[0][0] + lambda[1]*vp[1][0]*vp[1][0];
-      mtan2[1] = mu*vp[0][0]*vp[0][1] + lambda[1]*vp[1][0]*vp[1][1];
-      mtan2[2] = mu*vp[0][1]*vp[0][1] + lambda[1]*vp[1][1]*vp[1][1];
+      if( fabs(c[0]) > fabs(c[2]) ){
+        ichg = 0;
+        assert(c[0]*c[0] > _MMG5_EPS );
+        beta = (alpha*alpha - ps2*ps2)/(c[0]*c[0]);
+        mu = lambda[0] + beta;
+        mtan2[0] = mu*vp[0][0]*vp[0][0] + lambda[1]*vp[1][0]*vp[1][0];
+        mtan2[1] = mu*vp[0][0]*vp[0][1] + lambda[1]*vp[1][0]*vp[1][1];
+        mtan2[2] = mu*vp[0][1]*vp[0][1] + lambda[1]*vp[1][1]*vp[1][1];
+        mtan2[0] +=vp[2][0]*vp[2][0]*lambda[2];
+        mtan2[1] +=vp[2][1]*vp[2][0]*lambda[2];
+        mtan2[2] +=vp[2][1]*vp[2][1]*lambda[2];
+        mtan23d[2] = vp[0][0]*vp[0][2]*mu+vp[1][0]*vp[1][2]*lambda[1]+vp[2][0]*vp[2][2]*lambda[2];
+        mtan23d[4] = vp[0][1]*vp[0][2]*mu+vp[1][1]*vp[1][2]*lambda[1]+vp[2][1]*vp[2][2]*lambda[2];
+        mtan23d[5] = vp[0][2]*vp[0][2]*mu+vp[1][2]*vp[1][2]*lambda[1]+vp[2][2]*vp[2][2]*lambda[2];
+      }
+      else {
+        ichg = 2;
+        assert(c[2]*c[2] > _MMG5_EPS );
+        beta = (alpha*alpha - ps2*ps2)/(c[2]*c[2]);
+        mu = lambda[2] + beta;
+        mtan2[0] = lambda[0]*vp[0][0]*vp[0][0] + lambda[1]*vp[1][0]*vp[1][0];
+        mtan2[1] = lambda[0]*vp[0][0]*vp[0][1] + lambda[1]*vp[1][0]*vp[1][1];
+        mtan2[2] = lambda[0]*vp[0][1]*vp[0][1] + lambda[1]*vp[1][1]*vp[1][1];
+        mtan2[0] +=vp[2][0]*vp[2][0]*mu;
+        mtan2[1] +=vp[2][1]*vp[2][0]*mu;
+        mtan2[2] +=vp[2][1]*vp[2][1]*mu;
+        mtan23d[2] = vp[0][0]*vp[0][2]*lambda[0]+vp[1][0]*vp[1][2]*lambda[1]+vp[2][0]*vp[2][2]*mu;
+        mtan23d[4] = vp[0][1]*vp[0][2]*lambda[0]+vp[1][1]*vp[1][2]*lambda[1]+vp[2][1]*vp[2][2]*mu;
+        mtan23d[5] = vp[0][2]*vp[0][2]*lambda[0]+vp[1][2]*vp[1][2]*lambda[1]+vp[2][2]*vp[2][2]*mu;
+      }
     }
     else{
-      ichg = 1;
-      beta = (alpha*alpha - ps2*ps2)/(c[1]*c[1]);
-      mu = lambda[1] + beta;
-      mtan2[0] = lambda[0]*vp[0][0]*vp[0][0] + mu*vp[1][0]*vp[1][0];
-      mtan2[1] = lambda[0]*vp[0][0]*vp[0][1] + mu*vp[1][0]*vp[1][1];
-      mtan2[2] = lambda[0]*vp[0][1]*vp[0][1] + mu*vp[1][1]*vp[1][1];
+      if( fabs(c[1]) > fabs(c[2]) ){
+        ichg = 1;
+        assert(c[1]*c[1] > _MMG5_EPS );
+        beta = (alpha*alpha - ps2*ps2)/(c[1]*c[1]);
+        mu = lambda[1] + beta;
+        mtan2[0] = lambda[0]*vp[0][0]*vp[0][0] + mu*vp[1][0]*vp[1][0];
+        mtan2[1] = lambda[0]*vp[0][0]*vp[0][1] + mu*vp[1][0]*vp[1][1];
+        mtan2[2] = lambda[0]*vp[0][1]*vp[0][1] + mu*vp[1][1]*vp[1][1];
+        mtan2[0] +=vp[2][0]*vp[2][0]*lambda[2];
+        mtan2[1] +=vp[2][1]*vp[2][0]*lambda[2];
+        mtan2[2] +=vp[2][1]*vp[2][1]*lambda[2];
+        mtan23d[2] = vp[0][0]*vp[0][2]*lambda[0]+vp[1][0]*vp[1][2]*mu+vp[2][0]*vp[2][2]*lambda[2];
+        mtan23d[4] = vp[0][1]*vp[0][2]*lambda[0]+vp[1][1]*vp[1][2]*mu+vp[2][1]*vp[2][2]*lambda[2];
+        mtan23d[5] = vp[0][2]*vp[0][2]*lambda[0]+vp[1][2]*vp[1][2]*mu+vp[2][2]*vp[2][2]*lambda[2];
+      }
+      else {
+        ichg = 2;
+        assert(c[2]*c[2] > _MMG5_EPS );
+        beta = (alpha*alpha - ps2*ps2)/(c[2]*c[2]);
+        mu = lambda[2] + beta;
+        mtan2[0] = lambda[0]*vp[0][0]*vp[0][0] + lambda[1]*vp[1][0]*vp[1][0];
+        mtan2[1] = lambda[0]*vp[0][0]*vp[0][1] + lambda[1]*vp[1][0]*vp[1][1];
+        mtan2[2] = lambda[0]*vp[0][1]*vp[0][1] + lambda[1]*vp[1][1]*vp[1][1];
+        mtan2[0] +=vp[2][0]*vp[2][0]*mu;
+        mtan2[1] +=vp[2][1]*vp[2][0]*mu;
+        mtan2[2] +=vp[2][1]*vp[2][1]*mu;
+        mtan23d[2] = vp[0][0]*vp[0][2]*lambda[0]+vp[1][0]*vp[1][2]*lambda[1]+vp[2][0]*vp[2][2]*mu;
+        mtan23d[4] = vp[0][1]*vp[0][2]*lambda[0]+vp[1][1]*vp[1][2]*lambda[1]+vp[2][1]*vp[2][2]*mu;
+        mtan23d[5] = vp[0][2]*vp[0][2]*lambda[0]+vp[1][2]*vp[1][2]*lambda[1]+vp[2][2]*vp[2][2]*mu;
+      }
     }
 
     /* Metric update */
@@ -897,16 +1023,27 @@ static int grad2met(MMG5_pMesh mesh, MMG5_pSol met, int iel, int i){
       }
     }
     else{
-      /* Reuse t1 and t2 */
-      t1[0] = mtan2[0]*r2[0][0] + mtan2[1]*r2[1][0];  t1[1] = mtan2[0]*r2[0][1] + mtan2[1]*r2[1][1];  t1[2] = mtan2[0]*r2[0][2] + mtan2[1]*r2[1][2];
-      t2[0] = mtan2[1]*r2[0][0] + mtan2[2]*r2[1][0];  t2[1] = mtan2[1]*r2[0][1] + mtan2[2]*r2[1][1];  t2[2] = mtan2[1]*r2[0][2] + mtan2[2]*r2[1][2];
+      /* Return in initial basis */
+      mtmp[0][0] = mtan2[0]*r2[0][0] + mtan2[1]*r2[1][0] + mtan23d[2]*r2[2][0];
+      mtmp[0][1] = mtan2[0]*r2[0][1] + mtan2[1]*r2[1][1] + mtan23d[2]*r2[2][1];
+      mtmp[0][2] = mtan2[0]*r2[0][2] + mtan2[1]*r2[1][2] + mtan23d[2]*r2[2][2];
 
-      m2[0] = r2[0][0]*t1[0] + r2[1][0]*t2[0];
-      m2[1] = r2[0][0]*t1[1] + r2[1][0]*t2[1];
-      m2[2] = r2[0][0]*t1[2] + r2[1][0]*t2[2];
-      m2[3] = r2[0][1]*t1[1] + r2[1][1]*t2[1];
-      m2[4] = r2[0][1]*t1[2] + r2[1][1]*t2[2];
-      m2[5] = r2[0][2]*t1[2] + r2[1][2]*t2[2];
+      mtmp[1][0] = mtan2[1]*r2[0][0] + mtan2[2]*r2[1][0] + mtan23d[4]*r2[2][0];
+      mtmp[1][1] = mtan2[1]*r2[0][1] + mtan2[2]*r2[1][1] + mtan23d[4]*r2[2][1];
+      mtmp[1][2] = mtan2[1]*r2[0][2] + mtan2[2]*r2[1][2] + mtan23d[4]*r2[2][2];
+
+      mtmp[2][0] = mtan23d[2]*r2[0][0] + mtan23d[4]*r2[1][0] + mtan23d[5]*r2[2][0];
+      mtmp[2][1] = mtan23d[2]*r2[0][1] + mtan23d[4]*r2[1][1] + mtan23d[5]*r2[2][1];
+      mtmp[2][2] = mtan23d[2]*r2[0][2] + mtan23d[4]*r2[1][2] + mtan23d[5]*r2[2][2];
+
+      m2[0] = r2[0][0]*mtmp[0][0] + r2[1][0]*mtmp[1][0] + r2[2][0]*mtmp[2][0];
+      m2[1] = r2[0][0]*mtmp[0][1] + r2[1][0]*mtmp[1][1] + r2[2][0]*mtmp[2][1];
+      m2[2] = r2[0][0]*mtmp[0][2] + r2[1][0]*mtmp[1][2] + r2[2][0]*mtmp[2][2];
+
+      m2[3] = r2[0][1]*mtmp[0][1] + r2[1][1]*mtmp[1][1] + r2[2][1]*mtmp[2][1];
+      m2[4] = r2[0][1]*mtmp[0][2] + r2[1][1]*mtmp[1][2] + r2[2][1]*mtmp[2][2];
+
+      m2[5] = r2[0][2]*mtmp[0][2] + r2[1][2]*mtmp[1][2] + r2[2][2]*mtmp[2][2];
 
       memcpy(mm2,m2,6*sizeof(double));
     }
@@ -946,10 +1083,12 @@ int gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
     if ( !(p1->tag & MG_GEO) ) continue;
 
     m = &met->m[6*k];
-    mv = MG_MAX(m[0],MG_MAX(m[1],m[2]));
+    mv = MG_MAX(m[0],MG_MAX(MG_MAX(m[1],m[2]),MG_MAX(m[3],m[4])));
     m[0] = mv;
     m[1] = mv;
     m[2] = mv;
+    m[3] = mv;
+    m[4] = mv;
   }
 
   /* Second step : standard gradation procedure */

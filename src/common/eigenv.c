@@ -247,7 +247,6 @@ static int newton3(double p[4],double x[3]) {
   return(n);
 }
 
-
 /**
  * \brief Find eigenvalues and vectors of a 3x3 matrix.
  * \param symmat 0 if matrix is not symetric, 1 otherwise.
