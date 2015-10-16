@@ -967,7 +967,7 @@ double _MMG5_ridSizeInNormalDir(MMG5_pMesh mesh,int i0,double* bcu,
  * \param i edge index in triangle \a pt.
  * \return -1 if no gradation is needed, else index of graded point.
  *
- * Enforces gradation of metric in one extremity of edge \a i in tria \a iel
+ * Enforces gradation of metric in one extremity of edge \a i in tria \a pt
  * with respect to the other, along the direction of the associated support
  * curve.
  *
@@ -975,11 +975,11 @@ double _MMG5_ridSizeInNormalDir(MMG5_pMesh mesh,int i0,double* bcu,
 int _MMG5_grad2metSurf(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int i){
   MMG5_pPoint   p1,p2;
   double   *mm1,*mm2,*nn1,*nn2,ps1,ps2,ux,uy,uz,m1[6],m2[6],n1[3],n2[3],nt[3];
-  double   r1[3][3],r2[3][3],t1[3],t2[3],c[3],mtan1[3],mtan2[3],mr1[6],mr2[6];
-  double   mtan13d[6],mtan23d[6],mtmp[3][3];
+  double   r1[3][3],r2[3][3],t1[3],t2[3],c[5],mtan1[3],mtan2[3],mr1[6],mr2[6];
+  double   mtan13d[3],mtan23d[3],mtmp[3][3],val;
   double   /*,l1,l2*/l,dd;
-  double   lambda[3],vp[3][3],alpha,beta,mu;
-  int      np1,np2;
+  double   lambda[3],vp[3][3],alpha,beta,mu[3];
+  int      np1,np2,kmin,idx;
   char     i1,i2,ichg;
 
   i1 = _MMG5_inxt2[i];
@@ -1106,7 +1106,8 @@ int _MMG5_grad2metSurf(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int i){
 
   // edge length in metric mtan1: t^(t1) * mtan1 * t1.
   // neglected terms correspond to the direction orthogonal to the surface
-  ps1 = mtan1[0]*t1[0]*t1[0] + 2.0*mtan1[1]*t1[0]*t1[1] + mtan1[2]*t1[1]*t1[1];
+  ps1 =  mtan1[0]*t1[0]*t1[0] + 2.0*mtan1[1]*t1[0]*t1[1] + mtan1[2]*t1[1]*t1[1];
+  // ps1 += 2*mr1[2]*t1[0]*t1[2] + 2*mr1[4]*t1[1]*t1[2] + mr1[4]*t1[2]*t1[2];
 
   ps1 = sqrt(ps1);
 
@@ -1130,8 +1131,9 @@ int _MMG5_grad2metSurf(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int i){
   t2[1] *= dd;
   t2[2] *= dd;
 
- // edge length: t^(t2) * mtan2 * t2
+  // edge length: t^(t2) * mtan2 * t2
   ps2 = mtan2[0]*t2[0]*t2[0] + 2.0*mtan2[1]*t2[0]*t2[1] + mtan2[2]*t2[1]*t2[1];
+  // ps2 += 2*mr2[2]*t2[0]*t2[2] + 2*mr2[4]*t2[1]*t2[2] + mr2[4]*t2[2]*t2[2];
 
   ps2 = sqrt(ps2);
 
@@ -1146,71 +1148,33 @@ int _MMG5_grad2metSurf(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int i){
     c[1] = t1[0]*vp[1][0] + t1[1]*vp[1][1] + t1[2]*vp[1][2];
     c[2] = t1[0]*vp[2][0] + t1[1]*vp[2][1] + t1[2]*vp[2][2];
 
-    // Compute M=P \lambda t^P
-    if( fabs(c[0]) > fabs(c[1]) ){
-      if ( fabs(c[0]) > fabs(c[2]) ) {
-        ichg  = 0;
-        assert(c[0]*c[0] > _MMG5_EPS );
-        beta = (alpha*alpha - ps1*ps1)/(c[0]*c[0]);
-        mu = lambda[0] + beta ;
-        mtan1[0] = mu*vp[0][0]*vp[0][0] + lambda[1]*vp[1][0]*vp[1][0];
-        mtan1[1] = mu*vp[0][0]*vp[0][1] + lambda[1]*vp[1][0]*vp[1][1];
-        mtan1[2] = mu*vp[0][1]*vp[0][1] + lambda[1]*vp[1][1]*vp[1][1];
-        mtan1[0] +=vp[2][0]*vp[2][0]*lambda[2];
-        mtan1[1] +=vp[2][1]*vp[2][0]*lambda[2];
-        mtan1[2] +=vp[2][1]*vp[2][1]*lambda[2];
-        mtan13d[2] = vp[0][0]*vp[0][2]*mu+vp[1][0]*vp[1][2]*lambda[1]+vp[2][0]*vp[2][2]*lambda[2];
-        mtan13d[4] = vp[0][1]*vp[0][2]*mu+vp[1][1]*vp[1][2]*lambda[1]+vp[2][1]*vp[2][2]*lambda[2];
-        mtan13d[5] = vp[0][2]*vp[0][2]*mu+vp[1][2]*vp[1][2]*lambda[1]+vp[2][2]*vp[2][2]*lambda[2];
-      }
-      else {
-        ichg  = 2;
-        assert(c[2]*c[2] > _MMG5_EPS );
-        beta = (alpha*alpha - ps1*ps1)/(c[2]*c[2]);
-        mu = lambda[2] + beta ;
-        mtan1[0] = lambda[0]*vp[0][0]*vp[0][0] + lambda[1]*vp[1][0]*vp[1][0];
-        mtan1[1] = lambda[0]*vp[0][0]*vp[0][1] + lambda[1]*vp[1][0]*vp[1][1];
-        mtan1[2] = lambda[0]*vp[0][1]*vp[0][1] + lambda[1]*vp[1][1]*vp[1][1];
-        mtan1[0] +=vp[2][0]*vp[2][0]*mu;
-        mtan1[1] +=vp[2][1]*vp[2][0]*mu;
-        mtan1[2] +=vp[2][1]*vp[2][1]*mu;
-        mtan13d[2] = vp[0][0]*vp[0][2]*lambda[0]+vp[1][0]*vp[1][2]*lambda[1]+vp[2][0]*vp[2][2]*mu;
-        mtan13d[4] = vp[0][1]*vp[0][2]*lambda[0]+vp[1][1]*vp[1][2]*lambda[1]+vp[2][1]*vp[2][2]*mu;
-        mtan13d[5] = vp[0][2]*vp[0][2]*lambda[0]+vp[1][2]*vp[1][2]*lambda[1]+vp[2][2]*vp[2][2]*mu;
+    // Find index of the maximum value of c
+    ichg = 0;
+    val  = fabs(c[ichg]);
+    for (idx = 1; idx<3; ++idx) {
+      if ( fabs(c[idx]) > val ) {
+        val = fabs(c[idx]);
+        ichg = idx;
       }
     }
-    else{
-      if ( fabs(c[1]) > fabs(c[2]) ) {
-        ichg = 1;
-        assert(c[1]*c[1] > _MMG5_EPS );
-        beta = (alpha*alpha - ps1*ps1)/(c[1]*c[1]);
-        mu = lambda[1] + beta;
-        mtan1[0] = lambda[0]*vp[0][0]*vp[0][0] + mu*vp[1][0]*vp[1][0];
-        mtan1[1] = lambda[0]*vp[0][0]*vp[0][1] + mu*vp[1][0]*vp[1][1];
-        mtan1[2] = lambda[0]*vp[0][1]*vp[0][1] + mu*vp[1][1]*vp[1][1];
-        mtan1[0] +=vp[2][0]*vp[2][0]*lambda[2];
-        mtan1[1] +=vp[2][1]*vp[2][0]*lambda[2];
-        mtan1[2] +=vp[2][1]*vp[2][1]*lambda[2];
-        mtan13d[2] = vp[0][0]*vp[0][2]*lambda[0]+vp[1][0]*vp[1][2]*mu+vp[2][0]*vp[2][2]*lambda[2];
-        mtan13d[4] = vp[0][1]*vp[0][2]*lambda[0]+vp[1][1]*vp[1][2]*mu+vp[2][1]*vp[2][2]*lambda[2];
-        mtan13d[5] = vp[0][2]*vp[0][2]*lambda[0]+vp[1][2]*vp[1][2]*mu+vp[2][2]*vp[2][2]*lambda[2];
-      }
-      else {
-        ichg  = 2;
-        assert(c[2]*c[2] > _MMG5_EPS );
-        beta = (alpha*alpha - ps1*ps1)/(c[2]*c[2]);
-        mu = lambda[2] + beta ;
-        mtan1[0] = lambda[0]*vp[0][0]*vp[0][0] + lambda[1]*vp[1][0]*vp[1][0];
-        mtan1[1] = lambda[0]*vp[0][0]*vp[0][1] + lambda[1]*vp[1][0]*vp[1][1];
-        mtan1[2] = lambda[0]*vp[0][1]*vp[0][1] + lambda[1]*vp[1][1]*vp[1][1];
-        mtan1[0] +=vp[2][0]*vp[2][0]*mu;
-        mtan1[1] +=vp[2][1]*vp[2][0]*mu;
-        mtan1[2] +=vp[2][1]*vp[2][1]*mu;
-        mtan13d[2] = vp[0][0]*vp[0][2]*lambda[0]+vp[1][0]*vp[1][2]*lambda[1]+vp[2][0]*vp[2][2]*mu;
-        mtan13d[4] = vp[0][1]*vp[0][2]*lambda[0]+vp[1][1]*vp[1][2]*lambda[1]+vp[2][1]*vp[2][2]*mu;
-        mtan13d[5] = vp[0][2]*vp[0][2]*lambda[0]+vp[1][2]*vp[1][2]*lambda[1]+vp[2][2]*vp[2][2]*mu;
-      }
-    }
+    assert(c[ichg]*c[ichg] > _MMG5_EPS );
+    beta = (alpha*alpha - ps1*ps1)/(c[ichg]*c[ichg]);
+
+    mu[0] = lambda[0];
+    mu[1] = lambda[1];
+    mu[2] = lambda[2];
+
+    mu[ichg] += beta;
+
+    mtan1[0] = mu[0]*vp[0][0]*vp[0][0] + mu[1]*vp[1][0]*vp[1][0];
+    mtan1[1] = mu[0]*vp[0][0]*vp[0][1] + mu[1]*vp[1][0]*vp[1][1];
+    mtan1[2] = mu[0]*vp[0][1]*vp[0][1] + mu[1]*vp[1][1]*vp[1][1];
+    mtan1[0] +=vp[2][0]*vp[2][0]*mu[2];
+    mtan1[1] +=vp[2][1]*vp[2][0]*mu[2];
+    mtan1[2] +=vp[2][1]*vp[2][1]*mu[2];
+    mtan13d[0] = vp[0][0]*vp[0][2]*mu[0]+vp[1][0]*vp[1][2]*mu[1]+vp[2][0]*vp[2][2]*mu[2];
+    mtan13d[1] = vp[0][1]*vp[0][2]*mu[0]+vp[1][1]*vp[1][2]*mu[1]+vp[2][1]*vp[2][2]*mu[2];
+    mtan13d[2] = vp[0][2]*vp[0][2]*mu[0]+vp[1][2]*vp[1][2]*mu[1]+vp[2][2]*vp[2][2]*mu[2];
 
     /* Metric update */
     if( MS_SIN(p1->tag) ){
@@ -1222,36 +1186,33 @@ int _MMG5_grad2metSurf(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int i){
       c[0] = fabs(mm1[0]-lambda[ichg]);
       c[1] = fabs(mm1[1]-lambda[ichg]);
       c[2] = fabs(mm1[2]-lambda[ichg]);
-      if( c[0] < c[1] ){
-        if( c[0] < c[2] ){
-          mm1[0] += beta;
-        }
-        else{
-          mm1[2] += beta;
-        }
-      }
-      else{
-        if( c[1] < c[2] ){
-          mm1[1] += beta;
-        }
-        else{
-          mm1[2] += beta;
+      c[3] = fabs(mm1[3]-lambda[ichg]);
+      c[4] = fabs(mm1[4]-lambda[ichg]);
+
+      // Find index af the minimum value of c
+      kmin = 0;
+      val = fabs(c[kmin]);
+      for (idx = 1; idx<5; ++idx) {
+        if ( fabs(c[idx]) < val ) {
+          val = fabs(c[idx]);
+          kmin = idx;
         }
       }
+      mm1[kmin] += beta;
     }
     else{
       /* Return in initial basis */
-      mtmp[0][0] = mtan1[0]*r1[0][0] + mtan1[1]*r1[1][0] + mtan13d[2]*r1[2][0];
-      mtmp[0][1] = mtan1[0]*r1[0][1] + mtan1[1]*r1[1][1] + mtan13d[2]*r1[2][1];
-      mtmp[0][2] = mtan1[0]*r1[0][2] + mtan1[1]*r1[1][2] + mtan13d[2]*r1[2][2];
+      mtmp[0][0] = mtan1[0]*r1[0][0] + mtan1[1]*r1[1][0] + mtan13d[0]*r1[2][0];
+      mtmp[0][1] = mtan1[0]*r1[0][1] + mtan1[1]*r1[1][1] + mtan13d[0]*r1[2][1];
+      mtmp[0][2] = mtan1[0]*r1[0][2] + mtan1[1]*r1[1][2] + mtan13d[0]*r1[2][2];
 
-      mtmp[1][0] = mtan1[1]*r1[0][0] + mtan1[2]*r1[1][0] + mtan13d[4]*r1[2][0];
-      mtmp[1][1] = mtan1[1]*r1[0][1] + mtan1[2]*r1[1][1] + mtan13d[4]*r1[2][1];
-      mtmp[1][2] = mtan1[1]*r1[0][2] + mtan1[2]*r1[1][2] + mtan13d[4]*r1[2][2];
+      mtmp[1][0] = mtan1[1]*r1[0][0] + mtan1[2]*r1[1][0] + mtan13d[1]*r1[2][0];
+      mtmp[1][1] = mtan1[1]*r1[0][1] + mtan1[2]*r1[1][1] + mtan13d[1]*r1[2][1];
+      mtmp[1][2] = mtan1[1]*r1[0][2] + mtan1[2]*r1[1][2] + mtan13d[1]*r1[2][2];
 
-      mtmp[2][0] = mtan13d[2]*r1[0][0] + mtan13d[4]*r1[1][0] + mtan13d[5]*r1[2][0];
-      mtmp[2][1] = mtan13d[2]*r1[0][1] + mtan13d[4]*r1[1][1] + mtan13d[5]*r1[2][1];
-      mtmp[2][2] = mtan13d[2]*r1[0][2] + mtan13d[4]*r1[1][2] + mtan13d[5]*r1[2][2];
+      mtmp[2][0] = mtan13d[0]*r1[0][0] + mtan13d[1]*r1[1][0] + mtan13d[2]*r1[2][0];
+      mtmp[2][1] = mtan13d[0]*r1[0][1] + mtan13d[1]*r1[1][1] + mtan13d[2]*r1[2][1];
+      mtmp[2][2] = mtan13d[0]*r1[0][2] + mtan13d[1]*r1[1][2] + mtan13d[2]*r1[2][2];
 
 
       m1[0] = r1[0][0]*mtmp[0][0] + r1[1][0]*mtmp[1][0] + r1[2][0]*mtmp[2][0];
@@ -1278,70 +1239,33 @@ int _MMG5_grad2metSurf(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int i){
     c[1] = t2[0]*vp[1][0] + t2[1]*vp[1][1] + t2[2]*vp[1][2];
     c[2] = t2[0]*vp[2][0] + t2[1]*vp[2][1] + t2[2]*vp[2][2];
 
-    if( fabs(c[0]) > fabs(c[1]) ){
-      if( fabs(c[0]) > fabs(c[2]) ){
-        ichg = 0;
-        assert(c[0]*c[0] > _MMG5_EPS );
-        beta = (alpha*alpha - ps2*ps2)/(c[0]*c[0]);
-        mu = lambda[0] + beta;
-        mtan2[0] = mu*vp[0][0]*vp[0][0] + lambda[1]*vp[1][0]*vp[1][0];
-        mtan2[1] = mu*vp[0][0]*vp[0][1] + lambda[1]*vp[1][0]*vp[1][1];
-        mtan2[2] = mu*vp[0][1]*vp[0][1] + lambda[1]*vp[1][1]*vp[1][1];
-        mtan2[0] +=vp[2][0]*vp[2][0]*lambda[2];
-        mtan2[1] +=vp[2][1]*vp[2][0]*lambda[2];
-        mtan2[2] +=vp[2][1]*vp[2][1]*lambda[2];
-        mtan23d[2] = vp[0][0]*vp[0][2]*mu+vp[1][0]*vp[1][2]*lambda[1]+vp[2][0]*vp[2][2]*lambda[2];
-        mtan23d[4] = vp[0][1]*vp[0][2]*mu+vp[1][1]*vp[1][2]*lambda[1]+vp[2][1]*vp[2][2]*lambda[2];
-        mtan23d[5] = vp[0][2]*vp[0][2]*mu+vp[1][2]*vp[1][2]*lambda[1]+vp[2][2]*vp[2][2]*lambda[2];
-      }
-      else {
-        ichg = 2;
-        assert(c[2]*c[2] > _MMG5_EPS );
-        beta = (alpha*alpha - ps2*ps2)/(c[2]*c[2]);
-        mu = lambda[2] + beta;
-        mtan2[0] = lambda[0]*vp[0][0]*vp[0][0] + lambda[1]*vp[1][0]*vp[1][0];
-        mtan2[1] = lambda[0]*vp[0][0]*vp[0][1] + lambda[1]*vp[1][0]*vp[1][1];
-        mtan2[2] = lambda[0]*vp[0][1]*vp[0][1] + lambda[1]*vp[1][1]*vp[1][1];
-        mtan2[0] +=vp[2][0]*vp[2][0]*mu;
-        mtan2[1] +=vp[2][1]*vp[2][0]*mu;
-        mtan2[2] +=vp[2][1]*vp[2][1]*mu;
-        mtan23d[2] = vp[0][0]*vp[0][2]*lambda[0]+vp[1][0]*vp[1][2]*lambda[1]+vp[2][0]*vp[2][2]*mu;
-        mtan23d[4] = vp[0][1]*vp[0][2]*lambda[0]+vp[1][1]*vp[1][2]*lambda[1]+vp[2][1]*vp[2][2]*mu;
-        mtan23d[5] = vp[0][2]*vp[0][2]*lambda[0]+vp[1][2]*vp[1][2]*lambda[1]+vp[2][2]*vp[2][2]*mu;
+    // Find index of the maximum value of c
+    ichg = 0;
+    val  = fabs(c[ichg]);
+    for (idx = 1; idx<3; ++idx) {
+      if ( fabs(c[idx]) > val ) {
+        val = fabs(c[idx]);
+        ichg = idx;
       }
     }
-    else{
-      if( fabs(c[1]) > fabs(c[2]) ){
-        ichg = 1;
-        assert(c[1]*c[1] > _MMG5_EPS );
-        beta = (alpha*alpha - ps2*ps2)/(c[1]*c[1]);
-        mu = lambda[1] + beta;
-        mtan2[0] = lambda[0]*vp[0][0]*vp[0][0] + mu*vp[1][0]*vp[1][0];
-        mtan2[1] = lambda[0]*vp[0][0]*vp[0][1] + mu*vp[1][0]*vp[1][1];
-        mtan2[2] = lambda[0]*vp[0][1]*vp[0][1] + mu*vp[1][1]*vp[1][1];
-        mtan2[0] +=vp[2][0]*vp[2][0]*lambda[2];
-        mtan2[1] +=vp[2][1]*vp[2][0]*lambda[2];
-        mtan2[2] +=vp[2][1]*vp[2][1]*lambda[2];
-        mtan23d[2] = vp[0][0]*vp[0][2]*lambda[0]+vp[1][0]*vp[1][2]*mu+vp[2][0]*vp[2][2]*lambda[2];
-        mtan23d[4] = vp[0][1]*vp[0][2]*lambda[0]+vp[1][1]*vp[1][2]*mu+vp[2][1]*vp[2][2]*lambda[2];
-        mtan23d[5] = vp[0][2]*vp[0][2]*lambda[0]+vp[1][2]*vp[1][2]*mu+vp[2][2]*vp[2][2]*lambda[2];
-      }
-      else {
-        ichg = 2;
-        assert(c[2]*c[2] > _MMG5_EPS );
-        beta = (alpha*alpha - ps2*ps2)/(c[2]*c[2]);
-        mu = lambda[2] + beta;
-        mtan2[0] = lambda[0]*vp[0][0]*vp[0][0] + lambda[1]*vp[1][0]*vp[1][0];
-        mtan2[1] = lambda[0]*vp[0][0]*vp[0][1] + lambda[1]*vp[1][0]*vp[1][1];
-        mtan2[2] = lambda[0]*vp[0][1]*vp[0][1] + lambda[1]*vp[1][1]*vp[1][1];
-        mtan2[0] +=vp[2][0]*vp[2][0]*mu;
-        mtan2[1] +=vp[2][1]*vp[2][0]*mu;
-        mtan2[2] +=vp[2][1]*vp[2][1]*mu;
-        mtan23d[2] = vp[0][0]*vp[0][2]*lambda[0]+vp[1][0]*vp[1][2]*lambda[1]+vp[2][0]*vp[2][2]*mu;
-        mtan23d[4] = vp[0][1]*vp[0][2]*lambda[0]+vp[1][1]*vp[1][2]*lambda[1]+vp[2][1]*vp[2][2]*mu;
-        mtan23d[5] = vp[0][2]*vp[0][2]*lambda[0]+vp[1][2]*vp[1][2]*lambda[1]+vp[2][2]*vp[2][2]*mu;
-      }
-    }
+    assert(c[ichg]*c[ichg] > _MMG5_EPS );
+    beta = (alpha*alpha - ps2*ps2)/(c[ichg]*c[ichg]);
+
+    mu[0] = lambda[0];
+    mu[1] = lambda[1];
+    mu[2] = lambda[2];
+
+    mu[ichg] += beta;
+
+    mtan2[0] = mu[0]*vp[0][0]*vp[0][0] + mu[1]*vp[1][0]*vp[1][0];
+    mtan2[1] = mu[0]*vp[0][0]*vp[0][1] + mu[1]*vp[1][0]*vp[1][1];
+    mtan2[2] = mu[0]*vp[0][1]*vp[0][1] + mu[1]*vp[1][1]*vp[1][1];
+    mtan2[0] +=vp[2][0]*vp[2][0]*mu[2];
+    mtan2[1] +=vp[2][1]*vp[2][0]*mu[2];
+    mtan2[2] +=vp[2][1]*vp[2][1]*mu[2];
+    mtan23d[0] = vp[0][0]*vp[0][2]*mu[0]+vp[1][0]*vp[1][2]*mu[1]+vp[2][0]*vp[2][2]*mu[2];
+    mtan23d[1] = vp[0][1]*vp[0][2]*mu[0]+vp[1][1]*vp[1][2]*mu[1]+vp[2][1]*vp[2][2]*mu[2];
+    mtan23d[2] = vp[0][2]*vp[0][2]*mu[0]+vp[1][2]*vp[1][2]*mu[1]+vp[2][2]*vp[2][2]*mu[2];
 
     /* Metric update */
     if( MS_SIN(p2->tag) ){
@@ -1353,36 +1277,33 @@ int _MMG5_grad2metSurf(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int i){
       c[0] = fabs(mm2[0]-lambda[ichg]);
       c[1] = fabs(mm2[1]-lambda[ichg]);
       c[2] = fabs(mm2[2]-lambda[ichg]);
-      if( c[0] < c[1] ){
-        if( c[0] < c[2] ){
-          mm2[0] += beta;
-        }
-        else{
-          mm2[2] += beta;
-        }
-      }
-      else{
-        if( c[1] < c[2] ){
-          mm2[1] += beta;
-        }
-        else{
-          mm2[2] += beta;
+      c[3] = fabs(mm2[3]-lambda[ichg]);
+      c[4] = fabs(mm2[4]-lambda[ichg]);
+
+     // Find index af the minimum value of c
+      kmin = 0;
+      val = fabs(c[kmin]);
+      for (idx = 1; idx<5; ++idx) {
+        if ( fabs(c[idx]) < val ) {
+          val = fabs(c[idx]);
+          kmin = idx;
         }
       }
+      mm2[kmin] += beta;
     }
     else{
       /* Return in initial basis */
-      mtmp[0][0] = mtan2[0]*r2[0][0] + mtan2[1]*r2[1][0] + mtan23d[2]*r2[2][0];
-      mtmp[0][1] = mtan2[0]*r2[0][1] + mtan2[1]*r2[1][1] + mtan23d[2]*r2[2][1];
-      mtmp[0][2] = mtan2[0]*r2[0][2] + mtan2[1]*r2[1][2] + mtan23d[2]*r2[2][2];
+      mtmp[0][0] = mtan2[0]*r2[0][0] + mtan2[1]*r2[1][0] + mtan23d[0]*r2[2][0];
+      mtmp[0][1] = mtan2[0]*r2[0][1] + mtan2[1]*r2[1][1] + mtan23d[0]*r2[2][1];
+      mtmp[0][2] = mtan2[0]*r2[0][2] + mtan2[1]*r2[1][2] + mtan23d[0]*r2[2][2];
 
-      mtmp[1][0] = mtan2[1]*r2[0][0] + mtan2[2]*r2[1][0] + mtan23d[4]*r2[2][0];
-      mtmp[1][1] = mtan2[1]*r2[0][1] + mtan2[2]*r2[1][1] + mtan23d[4]*r2[2][1];
-      mtmp[1][2] = mtan2[1]*r2[0][2] + mtan2[2]*r2[1][2] + mtan23d[4]*r2[2][2];
+      mtmp[1][0] = mtan2[1]*r2[0][0] + mtan2[2]*r2[1][0] + mtan23d[1]*r2[2][0];
+      mtmp[1][1] = mtan2[1]*r2[0][1] + mtan2[2]*r2[1][1] + mtan23d[1]*r2[2][1];
+      mtmp[1][2] = mtan2[1]*r2[0][2] + mtan2[2]*r2[1][2] + mtan23d[1]*r2[2][2];
 
-      mtmp[2][0] = mtan23d[2]*r2[0][0] + mtan23d[4]*r2[1][0] + mtan23d[5]*r2[2][0];
-      mtmp[2][1] = mtan23d[2]*r2[0][1] + mtan23d[4]*r2[1][1] + mtan23d[5]*r2[2][1];
-      mtmp[2][2] = mtan23d[2]*r2[0][2] + mtan23d[4]*r2[1][2] + mtan23d[5]*r2[2][2];
+      mtmp[2][0] = mtan23d[0]*r2[0][0] + mtan23d[1]*r2[1][0] + mtan23d[2]*r2[2][0];
+      mtmp[2][1] = mtan23d[0]*r2[0][1] + mtan23d[1]*r2[1][1] + mtan23d[2]*r2[2][1];
+      mtmp[2][2] = mtan23d[0]*r2[0][2] + mtan23d[1]*r2[1][2] + mtan23d[2]*r2[2][2];
 
       m2[0] = r2[0][0]*mtmp[0][0] + r2[1][0]*mtmp[1][0] + r2[2][0]*mtmp[2][0];
       m2[1] = r2[0][0]*mtmp[0][1] + r2[1][0]*mtmp[1][1] + r2[2][0]*mtmp[2][1];
