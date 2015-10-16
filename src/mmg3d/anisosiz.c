@@ -917,12 +917,11 @@ int _MMG5_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
  */
 int _MMG5_gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTetra   pt;
-  MMG5_pPoint   p1,p2;
+  MMG5_pPoint   p0,p1;
   double        *m,mv;
   int           k,it,nup,nu,maxit;
-  char          i,ier,i1,i2;
-
-  printf("gradsize_ani not implemented\n");
+  int           i,j,ia,ip0,ip1;
+  char          ier,i0,i1;
 
   if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug )
     fprintf(stdout,"  ** Anisotropic mesh gradation\n");
@@ -940,9 +939,12 @@ int _MMG5_gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
 
     m = &met->m[6*k];
     mv = MG_MAX(m[0],MG_MAX(m[1],m[2]));
+    mv = MG_MAX(m[0],MG_MAX(MG_MAX(m[1],m[2]),MG_MAX(m[3],m[4])));
     m[0] = mv;
     m[1] = mv;
     m[2] = mv;
+    m[3] = mv;
+    m[4] = mv;
   }
 
   /* Second step : standard gradation procedure */
@@ -956,20 +958,25 @@ int _MMG5_gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
       if ( !MG_EOK(pt) )  continue;
 
       for (i=0; i<4; i++) {
-        /* i1 = _MMG5_inxt2[i]; */
-        /* i2 = _MMG5_iprv2[i]; */
-        p1 = &mesh->point[pt->v[i1]];
-        p2 = &mesh->point[pt->v[i2]];
+        for (j=0; j<3; j++) {
+          ia  = _MMG5_iarf[i][j];
+          i0  = _MMG5_iare[ia][0];
+          i1  = _MMG5_iare[ia][1];
+          ip0 = pt->v[i0];
+          ip1 = pt->v[i1];
+          p0  = &mesh->point[ip0];
+          p1  = &mesh->point[ip1];
+          if ( p0->flag < mesh->base-1 && p1->flag < mesh->base-1 )  continue;
 
-        if ( p1->flag < mesh->base-1 && p2->flag < mesh->base-1 )  continue;
-        //ier = grad2met(mesh,met,k,i);
-        if ( ier == i1 ) {
-          p1->flag = mesh->base;
-          nu++;
-        }
-        else if ( ier == i2 ) {
-          p2->flag = mesh->base;
-          nu++;
+          //ier = grad2met(mesh,met,k,ia);
+          if ( ier == i1 ) {
+            p1->flag = mesh->base;
+            nu++;
+          }
+          else if ( ier == i2 ) {
+            p2->flag = mesh->base;
+            nu++;
+          }
         }
       }
     }
