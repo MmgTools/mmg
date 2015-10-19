@@ -329,9 +329,16 @@ int MMG5_Set_meshSize(MMG5_pMesh mesh, int np, int ne, int nt, int na) {
 int MMG5_Get_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int* typEntity, int* np, int* typSol) {
 
   *typEntity = MMG5_Vertex;
-  *typSol    = sol->size;
+  if ( sol->size == 1 )
+    *typSol    = MMG5_Scalar;
+  else if ( sol->size == 3 )
+    *typSol    = MMG5_Vector;
+  else if ( sol->size == 6 )
+    *typSol    = MMG5_Tensor;
+  else
+    *typSol    = MMG5_Notype;
 
-  assert(sol->np = mesh->np);
+  assert(sol->np == mesh->np);
 
   *np = mesh->np;
   sol->npi = 0;
