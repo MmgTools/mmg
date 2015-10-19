@@ -110,7 +110,6 @@ void MMG5_Init_woalloc_mesh(MMG5_pMesh mesh, MMG5_pSol sol, MMG5_pSol disp
  */
 void MMG5_Init_mesh(MMG5_pMesh *mesh, MMG5_pSol *sol, MMG5_pSol *disp
   ) {
-
   /* allocations */
   MMG5_Alloc_mesh(mesh,sol,disp);
   /* initialisations */
