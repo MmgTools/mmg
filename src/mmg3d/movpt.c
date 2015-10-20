@@ -414,6 +414,8 @@ int _MMG5_movbdyregpt(MMG5_pMesh mesh, MMG5_pSol met,int *listv,
   pxp->n1[1] = no[1];
   pxp->n1[2] = no[2];
 
+  memcpy(&(met->m[0]),&(met->m[met->size*n0]),met->size*sizeof(double));
+
   /* For each surfacic triangle, build a virtual displaced triangle for check purposes */
   calold = calnew = DBL_MAX;
   for (l=0; l<ilists; l++) {
@@ -687,13 +689,15 @@ int _MMG5_movbdyrefpt(MMG5_pMesh mesh, MMG5_pSol met, int *listv,
   pxp = &mesh->xpoint[nxp];
   memcpy(pxp,&(mesh->xpoint[p0->xp]),sizeof(MMG5_xPoint));
 
-  p0->n[0] = to[0];
-  p0->n[1] = to[1];
-  p0->n[2] = to[2];
+  ppt0->n[0] = to[0];
+  ppt0->n[1] = to[1];
+  ppt0->n[2] = to[2];
 
   pxp->n1[0] = no[0];
   pxp->n1[1] = no[1];
   pxp->n1[2] = no[2];
+
+  memcpy(&(met->m[0]),&(met->m[met->size*ip0]),met->size*sizeof(double));
 
   /* For each surface triangle, build a virtual displaced triangle for check purposes */
   calold = calnew = DBL_MAX;
@@ -979,13 +983,15 @@ int _MMG5_movbdynompt(MMG5_pMesh mesh,MMG5_pSol met, int *listv,
   pxp = &mesh->xpoint[nxp];
   memcpy(pxp,&(mesh->xpoint[p0->xp]),sizeof(MMG5_xPoint));
 
-  p0->n[0] = to[0];
-  p0->n[1] = to[1];
-  p0->n[2] = to[2];
+  ppt0->n[0] = to[0];
+  ppt0->n[1] = to[1];
+  ppt0->n[2] = to[2];
 
   pxp->n1[0] = no[0];
   pxp->n1[1] = no[1];
   pxp->n1[2] = no[2];
+
+  memcpy(&(met->m[0]),&(met->m[met->size*ip0]),met->size*sizeof(double));
 
   /* For each surface triangle, build a virtual displaced triangle for check purposes */
   calold = calnew = DBL_MAX;
@@ -1277,9 +1283,9 @@ int _MMG5_movbdyridpt(MMG5_pMesh mesh, MMG5_pSol met, int *listv,
   pxp = &mesh->xpoint[nxp];
   memcpy(pxp,&(mesh->xpoint[p0->xp]),sizeof(MMG5_xPoint));
 
-  p0->n[0] = to[0];
-  p0->n[1] = to[1];
-  p0->n[2] = to[2];
+  ppt0->n[0] = to[0];
+  ppt0->n[1] = to[1];
+  ppt0->n[2] = to[2];
 
   pxp->n1[0] = no1[0];
   pxp->n1[1] = no1[1];
@@ -1288,6 +1294,8 @@ int _MMG5_movbdyridpt(MMG5_pMesh mesh, MMG5_pSol met, int *listv,
   pxp->n2[0] = no2[0];
   pxp->n2[1] = no2[1];
   pxp->n2[2] = no2[2];
+
+  memcpy(&(met->m[0]),&(met->m[met->size*ip0]),met->size*sizeof(double));
 
   /* For each surfacic triangle, build a virtual displaced triangle for check purposes */
   calold = calnew = DBL_MAX;

@@ -140,6 +140,7 @@ inline double _MMG5_caltet_iso_4pt(double *a, double *b, double *c, double *d) {
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
+ * \param itdeg degraded elements.
  * \param *warn \a warn is set to 1 if we don't have enough memory to complete mesh.
  * \return -1 if failed.
  * \return number of new points.
@@ -240,7 +241,7 @@ static int _MMG5_spllag(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int itdeg, 
     }
     
     /* Il y a un check sur la taille des arêtes ici aussi ! */
-    ier = _MMG5_split1b(mesh,met,list,ilist,ip,1);
+    ier = _MMG5_split1b(mesh,met,list,ilist,ip,1,1);
     if ( ier < 0 ) {
       fprintf(stdout,"  ## Error: unable to split.\n");
       return(-1);
@@ -261,7 +262,8 @@ static int _MMG5_spllag(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int itdeg, 
  * \param met pointer toward the metric structure.
  * \param crit coefficient of quality improvment.
  * \param bucket pointer toward the bucket structure in delaunay mode and
- * toward the \a NULL pointer otherwise
+ * toward the \a NULL pointer otherwise.
+ * \param itdeg degraded elements.
  *
  * Internal edge flipping in the Lagrangian mode; only affects tetra marked with it
  *
@@ -289,10 +291,10 @@ int _MMG5_swptetlag(MMG5_pMesh mesh,MMG5_pSol met,double crit,_MMG5_pBucket buck
           if ( pxt->edg[i] || pxt->tag[i] ) continue;
         }
 
-        nconf = _MMG5_chkswpgen(mesh,met,k,i,&ilist,list,crit);
+        nconf = _MMG5_chkswpgen(mesh,met,k,i,&ilist,list,crit,2);
         
         if ( nconf ) {
-          ier = _MMG5_swpgen(mesh,met,nconf,ilist,list,bucket);
+          ier = _MMG5_swpgen(mesh,met,nconf,ilist,list,bucket,2);
           if ( ier > 0 )  ns++;
           else if ( ier < 0 ) return(-1);
           break;
@@ -308,7 +310,7 @@ int _MMG5_swptetlag(MMG5_pMesh mesh,MMG5_pSol met,double crit,_MMG5_pBucket buck
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
- * \param maxitin maximum number of iteration.
+ * \param itdeg degraded elements.
  * \return -1 if failed, number of moved points otherwise.
  *
  * Analyze tetrahedra marked with it and move internal points so as to make mesh more uniform.
@@ -367,7 +369,7 @@ int _MMG5_movtetlag(MMG5_pMesh mesh,MMG5_pSol met,int itdeg) {
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
- * \param typchk type of checking permformed for edge length (hmin or LSHORT criterion).
+ * \param itdeg degraded elements.
  * \return -1 if failed.
  * \return number of collapsed points.
  *
@@ -415,10 +417,10 @@ static int _MMG5_coltetlag(MMG5_pMesh mesh,MMG5_pSol met,int itdeg) {
         if ( ll > hmi2 )  continue;
 
         isnm = 0;
-        ilist = _MMG5_chkcol_int(mesh,met,k,i,j,list,1);
+        ilist = _MMG5_chkcol_int(mesh,met,k,i,j,list,2);
       
         if ( ilist > 0 ) {
-          ier = _MMG5_colver(mesh,met,list,ilist,iq);
+          ier = _MMG5_colver(mesh,met,list,ilist,iq,2);
           if ( ier < 0 ) return(-1);
           else if ( ier ) {
             _MMG5_delPt(mesh,ier);

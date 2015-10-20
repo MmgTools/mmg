@@ -60,13 +60,13 @@ int _MMG5_split1_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int i,int *vx) {
 
   is         = _MMG5_iprv2[i];
   pt0->v[is] = vx[i];
-  cal        = _MMG5_calelt(mesh,met,pt0);
+  cal        = _MMG5_nonorsurf(mesh,pt0);
   if ( cal < _MMG5_EPSD )  return(0);
 
   pt0->v[is] = pt->v[is];
   is         = _MMG5_inxt2[i];
   pt0->v[is] = vx[i];
-  cal        = _MMG5_calelt(mesh,met,pt0);
+  cal        = _MMG5_nonorsurf(mesh,pt0);
   if ( cal < _MMG5_EPSD )  return(0);
 
   return(1);
@@ -330,18 +330,18 @@ int _MMG5_split2_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
 
   /* Check the quality of the 3 new triangles */
   pt0->v[i2] = vx[i];
-  cal        = _MMG5_calelt(mesh,met,pt0);
+  cal        = _MMG5_nonorsurf(mesh,pt0);
   if ( cal < _MMG5_EPSD )  return(0);
 
   pt0->v[i1] = vx[i];
   pt0->v[i2] = vx[i1];
-  cal        = _MMG5_calelt(mesh,met,pt0);
+  cal        = _MMG5_nonorsurf(mesh,pt0);
   if ( cal < _MMG5_EPSD )  return(0);
 
   pt0->v[i2] = pt->v[i2];
   pt0->v[i1] = vx[i];
   pt0->v[i]  = vx[i1];
-  cal        = _MMG5_calelt(mesh,met,pt0);
+  cal        = _MMG5_nonorsurf(mesh,pt0);
   if ( cal < _MMG5_EPSD )  return(0);
 
   return(1);
@@ -440,25 +440,25 @@ int _MMG5_split3_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
   /* Check the 4 new triangles */
   pt0->v[1]  = vx[2];
   pt0->v[2]  = vx[1];
-  cal        = _MMG5_calelt(mesh,met,pt0);
+  cal        = _MMG5_nonorsurf(mesh,pt0);
   if ( cal < _MMG5_EPSD )  return(0);
 
   pt0->v[1]  = pt->v[1];
   pt0->v[0]  = vx[2];
   pt0->v[2]  = vx[0];
-  cal        = _MMG5_calelt(mesh,met,pt0);
+  cal        = _MMG5_nonorsurf(mesh,pt0);
   if ( cal < _MMG5_EPSD )  return(0);
 
   pt0->v[2]  = pt->v[2];
   pt0->v[0]  = vx[1];
   pt0->v[1]  = vx[0];
-  cal        = _MMG5_calelt(mesh,met,pt0);
+  cal        = _MMG5_nonorsurf(mesh,pt0);
   if ( cal < _MMG5_EPSD )  return(0);
 
   pt0->v[0]  = vx[2];
   pt0->v[1]  = vx[0];
   pt0->v[2]  = vx[1];
-  cal        = _MMG5_calelt(mesh,met,pt0);
+  cal        = _MMG5_nonorsurf(mesh,pt0);
   if ( cal < _MMG5_EPSD )  return(0);
 
   return(1);

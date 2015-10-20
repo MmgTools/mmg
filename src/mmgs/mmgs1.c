@@ -531,8 +531,11 @@ static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
           }
         }
         if ( met->m ) {
-          intmet(mesh,met,k,i,ip,s);
-        }
+          if ( typchk == 1 && (met->size>1) )
+            _MMG5_intmet33_ani(mesh,met,k,i,ip,s);
+          else
+            intmet(mesh,met,k,i,ip,s);
+       }
       }
       else if ( pt->tag[i] & MG_GEO ) {
         ppt = &mesh->point[ip];
@@ -784,7 +787,8 @@ int chkspl(MMG5_pMesh mesh,MMG5_pSol met,int k,int i) {
     memcpy(go->n1,no,3*sizeof(double));
   }
   s = 0.5;
-  intmet(mesh,met,k,i,ip,s);
+
+  intmet(mesh,met,k,i,ip,s); 
 
   return(ip);
 }
@@ -1124,6 +1128,11 @@ int mmgs1(MMG5_pMesh mesh,MMG5_pSol met) {
   if ( abs(mesh->info.imprim) > 4 || mesh->info.ddebug )
     fprintf(stdout,"  ** COMPUTATIONAL MESH\n");
 
+  /* define metric map */
+  if ( !_MMG5_defsiz(mesh,met) ) {
+    fprintf(stdout,"  ## Metric undefined. Exit program.\n");
+    return(0);
+  }
   if ( mesh->info.hgrad > 0. && !gradsiz(mesh,met) ) {
     fprintf(stdout,"  ## Gradation problem. Exit program.\n");
     return(0);

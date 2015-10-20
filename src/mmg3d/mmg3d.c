@@ -168,8 +168,8 @@ int main(int argc,char *argv[]) {
   chrono(ON,&MMG5_ctim[2]);
   _MMG5_setfunc(&mesh,&met);
   MMG5_Set_saveFunc(&mesh);
-  
-//  if ( abs(mesh.info.imprim) > 0 )  _MMG5_outqua(&mesh,&met);
+
+  if ( abs(mesh.info.imprim) > 0 )  _MMG5_inqua(&mesh,&met);
 
   fprintf(stdout,"\n  %s\n   MODULE MMG3D: IMB-LJLL : %s (%s)\n  %s\n",
           MG_STR,MG_VER,MG_REL,MG_STR);
@@ -199,18 +199,7 @@ int main(int argc,char *argv[]) {
   if ( !_MMG5_analys(&mesh) )
     _MMG5_RETURN_AND_FREE(&mesh,&met,&disp,MMG5_LOWFAILURE);
 
-  /* define metric map */
-  if ( !_MMG5_defsiz(&mesh,&met) ) {
-    fprintf(stdout,"  ## Metric undefined. Exit program.\n");
-    _MMG5_RETURN_AND_FREE(&mesh,&met,&disp,MMG5_LOWFAILURE);
-  }
-  if ( (!mesh.info.iso) && mesh.info.lag < 0 ) {
-    // Compute the quality here because in aniso the defsiz function modify the
-    // metric storage on ridge points.
-    _MMG5_outqua(&mesh,&met);
-  }
-
-  if ( mesh.info.imprim > 1 && !mesh.info.iso && met.m ) _MMG5_prilen(&mesh,&met);
+  if ( mesh.info.imprim > 1 && !mesh.info.iso && met.m ) _MMG5_prilen(&mesh,&met,0);
 
   chrono(OFF,&MMG5_ctim[2]);
   printim(MMG5_ctim[2].gdif,stim);
@@ -306,7 +295,7 @@ if ( mesh.info.lag == -1 ) {
   _MMG5_outqua(&mesh,&met);
 
   if ( mesh.info.imprim > 1 && !mesh.info.iso )
-    _MMG5_prilen(&mesh,&met);
+    _MMG5_prilen(&mesh,&met,1);
 
   chrono(ON,&MMG5_ctim[1]);
   if ( mesh.info.imprim )  fprintf(stdout,"\n  -- WRITING DATA FILE %s\n",mesh.nameout);

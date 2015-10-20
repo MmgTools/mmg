@@ -272,12 +272,14 @@ inline double diamelt(MMG5_pPoint p0,MMG5_pPoint p1,MMG5_pPoint p2) {
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
+ * \param metRidTyp Type of storage of ridges metrics: 0 for classic storage,
+ * 1 for special storage.
  * \return 0 if fail, 1 otherwise.
  *
  * Compute sizes of edges of the mesh, and displays histo.
  *
  */
-int _MMG5_prilen(MMG5_pMesh mesh, MMG5_pSol met) {
+int _MMG5_prilen(MMG5_pMesh mesh, MMG5_pSol met, int metRidTyp) {
   MMG5_pTria      pt;
   _MMG5_Hash      hash;
   double          len,avlen,lmin,lmax;
@@ -328,7 +330,12 @@ int _MMG5_prilen(MMG5_pMesh mesh, MMG5_pSol met) {
       /* Remove edge from hash */
       _MMG5_hashGet(&hash,np,nq);
       ned ++;
-      len = _MMG5_lenSurfEdg(mesh,met,np,nq,(pt->tag[ia] & MG_GEO));
+      if ( (!metRidTyp) && met->m && met->size>1 ) {
+        len = _MMG5_lenSurfEdg33_ani(mesh,met,np,nq,(pt->tag[ia] & MG_GEO));
+      }
+      else
+        len = _MMG5_lenSurfEdg(mesh,met,np,nq,(pt->tag[ia] & MG_GEO));
+
       avlen += len;
 
       if( len < lmin ) {
@@ -362,90 +369,83 @@ int _MMG5_prilen(MMG5_pMesh mesh, MMG5_pSol met) {
   return(1);
 }
 
-/* /\** */
-/*  * \param mesh pointer toward the mesh structure. */
-/*  * \param met pointer toward the met structure. */
-/*  * \param iel index of element on which we compute the quality. */
-/*  * \return the computed quality. */
-/*  * */
-/*  * Quality of a triangle for the initial given metric (which means that the */
-/*  * metric on a ridge point is a `classic` metric and not the sizes in dir */
-/*  * \f$t\f$, \f$n_1^t\f$,\f$n2^t\f$) */
-/*  * */
-/*  *\/ */
-/* static double _MMG5_caltri33_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel) { */
-/*   MMG5_pTria    pt; */
-/*   double        cal,dd,abx,aby,abz,acx,acy,acz,bcx,bcy,bcz,rap,det; */
-/*   double        *a,*b,*c,*ma,*mb,*mc,n[3],m[6],l1,l2,l3,p; */
-/*   int           ia,ib,ic; */
-/*   char          i; */
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ *
+ * Print histogram of mesh qualities for classical storage of ridges
+ * metrics (so before the the _MMG5_defsiz function call).
+ *
+ */
+void _MMG5_inqua(MMG5_pMesh mesh,MMG5_pSol met) {
+  MMG5_pTria    pt;
+  double        rap,rapmin,rapmax,rapavg,med;
+  int           i,k,iel,ok,ir,imax,nex,his[5];
 
-/*   pt = &mesh->tria[iel]; */
-/*   ia = pt->v[0]; */
-/*   ib = pt->v[1]; */
-/*   ic = pt->v[2]; */
+  rapmin  = 1.0;
+  rapmax  = 0.0;
+  rapavg  = med = 0.0;
+  iel     = 0;
 
-/*   ma = &met->m[6*ia]; */
-/*   mb = &met->m[6*ib]; */
-/*   mc = &met->m[6*ic]; */
+  for (k=0; k<5; k++)  his[k] = 0;
 
-/*   dd  = 1.0 / 3.0; */
-/*   for (i=0; i<6; i++) */
-/*     m[i] = dd * (ma[i] + mb[i] + mc[i]); */
-/*   det = m[0]*(m[3]*m[5] - m[4]*m[4]) - m[1]*(m[1]*m[5] - m[2]*m[4]) + m[2]*(m[1]*m[4] - m[2]*m[3]); */
-/*   if ( det < _MMG5_EPSD2 )  return(0.0); */
+  nex = ok = 0;
+  for (k=1; k<=mesh->nt; k++) {
+    pt = &mesh->tria[k];
+    if ( !MG_EOK(pt) ) {
+      nex++;
+      continue;
+    }
+    ok++;
 
-/*   a = &mesh->point[ia].c[0]; */
-/*   b = &mesh->point[ib].c[0]; */
-/*   c = &mesh->point[ic].c[0]; */
+    if ( met->m && (met->size == 6) ) {
+      rap = ALPHAD * _MMG5_caltri33_ani(mesh,met,pt);
+    }
+    else
+      rap = ALPHAD * _MMG5_caltri_iso(mesh,NULL,pt);
 
-/*   /\* area *\/ */
-/*   abx = b[0] - a[0]; */
-/*   aby = b[1] - a[1]; */
-/*   abz = b[2] - a[2]; */
-/*   acx = c[0] - a[0]; */
-/*   acy = c[1] - a[1]; */
-/*   acz = c[2] - a[2]; */
-/*   bcx = c[0] - b[0]; */
-/*   bcy = c[1] - b[1]; */
-/*   bcz = c[2] - b[2]; */
+    if ( rap < rapmin ) {
+      rapmin = rap;
+      iel    = ok;
+    }
+    if ( rap > 0.5 )  med++;
+    if ( rap < BADKAL )  mesh->info.badkal = 1;
+    rapavg += rap;
+    rapmax  = MG_MAX(rapmax,rap);
+    ir = MG_MIN(4,(int)(5.0*rap));
+    his[ir] += 1;
+  }
 
-/*   n[0] = (aby*acz - abz*acy); */
-/*   n[1] = (abz*acx - abx*acz); */
-/*   n[2] = (abx*acy - aby*acx); */
-/*   n[0] *= n[0]; */
-/*   n[1] *= n[1]; */
-/*   n[2] *= n[2]; */
-/*   cal  = sqrt(n[0] + n[1] + n[2]); */
-/*   if ( cal > _MMG5_EPSD ) { */
-/*     /\* length *\/ */
-/*     l1 = m[0]*abx*abx + m[3]*aby*aby + m[5]*abz*abz + 2.0*(m[1]*abx*aby + m[2]*abx*abz + m[4]*aby*abz); */
-/*     l2 = m[0]*acx*acx + m[3]*acy*acy + m[5]*acz*acz + 2.0*(m[1]*acx*acy + m[2]*acx*acz + m[4]*acy*acz); */
-/*     l3 = m[0]*bcx*bcx + m[3]*bcy*bcy + m[5]*bcz*bcz + 2.0*(m[1]*bcx*bcy + m[2]*bcx*bcz + m[4]*bcy*bcz); */
-/*     rap = l1+l2+l3; */
-/*     /\* quality *\/ */
-/*     if ( rap > _MMG5_EPSD ) { */
-/*       l1 = sqrt(l1); */
-/*       l2 = sqrt(l2); */
-/*       l3 = sqrt(l3); */
-/*       p = 0.5*(l1+l2+l3); */
-/*       cal = p*(p-l1)*(p-l2)*(p-l3); */
+  fprintf(stdout,"\n  -- MESH QUALITY   %d\n",mesh->nt - nex);
+  fprintf(stdout,"     BEST   %8.6f  AVRG.   %8.6f  WRST.   %8.6f (%d)\n",
+          rapmax,rapavg / (mesh->nt-nex),rapmin,iel);
 
-/*       /\* qual = 2.*surf / length *\/ */
-/*       return(2.*sqrt(cal) / rap); */
-/*     } */
-/*     else */
-/*       return(0.0); */
-/*   } */
-/*   else */
-/*     return(0.0); */
-/* } */
+  if ( abs(mesh->info.imprim) < 4 ){
+    if (rapmin == 0){
+      fprintf(stdout,"  ## WARNING: TOO BAD QUALITY FOR THE WORST ELEMENT\n");
+      _MMG5_unscaleMesh(mesh,met);
+      MMG5_saveMesh(mesh);
+      saveMet(mesh,met);
+      exit(EXIT_FAILURE);
+    }
+    return;
+  }
+
+  /* print histo */
+  fprintf(stdout,"     HISTOGRAMM:  %6.2f %% > 0.5\n",100.0*(med/(float)(mesh->nt-nex)));
+  imax = MG_MIN(4,(int)(5.*rapmax));
+  for (i=imax; i>=(int)(5*rapmin); i--) {
+    fprintf(stdout,"     %5.1f < Q < %5.1f   %7d   %6.2f %%\n",
+            i/5.,i/5.+0.2,his[i],100.*(his[i]/(float)(mesh->nt-nex)));
+  }
+}
 
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
  *
- * Print histogram of mesh qualities.
+ * Print histogram of mesh qualities for special storage of ridges metrics
+ * (after the _MMG5_defsiz function call).
  *
  */
 void _MMG5_outqua(MMG5_pMesh mesh,MMG5_pSol met) {

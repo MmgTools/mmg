@@ -402,14 +402,15 @@ char _MMG5_chkedg(MMG5_pMesh mesh,MMG5_Tria *pt,char ori) {
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
  * \param bucket pointer toward the bucket structure (only for delaunay).
- * \return -1 if failed.
- * \return swap number.
+ * \param typchk type of checking permformed for edge length (hmin or LSHORT
+ * criterion).
+ * \return -1 if failed and swap number otherwise.
  *
  * Search for boundary edges that could be swapped for geometric
  * approximation.
  *
  */
-int _MMG5_swpmsh(MMG5_pMesh mesh,MMG5_pSol met,_MMG5_pBucket bucket) {
+int _MMG5_swpmsh(MMG5_pMesh mesh,MMG5_pSol met,_MMG5_pBucket bucket, int typchk) {
   MMG5_pTetra   pt;
   MMG5_pxTetra  pxt;
   int      k,it,list[_MMG5_LMAX+2],ilist,ret,it1,it2,ns,nns,maxit;
@@ -441,9 +442,9 @@ int _MMG5_swpmsh(MMG5_pMesh mesh,MMG5_pSol met,_MMG5_pBucket bucket) {
           if ( ret < 0 )  return(-1);
           /* CAUTION: trigger collapse with 2 elements */
           if ( ilist <= 1 )  continue;
-          ier = _MMG5_chkswpbdy(mesh,met,list,ilist,it1,it2);
+          ier = _MMG5_chkswpbdy(mesh,met,list,ilist,it1,it2,typchk);
           if ( ier ) {
-            ier = _MMG5_swpbdy(mesh,met,list,ret,it1,bucket);
+            ier = _MMG5_swpbdy(mesh,met,list,ret,it1,bucket,typchk);
             if ( ier > 0 )  ns++;
             else if ( ier < 0 )  return(-1);
             break;
@@ -467,11 +468,14 @@ int _MMG5_swpmsh(MMG5_pMesh mesh,MMG5_pSol met,_MMG5_pBucket bucket) {
  * \param crit coefficient of quality improvment.
  * \param bucket pointer toward the bucket structure in delaunay mode and
  * toward the \a NULL pointer otherwise
+ * \param typchk type of checking permformed for edge length (hmin or LSHORT
+ * criterion).
  *
  * Internal edge flipping.
  *
  */
-int _MMG5_swptet(MMG5_pMesh mesh,MMG5_pSol met,double crit,_MMG5_pBucket bucket) {
+int _MMG5_swptet(MMG5_pMesh mesh,MMG5_pSol met,double crit,
+                 _MMG5_pBucket bucket,int typchk) {
   MMG5_pTetra   pt;
   MMG5_pxTetra  pxt;
   int      list[_MMG5_LMAX+2],ilist,k,it,nconf,maxit,ns,nns,ier;
@@ -494,9 +498,9 @@ int _MMG5_swptet(MMG5_pMesh mesh,MMG5_pSol met,double crit,_MMG5_pBucket bucket)
           if ( pxt->edg[i] || pxt->tag[i] ) continue;
         }
 
-        nconf = _MMG5_chkswpgen(mesh,met,k,i,&ilist,list,crit);
+        nconf = _MMG5_chkswpgen(mesh,met,k,i,&ilist,list,crit,typchk);
         if ( nconf ) {
-          ier = _MMG5_swpgen(mesh,met,nconf,ilist,list,bucket);
+          ier = _MMG5_swpgen(mesh,met,nconf,ilist,list,bucket,typchk);
           if ( ier > 0 )  ns++;
           else if ( ier < 0 ) return(-1);
           break;
@@ -720,7 +724,7 @@ static int _MMG5_coltet(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
             if ( mesh->adja[4*(k-1)+1+i] )  continue;
           }
           if ( p0->tag > tag )  continue;
-          ilist = _MMG5_chkcol_bdy(mesh,met,k,i,j,list);
+          ilist = _MMG5_chkcol_bdy(mesh,met,k,i,j,list,typchk);
         }
         /* internal face */
         else {
@@ -730,7 +734,7 @@ static int _MMG5_coltet(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
         }
 
         if ( ilist > 0 ) {
-          ier = _MMG5_colver(mesh,met,list,ilist,iq);
+          ier = _MMG5_colver(mesh,met,list,ilist,iq,typchk);
           if ( ier < 0 ) return(-1);
           else if ( ier ) {
             _MMG5_delPt(mesh,ier);
@@ -867,7 +871,11 @@ _MMG5_anatetv(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
         }
 
         if ( met->m ) {
-          ier = _MMG5_intmet(mesh,met,k,i,ip,0.5);
+          if ( typchk == 1 && (met->size>1) )
+            ier = _MMG5_intmet33_ani(mesh,met,k,i,ip,0.5);
+          else
+            ier = _MMG5_intmet(mesh,met,k,i,ip,0.5);
+
           if (!ier) return(-1);
           else if ( ier < 0 ) {
             _MMG5_delPt(mesh,ip);
@@ -905,55 +913,55 @@ split:
 
     switch (pt->flag) {
     case 1: case 2: case 4: case 8: case 16: case 32: /* 1 edge split */
-      _MMG5_split1(mesh,met,k,vx);
+      _MMG5_split1(mesh,met,k,vx,typchk-1);
       ns++;
       break;
     case 48: case 24: case 40: case 6: case 34: case 36:
     case 20: case 5: case 17: case 9: case 3: case 10: /* 2 edges (same face) split */
-      _MMG5_split2sf(mesh,met,k,vx);
+      _MMG5_split2sf(mesh,met,k,vx,typchk-1);
       ns++;
       break;
 
     case 33: case 18: case 12: /* 2 opposite edges split */
-      _MMG5_split2(mesh,met,k,vx);
+      _MMG5_split2(mesh,met,k,vx,typchk-1);
       ns++;
       break;
 
     case 11: case 21: case 38: case 56: /* 3 edges on the same faces splitted */
-      _MMG5_split3(mesh,met,k,vx);
+      _MMG5_split3(mesh,met,k,vx,typchk-1);
       ns++;
       break;
 
     case 7: case 25: case 42: case 52: /* 3 edges on conic configuration splitted */
-      _MMG5_split3cone(mesh,met,k,vx);
+      _MMG5_split3cone(mesh,met,k,vx,typchk-1);
       ns++;
       break;
 
     case 35: case 19: case 13: case 37: case 22: case 28: case 26:
     case 14: case 49: case 50: case 44: case 41: /* 3 edges on opposite configuration splitted */
-      _MMG5_split3op(mesh,met,k,vx);
+      _MMG5_split3op(mesh,met,k,vx,typchk-1);
       ns++;
       break;
 
     case 23: case 29: case 53: case 60: case 57: case 58:
     case 27: case 15: case 43: case 39: case 54: case 46: /* 4 edges with 3 lying on the same face splitted */
-      _MMG5_split4sf(mesh,met,k,vx);
+      _MMG5_split4sf(mesh,met,k,vx,typchk-1);
       ns++;
       break;
 
       /* 4 edges with no 3 lying on the same face splitted */
     case 30: case 45: case 51:
-      _MMG5_split4op(mesh,met,k,vx);
+      _MMG5_split4op(mesh,met,k,vx,typchk-1);
       ns++;
       break;
 
     case 62: case 61: case 59: case 55: case 47: case 31: /* 5 edges split */
-      _MMG5_split5(mesh,met,k,vx);
+      _MMG5_split5(mesh,met,k,vx,typchk-1);
       ns++;
       break;
 
     case 63: /* 6 edges split */
-      _MMG5_split6(mesh,met,k,vx);
+      _MMG5_split6(mesh,met,k,vx,typchk-1);
       ns++;
       break;
     }
@@ -1049,7 +1057,6 @@ _MMG5_anatets(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
       ip1 = pt->v[i1];
       ip2 = pt->v[i2];
       ip  = _MMG5_hashGet(&hash,ip1,ip2);
-
       if ( ip > 0 && !(ptt.tag[j] & MG_GEO) )  continue;
 
       ier = _MMG5_bezierInt(&pb,&uv[j][0],o,no,to);
@@ -1077,7 +1084,11 @@ _MMG5_anatets(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
         p2  = &mesh->point[ip2];
 
         if ( met->m ) {
-          ier = _MMG5_intmet(mesh,met,k,ia,ip,0.5);
+          if ( typchk == 1 && (met->size>1) )
+            ier = _MMG5_intmet33_ani(mesh,met,k,ia,ip,0.5);
+          else
+            ier = _MMG5_intmet(mesh,met,k,ia,ip,0.5);
+
           if ( !ier )  return(-1);
           else if ( ier < 0 ) {
             _MMG5_delPt(mesh,ip);
@@ -1254,15 +1265,15 @@ _MMG5_anatets(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
     }
     switch (pt->flag) {
     case 1: case 2: case 4: case 8: case 16: case 32:  /* 1 edge split */
-      _MMG5_split1(mesh,met,k,vx);
+      _MMG5_split1(mesh,met,k,vx,typchk-1);
       ns++;
       break;
     case 11: case 21: case 38: case 56: /* 1 face (3 edges) subdivided */
-      _MMG5_split3(mesh,met,k,vx);
+      _MMG5_split3(mesh,met,k,vx,typchk-1);
       ns++;
       break;
     default:
-      _MMG5_split2sf(mesh,met,k,vx);
+      _MMG5_split2sf(mesh,met,k,vx,typchk-1);
       ns++;
       break;
     }
@@ -1279,13 +1290,13 @@ _MMG5_anatets(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
- * \return -1 if failed.
- * \return number of new points.
+ * \param typchk type of checking permformed.
+ * \return -1 if failed, number of new points otherwise.
  *
  * Split tetra into 4 when more than 1 boundary face.
  *
  */
-static int _MMG5_anatet4(MMG5_pMesh mesh, MMG5_pSol met) {
+static int _MMG5_anatet4(MMG5_pMesh mesh, MMG5_pSol met,char typchk) {
   MMG5_pTetra      pt;
   MMG5_pPoint      ppt;
   MMG5_pxTetra     pxt;
@@ -1303,7 +1314,7 @@ static int _MMG5_anatet4(MMG5_pMesh mesh, MMG5_pSol met) {
         if ( pxt->ftag[j] & MG_BDY )  nf++;
     }
     if ( nf > 1 ) {
-      if ( !_MMG5_split4bar(mesh,met,k) ) return(-1);
+      if ( !_MMG5_split4bar(mesh,met,k,typchk-1) ) return(-1);
       ns++;
     }
     else {
@@ -1313,7 +1324,7 @@ static int _MMG5_anatet4(MMG5_pMesh mesh, MMG5_pSol met) {
         if ( ppt->tag & MG_BDY )  nf++;
       }
       if ( nf == 4 ) {
-        if ( !_MMG5_split4bar(mesh,met,k) ) return(-1);
+        if ( !_MMG5_split4bar(mesh,met,k,typchk-1) ) return(-1);
         ns++;
       }
     }
@@ -1349,7 +1360,7 @@ int _MMG5_anatet(MMG5_pMesh mesh,MMG5_pSol met,char typchk, int patternMode) {
     if ( !mesh->info.noinsert ) {
 
       /* split tetra with more than 2 bdry faces */
-      ier = _MMG5_anatet4(mesh,met);
+      ier = _MMG5_anatet4(mesh,met,typchk);
       if ( ier < 0 )  return(0);
       ns = ier;
 
@@ -1391,14 +1402,14 @@ int _MMG5_anatet(MMG5_pMesh mesh,MMG5_pSol met,char typchk, int patternMode) {
 
     /* attempt to swap */
     if ( !mesh->info.noswap ) {
-      nf = _MMG5_swpmsh(mesh,met,NULL);
+      nf = _MMG5_swpmsh(mesh,met,NULL,typchk);
       if ( nf < 0 ) {
         fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
         return(0);
       }
       nnf += nf;
 
-      nf = _MMG5_swptet(mesh,met,1.1,NULL);
+      nf = _MMG5_swptet(mesh,met,1.1,NULL,typchk);
       if ( nf < 0 ) {
         fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
         return(0);

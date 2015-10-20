@@ -50,7 +50,7 @@ inline double _MMG5_orcal(MMG5_pMesh mesh,MMG5_pSol met,int iel) {
   MMG5_pTetra     pt;
 
   pt = &mesh->tetra[iel];
-  
+
   if ( met->m )
     return(_MMG5_caltet(mesh,met,pt));
   else // with -A option we are in aniso but without metric.
@@ -153,8 +153,7 @@ inline double _MMG5_caltet_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt) {
 
   /* average metric */
   _MMG5_moymet(mesh,met,pt,&mm[0]);
-  // for (k=0; k<6; k++)
-  //  mm[k] = 0.25 * (m[0][k]+m[1][k]+m[2][k]+m[3][k]);
+
   a = mesh->point[ip[0]].c;
   b = mesh->point[ip[1]].c;
   c = mesh->point[ip[2]].c;
@@ -201,16 +200,137 @@ inline double _MMG5_caltet_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt) {
   num = sqrt(rap) * rap;
 
   cal = det / num;
-  if(cal <= _MMG5_NULKAL) {
-    printf(" TOO BAD QUALITY %e %e %e %e\n",cal,num,det,vol);
-    // exit added to avoid memory consumption in CDash outputs.
-    _MMG5_unscaleMesh(mesh,met);
-    MMG5_saveMesh(mesh);
-    MMG5_saveMet(mesh,met);
-    exit(EXIT_FAILURE);
-    //  return(0.0);
+  if ( cal <= _MMG5_NULKAL ) {
+    if ( mesh->info.ddebug ) {
+      fprintf(stdout,"  ## WARNING: TOO BAD QUALITY FOR AT LEAST ONE ELEMENT\n");
+      fprintf(stdout," Element volume=%e\n metric det=%e\n"
+              " edges lengths sum=%e\n computed quality=%e\n",vol,det,num,cal);
+
+      // exit added to avoid memory consumption in CDash outputs.
+      /* _MMG5_unscaleMesh(mesh,met); */
+      /* MMG5_saveMesh(mesh); */
+      /* MMG5_saveMet(mesh,met); */
+      /* exit(EXIT_FAILURE); */
+    }
+    return(0.0);
   }
-  //printf("cal %e %e %e\n",cal,num,det);
+  return(cal);
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the meric structure.
+ * \param pt pointer toward a tetrahedra.
+ * \return The anisotropic quality of the tet or 0.0 if fail.
+ *
+ * Compute the quality of the tet pt with respect to the anisotropic metric \a
+ * met. \f$ Q = V_met(K) / (sum(len(edge_K)^2)^(3/2) \f$ and for a calssic
+ * storage of metrics at ridges.
+ *
+ * \todo test with the square of this measure
+ */
+inline double _MMG5_caltet33_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt) {
+  double       cal,abx,aby,abz,acx,acy,acz,adx,ady,adz;
+  double       bcx,bcy,bcz,bdx,bdy,bdz,cdx,cdy,cdz;
+  double       h1,h2,h3,h4,h5,h6,det,vol,rap,v1,v2,v3,num;
+  double       *a,*b,*c,*d;
+  double       mm[6];
+  int          ip[4],iad0,iad1,iad2,iad3,k;
+
+  ip[0] = pt->v[0];
+  ip[1] = pt->v[1];
+  ip[2] = pt->v[2];
+  ip[3] = pt->v[3];
+
+  iad0  = met->size * ip[0];
+  iad1  = met->size * ip[1];
+  iad2  = met->size * ip[2];
+  iad3  = met->size * ip[3];
+
+  cal = _MMG5_NULKAL;
+
+  /* average metric */
+  for (k=0; k<6; k++)
+    mm[k] = 0.25 * (met->m[iad0+k]+met->m[iad1+k]+met->m[iad2+k]+met->m[iad3+k]);
+
+  a = mesh->point[ip[0]].c;
+  b = mesh->point[ip[1]].c;
+  c = mesh->point[ip[2]].c;
+  d = mesh->point[ip[3]].c;
+
+  /* volume */
+  abx = b[0] - a[0];
+  aby = b[1] - a[1];
+  abz = b[2] - a[2];
+
+  acx = c[0] - a[0];
+  acy = c[1] - a[1];
+  acz = c[2] - a[2];
+
+  adx = d[0] - a[0];
+  ady = d[1] - a[1];
+  adz = d[2] - a[2];
+
+  bcx = c[0] - b[0];
+  bcy = c[1] - b[1];
+  bcz = c[2] - b[2];
+
+  bdx = d[0] - b[0];
+  bdy = d[1] - b[1];
+  bdz = d[2] - b[2];
+
+  cdx = d[0] - c[0];
+  cdy = d[1] - c[1];
+  cdz = d[2] - c[2];
+
+  v1  = acy*adz - acz*ady;
+  v2  = acz*adx - acx*adz;
+  v3  = acx*ady - acy*adx;
+  vol = abx * v1 + aby * v2 + abz * v3;
+  if ( vol <= 0. )  return(0.0);
+
+  det = mm[0] * ( mm[3]*mm[5] - mm[4]*mm[4]) \
+      - mm[1] * ( mm[1]*mm[5] - mm[2]*mm[4]) \
+      + mm[2] * ( mm[1]*mm[4] - mm[2]*mm[3]);
+  if ( det < _MMG5_EPSOK )   {
+    //printf("--- INVALID METRIC : DET  %e\n",det);
+    return(0.0);
+  }
+  det = sqrt(det) * vol;
+
+  /* edge lengths */
+  h1 = mm[0]*abx*abx + mm[3]*aby*aby + mm[5]*abz*abz
+    + 2.0*(mm[1]*abx*aby + mm[2]*abx*abz + mm[4]*aby*abz);
+  h2 =  mm[0]*acx*acx + mm[3]*acy*acy + mm[5]*acz*acz
+    + 2.0*(mm[1]*acx*acy + mm[2]*acx*acz + mm[4]*acy*acz);
+  h3 = mm[0]*adx*adx + mm[3]*ady*ady + mm[5]*adz*adz
+    + 2.0*(mm[1]*adx*ady + mm[2]*adx*adz + mm[4]*ady*adz);
+  h4 =  mm[0]*bcx*bcx + mm[3]*bcy*bcy + mm[5]*bcz*bcz
+    + 2.0*(mm[1]*bcx*bcy + mm[2]*bcx*bcz + mm[4]*bcy*bcz);
+  h5 =  mm[0]*bdx*bdx + mm[3]*bdy*bdy + mm[5]*bdz*bdz
+    + 2.0*(mm[1]*bdx*bdy + mm[2]*bdx*bdz + mm[4]*bdy*bdz);
+  h6 =  mm[0]*cdx*cdx + mm[3]*cdy*cdy + mm[5]*cdz*cdz
+    + 2.0*(mm[1]*cdx*cdy + mm[2]*cdx*cdz + mm[4]*cdy*cdz);
+
+  /* quality */
+  rap = h1 + h2 + h3 + h4 + h5 + h6;
+  num = sqrt(rap) * rap;
+
+  cal = det / num;
+
+  if ( cal <= _MMG5_NULKAL ) {
+    if ( mesh->info.ddebug ) {
+      fprintf(stdout,"  ## WARNING: TOO BAD QUALITY FOR AT LEAST ONE ELEMENT\n");
+      fprintf(stdout," Element volume=%e\n metric det=%e\n"
+              " edges lengths sum=%e\n computed quality=%e\n",vol,det,num,cal);
+      // exit added to avoid memory consumption in CDash outputs.
+      /* _MMG5_unscaleMesh(mesh,met); */
+      /* MMG5_saveMesh(mesh); */
+      /* MMG5_saveMet(mesh,met); */
+      /* exit(EXIT_FAILURE); */
+      return(0.0);
+    }
+  }
   return(cal);
 }
 
@@ -494,61 +614,65 @@ int _MMG5_typelt(MMG5_pMesh mesh,int iel,int *item) {
   return(9);
 }
 
-/**
- * \warning Not used.
- */
-int _MMG5_badelt(MMG5_pMesh mesh,MMG5_pSol met) {
-  MMG5_pTetra   pt;
-  double   kal;
-  int      k,it,maxit,nd/*,item[2],typ*/;
-  /*int      ntyp[10];*/
-  int      list[_MMG5_LMAX+2],i,ilist,nconf,ns;
+/* /\** */
+/*  * \warning Not used. */
+/*  *\/ */
+/* int _MMG5_badelt(MMG5_pMesh mesh,MMG5_pSol met) { */
+/*   MMG5_pTetra   pt; */
+/*   double   kal; */
+/*   int      k,it,maxit,nd/\*,item[2],typ*\/; */
+/*   /\*int      ntyp[10];*\/ */
+/*   int      list[_MMG5_LMAX+2],i,ilist,nconf,ns; */
 
-  it = 0;
-  maxit = 3;
-  do {
-    nd = 0;
-    ns = 0;
-    //for (k=1; k<10; k++) ntyp[k]=0;
-    for (k=1; k<=mesh->ne; k++) {
-      pt = &mesh->tetra[k];
-      if ( !MG_EOK(pt) )  continue;
-      kal = /*_MMG5_ALPHAD **/ pt->qual;
-      if ( kal > 0.0096225 /*_MMG5_BADKAL/_MMG5_ALPHAD*/ )  continue;
-      //typ =  _MMG5_typelt(mesh,k,item);
-      //ntyp[typ]++;
-      nd++;
-      /*treat bad elt*/
-      /*1) try to swp one edge*/
-      for(i=0 ; i<6 ; i++) {
-        nconf = _MMG5_chkswpgen(mesh,met,k,i,&ilist,list,1.01);
-        if ( nconf ) {
-          ns++;
-          if(!_MMG5_swpgen(mesh,met,nconf,ilist,list,NULL)) return(-1);
-          break;
-        }
-      }
-    }
-    /*printf("on trouve %d bad elt\n",nd);
-      for (k=0; k<=9; k++)
-      if ( ntyp[k] )
-      printf("  optim [%d]      = %5d  %6.2f %%\n",k,ntyp[k],100.0*ntyp[k]/nd);
-    */if ( ns > 0 )
-      fprintf(stdout,"     %8d edge swapped\n",ns);
-  }
-  while ( ++it < maxit && nd > 0 );
-  return(nd);
-}
+/*   it = 0; */
+/*   maxit = 3; */
+/*   do { */
+/*     nd = 0; */
+/*     ns = 0; */
+/*     //for (k=1; k<10; k++) ntyp[k]=0; */
+/*     for (k=1; k<=mesh->ne; k++) { */
+/*       pt = &mesh->tetra[k]; */
+/*       if ( !MG_EOK(pt) )  continue; */
+/*       kal = /\*_MMG5_ALPHAD **\/ pt->qual; */
+/*       if ( kal > 0.0096225 /\*_MMG5_BADKAL/_MMG5_ALPHAD*\/ )  continue; */
+/*       //typ =  _MMG5_typelt(mesh,k,item); */
+/*       //ntyp[typ]++; */
+/*       nd++; */
+/*       /\*treat bad elt*\/ */
+/*       /\*1) try to swp one edge*\/ */
+/*       for(i=0 ; i<6 ; i++) { */
+/*         nconf = _MMG5_chkswpgen(mesh,met,k,i,&ilist,list,1.01); */
+/*         if ( nconf ) { */
+/*           ns++; */
+/*           // Warning: last arg of swpgen stands for the type of metric storage */
+/*           // at ridges (must be 1 if call before the defsiz function, 2 otherwise). */
+/*           if(!_MMG5_swpgen(mesh,met,nconf,ilist,list,NULL,2)) return(-1); */
+/*           break; */
+/*         } */
+/*       } */
+/*     } */
+/*     /\*printf("on trouve %d bad elt\n",nd); */
+/*       for (k=0; k<=9; k++) */
+/*       if ( ntyp[k] ) */
+/*       printf("  optim [%d]      = %5d  %6.2f %%\n",k,ntyp[k],100.0*ntyp[k]/nd); */
+/*     *\/if ( ns > 0 ) */
+/*       fprintf(stdout,"     %8d edge swapped\n",ns); */
+/*   } */
+/*   while ( ++it < maxit && nd > 0 ); */
+/*   return(nd); */
+/* } */
 
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
+ * \param metRidTyp Type of storage of ridges metrics: 0 for classic storage,
+ * 1 for special storage.
  * \return 0 if fail, 1 otherwise.
  *
  * Compute sizes of edges of the mesh, and displays histo.
  *
  */
-int _MMG5_prilen(MMG5_pMesh mesh, MMG5_pSol met) {
+int _MMG5_prilen(MMG5_pMesh mesh, MMG5_pSol met, char metRidTyp) {
   MMG5_pTetra     pt;
   _MMG5_Hash      hash;
   double          len,avlen,lmin,lmax;
@@ -601,7 +725,15 @@ int _MMG5_prilen(MMG5_pMesh mesh, MMG5_pSol met) {
       ier = _MMG5_hashPop(&hash,np,nq);
       if( ier ) {
         ned ++;
-        len = _MMG5_lenedg(mesh,met,ia,pt);
+        if ( met->m ) {
+          if ( (!metRidTyp) && met->size>1 ) {
+            len = _MMG5_lenedg33_ani(mesh,met,ia,pt);
+          }
+          else
+            len = _MMG5_lenedg(mesh,met,ia,pt);
+        }
+        else // -A option
+          len = _MMG5_lenedg_iso(mesh,met,ia,pt);
 
         avlen += len;
 
@@ -641,7 +773,109 @@ int _MMG5_prilen(MMG5_pMesh mesh, MMG5_pSol met) {
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
  *
- * Print histogram of mesh qualities.
+ * Print histogram of mesh qualities for classic storage of metric at ridges.
+ *
+ */
+void _MMG5_inqua(MMG5_pMesh mesh,MMG5_pSol met) {
+  MMG5_pTetra    pt;
+  double   rap,rapmin,rapmax,rapavg,med,good;
+  int      i,k,iel,ok,ir,imax,nex,his[5];
+
+  /*compute tet quality*/
+  for (k=1; k<=mesh->ne; k++) {
+    pt = &mesh->tetra[k];
+     if( !MG_EOK(pt) )   continue;
+
+     if ( met->m ) {
+       if ( met->size == 6) {
+         pt->qual = _MMG5_caltet33_ani(mesh,met,pt);
+       }
+       else
+         pt->qual = _MMG5_orcal(mesh,met,k);
+     }
+     else // -A option
+       pt->qual = _MMG5_caltet_iso(mesh,met,pt);
+  }
+  if ( abs(mesh->info.imprim) <= 0 ) return;
+
+  rapmin  = 2.0;
+  rapmax  = 0.0;
+  rapavg  = med = good = 0.0;
+  iel     = 0;
+
+  for (k=0; k<5; k++)  his[k] = 0;
+
+  nex = ok = 0;
+  for (k=1; k<=mesh->ne; k++) {
+    pt = &mesh->tetra[k];
+    if( !MG_EOK(pt) ) {
+      nex++;
+      continue;
+    }
+    ok++;
+    if ( _MMG5_orvol(mesh->point,pt->v) < 0.0 ) {
+      fprintf(stdout,"dans quality vol negatif\n");
+    }
+    rap = _MMG5_ALPHAD * pt->qual;
+    if ( rap < rapmin ) {
+      rapmin = rap;
+      iel    = ok;
+    }
+    if ( rap > 0.5 )  med++;
+    if ( rap > 0.12 ) good++;
+    if ( rap < _MMG5_BADKAL )  mesh->info.badkal = 1;
+    rapavg += rap;
+    rapmax  = MG_MAX(rapmax,rap);
+    ir = MG_MIN(4,(int)(5.0*rap));
+    his[ir] += 1;
+  }
+
+#ifndef DEBUG
+  fprintf(stdout,"\n  -- MESH QUALITY   %d\n",mesh->ne - nex);
+  fprintf(stdout,"     BEST   %8.6f  AVRG.   %8.6f  WRST.   %8.6f (%d)\n",
+          rapmax,rapavg / (mesh->ne-nex),rapmin,iel);
+#else
+  fprintf(stdout,"     BEST   %e  AVRG.   %e  WRST.   %e (%d)\n => %d %d %d %d\n",
+          rapmax,rapavg / (mesh->ne-nex),rapmin,iel,
+          _MMG5_indPt(mesh,mesh->tetra[iel].v[0]),_MMG5_indPt(mesh,mesh->tetra[iel].v[1]),
+          _MMG5_indPt(mesh,mesh->tetra[iel].v[2]),_MMG5_indPt(mesh,mesh->tetra[iel].v[3]));
+#endif
+  if ( abs(mesh->info.imprim) < 3 ){
+    if (rapmin == 0){
+      fprintf(stdout,"  ## WARNING: TOO BAD QUALITY FOR THE WORST ELEMENT\n");
+      _MMG5_unscaleMesh(mesh,met);
+      MMG5_saveMesh(mesh);
+      MMG5_saveMet(mesh,met);
+      exit(EXIT_FAILURE);
+    }
+    return;
+  }
+
+  /* print histo */
+  fprintf(stdout,"     HISTOGRAMM:");
+  fprintf(stdout,"  %6.2f %% > 0.12\n",100.0*(good/(float)(mesh->ne-nex)));
+  if ( abs(mesh->info.imprim) > 3 ) {
+    fprintf(stdout,"                  %6.2f %% >  0.5\n",100.0*( med/(float)(mesh->ne-nex)));
+    imax = MG_MIN(4,(int)(5.*rapmax));
+    for (i=imax; i>=(int)(5*rapmin); i--) {
+      fprintf(stdout,"     %5.1f < Q < %5.1f   %7d   %6.2f %%\n",
+              i/5.,i/5.+0.2,his[i],100.*(his[i]/(float)(mesh->ne-nex)));
+    }
+  }
+  if (rapmin == 0){
+    fprintf(stdout,"  ## WARNING: TOO BAD QUALITY FOR THE WORST ELEMENT\n");
+    _MMG5_unscaleMesh(mesh,met);
+    MMG5_saveMesh(mesh);
+    MMG5_saveMet(mesh,met);
+    exit(EXIT_FAILURE);
+  }
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ *
+ * Print histogram of mesh qualities for special storage of metric at ridges.
  *
  */
 void _MMG5_outqua(MMG5_pMesh mesh,MMG5_pSol met) {

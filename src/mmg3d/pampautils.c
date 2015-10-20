@@ -569,12 +569,14 @@ void _MMG5_destockOptions(MMG5_pMesh mesh, MMG5_Info *info) {
  * \param lmin minimum edge length.
  * \param lmax maximum ede length.
  * \param *eltab pointer toward the table of invalid elements.
+ * \param metRidTyp Type of storage of ridges metrics: 0 for classic storage
+ * (before the _MMG5_defsiz call), 1 for special storage (after this call).
  *
  * Search invalid elements (in term of quality or edge length).
  *
  */
-int MMG5_mmg3dcheck(MMG5_pMesh mesh,MMG5_pSol met,
-                    double critmin, double lmin, double lmax, int *eltab) {
+int MMG5_mmg3dcheck(MMG5_pMesh mesh,MMG5_pSol met,double critmin, double lmin,
+                    double lmax, int *eltab,char metRidTyp) {
 
   mytime    ctim[TIMEMAX];
   char      stim[32];
@@ -627,8 +629,8 @@ int MMG5_mmg3dcheck(MMG5_pMesh mesh,MMG5_pSol met,
     if ( !_MMG5_mmg3d2(mesh,met) ) return(MMG5_STRONGFAILURE);
   }
 
-  MMG5_searchqua(mesh,met,critmin,eltab);
-  ier = MMG5_searchlen(mesh,met,lmin,lmax,eltab);
+  MMG5_searchqua(mesh,met,critmin,eltab,metRidTyp);
+  ier = MMG5_searchlen(mesh,met,lmin,lmax,eltab,metRidTyp);
   if ( !ier )
     return(MMG5_LOWFAILURE);
 
@@ -640,12 +642,15 @@ int MMG5_mmg3dcheck(MMG5_pMesh mesh,MMG5_pSol met,
  * \param met pointer toward the sol structure.
  * \param critmin minimum quality for elements.
  * \param *eltab pointer toward the table of invalid elements.
+ * \param metRidTyp Type of storage of ridges metrics: 0 for classic storage
+ * (before the _MMG5_defsiz call), 1 for special storage (after this call).
  *
  * Store elements which have worse quality than \a critmin in \a eltab,
  * \a eltab is allocated and could contain \a mesh->ne elements.
  *
  */
-void MMG5_searchqua(MMG5_pMesh mesh,MMG5_pSol met,double critmin, int *eltab) {
+void MMG5_searchqua(MMG5_pMesh mesh,MMG5_pSol met,double critmin, int *eltab,
+                    char metRidTyp) {
   MMG5_pTetra   pt;
   double   rap;
   int      k;
@@ -656,8 +661,13 @@ void MMG5_searchqua(MMG5_pMesh mesh,MMG5_pSol met,double critmin, int *eltab) {
     if( !MG_EOK(pt) )
       continue;
 
-    rap = _MMG5_ALPHAD *
-      _MMG5_caltet(mesh,met,pt);
+    if ( (!metRidTyp) && met->m && met->size>1 ) {
+      rap = _MMG5_ALPHAD * _MMG5_caltet33_ani(mesh,met,pt);
+    }
+    else {
+      rap = _MMG5_ALPHAD * _MMG5_caltet(mesh,met,pt);
+    }
+
     if ( rap == 0.0 || rap < critmin ) {
       eltab[k] = 1;
     }
@@ -671,6 +681,8 @@ void MMG5_searchqua(MMG5_pMesh mesh,MMG5_pSol met,double critmin, int *eltab) {
  * \param lmin minimum edge length.
  * \param lmax maximum ede length.
  * \param *eltab table of invalid elements.
+ * \param metRidTyp Type of storage of ridges metrics: 0 for classic storage
+ * (before the _MMG5_defsiz call), 1 for special storage (after this call).
  *
  * Store in \a eltab elements which have edge lengths shorter than \a lmin
  * or longer than \a lmax, \a eltab is allocated and could contain \a mesh->ne
@@ -678,7 +690,7 @@ void MMG5_searchqua(MMG5_pMesh mesh,MMG5_pSol met,double critmin, int *eltab) {
  *
  */
 int MMG5_searchlen(MMG5_pMesh mesh, MMG5_pSol met, double lmin,
-                   double lmax, int *eltab) {
+                   double lmax, int *eltab,char metRidTyp) {
   MMG5_pTetra          pt;
   _MMG5_Hash           hash;
   double          len;
@@ -720,7 +732,12 @@ int MMG5_searchlen(MMG5_pMesh mesh, MMG5_pSol met, double lmin,
       /* Remove edge from hash ; ier = 1 if edge has been found */
       ier = _MMG5_hashPop(&hash,np,nq);
       if( ier ) {
-        len = _MMG5_lenedg(mesh,met,ia,pt);
+        if ( (!metRidTyp) && met->m && met->size>1 ) {
+          len = _MMG5_lenedg(mesh,met,ia,pt);
+        }
+        else {
+          len = _MMG5_lenedg33_ani(mesh,met,ia,pt);
+        }
 
         if( (len < lmin) || (len > lmax) ) {
           eltab[k] = 1;

@@ -364,7 +364,7 @@ int MMG5_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp
   chrono(ON,&(ctim[2]));
   _MMG5_setfunc(mesh,met);
 
-  if ( abs(mesh->info.imprim) > 0 )  _MMG5_outqua(mesh,met);
+  if ( abs(mesh->info.imprim) > 0 )  _MMG5_inqua(mesh,met);
 
   fprintf(stdout,"\n  %s\n   MODULE MMG3D: IMB-LJLL : %s (%s)\n  %s\n",MG_STR,MG_VER,MG_REL,MG_STR);
   if ( mesh->info.imprim )  fprintf(stdout,"\n  -- PHASE 1 : ANALYSIS\n");
@@ -400,18 +400,7 @@ int MMG5_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp
     _MMG5_RETURN_AND_PACK(mesh,met,disp,MMG5_LOWFAILURE);
   }
 
-  /* define metric map */
-  /* if ( !_MMG5_defsiz(mesh,met) ) { */
-  /*   fprintf(stdout,"  ## Metric undefined. Exit program.\n"); */
-  /*   _MMG5_RETURN_AND_PACK(mesh,met,disp,MMG5_LOWFAILURE); */
-  /* } */
-  /* if ( (!mesh->info.iso) && mesh->info.lag < 0 ) { */
-  /*   // Compute the quality here because in aniso the defsiz function modify the */
-  /*   // metric storage on ridge points. */
-  /*   _MMG5_outqua(mesh,met); */
-  /* } */
-
-  if ( mesh->info.imprim > 4 && !mesh->info.iso && met->m ) _MMG5_prilen(mesh,met);
+  if ( mesh->info.imprim > 4 && !mesh->info.iso && met->m ) _MMG5_prilen(mesh,met,0);
 
   chrono(OFF,&(ctim[2]));
   printim(ctim[2].gdif,stim);
@@ -497,7 +486,7 @@ if ( mesh->info.lag == -1 ) {
   /* save file */
   _MMG5_outqua(mesh,met);
   if ( mesh->info.imprim > 4 && !mesh->info.iso )
-    _MMG5_prilen(mesh,met);
+    _MMG5_prilen(mesh,met,1);
 
   chrono(ON,&(ctim[1]));
   if ( mesh->info.imprim )  fprintf(stdout,"\n  -- MESH PACKED UP\n");

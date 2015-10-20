@@ -39,17 +39,20 @@
  * \param met pointer toward the sol structure.
  * \param np0 index of edge's extremity.
  * \param np1 index of edge's extremity.
+ * \param m0 metric at point np0.
+ * \param m1 metric at point np1.
  * \param isedg 1 if the edge is a ridge, 0 otherwise.
  * \return length of edge according to the prescribed metric.
  *
- * Compute length of surface edge \f$[i0;i1]\f$ according to the prescribed
- * aniso.  metric.
+ * Compute length of surface edge \f$[np0;np1]\f$ according to the prescribed
+ * aniso metrics \a m0 and \a m1.
  *
  */
-double _MMG5_lenSurfEdg_ani(MMG5_pMesh mesh,MMG5_pSol met,int np0,int np1,char isedg) {
+static inline
+double _MMG5_lenEdg(MMG5_pMesh mesh,int np0,int np1,
+                    double *m0,double *m1,char isedg) {
   MMG5_pPoint   p0,p1;
   double        gammaprim0[3],gammaprim1[3],t[3],*n1,*n2,ux,uy,uz,ps1,ps2,l0,l1;
-  double        *m0,*m1,met0[6],met1[6];
 
   p0 = &mesh->point[np0];
   p1 = &mesh->point[np1];
@@ -140,6 +143,53 @@ double _MMG5_lenSurfEdg_ani(MMG5_pMesh mesh,MMG5_pSol met,int np0,int np1,char i
     gammaprim1[2] = - uz - ps1*n1[2];
   }
 
+  /* computation of the length of the two tangent vectors in their respective tangent plane */
+  l0 = m0[0]*gammaprim0[0]*gammaprim0[0] + m0[3]*gammaprim0[1]*gammaprim0[1] \
+    + m0[5]*gammaprim0[2]*gammaprim0[2] \
+    + 2.0*m0[1]*gammaprim0[0]*gammaprim0[1]  + 2.0*m0[2]*gammaprim0[0]*gammaprim0[2] \
+    + 2.0*m0[4]*gammaprim0[1]*gammaprim0[2];
+
+  l1 = m1[0]*gammaprim1[0]*gammaprim1[0] + m1[3]*gammaprim1[1]*gammaprim1[1] \
+    + m1[5]*gammaprim1[2]*gammaprim1[2] \
+    +2.0*m1[1]*gammaprim1[0]*gammaprim1[1]  + 2.0*m1[2]*gammaprim1[0]*gammaprim1[2] \
+    + 2.0*m1[4]*gammaprim1[1]*gammaprim1[2];
+
+  if(l0 < 0) {
+    printf("%s:%d:Error: negative edge length (%e)\n",__FILE__,__LINE__,l0);
+    exit(EXIT_FAILURE);
+  }
+  if(l1 < 0) {
+    printf("%s:%d:Error: negative edge length (%e)\n",__FILE__,__LINE__,l1);
+    exit(EXIT_FAILURE);
+  }
+  l0 = 0.5*(sqrt(l0) + sqrt(l1));
+
+  return(l0);
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the sol structure.
+ * \param np0 index of edge's extremity.
+ * \param np1 index of edge's extremity.
+ * \param isedg 1 if the edge is a ridge, 0 otherwise.
+ * \return length of edge according to the prescribed metric.
+ *
+ * Compute length of surface edge \f$[i0;i1]\f$ according to the prescribed
+ * aniso metric (for special storage of metrics at ridges points).
+ *
+ */
+double _MMG5_lenSurfEdg_ani(MMG5_pMesh mesh,MMG5_pSol met,int np0,int np1,char isedg) {
+  MMG5_pPoint   p0,p1;
+  double        *m0,*m1,met0[6],met1[6],ux,uy,uz;
+
+  p0 = &mesh->point[np0];
+  p1 = &mesh->point[np1];
+
+  ux = p1->c[0] - p0->c[0];
+  uy = p1->c[1] - p0->c[1];
+  uz = p1->c[2] - p0->c[2];
+
   /* Set metrics */
   if ( MS_SIN(p0->tag) ) {
     m0 = &met->m[6*np0];
@@ -171,72 +221,53 @@ double _MMG5_lenSurfEdg_ani(MMG5_pMesh mesh,MMG5_pSol met,int np0,int np1,char i
     m1 = &met->m[6*np1];
   }
 
-  /* computation of the length of the two tangent vectors in their respective tangent plane */
-  l0 = m0[0]*gammaprim0[0]*gammaprim0[0] + m0[3]*gammaprim0[1]*gammaprim0[1] \
-    + m0[5]*gammaprim0[2]*gammaprim0[2] \
-    + 2.0*m0[1]*gammaprim0[0]*gammaprim0[1]  + 2.0*m0[2]*gammaprim0[0]*gammaprim0[2] \
-    + 2.0*m0[4]*gammaprim0[1]*gammaprim0[2];
+  return(_MMG5_lenEdg(mesh,np0,np1,m0,m1,isedg));
+}
 
-  l1 = m1[0]*gammaprim1[0]*gammaprim1[0] + m1[3]*gammaprim1[1]*gammaprim1[1] \
-    + m1[5]*gammaprim1[2]*gammaprim1[2] \
-    +2.0*m1[1]*gammaprim1[0]*gammaprim1[1]  + 2.0*m1[2]*gammaprim1[0]*gammaprim1[2] \
-    + 2.0*m1[4]*gammaprim1[1]*gammaprim1[2];
 
-  if(l0 < 0) {
-    printf("%s:%d:Error: negative edge length (%e)\n",__FILE__,__LINE__,l0);
-    exit(EXIT_FAILURE);
-  }
-  if(l1 < 0) {
-    printf("%s:%d:Error: negative edge length (%e)\n",__FILE__,__LINE__,l1);
-    exit(EXIT_FAILURE);
-  }
-  l0 = 0.5*(sqrt(l0) + sqrt(l1));
-  return(l0);
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the sol structure.
+ * \param np0 index of edge's extremity.
+ * \param np1 index of edge's extremity.
+ * \param isedg 1 if the edge is a ridge, 0 otherwise.
+ * \return length of edge according to the prescribed metric.
+ *
+ * Compute length of surface edge \f$[i0;i1]\f$ according to the prescribed
+ * aniso metric (for classic storage of metrics at ridges points).
+ *
+ */
+double _MMG5_lenSurfEdg33_ani(MMG5_pMesh mesh,MMG5_pSol met,
+                              int np0,int np1,char isedg) {
+  double        *m0,*m1;
+
+  /* Set metrics */
+  m0 = &met->m[6*np0];
+  m1 = &met->m[6*np1];
+
+  return(_MMG5_lenEdg(mesh,np0,np1,m0,m1,isedg));
 }
 
 /**
  * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the meric structure.
+ * \param m pointer toward the metric at triangle vertices.
  * \param ptt pointer toward the triangle structure.
- * \return The computed area.
+ * \return The double of the triangle area.
  *
- * Compute the area of the surface triangle \a ptt with respect to
- * the anisotropic metric \a met.
+ * Compute the double of the area of the surface triangle \a ptt with respect to
+ * the anisotropic metric \a m.
  *
  */
-double _MMG5_surftri_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt) {
-  MMG5_pPoint    p[3];
+static inline
+double _MMG5_surf(MMG5_pMesh mesh,double m[3][6],MMG5_pTria ptt) {
   _MMG5_Bezier   b;
-  int            np[3];
-  double         surf,ux,uy,uz,dens,m[3][6],J[3][2],mJ[3][2],tJmJ[2][2];
-  char           i,i1,i2;
+  double         surf,dens,J[3][2],mJ[3][2],tJmJ[2][2];
+  char           i;
 
   surf = 0.0;
 
-  for (i=0; i<3; i++) {
-    np[i] = ptt->v[i];
-    p[i]  = &mesh->point[np[i]];
-  }
   if ( !_MMG5_bezierCP(mesh,ptt,&b,1) ) return(0.0);
 
-  /* Set metric tensors at vertices of tria iel */
-  for(i=0; i<3; i++) {
-
-    if ( MS_SIN(p[i]->tag) ) {
-      memcpy(&m[i][0],&met->m[6*np[i]],6*sizeof(double));
-    }
-    else if ( p[i]->tag & MG_GEO ) {
-      i1 = _MMG5_inxt2[i];
-      i2 = _MMG5_iprv2[i];
-      ux = 0.5*(p[i1]->c[0]+p[i2]->c[0]) - p[i]->c[0];
-      uy = 0.5*(p[i1]->c[1]+p[i2]->c[1]) - p[i]->c[1];
-      uz = 0.5*(p[i1]->c[2]+p[i2]->c[2]) - p[i]->c[2];
-      if ( !_MMG5_buildridmet(mesh,met,np[i],ux,uy,uz,&m[i][0]) )  return(0.0);
-    }
-    else {
-      memcpy(&m[i][0],&met->m[6*np[i]],6*sizeof(double));
-    }
-  }
 
   /* Compute density integrand of volume at the 3 vertices of T */
   for (i=0; i<3; i++) {
@@ -280,6 +311,78 @@ double _MMG5_surftri_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt) {
 
   surf *= _MMG5_ATHIRD;
   return(surf);
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param ptt pointer toward the triangle structure.
+ * \return The double of the triangle area.
+ *
+ * Compute the double of the area of the surface triangle \a ptt with respect to
+ * the anisotropic metric \a met (for special storage of ridges metrics).
+ *
+ */
+double _MMG5_surftri_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt) {
+  MMG5_pPoint    p[3];
+  int            np[3];
+  double         ux,uy,uz,m[3][6];
+  char           i1,i2;
+  int            i;
+
+  for (i=0; i<3; i++) {
+    np[i] = ptt->v[i];
+    p[i]  = &mesh->point[np[i]];
+  }
+
+  /* Set metric tensors at vertices of tria iel */
+  for(i=0; i<3; i++) {
+
+    if ( MS_SIN(p[i]->tag) ) {
+      memcpy(&m[i][0],&met->m[6*np[i]],6*sizeof(double));
+    }
+    else if ( p[i]->tag & MG_GEO ) {
+      i1 = _MMG5_inxt2[i];
+      i2 = _MMG5_iprv2[i];
+      ux = 0.5*(p[i1]->c[0]+p[i2]->c[0]) - p[i]->c[0];
+      uy = 0.5*(p[i1]->c[1]+p[i2]->c[1]) - p[i]->c[1];
+      uz = 0.5*(p[i1]->c[2]+p[i2]->c[2]) - p[i]->c[2];
+      if ( !_MMG5_buildridmet(mesh,met,np[i],ux,uy,uz,&m[i][0]) )  return(0.0);
+    }
+    else {
+      memcpy(&m[i][0],&met->m[6*np[i]],6*sizeof(double));
+    }
+  }
+  return(_MMG5_surf(mesh,m,ptt));
+
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param ptt pointer toward the triangle structure.
+ * \return The double of the triangle area.
+ *
+ * Compute the double of the area of the surface triangle \a ptt with respect to
+ * the anisotropic metric \a met (for classic storage of ridges metrics).
+ *
+ */
+double _MMG5_surftri33_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt) {
+  MMG5_pPoint    p[3];
+  double         m[3][6];
+  int            np[3];
+  int            i;
+
+  for (i=0; i<3; i++) {
+    np[i] = ptt->v[i];
+    p[i]  = &mesh->point[np[i]];
+  }
+
+  /* Set metric tensors at vertices of tria iel */
+  for(i=0; i<3; i++) {
+    memcpy(&m[i][0],&met->m[6*np[i]],6*sizeof(double));
+  }
+  return(_MMG5_surf(mesh,m,ptt));
 }
 
 /**

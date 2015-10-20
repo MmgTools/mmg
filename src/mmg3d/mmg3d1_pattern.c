@@ -167,7 +167,7 @@ static int _MMG5_adpspl(MMG5_pMesh mesh,MMG5_pSol met, int* warn) {
       if ( !ier ) {
         ier = _MMG5_dichoto1b(mesh,met,list,ilist,ip);
       }
-      ier = _MMG5_split1b(mesh,met,list,ilist,ip,1);
+      ier = _MMG5_split1b(mesh,met,list,ilist,ip,1,1);
       /* if we realloc memory in _MMG5_split1b pt and pxt pointers are not valid */
       pt = &mesh->tetra[k];
       pxt = pt->xt ? &mesh->xtetra[pt->xt] : 0;
@@ -236,7 +236,7 @@ static int _MMG5_adpspl(MMG5_pMesh mesh,MMG5_pSol met, int* warn) {
           continue;
         }
       }
-      ier = _MMG5_split1b(mesh,met,list,ilist,ip,1);
+      ier = _MMG5_split1b(mesh,met,list,ilist,ip,1,1);
       if ( ier < 0 ) {
         fprintf(stdout,"  ## Error: unable to split.\n");
         return(-1);
@@ -316,7 +316,7 @@ static int _MMG5_adpcol(MMG5_pMesh mesh,MMG5_pSol met) {
       tag |= MG_BDY;
       if ( p0->tag > tag )   continue;
       if ( ( tag & MG_NOM ) && (mesh->adja[4*(k-1)+1+i]) ) continue;
-      ilist = _MMG5_chkcol_bdy(mesh,met,k,i,j,list);
+      ilist = _MMG5_chkcol_bdy(mesh,met,k,i,j,list,2);
     }
     /* Case of an internal face */
     else {
@@ -324,7 +324,7 @@ static int _MMG5_adpcol(MMG5_pMesh mesh,MMG5_pSol met) {
       ilist = _MMG5_chkcol_int(mesh,met,k,i,j,list,2);
     }
     if ( ilist > 0 ) {
-      ier = _MMG5_colver(mesh,met,list,ilist,i2);
+      ier = _MMG5_colver(mesh,met,list,ilist,i2,2);
       if ( ier < 0 )  return(-1);
       else if ( ier ) {
         _MMG5_delPt(mesh,ier);
@@ -377,7 +377,7 @@ static int _MMG5_adptet(MMG5_pMesh mesh,MMG5_pSol met) {
       }
 #ifdef DEBUG
       if ( nc ) { printf("APS ADPCOL == %d\n",nc);
-        _MMG5_prilen(mesh,met);
+        _MMG5_prilen(mesh,met,1);
       }
 #endif
     }
@@ -393,14 +393,14 @@ static int _MMG5_adptet(MMG5_pMesh mesh,MMG5_pSol met) {
     else  nm = 0;
 
     if ( !mesh->info.noswap ) {
-      nf = _MMG5_swpmsh(mesh,met,NULL);
+      nf = _MMG5_swpmsh(mesh,met,NULL,2);
       if ( nf < 0 ) {
         fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
         return(0);
       }
       nnf += nf;
 
-      nf = _MMG5_swptet(mesh,met,1.053,NULL);
+      nf = _MMG5_swptet(mesh,met,1.053,NULL,2);
       if ( nf < 0 ) {
         fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
         return(0);
@@ -461,14 +461,14 @@ static int _MMG5_adptet(MMG5_pMesh mesh,MMG5_pSol met) {
     else  nm = 0;
 
     if ( !mesh->info.noswap ) {
-      nf = _MMG5_swpmsh(mesh,met,NULL);
+      nf = _MMG5_swpmsh(mesh,met,NULL,2);
       if ( nf < 0 ) {
         fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
         return(0);
       }
       nnf += nf;
 
-      nf = _MMG5_swptet(mesh,met,1.053,NULL);
+      nf = _MMG5_swptet(mesh,met,1.053,NULL,2);
       if ( nf < 0 ) {
         fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
         return(0);
@@ -540,6 +540,12 @@ int _MMG5_mmg3d1_pattern(MMG5_pMesh mesh,MMG5_pSol met) {
   /**--- Stage 2: computational mesh */
   if ( abs(mesh->info.imprim) > 4 || mesh->info.ddebug )
     fprintf(stdout,"  ** COMPUTATIONAL MESH\n");
+
+  /* define metric map */
+  if ( !_MMG5_defsiz(mesh,met) ) {
+    fprintf(stdout,"  ## Metric undefined. Exit program.\n");
+    return(0);
+  }
 
   if ( mesh->info.hgrad > 0. && !_MMG5_gradsiz(mesh,met) ) {
     fprintf(stdout,"  ## Gradation problem. Exit program.\n");

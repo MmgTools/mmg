@@ -729,19 +729,25 @@
 !  * \param lmin minimum edge length.
 !  * \param lmax maximum ede length.
 !  * \param eltab table of invalid elements.
+!  * \param metRidTyp Type of storage of ridges metrics: 0 for classic storage
+!  * (before the _MMG5_defsiz call), 1 for special storage (after this call).
+!  *
 !  * \note Developped for the PaMPA library interface.
 !  *
 !  * Search invalid elements (in term of quality or edge length).
 !  *
 !  */
 
-! int MMG5_mmg3dcheck(MMG5_pMesh mesh,MMG5_pSol sol,
-!                     double critmin, double lmin, double lmax, int *eltab);
+! int MMG5_mmg3dcheck(MMG5_pMesh mesh,MMG5_pSol sol,double critmin,
+!                     double lmin, double lmax, int *eltab,char metRidTyp);
 ! /**
 !  * \param mesh pointer toward the mesh structure.
 !  * \param met pointer toward the sol structure.
 !  * \param critmin minimum quality for elements.
 !  * \param eltab pointer toward the table of invalid elements.
+!  * \param metRidTyp Type of storage of ridges metrics: 0 for classic storage
+!  * (before the _MMG5_defsiz call), 1 for special storage (after this call).
+!  *
 !  * \note Developped for the PaMPA library interface.
 !  *
 !  * Store elements which have worse quality than \a critmin in \a eltab,
@@ -749,13 +755,19 @@
 !  *
 !  */
 
-! void  MMG5_searchqua(MMG5_pMesh mesh, MMG5_pSol met, double critmin, int *eltab);
+! void  MMG5_searchqua(MMG5_pMesh mesh, MMG5_pSol met, double critmin, int *eltab,
+!                      char metRidTyp);
 ! /**
 !  * \param mesh pointer toward the mesh structure.
 !  * \param met pointer toward the sol structure.
 !  * \param lmin minimum edge length.
 !  * \param lmax maximum ede length.
 !  * \param eltab table of invalid elements.
+!  * \param metRidTyp Type of storage of ridges metrics: 0 for classic storage
+!  * (before the _MMG5_defsiz call), 1 for special storage (after this call).
+!  *
+!  * \return 1 if success, 0 otherwise.
+!  *
 !  * \note Developped for the PaMPA library interface.
 !  *
 !  * Store in \a eltab elements which have edge lengths shorter than \a lmin
@@ -764,7 +776,8 @@
 !  *
 !  */
 
-! int  MMG5_searchlen(MMG5_pMesh mesh, MMG5_pSol met, double lmin, double lmax, int *eltab);
+! int  MMG5_searchlen(MMG5_pMesh mesh, MMG5_pSol met, double lmin, double lmax,
+!                     int *eltab,char  metRidTyp);
 
 ! /** Utils */
 ! /**

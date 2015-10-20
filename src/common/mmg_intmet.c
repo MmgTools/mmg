@@ -35,132 +35,132 @@
 #include "mmg.h"
 
 
-/* /\** */
-/*  * \param m input metric. */
-/*  * \param n input metric. */
-/*  * \param mr computed output metric. */
-/*  * \param s parameter coordinate for the interpolation of metrics \a m and \a n. */
-/*  * \return 0 if fail, 1 otherwise. */
-/*  * */
-/*  * Compute the interpolated \f$(2 x 2)\f$ metric from metrics \a m and \a n, at */
-/*  * parameter \a s : \f$ mr = (1-s)*m +s*n \f$, both metrics being expressed in */
-/*  * the simultaneous reduction basis: linear interpolation of sizes. */
-/*  * */
-/*  *\/ */
-/* static int _MMG5_intmet22(double *m,double *n,double *mr,double s) { */
-/*   double  det,imn[4],dd,sqDelta,trimn,lambda[2],vp0[2],vp1[2],dm[2],dn[2],vnorm,d0,d1,ip[4]; */
+/**
+ * \param m input metric.
+ * \param n input metric.
+ * \param mr computed output metric.
+ * \param s parameter coordinate for the interpolation of metrics \a m and \a n.
+ * \return 0 if fail, 1 otherwise.
+ *
+ * Compute the interpolated \f$(2 x 2)\f$ metric from metrics \a m and \a n, at
+ * parameter \a s : \f$ mr = (1-s)*m +s*n \f$, both metrics being expressed in
+ * the simultaneous reduction basis: linear interpolation of sizes.
+ *
+ */
+static int _MMG5_intmet22(double *m,double *n,double *mr,double s) {
+  double  det,imn[4],dd,sqDelta,trimn,lambda[2],vp0[2],vp1[2],dm[2],dn[2],vnorm,d0,d1,ip[4];
 
-/*   /\* Compute imn = M^{-1}N *\/ */
-/*   det = m[0]*m[2] - m[1]*m[1]; */
-/*   if ( fabs(det) < _MMG5_EPS*_MMG5_EPS ) { */
-/*     printf("BEWARE : function intmet : null metric det : %E \n",det); */
-/*     return(0); */
-/*   } */
-/*   det = 1.0 / det; */
+  /* Compute imn = M^{-1}N */
+  det = m[0]*m[2] - m[1]*m[1];
+  if ( fabs(det) < _MMG5_EPS*_MMG5_EPS ) {
+    printf("BEWARE : function intmet : null metric det : %E \n",det);
+    return(0);
+  }
+  det = 1.0 / det;
 
-/*   imn[0] = det * ( m[2]*n[0] - m[1]*n[1]); */
-/*   imn[1] = det * ( m[2]*n[1] - m[1]*n[2]); */
-/*   imn[2] = det * (-m[1]*n[0] + m[0]*n[1]); */
-/*   imn[3] = det * (-m[1]*n[1] + m[0]*n[2]); */
-/*   dd = imn[0] - imn[3]; */
-/*   sqDelta = sqrt(fabs(dd*dd + 4.0*imn[1]*imn[2])); */
-/*   trimn = imn[0] + imn[3]; */
+  imn[0] = det * ( m[2]*n[0] - m[1]*n[1]);
+  imn[1] = det * ( m[2]*n[1] - m[1]*n[2]);
+  imn[2] = det * (-m[1]*n[0] + m[0]*n[1]);
+  imn[3] = det * (-m[1]*n[1] + m[0]*n[2]);
+  dd = imn[0] - imn[3];
+  sqDelta = sqrt(fabs(dd*dd + 4.0*imn[1]*imn[2]));
+  trimn = imn[0] + imn[3];
 
-/*   lambda[0] = 0.5 * (trimn - sqDelta); */
-/*   if ( lambda[0] < 0.0 ) { */
-/*     printf("Les valeurs propres : %f \n",lambda[0]); */
-/*     return(0); */
-/*   } */
+  lambda[0] = 0.5 * (trimn - sqDelta);
+  if ( lambda[0] < 0.0 ) {
+    printf("Les valeurs propres : %f \n",lambda[0]);
+    return(0);
+  }
 
-/*   /\** First case : matrices m and n are homothetic = n = lambda0*m *\/ */
-/*   if ( sqDelta < _MMG5_EPS ) { */
-/*     dd  = (1.0-s)*sqrt(lambda[0]) + s; */
-/*     dd *= dd; */
-/*     if ( dd < _MMG5_EPSD ) { */
-/*       mr[0] = m[0]; */
-/*       mr[1] = m[1]; */
-/*       mr[2] = m[2]; */
-/*       return(1); */
-/*     } */
-/*     dd = lambda[0] / dd; */
-/*     mr[0] = dd * m[0]; */
-/*     mr[1] = dd * m[1]; */
-/*     mr[2] = dd * m[2]; */
-/*     return(1); */
-/*   } */
+  /** First case : matrices m and n are homothetic = n = lambda0*m */
+  if ( sqDelta < _MMG5_EPS ) {
+    dd  = (1.0-s)*sqrt(lambda[0]) + s;
+    dd *= dd;
+    if ( dd < _MMG5_EPSD ) {
+      mr[0] = m[0];
+      mr[1] = m[1];
+      mr[2] = m[2];
+      return(1);
+    }
+    dd = lambda[0] / dd;
+    mr[0] = dd * m[0];
+    mr[1] = dd * m[1];
+    mr[2] = dd * m[2];
+    return(1);
+  }
 
-/*   /\** Second case : both eigenvalues of imn are distinct ; theory says qf */
-/*      associated to m and n are diagonalizable in basis (vp0, vp1) - the */
-/*      coreduction basis *\/ */
-/*   else { */
-/*     lambda[1] = 0.5 * (trimn + sqDelta); */
-/*     assert(lambda[1] >= 0.0); */
+  /** Second case : both eigenvalues of imn are distinct ; theory says qf
+     associated to m and n are diagonalizable in basis (vp0, vp1) - the
+     coreduction basis */
+  else {
+    lambda[1] = 0.5 * (trimn + sqDelta);
+    assert(lambda[1] >= 0.0);
 
-/*     vp0[0] = imn[1]; */
-/*     vp0[1] = (lambda[0] - imn[0]); */
-/*     vnorm  = sqrt(vp0[0]*vp0[0] + vp0[1]*vp0[1]); */
-/*     if ( vnorm < _MMG5_EPS ) { */
-/*       vp0[0] = (lambda[0] - imn[3]); */
-/*       vp0[1] = imn[2]; */
-/*       vnorm  = sqrt(vp0[0]*vp0[0] + vp0[1]*vp0[1]); */
-/*     } */
-/*     vnorm   = 1.0 / vnorm; */
-/*     vp0[0] *= vnorm; */
-/*     vp0[1] *= vnorm; */
+    vp0[0] = imn[1];
+    vp0[1] = (lambda[0] - imn[0]);
+    vnorm  = sqrt(vp0[0]*vp0[0] + vp0[1]*vp0[1]);
+    if ( vnorm < _MMG5_EPS ) {
+      vp0[0] = (lambda[0] - imn[3]);
+      vp0[1] = imn[2];
+      vnorm  = sqrt(vp0[0]*vp0[0] + vp0[1]*vp0[1]);
+    }
+    vnorm   = 1.0 / vnorm;
+    vp0[0] *= vnorm;
+    vp0[1] *= vnorm;
 
-/*     vp1[0] = imn[1]; */
-/*     vp1[1] = (lambda[1] - imn[0]); */
-/*     vnorm  = sqrt(vp1[0]*vp1[0] + vp1[1]*vp1[1]); */
-/*     if ( vnorm < _MMG5_EPS ) { */
-/*       vp1[0] = (lambda[1] - imn[3]); */
-/*       vp1[1] = imn[2]; */
-/*       vnorm  = sqrt(vp1[0]*vp1[0] + vp1[1]*vp1[1]); */
-/*     } */
-/*     vnorm   = 1.0 / vnorm; */
-/*     vp1[0] *= vnorm; */
-/*     vp1[1] *= vnorm; */
+    vp1[0] = imn[1];
+    vp1[1] = (lambda[1] - imn[0]);
+    vnorm  = sqrt(vp1[0]*vp1[0] + vp1[1]*vp1[1]);
+    if ( vnorm < _MMG5_EPS ) {
+      vp1[0] = (lambda[1] - imn[3]);
+      vp1[1] = imn[2];
+      vnorm  = sqrt(vp1[0]*vp1[0] + vp1[1]*vp1[1]);
+    }
+    vnorm   = 1.0 / vnorm;
+    vp1[0] *= vnorm;
+    vp1[1] *= vnorm;
 
-/*     /\* Compute diagonal values in simultaneous reduction basis *\/ */
-/*     dm[0] = m[0]*vp0[0]*vp0[0] + 2.0*m[1]*vp0[0]*vp0[1] + m[2]*vp0[1]*vp0[1]; */
-/*     dm[1] = m[0]*vp1[0]*vp1[0] + 2.0*m[1]*vp1[0]*vp1[1] + m[2]*vp1[1]*vp1[1]; */
-/*     dn[0] = n[0]*vp0[0]*vp0[0] + 2.0*n[1]*vp0[0]*vp0[1] + n[2]*vp0[1]*vp0[1]; */
-/*     dn[1] = n[0]*vp1[0]*vp1[0] + 2.0*n[1]*vp1[0]*vp1[1] + n[2]*vp1[1]*vp1[1]; */
+    /* Compute diagonal values in simultaneous reduction basis */
+    dm[0] = m[0]*vp0[0]*vp0[0] + 2.0*m[1]*vp0[0]*vp0[1] + m[2]*vp0[1]*vp0[1];
+    dm[1] = m[0]*vp1[0]*vp1[0] + 2.0*m[1]*vp1[0]*vp1[1] + m[2]*vp1[1]*vp1[1];
+    dn[0] = n[0]*vp0[0]*vp0[0] + 2.0*n[1]*vp0[0]*vp0[1] + n[2]*vp0[1]*vp0[1];
+    dn[1] = n[0]*vp1[0]*vp1[0] + 2.0*n[1]*vp1[0]*vp1[1] + n[2]*vp1[1]*vp1[1];
 
-/*     /\* Diagonal values of the interpolated metric *\/ */
-/*     dd  = (1.0-s)*sqrt(dn[0]) + s*sqrt(dm[0]); */
-/*     dd *= dd; */
-/*     if ( dd < _MMG5_EPSD ) { */
-/*       d0 = s < 0.5 ? dm[0] : dn[0]; */
-/*     } */
-/*     else { */
-/*       d0 = dm[0]*dn[0] / dd; */
-/*     } */
-/*     dd = (1.0-s)*sqrt(dn[1]) + s*sqrt(dm[1]); */
-/*     dd *= dd; */
-/*     if ( dd < _MMG5_EPSD ) { */
-/*       d1 = s < 0.5 ? dm[1] : dn[1]; */
-/*     } */
-/*     else{ */
-/*       d1 = dm[1]*dn[1] / dd; */
-/*     } */
+    /* Diagonal values of the interpolated metric */
+    dd  = (1.0-s)*sqrt(dn[0]) + s*sqrt(dm[0]);
+    dd *= dd;
+    if ( dd < _MMG5_EPSD ) {
+      d0 = s < 0.5 ? dm[0] : dn[0];
+    }
+    else {
+      d0 = dm[0]*dn[0] / dd;
+    }
+    dd = (1.0-s)*sqrt(dn[1]) + s*sqrt(dm[1]);
+    dd *= dd;
+    if ( dd < _MMG5_EPSD ) {
+      d1 = s < 0.5 ? dm[1] : dn[1];
+    }
+    else{
+      d1 = dm[1]*dn[1] / dd;
+    }
 
-/*     /\* Intersected metric = tP^-1 diag(d0,d1)P^-1, P = (vp0, vp1) stored in columns *\/ */
-/*     det = vp0[0]*vp1[1] - vp0[1]*vp1[0]; */
-/*     if ( fabs(det) < _MMG5_EPS )  return(0); */
-/*     det = 1.0 / det; */
+    /* Intersected metric = tP^-1 diag(d0,d1)P^-1, P = (vp0, vp1) stored in columns */
+    det = vp0[0]*vp1[1] - vp0[1]*vp1[0];
+    if ( fabs(det) < _MMG5_EPS )  return(0);
+    det = 1.0 / det;
 
-/*     ip[0] =  vp1[1]*det; */
-/*     ip[1] = -vp1[0]*det; */
-/*     ip[2] = -vp0[1]*det; */
-/*     ip[3] =  vp0[0]*det; */
+    ip[0] =  vp1[1]*det;
+    ip[1] = -vp1[0]*det;
+    ip[2] = -vp0[1]*det;
+    ip[3] =  vp0[0]*det;
 
-/*     mr[0] = d0*ip[0]*ip[0] + d1*ip[2]*ip[2]; */
-/*     mr[1] = d0*ip[0]*ip[1] + d1*ip[2]*ip[3]; */
-/*     mr[2] = d0*ip[1]*ip[1] + d1*ip[3]*ip[3]; */
-/*   } */
+    mr[0] = d0*ip[0]*ip[0] + d1*ip[2]*ip[2];
+    mr[1] = d0*ip[0]*ip[1] + d1*ip[2]*ip[3];
+    mr[2] = d0*ip[1]*ip[1] + d1*ip[3]*ip[3];
+  }
 
-/*   return(1); */
-/* } */
+  return(1);
+}
 
 /**
  * \param m input metric.
@@ -174,7 +174,7 @@
  * the simultaneous reduction basis: linear interpolation of sizes.
  *
  */
-static int _MMG5_intmet33(double *m,double *n,double *mr,double s) {
+int _MMG5_mmgIntmet33_ani(double *m,double *n,double *mr,double s) {
   int     order;
   double  lambda[3],vp[3][3],mu[3],is[6],isnis[6],mt[9],P[9],dd;
   char    i;
@@ -295,23 +295,17 @@ int _MMG5_intridmet(MMG5_pMesh mesh,MMG5_pSol met,int ip1, int ip2,double s,
         mr[0] = m1[0];
         mr[1] = m1[0];
         mr[2] = m1[0];
-        mr[3] = m1[0];
-        mr[4] = m1[0];
       }
       else {
         mr[0] = m2[0];
         mr[1] = m2[0];
         mr[2] = m2[0];
-        mr[3] = m2[0];
-        mr[4] = m2[0];
       }
     }
     else {
       mr[0] = m1[0]*m2[0] / dd;
       mr[1] = mr[0];
       mr[2] = mr[0];
-      mr[3] = mr[0];
-      mr[4] = mr[0];
     }
   }
   /* vertex p1 is singular, p2 is regular */
@@ -613,7 +607,7 @@ int _MMG5_interpreg_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt,char i,
   MMG5_pPoint    p1,p2;
   _MMG5_Bezier   b;
   double         b1[3],b2[3],bn[3],c[3],nt[3],cold[3],nold[3],n[3];
-  double         m1old[6],m2old[6],m1[6],m2[6];
+  double         m1old[6],m2old[6],m1[6],m2[6],m1tmp[3],m2tmp[3],mrtmp[3];
   double         *n1,*n2,step,u,r[3][3],dd;
   int            ip1,ip2,nstep,l;
   char           i1,i2;
@@ -749,7 +743,7 @@ int _MMG5_interpreg_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt,char i,
   _MMG5_rmtr(r,m2,m2old);
 
   /* Interpolate both metrics expressed in the same tangent plane. */
-  if ( !_MMG5_intmet33(m1old,m2old,mr,s) ) {
+  if ( !_MMG5_mmgIntmet33_ani(m1old,m2old,mr,s) ) {
     printf("Impossible interpolation between points : %d %d\n",pt->v[i1],pt->v[i2]);
     printf("m1 : %E %E %E %E %E %E \n",m1[0],m1[1],m1[2],m1[3],m1[4],m1[5]);
     printf("m2 : %E %E %E %E %E %E \n",m2[0],m2[1],m2[2],m2[3],m2[4],m2[5]);

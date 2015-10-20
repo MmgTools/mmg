@@ -85,7 +85,11 @@ int _MMG5_chkcol_int(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
 
     pt0->v[ip] = nq;
     calold = MG_MIN(calold,pt->qual);
-    caltmp = _MMG5_orcal(mesh,met,0);
+    if ( typchk==1 && met->m && met->size > 1 )
+      caltmp = _MMG5_caltet33_ani(mesh,met,pt0);
+    else
+      caltmp = _MMG5_orcal(mesh,met,0);
+
     if ( caltmp < _MMG5_EPSD )  return(0);
     calnew = MG_MIN(calnew,caltmp);
     /* check length */
@@ -393,7 +397,8 @@ _MMG5_topchkcol_bdy(MMG5_pMesh mesh,int k,int iface,char iedg,int *lists,int ili
  *  'mechanical' tests (positive jacobian) are not performed here ;
  *  iface = boundary face on which lie edge iedg - in local face num.
  *  (pq, or ia in local tet notation) */
-int _MMG5_chkcol_bdy(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,char iedg,int *listv) {
+int _MMG5_chkcol_bdy(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
+                     char iedg,int *listv,char typchk) {
   MMG5_pTetra        pt,pt0;
   MMG5_pxTetra       pxt;
   MMG5_pPoint        p0;
@@ -486,7 +491,10 @@ int _MMG5_chkcol_bdy(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,char iedg,in
     pt0->v[ipp] = numq;
 
     calold = MG_MIN(calold, pt->qual);
-    caltmp = _MMG5_orcal(mesh,met,0);
+    if ( typchk==1 && met->m && met->size > 1 )
+      pt->qual=_MMG5_caltet33_ani(mesh,met,pt0);
+    else
+      caltmp = _MMG5_orcal(mesh,met,0);
 
     if ( caltmp < _MMG5_EPSD )  return(0);
     calnew = MG_MIN(calnew,caltmp);
@@ -587,7 +595,7 @@ int _MMG5_chkcol_bdy(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,char iedg,in
 /** Collapse vertex p = list[0]%4 of tetra list[0]/4 over vertex indq of tetra list[0]/4.
  *  Only physical tests (positive jacobian) are done (i.e. approximation of the surface,
  *  etc... must be performed outside). */
-int _MMG5_colver(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,char indq) {
+int _MMG5_colver(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,char indq,char typchk) {
   MMG5_pTetra          pt,pt1;
   MMG5_pxTetra         pxt,pxt1;
   MMG5_xTetra          xt,xts;
@@ -1020,7 +1028,10 @@ int _MMG5_colver(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,char indq) {
     ip  = list[k] % 4;
     pt  = &mesh->tetra[iel];
     pt->v[ip] = nq;
-    pt->qual=_MMG5_orcal(mesh,met,iel);
+    if ( typchk==1 && met->m && met->size > 1 )
+      pt->qual=_MMG5_caltet33_ani(mesh,met,pt);
+    else
+      pt->qual=_MMG5_orcal(mesh,met,iel);
   }
   return(np);
 }

@@ -130,7 +130,7 @@ int _MMG5_split1_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
  * Split 1 edge of tetra \a k.
  *
  */
-void _MMG5_split1(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
+void _MMG5_split1(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) {
   MMG5_pTetra   pt,pt1;
   MMG5_xTetra   xt,xt1;
   MMG5_pxTetra  pxt0;
@@ -245,8 +245,15 @@ nextstep1:
     }
   }
   /* Quality update */
-  pt->qual=_MMG5_orcal(mesh,met,k);
-  pt1->qual=_MMG5_orcal(mesh,met,iel);
+  if ( (!metRidTyp) && met->m && met->size>1 ) {
+    pt->qual=_MMG5_caltet33_ani(mesh,met,pt);
+    pt1->qual=_MMG5_caltet33_ani(mesh,met,pt1);
+  }
+  else
+  {
+    pt->qual=_MMG5_orcal(mesh,met,k);
+    pt1->qual=_MMG5_orcal(mesh,met,iel);
+  }
 }
 
 /**
@@ -310,6 +317,8 @@ int _MMG5_simbulgept(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int ip) {
  * \param ret size of the shell of edge.
  * \param ip idex of new point.
  * \param cas flag to watch the length of the new edges.
+ * \param metRidTyp Type of storage of ridges metrics: 0 for classic storage,
+ * 1 for special storage.
  * \return -1 if lack of memory, 0 if we don't split the edge, 1 if success.
  *
  * Split edge \f$list[0]%6\f$, whose shell list is passed, introducing point \a
@@ -317,7 +326,8 @@ int _MMG5_simbulgept(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int ip) {
  * sense).
  *
  */
-int _MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,int cas){
+int _MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,
+                  int cas,char metRidTyp){
   MMG5_pTetra         pt,pt1,pt0;
   MMG5_xTetra         xt,xt1;
   MMG5_pxTetra        pxt0;
@@ -336,7 +346,10 @@ int _MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,int 
     for (j=0; j<ilist; j++) {
       for (i=0; i<6; i++) {
         pt   = &mesh->tetra[list[j]/6];
-        len  = _MMG5_lenedg(mesh,met,i,pt);
+        if ( (!metRidTyp) && met->m && met->size>1 )
+          len = _MMG5_lenedg33_ani(mesh,met,i,pt);
+        else
+          len  = _MMG5_lenedg(mesh,met,i,pt);
         if ( len < lmin) {
           lmin = len;
         }
@@ -377,12 +390,20 @@ int _MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,int 
         taued = &permedge[11][0];
         break;
       }
+
       pt0->v[_MMG5_isar[ie][1]] = ip;
-      len = _MMG5_lenedgspl(mesh,met,taued[5],pt0);
+      if ( (!metRidTyp) && met->m && met->size>1 )
+        len = _MMG5_lenedgspl33_ani(mesh,met,taued[5],pt0);
+      else
+        len = _MMG5_lenedgspl(mesh,met,taued[5],pt0);
       if ( len < lmin )  break;
       memcpy(pt0,pt,sizeof(MMG5_Tetra));
+
       pt0->v[_MMG5_isar[ie][0]] = ip;
-      len = _MMG5_lenedgspl(mesh,met,taued[5],pt0);
+      if ( (!metRidTyp) && met->m && met->size>1 )
+        len = _MMG5_lenedgspl33_ani(mesh,met,taued[5],pt0);
+      else
+        len = _MMG5_lenedgspl(mesh,met,taued[5],pt0);
       if ( len < lmin )  break;
     }
     if ( j < ilist )  return(0);
@@ -563,8 +584,14 @@ int _MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,int 
       adjan[voy] = 4*jel + tau[0];
     }
     /* Quality update */
-    pt->qual=_MMG5_orcal(mesh,met,iel);
-    pt1->qual=_MMG5_orcal(mesh,met,jel);
+    if ( (!metRidTyp) && met->m && met->size>1 ) {
+      pt->qual=_MMG5_caltet33_ani(mesh,met,pt);
+      pt1->qual=_MMG5_caltet33_ani(mesh,met,pt1);
+    }
+    else {
+      pt->qual=_MMG5_orcal(mesh,met,iel);
+      pt1->qual=_MMG5_orcal(mesh,met,jel);
+    }
 
     _MMG5_SAFE_FREE(newtet);
     return(1);
@@ -853,8 +880,14 @@ int _MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,int 
       adjan[voy] = 4*jel + tau[0];
     }
     /* Quality update */
-    pt->qual=_MMG5_orcal(mesh,met,iel);
-    pt1->qual=_MMG5_orcal(mesh,met,jel);
+    if ( (!metRidTyp) && met->m && met->size>1 ) {
+      pt->qual=_MMG5_caltet33_ani(mesh,met,pt);
+      pt1->qual=_MMG5_caltet33_ani(mesh,met,pt1);
+    }
+    else {
+      pt->qual=_MMG5_orcal(mesh,met,iel);
+      pt1->qual=_MMG5_orcal(mesh,met,jel);
+    }
   }
 
   _MMG5_SAFE_FREE(newtet);
@@ -963,7 +996,7 @@ int _MMG5_split2sf_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]){
 }
 
 /** Split of two edges that belong to a common face : 1 tetra becomes 3 */
-void _MMG5_split2sf(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]){
+void _MMG5_split2sf(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp){
   MMG5_pTetra        pt[3];
   MMG5_xTetra        xt[3];
   MMG5_pxTetra       pxt0;
@@ -1167,14 +1200,22 @@ void _MMG5_split2sf(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]){
     }
   }
   /* Quality update */
-  pt[0]->qual=_MMG5_orcal(mesh,met,newtet[0]);
-  pt[1]->qual=_MMG5_orcal(mesh,met,newtet[1]);
-  pt[2]->qual=_MMG5_orcal(mesh,met,newtet[2]);
+  if ( (!metRidTyp) && met->m && met->size>1 ) {
+    pt[0]->qual=_MMG5_caltet33_ani(mesh,met,pt[0]);
+    pt[1]->qual=_MMG5_caltet33_ani(mesh,met,pt[1]);
+    pt[2]->qual=_MMG5_caltet33_ani(mesh,met,pt[2]);
+  }
+  else
+  {
+    pt[0]->qual=_MMG5_orcal(mesh,met,newtet[0]);
+    pt[1]->qual=_MMG5_orcal(mesh,met,newtet[1]);
+    pt[2]->qual=_MMG5_orcal(mesh,met,newtet[2]);
+  }
 
 }
 
 /** Split of two OPPOSITE edges */
-void _MMG5_split2(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
+void _MMG5_split2(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) {
   MMG5_pTetra   pt[4];
   MMG5_xTetra   xt[4];
   MMG5_pxTetra  pxt0;
@@ -1357,10 +1398,18 @@ void _MMG5_split2(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
     }
   }
   /* Quality update */
-  pt[0]->qual=_MMG5_orcal(mesh,met,newtet[0]);
-  pt[1]->qual=_MMG5_orcal(mesh,met,newtet[1]);
-  pt[2]->qual=_MMG5_orcal(mesh,met,newtet[2]);
-  pt[3]->qual=_MMG5_orcal(mesh,met,newtet[3]);
+  if ( (!metRidTyp) && met->m && met->size>1 ) {
+    pt[0]->qual=_MMG5_caltet33_ani(mesh,met,pt[0]);
+    pt[1]->qual=_MMG5_caltet33_ani(mesh,met,pt[1]);
+    pt[2]->qual=_MMG5_caltet33_ani(mesh,met,pt[2]);
+    pt[3]->qual=_MMG5_caltet33_ani(mesh,met,pt[3]);
+  }
+  else {
+    pt[0]->qual=_MMG5_orcal(mesh,met,newtet[0]);
+    pt[1]->qual=_MMG5_orcal(mesh,met,newtet[1]);
+    pt[2]->qual=_MMG5_orcal(mesh,met,newtet[2]);
+    pt[3]->qual=_MMG5_orcal(mesh,met,newtet[3]);
+  }
 
 }
 
@@ -1426,7 +1475,7 @@ int _MMG5_split3_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
 }
 
 /** 1 face (3 edges) subdivided */
-void _MMG5_split3(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
+void _MMG5_split3(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) {
   MMG5_pTetra    pt[4];
   MMG5_xTetra    xt[4];
   MMG5_pxTetra   pxt0;
@@ -1608,15 +1657,22 @@ void _MMG5_split3(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
     }
   }
   /* Quality update */
-  pt[0]->qual=_MMG5_orcal(mesh,met,newtet[0]);
-  pt[1]->qual=_MMG5_orcal(mesh,met,newtet[1]);
-  pt[2]->qual=_MMG5_orcal(mesh,met,newtet[2]);
-  pt[3]->qual=_MMG5_orcal(mesh,met,newtet[3]);
-
+  if ( (!metRidTyp) && met->m && met->size>1 ) {
+    pt[0]->qual=_MMG5_caltet33_ani(mesh,met,pt[0]);
+    pt[1]->qual=_MMG5_caltet33_ani(mesh,met,pt[1]);
+    pt[2]->qual=_MMG5_caltet33_ani(mesh,met,pt[2]);
+    pt[3]->qual=_MMG5_caltet33_ani(mesh,met,pt[3]);
+  }
+  else {
+    pt[0]->qual=_MMG5_orcal(mesh,met,newtet[0]);
+    pt[1]->qual=_MMG5_orcal(mesh,met,newtet[1]);
+    pt[2]->qual=_MMG5_orcal(mesh,met,newtet[2]);
+    pt[3]->qual=_MMG5_orcal(mesh,met,newtet[3]);
+  }
 }
 
 /** Split 3 edge in cone configuration */
-void _MMG5_split3cone(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
+void _MMG5_split3cone(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) {
   MMG5_pTetra    pt[4];
   MMG5_xTetra    xt[4];
   MMG5_pxTetra   pxt0;
@@ -1950,14 +2006,22 @@ void _MMG5_split3cone(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
     }
   }
   /* Quality update */
-  pt[0]->qual=_MMG5_orcal(mesh,met,newtet[0]);
-  pt[1]->qual=_MMG5_orcal(mesh,met,newtet[1]);
-  pt[2]->qual=_MMG5_orcal(mesh,met,newtet[2]);
-  pt[3]->qual=_MMG5_orcal(mesh,met,newtet[3]);
+  if ( (!metRidTyp) && met->m && met->size>1 ) {
+    pt[0]->qual=_MMG5_caltet33_ani(mesh,met,pt[0]);
+    pt[1]->qual=_MMG5_caltet33_ani(mesh,met,pt[1]);
+    pt[2]->qual=_MMG5_caltet33_ani(mesh,met,pt[2]);
+    pt[3]->qual=_MMG5_caltet33_ani(mesh,met,pt[3]);
+  }
+  else {
+    pt[0]->qual=_MMG5_orcal(mesh,met,newtet[0]);
+    pt[1]->qual=_MMG5_orcal(mesh,met,newtet[1]);
+    pt[2]->qual=_MMG5_orcal(mesh,met,newtet[2]);
+    pt[3]->qual=_MMG5_orcal(mesh,met,newtet[3]);
+  }
 
 }
 
-void _MMG5_split3op(MMG5_pMesh mesh, MMG5_pSol met, int k, int vx[6]){
+void _MMG5_split3op(MMG5_pMesh mesh, MMG5_pSol met, int k, int vx[6],char metRidTyp){
   MMG5_pTetra        pt[5];
   MMG5_xTetra        xt[5];
   MMG5_pxTetra       pxt0;
@@ -2498,12 +2562,23 @@ void _MMG5_split3op(MMG5_pMesh mesh, MMG5_pSol met, int k, int vx[6]){
     }
   }
   /* Quality update */
-  pt[0]->qual=_MMG5_orcal(mesh,met,newtet[0]);
-  pt[1]->qual=_MMG5_orcal(mesh,met,newtet[1]);
-  pt[2]->qual=_MMG5_orcal(mesh,met,newtet[2]);
-  pt[3]->qual=_MMG5_orcal(mesh,met,newtet[3]);
-  if ( !((imin12 == ip1) && (imin03 == ip3)) ) {
-    pt[4]->qual=_MMG5_orcal(mesh,met,newtet[4]);
+  if ( (!metRidTyp) && met->m && met->size>1 ) {
+    pt[0]->qual=_MMG5_caltet33_ani(mesh,met,pt[0]);
+    pt[1]->qual=_MMG5_caltet33_ani(mesh,met,pt[1]);
+    pt[2]->qual=_MMG5_caltet33_ani(mesh,met,pt[2]);
+    pt[3]->qual=_MMG5_caltet33_ani(mesh,met,pt[3]);
+    if ( !((imin12 == ip1) && (imin03 == ip3)) ) {
+      pt[4]->qual=_MMG5_caltet33_ani(mesh,met,pt[4]);
+    }
+  }
+  else {
+    pt[0]->qual=_MMG5_orcal(mesh,met,newtet[0]);
+    pt[1]->qual=_MMG5_orcal(mesh,met,newtet[1]);
+    pt[2]->qual=_MMG5_orcal(mesh,met,newtet[2]);
+    pt[3]->qual=_MMG5_orcal(mesh,met,newtet[3]);
+    if ( !((imin12 == ip1) && (imin03 == ip3)) ) {
+      pt[4]->qual=_MMG5_orcal(mesh,met,newtet[4]);
+    }
   }
 
 }
@@ -2519,7 +2594,7 @@ void _MMG5_split3op(MMG5_pMesh mesh, MMG5_pSol met, int k, int vx[6]){
  * NEEDED ?
  *
  */
-int _MMG5_split4bar(MMG5_pMesh mesh, MMG5_pSol met, int k) {
+int _MMG5_split4bar(MMG5_pMesh mesh, MMG5_pSol met, int k,char metRidTyp) {
   MMG5_pTetra   pt[4];
   MMG5_pPoint   ppt;
   MMG5_xTetra   xt[4];
@@ -2555,7 +2630,10 @@ int _MMG5_split4bar(MMG5_pMesh mesh, MMG5_pSol met, int k) {
                         ,o,0);
   }
   if ( met->m ) {
-    _MMG5_interp4bar(mesh,met,k,ib,cb);
+    if ( !metRidTyp && met->size > 1 )
+      _MMG5_interp4bar33_ani(mesh,met,k,ib,cb);
+    else
+      _MMG5_interp4bar(mesh,met,k,ib,cb);
   }
 
   /* create 3 new tetras */
@@ -2711,16 +2789,24 @@ int _MMG5_split4bar(MMG5_pMesh mesh, MMG5_pSol met, int k) {
     }
   }
   /* Quality update */
-  pt[0]->qual=_MMG5_orcal(mesh,met,newtet[0]);
-  pt[1]->qual=_MMG5_orcal(mesh,met,newtet[1]);
-  pt[2]->qual=_MMG5_orcal(mesh,met,newtet[2]);
-  pt[3]->qual=_MMG5_orcal(mesh,met,newtet[3]);
+  if ( (!metRidTyp) && met->m && met->size>1 ) {
+    pt[0]->qual=_MMG5_caltet33_ani(mesh,met,pt[0]);
+    pt[1]->qual=_MMG5_caltet33_ani(mesh,met,pt[1]);
+    pt[2]->qual=_MMG5_caltet33_ani(mesh,met,pt[2]);
+    pt[3]->qual=_MMG5_caltet33_ani(mesh,met,pt[3]);
+  }
+  else {
+    pt[0]->qual=_MMG5_orcal(mesh,met,newtet[0]);
+    pt[1]->qual=_MMG5_orcal(mesh,met,newtet[1]);
+    pt[2]->qual=_MMG5_orcal(mesh,met,newtet[2]);
+    pt[3]->qual=_MMG5_orcal(mesh,met,newtet[3]);
+  }
 
   return(1);
 }
 
 /** Split 4 edges in a configuration when 3 lie on the same face */
-void _MMG5_split4sf(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
+void _MMG5_split4sf(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) {
   MMG5_pTetra    pt[6];
   MMG5_xTetra    xt[6];
   MMG5_pxTetra   pxt0;
@@ -2991,13 +3077,21 @@ void _MMG5_split4sf(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
       pt[0]->xt = 0;
     }
   }
-  for (i=0; i<6; i++) {
-    pt[i]->qual=_MMG5_orcal(mesh,met,newtet[i]);
+
+  if ( (!metRidTyp) && met->m && met->size>1 ) {
+    for (i=0; i<6; i++) {
+      pt[i]->qual=_MMG5_caltet33_ani(mesh,met,pt[i]);
+    }
+  }
+  else {
+    for (i=0; i<6; i++) {
+      pt[i]->qual=_MMG5_orcal(mesh,met,newtet[i]);
+    }
   }
 }
 
 /** Split 4 edges in a configuration when no 3 edges lie on the same face */
-void _MMG5_split4op(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
+void _MMG5_split4op(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) {
   MMG5_pTetra        pt[6];
   MMG5_xTetra        xt[6];
   MMG5_pxTetra       pxt0;
@@ -3241,13 +3335,20 @@ void _MMG5_split4op(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
 
     }
   }
-  for (i=0; i<6; i++) {
-    pt[i]->qual=_MMG5_orcal(mesh,met,newtet[i]);
+  if ( (!metRidTyp) && met->m && met->size>1 ) {
+    for (i=0; i<6; i++) {
+      pt[i]->qual=_MMG5_caltet33_ani(mesh,met,pt[i]);
+    }
+  }
+  else {
+    for (i=0; i<6; i++) {
+      pt[i]->qual=_MMG5_orcal(mesh,met,newtet[i]);
+    }
   }
 }
 
 /** Split 5 edges */
-void _MMG5_split5(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
+void _MMG5_split5(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) {
   MMG5_pTetra    pt[7];
   MMG5_xTetra    xt[7];
   MMG5_pxTetra   pxt0;
@@ -3490,13 +3591,20 @@ void _MMG5_split5(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
 
     }
   }
-  for (i=0; i<7; i++) {
-    pt[i]->qual=_MMG5_orcal(mesh,met,newtet[i]);
+  if ( (!metRidTyp) && met->m && met->size>1 ) {
+    for (i=0; i<7; i++) {
+      pt[i]->qual=_MMG5_caltet33_ani(mesh,met,pt[i]);
+    }
+  }
+  else {
+    for (i=0; i<7; i++) {
+      pt[i]->qual=_MMG5_orcal(mesh,met,newtet[i]);
+    }
   }
 }
 
 /** split all faces (6 edges) */
-void _MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
+void _MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) {
   MMG5_pTetra    pt[8];
   MMG5_xTetra    xt0,xt;
   MMG5_pxTetra   pxt;
@@ -3847,7 +3955,14 @@ void _MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
       }
     }
   }
-  for (i=0; i<8; i++) {
-    pt[i]->qual=_MMG5_orcal(mesh,met,newtet[i]);
+  if ( (!metRidTyp) && met->m && met->size>1 ) {
+    for (i=0; i<8; i++) {
+      pt[i]->qual=_MMG5_caltet33_ani(mesh,met,pt[i]);
+    }
+  }
+  else {
+    for (i=0; i<8; i++) {
+      pt[i]->qual=_MMG5_orcal(mesh,met,newtet[i]);
+    }
   }
 }

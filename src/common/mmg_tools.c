@@ -35,7 +35,6 @@
 
 #include "mmg.h"
 
-
 /**
  * \param mesh pointer toward the mesh stucture.
  * \param ip1 first point of face.
@@ -44,12 +43,13 @@
  * \param n pointer to store the computed normal.
  * \return 1
  *
- * Compute face normal given three points on the surface.
+ * Compute non-normalized face normal given three points on the surface.
  *
  */
-inline int _MMG5_norpts(MMG5_pMesh mesh,int ip1,int ip2, int ip3,double *n) {
+inline int _MMG5_nonUnitNorPts(MMG5_pMesh mesh,
+                                int ip1,int ip2, int ip3,double *n) {
   MMG5_pPoint   p1,p2,p3;
-  double   dd,abx,aby,abz,acx,acy,acz,det;
+  double        abx,aby,abz,acx,acy,acz;
 
   p1 = &mesh->point[ip1];
   p2 = &mesh->point[ip2];
@@ -67,6 +67,49 @@ inline int _MMG5_norpts(MMG5_pMesh mesh,int ip1,int ip2, int ip3,double *n) {
   n[0] = aby*acz - abz*acy;
   n[1] = abz*acx - abx*acz;
   n[2] = abx*acy - aby*acx;
+
+  return(1);
+}
+
+/**
+ * \param mesh pointer toward the mesh stucture.
+ * \param ip1 first point of face.
+ * \param ip2 second point of face.
+ * \param ip3 third point of face.
+ * \param n pointer to store the computed normal.
+ * \return 1
+ *
+ * Compute non-oriented surface area of a triangle.
+ *
+ */
+inline double _MMG5_nonorsurf(MMG5_pMesh mesh,MMG5_pTria pt) {
+  double   dd,det,n[3];
+  int      ip1, ip2, ip3;
+
+  ip1 = pt->v[0];
+  ip2 = pt->v[1];
+  ip3 = pt->v[2];
+
+  _MMG5_nonUnitNorPts(mesh,ip1,ip2,ip3,n);
+
+  return(n[0]*n[0] + n[1]*n[1] + n[2]*n[2]);
+}
+/**
+ * \param mesh pointer toward the mesh stucture.
+ * \param ip1 first point of face.
+ * \param ip2 second point of face.
+ * \param ip3 third point of face.
+ * \param n pointer to store the computed normal.
+ * \return 1
+ *
+ * Compute normalized face normal given three points on the surface.
+ *
+ */
+inline int _MMG5_norpts(MMG5_pMesh mesh,int ip1,int ip2, int ip3,double *n) {
+  double   dd,det;
+
+  _MMG5_nonUnitNorPts(mesh,ip1,ip2,ip3,n);
+
   det  = n[0]*n[0] + n[1]*n[1] + n[2]*n[2];
 
   if ( det < _MMG5_EPSD2 )  return(0);

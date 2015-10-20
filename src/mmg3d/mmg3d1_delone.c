@@ -199,7 +199,7 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
           ier = _MMG5_dichoto1b(mesh,met,list,ilist,ip);
         }
 
-        ier = _MMG5_split1b(mesh,met,list,ilist,ip,1);
+        ier = _MMG5_split1b(mesh,met,list,ilist,ip,1,1);
 
         /* if we realloc memory in _MMG5_split1b pt and pxt pointers are not valid */
         pt = &mesh->tetra[k];
@@ -275,7 +275,7 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
             goto collapse;
           }
         }
-        ier = _MMG5_split1b(mesh,met,list,ilist,ip,1);
+        ier = _MMG5_split1b(mesh,met,list,ilist,ip,1,1);
         if ( ier < 0 ) {
           fprintf(stdout,"  ## Error: unable to split.\n");
           _MMG5_delPt(mesh,ip);
@@ -377,9 +377,9 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
         tag |= MG_BDY;
         if ( p0->tag > tag )   continue;
         if ( ( tag & MG_NOM ) && (mesh->adja[4*(k-1)+1+i]) ) continue;
-        ilist = _MMG5_chkcol_bdy(mesh,met,k,i,j,list);
+        ilist = _MMG5_chkcol_bdy(mesh,met,k,i,j,list,2);
         if ( ilist > 0 ) {
-          ier = _MMG5_colver(mesh,met,list,ilist,i2);
+          ier = _MMG5_colver(mesh,met,list,ilist,i2,2);
 
           if ( ier < 0 ) return(-1);
           else if(ier) {
@@ -395,7 +395,7 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
         if ( p0->tag & MG_BDY )  continue;
         ilist = _MMG5_chkcol_int(mesh,met,k,i,j,list,2);
         if ( ilist > 0 ) {
-          ier = _MMG5_colver(mesh,met,list,ilist,i2);
+          ier = _MMG5_colver(mesh,met,list,ilist,i2,2);
           if ( ilist < 0 ) continue;
           if ( ier < 0 ) return(-1);
           else if(ier) {
@@ -515,7 +515,7 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
             ier = _MMG5_dichoto1b(mesh,met,list,ilist,ip);
           }
 
-          ier = _MMG5_split1b(mesh,met,list,ilist,ip,1);
+          ier = _MMG5_split1b(mesh,met,list,ilist,ip,1,1);
           /* if we realloc memory in _MMG5_split1b pt and pxt pointers are not valid */
           pt = &mesh->tetra[k];
           pxt = pt->xt ? &mesh->xtetra[pt->xt] : 0;
@@ -590,7 +590,7 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
               goto collapse2;
             }
           }
-          ier = _MMG5_split1b(mesh,met,list,ilist,ip,1);
+          ier = _MMG5_split1b(mesh,met,list,ilist,ip,1,1);
           if ( ier < 0 ) {
             fprintf(stdout,"  ## Error: unable to split.\n");
             _MMG5_delPt(mesh,ip);
@@ -689,9 +689,9 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
         tag |= MG_BDY;
         if ( p0->tag > tag )   continue;
         if ( ( tag & MG_NOM ) && (mesh->adja[4*(k-1)+1+i]) ) continue;
-        ilist = _MMG5_chkcol_bdy(mesh,met,k,i,j,list);
+        ilist = _MMG5_chkcol_bdy(mesh,met,k,i,j,list,2);
         if ( ilist > 0 ) {
-          ier = _MMG5_colver(mesh,met,list,ilist,i2);
+          ier = _MMG5_colver(mesh,met,list,ilist,i2,2);
           if ( ier < 0 ) return(-1);
           else if(ier) {
             _MMG5_delPt(mesh,ier);
@@ -706,7 +706,7 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
         if ( p0->tag & MG_BDY )  continue;
         ilist = _MMG5_chkcol_int(mesh,met,k,i,j,list,2);
         if ( ilist > 0 ) {
-          ier = _MMG5_colver(mesh,met,list,ilist,i2);
+          ier = _MMG5_colver(mesh,met,list,ilist,i2,2);
           if ( ilist < 0 ) continue;
           if ( ier < 0 ) return(-1);
           else if(ier) {
@@ -760,14 +760,14 @@ _MMG5_adpsplcol(MMG5_pMesh mesh,MMG5_pSol met,_MMG5_pBucket bucket, int* warn) {
     else  ns = nc = ifilt = 0;
 
     if ( !mesh->info.noswap ) {
-      nf = _MMG5_swpmsh(mesh,met,bucket);
+      nf = _MMG5_swpmsh(mesh,met,bucket,2);
       if ( nf < 0 ) {
         fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
         return(0);
       }
       nnf += nf;
       if(it==2 || it==6/*&& it==1 || it==3 || it==5 || it > 8*/) {
-        nf += _MMG5_swptet(mesh,met,1.053,bucket);
+        nf += _MMG5_swptet(mesh,met,1.053,bucket,2);
       } else {
         nf += 0;
       }
@@ -838,14 +838,14 @@ _MMG5_optet(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket) {
   do {
     /* badly shaped process */
     if ( !mesh->info.noswap ) {
-      nf = _MMG5_swpmsh(mesh,met,bucket);
+      nf = _MMG5_swpmsh(mesh,met,bucket,2);
       if ( nf < 0 ) {
         fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
         return(0);
       }
       nnf += nf;
 
-      nf = _MMG5_swptet(mesh,met,declic,bucket);
+      nf = _MMG5_swptet(mesh,met,declic,bucket,2);
       if ( nf < 0 ) {
         fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
         return(0);
@@ -916,13 +916,13 @@ _MMG5_adptet_delone(MMG5_pMesh mesh,MMG5_pSol met,_MMG5_pBucket bucket) {
 
   /*initial swap*/
   if ( !mesh->info.noswap ) {
-    nf = _MMG5_swpmsh(mesh,met,bucket);
+    nf = _MMG5_swpmsh(mesh,met,bucket,2);
     if ( nf < 0 ) {
       fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
       return(0);
     }
     nnf = nf;
-    nf = _MMG5_swptet(mesh,met,1.053,bucket);
+    nf = _MMG5_swptet(mesh,met,1.053,bucket,2);
     if ( nf < 0 ) {
       fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
       return(0);
@@ -992,17 +992,27 @@ int _MMG5_mmg3d1_delone(MMG5_pMesh mesh,MMG5_pSol met) {
   }
 
 #ifdef DEBUG
-  _MMG5_outqua(mesh,met);
+  _MMG5_inqua(mesh,met);
 #endif
 
   /**--- stage 2: computational mesh */
   if ( abs(mesh->info.imprim) > 4 || mesh->info.ddebug )
     fprintf(stdout,"  ** COMPUTATIONAL MESH\n");
 
+  /* define metric map */
+  if ( !_MMG5_defsiz(mesh,met) ) {
+    fprintf(stdout,"  ## Metric undefined. Exit program.\n");
+    return(0);
+  }
+
   if ( mesh->info.hgrad > 0. && !_MMG5_gradsiz(mesh,met) ) {
     fprintf(stdout,"  ## Gradation problem. Exit program.\n");
     return(0);
   }
+#warning remove
+  /* _MMG5_unscaleMesh(mesh,met); */
+  /* MMG5_saveMesh(mesh); MMG5_saveMet(mesh,met); */
+  /* exit(666); */
   if ( !_MMG5_anatet(mesh,met,2,0) ) {
     fprintf(stdout,"  ## Unable to split mesh. Exiting.\n");
     return(0);

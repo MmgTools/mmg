@@ -85,7 +85,7 @@ void intmet_iso(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int ip,double s) {
  * \return 0 if fail, 1 otherwise.
  *
  * Interpolation of anisotropic sizemap at parameter \a s along edge \a i of elt
- * \a k.
+ * \a k for special storage of ridges metrics (after defsiz call).
  *
  */
 void intmet_ani(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int ip,double s) {
@@ -111,4 +111,37 @@ void intmet_ani(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int ip,double s) {
   else {
     intregmet(mesh,met,k,i,s,m);
   }
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param k element index.
+ * \param i local index of edge in \a k.
+ * \param ip global index of the new point in which we want to compute the metric.
+ * \param s interpolation parameter (between 0 and 1).
+ * \return 0 if fail, 1 otherwise.
+ *
+ * Interpolation of anisotropic sizemap at parameter \a s along edge \a i of elt
+ * \a k for classic storage of ridges metrics (before defsiz call).
+ *
+ */
+int _MMG5_intmet33_ani(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int ip,double s) {
+  MMG5_pTria    pt;
+  MMG5_pPoint   ppt;
+  MMG5_pxPoint  go;
+  double        *mr,*m,*n;
+  int           ip1, ip2, i1, i2;
+
+  pt  = &mesh->tria[k];
+  i1  = _MMG5_inxt2[i];
+  i2  = _MMG5_iprv2[i];
+  ip1 = pt->v[i1];
+  ip2 = pt->v[i2];
+
+  m   = &met->m[6*ip1];
+  n   = &met->m[6*ip2];
+  mr  = &met->m[6*ip];
+
+  return(_MMG5_mmgIntmet33_ani(m,n,mr,s));
 }

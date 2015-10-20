@@ -455,18 +455,13 @@ int main(int argc,char *argv[]) {
   chrono(ON,&MMG5_ctim[2]);
   setfunc(&mesh,&met);
 
+  if ( abs(mesh.info.imprim) > 0 ) _MMG5_inqua(&mesh,&met);
+
   fprintf(stdout,"\n  %s\n   MODULE MMGS-LJLL : %s (%s)\n  %s\n",MG_STR,MG_VER,MG_REL,MG_STR);
   if ( mesh.info.imprim )   fprintf(stdout,"\n  -- PHASE 1 : ANALYSIS\n");
   if ( !analys(&mesh) )  return(1);
 
-  if ( !_MMG5_defsiz(&mesh,&met) ) {
-    fprintf(stdout,"  ## Metric undefined. Exit program.\n");
-    return(1);
-  }
-
-  _MMG5_outqua(&mesh,&met);
-
-  if ( mesh.info.imprim > 3 && met.m ) _MMG5_prilen(&mesh,&met);
+  if ( mesh.info.imprim > 3 && met.m ) _MMG5_prilen(&mesh,&met,0);
 
   chrono(OFF,&MMG5_ctim[2]);
   if ( mesh.info.imprim ) {
@@ -488,7 +483,7 @@ int main(int argc,char *argv[]) {
 
   /* save file */
   _MMG5_outqua(&mesh,&met);
-  if ( mesh.info.imprim > 3 )  _MMG5_prilen(&mesh,&met);
+  if ( mesh.info.imprim > 3 )  _MMG5_prilen(&mesh,&met,1);
 
   chrono(ON,&MMG5_ctim[1]);
   if ( mesh.info.imprim )  fprintf(stdout,"\n  -- WRITING DATA FILE %s\n",mesh.nameout);

@@ -43,13 +43,16 @@
  * \param crit improvment coefficient
  * \return 0 if fail, the index of point corresponding to the swapped
  * configuration otherwise (\f$4*k+i\f$).
+ * \param typchk type of checking permformed for edge length (hmin or LSHORT
+ * criterion).
  *
  * Check whether swap of edge \a ia in \a start should be performed, and
  * return \f$4*k+i\f$ the index of point corresponding to the swapped
  * configuration. The shell of edge is built during the process.
  *
  */
-int _MMG5_chkswpgen(MMG5_pMesh mesh,MMG5_pSol met,int start,int ia,int *ilist,int *list,double crit) {
+int _MMG5_chkswpgen(MMG5_pMesh mesh,MMG5_pSol met,int start,int ia,
+                    int *ilist,int *list,double crit,char typchk) {
   MMG5_pTetra    pt,pt0;
   MMG5_pPoint    p0;
   double    calold,calnew,caltmp;
@@ -165,17 +168,37 @@ int _MMG5_chkswpgen(MMG5_pMesh mesh,MMG5_pSol met,int start,int ia,int *ilist,in
       iel = list[l] / 6;
       i   = list[l] % 6;
       pt  = &mesh->tetra[iel];
-    
+
       /* First tetra obtained from iel */
       memcpy(pt0,pt,sizeof(MMG5_Tetra));
       pt0->v[_MMG5_iare[i][0]] = np;
-      caltmp = _MMG5_orcal(mesh,met,0);
+
+      if ( met->m ) {
+        if ( typchk==1 && met->size > 1 )
+          caltmp = _MMG5_caltet33_ani(mesh,met,pt0);
+        else
+          caltmp = _MMG5_orcal(mesh,met,0);
+      }
+      else // - A option
+        caltmp = _MMG5_caltet_iso(mesh,met, pt0);
+
       calnew = MG_MIN(calnew,caltmp);
+
       /* Second tetra obtained from iel */
       memcpy(pt0,pt,sizeof(MMG5_Tetra));
       pt0->v[_MMG5_iare[i][1]] = np;
-      caltmp = _MMG5_orcal(mesh,met,0);
+
+      if ( met->m ) {
+        if ( typchk==1 && met->size > 1 )
+          caltmp = _MMG5_caltet33_ani(mesh,met,pt0);
+        else
+          caltmp = _MMG5_orcal(mesh,met,0);
+      }
+      else // - A option
+        caltmp = _MMG5_caltet_iso(mesh,met, pt0);
+
       calnew = MG_MIN(calnew,caltmp);
+
       ier = (calnew > crit*calold);
       if ( !ier )  break;
     }
@@ -193,12 +216,15 @@ int _MMG5_chkswpgen(MMG5_pMesh mesh,MMG5_pSol met,int start,int ia,int *ilist,in
  * \param list pointer toward the shell of the edge that we want to swap.
  * \param bucket pointer toward the bucket structure in Delaunay mode,
  * NULL pointer in pattern mode.
+ * \param typchk type of checking permformed for edge length (hmin or LSHORT
+ * criterion).
  * \return -1 if lack of memory, 0 if fail to swap, 1 otherwise.
  *
  * Perform swap of edge whose shell is passed according to configuration nconf.
  *
  */
-int _MMG5_swpgen(MMG5_pMesh mesh,MMG5_pSol met,int nconf,int ilist,int *list,_MMG5_pBucket bucket) {
+int _MMG5_swpgen(MMG5_pMesh mesh,MMG5_pSol met,int nconf,int ilist,int *list,
+                 _MMG5_pBucket bucket, char typchk) {
   MMG5_pTetra    pt;
   MMG5_pPoint    p0,p1;
   int       iel,na,nb,np,nball,ret,start;
@@ -237,12 +263,18 @@ int _MMG5_swpgen(MMG5_pMesh mesh,MMG5_pSol met,int nconf,int ilist,int *list,_MM
                           ,m,0);
     }
   }
-  if ( met->m )
-    if ( _MMG5_intmet(mesh,met,iel,ia,np,0.5)<=0 ) return(0);
+  if ( met->m ) {
+    if ( typchk == 1 && (met->size>1) ) {
+      if ( _MMG5_intmet33_ani(mesh,met,iel,ia,np,0.5)<=0 )  return(0);
+    }
+    else {
+      if ( _MMG5_intmet(mesh,met,iel,ia,np,0.5)<=0 ) return(0);
+    }
+  }
 
   /** First step : split of edge (na,nb) */
   ret = 2*ilist + 0;
-  ier = _MMG5_split1b(mesh,met,list,ret,np,0);
+  ier = _MMG5_split1b(mesh,met,list,ret,np,0,typchk-1);
   /* pointer adress may change if we need to realloc memory during split */
   pt = &mesh->tetra[iel];
 
@@ -265,7 +297,7 @@ int _MMG5_swpgen(MMG5_pMesh mesh,MMG5_pSol met,int nconf,int ilist,int *list,_MM
   memset(list,0,(_MMG5_LMAX+2)*sizeof(int));
   nball = _MMG5_boulevolp(mesh,start,ip,list);
 
-  ier = _MMG5_colver(mesh,met,list,nball,iq);
+  ier = _MMG5_colver(mesh,met,list,nball,iq,typchk);
   if ( ier < 0 ) {
     fprintf(stdout,"  ## Warning: unable to swap internal edge.\n");
     return(-1);

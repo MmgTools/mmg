@@ -66,7 +66,7 @@ inline int _MMG5_moymet(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,double *m1)
  * \return length of edge according to the prescribed metric.
  *
  * Compute length of edge \f$[i0;i1]\f$ according to the prescribed aniso
- * metric.
+ * metric (for special storage of metrics at ridges points).
  *
  */
 inline double _MMG5_lenedg_ani(MMG5_pMesh mesh ,MMG5_pSol met, int ia,
@@ -87,6 +87,35 @@ inline double _MMG5_lenedg_ani(MMG5_pMesh mesh ,MMG5_pSol met, int ia,
   exit(EXIT_FAILURE);
 }
 
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the sol structure.
+ * \param ia index of edge in tetra \a pt .
+ * \param pt pointer toward the tetra from which we come.
+ * \return length of edge according to the prescribed metric.
+ *
+ * Compute length of edge \f$[i0;i1]\f$ according to the prescribed aniso
+ * metric (for classic storage of metrics at ridges points).
+ *
+ */
+inline double _MMG5_lenedg33_ani(MMG5_pMesh mesh ,MMG5_pSol met, int ia,
+                                 MMG5_pTetra pt)
+{
+  int ip1,ip2;
+  char isedg;
+
+  ip1 = pt->v[_MMG5_iare[ia][0]];
+  ip2 = pt->v[_MMG5_iare[ia][1]];
+
+  if ( pt->xt && (mesh->xtetra[pt->xt].tag[ia] & MG_BDY)) {
+    isedg = ( mesh->xtetra[pt->xt].tag[ia] & MG_GEO);
+    return(_MMG5_lenSurfEdg33_ani(mesh, met, ip1, ip2, isedg));
+  } else {
+    return( _MMG5_lenedgCoor_ani(mesh->point[ip1].c,mesh->point[ip2].c,
+                                 &met->m[6*ip1],&met->m[6*ip2]) );
+  }
+  exit(EXIT_FAILURE);
+}
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -96,7 +125,37 @@ inline double _MMG5_lenedg_ani(MMG5_pMesh mesh ,MMG5_pSol met, int ia,
  * \return length of edge according to the prescribed metric.
  *
  * Compute length of edge \f$[i0;i1]\f$ according to the prescribed aniso
- * metric.
+ * metric (for classic storage of metrics at ridges points).
+ *
+ */
+inline double _MMG5_lenedgspl33_ani(MMG5_pMesh mesh ,MMG5_pSol met, int ia,
+                                    MMG5_pTetra pt)
+{
+  MMG5_pPoint pp1,pp2;
+  double      *m1,*m2;
+  int         ip1,ip2;
+
+  ip1 = pt->v[_MMG5_iare[ia][0]];
+  ip2 = pt->v[_MMG5_iare[ia][1]];
+
+  pp1 = &mesh->point[ip1];
+  pp2 = &mesh->point[ip2];
+
+  m1 = &met->m[6*ip1];
+  m2 = &met->m[6*ip2];
+
+  return(_MMG5_lenedgCoor_ani(pp1->c,pp2->c,m1,m2));
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the sol structure.
+ * \param ia index of edge in tetra \a pt .
+ * \param pt pointer toward the tetra from which we come.
+ * \return length of edge according to the prescribed metric.
+ *
+ * Compute length of edge \f$[i0;i1]\f$ according to the prescribed aniso
+ * metric (for special storage of metrics at ridges points).
  *
  */
 inline double _MMG5_lenedgspl_ani(MMG5_pMesh mesh ,MMG5_pSol met, int ia,
@@ -1247,7 +1306,9 @@ int _MMG5_gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
               if ( p0->flag < mesh->base-1 && p1->flag < mesh->base-1 )  continue;
 
               // Impose gradation from a boundary face if possible
-              if ( _MMG5_hashGet(&hash,ip0,ip1) ) continue;
+              if ( _MMG5_hashGet(&hash,ip0,ip1) ) {
+                continue;
+              }
 
               ier = -1;//_MMG5_grad2metVol(mesh,met,pt,ia);
               if ( ier == i0 ) {
