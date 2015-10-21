@@ -261,6 +261,7 @@ int _MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, int *list,int ilist,int it1,
  * \param ret dobble of the number of tetrahedra in the shell
  * \param it1 boundary face carrying the beforehand tested terminal
  * point for collapse
+ * \param bucket pointer toward the bucket structure.
  * \return -1 if lack of memory, 0 if fail to swap, 1 otherwise
  *
  * Swap boundary edge whose shell is provided.

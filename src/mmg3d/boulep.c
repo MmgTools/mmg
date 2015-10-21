@@ -565,8 +565,8 @@ int _MMG5_boulesurfvolp(MMG5_pMesh mesh,int start,int ip,int iface,
  * \param il2 pointer toward the second ball size.
  * \param l2 pointer toward the second computed ball (associated to \a n_2's
  * side).
- * \param ip1 index of the first extremity of the ridge.
- * \param ip2 index of the second extremity of the ridge.
+ * \param ip0 index of the first extremity of the ridge.
+ * \param ip1 index of the second extremity of the ridge.
  * \return 0 if fail, 1 otherwise.
  *
  * Computation of the two surface balls of a ridge point: the list \a l1 is
@@ -1329,7 +1329,7 @@ int _MMG5_coquilface(MMG5_pMesh mesh,int start,int ia,int *list,int *it1,int *it
  * \param iface previous traveling face of the tet (suspected to be boundary),
  * updated.
  * \param i local index of the edge \f$[na,nb]\f$ in tet \a adj.
- * \return the tag of the face \a iface of the tetra \adj or 0 if the tetra
+ * \return the tag of the face \a iface of the tetra \a adj or 0 if the tetra
  * is not boundary.
  *
  * Travel around the edge \f$[na,nb]\f$ from tetra \a adj and through the face
@@ -1386,7 +1386,7 @@ char _MMG5_coquilTravel(MMG5_pMesh mesh, int na, int nb, int* adj, int *piv,
  * (updated for the finish tet at the end).
  * \param iface traveling face of the tet (suspected to be boundary), updated.
  * \param i local index of the edge \f$[na,nb]\f$ in tet \a adj.
- * \return the tag of the face \a iface of the tetra \adj or 0 if the tetra
+ * \return the tag of the face \a iface of the tetra \a adj or 0 if the tetra
  * is not boundary.
  *
  * Travel around the edge \f$[na,nb]\f$ from tetra \a adj and through the face

@@ -178,7 +178,7 @@ void _MMG5_swapNod(MMG5_pPoint points, double* sols, int* perm,
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the solution structure.
- * \return 0 if \ref _MMG5_renumbering fail (non conformal mesh), 1 otherwise
+ * \return 0 if \a _MMG5_renumbering fail (non conformal mesh), 1 otherwise
  * (renumerotation success of renumerotation fail but the mesh is still
  *  conformal).
  *

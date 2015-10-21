@@ -35,19 +35,19 @@
 
 #include "mmg3d.h"
 
-/**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
- * \param k element index.
- * \param i local index of edge in \a k.
- * \param ip global index of the new point in which we want to compute the metric.
- * \param s interpolation parameter (between 0 and 1).
- * \return 0 if fail, 1 otherwise.
- *
- * Interpolation of anisotropic sizemap at parameter \a s along edge \a i of elt
- * \a k.
- *
- */
+//* ** */
+ /* * \param mesh pointer toward the mesh structure. */
+ /* * \param met pointer toward the metric structure. */
+ /* * \param k element index. */
+ /* * \param i local index of edge in \a k. */
+ /* * \param ip global index of the new point in which we want to compute the metric. */
+ /* * \param s interpolation parameter (between 0 and 1). */
+ /* * \return 0 if fail, 1 otherwise. */
+ /* * */
+ /* * Interpolation of anisotropic sizemap at parameter \a s along edge \a i of elt */
+ /* * \a k. */
+ /* * */
+ /* *\/ */
 /* void _MMG5_intmet_ani(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int ip, */
 /*                       double s) { */
 /*   MMG5_pTetra   pt; */

@@ -332,6 +332,8 @@ int    (*_MMG5_defsiz)(MMG5_pMesh ,MMG5_pSol );
 int    (*_MMG5_gradsiz)(MMG5_pMesh ,MMG5_pSol );
 int    (*_MMG5_intmetvol)(double*,double*,double*,double );
 int    (*_MMG5_interp4bar)(MMG5_pMesh,MMG5_pSol,int,int,double *);
+int    (*_MMG5_saveMeshinternal)(MMG5_pMesh mesh);
+
 
 void   _MMG5_Set_commonFunc();
 

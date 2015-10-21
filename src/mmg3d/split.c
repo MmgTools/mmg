@@ -251,6 +251,7 @@ nextstep1:
 
 /**
  * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric.
  * \param list pointer toward the edge shell.
  * \param ret size of the edge shell.
  * \param o table of the new point coordinates.

@@ -318,7 +318,7 @@ inline int _MMG5_sys33sym(double a[6], double b[3], double r[3]){
 
 /**
  * \param mesh pointer toward the mesh structure.
- * \param filename pointer toward the file name.
+ * \param fileName pointer toward the file name.
  *
  * Debug function (not use in clean code): write mesh->tria structure in file.
  *

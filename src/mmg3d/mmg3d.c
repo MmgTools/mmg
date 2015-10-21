@@ -58,7 +58,7 @@ void MMG5_Free_all(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp
  *
  */
 void MMG5_Set_saveFunc(MMG5_pMesh mesh) {
-  MMG5_saveMesh = _MMG5_saveAllMesh;
+  _MMG5_saveMeshinternal = _MMG5_saveAllMesh;
 }
 
 /**

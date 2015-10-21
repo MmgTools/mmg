@@ -142,7 +142,7 @@ _MMG5_BezierGeod(double c1[3],double c2[3],double t1[3],double t2[3]) {
  * \param v direction for normal vectors.
  *
  * Compute control points associated to the underlying curve to
- * \f$[p0;p1]\f$. \a ised = 1 if \f$[p0;p1]\f must be considered as a
+ * \f$[p0;p1]\f$. \a ised = 1 if \f$[p0;p1]\f$ must be considered as a
  * special edge. Provide a direction \a v which will be considered as
  * reference when dealing with choice of normal vectors.
  *

@@ -161,7 +161,8 @@ int _MMG5_dichoto(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
 
 /**
  * \param mesh pointer toward the mesh structure.
- * \param *list pointer toward the shell of edge.
+ * \param met pointer toward the metric structure.
+ * \param list pointer toward the shell of edge.
  * \param ret double of the number of tetrahedra in the shell.
  * \param o[3] initial guess for coordinates of new point.
  * \param ro[3] output coordinates for the new point.
@@ -1326,7 +1327,7 @@ static int _MMG5_anatet4(MMG5_pMesh mesh, MMG5_pSol met) {
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
  * \param typchk type of checking for edges length.
- * \param paternMode flag to say if we perform vertex insertion by patterns
+ * \param patternMode flag to say if we perform vertex insertion by patterns
  * or by delaunay kernel.
  * \return 0 if fail, number of new points otherwise.
  *

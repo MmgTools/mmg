@@ -36,6 +36,7 @@
 
 /**
  * \param mesh pointer toward the mesh structure
+ * \param met pointer toward the metric structure.
  * \param start tetrahedra in which the swap should be performed
  * \param ia edge that we want to swap
  * \param ilist pointer to store the size of the shell of the edge

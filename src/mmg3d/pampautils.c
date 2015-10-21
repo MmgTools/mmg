@@ -88,7 +88,7 @@ void _MMG5_pampa_excfun(int sigid) {
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the sol structure.
- * \warning Copy of the \a setfunc function of the \ref mmg3d/shared_func.h
+ * \warning Copy of the \a _MMG5_setfunc function of the \a mmg3d/shared_func.h
  * file.
  *
  * Set function pointers for lenedgeCoor, _MMG5_hashTetra and saveMesh.
@@ -100,7 +100,7 @@ void MMG5_pampa_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
   else
     MMG5_lenedgCoor = _MMG5_lenedgCoor_ani;
   MMG5_hashTetra = _MMG5_hashTetra;
-  MMG5_saveMesh = _MMG5_saveLibraryMesh;
+  _MMG5_saveMeshinternal = _MMG5_saveLibraryMesh;
 }
 /* END COPY */
 
@@ -551,7 +551,7 @@ int _MMG5_stockOptions(MMG5_pMesh mesh, MMG5_Info *info) {
 
 /**
  * \param mesh pointer toward the mesh structure.
- * \param *info pointer toward the info structure.
+ * \param info pointer toward the info structure.
  *
  * Recover the info structure stored in the mesh structure.
  *
@@ -568,7 +568,7 @@ void _MMG5_destockOptions(MMG5_pMesh mesh, MMG5_Info *info) {
  * \param critmin minimum quality for elements.
  * \param lmin minimum edge length.
  * \param lmax maximum ede length.
- * \param *eltab pointer toward the table of invalid elements.
+ * \param eltab pointer toward the table of invalid elements.
  *
  * Search invalid elements (in term of quality or edge length).
  *
@@ -769,8 +769,8 @@ inline double _MMG5_lenedgCoor_iso(double *ca,double *cb,double *ma,double *mb) 
  * \brief Compute edge length from edge's coordinates.
  * \param *ca pointer toward the coordinates of the first edge's extremity.
  * \param *cb pointer toward the coordinates of the second edge's extremity.
- * \param *ma pointer toward the metric associated to the first edge's extremity.
- * \param *mb pointer toward the metric associated to the second edge's extremity.
+ * \param *sa pointer toward the metric associated to the first edge's extremity.
+ * \param *sb pointer toward the metric associated to the second edge's extremity.
  * \return edge length.
  *
  * Compute length of edge \f$[ca,cb]\f$ (with \a ca and \a cb
