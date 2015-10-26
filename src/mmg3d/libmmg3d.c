@@ -58,7 +58,7 @@
  * Deallocations before return.
  *
  */
-void MMG5_Free_all(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp
+void MMG5_Free_all(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp
   ){
 
   MMG5_Free_structures(mesh,met,disp);
@@ -294,7 +294,8 @@ int MMG5_packMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward a sol structure (metric or solution).
- * \param disp pointer toward a sol structure (displacement).
+ * \param disp pointer toward a sol structure (displacement for the
+ * lagrangian motion mode).
  * \return Return \ref MMG5_SUCCESS if success, \ref MMG5_LOWFAILURE if failed
  * but a conform mesh is saved and \ref MMG5_STRONGFAILURE if failed and we
  * can't save the mesh.
@@ -302,7 +303,7 @@ int MMG5_packMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
  * Main program for the library .
  *
  */
-int MMG5_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp
+int MMG5_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp
   ) {
   mytime    ctim[TIMEMAX];
   char      stim[32];
@@ -334,6 +335,13 @@ int MMG5_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp
   _MMG5_warnOrientation(mesh);
 
   if ( mesh->info.lag > -1 ) {
+    if ( !disp ) {
+      fprintf(stdout,"  ## Error: in lagrangian mode, a structure of type"
+              " \"MMG5_pSol\" is needed to store the displacement field.\n"
+              "            This structure must be different from the one used"
+              " to store the metric.\n");
+      return(MMG5_STRONGFAILURE);
+    }
     if (disp->np && (disp->np != mesh->np) ) {
       fprintf(stdout,"  ## WARNING: WRONG SOLUTION NUMBER. IGNORED\n");
       _MMG5_DEL_MEM(mesh,disp->m,(disp->size*(disp->npmax+1))*sizeof(double));

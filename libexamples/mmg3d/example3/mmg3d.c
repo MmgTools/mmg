@@ -21,13 +21,17 @@
 ** =============================================================================
 */
 
-/** \include Example for using of mmg3dlib
- * mmg3d: 3d mesh adaptation
+/**
+ * Example of use of the mmg3d library (mmg3d application)
  *
- * Written by Cecile Dobrzynski (IMB), Charles Dapogny and Pascal Frey (LJLL)
- * Copyright (c) 2004- IMB/LJLL.
- * All rights reserved.
+ * \author Charles Dapogny (LJLL, UPMC)
+ * \author Cécile Dobrzynski (Inria / IMB, Université de Bordeaux)
+ * \author Pascal Frey (LJLL, UPMC)
+ * \author Algiane Froehly (Inria / IMB, Université de Bordeaux)
+ * \version 5
+ * \copyright GNU Lesser General Public License.
  */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <memory.h>
@@ -91,13 +95,14 @@ int main(int argc,char *argv[]) {
     MMG5_Free_all(mesh,met,disp);
     return(MMG5_STRONGFAILURE);
   }
-  if ( !MMG5_Set_solSize(mesh,disp,MMG5_Vertex,0,MMG5_Vector) ) {
-    MMG5_Free_all(mesh,met,disp);
-    return(MMG5_STRONGFAILURE);
-  }
 
   /* read displacement if any */
   if ( MMG5_Get_iparameter(mesh, MMG5_IPARAM_lag) > -1 ) {
+    if ( !MMG5_Set_solSize(mesh,disp,MMG5_Vertex,0,MMG5_Vector) ) {
+      MMG5_Free_all(mesh,met,disp);
+      return(MMG5_STRONGFAILURE);
+    }
+
     if ( !MMG5_Set_inputSolName(mesh,disp,met->namein) ) {
       MMG5_Free_all(mesh,met,disp);
       return(MMG5_STRONGFAILURE);

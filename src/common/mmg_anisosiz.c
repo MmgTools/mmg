@@ -335,11 +335,10 @@ void _MMG5_defUninitSize(MMG5_pMesh mesh,MMG5_pSol met,char ismet)
  * \param tAA matrix to fill
  * \param tAb second member
  *
- * Fill matrice tAA and second member tAb with A=(\sum X_{P_i}^2 \sum
- * Y_{P_i}^2 \sum X_{P_i}Y_{P_i}) and b=\sum Z_{P_i} with P_i the physical
- * points at edge [i0;i1] extremities and middle.
- * Compute the physical coor \a c of the curve edge's
- * mid-point for a regular or reference point.
+ * Fill matrice tAA and second member tAb with \$f A=(\sum X_{P_i}^2 \sum
+ * Y_{P_i}^2 \sum X_{P_i}Y_{P_i}) \$f and \$f b=\sum Z_{P_i}\$f with P_i the
+ * physical points at edge [i0;i1] extremities and middle.  Compute the physical
+ * coor \a c of the curve edge's mid-point for a regular or reference point.
  *
  */
 void _MMG5_fillDefmetregSys( int k, MMG5_pPoint p0, int i0, _MMG5_Bezier b,

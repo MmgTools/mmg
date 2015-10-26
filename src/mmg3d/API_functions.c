@@ -55,12 +55,22 @@ void MMG5_Alloc_mesh(MMG5_pMesh *mesh, MMG5_pSol *sol, MMG5_pSol *disp
   _MMG5_SAFE_CALLOC(*mesh,1,MMG5_Mesh);
 
   /* sol allocation */
+  if ( !sol ) {
+    printf("  ## Error: an allocatable solution structure of type \"MMG5_pSol\""
+           " is needed.\n");
+    printf("            Exit program.\n");
+    exit(EXIT_FAILURE);
+  }
+
   if ( *sol )  _MMG5_DEL_MEM(*mesh,*sol,sizeof(MMG5_Sol));
   _MMG5_SAFE_CALLOC(*sol,1,MMG5_Sol);
 
   /* displacement allocation */
-  if ( *disp )  _MMG5_DEL_MEM(*mesh,*disp,sizeof(MMG5_Sol));
-  _MMG5_SAFE_CALLOC(*disp,1,MMG5_Sol);
+  if ( disp ) {
+    if ( *disp )
+      _MMG5_DEL_MEM(*mesh,*disp,sizeof(MMG5_Sol));
+    _MMG5_SAFE_CALLOC(*disp,1,MMG5_Sol);
+  }
 
   return;
 }
@@ -84,9 +94,11 @@ void MMG5_Init_woalloc_mesh(MMG5_pMesh mesh, MMG5_pSol sol, MMG5_pSol disp
   (sol)->dim   = 3;
   (sol)->ver   = 2;
   (sol)->size  = 1;
-  (disp)->dim  = 3;
-  (disp)->ver  = 2;
-  (disp)->size = 2;
+  if ( disp ) {
+    (disp)->dim  = 3;
+    (disp)->ver  = 2;
+    (disp)->size = 2;
+  }
 
   /* Default parameters values */
   MMG5_Init_parameters(mesh);
@@ -94,28 +106,36 @@ void MMG5_Init_woalloc_mesh(MMG5_pMesh mesh, MMG5_pSol sol, MMG5_pSol disp
   /* Default vaules for file names */
   MMG5_Init_fileNames(mesh,sol);
 
-  MMG5_Set_inputSolName(mesh,disp,"");
-  MMG5_Set_outputSolName(mesh,disp,"");
+  if ( disp ) {
+    MMG5_Set_inputSolName(mesh,disp,"");
+    MMG5_Set_outputSolName(mesh,disp,"");
+  }
 
   return;
 }
 /**
- * \param mesh pointer toward a pointer toward the mesh structure.
- * \param sol pointer toward a sol structure (metric or level-set).
- * \param disp pointer toward a sol structure (displacement).
+ * \param mesh adress of a pointer toward a pointer toward the mesh structure.
+ * \param sol adress of a pointer toward a sol structure (metric or level-set).
+ * \param disp adress of a pointer toward a sol structure (displacement for
+ * the lagrangian mode).
  *
  * Allocate the mesh and solution structures and initialize it to
  * their default values.
  *
  */
-void MMG5_Init_mesh(MMG5_pMesh *mesh, MMG5_pSol *sol, MMG5_pSol *disp
-  ) {
+void MMG5_Init_mesh(MMG5_pMesh *mesh, MMG5_pSol *sol, MMG5_pSol *disp ) {
+
   /* allocations */
   MMG5_Alloc_mesh(mesh,sol,disp);
   /* initialisations */
-  MMG5_Init_woalloc_mesh(*mesh,*sol,*disp);
+  if ( disp )
+    MMG5_Init_woalloc_mesh(*mesh,*sol,*disp);
+  else
+    MMG5_Init_woalloc_mesh(*mesh,*sol,NULL);
+
   /* set pointer to save the mesh*/
   _MMG5_saveMeshinternal = _MMG5_saveLibraryMesh;
+
   return;
 }
 
@@ -384,7 +404,7 @@ int MMG5_Get_meshSize(MMG5_pMesh mesh, int* np, int* ne, int* nt, int* na) {
 int MMG5_Set_vertex(MMG5_pMesh mesh, double c0, double c1, double c2, int ref, int pos) {
 
   if ( !mesh->np ) {
-    fprintf(stdout,"  ## Error: You must set the number of points with the");
+    fprintf(stdout,"  ## Error: you must set the number of points with the");
     fprintf(stdout," MMG5_Set_meshSize function before setting vertices in mesh\n");
     return(0);
   }

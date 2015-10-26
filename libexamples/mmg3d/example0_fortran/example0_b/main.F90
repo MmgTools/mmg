@@ -12,7 +12,7 @@
 
 PROGRAM main
   MMG5_DATA_PTR_T  :: mmgMesh
-  MMG5_DATA_PTR_T  :: mmgSol,mmgDisp
+  MMG5_DATA_PTR_T  :: mmgSol
   INTEGER          :: ier,k
 
   !> To save final mesh in a file
@@ -32,8 +32,7 @@ PROGRAM main
   !!   output mesh name
   mmgMesh = 0
   mmgSol  = 0
-  mmgDisp  = 0 !! Useless here: just needed forthe lagrangian motion option
-  CALL MMG5_Init_mesh(mmgMesh,mmgSol,mmgDisp)
+  CALL MMG5_Init_mesh(mmgMesh,mmgSol,0)
 
   !> 2) Build mesh in MMG5 format
   !! Two solutions: just use the MMG5_loadMesh function that will read a .mesh(b)
@@ -166,7 +165,7 @@ PROGRAM main
 
   !> ------------------------------ STEP  II --------------------------
   !! library call 
-  CALL MMG5_mmg3dlib(mmgMesh,mmgSol,mmgDisp,ier)
+  CALL MMG5_mmg3dlib(mmgMesh,mmgSol,0,ier)
   IF ( ier == MMG5_STRONGFAILURE ) THEN
     PRINT*,"BAD ENDING OF MMG3DLIB: UNABLE TO SAVE MESH"
     STOP MMG5_STRONGFAILURE
@@ -339,5 +338,5 @@ PROGRAM main
   CLOSE(inm)
 
   !> 3) Free the MMG3D5 structures
-  CALL MMG5_Free_all(mmgMesh,mmgSol,mmgDisp)
+  CALL MMG5_Free_all(mmgMesh,mmgSol,0)
 END PROGRAM main

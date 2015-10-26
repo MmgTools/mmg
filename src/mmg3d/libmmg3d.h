@@ -28,6 +28,15 @@
  * \version 5
  * \date 01 2014
  * \copyright GNU Lesser General Public License.
+ *
+ * \include mmg3d/example0/example0_a/main.c
+ * \include mmg3d/example0/example0_b/main.c
+ * \include mmg3d/example0_fortran/example0_a/main.F90
+ * \include mmg3d/example0_fortran/example0_b/main.F90
+ * \include mmg3d/example1/main.c
+ * \include mmg3d/example2/main.c
+ * \include mmg3d/example3/mmg3d.c
+ * \include mmg3d/example4/main.c
  */
 
 #ifndef _MMG3DLIB_H
@@ -121,15 +130,16 @@ enum MMG5_Param
 /* Initialization functions */
 /* init structures */
 /**
- * \param mesh pointer toward a pointer toward the mesh structure.
- * \param sol pointer toward a sol structure (metric or level-set).
- * \param disp pointer toward a sol structure (displacement).
+ * \param mesh adress of a pointer toward a pointer toward the mesh structure.
+ * \param sol adress of a pointer toward a sol structure (metric or level-set).
+ * \param disp adress of a pointer toward a sol structure
+ * (displacement for the lagrangian mode).
  *
  * Allocate the mesh and solution structures and initialize it to
  * their default values.
  *
  */
-void  MMG5_Init_mesh(MMG5_pMesh *mesh, MMG5_pSol *sol, MMG5_pSol *disp);
+void  MMG5_Init_mesh(MMG5_pMesh *mesh, MMG5_pSol *sol, MMG5_pSol *disp );
 /* init structure sizes */
 /**
  * \param mesh pointer toward the mesh structure.
@@ -542,12 +552,13 @@ int  MMG5_saveMet(MMG5_pMesh mesh, MMG5_pSol met);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the sol structure (metric or solution).
- * \param disp pointer toward a sol structure (displacement).
+ * \param disp pointer toward a sol structure (displacement for the
+ * lagrangian mode).
  *
  * Deallocations before return.
  *
  */
-void MMG5_Free_all(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pSol disp);
+void MMG5_Free_all(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pSol disp );
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -557,7 +568,7 @@ void MMG5_Free_all(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pSol disp);
  * Structure deallocations before return.
  *
  */
-void MMG5_Free_structures(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pSol disp);
+void MMG5_Free_structures(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pSol disp );
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -573,7 +584,8 @@ void MMG5_Free_names(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pSol disp);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the sol (metric or level-set) structure.
- * \param disp pointer toward the sol (displacement) structure.
+ * \param disp pointer toward a sol (displacement for the lagrangian motion
+ * mode) structure.
  * \return \ref MMG5_SUCCESS if success, \ref MMG5_LOWFAILURE if fail but a
  * conform mesh is saved or \ref MMG5_STRONGFAILURE if fail and we can't save
  * the mesh.
@@ -581,7 +593,7 @@ void MMG5_Free_names(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pSol disp);
  * Main program for the library.
  *
  */
-int  MMG5_mmg3dlib(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pSol disp);
+int  MMG5_mmg3dlib(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pSol disp );
 
 /* for PAMPA library */
 /** Options management */

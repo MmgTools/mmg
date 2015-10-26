@@ -44,7 +44,7 @@ char  ddb;
  * \param mesh pointer toward the mesh structure.
  * \param k tetrahedron index.
  * \param ie face index of tetrahedron.
- * \param *ptt pointer toward the output triangle.
+ * \param ptt pointer toward the output triangle.
  *
  * Set triangle corresponding to face ie of tetra k.
  *
@@ -164,8 +164,8 @@ int _MMG5_dichoto(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
  * \param met pointer toward the metric structure.
  * \param list pointer toward the shell of edge.
  * \param ret double of the number of tetrahedra in the shell.
- * \param o[3] initial guess for coordinates of new point.
- * \param ro[3] output coordinates for the new point.
+ * \param o initial guess for coordinates of new point.
+ * \param ro output coordinates for the new point.
  * \return 1.
  *
  * Find acceptable position for _MMG5_split1b, passing the shell of
@@ -221,7 +221,7 @@ int _MMG5_dichoto1b(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,double o[3],
 
 /**
  * \param mesh pointer toward the mesh structure.
- * \param *pt pointer toward the triangle.
+ * \param pt pointer toward the triangle.
  * \param ori orientation of the triangle (1 for direct orientation, 0 otherwise).
  * \return 0 if error.
  * \return edges of the triangle pt that need to be split.
