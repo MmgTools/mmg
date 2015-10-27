@@ -169,9 +169,20 @@ int _MMG5_chkswpgen(MMG5_pMesh mesh,MMG5_pSol met,int start,int ia,
       i   = list[l] % 6;
       pt  = &mesh->tetra[iel];
 
+      /* Prevent from creating a tetra with 4 ridges vertices */
+      if ( mesh->point[np].tag & MG_GEO ) {
+        if ( ( mesh->point[pt->v[_MMG5_ifar[i][0]]].tag & MG_GEO ) &&
+             ( mesh->point[pt->v[_MMG5_ifar[i][1]]].tag & MG_GEO ) ) {
+          if ( ( mesh->point[_MMG5_iare[i][0]].tag & MG_GEO ) ||
+               ( mesh->point[_MMG5_iare[i][1]].tag & MG_GEO ) )
+            return(0);
+        }
+      }
+
       /* First tetra obtained from iel */
       memcpy(pt0,pt,sizeof(MMG5_Tetra));
       pt0->v[_MMG5_iare[i][0]] = np;
+
 
       if ( met->m ) {
         if ( typchk==1 && met->size > 1 )

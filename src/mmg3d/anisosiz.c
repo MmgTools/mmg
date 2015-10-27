@@ -53,7 +53,10 @@ inline int _MMG5_moymet(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,double *m1)
     }
   }
 
-  if(!n) {printf("Error 4 points ridges. Exit program...\n");exit(EXIT_FAILURE);}
+  if(!n) {
+    printf("%s:%d: Error: 4 ridges points... Exit program\n",__FILE__,__LINE__);
+    exit(EXIT_FAILURE);
+  }
   dd = 1./n;
   for (k=0; k<6; ++k) m1[k] = mm[k]*dd;
   return(n);
@@ -388,6 +391,8 @@ static int _MMG5_defmetrid(MMG5_pMesh mesh,MMG5_pSol met,int kel,
   m[0] = isqhmax;
   m[1] = isqhmax;
   m[2] = isqhmax;
+  m[3] = isqhmax;
+  m[4] = isqhmax;
 
   // Call bouletrid that construct the surfacic ball
   ier = _MMG5_bouletrid(mesh,kel,iface,ip,&ilist1,list1,&ilist2,list2,

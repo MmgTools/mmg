@@ -44,7 +44,7 @@ int _MMG5_chkcol_int(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
   MMG5_pTetra   pt,pt0;
   MMG5_pPoint   p0;
   double   calold,calnew,caltmp,lon;
-  int      j,iel,ilist,nq;
+  int      j,iel,ilist,nq,nr;
   char     i,jj,ip,iq;
 
   ip  = _MMG5_idir[iface][_MMG5_inxt2[iedg]];
@@ -83,7 +83,21 @@ int _MMG5_chkcol_int(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
       }
     }
 
+    /* Prevent from creating a tetra with 4 ridges vertices */
+    p0 = &mesh->point[nq];
+    if ( p0->tag & MG_GEO ) {
+      i  = ip;
+      nr = 0;
+      for (jj=0; jj<3; jj++) {
+        i = _MMG5_inxt3[i];
+        p0 = &mesh->point[pt->v[i]];
+        if ( p0->tag & MG_GEO ) ++nr;
+      }
+      if ( nr==3 ) return(0);
+    }
+
     pt0->v[ip] = nq;
+
     calold = MG_MIN(calold,pt->qual);
     if ( typchk==1 && met->m && met->size > 1 )
       caltmp = _MMG5_caltet33_ani(mesh,met,pt0);
@@ -405,6 +419,7 @@ int _MMG5_chkcol_bdy(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
   MMG5_Tria          tt;
   double        calold,calnew,caltmp,nprvold[3],nprvnew[3],ncurold[3],ncurnew[3],ps,devold,devnew;
   int           ipp,ilistv,nump,numq,ilists,lists[_MMG5_LMAX+2],l,iel,nbbdy,ndepmin,ndepplus;
+  int           nr;
   char          iopp,ia,ip,tag,i,iq,i0,i1,ier,isminp,isplp;
 
   pt   = &mesh->tetra[k];
@@ -485,6 +500,17 @@ int _MMG5_chkcol_bdy(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
         ndepmin = iel;
       else if ( !ndepplus && pt->ref == MG_PLUS )
         ndepplus = iel;
+    }
+
+    /* Prevent from creating a tetra with 4 ridges vertices */
+    if ( mesh->point[numq].tag & MG_GEO ) {
+      i  = ipp;
+      nr = 0;
+      for (iq=0; iq<3; iq++) {
+        i = _MMG5_inxt3[i];
+        if ( mesh->point[pt->v[i]].tag & MG_GEO ) ++nr;
+      }
+      if ( nr==3 ) return(0);
     }
 
     memcpy(pt0,pt,sizeof(MMG5_Tetra));

@@ -164,6 +164,8 @@ static int _MMG5_defmetrid(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
   m[0] = isqhmax;
   m[1] = isqhmax;
   m[2] = isqhmax;
+  m[3] = isqhmax;
+  m[4] = isqhmax;
 
   ier = bouletrid(mesh,it,ip,&ilist1,list1,&ilist2,list2,&iprid[0],&iprid[1]);
   if ( !ier ) {
