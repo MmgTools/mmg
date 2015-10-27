@@ -37,6 +37,16 @@
 #include "mmg.h"
 
 /*----------------------------- functions header -----------------------------*/
-/** Initialization functions */
+/* Initialization functions */
+
+/* deallocations */
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the sol structure.
+ *
+ * File name deallocations before return.
+ *
+ */
+void MMG5_Free_names(MMG5_pMesh mesh, MMG5_pSol met);
 
 #endif

@@ -744,7 +744,7 @@ int MMG5_Chk_meshData(MMG5_pMesh mesh,MMG5_pSol met) {
 void MMG5_Free_structures(MMG5_pMesh mesh,MMG5_pSol met
   ){
 
-  MMG5_Free_names(mesh,met);
+  MMG5_mmgFree_names(mesh,met);
 
   /* mesh */
   if ( mesh->point )
