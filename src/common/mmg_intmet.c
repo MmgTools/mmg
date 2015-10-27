@@ -295,17 +295,23 @@ int _MMG5_intridmet(MMG5_pMesh mesh,MMG5_pSol met,int ip1, int ip2,double s,
         mr[0] = m1[0];
         mr[1] = m1[0];
         mr[2] = m1[0];
+        mr[3] = m1[0];
+        mr[4] = m1[0];
       }
       else {
         mr[0] = m2[0];
         mr[1] = m2[0];
         mr[2] = m2[0];
+        mr[3] = m2[0];
+        mr[4] = m2[0];
       }
     }
     else {
       mr[0] = m1[0]*m2[0] / dd;
       mr[1] = mr[0];
       mr[2] = mr[0];
+      mr[3] = mr[0];
+      mr[4] = mr[0];
     }
   }
   /* vertex p1 is singular, p2 is regular */
