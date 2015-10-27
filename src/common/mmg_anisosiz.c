@@ -1208,9 +1208,8 @@ int _MMG5_grad2metSurf(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int i){
   t1[2] *= dd;
 
   // edge length in metric mtan1: t^(t1) * mtan1 * t1.
-  // neglected terms correspond to the direction orthogonal to the surface
   ps1 =  mtan1[0]*t1[0]*t1[0] + 2.0*mtan1[1]*t1[0]*t1[1] + mtan1[2]*t1[1]*t1[1];
-  // ps1 += 2*mr1[2]*t1[0]*t1[2] + 2*mr1[4]*t1[1]*t1[2] + mr1[5]*t1[2]*t1[2];
+  ps1 += 2*mr1[2]*t1[0]*t1[2] + 2*mr1[4]*t1[1]*t1[2] + mr1[5]*t1[2]*t1[2];
 
   ps1 = sqrt(ps1);
 
@@ -1236,7 +1235,7 @@ int _MMG5_grad2metSurf(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int i){
 
   // edge length: t^(t2) * mtan2 * t2
   ps2 = mtan2[0]*t2[0]*t2[0] + 2.0*mtan2[1]*t2[0]*t2[1] + mtan2[2]*t2[1]*t2[1];
-  // ps2 += 2*mr2[2]*t2[0]*t2[2] + 2*mr2[4]*t2[1]*t2[2] + mr2[5]*t2[2]*t2[2];
+  ps2 += 2*mr2[2]*t2[0]*t2[2] + 2*mr2[4]*t2[1]*t2[2] + mr2[5]*t2[2]*t2[2];
 
   ps2 = sqrt(ps2);
 

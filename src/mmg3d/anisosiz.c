@@ -1228,12 +1228,13 @@ int _MMG5_gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
 
     m = &met->m[6*k];
     mv = MG_MAX(m[0],MG_MAX(m[1],m[2]));
-    mv = MG_MAX(m[0],MG_MAX(MG_MAX(m[1],m[2]),MG_MAX(m[3],m[4])));
+#warning to watch
+    //mv = MG_MAX(m[0],MG_MAX(MG_MAX(m[1],m[2]),MG_MAX(m[3],m[4])));
     m[0] = mv;
     m[1] = mv;
     m[2] = mv;
-    m[3] = mv;
-    m[4] = mv;
+    /* m[3] = mv; */
+    /* m[4] = mv; */
   }
 
   /* Second step : standard gradation procedure */
@@ -1278,14 +1279,14 @@ int _MMG5_gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
             /* virtual triangle */
             _MMG5_tet2tri(mesh,k,i,&ptt);
             for (j=0; j<3; j++) {
-              ia  = _MMG5_iarf[i][j];
               i0  = _MMG5_inxt2[j];
               i1  = _MMG5_iprv2[j];
               ip0 = ptt.v[i0];
               ip1 = ptt.v[i1];
               p0  = &mesh->point[ip0];
               p1  = &mesh->point[ip1];
-              if ( p0->flag < mesh->base-1 && p1->flag < mesh->base-1 )  continue;
+              if ( (p0->flag < mesh->base-1) && (p1->flag < mesh->base-1) )
+                continue;
 
               ier = _MMG5_grad2metSurf(mesh,met,&ptt,j);
               if ( ier == i0 ) {
