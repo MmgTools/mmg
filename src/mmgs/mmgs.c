@@ -455,11 +455,11 @@ int main(int argc,char *argv[]) {
   chrono(ON,&MMG5_ctim[2]);
   setfunc(&mesh,&met);
 
-  if ( abs(mesh.info.imprim) > 0 ) _MMG5_inqua(&mesh,&met);
-
   fprintf(stdout,"\n  %s\n   MODULE MMGS-LJLL : %s (%s)\n  %s\n",MG_STR,MG_VER,MG_REL,MG_STR);
   if ( mesh.info.imprim )   fprintf(stdout,"\n  -- PHASE 1 : ANALYSIS\n");
   if ( !analys(&mesh) )  return(1);
+
+  if ( abs(mesh.info.imprim) > 0 ) _MMG5_inqua(&mesh,&met);
 
   if ( mesh.info.imprim > 3 && met.m ) _MMG5_prilen(&mesh,&met,0);
 
