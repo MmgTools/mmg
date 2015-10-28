@@ -1230,12 +1230,12 @@ int _MMG5_gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
     m = &met->m[6*k];
     mv = MG_MAX(m[0],MG_MAX(m[1],m[2]));
 #warning to watch
-    //mv = MG_MAX(m[0],MG_MAX(MG_MAX(m[1],m[2]),MG_MAX(m[3],m[4])));
+    mv = MG_MAX(m[0],MG_MAX(MG_MAX(m[1],m[2]),MG_MAX(m[3],m[4])));
     m[0] = mv;
     m[1] = mv;
     m[2] = mv;
-    /* m[3] = mv; */
-    /* m[4] = mv; */
+    m[3] = mv;
+    m[4] = mv;
   }
 
   /* Second step : standard gradation procedure */

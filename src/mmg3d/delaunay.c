@@ -253,8 +253,7 @@ int _MMG5_delone(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist) {
         pt1->v[i] = ip;
         pt1->qual = _MMG5_orcal(mesh,sol,iel);
         pt1->ref = mesh->tetra[old].ref;
-        if(pt1->qual < 1e-10) {printf("argggg (%d) %d : %e\n",ip,iel,pt1->qual);
-          printf("pt1 : %d %d %d %d\n",pt1->v[0],pt1->v[1],pt1->v[2],pt1->v[3]);/*exit(0);*/}
+        assert( pt1->qual >= 1e-10 );
         iadr = (iel-1)*4 + 1;
         adjb = &mesh->adja[iadr];
         adjb[i] = adja[i];
