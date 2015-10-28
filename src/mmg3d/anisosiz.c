@@ -35,6 +35,17 @@
 
 #include "mmg3d.h"
 
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the sol structure.
+ * \param pt pointer toward a tetra.
+ * \param m1 computed metric.
+ * \return the number of vertices used for the mean computation, 0 if fail.
+ *
+ * Compute mean metric over the internal tetra \a pt. Do not take into account
+ * the metric values at ridges points (because we don't know how to build it).
+ *
+ */
 inline int _MMG5_moymet(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,double *m1) {
   MMG5_pPoint  ppt;
   double  mm[6],*mp;
@@ -54,8 +65,8 @@ inline int _MMG5_moymet(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,double *m1)
   }
 
   if(!n) {
-    printf("%s:%d: Error: 4 ridges points... Exit program\n",__FILE__,__LINE__);
-    exit(EXIT_FAILURE);
+    printf("  ## Warning: 4 ridges points... Unable to compute metric.\n");
+    return(0);
   }
   dd = 1./n;
   for (k=0; k<6; ++k) m1[k] = mm[k]*dd;
@@ -155,7 +166,7 @@ inline double _MMG5_lenedgspl33_ani(MMG5_pMesh mesh ,MMG5_pSol met, int ia,
  * \param met pointer toward the sol structure.
  * \param ia index of edge in tetra \a pt .
  * \param pt pointer toward the tetra from which we come.
- * \return length of edge according to the prescribed metric.
+ * \return length of edge according to the prescribed metric, 0 if fail.
  *
  * Compute length of edge \f$[i0;i1]\f$ according to the prescribed aniso
  * metric (for special storage of metrics at ridges points).
@@ -178,7 +189,7 @@ inline double _MMG5_lenedgspl_ani(MMG5_pMesh mesh ,MMG5_pSol met, int ia,
     m1 = &met->m[6*ip1];
   else if(pp1->tag & MG_GEO) {
     m1 = (double*)malloc(6*sizeof(double));
-    _MMG5_moymet(mesh,met,pt,m1);
+    if ( !_MMG5_moymet(mesh,met,pt,m1) ) return(0);
   } else
     m1 = &met->m[6*ip1];
 
@@ -186,7 +197,7 @@ inline double _MMG5_lenedgspl_ani(MMG5_pMesh mesh ,MMG5_pSol met, int ia,
     m2 = &met->m[6*ip2];
   else if(pp2->tag & MG_GEO) {
     m2 = (double*)malloc(6*sizeof(double));
-    _MMG5_moymet(mesh,met,pt,m2);
+    if ( !_MMG5_moymet(mesh,met,pt,m2) ) return(0);
   } else
     m2 = &met->m[6*ip2];
 

@@ -356,6 +356,9 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
     }
   collapse:
     if(lmin <= _MMG5_LOPTS_MMG5_DEL) {
+      // Case of an internal tetra with 4 ridges vertices.
+      if ( lmin == 0 ) continue;
+
       ifa0 = _MMG5_ifar[imin][0];
       ifa1 = _MMG5_ifar[imin][1];
       i  =  (pt->xt && (pxt->ftag[ifa1] & MG_BDY)) ? ifa1 : ifa0;
@@ -414,6 +417,8 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
     imintet = imin;
     lmaxtet = lmax;
     lmintet = lmin;
+    assert(lmin);
+
     for (ii=0; ii<6; ii++) {
       if ( pt->xt && (pxt->tag[ii] & MG_REQ) )  continue;
       if ( (ii==imintet) && (lmintet < _MMG5_LOPTS_MMG5_DEL)) continue;
@@ -668,6 +673,9 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
       }
     collapse2:
       if(lmin > _MMG5_LOPTS_MMG5_DEL) continue;
+      // Case of an internal tetra with 4 ridges vertices.
+      if ( lmin == 0 ) continue;
+
       ifa0 = _MMG5_ifar[imin][0];
       ifa1 = _MMG5_ifar[imin][1];
       i  =  (pt->xt && (pxt->ftag[ifa1] & MG_BDY)) ? ifa1 : ifa0;

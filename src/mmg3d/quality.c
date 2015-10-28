@@ -195,6 +195,13 @@ inline double _MMG5_caltet_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt) {
   h4 = _MMG5_lenedg_ani(mesh,met,4,pt);
   h5 = _MMG5_lenedg_ani(mesh,met,5,pt);
 
+  assert( h1!=0 );
+  assert( h2!=0 );
+  assert( h3!=0 );
+  assert( h4!=0 );
+  assert( h5!=0 );
+  assert( h6!=0 );
+
   /* quality */
   rap = h1*h1 + h2*h2 + h3*h3 + h4*h4 + h5*h5 + h6*h6;
   num = sqrt(rap) * rap;
@@ -735,6 +742,7 @@ int _MMG5_prilen(MMG5_pMesh mesh, MMG5_pSol met, char metRidTyp) {
         else // -A option
           len = _MMG5_lenedg_iso(mesh,met,ia,pt);
 
+        assert( len!=0 );
         avlen += len;
 
         if( len < lmin ) {
@@ -979,7 +987,7 @@ int _MMG5_countelt(MMG5_pMesh mesh,MMG5_pSol sol, double *weightelt, long *npcib
   int      isbdry;
   double   dned,dnface,dnint/*,dnins*/,w,lenavg,lent[6];
   double   dnpdel,dnadd,leninv,dnaddloc,dnpdelloc;
-  int      list[_MMG5_LMAX],ddebug=0,ib;
+  int      list[_MMG5_LMAX],ddebug=0,ib,nv;
   long     nptot;
   //FILE *inm;
 
@@ -1005,14 +1013,18 @@ int _MMG5_countelt(MMG5_pMesh mesh,MMG5_pSol sol, double *weightelt, long *npcib
 
     /*longueur moyenne*/
     lenavg = 0;
+    nv = 6;
     for(ib=0 ; ib<6 ; ib++) {
       ipa = _MMG5_iare[ib][0];
       ipb = _MMG5_iare[ib][1];
       lent[ib] = _MMG5_lenedg(mesh,sol,ib,pt);
-
+      if ( lent[ib]==0 ) nv--;
       lenavg+=lent[ib];
     }
-    lenavg /= 6.;
+    if ( nv )
+      lenavg /= (double)nv;
+    else
+      lenavg = 1; // Unable to treat this element
 
     w = 0;
     if(weightelt)

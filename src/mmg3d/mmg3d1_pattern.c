@@ -295,6 +295,9 @@ static int _MMG5_adpcol(MMG5_pMesh mesh,MMG5_pSol met) {
               __FILE__,__LINE__,k);
     if ( lmin > _MMG5_LOPTS )  continue;
 
+    // Case of an internal tetra with 4 ridges vertices.
+    if ( lmin == 0 ) continue;
+
     ifa0 = _MMG5_ifar[imin][0];
     ifa1 = _MMG5_ifar[imin][1];
     i  =  (pt->xt && (pxt->ftag[ifa1] & MG_BDY)) ? ifa1 : ifa0;
