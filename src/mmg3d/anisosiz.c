@@ -986,7 +986,7 @@ static inline
 int _MMG5_grad2metVol(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,int ia) {
   MMG5_pPoint    p1,p2;
   double         *mm1,*mm2,m1[6],m2[6],ps1,ps2,ux,uy,uz;
-  double         c[5],l,val;
+  double         c[5],l,val,t[3];
   double         lambda[3],vp[3][3],alpha,beta,mu[3];
   int            ip1,ip2,kmin,i;
   char           i1,i2,ichg;
@@ -1006,7 +1006,7 @@ int _MMG5_grad2metVol(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,int ia) {
   uy = p2->c[1] - p1->c[1];
   uz = p2->c[2] - p1->c[2];
 
-  if ( p1->tag & MG_GEO ) {
+  if ( (!( MG_SIN(p1->tag) || (p1->tag & MG_NOM) )) &&  p1->tag & MG_GEO ) {
     /* Recover normal and metric associated to p1 */
     if( !_MMG5_buildridmet(mesh,met,ip1,ux,uy,uz,m1) )
       return(-1);
@@ -1014,7 +1014,7 @@ int _MMG5_grad2metVol(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,int ia) {
   else
     memcpy(m1,mm1,6*sizeof(double));
 
-  if ( p2->tag & MG_GEO ) {
+  if ( (!( MG_SIN(p2->tag) || (p2->tag & MG_NOM) )) && p2->tag & MG_GEO ) {
     /* Recover normal and metric associated to p2 */
     if( !_MMG5_buildridmet(mesh,met,ip2,ux,uy,uz,m2) )
       return(-1);
@@ -1024,14 +1024,18 @@ int _MMG5_grad2metVol(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,int ia) {
 
   l = sqrt(ux*ux+uy*uy+uz*uz);
 
+  t[0] = ux/l;
+  t[1] = uy/l;
+  t[2] = uz/l;
+
   // edge length in metric m1: t^u * m1 * u.
-  ps1 =  m1[0]*ux*ux + 2.0*m1[1]*ux*uy + m1[3]*uy*uy + 2.0*m1[2]*ux*uz
-    + 2.0*m1[4]*uy*uz + m1[5]*uz*uz;
+  ps1 =  m1[0]*t[0]*t[0] + 2.0*m1[1]*t[0]*t[1] + m1[3]*t[1]*t[1]
+    + 2.0*m1[2]*t[0]*t[2] + 2.0*m1[4]*t[1]*t[2] + m1[5]*t[2]*t[2];
   ps1 = sqrt(ps1);
 
   // edge length in metric m2: t^u * m2 * u.
-  ps2 =  m2[0]*ux*ux + 2.0*m2[1]*ux*uy + m2[3]*uy*uy + 2.0*m2[2]*ux*uz
-    + 2.0*m2[4]*uy*uz + m2[5]*uz*uz;
+  ps2 =  m2[0]*t[0]*t[0] + 2.0*m2[1]*t[0]*t[1] + m2[3]*t[1]*t[1]
+    + 2.0*m2[2]*t[0]*t[2] + 2.0*m2[4]*t[1]*t[2] + m2[5]*t[2]*t[2];
   ps2 = sqrt(ps2);
 
   /* Metric in p1 has to be changed */
@@ -1041,9 +1045,10 @@ int _MMG5_grad2metVol(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,int ia) {
       return(-1);
 
     _MMG5_eigenv(1,m1,lambda,vp);
-    c[0] = ux*vp[0][0] + uy*vp[0][1] + uz*vp[0][2];
-    c[1] = ux*vp[1][0] + uy*vp[1][1] + uz*vp[1][2];
-    c[2] = ux*vp[2][0] + uy*vp[2][1] + uz*vp[2][2];
+
+    c[0] = t[0]*vp[0][0] + t[1]*vp[0][1] + t[2]*vp[0][2];
+    c[1] = t[0]*vp[1][0] + t[1]*vp[1][1] + t[2]*vp[1][2];
+    c[2] = t[0]*vp[2][0] + t[1]*vp[2][1] + t[2]*vp[2][2];
 
     // Compute M=P \lambda t^P
     // Find index of the maximum value of c
@@ -1098,16 +1103,6 @@ int _MMG5_grad2metVol(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,int ia) {
     else {
       memcpy(mm1,m1,6*sizeof(double));
     }
-
-#warning remove when ok
-    // test Nan
-    for (i=0; i<6; ++i) {
-      if (m1[i]!=m1[i]) {
-        puts("Nan");
-        assert(0);
-      }
-    }
-
     return(i1);
   }
   /* Metric in p2 has to be changed */
@@ -1118,9 +1113,9 @@ int _MMG5_grad2metVol(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,int ia) {
 
     _MMG5_eigenv(1,m2,lambda,vp);
 
-    c[0] = ux*vp[0][0] + uy*vp[0][1] + uz*vp[0][2];
-    c[1] = ux*vp[1][0] + uy*vp[1][1] + uz*vp[1][2];
-    c[2] = ux*vp[2][0] + uy*vp[2][1] + uz*vp[2][2];
+    c[0] = t[0]*vp[0][0] + t[1]*vp[0][1] + t[2]*vp[0][2];
+    c[1] = t[0]*vp[1][0] + t[1]*vp[1][1] + t[2]*vp[1][2];
+    c[2] = t[0]*vp[2][0] + t[1]*vp[2][1] + t[2]*vp[2][2];
 
     // Compute M=P \lambda t^P
     // Find index of the maximum value of c
@@ -1175,15 +1170,6 @@ int _MMG5_grad2metVol(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,int ia) {
     else{
       memcpy(mm2,m2,6*sizeof(double));
     }
-#warning remove when ok
-// test Nan
-    for (i=0; i<6; ++i) {
-      if (m2[i]!=m2[i]) {
-        puts("Nan");
-        assert(0);
-      }
-    }
-
     return(i2);
   }
 }
@@ -1207,11 +1193,6 @@ int _MMG5_gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   int           k,it,nup,nu,maxit;
   int           i,j,ia,ias,ip0,ip1;
   char          ier,i0,i1;
-#warning remove
-  /* _MMG5_unscaleMesh(mesh,met); */
-  /* MMG5_saveMesh(mesh); */
-  /* MMG5_saveMet(mesh,met); */
-  /* exit(666); */
 
   if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug )
     fprintf(stdout,"  ** Anisotropic mesh gradation\n");
@@ -1229,7 +1210,6 @@ int _MMG5_gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
 
     m = &met->m[6*k];
     mv = MG_MAX(m[0],MG_MAX(m[1],m[2]));
-#warning to watch
     mv = MG_MAX(m[0],MG_MAX(MG_MAX(m[1],m[2]),MG_MAX(m[3],m[4])));
     m[0] = mv;
     m[1] = mv;
@@ -1317,7 +1297,7 @@ int _MMG5_gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
                 continue;
               }
 
-              ier = -1;//_MMG5_grad2metVol(mesh,met,pt,ia);
+              ier = _MMG5_grad2metVol(mesh,met,pt,ia);
               if ( ier == i0 ) {
                 p0->flag = mesh->base;
                 nu++;
@@ -1346,7 +1326,7 @@ int _MMG5_gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
             // Impose gradation from a boundary face if possible
             if ( _MMG5_hashGet(&hash,ip0,ip1) ) continue;
 
-            ier = -1;//_MMG5_grad2metVol(mesh,met,pt,ia);
+            ier = _MMG5_grad2metVol(mesh,met,pt,ia);
             if ( ier == i0 ) {
               p0->flag = mesh->base;
               nu++;
@@ -1364,11 +1344,6 @@ int _MMG5_gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   while( ++it < maxit && nu > 0 );
 
   if ( abs(mesh->info.imprim) > 4 )  fprintf(stdout,"     gradation: %7d updated, %d iter.\n",nup,it);
-#warning remove
-  /* _MMG5_unscaleMesh(mesh,met); */
-  /* MMG5_saveMesh(mesh); */
-  /* MMG5_saveMet(mesh,met); */
-  /* exit(666); */
 
   _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
   return(1);

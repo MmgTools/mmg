@@ -1010,10 +1010,7 @@ int _MMG5_mmg3d1_delone(MMG5_pMesh mesh,MMG5_pSol met) {
     fprintf(stdout,"  ## Gradation problem. Exit program.\n");
     return(0);
   }
-#warning remove
-  /* _MMG5_unscaleMesh(mesh,met); */
-  /* MMG5_saveMesh(mesh); MMG5_saveMet(mesh,met); */
-  /* exit(666); */
+
   if ( !_MMG5_anatet(mesh,met,2,0) ) {
     fprintf(stdout,"  ## Unable to split mesh. Exiting.\n");
     return(0);
