@@ -818,9 +818,11 @@ _MMG5_adpsplcol(MMG5_pMesh mesh,MMG5_pSol met,_MMG5_pBucket bucket, int* warn) {
   }
   while( ++it < maxit && nc+ns > 0 );
 
-  if ( (abs(mesh->info.imprim) < 5) && ( nnc || nns ) ) {
-    fprintf(stdout,"     %8d filtered, %8d splitted, %8d collapsed,"
-            " %8d swapped, %8d moved, %d iter.\n",ifilt,nns,nnc,nnf,nnm, it);
+  if ( mesh->info.imprim ) {
+    if ( (abs(mesh->info.imprim) < 5) && ( nnc || nns ) ) {
+      fprintf(stdout,"     %8d filtered, %8d splitted, %8d collapsed,"
+              " %8d swapped, %8d moved, %d iter.\n",ifilt,nns,nnc,nnf,nnm, it);
+    }
   }
 
   return(1);
@@ -900,11 +902,12 @@ _MMG5_optet(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket) {
     fprintf(stdout,"     %8d moved\n",nm);
   }
 
-  if ( abs(mesh->info.imprim) < 5 && (nnf > 0 || nnm > 0) )
-    fprintf(stdout,"                                                 "
-            "        "
-            "      %8d swapped, %8d moved, %d iter. \n",nnf,nnm,it);
-
+  if ( mesh->info.imprim ) {
+    if ( abs(mesh->info.imprim) < 5 && (nnf > 0 || nnm > 0) )
+      fprintf(stdout,"                                                 "
+              "        "
+              "      %8d swapped, %8d moved, %d iter. \n",nnf,nnm,it);
+  }
   return(1);
 }
 

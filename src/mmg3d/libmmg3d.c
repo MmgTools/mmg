@@ -309,9 +309,11 @@ int MMG5_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp
   char      stim[32];
   MMG5_pSol scaledSol;
 
-  fprintf(stdout,"  -- MMG3d, Release %s (%s) \n",MG_VER,MG_REL);
-  fprintf(stdout,"     %s\n",MG_CPY);
-  fprintf(stdout,"     %s %s\n",__DATE__,__TIME__);
+  if ( mesh->info.imprim ) {
+    fprintf(stdout,"  -- MMG3d, Release %s (%s) \n",MG_VER,MG_REL);
+    fprintf(stdout,"     %s\n",MG_CPY);
+    fprintf(stdout,"     %s %s\n",__DATE__,__TIME__);
+  }
 
   _MMG5_Set_commonFunc();
 
@@ -329,7 +331,7 @@ int MMG5_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp
   _MMG5_warnScotch(mesh);
 #endif
 
-  fprintf(stdout,"\n  -- MMG3DLIB: INPUT DATA\n");
+  if ( mesh->info.imprim ) fprintf(stdout,"\n  -- MMG3DLIB: INPUT DATA\n");
   /* load data */
   chrono(ON,&(ctim[1]));
   _MMG5_warnOrientation(mesh);
@@ -366,7 +368,8 @@ int MMG5_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp
 
   chrono(OFF,&(ctim[1]));
   printim(ctim[1].gdif,stim);
-  fprintf(stdout,"  --  INPUT DATA COMPLETED.     %s\n",stim);
+  if ( mesh->info.imprim )
+    fprintf(stdout,"  --  INPUT DATA COMPLETED.     %s\n",stim);
 
   /* analysis */
   chrono(ON,&(ctim[2]));
@@ -374,8 +377,10 @@ int MMG5_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp
 
   if ( abs(mesh->info.imprim) > 0 )  _MMG5_inqua(mesh,met);
 
-  fprintf(stdout,"\n  %s\n   MODULE MMG3D: IMB-LJLL : %s (%s)\n  %s\n",MG_STR,MG_VER,MG_REL,MG_STR);
-  if ( mesh->info.imprim )  fprintf(stdout,"\n  -- PHASE 1 : ANALYSIS\n");
+  if ( mesh->info.imprim ) {
+    fprintf(stdout,"\n  %s\n   MODULE MMG3D: IMB-LJLL : %s (%s)\n  %s\n",MG_STR,MG_VER,MG_REL,MG_STR);
+    fprintf(stdout,"\n  -- PHASE 1 : ANALYSIS\n");
+  }
 
  /* scaling mesh */
   if ( mesh->info.lag == -1 ) {
@@ -487,9 +492,10 @@ if ( mesh->info.lag == -1 ) {
 
   chrono(OFF,&(ctim[3]));
   printim(ctim[3].gdif,stim);
-  if ( mesh->info.imprim )
+  if ( mesh->info.imprim ) {
     fprintf(stdout,"  -- PHASE 2 COMPLETED.     %s\n",stim);
-  fprintf(stdout,"\n  %s\n   END OF MODULE MMG3d: IMB-LJLL \n  %s\n",MG_STR,MG_STR);
+    fprintf(stdout,"\n  %s\n   END OF MODULE MMG3d: IMB-LJLL \n  %s\n",MG_STR,MG_STR);
+  }
 
   /* save file */
   _MMG5_outqua(mesh,met);
@@ -504,6 +510,7 @@ if ( mesh->info.lag == -1 ) {
 
   chrono(OFF,&ctim[0]);
   printim(ctim[0].gdif,stim);
-  fprintf(stdout,"\n   MMG3DLIB: ELAPSED TIME  %s\n",stim);
+  if ( mesh->info.imprim )
+    fprintf(stdout,"\n   MMG3DLIB: ELAPSED TIME  %s\n",stim);
   return(MMG5_SUCCESS);
 }

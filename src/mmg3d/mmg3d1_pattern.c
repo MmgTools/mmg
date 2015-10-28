@@ -501,11 +501,11 @@ static int _MMG5_adptet(MMG5_pMesh mesh,MMG5_pSol met) {
     fprintf(stdout,"                  %8d moved\n",nm);
   }
 
-
-  if ( abs(mesh->info.imprim) < 5 && (nnc > 0 || nns > 0) )
-    fprintf(stdout,"     %8d splitted, %8d collapsed, %8d swapped, %8d moved, %d iter. \n",
-            nns,nnc,nnf,nnm,it+it1);
-
+  if ( mesh->info.imprim ) {
+    if ( abs(mesh->info.imprim) < 5 && (nnc > 0 || nns > 0) )
+      fprintf(stdout,"     %8d splitted, %8d collapsed, %8d swapped, %8d moved, %d iter. \n",
+              nns,nnc,nnf,nnm,it+it1);
+  }
   return(1);
 }
 
