@@ -161,8 +161,11 @@ int* _MMG5_packLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,int *npfin) {
     return(0);
   }
 
-  /* Set verbosity and debug info to 1 and 0 (resp.)  */
-  LS_setPar(lsst,1,0,0);
+  /* Set verbosity and debug info */
+  if ( !mesh->info.imprim )
+    LS_setPar(lsst,0,0,0);
+  else
+    LS_setPar(lsst,1,0,0);
   
   /* Step 5: fill the LS mesh */
   /* Add vertices */

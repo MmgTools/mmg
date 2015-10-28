@@ -715,7 +715,7 @@ int _MMG5_mmg3d3(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met) {
 
       if ( t == _MMG5_SHORTMAX ) break;
     }
-    if ( abs(mesh->info.imprim) < 4 ) {
+    if ( mesh->info.imprim && abs(mesh->info.imprim) < 4 ) {
       printf("   ---> Realized displacement: %f\n",tau);
       if ( abs(mesh->info.imprim) > 2 )
         printf(" %d edges splitted, %d vertices collapsed, %d elements"

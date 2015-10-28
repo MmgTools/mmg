@@ -744,7 +744,8 @@ int _MMG5_chkmani(MMG5_pMesh mesh){
     }
   }
 
-  fprintf(stdout,"  *** Manifold implicit surface.\n");
+  if ( mesh->info.imprim || mesh->info.ddebug )
+    fprintf(stdout,"  *** Manifold implicit surface.\n");
   return(1);
 }
 
