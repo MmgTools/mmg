@@ -328,7 +328,7 @@ static int _MMG5_defmetsin(MMG5_pMesh mesh,MMG5_pSol met,int kel, int iface, int
       if ( (par->elt == MMG5_Triangle) && (pxt->ref[ifac] == par->ref ) )
         hausd = par->hausd;
     }
-    maxkappa = MG_MAX(kappa,maxkappa/hausd);
+    maxkappa = MG_MAX(kappa/hausd,maxkappa);
   }
 
   alpha = 1.0 / 8.0 * maxkappa;
@@ -404,7 +404,7 @@ static int _MMG5_defmetrid(MMG5_pMesh mesh,MMG5_pSol met,int kel,
   }
 
   /* Specific size in direction of t */
-  m[0] = _MMG5_ridSizeInTangentDir(mesh,p0,idp,iprid,isqhmin,isqhmax);
+  m[0] = MG_MAX(m[0],_MMG5_ridSizeInTangentDir(mesh,p0,idp,iprid,isqhmin,isqhmax));
 
   /* Characteristic sizes in directions u1 and u2 */
   for (i=0; i<2; i++) {

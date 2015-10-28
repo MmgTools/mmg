@@ -292,6 +292,7 @@ int movintpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
 
   /* Second test : check whether geometric approximation has not been too much degraded */
   ppt0 = &mesh->point[0];
+  ppt0->tag = p0->tag;
   ppt0->c[0] = o[0];
   ppt0->c[1] = o[1];
   ppt0->c[2] = o[2];

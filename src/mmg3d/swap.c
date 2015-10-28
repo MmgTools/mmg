@@ -69,6 +69,7 @@ int _MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, int *list,int ilist,
   pt  = &mesh->tetra[iel];
   pt0 = &mesh->tetra[0];
   ppt0= &mesh->point[0];
+  memset(ppt0,0,sizeof(MMG5_Point));
 
   np = pt->v[_MMG5_iare[ia][0]];
   nq = pt->v[_MMG5_iare[ia][1]];
