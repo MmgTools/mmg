@@ -28,6 +28,15 @@
  * \version 5
  * \date 01 2014
  * \copyright GNU Lesser General Public License.
+ *
+ * \include mmg3d/example0/example0_a/main.c
+ * \include mmg3d/example0/example0_b/main.c
+ * \include mmg3d/example0_fortran/example0_a/main.F90
+ * \include mmg3d/example0_fortran/example0_b/main.F90
+ * \include mmg3d/example1/main.c
+ * \include mmg3d/example2/main.c
+ * \include mmg3d/example3/mmg3d.c
+ * \include mmg3d/example4/main.c
  */
 
 #ifndef _MMG3DLIB_H
@@ -121,15 +130,16 @@ enum MMG5_Param
 /* Initialization functions */
 /* init structures */
 /**
- * \param mesh pointer toward a pointer toward the mesh structure.
- * \param sol pointer toward a sol structure (metric or level-set).
- * \param sol pointer toward a sol structure (displacement).
+ * \param mesh adress of a pointer toward a pointer toward the mesh structure.
+ * \param sol adress of a pointer toward a sol structure (metric or level-set).
+ * \param disp adress of a pointer toward a sol structure
+ * (displacement for the lagrangian mode).
  *
  * Allocate the mesh and solution structures and initialize it to
  * their default values.
  *
  */
-void  MMG5_Init_mesh(MMG5_pMesh *mesh, MMG5_pSol *sol, MMG5_pSol *disp);
+void  MMG5_Init_mesh(MMG5_pMesh *mesh, MMG5_pSol *sol, MMG5_pSol *disp );
 /* init structure sizes */
 /**
  * \param mesh pointer toward the mesh structure.
@@ -220,58 +230,58 @@ int  MMG5_Set_triangle(MMG5_pMesh mesh, int v0, int v1,
 int  MMG5_Set_edge(MMG5_pMesh mesh, int v0, int v1, int ref,int pos);
 /**
  * \param mesh pointer toward the mesh structure.
- * \param pos vertex index.
+ * \param k vertex index.
  * \return 1.
  *
  * Set corner at point \a pos.
  *
  */
-int  MMG5_Set_corner(MMG5_pMesh mesh, int pos);
+int  MMG5_Set_corner(MMG5_pMesh mesh, int k);
 /**
  * \param mesh pointer toward the mesh structure.
- * \param pos vertex index.
+ * \param k vertex index.
  * \return 1.
  *
- * Set point \a pos as required.
+ * Set point \a k as required.
  *
  */
-int  MMG5_Set_requiredVertex(MMG5_pMesh mesh, int pos);
+int  MMG5_Set_requiredVertex(MMG5_pMesh mesh, int k);
 /**
  * \param mesh pointer toward the mesh structure.
- * \param pos element index.
+ * \param k element index.
  * \return 1.
  *
- * Set element \a pos as required.
+ * Set element \a k as required.
  *
  */
-int  MMG5_Set_requiredTetrahedron(MMG5_pMesh mesh, int pos);
+int  MMG5_Set_requiredTetrahedron(MMG5_pMesh mesh, int k);
 /**
  * \param mesh pointer toward the mesh structure.
- * \param pos triangle index.
+ * \param k triangle index.
  * \return 1.
  *
- * Set triangle \a pos as required.
+ * Set triangle \a k as required.
  *
  */
-int  MMG5_Set_requiredTriangle(MMG5_pMesh mesh, int pos);
+int  MMG5_Set_requiredTriangle(MMG5_pMesh mesh, int k);
 /**
  * \param mesh pointer toward the mesh structure.
- * \param pos edge index.
+ * \param k edge index.
  * \return 1.
  *
- * Set ridge at edge \a pos.
+ * Set ridge at edge \a k.
  *
  */
-int  MMG5_Set_ridge(MMG5_pMesh mesh, int pos);
+int  MMG5_Set_ridge(MMG5_pMesh mesh, int k);
 /**
  * \param mesh pointer toward the mesh structure.
- * \param pos edge index.
+ * \param k edge index.
  * \return 1.
  *
  * Set edge \a k as required.
  *
  */
-int  MMG5_Set_requiredEdge(MMG5_pMesh mesh, int pos);
+int  MMG5_Set_requiredEdge(MMG5_pMesh mesh, int k);
 /**
  * \param met pointer toward the sol structure.
  * \param s solution scalar value.
@@ -349,7 +359,7 @@ int  MMG5_Set_iparameter(MMG5_pMesh mesh,MMG5_pSol sol, int iparam, int val);
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the sol structure.
  * \param dparam double parameter to set (see \a MMG5_Param structure).
- * \val value of the parameter.
+ * \param val value of the parameter.
  * \return 0 if failed, 1 otherwise.
  *
  * Set double parameter \a dparam at value \a val.
@@ -518,7 +528,7 @@ int  MMG5_loadMesh(MMG5_pMesh mesh);
  * Save mesh data.
  *
  */
-int  (*MMG5_saveMesh)(MMG5_pMesh mesh);
+int  MMG5_saveMesh(MMG5_pMesh mesh);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the sol structure.
@@ -542,12 +552,13 @@ int  MMG5_saveMet(MMG5_pMesh mesh, MMG5_pSol met);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the sol structure (metric or solution).
- * \param disp pointer toward a sol structure (displacement).
+ * \param disp pointer toward a sol structure (displacement for the
+ * lagrangian mode).
  *
  * Deallocations before return.
  *
  */
-void MMG5_Free_all(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pSol disp);
+void MMG5_Free_all(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pSol disp );
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -557,7 +568,7 @@ void MMG5_Free_all(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pSol disp);
  * Structure deallocations before return.
  *
  */
-void MMG5_Free_structures(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pSol disp);
+void MMG5_Free_structures(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pSol disp );
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -572,8 +583,9 @@ void MMG5_Free_names(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pSol disp);
 /* library */
 /**
  * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the sol (metric or level-set) structure.
- * \param disp pointer toward the sol (displacement) structure.
+ * \param met pointer toward the sol (metric or level-set) structure.
+ * \param disp pointer toward a sol (displacement for the lagrangian motion
+ * mode) structure.
  * \return \ref MMG5_SUCCESS if success, \ref MMG5_LOWFAILURE if fail but a
  * conform mesh is saved or \ref MMG5_STRONGFAILURE if fail and we can't save
  * the mesh.
@@ -581,7 +593,7 @@ void MMG5_Free_names(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pSol disp);
  * Main program for the library.
  *
  */
-int  MMG5_mmg3dlib(MMG5_pMesh mesh, MMG5_pSol sol, MMG5_pSol disp);
+int  MMG5_mmg3dlib(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pSol disp );
 
 /* for PAMPA library */
 /** Options management */
@@ -640,7 +652,7 @@ void  MMG5_destockOptions(MMG5_pMesh mesh, MMG5_Info *info);
 /** Checks */
 /**
  * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the sol structure.
+ * \param met pointer toward the sol structure.
  * \param critmin minimum quality for elements.
  * \param lmin minimum edge length.
  * \param lmax maximum ede length.
@@ -653,7 +665,7 @@ void  MMG5_destockOptions(MMG5_pMesh mesh, MMG5_Info *info);
  * Search invalid elements (in term of quality or edge length).
  *
  */
-int MMG5_mmg3dcheck(MMG5_pMesh mesh,MMG5_pSol sol,double critmin,
+int MMG5_mmg3dcheck(MMG5_pMesh mesh,MMG5_pSol met,double critmin,
                     double lmin, double lmax, int *eltab,char metRidTyp);
 /**
  * \param mesh pointer toward the mesh structure.
@@ -760,7 +772,7 @@ void  MMG5_setfunc(MMG5_pMesh mesh,MMG5_pSol met);
 /**
  * \param mesh pointer toward the mesh structure (unused).
  * \param met pointer toward the sol structure (unused).
- * \warning Copy of the \ref setfunc function of the \ref mmg3d/shared_func.h
+ * \warning Copy of the \a setfunc function of the \a mmg3d/shared_func.h
  * file.
  * \note Developped for the PaMPA library interface.
  *

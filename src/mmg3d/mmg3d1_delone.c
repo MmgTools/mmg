@@ -60,7 +60,7 @@ int MMG_npuiss,MMG_nvol,MMG_npres,MMG_npd;
  * \return -1 if fail and we don't save the mesh, 0 if fail but we try to save
  * the mesh, 1 otherwise.
  *
- * \ref adpsplcol loop: split edges longer than \ref _MMG5_LOPTL_MMG5_DEL and
+ * \a adpsplcol loop: split edges longer than \ref _MMG5_LOPTL_MMG5_DEL and
  * collapse edges shorter than \ref _MMG5_LOPTS_MMG5_DEL.
  *
  */
@@ -728,6 +728,7 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
  * \param bucket pointer toward the bucket structure.
+ * \param warn set to 1 if we can't insert point due to lack of memory.
  * \return -1 if fail and we dont try to end the remesh process,
  * 0 if fail but we try to end the remesh process and 1 if success.
  *

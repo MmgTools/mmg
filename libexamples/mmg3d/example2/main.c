@@ -21,8 +21,16 @@
 ** =============================================================================
 */
 
-/** Authors Cecile Dobrzynski, Charles Dapogny, Pascal Frey and Algiane Froehly */
-/** \include Example for using mmg3dlib (advanced used) */
+/**
+ * Example of use of the mmg3d library (advanced use of mesh adaptation)
+ *
+ * \author Charles Dapogny (LJLL, UPMC)
+ * \author Cécile Dobrzynski (Inria / IMB, Université de Bordeaux)
+ * \author Pascal Frey (LJLL, UPMC)
+ * \author Algiane Froehly (Inria / IMB, Université de Bordeaux)
+ * \version 5
+ * \copyright GNU Lesser General Public License.
+ */
 
 #include <assert.h>
 #include <stdio.h>
@@ -41,7 +49,7 @@
 
 int main(int argc,char *argv[]) {
   MMG5_pMesh      mmgMesh;
-  MMG5_pSol       mmgSol,mmgDisp;
+  MMG5_pSol       mmgSol;
   int             k,ier;
   char            *pwd,*inname,*outname;
 
@@ -62,12 +70,10 @@ int main(int argc,char *argv[]) {
   sprintf(inname, "%s%s%s", pwd, "/../libexamples/mmg3d/example2/", "2spheres");
 
   /** 1) Initialisation of mesh and sol structures */
-  /* args of InitMesh: mesh=&mmgMesh, sol=&mmgSol, input mesh name, input sol name,
-   output mesh name */
+  /* args of InitMesh: mesh=&mmgMesh, sol=&mmgSol */
   mmgMesh = NULL;
   mmgSol  = NULL;
-  mmgDisp = NULL; //Useless here: just needed forthe lagrangian motion option
-  MMG5_Init_mesh(&mmgMesh,&mmgSol,&mmgDisp);
+  MMG5_Init_mesh(&mmgMesh,&mmgSol,NULL);
 
   /** 2) Build mesh in MMG5 format */
   /** Two solutions: just use the MMG5_loadMesh function that will read a .mesh(b)
@@ -129,7 +135,7 @@ int main(int argc,char *argv[]) {
     exit(EXIT_FAILURE);
 
   /** library call */
-  ier = MMG5_mmg3dlib(mmgMesh,mmgSol,mmgDisp);
+  ier = MMG5_mmg3dlib(mmgMesh,mmgSol,NULL);
   if ( ier == MMG5_STRONGFAILURE ) {
     fprintf(stdout,"BAD ENDING OF MMG3DLIB: UNABLE TO SAVE MESH\n");
     return(ier);
@@ -187,7 +193,7 @@ int main(int argc,char *argv[]) {
     exit(EXIT_FAILURE);
 
   /** library call */
-  ier = MMG5_mmg3dlib(mmgMesh,mmgSol,mmgDisp);
+  ier = MMG5_mmg3dlib(mmgMesh,mmgSol,NULL);
   if ( ier == MMG5_STRONGFAILURE ) {
     fprintf(stdout,"BAD ENDING OF MMG3DLIB: UNABLE TO SAVE MESH\n");
     return(ier);
@@ -203,7 +209,7 @@ int main(int argc,char *argv[]) {
     if ( !MMG5_Set_scalarSol(mmgSol,10,k) ) exit(EXIT_FAILURE);
   }
 
-  ier = MMG5_mmg3dlib(mmgMesh,mmgSol,mmgDisp);
+  ier = MMG5_mmg3dlib(mmgMesh,mmgSol,NULL);
   if ( ier == MMG5_STRONGFAILURE ) {
     fprintf(stdout,"BAD ENDING OF MMG3DLIB: UNABLE TO SAVE MESH\n");
     return(ier);
@@ -225,7 +231,7 @@ int main(int argc,char *argv[]) {
   MMG5_saveMet(mmgMesh,mmgSol);
 
   /* 9) free the MMG3D5 structures */
-  MMG5_Free_all(mmgMesh,mmgSol,mmgDisp);
+  MMG5_Free_all(mmgMesh,mmgSol,NULL);
 
   free(inname);
   inname = NULL;

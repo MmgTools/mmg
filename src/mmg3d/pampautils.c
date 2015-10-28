@@ -88,7 +88,7 @@ void _MMG5_pampa_excfun(int sigid) {
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the sol structure.
- * \warning Copy of the \a setfunc function of the \ref mmg3d/shared_func.h
+ * \warning Copy of the \a _MMG5_setfunc function of the \a mmg3d/shared_func.h
  * file.
  *
  * Set function pointers for lenedgeCoor, _MMG5_hashTetra and saveMesh.
@@ -100,7 +100,7 @@ void MMG5_pampa_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
   else
     MMG5_lenedgCoor = _MMG5_lenedgCoor_ani;
   MMG5_hashTetra = _MMG5_hashTetra;
-  MMG5_saveMesh = _MMG5_saveLibraryMesh;
+  _MMG5_saveMeshinternal = _MMG5_saveLibraryMesh;
 }
 /* END COPY */
 
@@ -551,7 +551,7 @@ int _MMG5_stockOptions(MMG5_pMesh mesh, MMG5_Info *info) {
 
 /**
  * \param mesh pointer toward the mesh structure.
- * \param *info pointer toward the info structure.
+ * \param info pointer toward the info structure.
  *
  * Recover the info structure stored in the mesh structure.
  *
@@ -568,7 +568,7 @@ void _MMG5_destockOptions(MMG5_pMesh mesh, MMG5_Info *info) {
  * \param critmin minimum quality for elements.
  * \param lmin minimum edge length.
  * \param lmax maximum ede length.
- * \param *eltab pointer toward the table of invalid elements.
+ * \param eltab pointer toward the table of invalid elements.
  * \param metRidTyp Type of storage of ridges metrics: 0 for classic storage
  * (before the _MMG5_defsiz call), 1 for special storage (after this call).
  *
@@ -692,7 +692,7 @@ void MMG5_searchqua(MMG5_pMesh mesh,MMG5_pSol met,double critmin, int *eltab,
 int MMG5_searchlen(MMG5_pMesh mesh, MMG5_pSol met, double lmin,
                    double lmax, int *eltab,char metRidTyp) {
   MMG5_pTetra          pt;
-  _MMG5_Hash           hash;
+ _MMG5_Hash           hash;
   double          len;
   int             k,np,nq;
   char            ia,i0,i1,ier;

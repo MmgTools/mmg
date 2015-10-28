@@ -722,6 +722,7 @@ static int _MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,int kel, int iface, int
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
  * \param kel index of the triangle in which we work.
+ * \param iface working face.
  * \param ip index of the point on which we want to compute the metric
  * in (tetra \a kel).
  * \return 1 if success, 0 otherwise.

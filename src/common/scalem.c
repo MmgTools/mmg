@@ -39,7 +39,7 @@
  * \return 1 if success, 0 if fail (computed bounding box too small).
  *
  * Compute the mesh bounding box and fill the \a min, \a max and \a delta fields
- * of the \ref _MMG5_info structure.
+ * of the \a _MMG5_info structure.
  *
  */
 int _MMG5_boundingBox(MMG5_pMesh mesh) {

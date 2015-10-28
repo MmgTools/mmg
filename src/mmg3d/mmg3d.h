@@ -351,6 +351,7 @@ int    (*_MMG5_intmet)(MMG5_pMesh,MMG5_pSol,int,char,int, double);
 int    (*_MMG5_interp4bar)(MMG5_pMesh,MMG5_pSol,int,int,double *);
 int    (*_MMG5_cavity)(MMG5_pMesh ,MMG5_pSol ,int ,int ,int *,int );
 int    (*_MMG5_buckin)(MMG5_pMesh ,MMG5_pSol ,_MMG5_pBucket ,int );
+int    (*_MMG5_saveMeshinternal)(MMG5_pMesh mesh);
 
 void   _MMG5_Set_commonFunc();
 

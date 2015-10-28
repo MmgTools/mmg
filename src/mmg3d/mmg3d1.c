@@ -44,7 +44,7 @@ char  ddb;
  * \param mesh pointer toward the mesh structure.
  * \param k tetrahedron index.
  * \param ie face index of tetrahedron.
- * \param *ptt pointer toward the output triangle.
+ * \param ptt pointer toward the output triangle.
  *
  * Set triangle corresponding to face ie of tetra k.
  *
@@ -161,7 +161,8 @@ int _MMG5_dichoto(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
 
 /**
  * \param mesh pointer toward the mesh structure.
- * \param *list pointer toward the shell of edge.
+ * \param met pointer toward the metric structure.
+ * \param list pointer toward the shell of edge.
  * \param ret double of the number of tetrahedra in the shell.
  * \param ip new point index.
  * \return 1.
@@ -226,7 +227,7 @@ int _MMG5_dichoto1b(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int ip) {
 
 /**
  * \param mesh pointer toward the mesh structure.
- * \param *pt pointer toward the triangle.
+ * \param pt pointer toward the triangle.
  * \param ori orientation of the triangle (1 for direct orientation, 0 otherwise).
  * \return 0 if error.
  * \return edges of the triangle pt that need to be split.
@@ -1339,7 +1340,7 @@ static int _MMG5_anatet4(MMG5_pMesh mesh, MMG5_pSol met,char typchk) {
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
  * \param typchk type of checking for edges length.
- * \param paternMode flag to say if we perform vertex insertion by patterns
+ * \param patternMode flag to say if we perform vertex insertion by patterns
  * or by delaunay kernel.
  * \return 0 if fail, number of new points otherwise.
  *

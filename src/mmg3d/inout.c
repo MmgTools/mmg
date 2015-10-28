@@ -2147,3 +2147,15 @@ int MMG5_saveMet(MMG5_pMesh mesh,MMG5_pSol met) {
   fclose(inm);
   return(1);
 }
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \return 0 if failed, 1 otherwise.
+ *
+ * Save mesh data (wrap the \a _MMG5_saveMeshinternal function to avoid segfault
+ * when linking with the shared library \a mmg3dlib).
+ *
+ */
+int MMG5_saveMesh(MMG5_pMesh mesh) {
+  return(_MMG5_saveMeshinternal(mesh));
+}

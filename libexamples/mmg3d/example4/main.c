@@ -21,8 +21,16 @@
 ** =============================================================================
 */
 
-/** Authors Cecile Dobrzynski, Charles Dapogny, Pascal Frey and Algiane Froehly */
-/** \include Example for using mmg3dlib (advanced used) */
+/**
+ * Example of use of the mmg3d library (basic use of lagrangian motion option)
+ *
+ * \author Charles Dapogny (LJLL, UPMC)
+ * \author Cécile Dobrzynski (Inria / IMB, Université de Bordeaux)
+ * \author Pascal Frey (LJLL, UPMC)
+ * \author Algiane Froehly (Inria / IMB, Université de Bordeaux)
+ * \version 5
+ * \copyright GNU Lesser General Public License.
+ */
 
 #include <assert.h>
 #include <stdio.h>
@@ -62,8 +70,7 @@ int main(int argc,char *argv[]) {
   sprintf(inname, "%s%s%s", pwd, "/../libexamples/mmg3d/example4/", "tinyBoxt");
 
   /** 1) Initialisation of mesh and sol structures */
-  /* args of InitMesh: mesh=&mmgMesh, sol=&mmgSol, input mesh name, input sol name,
-   output mesh name */
+  /* args of InitMesh: mesh=&mmgMesh, sol=&mmgSol */
   mmgMesh = NULL;
   mmgSol  = NULL;
   mmgDisp = NULL; //Useless here: just needed forthe lagrangian motion option
