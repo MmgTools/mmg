@@ -360,7 +360,10 @@ int _MMG2_delone(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist) {
         //printf("on cree %d : %d %d %d\n",iel,pt1->v[0],pt1->v[1],pt1->v[2]);
         pt1->qual = MMG2_caltri_in(mesh,sol,pt1);
         pt1->ref = mesh->tria[old].ref;
-        assert( pt1->qual >= 1e-10);
+
+        if ( pt1->qual < 1e-10 ) {
+          fprintf(stdout,"  ## Warning: creation of a very bad element.\n");
+        }
 
         iadr = (iel-1)*3 + 1;
         adjb = &mesh->adja[iadr];
