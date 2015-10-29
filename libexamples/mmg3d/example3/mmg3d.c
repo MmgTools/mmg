@@ -62,7 +62,7 @@ static inline void endcod() {
 int main(int argc,char *argv[]) {
   MMG5_pMesh      mesh;
   MMG5_pSol       met,disp;
-  int             ier,dummy,typSol;
+  int             ier,dummy,typSol,np;
   char            stim[32];
 
   atexit(endcod);
@@ -91,6 +91,7 @@ int main(int argc,char *argv[]) {
     MMG5_Free_all(mesh,met,disp );
     return(MMG5_STRONGFAILURE);
   }
+  /* Set default metric size */
   if ( !MMG5_Set_solSize(mesh,met,MMG5_Vertex,0,MMG5_Scalar) ) {
     MMG5_Free_all(mesh,met,disp);
     return(MMG5_STRONGFAILURE);
