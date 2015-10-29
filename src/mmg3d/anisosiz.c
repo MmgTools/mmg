@@ -165,8 +165,8 @@ inline double _MMG5_lenedgspl_ani(MMG5_pMesh mesh ,MMG5_pSol met, int ia,
                                   MMG5_pTetra pt)
 {
   MMG5_pPoint pp1,pp2;
-  double      *m1,*m2;
-  int         ip1,ip2;
+  double      m1[6],m2[6];
+  int         ip1,ip2,i;
 
   ip1 = pt->v[_MMG5_iare[ia][0]];
   ip2 = pt->v[_MMG5_iare[ia][1]];
@@ -174,21 +174,19 @@ inline double _MMG5_lenedgspl_ani(MMG5_pMesh mesh ,MMG5_pSol met, int ia,
   pp1 = &mesh->point[ip1];
   pp2 = &mesh->point[ip2];
 
-  if(MG_SIN(pp1->tag) || (MG_NOM & pp1->tag))
-    m1 = &met->m[6*ip1];
-  else if(pp1->tag & MG_GEO) {
-    m1 = (double*)malloc(6*sizeof(double));
+  if ( !(MG_SIN(pp1->tag) || (MG_NOM & pp1->tag)) && (pp1->tag & MG_GEO) ) {
     _MMG5_moymet(mesh,met,pt,m1);
-  } else
-    m1 = &met->m[6*ip1];
+  } else {
+    for ( i=0; i<6; ++i )
+      m1[i] = met->m[6*ip1+i];
+  }
 
-  if(MG_SIN(pp2->tag)|| (MG_NOM & pp2->tag))
-    m2 = &met->m[6*ip2];
-  else if(pp2->tag & MG_GEO) {
-    m2 = (double*)malloc(6*sizeof(double));
+  if ( !(MG_SIN(pp2->tag)|| (MG_NOM & pp2->tag)) && (pp2->tag & MG_GEO) ) {
     _MMG5_moymet(mesh,met,pt,m2);
-  } else
-    m2 = &met->m[6*ip2];
+  } else {
+    for ( i=0; i<6; ++i )
+      m2[i] = met->m[6*ip2+i];
+  }
 
   return(_MMG5_lenedgCoor_ani(pp1->c,pp2->c,m1,m2));
 }
