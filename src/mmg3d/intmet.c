@@ -248,34 +248,30 @@ int _MMG5_intvolmet(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,double s,
                     double mr[6]) {
   MMG5_pTetra     pt;
   MMG5_pPoint     pp1,pp2;
-  double          *m1,*m2;
-  int             ip1,ip2;
+  double          m1[6],m2[6];
+  int             ip1,ip2,l;
 
   pt  = &mesh->tetra[k];
-  
+
   ip1 = pt->v[_MMG5_iare[i][0]];
   ip2 = pt->v[_MMG5_iare[i][1]];
-  
+
   pp1 = &mesh->point[ip1];
   pp2 = &mesh->point[ip2];
-  
+
   // build metric at ma and mb points (Warn for ridge points) mp points and
-  if(MG_SIN(pp1->tag) || (MG_NOM & pp1->tag))
-    m1 = &met->m[6*ip1];
-  else if(pp1->tag & MG_GEO) {
-    m1 = (double*)malloc(6*sizeof(double));
+  if ( !(MG_SIN(pp1->tag) || (MG_NOM & pp1->tag)) && (pp1->tag & MG_GEO) ) {
     if (!_MMG5_moymet(mesh,met,pt,m1)) return(0);
   } else {
-    m1 = &met->m[6*ip1]; 
+    for ( l=0; l<6; ++l )
+      m1[l] = met->m[6*ip1+l];
     //printf("\n\nm1 %e %e %e %e %e %e\n",m1[0],m1[1],m1[2],m1[3],m1[4],m1[5]);
   }
-  if(MG_SIN(pp2->tag)|| (MG_NOM & pp2->tag))
-    m2 = &met->m[6*ip2];
-  else if(pp2->tag & MG_GEO) {
-    m2 = (double*)malloc(6*sizeof(double));
+  if ( !(MG_SIN(pp2->tag)|| (MG_NOM & pp2->tag)) && (pp2->tag & MG_GEO) ) {
     if (!_MMG5_moymet(mesh,met,pt,m2)) return(0);
   } else {
-    m2 = &met->m[6*ip2];
+    for ( l=0; l<6; ++l )
+      m2[l] = met->m[6*ip2+l];
     // printf("m2 %e %e %e %e %e %e\n",m2[0],m2[1],m2[2],m2[3],m2[4],m2[5]);
   }
 

@@ -2090,33 +2090,37 @@ int MMG5_saveMet(MMG5_pMesh mesh,MMG5_pSol met) {
       ppt = &mesh->point[k];
       if ( MG_VOK(ppt) ) {
         if ( !(MG_SIN(ppt->tag) || (ppt->tag & MG_NOM)) && (ppt->tag & MG_GEO) ) {
-          // Arbitrary, we take the metric associated to the surface ruled by n_1
-          mtmp[0] = met->m[met->size*(k)];
-          mtmp[1] = met->m[met->size*(k)+1];
-          mtmp[2] = met->m[met->size*(k)+3];
+          if ( mesh->xp ) {
+            // Arbitrary, we take the metric associated to the surface ruled by n_1
+            mtmp[0] = met->m[met->size*(k)];
+            mtmp[1] = met->m[met->size*(k)+1];
+            mtmp[2] = met->m[met->size*(k)+3];
 
-          // Rotation matrix.
-          r[0][0] = ppt->n[0];
-          r[1][0] = ppt->n[1];
-          r[2][0] = ppt->n[2];
-          r[0][1] = mesh->xpoint[ppt->xp].n1[1]*ppt->n[2]
-            - mesh->xpoint[ppt->xp].n1[2]*ppt->n[1];
-          r[1][1] = mesh->xpoint[ppt->xp].n1[2]*ppt->n[0]
-            - mesh->xpoint[ppt->xp].n1[0]*ppt->n[2];
-          r[2][1] = mesh->xpoint[ppt->xp].n1[0]*ppt->n[1]
-            - mesh->xpoint[ppt->xp].n1[1]*ppt->n[0];
-          r[0][2] = mesh->xpoint[ppt->xp].n1[0];
-          r[1][2] = mesh->xpoint[ppt->xp].n1[1];
-          r[2][2] = mesh->xpoint[ppt->xp].n1[2];
+            // Rotation matrix.
+            r[0][0] = ppt->n[0];
+            r[1][0] = ppt->n[1];
+            r[2][0] = ppt->n[2];
+            r[0][1] = mesh->xpoint[ppt->xp].n1[1]*ppt->n[2]
+              - mesh->xpoint[ppt->xp].n1[2]*ppt->n[1];
+            r[1][1] = mesh->xpoint[ppt->xp].n1[2]*ppt->n[0]
+              - mesh->xpoint[ppt->xp].n1[0]*ppt->n[2];
+            r[2][1] = mesh->xpoint[ppt->xp].n1[0]*ppt->n[1]
+              - mesh->xpoint[ppt->xp].n1[1]*ppt->n[0];
+            r[0][2] = mesh->xpoint[ppt->xp].n1[0];
+            r[1][2] = mesh->xpoint[ppt->xp].n1[1];
+            r[2][2] = mesh->xpoint[ppt->xp].n1[2];
 
-          // Metric in the canonic space
-          dbuf[0] = mtmp[0]*r[0][0]*r[0][0] + mtmp[1]*r[0][1]*r[0][1] + mtmp[2]*r[0][2]*r[0][2];
-          dbuf[1] = mtmp[0]*r[0][0]*r[1][0] + mtmp[1]*r[0][1]*r[1][1] + mtmp[2]*r[0][2]*r[1][2];
-          dbuf[2] = mtmp[0]*r[0][0]*r[2][0] + mtmp[1]*r[0][1]*r[2][1] + mtmp[2]*r[0][2]*r[2][2];
-          dbuf[3] = mtmp[0]*r[1][0]*r[1][0] + mtmp[1]*r[1][1]*r[1][1] + mtmp[2]*r[1][2]*r[1][2];
-          dbuf[4] = mtmp[0]*r[1][0]*r[2][0] + mtmp[1]*r[1][1]*r[2][1] + mtmp[2]*r[1][2]*r[2][2];
-          dbuf[5] = mtmp[0]*r[2][0]*r[2][0] + mtmp[1]*r[2][1]*r[2][1] + mtmp[2]*r[2][2]*r[2][2];
-
+            // Metric in the canonic space
+            dbuf[0] = mtmp[0]*r[0][0]*r[0][0] + mtmp[1]*r[0][1]*r[0][1] + mtmp[2]*r[0][2]*r[0][2];
+            dbuf[1] = mtmp[0]*r[0][0]*r[1][0] + mtmp[1]*r[0][1]*r[1][1] + mtmp[2]*r[0][2]*r[1][2];
+            dbuf[2] = mtmp[0]*r[0][0]*r[2][0] + mtmp[1]*r[0][1]*r[2][1] + mtmp[2]*r[0][2]*r[2][2];
+            dbuf[3] = mtmp[0]*r[1][0]*r[1][0] + mtmp[1]*r[1][1]*r[1][1] + mtmp[2]*r[1][2]*r[1][2];
+            dbuf[4] = mtmp[0]*r[1][0]*r[2][0] + mtmp[1]*r[1][1]*r[2][1] + mtmp[2]*r[1][2]*r[2][2];
+            dbuf[5] = mtmp[0]*r[2][0]*r[2][0] + mtmp[1]*r[2][1]*r[2][1] + mtmp[2]*r[2][2]*r[2][2];
+          }
+          else { // Cannot recover the metric
+            for (i=0; i<met->size; i++)  dbuf[i] = 0.;
+          }
         }
         else {
           for (i=0; i<met->size; i++)  dbuf[i] = met->m[met->size*k+i];

@@ -271,13 +271,13 @@ int MMG5_Set_meshSize(MMG5_pMesh mesh, int np, int ne, int nt, int na) {
       //     mesh->ntmax,mesh->nt,mesh->nemax,mesh->ne,mesh->info.mem);
       if((mesh->npmax < mesh->np || mesh->ntmax < mesh->nt
           || mesh->nemax < mesh->ne)) {
-        fprintf(stdout,"mem insuffisante np : %d %d nt : %d %d ne :%d %d\n"
+        fprintf(stdout,"not enough memory: np : %d %d nt : %d %d ne :%d %d\n"
                 ,mesh->npmax,mesh->np,
                 mesh->ntmax,mesh->nt,mesh->nemax,mesh->ne);
         return(0);
       }
     } else if(mesh->info.mem < 39) {
-      printf("mem insuffisante %d\n",mesh->info.mem);
+      printf("not enough memory  %d\n",mesh->info.mem);
       return(0);
     }
   } else {
@@ -357,9 +357,9 @@ int MMG5_Get_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int* typEntity, int* np, in
   else
     *typSol    = MMG5_Notype;
 
-  assert(sol->np == mesh->np);
+  assert( (!sol->np) || (sol->np == mesh->np));
 
-  *np = mesh->np;
+  *np = sol->np;
   sol->npi = 0;
 
   return(1);
