@@ -148,7 +148,12 @@ int main(int argc,char *argv[]) {
   printim(ctim[1].gdif,stim);
   fprintf(stdout,"  -- DATA READING COMPLETED.     %s\n",stim);
 
-  ier = MMG5_mmg3dlib(mesh,met,disp );
+  if ( MMG5_Get_iparameter(mesh, MMG5_IPARAM_lag) > -1 ) {
+    ier = MMG5_mmg3dmov(mesh,met,disp);
+  }
+  else {
+    ier = MMG5_mmg3dlib(mesh,met);
+  }
 
   if ( ier != MMG5_STRONGFAILURE ) {
     chrono(ON,&ctim[1]);

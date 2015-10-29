@@ -14,7 +14,7 @@ PROGRAM main
   IMPLICIT NONE
 
   MMG5_DATA_PTR_T    :: mmgMesh
-  MMG5_DATA_PTR_T    :: mmgSol
+  MMG5_DATA_PTR_T    :: mmgSol,mmgDisp
   INTEGER            :: ier
   CHARACTER(len=255) :: pwd
   CHARACTER(len=300) :: filename
@@ -31,7 +31,8 @@ PROGRAM main
   !! output mesh name
   mmgMesh = 0
   mmgSol  = 0
-  CALL MMG5_Init_mesh(mmgMesh,mmgSol,0)
+  !! Remark: here %val(0) stands for the 0x0 adress.
+  CALL MMG5_Init_mesh(mmgMesh,mmgSol,%val(0));
 
   !> 2) Build mesh in MMG5 format
   !! Two solutions: just use the MMG5_loadMesh function that will read a .mesh(b)
@@ -75,7 +76,7 @@ PROGRAM main
 
   !> ------------------------------ STEP  II --------------------------
   !! library call
-  CALL MMG5_mmg3dlib(mmgMesh,mmgSol,0,ier)
+  CALL MMG5_mmg3dlib(mmgMesh,mmgSol,ier)
   IF ( ier == MMG5_STRONGFAILURE ) THEN
      PRINT*,"BAD ENDING OF MMG3DLIB: UNABLE TO SAVE MESH"
      STOP 2
@@ -103,7 +104,9 @@ PROGRAM main
   !! b) function calling
   CALL MMG5_saveMet(mmgMesh,mmgSol,ier)
 
+
   !> 3) Free the MMG3D5 structures
+  !! Remark: here, the 0 argument stands for a pointer toward NULL
   CALL MMG5_Free_all(mmgMesh,mmgSol,0)
 
 END PROGRAM main

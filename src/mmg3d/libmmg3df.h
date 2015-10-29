@@ -662,17 +662,30 @@
 ! /**
 !  * \param mesh pointer toward the mesh structure.
 !  * \param met pointer toward the sol (metric or level-set) structure.
+!  * \return \ref MMG5_SUCCESS if success, \ref MMG5_LOWFAILURE if fail but a
+!  * conform mesh is saved or \ref MMG5_STRONGFAILURE if fail and we can't save
+!  * the mesh.
+!  *
+!  * Main program for the remesh library.
+!  *
+!  */
+
+! int  MMG5_mmg3dlib(MMG5_pMesh mesh, MMG5_pSol met );
+
+! /**
+!  * \param mesh pointer toward the mesh structure.
+!  * \param met pointer toward the sol (output metric) structure.
 !  * \param disp pointer toward a sol (displacement for the lagrangian motion
 !  * mode) structure.
 !  * \return \ref MMG5_SUCCESS if success, \ref MMG5_LOWFAILURE if fail but a
 !  * conform mesh is saved or \ref MMG5_STRONGFAILURE if fail and we can't save
 !  * the mesh.
 !  *
-!  * Main program for the library.
+!  * Main program for the rigidbody movement library.
 !  *
 !  */
 
-! int  MMG5_mmg3dlib(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pSol disp );
+! int  MMG5_mmg3dmov(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pSol disp );
 
 ! /* for PAMPA library */
 ! /** Options management */

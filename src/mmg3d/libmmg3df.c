@@ -92,10 +92,22 @@ FORTRAN_NAME(MMG5_SAVEMESH,mmg5_savemesh,(MMG5_pMesh *mesh, int* retval),
  * See \ref MMG5_mmg3dlib function in \ref mmg3d/libmmg3d.h file.
  */
 FORTRAN_NAME(MMG5_MMG3DLIB,mmg5_mmg3dlib,(MMG5_pMesh *mesh,MMG5_pSol *met
+                                          ,int* retval),
+             (mesh,met,retval)){
+
+  *retval = MMG5_mmg3dlib(*mesh,*met);
+
+  return;
+}
+
+/**
+ * See \ref MMG5_mmg3dmov function in \ref mmg3d/libmmg3d.h file.
+ */
+FORTRAN_NAME(MMG5_MMG3DMOV,mmg5_mmg3dmov,(MMG5_pMesh *mesh,MMG5_pSol *met
                                           ,MMG5_pSol *disp,int* retval),
              (mesh,met,disp,retval)){
 
-  *retval = MMG5_mmg3dlib(*mesh,*met,*disp);
+  *retval = MMG5_mmg3dmov(*mesh,*met,*disp);
 
   return;
 }

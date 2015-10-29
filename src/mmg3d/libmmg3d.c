@@ -294,20 +294,17 @@ int MMG5_packMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward a sol structure (metric or solution).
- * \param disp pointer toward a sol structure (displacement for the
- * lagrangian motion mode).
  * \return Return \ref MMG5_SUCCESS if success, \ref MMG5_LOWFAILURE if failed
  * but a conform mesh is saved and \ref MMG5_STRONGFAILURE if failed and we
  * can't save the mesh.
  *
- * Main program for the library .
+ * Main program for the remesh library .
  *
  */
-int MMG5_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp
+int MMG5_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met
   ) {
   mytime    ctim[TIMEMAX];
   char      stim[32];
-  MMG5_pSol scaledSol;
 
   if ( mesh->info.imprim ) {
     fprintf(stdout,"  -- MMG3d, Release %s (%s) \n",MG_VER,MG_REL);
@@ -336,34 +333,21 @@ int MMG5_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp
   chrono(ON,&(ctim[1]));
   _MMG5_warnOrientation(mesh);
 
+  /* Check options */
   if ( mesh->info.lag > -1 ) {
-    if ( !disp ) {
-      fprintf(stdout,"  ## Error: in lagrangian mode, a structure of type"
-              " \"MMG5_pSol\" is needed to store the displacement field.\n"
-              "            This structure must be different from the one used"
-              " to store the metric.\n");
-      return(MMG5_STRONGFAILURE);
-    }
-    if (disp->np && (disp->np != mesh->np) ) {
-      fprintf(stdout,"  ## WARNING: WRONG SOLUTION NUMBER. IGNORED\n");
-      _MMG5_DEL_MEM(mesh,disp->m,(disp->size*(disp->npmax+1))*sizeof(double));
-      disp->np = 0;
-    }
-    else if (disp->size!=3) {
-      fprintf(stdout,"  ## ERROR: LAGRANGIAN MOTION OPTION NEED A VECTORIAL DISPLACEMENT\n");
-      return(MMG5_STRONGFAILURE);
-    }
+    fprintf(stdout,"  ## Error: lagrangian mode unavailable (MMG5_IPARAM_lag):\n"
+            "            You must call the mmg3dmov function to move a rigidbody.\n");
+    return(MMG5_STRONGFAILURE);
   }
-  else {
-    if ( met->np && (met->np != mesh->np) ) {
-      fprintf(stdout,"  ## WARNING: WRONG SOLUTION NUMBER. IGNORED\n");
-      _MMG5_DEL_MEM(mesh,met->m,(met->size*(met->npmax+1))*sizeof(double));
-      met->np = 0;
-    }
-    else if ( met->size!=1 && met->size!=6 ) {
-      fprintf(stdout,"  ## ERROR: WRONG DATA TYPE.\n");
-      return(MMG5_STRONGFAILURE);
-    }
+
+  if ( met->np && (met->np != mesh->np) ) {
+    fprintf(stdout,"  ## WARNING: WRONG SOLUTION NUMBER. IGNORED\n");
+    _MMG5_DEL_MEM(mesh,met->m,(met->size*(met->npmax+1))*sizeof(double));
+    met->np = 0;
+  }
+  else if ( met->size!=1 && met->size!=6 ) {
+    fprintf(stdout,"  ## ERROR: WRONG DATA TYPE.\n");
+    return(MMG5_STRONGFAILURE);
   }
 
   chrono(OFF,&(ctim[1]));
@@ -383,14 +367,7 @@ int MMG5_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp
   }
 
  /* scaling mesh */
-  if ( mesh->info.lag == -1 ) {
-    if ( !_MMG5_scaleMesh(mesh,met) ) return(MMG5_STRONGFAILURE);
-    scaledSol = met;
-  }
-  else {
-    if ( !_MMG5_scaleMesh(mesh,disp) ) return(MMG5_STRONGFAILURE);
-    scaledSol = disp;
-  }
+  if ( !_MMG5_scaleMesh(mesh,met) ) return(MMG5_STRONGFAILURE);
 
   /* specific meshing */
   if ( mesh->info.iso ) {
@@ -400,16 +377,205 @@ int MMG5_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp
     }
     if ( !_MMG5_mmg3d2(mesh,met) ) return(MMG5_STRONGFAILURE);
   }
-  else if ( mesh->info.lag < 0 ) {
+  else {
     if ( mesh->info.optim && !met->np && !_MMG5_DoSol(mesh,met) ) {
       if ( !_MMG5_unscaleMesh(mesh,met) )  return(MMG5_STRONGFAILURE);
-      _MMG5_RETURN_AND_PACK(mesh,met,disp,MMG5_LOWFAILURE);
+      _MMG5_RETURN_AND_PACK(mesh,met,NULL,MMG5_LOWFAILURE);
     }
   }
 
   /* mesh analysis */
   if ( !_MMG5_analys(mesh) ) {
-    if ( !_MMG5_unscaleMesh(mesh,scaledSol) )  return(MMG5_STRONGFAILURE);
+    if ( !_MMG5_unscaleMesh(mesh,met) )  return(MMG5_STRONGFAILURE);
+    _MMG5_RETURN_AND_PACK(mesh,met,NULL,MMG5_LOWFAILURE);
+  }
+
+  if ( mesh->info.imprim > 4 && !mesh->info.iso && met->m ) _MMG5_prilen(mesh,met,0);
+
+  chrono(OFF,&(ctim[2]));
+  printim(ctim[2].gdif,stim);
+  if ( mesh->info.imprim )
+    fprintf(stdout,"  -- PHASE 1 COMPLETED.     %s\n",stim);
+
+  /* mesh adaptation */
+  chrono(ON,&(ctim[3]));
+  if ( mesh->info.imprim ) {
+    fprintf(stdout,"\n  -- PHASE 2 : %s MESHING\n",met->size < 6 ? "ISOTROPIC" : "ANISOTROPIC");
+  }
+
+  /* renumerotation if available */
+  if ( !_MMG5_scotchCall(mesh,met) )
+  {
+    if ( !_MMG5_unscaleMesh(mesh,met) )  return(MMG5_STRONGFAILURE);
+    _MMG5_RETURN_AND_PACK(mesh,met,NULL,MMG5_LOWFAILURE);
+  }
+
+#ifdef PATTERN
+  if ( !_MMG5_mmg3d1_pattern(mesh,met) ) {
+    if ( !(mesh->adja) && !_MMG5_hashTetra(mesh,1) ) {
+      fprintf(stdout,"  ## Hashing problem. Invalid mesh.\n");
+      return(MMG5_STRONGFAILURE);
+    }
+    if ( !_MMG5_unscaleMesh(mesh,met) )  return(MMG5_STRONGFAILURE);
+    _MMG5_RETURN_AND_PACK(mesh,met,NULL,MMG5_LOWFAILURE);
+  }
+#else
+  /** Patterns in iso mode, delauney otherwise */
+  if ( !mesh->info.iso ) {
+    if ( !_MMG5_mmg3d1_delone(mesh,met) ) {
+      if ( !(mesh->adja) && !_MMG5_hashTetra(mesh,1) ) {
+        fprintf(stdout,"  ## Hashing problem. Invalid mesh.\n");
+        return(MMG5_STRONGFAILURE);
+      }
+      if ( !_MMG5_unscaleMesh(mesh,met) )  return(MMG5_STRONGFAILURE);
+      _MMG5_RETURN_AND_PACK(mesh,met,NULL,MMG5_LOWFAILURE);
+    }
+  }
+  else {
+    if ( !_MMG5_mmg3d1_pattern(mesh,met) ) {
+      if ( !(mesh->adja) && !_MMG5_hashTetra(mesh,1) ) {
+        fprintf(stdout,"  ## Hashing problem. Invalid mesh.\n");
+        return(MMG5_STRONGFAILURE);
+      }
+      if ( !_MMG5_unscaleMesh(mesh,met) )  return(MMG5_STRONGFAILURE);
+      _MMG5_RETURN_AND_PACK(mesh,met,NULL,MMG5_LOWFAILURE);
+    }
+  }
+#endif
+
+  chrono(OFF,&(ctim[3]));
+  printim(ctim[3].gdif,stim);
+  if ( mesh->info.imprim ) {
+    fprintf(stdout,"  -- PHASE 2 COMPLETED.     %s\n",stim);
+    fprintf(stdout,"\n  %s\n   END OF MODULE MMG3d: IMB-LJLL \n  %s\n",MG_STR,MG_STR);
+  }
+
+  /* save file */
+  _MMG5_outqua(mesh,met);
+  if ( mesh->info.imprim > 4 && !mesh->info.iso )
+    _MMG5_prilen(mesh,met,1);
+
+  chrono(ON,&(ctim[1]));
+  if ( mesh->info.imprim )  fprintf(stdout,"\n  -- MESH PACKED UP\n");
+  if ( !_MMG5_unscaleMesh(mesh,met) )  return(MMG5_STRONGFAILURE);
+  if ( !MMG5_packMesh(mesh,met,NULL) )     return(MMG5_STRONGFAILURE);
+  chrono(OFF,&(ctim[1]));
+
+  chrono(OFF,&ctim[0]);
+  printim(ctim[0].gdif,stim);
+  if ( mesh->info.imprim )
+    fprintf(stdout,"\n   MMG3DLIB: ELAPSED TIME  %s\n",stim);
+  return(MMG5_SUCCESS);
+}
+
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward a sol structure (for the output metric).
+ * \param disp pointer toward a sol structure (displacement for the
+ * lagrangian motion mode).
+ * \return Return \ref MMG5_SUCCESS if success, \ref MMG5_LOWFAILURE if failed
+ * but a conform mesh is saved and \ref MMG5_STRONGFAILURE if failed and we
+ * can't save the mesh.
+ *
+ * Main program for the rigidbody moving library .
+ *
+ */
+int MMG5_mmg3dmov(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp
+  ) {
+  mytime    ctim[TIMEMAX];
+  char      stim[32];
+
+  if ( mesh->info.imprim ) {
+    fprintf(stdout,"  -- MMG3d, Release %s (%s) \n",MG_VER,MG_REL);
+    fprintf(stdout,"     %s\n",MG_CPY);
+    fprintf(stdout,"     %s %s\n",__DATE__,__TIME__);
+  }
+
+  _MMG5_Set_commonFunc();
+
+  signal(SIGABRT,_MMG5_excfun);
+  signal(SIGFPE,_MMG5_excfun);
+  signal(SIGILL,_MMG5_excfun);
+  signal(SIGSEGV,_MMG5_excfun);
+  signal(SIGTERM,_MMG5_excfun);
+  signal(SIGINT,_MMG5_excfun);
+
+  tminit(ctim,TIMEMAX);
+  chrono(ON,&(ctim[0]));
+
+#ifdef USE_SCOTCH
+  _MMG5_warnScotch(mesh);
+#endif
+
+  if ( mesh->info.imprim ) fprintf(stdout,"\n  -- MMG3DLIB: INPUT DATA\n");
+  /* load data */
+  chrono(ON,&(ctim[1]));
+  _MMG5_warnOrientation(mesh);
+
+  /* Check options */
+  if ( mesh->info.iso ) {
+    fprintf(stdout,"  ## Error: level-set discretisation unavailable"
+            " (MMG5_IPARAM_iso):\n"
+            "          You must call the mmg3dlib function to use this option.\n");
+    return(MMG5_STRONGFAILURE);
+  }
+
+  if ( mesh->info.lag == -1 ) {
+    if ( mesh->info.imprim )
+      fprintf(stdout,"  ## Warning: displacement mode for the rigidbody"
+              " movement is not set.\n"
+              "               Lagrangian displacement computed according"
+              " to mode 1.\n");
+    mesh->info.lag = 1;
+  }
+
+#ifndef USE_SUSCELAS
+  fprintf(stdout,"  ## Error: you need to compile with the USE_SUSCELAS"
+    " CMake's flag set to ON to use the rigidbody movement library.\n");
+  return(MMG5_STRONGFAILURE);
+#endif
+
+  if ( !disp ) {
+    fprintf(stdout,"  ## Error: in lagrangian mode, a structure of type"
+            " \"MMG5_pSol\" is needed to store the displacement field.\n"
+            "            This structure must be different from the one used"
+            " to store the metric.\n");
+    return(MMG5_STRONGFAILURE);
+  }
+  if (disp->np && (disp->np != mesh->np) ) {
+    fprintf(stdout,"  ## WARNING: WRONG SOLUTION NUMBER. IGNORED\n");
+    _MMG5_DEL_MEM(mesh,disp->m,(disp->size*(disp->npmax+1))*sizeof(double));
+    disp->np = 0;
+  }
+  else if (disp->size!=3) {
+    fprintf(stdout,"  ## ERROR: LAGRANGIAN MOTION OPTION NEED A VECTORIAL DISPLACEMENT\n");
+    return(MMG5_STRONGFAILURE);
+  }
+
+  chrono(OFF,&(ctim[1]));
+  printim(ctim[1].gdif,stim);
+  if ( mesh->info.imprim )
+    fprintf(stdout,"  --  INPUT DATA COMPLETED.     %s\n",stim);
+
+  /* analysis */
+  chrono(ON,&(ctim[2]));
+  _MMG5_setfunc(mesh,met);
+
+  if ( abs(mesh->info.imprim) > 0 )  _MMG5_inqua(mesh,met);
+
+  if ( mesh->info.imprim ) {
+    fprintf(stdout,"\n  %s\n   MODULE MMG3D: IMB-LJLL : %s (%s)\n  %s\n",MG_STR,MG_VER,MG_REL,MG_STR);
+    fprintf(stdout,"\n  -- PHASE 1 : ANALYSIS\n");
+  }
+
+ /* scaling mesh */
+  if ( !_MMG5_scaleMesh(mesh,disp) ) return(MMG5_STRONGFAILURE);
+
+
+  /* mesh analysis */
+  if ( !_MMG5_analys(mesh) ) {
+    if ( !_MMG5_unscaleMesh(mesh,disp) )  return(MMG5_STRONGFAILURE);
     _MMG5_RETURN_AND_PACK(mesh,met,disp,MMG5_LOWFAILURE);
   }
 
@@ -423,70 +589,58 @@ int MMG5_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp
   /* mesh adaptation */
   chrono(ON,&(ctim[3]));
   if ( mesh->info.imprim ) {
-    if ( mesh->info.lag < 0 )
-      fprintf(stdout,"\n  -- PHASE 2 : %s MESHING\n",met->size < 6 ? "ISOTROPIC" : "ANISOTROPIC");
-    else
-      fprintf(stdout,"\n  -- PHASE 2 : LAGRANGIAN MOTION\n");
+    fprintf(stdout,"\n  -- PHASE 2 : LAGRANGIAN MOTION\n");
   }
 
   /* renumerotation if available */
   if ( !_MMG5_scotchCall(mesh,met) )
   {
-    if ( !_MMG5_unscaleMesh(mesh,scaledSol) )  return(MMG5_STRONGFAILURE);
+    if ( !_MMG5_unscaleMesh(mesh,disp) )  return(MMG5_STRONGFAILURE);
     _MMG5_RETURN_AND_PACK(mesh,met,disp,MMG5_LOWFAILURE);
   }
 
   /* Lagrangian mode */
-#ifdef USE_SUSCELAS
-  if ( mesh->info.lag >= 0 ) {
-    if ( !_MMG5_mmg3d3(mesh,disp,met) ) {
-      return(MMG5_STRONGFAILURE);
-    }
-    if ( !met->np && !_MMG5_DoSol(mesh,met) ) {
-      if ( !_MMG5_unscaleMesh(mesh,disp) )  return(MMG5_STRONGFAILURE);
-      _MMG5_RETURN_AND_PACK(mesh,met,disp,MMG5_LOWFAILURE);
-    }
+  if ( !_MMG5_mmg3d3(mesh,disp,met) ) {
+    return(MMG5_STRONGFAILURE);
   }
-#endif
-
-
-/* ******************* Part to skip in lag mode ? *************************** */
-if ( mesh->info.lag == -1 ) {
-
-#ifdef PATTERN
-  if ( !_MMG5_mmg3d1_pattern(mesh,met) ) {
-    if ( !(mesh->adja) && !_MMG5_hashTetra(mesh,1) ) {
-      fprintf(stdout,"  ## Hashing problem. Invalid mesh.\n");
-      return(MMG5_STRONGFAILURE);
-    }
-    if ( !_MMG5_unscaleMesh(mesh,met) )  return(MMG5_STRONGFAILURE);
+  if ( !met->np && !_MMG5_DoSol(mesh,met) ) {
+    if ( !_MMG5_unscaleMesh(mesh,disp) )  return(MMG5_STRONGFAILURE);
     _MMG5_RETURN_AND_PACK(mesh,met,disp,MMG5_LOWFAILURE);
   }
-#else
-  /** Patterns in iso mode, delauney otherwise */
-  if ( !mesh->info.iso ) {
-    if ( !_MMG5_mmg3d1_delone(mesh,met) ) {
-      if ( !(mesh->adja) && !_MMG5_hashTetra(mesh,1) ) {
-        fprintf(stdout,"  ## Hashing problem. Invalid mesh.\n");
-        return(MMG5_STRONGFAILURE);
-      }
-      if ( !_MMG5_unscaleMesh(mesh,met) )  return(MMG5_STRONGFAILURE);
-      _MMG5_RETURN_AND_PACK(mesh,met,disp,MMG5_LOWFAILURE);
-    }
-  }
-  else {
-    if ( !_MMG5_mmg3d1_pattern(mesh,met) ) {
-      if ( !(mesh->adja) && !_MMG5_hashTetra(mesh,1) ) {
-        fprintf(stdout,"  ## Hashing problem. Invalid mesh.\n");
-        return(MMG5_STRONGFAILURE);
-      }
-      if ( !_MMG5_unscaleMesh(mesh,met) )  return(MMG5_STRONGFAILURE);
-      _MMG5_RETURN_AND_PACK(mesh,met,disp,MMG5_LOWFAILURE);
-    }
-  }
-#endif
 
-}
+  /* ******************* Part to skip in lag mode ? *************************** */
+/* #ifdef PATTERN */
+/*   if ( !_MMG5_mmg3d1_pattern(mesh,met) ) { */
+/*     if ( !(mesh->adja) && !_MMG5_hashTetra(mesh,1) ) { */
+/*       fprintf(stdout,"  ## Hashing problem. Invalid mesh.\n"); */
+/*       return(MMG5_STRONGFAILURE); */
+/*     } */
+/*     if ( !_MMG5_unscaleMesh(mesh,met) )  return(MMG5_STRONGFAILURE); */
+/*     _MMG5_RETURN_AND_PACK(mesh,met,disp,MMG5_LOWFAILURE); */
+/*   } */
+/* #else */
+/*   /\** Patterns in iso mode, delauney otherwise *\/ */
+/*   if ( !mesh->info.iso ) { */
+/*     if ( !_MMG5_mmg3d1_delone(mesh,met) ) { */
+/*       if ( !(mesh->adja) && !_MMG5_hashTetra(mesh,1) ) { */
+/*         fprintf(stdout,"  ## Hashing problem. Invalid mesh.\n"); */
+/*         return(MMG5_STRONGFAILURE); */
+/*       } */
+/*       if ( !_MMG5_unscaleMesh(mesh,met) )  return(MMG5_STRONGFAILURE); */
+/*       _MMG5_RETURN_AND_PACK(mesh,met,disp,MMG5_LOWFAILURE); */
+/*     } */
+/*   } */
+/*   else { */
+/*     if ( !_MMG5_mmg3d1_pattern(mesh,met) ) { */
+/*       if ( !(mesh->adja) && !_MMG5_hashTetra(mesh,1) ) { */
+/*         fprintf(stdout,"  ## Hashing problem. Invalid mesh.\n"); */
+/*         return(MMG5_STRONGFAILURE); */
+/*       } */
+/*       if ( !_MMG5_unscaleMesh(mesh,met) )  return(MMG5_STRONGFAILURE); */
+/*       _MMG5_RETURN_AND_PACK(mesh,met,disp,MMG5_LOWFAILURE); */
+/*     } */
+/*   } */
+/* #endif */
 
 /* *************************************** End of part to skip in lag mode ? *************************** */
 
@@ -504,7 +658,7 @@ if ( mesh->info.lag == -1 ) {
 
   chrono(ON,&(ctim[1]));
   if ( mesh->info.imprim )  fprintf(stdout,"\n  -- MESH PACKED UP\n");
-  if ( !_MMG5_unscaleMesh(mesh,scaledSol) )  return(MMG5_STRONGFAILURE);
+  if ( !_MMG5_unscaleMesh(mesh,disp) )  return(MMG5_STRONGFAILURE);
   if ( !MMG5_packMesh(mesh,met,disp) )     return(MMG5_STRONGFAILURE);
   chrono(OFF,&(ctim[1]));
 
