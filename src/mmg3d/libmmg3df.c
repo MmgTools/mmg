@@ -74,7 +74,7 @@ FORTRAN_NAME(MMG5_FREE_ALL,mmg5_free_all,(MMG5_pMesh *mesh,MMG5_pSol *met
                ),(mesh,met,disp
                  )){
 
-  MMG5_Free_all(*mesh,*met,*disp);
+  MMG5_Free_all(*mesh,*met,(disp==NULL)?NULL:*disp);
 
   return;
 }

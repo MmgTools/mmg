@@ -32,7 +32,8 @@ PROGRAM main
   !!   output mesh name
   mmgMesh = 0
   mmgSol  = 0
-  !! Remark: here %val(0) stands for the 0x0 adress.
+  !! Remark: %val(0) allow to pass the value 0 (i.e. NULL) instead of a pointer
+  !! toward NULL.
   CALL MMG5_Init_mesh(mmgMesh,mmgSol,%val(0))
 
   !> 2) Build mesh in MMG5 format
@@ -339,8 +340,5 @@ PROGRAM main
   CLOSE(inm)
 
   !> 3) Free the MMG3D5 structures
-  !! Remark: here, the 0 argument stands for a pointer toward NULL
-
-  CALL MMG5_Free_all(mmgMesh,mmgSol,0)
-
+  CALL MMG5_Free_all(mmgMesh,mmgSol,%val(0))
 END PROGRAM main
