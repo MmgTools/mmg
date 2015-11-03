@@ -211,6 +211,8 @@ int _MMG5_unscaleMesh(MMG5_pMesh mesh,MMG5_pSol met) {
   /* normalize local parameters */
   for (k=0; k<mesh->info.npar; k++) {
     par = &mesh->info.par[k];
+    par->hmin  *= dd;
+    par->hmax  *= dd;
     par->hausd *= dd;
   }
 

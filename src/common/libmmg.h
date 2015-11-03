@@ -36,6 +36,53 @@
 #include "chrono.h"
 
 /**
+ * \def MMG5_SUCCESS
+ *
+ * Return value for success.
+ *
+ */
+#define MMG5_SUCCESS       0
+/**
+ * \def MMG5_LOWFAILURE
+ *
+ * Return value if the remesh process failed but we can save a conform
+ * mesh.
+ *
+ */
+#define MMG5_LOWFAILURE    1
+/**
+ * \def MMG5_STRONGFAILURE
+ *
+ * Return value if the remesh process failed and the mesh is
+ * non-conform.
+ *
+ */
+#define MMG5_STRONGFAILURE 2
+
+/**
+ * \enum MMG5_type
+ * \brief Type of solutions.
+ */
+enum MMG5_type
+{
+  MMG5_Notype, /*!< Undefined type (unusable) */
+  MMG5_Scalar, /*!< Scalar solution */
+  MMG5_Vector, /*!< Vectorial solution */
+  MMG5_Tensor  /*!< Tensorial solution */
+};
+
+/**
+ * \enum MMG5_entities
+ * \brief Type of mesh entities to which solutions are applied.
+ */
+enum MMG5_entities
+{
+  MMG5_Noentity, /*!< Undefined type (unusable) */
+  MMG5_Vertex, /*!< Vertex entity */
+  MMG5_Triangle, /*!< Triangle entity */
+};
+
+/**
  * \struct MMG5_Par
  * number) associated to a specific reference.
  *

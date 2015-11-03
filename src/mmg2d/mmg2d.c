@@ -22,6 +22,8 @@
 */
 #include "mmg2d.h"
 
+mytime   MMG5_ctim[TIMEMAX];
+
 static void usage(char *name) {
   _MMG5_mmgUsage(name);
 

@@ -52,6 +52,17 @@ void MMG5_Free_all(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp ){
 }
 
 /**
+ * Print elapsed time at end of process.
+ */
+static void _MMG5_endcod() {
+  char   stim[32];
+
+  chrono(OFF,&MMG5_ctim[0]);
+  printim(MMG5_ctim[0].gdif,stim);
+  fprintf(stdout,"\n   ELAPSED TIME  %s\n",stim);
+}
+
+/**
  * \param mesh pointer toward the mesh structure (unused).
  *
  * Set pointer for MMG5_saveMesh function.
@@ -59,19 +70,6 @@ void MMG5_Free_all(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp ){
  */
 void MMG5_Set_saveFunc(MMG5_pMesh mesh) {
   _MMG5_saveMeshinternal = _MMG5_saveAllMesh;
-}
-
-/**
- *
- * Messages at end of the code.
- *
- */
-static void _MMG5_endcod() {
-  char    stim[32];
-
-  chrono(OFF,&MMG5_ctim[0]);
-  printim(MMG5_ctim[0].gdif,stim);
-  fprintf(stdout,"\n   ELAPSED TIME  %s\n",stim);
 }
 
 /**
@@ -252,7 +250,7 @@ if ( mesh.info.lag == -1 ) {
   /* Pattern in iso mode, delaunay otherwise */
   if ( !mesh.info.iso ) {
     if( !_MMG5_mmg3d1_delone(&mesh,&met) ) {
-      if ( !(mesh.adja) && !_MMG5_hashTetra(&mesh,1) ) {
+      if ( (!mesh.adja) && !_MMG5_hashTetra(&mesh,1) ) {
         fprintf(stdout,"  ## Hashing problem. Unable to save mesh.\n");
         _MMG5_RETURN_AND_FREE(&mesh,&met,&disp,MMG5_STRONGFAILURE);
       }
@@ -267,7 +265,7 @@ if ( mesh.info.lag == -1 ) {
   }
   else {
     if( !_MMG5_mmg3d1_pattern(&mesh,&met) ) {
-      if ( !(mesh.adja) && !_MMG5_hashTetra(&mesh,1) ) {
+      if ( (!mesh.adja) && !_MMG5_hashTetra(&mesh,1) ) {
         fprintf(stdout,"  ## Hashing problem. Unable to save mesh.\n");
         _MMG5_RETURN_AND_FREE(&mesh,&met,&disp,MMG5_STRONGFAILURE);
       }

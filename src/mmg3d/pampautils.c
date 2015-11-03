@@ -551,19 +551,6 @@ int _MMG5_stockOptions(MMG5_pMesh mesh, MMG5_Info *info) {
 
 /**
  * \param mesh pointer toward the mesh structure.
- * \param info pointer toward the info structure.
- *
- * Recover the info structure stored in the mesh structure.
- *
- */
-void _MMG5_destockOptions(MMG5_pMesh mesh, MMG5_Info *info) {
-
-  memcpy(info,&mesh->info,sizeof(MMG5_Info));
-  return;
-}
-
-/**
- * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the sol structure.
  * \param critmin minimum quality for elements.
  * \param lmin minimum edge length.

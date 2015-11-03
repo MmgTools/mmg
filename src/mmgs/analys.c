@@ -788,7 +788,7 @@ static int regnor(MMG5_pMesh mesh) {
 
 
 /* preprocessing stage: mesh analysis */
-int analys(MMG5_pMesh mesh) {
+int _MMG5_analys(MMG5_pMesh mesh) {
 
   /* create adjacency */
   if ( !_MMG5_hashTria(mesh) ) {
