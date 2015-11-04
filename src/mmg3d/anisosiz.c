@@ -65,7 +65,7 @@ inline int _MMG5_moymet(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,double *m1)
   }
 
   if(!n) {
-    printf("  ## Warning: 4 ridges points... Unable to compute metric.\n");
+    // printf("  ## Warning: 4 ridges points... Unable to compute metric.\n");
     return(0);
   }
   dd = 1./n;
