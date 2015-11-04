@@ -1105,7 +1105,7 @@ static int anatri(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
   return(1);
 }
 
-int mmgs1(MMG5_pMesh mesh,MMG5_pSol met) {
+int _MMG5_mmgs1(MMG5_pMesh mesh,MMG5_pSol met) {
 
   /* renumbering if available */
   if ( abs(mesh->info.imprim) > 4 )

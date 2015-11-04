@@ -395,9 +395,9 @@ FORTRAN_NAME(MMG5_FREE_STRUCTURES,mmg5_free_structures,(MMG5_pMesh *mesh,MMG5_pS
 #endif
                  )){
 #ifdef SINGUL
-  MMG5_Free_structures(*mesh,*met,*disp,*singul);
+  MMG5_Free_structures(*mesh,*met,(disp==NULL)?NULL:*disp,*singul);
 #else
-  MMG5_Free_structures(*mesh,*met,*disp);
+  MMG5_Free_structures(*mesh,*met,(disp==NULL)?NULL:*disp);
 #endif
   return;
 }
@@ -409,7 +409,7 @@ FORTRAN_NAME(MMG5_FREE_NAMES,mmg5_free_names,(MMG5_pMesh *mesh,MMG5_pSol *met,
                                               MMG5_pSol *disp),
              (mesh,met,disp))
 {
-  MMG5_Free_names(*mesh,*met,*disp);
+  MMG5_Free_names(*mesh,*met,(disp==NULL)?NULL:*disp);
   return;
 }
 

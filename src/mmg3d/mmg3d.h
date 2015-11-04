@@ -273,14 +273,14 @@ int _MMG5_DoSol(MMG5_pMesh mesh,MMG5_pSol met);
 void _MMG5_defaultValues(MMG5_pMesh);
 int  _MMG5_intridmet(MMG5_pMesh,MMG5_pSol,int,int,double,double*,double*);
 int  _MMG5_intregmet(MMG5_pMesh,MMG5_pSol,int,char,double, double*);
-int _MMG5_intvolmet(MMG5_pMesh,MMG5_pSol,int,char,double, double*);
+int  _MMG5_intvolmet(MMG5_pMesh,MMG5_pSol,int,char,double, double*);
+int  _MMG5_saveAllMesh(MMG5_pMesh mesh);
 
 /* useful functions to debug */
 int  _MMG5_indElt(MMG5_pMesh mesh,int kel);
 int  _MMG5_indPt(MMG5_pMesh mesh,int kp);
 void _MMG5_printTetra(MMG5_pMesh mesh,char* fileName);
-int  _MMG5_saveAllMesh(MMG5_pMesh mesh);
-int  _MMG5_saveLibraryMesh(MMG5_pMesh mesh);
+
 
 #ifdef USE_SCOTCH
 int _MMG5_mmg3dRenumbering(int vertBoxNbr, MMG5_pMesh mesh, MMG5_pSol sol);

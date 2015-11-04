@@ -414,7 +414,7 @@ int MMG5_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp
     _MMG5_RETURN_AND_PACK(mesh,met,disp,MMG5_LOWFAILURE);
   }
 
-  if ( mesh->info.imprim > 4 && !mesh->info.iso && met->m ) _MMG5_prilen(mesh,met,0);
+  if ( mesh->info.imprim > 1 && !mesh->info.iso && met->m ) _MMG5_prilen(mesh,met,0);
 
   chrono(OFF,&(ctim[2]));
   printim(ctim[2].gdif,stim);
@@ -467,7 +467,7 @@ if ( mesh->info.lag == -1 ) {
   /** Patterns in iso mode, delauney otherwise */
   if ( !mesh->info.iso ) {
     if ( !_MMG5_mmg3d1_delone(mesh,met) ) {
-      if ( !(mesh->adja) && !_MMG5_hashTetra(mesh,1) ) {
+      if ( (!mesh->adja) && !_MMG5_hashTetra(mesh,1) ) {
         fprintf(stdout,"  ## Hashing problem. Invalid mesh.\n");
         return(MMG5_STRONGFAILURE);
       }
@@ -495,12 +495,12 @@ if ( mesh->info.lag == -1 ) {
   printim(ctim[3].gdif,stim);
   if ( mesh->info.imprim ) {
     fprintf(stdout,"  -- PHASE 2 COMPLETED.     %s\n",stim);
-    fprintf(stdout,"\n  %s\n   END OF MODULE MMG3d: IMB-LJLL \n  %s\n",MG_STR,MG_STR);
+    fprintf(stdout,"\n  %s\n   END OF MODULE MMG3D: IMB-LJLL \n  %s\n",MG_STR,MG_STR);
   }
 
   /* save file */
   _MMG5_outqua(mesh,met);
-  if ( mesh->info.imprim > 4 && !mesh->info.iso )
+  if ( mesh->info.imprim > 1 && !mesh->info.iso )
     _MMG5_prilen(mesh,met,1);
 
   chrono(ON,&(ctim[1]));

@@ -2,16 +2,17 @@
 ! ** and the "genfort.pl" script (scripts directory).
 ! ** Do not modified it by hand, it will be discarded.
 ! **
-! ** This scripts recopy the macros of the libmmg3d.h file
+! ** This scripts recopy the macros of the libmmg*.h file
 ! ** and convert enumerations into macros.
 ! **
 ! ** Note: "genfort.pl" is automatically called by the "genheader.c"
 ! ** executable code.
 ! **
-! ** See the "libmmg3d.h" file for a correct displaying of the documentation.
+! ** See the "libmmg*.h" file for a correct displaying of the documentation.
 ! */
 
-#define MMG5_DATA_PTR_T INTEGER(kind=8)
+#include "libmmgf.h"
+
 ! /* =============================================================================
 ! **  This file is part of the mmg software package for the tetrahedral
 ! **  mesh modification.
@@ -46,59 +47,9 @@
 
 
 ! #ifndef _MMG2DLIB_H
-#define _MMG2DLIB_H
 
 ! #include "mmg.h"
-! /**
-!  * \def MMG5_SUCCESS
-!  *
-!  * Return value for success.
-!  *
-!  */
 
-#define MMG5_SUCCESS       0
-! /**
-!  * \def MMG5_LOWFAILURE
-!  *
-!  * Return value if the remesh process failed but we can save a conform
-!  * mesh.
-!  *
-!  */
-
-#define MMG5_LOWFAILURE    1
-! /**
-!  * \def MMG5_STRONGFAILURE
-!  *
-!  * Return value if the remesh process failed and the mesh is
-!  * non-conform.
-!  *
-!  */
-
-#define MMG5_STRONGFAILURE 2
-! /**
-!  * \enum MMG5_type
-!  * \brief Type of solutions.
-!  */
-
-! /*!< Undefined type (unusable) */
-#define   MMG5_Notype                  0
-! /*!< Scalar solution */
-#define   MMG5_Scalar                  1
-! /*!< Vectorial solution */
-#define   MMG5_Vector                  2
-! /*!< Tensorial solution */
-#define   MMG5_Tensor                  3
-! /**
-!  * \enum MMG5_entities
-!  * \brief Type of mesh entities to which solutions are applied.
-!  */
-
-! /*!< Undefined type (unusable) */
-#define   MMG5_Noentity                0
-! /*!< Vertex entity */
-#define   MMG5_Vertex                  1
-! /*!< Triangle entity */
-#define   MMG5_Triangle                2
 ! /**
 !  * \enum MMG5_Param
 !  * \brief Input parameters for mmg library.

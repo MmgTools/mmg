@@ -6,6 +6,7 @@
 !> Include the mmg3d library hader file
 ! if the header file is in the "include" directory
 #include "libmmg3df.h"
+
 ! if the header file is in "include/mmg/mmg3d"
 ! #include "mmg/mmg3d/libmmg3d.h"
 
@@ -31,7 +32,9 @@ PROGRAM main
   !! output mesh name
   mmgMesh = 0
   mmgSol  = 0
-  CALL MMG5_Init_mesh(mmgMesh,mmgSol,0)
+  !! Remark: %val(0) allow to pass the value 0 (i.e. NULL) instead of a pointer
+  !! toward NULL.
+  CALL MMG5_Init_mesh(mmgMesh,mmgSol,%val(0))
 
   !> 2) Build mesh in MMG5 format
   !! Two solutions: just use the MMG5_loadMesh function that will read a .mesh(b)
@@ -75,7 +78,9 @@ PROGRAM main
 
   !> ------------------------------ STEP  II --------------------------
   !! library call
-  CALL MMG5_mmg3dlib(mmgMesh,mmgSol,0,ier)
+  !! Remark: %val(0) allow to pass the value 0 (i.e. NULL) instead of a pointer
+  !! toward NULL.
+  CALL MMG5_mmg3dlib(mmgMesh,mmgSol,%val(0),ier)
   IF ( ier == MMG5_STRONGFAILURE ) THEN
      PRINT*,"BAD ENDING OF MMG3DLIB: UNABLE TO SAVE MESH"
      STOP 2
@@ -104,6 +109,6 @@ PROGRAM main
   CALL MMG5_saveMet(mmgMesh,mmgSol,ier)
 
   !> 3) Free the MMG3D5 structures
-  CALL MMG5_Free_all(mmgMesh,mmgSol,0)
+  CALL MMG5_Free_all(mmgMesh,mmgSol,%val(0))
 
 END PROGRAM main
