@@ -48,6 +48,11 @@ int _MMG5_movintpt(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,int improve
   ppt0   = &mesh->point[0];
   memset(ppt0,0,sizeof(MMG5_Point));
 
+  iel = list[0] / 4;
+  i0  = list[0] % 4;
+
+  memcpy(&met->m[0],&met->m[met->size*mesh->tetra[iel].v[i0]],met->size*sizeof(double));
+
   /* Coordinates of optimal point */
   calold = DBL_MAX;
   totvol = 0.0;
