@@ -45,20 +45,11 @@
  * See \ref MMG5_Init_fileNames function in \ref common/libmmg.h file.
  */
 FORTRAN_NAME(INIT_FILENAMES,init_filenames,(MMG5_pMesh *mesh,MMG5_pSol *sol
-#ifdef SINGUL
-                                            ,MMG5_pSingul *sing
-#endif
                ),(mesh,sol
-#ifdef SINGUL
-                  ,sing
-#endif
                  )) {
-#ifdef SINGUL
-  MMG5_Init_fileNames(*mesh,*sol,*sing);
-#else
-  MMG5_Init_fileNames(*mesh,*sol);
-#endif
-  return;
+
+	MMG5_Init_fileNames(*mesh,*sol);
+    return;
 }
 
 /**
@@ -136,18 +127,8 @@ FORTRAN_NAME(MMG5_SET_OUTPUTSOLNAME,mmg5_set_outputsolname,
  */
 FORTRAN_NAME(MMG5_MMGFREE_NAMES,mmg5_mmgfree_names,(MMG5_pMesh *mesh
                                                     ,MMG5_pSol *met
-#ifdef SINGUL
-                                              ,MMG5_pSingul *singul
-#endif
                ),(mesh,met
-#ifdef SINGUL
-                  ,singul
-#endif
                  )){
-#ifdef SINGUL
-  MMG5_mmgFree_names(*mesh,*met,*singul);
-#else
   MMG5_mmgFree_names(*mesh,*met);
-#endif
   return;
 }

@@ -47,7 +47,7 @@
  * \param *ptt pointer toward mytime object that store the chronograph informations.
  */
 void  chrono(int cmode,mytime *ptt) {
-
+#ifdef UNIX
   if ( cmode == RESET ) {
     ptt->call = 0;
     ptt->gini = ptt->gend = ptt->gdif = 0.0;
@@ -84,6 +84,7 @@ void  chrono(int cmode,mytime *ptt) {
       ptt->call++;
     }
   }
+#endif
 }
 
 

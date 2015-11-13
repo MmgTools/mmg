@@ -485,7 +485,7 @@ int MMG2_markSD(MMG5_pMesh mesh) {
         if(pt1->ref==nref) continue;
         ped0 = pt->v[MMG2_iare[i][0]];
         ped1 = pt->v[MMG2_iare[i][1]];
-#warning optimize th
+//#warning optimize th
         for(j=1 ; j<=mesh->na ; j++) {
           ped = &mesh->edge[j];
           if((ped->a == ped0 && ped->b==ped1) || (ped->b == ped0 && ped->a==ped1)) break;  
@@ -635,7 +635,7 @@ int MMG2_findtrianglestate(MMG5_pMesh mesh,int k,int ip1,int ip2,int ip3,int ip4
 
   /*we have to check the status of neighbour*/
   /*number of bdry edges*/
-#warning to optimize
+//#warning to optimize
   nbed = 0;
   for(i=0 ; i<3 ; i++) {
     ped0 = pt->v[MMG2_iare[i][0]];
@@ -657,7 +657,7 @@ int MMG2_findtrianglestate(MMG5_pMesh mesh,int k,int ip1,int ip2,int ip3,int ip4
       pt->ref = 3;
       return(-base);
     } else {
-#warning check if it is true with 1 bdry edge
+//#warning check if it is true with 1 bdry edge
       pt->base = base;
       return(base);
     }

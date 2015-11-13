@@ -25,8 +25,10 @@
 #define _CHRONO_H
 
 #include <time.h>
+#ifdef UNIX
 #include <sys/time.h>
 #include <sys/resource.h>
+#endif
 
 #ifndef  ON
 #define  RESET  0
@@ -47,8 +49,10 @@
  */
 typedef struct mytime {
   double  gini,gend,gdif,uini,uend,udif,sini,send,sdif;
+#ifdef UNIX
   struct  timeval rutim;
   struct  rusage  ru;
+#endif
   int     call;
 } mytime;
 

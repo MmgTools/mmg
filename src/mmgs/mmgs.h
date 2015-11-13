@@ -128,8 +128,7 @@ int  swpedg(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,char typchk);
 char typelt(MMG5_pPoint p[3],char *ia);
 int  litswp(MMG5_pMesh mesh,int k,char i,double kal);
 int  litcol(MMG5_pMesh mesh,int k,char i,double kal);
-int  rootDeg2(double complex a[3], double complex r[2]);
-
+int  rootDeg2(DOUBLE_COMPLEX a[3], DOUBLE_COMPLEX r[2]);
 int  _MMG5_mmgsChkmsh(MMG5_pMesh,int,int);
 int  paratmet(double c0[3],double n0[3],double m[6],double c1[3],double n1[3],double mt[6]);
 int  intregmet(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,double s,double mr[6]);
@@ -153,8 +152,8 @@ int  _MMG5_indPt(MMG5_pMesh mesh,int kp);
 /* init structures */
 void  _MMG5_Init_parameters(MMG5_pMesh mesh);
 /* iso/aniso computations */
-double caleltsig_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel);
-double caleltsig_iso(MMG5_pMesh mesh,MMG5_pSol met,int iel);
+extern double caleltsig_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel);
+extern double caleltsig_iso(MMG5_pMesh mesh,MMG5_pSol met,int iel);
 int    _MMG5_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met);
 int    _MMG5_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met);
 void   _MMG5_defaultValues(MMG5_pMesh);

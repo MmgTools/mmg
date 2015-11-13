@@ -565,8 +565,10 @@ int _MMG5_stockOptions(MMG5_pMesh mesh, MMG5_Info *info) {
 int MMG5_mmg3dcheck(MMG5_pMesh mesh,MMG5_pSol met,double critmin, double lmin,
                     double lmax, int *eltab,char metRidTyp) {
 
+#ifdef UNIX
   mytime    ctim[TIMEMAX];
   char      stim[32];
+#endif
   int       ier;
 
   fprintf(stdout,"  -- MMG3d, Release %s (%s) \n",MG_VER,MG_REL);
@@ -580,12 +582,16 @@ int MMG5_mmg3dcheck(MMG5_pMesh mesh,MMG5_pSol met,double critmin, double lmin,
   signal(SIGTERM,_MMG5_pampa_excfun);
   signal(SIGINT,_MMG5_pampa_excfun);
 
+#ifdef UNIX
   tminit(ctim,TIMEMAX);
   chrono(ON,&(ctim[0]));
+#endif
 
   fprintf(stdout,"\n  -- MMG3DLIB: INPUT DATA\n");
   /* load data */
+#ifdef UNIX
   chrono(ON,&(ctim[1]));
+#endif
   _MMG5_pampa_warnOrientation(mesh);
 
   if ( met->np && (met->np != mesh->np) ) {
@@ -598,12 +604,18 @@ int MMG5_mmg3dcheck(MMG5_pMesh mesh,MMG5_pSol met,double critmin, double lmin,
     return(MMG5_STRONGFAILURE);
   }
 
-  chrono(OFF,&(ctim[1]));
-  printim(ctim[1].gdif,stim);
-  fprintf(stdout,"  --  INPUT DATA COMPLETED.     %s\n",stim);
+#ifdef UNIX
+  chrono(OFF, &(ctim[1]));
+  printim(ctim[1].gdif, stim);
+  fprintf(stdout, "  --  INPUT DATA COMPLETED.     %s\n", stim);
+#else
+  fprintf(stdout, "  --  INPUT DATA COMPLETED.     \n");
+#endif
 
   /* analysis */
+#ifdef UNIX
   chrono(ON,&(ctim[2]));
+#endif
   MMG5_pampa_setfunc(mesh,met);
   fprintf(stdout,"\n  %s\n   MODULE MMG3D: IMB-LJLL : %s (%s)\n  %s\n",MG_STR,MG_VER,MG_REL,MG_STR);
 

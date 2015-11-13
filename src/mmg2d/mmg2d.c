@@ -350,7 +350,7 @@ static void endcod() {
   int      k,call[TIMEMAX];
 
   //chrono(OFF,&ctim[0]);
-#warning endcod : comment for merge
+//#warning message endcod : comment for merge
   /* for (k=0; k<TIMEMAX; k++) { */
   /*   call[k] = ctim[k].call; */
   /*   ttim[k] = ctim[k].call ? gttime(ctim[k]) : 0.0; */

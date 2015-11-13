@@ -137,7 +137,7 @@ int MMG5_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
     mesh->info.ddebug   = val;
     break;
   case MMG5_IPARAM_angle :
-#warning dhd
+//#warning dhd
     /* free table that may contains old ridges */
     if ( mesh->htab.geom )
       _MMG5_DEL_MEM(mesh,mesh->htab.geom,(mesh->htab.max+1)*sizeof(MMG5_hgeom));
@@ -155,7 +155,7 @@ int MMG5_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
     break;
   case MMG5_IPARAM_iso :
     mesh->info.iso      = val;
-#warning : iso case
+//#warning : iso case
     // if ( mesh->info.iso )
     //if ( mesh->nt && !MMG5_skipIso(mesh) )
     //  exit(EXIT_FAILURE);

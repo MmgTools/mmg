@@ -216,7 +216,7 @@ int MMG2_split(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int k1,int adj1) {
   if(pt1->edg[voy1]) {
     /*edge creation*/
     /*split edge piar1 piar2 */
- #warning same tangent
+// #warning same tangent
     num = pt1->edg[voy1];
     assert(num);
     ped = &mesh->edge[num];

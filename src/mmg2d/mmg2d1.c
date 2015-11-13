@@ -337,7 +337,7 @@ static int cassarbdry(MMG5_pMesh mesh,MMG5_pSol sol,int ied,int ia,int ib,double
   
   /*interpol dep si option 9*/
   if( mesh->info.lag >= 0) {
-#warning option 9
+//#warning option 9
     printf("option 9..........\n");
     exit(0);
     /* pd = mesh->disp; */
@@ -360,6 +360,7 @@ static int analar(MMG5_pMesh mesh,MMG5_pSol sol,pBucket bucket,double declic,int
   MMG2_ni  = 0; 
   MMG2_nc  = 0;  
   nt    = mesh->nt;
+  npp = 0.0;
 
   for (k=1; k<=nt; k++) {
     pt = &mesh->tria[k];
@@ -419,7 +420,7 @@ static int analar(MMG5_pMesh mesh,MMG5_pSol sol,pBucket bucket,double declic,int
             }
             assert(mesh->tria[adj].ref!=pt->ref);
             assert((mesh->tria[adj]).edg[voi[i]%3]);
-#warning find why we have to do that
+//#warning find why we have to do that
             pt->edg[i] = (mesh->tria[adj]).edg[voi[i]%3];
           }
           assert(pt->edg[i]);
@@ -567,7 +568,7 @@ static int analargeom(MMG5_pMesh mesh,MMG5_pSol sol,int *alert) {
     ni  = 0; 
     base  = ++mesh->base;  
     nt    = mesh->nt;
-
+	npp   = 0;
     for (k=1; k<=nt; k++) {
       pt = &mesh->tria[k];
       if ( !M_EOK(pt) )  continue;
