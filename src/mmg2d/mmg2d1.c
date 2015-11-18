@@ -108,7 +108,7 @@ static int cassar(MMG5_pMesh mesh,MMG5_pSol sol,int ia,int ib,double t) {
   
   c[0] = t1*p1->c[0] +  t*p2->c[0];
   c[1] = t1*p1->c[1] +  t*p2->c[1];
-  ip   = _MMG5_newPt(mesh,c,0);
+  ip   = _MMG2D_newPt(mesh,c,0);
   if ( !ip ) {
     /* reallocation of point table */
     
@@ -229,7 +229,7 @@ static int cassarbdry(MMG5_pMesh mesh,MMG5_pSol sol,int ied,int ia,int ib,double
     c[i] = t_1*t_1*t_1*p0->c[i] + 3*t*t_1*t_1*pc1[i] + 3*t*t*t_1*pc2[i] +  t*t*t*p1->c[i];
   }
   // printf("c %e %e -- mid %e %e\n",c[0],c[1],0.5*(p0->c[0]+p1->c[0]),0.5*(p0->c[1]+p1->c[1]));
-  ip   = _MMG5_newPt(mesh,c,0);
+  ip   = _MMG2D_newPt(mesh,c,0);
   if ( !ip ) {
     /* reallocation of point table */
     
@@ -448,7 +448,7 @@ static int analar(MMG5_pMesh mesh,MMG5_pSol sol,pBucket bucket,double declic,int
                 //mesh->point[ip].ref = 5;
                 //	MMG2D_saveMesh(mesh,"del.mesh");
                 //exit(0);
-                _MMG5_delPt(mesh,ip);
+                _MMG2D_delPt(mesh,ip);
                 continue;  
               } 
               mesh->point[ip].tag |= M_BDRY;
@@ -459,7 +459,7 @@ static int analar(MMG5_pMesh mesh,MMG5_pSol sol,pBucket bucket,double declic,int
               ins = MMG2_split(mesh,sol,ip,k,voi[i]); 
               if(!ins) { 
                 if (ddebug) printf("on insere pas sd\n");
-                _MMG5_delPt(mesh,ip);
+                _MMG2D_delPt(mesh,ip);
                 continue;  
               } 
               MMG2_ni += 1; 
@@ -475,7 +475,7 @@ static int analar(MMG5_pMesh mesh,MMG5_pSol sol,pBucket bucket,double declic,int
             if(ddebug) printf("cut ? %d\n",ins);   
             if(!ins) {        
               if (ddebug) printf("on insere pas :::\n");
-              _MMG5_delPt(mesh,ip);
+              _MMG2D_delPt(mesh,ip);
               continue;  
             }
             MMG2_ni += 1;    
@@ -497,12 +497,12 @@ static int analar(MMG5_pMesh mesh,MMG5_pSol sol,pBucket bucket,double declic,int
                 continue;
               } else { 
                 MMG2_nc++;     
-                _MMG5_delPt(mesh,i1);   
+                _MMG2D_delPt(mesh,i1);   
                 break;
               }
             } 
             MMG2_nc++;
-            _MMG5_delPt(mesh,i2);   
+            _MMG2D_delPt(mesh,i2);   
             break;    
           } else {
             if(!MMG2_colpoi(mesh,sol,k,i,MMG2_iare[i][0],MMG2_iare[i][1],2.75)) {
@@ -510,11 +510,11 @@ static int analar(MMG5_pMesh mesh,MMG5_pSol sol,pBucket bucket,double declic,int
                 continue;
               } else {
                 MMG2_nc++; 
-                _MMG5_delPt(mesh,i1);
+                _MMG2D_delPt(mesh,i1);
                 break;   
               }  
             }
-            _MMG5_delPt(mesh,i2);
+            _MMG2D_delPt(mesh,i2);
             MMG2_nc++; 
             break;    
           }
@@ -524,7 +524,7 @@ static int analar(MMG5_pMesh mesh,MMG5_pSol sol,pBucket bucket,double declic,int
               continue;
             } else {
               MMG2_nc++; 
-              _MMG5_delPt(mesh,i1);
+              _MMG2D_delPt(mesh,i1);
               if(ddebug) {
                 printf("del ok\n");
                 //MMG2D_saveMesh(mesh,"del.mesh");
@@ -535,7 +535,7 @@ static int analar(MMG5_pMesh mesh,MMG5_pSol sol,pBucket bucket,double declic,int
             }  
           }
           MMG2_nc++; 
-          _MMG5_delPt(mesh,i2);
+          _MMG2D_delPt(mesh,i2);
           if(ddebug) {
             printf("del2 ok\n");
             //MMG2D_saveMesh(mesh,"del.mesh");
@@ -625,7 +625,7 @@ static int analargeom(MMG5_pMesh mesh,MMG5_pSol sol,int *alert) {
           ins = MMG2_splitbdry(mesh,sol,ip,k,i,tang);
           if(!ins) { 
             if (ddebug) printf("k= %d on insere pas bdry : %d %d\n",k,i1,i2);
-            _MMG5_delPt(mesh,ip);
+            _MMG2D_delPt(mesh,ip);
             continue;  
           } 
           mesh->point[ip].tag |= M_BDRY;

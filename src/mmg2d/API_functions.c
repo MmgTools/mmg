@@ -188,7 +188,7 @@ int MMG2D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
     }
     else
       mesh->info.mem      = val;
-    _MMG5_memOption(mesh);
+    _MMG2D_memOption(mesh);
     if(mesh->np && (mesh->npmax < mesh->np || mesh->ntmax < mesh->nt )) {
       return(0);
     } else if(mesh->info.mem < 39)
@@ -338,7 +338,7 @@ int MMG2D_Set_meshSize(MMG5_pMesh mesh, int np, int nt, int na) {
   /*tester si -m definie : renvoie 0 si pas ok et met la taille min dans info.mem */
   if( mesh->info.mem > 0) {
     if((mesh->npmax < mesh->np || mesh->ntmax < mesh->nt || mesh->namax < mesh->na) ) {
-      _MMG5_memOption(mesh);
+      _MMG2D_memOption(mesh);
       //     printf("pas de pbs ? %d %d %d %d %d %d -- %d\n",mesh->npmax,mesh->np,
       //     mesh->ntmax,mesh->nt,mesh->nemax,mesh->ne,mesh->info.mem);
       if((mesh->npmax < mesh->np || mesh->ntmax < mesh->nt)) {
@@ -354,8 +354,8 @@ int MMG2D_Set_meshSize(MMG5_pMesh mesh, int np, int nt, int na) {
       return(0);
     }
   } else {
-    mesh->npmax = MG_MAX(1.5*mesh->np,_MMG5_NPMAX);
-    mesh->ntmax = MG_MAX(1.5*mesh->nt,_MMG5_NEMAX);
+    mesh->npmax = MG_MAX(1.5*mesh->np,_MMG2D_NPMAX);
+    mesh->ntmax = MG_MAX(1.5*mesh->nt,_MMG2D_NEMAX);
 
   }
   _MMG5_ADD_MEM(mesh,(mesh->npmax+1)*sizeof(MMG5_Point),"initial vertices",
@@ -366,7 +366,7 @@ int MMG2D_Set_meshSize(MMG5_pMesh mesh, int np, int nt, int na) {
   _MMG5_ADD_MEM(mesh,(mesh->ntmax+1)*sizeof(MMG5_Tria),"initial triangles",return(0));
   _MMG5_SAFE_CALLOC(mesh->tria,mesh->ntmax+1,MMG5_Tria);
 
-  mesh->namax =  MG_MAX(mesh->na,_MMG5_NEDMAX);
+  mesh->namax =  MG_MAX(mesh->na,_MMG2D_NEDMAX);
   _MMG5_ADD_MEM(mesh,(mesh->namax+1)*sizeof(MMG5_Edge),"initial edges",return(0));
   _MMG5_SAFE_CALLOC(mesh->edge,(mesh->namax+1),MMG5_Edge);
 

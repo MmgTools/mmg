@@ -66,16 +66,16 @@
 #define M_REQUIRED (1 << 3)
 #define M_MOVE     (1 << 2)
 
-#define _MMG5_NPMAX   50000
-#define _MMG5_NEDMAX  100000
-#define _MMG5_NEMAX   100000
+#define _MMG2D_NPMAX   50000
+#define _MMG2D_NEDMAX  100000
+#define _MMG2D_NEMAX   100000
 #define LMAX   1024
 
 #define M_VOK(ppt)    (ppt && (ppt->tag < M_NUL))
 #define M_EOK(pt)     (pt && (pt->v[0] > 0))
 
 /** Free allocated pointers of mesh and sol structure and return value val */
-#define _MMG5_RETURN_AND_FREE(mesh,met,val)do       \
+#define _MMG2D_RETURN_AND_FREE(mesh,met,val)do       \
   {                                                 \
     MMG2D_Free_all(mesh,met);                        \
     return(val);                                    \
@@ -193,6 +193,32 @@ extern unsigned int MMG2_idir[5];
 extern unsigned int MMG2_inxt[5];
 
 
+/** Reallocation of point table and sol table and creation
+    of point ip with coordinates o and tag tag*/
+#define _MMG5_POINT_REALLOC(mesh,sol,ip,wantedGap,law,o,tag ) do        \
+  {                                                                     \
+    int klink;                                                          \
+                                                                        \
+    _MMG5_TAB_RECALLOC(mesh,mesh->point,mesh->npmax,wantedGap,MMG5_Point, \
+                       "larger point table",law);                       \
+                                                                        \
+    mesh->npnil = mesh->np+1;                                           \
+    for (klink=mesh->npnil; klink<mesh->npmax-1; klink++)               \
+      mesh->point[klink].tmp  = klink+1;                                \
+                                                                        \
+    /* solution */                                                      \
+    if ( sol->m ) {                                                     \
+      _MMG5_ADD_MEM(mesh,(sol->size*(mesh->npmax-sol->npmax))*sizeof(double), \
+                    "larger solution",law);                             \
+      _MMG5_SAFE_REALLOC(sol->m,sol->size*(mesh->npmax+1),double,"larger solution"); \
+    }                                                                   \
+    sol->npmax = mesh->npmax;                                           \
+                                                                        \
+    /* We try again to add the point */                                 \
+    ip = _MMG2D_newPt(mesh,o,tag);                                       \
+    if ( !ip ) {law;}                                                   \
+  }while(0)
+
 /** Reallocation of tria table and creation
     of tria jel */
 #define _MMG5_TRIA_REALLOC(mesh,jel,wantedGap,law ) do                 \
@@ -216,7 +242,7 @@ extern unsigned int MMG2_inxt[5];
     }                                                                   \
                                                                         \
     /* We try again to add the point */                                 \
-    jel = _MMG5_newElt(mesh);                                           \
+    jel = _MMG2D_newElt(mesh);                                           \
     if ( !jel ) {law;}                                                  \
   }while(0)
 
@@ -242,16 +268,16 @@ extern unsigned int MMG2_inxt[5];
 
 /* prototypes */
 /*zaldy*/
-int _MMG5_newPt(MMG5_pMesh mesh,double c[2],int tag);
-void _MMG5_delPt(MMG5_pMesh mesh,int ip) ;
+int _MMG2D_newPt(MMG5_pMesh mesh,double c[2],int tag);
+void _MMG2D_delPt(MMG5_pMesh mesh,int ip) ;
 int _MMG5_newEdge(MMG5_pMesh mesh);
 void _MMG5_delEdge(MMG5_pMesh mesh,int iel);
-int _MMG5_newElt(MMG5_pMesh mesh);
-void _MMG5_delElt(MMG5_pMesh mesh,int iel);
+int _MMG2D_newElt(MMG5_pMesh mesh);
+void _MMG2D_delElt(MMG5_pMesh mesh,int iel);
 int _MMG5_getnElt(MMG5_pMesh mesh,int n);
 int MMG2_zaldy(MMG5_pMesh mesh);
 long long _MMG5_memSize(void);
-void _MMG5_memOption(MMG5_pMesh mesh);
+void _MMG2D_memOption(MMG5_pMesh mesh);
 
 int MMG2_scaleMesh(MMG5_pMesh ,MMG5_pSol );
 int MMG2_unscaleMesh(MMG5_pMesh ,MMG5_pSol );
