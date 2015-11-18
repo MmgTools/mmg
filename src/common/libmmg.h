@@ -309,7 +309,7 @@ void  MMG5_Init_fileNames(MMG5_pMesh mesh, MMG5_pSol sol);
  * Initialization of the input parameters (stored in the Info structure).
  *
  */
-void  (*MMG5_Init_parameters)(MMG5_pMesh mesh);
+void  (_MMG5_Init_parameters)(MMG5_pMesh mesh);
 
 /* init file names */
 /**

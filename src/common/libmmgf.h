@@ -343,7 +343,7 @@
 !  *
 !  */
 
-! void  (*MMG5_Init_parameters)(MMG5_pMesh mesh);
+! void  (_MMG5_Init_parameters)(MMG5_pMesh mesh);
 
 ! /* init file names */
 ! /**

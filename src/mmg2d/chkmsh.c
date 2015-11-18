@@ -72,7 +72,7 @@ int _MMG5_mmg2dChkmsh(MMG5_pMesh mesh, int severe,int base) {
            			k,adja[0]/3,adja[1]/3,adja[2]/3);
     	printf("adj(%d): %d %d %d %d\n",
           		adj,adja1[0]/3,adja1[1]/3,adja1[2]/3,adja1[3]/3); 
-            MMG2_saveMesh(mesh,"chk.mesh");
+            MMG2D_saveMesh(mesh,"chk.mesh");
             assert(0);exit(1);
       }
       

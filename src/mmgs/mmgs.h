@@ -58,7 +58,7 @@
 /** Free allocated pointers of mesh and sol structure and return value val */
 #define _MMG5_RETURN_AND_FREE(mesh,met,val)do       \
   {                                                 \
-    MMG5_Free_all(mesh,met);                        \
+    MMGS_Free_all(mesh,met);                        \
     return(val);                                    \
   }while(0)
 
@@ -90,7 +90,7 @@
   }while(0)
 
 /* prototypes */
-int  _MMG5_saveAllMesh(MMG5_pMesh );
+int  _MMGS_saveAllMesh(MMG5_pMesh );
 int  zaldy(MMG5_pMesh mesh);
 int  assignEdge(MMG5_pMesh mesh);
 int  _MMG5_analys(MMG5_pMesh mesh);
@@ -175,7 +175,7 @@ int    (*gradsiz)(MMG5_pMesh mesh,MMG5_pSol met);
 void   (*intmet)(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int ip,double s);
 int    (*movridpt)(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist);
 int    (*movintpt)(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist);
-int    (*_MMG5_saveMeshinternal)(MMG5_pMesh mesh);
+int    (*_MMGS_saveMeshinternal)(MMG5_pMesh mesh);
 
 void _MMG5_Set_commonFunc();
 

@@ -88,7 +88,7 @@ double swapd(double sbin)
   //printf("CONVERTION DOUBLE\n");
   return(out);
 }
-int MMG5_loadMesh(MMG5_pMesh mesh) {
+int MMGS_loadMesh(MMG5_pMesh mesh) {
   FILE        *inm;
   MMG5_pTria  pt1,pt2;
   MMG5_pPoint ppt;
@@ -618,7 +618,7 @@ int MMG5_loadMesh(MMG5_pMesh mesh) {
   return(1);
 }
 
-int _MMG5_saveAllMesh(MMG5_pMesh mesh) {
+int _MMGS_saveAllMesh(MMG5_pMesh mesh) {
   FILE         *inm;
   MMG5_pPoint  ppt;
   MMG5_pTria   pt;
@@ -1053,7 +1053,7 @@ int _MMG5_saveAllMesh(MMG5_pMesh mesh) {
 }
 
 /* load metric field */
-int MMG5_loadMet(MMG5_pMesh mesh,MMG5_pSol met) {
+int MMGS_loadMet(MMG5_pMesh mesh,MMG5_pSol met) {
   FILE       *inm;
   float       fbuf[6],tmpf;
   double      dbuf[6],tmpd;
@@ -1325,7 +1325,7 @@ int MMG5_loadMet(MMG5_pMesh mesh,MMG5_pSol met) {
 }
 
 /* write iso or aniso metric */
-int MMG5_saveMet(MMG5_pMesh mesh,MMG5_pSol met) {
+int MMGS_saveMet(MMG5_pMesh mesh,MMG5_pSol met) {
   FILE*        inm;
   MMG5_pPoint  ppt;
   double       dbuf[6],mtmp[3],r[3][3],tmp;
@@ -1480,6 +1480,6 @@ int MMG5_saveMet(MMG5_pMesh mesh,MMG5_pSol met) {
  * when linking with the shared library \a mmg3dlib).
  *
  */
-int MMG5_saveMesh(MMG5_pMesh mesh) {
-  return(_MMG5_saveMeshinternal(mesh));
+int MMGS_saveMesh(MMG5_pMesh mesh) {
+  return(_MMGS_saveMeshinternal(mesh));
 }

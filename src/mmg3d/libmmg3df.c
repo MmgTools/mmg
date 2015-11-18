@@ -66,6 +66,43 @@
   { nu pc; }                                    \
   void nu pl
 
+
+
+/**
+ * See \ref MMG5_Free_all function in \ref mmg3d/libmmg3d.h file.
+ */
+FORTRAN_NAME(MMG3D_FREE_ALL,mmg3d_free_all,(MMG5_pMesh *mesh,MMG5_pSol *met
+                                          ,MMG5_pSol *disp
+               ),(mesh,met,disp
+                 )){
+
+  MMG3D_Free_all(*mesh,*met,(disp==NULL)?NULL:*disp);
+
+  return;
+}
+
+/**
+ * See \ref MMG3D_saveMesh function in \ref mmg3d/libmmg3d.h file.
+ */
+FORTRAN_NAME(MMG3D_SAVEMESH,mmg3d_savemesh,(MMG5_pMesh *mesh, int* retval),
+             (mesh,retval)){
+  *retval = MMG3D_saveMesh(*mesh);
+  return;
+}
+
+/**
+ * See \ref MMG3D_mmg3dlib function in \ref mmg3d/libmmg3d.h file.
+ */
+FORTRAN_NAME(MMG3D_MMG3DLIB,mmg3d_mmg3dlib,(MMG5_pMesh *mesh,MMG5_pSol *met
+                                          ,MMG5_pSol *disp,int* retval),
+             (mesh,met,disp,retval)){
+
+  *retval = MMG3D_mmg3dlib(*mesh,*met,(disp==NULL)?NULL:*disp);
+
+  return;
+}
+
+/** Old API °°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°*/
 /**
  * See \ref MMG5_Free_all function in \ref mmg3d/libmmg3d.h file.
  */

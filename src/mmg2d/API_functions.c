@@ -7,7 +7,7 @@
  *
  */
 static inline
-void MMG2_Alloc_mesh(MMG5_pMesh *mesh, MMG5_pSol *sol
+void _MMG2D_Alloc_mesh(MMG5_pMesh *mesh, MMG5_pSol *sol
   ) {
 
   /* mesh allocation */
@@ -29,10 +29,10 @@ void MMG2_Alloc_mesh(MMG5_pMesh *mesh, MMG5_pSol *sol
  *
  */
 static inline
-void MMG2_Init_woalloc_mesh(MMG5_pMesh mesh, MMG5_pSol sol
+void _MMG2D_Init_woalloc_mesh(MMG5_pMesh mesh, MMG5_pSol sol
   ) {
 
-  _MMG2_Set_commonFunc();
+  _MMG2D_Set_commonFunc();
 
   (mesh)->dim = 2;
   (mesh)->ver = 2;
@@ -41,10 +41,10 @@ void MMG2_Init_woalloc_mesh(MMG5_pMesh mesh, MMG5_pSol sol
   (sol)->size = 1;
 
   /* Default parameters values */
-  _MMG2_Init_parameters(mesh);
+  MMG2D_Init_parameters(mesh);
 
   /* Default vaules for file names */
-  MMG5_Init_fileNames(mesh,sol);
+  MMG2D_Init_fileNames(mesh,sol);
 
   return;
 }
@@ -56,14 +56,78 @@ void MMG2_Init_woalloc_mesh(MMG5_pMesh mesh, MMG5_pSol sol
  * their default values.
  *
  */
-void MMG2_Init_mesh(MMG5_pMesh *mesh, MMG5_pSol *sol
+void MMG2D_Init_mesh(MMG5_pMesh *mesh, MMG5_pSol *sol
   ) {
 
   /* allocations */
-  MMG2_Alloc_mesh(mesh,sol);
+  _MMG2D_Alloc_mesh(mesh,sol);
   /* initialisations */
-  MMG2_Init_woalloc_mesh(*mesh,*sol);
+  _MMG2D_Init_woalloc_mesh(*mesh,*sol);
   return;
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param sol pointer toward the sol structure.
+ *
+ * Initialize file names to their default values.
+ *
+ */
+void MMG2D_Init_fileNames(MMG5_pMesh mesh,MMG5_pSol sol
+  ) {
+
+  MMG5_Init_fileNames(mesh,sol);
+  return;
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param meshin input mesh name.
+ * \return 1.
+ *
+ * Set the name of input mesh.
+ *
+ */
+int MMG2D_Set_inputMeshName(MMG5_pMesh mesh, char* meshin) {
+
+  return(MMG5_Set_inputMeshName(mesh,meshin));
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param sol pointer toward the sol structure.
+ * \param solin name of the input solution file.
+ * \return 1.
+ *
+ * Set the name of input solution file.
+ *
+ */
+int MMG2D_Set_inputSolName(MMG5_pMesh mesh,MMG5_pSol sol, char* solin) {
+  return(MMG5_Set_inputSolName(mesh,sol,solin));
+}
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param meshout output mesh name.
+ * \return 1.
+ *
+ * Set the name of output mesh.
+ *
+ */
+int MMG2D_Set_outputMeshName(MMG5_pMesh mesh, char* meshout) {
+
+  return(MMG5_Set_outputMeshName(mesh,meshout));
+}
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param sol pointer toward the sol structure.
+ * \param solout name of the output solution file.
+ * \return 0 if failed, 1 otherwise.
+ *
+ *  Set the name of output solution file.
+ *
+ */
+int MMG2D_Set_outputSolName(MMG5_pMesh mesh,MMG5_pSol sol, char* solout) {
+  return(MMG5_Set_outputSolName(mesh,sol,solout));
 }
 /**
  * \param mesh pointer toward the mesh structure.
@@ -71,19 +135,19 @@ void MMG2_Init_mesh(MMG5_pMesh *mesh, MMG5_pSol *sol
  * Initialization of the input parameters (stored in the Info structure).
  *
  */
-void _MMG2_Init_parameters(MMG5_pMesh mesh) {
+void MMG2D_Init_parameters(MMG5_pMesh mesh) {
 
   /* Init common parameters for mmg2d, mmgs and mmg3d. */
-  _MMG5_mmgInit_parameters(mesh);
+  _MMG5_Init_parameters(mesh);
 
  /* default values for integers */
-  /** MMG5_IPARAM_iso = 0 */
+  /** MMG2D_IPARAM_iso = 0 */
   mesh->info.iso      =  0;  /* [0/1]    ,Turn on/off levelset meshing */
-  /** MMG5_IPARAM_lag = -1 */
+  /** MMG2D_IPARAM_lag = -1 */
   mesh->info.lag      = -1;
-  /** MMG5_IPARAM_optim = 0 */
+  /** MMG2D_IPARAM_optim = 0 */
   mesh->info.optim    =  0;
-  /** MMG5_IPARAM_nosurf = 0 */
+  /** MMG2D_IPARAM_nosurf = 0 */
   mesh->info.nosurf   =  0;  /* [0/1]    ,avoid/allow surface modifications */
 
   mesh->info.renum    = 0;   /* [0]    , Turn on/off the renumbering using SCOTCH; */
@@ -96,28 +160,28 @@ void _MMG2_Init_parameters(MMG5_pMesh mesh) {
 
   //mesh->info.imprim = -7;
 
-  /** MMG5_IPARAM_bucket = 64 */
+  /** MMG2D_IPARAM_bucket = 64 */
   mesh->info.bucket = 64;
 }
 
 /**
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the sol structure.
- * \param iparam integer parameter to set (see \a MMG5_Param structure).
+ * \param iparam integer parameter to set (see \a MMG2D_Param structure).
  * \param val value for the parameter.
  * \return 0 if failed, 1 otherwise.
  *
  * Set integer parameter \a iparam at value \a val.
  *
  */
-int MMG5_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
+int MMG2D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
 
   switch ( iparam ) {
     /* Integer parameters */
-  case MMG5_IPARAM_verbose :
+  case MMG2D_IPARAM_verbose :
     mesh->info.imprim   = val;
     break;
-  case MMG5_IPARAM_mem :
+  case MMG2D_IPARAM_mem :
     if ( val <= 0 ) {
       fprintf(stdout,"  ## Warning: maximal memory authorized must be strictly positive.\n");
       fprintf(stdout,"  Reset to default value.\n");
@@ -130,13 +194,13 @@ int MMG5_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
     } else if(mesh->info.mem < 39)
       return(0);
     break;
-  case MMG5_IPARAM_bucket :
+  case MMG2D_IPARAM_bucket :
     mesh->info.bucket   = val;
     break;
-  case MMG5_IPARAM_debug :
+  case MMG2D_IPARAM_debug :
     mesh->info.ddebug   = val;
     break;
-  case MMG5_IPARAM_angle :
+  case MMG2D_IPARAM_angle :
 #warning dhd
     /* free table that may contains old ridges */
     if ( mesh->htab.geom )
@@ -153,31 +217,31 @@ int MMG5_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
       mesh->info.dhd    = _MMG5_ANGEDG;
     }
     break;
-  case MMG5_IPARAM_iso :
+  case MMG2D_IPARAM_iso :
     mesh->info.iso      = val;
 #warning : iso case
     // if ( mesh->info.iso )
     //if ( mesh->nt && !MMG5_skipIso(mesh) )
     //  exit(EXIT_FAILURE);
     break;
-  case MMG5_IPARAM_lag :
+  case MMG2D_IPARAM_lag :
     if ( val < 0 || val > 2 )
       exit(EXIT_FAILURE);
     mesh->info.lag = val;
     break;
-  case MMG5_IPARAM_msh :
+  case MMG2D_IPARAM_msh :
     mesh->info.nreg = val;
     break;
-  case MMG5_IPARAM_numsubdomain :
+  case MMG2D_IPARAM_numsubdomain :
     mesh->info.renum = val;
     break;
-  case MMG5_IPARAM_noinsert :
+  case MMG2D_IPARAM_noinsert :
     mesh->info.noinsert = val;
     break;
-  case MMG5_IPARAM_noswap :
+  case MMG2D_IPARAM_noswap :
     mesh->info.noswap   = val;
     break;
-  case MMG5_IPARAM_nomove :
+  case MMG2D_IPARAM_nomove :
     mesh->info.nomove   = val;
     break;
   default :
@@ -191,34 +255,34 @@ int MMG5_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
 /**
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the sol structure.
- * \param dparam double parameter to set (see \a MMG5_Param structure).
+ * \param dparam double parameter to set (see \a MMG2D_Param structure).
  * \val value of the parameter.
  * \return 0 if failed, 1 otherwise.
  *
  * Set double parameter \a dparam at value \a val.
  *
  */
-int MMG5_Set_dparameter(MMG5_pMesh mesh, MMG5_pSol sol, int dparam, double val){
+int MMG2D_Set_dparameter(MMG5_pMesh mesh, MMG5_pSol sol, int dparam, double val){
 
   switch ( dparam ) {
     /* double parameters */
-  case MMG5_DPARAM_angleDetection :
+  case MMG2D_DPARAM_angleDetection :
     mesh->info.dhd = val;
     mesh->info.dhd = MG_MAX(0.0, MG_MIN(180.0,mesh->info.dhd));
     mesh->info.dhd = 180. - mesh->info.dhd;
     break;
-  case MMG5_DPARAM_hmin :
+  case MMG2D_DPARAM_hmin :
     mesh->info.hmin     = val;
     break;
-  case MMG5_DPARAM_hmax :
+  case MMG2D_DPARAM_hmax :
     mesh->info.hmax     = val;
     break;
-  case MMG5_DPARAM_hgrad :
+  case MMG2D_DPARAM_hgrad :
     mesh->info.hgrad    = val;
     if ( mesh->info.hgrad < 0.0 )
       mesh->info.hgrad = -1.0;
     break;
-  case MMG5_DPARAM_hausd :
+  case MMG2D_DPARAM_hausd :
     if ( val <=0 ) {
       fprintf(stdout,"  ## Error: hausdorff number must be strictly positive.\n");
       return(0);
@@ -226,7 +290,7 @@ int MMG5_Set_dparameter(MMG5_pMesh mesh, MMG5_pSol sol, int dparam, double val){
     else
       mesh->info.hausd    = val;
     break;
-  case MMG5_DPARAM_ls :
+  case MMG2D_DPARAM_ls :
     mesh->info.ls       = val;
     break;
   default :
@@ -250,7 +314,7 @@ int MMG5_Set_dparameter(MMG5_pMesh mesh, MMG5_pSol sol, int dparam, double val){
  * whole mesh to realloc it at the new size
  *
  */
-int MMG5_Set_meshSize(MMG5_pMesh mesh, int np, int nt, int na) {
+int MMG2D_Set_meshSize(MMG5_pMesh mesh, int np, int nt, int na) {
   int k;
 
   if ( ( (mesh->info.imprim > 5) || mesh->info.ddebug ) &&
@@ -350,13 +414,13 @@ int MMG5_Set_meshSize(MMG5_pMesh mesh, int np, int nt, int na) {
  * Set the solution number, dimension and type.
  *
  */
-int MMG5_Set_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int typEntity, int np, int typSol) {
+int MMG2D_Set_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int typEntity, int np, int typSol) {
 
   if ( ( (mesh->info.imprim > 5) || mesh->info.ddebug ) && sol->m )
     fprintf(stdout,"  ## Warning: new solution\n");
 
   if ( typEntity != MMG5_Vertex ) {
-    fprintf(stdout,"  ## Error: MMG2D5 need a solution imposed on vertices\n");
+    fprintf(stdout,"  ## Error: MMG2D need a solution imposed on vertices\n");
     return(0);
   }
   if ( typSol == MMG5_Scalar ) {
@@ -397,7 +461,7 @@ int MMG5_Set_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int typEntity, int np, int 
  * Get the number of vertices, triangles and edges of the mesh.
  *
  */
-int MMG5_Get_meshSize(MMG5_pMesh mesh, int* np, int* nt, int* na) {
+int MMG2D_Get_meshSize(MMG5_pMesh mesh, int* np, int* nt, int* na) {
 
   if ( np != NULL )
     *np = mesh->np;
@@ -420,11 +484,11 @@ int MMG5_Get_meshSize(MMG5_pMesh mesh, int* np, int* nt, int* na) {
  * at position \a pos in mesh structure
  *
  */
-int MMG5_Set_vertex(MMG5_pMesh mesh, double c0, double c1, int ref, int pos) {
+int MMG2D_Set_vertex(MMG5_pMesh mesh, double c0, double c1, int ref, int pos) {
 
   if ( !mesh->np ) {
     fprintf(stdout,"  ## Error: You must set the number of points with the");
-    fprintf(stdout," MMG5_Set_meshSize function before setting vertices in mesh\n");
+    fprintf(stdout," MMG2D_Set_meshSize function before setting vertices in mesh\n");
     return(0);
   }
 
@@ -466,12 +530,12 @@ int MMG5_Set_vertex(MMG5_pMesh mesh, double c0, double c1, int ref, int pos) {
  * vertex num of mesh.
  *
  */
-int MMG5_Get_vertex(MMG5_pMesh mesh,int num, double* c0, double* c1, int* ref,
+int MMG2D_Get_vertex(MMG5_pMesh mesh,int num, double* c0, double* c1, int* ref,
                     int* isCorner, int* isRequired) {
 
   if ( num > mesh->np ) {
     fprintf(stdout,"  ## Error: unable to get point.\n");
-    fprintf(stdout,"     The number %d in MMG5_Get_vertex function",num);
+    fprintf(stdout,"     The number %d in MMG2D_Get_vertex function",num);
     fprintf(stdout,"  exceed the max number of points: %d\n ",mesh->np);
     return(0);
   }
@@ -511,14 +575,14 @@ int MMG5_Get_vertex(MMG5_pMesh mesh,int num, double* c0, double* c1, int* ref,
  * at position \a pos in mesh structure.
  *
  */
-int MMG5_Set_triangle(MMG5_pMesh mesh, int v0, int v1, int v2, int ref, int pos) {
+int MMG2D_Set_triangle(MMG5_pMesh mesh, int v0, int v1, int v2, int ref, int pos) {
   MMG5_pTria pt;
   double  vol;
   int    i,tmp;
 
   if ( !mesh->nt ) {
     fprintf(stdout,"  ## Error: You must set the number of elements with the");
-    fprintf(stdout," MMG5_Set_meshSize function before setting elements in mesh\n");
+    fprintf(stdout," MMG2D_Set_meshSize function before setting elements in mesh\n");
     return(0);
   }
 
@@ -549,7 +613,7 @@ int MMG5_Set_triangle(MMG5_pMesh mesh, int v0, int v1, int v2, int ref, int pos)
 
   for(i=0 ; i<3 ; i++)
     pt->edg[i] = 0;
-      
+ 
   vol = MMG2_quickarea(mesh->point[pt->v[0]].c,mesh->point[pt->v[1]].c,
                            mesh->point[pt->v[2]].c);
   if(vol < 0) {
@@ -575,12 +639,12 @@ int MMG5_Set_triangle(MMG5_pMesh mesh, int v0, int v1, int v2, int ref, int pos)
  * at position \a pos in mesh structure.
  *
  */
-int MMG5_Set_edge(MMG5_pMesh mesh, int v0, int v1, int ref, int pos) {
+int MMG2D_Set_edge(MMG5_pMesh mesh, int v0, int v1, int ref, int pos) {
   MMG5_pEdge pt;
 
   if ( !mesh->na ) {
     fprintf(stdout,"  ## Error: You must set the number of elements with the");
-    fprintf(stdout," MMG5_Set_meshSize function before setting elements in mesh\n");
+    fprintf(stdout," MMG2D_Set_meshSize function before setting elements in mesh\n");
     return(0);
   }
 
@@ -618,11 +682,11 @@ int MMG5_Set_edge(MMG5_pMesh mesh, int v0, int v1, int ref, int pos) {
  * Set scalar value \a s at position \a pos in solution structure
  *
  */
-int MMG5_Set_scalarSol(MMG5_pSol met, double s, int pos) {
+int MMG2D_Set_scalarSol(MMG5_pSol met, double s, int pos) {
 
   if ( !met->np ) {
     fprintf(stdout,"  ## Error: You must set the number of solution with the");
-    fprintf(stdout," MMG5_Set_solSize function before setting values");
+    fprintf(stdout," MMG2D_Set_solSize function before setting values");
     fprintf(stdout," in solution structure \n");
     return(0);
   }
@@ -653,12 +717,12 @@ int MMG5_Set_scalarSol(MMG5_pSol met, double s, int pos) {
  * Set tensor value \a s at position \a pos in solution structure
  *
  */
-int MMG5_Set_tensorSol(MMG5_pSol met, double* s, int pos) {
+int MMG2D_Set_tensorSol(MMG5_pSol met, double* s, int pos) {
   int isol;
 
   if ( !met->np ) {
     fprintf(stdout,"  ## Error: You must set the number of solution with the");
-    fprintf(stdout," MMG5_Set_solSize function before setting values");
+    fprintf(stdout," MMG2D_Set_solSize function before setting values");
     fprintf(stdout," in solution structure \n");
     return(0);
   }
@@ -692,19 +756,19 @@ int MMG5_Set_tensorSol(MMG5_pSol met, double* s, int pos) {
  * (not mandatory) and check mesh datas.
  *
  */
-int MMG5_Chk_meshData(MMG5_pMesh mesh,MMG5_pSol met) {
+int MMG2D_Chk_meshData(MMG5_pMesh mesh,MMG5_pSol met) {
 
   if ( (mesh->npi != mesh->np) || (mesh->nti != mesh->nt) ) {
-    fprintf(stdout,"  ## Error: if you don't use the MMG5_loadMesh function,");
-    fprintf(stdout," you must call the MMG5_Set_meshSize function to have a");
+    fprintf(stdout,"  ## Error: if you don't use the MMG2D_loadMesh function,");
+    fprintf(stdout," you must call the MMG2D_Set_meshSize function to have a");
     fprintf(stdout," valid mesh.\n");
     fprintf(stdout," Missing datas.\n");
     return(0);
   }
 
   if ( met->npi != met->np ) {
-    fprintf(stdout,"  ## Error: if you don't use the MMG5_loadMet function,");
-    fprintf(stdout," you must call the MMG5_Set_solSize function to have a");
+    fprintf(stdout,"  ## Error: if you don't use the MMG2D_loadMet function,");
+    fprintf(stdout," you must call the MMG2D_Set_solSize function to have a");
     fprintf(stdout," valid solution.\n");
     fprintf(stdout," Missing datas.\n");
     return(0);
@@ -741,10 +805,10 @@ int MMG5_Chk_meshData(MMG5_pMesh mesh,MMG5_pSol met) {
  * Structure deallocations before return.
  *
  */
-void MMG5_Free_structures(MMG5_pMesh mesh,MMG5_pSol met
+void MMG2D_Free_structures(MMG5_pMesh mesh,MMG5_pSol met
   ){
 
-  MMG5_mmgFree_names(mesh,met);
+  MMG2D_Free_names(mesh,met);
 
   /* mesh */
   if ( mesh->point )
@@ -768,4 +832,16 @@ void MMG5_Free_structures(MMG5_pMesh mesh,MMG5_pSol met
 
   if ( mesh->info.imprim>6 || mesh->info.ddebug )
     printf("  MEMORY USED AT END (bytes) %lld\n",mesh->memCur);
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the sol structure.
+ *
+ * File name deallocations before return.
+ *
+ */
+void MMG2D_Free_names(MMG5_pMesh mesh,MMG5_pSol met){
+  MMG5_mmgFree_names(mesh,met);
+  return;
 }
