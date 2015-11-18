@@ -167,9 +167,7 @@ PROGRAM main
 
   !> ------------------------------ STEP  II --------------------------
   !! library call
-  !! Remark: %val(0) allow to pass the value 0 (i.e. NULL) instead of a pointer
-  !! toward NULL.
-  CALL MMG5_mmg3dlib(mmgMesh,mmgSol,%val(0),ier)
+  CALL MMG5_mmg3dlib(mmgMesh,mmgSol,ier)
   IF ( ier == MMG5_STRONGFAILURE ) THEN
     PRINT*,"BAD ENDING OF MMG3DLIB: UNABLE TO SAVE MESH"
     STOP MMG5_STRONGFAILURE

@@ -28,6 +28,7 @@
  * \version 5
  * \date 01 2014
  * \copyright GNU Lesser General Public License.
+ * \warning Use the MMG3D_ prefix: MMG5_ prefix will became obsolete soon...
  * \note Please, refer to the \ref mmg3d/libmmg3d.h file for functions
  * documentation.
  *

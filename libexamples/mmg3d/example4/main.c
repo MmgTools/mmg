@@ -22,7 +22,8 @@
 */
 
 /**
- * Example of use of the mmg3d library (basic use of lagrangian motion option)
+ * Example of use of the mmg3dmov function of the mmg3d library (basic use of
+ * lagrangian motion option)
  *
  * \author Charles Dapogny (LJLL, UPMC)
  * \author Cécile Dobrzynski (Inria / IMB, Université de Bordeaux)
@@ -53,7 +54,7 @@ int main(int argc,char *argv[]) {
   int             k,ier;
   char            *pwd,*inname,*outname;
 
-  fprintf(stdout,"  -- TEST MMG3DLIB \n");
+  fprintf(stdout,"  -- TEST MMG3DMOV \n");
 
   /* Name and path of the mesh files */
   pwd = getenv("PWD");
@@ -122,12 +123,13 @@ int main(int argc,char *argv[]) {
     exit(EXIT_FAILURE);
 
   /** library call */
-  ier = MMG3D_mmg3dlib(mmgMesh,mmgSol,mmgDisp);
+  ier = MMG3D_mmg3dmov(mmgMesh,mmgSol,mmgDisp);
+
   if ( ier == MMG5_STRONGFAILURE ) {
-    fprintf(stdout,"BAD ENDING OF MMG3DLIB: UNABLE TO SAVE MESH\n");
+    fprintf(stdout,"BAD ENDING OF MMG3DMOV: UNABLE TO SAVE MESH\n");
     return(ier);
   } else if ( ier == MMG5_LOWFAILURE )
-    fprintf(stdout,"BAD ENDING OF MMG3DLIB\n");
+    fprintf(stdout,"BAD ENDING OF MMG3DMOV\n");
 
   /* (Not mandatory) Automatically save the mesh */
   sprintf(outname, "%s%s%s", pwd, "/../libexamples/mmg3d/example4/", "tinyBoxt.o.mesh");

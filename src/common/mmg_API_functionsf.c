@@ -65,7 +65,7 @@ FORTRAN_NAME(INIT_FILENAMES,init_filenames,(MMG5_pMesh *mesh,MMG5_pSol *sol
  * See \ref MMG5_Set_inputMeshName function in \ref common/libmmg.h file.
  */
 FORTRAN_NAME(MMG5_SET_INPUTMESHNAME, mmg5_set_inputmeshname,
-             (MMG5_pMesh *mesh, char* meshin, int *strlen, int* retval),
+             (MMG5_pMesh *mesh, char *meshin, int *strlen, int *retval),
              (mesh,meshin,strlen,retval)) {
   char *tmp = NULL;
 

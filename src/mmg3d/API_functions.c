@@ -28,7 +28,7 @@
  * \version 5
  * \date 01 2014
  * \copyright GNU Lesser General Public License.
- * \warning the Use the MMG3D_ prefix: MMG5_ prefix will became obsolete...
+ * \warning Use the MMG3D_ prefix: MMG5_ prefix will became obsolete soon...
  *
  * \note This file contains some internal functions for the API, see
  * the \ref mmg3d/libmmg3d.h header file for the documentation of all
