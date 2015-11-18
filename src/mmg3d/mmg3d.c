@@ -46,9 +46,9 @@ mytime         MMG5_ctim[TIMEMAX];
  * Deallocations before return.
  *
  */
-void MMG5_Free_all(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp ){
+void MMG3D_Free_all(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp ){
 
-  MMG5_Free_structures(mesh,met,disp);
+  MMG3D_Free_structures(mesh,met,disp);
 }
 
 /**
@@ -68,8 +68,8 @@ static void _MMG5_endcod() {
  * Set pointer for MMG5_saveMesh function.
  *
  */
-void MMG5_Set_saveFunc(MMG5_pMesh mesh) {
-  _MMG5_saveMeshinternal = _MMG5_saveAllMesh;
+void MMG3D_Set_saveFunc(MMG5_pMesh mesh) {
+  _MMG3D_saveMeshinternal = _MMG3D_saveAllMesh;
 }
 
 /**
@@ -138,7 +138,7 @@ int main(int argc,char *argv[]) {
 
   /* read displacement if any */
   if ( mesh.info.lag > -1 ) {
-    if ( !MMG5_Set_inputSolName(&mesh,&disp,met.namein) )
+    if ( !MMG3D_Set_inputSolName(&mesh,&disp,met.namein) )
       exit(EXIT_FAILURE);
     ier = MMG5_loadMet(&mesh,&disp);
     if ( ier == 0 ) {
@@ -177,7 +177,7 @@ int main(int argc,char *argv[]) {
   chrono(ON,&MMG5_ctim[2]);
 #endif
   _MMG5_setfunc(&mesh,&met);
-  MMG5_Set_saveFunc(&mesh);
+  MMG3D_Set_saveFunc(&mesh);
 
   if ( abs(mesh.info.imprim) > 0 )  _MMG5_inqua(&mesh,&met);
 

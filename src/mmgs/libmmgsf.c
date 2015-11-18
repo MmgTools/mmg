@@ -67,34 +67,34 @@
   void nu pl
 
 /**
- * See \ref MMG5_Free_all function in \ref mmgs/libmmgs.h file.
+ * See \ref MMGS_Free_all function in \ref mmgs/libmmgs.h file.
  */
-FORTRAN_NAME(MMG5_FREE_ALL,mmg5_free_all,(MMG5_pMesh *mesh,MMG5_pSol *met
+FORTRAN_NAME(MMGS_FREE_ALL,mmgs_free_all,(MMG5_pMesh *mesh,MMG5_pSol *met
                                           ,MMG5_pSol *dummy),
              (mesh,met,dummy)){
 
-  MMG5_Free_all(*mesh,*met);
+  MMGS_Free_all(*mesh,*met);
 
   return;
 }
 
 /**
- * See \ref MMG5_saveMesh function in \ref mmgs/libmmgs.h file.
+ * See \ref MMGS_saveMesh function in \ref mmgs/libmmgs.h file.
  */
-FORTRAN_NAME(MMG5_SAVEMESH,mmg5_savemesh,(MMG5_pMesh *mesh, int* retval),
+FORTRAN_NAME(MMGS_SAVEMESH,mmgs_savemesh,(MMG5_pMesh *mesh, int* retval),
              (mesh,retval)){
-  *retval = MMG5_saveMesh(*mesh);
+  *retval = MMGS_saveMesh(*mesh);
   return;
 }
 
 /**
- * See \ref MMG5_mmgslib function in \ref mmgs/libmmgs.h file.
+ * See \ref MMGS_mmgslib function in \ref mmgs/libmmgs.h file.
  */
-FORTRAN_NAME(MMG5_MMGSLIB,mmg5_mmgslib,(MMG5_pMesh *mesh,MMG5_pSol *met,
+FORTRAN_NAME(MMGS_MMGSLIB,mmgs_mmgslib,(MMG5_pMesh *mesh,MMG5_pSol *met,
                                         int* retval),
              (mesh,met,retval)){
 
-  *retval = MMG5_mmgslib(*mesh,*met);
+  *retval = MMGS_mmgslib(*mesh,*met);
 
   return;
 }

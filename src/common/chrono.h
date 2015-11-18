@@ -25,7 +25,7 @@
 #define _CHRONO_H
 
 #include <time.h>
-#ifdef UNIX
+#ifdef POSIX
 #include <sys/time.h>
 #include <sys/resource.h>
 #endif
@@ -49,7 +49,7 @@
  */
 typedef struct mytime {
   double  gini,gend,gdif,uini,uend,udif,sini,send,sdif;
-#ifdef UNIX
+#ifdef POSIX
   struct  timeval rutim;
   struct  rusage  ru;
 #endif

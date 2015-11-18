@@ -96,7 +96,7 @@ static double _MMG5_swapd(double sbin)
  * Read mesh data.
  *
  */
-int MMG5_loadMesh(MMG5_pMesh mesh) {
+int MMG3D_loadMesh(MMG5_pMesh mesh) {
   FILE*       inm;
   MMG5_pTetra pt;
   MMG5_pTria  pt1;
@@ -738,7 +738,7 @@ int MMG5_loadMesh(MMG5_pMesh mesh) {
  * Save mesh data.
  *
  */
-int _MMG5_saveAllMesh(MMG5_pMesh mesh) {
+int _MMG3D_saveAllMesh(MMG5_pMesh mesh) {
   FILE*        inm;
   MMG5_pPoint  ppt;
   MMG5_pTetra  pt;
@@ -1288,7 +1288,7 @@ int _MMG5_saveAllMesh(MMG5_pMesh mesh) {
  * Load metric field.
  *
  */
-int MMG5_loadMet(MMG5_pMesh mesh,MMG5_pSol met) {
+int MMG3D_loadMet(MMG5_pMesh mesh,MMG5_pSol met) {
   FILE       *inm;
   float       fbuf[6],tmpf;
   double      dbuf[6],tmpd,lambda[3],eigenv[3][3];
@@ -1610,7 +1610,7 @@ int MMG5_loadMet(MMG5_pMesh mesh,MMG5_pSol met) {
  * Write isotropic or anisotropic metric.
  *
  */
-int MMG5_saveMet(MMG5_pMesh mesh,MMG5_pSol met) {
+int MMG3D_saveMet(MMG5_pMesh mesh,MMG5_pSol met) {
   FILE*        inm;
   MMG5_pPoint  ppt;
   double       dbuf[6],mtmp[3],r[3][3],tmp;
@@ -1793,6 +1793,23 @@ int MMG5_saveMet(MMG5_pMesh mesh,MMG5_pSol met) {
  * when linking with the shared library \a mmg3dlib).
  *
  */
+int MMG3D_saveMesh(MMG5_pMesh mesh) {
+  return(_MMG3D_saveMeshinternal(mesh));
+}
+
+/** Old API °°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°*/
+int MMG5_loadMesh(MMG5_pMesh mesh) {
+  return(MMG3D_loadMesh(mesh));
+}
+
+int MMG5_loadMet(MMG5_pMesh mesh,MMG5_pSol met) {
+  return(MMG3D_loadMet(mesh,met));
+}
+
 int MMG5_saveMesh(MMG5_pMesh mesh) {
-  return(_MMG5_saveMeshinternal(mesh));
+  return(MMG3D_saveMesh(mesh));
+}
+
+int MMG5_saveMet(MMG5_pMesh mesh,MMG5_pSol met) {
+  return(MMG3D_saveMet(mesh,met));
 }

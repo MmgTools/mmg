@@ -208,8 +208,8 @@ inline double _MMG5_caltet_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt) {
 
       // exit added to avoid memory consumption in CDash outputs.
       /* _MMG5_unscaleMesh(mesh,met); */
-      /* MMG5_saveMesh(mesh); */
-      /* MMG5_saveMet(mesh,met); */
+      /* MMGS_saveMesh(mesh); */
+      /* MMGS_saveMet(mesh,met); */
       /* exit(EXIT_FAILURE); */
     }
     return(0.0);
@@ -325,8 +325,8 @@ inline double _MMG5_caltet33_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt) {
               " edges lengths sum=%e\n computed quality=%e\n",vol,det,num,cal);
       // exit added to avoid memory consumption in CDash outputs.
       /* _MMG5_unscaleMesh(mesh,met); */
-      /* MMG5_saveMesh(mesh); */
-      /* MMG5_saveMet(mesh,met); */
+      /* MMGS_saveMesh(mesh); */
+      /* MMGS_saveMet(mesh,met); */
       /* exit(EXIT_FAILURE); */
       return(0.0);
     }
@@ -844,8 +844,8 @@ void _MMG5_inqua(MMG5_pMesh mesh,MMG5_pSol met) {
     if (rapmin == 0){
       fprintf(stdout,"  ## WARNING: TOO BAD QUALITY FOR THE WORST ELEMENT\n");
       _MMG5_unscaleMesh(mesh,met);
-      MMG5_saveMesh(mesh);
-      MMG5_saveMet(mesh,met);
+      MMG3D_saveMesh(mesh);
+      MMG3D_saveMet(mesh,met);
       exit(EXIT_FAILURE);
     }
     return;
@@ -865,8 +865,8 @@ void _MMG5_inqua(MMG5_pMesh mesh,MMG5_pSol met) {
   if (rapmin == 0){
     fprintf(stdout,"  ## WARNING: TOO BAD QUALITY FOR THE WORST ELEMENT\n");
     _MMG5_unscaleMesh(mesh,met);
-    MMG5_saveMesh(mesh);
-    MMG5_saveMet(mesh,met);
+    MMG3D_saveMesh(mesh);
+    MMG3D_saveMet(mesh,met);
     exit(EXIT_FAILURE);
   }
 }
@@ -937,8 +937,8 @@ void _MMG5_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
     if (rapmin == 0){
       fprintf(stdout,"  ## WARNING: TOO BAD QUALITY FOR THE WORST ELEMENT\n");
       _MMG5_unscaleMesh(mesh,met);
-      MMG5_saveMesh(mesh);
-      MMG5_saveMet(mesh,met);
+      MMG3D_saveMesh(mesh);
+      MMG3D_saveMet(mesh,met);
       exit(EXIT_FAILURE);
     }
     return;
@@ -958,8 +958,8 @@ void _MMG5_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
   if (rapmin == 0){
     fprintf(stdout,"  ## WARNING: TOO BAD QUALITY FOR THE WORST ELEMENT\n");
     _MMG5_unscaleMesh(mesh,met);
-    MMG5_saveMesh(mesh);
-    MMG5_saveMet(mesh,met);
+    MMG3D_saveMesh(mesh);
+    MMG3D_saveMet(mesh,met);
     exit(EXIT_FAILURE);
   }
 }

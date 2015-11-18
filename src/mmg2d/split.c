@@ -53,7 +53,7 @@ int MMG2_split(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int k1,int adj1) {
   pt2  = &mesh->tria[k2];
   if(ddebug) printf("tr1 %d %d %d -- voy %d : %d %d \n",pt1->v[0],pt1->v[1],pt1->v[2],voy1,iar1,iar2);
   if(ddebug) printf("tr2 %d %d %d -- voy %d : %d %d \n",pt2->v[0],pt2->v[1],pt2->v[2],voy2,iara1,iara2);
-  if(ddebug) MMG2_saveMesh(mesh,"tutu.mesh");
+  if(ddebug) MMG2D_saveMesh(mesh,"tutu.mesh");
   assert(pt2->v[iara1]==pt1->v[iar2]);
   assert(pt2->v[iara2]==pt1->v[iar1]);
   
@@ -303,8 +303,8 @@ int MMG2_split(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int k1,int adj1) {
 
  
 
-  if(MMG2_callbackinsert)
-    MMG2_callbackinsert((int) ip,(int) k1,(int) k2,(int)jel,(int) kel);
+  if(MMG2D_callbackinsert)
+    MMG2D_callbackinsert((int) ip,(int) k1,(int) k2,(int)jel,(int) kel);
 	    
   return(1);  
 }

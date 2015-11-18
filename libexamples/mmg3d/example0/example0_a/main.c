@@ -69,39 +69,40 @@ int main(int argc,char *argv[]) {
   /* args of InitMesh: mesh=&mmgMesh, sol=&mmgSol */
   mmgMesh = NULL;
   mmgSol  = NULL;
-  MMG5_Init_mesh(&mmgMesh,&mmgSol,NULL);
+  MMG3D_Init_mesh(&mmgMesh,&mmgSol,NULL);
 
   /** 2) Build mesh in MMG5 format */
-  /** Two solutions: just use the MMG5_loadMesh function that will read a .mesh(b)
-      file formatted or manually set your mesh using the MMG5_Set* functions */
+  /** Two solutions: just use the MMG3D_loadMesh function that will read a .mesh(b)
+      file formatted or manually set your mesh using the MMG3D_Set* functions */
 
-  /** with MMG5_loadMesh function */
+  /** with MMG3D_loadMesh function */
   /** a) (not mandatory): give the mesh name
      (by default, the "mesh.mesh" file is oppened)*/
-  if ( !MMG5_Set_inputMeshName(mmgMesh,filename) )
+  if ( !MMG3D_Set_inputMeshName(mmgMesh,filename) )
     exit(EXIT_FAILURE);
   /** b) function calling */
-  if ( !MMG5_loadMesh(mmgMesh) )  exit(EXIT_FAILURE);
+  if ( !MMG3D_loadMesh(mmgMesh) )  exit(EXIT_FAILURE);
 
   /** 3) Build sol in MMG5 format */
-  /** Two solutions: just use the MMG5_loadMet function that will read a .sol(b)
-      file formatted or manually set your sol using the MMG5_Set* functions */
+  /** Two solutions: just use the MMG3D_loadMet function that will read a .sol(b)
+      file formatted or manually set your sol using the MMG3D_Set* functions */
 
-  /** With MMG5_loadMet function */
+  /** With MMG3D_loadMet function */
   /** a) (not mandatory): give the sol name
      (by default, the "mesh.sol" file is oppened)*/
-  if ( !MMG5_Set_inputSolName(mmgMesh,mmgSol,filename) )
+  if ( !MMG3D_Set_inputSolName(mmgMesh,mmgSol,filename) )
     exit(EXIT_FAILURE);
   /** b) function calling */
-  if ( !MMG5_loadMet(mmgMesh,mmgSol) )
+  if ( !MMG3D_loadMet(mmgMesh,mmgSol) )
     exit(EXIT_FAILURE);
 
   /** 4) (not mandatory): check if the number of given entities match with mesh size */
-  if ( !MMG5_Chk_meshData(mmgMesh,mmgSol) ) exit(EXIT_FAILURE);
+  if ( !MMG3D_Chk_meshData(mmgMesh,mmgSol) ) exit(EXIT_FAILURE);
 
   /** ------------------------------ STEP  II -------------------------- */
   /** library call */
-  ier = MMG5_mmg3dlib(mmgMesh,mmgSol,NULL);
+  ier = MMG3D_mmg3dlib(mmgMesh,mmgSol);
+
   if ( ier == MMG5_STRONGFAILURE ) {
     fprintf(stdout,"BAD ENDING OF MMG3DLIB: UNABLE TO SAVE MESH\n");
     return(ier);
@@ -111,26 +112,26 @@ int main(int argc,char *argv[]) {
 
   /** ------------------------------ STEP III -------------------------- */
   /** get results */
-  /** Two solutions: just use the MMG5_saveMesh/MMG5_saveMet functions
+  /** Two solutions: just use the MMG3D_saveMesh/MMG3D_saveMet functions
       that will write .mesh(b)/.sol formatted files or manually get your mesh/sol
-      using the MMG5_getMesh/MMG5_getSol functions */
+      using the MMG3D_getMesh/MMG3D_getSol functions */
 
   /** 1) Automatically save the mesh */
-  /** a)  (not mandatory): give the ouptut mesh name using MMG5_Set_outputMeshName
+  /** a)  (not mandatory): give the ouptut mesh name using MMG3D_Set_outputMeshName
      (by default, the mesh is saved in the "mesh.o.mesh" file */
-  // MMG5_Set_outputMeshName(mmgMesh,"output.mesh");
+  // MMG3D_Set_outputMeshName(mmgMesh,"output.mesh");
   /** b) function calling */
-  MMG5_saveMesh(mmgMesh);
+  MMG3D_saveMesh(mmgMesh);
 
   /** 2) Automatically save the solution */
-  /** a)  (not mandatory): give the ouptut sol name using MMG5_Set_outputSolName
+  /** a)  (not mandatory): give the ouptut sol name using MMG3D_Set_outputSolName
      (by default, the mesh is saved in the "mesh.o.sol" file */
-  // MMG5_Set_outputSolName(mmgSol,"output.sol");
+  // MMG3D_Set_outputSolName(mmgSol,"output.sol");
   /** b) function calling */
-  MMG5_saveMet(mmgMesh,mmgSol);
+  MMG3D_saveMet(mmgMesh,mmgSol);
 
   /** 3) Free the MMG3D5 structures */
-  MMG5_Free_all(mmgMesh,mmgSol,NULL);
+  MMG3D_Free_all(mmgMesh,mmgSol,NULL);
 
   free(filename);
   filename = NULL;

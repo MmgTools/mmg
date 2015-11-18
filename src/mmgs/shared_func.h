@@ -133,7 +133,6 @@ void _MMG5_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
  * functions.
  */
 void _MMG5_Set_commonFunc() {
-  MMG5_Init_parameters    = _MMG5_Init_parameters;
   _MMG5_bezierCP          = _MMG5_mmgsBezierCP;
   _MMG5_chkmsh            = _MMG5_mmgsChkmsh;
 #ifdef USE_SCOTCH

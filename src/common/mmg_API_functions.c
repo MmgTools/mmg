@@ -48,7 +48,7 @@
  * Initialization of the input parameters (stored in the Info structure).
  *
  */
-void _MMG5_mmgInit_parameters(MMG5_pMesh mesh) {
+void _MMG5_Init_parameters(MMG5_pMesh mesh) {
 
   memset(&mesh->info,0, sizeof(MMG5_Info));
 

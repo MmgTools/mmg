@@ -46,7 +46,7 @@
  */
 #define _MMG5_RETURN_AND_PACK(mesh,met,val)do       \
   {                                                 \
-    MMG5_packMesh(mesh,met);                        \
+    _MMGS_packMesh(mesh,met);                        \
     return(val);                                    \
   }while(0)
 
@@ -58,9 +58,9 @@
  * Deallocations before return.
  *
  */
-void MMG5_Free_all(MMG5_pMesh mesh,MMG5_pSol met,... ){
+void MMGS_Free_all(MMG5_pMesh mesh,MMG5_pSol met,... ){
 
-  MMG5_Free_structures(mesh,met);
+  MMGS_Free_structures(mesh,met);
 
   _MMG5_SAFE_FREE(met);
   _MMG5_SAFE_FREE(mesh);
@@ -68,7 +68,7 @@ void MMG5_Free_all(MMG5_pMesh mesh,MMG5_pSol met,... ){
 
 /** Free adja, xtetra and xpoint tables */
 static inline
-void MMG5_Free_topoTables(MMG5_pMesh mesh) {
+void _MMGS_Free_topoTables(MMG5_pMesh mesh) {
   int k;
 
   mesh->xp = 0;
@@ -94,7 +94,7 @@ void MMG5_Free_topoTables(MMG5_pMesh mesh) {
  *
  */
 static inline
-int MMG5_packMesh(MMG5_pMesh mesh,MMG5_pSol met) {
+int _MMGS_packMesh(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTria    pt,ptnew;
   MMG5_pPoint   ppt,pptnew;
   MMG5_hgeom   *ph;
@@ -231,7 +231,7 @@ int MMG5_packMesh(MMG5_pMesh mesh,MMG5_pSol met) {
     return(0);
   }
 
-  MMG5_Free_topoTables(mesh);
+  _MMGS_Free_topoTables(mesh);
 
   if ( mesh->info.imprim ) {
     fprintf(stdout,"     NUMBER OF VERTICES   %8d   CORNERS %8d\n",mesh->np,nc);
@@ -254,7 +254,7 @@ int MMG5_packMesh(MMG5_pMesh mesh,MMG5_pSol met) {
  * Main program for the library .
  *
  */
-int MMG5_mmgslib(MMG5_pMesh mesh,MMG5_pSol met)
+int MMGS_mmgslib(MMG5_pMesh mesh,MMG5_pSol met)
 {
   mytime    ctim[TIMEMAX];
   char      stim[32];
@@ -356,7 +356,7 @@ int MMG5_mmgslib(MMG5_pMesh mesh,MMG5_pSol met)
   chrono(ON,&(ctim[1]));
   if ( mesh->info.imprim )  fprintf(stdout,"\n  -- MESH PACKED UP\n");
   if ( !_MMG5_unscaleMesh(mesh,met) )  return(MMG5_STRONGFAILURE);
-  if ( !MMG5_packMesh(mesh,met) )     return(MMG5_STRONGFAILURE);
+  if ( !_MMGS_packMesh(mesh,met) )     return(MMG5_STRONGFAILURE);
   chrono(OFF,&(ctim[1]));
 
   chrono(OFF,&ctim[0]);

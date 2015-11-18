@@ -27,11 +27,11 @@ PROJECT (mmg)
 # Set preprocessor flag to build on windows
 IF (NOT WIN32)
   # Set flags to say that we are posix and gnu compatible
-  SET (CMAKE_C_FLAGS "-DPOSIX" ${CMAKE_C_FLAGS})
-  SET (CMAKE_C_FLAGS "-DGNU" ${CMAKE_C_FLAGS})
+  SET (CMAKE_C_FLAGS "-DPOSIX ${CMAKE_C_FLAGS}")
+  SET (CMAKE_C_FLAGS "-DGNU ${CMAKE_C_FLAGS}")
 ELSEIF(MINGW)
   # Set flag to say that we are gnu compatible
-  SET (CMAKE_C_FLAGS "-DGNU" ${CMAKE_C_FLAGS})
+  SET (CMAKE_C_FLAGS "-DGNU ${CMAKE_C_FLAGS}")
 ENDIF ()
 
 ###############################################################################
@@ -601,6 +601,7 @@ IF (BUILD_MMG3D OR BUILD_MMG)
   OPTION ( TEST_LIBMMG3D "Compile tests for the mmg3d library" OFF)
   IF ( TEST_LIBMMG3D )
     INCLUDE(cmake/testing/libmmg3d_tests.cmake)
+    INCLUDE(cmake/testing/libmmg3d_oldAPI_tests.cmake)
   ENDIF()
 
   OPTION ( TEST_LIBMMG2D "Compile tests for the mmg2d library" OFF)

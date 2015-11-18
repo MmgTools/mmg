@@ -318,7 +318,7 @@ int MMG2_mmg2d9(MMG5_pMesh mesh,MMG5_pSol sol) {
   /*     pd.mv[2*(k-1) + 1 + 0] /= dd; */
   /*     pd.mv[2*(k-1) + 1 + 1] /= dd; */
   /*   } */
-  /*   if(!MMG2_saveVect(mesh,sol,mesh->namedep,lambda)) return(0); */
+  /*   if(!MMG2D_saveVect(mesh,sol,mesh->namedep,lambda)) return(0); */
   /*   return(1); */
   /* } */
   /* /\*seuil declenchement du post-traitement : qdegradbef qworstbef*\/ */
