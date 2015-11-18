@@ -406,6 +406,14 @@ long long _MMG5_memSize (void) {
 #elif defined(__unix__) || defined(__unix) || defined(unix)
   mem = ((long long)sysconf(_SC_PHYS_PAGES))*
     ((long long)sysconf(_SC_PAGE_SIZE));
+#elif defined(_WIN16) || defined(_WIN32) || defined(_WIN64) || defined(__WIN32__) || defined(__TOS_WIN__) || defined(__WINDOWS__)
+  MEMORYSTATUSEX status;
+  status.dwLength = sizeof(status);
+  GlobalMemoryStatusEx(&status);
+  // status.ullTotalPhys is an unsigned long long: we must check that it fits inside a long long
+  mem = status.ullTotalPhys & LLONG_MAX;
+  if (mem == status.ullTotalPhys) return(mem);
+  else return(LLONG_MAX);
 #else
   printf("  ## WARNING: UNKNOWN SYSTEM, RECOVER OF MAXIMAL MEMORY NOT AVAILABLE.\n");
   return(0);
@@ -413,6 +421,25 @@ long long _MMG5_memSize (void) {
 
   return(mem);
 }
+
+/**
+*Safe cast into a long */
+inline
+long _MMG5_safeLL2LCast(long long val)
+{
+  long tmp_l;
+
+  tmp_l  = (long)(val);
+
+  if ( (long long)(tmp_l) != val ) {
+        fprintf(stdout,"  ## Error:");
+        fprintf(stdout," unable to cast value.n");
+		exit(EXIT_FAILURE);
+		}
+  return(tmp_l);
+}
+
+
 
 #ifdef GNU
 /**

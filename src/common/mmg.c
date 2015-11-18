@@ -88,8 +88,8 @@ void _MMG5_mmgDefaultValues(MMG5_pMesh mesh) {
     /* default value = 800 Mo */
     memMax = _MMG5_MEMMAX;
   }
-  fprintf(stdout,"maximal memory size       (-m)      : %lld MBytes\n",
-          memMax);
+  fprintf(stdout,"maximal memory size       (-m)      : %ld MBytes\n",
+          _MMG5_safeLL2LCast(memMax));
 
 
   fprintf(stdout,"\n**  Parameters\n");

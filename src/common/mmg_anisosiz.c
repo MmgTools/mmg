@@ -368,14 +368,12 @@ double _MMG5_surftri_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt) {
  *
  */
 double _MMG5_surftri33_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt) {
-  MMG5_pPoint    p[3];
   double         m[3][6];
   int            np[3];
   int            i;
 
   for (i=0; i<3; i++) {
     np[i] = ptt->v[i];
-    p[i]  = &mesh->point[np[i]];
   }
 
   /* Set metric tensors at vertices of tria iel */

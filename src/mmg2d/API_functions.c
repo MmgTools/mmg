@@ -830,7 +830,7 @@ void MMG2D_Free_structures(MMG5_pMesh mesh,MMG5_pSol met
     _MMG5_DEL_MEM(mesh,met->m,(met->size*(met->npmax+1))*sizeof(double));
 
   if ( mesh->info.imprim>6 || mesh->info.ddebug )
-    printf("  MEMORY USED AT END (bytes) %lld\n",mesh->memCur);
+    printf("  MEMORY USED AT END (bytes) %ld\n",_MMG5_safeLL2LCast(mesh->memCur));
 }
 
 /**
