@@ -77,7 +77,7 @@
 /** Free allocated pointers of mesh and sol structure and return value val */
 #define _MMG5_RETURN_AND_FREE(mesh,met,val)do       \
   {                                                 \
-    MMG5_Free_all(mesh,met);                        \
+    MMG2D_Free_all(mesh,met);                        \
     return(val);                                    \
   }while(0)
 
@@ -341,7 +341,7 @@ int    (*MMG2_lissmet)(MMG5_pMesh ,MMG5_pSol );
 
 int MMG2_tassage(MMG5_pMesh ,MMG5_pSol );
 
-void _MMG2_Set_commonFunc();
+void _MMG2D_Set_commonFunc();
 /* init structures */
 void  _MMG2_Init_parameters(MMG5_pMesh mesh);
 

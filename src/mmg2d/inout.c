@@ -78,7 +78,7 @@ double MMG_swapd(double sbin)
 }
 
 /* read mesh data */
-int MMG2_loadMesh(MMG5_pMesh mesh,char *filename) {
+int MMG2D_loadMesh(MMG5_pMesh mesh,char *filename) {
   FILE        *inm;
   MMG5_pPoint       ppt; 
   MMG5_pEdge        ped;
@@ -505,7 +505,7 @@ int MMG2_loadMesh(MMG5_pMesh mesh,char *filename) {
   
 
 /* load metric */
-int MMG2_loadSol(MMG5_pSol sol,char *filename,int npmax,int msh) {
+int MMG2D_loadSol(MMG5_pSol sol,char *filename,int npmax,int msh) {
   FILE       *inm;
   float       fsol;
   double      dsol;
@@ -682,7 +682,7 @@ int MMG2_loadSol(MMG5_pSol sol,char *filename,int npmax,int msh) {
 
 
 /* save mesh to disk */
-int MMG2_saveMesh(MMG5_pMesh mesh,char *filename) {
+int MMG2D_saveMesh(MMG5_pMesh mesh,char *filename) {
   FILE*	       inm;
   MMG5_pPoint       ppt;
   MMG5_pEdge        ped;
@@ -1093,7 +1093,7 @@ int MMG2_loadVect(MMG5_pMesh mesh,char *filename) {
   /* fclose(inm); */
   return(1);
 }
-int MMG2_saveSol(MMG5_pMesh mesh,MMG5_pSol sol,char *filename) {
+int MMG2D_saveSol(MMG5_pMesh mesh,MMG5_pSol sol,char *filename) {
   FILE*        inm;
   MMG5_pPoint       ppt;
   float        fsol;
@@ -1285,7 +1285,7 @@ int MMG2_saveSol(MMG5_pMesh mesh,MMG5_pSol sol,char *filename) {
   return(1);
 }
 
-int MMG2_saveVect(MMG5_pMesh mesh,MMG5_pSol sol,char *filename,double lambda) {
+int MMG2D_saveVect(MMG5_pMesh mesh,MMG5_pSol sol,char *filename,double lambda) {
   printf("comment for merge of the data structure\n");
   exit(0);
   /* FILE        *inm,*f,*inm2; */

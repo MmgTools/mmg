@@ -47,7 +47,7 @@
  *
  */
 static inline
-void MMG5_Alloc_mesh(MMG5_pMesh *mesh, MMG5_pSol *sol) {
+void _MMGS_Alloc_mesh(MMG5_pMesh *mesh, MMG5_pSol *sol) {
 
   /* mesh allocation */
   if ( *mesh )  _MMG5_SAFE_FREE(*mesh);
@@ -75,7 +75,7 @@ void MMG5_Alloc_mesh(MMG5_pMesh *mesh, MMG5_pSol *sol) {
  *
  */
 static inline
-void MMG5_Init_woalloc_mesh(MMG5_pMesh mesh, MMG5_pSol sol ) {
+void _MMGS_Init_woalloc_mesh(MMG5_pMesh mesh, MMG5_pSol sol ) {
 
   _MMG5_Set_commonFunc();
 
@@ -86,10 +86,10 @@ void MMG5_Init_woalloc_mesh(MMG5_pMesh mesh, MMG5_pSol sol ) {
   (sol)->size  = 1;
 
   /* Default parameters values */
-  MMG5_Init_parameters(mesh);
+  MMGS_Init_parameters(mesh);
 
   /* Default vaules for file names */
-  MMG5_Init_fileNames(mesh,sol);
+  MMGS_Init_fileNames(mesh,sol);
 
   return;
 }
@@ -103,29 +103,92 @@ void MMG5_Init_woalloc_mesh(MMG5_pMesh mesh, MMG5_pSol sol ) {
  *
  * \Remark To call with NULL as last argument.
  */
-void MMG5_Init_mesh(MMG5_pMesh *mesh, MMG5_pSol *sol,... ) {
+void MMGS_Init_mesh(MMG5_pMesh *mesh, MMG5_pSol *sol,... ) {
 
   /* allocations */
-  MMG5_Alloc_mesh(mesh,sol);
+  _MMGS_Alloc_mesh(mesh,sol);
   /* initialisations */
-  MMG5_Init_woalloc_mesh(*mesh,*sol);
+  _MMGS_Init_woalloc_mesh(*mesh,*sol);
 
   /* set pointer to save the mesh*/
-  _MMG5_saveMeshinternal = _MMG5_saveLibraryMesh;
+  _MMGS_saveMeshinternal = _MMG5_saveLibraryMesh;
 
   return;
 }
 
 /**
  * \param mesh pointer toward the mesh structure.
+ * \param sol pointer toward the sol structure.
+ *
+ * Initialize file names to their default values.
+ *
+ */
+void MMGS_Init_fileNames(MMG5_pMesh mesh,MMG5_pSol sol
+  ) {
+
+  MMG5_Init_fileNames(mesh,sol);
+  return;
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param meshin input mesh name.
+ * \return 1.
+ *
+ * Set the name of input mesh.
+ *
+ */
+int MMGS_Set_inputMeshName(MMG5_pMesh mesh, char* meshin) {
+
+  return(MMG5_Set_inputMeshName(mesh,meshin));
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param sol pointer toward the sol structure.
+ * \param solin name of the input solution file.
+ * \return 1.
+ *
+ * Set the name of input solution file.
+ *
+ */
+int MMGS_Set_inputSolName(MMG5_pMesh mesh,MMG5_pSol sol, char* solin) {
+  return(MMG5_Set_inputSolName(mesh,sol,solin));
+}
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param meshout output mesh name.
+ * \return 1.
+ *
+ * Set the name of output mesh.
+ *
+ */
+int MMGS_Set_outputMeshName(MMG5_pMesh mesh, char* meshout) {
+
+  return(MMG5_Set_outputMeshName(mesh,meshout));
+}
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param sol pointer toward the sol structure.
+ * \param solout name of the output solution file.
+ * \return 0 if failed, 1 otherwise.
+ *
+ *  Set the name of output solution file.
+ *
+ */
+int MMGS_Set_outputSolName(MMG5_pMesh mesh,MMG5_pSol sol, char* solout) {
+  return(MMG5_Set_outputSolName(mesh,sol,solout));
+}
+/**
+ * \param mesh pointer toward the mesh structure.
  *
  * Initialization of the input parameters (stored in the Info structure).
  *
  */
-void _MMG5_Init_parameters(MMG5_pMesh mesh) {
+void MMGS_Init_parameters(MMG5_pMesh mesh) {
 
   /* Init common parameters for mmgs and mmg3d. */
-  _MMG5_mmgInit_parameters(mesh);
+  _MMG5_Init_parameters(mesh);
 
   mesh->info.renum    = 0;   /* [0/1], Turn off/on the renumbering using SCOTCH; */
 
@@ -142,7 +205,7 @@ void _MMG5_Init_parameters(MMG5_pMesh mesh) {
  * Set the solution number, dimension and type.
  *
  */
-int MMG5_Set_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int typEntity, int np, int typSol) {
+int MMGS_Set_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int typEntity, int np, int typSol) {
 
   if ( ( (mesh->info.imprim > 5) || mesh->info.ddebug ) && sol->m )
     fprintf(stdout,"  ## Warning: new solution\n");
@@ -193,7 +256,7 @@ int MMG5_Set_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int typEntity, int np, int 
  * whole mesh to realloc it at the new size
  *
  */
-int MMG5_Set_meshSize(MMG5_pMesh mesh, int np, int nt, int na) {
+int MMGS_Set_meshSize(MMG5_pMesh mesh, int np, int nt, int na) {
   int k;
 
   if ( ( (mesh->info.imprim > 5) || mesh->info.ddebug ) &&
@@ -282,7 +345,7 @@ int MMG5_Set_meshSize(MMG5_pMesh mesh, int np, int nt, int na) {
  * Get the solution number, dimension and type.
  *
  */
-int MMG5_Get_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int* typEntity, int* np, int* typSol) {
+int MMGS_Get_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int* typEntity, int* np, int* typSol) {
 
   *typEntity = MMG5_Vertex;
   if ( sol->size == 1 )
@@ -312,7 +375,7 @@ int MMG5_Get_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int* typEntity, int* np, in
  * Get the number of vertices, triangles and edges of the mesh.
  *
  */
-int MMG5_Get_meshSize(MMG5_pMesh mesh, int* np, int* nt, int* na) {
+int MMGS_Get_meshSize(MMG5_pMesh mesh, int* np, int* nt, int* na) {
 
   if ( np != NULL )
     *np = mesh->np;
@@ -341,11 +404,11 @@ int MMG5_Get_meshSize(MMG5_pMesh mesh, int* np, int* nt, int* na) {
  * at position \a pos in mesh structure
  *
  */
-int MMG5_Set_vertex(MMG5_pMesh mesh, double c0, double c1, double c2, int ref, int pos) {
+int MMGS_Set_vertex(MMG5_pMesh mesh, double c0, double c1, double c2, int ref, int pos) {
 
   if ( !mesh->np ) {
     fprintf(stdout,"  ## Error: you must set the number of points with the");
-    fprintf(stdout," MMG5_Set_meshSize function before setting vertices in mesh\n");
+    fprintf(stdout," MMGS_Set_meshSize function before setting vertices in mesh\n");
     return(0);
   }
 
@@ -389,14 +452,14 @@ int MMG5_Set_vertex(MMG5_pMesh mesh, double c0, double c1, double c2, int ref, i
  * vertex of mesh.
  *
  */
-int MMG5_Get_vertex(MMG5_pMesh mesh, double* c0, double* c1, double* c2, int* ref,
+int MMGS_Get_vertex(MMG5_pMesh mesh, double* c0, double* c1, double* c2, int* ref,
                     int* isCorner, int* isRequired) {
 
   mesh->npi++;
 
   if ( mesh->npi > mesh->np ) {
     fprintf(stdout,"  ## Error: unable to get point.\n");
-    fprintf(stdout,"     The number of call of MMG5_Get_vertex function");
+    fprintf(stdout,"     The number of call of MMGS_Get_vertex function");
     fprintf(stdout," can not exceed the number of points: %d\n ",mesh->np);
     return(0);
   }
@@ -438,11 +501,11 @@ int MMG5_Get_vertex(MMG5_pMesh mesh, double* c0, double* c1, double* c2, int* re
  * at position \a pos in mesh structure.
  *
  */
-int MMG5_Set_triangle(MMG5_pMesh mesh, int v0, int v1, int v2, int ref,int pos) {
+int MMGS_Set_triangle(MMG5_pMesh mesh, int v0, int v1, int v2, int ref,int pos) {
 
   if ( !mesh->nt ) {
     fprintf(stdout,"  ## Error: You must set the number of triangles with the");
-    fprintf(stdout," MMG5_Set_meshSize function before setting triangles in mesh\n");
+    fprintf(stdout," MMGS_Set_meshSize function before setting triangles in mesh\n");
     return(0);
   }
 
@@ -482,7 +545,7 @@ int MMG5_Set_triangle(MMG5_pMesh mesh, int v0, int v1, int v2, int ref,int pos) 
  * triangle of mesh.
  *
  */
-int MMG5_Get_triangle(MMG5_pMesh mesh, int* v0, int* v1, int* v2, int* ref
+int MMGS_Get_triangle(MMG5_pMesh mesh, int* v0, int* v1, int* v2, int* ref
                       ,int* isRequired) {
   MMG5_pTria  ptt;
 
@@ -490,7 +553,7 @@ int MMG5_Get_triangle(MMG5_pMesh mesh, int* v0, int* v1, int* v2, int* ref
 
   if ( mesh->nti > mesh->nt ) {
     fprintf(stdout,"  ## Error: unable to get triangle.\n");
-    fprintf(stdout,"    The number of call of MMG5_Get_triangle function");
+    fprintf(stdout,"    The number of call of MMGS_Get_triangle function");
     fprintf(stdout," can not exceed the number of triangles: %d\n ",mesh->nt);
     return(0);
   }
@@ -525,11 +588,11 @@ int MMG5_Get_triangle(MMG5_pMesh mesh, int* v0, int* v1, int* v2, int* ref
  * position \a pos in mesh structure
  *
  */
-int MMG5_Set_edge(MMG5_pMesh mesh, int v0, int v1, int ref, int pos) {
+int MMGS_Set_edge(MMG5_pMesh mesh, int v0, int v1, int ref, int pos) {
 
   if ( !mesh->na ) {
     fprintf(stdout,"  ## Error: You must set the number of edges with the");
-    fprintf(stdout," MMG5_Set_meshSize function before setting edges in mesh\n");
+    fprintf(stdout," MMGS_Set_meshSize function before setting edges in mesh\n");
     return(0);
   }
   if ( pos > mesh->namax ) {
@@ -566,14 +629,14 @@ int MMG5_Set_edge(MMG5_pMesh mesh, int v0, int v1, int ref, int pos) {
  * Get extremities \a e0, \a e1 and reference \a ref of next edge of mesh.
  *
  */
-int MMG5_Get_edge(MMG5_pMesh mesh, int* e0, int* e1, int* ref
+int MMGS_Get_edge(MMG5_pMesh mesh, int* e0, int* e1, int* ref
                   ,int* isRidge, int* isRequired) {
 
   mesh->nai++;
 
   if ( mesh->nai > mesh->na ) {
     fprintf(stdout,"  ## Error: unable to get edge.\n");
-    fprintf(stdout,"    The number of call of MMG5_Get_edge function");
+    fprintf(stdout,"    The number of call of MMGS_Get_edge function");
     fprintf(stdout," can not exceed the number of edges: %d\n ",mesh->na);
     return(0);
   }
@@ -608,7 +671,7 @@ int MMG5_Get_edge(MMG5_pMesh mesh, int* e0, int* e1, int* ref
  * Set corner at point \a k.
  *
  */
-int MMG5_Set_corner(MMG5_pMesh mesh, int k) {
+int MMGS_Set_corner(MMG5_pMesh mesh, int k) {
   assert ( k <= mesh->np );
   mesh->point[k].tag |= MG_CRN;
   return(1);
@@ -622,7 +685,7 @@ int MMG5_Set_corner(MMG5_pMesh mesh, int k) {
  * Set point \a k as required.
  *
  */
-int MMG5_Set_requiredVertex(MMG5_pMesh mesh, int k) {
+int MMGS_Set_requiredVertex(MMG5_pMesh mesh, int k) {
   assert ( k <= mesh->np );
   mesh->point[k].tag |= MG_REQ;
   return(1);
@@ -636,7 +699,7 @@ int MMG5_Set_requiredVertex(MMG5_pMesh mesh, int k) {
  * Set element \a k as required.
  *
  */
-int MMG5_Set_requiredTetrahedron(MMG5_pMesh mesh, int k) {
+int MMGS_Set_requiredTetrahedron(MMG5_pMesh mesh, int k) {
   assert ( k <= mesh->ne );
   mesh->tetra[k].tag |= MG_REQ;
   return(1);
@@ -650,7 +713,7 @@ int MMG5_Set_requiredTetrahedron(MMG5_pMesh mesh, int k) {
  * Set triangle \a k as required.
  *
  */
-int MMG5_Set_requiredTriangle(MMG5_pMesh mesh, int k) {
+int MMGS_Set_requiredTriangle(MMG5_pMesh mesh, int k) {
   assert ( k <= mesh->nt );
   mesh->tria[k].tag[0] |= MG_REQ;
   mesh->tria[k].tag[1] |= MG_REQ;
@@ -666,7 +729,7 @@ int MMG5_Set_requiredTriangle(MMG5_pMesh mesh, int k) {
  * Set ridge at edge \a k.
  *
  */
-int MMG5_Set_ridge(MMG5_pMesh mesh, int k) {
+int MMGS_Set_ridge(MMG5_pMesh mesh, int k) {
   assert ( k <= mesh->na );
   mesh->edge[k].tag |= MG_GEO;
   return(1);
@@ -680,7 +743,7 @@ int MMG5_Set_ridge(MMG5_pMesh mesh, int k) {
  * Set edge \a k as required.
  *
  */
-int MMG5_Set_requiredEdge(MMG5_pMesh mesh, int k) {
+int MMGS_Set_requiredEdge(MMG5_pMesh mesh, int k) {
   assert ( k <= mesh->na );
   mesh->edge[k].tag |= MG_REQ;
   return(1);
@@ -695,11 +758,11 @@ int MMG5_Set_requiredEdge(MMG5_pMesh mesh, int k) {
  * Set scalar value \a s at position \a pos in solution structure
  *
  */
-int MMG5_Set_scalarSol(MMG5_pSol met, double s, int pos) {
+int MMGS_Set_scalarSol(MMG5_pSol met, double s, int pos) {
 
   if ( !met->np ) {
     fprintf(stdout,"  ## Error: You must set the number of solution with the");
-    fprintf(stdout," MMG5_Set_solSize function before setting values");
+    fprintf(stdout," MMGS_Set_solSize function before setting values");
     fprintf(stdout," in solution structure \n");
     return(0);
   }
@@ -734,13 +797,13 @@ int MMG5_Set_scalarSol(MMG5_pSol met, double s, int pos) {
  * Get solution \a s of next vertex of mesh.
  *
  */
-int MMG5_Get_scalarSol(MMG5_pSol met, double* s) {
+int MMGS_Get_scalarSol(MMG5_pSol met, double* s) {
 
   met->npi++;
 
   if ( met->npi > met->np ) {
     fprintf(stdout,"  ## Error: unable to get solution.\n");
-    fprintf(stdout,"     The number of call of MMG5_Get_scalarSol function");
+    fprintf(stdout,"     The number of call of MMGS_Get_scalarSol function");
     fprintf(stdout," can not exceed the number of points: %d\n ",met->np);
     return(0);
   }
@@ -762,11 +825,11 @@ int MMG5_Get_scalarSol(MMG5_pSol met, double* s) {
  * structure.
  *
  */
-int MMG5_Set_vectorSol(MMG5_pSol met, double vx,double vy, double vz, int pos) {
+int MMGS_Set_vectorSol(MMG5_pSol met, double vx,double vy, double vz, int pos) {
 
   if ( !met->np ) {
     fprintf(stdout,"  ## Error: You must set the number of solution with the");
-    fprintf(stdout," MMG5_Set_solSize function before setting values");
+    fprintf(stdout," MMGS_Set_solSize function before setting values");
     fprintf(stdout," in solution structure \n");
     return(0);
   }
@@ -806,13 +869,13 @@ int MMG5_Set_vectorSol(MMG5_pSol met, double vx,double vy, double vz, int pos) {
  * Get vectorial solution \f$(v_x,v_y,vz)\f$ of next vertex of mesh.
  *
  */
-int MMG5_Get_vectorSol(MMG5_pSol met, double* vx, double* vy, double* vz) {
+int MMGS_Get_vectorSol(MMG5_pSol met, double* vx, double* vy, double* vz) {
 
   met->npi++;
 
   if ( met->npi > met->np ) {
     fprintf(stdout,"  ## Error: unable to get solution.\n");
-    fprintf(stdout,"     The number of call of MMG5_Get_scalarSol function");
+    fprintf(stdout,"     The number of call of MMGS_Get_scalarSol function");
     fprintf(stdout," can not exceed the number of points: %d\n ",met->np);
     return(0);
   }
@@ -838,12 +901,12 @@ int MMG5_Get_vectorSol(MMG5_pSol met, double* vx, double* vy, double* vz) {
  * structure.
  *
  */
-int MMG5_Set_tensorSol(MMG5_pSol met, double m11,double m12, double m13,
+int MMGS_Set_tensorSol(MMG5_pSol met, double m11,double m12, double m13,
                        double m22,double m23, double m33, int pos) {
 
   if ( !met->np ) {
     fprintf(stdout,"  ## Error: You must set the number of solution with the");
-    fprintf(stdout," MMG5_Set_solSize function before setting values");
+    fprintf(stdout," MMGS_Set_solSize function before setting values");
     fprintf(stdout," in solution structure \n");
     return(0);
   }
@@ -889,14 +952,14 @@ int MMG5_Set_tensorSol(MMG5_pSol met, double m11,double m12, double m13,
  * Get tensorial solution of next vertex of mesh.
  *
  */
-int MMG5_Get_tensorSol(MMG5_pSol met, double *m11,double *m12, double *m13,
+int MMGS_Get_tensorSol(MMG5_pSol met, double *m11,double *m12, double *m13,
                        double *m22,double *m23, double *m33) {
 
   met->npi++;
 
   if ( met->npi > met->np ) {
     fprintf(stdout,"  ## Error: unable to get solution.\n");
-    fprintf(stdout,"     The number of call of MMG5_Get_scalarSol function");
+    fprintf(stdout,"     The number of call of MMGS_Get_scalarSol function");
     fprintf(stdout," can not exceed the number of points: %d\n ",met->np);
     return(0);
   }
@@ -921,19 +984,19 @@ int MMG5_Get_tensorSol(MMG5_pSol met, double *m11,double *m12, double *m13,
  * (not mandatory) and check mesh datas.
  *
  */
-int MMG5_Chk_meshData(MMG5_pMesh mesh,MMG5_pSol met) {
+int MMGS_Chk_meshData(MMG5_pMesh mesh,MMG5_pSol met) {
 
   if ( (mesh->npi != mesh->np) || (mesh->nti != mesh->nt) ) {
-    fprintf(stdout,"  ## Error: if you don't use the MMG5_loadMesh function,");
-    fprintf(stdout," you must call the MMG5_Set_meshSize function to have a");
+    fprintf(stdout,"  ## Error: if you don't use the MMGS_loadMesh function,");
+    fprintf(stdout," you must call the MMGS_Set_meshSize function to have a");
     fprintf(stdout," valid mesh.\n");
     fprintf(stdout," Missing datas.\n");
     return(0);
   }
 
   if ( met->npi != met->np ) {
-    fprintf(stdout,"  ## Error: if you don't use the MMG5_loadMet function,");
-    fprintf(stdout," you must call the MMG5_Set_solSize function to have a");
+    fprintf(stdout,"  ## Error: if you don't use the MMGS_loadMet function,");
+    fprintf(stdout," you must call the MMGS_Set_solSize function to have a");
     fprintf(stdout," valid solution.\n");
     fprintf(stdout," Missing datas.\n");
     return(0);
@@ -967,22 +1030,22 @@ int MMG5_Chk_meshData(MMG5_pMesh mesh,MMG5_pSol met) {
 /**
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the sol structure.
- * \param iparam integer parameter to set (see \a MMG5_Param structure).
+ * \param iparam integer parameter to set (see \a MMGS_Param structure).
  * \param val value for the parameter.
  * \return 0 if failed, 1 otherwise.
  *
  * Set integer parameter \a iparam at value \a val.
  *
  */
-int MMG5_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
+int MMGS_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
   int k;
 
   switch ( iparam ) {
     /* Integer parameters */
-  case MMG5_IPARAM_verbose :
+  case MMGS_IPARAM_verbose :
     mesh->info.imprim   = val;
     break;
-  case MMG5_IPARAM_mem :
+  case MMGS_IPARAM_mem :
     if ( val <= 0 ) {
       fprintf(stdout,"  ## Warning: maximal memory authorized must be strictly positive.\n");
       fprintf(stdout,"  Reset to default value.\n");
@@ -995,10 +1058,10 @@ int MMG5_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
     } else if(mesh->info.mem < 39)
       return(0);
     break;
-  case MMG5_IPARAM_debug :
+  case MMGS_IPARAM_debug :
     mesh->info.ddebug   = val;
     break;
-  case MMG5_IPARAM_angle :
+  case MMGS_IPARAM_angle :
     if ( mesh->xpoint )
       _MMG5_DEL_MEM(mesh,mesh->xpoint,(mesh->xpmax+1)*sizeof(MMG5_xPoint));
     if ( !val )
@@ -1009,19 +1072,19 @@ int MMG5_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
       mesh->info.dhd    = _MMG5_ANGEDG;
     }
     break;
-  case MMG5_IPARAM_noinsert :
+  case MMGS_IPARAM_noinsert :
     mesh->info.noinsert = val;
     break;
-  case MMG5_IPARAM_noswap :
+  case MMGS_IPARAM_noswap :
     mesh->info.noswap   = val;
     break;
-  case MMG5_IPARAM_nomove :
+  case MMGS_IPARAM_nomove :
     mesh->info.nomove   = val;
     break;
-  case MMG5_IPARAM_nreg :
+  case MMGS_IPARAM_nreg :
     mesh->info.nreg     = val;
     break;
-  case MMG5_IPARAM_numberOfLocalParam :
+  case MMGS_IPARAM_numberOfLocalParam :
     if ( mesh->info.par ) {
       _MMG5_DEL_MEM(mesh,mesh->info.par,mesh->info.npar*sizeof(MMG5_Par));
       if ( (mesh->info.imprim > 5) || mesh->info.ddebug )
@@ -1044,7 +1107,7 @@ int MMG5_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
 
     break;
 #ifdef USE_SCOTCH
-  case MMG5_IPARAM_renum :
+  case MMGS_IPARAM_renum :
     mesh->info.renum    = val;
     break;
 #endif
@@ -1059,45 +1122,45 @@ int MMG5_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
 
 /**
  * \param mesh pointer toward the mesh structure.
- * \param iparam integer parameter to set (see \a MMG5_Param structure).
+ * \param iparam integer parameter to set (see \a MMGS_Param structure).
  * \return The value of integer parameter.
  *
  * Get the value of integer parameter \a iparam.
  *
  */
-int MMG5_Get_iparameter(MMG5_pMesh mesh, int iparam) {
+int MMGS_Get_iparameter(MMG5_pMesh mesh, int iparam) {
 
   switch ( iparam ) {
     /* Integer parameters */
-  case MMG5_IPARAM_verbose :
+  case MMGS_IPARAM_verbose :
     return ( mesh->info.imprim );
     break;
-  case MMG5_IPARAM_mem :
+  case MMGS_IPARAM_mem :
     return ( mesh->info.mem );
     break;
-  case MMG5_IPARAM_debug :
+  case MMGS_IPARAM_debug :
     return ( mesh->info.ddebug );
     break;
-  case MMG5_IPARAM_angle :
+  case MMGS_IPARAM_angle :
     return ( mesh->info.dhd );
     break;
-  case MMG5_IPARAM_noinsert :
+  case MMGS_IPARAM_noinsert :
     return ( mesh->info.noinsert );
     break;
-  case MMG5_IPARAM_noswap :
+  case MMGS_IPARAM_noswap :
     return ( mesh->info.noswap );
     break;
-  case MMG5_IPARAM_nomove :
+  case MMGS_IPARAM_nomove :
     return ( mesh->info.nomove );
     break;
-  case MMG5_IPARAM_nreg :
+  case MMGS_IPARAM_nreg :
     return ( mesh->info.nreg );
     break;
-  case MMG5_IPARAM_numberOfLocalParam :
+  case MMGS_IPARAM_numberOfLocalParam :
     return ( mesh->info.npar );
     break;
 #ifdef USE_SCOTCH
-  case MMG5_IPARAM_renum :
+  case MMGS_IPARAM_renum :
     return ( mesh->info.renum );
     break;
 #endif
@@ -1110,36 +1173,36 @@ int MMG5_Get_iparameter(MMG5_pMesh mesh, int iparam) {
 /**
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the sol structure.
- * \param dparam double parameter to set (see \a MMG5_Param structure).
+ * \param dparam double parameter to set (see \a MMGS_Param structure).
  * \param val value of the parameter.
  * \return 0 if failed, 1 otherwise.
  *
  * Set double parameter \a dparam at value \a val.
  *
  */
-int MMG5_Set_dparameter(MMG5_pMesh mesh, MMG5_pSol sol, int dparam, double val){
+int MMGS_Set_dparameter(MMG5_pMesh mesh, MMG5_pSol sol, int dparam, double val){
 
   switch ( dparam ) {
     /* double parameters */
-  case MMG5_DPARAM_angleDetection :
+  case MMGS_DPARAM_angleDetection :
     mesh->info.dhd = val;
     mesh->info.dhd = MG_MAX(0.0, MG_MIN(180.0,mesh->info.dhd));
     mesh->info.dhd = cos(mesh->info.dhd*M_PI/180.0);
     break;
-  case MMG5_DPARAM_hmin :
+  case MMGS_DPARAM_hmin :
     mesh->info.hmin     = val;
     break;
-  case MMG5_DPARAM_hmax :
+  case MMGS_DPARAM_hmax :
     mesh->info.hmax     = val;
     break;
-  case MMG5_DPARAM_hgrad :
+  case MMGS_DPARAM_hgrad :
     mesh->info.hgrad    = val;
     if ( mesh->info.hgrad < 0.0 )
       mesh->info.hgrad = -1.0;
     else
       mesh->info.hgrad = log(mesh->info.hgrad);
     break;
-  case MMG5_DPARAM_hausd :
+  case MMGS_DPARAM_hausd :
     if ( val <=0 ) {
       fprintf(stdout,"  ## Error: hausdorff number must be strictly positive.\n");
       return(0);
@@ -1169,13 +1232,13 @@ int MMG5_Set_dparameter(MMG5_pMesh mesh, MMG5_pSol sol, int dparam, double val){
  * elements of type \a typ and reference \a ref.
  *
  */
-int MMG5_Set_localParameter(MMG5_pMesh mesh,MMG5_pSol sol, int typ, int ref,
+int MMGS_Set_localParameter(MMG5_pMesh mesh,MMG5_pSol sol, int typ, int ref,
                             double hmin,double hmax,double hausd){
   int k;
 
   if ( !mesh->info.npar ) {
     fprintf(stdout,"  ## Error: You must set the number of local parameters");
-    fprintf(stdout," with the MMG5_Set_iparameters function before setting");
+    fprintf(stdout," with the MMGS_Set_iparameters function before setting");
     fprintf(stdout," values in local parameters structure. \n");
     return(0);
   }
@@ -1240,9 +1303,9 @@ int MMG5_Set_localParameter(MMG5_pMesh mesh,MMG5_pSol sol, int typ, int ref,
  * \remark must be called with NULL as last argument.
  *
  */
-void MMG5_Free_structures(MMG5_pMesh mesh,MMG5_pSol met,... ){
+void MMGS_Free_structures(MMG5_pMesh mesh,MMG5_pSol met,... ){
 
-  MMG5_Free_names(mesh,met);
+  MMGS_Free_names(mesh,met);
 
   /* mesh */
   if ( mesh->point )
@@ -1282,6 +1345,6 @@ void MMG5_Free_structures(MMG5_pMesh mesh,MMG5_pSol met,... ){
  * \remark must be called with NULL as last argument.
  *
  */
-void MMG5_Free_names(MMG5_pMesh mesh,MMG5_pSol met,...){
+void MMGS_Free_names(MMG5_pMesh mesh,MMG5_pSol met,...){
   MMG5_mmgFree_names(mesh,met);
 }

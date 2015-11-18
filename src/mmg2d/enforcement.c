@@ -38,7 +38,7 @@ int MMG2_bdryenforcement(MMG5_pMesh mesh,MMG5_pSol sol) {
  
   ddebug = 0;
   nex = 0;
-  //MMG2_saveMesh(mesh,"enforc.mesh");  
+  //MMG2D_saveMesh(mesh,"enforc.mesh");  
   for(i=1 ; i<=mesh->na ; i++) {
     ped = &mesh->edge[i];                                       
     if(!ped->a) continue;
@@ -62,7 +62,7 @@ int MMG2_bdryenforcement(MMG5_pMesh mesh,MMG5_pSol sol) {
       exit(1);
     } else if(!lon) {
       printf("PROBLEM WITH POINT %d of TRIANGLE %d\n",mesh->tria[kdep].v[j],kdep);
-      MMG2_saveMesh(mesh,"titi.mesh");
+      MMG2D_saveMesh(mesh,"titi.mesh");
       _MMG5_SAFE_FREE(list);
       return(0);
     }
@@ -124,7 +124,7 @@ int MMG2_bdryenforcement(MMG5_pMesh mesh,MMG5_pSol sol) {
       lon = -lon;
       ilon = lon;
       if(ddebug) printf("on a %d tr dans la liste\n",lon);
-      if(mesh->info.ddebug) MMG2_saveMesh(mesh,"titi.mesh");  
+      if(mesh->info.ddebug) MMG2D_saveMesh(mesh,"titi.mesh");  
 			
       /*retournement d'arêtes aleatoirement dans la liste, tant que */ 
       srand(time(NULL));
