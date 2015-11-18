@@ -565,6 +565,7 @@ IF ( BUILD_MMG3D OR BUILD_MMG )
   OPTION ( TEST_LIBMMG3D "Compile tests for the mmg3d library" OFF)
   IF ( TEST_LIBMMG3D )
     INCLUDE(cmake/testing/libmmg3d_tests.cmake)
+    INCLUDE(cmake/testing/libmmg3d_oldAPI_tests.cmake)
   ENDIF()
 
   OPTION ( TEST_LIBMMG2D "Compile tests for the mmg2d library" OFF)
