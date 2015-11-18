@@ -154,7 +154,7 @@ int MMG2_split(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int k1,int adj1) {
   pt2->qual = cal2;
   
    
-  jel  = _MMG5_newElt(mesh);
+  jel  = _MMG2D_newElt(mesh);
   if ( !jel ) {
     _MMG5_TRIA_REALLOC(mesh,jel,mesh->gap,
                         printf("  ## Error: unable to allocate a new element.\n");
@@ -166,7 +166,7 @@ int MMG2_split(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int k1,int adj1) {
     ptmp = &mesh->tria[0];
     adja2 =  &mesh->adja[3*(k2-1) + 1];
   }
-  kel  = _MMG5_newElt(mesh);  
+  kel  = _MMG2D_newElt(mesh);  
   if ( !kel ) {
     _MMG5_TRIA_REALLOC(mesh,kel,mesh->gap,
                         printf("  ## Error: unable to allocate a new element.\n");
@@ -356,7 +356,7 @@ int MMG2_splitbdry(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int k1,int voy1,double *
   pt1->v[2] = ip;
   pt1->qual = cal1;
      
-  jel  = _MMG5_newElt(mesh);
+  jel  = _MMG2D_newElt(mesh);
   if ( !jel ) {
     _MMG5_TRIA_REALLOC(mesh,jel,mesh->gap,
                         printf("  ## Error: unable to allocate a new element.\n");
