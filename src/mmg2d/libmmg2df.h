@@ -43,6 +43,8 @@
 !  * \version 5
 !  * \date 01 2014
 !  * \copyright GNU Lesser General Public License.
+!  * \warning To keep the genheader working, don't break line between the enum
+!  * name and the opening brace (it creates errors under windows)
 !  */
 
 
@@ -294,7 +296,7 @@
 !  * \param met pointer toward the sol structure.
 !  *
 !  * Structure deallocations before return.
-!  *
+!  *
 !  */
 
 ! void MMG5_Free_structures(MMG5_pMesh mesh,MMG5_pSol met

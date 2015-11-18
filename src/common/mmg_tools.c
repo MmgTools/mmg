@@ -414,7 +414,7 @@ long long _MMG5_memSize (void) {
   return(mem);
 }
 
-#ifdef UNIX
+#ifdef GNU
 /**
  * \param a real coefficient of the degree 3 polynomial.
  * \param r computed complex roots.

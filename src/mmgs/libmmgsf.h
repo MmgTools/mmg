@@ -44,6 +44,8 @@
 !  * \version 5
 !  * \date 01 2014
 !  * \copyright GNU Lesser General Public License.
+!  * \warning To keep the genheader working, don't break line between the enum
+!  * name and the opening brace (it creates errors under windows)
 !  *
 !  */
 

@@ -4,10 +4,19 @@ ADD_EXECUTABLE(libmmgs_example0
 ADD_EXECUTABLE(libmmgs_example1
   ${CMAKE_SOURCE_DIR}/libexamples/mmgs/example1/main.c)
 
+ IF ( WIN32 AND NOT MINGW AND USE_SCOTCH )
+    my_add_link_flags(libmmgs_example0 "/SAFESEH:NO")
+    my_add_link_flags(libmmgs_example1 "/SAFESEH:NO")
+ ENDIF ( )
+
 IF ( LIBMMGS_STATIC )
   ENABLE_LANGUAGE (Fortran)
   ADD_EXECUTABLE(libmmgs_fortran
     ${CMAKE_SOURCE_DIR}/libexamples/mmgs/example0_fortran/main.F90)
+
+  IF ( WIN32 AND NOT MINGW AND USE_SCOTCH )
+    my_add_link_flags(libmmgs_fortran "/SAFESEH:NO")
+  ENDIF ( )
 
   TARGET_LINK_LIBRARIES(libmmgs_example0 ${PROJECT_NAME}s_a)
   TARGET_LINK_LIBRARIES(libmmgs_example1 ${PROJECT_NAME}s_a)

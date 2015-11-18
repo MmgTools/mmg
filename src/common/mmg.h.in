@@ -37,13 +37,11 @@
 
 #if (defined(__APPLE__) && defined(__MACH__))
 #include <sys/sysctl.h>
-#define UNIX
 #elif defined(__unix__) || defined(__unix) || defined(unix)
 #include <unistd.h>
-#define UNIX
 #endif
 
-#ifdef UNIX
+#ifdef GNU
 #define DOUBLE_COMPLEX double complex
 #else
 #define inline __inline
@@ -455,7 +453,7 @@ int    _MMG5_interp_iso(double *ma,double *mb,double *mp,double t);
 
 int    _MMG5_saveLibraryMesh(MMG5_pMesh mesh);
 
-#ifndef UNIX
+#ifndef POSIX
 extern DOUBLE_COMPLEX _MMG5_opp_complex(DOUBLE_COMPLEX z1);
 extern DOUBLE_COMPLEX _MMG5_inv_complex(DOUBLE_COMPLEX z1);
 extern DOUBLE_COMPLEX _MMG5_add_complex(DOUBLE_COMPLEX z1,DOUBLE_COMPLEX z2);

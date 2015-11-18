@@ -16,6 +16,15 @@ ADD_EXECUTABLE(libmmg3d_example3
 ADD_EXECUTABLE(libmmg3d_example4
   ${CMAKE_SOURCE_DIR}/libexamples/mmg3d/example4/main.c)
 
+ IF ( WIN32 AND NOT MINGW AND USE_SCOTCH )
+    my_add_link_flags(libmmg3d_example0_a "/SAFESEH:NO")
+	my_add_link_flags(libmmg3d_example0_b "/SAFESEH:NO")
+    my_add_link_flags(libmmg3d_example1 "/SAFESEH:NO")
+    my_add_link_flags(libmmg3d_example2 "/SAFESEH:NO")
+    my_add_link_flags(libmmg3d_example3 "/SAFESEH:NO")
+    my_add_link_flags(libmmg3d_example4 "/SAFESEH:NO")
+ ENDIF ( )
+
 IF ( LIBMMG3D_STATIC )
   ENABLE_LANGUAGE (Fortran)
   ADD_EXECUTABLE(libmmg3d_fortran_a
@@ -23,6 +32,11 @@ IF ( LIBMMG3D_STATIC )
 
   ADD_EXECUTABLE(libmmg3d_fortran_b
     ${CMAKE_SOURCE_DIR}/libexamples/mmg3d/example0_fortran/example0_b/main.F90)
+
+  IF ( WIN32 AND NOT MINGW AND USE_SCOTCH )
+    my_add_link_flags(libmmg3d_fortran_a "/SAFESEH:NO")
+	my_add_link_flags(libmmg3d_fortran_b "/SAFESEH:NO")
+  ENDIF ( )
 
   TARGET_LINK_LIBRARIES(libmmg3d_example0_a ${PROJECT_NAME}3d_a)
   TARGET_LINK_LIBRARIES(libmmg3d_example0_b ${PROJECT_NAME}3d_a)

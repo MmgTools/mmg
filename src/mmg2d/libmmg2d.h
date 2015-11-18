@@ -27,6 +27,8 @@
  * \version 5
  * \date 01 2014
  * \copyright GNU Lesser General Public License.
+ * \warning To keep the genheader working, don't break line between the enum
+ * name and the opening brace (it creates errors under windows)
  */
 
 #ifndef _MMG2DLIB_H
@@ -43,8 +45,7 @@
  * MMG5_DPARAM asked for real values.
  *
  */
-enum MMG5_Param
-{
+enum MMG5_Param {
   MMG5_IPARAM_verbose,           /*!< [-10..10], Tune level of verbosity */
   MMG5_IPARAM_mem,               /*!< [n/-1], Set memory size to n Mbytes or keep the default value */
   MMG5_IPARAM_debug,             /*!< [1/0], Turn on/off debug mode */
