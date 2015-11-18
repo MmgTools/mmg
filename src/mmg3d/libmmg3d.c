@@ -31,6 +31,7 @@
  * \version 5
  * \date 01 2014
  * \copyright GNU Lesser General Public License.
+ * \warning Use the MMG3D_ prefix: MMG5_ prefix will became obsolete soon...
  * \todo documentation doxygen
  *
  * Private API functions for MMG3D library: incompatible functions
@@ -46,7 +47,7 @@
  */
 #define _MMG5_RETURN_AND_PACK(mesh,met,disp,val)do  \
   {                                                 \
-    MMG5_packMesh(mesh,met,disp);                   \
+    _MMG3D_packMesh(mesh,met,disp);                  \
     return(val);                                    \
   }while(0)
 
@@ -58,10 +59,10 @@
  * Deallocations before return.
  *
  */
-void MMG5_Free_all(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp
-  ){
-
-  MMG5_Free_structures(mesh,met,disp);
+void MMG3D_Free_all(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp
+  )
+{
+  MMG3D_Free_structures(mesh,met,disp);
 
   _MMG5_SAFE_FREE(met);
   _MMG5_SAFE_FREE(mesh);
@@ -70,7 +71,7 @@ void MMG5_Free_all(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp
 
 /** Free adja, xtetra and xpoint tables */
 static inline
-void MMG5_Free_topoTables(MMG5_pMesh mesh) {
+void _MMG3D_Free_topoTables(MMG5_pMesh mesh) {
   int k;
 
   mesh->xp = 0;
@@ -99,7 +100,7 @@ void MMG5_Free_topoTables(MMG5_pMesh mesh) {
  *
  */
 static inline
-int MMG5_packMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
+int _MMG3D_packMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
   MMG5_pTetra   pt,ptnew;
   MMG5_pPoint   ppt,pptnew;
   MMG5_hgeom   *ph;
@@ -279,7 +280,7 @@ int MMG5_packMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
     return(0);
   }
 
-  MMG5_Free_topoTables(mesh);
+  _MMG3D_Free_topoTables(mesh);
 
   if ( mesh->info.imprim ) {
     fprintf(stdout,"     NUMBER OF VERTICES   %8d   CORNERS %8d\n",mesh->np,nc);
@@ -302,8 +303,7 @@ int MMG5_packMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
  * Main program for the remesh library .
  *
  */
-int MMG5_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met
-  ) {
+int MMG3D_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met) {
   mytime    ctim[TIMEMAX];
   char      stim[32];
 
@@ -391,7 +391,7 @@ int MMG5_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met
     _MMG5_RETURN_AND_PACK(mesh,met,NULL,MMG5_LOWFAILURE);
   }
 
-  if ( mesh->info.imprim > 4 && !mesh->info.iso && met->m ) _MMG5_prilen(mesh,met,0);
+  if ( mesh->info.imprim > 1 && !mesh->info.iso && met->m ) _MMG5_prilen(mesh,met,0);
 
   chrono(OFF,&(ctim[2]));
   printim(ctim[2].gdif,stim);
@@ -424,7 +424,7 @@ int MMG5_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met
   /** Patterns in iso mode, delauney otherwise */
   if ( !mesh->info.iso ) {
     if ( !_MMG5_mmg3d1_delone(mesh,met) ) {
-      if ( !(mesh->adja) && !_MMG5_hashTetra(mesh,1) ) {
+      if ( (!mesh->adja) && !_MMG5_hashTetra(mesh,1) ) {
         fprintf(stdout,"  ## Hashing problem. Invalid mesh.\n");
         return(MMG5_STRONGFAILURE);
       }
@@ -459,7 +459,7 @@ int MMG5_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met
   chrono(ON,&(ctim[1]));
   if ( mesh->info.imprim )  fprintf(stdout,"\n  -- MESH PACKED UP\n");
   if ( !_MMG5_unscaleMesh(mesh,met) )  return(MMG5_STRONGFAILURE);
-  if ( !MMG5_packMesh(mesh,met,NULL) )     return(MMG5_STRONGFAILURE);
+  if ( !_MMG3D_packMesh(mesh,met,NULL) )     return(MMG5_STRONGFAILURE);
   chrono(OFF,&(ctim[1]));
 
   chrono(OFF,&ctim[0]);
@@ -482,8 +482,7 @@ int MMG5_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met
  * Main program for the rigidbody moving library .
  *
  */
-int MMG5_mmg3dmov(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp
-  ) {
+int MMG3D_mmg3dmov(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp) {
   mytime    ctim[TIMEMAX];
   char      stim[32];
 
@@ -649,18 +648,19 @@ int MMG5_mmg3dmov(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp
   printim(ctim[3].gdif,stim);
   if ( mesh->info.imprim ) {
     fprintf(stdout,"  -- PHASE 2 COMPLETED.     %s\n",stim);
-    fprintf(stdout,"\n  %s\n   END OF MODULE MMG3d: IMB-LJLL \n  %s\n",MG_STR,MG_STR);
+    fprintf(stdout,"\n  %s\n   END OF MODULE MMG3D: IMB-LJLL \n  %s\n",MG_STR,MG_STR);
   }
 
   /* save file */
   _MMG5_outqua(mesh,met);
-  if ( mesh->info.imprim > 4 && !mesh->info.iso )
+  if ( mesh->info.imprim > 1 && !mesh->info.iso )
     _MMG5_prilen(mesh,met,1);
 
   chrono(ON,&(ctim[1]));
   if ( mesh->info.imprim )  fprintf(stdout,"\n  -- MESH PACKED UP\n");
   if ( !_MMG5_unscaleMesh(mesh,disp) )  return(MMG5_STRONGFAILURE);
-  if ( !MMG5_packMesh(mesh,met,disp) )     return(MMG5_STRONGFAILURE);
+  if ( !_MMG3D_packMesh(mesh,met,disp) )     return(MMG5_STRONGFAILURE);
+
   chrono(OFF,&(ctim[1]));
 
   chrono(OFF,&ctim[0]);
@@ -668,4 +668,39 @@ int MMG5_mmg3dmov(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp
   if ( mesh->info.imprim )
     fprintf(stdout,"\n   MMG3DLIB: ELAPSED TIME  %s\n",stim);
   return(MMG5_SUCCESS);
+}
+
+/** Old API °°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°*/
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the sol structure (metric or solution).
+ * \param disp pointer toward a sol structure (displacement).
+ *
+ * Deallocations before return.
+ *
+ */
+void MMG5_Free_all(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp
+  )
+{
+  MMG3D_Free_all(mesh,met,disp);
+
+}
+
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward a sol structure (metric or solution).
+ * \param disp pointer toward a sol structure (displacement for the
+ * lagrangian motion mode).
+ * \return Return \ref MMG5_SUCCESS if success, \ref MMG5_LOWFAILURE if failed
+ * but a conform mesh is saved and \ref MMG5_STRONGFAILURE if failed and we
+ * can't save the mesh.
+ * \warning Do not use: will became obsolete
+ *
+ * Main program for the library .
+ *
+ */
+int MMG5_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met)
+{
+  return(MMG3D_mmg3dlib(mesh,met));
 }

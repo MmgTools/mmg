@@ -30,10 +30,10 @@
  * Deallocations before return.
  *
  */
-void MMG5_Free_all(MMG5_pMesh mesh,MMG5_pSol met
+void MMG2D_Free_all(MMG5_pMesh mesh,MMG5_pSol met
   ){
 
-  MMG5_Free_structures(mesh,met);
+  MMG2D_Free_structures(mesh,met);
 
 }
 
@@ -190,13 +190,13 @@ int MMG2_tassage(MMG5_pMesh mesh,MMG5_pSol sol) {
   optdbl[0] = hgrad
   optdbl[1] =ar
 */
-int MMG2_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol sol,void (*titi)(int ,int ,int,int,int)) {
+int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol sol,void (*titi)(int ,int ,int,int,int)) {
 
   fprintf(stdout,"  -- MMG2D, Release %s (%s) \n",M_VER,M_REL);
   fprintf(stdout,"     %s\n",M_CPY);
   fprintf(stdout,"     %s %s\n",__DATE__,__TIME__);
 
-  MMG2_callbackinsert = titi;
+  MMG2D_callbackinsert = titi;
   /* interrupts */
   signal(SIGABRT,_MMG2_excfun);
   signal(SIGFPE,_MMG2_excfun);
@@ -249,7 +249,7 @@ int MMG2_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol sol,void (*titi)(int ,int ,int,int,i
   /* sol->type = 1; */
 
   _MMG2_setfunc(sol->size);
-  _MMG2_Set_commonFunc();
+  _MMG2D_Set_commonFunc();
  
   if(mesh->info.lag >= 0) {
     /*alloc Disp*/
@@ -300,7 +300,7 @@ int MMG2_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol sol,void (*titi)(int ,int ,int,int,i
   if ( mesh->info.iso ) {
     fprintf(stdout,"Fit an embedded mesh\n");
     MMG2_mmg2d6(mesh,sol);
-    MMG2_saveMesh(mesh,mesh->nameout);
+    MMG2D_saveMesh(mesh,mesh->nameout);
     return(MMG5_SUCCESS);
   } else if ( mesh->info.lag >= 0 ) {
 
@@ -313,7 +313,7 @@ int MMG2_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol sol,void (*titi)(int ,int ,int,int,i
       fprintf(stdout,"\n  -- PHASE 2 : MESH GENERATION\n");
       if ( !MMG2_mmg2d2(mesh,sol) )  {
         if ( !MMG2_unscaleMesh(mesh,sol) )  return(MMG5_STRONGFAILURE);
-        MMG2_saveMesh(mesh,mesh->nameout);
+        MMG2D_saveMesh(mesh,mesh->nameout);
         return(MMG5_LOWFAILURE);
       }
       /*geom : corner detection*/
@@ -359,7 +359,7 @@ int MMG2_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol sol,void (*titi)(int ,int ,int,int,i
     MMG2_prilen(mesh,sol);
   }
   //chrono(ON,&ctim[1]);
-  //MMG2_saveMesh(mesh,"toto.mesh");
+  //MMG2D_saveMesh(mesh,"toto.mesh");
   MMG2_tassage(mesh,sol);
   //chrono(OFF,&ctim[1]);
 

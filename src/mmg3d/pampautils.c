@@ -100,7 +100,7 @@ void MMG5_pampa_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
   else
     MMG5_lenedgCoor = _MMG5_lenedgCoor_ani;
   MMG5_hashTetra = _MMG5_hashTetra;
-  _MMG5_saveMeshinternal = _MMG5_saveLibraryMesh;
+  _MMG3D_saveMeshinternal = _MMG5_saveLibraryMesh;
 }
 /* END COPY */
 
@@ -228,7 +228,7 @@ int MMG5_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
 
       case 'a':
         if ( !strcmp(argv[i],"-ar") && ++i < argc )
-          if ( !MMG5_Set_dparameter(mesh,met,MMG5_DPARAM_angleDetection,
+          if ( !MMG5_Set_dparameter(mesh,met,MMG3D_DPARAM_angleDetection,
                                     atof(argv[i])) )
             exit(EXIT_FAILURE);
         break;
@@ -239,33 +239,33 @@ int MMG5_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
 #ifndef PATTERN
       case 'b':
         if ( !strcmp(argv[i],"-bucket") && ++i < argc )
-          if ( !MMG5_Set_iparameter(mesh,met,MMG5_IPARAM_bucket,
+          if ( !MMG5_Set_iparameter(mesh,met,MMG3D_IPARAM_bucket,
                                     atoi(argv[i])) )
             exit(EXIT_FAILURE);
         break;
 #endif
       case 'd':  /* debug */
-        if ( !MMG5_Set_iparameter(mesh,met,MMG5_IPARAM_debug,1) )
+        if ( !MMG5_Set_iparameter(mesh,met,MMG3D_IPARAM_debug,1) )
           exit(EXIT_FAILURE);
         break;
       case 'h':
         if ( !strcmp(argv[i],"-hmin") && ++i < argc ) {
-          if ( !MMG5_Set_dparameter(mesh,met,MMG5_DPARAM_hmin,
+          if ( !MMG5_Set_dparameter(mesh,met,MMG3D_DPARAM_hmin,
                                     atof(argv[i])) )
             exit(EXIT_FAILURE);
         }
         else if ( !strcmp(argv[i],"-hmax") && ++i < argc ) {
-          if ( !MMG5_Set_dparameter(mesh,met,MMG5_DPARAM_hmax,
+          if ( !MMG5_Set_dparameter(mesh,met,MMG3D_DPARAM_hmax,
                                     atof(argv[i])) )
             exit(EXIT_FAILURE);
         }
         else if ( !strcmp(argv[i],"-hausd") && ++i <= argc ) {
-          if ( !MMG5_Set_dparameter(mesh,met,MMG5_DPARAM_hausd,
+          if ( !MMG5_Set_dparameter(mesh,met,MMG3D_DPARAM_hausd,
                                     atof(argv[i])) )
             exit(EXIT_FAILURE);
         }
         else if ( !strcmp(argv[i],"-hgrad") && ++i <= argc ) {
-          if ( !MMG5_Set_dparameter(mesh,met,MMG5_DPARAM_hgrad,
+          if ( !MMG5_Set_dparameter(mesh,met,MMG3D_DPARAM_hgrad,
                                     atof(argv[i])) )
             exit(EXIT_FAILURE);
         }
@@ -278,7 +278,7 @@ int MMG5_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
             if ( !MMG5_Set_inputMeshName(mesh, argv[i]) )
               exit(EXIT_FAILURE);
 
-            if ( !MMG5_Set_iparameter(mesh,met,MMG5_IPARAM_verbose,5) )
+            if ( !MMG5_Set_iparameter(mesh,met,MMG3D_IPARAM_verbose,5) )
               exit(EXIT_FAILURE);
           }else{
             fprintf(stderr,"Missing filname for %c%c\n",argv[i-1][1],argv[i-1][2]);
@@ -289,7 +289,7 @@ int MMG5_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
       case 'l':
         if ( !strcmp(argv[i],"-lag") ) {
           if ( ++i < argc && isdigit(argv[i][0]) ) {
-            if ( !MMG5_Set_iparameter(mesh,met,MMG5_IPARAM_lag,atoi(argv[i])) )
+            if ( !MMG5_Set_iparameter(mesh,met,MMG3D_IPARAM_lag,atoi(argv[i])) )
               exit(EXIT_FAILURE);
           }
           else if ( i == argc ) {
@@ -303,10 +303,10 @@ int MMG5_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
           }
         }
         else if ( !strcmp(argv[i],"-ls") ) {
-          if ( !MMG5_Set_iparameter(mesh,met,MMG5_IPARAM_iso,1) )
+          if ( !MMG5_Set_iparameter(mesh,met,MMG3D_IPARAM_iso,1) )
             exit(EXIT_FAILURE);
           if ( ++i < argc && isdigit(argv[i][0]) ) {
-            if ( !MMG5_Set_dparameter(mesh,met,MMG5_DPARAM_ls,atof(argv[i])) )
+            if ( !MMG5_Set_dparameter(mesh,met,MMG3D_DPARAM_ls,atof(argv[i])) )
               exit(EXIT_FAILURE);
           }
           else if ( i == argc ) {
@@ -318,7 +318,7 @@ int MMG5_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
         break;
       case 'm':  /* memory */
         if ( ++i < argc && isdigit(argv[i][0]) ) {
-          if ( !MMG5_Set_iparameter(mesh,met,MMG5_IPARAM_mem,atoi(argv[i])) )
+          if ( !MMG5_Set_iparameter(mesh,met,MMG3D_IPARAM_mem,atoi(argv[i])) )
             exit(EXIT_FAILURE);
         }
         else {
@@ -328,23 +328,23 @@ int MMG5_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
         break;
       case 'n':
         if ( !strcmp(argv[i],"-nr") ) {
-          if ( !MMG5_Set_iparameter(mesh,met,MMG5_IPARAM_angle,0) )
+          if ( !MMG5_Set_iparameter(mesh,met,MMG3D_IPARAM_angle,0) )
             exit(EXIT_FAILURE);
         }
         else if ( !strcmp(argv[i],"-noswap") ) {
-          if ( !MMG5_Set_iparameter(mesh,met,MMG5_IPARAM_noswap,1) )
+          if ( !MMG5_Set_iparameter(mesh,met,MMG3D_IPARAM_noswap,1) )
             exit(EXIT_FAILURE);
         }
         else if( !strcmp(argv[i],"-noinsert") ) {
-          if ( !MMG5_Set_iparameter(mesh,met,MMG5_IPARAM_noinsert,1) )
+          if ( !MMG5_Set_iparameter(mesh,met,MMG3D_IPARAM_noinsert,1) )
             exit(EXIT_FAILURE);
         }
         else if( !strcmp(argv[i],"-nomove") ) {
-          if ( !MMG5_Set_iparameter(mesh,met,MMG5_IPARAM_nomove,1) )
+          if ( !MMG5_Set_iparameter(mesh,met,MMG3D_IPARAM_nomove,1) )
             exit(EXIT_FAILURE);
         }
         else if( !strcmp(argv[i],"-nosurf") ) {
-          if ( !MMG5_Set_iparameter(mesh,met,MMG5_IPARAM_nosurf,1) )
+          if ( !MMG5_Set_iparameter(mesh,met,MMG3D_IPARAM_nosurf,1) )
             exit(EXIT_FAILURE);
         }
         break;
@@ -360,7 +360,7 @@ int MMG5_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
           }
         }
         else if( !strcmp(argv[i],"-optim") ) {
-          if ( !MMG5_Set_iparameter(mesh,met,MMG5_IPARAM_optim,1) )
+          if ( !MMG5_Set_iparameter(mesh,met,MMG3D_IPARAM_optim,1) )
             exit(EXIT_FAILURE);
         }
         break;
@@ -369,7 +369,7 @@ int MMG5_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
         if ( !strcmp(argv[i],"-rn") ) {
           if ( ++i < argc ) {
             if ( isdigit(argv[i][0]) ) {
-              if ( !MMG5_Set_iparameter(mesh,met,MMG5_IPARAM_renum,atoi(argv[i])) )
+              if ( !MMG5_Set_iparameter(mesh,met,MMG3D_IPARAM_renum,atoi(argv[i])) )
                 exit(EXIT_FAILURE);
             }
             else {
@@ -399,7 +399,7 @@ int MMG5_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
       case 'v':
         if ( ++i < argc ) {
           if ( argv[i][0] == '-' || isdigit(argv[i][0]) ) {
-            if ( !MMG5_Set_iparameter(mesh,met,MMG5_IPARAM_verbose,atoi(argv[i])) )
+            if ( !MMG5_Set_iparameter(mesh,met,MMG3D_IPARAM_verbose,atoi(argv[i])) )
               exit(EXIT_FAILURE);
           }
           else
@@ -420,7 +420,7 @@ int MMG5_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
         if ( !MMG5_Set_inputMeshName(mesh,argv[i]) )
           exit(EXIT_FAILURE);
         if ( mesh->info.imprim == -99 ) {
-          if ( !MMG5_Set_iparameter(mesh,met,MMG5_IPARAM_verbose,5) )
+          if ( !MMG5_Set_iparameter(mesh,met,MMG3D_IPARAM_verbose,5) )
             exit(EXIT_FAILURE);
         }
       }
@@ -441,7 +441,7 @@ int MMG5_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
     fprintf(stdout,"\n  -- PRINT (0 10(advised) -10) ?\n");
     fflush(stdin);
     fscanf(stdin,"%d",&i);
-    if ( !MMG5_Set_iparameter(mesh,met,MMG5_IPARAM_verbose,i) )
+    if ( !MMG5_Set_iparameter(mesh,met,MMG3D_IPARAM_verbose,i) )
       exit(EXIT_FAILURE);
   }
 
@@ -508,7 +508,7 @@ int MMG5_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
     /* check for condition type */
     if ( !strcmp(data,"parameters") ) {
       fscanf(in,"%d",&npar);
-      if ( !MMG5_Set_iparameter(mesh,met,MMG5_IPARAM_numberOfLocalParam,npar) )
+      if ( !MMG5_Set_iparameter(mesh,met,MMG3D_IPARAM_numberOfLocalParam,npar) )
         exit(EXIT_FAILURE);
 
       for (i=0; i<mesh->info.npar; i++) {
@@ -547,19 +547,6 @@ int _MMG5_stockOptions(MMG5_pMesh mesh, MMG5_Info *info) {
       return(0);
   }
   return(1);
-}
-
-/**
- * \param mesh pointer toward the mesh structure.
- * \param info pointer toward the info structure.
- *
- * Recover the info structure stored in the mesh structure.
- *
- */
-void _MMG5_destockOptions(MMG5_pMesh mesh, MMG5_Info *info) {
-
-  memcpy(info,&mesh->info,sizeof(MMG5_Info));
-  return;
 }
 
 /**

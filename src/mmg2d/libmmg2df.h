@@ -2,16 +2,17 @@
 ! ** and the "genfort.pl" script (scripts directory).
 ! ** Do not modified it by hand, it will be discarded.
 ! **
-! ** This scripts recopy the macros of the libmmg3d.h file
+! ** This scripts recopy the macros of the libmmg*.h file
 ! ** and convert enumerations into macros.
 ! **
 ! ** Note: "genfort.pl" is automatically called by the "genheader.c"
 ! ** executable code.
 ! **
-! ** See the "libmmg3d.h" file for a correct displaying of the documentation.
+! ** See the "libmmg*.h" file for a correct displaying of the documentation.
 ! */
 
-#define MMG5_DATA_PTR_T INTEGER(kind=8)
+#include "libmmgf.h"
+
 ! /* =============================================================================
 ! **  This file is part of the mmg software package for the tetrahedral
 ! **  mesh modification.
@@ -46,107 +47,57 @@
 
 
 ! #ifndef _MMG2DLIB_H
-#define _MMG2DLIB_H
 
 ! #include "mmg.h"
-! /**
-!  * \def MMG5_SUCCESS
-!  *
-!  * Return value for success.
-!  *
-!  */
 
-#define MMG5_SUCCESS       0
 ! /**
-!  * \def MMG5_LOWFAILURE
-!  *
-!  * Return value if the remesh process failed but we can save a conform
-!  * mesh.
-!  *
-!  */
-
-#define MMG5_LOWFAILURE    1
-! /**
-!  * \def MMG5_STRONGFAILURE
-!  *
-!  * Return value if the remesh process failed and the mesh is
-!  * non-conform.
-!  *
-!  */
-
-#define MMG5_STRONGFAILURE 2
-! /**
-!  * \enum MMG5_type
-!  * \brief Type of solutions.
-!  */
-
-! /*!< Undefined type (unusable) */
-#define   MMG5_Notype                  0
-! /*!< Scalar solution */
-#define   MMG5_Scalar                  1
-! /*!< Vectorial solution */
-#define   MMG5_Vector                  2
-! /*!< Tensorial solution */
-#define   MMG5_Tensor                  3
-! /**
-!  * \enum MMG5_entities
-!  * \brief Type of mesh entities to which solutions are applied.
-!  */
-
-! /*!< Undefined type (unusable) */
-#define   MMG5_Noentity                0
-! /*!< Vertex entity */
-#define   MMG5_Vertex                  1
-! /*!< Triangle entity */
-#define   MMG5_Triangle                2
-! /**
-!  * \enum MMG5_Param
+!  * \enum MMG2D_Param
 !  * \brief Input parameters for mmg library.
 !  *
 !  * Input parameters for mmg library. Options prefixed by \a
-!  * MMG5_IPARAM asked for integers values ans options prefixed by \a
-!  * MMG5_DPARAM asked for real values.
+!  * MMG2D_IPARAM asked for integers values ans options prefixed by \a
+!  * MMG2D_DPARAM asked for real values.
 !  *
 !  */
 
 ! /*!< [-10..10] Tune level of verbosity */
-#define   MMG5_IPARAM_verbose            0
+#define   MMG2D_IPARAM_verbose            0
 ! /*!< [n/-1] Set memory size to n Mbytes or keep the default value */
-#define   MMG5_IPARAM_mem                1
+#define   MMG2D_IPARAM_mem                1
 ! /*!< [1/0] Turn on/off debug mode */
-#define   MMG5_IPARAM_debug              2
+#define   MMG2D_IPARAM_debug              2
 ! /*!< [1/0] Turn on/off angle detection */
-#define   MMG5_IPARAM_angle              3
+#define   MMG2D_IPARAM_angle              3
 ! /*!< [1/0] Level-set meshing */
-#define   MMG5_IPARAM_iso                4
+#define   MMG2D_IPARAM_iso                4
 ! /*!< [-1/0/1/2] Lagrangian option */
-#define   MMG5_IPARAM_lag                5
+#define   MMG2D_IPARAM_lag                5
 ! /*!< [0/1/2] Read/write to gmsh visu if val=1 (out) if val=2 (in/out) */
-#define   MMG5_IPARAM_msh                6
+#define   MMG2D_IPARAM_msh                6
 ! /*!<only if no given triangle save the subdomain nb (0==all subdomain) */
-#define   MMG5_IPARAM_numsubdomain        7
+#define   MMG2D_IPARAM_numsubdomain        7
 ! /*!< [1/0] Avoid/allow point insertion */
-#define   MMG5_IPARAM_noinsert           8
+#define   MMG2D_IPARAM_noinsert           8
 ! /*!< [1/0] Avoid/allow edge or face flipping */
-#define   MMG5_IPARAM_noswap             9
+#define   MMG2D_IPARAM_noswap             9
 ! /*!< [1/0] Avoid/allow point relocation */
-#define   MMG5_IPARAM_nomove             10
+#define   MMG2D_IPARAM_nomove             10
 ! /*!< [1/0] Avoid/allow surface modifications */
-#define   MMG5_IPARAM_nosurf             11
+#define   MMG2D_IPARAM_nosurf             11
 ! /*!< [n] Specify the size of the bucket per dimension (DELAUNAY) */
-#define   MMG5_IPARAM_bucket             12
+#define   MMG2D_IPARAM_bucket             12
 ! /*!< [val] Value for angle detection */
-#define   MMG5_DPARAM_angleDetection     13
+#define   MMG2D_DPARAM_angleDetection     13
 ! /*!< [val] Minimal mesh size */
-#define   MMG5_DPARAM_hmin               14
+#define   MMG2D_DPARAM_hmin               14
 ! /*!< [val] Maximal mesh size */
-#define   MMG5_DPARAM_hmax               15
+#define   MMG2D_DPARAM_hmax               15
 ! /*!< [val] Control global Hausdorff distance (on all the boundary surfaces of the mesh) */
-#define   MMG5_DPARAM_hausd              16
+#define   MMG2D_DPARAM_hausd              16
 ! /*!< [val] Control gradation */
-#define   MMG5_DPARAM_hgrad              17
+#define   MMG2D_DPARAM_hgrad              17
 ! /*!< [val] Value of level-set (not use for now) */
-#define   MMG5_DPARAM_ls                 18
+#define   MMG2D_DPARAM_ls                 18
 
 ! /*----------------------------- functions header -----------------------------*/
 ! /* Initialization functions */
@@ -160,11 +111,72 @@
 !  *
 !  */
 
-! void  MMG2_Init_mesh(MMG5_pMesh *mesh, MMG5_pSol *sol);
+! void  MMG2D_Init_mesh(MMG5_pMesh *mesh, MMG5_pSol *sol);
 ! /**
 !  * \param mesh pointer toward the mesh structure.
 !  * \param sol pointer toward the sol structure.
-!  * \param iparam integer parameter to set (see \a MMG5_Param structure).
+!  *
+!  * Initialize file names to their default values.
+!  *
+!  */
+
+! void  MMG2D_Init_fileNames(MMG5_pMesh mesh, MMG5_pSol sol);
+! /**
+!  * \param mesh pointer toward the mesh structure.
+!  *
+!  * Initialization of the input parameters (stored in the Info structure).
+!  *
+!  */
+
+! void  MMG2D_Init_parameters(MMG5_pMesh mesh);
+
+! /* init file names */
+! /**
+!  * \param mesh pointer toward the mesh structure.
+!  * \param meshin input mesh name.
+!  * \return 1.
+!  *
+!  * Set the name of input mesh.
+!  *
+!  */
+
+! int  MMG2D_Set_inputMeshName(MMG5_pMesh mesh, char* meshin);
+! /**
+!  * \param mesh pointer toward the mesh structure.
+!  * \param meshout name of the output mesh file.
+!  * \return 1.
+!  *
+!  * Set the name of output mesh file.
+!  *
+!  */
+
+! int  MMG2D_Set_outputMeshName(MMG5_pMesh mesh, char* meshout);
+! /**
+!  * \param mesh pointer toward the mesh structure.
+!  * \param sol pointer toward the sol structure.
+!  * \param solin name of the input solution file.
+!  * \return 1.
+!  *
+!  * Set the name of input solution file.
+!  *
+!  */
+
+! int  MMG2D_Set_inputSolName(MMG5_pMesh mesh,MMG5_pSol sol, char* solin);
+! /**
+!  * \param mesh pointer toward the mesh structure.
+!  * \param sol pointer toward the sol structure.
+!  * \param solout name of the output solution file.
+!  * \return 0 if failed, 1 otherwise.
+!  *
+!  *  Set the name of output solution file.
+!  *
+!  */
+
+! int  MMG2D_Set_outputSolName(MMG5_pMesh mesh,MMG5_pSol sol, char* solout);
+! /**
+!  * \param mesh pointer toward the mesh structure.
+!  * \param sol pointer toward the sol structure.
+!  * \param iparam integer parameter to set (see \a MMG2D_Param structure).
 !  * \param val value for the parameter.
 !  * \return 0 if failed, 1 otherwise.
 !  *
@@ -172,12 +184,12 @@
 !  *
 !  */
 
-! int MMG5_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val);
+! int MMG2D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val);
 
 ! /**
 !  * \param mesh pointer toward the mesh structure.
 !  * \param sol pointer toward the sol structure.
-!  * \param dparam double parameter to set (see \a MMG5_Param structure).
+!  * \param dparam double parameter to set (see \a MMG2D_Param structure).
 !  * \val value of the parameter.
 !  * \return 0 if failed, 1 otherwise.
 !  *
@@ -185,7 +197,7 @@
 !  *
 !  */
 
-! int MMG5_Set_dparameter(MMG5_pMesh mesh, MMG5_pSol sol, int dparam, double val);
+! int MMG2D_Set_dparameter(MMG5_pMesh mesh, MMG5_pSol sol, int dparam, double val);
 ! /**
 !  * \param mesh pointer toward the mesh structure.
 !  * \param np number of vertices.
@@ -199,7 +211,7 @@
 !  *
 !  */
 
-! int  MMG5_Set_meshSize(MMG5_pMesh mesh, int np, int nt, int na);
+! int  MMG2D_Set_meshSize(MMG5_pMesh mesh, int np, int nt, int na);
 ! /**
 !  * \param mesh pointer toward the mesh structure.
 !  * \param sol pointer toward the sol structure.
@@ -212,7 +224,7 @@
 !  *
 !  */
 
-! int MMG5_Set_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int typEntity,
+! int MMG2D_Set_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int typEntity,
 !                      int np, int typSol);
 ! /* init structure datas */
 ! /**
@@ -228,7 +240,7 @@
 !  *
 !  */
 
-! int  MMG5_Set_vertex(MMG5_pMesh mesh, double c0, double c1,
+! int  MMG2D_Set_vertex(MMG5_pMesh mesh, double c0, double c1,
 !                      int ref,int pos);
 ! /**
 !  * \param mesh pointer toward the mesh structure.
@@ -240,12 +252,12 @@
 !  * \param isRequired pointer toward the flag saying if point is required.
 !  * \return 1.
 !  *
-!  * Get coordinates \a c0, \a c1 and reference \a ref of 
+!  * Get coordinates \a c0, \a c1 and reference \a ref of
 !  * vertex num of mesh.
 !  *
 !  */
 
-! int  MMG5_Get_vertex(MMG5_pMesh mesh, int num,double* c0, double* c1, int* ref,
+! int  MMG2D_Get_vertex(MMG5_pMesh mesh, int num,double* c0, double* c1, int* ref,
 !                      int* isCorner, int* isRequired);
 ! /**
 !  * \param mesh pointer toward the mesh structure.
@@ -261,7 +273,7 @@
 !  *
 !  */
 
-! int MMG5_Set_triangle(MMG5_pMesh mesh, int v0, int v1, 
+! int MMG2D_Set_triangle(MMG5_pMesh mesh, int v0, int v1, 
 !                       int v2, int ref, int pos);
 
 ! /**
@@ -277,7 +289,7 @@
 !  *
 !  */
 
-! int MMG5_Set_edge(MMG5_pMesh mesh, int v0, int v1, int ref, int pos);
+! int MMG2D_Set_edge(MMG5_pMesh mesh, int v0, int v1, int ref, int pos);
 
 ! /** recover datas */
 ! /**
@@ -291,7 +303,7 @@
 !  *
 !  */
 
-! int  MMG5_Get_meshSize(MMG5_pMesh mesh, int* np, int* nt, int* na);
+! int  MMG2D_Get_meshSize(MMG5_pMesh mesh, int* np, int* nt, int* na);
 ! /**
 !  * \param met pointer toward the sol structure.
 !  * \param s solution scalar value.
@@ -302,7 +314,7 @@
 !  *
 !  */
 
-! int MMG5_Set_scalarSol(MMG5_pSol met, double s, int pos);
+! int MMG2D_Set_scalarSol(MMG5_pSol met, double s, int pos);
 
 ! /**
 !  * \param met pointer toward the sol structure.
@@ -314,7 +326,7 @@
 !  *
 !  */
 
-! int MMG5_Set_tensorSol(MMG5_pSol met, double* s, int pos);
+! int MMG2D_Set_tensorSol(MMG5_pSol met, double* s, int pos);
 
 ! /**
 !  * \param mesh pointer toward the mesh structure.
@@ -326,7 +338,7 @@
 !  *
 !  */
 
-! int MMG5_Chk_meshData(MMG5_pMesh mesh,MMG5_pSol met);
+! int MMG2D_Chk_meshData(MMG5_pMesh mesh,MMG5_pSol met);
 
 ! /**
 !  * \param mesh pointer toward the mesh structure.
@@ -336,8 +348,18 @@
 !  *
 !  */
 
-! void MMG5_Free_all(MMG5_pMesh mesh,MMG5_pSol met
+! void MMG2D_Free_all(MMG5_pMesh mesh,MMG5_pSol met
 !   );
+! /**
+!  * \param mesh pointer toward the mesh structure.
+!  * \param met pointer toward the sol structure.
+!  *
+!  * File name deallocations before return.
+!  *
+!  */
+
+! void MMG2D_Free_names(MMG5_pMesh mesh, MMG5_pSol met);
+
 ! /**
 !  * \param mesh pointer toward the mesh structure.
 !  * \param met pointer toward the sol structure.
@@ -346,17 +368,17 @@
 !  *
 !  */
 
-! void MMG5_Free_structures(MMG5_pMesh mesh,MMG5_pSol met
+! void MMG2D_Free_structures(MMG5_pMesh mesh,MMG5_pSol met
 !   );
 
-! int MMG2_loadMesh(MMG5_pMesh ,char *);
-! int MMG2_loadSol(MMG5_pSol ,char *,int,int);
-! int MMG2_loadVect(MMG5_pMesh ,char *);
-! int MMG2_saveMesh(MMG5_pMesh ,char *);
-! int MMG2_saveSol(MMG5_pMesh ,MMG5_pSol ,char *);
-! int MMG2_saveVect(MMG5_pMesh mesh,MMG5_pSol sol,char *filename,double lambda);
+! int MMG2D_loadMesh(MMG5_pMesh ,char *);
+! int MMG2D_loadSol(MMG5_pSol ,char *,int,int);
+! int MMG2D_loadVect(MMG5_pMesh ,char *);
+! int MMG2D_saveMesh(MMG5_pMesh ,char *);
+! int MMG2D_saveSol(MMG5_pMesh ,MMG5_pSol ,char *);
+! int MMG2D_saveVect(MMG5_pMesh mesh,MMG5_pSol sol,char *filename,double lambda);
 
-! int MMG2_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol sol,void (*titi)(int ,int,int,int,int));
-! void (*MMG2_callbackinsert) (int ,int ,int ,int, int);
+! int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol sol,void (*titi)(int ,int,int,int,int));
+! void (*MMG2D_callbackinsert) (int ,int ,int ,int, int);
 
 ! #endif

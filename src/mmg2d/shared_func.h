@@ -41,14 +41,11 @@ unsigned int MMG2_idir[5] = {0,1,2,0,1};
 unsigned char _MMG5_iprv2[3] = {2,0,1};
 unsigned char _MMG5_inxt2[3] = {1,2,0};
 
-mytime   ctim[TIMEMAX];
-
 /**
  * Set common pointer functions between mmgs and mmg3d to the matching mmg3d
  * functions.
  */
-void _MMG2_Set_commonFunc() {
-  MMG5_Init_parameters    = _MMG2_Init_parameters;
+void _MMG2D_Set_commonFunc() {
   _MMG5_chkmsh            = _MMG5_mmg2dChkmsh;
   return;
 }

@@ -51,10 +51,14 @@
 #define MS_Ver       1
 #define MS_Tri       2
 
+/* /\* Global variables *\/ */
+/* extern unsigned char _MMG5_inxt2[3]; /\*!< next vertex of triangle: {1,2,0} *\/ */
+/* extern unsigned char _MMG5_iprv2[3]; /\*!< previous vertex of triangle: {2,0,1} *\/ */
+
 /** Free allocated pointers of mesh and sol structure and return value val */
 #define _MMG5_RETURN_AND_FREE(mesh,met,val)do       \
   {                                                 \
-    MMG5_Free_all(mesh,met);                        \
+    MMGS_Free_all(mesh,met);                        \
     return(val);                                    \
   }while(0)
 
@@ -86,18 +90,15 @@
   }while(0)
 
 /* prototypes */
-int  loadMesh(MMG5_pMesh );
-int  MMG5_saveMesh(MMG5_pMesh );
-int  MMG5_loadMet(MMG5_pMesh,MMG5_pSol );
-int  saveMet(MMG5_pMesh ,MMG5_pSol );
+int  _MMGS_saveAllMesh(MMG5_pMesh );
 int  zaldy(MMG5_pMesh mesh);
 int  assignEdge(MMG5_pMesh mesh);
-int  analys(MMG5_pMesh mesh);
+int  _MMG5_analys(MMG5_pMesh mesh);
 void _MMG5_inqua(MMG5_pMesh,MMG5_pSol);
 void _MMG5_outqua(MMG5_pMesh,MMG5_pSol);
 int  _MMG5_hashTria(MMG5_pMesh );
 int  curvpo(MMG5_pMesh ,MMG5_pSol );
-int  mmgs1(MMG5_pMesh ,MMG5_pSol );
+int  _MMG5_mmgs1(MMG5_pMesh ,MMG5_pSol );
 int  boulet(MMG5_pMesh mesh,int start,int ip,int *list);
 int  boulechknm(MMG5_pMesh mesh,int start,int ip,int *list);
 int  boulep(MMG5_pMesh mesh,int start,int ip,int *list);
@@ -156,6 +157,7 @@ double caleltsig_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel);
 double caleltsig_iso(MMG5_pMesh mesh,MMG5_pSol met,int iel);
 int    _MMG5_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met);
 int    _MMG5_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met);
+void   _MMG5_defaultValues(MMG5_pMesh);
 int    gradsiz_iso(MMG5_pMesh mesh,MMG5_pSol met);
 int    gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met);
 void   intmet_iso(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int ip,double s);
@@ -173,6 +175,7 @@ int    (*gradsiz)(MMG5_pMesh mesh,MMG5_pSol met);
 void   (*intmet)(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int ip,double s);
 int    (*movridpt)(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist);
 int    (*movintpt)(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist);
+int    (*_MMGS_saveMeshinternal)(MMG5_pMesh mesh);
 
 void _MMG5_Set_commonFunc();
 

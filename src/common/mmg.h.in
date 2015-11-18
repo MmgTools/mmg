@@ -268,6 +268,59 @@
     if ( !ip ) {law;}                                                   \
   }while(0)
 
+
+/** Inlined functions for libraries and executables */
+#ifdef USE_SCOTCH
+/** Warn user that we overflow asked memory during scotch call */
+static inline
+void _MMG5_warnScotch(MMG5_pMesh mesh) {
+  if ( mesh->info.imprim > 4 || mesh->info.ddebug ) {
+    if ( mesh->info.mem >= 0 ) {
+      fprintf(stdout,"  ## Warning: we will overflow the memory asked with \"-m\"");
+      fprintf(stdout," option during Scotch call.\n" );
+    }
+  }
+}
+#endif
+/**
+ * \param sigid signal number.
+ *
+ * Signal handling: specify error messages depending from catched signal.
+ *
+ */
+static inline
+void _MMG5_excfun(int sigid) {
+  fprintf(stdout,"\n Unexpected error:");  fflush(stdout);
+  switch(sigid) {
+  case SIGABRT:
+    fprintf(stdout,"  *** potential lack of memory.\n");  break;
+  case SIGFPE:
+    fprintf(stdout,"  Floating-point exception\n"); break;
+  case SIGILL:
+    fprintf(stdout,"  Illegal instruction\n"); break;
+  case SIGSEGV:
+    fprintf(stdout,"  Segmentation fault\n");  break;
+  case SIGTERM:
+  case SIGINT:
+    fprintf(stdout,"  Program killed\n");  break;
+  }
+  exit(EXIT_FAILURE);
+}
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param info pointer toward the info structure.
+ *
+ * Recover the info structure stored in the mesh structure.
+ *
+ */
+static inline
+void _MMG5_destockOptions(MMG5_pMesh mesh, MMG5_Info *info) {
+
+  memcpy(info,&mesh->info,sizeof(MMG5_Info));
+  return;
+}
+
+
 /* Macro for fortran function generation */
 /**
  * \def FORTRAN_NAME(nu,nl,pl,pc)
@@ -391,7 +444,7 @@ int    _MMG5_unscaleMesh(MMG5_pMesh mesh,MMG5_pSol met);
 int    _MMG5_interpreg_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt,char i,double s,double mr[6]);
 int    _MMG5_interp_iso(double *ma,double *mb,double *mp,double t);
 
-void _MMG5_Set_commonFunc();
+int    _MMG5_saveLibraryMesh(MMG5_pMesh mesh);
 
 /* function pointers */
 int    (*_MMG5_chkmsh)(MMG5_pMesh,int,int);
@@ -401,5 +454,7 @@ double (*_MMG5_lenSurfEdg)(MMG5_pMesh mesh,MMG5_pSol sol ,int ,int, char );
 #ifdef USE_SCOTCH
 int    (*_MMG5_renumbering)(int vertBoxNbr, MMG5_pMesh mesh, MMG5_pSol sol);
 #endif
+
+void   _MMG5_Set_commonFunc();
 
 #endif

@@ -23,7 +23,7 @@
 
 /**
  * \file mmg3d/shared_func.h
- * \brief Common functions between MMG3D5 library and executable.
+ * \brief Common functions between MMG3D library and executable.
  * \author Charles Dapogny (LJLL, UPMC)
  * \author Cécile Dobrzynski (Inria / IMB, Université de Bordeaux)
  * \author Pascal Frey (LJLL, UPMC)
@@ -34,8 +34,8 @@
  */
 
 /* global variables */
-unsigned char _MMG5_inxt2[3] = {1,2,0};
 unsigned char _MMG5_iprv2[3] = {2,0,1};
+unsigned char _MMG5_inxt2[3] = {1,2,0};
 unsigned char _MMG5_idir[4][3] = { {1,2,3}, {0,3,2}, {0,1,3}, {0,2,1} };
 char _MMG5_idirinv[4][4] = {{-1,0,1,2},{0,-1,2,1},{0,1,-1,2},{0,2,1,-1}};
 unsigned char _MMG5_iarf[4][3] = { {5,4,3}, {5,1,2}, {4,2,0}, {3,0,1} };
@@ -47,20 +47,8 @@ unsigned char _MMG5_ifar[6][2] = { {2,3}, {1,3}, {1,2}, {0,3}, {0,2}, {0,1} };
 unsigned char _MMG5_isar[6][2] = { {2,3}, {3,1}, {1,2}, {0,3}, {2,0}, {0,1} };
 unsigned char _MMG5_arpt[4][3] = { {0,1,2}, {0,4,3}, {1,3,5}, {2,5,4} };
 
-/* functions shared by executable and library versions of MMG3D5 */
 
-#ifdef USE_SCOTCH
-/** Warn user that we overflow asked memory during scotch call */
-static inline
-void _MMG5_warnScotch(MMG5_pMesh mesh) {
-  if ( mesh->info.imprim > 4 || mesh->info.ddebug ) {
-    if ( mesh->info.mem >= 0 ) {
-      fprintf(stdout,"  ## Warning: we will overflow the memory asked with \"-m\"");
-      fprintf(stdout," option during Scotch call.\n" );
-    }
-  }
-}
-#endif
+/* functions shared by executable and library versions of MMG3D5 */
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -81,31 +69,6 @@ void _MMG5_warnOrientation(MMG5_pMesh mesh) {
     }
   }
   mesh->xt = 0;
-}
-
-/**
- * \param sigid signal number.
- *
- * Signal handling: specify error messages depending from catched signal.
- *
- */
-static inline
-void _MMG5_excfun(int sigid) {
-  fprintf(stdout,"\n Unexpected error:");  fflush(stdout);
-  switch(sigid) {
-  case SIGABRT:
-    fprintf(stdout,"  *** potential lack of memory.\n");  break;
-  case SIGFPE:
-    fprintf(stdout,"  Floating-point exception\n"); break;
-  case SIGILL:
-    fprintf(stdout,"  Illegal instruction\n"); break;
-  case SIGSEGV:
-    fprintf(stdout,"  Segmentation fault\n");  break;
-  case SIGTERM:
-  case SIGINT:
-    fprintf(stdout,"  Program killed\n");  break;
-  }
-  exit(EXIT_FAILURE);
 }
 
 /**
@@ -151,7 +114,6 @@ void _MMG5_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
  * functions.
  */
 void _MMG5_Set_commonFunc() {
-  MMG5_Init_parameters    = _MMG5_Init_parameters;
   _MMG5_bezierCP          = _MMG5_mmg3dBezierCP;
   _MMG5_chkmsh            = _MMG5_mmg3dChkmsh;
 #ifdef USE_SCOTCH

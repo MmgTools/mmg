@@ -67,41 +67,41 @@
   void nu pl
 
 /**
- * See \ref MMG5_Free_all function in \ref mmg2d/libmmg2d.h file.
+ * See \ref MMG2D_Free_all function in \ref mmg2d/libmmg2d.h file.
  */
-FORTRAN_NAME(MMG5_FREE_ALL,mmg5_free_all,(MMG5_pMesh *mesh,MMG5_pSol *met
+FORTRAN_NAME(MMG2D_FREE_ALL,mmg2d_free_all,(MMG5_pMesh *mesh,MMG5_pSol *met
                ),(mesh,met
                  )){
 
-  MMG5_Free_all(*mesh,*met);
+  MMG2D_Free_all(*mesh,*met);
 
   return;
 }
 
 /**
- * See \ref MMG2_saveMesh function in \ref mmg2d/libmmg2d.h file.
+ * See \ref MMG2D_saveMesh function in \ref mmg2d/libmmg2d.h file.
  */
-FORTRAN_NAME(MMG2_SAVEMESH,mmg2_savemesh,(MMG5_pMesh *mesh,char *meshin,int *strlen, int* retval),
+FORTRAN_NAME(MMG2D_SAVEMESH,mmg2d_savemesh,(MMG5_pMesh *mesh,char *meshin,int *strlen, int* retval),
              (mesh,meshin,strlen,retval)){
   char *tmp = NULL;
 
   tmp = (char*)malloc((*strlen+1)*sizeof(char));
   strncpy(tmp,meshin,*strlen);
   tmp[*strlen] = '\0';
-  *retval = MMG2_saveMesh(*mesh,tmp);
+  *retval = MMG2D_saveMesh(*mesh,tmp);
   _MMG5_SAFE_FREE(tmp);
 
   return;
 }
 /**
- * See \ref MMG2_mmg2dlib function in \ref mmg2d/libmmg2d.h file.
+ * See \ref MMG2D_mmg2dlib function in \ref mmg2d/libmmg2d.h file.
  */
 #warning todo : add callbackfunction argument in Fortran
-FORTRAN_NAME(MMG2_MMG2DLIB,mmg2_mmg2dlib,(MMG5_pMesh *mesh,MMG5_pSol *met
+FORTRAN_NAME(MMG2D_MMG2DLIB,mmg2d_mmg2dlib,(MMG5_pMesh *mesh,MMG5_pSol *met
                                           ,int* retval),(mesh,met
                                                          ,retval)){
 
-  *retval = MMG2_mmg2dlib(*mesh,*met,NULL);
+  *retval = MMG2D_mmg2dlib(*mesh,*met,NULL);
 
   return;
 }

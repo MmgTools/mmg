@@ -430,7 +430,7 @@ static int analar(MMG5_pMesh mesh,MMG5_pSol sol,pBucket bucket,double declic,int
         if(ddebug) printf("try cut %d %f \n",ip,t);
         if(ddebug) {
           printf("on essaie\n");
-          MMG2_saveMesh(mesh,"in.mesh");
+          MMG2D_saveMesh(mesh,"in.mesh");
         }
         if(ip < 0) {
           printf("IMPOSSIBLE TO CREATE NEW VERTEX\n");
@@ -446,7 +446,7 @@ static int analar(MMG5_pMesh mesh,MMG5_pSol sol,pBucket bucket,double declic,int
                 if (ddebug) printf("k= %d on insere pas bdry : %d %d\n",k,i1,i2);
                 //mesh->point[ip].tag = M_CORNER;
                 //mesh->point[ip].ref = 5;
-                //	MMG2_saveMesh(mesh,"del.mesh");
+                //	MMG2D_saveMesh(mesh,"del.mesh");
                 //exit(0);
                 _MMG5_delPt(mesh,ip);
                 continue;  
@@ -469,7 +469,7 @@ static int analar(MMG5_pMesh mesh,MMG5_pSol sol,pBucket bucket,double declic,int
           } else {
             if(ddebug) {
               printf("on insere la\n");
-              MMG2_saveMesh(mesh,"cut.o.mesh");
+              MMG2D_saveMesh(mesh,"cut.o.mesh");
             }
             ins = MMG2_split(mesh,sol,ip,k,voi[i]);
             if(ddebug) printf("cut ? %d\n",ins);   
@@ -487,7 +487,7 @@ static int analar(MMG5_pMesh mesh,MMG5_pSol sol,pBucket bucket,double declic,int
       else if ( tail < M_SHORT ) {
         if(ddebug) {
           printf("too short %d \n",adj);
-          MMG2_saveMesh(mesh,"ttttt.mesh");
+          MMG2D_saveMesh(mesh,"ttttt.mesh");
         }
         if ( !adj || pt->ref != mesh->tria[adj].ref )  { 
           if(!adj) {
@@ -527,7 +527,7 @@ static int analar(MMG5_pMesh mesh,MMG5_pSol sol,pBucket bucket,double declic,int
               _MMG5_delPt(mesh,i1);
               if(ddebug) {
                 printf("del ok\n");
-                //MMG2_saveMesh(mesh,"del.mesh");
+                //MMG2D_saveMesh(mesh,"del.mesh");
                 //exit(0);
               }
               break;   
@@ -538,7 +538,7 @@ static int analar(MMG5_pMesh mesh,MMG5_pSol sol,pBucket bucket,double declic,int
           _MMG5_delPt(mesh,i2);
           if(ddebug) {
             printf("del2 ok\n");
-            //MMG2_saveMesh(mesh,"del.mesh");
+            //MMG2D_saveMesh(mesh,"del.mesh");
             //exit(0);
           }
 
@@ -613,7 +613,7 @@ static int analargeom(MMG5_pMesh mesh,MMG5_pSol sol,int *alert) {
             printf("tr %d : %d %d %d mais %d\n",k,pt->edg[0],pt->edg[1],pt->edg[2],i);
             printf("%d %d %d\n",pt->v[0],pt->v[1],pt->v[2]);
             printf("adj %d %d %d\n",voi[0]/3,voi[1]/3,voi[2]/3);
-            MMG2_saveMesh(mesh,"titii.mesh");
+            MMG2D_saveMesh(mesh,"titii.mesh");
           }
           assert(pt->edg[i]);
           ip = cassarbdry(mesh,sol,pt->edg[i],i1,i2,0.5,tang); 

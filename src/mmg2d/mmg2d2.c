@@ -39,7 +39,7 @@ int MMG2_removeBBtriangles(MMG5_pMesh mesh) {
   ip3=(mesh->np-1);
   ip4=(mesh->np);
 
-  if(mesh->info.ddebug) MMG2_saveMesh(mesh,"avtdel.mesh");
+  if(mesh->info.ddebug) MMG2D_saveMesh(mesh,"avtdel.mesh");
   nd = 0; 
   for(k=1 ; k<=mesh->nt ; k++) {
     pt  = &mesh->tria[k];
@@ -60,7 +60,7 @@ int MMG2_removeBBtriangles(MMG5_pMesh mesh) {
       nd++;
     }
   }
-  if(mesh->info.ddebug) MMG2_saveMesh(mesh,"apresdel.mesh");
+  if(mesh->info.ddebug) MMG2D_saveMesh(mesh,"apresdel.mesh");
            
   if(!nd) {
     _MMG5_delPt(mesh,ip1);
@@ -69,7 +69,7 @@ int MMG2_removeBBtriangles(MMG5_pMesh mesh) {
     _MMG5_delPt(mesh,ip4); 
   } else {
     fprintf(stdout,"PROCEDURE FAILED : %d INDETERMINED TRIANGLES\n",nd);
-    MMG2_saveMesh(mesh,mesh->nameout);
+    MMG2D_saveMesh(mesh,mesh->nameout);
     return(0);
   }
   return(1);
@@ -133,7 +133,7 @@ int MMG2_insertpointdelone(MMG5_pMesh mesh,MMG5_pSol sol) {
     //printf("on trouve %d tria dans la cavity\n",lon);
     if ( lon < 1 ) {
       fprintf(stdout,"impossible d'inserer le point %d\n",k);
-      MMG2_saveMesh(mesh,"toto.mesh");
+      MMG2D_saveMesh(mesh,"toto.mesh");
       exit(0);
     } else {
       ret = _MMG2_delone(mesh,sol,k,list,lon);
@@ -148,7 +148,7 @@ int MMG2_insertpointdelone(MMG5_pMesh mesh,MMG5_pSol sol) {
     /*     //printf("adja %d %d %d\n",adja[0]/3, adja[1]/3,adja[2]/3); */
     /*   } */
     /*   _MMG5_chkmsh(mesh,1,0); */
-      // MMG2_saveMesh(mesh,"toto.mesh");
+      // MMG2D_saveMesh(mesh,"toto.mesh");
       //exit(0);
     /*}*/
 
@@ -183,7 +183,7 @@ int MMG2_insertpoint(MMG5_pMesh mesh,MMG5_pSol sol) {
     lel = MMG2_findTria(mesh,k);    
     if(!lel) {         
       //printf("on cherche le point %d : %e %e %d\n",k,ppt->c[0],ppt->c[1],ppt->ref);
-      //MMG2_saveMesh(mesh,"tmp.mesh");  
+      //MMG2D_saveMesh(mesh,"tmp.mesh");  
     }
     assert(lel);
     nflat = 0; // to avoid bad triangle  1, 2, 4, 3, 5, 7
@@ -436,7 +436,7 @@ int MMG2_insertpoint(MMG5_pMesh mesh,MMG5_pSol sol) {
     }  
     if(ddebug) {
       MMG2_tassage(mesh,sol);
-      MMG2_saveMesh(mesh,"titi.mesh");
+      MMG2D_saveMesh(mesh,"titi.mesh");
       _MMG5_chkmsh(mesh,0,0);
     }
 
@@ -911,7 +911,7 @@ int MMG2_mmg2d2(MMG5_pMesh mesh,MMG5_pSol sol) {
      _MMG5_chkmsh(mesh,1,0);
      printf("chk ok\n");
      MMG2_tassage(mesh,sol);
-     MMG2_saveMesh(mesh,"bdyenforcement.mesh");	
+     MMG2D_saveMesh(mesh,"bdyenforcement.mesh");	
   }
 
   /*mark SD and remove BB*/

@@ -147,29 +147,44 @@ IF ( BUILD_MMG3D OR BUILD_MMG )
 
   ############################################################################
   #####
-  #####         Fortran header: libmmg3df.h libmmg2df.h
+  #####         Fortran header: libmmg3df.h libmmg2df.h libmmgsf.h libmmgf.h
   #####
   ############################################################################
   IF (NOT WIN32)
-    ADD_EXECUTABLE(genheader2d ${CMAKE_SOURCE_DIR}/scripts/genheader.c)
+    ADD_EXECUTABLE(genheader ${CMAKE_SOURCE_DIR}/scripts/genheader.c)
     ADD_CUSTOM_COMMAND(OUTPUT ${MMG2D_SOURCE_DIR}/libmmg2df.h
-      COMMAND genheader2d ${MMG2D_SOURCE_DIR}/libmmg2df.h
+      COMMAND genheader ${MMG2D_SOURCE_DIR}/libmmg2df.h
       ${MMG2D_SOURCE_DIR}/libmmg2d.h ${CMAKE_SOURCE_DIR}/scripts/genfort.pl
       WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-      DEPENDS genheader2d ${MMG2D_SOURCE_DIR}/libmmg2d.h
+      DEPENDS genheader ${MMG2D_SOURCE_DIR}/libmmg2d.h
       ${CMAKE_SOURCE_DIR}/scripts/genfort.pl
-      COMMENT "Generating Fortran header"
+      COMMENT "Generating Fortran header for mmg2d"
       )
-    ADD_EXECUTABLE(genheader ${CMAKE_SOURCE_DIR}/scripts/genheader.c)
-
     ADD_CUSTOM_COMMAND(OUTPUT ${MMG3D_SOURCE_DIR}/libmmg3df.h
       COMMAND genheader ${MMG3D_SOURCE_DIR}/libmmg3df.h
       ${MMG3D_SOURCE_DIR}/libmmg3d.h ${CMAKE_SOURCE_DIR}/scripts/genfort.pl
       WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
       DEPENDS genheader ${MMG3D_SOURCE_DIR}/libmmg3d.h
       ${CMAKE_SOURCE_DIR}/scripts/genfort.pl
-      COMMENT "Generating Fortran header"
+      COMMENT "Generating Fortran header for mmg3d"
       )
+    ADD_CUSTOM_COMMAND(OUTPUT ${MMGS_SOURCE_DIR}/libmmgsf.h
+      COMMAND genheader ${MMGS_SOURCE_DIR}/libmmgsf.h
+      ${MMGS_SOURCE_DIR}/libmmgs.h ${CMAKE_SOURCE_DIR}/scripts/genfort.pl
+      WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+      DEPENDS genheader ${MMGS_SOURCE_DIR}/libmmgs.h
+      ${CMAKE_SOURCE_DIR}/scripts/genfort.pl
+      COMMENT "Generating Fortran header for mmgs"
+      )
+    ADD_CUSTOM_COMMAND(OUTPUT ${COMMON_SOURCE_DIR}/libmmgf.h
+      COMMAND genheader ${COMMON_SOURCE_DIR}/libmmgf.h
+      ${COMMON_SOURCE_DIR}/libmmg.h ${CMAKE_SOURCE_DIR}/scripts/genfort.pl
+      WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+      DEPENDS genheader ${COMMON_SOURCE_DIR}/libmmg.h
+      ${CMAKE_SOURCE_DIR}/scripts/genfort.pl
+      COMMENT "Generating Fortran header for libmmg.h file"
+      )
+
   ENDIF ()
 
   ############################################################################
@@ -233,6 +248,22 @@ FILE(
   sourcemmgs_files
   ${MMGS_SOURCE_DIR}/*.c   ${MMGS_SOURCE_DIR}/*.h
   ${COMMON_SOURCE_DIR}/*.c ${COMMON_SOURCE_DIR}/*.h
+  )
+LIST(REMOVE_ITEM sourcemmgs_files
+  ${MMGS_SOURCE_DIR}/mmgs.c
+  ${MMGS_SOURCE_DIR}/lib${PROJECT_NAME}s.c
+  ${MMGS_SOURCE_DIR}/lib${PROJECT_NAME}sf.c
+  ${REMOVE_FILE})
+FILE(
+  GLOB
+  mainmmgs_file
+  ${MMGS_SOURCE_DIR}/mmgs.c
+  )
+FILE(
+  GLOB
+  libmmgs_file
+  ${MMGS_SOURCE_DIR}/lib${PROJECT_NAME}s.c
+  ${MMGS_SOURCE_DIR}/lib${PROJECT_NAME}sf.c
   )
 
 ## mmg2d
@@ -409,6 +440,7 @@ IF ( BUILD_MMG3D OR BUILD_MMG )
       ${COMMON_SOURCE_DIR}/mmg.h
       ${COMMON_SOURCE_DIR}/eigenv.h
       ${COMMON_SOURCE_DIR}/libmmg.h
+      ${COMMON_SOURCE_DIR}/libmmgf.h
       ${COMMON_SOURCE_DIR}/chrono.h
       )
     # Install header files in /usr/local or equivalent
@@ -417,6 +449,60 @@ IF ( BUILD_MMG3D OR BUILD_MMG )
     INSTALL(FILES ${mmg2d_headers} DESTINATION ${CMAKE_SOURCE_DIR}/include/mmg/mmg2d)
   ENDIF()
 
+  ############################################################################
+  #####
+  #####         Compile mmgs libraries
+  #####
+  ############################################################################
+  SET(LIBRARY_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/lib)
+
+  OPTION ( LIBMMGS_STATIC "Compile static library" ON)
+  IF ( LIBMMGS_STATIC )
+    ADD_LIBRARY(${PROJECT_NAME}s_a  STATIC
+      ${MMGS_SOURCE_DIR}/lib${PROJECT_NAME}sf.h
+      ${sourcemmgs_files} ${libmmgs_file} )
+    SET_TARGET_PROPERTIES(${PROJECT_NAME}s_a PROPERTIES OUTPUT_NAME
+      ${PROJECT_NAME}s)
+    TARGET_LINK_LIBRARIES(${PROJECT_NAME}s_a ${LIBRARIES})
+    INSTALL(TARGETS ${PROJECT_NAME}s_a
+      ARCHIVE DESTINATION lib
+      LIBRARY DESTINATION lib)
+  ENDIF()
+
+  # Compile shared library
+  OPTION ( LIBMMGS_SHARED "Compile dynamic library" OFF)
+  IF ( LIBMMGS_SHARED )
+    ADD_LIBRARY(${PROJECT_NAME}s_so SHARED
+      ${MMGS_SOURCE_DIR}/lib${PROJECT_NAME}sf.h
+      ${sourcemmgs_files} ${libmmgs_file})
+    SET_TARGET_PROPERTIES(${PROJECT_NAME}s_so PROPERTIES
+      OUTPUT_NAME ${PROJECT_NAME}s)
+    SET_TARGET_PROPERTIES(${PROJECT_NAME}s_so PROPERTIES
+      VERSION 5.0.0 SOVERSION 5)
+    TARGET_LINK_LIBRARIES(${PROJECT_NAME}s_so ${LIBRARIES})
+      INSTALL(FILES ${MMGS_SOURCE_DIR}/lib${PROJECT_NAME}sf.h
+      DESTINATION include)
+    INSTALL(TARGETS ${PROJECT_NAME}s_so
+      ARCHIVE DESTINATION
+      LIBRARY DESTINATION lib)
+  ENDIF()
+
+  IF ( LIBMMGS_STATIC OR LIBMMGS_SHARED )
+    # mmgs header files needed for library
+    SET( mmgs_headers
+      ${MMGS_SOURCE_DIR}/libmmgs.h
+      ${MMGS_SOURCE_DIR}/libmmgsf.h
+      ${COMMON_SOURCE_DIR}/mmg.h
+      ${COMMON_SOURCE_DIR}/eigenv.h
+      ${COMMON_SOURCE_DIR}/libmmg.h
+      ${COMMON_SOURCE_DIR}/libmmgf.h
+      ${COMMON_SOURCE_DIR}/chrono.h
+      )
+    # Install header files in /usr/local or equivalent
+    INSTALL(FILES ${mmgs_headers} DESTINATION include/mmg/mmgs)
+    # Install header files in project directory
+    INSTALL(FILES ${mmgs_headers} DESTINATION ${CMAKE_SOURCE_DIR}/include/mmg/mmgs)
+  ENDIF()
 
   ############################################################################
   #####
@@ -462,6 +548,7 @@ IF ( BUILD_MMG3D OR BUILD_MMG )
       ${COMMON_SOURCE_DIR}/mmg.h
       ${COMMON_SOURCE_DIR}/eigenv.h
       ${COMMON_SOURCE_DIR}/libmmg.h
+      ${COMMON_SOURCE_DIR}/libmmgf.h
       ${COMMON_SOURCE_DIR}/chrono.h
       )
     # Install header files in /usr/local or equivalent
@@ -478,11 +565,17 @@ IF ( BUILD_MMG3D OR BUILD_MMG )
   OPTION ( TEST_LIBMMG3D "Compile tests for the mmg3d library" OFF)
   IF ( TEST_LIBMMG3D )
     INCLUDE(cmake/testing/libmmg3d_tests.cmake)
+    INCLUDE(cmake/testing/libmmg3d_oldAPI_tests.cmake)
   ENDIF()
 
   OPTION ( TEST_LIBMMG2D "Compile tests for the mmg2d library" OFF)
   IF ( TEST_LIBMMG2D )
     INCLUDE(cmake/testing/libmmg2d_tests.cmake)
+  ENDIF()
+
+  OPTION ( TEST_LIBMMGS "Compile tests for the mmgs library" OFF)
+  IF ( TEST_LIBMMGS )
+    INCLUDE(cmake/testing/libmmgs_tests.cmake)
   ENDIF()
 
   ###############################################################################
@@ -513,7 +606,9 @@ ENDIF()
 #####
 ###############################################################################
 IF ( BUILD_MMGS OR BUILD_MMG )
-  ADD_EXECUTABLE(${PROJECT_NAME}s    ${sourcemmgs_files} )
+  ADD_EXECUTABLE(${PROJECT_NAME}s
+    ${MMGS_SOURCE_DIR}/lib${PROJECT_NAME}sf.h
+    ${sourcemmgs_files} ${mainmmgs_file})
   TARGET_LINK_LIBRARIES(${PROJECT_NAME}s ${LIBRARIES})
   INSTALL(TARGETS ${PROJECT_NAME}s RUNTIME DESTINATION bin)
 
@@ -645,10 +740,10 @@ IF ( BUILD_MMG3D OR BUILD_MMGS OR BUILD_MMG2D OR BUILD_MMG )
       ENDIF()
 
       SET ( LISTEXEC_MMG2D ${EXECUT_MMG2D} )
-     IF ( TEST_LIBMMG2D )
-       SET(LIBMMG2D_EXEC0 ${EXECUTABLE_OUTPUT_PATH}/libmmg2d_example0)
-       SET(LIBMMG2D_EXECFORTRAN_a ${EXECUTABLE_OUTPUT_PATH}/libmmg2d_fortran_a)
-       SET(LIBMMG2D_EXEC1   ${EXECUTABLE_OUTPUT_PATH}/libmmg2d_example1)
+      IF ( TEST_LIBMMG2D )
+        SET(LIBMMG2D_EXEC0 ${EXECUTABLE_OUTPUT_PATH}/libmmg2d_example0)
+        SET(LIBMMG2D_EXECFORTRAN_a ${EXECUTABLE_OUTPUT_PATH}/libmmg2d_fortran_a)
+        SET(LIBMMG2D_EXEC1   ${EXECUTABLE_OUTPUT_PATH}/libmmg2d_example1)
 
         IF ( LIBMMG2D_STATIC )
           ADD_TEST(NAME libmmg2d_example0   COMMAND ${LIBMMG2D_EXEC0})
@@ -658,8 +753,8 @@ IF ( BUILD_MMG3D OR BUILD_MMGS OR BUILD_MMG2D OR BUILD_MMG )
           ADD_TEST(NAME libmmg2d_example0   COMMAND ${LIBMMG2D_EXEC0})
           ADD_TEST(NAME libmmg2d_example1   COMMAND ${LIBMMG2D_EXEC1})
         ENDIF()
-    ENDIF()
-      # Add mmgs tests
+      ENDIF()
+      # Add mmg2d tests
       INCLUDE( ${CMAKE_SOURCE_DIR}/cmake/testing/mmg2d_tests.cmake )
     ENDIF()
 
@@ -684,6 +779,20 @@ IF ( BUILD_MMG3D OR BUILD_MMGS OR BUILD_MMG2D OR BUILD_MMG )
 
       SET ( LISTEXEC_MMGS ${EXECUT_MMGS} )
 
+      IF ( TEST_LIBMMGS )
+        SET(LIBMMGS_EXEC0 ${EXECUTABLE_OUTPUT_PATH}/libmmgs_example0)
+        SET(LIBMMGS_EXECFORTRAN ${EXECUTABLE_OUTPUT_PATH}/libmmgs_fortran)
+        SET(LIBMMGS_EXEC1   ${EXECUTABLE_OUTPUT_PATH}/libmmgs_example1)
+
+        IF ( LIBMMGS_STATIC )
+          ADD_TEST(NAME libmmgs_example0   COMMAND ${LIBMMGS_EXEC0})
+          ADD_TEST(NAME libmmgs_fortran    COMMAND ${LIBMMGS_EXECFORTRAN})
+          ADD_TEST(NAME libmmgs_example1   COMMAND ${LIBMMGS_EXEC1})
+        ELSEIF( LIBMMGS_SHARED )
+          ADD_TEST(NAME libmmgs_example0   COMMAND ${LIBMMGS_EXEC0})
+          ADD_TEST(NAME libmmgs_example1   COMMAND ${LIBMMGS_EXEC1})
+        ENDIF()
+      ENDIF()
       # Add mmgs tests
       INCLUDE( ${CMAKE_SOURCE_DIR}/cmake/testing/mmgs_tests.cmake )
     ENDIF()
