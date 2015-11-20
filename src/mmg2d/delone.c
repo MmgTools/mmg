@@ -322,7 +322,7 @@ int _MMG2_delone(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist) {
   /*tria allocation : we create "size" tria*/
   ielnum[0] = size;
   for (k=1 ; k<=size ; k++) {
-    ielnum[k] = _MMG5_newElt(mesh);
+    ielnum[k] = _MMG2D_newElt(mesh);
     if(!ielnum[k]) {
       _MMG5_TRIA_REALLOC(mesh,ielnum[k],mesh->gap,
                         printf("  ## Error: unable to allocate a new element.\n");
@@ -393,7 +393,7 @@ int _MMG2_delone(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist) {
   for (k=0; k<ilist; k++) {
     if(tref!=mesh->tria[list[k]].ref)
       printf("arg ref ???? %d %d\n",tref,mesh->tria[list[k]].ref);
-    _MMG5_delElt(mesh,list[k]);
+    _MMG2D_delElt(mesh,list[k]);
   }
 
   //ppt = &mesh->point[ip];

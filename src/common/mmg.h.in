@@ -252,32 +252,6 @@
   } while(0)
 
 
-/** Reallocation of point table and sol table and creation
-    of point ip with coordinates o and tag tag*/
-#define _MMG5_POINT_REALLOC(mesh,sol,ip,wantedGap,law,o,tag ) do        \
-  {                                                                     \
-    int klink;                                                          \
-                                                                        \
-    _MMG5_TAB_RECALLOC(mesh,mesh->point,mesh->npmax,wantedGap,MMG5_Point, \
-                       "larger point table",law);                       \
-                                                                        \
-    mesh->npnil = mesh->np+1;                                           \
-    for (klink=mesh->npnil; klink<mesh->npmax-1; klink++)               \
-      mesh->point[klink].tmp  = klink+1;                                \
-                                                                        \
-    /* solution */                                                      \
-    if ( sol->m ) {                                                     \
-      _MMG5_ADD_MEM(mesh,(sol->size*(mesh->npmax-sol->npmax))*sizeof(double), \
-                    "larger solution",law);                             \
-      _MMG5_SAFE_REALLOC(sol->m,sol->size*(mesh->npmax+1),double,"larger solution"); \
-    }                                                                   \
-    sol->npmax = mesh->npmax;                                           \
-                                                                        \
-    /* We try again to add the point */                                 \
-    ip = _MMG5_newPt(mesh,o,tag);                                       \
-    if ( !ip ) {law;}                                                   \
-  }while(0)
-
 /** Inlined functions for libraries and executables */
 #ifdef USE_SCOTCH
 /** Warn user that we overflow asked memory during scotch call */
