@@ -329,10 +329,10 @@ static int _MMG5_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
   ptr = strstr(data,".mesh");
   if ( ptr )  *ptr = '\0';
   strcat(data,".mmgs5");
-  in = fopen(data,"r");
+  in = fopen(data,"rb");
   if ( !in ) {
     sprintf(data,"%s","DEFAULT.mmgs5");
-    in = fopen(data,"r");
+    in = fopen(data,"rb");
     if ( !in )  return(1);
   }
   fprintf(stdout,"  %%%% %s OPENED\n",data);

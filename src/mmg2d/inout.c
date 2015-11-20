@@ -107,7 +107,7 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,char *filename) {
       ptr  = strstr(data,".mesh");
       *ptr = '\0';
       strcat(data,".mesh");
-      if (!(inm = fopen(data,"r")) ) {
+      if (!(inm = fopen(data,"rb")) ) {
         fprintf(stderr,"  ** %s  NOT FOUND.\n",data);
         return(0);
       } else {
@@ -134,7 +134,7 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,char *filename) {
   else {
     ptr = strstr(data,".meshb");
     if( !ptr ) {
-      if( !(inm = fopen(data,"r")) ) {
+      if( !(inm = fopen(data,"rb")) ) {
         fprintf(stderr,"  ** %s  NOT FOUND.\n",data);
         return(0);
       }
@@ -522,7 +522,7 @@ int MMG2D_loadSol(MMG5_pSol sol,char *filename,int npmax,int msh) {
     ptr  = strstr(data,".solb");
     *ptr = '\0';
     strcat(data,".sol");
-    if( !(inm = fopen(data,"r")) ) {
+    if( !(inm = fopen(data,"rb")) ) {
       fprintf(stderr,"  ** %s  NOT FOUND.\n",data);
       return(0);
     }
@@ -961,7 +961,7 @@ int MMG2_loadVect(MMG5_pMesh mesh,char *filename) {
   /*   ptr  = strstr(data,".solb"); */
   /*   *ptr = '\0'; */
   /*   strcat(data,".sol"); */
-  /*   if( !(inm = fopen(data,"r")) ) { */
+  /*   if( !(inm = fopen(data,"rb")) ) { */
   /*     fprintf(stderr,"  ** %s  NOT FOUND.\n",data); */
   /*     return(0); */
   /*   } */
