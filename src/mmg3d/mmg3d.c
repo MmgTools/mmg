@@ -86,9 +86,7 @@ int main(int argc,char *argv[]) {
   MMG5_Mesh      mesh;
   MMG5_Sol       met,disp;
   int       ier;
-#ifdef UNIX
   char      stim[32];
-#endif
 
   fprintf(stdout,"  -- MMG3d, Release %s (%s) \n",MG_VER,MG_REL);
   fprintf(stdout,"     %s\n",MG_CPY);
@@ -104,10 +102,8 @@ int main(int argc,char *argv[]) {
   signal(SIGINT,_MMG5_excfun);
   atexit(_MMG5_endcod);
 
-#ifdef UNIX
   tminit(MMG5_ctim,TIMEMAX);
   chrono(ON,&MMG5_ctim[0]);
-#endif
 
   /* assign default values */
   memset(&mesh,0,sizeof(MMG5_Mesh));
@@ -128,9 +124,9 @@ int main(int argc,char *argv[]) {
 
   /* load data */
   fprintf(stdout,"\n  -- INPUT DATA\n");
-#ifdef UNIX
+
   chrono(ON,&MMG5_ctim[1]);
-#endif
+
   _MMG5_warnOrientation(&mesh);
   /* read mesh file */
   if ( MMG5_loadMesh(&mesh) < 1 )
@@ -164,18 +160,14 @@ int main(int argc,char *argv[]) {
     if ( !MMG5_parsop(&mesh,&met) )
       _MMG5_RETURN_AND_FREE(&mesh,&met,&disp,MMG5_LOWFAILURE);
   }
-#ifdef UNIX
+
   chrono(OFF,&MMG5_ctim[1]);
   printim(MMG5_ctim[1].gdif,stim);
   fprintf(stdout,"  -- DATA READING COMPLETED.     %s\n",stim);
-#else
-  fprintf(stdout, "  -- DATA READING COMPLETED.     \n");
-#endif
 
   /* analysis */
-#ifdef UNIX
   chrono(ON,&MMG5_ctim[2]);
-#endif
+
   _MMG5_setfunc(&mesh,&met);
   MMG3D_Set_saveFunc(&mesh);
 
@@ -211,20 +203,13 @@ int main(int argc,char *argv[]) {
 
   if ( mesh.info.imprim > 1 && !mesh.info.iso && met.m ) _MMG5_prilen(&mesh,&met,0);
 
-#ifdef UNIX
   chrono(OFF,&MMG5_ctim[2]);
   printim(MMG5_ctim[2].gdif,stim);
   if ( mesh.info.imprim )
     fprintf(stdout,"  -- PHASE 1 COMPLETED.     %s\n",stim);
-#else
-  if (mesh.info.imprim)
-	  fprintf(stdout, "  -- PHASE 1 COMPLETED.     \n");
-#endif
 
   /* mesh adaptation */
-#ifdef UNIX
   chrono(ON,&MMG5_ctim[3]);
-#endif
 
   if ( mesh.info.imprim ) {
     if ( mesh.info.lag < 0 )
@@ -301,15 +286,11 @@ if ( mesh.info.lag == -1 ) {
 }
 /* *************************************** End of part to skip in lag mode ? *************************** */
   
-#ifdef UNIX
   chrono(OFF,&MMG5_ctim[3]);
   printim(MMG5_ctim[3].gdif,stim);
   if ( mesh.info.imprim )
     fprintf(stdout,"  -- PHASE 2 COMPLETED.     %s\n",stim);
-#else
-  if (mesh.info.imprim)
-	  fprintf(stdout, "  -- PHASE 2 COMPLETED.     \n");
-#endif
+
   fprintf(stdout,"\n  %s\n   END OF MODULE MMG3d: IMB-LJLL \n  %s\n",MG_STR,MG_STR);
   
   /* save file */
@@ -318,15 +299,10 @@ if ( mesh.info.lag == -1 ) {
   if ( mesh.info.imprim > 1 && !mesh.info.iso )
     _MMG5_prilen(&mesh,&met,1);
 
-#ifdef UNIX
     if ( mesh.info.imprim )
     fprintf(stdout,"  -- PHASE 2 COMPLETED.     %s\n",stim);
 
   chrono(ON,&MMG5_ctim[1]);
-#else
-  if (mesh.info.imprim)
-	  fprintf(stdout, "  -- PHASE 2 COMPLETED.     \n");
-#endif
 
   if ( mesh.info.imprim )  fprintf(stdout,"\n  -- WRITING DATA FILE %s\n",mesh.nameout);
   if ( !_MMG5_unscaleMesh(&mesh,&met) )
@@ -337,9 +313,9 @@ if ( mesh.info.lag == -1 ) {
 
   if ( !MMG5_saveMet(&mesh,&met) )
     _MMG5_RETURN_AND_FREE(&mesh,&met,&disp,MMG5_STRONGFAILURE);
-#ifdef UNIX
+
   chrono(OFF,&MMG5_ctim[1]);
-#endif
+
   if ( mesh.info.imprim )  fprintf(stdout,"  -- WRITING COMPLETED\n");
 
   /* free mem */

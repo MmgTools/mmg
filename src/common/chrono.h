@@ -28,6 +28,8 @@
 #ifdef POSIX
 #include <sys/time.h>
 #include <sys/resource.h>
+#else
+#include <windows.h>
 #endif
 
 #ifndef  ON
@@ -52,6 +54,12 @@ typedef struct mytime {
 #ifdef POSIX
   struct  timeval rutim;
   struct  rusage  ru;
+#else
+  HANDLE        thisProcess;
+  FILETIME      ftIni, ftEnd, ftSys, ftUser;
+  SYSTEMTIME    stSys, stUser;
+  LARGE_INTEGER frequency;
+  LARGE_INTEGER rutim;
 #endif
   int     call;
 } mytime;
