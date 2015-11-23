@@ -918,14 +918,12 @@ int _MMG3D_intextmet(MMG5_pMesh mesh,MMG5_pSol met,int np,double me[6]) {
    else if ( p0->tag & MG_GEO ) {
      /* Take the tangent at point */
      n = &p0->n[0];
-     if ( np == 912) printf("GEO %e %e %e\n",n[0],n[1],n[2]);
    }
    else {
      /* Take the normal at point */
      assert(p0->xp);
      go = &mesh->xpoint[p0->xp];
      n = &go->n1[0];
-     if ( np == 912) printf(" %e %e %e\n",n[0],n[1],n[2]);
    }
 
   return(_MMG5_mmgIntextmet(mesh,met,np,me,n));
