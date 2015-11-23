@@ -119,7 +119,7 @@ int MMGS_loadMesh(MMG5_pMesh mesh) {
       ptr = strstr(data,".mesh");
       *ptr = '\0';
       strcat(data,".mesh");
-      if( !(inm = fopen(data,"r")) ) {
+      if( !(inm = fopen(data,"rb")) ) {
         fprintf(stderr,"  ** %s  NOT FOUND.\n",data);
         return(0);
       }
@@ -147,7 +147,7 @@ int MMGS_loadMesh(MMG5_pMesh mesh) {
   else {
     ptr = strstr(data,".meshb");
     if( !ptr ) {
-      if( !(inm = fopen(data,"r")) ) {
+      if( !(inm = fopen(data,"rb")) ) {
         fprintf(stderr,"  ** %s  NOT FOUND.\n",data);
         return(0);
       }
@@ -1079,7 +1079,7 @@ int MMGS_loadMet(MMG5_pMesh mesh,MMG5_pSol met) {
       ptr  = strstr(data,".solb");
       *ptr = '\0';
       strcat(data,".sol");
-      if (!(inm = fopen(data,"r"))  ) {
+      if (!(inm = fopen(data,"rb"))  ) {
         fprintf(stderr,"  ** %s  NOT FOUND. USE DEFAULT METRIC.\n",data);
         return(0);
       }
@@ -1088,7 +1088,7 @@ int MMGS_loadMet(MMG5_pMesh mesh,MMG5_pSol met) {
     }
   }
   else {
-    if (!(inm = fopen(data,"r")) ) {
+    if (!(inm = fopen(data,"rb")) ) {
       fprintf(stderr,"  ** %s  NOT FOUND. USE DEFAULT METRIC.\n",data);
       return(0);
     }

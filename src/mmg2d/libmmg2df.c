@@ -96,7 +96,7 @@ FORTRAN_NAME(MMG2D_SAVEMESH,mmg2d_savemesh,(MMG5_pMesh *mesh,char *meshin,int *s
 /**
  * See \ref MMG2D_mmg2dlib function in \ref mmg2d/libmmg2d.h file.
  */
-#warning todo : add callbackfunction argument in Fortran
+//#warning todo : add callbackfunction argument in Fortran
 FORTRAN_NAME(MMG2D_MMG2DLIB,mmg2d_mmg2dlib,(MMG5_pMesh *mesh,MMG5_pSol *met
                                           ,int* retval),(mesh,met
                                                          ,retval)){

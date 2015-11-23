@@ -28,6 +28,8 @@
  * \version 5
  * \date 01 2014
  * \copyright GNU Lesser General Public License.
+ * \warning To keep the genheader working, don't break line between the enum
+ * name and the opening brace (it creates errors under windows)
  *
  */
 
@@ -45,8 +47,7 @@
  * MMGS_DPARAM asked for real values.
  *
  */
-enum MMGS_Param
-{
+enum MMGS_Param {
   MMGS_IPARAM_verbose,           /*!< [-10..10], Tune level of verbosity */
   MMGS_IPARAM_mem,               /*!< [n/-1], Set memory size to n Mbytes or keep the default value */
   MMGS_IPARAM_debug,             /*!< [1/0], Turn on/off debug mode */

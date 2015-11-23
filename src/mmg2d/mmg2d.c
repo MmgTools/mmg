@@ -350,7 +350,7 @@ static void endcod() {
   int      k,call[TIMEMAX];
 
   //chrono(OFF,&ctim[0]);
-#warning endcod : comment for merge
+//#warning message endcod : comment for merge
   /* for (k=0; k<TIMEMAX; k++) { */
   /*   call[k] = ctim[k].call; */
   /*   ttim[k] = ctim[k].call ? gttime(ctim[k]) : 0.0; */
@@ -409,7 +409,7 @@ int main(int argc,char *argv[]) {
   /* load data */
   fprintf(stdout,"\n  -- INPUT DATA\n");
   //chrono(ON,&MMG5_ctim[1]);
-  if ( MMG2D_loadMesh(&mesh,mesh.namein) < 1) _MMG5_RETURN_AND_FREE(&mesh,&sol,MMG5_STRONGFAILURE);
+  if ( MMG2D_loadMesh(&mesh,mesh.namein) < 1) _MMG2D_RETURN_AND_FREE(&mesh,&sol,MMG5_STRONGFAILURE);
   if ( !MMG2D_loadSol(&sol,sol.namein,mesh.npmax,mesh.info.nreg) )  {    
     sol.np = mesh.np;
     sol.size = 1;
@@ -421,7 +421,7 @@ int main(int argc,char *argv[]) {
     fprintf(stdout,"  ## WARNING: WRONG SOLUTION NUMBER : %d != %d\n",sol.np,mesh.np);
     //exit(1);
   }
-  if(MMG2D_mmg2dlib(&mesh,&sol,NULL)) _MMG5_RETURN_AND_FREE(&mesh,&sol,MMG5_STRONGFAILURE);
+  if(MMG2D_mmg2dlib(&mesh,&sol,NULL)) _MMG2D_RETURN_AND_FREE(&mesh,&sol,MMG5_STRONGFAILURE);
   
 /*   } */
   //chrono(ON,&ctim[1]);
@@ -433,7 +433,7 @@ int main(int argc,char *argv[]) {
   //chrono(OFF,&ctim[1]);
 
    /* free mem */
-  _MMG5_RETURN_AND_FREE(&mesh,&sol,MMG5_SUCCESS);
+  _MMG2D_RETURN_AND_FREE(&mesh,&sol,MMG5_SUCCESS);
 }
   
 

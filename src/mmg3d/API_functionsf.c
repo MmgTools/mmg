@@ -28,6 +28,7 @@
  * \version 5
  * \date 01 2014
  * \copyright GNU Lesser General Public License.
+ * \warning Use the MMG3D_ prefix: MMG5_ prefix will became obsolete soon...
  * \note Please, refer to the \ref mmg3d/libmmg3d.h file for functions
  * documentation.
  *
@@ -522,20 +523,9 @@ FORTRAN_NAME(MMG3D_SAVEMET,mmg3d_savemet,(MMG5_pMesh *mesh,MMG5_pSol *met,int* r
  */
 FORTRAN_NAME(MMG5_INIT_MESH, mmg5_init_mesh,(MMG5_pMesh *mesh, MMG5_pSol *sol
                                              ,MMG5_pSol *disp
-#ifdef SINGUL
-                                             , MMG5_pSingul *sing
-#endif
                ),(mesh,sol,disp
-#ifdef SINGUL
-                  ,sing
-#endif
                  )) {
-#ifdef SINGUL
-  MMG5_Init_mesh(mesh,sol,disp,sing);
-#else
   MMG5_Init_mesh(mesh,sol,disp);
-#endif
-
   return;
 }
 
@@ -865,19 +855,9 @@ FORTRAN_NAME(MMG5_SET_LOCALPARAMETER,mmg5_set_localparameter,
  */
 FORTRAN_NAME(MMG5_FREE_STRUCTURES,mmg5_free_structures,(MMG5_pMesh *mesh,MMG5_pSol *met
                                                         ,MMG5_pSol *disp
-#ifdef SINGUL
-                                                        ,MMG5_pSingul *singul
-#endif
                ),(mesh,met,disp
-#ifdef SINGUL
-                  ,singul
-#endif
                  )){
-#ifdef SINGUL
-  MMG5_Free_structures(*mesh,*met,(disp==NULL)?NULL:*disp,*singul);
-#else
   MMG5_Free_structures(*mesh,*met,(disp==NULL)?NULL:*disp);
-#endif
   return;
 }
 

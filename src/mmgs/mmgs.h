@@ -62,6 +62,32 @@
     return(val);                                    \
   }while(0)
 
+/** Reallocation of point table and sol table and creation
+    of point ip with coordinates o and tag tag*/
+#define _MMG5_POINT_REALLOC(mesh,sol,ip,wantedGap,law,o,tag ) do        \
+  {                                                                     \
+    int klink;                                                          \
+                                                                        \
+    _MMG5_TAB_RECALLOC(mesh,mesh->point,mesh->npmax,wantedGap,MMG5_Point, \
+                       "larger point table",law);                       \
+                                                                        \
+    mesh->npnil = mesh->np+1;                                           \
+    for (klink=mesh->npnil; klink<mesh->npmax-1; klink++)               \
+      mesh->point[klink].tmp  = klink+1;                                \
+                                                                        \
+    /* solution */                                                      \
+    if ( sol->m ) {                                                     \
+      _MMG5_ADD_MEM(mesh,(sol->size*(mesh->npmax-sol->npmax))*sizeof(double), \
+                    "larger solution",law);                             \
+      _MMG5_SAFE_REALLOC(sol->m,sol->size*(mesh->npmax+1),double,"larger solution"); \
+    }                                                                   \
+    sol->npmax = mesh->npmax;                                           \
+                                                                        \
+    /* We try again to add the point */                                 \
+    ip = _MMG5_newPt(mesh,o,tag);                                       \
+    if ( !ip ) {law;}                                                   \
+  }while(0)
+
 /** Reallocation of tria table and creation
     of tria jel */
 #define _MMG5_TRIA_REALLOC( mesh,jel,wantedGap,law ) do                 \
@@ -128,8 +154,7 @@ int  swpedg(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,char typchk);
 char typelt(MMG5_pPoint p[3],char *ia);
 int  litswp(MMG5_pMesh mesh,int k,char i,double kal);
 int  litcol(MMG5_pMesh mesh,int k,char i,double kal);
-int  rootDeg2(double complex a[3], double complex r[2]);
-
+int  rootDeg2(DOUBLE_COMPLEX a[3], DOUBLE_COMPLEX r[2]);
 int  _MMG5_mmgsChkmsh(MMG5_pMesh,int,int);
 int  paratmet(double c0[3],double n0[3],double m[6],double c1[3],double n1[3],double mt[6]);
 int  intregmet(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,double s,double mr[6]);
@@ -153,8 +178,8 @@ int  _MMG5_indPt(MMG5_pMesh mesh,int kp);
 /* init structures */
 void  _MMG5_Init_parameters(MMG5_pMesh mesh);
 /* iso/aniso computations */
-double caleltsig_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel);
-double caleltsig_iso(MMG5_pMesh mesh,MMG5_pSol met,int iel);
+extern double caleltsig_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel);
+extern double caleltsig_iso(MMG5_pMesh mesh,MMG5_pSol met,int iel);
 int    _MMG5_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met);
 int    _MMG5_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met);
 void   _MMG5_defaultValues(MMG5_pMesh);

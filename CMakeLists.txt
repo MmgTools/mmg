@@ -24,6 +24,16 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8.0)
 
 PROJECT (mmg)
 
+# Set preprocessor flag to build on windows
+IF (NOT WIN32)
+  # Set flags to say that we are posix and gnu compatible
+  SET (CMAKE_C_FLAGS "-DPOSIX ${CMAKE_C_FLAGS}")
+  SET (CMAKE_C_FLAGS "-DGNU ${CMAKE_C_FLAGS}")
+ELSEIF(MINGW)
+  # Set flag to say that we are gnu compatible
+  SET (CMAKE_C_FLAGS "-DGNU ${CMAKE_C_FLAGS}")
+ENDIF ()
+
 ###############################################################################
 #####
 #####         Release version and date
@@ -143,40 +153,14 @@ ELSE ( )
   MESSAGE (WARNING "Nothing to build")
 ENDIF()
 
-IF ( BUILD_MMG3D OR BUILD_MMG )
-
   ############################################################################
   #####
   #####         Fortran header: libmmg3df.h libmmg2df.h libmmgsf.h libmmgf.h
   #####
   ############################################################################
-  IF (NOT WIN32)
-    ADD_EXECUTABLE(genheader ${CMAKE_SOURCE_DIR}/scripts/genheader.c)
-    ADD_CUSTOM_COMMAND(OUTPUT ${MMG2D_SOURCE_DIR}/libmmg2df.h
-      COMMAND genheader ${MMG2D_SOURCE_DIR}/libmmg2df.h
-      ${MMG2D_SOURCE_DIR}/libmmg2d.h ${CMAKE_SOURCE_DIR}/scripts/genfort.pl
-      WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-      DEPENDS genheader ${MMG2D_SOURCE_DIR}/libmmg2d.h
-      ${CMAKE_SOURCE_DIR}/scripts/genfort.pl
-      COMMENT "Generating Fortran header for mmg2d"
-      )
-    ADD_CUSTOM_COMMAND(OUTPUT ${MMG3D_SOURCE_DIR}/libmmg3df.h
-      COMMAND genheader ${MMG3D_SOURCE_DIR}/libmmg3df.h
-      ${MMG3D_SOURCE_DIR}/libmmg3d.h ${CMAKE_SOURCE_DIR}/scripts/genfort.pl
-      WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-      DEPENDS genheader ${MMG3D_SOURCE_DIR}/libmmg3d.h
-      ${CMAKE_SOURCE_DIR}/scripts/genfort.pl
-      COMMENT "Generating Fortran header for mmg3d"
-      )
-    ADD_CUSTOM_COMMAND(OUTPUT ${MMGS_SOURCE_DIR}/libmmgsf.h
-      COMMAND genheader ${MMGS_SOURCE_DIR}/libmmgsf.h
-      ${MMGS_SOURCE_DIR}/libmmgs.h ${CMAKE_SOURCE_DIR}/scripts/genfort.pl
-      WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-      DEPENDS genheader ${MMGS_SOURCE_DIR}/libmmgs.h
-      ${CMAKE_SOURCE_DIR}/scripts/genfort.pl
-      COMMENT "Generating Fortran header for mmgs"
-      )
-    ADD_CUSTOM_COMMAND(OUTPUT ${COMMON_SOURCE_DIR}/libmmgf.h
+  IF ( NOT WIN32 OR MINGW )
+      ADD_EXECUTABLE(genheader ${CMAKE_SOURCE_DIR}/scripts/genheader.c)
+      ADD_CUSTOM_COMMAND(OUTPUT ${COMMON_SOURCE_DIR}/libmmgf.h
       COMMAND genheader ${COMMON_SOURCE_DIR}/libmmgf.h
       ${COMMON_SOURCE_DIR}/libmmg.h ${CMAKE_SOURCE_DIR}/scripts/genfort.pl
       WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
@@ -184,9 +168,48 @@ IF ( BUILD_MMG3D OR BUILD_MMG )
       ${CMAKE_SOURCE_DIR}/scripts/genfort.pl
       COMMENT "Generating Fortran header for libmmg.h file"
       )
+  ENDIF()
 
-  ENDIF ()
+IF ( BUILD_MMG2D OR BUILD_MMG )
+  IF (NOT WIN32 OR MINGW)
+    ADD_CUSTOM_COMMAND(OUTPUT ${MMG2D_SOURCE_DIR}/libmmg2df.h
+      COMMAND genheader ${MMG2D_SOURCE_DIR}/libmmg2df.h
+      ${MMG2D_SOURCE_DIR}/libmmg2d.h ${CMAKE_SOURCE_DIR}/scripts/genfort.pl
+      WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+      DEPENDS genheader ${MMG2D_SOURCE_DIR}/libmmg2d.h ${COMMON_SOURCE_DIR}/libmmgf.h
+      ${CMAKE_SOURCE_DIR}/scripts/genfort.pl
+      COMMENT "Generating Fortran header for mmg2d"
+      )
+	ENDIF()
+  ENDIF()
 
+IF ( BUILD_MMG3D OR BUILD_MMG )
+  IF (NOT WIN32 OR MINGW)
+    ADD_CUSTOM_COMMAND(OUTPUT ${MMG3D_SOURCE_DIR}/libmmg3df.h
+      COMMAND genheader ${MMG3D_SOURCE_DIR}/libmmg3df.h
+      ${MMG3D_SOURCE_DIR}/libmmg3d.h ${CMAKE_SOURCE_DIR}/scripts/genfort.pl
+      WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+      DEPENDS genheader ${MMG3D_SOURCE_DIR}/libmmg3d.h ${COMMON_SOURCE_DIR}/libmmgf.h
+      ${CMAKE_SOURCE_DIR}/scripts/genfort.pl
+      COMMENT "Generating Fortran header for mmg3d"
+      )
+	ENDIF()
+  ENDIF()
+
+  IF ( BUILD_MMGS OR BUILD_MMG )
+    IF ( NOT WIN32 OR MINGW )
+      ADD_CUSTOM_COMMAND(OUTPUT ${MMGS_SOURCE_DIR}/libmmgsf.h
+        COMMAND genheader ${MMGS_SOURCE_DIR}/libmmgsf.h
+        ${MMGS_SOURCE_DIR}/libmmgs.h ${CMAKE_SOURCE_DIR}/scripts/genfort.pl
+        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+        DEPENDS genheader ${MMGS_SOURCE_DIR}/libmmgs.h ${COMMON_SOURCE_DIR}/libmmgf.h
+        ${CMAKE_SOURCE_DIR}/scripts/genfort.pl
+        COMMENT "Generating Fortran header for mmgs"
+      )
+    ENDIF ( )
+  ENDIF ( )
+
+  IF ( BUILD_MMG3D OR BUILD_MMG )
   ############################################################################
   #####
   #####         Choose type of insertion: delaunay kernel or patterns
@@ -292,12 +315,12 @@ FILE(
 
 INCLUDE_DIRECTORIES(${COMMON_SOURCE_DIR})
 
-IF (NOT WIN32)
+IF (NOT WIN32 OR MINGW)
   FIND_LIBRARY(M_LIB m)
   SET( LIBRARIES ${M_LIB} ${LIBRARIES})
 ENDIF()
 
-IF ( BUILD_MMG3D OR BUILD_MMG )
+IF ( BUILD_MMG3D OR BUILD_MMGS OR BUILD_MMG )
   ############################################################################
   #####
   #####         Scotch
@@ -318,7 +341,17 @@ IF ( BUILD_MMG3D OR BUILD_MMG )
       SET(CMAKE_REQUIRED_LIBRARIES ${SCOTCHERR_LIBRARY})
 
       SET(CMAKE_C_FLAGS "-DUSE_SCOTCH ${CMAKE_C_FLAGS}")
-      SET(SCOTCH_LINK_FLAGS "-lpthread")
+
+	  IF ( NOT WIN32 )
+        SET(SCOTCH_LINK_FLAGS "-lpthread")
+	  ELSE ()
+	    # On win32, it is easier to compile scotch without the pthreads so, don't use the -lpthread flag
+
+        # Turn off "Image Has Safe Exception Handlers" linker option (SAFESEH error of visual studio):
+        # see the my_add_link_flags macro.
+        INCLUDE(cmake/config/AddCompileLinkFlags.cmake)
+      ENDIF ()
+
       MESSAGE(STATUS
         "Compilation with scotch: ${SCOTCH_LIBRARY}")
       SET( LIBRARIES ${SCOTCH_LINK_FLAGS} ${LIBRARIES})
@@ -333,8 +366,11 @@ IF ( BUILD_MMG3D OR BUILD_MMG )
       "please set the CMake variable or environment variable SCOTCH_DIR "
       "to your scotch directory.")
     OPTION ( USE_SCOTCH "Use SCOTCH TOOL for renumbering" OFF)
+	SET(USE_SCOTCH OFF)
   ENDIF ( )
+ENDIF ( )
 
+IF (BUILD_MMG3D OR BUILD_MMG)
   ############################################################################
   #####
   #####         Elastic
@@ -412,6 +448,9 @@ IF ( BUILD_MMG3D OR BUILD_MMG )
     SET_TARGET_PROPERTIES(${PROJECT_NAME}2d_a PROPERTIES OUTPUT_NAME
       ${PROJECT_NAME}2d)
     TARGET_LINK_LIBRARIES(${PROJECT_NAME}2d_a ${LIBRARIES})
+    INSTALL(TARGETS ${PROJECT_NAME}2d_a
+      ARCHIVE DESTINATION lib
+      LIBRARY DESTINATION lib)
   ENDIF()
 
   # Compile shared library
@@ -428,7 +467,7 @@ IF ( BUILD_MMG3D OR BUILD_MMG )
       INSTALL(FILES ${MMG2D_SOURCE_DIR}/lib${PROJECT_NAME}2df.h
       DESTINATION include)
     INSTALL(TARGETS ${PROJECT_NAME}2d_so
-      ARCHIVE DESTINATION
+      ARCHIVE DESTINATION lib
       LIBRARY DESTINATION lib)
   ENDIF()
 
@@ -483,7 +522,7 @@ IF ( BUILD_MMG3D OR BUILD_MMG )
       INSTALL(FILES ${MMGS_SOURCE_DIR}/lib${PROJECT_NAME}sf.h
       DESTINATION include)
     INSTALL(TARGETS ${PROJECT_NAME}s_so
-      ARCHIVE DESTINATION
+      ARCHIVE DESTINATION lib
       LIBRARY DESTINATION lib)
   ENDIF()
 
@@ -536,7 +575,7 @@ IF ( BUILD_MMG3D OR BUILD_MMG )
       OUTPUT_NAME ${PROJECT_NAME}3d)
     TARGET_LINK_LIBRARIES(${PROJECT_NAME}3d_so ${LIBRARIES})
     INSTALL(TARGETS ${PROJECT_NAME}3d_so
-      ARCHIVE DESTINATION
+      ARCHIVE DESTINATION lib
       LIBRARY DESTINATION lib)
   ENDIF()
 
@@ -586,6 +625,11 @@ IF ( BUILD_MMG3D OR BUILD_MMG )
   ADD_EXECUTABLE(${PROJECT_NAME}3d
     ${MMG3D_SOURCE_DIR}/lib${PROJECT_NAME}3df.h
     ${source_files} ${main_file})
+
+  IF ( WIN32 AND NOT MINGW AND USE_SCOTCH )
+    my_add_link_flags(${PROJECT_NAME}3d "/SAFESEH:NO")
+  ENDIF ( )
+
   TARGET_LINK_LIBRARIES(${PROJECT_NAME}3d ${LIBRARIES})
   INSTALL(TARGETS ${PROJECT_NAME}3d RUNTIME DESTINATION bin)
 
@@ -609,6 +653,11 @@ IF ( BUILD_MMGS OR BUILD_MMG )
   ADD_EXECUTABLE(${PROJECT_NAME}s
     ${MMGS_SOURCE_DIR}/lib${PROJECT_NAME}sf.h
     ${sourcemmgs_files} ${mainmmgs_file})
+
+  IF ( WIN32 AND NOT MINGW AND USE_SCOTCH )
+    my_add_link_flags(${PROJECT_NAME}s "/SAFESEH:NO")
+  ENDIF ( )
+
   TARGET_LINK_LIBRARIES(${PROJECT_NAME}s ${LIBRARIES})
   INSTALL(TARGETS ${PROJECT_NAME}s RUNTIME DESTINATION bin)
 
@@ -630,6 +679,11 @@ ENDIF()
 IF ( BUILD_MMG2D OR BUILD_MMG )
   ADD_EXECUTABLE(${PROJECT_NAME}2d    
  ${MMG2D_SOURCE_DIR}/lib${PROJECT_NAME}2df.h ${sourcemmg2d_files} ${mainmmg2d_file} )
+
+  IF ( WIN32 AND NOT MINGW AND USE_SCOTCH )
+    my_add_link_flags(${PROJECT_NAME}2d "/SAFESEH:NO")
+  ENDIF ( )
+
   TARGET_LINK_LIBRARIES(${PROJECT_NAME}2d ${LIBRARIES})
   INSTALL(TARGETS ${PROJECT_NAME}2d RUNTIME DESTINATION bin)
 
@@ -761,7 +815,8 @@ IF ( BUILD_MMG3D OR BUILD_MMGS OR BUILD_MMG2D OR BUILD_MMG )
     # Add runtime that we want to test for mmgs
     IF( MMGS_CI )
       IF(${CMAKE_BUILD_TYPE} MATCHES "Debug")
-        SET(EXECUT_MMGS ${EXECUTABLE_OUTPUT_PATH}/${PROJECT_NAME}s_debug)
+   	    FILE(TO_NATIVE_PATH ${EXECUTABLE_OUTPUT_PATH}/${PROJECT_NAME}s_debug  EXECUT_MMGS)
+        #SET(EXECUT_MMGS ${EXECUTABLE_OUTPUT_PATH}/${PROJECT_NAME}s_debug)
         SET(BUILDNAME ${BUILDNAME}_debug CACHE STRING "build name variable")
       ELSEIF(${CMAKE_BUILD_TYPE} MATCHES "Release")
         SET(EXECUT_MMGS ${EXECUTABLE_OUTPUT_PATH}/${PROJECT_NAME}s_O3)
@@ -1022,7 +1077,7 @@ SET(CPACK_SOURCE_IGNORE_FILES ";build*" ${CPACK_SOURCE_IGNORE_FILES}  )
 SET(CPACK_SOURCE_IGNORE_FILES ";doc/doxygen/.*/html;doc/doxygen/.*/Doxyfile$"
   ${CPACK_SOURCE_IGNORE_FILES}  )
 
-IF ( (WIN32 OR WIN64) AND (NOT UNIX) )
+IF ( WIN32 AND (NOT UNIX) )
 #  # Warning compilation under windows not tested
 #  #SET(CPACK_PACKAGE_ICON "${CMAKE_SOURCE_DIR}/logo.pdf")
 #  SET(CPACK_NSIS_INSTALLED_ICON_NAME "bin\\\\${PROJECT_NAME}.exe")
@@ -1039,6 +1094,6 @@ IF ( (WIN32 OR WIN64) AND (NOT UNIX) )
 #ELSEIF (APPLE )
 #  SET(CPACK_BINARY_OSX11 "ON")
 #ELSEIF ( UNIX )
-ENDIF (  (WIN32 OR WIN64) AND (NOT UNIX) )
+ENDIF (  WIN32 AND (NOT UNIX) )
 
 INCLUDE(CPack)

@@ -124,7 +124,9 @@ int main(int argc,char *argv[]) {
 
   /* load data */
   fprintf(stdout,"\n  -- INPUT DATA\n");
+
   chrono(ON,&MMG5_ctim[1]);
+
   _MMG5_warnOrientation(&mesh);
   /* read mesh file */
   if ( MMG5_loadMesh(&mesh) < 1 )
@@ -158,12 +160,14 @@ int main(int argc,char *argv[]) {
     if ( !MMG5_parsop(&mesh,&met) )
       _MMG5_RETURN_AND_FREE(&mesh,&met,&disp,MMG5_LOWFAILURE);
   }
+
   chrono(OFF,&MMG5_ctim[1]);
   printim(MMG5_ctim[1].gdif,stim);
   fprintf(stdout,"  -- DATA READING COMPLETED.     %s\n",stim);
 
   /* analysis */
   chrono(ON,&MMG5_ctim[2]);
+
   _MMG5_setfunc(&mesh,&met);
   MMG3D_Set_saveFunc(&mesh);
 
@@ -206,7 +210,7 @@ int main(int argc,char *argv[]) {
 
   /* mesh adaptation */
   chrono(ON,&MMG5_ctim[3]);
-  
+
   if ( mesh.info.imprim ) {
     if ( mesh.info.lag < 0 )
       fprintf(stdout,"\n  -- PHASE 2 : %s MESHING\n",met.size < 6 ? "ISOTROPIC" : "ANISOTROPIC");
@@ -279,7 +283,6 @@ if ( mesh.info.lag == -1 ) {
     }
   }
 #endif
-
 }
 /* *************************************** End of part to skip in lag mode ? *************************** */
   
@@ -287,6 +290,7 @@ if ( mesh.info.lag == -1 ) {
   printim(MMG5_ctim[3].gdif,stim);
   if ( mesh.info.imprim )
     fprintf(stdout,"  -- PHASE 2 COMPLETED.     %s\n",stim);
+
   fprintf(stdout,"\n  %s\n   END OF MODULE MMG3d: IMB-LJLL \n  %s\n",MG_STR,MG_STR);
   
   /* save file */
@@ -295,7 +299,11 @@ if ( mesh.info.lag == -1 ) {
   if ( mesh.info.imprim > 1 && !mesh.info.iso )
     _MMG5_prilen(&mesh,&met,1);
 
+    if ( mesh.info.imprim )
+    fprintf(stdout,"  -- PHASE 2 COMPLETED.     %s\n",stim);
+
   chrono(ON,&MMG5_ctim[1]);
+
   if ( mesh.info.imprim )  fprintf(stdout,"\n  -- WRITING DATA FILE %s\n",mesh.nameout);
   if ( !_MMG5_unscaleMesh(&mesh,&met) )
     _MMG5_RETURN_AND_FREE(&mesh,&met,&disp,MMG5_STRONGFAILURE);
@@ -305,7 +313,9 @@ if ( mesh.info.lag == -1 ) {
 
   if ( !MMG5_saveMet(&mesh,&met) )
     _MMG5_RETURN_AND_FREE(&mesh,&met,&disp,MMG5_STRONGFAILURE);
+
   chrono(OFF,&MMG5_ctim[1]);
+
   if ( mesh.info.imprim )  fprintf(stdout,"  -- WRITING COMPLETED\n");
 
   /* free mem */

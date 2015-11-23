@@ -41,8 +41,11 @@ int _MMG5_movintpt(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,int improve
   MMG5_pTetra               pt,pt0;
   MMG5_pPoint               p0,p1,p2,p3,ppt0;
   double               vol,totvol;
-  double               calold,calnew,callist[ilist];
+  double               calold,calnew,*callist;
   int                  k,iel,i0;
+
+  // Dynamic alloc for windows comptibility
+  _MMG5_SAFE_MALLOC(callist, ilist, double);
 
   pt0    = &mesh->tetra[0];
   ppt0   = &mesh->point[0];
@@ -71,7 +74,11 @@ int _MMG5_movintpt(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,int improve
     ppt0->c[2] += 0.25 * vol*(p0->c[2] + p1->c[2] + p2->c[2] + p3->c[2]);
     calold = MG_MIN(calold, pt->qual);
   }
-  if ( totvol < _MMG5_EPSD2 )  return(0);
+  if (totvol < _MMG5_EPSD2) {
+	  _MMG5_SAFE_FREE(callist);
+	  return(0);
+  }
+
   totvol = 1.0 / totvol;
   ppt0->c[0] *= totvol;
   ppt0->c[1] *= totvol;
@@ -86,14 +93,28 @@ int _MMG5_movintpt(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,int improve
     memcpy(pt0,pt,sizeof(MMG5_Tetra));
     pt0->v[i0] = 0;
     callist[k] = _MMG5_orcal(mesh,met,0);
-    if ( callist[k] < _MMG5_EPSD2 )        return(0);
+	if (callist[k] < _MMG5_EPSD2) {
+		_MMG5_SAFE_FREE(callist);
+		return(0);
+	}
     calnew = MG_MIN(calnew,callist[k]);
   }
-    
-  if ( calold < _MMG5_NULKAL && calnew <= calold )    return(0);
-  else if (calnew < _MMG5_NULKAL) return(0);
-  else if ( improve && calnew < 0.9 * calold )     return(0);
-  else if ( calnew < 0.3 * calold )     return(0);
+  if (calold < _MMG5_NULKAL && calnew <= calold) {
+	  _MMG5_SAFE_FREE(callist);
+	  return(0);
+  }
+  else if (calnew < _MMG5_NULKAL) {
+	  _MMG5_SAFE_FREE(callist);
+	  return(0);
+  }
+  else if ( improve && calnew < 0.9 * calold ) {
+	  _MMG5_SAFE_FREE(callist);
+	  return(0);
+  }
+  else if ( calnew < 0.3 * calold ) {
+	  _MMG5_SAFE_FREE(callist);
+	  return(0);
+  }
 
   /* update position */
   p0 = &mesh->point[pt->v[i0]];
@@ -104,6 +125,7 @@ int _MMG5_movintpt(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,int improve
     (&mesh->tetra[list[k]/4])->qual=callist[k];
   }
 
+  _MMG5_SAFE_FREE(callist);
   return(1);
 }
 
@@ -130,7 +152,7 @@ int _MMG5_movbdyregpt(MMG5_pMesh mesh, MMG5_pSol met,int *listv,
   double            *n,r[3][3],lispoi[3*_MMG5_LMAX+1],ux,uy,uz,det2d;
   double            detloc,oppt[2],step,lambda[3];
   double            ll,m[2],uv[2],o[3],no[3],to[3];
-  double            calold,calnew,caltmp,callist[ilistv];
+  double            calold,calnew,caltmp,*callist;
   int               k,kel,iel,l,n0,na,nb,ntempa,ntempb,ntempc,nut,nxp;
   unsigned char     i0,iface,i;
 
@@ -443,6 +465,10 @@ int _MMG5_movbdyregpt(MMG5_pMesh mesh, MMG5_pSol met,int *listv,
   memset(pxp,0,sizeof(MMG5_xPoint));
 
   /* Test : check whether all volumes remain positive with new position of the point */
+
+  // Dynamic allocations for windows compatibility
+  _MMG5_SAFE_MALLOC(callist, ilistv, double);
+
   calold = calnew = DBL_MAX;
   for (l=0; l<ilistv; l++) {
     k    = listv[l] / 4;
@@ -453,12 +479,24 @@ int _MMG5_movbdyregpt(MMG5_pMesh mesh, MMG5_pSol met,int *listv,
     pt0->v[i0] = 0;
     calold = MG_MIN(calold, pt->qual);
     callist[l]=_MMG5_orcal(mesh,met,0);
-    if ( callist[l] < _MMG5_EPSD )        return(0);
+	if (callist[l] < _MMG5_EPSD) {
+		_MMG5_SAFE_FREE(callist);
+		return(0);
+	}
     calnew = MG_MIN(calnew,callist[l]);
   }
-  if ( calold < _MMG5_NULKAL && calnew <= calold )    return(0);
-  else if (calnew < _MMG5_NULKAL) return(0);
-  else if ( calnew < 0.3*calold )        return(0);
+  if (calold < _MMG5_NULKAL && calnew <= calold) {
+	  _MMG5_SAFE_FREE(callist);
+	  return(0);
+  }
+  else if (calnew < _MMG5_NULKAL) {
+	  _MMG5_SAFE_FREE(callist);
+	  return(0);
+  }
+  else if (calnew < 0.3*calold) {
+	  _MMG5_SAFE_FREE(callist);
+	  return(0);
+  }
 
   /* When all tests have been carried out, update coordinates and normals */
   p0->c[0] = o[0];
@@ -472,6 +510,7 @@ int _MMG5_movbdyregpt(MMG5_pMesh mesh, MMG5_pSol met,int *listv,
   for(l=0; l<ilistv; l++){
     (&mesh->tetra[listv[l]/4])->qual= callist[l];
   }
+  _MMG5_SAFE_FREE(callist);
   return(1);
 }
 
@@ -495,7 +534,7 @@ int _MMG5_movbdyrefpt(MMG5_pMesh mesh, MMG5_pSol met, int *listv,
   MMG5_Tria             tt;
   MMG5_pxPoint          pxp;
   double                step,ll1old,ll2old,o[3],no[3],to[3];
-  double                calold,calnew,caltmp,callist[ilistv];
+  double                calold,calnew,caltmp,*callist;
   int                   l,iel,ip0,ipa,ipb,iptmpa,iptmpb,it1,it2,ip1,ip2,ip,nxp;
   unsigned char         i,i0,ie,iface,iface1,iface2,iea,ieb,ie1,ie2;
   char                  tag;
@@ -733,6 +772,9 @@ int _MMG5_movbdyrefpt(MMG5_pMesh mesh, MMG5_pSol met, int *listv,
   memset(pxp,0,sizeof(MMG5_xPoint));
 
   /* Test : check whether all volumes remain positive with new position of the point */
+  // Dynamic allocations for windows compatibility
+  _MMG5_SAFE_MALLOC(callist, ilistv, double);
+
   calold = calnew = DBL_MAX;
   for( l=0 ; l<ilistv ; l++ ){
     iel = listv[l] / 4;
@@ -743,12 +785,17 @@ int _MMG5_movbdyrefpt(MMG5_pMesh mesh, MMG5_pSol met, int *listv,
     pt0->v[i0] = 0;
     calold = MG_MIN(calold, pt->qual);
     callist[l] = _MMG5_orcal(mesh,met,0);
-    if ( callist[l] < _MMG5_EPSD )        return(0);
+	if (callist[l] < _MMG5_EPSD) {
+		_MMG5_SAFE_FREE(callist);
+		return(0);
+	}
     calnew = MG_MIN(calnew,callist[l]);
   }
-  if ( calold < _MMG5_NULKAL && calnew <= calold )    return(0);
-  else if (calnew < _MMG5_NULKAL) return(0);
-  else if ( calnew <= 0.3*calold )      return(0);
+  if ((calold < _MMG5_NULKAL && calnew <= calold) ||
+	  (calnew < _MMG5_NULKAL) || (calnew <= 0.3*calold)) {
+	  _MMG5_SAFE_FREE(callist);
+	  return(0);
+  }
 
   /* Update coordinates, normals, for new point */
   p0->c[0] = o[0];
@@ -767,6 +814,7 @@ int _MMG5_movbdyrefpt(MMG5_pMesh mesh, MMG5_pSol met, int *listv,
   for( l=0 ; l<ilistv ; l++ ){
     (&mesh->tetra[listv[l]/4])->qual = callist[l];
   }
+  _MMG5_SAFE_FREE(callist);
   return(1);
 }
 
@@ -791,7 +839,7 @@ int _MMG5_movbdynompt(MMG5_pMesh mesh,MMG5_pSol met, int *listv,
   MMG5_pPoint       p0,p1,p2,ppt0;
   MMG5_pxPoint      pxp;
   MMG5_Tria         tt;
-  double            step,ll1old,ll2old,calold,calnew,caltmp,callist[ilistv];
+  double            step,ll1old,ll2old,calold,calnew,caltmp,*callist;
   double            o[3],no[3],to[3];
   int               ip0,ip1,ip2,ip,iel,ipa,ipb,l,iptmpa,iptmpb,it1,it2,nxp;
   char              iface,i,i0,iea,ieb,ie,tag,ie1,ie2,iface1,iface2;
@@ -1029,6 +1077,9 @@ int _MMG5_movbdynompt(MMG5_pMesh mesh,MMG5_pSol met, int *listv,
   memset(pxp,0,sizeof(MMG5_xPoint));
 
   /* Test : check whether all volumes remain positive with new position of the point */
+  // Dynamic allocations for windows compatibility
+  _MMG5_SAFE_MALLOC(callist, ilistv, double);
+
   calold = calnew = DBL_MAX;
   for( l=0 ; l<ilistv ; l++ ){
     iel = listv[l] / 4;
@@ -1039,12 +1090,17 @@ int _MMG5_movbdynompt(MMG5_pMesh mesh,MMG5_pSol met, int *listv,
     pt0->v[i0] = 0;
     calold = MG_MIN(calold, pt->qual);
     callist[l]= _MMG5_orcal(mesh,met,0);
-    if ( callist[l] < _MMG5_EPSD )        return(0);
+	if (callist[l] < _MMG5_EPSD) {
+		_MMG5_SAFE_FREE(callist);
+		return(0);
+	}
     calnew = MG_MIN(calnew,callist[l]);
   }
-  if ( calold < _MMG5_NULKAL && calnew <= calold )    return(0);
-  else if (calnew < _MMG5_NULKAL) return(0);
-  else if ( calnew <= 0.3*calold )      return(0);
+  if ((calold < _MMG5_NULKAL && calnew <= calold) ||
+	  (calnew < _MMG5_NULKAL) || (calnew <= 0.3*calold)) {
+	  _MMG5_SAFE_FREE(callist);
+	  return(0);
+  }
 
   /* Update coordinates, normals, for new point */
   p0->c[0] = o[0];
@@ -1063,6 +1119,7 @@ int _MMG5_movbdynompt(MMG5_pMesh mesh,MMG5_pSol met, int *listv,
   for(l=0; l<ilistv; l++){
     (&mesh->tetra[listv[l]/4])->qual = callist[l];
   }
+  _MMG5_SAFE_FREE(callist);
   return(1);
 }
 
@@ -1086,7 +1143,7 @@ int _MMG5_movbdyridpt(MMG5_pMesh mesh, MMG5_pSol met, int *listv,
   MMG5_Tria            tt;
   MMG5_pxPoint         pxp;
   double               step,ll1old,ll2old,o[3],no1[3],no2[3],to[3];
-  double               calold,calnew,caltmp,callist[ilistv];
+  double               calold,calnew,caltmp,*callist;
   int                  l,iel,ip0,ipa,ipb,iptmpa,iptmpb,it1,it2,ip1,ip2,ip,nxp;
   unsigned char        i,i0,ie,iface,iface1,iface2,iea,ieb,ie1,ie2;
   char                 tag;
@@ -1332,6 +1389,9 @@ int _MMG5_movbdyridpt(MMG5_pMesh mesh, MMG5_pSol met, int *listv,
   memset(pxp,0,sizeof(MMG5_xPoint));
 
   /* Test : check whether all volumes remain positive with new position of the point */
+  // Dynamic allocations for windows compatibility
+  _MMG5_SAFE_MALLOC(callist, ilistv, double);
+
   calold = calnew = DBL_MAX;
   for (l=0; l<ilistv; l++) {
     iel = listv[l] / 4;
@@ -1342,12 +1402,17 @@ int _MMG5_movbdyridpt(MMG5_pMesh mesh, MMG5_pSol met, int *listv,
     pt0->v[i0] = 0;
     calold = MG_MIN(calold, pt->qual);
     callist[l]=_MMG5_orcal(mesh,met,0);
-    if ( callist[l] < _MMG5_EPSD )        return(0);
+	if (callist[l] < _MMG5_EPSD) {
+		_MMG5_SAFE_FREE(callist);
+		return(0);
+	}
     calnew = MG_MIN(calnew,callist[l]);
   }
-  if ( calold < _MMG5_NULKAL && calnew <= calold )    return(0);
-  else if (calnew < _MMG5_NULKAL) return(0);
-  else if ( calnew <= 0.3*calold )      return(0);
+  if ((calold < _MMG5_NULKAL && calnew <= calold) ||
+	  (calnew < _MMG5_NULKAL) || (calnew <= 0.3*calold)) {
+	  _MMG5_SAFE_FREE(callist);
+	  return(0);
+  }
 
   /* Update coordinates, normals, for new point */
   p0->c[0] = o[0];
@@ -1370,5 +1435,6 @@ int _MMG5_movbdyridpt(MMG5_pMesh mesh, MMG5_pSol met, int *listv,
   for(l=0; l<ilistv; l++){
     (&mesh->tetra[listv[l]/4])->qual = callist[l];
   }
+  _MMG5_SAFE_FREE(callist);
   return(1);
 }

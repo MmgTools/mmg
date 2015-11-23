@@ -28,6 +28,8 @@
  * \version 5
  * \date 01 2014
  * \copyright GNU Lesser General Public License.
+ * \warning To keep the genheader working, don't break line between the enum
+ * name and the opening brace (it creates errors under windows)
  */
 
 #ifndef _MMGLIB_H
@@ -63,8 +65,7 @@
  * \enum MMG5_type
  * \brief Type of solutions.
  */
-enum MMG5_type
-{
+enum MMG5_type {
   MMG5_Notype, /*!< Undefined type (unusable) */
   MMG5_Scalar, /*!< Scalar solution */
   MMG5_Vector, /*!< Vectorial solution */
@@ -75,8 +76,7 @@ enum MMG5_type
  * \enum MMG5_entities
  * \brief Type of mesh entities to which solutions are applied.
  */
-enum MMG5_entities
-{
+enum MMG5_entities {
   MMG5_Noentity, /*!< Undefined type (unusable) */
   MMG5_Vertex, /*!< Vertex entity */
   MMG5_Triangle, /*!< Triangle entity */

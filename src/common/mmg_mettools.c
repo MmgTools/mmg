@@ -410,7 +410,7 @@ int _MMG5_intextmet(MMG5_pMesh mesh,MMG5_pSol met,int np,double me[6]) {
   MMG5_pxPoint        go;
   double              hu,isqhmin,isqhmax,dd,alpha1,alpha2,alpha3,u[3],a[4];
   double              *m,*n,*n1,*n2,*t,r[3][3],mrot[6],mr[3],mtan[3],metan[3];
-  double              complex ro[3];
+  DOUBLE_COMPLEX      ro[3];
   char                i;
 
   isqhmin = 1.0 / (mesh->info.hmin*mesh->info.hmin);

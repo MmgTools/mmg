@@ -37,7 +37,6 @@
 
 extern char  ddb;
 
-
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.

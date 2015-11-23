@@ -329,10 +329,10 @@ static int _MMG5_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
   ptr = strstr(data,".mesh");
   if ( ptr )  *ptr = '\0';
   strcat(data,".mmgs5");
-  in = fopen(data,"r");
+  in = fopen(data,"rb");
   if ( !in ) {
     sprintf(data,"%s","DEFAULT.mmgs5");
-    in = fopen(data,"r");
+    in = fopen(data,"rb");
     if ( !in )  return(1);
   }
   fprintf(stdout,"  %%%% %s OPENED\n",data);
@@ -353,7 +353,7 @@ static int _MMG5_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
 
       for (i=0; i<mesh->info.npar; i++) {
         par = &mesh->info.par[i];
-        fscanf(in,"%d %s ",&par->ref,buf);
+        fscanf(in,"%d %s ",&ref,buf);
         for (j=0; j<strlen(buf); j++)  buf[j] = tolower(buf[j]);
         if ( !strcmp(buf,"vertices") || !strcmp(buf,"vertex") )          par->elt = MS_Ver;
         else if ( !strcmp(buf,"triangles") || !strcmp(buf,"triangle") )  par->elt = MS_Tri;

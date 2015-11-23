@@ -135,7 +135,8 @@ int main(int argc,char *argv[]) {
     exit(EXIT_FAILURE);
 
   /** library call */
-  ier = MMG3D_mmg3dlib(mmgMesh,mmgSol,NULL);
+  ier = MMG3D_mmg3dlib(mmgMesh,mmgSol);
+
   if ( ier == MMG5_STRONGFAILURE ) {
     fprintf(stdout,"BAD ENDING OF MMG3DLIB: UNABLE TO SAVE MESH\n");
     return(ier);
@@ -193,7 +194,8 @@ int main(int argc,char *argv[]) {
     exit(EXIT_FAILURE);
 
   /** library call */
-  ier = MMG3D_mmg3dlib(mmgMesh,mmgSol,NULL);
+  ier = MMG3D_mmg3dlib(mmgMesh,mmgSol);
+
   if ( ier == MMG5_STRONGFAILURE ) {
     fprintf(stdout,"BAD ENDING OF MMG3DLIB: UNABLE TO SAVE MESH\n");
     return(ier);
@@ -209,7 +211,8 @@ int main(int argc,char *argv[]) {
     if ( !MMG3D_Set_scalarSol(mmgSol,10,k) ) exit(EXIT_FAILURE);
   }
 
-  ier = MMG3D_mmg3dlib(mmgMesh,mmgSol,NULL);
+  ier = MMG3D_mmg3dlib(mmgMesh,mmgSol);
+
   if ( ier == MMG5_STRONGFAILURE ) {
     fprintf(stdout,"BAD ENDING OF MMG3DLIB: UNABLE TO SAVE MESH\n");
     return(ier);

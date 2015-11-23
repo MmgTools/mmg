@@ -439,27 +439,22 @@ int _MMG5_interp4bar_ani(MMG5_pMesh mesh, MMG5_pSol met, int k, int ip,
 int _MMG5_interp4bar33_ani(MMG5_pMesh mesh, MMG5_pSol met, int k, int ip,
                            double cb[4]) {
   MMG5_pTetra   pt;
-  MMG5_pPoint   pp1,pp2,pp3,pp4;
   double        dm0[6],dm1[6],dm2[6],dm3[6];
   int           i;
 
   pt  = &mesh->tetra[k];
-  pp1 = &mesh->point[pt->v[0]];
   for (i=0; i<6; i++) {
     dm0[i] = met->m[met->size*pt->v[0]+i];
   }
 
-  pp2 = &mesh->point[pt->v[1]];
   for (i=0; i<6; i++) {
     dm1[i] = met->m[met->size*pt->v[1]+i];
   }
 
-  pp3 = &mesh->point[pt->v[2]];
   for (i=0; i<6; i++) {
     dm2[i] = met->m[met->size*pt->v[2]+i];
   }
 
-  pp4 = &mesh->point[pt->v[3]];
   for (i=0; i<6; i++) {
     dm3[i] = met->m[met->size*pt->v[3]+i];
   }

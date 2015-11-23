@@ -152,7 +152,8 @@ int main(int argc,char *argv[]) {
 
   /** ------------------------------ STEP  II -------------------------- */
   /** library call */
-  ier = MMG3D_mmg3dlib(mmgMesh,mmgSol,NULL);
+  ier = MMG3D_mmg3dlib(mmgMesh,mmgSol);
+
   if ( ier == MMG5_STRONGFAILURE ) {
     fprintf(stdout,"BAD ENDING OF MMG3DLIB: UNABLE TO SAVE MESH\n");
     return(ier);

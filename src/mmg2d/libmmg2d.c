@@ -304,7 +304,7 @@ int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol sol,void (*titi)(int ,int ,int,int,
     return(MMG5_SUCCESS);
   } else if ( mesh->info.lag >= 0 ) {
 
-#warning option 9
+//#warning option 9
     printf("exit option 9 not implemented\n");
     exit(1);
   } else {

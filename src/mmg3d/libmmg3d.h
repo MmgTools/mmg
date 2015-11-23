@@ -28,7 +28,9 @@
  * \version 5
  * \date 01 2014
  * \copyright GNU Lesser General Public License.
- * \warning the Use the MMG3D_ prefix: MMG5_ prefix will became obsolete...
+ * \warning To keep the genheader working, don't break line between the enum
+ * name and the opening brace (it creates errors under windows)
+ * \warning Use the MMG3D_ prefix: MMG5_ prefix will became obsolete...
  *
  * \include mmg3d/example0/example0_a/main.c
  * \include mmg3d/example0/example0_b/main.c
@@ -55,8 +57,7 @@
  * MMG3D_DPARAM asked for real values.
  *
  */
-enum MMG3D_Param
-{
+enum MMG3D_Param {
   MMG3D_IPARAM_verbose,           /*!< [-10..10], Tune level of verbosity */
   MMG3D_IPARAM_mem,               /*!< [n/-1], Set memory size to n Mbytes or keep the default value */
   MMG3D_IPARAM_debug,             /*!< [1/0], Turn on/off debug mode */
@@ -594,16 +595,28 @@ void MMG3D_Free_names(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pSol disp);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the sol (metric or level-set) structure.
- * \param disp pointer toward a sol (displacement for the lagrangian motion
- * mode) structure.
- * \return \ref MMG3D_SUCCESS if success, \ref MMG3D_LOWFAILURE if fail but a
- * conform mesh is saved or \ref MMG3D_STRONGFAILURE if fail and we can't save
+ * \return \ref MMG5_SUCCESS if success, \ref MMG5_LOWFAILURE if fail but a
+ * conform mesh is saved or \ref MMG5_STRONGFAILURE if fail and we can't save
  * the mesh.
  *
- * Main program for the library.
+ * Main program for the remesh library.
  *
  */
-int  MMG3D_mmg3dlib(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pSol disp );
+int  MMG3D_mmg3dlib(MMG5_pMesh mesh, MMG5_pSol met );
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the sol (output metric) structure.
+ * \param disp pointer toward a sol (displacement for the lagrangian motion
+ * mode) structure.
+ * \return \ref MMG5_SUCCESS if success, \ref MMG5_LOWFAILURE if fail but a
+ * conform mesh is saved or \ref MMG5_STRONGFAILURE if fail and we can't save
+ * the mesh.
+ *
+ * Main program for the rigidbody movement library.
+ *
+ */
+int  MMG3D_mmg3dmov(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pSol disp );
 
 /* for PAMPA library */
 /** Options management */
@@ -803,8 +816,7 @@ void  MMG3D_pampa_setfunc(MMG5_pMesh mesh,MMG5_pSol met);
  * MMG5_DPARAM asked for real values.
  *
  */
-enum MMG5_Param
-{
+enum MMG5_Param {
   MMG5_IPARAM_verbose,           /*!< [-10..10], Tune level of verbosity */
   MMG5_IPARAM_mem,               /*!< [n/-1], Set memory size to n Mbytes or keep the default value */
   MMG5_IPARAM_debug,             /*!< [1/0], Turn on/off debug mode */
@@ -1294,16 +1306,14 @@ void MMG5_Free_names(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pSol disp);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the sol (metric or level-set) structure.
- * \param disp pointer toward a sol (displacement for the lagrangian motion
- * mode) structure.
  * \return \ref MMG5_SUCCESS if success, \ref MMG5_LOWFAILURE if fail but a
  * conform mesh is saved or \ref MMG5_STRONGFAILURE if fail and we can't save
  * the mesh.
  *
- * Main program for the library.
+ * Main program for the remesh library.
  *
  */
-int  MMG5_mmg3dlib(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pSol disp );
+int  MMG5_mmg3dlib(MMG5_pMesh mesh, MMG5_pSol met );
 
 /* for PAMPA library */
 /** Options management */

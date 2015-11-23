@@ -312,7 +312,7 @@ int movintpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
     caltmp = caleltsig_iso(mesh,NULL,iel);
     calold = MG_MIN(calold,caltmp);
     caltmp = caleltsig_iso(mesh,NULL,0);
-    if ( caltmp < _MMG5_EPSD )        return(0.0);
+    if ( caltmp < _MMG5_EPSD )        return(0);
     calnew = MG_MIN(calnew,caltmp);
     /*if ( (calnew < BADKAL) && (calnew<=calold) )  return(0);
       if ( chkedg(mesh,0) )  return(0); */
