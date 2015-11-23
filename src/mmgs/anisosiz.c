@@ -533,6 +533,41 @@ static int _MMG5_defmetreg(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
 
 /**
  * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param np global index of vertex in which we intersect the metrics.
+ * \param me physical metric at point \a np.
+ * \param n normal or tangent at point np.
+ * \return 0 if fail, 1 otherwise.
+ *
+ * Intersect the surface metric held in np (supported in tangent plane of \a np)
+ * with 3*3 physical metric in \a me. For ridge points, this function fill the
+ * \f$ p_0->m[3]\f$ and \f$ p_0->m[4]\f$ fields that contains respectively the
+ * specific sizes in the \f$n_1\f$ and \f$n_2\f$ directions.
+ *
+ */
+static inline
+int _MMGS_intextmet(MMG5_pMesh mesh,MMG5_pSol met,int np,double me[6]) {
+  MMG5_pPoint         p0;
+  double              *n;
+  double              dummy_n[3];
+
+   p0 = &mesh->point[np];
+
+   dummy_n[0] = dummy_n[1] = dummy_n[2] = 0.;
+
+   if ( MG_SIN(p0->tag) || (p0->tag & MG_NOM) ) {
+     n = &dummy_n[0];
+   }
+   else {
+     n = &p0->n[0];
+   }
+
+  return(_MMG5_mmgIntextmet(mesh,met,np,me,n));
+
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric stucture.
  * \return 0 if fail, 1 otherwise.
  *
@@ -595,7 +630,7 @@ int _MMG5_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
         if ( !_MMG5_defmetreg(mesh,met,k,i) )  continue;
       }
       if ( ismet ) {
-        if ( !_MMG5_intextmet(mesh,met,pt->v[i],mm) ) {
+        if ( !_MMGS_intextmet(mesh,met,pt->v[i],mm) ) {
           fprintf(stdout,"%s:%d:Error: unable to intersect metrics"
                   " at point %d.\n",__FILE__,__LINE__, pt->v[i]);
           return(0);
@@ -610,6 +645,7 @@ int _MMG5_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
 
   return(1);
 }
+
 
 /**
  * \param mesh pointer toward the mesh structure.
