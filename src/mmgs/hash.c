@@ -92,9 +92,9 @@ void _MMG5_setNmTag(MMG5_pMesh mesh) {
  *
  */
 int _MMG5_hashTria(MMG5_pMesh mesh) {
-  MMG5_pTria          pt;
+  //MMG5_pTria          pt;
   _MMG5_Hash          hash;
-  int                 *adja,k,i,ier;
+  //int                 *adja,k,i,ier;
 
   if ( mesh->adja )  return(1);
   if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug )

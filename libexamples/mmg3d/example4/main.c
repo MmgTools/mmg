@@ -51,7 +51,7 @@
 int main(int argc,char *argv[]) {
   MMG5_pMesh      mmgMesh;
   MMG5_pSol       mmgSol,mmgDisp;
-  int             k,ier;
+  int             ier;
   char            *pwd,*inname,*outname;
 
   fprintf(stdout,"  -- TEST MMG3DMOV \n");

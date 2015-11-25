@@ -62,7 +62,7 @@ static inline void endcod() {
 int main(int argc,char *argv[]) {
   MMG5_pMesh      mesh;
   MMG5_pSol       met,disp;
-  int             ier,dummy,typSol,np;
+  int             ier,dummy,typSol;
   char            stim[32];
 
   atexit(endcod);

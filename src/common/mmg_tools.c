@@ -83,7 +83,7 @@ inline int _MMG5_nonUnitNorPts(MMG5_pMesh mesh,
  *
  */
 inline double _MMG5_nonorsurf(MMG5_pMesh mesh,MMG5_pTria pt) {
-  double   dd,det,n[3];
+  double   n[3];
   int      ip1, ip2, ip3;
 
   ip1 = pt->v[0];

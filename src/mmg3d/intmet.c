@@ -101,9 +101,6 @@ int _MMG5_intmet_ani(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int ip,
 int _MMG5_intmet33_ani(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int ip,
                       double s) {
   MMG5_pTetra   pt;
-  MMG5_pxTetra  pxt;
-  MMG5_pPoint   ppt;
-  MMG5_pxPoint  pxp;
   double        *m,*n,*mr;
   int           ip1,ip2;
 
