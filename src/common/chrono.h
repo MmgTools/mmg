@@ -25,11 +25,13 @@
 #define _CHRONO_H
 
 #include <time.h>
-#ifdef POSIX
+#include "mmg.h"
+
+#ifndef POSIX
+#include <windows.h>
+#else
 #include <sys/time.h>
 #include <sys/resource.h>
-#else
-#include <windows.h>
 #endif
 
 #ifndef  ON

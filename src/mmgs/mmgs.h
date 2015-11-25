@@ -27,9 +27,6 @@
 #include "libmmgs.h"
 
 /* numerical accuracy */
-#define A64TH     0.015625
-#define A16TH     0.0625
-#define A32TH     0.03125
 #define ALPHAD    3.464101615137755   /* 6.0 / sqrt(3.0)  */
 
 #define LOPTL     1.4

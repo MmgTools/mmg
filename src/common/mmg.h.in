@@ -35,6 +35,9 @@
 #include <math.h>
 #include <complex.h>
 
+@DEF_POSIX@
+@DEF_GNU@
+
 #if (defined(__APPLE__) && defined(__MACH__))
 #include <sys/sysctl.h>
 #elif defined(__unix__) || defined(__unix) || defined(unix)
@@ -83,6 +86,9 @@
 #define M_PI_2          1.57079632679489661923   /**< pi/2 */
 #endif
 
+#define A64TH     0.015625
+#define A16TH     0.0625
+#define A32TH     0.03125
 
 /* Macros */
 #define MG_MAX(a,b) (((a) > (b)) ? (a) : (b))
