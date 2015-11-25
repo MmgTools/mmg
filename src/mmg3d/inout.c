@@ -1288,7 +1288,7 @@ int _MMG3D_saveAllMesh(MMG5_pMesh mesh) {
  * Load metric field.
  *
  */
-int MMG3D_loadMet(MMG5_pMesh mesh,MMG5_pSol met) {
+int MMG3D_loadSol(MMG5_pMesh mesh,MMG5_pSol met) {
   FILE       *inm;
   float       fbuf[6],tmpf;
   double      dbuf[6],tmpd,lambda[3],eigenv[3][3];
@@ -1610,7 +1610,7 @@ int MMG3D_loadMet(MMG5_pMesh mesh,MMG5_pSol met) {
  * Write isotropic or anisotropic metric.
  *
  */
-int MMG3D_saveMet(MMG5_pMesh mesh,MMG5_pSol met) {
+int MMG3D_saveSol(MMG5_pMesh mesh,MMG5_pSol met) {
   FILE*        inm;
   MMG5_pPoint  ppt;
   double       dbuf[6],mtmp[3],r[3][3],tmp;
@@ -1803,7 +1803,7 @@ int MMG5_loadMesh(MMG5_pMesh mesh) {
 }
 
 int MMG5_loadMet(MMG5_pMesh mesh,MMG5_pSol met) {
-  return(MMG3D_loadMet(mesh,met));
+  return(MMG3D_loadSol(mesh,met));
 }
 
 int MMG5_saveMesh(MMG5_pMesh mesh) {
@@ -1811,5 +1811,5 @@ int MMG5_saveMesh(MMG5_pMesh mesh) {
 }
 
 int MMG5_saveMet(MMG5_pMesh mesh,MMG5_pSol met) {
-  return(MMG3D_saveMet(mesh,met));
+  return(MMG3D_saveSol(mesh,met));
 }

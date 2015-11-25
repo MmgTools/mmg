@@ -420,21 +420,21 @@ FORTRAN_NAME(MMGS_LOADMESH,mmgs_loadmesh,(MMG5_pMesh *mesh,int* retval),(mesh, r
 }
 
 /**
- * See \ref MMGS_loadMet function in \ref mmg3d/libmmg3d.h file.
+ * See \ref MMGS_loadSol function in \ref mmg3d/libmmg3d.h file.
  */
-FORTRAN_NAME(MMGS_LOADMET,mmgs_loadmet,(MMG5_pMesh *mesh,MMG5_pSol *met,int* retval),(mesh,met,retval)){
+FORTRAN_NAME(MMGS_LOADSOL,mmgs_loadsol,(MMG5_pMesh *mesh,MMG5_pSol *met,int* retval),(mesh,met,retval)){
 
-  *retval = MMGS_loadMet(*mesh,*met);
+  *retval = MMGS_loadSol(*mesh,*met);
 
   return;
 }
 
 /**
- * See \ref MMGS_saveMet function in \ref mmg3d/libmmg3d.h file.
+ * See \ref MMGS_saveSol function in \ref mmg3d/libmmg3d.h file.
  */
-FORTRAN_NAME(MMGS_SAVEMET,mmgs_savemet,(MMG5_pMesh *mesh,MMG5_pSol *met,int* retval),(mesh,met,retval)){
+FORTRAN_NAME(MMGS_SAVESOL,mmgs_savesol,(MMG5_pMesh *mesh,MMG5_pSol *met,int* retval),(mesh,met,retval)){
 
-  *retval = MMGS_saveMet(*mesh,*met);
+  *retval = MMGS_saveSol(*mesh,*met);
 
   return;
 }

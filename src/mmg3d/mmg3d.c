@@ -65,7 +65,7 @@ static void _MMG5_endcod() {
 /**
  * \param mesh pointer toward the mesh structure (unused).
  *
- * Set pointer for MMG5_saveMesh function.
+ * Set pointer for MMG3D_saveMesh function.
  *
  */
 void MMG3D_Set_saveFunc(MMG5_pMesh mesh) {
@@ -129,14 +129,14 @@ int main(int argc,char *argv[]) {
 
   _MMG5_warnOrientation(&mesh);
   /* read mesh file */
-  if ( MMG5_loadMesh(&mesh) < 1 )
+  if ( MMG3D_loadMesh(&mesh) < 1 )
     _MMG5_RETURN_AND_FREE(&mesh,&met,&disp,MMG5_STRONGFAILURE);
 
   /* read displacement if any */
   if ( mesh.info.lag > -1 ) {
     if ( !MMG3D_Set_inputSolName(&mesh,&disp,met.namein) )
       exit(EXIT_FAILURE);
-    ier = MMG5_loadMet(&mesh,&disp);
+    ier = MMG3D_loadSol(&mesh,&disp);
     if ( ier == 0 ) {
       fprintf(stdout,"  ## ERROR: NO DISPLACEMENT FOUND.\n");
       _MMG5_RETURN_AND_FREE(&mesh,&met,&disp,MMG5_STRONGFAILURE);
@@ -148,7 +148,7 @@ int main(int argc,char *argv[]) {
   }
   /* read metric if any */
   else {
-    ier = MMG5_loadMet(&mesh,&met);
+    ier = MMG3D_loadSol(&mesh,&met);
     if ( ier == -1 ) {
       fprintf(stdout,"  ## ERROR: WRONG DATA TYPE OR WRONG SOLUTION NUMBER.\n");
       _MMG5_RETURN_AND_FREE(&mesh,&met,&disp,MMG5_STRONGFAILURE);
@@ -244,9 +244,9 @@ if ( mesh.info.lag == -1 ) {
     }
     if ( !_MMG5_unscaleMesh(&mesh,&met) )
       _MMG5_RETURN_AND_FREE(&mesh,&met,&disp,MMG5_STRONGFAILURE);
-    if ( !MMG5_saveMesh(&mesh) )
+    if ( !MMG3D_saveMesh(&mesh) )
       _MMG5_RETURN_AND_FREE(&mesh,&met,&disp,MMG5_STRONGFAILURE);
-    if ( met.m && !MMG5_saveMet(&mesh,&met) )
+    if ( met.m && !MMG3D_saveSol(&mesh,&met) )
       _MMG5_RETURN_AND_FREE(&mesh,&met,&disp,MMG5_STRONGFAILURE);
     _MMG5_RETURN_AND_FREE(&mesh,&met,&disp,MMG5_LOWFAILURE);
   }
@@ -260,9 +260,9 @@ if ( mesh.info.lag == -1 ) {
       }
       if ( !_MMG5_unscaleMesh(&mesh,&met) )
         _MMG5_RETURN_AND_FREE(&mesh,&met,&disp,MMG5_STRONGFAILURE);
-      if ( !MMG5_saveMesh(&mesh) )
+      if ( !MMG3D_saveMesh(&mesh) )
         _MMG5_RETURN_AND_FREE(&mesh,&met,&disp,MMG5_STRONGFAILURE);
-      if ( met.m && !MMG5_saveMet(&mesh,&met) )
+      if ( met.m && !MMG3D_saveSol(&mesh,&met) )
         _MMG5_RETURN_AND_FREE(&mesh,&met,&disp,MMG5_STRONGFAILURE);
       _MMG5_RETURN_AND_FREE(&mesh,&met,&disp,MMG5_LOWFAILURE);
     }
@@ -275,9 +275,9 @@ if ( mesh.info.lag == -1 ) {
       }
       if ( !_MMG5_unscaleMesh(&mesh,&met) )
         _MMG5_RETURN_AND_FREE(&mesh,&met,&disp,MMG5_STRONGFAILURE);
-      if ( !MMG5_saveMesh(&mesh) )
+      if ( !MMG3D_saveMesh(&mesh) )
         _MMG5_RETURN_AND_FREE(&mesh,&met,&disp,MMG5_STRONGFAILURE);
-      if ( met.m && !MMG5_saveMet(&mesh,&met) )
+      if ( met.m && !MMG3D_saveSol(&mesh,&met) )
         _MMG5_RETURN_AND_FREE(&mesh,&met,&disp,MMG5_STRONGFAILURE);
       _MMG5_RETURN_AND_FREE(&mesh,&met,&disp,MMG5_LOWFAILURE);
     }
@@ -308,10 +308,10 @@ if ( mesh.info.lag == -1 ) {
   if ( !_MMG5_unscaleMesh(&mesh,&met) )
     _MMG5_RETURN_AND_FREE(&mesh,&met,&disp,MMG5_STRONGFAILURE);
 
-  if ( !MMG5_saveMesh(&mesh) )
+  if ( !MMG3D_saveMesh(&mesh) )
     _MMG5_RETURN_AND_FREE(&mesh,&met,&disp,MMG5_STRONGFAILURE);
 
-  if ( !MMG5_saveMet(&mesh,&met) )
+  if ( !MMG3D_saveSol(&mesh,&met) )
     _MMG5_RETURN_AND_FREE(&mesh,&met,&disp,MMG5_STRONGFAILURE);
 
   chrono(OFF,&MMG5_ctim[1]);

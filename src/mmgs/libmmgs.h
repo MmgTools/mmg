@@ -486,7 +486,7 @@ int  MMGS_saveMesh(MMG5_pMesh mesh);
  * Load metric field.
  *
  */
-int  MMGS_loadMet(MMG5_pMesh mesh,MMG5_pSol met);
+int  MMGS_loadSol(MMG5_pMesh mesh,MMG5_pSol met);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the sol structure.
@@ -495,7 +495,7 @@ int  MMGS_loadMet(MMG5_pMesh mesh,MMG5_pSol met);
  * Write isotropic or anisotropic metric.
  *
  */
-int  MMGS_saveMet(MMG5_pMesh mesh, MMG5_pSol met);
+int  MMGS_saveSol(MMG5_pMesh mesh, MMG5_pSol met);
 
 /* deallocations */
 /**

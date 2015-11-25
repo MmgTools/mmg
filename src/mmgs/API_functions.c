@@ -995,7 +995,7 @@ int MMGS_Chk_meshData(MMG5_pMesh mesh,MMG5_pSol met) {
   }
 
   if ( met->npi != met->np ) {
-    fprintf(stdout,"  ## Error: if you don't use the MMGS_loadMet function,");
+    fprintf(stdout,"  ## Error: if you don't use the MMGS_loadSol function,");
     fprintf(stdout," you must call the MMGS_Set_solSize function to have a");
     fprintf(stdout," valid solution.\n");
     fprintf(stdout," Missing datas.\n");

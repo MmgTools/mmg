@@ -424,7 +424,7 @@ void _MMG5_inqua(MMG5_pMesh mesh,MMG5_pSol met) {
       fprintf(stdout,"  ## WARNING: TOO BAD QUALITY FOR THE WORST ELEMENT\n");
       _MMG5_unscaleMesh(mesh,met);
       MMGS_saveMesh(mesh);
-      MMGS_saveMet(mesh,met);
+      MMGS_saveSol(mesh,met);
       exit(EXIT_FAILURE);
     }
     return;
@@ -495,7 +495,7 @@ void _MMG5_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
       fprintf(stdout,"  ## WARNING: TOO BAD QUALITY FOR THE WORST ELEMENT\n");
       _MMG5_unscaleMesh(mesh,met);
       MMGS_saveMesh(mesh);
-      MMGS_saveMet(mesh,met);
+      MMGS_saveSol(mesh,met);
       exit(EXIT_FAILURE);
     }
     return;
