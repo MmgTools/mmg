@@ -154,7 +154,7 @@ static int _MMG5_hashGetFace(_MMG5_Hash *hash,int ia,int ib,int ic) {
  * mesh and to 1 for a mesh that need to be packed.
  *
  */
-int _MMG5_hashTetra(MMG5_pMesh mesh, int pack) {
+int MMG3D_hashTetra(MMG5_pMesh mesh, int pack) {
   MMG5_pTetra    pt,pt1;
   int            k,kk,pp,l,ll,mins,mins1,maxs,maxs1,sum,sum1,iadr;
   int           *hcode,*link,hsize,inival;

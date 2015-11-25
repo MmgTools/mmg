@@ -164,19 +164,19 @@ ELSE ()
 ENDIF()
 ############################################################################
 #####
-#####         Fortran header: libmmgf.h
+#####         Fortran header: libmmgcommonf.h
 #####
 ############################################################################
 
 IF ( NOT WIN32 )
   ADD_EXECUTABLE(genheader ${CMAKE_SOURCE_DIR}/scripts/genheader.c)
-  ADD_CUSTOM_COMMAND(OUTPUT ${COMMON_SOURCE_DIR}/libmmgf.h
-    COMMAND genheader ${COMMON_SOURCE_DIR}/libmmgf.h
-    ${COMMON_SOURCE_DIR}/libmmg.h ${CMAKE_SOURCE_DIR}/scripts/genfort.pl
+  ADD_CUSTOM_COMMAND(OUTPUT ${COMMON_SOURCE_DIR}/libmmgcommonf.h
+    COMMAND genheader ${COMMON_SOURCE_DIR}/libmmgcommonf.h
+    ${COMMON_SOURCE_DIR}/libmmgcommon.h ${CMAKE_SOURCE_DIR}/scripts/genfort.pl
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-    DEPENDS genheader ${COMMON_SOURCE_DIR}/libmmg.h
+    DEPENDS genheader ${COMMON_SOURCE_DIR}/libmmgcommon.h
     ${CMAKE_SOURCE_DIR}/scripts/genfort.pl
-    COMMENT "Generating Fortran header for libmmg.h file"
+    COMMENT "Generating Fortran header for libmmgcommon.h file"
     )
 ENDIF()
 

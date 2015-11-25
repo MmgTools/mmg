@@ -37,7 +37,7 @@
 
 
 ! /**
-!  * \file common/libmmg.h
+!  * \file common/libmmgcommon.h
 !  * \brief C API for MMG libraries.
 !  * \author Algiane Froehly (Inria / IMB, Université de Bordeaux)
 !  * \version 5

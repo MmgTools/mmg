@@ -39,7 +39,7 @@ IF ( NOT WIN32 )
     COMMAND genheader ${MMGS_SOURCE_DIR}/libmmgsf.h
     ${MMGS_SOURCE_DIR}/libmmgs.h ${CMAKE_SOURCE_DIR}/scripts/genfort.pl
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-    DEPENDS genheader ${MMGS_SOURCE_DIR}/libmmgs.h ${COMMON_SOURCE_DIR}/libmmgf.h
+    DEPENDS genheader ${MMGS_SOURCE_DIR}/libmmgs.h ${COMMON_SOURCE_DIR}/libmmgcommonf.h
     ${CMAKE_SOURCE_DIR}/scripts/genfort.pl
     COMMENT "Generating Fortran header for mmgs"
     )
@@ -120,8 +120,8 @@ IF ( LIBMMGS_STATIC OR LIBMMGS_SHARED )
     ${MMGS_SOURCE_DIR}/libmmgsf.h
     ${COMMON_SOURCE_DIR}/mmg.h
     ${COMMON_SOURCE_DIR}/eigenv.h
-    ${COMMON_SOURCE_DIR}/libmmg.h
-    ${COMMON_SOURCE_DIR}/libmmgf.h
+    ${COMMON_SOURCE_DIR}/libmmgcommon.h
+    ${COMMON_SOURCE_DIR}/libmmgcommonf.h
     ${COMMON_SOURCE_DIR}/chrono.h
     )
   # Install header files in /usr/local or equivalent

@@ -11,7 +11,7 @@
 ! ** See the "libmmg*.h" file for a correct displaying of the documentation.
 ! */
 
-#include "libmmgf.h"
+#include "libmmgcommonf.h"
 
 ! /* =============================================================================
 ! **  This file is part of the mmg software package for the tetrahedral
@@ -621,7 +621,6 @@
 ! /** To associate function pointers without calling MMGS_mmg3dlib */
 ! /**
 !  * \param mesh pointer toward the mesh structure (unused).
-!  * \note Developped for the PaMPA library interface.
 !  *
 !  * Set pointer for MMGS_saveMesh function.
 !  *
@@ -631,7 +630,6 @@
 ! /**
 !  * \param mesh pointer toward the mesh structure (unused).
 !  * \param met pointer toward the sol structure (unused).
-!  * \note Developped for the PaMPA library interface.
 !  *
 !  * Set function pointers for caltet, lenedg, defsiz and gradsiz.
 !  *

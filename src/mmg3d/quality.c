@@ -968,7 +968,7 @@ void _MMG5_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
  *
  * Approximation of the final number of vertex.
  *
- * \warning  call MMG5_hashTetra(mesh,1) or analysis before using
+ * \warning  call MMG3D_hashTetra(mesh,1) or analysis before using
  */
 int _MMG5_countelt(MMG5_pMesh mesh,MMG5_pSol sol, double *weightelt, long *npcible) {
   MMG5_pTetra pt;

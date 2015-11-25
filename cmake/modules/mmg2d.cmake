@@ -39,7 +39,7 @@ IF ( NOT WIN32 )
     COMMAND genheader ${MMG2D_SOURCE_DIR}/libmmg2df.h
     ${MMG2D_SOURCE_DIR}/libmmg2d.h ${CMAKE_SOURCE_DIR}/scripts/genfort.pl
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-    DEPENDS genheader ${MMG2D_SOURCE_DIR}/libmmg2d.h ${COMMON_SOURCE_DIR}/libmmgf.h
+    DEPENDS genheader ${MMG2D_SOURCE_DIR}/libmmg2d.h ${COMMON_SOURCE_DIR}/libmmgcommonf.h
     ${CMAKE_SOURCE_DIR}/scripts/genfort.pl
     COMMENT "Generating Fortran header for mmg2d"
     )
@@ -119,8 +119,8 @@ IF ( LIBMMG2D_STATIC OR LIBMMG2D_SHARED )
     ${MMG2D_SOURCE_DIR}/libmmg2df.h
     ${COMMON_SOURCE_DIR}/mmg.h
     ${COMMON_SOURCE_DIR}/eigenv.h
-    ${COMMON_SOURCE_DIR}/libmmg.h
-    ${COMMON_SOURCE_DIR}/libmmgf.h
+    ${COMMON_SOURCE_DIR}/libmmgcommon.h
+    ${COMMON_SOURCE_DIR}/libmmgcommonf.h
     ${COMMON_SOURCE_DIR}/chrono.h
     )
   # Install header files in /usr/local or equivalent

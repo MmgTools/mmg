@@ -58,7 +58,7 @@ int main (int argc, char ** argv)
 
   if (argc != 4)
     {
-      fprintf(stderr, "usage : %s headerNameFortran.h libmmg.h"
+      fprintf(stderr, "usage : %s headerNameFortran.h libmmgcommon.h"
               " genfort.pl\n",argv[0]);
       return EXIT_FAILURE;
     }
@@ -88,9 +88,9 @@ int main (int argc, char ** argv)
           " the documentation.\n");
   fprintf(file,"! */\n\n");
 
-  /* Include libmmgf.h if needed. */
-  if(strstr(libmmg_h,"libmmg.h")==NULL) {
-    fprintf(file,"#include \"libmmgf.h\"\n\n");
+  /* Include libmmgcommonf.h if needed. */
+  if(strstr(libmmg_h,"libmmgcommon.h")==NULL) {
+    fprintf(file,"#include \"libmmgcommonf.h\"\n\n");
   }
   else {
     /* Compute the size of the C pointer for the Fortran programm */

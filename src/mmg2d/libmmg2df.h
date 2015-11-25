@@ -11,7 +11,7 @@
 ! ** See the "libmmg*.h" file for a correct displaying of the documentation.
 ! */
 
-#include "libmmgf.h"
+#include "libmmgcommonf.h"
 
 ! /* =============================================================================
 ! **  This file is part of the mmg software package for the tetrahedral

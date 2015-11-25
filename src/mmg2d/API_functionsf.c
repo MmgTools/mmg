@@ -62,7 +62,7 @@ FORTRAN_NAME(MMG2D_INIT_PARAMETERS, mmg2d_init_parameters,(MMG5_pMesh *mesh),
   return;
 }
 /**
- * See \ref MMG2D_Set_inputMeshName function in \ref common/libmmg.h file.
+ * See \ref MMG2D_Set_inputMeshName function in \ref common/libmmgcommon.h file.
  */
 FORTRAN_NAME(MMG2D_SET_INPUTMESHNAME, mmg2d_set_inputmeshname,
              (MMG5_pMesh *mesh, char* meshin, int *strlen, int* retval),
@@ -79,7 +79,7 @@ FORTRAN_NAME(MMG2D_SET_INPUTMESHNAME, mmg2d_set_inputmeshname,
 }
 
 /**
- * See \ref MMG2D_Set_inputSolName function in \ref common/libmmg.h file.
+ * See \ref MMG2D_Set_inputSolName function in \ref common/libmmgcommon.h file.
  */
 FORTRAN_NAME(MMG2D_SET_INPUTSOLNAME, mmg2d_set_inputsolname,
              (MMG5_pMesh *mesh,MMG5_pSol *sol, char* solin, int* strlen, int* retval),
@@ -115,7 +115,7 @@ FORTRAN_NAME(MMG2D_SET_OUTPUTMESHNAME,mmg2d_set_outputmeshname,
 }
 
 /**
- * See \ref MMG2D_Set_outputSolName function in \ref common/libmmg.h file.
+ * See \ref MMG2D_Set_outputSolName function in \ref common/libmmgcommon.h file.
  */
 FORTRAN_NAME(MMG2D_SET_OUTPUTSOLNAME,mmg2d_set_outputsolname,
              (MMG5_pMesh *mesh,MMG5_pSol *sol, char* solout,int* strlen, int* retval),
@@ -255,7 +255,7 @@ FORTRAN_NAME(MMG2D_FREE_STRUCTURES,mmg2d_free_structures,(MMG5_pMesh *mesh,MMG5_
   return;
 }
 /**
- * See \ref MMG2D_Free_names function in \ref common/libmmg.h file.
+ * See \ref MMG2D_Free_names function in \ref common/libmmgcommon.h file.
  */
 FORTRAN_NAME(MMG2D_FREE_NAMES,mmg2d_free_names,(MMG5_pMesh *mesh,MMG5_pSol *met ),
              (mesh,met)){

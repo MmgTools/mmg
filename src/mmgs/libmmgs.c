@@ -133,8 +133,6 @@ int _MMGS_packMesh(MMG5_pMesh mesh,MMG5_pSol met) {
       adjanew = &mesh->adja[iadrnew];
       for(i=0 ; i<3 ; i++) {
         adjanew[i] = adja[i];
-        if ( MG_EDG(pt->tag[i]) )  ++na;
-
         if(!adja[i]) continue;
         iadrv = 3*(adja[i]/3-1) +1;
         adjav = &mesh->adja[iadrv];
@@ -143,6 +141,12 @@ int _MMGS_packMesh(MMG5_pMesh mesh,MMG5_pSol met) {
       }
     }
     nbl++;
+
+    /* Count the edges */
+    for(i=0 ; i<3 ; i++) {
+      if ( MG_EDG(pt->tag[i]) )  ++na;
+    }
+
   }
   mesh->nt = nt;
 
