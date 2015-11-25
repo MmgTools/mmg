@@ -48,10 +48,6 @@
 #define MS_Ver       1
 #define MS_Tri       2
 
-/* /\* Global variables *\/ */
-/* extern unsigned char _MMG5_inxt2[3]; /\*!< next vertex of triangle: {1,2,0} *\/ */
-/* extern unsigned char _MMG5_iprv2[3]; /\*!< previous vertex of triangle: {2,0,1} *\/ */
-
 /** Free allocated pointers of mesh and sol structure and return value val */
 #define _MMG5_RETURN_AND_FREE(mesh,met,val)do       \
   {                                                 \

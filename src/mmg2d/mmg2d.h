@@ -187,10 +187,10 @@ typedef struct {
 } HashTable;
 typedef HashTable * pHashTable;
 
-extern int MMG2_iare[3][2];
-extern int MMG2_iopp[3][2];
-extern unsigned int MMG2_idir[5]; 
-extern unsigned int MMG2_inxt[5];
+static int MMG2_iare[3][2] = {{1,2},{2,0},{0,1}};
+static int MMG2_iopp[3][2] = {{1,2},{0,2},{0,1}};
+static unsigned int MMG2_idir[5] = {0,1,2,0,1};
+static unsigned int MMG2_inxt[5] = {1,2,0,1,2};
 
 
 /** Reallocation of point table and sol table and creation

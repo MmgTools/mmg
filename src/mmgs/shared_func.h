@@ -33,10 +33,6 @@
  * \todo Doxygen documentation
  */
 
-/* global variables */
-unsigned char _MMG5_iprv2[3] = {2,0,1};
-unsigned char _MMG5_inxt2[3] = {1,2,0};
-
 /**
  * \param *prog pointer toward the program name.
  *

@@ -33,21 +33,6 @@
  * \todo Doxygen documentation
  */
 
-/* global variables */
-unsigned char _MMG5_iprv2[3] = {2,0,1};
-unsigned char _MMG5_inxt2[3] = {1,2,0};
-unsigned char _MMG5_idir[4][3] = { {1,2,3}, {0,3,2}, {0,1,3}, {0,2,1} };
-char _MMG5_idirinv[4][4] = {{-1,0,1,2},{0,-1,2,1},{0,1,-1,2},{0,2,1,-1}};
-unsigned char _MMG5_iarf[4][3] = { {5,4,3}, {5,1,2}, {4,2,0}, {3,0,1} };
-unsigned char _MMG5_iarfinv[4][6] = { {-1,-1,-1,2,1,0}, {-1,1,2,-1,-1,0},{2,-1,1,-1,0,-1},{1,2,-1,0,-1,-1}};
-unsigned char _MMG5_inxt3[7] = { 1,2,3,0,1,2,3 };
-unsigned char _MMG5_iprv3[7] = { 3,0,1,2,3,0,1 };
-unsigned char _MMG5_iare[6][2] = { {0,1}, {0,2}, {0,3}, {1,2}, {1,3}, {2,3} };
-unsigned char _MMG5_ifar[6][2] = { {2,3}, {1,3}, {1,2}, {0,3}, {0,2}, {0,1} };
-unsigned char _MMG5_isar[6][2] = { {2,3}, {3,1}, {1,2}, {0,3}, {2,0}, {0,1} };
-unsigned char _MMG5_arpt[4][3] = { {0,1,2}, {0,4,3}, {1,3,5}, {2,5,4} };
-
-
 /* functions shared by executable and library versions of MMG3D5 */
 
 /**
