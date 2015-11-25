@@ -33,7 +33,6 @@
  */
 
 #include "mmg3d.h"
-#include "shared_func.h"
 
 mytime         MMG5_ctim[TIMEMAX];
 
@@ -92,7 +91,7 @@ int main(int argc,char *argv[]) {
   fprintf(stdout,"     %s\n",MG_CPY);
   fprintf(stdout,"     %s %s\n",__DATE__,__TIME__);
 
-  _MMG5_Set_commonFunc();
+  _MMG3D_Set_commonFunc();
 
   signal(SIGABRT,_MMG5_excfun);
   signal(SIGFPE,_MMG5_excfun);
@@ -168,7 +167,7 @@ int main(int argc,char *argv[]) {
   /* analysis */
   chrono(ON,&MMG5_ctim[2]);
 
-  _MMG5_setfunc(&mesh,&met);
+  MMG3D_setfunc(&mesh,&met);
   MMG3D_Set_saveFunc(&mesh);
 
   if ( abs(mesh.info.imprim) > 0 )  _MMG5_inqua(&mesh,&met);
@@ -238,7 +237,7 @@ if ( mesh.info.lag == -1 ) {
   
 #ifdef PATTERN
   if ( !_MMG5_mmg3d1_pattern(&mesh,&met) ) {
-    if ( !(mesh.adja) && !_MMG5_hashTetra(&mesh,1) ) {
+    if ( !(mesh.adja) && !MMG3D_hashTetra(&mesh,1) ) {
       fprintf(stdout,"  ## Hashing problem. Unable to save mesh.\n");
       _MMG5_RETURN_AND_FREE(&mesh,&met,&disp,MMG5_STRONGFAILURE);
     }
@@ -254,7 +253,7 @@ if ( mesh.info.lag == -1 ) {
   /* Pattern in iso mode, delaunay otherwise */
   if ( !mesh.info.iso ) {
     if( !_MMG5_mmg3d1_delone(&mesh,&met) ) {
-      if ( (!mesh.adja) && !_MMG5_hashTetra(&mesh,1) ) {
+      if ( (!mesh.adja) && !MMG3D_hashTetra(&mesh,1) ) {
         fprintf(stdout,"  ## Hashing problem. Unable to save mesh.\n");
         _MMG5_RETURN_AND_FREE(&mesh,&met,&disp,MMG5_STRONGFAILURE);
       }
@@ -269,7 +268,7 @@ if ( mesh.info.lag == -1 ) {
   }
   else {
     if( !_MMG5_mmg3d1_pattern(&mesh,&met) ) {
-      if ( (!mesh.adja) && !_MMG5_hashTetra(&mesh,1) ) {
+      if ( (!mesh.adja) && !MMG3D_hashTetra(&mesh,1) ) {
         fprintf(stdout,"  ## Hashing problem. Unable to save mesh.\n");
         _MMG5_RETURN_AND_FREE(&mesh,&met,&disp,MMG5_STRONGFAILURE);
       }

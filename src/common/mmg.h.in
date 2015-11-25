@@ -295,20 +295,6 @@ void _MMG5_excfun(int sigid) {
   }
   exit(EXIT_FAILURE);
 }
-/**
- * \param mesh pointer toward the mesh structure.
- * \param info pointer toward the info structure.
- *
- * Recover the info structure stored in the mesh structure.
- *
- */
-static inline
-void _MMG5_destockOptions(MMG5_pMesh mesh, MMG5_Info *info) {
-
-  memcpy(info,&mesh->info,sizeof(MMG5_Info));
-  return;
-}
-
 
 /* Macro for fortran function generation */
 /**

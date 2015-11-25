@@ -77,7 +77,7 @@ void _MMGS_Alloc_mesh(MMG5_pMesh *mesh, MMG5_pSol *sol) {
 static inline
 void _MMGS_Init_woalloc_mesh(MMG5_pMesh mesh, MMG5_pSol sol ) {
 
-  _MMG5_Set_commonFunc();
+  _MMGS_Set_commonFunc();
 
   (mesh)->dim  = 3;
   (mesh)->ver  = 2;

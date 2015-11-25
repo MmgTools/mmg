@@ -159,6 +159,7 @@
 #define MG_PLUS    2
 #define MG_MINUS   3
 
+
 /*! \var next vertex of tetra: {1,2,3,0,1,2,3} */
 static unsigned char _MMG5_inxt3[7] = { 1,2,3,0,1,2,3 };
 /*! \var previous vertex of tetra: {3,0,1,2,3,0,1} */
@@ -241,7 +242,6 @@ int  _MMG5_chkmanicoll(MMG5_pMesh,int,int,int,int,int,char,char);
 int  _MMG5_chkmani(MMG5_pMesh mesh);
 int  _MMG5_colver(MMG5_pMesh,MMG5_pSol,int *,int,char,char);
 int  _MMG5_analys(MMG5_pMesh mesh);
-int  _MMG5_hashTetra(MMG5_pMesh mesh, int pack);
 int  _MMG5_hashTria(MMG5_pMesh mesh, _MMG5_Hash*);
 int  _MMG5_hashPop(_MMG5_Hash *hash,int a,int b);
 int  _MMG5_hPop(MMG5_HGeom *hash,int a,int b,int *ref,char *tag);
@@ -389,6 +389,38 @@ int    (*_MMG5_cavity)(MMG5_pMesh ,MMG5_pSol ,int ,int ,int *,int );
 int    (*_MMG5_buckin)(MMG5_pMesh ,MMG5_pSol ,_MMG5_pBucket ,int );
 int    (*_MMG3D_saveMeshinternal)(MMG5_pMesh mesh);
 
-void   _MMG5_Set_commonFunc();
+/**
+ * \param mesh pointer toward the mesh structure.
+ *
+ * Warn user that some tetrahedra of the mesh have been reoriented.
+ *
+ */
+static inline
+void _MMG5_warnOrientation(MMG5_pMesh mesh) {
+  if ( mesh->xt ) {
+    if ( mesh->xt != mesh->ne ) {
+      fprintf(stdout,"  ## Warning: %d tetra on %d reoriented.\n",
+              mesh->xt,mesh->ne);
+      fprintf(stdout,"  Your mesh may be non-conform.\n");
+    }
+    else {
+      fprintf(stdout,"  ## Warning: all tetra reoriented.\n");
+    }
+  }
+  mesh->xt = 0;
+}
+
+/**
+ * Set common pointer functions between mmgs and mmg3d to the matching mmg3d
+ * functions.
+ */
+static inline
+void _MMG3D_Set_commonFunc() {
+  _MMG5_bezierCP          = _MMG5_mmg3dBezierCP;
+  _MMG5_chkmsh            = _MMG5_mmg3dChkmsh;
+#ifdef USE_SCOTCH
+  _MMG5_renumbering       = _MMG5_mmg3dRenumbering;
+#endif
+}
 
 #endif

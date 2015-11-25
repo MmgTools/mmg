@@ -639,4 +639,51 @@
 
 ! void  MMGS_setfunc(MMG5_pMesh mesh,MMG5_pSol met);
 
+! /* Tools for the library */
+! /**
+!  * \param mesh pointer toward the mesh structure.
+!  * \param met pointer toward the sol structure.
+!  *
+!  * Set function pointers depending if case is iso or aniso.
+!  *
+!  */
+
+! void MMGS_setfunc(MMG5_pMesh mesh,MMG5_pSol met);
+! /**
+!  * \param prog pointer toward the program name.
+!  *
+!  * Print help for mmgs options.
+!  *
+!  */
+
+! void MMGS_usage(char *prog);
+! /**
+!  * \param mesh pointer toward the mesh structure.
+!  * \return 0 if fail, 1 if success.
+!  *
+!  * Print the default parameters values.
+!  *
+!  */
+
+! void MMGS_defaultValues(MMG5_pMesh mesh);
+! /**
+!  * \param mesh pointer toward the mesh structure.
+!  * \param info pointer toward the info structure.
+!  * \return 1.
+!  *
+!  * Store the info structure in the mesh structure.
+!  *
+!  */
+
+! int MMGS_stockOptions(MMG5_pMesh mesh, MMG5_Info *info);
+! /**
+!  * \param mesh pointer toward the mesh structure.
+!  * \param info pointer toward the info structure.
+!  *
+!  * Recover the info structure stored in the mesh structure.
+!  *
+!  */
+
+! void MMGS_destockOptions(MMG5_pMesh mesh, MMG5_Info *info);
+
 ! #endif

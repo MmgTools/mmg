@@ -90,7 +90,7 @@ int main(int argc,char *argv[]) {
   if ( !MMG3D_loadMesh(mmgMesh) )  exit(EXIT_FAILURE);
 
   /** 3) Build displacement in MMG5 format */
-  /** Two solutions: just use the MMG3D_loadMet function that will read a .sol(b)
+  /** Two solutions: just use the MMG3D_loadSol function that will read a .sol(b)
       file formatted or manually set your sol using the MMG3D_Set* functions */
 
   /**------------------- Lagrangian motion option ----------------------------*/
@@ -98,14 +98,14 @@ int main(int argc,char *argv[]) {
   if ( !MMG3D_Set_iparameter(mmgMesh,mmgDisp,MMG5_IPARAM_lag, 1) )
     exit(EXIT_FAILURE);
 
-  /** With MMG3D_loadMet function */
+  /** With MMG3D_loadSol function */
   /** a) (not mandatory): give the sol name
      (by default, the "mesh.sol" file is oppened)*/
   if ( !MMG3D_Set_inputSolName(mmgMesh,mmgDisp,inname) )
     exit(EXIT_FAILURE);
 
   /** b) function calling */
-  if ( !MMG3D_loadMet(mmgMesh,mmgDisp) )
+  if ( !MMG3D_loadSol(mmgMesh,mmgDisp) )
     exit(EXIT_FAILURE);
 
   /** 4) (not mandatory): check if the number of given entities match with mesh size */
@@ -142,7 +142,7 @@ int main(int argc,char *argv[]) {
   if ( !MMG3D_Set_outputSolName(mmgMesh,mmgSol,outname) )
     exit(EXIT_FAILURE);
 
-  MMG3D_saveMet(mmgMesh,mmgSol);
+  MMG3D_saveSol(mmgMesh,mmgSol);
 
   /* 9) free the MMG3D5 structures */
   MMG3D_Free_all(mmgMesh,mmgSol,mmgDisp);

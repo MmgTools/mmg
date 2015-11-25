@@ -569,7 +569,7 @@ int _MMG5_analys(MMG5_pMesh mesh) {
     fprintf(stdout,"  ** SURFACE ANALYSIS\n");
 
   /* create tetra adjacency */
-  if ( !_MMG5_hashTetra(mesh,1) ) {
+  if ( !MMG3D_hashTetra(mesh,1) ) {
     fprintf(stdout,"  ## Hashing problem (1). Exit program.\n");
     return(0);
   }

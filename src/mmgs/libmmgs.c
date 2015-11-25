@@ -39,7 +39,6 @@
  */
 
 #include "mmgs.h"
-#include "shared_func.h"
 
 /**
  * Pack the mesh \a mesh and its associated metric \a met and return \a val.
@@ -263,7 +262,7 @@ int MMGS_mmgslib(MMG5_pMesh mesh,MMG5_pSol met)
   fprintf(stdout,"     %s\n",MG_CPY);
   fprintf(stdout,"     %s %s\n",__DATE__,__TIME__);
 
-  _MMG5_Set_commonFunc();
+  _MMGS_Set_commonFunc();
 
   /* trap exceptions */
   signal(SIGABRT,_MMG5_excfun);
@@ -301,7 +300,7 @@ int MMGS_mmgslib(MMG5_pMesh mesh,MMG5_pSol met)
 
   /* analysis */
   chrono(ON,&(ctim[2]));
-  _MMG5_setfunc(mesh,met);
+  MMGS_setfunc(mesh,met);
 
   if ( mesh->info.imprim ) {
     fprintf(stdout,"\n  %s\n   MODULE MMGS: IMB-LJLL : %s (%s)\n  %s\n",MG_STR,MG_VER,MG_REL,MG_STR);

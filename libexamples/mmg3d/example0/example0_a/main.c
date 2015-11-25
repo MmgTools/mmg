@@ -84,16 +84,16 @@ int main(int argc,char *argv[]) {
   if ( !MMG3D_loadMesh(mmgMesh) )  exit(EXIT_FAILURE);
 
   /** 3) Build sol in MMG5 format */
-  /** Two solutions: just use the MMG3D_loadMet function that will read a .sol(b)
+  /** Two solutions: just use the MMG3D_loadSol function that will read a .sol(b)
       file formatted or manually set your sol using the MMG3D_Set* functions */
 
-  /** With MMG3D_loadMet function */
+  /** With MMG3D_loadSol function */
   /** a) (not mandatory): give the sol name
      (by default, the "mesh.sol" file is oppened)*/
   if ( !MMG3D_Set_inputSolName(mmgMesh,mmgSol,filename) )
     exit(EXIT_FAILURE);
   /** b) function calling */
-  if ( !MMG3D_loadMet(mmgMesh,mmgSol) )
+  if ( !MMG3D_loadSol(mmgMesh,mmgSol) )
     exit(EXIT_FAILURE);
 
   /** 4) (not mandatory): check if the number of given entities match with mesh size */
@@ -112,7 +112,7 @@ int main(int argc,char *argv[]) {
 
   /** ------------------------------ STEP III -------------------------- */
   /** get results */
-  /** Two solutions: just use the MMG3D_saveMesh/MMG3D_saveMet functions
+  /** Two solutions: just use the MMG3D_saveMesh/MMG3D_saveSol functions
       that will write .mesh(b)/.sol formatted files or manually get your mesh/sol
       using the MMG3D_getMesh/MMG3D_getSol functions */
 
@@ -128,7 +128,7 @@ int main(int argc,char *argv[]) {
      (by default, the mesh is saved in the "mesh.o.sol" file */
   // MMG3D_Set_outputSolName(mmgSol,"output.sol");
   /** b) function calling */
-  MMG3D_saveMet(mmgMesh,mmgSol);
+  MMG3D_saveSol(mmgMesh,mmgSol);
 
   /** 3) Free the MMG3D5 structures */
   MMG3D_Free_all(mmgMesh,mmgSol,NULL);

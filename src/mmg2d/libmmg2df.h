@@ -381,6 +381,17 @@
 ! int MMG2D_saveVect(MMG5_pMesh mesh,MMG5_pSol sol,char *filename,double lambda);
 
 ! int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol sol,void (*titi)(int ,int,int,int,int));
+
+! /* Tools for the library */
 ! void (*MMG2D_callbackinsert) (int ,int ,int ,int, int);
+
+! /**
+!  * \param type metric type
+!  *
+!  * Set function pointers for length, caltri, buckin... depending if case is iso or aniso
+!  *
+!  */
+
+! int MMG2D_setfunc(int type);
 
 ! #endif

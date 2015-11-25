@@ -207,11 +207,9 @@ IF ( BUILD_TESTING )
 
     IF ( TEST_LIBMMGS )
       SET(LIBMMGS_EXEC0 ${EXECUTABLE_OUTPUT_PATH}/libmmgs_example0)
-      SET(LIBMMGS_EXECFORTRAN ${EXECUTABLE_OUTPUT_PATH}/libmmgs_fortran)
       SET(LIBMMGS_EXEC1   ${EXECUTABLE_OUTPUT_PATH}/libmmgs_example1)
 
       ADD_TEST(NAME libmmgs_example0   COMMAND ${LIBMMGS_EXEC0})
-      ADD_TEST(NAME libmmgs_fortran    COMMAND ${LIBMMGS_EXECFORTRAN})
       ADD_TEST(NAME libmmgs_example1   COMMAND ${LIBMMGS_EXEC1})
 
       IF ( CMAKE_Fortran_COMPILER)

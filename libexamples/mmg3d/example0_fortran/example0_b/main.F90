@@ -146,7 +146,7 @@ PROGRAM main
   IF ( ier == 0 ) CALL EXIT(104)
 
   !> 3) Build sol in MMG5 format
-  !! Two solutions: just use the MMG3D_loadMet function that will read a .sol(b)
+  !! Two solutions: just use the MMG3D_loadSol function that will read a .sol(b)
   !!    file formatted or manually set your sol using the MMG3D_Set* functions
 
   !> Manually set of the sol
@@ -178,7 +178,7 @@ PROGRAM main
 
   !> ------------------------------ STEP III --------------------------
   !! get results */
-  !! Two solutions: just use the MMG3D_saveMesh/MMG3D_saveMet functions
+  !! Two solutions: just use the MMG3D_saveMesh/MMG3D_saveSol functions
   !! that will write .mesh(b)/.sol formatted files or manually get your mesh/sol
   !! using the MMG3D_getMesh/MMG3D_getSol functions
 

@@ -84,16 +84,16 @@ int main(int argc,char *argv[]) {
   if ( !MMGS_loadMesh(mmgMesh) )  exit(EXIT_FAILURE);
 
   /** 3) Build sol in MMG5 format */
-  /** Two solutions: just use the MMGS_loadMet function that will read a .sol(b)
+  /** Two solutions: just use the MMGS_loadSol function that will read a .sol(b)
       file formatted or manually set your sol using the MMGS_Set* functions */
 
-  /** With MMGS_loadMet function */
+  /** With MMGS_loadSol function */
   /** a) (not mandatory): give the sol name
      (by default, the "mesh.sol" file is oppened)*/
   if ( !MMGS_Set_inputSolName(mmgMesh,mmgSol,filename) )
     exit(EXIT_FAILURE);
   /** b) function calling */
-  if ( !MMGS_loadMet(mmgMesh,mmgSol) )
+  if ( !MMGS_loadSol(mmgMesh,mmgSol) )
     exit(EXIT_FAILURE);
 
   /** 4) (not mandatory): check if the number of given entities match with mesh size */
@@ -111,7 +111,7 @@ int main(int argc,char *argv[]) {
 
   /** ------------------------------ STEP III -------------------------- */
   /** get results */
-  /** Two solutions: just use the MMGS_saveMesh/MMGS_saveMet functions
+  /** Two solutions: just use the MMGS_saveMesh/MMGS_saveSol functions
       that will write .mesh(b)/.sol formatted files or manually get your mesh/sol
       using the MMGS_getMesh/MMGS_getSol functions */
 
@@ -127,7 +127,7 @@ int main(int argc,char *argv[]) {
      (by default, the mesh is saved in the "mesh.o.sol" file */
   // MMGS_Set_outputSolName(mmgSol,"output.sol");
   /** b) function calling */
-  MMGS_saveMet(mmgMesh,mmgSol);
+  MMGS_saveSol(mmgMesh,mmgSol);
 
   /** 3) Free the MMGS structures */
   MMGS_Free_all(mmgMesh,mmgSol,NULL);

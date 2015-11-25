@@ -33,7 +33,6 @@
  */
 
 #include "mmgs.h"
-#include "shared_func.h"
 
 #include <math.h>
 
@@ -93,7 +92,7 @@ int _MMG5_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
   /* First step: search if user want to see the default parameters values. */
   for ( i=1; i< argc; ++i ) {
     if ( !strcmp(argv[i],"-val") ) {
-      _MMG5_defaultValues(mesh);
+      MMGS_defaultValues(mesh);
     }
   }
 
@@ -103,7 +102,7 @@ int _MMG5_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
     if ( *argv[i] == '-' ) {
       switch(argv[i][1]) {
       case '?':
-        _MMG5_usage(argv[0]);
+        MMGS_usage(argv[0]);
         break;
       case 'a': /* ridge angle */
         if ( !strcmp(argv[i],"-ar") && ++i < argc ) {
@@ -138,7 +137,7 @@ int _MMG5_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
             exit(EXIT_FAILURE);
         }
         else
-          _MMG5_usage(argv[0]);
+          MMGS_usage(argv[0]);
         break;
       case 'd':
         if ( !MMGS_Set_iparameter(mesh,met,MMGS_IPARAM_debug,1) )
@@ -154,7 +153,7 @@ int _MMG5_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
               exit(EXIT_FAILURE);
           }else{
             fprintf(stderr,"Missing filname for %c%c\n",argv[i-1][1],argv[i-1][2]);
-            _MMG5_usage(argv[0]);
+            MMGS_usage(argv[0]);
           }
         }
         break;
@@ -165,7 +164,7 @@ int _MMG5_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
         }
         else {
           fprintf(stderr,"Missing argument option %c\n",argv[i-1][1]);
-          _MMG5_usage(argv[0]);
+          MMGS_usage(argv[0]);
         }
         break;
       case 'n':
@@ -198,7 +197,7 @@ int _MMG5_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
           }else{
             fprintf(stderr,"Missing filname for %c%c%c\n",
                     argv[i-1][1],argv[i-1][2],argv[i-1][3]);
-            _MMG5_usage(argv[0]);
+            MMGS_usage(argv[0]);
           }
         }
         break;
@@ -212,12 +211,12 @@ int _MMG5_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
             }
             else {
               fprintf(stderr,"Missing argument option %s\n",argv[i-1]);
-              _MMG5_usage(argv[0]);
+              MMGS_usage(argv[0]);
             }
           }
           else {
             fprintf(stderr,"Missing argument option %s\n",argv[i-1]);
-            _MMG5_usage(argv[0]);
+            MMGS_usage(argv[0]);
           }
         }
         break;
@@ -230,7 +229,7 @@ int _MMG5_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
           }
           else {
             fprintf(stderr,"Missing filname for %c%c%c\n",argv[i-1][1],argv[i-1][2],argv[i-1][3]);
-            _MMG5_usage(argv[0]);
+            MMGS_usage(argv[0]);
           }
         }
         break;
@@ -245,12 +244,12 @@ int _MMG5_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
         }
         else {
           fprintf(stderr,"Missing argument option %c\n",argv[i-1][1]);
-          _MMG5_usage(argv[0]);
+          MMGS_usage(argv[0]);
         }
         break;
       default:
         fprintf(stderr,"Unrecognized option %s\n",argv[i]);
-        _MMG5_usage(argv[0]);
+        MMGS_usage(argv[0]);
       }
     }
     else {
@@ -268,7 +267,7 @@ int _MMG5_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
       }
       else {
         fprintf(stdout,"Argument %s ignored\n",argv[i]);
-        _MMG5_usage(argv[0]);
+        MMGS_usage(argv[0]);
       }
     }
     i++;
@@ -382,7 +381,7 @@ int main(int argc,char *argv[]) {
   fprintf(stdout,"     %s\n",MG_CPY);
   fprintf(stdout,"     %s %s\n",__DATE__,__TIME__);
 
-  _MMG5_Set_commonFunc();
+  _MMGS_Set_commonFunc();
 
   /* trap exceptions */
   signal(SIGABRT,_MMG5_excfun);
@@ -432,7 +431,7 @@ int main(int argc,char *argv[]) {
 
   /* analysis */
   chrono(ON,&MMG5_ctim[2]);
-  _MMG5_setfunc(&mesh,&met);
+  MMGS_setfunc(&mesh,&met);
   MMGS_Set_saveFunc(&mesh);
 
   fprintf(stdout,"\n  %s\n   MODULE MMGS-LJLL : %s (%s)\n  %s\n",MG_STR,MG_VER,MG_REL,MG_STR);

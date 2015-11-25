@@ -76,6 +76,7 @@ FILE(
   )
 LIST(REMOVE_ITEM source_files
   ${MMG3D_SOURCE_DIR}/mmg3d.c
+ # ${MMG3D_SOURCE_DIR}/library_tools.c
   ${MMG3D_SOURCE_DIR}/lib${PROJECT_NAME}3d.c
   ${MMG3D_SOURCE_DIR}/lib${PROJECT_NAME}3df.c
   ${REMOVE_FILE})
@@ -87,6 +88,7 @@ FILE(
 FILE(
   GLOB
   lib_file
+  #${MMG3D_SOURCE_DIR}/library_tools.c
   ${MMG3D_SOURCE_DIR}/lib${PROJECT_NAME}3d.c
   ${MMG3D_SOURCE_DIR}/lib${PROJECT_NAME}3df.c
   )

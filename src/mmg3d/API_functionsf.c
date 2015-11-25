@@ -887,7 +887,7 @@ FORTRAN_NAME(MMG5_LOADMESH,mmg5_loadmesh,(MMG5_pMesh *mesh,int* retval),(mesh, r
  */
 FORTRAN_NAME(MMG5_LOADMET,mmg5_loadmet,(MMG5_pMesh *mesh,MMG5_pSol *met,int* retval),(mesh,met,retval)){
 
-  *retval = MMG3D_loadSol(*mesh,*met);
+  *retval = MMG5_loadMet(*mesh,*met);
 
   return;
 }
@@ -897,7 +897,7 @@ FORTRAN_NAME(MMG5_LOADMET,mmg5_loadmet,(MMG5_pMesh *mesh,MMG5_pSol *met,int* ret
  */
 FORTRAN_NAME(MMG5_SAVEMET,mmg5_savemet,(MMG5_pMesh *mesh,MMG5_pSol *met,int* retval),(mesh,met,retval)){
 
-  *retval = MMG3D_saveSol(*mesh,*met);
+  *retval = MMG5_saveMet(*mesh,*met);
 
   return;
 }

@@ -54,10 +54,10 @@ PROGRAM main
   IF ( ier == 0 )  CALL EXIT(102)
 
   !> 3) Build sol in MMG5 format
-  !! Two solutions: just use the MMG3D_loadMet function that will read a .sol(b)
+  !! Two solutions: just use the MMG3D_loadSol function that will read a .sol(b)
   !!    file formatted or manually set your sol using the MMG3D_Set* functions
 
-  !> With MMG3D_loadMet function
+  !> With MMG3D_loadSol function
   !! a) (not mandatory): give the sol name
   !!   (by default, the "mesh.sol" file is oppened)
   CALL MMG3D_Set_inputSolName(mmgMesh,mmgSol,TRIM(ADJUSTL(filename)),&
@@ -67,7 +67,7 @@ PROGRAM main
   ENDIF
 
   !> b) function calling
-  CALL MMG3D_loadMet(mmgMesh,mmgSol,ier)
+  CALL MMG3D_loadSol(mmgMesh,mmgSol,ier)
   IF ( ier ==0 ) THEN
      CALL EXIT(104)
   ENDIF
@@ -89,7 +89,7 @@ PROGRAM main
 
   !> ------------------------------ STEP III --------------------------
   !! get results
-  !! Two solutions: just use the MMG3D_saveMesh/MMG3D_saveMet functions
+  !! Two solutions: just use the MMG3D_saveMesh/MMG3D_saveSol functions
   !!    that will write .mesh(b)/.sol formatted files or manually get your mesh/sol
   !!    using the MMG3D_getMesh/MMG3D_getSol functions
 
@@ -105,7 +105,7 @@ PROGRAM main
   !!   (by default, the mesh is saved in the "mesh.o.sol" file
   !!call MMG3D_Set_outputSolName(mmgSol,"output.sol",len("output.sol"),ier)
   !! b) function calling
-  CALL MMG3D_saveMet(mmgMesh,mmgSol,ier)
+  CALL MMG3D_saveSol(mmgMesh,mmgSol,ier)
 
   !> 3) Free the MMG3D5 structures
   CALL MMG3D_Free_all(mmgMesh,mmgSol,%val(0))

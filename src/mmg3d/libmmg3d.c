@@ -40,7 +40,6 @@
  */
 
 #include "mmg3d.h"
-#include "shared_func.h"
 
 /**
  * Pack the mesh \a mesh and its associated metric \a met and return \a val.
@@ -295,6 +294,17 @@ int _MMG3D_packMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
 
 /**
  * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the sol structure.
+ *
+ * Set function pointers for saveMesh.
+ *
+ */
+void MMG3D_Set_saveFunc(MMG5_pMesh mesh) {
+  _MMG3D_saveMeshinternal = _MMG5_saveLibraryMesh;
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
  * \param met pointer toward a sol structure (metric or solution).
  * \return Return \ref MMG5_SUCCESS if success, \ref MMG5_LOWFAILURE if failed
  * but a conform mesh is saved and \ref MMG5_STRONGFAILURE if failed and we
@@ -313,7 +323,7 @@ int MMG3D_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met) {
     fprintf(stdout,"     %s %s\n",__DATE__,__TIME__);
   }
 
-  _MMG5_Set_commonFunc();
+  _MMG3D_Set_commonFunc();
 
   signal(SIGABRT,_MMG5_excfun);
   signal(SIGFPE,_MMG5_excfun);
@@ -358,7 +368,7 @@ int MMG3D_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met) {
 
   /* analysis */
   chrono(ON,&(ctim[2]));
-  _MMG5_setfunc(mesh,met);
+  MMG3D_setfunc(mesh,met);
 
   if ( abs(mesh->info.imprim) > 0 )  _MMG5_inqua(mesh,met);
 
@@ -413,7 +423,7 @@ int MMG3D_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met) {
 
 #ifdef PATTERN
   if ( !_MMG5_mmg3d1_pattern(mesh,met) ) {
-    if ( !(mesh->adja) && !_MMG5_hashTetra(mesh,1) ) {
+    if ( !(mesh->adja) && !MMG3D_hashTetra(mesh,1) ) {
       fprintf(stdout,"  ## Hashing problem. Invalid mesh.\n");
       return(MMG5_STRONGFAILURE);
     }
@@ -424,7 +434,7 @@ int MMG3D_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met) {
   /** Patterns in iso mode, delauney otherwise */
   if ( !mesh->info.iso ) {
     if ( !_MMG5_mmg3d1_delone(mesh,met) ) {
-      if ( (!mesh->adja) && !_MMG5_hashTetra(mesh,1) ) {
+      if ( (!mesh->adja) && !MMG3D_hashTetra(mesh,1) ) {
         fprintf(stdout,"  ## Hashing problem. Invalid mesh.\n");
         return(MMG5_STRONGFAILURE);
       }
@@ -434,7 +444,7 @@ int MMG3D_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met) {
   }
   else {
     if ( !_MMG5_mmg3d1_pattern(mesh,met) ) {
-      if ( !(mesh->adja) && !_MMG5_hashTetra(mesh,1) ) {
+      if ( !(mesh->adja) && !MMG3D_hashTetra(mesh,1) ) {
         fprintf(stdout,"  ## Hashing problem. Invalid mesh.\n");
         return(MMG5_STRONGFAILURE);
       }
@@ -492,7 +502,7 @@ int MMG3D_mmg3dmov(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp) {
     fprintf(stdout,"     %s %s\n",__DATE__,__TIME__);
   }
 
-  _MMG5_Set_commonFunc();
+  _MMG3D_Set_commonFunc();
 
   signal(SIGABRT,_MMG5_excfun);
   signal(SIGFPE,_MMG5_excfun);
@@ -560,7 +570,7 @@ int MMG3D_mmg3dmov(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp) {
 
   /* analysis */
   chrono(ON,&(ctim[2]));
-  _MMG5_setfunc(mesh,met);
+  MMG3D_setfunc(mesh,met);
 
   if ( abs(mesh->info.imprim) > 0 )  _MMG5_inqua(mesh,met);
 
@@ -611,7 +621,7 @@ int MMG3D_mmg3dmov(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp) {
   /* ******************* Part to skip in lag mode ? *************************** */
 /* #ifdef PATTERN */
 /*   if ( !_MMG5_mmg3d1_pattern(mesh,met) ) { */
-/*     if ( !(mesh->adja) && !_MMG5_hashTetra(mesh,1) ) { */
+/*     if ( !(mesh->adja) && !MMG3D_hashTetra(mesh,1) ) { */
 /*       fprintf(stdout,"  ## Hashing problem. Invalid mesh.\n"); */
 /*       return(MMG5_STRONGFAILURE); */
 /*     } */
@@ -622,7 +632,7 @@ int MMG3D_mmg3dmov(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp) {
 /*   /\** Patterns in iso mode, delauney otherwise *\/ */
 /*   if ( !mesh->info.iso ) { */
 /*     if ( !_MMG5_mmg3d1_delone(mesh,met) ) { */
-/*       if ( !(mesh->adja) && !_MMG5_hashTetra(mesh,1) ) { */
+/*       if ( !(mesh->adja) && !MMG3D_hashTetra(mesh,1) ) { */
 /*         fprintf(stdout,"  ## Hashing problem. Invalid mesh.\n"); */
 /*         return(MMG5_STRONGFAILURE); */
 /*       } */
@@ -632,7 +642,7 @@ int MMG3D_mmg3dmov(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp) {
 /*   } */
 /*   else { */
 /*     if ( !_MMG5_mmg3d1_pattern(mesh,met) ) { */
-/*       if ( !(mesh->adja) && !_MMG5_hashTetra(mesh,1) ) { */
+/*       if ( !(mesh->adja) && !MMG3D_hashTetra(mesh,1) ) { */
 /*         fprintf(stdout,"  ## Hashing problem. Invalid mesh.\n"); */
 /*         return(MMG5_STRONGFAILURE); */
 /*       } */
@@ -682,6 +692,8 @@ int MMG3D_mmg3dmov(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp) {
 void MMG5_Free_all(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp
   )
 {
+  printf("  ## MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
+        " be removed soon\n." );
   MMG3D_Free_all(mesh,met,disp);
 
 }
@@ -702,5 +714,7 @@ void MMG5_Free_all(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp
  */
 int MMG5_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met)
 {
+  printf("  ## MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
+        " be removed soon\n." );
   return(MMG3D_mmg3dlib(mesh,met));
 }

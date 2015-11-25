@@ -305,7 +305,7 @@ static int _MMG5_snpval_ls(MMG5_pMesh mesh,MMG5_pSol sol,double *tmp) {
   char     i;
 
   /* create tetra adjacency */
-  if ( !_MMG5_hashTetra(mesh,1) ) {
+  if ( !MMG3D_hashTetra(mesh,1) ) {
     fprintf(stdout,"  ## Hashing problem (1). Exit program.\n");
     return(0);
   }
@@ -1331,7 +1331,7 @@ int _MMG5_mmg3d2(MMG5_pMesh mesh,MMG5_pSol sol) {
   }
   _MMG5_DEL_MEM(mesh,tmp,(mesh->npmax+1)*sizeof(double));
 
-  if ( !_MMG5_hashTetra(mesh,1) ) {
+  if ( !MMG3D_hashTetra(mesh,1) ) {
     fprintf(stdout,"  ## Hashing problem. Exit program.\n");
     return(0);
   }

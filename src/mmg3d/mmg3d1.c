@@ -1385,7 +1385,7 @@ int _MMG5_anatet(MMG5_pMesh mesh,MMG5_pSol met,char typchk, int patternMode) {
     }
     else  ns = 0;
 
-    if ( !_MMG5_hashTetra(mesh,1) ) {
+    if ( !MMG3D_hashTetra(mesh,1) ) {
       fprintf(stdout,"  ## Hashing problem. Exit program.\n");
       return(0);
     }

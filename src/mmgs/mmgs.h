@@ -195,6 +195,17 @@ int    (*movridpt)(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist);
 int    (*movintpt)(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist);
 int    (*_MMGS_saveMeshinternal)(MMG5_pMesh mesh);
 
-void _MMG5_Set_commonFunc();
+/**
+ * Set common pointer functions between mmgs and mmg3d to the matching mmgs
+ * functions.
+ */
+static inline
+void _MMGS_Set_commonFunc() {
+  _MMG5_bezierCP          = _MMG5_mmgsBezierCP;
+  _MMG5_chkmsh            = _MMG5_mmgsChkmsh;
+#ifdef USE_SCOTCH
+  _MMG5_renumbering       = _MMG5_mmgsRenumbering;
+#endif
+}
 
 #endif

@@ -108,7 +108,7 @@ int main(int argc,char *argv[]) {
       MMG3D_Free_all(mesh,met,disp);
       return(MMG5_STRONGFAILURE);
     }
-    ier = MMG3D_loadMet(mesh,disp);
+    ier = MMG3D_loadSol(mesh,disp);
     if ( ier == 0 ) {
       fprintf(stdout,"  ## ERROR: NO DISPLACEMENT FOUND.\n");
       MMG3D_Free_all(mesh,met,disp);
@@ -122,7 +122,7 @@ int main(int argc,char *argv[]) {
   }
   /* read metric if any */
   else {
-    ier = MMG3D_loadMet(mesh,met);
+    ier = MMG3D_loadSol(mesh,met);
     if ( ier == -1 ) {
       fprintf(stdout,"  ## ERROR: WRONG DATA TYPE OR WRONG SOLUTION NUMBER.\n");
       MMG3D_Free_all(mesh,met,disp);
@@ -164,7 +164,7 @@ int main(int argc,char *argv[]) {
       MMG3D_Free_all(mesh,met,disp );
       return(MMG5_STRONGFAILURE);
     }
-    if ( !MMG3D_saveMet(mesh,met) )     {
+    if ( !MMG3D_saveSol(mesh,met) )     {
       MMG3D_Free_all(mesh,met,disp);
       return(MMG5_STRONGFAILURE);
     }
