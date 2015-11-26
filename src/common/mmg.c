@@ -33,7 +33,7 @@
  * \copyright GNU Lesser General Public License.
  **/
 
-#include "mmg.h"
+#include "mmgcommon.h"
 
 /**
  * \param *prog pointer toward the program name.

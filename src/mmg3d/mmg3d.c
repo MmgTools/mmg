@@ -170,7 +170,7 @@ int main(int argc,char *argv[]) {
   MMG3D_setfunc(&mesh,&met);
   MMG3D_Set_saveFunc(&mesh);
 
-  if ( abs(mesh.info.imprim) > 0 )  _MMG5_inqua(&mesh,&met);
+  if ( abs(mesh.info.imprim) > 0 )  _MMG3D_inqua(&mesh,&met);
 
   fprintf(stdout,"\n  %s\n   MODULE MMG3D: IMB-LJLL : %s (%s)\n  %s\n",
           MG_STR,MG_VER,MG_REL,MG_STR);
@@ -197,10 +197,10 @@ int main(int argc,char *argv[]) {
   }
 
   /* mesh analysis */
-  if ( !_MMG5_analys(&mesh) )
+  if ( !_MMG3D_analys(&mesh) )
     _MMG5_RETURN_AND_FREE(&mesh,&met,&disp,MMG5_LOWFAILURE);
 
-  if ( mesh.info.imprim > 1 && !mesh.info.iso && met.m ) _MMG5_prilen(&mesh,&met,0);
+  if ( mesh.info.imprim > 1 && !mesh.info.iso && met.m ) _MMG3D_prilen(&mesh,&met,0);
 
   chrono(OFF,&MMG5_ctim[2]);
   printim(MMG5_ctim[2].gdif,stim);
@@ -293,10 +293,10 @@ if ( mesh.info.lag == -1 ) {
   fprintf(stdout,"\n  %s\n   END OF MODULE MMG3d: IMB-LJLL \n  %s\n",MG_STR,MG_STR);
   
   /* save file */
-  _MMG5_outqua(&mesh,&met);
+  _MMG3D_outqua(&mesh,&met);
 
   if ( mesh.info.imprim > 1 && !mesh.info.iso )
-    _MMG5_prilen(&mesh,&met,1);
+    _MMG3D_prilen(&mesh,&met,1);
 
     if ( mesh.info.imprim )
     fprintf(stdout,"  -- PHASE 2 COMPLETED.     %s\n",stim);

@@ -38,7 +38,7 @@
 
 ! /**
 !  * \file mmg2d/libmmg2d.h
-!  * \brief C API for MMG2D library.
+!  * \brief API headers for the mmg2d library
 !  * \author Cecile Dobrzynski and Algiane Froehly (Inria / IMB, Université de Bordeaux)
 !  * \version 5
 !  * \date 01 2014
@@ -50,7 +50,7 @@
 
 ! #ifndef _MMG2DLIB_H
 
-! #include "mmg.h"
+! #include "mmgcommon.h"
 
 ! /**
 !  * \enum MMG2D_Param
@@ -374,7 +374,7 @@
 !   );
 
 ! int MMG2D_loadMesh(MMG5_pMesh ,char *);
-! int MMG2D_loadSol(MMG5_pSol ,char *,int,int);
+! int MMG2D_loadSol(MMG5_pMesh,MMG5_pSol ,char *,int);
 ! int MMG2D_loadVect(MMG5_pMesh ,char *);
 ! int MMG2D_saveMesh(MMG5_pMesh ,char *);
 ! int MMG2D_saveSol(MMG5_pMesh ,MMG5_pSol ,char *);

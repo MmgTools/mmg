@@ -27,7 +27,7 @@
  * \copyright GNU Lesser General Public License.
  */
 
-#include "mmg.h"
+#include "mmgcommon.h"
 
 /**
  * \param mesh pointer toward the mesh structure.

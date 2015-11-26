@@ -436,12 +436,12 @@ int main(int argc,char *argv[]) {
 
   fprintf(stdout,"\n  %s\n   MODULE MMGS-LJLL : %s (%s)\n  %s\n",MG_STR,MG_VER,MG_REL,MG_STR);
   if ( mesh.info.imprim )   fprintf(stdout,"\n  -- PHASE 1 : ANALYSIS\n");
-  if ( !_MMG5_analys(&mesh) )
+  if ( !_MMGS_analys(&mesh) )
     _MMG5_RETURN_AND_FREE(&mesh,&met,MMG5_LOWFAILURE);
 
-  if ( abs(mesh.info.imprim) > 0 ) _MMG5_inqua(&mesh,&met);
+  if ( abs(mesh.info.imprim) > 0 ) _MMGS_inqua(&mesh,&met);
 
-  if ( mesh.info.imprim > 1 && met.m ) _MMG5_prilen(&mesh,&met,0);
+  if ( mesh.info.imprim > 1 && met.m ) _MMGS_prilen(&mesh,&met,0);
 
   chrono(OFF,&MMG5_ctim[2]);
   if ( mesh.info.imprim ) {
@@ -454,7 +454,7 @@ int main(int argc,char *argv[]) {
   if ( mesh.info.imprim )
     fprintf(stdout,"\n  -- PHASE 2 : %s MESHING\n",met.size < 6 ? "ISOTROPIC" : "ANISOTROPIC");
   if ( !_MMG5_mmgs1(&mesh,&met) )  {
-    if ( (!mesh.adja) && !_MMG5_hashTria(&mesh) ) {
+    if ( (!mesh.adja) && !_MMGS_hashTria(&mesh) ) {
       fprintf(stdout,"  ## Hashing problem. Unable to save mesh.\n");
       _MMG5_RETURN_AND_FREE(&mesh,&met,MMG5_STRONGFAILURE);
     }
@@ -474,8 +474,8 @@ int main(int argc,char *argv[]) {
   fprintf(stdout,"\n  %s\n   END OF MODULE MMGS-LJLL \n  %s\n",MG_STR,MG_STR);
 
   /* save file */
-  _MMG5_outqua(&mesh,&met);
-  if ( mesh.info.imprim > 1 )  _MMG5_prilen(&mesh,&met,1);
+  _MMGS_outqua(&mesh,&met);
+  if ( mesh.info.imprim > 1 )  _MMGS_prilen(&mesh,&met,1);
 
   chrono(ON,&MMG5_ctim[1]);
   if ( mesh.info.imprim )  fprintf(stdout,"\n  -- WRITING DATA FILE %s\n",mesh.nameout);

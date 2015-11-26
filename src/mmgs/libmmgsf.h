@@ -39,7 +39,7 @@
 
 ! /**
 !  * \file mmgs/libmmgs.h
-!  * \brief C API for MMGS library.
+!  * \brief API headers for the mmgs library
 !  * \author Algiane Froehly (Inria / IMB, Université de Bordeaux)
 !  * \version 5
 !  * \date 01 2014
@@ -52,7 +52,7 @@
 
 ! #ifndef _MMGSLIB_H
 
-! #include "mmg.h"
+! #include "mmgcommon.h"
 
 ! /**
 !  * \enum MMGS_Param

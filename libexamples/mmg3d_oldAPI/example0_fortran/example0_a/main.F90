@@ -102,7 +102,7 @@ PROGRAM main
   !> 2) Automatically save the solution
   !! a)  (not mandatory): give the ouptut sol name using MMG5_Set_outputSolName
   !!   (by default, the mesh is saved in the "mesh.o.sol" file
-  !!call MMG5_Set_outputSolName(mmgSol,"output.sol",len("output.sol"),ier)
+  !!call MMG5_Set_outputSolName(mmgMesh,mmgSol,"output.sol",len("output.sol"),ier)
   !! b) function calling
   CALL MMG5_saveMet(mmgMesh,mmgSol,ier)
 

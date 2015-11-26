@@ -110,7 +110,7 @@ int setref(MMG5_pMesh mesh,int start,int ref,int putreq) {
 }
 
 /** find the element number in packed numerotation */
-int _MMG5_indElt(MMG5_pMesh mesh, int kel) {
+int _MMGS_indElt(MMG5_pMesh mesh, int kel) {
   MMG5_pTria pt;
   int    ne, k;
 
@@ -126,7 +126,7 @@ int _MMG5_indElt(MMG5_pMesh mesh, int kel) {
 }
 
 /** find the point number in packed numerotation */
-int _MMG5_indPt(MMG5_pMesh mesh, int kp) {
+int _MMGS_indPt(MMG5_pMesh mesh, int kp) {
   MMG5_pPoint ppt;
   int         np, k;
 

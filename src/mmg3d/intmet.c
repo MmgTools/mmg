@@ -98,7 +98,7 @@ int _MMG5_intmet_ani(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int ip,
  * \a k for a classic storage of ridges metrics (before defsiz call).
  *
  */
-int _MMG5_intmet33_ani(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int ip,
+int _MMG3D_intmet33_ani(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int ip,
                       double s) {
   MMG5_pTetra   pt;
   double        *m,*n,*mr;

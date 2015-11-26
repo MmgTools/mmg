@@ -202,7 +202,7 @@ _MMG5_topchkcol_bdy(MMG5_pMesh mesh,int k,int iface,char iedg,int *lists,int ili
     if ( nap == naq ) {
       /*printf("%s: %d: On devrait rarement passer ici:",__FILE__,__LINE__);
         printf(" k=%d (%d in saveMesh), nap=%d (%d in saveMesh)\n",
-        k,_MMG5_indElt(mesh,k),nap,_MMG5_indPt(mesh,nap));*/
+        k,_MMG3D_indElt(mesh,k),nap,_MMG3D_indPt(mesh,nap));*/
       return(0);
     }
 
@@ -270,7 +270,7 @@ _MMG5_topchkcol_bdy(MMG5_pMesh mesh,int k,int iface,char iedg,int *lists,int ili
     if ( nbp == nbq ) {
       /*printf("%s: %d: On devrait rarement passer ici:",__FILE__,__LINE__);
         printf(" k=%d (%d in saveMesh), nbp=%d (%d in saveMesh)\n",
-        k,_MMG5_indElt(mesh,k),nbp,_MMG5_indPt(mesh,nbp));*/
+        k,_MMG3D_indElt(mesh,k),nbp,_MMG3D_indPt(mesh,nbp));*/
       return(0);
     }
   }
@@ -331,7 +331,7 @@ _MMG5_topchkcol_bdy(MMG5_pMesh mesh,int k,int iface,char iedg,int *lists,int ili
     if ( nap == naq ) {
       /*printf("%s: %d: On devrait rarement passer ici:",__FILE__,__LINE__);
         printf(" k=%d (%d in saveMesh), nap=%d (%d in saveMesh)\n",
-        k,_MMG5_indElt(mesh,k),nap,_MMG5_indPt(mesh,nap));*/
+        k,_MMG3D_indElt(mesh,k),nap,_MMG3D_indPt(mesh,nap));*/
       return(0);
     }
 
@@ -399,7 +399,7 @@ _MMG5_topchkcol_bdy(MMG5_pMesh mesh,int k,int iface,char iedg,int *lists,int ili
     if ( nbp == nbq ) {
       /*printf("%s: %d: On devrait rarement passer ici:",__FILE__,__LINE__);
         printf(" k=%d (%d in saveMesh), nap=%d (%d in saveMesh)\n",
-        k,_MMG5_indElt(mesh,k),nap,_MMG5_indPt(mesh,nap));*/
+        k,_MMG3D_indElt(mesh,k),nap,_MMG3D_indPt(mesh,nap));*/
       return(0);
     }
   }
@@ -1060,7 +1060,7 @@ int _MMG5_colver(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,char indq,cha
         }
       }
     }
-    _MMG5_delElt(mesh,iel);
+    _MMG3D_delElt(mesh,iel);
   }
 
   /* Update vertices coordinates for elements that do not belong to the shell of (pq) */

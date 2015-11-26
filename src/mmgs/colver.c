@@ -294,9 +294,9 @@ int colver(MMG5_pMesh mesh,int *list,int ilist) {
       mesh->adja[3*(jel-1)+1+j] = 0;
   }
 
-  _MMG5_delPt(mesh,ip1);
-  _MMG5_delElt(mesh,list[0] / 3);
-  if ( !open )  _MMG5_delElt(mesh,list[ilist-1] / 3);
+  _MMGS_delPt(mesh,ip1);
+  _MMGS_delElt(mesh,list[0] / 3);
+  if ( !open )  _MMGS_delElt(mesh,list[ilist-1] / 3);
 
   return(1);
 }
@@ -365,9 +365,9 @@ int colver3(MMG5_pMesh mesh,int* list) {
   }
 
   /* remove vertex + elements */
-  _MMG5_delPt(mesh,ip);
-  _MMG5_delElt(mesh,iel);
-  _MMG5_delElt(mesh,kel);
+  _MMGS_delPt(mesh,ip);
+  _MMGS_delElt(mesh,iel);
+  _MMGS_delElt(mesh,kel);
 
   return(1);
 }
@@ -407,8 +407,8 @@ int colver2(MMG5_pMesh mesh,int* list) {
     mesh->adja[3*(kel-1)+1+k] = 3*iel + i2;
 
   /* remove vertex + element */
-  _MMG5_delPt(mesh,ip);
-  _MMG5_delElt(mesh,jel);
+  _MMGS_delPt(mesh,ip);
+  _MMGS_delElt(mesh,jel);
 
   return(1);
 }

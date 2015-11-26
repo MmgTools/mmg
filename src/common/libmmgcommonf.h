@@ -38,7 +38,7 @@
 
 ! /**
 !  * \file common/libmmgcommon.h
-!  * \brief C API for MMG libraries.
+!  * \brief API header for the common part of the MMG libraries.
 !  * \author Algiane Froehly (Inria / IMB, Université de Bordeaux)
 !  * \version 5
 !  * \date 01 2014
@@ -48,7 +48,8 @@
 !  */
 
 
-! #ifndef _MMGLIB_H
+! #ifndef _MMGLIBCOMMON_H
+#define _MMGLIBCOMMON_H
 
 ! #include "chrono.h"
 

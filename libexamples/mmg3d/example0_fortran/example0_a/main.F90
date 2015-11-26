@@ -62,19 +62,19 @@ PROGRAM main
   !!   (by default, the "mesh.sol" file is oppened)
   CALL MMG3D_Set_inputSolName(mmgMesh,mmgSol,TRIM(ADJUSTL(filename)),&
        LEN(TRIM(ADJUSTL(filename))),ier)
-  IF ( ier ==0 ) THEN
+  IF ( ier /= 1 ) THEN
      CALL EXIT(103)
   ENDIF
 
   !> b) function calling
   CALL MMG3D_loadSol(mmgMesh,mmgSol,ier)
-  IF ( ier ==0 ) THEN
+  IF ( ier /= 1 ) THEN
      CALL EXIT(104)
   ENDIF
 
   !> 4) (not mandatory): check if the number of given entities match with mesh size
   CALL MMG3D_Chk_meshData(mmgMesh,mmgSol,ier)
-  IF ( ier ==0 ) CALL EXIT(105)
+  IF ( ier /= 1 ) CALL EXIT(105)
 
   !> ------------------------------ STEP  II --------------------------
   !! library call
@@ -99,13 +99,19 @@ PROGRAM main
   !!call MMG3D_Set_outputMeshName(mmgMesh,"output.mesh",len("output.mesh"),ier)
   !! b) function calling
   CALL MMG3D_saveMesh(mmgMesh,ier)
+  IF ( ier /= 1 ) THEN
+     CALL EXIT(106)
+  ENDIF
 
   !> 2) Automatically save the solution
   !! a)  (not mandatory): give the ouptut sol name using MMG3D_Set_outputSolName
   !!   (by default, the mesh is saved in the "mesh.o.sol" file
-  !!call MMG3D_Set_outputSolName(mmgSol,"output.sol",len("output.sol"),ier)
+  !!call MMG3D_Set_outputSolName(mmgMesh,mmgSol,"output.sol",len("output.sol"),ier)
   !! b) function calling
   CALL MMG3D_saveSol(mmgMesh,mmgSol,ier)
+  IF ( ier /= 1 ) THEN
+     CALL EXIT(107)
+  ENDIF
 
   !> 3) Free the MMG3D5 structures
   CALL MMG3D_Free_all(mmgMesh,mmgSol,%val(0))

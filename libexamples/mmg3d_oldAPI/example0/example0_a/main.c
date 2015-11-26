@@ -125,7 +125,7 @@ int main(int argc,char *argv[]) {
   /** 2) Automatically save the solution */
   /** a)  (not mandatory): give the ouptut sol name using MMG5_Set_outputSolName
      (by default, the mesh is saved in the "mesh.o.sol" file */
-  // MMG5_Set_outputSolName(mmgSol,"output.sol");
+  // MMG5_Set_outputSolName(mmgMesh,mmgSol,"output.sol");
   /** b) function calling */
   MMG5_saveMet(mmgMesh,mmgSol);
 

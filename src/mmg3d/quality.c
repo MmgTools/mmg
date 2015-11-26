@@ -672,7 +672,7 @@ int _MMG5_typelt(MMG5_pMesh mesh,int iel,int *item) {
  * Compute sizes of edges of the mesh, and displays histo.
  *
  */
-int _MMG5_prilen(MMG5_pMesh mesh, MMG5_pSol met, char metRidTyp) {
+int _MMG3D_prilen(MMG5_pMesh mesh, MMG5_pSol met, char metRidTyp) {
   MMG5_pTetra     pt;
   _MMG5_Hash      hash;
   double          len,avlen,lmin,lmax;
@@ -776,7 +776,7 @@ int _MMG5_prilen(MMG5_pMesh mesh, MMG5_pSol met, char metRidTyp) {
  * Print histogram of mesh qualities for classic storage of metric at ridges.
  *
  */
-void _MMG5_inqua(MMG5_pMesh mesh,MMG5_pSol met) {
+void _MMG3D_inqua(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTetra    pt;
   double   rap,rapmin,rapmax,rapavg,med,good;
   int      i,k,iel,ok,ir,imax,nex,his[5];
@@ -837,8 +837,8 @@ void _MMG5_inqua(MMG5_pMesh mesh,MMG5_pSol met) {
 #else
   fprintf(stdout,"     BEST   %e  AVRG.   %e  WRST.   %e (%d)\n => %d %d %d %d\n",
           rapmax,rapavg / (mesh->ne-nex),rapmin,iel,
-          _MMG5_indPt(mesh,mesh->tetra[iel].v[0]),_MMG5_indPt(mesh,mesh->tetra[iel].v[1]),
-          _MMG5_indPt(mesh,mesh->tetra[iel].v[2]),_MMG5_indPt(mesh,mesh->tetra[iel].v[3]));
+          _MMG3D_indPt(mesh,mesh->tetra[iel].v[0]),_MMG3D_indPt(mesh,mesh->tetra[iel].v[1]),
+          _MMG3D_indPt(mesh,mesh->tetra[iel].v[2]),_MMG3D_indPt(mesh,mesh->tetra[iel].v[3]));
 #endif
   if ( abs(mesh->info.imprim) < 3 ){
     if (rapmin == 0){
@@ -878,7 +878,7 @@ void _MMG5_inqua(MMG5_pMesh mesh,MMG5_pSol met) {
  * Print histogram of mesh qualities for special storage of metric at ridges.
  *
  */
-void _MMG5_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
+void _MMG3D_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTetra    pt;
   double   rap,rapmin,rapmax,rapavg,med,good;
   int      i,k,iel,ok,ir,imax,nex,his[5];
@@ -930,8 +930,8 @@ void _MMG5_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
 #else
   fprintf(stdout,"     BEST   %e  AVRG.   %e  WRST.   %e (%d)\n => %d %d %d %d\n",
           rapmax,rapavg / (mesh->ne-nex),rapmin,iel,
-          _MMG5_indPt(mesh,mesh->tetra[iel].v[0]),_MMG5_indPt(mesh,mesh->tetra[iel].v[1]),
-          _MMG5_indPt(mesh,mesh->tetra[iel].v[2]),_MMG5_indPt(mesh,mesh->tetra[iel].v[3]));
+          _MMG3D_indPt(mesh,mesh->tetra[iel].v[0]),_MMG3D_indPt(mesh,mesh->tetra[iel].v[1]),
+          _MMG3D_indPt(mesh,mesh->tetra[iel].v[2]),_MMG3D_indPt(mesh,mesh->tetra[iel].v[3]));
 #endif
   if ( abs(mesh->info.imprim) < 3 ){
     if (rapmin == 0){

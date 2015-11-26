@@ -278,7 +278,7 @@ inline double diamelt(MMG5_pPoint p0,MMG5_pPoint p1,MMG5_pPoint p2) {
  * Compute sizes of edges of the mesh, and displays histo.
  *
  */
-int _MMG5_prilen(MMG5_pMesh mesh, MMG5_pSol met, int metRidTyp) {
+int _MMGS_prilen(MMG5_pMesh mesh, MMG5_pSol met, int metRidTyp) {
   MMG5_pTria      pt;
   _MMG5_Hash      hash;
   double          len,avlen,lmin,lmax;
@@ -376,7 +376,7 @@ int _MMG5_prilen(MMG5_pMesh mesh, MMG5_pSol met, int metRidTyp) {
  * metrics (so before the the _MMG5_defsiz function call).
  *
  */
-void _MMG5_inqua(MMG5_pMesh mesh,MMG5_pSol met) {
+void _MMGS_inqua(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTria    pt;
   double        rap,rapmin,rapmax,rapavg,med;
   int           i,k,iel,ok,ir,imax,nex,his[5];
@@ -447,7 +447,7 @@ void _MMG5_inqua(MMG5_pMesh mesh,MMG5_pSol met) {
  * (after the _MMG5_defsiz function call).
  *
  */
-void _MMG5_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
+void _MMGS_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTria    pt;
   double        rap,rapmin,rapmax,rapavg,med;
   int           i,k,iel,ok,ir,imax,nex,his[5];

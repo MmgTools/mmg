@@ -38,7 +38,7 @@
  *
  */
 
-#include "mmg.h"
+#include "mmgcommon.h"
 
 
 /**

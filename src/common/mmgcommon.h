@@ -21,8 +21,8 @@
 ** =============================================================================
 */
 
-#ifndef _MMG_H
-#define _MMG_H
+#ifndef _MMGCOMMON_H
+#define _MMGCOMMON_H
 
 #include <assert.h>
 #include <stdlib.h>
@@ -35,8 +35,8 @@
 #include <math.h>
 #include <complex.h>
 
-@DEF_POSIX@
-@DEF_GNU@
+#define POSIX
+#define GNU
 
 #if (defined(__APPLE__) && defined(__MACH__))
 #include <sys/sysctl.h>
@@ -57,8 +57,8 @@
 #include "eigenv.h"
 #include "libmmgcommon.h"
 
-#define MG_VER   "@CMAKE_RELEASE_VERSION@"
-#define MG_REL   "@CMAKE_RELEASE_DATE@"
+#define MG_VER   "5.1.0"
+#define MG_REL   "Dec 4, 2015"
 #define MG_CPY   "Copyright (c) IMB-LJLL, 2004-"
 #define MG_STR   "&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&"
 

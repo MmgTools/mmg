@@ -231,7 +231,7 @@ int _MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, int *list,int ilist,
 
   if ( met->m ) {
     if ( typchk == 1 && (met->size>1) ) {
-      if ( _MMG5_intmet33_ani(mesh,met,list[0]/6,list[0]%6,0,0.5) <= 0 )
+      if ( _MMG3D_intmet33_ani(mesh,met,list[0]/6,list[0]%6,0,0.5) <= 0 )
         return(0);
     }
     else {
@@ -381,7 +381,7 @@ int _MMG5_swpbdy(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int it1,
   c[0] = 0.5*( p0->c[0] + p1->c[0]);
   c[1] = 0.5*( p0->c[1] + p1->c[1]);
   c[2] = 0.5*( p0->c[2] + p1->c[2]);
-  nm = _MMG5_newPt(mesh,c,MG_BDY);
+  nm = _MMG3D_newPt(mesh,c,MG_BDY);
   if ( !nm ) {
     if ( bucket ) {
       _MMG5_POINT_AND_BUCKET_REALLOC(mesh,met,nm,mesh->gap,
@@ -400,7 +400,7 @@ int _MMG5_swpbdy(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int it1,
   }
   if ( met->m ) {
     if ( typchk == 1 && (met->size>1) ) {
-      if ( _MMG5_intmet33_ani(mesh,met,iel,ia,nm,0.5)<=0 )  return(0);
+      if ( _MMG3D_intmet33_ani(mesh,met,iel,ia,nm,0.5)<=0 )  return(0);
     }
     else {
       if ( _MMG5_intmet(mesh,met,iel,ia,nm,0.5)<=0 )  return(0);
@@ -425,7 +425,7 @@ int _MMG5_swpbdy(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int it1,
     if ( pt1->v[im] == nm )  break;
   }
   if ( pt1->v[im] != nm ){
-    _MMG5_delPt(mesh,nm);
+    _MMG3D_delPt(mesh,nm);
     fprintf(stdout,"%s:%d: Warning pt1->v[im] != nm\n",__FILE__,__LINE__);
     return(0);
   }
@@ -440,7 +440,7 @@ int _MMG5_swpbdy(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int it1,
     return(-1);
   }
   else if ( ier ) {
-    _MMG5_delPt(mesh,ier);
+    _MMG3D_delPt(mesh,ier);
     ier = 1;
   }
 

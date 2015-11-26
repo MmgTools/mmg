@@ -57,7 +57,7 @@ _MMG5_paktet(MMG5_pMesh mesh) {
       pt1 = &mesh->tetra[mesh->ne];
       assert(MG_EOK(pt1));
       memcpy(pt,pt1,sizeof(MMG5_Tetra));
-      _MMG5_delElt(mesh,mesh->ne);
+      _MMG3D_delElt(mesh,mesh->ne);
     }
   }
   while ( ++k < mesh->ne );
@@ -390,7 +390,7 @@ int _MMG5_setEdgeNmTag(MMG5_pMesh mesh, _MMG5_Hash *hash) {
             if ( ++ilist > _MMG5_LMAX-2 ) {
               fprintf(stdout,"  ## Warning: problem in surface remesh process.");
               fprintf(stdout," Coquil of edge %d-%d contains too many elts.\n",
-                      _MMG5_indPt(mesh,ia),_MMG5_indPt(mesh,ib));
+                      _MMG3D_indPt(mesh,ia),_MMG3D_indPt(mesh,ib));
               fprintf(stdout,"  ##          Try to modify the hausdorff number,");
               fprintf(stdout," or/and the maximum mesh.\n");
               return(0);
@@ -435,7 +435,7 @@ int _MMG5_setEdgeNmTag(MMG5_pMesh mesh, _MMG5_Hash *hash) {
               if ( ++ilist > _MMG5_LMAX-2 ) {
                 fprintf(stdout,"  ## Warning: problem in surface remesh process.");
                 fprintf(stdout," Coquil of edge %d-%d contains too many elts.\n",
-                        _MMG5_indPt(mesh,ia),_MMG5_indPt(mesh,ib));
+                        _MMG3D_indPt(mesh,ia),_MMG3D_indPt(mesh,ib));
                 fprintf(stdout,"  ##          Try to modify the hausdorff number,");
                 fprintf(stdout," or/and the maximum mesh.\n");
                 return(0);
@@ -574,7 +574,7 @@ int _MMG5_setNmTag(MMG5_pMesh mesh, _MMG5_Hash *hash) {
  * don't free it.
  *
  */
-int _MMG5_hashTria(MMG5_pMesh mesh, _MMG5_Hash *hash) {
+int _MMG3D_hashTria(MMG5_pMesh mesh, _MMG5_Hash *hash) {
 
   _MMG5_ADD_MEM(mesh,(3*mesh->nt+4)*sizeof(int),"surfacic adjacency table",return(0));
   _MMG5_SAFE_CALLOC(mesh->adjt,3*mesh->nt+4,int);
@@ -873,7 +873,7 @@ int _MMG5_hGeom(MMG5_pMesh mesh) {
   /* else, infer special edges from information carried by triangles */
   else {
     if ( !mesh->adjt ) {
-      ier = _MMG5_hashTria(mesh,&hash);
+      ier = _MMG3D_hashTria(mesh,&hash);
       _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
       if ( !ier ) return(0);
     }
@@ -984,7 +984,7 @@ int _MMG5_chkNumberOfTri(MMG5_pMesh mesh) {
  * Identify boundary triangles.
  *
  * \remark mesh->xtetra is not allocated when \ref _MMG5_bdryTria is called by
- * \ref _MMG5_analys but it is allocated at save time.
+ * \ref _MMG3D_analys but it is allocated at save time.
  *
  */
 int _MMG5_bdryTria(MMG5_pMesh mesh) {

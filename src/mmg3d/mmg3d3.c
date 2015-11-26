@@ -209,7 +209,7 @@ static int _MMG5_spllag(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int itdeg, 
     o[1] = 0.5*(p0->c[1] + p1->c[1]);
     o[2] = 0.5*(p0->c[2] + p1->c[2]);
       
-    ip = _MMG5_newPt(mesh,o,MG_NOTAG);
+    ip = _MMG3D_newPt(mesh,o,MG_NOTAG);
       
     if ( !ip )  {
       /* reallocation of point table */
@@ -220,7 +220,7 @@ static int _MMG5_spllag(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int itdeg, 
     /* Interpolation of metric, if any */
     if ( met->m ) {
       if ( !_MMG5_intmet(mesh,met,k,imax,ip,0.5) ) {
-        _MMG5_delPt(mesh,ip);
+        _MMG3D_delPt(mesh,ip);
         return(-1);
       }
     }
@@ -235,7 +235,7 @@ static int _MMG5_spllag(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int itdeg, 
       mp = &disp->m[iadr];
       
       if ( !_MMG5_intdispvol(m1,m2,mp,0.5) ) {
-        _MMG5_delPt(mesh,ip);
+        _MMG3D_delPt(mesh,ip);
         return(-1);
       }
     }
@@ -247,7 +247,7 @@ static int _MMG5_spllag(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int itdeg, 
       return(-1);
     }
     else if ( !ier ) {
-      _MMG5_delPt(mesh,ip);
+      _MMG3D_delPt(mesh,ip);
     }
     else {
       ns++;
@@ -423,7 +423,7 @@ static int _MMG5_coltetlag(MMG5_pMesh mesh,MMG5_pSol met,int itdeg) {
           ier = _MMG5_colver(mesh,met,list,ilist,iq,2);
           if ( ier < 0 ) return(-1);
           else if ( ier ) {
-            _MMG5_delPt(mesh,ier);
+            _MMG3D_delPt(mesh,ier);
             break;
           }
         }

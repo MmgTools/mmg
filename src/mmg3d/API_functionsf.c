@@ -43,21 +43,10 @@
 /**
  * See \ref MMG3D_Init_mesh function in common/libmmgcommon.h file.
  */
-FORTRAN_NAME(MMG3D_INIT_MESH, mmg3d_init_mesh,(MMG5_pMesh *mesh, MMG5_pSol *sol
-                                             ,MMG5_pSol *disp
-#ifdef SINGUL
-                                             , MMG5_pSingul *sing
-#endif
-               ),(mesh,sol,disp
-#ifdef SINGUL
-                  ,sing
-#endif
-                 )) {
-#ifdef SINGUL
-  MMG3D_Init_mesh(mesh,sol,disp,sing);
-#else
+FORTRAN_NAME(MMG3D_INIT_MESH, mmg3d_init_mesh,
+             (MMG5_pMesh *mesh, MMG5_pSol *sol,MMG5_pSol *disp),
+             (mesh,sol,disp )) {
   MMG3D_Init_mesh(mesh,sol,disp);
-#endif
 
   return;
 }
@@ -456,21 +445,11 @@ FORTRAN_NAME(MMG3D_SET_LOCALPARAMETER,mmg3d_set_localparameter,
 /**
  * See \ref MMG3D_Free_structures function in \ref mmg3d/libmmg3d.h file.
  */
-FORTRAN_NAME(MMG3D_FREE_STRUCTURES,mmg3d_free_structures,(MMG5_pMesh *mesh,MMG5_pSol *met
-                                                        ,MMG5_pSol *disp
-#ifdef SINGUL
-                                                        ,MMG5_pSingul *singul
-#endif
-               ),(mesh,met,disp
-#ifdef SINGUL
-                  ,singul
-#endif
-                 )){
-#ifdef SINGUL
-  MMG3D_Free_structures(*mesh,*met,(disp==NULL)?NULL:*disp,*singul);
-#else
+FORTRAN_NAME(MMG3D_FREE_STRUCTURES,mmg3d_free_structures,
+             (MMG5_pMesh *mesh,MMG5_pSol *met ,MMG5_pSol *disp ),
+             (mesh,met,disp)){
   MMG3D_Free_structures(*mesh,*met,(disp==NULL)?NULL:*disp);
-#endif
+
   return;
 }
 

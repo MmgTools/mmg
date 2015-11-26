@@ -1168,6 +1168,9 @@ int MMGS_loadSol(MMG5_pMesh mesh,MMG5_pSol met) {
 
   }
   if ( mesh->np != met->np ) {
+    fprintf(stdout,"  ** MISMATCHES DATA: THE NUMBER OF VERTICES IN "
+            "THE MESH (%d) DIFFERS FROM THE NUMBER OF VERTICES IN "
+            "THE SOLUTION (%d) \n",mesh->np,met->np);
     return(-1);
   }
 

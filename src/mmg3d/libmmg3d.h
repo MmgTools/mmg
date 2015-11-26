@@ -23,7 +23,7 @@
 
 /**
  * \file mmg3d/libmmg3d.h
- * \brief C API for MMG3D library.
+ * \brief API headers for the mmg3d library
  * \author Algiane Froehly (Inria / IMB, Université de Bordeaux)
  * \version 5
  * \date 01 2014
@@ -45,7 +45,7 @@
 #ifndef _MMG3DLIB_H
 #define _MMG3DLIB_H
 
-#include "mmg.h"
+#include "mmgcommon.h"
 
 /**
  * \enum MMG3D_Param

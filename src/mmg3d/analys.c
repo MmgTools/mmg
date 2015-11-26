@@ -561,7 +561,7 @@ static void _MMG5_nmgeom(MMG5_pMesh mesh){
 }
 
 /** preprocessing stage: mesh analysis */
-int _MMG5_analys(MMG5_pMesh mesh) {
+int _MMG3D_analys(MMG5_pMesh mesh) {
   _MMG5_Hash hash;
 
   /**--- stage 1: data structures for surface */
@@ -595,7 +595,7 @@ int _MMG5_analys(MMG5_pMesh mesh) {
   }
 
   /* create surface adjacency */
-  if ( !_MMG5_hashTria(mesh,&hash) ) {
+  if ( !_MMG3D_hashTria(mesh,&hash) ) {
     _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
     fprintf(stdout,"  ## Hashing problem (2). Exit program.\n");
     return(0);

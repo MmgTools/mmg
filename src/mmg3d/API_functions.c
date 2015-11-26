@@ -330,7 +330,7 @@ int MMG3D_Set_meshSize(MMG5_pMesh mesh, int np, int ne, int nt, int na) {
   /*tester si -m definie : renvoie 0 si pas ok et met la taille min dans info.mem */
   if( mesh->info.mem > 0) {
     if((mesh->npmax < mesh->np || mesh->ntmax < mesh->nt || mesh->nemax < mesh->ne)) {
-      _MMG5_memOption(mesh);
+      _MMG3D_memOption(mesh);
       //     printf("pas de pbs ? %d %d %d %d %d %d -- %d\n",mesh->npmax,mesh->np,
       //     mesh->ntmax,mesh->nt,mesh->nemax,mesh->ne,mesh->info.mem);
       if((mesh->npmax < mesh->np || mesh->ntmax < mesh->nt
@@ -1346,7 +1346,7 @@ int MMG3D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
     }
     else
       mesh->info.mem      = val;
-    _MMG5_memOption(mesh);
+    _MMG3D_memOption(mesh);
     if(mesh->np && (mesh->npmax < mesh->np || mesh->ntmax < mesh->nt || mesh->nemax < mesh->ne)) {
       return(0);
     } else if(mesh->info.mem < 39)

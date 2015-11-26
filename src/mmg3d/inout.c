@@ -769,10 +769,17 @@ int _MMG3D_saveAllMesh(MMG5_pMesh mesh) {
   }
   else {
     ptr = strstr(data,".meshb");
-    if( ptr ) bin = 1;
-    if( !(inm = fopen(data,"w")) ) {
-      fprintf(stderr,"  ** UNABLE TO OPEN %s.\n",data);
-      return(0);
+    if( ptr ) {
+      bin = 1;
+      if( !(inm = fopen(data,"wb")) ) {
+        fprintf(stderr,"  ** UNABLE TO OPEN %s.\n",data);
+        return(0);
+      }
+    } else {
+      if( !(inm = fopen(data,"w")) ) {
+        fprintf(stderr,"  ** UNABLE TO OPEN %s.\n",data);
+        return(0);
+      }
     }
   }
   fprintf(stdout,"  %%%% %s OPENED\n",data);
@@ -1401,6 +1408,9 @@ int MMG3D_loadSol(MMG5_pMesh mesh,MMG5_pSol met) {
 
   }
   if ( mesh->np != met->np ) {
+    fprintf(stdout,"  ** MISMATCHES DATA: THE NUMBER OF VERTICES IN "
+            "THE MESH (%d) DIFFERS FROM THE NUMBER OF VERTICES IN "
+            "THE SOLUTION (%d) \n",mesh->np,met->np);
     return(-1);
   }
 

@@ -45,7 +45,7 @@
 void MMGS_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
   if ( met->size < 6 ) {
     _MMG5_calelt  = _MMG5_caltri_iso;
-    _MMG5_defsiz  = _MMG5_defsiz_iso;
+    _MMG5_defsiz  = _MMGS_defsiz_iso;
     gradsiz = gradsiz_iso;
     _MMG5_lenSurfEdg  = _MMG5_lenSurfEdg_iso;
     intmet  = intmet_iso;
@@ -55,7 +55,7 @@ void MMGS_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
   else {
     fprintf(stdout,"\n  ## WARNING: ANISOTROPIC REMESHING NOT STABLE FOR NOW.\n\n");
     _MMG5_calelt  = _MMG5_caltri_ani;
-    _MMG5_defsiz  = _MMG5_defsiz_ani;
+    _MMG5_defsiz  = _MMGS_defsiz_ani;
     gradsiz = gradsiz_ani;
     _MMG5_lenSurfEdg  = _MMG5_lenSurfEdg_ani;
     intmet  = intmet_ani;
@@ -114,7 +114,7 @@ void MMGS_defaultValues(MMG5_pMesh mesh) {
 int MMGS_stockOptions(MMG5_pMesh mesh, MMG5_Info *info) {
 
   memcpy(&mesh->info,info,sizeof(MMG5_Info));
-  _MMG5_memOption(mesh);
+  _MMGS_memOption(mesh);
   if( mesh->info.mem > 0) {
     if ( mesh->npmax < mesh->np || mesh->ntmax < mesh->nt ) {
       return(0);

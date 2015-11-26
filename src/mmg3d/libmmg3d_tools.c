@@ -48,7 +48,7 @@ void MMG3D_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
     _MMG5_intmet     = _MMG5_intmet_iso;
     _MMG5_lenedgspl  = _MMG5_lenedg_iso;
     _MMG5_interp4bar = _MMG5_interp4bar_iso;
-    _MMG5_defsiz     = _MMG5_defsiz_iso;
+    _MMG5_defsiz     = _MMG3D_defsiz_iso;
     _MMG5_gradsiz    = _MMG5_gradsiz_iso;
 #ifndef PATTERN
     _MMG5_cavity     = _MMG5_cavity_iso;
@@ -63,7 +63,7 @@ void MMG3D_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
     _MMG5_intmet     = _MMG5_intmet_ani;
     _MMG5_lenedgspl  = _MMG5_lenedg_ani;
     _MMG5_interp4bar = _MMG5_interp4bar_ani;
-    _MMG5_defsiz     = _MMG5_defsiz_ani;
+    _MMG5_defsiz     = _MMG3D_defsiz_ani;
     _MMG5_gradsiz    = _MMG5_gradsiz_ani;
 #ifndef PATTERN
     _MMG5_cavity     = _MMG5_cavity_ani;
@@ -507,7 +507,7 @@ int MMG3D_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
 int MMG3D_stockOptions(MMG5_pMesh mesh, MMG5_Info *info) {
 
   memcpy(&mesh->info,info,sizeof(MMG5_Info));
-  _MMG5_memOption(mesh);
+  _MMG3D_memOption(mesh);
   if( mesh->info.mem > 0) {
     if((mesh->npmax < mesh->np || mesh->ntmax < mesh->nt || mesh->nemax < mesh->ne)) {
       return(0);

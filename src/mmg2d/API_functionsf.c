@@ -285,18 +285,19 @@ FORTRAN_NAME(MMG2D_LOADMESH,mmg2d_loadmesh,(MMG5_pMesh *mesh,char* meshin,int* s
 /**
  * See \ref MMG2D_loadSol function in \ref mmg2d/libmmg2d.h file.
  */
-FORTRAN_NAME(MMG2D_LOADSOL,mmg2d_loadSol,(MMG5_pSol *met,char *meshin,int* strlen,int *npmax,int *msh,int* retval),(met,meshin,strlen,npmax,msh,retval)){
+FORTRAN_NAME(MMG2D_LOADSOL,mmg2d_loadsol,(MMG5_pMesh *mesh,MMG5_pSol *met,char *meshin,int* strlen,int *msh,int* retval),(mesh,met,meshin,strlen,msh,retval)){
   char *tmp = NULL;
 
   tmp = (char*)malloc((*strlen+1)*sizeof(char));
   strncpy(tmp,meshin,*strlen);
   tmp[*strlen] = '\0';
 
-  *retval = MMG2D_loadSol(*met,tmp,*npmax,*msh);
+  *retval = MMG2D_loadSol(*mesh,*met,tmp,*msh);
   _MMG5_SAFE_FREE(tmp);
 
   return;
 }
+
 
 /**
  * See \ref MMG2D_saveSol function in \ref mmg2d/libmmg2d.h file.

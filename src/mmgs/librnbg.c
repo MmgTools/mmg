@@ -217,7 +217,7 @@ int _MMG5_mmgsRenumbering(int boxVertNbr, MMG5_pMesh mesh, MMG5_pSol sol) {
                 _MMG5_DEL_MEM(mesh,vertOldTab,(mesh->ne+1)*sizeof(int));
                 _MMG5_DEL_MEM(mesh,vertTab,(vertNbr+2)*sizeof(SCOTCH_Num));
                 _MMG5_DEL_MEM(mesh,edgeTab,edgeSiz*sizeof(SCOTCH_Num));
-                if( !_MMG5_hashTria(mesh) ) return(0);
+                if( !_MMGS_hashTria(mesh) ) return(0);
                 return(1));
   _MMG5_SAFE_CALLOC(permVrtTab,vertNbr+1,SCOTCH_Num);
 
@@ -235,7 +235,7 @@ int _MMG5_mmgsRenumbering(int boxVertNbr, MMG5_pMesh mesh, MMG5_pSol sol) {
                 _MMG5_DEL_MEM(mesh,vertTab,(vertNbr+2)*sizeof(SCOTCH_Num));
                 _MMG5_DEL_MEM(mesh,permVrtTab,(vertNbr+1)*sizeof(SCOTCH_Num));
                 _MMG5_DEL_MEM(mesh,edgeTab,edgeSiz*sizeof(SCOTCH_Num));
-                if( !_MMG5_hashTria(mesh) ) return(0);
+                if( !_MMGS_hashTria(mesh) ) return(0);
                 return(1));
   _MMG5_SAFE_CALLOC(permNodTab,mesh->np+1,int);
 
@@ -315,7 +315,7 @@ int _MMG5_mmgsRenumbering(int boxVertNbr, MMG5_pMesh mesh, MMG5_pSol sol) {
     for (k=mesh->nenil; k<mesh->ntmax-1; k++)
       mesh->tria[k].v[2] = k+1;
 
-  if( !_MMG5_hashTria(mesh) ) return(0);
+  if( !_MMGS_hashTria(mesh) ) return(0);
 
   return 1;
 }

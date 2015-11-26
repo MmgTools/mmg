@@ -84,10 +84,10 @@ int main(int argc,char *argv[]) {
   /** with MMG3D_loadMesh function */
   /** a) (not mandatory): give the mesh name
      (by default, the "mesh.mesh" file is oppened)*/
-  if ( !MMG3D_Set_inputMeshName(mmgMesh,inname) )
+  if ( MMG3D_Set_inputMeshName(mmgMesh,inname) != 1 )
     exit(EXIT_FAILURE);
   /** b) function calling */
-  if ( !MMG3D_loadMesh(mmgMesh) )  exit(EXIT_FAILURE);
+  if ( MMG3D_loadMesh(mmgMesh) != 1 )  exit(EXIT_FAILURE);
 
   /** 3) Build displacement in MMG5 format */
   /** Two solutions: just use the MMG3D_loadSol function that will read a .sol(b)
@@ -95,21 +95,21 @@ int main(int argc,char *argv[]) {
 
   /**------------------- Lagrangian motion option ----------------------------*/
   /* Ask for lagrangian motion (mode 1) */
-  if ( !MMG3D_Set_iparameter(mmgMesh,mmgDisp,MMG5_IPARAM_lag, 1) )
+  if ( MMG3D_Set_iparameter(mmgMesh,mmgDisp,MMG5_IPARAM_lag, 1) != 1 )
     exit(EXIT_FAILURE);
 
   /** With MMG3D_loadSol function */
   /** a) (not mandatory): give the sol name
      (by default, the "mesh.sol" file is oppened)*/
-  if ( !MMG3D_Set_inputSolName(mmgMesh,mmgDisp,inname) )
+  if ( MMG3D_Set_inputSolName(mmgMesh,mmgDisp,inname) != 1 )
     exit(EXIT_FAILURE);
 
   /** b) function calling */
-  if ( !MMG3D_loadSol(mmgMesh,mmgDisp) )
+  if ( MMG3D_loadSol(mmgMesh,mmgDisp) != 1 )
     exit(EXIT_FAILURE);
 
   /** 4) (not mandatory): check if the number of given entities match with mesh size */
-  if ( !MMG3D_Chk_meshData(mmgMesh,mmgDisp) ) exit(EXIT_FAILURE);
+  if ( MMG3D_Chk_meshData(mmgMesh,mmgDisp) != 1 ) exit(EXIT_FAILURE);
 
   /** 5) (not mandatory): set your global parameters using the
       MMG3D_Set_iparameter and MMG3D_Set_dparameter function
@@ -119,7 +119,7 @@ int main(int argc,char *argv[]) {
   /**------------------- Lagrangian motion computation ---------------------*/
 
   /* debug mode ON (default value = OFF) */
-  if ( !MMG3D_Set_iparameter(mmgMesh,mmgDisp,MMG3D_IPARAM_debug, 1) )
+  if ( MMG3D_Set_iparameter(mmgMesh,mmgDisp,MMG3D_IPARAM_debug, 1) != 1 )
     exit(EXIT_FAILURE);
 
   /** library call */
@@ -133,16 +133,18 @@ int main(int argc,char *argv[]) {
 
   /* (Not mandatory) Automatically save the mesh */
   sprintf(outname, "%s%s%s", pwd, "/../libexamples/mmg3d/example4/", "tinyBoxt.o.mesh");
-  if ( !MMG3D_Set_outputMeshName(mmgMesh,outname) )
+  if ( MMG3D_Set_outputMeshName(mmgMesh,outname) != 1 )
     exit(EXIT_FAILURE);
 
-  MMG3D_saveMesh(mmgMesh);
+  if ( MMG3D_saveMesh(mmgMesh) != 1 )
+    exit(EXIT_FAILURE);
 
   /* (Not mandatory) Automatically save the solution */
-  if ( !MMG3D_Set_outputSolName(mmgMesh,mmgSol,outname) )
+  if ( MMG3D_Set_outputSolName(mmgMesh,mmgSol,outname) != 1 )
     exit(EXIT_FAILURE);
 
-  MMG3D_saveSol(mmgMesh,mmgSol);
+  if ( MMG3D_saveSol(mmgMesh,mmgSol) != 1 )
+    exit(EXIT_FAILURE);
 
   /* 9) free the MMG3D5 structures */
   MMG3D_Free_all(mmgMesh,mmgSol,mmgDisp);

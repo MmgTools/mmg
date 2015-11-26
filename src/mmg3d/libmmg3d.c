@@ -23,7 +23,7 @@
 
 /**
  * \file mmg3d/libmmg3d.c
- * \brief Private API functions for MMG3D library.
+ * \brief Most of the API functions of the MMG3D library.
  * \author Charles Dapogny (LJLL, UPMC)
  * \author Cécile Dobrzynski (Inria / IMB, Université de Bordeaux)
  * \author Pascal Frey (LJLL, UPMC)
@@ -370,7 +370,7 @@ int MMG3D_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met) {
   chrono(ON,&(ctim[2]));
   MMG3D_setfunc(mesh,met);
 
-  if ( abs(mesh->info.imprim) > 0 )  _MMG5_inqua(mesh,met);
+  if ( abs(mesh->info.imprim) > 0 )  _MMG3D_inqua(mesh,met);
 
   if ( mesh->info.imprim ) {
     fprintf(stdout,"\n  %s\n   MODULE MMG3D: IMB-LJLL : %s (%s)\n  %s\n",MG_STR,MG_VER,MG_REL,MG_STR);
@@ -396,12 +396,12 @@ int MMG3D_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met) {
   }
 
   /* mesh analysis */
-  if ( !_MMG5_analys(mesh) ) {
+  if ( !_MMG3D_analys(mesh) ) {
     if ( !_MMG5_unscaleMesh(mesh,met) )  return(MMG5_STRONGFAILURE);
     _MMG5_RETURN_AND_PACK(mesh,met,NULL,MMG5_LOWFAILURE);
   }
 
-  if ( mesh->info.imprim > 1 && !mesh->info.iso && met->m ) _MMG5_prilen(mesh,met,0);
+  if ( mesh->info.imprim > 1 && !mesh->info.iso && met->m ) _MMG3D_prilen(mesh,met,0);
 
   chrono(OFF,&(ctim[2]));
   printim(ctim[2].gdif,stim);
@@ -462,9 +462,9 @@ int MMG3D_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met) {
   }
 
   /* save file */
-  _MMG5_outqua(mesh,met);
+  _MMG3D_outqua(mesh,met);
   if ( mesh->info.imprim > 4 && !mesh->info.iso )
-    _MMG5_prilen(mesh,met,1);
+    _MMG3D_prilen(mesh,met,1);
 
   chrono(ON,&(ctim[1]));
   if ( mesh->info.imprim )  fprintf(stdout,"\n  -- MESH PACKED UP\n");
@@ -572,7 +572,7 @@ int MMG3D_mmg3dmov(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp) {
   chrono(ON,&(ctim[2]));
   MMG3D_setfunc(mesh,met);
 
-  if ( abs(mesh->info.imprim) > 0 )  _MMG5_inqua(mesh,met);
+  if ( abs(mesh->info.imprim) > 0 )  _MMG3D_inqua(mesh,met);
 
   if ( mesh->info.imprim ) {
     fprintf(stdout,"\n  %s\n   MODULE MMG3D: IMB-LJLL : %s (%s)\n  %s\n",MG_STR,MG_VER,MG_REL,MG_STR);
@@ -584,12 +584,12 @@ int MMG3D_mmg3dmov(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp) {
 
 
   /* mesh analysis */
-  if ( !_MMG5_analys(mesh) ) {
+  if ( !_MMG3D_analys(mesh) ) {
     if ( !_MMG5_unscaleMesh(mesh,disp) )  return(MMG5_STRONGFAILURE);
     _MMG5_RETURN_AND_PACK(mesh,met,disp,MMG5_LOWFAILURE);
   }
 
-  if ( mesh->info.imprim > 4 && !mesh->info.iso && met->m ) _MMG5_prilen(mesh,met,0);
+  if ( mesh->info.imprim > 4 && !mesh->info.iso && met->m ) _MMG3D_prilen(mesh,met,0);
 
   chrono(OFF,&(ctim[2]));
   printim(ctim[2].gdif,stim);
@@ -609,10 +609,13 @@ int MMG3D_mmg3dmov(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp) {
     _MMG5_RETURN_AND_PACK(mesh,met,disp,MMG5_LOWFAILURE);
   }
 
+#ifdef USE_SUSCELAS
   /* Lagrangian mode */
   if ( !_MMG5_mmg3d3(mesh,disp,met) ) {
     return(MMG5_STRONGFAILURE);
   }
+#endif
+
   if ( !met->np && !_MMG5_DoSol(mesh,met) ) {
     if ( !_MMG5_unscaleMesh(mesh,disp) )  return(MMG5_STRONGFAILURE);
     _MMG5_RETURN_AND_PACK(mesh,met,disp,MMG5_LOWFAILURE);
@@ -662,9 +665,9 @@ int MMG3D_mmg3dmov(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp) {
   }
 
   /* save file */
-  _MMG5_outqua(mesh,met);
+  _MMG3D_outqua(mesh,met);
   if ( mesh->info.imprim > 1 && !mesh->info.iso )
-    _MMG5_prilen(mesh,met,1);
+    _MMG3D_prilen(mesh,met,1);
 
   chrono(ON,&(ctim[1]));
   if ( mesh->info.imprim )  fprintf(stdout,"\n  -- MESH PACKED UP\n");

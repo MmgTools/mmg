@@ -85,7 +85,7 @@ void _MMG5_tet2tri(MMG5_pMesh mesh,int k,char ie,MMG5_Tria *ptt) {
  * Find acceptable position for splitting.
  *
  */
-int _MMG5_dichoto(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
+int _MMG3D_dichoto(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
   MMG5_pTetra  pt;
   MMG5_pPoint  pa,pb,ps;
   double       o[6][3],p[6][3];
@@ -129,10 +129,10 @@ int _MMG5_dichoto(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
     }
     switch (pt->flag) {
     case 1: case 2: case 4: case 8: case 16: case 32:
-      ier = _MMG5_split1_sim(mesh,met,k,vx);
+      ier = _MMG3D_split1_sim(mesh,met,k,vx);
       break;
     case 11: case 21: case 38: case 56:
-      ier = _MMG5_split3_sim(mesh,met,k,vx);
+      ier = _MMG3D_split3_sim(mesh,met,k,vx);
       break;
     default:
       ier = _MMG5_split2sf_sim(mesh,met,k,vx);
@@ -171,7 +171,7 @@ int _MMG5_dichoto(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
  * considered edge, starting from o point.
  *
  */
-int _MMG5_dichoto1b(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int ip) {
+int _MMG3D_dichoto1b(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int ip) {
   MMG5_pTetra  pt;
   MMG5_pPoint  p0,p1,ppt;
   int          iel,np,nq,it,maxit;
@@ -209,7 +209,7 @@ int _MMG5_dichoto1b(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int ip) {
     ppt->c[1] = m[1] + t*(o[1]-m[1]);
     ppt->c[2] = m[2] + t*(o[2]-m[2]);
 
-    ier = _MMG5_simbulgept(mesh,met,list,ret,ip);
+    ier = _MMG3D_simbulgept(mesh,met,list,ret,ip);
     if ( ier )
       to = t;
     else
@@ -738,7 +738,7 @@ static int _MMG5_coltet(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
           ier = _MMG5_colver(mesh,met,list,ilist,iq,typchk);
           if ( ier < 0 ) return(-1);
           else if ( ier ) {
-            _MMG5_delPt(mesh,ier);
+            _MMG3D_delPt(mesh,ier);
             break;
           }
         }
@@ -857,7 +857,7 @@ _MMG5_anatetv(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
         o[1] = 0.5 * (p1->c[1]+p2->c[1]);
         o[2] = 0.5 * (p1->c[2]+p2->c[2]);
 
-        ip  = _MMG5_newPt(mesh,o,0);
+        ip  = _MMG3D_newPt(mesh,o,0);
         if ( !ip ) {
           /* reallocation of point table */
 
@@ -873,13 +873,13 @@ _MMG5_anatetv(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
 
         if ( met->m ) {
           if ( typchk == 1 && (met->size>1) )
-            ier = _MMG5_intmet33_ani(mesh,met,k,i,ip,0.5);
+            ier = _MMG3D_intmet33_ani(mesh,met,k,i,ip,0.5);
           else
             ier = _MMG5_intmet(mesh,met,k,i,ip,0.5);
 
           if (!ier) return(-1);
           else if ( ier < 0 ) {
-            _MMG5_delPt(mesh,ip);
+            _MMG3D_delPt(mesh,ip);
             continue;
           }
         }
@@ -1060,17 +1060,17 @@ _MMG5_anatets(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
       ip  = _MMG5_hashGet(&hash,ip1,ip2);
       if ( ip > 0 && !(ptt.tag[j] & MG_GEO) )  continue;
 
-      ier = _MMG5_bezierInt(&pb,&uv[j][0],o,no,to);
+      ier = _MMG3D_bezierInt(&pb,&uv[j][0],o,no,to);
       /* new point along edge */
       if ( !ip ) {
-        ip = _MMG5_newPt(mesh,o,MG_BDY);
+        ip = _MMG3D_newPt(mesh,o,MG_BDY);
         if ( !ip ) {
           /* reallocation of point table */
           _MMG5_POINT_REALLOC(mesh,met,ip,mesh->gap,
                               printf("  ## Error: unable to allocate a new point.\n");
                               _MMG5_INCREASE_MEM_MESSAGE();
                               do {
-                                _MMG5_delPt(mesh,mesh->np);
+                                _MMG3D_delPt(mesh,mesh->np);
                               } while ( mesh->np>npinit );
                               return(-1)
                               ,o,MG_BDY);
@@ -1086,13 +1086,13 @@ _MMG5_anatets(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
 
         if ( met->m ) {
           if ( typchk == 1 && (met->size>1) )
-            ier = _MMG5_intmet33_ani(mesh,met,k,ia,ip,0.5);
+            ier = _MMG3D_intmet33_ani(mesh,met,k,ia,ip,0.5);
           else
             ier = _MMG5_intmet(mesh,met,k,ia,ip,0.5);
 
           if ( !ier )  return(-1);
           else if ( ier < 0 ) {
-            _MMG5_delPt(mesh,ip);
+            _MMG3D_delPt(mesh,ip);
             continue;
           }
         }
@@ -1169,7 +1169,7 @@ _MMG5_anatets(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
           pxp = &mesh->xpoint[ppt->xp];
           if ( pt->xt )  ier = _MMG5_bezierCP(mesh,&ptt,&pb,MG_GET(pxt->ori,i));
           else  ier = _MMG5_bezierCP(mesh,&ptt,&pb,1);
-          ier = _MMG5_bezierInt(&pb,&uv[j][0],o,no,to);
+          ier = _MMG3D_bezierInt(&pb,&uv[j][0],o,no,to);
 
           dd = no[0]*pxp->n1[0]+no[1]*pxp->n1[1]+no[2]*pxp->n1[2];
           if ( dd > 1.0-_MMG5_EPS ) continue;
@@ -1210,10 +1210,10 @@ _MMG5_anatets(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
       if ( !pt->flag )  continue;
       switch (pt->flag) {
       case 1: case 2: case 4: case 8: case 16: case 32:
-        ier = _MMG5_split1_sim(mesh,met,k,vx);
+        ier = _MMG3D_split1_sim(mesh,met,k,vx);
         break;
       case 11: case 21: case 38: case 56:
-        ier = _MMG5_split3_sim(mesh,met,k,vx);
+        ier = _MMG3D_split3_sim(mesh,met,k,vx);
         break;
       default:
         ier = _MMG5_split2sf_sim(mesh,met,k,vx);
@@ -1222,7 +1222,7 @@ _MMG5_anatets(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
       if ( ier )  continue;
 
       ni++;
-      if ( ic == 0 && _MMG5_dichoto(mesh,met,k,vx) ) {
+      if ( ic == 0 && _MMG3D_dichoto(mesh,met,k,vx) ) {
         for (ia=0; ia<6; ia++)
           if ( vx[ia] > 0 )  mesh->point[vx[ia]].flag++;
       }

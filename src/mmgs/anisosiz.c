@@ -540,7 +540,7 @@ static int _MMG5_defmetreg(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
  * physical metric.
  *
  */
-int _MMG5_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
+int _MMGS_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTria    pt;
   MMG5_pPoint   ppt;
   double        mm[6];

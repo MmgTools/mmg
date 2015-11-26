@@ -847,7 +847,7 @@ int _MMG5_DoSol(MMG5_pMesh mesh,MMG5_pSol met) {
 }
 
 /** find the element number in packed numerotation */
-int _MMG5_indElt(MMG5_pMesh mesh, int kel) {
+int _MMG3D_indElt(MMG5_pMesh mesh, int kel) {
     MMG5_pTetra pt;
     int    ne, k;
 
@@ -863,7 +863,7 @@ int _MMG5_indElt(MMG5_pMesh mesh, int kel) {
 }
 
 /** find the point number in packed numerotation */
-int _MMG5_indPt(MMG5_pMesh mesh, int kp) {
+int _MMG3D_indPt(MMG5_pMesh mesh, int kp) {
     MMG5_pPoint ppt;
     int         np, k;
 

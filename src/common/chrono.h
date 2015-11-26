@@ -25,7 +25,7 @@
 #define _CHRONO_H
 
 #include <time.h>
-#include "mmg.h"
+#include "mmgcommon.h"
 
 #ifndef POSIX
 #include <windows.h>

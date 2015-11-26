@@ -885,7 +885,7 @@ static int _MMG5_defmetreg(MMG5_pMesh mesh,MMG5_pSol met,int kel,int iface, int 
  * physical metric.
  *
  */
-int _MMG5_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
+int _MMG3D_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTetra   pt;
   MMG5_pxTetra  pxt;
   MMG5_pPoint   ppt;

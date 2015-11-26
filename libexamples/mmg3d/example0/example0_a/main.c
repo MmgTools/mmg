@@ -78,10 +78,10 @@ int main(int argc,char *argv[]) {
   /** with MMG3D_loadMesh function */
   /** a) (not mandatory): give the mesh name
      (by default, the "mesh.mesh" file is oppened)*/
-  if ( !MMG3D_Set_inputMeshName(mmgMesh,filename) )
+  if ( MMG3D_Set_inputMeshName(mmgMesh,filename) != 1 )
     exit(EXIT_FAILURE);
   /** b) function calling */
-  if ( !MMG3D_loadMesh(mmgMesh) )  exit(EXIT_FAILURE);
+  if ( MMG3D_loadMesh(mmgMesh) != 1 )  exit(EXIT_FAILURE);
 
   /** 3) Build sol in MMG5 format */
   /** Two solutions: just use the MMG3D_loadSol function that will read a .sol(b)
@@ -90,14 +90,14 @@ int main(int argc,char *argv[]) {
   /** With MMG3D_loadSol function */
   /** a) (not mandatory): give the sol name
      (by default, the "mesh.sol" file is oppened)*/
-  if ( !MMG3D_Set_inputSolName(mmgMesh,mmgSol,filename) )
+  if ( MMG3D_Set_inputSolName(mmgMesh,mmgSol,filename) != 1 )
     exit(EXIT_FAILURE);
   /** b) function calling */
-  if ( !MMG3D_loadSol(mmgMesh,mmgSol) )
+  if ( MMG3D_loadSol(mmgMesh,mmgSol) != 1 )
     exit(EXIT_FAILURE);
 
   /** 4) (not mandatory): check if the number of given entities match with mesh size */
-  if ( !MMG3D_Chk_meshData(mmgMesh,mmgSol) ) exit(EXIT_FAILURE);
+  if ( MMG3D_Chk_meshData(mmgMesh,mmgSol) != 1 ) exit(EXIT_FAILURE);
 
   /** ------------------------------ STEP  II -------------------------- */
   /** library call */
@@ -121,14 +121,20 @@ int main(int argc,char *argv[]) {
      (by default, the mesh is saved in the "mesh.o.mesh" file */
   // MMG3D_Set_outputMeshName(mmgMesh,"output.mesh");
   /** b) function calling */
-  MMG3D_saveMesh(mmgMesh);
+  if ( MMG3D_saveMesh(mmgMesh) != 1 ) {
+    fprintf(stdout,"UNABLE TO SAVE MESH\n");
+    return(MMG5_STRONGFAILURE);
+  }
 
   /** 2) Automatically save the solution */
   /** a)  (not mandatory): give the ouptut sol name using MMG3D_Set_outputSolName
      (by default, the mesh is saved in the "mesh.o.sol" file */
-  // MMG3D_Set_outputSolName(mmgSol,"output.sol");
+  // MMG3D_Set_outputSolName(mmgMesh,mmgSol,"output.sol");
   /** b) function calling */
-  MMG3D_saveSol(mmgMesh,mmgSol);
+  if ( MMG3D_saveSol(mmgMesh,mmgSol) != 1 ) {
+    fprintf(stdout,"UNABLE TO SAVE SOL\n");
+    return(MMG5_LOWFAILURE);
+  }
 
   /** 3) Free the MMG3D5 structures */
   MMG3D_Free_all(mmgMesh,mmgSol,NULL);

@@ -51,9 +51,9 @@ ELSEIF(MINGW)
   SET (DEF_GNU "#define GNU")
 ENDIF ()
 
-# Create mmg.h file with the good release and architecture infos.
-CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/src/common/mmg.h.in
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/common/mmg.h @ONLY)
+# Create mmgcommon.h file with the good release and architecture infos.
+CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/src/common/mmgcommon.h.in
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/common/mmgcommon.h @ONLY)
 
 ###############################################################################
 #####
@@ -130,22 +130,22 @@ SET ( BUILD "MMG" CACHE STRING
   "\"MMG3D\", \"MMGS\",\"MMG2D\", or \"MMG\" to compile both MMGS, MMG3D and MMG2D" )
 
 IF ( BUILD MATCHES "MMGS" )
-#  SET(BUILD_MMG        OFF )
+  SET(BUILD_MMG        OFF )
   SET(BUILD_MMG3D      OFF )
   SET(BUILD_MMGS       ON  )
   SET(BUILD_MMG2D      OFF  )
 ELSEIF ( BUILD MATCHES "MMG3D" )
   SET(BUILD_MMG3D      ON  )
   SET(BUILD_MMGS       OFF )
-#  SET(BUILD_MMG        OFF )
+  SET(BUILD_MMG        OFF )
   SET(BUILD_MMG2D      OFF  )
 ELSEIF ( BUILD MATCHES "MMG2D" )
-#  SET(BUILD_MMG        OFF )
+  SET(BUILD_MMG        OFF )
   SET(BUILD_MMG3D      OFF )
   SET(BUILD_MMGS       OFF  )
   SET(BUILD_MMG2D      ON  )
 ELSEIF ( BUILD MATCHES "MMG" )
-#  SET(BUILD_MMG        ON  )
+  SET(BUILD_MMG        ON  )
   SET(BUILD_MMGS       ON )
   SET(BUILD_MMG3D      ON )
   SET(BUILD_MMG2D      ON  )
@@ -244,7 +244,7 @@ ENDIF ( )
 #####
 ############################################################################
 
-SET(CMAKE_MACOSX_RPATH TRUE)
+SET(CMAKE_MACOSX_RPATH FALSE)
 
 # use, i.e. don't skip the full RPATH for the build tree
 SET(CMAKE_SKIP_BUILD_RPATH  FALSE)
@@ -274,9 +274,9 @@ ENDIF("${isSystemDir}" STREQUAL "-1")
 ###############################################################################
 
 #------------------------------- mmg2d
-CMAKE_DEPENDENT_OPTION ( LIBMMG2D_STATIC "Compile static library" ON
+CMAKE_DEPENDENT_OPTION ( LIBMMG2D_STATIC "Compile the mmg2d static library" ON
   "BUILD_MMG2D" OFF)
-CMAKE_DEPENDENT_OPTION ( LIBMMG2D_SHARED "Compile dynamic library" OFF
+CMAKE_DEPENDENT_OPTION ( LIBMMG2D_SHARED "Compile the mmg2d dynamic library" OFF
   "BUILD_MMG2D" OFF )
 IF (LIBMMG2D_STATIC OR LIBMMG2D_SHARED)
   SET(LIBMMG2D_INTERNAL ON )
@@ -293,9 +293,9 @@ CMAKE_DEPENDENT_OPTION(
   "BUILD_TESTING;BUILD_MMG2D" OFF)
 
 #------------------------------- mmgs
-CMAKE_DEPENDENT_OPTION ( LIBMMGS_STATIC "Compile static library" ON
+CMAKE_DEPENDENT_OPTION ( LIBMMGS_STATIC "Compile the mmgs static library" ON
   "BUILD_MMGS" OFF)
-CMAKE_DEPENDENT_OPTION ( LIBMMGS_SHARED "Compile dynamic library" OFF
+CMAKE_DEPENDENT_OPTION ( LIBMMGS_SHARED "Compile the mmgs dynamic library" OFF
   "BUILD_MMGS" OFF)
 IF (LIBMMGS_STATIC OR LIBMMGS_SHARED)
   SET(LIBMMGS_INTERNAL ON )
@@ -312,9 +312,9 @@ CMAKE_DEPENDENT_OPTION(
   "BUILD_TESTING;BUILD_MMGS" OFF )
 
 #------------------------------- mmg3d
-CMAKE_DEPENDENT_OPTION ( LIBMMG3D_STATIC "Compile static library" ON
+CMAKE_DEPENDENT_OPTION ( LIBMMG3D_STATIC "Compile the mmg3d static library" ON
   "BUILD_MMG3D" OFF)
-CMAKE_DEPENDENT_OPTION ( LIBMMG3D_SHARED "Compile dynamic library" OFF
+CMAKE_DEPENDENT_OPTION ( LIBMMG3D_SHARED "Compile the mmg3d dynamic library" OFF
   "BUILD_MMG3D" OFF )
 IF (LIBMMG3D_STATIC OR LIBMMG3D_SHARED)
   SET(LIBMMG3D_INTERNAL ON )
@@ -350,6 +350,27 @@ INCLUDE(cmake/modules/FindScotch.cmake)
 CMAKE_DEPENDENT_OPTION ( USE_SCOTCH "Use SCOTCH TOOL for renumbering" ON
   "SCOTCH_FOUND;BUILD_MMGS3D" OFF)
 
+#---------------------------- mmg library gathering mmg2d, mmgs and mmg3d libs
+CMAKE_DEPENDENT_OPTION ( LIBMMG_STATIC
+  "Compile the mmg static library (mmg2d + mmgs + mmg3d)" ON
+  "BUILD_MMG" OFF)
+CMAKE_DEPENDENT_OPTION ( LIBMMG_SHARED
+  "Compile the mmg dynamic library (mmg2d + mmgs + mmg3d)" OFF
+  "BUILD_MMG" OFF )
+IF (LIBMMG_STATIC OR LIBMMG_SHARED)
+  SET(LIBMMG_INTERNAL ON )
+ELSE()
+  SET(LIBMMG_INTERNAL OFF )
+ENDIF()
+CMAKE_DEPENDENT_OPTION (
+  TEST_LIBMMG "Compile tests for the mmg library" OFF
+  "BUILD_MMG;LIBMMG_INTERNAL" OFF
+  )
+CMAKE_DEPENDENT_OPTION(
+  MMG3D_CI "Enable/Disable continuous integration for mmg" ON
+  "BUILD_TESTING;BUILD_MMG" OFF)
+
+
 ###############################################################################
 #####
 #####         Build Targets and libmmg if needed
@@ -370,7 +391,7 @@ IF ( BUILD_MMG3D )
 ENDIF ( )
 
 IF ( BUILD_MMG )
-
+  INCLUDE(cmake/modules/mmg.cmake)
 ENDIF ( )
 
 ###############################################################################
@@ -532,82 +553,75 @@ ENDIF ( DOXYGEN_FOUND )
 
 ###############################################################################
 #####
-#####         Create Package : not used since a long time : to correct and end
+#####         Create Package
 #####
 ###############################################################################
-# INCLUDE(InstallRequiredSystemLibraries)
-# SET( CPACK_SOURCE_GENERATOR TGZ )
-# SET( CPACK_GENERATOR TGZ )
+INCLUDE(InstallRequiredSystemLibraries)
+SET( CPACK_SOURCE_GENERATOR TGZ )
+SET( CPACK_GENERATOR TGZ )
 
-# SET(CPACK_PACKAGE_NAME ${PROJECT_NAME})
-# SET(CPACK_INCLUDE_TOPLEVEL_DIRECTORY 1)
-# SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "MMG3D/MMGS: ISOTROPIC TETRAHEDRAL"
-#   " REMESHER/SURFACE REMESHER")
-# SET(CPACK_PACKAGE_VENDOR "Cécile Dobrzynski, Pascal Frey, Charles Dapogny,"
-#   " Algiane Froehly")
-# SET(CPACK_PACKAGE_CONTACT "cecile.dobrzynski@inria.fr")
-# SET(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_SOURCE_DIR}/README.md")
-# SET(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}/LICENSE")
-# SET(CPACK_PACKAGE_VERSION ${CMAKE_RELEASE_VERSION})
-# SET(CPACK_PACKAGE_VERSION_MAJOR ${CMAKE_RELEASE_VERSION_MAJOR})
-# SET(CPACK_PACKAGE_VERSION_MINOR ${CMAKE_RELEASE_VERSION_MINOR})
-# SET(CPACK_PACKAGE_VERSION_PATCH ${CMAKE_RELEASE_VERSION_PATCH})
-# SET(CPACK_PACKAGE_INSTALL_DIRECTORY "${PROJECT_NAME}-${CPACK_PACKAGE_VERSION}")
-# SET(CPACK_PACKAGE_FILE_NAME ${CPACK_PACKAGE_INSTALL_DIRECTORY}-${CMAKE_SYSTEM})
-# SET(CPACK_PACKAGE_EXECUTABLES "${PROJECT_NAME}")
-# SET(CPACK_OUTPUT_FILE_PREFIX "../archives")
+SET(CPACK_PACKAGE_NAME ${PROJECT_NAME})
+SET(CPACK_INCLUDE_TOPLEVEL_DIRECTORY 1)
+SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "MMG: 2d, surface and 3d remeshers")
+SET(CPACK_PACKAGE_VENDOR "Cécile Dobrzynski, Pascal Frey, Charles Dapogny,"
+  " Algiane Froehly")
+SET(CPACK_PACKAGE_CONTACT "contact@mmgtools.org")
+SET(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_SOURCE_DIR}/README.md")
+SET(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}/LICENSE")
+SET(CPACK_PACKAGE_VERSION ${CMAKE_RELEASE_VERSION})
+SET(CPACK_PACKAGE_VERSION_MAJOR ${CMAKE_RELEASE_VERSION_MAJOR})
+SET(CPACK_PACKAGE_VERSION_MINOR ${CMAKE_RELEASE_VERSION_MINOR})
+SET(CPACK_PACKAGE_VERSION_PATCH ${CMAKE_RELEASE_VERSION_PATCH})
+SET(CPACK_PACKAGE_INSTALL_DIRECTORY "${PROJECT_NAME}-${CPACK_PACKAGE_VERSION}")
+SET(CPACK_PACKAGE_FILE_NAME ${CPACK_PACKAGE_INSTALL_DIRECTORY}-${CMAKE_SYSTEM})
+SET(CPACK_PACKAGE_EXECUTABLES "${PROJECT_NAME}")
+SET(CPACK_OUTPUT_FILE_PREFIX "../archives")
 
-# SET(CPACK_IGNORE_FILES ";.\\\\\\\\.#;/\\\\\\\\.git;.~;.#;.-e;.DS_Store"
-#   ${CPACK_IGNORE_FILES})
-# SET(CPACK_IGNORE_FILES ";libmmg3d.*" ${CPACK_IGNORE_FILES})
-# SET(CPACK_IGNORE_FILES ";libmmgs.*" ${CPACK_IGNORE_FILES})
-# SET(CPACK_IGNORE_FILES ";libmmg2d.*" ${CPACK_IGNORE_FILES})
+#SET(CPACK_SOURCE_IGNORE_FILES ";src/common/mmgcommon.h$" ${CPACK_SOURCE_IGNORE_FILE})
+#SET(CPACK_SOURCE_IGNORE_FILES ";.\\\\\\\\.#;/\\\\\\\\.git;.~;.#;.-e;.DS_Store"
+#  ${CPACK_SOURCE_IGNORE_FILES})
+#SET(CPACK_SOURCE_IGNORE_FILES ";lib/;bin;archives;def"
+#  ${CPACK_SOURCE_IGNORE_FILES})
+#SET(CPACK_SOURCE_IGNORE_FILES ";.dir-locals.el;.tm_properties"
+#  ${CPACK_SOURCE_IGNORE_FILES})
+#SET(CPACK_SOURCE_IGNORE_FILES ";libexamples/mmg3d/example0/example0_a/mesh.o.*"
+#  ${CPACK_SOURCE_IGNORE_FILES})
+#SET(CPACK_SOURCE_IGNORE_FILES ";libexamples/mmg3d/example0/example0_b/mesh.o.*"
+#  ${CPACK_SOURCE_IGNORE_FILES})
+#SET(CPACK_SOURCE_IGNORE_FILES ";libexamples/mmg3d/example1/result0.*"
+#  ${CPACK_SOURCE_IGNORE_FILES})
+#SET(CPACK_SOURCE_IGNORE_FILES ";libexamples/mmg3d/example2/result1.*"
+#  ${CPACK_SOURCE_IGNORE_FILES})
+#SET(CPACK_SOURCE_IGNORE_FILES ";libexamples/mmg3d/example3/SphereIso.*"
+#  ${CPACK_SOURCE_IGNORE_FILES})
+#SET(CPACK_SOURCE_IGNORE_FILES ";CMakeFiles" ${CPACK_SOURCE_IGNORE_FILES})
+#SET(CPACK_SOURCE_IGNORE_FILES ";cmake/supp/libSystem.supp"
+#  ${CPACK_SOURCE_IGNORE_FILES})
+#SET(CPACK_SOURCE_IGNORE_FILES ";CTestConfig.cmake" ${CPACK_SOURCE_IGNORE_FILES})
+#SET(CPACK_SOURCE_IGNORE_FILES ";cmake/testing/testing.cmake"
+#  ${CPACK_SOURCE_IGNORE_FILES})
+#SET(CPACK_SOURCE_IGNORE_FILES ";.#$"      ${CPACK_SOURCE_IGNORE_FILES})
+#SET(CPACK_SOURCE_IGNORE_FILES ";build*" ${CPACK_SOURCE_IGNORE_FILES}  )
+#SET(CPACK_SOURCE_IGNORE_FILES ";doc/doxygen/.*/html;doc/doxygen/.*/Doxyfile$"
+#  ${CPACK_SOURCE_IGNORE_FILES}  )
 
-# SET(CPACK_SOURCE_IGNORE_FILES ";src/mmg3d/mmg3d.h$" ${CPACK_SOURCE_IGNORE_FILE})
-# SET(CPACK_SOURCE_IGNORE_FILES ";.\\\\\\\\.#;/\\\\\\\\.git;.~;.#;.-e;.DS_Store"
-#   ${CPACK_SOURCE_IGNORE_FILES})
-# SET(CPACK_SOURCE_IGNORE_FILES ";lib/;bin;archives;def"
-#   ${CPACK_SOURCE_IGNORE_FILES})
-# SET(CPACK_SOURCE_IGNORE_FILES ";.dir-locals.el;.tm_properties"
-#   ${CPACK_SOURCE_IGNORE_FILES})
-# SET(CPACK_SOURCE_IGNORE_FILES ";libexamples/mmg3d/example0/example0_a/mesh.o.*"
-#   ${CPACK_SOURCE_IGNORE_FILES})
-# SET(CPACK_SOURCE_IGNORE_FILES ";libexamples/mmg3d/example0/example0_b/mesh.o.*"
-#   ${CPACK_SOURCE_IGNORE_FILES})
-# SET(CPACK_SOURCE_IGNORE_FILES ";libexamples/mmg3d/example1/result0.*"
-#   ${CPACK_SOURCE_IGNORE_FILES})
-# SET(CPACK_SOURCE_IGNORE_FILES ";libexamples/mmg3d/example2/result1.*"
-#   ${CPACK_SOURCE_IGNORE_FILES})
-# SET(CPACK_SOURCE_IGNORE_FILES ";libexamples/mmg3d/example3/SphereIso.*"
-#   ${CPACK_SOURCE_IGNORE_FILES})
-# SET(CPACK_SOURCE_IGNORE_FILES ";CMakeFiles" ${CPACK_SOURCE_IGNORE_FILES})
-# SET(CPACK_SOURCE_IGNORE_FILES ";cmake/supp/libSystem.supp"
-#   ${CPACK_SOURCE_IGNORE_FILES})
-# SET(CPACK_SOURCE_IGNORE_FILES ";CTestConfig.cmake" ${CPACK_SOURCE_IGNORE_FILES})
-# SET(CPACK_SOURCE_IGNORE_FILES ";cmake/testing/testing.cmake"
-#   ${CPACK_SOURCE_IGNORE_FILES})
-# SET(CPACK_SOURCE_IGNORE_FILES ";.#$"      ${CPACK_SOURCE_IGNORE_FILES})
-# SET(CPACK_SOURCE_IGNORE_FILES ";build*" ${CPACK_SOURCE_IGNORE_FILES}  )
-# SET(CPACK_SOURCE_IGNORE_FILES ";doc/doxygen/.*/html;doc/doxygen/.*/Doxyfile$"
-#   ${CPACK_SOURCE_IGNORE_FILES}  )
+#IF ( WIN32 AND (NOT UNIX) )
+#  #  # Warning compilation under windows not tested
+#  #  #SET(CPACK_PACKAGE_ICON "${CMAKE_SOURCE_DIR}/logo.pdf")
+#  #  SET(CPACK_NSIS_INSTALLED_ICON_NAME "bin\\\\${PROJECT_NAME}.exe")
+#  #  SET(CPACK_NSIS_DISPLAY_NAME
+#  #    "${CPACK_PACKAGE_INSTALL_DIRECTORY} mmg: surface and volume remeshers")
+#  #  SET(CPACK_NSIS_HELP_LINK "http:\\\\\\\\www.mmgtools.org‎")
+#  #  SET(CPACK_NSIS_URL_INFO_ABOUT
+#  #    "http:\\\\\\\\www.math.u-bordeaux1.fr/~dobrzyns/.../mmg3d.php‎")
+#  #  SET(CPACK_NSIS_CONTACT ${CPACK_PACKAGE_CONTACT})
+#  #  SET(CPACK_NSIS_MODIFY_PATH ON) # Choice to add prog dir to the system PATH
+#  #  SET(CPACK_PACKAGING_INSTALL_PREFIX "${PROJECT_NAME}" CACHE PATH
+#  #    "Where you want to install your package")
+#  #  MARK_AS_ADVANCED(CPACK_PACKAGING_INSTALL_PREFIX)
+#  #ELSEIF (APPLE )
+#  #  SET(CPACK_BINARY_OSX11 "ON")
+#  #ELSEIF ( UNIX )
+#ENDIF (  WIN32 AND (NOT UNIX) )
 
-# IF ( WIN32 AND (NOT UNIX) )
-#   #  # Warning compilation under windows not tested
-#   #  #SET(CPACK_PACKAGE_ICON "${CMAKE_SOURCE_DIR}/logo.pdf")
-#   #  SET(CPACK_NSIS_INSTALLED_ICON_NAME "bin\\\\${PROJECT_NAME}.exe")
-#   #  SET(CPACK_NSIS_DISPLAY_NAME
-#   #    "${CPACK_PACKAGE_INSTALL_DIRECTORY} mmg: surface and volume remeshers")
-#   #  SET(CPACK_NSIS_HELP_LINK "http:\\\\\\\\www.mmgtools.org‎")
-#   #  SET(CPACK_NSIS_URL_INFO_ABOUT
-#   #    "http:\\\\\\\\www.math.u-bordeaux1.fr/~dobrzyns/.../mmg3d.php‎")
-#   #  SET(CPACK_NSIS_CONTACT ${CPACK_PACKAGE_CONTACT})
-#   #  SET(CPACK_NSIS_MODIFY_PATH ON) # Choice to add prog dir to the system PATH
-#   #  SET(CPACK_PACKAGING_INSTALL_PREFIX "${PROJECT_NAME}" CACHE PATH
-#   #    "Where you want to install your package")
-#   #  MARK_AS_ADVANCED(CPACK_PACKAGING_INSTALL_PREFIX)
-#   #ELSEIF (APPLE )
-#   #  SET(CPACK_BINARY_OSX11 "ON")
-#   #ELSEIF ( UNIX )
-# ENDIF (  WIN32 AND (NOT UNIX) )
-
-# INCLUDE(CPack)
+INCLUDE(CPack)
