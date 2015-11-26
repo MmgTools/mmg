@@ -692,7 +692,8 @@ int MMG3D_mmg3dmov(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp) {
 void MMG5_Free_all(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp
   )
 {
-  printf("  ## MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
+  printf("  ## MMG5_Free_all: "
+         "MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
         " be removed soon\n." );
   MMG3D_Free_all(mesh,met,disp);
 
@@ -714,7 +715,8 @@ void MMG5_Free_all(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp
  */
 int MMG5_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met)
 {
-  printf("  ## MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
+  printf("  ## MMG5_mmg3dlib: "
+         "MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
         " be removed soon\n." );
   return(MMG3D_mmg3dlib(mesh,met));
 }

@@ -109,13 +109,13 @@ int main(int argc,char *argv[]) {
   memset(&met,0,sizeof(MMG5_Sol));
   memset(&disp,0,sizeof(MMG5_Sol));
 
-  MMG5_Init_parameters(&mesh);
+  MMG3D_Init_parameters(&mesh);
 
   met.size      = 1;
   disp.size     = 2;
 
   /* command line */
-  if ( !MMG5_parsar(argc,argv,&mesh,&met) )  return(MMG5_STRONGFAILURE);
+  if ( !MMG3D_parsar(argc,argv,&mesh,&met) )  return(MMG5_STRONGFAILURE);
 
 #ifdef USE_SCOTCH
   _MMG5_warnScotch(&mesh);
@@ -156,7 +156,7 @@ int main(int argc,char *argv[]) {
       fprintf(stdout,"  ## ERROR: NO ISOVALUE DATA.\n");
       _MMG5_RETURN_AND_FREE(&mesh,&met,&disp,MMG5_STRONGFAILURE);
     }
-    if ( !MMG5_parsop(&mesh,&met) )
+    if ( !MMG3D_parsop(&mesh,&met) )
       _MMG5_RETURN_AND_FREE(&mesh,&met,&disp,MMG5_LOWFAILURE);
   }
 

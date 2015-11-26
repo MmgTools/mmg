@@ -262,8 +262,10 @@ int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol sol,void (*titi)(int ,int ,int,int,
 
   fprintf(stdout,"\n  %s\n   MODULE MMG2D-IMB/LJLL : %s (%s) %s\n  %s\n",
           M_STR,M_VER,M_REL,sol->size == 1 ? "ISO" : "ANISO",M_STR);
-  fprintf(stdout,"  MAXIMUM NUMBER OF POINTS    (NPMAX) : %8d\n",mesh->npmax);
-  fprintf(stdout,"  MAXIMUM NUMBER OF TRIANGLES (NTMAX) : %8d\n",mesh->ntmax);
+  if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug ) {
+    fprintf(stdout,"  MAXIMUM NUMBER OF POINTS    (NPMAX) : %8d\n",mesh->npmax);
+    fprintf(stdout,"  MAXIMUM NUMBER OF TRIANGLES (NTMAX) : %8d\n",mesh->ntmax);
+  }
 
   /* analysis */
   //chrono(ON,&ctim[2]);
@@ -285,9 +287,9 @@ int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol sol,void (*titi)(int ,int ,int,int,
     if ( mesh->info.imprim )   fprintf(stdout,"\n  -- GRADATION : %8f\n",mesh->info.hgrad);
     MMG2_lissmet(mesh,sol);
   }
-  if ( mesh->nt && abs(mesh->info.imprim) > 3 )  MMG2_outqua(mesh,sol);
+  if ( mesh->nt )  MMG2_outqua(mesh,sol);
 
-  if ( mesh->nt && abs(mesh->info.imprim) > 4 )  {
+  if ( mesh->nt && abs(mesh->info.imprim) > 1 )  {
     MMG2_prilen(mesh,sol);
   }
 
@@ -309,7 +311,8 @@ int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol sol,void (*titi)(int ,int ,int,int,
   } else {
 
     if(!mesh->nt) {
-      fprintf(stdout,"\n  -- PHASE 2 : MESH GENERATION\n");
+      if ( mesh->info.imprim )
+        fprintf(stdout,"\n  -- PHASE 2 : MESH GENERATION\n");
       if ( !MMG2_mmg2d2(mesh,sol) )  {
         if ( !MMG2_unscaleMesh(mesh,sol) )  return(MMG5_STRONGFAILURE);
         MMG2D_saveMesh(mesh,mesh->nameout);
@@ -325,21 +328,23 @@ int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol sol,void (*titi)(int ,int ,int,int,
         if ( mesh->info.imprim )   fprintf(stdout,"\n  -- GRADATION : %8f\n",mesh->info.hgrad);
         MMG2_lissmet(mesh,sol);
       }
-      if ( mesh->nt && abs(mesh->info.imprim) > 4 )  MMG2_outqua(mesh,sol);
+      if ( mesh->nt )  MMG2_outqua(mesh,sol);
       
-      if ( mesh->nt && abs(mesh->info.imprim) > 5 )  {
+      if ( mesh->nt && abs(mesh->info.imprim) > 1 )  {
         MMG2_prilen(mesh,sol);
       }
       if ( (!mesh->info.noinsert) && !MMG2_mmg2d1(mesh,sol) )  return(MMG5_LOWFAILURE);
       
     } else {
-      fprintf(stdout,"\n  -- PHASE 2 : MESH ADAPTATION\n");
+      if ( mesh->info.imprim )
+        fprintf(stdout,"\n  -- PHASE 2 : MESH ADAPTATION\n");
       if ( (!mesh->info.noinsert) && !MMG2_mmg2d1(mesh,sol) )  return(MMG5_LOWFAILURE);
     }
 
     /* optimisation */
     //chrono(ON,&ctim[4]);
-    fprintf(stdout,"\n  -- PHASE 3 : MESH OPTIMISATION\n");
+    if ( mesh->info.imprim )
+      fprintf(stdout,"\n  -- PHASE 3 : MESH OPTIMISATION\n");
     //if ( !optlap(&mesh,&sol) ) return(1);
     if ( !MMG2_mmg2d0(mesh,sol) )  return(MMG5_LOWFAILURE);
 
@@ -353,8 +358,9 @@ int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol sol,void (*titi)(int ,int ,int,int,
 
   if ( !MMG2_unscaleMesh(mesh,sol) )  return(MMG5_STRONGFAILURE);
 
-  if ( abs(mesh->info.imprim) > 3 )  {
-    MMG2_outqua(mesh,sol);
+  MMG2_outqua(mesh,sol);
+
+  if ( abs(mesh->info.imprim) > 1 )  {
     MMG2_prilen(mesh,sol);
   }
   //chrono(ON,&ctim[1]);

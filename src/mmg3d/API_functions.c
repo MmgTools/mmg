@@ -1707,8 +1707,8 @@ void MMG3D_Free_names(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp){
  *
  */
 void MMG5_Init_mesh(MMG5_pMesh *mesh, MMG5_pSol *sol, MMG5_pSol *disp ) {
-  printf("  ## MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
-        " be removed soon\n." );
+  printf("  ## MMG5_Init_mesh: MMG5_ API is deprecated (replaced by the"
+         " MMG3D_ one) and will be removed soon\n." );
 
   MMG3D_Init_mesh(mesh,sol,disp);
 
@@ -1722,7 +1722,8 @@ void MMG5_Init_mesh(MMG5_pMesh *mesh, MMG5_pSol *sol, MMG5_pSol *disp ) {
  *
  */
 void MMG5_Init_parameters(MMG5_pMesh mesh) {
-  printf("  ## MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
+  printf("  ##  MMG5_Init_parameters:"
+         "MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
         " be removed soon\n." );
 
   MMG3D_Init_parameters(mesh);
@@ -1741,7 +1742,8 @@ void MMG5_Init_parameters(MMG5_pMesh mesh) {
  *
  */
 int MMG5_Set_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int typEntity, int np, int typSol) {
-  printf("  ## MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
+  printf("  ## MMG5_Set_solSize:"
+         "MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
         " be removed soon\n." );
 
   return(MMG3D_Set_solSize(mesh,sol,typEntity,np,typSol));
@@ -1761,7 +1763,8 @@ int MMG5_Set_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int typEntity, int np, int 
  *
  */
 int MMG5_Set_meshSize(MMG5_pMesh mesh, int np, int ne, int nt, int na) {
-  printf("  ## MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
+  printf("  ## MMG5_Set_meshSize:"
+         "MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
         " be removed soon\n." );
 
   return(MMG3D_Set_meshSize(mesh,np,ne,nt,na));
@@ -1780,7 +1783,8 @@ int MMG5_Set_meshSize(MMG5_pMesh mesh, int np, int ne, int nt, int na) {
  *
  */
 int MMG5_Get_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int* typEntity, int* np, int* typSol) {
-  printf("  ## MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
+  printf("  ## MMG5_Get_solSize:"
+         "MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
         " be removed soon\n." );
 
   return(MMG3D_Get_solSize(mesh,sol,typEntity,np,typSol));
@@ -1798,7 +1802,8 @@ int MMG5_Get_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int* typEntity, int* np, in
  *
  */
 int MMG5_Get_meshSize(MMG5_pMesh mesh, int* np, int* ne, int* nt, int* na) {
-  printf("  ## MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
+  printf("  ## MMG5_Get_meshSize:"
+         "MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
         " be removed soon\n." );
 
   return(MMG3D_Get_meshSize(mesh,np,ne,nt,na));
@@ -1818,7 +1823,8 @@ int MMG5_Get_meshSize(MMG5_pMesh mesh, int* np, int* ne, int* nt, int* na) {
  *
  */
 int MMG5_Set_vertex(MMG5_pMesh mesh, double c0, double c1, double c2, int ref, int pos) {
-  printf("  ## MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
+  printf("  ## MMG5_Set_vertex:"
+         "MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
         " be removed soon\n." );
 
   return(MMG3D_Set_vertex(mesh,c0,c1,c2,ref,pos));
@@ -1840,7 +1846,8 @@ int MMG5_Set_vertex(MMG5_pMesh mesh, double c0, double c1, double c2, int ref, i
  */
 int MMG5_Get_vertex(MMG5_pMesh mesh, double* c0, double* c1, double* c2, int* ref,
                     int* isCorner, int* isRequired) {
-  printf("  ## MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
+  printf("  ## MMG5_Get_vertex:"
+         "MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
         " be removed soon\n." );
 
   return(MMG3D_Get_vertex(mesh,c0,c1,c2,ref,isCorner,isRequired));
@@ -1861,7 +1868,8 @@ int MMG5_Get_vertex(MMG5_pMesh mesh, double* c0, double* c1, double* c2, int* re
  *
  */
 int MMG5_Set_tetrahedron(MMG5_pMesh mesh, int v0, int v1, int v2, int v3, int ref, int pos) {
-  printf("  ## MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
+  printf("  ## MMG5_Set_tetrahedron:"
+         "MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
         " be removed soon\n." );
 
   return(MMG3D_Set_tetrahedron(mesh,v0,v1,v2,v3,ref,pos));
@@ -1883,7 +1891,8 @@ int MMG5_Set_tetrahedron(MMG5_pMesh mesh, int v0, int v1, int v2, int v3, int re
  */
 int MMG5_Get_tetrahedron(MMG5_pMesh mesh, int* v0, int* v1, int* v2, int* v3,
                          int* ref, int* isRequired) {
-  printf("  ## MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
+  printf("  ## MMG5_Get_tetrahedron:"
+         "MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
         " be removed soon\n." );
 
   return(MMG3D_Get_tetrahedron(mesh,v0,v1,v2,v3,ref,isRequired));
@@ -1903,7 +1912,8 @@ int MMG5_Get_tetrahedron(MMG5_pMesh mesh, int* v0, int* v1, int* v2, int* v3,
  *
  */
 int MMG5_Set_triangle(MMG5_pMesh mesh, int v0, int v1, int v2, int ref,int pos) {
-  printf("  ## MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
+  printf("  ## MMG5_Set_triangle:"
+         "MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
         " be removed soon\n." );
 
   return(MMG3D_Set_triangle(mesh,v0,v1,v2,ref,pos));
@@ -1924,7 +1934,8 @@ int MMG5_Set_triangle(MMG5_pMesh mesh, int v0, int v1, int v2, int ref,int pos) 
  */
 int MMG5_Get_triangle(MMG5_pMesh mesh, int* v0, int* v1, int* v2, int* ref
                       ,int* isRequired) {
-  printf("  ## MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
+  printf("  ## MMG5_Get_triangle: "
+         "MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
         " be removed soon\n." );
 
   return(MMG3D_Get_triangle(mesh,v0,v1,v2,ref,isRequired));
@@ -1943,7 +1954,8 @@ int MMG5_Get_triangle(MMG5_pMesh mesh, int* v0, int* v1, int* v2, int* ref
  *
  */
 int MMG5_Set_edge(MMG5_pMesh mesh, int v0, int v1, int ref, int pos) {
-  printf("  ## MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
+  printf("  ## MMG5_Set_edge:"
+         " MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
         " be removed soon\n." );
 
   return(MMG3D_Set_edge(mesh,v0,v1,ref,pos));
@@ -1963,7 +1975,8 @@ int MMG5_Set_edge(MMG5_pMesh mesh, int v0, int v1, int ref, int pos) {
  */
 int MMG5_Get_edge(MMG5_pMesh mesh, int* e0, int* e1, int* ref
                   ,int* isRidge, int* isRequired) {
-  printf("  ## MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
+  printf("  ## MMG5_Get_edge:"
+         " MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
         " be removed soon\n." );
 
   return(MMG3D_Get_edge(mesh,e0,e1,ref,isRidge,isRequired));
@@ -1978,7 +1991,8 @@ int MMG5_Get_edge(MMG5_pMesh mesh, int* e0, int* e1, int* ref
  *
  */
 int MMG5_Set_corner(MMG5_pMesh mesh, int k) {
-  printf("  ## MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
+  printf("  ## MMG5_Set_corner: "
+         "MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
         " be removed soon\n." );
 
   return(MMG3D_Set_corner(mesh,k));
@@ -1993,7 +2007,8 @@ int MMG5_Set_corner(MMG5_pMesh mesh, int k) {
  *
  */
 int MMG5_Set_requiredVertex(MMG5_pMesh mesh, int k) {
-  printf("  ## MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
+  printf("  ## MMG5_Set_requiredVertex:"
+         " MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
         " be removed soon\n." );
 
   return(MMG3D_Set_requiredVertex(mesh,k));
@@ -2008,7 +2023,8 @@ int MMG5_Set_requiredVertex(MMG5_pMesh mesh, int k) {
  *
  */
 int MMG5_Set_requiredTetrahedron(MMG5_pMesh mesh, int k) {
-  printf("  ## MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
+  printf("  ## MMG5_Set_requiredTetrahedron: "
+         "MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
         " be removed soon\n." );
 
   return(MMG3D_Set_requiredTetrahedron(mesh,k));
@@ -2023,7 +2039,8 @@ int MMG5_Set_requiredTetrahedron(MMG5_pMesh mesh, int k) {
  *
  */
 int MMG5_Set_requiredTriangle(MMG5_pMesh mesh, int k) {
-  printf("  ## MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
+  printf("  ## MMG5_Set_requiredTriangle: "
+         "MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
         " be removed soon\n." );
 
   return(MMG3D_Set_requiredTriangle(mesh,k));
@@ -2038,7 +2055,8 @@ int MMG5_Set_requiredTriangle(MMG5_pMesh mesh, int k) {
  *
  */
 int MMG5_Set_ridge(MMG5_pMesh mesh, int k) {
-  printf("  ## MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
+  printf("  ## MMG5_Set_ridge: "
+         "MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
         " be removed soon\n." );
 
   return(MMG3D_Set_ridge(mesh,k));
@@ -2053,7 +2071,8 @@ int MMG5_Set_ridge(MMG5_pMesh mesh, int k) {
  *
  */
 int MMG5_Set_requiredEdge(MMG5_pMesh mesh, int k) {
-  printf("  ## MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
+  printf("  ## MMG5_Set_requiredEdge: "
+         "MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
         " be removed soon\n." );
 
   return(MMG3D_Set_requiredEdge(mesh,k));
@@ -2069,7 +2088,8 @@ int MMG5_Set_requiredEdge(MMG5_pMesh mesh, int k) {
  *
  */
 int MMG5_Set_scalarSol(MMG5_pSol met, double s, int pos) {
-  printf("  ## MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
+  printf("  ## MMG5_Set_scalarSol: "
+         "MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
         " be removed soon\n." );
 
   return(MMG3D_Set_scalarSol(met,s,pos));
@@ -2084,7 +2104,8 @@ int MMG5_Set_scalarSol(MMG5_pSol met, double s, int pos) {
  *
  */
 int MMG5_Get_scalarSol(MMG5_pSol met, double* s) {
-  printf("  ## MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
+  printf("  ## MMG5_Get_scalarSol: "
+         "MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
         " be removed soon\n." );
 
   return(MMG3D_Get_scalarSol(met,s));
@@ -2103,7 +2124,8 @@ int MMG5_Get_scalarSol(MMG5_pSol met, double* s) {
  *
  */
 int MMG5_Set_vectorSol(MMG5_pSol met, double vx,double vy, double vz, int pos) {
-  printf("  ## MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
+  printf("  ## MMG5_Set_vectorSol: "
+         "MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
         " be removed soon\n." );
 
   return(MMG3D_Set_vectorSol(met,vx,vy,vz,pos));
@@ -2120,7 +2142,8 @@ int MMG5_Set_vectorSol(MMG5_pSol met, double vx,double vy, double vz, int pos) {
  *
  */
 int MMG5_Get_vectorSol(MMG5_pSol met, double* vx, double* vy, double* vz) {
-  printf("  ## MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
+  printf("  ## MMG5_Get_vectorSol: "
+         "MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
         " be removed soon\n." );
 
   return(MMG3D_Get_vectorSol(met,vx,vy,vz));
@@ -2142,7 +2165,8 @@ int MMG5_Get_vectorSol(MMG5_pSol met, double* vx, double* vy, double* vz) {
  */
 int MMG5_Set_tensorSol(MMG5_pSol met, double m11,double m12, double m13,
                        double m22,double m23, double m33, int pos) {
-  printf("  ## MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
+  printf("  ## MMG5_Set_tensorSol: "
+         "MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
         " be removed soon\n." );
 
   return(MMG3D_Set_tensorSol(met,m11,m12,m13,m22,m23,m33,pos));
@@ -2163,7 +2187,8 @@ int MMG5_Set_tensorSol(MMG5_pSol met, double m11,double m12, double m13,
  */
 int MMG5_Get_tensorSol(MMG5_pSol met, double *m11,double *m12, double *m13,
                        double *m22,double *m23, double *m33) {
-  printf("  ## MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
+  printf("  ## MMG5_Get_tensorSol: "
+         "MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
         " be removed soon\n." );
 
   return(MMG3D_Get_tensorSol(met,m11,m12,m13,m22,m23,m33));
@@ -2177,7 +2202,8 @@ int MMG5_Get_tensorSol(MMG5_pSol met, double *m11,double *m12, double *m13,
  *
  */
 void MMG5_Set_handGivenMesh(MMG5_pMesh mesh) {
-  printf("  ## MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
+  printf("  ## MMG5_Set_handGivenMesh: "
+         "MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
         " be removed soon\n." );
 
   MMG3D_Set_handGivenMesh(mesh);
@@ -2194,7 +2220,8 @@ void MMG5_Set_handGivenMesh(MMG5_pMesh mesh) {
  *
  */
 int MMG5_Chk_meshData(MMG5_pMesh mesh,MMG5_pSol met) {
-  printf("  ## MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
+  printf("  ## MMG5_Chk_meshData: "
+         "MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
         " be removed soon\n." );
 
   return(MMG3D_Chk_meshData(mesh,met));
@@ -2211,7 +2238,8 @@ int MMG5_Chk_meshData(MMG5_pMesh mesh,MMG5_pSol met) {
  *
  */
 int MMG5_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
-  printf("  ## MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
+  printf("  ## MMG5_Set_iparameter: "
+         "MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
         " be removed soon\n." );
 
   return(MMG3D_Set_iparameter(mesh,sol,iparam,val));
@@ -2226,7 +2254,8 @@ int MMG5_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
  *
  */
 int MMG5_Get_iparameter(MMG5_pMesh mesh, int iparam) {
-  printf("  ## MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
+  printf("  ## MMG5_Get_iparameter: "
+         "MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
         " be removed soon\n." );
 
   return(MMG3D_Get_iparameter(mesh,iparam));
@@ -2243,7 +2272,8 @@ int MMG5_Get_iparameter(MMG5_pMesh mesh, int iparam) {
  *
  */
 int MMG5_Set_dparameter(MMG5_pMesh mesh, MMG5_pSol sol, int dparam, double val){
-  printf("  ## MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
+  printf("  ## MMG5_Set_dparameter: "
+         "MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
         " be removed soon\n." );
 
   return(MMG3D_Set_dparameter(mesh,sol,dparam,val));
@@ -2262,7 +2292,8 @@ int MMG5_Set_dparameter(MMG5_pMesh mesh, MMG5_pSol sol, int dparam, double val){
  *
  */
 int MMG5_Set_localParameter(MMG5_pMesh mesh,MMG5_pSol sol, int typ, int ref, double val){
-  printf("  ## MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
+  printf("  ##  MMG5_Set_localParameter "
+         "MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
         " be removed soon\n." );
 
   return(MMG3D_Set_localParameter(mesh,sol,typ,ref,val));
@@ -2278,7 +2309,8 @@ int MMG5_Set_localParameter(MMG5_pMesh mesh,MMG5_pSol sol, int typ, int ref, dou
  */
 void MMG5_Free_structures(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp
   ){
-  printf("  ## MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
+  printf("  ## MMG5_Free_structures: "
+         "MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
         " be removed soon\n." );
 
   MMG3D_Free_structures(mesh,met,disp);
@@ -2293,7 +2325,8 @@ void MMG5_Free_structures(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp
  *
  */
 void MMG5_Free_names(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp){
-  printf("  ## MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
+  printf("  ## MMG5_Free_names: "
+         "MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
         " be removed soon\n." );
 
   MMG3D_Free_names(mesh,met,disp);

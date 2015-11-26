@@ -1038,8 +1038,10 @@ static int adptri(MMG5_pMesh mesh,MMG5_pSol met) {
     nnm += nm;
   }
 
-  if ( abs(mesh->info.imprim) < 5 && (nnc > 0 || nns > 0) )
-    fprintf(stdout,"     %8d splitted, %8d collapsed, %8d swapped, %8d moved, %d iter. \n",nns,nnc,nnf,nnm,it);
+  if ( mesh->info.imprim ) {
+    if ( abs(mesh->info.imprim) < 5 && (nnc > 0 || nns > 0) )
+      fprintf(stdout,"     %8d splitted, %8d collapsed, %8d swapped, %8d moved, %d iter. \n",nns,nnc,nnf,nnm,it);
+  }
   return(1);
 }
 
@@ -1099,8 +1101,10 @@ static int anatri(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
   }
   while ( ++it < maxit && ns+nc+nf > 0 );
 
-  if ( (abs(mesh->info.imprim) < 5 || mesh->info.ddebug ) && nns+nnc > 0 )
-    fprintf(stdout,"     %8d splitted, %8d collapsed, %8d swapped, %d iter.\n",nns,nnc,nnf,it);
+  if ( mesh->info.imprim ) {
+    if ( (abs(mesh->info.imprim) < 5 || mesh->info.ddebug ) && nns+nnc > 0 )
+      fprintf(stdout,"     %8d splitted, %8d collapsed, %8d swapped, %d iter.\n",nns,nnc,nnf,it);
+  }
 
   return(1);
 }
