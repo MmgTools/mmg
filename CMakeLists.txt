@@ -352,7 +352,7 @@ CMAKE_DEPENDENT_OPTION ( USE_SCOTCH "Use SCOTCH TOOL for renumbering" ON
 
 ###############################################################################
 #####
-#####         Build Targets
+#####         Build Targets and libmmg if needed
 #####
 ###############################################################################
 SET(LIBRARY_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/lib)
@@ -367,6 +367,10 @@ ENDIF ( )
 
 IF ( BUILD_MMG3D )
   INCLUDE(cmake/modules/mmg3d.cmake)
+ENDIF ( )
+
+IF ( BUILD_MMG )
+
 ENDIF ( )
 
 ###############################################################################
