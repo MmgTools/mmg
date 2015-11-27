@@ -62,7 +62,7 @@ FORTRAN_NAME(MMG2D_INIT_PARAMETERS, mmg2d_init_parameters,(MMG5_pMesh *mesh),
   return;
 }
 /**
- * See \ref MMG2D_Set_inputMeshName function in \ref common/libmmg.h file.
+ * See \ref MMG2D_Set_inputMeshName function in \ref common/libmmgcommon.h file.
  */
 FORTRAN_NAME(MMG2D_SET_INPUTMESHNAME, mmg2d_set_inputmeshname,
              (MMG5_pMesh *mesh, char* meshin, int *strlen, int* retval),
@@ -79,7 +79,7 @@ FORTRAN_NAME(MMG2D_SET_INPUTMESHNAME, mmg2d_set_inputmeshname,
 }
 
 /**
- * See \ref MMG2D_Set_inputSolName function in \ref common/libmmg.h file.
+ * See \ref MMG2D_Set_inputSolName function in \ref common/libmmgcommon.h file.
  */
 FORTRAN_NAME(MMG2D_SET_INPUTSOLNAME, mmg2d_set_inputsolname,
              (MMG5_pMesh *mesh,MMG5_pSol *sol, char* solin, int* strlen, int* retval),
@@ -115,7 +115,7 @@ FORTRAN_NAME(MMG2D_SET_OUTPUTMESHNAME,mmg2d_set_outputmeshname,
 }
 
 /**
- * See \ref MMG2D_Set_outputSolName function in \ref common/libmmg.h file.
+ * See \ref MMG2D_Set_outputSolName function in \ref common/libmmgcommon.h file.
  */
 FORTRAN_NAME(MMG2D_SET_OUTPUTSOLNAME,mmg2d_set_outputsolname,
              (MMG5_pMesh *mesh,MMG5_pSol *sol, char* solout,int* strlen, int* retval),
@@ -255,7 +255,7 @@ FORTRAN_NAME(MMG2D_FREE_STRUCTURES,mmg2d_free_structures,(MMG5_pMesh *mesh,MMG5_
   return;
 }
 /**
- * See \ref MMG2D_Free_names function in \ref common/libmmg.h file.
+ * See \ref MMG2D_Free_names function in \ref common/libmmgcommon.h file.
  */
 FORTRAN_NAME(MMG2D_FREE_NAMES,mmg2d_free_names,(MMG5_pMesh *mesh,MMG5_pSol *met ),
              (mesh,met)){
@@ -285,18 +285,19 @@ FORTRAN_NAME(MMG2D_LOADMESH,mmg2d_loadmesh,(MMG5_pMesh *mesh,char* meshin,int* s
 /**
  * See \ref MMG2D_loadSol function in \ref mmg2d/libmmg2d.h file.
  */
-FORTRAN_NAME(MMG2D_LOADSOL,mmg2d_loadSol,(MMG5_pSol *met,char *meshin,int* strlen,int *npmax,int *msh,int* retval),(met,meshin,strlen,npmax,msh,retval)){
+FORTRAN_NAME(MMG2D_LOADSOL,mmg2d_loadsol,(MMG5_pMesh *mesh,MMG5_pSol *met,char *meshin,int* strlen,int *msh,int* retval),(mesh,met,meshin,strlen,msh,retval)){
   char *tmp = NULL;
 
   tmp = (char*)malloc((*strlen+1)*sizeof(char));
   strncpy(tmp,meshin,*strlen);
   tmp[*strlen] = '\0';
 
-  *retval = MMG2D_loadSol(*met,tmp,*npmax,*msh);
+  *retval = MMG2D_loadSol(*mesh,*met,tmp,*msh);
   _MMG5_SAFE_FREE(tmp);
 
   return;
 }
+
 
 /**
  * See \ref MMG2D_saveSol function in \ref mmg2d/libmmg2d.h file.

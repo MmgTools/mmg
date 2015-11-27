@@ -23,7 +23,7 @@
 
 /**
  * \file mmg2d/libmmg2df.c
- * \brief Private Fortran API functions for MMG2D library.
+ * \brief Fortran API functions for MMG2D library.
  * \author Charles Dapogny (LJLL, UPMC)
  * \author Cécile Dobrzynski (Inria / IMB, Université de Bordeaux)
  * \author Pascal Frey (LJLL, UPMC)

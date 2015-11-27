@@ -22,42 +22,24 @@
 */
 
 /**
- * \file mmg2d/shared_func.h
- * \brief Common functions between MMG3D5 library and executable.
- * \author Charles Dapogny (LJLL, UPMC)
- * \author Cécile Dobrzynski (Inria / IMB, Université de Bordeaux)
- * \author Pascal Frey (LJLL, UPMC)
+ * \file mmg3d/libmmg2d_tools.c
+ * \brief Tools functions for the mmg3d library.
  * \author Algiane Froehly (Inria / IMB, Université de Bordeaux)
  * \version 5
+ * \date 01 2014
  * \copyright GNU Lesser General Public License.
- * \todo Doxygen documentation
- */
+ **/
 
-/* global variables */
-int MMG2_iare[3][2] = {{1,2},{2,0},{0,1}};
-int MMG2_iopp[3][2] = {{1,2},{0,2},{0,1}};
-unsigned int MMG2_idir[5] = {0,1,2,0,1};
-
-unsigned char _MMG5_iprv2[3] = {2,0,1};
-unsigned char _MMG5_inxt2[3] = {1,2,0};
-
-/**
- * Set common pointer functions between mmgs and mmg3d to the matching mmg3d
- * functions.
- */
-void _MMG2D_Set_commonFunc() {
-  _MMG5_chkmsh            = _MMG5_mmg2dChkmsh;
-  return;
-}
+#include "mmg2d.h"
 
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the sol structure.
  *
- * Set function pointers.
+ * Set function pointers depending if case is iso or aniso.
  *
  */
-int _MMG2_setfunc(int type) {
+int MMG2D_setfunc(int type) {
   if ( type == 3 ) {
     MMG2_length    = long_ani;
     MMG2_caltri    = caltri_ani;
@@ -82,4 +64,3 @@ int _MMG2_setfunc(int type) {
 
   return(1);
 }
-

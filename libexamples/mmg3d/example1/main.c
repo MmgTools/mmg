@@ -68,13 +68,13 @@ int main(int argc,char *argv[]) {
 
   /** Manually set of the mesh */
   /** a) give the size of the mesh: 12 vertices, 12 tetra, 20 triangles, 0 edges */
-  if ( !MMG3D_Set_meshSize(mmgMesh,12,12,20,0) )  exit(EXIT_FAILURE);
+  if ( MMG3D_Set_meshSize(mmgMesh,12,12,20,0) != 1 )  exit(EXIT_FAILURE);
 
   /** b) give the vertices: for each vertex, give the coordinates, the reference
       and the position in mesh of the vertex */
   mmgMesh->point[1].c[0]  = 0.;  mmgMesh->point[1].c[1]  = 0.; mmgMesh->point[1].c[2]  = 0.; mmgMesh->point[1].ref  = 0;
   /* or with the api function :
-     if ( !MMG3D_Set_vertex(mmgMesh,0  ,0  ,0  ,0,  1) )  exit(EXIT_FAILURE); */
+     if ( MMG3D_Set_vertex(mmgMesh,0  ,0  ,0  ,0,  1) != 1 )  exit(EXIT_FAILURE); */
   mmgMesh->point[2].c[0]  = 0.5; mmgMesh->point[2].c[1]  = 0;  mmgMesh->point[2].c[2]  = 0;  mmgMesh->point[2].ref  = 0;
   mmgMesh->point[3].c[0]  = 0.5; mmgMesh->point[3].c[1]  = 0;  mmgMesh->point[3].c[2]  = 1;  mmgMesh->point[3].ref  = 0;
   mmgMesh->point[4].c[0]  = 0;   mmgMesh->point[4].c[1]  = 0;  mmgMesh->point[4].c[2]  = 1;  mmgMesh->point[4].ref  = 0;
@@ -90,7 +90,7 @@ int main(int argc,char *argv[]) {
   /*tetra*/
   mmgMesh->tetra[1].v[0]  = 1;  mmgMesh->tetra[1].v[1]  = 2;  mmgMesh->tetra[1].v[2]  = 4;  mmgMesh->tetra[1].v[3]  = 8;  mmgMesh->tetra[1].ref  = 1;
   /* or with the api function :
-     if ( !MMG3D_Set_tetrahedra(mmgMesh,1 ,2 ,4 ,8, 1) )  exit(EXIT_FAILURE); */
+     if ( MMG3D_Set_tetrahedra(mmgMesh,1 ,2 ,4 ,8, 1) != 1 )  exit(EXIT_FAILURE); */
   mmgMesh->tetra[2].v[0]  = 8;  mmgMesh->tetra[2].v[1]  = 3;  mmgMesh->tetra[2].v[2]  = 2;  mmgMesh->tetra[2].v[3]  = 7;  mmgMesh->tetra[2].ref  = 1;
   mmgMesh->tetra[3].v[0]  = 2;  mmgMesh->tetra[3].v[1]  = 5;  mmgMesh->tetra[3].v[2]  = 6;  mmgMesh->tetra[3].v[3]  = 8;  mmgMesh->tetra[3].ref  = 1;
   mmgMesh->tetra[4].v[0]  = 8;  mmgMesh->tetra[4].v[1]  = 5;  mmgMesh->tetra[4].v[2]  = 1;  mmgMesh->tetra[4].v[3]  = 2;  mmgMesh->tetra[4].ref  = 1;
@@ -104,20 +104,20 @@ int main(int argc,char *argv[]) {
   mmgMesh->tetra[12].v[0] = 9;  mmgMesh->tetra[12].v[1] = 3;  mmgMesh->tetra[12].v[2] = 11; mmgMesh->tetra[12].v[3] = 7;  mmgMesh->tetra[12].ref = 2;
 
   /** 3) Build sol in MMG5 format */
-  /** Two solutions: just use the MMG3D_loadMet function that will read a .sol(b)
+  /** Two solutions: just use the MMG3D_loadSol function that will read a .sol(b)
       file formatted or manually set your sol using the MMG3D_Set* functions */
 
   /** Manually set of the sol */
   /** a) give info for the sol structure: sol applied on vertex entities,
       number of vertices=12, the sol is scalar*/
-  if ( !MMG3D_Set_solSize(mmgMesh,mmgSol,MMG5_Vertex,12,MMG5_Scalar) )
+  if ( MMG3D_Set_solSize(mmgMesh,mmgSol,MMG5_Vertex,12,MMG5_Scalar) != 1 )
     exit(EXIT_FAILURE);
 
   /** b) give solutions values and positions */
   for(k=1 ; k<=12 ; k++) {
     mmgSol->m[k] = 0.5;
     /* or with the api function :
-       if ( !MMG3D_Set_scalarSol(mmgSol,0.5,k) ) exit(EXIT_FAILURE); */
+       if ( MMG3D_Set_scalarSol(mmgSol,0.5,k) != 1 ) exit(EXIT_FAILURE); */
   }
   /** 4) If you don't use the API functions, you MUST call
       the MMG3D_Set_handGivenMesh() function. Don't call it if you use
@@ -125,7 +125,7 @@ int main(int argc,char *argv[]) {
   MMG3D_Set_handGivenMesh(mmgMesh);
 
   /** 5) (not mandatory): check if the number of given entities match with mesh size */
-  if ( !MMG3D_Chk_meshData(mmgMesh,mmgSol) ) exit(EXIT_FAILURE);
+  if ( MMG3D_Chk_meshData(mmgMesh,mmgSol) != 1 ) exit(EXIT_FAILURE);
 
   /** ------------------------------ STEP  II -------------------------- */
   /** library call */
@@ -140,23 +140,24 @@ int main(int argc,char *argv[]) {
 
   /** ------------------------------ STEP III -------------------------- */
   /** get results */
-  /** Two solutions: just use the MMG3D_saveMesh/MMG3D_saveMet functions
+  /** Two solutions: just use the MMG3D_saveMesh/MMG3D_saveSol functions
       that will write .mesh(b)/.sol formatted files or manually get your mesh/sol
       using the MMG3D_getMesh/MMG3D_getSol functions */
 
   /** 1) Automatically save the mesh */
   /** a)  (not mandatory): give the ouptut mesh name using MMG3D_Set_outputMeshName
       (by default, the mesh is saved in the "mesh.o.mesh" file */
-  MMG3D_Set_outputMeshName(mmgMesh,"result0.mesh");
+  if ( MMG3D_Set_outputMeshName(mmgMesh,"result0.mesh") != 1 ) exit(EXIT_FAILURE);
   /** b) function calling */
-  MMG3D_saveMesh(mmgMesh);
+  if ( MMG3D_saveMesh(mmgMesh) != 1 ) exit(EXIT_FAILURE);
 
   /** 2) Automatically save the solution */
   /** a)  (not mandatory): give the ouptut sol name using MMG3D_Set_outputSolName
       (by default, the mesh is saved in the "mesh.o.sol" file */
-  MMG3D_Set_outputSolName(mmgMesh,mmgSol,"result0.sol");
+  if ( MMG3D_Set_outputSolName(mmgMesh,mmgSol,"result0.sol") != 1 )
+    exit(EXIT_FAILURE);
   /** b) function calling */
-  MMG3D_saveMet(mmgMesh,mmgSol);
+  if ( MMG3D_saveSol(mmgMesh,mmgSol) !=1 ) exit(EXIT_FAILURE);
 
   /** 3) Free the MMG3D5 structures */
   MMG3D_Free_all(mmgMesh,mmgSol,NULL);

@@ -544,7 +544,7 @@ int _MMG5_mmg3dBezierCP(MMG5_pMesh mesh,MMG5_Tria *pt,_MMG5_pBezier pb,char ori)
  * Compute \a o, \a no and \a to at \f$(u,v)\f$ in Bezier patch.
  *
  */
-int _MMG5_bezierInt(_MMG5_pBezier pb,double uv[2],double o[3],double no[3],double to[3]) {
+int _MMG3D_bezierInt(_MMG5_pBezier pb,double uv[2],double o[3],double no[3],double to[3]) {
   double    dd,u,v,w,ps,ux,uy,uz;
   char      i;
 

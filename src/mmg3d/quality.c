@@ -210,8 +210,8 @@ inline double _MMG5_caltet_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt) {
 
       // exit added to avoid memory consumption in CDash outputs.
       /* _MMG5_unscaleMesh(mesh,met); */
-      /* MMGS_saveMesh(mesh); */
-      /* MMGS_saveMet(mesh,met); */
+      /* MMG3D_saveMesh(mesh); */
+      /* MMG3D_saveSol(mesh,met); */
       /* exit(EXIT_FAILURE); */
     }
     return(0.0);
@@ -327,8 +327,8 @@ inline double _MMG5_caltet33_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt) {
               " edges lengths sum=%e\n computed quality=%e\n",vol,det,num,cal);
       // exit added to avoid memory consumption in CDash outputs.
       /* _MMG5_unscaleMesh(mesh,met); */
-      /* MMGS_saveMesh(mesh); */
-      /* MMGS_saveMet(mesh,met); */
+      /* MMG3D_saveMesh(mesh); */
+      /* MMG3D_saveSol(mesh,met); */
       /* exit(EXIT_FAILURE); */
       return(0.0);
     }
@@ -674,7 +674,7 @@ int _MMG5_typelt(MMG5_pMesh mesh,int iel,int *item) {
  * Compute sizes of edges of the mesh, and displays histo.
  *
  */
-int _MMG5_prilen(MMG5_pMesh mesh, MMG5_pSol met, char metRidTyp) {
+int _MMG3D_prilen(MMG5_pMesh mesh, MMG5_pSol met, char metRidTyp) {
   MMG5_pTetra     pt;
   _MMG5_Hash      hash;
   double          len,avlen,lmin,lmax;
@@ -779,7 +779,7 @@ int _MMG5_prilen(MMG5_pMesh mesh, MMG5_pSol met, char metRidTyp) {
  * Print histogram of mesh qualities for classic storage of metric at ridges.
  *
  */
-void _MMG5_inqua(MMG5_pMesh mesh,MMG5_pSol met) {
+void _MMG3D_inqua(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTetra    pt;
   double   rap,rapmin,rapmax,rapavg,med,good;
   int      i,k,iel,ok,ir,imax,nex,his[5];
@@ -840,15 +840,15 @@ void _MMG5_inqua(MMG5_pMesh mesh,MMG5_pSol met) {
 #else
   fprintf(stdout,"     BEST   %e  AVRG.   %e  WRST.   %e (%d)\n => %d %d %d %d\n",
           rapmax,rapavg / (mesh->ne-nex),rapmin,iel,
-          _MMG5_indPt(mesh,mesh->tetra[iel].v[0]),_MMG5_indPt(mesh,mesh->tetra[iel].v[1]),
-          _MMG5_indPt(mesh,mesh->tetra[iel].v[2]),_MMG5_indPt(mesh,mesh->tetra[iel].v[3]));
+          _MMG3D_indPt(mesh,mesh->tetra[iel].v[0]),_MMG3D_indPt(mesh,mesh->tetra[iel].v[1]),
+          _MMG3D_indPt(mesh,mesh->tetra[iel].v[2]),_MMG3D_indPt(mesh,mesh->tetra[iel].v[3]));
 #endif
   if ( abs(mesh->info.imprim) < 3 ){
     if (rapmin == 0){
       fprintf(stdout,"  ## WARNING: TOO BAD QUALITY FOR THE WORST ELEMENT\n");
       _MMG5_unscaleMesh(mesh,met);
       MMG3D_saveMesh(mesh);
-      MMG3D_saveMet(mesh,met);
+      MMG3D_saveSol(mesh,met);
       exit(EXIT_FAILURE);
     }
     return;
@@ -869,7 +869,7 @@ void _MMG5_inqua(MMG5_pMesh mesh,MMG5_pSol met) {
     fprintf(stdout,"  ## WARNING: TOO BAD QUALITY FOR THE WORST ELEMENT\n");
     _MMG5_unscaleMesh(mesh,met);
     MMG3D_saveMesh(mesh);
-    MMG3D_saveMet(mesh,met);
+    MMG3D_saveSol(mesh,met);
     exit(EXIT_FAILURE);
   }
 }
@@ -881,7 +881,7 @@ void _MMG5_inqua(MMG5_pMesh mesh,MMG5_pSol met) {
  * Print histogram of mesh qualities for special storage of metric at ridges.
  *
  */
-void _MMG5_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
+void _MMG3D_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTetra    pt;
   double   rap,rapmin,rapmax,rapavg,med,good;
   int      i,k,iel,ok,ir,imax,nex,his[5];
@@ -933,15 +933,15 @@ void _MMG5_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
 #else
   fprintf(stdout,"     BEST   %e  AVRG.   %e  WRST.   %e (%d)\n => %d %d %d %d\n",
           rapmax,rapavg / (mesh->ne-nex),rapmin,iel,
-          _MMG5_indPt(mesh,mesh->tetra[iel].v[0]),_MMG5_indPt(mesh,mesh->tetra[iel].v[1]),
-          _MMG5_indPt(mesh,mesh->tetra[iel].v[2]),_MMG5_indPt(mesh,mesh->tetra[iel].v[3]));
+          _MMG3D_indPt(mesh,mesh->tetra[iel].v[0]),_MMG3D_indPt(mesh,mesh->tetra[iel].v[1]),
+          _MMG3D_indPt(mesh,mesh->tetra[iel].v[2]),_MMG3D_indPt(mesh,mesh->tetra[iel].v[3]));
 #endif
   if ( abs(mesh->info.imprim) < 3 ){
     if (rapmin == 0){
       fprintf(stdout,"  ## WARNING: TOO BAD QUALITY FOR THE WORST ELEMENT\n");
       _MMG5_unscaleMesh(mesh,met);
       MMG3D_saveMesh(mesh);
-      MMG3D_saveMet(mesh,met);
+      MMG3D_saveSol(mesh,met);
       exit(EXIT_FAILURE);
     }
     return;
@@ -962,7 +962,7 @@ void _MMG5_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
     fprintf(stdout,"  ## WARNING: TOO BAD QUALITY FOR THE WORST ELEMENT\n");
     _MMG5_unscaleMesh(mesh,met);
     MMG3D_saveMesh(mesh);
-    MMG3D_saveMet(mesh,met);
+    MMG3D_saveSol(mesh,met);
     exit(EXIT_FAILURE);
   }
 }
@@ -971,7 +971,7 @@ void _MMG5_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
  *
  * Approximation of the final number of vertex.
  *
- * \warning  call _MMG5_hashTetra(mesh,1) or analysis before using
+ * \warning  call MMG3D_hashTetra(mesh,1) or analysis before using
  */
 int _MMG5_countelt(MMG5_pMesh mesh,MMG5_pSol sol, double *weightelt, long *npcible) {
   MMG5_pTetra pt;

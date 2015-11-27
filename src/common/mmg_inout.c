@@ -33,7 +33,7 @@
  * \todo doxygen documentation.
  */
 
-#include "mmg.h"
+#include "mmgcommon.h"
 
 #define sw 4
 #define sd 8

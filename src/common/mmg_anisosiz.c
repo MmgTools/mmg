@@ -32,7 +32,7 @@
  * \copyright GNU Lesser General Public License.
  */
 
-#include "mmgs.h"
+#include "mmgcommon.h"
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -62,7 +62,7 @@ double _MMG5_lenEdg(MMG5_pMesh mesh,int np0,int np1,
   uz = p1->c[2] - p0->c[2];
 
   /* computation of the two tangent vectors to the underlying curve of [i0i1] */
-  if ( MS_SIN(p0->tag) ) {
+  if ( MG_SIN(p0->tag) || (MG_NOM & p0->tag) ) {
     gammaprim0[0] = ux;
     gammaprim0[1] = uy;
     gammaprim0[2] = uz;
@@ -103,7 +103,7 @@ double _MMG5_lenEdg(MMG5_pMesh mesh,int np0,int np1,
     gammaprim0[2] = uz - ps1*n1[2];
   }
 
-  if ( MS_SIN(p1->tag) ) {
+  if ( MG_SIN(p1->tag) || (MG_NOM & p1->tag) ) {
     gammaprim1[0] = -ux;
     gammaprim1[1] = -uy;
     gammaprim1[2] = -uz;
@@ -191,7 +191,7 @@ double _MMG5_lenSurfEdg_ani(MMG5_pMesh mesh,MMG5_pSol met,int np0,int np1,char i
   uz = p1->c[2] - p0->c[2];
 
   /* Set metrics */
-  if ( MS_SIN(p0->tag) ) {
+  if ( MG_SIN(p0->tag) || (MG_NOM & p0->tag)) {
     m0 = &met->m[6*np0];
   }
   else if ( MG_GEO & p0->tag ) {
@@ -206,7 +206,7 @@ double _MMG5_lenSurfEdg_ani(MMG5_pMesh mesh,MMG5_pSol met,int np0,int np1,char i
     m0 = &met->m[6*np0];
   }
 
-  if ( MS_SIN(p1->tag) ) {
+  if ( MG_SIN(p1->tag) || (MG_NOM & p1->tag)) {
     m1 = &met->m[6*np1];
   }
   else if ( MG_GEO & p1->tag ) {
@@ -338,7 +338,7 @@ double _MMG5_surftri_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt) {
   /* Set metric tensors at vertices of tria iel */
   for(i=0; i<3; i++) {
 
-    if ( MS_SIN(p[i]->tag) ) {
+    if ( MG_SIN(p[i]->tag) || (MG_NOM & p[i]->tag) ) {
       memcpy(&m[i][0],&met->m[6*np[i]],6*sizeof(double));
     }
     else if ( p[i]->tag & MG_GEO ) {
@@ -409,7 +409,7 @@ void _MMG5_defUninitSize(MMG5_pMesh mesh,MMG5_pSol met,char ismet)
       continue;
     }
     memset(m,0,6*sizeof(double));
-    if ( MS_SIN(ppt->tag) ) {
+    if ( MG_SIN(ppt->tag) || (MG_NOM & ppt->tag) ) {
       m[0] = m[3] = m[5] = isqhmax;
     }
     else if ( ppt->tag & MG_GEO ) {
@@ -1102,7 +1102,7 @@ int _MMG5_grad2metSurf(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int i){
     return(-1);
 
   /* Recover normal and metric associated to p1 */
-  if( MS_SIN(p1->tag) ){
+  if( MG_SIN(p1->tag) || (MG_NOM & p1->tag)){
     memcpy(n1,nt,3*sizeof(double));
     memcpy(m1,mm1,6*sizeof(double));
   }
@@ -1130,7 +1130,7 @@ int _MMG5_grad2metSurf(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int i){
   }
 
   /* Recover normal and metric associated to p2 */
-  if ( MS_SIN(p2->tag) ) {
+  if ( MG_SIN(p2->tag) || (MG_NOM & p2->tag)) {
     memcpy(n2,nt,3*sizeof(double));
     memcpy(m2,mm2,6*sizeof(double));
   }
@@ -1276,7 +1276,7 @@ int _MMG5_grad2metSurf(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int i){
     mtan13d[2] = vp[0][2]*vp[0][2]*mu[0]+vp[1][2]*vp[1][2]*mu[1]+vp[2][2]*vp[2][2]*mu[2];
 
     /* Metric update */
-    if( MS_SIN(p1->tag) ){
+    if( MG_SIN(p1->tag) || (MG_NOM & p1->tag)){
       mm1[0] += 0.5*beta;
       mm1[3] += 0.5*beta;
       mm1[5] += 0.5*beta;
@@ -1367,7 +1367,7 @@ int _MMG5_grad2metSurf(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int i){
     mtan23d[2] = vp[0][2]*vp[0][2]*mu[0]+vp[1][2]*vp[1][2]*mu[1]+vp[2][2]*vp[2][2]*mu[2];
 
     /* Metric update */
-    if( MS_SIN(p2->tag) ){
+    if( MG_SIN(p2->tag) || (MG_NOM & p2->tag)){
       mm2[0] += 0.5*beta;
       mm2[3] += 0.5*beta;
       mm2[5] += 0.5*beta;

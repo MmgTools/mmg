@@ -45,36 +45,36 @@ PROGRAM main
   !!   (by default, the "mesh.mesh" file is oppened)
   CALL MMGS_Set_inputMeshName(mmgMesh,TRIM(ADJUSTL(filename)),&
        LEN(TRIM(ADJUSTL(filename))),ier)
-  IF ( ier == 0 ) THEN
+  IF ( ier /= 1 ) THEN
      CALL EXIT(101)
   ENDIF
 
   !> b) function calling
   CALL MMGS_loadMesh(mmgMesh,ier)
-  IF ( ier == 0 )  CALL EXIT(102)
+  IF ( ier /= 1 )  CALL EXIT(102)
 
   !> 3) Build sol in MMG5 format
-  !! Two solutions: just use the MMGS_loadMet function that will read a .sol(b)
+  !! Two solutions: just use the MMGS_loadSol function that will read a .sol(b)
   !!    file formatted or manually set your sol using the MMGS_Set* functions
 
-  !> With MMGS_loadMet function
+  !> With MMGS_loadSol function
   !! a) (not mandatory): give the sol name
   !!   (by default, the "mesh.sol" file is oppened)
   CALL MMGS_Set_inputSolName(mmgMesh,mmgSol,TRIM(ADJUSTL(filename)),&
        LEN(TRIM(ADJUSTL(filename))),ier)
-  IF ( ier ==0 ) THEN
+  IF ( ier /= 1 ) THEN
      CALL EXIT(103)
   ENDIF
 
   !> b) function calling
-  CALL MMGS_loadMet(mmgMesh,mmgSol,ier)
-  IF ( ier ==0 ) THEN
+  CALL MMGS_loadSol(mmgMesh,mmgSol,ier)
+  IF ( ier /= 1 ) THEN
      CALL EXIT(104)
   ENDIF
 
   !> 4) (not mandatory): check if the number of given entities match with mesh size
   CALL MMGS_Chk_meshData(mmgMesh,mmgSol,ier)
-  IF ( ier ==0 ) CALL EXIT(105)
+  IF ( ier /= 1 ) CALL EXIT(105)
 
   !> ------------------------------ STEP  II --------------------------
   !! library call
@@ -90,7 +90,7 @@ PROGRAM main
 
   !> ------------------------------ STEP III --------------------------
   !! get results
-  !! Two solutions: just use the MMGS_saveMesh/MMGS_saveMet functions
+  !! Two solutions: just use the MMGS_saveMesh/MMGS_saveSol functions
   !!    that will write .mesh(b)/.sol formatted files or manually get your mesh/sol
   !!    using the MMGS_getMesh/MMGS_getSol functions
 
@@ -100,13 +100,15 @@ PROGRAM main
   !!call MMGS_Set_outputMeshName(mmgMesh,"output.mesh",len("output.mesh"),ier)
   !! b) function calling
   CALL MMGS_saveMesh(mmgMesh,ier)
+  IF ( ier /= 1 ) CALL EXIT(106)
 
   !> 2) Automatically save the solution
   !! a)  (not mandatory): give the ouptut sol name using MMGS_Set_outputSolName
   !!   (by default, the mesh is saved in the "mesh.o.sol" file
-  !!call MMGS_Set_outputSolName(mmgSol,"output.sol",len("output.sol"),ier)
+  !!call MMGS_Set_outputSolName(mmgMesh,mmgSol,"output.sol",len("output.sol"),ier)
   !! b) function calling
-  CALL MMGS_saveMet(mmgMesh,mmgSol,ier)
+  CALL MMGS_saveSol(mmgMesh,mmgSol,ier)
+  IF ( ier /= 1 ) CALL EXIT(107)
 
   !> 3) Free the MMGS5 structures
   CALL MMGS_Free_all(mmgMesh,mmgSol,%val(0))

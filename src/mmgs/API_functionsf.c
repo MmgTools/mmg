@@ -40,7 +40,7 @@
 #include "mmgs.h"
 
 /**
- * See \ref MMGS_Init_mesh function in common/libmmg.h file.
+ * See \ref MMGS_Init_mesh function in common/libmmgcommon.h file.
  */
 FORTRAN_NAME(MMGS_INIT_MESH, mmgs_init_mesh,(MMG5_pMesh *mesh, MMG5_pSol *sol,
                                              MMG5_pSol *dummy),
@@ -59,7 +59,7 @@ FORTRAN_NAME(MMGS_INIT_PARAMETERS,mmgs_init_parameters,(MMG5_pMesh *mesh),(mesh)
   return;
 }
 /**
- * See \ref MMGS_Set_inputMeshName function in \ref common/libmmg.h file.
+ * See \ref MMGS_Set_inputMeshName function in \ref common/libmmgcommon.h file.
  */
 FORTRAN_NAME(MMGS_SET_INPUTMESHNAME, mmgs_set_inputmeshname,
              (MMG5_pMesh *mesh, char* meshin, int *strlen, int* retval),
@@ -76,7 +76,7 @@ FORTRAN_NAME(MMGS_SET_INPUTMESHNAME, mmgs_set_inputmeshname,
 }
 
 /**
- * See \ref MMGS_Set_inputSolName function in \ref common/libmmg.h file.
+ * See \ref MMGS_Set_inputSolName function in \ref common/libmmgcommon.h file.
  */
 FORTRAN_NAME(MMGS_SET_INPUTSOLNAME, mmgs_set_inputsolname,
              (MMG5_pMesh *mesh,MMG5_pSol *sol, char* solin, int* strlen, int* retval),
@@ -112,7 +112,7 @@ FORTRAN_NAME(MMGS_SET_OUTPUTMESHNAME,mmgs_set_outputmeshname,
 }
 
 /**
- * See \ref MMGS_Set_outputSolName function in \ref common/libmmg.h file.
+ * See \ref MMGS_Set_outputSolName function in \ref common/libmmgcommon.h file.
  */
 FORTRAN_NAME(MMGS_SET_OUTPUTSOLNAME,mmgs_set_outputsolname,
              (MMG5_pMesh *mesh,MMG5_pSol *sol, char* solout,int* strlen, int* retval),
@@ -420,21 +420,21 @@ FORTRAN_NAME(MMGS_LOADMESH,mmgs_loadmesh,(MMG5_pMesh *mesh,int* retval),(mesh, r
 }
 
 /**
- * See \ref MMGS_loadMet function in \ref mmg3d/libmmg3d.h file.
+ * See \ref MMGS_loadSol function in \ref mmg3d/libmmg3d.h file.
  */
-FORTRAN_NAME(MMGS_LOADMET,mmgs_loadmet,(MMG5_pMesh *mesh,MMG5_pSol *met,int* retval),(mesh,met,retval)){
+FORTRAN_NAME(MMGS_LOADSOL,mmgs_loadsol,(MMG5_pMesh *mesh,MMG5_pSol *met,int* retval),(mesh,met,retval)){
 
-  *retval = MMGS_loadMet(*mesh,*met);
+  *retval = MMGS_loadSol(*mesh,*met);
 
   return;
 }
 
 /**
- * See \ref MMGS_saveMet function in \ref mmg3d/libmmg3d.h file.
+ * See \ref MMGS_saveSol function in \ref mmg3d/libmmg3d.h file.
  */
-FORTRAN_NAME(MMGS_SAVEMET,mmgs_savemet,(MMG5_pMesh *mesh,MMG5_pSol *met,int* retval),(mesh,met,retval)){
+FORTRAN_NAME(MMGS_SAVESOL,mmgs_savesol,(MMG5_pMesh *mesh,MMG5_pSol *met,int* retval),(mesh,met,retval)){
 
-  *retval = MMGS_saveMet(*mesh,*met);
+  *retval = MMGS_saveSol(*mesh,*met);
 
   return;
 }

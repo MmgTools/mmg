@@ -33,7 +33,7 @@
  * \todo doxygen documentation.
  */
 
-#include "mmg.h"
+#include "mmgcommon.h"
 
 /**
  * \param mesh pointer toward the mesh stucture.
@@ -83,7 +83,7 @@ inline int _MMG5_nonUnitNorPts(MMG5_pMesh mesh,
  *
  */
 inline double _MMG5_nonorsurf(MMG5_pMesh mesh,MMG5_pTria pt) {
-  double   dd,det,n[3];
+  double   n[3];
   int      ip1, ip2, ip3;
 
   ip1 = pt->v[0];
@@ -647,7 +647,7 @@ int _MMG5_rootDeg3(double a[4],DOUBLE_COMPLEX r[3]) {
 
 /**
 * \param z1 complex number
-* \return \f$ -z1 f$
+* \return \f$ -z1 \f$
 *
 * Compute the opposite of a complex number.
 *
@@ -661,7 +661,7 @@ DOUBLE_COMPLEX _MMG5_opp_complex(DOUBLE_COMPLEX z1)
 
 /**
 * \param z1 complex number
-* \return \f$ 1/z1 f$
+* \return \f$ 1/z1 \f$
 *
 * Compute the inverse of a complex number.
 *
@@ -680,7 +680,7 @@ DOUBLE_COMPLEX _MMG5_inv_complex(DOUBLE_COMPLEX z1)
 /**
  * \param z1 complex number
  * \param z2 complex number
- * \return \f$ z1 + z2 f$
+ * \return \f$ z1 + z2 \f$
  *
  * Compute the sum of two complex numbers.
  *
@@ -695,7 +695,7 @@ DOUBLE_COMPLEX _MMG5_add_complex(DOUBLE_COMPLEX z1, DOUBLE_COMPLEX z2)
 /**
 * \param z1 complex number
 * \param z2 complex number
-* \return \f$ z1 - z2 f$
+* \return \f$ z1 - z2 \f$
 *
 * Compute the difference of two complex numbers.
 *
@@ -710,7 +710,7 @@ DOUBLE_COMPLEX _MMG5_substract_complex(DOUBLE_COMPLEX z1, DOUBLE_COMPLEX z2)
 /**
 * \param z1 complex number
 * \param z2 complex number
-* \return \f$ z1 * z2 f$
+* \return \f$ z1 * z2 \f$
 *
 * Multiplicate two complex numbers.
 *
@@ -746,7 +746,7 @@ DOUBLE_COMPLEX _MMG5_mult_cr(DOUBLE_COMPLEX z1, double r)
 /**
 * \param z1 complex number
 * \param z2 complex number
-* \return \f$ z1 * z2 f$
+* \return \f$ z1 * z2 \f$
 *
 * Multiplicate two complex numbers.
 *

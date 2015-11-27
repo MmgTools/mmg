@@ -36,7 +36,7 @@
 #include "mmg3d.h"
 
 /** get new point address */
-int _MMG5_newPt(MMG5_pMesh mesh,double c[3],char tag) {
+int _MMG3D_newPt(MMG5_pMesh mesh,double c[3],char tag) {
   MMG5_pPoint  ppt;
   int     curpt;
 
@@ -72,7 +72,7 @@ int _MMG5_newPt(MMG5_pMesh mesh,double c[3],char tag) {
   return(curpt);
 }
 
-void _MMG5_delPt(MMG5_pMesh mesh,int ip) {
+void _MMG3D_delPt(MMG5_pMesh mesh,int ip) {
   MMG5_pPoint   ppt;
   MMG5_xPoint  *pxp;
 
@@ -91,7 +91,7 @@ void _MMG5_delPt(MMG5_pMesh mesh,int ip) {
 }
 
 /** get new elt address */
-int _MMG5_newElt(MMG5_pMesh mesh) {
+int _MMG3D_newElt(MMG5_pMesh mesh) {
   int     curiel;
 
   if ( !mesh->nenil )  return(0);
@@ -106,7 +106,7 @@ int _MMG5_newElt(MMG5_pMesh mesh) {
 }
 
 
-void _MMG5_delElt(MMG5_pMesh mesh,int iel) {
+void _MMG3D_delElt(MMG5_pMesh mesh,int iel) {
   MMG5_pTetra   pt;
   int      iadr;
 
@@ -127,7 +127,7 @@ void _MMG5_delElt(MMG5_pMesh mesh,int iel) {
 }
 
 /** memory repartition for the -m option */
-void _MMG5_memOption(MMG5_pMesh mesh) {
+void _MMG3D_memOption(MMG5_pMesh mesh) {
   long long  million = 1048576L;
   int        ctri,npask,bytes,memtmp;
 
@@ -214,7 +214,7 @@ void _MMG5_memOption(MMG5_pMesh mesh) {
 int _MMG5_zaldy(MMG5_pMesh mesh) {
   int     k;
 
-  _MMG5_memOption(mesh);
+  _MMG3D_memOption(mesh);
 
   _MMG5_ADD_MEM(mesh,(mesh->npmax+1)*sizeof(MMG5_Point),"initial vertices",
                 printf("  Exit program.\n");

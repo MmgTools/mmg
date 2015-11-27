@@ -187,10 +187,10 @@ typedef struct {
 } HashTable;
 typedef HashTable * pHashTable;
 
-extern int MMG2_iare[3][2];
-extern int MMG2_iopp[3][2];
-extern unsigned int MMG2_idir[5]; 
-extern unsigned int MMG2_inxt[5];
+static int MMG2_iare[3][2] = {{1,2},{2,0},{0,1}};
+static int MMG2_iopp[3][2] = {{1,2},{0,2},{0,1}};
+static unsigned int MMG2_idir[5] = {0,1,2,0,1};
+static unsigned int MMG2_inxt[5] = {1,2,0,1,2};
 
 
 /** Reallocation of point table and sol table and creation
@@ -367,8 +367,18 @@ int    (*MMG2_lissmet)(MMG5_pMesh ,MMG5_pSol );
 
 int MMG2_tassage(MMG5_pMesh ,MMG5_pSol );
 
-void _MMG2D_Set_commonFunc();
 /* init structures */
 void  _MMG2_Init_parameters(MMG5_pMesh mesh);
+
+/**
+ * Set common pointer functions between mmgs and mmg3d to the matching mmg3d
+ * functions.
+ */
+static inline
+void _MMG2D_Set_commonFunc() {
+  _MMG5_chkmsh            = _MMG5_mmg2dChkmsh;
+  return;
+}
+
 
 #endif

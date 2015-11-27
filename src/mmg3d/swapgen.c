@@ -258,7 +258,7 @@ int _MMG5_swpgen(MMG5_pMesh mesh,MMG5_pSol met,int nconf,int ilist,int *list,
   m[1] = 0.5*(p0->c[1] + p1->c[1]);
   m[2] = 0.5*(p0->c[2] + p1->c[2]);
 
-  np  = _MMG5_newPt(mesh,m,0);
+  np  = _MMG3D_newPt(mesh,m,0);
   if(!np){
     if ( bucket ) {
       _MMG5_POINT_AND_BUCKET_REALLOC(mesh,met,np,mesh->gap,
@@ -277,7 +277,7 @@ int _MMG5_swpgen(MMG5_pMesh mesh,MMG5_pSol met,int nconf,int ilist,int *list,
   }
   if ( met->m ) {
     if ( typchk == 1 && (met->size>1) ) {
-      if ( _MMG5_intmet33_ani(mesh,met,iel,ia,np,0.5)<=0 )  return(0);
+      if ( _MMG3D_intmet33_ani(mesh,met,iel,ia,np,0.5)<=0 )  return(0);
     }
     else {
       if ( _MMG5_intmet(mesh,met,iel,ia,np,0.5)<=0 ) return(0);
@@ -314,7 +314,7 @@ int _MMG5_swpgen(MMG5_pMesh mesh,MMG5_pSol met,int nconf,int ilist,int *list,
     fprintf(stdout,"  ## Warning: unable to swap internal edge.\n");
     return(-1);
   }
-  else if ( ier ) _MMG5_delPt(mesh,ier);
+  else if ( ier ) _MMG3D_delPt(mesh,ier);
 
   return(1);
 }

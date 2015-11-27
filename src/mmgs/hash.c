@@ -46,7 +46,7 @@ static void paktri(MMG5_pMesh mesh) {
     if ( !MG_EOK(pt) ) {
       pt1 = &mesh->tria[mesh->nt];
       memcpy(pt,pt1,sizeof(MMG5_Tria));
-      _MMG5_delElt(mesh,mesh->nt);
+      _MMGS_delElt(mesh,mesh->nt);
     }
   }
   while ( ++k < mesh->nt );
@@ -91,10 +91,11 @@ void _MMG5_setNmTag(MMG5_pMesh mesh) {
  * Create adjacency table.
  *
  */
-int _MMG5_hashTria(MMG5_pMesh mesh) {
-  MMG5_pTria          pt;
+int _MMGS_hashTria(MMG5_pMesh mesh) {
+  //MMG5_pTria          pt;
   _MMG5_Hash          hash;
-  int                 *adja,k,i,ier;
+  int                 ier;
+  //int                 *adja,k,i;
 
   if ( mesh->adja )  return(1);
   if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug )

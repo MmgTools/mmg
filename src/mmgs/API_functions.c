@@ -77,7 +77,7 @@ void _MMGS_Alloc_mesh(MMG5_pMesh *mesh, MMG5_pSol *sol) {
 static inline
 void _MMGS_Init_woalloc_mesh(MMG5_pMesh mesh, MMG5_pSol sol ) {
 
-  _MMG5_Set_commonFunc();
+  _MMGS_Set_commonFunc();
 
   (mesh)->dim  = 3;
   (mesh)->ver  = 2;
@@ -280,7 +280,7 @@ int MMGS_Set_meshSize(MMG5_pMesh mesh, int np, int nt, int na) {
   /*tester si -m defini : renvoie 0 si pas ok et met la taille min dans info.mem */
   if( mesh->info.mem > 0) {
     if ( mesh->npmax < mesh->np || mesh->ntmax < mesh->nt) {
-      _MMG5_memOption(mesh);
+      _MMGS_memOption(mesh);
       //     printf("pas de pbs ? %d %d %d %d %d %d -- %d\n",mesh->npmax,mesh->np,
       //     mesh->ntmax,mesh->nt,mesh->nemax,mesh->ne,mesh->info.mem);
       if ( mesh->npmax < mesh->np || mesh->ntmax < mesh->nt) {
@@ -994,8 +994,9 @@ int MMGS_Chk_meshData(MMG5_pMesh mesh,MMG5_pSol met) {
     return(0);
   }
 
+  printf("%d %d\n",met->npi,met->np);
   if ( met->npi != met->np ) {
-    fprintf(stdout,"  ## Error: if you don't use the MMGS_loadMet function,");
+    fprintf(stdout,"  ## Error: if you don't use the MMGS_loadSol function,");
     fprintf(stdout," you must call the MMGS_Set_solSize function to have a");
     fprintf(stdout," valid solution.\n");
     fprintf(stdout," Missing datas.\n");
@@ -1052,7 +1053,7 @@ int MMGS_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
     }
     else
       mesh->info.mem      = val;
-    _MMG5_memOption(mesh);
+    _MMGS_memOption(mesh);
     if(mesh->np && (mesh->npmax < mesh->np || mesh->ntmax < mesh->nt)) {
       return(0);
     } else if(mesh->info.mem < 39)

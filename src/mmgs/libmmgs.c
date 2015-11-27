@@ -23,7 +23,7 @@
 
 /**
  * \file mmgs/libmmgs.c
- * \brief Private API functions for MMGS library.
+ * \brief API functions for MMGS library.
  * \author Charles Dapogny (LJLL, UPMC)
  * \author Cécile Dobrzynski (Inria / IMB, Université de Bordeaux)
  * \author Pascal Frey (LJLL, UPMC)
@@ -39,7 +39,6 @@
  */
 
 #include "mmgs.h"
-#include "shared_func.h"
 
 /**
  * Pack the mesh \a mesh and its associated metric \a met and return \a val.
@@ -134,8 +133,6 @@ int _MMGS_packMesh(MMG5_pMesh mesh,MMG5_pSol met) {
       adjanew = &mesh->adja[iadrnew];
       for(i=0 ; i<3 ; i++) {
         adjanew[i] = adja[i];
-        if ( MG_EDG(pt->tag[i]) )  ++na;
-
         if(!adja[i]) continue;
         iadrv = 3*(adja[i]/3-1) +1;
         adjav = &mesh->adja[iadrv];
@@ -144,6 +141,12 @@ int _MMGS_packMesh(MMG5_pMesh mesh,MMG5_pSol met) {
       }
     }
     nbl++;
+
+    /* Count the edges */
+    for(i=0 ; i<3 ; i++) {
+      if ( MG_EDG(pt->tag[i]) )  ++na;
+    }
+
   }
   mesh->nt = nt;
 
@@ -263,7 +266,7 @@ int MMGS_mmgslib(MMG5_pMesh mesh,MMG5_pSol met)
   fprintf(stdout,"     %s\n",MG_CPY);
   fprintf(stdout,"     %s %s\n",__DATE__,__TIME__);
 
-  _MMG5_Set_commonFunc();
+  _MMGS_Set_commonFunc();
 
   /* trap exceptions */
   signal(SIGABRT,_MMG5_excfun);
@@ -301,7 +304,7 @@ int MMGS_mmgslib(MMG5_pMesh mesh,MMG5_pSol met)
 
   /* analysis */
   chrono(ON,&(ctim[2]));
-  _MMG5_setfunc(mesh,met);
+  MMGS_setfunc(mesh,met);
 
   if ( mesh->info.imprim ) {
     fprintf(stdout,"\n  %s\n   MODULE MMGS: IMB-LJLL : %s (%s)\n  %s\n",MG_STR,MG_VER,MG_REL,MG_STR);
@@ -311,15 +314,15 @@ int MMGS_mmgslib(MMG5_pMesh mesh,MMG5_pSol met)
   if ( !_MMG5_scaleMesh(mesh,met) ) return(MMG5_STRONGFAILURE);
 
   /* mesh analysis */
-  if ( !_MMG5_analys(mesh) ) {
+  if ( !_MMGS_analys(mesh) ) {
     if ( !_MMG5_unscaleMesh(mesh,met) )  return(MMG5_STRONGFAILURE);
     _MMG5_RETURN_AND_PACK(mesh,met,MMG5_LOWFAILURE);
   }
 
-  if ( abs(mesh->info.imprim) > 0 )  _MMG5_inqua(mesh,met);
+  if ( abs(mesh->info.imprim) > 0 )  _MMGS_inqua(mesh,met);
 
   if ( mesh->info.imprim > 1 && !mesh->info.iso && met->m )
-    _MMG5_prilen(mesh,met,0);
+    _MMGS_prilen(mesh,met,0);
 
   chrono(OFF,&(ctim[2]));
   printim(ctim[2].gdif,stim);
@@ -333,7 +336,7 @@ int MMGS_mmgslib(MMG5_pMesh mesh,MMG5_pSol met)
   }
 
   if ( !_MMG5_mmgs1(mesh,met) ) {
-    if ( (!mesh->adja) && !_MMG5_hashTria(mesh) ) {
+    if ( (!mesh->adja) && !_MMGS_hashTria(mesh) ) {
       fprintf(stdout,"  ## Hashing problem. Invalid mesh.\n");
       return(MMG5_STRONGFAILURE);
     }
@@ -349,9 +352,9 @@ int MMGS_mmgslib(MMG5_pMesh mesh,MMG5_pSol met)
   }
 
   /* save file */
-  _MMG5_outqua(mesh,met);
+  _MMGS_outqua(mesh,met);
   if ( mesh->info.imprim > 1 )
-    _MMG5_prilen(mesh,met,1);
+    _MMGS_prilen(mesh,met,1);
 
   chrono(ON,&(ctim[1]));
   if ( mesh->info.imprim )  fprintf(stdout,"\n  -- MESH PACKED UP\n");

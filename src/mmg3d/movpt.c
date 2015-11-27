@@ -411,8 +411,8 @@ int _MMG5_movbdyregpt(MMG5_pMesh mesh, MMG5_pSol met,int *listv,
       uv[1] = lambda[0];
     }
   }
-  if(!_MMG5_bezierInt(&b,uv,o,no,to)){
-    fprintf(stdout,"%s:%d: Error: function _MMG5_bezierInt return 0\n",
+  if(!_MMG3D_bezierInt(&b,uv,o,no,to)){
+    fprintf(stdout,"%s:%d: Error: function _MMG3D_bezierInt return 0\n",
             __FILE__,__LINE__);
     exit(EXIT_FAILURE);
   }

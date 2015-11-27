@@ -674,7 +674,7 @@ int MMG2_mmg2d1(MMG5_pMesh mesh,MMG5_pSol sol) {
   if ( mesh->info.imprim > 3 )
     fprintf(stdout,"  -- GEOMETRIC MESH\n");
   ngeom = analargeom(mesh,sol,&alert); 
-  if ( (abs(mesh->info.imprim) < 6) )
+  if ( mesh->info.imprim && (abs(mesh->info.imprim) < 6) )
       fprintf(stdout,"     %8d splitted\n",ngeom);
 
   /* 2. field points */
@@ -698,7 +698,7 @@ int MMG2_mmg2d1(MMG5_pMesh mesh,MMG5_pSol sol) {
   while ( ++it < maxtou && (MMG2_ni+MMG2_nc > 0));
   //while ( ++it < maxtou && (MMG2_ni+MMG2_nc > 0));//> 0.05*mesh->np));
 
-  if ( (abs(mesh->info.imprim) < 6) && ( nadd || ndel ) ) {
+  if ( mesh->info.imprim && (abs(mesh->info.imprim) < 6) && ( nadd || ndel ) ) {
     fprintf(stdout,"     %8d splitted, %8d collapsed,"
             " %8d swapped.\n",nadd,ndel,nswp);
   }

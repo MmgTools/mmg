@@ -475,7 +475,7 @@ _MMG5_defsizreg(MMG5_pMesh mesh,MMG5_pSol met,int nump,int *lists,
  * Point is used, to store the prescribed size (not inverse, squared,...)
  *
  */
-int _MMG5_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
+int _MMG3D_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTetra    pt;
   MMG5_pxTetra   pxt;
   MMG5_pPoint    p0,p1;

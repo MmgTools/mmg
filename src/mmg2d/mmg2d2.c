@@ -23,8 +23,8 @@
 #include "mmg2d.h"
 #define EPSDD  1e+6
 
-unsigned int MMG2_iare2[3][2] = { {0,1}, {0,2}, {1,2} };
-unsigned int MMG2_inxt[5] = {1,2,0,1,2};
+static unsigned int MMG2_iare2[3][2] = { {0,1}, {0,2}, {1,2} };
+
 extern int ddebug;
 
 /*remove BB triangles*/

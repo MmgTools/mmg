@@ -23,7 +23,7 @@
 
 /**
  * \file mmgs/libmmgs.h
- * \brief C API for MMGS library.
+ * \brief API headers for the mmgs library
  * \author Algiane Froehly (Inria / IMB, Université de Bordeaux)
  * \version 5
  * \date 01 2014
@@ -36,7 +36,7 @@
 #ifndef _MMGSLIB_H
 #define _MMGSLIB_H
 
-#include "mmg.h"
+#include "mmgcommon.h"
 
 /**
  * \enum MMGS_Param
@@ -486,7 +486,7 @@ int  MMGS_saveMesh(MMG5_pMesh mesh);
  * Load metric field.
  *
  */
-int  MMGS_loadMet(MMG5_pMesh mesh,MMG5_pSol met);
+int  MMGS_loadSol(MMG5_pMesh mesh,MMG5_pSol met);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the sol structure.
@@ -495,7 +495,7 @@ int  MMGS_loadMet(MMG5_pMesh mesh,MMG5_pSol met);
  * Write isotropic or anisotropic metric.
  *
  */
-int  MMGS_saveMet(MMG5_pMesh mesh, MMG5_pSol met);
+int  MMGS_saveSol(MMG5_pMesh mesh, MMG5_pSol met);
 
 /* deallocations */
 /**
@@ -549,7 +549,6 @@ int  MMGS_mmgslib(MMG5_pMesh mesh, MMG5_pSol met);
 /** To associate function pointers without calling MMGS_mmg3dlib */
 /**
  * \param mesh pointer toward the mesh structure (unused).
- * \note Developped for the PaMPA library interface.
  *
  * Set pointer for MMGS_saveMesh function.
  *
@@ -558,11 +557,52 @@ void  MMGS_Set_saveFunc(MMG5_pMesh mesh);
 /**
  * \param mesh pointer toward the mesh structure (unused).
  * \param met pointer toward the sol structure (unused).
- * \note Developped for the PaMPA library interface.
  *
  * Set function pointers for caltet, lenedg, defsiz and gradsiz.
  *
  */
 void  MMGS_setfunc(MMG5_pMesh mesh,MMG5_pSol met);
+
+/* Tools for the library */
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the sol structure.
+ *
+ * Set function pointers depending if case is iso or aniso.
+ *
+ */
+void MMGS_setfunc(MMG5_pMesh mesh,MMG5_pSol met);
+/**
+ * \param prog pointer toward the program name.
+ *
+ * Print help for mmgs options.
+ *
+ */
+void MMGS_usage(char *prog);
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \return 0 if fail, 1 if success.
+ *
+ * Print the default parameters values.
+ *
+ */
+void MMGS_defaultValues(MMG5_pMesh mesh);
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param info pointer toward the info structure.
+ * \return 1.
+ *
+ * Store the info structure in the mesh structure.
+ *
+ */
+int MMGS_stockOptions(MMG5_pMesh mesh, MMG5_Info *info);
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param info pointer toward the info structure.
+ *
+ * Recover the info structure stored in the mesh structure.
+ *
+ */
+void MMGS_destockOptions(MMG5_pMesh mesh, MMG5_Info *info);
 
 #endif

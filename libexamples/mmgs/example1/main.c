@@ -82,26 +82,26 @@ int main(int argc,char *argv[]) {
   /** with MMGS_loadMesh function */
   /** a) (not mandatory): give the mesh name
      (by default, the "mesh.mesh" file is oppened)*/
-  if ( !MMGS_Set_inputMeshName(mmgMesh,inname) )
+  if ( MMGS_Set_inputMeshName(mmgMesh,inname) != 1 )
     exit(EXIT_FAILURE);
   /** b) function calling */
-  if ( !MMGS_loadMesh(mmgMesh) )  exit(EXIT_FAILURE);
+  if ( MMGS_loadMesh(mmgMesh) != 1 )  exit(EXIT_FAILURE);
 
   /** 3) Build sol in MMG5 format */
-  /** Two solutions: just use the MMGS_loadMet function that will read a .sol(b)
+  /** Two solutions: just use the MMGS_loadSol function that will read a .sol(b)
       file formatted or manually set your sol using the MMGS_Set* functions */
 
-  /** With MMGS_loadMet function */
+  /** With MMGS_loadSol function */
   /** a) (not mandatory): give the sol name
      (by default, the "mesh.sol" file is oppened)*/
-  if ( !MMGS_Set_inputSolName(mmgMesh,mmgSol,inname) )
+  if ( MMGS_Set_inputSolName(mmgMesh,mmgSol,inname) != 1 )
     exit(EXIT_FAILURE);
   /** b) function calling */
-  if ( !MMGS_loadMet(mmgMesh,mmgSol) )
+  if ( MMGS_loadSol(mmgMesh,mmgSol) != 1 )
     exit(EXIT_FAILURE);
 
   /** 4) (not mandatory): check if the number of given entities match with mesh size */
-  if ( !MMGS_Chk_meshData(mmgMesh,mmgSol) ) exit(EXIT_FAILURE);
+  if ( MMGS_Chk_meshData(mmgMesh,mmgSol) != 1 ) exit(EXIT_FAILURE);
 
   /** 5) (not mandatory): set your global parameters using the
       MMGS_Set_iparameter and MMGS_Set_dparameter function
@@ -111,27 +111,27 @@ int main(int argc,char *argv[]) {
   /**------------------- First wave of refinment---------------------*/
 
   /* debug mode ON (default value = OFF) */
-  if ( !MMGS_Set_iparameter(mmgMesh,mmgSol,MMGS_IPARAM_debug, 1) )
+  if ( MMGS_Set_iparameter(mmgMesh,mmgSol,MMGS_IPARAM_debug, 1) != 1 )
     exit(EXIT_FAILURE);
 
   /* maximal memory size (default value = 50/100*ram) */
-  if ( !MMGS_Set_iparameter(mmgMesh,mmgSol,MMGS_IPARAM_mem, 600) )
+  if ( MMGS_Set_iparameter(mmgMesh,mmgSol,MMGS_IPARAM_mem, 600) != 1 )
     exit(EXIT_FAILURE);
 
   /* Maximal mesh size (default FLT_MAX)*/
-  if ( !MMGS_Set_dparameter(mmgMesh,mmgSol,MMGS_DPARAM_hmax,40) )
+  if ( MMGS_Set_dparameter(mmgMesh,mmgSol,MMGS_DPARAM_hmax,40) != 1 )
     exit(EXIT_FAILURE);
 
   /* Minimal mesh size (default 0)*/
-  if ( !MMGS_Set_dparameter(mmgMesh,mmgSol,MMGS_DPARAM_hmin,0.001) )
+  if ( MMGS_Set_dparameter(mmgMesh,mmgSol,MMGS_DPARAM_hmin,0.001) != 1 )
     exit(EXIT_FAILURE);
 
   /* Global hausdorff value (default value = 0.01) applied on the whole boundary */
-  if ( !MMGS_Set_dparameter(mmgMesh,mmgSol,MMGS_DPARAM_hausd, 0.1) )
+  if ( MMGS_Set_dparameter(mmgMesh,mmgSol,MMGS_DPARAM_hausd, 0.1) != 1 )
     exit(EXIT_FAILURE);
 
   /* Gradation control (default value 1.105) */
-  if ( !MMGS_Set_dparameter(mmgMesh,mmgSol,MMGS_DPARAM_hgrad, 2) )
+  if ( MMGS_Set_dparameter(mmgMesh,mmgSol,MMGS_DPARAM_hgrad, 2) != 1 )
     exit(EXIT_FAILURE);
 
   /** library call */
@@ -144,16 +144,17 @@ int main(int argc,char *argv[]) {
 
   /* (Not mandatory) Automatically save the mesh */
   sprintf(outname, "%s%s%s", pwd, "/../libexamples/mmgs/example1/", "2spheres_1.o.mesh");
-  if ( !MMGS_Set_outputMeshName(mmgMesh,outname) )
+  if ( MMGS_Set_outputMeshName(mmgMesh,outname) != 1 )
     exit(EXIT_FAILURE);
 
   MMGS_saveMesh(mmgMesh);
 
   /* (Not mandatory) Automatically save the solution */
-  if ( !MMGS_Set_outputSolName(mmgMesh,mmgSol,outname) )
+  if ( MMGS_Set_outputSolName(mmgMesh,mmgSol,outname) != 1 )
     exit(EXIT_FAILURE);
 
-  MMGS_saveMet(mmgMesh,mmgSol);
+  if ( MMGS_saveSol(mmgMesh,mmgSol) != 1 )
+    exit(EXIT_FAILURE);
 
 
   /**------------------- Second wave of refinment---------------------*/
@@ -161,12 +162,12 @@ int main(int argc,char *argv[]) {
      local values are used instead of the global hausdorff number) */
 
   /* verbosity (default value = 4)*/
-  if ( !MMGS_Set_iparameter(mmgMesh,mmgSol,MMGS_IPARAM_verbose, 4) )
+  if ( MMGS_Set_iparameter(mmgMesh,mmgSol,MMGS_IPARAM_verbose, 4) != 1 )
     exit(EXIT_FAILURE);
 
-  if ( !MMGS_Set_iparameter(mmgMesh,mmgSol,MMGS_IPARAM_mem, 1000) )
+  if ( MMGS_Set_iparameter(mmgMesh,mmgSol,MMGS_IPARAM_mem, 1000) != 1 )
     exit(EXIT_FAILURE);
-  if ( !MMGS_Set_iparameter(mmgMesh,mmgSol,MMGS_IPARAM_debug, 0) )
+  if ( MMGS_Set_iparameter(mmgMesh,mmgSol,MMGS_IPARAM_debug, 0) != 1 )
     exit(EXIT_FAILURE);
 
 
@@ -174,7 +175,7 @@ int main(int argc,char *argv[]) {
   /* use a hmin value of 0.005 on ref 36 and 0.1 on ref 38 */
   /* use a hmax value of 0.05 on ref 36 and 1 on ref 38 */
   /* For now, the local hausdroff value is not take into account */
-  if ( !MMGS_Set_iparameter(mmgMesh,mmgSol,MMGS_IPARAM_numberOfLocalParam,2) )
+  if ( MMGS_Set_iparameter(mmgMesh,mmgSol,MMGS_IPARAM_numberOfLocalParam,2) != 1 )
     exit(EXIT_FAILURE);
 
   /** for each local parameter: give the type and reference of the element on which
@@ -189,9 +190,9 @@ int main(int argc,char *argv[]) {
      Then, you can not grow up the hausdorff value (resp. gradation) without
      resetting this metric (but you can decrease this value). */
 
-  if ( !MMGS_Set_localParameter(mmgMesh,mmgSol,MMG5_Triangle,36,0.005,0.05,1) )
+  if ( MMGS_Set_localParameter(mmgMesh,mmgSol,MMG5_Triangle,36,0.005,0.05,1) != 1 )
     exit(EXIT_FAILURE);
-  if ( !MMGS_Set_localParameter(mmgMesh,mmgSol,MMG5_Triangle,38,0.1,1,1) )
+  if ( MMGS_Set_localParameter(mmgMesh,mmgSol,MMG5_Triangle,38,0.1,1,1) != 1 )
     exit(EXIT_FAILURE);
 
   /** library call */
@@ -204,16 +205,18 @@ int main(int argc,char *argv[]) {
 
   /* (Not mandatory) Automatically save the mesh */
   sprintf(outname, "%s%s%s", pwd, "/../libexamples/mmgs/example1/", "2spheres_2.o.mesh");
-  if ( !MMGS_Set_outputMeshName(mmgMesh,outname) )
+  if ( MMGS_Set_outputMeshName(mmgMesh,outname) != 1 )
     exit(EXIT_FAILURE);
 
-  MMGS_saveMesh(mmgMesh);
+  if ( MMGS_saveMesh(mmgMesh) != 1 )
+    exit(EXIT_FAILURE);
 
   /* (Not mandatory) Automatically save the solution */
-  if ( !MMGS_Set_outputSolName(mmgMesh,mmgSol,outname) )
+  if ( MMGS_Set_outputSolName(mmgMesh,mmgSol,outname) != 1 )
     exit(EXIT_FAILURE);
 
-  MMGS_saveMet(mmgMesh,mmgSol);
+  if ( MMGS_saveSol(mmgMesh,mmgSol) != 1 )
+    exit(EXIT_FAILURE);
 
   /* 7) free the MMGS structures */
   MMGS_Free_all(mmgMesh,mmgSol,NULL);

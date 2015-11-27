@@ -1053,7 +1053,7 @@ int _MMGS_saveAllMesh(MMG5_pMesh mesh) {
 }
 
 /* load metric field */
-int MMGS_loadMet(MMG5_pMesh mesh,MMG5_pSol met) {
+int MMGS_loadSol(MMG5_pMesh mesh,MMG5_pSol met) {
   FILE       *inm;
   float       fbuf[6],tmpf;
   double      dbuf[6],tmpd;
@@ -1168,6 +1168,9 @@ int MMGS_loadMet(MMG5_pMesh mesh,MMG5_pSol met) {
 
   }
   if ( mesh->np != met->np ) {
+    fprintf(stdout,"  ** MISMATCHES DATA: THE NUMBER OF VERTICES IN "
+            "THE MESH (%d) DIFFERS FROM THE NUMBER OF VERTICES IN "
+            "THE SOLUTION (%d) \n",mesh->np,met->np);
     return(-1);
   }
 
@@ -1325,7 +1328,7 @@ int MMGS_loadMet(MMG5_pMesh mesh,MMG5_pSol met) {
 }
 
 /* write iso or aniso metric */
-int MMGS_saveMet(MMG5_pMesh mesh,MMG5_pSol met) {
+int MMGS_saveSol(MMG5_pMesh mesh,MMG5_pSol met) {
   FILE*        inm;
   MMG5_pPoint  ppt;
   double       dbuf[6],mtmp[3],r[3][3],tmp;

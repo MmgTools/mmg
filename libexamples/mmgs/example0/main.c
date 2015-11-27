@@ -78,26 +78,26 @@ int main(int argc,char *argv[]) {
   /** with MMGS_loadMesh function */
   /** a) (not mandatory): give the mesh name
      (by default, the "mesh.mesh" file is oppened)*/
-  if ( !MMGS_Set_inputMeshName(mmgMesh,filename) )
+  if ( MMGS_Set_inputMeshName(mmgMesh,filename) != 1 )
     exit(EXIT_FAILURE);
   /** b) function calling */
-  if ( !MMGS_loadMesh(mmgMesh) )  exit(EXIT_FAILURE);
+  if ( MMGS_loadMesh(mmgMesh) != 1 )  exit(EXIT_FAILURE);
 
   /** 3) Build sol in MMG5 format */
-  /** Two solutions: just use the MMGS_loadMet function that will read a .sol(b)
+  /** Two solutions: just use the MMGS_loadSol function that will read a .sol(b)
       file formatted or manually set your sol using the MMGS_Set* functions */
 
-  /** With MMGS_loadMet function */
+  /** With MMGS_loadSol function */
   /** a) (not mandatory): give the sol name
      (by default, the "mesh.sol" file is oppened)*/
-  if ( !MMGS_Set_inputSolName(mmgMesh,mmgSol,filename) )
+  if ( MMGS_Set_inputSolName(mmgMesh,mmgSol,filename) != 1 )
     exit(EXIT_FAILURE);
   /** b) function calling */
-  if ( !MMGS_loadMet(mmgMesh,mmgSol) )
+  if ( MMGS_loadSol(mmgMesh,mmgSol) != 1 )
     exit(EXIT_FAILURE);
 
   /** 4) (not mandatory): check if the number of given entities match with mesh size */
-  if ( !MMGS_Chk_meshData(mmgMesh,mmgSol) ) exit(EXIT_FAILURE);
+  if ( MMGS_Chk_meshData(mmgMesh,mmgSol) != 1 ) exit(EXIT_FAILURE);
 
   /** ------------------------------ STEP  II -------------------------- */
   /** library call */
@@ -111,7 +111,7 @@ int main(int argc,char *argv[]) {
 
   /** ------------------------------ STEP III -------------------------- */
   /** get results */
-  /** Two solutions: just use the MMGS_saveMesh/MMGS_saveMet functions
+  /** Two solutions: just use the MMGS_saveMesh/MMGS_saveSol functions
       that will write .mesh(b)/.sol formatted files or manually get your mesh/sol
       using the MMGS_getMesh/MMGS_getSol functions */
 
@@ -120,14 +120,16 @@ int main(int argc,char *argv[]) {
      (by default, the mesh is saved in the "mesh.o.mesh" file */
   // MMGS_Set_outputMeshName(mmgMesh,"output.mesh");
   /** b) function calling */
-  MMGS_saveMesh(mmgMesh);
+  if ( MMGS_saveMesh(mmgMesh) != 1 )
+    exit(EXIT_FAILURE);
 
   /** 2) Automatically save the solution */
   /** a)  (not mandatory): give the ouptut sol name using MMGS_Set_outputSolName
      (by default, the mesh is saved in the "mesh.o.sol" file */
-  // MMGS_Set_outputSolName(mmgSol,"output.sol");
+  // MMGS_Set_outputSolName(mmgMesh,mmgSol,"output.sol");
   /** b) function calling */
-  MMGS_saveMet(mmgMesh,mmgSol);
+  if ( MMGS_saveSol(mmgMesh,mmgSol) != 1 )
+    exit(EXIT_FAILURE);
 
   /** 3) Free the MMGS structures */
   MMGS_Free_all(mmgMesh,mmgSol,NULL);

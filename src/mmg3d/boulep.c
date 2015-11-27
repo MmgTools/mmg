@@ -454,7 +454,7 @@ int _MMG5_boulesurfvolp(MMG5_pMesh mesh,int start,int ip,int iface,
     if ( *ilists >= _MMG5_LMAX ) {
       fprintf(stdout,"  ## Warning: problem in surface remesh process.");
       fprintf(stdout," Surface ball of point %d contains too many elts.\n",
-              _MMG5_indPt(mesh,nump));
+              _MMG3D_indPt(mesh,nump));
       fprintf(stdout,"  ##          Try to modify the hausdorff number,");
       fprintf(stdout," or/and the maximum mesh.\n");
       return(-1);
@@ -540,7 +540,7 @@ int _MMG5_boulesurfvolp(MMG5_pMesh mesh,int start,int ip,int iface,
       if ( *ilistv > _MMG5_LMAX-3 ) {
         fprintf(stdout,"  ## Warning: problem in remesh process.");
         fprintf(stdout," Volumic ball of point %d contains too many elts.\n",
-                _MMG5_indPt(mesh,nump));
+                _MMG3D_indPt(mesh,nump));
         fprintf(stdout,"  ##          Try to modify the hausdorff number,");
         fprintf(stdout," or/and the maximum mesh.\n");
         return(-1);
@@ -646,7 +646,7 @@ int _MMG5_bouletrid(MMG5_pMesh mesh,int start,int iface,int ip,int *il1,int *l1,
     if ( ilists >= _MMG5_LMAX ) {
       fprintf(stdout,"  ## Warning: problem in surface remesh process.");
       fprintf(stdout," Surface ball of point %d contains too many elts.\n",
-              _MMG5_indPt(mesh,idp));
+              _MMG3D_indPt(mesh,idp));
       fprintf(stdout,"  ##          Try to modify the hausdorff number,");
       fprintf(stdout," or/and the maximum mesh.\n");
       return(-1);
@@ -972,7 +972,7 @@ int _MMG5_coquil(MMG5_pMesh mesh,int start,int ia,int * list) {
     if ( ilist > _MMG5_LMAX-3 ) {
       fprintf(stdout,"  ## Warning: problem in remesh process.");
       fprintf(stdout," Coquil of edge %d-%d contains too many elts.\n",
-              _MMG5_indPt(mesh,na),_MMG5_indPt(mesh,nb));
+              _MMG3D_indPt(mesh,na),_MMG3D_indPt(mesh,nb));
       fprintf(stdout,"  ##          Try to modify the hausdorff number,");
       fprintf(stdout," or/and the maximum mesh.\n");
       return(-1);
@@ -1007,7 +1007,7 @@ int _MMG5_coquil(MMG5_pMesh mesh,int start,int ia,int * list) {
   if ( ilist > _MMG5_LMAX-3 ) {
     fprintf(stdout,"  ## Warning: problem in remesh process.");
     fprintf(stdout," Coquil of edge %d-%d contains too many elts.\n",
-            _MMG5_indPt(mesh,na),_MMG5_indPt(mesh,nb));
+            _MMG3D_indPt(mesh,na),_MMG3D_indPt(mesh,nb));
     fprintf(stdout,"  ##          Try to modify the hausdorff number,");
     fprintf(stdout," or/and the maximum mesh.\n");
     return(-1);
@@ -1040,7 +1040,7 @@ int _MMG5_coquil(MMG5_pMesh mesh,int start,int ia,int * list) {
     if ( ilist > _MMG5_LMAX-2 ) {
       fprintf(stdout,"  ## Warning: problem in surface remesh process.");
       fprintf(stdout," Coquil of edge %d-%d contains too many elts.\n",
-              _MMG5_indPt(mesh,na),_MMG5_indPt(mesh,nb));
+              _MMG3D_indPt(mesh,na),_MMG3D_indPt(mesh,nb));
       fprintf(stdout,"  ##          Try to modify the hausdorff number,");
       fprintf(stdout," or/and the maximum mesh.\n");
       return(-1);
@@ -1252,7 +1252,7 @@ int _MMG5_coquilface(MMG5_pMesh mesh,int start,int ia,int *list,int *it1,int *it
     if ( ilist > _MMG5_LMAX-2 ) {
       fprintf(stdout,"  ## Warning: problem in surface remesh process.");
       fprintf(stdout," Coquil of edge %d-%d contains too many elts.\n",
-              _MMG5_indPt(mesh,na),_MMG5_indPt(mesh,nb));
+              _MMG3D_indPt(mesh,na),_MMG3D_indPt(mesh,nb));
       fprintf(stdout,"  ##          Try to modify the hausdorff number,");
       fprintf(stdout," or/and the maximum mesh.\n");
       return(-1);
@@ -1302,7 +1302,7 @@ int _MMG5_coquilface(MMG5_pMesh mesh,int start,int ia,int *list,int *it1,int *it
     if ( ilist > _MMG5_LMAX-2 ) {
       fprintf(stdout,"  ## Warning: problem in surface remesh process.");
       fprintf(stdout," Coquil of edge %d-%d contains too many elts.\n",
-              _MMG5_indPt(mesh,na),_MMG5_indPt(mesh,nb));
+              _MMG3D_indPt(mesh,na),_MMG3D_indPt(mesh,nb));
       fprintf(stdout,"  ##          Try to modify the hausdorff number,");
       fprintf(stdout," or/and the maximum mesh.\n");
       return(-1);

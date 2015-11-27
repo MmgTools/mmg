@@ -22,7 +22,7 @@
 */
 /**
  * \file mmg2d/libmmg2d.h
- * \brief C API for MMG2D library.
+ * \brief API headers for the mmg2d library
  * \author Cecile Dobrzynski and Algiane Froehly (Inria / IMB, Université de Bordeaux)
  * \version 5
  * \date 01 2014
@@ -34,7 +34,7 @@
 #ifndef _MMG2DLIB_H
 #define _MMG2DLIB_H
 
-#include "mmg.h"
+#include "mmgcommon.h"
 
 /**
  * \enum MMG2D_Param
@@ -318,13 +318,23 @@ void MMG2D_Free_structures(MMG5_pMesh mesh,MMG5_pSol met
   );
 
 int MMG2D_loadMesh(MMG5_pMesh ,char *);
-int MMG2D_loadSol(MMG5_pSol ,char *,int,int);
+int MMG2D_loadSol(MMG5_pMesh,MMG5_pSol ,char *,int);
 int MMG2D_loadVect(MMG5_pMesh ,char *);
 int MMG2D_saveMesh(MMG5_pMesh ,char *);
 int MMG2D_saveSol(MMG5_pMesh ,MMG5_pSol ,char *);
 int MMG2D_saveVect(MMG5_pMesh mesh,MMG5_pSol sol,char *filename,double lambda);
 
 int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol sol,void (*titi)(int ,int,int,int,int));
+
+/* Tools for the library */
 void (*MMG2D_callbackinsert) (int ,int ,int ,int, int);
+
+/**
+ * \param type metric type
+ *
+ * Set function pointers for length, caltri, buckin... depending if case is iso or aniso
+ *
+ */
+int MMG2D_setfunc(int type);
 
 #endif

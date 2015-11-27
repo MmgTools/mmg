@@ -32,7 +32,7 @@
  * \copyright GNU Lesser General Public License.
  */
 
-#include "mmg.h"
+#include "mmgcommon.h"
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -45,7 +45,7 @@
  *
  */
 double _MMG5_caltri33_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt) {
-  double   anisurf,dd,abx,aby,abz,acx,acy,acz,bcx,bcy,bcz,det;
+  double   anisurf,dd,abx,aby,abz,acx,acy,acz,bcx,bcy,bcz;
   double  *a,*b,*c,*ma,*mb,*mc,m[6],l0,l1,l2,rap;
   int      ia,ib,ic;
   char     i;

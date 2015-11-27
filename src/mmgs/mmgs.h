@@ -27,9 +27,6 @@
 #include "libmmgs.h"
 
 /* numerical accuracy */
-#define A64TH     0.015625
-#define A16TH     0.0625
-#define A32TH     0.03125
 #define ALPHAD    3.464101615137755   /* 6.0 / sqrt(3.0)  */
 
 #define LOPTL     1.4
@@ -50,10 +47,6 @@
 
 #define MS_Ver       1
 #define MS_Tri       2
-
-/* /\* Global variables *\/ */
-/* extern unsigned char _MMG5_inxt2[3]; /\*!< next vertex of triangle: {1,2,0} *\/ */
-/* extern unsigned char _MMG5_iprv2[3]; /\*!< previous vertex of triangle: {2,0,1} *\/ */
 
 /** Free allocated pointers of mesh and sol structure and return value val */
 #define _MMG5_RETURN_AND_FREE(mesh,met,val)do       \
@@ -84,7 +77,7 @@
     sol->npmax = mesh->npmax;                                           \
                                                                         \
     /* We try again to add the point */                                 \
-    ip = _MMG5_newPt(mesh,o,tag);                                       \
+    ip = _MMGS_newPt(mesh,o,tag);                                       \
     if ( !ip ) {law;}                                                   \
   }while(0)
 
@@ -111,7 +104,7 @@
     }                                                                   \
                                                                         \
     /* We try again to add the point */                                 \
-    jel = _MMG5_newElt(mesh);                                           \
+    jel = _MMGS_newElt(mesh);                                           \
     if ( !jel ) {law;}                                                  \
   }while(0)
 
@@ -119,27 +112,27 @@
 int  _MMGS_saveAllMesh(MMG5_pMesh );
 int  zaldy(MMG5_pMesh mesh);
 int  assignEdge(MMG5_pMesh mesh);
-int  _MMG5_analys(MMG5_pMesh mesh);
-void _MMG5_inqua(MMG5_pMesh,MMG5_pSol);
-void _MMG5_outqua(MMG5_pMesh,MMG5_pSol);
-int  _MMG5_hashTria(MMG5_pMesh );
+int  _MMGS_analys(MMG5_pMesh mesh);
+void _MMGS_inqua(MMG5_pMesh,MMG5_pSol);
+void _MMGS_outqua(MMG5_pMesh,MMG5_pSol);
+int  _MMGS_hashTria(MMG5_pMesh );
 int  curvpo(MMG5_pMesh ,MMG5_pSol );
 int  _MMG5_mmgs1(MMG5_pMesh ,MMG5_pSol );
 int  boulet(MMG5_pMesh mesh,int start,int ip,int *list);
 int  boulechknm(MMG5_pMesh mesh,int start,int ip,int *list);
 int  boulep(MMG5_pMesh mesh,int start,int ip,int *list);
 int  bouletrid(MMG5_pMesh mesh,int start,int ip,int *il1,int *l1,int *il2,int *l2,int *ip0,int *ip1);
-int  _MMG5_newPt(MMG5_pMesh mesh,double c[3],double n[3]);
-void _MMG5_delPt(MMG5_pMesh mesh,int ip);
-int  _MMG5_newElt(MMG5_pMesh mesh);
-void _MMG5_delElt(MMG5_pMesh mesh,int iel);
+int  _MMGS_newPt(MMG5_pMesh mesh,double c[3],double n[3]);
+void _MMGS_delPt(MMG5_pMesh mesh,int ip);
+int  _MMGS_newElt(MMG5_pMesh mesh);
+void _MMGS_delElt(MMG5_pMesh mesh,int iel);
 int  chkedg(MMG5_pMesh ,int );
 int  _MMG5_mmgsBezierCP(MMG5_pMesh ,MMG5_Tria*, _MMG5_pBezier, char ori);
-int  _MMG5_bezierInt(_MMG5_pBezier ,double *,double *,double *,double *);
-int  _MMG5_simbulgept(MMG5_pMesh mesh,MMG5_pSol met, int k,int i,int ip);
-int  _MMG5_split1_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int i, int *vx);
+int  _MMGS_bezierInt(_MMG5_pBezier ,double *,double *,double *,double *);
+int  _MMGS_simbulgept(MMG5_pMesh mesh,MMG5_pSol met, int k,int i,int ip);
+int  _MMGS_split1_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int i, int *vx);
 int  _MMG5_split2_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx);
-int  _MMG5_split3_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx);
+int  _MMGS_split3_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx);
 int  split1(MMG5_pMesh mesh,MMG5_pSol met,int k,int i,int *vx);
 int  split2(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx);
 int  split3(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx);
@@ -164,15 +157,15 @@ int  delref(MMG5_pMesh);
 int  chkmet(MMG5_pMesh,MMG5_pSol);
 int  chknor(MMG5_pMesh);
 long long _MMG5_memSize(void);
-void _MMG5_memOption(MMG5_pMesh mesh);
+void _MMGS_memOption(MMG5_pMesh mesh);
 
 #ifdef USE_SCOTCH
 int _MMG5_mmgsRenumbering(int vertBoxNbr, MMG5_pMesh mesh, MMG5_pSol sol);
 #endif
 
 /* useful functions to debug */
-int  _MMG5_indElt(MMG5_pMesh mesh,int kel);
-int  _MMG5_indPt(MMG5_pMesh mesh,int kp);
+int  _MMGS_indElt(MMG5_pMesh mesh,int kel);
+int  _MMGS_indPt(MMG5_pMesh mesh,int kp);
 
 /* function pointers */
 /* init structures */
@@ -180,19 +173,19 @@ void  _MMG5_Init_parameters(MMG5_pMesh mesh);
 /* iso/aniso computations */
 extern double caleltsig_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel);
 extern double caleltsig_iso(MMG5_pMesh mesh,MMG5_pSol met,int iel);
-int    _MMG5_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met);
-int    _MMG5_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met);
+int    _MMGS_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met);
+int    _MMGS_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met);
 void   _MMG5_defaultValues(MMG5_pMesh);
 int    gradsiz_iso(MMG5_pMesh mesh,MMG5_pSol met);
 int    gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met);
 void   intmet_iso(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int ip,double s);
 void   intmet_ani(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int ip,double s);
-int    _MMG5_intmet33_ani(MMG5_pMesh,MMG5_pSol,int,char,int,double);
+int    _MMGS_intmet33_ani(MMG5_pMesh,MMG5_pSol,int,char,int,double);
 int    movridpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist);
 int    movintpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist);
 int    movridpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist);
 int    movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist);
-int    _MMG5_prilen(MMG5_pMesh mesh,MMG5_pSol met,int);
+int    _MMGS_prilen(MMG5_pMesh mesh,MMG5_pSol met,int);
 
 double (*_MMG5_calelt)(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt);
 int    (*_MMG5_defsiz)(MMG5_pMesh mesh,MMG5_pSol met);
@@ -202,6 +195,17 @@ int    (*movridpt)(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist);
 int    (*movintpt)(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist);
 int    (*_MMGS_saveMeshinternal)(MMG5_pMesh mesh);
 
-void _MMG5_Set_commonFunc();
+/**
+ * Set common pointer functions between mmgs and mmg3d to the matching mmgs
+ * functions.
+ */
+static inline
+void _MMGS_Set_commonFunc() {
+  _MMG5_bezierCP          = _MMG5_mmgsBezierCP;
+  _MMG5_chkmsh            = _MMG5_mmgsChkmsh;
+#ifdef USE_SCOTCH
+  _MMG5_renumbering       = _MMG5_mmgsRenumbering;
+#endif
+}
 
 #endif

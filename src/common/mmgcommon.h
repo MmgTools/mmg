@@ -21,8 +21,8 @@
 ** =============================================================================
 */
 
-#ifndef _MMG_H
-#define _MMG_H
+#ifndef _MMGCOMMON_H
+#define _MMGCOMMON_H
 
 #include <assert.h>
 #include <stdlib.h>
@@ -34,6 +34,9 @@
 #include <float.h>
 #include <math.h>
 #include <complex.h>
+
+#define POSIX
+#define GNU
 
 #if (defined(__APPLE__) && defined(__MACH__))
 #include <sys/sysctl.h>
@@ -52,10 +55,10 @@
 #endif
 
 #include "eigenv.h"
-#include "libmmg.h"
+#include "libmmgcommon.h"
 
-#define MG_VER   "@CMAKE_RELEASE_VERSION@"
-#define MG_REL   "@CMAKE_RELEASE_DATE@"
+#define MG_VER   "5.1.0"
+#define MG_REL   "Dec 4, 2015"
 #define MG_CPY   "Copyright (c) IMB-LJLL, 2004-"
 #define MG_STR   "&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&"
 
@@ -83,6 +86,9 @@
 #define M_PI_2          1.57079632679489661923   /**< pi/2 */
 #endif
 
+#define A64TH     0.015625
+#define A16TH     0.0625
+#define A32TH     0.03125
 
 /* Macros */
 #define MG_MAX(a,b) (((a) > (b)) ? (a) : (b))
@@ -289,20 +295,6 @@ void _MMG5_excfun(int sigid) {
   }
   exit(EXIT_FAILURE);
 }
-/**
- * \param mesh pointer toward the mesh structure.
- * \param info pointer toward the info structure.
- *
- * Recover the info structure stored in the mesh structure.
- *
- */
-static inline
-void _MMG5_destockOptions(MMG5_pMesh mesh, MMG5_Info *info) {
-
-  memcpy(info,&mesh->info,sizeof(MMG5_Info));
-  return;
-}
-
 
 /* Macro for fortran function generation */
 /**
@@ -329,8 +321,8 @@ void _MMG5_destockOptions(MMG5_pMesh mesh, MMG5_Info *info) {
   void nu pl
 
 /* Global variables */
-extern unsigned char _MMG5_inxt2[3]; /*!< next vertex of triangle: {1,2,0} */
-extern unsigned char _MMG5_iprv2[3]; /*!< previous vertex of triangle: {2,0,1} */
+static unsigned char _MMG5_inxt2[3] = {1,2,0}; /*!< next vertex of triangle: {1,2,0} */
+static unsigned char _MMG5_iprv2[3] = {2,0,1}; /*!< previous vertex of triangle: {2,0,1} */
 
 /* Private structures */
 /**
@@ -392,7 +384,7 @@ int    _MMG5_hashGet(_MMG5_Hash *hash,int a,int b);
 int    _MMG5_hashNew(MMG5_pMesh mesh, _MMG5_Hash *hash,int hsiz,int hmax);
 int    _MMG5_intmetsavedir(MMG5_pMesh mesh, double *m,double *n,double *mr);
 int    _MMG5_mmgIntmet33_ani(double*,double*,double*,double);
-int    _MMG5_mmgIntextmet(MMG5_pMesh,MMG5_pSol,int,double *,double *);
+int    _MMG5_intextmet(MMG5_pMesh,MMG5_pSol,int,double *);
 double _MMG5_lenSurfEdg_ani(MMG5_pMesh mesh,MMG5_pSol met,int ip1,int ip2,char);
 double _MMG5_lenSurfEdg33_ani(MMG5_pMesh,MMG5_pSol,int,int,char);
 extern double _MMG5_lenSurfEdg_iso(MMG5_pMesh ,MMG5_pSol ,int ,int, char );

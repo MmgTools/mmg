@@ -939,7 +939,7 @@ int _MMG3D_intextmet(MMG5_pMesh mesh,MMG5_pSol met,int np,double me[6]) {
  * physical metric.
  *
  */
-int _MMG5_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
+int _MMG3D_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTetra   pt;
   MMG5_pxTetra  pxt;
   MMG5_pPoint   ppt;

@@ -769,10 +769,17 @@ int _MMG3D_saveAllMesh(MMG5_pMesh mesh) {
   }
   else {
     ptr = strstr(data,".meshb");
-    if( ptr ) bin = 1;
-    if( !(inm = fopen(data,"w")) ) {
-      fprintf(stderr,"  ** UNABLE TO OPEN %s.\n",data);
-      return(0);
+    if( ptr ) {
+      bin = 1;
+      if( !(inm = fopen(data,"wb")) ) {
+        fprintf(stderr,"  ** UNABLE TO OPEN %s.\n",data);
+        return(0);
+      }
+    } else {
+      if( !(inm = fopen(data,"w")) ) {
+        fprintf(stderr,"  ** UNABLE TO OPEN %s.\n",data);
+        return(0);
+      }
     }
   }
   fprintf(stdout,"  %%%% %s OPENED\n",data);
@@ -1288,7 +1295,7 @@ int _MMG3D_saveAllMesh(MMG5_pMesh mesh) {
  * Load metric field.
  *
  */
-int MMG3D_loadMet(MMG5_pMesh mesh,MMG5_pSol met) {
+int MMG3D_loadSol(MMG5_pMesh mesh,MMG5_pSol met) {
   FILE       *inm;
   float       fbuf[6],tmpf;
   double      dbuf[6],tmpd,lambda[3],eigenv[3][3];
@@ -1401,6 +1408,9 @@ int MMG3D_loadMet(MMG5_pMesh mesh,MMG5_pSol met) {
 
   }
   if ( mesh->np != met->np ) {
+    fprintf(stdout,"  ** MISMATCHES DATA: THE NUMBER OF VERTICES IN "
+            "THE MESH (%d) DIFFERS FROM THE NUMBER OF VERTICES IN "
+            "THE SOLUTION (%d) \n",mesh->np,met->np);
     return(-1);
   }
 
@@ -1610,7 +1620,7 @@ int MMG3D_loadMet(MMG5_pMesh mesh,MMG5_pSol met) {
  * Write isotropic or anisotropic metric.
  *
  */
-int MMG3D_saveMet(MMG5_pMesh mesh,MMG5_pSol met) {
+int MMG3D_saveSol(MMG5_pMesh mesh,MMG5_pSol met) {
   FILE*        inm;
   MMG5_pPoint  ppt;
   double       dbuf[6],mtmp[3],r[3][3],tmp;
@@ -1803,7 +1813,7 @@ int MMG5_loadMesh(MMG5_pMesh mesh) {
 }
 
 int MMG5_loadMet(MMG5_pMesh mesh,MMG5_pSol met) {
-  return(MMG3D_loadMet(mesh,met));
+  return(MMG3D_loadSol(mesh,met));
 }
 
 int MMG5_saveMesh(MMG5_pMesh mesh) {
@@ -1811,5 +1821,5 @@ int MMG5_saveMesh(MMG5_pMesh mesh) {
 }
 
 int MMG5_saveMet(MMG5_pMesh mesh,MMG5_pSol met) {
-  return(MMG3D_saveMet(mesh,met));
+  return(MMG3D_saveSol(mesh,met));
 }

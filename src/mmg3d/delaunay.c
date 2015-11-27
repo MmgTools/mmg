@@ -204,14 +204,14 @@ int _MMG5_delone(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist) {
   /*tetra allocation : we create "size" tetra*/
   ielnum[0] = size;
   for (k=1 ; k<=size ; k++) {
-    ielnum[k] = _MMG5_newElt(mesh);
+    ielnum[k] = _MMG3D_newElt(mesh);
 
     if ( !ielnum[k] ) {
       _MMG5_TETRA_REALLOC(mesh,ielnum[k],mesh->gap,
                           printf("  ## Warning: unable to allocate a new element but the mesh will be valid.\n");
                           for(ll=1 ; ll<k ; ll++) {
                             mesh->tetra[ielnum[ll]].v[0] = 1;
-                            _MMG5_delElt(mesh,ielnum[ll]);
+                            _MMG3D_delElt(mesh,ielnum[ll]);
                           }
                           return(-1);
         );
@@ -338,7 +338,7 @@ int _MMG5_delone(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist) {
   for (k=0; k<ilist; k++) {
     if(tref!=mesh->tetra[list[k]].ref)
       printf("arg ref ???? %d %d\n",tref,mesh->tetra[list[k]].ref);
-    _MMG5_delElt(mesh,list[k]);
+    _MMG3D_delElt(mesh,list[k]);
   }
 
   //ppt = &mesh->point[ip];

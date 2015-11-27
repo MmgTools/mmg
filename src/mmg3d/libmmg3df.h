@@ -11,7 +11,7 @@
 ! ** See the "libmmg*.h" file for a correct displaying of the documentation.
 ! */
 
-#include "libmmgf.h"
+#include "libmmgcommonf.h"
 
 ! /* =============================================================================
 ! **  This file is part of the mmg software package for the tetrahedral
@@ -39,7 +39,7 @@
 
 ! /**
 !  * \file mmg3d/libmmg3d.h
-!  * \brief C API for MMG3D library.
+!  * \brief API headers for the mmg3d library
 !  * \author Algiane Froehly (Inria / IMB, Université de Bordeaux)
 !  * \version 5
 !  * \date 01 2014
@@ -61,8 +61,7 @@
 
 ! #ifndef _MMG3DLIB_H
 
-! #include "mmg.h"
-
+! #include "mmgcommon.h"
 
 ! /**
 !  * \enum MMG3D_Param
@@ -624,7 +623,7 @@
 !  *
 !  */
 
-! int  MMG3D_loadMet(MMG5_pMesh mesh,MMG5_pSol met);
+! int  MMG3D_loadSol(MMG5_pMesh mesh,MMG5_pSol met);
 ! /**
 !  * \param mesh pointer toward the mesh structure.
 !  * \param met pointer toward the sol structure.
@@ -634,7 +633,7 @@
 !  *
 !  */
 
-! int  MMG3D_saveMet(MMG5_pMesh mesh, MMG5_pSol met);
+! int  MMG3D_saveSol(MMG5_pMesh mesh, MMG5_pSol met);
 
 ! /* deallocations */
 ! /**
@@ -700,15 +699,13 @@
 
 ! int  MMG3D_mmg3dmov(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pSol disp );
 
-! /* for PAMPA library */
-! /** Options management */
+! /** Tools for the library */
 ! /**
 !  * \param argc number of command line arguments.
 !  * \param argv command line arguments.
 !  * \param mesh pointer toward the mesh structure.
 !  * \param met pointer toward the sol structure.
 !  * \return 1.
-!  * \note Developped for the PaMPA library interface.
 !  *
 !  * Store command line arguments.
 !  *
@@ -719,7 +716,6 @@
 !  * \param mesh pointer toward the mesh structure.
 !  * \param met pointer toward the sol structure.
 !  * \return 1.
-!  * \note Developped for the PaMPA library interface.
 !  *
 !  * Read local parameters file. This file must have the same name as
 !  * the mesh with the \a .mmg3d5 extension or must be named \a
@@ -730,7 +726,6 @@
 ! int  MMG3D_parsop(MMG5_pMesh mesh,MMG5_pSol met);
 ! /**
 !  * \param prog pointer toward the program name.
-!  * \note Developped for the PaMPA library interface.
 !  *
 !  * Print help for mmg3d5 options.
 !  *
@@ -741,7 +736,6 @@
 !  * \param mesh pointer toward the mesh structure.
 !  * \param info pointer toward the info structure.
 !  * \return 1.
-!  * \note Developped for the PaMPA library interface.
 !  *
 !  * Store the info structure in the mesh structure.
 !  *
@@ -751,7 +745,6 @@
 ! /**
 !  * \param mesh pointer toward the mesh structure.
 !  * \param info pointer toward the info structure.
-!  * \note Developped for the PaMPA library interface.
 !  *
 !  * Recover the info structure stored in the mesh structure.
 !  *
@@ -770,8 +763,6 @@
 !  * \param metRidTyp Type of storage of ridges metrics: 0 for classic storage
 !  * (before the _MMG5_defsiz call), 1 for special storage (after this call).
 !  *
-!  * \note Developped for the PaMPA library interface.
-!  *
 !  * Search invalid elements (in term of quality or edge length).
 !  *
 !  */
@@ -785,8 +776,6 @@
 !  * \param eltab pointer toward the table of invalid elements.
 !  * \param metRidTyp Type of storage of ridges metrics: 0 for classic storage
 !  * (before the _MMG5_defsiz call), 1 for special storage (after this call).
-!  *
-!  * \note Developped for the PaMPA library interface.
 !  *
 !  * Store elements which have worse quality than \a critmin in \a eltab,
 !  * \a eltab is allocated and could contain \a mesh->ne elements.
@@ -805,8 +794,6 @@
 !  * (before the _MMG5_defsiz call), 1 for special storage (after this call).
 !  *
 !  * \return 1 if success, 0 otherwise.
-!  *
-!  * \note Developped for the PaMPA library interface.
 !  *
 !  * Store in \a eltab elements which have edge lengths shorter than \a lmin
 !  * or longer than \a lmax, \a eltab is allocated and could contain \a mesh->ne
@@ -831,7 +818,6 @@
 !  * \param v3 pointer toward the index of the adjacent element of \a kel through
 !  * its face number 3.
 !  * \return 1.
-!  * \note Developped for the PaMPA library interface.
 !  *
 !  * Find the indices of the 4 adjacent elements of tetrahedron \a
 !  * kel. \f$v_i = 0\f$ if the \f$i^{th}\f$ face has no adjacent element
@@ -846,7 +832,6 @@
 !  * \param ma pointer toward the metric associated to the first edge's extremity.
 !  * \param mb pointer toward the metric associated to the second edge's extremity.
 !  * \return edge length.
-!  * \note Developped for the PaMPA library interface.
 !  *
 !  * Compute length of edge \f$[ca,cb]\f$ (with \a ca and \a cb
 !  * coordinates of edge extremities) according to the size
@@ -855,6 +840,7 @@
 !  */
 
 ! double (*MMG3D_lenedgCoor)(double *ca,double *cb,double *sa,double *sb);
+
 ! /**
 !  * \param mesh pointer toward the mesh structure.
 !  * \param pack we pack the mesh at function begining if \f$pack=1\f$.
@@ -865,12 +851,11 @@
 !  *
 !  */
 
-! int  (*MMG3D_hashTetra)(MMG5_pMesh mesh, int pack);
+! int  MMG3D_hashTetra(MMG5_pMesh mesh, int pack);
 
 ! /** To associate function pointers without calling MMG3D_mmg3dlib */
 ! /**
 !  * \param mesh pointer toward the mesh structure (unused).
-!  * \note Developped for the PaMPA library interface.
 !  *
 !  * Set pointer for MMG3D_saveMesh function.
 !  *
@@ -880,26 +865,13 @@
 ! /**
 !  * \param mesh pointer toward the mesh structure (unused).
 !  * \param met pointer toward the sol structure (unused).
-!  * \note Developped for the PaMPA library interface.
 !  *
-!  * Set function pointers for caltet, lenedg, defsiz and gradsiz.
+!  * Set function pointers for caltet, lenedg, lenedgCoor defsiz, gradsiz...
+!  * depending if the readed metric is anisotropic or isotropic
 !  *
 !  */
 
 ! void  MMG3D_setfunc(MMG5_pMesh mesh,MMG5_pSol met);
-! /**
-!  * \param mesh pointer toward the mesh structure (unused).
-!  * \param met pointer toward the sol structure (unused).
-!  * \warning Copy of the \a setfunc function of the \a mmg3d/shared_func.h
-!  * file.
-!  * \note Developped for the PaMPA library interface.
-!  *
-!  * Set function pointers for lenedgeCoor, hashTetra and saveMesh.
-!  *
-!  */
-
-! void  MMG3D_pampa_setfunc(MMG5_pMesh mesh,MMG5_pSol met);
-
 
 ! /** Old API °°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°*/
 
@@ -1471,204 +1443,25 @@
 
 ! int  MMG5_mmg3dlib(MMG5_pMesh mesh, MMG5_pSol met );
 
-! /* for PAMPA library */
-! /** Options management */
-! /**
-!  * \param argc number of command line arguments.
-!  * \param argv command line arguments.
-!  * \param mesh pointer toward the mesh structure.
-!  * \param met pointer toward the sol structure.
-!  * \return 1.
-!  * \note Developped for the PaMPA library interface.
-!  *
-!  * Store command line arguments.
-!  *
-!  */
 
-! int  MMG5_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met);
-! /**
-!  * \param mesh pointer toward the mesh structure.
-!  * \param met pointer toward the sol structure.
-!  * \return 1.
-!  * \note Developped for the PaMPA library interface.
-!  *
-!  * Read local parameters file. This file must have the same name as
-!  * the mesh with the \a .mmg3d5 extension or must be named \a
-!  * DEFAULT.mmg3d5.
-!  *
-!  */
+! /* Library tools*/
 
-! int  MMG5_parsop(MMG5_pMesh mesh,MMG5_pSol met);
-! /**
-!  * \param prog pointer toward the program name.
-!  * \note Developped for the PaMPA library interface.
-!  *
-!  * Print help for mmg3d5 options.
-!  *
-!  */
+! int MMG5_Get_adjaTet(MMG5_pMesh mesh, int kel, int *v0, int *v1, int *v2, int *v3);
 
-! void  MMG5_usage(char *prog);
-! /**
-!  * \param mesh pointer toward the mesh structure.
-!  * \param info pointer toward the info structure.
-!  * \return 1.
-!  * \note Developped for the PaMPA library interface.
-!  *
-!  * Store the info structure in the mesh structure.
-!  *
-!  */
+! void MMG5_usage(char *prog);
 
-! int  MMG5_stockOptions(MMG5_pMesh mesh, MMG5_Info *info);
-! /**
-!  * \param mesh pointer toward the mesh structure.
-!  * \param info pointer toward the info structure.
-!  * \note Developped for the PaMPA library interface.
-!  *
-!  * Recover the info structure stored in the mesh structure.
-!  *
-!  */
+! void MMG5_defaultValues(MMG5_pMesh mesh);
 
-! void  MMG5_destockOptions(MMG5_pMesh mesh, MMG5_Info *info);
+! int MMG5_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met);
 
-! /** Checks */
-! /**
-!  * \param mesh pointer toward the mesh structure.
-!  * \param met pointer toward the sol structure.
-!  * \param critmin minimum quality for elements.
-!  * \param lmin minimum edge length.
-!  * \param lmax maximum ede length.
-!  * \param eltab table of invalid elements.
-!  * \param metRidTyp Type of storage of ridges metrics: 0 for classic storage
-!  * (before the _MMG5_defsiz call), 1 for special storage (after this call).
-!  *
-!  * \note Developped for the PaMPA library interface.
-!  *
-!  * Search invalid elements (in term of quality or edge length).
-!  *
-!  */
+! int MMG5_parsop(MMG5_pMesh mesh,MMG5_pSol met);
 
-! int MMG5_mmg3dcheck(MMG5_pMesh mesh,MMG5_pSol met,double critmin,
-!                     double lmin, double lmax, int *eltab,char metRidTyp);
-! /**
-!  * \param mesh pointer toward the mesh structure.
-!  * \param met pointer toward the sol structure.
-!  * \param critmin minimum quality for elements.
-!  * \param eltab pointer toward the table of invalid elements.
-!  * \param metRidTyp Type of storage of ridges metrics: 0 for classic storage
-!  * (before the _MMG5_defsiz call), 1 for special storage (after this call).
-!  *
-!  * \note Developped for the PaMPA library interface.
-!  *
-!  * Store elements which have worse quality than \a critmin in \a eltab,
-!  * \a eltab is allocated and could contain \a mesh->ne elements.
-!  *
-!  */
+! int MMG5_stockOptions(MMG5_pMesh mesh, MMG5_Info *info);
 
-! void  MMG5_searchqua(MMG5_pMesh mesh, MMG5_pSol met, double critmin, int *eltab,
-!                      char metRidTyp);
-! /**
-!  * \param mesh pointer toward the mesh structure.
-!  * \param met pointer toward the sol structure.
-!  * \param lmin minimum edge length.
-!  * \param lmax maximum ede length.
-!  * \param eltab table of invalid elements.
-!  * \param metRidTyp Type of storage of ridges metrics: 0 for classic storage
-!  * (before the _MMG5_defsiz call), 1 for special storage (after this call).
-!  *
-!  * \return 1 if success, 0 otherwise.
-!  *
-!  * \note Developped for the PaMPA library interface.
-!  *
-!  * Store in \a eltab elements which have edge lengths shorter than \a lmin
-!  * or longer than \a lmax, \a eltab is allocated and could contain \a mesh->ne
-!  * elements.
-!  *
-!  */
+! int MMG5_mmg3dcheck(MMG5_pMesh,MMG5_pSol,double, double,double, int *,char);
 
-! int  MMG5_searchlen(MMG5_pMesh mesh, MMG5_pSol met, double lmin, double lmax,
-!                     int *eltab,char  metRidTyp);
+! void MMG5_searchqua(MMG5_pMesh,MMG5_pSol,double, int *, char);
 
-! /** Utils */
-! /**
-!  * \brief Return adjacent elements of a tetrahedron.
-!  * \param mesh pointer toward the mesh structure.
-!  * \param kel tetrahedron index.
-!  * \param v0 pointer toward the index of the adjacent element of \a kel through
-!  * its face number 0.
-!  * \param v1 pointer toward the index of the adjacent element of \a kel through
-!  * its face number 1.
-!  * \param v2 pointer toward the index of the adjacent element of \a kel through
-!  * its face number 2.
-!  * \param v3 pointer toward the index of the adjacent element of \a kel through
-!  * its face number 3.
-!  * \return 1.
-!  * \note Developped for the PaMPA library interface.
-!  *
-!  * Find the indices of the 4 adjacent elements of tetrahedron \a
-!  * kel. \f$v_i = 0\f$ if the \f$i^{th}\f$ face has no adjacent element
-!  * (so we are on a boundary face).
-!  *
-!  */
-
-! int MMG5_Get_adjaTet(MMG5_pMesh mesh,int kel, int* v0, int* v1, int* v2, int* v3);
-! /**
-!  * \param ca pointer toward the coordinates of the first edge's extremity.
-!  * \param cb pointer toward the coordinates of the second edge's extremity.
-!  * \param ma pointer toward the metric associated to the first edge's extremity.
-!  * \param mb pointer toward the metric associated to the second edge's extremity.
-!  * \return edge length.
-!  * \note Developped for the PaMPA library interface.
-!  *
-!  * Compute length of edge \f$[ca,cb]\f$ (with \a ca and \a cb
-!  * coordinates of edge extremities) according to the size
-!  * prescription.
-!  *
-!  */
-
-! double (*MMG5_lenedgCoor)(double *ca,double *cb,double *sa,double *sb);
-! /**
-!  * \param mesh pointer toward the mesh structure.
-!  * \param pack we pack the mesh at function begining if \f$pack=1\f$.
-!  * \return 0 if failed, 1 otherwise.
-!  *
-!  * Create table of adjacency. Set pack variable to 0 for a compact
-!  * mesh and to 1 for a mesh that need to be packed.
-!  *
-!  */
-
-! int  (*MMG5_hashTetra)(MMG5_pMesh mesh, int pack);
-
-! /** To associate function pointers without calling MMG5_mmg3dlib */
-! /**
-!  * \param mesh pointer toward the mesh structure (unused).
-!  * \note Developped for the PaMPA library interface.
-!  *
-!  * Set pointer for MMG5_saveMesh function.
-!  *
-!  */
-
-! void  MMG5_Set_saveFunc(MMG5_pMesh mesh);
-! /**
-!  * \param mesh pointer toward the mesh structure (unused).
-!  * \param met pointer toward the sol structure (unused).
-!  * \note Developped for the PaMPA library interface.
-!  *
-!  * Set function pointers for caltet, lenedg, defsiz and gradsiz.
-!  *
-!  */
-
-! void  MMG5_setfunc(MMG5_pMesh mesh,MMG5_pSol met);
-! /**
-!  * \param mesh pointer toward the mesh structure (unused).
-!  * \param met pointer toward the sol structure (unused).
-!  * \warning Copy of the \a setfunc function of the \a mmg3d/shared_func.h
-!  * file.
-!  * \note Developped for the PaMPA library interface.
-!  *
-!  * Set function pointers for lenedgeCoor, hashTetra and saveMesh.
-!  *
-!  */
-
-! void  MMG5_pampa_setfunc(MMG5_pMesh mesh,MMG5_pSol met);
+! int MMG5_searchlen(MMG5_pMesh,MMG5_pSol, double, double, int *,char);
 
 ! #endif
