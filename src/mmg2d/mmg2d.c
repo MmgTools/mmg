@@ -74,9 +74,9 @@ static inline void _MMG5_defaultValues(MMG5_pMesh mesh, double qdegrad[2]) {
 
 int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,double *qdegrad) {
   int     i;
-  char   *ptr;
+  // char   *ptr;
   char    namein[128];
-  
+
   /* First step: search if user want to see the default parameters values. */
   for ( i=1; i< argc; ++i ) {
     if ( !strcmp(argv[i],"-val") ) {
@@ -346,8 +346,8 @@ int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,double *qdegrad) 
 
 
 static void endcod() {
-  double   ttot,ttim[TIMEMAX];
-  int      k,call[TIMEMAX];
+  // double   ttot,ttim[TIMEMAX];
+  // int      k,call[TIMEMAX];
 
   //chrono(OFF,&ctim[0]);
 //#warning message endcod : comment for merge
@@ -374,8 +374,7 @@ static void endcod() {
 int main(int argc,char *argv[]) {
   MMG5_Mesh      mesh;
   MMG5_Sol	    sol;
-  double declic,qdegrad[2];  
-  int    nsiter,k;
+  double        qdegrad[2];  
 
   fprintf(stdout,"  -- MMG2D, Release %s (%s) \n",M_VER,M_REL);
   fprintf(stdout,"     %s\n",M_CPY);
@@ -397,7 +396,7 @@ int main(int argc,char *argv[]) {
   /* default values */
   memset(&mesh,0,sizeof(MMG5_Mesh));
   memset(&sol,0,sizeof(MMG5_Sol));
-  
+
   MMG2D_Init_parameters(&mesh);
   qdegrad[0] = 10./ALPHA;
   qdegrad[1] = 1.3;   

@@ -1189,7 +1189,7 @@ int _MMG5_gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
  _MMG5_Hash     hash;
   double        *m,mv;
   int           k,it,nup,nu,maxit;
-  int           i,j,ia,ias,ip0,ip1;
+  int           i,j,ia,ip0,ip1;
   char          ier,i0,i1;
 
   if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug )

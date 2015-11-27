@@ -128,8 +128,6 @@ void intmet_ani(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int ip,double s) {
  */
 int _MMGS_intmet33_ani(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int ip,double s) {
   MMG5_pTria    pt;
-  MMG5_pPoint   ppt;
-  MMG5_pxPoint  go;
   double        *mr,*m,*n;
   int           ip1, ip2, i1, i2;
 
