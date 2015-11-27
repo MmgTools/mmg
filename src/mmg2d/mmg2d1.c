@@ -554,13 +554,13 @@ static int analar(MMG5_pMesh mesh,MMG5_pSol sol,pBucket bucket,double declic,int
   return(1);
 }
 static int analargeom(MMG5_pMesh mesh,MMG5_pSol sol,int *alert) {
-  MMG5_pTria    pt,pp; 
+  MMG5_pTria    pt; 
   MMG5_pPoint   ppa,ppb;
   double  *ca,*cb,*ma,*mb,tail,t,tang[2];
   int     *adja,voi[3],k,iadr,adj,base,npp,ip;  
   int     nt;
   int     i,i1,i2,ni,maxtou,it;
-  int     ins,ii,i0,ii0,nitot;
+  int     ins,i0,ii0,nitot;
   maxtou = 30;
   it     = 0;
   nitot = 0;

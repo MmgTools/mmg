@@ -55,9 +55,8 @@ extern char   ddb;
  */
 inline double _MMG5_lenedg_iso(MMG5_pMesh mesh,MMG5_pSol met,int ia,
                                MMG5_pTetra pt) {
-  MMG5_pxTetra    pxt;
   int ip1,ip2;
-  
+
   ip1 = pt->v[_MMG5_iare[ia][0]];
   ip2 = pt->v[_MMG5_iare[ia][1]];
 //#warning CECILE : on ne tient pas compte du fait que ca peut etre une ridge

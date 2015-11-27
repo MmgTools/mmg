@@ -161,25 +161,25 @@
 
 
 /*! \var next vertex of tetra: {1,2,3,0,1,2,3} */
-static unsigned char _MMG5_inxt3[7] = { 1,2,3,0,1,2,3 };
+static const unsigned char _MMG5_inxt3[7] = { 1,2,3,0,1,2,3 };
 /*! \var previous vertex of tetra: {3,0,1,2,3,0,1} */
-static unsigned char _MMG5_iprv3[7] = { 3,0,1,2,3,0,1 };
+static const unsigned char _MMG5_iprv3[7] = { 3,0,1,2,3,0,1 };
 /*! \var idir[i] : vertices of face opposite to vertex i */
-static unsigned char _MMG5_idir[4][3] = { {1,2,3}, {0,3,2}, {0,1,3}, {0,2,1} };
+static const unsigned char _MMG5_idir[4][3] = { {1,2,3}, {0,3,2}, {0,1,3}, {0,2,1} };
 /* \var< idirinv[i][j] : num of the jth point in the ith face */
-static          char _MMG5_idirinv[4][4] = {{-1,0,1,2},{0,-1,2,1},{0,1,-1,2},{0,2,1,-1}};
+static const          char _MMG5_idirinv[4][4] = {{-1,0,1,2},{0,-1,2,1},{0,1,-1,2},{0,2,1,-1}};
 /*! \var iarf[i]: edges of face opposite to vertex i */
-static unsigned char _MMG5_iarf[4][3] = { {5,4,3}, {5,1,2}, {4,2,0}, {3,0,1} };
+static const unsigned char _MMG5_iarf[4][3] = { {5,4,3}, {5,1,2}, {4,2,0}, {3,0,1} };
 /*! \var num of the j^th edge in the i^th face */
-static unsigned char _MMG5_iarfinv[4][6] = { {-1,-1,-1,2,1,0}, {-1,1,2,-1,-1,0},{2,-1,1,-1,0,-1},{1,2,-1,0,-1,-1}};
+static const unsigned char _MMG5_iarfinv[4][6] = { {-1,-1,-1,2,1,0}, {-1,1,2,-1,-1,0},{2,-1,1,-1,0,-1},{1,2,-1,0,-1,-1}};
 /*! \var vertices of extremities of the edges of the tetra */
-static unsigned char _MMG5_iare[6][2] = { {0,1}, {0,2}, {0,3}, {1,2}, {1,3}, {2,3} };
+static const unsigned char _MMG5_iare[6][2] = { {0,1}, {0,2}, {0,3}, {1,2}, {1,3}, {2,3} };
 /*! \var ifar[i][]: faces sharing the ith edge of the tetra */
-static unsigned char _MMG5_ifar[6][2] = { {2,3}, {1,3}, {1,2}, {0,3}, {0,2}, {0,1} };
+static const unsigned char _MMG5_ifar[6][2] = { {2,3}, {1,3}, {1,2}, {0,3}, {0,2}, {0,1} };
 /*! \var isar[i][]: vertices of extremities of the edge opposite to the ith edge */
-static unsigned char _MMG5_isar[6][2] = { {2,3}, {3,1}, {1,2}, {0,3}, {2,0}, {0,1} };
+static const unsigned char _MMG5_isar[6][2] = { {2,3}, {3,1}, {1,2}, {0,3}, {2,0}, {0,1} };
 /*! \var arpt[i]: edges passing through vertex i */
-static unsigned char _MMG5_arpt[4][3] = { {0,1,2}, {0,4,3}, {1,3,5}, {2,5,4} };
+static const unsigned char _MMG5_arpt[4][3] = { {0,1,2}, {0,4,3}, {1,3,5}, {2,5,4} };
 
 
 typedef struct {
