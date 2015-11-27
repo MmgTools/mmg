@@ -384,7 +384,7 @@ int    _MMG5_hashGet(_MMG5_Hash *hash,int a,int b);
 int    _MMG5_hashNew(MMG5_pMesh mesh, _MMG5_Hash *hash,int hsiz,int hmax);
 int    _MMG5_intmetsavedir(MMG5_pMesh mesh, double *m,double *n,double *mr);
 int    _MMG5_mmgIntmet33_ani(double*,double*,double*,double);
-int    _MMG5_intextmet(MMG5_pMesh,MMG5_pSol,int,double *);
+int    _MMG5_mmgIntextmet(MMG5_pMesh,MMG5_pSol,int,double *,double *);
 double _MMG5_lenSurfEdg_ani(MMG5_pMesh mesh,MMG5_pSol met,int ip1,int ip2,char);
 double _MMG5_lenSurfEdg33_ani(MMG5_pMesh,MMG5_pSol,int,int,char);
 extern double _MMG5_lenSurfEdg_iso(MMG5_pMesh ,MMG5_pSol ,int ,int, char );
