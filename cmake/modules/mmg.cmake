@@ -44,8 +44,8 @@ IF ( LIBMMG_STATIC )
     ${sourcemmgs_files} ${libmmgs_file}
     ${MMG3D_SOURCE_DIR}/lib${PROJECT_NAME}3df.h
     ${source_files} ${lib_file}
-    ${CMAKE_SOURCE_DIR}/src/libmmg.h
-    ${CMAKE_SOURCE_DIR}/src/libmmgf.h
+    ${CMAKE_SOURCE_DIR}/src/mmg/libmmg.h
+    ${CMAKE_SOURCE_DIR}/src/mmg/libmmgf.h
     )
   SET_TARGET_PROPERTIES(${PROJECT_NAME}_a PROPERTIES OUTPUT_NAME
     ${PROJECT_NAME})
@@ -64,8 +64,8 @@ IF ( LIBMMG_SHARED )
     ${sourcemmgs_files} ${libmmgs_file}
     ${MMG3D_SOURCE_DIR}/lib${PROJECT_NAME}3df.h
     ${source_files} ${lib_file}
-    ${CMAKE_SOURCE_DIR}/src/libmmg.h
-    ${CMAKE_SOURCE_DIR}/src/libmmgf.h
+    ${CMAKE_SOURCE_DIR}/src/mmg/libmmg.h
+    ${CMAKE_SOURCE_DIR}/src/mmg/libmmgf.h
     )
   SET_TARGET_PROPERTIES(${PROJECT_NAME}_so PROPERTIES
     VERSION ${CMAKE_RELEASE_VERSION} SOVERSION 5)
@@ -97,8 +97,8 @@ IF ( LIBMMG_STATIC OR LIBMMG_SHARED )
     ${COMMON_SOURCE_DIR}/libmmgcommon.h
     ${COMMON_SOURCE_DIR}/libmmgcommonf.h
     ${COMMON_SOURCE_DIR}/chrono.h
-    ${CMAKE_SOURCE_DIR}/src/libmmg.h
-    ${CMAKE_SOURCE_DIR}/src/libmmgf.h
+    ${CMAKE_SOURCE_DIR}/src/mmg/libmmg.h
+    ${CMAKE_SOURCE_DIR}/src/mmg/libmmgf.h
     )
   # Install header files in /usr/local or equivalent
   INSTALL(FILES ${mmg2d_headers} DESTINATION include/mmg/mmg2d)
