@@ -1039,6 +1039,11 @@ _MMG5_anatets(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
         ip2 = pt->v[i2];
         len = _MMG5_lenedg(mesh,met,ia,pt);
         if ( len > _MMG5_LLONG )  MG_SET(pt->flag,ia);
+        /* Treat here the ridges coming from a corner (we can not do that after
+         * because the corner don't have xpoints) */
+        if ( (mesh->point[ip1].tag & MG_CRN) ||  (mesh->point[ip2].tag & MG_CRN) ) {
+          if ( len > _MMG5_LOPTL )  MG_SET(pt->flag,ia);
+        }
       }
     }
     if ( !pt->flag )  continue;
