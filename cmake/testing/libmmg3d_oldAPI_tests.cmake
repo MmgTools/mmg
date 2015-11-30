@@ -13,6 +13,14 @@ ADD_EXECUTABLE(libmmg3d_example2_oldAPI
 ADD_EXECUTABLE(libmmg3d_example4_oldAPI
   ${CMAKE_SOURCE_DIR}/libexamples/mmg3d/example4/main.c)
 
+IF ( WIN32 AND ((NOT MINGW) AND USE_SCOTCH) )
+  my_add_link_flags(libmmg3d_example0_a_oldAPI "/SAFESEH:NO")
+  my_add_link_flags(libmmg3d_example0_b_oldAPI "/SAFESEH:NO")
+  my_add_link_flags(libmmg3d_example1_oldAPI "/SAFESEH:NO")
+  my_add_link_flags(libmmg3d_example2_oldAPI "/SAFESEH:NO")
+  my_add_link_flags(libmmg3d_example4_oldAPI "/SAFESEH:NO")
+ENDIF ( )
+
 IF ( LIBMMG3D_STATIC )
 
   TARGET_LINK_LIBRARIES(libmmg3d_example0_a_oldAPI ${PROJECT_NAME}3d_a)
@@ -53,7 +61,7 @@ IF (CMAKE_Fortran_COMPILER)
   ADD_EXECUTABLE(libmmg3d_fortran_b_oldAPI
     ${CMAKE_SOURCE_DIR}/libexamples/mmg3d/example0_fortran/example0_b/main.F90)
 
-  IF ( WIN32 AND NOT MINGW AND USE_SCOTCH )
+  IF ( WIN32 AND ((NOT MINGW) AND USE_SCOTCH) )
     my_add_link_flags(libmmg3d_fortran_a_oldAPI "/SAFESEH:NO")
     my_add_link_flags(libmmg3d_fortran_b_oldAPI "/SAFESEH:NO")
   ENDIF ( )

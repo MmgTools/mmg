@@ -22,7 +22,7 @@ ADD_EXECUTABLE(libmmg3d_example3
 ADD_EXECUTABLE(libmmg3d_example4
   ${CMAKE_SOURCE_DIR}/libexamples/mmg3d/example4/main.c)
 
- IF ( WIN32 AND NOT MINGW AND USE_SCOTCH )
+ IF ( WIN32 AND ((NOT MINGW) AND USE_SCOTCH) )
     my_add_link_flags(libmmg3d_example0_a "/SAFESEH:NO")
     my_add_link_flags(libmmg3d_example0_b "/SAFESEH:NO")
     my_add_link_flags(libmmg3d_example1 "/SAFESEH:NO")
@@ -75,7 +75,7 @@ IF (CMAKE_Fortran_COMPILER)
   ADD_EXECUTABLE(libmmg3d_fortran_b
     ${CMAKE_SOURCE_DIR}/libexamples/mmg3d/example0_fortran/example0_b/main.F90)
 
-  IF ( WIN32 AND NOT MINGW AND USE_SCOTCH )
+  IF ( WIN32 AND ((NOT MINGW) AND USE_SCOTCH) )
     my_add_link_flags(libmmg3d_fortran_a "/SAFESEH:NO")
     my_add_link_flags(libmmg3d_fortran_b "/SAFESEH:NO")
   ENDIF ( )

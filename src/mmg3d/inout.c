@@ -1007,10 +1007,10 @@ int _MMG3D_saveAllMesh(MMG5_pMesh mesh) {
         if ( !MG_VOK(ppt) || MG_SIN(ppt->tag) )  continue;
         else if ( MG_EDG(ppt->tag) || (ppt->tag & MG_NOM) ) {
           if(!bin) {
-            fprintf(inm,"%d %d\n",ppt->tmp,++nn);
+            fprintf(inm,"%d %d\n",ppt->tmp,++nt);
           } else {
             fwrite(&ppt->tmp,sw,1,inm);
-            ++nn;
+            ++nt;
             fwrite(&(nn),sw,1,inm);
           }
         }
