@@ -10,7 +10,7 @@ ADD_EXECUTABLE(libmmg2d_example0
 ADD_EXECUTABLE(libmmg2d_example1
   ${CMAKE_SOURCE_DIR}/libexamples/mmg2d/example1/main.c)
 
- IF ( WIN32 AND NOT MINGW AND USE_SCOTCH )
+ IF ( WIN32 AND ((NOT MINGW) AND USE_SCOTCH) )
     my_add_link_flags(libmmg2d_example0 "/SAFESEH:NO")
     my_add_link_flags(libmmg2d_example1 "/SAFESEH:NO")
  ENDIF ( )
@@ -45,7 +45,7 @@ IF (CMAKE_Fortran_COMPILER)
   ADD_EXECUTABLE(libmmg2d_fortran_a
     ${CMAKE_SOURCE_DIR}/libexamples/mmg2d/example0_fortran/main.F90)
 
-  IF ( WIN32 AND NOT MINGW AND USE_SCOTCH )
+  IF ( WIN32 AND ((NOT MINGW) AND USE_SCOTCH) )
     my_add_link_flags(libmmg2d_fortran_a "/SAFESEH:NO")
   ENDIF ( )
 

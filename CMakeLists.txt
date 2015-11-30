@@ -367,7 +367,7 @@ CMAKE_DEPENDENT_OPTION (
   "BUILD_MMG;LIBMMG_INTERNAL" OFF
   )
 CMAKE_DEPENDENT_OPTION(
-  MMG3D_CI "Enable/Disable continuous integration for mmg" ON
+  MMG_CI "Enable/Disable continuous integration for mmg" ON
   "BUILD_TESTING;BUILD_MMG" OFF)
 
 
