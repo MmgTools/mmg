@@ -140,6 +140,7 @@ inline double _MMG5_caltet_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra  pt) {
 inline double _MMG5_caltet_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt) {
   double       cal,abx,aby,abz,acx,acy,acz,adx,ady,adz;
   double       h1,h2,h3,h4,h5,h6,det,vol,rap,v1,v2,v3,num;
+  double       bcx,bcy,bcz,bdx,bdy,bdz,cdx,cdy,cdz;
   double       *a,*b,*c,*d;
   double       mm[6];
   int          ip[4];
@@ -172,6 +173,18 @@ inline double _MMG5_caltet_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt) {
   ady = d[1] - a[1];
   adz = d[2] - a[2];
 
+  bcx = c[0] - b[0];
+  bcy = c[1] - b[1];
+  bcz = c[2] - b[2];
+
+  bdx = d[0] - b[0];
+  bdy = d[1] - b[1];
+  bdz = d[2] - b[2];
+
+  cdx = d[0] - c[0];
+  cdy = d[1] - c[1];
+  cdz = d[2] - c[2];
+
   v1  = acy*adz - acz*ady;
   v2  = acz*adx - acx*adz;
   v3  = acx*ady - acy*adx;
@@ -188,17 +201,22 @@ inline double _MMG5_caltet_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt) {
   det = sqrt(det) * vol;
 
   /* edge lengths */
-  h6 = _MMG5_lenedg_ani(mesh,met,0,pt);
-  h1 = _MMG5_lenedg_ani(mesh,met,1,pt);
-  h2 = _MMG5_lenedg_ani(mesh,met,2,pt);
-  h3 = _MMG5_lenedg_ani(mesh,met,3,pt);
-  h4 = _MMG5_lenedg_ani(mesh,met,4,pt);
-  h5 = _MMG5_lenedg_ani(mesh,met,5,pt);
-
-  if ( h1==0 || h2==0 || h3==0 || h4==0 || h5==0 || h6==0 ) return(0);
+  h1 = mm[0]*abx*abx + mm[3]*aby*aby + mm[5]*abz*abz
+    + 2.0*(mm[1]*abx*aby + mm[2]*abx*abz + mm[4]*aby*abz);
+  h2 =  mm[0]*acx*acx + mm[3]*acy*acy + mm[5]*acz*acz
+    + 2.0*(mm[1]*acx*acy + mm[2]*acx*acz + mm[4]*acy*acz);
+  h3 = mm[0]*adx*adx + mm[3]*ady*ady + mm[5]*adz*adz
+    + 2.0*(mm[1]*adx*ady + mm[2]*adx*adz + mm[4]*ady*adz);
+  h4 =  mm[0]*bcx*bcx + mm[3]*bcy*bcy + mm[5]*bcz*bcz
+    + 2.0*(mm[1]*bcx*bcy + mm[2]*bcx*bcz + mm[4]*bcy*bcz);
+  h5 =  mm[0]*bdx*bdx + mm[3]*bdy*bdy + mm[5]*bdz*bdz
+    + 2.0*(mm[1]*bdx*bdy + mm[2]*bdx*bdz + mm[4]*bdy*bdz);
+  h6 =  mm[0]*cdx*cdx + mm[3]*cdy*cdy + mm[5]*cdz*cdz
+    + 2.0*(mm[1]*cdx*cdy + mm[2]*cdx*cdz + mm[4]*cdy*cdz);
 
   /* quality */
-  rap = h1*h1 + h2*h2 + h3*h3 + h4*h4 + h5*h5 + h6*h6;
+  rap = h1 + h2 + h3 + h4 + h5 + h6;
+
   num = sqrt(rap) * rap;
 
   cal = det / num;
