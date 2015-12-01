@@ -36,8 +36,22 @@
 #include "mmg3d.h"
 
 
-/** Move internal point */
-int _MMG5_movintpt(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,int improve) {
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param list pointer toward the volumic ball of the point.
+ * \param ilist size of the volumic ball.
+ * \param improve force the new minimum element quality to be greater or equal
+ * than 0.9 of the old minimum element quality.
+ *
+ * \return 0 if we can't move the point, 1 if we can.
+ *
+ * Move internal point whose volumic is passed.
+ *
+ * \Remark the metric is not interpolated at the new position.
+ *
+ */
+int _MMG5_movintpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,int improve) {
   MMG5_pTetra               pt,pt0;
   MMG5_pPoint               p0,p1,p2,p3,ppt0;
   double               vol,totvol;
@@ -141,9 +155,10 @@ int _MMG5_movintpt(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,int improve
  *
  * Move boundary regular point, whose volumic and surfacic balls are passed.
  *
+ * \Remark the metric is not interpolated at the new position.
  */
-int _MMG5_movbdyregpt(MMG5_pMesh mesh, MMG5_pSol met,int *listv,
-                      int ilistv,int *lists,int ilists) {
+int _MMG5_movbdyregpt_iso(MMG5_pMesh mesh, MMG5_pSol met,int *listv,
+                          int ilistv,int *lists,int ilists) {
   MMG5_pTetra       pt,pt0;
   MMG5_pxTetra      pxt;
   MMG5_pPoint       p0,p1,p2,ppt0;
@@ -526,9 +541,10 @@ int _MMG5_movbdyregpt(MMG5_pMesh mesh, MMG5_pSol met,int *listv,
  *
  * Move boundary reference point, whose volumic and surfacic balls are passed.
  *
+ * \Remark the metric is not interpolated at the new position.
  */
-int _MMG5_movbdyrefpt(MMG5_pMesh mesh, MMG5_pSol met, int *listv,
-                      int ilistv, int *lists, int ilists){
+int _MMG5_movbdyrefpt_iso(MMG5_pMesh mesh, MMG5_pSol met, int *listv,
+                          int ilistv, int *lists, int ilists){
   MMG5_pTetra           pt,pt0;
   MMG5_pxTetra          pxt;
   MMG5_pPoint           p0,p1,p2,ppt0;
@@ -832,9 +848,10 @@ int _MMG5_movbdyrefpt(MMG5_pMesh mesh, MMG5_pSol met, int *listv,
  * Move boundary non manifold point, whose volumic and (exterior)
  * surfacic balls are passed
  *
+ * \Remark the metric is not interpolated at the new position.
  */
-int _MMG5_movbdynompt(MMG5_pMesh mesh,MMG5_pSol met, int *listv,
-                      int ilistv, int *lists, int ilists){
+int _MMG5_movbdynompt_iso(MMG5_pMesh mesh,MMG5_pSol met, int *listv,
+                          int ilistv, int *lists, int ilists){
   MMG5_pTetra       pt,pt0;
   MMG5_pxTetra      pxt;
   MMG5_pPoint       p0,p1,p2,ppt0;
@@ -1136,8 +1153,8 @@ int _MMG5_movbdynompt(MMG5_pMesh mesh,MMG5_pSol met, int *listv,
  * Move boundary ridge point, whose volumic and surfacic balls are passed.
  *
  */
-int _MMG5_movbdyridpt(MMG5_pMesh mesh, MMG5_pSol met, int *listv,
-                      int ilistv,int *lists,int ilists) {
+int _MMG5_movbdyridpt_iso(MMG5_pMesh mesh, MMG5_pSol met, int *listv,
+                          int ilistv,int *lists,int ilists) {
   MMG5_pTetra          pt,pt0;
   MMG5_pxTetra         pxt;
   MMG5_pPoint          p0,p1,p2,ppt0;

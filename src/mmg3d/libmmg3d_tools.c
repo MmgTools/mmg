@@ -41,33 +41,43 @@
  */
 void MMG3D_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
   if ( met->size == 1 || ( met->size == 3 && mesh->info.lag >= 0 ) ) {
-    _MMG5_caltet     = _MMG5_caltet_iso;
-    _MMG5_caltri     = _MMG5_caltri_iso;
-    _MMG5_lenedg     = _MMG5_lenedg_iso;
-    MMG3D_lenedgCoor  = _MMG5_lenedgCoor_iso;
-    _MMG5_intmet     = _MMG5_intmet_iso;
-    _MMG5_lenedgspl  = _MMG5_lenedg_iso;
-    _MMG5_interp4bar = _MMG5_interp4bar_iso;
-    _MMG5_defsiz     = _MMG3D_defsiz_iso;
-    _MMG5_gradsiz    = _MMG5_gradsiz_iso;
+    _MMG5_caltet          = _MMG5_caltet_iso;
+    _MMG5_caltri          = _MMG5_caltri_iso;
+    _MMG5_lenedg          = _MMG5_lenedg_iso;
+    MMG3D_lenedgCoor      = _MMG5_lenedgCoor_iso;
+    _MMG5_intmet          = _MMG5_intmet_iso;
+    _MMG5_lenedgspl       = _MMG5_lenedg_iso;
+    _MMG5_movintpt        = _MMG5_movintpt_iso;
+    _MMG5_movbdyregpt     = _MMG5_movbdyregpt_iso;
+    _MMG5_movbdyrefpt     = _MMG5_movbdyrefpt_iso;
+    _MMG5_movbdynompt     = _MMG5_movbdynompt_iso;
+    _MMG5_movbdyridpt     = _MMG5_movbdyridpt_iso;
+    _MMG5_interp4bar      = _MMG5_interp4bar_iso;
+    _MMG5_defsiz          = _MMG3D_defsiz_iso;
+    _MMG5_gradsiz         = _MMG5_gradsiz_iso;
 #ifndef PATTERN
-    _MMG5_cavity     = _MMG5_cavity_iso;
-    _MMG5_buckin     = _MMG5_buckin_iso;
+    _MMG5_cavity          = _MMG5_cavity_iso;
+    _MMG5_buckin          = _MMG5_buckin_iso;
 #endif
   }
   else if ( met->size == 6 ) {
-    _MMG5_caltet     = _MMG5_caltet_ani;
-    _MMG5_caltri     = _MMG5_caltri_ani;
-    _MMG5_lenedg     = _MMG5_lenedg_ani;
-    MMG3D_lenedgCoor  = _MMG5_lenedgCoor_ani;
-    _MMG5_intmet     = _MMG5_intmet_ani;
-    _MMG5_lenedgspl  = _MMG5_lenedg_ani;
-    _MMG5_interp4bar = _MMG5_interp4bar_ani;
-    _MMG5_defsiz     = _MMG3D_defsiz_ani;
-    _MMG5_gradsiz    = _MMG5_gradsiz_ani;
+    _MMG5_caltet         = _MMG5_caltet_ani;
+    _MMG5_caltri         = _MMG5_caltri_ani;
+    _MMG5_lenedg         = _MMG5_lenedg_ani;
+    MMG3D_lenedgCoor     = _MMG5_lenedgCoor_ani;
+    _MMG5_intmet         = _MMG5_intmet_ani;
+    _MMG5_lenedgspl      = _MMG5_lenedg_ani;
+    _MMG5_movintpt       = _MMG5_movintpt_iso;
+   _MMG5_movbdyregpt     = _MMG5_movbdyregpt_ani;
+   _MMG5_movbdyrefpt     = _MMG5_movbdyrefpt_iso;
+   _MMG5_movbdynompt     = _MMG5_movbdynompt_iso;
+   _MMG5_movbdyridpt     = _MMG5_movbdyridpt_iso;
+    _MMG5_interp4bar     = _MMG5_interp4bar_ani;
+    _MMG5_defsiz         = _MMG3D_defsiz_ani;
+    _MMG5_gradsiz        = _MMG5_gradsiz_ani;
 #ifndef PATTERN
-    _MMG5_cavity     = _MMG5_cavity_ani;
-    _MMG5_buckin     = _MMG5_buckin_ani;
+    _MMG5_cavity         = _MMG5_cavity_ani;
+    _MMG5_buckin         = _MMG5_buckin_ani;
 #endif
   }
 }

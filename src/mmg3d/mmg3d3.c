@@ -349,7 +349,7 @@ int _MMG5_movtetlag(MMG5_pMesh mesh,MMG5_pSol met,int itdeg) {
         ilistv = _MMG5_boulevolp(mesh,k,i,listv);
         if ( !ilistv )  continue;
         
-        ier = _MMG5_movintpt(mesh,met,listv,ilistv,0);
+        ier = _MMG5_movintpt_iso(mesh,met,listv,ilistv,0);
           
         if ( ier ) {
           nm++;

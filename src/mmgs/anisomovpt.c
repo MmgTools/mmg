@@ -47,11 +47,11 @@
  */
 int movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
   MMG5_pTria     pt,pt0;
-  MMG5_pPoint    p0,p1,p2,ppt0;
+  MMG5_pPoint    p0,p1,ppt0;
   _MMG5_Bezier   pb;
-  double         r[3][3],ux,uy,uz,*n,area,lispoi[3*_MMG5_LMAX+1],Jacsigma[3][2],Jactmp[3][2],*m0,m[6],mo[6];
-  double         dens[3],intpt[2],gv[2],density,detloc,step,lambda[3],o[3],no[3],to[3],uv[2];
-  double         ll,*n1,*n2,ps1,ps2,calold,calnew,caltmp;
+  double         r[3][3],ux,uy,uz,*n,area,lispoi[3*_MMG5_LMAX+1],*m0;//,m[6],mo[6];
+  double         gv[2],detloc,step,lambda[3],o[3],no[3],to[3],uv[2];
+  double         calold,calnew,caltmp;
   int            k,iel,kel,nump,nbeg,nend;
   char           i0,i1,i2,j,ier;
   step = 0.1;
@@ -120,130 +120,9 @@ int movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
     pt = &mesh->tria[iel];
     if ( !_MMG5_bezierCP(mesh,pt,&pb,1) )  return(0);
 
-    area = lispoi[3*k+1]*lispoi[3*(k+1)+2] - lispoi[3*k+2]*lispoi[3*(k+1)+1];
-    i0 = 0;
-    i1 = 1;
-    i2 = 2;
+    /* Compute integral of sqrt(T^J(xi)  M(P(xi)) J(xi)) * P(xi) over the triangle */
+    if ( !_MMG5_elementWeight(mesh,met,pt,p0,&pb,r,gv) )  return(0);
 
-    for (j=0; j<3; j++) {
-      /* Set jacobian matrix of parametric Bezier patch, for each quadrature point */
-      if ( j == 0 ) {  //w,u = 1/2, v = 0
-        Jacsigma[0][0] = 0.75*(pb.b[7][0] - pb.b[0][0]) + 0.75*(pb.b[1][0] - pb.b[8][0]) + 1.5*(pb.b[8][0] - pb.b[7][0]);
-        Jacsigma[1][0] = 0.75*(pb.b[7][1] - pb.b[0][1]) + 0.75*(pb.b[1][1] - pb.b[8][1]) + 1.5*(pb.b[8][1] - pb.b[7][1]);
-        Jacsigma[2][0] = 0.75*(pb.b[7][2] - pb.b[0][2]) + 0.75*(pb.b[1][2] - pb.b[8][2]) + 1.5*(pb.b[8][2] - pb.b[7][2]);
-
-        Jacsigma[0][1] = 0.75*(pb.b[6][0] - pb.b[0][0]) + 0.75*(pb.b[3][0] - pb.b[8][0]) + 1.5*(pb.b[9][0] - pb.b[7][0]);
-        Jacsigma[1][1] = 0.75*(pb.b[6][1] - pb.b[0][1]) + 0.75*(pb.b[3][1] - pb.b[8][1]) + 1.5*(pb.b[9][1] - pb.b[7][1]);
-        Jacsigma[2][1] = 0.75*(pb.b[6][2] - pb.b[0][2]) + 0.75*(pb.b[3][2] - pb.b[8][2]) + 1.5*(pb.b[9][2] - pb.b[7][2]);
-      }
-      else if( j == 1 ) { //u,v = 1/2, w = 0
-        Jacsigma[0][0] = 0.75*(pb.b[1][0] - pb.b[8][0]) + 0.75*(pb.b[4][0] - pb.b[5][0]) + 1.5*(pb.b[3][0] - pb.b[9][0]);
-        Jacsigma[1][0] = 0.75*(pb.b[1][1] - pb.b[8][1]) + 0.75*(pb.b[4][1] - pb.b[5][1]) + 1.5*(pb.b[3][1] - pb.b[9][1]);
-        Jacsigma[2][0] = 0.75*(pb.b[1][2] - pb.b[8][2]) + 0.75*(pb.b[4][2] - pb.b[5][2]) + 1.5*(pb.b[3][2] - pb.b[9][2]);
-
-        Jacsigma[0][1] = 0.75*(pb.b[3][0] - pb.b[8][0]) + 0.75*(pb.b[2][0] - pb.b[5][0]) + 1.5*(pb.b[4][0] - pb.b[9][0]);
-        Jacsigma[1][1] = 0.75*(pb.b[3][1] - pb.b[8][1]) + 0.75*(pb.b[2][1] - pb.b[5][1]) + 1.5*(pb.b[4][1] - pb.b[9][1]);
-        Jacsigma[2][1] = 0.75*(pb.b[3][2] - pb.b[8][2]) + 0.75*(pb.b[2][2] - pb.b[5][2]) + 1.5*(pb.b[4][2] - pb.b[9][2]);
-      }
-      else { //w,v = 1/2, u= 0
-        Jacsigma[0][0] = 0.75*(pb.b[7][0] - pb.b[0][0]) + 0.75*(pb.b[4][0] - pb.b[5][0]) + 1.5*(pb.b[9][0] - pb.b[6][0]);
-        Jacsigma[1][0] = 0.75*(pb.b[7][1] - pb.b[0][1]) + 0.75*(pb.b[4][1] - pb.b[5][1]) + 1.5*(pb.b[9][1] - pb.b[6][1]);
-        Jacsigma[2][0] = 0.75*(pb.b[7][2] - pb.b[0][2]) + 0.75*(pb.b[4][2] - pb.b[5][2]) + 1.5*(pb.b[9][2] - pb.b[6][2]);
-
-        Jacsigma[0][1] = 0.75*(pb.b[6][0] - pb.b[0][0]) + 0.75*(pb.b[2][0] - pb.b[5][0]) + 1.5*(pb.b[5][0] - pb.b[6][0]);
-        Jacsigma[1][1] = 0.75*(pb.b[6][1] - pb.b[0][1]) + 0.75*(pb.b[2][1] - pb.b[5][1]) + 1.5*(pb.b[5][1] - pb.b[6][1]);
-        Jacsigma[2][1] = 0.75*(pb.b[6][2] - pb.b[0][2]) + 0.75*(pb.b[2][2] - pb.b[5][2]) + 1.5*(pb.b[5][2] - pb.b[6][2]);
-      }
-
-      /* Take metric at control point */
-      if ( !(MG_GEO & pt->tag[i2]) ) {
-        if ( !intregmet(mesh,met,iel,i2,0.5,m) )  return(0);
-      }
-      else {
-        if ( !_MMG5_nortri(mesh,pt,no) )  return(0);
-        if ( !_MMG5_intridmet(mesh,met,pt->v[i0],pt->v[i1],0.5,no,mo) )  return(0);
-
-        p1 = &mesh->point[pt->v[i0]];
-        p2 = &mesh->point[pt->v[i1]];
-
-        to[0] = p2->c[0] - p1->c[0];
-        to[1] = p2->c[1] - p1->c[1];
-        to[2] = p2->c[2] - p1->c[2];
-
-        ll = to[0]*to[0] + to[1]*to[1] + to[2]*to[2];
-        if ( ll < _MMG5_EPSD )  return(0);
-        ll = 1.0 / sqrt(ll);
-        to[0] *= ll;
-        to[1] *= ll;
-        to[2] *= ll;
-
-        if ( MS_SIN(p1->tag) && MS_SIN(p2->tag) ) {
-          if ( !_MMG5_buildridmetfic(mesh,to,no,mo[0],mo[0],mo[0],m) )  return(0);
-        }
-        else if ( !MS_SIN(p1->tag) ) {
-          n1 = &mesh->xpoint[p1->xp].n1[0];
-          n2 = &mesh->xpoint[p1->xp].n2[0];
-          ps1 = n1[0]*no[0] + n1[1]*no[1] + n1[2]*no[2];
-          ps2 = n2[0]*no[0] + n2[1]*no[1] + n2[2]*no[2];
-          if ( fabs(ps1) > fabs(ps2) ) {
-            if ( !_MMG5_buildridmetfic(mesh,to,no,mo[0],mo[1],mo[3],m) )  return(0);
-          }
-          else {
-            if ( !_MMG5_buildridmetfic(mesh,to,no,mo[0],mo[2],mo[4],m) )  return(0);
-          }
-        }
-        else {
-          assert(!MS_SIN(p2->tag));
-          n1 = &mesh->xpoint[p2->xp].n1[0];
-          n2 = &mesh->xpoint[p2->xp].n2[0];
-          ps1 = n1[0]*no[0] + n1[1]*no[1] + n1[2]*no[2];
-          ps2 = n2[0]*no[0] + n2[1]*no[1] + n2[2]*no[2];
-          if ( fabs(ps1) > fabs(ps2) ) {
-            if ( !_MMG5_buildridmetfic(mesh,to,no,mo[0],mo[1],mo[3],m) )  return(0);
-          }
-          else {
-            if ( !_MMG5_buildridmetfic(mesh,to,no,mo[0],mo[2],mo[4],m) )  return(0);
-          }
-        }
-      }
-
-      /* Compute density matrix {^t}Jacsigma * M * Jacsigma */
-      Jactmp[0][0] = m[0]*Jacsigma[0][0] + m[1]*Jacsigma[1][0] + m[2]*Jacsigma[2][0];
-      Jactmp[1][0] = m[1]*Jacsigma[0][0] + m[3]*Jacsigma[1][0] + m[4]*Jacsigma[2][0];
-      Jactmp[2][0] = m[2]*Jacsigma[0][0] + m[4]*Jacsigma[1][0] + m[5]*Jacsigma[2][0];
-
-      Jactmp[0][1] = m[0]*Jacsigma[0][1] + m[1]*Jacsigma[1][1] + m[2]*Jacsigma[2][1];
-      Jactmp[1][1] = m[1]*Jacsigma[0][1] + m[3]*Jacsigma[1][1] + m[4]*Jacsigma[2][1];
-      Jactmp[2][1] = m[2]*Jacsigma[0][1] + m[4]*Jacsigma[1][1] + m[5]*Jacsigma[2][1];
-
-      dens[0] = Jacsigma[0][0]*Jactmp[0][0] + Jacsigma[1][0]*Jactmp[1][0] + Jacsigma[2][0]*Jactmp[2][0];
-      dens[1] = Jacsigma[0][0]*Jactmp[0][1] + Jacsigma[1][0]*Jactmp[1][1] + Jacsigma[2][0]*Jactmp[2][1];
-      dens[2] = Jacsigma[0][1]*Jactmp[0][1] + Jacsigma[1][1]*Jactmp[1][1] + Jacsigma[2][1]*Jactmp[2][1];
-
-      density = dens[0]*dens[2] - dens[1]*dens[1];
-      if ( density <= 0.0 ) {
-        fprintf(stdout,"  ## Fct movptaniso: negative density \n");
-        continue;
-      }
-      density = sqrt(density);
-      /* Coordinates of the integration point */
-      p1 = &mesh->point[pt->v[i0]];
-      p2 = &mesh->point[pt->v[i1]];
-
-      ux = 0.5*(p1->c[0] + p2->c[0]) - p0->c[0];
-      uy = 0.5*(p1->c[1] + p2->c[1]) - p0->c[1];
-      uz = 0.5*(p1->c[2] + p2->c[2]) - p0->c[2];
-
-      intpt[0] =  r[0][0]*ux + r[0][1]*uy + r[0][2]*uz;
-      intpt[1] =  r[1][0]*ux + r[1][1]*uy + r[1][2]*uz;
-
-      gv[0] += density*_MMG5_ATHIRD*intpt[0];
-      gv[1] += density*_MMG5_ATHIRD*intpt[1];
-
-      i0 = _MMG5_inxt2[i0];
-      i1 = _MMG5_inxt2[i1];
-      i2 = _MMG5_inxt2[i2];
-    }
   }
 
   /* At this point : gv = - gradient of V = direction to follow */
