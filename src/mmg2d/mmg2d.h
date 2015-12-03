@@ -195,7 +195,7 @@ static const unsigned int MMG2_inxt[5] = {1,2,0,1,2};
 
 /** Reallocation of point table and sol table and creation
     of point ip with coordinates o and tag tag*/
-#define _MMG5_POINT_REALLOC(mesh,sol,ip,wantedGap,law,o,tag ) do        \
+#define _MMG2D_POINT_REALLOC(mesh,sol,ip,wantedGap,law,o,tag ) do        \
   {                                                                     \
     int klink;                                                          \
                                                                         \

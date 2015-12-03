@@ -112,7 +112,7 @@ static int cassar(MMG5_pMesh mesh,MMG5_pSol sol,int ia,int ib,double t) {
   if ( !ip ) {
     /* reallocation of point table */
     
-    _MMG5_POINT_REALLOC(mesh,sol,ip,mesh->gap,
+    _MMG2D_POINT_REALLOC(mesh,sol,ip,mesh->gap,
                         printf("  ## Error: unable to allocate a new point\n");
                         _MMG5_INCREASE_MEM_MESSAGE();
                         memlack=1;
@@ -233,7 +233,7 @@ static int cassarbdry(MMG5_pMesh mesh,MMG5_pSol sol,int ied,int ia,int ib,double
   if ( !ip ) {
     /* reallocation of point table */
     
-    _MMG5_POINT_REALLOC(mesh,sol,ip,mesh->gap,
+    _MMG2D_POINT_REALLOC(mesh,sol,ip,mesh->gap,
                         printf("  ## Error: unable to allocate a new bdry point\n");
                         _MMG5_INCREASE_MEM_MESSAGE();
                         memlack=1;
