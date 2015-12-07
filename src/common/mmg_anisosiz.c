@@ -144,6 +144,7 @@ double _MMG5_lenEdg(MMG5_pMesh mesh,int np0,int np1,
   }
 
   /* computation of the length of the two tangent vectors in their respective tangent plane */
+  /* l_ab = int_a^b sqrt(m_ij d_t x_i(t) d_t x_j(t) ) : evaluated by a 2-point quadrature method. */
   l0 = m0[0]*gammaprim0[0]*gammaprim0[0] + m0[3]*gammaprim0[1]*gammaprim0[1] \
     + m0[5]*gammaprim0[2]*gammaprim0[2] \
     + 2.0*m0[1]*gammaprim0[0]*gammaprim0[1]  + 2.0*m0[2]*gammaprim0[0]*gammaprim0[2] \
@@ -176,7 +177,8 @@ double _MMG5_lenEdg(MMG5_pMesh mesh,int np0,int np1,
  * \return length of edge according to the prescribed metric.
  *
  * Compute length of surface edge \f$[i0;i1]\f$ according to the prescribed
- * aniso metric (for special storage of metrics at ridges points).
+ * aniso metric (for special storage of metrics at ridges points). Here the
+ * length is computed taking into account the curve nature of the surface edge.
  *
  */
 double _MMG5_lenSurfEdg_ani(MMG5_pMesh mesh,MMG5_pSol met,int np0,int np1,char isedg) {
@@ -302,10 +304,10 @@ double _MMG5_surf(MMG5_pMesh mesh,double m[3][6],MMG5_pTria ptt) {
     tJmJ[1][1] = J[0][1]*mJ[0][1] + J[1][1]*mJ[1][1] + J[2][1]*mJ[2][1];
 
     dens = tJmJ[0][0]*tJmJ[1][1] - tJmJ[1][0]*tJmJ[0][1];
-    if ( dens < 0.0 ) {
-      //fprintf(stdout,"  ## Density should be positive : %E for elt %d %d %d \n",dens,ptt->v[0],ptt->v[1],ptt->v[2]);
-      //return(0.0);
-    }
+    /* if ( dens < 0.0 ) { */
+    /*   fprintf(stdout,"  ## Density should be positive : %E for elt %d %d %d \n",dens,ptt->v[0],ptt->v[1],ptt->v[2]); */
+    /*   return(0.0); */
+    /* } */
     surf += sqrt(fabs(dens));
   }
 
@@ -367,20 +369,49 @@ double _MMG5_surftri_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt) {
  * the anisotropic metric \a met (for classic storage of ridges metrics).
  *
  */
-double _MMG5_surftri33_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt) {
-  double         m[3][6];
-  int            np[3];
-  int            i;
+double _MMG5_surftri33_ani(MMG5_pMesh mesh,MMG5_pTria ptt,
+                           double ma[6], double mb[6], double mc[6]) {
+  double         mm[6];
+  double         *a,*b,*c,abx,aby,abz,acx,acy,acz,dens[3],surf;
+  int            i,ia,ib,ic;
 
-  for (i=0; i<3; i++) {
-    np[i] = ptt->v[i];
-  }
+  ia = ptt->v[0];
+  ib = ptt->v[1];
+  ic = ptt->v[2];
 
-  /* Set metric tensors at vertices of tria iel */
-  for(i=0; i<3; i++) {
-    memcpy(&m[i][0],&met->m[6*np[i]],6*sizeof(double));
-  }
-  return(_MMG5_surf(mesh,m,ptt));
+  a = &mesh->point[ia].c[0];
+  b = &mesh->point[ib].c[0];
+  c = &mesh->point[ic].c[0];
+
+  abx = b[0] - a[0];
+  aby = b[1] - a[1];
+  abz = b[2] - a[2];
+  acx = c[0] - a[0];
+  acy = c[1] - a[1];
+  acz = c[2] - a[2];
+
+  /* Compute the mean of the metrics over the triangle */
+  for (i=0; i<6; i++)
+    mm[i] = _MMG5_ATHIRD * (ma[i] + mb[i]+ mc[i]);
+
+  /* Compute sqrt(det(t^JmJ))  (= int_T sqrt(t^JmJ) for a non-curve element) */
+  dens[0] = (abx*abx*mm[0]+abx*aby*mm[1]+abx*abz*mm[2])
+    + (aby*abx*mm[1]+aby*aby*mm[3]+aby*abz*mm[4])
+    + (abz*abx*mm[2]+abz*aby*mm[4]+abz*abz*mm[5]);
+
+  dens[1] = (abx*acx*mm[0]+abx*acy*mm[1]+abx*acz*mm[2])
+    + (aby*acx*mm[1]+aby*acy*mm[3]+aby*acz*mm[4])
+    + (abz*acx*mm[2]+abz*acy*mm[4]+abz*acz*mm[5]);
+
+  dens[2] = (acx*acx*mm[0]+acx*acy*mm[1]+acx*acz*mm[2])
+    + (acy*acx*mm[1]+acy*acy*mm[3]+acy*acz*mm[4])
+    + (acz*acx*mm[2]+acz*acy*mm[4]+acz*acz*mm[5]);
+
+  surf = dens[0]*dens[2]-dens[1]*dens[1];
+
+  surf = sqrt(surf);
+
+  return(surf);
 }
 
 /**

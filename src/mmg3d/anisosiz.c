@@ -1412,7 +1412,7 @@ int _MMG3D_grad2metSurf(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int i){
     // thus vp[2][.] =( 0 0 1) and vp[.][2] = 0.
     c[0] = t1[0]*vp[0][0] + t1[1]*vp[0][1] ;//+ t1[2]*vp[0][2];
     c[1] = t1[0]*vp[1][0] + t1[1]*vp[1][1] ;//+ t1[2]*vp[1][2];
-    // c[2] = t1[2] and is neglectible comparing to c[0] and c[1]
+    //c[2] = t1[2] and is neglectible comparing to c[0] and c[1]
     //c[2] = t1[0]*vp[2][0] + t1[1]*vp[2][1] + t1[2]*vp[2][2];
 
     // Find index of the maximum value of c
@@ -1500,6 +1500,7 @@ int _MMG3D_grad2metSurf(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int i){
 
     }
     memcpy(mm1,m1,6*sizeof(double));
+
     return(i1);
   }
   /* Metric in p2 has to be changed */

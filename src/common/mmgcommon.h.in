@@ -415,7 +415,7 @@ int    _MMG5_solveDefmetrefSys( MMG5_pMesh,MMG5_pPoint,int*, double r[3][3],
                                 double *, double *, double *, double *,
                                 double, double, double);
 double _MMG5_surftri_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt);
-double _MMG5_surftri33_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt);
+double _MMG5_surftri33_ani(MMG5_pMesh,MMG5_pTria,double*,double*,double*);
 double _MMG5_surftri_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt);
 extern int    _MMG5_sys33sym(double a[6], double b[3], double r[3]);
 int    _MMG5_unscaleMesh(MMG5_pMesh mesh,MMG5_pSol met);

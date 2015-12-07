@@ -50,10 +50,6 @@ double _MMG5_caltri33_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt) {
   int      ia,ib,ic;
   char     i;
 
-  /* 2*area */
-  anisurf  = _MMG5_surftri33_ani(mesh,met,pt);
-  if ( anisurf <= _MMG5_EPSD ) return(0.0);
-
   ia = pt->v[0];
   ib = pt->v[1];
   ic = pt->v[2];
@@ -61,6 +57,10 @@ double _MMG5_caltri33_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt) {
   ma = &met->m[6*ia];
   mb = &met->m[6*ib];
   mc = &met->m[6*ic];
+
+  /* 2*area */
+  anisurf  = _MMG5_surftri33_ani(mesh,pt,ma,mb,mc);
+  if ( anisurf <= _MMG5_EPSD ) return(0.0);
 
   dd  = 1.0 / 3.0;
   for (i=0; i<6; i++)
@@ -100,6 +100,43 @@ double _MMG5_caltri33_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt) {
     return(0.0);
 }
 
+/* /\** */
+/*  * \param mesh pointer toward the mesh structure. */
+/*  * \param met pointer toward the meric structure. */
+/*  * \param ptt pointer toward the triangle structure. */
+/*  * \return The computed quality. */
+/*  * */
+/*  * Compute the quality of the surface triangle \a ptt with respect to */
+/*  * an anisotropic metric. */
+/*  * */
+/*  * \warning commentated because seems to be non consistant on curve element */
+/*  * (quality > 1) */
+/*  * */
+/*  *\/ */
+/* inline double _MMG5_caltri_aniOLD(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt) { */
+/*   double        rap,anisurf,l[3]; */
+/*   int           ia,ib,ic; */
+
+/*   ia = ptt->v[0]; */
+/*   ib = ptt->v[1]; */
+/*   ic = ptt->v[2]; */
+
+/*   anisurf = _MMG5_surftri_ani(mesh,met,ptt); */
+
+/*   l[0] = _MMG5_lenSurfEdg_ani(mesh,met,ib,ic,( ptt->tag[0] & MG_GEO )); */
+/*   l[1] = _MMG5_lenSurfEdg_ani(mesh,met,ia,ic,( ptt->tag[1] & MG_GEO )); */
+/*   l[2] = _MMG5_lenSurfEdg_ani(mesh,met,ia,ib,( ptt->tag[2] & MG_GEO )); */
+
+/*   rap = l[0]*l[0] + l[1]*l[1] + l[2]*l[2]; */
+
+/*   printf("anisurf -- l: %e -- %e %e %e \n" ,anisurf, l[0],l[1],l[2]); */
+
+/*   if ( rap < _MMG5_EPSD ) return(0.0); */
+
+/*   /\* quality = 2*area/length *\/ */
+/*   return (anisurf / rap); */
+/* } */
+
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the meric structure.
@@ -109,22 +146,72 @@ double _MMG5_caltri33_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt) {
  * Compute the quality of the surface triangle \a ptt with respect to
  * an anisotropic metric.
  *
+ * \warning The quality is computed as if the triangle is a "straight" triangle.
+ *
  */
 inline double _MMG5_caltri_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt) {
-  double        rap,anisurf,l[3];
-  int           ia,ib,ic;
+  MMG5_pPoint   p[3];
+  double        rap,anisurf,l0,l1,l2,m[6],mm[6];
+  double        abx,aby,abz,acx,acy,acz,bcy,bcx,bcz;
+  int           np[3],i,j;
+  char          i1,i2;
 
-  ia = ptt->v[0];
-  ib = ptt->v[1];
-  ic = ptt->v[2];
+  for (i=0; i<3; i++) {
+    np[i] = ptt->v[i];
+    p[i]  = &mesh->point[np[i]];
+  }
 
-  anisurf = _MMG5_surftri_ani(mesh,met,ptt);
+  /* Set metric tensors at vertices of tria iel */
+  for ( j=0; j<6; ++j) {
+    mm[j] = 0;
+  }
 
-  l[0] = _MMG5_lenSurfEdg_ani(mesh,met,ib,ic,( ptt->tag[0] & MG_GEO ));
-  l[1] = _MMG5_lenSurfEdg_ani(mesh,met,ia,ic,( ptt->tag[1] & MG_GEO ));
-  l[2] = _MMG5_lenSurfEdg_ani(mesh,met,ia,ib,( ptt->tag[2] & MG_GEO ));
+  for(i=0; i<3; i++) {
 
-  rap = l[0]*l[0] + l[1]*l[1] + l[2]*l[2];
+    if ( MG_SIN(p[i]->tag) || (MG_NOM & p[i]->tag) ) {
+      memcpy(&m[0],&met->m[6*np[i]],6*sizeof(double));
+    }
+    else if ( p[i]->tag & MG_GEO ) {
+      i1 = _MMG5_inxt2[i];
+      i2 = _MMG5_iprv2[i];
+      abx = 0.5*(p[i1]->c[0]+p[i2]->c[0]) - p[i]->c[0];
+      aby = 0.5*(p[i1]->c[1]+p[i2]->c[1]) - p[i]->c[1];
+      abz = 0.5*(p[i1]->c[2]+p[i2]->c[2]) - p[i]->c[2];
+      if ( !_MMG5_buildridmet(mesh,met,np[i],abx,aby,abz,&m[0]) )  return(0.0);
+    }
+    else {
+      memcpy(&m[0],&met->m[6*np[i]],6*sizeof(double));
+    }
+
+    for ( j=0; j<6; ++j) {
+      mm[j] += _MMG5_ATHIRD*m[j];
+    }
+  }
+
+  anisurf = _MMG5_surftri33_ani(mesh,ptt,mm,mm,mm);
+
+  /* length */
+  abx = p[1]->c[0] - p[0]->c[0];
+  aby = p[1]->c[1] - p[0]->c[1];
+  abz = p[1]->c[2] - p[0]->c[2];
+  acx = p[2]->c[0] - p[0]->c[0];
+  acy = p[2]->c[1] - p[0]->c[1];
+  acz = p[2]->c[2] - p[0]->c[2];
+  bcx = p[2]->c[0] - p[1]->c[0];
+  bcy = p[2]->c[1] - p[1]->c[1];
+  bcz = p[2]->c[2] - p[1]->c[2];
+
+
+  l0 = mm[0]*abx*abx + mm[3]*aby*aby + mm[5]*abz*abz
+    + 2.0*(mm[1]*abx*aby + mm[2]*abx*abz + mm[4]*aby*abz);
+
+  l1 = mm[0]*acx*acx + mm[3]*acy*acy + mm[5]*acz*acz
+      + 2.0*(mm[1]*acx*acy + mm[2]*acx*acz + mm[4]*acy*acz);
+
+  l2 = mm[0]*bcx*bcx + mm[3]*bcy*bcy + mm[5]*bcz*bcz
+      + 2.0*(mm[1]*bcx*bcy + mm[2]*bcx*bcz + mm[4]*bcy*bcz);
+
+  rap = l0 + l1 + l2;
 
   if ( rap < _MMG5_EPSD ) return(0.0);
 
