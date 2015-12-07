@@ -418,7 +418,7 @@ int movridpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
     ier = _MMG5_bezierCP(mesh,pt,&b,1);
     assert(ier);
 
-    /* fill table uv */
+    /* fill table uv with barycentric coor in the tria */
     if ( pt->v[0] == ip0 ) {
       if ( pt->v[1] == ip2 ) {
         uv[0] = step;
@@ -503,6 +503,7 @@ int movridpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
   if( fabs(ll2new -ll1new) >= fabs(ll2old -ll1old) )  return(0);
 
   /* normal and tangent updates */
+  // Bezier basis function of order 2
   lam0 = (1.0-step)*(1.0-step);
   lam1 = 2.0*step*(1.0-step);
   lam2 = step*step;
@@ -531,6 +532,7 @@ int movridpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
       nn2[1] = no2[1]+np2[1];
       nn2[2] = no2[2]+np2[2];
 
+      // p0p2 . nn1
       ps2 = (p2->c[0]-p0->c[0])*nn1[0]+(p2->c[1]-p0->c[1])*nn1[1]+(p2->c[2]-p0->c[2])*nn1[2];
       if ( ll2old < _MMG5_EPSD )  return(0);
       ps2 *= (2.0 / ll2old);

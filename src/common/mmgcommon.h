@@ -380,7 +380,6 @@ int    _MMG5_elementWeight(MMG5_pMesh,MMG5_pSol,MMG5_pTria,MMG5_pPoint,
                            _MMG5_Bezier*,double r[3][3],double gv[2]);
 void   _MMG5_fillDefmetregSys( int, MMG5_pPoint, int, _MMG5_Bezier,double r[3][3],
                                double *, double *, double *, double *);
-int    _MMG5_grad2metSurf(MMG5_pMesh, MMG5_pSol, MMG5_pTria, int);
 int    _MMG5_hashEdge(MMG5_pMesh mesh,_MMG5_Hash *hash,int a,int b,int k);
 int    _MMG5_hashGet(_MMG5_Hash *hash,int a,int b);
 int    _MMG5_hashNew(MMG5_pMesh mesh, _MMG5_Hash *hash,int hsiz,int hmax);
