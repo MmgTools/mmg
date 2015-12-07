@@ -3,14 +3,18 @@
 !> @brief
 !>  Example for using mmg3dlib (basic use)
 
+!> Include the mmg3d library hader file
+! if the header file is in the "include" directory
 #include "libmmg3df.h"
+! if the header file is in "include/mmg/mmg3d"
+! #include "mmg/mmg3d/libmmg3d.h"
 
 PROGRAM main
 
   IMPLICIT NONE
 
   MMG5_DATA_PTR_T    :: mmgMesh
-  MMG5_DATA_PTR_T    :: mmgSol
+  MMG5_DATA_PTR_T    :: mmgSol,mmgDisp
   INTEGER            :: ier
   CHARACTER(len=255) :: pwd
   CHARACTER(len=300) :: filename
@@ -27,7 +31,8 @@ PROGRAM main
   !! output mesh name
   mmgMesh = 0
   mmgSol  = 0
-  CALL MMG5_Init_mesh(mmgMesh,mmgSol)
+  mmgDisp = 0 !! Useless here: just needed forthe lagrangian motion option
+  CALL MMG5_Init_mesh(mmgMesh,mmgSol,mmgDisp)
 
   !> 2) Build mesh in MMG5 format
   !! Two solutions: just use the MMG5_loadMesh function that will read a .mesh(b)
@@ -71,7 +76,7 @@ PROGRAM main
 
   !> ------------------------------ STEP  II --------------------------
   !! library call
-  CALL MMG5_mmg3dlib(mmgMesh,mmgSol,ier)
+  CALL MMG5_mmg3dlib(mmgMesh,mmgSol,mmgDisp,ier)
   IF ( ier == MMG5_STRONGFAILURE ) THEN
      PRINT*,"BAD ENDING OF MMG3DLIB: UNABLE TO SAVE MESH"
      STOP 2
@@ -100,6 +105,6 @@ PROGRAM main
   CALL MMG5_saveMet(mmgMesh,mmgSol,ier)
 
   !> 3) Free the MMG3D5 structures
-  CALL MMG5_Free_all(mmgMesh,mmgSol)
+  CALL MMG5_Free_all(mmgMesh,mmgSol,mmgDisp)
 
 END PROGRAM main

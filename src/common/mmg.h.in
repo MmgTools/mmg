@@ -33,6 +33,7 @@
 #include <ctype.h>
 #include <float.h>
 #include <math.h>
+#include <complex.h>
 
 #if (defined(__APPLE__) && defined(__MACH__))
 #include <sys/sysctl.h>
@@ -216,7 +217,7 @@
                                                                         \
     if ( (mesh->memMax-mesh->memCur) <                                  \
          (long long) (wantedGap*initSize*sizeof(type)) ) {              \
-      gap = (int)(mesh->memMax-mesh->memCur)/sizeof(type);              \
+      gap = (int)((mesh->memMax-mesh->memCur)/sizeof(type));            \
       if(gap<1) {                                                       \
         fprintf(stdout,"  ## Error:");                                  \
         fprintf(stdout," unable to allocate %s.\n",message);            \
@@ -234,12 +235,12 @@
   }while(0);
 
 /** Free allocated pointers of mesh and sol structure and return value val */
-#define _MMG5_RETURN_AND_FREE(mesh,met,val)do   \
-  {                                             \
-    MMG5_Free_all(mesh,met);                    \
-    return(val);                                \
-  }while(0)
-
+//#define _MMG5_RETURN_AND_FREE(mesh,met,val)do   \
+//  {                                             \
+//    MMG5_Free_all(mesh,met);                    \
+//    return(val);                                \
+//  }while(0)
+//
 /** Error message when lack of memory */
 #define _MMG5_INCREASE_MEM_MESSAGE() do                     \
   {                                                         \
@@ -323,7 +324,7 @@ typedef _MMG5_Bezier * _MMG5_pBezier;
  */
 typedef struct {
   int   a,b,nxt;
-  int   s,k; /** k = point along edge a b */
+  int   s,k; /*!< k = point along edge a b or triangle index */
 } _MMG5_hedge;
 
 /**
@@ -340,6 +341,7 @@ typedef struct {
 /* Functions declarations */
 void   _MMG5_bezierEdge(MMG5_pMesh, int, int, double*, double*, char,double*);
 int    _MMG5_buildridmet(MMG5_pMesh,MMG5_pSol,int,double,double,double,double*);
+int    _MMG5_buildridmetfic(MMG5_pMesh,double*,double*,double,double,double,double*);
 int    _MMG5_buildridmetnor(MMG5_pMesh, MMG5_pSol, int,double*, double*);
 int    _MMG5_paratmet(double c0[3],double n0[3],double m[6],double c1[3],double n1[3],double mt[6]);
 int    _MMG5_rmtr(double r[3][3],double m[6], double mr[6]);
@@ -358,11 +360,12 @@ int    _MMG5_hashEdge(MMG5_pMesh mesh,_MMG5_Hash *hash,int a,int b,int k);
 int    _MMG5_hashGet(_MMG5_Hash *hash,int a,int b);
 int    _MMG5_hashNew(MMG5_pMesh mesh, _MMG5_Hash *hash,int hsiz,int hmax);
 int    _MMG5_intmetsavedir(MMG5_pMesh mesh, double *m,double *n,double *mr);
+int    _MMG5_intextmet(MMG5_pMesh,MMG5_pSol,int,double *);
 double _MMG5_lenedg_ani(MMG5_pMesh mesh,MMG5_pSol met,int ip1,int ip2,char);
 double _MMG5_lenedg_iso(MMG5_pMesh ,MMG5_pSol ,int ,int, char );
 long long _MMG5_memSize(void);
 void   _MMG5_mmgDefaultValues(MMG5_pMesh mesh);
-int    _MMG5_mmgHashTria(MMG5_pMesh mesh, int *adja, int chkISO);
+int    _MMG5_mmgHashTria(MMG5_pMesh mesh, int *adja, _MMG5_Hash*, int chkISO);
 void   _MMG5_mmgInit_parameters(MMG5_pMesh mesh);
 void   _MMG5_mmgUsage(char *prog);
 int    _MMG5_norpts(MMG5_pMesh,int,int,int,double *);
@@ -370,8 +373,10 @@ int    _MMG5_nortri(MMG5_pMesh mesh,MMG5_pTria pt,double *n);
 void   _MMG5_printTria(MMG5_pMesh mesh,char* fileName);
 int    _MMG5_rotmatrix(double n[3],double r[3][3]);
 int    _MMG5_invmat(double *m,double *mi);
+int    _MMG5_invmatg(double m[9],double mi[9]);
 double _MMG5_ridSizeInNormalDir(MMG5_pMesh,int,double*,_MMG5_pBezier,int,int);
 double _MMG5_ridSizeInTangentDir(MMG5_pMesh, MMG5_pPoint,int,int*,double,double);
+int    _MMG5_rootDeg3(double a[4],double complex r[3]);
 int    _MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met);
 int    _MMG5_scotchCall(MMG5_pMesh mesh, MMG5_pSol sol);
 int    _MMG5_solveDefmetregSys( MMG5_pMesh, double r[3][3], double *, double *,

@@ -39,15 +39,16 @@ mytime         MMG5_ctim[TIMEMAX];
 
 /**
  * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the sol structure.
+ * \param met pointer toward a sol structure (metric or solution).
+ * \param disp pointer toward a sol structure (displacement).
  *
  * Deallocations before return.
  *
  */
-void MMG5_Free_all(MMG5_pMesh mesh,MMG5_pSol met
+void MMG5_Free_all(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp
   ){
 
-  MMG5_Free_structures(mesh,met);
+  MMG5_Free_structures(mesh,met,disp);
 }
 
 /**
@@ -128,7 +129,8 @@ int main(int argc,char *argv[]) {
   chrono(ON,&MMG5_ctim[1]);
   _MMG5_warnOrientation(&mesh);
   /* read mesh file */
-  if ( MMG5_loadMesh(&mesh) < 1 )  _MMG5_RETURN_AND_FREE(&mesh,&met,MMG5_STRONGFAILURE);
+  if ( MMG5_loadMesh(&mesh) < 1 )
+    _MMG5_RETURN_AND_FREE(&mesh,&met,&disp,MMG5_STRONGFAILURE);
 
   /* read displacement if any */
   if ( mesh.info.lag > -1 ) {
@@ -137,11 +139,11 @@ int main(int argc,char *argv[]) {
     ier = MMG5_loadMet(&mesh,&disp);
     if ( ier == 0 ) {
       fprintf(stdout,"  ## ERROR: NO DISPLACEMENT FOUND.\n");
-      _MMG5_RETURN_AND_FREE(&mesh,&disp,MMG5_STRONGFAILURE);
+      _MMG5_RETURN_AND_FREE(&mesh,&met,&disp,MMG5_STRONGFAILURE);
     }
     else if ( ier == -1 ) {
       fprintf(stdout,"  ## ERROR: WRONG DATA TYPE OR WRONG SOLUTION NUMBER.\n");
-      _MMG5_RETURN_AND_FREE(&mesh,&disp,MMG5_STRONGFAILURE);
+      _MMG5_RETURN_AND_FREE(&mesh,&met,&disp,MMG5_STRONGFAILURE);
     }
   }
   /* read metric if any */
@@ -149,14 +151,14 @@ int main(int argc,char *argv[]) {
     ier = MMG5_loadMet(&mesh,&met);
     if ( ier == -1 ) {
       fprintf(stdout,"  ## ERROR: WRONG DATA TYPE OR WRONG SOLUTION NUMBER.\n");
-      _MMG5_RETURN_AND_FREE(&mesh,&met,MMG5_STRONGFAILURE);
+      _MMG5_RETURN_AND_FREE(&mesh,&met,&disp,MMG5_STRONGFAILURE);
     }
     if ( mesh.info.iso && !ier ) {
       fprintf(stdout,"  ## ERROR: NO ISOVALUE DATA.\n");
-      _MMG5_RETURN_AND_FREE(&mesh,&met,MMG5_STRONGFAILURE);
+      _MMG5_RETURN_AND_FREE(&mesh,&met,&disp,MMG5_STRONGFAILURE);
     }
     if ( !MMG5_parsop(&mesh,&met) )
-      _MMG5_RETURN_AND_FREE(&mesh,&met,MMG5_LOWFAILURE);
+      _MMG5_RETURN_AND_FREE(&mesh,&met,&disp,MMG5_LOWFAILURE);
   }
   chrono(OFF,&MMG5_ctim[1]);
   printim(MMG5_ctim[1].gdif,stim);
@@ -176,26 +178,26 @@ int main(int argc,char *argv[]) {
   /* scaling mesh */
   if ( mesh.info.lag == -1 ) {
     if ( !_MMG5_scaleMesh(&mesh,&met) )
-      _MMG5_RETURN_AND_FREE(&mesh,&met,MMG5_STRONGFAILURE);
+      _MMG5_RETURN_AND_FREE(&mesh,&met,&disp,MMG5_STRONGFAILURE);
   }
   else {
     if ( !_MMG5_scaleMesh(&mesh,&disp) )
-      _MMG5_RETURN_AND_FREE(&mesh,&disp,MMG5_STRONGFAILURE);
+      _MMG5_RETURN_AND_FREE(&mesh,&met,&disp,MMG5_STRONGFAILURE);
   }
 
   /* specific meshing */
   if ( mesh.info.iso ) {
     if ( !_MMG5_mmg3d2(&mesh,&met) )
-      _MMG5_RETURN_AND_FREE(&mesh,&met,MMG5_STRONGFAILURE);
+      _MMG5_RETURN_AND_FREE(&mesh,&met,&disp,MMG5_STRONGFAILURE);
   }
   else if ( mesh.info.lag < 0 ) {
     if ( mesh.info.optim && (!met.np && !_MMG5_DoSol(&mesh,&met)) )
-      _MMG5_RETURN_AND_FREE(&mesh,&met,MMG5_LOWFAILURE);
+      _MMG5_RETURN_AND_FREE(&mesh,&met,&disp,MMG5_LOWFAILURE);
   }
 
   /* mesh analysis */
   if ( !_MMG5_analys(&mesh) )
-    _MMG5_RETURN_AND_FREE(&mesh,&met,MMG5_LOWFAILURE);
+    _MMG5_RETURN_AND_FREE(&mesh,&met,&disp,MMG5_LOWFAILURE);
 
   if ( mesh.info.imprim > 1 && !mesh.info.iso && met.m ) _MMG5_prilen(&mesh,&met);
 
@@ -207,25 +209,27 @@ int main(int argc,char *argv[]) {
   /* mesh adaptation */
   chrono(ON,&MMG5_ctim[3]);
   
-  if ( mesh.info.imprim )
+  if ( mesh.info.imprim ) {
     if ( mesh.info.lag < 0 )
       fprintf(stdout,"\n  -- PHASE 2 : %s MESHING\n",met.size < 6 ? "ISOTROPIC" : "ANISOTROPIC");
     else
       fprintf(stdout,"\n  -- PHASE 2 : LAGRANGIAN MOTION\n");
+  }
 
   /* renumerotation if available */
   if ( !_MMG5_scotchCall(&mesh,&met) )
-    _MMG5_RETURN_AND_FREE(&mesh,&met,MMG5_STRONGFAILURE);
+    _MMG5_RETURN_AND_FREE(&mesh,&met,&disp,MMG5_STRONGFAILURE);
   
   /* Lagrangian mode */
+#ifdef USE_SUSCELAS
   if ( mesh.info.lag >= 0 ) {
     if ( !_MMG5_mmg3d3(&mesh,&disp,&met) ) {
-      _MMG5_RETURN_AND_FREE(&mesh,&disp,MMG5_STRONGFAILURE);
-      _MMG5_RETURN_AND_FREE(&mesh,&met,MMG5_STRONGFAILURE);
+      _MMG5_RETURN_AND_FREE(&mesh,&met,&disp,MMG5_STRONGFAILURE);
     }
     if ( !met.np && !_MMG5_DoSol(&mesh,&met) )
-      _MMG5_RETURN_AND_FREE(&mesh,&met,MMG5_LOWFAILURE);
+      _MMG5_RETURN_AND_FREE(&mesh,&met,&disp,MMG5_LOWFAILURE);
   }
+#endif
 
 /* *************************************** Part to skip in lag mode ? *************************** */
 if ( mesh.info.lag == -1 ) {
@@ -234,15 +238,15 @@ if ( mesh.info.lag == -1 ) {
   if ( !_MMG5_mmg3d1_pattern(&mesh,&met) ) {
     if ( !(mesh.adja) && !_MMG5_hashTetra(&mesh,1) ) {
       fprintf(stdout,"  ## Hashing problem. Unable to save mesh.\n");
-      _MMG5_RETURN_AND_FREE(&mesh,&met,MMG5_STRONGFAILURE);
+      _MMG5_RETURN_AND_FREE(&mesh,&met,&disp,MMG5_STRONGFAILURE);
     }
     if ( !_MMG5_unscaleMesh(&mesh,&met) )
-      _MMG5_RETURN_AND_FREE(&mesh,&met,MMG5_STRONGFAILURE);
+      _MMG5_RETURN_AND_FREE(&mesh,&met,&disp,MMG5_STRONGFAILURE);
     if ( !MMG5_saveMesh(&mesh) )
-      _MMG5_RETURN_AND_FREE(&mesh,&met,MMG5_STRONGFAILURE);
+      _MMG5_RETURN_AND_FREE(&mesh,&met,&disp,MMG5_STRONGFAILURE);
     if ( met.m && !MMG5_saveMet(&mesh,&met) )
-      _MMG5_RETURN_AND_FREE(&mesh,&met,MMG5_STRONGFAILURE);
-    _MMG5_RETURN_AND_FREE(&mesh,&met,MMG5_LOWFAILURE);
+      _MMG5_RETURN_AND_FREE(&mesh,&met,&disp,MMG5_STRONGFAILURE);
+    _MMG5_RETURN_AND_FREE(&mesh,&met,&disp,MMG5_LOWFAILURE);
   }
 #else
   /* Pattern in iso mode, delaunay otherwise */
@@ -250,30 +254,30 @@ if ( mesh.info.lag == -1 ) {
     if( !_MMG5_mmg3d1_delone(&mesh,&met) ) {
       if ( !(mesh.adja) && !_MMG5_hashTetra(&mesh,1) ) {
         fprintf(stdout,"  ## Hashing problem. Unable to save mesh.\n");
-        _MMG5_RETURN_AND_FREE(&mesh,&met,MMG5_STRONGFAILURE);
+        _MMG5_RETURN_AND_FREE(&mesh,&met,&disp,MMG5_STRONGFAILURE);
       }
       if ( !_MMG5_unscaleMesh(&mesh,&met) )
-        _MMG5_RETURN_AND_FREE(&mesh,&met,MMG5_STRONGFAILURE);
+        _MMG5_RETURN_AND_FREE(&mesh,&met,&disp,MMG5_STRONGFAILURE);
       if ( !MMG5_saveMesh(&mesh) )
-        _MMG5_RETURN_AND_FREE(&mesh,&met,MMG5_STRONGFAILURE);
+        _MMG5_RETURN_AND_FREE(&mesh,&met,&disp,MMG5_STRONGFAILURE);
       if ( met.m && !MMG5_saveMet(&mesh,&met) )
-        _MMG5_RETURN_AND_FREE(&mesh,&met,MMG5_STRONGFAILURE);
-      _MMG5_RETURN_AND_FREE(&mesh,&met,MMG5_LOWFAILURE);
+        _MMG5_RETURN_AND_FREE(&mesh,&met,&disp,MMG5_STRONGFAILURE);
+      _MMG5_RETURN_AND_FREE(&mesh,&met,&disp,MMG5_LOWFAILURE);
     }
   }
   else {
     if( !_MMG5_mmg3d1_pattern(&mesh,&met) ) {
       if ( !(mesh.adja) && !_MMG5_hashTetra(&mesh,1) ) {
         fprintf(stdout,"  ## Hashing problem. Unable to save mesh.\n");
-        _MMG5_RETURN_AND_FREE(&mesh,&met,MMG5_STRONGFAILURE);
+        _MMG5_RETURN_AND_FREE(&mesh,&met,&disp,MMG5_STRONGFAILURE);
       }
       if ( !_MMG5_unscaleMesh(&mesh,&met) )
-        _MMG5_RETURN_AND_FREE(&mesh,&met,MMG5_STRONGFAILURE);
+        _MMG5_RETURN_AND_FREE(&mesh,&met,&disp,MMG5_STRONGFAILURE);
       if ( !MMG5_saveMesh(&mesh) )
-        _MMG5_RETURN_AND_FREE(&mesh,&met,MMG5_STRONGFAILURE);
+        _MMG5_RETURN_AND_FREE(&mesh,&met,&disp,MMG5_STRONGFAILURE);
       if ( met.m && !MMG5_saveMet(&mesh,&met) )
-        _MMG5_RETURN_AND_FREE(&mesh,&met,MMG5_STRONGFAILURE);
-      _MMG5_RETURN_AND_FREE(&mesh,&met,MMG5_LOWFAILURE);
+        _MMG5_RETURN_AND_FREE(&mesh,&met,&disp,MMG5_STRONGFAILURE);
+      _MMG5_RETURN_AND_FREE(&mesh,&met,&disp,MMG5_LOWFAILURE);
     }
   }
 #endif
@@ -296,16 +300,16 @@ if ( mesh.info.lag == -1 ) {
   chrono(ON,&MMG5_ctim[1]);
   if ( mesh.info.imprim )  fprintf(stdout,"\n  -- WRITING DATA FILE %s\n",mesh.nameout);
   if ( !_MMG5_unscaleMesh(&mesh,&met) )
-    _MMG5_RETURN_AND_FREE(&mesh,&met,MMG5_STRONGFAILURE);
+    _MMG5_RETURN_AND_FREE(&mesh,&met,&disp,MMG5_STRONGFAILURE);
 
   if ( !MMG5_saveMesh(&mesh) )
-    _MMG5_RETURN_AND_FREE(&mesh,&met,MMG5_STRONGFAILURE);
+    _MMG5_RETURN_AND_FREE(&mesh,&met,&disp,MMG5_STRONGFAILURE);
 
   if ( !MMG5_saveMet(&mesh,&met) )
-    _MMG5_RETURN_AND_FREE(&mesh,&met,MMG5_STRONGFAILURE);
+    _MMG5_RETURN_AND_FREE(&mesh,&met,&disp,MMG5_STRONGFAILURE);
   chrono(OFF,&MMG5_ctim[1]);
   if ( mesh.info.imprim )  fprintf(stdout,"  -- WRITING COMPLETED\n");
 
   /* free mem */
-  _MMG5_RETURN_AND_FREE(&mesh,&met,MMG5_SUCCESS);
+  _MMG5_RETURN_AND_FREE(&mesh,&met,&disp,MMG5_SUCCESS);
 }

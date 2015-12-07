@@ -18,6 +18,7 @@ libexamples/mmg3d/example0/example0_a/mesh.*
 libexamples/mmg3d/example0/example0_b/mesh.*
 libexamples/mmg3d/example1/result0.*
 libexamples/mmg3d/example2/2spheres_*
+libexamples/mmg3d/example4/tinyBoxt.o*
 
 ci_tests
 

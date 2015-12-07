@@ -63,7 +63,6 @@ void _MMG5_mmgUsage(char *prog) {
   fprintf(stdout,"-hmax   val  maximal mesh size\n");
   fprintf(stdout,"-hausd  val  control Hausdorff distance\n");
   fprintf(stdout,"-hgrad  val  control gradation\n");
-  fprintf(stdout,"-A           enable anisotropy (without metric file).\n");
 }
 
 /**
@@ -74,12 +73,24 @@ void _MMG5_mmgUsage(char *prog) {
  *
  */
 void _MMG5_mmgDefaultValues(MMG5_pMesh mesh) {
+  long long memMax;
 
   fprintf(stdout,"\nDefault parameters values:\n");
 
   fprintf(stdout,"\n** Generic options :\n");
   fprintf(stdout,"verbosity                 (-v)      : %d\n",
           mesh->info.imprim);
+  memMax = _MMG5_memSize();
+  if ( memMax )
+    /* maximal memory = 50% of total physical memory */
+    memMax = memMax*50/104857600L;
+  else {
+    /* default value = 800 Mo */
+    memMax = _MMG5_MEMMAX;
+  }
+  fprintf(stdout,"maximal memory size       (-m)      : %lld MBytes\n",
+          memMax);
+
 
   fprintf(stdout,"\n**  Parameters\n");
   fprintf(stdout,"angle detection           (-ar)     : %lf\n",

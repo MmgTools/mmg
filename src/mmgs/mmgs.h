@@ -24,9 +24,6 @@
 #ifndef _MMGS_H
 #define _MMGS_H
 
-#include <complex.h>
-
-//#include "memory.h"
 #include "libmmgs.h"
 
 /* numerical accuracy */
@@ -53,6 +50,13 @@
 
 #define MS_Ver       1
 #define MS_Tri       2
+
+/** Free allocated pointers of mesh and sol structure and return value val */
+#define _MMG5_RETURN_AND_FREE(mesh,met,val)do       \
+  {                                                 \
+    MMG5_Free_all(mesh,met);                        \
+    return(val);                                    \
+  }while(0)
 
 /** Reallocation of tria table and creation
     of tria jel */
@@ -89,7 +93,7 @@ int  saveMet(MMG5_pMesh ,MMG5_pSol );
 int  zaldy(MMG5_pMesh mesh);
 int  assignEdge(MMG5_pMesh mesh);
 int  analys(MMG5_pMesh mesh);
-void _MMG5_outqua(MMG5_pMesh ,MMG5_pSol );
+void _MMG5_outqua(MMG5_pMesh ,MMG5_pSol);
 int  _MMG5_hashTria(MMG5_pMesh );
 int  curvpo(MMG5_pMesh ,MMG5_pSol );
 int  mmgs1(MMG5_pMesh ,MMG5_pSol );
@@ -122,17 +126,12 @@ int  swpedg(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,char typchk);
 char typelt(MMG5_pPoint p[3],char *ia);
 int  litswp(MMG5_pMesh mesh,int k,char i,double kal);
 int  litcol(MMG5_pMesh mesh,int k,char i,double kal);
-int  intmet33(MMG5_pMesh mesh,MMG5_pSol met,int np,int nq,int ip,double s);
-int  intextmet(MMG5_pMesh mesh,MMG5_pSol met,int np,double me[6]);
-int  invmatg(double m[9],double mi[9]);
 int  rootDeg2(double complex a[3], double complex r[2]);
-int  rootDeg3(double a[4],double complex r[3]);
 
-int  buildridmetfic(MMG5_pMesh mesh,double t[3],double n[3],double dtan,double dv,double m[6]);
 int  _MMG5_mmgsChkmsh(MMG5_pMesh,int,int);
 int  paratmet(double c0[3],double n0[3],double m[6],double c1[3],double n1[3],double mt[6]);
 int  intregmet(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,double s,double mr[6]);
-int  intridmet(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,double s,double v[3],double mr[6]);
+int  _MMG5_intridmet(MMG5_pMesh,MMG5_pSol,int,int,double,double*,double*);
 int  setref(MMG5_pMesh,int,int,int);
 int  delref(MMG5_pMesh);
 int  chkmet(MMG5_pMesh,MMG5_pSol);
@@ -143,6 +142,11 @@ void _MMG5_memOption(MMG5_pMesh mesh);
 #ifdef USE_SCOTCH
 int _MMG5_mmgsRenumbering(int vertBoxNbr, MMG5_pMesh mesh, MMG5_pSol sol);
 #endif
+
+/* useful functions to debug */
+int  _MMG5_indElt(MMG5_pMesh mesh,int kel);
+int  _MMG5_indPt(MMG5_pMesh mesh,int kp);
+
 /* function pointers */
 /* init structures */
 void  _MMG5_Init_parameters(MMG5_pMesh mesh);

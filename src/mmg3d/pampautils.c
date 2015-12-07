@@ -147,20 +147,27 @@ int MMG5_Get_adjaTet(MMG5_pMesh mesh, int kel, int *v0, int *v1, int *v2, int *v
 void _MMG5_usage(char *prog) {
 
   _MMG5_mmgUsage(prog);
-
-  fprintf(stdout,"-lag [0/1/2] Lagrangian mesh displacement according to mode 0/1/2\n");
+  fprintf(stdout,"-A           enable anisotropy (without metric file).\n");
   fprintf(stdout,"-ls     val  create mesh of isovalue val\n");
-  fprintf(stdout,"-optim       mesh optimization\n");
-  fprintf(stdout,"-noinsert    no point insertion/deletion \n");
-  fprintf(stdout,"-noswap      no edge or face flipping\n");
-  fprintf(stdout,"-nomove      no point relocation\n");
-  fprintf(stdout,"-nsurf       no surfacic modifications\n");
+
+#ifdef USE_SUSCELAS
+  fprintf(stdout,"-lag [0/1/2] Lagrangian mesh displacement according to mode 0/1/2\n");
+#endif
 #ifndef PATTERN
   fprintf(stdout,"-bucket val  Specify the size of bucket per dimension \n");
 #endif
 #ifdef USE_SCOTCH
   fprintf(stdout,"-rn [n]      Turn on or off the renumbering using SCOTCH [1/0] \n");
 #endif
+  fprintf(stdout,"\n");
+
+  fprintf(stdout,"-optim       mesh optimization\n");
+  fprintf(stdout,"-noinsert    no point insertion/deletion \n");
+  fprintf(stdout,"-noswap      no edge or face flipping\n");
+  fprintf(stdout,"-nomove      no point relocation\n");
+  fprintf(stdout,"-nosurf      no surface modifications\n");
+  fprintf(stdout,"\n\n");
+
   exit(EXIT_FAILURE);
 }
 
@@ -179,6 +186,12 @@ void _MMG5_defaultValues(MMG5_pMesh mesh) {
   fprintf(stdout,"Bucket size per dimension (-bucket) : %d\n",
           mesh->info.bucket);
 #endif
+#ifdef USE_SCOTCH
+  fprintf(stdout,"SCOTCH renumbering                  : enabled\n");
+#else
+  fprintf(stdout,"SCOTCH renumbering                  : disabled\n");
+#endif
+  fprintf(stdout,"\n\n");
 
   exit(EXIT_FAILURE);
 }

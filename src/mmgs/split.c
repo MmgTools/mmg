@@ -142,7 +142,8 @@ int _MMG5_simbulgept(MMG5_pMesh mesh,MMG5_pSol met, int k,int i,int ip) {
 
   pt0  = &mesh->tria[0];
   ppt0 = &mesh->point[0];
-  memcpy(ppt0->c,&mesh->point[ip].c, 3*sizeof(double));
+  memcpy(ppt0->c  ,&mesh->point[ip].c  , 3*sizeof(double));
+  ppt0->tag = mesh->point[ip].tag;
 
   memcpy(&met->m[0],&met->m[met->size*ip], met->size*sizeof(double));
 

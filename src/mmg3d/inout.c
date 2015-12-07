@@ -106,7 +106,7 @@ int MMG5_loadMesh(MMG5_pMesh mesh) {
   int         posnr;
   int         npreq,ntreq,nereq,nedreq,ncor,ned,bin,iswp;
   int         binch,bdim,bpos,i,k;
-  int         *ina,v[3],ref,nt,na,nr,ia,aux;
+  int         *ina,v[3],ref,nt,na,nr,ia,aux,nref;
   float            fc;
   char        *ptr,*name,data[128],chaine[128];
 
@@ -636,6 +636,7 @@ int MMG5_loadMesh(MMG5_pMesh mesh) {
   rewind(inm);
   fseek(inm,posne,SEEK_SET);
   mesh->xt = 0;
+  nref = 0;
   for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
     if (!bin)
@@ -648,7 +649,10 @@ int MMG5_loadMesh(MMG5_pMesh mesh) {
       fread(&ref,sw,1,inm);
       if(iswp) ref=_MMG5_swapbin(ref);
     }
-    pt->ref  = ref;//0;//ref ;
+    if(ref < 0) {
+      nref++;
+    }
+    pt->ref  = abs(ref);//0;//ref ;
     for (i=0; i<4; i++) {
       ppt = &mesh->point[pt->v[i]];
       ppt->tag &= ~MG_NUL;
@@ -664,6 +668,11 @@ int MMG5_loadMesh(MMG5_pMesh mesh) {
       pt->v[2] = pt->v[3];
       pt->v[3] = aux;
     }
+  }
+  if(nref) {
+    fprintf(stdout,"\n     $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ \n");
+    fprintf(stdout,"         WARNING : %d tet with ref < 0 \n",nref);
+    fprintf(stdout,"     $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ \n\n");
   }
   if(mesh->xt) {
     fprintf(stdout,"\n     $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ \n");
@@ -1763,6 +1772,7 @@ int MMG5_loadMet(MMG5_pMesh mesh,MMG5_pSol met) {
   if ( mesh->np != met->np ) {
     return(-1);
   }
+
   if ( mesh->info.lag == -1 ) {
     if(met->size!=1 && met->size!=3) {
       fprintf(stdout,"  ** DATA TYPE IGNORED %d \n",met->size);
@@ -1770,8 +1780,11 @@ int MMG5_loadMet(MMG5_pMesh mesh,MMG5_pSol met) {
     }
     if(met->size > 1) met->size = 6;
   }
-  else if ( met->size != 2 ) {
-    return(-1);
+  else {
+    if ( met->size != 2 ) {
+      return(-1);
+    }
+    met->size = 3;
   }
 
   met->npi = met->np;
@@ -1843,8 +1856,7 @@ int MMG5_loadMet(MMG5_pMesh mesh,MMG5_pSol met) {
     }
   }
   /* vector displacement only */
-  else if(met->size==2) {
-    met->size = 3;
+  else if(met->size==3) {
     if ( met->ver == 1 ) {
       for (k=1; k<=met->np; k++) {
         for (i=0; i<3; i++) {

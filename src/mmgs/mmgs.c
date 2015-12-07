@@ -63,11 +63,13 @@ static void excfun(int sigid) {
 static void usage(char *prog) {
 
   _MMG5_mmgUsage(prog);
+  fprintf(stdout,"-A           enable anisotropy (without metric file).\n");
 
   fprintf(stdout,"-nreg        normal regul.\n");
 #ifdef USE_SCOTCH
   fprintf(stdout,"-rn [n]      Turn on or off the renumbering using SCOTCH [0/1] \n");
 #endif
+  fprintf(stdout,"\n\n");
 
   exit(EXIT_FAILURE);
 }
@@ -75,6 +77,12 @@ static void usage(char *prog) {
 static void _MMG5_defaultValues(MMG5_pMesh mesh) {
 
   _MMG5_mmgDefaultValues(mesh);
+#ifdef USE_SCOTCH
+  fprintf(stdout,"SCOTCH renumbering                  : enabled\n");
+#else
+  fprintf(stdout,"SCOTCH renumbering                  : disabled\n");
+#endif
+  fprintf(stdout,"\n\n");
 
   exit(EXIT_FAILURE);
 }
@@ -156,6 +164,15 @@ static int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
           mesh->info.dhd = -1.0;
         else if ( !strcmp(argv[i],"-nreg") )
           mesh->info.nreg = 1;
+        else if( !strcmp(argv[i],"-noinsert") ) {
+          mesh->info.noinsert = 1;
+        }
+        else if ( !strcmp(argv[i],"-noswap") ) {
+          mesh->info.noswap = 1;
+        }
+        else if( !strcmp(argv[i],"-nomove") ) {
+          mesh->info.nomove = 1;
+        }
         break;
       case 'o':
         if ( !strcmp(argv[i],"-out") ) {
@@ -441,6 +458,11 @@ int main(int argc,char *argv[]) {
   fprintf(stdout,"\n  %s\n   MODULE MMGS-LJLL : %s (%s)\n  %s\n",MG_STR,MG_VER,MG_REL,MG_STR);
   if ( mesh.info.imprim )   fprintf(stdout,"\n  -- PHASE 1 : ANALYSIS\n");
   if ( !analys(&mesh) )  return(1);
+
+  if ( !_MMG5_defsiz(&mesh,&met) ) {
+    fprintf(stdout,"  ## Metric undefined. Exit program.\n");
+    return(1);
+  }
 
   _MMG5_outqua(&mesh,&met);
 

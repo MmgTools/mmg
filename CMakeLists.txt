@@ -32,7 +32,7 @@ PROJECT (mmg)
 SET (CMAKE_RELEASE_VERSION_MAJOR "5")
 SET (CMAKE_RELEASE_VERSION_MINOR "0")
 SET (CMAKE_RELEASE_VERSION_PATCH "0")
-SET (CMAKE_RELEASE_DATE "Jul. 6, 2012")
+SET (CMAKE_RELEASE_DATE "May 4, 2015")
 
 SET (CMAKE_RELEASE_VERSION
   "${CMAKE_RELEASE_VERSION_MAJOR}.${CMAKE_RELEASE_VERSION_MINOR}.${CMAKE_RELEASE_VERSION_PATCH}")
@@ -54,6 +54,7 @@ CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/src/common/mmg.h.in
 SET(EXECUTABLE_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/bin)
 SET(MMG3D_SOURCE_DIR ${CMAKE_SOURCE_DIR}/src/mmg3d)
 SET(MMGS_SOURCE_DIR ${CMAKE_SOURCE_DIR}/src/mmgs)
+SET(MMG2D_SOURCE_DIR ${CMAKE_SOURCE_DIR}/src/mmg2d)
 SET(COMMON_SOURCE_DIR ${CMAKE_SOURCE_DIR}/src/common)
 
 # Find "exotic" compilers
@@ -116,20 +117,28 @@ IF(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
 ENDIF()
 
 SET ( BUILD "MMG" CACHE STRING
-  "\"MMG3D\", \"MMGS\" or \"MMG\" to compile both MMGS and MMG3D" )
+  "\"MMG3D\", \"MMGS\",\"MMG2D\", or \"MMG\" to compile both MMGS, MMG3D and MMG2D" )
 
 IF ( BUILD MATCHES "MMGS" )
   SET(BUILD_MMG        OFF )
   SET(BUILD_MMG3D      OFF )
   SET(BUILD_MMGS       ON  )
+  SET(BUILD_MMG2D      OFF  )
 ELSEIF ( BUILD MATCHES "MMG3D" )
   SET(BUILD_MMG3D      ON  )
   SET(BUILD_MMGS       OFF )
   SET(BUILD_MMG        OFF )
+  SET(BUILD_MMG2D      OFF  )
+ELSEIF ( BUILD MATCHES "MMG2D" )
+  SET(BUILD_MMG        OFF )
+  SET(BUILD_MMG3D      OFF )
+  SET(BUILD_MMGS       OFF  )
+  SET(BUILD_MMG2D      ON  )
 ELSEIF ( BUILD MATCHES "MMG" )
   SET(BUILD_MMG        ON  )
   SET(BUILD_MMGS       OFF )
   SET(BUILD_MMG3D      OFF )
+  SET(BUILD_MMG2D      OFF  )
 ELSE ( )
   MESSAGE (WARNING "Nothing to build")
 ENDIF()
@@ -138,10 +147,19 @@ IF ( BUILD_MMG3D OR BUILD_MMG )
 
   ############################################################################
   #####
-  #####         Fortran header: libmmg3df.h
+  #####         Fortran header: libmmg3df.h libmmg2df.h
   #####
   ############################################################################
   IF (NOT WIN32)
+    ADD_EXECUTABLE(genheader2d ${CMAKE_SOURCE_DIR}/scripts/genheader.c)
+    ADD_CUSTOM_COMMAND(OUTPUT ${MMG2D_SOURCE_DIR}/libmmg2df.h
+      COMMAND genheader2d ${MMG2D_SOURCE_DIR}/libmmg2df.h
+      ${MMG2D_SOURCE_DIR}/libmmg2d.h ${CMAKE_SOURCE_DIR}/scripts/genfort.pl
+      WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+      DEPENDS genheader2d ${MMG2D_SOURCE_DIR}/libmmg2d.h
+      ${CMAKE_SOURCE_DIR}/scripts/genfort.pl
+      COMMENT "Generating Fortran header"
+      )
     ADD_EXECUTABLE(genheader ${CMAKE_SOURCE_DIR}/scripts/genheader.c)
 
     ADD_CUSTOM_COMMAND(OUTPUT ${MMG3D_SOURCE_DIR}/libmmg3df.h
@@ -182,8 +200,10 @@ ENDIF()
 # Header files
 INCLUDE_DIRECTORIES(${MMG3D_SOURCE_DIR})
 INCLUDE_DIRECTORIES(${MMGS_SOURCE_DIR})
+INCLUDE_DIRECTORIES(${MMG2D_SOURCE_DIR})
 
 # Source files
+## mmg3d
 FILE(
   GLOB
   source_files
@@ -206,11 +226,37 @@ FILE(
   ${MMG3D_SOURCE_DIR}/lib${PROJECT_NAME}3d.c
   ${MMG3D_SOURCE_DIR}/lib${PROJECT_NAME}3df.c
   )
+
+## mmgs
 FILE(
   GLOB
   sourcemmgs_files
   ${MMGS_SOURCE_DIR}/*.c   ${MMGS_SOURCE_DIR}/*.h
   ${COMMON_SOURCE_DIR}/*.c ${COMMON_SOURCE_DIR}/*.h
+  )
+
+## mmg2d
+FILE(
+  GLOB
+  sourcemmg2d_files
+  ${MMG2D_SOURCE_DIR}/*.c   ${MMG2D_SOURCE_DIR}/*.h
+  ${COMMON_SOURCE_DIR}/*.c ${COMMON_SOURCE_DIR}/*.h
+  )
+LIST(REMOVE_ITEM sourcemmg2d_files
+  ${MMG2D_SOURCE_DIR}/mmg2d.c
+  ${MMG2D_SOURCE_DIR}/lib${PROJECT_NAME}2df.c
+  ${REMOVE_FILE})
+FILE(
+  GLOB
+  mainmmg2d_file
+  ${MMG2D_SOURCE_DIR}/mmg2d.c
+  )
+FILE(
+  GLOB
+  libmmg2d_file
+  ${MMG2D_SOURCE_DIR}/lib${PROJECT_NAME}2d.c
+  ${MMG2D_SOURCE_DIR}/lib${PROJECT_NAME}2df.c
+
   )
 
 INCLUDE_DIRECTORIES(${COMMON_SOURCE_DIR})
@@ -243,7 +289,7 @@ IF ( BUILD_MMG3D OR BUILD_MMG )
       SET(CMAKE_C_FLAGS "-DUSE_SCOTCH ${CMAKE_C_FLAGS}")
       SET(SCOTCH_LINK_FLAGS "-lpthread")
       MESSAGE(STATUS
-        "Compilation with scotch: ${SCOTCH_DIR}$ENV{SCOTCH_DIR}")
+        "Compilation with scotch: ${SCOTCH_LIBRARY}")
       SET( LIBRARIES ${SCOTCH_LINK_FLAGS} ${LIBRARIES})
       SET( LIBRARIES ${SCOTCHERR_LIBRARY} ${LIBRARIES})
       SET( LIBRARIES ${SCOTCH_LIBRARY} ${LIBRARIES})
@@ -256,6 +302,40 @@ IF ( BUILD_MMG3D OR BUILD_MMG )
       "please set the CMake variable or environment variable SCOTCH_DIR "
       "to your scotch directory.")
     OPTION ( USE_SCOTCH "Use SCOTCH TOOL for renumbering" OFF)
+  ENDIF ( )
+
+  ############################################################################
+  #####
+  #####         Elastic
+  #####
+  ############################################################################
+  # add SUscElas library?
+  SET(SUSCELAS_DIR "" CACHE PATH "Installation directory for SUscElas")
+  INCLUDE(cmake/modules/FindSUscElas.cmake)
+
+  IF(SUSCELAS_FOUND)
+    OPTION ( USE_SUSCELAS "Use the Elas library for lagrangian motion option" ON)
+    IF( USE_SUSCELAS )
+      # Set flags for building test program
+      INCLUDE_DIRECTORIES(${SUSCELAS_INCLUDE_DIR})
+
+      SET(CMAKE_REQUIRED_INCLUDES ${SUSCELAS_INCLUDE_DIR})
+      SET(CMAKE_REQUIRED_LIBRARIES ${SUSCELAS_LIBRARY})
+
+      SET(CMAKE_C_FLAGS "-DUSE_SUSCELAS ${CMAKE_C_FLAGS}")
+      MESSAGE(STATUS
+        "Compilation with the Elas library: ${SUSCELAS_LIBRARY} ")
+      SET( LIBRARIES ${SUSCELAS_LINK_FLAGS} ${LIBRARIES})
+      SET( LIBRARIES ${SUSCELAS_LIBRARY} ${LIBRARIES})
+    ENDIF()
+  ELSE ( )
+    MESSAGE ( WARNING "SUscElas is a library to solve the linear elasticity "
+      "problem (see https://github.com/SUscTools/SUscElas to download it). "
+      "This library is needed to use the lagrangian motion option. "
+      "If you have already installed SUscElas and want to use it, "
+      "please set the CMake variable or environment variable SUSCELAS_DIR "
+      "to your SUscElas directory.")
+    OPTION ( USE_SUSCELAS "Use SUscElas library for lagrangian motion option" OFF)
   ENDIF ( )
 
   ############################################################################
@@ -288,6 +368,58 @@ IF ( BUILD_MMG3D OR BUILD_MMG )
 
   ############################################################################
   #####
+  #####         Compile mmg2d libraries
+  #####
+  ############################################################################
+  SET(LIBRARY_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/lib)
+
+  OPTION ( LIBMMG2D_STATIC "Compile static library" ON)
+  IF ( LIBMMG2D_STATIC )
+    ADD_LIBRARY(${PROJECT_NAME}2d_a  STATIC
+      ${MMG2D_SOURCE_DIR}/lib${PROJECT_NAME}2df.h
+      ${sourcemmg2d_files} ${libmmg2d_file} )
+    SET_TARGET_PROPERTIES(${PROJECT_NAME}2d_a PROPERTIES OUTPUT_NAME
+      ${PROJECT_NAME}2d)
+    TARGET_LINK_LIBRARIES(${PROJECT_NAME}2d_a ${LIBRARIES})
+  ENDIF()
+
+  # Compile shared library
+  OPTION ( LIBMMG2D_SHARED "Compile dynamic library" OFF)
+  IF ( LIBMMG2D_SHARED )
+    ADD_LIBRARY(${PROJECT_NAME}2d_so SHARED
+      ${MMG2D_SOURCE_DIR}/lib${PROJECT_NAME}2df.h
+      ${sourcemmg2d_files} ${libmmg2d_file})
+    SET_TARGET_PROPERTIES(${PROJECT_NAME}2d_so PROPERTIES
+      OUTPUT_NAME ${PROJECT_NAME}2d)
+    SET_TARGET_PROPERTIES(${PROJECT_NAME}2d_so PROPERTIES
+      VERSION 5.0.0 SOVERSION 5)
+    TARGET_LINK_LIBRARIES(${PROJECT_NAME}2d_so ${LIBRARIES})
+      INSTALL(FILES ${MMG2D_SOURCE_DIR}/lib${PROJECT_NAME}2df.h
+      DESTINATION include)
+    INSTALL(TARGETS ${PROJECT_NAME}2d_so
+      ARCHIVE DESTINATION
+      LIBRARY DESTINATION lib)
+  ENDIF()
+
+  IF ( LIBMMG2D_STATIC OR LIBMMG2D_SHARED )
+    # mmg2d header files needed for library
+    SET( mmg2d_headers
+      ${MMG2D_SOURCE_DIR}/libmmg2d.h
+      ${MMG2D_SOURCE_DIR}/libmmg2df.h
+      ${COMMON_SOURCE_DIR}/mmg.h
+      ${COMMON_SOURCE_DIR}/eigenv.h
+      ${COMMON_SOURCE_DIR}/libmmg.h
+      ${COMMON_SOURCE_DIR}/chrono.h
+      )
+    # Install header files in /usr/local or equivalent
+    INSTALL(FILES ${mmg2d_headers} DESTINATION include/mmg/mmg2d)
+    # Install header files in project directory
+    INSTALL(FILES ${mmg2d_headers} DESTINATION ${CMAKE_SOURCE_DIR}/include/mmg/mmg2d)
+  ENDIF()
+
+
+  ############################################################################
+  #####
   #####         Compile mmg3d libraries
   #####
   ############################################################################
@@ -301,17 +433,6 @@ IF ( BUILD_MMG3D OR BUILD_MMG )
     SET_TARGET_PROPERTIES(${PROJECT_NAME}3d_a PROPERTIES OUTPUT_NAME
       ${PROJECT_NAME}3d)
     TARGET_LINK_LIBRARIES(${PROJECT_NAME}3d_a ${LIBRARIES})
-    INSTALL(FILES ${MMG3D_SOURCE_DIR}/lib${PROJECT_NAME}3df.h DESTINATION
-      include)
-    INSTALL(FILES ${MMG3D_SOURCE_DIR}/lib${PROJECT_NAME}3d.h DESTINATION
-      include)
-    INSTALL(FILES ${COMMON_SOURCE_DIR}/libmmg.h DESTINATION
-      include)
-    INSTALL(FILES ${COMMON_SOURCE_DIR}/mmg.h DESTINATION
-      include)
-    INSTALL(FILES ${COMMON_SOURCE_DIR}/eigenv.h DESTINATION
-      include)
-    INSTALL(FILES ${COMMON_SOURCE_DIR}/chrono.h DESTINATION include)
     INSTALL(TARGETS ${PROJECT_NAME}3d_a
       ARCHIVE DESTINATION lib
       LIBRARY DESTINATION lib)
@@ -324,22 +445,29 @@ IF ( BUILD_MMG3D OR BUILD_MMG )
       ${MMG3D_SOURCE_DIR}/lib${PROJECT_NAME}3df.h
       ${source_files} ${lib_file})
     SET_TARGET_PROPERTIES(${PROJECT_NAME}3d_so PROPERTIES
+      VERSION 5.0.0 SOVERSION 5)
+    SET_TARGET_PROPERTIES(${PROJECT_NAME}3d_so PROPERTIES
       OUTPUT_NAME ${PROJECT_NAME}3d)
     TARGET_LINK_LIBRARIES(${PROJECT_NAME}3d_so ${LIBRARIES})
-    INSTALL(FILES ${MMG3D_SOURCE_DIR}/lib${PROJECT_NAME}3df.h
-      DESTINATION include)
-    INSTALL(FILES ${MMG3D_SOURCE_DIR}/lib${PROJECT_NAME}3d.h
-      DESTINATION include)
-    INSTALL(FILES ${COMMON_SOURCE_DIR}/libmmg.h DESTINATION
-      include)
-    INSTALL(FILES ${COMMON_SOURCE_DIR}/mmg.h DESTINATION
-      include)
-    INSTALL(FILES ${COMMON_SOURCE_DIR}/eigenv.h DESTINATION
-      include)
-    INSTALL(FILES ${COMMON_SOURCE_DIR}/chrono.h DESTINATION include)
     INSTALL(TARGETS ${PROJECT_NAME}3d_so
       ARCHIVE DESTINATION
       LIBRARY DESTINATION lib)
+  ENDIF()
+
+  IF ( LIBMMG3D_STATIC OR LIBMMG3D_SHARED )
+    # mmg3d header files needed for library
+    SET( mmg3d_headers
+      ${MMG3D_SOURCE_DIR}/libmmg3d.h
+      ${MMG3D_SOURCE_DIR}/libmmg3df.h
+      ${COMMON_SOURCE_DIR}/mmg.h
+      ${COMMON_SOURCE_DIR}/eigenv.h
+      ${COMMON_SOURCE_DIR}/libmmg.h
+      ${COMMON_SOURCE_DIR}/chrono.h
+      )
+    # Install header files in /usr/local or equivalent
+    INSTALL(FILES ${mmg3d_headers} DESTINATION include/mmg/mmg3d)
+    # Install header files in project directory
+    INSTALL(FILES ${mmg3d_headers} DESTINATION ${CMAKE_SOURCE_DIR}/include/mmg/mmg3d)
   ENDIF()
 
   ############################################################################
@@ -347,70 +475,14 @@ IF ( BUILD_MMG3D OR BUILD_MMG )
   #####         Compile program to test library
   #####
   ############################################################################
-  OPTION ( TEST_LIBMMG3D "Compile tests of library" OFF)
+  OPTION ( TEST_LIBMMG3D "Compile tests for the mmg3d library" OFF)
   IF ( TEST_LIBMMG3D )
-    IF ( LIBMMG3D_STATIC )
-      ADD_EXECUTABLE(libmmg3d_example0_a
-        ${CMAKE_SOURCE_DIR}/libexamples/mmg3d/example0/example0_a/main.c)
-      TARGET_LINK_LIBRARIES(libmmg3d_example0_a ${PROJECT_NAME}3d_a)
-      INSTALL(TARGETS libmmg3d_example0_a RUNTIME DESTINATION bin )
+    INCLUDE(cmake/testing/libmmg3d_tests.cmake)
+  ENDIF()
 
-      ADD_EXECUTABLE(libmmg3d_example0_b
-        ${CMAKE_SOURCE_DIR}/libexamples/mmg3d/example0/example0_b/main.c)
-      TARGET_LINK_LIBRARIES(libmmg3d_example0_b ${PROJECT_NAME}3d_a)
-      INSTALL(TARGETS libmmg3d_example0_b RUNTIME DESTINATION bin )
-
-      ADD_EXECUTABLE(libmmg3d_example1
-        ${CMAKE_SOURCE_DIR}/libexamples/mmg3d/example1/main.c)
-      TARGET_LINK_LIBRARIES(libmmg3d_example1 ${PROJECT_NAME}3d_a)
-      INSTALL(TARGETS libmmg3d_example1 RUNTIME DESTINATION bin )
-      ADD_EXECUTABLE(libmmg3d_example2
-        ${CMAKE_SOURCE_DIR}/libexamples/mmg3d/example2/main.c)
-      TARGET_LINK_LIBRARIES(libmmg3d_example2 ${PROJECT_NAME}3d_a)
-      INSTALL(TARGETS libmmg3d_example2 RUNTIME DESTINATION bin )
-
-      ENABLE_LANGUAGE (Fortran)
-      ADD_EXECUTABLE(libmmg3d_fortran_a
-        ${CMAKE_SOURCE_DIR}/libexamples/mmg3d/example0_fortran/example0_a/main.F90)
-      TARGET_LINK_LIBRARIES(libmmg3d_fortran_a ${PROJECT_NAME}3d_a)
-      INSTALL(TARGETS libmmg3d_fortran_a RUNTIME DESTINATION bin )
-      ADD_EXECUTABLE(libmmg3d_fortran_b
-        ${CMAKE_SOURCE_DIR}/libexamples/mmg3d/example0_fortran/example0_b/main.F90)
-      TARGET_LINK_LIBRARIES(libmmg3d_fortran_b ${PROJECT_NAME}3d_a)
-      INSTALL(TARGETS libmmg3d_fortran_b RUNTIME DESTINATION bin )
-
-      ADD_EXECUTABLE(libmmg3d_example3
-        ${CMAKE_SOURCE_DIR}/libexamples/mmg3d/example3/mmg3d.c)
-      TARGET_LINK_LIBRARIES(libmmg3d_example3 ${PROJECT_NAME}3d_a)
-      INSTALL(TARGETS libmmg3d_example3 RUNTIME DESTINATION bin )
-    ELSEIF ( LIBMMG3D_SHARED )
-      ADD_EXECUTABLE(libmmg3d_example0_a
-        ${CMAKE_SOURCE_DIR}/libexamples/mmg3d/example0/example0_a/main.c)
-      TARGET_LINK_LIBRARIES(libmmg3d_example0_a ${PROJECT_NAME}3d_so)
-      INSTALL(TARGETS libmmg3d_example0_a RUNTIME DESTINATION bin )
-
-      ADD_EXECUTABLE(libmmg3d_example0_b
-        ${CMAKE_SOURCE_DIR}/libexamples/mmg3d/example0/example0_b/main.c)
-      TARGET_LINK_LIBRARIES(libmmg3d_example0_b ${PROJECT_NAME}3d_so)
-      INSTALL(TARGETS libmmg3d_example0_b RUNTIME DESTINATION bin )
-
-      ADD_EXECUTABLE(libmmg3d_example1
-        ${CMAKE_SOURCE_DIR}/libexamples/mmg3d/example1/main.c)
-      TARGET_LINK_LIBRARIES(libmmg3d_example1 ${PROJECT_NAME}3d_so)
-      INSTALL(TARGETS libmmg3d_example1 RUNTIME DESTINATION bin )
-      ADD_EXECUTABLE(libmmg3d_example2
-        ${CMAKE_SOURCE_DIR}/libexamples/mmg3d/example2/main.c)
-      TARGET_LINK_LIBRARIES(libmmg3d_example2 ${PROJECT_NAME}3d_so)
-      INSTALL(TARGETS libmmg3d_example2 RUNTIME DESTINATION bin )
-
-      ADD_EXECUTABLE(libmmg3d_example3
-        ${CMAKE_SOURCE_DIR}/libexamples/mmg3d/example3/mmg3d.c)
-      TARGET_LINK_LIBRARIES(libmmg3d_example3 ${PROJECT_NAME}3d_so)
-      INSTALL(TARGETS libmmg3d_example3 RUNTIME DESTINATION bin )
-    ELSE ()
-      MESSAGE(WARNING "You must activate the compilation of the static or"
-        " shared ${PROJECT_NAME} library to compile this tests." )
-    ENDIF ()
+  OPTION ( TEST_LIBMMG2D "Compile tests for the mmg2d library" OFF)
+  IF ( TEST_LIBMMG2D )
+    INCLUDE(cmake/testing/libmmg2d_tests.cmake)
   ENDIF()
 
   ###############################################################################
@@ -457,14 +529,36 @@ ENDIF()
 
 ###############################################################################
 #####
+#####         Compile MMG2D executable
+#####
+###############################################################################
+IF ( BUILD_MMG2D OR BUILD_MMG )
+  ADD_EXECUTABLE(${PROJECT_NAME}2d    
+ ${MMG2D_SOURCE_DIR}/lib${PROJECT_NAME}2df.h ${sourcemmg2d_files} ${mainmmg2d_file} )
+  TARGET_LINK_LIBRARIES(${PROJECT_NAME}2d ${LIBRARIES})
+  INSTALL(TARGETS ${PROJECT_NAME}2d RUNTIME DESTINATION bin)
+
+  # in debug mode we name the executable mmg2d_debug
+  SET_TARGET_PROPERTIES(${PROJECT_NAME}2d PROPERTIES DEBUG_POSTFIX _debug)
+  # in Release mode we name the executable mmg2d_O3
+  SET_TARGET_PROPERTIES(${PROJECT_NAME}2d PROPERTIES RELEASE_POSTFIX _O3)
+  # in RelWithDebInfo mode we name the executable mmg2d_O3d
+  SET_TARGET_PROPERTIES(${PROJECT_NAME}2d PROPERTIES RELWITHDEBINFO_POSTFIX _O3d)
+  # in MinSizeRel mode we name the executable mmg2d_O3
+  SET_TARGET_PROPERTIES(${PROJECT_NAME}2d PROPERTIES MINSIZEREL_POSTFIX _Os)
+ENDIF()
+
+###############################################################################
+#####
 #####         Continuous integration
 #####
 ###############################################################################
-IF ( BUILD_MMG3D OR BUILD_MMGS OR BUILD_MMG )
+IF ( BUILD_MMG3D OR BUILD_MMGS OR BUILD_MMG2D OR BUILD_MMG )
 
   OPTION ( BUILD_TESTING "Enable/Disable continuous integration" OFF )
 
   IF( BUILD_TESTING )
+    OPTION(MMG2D_CI "Enable/Disable continuous integration for mmg2d" ON )
     OPTION(MMGS_CI "Enable/Disable continuous integration for mmgs" ON )
     OPTION(MMG3D_CI "Enable/Disable continuous integration for mmg3d" ON )
     OPTION(LONG_TESTS "Enable/Disable time consuming tests for the project" OFF )
@@ -481,6 +575,7 @@ IF ( BUILD_MMG3D OR BUILD_MMGS OR BUILD_MMG )
     SET(MMG_CI_TESTS ${CMAKE_SOURCE_DIR}/ci_tests/mmg )
     SET(MMGS_CI_TESTS ${CMAKE_SOURCE_DIR}/ci_tests/mmgs )
     SET(MMG3D_CI_TESTS ${CMAKE_SOURCE_DIR}/ci_tests/mmg3d )
+    SET(MMG2D_CI_TESTS ${CMAKE_SOURCE_DIR}/ci_tests/mmg2d )
 
     # Remove the --show-reachable=yes option from the default valgrind command
     SET(VALGRIND_COMMAND_OPTIONS "-q --tool=memcheck ")
@@ -506,7 +601,8 @@ IF ( BUILD_MMG3D OR BUILD_MMGS OR BUILD_MMG )
     ENABLE_TESTING()
     INCLUDE(CTest)
 
-    IF ( NOT APPLE)
+    OPTION ( COVERAGE "Watch code coverage (Linux only)" OFF)
+    IF ( NOT APPLE AND COVERAGE)
       # Add coverage flags
       SET(CMAKE_C_FLAGS_DEBUG " -fprofile-arcs ${CMAKE_C_FLAGS_DEBUG}")
       SET(CMAKE_C_FLAGS_DEBUG " -ftest-coverage ${CMAKE_C_FLAGS_DEBUG}")
@@ -529,6 +625,43 @@ IF ( BUILD_MMG3D OR BUILD_MMGS OR BUILD_MMG )
     ##-------------------------------------------------------------------##
     ##--------------------------- Add tests and configure it ------------##
     ##-------------------------------------------------------------------##
+    # Add runtime that we want to test for mmg2d
+    IF( MMG2D_CI )
+      IF(${CMAKE_BUILD_TYPE} MATCHES "Debug")
+        SET(EXECUT_MMG2D ${EXECUTABLE_OUTPUT_PATH}/${PROJECT_NAME}2d_debug)
+        SET(BUILDNAME ${BUILDNAME}_debug CACHE STRING "build name variable")
+      ELSEIF(${CMAKE_BUILD_TYPE} MATCHES "Release")
+        SET(EXECUT_MMG2D ${EXECUTABLE_OUTPUT_PATH}/${PROJECT_NAME}2d_O3)
+        SET(BUILDNAME ${BUILDNAME}_O3 CACHE STRING "build name variable")
+      ELSEIF(${CMAKE_BUILD_TYPE} MATCHES "RelWithDebInfo")
+        SET(EXECUT_MMG2D ${EXECUTABLE_OUTPUT_PATH}/${PROJECT_NAME}2d_O3d)
+        SET(BUILDNAME ${BUILDNAME}_O3d CACHE STRING "build name variable")
+      ELSEIF(${CMAKE_BUILD_TYPE} MATCHES "MinSizeRel")
+        SET(EXECUT_MMG2D ${EXECUTABLE_OUTPUT_PATH}/${PROJECT_NAME}2d_Os)
+        SET(BUILDNAME ${BUILDNAME}_Os CACHE STRING "build name variable")
+      ELSE()
+        SET(EXECUT_MMG2D ${EXECUTABLE_OUTPUT_PATH}/${PROJECT_NAME}2d)
+        SET(BUILDNAME ${BUILDNAME} CACHE STRING "build name variable")
+      ENDIF()
+
+      SET ( LISTEXEC_MMG2D ${EXECUT_MMG2D} )
+     IF ( TEST_LIBMMG2D )
+       SET(LIBMMG2D_EXEC0 ${EXECUTABLE_OUTPUT_PATH}/libmmg2d_example0)
+       SET(LIBMMG2D_EXECFORTRAN_a ${EXECUTABLE_OUTPUT_PATH}/libmmg2d_fortran_a)
+       SET(LIBMMG2D_EXEC1   ${EXECUTABLE_OUTPUT_PATH}/libmmg2d_example1)
+
+        IF ( LIBMMG2D_STATIC )
+          ADD_TEST(NAME libmmg2d_example0   COMMAND ${LIBMMG2D_EXEC0})
+          ADD_TEST(NAME libmmg2d_fortran_a  COMMAND ${LIBMMG2D_EXECFORTRAN_a})
+          ADD_TEST(NAME libmmg2d_example1   COMMAND ${LIBMMG2D_EXEC1})
+        ELSEIF( LIBMMG2D_SHARED )
+          ADD_TEST(NAME libmmg2d_example0   COMMAND ${LIBMMG2D_EXEC0})
+          ADD_TEST(NAME libmmg2d_example1   COMMAND ${LIBMMG2D_EXEC1})
+        ENDIF()
+    ENDIF()
+      # Add mmgs tests
+      INCLUDE( ${CMAKE_SOURCE_DIR}/cmake/testing/mmg2d_tests.cmake )
+    ENDIF()
 
     # Add runtime that we want to test for mmgs
     IF( MMGS_CI )
@@ -585,19 +718,37 @@ IF ( BUILD_MMG3D OR BUILD_MMGS OR BUILD_MMG )
 
       SET ( LISTEXEC_MMG3D ${EXECUT_MMG3D} )
       IF ( TEST_LIBMMG3D )
-        IF ( LIBMMG3D_STATIC OR LIBMMG3D_SHARED )
-          SET(LIBMMG3D_EXEC0_a ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_example0_a)
-          SET(LIBMMG3D_EXEC0_b ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_example0_b)
-          SET(LIBMMG3D_EXEC1   ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_example1)
-          SET(LIBMMG3D_EXEC2   ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_example2)
+        SET(LIBMMG3D_EXEC0_a ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_example0_a)
+        SET(LIBMMG3D_EXEC0_b ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_example0_b)
+        SET(LIBMMG3D_EXECFORTRAN_a ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_fortran_a)
+        SET(LIBMMG3D_EXECFORTRAN_b ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_fortran_b)
+        SET(LIBMMG3D_EXEC1   ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_example1)
+        SET(LIBMMG3D_EXEC2   ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_example2)
+        SET(LIBMMG3D_EXEC4   ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_example4)
 
+        IF ( LIBMMG3D_STATIC )
+
+          ADD_TEST(NAME libmmg3d_example0_a COMMAND ${LIBMMG3D_EXEC0_a})
+          ADD_TEST(NAME libmmg3d_example0_b COMMAND ${LIBMMG3D_EXEC0_b})
+          ADD_TEST(NAME libmmg3d_fortran_a  COMMAND ${LIBMMG3D_EXECFORTRAN_a})
+          ADD_TEST(NAME libmmg3d_fortran_b  COMMAND ${LIBMMG3D_EXECFORTRAN_b})
+          ADD_TEST(NAME libmmg3d_example1   COMMAND ${LIBMMG3D_EXEC1})
+          ADD_TEST(NAME libmmg3d_example2   COMMAND ${LIBMMG3D_EXEC2})
+          ADD_TEST(NAME libmmg3d_example4   COMMAND ${LIBMMG3D_EXEC4})
+
+          SET(LIBMMG3D_EXEC3 ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_example3)
+          SET( LISTEXEC_MMG3D ${LISTEXEC_MMG3D} ${LIBMMG3D_EXEC3} )
+
+        ELSEIF( LIBMMG3D_SHARED )
           ADD_TEST(NAME libmmg3d_example0_a COMMAND ${LIBMMG3D_EXEC0_a})
           ADD_TEST(NAME libmmg3d_example0_b COMMAND ${LIBMMG3D_EXEC0_b})
           ADD_TEST(NAME libmmg3d_example1   COMMAND ${LIBMMG3D_EXEC1})
           ADD_TEST(NAME libmmg3d_example2   COMMAND ${LIBMMG3D_EXEC2})
+          ADD_TEST(NAME libmmg3d_example4   COMMAND ${LIBMMG3D_EXEC4})
 
           SET(LIBMMG3D_EXEC3 ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_example3)
           SET( LISTEXEC_MMG3D ${LISTEXEC_MMG3D} ${LIBMMG3D_EXEC3} )
+
         ENDIF()
       ENDIF()
 
@@ -634,7 +785,7 @@ IF ( BUILD_MMG3D OR BUILD_MMGS OR BUILD_MMG )
 
   ENDIF ( BUILD_TESTING )
 
-ENDIF ( BUILD_MMG3D OR BUILD_MMGS OR BUILD_MMG )
+ENDIF ( BUILD_MMG3D OR BUILD_MMGS OR BUILD_MMG2D OR BUILD_MMG)
 
 ###############################################################################
 #####
@@ -673,13 +824,13 @@ IF(DOXYGEN_FOUND)
     )
   # MMGS and MMG3D Documentation
   ADD_CUSTOM_TARGET(doc
-    DEPENDS mmgs_doc mmg3d_doc
-    COMMENT "Generating MMGS and MMG3D API documentation with Doxygen.
+    DEPENDS mmgs_doc mmg3d_doc mmg2d_doc
+    COMMENT "Generating MMGS, MMG3D and MMG2D API documentation with Doxygen.
     To see the MMGS documentation,"
     " open up the doc/doxygen/mmgs/html/index.html file.
     To see the MMG3D documentation,"
     " open up the doc/doxygen/mmg3d/html/index.html file."
-    VERBATIM
+   VERBATIM
     )
 ENDIF(DOXYGEN_FOUND)
 
@@ -714,6 +865,7 @@ SET(CPACK_IGNORE_FILES ";.\\\\\\\\.#;/\\\\\\\\.git;.~;.#;.-e;.DS_Store"
   ${CPACK_IGNORE_FILES})
 SET(CPACK_IGNORE_FILES ";libmmg3d.*" ${CPACK_IGNORE_FILES})
 SET(CPACK_IGNORE_FILES ";libmmgs.*" ${CPACK_IGNORE_FILES})
+SET(CPACK_IGNORE_FILES ";libmmg2d.*" ${CPACK_IGNORE_FILES})
 
 SET(CPACK_SOURCE_IGNORE_FILES ";src/mmg3d/mmg3d.h$" ${CPACK_SOURCE_IGNORE_FILE})
 SET(CPACK_SOURCE_IGNORE_FILES ";.\\\\\\\\.#;/\\\\\\\\.git;.~;.#;.-e;.DS_Store"

@@ -34,9 +34,17 @@
  */
 
 #include "mmgs.h"
-#include <math.h>
 
-/* compute movement of an internal point whose ball is passed */
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param list ball of point.
+ * \param ilist size of the point ball.
+ * \return 0 if fail, 1 otherwise.
+ *
+ * Compute movement of an internal point whose ball is passed.
+ *
+ */
 int movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
   MMG5_pTria     pt,pt0;
   MMG5_pPoint    p0,p1,p2,ppt0;
@@ -46,7 +54,6 @@ int movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
   double         ll,*n1,*n2,ps1,ps2,calold,calnew,caltmp;
   int            k,iel,kel,nump,nbeg,nend;
   char           i0,i1,i2,j,ier;
-
   step = 0.1;
 
   /* Make sure ball of point is closed */
@@ -69,7 +76,7 @@ int movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
   nend = pt->v[i2];
   if ( nbeg != nend )  return(0);
 
-  /* Rotation matrix that sends normal at p0 to e_z */
+  /** Step 1 : Rotation matrix that sends normal at p0 to e_z */
   n = &(p0->n[0]);
   if ( !_MMG5_rotmatrix(n,r) )  return(0);
 
@@ -103,8 +110,8 @@ int movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
   area = lispoi[3*(ilist-1)+1]*lispoi[3*0+2] - lispoi[3*(ilist-1)+2]*lispoi[3*0+1];
   if ( area < 0.0 )  return(0);
 
-  /* Step 2 : Compute gradient towards optimal position = centre of mass of the ball,
-     projected to tangent plane */
+  /** Step 2 : Compute gradient towards optimal position = centre of mass of the
+     ball, projected to tangent plane */
   gv[0] = 0.0;
   gv[1] = 0.0;
 
@@ -154,7 +161,7 @@ int movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
       }
       else {
         if ( !_MMG5_nortri(mesh,pt,no) )  return(0);
-        if ( !intridmet(mesh,met,iel,i2,0.5,no,mo) )  return(0);
+        if ( !_MMG5_intridmet(mesh,met,pt->v[i0],pt->v[i1],0.5,no,mo) )  return(0);
 
         p1 = &mesh->point[pt->v[i0]];
         p2 = &mesh->point[pt->v[i1]];
@@ -171,7 +178,7 @@ int movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
         to[2] *= ll;
 
         if ( MS_SIN(p1->tag) && MS_SIN(p2->tag) ) {
-          if ( !buildridmetfic(mesh,to,no,mo[0],mo[0],m) )  return(0);
+          if ( !_MMG5_buildridmetfic(mesh,to,no,mo[0],mo[0],mo[0],m) )  return(0);
         }
         else if ( !MS_SIN(p1->tag) ) {
           n1 = &mesh->xpoint[p1->xp].n1[0];
@@ -179,10 +186,10 @@ int movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
           ps1 = n1[0]*no[0] + n1[1]*no[1] + n1[2]*no[2];
           ps2 = n2[0]*no[0] + n2[1]*no[1] + n2[2]*no[2];
           if ( fabs(ps1) > fabs(ps2) ) {
-            if ( !buildridmetfic(mesh,to,no,mo[0],mo[1],m) )  return(0);
+            if ( !_MMG5_buildridmetfic(mesh,to,no,mo[0],mo[1],mo[3],m) )  return(0);
           }
           else {
-            if ( !buildridmetfic(mesh,to,no,mo[0],mo[2],m) )  return(0);
+            if ( !_MMG5_buildridmetfic(mesh,to,no,mo[0],mo[2],mo[4],m) )  return(0);
           }
         }
         else {
@@ -192,10 +199,10 @@ int movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
           ps1 = n1[0]*no[0] + n1[1]*no[1] + n1[2]*no[2];
           ps2 = n2[0]*no[0] + n2[1]*no[1] + n2[2]*no[2];
           if ( fabs(ps1) > fabs(ps2) ) {
-            if ( !buildridmetfic(mesh,to,no,mo[0],mo[1],m) )  return(0);
+            if ( !_MMG5_buildridmetfic(mesh,to,no,mo[0],mo[1],mo[3],m) )  return(0);
           }
           else {
-            if ( !buildridmetfic(mesh,to,no,mo[0],mo[2],m) )  return(0);
+            if ( !_MMG5_buildridmetfic(mesh,to,no,mo[0],mo[2],mo[4],m) )  return(0);
           }
         }
       }
@@ -327,6 +334,10 @@ int movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
   ppt0->n[0] = no[0];
   ppt0->n[1] = no[1];
   ppt0->n[2] = no[2];
+  ppt0->tag  = 0;
+
+  // parallel transport of metric at p0 to new point
+  _MMG5_paratmet(p0->c,p0->n,m0,o,no,&met->m[0]);
 
   calold = calnew = DBL_MAX;
   for (k= 0; k<ilist; k++) {
@@ -350,8 +361,6 @@ int movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
   }
 
   /* Finally, update coordinates and normals of point, if new position is accepted :*/
-  _MMG5_paratmet(p0->c,p0->n,m0,o,no,m); // parallel transport of metric at p0 to new point
-
   p0->c[0] = o[0];
   p0->c[1] = o[1];
   p0->c[2] = o[2];
@@ -360,7 +369,7 @@ int movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
   p0->n[1] = no[1];
   p0->n[2] = no[2];
 
-  memcpy(m0,m,6*sizeof(double));
+  memcpy(m0,&met->m[0],6*sizeof(double));
 
   return(1);
 }
@@ -703,7 +712,8 @@ int movridpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
 
     /* Interpolation of metric between ip0 and ip2 */
     if ( isrid )
-      intridmet(mesh,met,it2,voy2,(1.0-step),nn1,mo);
+      _MMG5_intridmet(mesh,met,mesh->tria[it2].v[_MMG5_inxt2[voy2]],
+                      mesh->tria[it2].v[_MMG5_iprv2[voy2]],(1.0-step),nn1,mo);
     else {
       if ( !_MMG5_paratmet(p0->c,p0->n,m0,o,nn1,mo) )  return(0);
     }
@@ -867,7 +877,8 @@ int movridpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
 
     /* Interpolation of metric between ip0 and ip1 */
     if ( isrid ) {
-      intridmet(mesh,met,it1,voy1,(1.0-step),nn1,mo);
+      _MMG5_intridmet(mesh,met,mesh->tria[it1].v[_MMG5_inxt2[voy1]],
+                      mesh->tria[it1].v[_MMG5_iprv2[voy1]],(1.0-step),nn1,mo);
     }
     else {
       if ( !_MMG5_paratmet(p0->c,p0->n,m0,o,nn1,mo) )  return(0);

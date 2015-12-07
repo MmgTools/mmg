@@ -70,10 +70,11 @@
  * See \ref MMG5_Free_all function in \ref mmg3d/libmmg3d.h file.
  */
 FORTRAN_NAME(MMG5_FREE_ALL,mmg5_free_all,(MMG5_pMesh *mesh,MMG5_pSol *met
-               ),(mesh,met
+                                          ,MMG5_pSol *disp
+               ),(mesh,met,disp
                  )){
 
-  MMG5_Free_all(*mesh,*met);
+  MMG5_Free_all(*mesh,*met,*disp);
 
   return;
 }
@@ -91,10 +92,10 @@ FORTRAN_NAME(MMG5_SAVEMESH,mmg5_savemesh,(MMG5_pMesh *mesh, int* retval),
  * See \ref MMG5_mmg3dlib function in \ref mmg3d/libmmg3d.h file.
  */
 FORTRAN_NAME(MMG5_MMG3DLIB,mmg5_mmg3dlib,(MMG5_pMesh *mesh,MMG5_pSol *met
-                                          ,int* retval),(mesh,met
-                                                         ,retval)){
+                                          ,MMG5_pSol *disp,int* retval),
+             (mesh,met,disp,retval)){
 
-  *retval = MMG5_mmg3dlib(*mesh,*met);
+  *retval = MMG5_mmg3dlib(*mesh,*met,*disp);
 
   return;
 }
