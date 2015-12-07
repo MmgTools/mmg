@@ -318,7 +318,7 @@ int movintpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
   }
   if ( calold < NULKAL && calnew <= calold )      return(0);
   else if ( calnew < 0.3*calold )  return(0);
-
+  
   /* Finally, update coordinates and normals of point, if new position is accepted : */
   p0->c[0] = o[0];
   p0->c[1] = o[1];

@@ -35,7 +35,7 @@
 
 #include "mmg3d.h"
 #include "ls_calls.h"
-#define _MMG5_DEGTOL  1.e-1
+#define _MMG5_DEGTOL  0.7//1.e-1
 
 extern char  ddb;
 
