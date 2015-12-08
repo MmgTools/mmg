@@ -261,7 +261,7 @@ int movintpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
     uv[0] = lambda[2];
     uv[1] = lambda[0];
   }
-  ier = _MMG5_bezierInt(&b,uv,o,no,to);
+  ier = _MMGS_bezierInt(&b,uv,o,no,to);
   assert(ier);
 
   /* First test : check whether variance has been decreased */
@@ -292,6 +292,7 @@ int movintpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
 
   /* Second test : check whether geometric approximation has not been too much degraded */
   ppt0 = &mesh->point[0];
+  ppt0->tag = p0->tag;
   ppt0->c[0] = o[0];
   ppt0->c[1] = o[1];
   ppt0->c[2] = o[2];
@@ -311,7 +312,7 @@ int movintpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
     caltmp = caleltsig_iso(mesh,NULL,iel);
     calold = MG_MIN(calold,caltmp);
     caltmp = caleltsig_iso(mesh,NULL,0);
-    if ( caltmp < _MMG5_EPSD )        return(0.0);
+    if ( caltmp < _MMG5_EPSD )        return(0);
     calnew = MG_MIN(calnew,caltmp);
     /*if ( (calnew < BADKAL) && (calnew<=calold) )  return(0);
       if ( chkedg(mesh,0) )  return(0); */
@@ -448,7 +449,7 @@ int movridpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
         uv[1] = 1.0 - step;
       }
     }
-    ier = _MMG5_bezierInt(&b,uv,o,nn1,to);
+    ier = _MMGS_bezierInt(&b,uv,o,nn1,to);
     assert(ier);
   }
   /* move towards p1 */
@@ -490,7 +491,7 @@ int movridpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
         uv[1] = 1.0 - step;
       }
     }
-    ier = _MMG5_bezierInt(&b,uv,o,nn1,to);
+    ier = _MMGS_bezierInt(&b,uv,o,nn1,to);
     assert(ier);
   }
 

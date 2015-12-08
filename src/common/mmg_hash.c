@@ -32,11 +32,12 @@
  * \copyright GNU Lesser General Public License.
  */
 
-#include "mmg.h"
+#include "mmgcommon.h"
 
 /**
  * \param mesh pointer toward the mesh structure.
  * \param adjt pointer toward the adjacency table of the surfacic mesh.
+ * \param hash pointer toward the edge hash table.
  * \param chkISO flag to say if we check ISO references
  * (so if we come from mmg3d).
  * \return 1 if success, 0 otherwise.

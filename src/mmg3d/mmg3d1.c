@@ -44,7 +44,7 @@ char  ddb;
  * \param mesh pointer toward the mesh structure.
  * \param k tetrahedron index.
  * \param ie face index of tetrahedron.
- * \param *ptt pointer toward the output triangle.
+ * \param ptt pointer toward the output triangle.
  *
  * Set triangle corresponding to face ie of tetra k.
  *
@@ -85,7 +85,7 @@ void _MMG5_tet2tri(MMG5_pMesh mesh,int k,char ie,MMG5_Tria *ptt) {
  * Find acceptable position for splitting.
  *
  */
-int _MMG5_dichoto(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
+int _MMG3D_dichoto(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
   MMG5_pTetra  pt;
   MMG5_pPoint  pa,pb,ps;
   double       o[6][3],p[6][3];
@@ -129,10 +129,10 @@ int _MMG5_dichoto(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
     }
     switch (pt->flag) {
     case 1: case 2: case 4: case 8: case 16: case 32:
-      ier = _MMG5_split1_sim(mesh,met,k,vx);
+      ier = _MMG3D_split1_sim(mesh,met,k,vx);
       break;
     case 11: case 21: case 38: case 56:
-      ier = _MMG5_split3_sim(mesh,met,k,vx);
+      ier = _MMG3D_split3_sim(mesh,met,k,vx);
       break;
     default:
       ier = _MMG5_split2sf_sim(mesh,met,k,vx);
@@ -161,21 +161,21 @@ int _MMG5_dichoto(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
 
 /**
  * \param mesh pointer toward the mesh structure.
- * \param *list pointer toward the shell of edge.
+ * \param met pointer toward the metric structure.
+ * \param list pointer toward the shell of edge.
  * \param ret double of the number of tetrahedra in the shell.
- * \param o[3] initial guess for coordinates of new point.
- * \param ro[3] output coordinates for the new point.
+ * \param ip new point index.
  * \return 1.
  *
  * Find acceptable position for _MMG5_split1b, passing the shell of
  * considered edge, starting from o point.
  *
  */
-int _MMG5_dichoto1b(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,double o[3],double ro[3]) {
+int _MMG3D_dichoto1b(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int ip) {
   MMG5_pTetra  pt;
-  MMG5_pPoint  p0,p1;
+  MMG5_pPoint  p0,p1,ppt;
   int          iel,np,nq,it,maxit;
-  double       m[3],c[3],tp,to,t;
+  double       m[3],o[3],tp,to,t;
   char         ia,ier;
 
   iel = list[0] / 6;
@@ -186,6 +186,12 @@ int _MMG5_dichoto1b(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,double o[3],
   nq = pt->v[_MMG5_iare[ia][1]];
   p0 = &mesh->point[np];
   p1 = &mesh->point[nq];
+
+  /* initial coordinates for new point */
+  ppt = &mesh->point[ip];
+  o[0] = ppt->c[0];
+  o[1] = ppt->c[1];
+  o[2] = ppt->c[2];
 
   /* midpoint along edge */
   m[0] = 0.5*(p0->c[0] + p1->c[0]);
@@ -199,11 +205,11 @@ int _MMG5_dichoto1b(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,double o[3],
   to    = 0.0;
   do {
     t = 0.5*(to + tp);
-    c[0] = m[0] + t*(o[0]-m[0]);
-    c[1] = m[1] + t*(o[1]-m[1]);
-    c[2] = m[2] + t*(o[2]-m[2]);
+    ppt->c[0] = m[0] + t*(o[0]-m[0]);
+    ppt->c[1] = m[1] + t*(o[1]-m[1]);
+    ppt->c[2] = m[2] + t*(o[2]-m[2]);
 
-    ier = _MMG5_simbulgept(mesh,met,list,ret,c);
+    ier = _MMG3D_simbulgept(mesh,met,list,ret,ip);
     if ( ier )
       to = t;
     else
@@ -211,16 +217,17 @@ int _MMG5_dichoto1b(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,double o[3],
   }
   while ( ++it < maxit );
   if ( !ier )  t = to;
-  ro[0] = m[0] + t*(o[0]-m[0]);
-  ro[1] = m[1] + t*(o[1]-m[1]);
-  ro[2] = m[2] + t*(o[2]-m[2]);
+
+  ppt->c[0] = m[0] + t*(o[0]-m[0]);
+  ppt->c[1] = m[1] + t*(o[1]-m[1]);
+  ppt->c[2] = m[2] + t*(o[2]-m[2]);
 
   return(1);
 }
 
 /**
  * \param mesh pointer toward the mesh structure.
- * \param *pt pointer toward the triangle.
+ * \param pt pointer toward the triangle.
  * \param ori orientation of the triangle (1 for direct orientation, 0 otherwise).
  * \return 0 if error.
  * \return edges of the triangle pt that need to be split.
@@ -396,14 +403,15 @@ char _MMG5_chkedg(MMG5_pMesh mesh,MMG5_Tria *pt,char ori) {
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
  * \param bucket pointer toward the bucket structure (only for delaunay).
- * \return -1 if failed.
- * \return swap number.
+ * \param typchk type of checking permformed for edge length (hmin or LSHORT
+ * criterion).
+ * \return -1 if failed and swap number otherwise.
  *
  * Search for boundary edges that could be swapped for geometric
  * approximation.
  *
  */
-int _MMG5_swpmsh(MMG5_pMesh mesh,MMG5_pSol met,_MMG5_pBucket bucket) {
+int _MMG5_swpmsh(MMG5_pMesh mesh,MMG5_pSol met,_MMG5_pBucket bucket, int typchk) {
   MMG5_pTetra   pt;
   MMG5_pxTetra  pxt;
   int      k,it,list[_MMG5_LMAX+2],ilist,ret,it1,it2,ns,nns,maxit;
@@ -435,9 +443,9 @@ int _MMG5_swpmsh(MMG5_pMesh mesh,MMG5_pSol met,_MMG5_pBucket bucket) {
           if ( ret < 0 )  return(-1);
           /* CAUTION: trigger collapse with 2 elements */
           if ( ilist <= 1 )  continue;
-          ier = _MMG5_chkswpbdy(mesh,met,list,ilist,it1,it2);
+          ier = _MMG5_chkswpbdy(mesh,met,list,ilist,it1,it2,typchk);
           if ( ier ) {
-            ier = _MMG5_swpbdy(mesh,met,list,ret,it1,bucket);
+            ier = _MMG5_swpbdy(mesh,met,list,ret,it1,bucket,typchk);
             if ( ier > 0 )  ns++;
             else if ( ier < 0 )  return(-1);
             break;
@@ -461,11 +469,14 @@ int _MMG5_swpmsh(MMG5_pMesh mesh,MMG5_pSol met,_MMG5_pBucket bucket) {
  * \param crit coefficient of quality improvment.
  * \param bucket pointer toward the bucket structure in delaunay mode and
  * toward the \a NULL pointer otherwise
+ * \param typchk type of checking permformed for edge length (hmin or LSHORT
+ * criterion).
  *
  * Internal edge flipping.
  *
  */
-int _MMG5_swptet(MMG5_pMesh mesh,MMG5_pSol met,double crit,_MMG5_pBucket bucket) {
+int _MMG5_swptet(MMG5_pMesh mesh,MMG5_pSol met,double crit,
+                 _MMG5_pBucket bucket,int typchk) {
   MMG5_pTetra   pt;
   MMG5_pxTetra  pxt;
   int      list[_MMG5_LMAX+2],ilist,k,it,nconf,maxit,ns,nns,ier;
@@ -488,9 +499,9 @@ int _MMG5_swptet(MMG5_pMesh mesh,MMG5_pSol met,double crit,_MMG5_pBucket bucket)
           if ( pxt->edg[i] || pxt->tag[i] ) continue;
         }
 
-        nconf = _MMG5_chkswpgen(mesh,met,k,i,&ilist,list,crit);
+        nconf = _MMG5_chkswpgen(mesh,met,k,i,&ilist,list,crit,typchk);
         if ( nconf ) {
-          ier = _MMG5_swpgen(mesh,met,nconf,ilist,list,bucket);
+          ier = _MMG5_swpgen(mesh,met,nconf,ilist,list,bucket,typchk);
           if ( ier > 0 )  ns++;
           else if ( ier < 0 ) return(-1);
           break;
@@ -699,11 +710,8 @@ static int _MMG5_coltet(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
           if ( ll > hmi2 )  continue;
         }
         else if ( typchk == 2 ) {
-          if ( pt->xt )
-            ll = _MMG5_lenedg(mesh,met,pt->v[ip],pt->v[iq],
-                              (pxt->tag[_MMG5_iarf[i][j]] & MG_GEO));
-          else
-            ll = _MMG5_lenedg(mesh,met,pt->v[ip],pt->v[iq],0);
+          ll = _MMG5_lenedg(mesh,met,_MMG5_iarf[i][j],pt);
+
           if ( ll > _MMG5_LSHRT )  continue;
         }
 
@@ -717,7 +725,7 @@ static int _MMG5_coltet(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
             if ( mesh->adja[4*(k-1)+1+i] )  continue;
           }
           if ( p0->tag > tag )  continue;
-          ilist = _MMG5_chkcol_bdy(mesh,met,k,i,j,list);
+          ilist = _MMG5_chkcol_bdy(mesh,met,k,i,j,list,typchk);
         }
         /* internal face */
         else {
@@ -727,10 +735,10 @@ static int _MMG5_coltet(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
         }
 
         if ( ilist > 0 ) {
-          ier = _MMG5_colver(mesh,met,list,ilist,iq);
+          ier = _MMG5_colver(mesh,met,list,ilist,iq,typchk);
           if ( ier < 0 ) return(-1);
           else if ( ier ) {
-            _MMG5_delPt(mesh,ier);
+            _MMG3D_delPt(mesh,ier);
             break;
           }
         }
@@ -766,8 +774,8 @@ _MMG5_anatetv(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
   MMG5_pPoint   p1,p2;
   MMG5_xTetra  *pxt;
   _MMG5_Hash     hash;
-  double   ll,o[3],ux,uy,uz,hma2,*m1,*m2,*mp;
-  int      vx[6],k,ip,ip1,ip2,nap,ns,ne,memlack,iadr;
+  double   ll,o[3],ux,uy,uz,hma2;
+  int      vx[6],k,ip,ip1,ip2,nap,ns,ne,memlack,ier;
   char     i,j,ia;
 
   /** 1. analysis */
@@ -836,7 +844,7 @@ _MMG5_anatetv(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
             ip = _MMG5_hashGet(&hash,ip1,ip2);
         }
         else if ( typchk == 2 ) {
-          ll = _MMG5_lenedg(mesh,met,ip1,ip2,0);
+          ll = _MMG5_lenedg(mesh,met,i,pt);
 
           if ( ll > _MMG5_LLONG )
             ip = _MMG5_hashGet(&hash,ip1,ip2);
@@ -849,7 +857,7 @@ _MMG5_anatetv(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
         o[1] = 0.5 * (p1->c[1]+p2->c[1]);
         o[2] = 0.5 * (p1->c[2]+p2->c[2]);
 
-        ip  = _MMG5_newPt(mesh,o,0);
+        ip  = _MMG3D_newPt(mesh,o,0);
         if ( !ip ) {
           /* reallocation of point table */
 
@@ -862,16 +870,20 @@ _MMG5_anatetv(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
           p1  = &mesh->point[ip1];
           p2  = &mesh->point[ip2];
         }
-        if ( met->m ) {
-          iadr = met->size*ip1;
-          m1 = &met->m[iadr];
-          iadr = met->size*ip2;
-          m2 = &met->m[iadr];
-          iadr = met->size*ip;
-          mp = &met->m[iadr];
 
-          if ( !_MMG5_intmetvol(m1,m2,mp,0.5) ) return(-1);
+        if ( met->m ) {
+          if ( typchk == 1 && (met->size>1) )
+            ier = _MMG3D_intmet33_ani(mesh,met,k,i,ip,0.5);
+          else
+            ier = _MMG5_intmet(mesh,met,k,i,ip,0.5);
+
+          if (!ier) return(-1);
+          else if ( ier < 0 ) {
+            _MMG3D_delPt(mesh,ip);
+            continue;
+          }
         }
+
         if ( !_MMG5_hashEdge(mesh,&hash,ip1,ip2,ip) )  return(-1);
         MG_SET(pt->flag,i);
         nap++;
@@ -902,55 +914,55 @@ split:
 
     switch (pt->flag) {
     case 1: case 2: case 4: case 8: case 16: case 32: /* 1 edge split */
-      _MMG5_split1(mesh,met,k,vx);
+      _MMG5_split1(mesh,met,k,vx,typchk-1);
       ns++;
       break;
     case 48: case 24: case 40: case 6: case 34: case 36:
     case 20: case 5: case 17: case 9: case 3: case 10: /* 2 edges (same face) split */
-      _MMG5_split2sf(mesh,met,k,vx);
+      _MMG5_split2sf(mesh,met,k,vx,typchk-1);
       ns++;
       break;
 
     case 33: case 18: case 12: /* 2 opposite edges split */
-      _MMG5_split2(mesh,met,k,vx);
+      _MMG5_split2(mesh,met,k,vx,typchk-1);
       ns++;
       break;
 
     case 11: case 21: case 38: case 56: /* 3 edges on the same faces splitted */
-      _MMG5_split3(mesh,met,k,vx);
+      _MMG5_split3(mesh,met,k,vx,typchk-1);
       ns++;
       break;
 
     case 7: case 25: case 42: case 52: /* 3 edges on conic configuration splitted */
-      _MMG5_split3cone(mesh,met,k,vx);
+      _MMG5_split3cone(mesh,met,k,vx,typchk-1);
       ns++;
       break;
 
     case 35: case 19: case 13: case 37: case 22: case 28: case 26:
     case 14: case 49: case 50: case 44: case 41: /* 3 edges on opposite configuration splitted */
-      _MMG5_split3op(mesh,met,k,vx);
+      _MMG5_split3op(mesh,met,k,vx,typchk-1);
       ns++;
       break;
 
     case 23: case 29: case 53: case 60: case 57: case 58:
     case 27: case 15: case 43: case 39: case 54: case 46: /* 4 edges with 3 lying on the same face splitted */
-      _MMG5_split4sf(mesh,met,k,vx);
+      _MMG5_split4sf(mesh,met,k,vx,typchk-1);
       ns++;
       break;
 
       /* 4 edges with no 3 lying on the same face splitted */
     case 30: case 45: case 51:
-      _MMG5_split4op(mesh,met,k,vx);
+      _MMG5_split4op(mesh,met,k,vx,typchk-1);
       ns++;
       break;
 
     case 62: case 61: case 59: case 55: case 47: case 31: /* 5 edges split */
-      _MMG5_split5(mesh,met,k,vx);
+      _MMG5_split5(mesh,met,k,vx,typchk-1);
       ns++;
       break;
 
     case 63: /* 6 edges split */
-      _MMG5_split6(mesh,met,k,vx);
+      _MMG5_split6(mesh,met,k,vx,typchk-1);
       ns++;
       break;
     }
@@ -983,8 +995,8 @@ _MMG5_anatets(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
   MMG5_xPoint  *pxp;
   _MMG5_Bezier  pb;
   _MMG5_Hash    hash;
-  double        o[3],no[3],to[3],dd,len, *m1, *m2, *mp;
-  int           vx[6],k,ip,ic,it,nap,nc,ni,ne,npinit,ns,ip1,ip2,ier,iadr;
+  double        o[3],no[3],to[3],dd,len;
+  int           vx[6],k,ip,ic,it,nap,nc,ni,ne,npinit,ns,ip1,ip2,ier;
   char          i,j,ia,i1,i2;
   static double uv[3][2] = { {0.5,0.5}, {0.,0.5}, {0.5,0.} };
 
@@ -1025,8 +1037,13 @@ _MMG5_anatets(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
         i2  = _MMG5_iare[ia][1];
         ip1 = pt->v[i1];
         ip2 = pt->v[i2];
-        len = _MMG5_lenedg(mesh,met,ip1,ip2, (pxt->tag[ia] & MG_GEO));
+        len = _MMG5_lenedg(mesh,met,ia,pt);
         if ( len > _MMG5_LLONG )  MG_SET(pt->flag,ia);
+        /* Treat here the ridges coming from a corner (we can not do that after
+         * because the corner don't have xpoints) */
+        if ( (mesh->point[ip1].tag & MG_CRN) ||  (mesh->point[ip2].tag & MG_CRN) ) {
+          if ( len > _MMG5_LOPTL )  MG_SET(pt->flag,ia);
+        }
       }
     }
     if ( !pt->flag )  continue;
@@ -1046,20 +1063,19 @@ _MMG5_anatets(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
       ip1 = pt->v[i1];
       ip2 = pt->v[i2];
       ip  = _MMG5_hashGet(&hash,ip1,ip2);
-
       if ( ip > 0 && !(ptt.tag[j] & MG_GEO) )  continue;
 
-      ier = _MMG5_bezierInt(&pb,&uv[j][0],o,no,to);
+      ier = _MMG3D_bezierInt(&pb,&uv[j][0],o,no,to);
       /* new point along edge */
       if ( !ip ) {
-        ip = _MMG5_newPt(mesh,o,MG_BDY);
+        ip = _MMG3D_newPt(mesh,o,MG_BDY);
         if ( !ip ) {
           /* reallocation of point table */
           _MMG5_POINT_REALLOC(mesh,met,ip,mesh->gap,
                               printf("  ## Error: unable to allocate a new point.\n");
                               _MMG5_INCREASE_MEM_MESSAGE();
                               do {
-                                _MMG5_delPt(mesh,mesh->np);
+                                _MMG3D_delPt(mesh,mesh->np);
                               } while ( mesh->np>npinit );
                               return(-1)
                               ,o,MG_BDY);
@@ -1074,13 +1090,16 @@ _MMG5_anatets(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
         p2  = &mesh->point[ip2];
 
         if ( met->m ) {
-          iadr = met->size*ip1;
-          m1 = &met->m[iadr];
-          iadr = met->size*ip2;
-          m2 = &met->m[iadr];
-          iadr = met->size*ip;
-          mp = &met->m[iadr];
-          if ( !_MMG5_intmetvol(m1,m2,mp,0.5) )  return(-1);
+          if ( typchk == 1 && (met->size>1) )
+            ier = _MMG3D_intmet33_ani(mesh,met,k,ia,ip,0.5);
+          else
+            ier = _MMG5_intmet(mesh,met,k,ia,ip,0.5);
+
+          if ( !ier )  return(-1);
+          else if ( ier < 0 ) {
+            _MMG3D_delPt(mesh,ip);
+            continue;
+          }
         }
 
         if ( MG_EDG(ptt.tag[j]) || (ptt.tag[j] & MG_NOM) )
@@ -1155,7 +1174,7 @@ _MMG5_anatets(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
           pxp = &mesh->xpoint[ppt->xp];
           if ( pt->xt )  ier = _MMG5_bezierCP(mesh,&ptt,&pb,MG_GET(pxt->ori,i));
           else  ier = _MMG5_bezierCP(mesh,&ptt,&pb,1);
-          ier = _MMG5_bezierInt(&pb,&uv[j][0],o,no,to);
+          ier = _MMG3D_bezierInt(&pb,&uv[j][0],o,no,to);
 
           dd = no[0]*pxp->n1[0]+no[1]*pxp->n1[1]+no[2]*pxp->n1[2];
           if ( dd > 1.0-_MMG5_EPS ) continue;
@@ -1196,10 +1215,10 @@ _MMG5_anatets(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
       if ( !pt->flag )  continue;
       switch (pt->flag) {
       case 1: case 2: case 4: case 8: case 16: case 32:
-        ier = _MMG5_split1_sim(mesh,met,k,vx);
+        ier = _MMG3D_split1_sim(mesh,met,k,vx);
         break;
       case 11: case 21: case 38: case 56:
-        ier = _MMG5_split3_sim(mesh,met,k,vx);
+        ier = _MMG3D_split3_sim(mesh,met,k,vx);
         break;
       default:
         ier = _MMG5_split2sf_sim(mesh,met,k,vx);
@@ -1208,7 +1227,7 @@ _MMG5_anatets(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
       if ( ier )  continue;
 
       ni++;
-      if ( ic == 0 && _MMG5_dichoto(mesh,met,k,vx) ) {
+      if ( ic == 0 && _MMG3D_dichoto(mesh,met,k,vx) ) {
         for (ia=0; ia<6; ia++)
           if ( vx[ia] > 0 )  mesh->point[vx[ia]].flag++;
       }
@@ -1252,15 +1271,15 @@ _MMG5_anatets(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
     }
     switch (pt->flag) {
     case 1: case 2: case 4: case 8: case 16: case 32:  /* 1 edge split */
-      _MMG5_split1(mesh,met,k,vx);
+      _MMG5_split1(mesh,met,k,vx,typchk-1);
       ns++;
       break;
     case 11: case 21: case 38: case 56: /* 1 face (3 edges) subdivided */
-      _MMG5_split3(mesh,met,k,vx);
+      _MMG5_split3(mesh,met,k,vx,typchk-1);
       ns++;
       break;
     default:
-      _MMG5_split2sf(mesh,met,k,vx);
+      _MMG5_split2sf(mesh,met,k,vx,typchk-1);
       ns++;
       break;
     }
@@ -1277,13 +1296,13 @@ _MMG5_anatets(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
- * \return -1 if failed.
- * \return number of new points.
+ * \param typchk type of checking permformed.
+ * \return -1 if failed, number of new points otherwise.
  *
  * Split tetra into 4 when more than 1 boundary face.
  *
  */
-static int _MMG5_anatet4(MMG5_pMesh mesh, MMG5_pSol met) {
+static int _MMG5_anatet4(MMG5_pMesh mesh, MMG5_pSol met,char typchk) {
   MMG5_pTetra      pt;
   MMG5_pPoint      ppt;
   MMG5_pxTetra     pxt;
@@ -1301,7 +1320,7 @@ static int _MMG5_anatet4(MMG5_pMesh mesh, MMG5_pSol met) {
         if ( pxt->ftag[j] & MG_BDY )  nf++;
     }
     if ( nf > 1 ) {
-      if ( !_MMG5_split4bar(mesh,met,k) ) return(-1);
+      if ( !_MMG5_split4bar(mesh,met,k,typchk-1) ) return(-1);
       ns++;
     }
     else {
@@ -1311,7 +1330,7 @@ static int _MMG5_anatet4(MMG5_pMesh mesh, MMG5_pSol met) {
         if ( ppt->tag & MG_BDY )  nf++;
       }
       if ( nf == 4 ) {
-        if ( !_MMG5_split4bar(mesh,met,k) ) return(-1);
+        if ( !_MMG5_split4bar(mesh,met,k,typchk-1) ) return(-1);
         ns++;
       }
     }
@@ -1326,7 +1345,7 @@ static int _MMG5_anatet4(MMG5_pMesh mesh, MMG5_pSol met) {
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
  * \param typchk type of checking for edges length.
- * \param paternMode flag to say if we perform vertex insertion by patterns
+ * \param patternMode flag to say if we perform vertex insertion by patterns
  * or by delaunay kernel.
  * \return 0 if fail, number of new points otherwise.
  *
@@ -1347,7 +1366,7 @@ int _MMG5_anatet(MMG5_pMesh mesh,MMG5_pSol met,char typchk, int patternMode) {
     if ( !mesh->info.noinsert ) {
 
       /* split tetra with more than 2 bdry faces */
-      ier = _MMG5_anatet4(mesh,met);
+      ier = _MMG5_anatet4(mesh,met,typchk);
       if ( ier < 0 )  return(0);
       ns = ier;
 
@@ -1371,7 +1390,7 @@ int _MMG5_anatet(MMG5_pMesh mesh,MMG5_pSol met,char typchk, int patternMode) {
     }
     else  ns = 0;
 
-    if ( !_MMG5_hashTetra(mesh,1) ) {
+    if ( !MMG3D_hashTetra(mesh,1) ) {
       fprintf(stdout,"  ## Hashing problem. Exit program.\n");
       return(0);
     }
@@ -1389,14 +1408,14 @@ int _MMG5_anatet(MMG5_pMesh mesh,MMG5_pSol met,char typchk, int patternMode) {
 
     /* attempt to swap */
     if ( !mesh->info.noswap ) {
-      nf = _MMG5_swpmsh(mesh,met,NULL);
+      nf = _MMG5_swpmsh(mesh,met,NULL,typchk);
       if ( nf < 0 ) {
         fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
         return(0);
       }
       nnf += nf;
 
-      nf = _MMG5_swptet(mesh,met,1.1,NULL);
+      nf = _MMG5_swptet(mesh,met,1.1,NULL,typchk);
       if ( nf < 0 ) {
         fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
         return(0);
@@ -1417,11 +1436,13 @@ int _MMG5_anatet(MMG5_pMesh mesh,MMG5_pSol met,char typchk, int patternMode) {
   }
   while ( ++it < maxit && ns+nc+nf > 0 );
 
-  if ( (abs(mesh->info.imprim) < 5 || mesh->info.ddebug ) && nns+nnc > 0 ) {
+  if ( mesh->info.imprim ) {
+    if ( (abs(mesh->info.imprim) < 5 || mesh->info.ddebug ) && nns+nnc > 0 ) {
 #ifndef PATTERN
-    fprintf(stdout,"                   ");
+      fprintf(stdout,"                   ");
 #endif
-    fprintf(stdout, "     %8d splitted, %8d collapsed, %8d swapped, %d iter.\n",nns,nnc,nnf,it);
+      fprintf(stdout, "     %8d splitted, %8d collapsed, %8d swapped, %d iter.\n",nns,nnc,nnf,it);
+    }
   }
 
   return(1);

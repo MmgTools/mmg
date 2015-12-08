@@ -32,7 +32,73 @@
  * \copyright GNU Lesser General Public License.
  */
 
-#include "mmg.h"
+#include "mmgcommon.h"
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the meric structure.
+ * \param pt pointer toward the triangle structure.
+ * \return The computed quality.
+ *
+ * Compute the quality of the surface triangle \a ptt with respect to
+ * an anisotropic metric and a classic storage of the ridges metrics.
+ *
+ */
+double _MMG5_caltri33_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt) {
+  double   anisurf,dd,abx,aby,abz,acx,acy,acz,bcx,bcy,bcz;
+  double  *a,*b,*c,*ma,*mb,*mc,m[6],l0,l1,l2,rap;
+  int      ia,ib,ic;
+  char     i;
+
+  /* 2*area */
+  anisurf  = _MMG5_surftri33_ani(mesh,met,pt);
+  if ( anisurf <= _MMG5_EPSD ) return(0.0);
+
+  ia = pt->v[0];
+  ib = pt->v[1];
+  ic = pt->v[2];
+
+  ma = &met->m[6*ia];
+  mb = &met->m[6*ib];
+  mc = &met->m[6*ic];
+
+  dd  = 1.0 / 3.0;
+  for (i=0; i<6; i++)
+    m[i] = dd * (ma[i] + mb[i] + mc[i]);
+
+  a = &mesh->point[ia].c[0];
+  b = &mesh->point[ib].c[0];
+  c = &mesh->point[ic].c[0];
+
+  abx = b[0] - a[0];
+  aby = b[1] - a[1];
+  abz = b[2] - a[2];
+  acx = c[0] - a[0];
+  acy = c[1] - a[1];
+  acz = c[2] - a[2];
+  bcx = c[0] - b[0];
+  bcy = c[1] - b[1];
+  bcz = c[2] - b[2];
+
+  /* length */
+  l0 = m[0]*abx*abx + m[3]*aby*aby + m[5]*abz*abz
+    + 2.0*(m[1]*abx*aby + m[2]*abx*abz + m[4]*aby*abz);
+
+  l1 = m[0]*acx*acx + m[3]*acy*acy + m[5]*acz*acz
+      + 2.0*(m[1]*acx*acy + m[2]*acx*acz + m[4]*acy*acz);
+
+  l2 = m[0]*bcx*bcx + m[3]*bcy*bcy + m[5]*bcz*bcz
+      + 2.0*(m[1]*bcx*bcy + m[2]*bcx*bcz + m[4]*bcy*bcz);
+
+  rap = l0 + l1 + l2;
+
+  /* quality = 2*area/length */
+  if ( rap > _MMG5_EPSD ) {
+    return( anisurf / rap);
+  }
+  else
+    return(0.0);
+}
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -54,14 +120,15 @@ inline double _MMG5_caltri_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt) {
 
   anisurf = _MMG5_surftri_ani(mesh,met,ptt);
 
-  l[0] = _MMG5_lenedg_ani(mesh,met,ib,ic,( ptt->tag[0] & MG_GEO ));
-  l[1] = _MMG5_lenedg_ani(mesh,met,ia,ic,( ptt->tag[1] & MG_GEO ));
-  l[2] = _MMG5_lenedg_ani(mesh,met,ia,ib,( ptt->tag[2] & MG_GEO ));
+  l[0] = _MMG5_lenSurfEdg_ani(mesh,met,ib,ic,( ptt->tag[0] & MG_GEO ));
+  l[1] = _MMG5_lenSurfEdg_ani(mesh,met,ia,ic,( ptt->tag[1] & MG_GEO ));
+  l[2] = _MMG5_lenSurfEdg_ani(mesh,met,ia,ib,( ptt->tag[2] & MG_GEO ));
 
   rap = l[0]*l[0] + l[1]*l[1] + l[2]*l[2];
 
   if ( rap < _MMG5_EPSD ) return(0.0);
 
+  /* quality = 2*area/length */
   return (anisurf / rap);
 }
 

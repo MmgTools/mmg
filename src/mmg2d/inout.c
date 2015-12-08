@@ -78,7 +78,7 @@ double MMG_swapd(double sbin)
 }
 
 /* read mesh data */
-int MMG2_loadMesh(MMG5_pMesh mesh,char *filename) {
+int MMG2D_loadMesh(MMG5_pMesh mesh,char *filename) {
   FILE        *inm;
   MMG5_pPoint       ppt; 
   MMG5_pEdge        ped;
@@ -107,7 +107,7 @@ int MMG2_loadMesh(MMG5_pMesh mesh,char *filename) {
       ptr  = strstr(data,".mesh");
       *ptr = '\0';
       strcat(data,".mesh");
-      if (!(inm = fopen(data,"r")) ) {
+      if (!(inm = fopen(data,"rb")) ) {
         fprintf(stderr,"  ** %s  NOT FOUND.\n",data);
         return(0);
       } else {
@@ -134,7 +134,7 @@ int MMG2_loadMesh(MMG5_pMesh mesh,char *filename) {
   else {
     ptr = strstr(data,".meshb");
     if( !ptr ) {
-      if( !(inm = fopen(data,"r")) ) {
+      if( !(inm = fopen(data,"rb")) ) {
         fprintf(stderr,"  ** %s  NOT FOUND.\n",data);
         return(0);
       }
@@ -505,7 +505,7 @@ int MMG2_loadMesh(MMG5_pMesh mesh,char *filename) {
   
 
 /* load metric */
-int MMG2_loadSol(MMG5_pSol sol,char *filename,int npmax,int msh) {
+int MMG2D_loadSol(MMG5_pMesh mesh,MMG5_pSol sol,char *filename,int msh) {
   FILE       *inm;
   float       fsol;
   double      dsol;
@@ -522,7 +522,7 @@ int MMG2_loadSol(MMG5_pSol sol,char *filename,int npmax,int msh) {
     ptr  = strstr(data,".solb");
     *ptr = '\0';
     strcat(data,".sol");
-    if( !(inm = fopen(data,"r")) ) {
+    if( !(inm = fopen(data,"rb")) ) {
       fprintf(stderr,"  ** %s  NOT FOUND.\n",data);
       return(0);
     }
@@ -623,7 +623,7 @@ int MMG2_loadSol(MMG5_pSol sol,char *filename,int npmax,int msh) {
   sol->size = btyp;
 
   /* mem alloc */
-  _MMG5_SAFE_CALLOC(sol->m,(sol->size*npmax)+1,double);
+  _MMG5_SAFE_CALLOC(sol->m,(sol->size*(mesh->npmax+1)),double);
 
   /* read mesh solutions */
   rewind(inm);
@@ -682,7 +682,7 @@ int MMG2_loadSol(MMG5_pSol sol,char *filename,int npmax,int msh) {
 
 
 /* save mesh to disk */
-int MMG2_saveMesh(MMG5_pMesh mesh,char *filename) {
+int MMG2D_saveMesh(MMG5_pMesh mesh,char *filename) {
   FILE*	       inm;
   MMG5_pPoint       ppt;
   MMG5_pEdge        ped;
@@ -695,14 +695,29 @@ int MMG2_saveMesh(MMG5_pMesh mesh,char *filename) {
   strcpy(data,filename);
   ptr = strstr(data,".mesh");
   if ( !ptr ) {
-    strcat(data,".meshb");
-    *ptr = '\0';
     strcat(data,".mesh");
+    if( !(inm = fopen(data,"w")) ) {
+      fprintf(stderr,"  ** UNABLE TO OPEN %s.\n",data);
+      return(0);
+    }
   }
-  if( !(inm = fopen(data,"w")) ) {
-    fprintf(stderr,"  ** UNABLE TO OPEN %s.\n",data);
-    return(0);
+  else {
+    ptr = strstr(data,".meshb");
+    if( ptr ) {
+      fprintf(stderr,"  ** UNABLE TO SAVE FILE AT BINARY FORMAT:"
+              " OPTION UNAVAILABLE FOR MMG2D.\n");
+      return(0);
+
+    }
+    else {
+      if( !(inm = fopen(data,"w")) ) {
+        fprintf(stderr,"  ** UNABLE TO OPEN %s.\n",data);
+        return(0);
+      }
+    }
   }
+  fprintf(stdout,"  %%%% %s OPENED\n",data);
+
   strcpy(&chaine[0],"MeshVersionFormatted 2\n");
   fprintf(inm,"%s",chaine);
   if(mesh->info.nreg) {
@@ -712,8 +727,6 @@ int MMG2_saveMesh(MMG5_pMesh mesh,char *filename) {
   }
   fprintf(inm,"%s ",chaine);
 
-  fprintf(stdout,"  %%%% %s OPENED\n",data);
-  
   // //HACK SAVE ONLY SD ref 2
   //   for (k=1; k<=mesh->np; k++) {
   //     ppt = &mesh->point[k];
@@ -961,7 +974,7 @@ int MMG2_loadVect(MMG5_pMesh mesh,char *filename) {
   /*   ptr  = strstr(data,".solb"); */
   /*   *ptr = '\0'; */
   /*   strcat(data,".sol"); */
-  /*   if( !(inm = fopen(data,"r")) ) { */
+  /*   if( !(inm = fopen(data,"rb")) ) { */
   /*     fprintf(stderr,"  ** %s  NOT FOUND.\n",data); */
   /*     return(0); */
   /*   } */
@@ -1093,7 +1106,7 @@ int MMG2_loadVect(MMG5_pMesh mesh,char *filename) {
   /* fclose(inm); */
   return(1);
 }
-int MMG2_saveSol(MMG5_pMesh mesh,MMG5_pSol sol,char *filename) {
+int MMG2D_saveSol(MMG5_pMesh mesh,MMG5_pSol sol,char *filename) {
   FILE*        inm;
   MMG5_pPoint       ppt;
   float        fsol;
@@ -1285,7 +1298,7 @@ int MMG2_saveSol(MMG5_pMesh mesh,MMG5_pSol sol,char *filename) {
   return(1);
 }
 
-int MMG2_saveVect(MMG5_pMesh mesh,MMG5_pSol sol,char *filename,double lambda) {
+int MMG2D_saveVect(MMG5_pMesh mesh,MMG5_pSol sol,char *filename,double lambda) {
   printf("comment for merge of the data structure\n");
   exit(0);
   /* FILE        *inm,*f,*inm2; */

@@ -788,10 +788,10 @@ static int regnor(MMG5_pMesh mesh) {
 
 
 /* preprocessing stage: mesh analysis */
-int analys(MMG5_pMesh mesh) {
+int _MMGS_analys(MMG5_pMesh mesh) {
 
   /* create adjacency */
-  if ( !_MMG5_hashTria(mesh) ) {
+  if ( !_MMGS_hashTria(mesh) ) {
     fprintf(stdout,"  ## Hashing problem. Exit program.\n");
     return(0);
   }

@@ -58,7 +58,7 @@ int MMG2_colpoi(MMG5_pMesh mesh, MMG5_pSol sol,int iel,int iar,int ia,int ib,dou
   
   //if vertex between two SD, check geometry criterion
   if(ppb->tag & M_SD) {
-    // MMG2_saveMesh(mesh,"avttoto.mesh");
+    // MMG2D_saveMesh(mesh,"avttoto.mesh");
     if(!(ppa->tag & M_SD)) {
       free(list);
       return(0);
@@ -306,8 +306,8 @@ int MMG2_colpoi(MMG5_pMesh mesh, MMG5_pSol sol,int iel,int iar,int ia,int ib,dou
   }
 
 
-  _MMG5_delElt(mesh,iel);
-  _MMG5_delElt(mesh,jel);
+  _MMG2D_delElt(mesh,iel);
+  _MMG2D_delElt(mesh,jel);
   memcpy(ppb->c,coor,3*sizeof(double));
   memcpy(&sol->m[sol->size*(pib-1) + 1],solu,sol->size*sizeof(double));  
   
@@ -595,7 +595,7 @@ int MMG2_colpoibdry(MMG5_pMesh mesh, MMG5_pSol sol,int iel,int iar,int ia,int ib
     printf("la edge %d %d iar %d tr %d\n",pia,pib,iar,iel);
     printf("pt %d %d %d\n",pt->v[0],pt->v[1],pt->v[2]);
     printf("pt->ned %d %d %d\n",pt->edg[0],pt->edg[1],pt->edg[2]);
-    MMG2_saveMesh(mesh,"ttttt.mesh");
+    MMG2D_saveMesh(mesh,"ttttt.mesh");
     exit(0);
   }
   assert(num);
@@ -619,7 +619,7 @@ int MMG2_colpoibdry(MMG5_pMesh mesh, MMG5_pSol sol,int iel,int iar,int ia,int ib
     ped = &mesh->edge[pt->edg[ib]];
     mesh->tria[a1].edg[v1]=pt->edg[ib];
   }
-  _MMG5_delElt(mesh,iel);
+  _MMG2D_delElt(mesh,iel);
   memcpy(ppb->c,coor,3*sizeof(double));
   memcpy(&sol->m[sol->size*(pib-1) + 1],solu,sol->size*sizeof(double));  
   

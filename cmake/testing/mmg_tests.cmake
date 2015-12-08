@@ -43,6 +43,10 @@ FOREACH(EXEC ${LISTEXEC_MMG})
   ${MMG_CI_TESTS}/SphereVolAni/sphere
   -out ${MMG_CI_TESTS}/SphereVolAni/sphere.o.meshb)
 
+  ADD_TEST(NAME TorusholesAni_${EXEC}
+  COMMAND ${EXEC} -d -hgrad 1.15
+  ${MMG_CI_TESTS}/TorusholesAni/torusholes.meshb
+  -out ${MMG_CI_TESTS}/TorusholesAni/torusholes.o.meshb)
   ##############################################################################
   #####
   #####         Check Memory Leak

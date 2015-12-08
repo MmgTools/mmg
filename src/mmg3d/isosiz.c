@@ -42,6 +42,69 @@ extern char   ddb;
 #define A16TH     0.0625
 #define A32TH     0.03125
 
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the sol structure.
+ * \param ia index of edge in tetra \a pt .
+ * \param pt pointer toward the tetra from which we come.
+ * \return length of edge according to the prescribed metric.
+ *
+ * Compute length of edge \f$[i0;i1]\f$ according to the prescribed iso
+ * metric (length identic for internal edges than for surface edges).
+ *
+ */
+inline double _MMG5_lenedg_iso(MMG5_pMesh mesh,MMG5_pSol met,int ia,
+                               MMG5_pTetra pt) {
+  int ip1,ip2;
+
+  ip1 = pt->v[_MMG5_iare[ia][0]];
+  ip2 = pt->v[_MMG5_iare[ia][1]];
+//#warning CECILE : on ne tient pas compte du fait que ca peut etre une ridge
+  /* if(pt->xt) { */
+  /*    pxt = pt->xt ? &mesh->xtetra[pt->xt] : 0; */
+  /*   return(_MMG5_lenSurfEdg_iso(mesh,met,ip1,ip2,(pxt->tag[ia] & MG_GEO))); */
+  /* } */
+  /* else */
+    return(_MMG5_lenSurfEdg_iso(mesh,met,ip1,ip2,0));
+}
+
+inline double _MMG5_lenedgspl_iso(MMG5_pMesh mesh ,MMG5_pSol met, int ia,
+                                  MMG5_pTetra pt) {
+  int ip1,ip2;
+
+  ip1 = pt->v[_MMG5_iare[ia][0]];
+  ip2 = pt->v[_MMG5_iare[ia][1]];
+
+  return(_MMG5_lenSurfEdg_iso(mesh,met,ip1,ip2,0));
+
+}
+
+/**
+ * \brief Compute edge length from edge's coordinates.
+ * \param *ca pointer toward the coordinates of the first edge's extremity.
+ * \param *cb pointer toward the coordinates of the second edge's extremity.
+ * \param *ma pointer toward the metric associated to the first edge's extremity.
+ * \param *mb pointer toward the metric associated to the second edge's extremity.
+ * \return edge length.
+ *
+ * Compute length of edge \f$[ca,cb]\f$ (with \a ca and \a cb
+ * coordinates of edge extremities) according to the isotropic size
+ * prescription.
+ *
+ */
+inline double _MMG5_lenedgCoor_iso(double *ca,double *cb,double *ma,double *mb) {
+  double   h1,h2,l,r,len;
+
+  h1 = *ma;
+  h2 = *mb;
+  l = (cb[0]-ca[0])*(cb[0]-ca[0]) + (cb[1]-ca[1])*(cb[1]-ca[1]) \
+    + (cb[2]-ca[2])*(cb[2]-ca[2]);
+  l = sqrt(l);
+  r = h2 / h1 - 1.0;
+  len = fabs(r) < _MMG5_EPS ? l / h1 : l / (h2-h1) * log(r+1.0);
+
+  return(len);
+}
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -411,7 +474,7 @@ _MMG5_defsizreg(MMG5_pMesh mesh,MMG5_pSol met,int nump,int *lists,
  * Point is used, to store the prescribed size (not inverse, squared,...)
  *
  */
-int _MMG5_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
+int _MMG3D_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTetra    pt;
   MMG5_pxTetra   pxt;
   MMG5_pPoint    p0,p1;

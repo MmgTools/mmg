@@ -33,14 +33,14 @@
  * \copyright GNU Lesser General Public License.
  *
  * \note This file contains some internal functions for the API, see the \ref
- * common/libmmg.h, \ref mmgs/libmmgs.h and \ref mmg3d/libmmg3d.h header files
+ * common/libmmgcommon.h, \ref mmgs/libmmgs.h and \ref mmg3d/libmmg3d.h header files
  * for the documentation of all the usefull user's API functions.
  *
  * C API for MMG library.
  *
  */
 
-#include "mmg.h"
+#include "mmgcommon.h"
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -48,7 +48,7 @@
  * Initialization of the input parameters (stored in the Info structure).
  *
  */
-void _MMG5_mmgInit_parameters(MMG5_pMesh mesh) {
+void _MMG5_Init_parameters(MMG5_pMesh mesh) {
 
   memset(&mesh->info,0, sizeof(MMG5_Info));
 

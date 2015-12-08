@@ -33,8 +33,7 @@
  * \todo doxygen documentation.
  */
 
-#include "mmg.h"
-
+#include "mmgcommon.h"
 
 /**
  * \param mesh pointer toward the mesh stucture.
@@ -44,12 +43,13 @@
  * \param n pointer to store the computed normal.
  * \return 1
  *
- * Compute face normal given three points on the surface.
+ * Compute non-normalized face normal given three points on the surface.
  *
  */
-inline int _MMG5_norpts(MMG5_pMesh mesh,int ip1,int ip2, int ip3,double *n) {
+inline int _MMG5_nonUnitNorPts(MMG5_pMesh mesh,
+                                int ip1,int ip2, int ip3,double *n) {
   MMG5_pPoint   p1,p2,p3;
-  double   dd,abx,aby,abz,acx,acy,acz,det;
+  double        abx,aby,abz,acx,acy,acz;
 
   p1 = &mesh->point[ip1];
   p2 = &mesh->point[ip2];
@@ -67,6 +67,49 @@ inline int _MMG5_norpts(MMG5_pMesh mesh,int ip1,int ip2, int ip3,double *n) {
   n[0] = aby*acz - abz*acy;
   n[1] = abz*acx - abx*acz;
   n[2] = abx*acy - aby*acx;
+
+  return(1);
+}
+
+/**
+ * \param mesh pointer toward the mesh stucture.
+ * \param ip1 first point of face.
+ * \param ip2 second point of face.
+ * \param ip3 third point of face.
+ * \param n pointer to store the computed normal.
+ * \return 1
+ *
+ * Compute non-oriented surface area of a triangle.
+ *
+ */
+inline double _MMG5_nonorsurf(MMG5_pMesh mesh,MMG5_pTria pt) {
+  double   n[3];
+  int      ip1, ip2, ip3;
+
+  ip1 = pt->v[0];
+  ip2 = pt->v[1];
+  ip3 = pt->v[2];
+
+  _MMG5_nonUnitNorPts(mesh,ip1,ip2,ip3,n);
+
+  return(n[0]*n[0] + n[1]*n[1] + n[2]*n[2]);
+}
+/**
+ * \param mesh pointer toward the mesh stucture.
+ * \param ip1 first point of face.
+ * \param ip2 second point of face.
+ * \param ip3 third point of face.
+ * \param n pointer to store the computed normal.
+ * \return 1
+ *
+ * Compute normalized face normal given three points on the surface.
+ *
+ */
+inline int _MMG5_norpts(MMG5_pMesh mesh,int ip1,int ip2, int ip3,double *n) {
+  double   dd,det;
+
+  _MMG5_nonUnitNorPts(mesh,ip1,ip2,ip3,n);
+
   det  = n[0]*n[0] + n[1]*n[1] + n[2]*n[2];
 
   if ( det < _MMG5_EPSD2 )  return(0);
@@ -318,7 +361,7 @@ inline int _MMG5_sys33sym(double a[6], double b[3], double r[3]){
 
 /**
  * \param mesh pointer toward the mesh structure.
- * \param filename pointer toward the file name.
+ * \param fileName pointer toward the file name.
  *
  * Debug function (not use in clean code): write mesh->tria structure in file.
  *
@@ -363,6 +406,14 @@ long long _MMG5_memSize (void) {
 #elif defined(__unix__) || defined(__unix) || defined(unix)
   mem = ((long long)sysconf(_SC_PHYS_PAGES))*
     ((long long)sysconf(_SC_PAGE_SIZE));
+#elif defined(_WIN16) || defined(_WIN32) || defined(_WIN64) || defined(__WIN32__) || defined(__TOS_WIN__) || defined(__WINDOWS__)
+  MEMORYSTATUSEX status;
+  status.dwLength = sizeof(status);
+  GlobalMemoryStatusEx(&status);
+  // status.ullTotalPhys is an unsigned long long: we must check that it fits inside a long long
+  mem = status.ullTotalPhys & LLONG_MAX;
+  if (mem == status.ullTotalPhys) return(mem);
+  else return(LLONG_MAX);
 #else
   printf("  ## WARNING: UNKNOWN SYSTEM, RECOVER OF MAXIMAL MEMORY NOT AVAILABLE.\n");
   return(0);
@@ -371,6 +422,26 @@ long long _MMG5_memSize (void) {
   return(mem);
 }
 
+/**
+*Safe cast into a long */
+inline
+long _MMG5_safeLL2LCast(long long val)
+{
+  long tmp_l;
+
+  tmp_l  = (long)(val);
+
+  if ( (long long)(tmp_l) != val ) {
+        fprintf(stdout,"  ## Error:");
+        fprintf(stdout," unable to cast value.n");
+		exit(EXIT_FAILURE);
+		}
+  return(tmp_l);
+}
+
+
+
+#ifdef GNU
 /**
  * \param a real coefficient of the degree 3 polynomial.
  * \param r computed complex roots.
@@ -471,3 +542,219 @@ int _MMG5_rootDeg3(double a[4],double complex r[3]) {
 
   return(3);
 }
+#else
+/**
+ * \param a real coefficient of the degree 3 polynomial.
+ * \param r computed complex roots.
+ * \return number of roots, counted with multiplicity.
+ *
+ * Compute the 3 complex roots of a degree 3 polynomial with real coefficients
+ * \f$a[3]T^3 + ... + a[0]\f$ By convention, the real roots are stored first (same
+ * thing for multiple roots): return value = number of roots, counted with
+ * multiplicity.
+ *
+ */
+int _MMG5_rootDeg3(double a[4],DOUBLE_COMPLEX r[3]) {
+  double p,q,Delta,u,v,pi,b[4];
+  DOUBLE_COMPLEX t,tbar,j,jj;
+
+  pi = 3.14159;
+
+  j = _DCOMPLEX_(cos(2.0*_MMG5_ATHIRD*pi),sin(2.0*_MMG5_ATHIRD*pi));
+  jj = _MMG5_mult_complex(j, j);
+
+  /* Case when the polynomial is actually second order */
+  if( fabs(a[3]) < _MMG5_EPSD ) {
+    /* Case it is first order : return 0.0 when root does not exist */
+    if( fabs(a[2]) < _MMG5_EPSD ) {
+      if( fabs(a[1]) < _MMG5_EPSD ) {
+		  r[0] = r[1] = r[2] = _DCOMPLEX_(0.0,0.0);
+        return(0);
+      }
+      else{
+		  r[0] = r[1] = r[2] = _DCOMPLEX_(-a[0],0.0);
+        return(1);
+      }
+    }
+    else{
+      Delta = a[1]*a[1]-4.0*a[2]*a[0];
+      if( Delta > 0.0 ) {
+        r[0] = _DCOMPLEX_(0.5/a[2]*(-a[1] - sqrt(Delta)),0.0);
+        r[1] = r[2] = _DCOMPLEX_(0.5/a[2]*(-a[1] + sqrt(Delta)),0.0);
+      }
+      else if( Delta == 0.0 ) {
+        r[0] = r[1] = _DCOMPLEX_(-0.5*a[1]/a[2],0.0);
+      }
+      else{
+        r[0] = _DCOMPLEX_(-0.5/a[2]*a[1], -0.5/a[2]*sqrt(-Delta));
+        r[1] = r[2] = _DCOMPLEX_(-0.5/a[2]*a[1], 0.5/a[2]*sqrt(-Delta));
+      }
+      return(2);
+    }
+  }
+
+  /* Normalize coefficients */
+  b[3] = 1.0;
+  b[2] = a[2]/a[3];
+  b[1] = a[1]/a[3];
+  b[0] = a[0]/a[3];
+
+  p = b[1] - _MMG5_ATHIRD*b[2]*b[2];
+  q = b[0] - _MMG5_ATHIRD*b[2]*b[1] + 2.0/27.0*b[2]*b[2]*b[2];
+  Delta = 4.0/27.0*p*p*p+q*q;
+
+  if( Delta>0.0 ) {
+    /* Polynomial T^2 +qT -p^3/27 admits two real roots u and v */
+    u = 0.5*(-q - sqrt(Delta));
+    v = 0.5*(-q + sqrt(Delta));
+
+    u = u < 0.0 ? - pow(fabs(u),_MMG5_ATHIRD) :pow(fabs(u),_MMG5_ATHIRD);
+    v = v < 0.0 ? - pow(fabs(v),_MMG5_ATHIRD) :pow(fabs(v),_MMG5_ATHIRD);
+
+    r[0] = _DCOMPLEX_(u+v,0.0);
+    r[1] = _MMG5_add_complex(_MMG5_mult_cr(jj,u),_MMG5_mult_cr(j ,v));
+    r[2] = _MMG5_add_complex(_MMG5_mult_cr(j ,u),_MMG5_mult_cr(jj,v));
+
+  }
+  else if (Delta<0.0){
+    /* Polynomial T^2 +qT -p^3/27 admits two complex conjuguate roots u and v */
+    t = _DCOMPLEX_(-0.5*q, 0.5*sqrt(-Delta));
+    t = cpow(t, _DCOMPLEX_(_MMG5_ATHIRD,0.0));
+    tbar = conj(t);
+
+    /* Theoretically speaking, the 3 roots are real... But to make sure... */
+    r[0] = _DCOMPLEX_(creal(t)+creal(tbar),0.0);
+	r[1] = _DCOMPLEX_(creal(_MMG5_add_complex(_MMG5_mult_complex(j, t), _MMG5_mult_complex(_MMG5_mult_complex(j, j), tbar))),0);
+	r[2] = _DCOMPLEX_(creal(_MMG5_add_complex(_MMG5_mult_complex(_MMG5_mult_complex(j, j), t), _MMG5_mult_complex(j, tbar))),0);
+  }
+  else{
+    /* Polynomial T^2 +qT -p^3/27 admits one double real root */
+    u = -0.5*q;
+    u = pow(u,_MMG5_ATHIRD);
+
+    r[0] = _DCOMPLEX_(-u,0.0);
+    r[1] = _DCOMPLEX_(-u,0.0);
+    r[2] = _DCOMPLEX_(2.0*u,0.0);
+
+  }
+
+  r[0] = _DCOMPLEX_(creal(r[0])-_MMG5_ATHIRD*b[2],0.0);
+  r[1] = _DCOMPLEX_(creal(r[1])-_MMG5_ATHIRD*b[2],0.0);
+  r[2] = _DCOMPLEX_(creal(r[2])-_MMG5_ATHIRD*b[2],0.0);
+
+  return(3);
+}
+
+/**
+* \param z1 complex number
+* \return \f$ -z1 \f$
+*
+* Compute the opposite of a complex number.
+*
+* \Remark Needed to compile with visual studio IDE.
+*/
+inline
+DOUBLE_COMPLEX _MMG5_opp_complex(DOUBLE_COMPLEX z1)
+{
+	return(_DCOMPLEX_(-creal(z1), -cimag(z1)));
+}
+
+/**
+* \param z1 complex number
+* \return \f$ 1/z1 \f$
+*
+* Compute the inverse of a complex number.
+*
+* \Remark Needed to compile with visual studio IDE.
+*/
+inline
+DOUBLE_COMPLEX _MMG5_inv_complex(DOUBLE_COMPLEX z1)
+{
+	double denom;
+
+	denom  = creal(z1)*creal(z1) + cimag(z1)*cimag(z1);
+
+	return(_DCOMPLEX_(creal(z1)/denom, -cimag(z1)/denom));
+}
+
+/**
+ * \param z1 complex number
+ * \param z2 complex number
+ * \return \f$ z1 + z2 \f$
+ *
+ * Compute the sum of two complex numbers.
+ *
+ * \Remark needed to compile with visual studio IDE
+ */
+inline
+DOUBLE_COMPLEX _MMG5_add_complex(DOUBLE_COMPLEX z1, DOUBLE_COMPLEX z2)
+{
+	return(_DCOMPLEX_(creal(z1) + creal(z2), cimag(z1) + cimag(z2)));
+}
+
+/**
+* \param z1 complex number
+* \param z2 complex number
+* \return \f$ z1 - z2 \f$
+*
+* Compute the difference of two complex numbers.
+*
+* \Remark needed to compile with visual studio IDE
+*/
+inline
+DOUBLE_COMPLEX _MMG5_substract_complex(DOUBLE_COMPLEX z1, DOUBLE_COMPLEX z2)
+{
+	return(_MMG5_add_complex(z1,_MMG5_opp_complex(z2)));
+}
+
+/**
+* \param z1 complex number
+* \param z2 complex number
+* \return \f$ z1 * z2 \f$
+*
+* Multiplicate two complex numbers.
+*
+* \Remark needed to compile with visual studio IDE
+*/
+inline
+DOUBLE_COMPLEX _MMG5_mult_complex(DOUBLE_COMPLEX z1, DOUBLE_COMPLEX z2)
+{
+	double real_res;
+	double imag_res;
+
+	real_res = creal(z1)*creal(z2) - cimag(z1)*cimag(z2);
+	imag_res = creal(z1)*cimag(z2) + cimag(z1)*creal(z2);
+	return(_DCOMPLEX_(real_res, imag_res));
+}
+
+/**
+* \param z1 complex number
+* \param r real number
+* \return \f$ z1 * r f$
+*
+* Multiplicate a complex number by a real one.
+*
+* \Remark needed to compile with visual studio IDE
+*/
+inline
+DOUBLE_COMPLEX _MMG5_mult_cr(DOUBLE_COMPLEX z1, double r)
+{
+
+	return(_DCOMPLEX_(r*creal(z1), r*cimag(z1)));
+}
+
+/**
+* \param z1 complex number
+* \param z2 complex number
+* \return \f$ z1 * z2 \f$
+*
+* Multiplicate two complex numbers.
+*
+* \Remark needed to compile with visual studio IDE
+*/
+inline
+DOUBLE_COMPLEX _MMG5_div_complex(DOUBLE_COMPLEX z1, DOUBLE_COMPLEX z2)
+{
+	return(_MMG5_mult_complex(z1,_MMG5_inv_complex(z2)));
+}
+#endif

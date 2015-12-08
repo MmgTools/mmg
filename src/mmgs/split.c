@@ -47,7 +47,7 @@
  * triangles are not empty (otherwise we can create a 0 surface triangle).
  *
  */
-int _MMG5_split1_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int i,int *vx) {
+int _MMGS_split1_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int i,int *vx) {
   MMG5_pTria      pt,pt0;
   int             is;
   double          cal;
@@ -60,13 +60,13 @@ int _MMG5_split1_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int i,int *vx) {
 
   is         = _MMG5_iprv2[i];
   pt0->v[is] = vx[i];
-  cal        = _MMG5_calelt(mesh,met,pt0);
+  cal        = _MMG5_nonorsurf(mesh,pt0);
   if ( cal < _MMG5_EPSD )  return(0);
 
   pt0->v[is] = pt->v[is];
   is         = _MMG5_inxt2[i];
   pt0->v[is] = vx[i];
-  cal        = _MMG5_calelt(mesh,met,pt0);
+  cal        = _MMG5_nonorsurf(mesh,pt0);
   if ( cal < _MMG5_EPSD )  return(0);
 
   return(1);
@@ -89,7 +89,7 @@ int split1(MMG5_pMesh mesh,MMG5_pSol met,int k,int i,int *vx) {
   int             iel;
   char            i1,i2;
 
-  iel = _MMG5_newElt(mesh);
+  iel = _MMGS_newElt(mesh);
   if ( !iel ) {
     _MMG5_TRIA_REALLOC(mesh,iel,mesh->gap,
                        printf("  ## Error: unable to allocate a new element.\n");
@@ -134,7 +134,7 @@ int split1(MMG5_pMesh mesh,MMG5_pSol met,int k,int i,int *vx) {
  *
  * \remark Don't work for non-manifold edge.
  */
-int _MMG5_simbulgept(MMG5_pMesh mesh,MMG5_pSol met, int k,int i,int ip) {
+int _MMGS_simbulgept(MMG5_pMesh mesh,MMG5_pSol met, int k,int i,int ip) {
   MMG5_pTria     pt,pt0;
   MMG5_pPoint    ppt0;
   double         cal;
@@ -203,7 +203,7 @@ int split1b(MMG5_pMesh mesh,int k,char i,int ip) {
   int            *adja,iel,jel,kel,mel,ier;
   char           i1,i2,j,j1,j2,m;
 
-  iel = _MMG5_newElt(mesh);
+  iel = _MMGS_newElt(mesh);
   if ( !iel )  {
     _MMG5_TRIA_REALLOC(mesh,iel,mesh->gap,
                        _MMG5_INCREASE_MEM_MESSAGE();
@@ -234,7 +234,7 @@ int split1b(MMG5_pMesh mesh,int k,char i,int ip) {
     if ( j == 1 )       uv[0] = 0.0;
     else if ( j == 2 )  uv[1] = 0.0;
 
-    ier = _MMG5_bezierInt(&b,uv,o,no,to);
+    ier = _MMGS_bezierInt(&b,uv,o,no,to);
     assert(ier);
     go = &mesh->xpoint[ppt->xp];
     memcpy(go->n2,no,3*sizeof(double));
@@ -260,11 +260,11 @@ int split1b(MMG5_pMesh mesh,int k,char i,int ip) {
     mesh->adja[3*(mel-1)+1+m]  = 3*iel+i1;
 
   if ( jel ) {
-    kel = _MMG5_newElt(mesh);
+    kel = _MMGS_newElt(mesh);
     if ( !kel )  {
       _MMG5_TRIA_REALLOC(mesh,kel,mesh->gap,
                          _MMG5_INCREASE_MEM_MESSAGE();
-                         _MMG5_delElt(mesh,iel);
+                         _MMGS_delElt(mesh,iel);
                          return(0));
     }
     pt  = &mesh->tria[jel];
@@ -330,18 +330,18 @@ int _MMG5_split2_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
 
   /* Check the quality of the 3 new triangles */
   pt0->v[i2] = vx[i];
-  cal        = _MMG5_calelt(mesh,met,pt0);
+  cal        = _MMG5_nonorsurf(mesh,pt0);
   if ( cal < _MMG5_EPSD )  return(0);
 
   pt0->v[i1] = vx[i];
   pt0->v[i2] = vx[i1];
-  cal        = _MMG5_calelt(mesh,met,pt0);
+  cal        = _MMG5_nonorsurf(mesh,pt0);
   if ( cal < _MMG5_EPSD )  return(0);
 
   pt0->v[i2] = pt->v[i2];
   pt0->v[i1] = vx[i];
   pt0->v[i]  = vx[i1];
-  cal        = _MMG5_calelt(mesh,met,pt0);
+  cal        = _MMG5_nonorsurf(mesh,pt0);
   if ( cal < _MMG5_EPSD )  return(0);
 
   return(1);
@@ -364,7 +364,7 @@ int split2(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
   char          i,i1,i2;
 
   /* create 2 elements */
-  iel = _MMG5_newElt(mesh);
+  iel = _MMGS_newElt(mesh);
   if ( !iel ) {
     _MMG5_TRIA_REALLOC(mesh,iel,mesh->gap,
                        printf("  ## Error: unable to allocate a new element.\n");
@@ -372,7 +372,7 @@ int split2(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
                        printf("  Exit program.\n");
                        exit(EXIT_FAILURE));
   }
-  jel = _MMG5_newElt(mesh);
+  jel = _MMGS_newElt(mesh);
   if ( !jel ) {
     _MMG5_TRIA_REALLOC(mesh,jel,mesh->gap,
                        printf("  ## Error: unable to allocate a new element.\n");
@@ -428,7 +428,7 @@ int split2(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
  * triangles are not empty (otherwise we can create a 0 surface triangle).
  *
  */
-int _MMG5_split3_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
+int _MMGS_split3_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
   MMG5_pTria    pt,pt0;
   double        cal;
 
@@ -440,25 +440,25 @@ int _MMG5_split3_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
   /* Check the 4 new triangles */
   pt0->v[1]  = vx[2];
   pt0->v[2]  = vx[1];
-  cal        = _MMG5_calelt(mesh,met,pt0);
+  cal        = _MMG5_nonorsurf(mesh,pt0);
   if ( cal < _MMG5_EPSD )  return(0);
 
   pt0->v[1]  = pt->v[1];
   pt0->v[0]  = vx[2];
   pt0->v[2]  = vx[0];
-  cal        = _MMG5_calelt(mesh,met,pt0);
+  cal        = _MMG5_nonorsurf(mesh,pt0);
   if ( cal < _MMG5_EPSD )  return(0);
 
   pt0->v[2]  = pt->v[2];
   pt0->v[0]  = vx[1];
   pt0->v[1]  = vx[0];
-  cal        = _MMG5_calelt(mesh,met,pt0);
+  cal        = _MMG5_nonorsurf(mesh,pt0);
   if ( cal < _MMG5_EPSD )  return(0);
 
   pt0->v[0]  = vx[2];
   pt0->v[1]  = vx[0];
   pt0->v[2]  = vx[1];
-  cal        = _MMG5_calelt(mesh,met,pt0);
+  cal        = _MMG5_nonorsurf(mesh,pt0);
   if ( cal < _MMG5_EPSD )  return(0);
 
   return(1);
@@ -480,7 +480,7 @@ int split3(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
   int           iel,jel,kel;
 
   /* create 3 elements */
-  iel = _MMG5_newElt(mesh);
+  iel = _MMGS_newElt(mesh);
   if ( !iel ) {
     _MMG5_TRIA_REALLOC(mesh,iel,mesh->gap,
                        printf("  ## Error: unable to allocate a new element.\n");
@@ -488,7 +488,7 @@ int split3(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
                        printf("  Exit program.\n");
                        exit(EXIT_FAILURE));
   }
-  jel = _MMG5_newElt(mesh);
+  jel = _MMGS_newElt(mesh);
   if ( !jel ) {
     _MMG5_TRIA_REALLOC(mesh,jel,mesh->gap,
                        printf("  ## Error: unable to allocate a new element.\n");
@@ -496,7 +496,7 @@ int split3(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
                        printf("  Exit program.\n");
                        exit(EXIT_FAILURE));
   }
-  kel = _MMG5_newElt(mesh);
+  kel = _MMGS_newElt(mesh);
   if ( !kel ) {
     _MMG5_TRIA_REALLOC(mesh,kel,mesh->gap,
                        printf("  ## Error: unable to allocate a new element.\n");

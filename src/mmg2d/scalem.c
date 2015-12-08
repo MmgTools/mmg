@@ -119,7 +119,7 @@ int MMG2_scaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
       iadr = (k-1)*sol->size + 1; 
       for (i=0; i<sol->size; i++)  sol->m[iadr+i] *= dd;
       if(sethmin || sethmax) {
-#warning todo : metric troncature
+//#warning todo : metric troncature
       }
     }
     break;

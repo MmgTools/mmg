@@ -36,7 +36,7 @@
 #include "mmg3d.h"
 
 /** get new point address */
-int _MMG5_newPt(MMG5_pMesh mesh,double c[3],char tag) {
+int _MMG3D_newPt(MMG5_pMesh mesh,double c[3],char tag) {
   MMG5_pPoint  ppt;
   int     curpt;
 
@@ -72,7 +72,7 @@ int _MMG5_newPt(MMG5_pMesh mesh,double c[3],char tag) {
   return(curpt);
 }
 
-void _MMG5_delPt(MMG5_pMesh mesh,int ip) {
+void _MMG3D_delPt(MMG5_pMesh mesh,int ip) {
   MMG5_pPoint   ppt;
   MMG5_xPoint  *pxp;
 
@@ -91,7 +91,7 @@ void _MMG5_delPt(MMG5_pMesh mesh,int ip) {
 }
 
 /** get new elt address */
-int _MMG5_newElt(MMG5_pMesh mesh) {
+int _MMG3D_newElt(MMG5_pMesh mesh) {
   int     curiel;
 
   if ( !mesh->nenil )  return(0);
@@ -106,7 +106,7 @@ int _MMG5_newElt(MMG5_pMesh mesh) {
 }
 
 
-void _MMG5_delElt(MMG5_pMesh mesh,int iel) {
+void _MMG3D_delElt(MMG5_pMesh mesh,int iel) {
   MMG5_pTetra   pt;
   int      iadr;
 
@@ -127,7 +127,7 @@ void _MMG5_delElt(MMG5_pMesh mesh,int iel) {
 }
 
 /** memory repartition for the -m option */
-void _MMG5_memOption(MMG5_pMesh mesh) {
+void _MMG3D_memOption(MMG5_pMesh mesh) {
   long long  million = 1048576L;
   int        ctri,npask,bytes,memtmp;
 
@@ -151,7 +151,7 @@ void _MMG5_memOption(MMG5_pMesh mesh) {
     /* memory asked by user if possible, otherwise total physical memory */
     if ( (long long)(mesh->info.mem)*million > mesh->memMax && mesh->memMax ) {
       fprintf(stdout,"  ## Warning: asking for %d Mo of memory ",mesh->info.mem);
-      fprintf(stdout,"when only %lld available.\n",(long long)(mesh->memMax/million));
+      fprintf(stdout,"when only %ld available.\n",_MMG5_safeLL2LCast((long long)(mesh->memMax/million)));
     }
     else {
       mesh->memMax= (long long)(mesh->info.mem)*million;
@@ -198,8 +198,8 @@ void _MMG5_memOption(MMG5_pMesh mesh) {
   }
 
   if ( abs(mesh->info.imprim) > 4 || mesh->info.ddebug )
-    fprintf(stdout,"  MAXIMUM MEMORY AUTHORIZED (Mo)    %lld\n",
-            (long long)(mesh->memMax/million));
+    fprintf(stdout,"  MAXIMUM MEMORY AUTHORIZED (Mo)    %ld\n",
+            _MMG5_safeLL2LCast((long long)(mesh->memMax/million)));
 
   if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug ) {
     fprintf(stdout,"  _MMG5_NPMAX    %d\n",mesh->npmax);
@@ -214,7 +214,7 @@ void _MMG5_memOption(MMG5_pMesh mesh) {
 int _MMG5_zaldy(MMG5_pMesh mesh) {
   int     k;
 
-  _MMG5_memOption(mesh);
+  _MMG3D_memOption(mesh);
 
   _MMG5_ADD_MEM(mesh,(mesh->npmax+1)*sizeof(MMG5_Point),"initial vertices",
                 printf("  Exit program.\n");

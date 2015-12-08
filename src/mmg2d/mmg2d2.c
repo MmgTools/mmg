@@ -23,8 +23,8 @@
 #include "mmg2d.h"
 #define EPSDD  1e+6
 
-unsigned int MMG2_iare2[3][2] = { {0,1}, {0,2}, {1,2} };
-unsigned int MMG2_inxt[5] = {1,2,0,1,2};
+static unsigned int MMG2_iare2[3][2] = { {0,1}, {0,2}, {1,2} };
+
 extern int ddebug;
 
 /*remove BB triangles*/
@@ -39,7 +39,7 @@ int MMG2_removeBBtriangles(MMG5_pMesh mesh) {
   ip3=(mesh->np-1);
   ip4=(mesh->np);
 
-  if(mesh->info.ddebug) MMG2_saveMesh(mesh,"avtdel.mesh");
+  if(mesh->info.ddebug) MMG2D_saveMesh(mesh,"avtdel.mesh");
   nd = 0; 
   for(k=1 ; k<=mesh->nt ; k++) {
     pt  = &mesh->tria[k];
@@ -53,23 +53,23 @@ int MMG2_removeBBtriangles(MMG5_pMesh mesh) {
         adja2 = &mesh->adja[iadr2];
         adja2[adja[i]%3] = 0;
       }                  
-      _MMG5_delElt(mesh,k);
+      _MMG2D_delElt(mesh,k);
       continue;
     } else if(!pt->base) {
       printf("UNDETERMINED TRIANGLE %d : %d %d %d\n",k,pt->v[0],pt->v[1],pt->v[2]);
       nd++;
     }
   }
-  if(mesh->info.ddebug) MMG2_saveMesh(mesh,"apresdel.mesh");
+  if(mesh->info.ddebug) MMG2D_saveMesh(mesh,"apresdel.mesh");
            
   if(!nd) {
-    _MMG5_delPt(mesh,ip1);
-    _MMG5_delPt(mesh,ip2);
-    _MMG5_delPt(mesh,ip3);
-    _MMG5_delPt(mesh,ip4); 
+    _MMG2D_delPt(mesh,ip1);
+    _MMG2D_delPt(mesh,ip2);
+    _MMG2D_delPt(mesh,ip3);
+    _MMG2D_delPt(mesh,ip4); 
   } else {
     fprintf(stdout,"PROCEDURE FAILED : %d INDETERMINED TRIANGLES\n",nd);
-    MMG2_saveMesh(mesh,mesh->nameout);
+    MMG2D_saveMesh(mesh,mesh->nameout);
     return(0);
   }
   return(1);
@@ -133,7 +133,7 @@ int MMG2_insertpointdelone(MMG5_pMesh mesh,MMG5_pSol sol) {
     //printf("on trouve %d tria dans la cavity\n",lon);
     if ( lon < 1 ) {
       fprintf(stdout,"impossible d'inserer le point %d\n",k);
-      MMG2_saveMesh(mesh,"toto.mesh");
+      MMG2D_saveMesh(mesh,"toto.mesh");
       exit(0);
     } else {
       ret = _MMG2_delone(mesh,sol,k,list,lon);
@@ -148,7 +148,7 @@ int MMG2_insertpointdelone(MMG5_pMesh mesh,MMG5_pSol sol) {
     /*     //printf("adja %d %d %d\n",adja[0]/3, adja[1]/3,adja[2]/3); */
     /*   } */
     /*   _MMG5_chkmsh(mesh,1,0); */
-      // MMG2_saveMesh(mesh,"toto.mesh");
+      // MMG2D_saveMesh(mesh,"toto.mesh");
       //exit(0);
     /*}*/
 
@@ -183,7 +183,7 @@ int MMG2_insertpoint(MMG5_pMesh mesh,MMG5_pSol sol) {
     lel = MMG2_findTria(mesh,k);    
     if(!lel) {         
       //printf("on cherche le point %d : %e %e %d\n",k,ppt->c[0],ppt->c[1],ppt->ref);
-      //MMG2_saveMesh(mesh,"tmp.mesh");  
+      //MMG2D_saveMesh(mesh,"tmp.mesh");  
     }
     assert(lel);
     nflat = 0; // to avoid bad triangle  1, 2, 4, 3, 5, 7
@@ -198,7 +198,7 @@ int MMG2_insertpoint(MMG5_pMesh mesh,MMG5_pSol sol) {
     aext2 = adja[2];                
     if(ddebug) printf("tri trouve %d : %d %d %d\n",lel,ia,ib,ic);                
     /*creation de trois triangles*/
-    mel = _MMG5_newElt(mesh);
+    mel = _MMG2D_newElt(mesh);
     if ( !mel ) {
       _MMG5_TRIA_REALLOC(mesh,mel,mesh->gap,
                          printf("  ## Error: unable to allocate a new element.\n");
@@ -207,7 +207,7 @@ int MMG2_insertpoint(MMG5_pMesh mesh,MMG5_pSol sol) {
                          exit(EXIT_FAILURE));
       pt  = &mesh->tria[lel]; 
     }
-    nel = _MMG5_newElt(mesh);  
+    nel = _MMG2D_newElt(mesh);  
     if ( !nel ) {
       _MMG5_TRIA_REALLOC(mesh,mel,mesh->gap,
                          printf("  ## Error: unable to allocate a new element.\n");
@@ -436,7 +436,7 @@ int MMG2_insertpoint(MMG5_pMesh mesh,MMG5_pSol sol) {
     }  
     if(ddebug) {
       MMG2_tassage(mesh,sol);
-      MMG2_saveMesh(mesh,"titi.mesh");
+      MMG2D_saveMesh(mesh,"titi.mesh");
       _MMG5_chkmsh(mesh,0,0);
     }
 
@@ -485,7 +485,7 @@ int MMG2_markSD(MMG5_pMesh mesh) {
         if(pt1->ref==nref) continue;
         ped0 = pt->v[MMG2_iare[i][0]];
         ped1 = pt->v[MMG2_iare[i][1]];
-#warning optimize th
+//#warning optimize th
         for(j=1 ; j<=mesh->na ; j++) {
           ped = &mesh->edge[j];
           if((ped->a == ped0 && ped->b==ped1) || (ped->b == ped0 && ped->a==ped1)) break;  
@@ -535,7 +535,7 @@ int MMG2_markSD(MMG5_pMesh mesh) {
         voy = adja[i]%3;
         (&mesh->adja[3*(iel-1)+1])[voy] = 0;
       }
-      _MMG5_delElt(mesh,k); 
+      _MMG2D_delElt(mesh,k); 
       
     } 
   } else { /*remove all the triangle containing one of the BB vertex*/
@@ -558,15 +558,15 @@ int MMG2_markSD(MMG5_pMesh mesh) {
         voy = adja[i]%3;
         (&mesh->adja[3*(iel-1)+1])[voy] = 0;
       }
-      _MMG5_delElt(mesh,k); 
+      _MMG2D_delElt(mesh,k); 
     }
   }
 
 
-  _MMG5_delPt(mesh,ip1);
-  _MMG5_delPt(mesh,ip2);
-  _MMG5_delPt(mesh,ip3);
-  _MMG5_delPt(mesh,ip4); 
+  _MMG2D_delPt(mesh,ip1);
+  _MMG2D_delPt(mesh,ip2);
+  _MMG2D_delPt(mesh,ip3);
+  _MMG2D_delPt(mesh,ip4); 
 
   if(mesh->info.renum) {  
     nsd = mesh->info.renum;
@@ -576,7 +576,7 @@ int MMG2_markSD(MMG5_pMesh mesh) {
       pt = &mesh->tria[k];
       pt->ref--;
       if(mesh->tria[k].ref == nsd) continue;
-      _MMG5_delElt(mesh,k); 
+      _MMG2D_delElt(mesh,k); 
     }
   }
   
@@ -635,7 +635,7 @@ int MMG2_findtrianglestate(MMG5_pMesh mesh,int k,int ip1,int ip2,int ip3,int ip4
 
   /*we have to check the status of neighbour*/
   /*number of bdry edges*/
-#warning to optimize
+//#warning to optimize
   nbed = 0;
   for(i=0 ; i<3 ; i++) {
     ped0 = pt->v[MMG2_iare[i][0]];
@@ -657,7 +657,7 @@ int MMG2_findtrianglestate(MMG5_pMesh mesh,int k,int ip1,int ip2,int ip3,int ip4
       pt->ref = 3;
       return(-base);
     } else {
-#warning check if it is true with 1 bdry edge
+//#warning check if it is true with 1 bdry edge
       pt->base = base;
       return(base);
     }
@@ -767,7 +767,7 @@ int MMG2_mmg2d2(MMG5_pMesh mesh,MMG5_pSol sol) {
   if(mesh->nt) {
     nt = mesh->nt;
     for(k=1 ; k<=nt ; k++) {
-      _MMG5_delElt(mesh,k);
+      _MMG2D_delElt(mesh,k);
       iadr = 3*(k-1) + 1;
       (&mesh->adja[iadr])[0] = 0; 
       (&mesh->adja[iadr])[1] = 0; 
@@ -804,7 +804,7 @@ int MMG2_mmg2d2(MMG5_pMesh mesh,MMG5_pSol sol) {
   /*add bounding box vertex*/
   c[0] = -0.5;//mesh->info.min[0] - 1.;
   c[1] = -0.5;// mesh->info.min[1] - 1.;  
-  ip1 = _MMG5_newPt(mesh,c,0);
+  ip1 = _MMG2D_newPt(mesh,c,0);
   if ( !ip1 ) {
     /* reallocation of point table */
     _MMG5_POINT_REALLOC(mesh,sol,ip1,mesh->gap,
@@ -818,7 +818,7 @@ int MMG2_mmg2d2(MMG5_pMesh mesh,MMG5_pSol sol) {
   c[0] = -0.5;//mesh->info.min[0] - 1.;
   c[1] =  PRECI / mesh->info.delta *(mesh->info.max[1]-mesh->info.min[1])
     + 0.5;//mesh->info.max[1] + 1.;  
-  ip2 = _MMG5_newPt(mesh,c,0);
+  ip2 = _MMG2D_newPt(mesh,c,0);
   if ( !ip2 ) {
     /* reallocation of point table */
     _MMG5_POINT_REALLOC(mesh,sol,ip2,mesh->gap,
@@ -832,7 +832,7 @@ int MMG2_mmg2d2(MMG5_pMesh mesh,MMG5_pSol sol) {
   c[0] =  PRECI / mesh->info.delta *(mesh->info.max[0]-mesh->info.min[0])
     + 0.5;//mesh->info.max[0] + 1.;
   c[1] = -0.5;//mesh->info.min[1] - 1.;  
-  ip3 = _MMG5_newPt(mesh,c,0);
+  ip3 = _MMG2D_newPt(mesh,c,0);
   if ( !ip3 ) {
     /* reallocation of point table */
     _MMG5_POINT_REALLOC(mesh,sol,ip3,mesh->gap,
@@ -847,7 +847,7 @@ int MMG2_mmg2d2(MMG5_pMesh mesh,MMG5_pSol sol) {
     + 0.5;//mesh->info.max[0] + 1.;
   c[1] = PRECI / mesh->info.delta *(mesh->info.max[1]-mesh->info.min[1])
     + 0.5;//mesh->info.max[1] + 1.;  
-  ip4 = _MMG5_newPt(mesh,c,0);
+  ip4 = _MMG2D_newPt(mesh,c,0);
   if ( !ip4 ) {
     /* reallocation of point table */
     _MMG5_POINT_REALLOC(mesh,sol,ip4,mesh->gap,
@@ -863,7 +863,7 @@ int MMG2_mmg2d2(MMG5_pMesh mesh,MMG5_pSol sol) {
   assert(ip3==(mesh->np-1));
   assert(ip4==(mesh->np));
   /*creation des deux premiers triangles + adjacence*/
-  jel  = _MMG5_newElt(mesh);
+  jel  = _MMG2D_newElt(mesh);
   if ( !jel ) {
     _MMG5_TRIA_REALLOC(mesh,jel,mesh->gap,
                         printf("  ## Error: unable to allocate a new element.\n");
@@ -877,7 +877,7 @@ int MMG2_mmg2d2(MMG5_pMesh mesh,MMG5_pSol sol) {
   pt->v[2] = ip2; 
   pt->base = mesh->base;
 
-  kel  = _MMG5_newElt(mesh);
+  kel  = _MMG2D_newElt(mesh);
   if ( !kel ) {
     _MMG5_TRIA_REALLOC(mesh,kel,mesh->gap,
                         printf("  ## Error: unable to allocate a new element.\n");
@@ -911,7 +911,7 @@ int MMG2_mmg2d2(MMG5_pMesh mesh,MMG5_pSol sol) {
      _MMG5_chkmsh(mesh,1,0);
      printf("chk ok\n");
      MMG2_tassage(mesh,sol);
-     MMG2_saveMesh(mesh,"bdyenforcement.mesh");	
+     MMG2D_saveMesh(mesh,"bdyenforcement.mesh");	
   }
 
   /*mark SD and remove BB*/

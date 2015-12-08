@@ -88,7 +88,7 @@ double swapd(double sbin)
   //printf("CONVERTION DOUBLE\n");
   return(out);
 }
-int loadMesh(MMG5_pMesh mesh) {
+int MMGS_loadMesh(MMG5_pMesh mesh) {
   FILE        *inm;
   MMG5_pTria  pt1,pt2;
   MMG5_pPoint ppt;
@@ -119,7 +119,7 @@ int loadMesh(MMG5_pMesh mesh) {
       ptr = strstr(data,".mesh");
       *ptr = '\0';
       strcat(data,".mesh");
-      if( !(inm = fopen(data,"r")) ) {
+      if( !(inm = fopen(data,"rb")) ) {
         fprintf(stderr,"  ** %s  NOT FOUND.\n",data);
         return(0);
       }
@@ -147,7 +147,7 @@ int loadMesh(MMG5_pMesh mesh) {
   else {
     ptr = strstr(data,".meshb");
     if( !ptr ) {
-      if( !(inm = fopen(data,"r")) ) {
+      if( !(inm = fopen(data,"rb")) ) {
         fprintf(stderr,"  ** %s  NOT FOUND.\n",data);
         return(0);
       }
@@ -618,7 +618,7 @@ int loadMesh(MMG5_pMesh mesh) {
   return(1);
 }
 
-int MMG5_saveMesh(MMG5_pMesh mesh) {
+int _MMGS_saveAllMesh(MMG5_pMesh mesh) {
   FILE         *inm;
   MMG5_pPoint  ppt;
   MMG5_pTria   pt;
@@ -1053,7 +1053,7 @@ int MMG5_saveMesh(MMG5_pMesh mesh) {
 }
 
 /* load metric field */
-int MMG5_loadMet(MMG5_pMesh mesh,MMG5_pSol met) {
+int MMGS_loadSol(MMG5_pMesh mesh,MMG5_pSol met) {
   FILE       *inm;
   float       fbuf[6],tmpf;
   double      dbuf[6],tmpd;
@@ -1079,18 +1079,18 @@ int MMG5_loadMet(MMG5_pMesh mesh,MMG5_pSol met) {
       ptr  = strstr(data,".solb");
       *ptr = '\0';
       strcat(data,".sol");
-      if (!(inm = fopen(data,"r"))  ) {
+      if (!(inm = fopen(data,"rb"))  ) {
         fprintf(stderr,"  ** %s  NOT FOUND. USE DEFAULT METRIC.\n",data);
-        return(-1);
+        return(0);
       }
     } else {
       bin = 1;
     }
   }
   else {
-    if (!(inm = fopen(data,"r")) ) {
+    if (!(inm = fopen(data,"rb")) ) {
       fprintf(stderr,"  ** %s  NOT FOUND. USE DEFAULT METRIC.\n",data);
-      return(-1);
+      return(0);
     }
   }
   fprintf(stdout,"  %%%% %s OPENED\n",data);
@@ -1106,7 +1106,7 @@ int MMG5_loadMet(MMG5_pMesh mesh,MMG5_pSol met) {
         fscanf(inm,"%d",&met->dim);
         if(met->dim!=3) {
           fprintf(stdout,"BAD SOL DIMENSION : %d\n",met->dim);
-          return(1);
+          return(-1);
         }
         continue;
       } else if(!strncmp(chaine,"SolAtVertices",strlen("SolAtVertices"))) {
@@ -1114,7 +1114,7 @@ int MMG5_loadMet(MMG5_pMesh mesh,MMG5_pSol met) {
         fscanf(inm,"%d",&type);
         if(type!=1) {
           fprintf(stdout,"SEVERAL SOLUTION => IGNORED : %d\n",type);
-          return(1);
+          return(-1);
         }
         fscanf(inm,"%d",&met->size);
         posnp = ftell(inm);
@@ -1140,8 +1140,7 @@ int MMG5_loadMet(MMG5_pMesh mesh,MMG5_pSol met) {
         if(iswp) met->dim=swapbin(met->dim);
         if(met->dim!=3) {
           fprintf(stdout,"BAD SOL DIMENSION : %d\n",met->dim);
-          exit(0);
-          return(1);
+          return(-1);
         }
         continue;
       } else if(binch==62) {  //SolAtVertices
@@ -1153,7 +1152,7 @@ int MMG5_loadMet(MMG5_pMesh mesh,MMG5_pSol met) {
         if(iswp) type=swapbin(type);
         if(type!=1) {
           fprintf(stdout,"SEVERAL SOLUTION => IGNORED : %d\n",type);
-          return(1);
+          return(-1);
         }
         fread(&met->size,sw,1,inm); //typsol
         if(iswp) met->size=swapbin(met->size);
@@ -1168,11 +1167,13 @@ int MMG5_loadMet(MMG5_pMesh mesh,MMG5_pSol met) {
     }
 
   }
-
-  if ( !met->np ) {
-    fprintf(stdout,"  ** MISSING DATA.\n");
-    return(1);
+  if ( mesh->np != met->np ) {
+    fprintf(stdout,"  ** MISMATCHES DATA: THE NUMBER OF VERTICES IN "
+            "THE MESH (%d) DIFFERS FROM THE NUMBER OF VERTICES IN "
+            "THE SOLUTION (%d) \n",mesh->np,met->np);
+    return(-1);
   }
+
   if ( (type != 1) || (met->size != 1 && met->size != 3) ) {
     fprintf(stdout,"  ** DATA IGNORED %d  %d\n",type,met->size);
     met->np = met->npmax = 0;
@@ -1181,9 +1182,13 @@ int MMG5_loadMet(MMG5_pMesh mesh,MMG5_pSol met) {
 
   if(met->size == 3) met->size = 6;
 
+  met->npi = met->np;
+
   /* mem alloc */
   if ( met->m )
     _MMG5_DEL_MEM(mesh,met->m,(met->size*(met->npmax+1))*sizeof(double));
+
+  met->npmax = mesh->npmax;
 
   _MMG5_ADD_MEM(mesh,(met->size*(met->npmax+1))*sizeof(double),
                 "initial solution",return(0));
@@ -1323,7 +1328,7 @@ int MMG5_loadMet(MMG5_pMesh mesh,MMG5_pSol met) {
 }
 
 /* write iso or aniso metric */
-int saveMet(MMG5_pMesh mesh,MMG5_pSol met) {
+int MMGS_saveSol(MMG5_pMesh mesh,MMG5_pSol met) {
   FILE*        inm;
   MMG5_pPoint  ppt;
   double       dbuf[6],mtmp[3],r[3][3],tmp;
@@ -1470,4 +1475,14 @@ int saveMet(MMG5_pMesh mesh,MMG5_pSol met) {
   return(1);
 }
 
-
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \return 0 if failed, 1 otherwise.
+ *
+ * Save mesh data (wrap the \a _MMG5_saveMeshinternal function to avoid segfault
+ * when linking with the shared library \a mmg3dlib).
+ *
+ */
+int MMGS_saveMesh(MMG5_pMesh mesh) {
+  return(_MMGS_saveMeshinternal(mesh));
+}

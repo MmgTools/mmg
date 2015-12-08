@@ -183,8 +183,6 @@ void _MMG5_swapTet(MMG5_pTetra tetras/*, int* adja*/, int* perm, int ind1, int i
   perm[ind1] = tmp;
 }
 
-
-
 /**
  * \param boxVertNbr number of vertices by box.
  * \param mesh pointer toward the mesh structure.
@@ -339,7 +337,7 @@ int _MMG5_mmg3dRenumbering(int boxVertNbr, MMG5_pMesh mesh, MMG5_pSol sol) {
                 _MMG5_DEL_MEM(mesh,vertOldTab,(mesh->ne+1)*sizeof(int));
                 _MMG5_DEL_MEM(mesh,vertTab,(vertNbr+2)*sizeof(SCOTCH_Num));
                 _MMG5_DEL_MEM(mesh,edgeTab,edgeSiz*sizeof(SCOTCH_Num));
-                if( !_MMG5_hashTetra(mesh,1) ) return(0);
+                if( !MMG3D_hashTetra(mesh,1) ) return(0);
                 return(1));
   _MMG5_SAFE_CALLOC(permVrtTab,vertNbr+1,SCOTCH_Num);
 
@@ -357,7 +355,7 @@ int _MMG5_mmg3dRenumbering(int boxVertNbr, MMG5_pMesh mesh, MMG5_pSol sol) {
                 _MMG5_DEL_MEM(mesh,vertTab,(vertNbr+2)*sizeof(SCOTCH_Num));
                 _MMG5_DEL_MEM(mesh,permVrtTab,(vertNbr+1)*sizeof(SCOTCH_Num));
                 _MMG5_DEL_MEM(mesh,edgeTab,edgeSiz*sizeof(SCOTCH_Num));
-                if( !_MMG5_hashTetra(mesh,1) ) return(0);
+                if( !MMG3D_hashTetra(mesh,1) ) return(0);
                 return(1));
   _MMG5_SAFE_CALLOC(permNodTab,mesh->np+1,int);
 
@@ -434,7 +432,7 @@ int _MMG5_mmg3dRenumbering(int boxVertNbr, MMG5_pMesh mesh, MMG5_pSol sol) {
     for (k=mesh->nenil; k<mesh->nemax-1; k++)
       mesh->tetra[k].v[3] = k+1;
 
-  if( !_MMG5_hashTetra(mesh,0) ) return(0);
+  if( !MMG3D_hashTetra(mesh,0) ) return(0);
 
   return 1;
 }

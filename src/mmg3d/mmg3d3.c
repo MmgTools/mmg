@@ -140,6 +140,7 @@ inline double _MMG5_caltet_iso_4pt(double *a, double *b, double *c, double *d) {
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
+ * \param itdeg degraded elements.
  * \param *warn \a warn is set to 1 if we don't have enough memory to complete mesh.
  * \return -1 if failed.
  * \return number of new points.
@@ -208,7 +209,7 @@ static int _MMG5_spllag(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int itdeg, 
     o[1] = 0.5*(p0->c[1] + p1->c[1]);
     o[2] = 0.5*(p0->c[2] + p1->c[2]);
       
-    ip = _MMG5_newPt(mesh,o,MG_NOTAG);
+    ip = _MMG3D_newPt(mesh,o,MG_NOTAG);
       
     if ( !ip )  {
       /* reallocation of point table */
@@ -218,15 +219,8 @@ static int _MMG5_spllag(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int itdeg, 
     
     /* Interpolation of metric, if any */
     if ( met->m ) {
-      iadr = met->size*ip1;
-      m1 = &met->m[iadr];
-      iadr = met->size*ip2;
-      m2 = &met->m[iadr];
-      iadr = met->size*ip;
-      mp = &met->m[iadr];
-      
-      if ( !_MMG5_intmetvol(m1,m2,mp,0.5) ) {
-        _MMG5_delPt(mesh,ip);
+      if ( !_MMG5_intmet(mesh,met,k,imax,ip,0.5) ) {
+        _MMG3D_delPt(mesh,ip);
         return(-1);
       }
     }
@@ -241,19 +235,19 @@ static int _MMG5_spllag(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int itdeg, 
       mp = &disp->m[iadr];
       
       if ( !_MMG5_intdispvol(m1,m2,mp,0.5) ) {
-        _MMG5_delPt(mesh,ip);
+        _MMG3D_delPt(mesh,ip);
         return(-1);
       }
     }
     
     /* Il y a un check sur la taille des arêtes ici aussi ! */
-    ier = _MMG5_split1b(mesh,met,list,ilist,ip,1);
+    ier = _MMG5_split1b(mesh,met,list,ilist,ip,1,1);
     if ( ier < 0 ) {
       fprintf(stdout,"  ## Error: unable to split.\n");
       return(-1);
     }
     else if ( !ier ) {
-      _MMG5_delPt(mesh,ip);
+      _MMG3D_delPt(mesh,ip);
     }
     else {
       ns++;
@@ -268,7 +262,8 @@ static int _MMG5_spllag(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int itdeg, 
  * \param met pointer toward the metric structure.
  * \param crit coefficient of quality improvment.
  * \param bucket pointer toward the bucket structure in delaunay mode and
- * toward the \a NULL pointer otherwise
+ * toward the \a NULL pointer otherwise.
+ * \param itdeg degraded elements.
  *
  * Internal edge flipping in the Lagrangian mode; only affects tetra marked with it
  *
@@ -296,10 +291,10 @@ int _MMG5_swptetlag(MMG5_pMesh mesh,MMG5_pSol met,double crit,_MMG5_pBucket buck
           if ( pxt->edg[i] || pxt->tag[i] ) continue;
         }
 
-        nconf = _MMG5_chkswpgen(mesh,met,k,i,&ilist,list,crit);
+        nconf = _MMG5_chkswpgen(mesh,met,k,i,&ilist,list,crit,2);
         
         if ( nconf ) {
-          ier = _MMG5_swpgen(mesh,met,nconf,ilist,list,bucket);
+          ier = _MMG5_swpgen(mesh,met,nconf,ilist,list,bucket,2);
           if ( ier > 0 )  ns++;
           else if ( ier < 0 ) return(-1);
           break;
@@ -315,7 +310,7 @@ int _MMG5_swptetlag(MMG5_pMesh mesh,MMG5_pSol met,double crit,_MMG5_pBucket buck
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
- * \param maxitin maximum number of iteration.
+ * \param itdeg degraded elements.
  * \return -1 if failed, number of moved points otherwise.
  *
  * Analyze tetrahedra marked with it and move internal points so as to make mesh more uniform.
@@ -374,7 +369,7 @@ int _MMG5_movtetlag(MMG5_pMesh mesh,MMG5_pSol met,int itdeg) {
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
- * \param typchk type of checking permformed for edge length (hmin or LSHORT criterion).
+ * \param itdeg degraded elements.
  * \return -1 if failed.
  * \return number of collapsed points.
  *
@@ -422,13 +417,13 @@ static int _MMG5_coltetlag(MMG5_pMesh mesh,MMG5_pSol met,int itdeg) {
         if ( ll > hmi2 )  continue;
 
         isnm = 0;
-        ilist = _MMG5_chkcol_int(mesh,met,k,i,j,list,1);
+        ilist = _MMG5_chkcol_int(mesh,met,k,i,j,list,2);
       
         if ( ilist > 0 ) {
-          ier = _MMG5_colver(mesh,met,list,ilist,iq);
+          ier = _MMG5_colver(mesh,met,list,ilist,iq,2);
           if ( ier < 0 ) return(-1);
           else if ( ier ) {
-            _MMG5_delPt(mesh,ier);
+            _MMG3D_delPt(mesh,ier);
             break;
           }
         }
@@ -720,7 +715,7 @@ int _MMG5_mmg3d3(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met) {
 
       if ( t == _MMG5_SHORTMAX ) break;
     }
-    if ( abs(mesh->info.imprim) < 4 ) {
+    if ( mesh->info.imprim && abs(mesh->info.imprim) < 4 ) {
       printf("   ---> Realized displacement: %f\n",tau);
       if ( abs(mesh->info.imprim) > 2 )
         printf(" %d edges splitted, %d vertices collapsed, %d elements"

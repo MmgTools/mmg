@@ -32,24 +32,27 @@
  * \copyright GNU Lesser General Public License.
  */
 
-#include "mmgs.h"
+#include "mmgcommon.h"
 
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the sol structure.
  * \param np0 index of edge's extremity.
  * \param np1 index of edge's extremity.
+ * \param m0 metric at point np0.
+ * \param m1 metric at point np1.
  * \param isedg 1 if the edge is a ridge, 0 otherwise.
  * \return length of edge according to the prescribed metric.
  *
- * Compute length of edge \f$[i0;i1]\f$ according to the prescribed aniso.
- * metric.
+ * Compute length of surface edge \f$[np0;np1]\f$ according to the prescribed
+ * aniso metrics \a m0 and \a m1.
  *
  */
-double _MMG5_lenedg_ani(MMG5_pMesh mesh,MMG5_pSol met,int np0,int np1,char isedg) {
+static inline
+double _MMG5_lenEdg(MMG5_pMesh mesh,int np0,int np1,
+                    double *m0,double *m1,char isedg) {
   MMG5_pPoint   p0,p1;
   double        gammaprim0[3],gammaprim1[3],t[3],*n1,*n2,ux,uy,uz,ps1,ps2,l0,l1;
-  double        *m0,*m1,met0[6],met1[6];
 
   p0 = &mesh->point[np0];
   p1 = &mesh->point[np1];
@@ -59,7 +62,7 @@ double _MMG5_lenedg_ani(MMG5_pMesh mesh,MMG5_pSol met,int np0,int np1,char isedg
   uz = p1->c[2] - p0->c[2];
 
   /* computation of the two tangent vectors to the underlying curve of [i0i1] */
-  if ( MS_SIN(p0->tag) ) {
+  if ( MG_SIN(p0->tag) || (MG_NOM & p0->tag) ) {
     gammaprim0[0] = ux;
     gammaprim0[1] = uy;
     gammaprim0[2] = uz;
@@ -84,11 +87,14 @@ double _MMG5_lenedg_ani(MMG5_pMesh mesh,MMG5_pSol met,int np0,int np1,char isedg
         ps1 = ps2;
       }
     }
-    else if ( MG_REF & p0->tag ) {
+    else if ( MG_REF & p0->tag || MG_BDY & p0->tag ) {
+      // ( MG_BDY  & p0->tag ) => mmg3d
       n1  = &mesh->xpoint[p0->xp].n1[0];
       ps1 = ux*n1[0] + uy*n1[1] + uz*n1[2];
     }
     else {
+      // we come from mmgs because in mmg3d the boundary points are tagged
+      // MG_BDY.
       n1  = &(p0->n[0]);
       ps1 = ux*n1[0] + uy*n1[1] + uz*n1[2];
     }
@@ -97,7 +103,7 @@ double _MMG5_lenedg_ani(MMG5_pMesh mesh,MMG5_pSol met,int np0,int np1,char isedg
     gammaprim0[2] = uz - ps1*n1[2];
   }
 
-  if ( MS_SIN(p1->tag) ) {
+  if ( MG_SIN(p1->tag) || (MG_NOM & p1->tag) ) {
     gammaprim1[0] = -ux;
     gammaprim1[1] = -uy;
     gammaprim1[2] = -uz;
@@ -121,48 +127,20 @@ double _MMG5_lenedg_ani(MMG5_pMesh mesh,MMG5_pSol met,int np0,int np1,char isedg
         ps1 = ps2;
       }
     }
-    else if ( MG_REF & p1->tag ) {
+    else if ( MG_REF & p1->tag || MG_BDY & p1->tag ) {
+      // ( MG_BDY  & p1->tag ) => mmg3d )
       n1  = &mesh->xpoint[p1->xp].n1[0];
       ps1 = - ux*n1[0] - uy*n1[1] - uz*n1[2];
     }
     else {
+      // we come from mmgs because in mmg3d the boundary points are tagged
+      // MG_BDY.
       n1  = &(p1->n[0]);
       ps1 = -ux*n1[0] - uy*n1[1] - uz*n1[2];
     }
     gammaprim1[0] = - ux - ps1*n1[0];
     gammaprim1[1] = - uy - ps1*n1[1];
     gammaprim1[2] = - uz - ps1*n1[2];
-  }
-
-  /* Set metrics */
-  if ( MS_SIN(p0->tag) ) {
-    m0 = &met->m[6*np0];
-  }
-  else if ( MG_GEO & p0->tag ) {
-    if ( !_MMG5_buildridmet(mesh,met,np0,ux,uy,uz,met0) )  {
-      printf("%s:%d:Error: Unable to compute the metric along the ridge.\n "
-             "Exit program.\n",__FILE__,__LINE__);
-      exit(EXIT_FAILURE);
-    }
-    m0 = met0;
-  }
-  else {
-    m0 = &met->m[6*np0];
-  }
-
-  if ( MS_SIN(p1->tag) ) {
-    m1 = &met->m[6*np1];
-  }
-  else if ( MG_GEO & p1->tag ) {
-    if ( !_MMG5_buildridmet(mesh,met,np1,ux,uy,uz,met1) )  {
-      printf("%s:%d:Error: Unable to compute the metric along the ridge.\n "
-             "Exit program.\n",__FILE__,__LINE__);
-      exit(EXIT_FAILURE);
-    }
-    m1 = met1;
-  }
-  else {
-    m1 = &met->m[6*np1];
   }
 
   /* computation of the length of the two tangent vectors in their respective tangent plane */
@@ -185,52 +163,111 @@ double _MMG5_lenedg_ani(MMG5_pMesh mesh,MMG5_pSol met,int np0,int np1,char isedg
     exit(EXIT_FAILURE);
   }
   l0 = 0.5*(sqrt(l0) + sqrt(l1));
+
   return(l0);
 }
 
 /**
  * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the meric structure.
- * \param ptt pointer toward the triangle structure.
- * \return The computed area.
+ * \param met pointer toward the sol structure.
+ * \param np0 index of edge's extremity.
+ * \param np1 index of edge's extremity.
+ * \param isedg 1 if the edge is a ridge, 0 otherwise.
+ * \return length of edge according to the prescribed metric.
  *
- * Compute the area of the surface triangle \a ptt with respect to
- * the anisotropic metric \a met.
+ * Compute length of surface edge \f$[i0;i1]\f$ according to the prescribed
+ * aniso metric (for special storage of metrics at ridges points).
  *
  */
-double _MMG5_surftri_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt) {
-  MMG5_pPoint    p[3];
+double _MMG5_lenSurfEdg_ani(MMG5_pMesh mesh,MMG5_pSol met,int np0,int np1,char isedg) {
+  MMG5_pPoint   p0,p1;
+  double        *m0,*m1,met0[6],met1[6],ux,uy,uz;
+
+  p0 = &mesh->point[np0];
+  p1 = &mesh->point[np1];
+
+  ux = p1->c[0] - p0->c[0];
+  uy = p1->c[1] - p0->c[1];
+  uz = p1->c[2] - p0->c[2];
+
+  /* Set metrics */
+  if ( MG_SIN(p0->tag) || (MG_NOM & p0->tag)) {
+    m0 = &met->m[6*np0];
+  }
+  else if ( MG_GEO & p0->tag ) {
+    if ( !_MMG5_buildridmet(mesh,met,np0,ux,uy,uz,met0) )  {
+      printf("%s:%d:Error: Unable to compute the metric along the ridge.\n "
+             "Exit program.\n",__FILE__,__LINE__);
+      exit(EXIT_FAILURE);
+    }
+    m0 = met0;
+  }
+  else {
+    m0 = &met->m[6*np0];
+  }
+
+  if ( MG_SIN(p1->tag) || (MG_NOM & p1->tag)) {
+    m1 = &met->m[6*np1];
+  }
+  else if ( MG_GEO & p1->tag ) {
+    if ( !_MMG5_buildridmet(mesh,met,np1,ux,uy,uz,met1) )  {
+      printf("%s:%d:Error: Unable to compute the metric along the ridge.\n "
+             "Exit program.\n",__FILE__,__LINE__);
+      exit(EXIT_FAILURE);
+    }
+    m1 = met1;
+  }
+  else {
+    m1 = &met->m[6*np1];
+  }
+
+  return(_MMG5_lenEdg(mesh,np0,np1,m0,m1,isedg));
+}
+
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the sol structure.
+ * \param np0 index of edge's extremity.
+ * \param np1 index of edge's extremity.
+ * \param isedg 1 if the edge is a ridge, 0 otherwise.
+ * \return length of edge according to the prescribed metric.
+ *
+ * Compute length of surface edge \f$[i0;i1]\f$ according to the prescribed
+ * aniso metric (for classic storage of metrics at ridges points).
+ *
+ */
+double _MMG5_lenSurfEdg33_ani(MMG5_pMesh mesh,MMG5_pSol met,
+                              int np0,int np1,char isedg) {
+  double        *m0,*m1;
+
+  /* Set metrics */
+  m0 = &met->m[6*np0];
+  m1 = &met->m[6*np1];
+
+  return(_MMG5_lenEdg(mesh,np0,np1,m0,m1,isedg));
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param m pointer toward the metric at triangle vertices.
+ * \param ptt pointer toward the triangle structure.
+ * \return The double of the triangle area.
+ *
+ * Compute the double of the area of the surface triangle \a ptt with respect to
+ * the anisotropic metric \a m.
+ *
+ */
+static inline
+double _MMG5_surf(MMG5_pMesh mesh,double m[3][6],MMG5_pTria ptt) {
   _MMG5_Bezier   b;
-  int            np[3];
-  double         surf,ux,uy,uz,dens,m[3][6],J[3][2],mJ[3][2],tJmJ[2][2];
-  char           i,i1,i2;
+  double         surf,dens,J[3][2],mJ[3][2],tJmJ[2][2];
+  char           i;
 
   surf = 0.0;
 
-  for (i=0; i<3; i++) {
-    np[i] = ptt->v[i];
-    p[i]  = &mesh->point[np[i]];
-  }
   if ( !_MMG5_bezierCP(mesh,ptt,&b,1) ) return(0.0);
 
-  /* Set metric tensors at vertices of tria iel */
-  for(i=0; i<3; i++) {
-    i1 = _MMG5_inxt2[i];
-    i2 = _MMG5_iprv2[i];
-    ux = 0.5*(p[i1]->c[0]+p[i2]->c[0]) - p[i]->c[0];
-    uy = 0.5*(p[i1]->c[1]+p[i2]->c[1]) - p[i]->c[1];
-    uz = 0.5*(p[i1]->c[2]+p[i2]->c[2]) - p[i]->c[2];
-
-    if ( MS_SIN(p[i]->tag) ) {
-      memcpy(&m[i][0],&met->m[6*np[i]],6*sizeof(double));
-    }
-    else if ( p[i]->tag & MG_GEO ) {
-      if ( !_MMG5_buildridmet(mesh,met,np[i],ux,uy,uz,&m[i][0]) )  return(0.0);
-    }
-    else {
-      memcpy(&m[i][0],&met->m[6*np[i]],6*sizeof(double));
-    }
-  }
 
   /* Compute density integrand of volume at the 3 vertices of T */
   for (i=0; i<3; i++) {
@@ -279,6 +316,76 @@ double _MMG5_surftri_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt) {
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
+ * \param ptt pointer toward the triangle structure.
+ * \return The double of the triangle area.
+ *
+ * Compute the double of the area of the surface triangle \a ptt with respect to
+ * the anisotropic metric \a met (for special storage of ridges metrics).
+ *
+ */
+double _MMG5_surftri_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt) {
+  MMG5_pPoint    p[3];
+  int            np[3];
+  double         ux,uy,uz,m[3][6];
+  char           i1,i2;
+  int            i;
+
+  for (i=0; i<3; i++) {
+    np[i] = ptt->v[i];
+    p[i]  = &mesh->point[np[i]];
+  }
+
+  /* Set metric tensors at vertices of tria iel */
+  for(i=0; i<3; i++) {
+
+    if ( MG_SIN(p[i]->tag) || (MG_NOM & p[i]->tag) ) {
+      memcpy(&m[i][0],&met->m[6*np[i]],6*sizeof(double));
+    }
+    else if ( p[i]->tag & MG_GEO ) {
+      i1 = _MMG5_inxt2[i];
+      i2 = _MMG5_iprv2[i];
+      ux = 0.5*(p[i1]->c[0]+p[i2]->c[0]) - p[i]->c[0];
+      uy = 0.5*(p[i1]->c[1]+p[i2]->c[1]) - p[i]->c[1];
+      uz = 0.5*(p[i1]->c[2]+p[i2]->c[2]) - p[i]->c[2];
+      if ( !_MMG5_buildridmet(mesh,met,np[i],ux,uy,uz,&m[i][0]) )  return(0.0);
+    }
+    else {
+      memcpy(&m[i][0],&met->m[6*np[i]],6*sizeof(double));
+    }
+  }
+  return(_MMG5_surf(mesh,m,ptt));
+
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param ptt pointer toward the triangle structure.
+ * \return The double of the triangle area.
+ *
+ * Compute the double of the area of the surface triangle \a ptt with respect to
+ * the anisotropic metric \a met (for classic storage of ridges metrics).
+ *
+ */
+double _MMG5_surftri33_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt) {
+  double         m[3][6];
+  int            np[3];
+  int            i;
+
+  for (i=0; i<3; i++) {
+    np[i] = ptt->v[i];
+  }
+
+  /* Set metric tensors at vertices of tria iel */
+  for(i=0; i<3; i++) {
+    memcpy(&m[i][0],&met->m[6*np[i]],6*sizeof(double));
+  }
+  return(_MMG5_surf(mesh,m,ptt));
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
  * \param ismet has the user provided a metric?
  *
  * Search for points with unintialized metric and define anisotropic size at
@@ -302,7 +409,7 @@ void _MMG5_defUninitSize(MMG5_pMesh mesh,MMG5_pSol met,char ismet)
       continue;
     }
     memset(m,0,6*sizeof(double));
-    if ( MS_SIN(ppt->tag) ) {
+    if ( MG_SIN(ppt->tag) || (MG_NOM & ppt->tag) ) {
       m[0] = m[3] = m[5] = isqhmax;
     }
     else if ( ppt->tag & MG_GEO ) {
@@ -335,11 +442,10 @@ void _MMG5_defUninitSize(MMG5_pMesh mesh,MMG5_pSol met,char ismet)
  * \param tAA matrix to fill
  * \param tAb second member
  *
- * Fill matrice tAA and second member tAb with A=(\sum X_{P_i}^2 \sum
- * Y_{P_i}^2 \sum X_{P_i}Y_{P_i}) and b=\sum Z_{P_i} with P_i the physical
- * points at edge [i0;i1] extremities and middle.
- * Compute the physical coor \a c of the curve edge's
- * mid-point for a regular or reference point.
+ * Fill matrice tAA and second member tAb with \$f A=(\sum X_{P_i}^2 \sum
+ * Y_{P_i}^2 \sum X_{P_i}Y_{P_i}) \$f and \$f b=\sum Z_{P_i}\$f with P_i the
+ * physical points at edge [i0;i1] extremities and middle.  Compute the physical
+ * coor \a c of the curve edge's mid-point for a regular or reference point.
  *
  */
 void _MMG5_fillDefmetregSys( int k, MMG5_pPoint p0, int i0, _MMG5_Bezier b,
@@ -952,4 +1058,363 @@ double _MMG5_ridSizeInNormalDir(MMG5_pMesh mesh,int i0,double* bcu,
   kappacur = MG_MAX(kappacur,isqhmax);
 
   return(kappacur);
+}
+
+/**
+ * \param mesh pointer toward the mesh.
+ * \param met pointer toward the metric structure.
+ * \param pt pointer toward a triangle.
+ * \param i edge index in triangle \a pt.
+ * \return -1 if no gradation is needed, else index of graded point.
+ *
+ * Enforces gradation of metric in one extremity of edge \a i in tria \a pt
+ * with respect to the other, along the direction of the associated support
+ * curve.
+ *
+ */
+int _MMG5_grad2metSurf(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int i){
+  MMG5_pPoint   p1,p2;
+  double   *mm1,*mm2,*nn1,*nn2,ps1,ps2,ux,uy,uz,m1[6],m2[6],n1[3],n2[3],nt[3];
+  double   r1[3][3],r2[3][3],t1[3],t2[3],c[5],mtan1[3],mtan2[3],mr1[6],mr2[6];
+  double   mtan13d[3],mtan23d[3],mtmp[3][3],val;
+  double   /*,l1,l2*/l,dd;
+  double   lambda[3],vp[3][3],alpha,beta,mu[3];
+  int      np1,np2,kmin,idx;
+  char     i1,i2,ichg;
+
+  i1 = _MMG5_inxt2[i];
+  i2 = _MMG5_iprv2[i];
+  np1 = pt->v[i1];
+  np2 = pt->v[i2];
+
+  //  printf("on traite %d %d\n",np1,np2);
+  p1 = &mesh->point[np1];
+  p2 = &mesh->point[np2];
+
+  ux = p2->c[0] - p1->c[0];
+  uy = p2->c[1] - p1->c[1];
+  uz = p2->c[2] - p1->c[2];
+
+  mm1 = &met->m[6*np1];
+  mm2 = &met->m[6*np2];
+
+  if( !_MMG5_nortri(mesh,pt,nt) )
+    return(-1);
+
+  /* Recover normal and metric associated to p1 */
+  if( MG_SIN(p1->tag) || (MG_NOM & p1->tag)){
+    memcpy(n1,nt,3*sizeof(double));
+    memcpy(m1,mm1,6*sizeof(double));
+  }
+  else if( MG_GEO & p1->tag ){
+    nn1 = &mesh->xpoint[p1->xp].n1[0];
+    nn2 = &mesh->xpoint[p1->xp].n2[0];
+    ps1 = nt[0]*nn1[0] + nt[1]*nn1[1] + nt[2]*nn1[2];
+    ps2 = nt[0]*nn2[0] + nt[1]*nn2[1] + nt[2]*nn2[2];
+
+    if( fabs(ps1) < fabs(ps2))
+      memcpy(n1,nn2,3*sizeof(double));
+    else
+      memcpy(n1,nn1,3*sizeof(double));
+
+    if( !_MMG5_buildridmet(mesh,met,np1,ux,uy,uz,m1) )
+      return(-1);
+  }
+  else if( MG_REF & p1->tag ){
+    memcpy(n1,&(mesh->xpoint[p1->xp].n1[0]),3*sizeof(double));
+    memcpy(m1,mm1,6*sizeof(double));
+  }
+  else{
+    memcpy(n1,p1->n,3*sizeof(double));
+    memcpy(m1,mm1,6*sizeof(double));
+  }
+
+  /* Recover normal and metric associated to p2 */
+  if ( MG_SIN(p2->tag) || (MG_NOM & p2->tag)) {
+    memcpy(n2,nt,3*sizeof(double));
+    memcpy(m2,mm2,6*sizeof(double));
+  }
+  else if ( MG_GEO & p2->tag ) {
+    nn1 = &mesh->xpoint[p2->xp].n1[0];
+    nn2 = &mesh->xpoint[p2->xp].n2[0];
+    ps1 = nt[0]*nn1[0] + nt[1]*nn1[1] + nt[2]*nn1[2];
+    ps2 = nt[0]*nn2[0] + nt[1]*nn2[1] + nt[2]*nn2[2];
+
+    if( fabs(ps1) < fabs(ps2))
+      memcpy(n2,nn2,3*sizeof(double));
+    else
+      memcpy(n2,nn1,3*sizeof(double));
+
+    if( !_MMG5_buildridmet(mesh,met,np2,ux,uy,uz,m2) )
+      return(-1);
+  }
+  else if( MG_REF & p2->tag ){
+    memcpy(n2,&(mesh->xpoint[p2->xp].n1[0]),3*sizeof(double));
+    memcpy(m2,mm2,6*sizeof(double));
+  }
+  else{
+    memcpy(n2,p2->n,3*sizeof(double));
+    memcpy(m2,mm2,6*sizeof(double));
+  }
+
+  /* Rotation matrices mapping n1/n2 to e_3 */
+  _MMG5_rotmatrix(n1,r1);
+  _MMG5_rotmatrix(n2,r2);
+
+  /* Geodesic length of support curve to edge i */
+
+  // Commentated because the next line overwrite it... to check!
+  /* ps1 = ux*n1[0] + uy*n1[1] + uz*n1[2]; */
+  /* t1[0] = ux - ps1*n1[0]; */
+  /* t1[1] = uy - ps1*n1[1]; */
+  /* t1[2] = uz - ps1*n1[2]; */
+
+  /* // warning : t2 seems to be wrong calculated */
+  /* ps2 = - (ux*n2[0] + uy*n2[1] + uz*n2[2]); */
+  /* t2[0] = -ux - ps1*n2[0]; */
+  /* t2[1] = -uy - ps1*n2[1]; */
+  /* t2[2] = -uz - ps1*n2[2]; */
+
+  /* l1 = m1[0]*t1[0]*t1[0] + m1[3]*t1[1]*t1[1] + m1[5]*t1[2]*t1[2] \ */
+  /*   + 2.0 * ( m1[1]*t1[0]*t1[1] + m1[2]*t1[0]*t1[2] + m1[4]*t1[1]*t1[2] ) ; */
+  /* l2 = m2[0]*t2[0]*t2[0] + m2[3]*t2[1]*t2[1] + m2[5]*t2[2]*t2[2] \ */
+  /*   + 2.0 * ( m2[1]*t2[0]*t2[1] + m2[2]*t2[0]*t2[2] + m2[4]*t2[1]*t2[2] ) ; */
+  /* l = 0.5* ( sqrt(l1) + sqrt(l2) ) ; */
+
+  l = sqrt(ux*ux+uy*uy+uz*uz);
+
+  /* Characteristic sizes in direction of support curve */
+  _MMG5_rmtr(r1,m1,mr1);
+
+  mtan1[0] = mr1[0];
+  mtan1[1] = mr1[1];
+  mtan1[2] = mr1[3];
+
+  c[0] = r1[0][0]*ux + r1[0][1]*uy + r1[0][2]*uz;
+  c[1] = r1[1][0]*ux + r1[1][1]*uy + r1[1][2]*uz;
+  c[2] = r1[2][0]*ux + r1[2][1]*uy + r1[2][2]*uz;
+
+  memcpy(t1,c,3*sizeof(double));
+  dd = t1[0]*t1[0] + t1[1]*t1[1] + t1[2]*t1[2];
+  if(dd < _MMG5_EPSD2)
+    return(-1);
+
+  dd = 1.0/sqrt(dd);
+  t1[0] *= dd;
+  t1[1] *= dd;
+  t1[2] *= dd;
+
+  // edge length in metric mtan1: t^(t1) * mtan1 * t1.
+  ps1 =  mtan1[0]*t1[0]*t1[0] + 2.0*mtan1[1]*t1[0]*t1[1] + mtan1[2]*t1[1]*t1[1];
+  ps1 += 2*mr1[2]*t1[0]*t1[2] + 2*mr1[4]*t1[1]*t1[2] + mr1[5]*t1[2]*t1[2];
+
+  ps1 = sqrt(ps1);
+
+  _MMG5_rmtr(r2,m2,mr2);
+
+  mtan2[0] = mr2[0];
+  mtan2[1] = mr2[1];
+  mtan2[2] = mr2[3];
+
+  c[0] = - ( r2[0][0]*ux + r2[0][1]*uy + r2[0][2]*uz );
+  c[1] = - ( r2[1][0]*ux + r2[1][1]*uy + r2[1][2]*uz );
+  c[2] = - ( r2[2][0]*ux + r2[2][1]*uy + r2[2][2]*uz );
+  memcpy(t2,c,3*sizeof(double));
+
+  dd = t2[0]*t2[0] + t2[1]*t2[1] + t2[2]*t2[2];
+  if(dd < _MMG5_EPSD2)
+    return(-1);
+
+  dd = 1.0/sqrt(dd);
+  t2[0] *= dd;
+  t2[1] *= dd;
+  t2[2] *= dd;
+
+  // edge length: t^(t2) * mtan2 * t2
+  ps2 = mtan2[0]*t2[0]*t2[0] + 2.0*mtan2[1]*t2[0]*t2[1] + mtan2[2]*t2[1]*t2[1];
+  ps2 += 2*mr2[2]*t2[0]*t2[2] + 2*mr2[4]*t2[1]*t2[2] + mr2[5]*t2[2]*t2[2];
+
+  ps2 = sqrt(ps2);
+
+  /* Metric in p1 has to be changed */
+  if( ps2 > ps1 ){
+    alpha = ps2 /(1.0+mesh->info.hgrad*l*ps2);
+    if( ps1 >= alpha -_MMG5_EPS )
+      return(-1);
+
+    _MMG5_eigenv(1,mr1,lambda,vp);
+    c[0] = t1[0]*vp[0][0] + t1[1]*vp[0][1] + t1[2]*vp[0][2];
+    c[1] = t1[0]*vp[1][0] + t1[1]*vp[1][1] + t1[2]*vp[1][2];
+    c[2] = t1[0]*vp[2][0] + t1[1]*vp[2][1] + t1[2]*vp[2][2];
+
+    // Find index of the maximum value of c
+    ichg = 0;
+    val  = fabs(c[ichg]);
+    for (idx = 1; idx<3; ++idx) {
+      if ( fabs(c[idx]) > val ) {
+        val = fabs(c[idx]);
+        ichg = idx;
+      }
+    }
+    assert(c[ichg]*c[ichg] > _MMG5_EPS );
+    beta = (alpha*alpha - ps1*ps1)/(c[ichg]*c[ichg]);
+
+    mu[0] = lambda[0];
+    mu[1] = lambda[1];
+    mu[2] = lambda[2];
+
+    mu[ichg] += beta;
+
+    mtan1[0] = mu[0]*vp[0][0]*vp[0][0] + mu[1]*vp[1][0]*vp[1][0];
+    mtan1[1] = mu[0]*vp[0][0]*vp[0][1] + mu[1]*vp[1][0]*vp[1][1];
+    mtan1[2] = mu[0]*vp[0][1]*vp[0][1] + mu[1]*vp[1][1]*vp[1][1];
+    mtan1[0] +=vp[2][0]*vp[2][0]*mu[2];
+    mtan1[1] +=vp[2][1]*vp[2][0]*mu[2];
+    mtan1[2] +=vp[2][1]*vp[2][1]*mu[2];
+    mtan13d[0] = vp[0][0]*vp[0][2]*mu[0]+vp[1][0]*vp[1][2]*mu[1]+vp[2][0]*vp[2][2]*mu[2];
+    mtan13d[1] = vp[0][1]*vp[0][2]*mu[0]+vp[1][1]*vp[1][2]*mu[1]+vp[2][1]*vp[2][2]*mu[2];
+    mtan13d[2] = vp[0][2]*vp[0][2]*mu[0]+vp[1][2]*vp[1][2]*mu[1]+vp[2][2]*vp[2][2]*mu[2];
+
+    /* Metric update */
+    if( MG_SIN(p1->tag) || (MG_NOM & p1->tag)){
+      mm1[0] += 0.5*beta;
+      mm1[3] += 0.5*beta;
+      mm1[5] += 0.5*beta;
+    }
+    else if( p1->tag & MG_GEO ){
+      c[0] = fabs(mm1[0]-lambda[ichg]);
+      c[1] = fabs(mm1[1]-lambda[ichg]);
+      c[2] = fabs(mm1[2]-lambda[ichg]);
+      c[3] = fabs(mm1[3]-lambda[ichg]);
+      c[4] = fabs(mm1[4]-lambda[ichg]);
+
+      // Find index af the minimum value of c
+      kmin = 0;
+      val = fabs(c[kmin]);
+      for (idx = 1; idx<5; ++idx) {
+        if ( fabs(c[idx]) < val ) {
+          val = fabs(c[idx]);
+          kmin = idx;
+        }
+      }
+      mm1[kmin] += beta;
+    }
+    else{
+      /* Return in initial basis */
+      mtmp[0][0] = mtan1[0]*r1[0][0] + mtan1[1]*r1[1][0] + mtan13d[0]*r1[2][0];
+      mtmp[0][1] = mtan1[0]*r1[0][1] + mtan1[1]*r1[1][1] + mtan13d[0]*r1[2][1];
+      mtmp[0][2] = mtan1[0]*r1[0][2] + mtan1[1]*r1[1][2] + mtan13d[0]*r1[2][2];
+
+      mtmp[1][0] = mtan1[1]*r1[0][0] + mtan1[2]*r1[1][0] + mtan13d[1]*r1[2][0];
+      mtmp[1][1] = mtan1[1]*r1[0][1] + mtan1[2]*r1[1][1] + mtan13d[1]*r1[2][1];
+      mtmp[1][2] = mtan1[1]*r1[0][2] + mtan1[2]*r1[1][2] + mtan13d[1]*r1[2][2];
+
+      mtmp[2][0] = mtan13d[0]*r1[0][0] + mtan13d[1]*r1[1][0] + mtan13d[2]*r1[2][0];
+      mtmp[2][1] = mtan13d[0]*r1[0][1] + mtan13d[1]*r1[1][1] + mtan13d[2]*r1[2][1];
+      mtmp[2][2] = mtan13d[0]*r1[0][2] + mtan13d[1]*r1[1][2] + mtan13d[2]*r1[2][2];
+
+
+      m1[0] = r1[0][0]*mtmp[0][0] + r1[1][0]*mtmp[1][0] + r1[2][0]*mtmp[2][0];
+      m1[1] = r1[0][0]*mtmp[0][1] + r1[1][0]*mtmp[1][1] + r1[2][0]*mtmp[2][1];
+      m1[2] = r1[0][0]*mtmp[0][2] + r1[1][0]*mtmp[1][2] + r1[2][0]*mtmp[2][2];
+
+      m1[3] = r1[0][1]*mtmp[0][1] + r1[1][1]*mtmp[1][1] + r1[2][1]*mtmp[2][1];
+      m1[4] = r1[0][1]*mtmp[0][2] + r1[1][1]*mtmp[1][2] + r1[2][1]*mtmp[2][2];
+
+      m1[5] = r1[0][2]*mtmp[0][2] + r1[1][2]*mtmp[1][2] + r1[2][2]*mtmp[2][2];
+
+      memcpy(mm1,m1,6*sizeof(double));
+    }
+    return(i1);
+  }
+  /* Metric in p2 has to be changed */
+  else{
+    alpha = ps1 /(1.0+mesh->info.hgrad*l*ps1);
+    if( ps2 >= alpha - _MMG5_EPS)
+      return(-1);
+
+    _MMG5_eigenv(1,mr2,lambda,vp);
+    c[0] = t2[0]*vp[0][0] + t2[1]*vp[0][1] + t2[2]*vp[0][2];
+    c[1] = t2[0]*vp[1][0] + t2[1]*vp[1][1] + t2[2]*vp[1][2];
+    c[2] = t2[0]*vp[2][0] + t2[1]*vp[2][1] + t2[2]*vp[2][2];
+
+    // Find index of the maximum value of c
+    ichg = 0;
+    val  = fabs(c[ichg]);
+    for (idx = 1; idx<3; ++idx) {
+      if ( fabs(c[idx]) > val ) {
+        val = fabs(c[idx]);
+        ichg = idx;
+      }
+    }
+    assert(c[ichg]*c[ichg] > _MMG5_EPS );
+    beta = (alpha*alpha - ps2*ps2)/(c[ichg]*c[ichg]);
+
+    mu[0] = lambda[0];
+    mu[1] = lambda[1];
+    mu[2] = lambda[2];
+
+    mu[ichg] += beta;
+
+    mtan2[0] = mu[0]*vp[0][0]*vp[0][0] + mu[1]*vp[1][0]*vp[1][0];
+    mtan2[1] = mu[0]*vp[0][0]*vp[0][1] + mu[1]*vp[1][0]*vp[1][1];
+    mtan2[2] = mu[0]*vp[0][1]*vp[0][1] + mu[1]*vp[1][1]*vp[1][1];
+    mtan2[0] +=vp[2][0]*vp[2][0]*mu[2];
+    mtan2[1] +=vp[2][1]*vp[2][0]*mu[2];
+    mtan2[2] +=vp[2][1]*vp[2][1]*mu[2];
+    mtan23d[0] = vp[0][0]*vp[0][2]*mu[0]+vp[1][0]*vp[1][2]*mu[1]+vp[2][0]*vp[2][2]*mu[2];
+    mtan23d[1] = vp[0][1]*vp[0][2]*mu[0]+vp[1][1]*vp[1][2]*mu[1]+vp[2][1]*vp[2][2]*mu[2];
+    mtan23d[2] = vp[0][2]*vp[0][2]*mu[0]+vp[1][2]*vp[1][2]*mu[1]+vp[2][2]*vp[2][2]*mu[2];
+
+    /* Metric update */
+    if( MG_SIN(p2->tag) || (MG_NOM & p2->tag)){
+      mm2[0] += 0.5*beta;
+      mm2[3] += 0.5*beta;
+      mm2[5] += 0.5*beta;
+    }
+    else if( p2->tag & MG_GEO ){
+      c[0] = fabs(mm2[0]-lambda[ichg]);
+      c[1] = fabs(mm2[1]-lambda[ichg]);
+      c[2] = fabs(mm2[2]-lambda[ichg]);
+      c[3] = fabs(mm2[3]-lambda[ichg]);
+      c[4] = fabs(mm2[4]-lambda[ichg]);
+
+     // Find index af the minimum value of c
+      kmin = 0;
+      val = fabs(c[kmin]);
+      for (idx = 1; idx<5; ++idx) {
+        if ( fabs(c[idx]) < val ) {
+          val = fabs(c[idx]);
+          kmin = idx;
+        }
+      }
+      mm2[kmin] += beta;
+    }
+    else{
+      /* Return in initial basis */
+      mtmp[0][0] = mtan2[0]*r2[0][0] + mtan2[1]*r2[1][0] + mtan23d[0]*r2[2][0];
+      mtmp[0][1] = mtan2[0]*r2[0][1] + mtan2[1]*r2[1][1] + mtan23d[0]*r2[2][1];
+      mtmp[0][2] = mtan2[0]*r2[0][2] + mtan2[1]*r2[1][2] + mtan23d[0]*r2[2][2];
+
+      mtmp[1][0] = mtan2[1]*r2[0][0] + mtan2[2]*r2[1][0] + mtan23d[1]*r2[2][0];
+      mtmp[1][1] = mtan2[1]*r2[0][1] + mtan2[2]*r2[1][1] + mtan23d[1]*r2[2][1];
+      mtmp[1][2] = mtan2[1]*r2[0][2] + mtan2[2]*r2[1][2] + mtan23d[1]*r2[2][2];
+
+      mtmp[2][0] = mtan23d[0]*r2[0][0] + mtan23d[1]*r2[1][0] + mtan23d[2]*r2[2][0];
+      mtmp[2][1] = mtan23d[0]*r2[0][1] + mtan23d[1]*r2[1][1] + mtan23d[2]*r2[2][1];
+      mtmp[2][2] = mtan23d[0]*r2[0][2] + mtan23d[1]*r2[1][2] + mtan23d[2]*r2[2][2];
+
+      m2[0] = r2[0][0]*mtmp[0][0] + r2[1][0]*mtmp[1][0] + r2[2][0]*mtmp[2][0];
+      m2[1] = r2[0][0]*mtmp[0][1] + r2[1][0]*mtmp[1][1] + r2[2][0]*mtmp[2][1];
+      m2[2] = r2[0][0]*mtmp[0][2] + r2[1][0]*mtmp[1][2] + r2[2][0]*mtmp[2][2];
+
+      m2[3] = r2[0][1]*mtmp[0][1] + r2[1][1]*mtmp[1][1] + r2[2][1]*mtmp[2][1];
+      m2[4] = r2[0][1]*mtmp[0][2] + r2[1][1]*mtmp[1][2] + r2[2][1]*mtmp[2][2];
+
+      m2[5] = r2[0][2]*mtmp[0][2] + r2[1][2]*mtmp[1][2] + r2[2][2]*mtmp[2][2];
+
+      memcpy(mm2,m2,6*sizeof(double));
+    }
+    return(i2);
+  }
 }

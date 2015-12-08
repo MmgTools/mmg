@@ -22,6 +22,8 @@
 */
 #include "mmg2d.h"
 
+mytime   MMG5_ctim[TIMEMAX];
+
 static void usage(char *name) {
   _MMG5_mmgUsage(name);
 
@@ -72,9 +74,9 @@ static inline void _MMG5_defaultValues(MMG5_pMesh mesh, double qdegrad[2]) {
 
 int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,double *qdegrad) {
   int     i;
-  char   *ptr;
+  // char   *ptr;
   char    namein[128];
-  
+
   /* First step: search if user want to see the default parameters values. */
   for ( i=1; i< argc; ++i ) {
     if ( !strcmp(argv[i],"-val") ) {
@@ -92,13 +94,13 @@ int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,double *qdegrad) 
         break;
       case 'a':
         if ( !strcmp(argv[i],"-ar") && ++i < argc )
-          if ( !MMG5_Set_dparameter(mesh,met,MMG5_DPARAM_angleDetection,
+          if ( !MMG2D_Set_dparameter(mesh,met,MMG2D_DPARAM_angleDetection,
                                     atof(argv[i])) )
             exit(EXIT_FAILURE);
         break;
       case 'b':
         if ( !strcmp(argv[i],"-bucket") && ++i < argc )
-          if ( !MMG5_Set_iparameter(mesh,met,MMG5_IPARAM_bucket,
+          if ( !MMG2D_Set_iparameter(mesh,met,MMG2D_IPARAM_bucket,
                                     atoi(argv[i])) )
             exit(EXIT_FAILURE);
         break;
@@ -108,28 +110,28 @@ int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,double *qdegrad) 
           qdegrad[0] = atof(argv[i++])/ALPHA;
           qdegrad[1] = atof(argv[i]);
         } else {
-          if ( !MMG5_Set_iparameter(mesh,met,MMG5_IPARAM_debug,1) )
+          if ( !MMG2D_Set_iparameter(mesh,met,MMG2D_IPARAM_debug,1) )
             exit(EXIT_FAILURE);
         }
         break;
       case 'h':
         if ( !strcmp(argv[i],"-hmin") && ++i < argc ) {
-          if ( !MMG5_Set_dparameter(mesh,met,MMG5_DPARAM_hmin,
+          if ( !MMG2D_Set_dparameter(mesh,met,MMG2D_DPARAM_hmin,
                                     atof(argv[i])) )
             exit(EXIT_FAILURE);
         }
         else if ( !strcmp(argv[i],"-hmax") && ++i < argc ) {
-          if ( !MMG5_Set_dparameter(mesh,met,MMG5_DPARAM_hmax,
+          if ( !MMG2D_Set_dparameter(mesh,met,MMG2D_DPARAM_hmax,
                                     atof(argv[i])) )
             exit(EXIT_FAILURE);
         }
         else if ( !strcmp(argv[i],"-hausd") && ++i <= argc ) {
-          if ( !MMG5_Set_dparameter(mesh,met,MMG5_DPARAM_hausd,
+          if ( !MMG2D_Set_dparameter(mesh,met,MMG2D_DPARAM_hausd,
                                     atof(argv[i])) )
             exit(EXIT_FAILURE);
         }
         else if ( !strcmp(argv[i],"-hgrad") && ++i <= argc ) {
-          if ( !MMG5_Set_dparameter(mesh,met,MMG5_DPARAM_hgrad,
+          if ( !MMG2D_Set_dparameter(mesh,met,MMG2D_DPARAM_hgrad,
                                     atof(argv[i])) )
             exit(EXIT_FAILURE);
         }
@@ -139,10 +141,10 @@ int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,double *qdegrad) 
       case 'i':
         if ( !strcmp(argv[i],"-in") ) {
           if ( ++i < argc && isascii(argv[i][0]) && argv[i][0]!='-') {
-            if ( !MMG5_Set_inputMeshName(mesh, argv[i]) )
+            if ( !MMG2D_Set_inputMeshName(mesh, argv[i]) )
               exit(EXIT_FAILURE);
 
-            if ( !MMG5_Set_iparameter(mesh,met,MMG5_IPARAM_verbose,5) )
+            if ( !MMG2D_Set_iparameter(mesh,met,MMG2D_IPARAM_verbose,5) )
               exit(EXIT_FAILURE);
           }else{
             fprintf(stderr,"Missing filname for %c%c\n",argv[i-1][1],argv[i-1][2]);
@@ -153,7 +155,7 @@ int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,double *qdegrad) 
       case 'l':
         if ( !strcmp(argv[i],"-lag") ) {
           if ( ++i < argc && isdigit(argv[i][0]) ) {
-            if ( !MMG5_Set_iparameter(mesh,met,MMG5_IPARAM_lag,atoi(argv[i])) )
+            if ( !MMG2D_Set_iparameter(mesh,met,MMG2D_IPARAM_lag,atoi(argv[i])) )
               exit(EXIT_FAILURE);
           }
           else if ( i == argc ) {
@@ -167,10 +169,10 @@ int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,double *qdegrad) 
           }
         }
         else if ( !strcmp(argv[i],"-ls") ) {
-          if ( !MMG5_Set_iparameter(mesh,met,MMG5_IPARAM_iso,1) )
+          if ( !MMG2D_Set_iparameter(mesh,met,MMG2D_IPARAM_iso,1) )
             exit(EXIT_FAILURE);
           if ( ++i < argc && isdigit(argv[i][0]) ) {
-            if ( !MMG5_Set_dparameter(mesh,met,MMG5_DPARAM_ls,atof(argv[i])) )
+            if ( !MMG2D_Set_dparameter(mesh,met,MMG2D_DPARAM_ls,atof(argv[i])) )
               exit(EXIT_FAILURE);
           }
           else if ( i == argc ) {
@@ -183,7 +185,7 @@ int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,double *qdegrad) 
       case 'm':  /* memory */
         if (!strcmp(argv[i],"-m") ) {
           if ( ++i < argc && isdigit(argv[i][0]) ) {
-            if ( !MMG5_Set_iparameter(mesh,met,MMG5_IPARAM_mem,atoi(argv[i])) )
+            if ( !MMG2D_Set_iparameter(mesh,met,MMG2D_IPARAM_mem,atoi(argv[i])) )
               exit(EXIT_FAILURE);
           }
           else {
@@ -192,7 +194,7 @@ int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,double *qdegrad) 
           }
         } else if(!strcmp(argv[i],"-msh") ) {
           if ( ++i < argc && isdigit(argv[i][0]) ) {
-            if ( !MMG5_Set_iparameter(mesh,met,MMG5_IPARAM_msh,atoi(argv[i])) )
+            if ( !MMG2D_Set_iparameter(mesh,met,MMG2D_IPARAM_msh,atoi(argv[i])) )
               exit(EXIT_FAILURE);
           }
           else {
@@ -203,11 +205,11 @@ int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,double *qdegrad) 
         break;
       case 'n':
         if ( !strcmp(argv[i],"-nr") ) {
-          if ( !MMG5_Set_iparameter(mesh,met,MMG5_IPARAM_angle,0) )
+          if ( !MMG2D_Set_iparameter(mesh,met,MMG2D_IPARAM_angle,0) )
             exit(EXIT_FAILURE);
         } else if ( !strcmp(argv[i],"-nsd") ) {
           if ( ++i < argc && isdigit(argv[i][0]) ) {
-            if ( !MMG5_Set_iparameter(mesh,met,MMG5_IPARAM_numsubdomain,atoi(argv[i])) )
+            if ( !MMG2D_Set_iparameter(mesh,met,MMG2D_IPARAM_numsubdomain,atoi(argv[i])) )
             exit(EXIT_FAILURE);
           }
           else {
@@ -215,26 +217,26 @@ int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,double *qdegrad) 
             usage(argv[0]);
           }
         } else if ( !strcmp(argv[i],"-noswap") ) {
-          if ( !MMG5_Set_iparameter(mesh,met,MMG5_IPARAM_noswap,1) )
+          if ( !MMG2D_Set_iparameter(mesh,met,MMG2D_IPARAM_noswap,1) )
             exit(EXIT_FAILURE);
         }
         else if( !strcmp(argv[i],"-noinsert") ) {
-          if ( !MMG5_Set_iparameter(mesh,met,MMG5_IPARAM_noinsert,1) )
+          if ( !MMG2D_Set_iparameter(mesh,met,MMG2D_IPARAM_noinsert,1) )
             exit(EXIT_FAILURE);
         }
         else if( !strcmp(argv[i],"-nomove") ) {
-          if ( !MMG5_Set_iparameter(mesh,met,MMG5_IPARAM_nomove,1) )
+          if ( !MMG2D_Set_iparameter(mesh,met,MMG2D_IPARAM_nomove,1) )
             exit(EXIT_FAILURE);
         }
         else if( !strcmp(argv[i],"-nosurf") ) {
-          if ( !MMG5_Set_iparameter(mesh,met,MMG5_IPARAM_nosurf,1) )
+          if ( !MMG2D_Set_iparameter(mesh,met,MMG2D_IPARAM_nosurf,1) )
             exit(EXIT_FAILURE);
         }
         break;
       case 'o':
         if ( !strcmp(argv[i],"-out") ) {
           if ( ++i < argc && isascii(argv[i][0])  && argv[i][0]!='-') {
-            if ( !MMG5_Set_outputMeshName(mesh,argv[i]) )
+            if ( !MMG2D_Set_outputMeshName(mesh,argv[i]) )
               exit(EXIT_FAILURE);
           }else{
             fprintf(stderr,"Missing filname for %c%c%c\n",
@@ -252,7 +254,7 @@ int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,double *qdegrad) 
       case 's':
         if ( !strcmp(argv[i],"-sol") ) {
           if ( ++i < argc && isascii(argv[i][0]) && argv[i][0]!='-' ) {
-            if ( !MMG5_Set_inputSolName(mesh,met,argv[i]) )
+            if ( !MMG2D_Set_inputSolName(mesh,met,argv[i]) )
               exit(EXIT_FAILURE);
           }
           else {
@@ -264,7 +266,7 @@ int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,double *qdegrad) 
       case 'v':
         if ( ++i < argc ) {
           if ( argv[i][0] == '-' || isdigit(argv[i][0]) ) {
-            if ( !MMG5_Set_iparameter(mesh,met,MMG5_IPARAM_verbose,atoi(argv[i])) )
+            if ( !MMG2D_Set_iparameter(mesh,met,MMG2D_IPARAM_verbose,atoi(argv[i])) )
               exit(EXIT_FAILURE);
           }
           else
@@ -284,15 +286,15 @@ int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,double *qdegrad) 
 
     else {
       if ( mesh->namein == NULL ) {
-        if ( !MMG5_Set_inputMeshName(mesh,argv[i]) )
+        if ( !MMG2D_Set_inputMeshName(mesh,argv[i]) )
           exit(EXIT_FAILURE); 
         if ( mesh->info.imprim == -99 )  {
-          if ( !MMG5_Set_iparameter(mesh,met,MMG5_IPARAM_verbose,5) )
+          if ( !MMG2D_Set_iparameter(mesh,met,MMG2D_IPARAM_verbose,5) )
             exit(EXIT_FAILURE);
         }
       }
       else if ( mesh->nameout == NULL ) {
-        if ( !MMG5_Set_outputMeshName(mesh,argv[i]) )
+        if ( !MMG2D_Set_outputMeshName(mesh,argv[i]) )
           exit(EXIT_FAILURE);     
       }
       else {
@@ -308,7 +310,7 @@ int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,double *qdegrad) 
     fprintf(stdout,"\n  -- PRINT (0 10(advised) -10) ?\n");
     fflush(stdin);
     fscanf(stdin,"%d",&i);
-    if ( !MMG5_Set_iparameter(mesh,met,MMG5_IPARAM_verbose,i) )
+    if ( !MMG2D_Set_iparameter(mesh,met,MMG2D_IPARAM_verbose,i) )
       exit(EXIT_FAILURE);
   }
 
@@ -316,19 +318,19 @@ int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,double *qdegrad) 
     fprintf(stdout,"  -- INPUT MESH NAME ?\n");
     fflush(stdin); 
     fscanf(stdin,"%s",namein);
-    if ( !MMG5_Set_inputMeshName(mesh,namein) )
+    if ( !MMG2D_Set_inputMeshName(mesh,namein) )
       exit(EXIT_FAILURE);
   }
   if ( mesh->nameout == NULL ) {
-    if ( !MMG5_Set_outputMeshName(mesh,"") )
+    if ( !MMG2D_Set_outputMeshName(mesh,"") )
       exit(EXIT_FAILURE);
       }
   if ( met->namein == NULL ) {
-    if ( !MMG5_Set_inputSolName(mesh,met,"") )
+    if ( !MMG2D_Set_inputSolName(mesh,met,"") )
       exit(EXIT_FAILURE);
     }
   if ( met->nameout == NULL ) {
-    if ( !MMG5_Set_outputSolName(mesh,met,"") )
+    if ( !MMG2D_Set_outputSolName(mesh,met,"") )
       exit(EXIT_FAILURE);
   }
   /* if ( mesh->namedep == NULL ) { */
@@ -344,11 +346,11 @@ int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,double *qdegrad) 
 
 
 static void endcod() {
-  double   ttot,ttim[TIMEMAX];
-  int      k,call[TIMEMAX];
+  // double   ttot,ttim[TIMEMAX];
+  // int      k,call[TIMEMAX];
 
   //chrono(OFF,&ctim[0]);
-#warning endcod : comment for merge
+//#warning message endcod : comment for merge
   /* for (k=0; k<TIMEMAX; k++) { */
   /*   call[k] = ctim[k].call; */
   /*   ttim[k] = ctim[k].call ? gttime(ctim[k]) : 0.0; */
@@ -372,8 +374,7 @@ static void endcod() {
 int main(int argc,char *argv[]) {
   MMG5_Mesh      mesh;
   MMG5_Sol	    sol;
-  double declic,qdegrad[2];  
-  int    nsiter,k;
+  double        qdegrad[2];  
 
   fprintf(stdout,"  -- MMG2D, Release %s (%s) \n",M_VER,M_REL);
   fprintf(stdout,"     %s\n",M_CPY);
@@ -388,15 +389,15 @@ int main(int argc,char *argv[]) {
   signal(SIGINT,_MMG2_excfun);
   atexit(endcod);
 
-  _MMG2_Set_commonFunc();
+  _MMG2D_Set_commonFunc();
   //tminit(MMG5_ctim,TIMEMAX);
   //chrono(ON,&MMG5_ctim[0]);
 
   /* default values */
   memset(&mesh,0,sizeof(MMG5_Mesh));
   memset(&sol,0,sizeof(MMG5_Sol));
-  
-  MMG5_Init_parameters(&mesh);
+
+  MMG2D_Init_parameters(&mesh);
   qdegrad[0] = 10./ALPHA;
   qdegrad[1] = 1.3;   
 
@@ -407,8 +408,8 @@ int main(int argc,char *argv[]) {
   /* load data */
   fprintf(stdout,"\n  -- INPUT DATA\n");
   //chrono(ON,&MMG5_ctim[1]);
-  if ( MMG2_loadMesh(&mesh,mesh.namein) < 1) _MMG5_RETURN_AND_FREE(&mesh,&sol,MMG5_STRONGFAILURE);
-  if ( !MMG2_loadSol(&sol,sol.namein,mesh.npmax,mesh.info.nreg) )  {    
+  if ( MMG2D_loadMesh(&mesh,mesh.namein) < 1) _MMG2D_RETURN_AND_FREE(&mesh,&sol,MMG5_STRONGFAILURE);
+  if ( !MMG2D_loadSol(&mesh,&sol,sol.namein,mesh.info.nreg) )  {    
     sol.np = mesh.np;
     sol.size = 1;
     sol.ver  = mesh.ver;
@@ -419,19 +420,19 @@ int main(int argc,char *argv[]) {
     fprintf(stdout,"  ## WARNING: WRONG SOLUTION NUMBER : %d != %d\n",sol.np,mesh.np);
     //exit(1);
   }
-  if(MMG2_mmg2dlib(&mesh,&sol,NULL)) _MMG5_RETURN_AND_FREE(&mesh,&sol,MMG5_STRONGFAILURE);
+  if(MMG2D_mmg2dlib(&mesh,&sol,NULL)) _MMG2D_RETURN_AND_FREE(&mesh,&sol,MMG5_STRONGFAILURE);
   
 /*   } */
   //chrono(ON,&ctim[1]);
   fprintf(stdout,"\n  -- WRITING DATA FILE %s\n",mesh.nameout);
-  MMG2_saveMesh(&mesh,mesh.nameout);
+  MMG2D_saveMesh(&mesh,mesh.nameout);
   if( sol.np )
-    MMG2_saveSol(&mesh,&sol,mesh.nameout);
+    MMG2D_saveSol(&mesh,&sol,mesh.nameout);
   fprintf(stdout,"  -- WRITING COMPLETED\n");
   //chrono(OFF,&ctim[1]);
 
    /* free mem */
-  _MMG5_RETURN_AND_FREE(&mesh,&sol,MMG5_SUCCESS);
+  _MMG2D_RETURN_AND_FREE(&mesh,&sol,MMG5_SUCCESS);
 }
   
 

@@ -39,333 +39,26 @@ extern char ddb;
 
 
 
+
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
- * \param ip1 global index of ridge extremity.
- * \param ip2 global index of ridge extremity.
- * \param s interpolation parameter (between 0 and 1).
- * \param v normal at the point at which we want to compute the metric.
- * \param mr computed anisotropic size.
- * \return 1 if success, 0 otherwise.
+ * \param k element index.
+ * \param i local index of edge in \a k.
+ * \param s interpolation parameter.
+ * \param mr computed metric.
+ * \return call to _MMG5_interpreg_ani (thus, 0 if fail, 1 otherwise).
  *
- * Anisotropic metric interpolation between two points \f$p_1\f$ and \f$p_2\f$
- * such that \f$edge_0 = (p_1p_2)\f$ is ridge. \a v is a direction vector, aimed
- * at pointing towards direction of n1 at interpolated point.
+ * Metric interpolation on edge \a i in elt \a it at
+ * parameter \f$ 0 <= s0 <= 1 \f$ from \a p1 result is stored in \a mr. edge
+ * \f$ p_1-p_2 \f$ must not be a ridge.
  *
- */
-int _MMG5_intridmet(MMG5_pMesh mesh,MMG5_pSol met,int ip1, int ip2,double s,
-                    double v[3],double mr[6]) {
-  MMG5_pxPoint   go1,go2;
-  MMG5_pPoint    p1,p2;
-  double         *m1,*m2,*n11,*n12,*n21,*n22,ps11,ps12,dd;
-  double         hu1,hu2,hn1,hn2;
-
-  p1  = &mesh->point[ip1];
-  p2  = &mesh->point[ip2];
-  m1  = &met->m[6*ip1];
-  m2  = &met->m[6*ip2];
-
-  /* Case when both endpoints are singular */
-  if ( MS_SIN(p1->tag) && MS_SIN(p2->tag) ) {
-    /* m1 and m2 are isotropic metrics */
-    dd  = (1-s)*sqrt(m2[0]) + s*sqrt(m1[0]);
-    dd *= dd;
-    if ( dd < _MMG5_EPSD ) {
-      if ( s < 0.5 ) {
-        mr[0] = m1[0];
-        mr[1] = m1[0];
-        mr[2] = m1[0];
-        mr[3] = m1[0];
-        mr[4] = m1[0];
-      }
-      else {
-        mr[0] = m2[0];
-        mr[1] = m2[0];
-        mr[2] = m2[0];
-        mr[3] = m2[0];
-        mr[4] = m2[0];
-      }
-    }
-    else {
-      mr[0] = m1[0]*m2[0] / dd;
-      mr[1] = mr[0];
-      mr[2] = mr[0];
-      mr[3] = mr[0];
-      mr[4] = mr[0];
-    }
-  }
-  /* vertex p1 is singular, p2 is regular */
-  else if ( MS_SIN(p1->tag) && (!MS_SIN(p2->tag)) ) {
-    /* m1 is an isotropic metric and m2 is a "ridge" metric that respect our
-     * storage convention. */
-    go2 = &mesh->xpoint[p2->xp];
-    n21 = &go2->n1[0];
-    n22 = &go2->n2[0];
-
-    /* Interpolation of the eigenvalue associated to tangent vector */
-    dd = (1-s)*sqrt(m2[0]) + s*sqrt(m1[0]);
-    dd *= dd;
-    if ( dd < _MMG5_EPSD ) {
-      mr[0] = s < 0.5 ? m1[0] : m2[0];
-    }
-    else {
-      mr[0] = m1[0]*m2[0] / dd;
-    }
-
-    /* Interpolation of the two other eigenvalues for each configuration. */
-    /* 1. For the surface ruled by n1. */
-    dd  = (1-s)*sqrt(m2[1]) + s*sqrt(m1[0]);
-    dd *= dd;
-    if ( dd < _MMG5_EPSD ) {
-      hu1 = s < 0.5 ? m1[0] : m2[1];
-    }
-    else {
-      hu1 = m1[0]*m2[1] / dd;
-    }
-    dd  = (1-s)*sqrt(m2[3]) + s*sqrt(m1[0]);
-    dd *= dd;
-    if ( dd < _MMG5_EPSD ) {
-      hn1 = s < 0.5 ? m1[0] : m2[3];
-    }
-    else {
-      hn1 = m1[0]*m2[3] / dd;
-    }
-
-    /* 2. For the surface ruled by n2. */
-    dd = (1-s)*sqrt(m2[2]) + s*sqrt(m1[0]);
-    dd *= dd;
-    if ( dd < _MMG5_EPSD ) {
-      hu2 = s < 0.5 ? m1[0] : m2[2];
-    }
-    else {
-      hu2 = m1[0]*m2[2] / dd;
-    }
-    dd  = (1-s)*sqrt(m2[4]) + s*sqrt(m1[0]);
-    dd *= dd;
-    if ( dd < _MMG5_EPSD ) {
-      hn2 = s < 0.5 ? m1[0] : m2[4];
-    }
-    else {
-      hn2 = m1[0]*m2[4] / dd;
-    }
-
-    /* Decision of the ordering of hu1 and hu2 */
-    ps11 = n21[0]*v[0] + n21[1]*v[1] + n21[2]*v[2];
-    ps12 = n22[0]*v[0] + n22[1]*v[1] + n22[2]*v[2];
-    if ( fabs(ps11) > fabs(ps12) ) {
-      mr[1] = hu1;
-      mr[2] = hu2;
-      mr[3] = hn1;
-      mr[4] = hn2;
-    }
-    else {
-      mr[1] = hu2;
-      mr[2] = hu1;
-      mr[3] = hn2;
-      mr[4] = hn1;
-    }
-  }
-  /* vertex p2 is singular, p1 is regular */
-  else if ( MS_SIN(p2->tag) && (!MS_SIN(p1->tag)) ) {
-    /* m2 is an isotropic metric and m1 is a "ridge" metric that respect our
-     * storage convention. */
-    go1 = &mesh->xpoint[p1->xp];
-    n11 = &go1->n1[0];
-    n12 = &go1->n2[0];
-
-    /* Interpolation of the eigenvalue associated to tangent vector */
-    dd  = (1-s)*sqrt(m2[0]) + s*sqrt(m1[0]);
-    dd *= dd;
-    if ( dd < _MMG5_EPSD ) {
-      mr[0] = s < 0.5 ? m1[0] : m2[0];
-    }
-    else {
-      mr[0] = m1[0]*m2[0] / dd;
-    }
-    /* Interpolation of the two other eigenvalues for each configuration. */
-    /* 1. For the surface ruled by n1. */
-    dd = (1-s)*sqrt(m2[0]) + s*sqrt(m1[1]);
-    dd *= dd;
-    if ( dd < _MMG5_EPSD ) {
-      hu1 = s < 0.5 ? m1[1] : m2[0];
-    }
-    else {
-      hu1 = m1[1]*m2[0] / dd;
-    }
-    dd = (1-s)*sqrt(m2[0]) + s*sqrt(m1[3]);
-    dd *= dd;
-    if ( dd < _MMG5_EPSD ) {
-      hn1 = s < 0.5 ? m1[3] : m2[0];
-    }
-    else {
-      hn1 = m1[3]*m2[0] / dd;
-    }
-
-    /* 2. For the surface ruled by n2. */
-    dd  = (1-s)*sqrt(m2[0]) + s*sqrt(m1[2]);
-    dd *= dd;
-    if ( dd < _MMG5_EPSD ) {
-      hu2 = s < 0.5 ? m1[2] : m2[0];
-    }
-    else {
-      hu2 = m1[2]*m2[0] / dd;
-    }
-    dd  = (1-s)*sqrt(m2[0]) + s*sqrt(m1[4]);
-    dd *= dd;
-    if ( dd < _MMG5_EPSD ) {
-      hn2 = s < 0.5 ? m1[4] : m2[0];
-    }
-    else {
-      hn2 = m1[4]*m2[0] / dd;
-    }
-
-    /* Decision of the ordering of hu1 and hu2 */
-    ps11 = n11[0]*v[0] + n11[1]*v[1] + n11[2]*v[2];
-    ps12 = n12[0]*v[0] + n12[1]*v[1] + n12[2]*v[2];
-    if ( fabs(ps11) > fabs(ps12) ) {
-      mr[1] = hu1;
-      mr[2] = hu2;
-      mr[3] = hn1;
-      mr[4] = hn2;
-    }
-    else {
-      mr[1] = hu2;
-      mr[2] = hu1;
-      mr[3] = hn2;
-      mr[4] = hn1;
-    }
-  }
-  /* p1,p2 : nonsingular vertices */
-  else {
-    go1 = &mesh->xpoint[p1->xp];
-    go2 = &mesh->xpoint[p2->xp];
-
-    /* Interpolation of the eigenvalue associated to tangent vector */
-    dd  = (1-s)*sqrt(m2[0]) + s*sqrt(m1[0]);
-    dd *= dd;
-    if ( dd < _MMG5_EPSD ) {
-      mr[0] = s < 0.5 ? m1[0] : m2[0];
-    }
-    else {
-      mr[0] = m1[0]*m2[0] / dd;
-    }
-
-    /* Pairing of normal vectors at p1 and p2 */
-    n11 = &go1->n1[0];
-    n12 = &go1->n2[0];
-    n21 = &go2->n1[0];
-    n22 = &go2->n2[0];
-    ps11 = n11[0]*n21[0] + n11[1]*n21[1] + n11[2]*n21[2];
-    ps12 = n11[0]*n22[0] + n11[1]*n22[1] + n11[2]*n22[2];
-    if ( fabs(ps11) > fabs(ps12) ) {   //n11 and n21 go together
-      /* 1. For the surface ruled by n1. */
-      dd  = (1-s)*sqrt(m2[1]) + s*sqrt(m1[1]);
-      dd *= dd;
-      if ( dd < _MMG5_EPSD ) {
-        hu1 = s < 0.5 ? m1[1] : m2[1];
-      }
-      else {
-        hu1 = m1[1]*m2[1] / dd;
-      }
-      dd  = (1-s)*sqrt(m2[3]) + s*sqrt(m1[3]);
-      dd *= dd;
-      if ( dd < _MMG5_EPSD ) {
-        hn1 = s < 0.5 ? m1[3] : m2[3];
-      }
-      else {
-        hn1 = m1[3]*m2[3] / dd;
-      }
-      /* 2. For the surface ruled by n2. */
-      dd = (1-s)*sqrt(m2[2]) + s*sqrt(m1[2]);
-      dd *= dd;
-      if ( dd < _MMG5_EPSD ) {
-        hu2 = s < 0.5 ? m1[2] : m2[2];
-      }
-      else {
-        hu2 = m1[2]*m2[2] / dd;
-      }
-      dd = (1-s)*sqrt(m2[4]) + s*sqrt(m1[4]);
-      dd *= dd;
-      if ( dd < _MMG5_EPSD ) {
-        hn2 = s < 0.5 ? m1[4] : m2[4];
-      }
-      else {
-        hn2 = m1[4]*m2[4] / dd;
-      }
-
-    }
-    else {
-      /* 1. */
-      dd  = (1-s)*sqrt(m2[2]) + s*sqrt(m1[1]);
-      dd *= dd;
-      if ( dd < _MMG5_EPSD ) {
-        hu1 = s < 0.5 ? m1[1] : m2[2];
-      }
-      else {
-        hu1 = m1[1]*m2[2] / dd;
-      }
-      dd  = (1-s)*sqrt(m2[4]) + s*sqrt(m1[3]);
-      dd *= dd;
-      if ( dd < _MMG5_EPSD ) {
-        hn1 = s < 0.5 ? m1[3] : m2[4];
-      }
-      else {
-        hn1 = m1[3]*m2[4] / dd;
-      }
-
-      /* 2. */
-      dd  = (1-s)*sqrt(m2[1]) + s*sqrt(m1[2]);
-      dd *= dd;
-      if ( dd < _MMG5_EPSD ) {
-        hu2 = s < 0.5 ? m1[2] : m2[1];
-      }
-      else {
-        hu2 = m1[2]*m2[1] / dd;
-      }
-      dd  = (1-s)*sqrt(m2[3]) + s*sqrt(m1[4]);
-      dd *= dd;
-      if ( dd < _MMG5_EPSD ) {
-        hn2 = s < 0.5 ? m1[4] : m2[3];
-      }
-      else {
-        hn2 = m1[4]*m2[3] / dd;
-      }
-    }
-
-    /* Now, hu1 is the eigenvalue associated to the direction at interpolated
-       point, closest to n11 (hu2 -> n12) ; one may need a different
-       orientation, and put eigenvalue of direction closest to v (= interpolated
-       normal) first */
-    ps11 = n11[0]*v[0] + n11[1]*v[1] + n11[2]*v[2];
-    ps12 = n12[0]*v[0] + n12[1]*v[1] + n12[2]*v[2];
-    if ( fabs(ps11) > fabs(ps12) ) {
-      mr[1] = hu1;
-      mr[2] = hu2;
-      mr[3] = hn1;
-      mr[4] = hn2;
-    }
-    else {
-      mr[1] = hu2;
-      mr[2] = hu1;
-      mr[3] = hn2;
-      mr[4] = hn1;
-    }
-  }
-  mr[5] = 0.0;
-
-  return(1);
-}
-
-/* Metric interpolation between points p1 and p2, in tria it at parameter 0 <= s0 <= 1 from p1
-   result is stored in mr. edge p1p2 must not be a ridge */
+ * */
 int intregmet(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,double s,double mr[6]) {
   MMG5_pTria     pt;
 
   pt  = &mesh->tria[k];
   return(_MMG5_interpreg_ani(mesh,met,pt,i,s,mr));
-
-  return(1);
 }
 
 /* linear interpolation of sizemap along edge i of tria k */
@@ -392,7 +85,7 @@ void intmet_iso(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int ip,double s) {
  * \return 0 if fail, 1 otherwise.
  *
  * Interpolation of anisotropic sizemap at parameter \a s along edge \a i of elt
- * \a k.
+ * \a k for special storage of ridges metrics (after defsiz call).
  *
  */
 void intmet_ani(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int ip,double s) {
@@ -418,4 +111,35 @@ void intmet_ani(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int ip,double s) {
   else {
     intregmet(mesh,met,k,i,s,m);
   }
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param k element index.
+ * \param i local index of edge in \a k.
+ * \param ip global index of the new point in which we want to compute the metric.
+ * \param s interpolation parameter (between 0 and 1).
+ * \return 0 if fail, 1 otherwise.
+ *
+ * Interpolation of anisotropic sizemap at parameter \a s along edge \a i of elt
+ * \a k for classic storage of ridges metrics (before defsiz call).
+ *
+ */
+int _MMGS_intmet33_ani(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int ip,double s) {
+  MMG5_pTria    pt;
+  double        *mr,*m,*n;
+  int           ip1, ip2, i1, i2;
+
+  pt  = &mesh->tria[k];
+  i1  = _MMG5_inxt2[i];
+  i2  = _MMG5_iprv2[i];
+  ip1 = pt->v[i1];
+  ip2 = pt->v[i2];
+
+  m   = &met->m[6*ip1];
+  n   = &met->m[6*ip2];
+  mr  = &met->m[6*ip];
+
+  return(_MMG5_mmgIntmet33_ani(m,n,mr,s));
 }

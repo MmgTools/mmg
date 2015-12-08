@@ -21,13 +21,17 @@
 ** =============================================================================
 */
 
-/** \include Example for using of mmg3dlib
- * mmg3d: 3d mesh adaptation
+/**
+ * Example of use of the mmg3d library (mmg3d application)
  *
- * Written by Cecile Dobrzynski (IMB), Charles Dapogny and Pascal Frey (LJLL)
- * Copyright (c) 2004- IMB/LJLL.
- * All rights reserved.
+ * \author Charles Dapogny (LJLL, UPMC)
+ * \author Cécile Dobrzynski (Inria / IMB, Université de Bordeaux)
+ * \author Pascal Frey (LJLL, UPMC)
+ * \author Algiane Froehly (Inria / IMB, Université de Bordeaux)
+ * \version 5
+ * \copyright GNU Lesser General Public License.
  */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <memory.h>
@@ -43,7 +47,7 @@ mytime    ctim[TIMEMAX];
 
 #define RETURN_AND_FREE(mesh,met,val)do    \
     {                                                 \
-      MMG5_Free_all(mesh,met);                        \
+      MMG3D_Free_all(mesh,met);                        \
       return(val);                                    \
     }while(0)
 
@@ -71,10 +75,10 @@ int main(int argc,char *argv[]) {
   met  = NULL;
   disp = NULL;
 
-  MMG5_Init_mesh(&mesh,&met,&disp);
+  MMG3D_Init_mesh(&mesh,&met,&disp);
 
   /* reset default values for file names */
-  MMG5_Free_names(mesh,met,disp);
+  MMG3D_Free_names(mesh,met,disp);
 
   /* command line */
   if ( !MMG5_parsar(argc,argv,mesh,met) )  return(1);
@@ -83,56 +87,58 @@ int main(int argc,char *argv[]) {
   fprintf(stdout,"\n  -- INPUT DATA\n");
   chrono(ON,&ctim[1]);
   /* read mesh file */
-  if ( MMG5_loadMesh(mesh)<1 ) {
-    MMG5_Free_all(mesh,met,disp );
+  if ( MMG3D_loadMesh(mesh)<1 ) {
+    MMG3D_Free_all(mesh,met,disp );
     return(MMG5_STRONGFAILURE);
   }
-  if ( !MMG5_Set_solSize(mesh,met,MMG5_Vertex,0,MMG5_Scalar) ) {
-    MMG5_Free_all(mesh,met,disp);
-    return(MMG5_STRONGFAILURE);
-  }
-  if ( !MMG5_Set_solSize(mesh,disp,MMG5_Vertex,0,MMG5_Vector) ) {
-    MMG5_Free_all(mesh,met,disp);
+  /* Set default metric size */
+  if ( !MMG3D_Set_solSize(mesh,met,MMG5_Vertex,0,MMG5_Scalar) ) {
+    MMG3D_Free_all(mesh,met,disp);
     return(MMG5_STRONGFAILURE);
   }
 
   /* read displacement if any */
-  if ( MMG5_Get_iparameter(mesh, MMG5_IPARAM_lag) > -1 ) {
-    if ( !MMG5_Set_inputSolName(mesh,disp,met->namein) ) {
-      MMG5_Free_all(mesh,met,disp);
+  if ( MMG3D_Get_iparameter(mesh, MMG3D_IPARAM_lag) > -1 ) {
+    if ( !MMG3D_Set_solSize(mesh,disp,MMG5_Vertex,0,MMG5_Vector) ) {
+      MMG3D_Free_all(mesh,met,disp);
       return(MMG5_STRONGFAILURE);
     }
-    ier = MMG5_loadMet(mesh,disp);
+
+    if ( !MMG3D_Set_inputSolName(mesh,disp,met->namein) ) {
+      MMG3D_Free_all(mesh,met,disp);
+      return(MMG5_STRONGFAILURE);
+    }
+    ier = MMG3D_loadSol(mesh,disp);
     if ( ier == 0 ) {
       fprintf(stdout,"  ## ERROR: NO DISPLACEMENT FOUND.\n");
-      MMG5_Free_all(mesh,met,disp);
+      MMG3D_Free_all(mesh,met,disp);
       return(MMG5_STRONGFAILURE);
     }
     else if ( ier == -1 ) {
       fprintf(stdout,"  ## ERROR: WRONG DATA TYPE OR WRONG SOLUTION NUMBER.\n");
-      MMG5_Free_all(mesh,met,disp);
+      MMG3D_Free_all(mesh,met,disp);
       return(MMG5_STRONGFAILURE);
     }
   }
   /* read metric if any */
   else {
-    ier = MMG5_loadMet(mesh,met);
+    ier = MMG3D_loadSol(mesh,met);
     if ( ier == -1 ) {
       fprintf(stdout,"  ## ERROR: WRONG DATA TYPE OR WRONG SOLUTION NUMBER.\n");
-      MMG5_Free_all(mesh,met,disp);
+      MMG3D_Free_all(mesh,met,disp);
       return(MMG5_STRONGFAILURE);
     }
     else {
-      MMG5_Get_solSize( mesh, met, &dummy, &dummy, &typSol);
+      MMG3D_Get_solSize( mesh, met, &dummy, &dummy, &typSol);
       if ( (typSol != MMG5_Scalar) && (typSol != MMG5_Tensor) ) {
         fprintf(stdout,"  ## ERROR: WRONG DATA TYPE.\n");
-        MMG5_Free_all(mesh,met,disp);
+        MMG3D_Free_all(mesh,met,disp);
         return(MMG5_STRONGFAILURE);
       }
     }
-    if ( MMG5_Get_iparameter(mesh, MMG5_IPARAM_iso) && !ier ) {
+    if ( MMG3D_Get_iparameter(mesh, MMG3D_IPARAM_iso) && !ier ) {
       fprintf(stdout,"  ## ERROR: NO ISOVALUE DATA.\n");
-      MMG5_Free_all(mesh,met,disp);
+      MMG3D_Free_all(mesh,met,disp);
       return(MMG5_STRONGFAILURE);
     }
     if ( !MMG5_parsop(mesh,met) )
@@ -143,18 +149,23 @@ int main(int argc,char *argv[]) {
   printim(ctim[1].gdif,stim);
   fprintf(stdout,"  -- DATA READING COMPLETED.     %s\n",stim);
 
-  ier = MMG5_mmg3dlib(mesh,met,disp );
+  if ( MMG3D_Get_iparameter(mesh, MMG3D_IPARAM_lag) > -1 ) {
+    ier = MMG3D_mmg3dmov(mesh,met,disp);
+  }
+  else {
+    ier = MMG3D_mmg3dlib(mesh,met);
+  }
 
   if ( ier != MMG5_STRONGFAILURE ) {
     chrono(ON,&ctim[1]);
     if ( mesh->info.imprim )
       fprintf(stdout,"\n  -- WRITING DATA FILE %s\n",mesh->nameout);
-    if ( !MMG5_saveMesh(mesh) )         {
-      MMG5_Free_all(mesh,met,disp );
+    if ( !MMG3D_saveMesh(mesh) )         {
+      MMG3D_Free_all(mesh,met,disp );
       return(MMG5_STRONGFAILURE);
     }
-    if ( !MMG5_saveMet(mesh,met) )     {
-      MMG5_Free_all(mesh,met,disp);
+    if ( !MMG3D_saveSol(mesh,met) )     {
+      MMG3D_Free_all(mesh,met,disp);
       return(MMG5_STRONGFAILURE);
     }
     chrono(OFF,&ctim[1]);
@@ -166,6 +177,6 @@ int main(int argc,char *argv[]) {
   chrono(OFF,&ctim[0]);
   printim(ctim[0].gdif,stim);
   fprintf(stdout,"\n   MMG3D: ELAPSED TIME  %s\n",stim);
-  MMG5_Free_all(mesh,met,disp);
+  MMG3D_Free_all(mesh,met,disp);
   return(ier);
 }

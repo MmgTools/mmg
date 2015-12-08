@@ -43,6 +43,8 @@ extern char ddb;
  * \param ilist pointer toward the size of the shell of the edge.
  * \param it1 first element of the open shell.
  * \param it2 last element of the open shell.
+ * \param typchk type of checking permformed for edge length (hmin or LSHORT
+ * criterion).
  * \return 0 if fail, 1 otherwise.
  *
  * Check whether edge whose shell is provided should be swapped for
@@ -50,7 +52,8 @@ extern char ddb;
  * provided).
  *
  */
-int _MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, int *list,int ilist,int it1,int it2) {
+int _MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, int *list,int ilist,
+                    int it1,int it2,char typchk) {
   MMG5_pTetra   pt,pt0;
   MMG5_pxTetra  pxt;
   MMG5_pPoint   p0,p1,ppt0;
@@ -66,6 +69,7 @@ int _MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, int *list,int ilist,int it1,
   pt  = &mesh->tetra[iel];
   pt0 = &mesh->tetra[0];
   ppt0= &mesh->point[0];
+  memset(ppt0,0,sizeof(MMG5_Point));
 
   np = pt->v[_MMG5_iare[ia][0]];
   nq = pt->v[_MMG5_iare[ia][1]];
@@ -176,9 +180,16 @@ int _MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, int *list,int ilist,int it1,
   dischg = MG_MAX(dischg,hausd * hausd);
 
   if ( dischg > disnat )   return(0);
+
   if ( met->m ) {
-    cal1 = _MMG5_caltri(mesh,met,&tt1);
-    cal2 = _MMG5_caltri(mesh,met,&tt2);
+    if ( typchk==1 && met->size > 1 ) {
+      cal1 = _MMG5_caltri33_ani(mesh,met,&tt1);
+      cal2 = _MMG5_caltri33_ani(mesh,met,&tt2);
+    }
+    else {
+      cal1 = _MMG5_caltri(mesh,met,&tt1);
+      cal2 = _MMG5_caltri(mesh,met,&tt2);
+    }
   }
   else { // with -A option we don't have the metric here so we always use the
          // iso func.
@@ -193,11 +204,17 @@ int _MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, int *list,int ilist,int it1,
   }
 
   if ( met->m ) {
-    cal1 = _MMG5_caltri(mesh,met,&tt1);
-    cal2 = _MMG5_caltri(mesh,met,&tt2);
+    if ( typchk==1 && met->size > 1 ) {
+      cal1 = _MMG5_caltri33_ani(mesh,met,&tt1);
+      cal2 = _MMG5_caltri33_ani(mesh,met,&tt2);
+    }
+    else {
+      cal1 = _MMG5_caltri(mesh,met,&tt1);
+      cal2 = _MMG5_caltri(mesh,met,&tt2);
+    }
   }
   else { // with -A option we don't have the metric here so we always use the
-         // iso func.
+    // iso func.
     cal1 = _MMG5_caltri_iso(mesh,met,&tt1);
     cal2 = _MMG5_caltri_iso(mesh,met,&tt2);
   }
@@ -211,6 +228,17 @@ int _MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, int *list,int ilist,int it1,
   ppt0->c[0] = 0.5*(p0->c[0] + p1->c[0]);
   ppt0->c[1] = 0.5*(p0->c[1] + p1->c[1]);
   ppt0->c[2] = 0.5*(p0->c[2] + p1->c[2]);
+
+  if ( met->m ) {
+    if ( typchk == 1 && (met->size>1) ) {
+      if ( _MMG3D_intmet33_ani(mesh,met,list[0]/6,list[0]%6,0,0.5) <= 0 )
+        return(0);
+    }
+    else {
+      if ( _MMG5_intmet(mesh,met,list[0]/6,list[0]%6,0,0.5) <= 0 )
+        return(0);
+    }
+  }
 
   /* Check validity of insertion of midpoint on edge (pq), then collapse of m on a1 */
   calold = calnew = DBL_MAX;
@@ -232,19 +260,56 @@ int _MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, int *list,int ilist,int it1,
 
     /* 2 elts resulting from split and collapse */
     pt0->v[ip] = 0;
-    if ( _MMG5_orcal(mesh,met,0) < _MMG5_NULKAL )  return(0);
+
+    if ( met->m ) {
+      if ( typchk==1 && met->size > 1 )
+        caltmp = _MMG5_caltet33_ani(mesh,met,pt0);
+      else
+        caltmp = _MMG5_orcal(mesh,met,0);
+    }
+    else // -A option
+      caltmp = _MMG5_caltet_iso(mesh,met,pt0);
+
+    if ( caltmp < _MMG5_NULKAL )  return(0);
+
     if ( !isshell ) {
       pt0->v[ip] = na1;
-      caltmp = _MMG5_orcal(mesh,met,0);
+      if ( met->m ) {
+        if ( typchk==1 && met->size > 1 )
+          caltmp = _MMG5_caltet33_ani(mesh,met,pt0);
+        else
+          caltmp = _MMG5_orcal(mesh,met,0);
+      }
+      else // -A option
+        caltmp = _MMG5_caltet_iso(mesh,met,pt0);
+
       calnew = MG_MIN(calnew,caltmp);
     }
     memcpy(pt0,pt,sizeof(MMG5_Tetra));
     pt0->v[iq] = 0;
-    if ( _MMG5_orcal(mesh,met,0) < _MMG5_NULKAL )  return(0);
+
+    if ( met->m ) {
+      if ( typchk==1 && met->size > 1 )
+        caltmp = _MMG5_caltet33_ani(mesh,met,pt0);
+      else
+        caltmp = _MMG5_orcal(mesh,met,0);
+    }
+    else // -A option
+      caltmp = _MMG5_caltet_iso(mesh,met,pt0);
+
+    if ( caltmp < _MMG5_NULKAL )  return(0);
 
     if ( !isshell ) {
       pt0->v[iq] = na1;
-      caltmp = _MMG5_orcal(mesh,met,0);
+      if ( met->m ) {
+        if ( typchk==1 && met->size > 1 )
+          caltmp = _MMG5_caltet33_ani(mesh,met,pt0);
+        else
+          caltmp = _MMG5_orcal(mesh,met,0);
+      }
+      else // -A option
+        caltmp = _MMG5_caltet_iso(mesh,met,pt0);
+
       calnew = MG_MIN(calnew,caltmp);
     }
   }
@@ -261,16 +326,21 @@ int _MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, int *list,int ilist,int it1,
  * \param ret dobble of the number of tetrahedra in the shell
  * \param it1 boundary face carrying the beforehand tested terminal
  * point for collapse
+ * \param bucket pointer toward the bucket structure in Delaunay mode,
+ * NULL pointer in pattern mode.
+ * \param typchk type of checking permformed for edge length (hmin or LSHORT
+ * criterion).
  * \return -1 if lack of memory, 0 if fail to swap, 1 otherwise
  *
  * Swap boundary edge whose shell is provided.
  *
  */
-int _MMG5_swpbdy(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int it1,_MMG5_pBucket bucket) {
+int _MMG5_swpbdy(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int it1,
+                 _MMG5_pBucket bucket, char typchk) {
   MMG5_pTetra   pt,pt1;
   MMG5_pPoint   p0,p1;
   int           iel,iel1,ilist,np,nq,nm;
-  double        c[3],*mp, *mq, *mm;
+  double        c[3];
   char          ia,iface1,j,ipa,im;
   int           ier;
 #ifndef NDEBUG
@@ -311,7 +381,7 @@ int _MMG5_swpbdy(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int it1,_MMG5_p
   c[0] = 0.5*( p0->c[0] + p1->c[0]);
   c[1] = 0.5*( p0->c[1] + p1->c[1]);
   c[2] = 0.5*( p0->c[2] + p1->c[2]);
-  nm = _MMG5_newPt(mesh,c,MG_BDY);
+  nm = _MMG3D_newPt(mesh,c,MG_BDY);
   if ( !nm ) {
     if ( bucket ) {
       _MMG5_POINT_AND_BUCKET_REALLOC(mesh,met,nm,mesh->gap,
@@ -329,13 +399,15 @@ int _MMG5_swpbdy(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int it1,_MMG5_p
     }
   }
   if ( met->m ) {
-    mp = &met->m[met->size*np];
-    mq = &met->m[met->size*nq];
-    mm = &met->m[met->size*nm];
-    if ( !_MMG5_intmetvol(mq,mp,mm,0.5) )  return(0);
+    if ( typchk == 1 && (met->size>1) ) {
+      if ( _MMG3D_intmet33_ani(mesh,met,iel,ia,nm,0.5)<=0 )  return(0);
+    }
+    else {
+      if ( _MMG5_intmet(mesh,met,iel,ia,nm,0.5)<=0 )  return(0);
+    }
   }
 
-  ier = _MMG5_split1b(mesh,met,list,ret,nm,0);
+  ier = _MMG5_split1b(mesh,met,list,ret,nm,0,typchk-1);
   /* pointer adress may change if we need to realloc memory during split */
   pt  = &mesh->tetra[iel];
   pt1 = &mesh->tetra[iel1];
@@ -353,7 +425,7 @@ int _MMG5_swpbdy(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int it1,_MMG5_p
     if ( pt1->v[im] == nm )  break;
   }
   if ( pt1->v[im] != nm ){
-    _MMG5_delPt(mesh,nm);
+    _MMG3D_delPt(mesh,nm);
     fprintf(stdout,"%s:%d: Warning pt1->v[im] != nm\n",__FILE__,__LINE__);
     return(0);
   }
@@ -362,13 +434,13 @@ int _MMG5_swpbdy(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int it1,_MMG5_p
   assert(list[0]/4 == iel1);
   assert(pt1->v[ipa] == na);
 
-  ier = _MMG5_colver(mesh,met,list,ilist,ipa);
+  ier = _MMG5_colver(mesh,met,list,ilist,ipa,typchk);
   if ( ier < 0 ) {
     fprintf(stdout,"  ## Warning: unable to swap boundary edge.\n");
     return(-1);
   }
   else if ( ier ) {
-    _MMG5_delPt(mesh,ier);
+    _MMG3D_delPt(mesh,ier);
     ier = 1;
   }
 

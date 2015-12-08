@@ -54,7 +54,7 @@ int chkcol(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int *list,char typchk) {
   ip1 = pt->v[i1];
   ip2 = pt->v[i2];
   if ( typchk == 2 && met->m ) {
-    lon = _MMG5_lenedg(mesh,met,ip1,ip2,0);
+    lon = _MMG5_lenSurfEdg(mesh,met,ip1,ip2,0);
     lon = MG_MIN(lon,LSHRT);
     lon = MG_MAX(1.0/lon,LLONG);
   }
@@ -86,7 +86,7 @@ int chkcol(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int *list,char typchk) {
       /* check length */
       if ( typchk == 2 && met->m && !MG_EDG(mesh->point[ip2].tag) ) {
         ip1 = pt1->v[j2];
-        len = _MMG5_lenedg(mesh,met,ip1,ip2,0);
+        len = _MMG5_lenSurfEdg(mesh,met,ip1,ip2,0);
         if ( len > lon )  return(0);
       }
 
@@ -135,7 +135,7 @@ int chkcol(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int *list,char typchk) {
       else
         kal = ALPHAD*_MMG5_caltri_iso(mesh,NULL,pt0);
       if ( kal < NULKAL )  return(0);
-       
+
       memcpy(n0old,n1old,3*sizeof(double));
       memcpy(n0new,n1new,3*sizeof(double));
     }
@@ -294,9 +294,9 @@ int colver(MMG5_pMesh mesh,int *list,int ilist) {
       mesh->adja[3*(jel-1)+1+j] = 0;
   }
 
-  _MMG5_delPt(mesh,ip1);
-  _MMG5_delElt(mesh,list[0] / 3);
-  if ( !open )  _MMG5_delElt(mesh,list[ilist-1] / 3);
+  _MMGS_delPt(mesh,ip1);
+  _MMGS_delElt(mesh,list[0] / 3);
+  if ( !open )  _MMGS_delElt(mesh,list[ilist-1] / 3);
 
   return(1);
 }
@@ -365,9 +365,9 @@ int colver3(MMG5_pMesh mesh,int* list) {
   }
 
   /* remove vertex + elements */
-  _MMG5_delPt(mesh,ip);
-  _MMG5_delElt(mesh,iel);
-  _MMG5_delElt(mesh,kel);
+  _MMGS_delPt(mesh,ip);
+  _MMGS_delElt(mesh,iel);
+  _MMGS_delElt(mesh,kel);
 
   return(1);
 }
@@ -407,8 +407,8 @@ int colver2(MMG5_pMesh mesh,int* list) {
     mesh->adja[3*(kel-1)+1+k] = 3*iel + i2;
 
   /* remove vertex + element */
-  _MMG5_delPt(mesh,ip);
-  _MMG5_delElt(mesh,jel);
+  _MMGS_delPt(mesh,ip);
+  _MMGS_delElt(mesh,jel);
 
   return(1);
 }

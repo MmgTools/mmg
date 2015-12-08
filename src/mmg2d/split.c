@@ -53,7 +53,7 @@ int MMG2_split(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int k1,int adj1) {
   pt2  = &mesh->tria[k2];
   if(ddebug) printf("tr1 %d %d %d -- voy %d : %d %d \n",pt1->v[0],pt1->v[1],pt1->v[2],voy1,iar1,iar2);
   if(ddebug) printf("tr2 %d %d %d -- voy %d : %d %d \n",pt2->v[0],pt2->v[1],pt2->v[2],voy2,iara1,iara2);
-  if(ddebug) MMG2_saveMesh(mesh,"tutu.mesh");
+  if(ddebug) MMG2D_saveMesh(mesh,"tutu.mesh");
   assert(pt2->v[iara1]==pt1->v[iar2]);
   assert(pt2->v[iara2]==pt1->v[iar1]);
   
@@ -154,7 +154,7 @@ int MMG2_split(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int k1,int adj1) {
   pt2->qual = cal2;
   
    
-  jel  = _MMG5_newElt(mesh);
+  jel  = _MMG2D_newElt(mesh);
   if ( !jel ) {
     _MMG5_TRIA_REALLOC(mesh,jel,mesh->gap,
                         printf("  ## Error: unable to allocate a new element.\n");
@@ -166,7 +166,7 @@ int MMG2_split(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int k1,int adj1) {
     ptmp = &mesh->tria[0];
     adja2 =  &mesh->adja[3*(k2-1) + 1];
   }
-  kel  = _MMG5_newElt(mesh);  
+  kel  = _MMG2D_newElt(mesh);  
   if ( !kel ) {
     _MMG5_TRIA_REALLOC(mesh,kel,mesh->gap,
                         printf("  ## Error: unable to allocate a new element.\n");
@@ -216,7 +216,7 @@ int MMG2_split(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int k1,int adj1) {
   if(pt1->edg[voy1]) {
     /*edge creation*/
     /*split edge piar1 piar2 */
- #warning same tangent
+// #warning same tangent
     num = pt1->edg[voy1];
     assert(num);
     ped = &mesh->edge[num];
@@ -303,8 +303,8 @@ int MMG2_split(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int k1,int adj1) {
 
  
 
-  if(MMG2_callbackinsert)
-    MMG2_callbackinsert((int) ip,(int) k1,(int) k2,(int)jel,(int) kel);
+  if(MMG2D_callbackinsert)
+    MMG2D_callbackinsert((int) ip,(int) k1,(int) k2,(int)jel,(int) kel);
 	    
   return(1);  
 }
@@ -356,7 +356,7 @@ int MMG2_splitbdry(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int k1,int voy1,double *
   pt1->v[2] = ip;
   pt1->qual = cal1;
      
-  jel  = _MMG5_newElt(mesh);
+  jel  = _MMG2D_newElt(mesh);
   if ( !jel ) {
     _MMG5_TRIA_REALLOC(mesh,jel,mesh->gap,
                         printf("  ## Error: unable to allocate a new element.\n");

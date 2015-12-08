@@ -305,7 +305,7 @@ static int _MMG5_snpval_ls(MMG5_pMesh mesh,MMG5_pSol sol,double *tmp) {
   char     i;
 
   /* create tetra adjacency */
-  if ( !_MMG5_hashTetra(mesh,1) ) {
+  if ( !MMG3D_hashTetra(mesh,1) ) {
     fprintf(stdout,"  ## Hashing problem (1). Exit program.\n");
     return(0);
   }
@@ -495,7 +495,7 @@ static int _MMG5_cuttet_ls(MMG5_pMesh mesh, MMG5_pSol sol/*,double *tmp*/){
       c[1] = p0->c[1] + s*(p1->c[1]-p0->c[1]);
       c[2] = p0->c[2] + s*(p1->c[2]-p0->c[2]);
 
-      np = _MMG5_newPt(mesh,c,0);
+      np = _MMG3D_newPt(mesh,c,0);
       if ( !np ) {
         _MMG5_POINT_REALLOC(mesh,sol,np,0.2,
                             printf("  ## Error: unable to allocate a new point\n");
@@ -522,23 +522,23 @@ static int _MMG5_cuttet_ls(MMG5_pMesh mesh, MMG5_pSol sol/*,double *tmp*/){
     }
     switch (pt->flag) {
     case 1: case 2: case 4: case 8: case 16: case 32: /* 1 edge split */
-      _MMG5_split1(mesh,sol,k,vx);
+      _MMG5_split1(mesh,sol,k,vx,1);
       ns++;
       break;
 
     case 48: case 24: case 40: case 6: case 34: case 36:
     case 20: case 5: case 17: case 9: case 3: case 10: /* 2 edges (same face) split */
-      _MMG5_split2sf(mesh,sol,k,vx);
+      _MMG5_split2sf(mesh,sol,k,vx,1);
       ns++;
       break;
 
     case 7: case 25: case 42: case 52: /* 3 edges on conic configuration splitted */
-      _MMG5_split3cone(mesh,sol,k,vx);
+      _MMG5_split3cone(mesh,sol,k,vx,1);
       ns++;
       break;
 
     case 30: case 45: case 51:
-      _MMG5_split4op(mesh,sol,k,vx);
+      _MMG5_split4op(mesh,sol,k,vx,1);
       ns++;
       break;
 
@@ -744,7 +744,8 @@ int _MMG5_chkmani(MMG5_pMesh mesh){
     }
   }
 
-  fprintf(stdout,"  *** Manifold implicit surface.\n");
+  if ( mesh->info.imprim || mesh->info.ddebug )
+    fprintf(stdout,"  *** Manifold implicit surface.\n");
   return(1);
 }
 
@@ -1330,7 +1331,7 @@ int _MMG5_mmg3d2(MMG5_pMesh mesh,MMG5_pSol sol) {
   }
   _MMG5_DEL_MEM(mesh,tmp,(mesh->npmax+1)*sizeof(double));
 
-  if ( !_MMG5_hashTetra(mesh,1) ) {
+  if ( !MMG3D_hashTetra(mesh,1) ) {
     fprintf(stdout,"  ## Hashing problem. Exit program.\n");
     return(0);
   }
@@ -1373,7 +1374,6 @@ int _MMG5_mmg3d2(MMG5_pMesh mesh,MMG5_pSol sol) {
 
   /* Clean memory */
   _MMG5_DEL_MEM(mesh,sol->m,(sol->size*(sol->npmax+1))*sizeof(double));
-  memset(sol,0,sizeof(MMG5_Sol));
 
   return(1);
 }

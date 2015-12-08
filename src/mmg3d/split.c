@@ -69,7 +69,7 @@ unsigned char permedge[12][6] = {
  * Simulate the splitting of 1 edge of element
  *
  */
-int _MMG5_split1_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
+int _MMG3D_split1_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
   MMG5_pTetra   pt,pt0;
   double   vold,vnew;
   unsigned char tau[4],*taued;
@@ -130,7 +130,7 @@ int _MMG5_split1_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
  * Split 1 edge of tetra \a k.
  *
  */
-void _MMG5_split1(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
+void _MMG5_split1(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) {
   MMG5_pTetra   pt,pt1;
   MMG5_xTetra   xt,xt1;
   MMG5_pxTetra  pxt0;
@@ -140,7 +140,7 @@ void _MMG5_split1(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
 
   /* create a new tetra */
   pt  = &mesh->tetra[k];
-  iel = _MMG5_newElt(mesh);
+  iel = _MMG3D_newElt(mesh);
   if ( !iel ) {
     _MMG5_TETRA_REALLOC(mesh,iel,mesh->gap,
                         printf("  ## Error: unable to allocate a new element.\n");
@@ -245,35 +245,43 @@ nextstep1:
     }
   }
   /* Quality update */
-  pt->qual=_MMG5_orcal(mesh,met,k);
-  pt1->qual=_MMG5_orcal(mesh,met,iel);
+  if ( (!metRidTyp) && met->m && met->size>1 ) {
+    pt->qual=_MMG5_caltet33_ani(mesh,met,pt);
+    pt1->qual=_MMG5_caltet33_ani(mesh,met,pt1);
+  }
+  else
+  {
+    pt->qual=_MMG5_orcal(mesh,met,k);
+    pt1->qual=_MMG5_orcal(mesh,met,iel);
+  }
 }
 
 /**
  * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric.
  * \param list pointer toward the edge shell.
  * \param ret size of the edge shell.
- * \param o table of the new point coordinates.
+ * \param ip new point index.
  * \return 0 if final position is invalid, 1 if all checks are ok.
  *
- * Simulate at the same time creation and bulging of one point, with new position o,
- * to be inserted at an edge, whose shell is passed.
+ * Simulate at the same time creation and bulging of one point, with new
+ * position o and tag \tag, to be inserted at an edge, whose shell is passed.
  *
  */
-#warning we need the point tag too here (to detect ridge metric)
-int _MMG5_simbulgept(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,double o[3]) {
+int _MMG3D_simbulgept(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int ip) {
   MMG5_pTetra    pt,pt0;
   MMG5_pPoint    ppt0;
-  double    calold,calnew,caltmp;
-  int       k,iel,ilist;
-  char      ie,ia,ib;
+  double         calold,calnew,caltmp;
+  int            k,iel,ilist;
+  char           ie,ia,ib;
 
   ilist = ret / 2;
   pt0  = &mesh->tetra[0];
   ppt0 = &mesh->point[0];
-  ppt0->c[0] = o[0];
-  ppt0->c[1] = o[1];
-  ppt0->c[2] = o[2];
+  memcpy(ppt0->c  ,&mesh->point[ip].c  , 3*sizeof(double));
+  ppt0->tag = mesh->point[ip].tag;
+
+  memcpy(&met->m[0],&met->m[met->size*ip], met->size*sizeof(double));
 
   calold = calnew = DBL_MAX;
   for (k=0; k<ilist; k++) {
@@ -310,6 +318,8 @@ int _MMG5_simbulgept(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,double o[3]
  * \param ret size of the shell of edge.
  * \param ip idex of new point.
  * \param cas flag to watch the length of the new edges.
+ * \param metRidTyp Type of storage of ridges metrics: 0 for classic storage,
+ * 1 for special storage.
  * \return -1 if lack of memory, 0 if we don't split the edge, 1 if success.
  *
  * Split edge \f$list[0]%6\f$, whose shell list is passed, introducing point \a
@@ -317,13 +327,14 @@ int _MMG5_simbulgept(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,double o[3]
  * sense).
  *
  */
-int _MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,int cas){
-  MMG5_pTetra         pt,pt1;
+int _MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,
+                  int cas,char metRidTyp){
+  MMG5_pTetra         pt,pt1,pt0;
   MMG5_xTetra         xt,xt1;
   MMG5_pxTetra        pxt0;
   int            ilist,k,open,iel,jel,*newtet,nump,*adja,j;
   int            *adjan,nei2,nei3,mel;
-  char           ie,tau[4],isxt,isxt1,i,voy,tag;
+  char           ie,tau[4],isxt,isxt1,i,voy;
   unsigned char  *taued;
   double         lmin,lmax,len;
 
@@ -336,9 +347,10 @@ int _MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,int 
     for (j=0; j<ilist; j++) {
       for (i=0; i<6; i++) {
         pt   = &mesh->tetra[list[j]/6];
-        tag  = pt->xt ? (mesh->xtetra[pt->xt].tag[i]) : 0;
-        len  = _MMG5_lenedg(mesh,met, pt->v[_MMG5_iare[i][0]],
-                            pt->v[_MMG5_iare[i][1]],tag);
+        if ( (!metRidTyp) && met->m && met->size>1 )
+          len = _MMG5_lenedg33_ani(mesh,met,i,pt);
+        else
+          len  = _MMG5_lenedg(mesh,met,i,pt);
         if ( len < lmin) {
           lmin = len;
         }
@@ -352,9 +364,47 @@ int _MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,int 
       iel = list[j] / 6;
       pt  = &mesh->tetra[iel];
       ie  = list[j] % 6;
-      len = _MMG5_lenedg(mesh,met, pt->v[_MMG5_isar[ie][0]],ip,0);
+      pt0 = &mesh->tetra[0];
+      memcpy(pt0,pt,sizeof(MMG5_Tetra));
+      /* tau = sigma^-1 = permutation that sends the ref config (edge 01 split) to current */
+      tau[0] = 0; tau[1] = 1; tau[2] = 2; tau[3] = 3;
+      taued = &permedge[0][0];
+      switch(ie){
+      case 1:
+        tau[0] = 2; tau[1] = 0; tau[2] = 1; tau[3] = 3;
+        taued = &permedge[6][0];
+        break;
+      case 2:
+        tau[0] = 0; tau[1] = 3; tau[2] = 1; tau[3] = 2;
+        taued = &permedge[2][0];
+        break;
+      case 3:
+        tau[0] = 1; tau[1] = 2; tau[2] = 0; tau[3] = 3;
+        taued = &permedge[4][0];
+        break;
+      case 4:
+        tau[0] = 3; tau[1] = 1; tau[2] = 0; tau[3] = 2;
+        taued = &permedge[10][0];
+        break;
+      case 5:
+        tau[0] = 3; tau[1] = 2; tau[2] = 1; tau[3] = 0;
+        taued = &permedge[11][0];
+        break;
+      }
+
+      pt0->v[_MMG5_isar[ie][1]] = ip;
+      if ( (!metRidTyp) && met->m && met->size>1 )
+        len = _MMG5_lenedgspl33_ani(mesh,met,taued[5],pt0);
+      else
+        len = _MMG5_lenedgspl(mesh,met,taued[5],pt0);
       if ( len < lmin )  break;
-      len = _MMG5_lenedg(mesh,met, pt->v[_MMG5_isar[ie][1]],ip,0);
+      memcpy(pt0,pt,sizeof(MMG5_Tetra));
+
+      pt0->v[_MMG5_isar[ie][0]] = ip;
+      if ( (!metRidTyp) && met->m && met->size>1 )
+        len = _MMG5_lenedgspl33_ani(mesh,met,taued[5],pt0);
+      else
+        len = _MMG5_lenedgspl(mesh,met,taued[5],pt0);
       if ( len < lmin )  break;
     }
     if ( j < ilist )  return(0);
@@ -393,14 +443,14 @@ int _MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,int 
       tau[0] = 3; tau[1] = 2; tau[2] = 1; tau[3] = 0;
       break;
     }
-    jel = _MMG5_newElt(mesh);
+    jel = _MMG3D_newElt(mesh);
     if ( !jel ) {
       _MMG5_TETRA_REALLOC(mesh,jel,mesh->gap,
                           printf("  ## Error: unable to allocate a new element.\n");
                           _MMG5_INCREASE_MEM_MESSAGE();
                           k--;
                           for ( ; k>=0 ; --k ) {
-                            _MMG5_delElt(mesh,abs(newtet[k]));
+                            _MMG3D_delElt(mesh,abs(newtet[k]));
                           }
                           return(-1));
       pt  = &mesh->tetra[iel];
@@ -535,8 +585,14 @@ int _MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,int 
       adjan[voy] = 4*jel + tau[0];
     }
     /* Quality update */
-    pt->qual=_MMG5_orcal(mesh,met,iel);
-    pt1->qual=_MMG5_orcal(mesh,met,jel);
+    if ( (!metRidTyp) && met->m && met->size>1 ) {
+      pt->qual=_MMG5_caltet33_ani(mesh,met,pt);
+      pt1->qual=_MMG5_caltet33_ani(mesh,met,pt1);
+    }
+    else {
+      pt->qual=_MMG5_orcal(mesh,met,iel);
+      pt1->qual=_MMG5_orcal(mesh,met,jel);
+    }
 
     _MMG5_SAFE_FREE(newtet);
     return(1);
@@ -825,8 +881,14 @@ int _MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,int 
       adjan[voy] = 4*jel + tau[0];
     }
     /* Quality update */
-    pt->qual=_MMG5_orcal(mesh,met,iel);
-    pt1->qual=_MMG5_orcal(mesh,met,jel);
+    if ( (!metRidTyp) && met->m && met->size>1 ) {
+      pt->qual=_MMG5_caltet33_ani(mesh,met,pt);
+      pt1->qual=_MMG5_caltet33_ani(mesh,met,pt1);
+    }
+    else {
+      pt->qual=_MMG5_orcal(mesh,met,iel);
+      pt1->qual=_MMG5_orcal(mesh,met,jel);
+    }
   }
 
   _MMG5_SAFE_FREE(newtet);
@@ -935,7 +997,7 @@ int _MMG5_split2sf_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]){
 }
 
 /** Split of two edges that belong to a common face : 1 tetra becomes 3 */
-void _MMG5_split2sf(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]){
+void _MMG5_split2sf(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp){
   MMG5_pTetra        pt[3];
   MMG5_xTetra        xt[3];
   MMG5_pxTetra       pxt0;
@@ -949,7 +1011,7 @@ void _MMG5_split2sf(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]){
   pt[0]->flag = 0;
   newtet[0]=k;
 
-  iel = _MMG5_newElt(mesh);
+  iel = _MMG3D_newElt(mesh);
   if ( !iel ) {
     _MMG5_TETRA_REALLOC(mesh,iel,mesh->gap,
                         printf("  ## Error: unable to allocate a new element.\n");
@@ -962,7 +1024,7 @@ void _MMG5_split2sf(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]){
   memcpy(pt[1],pt[0],sizeof(MMG5_Tetra));
   newtet[1]=iel;
 
-  iel = _MMG5_newElt(mesh);
+  iel = _MMG3D_newElt(mesh);
   if ( !iel ) {
     _MMG5_TETRA_REALLOC(mesh,iel,mesh->gap,
                         printf("  ## Error: unable to allocate a new element.\n");
@@ -1139,14 +1201,22 @@ void _MMG5_split2sf(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]){
     }
   }
   /* Quality update */
-  pt[0]->qual=_MMG5_orcal(mesh,met,newtet[0]);
-  pt[1]->qual=_MMG5_orcal(mesh,met,newtet[1]);
-  pt[2]->qual=_MMG5_orcal(mesh,met,newtet[2]);
+  if ( (!metRidTyp) && met->m && met->size>1 ) {
+    pt[0]->qual=_MMG5_caltet33_ani(mesh,met,pt[0]);
+    pt[1]->qual=_MMG5_caltet33_ani(mesh,met,pt[1]);
+    pt[2]->qual=_MMG5_caltet33_ani(mesh,met,pt[2]);
+  }
+  else
+  {
+    pt[0]->qual=_MMG5_orcal(mesh,met,newtet[0]);
+    pt[1]->qual=_MMG5_orcal(mesh,met,newtet[1]);
+    pt[2]->qual=_MMG5_orcal(mesh,met,newtet[2]);
+  }
 
 }
 
 /** Split of two OPPOSITE edges */
-void _MMG5_split2(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
+void _MMG5_split2(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) {
   MMG5_pTetra   pt[4];
   MMG5_xTetra   xt[4];
   MMG5_pxTetra  pxt0;
@@ -1160,7 +1230,7 @@ void _MMG5_split2(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
   pt[0]->flag = 0;
   newtet[0]=k;
 
-  iel = _MMG5_newElt(mesh);
+  iel = _MMG3D_newElt(mesh);
   if ( !iel ) {
     _MMG5_TETRA_REALLOC(mesh,iel,mesh->gap,
                         printf("  ## Error: unable to allocate a new element.\n");
@@ -1173,7 +1243,7 @@ void _MMG5_split2(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
   memcpy(pt[1],pt[0],sizeof(MMG5_Tetra));
   newtet[1]=iel;
 
-  iel = _MMG5_newElt(mesh);
+  iel = _MMG3D_newElt(mesh);
   if ( !iel ) {
     _MMG5_TETRA_REALLOC(mesh,iel,mesh->gap,
                         printf("  ## Error: unable to allocate a new element.\n");
@@ -1187,7 +1257,7 @@ void _MMG5_split2(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
   memcpy(pt[2],pt[0],sizeof(MMG5_Tetra));
   newtet[2]=iel;
 
-  iel = _MMG5_newElt(mesh);
+  iel = _MMG3D_newElt(mesh);
   if ( !iel ) {
     _MMG5_TETRA_REALLOC(mesh,iel,mesh->gap,
                         printf("  ## Error: unable to allocate a new element.\n");
@@ -1329,15 +1399,23 @@ void _MMG5_split2(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
     }
   }
   /* Quality update */
-  pt[0]->qual=_MMG5_orcal(mesh,met,newtet[0]);
-  pt[1]->qual=_MMG5_orcal(mesh,met,newtet[1]);
-  pt[2]->qual=_MMG5_orcal(mesh,met,newtet[2]);
-  pt[3]->qual=_MMG5_orcal(mesh,met,newtet[3]);
+  if ( (!metRidTyp) && met->m && met->size>1 ) {
+    pt[0]->qual=_MMG5_caltet33_ani(mesh,met,pt[0]);
+    pt[1]->qual=_MMG5_caltet33_ani(mesh,met,pt[1]);
+    pt[2]->qual=_MMG5_caltet33_ani(mesh,met,pt[2]);
+    pt[3]->qual=_MMG5_caltet33_ani(mesh,met,pt[3]);
+  }
+  else {
+    pt[0]->qual=_MMG5_orcal(mesh,met,newtet[0]);
+    pt[1]->qual=_MMG5_orcal(mesh,met,newtet[1]);
+    pt[2]->qual=_MMG5_orcal(mesh,met,newtet[2]);
+    pt[3]->qual=_MMG5_orcal(mesh,met,newtet[3]);
+  }
 
 }
 
 /** Simulate split of 1 face (3 edges) */
-int _MMG5_split3_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
+int _MMG3D_split3_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
   MMG5_pTetra    pt,pt0;
   double    vold,vnew;
   unsigned char tau[4],*taued;
@@ -1398,7 +1476,7 @@ int _MMG5_split3_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
 }
 
 /** 1 face (3 edges) subdivided */
-void _MMG5_split3(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
+void _MMG5_split3(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) {
   MMG5_pTetra    pt[4];
   MMG5_xTetra    xt[4];
   MMG5_pxTetra   pxt0;
@@ -1413,7 +1491,7 @@ void _MMG5_split3(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
   newtet[0]=k;
 
   /* create 3 new tetras */
-  iel = _MMG5_newElt(mesh);
+  iel = _MMG3D_newElt(mesh);
   if ( !iel ) {
     _MMG5_TETRA_REALLOC(mesh,iel,mesh->gap,
                         printf("  ## Error: unable to allocate a new element.\n");
@@ -1426,7 +1504,7 @@ void _MMG5_split3(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
   pt[1] = memcpy(pt[1],pt[0],sizeof(MMG5_Tetra));
   newtet[1]=iel;
 
-  iel = _MMG5_newElt(mesh);
+  iel = _MMG3D_newElt(mesh);
   if ( !iel ) {
     _MMG5_TETRA_REALLOC(mesh,iel,mesh->gap,
                         printf("  ## Error: unable to allocate a new element.\n");
@@ -1440,7 +1518,7 @@ void _MMG5_split3(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
   pt[2] = memcpy(pt[2],pt[0],sizeof(MMG5_Tetra));
   newtet[2]=iel;
 
-  iel = _MMG5_newElt(mesh);
+  iel = _MMG3D_newElt(mesh);
   if ( !iel ) {
     _MMG5_TETRA_REALLOC(mesh,iel,mesh->gap,
                         printf("  ## Error: unable to allocate a new element.\n");
@@ -1580,15 +1658,22 @@ void _MMG5_split3(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
     }
   }
   /* Quality update */
-  pt[0]->qual=_MMG5_orcal(mesh,met,newtet[0]);
-  pt[1]->qual=_MMG5_orcal(mesh,met,newtet[1]);
-  pt[2]->qual=_MMG5_orcal(mesh,met,newtet[2]);
-  pt[3]->qual=_MMG5_orcal(mesh,met,newtet[3]);
-
+  if ( (!metRidTyp) && met->m && met->size>1 ) {
+    pt[0]->qual=_MMG5_caltet33_ani(mesh,met,pt[0]);
+    pt[1]->qual=_MMG5_caltet33_ani(mesh,met,pt[1]);
+    pt[2]->qual=_MMG5_caltet33_ani(mesh,met,pt[2]);
+    pt[3]->qual=_MMG5_caltet33_ani(mesh,met,pt[3]);
+  }
+  else {
+    pt[0]->qual=_MMG5_orcal(mesh,met,newtet[0]);
+    pt[1]->qual=_MMG5_orcal(mesh,met,newtet[1]);
+    pt[2]->qual=_MMG5_orcal(mesh,met,newtet[2]);
+    pt[3]->qual=_MMG5_orcal(mesh,met,newtet[3]);
+  }
 }
 
 /** Split 3 edge in cone configuration */
-void _MMG5_split3cone(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
+void _MMG5_split3cone(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) {
   MMG5_pTetra    pt[4];
   MMG5_xTetra    xt[4];
   MMG5_pxTetra   pxt0;
@@ -1603,7 +1688,7 @@ void _MMG5_split3cone(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
   newtet[0]=k;
 
   /* create 3 new tetras */
-  iel = _MMG5_newElt(mesh);
+  iel = _MMG3D_newElt(mesh);
   if ( !iel ) {
     _MMG5_TETRA_REALLOC(mesh,iel,mesh->gap,
                         printf("  ## Error: unable to allocate a new element.\n");
@@ -1616,7 +1701,7 @@ void _MMG5_split3cone(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
   memcpy(pt[1],pt[0],sizeof(MMG5_Tetra));
   newtet[1]=iel;
 
-  iel = _MMG5_newElt(mesh);
+  iel = _MMG3D_newElt(mesh);
   if ( !iel ) {
     _MMG5_TETRA_REALLOC(mesh,iel,mesh->gap,
                         printf("  ## Error: unable to allocate a new element.\n");
@@ -1630,7 +1715,7 @@ void _MMG5_split3cone(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
   memcpy(pt[2],pt[0],sizeof(MMG5_Tetra));
   newtet[2]=iel;
 
-  iel = _MMG5_newElt(mesh);
+  iel = _MMG3D_newElt(mesh);
   if ( !iel ) {
     _MMG5_TETRA_REALLOC(mesh,iel,mesh->gap,
                         printf("  ## Error: unable to allocate a new element.\n");
@@ -1922,14 +2007,22 @@ void _MMG5_split3cone(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
     }
   }
   /* Quality update */
-  pt[0]->qual=_MMG5_orcal(mesh,met,newtet[0]);
-  pt[1]->qual=_MMG5_orcal(mesh,met,newtet[1]);
-  pt[2]->qual=_MMG5_orcal(mesh,met,newtet[2]);
-  pt[3]->qual=_MMG5_orcal(mesh,met,newtet[3]);
+  if ( (!metRidTyp) && met->m && met->size>1 ) {
+    pt[0]->qual=_MMG5_caltet33_ani(mesh,met,pt[0]);
+    pt[1]->qual=_MMG5_caltet33_ani(mesh,met,pt[1]);
+    pt[2]->qual=_MMG5_caltet33_ani(mesh,met,pt[2]);
+    pt[3]->qual=_MMG5_caltet33_ani(mesh,met,pt[3]);
+  }
+  else {
+    pt[0]->qual=_MMG5_orcal(mesh,met,newtet[0]);
+    pt[1]->qual=_MMG5_orcal(mesh,met,newtet[1]);
+    pt[2]->qual=_MMG5_orcal(mesh,met,newtet[2]);
+    pt[3]->qual=_MMG5_orcal(mesh,met,newtet[3]);
+  }
 
 }
 
-void _MMG5_split3op(MMG5_pMesh mesh, MMG5_pSol met, int k, int vx[6]){
+void _MMG5_split3op(MMG5_pMesh mesh, MMG5_pSol met, int k, int vx[6],char metRidTyp){
   MMG5_pTetra        pt[5];
   MMG5_xTetra        xt[5];
   MMG5_pxTetra       pxt0;
@@ -2080,7 +2173,7 @@ void _MMG5_split3op(MMG5_pMesh mesh, MMG5_pSol met, int k, int vx[6]){
   imin12 = ((pt[0])->v[ip1] < (pt[0])->v[ip2]) ? ip1 : ip2;
 
   /* Create new elements according to the current configuration */
-  iel = _MMG5_newElt(mesh);
+  iel = _MMG3D_newElt(mesh);
   if ( !iel ) {
     _MMG5_TETRA_REALLOC(mesh,iel,mesh->gap,
                         printf("  ## Error: unable to allocate a new element.\n");
@@ -2094,7 +2187,7 @@ void _MMG5_split3op(MMG5_pMesh mesh, MMG5_pSol met, int k, int vx[6]){
   pt[1] = memcpy(pt[1],pt[0],sizeof(MMG5_Tetra));
   newtet[1]=iel;
 
-  iel = _MMG5_newElt(mesh);
+  iel = _MMG3D_newElt(mesh);
   if ( !iel ) {
     _MMG5_TETRA_REALLOC(mesh,iel,mesh->gap,
                         printf("  ## Error: unable to allocate a new element.\n");
@@ -2108,7 +2201,7 @@ void _MMG5_split3op(MMG5_pMesh mesh, MMG5_pSol met, int k, int vx[6]){
   pt[2] = memcpy(pt[2],pt[0],sizeof(MMG5_Tetra));
   newtet[2]=iel;
 
-  iel = _MMG5_newElt(mesh);
+  iel = _MMG3D_newElt(mesh);
   if ( !iel ) {
     _MMG5_TETRA_REALLOC(mesh,iel,mesh->gap,
                         printf("  ## Error: unable to allocate a new element.\n");
@@ -2139,7 +2232,7 @@ void _MMG5_split3op(MMG5_pMesh mesh, MMG5_pSol met, int k, int vx[6]){
   }
 
   if ( !((imin12 == ip1) && (imin03 == ip3)) ) {
-    iel = _MMG5_newElt(mesh);
+    iel = _MMG3D_newElt(mesh);
     if ( !iel ) {
       _MMG5_TETRA_REALLOC(mesh,iel,mesh->gap,
                           printf("  ## Error: unable to allocate a new element.\n");
@@ -2470,12 +2563,23 @@ void _MMG5_split3op(MMG5_pMesh mesh, MMG5_pSol met, int k, int vx[6]){
     }
   }
   /* Quality update */
-  pt[0]->qual=_MMG5_orcal(mesh,met,newtet[0]);
-  pt[1]->qual=_MMG5_orcal(mesh,met,newtet[1]);
-  pt[2]->qual=_MMG5_orcal(mesh,met,newtet[2]);
-  pt[3]->qual=_MMG5_orcal(mesh,met,newtet[3]);
-  if ( !((imin12 == ip1) && (imin03 == ip3)) ) {
-    pt[4]->qual=_MMG5_orcal(mesh,met,newtet[4]);
+  if ( (!metRidTyp) && met->m && met->size>1 ) {
+    pt[0]->qual=_MMG5_caltet33_ani(mesh,met,pt[0]);
+    pt[1]->qual=_MMG5_caltet33_ani(mesh,met,pt[1]);
+    pt[2]->qual=_MMG5_caltet33_ani(mesh,met,pt[2]);
+    pt[3]->qual=_MMG5_caltet33_ani(mesh,met,pt[3]);
+    if ( !((imin12 == ip1) && (imin03 == ip3)) ) {
+      pt[4]->qual=_MMG5_caltet33_ani(mesh,met,pt[4]);
+    }
+  }
+  else {
+    pt[0]->qual=_MMG5_orcal(mesh,met,newtet[0]);
+    pt[1]->qual=_MMG5_orcal(mesh,met,newtet[1]);
+    pt[2]->qual=_MMG5_orcal(mesh,met,newtet[2]);
+    pt[3]->qual=_MMG5_orcal(mesh,met,newtet[3]);
+    if ( !((imin12 == ip1) && (imin03 == ip3)) ) {
+      pt[4]->qual=_MMG5_orcal(mesh,met,newtet[4]);
+    }
   }
 
 }
@@ -2491,7 +2595,7 @@ void _MMG5_split3op(MMG5_pMesh mesh, MMG5_pSol met, int k, int vx[6]){
  * NEEDED ?
  *
  */
-int _MMG5_split4bar(MMG5_pMesh mesh, MMG5_pSol met, int k) {
+int _MMG5_split4bar(MMG5_pMesh mesh, MMG5_pSol met, int k,char metRidTyp) {
   MMG5_pTetra   pt[4];
   MMG5_pPoint   ppt;
   MMG5_xTetra   xt[4];
@@ -2518,7 +2622,7 @@ int _MMG5_split4bar(MMG5_pMesh mesh, MMG5_pSol met, int k) {
   o[2] *= 0.25;
 
   cb[0] = 0.25; cb[1] = 0.25;  cb[2] = 0.25;  cb[3] = 0.25;
-  ib = _MMG5_newPt(mesh,o,0);
+  ib = _MMG3D_newPt(mesh,o,0);
   if ( !ib ) {
     _MMG5_POINT_REALLOC(mesh,met,ib,mesh->gap,
                         printf("  ## Error: unable to allocate a new point\n");
@@ -2527,16 +2631,19 @@ int _MMG5_split4bar(MMG5_pMesh mesh, MMG5_pSol met, int k) {
                         ,o,0);
   }
   if ( met->m ) {
-    _MMG5_interp4bar(mesh,met,k,ib,cb);
+    if ( !metRidTyp && met->size > 1 )
+      _MMG5_interp4bar33_ani(mesh,met,k,ib,cb);
+    else
+      _MMG5_interp4bar(mesh,met,k,ib,cb);
   }
 
   /* create 3 new tetras */
-  iel = _MMG5_newElt(mesh);
+  iel = _MMG3D_newElt(mesh);
   if ( !iel ) {
     _MMG5_TETRA_REALLOC(mesh,iel,mesh->gap,
                         printf("  ## Error: unable to allocate a new element.\n");
                         _MMG5_INCREASE_MEM_MESSAGE();
-                        _MMG5_delPt(mesh,ib);
+                        _MMG3D_delPt(mesh,ib);
                         return(0));
     pt[0] = &mesh->tetra[newtet[0]];
   }
@@ -2544,13 +2651,13 @@ int _MMG5_split4bar(MMG5_pMesh mesh, MMG5_pSol met, int k) {
   pt[1] = memcpy(pt[1],pt[0],sizeof(MMG5_Tetra));
   newtet[1]=iel;
 
-  iel = _MMG5_newElt(mesh);
+  iel = _MMG3D_newElt(mesh);
   if ( !iel ) {
     _MMG5_TETRA_REALLOC(mesh,iel,mesh->gap,
                         printf("  ## Error: unable to allocate a new element.\n");
                         _MMG5_INCREASE_MEM_MESSAGE();
-                        _MMG5_delPt(mesh,ib);
-                        _MMG5_delElt(mesh,newtet[1]);
+                        _MMG3D_delPt(mesh,ib);
+                        _MMG3D_delElt(mesh,newtet[1]);
                         return(0));
     pt[0] = &mesh->tetra[newtet[0]];
     pt[1] = &mesh->tetra[newtet[1]];
@@ -2559,14 +2666,14 @@ int _MMG5_split4bar(MMG5_pMesh mesh, MMG5_pSol met, int k) {
   pt[2] = memcpy(pt[2],pt[0],sizeof(MMG5_Tetra));
   newtet[2]=iel;
 
-  iel = _MMG5_newElt(mesh);
+  iel = _MMG3D_newElt(mesh);
   if ( !iel ) {
     _MMG5_TETRA_REALLOC(mesh,iel,mesh->gap,
                         printf("  ## Error: unable to allocate a new element.\n");
                         _MMG5_INCREASE_MEM_MESSAGE();
-                        _MMG5_delPt(mesh,ib);
-                        _MMG5_delElt(mesh,newtet[1]);
-                        _MMG5_delElt(mesh,newtet[2]);
+                        _MMG3D_delPt(mesh,ib);
+                        _MMG3D_delElt(mesh,newtet[1]);
+                        _MMG3D_delElt(mesh,newtet[2]);
                         return(0));
     pt[0] = &mesh->tetra[newtet[0]];
     pt[1] = &mesh->tetra[newtet[1]];
@@ -2683,16 +2790,24 @@ int _MMG5_split4bar(MMG5_pMesh mesh, MMG5_pSol met, int k) {
     }
   }
   /* Quality update */
-  pt[0]->qual=_MMG5_orcal(mesh,met,newtet[0]);
-  pt[1]->qual=_MMG5_orcal(mesh,met,newtet[1]);
-  pt[2]->qual=_MMG5_orcal(mesh,met,newtet[2]);
-  pt[3]->qual=_MMG5_orcal(mesh,met,newtet[3]);
+  if ( (!metRidTyp) && met->m && met->size>1 ) {
+    pt[0]->qual=_MMG5_caltet33_ani(mesh,met,pt[0]);
+    pt[1]->qual=_MMG5_caltet33_ani(mesh,met,pt[1]);
+    pt[2]->qual=_MMG5_caltet33_ani(mesh,met,pt[2]);
+    pt[3]->qual=_MMG5_caltet33_ani(mesh,met,pt[3]);
+  }
+  else {
+    pt[0]->qual=_MMG5_orcal(mesh,met,newtet[0]);
+    pt[1]->qual=_MMG5_orcal(mesh,met,newtet[1]);
+    pt[2]->qual=_MMG5_orcal(mesh,met,newtet[2]);
+    pt[3]->qual=_MMG5_orcal(mesh,met,newtet[3]);
+  }
 
   return(1);
 }
 
 /** Split 4 edges in a configuration when 3 lie on the same face */
-void _MMG5_split4sf(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
+void _MMG5_split4sf(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) {
   MMG5_pTetra    pt[6];
   MMG5_xTetra    xt[6];
   MMG5_pxTetra   pxt0;
@@ -2771,7 +2886,7 @@ void _MMG5_split4sf(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
 
   /* create 5 new tetras */
   for (j=1; j<6; j++) {
-    iel = _MMG5_newElt(mesh);
+    iel = _MMG3D_newElt(mesh);
     if ( !iel ) {
       _MMG5_TETRA_REALLOC(mesh,iel,mesh->gap,
                           printf("  ## Error: unable to allocate a new element.\n");
@@ -2963,13 +3078,21 @@ void _MMG5_split4sf(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
       pt[0]->xt = 0;
     }
   }
-  for (i=0; i<6; i++) {
-    pt[i]->qual=_MMG5_orcal(mesh,met,newtet[i]);
+
+  if ( (!metRidTyp) && met->m && met->size>1 ) {
+    for (i=0; i<6; i++) {
+      pt[i]->qual=_MMG5_caltet33_ani(mesh,met,pt[i]);
+    }
+  }
+  else {
+    for (i=0; i<6; i++) {
+      pt[i]->qual=_MMG5_orcal(mesh,met,newtet[i]);
+    }
   }
 }
 
 /** Split 4 edges in a configuration when no 3 edges lie on the same face */
-void _MMG5_split4op(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
+void _MMG5_split4op(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) {
   MMG5_pTetra        pt[6];
   MMG5_xTetra        xt[6];
   MMG5_pxTetra       pxt0;
@@ -3004,7 +3127,7 @@ void _MMG5_split4op(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
 
   /* create 5 new tetras */
   for (j=1; j<6; j++) {
-    iel = _MMG5_newElt(mesh);
+    iel = _MMG3D_newElt(mesh);
     if ( !iel ) {
       _MMG5_TETRA_REALLOC(mesh,iel,mesh->gap,
                           printf("  ## Error: unable to allocate a new element.\n");
@@ -3213,13 +3336,20 @@ void _MMG5_split4op(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
 
     }
   }
-  for (i=0; i<6; i++) {
-    pt[i]->qual=_MMG5_orcal(mesh,met,newtet[i]);
+  if ( (!metRidTyp) && met->m && met->size>1 ) {
+    for (i=0; i<6; i++) {
+      pt[i]->qual=_MMG5_caltet33_ani(mesh,met,pt[i]);
+    }
+  }
+  else {
+    for (i=0; i<6; i++) {
+      pt[i]->qual=_MMG5_orcal(mesh,met,newtet[i]);
+    }
   }
 }
 
 /** Split 5 edges */
-void _MMG5_split5(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
+void _MMG5_split5(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) {
   MMG5_pTetra    pt[7];
   MMG5_xTetra    xt[7];
   MMG5_pxTetra   pxt0;
@@ -3235,7 +3365,7 @@ void _MMG5_split5(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
 
   /* create 6 new tetras */
   for (i=1; i<7; i++) {
-    iel = _MMG5_newElt(mesh);
+    iel = _MMG3D_newElt(mesh);
     if ( !iel ) {
       _MMG5_TETRA_REALLOC(mesh,iel,mesh->gap,
                           printf("  ## Error: unable to allocate a new element.\n");
@@ -3462,13 +3592,20 @@ void _MMG5_split5(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
 
     }
   }
-  for (i=0; i<7; i++) {
-    pt[i]->qual=_MMG5_orcal(mesh,met,newtet[i]);
+  if ( (!metRidTyp) && met->m && met->size>1 ) {
+    for (i=0; i<7; i++) {
+      pt[i]->qual=_MMG5_caltet33_ani(mesh,met,pt[i]);
+    }
+  }
+  else {
+    for (i=0; i<7; i++) {
+      pt[i]->qual=_MMG5_orcal(mesh,met,newtet[i]);
+    }
   }
 }
 
 /** split all faces (6 edges) */
-void _MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
+void _MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) {
   MMG5_pTetra    pt[8];
   MMG5_xTetra    xt0,xt;
   MMG5_pxTetra   pxt;
@@ -3486,7 +3623,7 @@ void _MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
 
   /* create 7 new tetras */
   for (i=1; i<8; i++) {
-    iel = _MMG5_newElt(mesh);
+    iel = _MMG3D_newElt(mesh);
     if ( !iel ) {
       _MMG5_TETRA_REALLOC(mesh,iel,mesh->gap,
                           printf("  ## Error: unable to allocate a new element.\n");
@@ -3819,7 +3956,14 @@ void _MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
       }
     }
   }
-  for (i=0; i<8; i++) {
-    pt[i]->qual=_MMG5_orcal(mesh,met,newtet[i]);
+  if ( (!metRidTyp) && met->m && met->size>1 ) {
+    for (i=0; i<8; i++) {
+      pt[i]->qual=_MMG5_caltet33_ani(mesh,met,pt[i]);
+    }
+  }
+  else {
+    for (i=0; i<8; i++) {
+      pt[i]->qual=_MMG5_orcal(mesh,met,newtet[i]);
+    }
   }
 }

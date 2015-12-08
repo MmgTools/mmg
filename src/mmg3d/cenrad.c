@@ -33,10 +33,10 @@
 
 #include "mmg3d.h"
 /**
- * \param mesh Pointer toward the mesh structure.
- * \param *ct coordinates of vertices of the element.
- * \param *c center of circumscribing circle to the element.
- * \param *rad radius of circumscribing circle to the element.
+ * \param mesh pointer toward the mesh structure.
+ * \param ct coordinates of vertices of the element.
+ * \param c center of circumscribing circle to the element.
+ * \param rad radius of circumscribing circle to the element.
  * \return 0 if failed, 1 otherwise.
  *
  * Compute radius and center of circumscribing circle to the element.
@@ -111,6 +111,83 @@ int _MMG5_cenrad_iso(MMG5_pMesh mesh,double *ct,double *c,double *rad) {
   *rad = (c[0] - c4[0]) * (c[0] - c4[0]) \
     + (c[1] - c4[1]) * (c[1] - c4[1]) \
     + (c[2] - c4[2]) * (c[2] - c4[2]);
+
+  return(1);
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param ct coordinates of vertices of the element.
+ * \param m metric at the point for which we compute the cavity.
+ * \param c center of circumscribing circle to the element.
+ * \param rad radius of circumscribing circle to the element.
+ * \return 0 if failed, 1 otherwise.
+ *
+ * Compute radius and center of circumscribing circle to the element for
+ * an anisotropic metric \a m.
+ *
+ */
+int _MMG5_cenrad_ani(MMG5_pMesh mesh,double *ct,double *m,double *c,double *rad) {
+  double      d1,d2,d3,det,dd,ux,uy,uz,vx,vy,vz,wx,wy,wz;
+  double      ax,ay,az,bx,by,bz,cx,cy,cz;
+
+
+  dd =      m[0]*ct[0]*ct[0] + m[3]*ct[1]*ct[1] + m[5]*ct[2]*ct[2] \
+    + 2.0*(m[1]*ct[0]*ct[1] + m[2]*ct[0]*ct[2] + m[4]*ct[1]*ct[2]);
+
+  /* MMG_lengths */
+  d1 =      m[0]*ct[3]*ct[3] + m[3]*ct[4]*ct[4] + m[5]*ct[5]*ct[5] \
+    + 2.0*(m[1]*ct[3]*ct[4] + m[2]*ct[3]*ct[5] + m[4]*ct[4]*ct[5]) - dd;
+
+  d2 =      m[0]*ct[6]*ct[6] + m[3]*ct[7]*ct[7] + m[5]*ct[8]*ct[8] \
+    + 2.0*(m[1]*ct[6]*ct[7] + m[2]*ct[6]*ct[8] + m[4]*ct[7]*ct[8]) - dd;
+
+  d3 =      m[0]*ct[9]*ct[9] + m[3]*ct[10]*ct[10] + m[5]*ct[11]*ct[11] \
+    + 2.0*(m[1]*ct[9]*ct[10] + m[2]*ct[9]*ct[11] + m[4]*ct[10]*ct[11]) - dd;
+
+  ux = ct[3] - ct[0];
+  uy = ct[4] - ct[1];
+  uz = ct[5] - ct[2];
+
+  vx = ct[6] - ct[0];
+  vy = ct[7] - ct[1];
+  vz = ct[8] - ct[2];
+
+  wx = ct[9] - ct[0];
+  wy = ct[10] - ct[1];
+  wz = ct[11] - ct[2];
+
+  /* M.u */
+  ax = m[0]*ux + m[1]*uy + m[2]*uz;
+  ay = m[1]*ux + m[3]*uy + m[4]*uz;
+  az = m[2]*ux + m[4]*uy + m[5]*uz;
+
+  bx = m[0]*vx + m[1]*vy + m[2]*vz;
+  by = m[1]*vx + m[3]*vy + m[4]*vz;
+  bz = m[2]*vx + m[4]*vy + m[5]*vz;
+
+  cx = m[0]*wx + m[1]*wy + m[2]*wz;
+  cy = m[1]*wx + m[3]*wy + m[4]*wz;
+  cz = m[2]*wx + m[4]*wy + m[5]*wz;
+
+  /* center */
+  c[0] = d1 *(by*cz - bz*cy) - d2 * (ay*cz - az*cy) + d3 * (ay*bz - az*by); 
+  c[1] = d1 *(bz*cx - bx*cz) - d2 * (az*cx - ax*cz) + d3 * (az*bx - ax*bz);
+  c[2] = d1 *(bx*cy - by*cx) - d2 * (ax*cy - ay*cx) + d3 * (ax*by - ay*bx);
+
+  det = ax * (by*cz - bz*cy) - ay * (bx*cz - bz*cx) + az * (bx*cy - cx*by);
+  det = 1.0 / (2.0*det);
+
+  c[0] *= det;
+  c[1] *= det;
+  c[2] *= det;
+
+  /* radius (squared) */
+  ux = ct[0] - c[0];
+  uy = ct[1] - c[1];
+  uz = ct[2] - c[2];
+  *rad =      m[0]*ux*ux + m[3]*uy*uy + m[5]*uz*uz \
+    + 2.0*(m[1]*ux*uy + m[2]*ux*uz + m[4]*uy*uz);
 
   return(1);
 }

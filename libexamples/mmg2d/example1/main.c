@@ -35,59 +35,59 @@ int main(int argc,char *argv[]) {
     exit(EXIT_FAILURE);
   }
   sprintf(filename, "%s%s%s", pwd, "/../libexamples/mmg2d/example1/", "dom");
- 
+
   /** ------------------------------ STEP   I -------------------------- */
   /** 1) Initialisation of mesh and sol structures */
   /* args of InitMesh: mesh=&mmgMesh, sol=&mmgSol, input mesh name, input sol name,
      output mesh name */
   mmgMesh = NULL;
   mmgSol  = NULL;
-  MMG2_Init_mesh(&mmgMesh,&mmgSol);
+  MMG2D_Init_mesh(&mmgMesh,&mmgSol);
 
  /** 2) Build mesh in MMG5 format */
-  /** Two solutions: just use the MMG5_loadMesh function that will read a .mesh(b)
-      file formatted or manually set your mesh using the MMG5_Set* functions */
+  /** Two solutions: just use the MMG2D_loadMesh function that will read a .mesh(b)
+      file formatted or manually set your mesh using the MMG2D_Set* functions */
 
-  /** with MMG5_loadMesh function */
+  /** with MMG2D_loadMesh function */
   /** a) (not mandatory): give the mesh name
      (by default, the "mesh.mesh" file is oppened)*/
-  if ( !MMG5_Set_inputMeshName(mmgMesh,filename) )
+  if ( MMG2D_Set_inputMeshName(mmgMesh,filename) != 1 )
     exit(EXIT_FAILURE);
   /** b) function calling */
-  if ( !MMG2_loadMesh(mmgMesh,filename) )  exit(EXIT_FAILURE);
+  if ( MMG2D_loadMesh(mmgMesh,filename) != 1 )  exit(EXIT_FAILURE);
 
 
   /*save init mesh*/
-  MMG2_saveMesh(mmgMesh,"init.mesh");
+  if ( MMG2D_saveMesh(mmgMesh,"init.mesh") != 1 )  exit(EXIT_FAILURE);
 
   /** 3) Build sol in MMG5 format */
-  /** Two solutions: just use the MMG5_loadMet function that will read a .sol(b)
-      file formatted or manually set your sol using the MMG5_Set* functions */
-  
+  /** Two solutions: just use the MMG2D_loadMet function that will read a .sol(b)
+      file formatted or manually set your sol using the MMG2D_Set* functions */
+
   /** Manually set of the sol */
   /** a) Get np the number of vertex */
-  if (!MMG5_Get_meshSize(mmgMesh,&np,&nt,&na) )
+  if ( MMG2D_Get_meshSize(mmgMesh,&np,&nt,&na) != 1 )
     exit(EXIT_FAILURE);
-  
+
   /** b) give info for the sol structure: sol applied on vertex entities,
       number of vertices=np, the sol is scalar*/
-  if ( !MMG5_Set_solSize(mmgMesh,mmgSol,MMG5_Vertex,np,MMG5_Scalar) )
+  if ( MMG2D_Set_solSize(mmgMesh,mmgSol,MMG5_Vertex,np,MMG5_Scalar) != 1 )
     exit(EXIT_FAILURE);
 
   /** c) give solutions values and positions */
   for(k=1 ; k<=np ; k++) {
-    if ( !MMG5_Set_scalarSol(mmgSol,0.01,k) ) exit(EXIT_FAILURE);
+    if ( MMG2D_Set_scalarSol(mmgSol,0.01,k) != 1 ) exit(EXIT_FAILURE);
   }
 
   /** 4) (not mandatory): check if the number of given entities match with mesh size */
-  if ( !MMG5_Chk_meshData(mmgMesh,mmgSol) ) exit(EXIT_FAILURE);
-  
+  if ( MMG2D_Chk_meshData(mmgMesh,mmgSol) != 1 ) exit(EXIT_FAILURE);
+
 
   /*save init size*/
-  MMG2_saveSol(mmgMesh,mmgSol,"init");
+  if ( MMG2D_saveSol(mmgMesh,mmgSol,"init") != 1 )  exit(EXIT_FAILURE);
 
-  ier = MMG2_mmg2dlib(mmgMesh,mmgSol,NULL);
-  
+  ier = MMG2D_mmg2dlib(mmgMesh,mmgSol,NULL);
+
   if ( ier == MMG5_STRONGFAILURE ) {
     fprintf(stdout,"BAD ENDING OF MMG3DLIB: UNABLE TO SAVE MESH\n");
     return(ier);
@@ -95,13 +95,13 @@ int main(int argc,char *argv[]) {
     fprintf(stdout,"BAD ENDING OF MMG3DLIB\n");
 
   /*save result*/
-  MMG2_saveMesh(mmgMesh,"result.mesh");
+  if ( MMG2D_saveMesh(mmgMesh,"result.mesh") != 1 )  exit(EXIT_FAILURE);
 
   /*save metric*/
-  MMG2_saveSol(mmgMesh,mmgSol,"result");
+  if ( MMG2D_saveSol(mmgMesh,mmgSol,"result") != 1 )  exit(EXIT_FAILURE);
 
   /** 5) Free the MMG3D5 structures */
-  MMG5_Free_all(mmgMesh,mmgSol);
+  MMG2D_Free_all(mmgMesh,mmgSol);
 
 
   return(0);

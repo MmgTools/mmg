@@ -24,7 +24,7 @@
 
 
 /* get new point address */
-int _MMG5_newPt(MMG5_pMesh mesh,double c[2],int tag) {
+int _MMG2D_newPt(MMG5_pMesh mesh,double c[2],int tag) {
   MMG5_pPoint  ppt;
   int     curpt;
 
@@ -44,7 +44,7 @@ int _MMG5_newPt(MMG5_pMesh mesh,double c[2],int tag) {
 }
 
 
-void _MMG5_delPt(MMG5_pMesh mesh,int ip) {
+void _MMG2D_delPt(MMG5_pMesh mesh,int ip) {
   MMG5_pPoint   ppt;
   MMG5_pxPoint  pxp;
 
@@ -93,7 +93,7 @@ void _MMG5_delEdge(MMG5_pMesh mesh,int iel) {
 }
 
 /* get new elt address */
-int _MMG5_newElt(MMG5_pMesh mesh) {
+int _MMG2D_newElt(MMG5_pMesh mesh) {
   int     curiel;
 
   if ( !mesh->nenil ) {
@@ -114,7 +114,7 @@ int _MMG5_newElt(MMG5_pMesh mesh) {
 }
 
 
-void _MMG5_delElt(MMG5_pMesh mesh,int iel) {
+void _MMG2D_delElt(MMG5_pMesh mesh,int iel) {
   MMG5_pTria    pt;
   int      iadr;
 
@@ -149,16 +149,16 @@ int _MMG5_getnElt(MMG5_pMesh mesh,int n) {
 }
 
 /** memory repartition for the -m option */
-void _MMG5_memOption(MMG5_pMesh mesh) {
+void _MMG2D_memOption(MMG5_pMesh mesh) {
   long long  million = 1048576L;
   int        ctri,npask,bytes,memtmp;
 
   mesh->memMax = _MMG5_memSize();
  
-  mesh->npmax = MG_MAX(1.5*mesh->np,_MMG5_NPMAX);
-  mesh->ntmax = MG_MAX(1.5*mesh->nt,_MMG5_NEMAX);
-  mesh->namax = M_MAX(1.5*mesh->na,_MMG5_NEDMAX);
-  mesh->xpmax  = M_MAX(0.1*mesh->xp,0.1*_MMG5_NPMAX);
+  mesh->npmax = MG_MAX(1.5*mesh->np,_MMG2D_NPMAX);
+  mesh->ntmax = MG_MAX(1.5*mesh->nt,_MMG2D_NEMAX);
+  mesh->namax = M_MAX(1.5*mesh->na,_MMG2D_NEDMAX);
+  mesh->xpmax  = M_MAX(0.1*mesh->xp,0.1*_MMG2D_NPMAX);
 
   if ( mesh->info.mem <= 0 ) {
     if ( mesh->memMax && (mesh->memMax >2000*million))
@@ -174,13 +174,13 @@ void _MMG5_memOption(MMG5_pMesh mesh) {
     /* memory asked by user if possible, otherwise total physical memory */
     if ( (long long)(mesh->info.mem)*million > mesh->memMax && mesh->memMax ) {
       fprintf(stdout,"  ## Warning: asking for %d Mo of memory ",mesh->info.mem);
-      fprintf(stdout,"when only %lld available.\n",(long long)(mesh->memMax/million));
+      fprintf(stdout,"when only %ld available.\n",_MMG5_safeLL2LCast((long long)(mesh->memMax/million)));
     }
     else {
       mesh->memMax= (long long)(mesh->info.mem)*million;
     }
 
-    /* if asked memory is lower than default _MMG5_NPMAX/_MMG5_NTMAX we take lower values */
+    /* if asked memory is lower than default _MMG2D_NPMAX/_MMG2D_NTMAX we take lower values */
     ctri = 2;
 
     /* Euler-poincare: ne = 6*np; nt = 2*np; na = np/5 *
@@ -218,13 +218,13 @@ void _MMG5_memOption(MMG5_pMesh mesh) {
   }
 
   if ( abs(mesh->info.imprim) > 4 || mesh->info.ddebug )
-    fprintf(stdout,"  MAXIMUM MEMORY AUTHORIZED (Mo)    %lld\n",
-            (long long)(mesh->memMax/million));
+    fprintf(stdout,"  MAXIMUM MEMORY AUTHORIZED (Mo)    %ld\n",
+            _MMG5_safeLL2LCast((long long)(mesh->memMax/million)));
 
   if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug ) {
-    fprintf(stdout,"  _MMG5_NPMAX    %d\n",mesh->npmax);
-    fprintf(stdout,"  _MMG5_NTMAX    %d\n",mesh->ntmax);
-    fprintf(stdout,"  _MMG5_NAMAX    %d\n",mesh->namax);
+    fprintf(stdout,"  _MMG2D_NPMAX    %d\n",mesh->npmax);
+    fprintf(stdout,"  _MMG2D_NTMAX    %d\n",mesh->ntmax);
+    fprintf(stdout,"  _MMG2D_NAMAX    %d\n",mesh->namax);
   }
 
   return;
@@ -234,7 +234,7 @@ void _MMG5_memOption(MMG5_pMesh mesh) {
 int MMG2_zaldy(MMG5_pMesh mesh) {
   int     k;
 
-   _MMG5_memOption(mesh);
+   _MMG2D_memOption(mesh);
 
   _MMG5_ADD_MEM(mesh,(mesh->npmax+1)*sizeof(MMG5_Point),"initial vertices",
                 printf("  Exit program.\n");

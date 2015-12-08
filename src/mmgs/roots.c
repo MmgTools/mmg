@@ -36,6 +36,7 @@
 #include "mmgs.h"
 #define EPSRO     1.e-3
 
+#ifdef GNU
 /* Returns the 2 complex roots of a degree 2 polynomial with real coefficients a[2]T^2 + ... + a[0]
    By convention, the real roots are stored first (same thing for multiple roots) :
    return value = number of roots, counted with multiplicity */
@@ -71,3 +72,66 @@ int rootDeg2(double complex a[3], double complex r[2]){
 
   return(2);
 }
+
+#else
+/* Returns the 2 complex roots of a degree 2 polynomial with real coefficients a[2]T^2 + ... + a[0]
+   By convention, the real roots are stored first (same thing for multiple roots) :
+   return value = number of roots, counted with multiplicity */
+int rootDeg2(DOUBLE_COMPLEX a[3], DOUBLE_COMPLEX r[2]){
+  DOUBLE_COMPLEX Delta,delta,r1,r2;
+  double         real_tmp, imag_tmp, denom,real_r,imag_r;
+
+  if( cabs(a[2])<_MMG5_EPSD ) {
+    if( cabs(a[1])<_MMG5_EPSD ) {
+      r[0] = r[1] = _DCOMPLEX_(0.0,0.0);
+      return(0);
+    }
+
+    else{
+	  real_tmp = creal(a[0])*creal(a[1]) + cimag(a[0])*cimag(a[1]);
+	  imag_tmp = cimag(a[0])*creal(a[1]) - creal(a[0])*cimag(a[1]);
+	  denom    = creal(a[1])*creal(a[1]) + cimag(a[1])*cimag(a[1]);
+
+      r[0] = r[1] = _DCOMPLEX_(-real_tmp/denom,-imag_tmp/denom);
+      return(1);
+    }
+  }
+
+  real_tmp = creal(a[1])*creal(a[1]) - cimag(a[1])*cimag(a[1])
+	  -4.0*(creal(a[2])*creal(a[0]) - cimag(a[2])*cimag(a[0]));
+  imag_tmp = creal(a[1])*cimag(a[1]) + cimag(a[1])*creal(a[1])
+	  - 4.0*(creal(a[2])*cimag(a[0]) + cimag(a[2])*creal(a[0]));
+  Delta = _DCOMPLEX_(real_tmp, imag_tmp);
+
+  /* ONE square root of Delta */
+  delta = cpow(Delta,_DCOMPLEX_(0.5,0.0));
+  a[2] = _DCOMPLEX_(2. * creal(a[2]), 2. * cimag(a[2]));
+
+  real_tmp = -creal(a[1]) - creal(delta);
+  imag_tmp = -cimag(a[1]) - cimag(delta);
+  real_r = real_tmp*creal(a[2]) + imag_tmp*cimag(a[2]);
+  imag_r = imag_tmp*creal(a[2]) - real_tmp*cimag(a[2]);
+  denom = creal(a[2])*creal(a[2]) + cimag(a[2])*cimag(a[2]);
+  r1 = _DCOMPLEX_(real_r / denom, imag_r / denom);
+  //r1 = 0.5/a[2]*(-a[1] - delta);
+
+  real_tmp = -creal(a[1]) + creal(delta);
+  imag_tmp = -cimag(a[1]) + cimag(delta);
+  real_r = real_tmp*creal(a[2]) + imag_tmp*cimag(a[2]);
+  imag_r = imag_tmp*creal(a[2]) - real_tmp*cimag(a[2]);
+  denom = creal(a[2])*creal(a[2]) + cimag(a[2])*cimag(a[2]);
+  r2 = _DCOMPLEX_(real_r / denom, imag_r / denom);
+ // r2 = 0.5/a[2]*(-a[1] + delta);
+
+  if( fabs(cimag(r1)) < EPSRO ){
+    r[0] = _DCOMPLEX_(creal(r1),0.0);
+    r[1] = ( fabs(cimag(r2)) < EPSRO ) ? _DCOMPLEX_(creal(r2),0.0) : r2;
+  }
+  else {
+    r[0] = ( fabs(cimag(r2)) < EPSRO ) ? _DCOMPLEX_(creal(r2),0.0) : r2;
+    r[1] = r1;
+  }
+
+  return(2);
+}
+#endif
