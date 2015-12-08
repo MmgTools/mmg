@@ -409,6 +409,8 @@ double _MMG5_surftri33_ani(MMG5_pMesh mesh,MMG5_pTria ptt,
 
   surf = dens[0]*dens[2]-dens[1]*dens[1];
 
+  if ( surf < _MMG5_EPSD ) return(0.0);
+
   surf = sqrt(surf);
 
   return(surf);

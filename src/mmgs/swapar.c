@@ -220,6 +220,7 @@ int chkswp(MMG5_pMesh mesh,MMG5_pSol met,int k,int i,char typchk) {
     cal2 = _MMG5_calelt(mesh,met,pt0);
 
     calnat = MG_MIN(cal1,cal2);
+    assert(calnat > 0.);
 
     /* quality after swap */
     pt0->v[0]= ip0;  pt0->v[1]= ip1;  pt0->v[2]= iq;
@@ -260,6 +261,16 @@ int chkswp(MMG5_pMesh mesh,MMG5_pSol met,int k,int i,char typchk) {
   return(calchg > 1.01 * calnat);
 }
 
+/**
+ * \param mesh poiner toward the mesh structure.
+ * \param k elt index.
+ * \param i index of the elt edge to swap.
+ * \return 1
+ *
+ * \warning the quality of the resulting triangles is not checked here... It
+ * must be checked outside to prevent the creation of empty elts.
+ *
+ */
 int swapar(MMG5_pMesh mesh,int k,int i) {
   MMG5_pTria    pt,pt1;
   int     *adja,adj,k11,k21;
