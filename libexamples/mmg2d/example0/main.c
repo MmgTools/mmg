@@ -40,7 +40,7 @@ int main(int argc,char *argv[]) {
   /** Manually set of the mesh */
   /** a) give the size of the mesh: 4 vertices, 2 triangles, 4 edges */
   /* allocation */
-  if ( MMG2D_Set_meshSize(mmgMesh,4,2,5) != 1 )  exit(EXIT_FAILURE);
+  if ( MMG2D_Set_meshSize(mmgMesh,4,2,4) != 1 )  exit(EXIT_FAILURE);
 
 /** b) give the vertices: for each vertex, give the coordinates, the reference
       and the position in mesh of the vertex */
