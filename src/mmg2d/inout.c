@@ -830,7 +830,7 @@ int MMG2D_saveMesh(MMG5_pMesh mesh,char *filename) {
 
   
   if (!mesh->na) {
-    printf("NO EDGES\n");
+    //printf("NO EDGES\n");
     for (k=1; k<=mesh->nt; k++) {
       pt = &mesh->tria[k];
       if (!pt->v[0]) continue;

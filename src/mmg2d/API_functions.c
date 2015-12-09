@@ -390,6 +390,10 @@ int MMG2D_Set_meshSize(MMG5_pMesh mesh, int np, int nt, int na) {
                 exit(EXIT_FAILURE));
   _MMG5_SAFE_CALLOC(mesh->adja,3*mesh->ntmax+5,int);
 
+  if ( !mesh->nt ) {
+    fprintf(stdout,"  **WARNING NO GIVEN TRIANGLE\n");
+  }
+
   /* stats */
   if ( abs(mesh->info.imprim) > 6 ) {
     fprintf(stdout,"     NUMBER OF VERTICES     %8d\n",mesh->np);
@@ -509,7 +513,11 @@ int MMG2D_Set_vertex(MMG5_pMesh mesh, double c0, double c1, int ref, int pos) {
   mesh->point[pos].c[0] = c0;
   mesh->point[pos].c[1] = c1;
   mesh->point[pos].ref  = ref;
-  mesh->point[pos].tag  = MG_NUL;
+  if ( mesh->nt )
+    mesh->point[pos].tag  = MG_NUL;
+  else
+    mesh->point[pos].tag  &= ~MG_NUL;
+
   mesh->point[pos].flag = 0;
   mesh->point[pos].tmp = 0;
 
