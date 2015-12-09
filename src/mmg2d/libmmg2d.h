@@ -314,16 +314,65 @@ void MMG2D_Free_names(MMG5_pMesh mesh, MMG5_pSol met);
  * Structure deallocations before return.
  *
  */
-void MMG2D_Free_structures(MMG5_pMesh mesh,MMG5_pSol met
-  );
+void MMG2D_Free_structures(MMG5_pMesh mesh,MMG5_pSol met);
 
-int MMG2D_loadMesh(MMG5_pMesh ,char *);
-int MMG2D_loadSol(MMG5_pMesh,MMG5_pSol ,char *,int);
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param filename name of the readed file.
+ * \return 0 or -1 if fail, 1 otherwise
+ *
+ * Read mesh data.
+ *
+ */
+int MMG2D_loadMesh(MMG5_pMesh mesh,char * filename);
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param sol pointer toward the solution structure..
+ * \param filename name of the solution file.
+ * \param msh if 1, read the 2D solution saved in 3D (.sol files saved by gmsh)
+ * \return 0 or -1 if fail, 1 otherwise.
+ *
+ * Load solution field.
+ *
+ */
+int MMG2D_loadSol(MMG5_pMesh sol,MMG5_pSol sol,char * filename,int msh);
+
 int MMG2D_loadVect(MMG5_pMesh ,char *);
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param filename name of the readed file.
+ * \return 0 or -1 if fail, 1 otherwise.
+ *
+ * Save mesh data.
+ *
+ */
 int MMG2D_saveMesh(MMG5_pMesh ,char *);
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param sol pointer toward the solution structure..
+ * \param filename name of the solution file.
+ * \param msh if 1, read the 2D solution saved in 3D (.sol files saved by gmsh)
+ * \return 0 or -1 if fail, 1 otherwise.
+ *
+ * Save metric field.
+ *
+ */
 int MMG2D_saveSol(MMG5_pMesh ,MMG5_pSol ,char *);
 int MMG2D_saveVect(MMG5_pMesh mesh,MMG5_pSol sol,char *filename,double lambda);
 
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the sol (metric or level-set) structure.
+ * \return \ref MMG5_SUCCESS if success, \ref MMG5_LOWFAILURE if fail but a
+ * conform mesh is saved or \ref MMG5_STRONGFAILURE if fail and we can't save
+ * the mesh.
+ *
+ * Main program for the remesh library.
+ *
+ */
 int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol sol,void (*titi)(int ,int,int,int,int));
 
 /* Tools for the library */
