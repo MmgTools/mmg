@@ -677,7 +677,6 @@ int _MMGS_grad2metSurf(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int i){
   np1 = pt->v[i1];
   np2 = pt->v[i2];
 
-  //  printf("on traite %d %d\n",np1,np2);
   p1 = &mesh->point[np1];
   p2 = &mesh->point[np2];
 
@@ -793,7 +792,7 @@ int _MMGS_grad2metSurf(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int i){
   t1[0] *= dd;
   t1[1] *= dd;
 
-  // edge length in metric mtan1: t^(t1) * mtan1 * t1.
+  // edge length in metric mtan1: sqrt(t^(t1) * mtan1 * t1).
   ps1 =  mtan1[0]*t1[0]*t1[0] + 2.0*mtan1[1]*t1[0]*t1[1] + mtan1[2]*t1[1]*t1[1];
   ps1 = sqrt(ps1);
 
@@ -815,7 +814,7 @@ int _MMGS_grad2metSurf(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int i){
   t2[0] *= dd;
   t2[1] *= dd;
 
-  // edge length: t^(t2) * mtan2 * t2
+  // edge length: sqrt(t^(t2) * mtan2 * t2)
   ps2 = mtan2[0]*t2[0]*t2[0] + 2.0*mtan2[1]*t2[0]*t2[1] + mtan2[2]*t2[1]*t2[1];
   ps2 = sqrt(ps2);
 
@@ -1038,7 +1037,7 @@ int gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   for (k=1; k<=mesh->np; k++)
     mesh->point[k].flag = mesh->base;
 
-  /* First step : make ridges iso */
+  /* First step : make ridges iso in each apairing direction */
   for (k=1; k<= mesh->np; k++) {
     p1 = &mesh->point[k];
     if ( !MG_VOK(p1) ) continue;
@@ -1046,10 +1045,10 @@ int gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
     if ( !(p1->tag & MG_GEO) ) continue;
 
     m = &met->m[6*k];
-    mv = MG_MAX(m[0],MG_MAX(MG_MAX(m[1],m[2]),MG_MAX(m[3],m[4])));
-    m[0] = mv;
+    mv = MG_MAX(m[1],m[2]);
     m[1] = mv;
     m[2] = mv;
+    mv = MG_MAX(m[3],m[4]);
     m[3] = mv;
     m[4] = mv;
   }
