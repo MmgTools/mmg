@@ -535,7 +535,7 @@ static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
             _MMGS_intmet33_ani(mesh,met,k,i,ip,s);
           else
             intmet(mesh,met,k,i,ip,s);
-       }
+        }
       }
       else if ( pt->tag[i] & MG_GEO ) {
         ppt = &mesh->point[ip];

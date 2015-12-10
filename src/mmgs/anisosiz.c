@@ -793,7 +793,7 @@ int _MMGS_grad2metSurf(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int i){
   t1[0] *= dd;
   t1[1] *= dd;
 
-  // edge length in metric mtan1: t^(t1) * mtan1 * t1.
+  // edge length in metric mtan1: sqrt(t^(t1) * mtan1 * t1).
   ps1 =  mtan1[0]*t1[0]*t1[0] + 2.0*mtan1[1]*t1[0]*t1[1] + mtan1[2]*t1[1]*t1[1];
   ps1 = sqrt(ps1);
 
@@ -815,7 +815,7 @@ int _MMGS_grad2metSurf(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int i){
   t2[0] *= dd;
   t2[1] *= dd;
 
-  // edge length: t^(t2) * mtan2 * t2
+  // edge length: sqrt(t^(t2) * mtan2 * t2)
   ps2 = mtan2[0]*t2[0]*t2[0] + 2.0*mtan2[1]*t2[0]*t2[1] + mtan2[2]*t2[1]*t2[1];
   ps2 = sqrt(ps2);
 
@@ -1046,7 +1046,7 @@ int gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
     if ( !(p1->tag & MG_GEO) ) continue;
 
     m = &met->m[6*k];
-    mv = MG_MAX(m[0],MG_MAX(MG_MAX(m[1],m[2]),MG_MAX(m[3],m[4])));
+    mv = MG_MAX(m[0],MG_MAX(m[1],m[2]));
     m[0] = mv;
     m[1] = mv;
     m[2] = mv;
