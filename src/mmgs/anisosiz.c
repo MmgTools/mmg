@@ -821,17 +821,22 @@ int _MMGS_grad2metSurf(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int i){
 
   /* Metric in p1 has to be changed */
   if( ps2 > ps1 ){
+    /* compute alpha = h2 + hgrad*l */
     alpha = ps2 /(1.0+mesh->info.hgrad*l*ps2);
     if( ps1 >= alpha -_MMG5_EPS )
       return(-1);
 
     _MMG5_eigensym(mtan1,lambda,vp);
+    /* Project the vector t1 along the main directions of the metric */
     // Remark: along the third direction mr1 is already diagonal,
     // thus vp[2][.] =( 0 0 1) and vp[.][2] = 0.
     c[0] = t1[0]*vp[0][0] + t1[1]*vp[0][1] ;
     c[1] = t1[0]*vp[1][0] + t1[1]*vp[1][1] ;
 
-    // Find index of the maximum value of c
+    /* Find index of the maximum value of c: this allow to detect which of the
+     * main directions of the metric is closest to our edge direction. We want
+     * that our new metric respect the gradation related to the size associated
+     * to this main direction (the ichg direction). */
     ichg = 0;
     val  = fabs(c[ichg]);
     for (idx = 1; idx<2; ++idx) {
@@ -841,25 +846,24 @@ int _MMGS_grad2metSurf(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int i){
       }
     }
     assert(c[ichg]*c[ichg] > _MMG5_EPS );
+   /* Compute beta coef such as lambda_1 = beta*lambda_1 => h1 = h2 + hgrad*l
+    * (see p317 of Charles Dapogny Thesis). */
     beta = (alpha*alpha - ps1*ps1)/(c[ichg]*c[ichg]);
-
-    mu[0] = lambda[0];
-    mu[1] = lambda[1];
-    mu[2] = mr1[5];
-
-    mu[ichg] += beta;
-
-    mtan1[0] = mu[0]*vp[0][0]*vp[0][0] + mu[1]*vp[1][0]*vp[1][0];
-    mtan1[1] = mu[0]*vp[0][0]*vp[0][1] + mu[1]*vp[1][0]*vp[1][1];
-    mtan1[2] = mu[0]*vp[0][1]*vp[0][1] + mu[1]*vp[1][1]*vp[1][1];
 
     /* Metric update */
     if( MG_SIN(p1->tag) || (MG_NOM & p1->tag)){
+      /* lambda_new = 0.5 lambda_1 + 0.5 beta lambda_1: here we choose to not
+       * respect the gradation in order to restric the influence of the singular
+       * points. */
       mm1[0] += 0.5*beta;
       mm1[3] += 0.5*beta;
       mm1[5] += 0.5*beta;
     }
     else if( p1->tag & MG_GEO ){
+      /* lambda[ichg] is the metric eigenvalue associated to the main metric
+       * direction closest to our edge direction. Find were is stored this
+       * eigenvalue in our special storage of ridge metric (mm-lambda = 0) and
+       * update it. */
       c[0] = fabs(mm1[0]-lambda[ichg]);
       c[1] = fabs(mm1[1]-lambda[ichg]);
       c[2] = fabs(mm1[2]-lambda[ichg]);
@@ -876,6 +880,19 @@ int _MMGS_grad2metSurf(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int i){
       mm1[kmin] += beta;
     }
     else{
+      /* Update the metric eigenvalue associated to the main metric direction
+       * which is closest to our edge direction (because this is the one that is
+       * the more influent on our edge length). */
+      mu[0] = lambda[0];
+      mu[1] = lambda[1];
+      mu[2] = mr1[5];
+
+      mu[ichg] += beta;
+
+      mtan1[0] = mu[0]*vp[0][0]*vp[0][0] + mu[1]*vp[1][0]*vp[1][0];
+      mtan1[1] = mu[0]*vp[0][0]*vp[0][1] + mu[1]*vp[1][0]*vp[1][1];
+      mtan1[2] = mu[0]*vp[0][1]*vp[0][1] + mu[1]*vp[1][1]*vp[1][1];
+
       /* Return in initial basis */
       // Because of the rotation, we know that:
       // mr.[2] = mr.[4]= 0
@@ -911,12 +928,12 @@ int _MMGS_grad2metSurf(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int i){
       return(-1);
 
     _MMG5_eigensym(mtan2,lambda,vp);
-    // Remark: along the third direction mr1 is already diagonal,
-    // thus vp[2][.] =( 0 0 1) and vp[.][2] = 0.
+
     c[0] = t2[0]*vp[0][0] + t2[1]*vp[0][1] ;
     c[1] = t2[0]*vp[1][0] + t2[1]*vp[1][1] ;
 
-    // Find index of the maximum value of c
+    /* Detect which of the main directions of the metric is closest to our edge
+     * direction. */
     ichg = 0;
     val  = fabs(c[ichg]);
     for (idx = 1; idx<2; ++idx) {
@@ -926,20 +943,18 @@ int _MMGS_grad2metSurf(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int i){
       }
     }
     assert(c[ichg]*c[ichg] > _MMG5_EPS );
+
+   /* Compute beta coef such as lambda_1 = beta*lambda_1 => h1 = h2 + hgrad*l
+    * (see p317 of Charles Dapogny Thesis). */
     beta = (alpha*alpha - ps2*ps2)/(c[ichg]*c[ichg]);
 
-    mu[0] = lambda[0];
-    mu[1] = lambda[1];
-    mu[2] = mr2[5];
-
-    mu[ichg] += beta;
-
-    mtan2[0] = mu[0]*vp[0][0]*vp[0][0] + mu[1]*vp[1][0]*vp[1][0];
-    mtan2[1] = mu[0]*vp[0][0]*vp[0][1] + mu[1]*vp[1][0]*vp[1][1];
-    mtan2[2] = mu[0]*vp[0][1]*vp[0][1] + mu[1]*vp[1][1]*vp[1][1];
-
-    /* Metric update */
+    /* Metric update: update the metric eigenvalue associated to the main metric
+       * direction which is closest to our edge direction (because this is the
+       * one that is the more influent on our edge length). */
     if( MG_SIN(p2->tag) || (MG_NOM & p2->tag)){
+      /* lambda_new = 0.5 lambda_1 + 0.5 beta lambda_1: here we choose to not
+       * respect the gradation in order to restric the influence of the singular
+       * points. */
       mm2[0] += 0.5*beta;
       mm2[3] += 0.5*beta;
       mm2[5] += 0.5*beta;
@@ -949,7 +964,6 @@ int _MMGS_grad2metSurf(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int i){
       c[1] = fabs(mm2[1]-lambda[ichg]);
       c[2] = fabs(mm2[2]-lambda[ichg]);
 
-     // Find index af the minimum value of c
       kmin = 0;
       val = fabs(c[kmin]);
       for (idx = 1; idx<3; ++idx) {
@@ -958,12 +972,21 @@ int _MMGS_grad2metSurf(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int i){
           kmin = idx;
         }
       }
+      assert(val < _MMG5_EPS);
       mm2[kmin] += beta;
     }
     else{
+      mu[0] = lambda[0];
+      mu[1] = lambda[1];
+      mu[2] = mr2[5];
+
+      mu[ichg] += beta;
+
+      mtan2[0] = mu[0]*vp[0][0]*vp[0][0] + mu[1]*vp[1][0]*vp[1][0];
+      mtan2[1] = mu[0]*vp[0][0]*vp[0][1] + mu[1]*vp[1][0]*vp[1][1];
+      mtan2[2] = mu[0]*vp[0][1]*vp[0][1] + mu[1]*vp[1][1]*vp[1][1];
+
       /* Return in initial basis */
-      // Because of the rotation, we know that:
-      // mr.[2] (=mtan.3d[0]) = mr.[4] (=mtan.3d[1])= 0
       mtmp[0][0] = mtan2[0]*r2[0][0] + mtan2[1]*r2[1][0];
       mtmp[0][1] = mtan2[0]*r2[0][1] + mtan2[1]*r2[1][1];
       mtmp[0][2] = mtan2[0]*r2[0][2] + mtan2[1]*r2[1][2];

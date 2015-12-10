@@ -1092,18 +1092,21 @@ int _MMG5_grad2metVol(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,int ia) {
 
   /* Metric in p1 has to be changed */
   if ( ps2 > ps1 ){
+    /* compute alpha = h2 + hgrad*l */
     alpha = ps2 /(1.0+mesh->info.hgrad*l*ps2);
     if( ps1 >= alpha -_MMG5_EPS )
       return(-1);
 
     _MMG5_eigenv(1,m1,lambda,vp);
-
+    /* Project the vector t1 along the main directions of the metric */
     c[0] = t[0]*vp[0][0] + t[1]*vp[0][1] + t[2]*vp[0][2];
     c[1] = t[0]*vp[1][0] + t[1]*vp[1][1] + t[2]*vp[1][2];
     c[2] = t[0]*vp[2][0] + t[1]*vp[2][1] + t[2]*vp[2][2];
 
-    // Compute M=P \lambda t^P
-    // Find index of the maximum value of c
+    /* Find index of the maximum value of c: this allow to detect which of the
+     * main directions of the metric is closest to our edge direction. We want
+     * that our new metric respect the gradation related to the size associated
+     * to this main direction (the ichg direction). */
     ichg = 0;
     val  = fabs(c[ichg]);
     for (i = 1; i<3; ++i) {
@@ -1113,28 +1116,24 @@ int _MMG5_grad2metVol(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,int ia) {
       }
     }
     assert(c[ichg]*c[ichg] > _MMG5_EPS );
+   /* Compute beta coef such as lambda_1 = beta*lambda_1 => h1 = h2 + hgrad*l
+    * (see p317 of Charles Dapogny Thesis). */
     beta = (alpha*alpha - ps1*ps1)/(c[ichg]*c[ichg]);
-
-    mu[0] = lambda[0];
-    mu[1] = lambda[1];
-    mu[2] = lambda[2];
-
-    mu[ichg] += beta;
-
-    m1[0] = mu[0]*vp[0][0]*vp[0][0] + mu[1]*vp[1][0]*vp[1][0] + vp[2][0]*vp[2][0]*mu[2];
-    m1[1] = mu[0]*vp[0][0]*vp[0][1] + mu[1]*vp[1][0]*vp[1][1] + vp[2][1]*vp[2][0]*mu[2];
-    m1[2] = mu[0]*vp[0][0]*vp[0][2] + mu[1]*vp[1][0]*vp[1][2] + vp[2][0]*vp[2][2]*mu[2];
-    m1[3] = mu[0]*vp[0][1]*vp[0][1] + mu[1]*vp[1][1]*vp[1][1] + vp[2][1]*vp[2][1]*mu[2];
-    m1[4] = mu[0]*vp[0][1]*vp[0][2] + mu[1]*vp[1][1]*vp[1][2] + vp[2][1]*vp[2][2]*mu[2];
-    m1[5] = mu[0]*vp[0][2]*vp[0][2] + mu[1]*vp[1][2]*vp[1][2] + vp[2][2]*vp[2][2]*mu[2];
 
     /* Metric update */
     if( MG_SIN(p1->tag) || (p1->tag & MG_NOM) ){
+      /* lambda_new = 0.5 lambda_1 + 0.5 beta lambda_1: here we choose to not
+       * respect the gradation in order to restric the influence of the singular
+       * points. */
       mm1[0] += 0.5*beta;
       mm1[3] += 0.5*beta;
       mm1[5] += 0.5*beta;
     }
     else if( p1->tag & MG_GEO ) {
+      /* lambda[ichg] is the metric eigenvalue associated to the main metric
+       * direction closest to our edge direction. Find were is stored this
+       * eigenvalue in our special storage of ridge metric (mm-lambda = 0) and
+       * update it. */
       c[0] = fabs(mm1[0]-lambda[ichg]);
       c[1] = fabs(mm1[1]-lambda[ichg]);
       c[2] = fabs(mm1[2]-lambda[ichg]);
@@ -1153,6 +1152,22 @@ int _MMG5_grad2metVol(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,int ia) {
       mm1[kmin] += beta;
     }
     else {
+      /* Update the metric eigenvalue associated to the main metric direction
+       * which is closest to our edge direction (because this is the one that is
+       * the more influent on our edge length). */
+      mu[0] = lambda[0];
+      mu[1] = lambda[1];
+      mu[2] = lambda[2];
+
+      mu[ichg] += beta;
+
+      m1[0] = mu[0]*vp[0][0]*vp[0][0] + mu[1]*vp[1][0]*vp[1][0] + vp[2][0]*vp[2][0]*mu[2];
+      m1[1] = mu[0]*vp[0][0]*vp[0][1] + mu[1]*vp[1][0]*vp[1][1] + vp[2][1]*vp[2][0]*mu[2];
+      m1[2] = mu[0]*vp[0][0]*vp[0][2] + mu[1]*vp[1][0]*vp[1][2] + vp[2][0]*vp[2][2]*mu[2];
+      m1[3] = mu[0]*vp[0][1]*vp[0][1] + mu[1]*vp[1][1]*vp[1][1] + vp[2][1]*vp[2][1]*mu[2];
+      m1[4] = mu[0]*vp[0][1]*vp[0][2] + mu[1]*vp[1][1]*vp[1][2] + vp[2][1]*vp[2][2]*mu[2];
+      m1[5] = mu[0]*vp[0][2]*vp[0][2] + mu[1]*vp[1][2]*vp[1][2] + vp[2][2]*vp[2][2]*mu[2];
+
       memcpy(mm1,m1,6*sizeof(double));
     }
     return(i1);
@@ -1169,8 +1184,8 @@ int _MMG5_grad2metVol(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,int ia) {
     c[1] = t[0]*vp[1][0] + t[1]*vp[1][1] + t[2]*vp[1][2];
     c[2] = t[0]*vp[2][0] + t[1]*vp[2][1] + t[2]*vp[2][2];
 
-    // Compute M=P \lambda t^P
-    // Find index of the maximum value of c
+    /* Detect which of the main directions of the metric is closest to our edge
+     * direction. */
     ichg = 0;
     val  = fabs(c[ichg]);
     for (i = 1; i<3; ++i) {
@@ -1180,23 +1195,17 @@ int _MMG5_grad2metVol(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,int ia) {
       }
     }
     assert(c[ichg]*c[ichg] > _MMG5_EPS );
+    /* Compute beta coef such as lambda_1 = beta*lambda_1 => h1 = h2 + hgrad*l
+     * (see p317 of Charles Dapogny Thesis). */
     beta = (alpha*alpha - ps2*ps2)/(c[ichg]*c[ichg]);
 
-    mu[0] = lambda[0];
-    mu[1] = lambda[1];
-    mu[2] = lambda[2];
-
-    mu[ichg] += beta;
-
-    m2[0] = mu[0]*vp[0][0]*vp[0][0] + mu[1]*vp[1][0]*vp[1][0] + vp[2][0]*vp[2][0]*mu[2];
-    m2[1] = mu[0]*vp[0][0]*vp[0][1] + mu[1]*vp[1][0]*vp[1][1] + vp[2][1]*vp[2][0]*mu[2];
-    m2[2] = mu[0]*vp[0][0]*vp[0][2] + mu[1]*vp[1][0]*vp[1][2] + vp[2][0]*vp[2][2]*mu[2];
-    m2[3] = mu[0]*vp[0][1]*vp[0][1] + mu[1]*vp[1][1]*vp[1][1] + vp[2][1]*vp[2][1]*mu[2];
-    m2[4] = mu[0]*vp[0][1]*vp[0][2] + mu[1]*vp[1][1]*vp[1][2] + vp[2][1]*vp[2][2]*mu[2];
-    m2[5] = mu[0]*vp[0][2]*vp[0][2] + mu[1]*vp[1][2]*vp[1][2] + vp[2][2]*vp[2][2]*mu[2];
-
-    /* Metric update */
+    /* Metric update: update the metric eigenvalue associated to the main metric
+     * direction which is closest to our edge direction (because this is the
+     * one that is the more influent on our edge length). */
     if( MG_SIN(p2->tag) || (p2->tag & MG_NOM) ){
+      /* lambda_new = 0.5 lambda_1 + 0.5 beta lambda_1: here we choose to not
+       * respect the gradation in order to restric the influence of the singular
+       * points. */
       mm2[0] += 0.5*beta;
       mm2[3] += 0.5*beta;
       mm2[5] += 0.5*beta;
@@ -1208,7 +1217,6 @@ int _MMG5_grad2metVol(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,int ia) {
       c[3] = fabs(mm2[3]-lambda[ichg]);
       c[4] = fabs(mm2[4]-lambda[ichg]);
 
-      // Find index af the minimum value of c
       kmin = 0;
       val = fabs(c[kmin]);
       for (i = 1; i<5; ++i) {
@@ -1220,6 +1228,18 @@ int _MMG5_grad2metVol(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,int ia) {
       mm2[kmin] += beta;
     }
     else{
+      mu[0] = lambda[0];
+      mu[1] = lambda[1];
+      mu[2] = lambda[2];
+
+      mu[ichg] += beta;
+
+      m2[0] = mu[0]*vp[0][0]*vp[0][0] + mu[1]*vp[1][0]*vp[1][0] + vp[2][0]*vp[2][0]*mu[2];
+      m2[1] = mu[0]*vp[0][0]*vp[0][1] + mu[1]*vp[1][0]*vp[1][1] + vp[2][1]*vp[2][0]*mu[2];
+      m2[2] = mu[0]*vp[0][0]*vp[0][2] + mu[1]*vp[1][0]*vp[1][2] + vp[2][0]*vp[2][2]*mu[2];
+      m2[3] = mu[0]*vp[0][1]*vp[0][1] + mu[1]*vp[1][1]*vp[1][1] + vp[2][1]*vp[2][1]*mu[2];
+      m2[4] = mu[0]*vp[0][1]*vp[0][2] + mu[1]*vp[1][1]*vp[1][2] + vp[2][1]*vp[2][2]*mu[2];
+      m2[5] = mu[0]*vp[0][2]*vp[0][2] + mu[1]*vp[1][2]*vp[1][2] + vp[2][2]*vp[2][2]*mu[2];
       memcpy(mm2,m2,6*sizeof(double));
     }
     return(i2);
@@ -1258,7 +1278,6 @@ int _MMG3D_grad2metSurf(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int i){
   np1 = pt->v[i1];
   np2 = pt->v[i2];
 
-  //  printf("on traite %d %d\n",np1,np2);
   p1 = &mesh->point[np1];
   p2 = &mesh->point[np2];
 
@@ -1292,7 +1311,6 @@ int _MMG3D_grad2metSurf(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int i){
       return(-1);
   }
   else {
-    // if MG_BDY, we are in mmg3d: the normal is stored in the xPoint
     memcpy(n1,&(mesh->xpoint[p1->xp].n1[0]),3*sizeof(double));
     memcpy(m1,mm1,6*sizeof(double));
   }
@@ -1403,11 +1421,14 @@ int _MMG3D_grad2metSurf(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int i){
 
   /* Metric in p1 has to be changed */
   if( ps2 > ps1 ){
+    /* compute alpha = h2 + hgrad*l */
     alpha = ps2 /(1.0+mesh->info.hgrad*l*ps2);
     if( ps1 >= alpha -_MMG5_EPS )
       return(-1);
 
     _MMG5_eigensym(mtan1,lambda,vp);
+
+    /* Project the vector t1 along the main directions of the metric */
     // Remark: along the third direction mr1 is already diagonal,
     // thus vp[2][.] =( 0 0 1) and vp[.][2] = 0.
     c[0] = t1[0]*vp[0][0] + t1[1]*vp[0][1] ;//+ t1[2]*vp[0][2];
@@ -1415,7 +1436,10 @@ int _MMG3D_grad2metSurf(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int i){
     //c[2] = t1[2] and is neglectible comparing to c[0] and c[1]
     //c[2] = t1[0]*vp[2][0] + t1[1]*vp[2][1] + t1[2]*vp[2][2];
 
-    // Find index of the maximum value of c
+    /* Find index of the maximum value of c: this allow to detect which of the
+     * main directions of the metric is closest to our edge direction. We want
+     * that our new metric respect the gradation related to the size associated
+     * to this main direction (the ichg direction). */
     ichg = 0;
     val  = fabs(c[ichg]);
     for (idx = 1; idx<2; ++idx) {
@@ -1425,16 +1449,26 @@ int _MMG3D_grad2metSurf(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int i){
       }
     }
     assert(c[ichg]*c[ichg] > _MMG5_EPS );
+
+    /* Compute beta coef such as lambda_1 = beta*lambda_1 => h1 = h2 + hgrad*l
+     * (see p317 of Charles Dapogny Thesis). */
     beta = (alpha*alpha - ps1*ps1)/(c[ichg]*c[ichg]);
 
     /* Metric update */
     if( MG_SIN(p1->tag) || (MG_NOM & p1->tag)){
+      /* lambda_new = 0.5 lambda_1 + 0.5 beta lambda_1: here we choose to not
+       * respect the gradation in order to restric the influence of the singular
+       * points. */
       m1[0] += 0.5*beta;
       m1[0] += 0.5*beta;
       m1[0] += 0.5*beta;
 
     }
     else if( p1->tag & MG_GEO ){
+      /* lambda[ichg] is the metric eigenvalue associated to the main metric
+       * direction closest to our edge direction. Find were is stored this
+       * eigenvalue in our special storage of ridge metric (mm-lambda = 0) and
+       * update it. */
       c[0] = fabs(m1[0]-lambda[ichg]);
       c[1] = fabs(m1[1]-lambda[ichg]);
       c[2] = fabs(m1[2]-lambda[ichg]);
@@ -1453,6 +1487,9 @@ int _MMG3D_grad2metSurf(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int i){
       m1[kmin] += beta;
     }
     else{
+      /* Update the metric eigenvalue associated to the main metric direction
+       * which is closest to our edge direction (because this is the one that is
+       * the more influent on our edge length). */
       mu[0] = lambda[0];
       mu[1] = lambda[1];
       mu[2] = mr1[5];
@@ -1527,6 +1564,8 @@ int _MMG3D_grad2metSurf(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int i){
       }
     }
     assert(c[ichg]*c[ichg] > _MMG5_EPS );
+    /* Compute beta coef such as lambda_1 = beta*lambda_1 => h1 = h2 + hgrad*l
+    * (see p317 of Charles Dapogny Thesis). */
     beta = (alpha*alpha - ps2*ps2)/(c[ichg]*c[ichg]);
 
     mu[0] = lambda[0];
@@ -1545,8 +1584,13 @@ int _MMG3D_grad2metSurf(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int i){
     /* mtan23d[1] = vp[0][1]*vp[0][2]*mu[0]+vp[1][1]*vp[1][2]*mu[1]+vp[2][1]*vp[2][2]*mu[2]; */
     /* mtan23d[2] = vp[0][2]*vp[0][2]*mu[0]+vp[1][2]*vp[1][2]*mu[1]+vp[2][2]*vp[2][2]*mu[2]; */
 
-    /* Metric update */
+    /* Metric update: update the metric eigenvalue associated to the main metric
+     * direction which is closest to our edge direction (because this is the
+     * one that is the more influent on our edge length). */
     if( MG_SIN(p2->tag) || (MG_NOM & p2->tag)){
+      /* lambda_new = 0.5 lambda_1 + 0.5 beta lambda_1: here we choose to not
+       * respect the gradation in order to restric the influence of the singular
+       * points. */
       m2[0] += 0.5*beta;
       m2[3] += 0.5*beta;
       m2[5] += 0.5*beta;
