@@ -56,11 +56,10 @@ int _MMG5_movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,
 
 
   MMG5_pTetra          pt,pt0;
-  MMG5_pxTetra         pxt;
-  MMG5_pPoint          p0,p1,p2,p3,ppt0,pj;
+  MMG5_pPoint          p0,p1,p2,p3,ppt0;
   double               vol,totvol,m[6];
   double               calold,calnew,*callist,det;
-  int                  k,iel,i0,j,l,ia,ifac;
+  int                  k,iel,i0;
   // Dynamic alloc for windows comptibility
   _MMG5_SAFE_MALLOC(callist, ilist, double);
 
@@ -186,7 +185,7 @@ int _MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met,int *listv,
   _MMG5_Bezier      pb;
   double            *n,r[3][3],lispoi[3*_MMG5_LMAX+1],ux,uy,uz,det2d;
   double            detloc,gv[2],step,lambda[3];
-  double            ll,m[2],uv[2],o[3],no[3],to[3],*m0;
+  double            uv[2],o[3],no[3],to[3],*m0;
   double            calold,calnew,caltmp,callist[ilistv];
   int               k,kel,iel,l,n0,na,nb,ntempa,ntempb,ntempc,nxp;
   unsigned char     i0,iface,i;
@@ -554,8 +553,7 @@ int _MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met,int *listv,
 int _MMG5_movbdyrefpt_ani(MMG5_pMesh mesh, MMG5_pSol met, int *listv,
                           int ilistv, int *lists, int ilists){
   MMG5_pTetra           pt,pt0;
-  MMG5_pxTetra          pxt;
-  MMG5_pPoint           p0,p1,p2,ppt0;
+  MMG5_pPoint           p0,ppt0;
   MMG5_Tria             tt;
   MMG5_pxPoint          pxp;
   double                step,ll1old,ll2old,l1new,l2new;
@@ -714,9 +712,6 @@ int _MMG5_movbdyrefpt_ani(MMG5_pMesh mesh, MMG5_pSol met, int *listv,
      associated edges ie1,ie2.*/
 
   /* Changes needed for choice of time step : see manuscript notes */
-  p1 = &mesh->point[ip1];
-  p2 = &mesh->point[ip2];
-
   ll1old = _MMG5_lenSurfEdg(mesh,met,ip0,ip1,0);
   ll2old = _MMG5_lenSurfEdg(mesh,met,ip0,ip2,0);
   if ( ll1old < ll2old ) { //move towards p2
@@ -778,7 +773,6 @@ int _MMG5_movbdyrefpt_ani(MMG5_pMesh mesh, MMG5_pSol met, int *listv,
     iel         = lists[l] / 4;
     iface       = lists[l] % 4;
     pt          = &mesh->tetra[iel];
-    pxt         = &mesh->xtetra[pt->xt];
     _MMG5_tet2tri(mesh,iel,iface,&tt);
     calold = MG_MIN(calold,_MMG5_caltri(mesh,met,&tt));
     for( i=0 ; i<3 ; i++ )
@@ -870,8 +864,7 @@ int _MMG5_movbdyrefpt_ani(MMG5_pMesh mesh, MMG5_pSol met, int *listv,
 int _MMG5_movbdynompt_ani(MMG5_pMesh mesh,MMG5_pSol met, int *listv,
                           int ilistv, int *lists, int ilists){
   MMG5_pTetra       pt,pt0;
-  MMG5_pxTetra      pxt;
-  MMG5_pPoint       p0,p1,p2,ppt0;
+  MMG5_pPoint       p0,ppt0;
   MMG5_pxPoint      pxp;
   MMG5_Tria         tt;
   double            step,ll1old,ll2old,l1new,l2new;
@@ -1027,10 +1020,6 @@ int _MMG5_movbdynompt_ani(MMG5_pMesh mesh,MMG5_pSol met, int *listv,
   /* At this point, we get the point extremities of the non manifold curve passing through ip0 :
      ip1, ip2, along with support tets it1,it2, the surface faces iface1,iface2, and the
      associated edges ie1,ie2.*/
-
-  p1 = &mesh->point[ip1];
-  p2 = &mesh->point[ip2];
-
   ll1old = _MMG5_lenSurfEdg(mesh,met,ip0,ip1,0);
   ll2old = _MMG5_lenSurfEdg(mesh,met,ip0,ip2,0);
 
@@ -1092,7 +1081,6 @@ int _MMG5_movbdynompt_ani(MMG5_pMesh mesh,MMG5_pSol met, int *listv,
     iel         = lists[l] / 4;
     iface       = lists[l] % 4;
     pt          = &mesh->tetra[iel];
-    pxt         = &mesh->xtetra[pt->xt];
     _MMG5_tet2tri(mesh,iel,iface,&tt);
     caltmp = _MMG5_caltri(mesh,met,&tt);
     calold = MG_MIN(calold,caltmp);
@@ -1185,8 +1173,7 @@ int _MMG5_movbdynompt_ani(MMG5_pMesh mesh,MMG5_pSol met, int *listv,
 int _MMG5_movbdyridpt_ani(MMG5_pMesh mesh, MMG5_pSol met, int *listv,
                           int ilistv,int *lists,int ilists) {
   MMG5_pTetra          pt,pt0;
-  MMG5_pxTetra         pxt;
-  MMG5_pPoint          p0,p1,p2,ppt0;
+  MMG5_pPoint          p0,ppt0;
   MMG5_Tria            tt;
   MMG5_pxPoint         pxp;
   double               step,l1old,l2old,l1new,l2new;
@@ -1345,9 +1332,6 @@ int _MMG5_movbdyridpt_ani(MMG5_pMesh mesh, MMG5_pSol met, int *listv,
      associated edges ie1,ie2.*/
 
   /* Changes needed for choice of time step : see manuscript notes */
-  p1 = &mesh->point[ip1];
-  p2 = &mesh->point[ip2];
-
   l1old = _MMG5_lenSurfEdg(mesh,met,ip0,ip1,1);
   l2old = _MMG5_lenSurfEdg(mesh,met,ip0,ip2,1);
   l1old = l1old*l1old;
@@ -1414,7 +1398,6 @@ int _MMG5_movbdyridpt_ani(MMG5_pMesh mesh, MMG5_pSol met, int *listv,
     iel         = lists[l] / 4;
     iface       = lists[l] % 4;
     pt          = &mesh->tetra[iel];
-    pxt         = &mesh->xtetra[pt->xt];
     _MMG5_tet2tri(mesh,iel,iface,&tt);
     calold = MG_MIN(calold,_MMG5_caltri(mesh,met,&tt));
     for (i=0; i<3; i++) {

@@ -96,7 +96,6 @@ static inline
 int _MMGS_packMesh(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTria    pt,ptnew;
   MMG5_pPoint   ppt,pptnew;
-  MMG5_hgeom   *ph;
   int           np,nc,nr, k,nt,nbl,imet,imetnew,i,na,jel;
   int           iadr,iadrnew,iadrv,*adjav,*adja,*adjanew,voy;
   char          i1,i2;

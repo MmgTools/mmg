@@ -112,8 +112,7 @@ int _MMG5_intmetsavedir(MMG5_pMesh mesh, double *m,double *n,double *mr) {
  * \param uz distance \f$[p0;p1]\f$ along z axis.
  * \param mr computed metric tensor.
  *
- * \return the detected configuration (1 if m[1] and m[3] are chosen to build
- * the metric, 2 otherwise)
+ * \return 1 if success
  *
  * Build metric tensor at ridge point p0, when computations with respect to p1
  * are to be held.
@@ -124,7 +123,6 @@ int _MMG5_buildridmet(MMG5_pMesh mesh,MMG5_pSol met,int np0,
   MMG5_pPoint  p0;
   MMG5_pxPoint go;
   double       ps1,ps2,*n1,*n2,*t,*m,dv,dn,u[3],r[3][3];
-  int          cfg;
 
   p0 = &mesh->point[np0];
   if ( !(MG_GEO & p0->tag) )  return(0);
@@ -143,12 +141,10 @@ int _MMG5_buildridmet(MMG5_pMesh mesh,MMG5_pSol met,int np0,
     n1 = &go->n2[0];
     dv = m[2];
     dn = m[4];
-    cfg = 2;
   }
   else{
     dv = m[1];
     dn = m[3];
-    cfg = 1;
   }
 
   u[0] = n1[1]*t[2] - n1[2]*t[1];
@@ -166,7 +162,7 @@ int _MMG5_buildridmet(MMG5_pMesh mesh,MMG5_pSol met,int np0,
   mr[3] = m[0]*r[1][0]*r[1][0] + dv*r[1][1]*r[1][1] + dn*r[1][2]*r[1][2];
   mr[4] = m[0]*r[1][0]*r[2][0] + dv*r[1][1]*r[2][1] + dn*r[1][2]*r[2][2];
   mr[5] = m[0]*r[2][0]*r[2][0] + dv*r[2][1]*r[2][1] + dn*r[2][2]*r[2][2];
-  return(cfg);
+  return(1);
 }
 
 /**
@@ -184,7 +180,6 @@ int _MMG5_buildridmetnor(MMG5_pMesh mesh,MMG5_pSol met,int np0,double nt[3],doub
   MMG5_pPoint  p0;
   MMG5_pxPoint go;
   double       ps1,ps2,*n1,*n2,*t,*m,dv,dn,u[3],r[3][3];
-  int          cfg;
 
   p0 = &mesh->point[np0];
   if ( !(MG_GEO & p0->tag) )  return(0);
