@@ -1116,7 +1116,6 @@ int _MMG5_grad2metVol(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,int ia) {
       }
     }
     assert(c[ichg]*c[ichg] > _MMG5_EPS );
-
    /* Compute beta coef such as lambda_1 = beta*lambda_1 => h1 = h2 + hgrad*l
     * (see p317 of Charles Dapogny Thesis). */
     beta = (alpha*alpha - ps1*ps1)/(c[ichg]*c[ichg]);
@@ -1196,7 +1195,6 @@ int _MMG5_grad2metVol(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,int ia) {
       }
     }
     assert(c[ichg]*c[ichg] > _MMG5_EPS );
-
     /* Compute beta coef such as lambda_1 = beta*lambda_1 => h1 = h2 + hgrad*l
      * (see p317 of Charles Dapogny Thesis). */
     beta = (alpha*alpha - ps2*ps2)/(c[ichg]*c[ichg]);
@@ -1267,10 +1265,10 @@ int _MMG5_grad2metVol(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,int ia) {
 static inline
 int _MMG3D_grad2metSurf(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int i){
   MMG5_pPoint   p1,p2;
-  double   *mm1,*mm2,*nn1,*nn2,ps1_n,ps2_n,ps1,ps2,ux,uy,uz,m1[6],m2[6];
-  double   r1[3][3],r2[3][3],t1[2],t2[2],c[3],mtan1[3],mtan2[3],mr1[6],mr2[6];
-  double   n1[3],n2[3],nt[3],mtmp[3][3],val;
-  double   /*l1,l2*/l,dd;
+  double   *mm1,*mm2,*nn1,*nn2,ps1,ps2,ux,uy,uz,m1[6],m2[6],n1[3],n2[3],nt[3];
+  double   r1[3][3],r2[3][3],t1[3],t2[3],c[3],mtan1[3],mtan2[3],mr1[6],mr2[6];
+  double   mtmp[3][3],val;
+  double   /*,l1,l2*/l,dd;
   double   lambda[2],vp[2][2],alpha,beta,mu[3];
   int      np1,np2,kmin,idx;
   char     i1,i2,ichg;
@@ -1740,8 +1738,13 @@ int _MMG5_gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   while( ++itv < maxit && nu > 0 );
 
   if ( abs(mesh->info.imprim) > 4 ) {
-    fprintf(stdout,"    surface gradation: %7d updated, %d iter\n"
-                   "    volume gradation:  %7d updated, %d iter\n",nup,it,nupv,itv);
+    if ( abs(mesh->info.imprim) < 6 ) {
+      fprintf(stdout,"    gradation: %7d updated, %d iter\n",nup+nupv,it+itv);
+    }
+    else {
+      fprintf(stdout,"    surface gradation: %7d updated, %d iter\n"
+              "    volume gradation:  %7d updated, %d iter\n",nup,it,nupv,itv);
+    }
   }
   return(1);
 }

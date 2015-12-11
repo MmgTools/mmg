@@ -221,17 +221,19 @@ inline double _MMG5_caltet_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt) {
 
   cal = det / num;
   if ( cal <= _MMG5_NULKAL ) {
-    if ( mesh->info.ddebug ) {
-      fprintf(stdout,"  ## WARNING: TOO BAD QUALITY FOR AT LEAST ONE ELEMENT\n");
-      fprintf(stdout," Element volume=%e\n metric det=%e\n"
-              " edges lengths sum=%e\n computed quality=%e\n",vol,det,num,cal);
+    /* if ( mesh->info.ddebug ) { */
+    /*   // Remark: we can pass here in chkswpgen: the bad element is not created */
+    /*   // thus this is not a problem. */
+    /*   fprintf(stdout,"  ## WARNING: TOO BAD QUALITY FOR AT LEAST ONE ELEMENT\n"); */
+    /*   fprintf(stdout," Element volume=%e\n metric det=%e\n" */
+    /*           " edges lengths sum=%e\n computed quality=%e\n",vol,det,num,cal); */
 
-      // exit added to avoid memory consumption in CDash outputs.
-      /* _MMG5_unscaleMesh(mesh,met); */
-      /* MMG3D_saveMesh(mesh); */
-      /* MMG3D_saveSol(mesh,met); */
-      /* exit(EXIT_FAILURE); */
-    }
+    /*   // exit added to avoid memory consumption in CDash outputs. */
+    /*   /\* _MMG5_unscaleMesh(mesh,met); *\/ */
+    /*   /\* MMG3D_saveMesh(mesh); *\/ */
+    /*   /\* MMG3D_saveSol(mesh,met); *\/ */
+    /*   /\* exit(EXIT_FAILURE); *\/ */
+    /* } */
     return(0.0);
   }
   return(cal);
@@ -339,17 +341,19 @@ inline double _MMG5_caltet33_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt) {
   cal = det / num;
 
   if ( cal <= _MMG5_NULKAL ) {
-    if ( mesh->info.ddebug ) {
-      fprintf(stdout,"  ## WARNING: TOO BAD QUALITY FOR AT LEAST ONE ELEMENT\n");
-      fprintf(stdout," Element volume=%e\n metric det=%e\n"
-              " edges lengths sum=%e\n computed quality=%e\n",vol,det,num,cal);
-      // exit added to avoid memory consumption in CDash outputs.
-      /* _MMG5_unscaleMesh(mesh,met); */
-      /* MMG3D_saveMesh(mesh); */
-      /* MMG3D_saveSol(mesh,met); */
-      /* exit(EXIT_FAILURE); */
-      return(0.0);
-    }
+    /* if ( mesh->info.ddebug ) { */
+    /*   // Remark: we can pass here in chkswpgen, this not a problem since the elt */
+    /*   // is not created */
+    /*   fprintf(stdout,"  ## WARNING: TOO BAD QUALITY FOR AT LEAST ONE ELEMENT\n"); */
+    /*   fprintf(stdout," Element volume=%e\n metric det=%e\n" */
+    /*           " edges lengths sum=%e\n computed quality=%e\n",vol,det,num,cal); */
+    /*   // exit added to avoid memory consumption in CDash outputs. */
+    /*   /\* _MMG5_unscaleMesh(mesh,met); *\/ */
+    /*   /\* MMG3D_saveMesh(mesh); *\/ */
+    /*   /\* MMG3D_saveSol(mesh,met); *\/ */
+    /*   /\* exit(EXIT_FAILURE); *\/ */
+    /*   return(0.0); */
+    /* } */
   }
   return(cal);
 }
