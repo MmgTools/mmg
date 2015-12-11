@@ -43,9 +43,9 @@
 
 /** Include the mmgs library hader file */
 // if the header file is in the "include" directory
-#include "libmmgs.h"
+// #include "libmmgs.h"
 // if the header file is in "include/mmg/mmgs"
-// #include "mmg/mmgs/libmmgs.h"
+#include "mmg/mmgs/libmmgs.h"
 
 int main(int argc,char *argv[]) {
   MMG5_pMesh      mmgMesh;

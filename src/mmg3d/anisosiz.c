@@ -1373,7 +1373,7 @@ int _MMG5_gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   while( ++itv < maxit && nu > 0 );
 
   if ( abs(mesh->info.imprim) > 4 ) {
-    if ( abs(mesh->info.imprim) < 6 ) {
+    if ( abs(mesh->info.imprim) < 6 && !mesh->info.ddebug ) {
       fprintf(stdout,"    gradation: %7d updated, %d iter\n",nup+nupv,it+itv);
     }
     else {

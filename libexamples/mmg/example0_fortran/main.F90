@@ -5,10 +5,9 @@
 
 !> Include the mmg library hader file
 ! if the "include/mmg" dir is in your include path
-!#include "libmmg.h"
+!#include "libmmgf.h"
 
 ! if your include path do not contain the "mmg/mmg" subdirectories
-! #include "mmglibmmg.h"
 #include "mmg/libmmgf.h"
 
 PROGRAM main

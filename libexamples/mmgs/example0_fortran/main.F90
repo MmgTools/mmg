@@ -5,10 +5,10 @@
 
 !> Include the mmgs library hader file
 ! if the header file is in the "include" directory
-#include "libmmgsf.h"
+! #include "libmmgsf.h"
 
 ! if the header file is in "include/mmg/mmgs"
-! #include "mmg/mmgs/libmmgs.h"
+#include "mmg/mmgs/libmmgsf.h"
 
 PROGRAM main
 

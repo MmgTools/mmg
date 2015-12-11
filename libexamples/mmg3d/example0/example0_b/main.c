@@ -43,9 +43,9 @@
 
 /** Include the mmg3d library hader file */
 // if the header file is in the "include" directory
-#include "libmmg3d.h"
+// #include "libmmg3d.h"
 // if the header file is in "include/mmg/mmg3d"
-// #include "mmg/mmg3d/libmmg3d.h"
+#include "mmg/mmg3d/libmmg3d.h"
 
 #define MAX0(a,b)     (((a) > (b)) ? (a) : (b))
 #define MAX4(a,b,c,d)  (((MAX0(a,b)) > (MAX0(c,d))) ? (MAX0(a,b)) : (MAX0(c,d)))

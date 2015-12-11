@@ -235,7 +235,6 @@ int movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
 
     if ( calold < NULKAL && calnew <= calold )  return(0);
     else if ( calnew < 0.3*calold )      return(0);
-#warning in mmg3d we check this
     /* if ( chkedg(mesh,0) )  return(0); */
   }
 
@@ -264,7 +263,7 @@ int movridpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
   double   psn11,psn12,ps2,l1new,l2new,dd1,dd2,ddt,calold,calnew;
   int      it1,it2,ip0,ip1,ip2,k,iel,ier;
   char     voy1,voy2,isrid,isrid1,isrid2,i0,i1,i2;
-#warning this step is different than the one used on iso or for int pts in aniso
+//#warning this step is different than the one used on iso or for int pts in aniso
   step  = 0.2;
   isrid = isrid1 = isrid2 = 0;
   it1   = it2 = 0;
@@ -819,7 +818,6 @@ int movridpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
       ppt0->tag = 0;
       return(0);
     }
-#warning in mmg3d we check this
     /* if ( chkedg(mesh,0) )  return(0);*/
   }
 
