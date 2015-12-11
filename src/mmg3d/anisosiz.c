@@ -1369,6 +1369,7 @@ int _MMG5_gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
         }
       }
     }
+    nupv += nu;
   }
   while( ++itv < maxit && nu > 0 );
 
