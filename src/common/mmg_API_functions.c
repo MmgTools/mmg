@@ -77,8 +77,8 @@ void _MMG5_Init_parameters(MMG5_pMesh mesh) {
   mesh->info.hmax     = -1.;      /* maximal mesh size; */
   /** MMG5_DPARAM_hausd = 0.01 */
   mesh->info.hausd    = 0.01;     /* control Hausdorff */
-  /** MMG5_DPARAM_hgrad = 0.1 */
-  mesh->info.hgrad    = 0.1;      /* control gradation; */
+  /** MMG5_DPARAM_hgrad = 1.3 */
+  mesh->info.hgrad    = 0.26236426446;      /* control gradation; */
 
   /* initial value for memMax and gap */
   mesh->gap = 0.2;

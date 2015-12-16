@@ -1137,9 +1137,12 @@ int _MMG5_mmgs1(MMG5_pMesh mesh,MMG5_pSol met) {
     fprintf(stdout,"  ## Metric undefined. Exit program.\n");
     return(0);
   }
-  if ( mesh->info.hgrad > 0. && !gradsiz(mesh,met) ) {
-    fprintf(stdout,"  ## Gradation problem. Exit program.\n");
-    return(0);
+  if ( mesh->info.hgrad > 0. ) {
+    if ( mesh->info.imprim )   fprintf(stdout,"\n  -- GRADATION : %8f\n",exp(mesh->info.hgrad));
+    if (!gradsiz(mesh,met) ) {
+      fprintf(stdout,"  ## Gradation problem. Exit program.\n");
+      return(0);
+    }
   }
 
   if ( !anatri(mesh,met,2) ) {

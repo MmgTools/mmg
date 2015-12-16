@@ -1017,9 +1017,12 @@ int _MMG5_mmg3d1_delone(MMG5_pMesh mesh,MMG5_pSol met) {
     return(0);
   }
 
-  if ( mesh->info.hgrad > 0. && !_MMG5_gradsiz(mesh,met) ) {
-    fprintf(stdout,"  ## Gradation problem. Exit program.\n");
-    return(0);
+  if ( mesh->info.hgrad > 0. ) {
+    if ( mesh->info.imprim )   fprintf(stdout,"\n  -- GRADATION : %8f\n",exp(mesh->info.hgrad));
+    if ( !_MMG5_gradsiz(mesh,met) ) {
+      fprintf(stdout,"  ## Gradation problem. Exit program.\n");
+      return(0);
+    }
   }
 
   if ( !_MMG5_anatet(mesh,met,2,0) ) {
