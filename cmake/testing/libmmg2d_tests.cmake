@@ -7,10 +7,10 @@ INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/include)
 ###############################################################################
 
 ADD_EXECUTABLE(libmmg2d_example0
-  ${CMAKE_SOURCE_DIR}/libexamples/mmg2d/example0/main.c)
+  ${CMAKE_SOURCE_DIR}/libexamples/mmg2d/example0/main.c ${mmg2d_includes})
 
 ADD_EXECUTABLE(libmmg2d_example1
-  ${CMAKE_SOURCE_DIR}/libexamples/mmg2d/example1/main.c)
+  ${CMAKE_SOURCE_DIR}/libexamples/mmg2d/example1/main.c  ${mmg2d_includes})
 
  IF ( WIN32 AND ((NOT MINGW) AND USE_SCOTCH) )
     my_add_link_flags(libmmg2d_example0 "/SAFESEH:NO")
@@ -45,7 +45,7 @@ IF (CMAKE_Fortran_COMPILER)
   ENABLE_LANGUAGE (Fortran)
 
   ADD_EXECUTABLE(libmmg2d_fortran_a
-    ${CMAKE_SOURCE_DIR}/libexamples/mmg2d/example0_fortran/main.F90)
+    ${CMAKE_SOURCE_DIR}/libexamples/mmg2d/example0_fortran/main.F90  ${mmg2d_includes})
 
   IF ( WIN32 AND ((NOT MINGW) AND USE_SCOTCH) )
     my_add_link_flags(libmmg2d_fortran_a "/SAFESEH:NO")

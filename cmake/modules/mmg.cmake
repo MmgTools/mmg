@@ -100,16 +100,78 @@ IF ( LIBMMG_STATIC OR LIBMMG_SHARED )
     ${CMAKE_SOURCE_DIR}/src/mmg/libmmg.h
     ${CMAKE_SOURCE_DIR}/src/mmg/libmmgf.h
     )
+  SET(MMG2D_INCLUDE ${CMAKE_SOURCE_DIR}/include/mmg/mmg2d )
+  SET(MMGS_INCLUDE ${CMAKE_SOURCE_DIR}/include/mmg/mmgs )
+  SET(MMG3D_INCLUDE ${CMAKE_SOURCE_DIR}/include/mmg/mmg3d )
+  SET(MMG_INCLUDE ${CMAKE_SOURCE_DIR}/include/mmg )
+  SET( mmg2d_includes
+    ${MMG2D_INCLUDE}/libmmg2d.h
+    ${MMG2D_INCLUDE}/libmmg2df.h
+    )
+  SET( mmgs_includes
+    ${MMGS_INCLUDE}/libmmgs.h
+    ${MMGS_INCLUDE}/libmmgsf.h
+    )
+  SET( mmg3d_includes
+    ${MMG3D_INCLUDE}/libmmg3d.h
+    ${MMG3D_INCLUDE}/libmmg3df.h
+    )
+  SET( mmg_includes
+    ${MMG_INCLUDE}/libmmg.h
+    ${MMG_INCLUDE}/libmmgf.h
+    ${MMG_INCLUDE}/mmgcommon.h
+    ${MMG_INCLUDE}/eigenv.h
+    ${MMG_INCLUDE}/libmmgcommon.h
+    ${MMG_INCLUDE}/libmmgcommonf.h
+    ${MMG_INCLUDE}/chrono.h
+    ) 
+
   # Install header files in /usr/local or equivalent
   INSTALL(FILES ${mmg2d_headers} DESTINATION include/mmg/mmg2d)
   INSTALL(FILES ${mmgs_headers} DESTINATION include/mmg/mmgs)
   INSTALL(FILES ${mmg3d_headers} DESTINATION include/mmg/mmg3d)
   INSTALL(FILES ${mmg_headers} DESTINATION include/mmg)
+
+  ADD_CUSTOM_COMMAND(OUTPUT ${MMG_INCLUDE}/libmmgcommonf.h
+    COMMAND ${CMAKE_COMMAND} -E copy ${COMMON_SOURCE_DIR}/libmmgcommonf.h ${MMG_INCLUDE}/libmmgcommonf.h
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+    DEPENDS ${COMMON_SOURCE_DIR}/libmmgcommonf.h) 
+
+  IF ( NOT BUILD_MMG2D )
+    ADD_CUSTOM_COMMAND(OUTPUT ${MMG2D_INCLUDE}/libmmg2df.h
+      COMMAND ${CMAKE_COMMAND} -E copy ${COMMON_SOURCE_DIR}/libmmg2df.h ${MMG2D_INCLUDE}/libmmg2df.h
+      WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+      DEPENDS ${MMG2D_SOURCE_DIR}/libmmg2df.h)
+  ENDIF ()
+  IF ( NOT BUILD_MMG2D )
+    ADD_CUSTOM_COMMAND(OUTPUT ${MMGS_INCLUDE}/libmmgsf.h
+      COMMAND ${CMAKE_COMMAND} -E copy ${COMMON_SOURCE_DIR}/libmmgsf.h ${MMGS_INCLUDE}/libmmgsf.h
+      WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+      DEPENDS ${MMGS_SOURCE_DIR}/libmmgsf.h)
+  ENDIF()
+  IF ( NOT BUILD_MMG2D )
+    ADD_CUSTOM_COMMAND(OUTPUT ${MMG3D_INCLUDE}/libmmg3df.h
+      COMMAND ${CMAKE_COMMAND} -E copy ${COMMON_SOURCE_DIR}/libmmg3df.h ${MMG3D_INCLUDE}/libmmg3df.h
+      WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+      DEPENDS ${MMG3D_SOURCE_DIR}/libmmg3df.h)
+  ENDIF()
+
+  ADD_CUSTOM_COMMAND(OUTPUT ${MMG_INCLUDE}/libmmgf.h
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/src/mmg/libmmgf.h ${MMG_INCLUDE}/libmmgf.h
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+    DEPENDS ${CMAKE_SOURCE_DIR}/src/mmg/libmmgf.h)
+
+
   # Install header files in project directory
-  INSTALL(FILES ${mmg2d_headers} DESTINATION ${CMAKE_SOURCE_DIR}/include/mmg/mmg2d)
-  INSTALL(FILES ${mmgs_headers} DESTINATION ${CMAKE_SOURCE_DIR}/include/mmg/mmgs)
-  INSTALL(FILES ${mmg3d_headers} DESTINATION ${CMAKE_SOURCE_DIR}/include/mmg/mmg3d)
-  INSTALL(FILES ${mmg_headers} DESTINATION ${CMAKE_SOURCE_DIR}/include/mmg)
+  FILE (INSTALL ${mmg2d_headers}
+    DESTINATION ${CMAKE_SOURCE_DIR}/include/mmg/mmg2d
+    PATTERN "libmmg*f.h"  EXCLUDE)
+  FILE (INSTALL ${mmgs_headers} DESTINATION ${CMAKE_SOURCE_DIR}/include/mmg/mmgs
+    PATTERN "libmmg*f.h"  EXCLUDE)
+  FILE (INSTALL ${mmg3d_headers} DESTINATION ${CMAKE_SOURCE_DIR}/include/mmg/mmg3d
+    PATTERN "libmmg*f.h"  EXCLUDE)
+  FILE (INSTALL ${mmg_headers} DESTINATION ${CMAKE_SOURCE_DIR}/include/mmg
+    PATTERN "libmmg*f.h"  EXCLUDE)
 ENDIF()
 
 ############################################################################

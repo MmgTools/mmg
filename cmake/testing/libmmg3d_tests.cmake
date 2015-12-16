@@ -7,22 +7,22 @@ INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/include)
 ###############################################################################
 
 ADD_EXECUTABLE(libmmg3d_example0_a
-  ${CMAKE_SOURCE_DIR}/libexamples/mmg3d/example0/example0_a/main.c)
+  ${CMAKE_SOURCE_DIR}/libexamples/mmg3d/example0/example0_a/main.c ${mmg3d_includes})
 
 ADD_EXECUTABLE(libmmg3d_example0_b
-  ${CMAKE_SOURCE_DIR}/libexamples/mmg3d/example0/example0_b/main.c)
+  ${CMAKE_SOURCE_DIR}/libexamples/mmg3d/example0/example0_b/main.c ${mmg3d_includes})
 
 ADD_EXECUTABLE(libmmg3d_example1
-  ${CMAKE_SOURCE_DIR}/libexamples/mmg3d/example1/main.c)
+  ${CMAKE_SOURCE_DIR}/libexamples/mmg3d/example1/main.c ${mmg3d_includes})
 
 ADD_EXECUTABLE(libmmg3d_example2
-  ${CMAKE_SOURCE_DIR}/libexamples/mmg3d/example2/main.c)
+  ${CMAKE_SOURCE_DIR}/libexamples/mmg3d/example2/main.c ${mmg3d_includes})
 
 ADD_EXECUTABLE(libmmg3d_example3
-  ${CMAKE_SOURCE_DIR}/libexamples/mmg3d/example3/mmg3d.c)
+  ${CMAKE_SOURCE_DIR}/libexamples/mmg3d/example3/mmg3d.c ${mmg3d_includes})
 
 ADD_EXECUTABLE(libmmg3d_example4
-  ${CMAKE_SOURCE_DIR}/libexamples/mmg3d/example4/main.c)
+  ${CMAKE_SOURCE_DIR}/libexamples/mmg3d/example4/main.c ${mmg3d_includes})
 
  IF ( WIN32 AND ((NOT MINGW) AND USE_SCOTCH) )
     my_add_link_flags(libmmg3d_example0_a "/SAFESEH:NO")
@@ -72,10 +72,10 @@ IF (CMAKE_Fortran_COMPILER)
   ENABLE_LANGUAGE (Fortran)
 
   ADD_EXECUTABLE(libmmg3d_fortran_a
-    ${CMAKE_SOURCE_DIR}/libexamples/mmg3d/example0_fortran/example0_a/main.F90)
+    ${CMAKE_SOURCE_DIR}/libexamples/mmg3d/example0_fortran/example0_a/main.F90 ${mmg3d_includes})
 
   ADD_EXECUTABLE(libmmg3d_fortran_b
-    ${CMAKE_SOURCE_DIR}/libexamples/mmg3d/example0_fortran/example0_b/main.F90)
+    ${CMAKE_SOURCE_DIR}/libexamples/mmg3d/example0_fortran/example0_b/main.F90 ${mmg3d_includes})
 
   IF ( WIN32 AND ((NOT MINGW) AND USE_SCOTCH) )
     my_add_link_flags(libmmg3d_fortran_a "/SAFESEH:NO")
