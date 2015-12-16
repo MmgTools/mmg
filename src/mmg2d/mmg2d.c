@@ -409,17 +409,7 @@ int main(int argc,char *argv[]) {
   fprintf(stdout,"\n  -- INPUT DATA\n");
   //chrono(ON,&MMG5_ctim[1]);
   if ( MMG2D_loadMesh(&mesh,mesh.namein) < 1) _MMG2D_RETURN_AND_FREE(&mesh,&sol,MMG5_STRONGFAILURE);
-  if ( !MMG2D_loadSol(&mesh,&sol,sol.namein,mesh.info.nreg) )  {    
-    sol.np = mesh.np;
-    sol.size = 1;
-    sol.ver  = mesh.ver;
-    /* mem alloc */
-    _MMG5_SAFE_CALLOC(sol.m,sol.size*mesh.npmax,double);
-    sol.np = 0;
-  } else   if ( sol.np && (sol.np != mesh.np) ) {
-    fprintf(stdout,"  ## WARNING: WRONG SOLUTION NUMBER : %d != %d\n",sol.np,mesh.np);
-    //exit(1);
-  }
+
   if(MMG2D_mmg2dlib(&mesh,&sol,NULL)) _MMG2D_RETURN_AND_FREE(&mesh,&sol,MMG5_STRONGFAILURE);
   
 /*   } */

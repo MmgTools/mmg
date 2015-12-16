@@ -141,7 +141,7 @@ int main(int argc,char *argv[]) {
       MMG3D_Free_all(mesh,met,disp);
       return(MMG5_STRONGFAILURE);
     }
-    if ( !MMG5_parsop(mesh,met) )
+    if ( !MMG3D_parsop(mesh,met) )
       return(MMG5_LOWFAILURE);
   }
 

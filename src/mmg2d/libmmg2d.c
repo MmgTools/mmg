@@ -204,6 +204,19 @@ int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol sol,void (*titi)(int ,int ,int,int,
   signal(SIGTERM,_MMG2_excfun);
   signal(SIGINT,_MMG2_excfun);
 
+  sol->np = mesh->np;
+  sol->size = 1;
+  sol->ver  = mesh->ver;
+  if ( !sol->m ) {
+    /* mem alloc */
+    _MMG5_SAFE_CALLOC(sol->m,sol->size*mesh->npmax,double);
+    sol->np = 0;
+  } else   if ( sol->np && (sol->np != mesh->np) ) {
+    fprintf(stdout,"  ## WARNING: WRONG SOLUTION NUMBER : %d != %d\n",sol->np,mesh->np);
+    //exit(1);
+  }
+
+
   // tminit(ctim,TIMEMAX);
   //chrono(ON,&ctim[0]);
 
