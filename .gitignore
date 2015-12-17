@@ -14,6 +14,7 @@ doc/doxygen/man
 
 lib
 
+libexamples/mmg2d/example1/mainTESTADJA.c
 libexamples/mmg3d/example0/example0_a/mesh.*
 libexamples/mmg3d/example0/example0_b/mesh.*
 libexamples/mmg3d/example1/result0.*

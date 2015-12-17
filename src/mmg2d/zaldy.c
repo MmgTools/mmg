@@ -127,7 +127,8 @@ void _MMG2D_delElt(MMG5_pMesh mesh,int iel) {
   pt->v[2] = mesh->nenil;
   pt->qual = 0.0;
   iadr = (iel-1)*3 + 1;
-  memset(&mesh->adja[iadr],0,3*sizeof(int));
+  if ( mesh->adja )
+    memset(&mesh->adja[iadr],0,3*sizeof(int));
 
   mesh->nenil = iel;
   if ( iel == mesh->nt )  mesh->nt--;
@@ -272,13 +273,6 @@ int MMG2_zaldy(MMG5_pMesh mesh) {
 
   for (k=mesh->nenil; k<mesh->ntmax-1; k++)
     mesh->tria[k].v[2] = k+1;
-
-
-   /* memory alloc */
-  _MMG5_ADD_MEM(mesh,(3*mesh->ntmax+5)*sizeof(int),"adjacency table",
-                printf("  Exit program.\n");
-                exit(EXIT_FAILURE));
-  _MMG5_SAFE_CALLOC(mesh->adja,3*mesh->ntmax+5,int);
 
   return(1);
 }

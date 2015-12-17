@@ -163,7 +163,7 @@ int _MMG5_movbdyregpt_iso(MMG5_pMesh mesh, MMG5_pSol met,int *listv,
   MMG5_Tria         tt;
   MMG5_pxPoint      pxp;
   _MMG5_Bezier      b;
-  double            *n,r[3][3],lispoi[3*_MMG5_LMAX+1],ux,uy,uz,det2d;
+  double            *n,r[3][3],lispoi[3*MMG3D_LMAX+1],ux,uy,uz,det2d;
   double            detloc,oppt[2],step,lambda[3];
   double            ll,m[2],uv[2],o[3],no[3],to[3];
   double            calold,calnew,caltmp,*callist;

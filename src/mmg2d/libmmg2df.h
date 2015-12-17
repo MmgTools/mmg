@@ -53,6 +53,12 @@
 ! #include "mmgcommon.h"
 
 ! /**
+!  * Maximum array size when storing adjacent points (or ball) of a vertex.
+!  */
+
+#define MMG2D_LMAX   1024
+
+! /**
 !  * \enum MMG2D_Param
 !  * \brief Input parameters for mmg library.
 !  *
@@ -446,6 +452,55 @@
 !  *
 !  */
 
-! int MMG2D_setfunc(int type);
+! void MMG2D_setfunc(MMG5_pMesh mesh,MMG5_pSol met);
+
+! /**
+!  * \brief Return adjacent elements of a triangle.
+!  * \param mesh pointer toward the mesh structure.
+!  * \param kel triangle index.
+!  * \param listri pointer toward the table of the indices of the three adjacent
+!  * triangles of the elt \a kel (the index is 0 if there is no adjacent).
+!  * \return 1.
+!  *
+!  * Find the indices of the 3 adjacent elements of triangle \a
+!  * kel. \f$v_i = 0\f$ if the \f$i^{th}\f$ face has no adjacent element
+!  * (so we are on a boundary face).
+!  *
+!  */
+
+! int MMG2D_Get_adjaTri(MMG5_pMesh mesh, int kel, int listri[3]);
+
+! /**
+!  * \brief Return adjacent elements of a triangle.
+!  * \param mesh pointer toward the mesh structure.
+!  * \param ip vertex index.
+!  * \param lispoi pointer toward an array of size MMG2D_LMAX that will contain
+!  * the indices of adjacent vertices to the vertex \a ip.
+!  * \return nbpoi the number of adjacent points if success, 0 if fail.
+!  *
+!  * Find the indices of the adjacent vertices of the vertex \a
+!  * ip.
+!  *
+!  */
+
+! extern
+! int MMG2D_Get_adjaVertices(MMG5_pMesh mesh, int ip, int lispoi[MMG2D_LMAX]);
+
+! /**
+!  * \brief Return adjacent elements of a triangle.
+!  * \param mesh pointer toward the mesh structure.
+!  * \param ip vertex index.
+!  * \param start index of a triangle holding \a ip.
+!  * \param lispoi pointer toward an array of size MMG2D_LMAX that will contain
+!  * the indices of adjacent vertices to the vertex \a ip.
+!  * \return nbpoi the number of adjacent points if success, 0 if fail.
+!  *
+!  * Find the indices of the adjacent vertices of the vertex \a
+!  * ip of the triangle \a start.
+!  *
+!  */
+
+! int MMG2D_Get_adjaVerticesFast(MMG5_pMesh mesh, int ip,int start,
+!                                int lispoi[MMG2D_LMAX]);
 
 ! #endif

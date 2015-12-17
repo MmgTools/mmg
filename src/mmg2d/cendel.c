@@ -33,7 +33,7 @@ int MMG2_cendel(MMG5_pMesh mesh,MMG5_pSol sol,double declic,int base) {
   /* queue on quality */
   queue = MMG2_kiuini(mesh,mesh->nt,declic,-1);
   assert(queue);
-  list  = (int*)malloc(LMAX*sizeof(int));
+  list  = (int*)malloc(MMG2D_LMAX*sizeof(int));
   assert(list);
   ns = 0;
   np = 0;

@@ -22,8 +22,8 @@
 */
 
 /**
- * \file mmgs/libmmgsf.c
- * \brief Fortran API functions for MMGS library.
+ * \file mmg2d/libmmg2d_toolsf.c
+ * \brief Fortran API functions for MMG2D library.
  * \author Charles Dapogny (LJLL, UPMC)
  * \author Cécile Dobrzynski (Inria / IMB, Université de Bordeaux)
  * \author Pascal Frey (LJLL, UPMC)
@@ -34,67 +34,52 @@
  * \note Please, refer to the \ref mmgs/libmmgs.h file for functions
  * documentation.
  *
- * Define the private Fortran API functions for MMGS library
+ * Define the private Fortran API functions for MMG2D library
  * (incompatible functions with the main binary): adds function
  * definitions with upcase, underscore and double underscore to match
  * any fortran compiler.
  *
  */
 
-#include "libmmgs.h"
+#include "mmg2d.h"
 
 /**
- * \def FORTRAN_NAME(nu,nl,pl,pc)
- * \brief Adds function definitions.
- * \param nu function name in upper case.
- * \param nl function name in lower case.
- * \param pl type of arguments.
- * \param pc name of arguments.
- * \note Macro coming from Scotch library.
- *
- * Adds function definitions with upcase, underscore and double
- * underscore to match any fortran compiler.
- *
+ * See \ref MMG2D_setfunc function in \ref mmg2d/libmmg2d.h file.
  */
-#define FORTRAN_NAME(nu,nl,pl,pc)               \
-  void nu pl;                                   \
-  void nl pl                                    \
-  { nu pc; }                                    \
-  void nl##_ pl                                 \
-  { nu pc; }                                    \
-  void nl##__ pl                                \
-  { nu pc; }                                    \
-  void nu pl
+FORTRAN_NAME(MMG2D_SETFUNC,mmg2d_setfunc,
+               (MMG5_pMesh *mesh,MMG5_pSol *met),
+               (mesh,met)) {
+   MMG2D_setfunc(*mesh,*met);
+   return;
+}
+
 
 /**
- * See \ref MMGS_Free_all function in \ref mmgs/libmmgs.h file.
+ * See \ref MMG2D_Get_adjaTri function in \ref mmg2d/libmmg2d.h file.
  */
-FORTRAN_NAME(MMGS_FREE_ALL,mmgs_free_all,(MMG5_pMesh *mesh,MMG5_pSol *met
-                                          ,MMG5_pSol *dummy),
-             (mesh,met,dummy)){
-
-  MMGS_Free_all(*mesh,*met);
-
+FORTRAN_NAME(MMG2D_GET_ADJATRI,mmg2d_get_adjatri,
+               (MMG5_pMesh *mesh,int* kel, int* listri, int* retval),
+               (mesh,kel,listri,retval)) {
+  *retval =  MMG2D_Get_adjaTri(*mesh,*kel,listri);
   return;
 }
 
 /**
- * See \ref MMGS_saveMesh function in \ref mmgs/libmmgs.h file.
+ * See \ref MMG2D_Get_adjaVertices function in \ref mmg2d/libmmg2d.h file.
  */
-FORTRAN_NAME(MMGS_SAVEMESH,mmgs_savemesh,(MMG5_pMesh *mesh, int* retval),
-             (mesh,retval)){
-  *retval = MMGS_saveMesh(*mesh);
+FORTRAN_NAME(MMG2D_GET_ADJAVERTICES,mmg2d_get_adjavertices,
+               (MMG5_pMesh *mesh,int* ip, int* lispoi, int* retval),
+               (mesh,ip,lispoi,retval)) {
+  *retval =  MMG2D_Get_adjaVertices(*mesh, *ip,lispoi);
   return;
 }
 
 /**
- * See \ref MMGS_mmgslib function in \ref mmgs/libmmgs.h file.
+ * See \ref MMG2D_Get_adjaVerticesFast function in \ref mmg2d/libmmg2d.h file.
  */
-FORTRAN_NAME(MMGS_MMGSLIB,mmgs_mmgslib,(MMG5_pMesh *mesh,MMG5_pSol *met,
-                                        int* retval),
-             (mesh,met,retval)){
-
-  *retval = MMGS_mmgslib(*mesh,*met);
-
+FORTRAN_NAME(MMG2D_GET_ADJAVERTICESFAST,mmg2d_get_adjaverticesfast,
+               (MMG5_pMesh *mesh,int* ip, int *start, int* lispoi, int* retval),
+               (mesh,ip,start,lispoi,retval)) {
+  *retval =  MMG2D_Get_adjaVerticesFast(*mesh,*ip, *start,lispoi);
   return;
 }

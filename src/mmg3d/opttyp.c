@@ -320,7 +320,7 @@ int MMG3D_typelt(MMG5_pMesh mesh,int iel,int *item) {
 static inline int _MMG3D_swpalmostall(MMG5_pMesh mesh,  MMG5_pSol met,_MMG5_pBucket bucket,int k,int iar) {
   MMG5_pTetra   pt,pt1;
   MMG5_pxTetra  pxt;
-  int           i,l,list[_MMG5_LMAX+2],lon,iel,nconf,ier;
+  int           i,l,list[MMG3D_LMAX+2],lon,iel,nconf,ier;
   double        crit;
   double        OCRIT = 1.01;
   
@@ -364,7 +364,7 @@ int MMG3D_opttyp(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket) {
   MMG5_pxTetra   pxt;
   double         crit,critswp;
   int            k,ityp,cs[10],ds[10],item[2],lon;
-  int            list[_MMG5_LMAX+2],l,iel,ier,i,nd,nconf;
+  int            list[MMG3D_LMAX+2],l,iel,ier,i,nd,nconf;
   double         OCRIT = 1.01;
   
   memset(cs,0,10*sizeof(int)); 

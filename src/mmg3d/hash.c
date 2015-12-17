@@ -387,7 +387,7 @@ int _MMG5_setEdgeNmTag(MMG5_pMesh mesh, _MMG5_Hash *hash) {
             }
 
             /* overflow */
-            if ( ++ilist > _MMG5_LMAX-2 ) {
+            if ( ++ilist > MMG3D_LMAX-2 ) {
               fprintf(stdout,"  ## Warning: problem in surface remesh process.");
               fprintf(stdout," Coquil of edge %d-%d contains too many elts.\n",
                       _MMG3D_indPt(mesh,ia),_MMG3D_indPt(mesh,ib));
@@ -432,7 +432,7 @@ int _MMG5_setEdgeNmTag(MMG5_pMesh mesh, _MMG5_Hash *hash) {
               _MMG5_openCoquilTravel( mesh, ia, ib, &adj, &piv, &iface, &l );
 
               /* overflow */
-              if ( ++ilist > _MMG5_LMAX-2 ) {
+              if ( ++ilist > MMG3D_LMAX-2 ) {
                 fprintf(stdout,"  ## Warning: problem in surface remesh process.");
                 fprintf(stdout," Coquil of edge %d-%d contains too many elts.\n",
                         _MMG3D_indPt(mesh,ia),_MMG3D_indPt(mesh,ib));

@@ -646,7 +646,7 @@ int _MMG5_typelt(MMG5_pMesh mesh,int iel,int *item) {
 /*   double   kal; */
 /*   int      k,it,maxit,nd/\*,item[2],typ*\/; */
 /*   /\*int      ntyp[10];*\/ */
-/*   int      list[_MMG5_LMAX+2],i,ilist,nconf,ns; */
+/*   int      list[MMG3D_LMAX+2],i,ilist,nconf,ns; */
 
 /*   it = 0; */
 /*   maxit = 3; */
@@ -1004,7 +1004,7 @@ int _MMG5_countelt(MMG5_pMesh mesh,MMG5_pSol sol, double *weightelt, long *npcib
   int      isbdry;
   double   dned,dnface,dnint/*,dnins*/,w,lenavg,lent[6];
   double   dnpdel,dnadd,leninv,dnaddloc,dnpdelloc;
-  int      list[_MMG5_LMAX],ddebug=0,ib,nv;
+  int      list[MMG3D_LMAX],ddebug=0,ib,nv;
   long     nptot;
   //FILE *inm;
 

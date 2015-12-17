@@ -77,16 +77,16 @@ static int
 _MMG5_ismaniball(MMG5_pMesh mesh,MMG5_pSol sol,int k,int indp) {
   MMG5_pTetra   pt,pt1;
   double   v,v0,v1,v2;
-  int      *adja,list[_MMG5_LMAX+1],bdy[_MMG5_LMAX+1],ibdy,np,ilist,base,cur,iel,jel,res,l;
+  int      *adja,list[MMG3D_LMAX+1],bdy[MMG3D_LMAX+1],ibdy,np,ilist,base,cur,iel,jel,res,l;
   char     i,i0,i1,i2,j0,j1,j2,j,ip,nzeros,nopp,nsame;
 
   pt = &mesh->tetra[k];
   np = pt->v[indp];
   if ( fabs(sol->m[np]) > _MMG5_EPSD2 )  return(1);
 
-  memset(bdy,0,(_MMG5_LMAX+1)*sizeof(int));
+  memset(bdy,0,(MMG3D_LMAX+1)*sizeof(int));
 
-  memset(list,0,(_MMG5_LMAX+1)*sizeof(int));
+  memset(list,0,(MMG3D_LMAX+1)*sizeof(int));
 
   /* Sign of a starting point in ball of np */
   for (j=0; j<3; j++) {
@@ -147,7 +147,7 @@ _MMG5_ismaniball(MMG5_pMesh mesh,MMG5_pSol sol,int k,int indp) {
         pt1->flag   = base;
         list[ilist] = 4*jel + ip;
         ilist++;
-        assert(ilist < _MMG5_LMAX);
+        assert(ilist < MMG3D_LMAX);
       }
     }
     cur++;
@@ -208,7 +208,7 @@ _MMG5_ismaniball(MMG5_pMesh mesh,MMG5_pSol sol,int k,int indp) {
   base = ++mesh->base;
   pt->flag = base;
 
-  memset(list,0,(_MMG5_LMAX+1)*sizeof(int));
+  memset(list,0,(MMG3D_LMAX+1)*sizeof(int));
   ilist = cur = 0;
   list[ilist] = res;
   ilist++;
@@ -280,7 +280,7 @@ _MMG5_ismaniball(MMG5_pMesh mesh,MMG5_pSol sol,int k,int indp) {
         pt1->flag   = base;
         list[ilist] = 4*jel + ip;
         ilist++;
-        assert(ilist < _MMG5_LMAX);
+        assert(ilist < MMG3D_LMAX);
       }
     }
     cur++;
@@ -591,7 +591,7 @@ static int _MMG5_setref_ls(MMG5_pMesh mesh, MMG5_pSol sol) {
 int _MMG5_chkmaniball(MMG5_pMesh mesh, int start, char ip){
   MMG5_pTetra    pt,pt1;
   int       ref,base,ilist,nump,k,cur,k1,nref;
-  int       *adja,list[_MMG5_LMAX+2];
+  int       *adja,list[MMG3D_LMAX+2];
   char      i,l,j;
 
   base = ++mesh->base;
@@ -634,7 +634,7 @@ int _MMG5_chkmaniball(MMG5_pMesh mesh, int start, char ip){
       assert(j<4);
 
       /* overflow */
-      assert ( ilist <= _MMG5_LMAX-3 );
+      assert ( ilist <= MMG3D_LMAX-3 );
       list[ilist] = 4*k1+j;
       ilist++;
     }
@@ -668,7 +668,7 @@ int _MMG5_chkmaniball(MMG5_pMesh mesh, int start, char ip){
       assert(j<4);
 
       /* overflow */
-      assert ( ilist <= _MMG5_LMAX-3 );
+      assert ( ilist <= MMG3D_LMAX-3 );
       list[ilist] = 4*k1+j;
       ilist++;
     }
@@ -807,7 +807,7 @@ int _MMG5_chkmani2(MMG5_pMesh mesh,MMG5_pSol sol) {
 int _MMG5_chkmanicoll(MMG5_pMesh mesh,int k,int iface,int iedg,int ndepmin,int ndepplus,char isminp,char isplp) {
   MMG5_pTetra    pt,pt1;
   int       nump,numq,ilist,ref,cur,stor,iel,jel,base,ndepmq,ndeppq;
-  int       list[_MMG5_LMAX+2],*adja,*adja1;
+  int       list[MMG3D_LMAX+2],*adja,*adja1;
   char      i,j,ip,jp,iq,jq,voy,indp,indq,isminq,isplq,ismin,ispl;
 
   ilist = 0;
@@ -832,7 +832,7 @@ int _MMG5_chkmanicoll(MMG5_pMesh mesh,int k,int iface,int iedg,int ndepmin,int n
     assert( j < 4 );
     list[ilist] = 4*k+j;
     ilist++;
-    assert( ilist < _MMG5_LMAX+2 );
+    assert( ilist < MMG3D_LMAX+2 );
     pt->flag = base;
 
     if ( pt->ref == MG_MINUS ) isminq = 1;
@@ -860,7 +860,7 @@ int _MMG5_chkmanicoll(MMG5_pMesh mesh,int k,int iface,int iedg,int ndepmin,int n
           if ( pt1->v[iq] == numq ) break;
         assert( iq < 4 );
         /* overflow */
-        assert ( ilist < _MMG5_LMAX+2 );
+        assert ( ilist < MMG3D_LMAX+2 );
 
         list[ilist] = 4*jel+iq;
         ilist++;
@@ -880,7 +880,7 @@ int _MMG5_chkmanicoll(MMG5_pMesh mesh,int k,int iface,int iedg,int ndepmin,int n
       cur++;
     }
 
-    memset(list,0,(_MMG5_LMAX+2)*sizeof(int));
+    memset(list,0,(MMG3D_LMAX+2)*sizeof(int));
     ilist = 0;
   }
 
@@ -977,7 +977,7 @@ int _MMG5_chkmanicoll(MMG5_pMesh mesh,int k,int iface,int iedg,int ndepmin,int n
 
           list[ilist] = 4*jel+j;
           ilist++;
-          assert( ilist < _MMG5_LMAX+1 );
+          assert( ilist < MMG3D_LMAX+1 );
         }
         else {
           if ( pt1->flag == base ) continue;
@@ -988,7 +988,7 @@ int _MMG5_chkmanicoll(MMG5_pMesh mesh,int k,int iface,int iedg,int ndepmin,int n
 
           list[ilist] = - (4*jel+j);
           ilist++;
-          assert( ilist < _MMG5_LMAX+1 );
+          assert( ilist < MMG3D_LMAX+1 );
         }
       }
     }
@@ -1037,7 +1037,7 @@ int _MMG5_chkmanicoll(MMG5_pMesh mesh,int k,int iface,int iedg,int ndepmin,int n
 
           list[ilist] = -(4*jel+j);
           ilist++;
-          assert( ilist < _MMG5_LMAX+1 );
+          assert( ilist < MMG3D_LMAX+1 );
         }
         else {
           if ( pt1->flag == base ) continue;
@@ -1048,7 +1048,7 @@ int _MMG5_chkmanicoll(MMG5_pMesh mesh,int k,int iface,int iedg,int ndepmin,int n
 
           list[ilist] = 4*jel+j;
           ilist++;
-          assert( ilist < _MMG5_LMAX+1 );
+          assert( ilist < MMG3D_LMAX+1 );
         }
       }
     }
@@ -1138,7 +1138,7 @@ int _MMG5_chkmanicoll(MMG5_pMesh mesh,int k,int iface,int iedg,int ndepmin,int n
 
           list[ilist] = 4*jel+j;
           ilist++;
-          assert( ilist < _MMG5_LMAX+1 );
+          assert( ilist < MMG3D_LMAX+1 );
         }
         else {
           if ( pt1->flag == base ) continue;
@@ -1149,7 +1149,7 @@ int _MMG5_chkmanicoll(MMG5_pMesh mesh,int k,int iface,int iedg,int ndepmin,int n
 
           list[ilist] = - (4*jel+j);
           ilist++;
-          assert( ilist < _MMG5_LMAX+1 );
+          assert( ilist < MMG3D_LMAX+1 );
         }
       }
     }
@@ -1201,7 +1201,7 @@ int _MMG5_chkmanicoll(MMG5_pMesh mesh,int k,int iface,int iedg,int ndepmin,int n
 
           list[ilist] = -(4*jel+j);
           ilist++;
-          assert( ilist < _MMG5_LMAX+1 );
+          assert( ilist < MMG3D_LMAX+1 );
         }
         else {
           if ( pt1->flag == base ) continue;
@@ -1212,7 +1212,7 @@ int _MMG5_chkmanicoll(MMG5_pMesh mesh,int k,int iface,int iedg,int ndepmin,int n
 
           list[ilist] = 4*jel+j;
           ilist++;
-          assert( ilist < _MMG5_LMAX+1 );
+          assert( ilist < MMG3D_LMAX+1 );
         }
       }
     }
@@ -1263,7 +1263,7 @@ int _MMG5_chkmanicoll(MMG5_pMesh mesh,int k,int iface,int iedg,int ndepmin,int n
 
         list[ilist] = -(4*jel+indp);
         ilist++;
-        assert( ilist < _MMG5_LMAX +1 );
+        assert( ilist < MMG3D_LMAX +1 );
       }
     }
     else {
@@ -1303,7 +1303,7 @@ int _MMG5_chkmanicoll(MMG5_pMesh mesh,int k,int iface,int iedg,int ndepmin,int n
 
         list[ilist] = 4*jel+indq;
         ilist++;
-        assert( ilist < _MMG5_LMAX +1 );
+        assert( ilist < MMG3D_LMAX +1 );
       }
     }
     cur++;

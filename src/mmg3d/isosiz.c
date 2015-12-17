@@ -127,7 +127,7 @@ _MMG5_defsizreg(MMG5_pMesh mesh,MMG5_pSol met,int nump,int *lists,
   MMG5_Tria         tt;
   _MMG5_Bezier       b;
   double       ux,uy,uz,det2d,h,isqhmin,isqhmax,ll,lmin,lmax,hnm,s;
-  double       *n,*t,r[3][3],lispoi[3*_MMG5_LMAX+1],intm[3],b0[3],b1[3],c[3],tAA[6],tAb[3],d[3];
+  double       *n,*t,r[3][3],lispoi[3*MMG3D_LMAX+1],intm[3],b0[3],b1[3],c[3],tAA[6],tAb[3],d[3];
   double       kappa[2],vp[2][2];
   int          k,na,nb,ntempa,ntempb,iel,ip0;
   char         iface,i,j,i0;
@@ -480,7 +480,7 @@ int _MMG3D_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pPoint    p0,p1;
   double         hp,v[3],b0[3],b1[3],b0p0[3],b1b0[3],p1b1[3],hausd;
   double         secder0[3],secder1[3],kappa,tau[3],gammasec[3],ntau2,intau,ps,lm;
-  int            lists[_MMG5_LMAX+2],listv[_MMG5_LMAX+2],ilists,ilistv,k,ip0,ip1,l;
+  int            lists[MMG3D_LMAX+2],listv[MMG3D_LMAX+2],ilists,ilistv,k,ip0,ip1,l;
   char           i,j,ia,ised,i0,i1;
   MMG5_pPar      par;
 

@@ -422,7 +422,7 @@ int _MMG5_chkcol_bdy(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
   MMG5_pPoint        p0;
   MMG5_Tria          tt;
   double        calold,calnew,caltmp,nprvold[3],nprvnew[3],ncurold[3],ncurnew[3],ps,devold,devnew;
-  int           ipp,ilistv,nump,numq,ilists,lists[_MMG5_LMAX+2],l,iel,nbbdy,ndepmin,ndepplus;
+  int           ipp,ilistv,nump,numq,ilists,lists[MMG3D_LMAX+2],l,iel,nbbdy,ndepmin,ndepplus;
   int           nr;
   char          iopp,ia,ip,tag,i,iq,i0,i1,ier,isminp,isplp;
 

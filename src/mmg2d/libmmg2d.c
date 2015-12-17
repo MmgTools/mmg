@@ -260,7 +260,7 @@ int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol sol,void (*titi)(int ,int ,int,int,
 
   /* sol->type = 1; */
 
-  MMG2D_setfunc(sol->size);
+  MMG2D_setfunc(mesh,sol);
   _MMG2D_Set_commonFunc();
  
   if(mesh->info.lag >= 0) {

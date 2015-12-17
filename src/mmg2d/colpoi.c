@@ -47,7 +47,7 @@ int MMG2_colpoi(MMG5_pMesh mesh, MMG5_pSol sol,int iel,int iar,int ia,int ib,dou
   adja = &mesh->adja[iadr];
   jel  = adja[iar]/3;  
    
-  list  = (int*)malloc(LMAX*sizeof(int));
+  list  = (int*)malloc(MMG2D_LMAX*sizeof(int));
   assert(list);
    
   lon = MMG2_boulep(mesh,iel,ib,list);
@@ -406,7 +406,7 @@ int MMG2_colpoibdry(MMG5_pMesh mesh, MMG5_pSol sol,int iel,int iar,int ia,int ib
   adja = &mesh->adja[iadr];
   jel  = adja[iar]/3;  
   assert(!jel);
-  _MMG5_SAFE_MALLOC(list,LMAX,int);
+  _MMG5_SAFE_MALLOC(list,MMG2D_LMAX,int);
    
   lon = MMG2_boulep(mesh,iel,ib,list);  
   if(!lon) {

@@ -22,7 +22,7 @@
 */
 
 /**
- * \file mmg3d/libmmg3d.c
+ * \file mmg3d/libmmg3df.c
  * \brief Fortran API functions for MMG3D library.
  * \author Charles Dapogny (LJLL, UPMC)
  * \author Cécile Dobrzynski (Inria / IMB, Université de Bordeaux)

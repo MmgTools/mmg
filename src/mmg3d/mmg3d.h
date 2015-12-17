@@ -142,7 +142,6 @@
 #define _MMG5_LOPTL     1.3
 #define _MMG5_LOPTS     0.6
 
-#define _MMG5_LMAX      10240
 #define _MMG5_BADKAL    0.2
 #define _MMG5_NULKAL    1.e-30
 

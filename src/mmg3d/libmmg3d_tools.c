@@ -88,14 +88,8 @@ void MMG3D_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
  * \brief Return adjacent elements of a tetrahedron.
  * \param mesh pointer toward the mesh structure.
  * \param kel tetrahedron index.
- * \param v0 pointer toward the index of the adjacent element of \a kel through
- * its face number 0.
- * \param v1 pointer toward the index of the adjacent element of \a kel through
- * its face number 1.
- * \param v2 pointer toward the index of the adjacent element of \a kel through
- * its face number 2.
- * \param v3 pointer toward the index of the adjacent element of \a kel through
- * its face number 3.
+ * \param listet pointer toward the table of the 4 adjacent tetra to \a kel.
+ * (the index is 0 if there is no adjacent)
  * \return 1.
  *
  * Find the indices of the 4 adjacent elements of tetrahedron \a
@@ -103,17 +97,17 @@ void MMG3D_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
  * (so we are on a boundary face).
  *
  */
-int MMG3D_Get_adjaTet(MMG5_pMesh mesh, int kel, int *v0, int *v1, int *v2, int *v3) {
+int MMG3D_Get_adjaTet(MMG5_pMesh mesh, int kel, int listet[4]) {
 
   if ( ! mesh->adja ) {
     if (! MMG3D_hashTetra(mesh, 0))
       return(0);
   }
 
-  (*v0) = mesh->adja[4*(kel-1)+1]/4;
-  (*v1) = mesh->adja[4*(kel-1)+2]/4;
-  (*v2) = mesh->adja[4*(kel-1)+3]/4;
-  (*v3) = mesh->adja[4*(kel-1)+4]/4;
+  listet[0] = mesh->adja[4*(kel-1)+1]/4;
+  listet[1] = mesh->adja[4*(kel-1)+2]/4;
+  listet[2] = mesh->adja[4*(kel-1)+3]/4;
+  listet[3] = mesh->adja[4*(kel-1)+4]/4;
 
   return(1);
 }
@@ -749,8 +743,16 @@ int MMG5_Get_adjaTet(MMG5_pMesh mesh, int kel, int *v0, int *v1, int *v2, int *v
   printf("  ##  MMG5_Get_adjaTet: "
          "MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
         " be removed soon\n." );
+  int listet[4],ier;
 
-  return(MMG3D_Get_adjaTet(mesh,kel,v0,v1,v2,v3));
+  ier = MMG3D_Get_adjaTet(mesh,kel,listet);
+  if (ier!=1) return ier;
+
+  *v0=listet[0];
+  *v1=listet[1];
+  *v2=listet[2];
+  *v3=listet[3];
+  return 1;
 }
 
 void MMG5_usage(char *prog) {
@@ -806,7 +808,7 @@ int MMG5_mmg3dcheck(MMG5_pMesh mesh,MMG5_pSol met,double critmin, double lmin,
 
 void MMG5_searchqua(MMG5_pMesh mesh,MMG5_pSol met,double critmin, int *eltab,
                     char metRidTyp) {
-  printf("  ## MMG5_searchqu: "
+  printf("  ## MMG5_searchqua: "
          "MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
         " be removed soon\n." );
 

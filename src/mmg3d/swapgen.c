@@ -58,7 +58,7 @@ int _MMG5_chkswpgen(MMG5_pMesh mesh,MMG5_pSol met,int start,int ia,
   MMG5_pPoint    p0;
   double    calold,calnew,caltmp;
   int       na,nb,np,adj,piv,npol,refdom,k,l,iel;
-  int       *adja,pol[_MMG5_LMAX+2];
+  int       *adja,pol[MMG3D_LMAX+2];
   char      i,ipa,ipb,ip,ier;
 
   pt  = &mesh->tetra[start];
@@ -98,7 +98,7 @@ int _MMG5_chkswpgen(MMG5_pMesh mesh,MMG5_pSol met,int start,int ia,
     list[(*ilist)] = 6*adj +i;
     (*ilist)++;
     /* overflow */
-    if ( (*ilist) > _MMG5_LMAX-3 )  return(0);
+    if ( (*ilist) > MMG3D_LMAX-3 )  return(0);
 
     /* set new triangle for travel */
     adja = &mesh->adja[4*(adj-1)+1];
@@ -306,7 +306,7 @@ int _MMG5_swpgen(MMG5_pMesh mesh,MMG5_pSol met,int nconf,int ilist,int *list,
   }
   assert(ip<4);
 
-  memset(list,0,(_MMG5_LMAX+2)*sizeof(int));
+  memset(list,0,(MMG3D_LMAX+2)*sizeof(int));
   nball = _MMG5_boulevolp(mesh,start,ip,list);
 
   ier = _MMG5_colver(mesh,met,list,nball,iq,typchk);

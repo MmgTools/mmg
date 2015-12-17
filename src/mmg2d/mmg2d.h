@@ -62,14 +62,13 @@
 #define M_NUL      (1 << 6)
 #define M_BDRY     (1 << 1)
 #define M_SD       (1 << 5)
-#define M_CORNER   (1 << 4) 
+#define M_CORNER   (1 << 4)
 #define M_REQUIRED (1 << 3)
 #define M_MOVE     (1 << 2)
 
 #define _MMG2D_NPMAX   50000
 #define _MMG2D_NEDMAX  100000
 #define _MMG2D_NEMAX   100000
-#define LMAX   1024
 
 #define M_VOK(ppt)    (ppt && (ppt->tag < M_NUL))
 #define M_EOK(pt)     (pt && (pt->v[0] > 0))
