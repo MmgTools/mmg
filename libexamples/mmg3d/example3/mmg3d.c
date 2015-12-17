@@ -152,6 +152,9 @@ int main(int argc,char *argv[]) {
   if ( MMG3D_Get_iparameter(mesh, MMG3D_IPARAM_lag) > -1 ) {
     ier = MMG3D_mmg3dmov(mesh,met,disp);
   }
+  else if ( MMG3D_Get_iparameter(mesh, MMG3D_IPARAM_iso) ) {
+    ier = MMG3D_mmg3dls(mesh,met);
+  }
   else {
     ier = MMG3D_mmg3dlib(mesh,met);
   }

@@ -86,18 +86,6 @@ int main(int argc,char *argv[]) {
   /*save init size*/
   if ( MMG2D_saveSol(mmgMesh,mmgSol,"init") != 1 )  exit(EXIT_FAILURE);
 
-//TOTRASH
-  MMG2D_set_iparameter(mesh,sol,MMG2D_noinsert,1);
-  MMG2D_set_iparameter(mesh,sol,MMG2D_noswap,1);
-
-//////
-
-  int voisT[3],voisV[MMG2D_LMAX],nb;
-  MMG2D_adjaTri(mesh,4950,voisT);
-  printf("first : %d %d %d\n",voisT[0],voisT[1],voisT[2]);
-  MMG2D_adjaTri(mesh,4852,voisT);
-  printf("sec : %d %d %d\n",voisT[0],voisT[1],voisT[2]);
-
   ier = MMG2D_mmg2dlib(mmgMesh,mmgSol,NULL);
 
   if ( ier == MMG5_STRONGFAILURE ) {

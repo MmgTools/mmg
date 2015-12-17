@@ -383,12 +383,6 @@ int MMG2D_Set_meshSize(MMG5_pMesh mesh, int np, int nt, int na) {
   for (k=mesh->nanil; k<mesh->namax-1; k++) {
     mesh->edge[k].b = k+1;
   }
-   
-  /* memory alloc */
-  _MMG5_ADD_MEM(mesh,(3*mesh->ntmax+5)*sizeof(int),"adjacency table",
-                printf("  Exit program.\n");
-                exit(EXIT_FAILURE));
-  _MMG5_SAFE_CALLOC(mesh->adja,3*mesh->ntmax+5,int);
 
   if ( !mesh->nt ) {
     fprintf(stdout,"  **WARNING NO GIVEN TRIANGLE\n");

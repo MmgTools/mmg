@@ -598,7 +598,7 @@ void MMG3D_Free_names(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pSol disp);
 /* library */
 /**
  * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the sol (metric or level-set) structure.
+ * \param met pointer toward the sol (metric) structure.
  * \return \ref MMG5_SUCCESS if success, \ref MMG5_LOWFAILURE if fail but a
  * conform mesh is saved or \ref MMG5_STRONGFAILURE if fail and we can't save
  * the mesh.
@@ -607,6 +607,18 @@ void MMG3D_Free_names(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pSol disp);
  *
  */
 int  MMG3D_mmg3dlib(MMG5_pMesh mesh, MMG5_pSol met );
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the sol (level-set) structure.
+ * \return \ref MMG5_SUCCESS if success, \ref MMG5_LOWFAILURE if fail but a
+ * conform mesh is saved or \ref MMG5_STRONGFAILURE if fail and we can't save
+ * the mesh.
+ *
+ * Main program for the level-set discretization library.
+ *
+ */
+int  MMG3D_mmg3dls(MMG5_pMesh mesh, MMG5_pSol met );
 
 /**
  * \param mesh pointer toward the mesh structure.

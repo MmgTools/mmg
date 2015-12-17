@@ -24,6 +24,9 @@ ADD_EXECUTABLE(libmmg3d_example3
 ADD_EXECUTABLE(libmmg3d_example4
   ${CMAKE_SOURCE_DIR}/libexamples/mmg3d/example4/main.c ${mmg3d_includes})
 
+ADD_EXECUTABLE(libmmg3d_example5
+  ${CMAKE_SOURCE_DIR}/libexamples/mmg3d/example5/main.c ${mmg3d_includes})
+
  IF ( WIN32 AND ((NOT MINGW) AND USE_SCOTCH) )
     my_add_link_flags(libmmg3d_example0_a "/SAFESEH:NO")
     my_add_link_flags(libmmg3d_example0_b "/SAFESEH:NO")
@@ -31,6 +34,7 @@ ADD_EXECUTABLE(libmmg3d_example4
     my_add_link_flags(libmmg3d_example2 "/SAFESEH:NO")
     my_add_link_flags(libmmg3d_example3 "/SAFESEH:NO")
     my_add_link_flags(libmmg3d_example4 "/SAFESEH:NO")
+    my_add_link_flags(libmmg3d_example5 "/SAFESEH:NO")
  ENDIF ( )
 
 IF ( LIBMMG3D_STATIC )
@@ -41,6 +45,7 @@ IF ( LIBMMG3D_STATIC )
   TARGET_LINK_LIBRARIES(libmmg3d_example2   ${PROJECT_NAME}3d_a)
   TARGET_LINK_LIBRARIES(libmmg3d_example3   ${PROJECT_NAME}3d_a)
   TARGET_LINK_LIBRARIES(libmmg3d_example4   ${PROJECT_NAME}3d_a)
+  TARGET_LINK_LIBRARIES(libmmg3d_example5   ${PROJECT_NAME}3d_a)
 
 ELSEIF ( LIBMMG3D_SHARED )
 
@@ -50,6 +55,7 @@ ELSEIF ( LIBMMG3D_SHARED )
   TARGET_LINK_LIBRARIES(libmmg3d_example2   ${PROJECT_NAME}3d_so)
   TARGET_LINK_LIBRARIES(libmmg3d_example3   ${PROJECT_NAME}3d_so)
   TARGET_LINK_LIBRARIES(libmmg3d_example4   ${PROJECT_NAME}3d_so)
+  TARGET_LINK_LIBRARIES(libmmg3d_example5   ${PROJECT_NAME}3d_so)
 
 ELSE ()
   MESSAGE(WARNING "You must activate the compilation of the static or"
@@ -62,6 +68,7 @@ INSTALL(TARGETS libmmg3d_example1   RUNTIME DESTINATION bin )
 INSTALL(TARGETS libmmg3d_example2   RUNTIME DESTINATION bin )
 INSTALL(TARGETS libmmg3d_example3   RUNTIME DESTINATION bin )
 INSTALL(TARGETS libmmg3d_example4   RUNTIME DESTINATION bin )
+INSTALL(TARGETS libmmg3d_example5   RUNTIME DESTINATION bin )
 
 ###############################################################################
 #####

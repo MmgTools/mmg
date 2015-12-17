@@ -20,6 +20,7 @@ libexamples/mmg3d/example0/example0_b/mesh.*
 libexamples/mmg3d/example1/result0.*
 libexamples/mmg3d/example2/2spheres_*
 libexamples/mmg3d/example4/tinyBoxt.o*
+libexamples/mmg3d/example5/test.o*
 libexamples/mmgs/example0/mesh.*
 libexamples/mmgs/example0_fortran/mesh.*
 libexamples/mmgs/example1/2spheres_*

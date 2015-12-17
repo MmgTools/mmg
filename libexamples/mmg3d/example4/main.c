@@ -74,7 +74,7 @@ int main(int argc,char *argv[]) {
   /* args of InitMesh: mesh=&mmgMesh, sol=&mmgSol */
   mmgMesh = NULL;
   mmgSol  = NULL;
-  mmgDisp = NULL; //Useless here: just needed forthe lagrangian motion option
+  mmgDisp = NULL;
   MMG3D_Init_mesh(&mmgMesh,&mmgSol,&mmgDisp);
 
   /** 2) Build mesh in MMG5 format */
