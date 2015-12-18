@@ -140,6 +140,7 @@ inline double _MMG5_caltet_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra  pt) {
 inline double _MMG5_caltet_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt) {
   double       cal,abx,aby,abz,acx,acy,acz,adx,ady,adz;
   double       h1,h2,h3,h4,h5,h6,det,vol,rap,v1,v2,v3,num;
+  double       bcx,bcy,bcz,bdx,bdy,bdz,cdx,cdy,cdz;
   double       *a,*b,*c,*d;
   double       mm[6];
   int          ip[4];
@@ -172,6 +173,18 @@ inline double _MMG5_caltet_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt) {
   ady = d[1] - a[1];
   adz = d[2] - a[2];
 
+  bcx = c[0] - b[0];
+  bcy = c[1] - b[1];
+  bcz = c[2] - b[2];
+
+  bdx = d[0] - b[0];
+  bdy = d[1] - b[1];
+  bdz = d[2] - b[2];
+
+  cdx = d[0] - c[0];
+  cdy = d[1] - c[1];
+  cdz = d[2] - c[2];
+
   v1  = acy*adz - acz*ady;
   v2  = acz*adx - acx*adz;
   v3  = acx*ady - acy*adx;
@@ -188,30 +201,39 @@ inline double _MMG5_caltet_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt) {
   det = sqrt(det) * vol;
 
   /* edge lengths */
-  h6 = _MMG5_lenedg_ani(mesh,met,0,pt);
-  h1 = _MMG5_lenedg_ani(mesh,met,1,pt);
-  h2 = _MMG5_lenedg_ani(mesh,met,2,pt);
-  h3 = _MMG5_lenedg_ani(mesh,met,3,pt);
-  h4 = _MMG5_lenedg_ani(mesh,met,4,pt);
-  h5 = _MMG5_lenedg_ani(mesh,met,5,pt);
+  h1 = mm[0]*abx*abx + mm[3]*aby*aby + mm[5]*abz*abz
+    + 2.0*(mm[1]*abx*aby + mm[2]*abx*abz + mm[4]*aby*abz);
+  h2 =  mm[0]*acx*acx + mm[3]*acy*acy + mm[5]*acz*acz
+    + 2.0*(mm[1]*acx*acy + mm[2]*acx*acz + mm[4]*acy*acz);
+  h3 = mm[0]*adx*adx + mm[3]*ady*ady + mm[5]*adz*adz
+    + 2.0*(mm[1]*adx*ady + mm[2]*adx*adz + mm[4]*ady*adz);
+  h4 =  mm[0]*bcx*bcx + mm[3]*bcy*bcy + mm[5]*bcz*bcz
+    + 2.0*(mm[1]*bcx*bcy + mm[2]*bcx*bcz + mm[4]*bcy*bcz);
+  h5 =  mm[0]*bdx*bdx + mm[3]*bdy*bdy + mm[5]*bdz*bdz
+    + 2.0*(mm[1]*bdx*bdy + mm[2]*bdx*bdz + mm[4]*bdy*bdz);
+  h6 =  mm[0]*cdx*cdx + mm[3]*cdy*cdy + mm[5]*cdz*cdz
+    + 2.0*(mm[1]*cdx*cdy + mm[2]*cdx*cdz + mm[4]*cdy*cdz);
 
   /* quality */
-  rap = h1*h1 + h2*h2 + h3*h3 + h4*h4 + h5*h5 + h6*h6;
+  rap = h1 + h2 + h3 + h4 + h5 + h6;
+
   num = sqrt(rap) * rap;
 
   cal = det / num;
   if ( cal <= _MMG5_NULKAL ) {
-    if ( mesh->info.ddebug ) {
-      fprintf(stdout,"  ## WARNING: TOO BAD QUALITY FOR AT LEAST ONE ELEMENT\n");
-      fprintf(stdout," Element volume=%e\n metric det=%e\n"
-              " edges lengths sum=%e\n computed quality=%e\n",vol,det,num,cal);
+    /* if ( mesh->info.ddebug ) { */
+    /*   // Remark: we can pass here in chkswpgen: the bad element is not created */
+    /*   // thus this is not a problem. */
+    /*   fprintf(stdout,"  ## WARNING: TOO BAD QUALITY FOR AT LEAST ONE ELEMENT\n"); */
+    /*   fprintf(stdout," Element volume=%e\n metric det=%e\n" */
+    /*           " edges lengths sum=%e\n computed quality=%e\n",vol,det,num,cal); */
 
-      // exit added to avoid memory consumption in CDash outputs.
-      /* _MMG5_unscaleMesh(mesh,met); */
-      /* MMG3D_saveMesh(mesh); */
-      /* MMG3D_saveSol(mesh,met); */
-      /* exit(EXIT_FAILURE); */
-    }
+    /*   // exit added to avoid memory consumption in CDash outputs. */
+    /*   /\* _MMG5_unscaleMesh(mesh,met); *\/ */
+    /*   /\* MMG3D_saveMesh(mesh); *\/ */
+    /*   /\* MMG3D_saveSol(mesh,met); *\/ */
+    /*   /\* exit(EXIT_FAILURE); *\/ */
+    /* } */
     return(0.0);
   }
   return(cal);
@@ -319,17 +341,19 @@ inline double _MMG5_caltet33_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt) {
   cal = det / num;
 
   if ( cal <= _MMG5_NULKAL ) {
-    if ( mesh->info.ddebug ) {
-      fprintf(stdout,"  ## WARNING: TOO BAD QUALITY FOR AT LEAST ONE ELEMENT\n");
-      fprintf(stdout," Element volume=%e\n metric det=%e\n"
-              " edges lengths sum=%e\n computed quality=%e\n",vol,det,num,cal);
-      // exit added to avoid memory consumption in CDash outputs.
-      /* _MMG5_unscaleMesh(mesh,met); */
-      /* MMG3D_saveMesh(mesh); */
-      /* MMG3D_saveSol(mesh,met); */
-      /* exit(EXIT_FAILURE); */
-      return(0.0);
-    }
+    /* if ( mesh->info.ddebug ) { */
+    /*   // Remark: we can pass here in chkswpgen, this not a problem since the elt */
+    /*   // is not created */
+    /*   fprintf(stdout,"  ## WARNING: TOO BAD QUALITY FOR AT LEAST ONE ELEMENT\n"); */
+    /*   fprintf(stdout," Element volume=%e\n metric det=%e\n" */
+    /*           " edges lengths sum=%e\n computed quality=%e\n",vol,det,num,cal); */
+    /*   // exit added to avoid memory consumption in CDash outputs. */
+    /*   /\* _MMG5_unscaleMesh(mesh,met); *\/ */
+    /*   /\* MMG3D_saveMesh(mesh); *\/ */
+    /*   /\* MMG3D_saveSol(mesh,met); *\/ */
+    /*   /\* exit(EXIT_FAILURE); *\/ */
+    /*   return(0.0); */
+    /* } */
   }
   return(cal);
 }
@@ -622,7 +646,7 @@ int _MMG5_typelt(MMG5_pMesh mesh,int iel,int *item) {
 /*   double   kal; */
 /*   int      k,it,maxit,nd/\*,item[2],typ*\/; */
 /*   /\*int      ntyp[10];*\/ */
-/*   int      list[_MMG5_LMAX+2],i,ilist,nconf,ns; */
+/*   int      list[MMG3D_LMAX+2],i,ilist,nconf,ns; */
 
 /*   it = 0; */
 /*   maxit = 3; */
@@ -735,6 +759,7 @@ int _MMG3D_prilen(MMG5_pMesh mesh, MMG5_pSol met, char metRidTyp) {
         else // -A option
           len = _MMG5_lenedg_iso(mesh,met,ia,pt);
 
+        assert( len!=0 );
         avlen += len;
 
         if( len < lmin ) {
@@ -979,7 +1004,7 @@ int _MMG5_countelt(MMG5_pMesh mesh,MMG5_pSol sol, double *weightelt, long *npcib
   int      isbdry;
   double   dned,dnface,dnint/*,dnins*/,w,lenavg,lent[6];
   double   dnpdel,dnadd,leninv,dnaddloc,dnpdelloc;
-  int      list[_MMG5_LMAX],ddebug=0,ib;
+  int      list[MMG3D_LMAX],ddebug=0,ib,nv;
   long     nptot;
   //FILE *inm;
 
@@ -1005,14 +1030,18 @@ int _MMG5_countelt(MMG5_pMesh mesh,MMG5_pSol sol, double *weightelt, long *npcib
 
     /*longueur moyenne*/
     lenavg = 0;
+    nv = 6;
     for(ib=0 ; ib<6 ; ib++) {
       ipa = _MMG5_iare[ib][0];
       ipb = _MMG5_iare[ib][1];
       lent[ib] = _MMG5_lenedg(mesh,sol,ib,pt);
-
+      if ( lent[ib]==0 ) nv--;
       lenavg+=lent[ib];
     }
-    lenavg /= 6.;
+    if ( nv )
+      lenavg /= (double)nv;
+    else
+      lenavg = 1; // Unable to treat this element
 
     w = 0;
     if(weightelt)

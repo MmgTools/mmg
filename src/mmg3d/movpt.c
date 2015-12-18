@@ -36,8 +36,23 @@
 #include "mmg3d.h"
 
 
-/** Move internal point */
-int _MMG5_movintpt(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,int improve) {
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param list pointer toward the volumic ball of the point.
+ * \param ilist size of the volumic ball.
+ * \param improve force the new minimum element quality to be greater or equal
+ * than 0.9 of the old minimum element quality.
+ *
+ * \return 0 if we can't move the point, 1 if we can.
+ *
+ * Move internal point whose volumic is passed.
+ *
+ * \Remark the metric is not interpolated at the new position.
+ * \Remark we don't check if we break the hausdorff criterion.
+ *
+ */
+int _MMG5_movintpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,int improve) {
   MMG5_pTetra               pt,pt0;
   MMG5_pPoint               p0,p1,p2,p3,ppt0;
   double               vol,totvol;
@@ -50,6 +65,9 @@ int _MMG5_movintpt(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,int improve
   pt0    = &mesh->tetra[0];
   ppt0   = &mesh->point[0];
   memset(ppt0,0,sizeof(MMG5_Point));
+
+  iel = list[0] / 4;
+  i0  = list[0] % 4;
 
   /* Coordinates of optimal point */
   calold = DBL_MAX;
@@ -135,16 +153,17 @@ int _MMG5_movintpt(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,int improve
  *
  * Move boundary regular point, whose volumic and surfacic balls are passed.
  *
+ * \Remark the metric is not interpolated at the new position.
  */
-int _MMG5_movbdyregpt(MMG5_pMesh mesh, MMG5_pSol met,int *listv,
-                      int ilistv,int *lists,int ilists) {
+int _MMG5_movbdyregpt_iso(MMG5_pMesh mesh, MMG5_pSol met,int *listv,
+                          int ilistv,int *lists,int ilists) {
   MMG5_pTetra       pt,pt0;
   MMG5_pxTetra      pxt;
   MMG5_pPoint       p0,p1,p2,ppt0;
   MMG5_Tria         tt;
   MMG5_pxPoint      pxp;
   _MMG5_Bezier      b;
-  double            *n,r[3][3],lispoi[3*_MMG5_LMAX+1],ux,uy,uz,det2d;
+  double            *n,r[3][3],lispoi[3*MMG3D_LMAX+1],ux,uy,uz,det2d;
   double            detloc,oppt[2],step,lambda[3];
   double            ll,m[2],uv[2],o[3],no[3],to[3];
   double            calold,calnew,caltmp,*callist;
@@ -436,8 +455,6 @@ int _MMG5_movbdyregpt(MMG5_pMesh mesh, MMG5_pSol met,int *listv,
   pxp->n1[1] = no[1];
   pxp->n1[2] = no[2];
 
-  memcpy(&(met->m[0]),&(met->m[met->size*n0]),met->size*sizeof(double));
-
   /* For each surfacic triangle, build a virtual displaced triangle for check purposes */
   calold = calnew = DBL_MAX;
   for (l=0; l<ilists; l++) {
@@ -520,9 +537,10 @@ int _MMG5_movbdyregpt(MMG5_pMesh mesh, MMG5_pSol met,int *listv,
  *
  * Move boundary reference point, whose volumic and surfacic balls are passed.
  *
+ * \Remark the metric is not interpolated at the new position.
  */
-int _MMG5_movbdyrefpt(MMG5_pMesh mesh, MMG5_pSol met, int *listv,
-                      int ilistv, int *lists, int ilists){
+int _MMG5_movbdyrefpt_iso(MMG5_pMesh mesh, MMG5_pSol met, int *listv,
+                          int ilistv, int *lists, int ilists){
   MMG5_pTetra           pt,pt0;
   MMG5_pxTetra          pxt;
   MMG5_pPoint           p0,p1,p2,ppt0;
@@ -736,8 +754,6 @@ int _MMG5_movbdyrefpt(MMG5_pMesh mesh, MMG5_pSol met, int *listv,
   pxp->n1[1] = no[1];
   pxp->n1[2] = no[2];
 
-  memcpy(&(met->m[0]),&(met->m[met->size*ip0]),met->size*sizeof(double));
-
   /* For each surface triangle, build a virtual displaced triangle for check purposes */
   calold = calnew = DBL_MAX;
   for( l=0 ; l<ilists ; l++ ){
@@ -826,9 +842,10 @@ int _MMG5_movbdyrefpt(MMG5_pMesh mesh, MMG5_pSol met, int *listv,
  * Move boundary non manifold point, whose volumic and (exterior)
  * surfacic balls are passed
  *
+ * \Remark the metric is not interpolated at the new position.
  */
-int _MMG5_movbdynompt(MMG5_pMesh mesh,MMG5_pSol met, int *listv,
-                      int ilistv, int *lists, int ilists){
+int _MMG5_movbdynompt_iso(MMG5_pMesh mesh,MMG5_pSol met, int *listv,
+                          int ilistv, int *lists, int ilists){
   MMG5_pTetra       pt,pt0;
   MMG5_pxTetra      pxt;
   MMG5_pPoint       p0,p1,p2,ppt0;
@@ -1039,8 +1056,6 @@ int _MMG5_movbdynompt(MMG5_pMesh mesh,MMG5_pSol met, int *listv,
   pxp->n1[1] = no[1];
   pxp->n1[2] = no[2];
 
-  memcpy(&(met->m[0]),&(met->m[met->size*ip0]),met->size*sizeof(double));
-
   /* For each surface triangle, build a virtual displaced triangle for check purposes */
   calold = calnew = DBL_MAX;
   for( l=0 ; l<ilists ; l++ ){
@@ -1130,8 +1145,8 @@ int _MMG5_movbdynompt(MMG5_pMesh mesh,MMG5_pSol met, int *listv,
  * Move boundary ridge point, whose volumic and surfacic balls are passed.
  *
  */
-int _MMG5_movbdyridpt(MMG5_pMesh mesh, MMG5_pSol met, int *listv,
-                      int ilistv,int *lists,int ilists) {
+int _MMG5_movbdyridpt_iso(MMG5_pMesh mesh, MMG5_pSol met, int *listv,
+                          int ilistv,int *lists,int ilists) {
   MMG5_pTetra          pt,pt0;
   MMG5_pxTetra         pxt;
   MMG5_pPoint          p0,p1,p2,ppt0;
@@ -1285,11 +1300,7 @@ int _MMG5_movbdyridpt(MMG5_pMesh mesh, MMG5_pSol met, int *listv,
     ipa = iptmpa;
     ipb = iptmpb;
   }
-  if ( !(ip1 && ip2 && (ip1 != ip2)) ) {
-    //printf("move de %d\n",ip0);
-    return(0);
-  }
-  //assert(ip1 && ip2 && (ip1 != ip2));
+  if ( !(ip1 && ip2 && (ip1 != ip2)) ) return(0);
 
   /* At this point, we get the point extremities of the ridge curve passing through ip0 :
      ip1, ip2, along with support tets it1,it2, the surface faces iface1,iface2, and the
@@ -1351,8 +1362,6 @@ int _MMG5_movbdyridpt(MMG5_pMesh mesh, MMG5_pSol met, int *listv,
   pxp->n2[0] = no2[0];
   pxp->n2[1] = no2[1];
   pxp->n2[2] = no2[2];
-
-  memcpy(&(met->m[0]),&(met->m[met->size*ip0]),met->size*sizeof(double));
 
   /* For each surfacic triangle, build a virtual displaced triangle for check purposes */
   calold = calnew = DBL_MAX;

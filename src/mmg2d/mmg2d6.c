@@ -29,6 +29,9 @@ int MMG2_mmg2d6(MMG5_pMesh mesh, MMG5_pSol sol) {
   double maxls;
   int k,i;
 
+  if ( abs(mesh->info.imprim) > 3 )
+    fprintf(stdout,"  ** ISOSURFACE EXTRACTION\n");
+
  /* base used vertices */
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
@@ -77,7 +80,11 @@ int MMG2_mmg2d6(MMG5_pMesh mesh, MMG5_pSol sol) {
       ppt = &mesh->point[ pt->v[i] ];
       ppt->tag &= ~M_NUL;
     }
-  }       
+  }
+
+  /* Clean memory */
+  _MMG5_DEL_MEM(mesh,sol->m,(sol->size*(sol->npmax+1))*sizeof(double));
+
   return(1);
 }
 

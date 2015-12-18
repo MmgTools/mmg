@@ -46,7 +46,7 @@ int optlen_ani(MMG5_pMesh mesh,MMG5_pSol sol,double declic,int base) {
   npp    = 0;
   nrj = 0;  
 
-  _MMG5_SAFE_CALLOC(list,LMAX,int);
+  _MMG5_SAFE_CALLOC(list,MMG2D_LMAX,int);
   
   do {
     k = MMG2_kiupop(queue);   
@@ -196,7 +196,7 @@ int optlen_iso(MMG5_pMesh mesh,MMG5_pSol sol,double declic,int base) {
   nm     = 0;
   npp    = 0;
   nrj = 0;  
-  _MMG5_SAFE_MALLOC(list,LMAX,int);
+  _MMG5_SAFE_MALLOC(list,MMG2D_LMAX,int);
  
   do {
     k = MMG2_kiupop(queue);   
@@ -365,7 +365,7 @@ int optlen_iso_bar(MMG5_pMesh mesh,MMG5_pSol sol,double declic,int base) {
   nm     = 0;
   npp    = 0;
   nrj = 0;  
-  _MMG5_SAFE_MALLOC(list,LMAX,int);
+  _MMG5_SAFE_MALLOC(list,MMG2D_LMAX,int);
 
   do {
     k = MMG2_kiupop(queue);   

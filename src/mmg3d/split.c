@@ -359,6 +359,8 @@ int _MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,
         }
       }
     }
+    assert( lmin!=0 );
+
     /* cree-t-on une trop petite arete ? (voir le bug de BUG_Split1b_SpereIso_0.125h_met) */
     for (j=0; j<ilist; j++) {
       iel = list[j] / 6;

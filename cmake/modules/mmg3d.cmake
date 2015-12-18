@@ -76,7 +76,6 @@ FILE(
   )
 LIST(REMOVE_ITEM source_files
   ${MMG3D_SOURCE_DIR}/mmg3d.c
-  ${MMG3D_SOURCE_DIR}/lib${PROJECT_NAME}3d.c
   ${MMG3D_SOURCE_DIR}/lib${PROJECT_NAME}3df.c
   ${CMAKE_SOURCE_DIR}/src/libmmg.h
   ${CMAKE_SOURCE_DIR}/src/libmmgf.h
@@ -90,7 +89,6 @@ FILE(
   GLOB
   lib_file
   #${MMG3D_SOURCE_DIR}/library_tools.c
-  ${MMG3D_SOURCE_DIR}/lib${PROJECT_NAME}3d.c
   ${MMG3D_SOURCE_DIR}/lib${PROJECT_NAME}3df.c
   )
 
@@ -168,10 +166,31 @@ IF ( LIBMMG3D_STATIC OR LIBMMG3D_SHARED )
     ${COMMON_SOURCE_DIR}/libmmgcommonf.h
     ${COMMON_SOURCE_DIR}/chrono.h
     )
+  SET(MMG3D_INCLUDE ${CMAKE_SOURCE_DIR}/include/mmg/mmg3d )
+  SET( mmg3d_includes
+    ${MMG3D_INCLUDE}/libmmg3d.h
+    ${MMG3D_INCLUDE}/libmmg3df.h
+    ${MMG3D_INCLUDE}/mmgcommon.h
+    ${MMG3D_INCLUDE}/eigenv.h
+    ${MMG3D_INCLUDE}/libmmgcommon.h
+    ${MMG3D_INCLUDE}/libmmgcommonf.h
+    ${MMG3D_INCLUDE}/chrono.h
+    ) 
   # Install header files in /usr/local or equivalent
-  INSTALL(FILES ${mmg3d_headers} DESTINATION include/mmg/mmg3d)
+  #INSTALL(FILES ${mmg3d_headers} DESTINATION include/mmg/mmg3d)
+
+  ADD_CUSTOM_COMMAND(OUTPUT ${MMG3D_INCLUDE}/libmmgcommonf.h
+    COMMAND ${CMAKE_COMMAND} -E copy ${COMMON_SOURCE_DIR}/libmmgcommonf.h ${MMG3D_INCLUDE}/libmmgcommonf.h
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+    DEPENDS ${COMMON_SOURCE_DIR}/libmmgcommonf.h)
+  ADD_CUSTOM_COMMAND(OUTPUT ${MMG3D_INCLUDE}/libmmg3df.h
+    COMMAND ${CMAKE_COMMAND} -E copy ${MMG3D_SOURCE_DIR}/libmmg3df.h ${MMG3D_INCLUDE}/libmmg3df.h
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+    DEPENDS ${MMG3D_SOURCE_DIR}/libmmg3df.h)
+
   # Install header files in project directory
-  INSTALL(FILES ${mmg3d_headers} DESTINATION ${CMAKE_SOURCE_DIR}/include/mmg/mmg3d)
+  FILE ( INSTALL ${mmg3d_headers} DESTINATION ${CMAKE_SOURCE_DIR}/include/mmg/mmg3d
+    PATTERN "libmmg*f.h"  EXCLUDE)
 ENDIF()
 
 ############################################################################
@@ -261,6 +280,7 @@ IF ( BUILD_TESTING )
       SET(LIBMMG3D_EXEC1   ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_example1)
       SET(LIBMMG3D_EXEC2   ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_example2)
       SET(LIBMMG3D_EXEC4   ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_example4)
+      SET(LIBMMG3D_EXEC5   ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_example5)
 
       ADD_TEST(NAME libmmg3d_example0_a COMMAND ${LIBMMG3D_EXEC0_a})
       ADD_TEST(NAME libmmg3d_example0_b COMMAND ${LIBMMG3D_EXEC0_b})
@@ -269,9 +289,9 @@ IF ( BUILD_TESTING )
       IF ( USE_SUSCELAS )
         ADD_TEST(NAME libmmg3d_example4   COMMAND ${LIBMMG3D_EXEC4})
       ENDIF ()
+      ADD_TEST(NAME libmmg3d_example5   COMMAND ${LIBMMG3D_EXEC5})
 
-      SET(LIBMMG3D_EXEC3 ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_example3)
-      SET( LISTEXEC_MMG3D ${LISTEXEC_MMG3D} ${LIBMMG3D_EXEC3} )
+      SET( LISTEXEC_MMG3D ${LISTEXEC_MMG3D} )
 
       IF ( CMAKE_Fortran_COMPILER)
         SET(LIBMMG3D_EXECFORTRAN_a ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_fortran_a)

@@ -258,14 +258,14 @@ int _MMG5_intvolmet(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,double s,
 
   // build metric at ma and mb points (Warn for ridge points) mp points and
   if ( !(MG_SIN(pp1->tag) || (MG_NOM & pp1->tag)) && (pp1->tag & MG_GEO) ) {
-    _MMG5_moymet(mesh,met,pt,m1);
+    if (!_MMG5_moymet(mesh,met,pt,m1)) return(0);
   } else {
     for ( l=0; l<6; ++l )
       m1[l] = met->m[6*ip1+l];
     //printf("\n\nm1 %e %e %e %e %e %e\n",m1[0],m1[1],m1[2],m1[3],m1[4],m1[5]);
   }
   if ( !(MG_SIN(pp2->tag)|| (MG_NOM & pp2->tag)) && (pp2->tag & MG_GEO) ) {
-    _MMG5_moymet(mesh,met,pt,m2);
+    if (!_MMG5_moymet(mesh,met,pt,m2)) return(0);
   } else {
     for ( l=0; l<6; ++l )
       m2[l] = met->m[6*ip2+l];
@@ -375,7 +375,7 @@ int _MMG5_interp4bar_ani(MMG5_pMesh mesh, MMG5_pSol met, int k, int ip,
       dm0[i] = met->m[met->size*pt->v[0]+i];
     }
   } else if(pp1->tag & MG_GEO) {
-    _MMG5_moymet(mesh,met,pt,&dm0[0]);
+    if (!_MMG5_moymet(mesh,met,pt,&dm0[0])) return(0);
   } else{
     for (i=0; i<6; i++) {
       dm0[i] = met->m[met->size*pt->v[0]+i];
@@ -387,7 +387,7 @@ int _MMG5_interp4bar_ani(MMG5_pMesh mesh, MMG5_pSol met, int k, int ip,
       dm1[i] = met->m[met->size*pt->v[1]+i];
     }
   } else if(pp2->tag & MG_GEO) {
-    _MMG5_moymet(mesh,met,pt,&dm1[0]);
+    if (!_MMG5_moymet(mesh,met,pt,&dm1[0])) return(0);
   } else{
     for (i=0; i<6; i++) {
       dm1[i] = met->m[met->size*pt->v[1]+i];
@@ -399,7 +399,7 @@ int _MMG5_interp4bar_ani(MMG5_pMesh mesh, MMG5_pSol met, int k, int ip,
       dm2[i] = met->m[met->size*pt->v[2]+i];
     }
   } else if(pp3->tag & MG_GEO) {
-    _MMG5_moymet(mesh,met,pt,&dm2[0]);
+    if (!_MMG5_moymet(mesh,met,pt,&dm2[0])) return(0);
   } else{
     for (i=0; i<6; i++) {
       dm2[i] = met->m[met->size*pt->v[2]+i];
@@ -411,7 +411,7 @@ int _MMG5_interp4bar_ani(MMG5_pMesh mesh, MMG5_pSol met, int k, int ip,
       dm3[i] = met->m[met->size*pt->v[3]+i];
     }
   } else if(pp4->tag & MG_GEO) {
-    _MMG5_moymet(mesh,met,pt,&dm3[0]);
+    if (!_MMG5_moymet(mesh,met,pt,&dm3[0])) return(0);
   } else{
     for (i=0; i<6; i++) {
       dm3[i] = met->m[met->size*pt->v[3]+i];

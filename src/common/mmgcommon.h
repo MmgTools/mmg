@@ -376,15 +376,18 @@ extern double _MMG5_caltri_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt);
 void   _MMG5_defUninitSize(MMG5_pMesh mesh,MMG5_pSol met, char ismet);
 void   _MMG5_displayHisto(MMG5_pMesh,int, double*, int, int, double, int, int,
                           double, double*, int*);
+int    _MMG5_elementWeight(MMG5_pMesh,MMG5_pSol,MMG5_pTria,MMG5_pPoint,
+                           _MMG5_Bezier*,double r[3][3],double gv[2]);
 void   _MMG5_fillDefmetregSys( int, MMG5_pPoint, int, _MMG5_Bezier,double r[3][3],
                                double *, double *, double *, double *);
-int    _MMG5_grad2metSurf(MMG5_pMesh, MMG5_pSol, MMG5_pTria, int);
+int    _MMG5_grad2metSurf(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int i);
 int    _MMG5_hashEdge(MMG5_pMesh mesh,_MMG5_Hash *hash,int a,int b,int k);
 int    _MMG5_hashGet(_MMG5_Hash *hash,int a,int b);
 int    _MMG5_hashNew(MMG5_pMesh mesh, _MMG5_Hash *hash,int hsiz,int hmax);
 int    _MMG5_intmetsavedir(MMG5_pMesh mesh, double *m,double *n,double *mr);
+int    _MMG5_intridmet(MMG5_pMesh,MMG5_pSol,int,int,double,double*,double*);
 int    _MMG5_mmgIntmet33_ani(double*,double*,double*,double);
-int    _MMG5_intextmet(MMG5_pMesh,MMG5_pSol,int,double *);
+int    _MMG5_mmgIntextmet(MMG5_pMesh,MMG5_pSol,int,double *,double *);
 double _MMG5_lenSurfEdg_ani(MMG5_pMesh mesh,MMG5_pSol met,int ip1,int ip2,char);
 double _MMG5_lenSurfEdg33_ani(MMG5_pMesh,MMG5_pSol,int,int,char);
 extern double _MMG5_lenSurfEdg_iso(MMG5_pMesh ,MMG5_pSol ,int ,int, char );
@@ -413,7 +416,7 @@ int    _MMG5_solveDefmetrefSys( MMG5_pMesh,MMG5_pPoint,int*, double r[3][3],
                                 double *, double *, double *, double *,
                                 double, double, double);
 double _MMG5_surftri_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt);
-double _MMG5_surftri33_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt);
+double _MMG5_surftri33_ani(MMG5_pMesh,MMG5_pTria,double*,double*,double*);
 double _MMG5_surftri_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt);
 extern int    _MMG5_sys33sym(double a[6], double b[3], double r[3]);
 int    _MMG5_unscaleMesh(MMG5_pMesh mesh,MMG5_pSol met);

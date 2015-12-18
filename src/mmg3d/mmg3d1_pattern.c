@@ -55,7 +55,7 @@ static int _MMG5_adpspl(MMG5_pMesh mesh,MMG5_pSol met, int* warn) {
   MMG5_pPoint     p0,p1,ppt;
   MMG5_pxPoint    pxp;
   double     dd,len,lmax,o[3],to[3],no1[3],no2[3],v[3];
-  int        k,ip,ip1,ip2,list[_MMG5_LMAX+2],ilist,ns,ref,ier;
+  int        k,ip,ip1,ip2,list[MMG3D_LMAX+2],ilist,ns,ref,ier;
   char       imax,tag,j,i,i1,i2,ifa0,ifa1;
 
   *warn=0;
@@ -268,7 +268,7 @@ static int _MMG5_adpcol(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pxTetra    pxt;
   MMG5_pPoint     p0,p1;
   double     len,lmin;
-  int        k,ip,iq,list[_MMG5_LMAX+2],ilist,nc;
+  int        k,ip,iq,list[MMG3D_LMAX+2],ilist,nc;
   char       imin,tag,j,i,i1,i2,ifa0,ifa1;
   int        ier;
 
@@ -294,6 +294,9 @@ static int _MMG5_adpcol(MMG5_pMesh mesh,MMG5_pSol met) {
       fprintf(stdout,"%s:%d: Warning: all edges of tetra %d are boundary and required\n",
               __FILE__,__LINE__,k);
     if ( lmin > _MMG5_LOPTS )  continue;
+
+    // Case of an internal tetra with 4 ridges vertices.
+    if ( lmin == 0 ) continue;
 
     ifa0 = _MMG5_ifar[imin][0];
     ifa1 = _MMG5_ifar[imin][1];
@@ -547,9 +550,12 @@ int _MMG5_mmg3d1_pattern(MMG5_pMesh mesh,MMG5_pSol met) {
     return(0);
   }
 
-  if ( mesh->info.hgrad > 0. && !_MMG5_gradsiz(mesh,met) ) {
-    fprintf(stdout,"  ## Gradation problem. Exit program.\n");
-    return(0);
+  if ( mesh->info.hgrad > 0. ) {
+    if ( mesh->info.imprim )   fprintf(stdout,"\n  -- GRADATION : %8f\n",exp(mesh->info.hgrad));
+    if ( !_MMG5_gradsiz(mesh,met) ) {
+      fprintf(stdout,"  ## Gradation problem. Exit program.\n");
+      return(0);
+    }
   }
 
   if ( !_MMG5_anatet(mesh,met,2,1) ) {

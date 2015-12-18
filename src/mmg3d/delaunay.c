@@ -253,7 +253,11 @@ int _MMG5_delone(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist) {
         pt1->v[i] = ip;
         pt1->qual = _MMG5_orcal(mesh,sol,iel);
         pt1->ref = mesh->tetra[old].ref;
-        assert( pt1->qual >= 1e-10 );
+
+        if ( pt1->qual < 1e-10 ) {
+          fprintf(stdout,"  ## Warning: creation of a very bad element.\n");
+        }
+
         iadr = (iel-1)*4 + 1;
         adjb = &mesh->adja[iadr];
         adjb[i] = adja[i];

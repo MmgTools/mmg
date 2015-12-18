@@ -82,7 +82,7 @@ int _MMG5_boulevolp (MMG5_pMesh mesh, int start, int ip, int * list){
         if ( pt1->v[j] == nump )  break;
       assert(j<4);
       /* overflow */
-      if ( ilist > _MMG5_LMAX-3 )  return(0);
+      if ( ilist > MMG3D_LMAX-3 )  return(0);
       list[ilist] = 4*k1+j;
       ilist++;
     }
@@ -283,7 +283,7 @@ int _MMG5_boulernm(MMG5_pMesh mesh, int start, int ip, int *ng, int *nr){
   _MMG5_Hash     hash;
   _MMG5_hedge    *ph;
   int            *adja,nump,ilist,base,cur,k,k1,ns;
-  int            hmax, list[_MMG5_LMAX+2];
+  int            hmax, list[MMG3D_LMAX+2];
   int            key,ia,ib,jj,a,b;
   char           j,l,i;
   unsigned char  ie;
@@ -386,7 +386,7 @@ int _MMG5_boulernm(MMG5_pMesh mesh, int start, int ip, int *ng, int *nr){
         if ( pt1->v[j] == nump )  break;
       assert(j<4);
       /* overflow */
-      if ( ilist > _MMG5_LMAX-3 )  return(0);
+      if ( ilist > MMG3D_LMAX-3 )  return(0);
       list[ilist] = 4*k1+j;
       ilist++;
     }
@@ -451,7 +451,7 @@ int _MMG5_boulesurfvolp(MMG5_pMesh mesh,int start,int ip,int iface,
     /* A boundary face has been hit : change travel edge */
     lists[(*ilists)] = 4*k+iopp;
     (*ilists)++;
-    if ( *ilists >= _MMG5_LMAX ) {
+    if ( *ilists >= MMG3D_LMAX ) {
       fprintf(stdout,"  ## Warning: problem in surface remesh process.");
       fprintf(stdout," Surface ball of point %d contains too many elts.\n",
               _MMG3D_indPt(mesh,nump));
@@ -537,7 +537,7 @@ int _MMG5_boulesurfvolp(MMG5_pMesh mesh,int start,int ip,int iface,
       assert(j<4);
 
       /* overflow */
-      if ( *ilistv > _MMG5_LMAX-3 ) {
+      if ( *ilistv > MMG3D_LMAX-3 ) {
         fprintf(stdout,"  ## Warning: problem in remesh process.");
         fprintf(stdout," Volumic ball of point %d contains too many elts.\n",
                 _MMG3D_indPt(mesh,nump));
@@ -582,7 +582,7 @@ int _MMG5_bouletrid(MMG5_pMesh mesh,int start,int iface,int ip,int *il1,int *l1,
   MMG5_pxTetra         pxt;
   MMG5_pPoint          ppt;
   int                  k,*adja,*ilist1,*ilist2,*list1,*list2,aux;
-  int                  lists[_MMG5_LMAX+2], ilists;
+  int                  lists[MMG3D_LMAX+2], ilists;
   int                  idp,na, nb, base, iopp, ipiv, piv, fstart, nvstart, adj;
   int                  i,ifac,idx,idx2,idx_tmp,i1,ipa,ipb, isface;
   double               *n1,*n2,nt[3],ps1,ps2;
@@ -643,7 +643,7 @@ int _MMG5_bouletrid(MMG5_pMesh mesh,int start,int iface,int ip,int *il1,int *l1,
     /* A boundary face has been hit : change travel edge */
     lists[ilists] = 4*k+iopp;
     ilists++;
-    if ( ilists >= _MMG5_LMAX ) {
+    if ( ilists >= MMG3D_LMAX ) {
       fprintf(stdout,"  ## Warning: problem in surface remesh process.");
       fprintf(stdout," Surface ball of point %d contains too many elts.\n",
               _MMG3D_indPt(mesh,idp));
@@ -730,7 +730,7 @@ int _MMG5_bouletrid(MMG5_pMesh mesh,int start,int iface,int ip,int *il1,int *l1,
     assert(pt->xt);
     pxt     = &mesh->xtetra[pt->xt];
 
-    if ( (*ilist2) > _MMG5_LMAX-2 )  return(0);
+    if ( (*ilist2) > MMG3D_LMAX-2 )  return(0);
     list2[(*ilist2)] = 4*k+ifac;
     (*ilist2)++;
 
@@ -756,7 +756,7 @@ int _MMG5_bouletrid(MMG5_pMesh mesh,int start,int iface,int ip,int *il1,int *l1,
     assert(pt->xt);
     pxt     = &mesh->xtetra[pt->xt];
 
-    if ( (*ilist1) > _MMG5_LMAX-2 )  return(0);
+    if ( (*ilist1) > MMG3D_LMAX-2 )  return(0);
     list1[(*ilist1)] = 4*k+ifac;
     (*ilist1)++;
 
@@ -969,7 +969,7 @@ int _MMG5_coquil(MMG5_pMesh mesh,int start,int ia,int * list) {
     list[ilist] = 6*adj +i;
     ilist++;
     /* overflow */
-    if ( ilist > _MMG5_LMAX-3 ) {
+    if ( ilist > MMG3D_LMAX-3 ) {
       fprintf(stdout,"  ## Warning: problem in remesh process.");
       fprintf(stdout," Coquil of edge %d-%d contains too many elts.\n",
               _MMG3D_indPt(mesh,na),_MMG3D_indPt(mesh,nb));
@@ -1004,7 +1004,7 @@ int _MMG5_coquil(MMG5_pMesh mesh,int start,int ia,int * list) {
   list[ilist] = 6*adj + i;
   ilist++;
   /* overflow */
-  if ( ilist > _MMG5_LMAX-3 ) {
+  if ( ilist > MMG3D_LMAX-3 ) {
     fprintf(stdout,"  ## Warning: problem in remesh process.");
     fprintf(stdout," Coquil of edge %d-%d contains too many elts.\n",
             _MMG3D_indPt(mesh,na),_MMG3D_indPt(mesh,nb));
@@ -1037,7 +1037,7 @@ int _MMG5_coquil(MMG5_pMesh mesh,int start,int ia,int * list) {
     list[ilist] = 6*adj +i;
     ilist++;
     /* overflow */
-    if ( ilist > _MMG5_LMAX-2 ) {
+    if ( ilist > MMG3D_LMAX-2 ) {
       fprintf(stdout,"  ## Warning: problem in surface remesh process.");
       fprintf(stdout," Coquil of edge %d-%d contains too many elts.\n",
               _MMG3D_indPt(mesh,na),_MMG3D_indPt(mesh,nb));
@@ -1249,7 +1249,7 @@ int _MMG5_coquilface(MMG5_pMesh mesh,int start,int ia,int *list,int *it1,int *it
     list[ilist] = 6*pradj +i;
     (ilist)++;
     /* overflow */
-    if ( ilist > _MMG5_LMAX-2 ) {
+    if ( ilist > MMG3D_LMAX-2 ) {
       fprintf(stdout,"  ## Warning: problem in surface remesh process.");
       fprintf(stdout," Coquil of edge %d-%d contains too many elts.\n",
               _MMG3D_indPt(mesh,na),_MMG3D_indPt(mesh,nb));
@@ -1299,7 +1299,7 @@ int _MMG5_coquilface(MMG5_pMesh mesh,int start,int ia,int *list,int *it1,int *it
     list[ilist] = 6*pradj +i;
     ilist++;
     /* overflow */
-    if ( ilist > _MMG5_LMAX-2 ) {
+    if ( ilist > MMG3D_LMAX-2 ) {
       fprintf(stdout,"  ## Warning: problem in surface remesh process.");
       fprintf(stdout," Coquil of edge %d-%d contains too many elts.\n",
               _MMG3D_indPt(mesh,na),_MMG3D_indPt(mesh,nb));

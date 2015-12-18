@@ -41,33 +41,45 @@
  */
 void MMG3D_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
   if ( met->size == 1 || ( met->size == 3 && mesh->info.lag >= 0 ) ) {
-    _MMG5_caltet     = _MMG5_caltet_iso;
-    _MMG5_caltri     = _MMG5_caltri_iso;
-    _MMG5_lenedg     = _MMG5_lenedg_iso;
-    MMG3D_lenedgCoor  = _MMG5_lenedgCoor_iso;
-    _MMG5_intmet     = _MMG5_intmet_iso;
-    _MMG5_lenedgspl  = _MMG5_lenedg_iso;
-    _MMG5_interp4bar = _MMG5_interp4bar_iso;
-    _MMG5_defsiz     = _MMG3D_defsiz_iso;
-    _MMG5_gradsiz    = _MMG5_gradsiz_iso;
+    _MMG5_caltet          = _MMG5_caltet_iso;
+    _MMG5_caltri          = _MMG5_caltri_iso;
+    _MMG5_lenedg          = _MMG5_lenedg_iso;
+    MMG3D_lenedgCoor      = _MMG5_lenedgCoor_iso;
+    _MMG5_lenSurfEdg      = _MMG5_lenSurfEdg_iso;
+    _MMG5_intmet          = _MMG5_intmet_iso;
+    _MMG5_lenedgspl       = _MMG5_lenedg_iso;
+    _MMG5_movintpt        = _MMG5_movintpt_iso;
+    _MMG5_movbdyregpt     = _MMG5_movbdyregpt_iso;
+    _MMG5_movbdyrefpt     = _MMG5_movbdyrefpt_iso;
+    _MMG5_movbdynompt     = _MMG5_movbdynompt_iso;
+    _MMG5_movbdyridpt     = _MMG5_movbdyridpt_iso;
+    _MMG5_interp4bar      = _MMG5_interp4bar_iso;
+    _MMG5_defsiz          = _MMG3D_defsiz_iso;
+    _MMG5_gradsiz         = _MMG5_gradsiz_iso;
 #ifndef PATTERN
-    _MMG5_cavity     = _MMG5_cavity_iso;
-    _MMG5_buckin     = _MMG5_buckin_iso;
+    _MMG5_cavity          = _MMG5_cavity_iso;
+    _MMG5_buckin          = _MMG5_buckin_iso;
 #endif
   }
   else if ( met->size == 6 ) {
-    _MMG5_caltet     = _MMG5_caltet_ani;
-    _MMG5_caltri     = _MMG5_caltri_ani;
-    _MMG5_lenedg     = _MMG5_lenedg_ani;
-    MMG3D_lenedgCoor  = _MMG5_lenedgCoor_ani;
-    _MMG5_intmet     = _MMG5_intmet_ani;
-    _MMG5_lenedgspl  = _MMG5_lenedg_ani;
-    _MMG5_interp4bar = _MMG5_interp4bar_ani;
-    _MMG5_defsiz     = _MMG3D_defsiz_ani;
-    _MMG5_gradsiz    = _MMG5_gradsiz_ani;
+    _MMG5_caltet         = _MMG5_caltet_ani;
+    _MMG5_caltri         = _MMG5_caltri_ani;
+    _MMG5_lenedg         = _MMG5_lenedg_ani;
+    MMG3D_lenedgCoor     = _MMG5_lenedgCoor_ani;
+    _MMG5_lenSurfEdg     = _MMG5_lenSurfEdg_ani;
+    _MMG5_intmet         = _MMG5_intmet_ani;
+    _MMG5_lenedgspl      = _MMG5_lenedg_ani;
+    _MMG5_movintpt       = _MMG5_movintpt_ani;
+   _MMG5_movbdyregpt     = _MMG5_movbdyregpt_ani;
+   _MMG5_movbdyrefpt     = _MMG5_movbdyrefpt_ani;
+   _MMG5_movbdynompt     = _MMG5_movbdynompt_ani;
+   _MMG5_movbdyridpt     = _MMG5_movbdyridpt_ani;
+    _MMG5_interp4bar     = _MMG5_interp4bar_ani;
+    _MMG5_defsiz         = _MMG3D_defsiz_ani;
+    _MMG5_gradsiz        = _MMG5_gradsiz_ani;
 #ifndef PATTERN
-    _MMG5_cavity     = _MMG5_cavity_ani;
-    _MMG5_buckin     = _MMG5_buckin_ani;
+    _MMG5_cavity         = _MMG5_cavity_ani;
+    _MMG5_buckin         = _MMG5_buckin_ani;
 #endif
   }
 }
@@ -76,14 +88,8 @@ void MMG3D_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
  * \brief Return adjacent elements of a tetrahedron.
  * \param mesh pointer toward the mesh structure.
  * \param kel tetrahedron index.
- * \param v0 pointer toward the index of the adjacent element of \a kel through
- * its face number 0.
- * \param v1 pointer toward the index of the adjacent element of \a kel through
- * its face number 1.
- * \param v2 pointer toward the index of the adjacent element of \a kel through
- * its face number 2.
- * \param v3 pointer toward the index of the adjacent element of \a kel through
- * its face number 3.
+ * \param listet pointer toward the table of the 4 adjacent tetra to \a kel.
+ * (the index is 0 if there is no adjacent)
  * \return 1.
  *
  * Find the indices of the 4 adjacent elements of tetrahedron \a
@@ -91,17 +97,17 @@ void MMG3D_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
  * (so we are on a boundary face).
  *
  */
-int MMG3D_Get_adjaTet(MMG5_pMesh mesh, int kel, int *v0, int *v1, int *v2, int *v3) {
+int MMG3D_Get_adjaTet(MMG5_pMesh mesh, int kel, int listet[4]) {
 
   if ( ! mesh->adja ) {
     if (! MMG3D_hashTetra(mesh, 0))
       return(0);
   }
 
-  (*v0) = mesh->adja[4*(kel-1)+1]/4;
-  (*v1) = mesh->adja[4*(kel-1)+2]/4;
-  (*v2) = mesh->adja[4*(kel-1)+3]/4;
-  (*v3) = mesh->adja[4*(kel-1)+4]/4;
+  listet[0] = mesh->adja[4*(kel-1)+1]/4;
+  listet[1] = mesh->adja[4*(kel-1)+2]/4;
+  listet[2] = mesh->adja[4*(kel-1)+3]/4;
+  listet[3] = mesh->adja[4*(kel-1)+4]/4;
 
   return(1);
 }
@@ -273,15 +279,15 @@ int MMG3D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
         else if ( !strcmp(argv[i],"-ls") ) {
           if ( !MMG3D_Set_iparameter(mesh,met,MMG3D_IPARAM_iso,1) )
             exit(EXIT_FAILURE);
-          if ( ++i < argc && isdigit(argv[i][0]) ) {
-            if ( !MMG3D_Set_dparameter(mesh,met,MMG3D_DPARAM_ls,atof(argv[i])) )
-              exit(EXIT_FAILURE);
-          }
-          else if ( i == argc ) {
-            fprintf(stderr,"Missing argument option %c%c\n",argv[i-1][1],argv[i-1][2]);
-            MMG3D_usage(argv[0]);
-          }
-          else i--;
+          /* if ( ++i < argc && isdigit(argv[i][0]) ) { */
+          /*   if ( !MMG3D_Set_dparameter(mesh,met,MMG3D_DPARAM_ls,atof(argv[i])) ) */
+          /*     exit(EXIT_FAILURE); */
+          /* } */
+          /* else if ( i == argc ) { */
+          /*   fprintf(stderr,"Missing argument option %c%c\n",argv[i-1][1],argv[i-1][2]); */
+          /*   MMG3D_usage(argv[0]); */
+          /* } */
+          /* else i--; */
         }
         break;
       case 'm':  /* memory */
@@ -737,8 +743,16 @@ int MMG5_Get_adjaTet(MMG5_pMesh mesh, int kel, int *v0, int *v1, int *v2, int *v
   printf("  ##  MMG5_Get_adjaTet: "
          "MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
         " be removed soon\n." );
+  int listet[4],ier;
 
-  return(MMG3D_Get_adjaTet(mesh,kel,v0,v1,v2,v3));
+  ier = MMG3D_Get_adjaTet(mesh,kel,listet);
+  if (ier!=1) return ier;
+
+  *v0=listet[0];
+  *v1=listet[1];
+  *v2=listet[2];
+  *v3=listet[3];
+  return 1;
 }
 
 void MMG5_usage(char *prog) {
@@ -794,7 +808,7 @@ int MMG5_mmg3dcheck(MMG5_pMesh mesh,MMG5_pSol met,double critmin, double lmin,
 
 void MMG5_searchqua(MMG5_pMesh mesh,MMG5_pSol met,double critmin, int *eltab,
                     char metRidTyp) {
-  printf("  ## MMG5_searchqu: "
+  printf("  ## MMG5_searchqua: "
          "MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
         " be removed soon\n." );
 
@@ -809,4 +823,71 @@ int MMG5_searchlen(MMG5_pMesh mesh, MMG5_pSol met, double lmin,
         " be removed soon\n." );
 
   return(MMG3D_searchlen(mesh, met,  lmin,lmax,eltab,metRidTyp));
+}
+
+/**
+ * \param mesh pointer toward the mesh structure
+ * \param met pointer toward the sol structure
+ * \return 1 if success
+ *
+ * Compute isotropic size map according to the mean of the length of the edges
+ * passing through a point.
+ *
+ */
+int MMG3D_DoSol(MMG5_pMesh mesh,MMG5_pSol met) {
+    MMG5_pTetra     pt;
+    MMG5_pPoint     p1,p2;
+    double     ux,uy,uz,dd;
+    int        i,k,ia,ib,ipa,ipb;
+    int       *mark;
+
+    _MMG5_SAFE_CALLOC(mark,mesh->np+1,int);
+
+    /* Memory alloc */
+    met->np     = mesh->np;
+    met->npmax  = mesh->npmax;
+    met->size   = 1;
+    met->dim    = mesh->dim;
+
+    _MMG5_ADD_MEM(mesh,(met->size*(met->npmax+1))*sizeof(double),"solution",return(0));
+    _MMG5_SAFE_CALLOC(met->m,met->size*(met->npmax+1),double);
+
+    /* internal edges */
+    for (k=1; k<=mesh->ne; k++) {
+        pt = &mesh->tetra[k];
+        if ( !pt->v[0] )  continue;
+
+        /* internal edges */
+        for (i=0; i<6; i++) {
+            ia  = _MMG5_iare[i][0];
+            ib  = _MMG5_iare[i][1];
+            ipa = pt->v[ia];
+            ipb = pt->v[ib];
+            p1  = &mesh->point[ipa];
+            p2  = &mesh->point[ipb];
+
+            ux  = p1->c[0] - p2->c[0];
+            uy  = p1->c[1] - p2->c[1];
+            uz  = p1->c[2] - p2->c[2];
+            dd  = sqrt(ux*ux + uy*uy + uz*uz);
+
+            met->m[ipa] += dd;
+            mark[ipa]++;
+            met->m[ipb] += dd;
+            mark[ipb]++;
+        }
+    }
+
+    /* vertex size */
+    for (k=1; k<=mesh->np; k++) {
+        p1 = &mesh->point[k];
+        if ( !mark[k] ) {
+            met->m[k] = mesh->info.hmax;
+            continue;
+        }
+        else
+            met->m[k] = MG_MIN(mesh->info.hmax,MG_MAX(mesh->info.hmin,met->m[k] / (double)mark[k]));
+    }
+    _MMG5_SAFE_FREE(mark);
+    return(1);
 }

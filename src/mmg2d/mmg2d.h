@@ -36,10 +36,6 @@
 #include "libmmg2d.h"
 
 /* constantes */
-#define M_VER   "2.0"
-#define M_REL   "SEPTEMBER 2014"
-#define M_CPY   "Copyright (c) LJLL/IMB, 2007-"
-#define M_STR   "&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&"
 
 #define M_MAX(a,b) (((a) > (b)) ? (a) : (b))
 #define M_MIN(a,b) (((a) < (b)) ? (a) : (b))
@@ -62,14 +58,13 @@
 #define M_NUL      (1 << 6)
 #define M_BDRY     (1 << 1)
 #define M_SD       (1 << 5)
-#define M_CORNER   (1 << 4) 
+#define M_CORNER   (1 << 4)
 #define M_REQUIRED (1 << 3)
 #define M_MOVE     (1 << 2)
 
 #define _MMG2D_NPMAX   50000
 #define _MMG2D_NEDMAX  100000
 #define _MMG2D_NEMAX   100000
-#define LMAX   1024
 
 #define M_VOK(ppt)    (ppt && (ppt->tag < M_NUL))
 #define M_EOK(pt)     (pt && (pt->v[0] > 0))
@@ -195,7 +190,7 @@ static const unsigned int MMG2_inxt[5] = {1,2,0,1,2};
 
 /** Reallocation of point table and sol table and creation
     of point ip with coordinates o and tag tag*/
-#define _MMG5_POINT_REALLOC(mesh,sol,ip,wantedGap,law,o,tag ) do        \
+#define _MMG2D_POINT_REALLOC(mesh,sol,ip,wantedGap,law,o,tag ) do        \
   {                                                                     \
     int klink;                                                          \
                                                                         \

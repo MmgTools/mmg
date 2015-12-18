@@ -54,7 +54,7 @@ int MMG2_boulep(MMG5_pMesh mesh, int ifirst, int iploc, int * list) {
   i    = inxt[voy];
 
   while ( iel && (iel != ifirst) && mesh->tria[iel].v[0]){
-    if(ilist==LMAX-1) return(0);
+    if(ilist==MMG2D_LMAX-1) return(0);
 	  list[++ilist] = 3*iel + i;   
 	  assert( ip==(&mesh->tria[iel])->v[i] );			
 	  iadr = 3*(iel-1) + 1;
@@ -72,7 +72,7 @@ int MMG2_boulep(MMG5_pMesh mesh, int ifirst, int iploc, int * list) {
     i    = iprev[voy];
     
     while ( iel && (iel != ifirst) && mesh->tria[iel].v[0]) {
-      if(ilist==LMAX-1) return(0);
+      if(ilist==MMG2D_LMAX-1) return(0);
 	    list[++ilist] = 3*iel + i;
 	    assert( ip==(&mesh->tria[iel])->v[i] );			
 	    iadr = 3*(iel-1) + 1;

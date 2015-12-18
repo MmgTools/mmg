@@ -807,7 +807,7 @@ int MMG2_mmg2d2(MMG5_pMesh mesh,MMG5_pSol sol) {
   ip1 = _MMG2D_newPt(mesh,c,0);
   if ( !ip1 ) {
     /* reallocation of point table */
-    _MMG5_POINT_REALLOC(mesh,sol,ip1,mesh->gap,
+    _MMG2D_POINT_REALLOC(mesh,sol,ip1,mesh->gap,
                         printf("  ## Error: unable to allocate a new point\n");
                         _MMG5_INCREASE_MEM_MESSAGE();
                         memlack=1;
@@ -821,7 +821,7 @@ int MMG2_mmg2d2(MMG5_pMesh mesh,MMG5_pSol sol) {
   ip2 = _MMG2D_newPt(mesh,c,0);
   if ( !ip2 ) {
     /* reallocation of point table */
-    _MMG5_POINT_REALLOC(mesh,sol,ip2,mesh->gap,
+    _MMG2D_POINT_REALLOC(mesh,sol,ip2,mesh->gap,
                         printf("  ## Error: unable to allocate a new point\n");
                         _MMG5_INCREASE_MEM_MESSAGE();
                         memlack=1;
@@ -835,7 +835,7 @@ int MMG2_mmg2d2(MMG5_pMesh mesh,MMG5_pSol sol) {
   ip3 = _MMG2D_newPt(mesh,c,0);
   if ( !ip3 ) {
     /* reallocation of point table */
-    _MMG5_POINT_REALLOC(mesh,sol,ip3,mesh->gap,
+    _MMG2D_POINT_REALLOC(mesh,sol,ip3,mesh->gap,
                         printf("  ## Error: unable to allocate a new point\n");
                         _MMG5_INCREASE_MEM_MESSAGE();
                         memlack=1;
@@ -850,7 +850,7 @@ int MMG2_mmg2d2(MMG5_pMesh mesh,MMG5_pSol sol) {
   ip4 = _MMG2D_newPt(mesh,c,0);
   if ( !ip4 ) {
     /* reallocation of point table */
-    _MMG5_POINT_REALLOC(mesh,sol,ip4,mesh->gap,
+    _MMG2D_POINT_REALLOC(mesh,sol,ip4,mesh->gap,
                         printf("  ## Error: unable to allocate a new point\n");
                         _MMG5_INCREASE_MEM_MESSAGE();
                         memlack=1;

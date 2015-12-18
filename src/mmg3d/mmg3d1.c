@@ -414,7 +414,7 @@ char _MMG5_chkedg(MMG5_pMesh mesh,MMG5_Tria *pt,char ori) {
 int _MMG5_swpmsh(MMG5_pMesh mesh,MMG5_pSol met,_MMG5_pBucket bucket, int typchk) {
   MMG5_pTetra   pt;
   MMG5_pxTetra  pxt;
-  int      k,it,list[_MMG5_LMAX+2],ilist,ret,it1,it2,ns,nns,maxit;
+  int      k,it,list[MMG3D_LMAX+2],ilist,ret,it1,it2,ns,nns,maxit;
   char     i,j,ia,ier;
 
   it = nns = 0;
@@ -479,7 +479,7 @@ int _MMG5_swptet(MMG5_pMesh mesh,MMG5_pSol met,double crit,
                  _MMG5_pBucket bucket,int typchk) {
   MMG5_pTetra   pt;
   MMG5_pxTetra  pxt;
-  int      list[_MMG5_LMAX+2],ilist,k,it,nconf,maxit,ns,nns,ier;
+  int      list[MMG3D_LMAX+2],ilist,k,it,nconf,maxit,ns,nns,ier;
   char     i;
 
   maxit = 2;
@@ -532,7 +532,7 @@ int _MMG5_movtet(MMG5_pMesh mesh,MMG5_pSol met,int maxitin) {
   MMG5_pPoint        ppt;
   MMG5_pxTetra       pxt;
   double        *n;
-  int           i,k,ier,nm,nnm,ns,lists[_MMG5_LMAX+2],listv[_MMG5_LMAX+2],ilists,ilistv,it;
+  int           i,k,ier,nm,nnm,ns,lists[MMG3D_LMAX+2],listv[MMG3D_LMAX+2],ilists,ilistv,it;
   int           improve;
   unsigned char j,i0,base;
   int           internal,maxit;
@@ -672,7 +672,7 @@ static int _MMG5_coltet(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
   MMG5_pxTetra    pxt;
   MMG5_pPoint     p0,p1;
   double     ll,ux,uy,uz,hmi2;
-  int        k,nc,list[_MMG5_LMAX+2],ilist,base,nnm;
+  int        k,nc,list[MMG3D_LMAX+2],ilist,base,nnm;
   char       i,j,tag,ip,iq,isnm;
   int        ier;
 
@@ -711,7 +711,8 @@ static int _MMG5_coltet(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
         }
         else if ( typchk == 2 ) {
           ll = _MMG5_lenedg(mesh,met,_MMG5_iarf[i][j],pt);
-
+          // Case of an internal tetra with 4 ridges vertices.
+          if ( ll == 0 ) continue;
           if ( ll > _MMG5_LSHRT )  continue;
         }
 
@@ -845,7 +846,8 @@ _MMG5_anatetv(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
         }
         else if ( typchk == 2 ) {
           ll = _MMG5_lenedg(mesh,met,i,pt);
-
+          // Case of an internal tetra with 4 ridges vertices.
+          if ( ll == 0 ) continue;
           if ( ll > _MMG5_LLONG )
             ip = _MMG5_hashGet(&hash,ip1,ip2);
         }
@@ -1038,6 +1040,8 @@ _MMG5_anatets(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
         ip1 = pt->v[i1];
         ip2 = pt->v[i2];
         len = _MMG5_lenedg(mesh,met,ia,pt);
+        // Case of an internal tetra with 4 ridges vertices.
+        if ( len == 0 ) continue;
         if ( len > _MMG5_LLONG )  MG_SET(pt->flag,ia);
         /* Treat here the ridges coming from a corner (we can not do that after
          * because the corner don't have xpoints) */

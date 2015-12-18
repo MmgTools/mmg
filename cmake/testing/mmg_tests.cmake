@@ -45,7 +45,7 @@ FOREACH(EXEC ${LISTEXEC_MMG})
 
   ADD_TEST(NAME TorusholesAni_${EXEC}
   COMMAND ${EXEC} -d -hgrad 1.15
-  ${MMG_CI_TESTS}/TorusholesAni/torusholes.meshb
+  ${MMG_CI_TESTS}/TorusholesAni/torusholes
   -out ${MMG_CI_TESTS}/TorusholesAni/torusholes.o.meshb)
   ##############################################################################
   #####

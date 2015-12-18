@@ -107,7 +107,8 @@ inline void _MMG5_bezierEdge(MMG5_pMesh mesh,int i0,int i1,
           ps1 = ps2;
         }
       }
-      else if ( MG_REF & p0->tag ) {
+      else if ( (MG_REF & p0->tag) || (MG_BDY & p0->tag) ) {
+        // if MG_BDY, we are in mmg3d: the normal is stored in the xPoint
         n1 = &mesh->xpoint[p0->xp].n1[0];
         ps1 = ux*n1[0] + uy*n1[1] + uz*n1[2];
       }
@@ -136,7 +137,8 @@ inline void _MMG5_bezierEdge(MMG5_pMesh mesh,int i0,int i1,
           ps1 = ps2;
         }
       }
-      else if ( MG_REF & p1->tag ) {
+      else if ( (MG_REF & p1->tag ) || (MG_BDY & p1->tag) ) {
+        // if MG_BDY, we are in mmg3d: the normal is stored in the xPoint
         n1 = &mesh->xpoint[p1->xp].n1[0];
         ps1 = -(ux*n1[0] + uy*n1[1] + uz*n1[2]);
       }

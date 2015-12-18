@@ -43,10 +43,10 @@
 /**
  * Pack the mesh \a mesh and its associated metric \a met and return \a val.
  */
-#define _MMG5_RETURN_AND_PACK(mesh,met,val)do       \
-  {                                                 \
-    _MMGS_packMesh(mesh,met);                        \
-    return(val);                                    \
+#define _MMG5_RETURN_AND_PACK(mesh,met,val)do                     \
+  {                                                               \
+    if ( !_MMGS_packMesh(mesh,met) ) return(MMG5_STRONGFAILURE);  \
+    return(val);                                                  \
   }while(0)
 
 /**
@@ -96,7 +96,6 @@ static inline
 int _MMGS_packMesh(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTria    pt,ptnew;
   MMG5_pPoint   ppt,pptnew;
-  MMG5_hgeom   *ph;
   int           np,nc,nr, k,nt,nbl,imet,imetnew,i,na,jel;
   int           iadr,iadrnew,iadrv,*adjav,*adja,*adjanew,voy;
   char          i1,i2;
@@ -234,8 +233,6 @@ int _MMGS_packMesh(MMG5_pMesh mesh,MMG5_pSol met) {
     return(0);
   }
 
-  _MMGS_Free_topoTables(mesh);
-
   if ( mesh->info.imprim ) {
     fprintf(stdout,"     NUMBER OF VERTICES   %8d   CORNERS %8d\n",mesh->np,nc);
     if ( mesh->na )
@@ -243,6 +240,17 @@ int _MMGS_packMesh(MMG5_pMesh mesh,MMG5_pSol met) {
     fprintf(stdout,"     NUMBER OF TRIANGLES  %8d\n",mesh->nt);
   }
   return(1);
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the sol structure.
+ *
+ * Set function pointers for saveMesh.
+ *
+ */
+void MMGS_Set_saveFunc(MMG5_pMesh mesh) {
+  _MMGS_saveMeshinternal = _MMGS_saveAllMesh;
 }
 
 /**
@@ -267,6 +275,10 @@ int MMGS_mmgslib(MMG5_pMesh mesh,MMG5_pSol met)
   fprintf(stdout,"     %s %s\n",__DATE__,__TIME__);
 
   _MMGS_Set_commonFunc();
+
+  /** Free topologic tables (adja, xpoint, xtetra) resulting from a previous
+   * run */
+  _MMGS_Free_topoTables(mesh);
 
   /* trap exceptions */
   signal(SIGABRT,_MMG5_excfun);

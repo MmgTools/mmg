@@ -105,7 +105,7 @@ int _MMG5_mmg3dChkmsh(MMG5_pMesh mesh,int severe,int base) {
   /* commentated part variables
      MMG5_pTetra        pt0;
      MMG5_xTetra       pxt0,pxt1,pxt2;
-     int           ilists,ilistv,lists[_MMG5_LMAX+2],listv[_MMG5_LMAX+2];
+     int           ilists,ilistv,lists[MMG3D_LMAX+2],listv[MMG3D_LMAX+2];
      int           ielprv,ielnxt,l,nump,np,nq;
      unsigned char j,iface,ifaceprv,ifacenxt,indp,indpprv,indpnxt,tag0,tag1,tag2,ia;
   */
@@ -510,7 +510,7 @@ int _MMG5_chkfemtopo(MMG5_pMesh mesh) {
   MMG5_pTetra      pt,pt1;
   MMG5_pxTetra     pxt;
   MMG5_pPoint      p0,p1;
-  int         k,nf,ntet,ned,np,ischk,ilist,list[_MMG5_LMAX+2],l,np1,npchk,iel;
+  int         k,nf,ntet,ned,np,ischk,ilist,list[MMG3D_LMAX+2],l,np1,npchk,iel;
   char        i0,j,i,i1,ia;
 
   ntet = ned = 0;

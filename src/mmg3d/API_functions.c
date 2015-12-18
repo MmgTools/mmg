@@ -136,7 +136,7 @@ void MMG3D_Init_mesh(MMG5_pMesh *mesh, MMG5_pSol *sol, MMG5_pSol *disp ) {
     _MMG3D_Init_woalloc_mesh(*mesh,*sol,NULL);
 
   /* set pointer to save the mesh*/
-  _MMG3D_saveMeshinternal = _MMG5_saveLibraryMesh;
+  _MMG3D_saveMeshinternal = _MMG3D_saveAllMesh;
 
   return;
 }

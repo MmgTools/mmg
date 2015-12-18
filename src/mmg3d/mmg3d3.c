@@ -153,7 +153,7 @@ static int _MMG5_spllag(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int itdeg, 
   MMG5_pPoint     p0,p1,ppt;
   double     dd,len,lmax,o[3],hma2;
   double    *m1,*m2,*mp;
-  int        k,ip,ip1,ip2,list[_MMG5_LMAX+2],ilist,ns,ier,iadr;
+  int        k,ip,ip1,ip2,list[MMG3D_LMAX+2],ilist,ns,ier,iadr;
   char       imax,i,i1,i2;
   
   *warn=0;
@@ -271,7 +271,7 @@ static int _MMG5_spllag(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int itdeg, 
 int _MMG5_swptetlag(MMG5_pMesh mesh,MMG5_pSol met,double crit,_MMG5_pBucket bucket,int itdeg) {
   MMG5_pTetra   pt;
   MMG5_pxTetra  pxt;
-  int      list[_MMG5_LMAX+2],ilist,k,it,nconf,maxit,ns,nns,ier;
+  int      list[MMG3D_LMAX+2],ilist,k,it,nconf,maxit,ns,nns,ier;
   char     i;
   
   maxit = 2;
@@ -319,7 +319,7 @@ int _MMG5_swptetlag(MMG5_pMesh mesh,MMG5_pSol met,double crit,_MMG5_pBucket buck
 int _MMG5_movtetlag(MMG5_pMesh mesh,MMG5_pSol met,int itdeg) {
   MMG5_pTetra        pt;
   MMG5_pPoint        ppt;
-  int           k,ier,nm,nnm,ns,listv[_MMG5_LMAX+2],ilistv,it;
+  int           k,ier,nm,nnm,ns,listv[MMG3D_LMAX+2],ilistv,it;
   unsigned char i,base;
   int           maxit;
   
@@ -349,7 +349,7 @@ int _MMG5_movtetlag(MMG5_pMesh mesh,MMG5_pSol met,int itdeg) {
         ilistv = _MMG5_boulevolp(mesh,k,i,listv);
         if ( !ilistv )  continue;
         
-        ier = _MMG5_movintpt(mesh,met,listv,ilistv,0);
+        ier = _MMG5_movintpt_iso(mesh,met,listv,ilistv,0);
           
         if ( ier ) {
           nm++;
@@ -380,7 +380,7 @@ static int _MMG5_coltetlag(MMG5_pMesh mesh,MMG5_pSol met,int itdeg) {
   MMG5_pTetra     pt;
   MMG5_pPoint     p0,p1;
   double     ll,ux,uy,uz,hmi2;
-  int        k,nc,list[_MMG5_LMAX+2],ilist,base,nnm;
+  int        k,nc,list[MMG3D_LMAX+2],ilist,base,nnm;
   char       i,j,tag,ip,iq,isnm;
   int        ier;
   

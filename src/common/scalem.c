@@ -85,8 +85,10 @@ int _MMG5_boundingBox(MMG5_pMesh mesh) {
 int _MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pPoint    ppt;
   double         dd,d1;
-  int            k,sethmin,sethmax;
+  int            k,i,sethmin,sethmax;
   MMG5_pPar      par;
+  double         *m;
+  double         lambda[3],v[3][3];
 
 
   /* compute bounding box */
@@ -146,7 +148,30 @@ int _MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met) {
       }
     } else { //met->size==6
       d1 = 1.0 / (dd*dd);
-      for (k=6; k<6*(mesh->np+1); k++)  met->m[k] *= d1;
+      for (k=1; k<mesh->np+1; k++) {
+        for ( i=0; i<met->size; ++i ) {
+          met->m[6*k+i] *= d1;
+        }
+
+        m    = &met->m[6*k];
+        /*calcul du log de M*/
+        if ( !_MMG5_eigenv(1,m,lambda,v) ) {
+          printf("  ## ERROR: WRONG METRIC AT POINT %d -- \n",k);
+          return(0);
+        }
+        for (i=0; i<3; i++) {
+          if(lambda[i]<=0) {
+            printf("  ## ERROR: WRONG METRIC AT POINT %d -- eigenvalue :"
+                   " %e %e %e -- det %e\n",k,lambda[0],lambda[1],lambda[2],
+                   m[0]*(m[3]*m[5]-m[4]*m[4])-m[1]*(m[1]*m[5]-m[2]*m[4])+
+                   m[2]*(m[1]*m[4]-m[2]*m[3]));
+            printf("WRONG METRIC AT POINT %d -- metric %e %e %e %e %e %e\n",
+                   k,m[0],m[1],m[2],m[3],m[4],m[5]);
+            return(0);
+          }
+          lambda[i] = log(lambda[i]);
+        }
+      }
     }
   }
 

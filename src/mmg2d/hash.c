@@ -45,9 +45,17 @@ int MMG2_hashel(MMG5_pMesh mesh) {
   unsigned char  *hvoy,i,ii,i1,i2;
   unsigned int    key;
 
+  if ( mesh->adja )  return(1);
   if ( !mesh->nt )  return(0);
+
   /* memory alloc */
   _MMG5_SAFE_CALLOC(hcode,mesh->nt+1,int);
+
+   /* memory alloc */
+  _MMG5_ADD_MEM(mesh,(3*mesh->ntmax+5)*sizeof(int),"adjacency table",
+                printf("  Exit program.\n");
+                exit(EXIT_FAILURE));
+  _MMG5_SAFE_CALLOC(mesh->adja,3*mesh->ntmax+5,int);
 
   link  = mesh->adja;
   hsize = mesh->nt;

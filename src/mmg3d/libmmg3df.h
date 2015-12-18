@@ -64,6 +64,12 @@
 ! #include "mmgcommon.h"
 
 ! /**
+!  * Maximum array size when storing adjacent points (or ball) of a vertex.
+!  */
+
+#define MMG3D_LMAX      10240
+
+! /**
 !  * \enum MMG3D_Param
 !  * \brief Input parameters for mmg library.
 !  *
@@ -673,7 +679,7 @@
 ! /* library */
 ! /**
 !  * \param mesh pointer toward the mesh structure.
-!  * \param met pointer toward the sol (metric or level-set) structure.
+!  * \param met pointer toward the sol (metric) structure.
 !  * \return \ref MMG5_SUCCESS if success, \ref MMG5_LOWFAILURE if fail but a
 !  * conform mesh is saved or \ref MMG5_STRONGFAILURE if fail and we can't save
 !  * the mesh.
@@ -683,6 +689,19 @@
 !  */
 
 ! int  MMG3D_mmg3dlib(MMG5_pMesh mesh, MMG5_pSol met );
+
+! /**
+!  * \param mesh pointer toward the mesh structure.
+!  * \param met pointer toward the sol (level-set) structure.
+!  * \return \ref MMG5_SUCCESS if success, \ref MMG5_LOWFAILURE if fail but a
+!  * conform mesh is saved or \ref MMG5_STRONGFAILURE if fail and we can't save
+!  * the mesh.
+!  *
+!  * Main program for the level-set discretization library.
+!  *
+!  */
+
+! int  MMG3D_mmg3dls(MMG5_pMesh mesh, MMG5_pSol met );
 
 ! /**
 !  * \param mesh pointer toward the mesh structure.
@@ -700,6 +719,16 @@
 ! int  MMG3D_mmg3dmov(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pSol disp );
 
 ! /** Tools for the library */
+! /**
+!  * \param mesh pointer toward the mesh structure.
+!  * \return 0 if fail, 1 if success.
+!  *
+!  * Print the default parameters values.
+!  *
+!  */
+
+! void MMG3D_defaultValues(MMG5_pMesh mesh);
+
 ! /**
 !  * \param argc number of command line arguments.
 !  * \param argv command line arguments.
@@ -809,23 +838,17 @@
 !  * \brief Return adjacent elements of a tetrahedron.
 !  * \param mesh pointer toward the mesh structure.
 !  * \param kel tetrahedron index.
-!  * \param v0 pointer toward the index of the adjacent element of \a kel through
-!  * its face number 0.
-!  * \param v1 pointer toward the index of the adjacent element of \a kel through
-!  * its face number 1.
-!  * \param v2 pointer toward the index of the adjacent element of \a kel through
-!  * its face number 2.
-!  * \param v3 pointer toward the index of the adjacent element of \a kel through
-!  * its face number 3.
+!  * \param listet pointer toward the table of the 4 tetra adjacent to \a kel.
+!  * (the index is 0 if there is no adjacent)
 !  * \return 1.
 !  *
 !  * Find the indices of the 4 adjacent elements of tetrahedron \a
-!  * kel. \f$v_i = 0\f$ if the \f$i^{th}\f$ face has no adjacent element
+!  * kel. \f$listet[i] = 0\f$ if the \f$i^{th}\f$ face has no adjacent element
 !  * (so we are on a boundary face).
 !  *
 !  */
 
-! int MMG3D_Get_adjaTet(MMG5_pMesh mesh,int kel, int* v0, int* v1, int* v2, int* v3);
+! int MMG3D_Get_adjaTet(MMG5_pMesh mesh,int kel, int listet[4]);
 ! /**
 !  * \param ca pointer toward the coordinates of the first edge's extremity.
 !  * \param cb pointer toward the coordinates of the second edge's extremity.
@@ -852,6 +875,18 @@
 !  */
 
 ! int  MMG3D_hashTetra(MMG5_pMesh mesh, int pack);
+
+! /**
+!  * \param mesh pointer toward the mesh structure
+!  * \param met pointer toward the sol structure
+!  * \return 1 if success
+!  *
+!  * Compute isotropic size map according to the mean of the length of the edges
+!  * passing through a point.
+!  *
+!  */
+
+! int MMG3D_DoSol(MMG5_pMesh mesh,MMG5_pSol met);
 
 ! /** To associate function pointers without calling MMG3D_mmg3dlib */
 ! /**
@@ -1445,16 +1480,56 @@
 
 
 ! /* Library tools*/
+! /**
+!  * \brief Return adjacent elements of a tetrahedron.
+!  * \param mesh pointer toward the mesh structure.
+!  * \param kel tetrahedron index.
+!  * \param v0 pointer toward the index of the adjacent element of \a kel through
+!  * its face number 0.
+!  * \param v1 pointer toward the index of the adjacent element of \a kel through
+!  * its face number 1.
+!  * \param v2 pointer toward the index of the adjacent element of \a kel through
+!  * its face number 2.
+!  * \param v3 pointer toward the index of the adjacent element of \a kel through
+!  * its face number 3.
+!  * \return 1.
+!  *
+!  * Find the indices of the 4 adjacent elements of tetrahedron \a
+!  * kel. \f$v_i = 0\f$ if the \f$i^{th}\f$ face has no adjacent element
+!  * (so we are on a boundary face).
+!  *
+!  */
 
 ! int MMG5_Get_adjaTet(MMG5_pMesh mesh, int kel, int *v0, int *v1, int *v2, int *v3);
+! /**
+!  * \param prog pointer toward the program name.
+!  *
+!  * Print help for mmgs options.
+!  *
+!  */
 
 ! void MMG5_usage(char *prog);
+! /**
+!  * \param mesh pointer toward the mesh structure.
+!  * \return 0 if fail, 1 if success.
+!  *
+!  * Print the default parameters values.
+!  *
+!  */
 
 ! void MMG5_defaultValues(MMG5_pMesh mesh);
 
 ! int MMG5_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met);
 
 ! int MMG5_parsop(MMG5_pMesh mesh,MMG5_pSol met);
+! /**
+!  * \param mesh pointer toward the mesh structure.
+!  * \param info pointer toward the info structure.
+!  * \return 1.
+!  *
+!  * Store the info structure in the mesh structure.
+!  *
+!  */
 
 ! int MMG5_stockOptions(MMG5_pMesh mesh, MMG5_Info *info);
 
@@ -1463,5 +1538,20 @@
 ! void MMG5_searchqua(MMG5_pMesh,MMG5_pSol,double, int *, char);
 
 ! int MMG5_searchlen(MMG5_pMesh,MMG5_pSol, double, double, int *,char);
+
+! /**
+!  * \brief Return adjacent elements of a triangle.
+!  * \param mesh pointer toward the mesh structure.
+!  * \param ip vertex index.
+!  * \param vtab pointer toward an array of size MMG3D_LMAX that will contain
+!  * the indices of adjacent vertices to the vertex \a k.
+!  * \return 1 if success.
+!  *
+!  * Find the indices of the adjacent vertices of the vertex \a
+!  * ip.
+!  *
+!  */
+
+! int MMG3D_Get_adjaVertices(MMG5_pMesh mesh, int ip, int vtab[MMG3D_LMAX]);
 
 ! #endif

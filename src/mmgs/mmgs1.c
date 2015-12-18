@@ -535,7 +535,7 @@ static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
             _MMGS_intmet33_ani(mesh,met,k,i,ip,s);
           else
             intmet(mesh,met,k,i,ip,s);
-       }
+        }
       }
       else if ( pt->tag[i] & MG_GEO ) {
         ppt = &mesh->point[ip];
@@ -1137,9 +1137,12 @@ int _MMG5_mmgs1(MMG5_pMesh mesh,MMG5_pSol met) {
     fprintf(stdout,"  ## Metric undefined. Exit program.\n");
     return(0);
   }
-  if ( mesh->info.hgrad > 0. && !gradsiz(mesh,met) ) {
-    fprintf(stdout,"  ## Gradation problem. Exit program.\n");
-    return(0);
+  if ( mesh->info.hgrad > 0. ) {
+    if ( mesh->info.imprim )   fprintf(stdout,"\n  -- GRADATION : %8f\n",exp(mesh->info.hgrad));
+    if (!gradsiz(mesh,met) ) {
+      fprintf(stdout,"  ## Gradation problem. Exit program.\n");
+      return(0);
+    }
   }
 
   if ( !anatri(mesh,met,2) ) {

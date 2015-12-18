@@ -22,7 +22,7 @@
 */
 
 /**
- * \file mmgs/libmmgs.c
+ * \file mmgs/libmmgsf.c
  * \brief Fortran API functions for MMGS library.
  * \author Charles Dapogny (LJLL, UPMC)
  * \author Cécile Dobrzynski (Inria / IMB, Université de Bordeaux)

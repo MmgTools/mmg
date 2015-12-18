@@ -53,6 +53,12 @@
 ! #include "mmgcommon.h"
 
 ! /**
+!  * Maximum array size when storing adjacent points (or ball) of a vertex.
+!  */
+
+#define MMG2D_LMAX   1024
+
+! /**
 !  * \enum MMG2D_Param
 !  * \brief Input parameters for mmg library.
 !  *
@@ -370,17 +376,112 @@
 !  *
 !  */
 
-! void MMG2D_Free_structures(MMG5_pMesh mesh,MMG5_pSol met
-!   );
+! void MMG2D_Free_structures(MMG5_pMesh mesh,MMG5_pSol met);
 
-! int MMG2D_loadMesh(MMG5_pMesh ,char *);
-! int MMG2D_loadSol(MMG5_pMesh,MMG5_pSol ,char *,int);
+! /**
+!  * \param mesh pointer toward the mesh structure.
+!  * \param filename name of the readed file.
+!  * \return 0 or -1 if fail, 1 otherwise
+!  *
+!  * Read mesh data.
+!  *
+!  */
+
+! int MMG2D_loadMesh(MMG5_pMesh mesh,char * filename);
+
+! /**
+!  * \param mesh pointer toward the mesh structure.
+!  * \param sol pointer toward the solution structure..
+!  * \param filename name of the solution file.
+!  * \param msh if 1, read the 2D solution saved in 3D (.sol files saved by gmsh)
+!  * \return 0 or -1 if fail, 1 otherwise.
+!  *
+!  * Load solution field.
+!  *
+!  */
+
+! int MMG2D_loadSol(MMG5_pMesh mesh,MMG5_pSol sol,char * filename,int msh);
+
 ! int MMG2D_loadVect(MMG5_pMesh ,char *);
+
+! /**
+!  * \param mesh pointer toward the mesh structure.
+!  * \param filename name of the readed file.
+!  * \return 0 or -1 if fail, 1 otherwise.
+!  *
+!  * Save mesh data.
+!  *
+!  */
+
 ! int MMG2D_saveMesh(MMG5_pMesh ,char *);
+! /**
+!  * \param mesh pointer toward the mesh structure.
+!  * \param sol pointer toward the solution structure..
+!  * \param filename name of the solution file.
+!  * \param msh if 1, read the 2D solution saved in 3D (.sol files saved by gmsh)
+!  * \return 0 or -1 if fail, 1 otherwise.
+!  *
+!  * Save metric field.
+!  *
+!  */
+
 ! int MMG2D_saveSol(MMG5_pMesh ,MMG5_pSol ,char *);
 ! int MMG2D_saveVect(MMG5_pMesh mesh,MMG5_pSol sol,char *filename,double lambda);
 
-! int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol sol,void (*titi)(int ,int,int,int,int));
+! /**
+!  * \param mesh pointer toward the mesh structure.
+!  * \param sol pointer toward a sol structure (metric).
+!  * \param titi callback function.
+!  * \return \ref MMG5_SUCCESS if success, \ref MMG5_LOWFAILURE if failed
+!  * but a conform mesh is saved and \ref MMG5_STRONGFAILURE if failed and we
+!  * can't save the mesh.
+!  *
+!  * Main program for the mesh adaptation library .
+!  *
+!  */
+
+! int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol sol,void (*titi)(int ,int ,int,int,int));
+
+! /**
+!  * \param mesh pointer toward the mesh structure.
+!  * \param sol pointer toward a sol structure (metric).
+!  * \param titi callback function.
+!  * \return \ref MMG5_SUCCESS if success, \ref MMG5_LOWFAILURE if failed
+!  * but a conform mesh is saved and \ref MMG5_STRONGFAILURE if failed and we
+!  * can't save the mesh.
+!  *
+!  * Main program for the mesh generation library .
+!  *
+!  */
+
+! int MMG2D_mmg2dmesh(MMG5_pMesh mesh,MMG5_pSol sol,void (*titi)(int ,int ,int,int,int));
+
+! /**
+!  * \param mesh pointer toward the mesh structure.
+!  * \param sol pointer toward a sol structure (metric).
+!  * \param titi callback function.
+!  * \return \ref MMG5_SUCCESS if success, \ref MMG5_LOWFAILURE if failed
+!  * but a conform mesh is saved and \ref MMG5_STRONGFAILURE if failed and we
+!  * can't save the mesh.
+!  *
+!  * Main program for the level-set discretization library .
+!  *
+!  */
+
+! int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol,void (*titi)(int ,int ,int,int,int)) ;
+! /**
+!  * \param mesh pointer toward the mesh structure.
+!  * \param sol pointer toward a sol structure (displacement).
+!  * \param titi callback function.
+!  * \return \ref MMG5_SUCCESS if success, \ref MMG5_LOWFAILURE if failed
+!  * but a conform mesh is saved and \ref MMG5_STRONGFAILURE if failed and we
+!  * can't save the mesh.
+!  *
+!  * Main program for the rigid body movement library .
+!  *
+!  */
+
+! int MMG2D_mmg2dmov(MMG5_pMesh mesh,MMG5_pSol sol,void (*titi)(int ,int ,int,int,int));
 
 ! /* Tools for the library */
 ! void (*MMG2D_callbackinsert) (int ,int ,int ,int, int);
@@ -392,6 +493,55 @@
 !  *
 !  */
 
-! int MMG2D_setfunc(int type);
+! void MMG2D_setfunc(MMG5_pMesh mesh,MMG5_pSol met);
+
+! /**
+!  * \brief Return adjacent elements of a triangle.
+!  * \param mesh pointer toward the mesh structure.
+!  * \param kel triangle index.
+!  * \param listri pointer toward the table of the indices of the three adjacent
+!  * triangles of the elt \a kel (the index is 0 if there is no adjacent).
+!  * \return 1.
+!  *
+!  * Find the indices of the 3 adjacent elements of triangle \a
+!  * kel. \f$v_i = 0\f$ if the \f$i^{th}\f$ face has no adjacent element
+!  * (so we are on a boundary face).
+!  *
+!  */
+
+! int MMG2D_Get_adjaTri(MMG5_pMesh mesh, int kel, int listri[3]);
+
+! /**
+!  * \brief Return adjacent elements of a triangle.
+!  * \param mesh pointer toward the mesh structure.
+!  * \param ip vertex index.
+!  * \param lispoi pointer toward an array of size MMG2D_LMAX that will contain
+!  * the indices of adjacent vertices to the vertex \a ip.
+!  * \return nbpoi the number of adjacent points if success, 0 if fail.
+!  *
+!  * Find the indices of the adjacent vertices of the vertex \a
+!  * ip.
+!  *
+!  */
+
+! extern
+! int MMG2D_Get_adjaVertices(MMG5_pMesh mesh, int ip, int lispoi[MMG2D_LMAX]);
+
+! /**
+!  * \brief Return adjacent elements of a triangle.
+!  * \param mesh pointer toward the mesh structure.
+!  * \param ip vertex index.
+!  * \param start index of a triangle holding \a ip.
+!  * \param lispoi pointer toward an array of size MMG2D_LMAX that will contain
+!  * the indices of adjacent vertices to the vertex \a ip.
+!  * \return nbpoi the number of adjacent points if success, 0 if fail.
+!  *
+!  * Find the indices of the adjacent vertices of the vertex \a
+!  * ip of the triangle \a start.
+!  *
+!  */
+
+! int MMG2D_Get_adjaVerticesFast(MMG5_pMesh mesh, int ip,int start,
+!                                int lispoi[MMG2D_LMAX]);
 
 ! #endif

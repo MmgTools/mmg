@@ -73,7 +73,7 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
   MMG5_pPoint     p0,p1,ppt;
   MMG5_pxPoint    pxp;
   double     dd,len,lmax,o[3],to[3],no1[3],no2[3],v[3];
-  int        k,ip,ip1,ip2,list[_MMG5_LMAX+2],ilist,ref;
+  int        k,ip,ip1,ip2,list[MMG3D_LMAX+2],ilist,ref;
   char       imax,tag,j,i,i1,i2,ifa0,ifa1;
   int        lon,ret,ier;
   double     lmin;
@@ -356,6 +356,9 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
     }
   collapse:
     if(lmin <= _MMG5_LOPTS_MMG5_DEL) {
+      // Case of an internal tetra with 4 ridges vertices.
+      if ( lmin == 0 ) continue;
+
       ifa0 = _MMG5_ifar[imin][0];
       ifa1 = _MMG5_ifar[imin][1];
       i  =  (pt->xt && (pxt->ftag[ifa1] & MG_BDY)) ? ifa1 : ifa0;
@@ -414,6 +417,8 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
     imintet = imin;
     lmaxtet = lmax;
     lmintet = lmin;
+    assert(lmin);
+
     for (ii=0; ii<6; ii++) {
       if ( pt->xt && (pxt->tag[ii] & MG_REQ) )  continue;
       if ( (ii==imintet) && (lmintet < _MMG5_LOPTS_MMG5_DEL)) continue;
@@ -668,6 +673,9 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
       }
     collapse2:
       if(lmin > _MMG5_LOPTS_MMG5_DEL) continue;
+      // Case of an internal tetra with 4 ridges vertices.
+      if ( lmin == 0 ) continue;
+
       ifa0 = _MMG5_ifar[imin][0];
       ifa1 = _MMG5_ifar[imin][1];
       i  =  (pt->xt && (pxt->ftag[ifa1] & MG_BDY)) ? ifa1 : ifa0;
@@ -1009,9 +1017,12 @@ int _MMG5_mmg3d1_delone(MMG5_pMesh mesh,MMG5_pSol met) {
     return(0);
   }
 
-  if ( mesh->info.hgrad > 0. && !_MMG5_gradsiz(mesh,met) ) {
-    fprintf(stdout,"  ## Gradation problem. Exit program.\n");
-    return(0);
+  if ( mesh->info.hgrad > 0. ) {
+    if ( mesh->info.imprim )   fprintf(stdout,"\n  -- GRADATION : %8f\n",exp(mesh->info.hgrad));
+    if ( !_MMG5_gradsiz(mesh,met) ) {
+      fprintf(stdout,"  ## Gradation problem. Exit program.\n");
+      return(0);
+    }
   }
 
   if ( !_MMG5_anatet(mesh,met,2,0) ) {

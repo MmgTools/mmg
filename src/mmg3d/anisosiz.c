@@ -35,6 +35,17 @@
 
 #include "mmg3d.h"
 
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the sol structure.
+ * \param pt pointer toward a tetra.
+ * \param m1 computed metric.
+ * \return the number of vertices used for the mean computation, 0 if fail.
+ *
+ * Compute mean metric over the internal tetra \a pt. Do not take into account
+ * the metric values at ridges points (because we don't know how to build it).
+ *
+ */
 inline int _MMG5_moymet(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,double *m1) {
   MMG5_pPoint  ppt;
   double  mm[6],*mp;
@@ -54,8 +65,8 @@ inline int _MMG5_moymet(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,double *m1)
   }
 
   if(!n) {
-    printf("%s:%d: Error: 4 ridges points... Exit program\n",__FILE__,__LINE__);
-    exit(EXIT_FAILURE);
+    // printf("  ## Warning: 4 ridges points... Unable to compute metric.\n");
+    return(0);
   }
   dd = 1./n;
   for (k=0; k<6; ++k) m1[k] = mm[k]*dd;
@@ -155,7 +166,7 @@ inline double _MMG5_lenedgspl33_ani(MMG5_pMesh mesh ,MMG5_pSol met, int ia,
  * \param met pointer toward the sol structure.
  * \param ia index of edge in tetra \a pt .
  * \param pt pointer toward the tetra from which we come.
- * \return length of edge according to the prescribed metric.
+ * \return length of edge according to the prescribed metric, 0 if fail.
  *
  * Compute length of edge \f$[i0;i1]\f$ according to the prescribed aniso
  * metric (for special storage of metrics at ridges points).
@@ -175,14 +186,14 @@ inline double _MMG5_lenedgspl_ani(MMG5_pMesh mesh ,MMG5_pSol met, int ia,
   pp2 = &mesh->point[ip2];
 
   if ( !(MG_SIN(pp1->tag) || (MG_NOM & pp1->tag)) && (pp1->tag & MG_GEO) ) {
-    _MMG5_moymet(mesh,met,pt,m1);
+    if ( !_MMG5_moymet(mesh,met,pt,m1) ) return(0);
   } else {
     for ( i=0; i<6; ++i )
       m1[i] = met->m[6*ip1+i];
   }
 
   if ( !(MG_SIN(pp2->tag)|| (MG_NOM & pp2->tag)) && (pp2->tag & MG_GEO) ) {
-    _MMG5_moymet(mesh,met,pt,m2);
+    if ( !_MMG5_moymet(mesh,met,pt,m2) ) return(0);
   } else {
     for ( i=0; i<6; ++i )
       m2[i] = met->m[6*ip2+i];
@@ -253,7 +264,7 @@ static int _MMG5_defmetsin(MMG5_pMesh mesh,MMG5_pSol met,int kel, int iface, int
   double             *m,n[3],isqhmin,isqhmax,b0[3],b1[3],ps1,tau[3];
   double             ntau2,gammasec[3];
   double             c[3],kappa,maxkappa,alpha, hausd;
-  int                lists[_MMG5_LMAX+2],listv[_MMG5_LMAX+2],ilist,ilists,ilistv;
+  int                lists[MMG3D_LMAX+2],listv[MMG3D_LMAX+2],ilist,ilists,ilistv;
   int                k,iel,idp,ifac;
   unsigned char      i,i0,i1,i2;
 
@@ -366,10 +377,10 @@ static int _MMG5_defmetrid(MMG5_pMesh mesh,MMG5_pSol met,int kel,
   MMG5_pPoint    p0,p1,p2;
   _MMG5_Bezier   b;
   int            k,iel,idp,ilist1,ilist2,ilist,*list;
-  int            list1[_MMG5_LMAX+2],list2[_MMG5_LMAX+2],iprid[2],ier;
+  int            list1[MMG3D_LMAX+2],list2[MMG3D_LMAX+2],iprid[2],ier;
   double         *m,isqhmin,isqhmax,*n1,*n2,*n,*t;
   double         trot[2],u[2],ux,uy,uz,det,bcu[3];
-  double         r[3][3],lispoi[3*_MMG5_LMAX+1];
+  double         r[3][3],lispoi[3*MMG3D_LMAX+1];
   double         detg,detd;
   int            i,i0,i1,i2,ifac;
 
@@ -541,9 +552,9 @@ static int _MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,int kel, int iface, int
   MMG5_pxPoint  px0;
   _MMG5_Bezier  b;
   MMG5_pPar     par;
-  int           lists[_MMG5_LMAX+2],listv[_MMG5_LMAX+2],ilists,ilistv,ilist;
+  int           lists[MMG3D_LMAX+2],listv[MMG3D_LMAX+2],ilists,ilistv,ilist;
   int           k,iel,ipref[2],idp,ifac;
-  double        *m,isqhmin,isqhmax,*n,r[3][3],lispoi[3*_MMG5_LMAX+1];
+  double        *m,isqhmin,isqhmax,*n,r[3][3],lispoi[3*MMG3D_LMAX+1];
   double        ux,uy,uz,det2d,c[3];
   double        tAA[6],tAb[3], hausd, hausdloc;
   unsigned char i1,i2,itri1,itri2,i;
@@ -737,9 +748,9 @@ static int _MMG5_defmetreg(MMG5_pMesh mesh,MMG5_pSol met,int kel,int iface, int 
   MMG5_pxPoint   px0;
   _MMG5_Bezier   b;
   MMG5_pPar      par;
-  int            lists[_MMG5_LMAX+2],listv[_MMG5_LMAX+2],ilists,ilistv,ilist;
+  int            lists[MMG3D_LMAX+2],listv[MMG3D_LMAX+2],ilists,ilistv,ilist;
   int            k,iel,idp,ifac;
-  double         *n,*m,r[3][3],ux,uy,uz,lispoi[3*_MMG5_LMAX+1];
+  double         *n,*m,r[3][3],ux,uy,uz,lispoi[3*MMG3D_LMAX+1];
   double         det2d,c[3],isqhmin,isqhmax;
   double         tAA[6],tAb[3],hausd, hausdloc;
   unsigned char  i1,i;
@@ -878,6 +889,49 @@ static int _MMG5_defmetreg(MMG5_pMesh mesh,MMG5_pSol met,int kel,int iface, int 
 
 /**
  * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param np global index of vertex in which we intersect the metrics.
+ * \param me physical metric at point \a np.
+ * \param n normal or tangent at point np.
+ * \return 0 if fail, 1 otherwise.
+ *
+ * Intersect the surface metric held in np (supported in tangent plane of \a np)
+ * with 3*3 physical metric in \a me. For ridge points, this function fill the
+ * \f$ p_0->m[3]\f$ and \f$ p_0->m[4]\f$ fields that contains respectively the
+ * specific sizes in the \f$n_1\f$ and \f$n_2\f$ directions.
+ *
+ */
+static inline
+int _MMG3D_intextmet(MMG5_pMesh mesh,MMG5_pSol met,int np,double me[6]) {
+  MMG5_pPoint         p0;
+  MMG5_pxPoint        go;
+  double              *n;
+  double              dummy_n[3];
+
+   p0 = &mesh->point[np];
+
+   dummy_n[0] = dummy_n[1] = dummy_n[2] = 0.;
+
+   if ( MG_SIN(p0->tag) || (p0->tag & MG_NOM) ) {
+     n = &dummy_n[0];
+   }
+   else if ( p0->tag & MG_GEO ) {
+     /* Take the tangent at point */
+     n = &p0->n[0];
+   }
+   else {
+     /* Take the normal at point */
+     assert(p0->xp);
+     go = &mesh->xpoint[p0->xp];
+     n = &go->n1[0];
+   }
+
+  return(_MMG5_mmgIntextmet(mesh,met,np,me,n));
+
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric stucture.
  * \return 0 if fail, 1 otherwise.
  *
@@ -952,7 +1006,7 @@ int _MMG3D_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
           if ( !_MMG5_defmetreg(mesh,met,k,l,iploc) )  continue;
         }
         if ( ismet ) {
-          if ( !_MMG5_intextmet(mesh,met,pt->v[iploc],mm) ) {
+          if ( !_MMG3D_intextmet(mesh,met,pt->v[iploc],mm) ) {
             fprintf(stdout,"%s:%d:Error: unable to intersect metrics"
                     " at point %d.\n",__FILE__,__LINE__, pt->v[iploc]);
             return(0);
@@ -1026,30 +1080,33 @@ int _MMG5_grad2metVol(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,int ia) {
   t[1] = uy/l;
   t[2] = uz/l;
 
-  // edge length in metric m1: t^u * m1 * u.
+  // edge length in metric m1: sqrt(t^u * m1 * u).
   ps1 =  m1[0]*t[0]*t[0] + 2.0*m1[1]*t[0]*t[1] + m1[3]*t[1]*t[1]
     + 2.0*m1[2]*t[0]*t[2] + 2.0*m1[4]*t[1]*t[2] + m1[5]*t[2]*t[2];
   ps1 = sqrt(ps1);
 
-  // edge length in metric m2: t^u * m2 * u.
+  // edge length in metric m2: sqrt(t^u * m2 * u).
   ps2 =  m2[0]*t[0]*t[0] + 2.0*m2[1]*t[0]*t[1] + m2[3]*t[1]*t[1]
     + 2.0*m2[2]*t[0]*t[2] + 2.0*m2[4]*t[1]*t[2] + m2[5]*t[2]*t[2];
   ps2 = sqrt(ps2);
 
   /* Metric in p1 has to be changed */
   if ( ps2 > ps1 ){
+    /* compute alpha = h2 + hgrad*l */
     alpha = ps2 /(1.0+mesh->info.hgrad*l*ps2);
     if( ps1 >= alpha -_MMG5_EPS )
       return(-1);
 
     _MMG5_eigenv(1,m1,lambda,vp);
-
+    /* Project the vector t1 along the main directions of the metric */
     c[0] = t[0]*vp[0][0] + t[1]*vp[0][1] + t[2]*vp[0][2];
     c[1] = t[0]*vp[1][0] + t[1]*vp[1][1] + t[2]*vp[1][2];
     c[2] = t[0]*vp[2][0] + t[1]*vp[2][1] + t[2]*vp[2][2];
 
-    // Compute M=P \lambda t^P
-    // Find index of the maximum value of c
+    /* Find index of the maximum value of c: this allow to detect which of the
+     * main directions of the metric is closest to our edge direction. We want
+     * that our new metric respect the gradation related to the size associated
+     * to this main direction (the ichg direction). */
     ichg = 0;
     val  = fabs(c[ichg]);
     for (i = 1; i<3; ++i) {
@@ -1059,28 +1116,24 @@ int _MMG5_grad2metVol(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,int ia) {
       }
     }
     assert(c[ichg]*c[ichg] > _MMG5_EPS );
+   /* Compute beta coef such as lambda_1 = beta*lambda_1 => h1 = h2 + hgrad*l
+    * (see p317 of Charles Dapogny Thesis). */
     beta = (alpha*alpha - ps1*ps1)/(c[ichg]*c[ichg]);
-
-    mu[0] = lambda[0];
-    mu[1] = lambda[1];
-    mu[2] = lambda[2];
-
-    mu[ichg] += beta;
-
-    m1[0] = mu[0]*vp[0][0]*vp[0][0] + mu[1]*vp[1][0]*vp[1][0] + vp[2][0]*vp[2][0]*mu[2];
-    m1[1] = mu[0]*vp[0][0]*vp[0][1] + mu[1]*vp[1][0]*vp[1][1] + vp[2][1]*vp[2][0]*mu[2];
-    m1[2] = mu[0]*vp[0][0]*vp[0][2] + mu[1]*vp[1][0]*vp[1][2] + vp[2][0]*vp[2][2]*mu[2];
-    m1[3] = mu[0]*vp[0][1]*vp[0][1] + mu[1]*vp[1][1]*vp[1][1] + vp[2][1]*vp[2][1]*mu[2];
-    m1[4] = mu[0]*vp[0][1]*vp[0][2] + mu[1]*vp[1][1]*vp[1][2] + vp[2][1]*vp[2][2]*mu[2];
-    m1[5] = mu[0]*vp[0][2]*vp[0][2] + mu[1]*vp[1][2]*vp[1][2] + vp[2][2]*vp[2][2]*mu[2];
 
     /* Metric update */
     if( MG_SIN(p1->tag) || (p1->tag & MG_NOM) ){
+      /* lambda_new = 0.5 lambda_1 + 0.5 beta lambda_1: here we choose to not
+       * respect the gradation in order to restric the influence of the singular
+       * points. */
       mm1[0] += 0.5*beta;
       mm1[3] += 0.5*beta;
       mm1[5] += 0.5*beta;
     }
     else if( p1->tag & MG_GEO ) {
+      /* lambda[ichg] is the metric eigenvalue associated to the main metric
+       * direction closest to our edge direction. Find were is stored this
+       * eigenvalue in our special storage of ridge metric (mm-lambda = 0) and
+       * update it. */
       c[0] = fabs(mm1[0]-lambda[ichg]);
       c[1] = fabs(mm1[1]-lambda[ichg]);
       c[2] = fabs(mm1[2]-lambda[ichg]);
@@ -1099,6 +1152,22 @@ int _MMG5_grad2metVol(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,int ia) {
       mm1[kmin] += beta;
     }
     else {
+      /* Update the metric eigenvalue associated to the main metric direction
+       * which is closest to our edge direction (because this is the one that is
+       * the more influent on our edge length). */
+      mu[0] = lambda[0];
+      mu[1] = lambda[1];
+      mu[2] = lambda[2];
+
+      mu[ichg] += beta;
+
+      m1[0] = mu[0]*vp[0][0]*vp[0][0] + mu[1]*vp[1][0]*vp[1][0] + vp[2][0]*vp[2][0]*mu[2];
+      m1[1] = mu[0]*vp[0][0]*vp[0][1] + mu[1]*vp[1][0]*vp[1][1] + vp[2][1]*vp[2][0]*mu[2];
+      m1[2] = mu[0]*vp[0][0]*vp[0][2] + mu[1]*vp[1][0]*vp[1][2] + vp[2][0]*vp[2][2]*mu[2];
+      m1[3] = mu[0]*vp[0][1]*vp[0][1] + mu[1]*vp[1][1]*vp[1][1] + vp[2][1]*vp[2][1]*mu[2];
+      m1[4] = mu[0]*vp[0][1]*vp[0][2] + mu[1]*vp[1][1]*vp[1][2] + vp[2][1]*vp[2][2]*mu[2];
+      m1[5] = mu[0]*vp[0][2]*vp[0][2] + mu[1]*vp[1][2]*vp[1][2] + vp[2][2]*vp[2][2]*mu[2];
+
       memcpy(mm1,m1,6*sizeof(double));
     }
     return(i1);
@@ -1115,8 +1184,8 @@ int _MMG5_grad2metVol(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,int ia) {
     c[1] = t[0]*vp[1][0] + t[1]*vp[1][1] + t[2]*vp[1][2];
     c[2] = t[0]*vp[2][0] + t[1]*vp[2][1] + t[2]*vp[2][2];
 
-    // Compute M=P \lambda t^P
-    // Find index of the maximum value of c
+    /* Detect which of the main directions of the metric is closest to our edge
+     * direction. */
     ichg = 0;
     val  = fabs(c[ichg]);
     for (i = 1; i<3; ++i) {
@@ -1126,23 +1195,17 @@ int _MMG5_grad2metVol(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,int ia) {
       }
     }
     assert(c[ichg]*c[ichg] > _MMG5_EPS );
+    /* Compute beta coef such as lambda_1 = beta*lambda_1 => h1 = h2 + hgrad*l
+     * (see p317 of Charles Dapogny Thesis). */
     beta = (alpha*alpha - ps2*ps2)/(c[ichg]*c[ichg]);
 
-    mu[0] = lambda[0];
-    mu[1] = lambda[1];
-    mu[2] = lambda[2];
-
-    mu[ichg] += beta;
-
-    m2[0] = mu[0]*vp[0][0]*vp[0][0] + mu[1]*vp[1][0]*vp[1][0] + vp[2][0]*vp[2][0]*mu[2];
-    m2[1] = mu[0]*vp[0][0]*vp[0][1] + mu[1]*vp[1][0]*vp[1][1] + vp[2][1]*vp[2][0]*mu[2];
-    m2[2] = mu[0]*vp[0][0]*vp[0][2] + mu[1]*vp[1][0]*vp[1][2] + vp[2][0]*vp[2][2]*mu[2];
-    m2[3] = mu[0]*vp[0][1]*vp[0][1] + mu[1]*vp[1][1]*vp[1][1] + vp[2][1]*vp[2][1]*mu[2];
-    m2[4] = mu[0]*vp[0][1]*vp[0][2] + mu[1]*vp[1][1]*vp[1][2] + vp[2][1]*vp[2][2]*mu[2];
-    m2[5] = mu[0]*vp[0][2]*vp[0][2] + mu[1]*vp[1][2]*vp[1][2] + vp[2][2]*vp[2][2]*mu[2];
-
-    /* Metric update */
+    /* Metric update: update the metric eigenvalue associated to the main metric
+     * direction which is closest to our edge direction (because this is the
+     * one that is the more influent on our edge length). */
     if( MG_SIN(p2->tag) || (p2->tag & MG_NOM) ){
+      /* lambda_new = 0.5 lambda_1 + 0.5 beta lambda_1: here we choose to not
+       * respect the gradation in order to restric the influence of the singular
+       * points. */
       mm2[0] += 0.5*beta;
       mm2[3] += 0.5*beta;
       mm2[5] += 0.5*beta;
@@ -1154,7 +1217,6 @@ int _MMG5_grad2metVol(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,int ia) {
       c[3] = fabs(mm2[3]-lambda[ichg]);
       c[4] = fabs(mm2[4]-lambda[ichg]);
 
-      // Find index af the minimum value of c
       kmin = 0;
       val = fabs(c[kmin]);
       for (i = 1; i<5; ++i) {
@@ -1166,11 +1228,24 @@ int _MMG5_grad2metVol(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,int ia) {
       mm2[kmin] += beta;
     }
     else{
+      mu[0] = lambda[0];
+      mu[1] = lambda[1];
+      mu[2] = lambda[2];
+
+      mu[ichg] += beta;
+
+      m2[0] = mu[0]*vp[0][0]*vp[0][0] + mu[1]*vp[1][0]*vp[1][0] + vp[2][0]*vp[2][0]*mu[2];
+      m2[1] = mu[0]*vp[0][0]*vp[0][1] + mu[1]*vp[1][0]*vp[1][1] + vp[2][1]*vp[2][0]*mu[2];
+      m2[2] = mu[0]*vp[0][0]*vp[0][2] + mu[1]*vp[1][0]*vp[1][2] + vp[2][0]*vp[2][2]*mu[2];
+      m2[3] = mu[0]*vp[0][1]*vp[0][1] + mu[1]*vp[1][1]*vp[1][1] + vp[2][1]*vp[2][1]*mu[2];
+      m2[4] = mu[0]*vp[0][1]*vp[0][2] + mu[1]*vp[1][1]*vp[1][2] + vp[2][1]*vp[2][2]*mu[2];
+      m2[5] = mu[0]*vp[0][2]*vp[0][2] + mu[1]*vp[1][2]*vp[1][2] + vp[2][2]*vp[2][2]*mu[2];
       memcpy(mm2,m2,6*sizeof(double));
     }
     return(i2);
   }
 }
+
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -1186,10 +1261,9 @@ int _MMG5_gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pxTetra  pxt;
   MMG5_Tria     ptt;
   MMG5_pPoint   p0,p1;
- _MMG5_Hash     hash;
   double        *m,mv;
-  int           k,it,nup,nu,maxit;
-  int           i,j,ia,ip0,ip1;
+  int           k,it,itv,nup,nu,nupv,maxit;
+  int           i,j,ip0,ip1;
   char          ier,i0,i1;
 
   if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug )
@@ -1199,7 +1273,7 @@ int _MMG5_gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   for (k=1; k<=mesh->np; k++)
     mesh->point[k].flag = mesh->base;
 
-  /* First step : make ridges iso */
+  /* First step : make ridges iso in each apairing direction */
   for (k=1; k<= mesh->np; k++) {
     p1 = &mesh->point[k];
     if ( !MG_VOK(p1) ) continue;
@@ -1207,38 +1281,12 @@ int _MMG5_gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
     if ( !(p1->tag & MG_GEO) ) continue;
 
     m = &met->m[6*k];
-    mv = MG_MAX(m[0],MG_MAX(m[1],m[2]));
-    mv = MG_MAX(m[0],MG_MAX(MG_MAX(m[1],m[2]),MG_MAX(m[3],m[4])));
-    m[0] = mv;
+    mv = MG_MAX(m[1],m[2]);
     m[1] = mv;
     m[2] = mv;
+    mv = MG_MAX(m[3],m[4]);
     m[3] = mv;
     m[4] = mv;
-  }
-
-  /* Second step : standard gradation procedure */
-  if ( !_MMG5_hashNew(mesh,&hash,mesh->np,7*mesh->np) )  return(-1);
-
-  /* Hash all boundary edges, and put ip = 1 in hash structure */
-  for (k=1; k<=mesh->ne; k++) {
-    pt = &mesh->tetra[k];
-    if ( !MG_EOK(pt) )  continue;
-    if ( !pt->xt ) continue;
-
-    pxt = &mesh->xtetra[pt->xt];
-    for (i=0; i<4; i++) {
-      if ( pxt->ftag[i] & MG_BDY ) {
-        for (j=0; j<3; j++) {
-          ip0 = pt->v[_MMG5_idir[i][_MMG5_inxt2[j]]];
-          ip1 = pt->v[_MMG5_idir[i][_MMG5_iprv2[j]]];
-          if ( !_MMG5_hashEdge(mesh,&hash,ip0,ip1,1) ) {
-            _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
-            return(0);
-          }
-        }
-        break;
-      }
-    }
   }
 
   it = nup = 0;
@@ -1266,7 +1314,7 @@ int _MMG5_gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
               p1  = &mesh->point[ip1];
               if ( (p0->flag < mesh->base-1) && (p1->flag < mesh->base-1) )
                 continue;
-
+              /* gradation along the tangent plane */
               ier = _MMG5_grad2metSurf(mesh,met,&ptt,j);
               if ( ier == i0 ) {
                 p0->flag = mesh->base;
@@ -1278,62 +1326,8 @@ int _MMG5_gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
               }
             }
           }
-          else {
-            /* Gradation along a volume edge */
-            for (j=0; j<3; j++) {
-              ia  = _MMG5_iarf[i][j];
-              i0  = _MMG5_iare[ia][0];
-              i1  = _MMG5_iare[ia][1];
-              ip0 = pt->v[i0];
-              ip1 = pt->v[i1];
-              p0  = &mesh->point[ip0];
-              p1  = &mesh->point[ip1];
-              if ( p0->flag < mesh->base-1 && p1->flag < mesh->base-1 )  continue;
 
-              // Impose gradation from a boundary face if possible
-              if ( _MMG5_hashGet(&hash,ip0,ip1) ) {
-                continue;
-              }
-
-              ier = _MMG5_grad2metVol(mesh,met,pt,ia);
-              if ( ier == i0 ) {
-                p0->flag = mesh->base;
-                nu++;
-              }
-              else if ( ier == i1 ) {
-                p1->flag = mesh->base;
-                nu++;
-              }
-            }
-          }
-        }
-      }
-      else {
-        for (i=0; i<4; i++) {
-          /* Gradation along a volume edge */
-          for (j=0; j<3; j++) {
-            ia  = _MMG5_iarf[i][j];
-            i0  = _MMG5_iare[ia][0];
-            i1  = _MMG5_iare[ia][1];
-            ip0 = pt->v[i0];
-            ip1 = pt->v[i1];
-            p0  = &mesh->point[ip0];
-            p1  = &mesh->point[ip1];
-            if ( p0->flag < mesh->base-1 && p1->flag < mesh->base-1 )  continue;
-
-            // Impose gradation from a boundary face if possible
-            if ( _MMG5_hashGet(&hash,ip0,ip1) ) continue;
-
-            ier = _MMG5_grad2metVol(mesh,met,pt,ia);
-            if ( ier == i0 ) {
-              p0->flag = mesh->base;
-              nu++;
-            }
-            else if ( ier == i1 ) {
-              p1->flag = mesh->base;
-              nu++;
-            }
-          }
+          else continue;
         }
       }
     }
@@ -1341,8 +1335,52 @@ int _MMG5_gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   }
   while( ++it < maxit && nu > 0 );
 
-  if ( abs(mesh->info.imprim) > 4 )  fprintf(stdout,"     gradation: %7d updated, %d iter.\n",nup,it);
+  mesh->base = 0;
+  for (k=1; k<=mesh->np; k++)
+    mesh->point[k].flag = mesh->base;
 
-  _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
+  nupv = itv = 0;
+  maxit = 500;
+
+  do {
+    mesh->base++;
+    nu = 0;
+    for (k=1; k<=mesh->ne; k++) {
+      pt = &mesh->tetra[k];
+      if ( !MG_EOK(pt) )  continue;
+      for (i=0; i<4; i++) {
+        /* Gradation along a volume edge */
+        i0  = _MMG5_iare[i][0];
+        i1  = _MMG5_iare[i][1];
+        ip0 = pt->v[i0];
+        ip1 = pt->v[i1];
+        p0  = &mesh->point[ip0];
+        p1  = &mesh->point[ip1];
+        if ( p0->flag < mesh->base-1 && p1->flag < mesh->base-1 )  continue;
+
+        ier = _MMG5_grad2metVol(mesh,met,pt,i);
+        if ( ier == i0 ) {
+          p0->flag = mesh->base;
+          nu++;
+        }
+        else if ( ier == i1 ) {
+          p1->flag = mesh->base;
+          nu++;
+        }
+      }
+    }
+    nupv += nu;
+  }
+  while( ++itv < maxit && nu > 0 );
+
+  if ( abs(mesh->info.imprim) > 3 ) {
+    if ( abs(mesh->info.imprim) < 5 && !mesh->info.ddebug ) {
+      fprintf(stdout,"    gradation: %7d updated, %d iter\n",nup+nupv,it+itv);
+    }
+    else {
+      fprintf(stdout,"    surface gradation: %7d updated, %d iter\n"
+              "    volume gradation:  %7d updated, %d iter\n",nup,it,nupv,itv);
+    }
+  }
   return(1);
 }

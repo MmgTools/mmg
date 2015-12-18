@@ -22,7 +22,7 @@
 */
 
 /**
- * \file mmg3d/libmmg3d.c
+ * \file mmg3d/libmmg3df.c
  * \brief Fortran API functions for MMG3D library.
  * \author Charles Dapogny (LJLL, UPMC)
  * \author Cécile Dobrzynski (Inria / IMB, Université de Bordeaux)
@@ -103,6 +103,18 @@ FORTRAN_NAME(MMG3D_MMG3DLIB,mmg3d_mmg3dlib,(MMG5_pMesh *mesh,MMG5_pSol *met,
 }
 
 /**
+ * See \ref MMG3D_mmg3dls function in \ref mmg3d/libmmg3d.h file.
+ */
+FORTRAN_NAME(MMG3D_MMG3DLS,mmg3d_mmg3dls,(MMG5_pMesh *mesh,MMG5_pSol *met,
+                                          int* retval),
+             (mesh,met,retval)){
+
+  *retval = MMG3D_mmg3dls(*mesh,*met);
+
+  return;
+}
+
+/**
  * See \ref MMG3D_mmg3dmov function in \ref mmg3d/libmmg3d.h file.
  */
 FORTRAN_NAME(MMG3D_MMG3DMOV,mmg3d_mmg3dmov,(MMG5_pMesh *mesh,MMG5_pSol *met
@@ -136,6 +148,7 @@ FORTRAN_NAME(MMG5_SAVEMESH,mmg5_savemesh,(MMG5_pMesh *mesh, int* retval),
   *retval = MMG5_saveMesh(*mesh);
   return;
 }
+
 
 /**
  * See \ref MMG5_mmg3dlib function in \ref mmg3d/libmmg3d.h file.

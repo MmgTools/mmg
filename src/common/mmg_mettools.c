@@ -111,7 +111,8 @@ int _MMG5_intmetsavedir(MMG5_pMesh mesh, double *m,double *n,double *mr) {
  * \param uy distance \f$[p0;p1]\f$ along y axis.
  * \param uz distance \f$[p0;p1]\f$ along z axis.
  * \param mr computed metric tensor.
- * \return 1.
+ *
+ * \return 1 if success
  *
  * Build metric tensor at ridge point p0, when computations with respect to p1
  * are to be held.
@@ -170,8 +171,6 @@ int _MMG5_buildridmet(MMG5_pMesh mesh,MMG5_pSol met,int np0,
  * \param np0 index of edge's extremity.
  * \param nt.
  * \param mr computed metric tensor.
- *
- * \return 1.
  *
  * Build metric tensor at ridge point \a p0, when the 'good' normal direction is
  * given by \a nt.
@@ -397,6 +396,7 @@ static int _MMG5_intersecmet22(MMG5_pMesh mesh, double *m,double *n,double *mr) 
  * \param met pointer toward the metric structure.
  * \param np global index of vertex in which we intersect the metrics.
  * \param me physical metric at point \a np.
+ * \param n normal or tangent at point np.
  * \return 0 if fail, 1 otherwise.
  *
  * Intersect the surface metric held in np (supported in tangent plane of \a np)
@@ -405,11 +405,12 @@ static int _MMG5_intersecmet22(MMG5_pMesh mesh, double *m,double *n,double *mr) 
  * specific sizes in the \f$n_1\f$ and \f$n_2\f$ directions.
  *
  */
-int _MMG5_intextmet(MMG5_pMesh mesh,MMG5_pSol met,int np,double me[6]) {
+int _MMG5_mmgIntextmet(MMG5_pMesh mesh,MMG5_pSol met,int np,double me[6],
+                       double n[3]) {
   MMG5_pPoint         p0;
   MMG5_pxPoint        go;
   double              hu,isqhmin,isqhmax,dd,alpha1,alpha2,alpha3,u[3],a[4];
-  double              *m,*n,*n1,*n2,*t,r[3][3],mrot[6],mr[3],mtan[3],metan[3];
+  double              *m,*n1,*n2,*t,r[3][3],mrot[6],mr[3],mtan[3],metan[3];
   DOUBLE_COMPLEX      ro[3];
   char                i;
 
@@ -446,7 +447,7 @@ int _MMG5_intextmet(MMG5_pMesh mesh,MMG5_pSol met,int np,double me[6]) {
   /* Case of a ridge point : take sizes in 3 directions t,n1,u */
   else if ( p0->tag & MG_GEO ) {
     /* Size prescribed by metric me in direction t */
-    t = &p0->n[0];
+    t = n;
     hu = me[0]*t[0]*t[0] + me[3]*t[1]*t[1] + me[5]*t[2]*t[2] \
       + 2.0*me[1]*t[0]*t[1] + 2.0*me[2]*t[0]*t[2] + 2.0*me[4]*t[1]*t[2];
 
@@ -516,7 +517,6 @@ int _MMG5_intextmet(MMG5_pMesh mesh,MMG5_pSol met,int np,double me[6]) {
   }
   /* Case of a ref, or regular point : intersect metrics in tangent plane */
   else {
-    n = &p0->n[0];
     _MMG5_rotmatrix(n,r);
 
     /* Expression of both metrics in tangent plane */
