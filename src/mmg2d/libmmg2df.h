@@ -428,19 +428,60 @@
 ! int MMG2D_saveSol(MMG5_pMesh ,MMG5_pSol ,char *);
 ! int MMG2D_saveVect(MMG5_pMesh mesh,MMG5_pSol sol,char *filename,double lambda);
 
-
 ! /**
 !  * \param mesh pointer toward the mesh structure.
-!  * \param met pointer toward the sol (metric or level-set) structure.
-!  * \return \ref MMG5_SUCCESS if success, \ref MMG5_LOWFAILURE if fail but a
-!  * conform mesh is saved or \ref MMG5_STRONGFAILURE if fail and we can't save
-!  * the mesh.
+!  * \param sol pointer toward a sol structure (metric).
+!  * \param titi callback function.
+!  * \return \ref MMG5_SUCCESS if success, \ref MMG5_LOWFAILURE if failed
+!  * but a conform mesh is saved and \ref MMG5_STRONGFAILURE if failed and we
+!  * can't save the mesh.
 !  *
-!  * Main program for the remesh library.
+!  * Main program for the mesh adaptation library .
 !  *
 !  */
 
-! int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol sol,void (*titi)(int ,int,int,int,int));
+! int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol sol,void (*titi)(int ,int ,int,int,int));
+
+! /**
+!  * \param mesh pointer toward the mesh structure.
+!  * \param sol pointer toward a sol structure (metric).
+!  * \param titi callback function.
+!  * \return \ref MMG5_SUCCESS if success, \ref MMG5_LOWFAILURE if failed
+!  * but a conform mesh is saved and \ref MMG5_STRONGFAILURE if failed and we
+!  * can't save the mesh.
+!  *
+!  * Main program for the mesh generation library .
+!  *
+!  */
+
+! int MMG2D_mmg2dmesh(MMG5_pMesh mesh,MMG5_pSol sol,void (*titi)(int ,int ,int,int,int));
+
+! /**
+!  * \param mesh pointer toward the mesh structure.
+!  * \param sol pointer toward a sol structure (metric).
+!  * \param titi callback function.
+!  * \return \ref MMG5_SUCCESS if success, \ref MMG5_LOWFAILURE if failed
+!  * but a conform mesh is saved and \ref MMG5_STRONGFAILURE if failed and we
+!  * can't save the mesh.
+!  *
+!  * Main program for the level-set discretization library .
+!  *
+!  */
+
+! int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol,void (*titi)(int ,int ,int,int,int)) ;
+! /**
+!  * \param mesh pointer toward the mesh structure.
+!  * \param sol pointer toward a sol structure (displacement).
+!  * \param titi callback function.
+!  * \return \ref MMG5_SUCCESS if success, \ref MMG5_LOWFAILURE if failed
+!  * but a conform mesh is saved and \ref MMG5_STRONGFAILURE if failed and we
+!  * can't save the mesh.
+!  *
+!  * Main program for the rigid body movement library .
+!  *
+!  */
+
+! int MMG2D_mmg2dmov(MMG5_pMesh mesh,MMG5_pSol sol,void (*titi)(int ,int ,int,int,int));
 
 ! /* Tools for the library */
 ! void (*MMG2D_callbackinsert) (int ,int ,int ,int, int);

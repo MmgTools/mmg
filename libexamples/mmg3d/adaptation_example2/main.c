@@ -22,7 +22,7 @@
 */
 
 /**
- * Example of use of the mmgs library (advanced use of mesh adaptation)
+ * Example of use of the mmg3d library (advanced use of mesh adaptation)
  *
  * \author Charles Dapogny (LJLL, UPMC)
  * \author Cécile Dobrzynski (Inria / IMB, Université de Bordeaux)
@@ -41,11 +41,11 @@
 #include <math.h>
 #include <float.h>
 
-/** Include the mmgs library hader file */
+/** Include the mmg3d library hader file */
 // if the header file is in the "include" directory
-// #include "libmmgs.h"
-// if the header file is in "include/mmg/mmgs"
-#include "mmg/mmgs/libmmgs.h"
+// #include "libmmg3d.h"
+// if the header file is in "include/mmg/mmg3d"
+#include "mmg/mmg3d/libmmg3d.h"
 
 int main(int argc,char *argv[]) {
   MMG5_pMesh      mmgMesh;
@@ -53,107 +53,108 @@ int main(int argc,char *argv[]) {
   int             k,ier;
   char            *pwd,*inname,*outname;
 
-  fprintf(stdout,"  -- TEST MMGSLIB \n");
+  fprintf(stdout,"  -- TEST MMG3DLIB \n");
 
   /* Name and path of the mesh files */
   pwd = getenv("PWD");
-  inname = (char *) calloc(strlen(pwd) + 40, sizeof(char));
+  inname = (char *) calloc(strlen(pwd) + 51, sizeof(char));
   if ( inname == NULL ) {
     perror("  ## Memory problem: calloc");
     exit(EXIT_FAILURE);
   }
-  outname = (char *) calloc(strlen(pwd) + 49, sizeof(char));
+  outname = (char *) calloc(strlen(pwd) + 60, sizeof(char));
   if ( outname == NULL ) {
     perror("  ## Memory problem: calloc");
     exit(EXIT_FAILURE);
   }
-  sprintf(inname, "%s%s%s", pwd, "/../libexamples/mmgs/example1/", "2spheres");
+  sprintf(inname, "%s%s%s", pwd, "/../libexamples/mmg3d/adaptation_example2/", "2spheres");
 
   /** 1) Initialisation of mesh and sol structures */
   /* args of InitMesh: mesh=&mmgMesh, sol=&mmgSol */
   mmgMesh = NULL;
   mmgSol  = NULL;
-  MMGS_Init_mesh(&mmgMesh,&mmgSol,NULL);
+  MMG3D_Init_mesh(&mmgMesh,&mmgSol,NULL);
 
   /** 2) Build mesh in MMG5 format */
-  /** Two solutions: just use the MMGS_loadMesh function that will read a .mesh(b)
-     file formatted or manually set your mesh using the MMGS_Set* functions */
+  /** Two solutions: just use the MMG3D_loadMesh function that will read a .mesh(b)
+     file formatted or manually set your mesh using the MMG3D_Set* functions */
 
-  /** with MMGS_loadMesh function */
+  /** with MMG3D_loadMesh function */
   /** a) (not mandatory): give the mesh name
      (by default, the "mesh.mesh" file is oppened)*/
-  if ( MMGS_Set_inputMeshName(mmgMesh,inname) != 1 )
+  if ( MMG3D_Set_inputMeshName(mmgMesh,inname) != 1 )
     exit(EXIT_FAILURE);
   /** b) function calling */
-  if ( MMGS_loadMesh(mmgMesh) != 1 )  exit(EXIT_FAILURE);
+  if ( MMG3D_loadMesh(mmgMesh) != 1 )  exit(EXIT_FAILURE);
 
   /** 3) Build sol in MMG5 format */
-  /** Two solutions: just use the MMGS_loadSol function that will read a .sol(b)
-      file formatted or manually set your sol using the MMGS_Set* functions */
+  /** Two solutions: just use the MMG3D_loadSol function that will read a .sol(b)
+      file formatted or manually set your sol using the MMG3D_Set* functions */
 
-  /** With MMGS_loadSol function */
+  /** With MMG3D_loadSol function */
   /** a) (not mandatory): give the sol name
      (by default, the "mesh.sol" file is oppened)*/
-  if ( MMGS_Set_inputSolName(mmgMesh,mmgSol,inname) != 1 )
+  if ( MMG3D_Set_inputSolName(mmgMesh,mmgSol,inname) != 1 )
     exit(EXIT_FAILURE);
   /** b) function calling */
-  if ( MMGS_loadSol(mmgMesh,mmgSol) != 1 )
+  if ( MMG3D_loadSol(mmgMesh,mmgSol) != 1 )
     exit(EXIT_FAILURE);
 
   /** 4) (not mandatory): check if the number of given entities match with mesh size */
-  if ( MMGS_Chk_meshData(mmgMesh,mmgSol) != 1 ) exit(EXIT_FAILURE);
+  if ( MMG3D_Chk_meshData(mmgMesh,mmgSol) != 1 ) exit(EXIT_FAILURE);
 
   /** 5) (not mandatory): set your global parameters using the
-      MMGS_Set_iparameter and MMGS_Set_dparameter function
+      MMG3D_Set_iparameter and MMG3D_Set_dparameter function
       (resp. for integer parameters and double param)*/
 
 
   /**------------------- First wave of refinment---------------------*/
 
   /* debug mode ON (default value = OFF) */
-  if ( MMGS_Set_iparameter(mmgMesh,mmgSol,MMGS_IPARAM_debug, 1) != 1 )
+  if ( MMG3D_Set_iparameter(mmgMesh,mmgSol,MMG3D_IPARAM_debug, 1) != 1 )
     exit(EXIT_FAILURE);
 
   /* maximal memory size (default value = 50/100*ram) */
-  if ( MMGS_Set_iparameter(mmgMesh,mmgSol,MMGS_IPARAM_mem, 600) != 1 )
+  if ( MMG3D_Set_iparameter(mmgMesh,mmgSol,MMG3D_IPARAM_mem, 600) != 1 )
     exit(EXIT_FAILURE);
 
   /* Maximal mesh size (default FLT_MAX)*/
-  if ( MMGS_Set_dparameter(mmgMesh,mmgSol,MMGS_DPARAM_hmax,40) != 1 )
+  if ( MMG3D_Set_dparameter(mmgMesh,mmgSol,MMG3D_DPARAM_hmax,40) != 1 )
     exit(EXIT_FAILURE);
 
   /* Minimal mesh size (default 0)*/
-  if ( MMGS_Set_dparameter(mmgMesh,mmgSol,MMGS_DPARAM_hmin,0.001) != 1 )
+  if ( MMG3D_Set_dparameter(mmgMesh,mmgSol,MMG3D_DPARAM_hmin,0.001) != 1 )
     exit(EXIT_FAILURE);
 
   /* Global hausdorff value (default value = 0.01) applied on the whole boundary */
-  if ( MMGS_Set_dparameter(mmgMesh,mmgSol,MMGS_DPARAM_hausd, 0.1) != 1 )
+  if ( MMG3D_Set_dparameter(mmgMesh,mmgSol,MMG3D_DPARAM_hausd, 0.1) != 1 )
     exit(EXIT_FAILURE);
 
   /* Gradation control (default value 1.105) */
-  if ( MMGS_Set_dparameter(mmgMesh,mmgSol,MMGS_DPARAM_hgrad, 2) != 1 )
+  if ( MMG3D_Set_dparameter(mmgMesh,mmgSol,MMG3D_DPARAM_hgrad, 2) != 1 )
     exit(EXIT_FAILURE);
 
   /** library call */
-  ier = MMGS_mmgslib(mmgMesh,mmgSol);
+  ier = MMG3D_mmg3dlib(mmgMesh,mmgSol);
+
   if ( ier == MMG5_STRONGFAILURE ) {
-    fprintf(stdout,"BAD ENDING OF MMGSLIB: UNABLE TO SAVE MESH\n");
+    fprintf(stdout,"BAD ENDING OF MMG3DLIB: UNABLE TO SAVE MESH\n");
     return(ier);
   } else if ( ier == MMG5_LOWFAILURE )
-    fprintf(stdout,"BAD ENDING OF MMGSLIB\n");
+    fprintf(stdout,"BAD ENDING OF MMG3DLIB\n");
 
   /* (Not mandatory) Automatically save the mesh */
-  sprintf(outname, "%s%s%s", pwd, "/../libexamples/mmgs/example1/", "2spheres_1.o.mesh");
-  if ( MMGS_Set_outputMeshName(mmgMesh,outname) != 1 )
+  sprintf(outname, "%s%s%s", pwd, "/../libexamples/mmg3d/adaptation_example2/", "2spheres_1.o.mesh");
+  if ( MMG3D_Set_outputMeshName(mmgMesh,outname) != 1 )
     exit(EXIT_FAILURE);
 
-  MMGS_saveMesh(mmgMesh);
+  MMG3D_saveMesh(mmgMesh);
 
   /* (Not mandatory) Automatically save the solution */
-  if ( MMGS_Set_outputSolName(mmgMesh,mmgSol,outname) != 1 )
+  if ( MMG3D_Set_outputSolName(mmgMesh,mmgSol,outname) != 1 )
     exit(EXIT_FAILURE);
 
-  if ( MMGS_saveSol(mmgMesh,mmgSol) != 1 )
+   if ( MMG3D_saveSol(mmgMesh,mmgSol) != 1 )
     exit(EXIT_FAILURE);
 
 
@@ -162,20 +163,18 @@ int main(int argc,char *argv[]) {
      local values are used instead of the global hausdorff number) */
 
   /* verbosity (default value = 4)*/
-  if ( MMGS_Set_iparameter(mmgMesh,mmgSol,MMGS_IPARAM_verbose, 4) != 1 )
+  if ( MMG3D_Set_iparameter(mmgMesh,mmgSol,MMG3D_IPARAM_verbose, 4) != 1 )
     exit(EXIT_FAILURE);
 
-  if ( MMGS_Set_iparameter(mmgMesh,mmgSol,MMGS_IPARAM_mem, 1000) != 1 )
+  if ( MMG3D_Set_iparameter(mmgMesh,mmgSol,MMG3D_IPARAM_mem, 1000) != 1 )
     exit(EXIT_FAILURE);
-  if ( MMGS_Set_iparameter(mmgMesh,mmgSol,MMGS_IPARAM_debug, 0) != 1 )
+  if ( MMG3D_Set_iparameter(mmgMesh,mmgSol,MMG3D_IPARAM_debug, 0) != 1 )
     exit(EXIT_FAILURE);
 
 
   /** 6) (not mandatory): set your local parameters */
-  /* use a hmin value of 0.005 on ref 36 and 0.1 on ref 38 */
-  /* use a hmax value of 0.05 on ref 36 and 1 on ref 38 */
-  /* For now, the local hausdroff value is not take into account */
-  if ( MMGS_Set_iparameter(mmgMesh,mmgSol,MMGS_IPARAM_numberOfLocalParam,2) != 1 )
+  /* use 2 local hausdorff numbers on ref 36 (hausd = 0.01) and 38 (hausd = 1) */
+  if ( MMG3D_Set_iparameter(mmgMesh,mmgSol,MMG3D_IPARAM_numberOfLocalParam,2) != 1 )
     exit(EXIT_FAILURE);
 
   /** for each local parameter: give the type and reference of the element on which
@@ -190,36 +189,55 @@ int main(int argc,char *argv[]) {
      Then, you can not grow up the hausdorff value (resp. gradation) without
      resetting this metric (but you can decrease this value). */
 
-  if ( MMGS_Set_localParameter(mmgMesh,mmgSol,MMG5_Triangle,36,0.005,0.05,1) != 1 )
+  if ( MMG3D_Set_localParameter(mmgMesh,mmgSol,MMG5_Triangle,36,0.01) != 1 )
     exit(EXIT_FAILURE);
-  if ( MMGS_Set_localParameter(mmgMesh,mmgSol,MMG5_Triangle,38,0.1,1,1) != 1 )
+  if ( MMG3D_Set_localParameter(mmgMesh,mmgSol,MMG5_Triangle,38,1) != 1 )
     exit(EXIT_FAILURE);
 
   /** library call */
-  ier = MMGS_mmgslib(mmgMesh,mmgSol);
+  ier = MMG3D_mmg3dlib(mmgMesh,mmgSol);
+
   if ( ier == MMG5_STRONGFAILURE ) {
-    fprintf(stdout,"BAD ENDING OF MMGSLIB: UNABLE TO SAVE MESH\n");
+    fprintf(stdout,"BAD ENDING OF MMG3DLIB: UNABLE TO SAVE MESH\n");
     return(ier);
   } else if ( ier == MMG5_LOWFAILURE )
-    fprintf(stdout,"BAD ENDING OF MMGSLIB\n");
+    fprintf(stdout,"BAD ENDING OF MMG3DLIB\n");
 
-  /* (Not mandatory) Automatically save the mesh */
-  sprintf(outname, "%s%s%s", pwd, "/../libexamples/mmgs/example1/", "2spheres_2.o.mesh");
-  if ( MMGS_Set_outputMeshName(mmgMesh,outname) != 1 )
+  /**------------------- Last wave of refinment---------------------*/
+  /** library call */
+
+  /* New metric to see the effect of the local hausdorff number on triangles
+     of ref 38: constant and of size 10 */
+  for ( k=1; k<=mmgSol->np; k++ ) {
+    if ( MMG3D_Set_scalarSol(mmgSol,10,k) != 1 ) exit(EXIT_FAILURE);
+  }
+
+  ier = MMG3D_mmg3dlib(mmgMesh,mmgSol);
+
+  if ( ier == MMG5_STRONGFAILURE ) {
+    fprintf(stdout,"BAD ENDING OF MMG3DLIB: UNABLE TO SAVE MESH\n");
+    return(ier);
+  } else if ( ier == MMG5_LOWFAILURE )
+    fprintf(stdout,"BAD ENDING OF MMG3DLIB\n");
+
+
+  /* 7) Automatically save the mesh */
+  sprintf(outname, "%s%s%s", pwd, "/../libexamples/mmg3d/adaptation_example2/", "2spheres_2.o.mesh");
+  if ( MMG3D_Set_outputMeshName(mmgMesh,outname) != 1 )
     exit(EXIT_FAILURE);
 
-  if ( MMGS_saveMesh(mmgMesh) != 1 )
+  if ( MMG3D_saveMesh(mmgMesh) != 1 )
     exit(EXIT_FAILURE);
 
-  /* (Not mandatory) Automatically save the solution */
-  if ( MMGS_Set_outputSolName(mmgMesh,mmgSol,outname) != 1 )
+  /* 8) Automatically save the solution */
+  if ( MMG3D_Set_outputSolName(mmgMesh,mmgSol,outname) != 1 )
     exit(EXIT_FAILURE);
 
-  if ( MMGS_saveSol(mmgMesh,mmgSol) != 1 )
+  if ( MMG3D_saveSol(mmgMesh,mmgSol) != 1 )
     exit(EXIT_FAILURE);
 
-  /* 7) free the MMGS structures */
-  MMGS_Free_all(mmgMesh,mmgSol,NULL);
+  /* 9) free the MMG3D5 structures */
+  MMG3D_Free_all(mmgMesh,mmgSol,NULL);
 
   free(inname);
   inname = NULL;

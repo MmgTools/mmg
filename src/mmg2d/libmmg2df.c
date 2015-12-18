@@ -105,3 +105,39 @@ FORTRAN_NAME(MMG2D_MMG2DLIB,mmg2d_mmg2dlib,(MMG5_pMesh *mesh,MMG5_pSol *met
 
   return;
 }
+/**
+ * See \ref MMG2D_mmg2dmesh function in \ref mmg2d/libmmg2d.h file.
+ */
+//#warning todo : add callbackfunction argument in Fortran
+FORTRAN_NAME(MMG2D_MMG2DMESH,mmg2d_mmg2dmesh,(MMG5_pMesh *mesh,MMG5_pSol *met
+                                          ,int* retval),(mesh,met
+                                                         ,retval)){
+
+  *retval = MMG2D_mmg2dmesh(*mesh,*met,NULL);
+
+  return;
+}
+/**
+ * See \ref MMG2D_mmg2dls function in \ref mmg2d/libmmg2d.h file.
+ */
+//#warning todo : add callbackfunction argument in Fortran
+FORTRAN_NAME(MMG2D_MMG2DLS,mmg2d_mmg2dls,(MMG5_pMesh *mesh,MMG5_pSol *met
+                                          ,int* retval),(mesh,met
+                                                         ,retval)){
+
+  *retval = MMG2D_mmg2dls(*mesh,*met,NULL);
+
+  return;
+}
+/**
+ * See \ref MMG2D_mmg2dmov function in \ref mmg2d/libmmg2d.h file.
+ */
+//#warning todo : add callbackfunction argument in Fortran
+FORTRAN_NAME(MMG2D_MMG2DMOV,mmg2d_mmg2dmov,(MMG5_pMesh *mesh,MMG5_pSol *met
+                                          ,int* retval),(mesh,met
+                                                         ,retval)){
+
+  *retval = MMG2D_mmg2dmov(*mesh,*met,NULL);
+
+  return;
+}

@@ -310,7 +310,6 @@ void _MMG3D_inqua(MMG5_pMesh mesh,MMG5_pSol met);
 void _MMG3D_outqua(MMG5_pMesh mesh,MMG5_pSol met);
 int  _MMG5_badelt(MMG5_pMesh mesh,MMG5_pSol met);
 int _MMG3D_prilen(MMG5_pMesh mesh,MMG5_pSol met,char);
-int _MMG5_DoSol(MMG5_pMesh mesh,MMG5_pSol met);
 void _MMG5_defaultValues(MMG5_pMesh);
 int  _MMG5_intridmet(MMG5_pMesh,MMG5_pSol,int,int,double,double*,double*);
 int  _MMG5_intregmet(MMG5_pMesh,MMG5_pSol,int,char,double, double*);

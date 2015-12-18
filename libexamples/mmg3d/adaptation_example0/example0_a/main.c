@@ -57,12 +57,12 @@ int main(int argc,char *argv[]) {
 
   /* Name and path of the mesh file */
   pwd = getenv("PWD");
-  filename = (char *) calloc(strlen(pwd) + 47, sizeof(char));
+  filename = (char *) calloc(strlen(pwd) + 58, sizeof(char));
   if ( filename == NULL ) {
     perror("  ## Memory problem: calloc");
     exit(EXIT_FAILURE);
   }
-  sprintf(filename, "%s%s%s", pwd, "/../libexamples/mmg3d/example0/example0_a/", "cube");
+  sprintf(filename, "%s%s%s", pwd, "/../libexamples/mmg3d/adaptation_example0/example0_a/", "cube");
 
   /** ------------------------------ STEP   I -------------------------- */
   /** 1) Initialisation of mesh and sol structures */

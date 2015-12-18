@@ -7,10 +7,10 @@ INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/include)
 ###############################################################################
 
 ADD_EXECUTABLE(libmmgs_example0
-  ${CMAKE_SOURCE_DIR}/libexamples/mmgs/example0/main.c ${mmgs_includes})
+  ${CMAKE_SOURCE_DIR}/libexamples/mmgs/adaptation_example0/main.c ${mmgs_includes})
 
 ADD_EXECUTABLE(libmmgs_example1
-  ${CMAKE_SOURCE_DIR}/libexamples/mmgs/example1/main.c ${mmgs_includes})
+  ${CMAKE_SOURCE_DIR}/libexamples/mmgs/adaptation_example1/main.c ${mmgs_includes})
 
  IF ( WIN32 AND ((NOT MINGW) AND USE_SCOTCH) )
     my_add_link_flags(libmmgs_example0 "/SAFESEH:NO")
@@ -45,7 +45,7 @@ IF (CMAKE_Fortran_COMPILER)
   ENABLE_LANGUAGE (Fortran)
 
   ADD_EXECUTABLE(libmmgs_fortran
-    ${CMAKE_SOURCE_DIR}/libexamples/mmgs/example0_fortran/main.F90 ${mmgs_includes})
+    ${CMAKE_SOURCE_DIR}/libexamples/mmgs/adaptation_example0_fortran/main.F90 ${mmgs_includes})
 
   IF ( WIN32 AND ((NOT MINGW) AND USE_SCOTCH) )
     my_add_link_flags(libmmgs_fortran "/SAFESEH:NO")

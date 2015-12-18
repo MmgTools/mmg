@@ -36,10 +36,6 @@
 #include "libmmg2d.h"
 
 /* constantes */
-#define M_VER   "2.0"
-#define M_REL   "SEPTEMBER 2014"
-#define M_CPY   "Copyright (c) LJLL/IMB, 2007-"
-#define M_STR   "&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&"
 
 #define M_MAX(a,b) (((a) > (b)) ? (a) : (b))
 #define M_MIN(a,b) (((a) < (b)) ? (a) : (b))

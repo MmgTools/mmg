@@ -59,28 +59,27 @@ int _MMG5_mmgsChkmsh(MMG5_pMesh mesh,int severe,int base) {
                 fprintf(stdout,"  0. Missing edge tag %d %d\n",k,adj);
                 printf("k %d: %d %d %d \n",k,pt1->v[0],pt1->v[1],pt1->v[2]);
                 printf("tag (%d): %d %d %d \n",k,pt1->tag[0],pt1->tag[1],pt1->tag[2]);
-                MMGS_saveMesh(mesh);
-                exit(1);
+                return(0);
             }
             if ( adj == k ) {
                 fprintf(stdout,"  1. Wrong adjacency %d %d\n",k,adj);
                 printf("k %d: %d %d %d \n",k,pt1->v[0],pt1->v[1],pt1->v[2]);
                 printf("adj (%d): %d %d %d \n",k,adja[0]/3,adja[1]/3,adja[2]/3);
-                MMGS_saveMesh(mesh);
-                exit(1);
+                //MMGS_saveMesh(mesh);
+                return(0);
             }
             pt2 = &mesh->tria[adj];
             if ( !MG_EOK(pt2) ) {
                 fprintf(stdout,"  4. Invalid adjacent %d %d\n",adj,k);
                 printf("sommets k   %d: %d %d %d\n",k,pt1->v[0],pt1->v[1],pt1->v[2]);
                 printf("sommets adj %d: %d %d %d \n",adj,pt2->v[0],pt2->v[1],pt2->v[2]);
-                MMGS_saveMesh(mesh);
-                exit(1);
+                //MMGS_saveMesh(mesh);
+                return(0);
             }
-            if ( (pt1->tag[i] != pt2->tag[voy]) || (pt1->edg[i] != pt2->edg[i] ) ) {
+            if ( (pt1->tag[i] != pt2->tag[voy]) || (pt1->edg[i] != pt2->edg[voy] ) ) {
                 fprintf(stdout,"  3. Wrong tag/ref %d %d  %d - %d\n",k,adj,pt1->tag[i],pt2->tag[voy]);
                 MMGS_saveMesh(mesh);
-                exit(1);
+                return(0);
             }
             adjb = &mesh->adja[3*(adj-1)+1];
             adj1 = adjb[voy] / 3;
@@ -91,15 +90,15 @@ int _MMG5_mmgsChkmsh(MMG5_pMesh mesh,int severe,int base) {
                 printf("a %d: %d %d %d \n",adj,pt2->v[0],pt2->v[1],pt2->v[2]);
                 printf("adj(%d): %d %d %d\n",k,adja[0]/3,adja[1]/3,adja[2]/3);
                 printf("adj(%d): %d %d %d\n",adj,adjb[0]/3,adjb[1]/3,adjb[2]/3);
-                MMGS_saveMesh(mesh);
-                exit(1);
+                //MMGS_saveMesh(mesh);
+                return(0);
             }
             if ( !MS_SIN(pt1->tag[i]) ) {
                 j1 = _MMG5_inxt2[voy];
                 j2 = _MMG5_iprv2[voy];
                 if ( pt2->v[j2] != pt1->v[i1] || pt2->v[j1] != pt1->v[i2] ) {
                     fprintf(stdout,"  8. Wrong orientation %d %d\n",k,adj);
-                    exit(1);
+                    return(0);
                 }
             }
         }
@@ -120,7 +119,7 @@ int _MMG5_mmgsChkmsh(MMG5_pMesh mesh,int severe,int base) {
             if ( !MG_VOK(ppt) ) {
                 fprintf(stdout,"  6. Unused vertex %d  %d\n",k,ip);
                 printf("%d %d %d\n",pt1->v[0],pt1->v[1],pt1->v[2]);
-                exit(1);
+                return(0);
             }
             else if ( MS_SIN(ppt->tag) )  continue;
 
@@ -132,8 +131,8 @@ int _MMG5_mmgsChkmsh(MMG5_pMesh mesh,int severe,int base) {
                 pt2 = &mesh->tria[kk];
                 if ( pt2->v[nk] != ip ) {
                     fprintf(stdout,"  5. Wrong ball %d, %d\n",ip,pt2->v[nk]);
-                    MMGS_saveMesh(mesh);
-                    exit(1);
+                    //MMGS_saveMesh(mesh);
+                    return(0);
                 }
             }
             len = 0;

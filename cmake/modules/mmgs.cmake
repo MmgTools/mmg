@@ -63,7 +63,6 @@ FILE(
   )
 LIST(REMOVE_ITEM sourcemmgs_files
   ${MMGS_SOURCE_DIR}/mmgs.c
-  ${MMGS_SOURCE_DIR}/lib${PROJECT_NAME}s.c
   ${MMGS_SOURCE_DIR}/lib${PROJECT_NAME}sf.c
   ${CMAKE_SOURCE_DIR}/src/libmmg.h
   ${CMAKE_SOURCE_DIR}/src/libmmgf.h

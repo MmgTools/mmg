@@ -540,13 +540,13 @@ int MMG2D_loadSol(MMG5_pMesh mesh,MMG5_pSol sol,char *filename,int msh) {
         fscanf(inm,"%d",&dim);
         if(dim!=2 && !msh) {
           fprintf(stdout,"  -- BAD SOL DIMENSION : %d\n",dim);
-          return(0);
+          return(-1);
         } else if(dim!=2 && msh) {
           if(dim==3) 
             fprintf(stdout,"  -- READ 3D SOLUTION : %d\n",dim);
           else {
             fprintf(stdout,"  -- BAD SOL DIMENSION : %d\n",dim);
-            return(0);
+            return(-1);
           }
         }
         continue;
@@ -555,7 +555,7 @@ int MMG2D_loadSol(MMG5_pMesh mesh,MMG5_pSol sol,char *filename,int msh) {
         fscanf(inm,"%d",&type);
         if(type!=1) {
           fprintf(stdout,"SEVERAL SOLUTION => IGNORED : %d\n",type);
-          return(0);
+          return(-1);
         }
         fscanf(inm,"%d",&btyp);
         posnp = ftell(inm);
@@ -582,7 +582,7 @@ int MMG2D_loadSol(MMG5_pMesh mesh,MMG5_pSol sol,char *filename,int msh) {
         if(bdim!=2) {
           fprintf(stdout,"BAD SOL DIMENSION : %d\n",dim);
           exit(0);
-          return(0);
+          return(-1);
         }
         continue;
       } else if(binch==62) {  //SolAtVertices
@@ -594,7 +594,7 @@ int MMG2D_loadSol(MMG5_pMesh mesh,MMG5_pSol sol,char *filename,int msh) {
         if(iswp) binch=MMG_swapbin(binch);
         if(binch!=1) {
           fprintf(stdout,"SEVERAL SOLUTION => IGNORED : %d\n",type);
-          return(0);
+          return(-1);
         }
         fread(&btyp,sw,1,inm); //typsol
         if(iswp) btyp=MMG_swapbin(btyp);
@@ -612,13 +612,13 @@ int MMG2D_loadSol(MMG5_pMesh mesh,MMG5_pSol sol,char *filename,int msh) {
 
   if ( !sol->np ) {
     fprintf(stdout,"  ** MISSING DATA.\n");
-    return(0);
+    return(-1);
   }
   if ( btyp!= 1 && btyp!=3 ) {
     fprintf(stdout,"  ** DATA IGNORED\n");
     sol->size = 1;
     sol->np = 0;
-    return(0);
+    return(-1);
   }
   sol->size = btyp;
 

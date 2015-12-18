@@ -38,20 +38,6 @@
 
 mytime         MMG5_ctim[TIMEMAX];
 
-/**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward a sol structure (metric or solution).
- * \param ... optional arguments: not used for now. To end by the NULL value.
- *
- * Deallocations before return.
- *
- * \Remark To call with NULL as last argument.
- *
- */
-void MMGS_Free_all(MMG5_pMesh mesh,MMG5_pSol met,... ){
-
-  MMGS_Free_structures(mesh,met);
-}
 
 /**
  * Print elapsed time at end of process.
@@ -62,16 +48,6 @@ static void _MMG5_endcod() {
   chrono(OFF,&MMG5_ctim[0]);
   printim(MMG5_ctim[0].gdif,stim);
   fprintf(stdout,"\n   ELAPSED TIME  %s\n",stim);
-}
-
-/**
- * \param mesh pointer toward the mesh structure (unused).
- *
- * Set pointer for MMGS_saveMesh function.
- *
- */
-void MMGS_Set_saveFunc(MMG5_pMesh mesh) {
-  _MMGS_saveMeshinternal = _MMGS_saveAllMesh;
 }
 
 /**
@@ -372,10 +348,10 @@ static int _MMG5_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
 }
 
 int main(int argc,char *argv[]) {
-  MMG5_Mesh mesh;
-  MMG5_Sol  met;
-  int       ier;
-  char      stim[32];
+  MMG5_pMesh mesh;
+  MMG5_pSol  met;
+  int        ier;
+  char       stim[32];
 
   fprintf(stdout,"  -- MMGS, Release %s (%s) \n",MG_VER,MG_REL);
   fprintf(stdout,"     %s\n",MG_CPY);
@@ -396,101 +372,59 @@ int main(int argc,char *argv[]) {
   chrono(ON,&MMG5_ctim[0]);
 
   /* assign default values */
-  memset(&mesh,0,sizeof(MMG5_Mesh));
-  memset(&met,0,sizeof(MMG5_Sol));
+  mesh = NULL;
+  met  = NULL;
 
-  MMGS_Init_parameters(&mesh);
-
-  met.size    = 1;
+  MMGS_Init_mesh(&mesh,&met);
+  /* reset default values for file names */
+  MMGS_Free_names(mesh,met);
 
   /* command line */
-  if ( !_MMG5_parsar(argc,argv,&mesh,&met) )  return(MMG5_STRONGFAILURE);
+  if ( !_MMG5_parsar(argc,argv,mesh,met) )  return(MMG5_STRONGFAILURE);
 
   /* load data */
   fprintf(stdout,"\n  -- INPUT DATA\n");
   chrono(ON,&MMG5_ctim[1]);
 
-  if ( !MMGS_loadMesh(&mesh) )
-    _MMG5_RETURN_AND_FREE(&mesh,&met,MMG5_STRONGFAILURE);
+  if ( !MMGS_loadMesh(mesh) )
+    _MMG5_RETURN_AND_FREE(mesh,met,MMG5_STRONGFAILURE);
 
-  ier = MMGS_loadSol(&mesh,&met);
+  ier = MMGS_loadSol(mesh,met);
   if ( ier==-1 ) {
       fprintf(stdout,"  ## ERROR: WRONG DATA TYPE OR WRONG SOLUTION NUMBER.\n");
-      _MMG5_RETURN_AND_FREE(&mesh,&met,MMG5_STRONGFAILURE);
+      _MMG5_RETURN_AND_FREE(mesh,met,MMG5_STRONGFAILURE);
   }
 
-  if ( !_MMG5_parsop(&mesh,&met) )
-    _MMG5_RETURN_AND_FREE(&mesh,&met,MMG5_LOWFAILURE);
+  if ( !_MMG5_parsop(mesh,met) )
+    _MMG5_RETURN_AND_FREE(mesh,met,MMG5_LOWFAILURE);
 
-  if ( !_MMG5_scaleMesh(&mesh,&met) )
-    _MMG5_RETURN_AND_FREE(&mesh,&met,MMG5_STRONGFAILURE);
+  if ( !_MMG5_scaleMesh(mesh,met) )
+    _MMG5_RETURN_AND_FREE(mesh,met,MMG5_STRONGFAILURE);
 
   chrono(OFF,&MMG5_ctim[1]);
   printim(MMG5_ctim[1].gdif,stim);
   fprintf(stdout,"  -- DATA READING COMPLETED.     %s\n",stim);
 
-  /* analysis */
-  chrono(ON,&MMG5_ctim[2]);
-  MMGS_setfunc(&mesh,&met);
-  MMGS_Set_saveFunc(&mesh);
+  ier = MMGS_mmgslib(mesh,met);
 
-  fprintf(stdout,"\n  %s\n   MODULE MMGS-LJLL : %s (%s)\n  %s\n",MG_STR,MG_VER,MG_REL,MG_STR);
-  if ( mesh.info.imprim )   fprintf(stdout,"\n  -- PHASE 1 : ANALYSIS\n");
-  if ( !_MMGS_analys(&mesh) )
-    _MMG5_RETURN_AND_FREE(&mesh,&met,MMG5_LOWFAILURE);
-
-  if ( abs(mesh.info.imprim) > 0 ) _MMGS_inqua(&mesh,&met);
-
-  if ( mesh.info.imprim > 1 && met.m ) _MMGS_prilen(&mesh,&met,0);
-
-  chrono(OFF,&MMG5_ctim[2]);
-  if ( mesh.info.imprim ) {
-    printim(MMG5_ctim[2].gdif,stim);
-    fprintf(stdout,"  -- PHASE 1 COMPLETED.     %s\n",stim);
-  }
-
-  /* solve */
-  chrono(ON,&MMG5_ctim[3]);
-  if ( mesh.info.imprim )
-    fprintf(stdout,"\n  -- PHASE 2 : %s MESHING\n",met.size < 6 ? "ISOTROPIC" : "ANISOTROPIC");
-  if ( !_MMG5_mmgs1(&mesh,&met) )  {
-    if ( (!mesh.adja) && !_MMGS_hashTria(&mesh) ) {
-      fprintf(stdout,"  ## Hashing problem. Unable to save mesh.\n");
-      _MMG5_RETURN_AND_FREE(&mesh,&met,MMG5_STRONGFAILURE);
-    }
-    if ( !_MMG5_unscaleMesh(&mesh,&met) )
-      _MMG5_RETURN_AND_FREE(&mesh,&met,MMG5_STRONGFAILURE);
-    if ( !MMGS_saveMesh(&mesh) )
-      _MMG5_RETURN_AND_FREE(&mesh,&met,MMG5_STRONGFAILURE);
-    if ( met.m && !MMGS_saveSol(&mesh,&met) )
-      _MMG5_RETURN_AND_FREE(&mesh,&met,MMG5_STRONGFAILURE);
-    _MMG5_RETURN_AND_FREE(&mesh,&met,MMG5_LOWFAILURE);
-  }
-  chrono(OFF,&MMG5_ctim[3]);
-  if ( mesh.info.imprim ) {
-    printim(MMG5_ctim[3].gdif,stim);
-    fprintf(stdout,"  -- PHASE 2 COMPLETED.     %s\n",stim);
-  }
-  fprintf(stdout,"\n  %s\n   END OF MODULE MMGS-LJLL \n  %s\n",MG_STR,MG_STR);
-
-  /* save file */
-  _MMGS_outqua(&mesh,&met);
-  if ( mesh.info.imprim > 1 )  _MMGS_prilen(&mesh,&met,1);
+  if ( ier == MMG5_STRONGFAILURE )
+    _MMG5_RETURN_AND_FREE(mesh,met,MMG5_STRONGFAILURE);
 
   chrono(ON,&MMG5_ctim[1]);
-  if ( mesh.info.imprim )  fprintf(stdout,"\n  -- WRITING DATA FILE %s\n",mesh.nameout);
-  if ( !_MMG5_unscaleMesh(&mesh,&met) )
-    _MMG5_RETURN_AND_FREE(&mesh,&met,MMG5_STRONGFAILURE);
-  if ( !MMGS_saveMesh(&mesh) )
-    _MMG5_RETURN_AND_FREE(&mesh,&met,MMG5_STRONGFAILURE);
-  if ( !MMGS_saveSol(&mesh,&met) )
-    _MMG5_RETURN_AND_FREE(&mesh,&met,MMG5_STRONGFAILURE);
+  if ( mesh->info.imprim )
+    fprintf(stdout,"\n  -- WRITING DATA FILE %s\n",mesh->nameout);
+  if ( !_MMG5_unscaleMesh(mesh,met) )
+    _MMG5_RETURN_AND_FREE(mesh,met,MMG5_STRONGFAILURE);
+  if ( !MMGS_saveMesh(mesh) )
+    _MMG5_RETURN_AND_FREE(mesh,met,MMG5_STRONGFAILURE);
+  if ( !MMGS_saveSol(mesh,met) )
+    _MMG5_RETURN_AND_FREE(mesh,met,MMG5_STRONGFAILURE);
   chrono(OFF,&MMG5_ctim[1]);
-  if ( mesh.info.imprim )  fprintf(stdout,"  -- WRITING COMPLETED\n");
+  if ( mesh->info.imprim )  fprintf(stdout,"  -- WRITING COMPLETED\n");
 
   /* release memory */
   /* free mem */
-  _MMG5_RETURN_AND_FREE(&mesh,&met,MMG5_SUCCESS);
+  _MMG5_RETURN_AND_FREE(mesh,met,ier);
 
   return(0);
 }

@@ -76,7 +76,6 @@ FILE(
   )
 LIST(REMOVE_ITEM source_files
   ${MMG3D_SOURCE_DIR}/mmg3d.c
-  ${MMG3D_SOURCE_DIR}/lib${PROJECT_NAME}3d.c
   ${MMG3D_SOURCE_DIR}/lib${PROJECT_NAME}3df.c
   ${CMAKE_SOURCE_DIR}/src/libmmg.h
   ${CMAKE_SOURCE_DIR}/src/libmmgf.h
@@ -90,7 +89,6 @@ FILE(
   GLOB
   lib_file
   #${MMG3D_SOURCE_DIR}/library_tools.c
-  ${MMG3D_SOURCE_DIR}/lib${PROJECT_NAME}3d.c
   ${MMG3D_SOURCE_DIR}/lib${PROJECT_NAME}3df.c
   )
 
@@ -293,8 +291,7 @@ IF ( BUILD_TESTING )
       ENDIF ()
       ADD_TEST(NAME libmmg3d_example5   COMMAND ${LIBMMG3D_EXEC5})
 
-      SET(LIBMMG3D_EXEC3 ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_example3)
-      SET( LISTEXEC_MMG3D ${LISTEXEC_MMG3D} ${LIBMMG3D_EXEC3} )
+      SET( LISTEXEC_MMG3D ${LISTEXEC_MMG3D} )
 
       IF ( CMAKE_Fortran_COMPILER)
         SET(LIBMMG3D_EXECFORTRAN_a ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_fortran_a)

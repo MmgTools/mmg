@@ -110,18 +110,19 @@ int MMG2_tassage(MMG5_pMesh mesh,MMG5_pSol sol) {
   mesh->nt = nt;
 
   /* compact metric */
-  nbl = 1;
-  for (k=1; k<=mesh->np; k++) {
-    ppt = &mesh->point[k];
-    if ( ppt->tag & M_NUL )  continue;
-    isol    = (k-1) * sol->size + 1;
-    isolnew = (nbl-1) * sol->size + 1;
+  if ( sol->m ) {
+    nbl = 1;
+    for (k=1; k<=mesh->np; k++) {
+      ppt = &mesh->point[k];
+      if ( ppt->tag & M_NUL )  continue;
+      isol    = (k-1) * sol->size + 1;
+      isolnew = (nbl-1) * sol->size + 1;
 
-    for (i=0; i<sol->size; i++)
-      sol->m[isolnew + i] = sol->m[isol + i];
-    ++nbl;
+      for (i=0; i<sol->size; i++)
+        sol->m[isolnew + i] = sol->m[isol + i];
+      ++nbl;
+    }
   }
-
 
   /*compact vertices*/
   np  = 0;
@@ -144,7 +145,7 @@ int MMG2_tassage(MMG5_pMesh mesh,MMG5_pSol sol) {
     nbl++;
   }
   mesh->np = np;
-  sol->np  = np;
+  if ( sol->m ) sol->np  = np;
 
   for(k=1 ; k<=mesh->np ; k++)
     mesh->point[k].tmp = 0;
@@ -189,10 +190,25 @@ int MMG2_tassage(MMG5_pMesh mesh,MMG5_pSol sol) {
   optdbl[0] = hgrad
   optdbl[1] =ar
 */
-int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol sol,void (*titi)(int ,int ,int,int,int)) {
 
-  fprintf(stdout,"  -- MMG2D, Release %s (%s) \n",M_VER,M_REL);
-  fprintf(stdout,"     %s\n",M_CPY);
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param sol pointer toward a sol structure (metric).
+ * \param titi callback function.
+ * \return \ref MMG5_SUCCESS if success, \ref MMG5_LOWFAILURE if failed
+ * but a conform mesh is saved and \ref MMG5_STRONGFAILURE if failed and we
+ * can't save the mesh.
+ *
+ * Main program for the mesh adaptation library .
+ *
+ */
+int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol sol,void (*titi)(int ,int ,int,int,int))
+ {
+  mytime    ctim[TIMEMAX];
+  char      stim[32];
+
+  fprintf(stdout,"  -- MMG2D, Release %s (%s) \n",MG_VER,MG_REL);
+  fprintf(stdout,"     %s\n",MG_CPY);
   fprintf(stdout,"     %s %s\n",__DATE__,__TIME__);
 
   MMG2D_callbackinsert = titi;
@@ -204,9 +220,34 @@ int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol sol,void (*titi)(int ,int ,int,int,
   signal(SIGTERM,_MMG2_excfun);
   signal(SIGINT,_MMG2_excfun);
 
+  tminit(ctim,TIMEMAX);
+  chrono(ON,&(ctim[0]));
+
+  /* Check options */
+  if ( !mesh->nt ) {
+    fprintf(stdout,"\n  ## ERROR: NO TRIANGLES IN THE MESH. \n");
+    fprintf(stdout,"          To generate a mesh from boundaries call the"
+            " MMG2D_mmg2dmesh function\n.");
+    return(MMG5_STRONGFAILURE);
+  }
+  else if ( mesh->info.iso ) {
+    fprintf(stdout,"  ## Error: level-set discretisation unavailable"
+            " (MMG2D_IPARAM_iso):\n"
+            "          You must call the MMG2D_mmg2dls function to use this option.\n");
+    return(MMG5_STRONGFAILURE);
+  } else if ( mesh->info.lag >= 0 ) {
+    fprintf(stdout,"  ## Error: lagrangian mode unavailable (MMG2D_IPARAM_lag):\n"
+            "            You must call the MMG2D_mmg2dmov function to move a rigidbody.\n");
+    return(MMG5_STRONGFAILURE);
+  }
+
+  if ( mesh->info.imprim ) fprintf(stdout,"\n  -- MMG2DLIB: INPUT DATA\n");
+  /* load data */
+  chrono(ON,&(ctim[1]));
+
   sol->np = mesh->np;
-  sol->size = 1;
   sol->ver  = mesh->ver;
+
   if ( !sol->m ) {
     /* mem alloc */
     _MMG5_SAFE_CALLOC(sol->m,sol->size*mesh->npmax,double);
@@ -215,10 +256,10 @@ int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol sol,void (*titi)(int ,int ,int,int,
     fprintf(stdout,"  ## WARNING: WRONG SOLUTION NUMBER : %d != %d\n",sol->np,mesh->np);
     //exit(1);
   }
-
-
-  // tminit(ctim,TIMEMAX);
-  //chrono(ON,&ctim[0]);
+  chrono(OFF,&(ctim[1]));
+  printim(ctim[1].gdif,stim);
+  if ( mesh->info.imprim )
+    fprintf(stdout,"  --  INPUT DATA COMPLETED.     %s\n",stim);
 
   /* /\* default values *\/ */
   /* mesh->info.imprim = opt[5]; */
@@ -262,26 +303,16 @@ int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol sol,void (*titi)(int ,int ,int,int,
 
   MMG2D_setfunc(mesh,sol);
   _MMG2D_Set_commonFunc();
- 
-  if(mesh->info.lag >= 0) {
-    /*alloc Disp*/
-    fprintf(stdout,"OPTION LAG NOT AVAILABLE WITH THE LIBRARY   \n");
-    return(MMG5_STRONGFAILURE);
-  }
-  //chrono(OFF,&ctim[1]);
-  //fprintf(stdout,"  -- DATA READING COMPLETED.     %.2f sec.\n",
-  //       gttime(ctim[1]));
-
 
   fprintf(stdout,"\n  %s\n   MODULE MMG2D-IMB/LJLL : %s (%s) %s\n  %s\n",
-          M_STR,M_VER,M_REL,sol->size == 1 ? "ISO" : "ANISO",M_STR);
+          MG_STR,MG_VER,MG_REL,sol->size == 1 ? "ISO" : "ANISO",MG_STR);
   if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug ) {
     fprintf(stdout,"  MAXIMUM NUMBER OF POINTS    (NPMAX) : %8d\n",mesh->npmax);
     fprintf(stdout,"  MAXIMUM NUMBER OF TRIANGLES (NTMAX) : %8d\n",mesh->ntmax);
   }
 
   /* analysis */
-  //chrono(ON,&ctim[2]);
+  chrono(ON,&ctim[2]);
   if ( mesh->info.imprim )   fprintf(stdout,"\n  -- PHASE 1 : DATA ANALYSIS\n");
   if ( abs(mesh->info.imprim) > 4 )
     fprintf(stdout,"  ** SETTING ADJACENCIES\n");
@@ -294,7 +325,6 @@ int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol sol,void (*titi)(int ,int ,int,int,
   if ( mesh->info.dhd>0 )
     if( !MMG2_evalgeom(mesh) ) return(MMG5_STRONGFAILURE);
 
-
   /*mesh gradation*/
   if( mesh->nt && mesh->info.hgrad > 0 ) {
     if ( mesh->info.imprim )   fprintf(stdout,"\n  -- GRADATION : %8f\n",mesh->info.hgrad);
@@ -306,68 +336,43 @@ int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol sol,void (*titi)(int ,int ,int,int,
     MMG2_prilen(mesh,sol);
   }
 
-  //chrono(OFF,&ctim[2]);
-  //fprintf(stdout,"  -- PHASE 1 COMPLETED.     %.2f sec.\n",gttime(ctim[2]));
+  chrono(OFF,&(ctim[2]));
+  printim(ctim[2].gdif,stim);
+  if ( mesh->info.imprim )
+    fprintf(stdout,"  -- PHASE 1 COMPLETED.     %s\n",stim);
 
   /* remeshing */
-  //chrono(ON,&ctim[3]);
-  if ( mesh->info.iso ) {
-    fprintf(stdout,"Fit an embedded mesh\n");
-    MMG2_mmg2d6(mesh,sol);
-    MMG2D_saveMesh(mesh,mesh->nameout);
-    return(MMG5_SUCCESS);
-  } else if ( mesh->info.lag >= 0 ) {
+  chrono(ON,&ctim[3]);
 
-//#warning option 9
-    printf("exit option 9 not implemented\n");
-    exit(1);
-  } else {
-
-    if(!mesh->nt) {
-      if ( mesh->info.imprim )
-        fprintf(stdout,"\n  -- PHASE 2 : MESH GENERATION\n");
-      if ( !MMG2_mmg2d2(mesh,sol) )  {
-        if ( !MMG2_unscaleMesh(mesh,sol) )  return(MMG5_STRONGFAILURE);
-        MMG2D_saveMesh(mesh,mesh->nameout);
-        return(MMG5_LOWFAILURE);
-      }
-      /*geom : corner detection*/
-      if ( mesh->info.dhd>0 )
-        if( !MMG2_evalgeom(mesh) ) return(MMG5_STRONGFAILURE);
-
-
-      /*mesh gradation*/
-      if( mesh->nt && mesh->info.hgrad > 0 ) {
-        if ( mesh->info.imprim )   fprintf(stdout,"\n  -- GRADATION : %8f\n",mesh->info.hgrad);
-        MMG2_lissmet(mesh,sol);
-      }
-      if ( mesh->nt )  MMG2_outqua(mesh,sol);
-      
-      if ( mesh->nt && abs(mesh->info.imprim) > 1 )  {
-        MMG2_prilen(mesh,sol);
-      }
-      if ( (!mesh->info.noinsert) && !MMG2_mmg2d1(mesh,sol) )  return(MMG5_LOWFAILURE);
-      
-    } else {
-      if ( mesh->info.imprim )
-        fprintf(stdout,"\n  -- PHASE 2 : MESH ADAPTATION\n");
-      if ( (!mesh->info.noinsert) && !MMG2_mmg2d1(mesh,sol) )  return(MMG5_LOWFAILURE);
-    }
-
-    /* optimisation */
-    //chrono(ON,&ctim[4]);
-    if ( mesh->info.imprim )
-      fprintf(stdout,"\n  -- PHASE 3 : MESH OPTIMISATION\n");
-    //if ( !optlap(&mesh,&sol) ) return(1);
-    if ( !MMG2_mmg2d0(mesh,sol) )  return(MMG5_LOWFAILURE);
-
-    // chrono(OFF,&ctim[4]);
-    //fprintf(stdout,"  -- PHASE 3 COMPLETED.     %.2f sec.\n",gttime(ctim[4]));
-
+  if ( mesh->info.imprim )
+    fprintf(stdout,"\n  -- PHASE 2 : MESH ADAPTATION\n");
+  if ( (!mesh->info.noinsert) && !MMG2_mmg2d1(mesh,sol) ) {
+    MMG2_tassage(mesh,sol);
+    return(MMG5_LOWFAILURE);
   }
-  //chrono(OFF,&ctim[3]);
-  // fprintf(stdout,"  -- PHASE 2 COMPLETED.     %.2f sec.\n",gttime(ctim[3]));
 
+  /* optimisation */
+  chrono(ON,&ctim[4]);
+  if ( mesh->info.imprim )
+    fprintf(stdout,"\n  -- PHASE 3 : MESH OPTIMISATION\n");
+  //if ( !optlap(&mesh,&sol) ) return(1);
+  if ( !MMG2_mmg2d0(mesh,sol) ) {
+    MMG2_tassage(mesh,sol);
+    return(MMG5_LOWFAILURE);
+  }
+
+  chrono(OFF,&(ctim[4]));
+  printim(ctim[4].gdif,stim);
+  if ( mesh->info.imprim ) {
+    fprintf(stdout,"  -- PHASE 3 COMPLETED.     %s\n",stim);
+  }
+
+  chrono(OFF,&(ctim[3]));
+  printim(ctim[3].gdif,stim);
+  if ( mesh->info.imprim ) {
+    fprintf(stdout,"  -- PHASE 2 COMPLETED.     %s\n",stim);
+    fprintf(stdout,"\n  %s\n   END OF MODULE MMGS: IMB-LJLL \n  %s\n",MG_STR,MG_STR);
+  }
 
   if ( !MMG2_unscaleMesh(mesh,sol) )  return(MMG5_STRONGFAILURE);
 
@@ -376,14 +381,411 @@ int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol sol,void (*titi)(int ,int ,int,int,
   if ( abs(mesh->info.imprim) > 1 )  {
     MMG2_prilen(mesh,sol);
   }
-  //chrono(ON,&ctim[1]);
+
+  chrono(ON,&(ctim[1]));
+  if ( mesh->info.imprim )  fprintf(stdout,"\n  -- MESH PACKED UP\n");
   //MMG2D_saveMesh(mesh,"toto.mesh");
   MMG2_tassage(mesh,sol);
-  //chrono(OFF,&ctim[1]);
+  chrono(OFF,&(ctim[1]));
 
-
+  chrono(OFF,&ctim[0]);
+  printim(ctim[0].gdif,stim);
+  if ( mesh->info.imprim )
+    fprintf(stdout,"\n   MMG2DLIB: ELAPSED TIME  %s\n",stim);
   return(MMG5_SUCCESS);
 
 }
 
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param sol pointer toward a sol structure (metric).
+ * \param titi callback function.
+ * \return \ref MMG5_SUCCESS if success, \ref MMG5_LOWFAILURE if failed
+ * but a conform mesh is saved and \ref MMG5_STRONGFAILURE if failed and we
+ * can't save the mesh.
+ *
+ * Main program for the mesh generation library .
+ *
+ */
+int MMG2D_mmg2dmesh(MMG5_pMesh mesh,MMG5_pSol sol,void (*titi)(int ,int ,int,int,int)) {
+  mytime    ctim[TIMEMAX];
+  char      stim[32];
 
+  fprintf(stdout,"  -- MMG2D, Release %s (%s) \n",MG_VER,MG_REL);
+  fprintf(stdout,"     %s\n",MG_CPY);
+  fprintf(stdout,"     %s %s\n",__DATE__,__TIME__);
+
+  MMG2D_callbackinsert = titi;
+  /* interrupts */
+  signal(SIGABRT,_MMG2_excfun);
+  signal(SIGFPE,_MMG2_excfun);
+  signal(SIGILL,_MMG2_excfun);
+  signal(SIGSEGV,_MMG2_excfun);
+  signal(SIGTERM,_MMG2_excfun);
+  signal(SIGINT,_MMG2_excfun);
+
+  tminit(ctim,TIMEMAX);
+  chrono(ON,&(ctim[0]));
+
+  /* Check options */
+  if ( mesh->nt ) {
+    fprintf(stdout,"  ## Error: your mesh contains already triangles.\n"
+            " The mesh generation option is unavailable.\n");
+    return(MMG5_STRONGFAILURE);
+  }
+  else if ( mesh->info.iso ) {
+    fprintf(stdout,"  ## Error: level-set discretisation unavailable"
+            " (MMG2D_IPARAM_iso):\n"
+            "          You must call the MMG2D_mmg2dls function to use this option.\n");
+    return(MMG5_STRONGFAILURE);
+  } else if ( mesh->info.lag >= 0 ) {
+    fprintf(stdout,"  ## Error: lagrangian mode unavailable (MMG2D_IPARAM_lag):\n"
+            "            You must call the MMG2D_mmg2dmov function to move a rigidbody.\n");
+    return(MMG5_STRONGFAILURE);
+  }
+
+  if ( mesh->info.imprim ) fprintf(stdout,"\n  -- MMG2DMESH: INPUT DATA\n");
+  /* load data */
+  chrono(ON,&(ctim[1]));
+
+  sol->ver  = mesh->ver;
+  if ( !sol->m ) {
+    /* mem alloc */
+    _MMG5_SAFE_CALLOC(sol->m,sol->size*mesh->npmax,double);
+    sol->np = 0;
+  } else   if ( sol->np && (sol->np != mesh->np) ) {
+    fprintf(stdout,"  ## WARNING: WRONG SOLUTION NUMBER : %d != %d\n",sol->np,mesh->np);
+    //exit(1);
+  }
+  chrono(OFF,&(ctim[1]));
+  printim(ctim[1].gdif,stim);
+  if ( mesh->info.imprim )
+    fprintf(stdout,"  --  INPUT DATA COMPLETED.     %s\n",stim);
+
+  MMG2D_setfunc(mesh,sol);
+  _MMG2D_Set_commonFunc();
+
+  fprintf(stdout,"\n  %s\n   MODULE MMG2D-IMB/LJLL : %s (%s) %s\n  %s\n",
+          MG_STR,MG_VER,MG_REL,sol->size == 1 ? "ISO" : "ANISO",MG_STR);
+  if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug ) {
+    fprintf(stdout,"  MAXIMUM NUMBER OF POINTS    (NPMAX) : %8d\n",mesh->npmax);
+    fprintf(stdout,"  MAXIMUM NUMBER OF TRIANGLES (NTMAX) : %8d\n",mesh->ntmax);
+  }
+
+  /* analysis */
+  chrono(ON,&ctim[2]);
+  if ( mesh->info.imprim )   fprintf(stdout,"\n  -- PHASE 1 : DATA ANALYSIS\n");
+  if ( abs(mesh->info.imprim) > 4 )
+    fprintf(stdout,"  ** SETTING ADJACENCIES\n");
+  if ( !MMG2_scaleMesh(mesh,sol) )  return(MMG5_STRONGFAILURE);
+  if ( !sol->np && !MMG2_doSol(mesh,sol) )  return(MMG5_STRONGFAILURE);
+
+  if ( mesh->info.ddebug && !_MMG5_chkmsh(mesh,1,0) )  return(MMG5_STRONGFAILURE);
+  /*geom : corner detection*/
+  if ( mesh->info.dhd>0 )
+    if( !MMG2_evalgeom(mesh) ) return(MMG5_STRONGFAILURE);
+
+  chrono(OFF,&(ctim[2]));
+  printim(ctim[2].gdif,stim);
+  if ( mesh->info.imprim )
+    fprintf(stdout,"  -- PHASE 1 COMPLETED.     %s\n",stim);
+
+  /* specific meshing */
+  chrono(ON,&ctim[3]);
+
+  /* memory alloc */
+  _MMG5_ADD_MEM(mesh,(3*mesh->ntmax+5)*sizeof(int),"adjacency table",
+                printf("  Exit program.\n");
+                exit(EXIT_FAILURE));
+  _MMG5_SAFE_CALLOC(mesh->adja,3*mesh->ntmax+5,int);
+
+  if ( mesh->info.imprim )
+    fprintf(stdout,"\n  -- PHASE 2 : MESH GENERATION\n");
+
+  if ( !MMG2_mmg2d2(mesh,sol) )  {
+    if ( !MMG2_unscaleMesh(mesh,sol) )  return(MMG5_STRONGFAILURE);
+    MMG2_tassage(mesh,sol);
+    return(MMG5_LOWFAILURE);
+  }
+
+  chrono(OFF,&(ctim[3]));
+  printim(ctim[3].gdif,stim);
+  if ( mesh->info.imprim )
+    fprintf(stdout,"  -- PHASE 2 COMPLETED.     %s\n",stim);
+
+  /* remeshing */
+  chrono(ON,&ctim[4]);
+  if ( mesh->info.imprim ) {
+    fprintf(stdout,"\n  -- PHASE 3 : MESH IMPROVEMENT\n");
+  }
+
+  /* analysis */
+  /*geom : corner detection*/
+  if ( mesh->info.dhd>0 )
+    if( !MMG2_evalgeom(mesh) ) return(MMG5_STRONGFAILURE);
+
+
+  /*mesh gradation*/
+  if( mesh->nt && mesh->info.hgrad > 0 ) {
+    if ( mesh->info.imprim )   fprintf(stdout,"\n  -- GRADATION : %8f\n",mesh->info.hgrad);
+    MMG2_lissmet(mesh,sol);
+    }
+  if ( mesh->nt )  MMG2_outqua(mesh,sol);
+
+  if ( mesh->nt && abs(mesh->info.imprim) > 1 )  {
+    MMG2_prilen(mesh,sol);
+  }
+  if ( (!mesh->info.noinsert) && !MMG2_mmg2d1(mesh,sol) ) {
+    MMG2_tassage(mesh,sol);
+    return(MMG5_LOWFAILURE);
+  }
+
+  /* optimisation */
+  chrono(ON,&ctim[5]);
+  if ( mesh->info.imprim )
+    fprintf(stdout,"\n  -- PHASE 4 : MESH OPTIMISATION\n");
+  //if ( !optlap(&mesh,&sol) ) return(1);
+  if ( !MMG2_mmg2d0(mesh,sol) ) {
+    MMG2_tassage(mesh,sol);
+    return(MMG5_LOWFAILURE);
+  }
+
+  chrono(OFF,&(ctim[5]));
+  printim(ctim[5].gdif,stim);
+  if ( mesh->info.imprim ) {
+    fprintf(stdout,"  -- PHASE 4 COMPLETED.     %s\n",stim);
+  }
+
+  chrono(OFF,&(ctim[4]));
+  printim(ctim[4].gdif,stim);
+  if ( mesh->info.imprim ) {
+    fprintf(stdout,"  -- PHASE 3 COMPLETED.     %s\n",stim);
+    fprintf(stdout,"\n  %s\n   END OF MODULE MMGS: IMB-LJLL \n  %s\n",MG_STR,MG_STR);
+  }
+
+  if ( !MMG2_unscaleMesh(mesh,sol) )  return(MMG5_STRONGFAILURE);
+
+  MMG2_outqua(mesh,sol);
+
+  if ( abs(mesh->info.imprim) > 1 )  {
+    MMG2_prilen(mesh,sol);
+  }
+
+  chrono(ON,&(ctim[1]));
+  if ( mesh->info.imprim )  fprintf(stdout,"\n  -- MESH PACKED UP\n");
+  //MMG2D_saveMesh(mesh,"toto.mesh");
+  MMG2_tassage(mesh,sol);
+  chrono(OFF,&(ctim[1]));
+
+  chrono(OFF,&ctim[0]);
+  printim(ctim[0].gdif,stim);
+  if ( mesh->info.imprim )
+    fprintf(stdout,"\n   MMG2DMESH: ELAPSED TIME  %s\n",stim);
+  return(MMG5_SUCCESS);
+
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param sol pointer toward a sol structure (metric).
+ * \param titi callback function.
+ * \return \ref MMG5_SUCCESS if success, \ref MMG5_LOWFAILURE if failed
+ * but a conform mesh is saved and \ref MMG5_STRONGFAILURE if failed and we
+ * can't save the mesh.
+ *
+ * Main program for the level-set discretization library .
+ *
+ */
+int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol,void (*titi)(int ,int ,int,int,int))
+{
+  mytime    ctim[TIMEMAX];
+  char      stim[32];
+
+  fprintf(stdout,"  -- MMG2D, Release %s (%s) \n",MG_VER,MG_REL);
+  fprintf(stdout,"     %s\n",MG_CPY);
+  fprintf(stdout,"     %s %s\n",__DATE__,__TIME__);
+
+  MMG2D_callbackinsert = titi;
+  /* interrupts */
+  signal(SIGABRT,_MMG2_excfun);
+  signal(SIGFPE,_MMG2_excfun);
+  signal(SIGILL,_MMG2_excfun);
+  signal(SIGSEGV,_MMG2_excfun);
+  signal(SIGTERM,_MMG2_excfun);
+  signal(SIGINT,_MMG2_excfun);
+
+  tminit(ctim,TIMEMAX);
+  chrono(ON,&(ctim[0]));
+
+  /* Check options */
+  if ( mesh->info.lag >= 0 ) {
+    fprintf(stdout,"  ## Error: lagrangian mode unavailable (MMG2D_IPARAM_lag):\n"
+            "            You must call the MMG2D_mmg2dmov function to move a rigidbody.\n");
+    return(MMG5_STRONGFAILURE);
+  }
+
+  if ( mesh->info.imprim ) fprintf(stdout,"\n  -- MMG2DLS: INPUT DATA\n");
+  /* load data */
+  chrono(ON,&(ctim[1]));
+
+  sol->ver  = mesh->ver;
+
+  if ( !mesh->nt ) {
+    fprintf(stdout,"\n  ## ERROR: NO TRIANGLES IN THE MESH \n");
+    return(MMG5_STRONGFAILURE);
+  }
+  else if ( !sol->m ) {
+    fprintf(stdout,"\n  ## ERROR: A VALID SOLUTION FILE IS NEEDED \n");
+    return(MMG5_STRONGFAILURE);
+  } else   if ( sol->size != 1 ) {
+    fprintf(stdout,"  ## ERROR: WRONG DATA TYPE.\n");
+    return(MMG5_STRONGFAILURE);
+  } else if ( sol->np && (sol->np != mesh->np) ) {
+    fprintf(stdout,"  ## WARNING: WRONG SOLUTION NUMBER. IGNORED\n");
+    _MMG5_DEL_MEM(mesh,sol->m,(sol->size*(sol->npmax+1))*sizeof(double));
+    sol->np = 0;
+  }
+
+  chrono(OFF,&(ctim[1]));
+  printim(ctim[1].gdif,stim);
+  if ( mesh->info.imprim )
+    fprintf(stdout,"  --  INPUT DATA COMPLETED.     %s\n",stim);
+
+
+  MMG2D_setfunc(mesh,sol);
+ _MMG2D_Set_commonFunc();
+
+  fprintf(stdout,"\n  %s\n   MODULE MMG2D-IMB/LJLL : %s (%s) %s\n  %s\n",
+          MG_STR,MG_VER,MG_REL,sol->size == 1 ? "ISO" : "ANISO",MG_STR);
+  if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug ) {
+    fprintf(stdout,"  MAXIMUM NUMBER OF POINTS    (NPMAX) : %8d\n",mesh->npmax);
+    fprintf(stdout,"  MAXIMUM NUMBER OF TRIANGLES (NTMAX) : %8d\n",mesh->ntmax);
+  }
+
+  /* analysis */
+  chrono(ON,&ctim[2]);
+  if ( mesh->info.imprim )   fprintf(stdout,"\n  -- PHASE 1 : DATA ANALYSIS\n");
+  if ( abs(mesh->info.imprim) > 4 )
+    fprintf(stdout,"  ** SETTING ADJACENCIES\n");
+  if ( !MMG2_scaleMesh(mesh,sol) )  return(MMG5_STRONGFAILURE);
+
+  if ( mesh->nt && !MMG2_hashel(mesh) )  return(MMG5_STRONGFAILURE);
+  if ( mesh->info.ddebug && !_MMG5_chkmsh(mesh,1,0) )  return(MMG5_STRONGFAILURE);
+  /*geom : corner detection*/
+  if ( mesh->info.dhd>0 )
+    if( !MMG2_evalgeom(mesh) ) return(MMG5_STRONGFAILURE);
+
+  MMG2_outqua(mesh,sol);
+
+  chrono(OFF,&(ctim[2]));
+  printim(ctim[2].gdif,stim);
+  if ( mesh->info.imprim )
+    fprintf(stdout,"  -- PHASE 1 COMPLETED.     %s\n",stim);
+
+ chrono(ON,&ctim[3]);
+  if ( mesh->info.imprim ) {
+    fprintf(stdout,"\n  -- PHASE 2 : LEVEL-SET DISCRETIZATION\n");
+  }
+
+  /* specific meshing */
+  if (! MMG2_mmg2d6(mesh,sol) ) return(MMG5_STRONGFAILURE);
+
+
+  chrono(OFF,&(ctim[3]));
+  printim(ctim[3].gdif,stim);
+  if ( mesh->info.imprim )
+    fprintf(stdout,"  -- PHASE 2 COMPLETED.     %s\n",stim);
+
+  /* mesh improvement */
+  chrono(ON,&ctim[4]);
+  if ( mesh->info.imprim ) {
+    fprintf(stdout,"\n  -- PHASE 3 : MESH IMPROVEMENT\n");
+  }
+
+  /* analysis */
+  /* metric creation */
+  _MMG5_SAFE_CALLOC(sol->m,sol->size*mesh->npmax,double);
+  sol->np = 0;
+  if ( !MMG2_doSol(mesh,sol) )  return(MMG5_STRONGFAILURE);
+
+  /*geom : corner detection*/
+  if ( mesh->info.dhd>0 )
+    if( !MMG2_evalgeom(mesh) ) return(MMG5_STRONGFAILURE);
+
+  /*mesh gradation*/
+  if( mesh->info.hgrad > 0 ) {
+    if ( mesh->info.imprim )   fprintf(stdout,"\n  -- GRADATION : %8f\n",
+                                       mesh->info.hgrad);
+    MMG2_lissmet(mesh,sol);
+  }
+
+  if ( (!mesh->info.noinsert) && !MMG2_mmg2d1(mesh,sol) ) {
+    MMG2_tassage(mesh,sol);
+    return(MMG5_LOWFAILURE);
+  }
+
+  /* optimisation */
+  chrono(ON,&ctim[5]);
+  if ( mesh->info.imprim )
+    fprintf(stdout,"\n  -- PHASE 4 : MESH OPTIMISATION\n");
+  //if ( !optlap(&mesh,&sol) ) return(1);
+  if ( !MMG2_mmg2d0(mesh,sol) ) {
+    MMG2_tassage(mesh,sol);
+    return(MMG5_LOWFAILURE);
+  }
+
+  chrono(OFF,&(ctim[5]));
+  printim(ctim[5].gdif,stim);
+  if ( mesh->info.imprim ) {
+    fprintf(stdout,"  -- PHASE 4 COMPLETED.     %s\n",stim);
+  }
+
+  chrono(OFF,&(ctim[4]));
+  printim(ctim[4].gdif,stim);
+  if ( mesh->info.imprim ) {
+    fprintf(stdout,"  -- PHASE 5 COMPLETED.     %s\n",stim);
+    fprintf(stdout,"\n  %s\n   END OF MODULE MMGS: IMB-LJLL \n  %s\n",MG_STR,MG_STR);
+  }
+
+  if ( !MMG2_unscaleMesh(mesh,sol) )  return(MMG5_STRONGFAILURE);
+
+  MMG2_outqua(mesh,sol);
+
+  chrono(ON,&(ctim[1]));
+  if ( mesh->info.imprim )  fprintf(stdout,"\n  -- MESH PACKED UP\n");
+  //MMG2D_saveMesh(mesh,"toto.mesh");
+  MMG2_tassage(mesh,sol);
+  chrono(OFF,&(ctim[1]));
+
+  chrono(OFF,&ctim[0]);
+  printim(ctim[0].gdif,stim);
+  if ( mesh->info.imprim )
+    fprintf(stdout,"\n   MMG2DLIB: ELAPSED TIME  %s\n",stim);
+  return(MMG5_SUCCESS);
+
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param sol pointer toward a sol structure (displacement).
+ * \param titi callback function.
+ * \return \ref MMG5_SUCCESS if success, \ref MMG5_LOWFAILURE if failed
+ * but a conform mesh is saved and \ref MMG5_STRONGFAILURE if failed and we
+ * can't save the mesh.
+ *
+ * Main program for the rigid body movement library .
+ *
+ */
+int MMG2D_mmg2dmov(MMG5_pMesh mesh,MMG5_pSol sol,void (*titi)(int ,int ,int,int,int))
+{
+  mytime    ctim[TIMEMAX];
+  char      stim[32];
+
+  fprintf(stdout,"  -- MMG2D, Release %s (%s) \n",MG_VER,MG_REL);
+  fprintf(stdout,"     %s\n",MG_CPY);
+  fprintf(stdout,"     %s %s\n",__DATE__,__TIME__);
+
+  fprintf(stdout,"\n  ## ERROR: OPTIONALITY NOT YET IMPLEMENTED. \n");
+
+  return(MMG5_STRONGFAILURE);
+}

@@ -1,17 +1,17 @@
 ADD_EXECUTABLE(libmmg3d_example0_a_oldAPI
-  ${CMAKE_SOURCE_DIR}/libexamples/mmg3d/example0/example0_a/main.c)
+  ${CMAKE_SOURCE_DIR}/libexamples/mmg3d/adaptation_example0/example0_a/main.c)
 
 ADD_EXECUTABLE(libmmg3d_example0_b_oldAPI
-  ${CMAKE_SOURCE_DIR}/libexamples/mmg3d/example0/example0_b/main.c)
+  ${CMAKE_SOURCE_DIR}/libexamples/mmg3d/adaptation_example0/example0_b/main.c)
 
 ADD_EXECUTABLE(libmmg3d_example1_oldAPI
-  ${CMAKE_SOURCE_DIR}/libexamples/mmg3d/example1/main.c)
+  ${CMAKE_SOURCE_DIR}/libexamples/mmg3d/adaptation_example1/main.c)
 
 ADD_EXECUTABLE(libmmg3d_example2_oldAPI
-  ${CMAKE_SOURCE_DIR}/libexamples/mmg3d/example2/main.c)
+  ${CMAKE_SOURCE_DIR}/libexamples/mmg3d/adaptation_example2/main.c)
 
 ADD_EXECUTABLE(libmmg3d_example4_oldAPI
-  ${CMAKE_SOURCE_DIR}/libexamples/mmg3d/example4/main.c)
+  ${CMAKE_SOURCE_DIR}/libexamples/mmg3d/LagrangianMotion_example0/main.c)
 
 IF ( WIN32 AND ((NOT MINGW) AND USE_SCOTCH) )
   my_add_link_flags(libmmg3d_example0_a_oldAPI "/SAFESEH:NO")
@@ -56,10 +56,10 @@ IF (CMAKE_Fortran_COMPILER)
   ENABLE_LANGUAGE (Fortran)
 
   ADD_EXECUTABLE(libmmg3d_fortran_a_oldAPI
-    ${CMAKE_SOURCE_DIR}/libexamples/mmg3d/example0_fortran/example0_a/main.F90)
+    ${CMAKE_SOURCE_DIR}/libexamples/mmg3d/adaptation_example0_fortran/example0_a/main.F90)
 
   ADD_EXECUTABLE(libmmg3d_fortran_b_oldAPI
-    ${CMAKE_SOURCE_DIR}/libexamples/mmg3d/example0_fortran/example0_b/main.F90)
+    ${CMAKE_SOURCE_DIR}/libexamples/mmg3d/adaptation_example0_fortran/example0_b/main.F90)
 
   IF ( WIN32 AND ((NOT MINGW) AND USE_SCOTCH) )
     my_add_link_flags(libmmg3d_fortran_a_oldAPI "/SAFESEH:NO")

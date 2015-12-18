@@ -1199,7 +1199,7 @@ int _MMG3D_saveAllMesh(MMG5_pMesh mesh) {
     }
     else
       mesh->memCur -= (long long)((3*mesh->nt+2)*sizeof(MMG5_hgeom));
-  } //fin if bdrytria....
+  } //if bdrytria....
 
     /* tetrahedra */
   ne = nereq = 0;

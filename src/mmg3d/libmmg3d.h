@@ -780,6 +780,17 @@ double (*MMG3D_lenedgCoor)(double *ca,double *cb,double *sa,double *sb);
  */
 int  MMG3D_hashTetra(MMG5_pMesh mesh, int pack);
 
+/**
+ * \param mesh pointer toward the mesh structure
+ * \param met pointer toward the sol structure
+ * \return 1 if success
+ *
+ * Compute isotropic size map according to the mean of the length of the edges
+ * passing through a point.
+ *
+ */
+int MMG3D_DoSol(MMG5_pMesh mesh,MMG5_pSol met);
+
 /** To associate function pointers without calling MMG3D_mmg3dlib */
 /**
  * \param mesh pointer toward the mesh structure (unused).

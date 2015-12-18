@@ -29,8 +29,9 @@ int MMG2_evalgeom(MMG5_pMesh mesh) {
   MMG5_pPoint    ppt,ppa,ppb;      
   double    capx,capy,cbpx,cbpy,alpha,rbound;
   int       *list,k,j,lon,iadr,*adja,nbdry,ibdry[2],ip,i,iel;
-  int       ref;
+  int       ref,nc;
 
+  nc = 0;
   rbound = mesh->info.dhd*M_PI/180.;
   /*corners detection*/
  _MMG5_SAFE_MALLOC(list,MMG2D_LMAX,int);
@@ -93,13 +94,18 @@ int MMG2_evalgeom(MMG5_pMesh mesh) {
       alpha /= sqrt(capx*capx+capy*capy)*sqrt(cbpx*cbpx+cbpy*cbpy);  
       alpha = acos(alpha);
       //printf("point %d : %e (= %e)-- %e %e\n",pt->v[j],alpha,alpha*180./M_PI,capx,capy); 
-      if(alpha < rbound) ppt->tag |= M_CORNER; 
+      if(alpha < rbound && (!(ppt->tag & M_CORNER)) ) {
+        ++nc;
+        ppt->tag |= M_CORNER; 
+      }
       
       ppt->tagdel++;
     } 
   }     
 
   _MMG5_SAFE_FREE(list);
-   
+
+  if ( abs(mesh->info.imprim) > 3 && nc )
+    fprintf(stdout,"     %d corners detected\n",nc);
   return(1); 
 }

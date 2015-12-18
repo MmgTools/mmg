@@ -43,14 +43,14 @@ FOREACH(EXEC ${LISTEXEC_MMG3D})
   ADD_TEST(NAME LeakCheck_AbnormalEnd3_${EXEC}
     COMMAND ${EXEC}
     ${MMG3D_CI_TESTS}/LeakCheck_AbnormalEnd3/d -sol
-    ${MMG3D_CI_TESTS}/LeakCheck_AbnormalEnd3/dsol.sol -ls 2
+    ${MMG3D_CI_TESTS}/LeakCheck_AbnormalEnd3/dsol.sol -ls
     -out ${MMG3D_CI_TESTS}/LeakCheck_AbnormalEnd3/d.o.meshb)
   SET(passRegex "## ERROR: WRONG DATA TYPE OR WRONG SOLUTION NUMBER")
   SET_PROPERTY(TEST LeakCheck_AbnormalEnd3_${EXEC}
     PROPERTY PASS_REGULAR_EXPRESSION "${passRegex}")
   #####
   ADD_TEST(NAME LeakCheck_optLevelSet_${EXEC}
-    COMMAND ${EXEC}  -ls 0 -hgrad 1.5
+    COMMAND ${EXEC}  -ls -hgrad 1.5
     ${MMG3D_CI_TESTS}/LeakCheck_optLevelSet/rect03d
     -out ${MMG3D_CI_TESTS}/LeakCheck_optLevelSet/rect03d.o.meshb)
 

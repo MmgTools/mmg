@@ -14,22 +14,15 @@ doc/doxygen/man
 
 lib
 
-libexamples/mmg2d/example1/mainTESTADJA.c
-libexamples/mmg3d/example0/example0_a/mesh.*
-libexamples/mmg3d/example0/example0_b/mesh.*
-libexamples/mmg3d/example1/result0.*
-libexamples/mmg3d/example2/2spheres_*
-libexamples/mmg3d/example4/tinyBoxt.o*
-libexamples/mmg3d/example5/test.o*
-libexamples/mmgs/example0/mesh.*
-libexamples/mmgs/example0_fortran/mesh.*
-libexamples/mmgs/example1/2spheres_*
-libexamples/mmg/example0/cube.3d.*
-libexamples/mmg/example0/cube.s.*
-libexamples/mmg/example0/result.*
-libexamples/mmg/example0_fortran/cube.3d.*
-libexamples/mmg/example0_fortran/cube.s.*
-libexamples/mmg/example0_fortran/result.*
+libexamples/*/*/mainTESTADJA.c
+libexamples/*/*/*/mesh.*
+libexamples/*/*/result0.*
+libexamples/*/*/2spheres_*
+libexamples/*/*/*.o*
+libexamples/*/*/mesh.*
+libexamples/*/*/cube.3d.*
+libexamples/*/*/cube.s.*
+libexamples/*/*/result.*
 
 ci_tests
 

@@ -171,15 +171,15 @@ int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,double *qdegrad) 
         else if ( !strcmp(argv[i],"-ls") ) {
           if ( !MMG2D_Set_iparameter(mesh,met,MMG2D_IPARAM_iso,1) )
             exit(EXIT_FAILURE);
-          if ( ++i < argc && isdigit(argv[i][0]) ) {
-            if ( !MMG2D_Set_dparameter(mesh,met,MMG2D_DPARAM_ls,atof(argv[i])) )
-              exit(EXIT_FAILURE);
-          }
-          else if ( i == argc ) {
-            fprintf(stderr,"Missing argument option %c%c\n",argv[i-1][1],argv[i-1][2]);
-            usage(argv[0]);
-          }
-          else i--;
+          /* if ( ++i < argc && isdigit(argv[i][0]) ) { */
+          /*   if ( !MMG2D_Set_dparameter(mesh,met,MMG2D_DPARAM_ls,atof(argv[i])) ) */
+          /*     exit(EXIT_FAILURE); */
+          /* } */
+          /* else if ( i == argc ) { */
+          /*   fprintf(stderr,"Missing argument option %c%c\n",argv[i-1][1],argv[i-1][2]); */
+          /*   usage(argv[0]); */
+          /* } */
+          /* else i--; */
         }
         break;
       case 'm':  /* memory */
@@ -372,13 +372,11 @@ static void endcod() {
 }
 
 int main(int argc,char *argv[]) {
-  MMG5_Mesh      mesh;
-  MMG5_Sol	    sol;
-  double        qdegrad[2];  
-
-  fprintf(stdout,"  -- MMG2D, Release %s (%s) \n",M_VER,M_REL);
-  fprintf(stdout,"     %s\n",M_CPY);
-  fprintf(stdout,"     %s %s\n",__DATE__,__TIME__);
+  MMG5_pMesh    mesh;
+  MMG5_pSol     sol;
+  double        qdegrad[2];
+  int           ier;
+  char          stim[32];
 
   /* interrupts */
   signal(SIGABRT,_MMG2_excfun);
@@ -387,42 +385,96 @@ int main(int argc,char *argv[]) {
   signal(SIGSEGV,_MMG2_excfun);
   signal(SIGTERM,_MMG2_excfun);
   signal(SIGINT,_MMG2_excfun);
+
   atexit(endcod);
 
   _MMG2D_Set_commonFunc();
-  //tminit(MMG5_ctim,TIMEMAX);
-  //chrono(ON,&MMG5_ctim[0]);
+  tminit(MMG5_ctim,TIMEMAX);
+  chrono(ON,&MMG5_ctim[0]);
 
-  /* default values */
-  memset(&mesh,0,sizeof(MMG5_Mesh));
-  memset(&sol,0,sizeof(MMG5_Sol));
+  /* assign default values */
+  mesh = NULL;
+  sol  = NULL;
 
-  MMG2D_Init_parameters(&mesh);
+  MMG2D_Init_mesh(&mesh,&sol);
+
+  /* reset default values for file names */
+  MMG2D_Free_names(mesh,sol);
+
   qdegrad[0] = 10./ALPHA;
-  qdegrad[1] = 1.3;   
+  qdegrad[1] = 1.3;
 
-  sol.type = 1;
+//  sol.type = 1;
 
-  if ( !parsar(argc,argv,&mesh,&sol,qdegrad) )  return(1);
+  if ( !parsar(argc,argv,mesh,sol,qdegrad) )  return(MMG5_STRONGFAILURE);
 
   /* load data */
   fprintf(stdout,"\n  -- INPUT DATA\n");
-  //chrono(ON,&MMG5_ctim[1]);
-  if ( MMG2D_loadMesh(&mesh,mesh.namein) < 1) _MMG2D_RETURN_AND_FREE(&mesh,&sol,MMG5_STRONGFAILURE);
+  chrono(ON,&MMG5_ctim[1]);
+  if ( MMG2D_loadMesh(mesh,mesh->namein) < 1)
+    _MMG2D_RETURN_AND_FREE(mesh,sol,MMG5_STRONGFAILURE);
+  /* Set default metric size */
+  if ( !MMG2D_Set_solSize(mesh,sol,MMG5_Vertex,0,MMG5_Scalar) )
+    _MMG2D_RETURN_AND_FREE(mesh,sol,MMG5_STRONGFAILURE);
 
-  if(MMG2D_mmg2dlib(&mesh,&sol,NULL)) _MMG2D_RETURN_AND_FREE(&mesh,&sol,MMG5_STRONGFAILURE);
-  
+  /* read displacement if any */
+  if ( mesh->info.lag >= 0 ) {
+    ier = MMG2D_loadSol(mesh,sol,sol->namein,mesh->info.nreg);
+    if ( ier < 1 ) {
+      fprintf(stdout,"  ## ERROR: UNABLE TO LOAD DISPLACEMENT.\n");
+      _MMG2D_RETURN_AND_FREE(mesh,sol,MMG5_STRONGFAILURE);
+    } else if ( sol->size != 2 ) {
+      fprintf(stdout,"  ## ERROR: WRONG DATA TYPE.\n");
+      _MMG2D_RETURN_AND_FREE(mesh,sol,MMG5_STRONGFAILURE);
+    }
+  }
+  /* read metric if any */
+  else {
+    ier = MMG2D_loadSol(mesh,sol,sol->namein,mesh->info.nreg);
+    if ( ier == -1 ) {
+      if ( (sol->size != MMG5_Scalar) && (sol->size != MMG5_Tensor) ) {
+        fprintf(stdout,"  ## ERROR: WRONG DATA TYPE OR WRONG SOLUTION NUMBER.\n");
+        _MMG2D_RETURN_AND_FREE(mesh,sol,MMG5_STRONGFAILURE);
+      }
+    }
+    if ( mesh->info.iso && !ier ) {
+      fprintf(stdout,"  ## ERROR: NO ISOVALUE DATA.\n");
+      _MMG2D_RETURN_AND_FREE(mesh,sol,MMG5_STRONGFAILURE);
+    }
+  }
+
+  chrono(OFF,&MMG5_ctim[1]);
+  printim(MMG5_ctim[1].gdif,stim);
+  fprintf(stdout,"  -- DATA READING COMPLETED.     %s\n",stim);
+
+  if ( mesh->info.lag > -1 ) {
+    ier = MMG2D_mmg2dmov(mesh,sol,NULL);
+  }
+  else if ( mesh->info.iso ) {
+    ier = MMG2D_mmg2dls(mesh,sol,NULL);
+  }
+  else if ( !mesh->nt ) {
+    ier = MMG2D_mmg2dmesh(mesh,sol,NULL);
+  }
+  else {
+    ier = MMG2D_mmg2dlib(mesh,sol,NULL);
+  }
+
+  if ( ier == MMG5_STRONGFAILURE )
+    _MMG2D_RETURN_AND_FREE(mesh,sol,MMG5_STRONGFAILURE);
+
 /*   } */
-  //chrono(ON,&ctim[1]);
-  fprintf(stdout,"\n  -- WRITING DATA FILE %s\n",mesh.nameout);
-  MMG2D_saveMesh(&mesh,mesh.nameout);
-  if( sol.np )
-    MMG2D_saveSol(&mesh,&sol,mesh.nameout);
+  //chrono(ON,&MMG5_ctim[1]);
+  fprintf(stdout,"\n  -- WRITING DATA FILE %s\n",mesh->nameout);
+  MMG2D_saveMesh(mesh,mesh->nameout);
+  if( sol->np )
+    MMG2D_saveSol(mesh,sol,mesh->nameout);
   fprintf(stdout,"  -- WRITING COMPLETED\n");
-  //chrono(OFF,&ctim[1]);
+  //chrono(OFF,&MMG5_ctim[1]);
 
    /* free mem */
-  _MMG2D_RETURN_AND_FREE(&mesh,&sol,MMG5_SUCCESS);
+  chrono(OFF,&MMG5_ctim[0]);
+  printim(MMG5_ctim[0].gdif,stim);
+  fprintf(stdout,"\n   MMG2D: ELAPSED TIME  %s\n",stim);
+  _MMG2D_RETURN_AND_FREE(mesh,sol,ier);
 }
-  
-

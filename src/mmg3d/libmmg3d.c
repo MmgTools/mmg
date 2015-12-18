@@ -279,8 +279,6 @@ int _MMG3D_packMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
     return(0);
   }
 
-  _MMG3D_Free_topoTables(mesh);
-
   if ( mesh->info.imprim ) {
     fprintf(stdout,"     NUMBER OF VERTICES   %8d   CORNERS %8d\n",mesh->np,nc);
     if ( mesh->na )
@@ -300,7 +298,7 @@ int _MMG3D_packMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
  *
  */
 void MMG3D_Set_saveFunc(MMG5_pMesh mesh) {
-  _MMG3D_saveMeshinternal = _MMG5_saveLibraryMesh;
+  _MMG3D_saveMeshinternal = _MMG3D_saveAllMesh;
 }
 
 /**
@@ -325,6 +323,10 @@ int MMG3D_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met) {
 
   _MMG3D_Set_commonFunc();
 
+  /** Free topologic tables (adja, xpoint, xtetra) resulting from a previous
+   * run */
+  _MMG3D_Free_topoTables(mesh);
+
   signal(SIGABRT,_MMG5_excfun);
   signal(SIGFPE,_MMG5_excfun);
   signal(SIGILL,_MMG5_excfun);
@@ -335,6 +337,19 @@ int MMG3D_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met) {
   tminit(ctim,TIMEMAX);
   chrono(ON,&(ctim[0]));
 
+  /* Check options */
+  if ( mesh->info.lag > -1 ) {
+    fprintf(stdout,"  ## Error: lagrangian mode unavailable (MMG3D_IPARAM_lag):\n"
+            "            You must call the MMG3D_mmg3dmov function to move a rigidbody.\n");
+    return(MMG5_STRONGFAILURE);
+  }
+  else if ( mesh->info.iso ) {
+    fprintf(stdout,"  ## Error: level-set discretisation unavailable"
+            " (MMG3D_IPARAM_iso):\n"
+            "          You must call the MMG3D_mmg3dmov function to use this option.\n");
+    return(MMG5_STRONGFAILURE);
+  }
+
 #ifdef USE_SCOTCH
   _MMG5_warnScotch(mesh);
 #endif
@@ -344,12 +359,7 @@ int MMG3D_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met) {
   chrono(ON,&(ctim[1]));
   _MMG5_warnOrientation(mesh);
 
-  /* Check options */
-  if ( mesh->info.lag > -1 ) {
-    fprintf(stdout,"  ## Error: lagrangian mode unavailable (MMG3D_IPARAM_lag):\n"
-            "            You must call the mmg3dmov function to move a rigidbody.\n");
-    return(MMG5_STRONGFAILURE);
-  }
+
 
   if ( met->np && (met->np != mesh->np) ) {
     fprintf(stdout,"  ## WARNING: WRONG SOLUTION NUMBER. IGNORED\n");
@@ -381,7 +391,7 @@ int MMG3D_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met) {
   if ( !_MMG5_scaleMesh(mesh,met) ) return(MMG5_STRONGFAILURE);
 
   /* specific meshing */
-  if ( mesh->info.optim && !met->np && !_MMG5_DoSol(mesh,met) ) {
+  if ( mesh->info.optim && !met->np && !MMG3D_DoSol(mesh,met) ) {
     if ( !_MMG5_unscaleMesh(mesh,met) )  return(MMG5_STRONGFAILURE);
     _MMG5_RETURN_AND_PACK(mesh,met,NULL,MMG5_LOWFAILURE);
   }
@@ -489,6 +499,13 @@ int MMG3D_mmg3dls(MMG5_pMesh mesh,MMG5_pSol met) {
   tminit(ctim,TIMEMAX);
   chrono(ON,&(ctim[0]));
 
+  /* Check options */
+  if ( mesh->info.lag > -1 ) {
+    fprintf(stdout,"  ## Error: lagrangian mode unavailable (MMG3D_IPARAM_lag):\n"
+            "            You must call the MMG3D_mmg3dmov function to move a rigidbody.\n");
+    return(MMG5_STRONGFAILURE);
+  }
+
 #ifdef USE_SCOTCH
   _MMG5_warnScotch(mesh);
 #endif
@@ -497,13 +514,6 @@ int MMG3D_mmg3dls(MMG5_pMesh mesh,MMG5_pSol met) {
   /* load data */
   chrono(ON,&(ctim[1]));
   _MMG5_warnOrientation(mesh);
-
-  /* Check options */
-  if ( mesh->info.lag > -1 ) {
-    fprintf(stdout,"  ## Error: lagrangian mode unavailable (MMG3D_IPARAM_lag):\n"
-            "            You must call the mmg3dmov function to move a rigidbody.\n");
-    return(MMG5_STRONGFAILURE);
-  }
 
   if ( met->np && (met->np != mesh->np) ) {
     fprintf(stdout,"  ## WARNING: WRONG SOLUTION NUMBER. IGNORED\n");
@@ -644,6 +654,14 @@ int MMG3D_mmg3dmov(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp) {
   tminit(ctim,TIMEMAX);
   chrono(ON,&(ctim[0]));
 
+  /* Check options */
+  if ( mesh->info.iso ) {
+    fprintf(stdout,"  ## Error: level-set discretisation unavailable"
+            " (MMG3D_IPARAM_iso):\n"
+            "          You must call the MMG3D_mmg3dmov function to use this option.\n");
+    return(MMG5_STRONGFAILURE);
+  }
+
 #ifdef USE_SCOTCH
   _MMG5_warnScotch(mesh);
 #endif
@@ -652,14 +670,6 @@ int MMG3D_mmg3dmov(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp) {
   /* load data */
   chrono(ON,&(ctim[1]));
   _MMG5_warnOrientation(mesh);
-
-  /* Check options */
-  if ( mesh->info.iso ) {
-    fprintf(stdout,"  ## Error: level-set discretisation unavailable"
-            " (MMG3D_IPARAM_iso):\n"
-            "          You must call the mmg3dmov function to use this option.\n");
-    return(MMG5_STRONGFAILURE);
-  }
 
   if ( mesh->info.lag == -1 ) {
     if ( mesh->info.imprim )
@@ -746,7 +756,7 @@ int MMG3D_mmg3dmov(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp) {
   }
 #endif
 
-  if ( !met->np && !_MMG5_DoSol(mesh,met) ) {
+  if ( !met->np && !MMG3D_DoSol(mesh,met) ) {
     if ( !_MMG5_unscaleMesh(mesh,disp) )  return(MMG5_STRONGFAILURE);
     _MMG5_RETURN_AND_PACK(mesh,met,disp,MMG5_LOWFAILURE);
   }
