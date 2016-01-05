@@ -567,12 +567,21 @@ int MMG5_mmg3dcheck(MMG5_pMesh mesh,MMG5_pSol met,
   fprintf(stdout,"     %s\n",MG_CPY);
   fprintf(stdout,"    %s %s\n",__DATE__,__TIME__);
 
+#ifdef DEFAULT_SIGHAND
+  signal(SIGABRT,SIG_DFL);
+  signal(SIGFPE,SIG_DFL);
+  signal(SIGILL,SIG_DFL);
+  signal(SIGSEGV,SIG_DFL);
+  signal(SIGTERM,SIG_DFL);
+  signal(SIGINT,SIG_DFL);
+#else
   signal(SIGABRT,_MMG5_pampa_excfun);
   signal(SIGFPE,_MMG5_pampa_excfun);
   signal(SIGILL,_MMG5_pampa_excfun);
   signal(SIGSEGV,_MMG5_pampa_excfun);
   signal(SIGTERM,_MMG5_pampa_excfun);
   signal(SIGINT,_MMG5_pampa_excfun);
+#endif
 
   tminit(ctim,TIMEMAX);
   chrono(ON,&(ctim[0]));

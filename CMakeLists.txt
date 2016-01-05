@@ -260,6 +260,20 @@ IF ( BUILD_MMG3D OR BUILD_MMG )
 
   ############################################################################
   #####
+  #####         Signal handling
+  #####
+  ############################################################################
+  # use in-house signal handling
+  OPTION ( DEFAULT_SIGHAND "Default signal handling" OFF)
+  IF( DEFAULT_SIGHAND )
+    MESSAGE(STATUS "Using default signal handlers")
+    SET(CMAKE_C_FLAGS "-DDEFAULT_SIGHAND ${CMAKE_C_FLAGS}")
+  ELSE()
+    MESSAGE(STATUS "Overwritting default signal handlers by MMG-defined ones")
+  ENDIF()
+
+  ############################################################################
+  #####
   #####Set the full RPATH to find libraries independently from LD_LIBRARY_PATH
   #####
   ############################################################################

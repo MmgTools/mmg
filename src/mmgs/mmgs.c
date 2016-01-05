@@ -362,12 +362,21 @@ int main(int argc,char *argv[]) {
   _MMG5_Set_APIFunc();
 
   /* trap exceptions */
+#ifdef DEFAULT_SIGHAND
+  signal(SIGABRT,SIG_DFL);
+  signal(SIGFPE,SIG_DFL);
+  signal(SIGILL,SIG_DFL);
+  signal(SIGSEGV,SIG_DFL);
+  signal(SIGTERM,SIG_DFL);
+  signal(SIGINT,SIG_DFL);
+#else
   signal(SIGABRT,excfun);
   signal(SIGFPE,excfun);
   signal(SIGILL,excfun);
   signal(SIGSEGV,excfun);
   signal(SIGTERM,excfun);
   signal(SIGINT,excfun);
+#endif
   atexit(endcod);
 
   tminit(MMG5_ctim,TIMEMAX);
