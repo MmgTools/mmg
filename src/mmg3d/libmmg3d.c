@@ -534,8 +534,6 @@ int MMG3D_mmg3dls(MMG5_pMesh mesh,MMG5_pSol met) {
   chrono(ON,&(ctim[2]));
   MMG3D_setfunc(mesh,met);
 
-  if ( abs(mesh->info.imprim) > 0 )  _MMG3D_inqua(mesh,met);
-
   if ( mesh->info.imprim ) {
     fprintf(stdout,"\n  %s\n   MODULE MMG3D: IMB-LJLL : %s (%s)\n  %s\n",MG_STR,MG_VER,MG_REL,MG_STR);
     fprintf(stdout,"\n  -- PHASE 1 : ANALYSIS\n");
@@ -543,6 +541,8 @@ int MMG3D_mmg3dls(MMG5_pMesh mesh,MMG5_pSol met) {
 
  /* scaling mesh */
   if ( !_MMG5_scaleMesh(mesh,met) ) return(MMG5_STRONGFAILURE);
+
+  if ( abs(mesh->info.imprim) > 0 )  _MMG3D_inqua(mesh,met);
 
   /* specific meshing */
   if ( !met->np ) {
