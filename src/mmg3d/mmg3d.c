@@ -87,9 +87,15 @@ int main(int argc,char *argv[]) {
   met  = NULL;
   disp = NULL;
 
-  MMG3D_Init_mesh(&mesh,&met,&disp);
+  MMG3D_Init_mesh(MMG5_ARG_start,
+                  MMG5_ARG_ppMesh,&mesh,MMG5_ARG_ppMet,&met,
+                  MMG5_ARG_ppDisp,&disp,
+                  MMG5_ARG_end);
   /* reset default values for file names */
-  MMG3D_Free_names(mesh,met,disp);
+  MMG3D_Free_names(MMG5_ARG_start,
+                   MMG5_ARG_ppMesh,&mesh,MMG5_ARG_ppMet,&met,
+                   MMG5_ARG_ppDisp,&disp,
+                   MMG5_ARG_end);
 
   /* command line */
   if ( !MMG3D_parsar(argc,argv,mesh,met) )  return(MMG5_STRONGFAILURE);

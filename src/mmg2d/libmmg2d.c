@@ -22,21 +22,6 @@
 */
 #include "mmg2d.h"
 
-/**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the sol structure.
- *
- * Deallocations before return.
- *
- */
-void MMG2D_Free_all(MMG5_pMesh mesh,MMG5_pSol met
-  ){
-
-  MMG2D_Free_structures(mesh,met);
-
-}
-
-
 int MMG2_tassage(MMG5_pMesh mesh,MMG5_pSol sol) {
   MMG5_pEdge         ped;
   MMG5_pTria         pt,ptnew;
@@ -157,7 +142,7 @@ int MMG2_tassage(MMG5_pMesh mesh,MMG5_pSol sol) {
   } else {
     mesh->npnil = 0;
   }
- 
+
  /*to do only if the edges are packed*/
   /* if(mesh->na < mesh->namax - 3) { */
   /*   mesh->nanil = mesh->na + 1; */

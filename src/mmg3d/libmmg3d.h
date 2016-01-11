@@ -89,16 +89,21 @@ enum MMG3D_Param {
 /* Initialization functions */
 /* init structures */
 /**
- * \param mesh adress of a pointer toward a pointer toward the mesh structure.
- * \param sol adress of a pointer toward a sol structure (metric or level-set).
- * \param disp adress of a pointer toward a sol structure
- * (displacement for the lagrangian mode).
+ * \param starter dummy argument used to initialize the variadic argument list
+ * \param ... variadic arguments that depend to the library function that you
+ * want to call. For the MMG3D_mmg3dlib or the MMG3D_mmg3dls functions, you need
+ * to call the \a MMG3D_Init_mesh function with the following arguments :
+ * MMG3D_Init_mesh(MMG5_ARG_start,MMG5_ARG_ppMesh, &your_mesh, MMG5_ARG_ppSol,
+ * &your_metric,MMG5_ARG_end). For the MMG3D_mmg3dmov function, you must call
+ * : MMG3D_Init_mesh(MMG5_ARG_start,MMG5_ARG_ppMesh, &your_mesh, MMG5_ARG_ppSol,
+ * &your_metric,MMG5_ARG_ppDisp, &your_displacement,MMG5_ARG_end). Here,
+ * \a your_mesh is a \a MMG5_pMesh, \a your_metric a \a MMG5_pSol and \a
+ * your_displacement a \a MMG5_pSol.
  *
- * Allocate the mesh and solution structures and initialize it to
- * their default values.
+ * MMG structures allocation and initialization.
  *
  */
-void  MMG3D_Init_mesh(MMG5_pMesh *mesh, MMG5_pSol *sol, MMG5_pSol *disp );
+void MMG3D_Init_mesh(enum MMG5_arg starter,...);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the sol structure.
@@ -565,35 +570,64 @@ int  MMG3D_saveSol(MMG5_pMesh mesh, MMG5_pSol met);
 
 /* deallocations */
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the sol structure (metric or solution).
- * \param disp pointer toward a sol structure (displacement for the
- * lagrangian mode).
+ * \param starter dummy argument used to initialize the variadic argument list.
+ * \param ... variadic arguments that depend to the library function that you
+ * have call. For the MMG3D_mmg3dlib or the MMG3D_mmg3dls functions, you need to
+ * call the \a MMG3D_Free_all function with the following arguments :
+ * MMG3D_Free_all(MMG5_ARG_start,MMG5_ARG_ppMesh, your_mesh, MMG5_ARG_ppMet,
+ * your_metric,MMG5_ARG_end). For the MMG3D_mmg3dmov function, you must call :
+ * MMG3D_Free_all(MMG5_ARG_start,MMG5_ARG_ppMesh, your_mesh, MMG5_ARG_ppMet,
+ * your_metric,MMG5_ARG_ppDisp, your_displacement,MMG5_ARG_end). Here,
+ * \a your_mesh is a pointer toward \a MMG5_pMesh, \a your_metric a pointer
+ * toward \a MMG5_pSol and \a your_displacement a pointer toward \a MMG5_pSol.
  *
  * Deallocations before return.
  *
+ * \remark we pass the structures by reference in order to have argument
+ * compatibility between the library call from a Fortran code and a C code.
+ *
  */
-void MMG3D_Free_all(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pSol disp );
+void MMG3D_Free_all(enum MMG5_arg starter,...);
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the sol structure (metric or solution).
- * \param disp pointer toward a sol structure (displacement).
+ * \param starter dummy argument used to initialize the variadic argument list.
+ * \param ... variadic arguments that depend to the library function that you
+ * have call. For the MMG3D_mmg3dlib or the MMG3D_mmg3dls functions, you need to
+ * call the \a MMG3D_Free_structures function with the following arguments :
+ * MMG3D_Free_structures(MMG5_ARG_start,MMG5_ARG_ppMesh, your_mesh, MMG5_ARG_ppMet,
+ * your_metric,MMG5_ARG_end). For the MMG3D_mmg3dmov function, you must call :
+ * MMG3D_Free_structures(MMG5_ARG_start,MMG5_ARG_ppMesh, your_mesh, MMG5_ARG_ppMet,
+ * your_metric,MMG5_ARG_ppDisp, your_displacement,MMG5_ARG_end). Here,
+ * \a your_mesh is a pointer toward \a MMG5_pMesh, \a your_metric a pointer
+ * toward \a MMG5_pSol and \a your_displacement a pointer toward \a MMG5_pSol.
  *
  * Structure deallocations before return.
  *
+ * \remark we pass the structures by reference in order to have argument
+ * compatibility between the library call from a Fortran code and a C code.
+ *
  */
-void MMG3D_Free_structures(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pSol disp );
+void MMG3D_Free_structures(enum MMG5_arg starter,...);
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward a sol structure (metric or solution).
- * \param disp pointer toward a sol structure (displacement).
+ * \param starter dummy argument used to initialize the variadic argument list.
+ * \param ... variadic arguments that depend to the library function that you
+ * have call. For the MMG3D_mmg3dlib or the MMG3D_mmg3dls functions, you need to
+ * call the \a MMG3D_Free_names function with the following arguments :
+ * MMG3D_Free_names(MMG5_ARG_start,MMG5_ARG_ppMesh, your_mesh, MMG5_ARG_ppMet,
+ * your_metric,MMG5_ARG_end). For the MMG3D_mmg3dmov function, you must call :
+ * MMG3D_Free_names(MMG5_ARG_start,MMG5_ARG_ppMesh, your_mesh, MMG5_ARG_ppMet,
+ * your_metric,MMG5_ARG_ppDisp, your_displacement,MMG5_ARG_end). Here,
+ * \a your_mesh is a pointer toward \a MMG5_pMesh, \a your_metric a pointer
+ * toward \a MMG5_pSol and \a your_displacement a pointer toward \a MMG5_pSol.
  *
- * File name deallocations before return.
+ * Structure deallocations before return.
+ *
+ * \remark we pass the structures by reference in order to have argument
+ * compatibility between the library call from a Fortran code and a C code.
  *
  */
-void MMG3D_Free_names(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pSol disp);
+void MMG3D_Free_names(enum MMG5_arg starter,...);
 
 /* library */
 /**

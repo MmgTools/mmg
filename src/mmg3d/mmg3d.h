@@ -29,10 +29,13 @@
 #define MG_SMSGN(a,b)  (((double)(a)*(double)(b) > (0.0)) ? (1) : (0))
 
 /** Free allocated pointers of mesh and sol structure and return value val */
-#define _MMG5_RETURN_AND_FREE(mesh,met,disp,val)do  \
-  {                                                 \
-    MMG3D_Free_all(mesh,met,disp);                  \
-    return(val);                                    \
+#define _MMG5_RETURN_AND_FREE(mesh,met,disp,val)do            \
+  {                                                           \
+    MMG3D_Free_all(MMG5_ARG_start,                            \
+                   MMG5_ARG_ppMesh,&mesh,MMG5_ARG_ppMet,&met, \
+                   MMG5_ARG_ppDisp,&disp,                     \
+                   MMG5_ARG_end);                             \
+    return(val);                                              \
   }while(0)
 
 /** Reallocation of point table and sol table and creation
@@ -201,6 +204,10 @@ extern double _MMG5_det4pt(double c0[3],double c1[3],double c2[3],double c3[3]);
 extern double _MMG5_orvol(MMG5_pPoint point,int *v);
 extern int _MMG5_directsurfball(MMG5_pMesh mesh, int ip, int *list, int ilist, double n[3]);
 
+void _MMG3D_Init_mesh_var( va_list argptr );
+void _MMG3D_Free_all_var( va_list argptr );
+void _MMG3D_Free_structures_var( va_list argptr );
+void _MMG3D_Free_names_var( va_list argptr );
 int  _MMG3D_newPt(MMG5_pMesh mesh,double c[3],char tag);
 int  _MMG3D_newElt(MMG5_pMesh mesh);
 void _MMG3D_delElt(MMG5_pMesh mesh,int iel);

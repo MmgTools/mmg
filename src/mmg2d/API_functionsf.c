@@ -37,14 +37,23 @@
  *
  */
 #include "mmg2d.h"
+
 /**
- * See \ref MMG2D_Init_mesh function in mmg2d/libmmg2d.h file.
+ * See \ref MMG2D_Init_mesh function in common/libmmgcommon.h file.
  */
-FORTRAN_NAME(MMG2D_INIT_MESH, mmg2d_init_mesh,(MMG5_pMesh *mesh, MMG5_pSol *sol),
-             (mesh,sol)) {
-  MMG2D_Init_mesh(mesh,sol);
-  return;
-}
+FORTRAN_VARIADIC ( MMG2D_INIT_MESH, mmg2d_init_mesh,
+                 (enum MMG5_arg starter, ... ),
+                 va_list argptr;
+
+                 va_start(argptr, starter);
+
+                 _MMG2D_Init_mesh_var(argptr);
+
+                 va_end(argptr);
+
+                 return;
+  )
+
 /**
  * See \ref MMG2D_Init_fileNames function in mmg2d/libmmg2d.h file.
  */
@@ -98,7 +107,7 @@ FORTRAN_NAME(MMG2D_SET_INPUTSOLNAME, mmg2d_set_inputsolname,
 
 /**
  * See \ref MMG2D_Set_outputMeshName function in mmgs/libmmgs.h or
- * mmg3d/libmmg3d.h file.
+ * mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_SET_OUTPUTMESHNAME,mmg2d_set_outputmeshname,
              (MMG5_pMesh *mesh, char* meshout, int* strlen,int* retval),
@@ -245,25 +254,54 @@ FORTRAN_NAME(MMG2D_CHK_MESHDATA,mmg2d_chk_meshdata,
   *retval = MMG2D_Chk_meshData(*mesh,*met);
   return;
 }
+
+/**
+ * See \ref MMG5_Free_all function in \ref mmg2d/libmmg2d.h file.
+ */
+FORTRAN_VARIADIC(MMG2D_FREE_ALL,mmg2d_free_all,
+                 (enum MMG5_arg starter,...),
+                 va_list argptr;
+
+                 va_start(argptr, starter);
+
+                 _MMG2D_Free_all_var(argptr);
+
+                 va_end(argptr);
+
+                 return;
+  )
+
 /**
  * See \ref MMG2D_Free_structures function in \ref mmg2d/libmmg2d.h file.
  */
-FORTRAN_NAME(MMG2D_FREE_STRUCTURES,mmg2d_free_structures,(MMG5_pMesh *mesh,MMG5_pSol *met
-               ),(mesh,met
-                 )){
-  MMG2D_Free_structures(*mesh,*met);
-  return;
-}
+FORTRAN_VARIADIC(MMG2D_FREE_STRUCTURES,mmg2d_free_structures,
+                 (enum MMG5_arg starter,...),
+                 va_list argptr;
+
+                 va_start(argptr, starter);
+
+                 _MMG2D_Free_structures_var(argptr);
+
+                 va_end(argptr);
+
+                 return;
+  )
+
 /**
- * See \ref MMG2D_Free_names function in \ref common/libmmgcommon.h file.
+ * See \ref MMG2D_Free_names function in \ref mmg2d/libmmg2d.h file.
  */
-FORTRAN_NAME(MMG2D_FREE_NAMES,mmg2d_free_names,(MMG5_pMesh *mesh,MMG5_pSol *met ),
-             (mesh,met)){
-  MMG2D_Free_names(*mesh,*met);
+FORTRAN_VARIADIC(MMG2D_FREE_NAMES,mmg2d_free_names,
+             (enum MMG5_arg starter,...),
+             va_list argptr;
 
-  return;
-}
+             va_start(argptr, starter);
 
+             _MMG2D_Free_names_var(argptr);
+
+             va_end(argptr);
+
+             return;
+  )
 
 /**
  * See \ref MMG2D_loadMesh function in \ref mmg2d/libmmg2d.h file.

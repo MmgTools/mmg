@@ -71,11 +71,19 @@ int main(int argc,char *argv[]) {
   sprintf(inname, "%s%s%s", pwd, "/../libexamples/mmg3d/LagrangianMotion_example0/", "tinyBoxt");
 
   /** 1) Initialisation of mesh and sol structures */
-  /* args of InitMesh: mesh=&mmgMesh, sol=&mmgSol */
+  /* args of InitMesh:
+   * MMG5_ARG_start: we start to give the args of a variadic func
+   * MMG5_ARG_ppMesh: next arg will be a pointer over a MMG5_pMesh
+   * &mmgMesh: pointer toward your MMG5_pMesh (that store your mesh)
+   * MMG5_ARG_ppMet: next arg will be a pointer over a MMG5_pSol storing a metric
+   * &mmgSol: pointer toward your MMG5_pSol (that store your metric) */
   mmgMesh = NULL;
   mmgSol  = NULL;
   mmgDisp = NULL;
-  MMG3D_Init_mesh(&mmgMesh,&mmgSol,&mmgDisp);
+  MMG3D_Init_mesh(MMG5_ARG_start,
+                  MMG5_ARG_ppMesh,&mmgMesh,MMG5_ARG_ppMet,&mmgSol,
+                  MMG5_ARG_ppDisp,&mmgDisp,
+                  MMG5_ARG_end);
 
   /** 2) Build mesh in MMG5 format */
   /** Two solutions: just use the MMG3D_loadMesh function that will read a .mesh(b)
@@ -147,8 +155,10 @@ int main(int argc,char *argv[]) {
     exit(EXIT_FAILURE);
 
   /* 9) free the MMG3D5 structures */
-  MMG3D_Free_all(mmgMesh,mmgSol,mmgDisp);
-
+  MMG3D_Free_all(MMG5_ARG_start,
+                 MMG5_ARG_ppMesh,&mmgMesh,MMG5_ARG_ppMet,&mmgSol,
+                 MMG5_ARG_ppDisp,&mmgDisp,
+                 MMG5_ARG_end);
   free(inname);
   inname = NULL;
   free(outname);

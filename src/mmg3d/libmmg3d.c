@@ -50,24 +50,6 @@
     return(val);                                    \
   }while(0)
 
-/**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the sol structure (metric or solution).
- * \param disp pointer toward a sol structure (displacement).
- *
- * Deallocations before return.
- *
- */
-void MMG3D_Free_all(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp
-  )
-{
-  MMG3D_Free_structures(mesh,met,disp);
-
-  _MMG5_SAFE_FREE(met);
-  _MMG5_SAFE_FREE(mesh);
-  _MMG5_SAFE_FREE(disp);
-}
-
 /** Free adja, xtetra and xpoint tables */
 static inline
 void _MMG3D_Free_topoTables(MMG5_pMesh mesh) {
@@ -824,24 +806,6 @@ int MMG3D_mmg3dmov(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp) {
 }
 
 /** Old API °°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°*/
-/**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the sol structure (metric or solution).
- * \param disp pointer toward a sol structure (displacement).
- *
- * Deallocations before return.
- *
- */
-void MMG5_Free_all(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp
-  )
-{
-  printf("  ## MMG5_Free_all: "
-         "MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
-        " be removed soon\n." );
-  MMG3D_Free_all(mesh,met,disp);
-
-}
-
 
 /**
  * \param mesh pointer toward the mesh structure.

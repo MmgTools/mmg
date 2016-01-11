@@ -70,10 +70,12 @@
 #define M_EOK(pt)     (pt && (pt->v[0] > 0))
 
 /** Free allocated pointers of mesh and sol structure and return value val */
-#define _MMG2D_RETURN_AND_FREE(mesh,met,val)do       \
-  {                                                 \
-    MMG2D_Free_all(mesh,met);                        \
-    return(val);                                    \
+#define _MMG2D_RETURN_AND_FREE(mesh,met,val)do                \
+  {                                                           \
+    MMG2D_Free_all(MMG5_ARG_start,                            \
+                   MMG5_ARG_ppMesh,&mesh,MMG5_ARG_ppMet,&met, \
+                   MMG5_ARG_end);                             \
+    return(val);                                              \
   }while(0)
 
 /**
@@ -82,7 +84,7 @@
  * Signal handling: specify error messages depending from catched signal.
  *
  */
-static inline 
+static inline
 void _MMG2_excfun(int sigid) {
   fprintf(stdout,"\n Unexpected error:");  fflush(stdout);
   switch(sigid) {
@@ -284,6 +286,10 @@ int MMG2_splitbdry(MMG5_pMesh ,MMG5_pSol ,int ,int ,int,double*);
 int MMG2_colpoi(MMG5_pMesh ,MMG5_pSol , int ,int ,int ,int ,double );
 int MMG2_colpoibdry(MMG5_pMesh ,MMG5_pSol , int ,int ,int ,int ,double );
 
+void _MMG2D_Init_mesh_var( va_list argptr );
+void _MMG2D_Free_all_var( va_list argptr );
+void _MMG2D_Free_structures_var( va_list argptr );
+void _MMG2D_Free_names_var( va_list argptr );
 
 int MMG2_mmg2d2(MMG5_pMesh , MMG5_pSol);
 int MMG2_mmg2d6(MMG5_pMesh ,MMG5_pSol );
@@ -292,7 +298,7 @@ int MMG2_cendel(MMG5_pMesh ,MMG5_pSol ,double ,int );
 int MMG2_swapar(MMG5_pMesh ,MMG5_pSol ,int ,int ,double ,int *);
 int _MMG5_mmg2dChkmsh(MMG5_pMesh , int, int );
 int MMG2_boulep(MMG5_pMesh , int , int , int * );
-int MMG2_markBdry(MMG5_pMesh ); 
+int MMG2_markBdry(MMG5_pMesh );
 int MMG2_doSol(MMG5_pMesh ,MMG5_pSol );
 int MMG2_prilen(MMG5_pMesh ,MMG5_pSol );
 
@@ -300,7 +306,7 @@ void MMG2_coorbary(MMG5_pMesh ,MMG5_pTria ,double c[2],double* ,double* ,double*
 int MMG2_isInTriangle(MMG5_pMesh ,int,double c[2]);
 int MMG2_cutEdge(MMG5_pMesh ,MMG5_pTria ,MMG5_pPoint ,MMG5_pPoint );
 int MMG2_cutEdgeTriangle(MMG5_pMesh ,int ,int ,int );
-int MMG2_findTria(MMG5_pMesh ,int );  
+int MMG2_findTria(MMG5_pMesh ,int );
 int MMG2_findpos(MMG5_pMesh ,MMG5_pTria ,int ,int ,int ,int ,int );
 int MMG2_locateEdge(MMG5_pMesh ,int ,int ,int* ,int* ) ;
 int MMG2_bdryenforcement(MMG5_pMesh ,MMG5_pSol);
@@ -366,7 +372,7 @@ int MMG2_tassage(MMG5_pMesh ,MMG5_pSol );
 void  _MMG2_Init_parameters(MMG5_pMesh mesh);
 
 /**
- * Set common pointer functions between mmgs and mmg3d to the matching mmg3d
+ * Set common pointer functions between mmgs and mmg2d to the matching mmg2d
  * functions.
  */
 static inline

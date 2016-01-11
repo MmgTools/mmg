@@ -60,11 +60,17 @@ int main(int argc,char *argv[]) {
 
   /** ------------------------------ STEP   I -------------------------- */
   /** 1) Initialisation of mesh and sol structures */
-  /* args of InitMesh: mesh=&mmgMesh, sol=&mmgSol, input mesh name, input sol name,
-     output mesh name */
+  /* args of InitMesh:
+   * MMG5_ARG_start: we start to give the args of a variadic func
+   * MMG5_ARG_ppMesh: next arg will be a pointer over a MMG5_pMesh
+   * &mmgMesh: pointer toward your MMG5_pMesh (that store your mesh)
+   * MMG5_ARG_ppMet: next arg will be a pointer over a MMG5_pSol storing a metric
+   * &mmgSol: pointer toward your MMG5_pSol (that store your metric) */
   mmgMesh = NULL;
   mmgSol  = NULL;
-  MMG2D_Init_mesh(&mmgMesh,&mmgSol);
+  MMG2D_Init_mesh(MMG5_ARG_start,
+                  MMG5_ARG_ppMesh,&mmgMesh, MMG5_ARG_ppMet,&mmgSol,
+                  MMG5_ARG_end);
 
   /** 2) Build mesh in MMG5 format */
   /** Two solutions: just use the MMG3D_loadMesh function that will read a .mesh(b)
@@ -100,7 +106,9 @@ int main(int argc,char *argv[]) {
   if ( MMG2D_saveSol(mmgMesh,mmgSol,"result") != 1 )  exit(EXIT_FAILURE);
 
   /** 2) Free the MMG2D structures */
-  MMG2D_Free_all(mmgMesh,mmgSol);
+  MMG2D_Free_all(MMG5_ARG_start,
+                 MMG5_ARG_ppMesh,&mmgMesh, MMG5_ARG_ppMet,&mmgSol,
+                 MMG5_ARG_end);
 
   /** ================ surface remeshing using the mmgs library ======== */
 
@@ -121,12 +129,18 @@ int main(int argc,char *argv[]) {
 
   /** ------------------------------ STEP   I -------------------------- */
   /** 1) Initialisation of mesh and sol structures */
-  /* args of InitMesh: mesh=&mmgMesh, sol=&mmgSol, input mesh name, input sol name,
-     output mesh name */
+  /* args of InitMesh
+   * MMG5_ARG_start: we start to give the args of a variadic func
+   * MMG5_ARG_ppMesh: next arg will be a pointer over a MMG5_pMesh
+   * &mmgMesh: pointer toward your MMG5_pMesh (that store your mesh)
+   * MMG5_ARG_ppMet: next arg will be a pointer over a MMG5_pSol storing a metric
+   * &mmgSol: pointer toward your MMG5_pSol (that store your metric) */
 
   mmgMesh = NULL;
   mmgSol  = NULL;
-  MMGS_Init_mesh(&mmgMesh,&mmgSol,NULL);
+  MMGS_Init_mesh(MMG5_ARG_start,
+                 MMG5_ARG_ppMesh,&mmgMesh, MMG5_ARG_ppMet,&mmgSol,
+                 MMG5_ARG_end);
 
   /** 2) Build mesh in MMG5 format */
   /** Two solutions: just use the MMGS_loadMesh function that will read a .mesh(b)
@@ -187,7 +201,9 @@ int main(int argc,char *argv[]) {
   if ( MMGS_saveSol(mmgMesh,mmgSol) != 1 )  exit(EXIT_FAILURE);
 
   /** 3) Free the MMGS structures */
-  MMGS_Free_all(mmgMesh,mmgSol,NULL);
+  MMGS_Free_all(MMG5_ARG_start,
+                MMG5_ARG_ppMesh,&mmgMesh, MMG5_ARG_ppMet,&mmgSol,
+                MMG5_ARG_end);
 
   /** ================== 3d remeshing using the mmg3d library ========== */
   filename_o3d = (char *) calloc(strlen(pwd) + 47, sizeof(char));
@@ -199,10 +215,17 @@ int main(int argc,char *argv[]) {
 
   /** ------------------------------ STEP   I -------------------------- */
   /** 1) Initialisation of mesh and sol structures */
-  /* args of InitMesh: mesh=&mmgMesh, sol=&mmgSol */
+  /* args of InitMesh:
+   * MMG5_ARG_start: we start to give the args of a variadic func
+   * MMG5_ARG_ppMesh: next arg will be a pointer over a MMG5_pMesh
+   * &mmgMesh: pointer toward your MMG5_pMesh (that store your mesh)
+   * MMG5_ARG_ppMet: next arg will be a pointer over a MMG5_pSol storing a metric
+   * &mmgSol: pointer toward your MMG5_pSol (that store your metric) */
   mmgMesh = NULL;
   mmgSol  = NULL;
-  MMG3D_Init_mesh(&mmgMesh,&mmgSol,NULL);
+  MMG3D_Init_mesh(MMG5_ARG_start,
+                  MMG5_ARG_ppMesh,&mmgMesh, MMG5_ARG_ppMet,&mmgSol,
+                  MMG5_ARG_end);
 
   /** 2) Build mesh in MMG5 format */
   /** Two solutions: just use the MMG3D_loadMesh function that will read a .mesh(b)
@@ -261,7 +284,9 @@ int main(int argc,char *argv[]) {
   if ( MMG3D_saveSol(mmgMesh,mmgSol) != 1 )  exit(EXIT_FAILURE);
 
   /** 3) Free the MMG3D structures */
-  MMG3D_Free_all(mmgMesh,mmgSol,NULL);
+  MMG3D_Free_all(MMG5_ARG_start,
+                 MMG5_ARG_ppMesh,&mmgMesh,MMG5_ARG_ppMet,&mmgSol,
+                 MMG5_ARG_end);
 
   free(filename);
   free(filename_os);

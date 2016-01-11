@@ -44,41 +44,6 @@
 #include "libmmgs.h"
 
 /**
- * \def FORTRAN_NAME(nu,nl,pl,pc)
- * \brief Adds function definitions.
- * \param nu function name in upper case.
- * \param nl function name in lower case.
- * \param pl type of arguments.
- * \param pc name of arguments.
- * \note Macro coming from Scotch library.
- *
- * Adds function definitions with upcase, underscore and double
- * underscore to match any fortran compiler.
- *
- */
-#define FORTRAN_NAME(nu,nl,pl,pc)               \
-  void nu pl;                                   \
-  void nl pl                                    \
-  { nu pc; }                                    \
-  void nl##_ pl                                 \
-  { nu pc; }                                    \
-  void nl##__ pl                                \
-  { nu pc; }                                    \
-  void nu pl
-
-/**
- * See \ref MMGS_Free_all function in \ref mmgs/libmmgs.h file.
- */
-FORTRAN_NAME(MMGS_FREE_ALL,mmgs_free_all,(MMG5_pMesh *mesh,MMG5_pSol *met
-                                          ,MMG5_pSol *dummy),
-             (mesh,met,dummy)){
-
-  MMGS_Free_all(*mesh,*met);
-
-  return;
-}
-
-/**
  * See \ref MMGS_saveMesh function in \ref mmgs/libmmgs.h file.
  */
 FORTRAN_NAME(MMGS_SAVEMESH,mmgs_savemesh,(MMG5_pMesh *mesh, int* retval),

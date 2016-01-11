@@ -44,44 +44,6 @@
 #include "libmmg3d.h"
 
 /**
- * \def FORTRAN_NAME(nu,nl,pl,pc)
- * \brief Adds function definitions.
- * \param nu function name in upper case.
- * \param nl function name in lower case.
- * \param pl type of arguments.
- * \param pc name of arguments.
- * \note Macro coming from Scotch library.
- *
- * Adds function definitions with upcase, underscore and double
- * underscore to match any fortran compiler.
- *
- */
-#define FORTRAN_NAME(nu,nl,pl,pc)               \
-  void nu pl;                                   \
-  void nl pl                                    \
-  { nu pc; }                                    \
-  void nl##_ pl                                 \
-  { nu pc; }                                    \
-  void nl##__ pl                                \
-  { nu pc; }                                    \
-  void nu pl
-
-
-
-/**
- * See \ref MMG5_Free_all function in \ref mmg3d/libmmg3d.h file.
- */
-FORTRAN_NAME(MMG3D_FREE_ALL,mmg3d_free_all,(MMG5_pMesh *mesh,MMG5_pSol *met
-                                          ,MMG5_pSol *disp
-               ),(mesh,met,disp
-                 )){
-
-  MMG3D_Free_all(*mesh,*met,(disp==NULL)?NULL:*disp);
-
-  return;
-}
-
-/**
  * See \ref MMG3D_saveMesh function in \ref mmg3d/libmmg3d.h file.
  */
 FORTRAN_NAME(MMG3D_SAVEMESH,mmg3d_savemesh,(MMG5_pMesh *mesh, int* retval),

@@ -49,10 +49,12 @@
 #define MS_Tri       2
 
 /** Free allocated pointers of mesh and sol structure and return value val */
-#define _MMG5_RETURN_AND_FREE(mesh,met,val)do       \
-  {                                                 \
-    MMGS_Free_all(mesh,met);                        \
-    return(val);                                    \
+#define _MMG5_RETURN_AND_FREE(mesh,met,val)do                 \
+  {                                                           \
+    MMGS_Free_all(MMG5_ARG_start,                             \
+                  MMG5_ARG_ppMesh,&mesh,MMG5_ARG_ppMet,&met,  \
+                  MMG5_ARG_end);                              \
+    return(val);                                              \
   }while(0)
 
 /** Reallocation of point table and sol table and creation
@@ -109,6 +111,11 @@
   }while(0)
 
 /* prototypes */
+void _MMGS_Init_mesh_var( va_list argptr );
+void _MMGS_Free_all_var( va_list argptr );
+void _MMGS_Free_structures_var( va_list argptr );
+void _MMGS_Free_names_var( va_list argptr );
+
 int  _MMGS_saveAllMesh(MMG5_pMesh );
 int  zaldy(MMG5_pMesh mesh);
 int  assignEdge(MMG5_pMesh mesh);

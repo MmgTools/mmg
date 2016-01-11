@@ -33,12 +33,12 @@ static void usage(char *name) {
   fprintf(stdout,"-nsd val        only if no given triangle, save the subdomain nb (0==all subdomain)\n");
   fprintf(stdout,"-msh val        read and write to gmsh visu if val = 1 (out) if val=2 (in and out)\n");
   fprintf(stdout,"-degrad Qw Qdeg (with -lag option) : threshold for optimization\n");
- 
+
   /* fprintf(stdout,"-per          obsolete : to deal with periodic mesh on a square\n");*/
 
   fprintf(stdout,"\n");
-  /* 
-  
+  /*
+
      fprintf(stdout,"-optim       mesh optimization\n");
      fprintf(stdout,"-nsurf       no surfacic modifications\n");
   */
@@ -151,7 +151,7 @@ int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,double *qdegrad) 
             usage(argv[0]);
           }
         }
-        break;  
+        break;
       case 'l':
         if ( !strcmp(argv[i],"-lag") ) {
           if ( ++i < argc && isdigit(argv[i][0]) ) {
@@ -280,14 +280,14 @@ int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,double *qdegrad) 
       default:
         fprintf(stderr,"Unrecognized option %s\n",argv[i]);
         usage(argv[0]);
-      }   
- 
+      }
+
     }
 
     else {
       if ( mesh->namein == NULL ) {
         if ( !MMG2D_Set_inputMeshName(mesh,argv[i]) )
-          exit(EXIT_FAILURE); 
+          exit(EXIT_FAILURE);
         if ( mesh->info.imprim == -99 )  {
           if ( !MMG2D_Set_iparameter(mesh,met,MMG2D_IPARAM_verbose,5) )
             exit(EXIT_FAILURE);
@@ -295,7 +295,7 @@ int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,double *qdegrad) 
       }
       else if ( mesh->nameout == NULL ) {
         if ( !MMG2D_Set_outputMeshName(mesh,argv[i]) )
-          exit(EXIT_FAILURE);     
+          exit(EXIT_FAILURE);
       }
       else {
         fprintf(stdout,"  Argument %s ignored\n",argv[i]);
@@ -316,7 +316,7 @@ int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,double *qdegrad) 
 
   if ( mesh->namein == NULL ) {
     fprintf(stdout,"  -- INPUT MESH NAME ?\n");
-    fflush(stdin); 
+    fflush(stdin);
     fscanf(stdin,"%s",namein);
     if ( !MMG2D_Set_inputMeshName(mesh,namein) )
       exit(EXIT_FAILURE);
@@ -396,10 +396,14 @@ int main(int argc,char *argv[]) {
   mesh = NULL;
   sol  = NULL;
 
-  MMG2D_Init_mesh(&mesh,&sol);
+  MMG2D_Init_mesh(MMG5_ARG_start,
+                   MMG5_ARG_ppMesh,&mesh,MMG5_ARG_ppMet,&sol,
+                   MMG5_ARG_end);
 
   /* reset default values for file names */
-  MMG2D_Free_names(mesh,sol);
+  MMG2D_Free_names(MMG5_ARG_start,
+                   MMG5_ARG_ppMesh,&mesh,MMG5_ARG_ppMet,&sol,
+                   MMG5_ARG_end);
 
   qdegrad[0] = 10./ALPHA;
   qdegrad[1] = 1.3;

@@ -40,78 +40,24 @@
 #include "mmgs.h"
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the sol structure.
+ * \param starter dummy argument used to initialize the variadic argument list
+ * \param ... variadic arguments. For now, you need to call the \a
+ * MMGS_Init_mesh function with the following arguments :
+ * MMGS_Init_mesh(MMG5_ARG_start,MMG5_ARG_ppMesh, your_mesh,
+ * MMG5_ARG_ppMet, your_metric,MMG5_ARG_end). Here, \a your_mesh is a pointer
+ * toward \a MMG5_pMesh and \a your_metric a pointer toward \a MMG5_pSol.
  *
- * Allocate the mesh and solutions structures at \a MMGS format.
- *
- */
-static inline
-void _MMGS_Alloc_mesh(MMG5_pMesh *mesh, MMG5_pSol *sol) {
-
-  /* mesh allocation */
-  if ( *mesh )  _MMG5_SAFE_FREE(*mesh);
-  _MMG5_SAFE_CALLOC(*mesh,1,MMG5_Mesh);
-
-  /* sol allocation */
-  if ( !sol ) {
-    printf("  ## Error: an allocatable solution structure of type \"MMG5_pSol\""
-           " is needed.\n");
-    printf("            Exit program.\n");
-    exit(EXIT_FAILURE);
-  }
-
-  if ( *sol )  _MMG5_DEL_MEM(*mesh,*sol,sizeof(MMG5_Sol));
-  _MMG5_SAFE_CALLOC(*sol,1,MMG5_Sol);
-
-  return;
-}
-/**
- * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the sol structure.
- *
- * Initialization of mesh and solution structures to their default
- * values (default names, versions, dimensions...).
+ * MMG structures allocation and initialization.
  *
  */
-static inline
-void _MMGS_Init_woalloc_mesh(MMG5_pMesh mesh, MMG5_pSol sol ) {
+void MMGS_Init_mesh(enum MMG5_arg starter,...) {
+  va_list argptr;
 
-  _MMGS_Set_commonFunc();
+  va_start(argptr, starter);
 
-  (mesh)->dim  = 3;
-  (mesh)->ver  = 2;
-  (sol)->dim   = 3;
-  (sol)->ver   = 2;
-  (sol)->size  = 1;
+  _MMGS_Init_mesh_var(argptr);
 
-  /* Default parameters values */
-  MMGS_Init_parameters(mesh);
-
-  /* Default vaules for file names */
-  MMGS_Init_fileNames(mesh,sol);
-
-  return;
-}
-/**
- * \param mesh adress of a pointer toward a pointer toward the mesh structure.
- * \param sol adress of a pointer toward a sol structure (metric or level-set).
- * \param ... optional arguments: not used for now. To end by the NULL value.
- *
- * Allocate the mesh and solution structures and initialize it to
- * their default values.
- *
- * \Remark To call with NULL as last argument.
- */
-void MMGS_Init_mesh(MMG5_pMesh *mesh, MMG5_pSol *sol,... ) {
-
-  /* allocations */
-  _MMGS_Alloc_mesh(mesh,sol);
-  /* initialisations */
-  _MMGS_Init_woalloc_mesh(*mesh,*sol);
-
-  /* set pointer to save the mesh*/
-  _MMGS_saveMeshinternal = _MMGS_saveAllMesh;
+  va_end(argptr);
 
   return;
 }
@@ -1295,57 +1241,85 @@ int MMGS_Set_localParameter(MMG5_pMesh mesh,MMG5_pSol sol, int typ, int ref,
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward a sol structure (metric or solution).
- * \param ... optional arguments: not used for now
+ * \param starter dummy argument used to initialize the variadic argument list.
+ * \param ... variadic arguments. For now, you need to call the \a
+ * MMGS_Free_all function with the following arguments :
+ * MMGS_Free_all(MMG5_ARG_start,MMG5_ARG_ppMesh, your_mesh,
+ * MMG5_ARG_ppMet, your_metric,MMG5_ARG_end). Here, \a your_mesh is a pointer
+ * toward \a MMG5_pMesh and \a your_metric a pointer toward \a MMG5_pSol.
  *
- * Structure deallocations before return.
+ * Deallocations before return.
  *
- * \remark must be called with NULL as last argument.
+ * \remark we pass the structures by reference in order to have argument
+ * compatibility between the library call from a Fortran code and a C code.
  *
  */
-void MMGS_Free_structures(MMG5_pMesh mesh,MMG5_pSol met,... ){
+void MMGS_Free_all(enum MMG5_arg starter,...)
+{
 
-  MMGS_Free_names(mesh,met);
+  va_list argptr;
 
-  /* mesh */
-  if ( mesh->point )
-    _MMG5_DEL_MEM(mesh,mesh->point,(mesh->npmax+1)*sizeof(MMG5_Point));
+  va_start(argptr, starter);
 
-  if ( mesh->edge )
-    _MMG5_DEL_MEM(mesh,mesh->edge,(mesh->na+1)*sizeof(MMG5_Edge));
+  _MMGS_Free_all_var(argptr);
 
-  if ( mesh->adja )
-    _MMG5_DEL_MEM(mesh,mesh->adja,(3*mesh->ntmax+5)*sizeof(int));
+  va_end(argptr);
 
-  if ( mesh->xpoint )
-    _MMG5_DEL_MEM(mesh,mesh->xpoint,(mesh->xpmax+1)*sizeof(MMG5_xPoint));
-
-  if ( mesh->tria )
-    _MMG5_DEL_MEM(mesh,mesh->tria,(mesh->ntmax+1)*sizeof(MMG5_Tria));
-
-  /* met */
-  if ( met && met->m )
-    _MMG5_DEL_MEM(mesh,met->m,(met->size*(met->npmax+1))*sizeof(double));
-
-  /* mesh->info */
-  if ( mesh->info.npar && mesh->info.par )
-    _MMG5_DEL_MEM(mesh,mesh->info.par,mesh->info.npar*sizeof(MMG5_Par));
-
-  if ( mesh->info.imprim>6 || mesh->info.ddebug )
-    printf("  MEMORY USED AT END (bytes) %ld\n",_MMG5_safeLL2LCast(mesh->memCur));
+  return;
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward a sol structure (metric or solution).
- * \param ... optional argument: not used for now
+ * \param starter dummy argument used to initialize the variadic argument list.
+ * \param ... variadic arguments. For now, you need to call the \a
+ * MMGS_Free_structures function with the following arguments :
+ * MMGS_Free_structures(MMG5_ARG_start,MMG5_ARG_ppMesh, your_mesh,
+ * MMG5_ARG_ppMet, your_metric,MMG5_ARG_end). Here, \a your_mesh is a pointer
+ * toward \a MMG5_pMesh and \a your_metric a pointer toward \a MMG5_pSol.
  *
  * Structure deallocations before return.
  *
- * \remark must be called with NULL as last argument.
+ * \remark we pass the structures by reference in order to have argument
+ * compatibility between the library call from a Fortran code and a C code.
  *
  */
-void MMGS_Free_names(MMG5_pMesh mesh,MMG5_pSol met,...){
-  MMG5_mmgFree_names(mesh,met);
+void MMGS_Free_structures(enum MMG5_arg starter,...)
+{
+
+  va_list argptr;
+
+  va_start(argptr, starter);
+
+  _MMGS_Free_structures_var(argptr);
+
+  va_end(argptr);
+
+  return;
+}
+
+/**
+ * \param starter dummy argument used to initialize the variadic argument list.
+ * \param ... variadic arguments. For now, you need to call the \a
+ * MMGS_Free_names function with the following arguments :
+ * MMGS_Free_names(MMG5_ARG_start,MMG5_ARG_ppMesh, your_mesh,
+ * MMG5_ARG_ppMet, your_metric,MMG5_ARG_end). Here, \a your_mesh is a pointer
+ * toward \a MMG5_pMesh and \a your_metric a pointer toward \a MMG5_pSol.
+ *
+ * Structure deallocations before return.
+ *
+ * \remark we pass the structures by reference in order to have argument
+ * compatibility between the library call from a Fortran code and a C code.
+ *
+ */
+void MMGS_Free_names(enum MMG5_arg starter,...)
+{
+
+  va_list argptr;
+
+  va_start(argptr, starter);
+
+  _MMGS_Free_names_var(argptr);
+
+  va_end(argptr);
+
+  return;
 }

@@ -27,16 +27,22 @@ PROGRAM main
   !> ================== 2d remeshing using the mmg2d library
   !! ------------------------------ STEP   I --------------------------
   !! 1) Initialisation of mesh and sol structures */
-  !! args of InitMesh: mesh=&mmgMesh, sol=&mmgSol, input mesh name, input sol
-  !! name, output mesh name */
+  !! args of InitMesh:
+  !! MMG5_ARG_start: we start to give the args of a variadic func
+  !! MMG5_ARG_ppMesh: next arg will be a pointer over a MMG5_pMesh
+  !! mmgMesh: your MMG5_pMesh (that store your mesh)
+  !! MMG5_ARG_ppMet: next arg will be a pointer over a MMG5_pSol storing a metric
+  !! mmgSol: your MMG5_pSol (that store your metric) */
+
   WRITE(bdfile,*) TRIM(pwd),"/../libexamples/mmg/example0_fortran/init"
   WRITE(bdfileout,*) TRIM(pwd),"/../libexamples/mmg/example0_fortran/result.mesh"
 
   mmgMesh = 0
   mmgSol  = 0
-  !! Remark: %val(0) allow to pass the value 0 (i.e. NULL) instead of a pointer
-  !! toward NULL.
-  CALL MMG2D_Init_mesh(mmgMesh,mmgSol,%val(0))
+
+  CALL MMG2D_Init_mesh(MMG5_ARG_start, &
+       MMG5_ARG_ppMesh,mmgMesh,MMG5_ARG_ppMet,mmgSol, &
+       MMG5_ARG_end)
 
   !> 2) Build mesh in MMG5 format
   !! Two solutions: just use the MMG2D_loadMesh function that will read a .mesh(b)
@@ -110,22 +116,30 @@ PROGRAM main
   ENDIF
 
   !> 3) Free the MMG2D5 structures
-  CALL MMG2D_Free_all(mmgMesh,mmgSol,%val(0))
+  CALL MMG2D_Free_all(MMG5_ARG_start, &
+       MMG5_ARG_ppMesh,mmgMesh,MMG5_ARG_ppMet,mmgSol, &
+       MMG5_ARG_end)
 
   !> ================== surface remeshing using the mmgs library
 
   !! ------------------------------ STEP   I --------------------------
   !! 1) Initialisation of mesh and sol structures */
-  !! args of InitMesh: mesh=&mmgMesh, sol=&mmgSol, input mesh name, input sol
-  !! name, output mesh name */
+  !! args of InitMesh:
+  !! MMG5_ARG_start: we start to give the args of a variadic func
+  !! MMG5_ARG_ppMesh: next arg will be a pointer over a MMG5_pMesh
+  !! mmgMesh: your MMG5_pMesh (that store your mesh)
+  !! MMG5_ARG_ppMet: next arg will be a pointer over a MMG5_pSol storing a metric
+  !! mmgSol: your MMG5_pSol (that store your metric) */
+
   WRITE(tdfile,*) TRIM(pwd),"/../libexamples/mmg/example0_fortran/cube"
   WRITE(tdfileout,*) TRIM(pwd),"/../libexamples/mmg/example0_fortran/cube.s"
 
   mmgMesh = 0
   mmgSol  = 0
-  !! Remark: %val(0) allow to pass the value 0 (i.e. NULL) instead of a pointer
-  !! toward NULL.
-  CALL MMGS_Init_mesh(mmgMesh,mmgSol,%val(0))
+
+  CALL MMGS_Init_mesh(MMG5_ARG_start, &
+       MMG5_ARG_ppMesh,mmgMesh,MMG5_ARG_ppMet,mmgSol, &
+       MMG5_ARG_end)
 
   !> 2) Build mesh in MMG5 format
   !! Two solutions: just use the MMGS_loadMesh function that will read a .mesh(b)
@@ -216,21 +230,28 @@ PROGRAM main
   ENDIF
 
   !> 3) Free the MMGS5 structures
-  CALL MMGS_Free_all(mmgMesh,mmgSol,%val(0))
+  CALL MMGS_Free_all(MMG5_ARG_start, &
+       MMG5_ARG_ppMesh,mmgMesh,MMG5_ARG_ppMet,mmgSol, &
+       MMG5_ARG_end)
 
   !> ================== 3d remeshing using the mmg3d library
 
   !! ------------------------------ STEP   I --------------------------
   !! 1) Initialisation of mesh and sol structures */
-  !! args of InitMesh: mesh=&mmgMesh, sol=&mmgSol, input mesh name, input sol
-  !! name, output mesh name */
+  !! args of InitMesh:
+  !! MMG5_ARG_start: we start to give the args of a variadic func
+  !! MMG5_ARG_ppMesh: next arg will be a pointer over a MMG5_pMesh
+  !! mmgMesh: your MMG5_pMesh (that store your mesh)
+  !! MMG5_ARG_ppMet: next arg will be a pointer over a MMG5_pSol storing a metric
+  !! mmgSol: your MMG5_pSol (that store your metric) */
   WRITE(tdfileout,*) TRIM(pwd),"/../libexamples/mmg/example0_fortran/cube.3d"
 
   mmgMesh = 0
   mmgSol  = 0
-  !! Remark: %val(0) allow to pass the value 0 (i.e. NULL) instead of a pointer
-  !! toward NULL.
-  CALL MMG3D_Init_mesh(mmgMesh,mmgSol,%val(0))
+
+  CALL MMG3D_Init_mesh(MMG5_ARG_start, &
+       MMG5_ARG_ppMesh,mmgMesh,MMG5_ARG_ppMet,mmgSol, &
+       MMG5_ARG_end)
 
   !> 2) Build mesh in MMG5 format
   !! Two solutions: just use the MMG3D_loadMesh function that will read a .mesh(b)
@@ -322,6 +343,8 @@ PROGRAM main
 
 
   !> 3) Free the MMG3D5 structures
-  CALL MMG3D_Free_all(mmgMesh,mmgSol,%val(0))
+  CALL MMG3D_Free_all(MMG5_ARG_start, &
+       MMG5_ARG_pMesh,mmgMesh,MMG5_ARG_pMet,mmgSol, &
+       MMG5_ARG_end)
 
 END PROGRAM main

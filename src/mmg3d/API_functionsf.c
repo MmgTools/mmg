@@ -43,13 +43,18 @@
 /**
  * See \ref MMG3D_Init_mesh function in common/libmmgcommon.h file.
  */
-FORTRAN_NAME(MMG3D_INIT_MESH, mmg3d_init_mesh,
-             (MMG5_pMesh *mesh, MMG5_pSol *sol,MMG5_pSol *disp),
-             (mesh,sol,disp )) {
-  MMG3D_Init_mesh(mesh,sol,disp);
+FORTRAN_VARIADIC ( MMG3D_INIT_MESH, mmg3d_init_mesh,
+                 (enum MMG5_arg starter, ... ),
+                 va_list argptr;
 
-  return;
-}
+                 va_start(argptr, starter);
+
+                 _MMG3D_Init_mesh_var(argptr);
+
+                 va_end(argptr);
+
+                 return;
+  )
 
 /**
  * See \ref MMG3D_Init_parameters function in \ref mmg3d/libmmg3d.h file.
@@ -441,28 +446,54 @@ FORTRAN_NAME(MMG3D_SET_LOCALPARAMETER,mmg3d_set_localparameter,
   return;
 }
 
+/**
+ * See \ref MMG5_Free_all function in \ref mmg3d/libmmg3d.h file.
+ */
+FORTRAN_VARIADIC(MMG3D_FREE_ALL,mmg3d_free_all,
+                 (enum MMG5_arg starter,...),
+                 va_list argptr;
+
+                 va_start(argptr, starter);
+
+                 _MMG3D_Free_all_var(argptr);
+
+                 va_end(argptr);
+
+                 return;
+  )
 
 /**
  * See \ref MMG3D_Free_structures function in \ref mmg3d/libmmg3d.h file.
  */
-FORTRAN_NAME(MMG3D_FREE_STRUCTURES,mmg3d_free_structures,
-             (MMG5_pMesh *mesh,MMG5_pSol *met ,MMG5_pSol *disp ),
-             (mesh,met,disp)){
-  MMG3D_Free_structures(*mesh,*met,(disp==NULL)?NULL:*disp);
+FORTRAN_VARIADIC(MMG3D_FREE_STRUCTURES,mmg3d_free_structures,
+                 (enum MMG5_arg starter,...),
+                 va_list argptr;
 
-  return;
-}
+                 va_start(argptr, starter);
+
+                 _MMG3D_Free_structures_var(argptr);
+
+                 va_end(argptr);
+
+                 return;
+  )
 
 /**
  * See \ref MMG3D_Free_names function in \ref mmg3d/libmmg3d.h file.
  */
-FORTRAN_NAME(MMG3D_FREE_NAMES,mmg3d_free_names,(MMG5_pMesh *mesh,MMG5_pSol *met,
-                                              MMG5_pSol *disp),
-             (mesh,met,disp))
-{
-  MMG3D_Free_names(*mesh,*met,(disp==NULL)?NULL:*disp);
-  return;
-}
+FORTRAN_VARIADIC(MMG3D_FREE_NAMES,mmg3d_free_names,
+             (enum MMG5_arg starter,...),
+             va_list argptr;
+
+             va_start(argptr, starter);
+
+             _MMG3D_Free_names_var(argptr);
+
+             va_end(argptr);
+
+             return;
+  )
+
 
 /**
  * See \ref MMG3D_loadMesh function in \ref mmg3d/libmmg3d.h file.

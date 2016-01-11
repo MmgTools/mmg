@@ -375,9 +375,14 @@ int main(int argc,char *argv[]) {
   mesh = NULL;
   met  = NULL;
 
-  MMGS_Init_mesh(&mesh,&met);
+  MMGS_Init_mesh(MMG5_ARG_start,
+                 MMG5_ARG_ppMesh,&mesh,MMG5_ARG_ppMet,&met,
+                 MMG5_ARG_end);
+
   /* reset default values for file names */
-  MMGS_Free_names(mesh,met);
+  MMGS_Free_names(MMG5_ARG_start,
+                  MMG5_ARG_ppMesh,&mesh,MMG5_ARG_ppMet,&met,
+                  MMG5_ARG_end);
 
   /* command line */
   if ( !_MMG5_parsar(argc,argv,mesh,met) )  return(MMG5_STRONGFAILURE);

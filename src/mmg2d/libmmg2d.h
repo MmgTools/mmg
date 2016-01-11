@@ -75,15 +75,20 @@ enum MMG2D_Param {
 /*----------------------------- functions header -----------------------------*/
 /* Initialization functions */
 /* init structures */
+
 /**
- * \param mesh pointer toward a pointer toward the mesh structure.
- * \param sol pointer toward a pointer toward the sol structure.
+ * \param starter dummy argument used to initialize the variadic argument list
+ * \param ... variadic arguments. For now, you need to call the \a
+ * MMG2D_Init_mesh function with the following arguments :
+ * MMG2D_Init_mesh(MMG5_ARG_start,MMG5_ARG_ppMesh, your_mesh,
+ * MMG5_ARG_ppMet, your_metric,MMG5_ARG_end). Here, \a your_mesh is a pointer
+ * toward \a MMG5_pMesh and \a your_metric a pointer toward \a MMG5_pSol.
  *
- * Allocate the mesh and solution structures and initialize it to
- * their default values.
+ * MMG structures allocation and initialization.
  *
  */
-void  MMG2D_Init_mesh(MMG5_pMesh *mesh, MMG5_pSol *sol);
+void MMG2D_Init_mesh(enum MMG5_arg starter,...);
+
 /**
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the sol structure.
@@ -294,32 +299,54 @@ int MMG2D_Set_tensorSol(MMG5_pSol met, double* s, int pos);
  */
 int MMG2D_Chk_meshData(MMG5_pMesh mesh,MMG5_pSol met);
 
+/* deallocations */
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the sol structure.
+ * \param starter dummy argument used to initialize the variadic argument list.
+ * \param ... variadic arguments. For now, you need to call the \a
+ * MMG2D_Free_all function with the following arguments :
+ * MMG2D_Free_all(MMG5_ARG_start,MMG5_ARG_ppMesh, your_mesh,
+ * MMG5_ARG_ppMet, your_metric,MMG5_ARG_end). Here, \a your_mesh is a pointer
+ * toward \a MMG5_pMesh and \a your_metric a pointer toward \a MMG5_pSol.
  *
  * Deallocations before return.
  *
- */
-void MMG2D_Free_all(MMG5_pMesh mesh,MMG5_pSol met
-  );
-/**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the sol structure.
- *
- * File name deallocations before return.
+ * \remark we pass the structures by reference in order to have argument
+ * compatibility between the library call from a Fortran code and a C code.
  *
  */
-void MMG2D_Free_names(MMG5_pMesh mesh, MMG5_pSol met);
+void MMG2D_Free_all(enum MMG5_arg starter,...);
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the sol structure.
+ * \param starter dummy argument used to initialize the variadic argument list.
+ * \param ... variadic arguments. For now, you need to call the \a
+ * MMG2D_Free_structures function with the following arguments :
+ * MMG2D_Free_structures(MMG5_ARG_start,MMG5_ARG_ppMesh, your_mesh,
+ * MMG5_ARG_ppMet, your_metric,MMG5_ARG_end). Here, \a your_mesh is a pointer
+ * toward \a MMG5_pMesh and \a your_metric a pointer toward \a MMG5_pSol.
  *
  * Structure deallocations before return.
  *
+ * \remark we pass the structures by reference in order to have argument
+ * compatibility between the library call from a Fortran code and a C code.
+ *
  */
-void MMG2D_Free_structures(MMG5_pMesh mesh,MMG5_pSol met);
+void MMG2D_Free_structures(enum MMG5_arg starter,...);
+
+/**
+ * \param starter dummy argument used to initialize the variadic argument list.
+ * \param ... variadic arguments. For now, you need to call the \a
+ * MMG2D_Free_names function with the following arguments :
+ * MMG2D_Free_names(MMG5_ARG_start,MMG5_ARG_ppMesh, your_mesh,
+ * MMG5_ARG_ppMet, your_metric,MMG5_ARG_end). Here, \a your_mesh is a pointer
+ * toward \a MMG5_pMesh and \a your_metric a pointer toward \a MMG5_pSol.
+ *
+ * Structure deallocations before return.
+ *
+ * \remark we pass the structures by reference in order to have argument
+ * compatibility between the library call from a Fortran code and a C code.
+ *
+ */
+void MMG2D_Free_names(enum MMG5_arg starter,...);
 
 /**
  * \param mesh pointer toward the mesh structure.

@@ -51,6 +51,7 @@
 ! #ifndef _MMGLIBCOMMON_H
 #define _MMGLIBCOMMON_H
 
+! #include "stdarg.h"
 ! #include "chrono.h"
 
 ! /**
@@ -80,6 +81,27 @@
 
 #define MMG5_STRONGFAILURE 2
 
+! /**
+!  * \enum MMG5_arg
+!  * \brief Argument type of mmg3d structures.
+!  */
+
+! /*!< To begin a list of variadic arguments (mandatory first arg for all our variadic functions) */
+#define   MMG5_ARG_start               %val(0)
+! /*!< Pointer toward a MMG5_pMesh structure (for structure allocations purposes) */
+#define   MMG5_ARG_ppMesh              %val(1)
+! /*!< Pointer toward a MMG5_pSol structure storing a metric (for structure allocations purposes)  */
+#define   MMG5_ARG_ppMet               %val(2)
+! /*!< Pointer toward a MMG5_pSol structure storing a displacement (for structure allocations purposes)  */
+#define   MMG5_ARG_ppDisp              %val(3)
+! /*!< MMG5_pMesh structure */
+#define   MMG5_ARG_pMesh               %val(4)
+! /*!< MMG5_pSol structure storing a metric field */
+#define   MMG5_ARG_pMet                %val(5)
+! /*!< MMG5_pSol structure storing a displacement field */
+#define   MMG5_ARG_pDisp               %val(6)
+! /*!< To end a list of variadic argument (mandatory last argument for all our variadic functions) */
+#define   MMG5_ARG_end                 %val(7)
 ! /**
 !  * \enum MMG5_type
 !  * \brief Type of solutions.

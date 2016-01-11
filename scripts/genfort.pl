@@ -46,6 +46,7 @@ my $int      = 0;
 my $fichier;
 #my $format = "MMG_INTEGER, PARAMETER :: %-30s = %d";
 my $format = "#define %-30s %d";
+my $formatbyval = "#define %-30s \%val(%d)";
 my %opts;
 
 ###############################################################################
@@ -123,6 +124,7 @@ sub Convert {
     my $startcom  = 0;
     my $startenum = 0;
     my $countenum = 0;
+    my $byvalue   = 0;
     my $chaine;
     my $tabcount = 0;
     my $interfaceprinted = 0;
@@ -151,11 +153,21 @@ sub Convert {
                         printTab( $chaine, $tabcount, 1);
                     }
                 }
+                elsif($line =~ /^\s*enum MMG5_arg/)
+                {
+                    # We start an enum and we want fortran to pass directly its
+                    # value and not its reference.
+                    $startenum = 1;
+                    $countenum = 0;
+                    $byvalue = 1;
+                    #$countenum = $countenum + 1 if (/PARAM/);
+                }
                 elsif($line =~ /^\s*enum/)
                 {
                     # We start an enum
                     $startenum = 1;
                     $countenum = 0;
+                    $byvalue = 0;
                     #$countenum = $countenum + 1 if (/PARAM/);
                 }
                 elsif ( $line =~ /^\s*$/ )
@@ -241,12 +253,26 @@ sub Convert {
 
                     if ( $key =~ /(.*)(\/\*.*\*\/)/ )
                     {
-                        $chaine = sprintf($format, $1, $countenum);
+                        if ( $byvalue ) {
+                            # Fortran code must pass an value and not a
+                            # reference over a value
+                            $chaine = sprintf($formatbyval, $1,$countenum);
+                        }
+                        else {
+                            $chaine = sprintf($format, $1, $countenum);
+                        }
                         $chaine = "$2\n$chaine\n";
                     }
                     else
                     {
-                        $chaine = sprintf($format, $key, $countenum);
+                        if ( 0 && $byvalue ) {
+                            # Fortran code must pass an value and not a
+                            # reference over a value
+                            $chaine = sprintf($formatbyval, $key, $countenum,);
+                        }
+                        else {
+                            $chaine = sprintf($format, $key, $countenum);
+                        }
                         $chaine = "$chaine\n";
                     }
                     printTab($chaine,$tabcount, 0);

@@ -49,22 +49,6 @@
     return(val);                                                  \
   }while(0)
 
-/**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the sol structure (metric).
- * \param ... optional arguments: not used for now. To end by the NULL value.
- *
- * Deallocations before return.
- *
- */
-void MMGS_Free_all(MMG5_pMesh mesh,MMG5_pSol met,... ){
-
-  MMGS_Free_structures(mesh,met);
-
-  _MMG5_SAFE_FREE(met);
-  _MMG5_SAFE_FREE(mesh);
-}
-
 /** Free adja, xtetra and xpoint tables */
 static inline
 void _MMGS_Free_topoTables(MMG5_pMesh mesh) {

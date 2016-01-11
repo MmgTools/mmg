@@ -144,7 +144,7 @@ void  tminit(mytime *t,int maxtim) {
  * \fn void  printim(double elps,char *stim)
  * \brief Print real time.
  * \param elps elapsed time in seconds.
- * \param *stim pointer toward string containg the elapsed time at .h.m.s format.
+ * \param stim pointer toward string containg the elapsed time at .h.m.s format.
  */
 void printim(double elps,char *stim) {
   int    hh,mm,ss;
