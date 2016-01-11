@@ -316,111 +316,111 @@ int MMG3D_typelt(MMG5_pMesh mesh,int iel,int *item) {
   item[0] = 0;
   return(1);
 }
-
-static inline int _MMG3D_swpalmostall(MMG5_pMesh mesh,  MMG5_pSol met,_MMG5_pBucket bucket,int k,int iar) {
+static inline int _MMG3D_swpItem(MMG5_pMesh mesh,  MMG5_pSol met,_MMG5_pBucket bucket,int k,int iar) {
   MMG5_pTetra   pt,pt1;
   MMG5_pxTetra  pxt;
-  int           i,l,list[MMG3D_LMAX+2],lon,iel,nconf,ier;
+  int           l,list[MMG3D_LMAX+2],lon,iel,nconf,ier;
   double        crit;
   double        OCRIT = 1.01;
   
+  ier = 0;
   pt = &mesh->tetra[k];
+  lon = _MMG5_coquil(mesh,k,iar,&list[0]);
+  if(lon%2) return(0);
+  lon = lon/2;
+  if ( lon > 2 ) {
+    crit = pt->qual;
+    for (l=1; l<lon; l++) {
+      iel = list[l] / 6;
+      pt1 = &mesh->tetra[iel];
+      if(pt1->tag & MG_REQ) break;
+      if ( pt1->qual < crit )  crit = pt1->qual;
+    }
+    if(l<lon)  {
+      ier = 0;
+    } else {
+      crit *= OCRIT;
+      /* Prevent swap of a ref or tagged edge */
+      if ( pt->xt ) {
+        pxt = &mesh->xtetra[pt->xt];
+        if ( pxt->edg[iar] || pxt->tag[iar] ) return(0);
+      }
+      
+      nconf = _MMG5_chkswpgen(mesh,met,k,iar,&lon,list,OCRIT,2);
+      if ( nconf ) {
+        ier = _MMG5_swpgen(mesh,met,nconf,lon,list,bucket,2);
+        if ( ier < 0 ) return(-1);
+        else 
+          return(ier);
+      }           
+    }
+  }
+
+  return(ier);
+}
+static inline int _MMG3D_swpalmostall(MMG5_pMesh mesh,  MMG5_pSol met,_MMG5_pBucket bucket,int k,int iar) {
+  int           i,ier;
   
+  ier = 0;
   for(i=0 ; i<6 ; i++) {
     if(i==iar) continue;
-    lon = _MMG5_coquil(mesh,k,i,&list[0]);
-    if ( lon > 2 ) {
-      crit = pt->qual;
-      for (l=1; l<lon; l++) {
-        iel = list[l] / 6;
-        pt1 = &mesh->tetra[iel];
-        if(pt1->tag & MG_REQ) break;
-        if ( pt1->qual < crit )  crit = pt1->qual;
-      }
-      if(l<lon)  {
-        ier = 0;
-      } else {
-        crit *= OCRIT;
-        /* Prevent swap of a ref or tagged edge */
-        if ( pt->xt ) {
-          pxt = &mesh->xtetra[pt->xt];
-          if ( pxt->edg[i] || pxt->tag[i] ) continue;
-        }
-
-        nconf = _MMG5_chkswpgen(mesh,met,k,i,&lon,list,OCRIT,2);
-        if ( nconf ) {
-          ier = _MMG5_swpgen(mesh,met,nconf,lon,list,bucket,2);
-          if ( ier < 0 ) return(-1);
-          break;
-        }           
-      }
-    }
+    ier = _MMG3D_swpItem(mesh,met,bucket,k,i);
+    if ( ier < 0 ) return(-1);
+    else if(ier) 
+      return(ier);
   }
   return(ier);
 }
+
 
 int MMG3D_opttyp(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket) {
   MMG5_pTetra    pt,pt1;
   MMG5_pxTetra   pxt;
   double         crit,critswp;
   int            k,ityp,cs[10],ds[10],item[2],lon;
-  int            list[MMG3D_LMAX+2],l,iel,ier,i,nd,nconf;
+  int            list[MMG3D_LMAX+2],l,iel,ier,i,nd,nconf,ne;
   double         OCRIT = 1.01;
   
   memset(cs,0,10*sizeof(int)); 
   memset(ds,0,10*sizeof(int));
   nd = 0;
-  crit = 0.05 / _MMG5_ALPHAD;
+  crit = 0.2 / _MMG5_ALPHAD;
 
-  for (k=1 ; k<=mesh->ne ; k++) {
+  ne = mesh->ne;
+  ++mesh->base;
+  for (k=1 ; k<=ne ; k++) {
     pt = &mesh->tetra[k];
     if(!pt->v[0]) continue;
     if(pt->qual > crit) continue;
     
-    ityp = MMG3D_typelt(mesh,k,item);
+   if(pt->flag == mesh->base) {
+     printf("on ignore %d\n",k);
+      continue;
+    }
+     ityp = MMG3D_typelt(mesh,k,item);
     cs[ityp]++;
     
     switch(ityp) {
+      
     case 1:  /* sliver */
-    case 3:  /* aileron */
+    case 3:  /* aileron*/
     case 6:  /* O good face: move away closest vertices */
     case 7:
+    default:
       if(mesh->info.noswap) break;
-      lon = _MMG5_coquil(mesh,k,item[0],&list[0]);
-      if ( lon > 2 ) {
-        critswp = pt->qual;
-        for (l=1; l<lon; l++) {
-          iel = list[l] / 6;
-          pt1 = &mesh->tetra[iel];
-          if ( pt1->tag & MG_REQ ) break;
-          if ( pt1->qual < critswp )  critswp = pt1->qual;
-        }
-        /*impossible de dégrader à cause des swap 4-4*/
-        critswp *= OCRIT;
-        if(l<lon) {
-          ier = 0;
-        }
-        else {
-          /* Prevent swap of a ref or tagged edge */
-          if ( pt->xt ) {
-            pxt = &mesh->xtetra[pt->xt];
-            if ( pxt->edg[item[0]] || pxt->tag[item[0]] ) continue;
-          }
-
-          nconf = _MMG5_chkswpgen(mesh,met,k,item[0],&lon,list,OCRIT,2);
-          if ( nconf ) {
-            ier = _MMG5_swpgen(mesh,met,nconf,lon,list,bucket,2);
-            if ( ier < 0 ) return(-1);
-          }
-        }
-        if(ier > 0) {
+      ier = _MMG3D_swpItem(mesh,met,bucket,k,item[0]);
+      if(ier > 0) {
+        nd++;
+        ds[ityp]++;
+        break;
+      } else if(!ier) {
+        ier = _MMG3D_swpalmostall(mesh,met,bucket,k,item[0]);
+        if(ier > 0) { 
           nd++;
-          ds[1]++;
-          break;
+          ds[ityp]++;
         }
       }
-      ier = _MMG3D_swpalmostall(mesh,met,bucket,k,item[0]);
-
+      break;
     }/*end switch*/
   }/*end for k*/
           
@@ -428,5 +428,5 @@ int MMG3D_opttyp(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket) {
     if ( cs[k] )
       printf("  optim [%d]      = %5d   %5d  %6.2f %%\n",k,cs[k],ds[k],100.0*ds[k]/cs[k]);
   
-    return(1);
+    return(nd);
   }
