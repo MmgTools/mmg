@@ -397,8 +397,8 @@ int main(int argc,char *argv[]) {
   sol  = NULL;
 
   MMG2D_Init_mesh(MMG5_ARG_start,
-                   MMG5_ARG_ppMesh,&mesh,MMG5_ARG_ppMet,&sol,
-                   MMG5_ARG_end);
+                  MMG5_ARG_ppMesh,&mesh,MMG5_ARG_ppMet,&sol,
+                  MMG5_ARG_end);
 
   /* reset default values for file names */
   MMG2D_Free_names(MMG5_ARG_start,

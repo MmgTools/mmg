@@ -1039,7 +1039,9 @@ int _MMG3D_saveAllMesh(MMG5_pMesh mesh) {
     }
     for (k=1; k<=mesh->nt; k++) {
       ptt = &mesh->tria[k];
-      if ( ptt->tag[0] & MG_REQ && ptt->tag[1] & MG_REQ && ptt->tag[2] & MG_REQ )  ntreq++;
+      if ( ptt->tag[0] & MG_REQ && ptt->tag[1] & MG_REQ && ptt->tag[2] & MG_REQ ) {
+        ntreq++;
+      }
       if(!bin) {
         fprintf(inm,"%d %d %d %d\n",mesh->point[ptt->v[0]].tmp,mesh->point[ptt->v[1]].tmp
                 ,mesh->point[ptt->v[2]].tmp,ptt->ref);
@@ -1050,9 +1052,7 @@ int _MMG3D_saveAllMesh(MMG5_pMesh mesh) {
         fwrite(&ptt->ref,sw,1,inm);
       }
     }
-    if ( ntreq  && !mesh->info.nosurf ) {
-      /* Don't save the required triangles when no surface remeshing (because
-       * all the surface triangles are required). */
+    if ( ntreq ) {
       if(!bin) {
         strcpy(&chaine[0],"\n\nRequiredTriangles\n");
         fprintf(inm,"%s",chaine);
@@ -1066,7 +1066,8 @@ int _MMG3D_saveAllMesh(MMG5_pMesh mesh) {
       }
       for (k=0; k<=mesh->nt; k++) {
         ptt = &mesh->tria[k];
-        if ( ptt->tag[0] & MG_REQ && ptt->tag[1] & MG_REQ && ptt->tag[2] & MG_REQ ) {
+        if ( (ptt->tag[0] & MG_REQ) && (ptt->tag[1] & MG_REQ)
+             && ptt->tag[2] & MG_REQ ) {
           if(!bin) {
             fprintf(inm,"%d \n",k);
           } else {
@@ -1086,7 +1087,7 @@ int _MMG3D_saveAllMesh(MMG5_pMesh mesh) {
     if ( mesh->htab.geom )
       _MMG5_DEL_MEM(mesh,mesh->htab.geom,(mesh->htab.max+1)*sizeof(MMG5_hgeom));
 
-    /* in the wost case (all edges are marked), we will have around 1 edge per *
+    /* in the worst case (all edges are marked), we will have around 1 edge per *
      * triangle (we count edges only one time) */
     na = nr = nedreq = 0;
     mesh->memCur += (long long)((3*mesh->nt+2)*sizeof(MMG5_hgeom));
@@ -1165,9 +1166,7 @@ int _MMG3D_saveAllMesh(MMG5_pMesh mesh) {
             }
           }
         }
-        if ( nedreq  && !mesh->info.nosurf ) {
-          /* Don't save the required edges when no surface remeshing (because
-           * all the surface edges are required). */
+        if ( nedreq ) {
           if(!bin) {
             strcpy(&chaine[0],"\n\nRequiredEdges\n");
             fprintf(inm,"%s",chaine);

@@ -195,7 +195,7 @@ int _MMG3D_packMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
     _MMG5_DEL_MEM(mesh,mesh->htab.geom,(mesh->htab.max+1)*sizeof(MMG5_hgeom));
 
   mesh->na = 0;
-  /* in the wost case (all edges are marked), we will have around 1 edge per *
+  /* in the worst case (all edges are marked), we will have around 1 edge per *
    * triangle (we count edges only one time) */
   mesh->memCur += (long long)((3*mesh->nt+2)*sizeof(MMG5_hgeom));
   if ( (mesh->memCur) > (mesh->memMax) ) {
@@ -208,11 +208,25 @@ int _MMG3D_packMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
       pt   = &mesh->tetra[k];
       if ( MG_EOK(pt) &&  pt->xt ) {
         for (i=0; i<6; i++) {
-          if ( mesh->xtetra[pt->xt].edg[i] ||
-               ( MG_EDG(mesh->xtetra[pt->xt].tag[i] ) ||
-                 (mesh->xtetra[pt->xt].tag[i] & MG_REQ) ) )
+          if ( mesh->xtetra[pt->xt].edg[i] )
             _MMG5_hEdge(mesh,pt->v[_MMG5_iare[i][0]],pt->v[_MMG5_iare[i][1]],
                         mesh->xtetra[pt->xt].edg[i],mesh->xtetra[pt->xt].tag[i]);
+          else if ( mesh->xtetra[pt->xt].tag[i] & MG_REQ ) {
+            if ( mesh->info.nosurf ) {
+              if ( mesh->xtetra[pt->xt].tag[i]==MG_REQ+MG_CRN+MG_GEO )
+                continue;
+              else if ( mesh->xtetra[pt->xt].tag[i] & MG_CRN ) {
+                mesh->xtetra[pt->xt].tag[i] &= ~MG_CRN;
+                mesh->xtetra[pt->xt].tag[i] &= ~MG_REQ;
+              }
+              _MMG5_hEdge(mesh,pt->v[_MMG5_iare[i][0]],pt->v[_MMG5_iare[i][1]],
+                          mesh->xtetra[pt->xt].edg[i],mesh->xtetra[pt->xt].tag[i]);
+            }
+          }
+          else if ( MG_EDG(mesh->xtetra[pt->xt].tag[i] ) ) {
+            _MMG5_hEdge(mesh,pt->v[_MMG5_iare[i][0]],pt->v[_MMG5_iare[i][1]],
+                        mesh->xtetra[pt->xt].edg[i],mesh->xtetra[pt->xt].tag[i]);
+          }
         }
       }
     }
@@ -236,6 +250,7 @@ int _MMG3D_packMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
         mesh->edge[mesh->na ].b  = mesh->point[ph->b].tmp;
         mesh->edge[mesh->na].tag = ( ph->tag | MG_REF ) ;
         mesh->edge[mesh->na].ref = ph->ref;
+
         if ( MG_GEO & ph->tag ) nr++;
       }
     }

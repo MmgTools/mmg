@@ -862,6 +862,12 @@ int _MMG5_hGeom(MMG5_pMesh mesh) {
 
         _MMG5_hGet(&mesh->htab,pt->v[i1],pt->v[i2],&edg,&tag);
         pt->edg[i]  = edg;
+
+        /* If we use the nosurf option and the edge is required, we don't want
+         * to detect it as an edge whose tag has been modified for the option */
+        if ( mesh->info.nosurf && (tag & MG_REQ) )
+          pt->tag[i] = ~MG_CRN;
+
         /* Mark edges as boundary edges */
         pt->tag[i] |= (tag | MG_BDY);
         _MMG5_hTag(&mesh->htab,pt->v[i1],pt->v[i2],edg,pt->tag[i]);
@@ -965,7 +971,7 @@ int _MMG5_chkNumberOfTri(MMG5_pMesh mesh) {
   }
   if ( mesh->nt == nttmp ) return(1);
   else if ( mesh->nt ){
-    if ( !mesh->info.iso && (mesh->info.imprim > 0 || mesh->info.ddebug) ) 
+    if ( !mesh->info.iso && (mesh->info.imprim > 0 || mesh->info.ddebug) )
       fprintf(stdout,"  ## WARNING: INITIAL TRIANGLES ARE DELETED.\n");
     if ( !mesh->info.iso && (mesh->info.imprim > 3 || mesh->info.ddebug) ) {
       fprintf(stdout,"  Not enough or too much triangles for geometry (maybe");

@@ -761,7 +761,9 @@ int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol,void (*titi)(int ,int ,int,int,i
  * Main program for the rigid body movement library .
  *
  */
-int MMG2D_mmg2dmov(MMG5_pMesh mesh,MMG5_pSol sol,void (*titi)(int ,int ,int,int,int))
+int MMG2D_mmg2dmov(MMG5_pMesh mesh,MMG5_pSol sol,
+// MMG5_pSol,met,
+                   void (*titi)(int ,int ,int,int,int))
 {
   mytime    ctim[TIMEMAX];
   char      stim[32];

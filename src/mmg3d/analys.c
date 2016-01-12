@@ -38,18 +38,26 @@
 /**
  * \param mesh pointer towarad the mesh structure.
  *
- * Set all boundary triangles to required.
+ * Set all boundary triangles to required and add a tag to detect that they are
+ * not realy required.
  *
  */
 static inline void _MMG5_reqBoundaries(MMG5_pMesh mesh) {
   MMG5_pTria     ptt;
   int            k;
 
+  /* The MG_REQ+MG_CRN tag mark the boundary edges that we dont want to touch
+   * but that are not really required (-nosurf option) */
   for (k=1; k<=mesh->nt; k++) {
     ptt = &mesh->tria[k];
     ptt->tag[0] |= MG_REQ;
     ptt->tag[1] |= MG_REQ;
     ptt->tag[2] |= MG_REQ;
+
+    ptt->tag[0] |= MG_CRN;
+    ptt->tag[1] |= MG_CRN;
+    ptt->tag[2] |= MG_CRN;
+
   }
   return;
 }
