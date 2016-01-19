@@ -1,3 +1,4 @@
+
 /* =============================================================================
 **  This file is part of the mmg software package for the tetrahedral
 **  mesh modification.
@@ -498,9 +499,37 @@ FORTRAN_VARIADIC(MMG3D_FREE_NAMES,mmg3d_free_names,
 /**
  * See \ref MMG3D_loadMesh function in \ref mmg3d/libmmg3d.h file.
  */
-FORTRAN_NAME(MMG3D_LOADMESH,mmg3d_loadmesh,(MMG5_pMesh *mesh,int* retval),(mesh, retval)){
+FORTRAN_NAME(MMG3D_LOADMESH,mmg3d_loadmesh,
+             (MMG5_pMesh *mesh,char* filename, int *strlen,int* retval),
+             (mesh,filename,strlen, retval)){
+  char *tmp = NULL;
 
-  *retval = MMG3D_loadMesh(*mesh);
+  tmp = (char*)malloc((*strlen+1)*sizeof(char));
+  strncpy(tmp,filename,*strlen);
+  tmp[*strlen] = '\0';
+
+  *retval = MMG3D_loadMesh(*mesh,tmp);
+
+  _MMG5_SAFE_FREE(tmp);
+
+  return;
+}
+
+/**
+ * See \ref MMG3D_saveMesh function in \ref mmg3d/libmmg3d.h file.
+ */
+FORTRAN_NAME(MMG3D_SAVEMESH,mmg3d_savemesh,
+             (MMG5_pMesh *mesh,char* filename, int *strlen,int* retval),
+             (mesh,filename,strlen, retval)){
+  char *tmp = NULL;
+
+  tmp = (char*)malloc((*strlen+1)*sizeof(char));
+  strncpy(tmp,filename,*strlen);
+  tmp[*strlen] = '\0';
+
+  *retval = MMG3D_saveMesh(*mesh,tmp);
+
+  _MMG5_SAFE_FREE(tmp);
 
   return;
 }
@@ -508,9 +537,18 @@ FORTRAN_NAME(MMG3D_LOADMESH,mmg3d_loadmesh,(MMG5_pMesh *mesh,int* retval),(mesh,
 /**
  * See \ref MMG3D_loadSol function in \ref mmg3d/libmmg3d.h file.
  */
-FORTRAN_NAME(MMG3D_LOADSOL,mmg3d_loadsol,(MMG5_pMesh *mesh,MMG5_pSol *met,int* retval),(mesh,met,retval)){
+FORTRAN_NAME(MMG3D_LOADSOL,mmg3d_loadsol,
+             (MMG5_pMesh *mesh,MMG5_pSol *met,char* filename, int *strlen,int* retval),
+             (mesh,met,filename,strlen,retval)){
+  char *tmp = NULL;
 
-  *retval = MMG3D_loadSol(*mesh,*met);
+  tmp = (char*)malloc((*strlen+1)*sizeof(char));
+  strncpy(tmp,filename,*strlen);
+  tmp[*strlen] = '\0';
+
+  *retval = MMG3D_loadSol(*mesh,*met,tmp);
+
+  _MMG5_SAFE_FREE(tmp);
 
   return;
 }
@@ -518,9 +556,18 @@ FORTRAN_NAME(MMG3D_LOADSOL,mmg3d_loadsol,(MMG5_pMesh *mesh,MMG5_pSol *met,int* r
 /**
  * See \ref MMG3D_saveSol function in \ref mmg3d/libmmg3d.h file.
  */
-FORTRAN_NAME(MMG3D_SAVESOL,mmg3d_savesol,(MMG5_pMesh *mesh,MMG5_pSol *met,int* retval),(mesh,met,retval)){
+FORTRAN_NAME(MMG3D_SAVESOL,mmg3d_savesol,
+             (MMG5_pMesh *mesh,MMG5_pSol *met,char* filename, int *strlen,int* retval),
+             (mesh,met,filename,strlen,retval)){
+  char *tmp = NULL;
 
-  *retval = MMG3D_saveSol(*mesh,*met);
+  tmp = (char*)malloc((*strlen+1)*sizeof(char));
+  strncpy(tmp,filename,*strlen);
+  tmp[*strlen] = '\0';
+
+  *retval = MMG3D_saveSol(*mesh,*met,tmp);
+
+  _MMG5_SAFE_FREE(tmp);
 
   return;
 }
@@ -888,6 +935,15 @@ FORTRAN_NAME(MMG5_FREE_NAMES,mmg5_free_names,(MMG5_pMesh *mesh,MMG5_pSol *met,
 FORTRAN_NAME(MMG5_LOADMESH,mmg5_loadmesh,(MMG5_pMesh *mesh,int* retval),(mesh, retval)){
 
   *retval = MMG5_loadMesh(*mesh);
+
+  return;
+}
+/**
+ * See \ref MMG5_saveMesh function in \ref mmg3d/libmmg3d.h file.
+ */
+FORTRAN_NAME(MMG5_SAVEMESH,mmg5_savemesh,(MMG5_pMesh *mesh,int* retval),(mesh, retval)){
+
+  *retval = MMG5_saveMesh(*mesh);
 
   return;
 }

@@ -238,7 +238,7 @@
 !  */
 
 ! int MMG2D_Set_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int typEntity,
-!                      int np, int typSol);
+!                       int np, int typSol);
 ! /* init structure datas */
 ! /**
 !  * \param mesh pointer toward the mesh structure.
@@ -254,7 +254,7 @@
 !  */
 
 ! int  MMG2D_Set_vertex(MMG5_pMesh mesh, double c0, double c1,
-!                      int ref,int pos);
+!                       int ref,int pos);
 ! /**
 !  * \param mesh pointer toward the mesh structure.
 !  * \param num integer
@@ -271,7 +271,7 @@
 !  */
 
 ! int  MMG2D_Get_vertex(MMG5_pMesh mesh, int num,double* c0, double* c1, int* ref,
-!                      int* isCorner, int* isRequired);
+!                       int* isCorner, int* isRequired);
 ! /**
 !  * \param mesh pointer toward the mesh structure.
 !  * \param v0 first vertex of triangle.
@@ -286,8 +286,8 @@
 !  *
 !  */
 
-! int MMG2D_Set_triangle(MMG5_pMesh mesh, int v0, int v1, 
-!                       int v2, int ref, int pos);
+! int MMG2D_Set_triangle(MMG5_pMesh mesh, int v0, int v1,
+!                        int v2, int ref, int pos);
 
 ! /**
 !  * \param mesh pointer toward the mesh structure.

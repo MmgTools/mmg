@@ -289,17 +289,6 @@ int _MMG3D_packMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
 
 /**
  * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the sol structure.
- *
- * Set function pointers for saveMesh.
- *
- */
-void MMG3D_Set_saveFunc(MMG5_pMesh mesh) {
-  _MMG3D_saveMeshinternal = _MMG3D_saveAllMesh;
-}
-
-/**
- * \param mesh pointer toward the mesh structure.
  * \param met pointer toward a sol structure (metric).
  * \return \ref MMG5_SUCCESS if success, \ref MMG5_LOWFAILURE if failed
  * but a conform mesh is saved and \ref MMG5_STRONGFAILURE if failed and we

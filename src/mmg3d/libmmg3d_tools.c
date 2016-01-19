@@ -604,7 +604,6 @@ int MMG3D_mmg3dcheck(MMG5_pMesh mesh,MMG5_pSol met,double critmin, double lmin,
   chrono(ON,&(ctim[2]));
 #endif
   MMG3D_setfunc(mesh,met);
-  MMG3D_Set_saveFunc(mesh);
 
   fprintf(stdout,"\n  %s\n   MODULE MMG3D: IMB-LJLL : %s (%s)\n  %s\n",MG_STR,MG_VER,MG_REL,MG_STR);
 

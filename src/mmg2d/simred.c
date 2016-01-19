@@ -25,10 +25,8 @@
 extern int ddebug;
 /*simultaneous reduction*/
 int simred(double *m1,double *m2,double *m) {
-  double  dd,lambda[2],hh[2],det,pp[2][2];
-  double  maxd1,maxd2,ex,ey,ez,m1i[3],n[4],pi[4];
-  int     i,j,k;
-  
+  double  lambda[2],hh[2],det,pp[2][2];
+  double  maxd1,maxd2,ex,ey,m1i[3],n[4],pi[4];
  
   /* check diag matrices */
   if ( fabs(m1[1]) < EPSD && fabs(m2[1]) < EPSD ) {

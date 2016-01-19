@@ -228,17 +228,6 @@ int _MMGS_packMesh(MMG5_pMesh mesh,MMG5_pSol met) {
 
 /**
  * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the sol structure.
- *
- * Set function pointers for saveMesh.
- *
- */
-void MMGS_Set_saveFunc(MMG5_pMesh mesh) {
-  _MMGS_saveMeshinternal = _MMGS_saveAllMesh;
-}
-
-/**
- * \param mesh pointer toward the mesh structure.
  * \param met pointer toward a sol structure (metric or solution).
  * \param disp pointer toward a sol structure (displacement for the
  * lagrangian motion mode).

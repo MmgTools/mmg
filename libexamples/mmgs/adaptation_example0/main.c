@@ -88,7 +88,7 @@ int main(int argc,char *argv[]) {
   if ( MMGS_Set_inputMeshName(mmgMesh,filename) != 1 )
     exit(EXIT_FAILURE);
   /** b) function calling */
-  if ( MMGS_loadMesh(mmgMesh) != 1 )  exit(EXIT_FAILURE);
+  if ( MMGS_loadMesh(mmgMesh,filename) != 1 )  exit(EXIT_FAILURE);
 
   /** 3) Build sol in MMG5 format */
   /** Two solutions: just use the MMGS_loadSol function that will read a .sol(b)
@@ -100,7 +100,7 @@ int main(int argc,char *argv[]) {
   if ( MMGS_Set_inputSolName(mmgMesh,mmgSol,filename) != 1 )
     exit(EXIT_FAILURE);
   /** b) function calling */
-  if ( MMGS_loadSol(mmgMesh,mmgSol) != 1 )
+  if ( MMGS_loadSol(mmgMesh,mmgSol,filename) != 1 )
     exit(EXIT_FAILURE);
 
   /** 4) (not mandatory): check if the number of given entities match with mesh size */
@@ -127,7 +127,7 @@ int main(int argc,char *argv[]) {
      (by default, the mesh is saved in the "mesh.o.mesh" file */
   // MMGS_Set_outputMeshName(mmgMesh,"output.mesh");
   /** b) function calling */
-  if ( MMGS_saveMesh(mmgMesh) != 1 )
+  if ( MMGS_saveMesh(mmgMesh,"cube.o") != 1 )
     exit(EXIT_FAILURE);
 
   /** 2) Automatically save the solution */
@@ -135,7 +135,7 @@ int main(int argc,char *argv[]) {
      (by default, the mesh is saved in the "mesh.o.sol" file */
   // MMGS_Set_outputSolName(mmgMesh,mmgSol,"output.sol");
   /** b) function calling */
-  if ( MMGS_saveSol(mmgMesh,mmgSol) != 1 )
+  if ( MMGS_saveSol(mmgMesh,mmgSol,"cube.o") != 1 )
     exit(EXIT_FAILURE);
 
   /** 3) Free the MMGS structures */

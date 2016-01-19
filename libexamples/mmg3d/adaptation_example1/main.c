@@ -158,7 +158,7 @@ int main(int argc,char *argv[]) {
       (by default, the mesh is saved in the "mesh.o.mesh" file */
   if ( MMG3D_Set_outputMeshName(mmgMesh,"result0.mesh") != 1 ) exit(EXIT_FAILURE);
   /** b) function calling */
-  if ( MMG3D_saveMesh(mmgMesh) != 1 ) exit(EXIT_FAILURE);
+  if ( MMG3D_saveMesh(mmgMesh,"result0.mesh") != 1 ) exit(EXIT_FAILURE);
 
   /** 2) Automatically save the solution */
   /** a)  (not mandatory): give the ouptut sol name using MMG3D_Set_outputSolName
@@ -166,7 +166,7 @@ int main(int argc,char *argv[]) {
   if ( MMG3D_Set_outputSolName(mmgMesh,mmgSol,"result0.sol") != 1 )
     exit(EXIT_FAILURE);
   /** b) function calling */
-  if ( MMG3D_saveSol(mmgMesh,mmgSol) !=1 ) exit(EXIT_FAILURE);
+  if ( MMG3D_saveSol(mmgMesh,mmgSol,"result0.sol") !=1 ) exit(EXIT_FAILURE);
 
   /** 3) Free the MMG3D5 structures */
   MMG3D_Free_all(MMG5_ARG_start,

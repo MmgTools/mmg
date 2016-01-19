@@ -33,7 +33,7 @@ int MMG2_colpoi(MMG5_pMesh mesh, MMG5_pSol sol,int iel,int iar,int ia,int ib,dou
   int	    *list,lon,i,kel,num,ed,i1,i2;
   double    declic,*cal,air,coor[2],solu[3],*c1,*c2,*m1,*m2,len;
   double    cbound,capx,capy,cbpx,cbpy,alpha;
-  int       nbdry,ref,ip,iadri,*adjai,ibdry[2],it1,k;
+  int       nbdry,ref,ip,iadri,*adjai,ibdry[2],it1;
 
   pt  = &mesh->tria[iel];  
   pib = pt->v[ib]; 
@@ -323,8 +323,8 @@ int MMG2_colpoi(MMG5_pMesh mesh, MMG5_pSol sol,int iel,int iar,int ia,int ib,dou
  * \brief return 1 if the edge does not verify hausd criterion
 */
 int MMG2_chkedg(MMG5_pMesh mesh, MMG5_pPoint ppa,MMG5_pPoint ppb) {
-  double t0[2],t1[2],pc1[2],pc2[2];
-  double da,db,l,ux,uy,cosn,ps;
+  double t0[2],t1[2];
+  double l,ux,uy,cosn,ps;
   int    i;
   
   ux = ppa->c[0] - ppb->c[0];
@@ -359,11 +359,6 @@ int MMG2_chkedg(MMG5_pMesh mesh, MMG5_pPoint ppa,MMG5_pPoint ppb) {
       t1[i] *= -1;
     }
   }
-  /*control points*/
-  for(i=0 ; i<2 ; i++) {
-    pc1[i] = (t0[i]+3*ppa->c[i])/3.;
-    pc2[i] = (t1[i]+3*ppb->c[i])/3.;
-  }
   //compute the distance between mid point and curve (with angle between edge and tang)
   ps = t0[0]*ux + t0[1]*uy;
   ps /= l*l;
@@ -388,13 +383,13 @@ int MMG2_chkedg(MMG5_pMesh mesh, MMG5_pPoint ppa,MMG5_pPoint ppb) {
 /*collapse edge ppb-->ppa and ppbppa is boundary edge*/
 int MMG2_colpoibdry(MMG5_pMesh mesh, MMG5_pSol sol,int iel,int iar,int ia,int ib,double coe) {
   MMG5_pTria     pt,pt1;
-  MMG5_pEdge     ped,ped1;
+  MMG5_pEdge     ped;
   MMG5_pPoint    ppa,ppb,pp1,pp2,ppa1,ppb1; 
-  int       pib,pia,jel,iadr,a1,v1,*adja,iaa,voy,a,a2,v2,adj,adj1;
-  int	    *list,lon,i,kel,num,i1,i2,ed,k;
+  int       pib,pia,jel,iadr,a1,v1,*adja,voy,a,adj;
+  int	    *list,lon,i,kel,num,i1,i2,ed;
   double    declic,*cal,air,coor[2],solu[3],*c1,*c2,*m1,*m2,len;
-  double    capx,capy,cbpx,cbpy,alpha,cbound;
-  int       j,iadri,*adjai,nbdry,ibdry[2],ip;
+  //double    capx,capy,cbpx,cbpy,alpha,cbound;
+  int       iadri,*adjai,nbdry,ibdry[2],ip;
   pt  = &mesh->tria[iel];  
   pib = pt->v[ib]; 
   pia = pt->v[ia];

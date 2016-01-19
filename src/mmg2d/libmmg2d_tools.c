@@ -133,7 +133,7 @@ int MMG2D_Get_adjaVertices(MMG5_pMesh mesh, int ip, int lispoi[MMG2D_LMAX])
 inline
 int MMG2D_Get_adjaVerticesFast(MMG5_pMesh mesh, int ip,int start, int lispoi[MMG2D_LMAX])
 {
-  MMG5_pTria pt,ptcur;
+  MMG5_pTria pt;
   int k,prevk,nbpoi,iploc,i,i1,i2,*adja;
 
   pt   = &mesh->tria[start];

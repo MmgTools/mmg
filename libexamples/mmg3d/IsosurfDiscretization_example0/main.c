@@ -93,7 +93,7 @@ int main(int argc,char *argv[]) {
   if ( MMG3D_Set_inputMeshName(mmgMesh,inname) != 1 )
     exit(EXIT_FAILURE);
   /** b) function calling */
-  if ( MMG3D_loadMesh(mmgMesh) != 1 )  exit(EXIT_FAILURE);
+  if ( MMG3D_loadMesh(mmgMesh,inname) != 1 )  exit(EXIT_FAILURE);
 
   /** 3) Build solution in MMG5 format */
   /** Two solutions: just use the MMG3D_loadSol function that will read a .sol(b)
@@ -111,7 +111,7 @@ int main(int argc,char *argv[]) {
     exit(EXIT_FAILURE);
 
   /** b) function calling */
-  if ( MMG3D_loadSol(mmgMesh,mmgSol) != 1 )
+  if ( MMG3D_loadSol(mmgMesh,mmgSol,inname) != 1 )
     exit(EXIT_FAILURE);
 
   /** 4) (not mandatory): check if the number of given entities match with mesh size */
@@ -138,18 +138,18 @@ int main(int argc,char *argv[]) {
     fprintf(stdout,"BAD ENDING OF MMG3DLS\n");
 
   /* (Not mandatory) Automatically save the mesh */
-  sprintf(outname, "%s%s%s", pwd, "/../libexamples/mmg3d/IsosurfDiscretization_example0/", "test.o.mesh");
+  sprintf(outname, "%s%s%s", pwd, "/../libexamples/mmg3d/IsosurfDiscretization_example0/", "test.o");
   if ( MMG3D_Set_outputMeshName(mmgMesh,outname) != 1 )
     exit(EXIT_FAILURE);
 
-  if ( MMG3D_saveMesh(mmgMesh) != 1 )
+  if ( MMG3D_saveMesh(mmgMesh,outname) != 1 )
     exit(EXIT_FAILURE);
 
   /* (Not mandatory) Automatically save the solution */
   if ( MMG3D_Set_outputSolName(mmgMesh,mmgSol,outname) != 1 )
     exit(EXIT_FAILURE);
 
-  if ( MMG3D_saveSol(mmgMesh,mmgSol) != 1 )
+  if ( MMG3D_saveSol(mmgMesh,mmgSol,outname) != 1 )
     exit(EXIT_FAILURE);
 
   /* 9) free the MMG3D5 structures */

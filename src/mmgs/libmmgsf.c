@@ -44,15 +44,6 @@
 #include "libmmgs.h"
 
 /**
- * See \ref MMGS_saveMesh function in \ref mmgs/libmmgs.h file.
- */
-FORTRAN_NAME(MMGS_SAVEMESH,mmgs_savemesh,(MMG5_pMesh *mesh, int* retval),
-             (mesh,retval)){
-  *retval = MMGS_saveMesh(*mesh);
-  return;
-}
-
-/**
  * See \ref MMGS_mmgslib function in \ref mmgs/libmmgs.h file.
  */
 FORTRAN_NAME(MMGS_MMGSLIB,mmgs_mmgslib,(MMG5_pMesh *mesh,MMG5_pSol *met,

@@ -312,7 +312,7 @@ void _MMG2D_Free_structures_var(va_list argptr)
   /* if ( (*mesh)->info.npar && (*mesh)->info.par ) */
   /*   _MMG5_DEL_MEM((*mesh),(*mesh)->info.par,(*mesh)->info.npar*sizeof(MMG5_Par)); */
 
-  if ( (*mesh)->info.imprim>6 || (*mesh)->info.ddebug )
+  if ( (*mesh)->info.imprim>5 || (*mesh)->info.ddebug )
     printf("  MEMORY USED AT END (bytes) %ld\n",_MMG5_safeLL2LCast((*mesh)->memCur));
 
   return;

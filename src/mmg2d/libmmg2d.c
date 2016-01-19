@@ -135,7 +135,7 @@ int MMG2_tassage(MMG5_pMesh mesh,MMG5_pSol sol) {
   for(k=1 ; k<=mesh->np ; k++)
     mesh->point[k].tmp = 0;
 
- if(mesh->np < mesh->npmax - 3) {
+  if(mesh->np < mesh->npmax - 3) {
     mesh->npnil = mesh->np + 1;
     for (k=mesh->npnil; k<mesh->npmax-1; k++)
       mesh->point[k].tmp  = k+1;
@@ -143,7 +143,7 @@ int MMG2_tassage(MMG5_pMesh mesh,MMG5_pSol sol) {
     mesh->npnil = 0;
   }
 
- /*to do only if the edges are packed*/
+  /*to do only if the edges are packed*/
   /* if(mesh->na < mesh->namax - 3) { */
   /*   mesh->nanil = mesh->na + 1; */
   /*   for (k=mesh->nanil; k<mesh->namax-1; k++) */
@@ -188,7 +188,7 @@ int MMG2_tassage(MMG5_pMesh mesh,MMG5_pSol sol) {
  *
  */
 int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol sol,void (*titi)(int ,int ,int,int,int))
- {
+{
   mytime    ctim[TIMEMAX];
   char      stim[32];
 
@@ -514,7 +514,7 @@ int MMG2D_mmg2dmesh(MMG5_pMesh mesh,MMG5_pSol sol,void (*titi)(int ,int ,int,int
   if( mesh->nt && mesh->info.hgrad > 0 ) {
     if ( mesh->info.imprim )   fprintf(stdout,"\n  -- GRADATION : %8f\n",mesh->info.hgrad);
     MMG2_lissmet(mesh,sol);
-    }
+  }
   if ( mesh->nt )  MMG2_outqua(mesh,sol);
 
   if ( mesh->nt && abs(mesh->info.imprim) > 1 )  {
@@ -638,7 +638,7 @@ int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol,void (*titi)(int ,int ,int,int,i
 
 
   MMG2D_setfunc(mesh,sol);
- _MMG2D_Set_commonFunc();
+  _MMG2D_Set_commonFunc();
 
   fprintf(stdout,"\n  %s\n   MODULE MMG2D-IMB/LJLL : %s (%s) %s\n  %s\n",
           MG_STR,MG_VER,MG_REL,sol->size == 1 ? "ISO" : "ANISO",MG_STR);
@@ -667,7 +667,7 @@ int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol,void (*titi)(int ,int ,int,int,i
   if ( mesh->info.imprim )
     fprintf(stdout,"  -- PHASE 1 COMPLETED.     %s\n",stim);
 
- chrono(ON,&ctim[3]);
+  chrono(ON,&ctim[3]);
   if ( mesh->info.imprim ) {
     fprintf(stdout,"\n  -- PHASE 2 : LEVEL-SET DISCRETIZATION\n");
   }
@@ -765,8 +765,8 @@ int MMG2D_mmg2dmov(MMG5_pMesh mesh,MMG5_pSol sol,
 // MMG5_pSol,met,
                    void (*titi)(int ,int ,int,int,int))
 {
-  mytime    ctim[TIMEMAX];
-  char      stim[32];
+  //mytime    ctim[TIMEMAX];
+  //char      stim[32];
 
   fprintf(stdout,"  -- MMG2D, Release %s (%s) \n",MG_VER,MG_REL);
   fprintf(stdout,"     %s\n",MG_CPY);

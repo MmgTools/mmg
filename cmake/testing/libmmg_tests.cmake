@@ -37,7 +37,8 @@ IF (CMAKE_Fortran_COMPILER)
   ENABLE_LANGUAGE (Fortran)
 
   ADD_EXECUTABLE(libmmg_fortran_a
-    ${CMAKE_SOURCE_DIR}/libexamples/mmg/example0_fortran/main.F90 ${mmg_includes})
+    ${CMAKE_SOURCE_DIR}/libexamples/mmg/example0_fortran/main.F90
+    ${mmg_includes} ${mmg2d_includes} ${mmgs_includes} ${mmg3d_includes})
 
   IF ( WIN32 AND NOT MINGW AND USE_SCOTCH )
     my_add_link_flags(libmmg_fortran_a "/SAFESEH:NO")

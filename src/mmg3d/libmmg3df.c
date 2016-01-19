@@ -44,15 +44,6 @@
 #include "libmmg3d.h"
 
 /**
- * See \ref MMG3D_saveMesh function in \ref mmg3d/libmmg3d.h file.
- */
-FORTRAN_NAME(MMG3D_SAVEMESH,mmg3d_savemesh,(MMG5_pMesh *mesh, int* retval),
-             (mesh,retval)){
-  *retval = MMG3D_saveMesh(*mesh);
-  return;
-}
-
-/**
  * See \ref MMG3D_mmg3dlib function in \ref mmg3d/libmmg3d.h file.
  */
 FORTRAN_NAME(MMG3D_MMG3DLIB,mmg3d_mmg3dlib,(MMG5_pMesh *mesh,MMG5_pSol *met,
@@ -101,16 +92,6 @@ FORTRAN_NAME(MMG5_FREE_ALL,mmg5_free_all,(MMG5_pMesh *mesh,MMG5_pSol *met
 
   return;
 }
-
-/**
- * See \ref MMG5_saveMesh function in \ref mmg3d/libmmg3d.h file.
- */
-FORTRAN_NAME(MMG5_SAVEMESH,mmg5_savemesh,(MMG5_pMesh *mesh, int* retval),
-             (mesh,retval)){
-  *retval = MMG5_saveMesh(*mesh);
-  return;
-}
-
 
 /**
  * See \ref MMG5_mmg3dlib function in \ref mmg3d/libmmg3d.h file.

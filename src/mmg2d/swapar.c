@@ -29,7 +29,7 @@ int MMG2_swapar(MMG5_pMesh mesh,MMG5_pSol sol,int k,int i,double crit,int *list)
   double  cal1,cal2,air1,air2,airn1,airn2;
   int    *adj,*adj1,k1,k2,k3;
   int    i1,i2,vo1,vo2,vo3;
-  int    num,num1,num2,numa1,numa2;
+  int    num,num1,numa1;
 
   adj = &mesh->adja[3*(k-1)+1];
   pt  = &mesh->tria[k];
@@ -85,9 +85,7 @@ int MMG2_swapar(MMG5_pMesh mesh,MMG5_pSol sol,int k,int i,double crit,int *list)
   num = pt->edg[i];
   assert(!num);
   num1 = pt->edg[i1];
-  num2 = pt->edg[i2];
   numa1 = pt1->edg[MMG2_idir[vo1+1]];
-  numa2 = pt1->edg[MMG2_idir[vo1+2]];
 
   if(k2) (&mesh->adja[3*(k2-1)+1])[vo2] = 3*k1+vo1;
   pt1->edg[vo1] = num1;

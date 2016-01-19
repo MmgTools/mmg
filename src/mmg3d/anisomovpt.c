@@ -1177,7 +1177,7 @@ int _MMG5_movbdyridpt_ani(MMG5_pMesh mesh, MMG5_pSol met, int *listv,
   MMG5_Tria            tt;
   MMG5_pxPoint         pxp;
   double               step,l1old,l2old,l1new,l2new;
-  double               o[3],no1[3],no2[3],to[3],mo[6];
+  double               o[3],no1[3],no2[3],to[3];
   double               calold,calnew,caltmp,*callist;
   int                  l,iel,ip0,ipa,ipb,iptmpa,iptmpb,it1,it2,ip1,ip2,ip,nxp;
   unsigned char        i,i0,ie,iface,iface1,iface2,iea,ieb,ie1,ie2;

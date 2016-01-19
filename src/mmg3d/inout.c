@@ -91,12 +91,13 @@ static double _MMG5_swapd(double sbin)
 
 /**
  * \param mesh pointer toward the mesh structure.
+ * \param filename name of file.
  * \return 0 if failed, 1 otherwise.
  *
  * Read mesh data.
  *
  */
-int MMG3D_loadMesh(MMG5_pMesh mesh) {
+int MMG3D_loadMesh(MMG5_pMesh mesh,char *filename) {
   FILE*       inm;
   MMG5_pTetra pt;
   MMG5_pTria  pt1;
@@ -108,7 +109,7 @@ int MMG3D_loadMesh(MMG5_pMesh mesh) {
   int         binch,bdim,bpos,i,k;
   int         *ina,v[3],ref,nt,na,nr,ia,aux,nref;
   float            fc;
-  char        *ptr,*name,data[128],chaine[128];
+  char        *ptr,data[128],chaine[128];
 
   posnp = posnt = posne = posncor = 0;
   posnpreq = posntreq = posnereq = posned = posnedreq = posnr = 0;
@@ -118,8 +119,7 @@ int MMG3D_loadMesh(MMG5_pMesh mesh) {
   ina = NULL;
   mesh->np = mesh->nt = mesh->ne = 0;
 
-  name = mesh->namein;
-  strcpy(data,name);
+  strcpy(data,filename);
   ptr = strstr(data,".mesh");
   if ( !ptr ) {
     /* data contains the filename without extension */
@@ -133,42 +133,18 @@ int MMG3D_loadMesh(MMG5_pMesh mesh) {
         fprintf(stderr,"  ** %s  NOT FOUND.\n",data);
         return(0);
       }
-      else {
-        if ( !strstr(mesh->nameout,".mesh") ) {
-          _MMG5_ADD_MEM(mesh,5*sizeof(char),"output file name",
-                        printf("  Exit program.\n");
-                        exit(EXIT_FAILURE));
-          _MMG5_SAFE_REALLOC(mesh->nameout,strlen(mesh->nameout)+6,char,"output mesh name");
-          strcat(mesh->nameout,".mesh");
-        }
-      }
     }
-    else {
-      bin = 1;
-      if ( !strstr(mesh->nameout,".mesh") ) {
-        _MMG5_ADD_MEM(mesh,6*sizeof(char),"input file name",
-                      printf("  Exit program.\n");
-                      exit(EXIT_FAILURE));
-        _MMG5_SAFE_REALLOC(mesh->nameout,strlen(mesh->nameout)+7,char,"input file name");
-        strcat(mesh->nameout,".meshb");
-      }
-    }
+    else  bin = 1;
   }
   else {
     ptr = strstr(data,".meshb");
-    if( !ptr ) {
+    if ( ptr )  bin = 1;
       if( !(inm = fopen(data,"rb")) ) {
         fprintf(stderr,"  ** %s  NOT FOUND.\n",data);
         return(0);
       }
-    } else {
-      bin = 1;
-      if( !(inm = fopen(data,"rb")) ) {
-        fprintf(stderr,"  ** %s  NOT FOUND.\n",data);
-        return(0);
-      }
-    }
   }
+
   fprintf(stdout,"  %%%% %s OPENED\n",data);
 
   if (!bin) {
@@ -732,13 +708,14 @@ int MMG3D_loadMesh(MMG5_pMesh mesh) {
 
 /**
  * \param mesh pointer toward the mesh structure.
+ * \param gilename pointer toward the name of file.
+
  * \return 0 if failed, 1 otherwise.
- * \remark Function call through the function pointer \ref MMG5_saveMesh.
  *
  * Save mesh data.
  *
  */
-int _MMG3D_saveAllMesh(MMG5_pMesh mesh) {
+int MMG3D_saveMesh(MMG5_pMesh mesh, char *filename) {
   FILE*        inm;
   MMG5_pPoint  ppt;
   MMG5_pTetra  pt;
@@ -751,7 +728,7 @@ int _MMG3D_saveAllMesh(MMG5_pMesh mesh) {
 
   mesh->ver = 2;
   bin = 0;
-  strcpy(data,mesh->nameout);
+  strcpy(data,filename);
   ptr = strstr(data,".mesh");
   if ( !ptr ) {
     strcat(data,".meshb");
@@ -909,8 +886,7 @@ int _MMG3D_saveAllMesh(MMG5_pMesh mesh) {
       strcpy(&chaine[0],"\n\nNormals\n");
       fprintf(inm,"%s",chaine);
       fprintf(inm,"%d\n",nn);
-    } else {
-      binch = 60; //normals
+    } else {      binch = 60; //normals
       fwrite(&binch,sw,1,inm);
       bpos += 12+(3*mesh->ver)*4*nn; //Pos
       fwrite(&bpos,sw,1,inm);
@@ -1020,9 +996,11 @@ int _MMG3D_saveAllMesh(MMG5_pMesh mesh) {
 
   /* boundary mesh */
   /* tria + required tria */
-  mesh->nt = ntreq = 0;
-  if ( mesh->tria )
+  ntreq = 0;
+  if ( mesh->tria ) {
     _MMG5_DEL_MEM(mesh,mesh->tria,(mesh->nt+1)*sizeof(MMG5_Tria));
+    mesh->nt = 0;
+  }
 
   _MMG5_chkNumberOfTri(mesh);
   if ( _MMG5_bdryTria(mesh) ) {
@@ -1289,12 +1267,13 @@ int _MMG3D_saveAllMesh(MMG5_pMesh mesh) {
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the sol structure.
+ * \param filename name of file.
  * \return -1 data invalid, 0 no file, 1 ok.
  *
  * Load metric field.
  *
  */
-int MMG3D_loadSol(MMG5_pMesh mesh,MMG5_pSol met) {
+int MMG3D_loadSol(MMG5_pMesh mesh,MMG5_pSol met, char *filename) {
   FILE       *inm;
   float       fbuf[6],tmpf;
   double      dbuf[6],tmpd,lambda[3],eigenv[3][3];
@@ -1304,13 +1283,17 @@ int MMG3D_loadSol(MMG5_pMesh mesh,MMG5_pSol met) {
   long        posnp;
   char        *ptr,data[128],chaine[128];
 
-  if ( !met->namein )  return(0);
   posnp = 0;
   bin   = 0;
   iswp  = 0;
 
-  strcpy(data,met->namein);
+  strcpy(data,filename);
+
+  ptr = strstr(data,".mesh");
+  if ( ptr )  *ptr = '\0';
+
   ptr = strstr(data,".sol");
+
   if ( !ptr ) {
     /* data contains the filename without extension */
     strcat(data,".solb");
@@ -1614,33 +1597,58 @@ int MMG3D_loadSol(MMG5_pMesh mesh,MMG5_pSol met) {
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the sol structure.
+ * \param filename name of file.
  * \return 0 if failed, 1 otherwise.
  *
  * Write isotropic or anisotropic metric.
  *
  */
-int MMG3D_saveSol(MMG5_pMesh mesh,MMG5_pSol met) {
+int MMG3D_saveSol(MMG5_pMesh mesh,MMG5_pSol met, char *filename) {
   FILE*        inm;
   MMG5_pPoint  ppt;
   double       dbuf[6],mtmp[3],r[3][3],tmp;
   char        *ptr,data[128],chaine[128];
   int          binch,bpos,bin,np,k,typ,i;
-  
-  if ( !met->m || !met->nameout )  return(-1);
-  
+
+  if ( !met->m )  return(-1);
+
   met->ver = 2;
   bin = 0;
-  strcpy(data,met->nameout);
-  ptr = strstr(data,".mesh");
-  if ( ptr )  *ptr = '\0';
+
+  strcpy(data,filename);
   ptr = strstr(data,".sol");
-  if ( !ptr )  strcat(data,".sol");
-  if (  !(inm = fopen(data,"w")) ) {
-    fprintf(stderr,"  ** UNABLE TO OPEN %s\n",data);
-    return(0);
+  if ( ptr ) {
+    // filename contains the solution extension
+    ptr = strstr(data,".solb");
+
+    if ( ptr )  bin = 1;
+
+    if( !(inm = fopen(data,"wb")) ) {
+      fprintf(stderr,"  ** UNABLE TO OPEN %s.\n",data);
+      return(0);
+    }
   }
+  else
+  {
+    // filename don't contains the solution extension
+    ptr = strstr(data,".mesh");
+    if ( ptr ) *ptr = '\0';
+
+    strcat(data,".sol");
+    if (!(inm = fopen(data,"wb")) ) {
+      ptr  = strstr(data,".solb");
+      *ptr = '\0';
+      strcat(data,".sol");
+      if (!(inm = fopen(data,"wb")) ) {
+        fprintf(stderr,"  ** UNABLE TO OPEN %s.\n",data);
+        return(0);
+      }
+      else bin = 1;
+    }
+  }
+
   fprintf(stdout,"  %%%% %s OPENED\n",data);
-  
+
   /*entete fichier*/
   binch=bpos=0;
   if(!bin) {
@@ -1794,31 +1802,19 @@ int MMG3D_saveSol(MMG5_pMesh mesh,MMG5_pSol met) {
   return(1);
 }
 
-/**
- * \param mesh pointer toward the mesh structure.
- * \return 0 if failed, 1 otherwise.
- *
- * Save mesh data (wrap the \a _MMG5_saveMeshinternal function to avoid segfault
- * when linking with the shared library \a mmg3dlib).
- *
- */
-int MMG3D_saveMesh(MMG5_pMesh mesh) {
-  return(_MMG3D_saveMeshinternal(mesh));
-}
-
 /** Old API °°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°*/
 int MMG5_loadMesh(MMG5_pMesh mesh) {
-  return(MMG3D_loadMesh(mesh));
+  return(MMG3D_loadMesh(mesh,mesh->namein));
 }
 
 int MMG5_loadMet(MMG5_pMesh mesh,MMG5_pSol met) {
-  return(MMG3D_loadSol(mesh,met));
+  return(MMG3D_loadSol(mesh,met,met->namein));
 }
 
 int MMG5_saveMesh(MMG5_pMesh mesh) {
-  return(MMG3D_saveMesh(mesh));
+  return(MMG3D_saveMesh(mesh,mesh->nameout));
 }
 
 int MMG5_saveMet(MMG5_pMesh mesh,MMG5_pSol met) {
-  return(MMG3D_saveSol(mesh,met));
+  return(MMG3D_saveSol(mesh,met,met->nameout));
 }

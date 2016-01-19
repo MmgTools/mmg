@@ -471,38 +471,42 @@ int MMGS_Get_iparameter(MMG5_pMesh mesh, int iparam);
 /* input/output functions */
 /**
  * \param mesh pointer toward the mesh structure.
+ * \param filename name of file.
  * \return 0 if failed, 1 otherwise.
  *
  * Read mesh data.
  *
  */
-int  MMGS_loadMesh(MMG5_pMesh mesh);
+int  MMGS_loadMesh(MMG5_pMesh mesh, char* filename);
 /**
  * \param mesh pointer toward the mesh structure.
+ * \param filename name of file.
  * \return 0 if failed, 1 otherwise.
  *
  * Save mesh data.
  *
  */
-int  MMGS_saveMesh(MMG5_pMesh mesh);
+int  MMGS_saveMesh(MMG5_pMesh mesh, char *filename);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the sol structure.
+ * \param filename name of file.
  * \return 0 if failed, 1 otherwise.
  *
  * Load metric field.
  *
  */
-int  MMGS_loadSol(MMG5_pMesh mesh,MMG5_pSol met);
+int  MMGS_loadSol(MMG5_pMesh mesh,MMG5_pSol met, char* filename);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the sol structure.
+ * \param filename name of file.
  * \return 0 if failed, 1 otherwise.
  *
  * Write isotropic or anisotropic metric.
  *
  */
-int  MMGS_saveSol(MMG5_pMesh mesh, MMG5_pSol met);
+int  MMGS_saveSol(MMG5_pMesh mesh, MMG5_pSol met, char *filename);
 
 /* deallocations */
 /**

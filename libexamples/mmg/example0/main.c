@@ -152,7 +152,7 @@ int main(int argc,char *argv[]) {
   if ( MMGS_Set_inputMeshName(mmgMesh,filename) != 1 )
     exit(EXIT_FAILURE);
   /** b) function calling */
-  if ( MMGS_loadMesh(mmgMesh) != 1 )  exit(EXIT_FAILURE);
+  if ( MMGS_loadMesh(mmgMesh,filename) != 1 )  exit(EXIT_FAILURE);
   /** 3) Build sol in MMG5 format */
   /** Two solutions: just use the MMGS_loadSol function that will read a .sol(b)
       file formatted or manually set your sol using the MMGS_Set* functions */
@@ -164,7 +164,7 @@ int main(int argc,char *argv[]) {
     exit(EXIT_FAILURE);
 
   /** b) function calling */
-  if ( MMGS_loadSol(mmgMesh,mmgSol) != 1 )  exit(EXIT_FAILURE);
+  if ( MMGS_loadSol(mmgMesh,mmgSol,filename) != 1 )  exit(EXIT_FAILURE);
 
   /** ------------------------------ STEP  II -------------------------- */
   /** library call */
@@ -189,7 +189,7 @@ int main(int argc,char *argv[]) {
     exit(EXIT_FAILURE);
   /** b) function calling */
   /*save result*/
-  if ( MMGS_saveMesh(mmgMesh) != 1 )  exit(EXIT_FAILURE);
+  if ( MMGS_saveMesh(mmgMesh,filename_os) != 1 )  exit(EXIT_FAILURE);
 
   /** 2) Automatically save the solution */
   /** a)  (not mandatory): give the ouptut sol name using MMGS_Set_outputSolName
@@ -198,7 +198,7 @@ int main(int argc,char *argv[]) {
     exit(EXIT_FAILURE);
   /** b) function calling */
   /*save metric*/
-  if ( MMGS_saveSol(mmgMesh,mmgSol) != 1 )  exit(EXIT_FAILURE);
+  if ( MMGS_saveSol(mmgMesh,mmgSol,filename_os) != 1 )  exit(EXIT_FAILURE);
 
   /** 3) Free the MMGS structures */
   MMGS_Free_all(MMG5_ARG_start,
@@ -237,7 +237,7 @@ int main(int argc,char *argv[]) {
   if ( MMG3D_Set_inputMeshName(mmgMesh,filename) != 1 )
     exit(EXIT_FAILURE);
   /** b) function calling */
-  if ( MMG3D_loadMesh(mmgMesh) != 1 )  exit(EXIT_FAILURE);
+  if ( MMG3D_loadMesh(mmgMesh,filename) != 1 )  exit(EXIT_FAILURE);
 
   /** 3) Build sol in MMG5 format */
   /** Two solutions: just use the MMG3D_loadSol function that will read a .sol(b)
@@ -249,7 +249,7 @@ int main(int argc,char *argv[]) {
   if ( MMG3D_Set_inputSolName(mmgMesh,mmgSol,filename) != 1 )
     exit(EXIT_FAILURE);
   /** b) function calling */
-  if ( MMG3D_loadSol(mmgMesh,mmgSol) != 1 )  exit(EXIT_FAILURE);
+  if ( MMG3D_loadSol(mmgMesh,mmgSol,filename) != 1 )  exit(EXIT_FAILURE);
 
   /** ------------------------------ STEP  II -------------------------- */
   /** library call */
@@ -273,7 +273,7 @@ int main(int argc,char *argv[]) {
   if ( MMG3D_Set_outputMeshName(mmgMesh,filename_o3d) != 1 )
     exit(EXIT_FAILURE);
   /** b) function calling */
-  if ( MMG3D_saveMesh(mmgMesh) != 1 )  exit(EXIT_FAILURE);
+  if ( MMG3D_saveMesh(mmgMesh,filename_o3d) != 1 )  exit(EXIT_FAILURE);
 
   /** 2) Automatically save the solution */
   /** a)  (not mandatory): give the ouptut sol name using MMG3D_Set_outputSolName
@@ -281,7 +281,7 @@ int main(int argc,char *argv[]) {
   if ( MMG3D_Set_outputSolName(mmgMesh,mmgSol,filename_o3d) != 1 )
     exit(EXIT_FAILURE);
   /** b) function calling */
-  if ( MMG3D_saveSol(mmgMesh,mmgSol) != 1 )  exit(EXIT_FAILURE);
+  if ( MMG3D_saveSol(mmgMesh,mmgSol,filename_o3d) != 1 )  exit(EXIT_FAILURE);
 
   /** 3) Free the MMG3D structures */
   MMG3D_Free_all(MMG5_ARG_start,

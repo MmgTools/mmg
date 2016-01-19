@@ -104,7 +104,7 @@ int main(int argc,char *argv[]) {
   fprintf(stdout,"\n  -- INPUT DATA\n");
   chrono(ON,&MMG5_ctim[1]);
   /* read mesh file */
-  if ( MMG3D_loadMesh(mesh)<1 )
+  if ( MMG3D_loadMesh(mesh,mesh->namein)<1 )
     _MMG5_RETURN_AND_FREE(mesh,met,disp,MMG5_STRONGFAILURE);
 
   /* Set default metric size */
@@ -119,7 +119,7 @@ int main(int argc,char *argv[]) {
     if ( !MMG3D_Set_inputSolName(mesh,disp,met->namein) )
       _MMG5_RETURN_AND_FREE(mesh,met,disp,MMG5_STRONGFAILURE);
 
-    ier = MMG3D_loadSol(mesh,disp);
+    ier = MMG3D_loadSol(mesh,disp,disp->namein);
     if ( ier == 0 ) {
       fprintf(stdout,"  ## ERROR: NO DISPLACEMENT FOUND.\n");
       _MMG5_RETURN_AND_FREE(mesh,met,disp,MMG5_STRONGFAILURE);
@@ -131,7 +131,7 @@ int main(int argc,char *argv[]) {
   }
   /* read metric if any */
   else {
-    ier = MMG3D_loadSol(mesh,met);
+    ier = MMG3D_loadSol(mesh,met,met->namein);
     if ( ier == -1 ) {
       fprintf(stdout,"  ## ERROR: WRONG DATA TYPE OR WRONG SOLUTION NUMBER.\n");
       _MMG5_RETURN_AND_FREE(mesh,met,disp,MMG5_STRONGFAILURE);
@@ -162,10 +162,10 @@ int main(int argc,char *argv[]) {
     chrono(ON,&MMG5_ctim[1]);
     if ( mesh->info.imprim )
       fprintf(stdout,"\n  -- WRITING DATA FILE %s\n",mesh->nameout);
-    if ( !_MMG3D_saveAllMesh(mesh) )
+    if ( !MMG3D_saveMesh(mesh,mesh->nameout) )
       _MMG5_RETURN_AND_FREE(mesh,met,disp,MMG5_STRONGFAILURE);
 
-    if ( !MMG3D_saveSol(mesh,met) )
+    if ( !MMG3D_saveSol(mesh,met,met->nameout) )
       _MMG5_RETURN_AND_FREE(mesh,met,disp,MMG5_STRONGFAILURE);
 
     chrono(OFF,&MMG5_ctim[1]);

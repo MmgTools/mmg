@@ -446,8 +446,6 @@ int    _MMG5_unscaleMesh(MMG5_pMesh mesh,MMG5_pSol met);
 int    _MMG5_interpreg_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt,char i,double s,double mr[6]);
 int    _MMG5_interp_iso(double *ma,double *mb,double *mp,double t);
 
-int    _MMG5_saveLibraryMesh(MMG5_pMesh mesh);
-
 #ifndef POSIX
 extern DOUBLE_COMPLEX _MMG5_opp_complex(DOUBLE_COMPLEX z1);
 extern DOUBLE_COMPLEX _MMG5_inv_complex(DOUBLE_COMPLEX z1);

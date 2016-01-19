@@ -116,7 +116,6 @@ void _MMGS_Free_all_var( va_list argptr );
 void _MMGS_Free_structures_var( va_list argptr );
 void _MMGS_Free_names_var( va_list argptr );
 
-int  _MMGS_saveAllMesh(MMG5_pMesh );
 int  zaldy(MMG5_pMesh mesh);
 int  assignEdge(MMG5_pMesh mesh);
 int  _MMGS_analys(MMG5_pMesh mesh);
@@ -200,7 +199,6 @@ int    (*gradsiz)(MMG5_pMesh mesh,MMG5_pSol met);
 void   (*intmet)(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int ip,double s);
 int    (*movridpt)(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist);
 int    (*movintpt)(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist);
-int    (*_MMGS_saveMeshinternal)(MMG5_pMesh mesh);
 
 /**
  * Set common pointer functions between mmgs and mmg3d to the matching mmgs

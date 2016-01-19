@@ -391,10 +391,10 @@ int main(int argc,char *argv[]) {
   fprintf(stdout,"\n  -- INPUT DATA\n");
   chrono(ON,&MMG5_ctim[1]);
 
-  if ( !MMGS_loadMesh(mesh) )
+  if ( !MMGS_loadMesh(mesh,mesh->namein) )
     _MMG5_RETURN_AND_FREE(mesh,met,MMG5_STRONGFAILURE);
 
-  ier = MMGS_loadSol(mesh,met);
+  ier = MMGS_loadSol(mesh,met,met->namein);
   if ( ier==-1 ) {
       fprintf(stdout,"  ## ERROR: WRONG DATA TYPE OR WRONG SOLUTION NUMBER.\n");
       _MMG5_RETURN_AND_FREE(mesh,met,MMG5_STRONGFAILURE);
@@ -420,9 +420,9 @@ int main(int argc,char *argv[]) {
     fprintf(stdout,"\n  -- WRITING DATA FILE %s\n",mesh->nameout);
   if ( !_MMG5_unscaleMesh(mesh,met) )
     _MMG5_RETURN_AND_FREE(mesh,met,MMG5_STRONGFAILURE);
-  if ( !MMGS_saveMesh(mesh) )
+  if ( !MMGS_saveMesh(mesh,mesh->nameout) )
     _MMG5_RETURN_AND_FREE(mesh,met,MMG5_STRONGFAILURE);
-  if ( !MMGS_saveSol(mesh,met) )
+  if ( !MMGS_saveSol(mesh,met,met->nameout) )
     _MMG5_RETURN_AND_FREE(mesh,met,MMG5_STRONGFAILURE);
   chrono(OFF,&MMG5_ctim[1]);
   if ( mesh->info.imprim )  fprintf(stdout,"  -- WRITING COMPLETED\n");

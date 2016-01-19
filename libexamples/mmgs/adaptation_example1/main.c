@@ -92,7 +92,7 @@ int main(int argc,char *argv[]) {
   if ( MMGS_Set_inputMeshName(mmgMesh,inname) != 1 )
     exit(EXIT_FAILURE);
   /** b) function calling */
-  if ( MMGS_loadMesh(mmgMesh) != 1 )  exit(EXIT_FAILURE);
+  if ( MMGS_loadMesh(mmgMesh,inname) != 1 )  exit(EXIT_FAILURE);
 
   /** 3) Build sol in MMG5 format */
   /** Two solutions: just use the MMGS_loadSol function that will read a .sol(b)
@@ -104,7 +104,7 @@ int main(int argc,char *argv[]) {
   if ( MMGS_Set_inputSolName(mmgMesh,mmgSol,inname) != 1 )
     exit(EXIT_FAILURE);
   /** b) function calling */
-  if ( MMGS_loadSol(mmgMesh,mmgSol) != 1 )
+  if ( MMGS_loadSol(mmgMesh,mmgSol,inname) != 1 )
     exit(EXIT_FAILURE);
 
   /** 4) (not mandatory): check if the number of given entities match with mesh size */
@@ -154,13 +154,13 @@ int main(int argc,char *argv[]) {
   if ( MMGS_Set_outputMeshName(mmgMesh,outname) != 1 )
     exit(EXIT_FAILURE);
 
-  MMGS_saveMesh(mmgMesh);
+  MMGS_saveMesh(mmgMesh,"2spheres_1.o");
 
   /* (Not mandatory) Automatically save the solution */
   if ( MMGS_Set_outputSolName(mmgMesh,mmgSol,outname) != 1 )
     exit(EXIT_FAILURE);
 
-  if ( MMGS_saveSol(mmgMesh,mmgSol) != 1 )
+  if ( MMGS_saveSol(mmgMesh,mmgSol,"2spheres_1.o") != 1 )
     exit(EXIT_FAILURE);
 
 
@@ -215,14 +215,14 @@ int main(int argc,char *argv[]) {
   if ( MMGS_Set_outputMeshName(mmgMesh,outname) != 1 )
     exit(EXIT_FAILURE);
 
-  if ( MMGS_saveMesh(mmgMesh) != 1 )
+  if ( MMGS_saveMesh(mmgMesh,"2spheres_2.o") != 1 )
     exit(EXIT_FAILURE);
 
   /* (Not mandatory) Automatically save the solution */
   if ( MMGS_Set_outputSolName(mmgMesh,mmgSol,outname) != 1 )
     exit(EXIT_FAILURE);
 
-  if ( MMGS_saveSol(mmgMesh,mmgSol) != 1 )
+  if ( MMGS_saveSol(mmgMesh,mmgSol,"2spheres_2.o") != 1 )
     exit(EXIT_FAILURE);
 
   /* 7) free the MMGS structures */

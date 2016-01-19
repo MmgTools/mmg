@@ -321,7 +321,6 @@ void _MMG5_defaultValues(MMG5_pMesh);
 int  _MMG5_intridmet(MMG5_pMesh,MMG5_pSol,int,int,double,double*,double*);
 int  _MMG5_intregmet(MMG5_pMesh,MMG5_pSol,int,char,double, double*);
 int  _MMG5_intvolmet(MMG5_pMesh,MMG5_pSol,int,char,double, double*);
-int  _MMG3D_saveAllMesh(MMG5_pMesh mesh);
 
 /* useful functions to debug */
 int  _MMG3D_indElt(MMG5_pMesh mesh,int kel);
@@ -403,7 +402,6 @@ int    (*_MMG5_movbdynompt)(MMG5_pMesh, MMG5_pSol, int*, int, int*, int);
 int    (*_MMG5_movbdyridpt)(MMG5_pMesh, MMG5_pSol, int*, int, int*, int);
 int    (*_MMG5_cavity)(MMG5_pMesh ,MMG5_pSol ,int ,int ,int *,int );
 int    (*_MMG5_buckin)(MMG5_pMesh ,MMG5_pSol ,_MMG5_pBucket ,int );
-int    (*_MMG3D_saveMeshinternal)(MMG5_pMesh mesh);
 
 /**
  * \param mesh pointer toward the mesh structure.

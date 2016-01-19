@@ -132,11 +132,11 @@ IF ( LIBMMGS_STATIC OR LIBMMGS_SHARED )
     ${MMGS_INCLUDE}/libmmgcommon.h
     ${MMGS_INCLUDE}/libmmgcommonf.h
     ${MMGS_INCLUDE}/chrono.h
-    ) 
+    )
 
   # Install header files in /usr/local or equivalent
-  INSTALL(FILES ${mmgs_headers} DESTINATION include/mmg/mmgs)
- 
+  #INSTALL(FILES ${mmgs_headers} DESTINATION include/mmg/mmgs)
+
   ADD_CUSTOM_COMMAND(OUTPUT ${MMGS_INCLUDE}/libmmgcommonf.h
     COMMAND ${CMAKE_COMMAND} -E copy ${COMMON_SOURCE_DIR}/libmmgcommonf.h ${MMGS_INCLUDE}/libmmgcommonf.h
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}

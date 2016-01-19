@@ -535,38 +535,43 @@ int MMG3D_Get_iparameter(MMG5_pMesh mesh, int iparam);
 /* input/output functions */
 /**
  * \param mesh pointer toward the mesh structure.
+ * \param filename name of file.
  * \return 0 if failed, 1 otherwise.
  *
  * Read mesh data.
  *
  */
-int  MMG3D_loadMesh(MMG5_pMesh mesh);
+int MMG3D_loadMesh(MMG5_pMesh mesh,char *filename);
 /**
  * \param mesh pointer toward the mesh structure.
+ * \param gilename pointer toward the name of file.
+
  * \return 0 if failed, 1 otherwise.
  *
  * Save mesh data.
  *
  */
-int  MMG3D_saveMesh(MMG5_pMesh mesh);
+int MMG3D_saveMesh(MMG5_pMesh mesh, char *filename);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the sol structure.
- * \return 0 if failed, 1 otherwise.
+ * \param filename name of file.
+ * \return -1 data invalid, 0 no file, 1 ok.
  *
  * Load metric field.
  *
  */
-int  MMG3D_loadSol(MMG5_pMesh mesh,MMG5_pSol met);
+int MMG3D_loadSol(MMG5_pMesh mesh,MMG5_pSol met, char *filename);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the sol structure.
+ * \param filename name of file.
  * \return 0 if failed, 1 otherwise.
  *
  * Write isotropic or anisotropic metric.
  *
  */
-int  MMG3D_saveSol(MMG5_pMesh mesh, MMG5_pSol met);
+int MMG3D_saveSol(MMG5_pMesh mesh,MMG5_pSol met, char *filename);
 
 /* deallocations */
 /**
@@ -826,13 +831,6 @@ int  MMG3D_hashTetra(MMG5_pMesh mesh, int pack);
 int MMG3D_DoSol(MMG5_pMesh mesh,MMG5_pSol met);
 
 /** To associate function pointers without calling MMG3D_mmg3dlib */
-/**
- * \param mesh pointer toward the mesh structure (unused).
- *
- * Set pointer for MMG3D_saveMesh function.
- *
- */
-void  MMG3D_Set_saveFunc(MMG5_pMesh mesh);
 /**
  * \param mesh pointer toward the mesh structure (unused).
  * \param met pointer toward the sol structure (unused).

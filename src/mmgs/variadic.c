@@ -158,9 +158,6 @@ void _MMGS_Init_mesh_var( va_list argptr ) {
   /* initialisations */
   _MMGS_Init_woalloc_mesh(*mesh,*sol);
 
-  /* set pointer to save the mesh*/
-  _MMGS_saveMeshinternal = _MMGS_saveAllMesh;
-
   return;
 }
 
@@ -320,7 +317,7 @@ void _MMGS_Free_structures_var(va_list argptr)
   if ( (*mesh)->info.npar && (*mesh)->info.par )
     _MMG5_DEL_MEM((*mesh),(*mesh)->info.par,(*mesh)->info.npar*sizeof(MMG5_Par));
 
-  if ( (*mesh)->info.imprim>6 || (*mesh)->info.ddebug )
+  if ( (*mesh)->info.imprim>5 || (*mesh)->info.ddebug )
     printf("  MEMORY USED AT END (bytes) %ld\n",_MMG5_safeLL2LCast((*mesh)->memCur));
 
   return;

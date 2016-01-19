@@ -90,7 +90,7 @@ int main(int argc,char *argv[]) {
   if ( MMG3D_Set_inputMeshName(mmgMesh,filename) != 1 )
     exit(EXIT_FAILURE);
   /** b) function calling */
-  if ( MMG3D_loadMesh(mmgMesh) != 1 )  exit(EXIT_FAILURE);
+  if ( MMG3D_loadMesh(mmgMesh,filename) != 1 )  exit(EXIT_FAILURE);
 
   /** 3) Build sol in MMG5 format */
   /** Two solutions: just use the MMG3D_loadSol function that will read a .sol(b)
@@ -102,7 +102,7 @@ int main(int argc,char *argv[]) {
   if ( MMG3D_Set_inputSolName(mmgMesh,mmgSol,filename) != 1 )
     exit(EXIT_FAILURE);
   /** b) function calling */
-  if ( MMG3D_loadSol(mmgMesh,mmgSol) != 1 )
+  if ( MMG3D_loadSol(mmgMesh,mmgSol,filename) != 1 )
     exit(EXIT_FAILURE);
 
   /** 4) (not mandatory): check if the number of given entities match with mesh size */
@@ -130,7 +130,7 @@ int main(int argc,char *argv[]) {
      (by default, the mesh is saved in the "mesh.o.mesh" file */
   // MMG3D_Set_outputMeshName(mmgMesh,"output.mesh");
   /** b) function calling */
-  if ( MMG3D_saveMesh(mmgMesh) != 1 ) {
+  if ( MMG3D_saveMesh(mmgMesh,"cube.o.mesh") != 1 ) {
     fprintf(stdout,"UNABLE TO SAVE MESH\n");
     return(MMG5_STRONGFAILURE);
   }
@@ -140,7 +140,7 @@ int main(int argc,char *argv[]) {
      (by default, the mesh is saved in the "mesh.o.sol" file */
   // MMG3D_Set_outputSolName(mmgMesh,mmgSol,"output.sol");
   /** b) function calling */
-  if ( MMG3D_saveSol(mmgMesh,mmgSol) != 1 ) {
+  if ( MMG3D_saveSol(mmgMesh,mmgSol,"cube.o.sol") != 1 ) {
     fprintf(stdout,"UNABLE TO SAVE SOL\n");
     return(MMG5_LOWFAILURE);
   }

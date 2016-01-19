@@ -56,7 +56,8 @@ PROGRAM main
   ENDIF
 
   !> b) function calling
-  CALL MMG3D_loadMesh(mmgMesh,ier)
+  CALL MMG3D_loadMesh(mmgMesh,TRIM(ADJUSTL(filename)),&
+       LEN(TRIM(ADJUSTL(filename))),ier)
   IF ( ier == 0 )  CALL EXIT(102)
 
   !> 3) Build sol in MMG5 format
@@ -73,7 +74,8 @@ PROGRAM main
   ENDIF
 
   !> b) function calling
-  CALL MMG3D_loadSol(mmgMesh,mmgSol,ier)
+  CALL MMG3D_loadSol(mmgMesh,mmgSol,TRIM(ADJUSTL(filename)),&
+       LEN(TRIM(ADJUSTL(filename))),ier)
   IF ( ier /= 1 ) THEN
      CALL EXIT(104)
   ENDIF
@@ -104,7 +106,7 @@ PROGRAM main
   !!   (by default, the mesh is saved in the "mesh.o.mesh" file
   !!call MMG3D_Set_outputMeshName(mmgMesh,"output.mesh",len("output.mesh"),ier)
   !! b) function calling
-  CALL MMG3D_saveMesh(mmgMesh,ier)
+  CALL MMG3D_saveMesh(mmgMesh,"cube.o.mesh",ier)
   IF ( ier /= 1 ) THEN
      CALL EXIT(106)
   ENDIF
@@ -114,7 +116,7 @@ PROGRAM main
   !!   (by default, the mesh is saved in the "mesh.o.sol" file
   !!call MMG3D_Set_outputSolName(mmgMesh,mmgSol,"output.sol",len("output.sol"),ier)
   !! b) function calling
-  CALL MMG3D_saveSol(mmgMesh,mmgSol,ier)
+  CALL MMG3D_saveSol(mmgMesh,mmgSol,"cube.o.sol",ier)
   IF ( ier /= 1 ) THEN
      CALL EXIT(107)
   ENDIF

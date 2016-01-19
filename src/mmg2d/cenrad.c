@@ -40,8 +40,8 @@
  *
  */
 int _MMG2_cenrad_iso(MMG5_pMesh mesh,double *ct,double *c,double *rad) {
-    double      dd,ux,uy,n1[2],n2[2],n3[2],*c1,*c2,*c3,pl1,pl2,pl3;
-    double      cc1,cc2,cc3;
+    double      dd,ux,uy,n1[2],n2[2],*c1,*c2,*c3,pl1,pl2;
+    double      cc1,cc2;
 
     c1 = &ct[0];
     c2 = &ct[2];
