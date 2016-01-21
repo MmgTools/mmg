@@ -42,6 +42,13 @@ ADD_TEST(NAME SquareIso
   ${MMG2D_CI_TESTS}/SquareIso/carretest
   -out ${MMG2D_CI_TESTS}/SquareIso/carretest.o.meshb)
 
+####### -nosurf option
+ADD_TEST(NAME 2squares
+  COMMAND ${EXECUT_MMG2D} -hmax 1 -nosurf
+  ${MMG2D_CI_TESTS}/2squares/2squares
+  -out ${MMG2D_CI_TESTS}/2squares/2squares.o.meshb)
+
+
 ###############################################################################
 #####
 #####         Anisotropic cases
@@ -51,3 +58,28 @@ ADD_TEST(NAME SquareAniso
   COMMAND ${EXECUT_MMG2D}
   ${MMG2D_CI_TESTS}/SquareAniso/adap1
   -out ${MMG2D_CI_TESTS}/SquareAniso/adap1.o.meshb)
+
+###############################################################################
+#####
+#####         Mesh generation
+#####
+###############################################################################
+ADD_TEST(NAME SquareGeneration
+  COMMAND ${EXECUT_MMG2D}
+  ${MMG2D_CI_TESTS}/SquareGeneration/carretest
+  -out ${MMG2D_CI_TESTS}/SquareGeneration/carretest.o.meshb)
+
+###############################################################################
+#####
+#####         Implicit domain discretization
+#####
+###############################################################################
+ADD_TEST(NAME LSDiscretization
+  COMMAND ${EXECUT_MMG2D} -ls
+  ${MMG2D_CI_TESTS}/LSDiscretization/dom
+  -out ${MMG2D_CI_TESTS}/LSDiscretization/dom.o.meshb)
+
+ADD_TEST(NAME LSDiscretization2
+  COMMAND ${EXECUT_MMG2D} -ls
+  ${MMG2D_CI_TESTS}/LSDiscretization/nacai
+  -out ${MMG2D_CI_TESTS}/LSDiscretization/nacai.o.meshb)
