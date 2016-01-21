@@ -47,10 +47,10 @@
  * See \ref MMG2D_setfunc function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_SETFUNC,mmg2d_setfunc,
-               (MMG5_pMesh *mesh,MMG5_pSol *met),
-               (mesh,met)) {
-   MMG2D_setfunc(*mesh,*met);
-   return;
+             (MMG5_pMesh *mesh,MMG5_pSol *met),
+             (mesh,met)) {
+  MMG2D_setfunc(*mesh,*met);
+  return;
 }
 
 
@@ -58,8 +58,8 @@ FORTRAN_NAME(MMG2D_SETFUNC,mmg2d_setfunc,
  * See \ref MMG2D_Get_adjaTri function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_GET_ADJATRI,mmg2d_get_adjatri,
-               (MMG5_pMesh *mesh,int* kel, int* listri, int* retval),
-               (mesh,kel,listri,retval)) {
+             (MMG5_pMesh *mesh,int* kel, int* listri, int* retval),
+             (mesh,kel,listri,retval)) {
   *retval =  MMG2D_Get_adjaTri(*mesh,*kel,listri);
   return;
 }
@@ -68,8 +68,8 @@ FORTRAN_NAME(MMG2D_GET_ADJATRI,mmg2d_get_adjatri,
  * See \ref MMG2D_Get_adjaVertices function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_GET_ADJAVERTICES,mmg2d_get_adjavertices,
-               (MMG5_pMesh *mesh,int* ip, int* lispoi, int* retval),
-               (mesh,ip,lispoi,retval)) {
+             (MMG5_pMesh *mesh,int* ip, int* lispoi, int* retval),
+             (mesh,ip,lispoi,retval)) {
   *retval =  MMG2D_Get_adjaVertices(*mesh, *ip,lispoi);
   return;
 }
@@ -78,8 +78,8 @@ FORTRAN_NAME(MMG2D_GET_ADJAVERTICES,mmg2d_get_adjavertices,
  * See \ref MMG2D_Get_adjaVerticesFast function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_GET_ADJAVERTICESFAST,mmg2d_get_adjaverticesfast,
-               (MMG5_pMesh *mesh,int* ip, int *start, int* lispoi, int* retval),
-               (mesh,ip,start,lispoi,retval)) {
+             (MMG5_pMesh *mesh,int* ip, int *start, int* lispoi, int* retval),
+             (mesh,ip,start,lispoi,retval)) {
   *retval =  MMG2D_Get_adjaVerticesFast(*mesh,*ip, *start,lispoi);
   return;
 }

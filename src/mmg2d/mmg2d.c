@@ -39,8 +39,8 @@ static void usage(char *name) {
   fprintf(stdout,"\n");
   /*
 
-     fprintf(stdout,"-optim       mesh optimization\n");
-     fprintf(stdout,"-nsurf       no surfacic modifications\n");
+    fprintf(stdout,"-optim       mesh optimization\n");
+    fprintf(stdout,"-nosurf      no surfacic modifications\n");
   */
   fprintf(stdout,"-noinsert     no insertion/suppression point\n");
   fprintf(stdout,"-noswap       no edge flipping\n");
@@ -90,18 +90,18 @@ int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,double *qdegrad) 
     if ( *argv[i] == '-' ) {
       switch(argv[i][1]) {
       case '?':
-          usage(argv[0]);
+        usage(argv[0]);
         break;
       case 'a':
         if ( !strcmp(argv[i],"-ar") && ++i < argc )
           if ( !MMG2D_Set_dparameter(mesh,met,MMG2D_DPARAM_angleDetection,
-                                    atof(argv[i])) )
+                                     atof(argv[i])) )
             exit(EXIT_FAILURE);
         break;
       case 'b':
         if ( !strcmp(argv[i],"-bucket") && ++i < argc )
           if ( !MMG2D_Set_iparameter(mesh,met,MMG2D_IPARAM_bucket,
-                                    atoi(argv[i])) )
+                                     atoi(argv[i])) )
             exit(EXIT_FAILURE);
         break;
       case 'd':  /* debug */
@@ -117,22 +117,22 @@ int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,double *qdegrad) 
       case 'h':
         if ( !strcmp(argv[i],"-hmin") && ++i < argc ) {
           if ( !MMG2D_Set_dparameter(mesh,met,MMG2D_DPARAM_hmin,
-                                    atof(argv[i])) )
+                                     atof(argv[i])) )
             exit(EXIT_FAILURE);
         }
         else if ( !strcmp(argv[i],"-hmax") && ++i < argc ) {
           if ( !MMG2D_Set_dparameter(mesh,met,MMG2D_DPARAM_hmax,
-                                    atof(argv[i])) )
+                                     atof(argv[i])) )
             exit(EXIT_FAILURE);
         }
         else if ( !strcmp(argv[i],"-hausd") && ++i <= argc ) {
           if ( !MMG2D_Set_dparameter(mesh,met,MMG2D_DPARAM_hausd,
-                                    atof(argv[i])) )
+                                     atof(argv[i])) )
             exit(EXIT_FAILURE);
         }
         else if ( !strcmp(argv[i],"-hgrad") && ++i <= argc ) {
           if ( !MMG2D_Set_dparameter(mesh,met,MMG2D_DPARAM_hgrad,
-                                    atof(argv[i])) )
+                                     atof(argv[i])) )
             exit(EXIT_FAILURE);
         }
         else
@@ -210,7 +210,7 @@ int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,double *qdegrad) 
         } else if ( !strcmp(argv[i],"-nsd") ) {
           if ( ++i < argc && isdigit(argv[i][0]) ) {
             if ( !MMG2D_Set_iparameter(mesh,met,MMG2D_IPARAM_numsubdomain,atoi(argv[i])) )
-            exit(EXIT_FAILURE);
+              exit(EXIT_FAILURE);
           }
           else {
             fprintf(stderr,"Missing argument option %c\n",argv[i-1][1]);
@@ -324,11 +324,11 @@ int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,double *qdegrad) 
   if ( mesh->nameout == NULL ) {
     if ( !MMG2D_Set_outputMeshName(mesh,"") )
       exit(EXIT_FAILURE);
-      }
+  }
   if ( met->namein == NULL ) {
     if ( !MMG2D_Set_inputSolName(mesh,met,"") )
       exit(EXIT_FAILURE);
-    }
+  }
   if ( met->nameout == NULL ) {
     if ( !MMG2D_Set_outputSolName(mesh,met,"") )
       exit(EXIT_FAILURE);
@@ -359,13 +359,13 @@ static void endcod() {
   /* ttim[0] = M_MAX(ttim[0],ttot); */
 
   /* fprintf(stdout,"\n  -- CPU REQUIREMENTS\n"); */
-  /* fprintf(stdout,"  in/out	%8.2f %%    %3d. calls,   %7.2f sec/call\n", */
+  /* fprintf(stdout,"  in/out %8.2f %%    %3d. calls,   %7.2f sec/call\n", */
   /*         100.*ttim[1]/ttim[0],call[1],ttim[1]/(float)call[1]); */
-  /* fprintf(stdout,"  analysis	%8.2f %%    %3d. calls,   %7.2f sec/call\n", */
+  /* fprintf(stdout,"  analysis %8.2f %%    %3d. calls,   %7.2f sec/call\n", */
   /*         100.*ttim[2]/ttim[0],call[2],ttim[2]/(float)call[2]); */
-  /* fprintf(stdout,"  remeshing	%8.2f %%    %3d. calls,   %7.2f sec/call\n", */
+  /* fprintf(stdout,"  remeshing  %8.2f %%    %3d. calls,   %7.2f sec/call\n", */
   /*         100.*ttim[3]/ttim[0],call[3],ttim[3]/(float)call[3]); */
-  /* fprintf(stdout,"  total     %8.2f %%    %3d. calls,	%7.2f sec/call\n", */
+  /* fprintf(stdout,"  total     %8.2f %%    %3d. calls,  %7.2f sec/call\n", */
   /*         100.*ttot/ttim[0],call[0],ttot/(float)call[0]); */
 
   /* fprintf(stdout,"\n   ELAPSED TIME  %.2f SEC.  (%.2f)\n",ttim[0],ttot); */
@@ -468,15 +468,18 @@ int main(int argc,char *argv[]) {
     _MMG2D_RETURN_AND_FREE(mesh,sol,MMG5_STRONGFAILURE);
 
 /*   } */
-  //chrono(ON,&MMG5_ctim[1]);
-  fprintf(stdout,"\n  -- WRITING DATA FILE %s\n",mesh->nameout);
+
+  chrono(ON,&MMG5_ctim[1]);
+  if ( mesh->info.imprim )
+    fprintf(stdout,"\n  -- WRITING DATA FILE %s\n",mesh->nameout);
   MMG2D_saveMesh(mesh,mesh->nameout);
   if( sol->np )
     MMG2D_saveSol(mesh,sol,mesh->nameout);
-  fprintf(stdout,"  -- WRITING COMPLETED\n");
-  //chrono(OFF,&MMG5_ctim[1]);
 
-   /* free mem */
+  chrono(OFF,&MMG5_ctim[1]);
+  if ( mesh->info.imprim ) fprintf(stdout,"  -- WRITING COMPLETED\n");
+
+  /* free mem */
   chrono(OFF,&MMG5_ctim[0]);
   printim(MMG5_ctim[0].gdif,stim);
   fprintf(stdout,"\n   MMG2D: ELAPSED TIME  %s\n",stim);

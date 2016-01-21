@@ -21,7 +21,7 @@
 ** =============================================================================
 */
 #include "mmg2d.h"
- 
+
 extern int ddebug;
 int MMG2_swapar(MMG5_pMesh mesh,MMG5_pSol sol,int k,int i,double crit,int *list) {
   MMG5_pTria   pt,pt1;
@@ -46,9 +46,9 @@ int MMG2_swapar(MMG5_pMesh mesh,MMG5_pSol sol,int k,int i,double crit,int *list)
   tmp.v[0] = pt->v[i];
   tmp.v[1] = pt->v[i1];
   tmp.v[2] = pt1->v[adj[i] % 3];
-  cal1 = MMG2_caltri_in(mesh,sol,&tmp); 
-  airn1 = MMG2_quickarea(mesh->point[tmp.v[0]].c,mesh->point[tmp.v[1]].c,mesh->point[tmp.v[2]].c);   
-	if(ddebug) printf("cal1 %e %e\n",cal1,crit);
+  cal1 = MMG2_caltri_in(mesh,sol,&tmp);
+  airn1 = MMG2_quickarea(mesh->point[tmp.v[0]].c,mesh->point[tmp.v[1]].c,mesh->point[tmp.v[2]].c);
+  if(ddebug) printf("cal1 %e %e\n",cal1,crit);
   if ( cal1 > crit )  return(0);
 
   tmp.v[0] = pt->v[i];
@@ -56,14 +56,14 @@ int MMG2_swapar(MMG5_pMesh mesh,MMG5_pSol sol,int k,int i,double crit,int *list)
   tmp.v[2] = pt->v[i2];
   cal2 = MMG2_caltri_in(mesh,sol,&tmp);
   airn2 = MMG2_quickarea(mesh->point[tmp.v[0]].c,mesh->point[tmp.v[1]].c,mesh->point[tmp.v[2]].c);
-	if(ddebug) printf("cal2 %e %e\n",cal2,crit);
+  if(ddebug) printf("cal2 %e %e\n",cal2,crit);
   if ( cal2 > crit )  return(0);
-  
+
   if( airn1 < 0 || airn2 < 0 || fabs((air1+air2)-(airn1+airn2)) > EPSD) {
     if(ddebug) printf("config non convex\n");
-    return(0);  
-  } 
-  
+    return(0);
+  }
+
   /* update structure */
   k1   = adj[i] / 3;
   assert(k1);
@@ -80,7 +80,7 @@ int MMG2_swapar(MMG5_pMesh mesh,MMG5_pSol sol,int k,int i,double crit,int *list)
   pt1->v[MMG2_idir[vo1+2]] = pt->v[i];
   pt1->qual = cal2;
   list[2] = k1;
-  
+
   /*update edge*/
   num = pt->edg[i];
   assert(!num);

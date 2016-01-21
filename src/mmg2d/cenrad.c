@@ -40,49 +40,49 @@
  *
  */
 int _MMG2_cenrad_iso(MMG5_pMesh mesh,double *ct,double *c,double *rad) {
-    double      dd,ux,uy,n1[2],n2[2],*c1,*c2,*c3,pl1,pl2;
-    double      cc1,cc2;
+  double      dd,ux,uy,n1[2],n2[2],*c1,*c2,*c3,pl1,pl2;
+  double      cc1,cc2;
 
-    c1 = &ct[0];
-    c2 = &ct[2];
-    c3 = &ct[4];
+  c1 = &ct[0];
+  c2 = &ct[2];
+  c3 = &ct[4];
 
-    ux = c3[0] - c1[0];
-    uy = c3[1] - c1[1];
-    //if(fabs(sqrt(ux*ux + uy*uy + uz*uz))<1e-12) printf("garg 1 %e\n",fabs(sqrt(ux*ux + uy*uy + uz*uz)));
-    dd = 1.0 / sqrt(ux*ux + uy*uy);
-    n1[0] = ux*dd;
-    n1[1] = uy*dd;
+  ux = c3[0] - c1[0];
+  uy = c3[1] - c1[1];
+  //if(fabs(sqrt(ux*ux + uy*uy + uz*uz))<1e-12) printf("garg 1 %e\n",fabs(sqrt(ux*ux + uy*uy + uz*uz)));
+  dd = 1.0 / sqrt(ux*ux + uy*uy);
+  n1[0] = ux*dd;
+  n1[1] = uy*dd;
 
-    /* droite passant par le milieu de c1c3 */
-    pl1 = 0.5*(n1[0]*(c3[0]+c1[0])+ n1[1]*(c3[1]+c1[1])) ;
+  /* droite passant par le milieu de c1c3 */
+  pl1 = 0.5*(n1[0]*(c3[0]+c1[0])+ n1[1]*(c3[1]+c1[1])) ;
 
-    ux = c3[0] - c2[0];
-    uy = c3[1] - c2[1];
-    //if(fabs(sqrt(ux*ux + uy*uy + uz*uz))<1e-12) printf("garg 2 %e\n",fabs(sqrt(ux*ux + uy*uy + uz*uz)));
-    dd = 1.0 / sqrt(ux*ux + uy*uy);
-    n2[0] = ux*dd;
-    n2[1] = uy*dd;
-    pl2 = 0.5*(n2[0]*(c3[0]+c2[0])+ n2[1]*(c3[1]+c2[1]));
+  ux = c3[0] - c2[0];
+  uy = c3[1] - c2[1];
+  //if(fabs(sqrt(ux*ux + uy*uy + uz*uz))<1e-12) printf("garg 2 %e\n",fabs(sqrt(ux*ux + uy*uy + uz*uz)));
+  dd = 1.0 / sqrt(ux*ux + uy*uy);
+  n2[0] = ux*dd;
+  n2[1] = uy*dd;
+  pl2 = 0.5*(n2[0]*(c3[0]+c2[0])+ n2[1]*(c3[1]+c2[1]));
 
-    /* center = intersection of 3 mediatrice */
-    dd = n1[0]*n2[1] - n2[0]*n1[1] ;
-    if(fabs((dd))<1e-12)  return(0);
-    dd = 1./dd;
+  /* center = intersection of 3 mediatrice */
+  dd = n1[0]*n2[1] - n2[0]*n1[1] ;
+  if(fabs((dd))<1e-12)  return(0);
+  dd = 1./dd;
 
-    cc1 = n2[1]*pl1 - n1[1]*pl2;
-    cc2 = -n2[0]*pl1 + n1[0]*pl2;
- 
-    c[0] = dd * cc1;
-    c[1] = dd * cc2;
+  cc1 = n2[1]*pl1 - n1[1]*pl2;
+  cc2 = -n2[0]*pl1 + n1[0]*pl2;
 
-    /* radius (squared) */
-    *rad = (c[0] - c1[0]) * (c[0] - c1[0]) \
-        + (c[1] - c1[1]) * (c[1] - c1[1]);
+  c[0] = dd * cc1;
+  c[1] = dd * cc2;
 
-    /* printf("check rad %e -- %e %e\n",*rad, (c[0] - c2[0]) * (c[0] - c2[0]) \ */
-    /* 	   + (c[1] - c2[1]) * (c[1] - c2[1]), (c[0] - c3[0]) * (c[0] - c3[0]) \ */
-    /* 	   + (c[1] - c3[1]) * (c[1] - c3[1])); */
+  /* radius (squared) */
+  *rad = (c[0] - c1[0]) * (c[0] - c1[0]) \
+    + (c[1] - c1[1]) * (c[1] - c1[1]);
 
-    return(1);
+  /* printf("check rad %e -- %e %e\n",*rad, (c[0] - c2[0]) * (c[0] - c2[0]) \ */
+  /*     + (c[1] - c2[1]) * (c[1] - c2[1]), (c[0] - c3[0]) * (c[0] - c3[0]) \ */
+  /*     + (c[1] - c3[1]) * (c[1] - c3[1])); */
+
+  return(1);
 }

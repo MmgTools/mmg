@@ -46,11 +46,11 @@ int MMG2_scaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
     if ( !M_VOK(ppt) ) continue;
     for (i=0; i<2; i++) {
       if ( ppt->c[i] > info->max[i] )  info->max[i] = ppt->c[i];
-      if ( ppt->c[i] < info->min[i] )  info->min[i] = ppt->c[i];   
+      if ( ppt->c[i] < info->min[i] )  info->min[i] = ppt->c[i];
     }
   }
-	info->delta = info->max[0]-info->min[0];
-	dd = info->max[1]-info->min[1];
+  info->delta = info->max[0]-info->min[0];
+  dd = info->max[1]-info->min[1];
   if ( dd > info->delta )
     info->delta = dd;
   if ( info->delta < EPS30 ) {
@@ -59,8 +59,8 @@ int MMG2_scaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
   }
 
   /* normalize coordinates */
-  dd = PRECI / info->delta; 
-    
+  dd = PRECI / info->delta;
+
 
   sethmin = 0;
   sethmax = 0;
@@ -75,7 +75,7 @@ int MMG2_scaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
     mesh->info.hmax  *= dd;
     sethmax = 1;
   }
-  else 
+  else
     mesh->info.hmax  = 1.;
   if ( mesh->info.hmax < mesh->info.hmin ) {
     if ( sethmin && sethmax ) {
@@ -116,7 +116,7 @@ int MMG2_scaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
     }
     dd = 1.0 / (dd*dd);
     for (k=1; k<=mesh->np; k++) {
-      iadr = (k-1)*sol->size + 1; 
+      iadr = (k-1)*sol->size + 1;
       for (i=0; i<sol->size; i++)  sol->m[iadr+i] *= dd;
       if(sethmin || sethmax) {
 //#warning todo : metric troncature
@@ -128,7 +128,7 @@ int MMG2_scaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
   /* compute quality */
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
-    pt->qual = MMG2_caltri_in(mesh,sol,pt);        
+    pt->qual = MMG2_caltri_in(mesh,sol,pt);
   }
 
   return(1);
@@ -150,11 +150,11 @@ int MMG2_unscaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
     ppt = &mesh->point[k];
     if ( !M_VOK(ppt) )  continue;
     ppt->c[0] = ppt->c[0] * dd + info->min[0];
-    ppt->c[1] = ppt->c[1] * dd + info->min[1]; 
+    ppt->c[1] = ppt->c[1] * dd + info->min[1];
   }
 
   /* de-normalize metric */
-  if ( !sol->np )  return(1);   
+  if ( !sol->np )  return(1);
   switch (sol->size) {
   case 1:
     for (k=1; k<=mesh->np; k++)  sol->m[k] *= dd;
@@ -164,7 +164,7 @@ int MMG2_unscaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
     dd = 1.0 / (dd*dd);
     for (k=1; k<=mesh->np; k++) {
       ppt = &mesh->point[k];
-      if ( !M_VOK(ppt) )  continue;  
+      if ( !M_VOK(ppt) )  continue;
       iadr = (k-1)*sol->size + 1;
       for (i=0; i<sol->size; i++)  sol->m[iadr+i] *= dd;
     }

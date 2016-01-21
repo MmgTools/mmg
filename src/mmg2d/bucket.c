@@ -119,8 +119,8 @@ int buckin_ani(MMG5_pMesh mesh,MMG5_pSol sol,pBucket bucket,int ip) {
   /* bounding box */
   det = ma[0]*ma[2] - ma[1]*ma[1];
   det = 1.0 / det;
-  if ( det < 0.0 ) 
-   return(1);
+  if ( det < 0.0 )
+    return(1);
   else {
     dx = LFILT * sqrt(ma[2] * det) ;
     dy = LFILT * sqrt(ma[1] * det) ;
@@ -138,7 +138,7 @@ int buckin_ani(MMG5_pMesh mesh,MMG5_pSol sol,pBucket bucket,int ip) {
   if ( imin == imax && jmin == jmax )  return(1);
 
   /* explore neighbours */
-  for (j=jmin; j<=jmax; j++) 
+  for (j=jmin; j<=jmax; j++)
     for (i=imin; i<=imax; i++) {
       icc = j*siz + i;
       ip1 = bucket->head[icc];
@@ -148,24 +148,24 @@ int buckin_ani(MMG5_pMesh mesh,MMG5_pSol sol,pBucket bucket,int ip) {
       uy = pp1->c[1] - ppt->c[1];
       d2 = ma[0]*ux*ux + ma[2]*uy*uy + 2.0*ma[1]*ux*uy;
       if ( d2 < dmi ) {
-  	iadr = (ip1-1)*sol->size + 1;
-  	mb = &sol->m[iadr];
-  	d2 = mb[0]*ux*ux + mb[2]*uy*uy + 2.0*mb[1]*ux*uy;
-  	if ( d2 < dmi )  return(0);
+        iadr = (ip1-1)*sol->size + 1;
+        mb = &sol->m[iadr];
+        d2 = mb[0]*ux*ux + mb[2]*uy*uy + 2.0*mb[1]*ux*uy;
+        if ( d2 < dmi )  return(0);
       }
 
       while ( bucket->link[ip1] ) {
-  	ip1 = bucket->link[ip1];
-  	pp1 = &mesh->point[ip1];
-  	ux = pp1->c[0] - ppt->c[0];
-  	uy = pp1->c[1] - ppt->c[1];
-  	d2 = ma[0]*ux*ux + ma[2]*uy*uy + 2.0*ma[1]*ux*uy;
-  	if ( d2 < dmi ) {
-  	  iadr = (ip1-1)*sol->size + 1;
-  	  mb = &sol->m[iadr];
-  	  d2 = mb[0]*ux*ux + mb[2]*uy*uy + 2.0*mb[1]*ux*uy;
-  	  if ( d2 < dmi )  return(0);
-  	}
+        ip1 = bucket->link[ip1];
+        pp1 = &mesh->point[ip1];
+        ux = pp1->c[0] - ppt->c[0];
+        uy = pp1->c[1] - ppt->c[1];
+        d2 = ma[0]*ux*ux + ma[2]*uy*uy + 2.0*ma[1]*ux*uy;
+        if ( d2 < dmi ) {
+          iadr = (ip1-1)*sol->size + 1;
+          mb = &sol->m[iadr];
+          d2 = mb[0]*ux*ux + mb[2]*uy*uy + 2.0*mb[1]*ux*uy;
+          if ( d2 < dmi )  return(0);
+        }
       }
     }
 
@@ -221,7 +221,7 @@ int buckin_iso(MMG5_pMesh mesh,MMG5_pSol sol,pBucket bucket,int ip) {
   jmax = M_MIN(siz-1,M_MAX(0,jmax));
   if ( imin == imax && jmin == jmax )  return(1);
 
-  for (j=jmin; j<=jmax; j++) 
+  for (j=jmin; j<=jmax; j++)
     for (i=imin; i<=imax; i++) {
       icc = j*siz + i;
       ip1 = bucket->head[icc];
@@ -234,13 +234,13 @@ int buckin_iso(MMG5_pMesh mesh,MMG5_pSol sol,pBucket bucket,int ip) {
       if ( d2 < hp1 || d2 < hp2*hp2 )  return(0);
 
       while ( bucket->link[ip1] ) {
-  	ip1 = bucket->link[ip1];
-  	pp1 = &mesh->point[ip1];
-  	hp2 = LFILT * sol->m[ip1];
-  	ux = pp1->c[0] - ppt->c[0];
-  	uy = pp1->c[1] - ppt->c[1];
-  	d2 = ux*ux + uy*uy;
-  	if ( d2 < hp1 || d2 < hp2*hp2 )  return(0);
+        ip1 = bucket->link[ip1];
+        pp1 = &mesh->point[ip1];
+        hp2 = LFILT * sol->m[ip1];
+        ux = pp1->c[0] - ppt->c[0];
+        uy = pp1->c[1] - ppt->c[1];
+        d2 = ux*ux + uy*uy;
+        if ( d2 < hp1 || d2 < hp2*hp2 )  return(0);
       }
     }
 

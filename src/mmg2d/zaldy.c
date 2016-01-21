@@ -56,8 +56,8 @@ void _MMG2D_delPt(MMG5_pMesh mesh,int ip) {
 
   memset(ppt,0,sizeof(MMG5_Point));
   ppt->tag    = M_NUL;
-  ppt->tmp    = mesh->npnil; 
-  
+  ppt->tmp    = mesh->npnil;
+
   mesh->npnil = ip;
   if ( ip == mesh->np )  mesh->np--;
 }
@@ -155,7 +155,7 @@ void _MMG2D_memOption(MMG5_pMesh mesh) {
   int        ctri,npask,bytes,memtmp;
 
   mesh->memMax = _MMG5_memSize();
- 
+
   mesh->npmax = MG_MAX(1.5*mesh->np,_MMG2D_NPMAX);
   mesh->ntmax = MG_MAX(1.5*mesh->nt,_MMG2D_NEMAX);
   mesh->namax = M_MAX(1.5*mesh->na,_MMG2D_NEDMAX);
@@ -187,7 +187,7 @@ void _MMG2D_memOption(MMG5_pMesh mesh) {
     /* Euler-poincare: ne = 6*np; nt = 2*np; na = np/5 *
      * point+tria+tets+adja+adjt+sol+item *
      * warning: we exceed memory in saveMesh when we call _MMG5_hNew */
-    bytes = sizeof(MMG5_Point) +  0.1*sizeof(MMG5_xPoint) + 
+    bytes = sizeof(MMG5_Point) +  0.1*sizeof(MMG5_xPoint) +
       2*sizeof(MMG5_Tria) + 3*sizeof(int)
       + sizeof(MMG5_Sol) /*+ sizeof(Displ)*/
       + sizeof(int) + 5*sizeof(int);
@@ -235,7 +235,7 @@ void _MMG2D_memOption(MMG5_pMesh mesh) {
 int MMG2_zaldy(MMG5_pMesh mesh) {
   int     k;
 
-   _MMG2D_memOption(mesh);
+  _MMG2D_memOption(mesh);
 
   _MMG5_ADD_MEM(mesh,(mesh->npmax+1)*sizeof(MMG5_Point),"initial vertices",
                 printf("  Exit program.\n");
@@ -247,12 +247,12 @@ int MMG2_zaldy(MMG5_pMesh mesh) {
     _MMG5_SAFE_CALLOC(mesh->xpoint,mesh->xpmax+1,MMG5_xPoint);
     memset(&mesh->xpoint[0],0,sizeof(MMG5_xPoint));
   }
-    _MMG5_ADD_MEM(mesh,(mesh->ntmax+1)*sizeof(MMG5_Tria),"initial triangles",return(0));
-    _MMG5_SAFE_CALLOC(mesh->tria,mesh->ntmax+1,MMG5_Tria);
-    memset(&mesh->tria[0],0,sizeof(MMG5_Tria));
+  _MMG5_ADD_MEM(mesh,(mesh->ntmax+1)*sizeof(MMG5_Tria),"initial triangles",return(0));
+  _MMG5_SAFE_CALLOC(mesh->tria,mesh->ntmax+1,MMG5_Tria);
+  memset(&mesh->tria[0],0,sizeof(MMG5_Tria));
 
-    _MMG5_ADD_MEM(mesh,(mesh->namax+1)*sizeof(MMG5_Edge),"initial edges",return(0));
-    _MMG5_SAFE_CALLOC(mesh->edge,(mesh->namax+1),MMG5_Edge);
+  _MMG5_ADD_MEM(mesh,(mesh->namax+1)*sizeof(MMG5_Edge),"initial edges",return(0));
+  _MMG5_SAFE_CALLOC(mesh->edge,(mesh->namax+1),MMG5_Edge);
 
   /* keep track of empty links */
   mesh->npnil = mesh->np + 1;

@@ -28,15 +28,15 @@ pQueue MMG2_kiuini(MMG5_pMesh mesh,int nbel,double declic,int base) {
   MMG5_pTria    pt;
   int      k;
 
-  _MMG5_SAFE_CALLOC(q,1,Queue);  
-  _MMG5_SAFE_CALLOC(q->stack,(1+nbel),int);            
-  
+  _MMG5_SAFE_CALLOC(q,1,Queue);
+  _MMG5_SAFE_CALLOC(q->stack,(1+nbel),int);
+
   q->cur = 0;
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
     if ( !M_EOK(pt) || pt->qual < declic )     continue;
-    else if ( base > 0 && pt->flag < base-1 )  continue; 
-    q->stack[q->cur] = k; 
+    else if ( base > 0 && pt->flag < base-1 )  continue;
+    q->stack[q->cur] = k;
     q->cur++;
   }
   return(q);
@@ -51,18 +51,18 @@ void MMG2_kiufree(pQueue q) {
 
 int MMG2_kiudel(pQueue q,int iel) {
   int   k;
-  if ( !q->stack[0] )  
+  if ( !q->stack[0] )
     return(0);
 
   else if ( q->cur != iel && !q->stack[iel] )
     return(0);
 
   else {
-    /*recherche un peu longue!!!!*/  
+    /*recherche un peu longue!!!!*/
     for (k=q->cur-1; k>0; k--)
-      if ( q->stack[k] == iel )  break; 
-    if(!k) return(0); 
-    assert(q->stack[k] == iel);    
+      if ( q->stack[k] == iel )  break;
+    if(!k) return(0);
+    assert(q->stack[k] == iel);
     if ( k == q->cur-1 ) { /*dernier elt de la pile*/
       q->cur--;
       q->stack[k]   = 0;
@@ -118,16 +118,16 @@ int MMG2_kiupop(pQueue q) {
   int  cur;
 
   /*cur = q->stack[0];
-  q->stack[0]   = q->stack[q->cur-1];
-  q->stack[q->cur] = 0; 
-  if(q->cur) q->cur--;*/ 
-  
+    q->stack[0]   = q->stack[q->cur-1];
+    q->stack[q->cur] = 0;
+    if(q->cur) q->cur--;*/
+
   /*on depile par le haut*/
   if(!q->cur) return(0);
   cur = q->stack[q->cur-1];
   q->stack[q->cur-1] = 0;
-  q->cur--;  
-   
+  q->cur--;
+
   return(cur);
 }
 

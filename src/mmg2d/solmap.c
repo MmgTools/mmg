@@ -31,8 +31,8 @@ int MMG2_doSol(MMG5_pMesh mesh,MMG5_pSol sol) {
   MMG5_pPoint     p1,p2;
   double          ux,uy,dd;
   int        i,k,ib,ipa,ipb;
-  
-  sol->np = mesh->np;  
+
+  sol->np = mesh->np;
   for (k=1; k<=mesh->np; k++) {
     p1 = &mesh->point[k];
     p1->tagdel = 0;
@@ -63,7 +63,7 @@ int MMG2_doSol(MMG5_pMesh mesh,MMG5_pSol sol) {
   for (k=1; k<=mesh->np; k++) {
     p1 = &mesh->point[k];
     if ( !p1->tagdel )  {
-       sol->m[k] = mesh->info.hmax;
+      sol->m[k] = mesh->info.hmax;
       continue;
     }
 
@@ -74,7 +74,7 @@ int MMG2_doSol(MMG5_pMesh mesh,MMG5_pSol sol) {
 /* compute quality */
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
-    pt->qual = MMG2_caltri_in(mesh,sol,pt);        
+    pt->qual = MMG2_caltri_in(mesh,sol,pt);
   }
 
   if ( mesh->info.imprim < -4 )

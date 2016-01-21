@@ -33,8 +33,8 @@ int MMG2_hashNew(HashTable *hash,int hsize,int hmax) {
   hash->hnxt  = hsize;
   _MMG5_SAFE_CALLOC(hash->item,hash->nxtmax,Hedge);
 
- for (k=hash->size; k<hash->nxtmax; k++)
-    hash->item[k].nxt = k+1; 
+  for (k=hash->size; k<hash->nxtmax; k++)
+    hash->item[k].nxt = k+1;
 
   return(1);
 }
@@ -51,7 +51,7 @@ int MMG2_hashel(MMG5_pMesh mesh) {
   /* memory alloc */
   _MMG5_SAFE_CALLOC(hcode,mesh->nt+1,int);
 
-   /* memory alloc */
+  /* memory alloc */
   _MMG5_ADD_MEM(mesh,(3*mesh->ntmax+5)*sizeof(int),"adjacency table",
                 printf("  Exit program.\n");
                 exit(EXIT_FAILURE));
@@ -125,7 +125,7 @@ int MMG2_hashel(MMG5_pMesh mesh) {
         mins1 = pt1->v[i2];
         maxs1 = pt1->v[i1];
       }
-      
+
       if ( mins1 == mins  && maxs1 == maxs ) {
         /* adjacent found */
         if ( pp != 0 )  link[pp] = link[ll];
@@ -148,7 +148,7 @@ int MMG2_hashel(MMG5_pMesh mesh) {
  * \param ip1,ip2,ip3 integer
  * \param t  : computed tangent at vertex ip2
  *
- * Compute the tangent at vertex ip2 
+ * Compute the tangent at vertex ip2
  *
  */
 int MMG2_computetangent(MMG5_pMesh mesh,int ip1,int ip2,int ip3,double *t) {
@@ -166,13 +166,13 @@ int MMG2_computetangent(MMG5_pMesh mesh,int ip1,int ip2,int ip3,double *t) {
     t[0] = c2[0]-c1[0];
     t[1] = c2[1]-c1[1];
   }
-  
+
 
   /*mean normal*/
-  n1[0] = - (c2[1] - c1[1]); 
+  n1[0] = - (c2[1] - c1[1]);
   n1[1] =  (c2[0] - c1[0]);
   dd1 = 1;//sqrt(n1[0]*n1[0]+n1[1]*n1[1]);
-  n2[0] = - (c3[1] - c2[1]); 
+  n2[0] = - (c3[1] - c2[1]);
   n2[1] =  (c3[0] - c2[0]);
   dd2 = 1;//sqrt(n2[0]*n2[0]+n2[1]*n2[1]);
 
@@ -184,7 +184,7 @@ int MMG2_computetangent(MMG5_pMesh mesh,int ip1,int ip2,int ip3,double *t) {
   dd = sqrt(dd);
   n[0] /= dd;
   n[1]/=dd;
-  t[0] = n[1]; 
+  t[0] = n[1];
   t[1] = -n[0];
   /* t1[0] = c2[0] - c1[0]; */
   /* t1[1] = c2[1] - c1[1]; */
@@ -225,7 +225,7 @@ int MMG2_computetangent(MMG5_pMesh mesh,int ip1,int ip2,int ip3,double *t) {
   /* } */
   /* center[0] = 0.5*(c1[0]+c2[0]) + (sqrt(r*r - 0.25*dd*dd))*(n[0]); */
   /* center[1] = 0.5*(c1[1]+c2[1]) + (sqrt(r*r - 0.25*dd*dd))*(n[1]); */
-  
+
   return(1);
 }
 /**
@@ -235,7 +235,7 @@ int MMG2_computetangent(MMG5_pMesh mesh,int ip1,int ip2,int ip3,double *t) {
  * \param ik
  * \param i2
  * \param nv
- * \return 1 
+ * \return 1
  *
  * Compute the tangent.
  *
@@ -294,7 +294,7 @@ int MMG2_tangent(MMG5_pMesh mesh,MMG5_pEdge ped,int k,int ik,int i2,int nv) {
     /*find ptiel*/
     iadr = 3*(iel-1) + 1;
     adja = &mesh->adja[iadr];
-    
+
     vi1 = MMG2_idir[voyiel+1];
     vi2 = MMG2_idir[voyiel+2];
     if(ptiel->v[vi2]==ip) {
@@ -312,7 +312,7 @@ int MMG2_tangent(MMG5_pMesh mesh,MMG5_pEdge ped,int k,int ik,int i2,int nv) {
   else {
     MMG2_computetangent(mesh,pt->v[i2],ped->a,ptiel->v[voyiel],pta->n);
   }
-  
+
   return(1);
 }
 
@@ -332,7 +332,7 @@ int MMG2_baseBdry(MMG5_pMesh mesh) {
     edgeT.nxtmax = 3*mesh->namax+1;
     edgeT.hnxt  = mesh->namax;
     _MMG5_SAFE_CALLOC(edgeT.item,edgeT.nxtmax,Hedge);
- 
+
     memset(edgeT.item,0,edgeT.nxtmax*sizeof(Hedge));
     for (k=edgeT.size; k<edgeT.nxtmax; k++)
       edgeT.item[k].nxt = k+1;
@@ -389,7 +389,7 @@ int MMG2_baseBdry(MMG5_pMesh mesh) {
           pt->edg[i] = num;
         } else {
           num = _MMG5_newEdge(mesh);
-         if ( !num ) {
+          if ( !num ) {
             _MMG5_EDGE_REALLOC(mesh,num,mesh->gap,
                                printf("  ## Error: unable to allocate a new edge.\n");
                                _MMG5_INCREASE_MEM_MESSAGE();
@@ -418,7 +418,7 @@ int MMG2_baseBdry(MMG5_pMesh mesh) {
       num = pt->edg[i];
       if(!num) continue;
       ped = &mesh->edge[num];
-      
+
       i1 = MMG2_idir[i+1];
       i2 = MMG2_idir[i+2];
       ppt = &mesh->point[ped->a];
@@ -433,39 +433,39 @@ int MMG2_baseBdry(MMG5_pMesh mesh) {
           MMG2_tangent(mesh,ped,k,i,i1,0);
           ppt->flag = mesh->base;
         }
-	
+
       } else {
         //printf("on a deja calcule pour %d %e %e\n",ped->a,ped->t0[0],ped->t0[1]);
       }
-      
-      
-      
+
+
+
       /* ppt = &mesh->point[ped->b]; */
       /* /\*tangent on ped->b*\/ */
       /* if(ppt->flag != mesh->flag) { */
-      /* 	if(pt->v[i1]==ped->b) { */
-      /* 	  MMG2_tangent(mesh,ped,k,i,i2,1); */
-      /* 	} else { */
-      /* 	  MMG2_tangent(mesh,ped,k,i,i1,1);	   */
-      /* 	} */
-      /* 	ppt->flag = mesh->flag; */
-		
+      /*  if(pt->v[i1]==ped->b) { */
+      /*    MMG2_tangent(mesh,ped,k,i,i2,1); */
+      /*  } else { */
+      /*    MMG2_tangent(mesh,ped,k,i,i1,1);     */
+      /*  } */
+      /*  ppt->flag = mesh->flag; */
+
       /* } else { */
-      /* 	//printf("on a deja calcule pour %d %e %e\n",ped->b,ped->t1[0],ped->t1[1]); */
+      /*  //printf("on a deja calcule pour %d %e %e\n",ped->b,ped->t1[0],ped->t1[1]); */
       /* } */
-      
+
     }
   }
   return(1);
-}  
+}
 
 
 /*hash edge :
-  return 1 if edge exist in the table*/  
+  return 1 if edge exist in the table*/
 int MMG2_hashEdge(pHashTable edgeTable,int iel,int ia, int ib) {
   int       key,mins,maxs;
   Hedge     *ha;
-  
+
   /* compute key */
   if ( ia < ib ) {
     mins = ia;
@@ -475,7 +475,7 @@ int MMG2_hashEdge(pHashTable edgeTable,int iel,int ia, int ib) {
     mins = ib;
     maxs = ia;
   }
- 
+
   key = KTA*mins + KTB*maxs;
   key = key % edgeTable->size;
   ha  = &edgeTable->item[key];
@@ -497,7 +497,7 @@ int MMG2_hashEdge(pHashTable edgeTable,int iel,int ia, int ib) {
         fprintf(stdout,"  ## Memory alloc problem (edge): %d\n",edgeTable->nxtmax);
         assert(0);
         return(0);
-      } 
+      }
     }
   }
   /* insert */
@@ -505,7 +505,7 @@ int MMG2_hashEdge(pHashTable edgeTable,int iel,int ia, int ib) {
   ha->max = maxs;
   ha->iel = iel;
   ha->nxt = 0;
-  
-  return(0);                      
-  
+
+  return(0);
+
 }

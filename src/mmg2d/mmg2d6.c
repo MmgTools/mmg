@@ -32,21 +32,21 @@ int MMG2_mmg2d6(MMG5_pMesh mesh, MMG5_pSol sol) {
   if ( abs(mesh->info.imprim) > 3 )
     fprintf(stdout,"  ** ISOSURFACE EXTRACTION\n");
 
- /* base used vertices */
+  /* base used vertices */
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
-    
+
     if ( !M_EOK(pt) )  continue;
     for (i=0; i<3; i++) {
       ppt = &mesh->point[ pt->v[i] ];
       ppt->tag &= ~M_NUL;
     }
-  }       
-  
+  }
+
   /*delete triangles which are inside the obstacles*/
-   for (k=1; k<=mesh->nt; k++) {
+  for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
-    
+
     if ( !M_EOK(pt) )  continue;
     maxls = -10000;
     for (i=0; i<3; i++) {
@@ -55,26 +55,26 @@ int MMG2_mmg2d6(MMG5_pMesh mesh, MMG5_pSol sol) {
     if(!(maxls > 1e-4)) {
       _MMG2D_delElt(mesh,k);
     }
-  }   
+  }
 
-   if ( !MMG2_hashel(mesh) )  return(1);    
- 
-   for(k=1 ; k<=mesh->na ; k++) {
-     if(!mesh->edge[k].ref) {
-       mesh->edge[k].ref = 4;
-     }
+  if ( !MMG2_hashel(mesh) )  return(1);
 
-   }
+  for(k=1 ; k<=mesh->na ; k++) {
+    if(!mesh->edge[k].ref) {
+      mesh->edge[k].ref = 4;
+    }
+
+  }
   for (k=1; k<=mesh->np; k++) {
     ppt = &mesh->point[k];
-    
+
     ppt->tag |= M_NUL;
-    
-  }       
+
+  }
 
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
-    
+
     if ( !M_EOK(pt) )  continue;
     for (i=0; i<3; i++) {
       ppt = &mesh->point[ pt->v[i] ];

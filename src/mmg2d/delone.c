@@ -76,7 +76,7 @@ _MMG2_correction_iso(MMG5_pMesh mesh,int ip,int *list,int ilist,int nedep) {
 
       }
       if ( i < 3 /*||  pt->tag & MG_REQ*/ ) {
-	      if ( ipil < nedep )  
+        if ( ipil < nedep )
         {/*printf("on veut tout retirer ? %d %d -- %d\n",ipil,nedep,iel);*/return(0);   }
         /* remove iel from list */
         pt->base = base-1;
@@ -231,7 +231,7 @@ int _MMG2_cavity(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list) {
       }
       /* store tria */
       if ( j == 3 ) {
-	      //if ( pt->tag & M_REQUIRED ) isreq = 1;
+        //if ( pt->tag & M_REQUIRED ) isreq = 1;
         pt->base = base;
         list[ilist++] = adj;
       }
@@ -325,10 +325,10 @@ int _MMG2_delone(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist) {
     ielnum[k] = _MMG2D_newElt(mesh);
     if(!ielnum[k]) {
       _MMG5_TRIA_REALLOC(mesh,ielnum[k],mesh->gap,
-                        printf("  ## Error: unable to allocate a new element.\n");
-                        _MMG5_INCREASE_MEM_MESSAGE();
-                        printf("  Exit program.\n");
-                        exit(EXIT_FAILURE));
+                         printf("  ## Error: unable to allocate a new element.\n");
+                         _MMG5_INCREASE_MEM_MESSAGE();
+                         printf("  Exit program.\n");
+                         exit(EXIT_FAILURE));
       pt1  = &mesh->tria[old];
     }
   }
@@ -348,12 +348,12 @@ int _MMG2_delone(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist) {
     for (i=0; i<3; i++) {
       jel = vois[i] /3;
       j   = vois[i] % 3;
-	  
+
       /* external face */
       if ( !jel || (mesh->tria[jel].base != base) ) {
         iel = ielnum[size++];
         assert(iel);
-	    
+
         pt1 = &mesh->tria[iel];
         memcpy(pt1,pt,sizeof(MMG5_Tria));
         pt1->v[i] = ip;
@@ -368,8 +368,8 @@ int _MMG2_delone(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist) {
         iadr = (iel-1)*3 + 1;
         adjb = &mesh->adja[iadr];
         adjb[i] = adja[i];
-	    
-	  
+
+
         if ( jel ) {
           //printf("on a jel %d, MAJ\n",jel);
           iadr = (jel-1)*3 + 1;
@@ -382,7 +382,7 @@ int _MMG2_delone(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist) {
           if ( j != i ) {
             v[0] = pt1->v[ MMG2_iare[j][0] ];
             v[1] = pt1->v[ MMG2_iare[j][1] ];
-	      
+
             //printf("on hash %d %d -- %d %d\n",v[0],v[1],iel,j);
             _MMG2_hashEdgeDelone(mesh,&hedg,iel,j,v);
           }

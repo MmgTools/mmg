@@ -51,8 +51,8 @@ int MMG2_invmat(double *m,double *minv) {
 }
 
 int interp_ani(double *ma,double *mb,double *mp,double t) {
-  double	dma[3],dmb[3],mai[3],mbi[3],mi[3];
-  int		i;
+  double  dma[3],dmb[3],mai[3],mbi[3],mi[3];
+  int   i;
 
   for (i=0; i<3; i++) {
     dma[i] = ma[i];
@@ -247,7 +247,7 @@ static int cassarbdry(MMG5_pMesh mesh,MMG5_pSol sol,int ied,int ia,int ib,double
   ppt = &mesh->point[ip];
   for(i=0 ; i<2 ; i++) {
     // tang[i] = -(-3*t_1*t_1*p0->c[i] +(3*t_1*(1-3*t))*pc1[i]
-    //		+ (3*t*(2-3*t))*pc2[i] +  3*t*t*p1->c[i]);
+    //    + (3*t*(2-3*t))*pc2[i] +  3*t*t*p1->c[i]);
     // printf("tang %e %e diff %e\n",tang[i],(3./8.)*(p1->c[i]+pc2[i]-pc1[i]-p0->c[i]),
     //     fabs(tang[i]-(3./8.)*(p1->c[i]+pc2[i]-pc1[i]-p0->c[i])));
     tang[i] = (3./8.)*(p1->c[i]+pc2[i]-pc1[i]-p0->c[i]);
@@ -447,7 +447,7 @@ static int analar(MMG5_pMesh mesh,MMG5_pSol sol,pBucket bucket,double declic,int
                 if (ddebug) printf("k= %d on insere pas bdry : %d %d\n",k,i1,i2);
                 //mesh->point[ip].tag = M_CORNER;
                 //mesh->point[ip].ref = 5;
-                //	MMG2D_saveMesh(mesh,"del.mesh");
+                //  MMG2D_saveMesh(mesh,"del.mesh");
                 //exit(0);
                 _MMG2D_delPt(mesh,ip);
                 continue;

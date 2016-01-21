@@ -63,7 +63,7 @@ int MMG2_prilen(MMG5_pMesh mesh,MMG5_pSol sol) {
   MMG5_pTria       pt;
   double      lavg,len,ecart,som,lmin,lmax,*ca,*cb,*ma,*mb;
   int         k,l,navg,ia,ipa,ipb,iamin,ibmin,iamax,ibmax,hl[9];
-  int	      iadr;
+  int       iadr;
   static double bd[9] = {0.0, 0.3, 0.6, 0.7071, 0.9, 1.3, 1.4142, 2.0, 5.0};
 //{0.0, 0.2, 0.5, 0.7071, 0.9, 1.111, 1.4142, 2.0, 5.0 };
   navg  = 0;
@@ -90,22 +90,22 @@ int MMG2_prilen(MMG5_pMesh mesh,MMG5_pSol sol) {
       ipb = MMG2_iare[ia][1];
       ca  = &mesh->point[pt->v[ipa]].c[0];
       cb  = &mesh->point[pt->v[ipb]].c[0];
-          
+
       iadr = (pt->v[ipa]-1)*sol->size + 1;
       ma   = &sol->m[iadr];
       iadr = (pt->v[ipb]-1)*sol->size + 1;
-      mb   = &sol->m[iadr]; 
-      
-      len = MMG2_length(ca,cb,ma,mb);  
+      mb   = &sol->m[iadr];
+
+      len = MMG2_length(ca,cb,ma,mb);
       navg++;
-      ecart = len; 
+      ecart = len;
       lavg += len;
 
       /* update efficiency index */
-	  if ( ecart > 1.0 )  ecart = 1.0 / ecart; 
+      if ( ecart > 1.0 )  ecart = 1.0 / ecart;
 
-      som  += (ecart - 1.0); 
-      
+      som  += (ecart - 1.0);
+
       /* find largest, smallest edge */
       if (len < lmin) {
         lmin  = len;
@@ -117,19 +117,16 @@ int MMG2_prilen(MMG5_pMesh mesh,MMG5_pSol sol) {
         iamax = pt->v[ipa];
         ibmax = pt->v[ipb];
       }
-      if(k==6149 && len > bd[7]) {printf("tr %d : %d -- %d %f\n",k,pt->v[ipa],pt->v[ipb],len);
-      printf("met : %e %e %e\n",ma[0],ma[1],ma[2]);
-      printf("met : %e %e %e\n",mb[0],mb[1],mb[2]);
-      printf("sol->size %d\n",sol->size);}
+
       /* update histogram */
       if (len < bd[3]) {
-		if (len > bd[2])       hl[2]++;
-		else if (len > bd[1])  hl[1]++;
-		else                   hl[0]++;
+        if (len > bd[2])       hl[2]++;
+        else if (len > bd[1])  hl[1]++;
+        else                   hl[0]++;
       }
       else if (len < bd[5]) {
-		if (len > bd[4])       hl[4]++;
-		else if (len > bd[3])  hl[3]++;
+        if (len > bd[4])       hl[4]++;
+        else if (len > bd[3])  hl[3]++;
       }
       else if (len < bd[6])    hl[5]++;
       else if (len < bd[7])    hl[6]++;
@@ -137,7 +134,7 @@ int MMG2_prilen(MMG5_pMesh mesh,MMG5_pSol sol) {
       else                     hl[8]++;
     }
   }
-   _MMG5_displayHisto(mesh, navg, &lavg, iamin, ibmin, lmin,
+  _MMG5_displayHisto(mesh, navg, &lavg, iamin, ibmin, lmin,
                      iamax, ibmax, lmax, &bd[0], &hl[0]);
 
 

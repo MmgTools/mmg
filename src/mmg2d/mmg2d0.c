@@ -27,39 +27,39 @@ int optlen_iso_bar(MMG5_pMesh mesh,MMG5_pSol sol,double declic,int base);
 int MMG2_mmg2d0(MMG5_pMesh mesh,MMG5_pSol sol) {
   int       ns,nm,nsiter,nmiter,nmbar,it,maxtou;
   double    declic;
-  
-  /*optim*/ 
+
+  /*optim*/
   ns     = 0;
   nm     = 0;
   nmiter = 0;
-  nsiter = 0; 
+  nsiter = 0;
   it     = 0;
   maxtou = 100;
-  do {                         
-    /*edge flip*/  
+  do {
+    /*edge flip*/
     if(!mesh->info.noswap) {
-      declic = 1.5 / ALPHA;    
+      declic = 1.5 / ALPHA;
       nsiter = MMG2_cendel(mesh,sol,declic,-1);
       if ( nsiter && mesh->info.imprim < 0)
-        fprintf(stdout,"     %7d SWAPPED\n",nsiter); 
-      
-      ns+=nsiter;    
+        fprintf(stdout,"     %7d SWAPPED\n",nsiter);
+
+      ns+=nsiter;
     }
     /*point relocation*/
-    if(!mesh->info.nomove) { 
+    if(!mesh->info.nomove) {
       declic = 1.5 / ALPHA;
       nmiter = MMG2_optlen(mesh,sol,declic,-1);
       if(sol->size==1) nmbar =  optlen_iso_bar(mesh,sol,declic,-1);
-      else nmbar=0;     
+      else nmbar=0;
       nm += nmiter+nmbar;
       if ( mesh->info.imprim < 0)
         fprintf(stdout,"     %7d + %7d MOVED \n",nmiter,nmbar);
     }
-      
-      
+
+
   } while((nmiter+nsiter > 0) && (++it <= maxtou));
   if ( mesh->info.imprim )
-    fprintf(stdout,"     %7d SWAPPED %7d MOVED\n",ns,nm); 
+    fprintf(stdout,"     %7d SWAPPED %7d MOVED\n",ns,nm);
 
   return(1);
 }

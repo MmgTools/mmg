@@ -287,7 +287,7 @@ void _MMG2D_Free_structures_var(va_list argptr)
                    MMG5_ARG_ppMesh, mesh, MMG5_ARG_ppMet, sol,
                    MMG5_ARG_end);
 
- /* mesh */
+  /* mesh */
   assert(mesh && *mesh);
   if ( (*mesh)->point )
     _MMG5_DEL_MEM((*mesh),(*mesh)->point,((*mesh)->npmax+1)*sizeof(MMG5_Point));

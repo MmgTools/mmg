@@ -63,8 +63,8 @@ FORTRAN_NAME(MMG2D_SAVEMESH,mmg2d_savemesh,(MMG5_pMesh *mesh,char *meshin,int *s
  */
 //#warning todo : add callbackfunction argument in Fortran
 FORTRAN_NAME(MMG2D_MMG2DLIB,mmg2d_mmg2dlib,(MMG5_pMesh *mesh,MMG5_pSol *met
-                                          ,int* retval),(mesh,met
-                                                         ,retval)){
+                                            ,int* retval),(mesh,met
+                                                           ,retval)){
 
   *retval = MMG2D_mmg2dlib(*mesh,*met,NULL);
 
@@ -75,8 +75,8 @@ FORTRAN_NAME(MMG2D_MMG2DLIB,mmg2d_mmg2dlib,(MMG5_pMesh *mesh,MMG5_pSol *met
  */
 //#warning todo : add callbackfunction argument in Fortran
 FORTRAN_NAME(MMG2D_MMG2DMESH,mmg2d_mmg2dmesh,(MMG5_pMesh *mesh,MMG5_pSol *met
-                                          ,int* retval),(mesh,met
-                                                         ,retval)){
+                                              ,int* retval),(mesh,met
+                                                             ,retval)){
 
   *retval = MMG2D_mmg2dmesh(*mesh,*met,NULL);
 
@@ -99,8 +99,8 @@ FORTRAN_NAME(MMG2D_MMG2DLS,mmg2d_mmg2dls,(MMG5_pMesh *mesh,MMG5_pSol *met
  */
 //#warning todo : add callbackfunction argument in Fortran
 FORTRAN_NAME(MMG2D_MMG2DMOV,mmg2d_mmg2dmov,(MMG5_pMesh *mesh,MMG5_pSol *met
-                                          ,int* retval),(mesh,met
-                                                         ,retval)){
+                                            ,int* retval),(mesh,met
+                                                           ,retval)){
 
   *retval = MMG2D_mmg2dmov(*mesh,*met,NULL);
 

@@ -23,7 +23,7 @@
 #include "mmg2d.h"
 /* compute tria area */
 double MMG2_quickarea(double a[2],double b[2],double c[2]) {
-	double     abx,aby,acx,acy;//,bcx,bcy;
+  double     abx,aby,acx,acy;//,bcx,bcy;
   double     aire;
 
   abx = b[0] - a[0];
@@ -32,11 +32,11 @@ double MMG2_quickarea(double a[2],double b[2],double c[2]) {
   acy = c[1] - a[1];
   // bcx = c[0] - b[0];
   // bcy = c[1] - b[1];
-  //   
+  //
   /* orientation */
   aire = abx*acy - aby*acx;
-  
-  return(aire);  
+
+  return(aire);
 }
 
 /* compute tria quality iso */
@@ -56,11 +56,11 @@ double caltri_iso_in(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pTria pt) {
   acy = c[1] - a[1];
   bcx = c[0] - b[0];
   bcy = c[1] - b[1];
-  
+
   /* orientation */
   aire = abx*acy - aby*acx;
   if ( aire <= 0 ) return(cal);
-  
+
   /* edge lengths */
   h1 = abx*abx + aby*aby;
   h1 = sqrt(h1);
@@ -75,12 +75,12 @@ double caltri_iso_in(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pTria pt) {
   if ( peri > EPSD ) {
     aire = aire * 0.5;//(peri-h1) * (peri-h2) * (peri-h3);
     if ( aire > 0.0 ) {
-		cal = cal / aire;//sqrt(aire*peri);
+      cal = cal / aire;//sqrt(aire*peri);
     } else {
-		cal = 1e+9;	
-	}
+      cal = 1e+9;
+    }
   } else {
-	cal = 1e+9;	
+    cal = 1e+9;
   }
 
   return(cal);
@@ -93,16 +93,16 @@ double caltri_ani_in(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pTria pt) {
   double    *ma,*mb,*mc,m[6];
   double     aire,h1,h2,h3,peri,hm,a1;
   int        i;
-  cal = 1e+9;	  
+  cal = 1e+9;
   a  = mesh->point[pt->v[0]].c;
   b  = mesh->point[pt->v[1]].c;
   c  = mesh->point[pt->v[2]].c;
-  
-  /* check orientation*/ 
-//#warning a optimiser???  
-  a1 = MMG2_quickarea(a,b,c);  
+
+  /* check orientation*/
+//#warning a optimiser???
+  a1 = MMG2_quickarea(a,b,c);
   if(a1 < 0) return(cal) ;
-  
+
   /* average metric */
   ma = &sol->m[(pt->v[0]-1)*sol->size+1];
   mb = &sol->m[(pt->v[1]-1)*sol->size+1];
@@ -127,16 +127,16 @@ double caltri_ani_in(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pTria pt) {
   /* quality */
   peri = 0.5 * (h1 + h2 + h3);
   hm   = M_MAX(h1,M_MAX(h2,h3));
-  cal  = hm * peri;   
+  cal  = hm * peri;
   if ( peri > EPSD ) {
-    aire = peri * (peri-h1) * (peri-h2) * (peri-h3);  
+    aire = peri * (peri-h1) * (peri-h2) * (peri-h3);
     if ( aire > 0.0 ) {
       cal /= sqrt(aire);
     } else {
-	  cal = 1e+9;	
-	}
+      cal = 1e+9;
+    }
   } else {
-	cal = 1e+9;	
+    cal = 1e+9;
   }
   return(cal);
 }
@@ -145,24 +145,24 @@ double caltri_ani_in(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pTria pt) {
 double caltri_iso(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pTria pt) {
   double     cal,abx,aby,acx,acy,bcx,bcy;
   double    *a,*b,*c,h1,h2,h3,aire,hm;
-  
+
   cal = 0;
-  
+
   a  = mesh->point[pt->v[0]].c;
   b  = mesh->point[pt->v[1]].c;
   c  = mesh->point[pt->v[2]].c;
-  
+
   abx = b[0] - a[0];
   aby = b[1] - a[1];
   acx = c[0] - a[0];
   acy = c[1] - a[1];
   bcx = c[0] - b[0];
   bcy = c[1] - b[1];
-  
+
   /* orientation */
   aire = abx*acy - aby*acx;
   if ( aire <= 0 ) return(cal);
-  
+
   /* edge lengths */
   h1 = abx*abx + aby*aby;
   h1 = sqrt(h1);
@@ -170,7 +170,7 @@ double caltri_iso(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pTria pt) {
   h2 = sqrt(h2);
   h3 = bcx*bcx + bcy*bcy;
   h3 = sqrt(h3);
-  
+
   hm = h1*h1 + h2*h2 + h3*h3;
   if (hm > EPSD) {
     //return(1./MMG2_caltri_in(mesh,sol,pt));
@@ -187,16 +187,16 @@ double caltri_ani(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pTria pt) {
   double    *ma,*mb,*mc,m[6];
   double     aire,h1,h2,h3,peri,hm,a1;
   int        i;
-  cal = 0;	  
+  cal = 0;
   a  = mesh->point[pt->v[0]].c;
   b  = mesh->point[pt->v[1]].c;
   c  = mesh->point[pt->v[2]].c;
-  
-  /* check orientation*/ 
-//#warning a optimiser???  
-  a1 = MMG2_quickarea(a,b,c);  
+
+  /* check orientation*/
+//#warning a optimiser???
+  a1 = MMG2_quickarea(a,b,c);
   if(a1 < 0) return(cal) ;
-  
+
   /* average metric */
   ma = &sol->m[(pt->v[0]-1)*sol->size+1];
   mb = &sol->m[(pt->v[1]-1)*sol->size+1];
@@ -221,14 +221,14 @@ double caltri_ani(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pTria pt) {
   /* quality */
   hm = h1*h1 + h2*h2 + h3*h3;
   peri = 0.5 * (h1 + h2 + h3);
-  aire = peri * (peri-h1) * (peri-h2) * (peri-h3); 
+  aire = peri * (peri-h1) * (peri-h2) * (peri-h3);
   if (hm > EPSD) {
     return(2*sqrt(aire)/hm);
     //return(1./MMG2_caltri_in(mesh,sol,pt));
   } else {
     return(0.0);
   }
- 
+
 }
 
 
@@ -247,8 +247,8 @@ void MMG2_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
   /*compute triangle quality*/
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
-     if( !MG_EOK(pt) )   continue;
-     pt->qual = MMG2_caltri_in(mesh,met,pt);
+    if( !MG_EOK(pt) )   continue;
+    pt->qual = MMG2_caltri_in(mesh,met,pt);
   }
   if ( abs(mesh->info.imprim) <= 0 ) return;
 
@@ -303,7 +303,7 @@ void MMG2_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
               i/5.,i/5.+0.2,his[i],100.*(his[i]/(float)(mesh->nt-nex)));
     }
   }
-  
+
 }
 
 /* /\* print mesh quality histo *\/ */
@@ -349,12 +349,12 @@ void MMG2_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
 /*       rapmin = M_MIN(rapmin,rap4); */
 /*       if ( rap4 < 10.0 ) { */
 /*         his10[ir] += 1; */
-/* 	    his01[0]  += 1; */
+/*      his01[0]  += 1; */
 /*       } */
 /*       else if ( rap4 < 1e9 ) { */
 /*         rapl = M_MIN(log10(rap4),32.0); */
 /*         his01[(int)rapl] += 1; */
-/* 	    his01[0]  += 1; */
+/*      his01[0]  += 1; */
 /*       }  */
 /*     } else { */
 /*        printf("pbs qual %d : %e\n",k,rap4);   */
@@ -376,10 +376,10 @@ void MMG2_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
 /*   j = 0; */
 /*   for (i=1; i<16; i++) */
 /*     j += his01[i]; */
-  
+
 /*   for (i=M_MAX((int)rapmin,1); i<=M_MIN((int)rapmax,9); i++) { */
 /*     fprintf(stdout,"     %5d < Q < %5d   %7d   %6.2f %%\n", */
-/* 	    i,i+1,his10[i],100.*(his10[i]/(float)his01[0])); */
+/*      i,i+1,his10[i],100.*(his10[i]/(float)his01[0])); */
 /*   } */
 
 /*   /\* quality per interval *\/ */
@@ -389,11 +389,11 @@ void MMG2_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
 
 /*     for (i=1; i<=imax; i++) { */
 /*       fprintf(stdout,"     %5.0f < Q < %5.0f   %7d   %6.2f %%\n", */
-/* 	      pow(10.,i),pow(10.,i+1),his01[i],100.*(his01[i]/(float)his01[0])); */
+/*        pow(10.,i),pow(10.,i+1),his01[i],100.*(his01[i]/(float)his01[0])); */
 /*     } */
 /*     for (i=4; i<=(int)log10(rapmax); i++) { */
 /*       fprintf(stdout,"    10**%2d < Q < 10**%2d  %7d   %6.2f %%\n", */
-/* 	      i,i+1,his01[i],100.*(his01[i]/(float)his01[0])); */
+/*        i,i+1,his01[i],100.*(his01[i]/(float)his01[0])); */
 /*     } */
 /*   } */
 /* } */

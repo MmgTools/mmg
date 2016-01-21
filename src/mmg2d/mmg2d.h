@@ -124,7 +124,7 @@ void _MMG2_excfun(int sigid) {
 /* typedef struct { */
 /*   int       v[2],ref,flag,mark;  */
 /*   double    t0[2],t1[2]; //tangents */
-/*   char	    tag;  */
+/*   char     tag;  */
 /* } Edge; */
 /* typedef Edge * pEdge; */
 
@@ -148,7 +148,7 @@ void _MMG2_excfun(int sigid) {
 /*   MMG5_pPoint     point; */
 /*   Displ      disp; */
 /*   MMG5_pTria      tria; */
-/*   pEdge		 edge; */
+/*   pEdge     edge; */
 /*   Info       info; */
 /*   char       flag; */
 /*   char      *namein,*nameout,*namedep; */
@@ -192,7 +192,7 @@ static const unsigned int MMG2_inxt[5] = {1,2,0,1,2};
 
 /** Reallocation of point table and sol table and creation
     of point ip with coordinates o and tag tag*/
-#define _MMG2D_POINT_REALLOC(mesh,sol,ip,wantedGap,law,o,tag ) do        \
+#define _MMG2D_POINT_REALLOC(mesh,sol,ip,wantedGap,law,o,tag ) do       \
   {                                                                     \
     int klink;                                                          \
                                                                         \
@@ -212,54 +212,54 @@ static const unsigned int MMG2_inxt[5] = {1,2,0,1,2};
     sol->npmax = mesh->npmax;                                           \
                                                                         \
     /* We try again to add the point */                                 \
-    ip = _MMG2D_newPt(mesh,o,tag);                                       \
+    ip = _MMG2D_newPt(mesh,o,tag);                                      \
     if ( !ip ) {law;}                                                   \
   }while(0)
 
 /** Reallocation of tria table and creation
     of tria jel */
-#define _MMG5_TRIA_REALLOC(mesh,jel,wantedGap,law ) do                 \
+#define _MMG5_TRIA_REALLOC(mesh,jel,wantedGap,law ) do                  \
   {                                                                     \
-    int klink,oldSiz;                                                   \
+   int klink,oldSiz;                                                    \
                                                                         \
-    oldSiz = mesh->ntmax;                                               \
-    _MMG5_TAB_RECALLOC(mesh,mesh->tria,mesh->ntmax,wantedGap,MMG5_Tria, \
-                       "larger tria table",law);                       \
+   oldSiz = mesh->ntmax;                                                \
+   _MMG5_TAB_RECALLOC(mesh,mesh->tria,mesh->ntmax,wantedGap,MMG5_Tria,  \
+                        "larger tria table",law);                       \
                                                                         \
-    mesh->nenil = mesh->nt+1;                                           \
-    for (klink=mesh->nenil; klink<mesh->ntmax-1; klink++)               \
-      mesh->tria[klink].v[2]  = klink+1;                               \
+   mesh->nenil = mesh->nt+1;                                            \
+   for (klink=mesh->nenil; klink<mesh->ntmax-1; klink++)                \
+     mesh->tria[klink].v[2]  = klink+1;                                 \
                                                                         \
-    if ( mesh->adja ) {                                                 \
-      /* adja table */                                                  \
-      _MMG5_ADD_MEM(mesh,3*(mesh->ntmax-oldSiz)*sizeof(int),            \
-                    "larger adja table",law);                           \
-      _MMG5_SAFE_RECALLOC(mesh->adja,3*mesh->nt+5,3*mesh->ntmax+5,int   \
-                          ,"larger adja table");                        \
-    }                                                                   \
+   if ( mesh->adja ) {                                                  \
+                      /* adja table */                                  \
+                      _MMG5_ADD_MEM(mesh,3*(mesh->ntmax-oldSiz)*sizeof(int), \
+                                      "larger adja table",law);         \
+                      _MMG5_SAFE_RECALLOC(mesh->adja,3*mesh->nt+5,3*mesh->ntmax+5,int \
+                                            ,"larger adja table");      \
+                      }                                                 \
                                                                         \
-    /* We try again to add the point */                                 \
-    jel = _MMG2D_newElt(mesh);                                           \
-    if ( !jel ) {law;}                                                  \
-  }while(0)
+   /* We try again to add the point */                                  \
+   jel = _MMG2D_newElt(mesh);                                           \
+   if ( !jel ) {law;}                                                   \
+   }while(0)
 
 /** Reallocation of edge table and creation
     of edge jel */
-#define _MMG5_EDGE_REALLOC(mesh,jel,wantedGap,law ) do                 \
+#define _MMG5_EDGE_REALLOC(mesh,jel,wantedGap,law ) do                  \
   {                                                                     \
-    int klink;                                                          \
+   int klink;                                                           \
                                                                         \
-    _MMG5_TAB_RECALLOC(mesh,mesh->edge,mesh->namax,wantedGap,MMG5_Edge, \
-                       "larger edge table",law);                       \
+   _MMG5_TAB_RECALLOC(mesh,mesh->edge,mesh->namax,wantedGap,MMG5_Edge,  \
+                      "larger edge table",law);                         \
                                                                         \
-    mesh->nanil = mesh->na+1;                                           \
-    for (klink=mesh->nanil; klink<mesh->namax-1; klink++)               \
-      mesh->edge[klink].b  = klink+1;                               \
+   mesh->nanil = mesh->na+1;                                            \
+   for (klink=mesh->nanil; klink<mesh->namax-1; klink++)                \
+     mesh->edge[klink].b  = klink+1;                                    \
                                                                         \
                                                                         \
-    /* We try again to add the point */                                 \
-    jel = _MMG5_newEdge(mesh);                                           \
-    if ( !jel ) {law;}                                                  \
+   /* We try again to add the point */                                  \
+   jel = _MMG5_newEdge(mesh);                                           \
+   if ( !jel ) {law;}                                                   \
   }while(0)
 
 

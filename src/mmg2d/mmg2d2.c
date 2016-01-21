@@ -900,11 +900,10 @@ int MMG2_mmg2d2(MMG5_pMesh mesh,MMG5_pSol sol) {
 
   /*bdry enforcement*/
   if(!MMG2_bdryenforcement(mesh,sol)) {
-    printf("bdry enforcement failed\n");return(0);
+    printf("  ## Error: unable to enforce the boundaries.\n");return(0);
   }
   if(mesh->info.ddebug) {
     _MMG5_chkmsh(mesh,1,0);
-    printf("chk ok\n");
     MMG2_tassage(mesh,sol);
     MMG2D_saveMesh(mesh,"bdyenforcement.mesh");
   }
@@ -921,7 +920,5 @@ int MMG2_mmg2d2(MMG5_pMesh mesh,MMG5_pSol sol) {
   /*mark vertex bdry and compute tangent*/
   MMG2_baseBdry(mesh);
 
-
   return(1);
 }
-

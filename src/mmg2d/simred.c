@@ -27,7 +27,7 @@ extern int ddebug;
 int simred(double *m1,double *m2,double *m) {
   double  lambda[2],hh[2],det,pp[2][2];
   double  maxd1,maxd2,ex,ey,m1i[3],n[4],pi[4];
- 
+
   /* check diag matrices */
   if ( fabs(m1[1]) < EPSD && fabs(m2[1]) < EPSD ) {
     m[0] = M_MAX(m1[0],m2[0]);
@@ -35,17 +35,17 @@ int simred(double *m1,double *m2,double *m) {
     m[1] = 0.0;
     return(1);
   }
-  if ( !MMG2_invmat(m1,m1i) )  return(0); 
+  if ( !MMG2_invmat(m1,m1i) )  return(0);
   if(ddebug) printf("inv %e %e %e\n",m1[0]*m1i[0]+m1[1]*m1i[1],m1[0]*m1i[1]+m1[1]*m1i[2],
-                          m1[1]*m1i[1]+m1[2]*m1i[2]);
+                    m1[1]*m1i[1]+m1[2]*m1i[2]);
 
   _MMG5_eigensym(m1,lambda,pp);
   if(ddebug) printf(" m1 lambda : %e %e -- %e %e\n",lambda[0],lambda[1],1./sqrt(lambda[0]),
-                                1./sqrt(lambda[1]));
+                    1./sqrt(lambda[1]));
 
   _MMG5_eigensym(m2,lambda,pp);
   if(ddebug) printf(" m2 lambda : %e %e -- %e %e\n",lambda[0],lambda[1],1./sqrt(lambda[0]),
-                                1./sqrt(lambda[1]));
+                    1./sqrt(lambda[1]));
 
 
   /* n = (m1)^-1*m2 : stocke en ligne*/
@@ -53,13 +53,13 @@ int simred(double *m1,double *m2,double *m) {
   n[1] = m1i[0]*m2[1] + m1i[1]*m2[2];
   n[2] = m1i[1]*m2[0] + m1i[2]*m2[1];
   n[3] = m1i[1]*m2[1] + m1i[2]*m2[2];
-  
+
   _MMG5_eigensym(n,lambda,pp);
   if(ddebug) printf("lambda : %e %e -- %e %e\n",lambda[0],lambda[1],0.5*((n[0]+n[3])+
-                                sqrt((n[0]+n[3])*(n[0]+n[3])-4*(n[0]*n[3]-n[1]*n[2])))
-                                ,0.5*((n[0]+n[3])-
-                                sqrt((n[0]+n[3])*(n[0]+n[3])-4*(n[0]*n[3]-n[1]*n[2]))));
-  
+                                                                         sqrt((n[0]+n[3])*(n[0]+n[3])-4*(n[0]*n[3]-n[1]*n[2])))
+                    ,0.5*((n[0]+n[3])-
+                          sqrt((n[0]+n[3])*(n[0]+n[3])-4*(n[0]*n[3]-n[1]*n[2]))));
+
   if(ddebug) printf("l0 %e\n",lambda[0]*lambda[0]-lambda[0]*(n[0]+n[3])+n[0]*n[3]-n[1]*n[2]);
   if(ddebug) printf("l1 %e\n",lambda[1]*lambda[1]-lambda[1]*(n[0]+n[3])+n[0]*n[3]-n[1]*n[2]);
   if ( fabs(lambda[0]-lambda[1]) < EPSD ) {
@@ -70,10 +70,10 @@ int simred(double *m1,double *m2,double *m) {
   else {
     /* matrix of passage */
     if(ddebug) printf("aaa : %e == %e -- %e == %e \n",n[0]*pp[0][0]+n[1]*pp[0][1],lambda[0]*pp[0][0]
-                      ,n[2]*pp[0][0]+n[3]*pp[0][1],lambda[0]*pp[0][1]  ) ; 
+                      ,n[2]*pp[0][0]+n[3]*pp[0][1],lambda[0]*pp[0][1]  ) ;
 
     if(ddebug) printf("bbb : %e == %e -- %e == %e \n",n[0]*pp[1][0]+n[1]*pp[1][1],lambda[1]*pp[1][0]
-                      ,n[2]*pp[1][0]+n[3]*pp[1][1],lambda[1]*pp[1][1]  ) ; 
+                      ,n[2]*pp[1][0]+n[3]*pp[1][1],lambda[1]*pp[1][1]  ) ;
 
     det = pp[0][0]*pp[1][1]-pp[1][0]*pp[0][1];
     if(fabs(det) < EPSD) return(0);
@@ -87,21 +87,21 @@ int simred(double *m1,double *m2,double *m) {
     /*eigenvalues*/
     ex = pp[0][0];
     ey = pp[0][1];
-    maxd1 = ex*(m1[0]*ex+m1[1]*ey) 
-          + ey*(m1[1]*ex+m1[2]*ey);
-    maxd2 = ex*(m2[0]*ex+m2[1]*ey) 
-          + ey*(m2[1]*ex+m2[2]*ey);
+    maxd1 = ex*(m1[0]*ex+m1[1]*ey)
+      + ey*(m1[1]*ex+m1[2]*ey);
+    maxd2 = ex*(m2[0]*ex+m2[1]*ey)
+      + ey*(m2[1]*ex+m2[2]*ey);
     hh[0] = M_MAX(maxd1,maxd2);
     ex = pp[1][0];
     ey = pp[1][1];
-    maxd1 = ex*(m1[0]*ex+m1[1]*ey) 
-          + ey*(m1[1]*ex+m1[2]*ey);
-    maxd2 = ex*(m2[0]*ex+m2[1]*ey) 
-          + ey*(m2[1]*ex+m2[2]*ey);
+    maxd1 = ex*(m1[0]*ex+m1[1]*ey)
+      + ey*(m1[1]*ex+m1[2]*ey);
+    maxd2 = ex*(m2[0]*ex+m2[1]*ey)
+      + ey*(m2[1]*ex+m2[2]*ey);
     hh[1] = M_MAX(maxd1,maxd2);
-    
+
     if(ddebug) printf("----------------- hh : %e %e -- %e %e\n",hh[0],hh[1],1./sqrt(hh[0]),1./sqrt(hh[1]));
-  
+
     /* compose matrix tP^-1*lambda*P^-1 */
     m[0] = pi[0]*hh[0]*pi[0] + pi[2]*hh[1]*pi[2];
     m[1] = pi[0]*hh[0]*pi[1] + pi[2]*hh[1]*pi[3];
@@ -119,8 +119,8 @@ int simred(double *m1,double *m2,double *m) {
     }
 
     return(1);
-  }   
-  
-  
-  
+  }
+
+
+
 }

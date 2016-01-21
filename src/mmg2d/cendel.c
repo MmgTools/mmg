@@ -38,10 +38,10 @@ int MMG2_cendel(MMG5_pMesh mesh,MMG5_pSol sol,double declic,int base) {
   ns = 0;
   np = 0;
   do {
-    k = MMG2_kiupop(queue); 
+    k = MMG2_kiupop(queue);
     if ( !k )  break;
     np++;
-    pt = &mesh->tria[k];  
+    pt = &mesh->tria[k];
     if ( !M_EOK(pt) )  continue;
 
     /* base internal edges */
@@ -53,16 +53,16 @@ int MMG2_cendel(MMG5_pMesh mesh,MMG5_pSol sol,double declic,int base) {
       //check required
       if((mesh->point[pt->v[MMG2_iare[i][0]]].tag & M_REQUIRED) && (mesh->point[pt->v[MMG2_iare[i][1]]].tag & M_REQUIRED)) {
         //printf("edge required %d %d\n",pt->v[MMG2_iare[i][0]],pt->v[MMG2_iare[i][1]]);
-        continue; 
-      } 
-      
+        continue;
+      }
+
       pt1  = &mesh->tria[adj];
-      crit = 0.99 * M_MAX(pt->qual,pt1->qual); 
+      crit = 0.99 * M_MAX(pt->qual,pt1->qual);
       if ( MMG2_swapar(mesh,sol,k,i,crit,list) ) {
-        ns++;         
+        ns++;
         break;
       }
-      
+
     }
   }
   while ( k );

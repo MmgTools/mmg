@@ -28,21 +28,21 @@ static unsigned char iprev[3] = {2,0,1};
 
 
 /* find all triangles sharing P
-   in:  ifirst    : triangle containing p 
-        iploc     : index of p in start
+   in:  ifirst    : triangle containing p
+   iploc     : index of p in start
    out: list  : list of triangles */
 int MMG2_boulep(MMG5_pMesh mesh, int ifirst, int iploc, int * list) {
   MMG5_pTria  pt;
   MMG5_pPoint ppt;
   int    ip,voy,ilist,iel,*adja,i,iadr;
 
-  if ( ifirst < 1 ) return(0);	
+  if ( ifirst < 1 ) return(0);
   pt = &mesh->tria[ifirst];
   if ( !M_EOK(pt) ) return(0);
   ip = pt->v[iploc];
   ppt = &mesh->point[ip];
-  if ( !M_VOK(ppt) ) return(0);	
-  
+  if ( !M_VOK(ppt) ) return(0);
+
   /* init list */
   ilist       = 1;
   list[ilist] = 3*ifirst + iploc;
@@ -55,34 +55,34 @@ int MMG2_boulep(MMG5_pMesh mesh, int ifirst, int iploc, int * list) {
 
   while ( iel && (iel != ifirst) && mesh->tria[iel].v[0]){
     if(ilist==MMG2D_LMAX-1) return(0);
-	  list[++ilist] = 3*iel + i;   
-	  assert( ip==(&mesh->tria[iel])->v[i] );			
-	  iadr = 3*(iel-1) + 1;
-	  adja = &mesh->adja[iadr];
-	  iel  = adja[inxt[i]]/3;
-	  voy = adja[inxt[i]]%3;
-	  i   = inxt[voy];
+    list[++ilist] = 3*iel + i;
+    assert( ip==(&mesh->tria[iel])->v[i] );
+    iadr = 3*(iel-1) + 1;
+    adja = &mesh->adja[iadr];
+    iel  = adja[inxt[i]]/3;
+    voy = adja[inxt[i]]%3;
+    i   = inxt[voy];
   }
-  
+
   if ( iel!=ifirst ) {
     iadr = 3*(ifirst-1) + 1;
     adja = &mesh->adja[iadr];
     iel  = adja[iprev[iploc]]/3;
     voy  = adja[iprev[iploc]]%3;
     i    = iprev[voy];
-    
+
     while ( iel && (iel != ifirst) && mesh->tria[iel].v[0]) {
       if(ilist==MMG2D_LMAX-1) return(0);
-	    list[++ilist] = 3*iel + i;
-	    assert( ip==(&mesh->tria[iel])->v[i] );			
-	    iadr = 3*(iel-1) + 1;
-	    adja = &mesh->adja[iadr];
-	    iel  = adja[iprev[i]]/3;
-        if (!iel) break;
-	    voy = adja[iprev[i]]%3;
-	    i   = iprev[voy];
+      list[++ilist] = 3*iel + i;
+      assert( ip==(&mesh->tria[iel])->v[i] );
+      iadr = 3*(iel-1) + 1;
+      adja = &mesh->adja[iadr];
+      iel  = adja[iprev[i]]/3;
+      if (!iel) break;
+      voy = adja[iprev[i]]%3;
+      i   = iprev[voy];
 
-    } 
+    }
   }
 
   return(ilist);
