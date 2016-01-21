@@ -105,7 +105,7 @@ int MMG2_cutEdge(MMG5_pMesh mesh,MMG5_pTria pt,MMG5_pPoint ppa,MMG5_pPoint ppb) 
   lb[2] = 1.-(lb[0]+lb[1]);
   /* if(ddebug) printf("barya %e %e %e\n",la[0],la[1],la[2]); */
   /* if(ddebug) printf("baryb %e %e %e\n",lb[0],lb[1],lb[2]); */
-  //if(ddebug) exit(0);
+  //if(ddebug) exit(EXIT_FAILURE);
   /*if ia ou ib sommets de pt*/
   for(i=0 ; i<3 ; i++) {
     if(fabs(la[i]-1.)<1e-12) {
@@ -542,14 +542,14 @@ int MMG2_locateEdge(MMG5_pMesh mesh,int ia,int ib,int* kdep,int* list) {
       }/*end if ia || ibreak;*/
     }
     if(mesh->info.ddebug) printf("bon on est la ok! %d\n",ibreak);
-    //if(ddebug) exit(0);
+    //if(ddebug) exit(EXIT_FAILURE);
     if(ibreak==1 || ibreak==-10) continue;
     if(ibreak>1) break;
     /*a-t-on un pts sur l'arete iaib ?*/
     if (fabs(aire1) < EPSNULL || fabs(aire2) < EPSNULL || fabs(aire3) < EPSNULL) {
       printf("aire %e %e %e\n",aire1,aire2,aire3);
       printf("un point aligné\n");
-      //exit(0);
+      //exit(EXIT_FAILURE);
     }
 
     //ktemp = k;

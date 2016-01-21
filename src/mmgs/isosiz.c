@@ -42,7 +42,7 @@
    by convention, p0->h stores desired length at point p0 */
 int _MMGS_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTria    pt;
-  MMG5_pPoint   ppt,p[3];
+  MMG5_pPoint   p[3];
   MMG5_pPar     par;
   double   n[3][3],t[3][3],nt[3],c1[3],c2[3],*n1,*n2,*t1,*t2;
   double   ps,ps2,ux,uy,uz,ll,l,lm,dd,M1,M2,hausd,hmin,hmax;

@@ -293,7 +293,6 @@ int _MMG5_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
  *
  */
 static int _MMG5_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
-  MMG5_Par   *par;
   float      fp1,fp2,hausd;
   int        ref,i,j,ret,npar;
   char       *ptr,buf[256],data[256];
@@ -327,7 +326,6 @@ static int _MMG5_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
         exit(EXIT_FAILURE);
 
       for (i=0; i<mesh->info.npar; i++) {
-        par = &mesh->info.par[i];
         fscanf(in,"%d %s ",&ref,buf);
         ret = fscanf(in,"%f %f %f",&fp1,&fp2,&hausd);
         for (j=0; j<strlen(buf); j++)  buf[j] = tolower(buf[j]);

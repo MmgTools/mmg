@@ -134,7 +134,7 @@ int MMG2_insertpointdelone(MMG5_pMesh mesh,MMG5_pSol sol) {
     if ( lon < 1 ) {
       fprintf(stdout,"impossible d'inserer le point %d\n",k);
       MMG2D_saveMesh(mesh,"toto.mesh");
-      exit(0);
+      exit(EXIT_FAILURE);
     } else {
       _MMG2_delone(mesh,sol,k,list,lon);
     }
@@ -149,7 +149,7 @@ int MMG2_insertpointdelone(MMG5_pMesh mesh,MMG5_pSol sol) {
     /*   } */
     /*   _MMG5_chkmsh(mesh,1,0); */
     // MMG2D_saveMesh(mesh,"toto.mesh");
-    //exit(0);
+    //exit(EXIT_FAILURE);
     /*}*/
 
   }
@@ -751,7 +751,14 @@ int MMG2_findpos(MMG5_pMesh mesh,MMG5_pTria pt,int ip1,int ip2,int ip3,int ip4,i
   return(0);
 }
 
-/*create triangulation*/
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param sol pointer toward the sol structure.
+ * \return 1 if success.
+ *
+ * Mesh triangulation.
+ *
+ **/
 int MMG2_mmg2d2(MMG5_pMesh mesh,MMG5_pSol sol) {
   MMG5_pTria     pt;
   //MMG5_pEdge     ped;

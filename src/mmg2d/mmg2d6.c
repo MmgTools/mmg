@@ -23,6 +23,14 @@
 #include "mmg2d.h"
 
 
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param sol pointer toward the sol structure.
+ * \return 1 if success.
+ *
+ * Isosurface discretization
+ *
+ **/
 int MMG2_mmg2d6(MMG5_pMesh mesh, MMG5_pSol sol) {
   MMG5_pTria  pt;
   MMG5_pPoint ppt;

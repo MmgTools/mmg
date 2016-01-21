@@ -339,7 +339,7 @@ static int cassarbdry(MMG5_pMesh mesh,MMG5_pSol sol,int ied,int ia,int ib,double
   if( mesh->info.lag >= 0) {
 //#warning option 9
     printf("option 9..........\n");
-    exit(0);
+    exit(EXIT_FAILURE);
     /* pd = mesh->disp; */
     /* pd.mv[2*(ip-1) + 1 + 0] = t_1*pd.mv[2*(ia-1) + 1 + 0] + t*pd.mv[2*(ib-1) + 1 + 0]; */
     /* pd.mv[2*(ip-1) + 1 + 1] = t_1*pd.mv[2*(ia-1) + 1 + 1] + t*pd.mv[2*(ib-1) + 1 + 1]; */
@@ -367,9 +367,6 @@ static int analar(MMG5_pMesh mesh,MMG5_pSol sol,pBucket bucket,double declic,int
     if ( !M_EOK(pt) )  continue;
     //else if ( /*pt->flag = base-1 || pt->qual < declic*/ )  continue;
 
-    if(0 && k==11385) ddebug =1;
-    else ddebug = 0;
-    if(ddebug) printf("k %d parti\n",k);
     /* base internal edges */
     iadr  = 3*(k-1) + 1;
     adja  = &mesh->adja[iadr];
@@ -448,7 +445,7 @@ static int analar(MMG5_pMesh mesh,MMG5_pSol sol,pBucket bucket,double declic,int
                 //mesh->point[ip].tag = M_CORNER;
                 //mesh->point[ip].ref = 5;
                 //  MMG2D_saveMesh(mesh,"del.mesh");
-                //exit(0);
+                //exit(EXIT_FAILURE);
                 _MMG2D_delPt(mesh,ip);
                 continue;
               }
@@ -529,7 +526,7 @@ static int analar(MMG5_pMesh mesh,MMG5_pSol sol,pBucket bucket,double declic,int
               if(ddebug) {
                 printf("del ok\n");
                 //MMG2D_saveMesh(mesh,"del.mesh");
-                //exit(0);
+                //exit(EXIT_FAILURE);
               }
               break;
 
@@ -540,7 +537,7 @@ static int analar(MMG5_pMesh mesh,MMG5_pSol sol,pBucket bucket,double declic,int
           if(ddebug) {
             printf("del2 ok\n");
             //MMG2D_saveMesh(mesh,"del.mesh");
-            //exit(0);
+            //exit(EXIT_FAILURE);
           }
 
           break;
@@ -636,6 +633,14 @@ static int analargeom(MMG5_pMesh mesh,MMG5_pSol sol,int *alert) {
   return(nitot);
 }
 
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param sol pointer toward the sol structure.
+ * \return 1 if success.
+ *
+ * Mesh adaptation.
+ *
+ **/
 int MMG2_mmg2d1(MMG5_pMesh mesh,MMG5_pSol sol) {
   pBucket  bucket;
   double   declic;

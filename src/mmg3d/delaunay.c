@@ -698,7 +698,7 @@ int _MMG5_cavity_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel,int ip,int* list,int 
       }
       /* store tetra */
       if ( j == 4 ) {
-        if ( pt->tag & MG_REQ ) isreq = 1;        
+        if ( pt->tag & MG_REQ ) isreq = 1;
         pt->mark = base;
         list[ilist++] = adj;
       }

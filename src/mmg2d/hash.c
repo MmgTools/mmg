@@ -342,11 +342,14 @@ int MMG2_baseBdry(MMG5_pMesh mesh) {
       MMG2_hashEdge(&edgeT,k,ped->a,ped->b);
     }
   }
+
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
     if ( !M_EOK(pt) )  continue;
+
     iadr = 3*(k-1) + 1;
     adja = &mesh->adja[iadr];
+
     for (i=0; i<3; i++) {
       adj = adja[i]/3;
       pt1 = &mesh->tria[adj];
@@ -358,8 +361,18 @@ int MMG2_baseBdry(MMG5_pMesh mesh) {
         }
         ip  = pt->v[MMG2_iopp[i][0]];
         mesh->point[ip].tag |= M_BDRY;
+        if ( mesh->info.nosurf && ( !( mesh->point[ip].tag & M_REQUIRED) ) ) {
+          mesh->point[ip].tag |= M_REQUIRED;
+          mesh->point[ip].tag |= M_NOSURF;
+        }
+
         ip  = pt->v[MMG2_iopp[i][1]];
         mesh->point[ip].tag |= M_BDRY;
+        if ( mesh->info.nosurf && ( !( mesh->point[ip].tag & M_REQUIRED) ) ) {
+          mesh->point[ip].tag |= M_REQUIRED;
+          mesh->point[ip].tag |= M_NOSURF;
+        }
+
         if(num) {
           pt->edg[i] = num;
         } else {
@@ -383,8 +396,18 @@ int MMG2_baseBdry(MMG5_pMesh mesh) {
         }
         ip  = pt->v[MMG2_iopp[i][0]];
         mesh->point[ip].tag |= M_SD;
+        if ( mesh->info.nosurf && ( !( mesh->point[ip].tag & M_REQUIRED) ) ) {
+          mesh->point[ip].tag |= M_REQUIRED;
+          mesh->point[ip].tag |= M_NOSURF;
+        }
+
         ip  = pt->v[MMG2_iopp[i][1]];
         mesh->point[ip].tag |= M_SD;
+        if ( mesh->info.nosurf  && ( !( mesh->point[ip].tag & M_REQUIRED) )  ) {
+          mesh->point[ip].tag |= M_REQUIRED;
+          mesh->point[ip].tag |= M_NOSURF;
+        }
+
         if(num) {
           pt->edg[i] = num;
         } else {

@@ -115,6 +115,12 @@ int MMG2_tassage(MMG5_pMesh mesh,MMG5_pSol sol) {
   for (k=1; k<=mesh->np; k++) {
     ppt = &mesh->point[k];
     if ( ppt->tag & M_NUL )  continue;
+
+    /* remove the required tag at vertices in -nosurf mode */
+    if ( mesh->info.nosurf && (ppt->tag & M_NOSURF) ) {
+      ppt->tag &= ~M_REQUIRED;
+    }
+
     if(k!=nbl) {
       pptnew = &mesh->point[nbl];
       memcpy(pptnew,ppt,sizeof(MMG5_Point));
@@ -239,7 +245,7 @@ int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol sol,void (*titi)(int ,int ,int,int,
     sol->np = 0;
   } else   if ( sol->np && (sol->np != mesh->np) ) {
     fprintf(stdout,"  ## WARNING: WRONG SOLUTION NUMBER : %d != %d\n",sol->np,mesh->np);
-    //exit(1);
+    //exit(EXIT_FAILURE);
   }
   chrono(OFF,&(ctim[1]));
   printim(ctim[1].gdif,stim);
@@ -269,7 +275,7 @@ int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol sol,void (*titi)(int ,int ,int,int,
   /*   break; */
   /* default: */
   /*   fprintf(stdout,"option not recognized %d\n",opt[0]); */
-  /*   exit(0); */
+  /*   exit(EXIT_FAILURE); */
   /* } */
   /* mesh->info.noswap = opt[2]; */
   /* mesh->info.nomove = opt[4]; */
@@ -440,7 +446,7 @@ int MMG2D_mmg2dmesh(MMG5_pMesh mesh,MMG5_pSol sol,void (*titi)(int ,int ,int,int
     sol->np = 0;
   } else   if ( sol->np && (sol->np != mesh->np) ) {
     fprintf(stdout,"  ## WARNING: WRONG SOLUTION NUMBER : %d != %d\n",sol->np,mesh->np);
-    //exit(1);
+    //exit(EXIT_FAILURE);
   }
   chrono(OFF,&(ctim[1]));
   printim(ctim[1].gdif,stim);

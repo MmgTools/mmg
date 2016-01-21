@@ -55,12 +55,13 @@
 #define MMG2_LONMAX 1024
 #define _MMG5_BADKAL    0.2
 
-#define M_NUL      (1 << 6)
-#define M_BDRY     (1 << 1)
-#define M_SD       (1 << 5)
-#define M_CORNER   (1 << 4)
-#define M_REQUIRED (1 << 3)
-#define M_MOVE     (1 << 2)
+#define M_NOSURF   (1 << 0) /**< 1 Mark for the nosurf option */
+#define M_BDRY     (1 << 1) /**< 2 Boundary */
+#define M_MOVE     (1 << 2) /**< 4 Moved point */
+#define M_REQUIRED (1 << 3) /**< 8 Required entity */
+#define M_CORNER   (1 << 4) /**< 16 corner */
+#define M_SD       (1 << 5) /**< 32 interface between two domains */
+#define M_NUL      (1 << 6) /**< 64 vertex removed */
 
 #define _MMG2D_NPMAX   50000
 #define _MMG2D_NEDMAX  100000
@@ -89,18 +90,18 @@ void _MMG2_excfun(int sigid) {
   fprintf(stdout,"\n Unexpected error:");  fflush(stdout);
   switch(sigid) {
   case SIGABRT:
-    fprintf(stdout,"  Abnormal stop\n");  exit(1);
+    fprintf(stdout,"  Abnormal stop\n"); break;
   case SIGFPE:
-    fprintf(stdout,"  Floating-point exception\n"); exit(1);
+    fprintf(stdout,"  Floating-point exception\n"); break;
   case SIGILL:
-    fprintf(stdout,"  Illegal instruction\n"); exit(1);
+    fprintf(stdout,"  Illegal instruction\n"); break;
   case SIGSEGV:
-    fprintf(stdout,"  Segmentation fault\n");  exit(1);
+    fprintf(stdout,"  Segmentation fault\n"); break;
   case SIGTERM:
   case SIGINT:
-    fprintf(stdout,"  Program killed\n");  exit(1);
+    fprintf(stdout,"  Program killed\n"); break;
   }
-  exit(1);
+  exit(EXIT_FAILURE);
 }
 
 

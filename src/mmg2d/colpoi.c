@@ -592,7 +592,7 @@ int MMG2_colpoibdry(MMG5_pMesh mesh, MMG5_pSol sol,int iel,int iar,int ia,int ib
     printf("pt %d %d %d\n",pt->v[0],pt->v[1],pt->v[2]);
     printf("pt->ned %d %d %d\n",pt->edg[0],pt->edg[1],pt->edg[2]);
     MMG2D_saveMesh(mesh,"ttttt.mesh");
-    exit(0);
+    exit(EXIT_FAILURE);
   }
   assert(num);
   if(ddebug) printf("on suppr %d : %d %d\n",num,mesh->edge[num].a,mesh->edge[num].b);

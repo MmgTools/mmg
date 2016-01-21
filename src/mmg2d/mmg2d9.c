@@ -32,7 +32,7 @@ int optlen_iso_bar(MMG5_pMesh mesh,MMG5_pSol sol,double declic,int base);
 // si < 1 --> on ne reussira pas a bouger sans croiser!
 double MMG_maxdep(MMG5_pMesh mesh,MMG5_pSol sol) {
   printf("comment because of the merge needs\n");
-  exit(0);
+  exit(EXIT_FAILURE);
   /* MMG5_pTria pt; */
   /* MMG5_pPoint ppt; */
   /* Displ pd; */
@@ -64,7 +64,7 @@ double MMG_maxdep(MMG5_pMesh mesh,MMG5_pSol sol) {
   /* for (k=1; k<=mesh->nt; k++) { */
   /*   pt = &mesh->tria[k]; */
   /*   if ( !pt->v[0] )  continue; */
-  /*   //if(k==5) exit(0); */
+  /*   //if(k==5) exit(EXIT_FAILURE); */
   /*   //printf("triangle %d %d %d\n",pt->v[0],pt->v[1],pt->v[2]); */
   /*   mod = 0; */
   /*   for (i=0; i<3; i++) {   */
@@ -130,13 +130,13 @@ double MMG_maxdep(MMG5_pMesh mesh,MMG5_pSol sol) {
   /*  //printf("le triangle marche ?? %e\n",MMG2_quickarea(c[0],c[1],c[2]));      */
   /*  if(airenew > 0) continue;  */
   /*  printf("delta negatif on sait pas quoi faire!!!!!\n"); */
-  /*  exit(0); */
+  /*  exit(EXIT_FAILURE); */
   /*     }           */
   /*     delta = sqrt(delta); */
 
   /*     lambda1 = (-b - delta)/(2.*a); */
   /*     lambda2 = (-b + delta)/(2.*a); */
-  /*     //exit(0);  */
+  /*     //exit(EXIT_FAILURE);  */
   /*     lambda = 0.5*(lambda1+lambda2);  */
   /*     // printf("lambdamilieu %e -- %e et %e\n",lambda,1+lambda*b+lambda*lambda*a,1+b+a); */
   /*     if((ce+lambda*b+lambda*lambda*a) > 0) { */
@@ -168,10 +168,10 @@ double MMG_maxdep(MMG5_pMesh mesh,MMG5_pSol sol) {
   /*   //       }      */
   /*   //   //printf("le triangle marche ?? %e\n",MMG2_quickarea(c[0],c[1],c[2]));   */
   /*   //   //printf("  on trouve lambda %e %e ---- lambdamax %e\n",lambda1,lambda2,lambdamax);  */
-  /*   //   //exit(0);   */
+  /*   //   //exit(EXIT_FAILURE);   */
   /*   // } */
   /*   lambdamax = (lambdamax < (lambda)) ? lambdamax:(lambda);     */
-  /*   if(lambdamax<0) {printf("heu lambdamax < 0!!! %e tr %d -- dep %e\n",lambdamax,k,mod);exit(1);   } */
+  /*   if(lambdamax<0) {printf("heu lambdamax < 0!!! %e tr %d -- dep %e\n",lambdamax,k,mod);exit(EXIT_FAILURE);   } */
   /*   //printf("  on trouve lambda %e %e ---- lambdamax %e\n",lambda1,lambda2,lambdamax);  */
   /* }   */
   /* printf("%e < dep or dep < %e\n",lambdamin,lambdamax); */
@@ -181,7 +181,7 @@ double MMG_maxdep(MMG5_pMesh mesh,MMG5_pSol sol) {
 /* dichotomy: check if nodes can move */
 int MMG_dikomv(MMG5_pMesh mesh,MMG5_pSol sol,short t) {
   printf("comment because of the merge needs\n");
-  exit(0);
+  exit(EXIT_FAILURE);
   /*  MMG5_pTria     pt; */
 /*   MMG5_pPoint    ppt; */
 /*   Displ     pd; */
@@ -243,7 +243,7 @@ int MMG_dikomv(MMG5_pMesh mesh,MMG5_pSol sol,short t) {
 /* check if displacement ok */
 int MMG_chkmov(MMG5_pMesh mesh,char level) {
   printf("comment because of the merge needs\n");
-  exit(0);
+  exit(EXIT_FAILURE);
   /* MMG5_pTria      pt; */
   /* MMG5_pPoint     ppt; */
   /* // Displ      pd; */
@@ -281,7 +281,7 @@ int MMG_chkmov(MMG5_pMesh mesh,char level) {
 /*rigid bodies moving*/
 int MMG2_mmg2d9(MMG5_pMesh mesh,MMG5_pSol sol) {
   printf("comment because of the merge needs\n");
-  exit(0);
+  exit(EXIT_FAILURE);
   /* MMG5_pPoint   ppt;    */
   /* MMG5_pTria    pt; */
   /* Displ    pd; */

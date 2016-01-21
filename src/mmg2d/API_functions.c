@@ -108,7 +108,7 @@ void MMG2D_Init_parameters(MMG5_pMesh mesh) {
   mesh->info.nosurf   =  0;  /* [0/1]    ,avoid/allow surface modifications */
 
   mesh->info.renum    = 0;   /* [0]    , Turn on/off the renumbering using SCOTCH; */
-  mesh->info.nreg    = 0;
+  mesh->info.nreg     = 0;
   /* default values for doubles */
   mesh->info.ls       = 0.0;      /* level set value */
   mesh->info.hgrad    = 1.3;      /* control gradation; */
@@ -199,6 +199,9 @@ int MMG2D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
     break;
   case MMG2D_IPARAM_nomove :
     mesh->info.nomove   = val;
+    break;
+  case MMG2D_IPARAM_nosurf :
+    mesh->info.nosurf   = val;
     break;
   default :
     fprintf(stdout,"  ## Error: unknown type of parameter\n");

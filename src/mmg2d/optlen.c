@@ -255,7 +255,7 @@ int optlen_iso(MMG5_pMesh mesh,MMG5_pSol sol,double declic,int base) {
           if(MMG_caltet(mesh,sol,iel) > pt1->qual) {
           printf("oups %d -- cal of %d ( %d ) %e > %e\n",nb,iel,ipa,pt1->qual,MMG_caltet(mesh,sol,iel));
 
-          //exit(0);
+          //exit(EXIT_FAILURE);
           }
           else {
           //printf("%d -- cal of %d ( %d ) %e > %e\n",nb,iel,ipa,pt1->qual,MMG_caltet(mesh,sol,iel));
@@ -416,7 +416,7 @@ int optlen_iso_bar(MMG5_pMesh mesh,MMG5_pSol sol,double declic,int base) {
           if(MMG_caltet(mesh,sol,iel) > pt1->qual) {
           printf("oups %d -- cal of %d ( %d ) %e > %e\n",nb,iel,ipa,pt1->qual,MMG_caltet(mesh,sol,iel));
 
-          //exit(0);
+          //exit(EXIT_FAILURE);
           }
           else {
           //printf("%d -- cal of %d ( %d ) %e > %e\n",nb,iel,ipa,pt1->qual,MMG_caltet(mesh,sol,iel));

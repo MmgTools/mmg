@@ -59,7 +59,7 @@ int MMG2_bdryenforcement(MMG5_pMesh mesh,MMG5_pSol sol) {
     lon = MMG2_boulep(mesh,kdep,j,list);
     if(lon>1000) {
       printf("TOO MANY TRIANGLES (%d) AROUND THE VERTEX %d\n",lon,ped->a);
-      exit(1);
+      exit(EXIT_FAILURE);
     } else if(!lon) {
       printf("PROBLEM WITH POINT %d of TRIANGLE %d\n",mesh->tria[kdep].v[j],kdep);
       MMG2D_saveMesh(mesh,"titi.mesh");
@@ -106,20 +106,20 @@ int MMG2_bdryenforcement(MMG5_pMesh mesh,MMG5_pSol sol) {
       }
       if(!(lon<0 || lon==4)) {
         if(mesh->info.ddebug) printf("a-t-on un pbs ???? edge %d %d -- %d\n",ia,ib,lon);
-        exit(0);
+        exit(EXIT_FAILURE);
       }
       /*edge exist*/
       if(lon==4) {
         if(mesh->info.ddebug) printf("edge existante\n");
-        //exit(1);
+        //exit(EXIT_FAILURE);
       }
       if(lon>1000) {
         printf("TOO MANY TRIANGLES (%d)\n",lon);
-        exit(1);
+        exit(EXIT_FAILURE);
       }
       if(lon<2) {
         if(mesh->info.ddebug) printf("few edges... %d\n",lon);
-        //exit(1);
+        //exit(EXIT_FAILURE);
       }
       lon = -lon;
       ilon = lon;
@@ -197,7 +197,7 @@ int MMG2_bdryenforcement(MMG5_pMesh mesh,MMG5_pSol sol) {
         }
         if(ddebug) {
           printf("ici on stoppe\n");
-          exit(0);
+          exit(EXIT_FAILURE);
         }
 
         //assert(i<3);

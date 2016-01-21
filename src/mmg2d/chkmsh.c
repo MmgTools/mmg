@@ -48,7 +48,7 @@ int _MMG5_mmg2dChkmsh(MMG5_pMesh mesh, int severe,int base) {
         printf("k %d: %d %d %d \n",k,pt1->v[0],pt1->v[1],pt1->v[2]);
         printf("adj of %d: %d %d %d \n",
                k,adja[0]/3,adja[1]/3,adja[2]/3);
-        exit(1);
+        exit(EXIT_FAILURE);
       }
       pt2 = &mesh->tria[adj];
       if ( !M_EOK(pt2) ) {
@@ -58,7 +58,7 @@ int _MMG5_mmg2dChkmsh(MMG5_pMesh mesh, int severe,int base) {
         printf("sommets adj %d: %d %d %d \n",
                adj,pt2->v[0],pt2->v[1],pt2->v[2]);
         printf("numeros adj %d: %d %d %d\n",k,adja[0]/3,adja[1]/3,adja[2]/3);
-        exit(1);
+        exit(EXIT_FAILURE);
       }
       iadr  = (adj-1)*3 + 1;
       adja1 = &mesh->adja[iadr];
@@ -73,7 +73,7 @@ int _MMG5_mmg2dChkmsh(MMG5_pMesh mesh, int severe,int base) {
         printf("adj(%d): %d %d %d %d\n",
                adj,adja1[0]/3,adja1[1]/3,adja1[2]/3,adja1[3]/3);
         MMG2D_saveMesh(mesh,"chk.mesh");
-        assert(0);exit(1);
+        assert(0);exit(EXIT_FAILURE);
       }
 
       /*chk edge*/
@@ -85,7 +85,7 @@ int _MMG5_mmg2dChkmsh(MMG5_pMesh mesh, int severe,int base) {
           printf("tr k %d: %d %d %d \n",k,pt1->v[0],pt1->v[1],pt1->v[2]);
           printf("edge %d : %d %d\n",i,ped->a,ped->b);
           assert(0);
-          exit(1);
+          exit(EXIT_FAILURE);
         }
       }
 
@@ -112,7 +112,7 @@ int _MMG5_mmg2dChkmsh(MMG5_pMesh mesh, int severe,int base) {
       if ( !M_VOK(ppt) ) {
       fprintf(stdout,"  6. Unused vertex %d  %d\n",k,ip);
       printf("%d %d %d\n",pt1->v[0],pt1->v[1],pt1->v[2]);
-      exit(1);
+      exit(EXIT_FAILURE);
       }
       lon = boulep(mesh,k,i,list);
       for (l=1; l<=lon; l++) {
@@ -121,7 +121,7 @@ int _MMG5_mmg2dChkmsh(MMG5_pMesh mesh, int severe,int base) {
       pt2 = &mesh->tria[kk];
       if ( pt2->v[nk] != ip ) {
       fprintf(stdout,"  5. Wrong ball %d, %d\n",ip,pt2->v[nk]);
-      exit(1);
+      exit(EXIT_FAILURE);
       }
       }
       if ( lon < 1 )  continue;
@@ -137,7 +137,7 @@ int _MMG5_mmg2dChkmsh(MMG5_pMesh mesh, int severe,int base) {
       }
       if ( len != lon ) {
       fprintf(stdout,"  7. Incorrect ball %d: %d %d\n",pt1->v[i],lon,len);
-      exit(1);
+      exit(EXIT_FAILURE);
       }
       } */
   }

@@ -40,15 +40,16 @@ static void usage(char *name) {
   /*
 
     fprintf(stdout,"-optim       mesh optimization\n");
-    fprintf(stdout,"-nosurf      no surfacic modifications\n");
   */
+  fprintf(stdout,"-nosurf       no surfacic modifications\n");
+
   fprintf(stdout,"-noinsert     no insertion/suppression point\n");
   fprintf(stdout,"-noswap       no edge flipping\n");
   fprintf(stdout,"-nomove       no point relocation\n");
   fprintf(stdout,"-bucket val   Specify the size of bucket per dimension \n");
   fprintf(stdout,"\n\n");
 
-  exit(1);
+  exit(EXIT_FAILURE);
 }
 
 /**

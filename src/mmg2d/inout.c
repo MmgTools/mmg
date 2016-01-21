@@ -198,7 +198,7 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,char *filename) {
         mesh->dim = bdim;
         if(bdim!=2) {
           fprintf(stdout,"BAD SOL DIMENSION : %d\n",mesh->dim);
-          exit(0);
+          exit(EXIT_FAILURE);
           return(1);
         }
         continue;
@@ -578,7 +578,7 @@ int MMG2D_loadSol(MMG5_pMesh mesh,MMG5_pSol sol,char *filename,int msh) {
         dim = bdim;
         if(bdim!=2) {
           fprintf(stdout,"BAD SOL DIMENSION : %d\n",bdim);
-          exit(0);
+          exit(EXIT_FAILURE);
           return(-1);
         }
         continue;
@@ -876,7 +876,10 @@ int MMG2D_saveMesh(MMG5_pMesh mesh,char *filename) {
   ne = 0;
   for (k=1; k<=mesh->np; k++) {
     ppt = &mesh->point[k];
-    if ( M_VOK(ppt) && (ppt->tag & M_REQUIRED))  ne++;
+    if ( M_VOK(ppt) ) {
+      if ( mesh->info.nosurf && (ppt->tag & M_NOSURF) ) continue;
+      if (ppt->tag & M_REQUIRED) ne++;
+    }
   }
   if ( ne ) {
     if(!bin) {
@@ -893,11 +896,15 @@ int MMG2D_saveMesh(MMG5_pMesh mesh,char *filename) {
     }
     for (k=1; k<=mesh->np; k++) {
       ppt = &mesh->point[k];
-      if ( M_VOK(ppt) && (ppt->tag & M_REQUIRED) && (ppt->tag & M_BDRY)) {
-        if(!bin)
-          fprintf(inm,"%d\n",ppt->tmp);
-        else
-          fwrite(&ppt->tmp,sw,1,inm);
+      if ( M_VOK(ppt) ) {
+        if ( mesh->info.nosurf && ( ppt->tag & M_NOSURF )) continue;
+
+        if ((ppt->tag & M_REQUIRED) && ( (ppt->tag & M_BDRY) || (ppt->tag & M_SD) ) ) {
+          if(!bin)
+            fprintf(inm,"%d\n",ppt->tmp);
+          else
+            fwrite(&ppt->tmp,sw,1,inm);
+        }
       }
     }
   }
@@ -1141,7 +1148,7 @@ int MMG2D_saveMesh(MMG5_pMesh mesh,char *filename) {
 
 int MMG2_loadVect(MMG5_pMesh mesh,char *filename) {
   printf("comment for merge of the data structure\n");
-  exit(0);
+  exit(EXIT_FAILURE);
   /* FILE       *inm; */
   /* Displ       pd; */
   /* float       fsol; */
@@ -1218,7 +1225,7 @@ int MMG2_loadVect(MMG5_pMesh mesh,char *filename) {
   /*  dim = bdim */
   /*  if(bdim!=2) { */
   /*    fprintf(stdout,"BAD SOL DIMENSION : %d\n",dim); */
-  /*    exit(0); */
+  /*    exit(EXIT_FAILURE); */
   /*    return(0); */
   /*  } */
   /*  continue; */
@@ -1491,7 +1498,7 @@ int MMG2D_saveSol(MMG5_pMesh mesh,MMG5_pSol sol,char *filename) {
 
 int MMG2D_saveVect(MMG5_pMesh mesh,MMG5_pSol sol,char *filename,double lambda) {
   printf("comment for merge of the data structure\n");
-  exit(0);
+  exit(EXIT_FAILURE);
   /* FILE        *inm,*f,*inm2; */
   /* Displ        pd; */
   /* MMG5_pPoint       ppt; */
