@@ -46,7 +46,7 @@
 #define _MMG5_RETURN_AND_PACK(mesh,met,val)do                     \
   {                                                               \
     if ( !_MMGS_packMesh(mesh,met) ) return(MMG5_STRONGFAILURE);  \
-    return(val);                                                  \
+    _LIBMMG5_RETURN(val);                                         \
   }while(0)
 
 /** Free adja, xtetra and xpoint tables */
@@ -279,7 +279,7 @@ int MMGS_mmgslib(MMG5_pMesh mesh,MMG5_pSol met)
   }
   else if ( met->size!=1 && met->size!=6 ) {
     fprintf(stdout,"  ## ERROR: WRONG DATA TYPE.\n");
-    return(MMG5_STRONGFAILURE);
+    _LIBMMG5_RETURN(MMG5_STRONGFAILURE);
   }
 
   chrono(OFF,&(ctim[1]));
@@ -296,11 +296,11 @@ int MMGS_mmgslib(MMG5_pMesh mesh,MMG5_pSol met)
     fprintf(stdout,"\n  -- PHASE 1 : ANALYSIS\n");
   }
 
-  if ( !_MMG5_scaleMesh(mesh,met) ) return(MMG5_STRONGFAILURE);
+  if ( !_MMG5_scaleMesh(mesh,met) ) _LIBMMG5_RETURN(MMG5_STRONGFAILURE);
 
   /* mesh analysis */
   if ( !_MMGS_analys(mesh) ) {
-    if ( !_MMG5_unscaleMesh(mesh,met) )  return(MMG5_STRONGFAILURE);
+    if ( !_MMG5_unscaleMesh(mesh,met) )  _LIBMMG5_RETURN(MMG5_STRONGFAILURE);
     _MMG5_RETURN_AND_PACK(mesh,met,MMG5_LOWFAILURE);
   }
 
@@ -323,9 +323,9 @@ int MMGS_mmgslib(MMG5_pMesh mesh,MMG5_pSol met)
   if ( !_MMG5_mmgs1(mesh,met) ) {
     if ( (!mesh->adja) && !_MMGS_hashTria(mesh) ) {
       fprintf(stdout,"  ## Hashing problem. Invalid mesh.\n");
-      return(MMG5_STRONGFAILURE);
+      _LIBMMG5_RETURN(MMG5_STRONGFAILURE);
     }
-    if ( !_MMG5_unscaleMesh(mesh,met) )  return(MMG5_STRONGFAILURE);
+    if ( !_MMG5_unscaleMesh(mesh,met) )  _LIBMMG5_RETURN(MMG5_STRONGFAILURE);
     _MMG5_RETURN_AND_PACK(mesh,met,MMG5_LOWFAILURE);
   }
 
@@ -344,14 +344,14 @@ int MMGS_mmgslib(MMG5_pMesh mesh,MMG5_pSol met)
   chrono(ON,&(ctim[1]));
   if ( mesh->info.imprim )  fprintf(stdout,"\n  -- MESH PACKED UP\n");
 
-  if ( !_MMG5_unscaleMesh(mesh,met) )  return(MMG5_STRONGFAILURE);
+  if ( !_MMG5_unscaleMesh(mesh,met) )  _LIBMMG5_RETURN(MMG5_STRONGFAILURE);
 
-  if ( !_MMGS_packMesh(mesh,met) )     return(MMG5_STRONGFAILURE);
+  if ( !_MMGS_packMesh(mesh,met) )     _LIBMMG5_RETURN(MMG5_STRONGFAILURE);
   chrono(OFF,&(ctim[1]));
 
   chrono(OFF,&ctim[0]);
   printim(ctim[0].gdif,stim);
   if ( mesh->info.imprim )
     fprintf(stdout,"\n   MMGSLIB: ELAPSED TIME  %s\n",stim);
-  return(MMG5_SUCCESS);
+  _LIBMMG5_RETURN(MMG5_SUCCESS);
 }

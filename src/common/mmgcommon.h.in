@@ -120,6 +120,18 @@
 /* Domain refs in iso mode */
 #define MG_ISO    10
 
+#define _LIBMMG5_RETURN(val)do \
+{                              \
+  signal(SIGABRT,SIG_DFL);     \
+  signal(SIGFPE,SIG_DFL);      \
+  signal(SIGILL,SIG_DFL);      \
+  signal(SIGSEGV,SIG_DFL);     \
+  signal(SIGTERM,SIG_DFL);     \
+  signal(SIGINT,SIG_DFL);      \
+                               \
+  return(val);                 \
+}while(0)
+
 /* Macros for memory management */
 /** Check if used memory overflow maximal authorized memory.
     Execute the command law if lack of memory. */
@@ -284,14 +296,14 @@ void _MMG5_excfun(int sigid) {
   case SIGABRT:
     fprintf(stdout,"  *** potential lack of memory.\n");  break;
   case SIGFPE:
-    fprintf(stdout,"  Floating-point exception\n"); break;
+    fprintf(stdout,"  *** Floating-point exception\n"); break;
   case SIGILL:
-    fprintf(stdout,"  Illegal instruction\n"); break;
+    fprintf(stdout,"  *** Illegal instruction\n"); break;
   case SIGSEGV:
-    fprintf(stdout,"  Segmentation fault\n");  break;
+    fprintf(stdout,"  *** Segmentation fault\n");  break;
   case SIGTERM:
   case SIGINT:
-    fprintf(stdout,"  Program killed\n");  break;
+    fprintf(stdout,"  *** Program killed\n");  break;
   }
   exit(EXIT_FAILURE);
 }

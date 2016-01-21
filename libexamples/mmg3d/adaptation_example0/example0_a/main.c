@@ -120,7 +120,6 @@ int main(int argc,char *argv[]) {
   } else if ( ier == MMG5_LOWFAILURE )
     fprintf(stdout,"BAD ENDING OF MMG3DLIB\n");
 
-
   /** ------------------------------ STEP III -------------------------- */
   /** get results */
   /** Two solutions: just use the MMG3D_saveMesh/MMG3D_saveSol functions

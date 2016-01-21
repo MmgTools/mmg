@@ -380,13 +380,6 @@ int main(int argc,char *argv[]) {
   char          stim[32];
 
   /* interrupts */
-  signal(SIGABRT,_MMG2_excfun);
-  signal(SIGFPE,_MMG2_excfun);
-  signal(SIGILL,_MMG2_excfun);
-  signal(SIGSEGV,_MMG2_excfun);
-  signal(SIGTERM,_MMG2_excfun);
-  signal(SIGINT,_MMG2_excfun);
-
   atexit(endcod);
 
   _MMG2D_Set_commonFunc();

@@ -71,16 +71,11 @@ int main(int argc,char *argv[]) {
 
   _MMG3D_Set_commonFunc();
 
-  signal(SIGABRT,_MMG5_excfun);
-  signal(SIGFPE,_MMG5_excfun);
-  signal(SIGILL,_MMG5_excfun);
-  signal(SIGSEGV,_MMG5_excfun);
-  signal(SIGTERM,_MMG5_excfun);
-  signal(SIGINT,_MMG5_excfun);
   atexit(_MMG5_endcod);
 
   tminit(MMG5_ctim,TIMEMAX);
   chrono(ON,&MMG5_ctim[0]);
+
 
   /* assign default values */
   mesh = NULL;
