@@ -177,7 +177,7 @@ IF ( LIBMMG3D_STATIC OR LIBMMG3D_SHARED )
     ${MMG3D_INCLUDE}/chrono.h
     ) 
   # Install header files in /usr/local or equivalent
-  #INSTALL(FILES ${mmg3d_headers} DESTINATION include/mmg/mmg3d)
+  INSTALL(FILES ${mmg3d_headers} DESTINATION include/mmg/mmg3d)
 
   ADD_CUSTOM_COMMAND(OUTPUT ${MMG3D_INCLUDE}/libmmgcommonf.h
     COMMAND ${CMAKE_COMMAND} -E copy ${COMMON_SOURCE_DIR}/libmmgcommonf.h ${MMG3D_INCLUDE}/libmmgcommonf.h
