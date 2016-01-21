@@ -343,7 +343,9 @@ int MMGS_mmgslib(MMG5_pMesh mesh,MMG5_pSol met)
 
   chrono(ON,&(ctim[1]));
   if ( mesh->info.imprim )  fprintf(stdout,"\n  -- MESH PACKED UP\n");
+
   if ( !_MMG5_unscaleMesh(mesh,met) )  return(MMG5_STRONGFAILURE);
+
   if ( !_MMGS_packMesh(mesh,met) )     return(MMG5_STRONGFAILURE);
   chrono(OFF,&(ctim[1]));
 
