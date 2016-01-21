@@ -240,8 +240,8 @@ char _MMG5_chkedg(MMG5_pMesh mesh,MMG5_Tria *pt,char ori) {
   MMG5_pPoint   p[3];
   MMG5_xPoint  *pxp;
   double   n[3][3],t[3][3],nt[3],*n1,*n2,t1[3],t2[3];
-  double   ps,ps2,ux,uy,uz,ll,il,alpha,dis,hma2,hausd;
-  int      ia,ib,ic;
+  double   ps,ps2,ux,uy,uz,ll,il,alpha,dis,hma2,hausd,hmax;
+  int      ia,ib,ic,l,isloc;
   char     i,i1,i2;
   MMG5_pPar     par;
 
@@ -252,7 +252,6 @@ char _MMG5_chkedg(MMG5_pMesh mesh,MMG5_Tria *pt,char ori) {
   p[1] = &mesh->point[ib];
   p[2] = &mesh->point[ic];
   pt->flag = 0;
-  hma2 = _MMG5_LLONG*_MMG5_LLONG*mesh->info.hmax*mesh->info.hmax;
 
   /* for (i=0; i<3; i++) { */
   /*   for (i1=0; i1<3; i1++)  */
@@ -302,18 +301,32 @@ char _MMG5_chkedg(MMG5_pMesh mesh,MMG5_Tria *pt,char ori) {
     }
   }
 
-  /* local hausdorff for triangle */
-  hausd = mesh->info.hausd;
-  for (i=0; i<mesh->info.npar; i++) {
-    par = &mesh->info.par[i];
-    if ( (par->elt == MMG5_Triangle) && (pt->ref == par->ref ) )
-      hausd = par->hausd;
-  }
-
   /* analyze edges */
   for (i=0; i<3; i++) {
     i1 = _MMG5_inxt2[i];
     i2 = _MMG5_iprv2[i];
+
+    /* local parameters */
+    hmax  = mesh->info.hmax;
+    hausd = mesh->info.hausd;
+    isloc = 0;
+    for (l=0; l<mesh->info.npar; l++) {
+      par = &mesh->info.par[l];
+      if ( /*((par->elt == MMG5_Vertex) &&
+            ( (p[i1]->ref == par->ref ) || (p[i2]->ref == par->ref) ))
+            ||*/ ( (par->elt == MMG5_Triangle) && (pt->ref == par->ref ) ) ) {
+        if ( !isloc ) {
+          hmax  = par->hmax;
+          hausd = par->hausd;
+          isloc = 1;
+        }
+        else {
+          hausd = MG_MIN(par->hausd,hausd);
+          hmax  = MG_MIN(par->hmax,hmax);
+        }
+      }
+    }
+    hma2 = _MMG5_LLONG*_MMG5_LLONG*hmax*hmax;
 
     /* check length */
     ux = p[i2]->c[0] - p[i1]->c[0];
@@ -671,26 +684,30 @@ static int _MMG5_coltet(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
   MMG5_pTetra     pt;
   MMG5_pxTetra    pxt;
   MMG5_pPoint     p0,p1;
+  MMG5_pPar       par;
   double     ll,ux,uy,uz,hmi2;
-  int        k,nc,list[MMG3D_LMAX+2],ilist,base,nnm;
+  int        k,nc,list[MMG3D_LMAX+2],ilist,base,nnm,l,isloc;
   char       i,j,tag,ip,iq,isnm;
   int        ier;
 
   nc = nnm = 0;
-  hmi2 = mesh->info.hmin*mesh->info.hmin;
 
-  /* init of point flags, otherwise it can be uninitialized */
-  for (k=1; k<=mesh->np; k++)
-    mesh->point[k].flag = 0;
+  /* init point flags */
+  for (k=1; k<=mesh->np; k++) {
+    p0 = &mesh->point[k];
+    p0->flag = 0;
+  }
 
   for (k=1; k<=mesh->ne; k++) {
     base = ++mesh->base;
     pt = &mesh->tetra[k];
     if ( !MG_EOK(pt) || (pt->tag & MG_REQ) )   continue;
 
-    pxt = pt->xt ? &mesh->xtetra[pt->xt] : 0;
+    pxt = pt->xt?  &mesh->xtetra[pt->xt] : 0;
+
     for (i=0; i<4; i++) {
       ier = 0;
+
       for (j=0; j<3; j++) {
         if ( pt->xt && (pxt->tag[_MMG5_iarf[i][j]] & MG_REQ) )  continue;
         ip = _MMG5_idir[i][_MMG5_inxt2[j]];
@@ -707,6 +724,25 @@ static int _MMG5_coltet(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
           uy = p1->c[1] - p0->c[1];
           uz = p1->c[2] - p0->c[2];
           ll = ux*ux + uy*uy + uz*uz;
+
+          /* local parameters*/
+          hmi2  = mesh->info.hmin;
+          isloc = 0;
+          for (l=0; l<mesh->info.npar; l++) {
+            par = &mesh->info.par[l];
+            if ( /*((par->elt == MMG5_Vertex) &&
+                  ( (p0->ref == par->ref ) || (p1->ref == par->ref) ))
+                  ||*/ (pt->xt && (par->elt == MMG5_Triangle) && (pxt->ref[i] == par->ref) ) ) {
+              if ( !isloc ) {
+                hmi2  = par->hmin;
+                isloc = 1;
+              }
+              else {
+                hmi2  = MG_MAX(par->hmin,hmi2);
+              }
+            }
+          }
+          hmi2 = hmi2*hmi2;
           if ( ll > hmi2 )  continue;
         }
         else if ( typchk == 2 ) {

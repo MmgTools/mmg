@@ -39,9 +39,10 @@
 int chkswp(MMG5_pMesh mesh,MMG5_pSol met,int k,int i,char typchk) {
   MMG5_pTria    pt,pt0,pt1;
   MMG5_pPoint   p[3],q;
-  double   np[3][3],nq[3],*nr1,*nr2,nt[3],ps,ps2,*n1,*n2,dd,c1[3],c2[3];
+  MMG5_pPar      par;
+  double   np[3][3],nq[3],*nr1,*nr2,nt[3],ps,ps2,*n1,*n2,dd,c1[3],c2[3],hausd;
   double   cosn1,cosn2,calnat,calchg,cal1,cal2,cosnat,coschg,ux,uy,uz,ll,loni,lona;
-  int     *adja,j,kk,ip0,ip1,ip2,iq;
+  int     *adja,j,kk,l,ip0,ip1,ip2,iq,isloc;
   char     ii,i1,i2,jj;
 
   pt0 = &mesh->tria[0];
@@ -69,6 +70,27 @@ int chkswp(MMG5_pMesh mesh,MMG5_pSol met,int k,int i,char typchk) {
 
   iq = pt1->v[ii];
   q  = &mesh->point[iq];
+
+  /* local hausdorff for triangle */
+  hausd = mesh->info.hausd;
+  isloc = 0;
+  for (l=0; l<mesh->info.npar; l++) {
+    par = &mesh->info.par[l];
+    if ( ((par->elt == MMG5_Triangle) &&
+          ( (pt->ref == par->ref) || (pt1->ref == par->ref) )) /* ||
+         ( (par->elt == MMG5_Vertex) &&
+         ((p[1]->ref == par->ref ) || (p[2]->ref == par->ref)) ) */ ) {
+      if ( !isloc ) {
+        hausd = par->hausd;
+        isloc = 1;
+      }
+      else {
+        // take the minimum value between the two local hausdorff number asked
+        // by the user.
+        hausd = MG_MIN(hausd,par->hausd);
+      }
+    }
+  }
 
   /* check length */
   if ( typchk == 2 && met->m ) {
@@ -203,7 +225,7 @@ int chkswp(MMG5_pMesh mesh,MMG5_pSol met,int k,int i,char typchk) {
   coschg = coschg < _MMG5_EPS ? 0.0 : coschg;
 
   /* swap if Hausdorff contribution of the swapped edge is less than existing one */
-  if ( coschg > mesh->info.hausd*mesh->info.hausd )  return(0);
+  if ( coschg > hausd*hausd )  return(0);
 
   if ( typchk == 2 && met->m ) {
     /* initial quality */
@@ -256,7 +278,7 @@ int chkswp(MMG5_pMesh mesh,MMG5_pSol met,int k,int i,char typchk) {
   if ( calchg < _MMG5_EPS && calnat >= calchg ) return(0);
 
   /* else we can degrade the quality to improve the surface approx. */
-  if ( coschg < mesh->info.hausd*mesh->info.hausd && cosnat > mesh->info.hausd*mesh->info.hausd )  return(1);
+  if ( coschg < hausd*hausd && cosnat > hausd*hausd )  return(1);
 
   return(calchg > 1.01 * calnat);
 }

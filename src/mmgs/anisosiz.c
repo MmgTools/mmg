@@ -50,15 +50,32 @@
 static int _MMG5_defmetsin(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
   MMG5_pTria         pt;
   MMG5_pPoint        p0;
+  MMG5_pPar          par;
   double             *m,n[3],isqhmin,isqhmax,b0[3],b1[3],ps1,tau[3];
   double             ntau2,gammasec[3];
-  double             c[3],kappa,maxkappa,alpha;
-  int                ilist,list[_MMG5_LMAX+2],k,iel,idp;
+  double             c[3],kappa,maxkappa,alpha,hausd,hausd_v;
+  int                ilist,list[_MMG5_LMAX+2],k,i,iel,idp,isloc,init_s;
   unsigned char      i0,i1,i2;
 
   pt  = &mesh->tria[it];
   idp = pt->v[ip];
   p0  = &mesh->point[idp];
+
+  /* local parameters at vertex: useless for now because new points are created
+   * without reference (inside the domain) */
+  hausd_v = mesh->info.hausd;
+  isqhmin = mesh->info.hmin;
+  isqhmax = mesh->info.hmax;
+  isloc     = 0;
+  /* for (i=0; i<mesh->info.npar; i++) { */
+  /*   par = &mesh->info.par[i]; */
+  /*   if ( (par->elt == MMG5_Vertex) && (p0->ref == par->ref ) ) { */
+  /*     hausd_v = par->hausd; */
+  /*     isqhmin = par->hmin; */
+  /*     isqhmax = par->hmax; */
+  /*     isloc   = 1; */
+  /*   } */
+  /* } */
 
   ilist = boulet(mesh,it,ip,list);
   if ( !ilist ) {
@@ -67,8 +84,6 @@ static int _MMG5_defmetsin(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
     return(0);
   }
 
-  isqhmin  = 1.0 / (mesh->info.hmin*mesh->info.hmin);
-  isqhmax  = 1.0 / (mesh->info.hmax*mesh->info.hmax);
   maxkappa = 0.0;
   for (k=0; k<ilist; k++) {
     iel = list[k] / 3;
@@ -105,9 +120,39 @@ static int _MMG5_defmetsin(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
     c[2] = gammasec[2] - ps1*tau[2]*ntau2;
 
     kappa = ntau2 * sqrt(c[0]*c[0] + c[1]*c[1] + c[2]*c[2]);
-    maxkappa = MG_MAX(kappa,maxkappa);
+
+    /* local parameters for triangle */
+    hausd   = hausd_v;
+    init_s  = 0;
+    for (i=0; i<mesh->info.npar; i++) {
+      par = &mesh->info.par[i];
+      if ( (par->elt == MMG5_Triangle) && (pt->ref == par->ref ) ) {
+        if ( !isloc ) {
+          hausd   = par->hausd;
+          if ( !init_s ) {
+            isqhmin = par->hmin;
+            isqhmax = par->hmax;
+            init_s  = 1;
+          }
+          else {
+            isqhmin = MG_MAX(par->hmin,isqhmin);
+            isqhmax = MG_MIN(par->hmax,isqhmax);
+          }
+        }
+        else {
+          hausd   = MG_MIN(par->hausd,hausd);
+          isqhmin = MG_MAX(par->hmin,isqhmin);
+          isqhmax = MG_MIN(par->hmax,isqhmax);
+        }
+      }
+    }
+    maxkappa = MG_MAX(kappa/hausd,maxkappa);
   }
-  alpha = 1.0 / 8.0 * maxkappa / mesh->info.hausd;
+
+  isqhmin  = 1.0 / (isqhmin*isqhmin);
+  isqhmax  = 1.0 / (isqhmax*isqhmax);
+
+  alpha = 1.0 / 8.0 * maxkappa;
   alpha = MG_MIN(alpha,isqhmin);
   alpha = MG_MAX(alpha,isqhmax);
 
@@ -141,8 +186,9 @@ static int _MMG5_defmetrid(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
   MMG5_pTria     pt;
   MMG5_pPoint    p0,p1,p2;
   _MMG5_Bezier   b;
+  MMG5_pPar      par;
   int            k,iel,idp,ilist1,ilist2,ilist,*list,list1[_MMG5_LMAX+2];
-  int            list2[_MMG5_LMAX+2],iprid[2],ier;
+  int            list2[_MMG5_LMAX+2],iprid[2],ier,isloc;
   double         *m,isqhmin,isqhmax,*n1,*n2,*n,*t,trot[2],u[2];
   double         r[3][3],lispoi[3*_MMG5_LMAX+1],ux,uy,uz,det,bcu[3];
   double         detg,detd;
@@ -152,8 +198,28 @@ static int _MMG5_defmetrid(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
   idp = pt->v[ip];
   p0  = &mesh->point[idp];
 
-  isqhmin = 1.0 / (mesh->info.hmin*mesh->info.hmin);
-  isqhmax = 1.0 / (mesh->info.hmax*mesh->info.hmax);
+  /* local parameters */
+  isqhmin = mesh->info.hmin;
+  isqhmax = mesh->info.hmax;
+  isloc   = 0;
+  for (k=0; k<mesh->info.npar; k++) {
+    par = &mesh->info.par[k];
+    if ( /*( (par->elt == MMG5_Vertex) && (p0->ref == par->ref ) )
+           || */( (par->elt == MMG5_Triangle) && (pt->ref == par->ref ) ) ) {
+      if ( !isloc ) {
+        isqhmin = par->hmin;
+        isqhmax = par->hmax;
+        isloc = 1;
+      }
+      else {
+        isqhmin = MG_MAX(isqhmin,par->hmin);
+        isqhmax = MG_MIN(isqhmax,par->hmax);
+      }
+    }
+  }
+
+  isqhmin = 1.0 / (isqhmin*isqhmin);
+  isqhmax = 1.0 / (isqhmax*isqhmax);
 
   n1 = &mesh->xpoint[p0->xp].n1[0];
   n2 = &mesh->xpoint[p0->xp].n2[0];
@@ -296,25 +362,40 @@ static int _MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
   MMG5_pTria         pt;
   MMG5_pPoint        p0,p1;
   _MMG5_Bezier       b;
-  int                ilist,list[_MMG5_LMAX+2],k,iel,ipref[2],idp;
+  MMG5_pPar          par;
+  int                i,ilist,list[_MMG5_LMAX+2],k,iel,ipref[2],idp,isloc;
   double             *m,isqhmin,isqhmax,*n,r[3][3],lispoi[3*_MMG5_LMAX+1];
   double             ux,uy,uz,det2d,intm[3],c[3];
-  double             tAA[6],tAb[3];
+  double             tAA[6],tAb[3],hausd;
   unsigned char      i0,i1,i2;
 
   ipref[0] = ipref[1] = 0;
   pt  = &mesh->tria[it];
   idp = pt->v[ip];
   p0  = &mesh->point[idp];
+
+  /* local parameters at vertex: useless for now because new points are created
+   * without reference (inside the domain) */
+  hausd   = mesh->info.hausd;
+  isqhmin = mesh->info.hmin;
+  isqhmax = mesh->info.hmax;
+  isloc = 0;
+  /* for (i=0; i<mesh->info.npar; i++) { */
+  /*   par = &mesh->info.par[i]; */
+  /*   if ( (par->elt == MMG5_Vertex) && (p0->ref == par->ref ) ) { */
+  /*     hausd   = par->hausd; */
+  /*     isqhmin = par->hmin; */
+  /*     isqhmax = par->hmax; */
+  /*     isloc = 1; */
+  /*   } */
+  /* } */
+
   ilist = boulet(mesh,it,ip,list);
   if ( !ilist ) {
     printf("%s:%d:Error: unable to compute the ball af the point %d.\n",
            __FILE__,__LINE__, idp);
     return(0);
   }
-
-  isqhmin = 1.0 / (mesh->info.hmin*mesh->info.hmin);
-  isqhmax = 1.0 / (mesh->info.hmax*mesh->info.hmax);
 
   /* Computation of the rotation matrix T_p0 S -> [z = 0] */
   n  = &mesh->xpoint[p0->xp].n1[0];
@@ -399,6 +480,10 @@ static int _MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
   memset(tAA,0.0,6*sizeof(double));
   memset(tAb,0.0,3*sizeof(double));
 
+  hausd   = mesh->info.hausd;
+  isqhmin = mesh->info.hmin;
+  isqhmax = mesh->info.hmax;
+  isloc = 0;
   for (k=0; k<ilist; k++) {
     /* Approximation of the curvature in the normal section associated to tau : by assumption,
        p1 is either regular, either on a ridge (or a singularity), but p0p1 is not ridge*/
@@ -416,9 +501,33 @@ static int _MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
      * mid-point.
      */
     _MMG5_fillDefmetregSys(k,p0,i0,b,r,c,lispoi,tAA,tAb);
+
+    /* local parameters */
+    for (i=0; i<mesh->info.npar; i++) {
+      par = &mesh->info.par[i];
+      if ( (par->elt == MMG5_Triangle) && (pt->ref == par->ref ) ) {
+        if ( !isloc ) {
+          hausd = par->hausd;
+          isqhmin = par->hmin;
+          isqhmax = par->hmax;
+          isloc = 1;
+        }
+        else {
+          // take the wanted value between the two local parameters asked
+          // by the user.
+          hausd = MG_MIN(hausd,par->hausd);
+          isqhmin = MG_MAX(isqhmin,par->hmin);
+          isqhmax = MG_MIN(isqhmax,par->hmax);
+        }
+      }
+    }
   }
+
+  isqhmin = 1.0 / (isqhmin*isqhmin);
+  isqhmax = 1.0 / (isqhmax*isqhmax);
+
   return( _MMG5_solveDefmetrefSys(mesh,p0,ipref,r,c,tAA,tAb,m,
-                                  isqhmin,isqhmax,mesh->info.hausd) );
+                                  isqhmin,isqhmax,hausd) );
 }
 
 /**
@@ -436,15 +545,32 @@ static int _MMG5_defmetreg(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
   MMG5_pTria          pt;
   MMG5_pPoint         p0,p1;
   _MMG5_Bezier        b;
-  int                 ilist,list[_MMG5_LMAX+2],k,iel,idp;
+  MMG5_pPar           par;
+  int                 ilist,list[_MMG5_LMAX+2],k,iel,idp,isloc,i;
   double              *n,*m,r[3][3],ux,uy,uz,lispoi[3*_MMG5_LMAX+1];
   double              det2d,c[3],isqhmin,isqhmax;
-  double              tAA[6],tAb[3];
+  double              tAA[6],tAb[3],hausd;
   unsigned char       i0,i1;
 
   pt  = &mesh->tria[it];
   idp = pt->v[ip];
   p0  = &mesh->point[idp];
+
+  /* local parameters at vertex: useless for now because new points are created
+   * without reference (inside the domain) */
+  hausd   = mesh->info.hausd;
+  isqhmin = mesh->info.hmin;
+  isqhmax = mesh->info.hmax;
+  isloc     = 0;
+  /* for (i=0; i<mesh->info.npar; i++) { */
+  /*   par = &mesh->info.par[i]; */
+  /*   if ( (par->elt == MMG5_Vertex) && (p0->ref == par->ref ) ) { */
+  /*     hausd   = par->hausd; */
+  /*     isqhmin = par->hmin; */
+  /*     isqhmax = par->hmax; */
+  /*     isloc   = 1; */
+  /*   } */
+  /* } */
 
   ilist = boulet(mesh,it,ip,list);
   if ( !ilist ) {
@@ -452,9 +578,6 @@ static int _MMG5_defmetreg(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
            __FILE__,__LINE__, idp);
     return(0);
   }
-
-  isqhmin = 1.0 / (mesh->info.hmin*mesh->info.hmin);
-  isqhmax = 1.0 / (mesh->info.hmax*mesh->info.hmax);
 
   /* Computation of the rotation matrix T_p0 S -> [z = 0] */
   n  = &p0->n[0];
@@ -507,6 +630,10 @@ static int _MMG5_defmetreg(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
   memset(tAA,0.0,6*sizeof(double));
   memset(tAb,0.0,3*sizeof(double));
 
+  hausd   = mesh->info.hausd;
+  isqhmin = mesh->info.hmin;
+  isqhmax = mesh->info.hmax;
+  isloc = 0;
   for (k=0; k<ilist; k++) {
     /* Approximation of the curvature in the normal section associated to tau :
        by assumption, p1 is either regular, either on a ridge (or a
@@ -524,11 +651,34 @@ static int _MMG5_defmetreg(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
      * mid-point.
      */
     _MMG5_fillDefmetregSys(k,p0,i0,b,r,c,lispoi,tAA,tAb);
+
+    /* local parameters */
+    for (i=0; i<mesh->info.npar; i++) {
+      par = &mesh->info.par[i];
+      if ( (par->elt == MMG5_Triangle) && (pt->ref == par->ref ) ) {
+        if ( !isloc ) {
+          hausd = par->hausd;
+          isqhmin = par->hmin;
+          isqhmax = par->hmax;
+          isloc = 1;
+        }
+        else {
+          // take the minimum value between the two local parameters asked by
+          // the user.
+          hausd = MG_MIN(hausd,par->hausd);
+          isqhmin = MG_MAX(isqhmin,par->hmin);
+          isqhmax = MG_MIN(isqhmax,par->hmax);
+        }
+      }
+    }
   }
+
+  isqhmin = 1.0 / (isqhmin*isqhmin);
+  isqhmax = 1.0 / (isqhmax*isqhmax);
 
   /* 2. Solve tAA * tmp_m = tAb and fill m with tmp_m (after rotation) */
   return(_MMG5_solveDefmetregSys( mesh,r, c, tAA, tAb, m, isqhmin, isqhmax,
-                                  mesh->info.hausd));
+                                  hausd));
 }
 
 /**

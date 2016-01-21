@@ -89,6 +89,27 @@ FOREACH(EXEC ${LISTEXEC_MMG})
 
   ##############################################################################
   #####
+  #####         Check Local parameters
+  #####
+  ##############################################################################
+  #####
+  ADD_TEST(NAME HausdLoc_2Spheres${EXEC}
+    COMMAND ${EXEC} -hgrad 2
+    ${MMG_CI_TESTS}/HausdLoc_2Spheres/2spheres
+    ${MMG_CI_TESTS}/HausdLoc_2Spheres/2spheres.o.meshb
+    -hgrad 2
+    )
+  #####
+  ADD_TEST(NAME hminmaxLoc_2Spheres${EXEC}
+    COMMAND ${EXEC} -hgrad 2
+    ${MMG_CI_TESTS}/HausdLoc_2Spheres/2spheres
+    ${MMG_CI_TESTS}/HausdLoc_2Spheres/2spheres.o.meshb
+    -hgrad 2
+    )
+
+
+  ##############################################################################
+  #####
   #####         Check Precision
   #####
   ##############################################################################

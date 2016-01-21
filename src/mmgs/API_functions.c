@@ -1198,7 +1198,7 @@ int MMGS_Set_localParameter(MMG5_pMesh mesh,MMG5_pSol sol, int typ, int ref,
   switch ( typ ) {
     /* double parameters */
   case MMG5_Triangle :
-  case MMG5_Vertex :
+    //case MMG5_Vertex :
     for (k=0; k<mesh->info.npari; k++) {
       if ( mesh->info.par[k].ref == ref ) {
         mesh->info.par[k].hmin  = hmin;
@@ -1206,12 +1206,12 @@ int MMGS_Set_localParameter(MMG5_pMesh mesh,MMG5_pSol sol, int typ, int ref,
         mesh->info.par[k].hausd = hausd;
         if ( (mesh->info.imprim > 5) || mesh->info.ddebug ) {
           if ( typ == MMG5_Triangle ) {
-            fprintf(stdout,"  ## Warning: new hausdorff value for triangles");
-            fprintf(stdout," of ref %d\n",ref);
+            fprintf(stdout,"  ## Warning: new parameters (hausd, hmin and hmax)");
+            fprintf(stdout," for triangles of ref %d\n",ref);
           }
           else {
-            fprintf(stdout,"  ## Warning: new hausdorff value for vertices");
-            fprintf(stdout," of ref %d\n",ref);
+            fprintf(stdout,"  ## Warning: new new parameters (hausd, hmin and hmax)");
+            fprintf(stdout," for vertices of ref %d\n",ref);
           }
         }
         return(1);
@@ -1230,9 +1230,12 @@ int MMGS_Set_localParameter(MMG5_pMesh mesh,MMG5_pSol sol, int typ, int ref,
     mesh->info.npari++;
     break;
   default :
-    fprintf(stdout,"  ## Warning: you must apply local hausdorff number");
-    fprintf(stdout," on triangles (MMG5_Triangle or %d) or vertices"
-            " (MMG5_Vertex or %d).\n",MMG5_Triangle,MMG5_Vertex);
+    /* fprintf(stdout,"  ## Warning: you must apply your local parameters"); */
+    /* fprintf(stdout," on triangles (MMG5_Triangle or %d) or vertices" */
+    /*         " (MMG5_Vertex or %d).\n",MMG5_Triangle,MMG5_Vertex); */
+    fprintf(stdout,"  ## Warning: you must apply your local parameters");
+    fprintf(stdout," on triangles (MMG5_Triangle or %d).\n",MMG5_Triangle);
+
     fprintf(stdout,"  ## Ignored.\n");
     return(1);
   }

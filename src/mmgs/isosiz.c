@@ -45,8 +45,8 @@ int _MMGS_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pPoint   ppt,p[3];
   MMG5_pPar     par;
   double   n[3][3],t[3][3],nt[3],c1[3],c2[3],*n1,*n2,*t1,*t2;
-  double   ps,ps2,ux,uy,uz,ll,l,lm,dd,M1,M2;
-  int      k,j,ip1,ip2;
+  double   ps,ps2,ux,uy,uz,ll,l,lm,dd,M1,M2,hausd,hmin,hmax;
+  int      k,j,ip1,ip2,isloc;
   char     i,i1,i2;
 
   if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug )
@@ -101,6 +101,30 @@ int _MMGS_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
       i2  = _MMG5_iprv2[i];
       ip1 = pt->v[i1];
       ip2 = pt->v[i2];
+
+      /* local parameters */
+      hausd = mesh->info.hausd;
+      hmin  = mesh->info.hmin;
+      hmax  = mesh->info.hmax;
+      isloc = 0;
+      for (j=0; j<mesh->info.npar; j++) {
+        par = &mesh->info.par[j];
+        if ( /*( (par->elt == MMG5_Vertex) &&
+               ( (p[i1]->ref == par->ref ) || (p[i2]->ref == par->ref) ))
+               ||*/ ( (par->elt == MMG5_Triangle) && (pt->ref == par->ref ) ) ) {
+          if ( !isloc ) {
+            hausd = par->hausd;
+            hmin  = par->hmin;
+            hmax  = par->hmax;
+            isloc = 1;
+          }
+          else {
+            hausd = MG_MIN(par->hausd,hausd);
+            hmin  = MG_MAX(par->hmin,hmin);
+            hmax  = MG_MIN(par->hmax,hmax);
+          }
+        }
+      }
 
       ux = p[i2]->c[0] - p[i1]->c[0];
       uy = p[i2]->c[1] - p[i1]->c[1];
@@ -157,11 +181,11 @@ int _MMGS_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
         if ( M1 < _MMG5_EPSD )
           lm = MAXLEN;
         else {
-          lm = (16.0*ll*mesh->info.hausd) / (3.0*M1);
+          lm = (16.0*ll*hausd) / (3.0*M1);
           lm = sqrt(lm);
         }
-        met->m[ip1] = MG_MAX(mesh->info.hmin,MG_MIN(met->m[ip1],lm));
-        met->m[ip2] = MG_MAX(mesh->info.hmin,MG_MIN(met->m[ip2],lm));
+        met->m[ip1] = MG_MAX(hmin,MG_MIN(met->m[ip1],lm));
+        met->m[ip2] = MG_MAX(hmin,MG_MIN(met->m[ip2],lm));
       }
       else {
         n1 = n[i1];
@@ -192,11 +216,11 @@ int _MMGS_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
         if ( M1 < _MMG5_EPSD )
           lm = MAXLEN;
         else {
-          lm = (16.0*ll*mesh->info.hausd) / (3.0*M1);
+          lm = (16.0*ll*hausd) / (3.0*M1);
           lm = sqrt(lm);
         }
-        met->m[ip1] = MG_MAX(mesh->info.hmin,MG_MIN(met->m[ip1],lm));
-        met->m[ip2] = MG_MAX(mesh->info.hmin,MG_MIN(met->m[ip2],lm));
+        met->m[ip1] = MG_MAX(hmin,MG_MIN(met->m[ip1],lm));
+        met->m[ip2] = MG_MAX(hmin,MG_MIN(met->m[ip2],lm));
       }
     }
   }
@@ -204,14 +228,14 @@ int _MMGS_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
   /* take local parameters */
   for (j=0; j<mesh->info.npar; j++) {
     par = &mesh->info.par[j];
-    if ( par->elt == MS_Ver ) {
-      for (k=1; k<=mesh->np; k++) {
-        ppt = &mesh->point[k];
-        if ( !MG_VOK(ppt) || ppt->ref != par->ref )  continue;
-        met->m[k] = MG_MAX(par->hmin,MG_MIN(met->m[k],par->hmax));
-      }
-    }
-    else if ( par->elt == MS_Tri ) {
+    /* if ( par->elt == MMG5_Vertex ) { */
+    /*   for (k=1; k<=mesh->np; k++) { */
+    /*     ppt = &mesh->point[k]; */
+    /*     if ( !MG_VOK(ppt) || ppt->ref != par->ref )  continue; */
+    /*     met->m[k] = MG_MAX(par->hmin,MG_MIN(met->m[k],par->hmax)); */
+    /*   } */
+    /* } */
+    /* else */ if ( par->elt == MMG5_Triangle ) {
       for (k=1; k<=mesh->nt; k++) {
         pt = &mesh->tria[k];
         if ( !MG_EOK(pt) || pt->ref != par->ref )  continue;

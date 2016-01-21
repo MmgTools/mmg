@@ -198,9 +198,9 @@ int main(int argc,char *argv[]) {
      Then, you can not grow up the hausdorff value (resp. gradation) without
      resetting this metric (but you can decrease this value). */
 
-  if ( MMG3D_Set_localParameter(mmgMesh,mmgSol,MMG5_Triangle,36,0.01) != 1 )
+  if ( MMG3D_Set_localParameter(mmgMesh,mmgSol,MMG5_Triangle,36,0.00001,40.,0.01) != 1 )
     exit(EXIT_FAILURE);
-  if ( MMG3D_Set_localParameter(mmgMesh,mmgSol,MMG5_Triangle,38,1) != 1 )
+  if ( MMG3D_Set_localParameter(mmgMesh,mmgSol,MMG5_Triangle,38,0.00001,40.,1) != 1 )
     exit(EXIT_FAILURE);
 
   /** library call */

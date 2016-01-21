@@ -96,13 +96,6 @@ FOREACH(EXEC ${LISTEXEC_MMG3D})
   ADD_TEST(NAME ChkBdry_multidomCube3_${EXEC}
     COMMAND ${EXEC} -hmax 0.1
     ${MMG3D_CI_TESTS}/ChkBdry_multidomCube3/c)
-  #####
-  ADD_TEST(NAME HausdLoc_2Spheres${EXEC}
-    COMMAND ${EXEC} -hgrad 2
-    ${MMG3D_CI_TESTS}/HausdLoc_2Spheres/2spheres
-    ${MMG3D_CI_TESTS}/HausdLoc_2Spheres/2spheres.o.meshb
-    -hgrad 2
-    )
 
   ###############################################################################
   #####

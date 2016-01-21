@@ -391,14 +391,17 @@ int  MMG3D_Set_dparameter(MMG5_pMesh mesh,MMG5_pSol sol, int dparam, double val)
  * \param sol pointer toward the sol structure.
  * \param typ type of entity (triangle, edge,...).
  * \param ref reference of the entity.
- * \param val value of the Hausdorff number.
+ * \param hmin minimal edge size.
+ * \param hmax maximal edge size.
+ * \param hausd value of the Hausdorff number.
  * \return 0 if failed, 1 otherwise.
  *
  * Set local parameters: set the hausdorff value at \a val for all
  * elements of type \a typ and reference \a ref.
  *
  */
-int  MMG3D_Set_localParameter(MMG5_pMesh mesh, MMG5_pSol sol, int typ, int ref, double val);
+int  MMG3D_Set_localParameter(MMG5_pMesh mesh, MMG5_pSol sol, int typ, int ref,
+                              double hmin,double hmax,double hausd);
 
 /** recover datas */
 /**
@@ -700,15 +703,15 @@ int  MMG3D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met);
  * \return 1.
  *
  * Read local parameters file. This file must have the same name as
- * the mesh with the \a .mmg3d5 extension or must be named \a
- * DEFAULT.mmg3d5.
+ * the mesh with the \a .mmg3d extension or must be named \a
+ * DEFAULT.mmg3d.
  *
  */
 int  MMG3D_parsop(MMG5_pMesh mesh,MMG5_pSol met);
 /**
  * \param prog pointer toward the program name.
  *
- * Print help for mmg3d5 options.
+ * Print help for mmg3d options.
  *
  */
 void  MMG3D_usage(char *prog);

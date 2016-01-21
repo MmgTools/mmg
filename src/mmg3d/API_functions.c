@@ -1257,7 +1257,7 @@ int _MMG3D_skipIso(MMG5_pMesh mesh) {
  * Set integer parameter \a iparam at value \a val.
  *
  */
-int MMG3D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
+int MMG3D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam,int val){
   int k;
 
   switch ( iparam ) {
@@ -1353,6 +1353,8 @@ int MMG3D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
       mesh->info.par[k].elt   = MMG5_Noentity;
       mesh->info.par[k].ref   = INT_MAX;
       mesh->info.par[k].hausd = mesh->info.hausd;
+      mesh->info.par[k].hmin  = mesh->info.hmin;
+      mesh->info.par[k].hmax  = mesh->info.hmax;
     }
 
     break;
@@ -1493,7 +1495,8 @@ int MMG3D_Set_dparameter(MMG5_pMesh mesh, MMG5_pSol sol, int dparam, double val)
  * elements of type \a typ and reference \a ref.
  *
  */
-int MMG3D_Set_localParameter(MMG5_pMesh mesh,MMG5_pSol sol, int typ, int ref, double val){
+int MMG3D_Set_localParameter(MMG5_pMesh mesh,MMG5_pSol sol, int typ, int ref,
+                             double hmin,double hmax,double hausd){
   int k;
 
   if ( !mesh->info.npar ) {
@@ -1511,12 +1514,19 @@ int MMG3D_Set_localParameter(MMG5_pMesh mesh,MMG5_pSol sol, int typ, int ref, do
   switch ( typ ) {
     /* double parameters */
   case MMG5_Triangle :
+// case MMG5_Vertex :
     for (k=0; k<mesh->info.npari; k++) {
       if ( mesh->info.par[k].ref == ref ) {
-        mesh->info.par[k].hausd = val;
+        mesh->info.par[k].hausd = hausd;
         if ( (mesh->info.imprim > 5) || mesh->info.ddebug ) {
-          fprintf(stdout,"  ## Warning: new hausdorff value for triangles");
-          fprintf(stdout," of ref %d\n",ref);
+          if ( typ == MMG5_Triangle ) {
+            fprintf(stdout,"  ## Warning: new parameters (hausd, hmin and hmax)");
+            fprintf(stdout," for triangles of ref %d\n",ref);
+          }
+          else {
+            fprintf(stdout,"  ## Warning: new new parameters (hausd, hmin and hmax)");
+            fprintf(stdout," for vertices of ref %d\n",ref);
+          }
         }
         return(1);
       }
@@ -1528,12 +1538,19 @@ int MMG3D_Set_localParameter(MMG5_pMesh mesh,MMG5_pSol sol, int typ, int ref, do
     }
     mesh->info.par[mesh->info.npari].elt   = typ;
     mesh->info.par[mesh->info.npari].ref   = ref;
-    mesh->info.par[mesh->info.npari].hausd = val;
+    mesh->info.par[mesh->info.npari].hmin  = hmin;
+    mesh->info.par[mesh->info.npari].hmax  = hmax;
+    mesh->info.par[mesh->info.npari].hausd = hausd;
     mesh->info.npari++;
     break;
   default :
-    fprintf(stdout,"  ## Warning: you must apply local hausdorff number");
-    fprintf(stdout," on triangles (MMG5_Triangle or %d).\n",MMG5_Triangle);
+    /* fprintf(stdout,"  ## Warning: you must apply your local parameters"); */
+    /* fprintf(stdout," on triangles (MMG5_Triangle or %d) or vertices" */
+    /*         " (MMG5_Vertex or %d).\n",MMG5_Triangle,MMG5_Vertex); */
+    fprintf(stdout,"  ## Warning: you must apply your local parameters");
+    fprintf(stdout," on triangles (MMG5_Triangle or %d).\n",
+            MMG5_Triangle);
+
     fprintf(stdout,"  ## Ignored.\n");
     return(1);
   }
@@ -2241,7 +2258,7 @@ int MMG5_Set_localParameter(MMG5_pMesh mesh,MMG5_pSol sol, int typ, int ref, dou
          "MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
         " be removed soon\n." );
 
-  return(MMG3D_Set_localParameter(mesh,sol,typ,ref,val));
+  return(MMG3D_Set_localParameter(mesh,sol,typ,ref,mesh->info.hmin,mesh->info.hmax,val));
 }
 
 /**

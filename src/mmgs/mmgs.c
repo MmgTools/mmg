@@ -288,13 +288,13 @@ int _MMG5_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
  * \return 1.
  *
  * Read local parameters file. This file must have the same name as
- * the mesh with the \a .mmg3d5 extension or must be named \a
- * DEFAULT.mmg3d5.
+ * the mesh with the \a .mmgs extension or must be named \a
+ * DEFAULT.mmgs.
  *
  */
 static int _MMG5_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_Par   *par;
-  float      fp1,fp2;
+  float      fp1,fp2,hausd;
   int        ref,i,j,ret,npar;
   char       *ptr,buf[256],data[256];
   FILE       *in;
@@ -303,10 +303,10 @@ static int _MMG5_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
   strcpy(data,mesh->namein);
   ptr = strstr(data,".mesh");
   if ( ptr )  *ptr = '\0';
-  strcat(data,".mmgs5");
+  strcat(data,".mmgs");
   in = fopen(data,"rb");
   if ( !in ) {
-    sprintf(data,"%s","DEFAULT.mmgs5");
+    sprintf(data,"%s","DEFAULT.mmgs");
     in = fopen(data,"rb");
     if ( !in )  return(1);
   }
@@ -329,17 +329,23 @@ static int _MMG5_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
       for (i=0; i<mesh->info.npar; i++) {
         par = &mesh->info.par[i];
         fscanf(in,"%d %s ",&ref,buf);
+        ret = fscanf(in,"%f %f %f",&fp1,&fp2,&hausd);
         for (j=0; j<strlen(buf); j++)  buf[j] = tolower(buf[j]);
-        if ( !strcmp(buf,"vertices") || !strcmp(buf,"vertex") )          par->elt = MS_Ver;
-        else if ( !strcmp(buf,"triangles") || !strcmp(buf,"triangle") )  par->elt = MS_Tri;
+
+        if ( !strcmp(buf,"triangles") || !strcmp(buf,"triangle") ) {
+          if ( !MMGS_Set_localParameter(mesh,met,MMG5_Triangle,ref,fp1,fp2,hausd) ) {
+            exit(EXIT_FAILURE);
+          }
+        }
+        /* else if ( !strcmp(buf,"vertices") || !strcmp(buf,"vertex") ) { */
+        /*   if ( !MMGS_Set_localParameter(mesh,met,MMG5_Vertex,ref,fp1,fp2,hausd) ) { */
+        /*     exit(EXIT_FAILURE); */
+        /*   } */
+        /* } */
         else {
           fprintf(stdout,"  %%%% Wrong format: %s\n",buf);
           continue;
         }
-        ret = fscanf(in,"%f %f",&fp1,&fp2);
-        if ( !MMGS_Set_localParameter(mesh,met,MMG5_Triangle,ref,
-                                      fp1,fp2,mesh->info.hausd) )
-          exit(EXIT_FAILURE);
       }
     }
   }

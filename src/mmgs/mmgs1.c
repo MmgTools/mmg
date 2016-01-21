@@ -194,8 +194,10 @@ int _MMGS_dichoto1b(MMG5_pMesh mesh, MMG5_pSol met, int iel, int ia, int ip) {
 int chkedg(MMG5_pMesh mesh,int iel) {
   MMG5_pTria    pt;
   MMG5_pPoint   p[3];
+  MMG5_pPar     par;
   double   n[3][3],t[3][3],nt[3],c1[3],c2[3],*n1,*n2,t1[3],t2[3];
-  double   ps,ps2,cosn,ux,uy,uz,ll,li,dd;
+  double   ps,ps2,cosn,ux,uy,uz,ll,li,dd,hausd,hmax;
+  int      l,isloc;
   char     i,i1,i2;
 
   pt   = &mesh->tria[iel];
@@ -235,12 +237,33 @@ int chkedg(MMG5_pMesh mesh,int iel) {
     i1 = _MMG5_inxt2[i];
     i2 = _MMG5_iprv2[i];
 
+    /* local parameters */
+    hmax   = mesh->info.hmax;
+    hausd  = mesh->info.hausd;
+    isloc  = 0;
+    for (l=0; l<mesh->info.npar; l++) {
+      par = &mesh->info.par[l];
+      if ( /*((par->elt == MMG5_Vertex) &&
+            ( (p[i1]->ref == par->ref ) || (p[i2]->ref == par->ref) ))
+            || */ ((par->elt == MMG5_Triangle) && (pt->ref == par->ref) ) ) {
+        if ( !isloc ) {
+          hmax  = par->hmax;
+          hausd = par->hausd;
+          isloc = 1;
+        }
+        else {
+          hausd = MG_MIN(par->hausd,hausd);
+          hmax  = MG_MIN(par->hmax,hmax);
+        }
+      }
+    }
+
     /* check length */
     ux = p[i2]->c[0] - p[i1]->c[0];
     uy = p[i2]->c[1] - p[i1]->c[1];
     uz = p[i2]->c[2] - p[i1]->c[2];
     ll = ux*ux + uy*uy + uz*uz;
-    if ( ll > mesh->info.hmax*mesh->info.hmax ) {
+    if ( ll > hmax*hmax ) {
       MG_SET(pt->flag,i);
       continue;
     }
@@ -274,7 +297,7 @@ int chkedg(MMG5_pMesh mesh,int iel) {
       }
       else{
         if(!((p[i2]->tag & MG_NOM) || MG_EDG(p[i2]->tag) ) ) {
-          //MMG5_saveMesh(mesh);
+          //MMG5_saveMesh(mesh, mesh->nameout);
           fprintf(stdout,"2. warning geometrical problem\n");
           return(0);
         }
@@ -286,7 +309,7 @@ int chkedg(MMG5_pMesh mesh,int iel) {
       cosn = ps/ll ;
       cosn *= (1.0-cosn);
       cosn *= (0.25*ll);
-      if ( cosn > mesh->info.hausd*mesh->info.hausd ) {
+      if ( cosn > hausd*hausd ) {
         MG_SET(pt->flag,i);
         continue;
       }
@@ -296,7 +319,7 @@ int chkedg(MMG5_pMesh mesh,int iel) {
       cosn = ps/ll ;
       cosn *= (1.0-cosn);
       cosn *= (0.25*ll);
-      if ( cosn > mesh->info.hausd*mesh->info.hausd ) {
+      if ( cosn > hausd*hausd ) {
         MG_SET(pt->flag,i);
         continue;
       }
@@ -322,7 +345,7 @@ int chkedg(MMG5_pMesh mesh,int iel) {
       cosn  =  ps / (dd*ll);
       cosn *= (1.0-cosn);
       cosn *= (0.25*ll);
-      if ( cosn > mesh->info.hausd*mesh->info.hausd ) {
+      if ( cosn > hausd*hausd ) {
         MG_SET(pt->flag,i);
         continue;
       }
@@ -333,7 +356,7 @@ int chkedg(MMG5_pMesh mesh,int iel) {
       cosn  =  ps / (dd*ll);
       cosn *= (1.0-cosn);
       cosn *= (0.25*ll);
-      if ( cosn > mesh->info.hausd*mesh->info.hausd ) {
+      if ( cosn > hausd*hausd ) {
         MG_SET(pt->flag,i);
         continue;
       }
@@ -797,8 +820,9 @@ int chkspl(MMG5_pMesh mesh,MMG5_pSol met,int k,int i) {
 static int colelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
   MMG5_pTria    pt;
   MMG5_pPoint   p1,p2;
-  double        ll,ux,uy,uz;
-  int           list[_MMG5_LMAX+2],ilist,k,nc;
+  MMG5_pPar     par;
+  double        ll,ux,uy,uz,hmin;
+  int           list[_MMG5_LMAX+2],ilist,k,nc,l,isloc;
   char          i,i1,i2;
 
   nc = 0;
@@ -808,6 +832,7 @@ static int colelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
 
     /* check edge length */
     pt->flag = 0;
+
     for (i=0; i<3; i++) {
       if ( MS_SIN(pt->tag[i]) )  continue;
 
@@ -825,7 +850,25 @@ static int colelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
         uy = p2->c[1] - p1->c[1];
         uz = p2->c[2] - p1->c[2];
         ll = ux*ux + uy*uy + uz*uz;
-        if ( ll > mesh->info.hmin*mesh->info.hmin )  continue;
+
+        /* local parameters*/
+        hmin  = mesh->info.hmin;
+        isloc = 0;
+        for (l=0; l<mesh->info.npar; l++) {
+          par = &mesh->info.par[l];
+          if ( /*((par->elt == MMG5_Vertex) &&
+                ( (p1->ref == par->ref ) || (p2->ref == par->ref) ))
+                || */((par->elt == MMG5_Triangle) && (pt->ref == par->ref) ) ) {
+            if ( !isloc ) {
+              hmin  = par->hmin;
+              isloc = 1;
+            }
+            else {
+              hmin  = MG_MAX(par->hmin,hmin);
+            }
+          }
+        }
+        if ( ll > hmin*hmin )  continue;
       }
       else {
         ll = _MMG5_lenSurfEdg(mesh,met,pt->v[i1],pt->v[i2],0);

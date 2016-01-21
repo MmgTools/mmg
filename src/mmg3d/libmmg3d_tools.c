@@ -115,7 +115,7 @@ int MMG3D_Get_adjaTet(MMG5_pMesh mesh, int kel, int listet[4]) {
 /**
  * \param prog pointer toward the program name.
  *
- * Print help for mmg3d5 options.
+ * Print help for mmg3d options.
  *
  */
 void MMG3D_usage(char *prog) {
@@ -449,12 +449,12 @@ int MMG3D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
  * \return 1.
  *
  * Read local parameters file. This file must have the same name as
- * the mesh with the \a .mmg3d5 extension or must be named \a
- * DEFAULT.mmg3d5.
+ * the mesh with the \a .mmg3d extension or must be named \a
+ * DEFAULT.mmg3d.
  *
  */
 int MMG3D_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
-  float       fp1;
+  float       fp1,fp2,hausd;
   int         ref,i,j,ret,npar;
   char       *ptr,buf[256],data[256];
   FILE       *in;
@@ -463,12 +463,22 @@ int MMG3D_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
   strcpy(data,mesh->namein);
   ptr = strstr(data,".mesh");
   if ( ptr )  *ptr = '\0';
-  strcat(data,".mmg3d5");
+  strcat(data,".mmg3d");
   in = fopen(data,"rb");
   if ( !in ) {
-    sprintf(data,"%s","DEFAULT.mmg3d5");
+    strcat(data,".mmg3d5");
     in = fopen(data,"rb");
-    if ( !in )  return(1);
+    if ( !in ) {
+      sprintf(data,"%s","DEFAULT.mmg3d");
+      in = fopen(data,"rb");
+      if ( !in ) {
+        sprintf(data,"%s","DEFAULT.mmg3d5");
+        in = fopen(data,"rb");
+        if ( !in ) {
+          return(1);
+        }
+      }
+    }
   }
   fprintf(stdout,"  %%%% %s OPENED\n",data);
 
@@ -487,14 +497,23 @@ int MMG3D_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
 
       for (i=0; i<mesh->info.npar; i++) {
         ret = fscanf(in,"%d %s ",&ref,buf);
+        ret = fscanf(in,"%f %f %f",&fp1,&fp2,&hausd);
         for (j=0; j<strlen(buf); j++)  buf[j] = tolower(buf[j]);
-        if ( strcmp(buf,"triangles") && strcmp(buf,"triangle") ) {
+
+        if ( !strcmp(buf,"triangles") || !strcmp(buf,"triangle") ) {
+          if ( !MMG3D_Set_localParameter(mesh,met,MMG5_Triangle,ref,fp1,fp2,hausd) ) {
+            exit(EXIT_FAILURE);
+          }
+        }
+        /* else if ( !strcmp(buf,"vertices") || !strcmp(buf,"vertex") ) { */
+        /*   if ( !MMG3D_Set_localParameter(mesh,met,MMG5_Vertex,ref,fp1,fp2,hausd) ) { */
+        /*     exit(EXIT_FAILURE); */
+        /*   } */
+        /* } */
+        else {
           fprintf(stdout,"  %%%% Wrong format: %s\n",buf);
           continue;
         }
-        ret = fscanf(in,"%f",&fp1);
-        if ( !MMG3D_Set_localParameter(mesh,met,MMG5_Triangle,ref,fp1) )
-          exit(EXIT_FAILURE);
       }
     }
   }

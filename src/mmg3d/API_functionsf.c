@@ -441,9 +441,10 @@ FORTRAN_NAME(MMG3D_SET_DPARAMETER,mmg3d_set_dparameter,
  * See \ref MMG3D_Set_localParameter function in \ref mmg3d/libmmg3d.h file.
  */
 FORTRAN_NAME(MMG3D_SET_LOCALPARAMETER,mmg3d_set_localparameter,
-             (MMG5_pMesh *mesh,MMG5_pSol *sol, int *typ, int *ref, double *val, int* retval),
-             (mesh,sol,typ,ref,val,retval)){
-  *retval = MMG3D_Set_localParameter(*mesh,*sol,*typ,*ref,*val);
+             (MMG5_pMesh *mesh,MMG5_pSol *sol, int *typ, int *ref,
+              double *hmin, double *hmax, double *hausd, int* retval),
+             (mesh,sol,typ,ref,hmin, hmax, hausd,retval)){
+  *retval = MMG3D_Set_localParameter(*mesh,*sol,*typ,*ref,*hmin,*hmax,*hausd);
   return;
 }
 

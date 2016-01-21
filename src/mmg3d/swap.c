@@ -60,7 +60,7 @@ int _MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, int *list,int ilist,
   MMG5_Tria     tt1,tt2;
   double        b0[3],b1[3],v[3],c[3],ux,uy,uz,ps,disnat,dischg;
   double        cal1,cal2,calnat,calchg,calold,calnew,caltmp,hausd;
-  int           iel,iel1,iel2,np,nq,na1,na2,k,nminus,nplus;
+  int           iel,iel1,iel2,np,nq,na1,na2,k,nminus,nplus,isloc;
   char          ifa1,ifa2,ia,ip,iq,ia1,ia2,j,isshell;
   MMG5_pPar     par;
 
@@ -131,13 +131,24 @@ int _MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, int *list,int ilist,
   p0 = &mesh->point[np];
   p1 = &mesh->point[nq];
 
-  /* local hausdorff for triangles */
+  /* local parameters */
   hausd = mesh->info.hausd;
+  isloc = 0;
   for (k=0; k<mesh->info.npar; k++) {
     par = &mesh->info.par[k];
-    if ( (par->elt == MMG5_Triangle) &&
-         ((tt1.ref == par->ref ) || (tt2.ref == par->ref)) ) {
-      hausd = par->hausd;
+    if ( ( (par->elt == MMG5_Triangle) &&
+           ((tt1.ref == par->ref ) || (tt2.ref == par->ref)) ) /*||
+         ( (par->elt == MMG5_Vertex) &&
+         ((p0->ref == par->ref ) || (p1->ref == par->ref)) ) */ ){
+      if ( !isloc ) {
+        hausd = par->hausd;
+        isloc = 1;
+      }
+      else {
+        // take the minimum value between the two local hausdorff number asked
+        // by the user.
+        hausd = MG_MIN(hausd,par->hausd);
+      }
     }
   }
 
