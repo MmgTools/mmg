@@ -1308,7 +1308,7 @@ int MMG2D_saveSol(MMG5_pMesh mesh,MMG5_pSol sol,char *filename) {
 
   msh = mesh->info.nreg;
   if ( !sol->np )  return(1);
-  bin = 1;
+  bin = 0;
 
   strcpy(data,filename);
 
