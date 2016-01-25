@@ -27,7 +27,7 @@ mytime   MMG5_ctim[TIMEMAX];
 static void usage(char *name) {
   _MMG5_mmgUsage(name);
 
-  fprintf(stdout,"-ls     val     create mesh of isovalue 0\n");
+  //fprintf(stdout,"-ls     val     create mesh of isovalue 0\n");
   fprintf(stdout,"-lag [0/1/2]    Lagrangian mesh displacement according to mode 0/1/2\n");
   fprintf(stdout,"-mov filedep    (with -lag option)\n");
   fprintf(stdout,"-nsd val        only if no given triangle, save the subdomain nb (0==all subdomain)\n");

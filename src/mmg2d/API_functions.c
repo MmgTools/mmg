@@ -249,9 +249,10 @@ int MMG2D_Set_dparameter(MMG5_pMesh mesh, MMG5_pSol sol, int dparam, double val)
     else
       mesh->info.hausd    = val;
     break;
-  case MMG2D_DPARAM_ls :
-    mesh->info.ls       = val;
-    break;
+  /* case MMG2D_DPARAM_ls : */
+  /*   mesh->info.ls       = val; */
+  /*   fprintf(stdout,"  ## Warning: unstable feature.\n"); */
+  /*   break; */
   default :
     fprintf(stdout,"  ## Error: unknown type of parameter\n");
     return(0);
