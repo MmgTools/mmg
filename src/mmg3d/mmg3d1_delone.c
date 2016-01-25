@@ -746,12 +746,12 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
  */
 static int
 _MMG5_adpsplcol(MMG5_pMesh mesh,MMG5_pSol met,_MMG5_pBucket bucket, int* warn) {
-  int        ifilt,ne,ier;
+  int        nfilt,ifilt,ne,ier;
   int        ns,nc,it,nnc,nns,nnf,nnm,maxit,nf,nm;
   double     maxgap;
 
   /* Iterative mesh modifications */
-  it = nnc = nns = nnf = nnm = 0;
+  it = nnc = nns = nnf = nnm = nfilt = 0;
   maxit = 10;
   mesh->gap = maxgap = 0.5;
   MMG_npuiss = MMG_nvol = MMG_npres = MMG_npd = 0;
@@ -795,10 +795,12 @@ _MMG5_adpsplcol(MMG5_pMesh mesh,MMG5_pSol met,_MMG5_pBucket bucket, int* warn) {
       }
     }
     else  nm = 0;
+
     nnm += nm;
     nnc += nc;
     nns += ns;
-    nnf+=nf;
+    nnf += nf;
+    nfilt += ifilt;
 
     /* decrease size of gap for reallocation */
 
@@ -821,7 +823,7 @@ _MMG5_adpsplcol(MMG5_pMesh mesh,MMG5_pSol met,_MMG5_pBucket bucket, int* warn) {
   if ( mesh->info.imprim ) {
     if ( (abs(mesh->info.imprim) < 5) && ( nnc || nns ) ) {
       fprintf(stdout,"     %8d filtered, %8d splitted, %8d collapsed,"
-              " %8d swapped, %8d moved, %d iter.\n",ifilt,nns,nnc,nnf,nnm, it);
+              " %8d swapped, %8d moved, %d iter.\n",nfilt,nns,nnc,nnf,nnm, it);
     }
   }
 

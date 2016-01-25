@@ -30,7 +30,6 @@
  * \author Algiane Froehly (Inria / IMB, Université de Bordeaux)
  * \version 5
  * \copyright GNU Lesser General Public License.
- * \todo doxygen documentation.
  */
 
 #include "mmg3d.h"
@@ -720,7 +719,14 @@ int _MMG3D_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
   return(1);
 }
 
-/** Enforce mesh gradation by truncating size map */
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \return 0 if fail, 1 otherwise.
+ *
+ * Enforce mesh gradation by truncating size map.
+ *
+ */
 int _MMG5_gradsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTetra    pt;
   MMG5_pPoint    p0,p1;

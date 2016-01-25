@@ -105,7 +105,7 @@
 ! /*!< [val] Control gradation */
 #define   MMG2D_DPARAM_hgrad              17
 ! /*!< [val] Value of level-set (not use for now) */
-#define   // MMG2D_DPARAM_ls                 18
+#define   MMG2D_DPARAM_ls                 18
 
 ! /*----------------------------- functions header -----------------------------*/
 ! /* Initialization functions */
