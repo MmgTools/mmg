@@ -1533,7 +1533,7 @@ int MMG3D_loadSol(MMG5_pMesh mesh,MMG5_pSol met, char *filename) {
             fscanf(inm,"%lf",&dbuf[i]);
         } else {
           for(i=0 ; i<met->size ; i++) {
-            fread(&dbuf[i],sw,1,inm);
+            fread(&dbuf[i],sd,1,inm);
             if(iswp) dbuf[i]=_MMG5_swapf(dbuf[i]);
           }
         }
