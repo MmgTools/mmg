@@ -106,7 +106,7 @@ PROGRAM main
   !!   (by default, the mesh is saved in the "mesh.o.mesh" file
   !!call MMG3D_Set_outputMeshName(mmgMesh,"output.mesh",len("output.mesh"),ier)
   !! b) function calling
-  CALL MMG3D_saveMesh(mmgMesh,"cube.o.mesh",ier)
+  CALL MMG3D_saveMesh(mmgMesh,"cube.o.mesh",LEN("cube.o.mesh"),ier)
   IF ( ier /= 1 ) THEN
      CALL EXIT(106)
   ENDIF
@@ -116,7 +116,7 @@ PROGRAM main
   !!   (by default, the mesh is saved in the "mesh.o.sol" file
   !!call MMG3D_Set_outputSolName(mmgMesh,mmgSol,"output.sol",len("output.sol"),ier)
   !! b) function calling
-  CALL MMG3D_saveSol(mmgMesh,mmgSol,"cube.o.sol",ier)
+  CALL MMG3D_saveSol(mmgMesh,mmgSol,"cube.o.sol",LEN("cube.o.sol"),ier)
   IF ( ier /= 1 ) THEN
      CALL EXIT(107)
   ENDIF

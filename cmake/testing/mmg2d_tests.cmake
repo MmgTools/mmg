@@ -44,7 +44,7 @@ ADD_TEST(NAME SquareIso
 
 ####### -nosurf option
 ADD_TEST(NAME 2squares
-  COMMAND ${EXECUT_MMG2D} -hmax 1 -nosurf
+  COMMAND ${EXECUT_MMG2D} -msh 2 -hmax 1 -nosurf
   ${MMG2D_CI_TESTS}/2squares/2squares
   -out ${MMG2D_CI_TESTS}/2squares/2squares.o.meshb)
 
