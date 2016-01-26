@@ -1053,81 +1053,85 @@ int MMG2D_saveMesh(MMG5_pMesh mesh,char *filename) {
     }
   }
 
-#warning ask Cecile
 
-  if ( ntang ) {
-    if ( !bin ) {
-      strcpy(&chaine[0],"\n\nNormals\n"); //be careful it is tangent!!
-      fprintf(inm,"%s",chaine);
-      fprintf(inm,"%d\n",ntang);
-    }
-    else
-    {
-      binch = 60; //normals
-      fwrite(&binch,sw,1,inm);
-      if ( mesh->info.nreg )
-        bpos += 12+(3*mesh->ver)*4*ntang; //Pos
-      else
-        bpos += 12+(2*mesh->ver)*4*ntang; //Pos
-      fwrite(&bpos,sw,1,inm);
-      fwrite(&ntang,sw,1,inm);
-    }
+  /* Remark: here we save the tangents but there is a bug in medit (it crashes
+   * if it try to read tangents without normals. It is easy to patch, in
+   * zaldy1.c, seek the " if ( mesh->ntg )" field and replace
+   * "assert(mesh->extra->n);" by "assert(mesh->extra->t);").
+   * To not have to modify medit, here we save the tangents as if it were normals. */
+  /* if ( ntang ) { */
+  /*   if ( !bin ) { */
+  /*     strcpy(&chaine[0],"\n\nNormals\n"); //be careful it is tangent!! */
+  /*     fprintf(inm,"%s",chaine); */
+  /*     fprintf(inm,"%d\n",ntang); */
+  /*   } */
+  /*   else */
+  /*   { */
+  /*     binch = 60; //normals */
+  /*     fwrite(&binch,sw,1,inm); */
+  /*     if ( mesh->info.nreg ) */
+  /*       bpos += 12+(3*mesh->ver)*4*ntang; //Pos */
+  /*     else */
+  /*       bpos += 12+(2*mesh->ver)*4*ntang; //Pos */
+  /*     fwrite(&bpos,sw,1,inm); */
+  /*     fwrite(&ntang,sw,1,inm); */
+  /*   } */
 
-    for(k=1 ; k<=mesh->np ; k++) {
-      ppt = &mesh->point[k];
-      if(!M_VOK(ppt)) continue;
-      if(!(ppt->tag & M_BDRY)) continue;
-      if(ppt->tag & M_CORNER) continue;
-      if(mesh->info.nreg) {
-        if ( !bin )
-          fprintf(inm,"%lf %lf %lf\n",ppt->n[0],ppt->n[1],0.e0);
-        else {
-          dblb = 0;
-          fwrite((unsigned char*)&ppt->n[0],sd,1,inm);
-          fwrite((unsigned char*)&ppt->n[1],sd,1,inm);
-          fwrite(&dblb,sd,1,inm);
-        }
-      }
-      else
-      {
-        if ( !bin )
-          fprintf(inm,"%lf %lf \n",ppt->n[0],ppt->n[1]);
-        else {
-          fwrite((unsigned char*)&ppt->n[0],sd,1,inm);
-          fwrite((unsigned char*)&ppt->n[1],sd,1,inm);
-        }
-      }
-    }
+  /*   for(k=1 ; k<=mesh->np ; k++) { */
+  /*     ppt = &mesh->point[k]; */
+  /*     if(!M_VOK(ppt)) continue; */
+  /*     if(!(ppt->tag & M_BDRY)) continue; */
+  /*     if(ppt->tag & M_CORNER) continue; */
+  /*     if(mesh->info.nreg) { */
+  /*       if ( !bin ) */
+  /*         fprintf(inm,"%lf %lf %lf\n",ppt->n[0],ppt->n[1],0.e0); */
+  /*       else { */
+  /*         dblb = 0; */
+  /*         fwrite((unsigned char*)&ppt->n[0],sd,1,inm); */
+  /*         fwrite((unsigned char*)&ppt->n[1],sd,1,inm); */
+  /*         fwrite(&dblb,sd,1,inm); */
+  /*       } */
+  /*     } */
+  /*     else */
+  /*     { */
+  /*       if ( !bin ) */
+  /*         fprintf(inm,"%lf %lf \n",ppt->n[0],ppt->n[1]); */
+  /*       else { */
+  /*         fwrite((unsigned char*)&ppt->n[0],sd,1,inm); */
+  /*         fwrite((unsigned char*)&ppt->n[1],sd,1,inm); */
+  /*       } */
+  /*     } */
+  /*   } */
 
-    if ( !bin ) {
-      strcpy(&chaine[0],"\n\nNormalAtVertices\n");
-      fprintf(inm,"%s",chaine);
-      fprintf(inm,"%d\n",ntang);
-    }
-    else {
-      binch = 20; //normalatvertices
-      fwrite(&binch,sw,1,inm);
-      bpos += 12 + 2*4*ntang;//Pos
-      fwrite(&bpos,sw,1,inm);
-      fwrite(&ntang,sw,1,inm);
-    }
-    nn=1;
-    for(k=1 ; k<=mesh->np ; k++) {
-      ppt = &mesh->point[k];
-      if ( !M_VOK(ppt) ) continue;
-      if(!(ppt->tag & M_BDRY)) continue;
-      if(ppt->tag & M_CORNER) continue;
+  /*   if ( !bin ) { */
+  /*     strcpy(&chaine[0],"\n\nNormalAtVertices\n"); */
+  /*     fprintf(inm,"%s",chaine); */
+  /*     fprintf(inm,"%d\n",ntang); */
+  /*   } */
+  /*   else { */
+  /*     binch = 20; //normalatvertices */
+  /*     fwrite(&binch,sw,1,inm); */
+  /*     bpos += 12 + 2*4*ntang;//Pos */
+  /*     fwrite(&bpos,sw,1,inm); */
+  /*     fwrite(&ntang,sw,1,inm); */
+  /*   } */
+  /*   nn=1; */
+  /*   for(k=1 ; k<=mesh->np ; k++) { */
+  /*     ppt = &mesh->point[k]; */
+  /*     if ( !M_VOK(ppt) ) continue; */
+  /*     if(!(ppt->tag & M_BDRY)) continue; */
+  /*     if(ppt->tag & M_CORNER) continue; */
 
-      if(!bin) {
-        fprintf(inm,"%d %d \n",ppt->tmp,nn++);
-      }
-      else {
-        fwrite(&ppt->tmp,sw,1,inm);
-        ++nn;
-        fwrite(&nn,sw,1,inm);
-      }
-    }
-  }
+  /*     if(!bin) { */
+  /*       fprintf(inm,"%d %d \n",ppt->tmp,nn++); */
+  /*     } */
+  /*     else { */
+  /*       fwrite(&ppt->tmp,sw,1,inm); */
+  /*       ++nn; */
+  /*       fwrite(&nn,sw,1,inm); */
+  /*     } */
+  /*   } */
+  /* } */
 
   if(!bin) {
     strcpy(&chaine[0],"\n\nEnd\n");
