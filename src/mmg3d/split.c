@@ -3969,3 +3969,115 @@ void _MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) 
     }
   }
 }
+
+/** chk quality before split*/
+static inline int _MMG3D_chksplit(MMG5_pMesh mesh, MMG5_pSol met,int ip,
+                                  int* list,int ret,double crit) {
+  MMG5_pTetra   pt0,pt1;
+  double        cal,critloc;
+  int           nbt,l,jel,na,ipb,lon;
+  
+  lon = ret/2;
+  critloc = 1.;
+  for (l=0; l<lon; l++) {
+    jel = list[l] / 6;
+    pt1 = &mesh->tetra[jel];
+    if(pt1->qual < critloc) critloc = pt1->qual;
+  }
+  critloc *= crit;
+  
+  pt0  = &mesh->tetra[0];
+  nbt  = 0;
+  for (l=0; l<lon; l++) {
+    jel = list[l] / 6;
+    na  = list[l] % 6;
+    pt1 = &mesh->tetra[jel];
+            
+    memcpy(pt0->v,pt1->v,4*sizeof(int));
+    ipb = _MMG5_iare[na][0];
+    pt0->v[ipb] = ip;
+    cal = _MMG5_caltet(mesh,met,pt0);
+    if ( cal < critloc ) {
+      _MMG3D_delPt(mesh,ip);
+      return(0);
+    }
+            
+    memcpy(pt0->v,pt1->v,4*sizeof(int));
+    ipb = _MMG5_iare[na][1];
+    pt0->v[ipb] = ip;
+    cal = _MMG5_caltet(mesh,met,pt0);
+    if ( cal < critloc ) {
+      _MMG3D_delPt(mesh,ip);
+      return(0);
+    }
+  }
+  return(1);
+}
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param iel tetra index
+ * \param iar edge index of iel
+ * \param crit quality threeshold.
+ * \return -1 if lack of memory, 0 if we don't split the edge, ip if success.
+ *
+ * Split edge iar of iel and verify that every new tet have a better quality than crit
+ *
+ */
+int _MMG5_splitedg(MMG5_pMesh mesh, MMG5_pSol met,int iel, int iar, double crit){
+  MMG5_pTetra  pt;
+  MMG5_pPoint  p0,p1,ppt;
+  double       o[3];
+  int          list[MMG3D_LMAX+2],l,i0,i1,ip,warn,lon,ier;
+
+  warn = 0;
+  pt = &mesh->tetra[iel];
+  lon = _MMG5_coquil(mesh,iel,iar,list);
+  if ( (!lon || lon<0) ) 
+    return(0);
+  if(lon%2) return(0);
+
+  i0 = pt->v[_MMG5_iare[iar][0]];
+  i1 = pt->v[_MMG5_iare[iar][1]];
+  p0  = &mesh->point[i0];
+  p1  = &mesh->point[i1];
+  o[0] = 0.5*(p0->c[0] + p1->c[0]);
+  o[1] = 0.5*(p0->c[1] + p1->c[1]);
+  o[2] = 0.5*(p0->c[2] + p1->c[2]);
+        
+  ip = _MMG3D_newPt(mesh,o,MG_NOTAG);
+        
+  if ( !ip )  {
+    /* reallocation of point table */
+    _MMG5_POINT_REALLOC(mesh,met,ip,mesh->gap,
+                        warn=1;
+                        break
+                        ,o,MG_NOTAG);
+  }
+  ppt = &mesh->point[ip];
+  ier = _MMG5_intmet(mesh,met,iel,iar,ip,0.5);
+  if ( !ier ) {
+    _MMG3D_delPt(mesh,ip);
+    return(0);
+  }
+  else if (ier < 0 ) {
+    _MMG3D_delPt(mesh,ip);
+    return(0);
+  } 
+    
+  ier = _MMG3D_chksplit(mesh,met,ip,&list[0],lon,crit);
+  if(!ier) return(0);
+  ier = _MMG5_split1b(mesh,met,list,lon,ip,0,1);
+  if ( ier < 0 ) {
+    fprintf(stdout,"  ## Error: unable to split.\n");
+    return(-1);
+  }
+  else if ( !ier ) {
+    _MMG3D_delPt(mesh,ip);
+    return(0);
+  }
+    
+  return(ip);
+}
+
+
