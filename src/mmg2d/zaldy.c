@@ -20,6 +20,17 @@
 **  use this copy of the mmg distribution only if you accept them.
 ** =============================================================================
 */
+/**
+ * \file mmg2d/zaldy.c
+ * \brief Memory management.
+ * \author Charles Dapogny (LJLL, UPMC)
+ * \author Cécile Dobrzynski (Inria / IMB, Université de Bordeaux)
+ * \author Pascal Frey (LJLL, UPMC)
+ * \author Algiane Froehly (Inria / IMB, Université de Bordeaux)
+ * \version 5
+ * \copyright GNU Lesser General Public License.
+ * \todo Doxygen documentation
+ */
 #include "mmg2d.h"
 
 

@@ -20,12 +20,21 @@
 **  use this copy of the mmg distribution only if you accept them.
 ** =============================================================================
 */
+/**
+ * \file mmg2d/locate.c
+ * \brief 
+ * \author Charles Dapogny (LJLL, UPMC)
+ * \author Cécile Dobrzynski (Inria / IMB, Université de Bordeaux)
+ * \author Pascal Frey (LJLL, UPMC)
+ * \author Algiane Froehly (Inria / IMB, Université de Bordeaux)
+ * \version 5
+ * \copyright GNU Lesser General Public License.
+ */
 #include "mmg2d.h"
 #define EPST -1e-18
 #define EPSR  1e+18
 #define EPSNULL 1e-12
 #define EPSNULL2 5e-13
-extern int ddebug;
 
 
 
@@ -138,10 +147,7 @@ int MMG2_cutEdgeTriangle(MMG5_pMesh mesh,int k,int ia,int ib) {
   MMG5_pPoint  pt1,pt2,pt3,ppa,ppb;
   double  a11,a21,a12,a22,aire1,aire2,aire3,prod1,prod2,prod3;
   int     ibreak,iare,i;
-  int ddebug ;
 
-  /* if(k==8096) ddebug = 1;
-     else*/ ddebug = 0;
   ppa = &mesh->point[ia];
   ppb = &mesh->point[ib];
 
@@ -174,8 +180,6 @@ int MMG2_cutEdgeTriangle(MMG5_pMesh mesh,int k,int ia,int ib) {
   prod2 = aire3*aire2;
   prod3 = aire3*aire1;
 
-  /* if(ddebug) printf("aire %e %e %e\n",aire1,aire2,aire3); */
-  /* if(ddebug) printf("prod %e %e %e\n",prod1,prod2,prod3); */
   if ( prod1 > 0 && ((prod2 < 0 || prod3 < 0))) { /*le tr est coupe par la droite ia-ib*/
     if ((iare = MMG2_cutEdge(mesh,pt,ppa,ppb))) {
       return(iare);
@@ -195,9 +199,7 @@ int MMG2_cutEdgeTriangle(MMG5_pMesh mesh,int k,int ia,int ib) {
   /*sommet == pt arete*/
   for(i=0 ; i<3 ; i++){
     if(pt->v[i]==ia || ibreak) {
-      if(ddebug) printf("on traite %d : %e %e %e\n",k,prod1,prod2,prod3);
       if((prod1 < 0) || (prod2 < 0) || (prod3 < 0)) {
-        if(ddebug) printf("passe-t-on la ?\n");
         if ((iare = MMG2_cutEdge(mesh,pt,ppa,ppb))) {
           return(iare);
         }
@@ -229,7 +231,6 @@ int MMG2_findTria(MMG5_pMesh mesh,int ip) {
   base = ++mesh->base;
   find = 0;
   iel  = 1;
-  ddebug=0;
   do {
     pt = &mesh->tria[iel];
     if ( !M_EOK(pt) )  {
@@ -247,7 +248,6 @@ int MMG2_findTria(MMG5_pMesh mesh,int ip) {
     }
     /*check not vertex*/
     if (pt->v[0]==ip || pt->v[1]==ip || pt->v[2]==ip) return(iel);
-    if(ddebug) printf("pt : %d %d %d \n",pt->v[0],pt->v[1],pt->v[2]);
     pt->base = base;
     iadr = 3*(iel-1)+1;
     adja = &mesh->adja[iadr];
@@ -264,7 +264,6 @@ int MMG2_findTria(MMG5_pMesh mesh,int ip) {
     dd = ax*by - ay*bx;
     isign = dd > 0.0 ? 1 : -1;
     epsra = isign * (EPST*dd);
-    if(ddebug) printf("epsra %e -- %e %e\n",epsra,EPST,dd);
     /* barycentric */
     bx = p1->c[0] - ppt->c[0];
     by = p1->c[1] - ppt->c[1];
@@ -273,7 +272,6 @@ int MMG2_findTria(MMG5_pMesh mesh,int ip) {
 
     /* p in 1 */
     aire1 = isign*(bx*cy - by*cx);
-    if(ddebug) printf("tr %d aire1 : %e\n",iel,aire1);
     if ( aire1 < epsra && adja[0]) {
       iel = adja[0] / 3;
       continue;
@@ -282,7 +280,6 @@ int MMG2_findTria(MMG5_pMesh mesh,int ip) {
     ax = p0->c[0] - ppt->c[0];
     ay = p0->c[1] - ppt->c[1];
     aire2 = isign*(cx*ay - cy*ax);
-    if(ddebug) printf("tr %d aire2 : %e\n",iel,aire2);
     if ( aire2 < epsra && adja[1]) {
       iel = adja[1] / 3;
       continue;
@@ -292,7 +289,6 @@ int MMG2_findTria(MMG5_pMesh mesh,int ip) {
     /*try to be more robust...*/
     // aire3 = M_MAX(aire3,isign*(bx*ay - by*ax));
     aire3 = (isign*(ax*by - ay*bx));
-    if(ddebug) printf("tr %d aire3 : %e -- sum %e\n",iel,aire3,aire1+aire2+aire3);
     if ( aire3 < epsra && adja[2]) {
       iel = adja[2] / 3;
       continue;
@@ -330,7 +326,6 @@ int MMG2_locateEdge(MMG5_pMesh mesh,int ia,int ib,int* kdep,int* list) {
   lon = 0;
   ppa = &mesh->point[ia];
   ppb = &mesh->point[ib];
-  ddebug = 0;// mesh->info.ddebug;
   do {
     pt = &mesh->tria[k];
     //if(!pt->v[0]) {printf("c ca ? %d\n",k);MMG2D_saveMesh(mesh,"locate.mesh");break; }
@@ -369,14 +364,8 @@ int MMG2_locateEdge(MMG5_pMesh mesh,int ia,int ib,int* kdep,int* list) {
     a[1] = aire2;
     a[2] = aire3;
 
-    if (ddebug) printf("tr %d : %d %d %d\n",k,pt->v[0],pt->v[1],pt->v[2]);
-    if (ddebug) printf("on traite %d : %e %e %e ibreak : %d\n",k,prod1,prod2,prod3,ibreak);
-    if (ddebug) printf("test > 0 : %d %d %d\n",prod1>0,prod2>0,prod3>0);
-    if (ddebug) printf("test < 0 : %d %d %d\n",prod1<0,prod2<0,prod3<0);
-    if (ddebug) printf("aire : %e %e %e\n",aire1,aire2,aire3);
     if ( prod1 > 0 && ((prod2 < 0 || prod3 < 0))) { /*le tr est coupe par la droite ia-ib*/
       if ((iare = MMG2_cutEdge(mesh,pt,ppa,ppb))) {
-        if(ddebug) printf("on rajoute %d\n",k);
         pt->base = mesh->base+1;
         list[lon++] = 3*k + iare-1;
       }
@@ -394,7 +383,6 @@ int MMG2_locateEdge(MMG5_pMesh mesh,int ia,int ib,int* kdep,int* list) {
 
     if ( prod2 > 0 && ((prod1 < 0 || prod3 < 0))) {
       if ((iare = MMG2_cutEdge(mesh,pt,ppa,ppb))) {
-        if(ddebug) printf("on rajoute %d\n",k);
         pt->base = mesh->base+1;
         list[lon++] = 3*k + iare-1;
       }
@@ -411,7 +399,6 @@ int MMG2_locateEdge(MMG5_pMesh mesh,int ia,int ib,int* kdep,int* list) {
     }
     if ( prod3 > 0 && ((prod2 < 0 || prod1 < 0))) {
       if ((iare = MMG2_cutEdge(mesh,pt,ppa,ppb))) {
-        if(ddebug) printf("3. on rajoute %d\n",k);
         pt->base = mesh->base+1;
         list[lon++] = 3*k + iare-1;
       }
@@ -430,11 +417,8 @@ int MMG2_locateEdge(MMG5_pMesh mesh,int ia,int ib,int* kdep,int* list) {
     for(i=0 ; i<3 ; i++){
       iare = 0;
       if(pt->v[i]==ia || ibreak) {
-        if(ddebug) printf("i = %d pt dep/end : on traite %d : %e %e %e\n",i,k,prod1,prod2,prod3);
         if((prod1 < 0) || (prod2 < 0) || (prod3 < 0)) {
-          if(ddebug) printf("on essaie de rajouter %d : %d\n",k,MMG2_cutEdge(mesh,pt,ppa,ppb));
           if ((iare = MMG2_cutEdge(mesh,pt,ppa,ppb))) {
-            if(ddebug) printf("on rajoute %d\n",k);
             pt->base = mesh->base+1;
             list[lon++] = 3*k + iare-1;
           }
@@ -442,19 +426,16 @@ int MMG2_locateEdge(MMG5_pMesh mesh,int ia,int ib,int* kdep,int* list) {
         } else {
           /*check if ia-ib edge de pt*/
           if(ibreak && (pt->v[(i+1)%3]==ia || pt->v[(i+2)%3]==ia) ){
-            if(ddebug) printf("edge : on rajoute %d\n",k);
             pt->base = mesh->base+1;
             list[lon++] = 3*k;
             ibreak = 3;
           }
           else if(pt->v[i]==ia && (pt->v[(i+1)%3]==ib || pt->v[(i+2)%3]==ib)) {
-            if(ddebug) printf("fedge : on rajoute %d\n",k);
             pt->base = mesh->base+1;
             list[lon++] = 3*k;
             ibreak = 3;
           }
           else if(fabs(prod1)<EPSNULL2 && fabs(prod2)<EPSNULL2 && fabs(prod3)<EPSNULL2) {
-            if(ddebug) printf("i= %d : pile sur l'arete!! on rajoute %d : %e %e %e\n",i,k,prod1,prod2,prod3);
             if((a[MMG2_inxt[i]]<0 && a[MMG2_inxt[MMG2_inxt[i]]]>0)
                || (a[MMG2_inxt[i]]>0 && a[MMG2_inxt[MMG2_inxt[i]]]<0)) {
               // printf("l'arete coupe le tr %e %e\n",a[MMG2_inxt[i]], a[MMG2_inxt[MMG2_inxt[i]]]);
@@ -466,7 +447,6 @@ int MMG2_locateEdge(MMG5_pMesh mesh,int ia,int ib,int* kdep,int* list) {
               //ibreak = 1;
               break;
             } else {
-              if(ddebug) printf("on prend le tri voisin par  %d : %d\n",MMG2_inxt[i],adja[MMG2_inxt[i]]/3);
               //calcul de ||iaib|| et de ||ptiib|| avec aire(iaibpti)==0
               niaib = sqrt(a11*a11+a21*a21 );
               if(fabs(a[MMG2_inxt[i]])>EPSNULL) {
@@ -476,10 +456,8 @@ int MMG2_locateEdge(MMG5_pMesh mesh,int ia,int ib,int* kdep,int* list) {
               }
               npti = sqrt((ppb->c[0]-pt4->c[0])*(ppb->c[0]-pt4->c[0])+
                           (ppb->c[1]-pt4->c[1])*(ppb->c[1]-pt4->c[1]));
-              printf("et alors ? %e %e\n",niaib,npti);
               if(niaib > npti) {
                 //on rajoute le triangle
-                printf("eh eh eh on rajoute!! %d\n",k);
                 pt->base = mesh->base+1;
                 list[lon++] = 3*k;
                 // ibreak = 3;
@@ -526,7 +504,6 @@ int MMG2_locateEdge(MMG5_pMesh mesh,int ia,int ib,int* kdep,int* list) {
           }
         } else {
           //ktemp = k;
-          if(ddebug) printf("pt : on veut continuer par %d : %d %d %d\n",k,adja[i]/3,adja[(i+1)%3]/3,adja[(i+2)%3]/3);
           k = adja[(i+1)%3]/3;
           if (!k || mesh->tria[k].base>=mesh->base || !mesh->tria[k].v[0]) {
             k = adja[(i+2)%3]/3;
@@ -536,20 +513,17 @@ int MMG2_locateEdge(MMG5_pMesh mesh,int ia,int ib,int* kdep,int* list) {
             }
           }
         }
-        if(ddebug) printf("on veut continuer par %d : %d %d %d\n",k,adja[i]/3,adja[(i+1)%3]/3,adja[(i+2)%3]/3);
         ibreak++;
         break;
       }/*end if ia || ibreak;*/
     }
-    if(mesh->info.ddebug) printf("bon on est la ok! %d\n",ibreak);
     //if(ddebug) exit(EXIT_FAILURE);
     if(ibreak==1 || ibreak==-10) continue;
     if(ibreak>1) break;
     /*a-t-on un pts sur l'arete iaib ?*/
     if (fabs(aire1) < EPSNULL || fabs(aire2) < EPSNULL || fabs(aire3) < EPSNULL) {
-      printf("aire %e %e %e\n",aire1,aire2,aire3);
-      printf("un point aligné\n");
-      //exit(EXIT_FAILURE);
+      fprintf(stdout,"  ##Error: unexpected failure. Check your initial data and/or report the bug\n");
+      exit(EXIT_FAILURE);
     }
 
     //ktemp = k;
@@ -569,6 +543,5 @@ int MMG2_locateEdge(MMG5_pMesh mesh,int ia,int ib,int* kdep,int* list) {
   } while (ncompt < mesh->nt);
   assert(ibreak);
   lon = (ibreak==4)?4:((-1)*lon);
-  ddebug = 0;
   return(lon);
 }

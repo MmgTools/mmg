@@ -20,6 +20,16 @@
 **  use this copy of the mmg distribution only if you accept them.
 ** =============================================================================
 */
+/**
+ * \file mmg2d/queue.c
+ * \brief Queue data structure
+ * \author Cécile Dobrzynski (Inria / IMB, Université de Bordeaux)
+ * \author Pascal Frey (LJLL, UPMC)
+ * \author Algiane Froehly (Inria / IMB, Université de Bordeaux)
+ * \version 5
+ * \date 01 2014
+ * \copyright GNU Lesser General Public License.
+ **/
 #include "mmg2d.h"
 
 

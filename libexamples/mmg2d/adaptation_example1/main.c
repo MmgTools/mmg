@@ -93,13 +93,13 @@ int main(int argc,char *argv[]) {
   /*save init size*/
   if ( MMG2D_saveSol(mmgMesh,mmgSol,"init") != 1 )  exit(EXIT_FAILURE);
 
-  ier = MMG2D_mmg2dlib(mmgMesh,mmgSol,NULL);
+  ier = MMG2D_mmg2dlib(mmgMesh,mmgSol);
 
   if ( ier == MMG5_STRONGFAILURE ) {
-    fprintf(stdout,"BAD ENDING OF MMG3DLIB: UNABLE TO SAVE MESH\n");
+    fprintf(stdout,"BAD ENDING OF MMG2DLIB: UNABLE TO SAVE MESH\n");
     return(ier);
   } else if ( ier == MMG5_LOWFAILURE )
-    fprintf(stdout,"BAD ENDING OF MMG3DLIB\n");
+    fprintf(stdout,"BAD ENDING OF MMG2DLIB\n");
 
   /*save result*/
   if ( MMG2D_saveMesh(mmgMesh,"result.mesh") != 1 )  exit(EXIT_FAILURE);

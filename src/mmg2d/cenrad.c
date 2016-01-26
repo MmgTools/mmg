@@ -21,7 +21,7 @@
 ** =============================================================================
 */
 /**
- * \file cenrad.c
+ * \file mmg2d/cenrad.c
  * \brief Compute radius and center of circumscribing circle to the element.
  * \author Cécile Dobrzynski (Inria / IMB, Université de Bordeaux)
  * \date 2015

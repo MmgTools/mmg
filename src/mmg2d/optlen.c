@@ -20,6 +20,15 @@
 **  use this copy of the mmg distribution only if you accept them.
 ** =============================================================================
 */
+/**
+ * \file mmg2d/optlen.c
+ * \brief Functions to move the points.
+ * \author Cécile Dobrzynski (Inria / IMB, Université de Bordeaux)
+ * \author Pascal Frey (LJLL, UPMC)
+ * \author Algiane Froehly (Inria / IMB, Université de Bordeaux)
+ * \version 5
+ * \copyright GNU Lesser General Public License.
+ */
 #include "mmg2d.h"
 
 #define  HQCOEF    0.9

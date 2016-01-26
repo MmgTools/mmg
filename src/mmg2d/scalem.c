@@ -20,6 +20,16 @@
 **  use this copy of the mmg distribution only if you accept them.
 ** =============================================================================
 */
+/**
+ * \file mmg2d/scalem.c
+ * \brief Scale and unscale mesh and solution
+ * \author Cécile Dobrzynski (Inria / IMB, Université de Bordeaux)
+ * \author Pascal Frey (LJLL, UPMC)
+ * \author Algiane Froehly (Inria / IMB, Université de Bordeaux)
+ * \version 5
+ * \date 01 2014
+ * \copyright GNU Lesser General Public License.
+ **/
 #include "mmg2d.h"
 
 
@@ -39,8 +49,7 @@ int MMG2_scaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
     info->min[i] =  DBL_MAX;
     info->max[i] = -DBL_MAX;
   }
-  // #warning no normalization
-  //return(1);
+
   for (k=1; k<=mesh->np; k++) {
     ppt = &mesh->point[k];
     if ( !M_VOK(ppt) ) continue;
@@ -142,7 +151,6 @@ int MMG2_unscaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
   int        i,k,iadr;
 
   info = &mesh->info;
-  //return(1);
 
   /* de-normalize coordinates */
   dd = info->delta / (double)PRECI;

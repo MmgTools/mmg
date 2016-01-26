@@ -20,19 +20,28 @@
 **  use this copy of the mmg distribution only if you accept them.
 ** =============================================================================
 */
+/**
+ * \file mmg2d/optlap.c
+ * \brief Functions to optimize with a laplacian/antilaplacian.
+ * \author Cécile Dobrzynski (Inria / IMB, Université de Bordeaux)
+ * \author Pascal Frey (LJLL, UPMC)
+ * \author Algiane Froehly (Inria / IMB, Université de Bordeaux)
+ * \version 5
+ * \copyright GNU Lesser General Public License.
+ */
 #include "mmg2d.h"
 
-#define LLMAX 64
-
-static int iare[3][2] = {{0,1},{0,2},{1,2}};
-
-/*optimisation by laplacian-antilaplacian*/
+/**
+ * optimisation by laplacian-antilaplacian
+ * \warning UNUSED FUNCTION : change memory allocation to use it
+ */
 
 int MMG2_optlap(MMG5_pMesh mesh,MMG5_pSol sol) {
   MMG5_pTria   pt;
   MMG5_pPoint  ppt,ppta,pptb;
   int     k,it,maxtou,i,ipa,ipb,iadr;
   double  omega,mu,*cnew,*cold,*cini,res,res0,*ncount,len;
+  int iare[3][2] = {{0,1},{0,2},{1,2}};
 
   cnew = (double*)malloc(2*(mesh->np+1)*sizeof(double));
   assert(cnew);

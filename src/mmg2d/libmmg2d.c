@@ -89,10 +89,8 @@ int MMG2_tassage(MMG5_pMesh mesh,MMG5_pSol sol) {
       for(i=0 ; i<3 ; i++) {
         adjanew[i] = adja[i];
         if(!adja[i]) continue;
-        //if(adja[i]/3==2414 || nbl==2414) printf("adja of %d nbl %d : %d\n",k,nbl,adja[i]/3);
         iadrv = 3*(adja[i]/3-1) +1;
         adjav = &mesh->adja[iadrv];
-        //if(k==2414 || nbl==2414) printf("on met %d pour %d\n",nbl,adja[i]/3);
         voy = i;
         adjav[adja[i]%3] = 3*nbl + voy;
 
@@ -195,7 +193,6 @@ int MMG2_tassage(MMG5_pMesh mesh,MMG5_pSol sol) {
 /**
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward a sol structure (metric).
- * \param titi callback function.
  * \return \ref MMG5_SUCCESS if success, \ref MMG5_LOWFAILURE if failed
  * but a conform mesh is saved and \ref MMG5_STRONGFAILURE if failed and we
  * can't save the mesh.
@@ -203,7 +200,8 @@ int MMG2_tassage(MMG5_pMesh mesh,MMG5_pSol sol) {
  * Main program for the mesh adaptation library .
  *
  */
-int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol sol,void (*titi)(int ,int ,int,int,int))
+int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol sol)
+//,void (*titi)(int ,int ,int,int,int)
 {
   mytime    ctim[TIMEMAX];
   char      stim[32];
@@ -212,7 +210,8 @@ int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol sol,void (*titi)(int ,int ,int,int,
   fprintf(stdout,"     %s\n",MG_CPY);
   fprintf(stdout,"     %s %s\n",__DATE__,__TIME__);
 
-  MMG2D_callbackinsert = titi;
+  /*uncomment to callback*/
+  //MMG2D_callbackinsert = titi;
   /* interrupts */
   signal(SIGABRT,_MMG2_excfun);
   signal(SIGFPE,_MMG2_excfun);
@@ -358,7 +357,6 @@ int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol sol,void (*titi)(int ,int ,int,int,
   chrono(ON,&ctim[4]);
   if ( mesh->info.imprim )
     fprintf(stdout,"\n  -- PHASE 3 : MESH OPTIMISATION\n");
-  //if ( !optlap(&mesh,&sol) ) _LIBMMG5_RETURN(1);
   if ( !MMG2_mmg2d0(mesh,sol) ) {
     _MMG2D_RETURN_AND_PACK(mesh,sol,MMG5_LOWFAILURE);
   }
@@ -401,7 +399,6 @@ int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol sol,void (*titi)(int ,int ,int,int,
 /**
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward a sol structure (metric).
- * \param titi callback function.
  * \return \ref MMG5_SUCCESS if success, \ref MMG5_LOWFAILURE if failed
  * but a conform mesh is saved and \ref MMG5_STRONGFAILURE if failed and we
  * can't save the mesh.
@@ -409,7 +406,7 @@ int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol sol,void (*titi)(int ,int ,int,int,
  * Main program for the mesh generation library .
  *
  */
-int MMG2D_mmg2dmesh(MMG5_pMesh mesh,MMG5_pSol sol,void (*titi)(int ,int ,int,int,int)) {
+int MMG2D_mmg2dmesh(MMG5_pMesh mesh,MMG5_pSol sol) {
   mytime    ctim[TIMEMAX];
   char      stim[32];
 
@@ -417,7 +414,9 @@ int MMG2D_mmg2dmesh(MMG5_pMesh mesh,MMG5_pSol sol,void (*titi)(int ,int ,int,int
   fprintf(stdout,"     %s\n",MG_CPY);
   fprintf(stdout,"     %s %s\n",__DATE__,__TIME__);
 
-  MMG2D_callbackinsert = titi;
+  /*uncomment for callback*/
+  //MMG2D_callbackinsert = titi;
+
   /* interrupts */
   signal(SIGABRT,_MMG2_excfun);
   signal(SIGFPE,_MMG2_excfun);
@@ -544,7 +543,6 @@ int MMG2D_mmg2dmesh(MMG5_pMesh mesh,MMG5_pSol sol,void (*titi)(int ,int ,int,int
   chrono(ON,&ctim[5]);
   if ( mesh->info.imprim )
     fprintf(stdout,"\n  -- PHASE 4 : MESH OPTIMISATION\n");
-  //if ( !optlap(&mesh,&sol) ) _LIBMMG5_RETURN(1);
   if ( !MMG2_mmg2d0(mesh,sol) ) {
     _MMG2D_RETURN_AND_PACK(mesh,sol,MMG5_LOWFAILURE);
   }
@@ -587,7 +585,6 @@ int MMG2D_mmg2dmesh(MMG5_pMesh mesh,MMG5_pSol sol,void (*titi)(int ,int ,int,int
 /**
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward a sol structure (metric).
- * \param titi callback function.
  * \return \ref MMG5_SUCCESS if success, \ref MMG5_LOWFAILURE if failed
  * but a conform mesh is saved and \ref MMG5_STRONGFAILURE if failed and we
  * can't save the mesh.
@@ -595,7 +592,7 @@ int MMG2D_mmg2dmesh(MMG5_pMesh mesh,MMG5_pSol sol,void (*titi)(int ,int ,int,int
  * Main program for the level-set discretization library .
  *
  */
-int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol,void (*titi)(int ,int ,int,int,int))
+int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol)
 {
   mytime    ctim[TIMEMAX];
   char      stim[32];
@@ -604,7 +601,9 @@ int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol,void (*titi)(int ,int ,int,int,i
   fprintf(stdout,"     %s\n",MG_CPY);
   fprintf(stdout,"     %s %s\n",__DATE__,__TIME__);
 
-  MMG2D_callbackinsert = titi;
+  /*uncomment for callback*/
+  //MMG2D_callbackinsert = titi;
+
   /* interrupts */
   signal(SIGABRT,_MMG2_excfun);
   signal(SIGFPE,_MMG2_excfun);
@@ -727,7 +726,6 @@ int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol,void (*titi)(int ,int ,int,int,i
   chrono(ON,&ctim[5]);
   if ( mesh->info.imprim )
     fprintf(stdout,"\n  -- PHASE 4 : MESH OPTIMISATION\n");
-  //if ( !optlap(&mesh,&sol) ) _LIBMMG5_RETURN(1);
   if ( !MMG2_mmg2d0(mesh,sol) ) {
     MMG2_tassage(mesh,sol);
     _MMG2D_RETURN_AND_PACK(mesh,sol,MMG5_LOWFAILURE);
@@ -767,7 +765,6 @@ int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol,void (*titi)(int ,int ,int,int,i
 /**
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward a sol structure (displacement).
- * \param titi callback function.
  * \return \ref MMG5_SUCCESS if success, \ref MMG5_LOWFAILURE if failed
  * but a conform mesh is saved and \ref MMG5_STRONGFAILURE if failed and we
  * can't save the mesh.
@@ -775,9 +772,8 @@ int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol,void (*titi)(int ,int ,int,int,i
  * Main program for the rigid body movement library .
  *
  */
-int MMG2D_mmg2dmov(MMG5_pMesh mesh,MMG5_pSol sol,
-// MMG5_pSol,met,
-                   void (*titi)(int ,int ,int,int,int))
+int MMG2D_mmg2dmov(MMG5_pMesh mesh,MMG5_pSol sol)
+// MMG5_pSol,met)
 {
   //mytime    ctim[TIMEMAX];
   //char      stim[32];

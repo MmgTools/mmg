@@ -20,9 +20,18 @@
 **  use this copy of the mmg distribution only if you accept them.
 ** =============================================================================
 */
+/**
+ * \file mmg2d/mmg2d0.c
+ * \brief Mesh optimization functions.
+ * \author Charles Dapogny (LJLL, UPMC)
+ * \author Cécile Dobrzynski (Inria / IMB, Université de Bordeaux)
+ * \author Pascal Frey (LJLL, UPMC)
+ * \author Algiane Froehly (Inria / IMB, Université de Bordeaux)
+ * \version 5
+ * \copyright GNU Lesser General Public License.
+ */
 #include "mmg2d.h"
 
-int optlen_iso_bar(MMG5_pMesh mesh,MMG5_pSol sol,double declic,int base);
 
 int MMG2_mmg2d0(MMG5_pMesh mesh,MMG5_pSol sol) {
   int       ns,nm,nsiter,nmiter,nmbar,it,maxtou;

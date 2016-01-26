@@ -20,9 +20,19 @@
 **  use this copy of the mmg distribution only if you accept them.
 ** =============================================================================
 */
+/**
+ * \file mmg2d/solmap.c
+ * \brief  Compute isotropic size map according to the mean of the length of the edges
+ * passing through a point.
+ * \author Cécile Dobrzynski (Inria / IMB, Université de Bordeaux)
+ * \author Pascal Frey (LJLL, UPMC)
+ * \author Algiane Froehly (Inria / IMB, Université de Bordeaux)
+ * \version 5
+ * \copyright GNU Lesser General Public License.
+ */
+
 #include "mmg2d.h"
 
-static int MMG_inxtt[5] = {0,1,2,0,1};
 
 
 /* compute iso size map */
@@ -30,7 +40,8 @@ int MMG2_doSol(MMG5_pMesh mesh,MMG5_pSol sol) {
   MMG5_pTria      ptt,pt;
   MMG5_pPoint     p1,p2;
   double          ux,uy,dd;
-  int        i,k,ib,ipa,ipb;
+  int             i,k,ib,ipa,ipb;
+  int             MMG_inxtt[5] = {0,1,2,0,1};
 
   sol->np = mesh->np;
   for (k=1; k<=mesh->np; k++) {

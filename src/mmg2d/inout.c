@@ -22,8 +22,6 @@
 */
 #include "mmg2d.h"
 
-
-extern short           MMG_imprim;
 #define sw 4
 #define sd 8
 

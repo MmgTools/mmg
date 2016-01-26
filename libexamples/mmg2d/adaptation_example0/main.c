@@ -92,7 +92,7 @@ int main(int argc,char *argv[]) {
   if ( MMG2D_saveSol(mmgMesh,mmgSol,"init.sol") != 1 )
     exit(EXIT_FAILURE);
 
-  ier = MMG2D_mmg2dlib(mmgMesh,mmgSol,NULL);
+  ier = MMG2D_mmg2dlib(mmgMesh,mmgSol);
 
   if ( ier == MMG5_STRONGFAILURE ) {
     fprintf(stdout,"BAD ENDING OF MMG3DLIB: UNABLE TO SAVE MESH\n");

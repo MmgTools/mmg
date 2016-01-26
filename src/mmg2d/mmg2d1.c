@@ -20,12 +20,21 @@
 **  use this copy of the mmg distribution only if you accept them.
 ** =============================================================================
 */
+/**
+ * \file mmg2d/mmg2d1.c
+ * \brief Mesh adaptation functions.
+ * \author Charles Dapogny (LJLL, UPMC)
+ * \author Cécile Dobrzynski (Inria / IMB, Université de Bordeaux)
+ * \author Pascal Frey (LJLL, UPMC)
+ * \author Algiane Froehly (Inria / IMB, Université de Bordeaux)
+ * \version 5
+ * \copyright GNU Lesser General Public License.
+ */
 #include "mmg2d.h"
 
 #define BUCKSIZ    64
 #define M_LONG     1.4//1.85//1.4//1.421
 #define M_SHORT    0.65//0.8//0.65//0.707
-int ddebug = 0;
 
 int MMG2_invmat(double *m,double *minv) {
   double        det;
@@ -34,18 +43,12 @@ int MMG2_invmat(double *m,double *minv) {
     minv[0] = 1./m[0];
     minv[1] = 0;
     minv[2] = 1./m[2];
-    if(ddebug) printf("Idd : %e %e %e \n",m[0]*minv[0]+m[1]*minv[1],
-                      m[1]*minv[0]+m[2]*minv[1],
-                      m[1]*minv[1]+m[2]*minv[2]);
   } else {
     det = m[0]*m[2] - m[1]*m[1];
     det = 1. / det;
     minv[0] = det * m[2];
     minv[1] = - det * m[1];
     minv[2] = det * m[0];
-    if(ddebug) printf("Id : %e %e %e -- %e\n",m[0]*minv[0]+m[1]*minv[1],
-                      m[1]*minv[0]+m[2]*minv[1],
-                      m[1]*minv[1]+m[2]*minv[2],det);
   }
   return(1);
 }
@@ -58,32 +61,20 @@ int interp_ani(double *ma,double *mb,double *mp,double t) {
     dma[i] = ma[i];
     dmb[i] = mb[i];
   }
-  if(ddebug) {
-    printf("met1 : %e %e %e\n",ma[0],ma[1],ma[2]);
-    printf("met2 : %e %e %e\n",mb[0],mb[1],mb[2]);
-  }
+ 
   if ( !MMG2_invmat(dma,mai) || !MMG2_invmat(dmb,mbi) ) {
     fprintf(stderr,"  ## INTERP INVALID METRIC.\n");
     return(0);
   }
-  if(ddebug) {
-    printf("invmet1 : %e %e %e\n",mai[0],mai[1],mai[2]);
-    printf("invmet2 : %e %e %e\n",mbi[0],mbi[1],mbi[2]);
-  }
 
   for (i=0; i<3; i++)
     mi[i] = (1.0-t)*mai[i] + t*mbi[i];
-  if(ddebug) {
-    printf("meti : %e %e %e\n",mi[0],mi[1],mi[2]);
-  }
 
   if ( !MMG2_invmat(mi,mai) ) {
     fprintf(stderr,"  ## INTERP INVALID METRIC.\n");
     return(0);
   }
-  if(ddebug) {
-    printf("met : %e %e %e\n",mai[0],mai[1],mai[2]);
-  }
+
   for (i=0; i<3; i++)  mp[i] = mai[i];
   return(1);
 }
@@ -397,12 +388,8 @@ static int analar(MMG5_pMesh mesh,MMG5_pSol sol,pBucket bucket,double declic,int
       iadr = (i2-1)*sol->size + 1;
       mb   = &sol->m[iadr];
       tail = MMG2_length(ca,cb,ma,mb);
-      if(ddebug) printf("edge %d -- %d %d: %f tr : %d %d %d\n",
-                        i,i1,i2,tail,pt->v[0],pt->v[1],pt->v[2]);
+
       if ( tail > M_LONG && *alert <= 1 ) {
-        if(ddebug) {
-          printf("too long %d\n",adj);
-        }
         npp++;
         nbp = tail + 0.5;
         if ( nbp*(nbp+1) < 0.99*tail*tail )  nbp++;
@@ -425,13 +412,8 @@ static int analar(MMG5_pMesh mesh,MMG5_pSol sol,pBucket bucket,double declic,int
         } else {
           ip = cassar(mesh,sol,i1,i2,t);
         }
-        if(ddebug) printf("try cut %d %f \n",ip,t);
-        if(ddebug) {
-          printf("on essaie\n");
-          MMG2D_saveMesh(mesh,"in.mesh");
-        }
         if(ip < 0) {
-          printf("IMPOSSIBLE TO CREATE NEW VERTEX\n");
+          if(mesh->info.imprim > 6) printf("IMPOSSIBLE TO CREATE NEW VERTEX\n");
           //return(0);
           //printf("ahhhhhhhhhhhhhhhh\n");
           *alert = 2;
@@ -441,7 +423,6 @@ static int analar(MMG5_pMesh mesh,MMG5_pSol sol,pBucket bucket,double declic,int
             if(!adj) {
               ins = MMG2_splitbdry(mesh,sol,ip,k,i,tang);
               if(!ins) {
-                if (ddebug) printf("k= %d on insere pas bdry : %d %d\n",k,i1,i2);
                 //mesh->point[ip].tag = M_CORNER;
                 //mesh->point[ip].ref = 5;
                 //  MMG2D_saveMesh(mesh,"del.mesh");
@@ -456,7 +437,6 @@ static int analar(MMG5_pMesh mesh,MMG5_pSol sol,pBucket bucket,double declic,int
               mesh->point[ip].tag |= M_SD;
               ins = MMG2_split(mesh,sol,ip,k,voi[i]);
               if(!ins) {
-                if (ddebug) printf("on insere pas sd\n");
                 _MMG2D_delPt(mesh,ip);
                 continue;
               }
@@ -465,14 +445,8 @@ static int analar(MMG5_pMesh mesh,MMG5_pSol sol,pBucket bucket,double declic,int
             }
             continue;
           } else {
-            if(ddebug) {
-              printf("on insere la\n");
-              MMG2D_saveMesh(mesh,"cut.o.mesh");
-            }
             ins = MMG2_split(mesh,sol,ip,k,voi[i]);
-            if(ddebug) printf("cut ? %d\n",ins);
             if(!ins) {
-              if (ddebug) printf("on insere pas :::\n");
               _MMG2D_delPt(mesh,ip);
               continue;
             }
@@ -483,13 +457,8 @@ static int analar(MMG5_pMesh mesh,MMG5_pSol sol,pBucket bucket,double declic,int
       }
 
       else if ( tail < M_SHORT ) {
-        if(ddebug) {
-          printf("too short %d \n",adj);
-          MMG2D_saveMesh(mesh,"ttttt.mesh");
-        }
         if ( !adj || pt->ref != mesh->tria[adj].ref )  {
           if(!adj) {
-            if(ddebug) printf("edge %d -- %d %d\n",pt->edg[i],mesh->edge[pt->edg[i]].a,mesh->edge[pt->edg[i]].b);
             if (!MMG2_colpoibdry(mesh,sol,k,i,MMG2_iare[i][0],MMG2_iare[i][1],2.75)){
               if (!MMG2_colpoibdry(mesh,sol,k,i,MMG2_iare[i][1],MMG2_iare[i][0],2.75)){
                 continue;
@@ -523,23 +492,12 @@ static int analar(MMG5_pMesh mesh,MMG5_pSol sol,pBucket bucket,double declic,int
             } else {
               MMG2_nc++;
               _MMG2D_delPt(mesh,i1);
-              if(ddebug) {
-                printf("del ok\n");
-                //MMG2D_saveMesh(mesh,"del.mesh");
-                //exit(EXIT_FAILURE);
-              }
               break;
 
             }
           }
           MMG2_nc++;
           _MMG2D_delPt(mesh,i2);
-          if(ddebug) {
-            printf("del2 ok\n");
-            //MMG2D_saveMesh(mesh,"del.mesh");
-            //exit(EXIT_FAILURE);
-          }
-
           break;
         }
       }
@@ -610,12 +568,11 @@ static int analargeom(MMG5_pMesh mesh,MMG5_pSol sol,int *alert) {
           ip = cassarbdry(mesh,sol,pt->edg[i],i1,i2,0.5,tang);
 
           if(ip < 0) {
-            printf("IMPOSSIBLE TO CREATE NEW VERTEX\n");
+            if(mesh->info.imprim > 6) printf("IMPOSSIBLE TO CREATE NEW VERTEX\n");
             *alert = 2;
           }
           ins = MMG2_splitbdry(mesh,sol,ip,k,i,tang);
           if(!ins) {
-            if (ddebug) printf("k= %d on insere pas bdry : %d %d\n",k,i1,i2);
             _MMG2D_delPt(mesh,ip);
             continue;
           }

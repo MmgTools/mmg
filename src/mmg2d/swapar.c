@@ -20,9 +20,18 @@
 **  use this copy of the mmg distribution only if you accept them.
 ** =============================================================================
 */
+/**
+ * \file mmg2d/swapar.c
+ * \brief Functions for swapping process.
+ * \author Cécile Dobrzynski (Inria / IMB, Université de Bordeaux)
+ * \author Pascal Frey (LJLL, UPMC)
+ * \author Algiane Froehly (Inria / IMB, Université de Bordeaux)
+ * \version 5
+ * \copyright GNU Lesser General Public License.
+ */
+
 #include "mmg2d.h"
 
-extern int ddebug;
 int MMG2_swapar(MMG5_pMesh mesh,MMG5_pSol sol,int k,int i,double crit,int *list) {
   MMG5_pTria   pt,pt1;
   MMG5_Tria    tmp;
@@ -48,7 +57,6 @@ int MMG2_swapar(MMG5_pMesh mesh,MMG5_pSol sol,int k,int i,double crit,int *list)
   tmp.v[2] = pt1->v[adj[i] % 3];
   cal1 = MMG2_caltri_in(mesh,sol,&tmp);
   airn1 = MMG2_quickarea(mesh->point[tmp.v[0]].c,mesh->point[tmp.v[1]].c,mesh->point[tmp.v[2]].c);
-  if(ddebug) printf("cal1 %e %e\n",cal1,crit);
   if ( cal1 > crit )  return(0);
 
   tmp.v[0] = pt->v[i];
@@ -56,11 +64,10 @@ int MMG2_swapar(MMG5_pMesh mesh,MMG5_pSol sol,int k,int i,double crit,int *list)
   tmp.v[2] = pt->v[i2];
   cal2 = MMG2_caltri_in(mesh,sol,&tmp);
   airn2 = MMG2_quickarea(mesh->point[tmp.v[0]].c,mesh->point[tmp.v[1]].c,mesh->point[tmp.v[2]].c);
-  if(ddebug) printf("cal2 %e %e\n",cal2,crit);
   if ( cal2 > crit )  return(0);
 
   if( airn1 < 0 || airn2 < 0 || fabs((air1+air2)-(airn1+airn2)) > EPSD) {
-    if(ddebug) printf("config non convex\n");
+    if(mesh->info.ddebug) printf("config non convex\n");
     return(0);
   }
 

@@ -350,6 +350,7 @@ double caltri_ani_in(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pTria );
 double caltri_iso_in(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pTria );
 int    optlen_ani(MMG5_pMesh mesh,MMG5_pSol sol,double declic,int base);
 int    optlen_iso(MMG5_pMesh mesh,MMG5_pSol sol,double declic,int base);
+int    optlen_iso_bar(MMG5_pMesh mesh,MMG5_pSol sol,double declic,int base);
 int    interp_ani(double *,double *,double * ,double );
 int    interp_iso(double *,double *,double * ,double );
 int    buckin_iso(MMG5_pMesh mesh,MMG5_pSol sol,pBucket bucket,int ip);

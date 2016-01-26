@@ -20,12 +20,17 @@
 **  use this copy of the mmg distribution only if you accept them.
 ** =============================================================================
 */
+/**
+ * \file mmg2d/mmg2d2.c
+ * \brief Mesh generation functions.
+ * \author Charles Dapogny (LJLL, UPMC)
+ * \author Cécile Dobrzynski (Inria / IMB, Université de Bordeaux)
+ * \author Pascal Frey (LJLL, UPMC)
+ * \author Algiane Froehly (Inria / IMB, Université de Bordeaux)
+ * \version 5
+ * \copyright GNU Lesser General Public License.
+ */
 #include "mmg2d.h"
-#define EPSDD  1e+6
-
-static unsigned int MMG2_iare2[3][2] = { {0,1}, {0,2}, {1,2} };
-
-extern int ddebug;
 
 /*remove BB triangles*/
 int MMG2_removeBBtriangles(MMG5_pMesh mesh) {
@@ -164,11 +169,11 @@ int MMG2_insertpoint(MMG5_pMesh mesh,MMG5_pSol sol) {
   double  declic;
   int     k,nsiter,lel,mel,nel,ia,ib,ic,aext0,aext1,aext2;
   int     iadr,*adja,nflat,ie1,ie2,ie3,voy,text,atext1,atext2;
+  double  EPSDD = 1e+6;
 
-  ddebug = 0;
   for(k=1 ; k<=mesh->np - 4 ; k++) {
     if(1){
-      if(ddebug) printf("------------------------------------try swap to increase mesh quality\n");
+      if(mesh->info.ddebug) printf("------------------------------------try swap to increase mesh quality\n");
       declic = 1.1 / ALPHA;
       nsiter = 1;
       while (nsiter) {
@@ -196,7 +201,7 @@ int MMG2_insertpoint(MMG5_pMesh mesh,MMG5_pSol sol) {
     aext0 = adja[0];
     aext1 = adja[1];
     aext2 = adja[2];
-    if(ddebug) printf("tri trouve %d : %d %d %d\n",lel,ia,ib,ic);
+
     /*creation de trois triangles*/
     mel = _MMG2D_newElt(mesh);
     if ( !mel ) {
@@ -219,7 +224,6 @@ int MMG2_insertpoint(MMG5_pMesh mesh,MMG5_pSol sol) {
     pt->v[2] = k;
     pt->qual = MMG2_caltri_in(mesh,sol,pt);
     if(pt->qual > EPSDD) {
-      if(ddebug) printf("1 : on a un pbs avec le tr %d\n",lel);
       nflat = 1;
     } else {
       adja[0] = 3*nel + 1;
@@ -238,7 +242,6 @@ int MMG2_insertpoint(MMG5_pMesh mesh,MMG5_pSol sol) {
     pt->qual = MMG2_caltri_in(mesh,sol,pt);
     if(pt->qual > EPSDD) {
       nflat += 2;
-      if(ddebug) printf("2 : on a un pbs avec le tr %d\n",nel);
     } else {
       adja[0] = 3*mel + 1;
       adja[1] = 3*lel + 0;
@@ -256,7 +259,6 @@ int MMG2_insertpoint(MMG5_pMesh mesh,MMG5_pSol sol) {
     pt->v[2] = k;
     pt->qual = MMG2_caltri_in(mesh,sol,pt);
     if(pt->qual > EPSDD) {
-      if(ddebug) printf("3 : on a un pbs avec le tr %d nflat : %d\n",mel,nflat);
       nflat += 4;
       /*on coupe le tr aext1 en 2*/
       text = aext1/3;
@@ -269,12 +271,10 @@ int MMG2_insertpoint(MMG5_pMesh mesh,MMG5_pSol sol) {
       pt1->v[1] = ie2;
       pt1->v[2] = k;
       pt1->qual = MMG2_caltri_in(mesh,sol,pt1);
-      if(ddebug) printf("on cree %d : %d %d %d\n",text,ie1,ie2,k);
       pt->v[0] = ie3;
       pt->v[1] = ie1;
       pt->v[2] = k;
       pt->qual = MMG2_caltri_in(mesh,sol,pt);
-      if(ddebug) printf("on cree %d : %d %d %d\n",mel,ie3,ie1,k);
       /*maj des adj*/
       /*text*/
       iadr = 3*(text-1) + 1;
@@ -298,10 +298,8 @@ int MMG2_insertpoint(MMG5_pMesh mesh,MMG5_pSol sol) {
       if(nflat==6 /*|| (*adj)==7*/) {//CECILE 14/04/14:*adj ne veut rien dire!!!
         adja[1] = 3*(aext0/3);
         //pas de suite sinon on perd de l'info (&mesh->adja[3*(aext0/3-1) + 1])[0] = 3*mel + 1;
-        if(ddebug) printf("adj of %d : %d %d %d \n",mel,adja[0]/3,adja[1]/3,adja[2]/3);
 
       } else {
-        if(ddebug) printf("adj of %d : %d %d %d \n",mel,adja[0]/3,adja[1]/3,adja[2]/3);
         /*nel*/
         iadr = 3*(nel-1) + 1;
         adja = &mesh->adja[iadr];
@@ -334,26 +332,22 @@ int MMG2_insertpoint(MMG5_pMesh mesh,MMG5_pSol sol) {
       pt1->v[1] = ie2;
       pt1->v[2] = k;
       pt1->qual = MMG2_caltri_in(mesh,sol,pt1);
-      if(ddebug) printf("on cree %d : %d %d %d\n",text,ie1,ie2,k);
       pt = &mesh->tria[lel];
       pt->v[0] = ie3;
       pt->v[1] = ie1;
       pt->v[2] = k;
       pt->qual = MMG2_caltri_in(mesh,sol,pt);
-      if(ddebug) printf("on cree %d : %d %d %d\n",lel,ie3,ie1,k);
       /*maj des adj*/
       /*text*/
       iadr = 3*(text-1) + 1;
       adja = &mesh->adja[iadr];
       atext1 = adja[MMG2_inxt[voy]];
       atext2 = adja[MMG2_inxt[voy+1]];
-      if(ddebug) printf("ben quoi %d %d\n",atext1/3,atext2/3);
       adja[0] = 3*nel + 1;
       adja[1] = 3*lel + 0;
       adja[2] = atext2;
       if(atext2)
         (&mesh->adja[3*(atext2/3-1) + 1])[atext2%3] = 3*text + 2;
-      if(ddebug) printf("adj of %d : %d %d %d \n",text,adja[0]/3,adja[1]/3,adja[2]/3);
 
       /*lel*/
       iadr = 3*(lel-1) + 1;
@@ -368,7 +362,6 @@ int MMG2_insertpoint(MMG5_pMesh mesh,MMG5_pSol sol) {
         if(aext1)
           (&mesh->adja[3*(aext1/3-1) + 1])[0] = 3*lel + 1;
       }
-      if(ddebug) printf("adj of %d : %d %d %d \n",lel,adja[0]/3,adja[1]/3,adja[2]/3);
 
       /*nel*/
       iadr = 3*(nel-1) + 1;
@@ -378,13 +371,11 @@ int MMG2_insertpoint(MMG5_pMesh mesh,MMG5_pSol sol) {
       /*mel*/
       iadr = 3*(mel-1) + 1;
       adja = &mesh->adja[iadr];
-      if(ddebug) printf("la change-t-on adj(%d) ? %d : %d ou %d et %d %d\n",mel,nflat,adja[0]/3,lel,adja[1]/3,adja[2]/3);
       if(!(nflat==5 || nflat==7))
         adja[0] = 3*lel + 1;
 
     }
     if(nflat==2 || nflat==3 || nflat==7 || nflat == 6){
-      if(ddebug) printf("ben oui on passe la\n");
       /*on coupe le tr aext0 en 2*/
       text = aext0/3;
       voy  = aext0%3;
@@ -396,13 +387,11 @@ int MMG2_insertpoint(MMG5_pMesh mesh,MMG5_pSol sol) {
       pt1->v[1] = ie2;
       pt1->v[2] = k;
       pt1->qual = MMG2_caltri_in(mesh,sol,pt1);
-      if(ddebug) printf("on change %d : %d %d %d\n",text,ie1,ie2,k);
       pt = &mesh->tria[nel];
       pt->v[0] = ie3;
       pt->v[1] = ie1;
       pt->v[2] = k;
       pt->qual = MMG2_caltri_in(mesh,sol,pt);
-      if(ddebug) printf("on a      %d : %d %d %d\n",nel,ie3,ie1,k);
       /*maj des adj*/
       /*text*/
       iadr = 3*(text-1) + 1;
@@ -414,7 +403,6 @@ int MMG2_insertpoint(MMG5_pMesh mesh,MMG5_pSol sol) {
       adja[2] = atext2;
       if(atext2)
         (&mesh->adja[3*(atext2/3-1) + 1])[atext2%3] = 3*text + 2;
-      if(ddebug) printf("------- adj of %d : %d %d %d == %d\n",text,adja[0]/3,adja[1]/3,adja[2]/3,atext2/3);
       /*nel*/
       iadr = 3*(nel-1) + 1;
       adja = &mesh->adja[iadr];
@@ -427,14 +415,13 @@ int MMG2_insertpoint(MMG5_pMesh mesh,MMG5_pSol sol) {
         adja[1] = 3*(aext2/3);
         //(&mesh->adja[3*(aext2/3-1) + 1])[aext2%3] = 3*nel + 1;
       }
-      if(ddebug) printf("adj of %d : %d %d %d \n",nel,adja[0]/3,adja[1]/3,adja[2]/3);
 
       /*mel*/
       iadr = 3*(mel-1) + 1;
       adja = &mesh->adja[iadr];
       adja[1] = 3*text + 0;
     }
-    if(ddebug) {
+    if(mesh->info.ddebug) {
       MMG2_tassage(mesh,sol);
       MMG2D_saveMesh(mesh,"titi.mesh");
       _MMG5_chkmsh(mesh,0,0);
@@ -464,14 +451,12 @@ int MMG2_markSD(MMG5_pMesh mesh) {
     pt->ref  = 0;
     list[k-1] = 0;
     if((!kinit) && (pt->v[0]==ip1 || pt->v[1]==ip1 || pt->v[2]==ip1)) kinit = k;
-    if(ddebug) printf("tr %d : %d %d %d\n",k,mesh->tria[k].v[0],mesh->tria[k].v[1],mesh->tria[k].v[2]);
   }
   do {
     nref++;
     list[0] = kinit;
     ipil = 0;
     ncurc = 0;
-    if(ddebug) printf("la %d ref %d\n",532, mesh->tria[532].ref );
     do {
       k = list[ipil];
       pt = &mesh->tria[k];
@@ -480,7 +465,6 @@ int MMG2_markSD(MMG5_pMesh mesh) {
       adja = &mesh->adja[iadr];
       for(i=0 ; i<3 ; i++)  {
         pt1 = &mesh->tria[adja[i]/3];
-        if(ddebug) printf("adj of %d ref %d\n",k, mesh->tria[135].ref );
 
         if(pt1->ref==nref) continue;
         ped0 = pt->v[MMG2_iare[i][0]];
@@ -491,7 +475,6 @@ int MMG2_markSD(MMG5_pMesh mesh) {
           if((ped->a == ped0 && ped->b==ped1) || (ped->b == ped0 && ped->a==ped1)) break;
         }
         if(j<=mesh->na) continue;
-        if(ddebug) printf("on a cherche %d %d ....\n",ped0,ped1);
 
         pt1->ref = nref;
         if(adja[i])
@@ -506,7 +489,6 @@ int MMG2_markSD(MMG5_pMesh mesh) {
       list[k-1] = 0;
       if(!kinit && !(mesh->tria[k].ref)) kinit = k;
     }
-    if(ddebug) printf("kinit ? %d\n",kinit);
   } while (kinit);
 
   fprintf(stdout," %8d SUB-DOMAINS\n",nref-1); //because we have BB triangles
@@ -706,7 +688,8 @@ int MMG2_findtrianglestate(MMG5_pMesh mesh,int k,int ip1,int ip2,int ip3,int ip4
 /*return <0 value if triangle outside ; > 0 if triangle inside*/
 int MMG2_findpos(MMG5_pMesh mesh,MMG5_pTria pt,int ip1,int ip2,int ip3,int ip4,int base) {
   MMG5_pEdge     ped;
-  int       i,j,nb,ped0,ped1;
+  int            i,j,nb,ped0,ped1;
+  unsigned int   MMG2_iare2[3][2] = { {0,1}, {0,2}, {1,2} };
 
   /*au moins 1 point de la BB ??*/
   nb = 0;
@@ -768,7 +751,6 @@ int MMG2_mmg2d2(MMG5_pMesh mesh,MMG5_pSol sol) {
   int       *numper;
 
   mesh->base = 0;
-  ddebug = 0;
   /*if existed triangle : delete them*/
   if(mesh->nt) {
     nt = mesh->nt;

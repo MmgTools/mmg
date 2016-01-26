@@ -20,8 +20,17 @@
 **  use this copy of the mmg distribution only if you accept them.
 ** =============================================================================
 */
+/**
+ * \file mmg2d/split.c
+ * \brief Functions for splitting.
+ * \author Cécile Dobrzynski (Inria / IMB, Université de Bordeaux)
+ * \author Pascal Frey (LJLL, UPMC)
+ * \author Algiane Froehly (Inria / IMB, Université de Bordeaux)
+ * \version 5
+ * \copyright GNU Lesser General Public License.
+ */
+
 #include "mmg2d.h"
-extern int ddebug;
 
 #define QSEUIL 1e4
 #define LSHORT1 0.65
@@ -43,7 +52,7 @@ int MMG2_split(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int k1,int adj1) {
   adj2  = adja2[voy2];
   assert(adj2/3==k1);
   voy1  = adj2%3;
-  if(ddebug) printf("pour %d : %d %d\n",k2,adj2/3,adj2%3);
+
   iar1  = MMG2_iare[voy1][0];
   iar2  = MMG2_iare[voy1][1];
   iara1 = MMG2_iare[voy2][0];
@@ -51,9 +60,7 @@ int MMG2_split(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int k1,int adj1) {
 
   pt1  = &mesh->tria[k1];
   pt2  = &mesh->tria[k2];
-  if(ddebug) printf("tr1 %d %d %d -- voy %d : %d %d \n",pt1->v[0],pt1->v[1],pt1->v[2],voy1,iar1,iar2);
-  if(ddebug) printf("tr2 %d %d %d -- voy %d : %d %d \n",pt2->v[0],pt2->v[1],pt2->v[2],voy2,iara1,iara2);
-  if(ddebug) MMG2D_saveMesh(mesh,"tutu.mesh");
+
   assert(pt2->v[iara1]==pt1->v[iar2]);
   assert(pt2->v[iara2]==pt1->v[iar1]);
 
@@ -67,16 +74,12 @@ int MMG2_split(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int k1,int adj1) {
   /*test split ok*/
   /*test area > 0*/
   air = MMG2_quickarea(mesh->point[piar2].c,mesh->point[pvoy1].c,mesh->point[ip].c);
-  if(ddebug) printf("air %e\n",air);
   if(air < EPSA) return(0);
   air = MMG2_quickarea(mesh->point[piara1].c,mesh->point[ip].c,mesh->point[pvoy2].c);
-  if(ddebug) printf("air %e\n",air);
   if(air < EPSA) return(0);
   air = MMG2_quickarea(mesh->point[ip].c,mesh->point[pvoy1].c,mesh->point[piar1].c);
-  if(ddebug) printf("air %e\n",air);
   if(air < EPSA) return(0);
   air = MMG2_quickarea(mesh->point[ip].c,mesh->point[piara2].c,mesh->point[pvoy2].c);
-  if(ddebug) printf("air %e\n",air);
   if(air < EPSA) return(0);
 
   /*test qual*/
@@ -192,14 +195,6 @@ int MMG2_split(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int k1,int adj1) {
   pt4->ref  = pt2->ref;
   pt4->qual = cal4;
 
-  if(ddebug) {
-    printf("tr %d : %d %d %d \n",k1,pt1->v[0],pt1->v[1],pt1->v[2]);
-    printf("tr %d : %d %d %d \n",k2,pt2->v[0],pt2->v[1],pt2->v[2]);
-    printf("tr %d : %d %d %d \n",jel,pt3->v[0],pt3->v[1],pt3->v[2]);
-    printf("tr %d : %d %d %d \n",kel,pt4->v[0],pt4->v[1],pt4->v[2]);
-    printf("k1ned %d %d %d\n",pt1->edg[0],pt1->edg[1],pt1->edg[2]);
-    printf("k2ned %d %d %d\n",pt2->edg[0],pt2->edg[1],pt2->edg[2]);
-  }
   /*adj*/
   adja1 = &mesh->adja[3*(k1-1) + 1];
   /*printf("adj1 : %d %d %d\n",adja1[0]/3,adja1[1]/3,adja1[2]/3);
@@ -281,7 +276,6 @@ int MMG2_split(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int k1,int adj1) {
   pt2->edg[0] = 0;
   adja2[1] = tmp2;
   pt2->edg[1] = num2;
-  if(ddebug) printf("on met num2 pt2 %d %d\n",pt2->v[MMG2_iare[1][0]],pt2->v[MMG2_iare[1][1]]);
   if(tmp2)
     (&mesh->adja[3*(tmp2/3-1)+1])[tmp2%3] = 3*k2 + 1;
   adja2[2] = 3*k1 + 1;
@@ -330,7 +324,6 @@ int MMG2_splitbdry(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int k1,int voy1,double *
   piar2  = pt1->v[iar2];
   pvoy1  = pt1->v[voy1];
 
-  if(ddebug) printf("bdrysp %d %d\n",piar1,piar2);
   /*test split ok*/
   air = MMG2_quickarea(mesh->point[piar2].c,mesh->point[pvoy1].c,mesh->point[ip].c);
   if(air < EPSA) return(0);
@@ -374,15 +367,9 @@ int MMG2_splitbdry(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int k1,int voy1,double *
   pt3->ref  = pt1->ref;
   pt3->qual = cal2;
 
-  if(ddebug) {
-    printf("tr %d : %d %d %d \n",k1,pt1->v[0],pt1->v[1],pt1->v[2]);
-    printf("tr %d : %d %d %d \n",jel,pt3->v[0],pt3->v[1],pt3->v[2]);
-  }
   /*adj*/
   adja1 = &mesh->adja[3*(k1-1) + 1];
-  if(ddebug) {
-    printf("adj1 : %d %d %d\n",adja1[0]/3,adja1[1]/3,adja1[2]/3);
-  }
+
   adja = &mesh->adja[3*(jel-1) + 1];
   adja[0] = adja1[iar2];
   if(adja1[iar2])
@@ -416,7 +403,6 @@ int MMG2_splitbdry(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int k1,int voy1,double *
   num = pt1->edg[voy1];
   assert(num);
   ped = &mesh->edge[num];
-  if(ddebug) printf("on coupe ped %d %d\n",ped->a,ped->b);
 
   newed = _MMG5_newEdge(mesh);
   if ( !newed ) {
@@ -434,16 +420,14 @@ int MMG2_splitbdry(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int k1,int voy1,double *
   ppt = &mesh->point[ip];
   for(i=0 ; i<2 ; i++)
     ppt->n[i] = tang[i];
-  if(ddebug)printf("ped1 %d %d\n",ped1->a,ped1->b);
+
   ped->b = ip;
-  if(ddebug)printf("pedcut %d %d\n",ped->a,ped->b);
 
   num1 = pt1->edg[iar1];
   num2 = pt1->edg[iar2];
   pt1->edg[2] = num1;
   pt3->edg[0] = num2;
 
-  if(ddebug) printf("piar1 : %d\n",piar1);
   if(ped->a==piar1) {
     pt3->edg[1] = num;
     pt1->edg[1] = newed;

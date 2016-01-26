@@ -20,6 +20,16 @@
 **  use this copy of the mmg distribution only if you accept them.
 ** =============================================================================
 */
+/**
+ * \file mmg2d/quality.c
+ * \brief Functions to compute the quality.
+ * \author Cécile Dobrzynski (Inria / IMB, Université de Bordeaux)
+ * \author Pascal Frey (LJLL, UPMC)
+ * \author Algiane Froehly (Inria / IMB, Université de Bordeaux)
+ * \version 5
+ * \copyright GNU Lesser General Public License.
+ */
+
 #include "mmg2d.h"
 /* compute tria area */
 double MMG2_quickarea(double a[2],double b[2],double c[2]) {

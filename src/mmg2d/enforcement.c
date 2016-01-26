@@ -23,9 +23,6 @@
 #include "mmg2d.h"
 
 
-int ddebug;
-
-
 /*check if all edges exist and if not force them*/
 int MMG2_bdryenforcement(MMG5_pMesh mesh,MMG5_pSol sol) {
   MMG5_pTria      pt,pt1;
@@ -36,9 +33,8 @@ int MMG2_bdryenforcement(MMG5_pMesh mesh,MMG5_pSol sol) {
 
   _MMG5_SAFE_CALLOC(list,MMG2D_LMAX,int);
 
-  ddebug = 0;
   nex = 0;
-  //MMG2D_saveMesh(mesh,"enforc.mesh");
+
   for(i=1 ; i<=mesh->na ; i++) {
     ped = &mesh->edge[i];
     if(!ped->a) continue;
@@ -47,7 +43,6 @@ int MMG2_bdryenforcement(MMG5_pMesh mesh,MMG5_pSol sol) {
       continue;
     }
     kdep = mesh->nt;
-    //if(ddebug) printf("on cherche %d %d\n",ped->a,ped->b);
     kdep = MMG2_findTria(mesh,ped->a);
     assert(kdep);
     if(mesh->tria[kdep].v[0]==ped->a)
@@ -58,7 +53,7 @@ int MMG2_bdryenforcement(MMG5_pMesh mesh,MMG5_pSol sol) {
       j=2;
     lon = MMG2_boulep(mesh,kdep,j,list);
     if(lon>1000) {
-      printf("TOO MANY TRIANGLES (%d) AROUND THE VERTEX %d\n",lon,ped->a);
+      printf(" ##Error: TOO MANY TRIANGLES (%d) AROUND THE VERTEX %d\n",lon,ped->a);
       exit(EXIT_FAILURE);
     } else if(!lon) {
       printf("PROBLEM WITH POINT %d of TRIANGLE %d\n",mesh->tria[kdep].v[j],kdep);
@@ -96,8 +91,6 @@ int MMG2_bdryenforcement(MMG5_pMesh mesh,MMG5_pSol sol) {
       ia = ped->a;
       ib = ped->b;
       kdep = ped->base;
-      if(ped->a!=315) ddebug=0;
-      else ddebug = 0;
       if(mesh->info.ddebug) printf("\n\n\n $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ on force %d %d\n",ia,ib);
       if(!(lon=MMG2_locateEdge(mesh,ia,ib,&kdep,list))) {
         if(mesh->info.ddebug) printf("edge non localisee!!!!!\n");
@@ -114,7 +107,7 @@ int MMG2_bdryenforcement(MMG5_pMesh mesh,MMG5_pSol sol) {
         //exit(EXIT_FAILURE);
       }
       if(lon>1000) {
-        printf("TOO MANY TRIANGLES (%d)\n",lon);
+        printf(" ##Error: TOO MANY TRIANGLES (%d)\n",lon);
         exit(EXIT_FAILURE);
       }
       if(lon<2) {
@@ -123,7 +116,6 @@ int MMG2_bdryenforcement(MMG5_pMesh mesh,MMG5_pSol sol) {
       }
       lon = -lon;
       ilon = lon;
-      if(ddebug) printf("on a %d tr dans la liste\n",lon);
       if(mesh->info.ddebug) MMG2D_saveMesh(mesh,"titi.mesh");
 
       /*retournement d'arêtes aleatoirement dans la liste, tant que */
@@ -151,20 +143,16 @@ int MMG2_bdryenforcement(MMG5_pMesh mesh,MMG5_pSol sol) {
           if(pt->base == mesh->base+1) break;
           k = list[(++rnd)%lon]/3;
         }
-        //printf("k %d i %d lon %d\n",k,i,lon);
         assert(i<=lon);
         idep = list[rnd]%3;
         if(mesh->info.ddebug) printf("i= %d < %d ? on demarre avec %d\n",i,lon+1,k);
         adja = &mesh->adja[3*(k-1)+1];
-        if(ddebug)
-          printf("vois %d %d %d\n",adja[0]/3,adja[1]/3,adja[2]/3);
         for(i=0 ; i<3 ; i++) {
           ir = (idep+i)%3;
           /*check adj in Pipe*/
           adj = adja[ir]/3;
           voy = adja[ir]%3;
           pt1 = &mesh->tria[adj];
-          if(ddebug) printf("tr %d pas dans pipe ? %d == %d\n",adj,pt1->base,mesh->base+1);
           if (pt1->base != (mesh->base+1)) {
             continue;
           }
@@ -195,13 +183,7 @@ int MMG2_bdryenforcement(MMG5_pMesh mesh,MMG5_pSol sol) {
           }
           break;
         }
-        if(ddebug) {
-          printf("ici on stoppe\n");
-          exit(EXIT_FAILURE);
-        }
-
-        //assert(i<3);
-      }
+     }
     }/*end k --> mesh->na*/
   }
 

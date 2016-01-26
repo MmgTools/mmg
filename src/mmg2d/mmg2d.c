@@ -446,16 +446,16 @@ int main(int argc,char *argv[]) {
   fprintf(stdout,"  -- DATA READING COMPLETED.     %s\n",stim);
 
   if ( mesh->info.lag > -1 ) {
-    ier = MMG2D_mmg2dmov(mesh,sol,NULL);
+    ier = MMG2D_mmg2dmov(mesh,sol);
   }
   else if ( mesh->info.iso ) {
-    ier = MMG2D_mmg2dls(mesh,sol,NULL);
+    ier = MMG2D_mmg2dls(mesh,sol);
   }
   else if ( !mesh->nt ) {
-    ier = MMG2D_mmg2dmesh(mesh,sol,NULL);
+    ier = MMG2D_mmg2dmesh(mesh,sol);
   }
   else {
-    ier = MMG2D_mmg2dlib(mesh,sol,NULL);
+    ier = MMG2D_mmg2dlib(mesh,sol);
   }
 
   if ( ier == MMG5_STRONGFAILURE )

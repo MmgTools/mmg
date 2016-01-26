@@ -71,7 +71,6 @@ _MMG2_correction_iso(MMG5_pMesh mesh,int ip,int *list,int ilist,int nedep) {
 
         /* area PBC */
         dd =  ux*vy - uy*vx;
-        //printf("on trouve vol %e <? %e\n",dd,_MMG2_AREAMIN);
         if ( dd < _MMG2_AREAMIN )  break;
 
       }
@@ -150,7 +149,7 @@ int _MMG2_hashEdgeDelone(MMG5_pMesh mesh,HashTable *hash,int iel,int i,int *v) {
     ha->nxt   = 0;
 
     if ( hash->hnxt >= hash->nxtmax ) {
-      fprintf(stdout,"OVERFLOW\n");
+      if(mesh->info.imprim > 6) fprintf(stdout," ##Warning: OVERFLOW\n");
       return(0);
     }
     return(1);
@@ -265,16 +264,12 @@ int _MMG2_delone(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist) {
   int         tref,ielnum[3*MMG2_LONMAX+1];
   HashTable   hedg;
 
-  //printf("--------------------------------- delone ----------\n");
-
-  //if ( mesh->nt + 2*ilist > mesh->ntmax )  {printf("OVERFLOW\n");return(0);}
   base = mesh->base;
   /* external faces */
   size = 0;
   for (k=0; k<ilist; k++) {
     old  = list[k];
     pt1  = &mesh->tria[old];
-    //printf("tria %d : %d %d %d\n",old,pt1->v[0],pt1->v[1],pt1->v[2]);
     iadr = (old-1)*3 + 1;
     adja = &mesh->adja[iadr];
     vois[0]  = adja[0]/3 ;
@@ -357,7 +352,6 @@ int _MMG2_delone(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist) {
         pt1 = &mesh->tria[iel];
         memcpy(pt1,pt,sizeof(MMG5_Tria));
         pt1->v[i] = ip;
-        //printf("on cree %d : %d %d %d\n",iel,pt1->v[0],pt1->v[1],pt1->v[2]);
         pt1->qual = MMG2_caltri_in(mesh,sol,pt1);
         pt1->ref = mesh->tria[old].ref;
 
@@ -371,19 +365,16 @@ int _MMG2_delone(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist) {
 
 
         if ( jel ) {
-          //printf("on a jel %d, MAJ\n",jel);
           iadr = (jel-1)*3 + 1;
           adjb = &mesh->adja[iadr];
           adjb[j] = iel*3 + i;
         }
-        //printf("on cree %d %d\n",iel,i);
         /* internal edges (p1,p2) */
         for (j=0; j<3; j++) {
           if ( j != i ) {
             v[0] = pt1->v[ MMG2_iare[j][0] ];
             v[1] = pt1->v[ MMG2_iare[j][1] ];
 
-            //printf("on hash %d %d -- %d %d\n",v[0],v[1],iel,j);
             _MMG2_hashEdgeDelone(mesh,&hedg,iel,j,v);
           }
         }
@@ -394,8 +385,9 @@ int _MMG2_delone(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist) {
   /* remove old tria */
   tref = mesh->tria[list[0]].ref;
   for (k=0; k<ilist; k++) {
-    if(tref!=mesh->tria[list[k]].ref)
-      printf("arg ref ???? %d %d\n",tref,mesh->tria[list[k]].ref);
+    if(tref!=mesh->tria[list[k]].ref) {
+      fprintf(stdout,"  ## Warning: sud-domain ignored\n");
+    }
     _MMG2D_delElt(mesh,list[k]);
   }
 

@@ -23,7 +23,6 @@
 #include "mmg2d.h"
 #define LLONG1 1.9
 
-extern int ddebug;
 /*collapse edge ppb-->ppa*/
 int MMG2_colpoi(MMG5_pMesh mesh, MMG5_pSol sol,int iel,int iar,int ia,int ib,double coe) {
   MMG5_pTria     pt,pt1;
@@ -107,7 +106,6 @@ int MMG2_colpoi(MMG5_pMesh mesh, MMG5_pSol sol,int iel,int iar,int ia,int ib,dou
     alpha = capx*cbpx + capy*cbpy;
     alpha /= sqrt(capx*capx+capy*capy)*sqrt(cbpx*cbpx+cbpy*cbpy);
     alpha = acos(alpha);
-    //printf("point %d : %e (= %e)-- %e %e\n",pt->v[j],alpha,alpha*180./M_PI,capx,capy);
 
     if(alpha < cbound ) {
       free(list);
@@ -191,7 +189,6 @@ int MMG2_colpoi(MMG5_pMesh mesh, MMG5_pSol sol,int iel,int iar,int ia,int ib,dou
     if(kel==jel) continue;
     voy = list[i]%3;
     pt1 = &mesh->tria[kel];
-    if(ddebug) printf(" kel %d -- %d %d %d -- %d %d %d\n",kel,pt1->edg[0],pt1->edg[1],pt1->edg[2],voy,MMG2_iare[voy][0],MMG2_iare[voy][1]);
 
     assert(pt1->v[voy]==pib);
     pt1->v[voy] = pia;
@@ -243,18 +240,8 @@ int MMG2_colpoi(MMG5_pMesh mesh, MMG5_pSol sol,int iel,int iar,int ia,int ib,dou
     adja[voy] = 3*a1 + v1;
   }
   /*update edge*/
-  if(ddebug) printf("tr iel %d %d %d\n",pt->edg[0],pt->edg[1],pt->edg[2]);
-  if(ddebug) printf("a %d a1 %d\n",a,a1);
   num = pt->edg[ib];
   if(num) {
-    if ( ddebug ) {
-      if(!((mesh->edge[num].a==mesh->tria[a1].v[MMG2_iare[v1][0]] || mesh->edge[num].a==mesh->tria[a1].v[MMG2_iare[v1][1]])
-           && (mesh->edge[num].b==mesh->tria[a1].v[MMG2_iare[v1][0]] || mesh->edge[num].b==mesh->tria[a1].v[MMG2_iare[v1][1]]))) {
-        printf("on a un soucis 0\n");
-        printf("pnum %d %d dans %d %d %d\n",mesh->edge[num].a,mesh->edge[num].b,pt1->v[0],pt1->v[1],pt1->v[2]);
-        printf("edgea %d %d\n",mesh->tria[a2].v[MMG2_iare[v2][0]],mesh->tria[a2].v[MMG2_iare[v2][1]]);
-      }
-    }
     mesh->tria[a1].edg[v1] = num;
   }
 
@@ -272,16 +259,14 @@ int MMG2_colpoi(MMG5_pMesh mesh, MMG5_pSol sol,int iel,int iar,int ia,int ib,dou
   }
   /*update edge*/
   pt1  = &mesh->tria[jel];
-  if(ddebug) printf("tr jel %d %d %d\n",pt1->edg[0],pt1->edg[1],pt1->edg[2]);
-  if(ddebug) printf("a %d a2 %d\n",a,a2);
   num = pt1->edg[adjj1];
   if(a2 && num) {
-    //printf("tr %d : %d %d %d\n",a2,mesh->tria[a2].edg[0],mesh->tria[a2].edg[1],mesh->tria[a2].edg[2]);
     if(!((mesh->edge[num].a==mesh->tria[a2].v[MMG2_iare[v2][0]] || mesh->edge[num].a==mesh->tria[a2].v[MMG2_iare[v2][1]])
          && (mesh->edge[num].b==mesh->tria[a2].v[MMG2_iare[v2][0]] ||mesh->edge[num].b==mesh->tria[a2].v[MMG2_iare[v2][1]]))) {
-      printf("on a un soucis 1\n");
-      printf("pnum %d %d dans %d %d %d\n",mesh->edge[num].a,mesh->edge[num].b,pt1->v[0],pt1->v[1],pt1->v[2]);
-      printf("edgea %d %d\n",mesh->tria[a2].v[MMG2_iare[v2][0]],mesh->tria[a2].v[MMG2_iare[v2][1]]);
+      /* printf("on a un soucis 1\n"); */
+      /* printf("pnum %d %d dans %d %d %d\n",mesh->edge[num].a,mesh->edge[num].b,pt1->v[0],pt1->v[1],pt1->v[2]); */
+      /* printf("edgea %d %d\n",mesh->tria[a2].v[MMG2_iare[v2][0]],mesh->tria[a2].v[MMG2_iare[v2][1]]); */
+      if(mesh->info.imprim > 6) fprintf(stdout," ##Warning: BAD CONFIGURATION FOR COLLAPSE\n");
     }
     mesh->tria[a2].edg[v2] = num;
   }
@@ -292,17 +277,16 @@ int MMG2_colpoi(MMG5_pMesh mesh, MMG5_pSol sol,int iel,int iar,int ia,int ib,dou
     /* printf("edgea %d %d\n",mesh->tria[a].v[MMG2_iare[voy][0]],mesh->tria[a].v[MMG2_iare[voy][1]]); */
     if(!((mesh->edge[num].a==mesh->tria[a].v[MMG2_iare[voy][0]] || mesh->edge[num].a==mesh->tria[a].v[MMG2_iare[voy][1]])
          && (mesh->edge[num].b==mesh->tria[a].v[MMG2_iare[voy][0]] || mesh->edge[num].b==mesh->tria[a].v[MMG2_iare[voy][1]]))) {
-      printf("on a un soucis\n");
-      printf("pnum %d %d dans %d %d %d\n",mesh->edge[num].a,mesh->edge[num].b,pt1->v[0],pt1->v[1],pt1->v[2]);
-      printf("edgea %d %d\n",mesh->tria[a].v[MMG2_iare[voy][0]],mesh->tria[a].v[MMG2_iare[voy][1]]);
+      /* printf("on a un soucis\n"); */
+      /* printf("pnum %d %d dans %d %d %d\n",mesh->edge[num].a,mesh->edge[num].b,pt1->v[0],pt1->v[1],pt1->v[2]); */
+      /* printf("edgea %d %d\n",mesh->tria[a].v[MMG2_iare[voy][0]],mesh->tria[a].v[MMG2_iare[voy][1]]); */
+      if(mesh->info.imprim > 6) fprintf(stdout," ##Warning: BAD CONFIGURATION FOR COLLAPSE\n");
     }
     mesh->tria[a].edg[voy] = num;
   }
 
   num = pt->edg[iar];
   if(num) {
-    if(ddebug) printf("inside on suppr %d : %d %d\n",num,mesh->edge[num].a,mesh->edge[num].b);
-
     _MMG5_delEdge(mesh,num);
   }
 
@@ -312,9 +296,6 @@ int MMG2_colpoi(MMG5_pMesh mesh, MMG5_pSol sol,int iel,int iar,int ia,int ib,dou
   memcpy(ppb->c,coor,3*sizeof(double));
   memcpy(&sol->m[sol->size*(pib-1) + 1],solu,sol->size*sizeof(double));
 
-
-
-  //MMG2_ch.nreg(mesh,0);
   free(list);
   free(cal);
   return(1);
@@ -554,15 +535,12 @@ int MMG2_colpoibdry(MMG5_pMesh mesh, MMG5_pSol sol,int iel,int iar,int ia,int ib
       ped = &mesh->edge[num];
       if(ped->a==pib) ped->a = pia;
       if(ped->b==pib) ped->b = pia;
-      if(ddebug) printf("bdMAJ1 %d %d\n",ped->a,ped->b);
     }
     num = pt1->edg[ MMG2_iare[voy][1]];
     if(num) {
       ped = &mesh->edge[num];
       if(ped->a==pib) ped->a = pia;
       if(ped->b==pib) ped->b = pia;
-      if(ddebug) printf("bdMAJ2 %d %d\n",ped->a,ped->b);
-
     }
   }
 
@@ -588,14 +566,14 @@ int MMG2_colpoibdry(MMG5_pMesh mesh, MMG5_pSol sol,int iel,int iar,int ia,int ib
   /*del edge pib pia if exist*/
   num = pt->edg[iar];
   if(!num) {
-    printf("la edge %d %d iar %d tr %d\n",pia,pib,iar,iel);
-    printf("pt %d %d %d\n",pt->v[0],pt->v[1],pt->v[2]);
-    printf("pt->ned %d %d %d\n",pt->edg[0],pt->edg[1],pt->edg[2]);
-    MMG2D_saveMesh(mesh,"ttttt.mesh");
+    /* printf("la edge %d %d iar %d tr %d\n",pia,pib,iar,iel); */
+    /* printf("pt %d %d %d\n",pt->v[0],pt->v[1],pt->v[2]); */
+    /* printf("pt->ned %d %d %d\n",pt->edg[0],pt->edg[1],pt->edg[2]); */
+    MMG2D_saveMesh(mesh,mesh->nameout);
+    fprintf(stdout," ##Error: PROBLEM WITH EDGE %d %d. Check your data and/or report the bug\n",pia,pib);
     exit(EXIT_FAILURE);
   }
   assert(num);
-  if(ddebug) printf("on suppr %d : %d %d\n",num,mesh->edge[num].a,mesh->edge[num].b);
   _MMG5_delEdge(mesh,num);
 
   /*check if tr iel has other edge*/
