@@ -120,7 +120,7 @@ int _MMG5_movintpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,int imp
 	  _MMG5_SAFE_FREE(callist);
 	  return(0);
   }
-  else if ( improve && calnew < 0.9 * calold ) {
+  else if ( improve && calnew < 1.02 * calold ) {
 	  _MMG5_SAFE_FREE(callist);
 	  return(0);
   }
@@ -476,6 +476,7 @@ int _MMG5_movbdyregpt_iso(MMG5_pMesh mesh, MMG5_pSol met,int *listv,
   }
   if ( calold < _MMG5_NULKAL && calnew <= calold )    return(0);
   else if (calnew < _MMG5_NULKAL) return(0);
+  else if (improve && calnew < 1.02*calold) return(0);
   else if ( calnew < 0.3*calold )        return(0);
   memset(pxp,0,sizeof(MMG5_xPoint));
 
@@ -507,6 +508,10 @@ int _MMG5_movbdyregpt_iso(MMG5_pMesh mesh, MMG5_pSol met,int *listv,
   else if (calnew < _MMG5_NULKAL) {
 	  _MMG5_SAFE_FREE(callist);
 	  return(0);
+  }
+  else if (improve && calnew < calold) {
+    _MMG5_SAFE_FREE(callist);
+    return(0);
   }
   else if (calnew < 0.3*calold) {
 	  _MMG5_SAFE_FREE(callist);
@@ -810,6 +815,9 @@ int _MMG5_movbdyrefpt_iso(MMG5_pMesh mesh, MMG5_pSol met, int *listv,
   }
   if ((calold < _MMG5_NULKAL && calnew <= calold) ||
 	  (calnew < _MMG5_NULKAL) || (calnew <= 0.3*calold)) {
+	  _MMG5_SAFE_FREE(callist);
+	  return(0);
+  } else if (improve && calnew < calold) {
 	  _MMG5_SAFE_FREE(callist);
 	  return(0);
   }
@@ -1119,6 +1127,9 @@ int _MMG5_movbdynompt_iso(MMG5_pMesh mesh,MMG5_pSol met, int *listv,
 	  (calnew < _MMG5_NULKAL) || (calnew <= 0.3*calold)) {
 	  _MMG5_SAFE_FREE(callist);
 	  return(0);
+  } else if (improve && calnew < calold) {
+	  _MMG5_SAFE_FREE(callist);
+	  return(0);
   }
 
   /* Update coordinates, normals, for new point */
@@ -1426,6 +1437,9 @@ int _MMG5_movbdyridpt_iso(MMG5_pMesh mesh, MMG5_pSol met, int *listv,
   }
   if ((calold < _MMG5_NULKAL && calnew <= calold) ||
 	  (calnew < _MMG5_NULKAL) || (calnew <= 0.3*calold)) {
+	  _MMG5_SAFE_FREE(callist);
+	  return(0);
+  } else if (improve && calnew < calold) {
 	  _MMG5_SAFE_FREE(callist);
 	  return(0);
   }

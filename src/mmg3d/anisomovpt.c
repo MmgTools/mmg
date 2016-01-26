@@ -519,10 +519,18 @@ int _MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met,int *listv,
     calnew = MG_MIN(calnew,callist[l]);
   }
 
-  if ( calold < _MMG5_NULKAL && calnew <= calold )    return(0);
-  else if (calnew < _MMG5_NULKAL) return(0);
-  else if (improve && calnew < calold) return(0);
-  else if ( calnew < 0.3*calold )        return(0);
+  if ( calold < _MMG5_NULKAL && calnew <= calold ) {
+    return(0);
+  }
+  else if (calnew < _MMG5_NULKAL) {
+    return(0);
+  }
+  else if (improve && calnew < calold) {
+    return(0);
+  }
+  else if ( calnew < 0.3*calold ) {
+    return(0);
+  }
 
   /* When all tests have been carried out, update coordinates, normals and metrics*/
   p0->c[0] = o[0];
