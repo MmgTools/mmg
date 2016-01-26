@@ -149,6 +149,8 @@ int _MMG5_movintpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,int imp
  * \param ilistv size of the volumic ball.
  * \param lists pointer toward the surfacic ball of the point.
  * \param ilists size of the surfacic ball.
+ * \param improve TO IMPLEMENT force the new minimum element quality to be greater or equal
+ * than 1.02 of the old minimum element quality.
  * \return 0 if fail, 1 if success.
  *
  * Move boundary regular point, whose volumic and surfacic balls are passed.
@@ -156,7 +158,8 @@ int _MMG5_movintpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,int imp
  * \Remark the metric is not interpolated at the new position.
  */
 int _MMG5_movbdyregpt_iso(MMG5_pMesh mesh, MMG5_pSol met,int *listv,
-                          int ilistv,int *lists,int ilists) {
+                          int ilistv,int *lists,int ilists,
+                          int improve) {
   MMG5_pTetra       pt,pt0;
   MMG5_pxTetra      pxt;
   MMG5_pPoint       p0,p1,p2,ppt0;
@@ -533,6 +536,8 @@ int _MMG5_movbdyregpt_iso(MMG5_pMesh mesh, MMG5_pSol met,int *listv,
  * \param ilistv size of the volumic ball.
  * \param lists pointer toward the surfacic ball of the point.
  * \param ilists size of the surfacic ball.
+ * \param improve TO IMPLEMENT force the new minimum element quality to be greater or equal
+ * than 1.02 of the old minimum element quality.
  * \return 0 if fail, 1 if success.
  *
  * Move boundary reference point, whose volumic and surfacic balls are passed.
@@ -540,7 +545,8 @@ int _MMG5_movbdyregpt_iso(MMG5_pMesh mesh, MMG5_pSol met,int *listv,
  * \Remark the metric is not interpolated at the new position.
  */
 int _MMG5_movbdyrefpt_iso(MMG5_pMesh mesh, MMG5_pSol met, int *listv,
-                          int ilistv, int *lists, int ilists){
+                          int ilistv, int *lists, int ilists,
+                          int improve){
   MMG5_pTetra           pt,pt0;
   MMG5_pxTetra          pxt;
   MMG5_pPoint           p0,p1,p2,ppt0;
@@ -837,6 +843,8 @@ int _MMG5_movbdyrefpt_iso(MMG5_pMesh mesh, MMG5_pSol met, int *listv,
  * \param ilistv size of the volumic ball.
  * \param lists pointer toward the surfacic ball of the point.
  * \param ilists size of the surfacic ball.
+ * \param improve TO IMPLEMENT force the new minimum element quality to be greater or equal
+ * than 1.02 of the old minimum element quality.
  * \return 0 if fail, 1 if success.
  *
  * Move boundary non manifold point, whose volumic and (exterior)
@@ -845,7 +853,8 @@ int _MMG5_movbdyrefpt_iso(MMG5_pMesh mesh, MMG5_pSol met, int *listv,
  * \Remark the metric is not interpolated at the new position.
  */
 int _MMG5_movbdynompt_iso(MMG5_pMesh mesh,MMG5_pSol met, int *listv,
-                          int ilistv, int *lists, int ilists){
+                          int ilistv, int *lists, int ilists,
+                          int improve){
   MMG5_pTetra       pt,pt0;
   MMG5_pxTetra      pxt;
   MMG5_pPoint       p0,p1,p2,ppt0;
@@ -1140,13 +1149,16 @@ int _MMG5_movbdynompt_iso(MMG5_pMesh mesh,MMG5_pSol met, int *listv,
  * \param ilistv size of the volumic ball.
  * \param lists pointer toward the surfacic ball of the point.
  * \param ilists size of the surfacic ball.
+ * \param improve TO IMPLEMENT force the new minimum element quality to be greater or equal
+ * than 1.02 of the old minimum element quality.
  * \return 0 if fail, 1 if success.
  *
  * Move boundary ridge point, whose volumic and surfacic balls are passed.
  *
  */
 int _MMG5_movbdyridpt_iso(MMG5_pMesh mesh, MMG5_pSol met, int *listv,
-                          int ilistv,int *lists,int ilists) {
+                          int ilistv,int *lists,int ilists,
+                          int improve) {
   MMG5_pTetra          pt,pt0;
   MMG5_pxTetra         pxt;
   MMG5_pPoint          p0,p1,p2,ppt0;

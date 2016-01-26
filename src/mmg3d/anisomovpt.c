@@ -41,7 +41,7 @@
  * \param list pointer toward the volumic ball of the point.
  * \param ilist size of the volumic ball.
  * \param improve force the new minimum element quality to be greater or equal
- * than 0.9 of the old minimum element quality.
+ * than 1.02 of the old minimum element quality.
  *
  * \return 0 if we can't move the point, 1 if we can.
  *
@@ -138,7 +138,7 @@ int _MMG5_movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,
     _MMG5_SAFE_FREE(callist);
     return(0);
   }
-  else if ( improve && calnew < 0.9 * calold ) {
+  else if ( improve && calnew < 1.02* calold ) {
     _MMG5_SAFE_FREE(callist);
     return(0);
   }
@@ -167,6 +167,9 @@ int _MMG5_movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,
  * \param ilistv size of the volumic ball.
  * \param lists pointer toward the surfacic ball of the point.
  * \param ilists size of the surfacic ball.
+ * \param improve force the new minimum element quality to be greater or equal
+ * than 1.02 of the old minimum element quality.
+
  * \return 0 if we can't move the point, 1 if we can.
  *
  * \Remark we don't check if we break the hausdorff criterion.
@@ -176,7 +179,8 @@ int _MMG5_movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,
  *
  */
 int _MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met,int *listv,
-                          int ilistv,int *lists,int ilists) {
+                          int ilistv,int *lists,int ilists,
+                          int improve) {
   MMG5_pTetra       pt,pt0;
   MMG5_pxTetra      pxt;
   MMG5_pPoint       p0,p1,p2,ppt0;
@@ -496,6 +500,7 @@ int _MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met,int *listv,
   }
   if ( calold < _MMG5_NULKAL && calnew <= calold )    return(0);
   else if (calnew < _MMG5_NULKAL) return(0);
+  else if (improve && calnew < 1.02*calold) return(0);
   else if ( calnew < 0.3*calold )        return(0);
   memset(pxp,0,sizeof(MMG5_xPoint));
 
@@ -516,6 +521,7 @@ int _MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met,int *listv,
 
   if ( calold < _MMG5_NULKAL && calnew <= calold )    return(0);
   else if (calnew < _MMG5_NULKAL) return(0);
+  else if (improve && calnew < calold) return(0);
   else if ( calnew < 0.3*calold )        return(0);
 
   /* When all tests have been carried out, update coordinates, normals and metrics*/
@@ -543,6 +549,9 @@ int _MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met,int *listv,
  * \param ilistv size of the volumic ball.
  * \param lists pointer toward the surfacic ball of the point.
  * \param ilists size of the surfacic ball.
+ * \param improve force the new minimum element quality to be greater or equal
+ * than 1.02 of the old minimum element quality.
+
  * \return 0 if fail, 1 if success.
  *
  * \Remark we don't check if we break the hausdorff criterion.
@@ -551,7 +560,8 @@ int _MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met,int *listv,
  *
  */
 int _MMG5_movbdyrefpt_ani(MMG5_pMesh mesh, MMG5_pSol met, int *listv,
-                          int ilistv, int *lists, int ilists){
+                          int ilistv, int *lists, int ilists,
+                          int improve){
   MMG5_pTetra           pt,pt0;
   MMG5_pPoint           p0,ppt0;
   MMG5_Tria             tt;
@@ -820,6 +830,9 @@ int _MMG5_movbdyrefpt_ani(MMG5_pMesh mesh, MMG5_pSol met, int *listv,
 	  (calnew < _MMG5_NULKAL) || (calnew <= 0.3*calold)) {
 	  _MMG5_SAFE_FREE(callist);
 	  return(0);
+  } else if (improve && calnew < calold) {
+	  _MMG5_SAFE_FREE(callist);
+	  return(0);
   }
 
   /* Update coordinates, normals, for new point */
@@ -853,6 +866,8 @@ int _MMG5_movbdyrefpt_ani(MMG5_pMesh mesh, MMG5_pSol met, int *listv,
  * \param ilistv size of the volumic ball.
  * \param lists pointer toward the surfacic ball of the point.
  * \param ilists size of the surfacic ball.
+ * \param improve force the new minimum element quality to be greater or equal
+ * than 1.02 of the old minimum element quality.
  * \return 0 if fail, 1 if success.
  *
  * Move boundary non manifold point, whose volumic and (exterior)
@@ -862,7 +877,8 @@ int _MMG5_movbdyrefpt_ani(MMG5_pMesh mesh, MMG5_pSol met, int *listv,
  *
  */
 int _MMG5_movbdynompt_ani(MMG5_pMesh mesh,MMG5_pSol met, int *listv,
-                          int ilistv, int *lists, int ilists){
+                          int ilistv, int *lists, int ilists,
+                          int improve){
   MMG5_pTetra       pt,pt0;
   MMG5_pPoint       p0,ppt0;
   MMG5_pxPoint      pxp;
@@ -1130,6 +1146,9 @@ int _MMG5_movbdynompt_ani(MMG5_pMesh mesh,MMG5_pSol met, int *listv,
 	  (calnew < _MMG5_NULKAL) || (calnew <= 0.3*calold)) {
 	  _MMG5_SAFE_FREE(callist);
 	  return(0);
+  } else if (improve && calnew < calold) {
+	  _MMG5_SAFE_FREE(callist);
+	  return(0);
   }
 
   /* Update coordinates, normals, for new point */
@@ -1171,7 +1190,8 @@ int _MMG5_movbdynompt_ani(MMG5_pMesh mesh,MMG5_pSol met, int *listv,
  *
  */
 int _MMG5_movbdyridpt_ani(MMG5_pMesh mesh, MMG5_pSol met, int *listv,
-                          int ilistv,int *lists,int ilists) {
+                          int ilistv,int *lists,int ilists,
+                          int improve) {
   MMG5_pTetra          pt,pt0;
   MMG5_pPoint          p0,ppt0;
   MMG5_Tria            tt;
@@ -1443,6 +1463,9 @@ int _MMG5_movbdyridpt_ani(MMG5_pMesh mesh, MMG5_pSol met, int *listv,
       (calnew < _MMG5_NULKAL) || (calnew <= 0.3*calold)) {
     _MMG5_SAFE_FREE(callist);
     return(0);
+  } else if (improve && calnew < calold) {
+	  _MMG5_SAFE_FREE(callist);
+	  return(0);
   }
 
   /* Update coordinates, normals, for new point */
