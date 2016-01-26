@@ -788,6 +788,7 @@ _MMG5_adpsplcol(MMG5_pMesh mesh,MMG5_pSol met,_MMG5_pBucket bucket, int* warn) {
     else  nf = 0;
 
     if ( !mesh->info.nomove ) {
+      /*perform only boundary moves*/
       nm = _MMG5_movtet(mesh,met,-1);
       if ( nm < 0 ) {
         fprintf(stdout,"  ## Unable to improve mesh.\n");

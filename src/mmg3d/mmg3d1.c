@@ -557,6 +557,11 @@ int _MMG5_movtet(MMG5_pMesh mesh,MMG5_pSol met,int maxitin) {
     internal=1;
     maxit = maxitin;
   }
+  if ( maxit != 1 ) {
+    improve   = 1;
+  } else {
+    improve = 0;
+  }
 
   if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug )
     fprintf(stdout,"  ** OPTIMIZING MESH\n");
@@ -588,10 +593,6 @@ int _MMG5_movtet(MMG5_pMesh mesh,MMG5_pSol met,int maxitin) {
 
           if ( maxit != 1 ) {
             ppt->flag = base;
-            improve   = 1;
-          }
-          else {
-            improve = 0;
           }
           ier = 0;
           if ( ppt->tag & MG_BDY ) {
@@ -602,7 +603,7 @@ int _MMG5_movtet(MMG5_pMesh mesh,MMG5_pSol met,int maxitin) {
               ier=_MMG5_boulesurfvolp(mesh,k,i0,i,listv,&ilistv,lists,&ilists,1);
               if( !ier )  continue;
               else if ( ier>0 )
-                ier = _MMG5_movbdynompt(mesh,met,listv,ilistv,lists,ilists);
+                ier = _MMG5_movbdynompt(mesh,met,listv,ilistv,lists,ilists,improve);
               else
                 return(-1);
             }
@@ -610,7 +611,7 @@ int _MMG5_movtet(MMG5_pMesh mesh,MMG5_pSol met,int maxitin) {
               ier=_MMG5_boulesurfvolp(mesh,k,i0,i,listv,&ilistv,lists,&ilists,0);
               if ( !ier )  continue;
               else if ( ier>0 )
-                ier = _MMG5_movbdyridpt(mesh,met,listv,ilistv,lists,ilists);
+                ier = _MMG5_movbdyridpt(mesh,met,listv,ilistv,lists,ilists,improve);
               else
                 return(-1);
             }
@@ -619,7 +620,7 @@ int _MMG5_movtet(MMG5_pMesh mesh,MMG5_pSol met,int maxitin) {
               if ( !ier )
                 continue;
               else if ( ier>0 )
-                ier = _MMG5_movbdyrefpt(mesh,met,listv,ilistv,lists,ilists);
+                ier = _MMG5_movbdyrefpt(mesh,met,listv,ilistv,lists,ilists,improve);
               else
                 return(-1);
             }
@@ -642,7 +643,7 @@ int _MMG5_movtet(MMG5_pMesh mesh,MMG5_pSol met,int maxitin) {
                 if ( !_MMG5_directsurfball(mesh,pt->v[i0],lists,ilists,n) )
                   continue;
               }
-              ier = _MMG5_movbdyregpt(mesh,met,listv,ilistv,lists,ilists);
+              ier = _MMG5_movbdyregpt(mesh,met,listv,ilistv,lists,ilists,improve);
               if ( ier )  ns++;
             }
           }
