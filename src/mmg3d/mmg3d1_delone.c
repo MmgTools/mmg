@@ -843,7 +843,7 @@ _MMG5_adpsplcol(MMG5_pMesh mesh,MMG5_pSol met,_MMG5_pBucket bucket, int* warn) {
  */
 static int
 _MMG5_optet(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket) {
-  int it,nnm,nnf,maxit,nm,nf;
+  int it,nnm,nnf,maxit,nm,nf,nw;
   double declic;
 
   /* shape optim */
@@ -851,6 +851,12 @@ _MMG5_optet(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket) {
   maxit = 4;
   declic = 1.053;
   do {
+    /* treatment of bad elements*/
+    if(it < 5) {
+      nw = MMG3D_opttyp(mesh,met,bucket);
+    }
+    else
+      nw = 0;
     /* badly shaped process */
     if ( !mesh->info.noswap ) {
       nf = _MMG5_swpmsh(mesh,met,bucket,2);
@@ -884,12 +890,12 @@ _MMG5_optet(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket) {
        return(0);
        }*/
 
-    if ( (abs(mesh->info.imprim) > 4 || mesh->info.ddebug) && nf+nm > 0 ){
+    if ( (abs(mesh->info.imprim) > 4 || mesh->info.ddebug) && nw+nf+nm > 0 ){
       fprintf(stdout,"                                                   ");
-      fprintf(stdout,"      ""      %8d swapped, %8d moved\n",nf,nm);
+      fprintf(stdout,"      ""  %8d improved  %8d swapped, %8d moved\n",nw,nf,nm);
     }
   }
-  while( ++it < maxit && nm+nf > 0 );
+  while( ++it < maxit && nw+nm+nf > 0 );
 
   if ( !mesh->info.nomove ) {
     nm = _MMG5_movtet(mesh,met,3);

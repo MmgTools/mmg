@@ -322,7 +322,8 @@ static inline int _MMG3D_swpItem(MMG5_pMesh mesh,  MMG5_pSol met,_MMG5_pBucket b
   int           l,list[MMG3D_LMAX+2],lon,iel,nconf,ier;
   double        crit;
   double        OCRIT = 1.01;
-  
+  int           nf = 0,j;
+
   ier = 0;
   pt = &mesh->tetra[k];
   lon = _MMG5_coquil(mesh,k,iar,&list[0]);
@@ -330,12 +331,18 @@ static inline int _MMG3D_swpItem(MMG5_pMesh mesh,  MMG5_pSol met,_MMG5_pBucket b
   lon = lon/2;
   if ( lon > 2 ) {
     crit = pt->qual;
-    for (l=1; l<lon; l++) {
+    for (l=0; l<lon; l++) {
       iel = list[l] / 6;
       pt1 = &mesh->tetra[iel];
       if(pt1->tag & MG_REQ) break;
       if ( pt1->qual < crit )  crit = pt1->qual;
+      if ( pt1->xt ) {
+        pxt = &mesh->xtetra[pt1->xt];
+        for (j=0; j<4; j++)
+          if ( pxt->ftag[j] & MG_BDY )  nf++;
+      }
     }
+    if(nf > 1) return(0);//printf("on risque de crreerrrr %d\n",nf);
     if(l<lon)  {
       ier = 0;
     } else {
@@ -372,61 +379,201 @@ static inline int _MMG3D_swpalmostall(MMG5_pMesh mesh,  MMG5_pSol met,_MMG5_pBuc
   return(ier);
 }
 
+static inline int _MMG3D_splitItem(MMG5_pMesh mesh,  MMG5_pSol met,_MMG5_pBucket bucket,
+                                   int k,int iar,double OCRIT) {
+  MMG5_pTetra   pt;
+  double        len;
+  double        LLONG2 = 0.1;
+  int           ier,j,ip;
+
+  ier = 0;
+  pt = &mesh->tetra[k];
+  len = _MMG5_lenedg(mesh,met,iar,pt);
+  if(len > LLONG2) {
+    ier = _MMG5_splitedg(mesh,met,k,iar,OCRIT);
+  }
+
+  if(ier) {
+    for(j=0 ; j<4 ; j++) {
+      if(pt->v[j] == ier) break;	
+    }
+    assert(j<4);
+    ier = _MMG3D_movv_ani(mesh,met,k,j);
+  }
+  return(ier);
+}
+
+static inline int _MMG3D_splitalmostall(MMG5_pMesh mesh,  MMG5_pSol met,_MMG5_pBucket bucket,
+                                        int k,int iar) {
+  MMG5_pTetra   pt,pt1;
+  int           i,l,list[MMG3D_LMAX+2],lon,iel,nconf,ier;
+  double        len;
+  double        OCRIT=1.01;
+
+  ier = 0;
+  
+  pt = &mesh->tetra[k];
+  /* if(_MMG5_orvolnorm(mesh,k) < 5.e-9) { */
+  /*   OCRIT *= 0.5; */
+  /* } else */
+  /*   OCRIT *= 0.75; */
+  
+  for(i=0 ; i<6 ; i++) {
+    if(i==iar) continue;
+    ier = _MMG3D_splitItem(mesh,met,bucket,k,i,OCRIT);
+    if(ier) return(ier);
+  }           
+
+  return(ier);
+}
 
 int MMG3D_opttyp(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket) {
   MMG5_pTetra    pt,pt1;
   MMG5_pxTetra   pxt;
-  double         crit,critswp;
-  int            k,ityp,cs[10],ds[10],item[2],lon;
-  int            list[MMG3D_LMAX+2],l,iel,ier,i,nd,nconf,ne;
+  double         crit,critswp,len;
+  int            k,j,ityp,cs[10],ds[10],item[2],lon,*adja,iadr;
+  int            list[MMG3D_LMAX+2],l,iel,ier,i,nd,nconf,ne,npeau;
+  int            it,maxit,ntot;
   double         OCRIT = 1.01;
-  
-  memset(cs,0,10*sizeof(int)); 
-  memset(ds,0,10*sizeof(int));
-  nd = 0;
+  double         LLONG2 = 0.1;
+  int ddebug ;
+
+  //printf("on lance anatet4\n");
+  ier = 0;//_MMG5_anatet4(mesh,met,1);
+  if(ier) {
+    printf("on a splitte %d\n",ier);
+ /* memory free */
+    _MMG5_DEL_MEM(mesh,mesh->adja,(4*mesh->nemax+5)*sizeof(int));
+     if ( !MMG3D_hashTetra(mesh,1) ) {
+      fprintf(stdout,"  ## Hashing problem. Exit program.\n");
+      return(0);
+    }
+  }
+
+  ntot = 0;
   crit = 0.2 / _MMG5_ALPHAD;
 
-  ne = mesh->ne;
-  ++mesh->base;
-  for (k=1 ; k<=ne ; k++) {
-    pt = &mesh->tetra[k];
-    if(!pt->v[0]) continue;
-    if(pt->qual > crit) continue;
+  it = 0;
+  maxit = 10;
+  do {
+    ne = mesh->ne;
+    nd = 0;
+    memset(cs,0,10*sizeof(int)); 
+    memset(ds,0,10*sizeof(int));
     
-   if(pt->flag == mesh->base) {
-     printf("on ignore %d\n",k);
-      continue;
-    }
-     ityp = MMG3D_typelt(mesh,k,item);
-    cs[ityp]++;
+    for (k=1 ; k<=ne ; k++) {
+      pt = &mesh->tetra[k];
+      if(!pt->v[0]) continue;
+      /* if(pt->qual <= 3.117138e-07) {printf("k %d ityp %d %e npeau %d\n",k,ityp,pt->qual,npeau);
+        ddebug = 1;}
+        else*/
+        ddebug = 0;
+
+      if(pt->qual > crit) continue;
     
-    switch(ityp) {
-      
-    case 1:  /* sliver */
-    case 3:  /* aileron*/
-    case 6:  /* O good face: move away closest vertices */
-    case 7:
-    default:
-      if(mesh->info.noswap) break;
-      ier = _MMG3D_swpItem(mesh,met,bucket,k,item[0]);
-      if(ier > 0) {
-        nd++;
-        ds[ityp]++;
-        break;
-      } else if(!ier) {
-        ier = _MMG3D_swpalmostall(mesh,met,bucket,k,item[0]);
-        if(ier > 0) { 
+      ityp = MMG3D_typelt(mesh,k,item);
+      cs[ityp]++;
+
+      /*tet with bdry faces*/
+      iadr = 4*(k-1) + 1;
+      adja = &mesh->adja[iadr];
+      /*optim bdry tetra*/
+      npeau = 0;
+      for(i=0 ; i<4 ; i++) {
+        if(!adja[i]) npeau++;     
+      }
+      if(npeau>1 && !mesh->info.noswap) {
+        if(1 || mesh->info.imprim<-4) printf("%d faces de peau!!!! %d (typ %d) %e\n",npeau,k,ityp,pt->qual);
+        /* if ( !_MMG5_split4bar(mesh,met,k,1) ) return(-1); */
+        /* else { */
+        /*   nd++;  */
+        /*   ds[ityp]++; */
+        /*   printf("on a splitte\n"); */
+        /*   continue; */
+        /* } */
+      }  
+      if(npeau) {       
+        ier = 0;//MMG3D_optbdry(mesh,sol,k);
+        if(ier) { 
           nd++;
           ds[ityp]++;
+          continue;
         }
       }
-      break;
-    }/*end switch*/
-  }/*end for k*/
+
+      switch(ityp) {
+      
+      case 1:  /* sliver */
+      case 3:  /* aileron*/
+      case 6:  /* O good face: move away closest vertices */
+      case 7:
+      default:
+        if(mesh->info.noswap) break;
+        ier = _MMG3D_swpItem(mesh,met,bucket,k,item[0]);
+        if(ddebug) printf("on swp %d ?\n",ier);
+        if(ier > 0) {
+          nd++;
+          ds[ityp]++;
+          break;
+        } else if(!ier) {
+          /*second try to split the biggest edge*/
+          if(!mesh->info.noinsert) {
+            /* if(_MMG5_orvolnorm(mesh,k) < 5.e-9) { */
+            /*   OCRIT *= 0.5; */
+            /* } else */
+            /*   OCRIT *= 0.75; */
+            ier = 0;//_MMG3D_splitItem(mesh,met,bucket,k,item[0],OCRIT);
+            if(ddebug) printf("on split %d ?\n",ier);
+
+            if(ier) {
+              nd++;
+              ds[ityp]++;
+              break;
+            }
+          } /*end noinsert*/
+
+          ier = _MMG3D_swpalmostall(mesh,met,bucket,k,item[0]);
+          if(ddebug) printf("on swp2 %d ?\n",ier);
+
+          if(ier > 0) { 
+            nd++;
+            ds[ityp]++;
+            break;
+          }
+          ier = 0;//_MMG3D_splitalmostall(mesh,met,bucket,k,item[0]);
+          if(ddebug) printf("on split2 %d ?\n",ier);
+
+          if(ier > 0) { 
+            nd++;
+            ds[ityp]++;
+            break;
+          }
+        }
+        break;
+      case 2: /*chapeau*/
+        if((met->size!=1) && _MMG3D_movv_ani(mesh,met,k,item[0])) {
+          nd++;
+          ds[ityp]++;
+        } else {
+          for(i=0 ; i<4 ; i++) {
+            if(item[0]==i) continue;
+            if((met->size!=1) && _MMG3D_movv_ani(mesh,met,k,i)) {
+              nd++;
+              ds[ityp]++;
+              break;
+            }
+          }
+        }
+        break;
+      }/*end switch*/
+    }/*end for k*/
+    /* for (k=0; k<=7; k++)
+      if ( cs[k] )
+        printf("  optim [%d]      = %5d   %5d  %6.2f %%\n",k,cs[k],ds[k],100.0*ds[k]/cs[k]);
+    */
+    ntot += nd;
+  } while (nd && it++<maxit);
           
-  for (k=0; k<=7; k++)
-    if ( cs[k] )
-      printf("  optim [%d]      = %5d   %5d  %6.2f %%\n",k,cs[k],ds[k],100.0*ds[k]/cs[k]);
   
-    return(nd);
+    return(ntot);
   }
