@@ -149,7 +149,7 @@ int _MMG5_movintpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,int imp
  * \param ilistv size of the volumic ball.
  * \param lists pointer toward the surfacic ball of the point.
  * \param ilists size of the surfacic ball.
- * \param improve TO IMPLEMENT force the new minimum element quality to be greater or equal
+ * \param improve force the new minimum element quality to be greater or equal
  * than 1.02 of the old minimum element quality.
  * \return 0 if fail, 1 if success.
  *
@@ -541,7 +541,7 @@ int _MMG5_movbdyregpt_iso(MMG5_pMesh mesh, MMG5_pSol met,int *listv,
  * \param ilistv size of the volumic ball.
  * \param lists pointer toward the surfacic ball of the point.
  * \param ilists size of the surfacic ball.
- * \param improve TO IMPLEMENT force the new minimum element quality to be greater or equal
+ * \param improve force the new minimum element quality to be greater or equal
  * than 1.02 of the old minimum element quality.
  * \return 0 if fail, 1 if success.
  *
@@ -851,7 +851,7 @@ int _MMG5_movbdyrefpt_iso(MMG5_pMesh mesh, MMG5_pSol met, int *listv,
  * \param ilistv size of the volumic ball.
  * \param lists pointer toward the surfacic ball of the point.
  * \param ilists size of the surfacic ball.
- * \param improve TO IMPLEMENT force the new minimum element quality to be greater or equal
+ * \param improve force the new minimum element quality to be greater or equal
  * than 1.02 of the old minimum element quality.
  * \return 0 if fail, 1 if success.
  *
@@ -1160,7 +1160,7 @@ int _MMG5_movbdynompt_iso(MMG5_pMesh mesh,MMG5_pSol met, int *listv,
  * \param ilistv size of the volumic ball.
  * \param lists pointer toward the surfacic ball of the point.
  * \param ilists size of the surfacic ball.
- * \param improve TO IMPLEMENT force the new minimum element quality to be greater or equal
+ * \param improve force the new minimum element quality to be greater or equal
  * than 1.02 of the old minimum element quality.
  * \return 0 if fail, 1 if success.
  *
