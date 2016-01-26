@@ -28,7 +28,7 @@
 
 # Simple test: must already pass
 ADD_TEST(NAME Circle
-  COMMAND ${EXECUT_MMG2D}
+  COMMAND ${EXECUT_MMG2D} -v 5
   ${MMG2D_CI_TESTS}/Circle/cercle
   -out ${MMG2D_CI_TESTS}/Circle/cercle.o.meshb)
 
@@ -38,13 +38,13 @@ ADD_TEST(NAME Circle
 #####
 ###############################################################################
 ADD_TEST(NAME SquareIso
-  COMMAND ${EXECUT_MMG2D}
+  COMMAND ${EXECUT_MMG2D} -v 5
   ${MMG2D_CI_TESTS}/SquareIso/carretest
   -out ${MMG2D_CI_TESTS}/SquareIso/carretest.o.meshb)
 
 ####### -nosurf option
 ADD_TEST(NAME 2squares
-  COMMAND ${EXECUT_MMG2D} -msh 2 -hmax 1 -nosurf
+  COMMAND ${EXECUT_MMG2D} -msh 2 -hmax 1 -nosurf -v 5
   ${MMG2D_CI_TESTS}/2squares/2squares
   -out ${MMG2D_CI_TESTS}/2squares/2squares.o.meshb)
 
@@ -55,7 +55,7 @@ ADD_TEST(NAME 2squares
 #####
 ###############################################################################
 ADD_TEST(NAME SquareAniso
-  COMMAND ${EXECUT_MMG2D}
+  COMMAND ${EXECUT_MMG2D} -v 5
   ${MMG2D_CI_TESTS}/SquareAniso/adap1
   -out ${MMG2D_CI_TESTS}/SquareAniso/adap1.o.meshb)
 
@@ -65,7 +65,7 @@ ADD_TEST(NAME SquareAniso
 #####
 ###############################################################################
 ADD_TEST(NAME SquareGeneration
-  COMMAND ${EXECUT_MMG2D}
+  COMMAND ${EXECUT_MMG2D} -v 5
   ${MMG2D_CI_TESTS}/SquareGeneration/carretest
   -out ${MMG2D_CI_TESTS}/SquareGeneration/carretest.o.meshb)
 
@@ -74,12 +74,12 @@ ADD_TEST(NAME SquareGeneration
 #####         Implicit domain discretization
 #####
 ###############################################################################
-ADD_TEST(NAME LSDiscretization
-  COMMAND ${EXECUT_MMG2D} -ls
-  ${MMG2D_CI_TESTS}/LSDiscretization/dom
-  -out ${MMG2D_CI_TESTS}/LSDiscretization/dom.o.meshb)
-
-ADD_TEST(NAME LSDiscretization2
-  COMMAND ${EXECUT_MMG2D} -ls
-  ${MMG2D_CI_TESTS}/LSDiscretization/nacai
-  -out ${MMG2D_CI_TESTS}/LSDiscretization/nacai.o.meshb)
+#ADD_TEST(NAME LSDiscretization
+#  COMMAND ${EXECUT_MMG2D} -v 5 -ls
+#  ${MMG2D_CI_TESTS}/LSDiscretization/dom
+#  -out ${MMG2D_CI_TESTS}/LSDiscretization/dom.o.meshb)
+#
+#ADD_TEST(NAME LSDiscretization2
+#  COMMAND ${EXECUT_MMG2D} -v 5 -ls
+#  ${MMG2D_CI_TESTS}/LSDiscretization/nacai
+#  -out ${MMG2D_CI_TESTS}/LSDiscretization/nacai.o.meshb)

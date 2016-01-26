@@ -29,24 +29,29 @@ FOREACH(EXEC ${LISTEXEC_MMG})
   ##############################################################################
   #####
   ADD_TEST(NAME CubeVolAni_${EXEC}
-  COMMAND ${EXEC} -v 6 -d
+  COMMAND ${EXEC} -v 5
   ${MMG_CI_TESTS}/CubeVolAni/cube
   -out ${MMG_CI_TESTS}/CubeVolAni/cube.o.meshb)
 
   ADD_TEST(NAME CubeVolAni2_${EXEC}
-  COMMAND ${EXEC} -v 6 -d
+  COMMAND ${EXEC} -v 5
   ${MMG_CI_TESTS}/CubeVolAni2/cube
   -out ${MMG_CI_TESTS}/CubeVolAni2/cube.o.meshb)
 
   ADD_TEST(NAME SphereVolAni_${EXEC}
-  COMMAND ${EXEC} -v 6 -d
+  COMMAND ${EXEC} -v 5
   ${MMG_CI_TESTS}/SphereVolAni/sphere
   -out ${MMG_CI_TESTS}/SphereVolAni/sphere.o.meshb)
 
   ADD_TEST(NAME TorusholesAni_${EXEC}
-  COMMAND ${EXEC} -d -hgrad 1.15
+  COMMAND ${EXEC} -v 5 -hgrad 1.15
   ${MMG_CI_TESTS}/TorusholesAni/torusholes
   -out ${MMG_CI_TESTS}/TorusholesAni/torusholes.o.meshb)
+
+ ADD_TEST(NAME TorusholesAni_chocCyl_${EXEC}
+  COMMAND ${EXEC} -v 5 -hgrad 1.15
+  ${MMG_CI_TESTS}/TorusholesAni_chocCyl/torusholesTiny
+  -out ${MMG_CI_TESTS}/TorusholesAni_chocCyl/torusholesTiny.o.meshb)
   ##############################################################################
   #####
   #####         Check Memory Leak
@@ -94,14 +99,14 @@ FOREACH(EXEC ${LISTEXEC_MMG})
   ##############################################################################
   #####
   ADD_TEST(NAME HausdLoc_2Spheres${EXEC}
-    COMMAND ${EXEC} -hgrad 2
+    COMMAND ${EXEC} -v 5 -hgrad 2
     ${MMG_CI_TESTS}/HausdLoc_2Spheres/2spheres
     ${MMG_CI_TESTS}/HausdLoc_2Spheres/2spheres.o.meshb
     -hgrad 2
     )
   #####
   ADD_TEST(NAME hminmaxLoc_2Spheres${EXEC}
-    COMMAND ${EXEC} -hgrad 2
+    COMMAND ${EXEC} -v 5 -hgrad 2
     ${MMG_CI_TESTS}/HausdLoc_2Spheres/2spheres
     ${MMG_CI_TESTS}/HausdLoc_2Spheres/2spheres.o.meshb
     -hgrad 2

@@ -55,7 +55,7 @@ ADD_TEST(NAME SphereAni
 #####
 ###############################################################################
 ADD_TEST(NAME Rhino_M
-  COMMAND ${EXECUT_MMGS}
+  COMMAND ${EXECUT_MMGS} -v 5
   ${MMGS_CI_TESTS}/Rhino_M/rhino -hausd 1
   -out ${MMGS_CI_TESTS}/Rhino_M/rhino.d.meshb)
 
@@ -65,7 +65,7 @@ ADD_TEST(NAME Rhino_M
 #####
 ###############################################################################
 ADD_TEST(NAME Cow_NM_hausd10
-  COMMAND ${EXECUT_MMGS}
+  COMMAND ${EXECUT_MMGS} -v 5
   ${MMGS_CI_TESTS}/Cow_NM/cow -hausd 10
   -out ${MMGS_CI_TESTS}/Cow_NM/cow.d.meshb)
 
@@ -76,11 +76,11 @@ ADD_TEST(NAME Cow_NM_hausd10
 #####
 ###############################################################################
 ADD_TEST(NAME Car_NM
-  COMMAND ${EXECUT_MMGS}
+  COMMAND ${EXECUT_MMGS} -v 5
   ${MMGS_CI_TESTS}/Car_NM/car
   -out ${MMGS_CI_TESTS}/Car_NM/car.d.meshb)
 
 ADD_TEST(NAME Cow_NM_hausd20
-  COMMAND ${EXECUT_MMGS}
+  COMMAND ${EXECUT_MMGS} -v 5
   ${MMGS_CI_TESTS}/Cow_NM/cow -hausd 20
   -out ${MMGS_CI_TESTS}/Cow_NM/cow.d.meshb)
