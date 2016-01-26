@@ -533,6 +533,12 @@ int MMGS_loadMesh(MMG5_pMesh mesh, char *filename) {
   }
 
   /* read geometric entities */
+  if ( mesh->nc1 && !ng ) {
+    printf("  ## Warning: Your mesh don't contains Normals but contains"
+             " NormalAtVertices. The NormalAtVertices are deleted. \n");
+    mesh->nc1 = 0;
+  }
+
   if ( ng > 0 ) {
     _MMG5_SAFE_CALLOC(norm,3*ng+1,double);
 
@@ -575,6 +581,7 @@ int MMGS_loadMesh(MMG5_pMesh mesh, char *filename) {
 
     rewind(inm);
     fseek(inm,posnc1,SEEK_SET);
+
     for (k=1; k<=mesh->nc1; k++) {
       if (!bin)
         fscanf(inm,"%d %d",&ip,&idn);
