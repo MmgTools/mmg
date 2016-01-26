@@ -43,9 +43,9 @@
 #define  VOLMIN       1e-15//1.e-10//1.0e-15  --> vol negatif qd on rejoue
 #define LONMAX     4096
 
-int MMG_cas;
+// int MMG_cas; uncomment to debug
 
-extern int MMG_npuiss,MMG_nvol,MMG_npres;
+// extern int MMG_npuiss,MMG_nvol,MMG_npres;
 
 #define KTA     7
 #define KTB    11
@@ -381,10 +381,10 @@ static int _MMG5_correction_ani(MMG5_pMesh mesh,MMG5_pSol met,int ip,int* list,i
       vois[3]  = adja[3] >> 2;
       pt   = &mesh->tetra[iel];
 
-      MMG_cas=0;
+      // MMG_cas=0; // uncomment to debug
       for (i=0; i<4; i++) {
         adj = vois[i];
-        MMG_cas = 0;
+        // MMG_cas = 0;// uncomment to debug
         if ( adj && mesh->tetra[adj].mark == base)  continue;
 
         ib = pt->v[ _MMG5_idir[i][0] ];
@@ -409,7 +409,7 @@ static int _MMG5_correction_ani(MMG5_pMesh mesh,MMG5_pSol met,int ip,int* list,i
         v3 = uy*vx - ux*vy;
         dd = v1*(ppt->c[0]-p1->c[0]) + v2*(ppt->c[1]-p1->c[1]) \
           + v3*(ppt->c[2]-p1->c[2]);
-        MMG_cas=1;
+        // MMG_cas=1; // uncomment to debug
         //if ( dd < VOLMIN )  break;
         /*test sur le volume avec un eps local*/
         h1 = ux*ux + uy*uy + uz*uz;
@@ -432,7 +432,7 @@ static int _MMG5_correction_ani(MMG5_pMesh mesh,MMG5_pSol met,int ip,int* list,i
 
         /* point close to face */
         /*nn = (v1*v1 + v2*v2 + v3*v3);*/
-        MMG_cas=2;
+        // MMG_cas=2; // uncomment to debug
         nn = mm[0]*v1*v1 + mm[3]*v2*v2 + mm[5]*v3*v3 \
           + 2.0*(mm[1]*v1*v2 + mm[2]*v1*v3 + mm[4]*v2*v3);
         /*if ( det*dd*dd*dd*dd*dd*dd < nn * nn * nn * eps2 * eps2 * eps2 )  break;*/
@@ -477,7 +477,7 @@ static int _MMG5_correction_ani(MMG5_pMesh mesh,MMG5_pSol met,int ip,int* list,i
           exit(0);
           break;
           }*/
-        MMG_cas=0;
+        // MMG_cas=0; // uncomment to debug
       }
       if ( i < 4 || pt->tag & MG_REQ ) {
         if ( ipil <= nedep )   {/*printf("on veut tout retirer ? %d %d\n",ipil,nedep);*/return(0);   }
@@ -525,10 +525,10 @@ _MMG5_correction_iso(MMG5_pMesh mesh,int ip,int *list,int ilist,int nedep) {
       vois[2]  = adja[2] >> 2;
       vois[3]  = adja[3] >> 2;
       pt   = &mesh->tetra[iel];
-      MMG_cas=0;
+      // MMG_cas=0; // uncomment to debug
       for (i=0; i<4; i++) {
         adj = vois[i];
-        MMG_cas = 0;
+        // MMG_cas = 0; // uncomment to debug
         if ( adj && mesh->tetra[adj].mark == base )  continue;
 
         ib = pt->v[ _MMG5_idir[i][0] ];
@@ -553,16 +553,16 @@ _MMG5_correction_iso(MMG5_pMesh mesh,int ip,int *list,int ilist,int nedep) {
         v3 = uy*vx - ux*vy;
         dd = v1*(ppt->c[0]-p1->c[0]) + v2*(ppt->c[1]-p1->c[1]) \
           + v3*(ppt->c[2]-p1->c[2]);
-        MMG_cas=1;
+        // MMG_cas=1; // uncomment to debug
         //printf("on trouve vol %e <? %e\n",dd,VOLMIN);
         if ( dd < VOLMIN )  break;
 
         /* point close to face */
         nn = (v1*v1 + v2*v2 + v3*v3);
-        MMG_cas=2;
+        // MMG_cas=2; // uncomment to debug
         //printf("on trouve close ? %e %e\n",dd*dd,nn*eps2);
         if ( dd*dd < nn * eps2 )  break;
-        MMG_cas=0;
+        // MMG_cas=0; //uncomment to debug
       }
       if ( i < 4 ||  pt->tag & MG_REQ ) {
         if ( ipil <= nedep )  {/*printf("on veut tout retirer ? %d %d\n",ipil,nedep);*/return(0);   }
@@ -713,11 +713,12 @@ int _MMG5_cavity_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel,int ip,int* list,int 
 
   if ( isreq ) ilist = -abs(ilist);
 
-  if(MMG_cas==1) MMG_nvol++;
-  else if(MMG_cas==2 || MMG_cas>20) {
-    MMG_npuiss++;
-    if(MMG_cas>20) MMG_npres++;
-  }
+  // uncomment to debug
+  /* if(MMG_cas==1) MMG_nvol++; */
+  /* else if(MMG_cas==2 || MMG_cas>20) { */
+  /*   MMG_npuiss++; */
+  /*   if(MMG_cas>20) MMG_npres++; */
+  /* } */
 
   return(ilist);
 }
@@ -832,11 +833,12 @@ int _MMG5_cavity_iso(MMG5_pMesh mesh,MMG5_pSol sol,int iel,int ip,int *list,int 
 
   if ( isreq ) ilist = -abs(ilist);
 
-  if(MMG_cas==1) MMG_nvol++;
-  else if(MMG_cas==2 || MMG_cas>20) {
-    MMG_npuiss++;
-    if(MMG_cas>20) MMG_npres++;
-  }
+  // uncomment to debug
+  /* if(MMG_cas==1) MMG_nvol++; */
+  /* else if(MMG_cas==2 || MMG_cas>20) { */
+  /*   MMG_npuiss++; */
+  /*   if(MMG_cas>20) MMG_npres++; */
+  /* } */
   return(ilist);
 }
 

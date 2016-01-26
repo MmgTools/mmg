@@ -43,7 +43,8 @@ char  ddb;
 #define _MMG5_LOPTL_MMG5_DEL     1.41
 #define _MMG5_LOPTS_MMG5_DEL     0.6
 
-int MMG_npuiss,MMG_nvol,MMG_npres,MMG_npd;
+/* Decomment this part to debug */
+//int MMG_npuiss,MMG_nvol,MMG_npres,MMG_npd;
 
 
 /**
@@ -331,7 +332,7 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
         } else {
           lon = _MMG5_cavity(mesh,met,k,ip,list,ilist/2);
           if ( lon < 1 ) {
-            MMG_npd++;
+            // MMG_npd++; // decomment to debug
             _MMG3D_delPt(mesh,ip);
             goto collapse;
           } else {
@@ -342,7 +343,7 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
               continue;
             }
             else if ( ret == 0 ) {
-              MMG_npd++;
+              // MMG_npd++; // decomment to debug
               _MMG3D_delPt(mesh,ip);
               goto collapse;//continue;
             }
@@ -648,7 +649,7 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
           } else {
             lon = _MMG5_cavity(mesh,met,k,ip,list,ilist/2);
             if ( lon < 1 ) {
-              MMG_npd++;
+              // MMG_npd++; // decomment to debug
               _MMG3D_delPt(mesh,ip);
               goto collapse2;
             } else {
@@ -659,7 +660,7 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
                 break;//imax continue;
               }
               else if ( ret == 0 ) {
-                MMG_npd++;
+                // MMG_npd++; // decomment to debug
                 _MMG3D_delPt(mesh,ip);
                 goto collapse2;//continue;
               }
@@ -754,7 +755,7 @@ _MMG5_adpsplcol(MMG5_pMesh mesh,MMG5_pSol met,_MMG5_pBucket bucket, int* warn) {
   it = nnc = nns = nnf = nnm = nfilt = 0;
   maxit = 10;
   mesh->gap = maxgap = 0.5;
-  MMG_npuiss = MMG_nvol = MMG_npres = MMG_npd = 0;
+  // MMG_npuiss = MMG_nvol = MMG_npres = MMG_npd = 0; // decomment to debug
   do {
     if ( !mesh->info.noinsert ) {
       *warn=0;
