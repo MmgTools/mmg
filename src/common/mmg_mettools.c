@@ -409,9 +409,9 @@ int _MMG5_mmgIntextmet(MMG5_pMesh mesh,MMG5_pSol met,int np,double me[6],
                        double n[3]) {
   MMG5_pPoint         p0;
   MMG5_pxPoint        go;
-  double              hu,isqhmin,isqhmax,dd,alpha1,alpha2,alpha3,u[3],a[4];
+  double              hu,isqhmin,isqhmax,dd,alpha1,alpha2,alpha3,u[3];
+  double              lambda[3],vp[3][3];
   double              *m,*n1,*n2,*t,r[3][3],mrot[6],mr[3],mtan[3],metan[3];
-  DOUBLE_COMPLEX      ro[3];
   char                i;
 
   isqhmin = 1.0 / (mesh->info.hmin*mesh->info.hmin);
@@ -423,20 +423,19 @@ int _MMG5_mmgIntextmet(MMG5_pMesh mesh,MMG5_pSol met,int np,double me[6],
   /* Case of a singular point : take smallest size prescribed by met, or me in
    * every direction */
   if ( MG_SIN(p0->tag) || (p0->tag & MG_NOM) ) {
-    /* Characteristic polynomial of me */
-    a[3] = -1.0;
-    a[2] = me[0]+me[3]+me[5];
-    a[1] = -(me[0]*me[3]+me[0]*me[5]+me[3]*me[5]) + (me[1]*me[1]+me[2]*me[2]+me[4]*me[4]);
-    a[0] = me[0]*(me[3]*me[5]-me[4]*me[4]) -me[1]*(me[1]*me[5]-me[2]*me[4]) \
-      + me[2]*(me[1]*me[4]-me[2]*me[3]);
+    /* /\* Characteristic polynomial of me *\/ */
+    /* a[3] = -1.0; */
+    /* a[2] = me[0]+me[3]+me[5]; */
+    /* a[1] = -(me[0]*me[3]+me[0]*me[5]+me[3]*me[5]) + (me[1]*me[1]+me[2]*me[2]+me[4]*me[4]); */
+    /* a[0] = me[0]*(me[3]*me[5]-me[4]*me[4]) -me[1]*(me[1]*me[5]-me[2]*me[4]) \ */
+    /*   + me[2]*(me[1]*me[4]-me[2]*me[3]); */
+    /* _MMG5_rootDeg3(a,ro); */
 
-    _MMG5_rootDeg3(a,ro);
+    _MMG5_eigenv(1,me,lambda,vp);
+
     hu = m[0];
     for(i=0; i<3; i++) {
-      if( cimag(ro[i]) != 0.0 )
-        break;
-      else
-        hu = MG_MAX(hu,creal(ro[i]));
+        hu = MG_MAX(hu,lambda[i]);
     }
     hu = MG_MIN(isqhmin,hu);
     hu = MG_MAX(isqhmax,hu);
