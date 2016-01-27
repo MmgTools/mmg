@@ -120,7 +120,7 @@ int _MMG5_movintpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,int imp
 	  _MMG5_SAFE_FREE(callist);
 	  return(0);
   }
-  else if ( improve && calnew < 1.00 * calold ) {
+  else if ( improve && calnew < 1.02 * calold ) {
 	  _MMG5_SAFE_FREE(callist);
 	  return(0);
   }
@@ -150,7 +150,7 @@ int _MMG5_movintpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,int imp
  * \param lists pointer toward the surfacic ball of the point.
  * \param ilists size of the surfacic ball.
  * \param improve force the new minimum element quality to be greater or equal
- * than 1.00 of the old minimum element quality.
+ * than 1.02 of the old minimum element quality.
  * \return 0 if fail, 1 if success.
  *
  * Move boundary regular point, whose volumic and surfacic balls are passed.
@@ -476,7 +476,7 @@ int _MMG5_movbdyregpt_iso(MMG5_pMesh mesh, MMG5_pSol met,int *listv,
   }
   if ( calold < _MMG5_NULKAL && calnew <= calold )    return(0);
   else if (calnew < _MMG5_NULKAL) return(0);
-  else if (improve && calnew < 1.00*calold) return(0);
+  else if (improve && calnew < 1.02*calold) return(0);
   else if ( calnew < 0.3*calold )        return(0);
   memset(pxp,0,sizeof(MMG5_xPoint));
 
@@ -542,7 +542,7 @@ int _MMG5_movbdyregpt_iso(MMG5_pMesh mesh, MMG5_pSol met,int *listv,
  * \param lists pointer toward the surfacic ball of the point.
  * \param ilists size of the surfacic ball.
  * \param improve force the new minimum element quality to be greater or equal
- * than 1.00 of the old minimum element quality.
+ * than 1.02 of the old minimum element quality.
  * \return 0 if fail, 1 if success.
  *
  * Move boundary reference point, whose volumic and surfacic balls are passed.
@@ -852,7 +852,7 @@ int _MMG5_movbdyrefpt_iso(MMG5_pMesh mesh, MMG5_pSol met, int *listv,
  * \param lists pointer toward the surfacic ball of the point.
  * \param ilists size of the surfacic ball.
  * \param improve force the new minimum element quality to be greater or equal
- * than 1.00 of the old minimum element quality.
+ * than 1.02 of the old minimum element quality.
  * \return 0 if fail, 1 if success.
  *
  * Move boundary non manifold point, whose volumic and (exterior)
@@ -1161,7 +1161,7 @@ int _MMG5_movbdynompt_iso(MMG5_pMesh mesh,MMG5_pSol met, int *listv,
  * \param lists pointer toward the surfacic ball of the point.
  * \param ilists size of the surfacic ball.
  * \param improve force the new minimum element quality to be greater or equal
- * than 1.00 of the old minimum element quality.
+ * than 1.02 of the old minimum element quality.
  * \return 0 if fail, 1 if success.
  *
  * Move boundary ridge point, whose volumic and surfacic balls are passed.
