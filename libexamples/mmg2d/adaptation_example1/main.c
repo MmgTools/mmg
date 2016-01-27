@@ -111,5 +111,9 @@ int main(int argc,char *argv[]) {
   MMG2D_Free_all(MMG5_ARG_start,
                  MMG5_ARG_ppMesh,&mmgMesh,MMG5_ARG_ppMet,&mmgSol,
                  MMG5_ARG_end);
+
+  free(filename);
+  filename = NULL;
+
   return(0);
 }
