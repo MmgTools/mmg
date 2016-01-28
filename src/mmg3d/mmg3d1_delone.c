@@ -891,8 +891,8 @@ _MMG5_optet(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket) {
        }*/
 
     if ( (abs(mesh->info.imprim) > 4 || mesh->info.ddebug) && nw+nf+nm > 0 ){
-      fprintf(stdout,"                                                   ");
-      fprintf(stdout,"      ""  %8d improved  %8d swapped, %8d moved\n",nw,nf,nm);
+      fprintf(stdout,"                                          ");
+      fprintf(stdout,"  %8d improved, %8d swapped, %8d moved\n",nw,nf,nm);
     }
   }
   while( ++it < maxit && nw+nm+nf > 0 );

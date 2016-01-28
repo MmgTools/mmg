@@ -351,7 +351,7 @@ static int _MMG5_adpcol(MMG5_pMesh mesh,MMG5_pSol met) {
  */
 static int _MMG5_adptet(MMG5_pMesh mesh,MMG5_pSol met) {
   int      it1,it,nnc,nns,nnf,nnm,maxit,nc,ns,nf,nm;
-  int      warn;
+  int      warn;//,nw;
   double   maxgap;
 
   /* Iterative mesh modifications */
@@ -446,6 +446,13 @@ static int _MMG5_adptet(MMG5_pMesh mesh,MMG5_pSol met) {
   it  = 0;
   maxit = 2;
   do {
+/*     /\* treatment of bad elements*\/ */
+/*     if( 0 && it < 2) { */
+/*       nw = MMG3D_opttyp(mesh,met,NULL); */
+/*     } */
+/*     else */
+/*       nw = 0; */
+
     /* badly shaped process */
     /*ier = _MMG5_badelt(mesh,met);
       if ( ier < 0 ) {
@@ -479,12 +486,14 @@ static int _MMG5_adptet(MMG5_pMesh mesh,MMG5_pSol met) {
     }
     else  nf = 0;
 
-    if ( (abs(mesh->info.imprim) > 4 || mesh->info.ddebug) && nf+nm > 0 ){
+    if ( (abs(mesh->info.imprim) > 4 || mesh->info.ddebug) && /*nw+*/nf+nm > 0 ){
+/*       fprintf(stdout,"                         "); */
+/*       fprintf(stdout,"%8d improved, %8d swapped, %8d moved\n",nw,nf,nm); */
       fprintf(stdout,"                                            ");
       fprintf(stdout,"%8d swapped, %8d moved\n",nf,nm);
     }
   }
-  while( ++it < maxit && nm+nf > 0 );
+  while( ++it < maxit && /*nw+*/nm+nf > 0 );
 
   if ( !mesh->info.nomove ) {
     nm = _MMG5_movtet(mesh,met,3);
