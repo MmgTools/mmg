@@ -201,3 +201,63 @@ int MMG2D_Get_adjaVerticesFast(MMG5_pMesh mesh, int ip,int start, int lispoi[MMG
 
   return nbpoi;
 }
+
+/**
+ * \param mesh pointer toward the mesh structure
+ *
+ * Free the mesh elements (and the adjacency).
+ *
+ */
+void MMG2D_Free_Triangles(MMG5_pMesh mesh) {
+
+  if ( mesh->adja )
+    _MMG5_DEL_MEM(mesh,mesh->adja,(3*mesh->ntmax+5)*sizeof(int));
+
+  if ( mesh->tria )
+    _MMG5_DEL_MEM(mesh,mesh->tria,(mesh->nt+1)*sizeof(MMG5_Tria));
+
+  mesh->nt = 0;
+  mesh->nti = 0;
+  mesh->nenil = 0;
+
+  return;
+}
+
+/**
+ * \param mesh pointer toward the mesh structure
+ *
+ * Free the mesh edges (and the associated xpoints).
+ *
+ */
+void MMG2D_Free_Edges(MMG5_pMesh mesh) {
+
+  if ( mesh->edge )
+    _MMG5_DEL_MEM(mesh,mesh->edge,(mesh->na+1)*sizeof(MMG5_Edge));
+
+  if ( mesh->xpoint )
+    _MMG5_DEL_MEM(mesh,mesh->xpoint,(mesh->xpmax+1)*sizeof(MMG5_xPoint));
+
+  mesh->na = 0;
+  mesh->nai = 0;
+  mesh->nanil = 0;
+
+  mesh->xp = 0;
+
+  return;
+}
+
+/**
+ * \param mesh pointer toward the mesh structure
+ * \param sol pointer toward the solution structure
+ *
+ * Free the solution.
+ *
+ */
+void MMG2D_Free_Solutions(MMG5_pMesh mesh,MMG5_pSol sol) {
+
+  /* sol */
+  if ( sol && sol->m )
+    _MMG5_DEL_MEM(mesh,sol->m,(sol->size*(sol->npmax+1))*sizeof(double));
+
+  return;
+}

@@ -498,4 +498,29 @@ int MMG2D_Get_adjaVertices(MMG5_pMesh mesh, int ip, int lispoi[MMG2D_LMAX]);
 int MMG2D_Get_adjaVerticesFast(MMG5_pMesh mesh, int ip,int start,
                                int lispoi[MMG2D_LMAX]);
 
+/**
+ * \param mesh pointer toward the mesh structure
+ *
+ * Free the mesh elements (and the adjacency).
+ *
+ */
+void MMG2D_Free_Triangles(MMG5_pMesh mesh);
+
+/**
+ * \param mesh pointer toward the mesh structure
+ *
+ * Free the mesh edges (and the associated xpoints).
+ *
+ */
+void MMG2D_Free_Edges(MMG5_pMesh mesh);
+
+/**
+ * \param mesh pointer toward the mesh structure
+ * \param sol pointer toward the solution structure
+ *
+ * Free the solution.
+ *
+ */
+void MMG2D_Free_Solutions(MMG5_pMesh mesh,MMG5_pSol sol);
+
 #endif

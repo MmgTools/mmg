@@ -83,3 +83,36 @@ FORTRAN_NAME(MMG2D_GET_ADJAVERTICESFAST,mmg2d_get_adjaverticesfast,
   *retval =  MMG2D_Get_adjaVerticesFast(*mesh,*ip, *start,lispoi);
   return;
 }
+
+/**
+ * See \ref MMG2D_Free_Triangles function in \ref mmg2d/libmmg2d.h file.
+ */
+FORTRAN_NAME(MMG2D_FREE_TRIANGLES,mmg2d_free_triangles,
+             (MMG5_pMesh *mesh),(mesh)) {
+
+  MMG2D_Free_Triangles(*mesh);
+
+  return;
+}
+
+/**
+ * See \ref MMG2D_Free_Edges function in \ref mmg2d/libmmg2d.h file.
+ */
+FORTRAN_NAME(MMG2D_FREE_EDGES,mmg2d_free_edges,
+             (MMG5_pMesh *mesh),(mesh)) {
+
+  MMG2D_Free_Edges(*mesh);
+
+  return;
+}
+
+/**
+ * See \ref MMG2D_Free_Edges function in \ref mmg2d/libmmg2d.h file.
+ */
+FORTRAN_NAME(MMG2D_FREE_SOLUTIONS,mmg2d_free_solutions,
+             (MMG5_pMesh *mesh,MMG5_pSol *sol),(mesh,sol)) {
+
+  MMG2D_Free_Solutions(*mesh,*sol);
+
+  return;
+}

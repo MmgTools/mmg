@@ -94,7 +94,16 @@ int _MMG3D_packMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
     ppt = &mesh->point[k];
     if ( !MG_VOK(ppt) )  continue;
     ppt->tmp = ++np;
-    if ( ppt->tag & MG_CRN )  nc++;
+    if ( ppt->tag & MG_CRN ) {
+      if ( mesh->info.nosurf && (ppt->tag & MG_REQ) ) {
+        // Warning: in -nosurf option : we loose the corner and the required
+        // points
+        ppt->tag &= ~MG_CRN;
+        ppt->tag &= ~MG_REQ;
+        continue;
+      }
+      nc++;
+    }
     ppt->ref = abs(ppt->ref);
   }
 

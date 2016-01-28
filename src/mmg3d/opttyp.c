@@ -483,7 +483,7 @@ int MMG3D_opttyp(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket) {
         if(!adja[i]) npeau++;     
       }
       if(npeau>1 && !mesh->info.noswap) {
-        if(1 || mesh->info.imprim<-4) printf("%d faces de peau!!!! %d (typ %d) %e\n",npeau,k,ityp,pt->qual);
+        if( mesh->info.imprim<-4 ) printf("%d faces de peau!!!! %d (typ %d) %e\n",npeau,k,ityp,pt->qual);
         /* if ( !_MMG5_split4bar(mesh,met,k,1) ) return(-1); */
         /* else { */
         /*   nd++;  */
