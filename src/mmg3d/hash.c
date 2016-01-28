@@ -866,7 +866,7 @@ int _MMG5_hGeom(MMG5_pMesh mesh) {
         /* If we use the nosurf option and the edge is required, we don't want
          * to detect it as an edge whose tag has been modified for the option */
         if ( mesh->info.nosurf && (tag & MG_REQ) )
-          pt->tag[i] = ~MG_CRN;
+          pt->tag[i] &= ~MG_CRN;
 
         /* Mark edges as boundary edges */
         pt->tag[i] |= (tag | MG_BDY);

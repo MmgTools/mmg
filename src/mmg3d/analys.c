@@ -100,8 +100,20 @@ static int _MMG5_setadj(MMG5_pMesh mesh){
         if ( !mesh->point[ip1].tmp )  mesh->point[ip1].tmp = ++nvf;
         if ( !mesh->point[ip2].tmp )  mesh->point[ip2].tmp = ++nvf;
         if ( MG_EDG(pt->tag[i]) || pt->tag[i] & MG_REQ ) {
-          mesh->point[ip1].tag |= pt->tag[i];
-          mesh->point[ip2].tag |= pt->tag[i];
+              tag = mesh->point[ip1].tag;
+              mesh->point[ip1].tag |= pt->tag[i];
+              // Warning: in -nosurf option : we loose the corner points and the
+              // (corner + required) points provided by the user.
+              if ( (tag & MG_REQ) && (!(tag & MG_GEO)) ) {
+                mesh->point[ip1].tag &= ~MG_GEO;
+              }
+              tag = mesh->point[ip2].tag;
+              mesh->point[ip2].tag |= pt->tag[i];
+              // Warning: in -nosurf option : we loose the corner points and the
+              // (corner + required) points provided by the user.
+              if ( (tag & MG_REQ) && (!(tag & MG_GEO)) ) {
+                mesh->point[ip2].tag &= ~MG_GEO;
+              }
         }
 
         /* open boundary */
