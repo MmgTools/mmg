@@ -211,10 +211,14 @@ int MMG2D_Get_adjaVerticesFast(MMG5_pMesh mesh, int ip,int start, int lispoi[MMG
 void MMG2D_Free_Triangles(MMG5_pMesh mesh) {
 
   if ( mesh->adja )
-    _MMG5_DEL_MEM(mesh,mesh->adja,(4*mesh->nemax+5)*sizeof(int));
+    _MMG5_DEL_MEM(mesh,mesh->adja,(3*mesh->ntmax+5)*sizeof(int));
 
   if ( mesh->tria )
     _MMG5_DEL_MEM(mesh,mesh->tria,(mesh->nt+1)*sizeof(MMG5_Tria));
+
+  mesh->nt = 0;
+  mesh->nti = 0;
+  mesh->nenil = 0;
 
   return;
 }
@@ -232,6 +236,12 @@ void MMG2D_Free_Edges(MMG5_pMesh mesh) {
 
   if ( mesh->xpoint )
     _MMG5_DEL_MEM(mesh,mesh->xpoint,(mesh->xpmax+1)*sizeof(MMG5_xPoint));
+
+  mesh->na = 0;
+  mesh->nai = 0;
+  mesh->nanil = 0;
+
+  mesh->xp = 0;
 
   return;
 }
