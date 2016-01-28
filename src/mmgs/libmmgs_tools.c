@@ -53,7 +53,6 @@ void MMGS_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
     movridpt= movridpt_iso;
   }
   else {
-    fprintf(stdout,"\n  ## WARNING: ANISOTROPIC REMESHING NOT STABLE FOR NOW.\n\n");
     _MMG5_calelt  = _MMG5_caltri_ani;
     _MMG5_defsiz  = _MMGS_defsiz_ani;
     gradsiz = gradsiz_ani;
