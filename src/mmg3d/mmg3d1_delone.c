@@ -884,12 +884,6 @@ _MMG5_optet(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket) {
     else  nm = 0;
     nnm += nm;
 
-    /* ier = _MMG5_badelt(mesh,met);
-       if ( ier < 0 ) {
-       fprintf(stdout,"  ## Unable to remove bad elements.\n");
-       return(0);
-       }*/
-
     if ( (abs(mesh->info.imprim) > 4 || mesh->info.ddebug) && nw+nf+nm > 0 ){
       fprintf(stdout,"                                          ");
       fprintf(stdout,"  %8d improved, %8d swapped, %8d moved\n",nw,nf,nm);

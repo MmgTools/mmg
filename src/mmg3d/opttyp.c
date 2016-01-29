@@ -28,45 +28,39 @@
  * \author Algiane Froehly
  * \version 5
  * \copyright GNU Lesser General Public License.
- * \todo doxygen documentation.
  */
 
 #include "mmg3d.h"
 
-/* identify type of element :
-   ityp= 0: 4 faces bonnes          (elt ok)
-   1: 4 faces bonnes, vol nul (sliver)
-   2: 4 faces ok, vol nul+sommet proche face   (chapeau)
-   3: 3 faces bonnes, 1 obtuse    (aileron)
-   4: 2 faces bonnes, 2 faces aigu => 1 petite arete
-   5: 1 face bonne, 3 petites aretes
-   6: 2 faces grandes aretes, 2 faces petites iaretes
-   7: 4 faces grandes aretes
-   item: bad entity
-*/
-
-
-/* nb face obtuse :    nb faces aigu :
-   ityp :  0: 0             0
-   1: 0             0
-   2: 0             0
-   3: 1             0
-   4: 0             2
-   5: 0             3
-   6: 2             2
-   7: 0             4
-*/
-/* nb gde arete :    nb petite arete :
-   ityp :  0: 0             0
-   1: 0             0
-   2: 0             0
-   3: 1             0
-   4: 0             1
-   5: 0             3
-   6: 1             1
-   7: 0             2
-*/
-
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param iel element index.
+ * \param item bad entity.
+ * \return -1 if fail, element type otherwise.
+ *
+ * Identify the type of element.\n
+ * Type:
+ *    - 0: element is ok.
+ *    - 1: empty volume but 4 valid faces (sliver)
+ *    - 2: empty volume and a vertex close to the opposite face.
+ * 4 valid faces (chinese hat).
+ *    - 3: 3 valid faces, 1 obtuse face (aileron)
+ *    - 4: 2 valid faces, 2 acute faces (=> 1 small edge)
+ *    - 5: 1 valid face, 3 small edges
+ *    - 6: 2 faces with big edges, 2 faces with small edges
+ *    - 7: 4 faces with big edges
+ *
+ * Element caracteristics by type:
+ *    - 0: 0 obtuse face, 0 acute face, 0 big edge, 0 small edge.
+ *    - 1: 0 obtuse face, 0 acute face, 0 big edge, 0 small edge.
+ *    - 2: 0 obtuse face, 0 acute face, 0 big edge, 0 small edge.
+ *    - 3: 1 obtuse face, 0 acute face, 1 big edge, 0 small edge.
+ *    - 4: 0 obtuse face, 2 acute face, 0 big edge, 1 small edge.
+ *    - 5: 0 obtuse face, 3 acute face, 0 big edge, 3 small edge.
+ *    - 6: 2 obtuse face, 2 acute face, 1 big edge, 1 small edge.
+ *    - 7: 0 obtuse face, 4 acute face, 0 big edge, 2 small edge.
+ *
+ */
 int MMG3D_typelt(MMG5_pMesh mesh,int iel,int *item) {
   MMG5_pTetra    pt;
   MMG5_pPoint    pa,pb,pc,pd;
@@ -215,7 +209,7 @@ int MMG3D_typelt(MMG5_pMesh mesh,int iel,int *item) {
       }
     }
 
-    /* types 1 */
+    /* type 1 */
     isur = 0;
     if ( s[0]+s[1] > ssmall )  isur = 1;
     if ( s[0]+s[2] > ssmall )  isur++;
@@ -352,35 +346,62 @@ static inline int _MMG3D_swpItem(MMG5_pMesh mesh,  MMG5_pSol met,_MMG5_pBucket b
         pxt = &mesh->xtetra[pt->xt];
         if ( pxt->edg[iar] || pxt->tag[iar] ) return(0);
       }
-      
+
       nconf = _MMG5_chkswpgen(mesh,met,k,iar,&lon,list,OCRIT,2);
       if ( nconf ) {
         ier = _MMG5_swpgen(mesh,met,nconf,lon,list,bucket,2);
         if ( ier < 0 ) return(-1);
-        else 
+        else
           return(ier);
-      }           
+      }
     }
   }
 
   return(ier);
 }
-static inline int _MMG3D_swpalmostall(MMG5_pMesh mesh,  MMG5_pSol met,_MMG5_pBucket bucket,int k,int iar) {
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param bucket pointer toward the bucket structure.
+ * \param k elt index.
+ * \param iar index of edge to not try to swap.
+ * \return -1 if fail, 0 if we don't swap anything, 1 otherwise.
+ *
+ * Try to swap all edges of tetra \a k except of the edge number \a iar.
+ *
+ */
+static inline
+int _MMG3D_swpalmostall(MMG5_pMesh mesh,  MMG5_pSol met,_MMG5_pBucket bucket,
+                        int k,int iar) {
   int           i,ier;
-  
+
   ier = 0;
   for(i=0 ; i<6 ; i++) {
     if(i==iar) continue;
     ier = _MMG3D_swpItem(mesh,met,bucket,k,i);
     if ( ier < 0 ) return(-1);
-    else if(ier) 
+    else if(ier)
       return(ier);
   }
   return(ier);
 }
 
-static inline int _MMG3D_splitItem(MMG5_pMesh mesh,  MMG5_pSol met,_MMG5_pBucket bucket,
-                                   int k,int iar,double OCRIT) {
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param bucket pointer toward the bucket structure.
+ * \param k elt index.
+ * \param iar index of edge to split.
+ * \param quality threshold.
+ * \return 1 if success, 0 otherwise
+ *
+ * Try to split edge number \a iar of tetra \a k
+ *
+ */
+static inline
+int _MMG3D_splitItem(MMG5_pMesh mesh,  MMG5_pSol met,_MMG5_pBucket bucket,
+                     int k,int iar,double OCRIT) {
   MMG5_pTetra   pt;
   double        len;
   double        LLONG2 = 0.1;
@@ -395,7 +416,7 @@ static inline int _MMG3D_splitItem(MMG5_pMesh mesh,  MMG5_pSol met,_MMG5_pBucket
 
   if(ier) {
     for(j=0 ; j<4 ; j++) {
-      if(pt->v[j] == ier) break;	
+      if(pt->v[j] == ier) break;
     }
     assert(j<4);
     ier = _MMG3D_movv_ani(mesh,met,k,j);
@@ -403,30 +424,52 @@ static inline int _MMG3D_splitItem(MMG5_pMesh mesh,  MMG5_pSol met,_MMG5_pBucket
   return(ier);
 }
 
-static inline int _MMG3D_splitalmostall(MMG5_pMesh mesh,  MMG5_pSol met,_MMG5_pBucket bucket,
-                                        int k,int iar) {
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param bucket pointer toward the bucket structure.
+ * \param k elt index.
+ * \param iar index of edge to not split.
+ * \return 1 if success, 0 otherwise
+ *
+ * Try to split evry edge of tetra \a k except of edge number \a iar.
+ *
+ */
+static inline
+int _MMG3D_splitalmostall(MMG5_pMesh mesh,  MMG5_pSol met,_MMG5_pBucket bucket,
+                          int k,int iar) {
   MMG5_pTetra   pt,pt1;
   int           i,l,list[MMG3D_LMAX+2],lon,iel,nconf,ier;
   double        len;
   double        OCRIT=1.01;
 
   ier = 0;
-  
+
   pt = &mesh->tetra[k];
   /* if(_MMG5_orvolnorm(mesh,k) < 5.e-9) { */
   /*   OCRIT *= 0.5; */
   /* } else */
   /*   OCRIT *= 0.75; */
-  
+
   for(i=0 ; i<6 ; i++) {
     if(i==iar) continue;
     ier = _MMG3D_splitItem(mesh,met,bucket,k,i,OCRIT);
     if(ier) return(ier);
-  }           
+  }
 
   return(ier);
 }
 
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param bucket pointer toward the bucket structure.
+ * \return 0 if fail, number of improved elts otherwise.
+ *
+ * Travel across the mesh to detect element with very bad quality (less than
+ * 0.2) and try to improve them by every means.
+ *
+ */
 int MMG3D_opttyp(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket) {
   MMG5_pTetra    pt,pt1;
   MMG5_pxTetra   pxt;
@@ -442,9 +485,9 @@ int MMG3D_opttyp(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket) {
   ier = 0;//_MMG5_anatet4(mesh,met,1);
   if(ier) {
     printf("on a splitte %d\n",ier);
- /* memory free */
+    /* memory free */
     _MMG5_DEL_MEM(mesh,mesh->adja,(4*mesh->nemax+5)*sizeof(int));
-     if ( !MMG3D_hashTetra(mesh,1) ) {
+    if ( !MMG3D_hashTetra(mesh,1) ) {
       fprintf(stdout,"  ## Hashing problem. Exit program.\n");
       return(0);
     }
@@ -458,19 +501,19 @@ int MMG3D_opttyp(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket) {
   do {
     ne = mesh->ne;
     nd = 0;
-    memset(cs,0,10*sizeof(int)); 
+    memset(cs,0,10*sizeof(int));
     memset(ds,0,10*sizeof(int));
-    
+
     for (k=1 ; k<=ne ; k++) {
       pt = &mesh->tetra[k];
       if(!pt->v[0]) continue;
       /* if(pt->qual <= 3.117138e-07) {printf("k %d ityp %d %e npeau %d\n",k,ityp,pt->qual,npeau);
-        ddebug = 1;}
-        else*/
-        ddebug = 0;
+         ddebug = 1;}
+         else*/
+      ddebug = 0;
 
       if(pt->qual > crit) continue;
-    
+
       ityp = MMG3D_typelt(mesh,k,item);
       cs[ityp]++;
 
@@ -480,7 +523,7 @@ int MMG3D_opttyp(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket) {
       /*optim bdry tetra*/
       npeau = 0;
       for(i=0 ; i<4 ; i++) {
-        if(!adja[i]) npeau++;     
+        if(!adja[i]) npeau++;
       }
       if(npeau>1 && !mesh->info.noswap) {
         if( mesh->info.imprim<-4 ) printf("%d faces de peau!!!! %d (typ %d) %e\n",npeau,k,ityp,pt->qual);
@@ -491,10 +534,10 @@ int MMG3D_opttyp(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket) {
         /*   printf("on a splitte\n"); */
         /*   continue; */
         /* } */
-      }  
-      if(npeau) {       
+      }
+      if(npeau) {
         ier = 0;//MMG3D_optbdry(mesh,sol,k);
-        if(ier) { 
+        if(ier) {
           nd++;
           ds[ityp]++;
           continue;
@@ -502,7 +545,7 @@ int MMG3D_opttyp(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket) {
       }
 
       switch(ityp) {
-      
+
       case 1:  /* sliver */
       case 3:  /* aileron*/
       case 6:  /* O good face: move away closest vertices */
@@ -535,7 +578,7 @@ int MMG3D_opttyp(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket) {
           ier = _MMG3D_swpalmostall(mesh,met,bucket,k,item[0]);
           if(ddebug) printf("on swp2 %d ?\n",ier);
 
-          if(ier > 0) { 
+          if(ier > 0) {
             nd++;
             ds[ityp]++;
             break;
@@ -543,7 +586,7 @@ int MMG3D_opttyp(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket) {
           ier = 0;//_MMG3D_splitalmostall(mesh,met,bucket,k,item[0]);
           if(ddebug) printf("on split2 %d ?\n",ier);
 
-          if(ier > 0) { 
+          if(ier > 0) {
             nd++;
             ds[ityp]++;
             break;
@@ -568,12 +611,12 @@ int MMG3D_opttyp(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket) {
       }/*end switch*/
     }/*end for k*/
     /* for (k=0; k<=7; k++)
-      if ( cs[k] )
-        printf("  optim [%d]      = %5d   %5d  %6.2f %%\n",k,cs[k],ds[k],100.0*ds[k]/cs[k]);
+       if ( cs[k] )
+       printf("  optim [%d]      = %5d   %5d  %6.2f %%\n",k,cs[k],ds[k],100.0*ds[k]/cs[k]);
     */
     ntot += nd;
   } while (nd && it++<maxit);
-          
-  
-    return(ntot);
-  }
+
+
+  return(ntot);
+}

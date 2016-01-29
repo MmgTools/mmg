@@ -3976,7 +3976,7 @@ static inline int _MMG3D_chksplit(MMG5_pMesh mesh, MMG5_pSol met,int ip,
   MMG5_pTetra   pt0,pt1;
   double        cal,critloc;
   int           nbt,l,jel,na,ipb,lon;
-  
+
   lon = ret/2;
   critloc = 1.;
   for (l=0; l<lon; l++) {
@@ -3985,14 +3985,14 @@ static inline int _MMG3D_chksplit(MMG5_pMesh mesh, MMG5_pSol met,int ip,
     if(pt1->qual < critloc) critloc = pt1->qual;
   }
   critloc *= crit;
-  
+
   pt0  = &mesh->tetra[0];
   nbt  = 0;
   for (l=0; l<lon; l++) {
     jel = list[l] / 6;
     na  = list[l] % 6;
     pt1 = &mesh->tetra[jel];
-            
+
     memcpy(pt0->v,pt1->v,4*sizeof(int));
     ipb = _MMG5_iare[na][0];
     pt0->v[ipb] = ip;
@@ -4001,7 +4001,7 @@ static inline int _MMG3D_chksplit(MMG5_pMesh mesh, MMG5_pSol met,int ip,
       _MMG3D_delPt(mesh,ip);
       return(0);
     }
-            
+
     memcpy(pt0->v,pt1->v,4*sizeof(int));
     ipb = _MMG5_iare[na][1];
     pt0->v[ipb] = ip;
@@ -4018,7 +4018,7 @@ static inline int _MMG3D_chksplit(MMG5_pMesh mesh, MMG5_pSol met,int ip,
  * \param met pointer toward the metric structure.
  * \param iel tetra index
  * \param iar edge index of iel
- * \param crit quality threeshold.
+ * \param crit quality threshold.
  * \return -1 if lack of memory, 0 if we don't split the edge, ip if success.
  *
  * Split edge iar of iel and verify that every new tet have a better quality than crit
@@ -4033,7 +4033,7 @@ int _MMG5_splitedg(MMG5_pMesh mesh, MMG5_pSol met,int iel, int iar, double crit)
   warn = 0;
   pt = &mesh->tetra[iel];
   lon = _MMG5_coquil(mesh,iel,iar,list);
-  if ( (!lon || lon<0) ) 
+  if ( (!lon || lon<0) )
     return(0);
   if(lon%2) return(0);
 
@@ -4044,9 +4044,9 @@ int _MMG5_splitedg(MMG5_pMesh mesh, MMG5_pSol met,int iel, int iar, double crit)
   o[0] = 0.5*(p0->c[0] + p1->c[0]);
   o[1] = 0.5*(p0->c[1] + p1->c[1]);
   o[2] = 0.5*(p0->c[2] + p1->c[2]);
-        
+
   ip = _MMG3D_newPt(mesh,o,MG_NOTAG);
-        
+
   if ( !ip )  {
     /* reallocation of point table */
     _MMG5_POINT_REALLOC(mesh,met,ip,mesh->gap,
@@ -4063,8 +4063,8 @@ int _MMG5_splitedg(MMG5_pMesh mesh, MMG5_pSol met,int iel, int iar, double crit)
   else if (ier < 0 ) {
     _MMG3D_delPt(mesh,ip);
     return(0);
-  } 
-    
+  }
+
   ier = _MMG3D_chksplit(mesh,met,ip,&list[0],lon,crit);
   if(!ier) return(0);
   ier = _MMG5_split1b(mesh,met,list,lon,ip,0,1);
@@ -4076,8 +4076,6 @@ int _MMG5_splitedg(MMG5_pMesh mesh, MMG5_pSol met,int iel, int iar, double crit)
     _MMG3D_delPt(mesh,ip);
     return(0);
   }
-    
+
   return(ip);
 }
-
-

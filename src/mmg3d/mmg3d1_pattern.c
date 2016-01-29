@@ -453,13 +453,6 @@ static int _MMG5_adptet(MMG5_pMesh mesh,MMG5_pSol met) {
 /*     else */
 /*       nw = 0; */
 
-    /* badly shaped process */
-    /*ier = _MMG5_badelt(mesh,met);
-      if ( ier < 0 ) {
-      fprintf(stdout,"  ## Unable to remove bad elements.\n");
-      return(0);
-      }*/
-
     if ( !mesh->info.nomove ) {
       nm = _MMG5_movtet(mesh,met,0);
       if ( nm < 0 ) {
