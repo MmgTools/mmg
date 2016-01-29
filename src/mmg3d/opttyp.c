@@ -67,13 +67,12 @@ int MMG3D_typelt(MMG5_pMesh mesh,int iel,int *item) {
   double    abx,aby,abz,acx,acy,acz,adx,ady,adz,v1,v2,v3,vol;
   double    bcx,bcy,bcz,bdx,bdy,bdz,cdx,cdy,cdz,h[6],volchk,ssmall;
   double    s[4],dd,rapmin,rapmax,surmin,surmax;
-  int       i,k,ia,ib,ic,id,ityp,isur,isurmax,isurmin,iarmax,iarmin;
+  int       i,k,ia,ib,ic,id,isur,isurmax,isurmin,iarmax,iarmin;
   int       nobtus,naigu;
   short     i0,i1,i2;
   double    EPSVOL = 0.001;
   double    RAPMAX = 0.25;
 
-  ityp = 0;
   pt = &mesh->tetra[iel];
   if ( !pt->v[0] )  return(-1);
 
@@ -405,7 +404,7 @@ int _MMG3D_splitItem(MMG5_pMesh mesh,  MMG5_pSol met,_MMG5_pBucket bucket,
   MMG5_pTetra   pt;
   double        len;
   double        LLONG2 = 0.1;
-  int           ier,j,ip;
+  int           ier,j;
 
   ier = 0;
   pt = &mesh->tetra[k];
@@ -438,14 +437,11 @@ int _MMG3D_splitItem(MMG5_pMesh mesh,  MMG5_pSol met,_MMG5_pBucket bucket,
 static inline
 int _MMG3D_splitalmostall(MMG5_pMesh mesh,  MMG5_pSol met,_MMG5_pBucket bucket,
                           int k,int iar) {
-  MMG5_pTetra   pt,pt1;
-  int           i,l,list[MMG3D_LMAX+2],lon,iel,nconf,ier;
-  double        len;
+  int           i,ier;
   double        OCRIT=1.01;
 
   ier = 0;
 
-  pt = &mesh->tetra[k];
   /* if(_MMG5_orvolnorm(mesh,k) < 5.e-9) { */
   /*   OCRIT *= 0.5; */
   /* } else */
@@ -471,14 +467,12 @@ int _MMG3D_splitalmostall(MMG5_pMesh mesh,  MMG5_pSol met,_MMG5_pBucket bucket,
  *
  */
 int MMG3D_opttyp(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket) {
-  MMG5_pTetra    pt,pt1;
-  MMG5_pxTetra   pxt;
-  double         crit,critswp,len;
-  int            k,j,ityp,cs[10],ds[10],item[2],lon,*adja,iadr;
-  int            list[MMG3D_LMAX+2],l,iel,ier,i,nd,nconf,ne,npeau;
+  MMG5_pTetra    pt;
+  double         crit;
+  int            k,ityp,cs[10],ds[10],item[2],*adja,iadr;
+  int            ier,i,nd,ne,npeau;
   int            it,maxit,ntot;
-  double         OCRIT = 1.01;
-  double         LLONG2 = 0.1;
+//  double         OCRIT = 1.01;
   int ddebug ;
 
   //printf("on lance anatet4\n");
@@ -616,7 +610,6 @@ int MMG3D_opttyp(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket) {
     */
     ntot += nd;
   } while (nd && it++<maxit);
-
 
   return(ntot);
 }

@@ -38,19 +38,19 @@
 extern char  ddb;
 
 /** Table that associates to each (even) permutation of the 4 vertices of a tetrahedron
- *  the corresponding permutation of its edges. Labels :
- *  0  : [0,1,2,3]
- *  1  : [0,2,3,1]
- *  2  : [0,3,1,2]
- *  3  : [1,0,3,2]
- *  4  : [1,2,0,3]
- *  5  : [1,3,2,0]
- *  6  : [2,0,1,3]
- *  7  : [2,1,3,0]
- *  8  : [2,3,0,1]
- *  9  : [3,0,2,1]
- *  10 : [3,1,0,2]
- *  11 : [3,2,1,0]
+ *  the corresponding permutation of its edges.\n Labels :
+ *    0  : [0,1,2,3]
+ *    1  : [0,2,3,1]
+ *    2  : [0,3,1,2]
+ *    3  : [1,0,3,2]
+ *    4  : [1,2,0,3]
+ *    5  : [1,3,2,0]
+ *    6  : [2,0,1,3]
+ *    7  : [2,1,3,0]
+ *    8  : [2,3,0,1]
+ *    9  : [3,0,2,1]
+ *    10 : [3,1,0,2]
+ *    11 : [3,2,1,0]
  *  The edge 0 of the config 1 become the edge 1 of the reference config so permedge[1][0]=1 ...
  */
 
@@ -3970,12 +3970,25 @@ void _MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) 
   }
 }
 
-/** chk quality before split*/
-static inline int _MMG3D_chksplit(MMG5_pMesh mesh, MMG5_pSol met,int ip,
-                                  int* list,int ret,double crit) {
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param ip index of new point.
+ * \param list pointer toward the shell of edge.
+ * \param ret size of the shell of edge.
+ * \param crit quality threshold.
+ * \return 0 if fail, 1 otherwise.
+ *
+ * Check quality before split.
+ *
+ */
+static inline
+int _MMG3D_chksplit(MMG5_pMesh mesh, MMG5_pSol met,int ip,
+                    int* list,int ret,double crit) {
   MMG5_pTetra   pt0,pt1;
   double        cal,critloc;
-  int           nbt,l,jel,na,ipb,lon;
+  int           l,jel,na,ipb,lon;
 
   lon = ret/2;
   critloc = 1.;
@@ -3987,7 +4000,6 @@ static inline int _MMG3D_chksplit(MMG5_pMesh mesh, MMG5_pSol met,int ip,
   critloc *= crit;
 
   pt0  = &mesh->tetra[0];
-  nbt  = 0;
   for (l=0; l<lon; l++) {
     jel = list[l] / 6;
     na  = list[l] % 6;
@@ -4026,9 +4038,9 @@ static inline int _MMG3D_chksplit(MMG5_pMesh mesh, MMG5_pSol met,int ip,
  */
 int _MMG5_splitedg(MMG5_pMesh mesh, MMG5_pSol met,int iel, int iar, double crit){
   MMG5_pTetra  pt;
-  MMG5_pPoint  p0,p1,ppt;
+  MMG5_pPoint  p0,p1;
   double       o[3];
-  int          list[MMG3D_LMAX+2],l,i0,i1,ip,warn,lon,ier;
+  int          list[MMG3D_LMAX+2],i0,i1,ip,warn,lon,ier;
 
   warn = 0;
   pt = &mesh->tetra[iel];
@@ -4054,7 +4066,14 @@ int _MMG5_splitedg(MMG5_pMesh mesh, MMG5_pSol met,int iel, int iar, double crit)
                         break
                         ,o,MG_NOTAG);
   }
-  ppt = &mesh->point[ip];
+
+  if ( warn ) {
+    fprintf(stdout,"  ## Warning:");
+    fprintf(stdout," unable to allocate a new point in last call"
+            " of _MMG5_adpspl.\n");
+    _MMG5_INCREASE_MEM_MESSAGE();
+  }
+
   ier = _MMG5_intmet(mesh,met,iel,iar,ip,0.5);
   if ( !ier ) {
     _MMG3D_delPt(mesh,ip);

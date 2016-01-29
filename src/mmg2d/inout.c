@@ -683,7 +683,7 @@ int MMG2D_saveMesh(MMG5_pMesh mesh,char *filename) {
   MMG5_pEdge        ped;
   MMG5_pTria        pt;
   double            dblb;
-  int               k,ne,ref,j,nn,ntang,num;
+  int               k,ne,ref,j/*,nn*/,ntang,num;
   int               bin, binch, bpos;
   char              *ptr,data[128],chaine[128];
 
