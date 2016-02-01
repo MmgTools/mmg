@@ -618,6 +618,8 @@ int MMG2D_loadSol(MMG5_pMesh mesh,MMG5_pSol sol,char *filename,int msh) {
   sol->size = btyp;
 
   /* mem alloc */
+  _MMG5_ADD_MEM(mesh,(sol->size*(mesh->npmax+1))*sizeof(double),
+                "initial solution",return(0));
   _MMG5_SAFE_CALLOC(sol->m,(sol->size*(mesh->npmax+1)),double);
 
   /* read mesh solutions */
@@ -783,7 +785,6 @@ int MMG2D_saveMesh(MMG5_pMesh mesh,char *filename) {
   for (k=1; k<=mesh->np; k++) {
     ppt = &mesh->point[k];
     if ( M_VOK(ppt) )  ne++;
-    //if(k==1 || k==160 || k==492) printf("k %d -> %d\n",k,ne);
     ppt->tmp = ne;
   }
 
@@ -896,8 +897,9 @@ int MMG2D_saveMesh(MMG5_pMesh mesh,char *filename) {
       ppt = &mesh->point[k];
       if ( M_VOK(ppt) ) {
         if ( mesh->info.nosurf && ( ppt->tag & M_NOSURF )) continue;
-
-        if ((ppt->tag & M_REQUIRED) && ( (ppt->tag & M_BDRY) || (ppt->tag & M_SD) ) ) {
+#warning ask Cecile
+        if ((ppt->tag & M_REQUIRED)
+            /*&& ( (ppt->tag & M_BDRY) || (ppt->tag & M_SD) ) */ ) {
           if(!bin)
             fprintf(inm,"%d\n",ppt->tmp);
           else
@@ -907,52 +909,19 @@ int MMG2D_saveMesh(MMG5_pMesh mesh,char *filename) {
     }
   }
 
-
-  if (!mesh->na) {
-    //printf("NO EDGES\n");
-    for (k=1; k<=mesh->nt; k++) {
-      pt = &mesh->tria[k];
-      if (!pt->v[0]) continue;
-      for (j=0 ; j<3 ; j++) {
-        if (!(&mesh->adja[3*(k-1)+1])[j]) {
-          if(mesh->na == mesh->namax) {
-            _MMG5_EDGE_REALLOC(mesh,num,mesh->gap,
-                               printf("  ## Error: unable to allocate a new edge.\n");
-                               _MMG5_INCREASE_MEM_MESSAGE();
-                               printf("  Exit program.\n");
-                               exit(EXIT_FAILURE));
-          } else {
-            num = mesh->na++;
-          }
-          ped = &mesh->edge[num];
-          ped->a = pt->v[MMG2_iare[j][0]];
-          ped->b = pt->v[MMG2_iare[j][1]];
-          ped->ref  = M_MIN(mesh->point[pt->v[MMG2_iare[j][0]]].ref,
-                            mesh->point[pt->v[MMG2_iare[j][1]]].ref);
-        }
-      }
-    }
-  }
-
   /* edges */
-  ne = 0;
-  for (k=1; k<=mesh->na; k++) {
-    ped = &mesh->edge[k];
-    if(!ped->a) continue;
-    ne++;
-  }
-  if ( ne ) {
+  if ( mesh->na ) {
     if(!bin) {
       strcpy(&chaine[0],"\n\nEdges\n");
       fprintf(inm,"%s",chaine);
-      fprintf(inm,"%d\n",ne);
+      fprintf(inm,"%d\n",mesh->na);
     }
     else {
       binch = 5; //Edges
       fwrite(&binch,sw,1,inm);
-      bpos += 12 + 3*4*ne;//Pos
+      bpos += 12 + 3*4*mesh->na;//Pos
       fwrite(&bpos,sw,1,inm);
-      fwrite(&ne,sw,1,inm);
+      fwrite(&mesh->na,sw,1,inm);
     }
     for (k=1; k<=mesh->na; k++) {
       ped = &mesh->edge[k];
@@ -990,8 +959,9 @@ int MMG2D_saveMesh(MMG5_pMesh mesh,char *filename) {
       ne = 0;
       for (k=1; k<=mesh->na; k++) {
         ped = &mesh->edge[k];
-        if ( ped->a && (ped->tag & M_REQUIRED)) {
-          ++ne;
+        if ( !ped->a ) continue;
+        ++ne;
+        if ( (ped->tag & M_REQUIRED) ) {
           if ( !bin )
             fprintf(inm,"%d\n",ne);
           else {

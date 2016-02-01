@@ -27,18 +27,26 @@
  */
 #define _MMG2D_RETURN_AND_PACK(mesh,met,val)do                    \
   {                                                               \
-    if ( !MMG2_tassage(mesh,met) ) return(MMG5_STRONGFAILURE);    \
+    if ( !MMG2_tassage(mesh,met) ) return(MMG5_LOWFAILURE);    \
     _LIBMMG5_RETURN(val);                                         \
   }while(0)
 
 
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param sol pointer toward the solution structure.
+ * \return 0 if memory problem (uncomplete mesh), 1 otherwise.
+ *
+ * Pack the mesh and metric and create explicitly all the mesh structures
+ * (edges).
+ *
+ */
 int MMG2_tassage(MMG5_pMesh mesh,MMG5_pSol sol) {
   MMG5_pEdge         ped;
   MMG5_pTria         pt,ptnew;
   MMG5_pPoint        ppt,pptnew;
-  int                np,nt,k,nbl,isol,isolnew,i;
+  int                np,nt,k,nbl,isol,isolnew,i,memWarn,num,jel;
   int                iadr,iadrnew,iadrv,*adjav,*adja,*adjanew,voy;
-
 
   /* compact vertices */
   np=0;
@@ -50,6 +58,59 @@ int MMG2_tassage(MMG5_pMesh mesh,MMG5_pSol sol) {
 
 
   /* compact edges */
+  memWarn = 0; num = 0;
+
+  if ( (!mesh->na) && mesh->adja ) {
+    //printf("NO EDGES\n");
+    for (k=1; k<=mesh->nt; k++) {
+      pt = &mesh->tria[k];
+      if (!pt->v[0]) continue;
+      for (i=0 ; i<3 ; i++) {
+        if (!(&mesh->adja[3*(k-1)+1])[i]) ++mesh->na;
+      }
+    }
+
+    if ( mesh->na ) {
+      assert(!mesh->edge);
+      _MMG5_ADD_MEM(mesh,(mesh->namax+1)*sizeof(MMG5_Edge),"final edges",
+                    memWarn=1);
+
+      if ( memWarn ) {
+        if ( mesh->info.ddebug )
+          printf("  ## Warning: unable to allocate an edge table at the size"
+                 " of the maximal number of edges.\n"
+                 "              Attempt to decrease this number...\n");
+        mesh->namax = mesh->na;
+        memWarn = 0;
+        _MMG5_ADD_MEM(mesh,(mesh->namax+1)*sizeof(MMG5_Edge),"final edges",
+                      printf("  ## Warning: uncomplete mesh.\n");
+                      memWarn=1);
+      }
+
+      if ( memWarn ) {
+        mesh->na = 0;
+        goto triangles;
+      }
+
+      /* We have enough memory to allocate the edge table */
+      _MMG5_SAFE_CALLOC(mesh->edge,(mesh->namax+1),MMG5_Edge);
+
+      for (k=1; k<=mesh->nt; k++) {
+        pt = &mesh->tria[k];
+        if (!pt->v[0]) continue;
+        for (i=0 ; i<3 ; i++) {
+          if ((&mesh->adja[3*(k-1)+1])[i]) continue;
+          ++num;
+          ped = &mesh->edge[num];
+          ped->a = pt->v[MMG2_iare[i][0]];
+          ped->b = pt->v[MMG2_iare[i][1]];
+          ped->ref  = M_MIN(mesh->point[pt->v[MMG2_iare[i][0]]].ref,
+                            mesh->point[pt->v[MMG2_iare[i][1]]].ref);
+        }
+      }
+    }
+  }
+
   nbl = 0;
   for (k=1; k<=mesh->na; k++) {
     ped  = &mesh->edge[k];
@@ -67,6 +128,7 @@ int MMG2_tassage(MMG5_pMesh mesh,MMG5_pSol sol) {
   /* mesh->na = nbl;*/
 
   /* compact triangle */
+triangles:
   nt  = 0;
   nbl = 1;
   for (k=1; k<=mesh->nt; k++) {
@@ -174,6 +236,8 @@ int MMG2_tassage(MMG5_pMesh mesh,MMG5_pSol sol) {
     mesh->nenil = 0;
   }
 
+  if ( memWarn ) return 0;
+
   return(1);
 }
 
@@ -250,7 +314,9 @@ int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol sol)
 
   if ( !sol->m ) {
     /* mem alloc */
-    _MMG5_SAFE_CALLOC(sol->m,sol->size*mesh->npmax,double);
+    _MMG5_ADD_MEM(mesh,(sol->size*(mesh->npmax+1))*sizeof(double),
+                  "initial solution",return(0));
+    _MMG5_SAFE_CALLOC(sol->m,sol->size*(mesh->npmax+1),double);
     sol->np = 0;
   } else   if ( sol->np && (sol->np != mesh->np) ) {
     fprintf(stdout,"  ## WARNING: WRONG SOLUTION NUMBER : %d != %d\n",sol->np,mesh->np);
@@ -384,8 +450,9 @@ int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol sol)
 
   chrono(ON,&(ctim[1]));
   if ( mesh->info.imprim )  fprintf(stdout,"\n  -- MESH PACKED UP\n");
-  //MMG2D_saveMesh(mesh,"toto.mesh");
-  MMG2_tassage(mesh,sol);
+
+  if (!MMG2_tassage(mesh,sol) ) _LIBMMG5_RETURN(MMG5_LOWFAILURE);
+
   chrono(OFF,&(ctim[1]));
 
   chrono(OFF,&ctim[0]);
@@ -452,7 +519,9 @@ int MMG2D_mmg2dmesh(MMG5_pMesh mesh,MMG5_pSol sol) {
   sol->ver  = mesh->ver;
   if ( !sol->m ) {
     /* mem alloc */
-    _MMG5_SAFE_CALLOC(sol->m,sol->size*mesh->npmax,double);
+    _MMG5_ADD_MEM(mesh,(sol->size*(mesh->npmax+1))*sizeof(double),
+                  "initial solution",return(0));
+    _MMG5_SAFE_CALLOC(sol->m,sol->size*(mesh->npmax+1),double);
     sol->np = 0;
   } else   if ( sol->np && (sol->np != mesh->np) ) {
     fprintf(stdout,"  ## WARNING: WRONG SOLUTION NUMBER : %d != %d\n",sol->np,mesh->np);
@@ -570,8 +639,9 @@ int MMG2D_mmg2dmesh(MMG5_pMesh mesh,MMG5_pSol sol) {
 
   chrono(ON,&(ctim[1]));
   if ( mesh->info.imprim )  fprintf(stdout,"\n  -- MESH PACKED UP\n");
-  //MMG2D_saveMesh(mesh,"toto.mesh");
-  MMG2_tassage(mesh,sol);
+
+  if (!MMG2_tassage(mesh,sol) ) _LIBMMG5_RETURN(MMG5_LOWFAILURE);
+
   chrono(OFF,&(ctim[1]));
 
   chrono(OFF,&ctim[0]);
@@ -718,7 +788,6 @@ int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol)
   }
 
   if ( (!mesh->info.noinsert) && !MMG2_mmg2d1(mesh,sol) ) {
-    MMG2_tassage(mesh,sol);
     _MMG2D_RETURN_AND_PACK(mesh,sol,MMG5_LOWFAILURE);
   }
 
@@ -727,7 +796,6 @@ int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol)
   if ( mesh->info.imprim )
     fprintf(stdout,"\n  -- PHASE 4 : MESH OPTIMISATION\n");
   if ( !MMG2_mmg2d0(mesh,sol) ) {
-    MMG2_tassage(mesh,sol);
     _MMG2D_RETURN_AND_PACK(mesh,sol,MMG5_LOWFAILURE);
   }
 
@@ -750,8 +818,9 @@ int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol)
 
   chrono(ON,&(ctim[1]));
   if ( mesh->info.imprim )  fprintf(stdout,"\n  -- MESH PACKED UP\n");
-  //MMG2D_saveMesh(mesh,"toto.mesh");
-  MMG2_tassage(mesh,sol);
+
+  if (!MMG2_tassage(mesh,sol) ) _LIBMMG5_RETURN(MMG5_LOWFAILURE);
+
   chrono(OFF,&(ctim[1]));
 
   chrono(OFF,&ctim[0]);

@@ -152,7 +152,7 @@ int MMG2_insertpointdelone(MMG5_pMesh mesh,MMG5_pSol sol) {
     /*     adja = &mesh->adja[iadr]; */
     /*     //printf("adja %d %d %d\n",adja[0]/3, adja[1]/3,adja[2]/3); */
     /*   } */
-    /*   _MMG5_chkmsh(mesh,1,0); */
+    /*   if ( !_MMG5_chkmsh(mesh,1,0) ) exit(EXIT_FAILURE); */
     // MMG2D_saveMesh(mesh,"toto.mesh");
     //exit(EXIT_FAILURE);
     /*}*/
@@ -161,6 +161,8 @@ int MMG2_insertpointdelone(MMG5_pMesh mesh,MMG5_pSol sol) {
 
   return(1);
 }
+
+#warning unused?? ask Cecile
 /*insertion of the list of points inside the mesh*/
 /*return 0 if pbs occur*/
 int MMG2_insertpoint(MMG5_pMesh mesh,MMG5_pSol sol) {
@@ -422,9 +424,9 @@ int MMG2_insertpoint(MMG5_pMesh mesh,MMG5_pSol sol) {
       adja[1] = 3*text + 0;
     }
     if(mesh->info.ddebug) {
+      if ( !_MMG5_chkmsh(mesh,0,0) ) exit(EXIT_FAILURE);
       MMG2_tassage(mesh,sol);
       MMG2D_saveMesh(mesh,"titi.mesh");
-      _MMG5_chkmsh(mesh,0,0);
     }
 
   }
@@ -892,7 +894,7 @@ int MMG2_mmg2d2(MMG5_pMesh mesh,MMG5_pSol sol) {
     printf("  ## Error: unable to enforce the boundaries.\n");return(0);
   }
   if(mesh->info.ddebug) {
-    _MMG5_chkmsh(mesh,1,0);
+    if ( !_MMG5_chkmsh(mesh,1,0) ) exit(EXIT_FAILURE);
     MMG2_tassage(mesh,sol);
     MMG2D_saveMesh(mesh,"bdyenforcement.mesh");
   }

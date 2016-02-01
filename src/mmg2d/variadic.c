@@ -293,7 +293,7 @@ void _MMG2D_Free_structures_var(va_list argptr)
     _MMG5_DEL_MEM((*mesh),(*mesh)->point,((*mesh)->npmax+1)*sizeof(MMG5_Point));
 
   if ( (*mesh)->edge )
-    _MMG5_DEL_MEM((*mesh),(*mesh)->edge,((*mesh)->na+1)*sizeof(MMG5_Edge));
+    _MMG5_DEL_MEM((*mesh),(*mesh)->edge,((*mesh)->namax+1)*sizeof(MMG5_Edge));
 
   if ( (*mesh)->adja )
     _MMG5_DEL_MEM((*mesh),(*mesh)->adja,(3*(*mesh)->ntmax+5)*sizeof(int));
@@ -302,11 +302,12 @@ void _MMG2D_Free_structures_var(va_list argptr)
     _MMG5_DEL_MEM((*mesh),(*mesh)->xpoint,((*mesh)->xpmax+1)*sizeof(MMG5_xPoint));
 
   if ( (*mesh)->tria )
-    _MMG5_DEL_MEM((*mesh),(*mesh)->tria,((*mesh)->nt+1)*sizeof(MMG5_Tria));
+    _MMG5_DEL_MEM((*mesh),(*mesh)->tria,((*mesh)->ntmax+1)*sizeof(MMG5_Tria));
 
   /* sol */
-  if ( sol && (*sol) && (*sol)->m )
-    _MMG5_DEL_MEM((*mesh),(*sol)->m,((*sol)->size*((*sol)->npmax+1))*sizeof(double));
+  if ( sol && (*sol) && (*sol)->m ) {
+    _MMG5_DEL_MEM((*mesh),(*sol)->m,((*sol)->size*((*mesh)->npmax+1))*sizeof(double));
+  }
 
   /* (*mesh)->info */
   /* if ( (*mesh)->info.npar && (*mesh)->info.par ) */

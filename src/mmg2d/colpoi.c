@@ -362,7 +362,12 @@ int MMG2_chkedg(MMG5_pMesh mesh, MMG5_pPoint ppa,MMG5_pPoint ppb) {
   return(0);
 }
 
-/*collapse edge ppb-->ppa and ppbppa is boundary edge*/
+/**
+ * \return 0 if fail, 1 otherwise.
+ *
+ * collapse edge ppb-->ppa and ppbppa is boundary edge
+ *
+ */
 int MMG2_colpoibdry(MMG5_pMesh mesh, MMG5_pSol sol,int iel,int iar,int ia,int ib,double coe) {
   MMG5_pTria     pt,pt1;
   MMG5_pEdge     ped;
@@ -597,8 +602,10 @@ int MMG2_colpoibdry(MMG5_pMesh mesh, MMG5_pSol sol,int iel,int iar,int ia,int ib
   memcpy(ppb->c,coor,3*sizeof(double));
   memcpy(&sol->m[sol->size*(pib-1) + 1],solu,sol->size*sizeof(double));
 
-  //MMG2_chkmsh(mesh,0);
   _MMG5_SAFE_FREE(cal);
   _MMG5_SAFE_FREE(list);
+
+  // if ( !MG2_chkmsh(mesh,0) ) exit(EXIT_FAILURE);
+
   return(1);
 }

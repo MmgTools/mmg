@@ -214,7 +214,7 @@ void MMG2D_Free_Triangles(MMG5_pMesh mesh) {
     _MMG5_DEL_MEM(mesh,mesh->adja,(3*mesh->ntmax+5)*sizeof(int));
 
   if ( mesh->tria )
-    _MMG5_DEL_MEM(mesh,mesh->tria,(mesh->nt+1)*sizeof(MMG5_Tria));
+    _MMG5_DEL_MEM(mesh,mesh->tria,(mesh->ntmax+1)*sizeof(MMG5_Tria));
 
   mesh->nt = 0;
   mesh->nti = 0;
@@ -232,7 +232,7 @@ void MMG2D_Free_Triangles(MMG5_pMesh mesh) {
 void MMG2D_Free_Edges(MMG5_pMesh mesh) {
 
   if ( mesh->edge )
-    _MMG5_DEL_MEM(mesh,mesh->edge,(mesh->na+1)*sizeof(MMG5_Edge));
+    _MMG5_DEL_MEM(mesh,mesh->edge,(mesh->namax+1)*sizeof(MMG5_Edge));
 
   if ( mesh->xpoint )
     _MMG5_DEL_MEM(mesh,mesh->xpoint,(mesh->xpmax+1)*sizeof(MMG5_xPoint));
