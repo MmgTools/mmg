@@ -995,13 +995,8 @@ int MMG3D_saveMesh(MMG5_pMesh mesh, char *filename) {
   /* boundary mesh */
   /* tria + required tria */
   ntreq = 0;
-  if ( mesh->tria ) {
-    _MMG5_DEL_MEM(mesh,mesh->tria,(mesh->nt+1)*sizeof(MMG5_Tria));
-    mesh->nt = 0;
-  }
 
-  _MMG5_chkNumberOfTri(mesh);
-  if ( _MMG5_bdryTria(mesh) ) {
+  if ( mesh->nt ) {
     if(!bin) {
       strcpy(&chaine[0],"\n\nTriangles\n");
       fprintf(inm,"%s",chaine);
