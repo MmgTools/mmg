@@ -23,7 +23,14 @@
 #include "mmg2d.h"
 
 
-/*check if all edges exist and if not force them*/
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param sol pointer toward the sol structure.
+ * \return 0 if fail, 1 otherwise.
+ *
+ * Check if all edges exist and if not force them.
+ *
+ */
 int MMG2_bdryenforcement(MMG5_pMesh mesh,MMG5_pSol sol) {
   MMG5_pTria      pt,pt1;
   MMG5_pEdge      ped;
@@ -53,11 +60,12 @@ int MMG2_bdryenforcement(MMG5_pMesh mesh,MMG5_pSol sol) {
       j=2;
     lon = MMG2_boulep(mesh,kdep,j,list);
     if(lon>1000) {
-      printf(" ##Error: TOO MANY TRIANGLES (%d) AROUND THE VERTEX %d\n",lon,ped->a);
+      printf("  ## Error: too many triangles (%d) around the vertex %d\n",
+             lon,ped->a);
       exit(EXIT_FAILURE);
     } else if(!lon) {
-      printf("PROBLEM WITH POINT %d of TRIANGLE %d\n",mesh->tria[kdep].v[j],kdep);
-      MMG2D_saveMesh(mesh,"titi.mesh");
+      printf(" ## Error: problem with point %d of triangle %d\n",
+             mesh->tria[kdep].v[j],kdep);
       _MMG5_SAFE_FREE(list);
       return(0);
     }
@@ -78,45 +86,50 @@ int MMG2_bdryenforcement(MMG5_pMesh mesh,MMG5_pSol sol) {
       }
     }
     if(j>lon) {
-      if(mesh->info.imprim > 5) printf("MISSIONG EDGE %d %d \n",ped->a,ped->b);
+      if(mesh->info.imprim > 5) printf("  ** missing edge %d %d \n",
+                                       ped->a,ped->b);
       ped->base = kdep;
     }
 
   }
   if(nex!=mesh->na) {
-    if(mesh->info.imprim > 5) printf("NUMBER OF MISSING EDGES : %d\n",mesh->na-nex);
+    if(mesh->info.imprim > 5)
+      printf(" ** number of missing edges : %d\n",mesh->na-nex);
     for(kk=1 ; kk<=mesh->na ; kk++) {
       ped = &mesh->edge[kk];
       if(!ped->a || ped->base < 0) continue;
       ia = ped->a;
       ib = ped->b;
       kdep = ped->base;
-      if(mesh->info.ddebug) printf("\n\n\n $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ on force %d %d\n",ia,ib);
+      if(mesh->info.ddebug)
+        printf("\n  -- edge enforcement %d %d\n",ia,ib);
+
       if(!(lon=MMG2_locateEdge(mesh,ia,ib,&kdep,list))) {
-        if(mesh->info.ddebug) printf("edge non localisee!!!!!\n");
+        if(mesh->info.ddebug)
+          printf("  ## Error: edge not found\n");
         _MMG5_SAFE_FREE(list);
         return(0);
       }
       if(!(lon<0 || lon==4)) {
-        if(mesh->info.ddebug) printf("a-t-on un pbs ???? edge %d %d -- %d\n",ia,ib,lon);
+        if(mesh->info.ddebug)
+          printf("  ** Unexpected situation: edge %d %d -- %d\n",ia,ib,lon);
         exit(EXIT_FAILURE);
       }
       /*edge exist*/
       if(lon==4) {
-        if(mesh->info.ddebug) printf("edge existante\n");
+        if(mesh->info.ddebug) printf("  ** Existing edge\n");
         //exit(EXIT_FAILURE);
       }
       if(lon>1000) {
-        printf(" ##Error: TOO MANY TRIANGLES (%d)\n",lon);
+        printf(" ## Error: too many triangles (%d)\n",lon);
         exit(EXIT_FAILURE);
       }
       if(lon<2) {
-        if(mesh->info.ddebug) printf("few edges... %d\n",lon);
+        if(mesh->info.ddebug) printf("  ** few edges... %d\n",lon);
         //exit(EXIT_FAILURE);
       }
       lon = -lon;
       ilon = lon;
-      if(mesh->info.ddebug) MMG2D_saveMesh(mesh,"titi.mesh");
 
       /*retournement d'arêtes aleatoirement dans la liste, tant que */
       srand(time(NULL));
@@ -124,15 +137,16 @@ int MMG2_bdryenforcement(MMG5_pMesh mesh,MMG5_pSol sol) {
         rnd = (rand()%lon);
         k = list[rnd]/3;
         if(mesh->info.ddebug) {
-          printf("pipe : size %d rnd %d\n",lon,rnd);
-          for(i=0 ; i<lon ; i++) {
-            if((mesh->tria[list[i]/3]).base == mesh->base+1)
-              printf("%de tr : %d base %d == %d\n",i+1,list[i]/3,mesh->tria[list[i]/3].base,mesh->base+1);
-            else
-              printf("pas base %de tr %d \n",i+1,list[i]/3);
-            printf("vertex %d %d %d\n",mesh->tria[list[i]/3].v[0],mesh->tria[list[i]/3].v[1],
-                   mesh->tria[list[i]/3].v[2]);
-          }
+          printf("  ** Random edge swap\n");
+          /* for(i=0 ; i<lon ; i++) { */
+          /*   if((mesh->tria[list[i]/3]).base == mesh->base+1) */
+          /*     printf("%de tr : %d base %d == %d\n",i+1,list[i]/3,mesh->tria[list[i]/3].base,mesh->base+1); */
+          /*   else */
+          /*     printf("pas base %de tr %d \n",i+1,list[i]/3); */
+
+          /*   printf("vertex %d %d %d\n",mesh->tria[list[i]/3].v[0],mesh->tria[list[i]/3].v[1], */
+          /*          mesh->tria[list[i]/3].v[2]); */
+          /* } */
         }
 
         /*check k in Pipe*/
@@ -145,7 +159,7 @@ int MMG2_bdryenforcement(MMG5_pMesh mesh,MMG5_pSol sol) {
         }
         assert(i<=lon);
         idep = list[rnd]%3;
-        if(mesh->info.ddebug) printf("i= %d < %d ? on demarre avec %d\n",i,lon+1,k);
+        // if(mesh->info.ddebug) printf("i= %d < %d ? on demarre avec %d\n",i,lon+1,k);
         adja = &mesh->adja[3*(k-1)+1];
         for(i=0 ; i<3 ; i++) {
           ir = (idep+i)%3;
@@ -160,24 +174,23 @@ int MMG2_bdryenforcement(MMG5_pMesh mesh,MMG5_pSol sol) {
           /********swap***********/
           /************************/
           if(!MMG2_swapar(mesh,sol,k,ir,1e+4,list2)) {
-            if(mesh->info.ddebug) printf("swap impossible\n");
+            if(mesh->info.ddebug) printf("  ## Warning: unable to swap\n");
             continue;
           }
-          if(mesh->info.ddebug) printf("on swap !!!!\n");
+          if(mesh->info.ddebug) printf("  ** Successful swap\n");
           /*new tr intersecté par ia-ib ??*/
           for(ied=1 ; ied<3 ; ied++) {
-            if(mesh->info.ddebug) printf("tr %d\n",list2[ied]);
             iare = MMG2_cutEdgeTriangle(mesh,list2[ied],ia,ib);
             if(!iare) { /*tr not in pipe*/
               ilon--;
-              if(mesh->info.ddebug) printf("tr %d not intersected ==> %d\n",list2[ied],ilon);
+              if(mesh->info.ddebug)
+                printf("  ## Warning: tr %d not intersected ==> %d\n",list2[ied],ilon);
               mesh->tria[list2[ied]].base = mesh->base;
             } else if(iare < 0) {
-              if(mesh->info.ddebug) printf("on a fini ?? %d\n",ilon-2);
               mesh->tria[list2[ied]].base = mesh->base;
               ilon -= 2;
             } else {
-              if(mesh->info.ddebug) printf("tr intersecté %d \n",list2[ied]);
+              if(mesh->info.ddebug) printf("  ** tr intersected %d \n",list2[ied]);
               mesh->tria[list2[ied]].base = mesh->base+1;
             }
           }
@@ -215,7 +228,7 @@ int MMG2_bdryenforcement(MMG5_pMesh mesh,MMG5_pSol sol) {
 /*    break; */
 /*       } */
 /*       if(i==3) continue;  */
-/*       fprintf(stdout,"WARNING BDRY EDGES MISSING : DO YOU HAVE DUPLICATED VERTEX ? %d %d %d\n", */
+  /*       fprintf(stdout,"WARNING BDRY EDGES MISSING : DO YOU HAVE DUPLICATED VERTEX ? %d %d %d\n", */
 /*        pt->v[0],pt->v[1],pt->v[2]); */
 /*       for(i=0 ; i<3 ; i++) {         */
 /*  if(!adja[i]) continue; */

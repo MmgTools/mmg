@@ -772,7 +772,9 @@ int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol)
 
   /* analysis */
   /* metric creation */
-  _MMG5_SAFE_CALLOC(sol->m,sol->size*mesh->npmax,double);
+  _MMG5_ADD_MEM(mesh,(sol->size*(mesh->npmax+1))*sizeof(double),
+                "initial solution",return(0));
+  _MMG5_SAFE_CALLOC(sol->m,sol->size*(mesh->npmax+1),double);
   sol->np = 0;
   if ( !MMG2_doSol(mesh,sol) )  _LIBMMG5_RETURN(MMG5_STRONGFAILURE);
 

@@ -51,8 +51,8 @@ int MMG2_cendel(MMG5_pMesh mesh,MMG5_pSol sol,double declic,int base) {
       adj = adja[i] / 3;
       if ( !adj || pt->ref != mesh->tria[adj].ref )  continue;
       //check required
-      if((mesh->point[pt->v[MMG2_iare[i][0]]].tag & M_REQUIRED) && (mesh->point[pt->v[MMG2_iare[i][1]]].tag & M_REQUIRED)) {
-        //printf("edge required %d %d\n",pt->v[MMG2_iare[i][0]],pt->v[MMG2_iare[i][1]]);
+      if((mesh->point[pt->v[MMG2_iare[i][0]]].tag & M_REQUIRED)
+         && (mesh->point[pt->v[MMG2_iare[i][1]]].tag & M_REQUIRED)) {
         continue;
       }
 

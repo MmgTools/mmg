@@ -458,14 +458,6 @@ int main(int argc,char *argv[]) {
     ier = MMG2D_mmg2dlib(mesh,sol);
   }
 
-  if ( ier == MMG5_STRONGFAILURE )
-    _MMG2D_RETURN_AND_FREE(mesh,sol,MMG5_STRONGFAILURE);
-
-/*   } */
-
-  chrono(ON,&MMG5_ctim[1]);
-  if ( mesh->info.imprim )
-    fprintf(stdout,"\n  -- WRITING DATA FILE %s\n",mesh->nameout);
   MMG2D_saveMesh(mesh,mesh->nameout);
   if( sol->np )
     MMG2D_saveSol(mesh,sol,mesh->nameout);

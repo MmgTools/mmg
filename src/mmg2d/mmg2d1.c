@@ -61,9 +61,9 @@ int interp_ani(double *ma,double *mb,double *mp,double t) {
     dma[i] = ma[i];
     dmb[i] = mb[i];
   }
- 
+
   if ( !MMG2_invmat(dma,mai) || !MMG2_invmat(dmb,mbi) ) {
-    fprintf(stderr,"  ## INTERP INVALID METRIC.\n");
+    fprintf(stderr,"  ## Error: unable to interpole the metric.\n");
     return(0);
   }
 
@@ -71,7 +71,7 @@ int interp_ani(double *ma,double *mb,double *mp,double t) {
     mi[i] = (1.0-t)*mai[i] + t*mbi[i];
 
   if ( !MMG2_invmat(mi,mai) ) {
-    fprintf(stderr,"  ## INTERP INVALID METRIC.\n");
+    fprintf(stderr,"  ## Error: invalid metric.\n");
     return(0);
   }
 
@@ -133,7 +133,9 @@ static int cassar(MMG5_pMesh mesh,MMG5_pSol sol,int ia,int ib,double t) {
 
   /*interpol dep si option 9*/
   if( mesh->info.lag >=0) {
-    printf("comment because of merge needs mmg2d1 option 9\n");
+    printf(" ## Error: option not available:"
+           " comment because of merge needs mmg2d1 option 9\n");
+    exit(EXIT_FAILURE);
     // pd = mesh->disp;
     //pd.mv[2*(ip-1) + 1 + 0] = t1*pd.mv[2*(ia-1) + 1 + 0] + t*pd.mv[2*(ib-1) + 1 + 0];
     //pd.mv[2*(ip-1) + 1 + 1] = t1*pd.mv[2*(ia-1) + 1 + 1] + t*pd.mv[2*(ib-1) + 1 + 1];
@@ -329,7 +331,8 @@ static int cassarbdry(MMG5_pMesh mesh,MMG5_pSol sol,int ied,int ia,int ib,double
   /*interpol dep si option 9*/
   if( mesh->info.lag >= 0) {
 //#warning option 9
-    printf("option 9..........\n");
+    printf(" ## Error: option not available:"
+           " comment because of merge needs mmg2d1 option 9\n");
     exit(EXIT_FAILURE);
     /* pd = mesh->disp; */
     /* pd.mv[2*(ip-1) + 1 + 0] = t_1*pd.mv[2*(ia-1) + 1 + 0] + t*pd.mv[2*(ib-1) + 1 + 0]; */
@@ -338,19 +341,34 @@ static int cassarbdry(MMG5_pMesh mesh,MMG5_pSol sol,int ied,int ia,int ib,double
   if ( memlack )  return(-1);
   return(ip);
 }
-int MMG2_ni,MMG2_nc;
-static int analar(MMG5_pMesh mesh,MMG5_pSol sol,pBucket bucket,double declic,int *alert) {
+
+/**
+ * \param mesh poitner toward the mesh structure.
+ * \param sol pointer toward the sol structure.
+ * \param bucket pointer toward the bucket structure.
+ * \param declic quality threshold.
+ * \param alert if 1, we are unable to create a new vertex.
+ * \param ni number of inserted points.
+ * \param nc nuber of collapsed points.
+ * \return 0 if fail, 1 otherwise.
+ *
+ * Analyse the edges, split the longer and collapse the shorter one.
+ *
+ */
+static int analar(MMG5_pMesh mesh,MMG5_pSol sol,pBucket bucket,
+                  double declic,int *alert, int *ni, int *nc) {
   MMG5_pTria    pt;
   MMG5_pPoint   ppa,ppb;
   double  *ca,*cb,*ma,*mb,tail,t,tang[2];
   int     *adja,voi[3],k,iadr,adj,/*base,*/nbp,npp,ip;
-  int     nt;
+  int     nt,ier;
   int     i,i1,i2;
-  int ins,i0,ii0;
+  int     ins,i0,ii0;
+
 //  base  = ++mesh->base;
-  MMG2_ni  = 0;
-  MMG2_nc  = 0;
-  nt    = mesh->nt;
+  (*ni)  = 0;
+  (*nc)  = 0;
+  nt  = mesh->nt;
   npp = 0.0;
 
   for (k=1; k<=nt; k++) {
@@ -398,10 +416,10 @@ static int analar(MMG5_pMesh mesh,MMG5_pSol sol,pBucket bucket,double declic,int
         if ( !adj || pt->ref != mesh->tria[adj].ref )  {
           /*add bdry*/
           if(!pt->edg[i])  {
-            if(mesh->info.ddebug) {
-              printf("tr %d : %d %d %d mais %d\n",k,pt->edg[0],pt->edg[1],pt->edg[2],i);
-              printf("%d %d %d\n",pt->v[0],pt->v[1],pt->v[2]);
-            }
+            /* if(mesh->info.ddebug) { */
+            /*   printf("tr %d : %d %d %d mais %d\n",k,pt->edg[0],pt->edg[1],pt->edg[2],i); */
+            /*   printf("%d %d %d\n",pt->v[0],pt->v[1],pt->v[2]); */
+            /* } */
             assert(mesh->tria[adj].ref!=pt->ref);
             assert((mesh->tria[adj]).edg[voi[i]%3]);
 //#warning find why we have to do that
@@ -413,7 +431,8 @@ static int analar(MMG5_pMesh mesh,MMG5_pSol sol,pBucket bucket,double declic,int
           ip = cassar(mesh,sol,i1,i2,t);
         }
         if(ip < 0) {
-          if(mesh->info.imprim > 6) printf("IMPOSSIBLE TO CREATE NEW VERTEX\n");
+          if(mesh->info.imprim > 6)
+            printf("  ## Warning: impossible to create new vertex\n");
           //return(0);
           //printf("ahhhhhhhhhhhhhhhh\n");
           *alert = 2;
@@ -423,15 +442,11 @@ static int analar(MMG5_pMesh mesh,MMG5_pSol sol,pBucket bucket,double declic,int
             if(!adj) {
               ins = MMG2_splitbdry(mesh,sol,ip,k,i,tang);
               if(!ins) {
-                //mesh->point[ip].tag = M_CORNER;
-                //mesh->point[ip].ref = 5;
-                //  MMG2D_saveMesh(mesh,"del.mesh");
-                //exit(EXIT_FAILURE);
                 _MMG2D_delPt(mesh,ip);
                 continue;
               }
               mesh->point[ip].tag |= M_BDRY;
-              MMG2_ni += 1;
+              (*ni) += 1;
               break;
             } else {
               mesh->point[ip].tag |= M_SD;
@@ -440,7 +455,7 @@ static int analar(MMG5_pMesh mesh,MMG5_pSol sol,pBucket bucket,double declic,int
                 _MMG2D_delPt(mesh,ip);
                 continue;
               }
-              MMG2_ni += 1;
+              (*ni) += 1;
               break;
             }
             continue;
@@ -450,7 +465,7 @@ static int analar(MMG5_pMesh mesh,MMG5_pSol sol,pBucket bucket,double declic,int
               _MMG2D_delPt(mesh,ip);
               continue;
             }
-            MMG2_ni += 1;
+            (*ni) += 1;
             break;
           }
         }
@@ -459,16 +474,24 @@ static int analar(MMG5_pMesh mesh,MMG5_pSol sol,pBucket bucket,double declic,int
       else if ( tail < M_SHORT ) {
         if ( !adj || pt->ref != mesh->tria[adj].ref )  {
           if(!adj) {
-            if (!MMG2_colpoibdry(mesh,sol,k,i,MMG2_iare[i][0],MMG2_iare[i][1],2.75)){
-              if (!MMG2_colpoibdry(mesh,sol,k,i,MMG2_iare[i][1],MMG2_iare[i][0],2.75)){
+
+            ier = MMG2_colpoibdry(mesh,sol,k,i,MMG2_iare[i][0],
+                                  MMG2_iare[i][1],2.75);
+            if ( ier ==-1 ) return(0);
+
+            else if ( !ier ){
+              ier = MMG2_colpoibdry(mesh,sol,k,i,MMG2_iare[i][1],
+                                    MMG2_iare[i][0],2.75);
+              if ( ier==-1 ) return(0);
+              else if ( !ier ){
                 continue;
               } else {
-                MMG2_nc++;
+                (*nc)++;
                 _MMG2D_delPt(mesh,i1);
                 break;
               }
             }
-            MMG2_nc++;
+            (*nc)++;
             _MMG2D_delPt(mesh,i2);
             break;
           } else {
@@ -476,13 +499,13 @@ static int analar(MMG5_pMesh mesh,MMG5_pSol sol,pBucket bucket,double declic,int
               if(!MMG2_colpoi(mesh,sol,k,i,MMG2_iare[i][1],MMG2_iare[i][0],2.75)) {
                 continue;
               } else {
-                MMG2_nc++;
+                (*nc)++;
                 _MMG2D_delPt(mesh,i1);
                 break;
               }
             }
             _MMG2D_delPt(mesh,i2);
-            MMG2_nc++;
+            (*nc)++;
             break;
           }
         } else {
@@ -490,13 +513,13 @@ static int analar(MMG5_pMesh mesh,MMG5_pSol sol,pBucket bucket,double declic,int
             if(!MMG2_colpoi(mesh,sol,k,i,MMG2_iare[i][1],MMG2_iare[i][0],2.75)) {
               continue;
             } else {
-              MMG2_nc++;
+              (*nc)++;
               _MMG2D_delPt(mesh,i1);
               break;
 
             }
           }
-          MMG2_nc++;
+          (*nc)++;
           _MMG2D_delPt(mesh,i2);
           break;
         }
@@ -504,7 +527,7 @@ static int analar(MMG5_pMesh mesh,MMG5_pSol sol,pBucket bucket,double declic,int
     }
   }
   if ( mesh->info.imprim > 5 ) {
-    fprintf(stdout,"    %8d INSERTED %8d COLLAPSED\n",MMG2_ni,MMG2_nc);
+    fprintf(stdout,"    %8d INSERTED %8d COLLAPSED\n",*ni,*nc);
   }
   return(1);
 }
@@ -558,17 +581,11 @@ static int analargeom(MMG5_pMesh mesh,MMG5_pSol sol,int *alert) {
         if(!tail) continue;
         if ( *alert <= 1 ) {
           npp++;
-          if(!pt->edg[i])  {
-            printf("tr %d : %d %d %d mais %d\n",k,pt->edg[0],pt->edg[1],pt->edg[2],i);
-            printf("%d %d %d\n",pt->v[0],pt->v[1],pt->v[2]);
-            printf("adj %d %d %d\n",voi[0]/3,voi[1]/3,voi[2]/3);
-            MMG2D_saveMesh(mesh,"titii.mesh");
-          }
           assert(pt->edg[i]);
           ip = cassarbdry(mesh,sol,pt->edg[i],i1,i2,0.5,tang);
 
           if(ip < 0) {
-            if(mesh->info.imprim > 6) printf("IMPOSSIBLE TO CREATE NEW VERTEX\n");
+            if(mesh->info.imprim > 6) printf("  ## Warning: impossible to create new vertex\n");
             *alert = 2;
           }
           ins = MMG2_splitbdry(mesh,sol,ip,k,i,tang);
@@ -593,7 +610,7 @@ static int analargeom(MMG5_pMesh mesh,MMG5_pSol sol,int *alert) {
 /**
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the sol structure.
- * \return 1 if success.
+ * \return 1 if success, 0 if strongly fail.
  *
  * Mesh adaptation.
  *
@@ -602,7 +619,7 @@ int MMG2_mmg2d1(MMG5_pMesh mesh,MMG5_pSol sol) {
   pBucket  bucket;
   double   declic;
   int      ns,base,alert,it,maxtou;
-  int      nadd,ndel,nswp,ngeom;
+  int      nadd,ndel,nswp,ngeom,ni,nc;
 
   nadd = ndel = nswp = 0;
   if ( mesh->info.imprim < 0 ) {
@@ -639,10 +656,13 @@ int MMG2_mmg2d1(MMG5_pMesh mesh,MMG5_pSol sol) {
   maxtou = 30;
   it     = 0;
   do {
-
-    analar(mesh,sol,bucket,declic,&alert);
-    nadd += MMG2_ni;
-    ndel += MMG2_nc;
+    ni = 0;
+    nc = 0;
+    if ( !analar(mesh,sol,bucket,declic,&alert,&ni,&nc) ) {
+      return(0);
+    }
+    nadd += ni;
+    ndel += nc;
     if(!mesh->info.noswap) {
       ns = MMG2_cendel(mesh,sol,declic,mesh->base);
       nswp += ns;
@@ -650,8 +670,8 @@ int MMG2_mmg2d1(MMG5_pMesh mesh,MMG5_pSol sol) {
         fprintf(stdout,"  -- %8d SWAPPED\n",ns);
     }
   }
-  while ( ++it < maxtou && (MMG2_ni+MMG2_nc > 0));
-  //while ( ++it < maxtou && (MMG2_ni+MMG2_nc > 0));//> 0.05*mesh->np));
+  while ( ++it < maxtou && (ni+nc > 0));
+  //while ( ++it < maxtou && (ni+nc > 0));//> 0.05*mesh->np));
 
   if ( mesh->info.imprim && (abs(mesh->info.imprim) < 6) && ( nadd || ndel ) ) {
     fprintf(stdout,"     %8d splitted, %8d collapsed,"

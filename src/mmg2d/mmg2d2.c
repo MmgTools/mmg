@@ -32,7 +32,13 @@
  */
 #include "mmg2d.h"
 
-/*remove BB triangles*/
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \return 1 if success, 0 if fail.
+ *
+ * Remove the bounding box triangles.
+ *
+ */
 int MMG2_removeBBtriangles(MMG5_pMesh mesh) {
   MMG5_pTria   pt;
   int     ip1,ip2,ip3,ip4,k,iadr,*adja,iadr2,*adja2;
@@ -44,7 +50,6 @@ int MMG2_removeBBtriangles(MMG5_pMesh mesh) {
   ip3=(mesh->np-1);
   ip4=(mesh->np);
 
-  if(mesh->info.ddebug) MMG2D_saveMesh(mesh,"avtdel.mesh");
   nd = 0;
   for(k=1 ; k<=mesh->nt ; k++) {
     pt  = &mesh->tria[k];
@@ -61,11 +66,11 @@ int MMG2_removeBBtriangles(MMG5_pMesh mesh) {
       _MMG2D_delElt(mesh,k);
       continue;
     } else if(!pt->base) {
-      printf("UNDETERMINED TRIANGLE %d : %d %d %d\n",k,pt->v[0],pt->v[1],pt->v[2]);
+      printf("  ## Warning: undetermined triangle %d : %d %d %d\n",
+             k,pt->v[0],pt->v[1],pt->v[2]);
       nd++;
     }
   }
-  if(mesh->info.ddebug) MMG2D_saveMesh(mesh,"apresdel.mesh");
 
   if(!nd) {
     _MMG2D_delPt(mesh,ip1);
@@ -73,8 +78,7 @@ int MMG2_removeBBtriangles(MMG5_pMesh mesh) {
     _MMG2D_delPt(mesh,ip3);
     _MMG2D_delPt(mesh,ip4);
   } else {
-    fprintf(stdout,"PROCEDURE FAILED : %d INDETERMINED TRIANGLES\n",nd);
-    MMG2D_saveMesh(mesh,mesh->nameout);
+    fprintf(stdout,"  ## Error: procedure failed : %d indetermined triangles\n",nd);
     return(0);
   }
   return(1);
@@ -102,17 +106,23 @@ int MMG2_settagtriangles(MMG5_pMesh mesh,MMG5_pSol sol) {
       if ( !M_EOK(pt) )  continue;
       if(!MMG2_findtrianglestate(mesh,k,ip1,ip2,ip3,ip4,base)) nd++ ;
     }
-    if(mesh->info.ddebug) printf("how many undetermined triangles ? %d\n",nd);
+    if(mesh->info.ddebug) printf(" ** how many undetermined triangles ? %d\n",nd);
   } while (nd && ++iter<maxiter);
 
   return(1);
 }
 
-/*insertion of the list of points inside the mesh*/
-/*return 0 if pbs occur*/
+/**
+ * \param mesh poitner toward the mesh structure
+ * \param sol pointer toward the solution structure
+ * \return  0 if fail.
+ *
+ * Insertion of the list of points inside the mesh
+ *
+ */
 int MMG2_insertpointdelone(MMG5_pMesh mesh,MMG5_pSol sol) {
   MMG5_pPoint  ppt;
-//  MMG5_pTria   pt;
+  //  MMG5_pTria   pt;
   int     list[MMG2_LONMAX],lon;
   int     k,i;
   // int     kk, iadr,*adja,
@@ -120,43 +130,32 @@ int MMG2_insertpointdelone(MMG5_pMesh mesh,MMG5_pSol sol) {
   for(k=1 ; k<=mesh->np - 4 ; k++) {
 
     ppt = &mesh->point[k];
+
     /*recherche du triangle contenant le point : lel*/
     list[0] = MMG2_findTria(mesh,k);
     if(!list[0]) {
-      printf("exhaustive search\n");
+      if ( mesh->info.ddebug )
+        printf(" ** exhaustive search of point location.\n");
+
       for(i = 1 ; i<= mesh->nt ; i++) {
         list[0] = MMG2_isInTriangle(mesh,i,&ppt->c[0]);
         if(list[0]) break;
       }
       if(i>mesh->nt) {
-        fprintf(stdout,"NO TRIANGLE FOUND FOR VERTEX %d\n",k);
+        fprintf(stdout,"  ## Error: no triangle found for vertex %d\n",k);
         return(0);
       }
     }
 
     lon = _MMG2_cavity(mesh,sol,k,list);
-    //printf("on trouve %d tria dans la cavity\n",lon);
+
     if ( lon < 1 ) {
-      fprintf(stdout,"impossible d'inserer le point %d\n",k);
-      MMG2D_saveMesh(mesh,"toto.mesh");
-      exit(EXIT_FAILURE);
+      fprintf(stdout,"  ## Error: unable to insert vertex %d\n",k);
+      return(0);
+
     } else {
       _MMG2_delone(mesh,sol,k,list,lon);
     }
-    /* if(k==5) { */
-    /*   for(kk=1 ; kk<=mesh->nt ; kk++) { */
-    /*     pt = &mesh->tria[kk]; */
-    /*     if(!pt->v[0]) continue; */
-    /*     //printf("tr %d : %d %d %d\n",kk,pt->v[0],pt->v[1],pt->v[2]); */
-    /*     iadr = 3*(kk-1)+1; */
-    /*     adja = &mesh->adja[iadr]; */
-    /*     //printf("adja %d %d %d\n",adja[0]/3, adja[1]/3,adja[2]/3); */
-    /*   } */
-    /*   if ( !_MMG5_chkmsh(mesh,1,0) ) exit(EXIT_FAILURE); */
-    // MMG2D_saveMesh(mesh,"toto.mesh");
-    //exit(EXIT_FAILURE);
-    /*}*/
-
   }
 
   return(1);
@@ -188,11 +187,8 @@ int MMG2_insertpoint(MMG5_pMesh mesh,MMG5_pSol sol) {
     if(ppt->tmp==1) continue;
     /*recherche du triangle contenant le point : lel*/
     lel = MMG2_findTria(mesh,k);
-    if(!lel) {
-      //printf("on cherche le point %d : %e %e %d\n",k,ppt->c[0],ppt->c[1],ppt->ref);
-      //MMG2D_saveMesh(mesh,"tmp.mesh");
-    }
     assert(lel);
+
     nflat = 0; // to avoid bad triangle  1, 2, 4, 3, 5, 7
     pt  = &mesh->tria[lel];
     iadr = 3*(lel-1) + 1;
@@ -425,13 +421,12 @@ int MMG2_insertpoint(MMG5_pMesh mesh,MMG5_pSol sol) {
     }
     if(mesh->info.ddebug) {
       if ( !_MMG5_chkmsh(mesh,0,0) ) exit(EXIT_FAILURE);
-      MMG2_tassage(mesh,sol);
-      MMG2D_saveMesh(mesh,"titi.mesh");
     }
 
   }
   return(1);
 }
+
 /*put different ref on different SD*/
 int MMG2_markSD(MMG5_pMesh mesh) {
   MMG5_pTria   pt,pt1;
@@ -659,7 +654,6 @@ int MMG2_findtrianglestate(MMG5_pMesh mesh,int k,int ip1,int ip2,int ip3,int ip4
         if(!pt1->base) continue;
         if(abs(pt1->base)<mesh->base) continue;
         if(numed[i]) { //wrong if the edge is an internal boundary
-          printf("c'est bien la qu'on sort %d %d\n",adj,pt1->base);
           pt->base = -pt1->base;
           return(pt->base);
         } else {
@@ -674,7 +668,7 @@ int MMG2_findtrianglestate(MMG5_pMesh mesh,int k,int ip1,int ip2,int ip3,int ip4
     }
   } else {
     assert(!nb);
-    fprintf(stdout,"CONNEX COMPONENT WITH ONLY ONE TRIANGLE\n");
+    fprintf(stdout,"  ## Warning: connex component with only one triangle\n");
     pt->base = base;
     return(base);
   }
@@ -686,8 +680,14 @@ int MMG2_findtrianglestate(MMG5_pMesh mesh,int k,int ip1,int ip2,int ip3,int ip4
   return(0);
 }
 
-/*cherche si le  tr est dedans ou dehors ou indetermine (donc edge a forcer ou cas non convexe)*/
-/*return <0 value if triangle outside ; > 0 if triangle inside*/
+/**
+ *
+ * \return <0 value if triangle outside ; > 0 if triangle inside
+ *
+ * Seek if triangle is inside, outside or not determinated (thus, the edge must
+ * be enforced or the case is non convexe.
+ *
+ */
 int MMG2_findpos(MMG5_pMesh mesh,MMG5_pTria pt,int ip1,int ip2,int ip3,int ip4,int base) {
   MMG5_pEdge     ped;
   int            i,j,nb,ped0,ped1;
@@ -739,7 +739,7 @@ int MMG2_findpos(MMG5_pMesh mesh,MMG5_pTria pt,int ip1,int ip2,int ip3,int ip4,i
 /**
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the sol structure.
- * \return 1 if success.
+ * \return 0 if fail, 1 if success.
  *
  * Mesh triangulation.
  *
@@ -780,7 +780,7 @@ int MMG2_mmg2d2(MMG5_pMesh mesh,MMG5_pSol sol) {
             numper[k] = kk;
           } else if(numper[k]!=kk){
             j = numper[k];
-            printf("j = %d %d\n",j,numper[j]) ;
+            // printf("j = %d %d\n",j,numper[j]) ;
             while(numper[j] && numper[j]!=kk) {
               j = numper[j];
               //printf("j = %d %d\n",j,numper[j]) ;
@@ -891,13 +891,12 @@ int MMG2_mmg2d2(MMG5_pMesh mesh,MMG5_pSol sol) {
 
   /*bdry enforcement*/
   if(!MMG2_bdryenforcement(mesh,sol)) {
-    printf("  ## Error: unable to enforce the boundaries.\n");return(0);
+    printf("  ## Error: unable to enforce the boundaries.\n");
+    return(0);
   }
-  if(mesh->info.ddebug) {
+
+  if(mesh->info.ddebug)
     if ( !_MMG5_chkmsh(mesh,1,0) ) exit(EXIT_FAILURE);
-    MMG2_tassage(mesh,sol);
-    MMG2D_saveMesh(mesh,"bdyenforcement.mesh");
-  }
 
   /*mark SD and remove BB*/
   if(mesh->na)

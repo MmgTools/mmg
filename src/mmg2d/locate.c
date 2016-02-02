@@ -328,7 +328,7 @@ int MMG2_locateEdge(MMG5_pMesh mesh,int ia,int ib,int* kdep,int* list) {
   ppb = &mesh->point[ib];
   do {
     pt = &mesh->tria[k];
-    //if(!pt->v[0]) {printf("c ca ? %d\n",k);MMG2D_saveMesh(mesh,"locate.mesh");break; }
+
     pt->base = mesh->base;
     iadr = 3*(k-1)+1;
     adja = &mesh->adja[iadr];
