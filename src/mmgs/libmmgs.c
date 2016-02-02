@@ -127,7 +127,13 @@ int _MMGS_packMesh(MMG5_pMesh mesh,MMG5_pSol met) {
 
     /* Count the edges */
     for(i=0 ; i<3 ; i++) {
-      if ( MG_EDG(pt->tag[i]) )  ++na;
+      if ( !MG_EDG(pt->tag[i]) ) continue;
+
+      adja = &mesh->adja[3*(k-1)+1];
+      jel  = adja[i] / 3;
+
+      if ( jel && jel <= k ) continue;
+      ++na;
     }
 
   }
@@ -168,25 +174,30 @@ int _MMGS_packMesh(MMG5_pMesh mesh,MMG5_pSol met) {
     met->np  = np;
 
   /* memory alloc */
-  if ( na ) {
-    if ( mesh->edge ) {
-      _MMG5_DEL_MEM(mesh,mesh->edge,(mesh->na+1)*sizeof(MMG5_Edge));
-      _MMG5_SAFE_FREE(mesh->edge);
-    }
-    _MMG5_ADD_MEM(mesh,(na+1)*sizeof(MMG5_Edge),"edges",);
-    _MMG5_SAFE_CALLOC(mesh->edge,na+1,MMG5_Edge);
+  mesh->na = 0;
+  if ( mesh->edge ) {
+    _MMG5_DEL_MEM(mesh,mesh->edge,(mesh->na+1)*sizeof(MMG5_Edge));
+    _MMG5_SAFE_FREE(mesh->edge);
   }
 
-  mesh->na = 0;
-  for (k=1; k<=mesh->nt; k++) {
-    pt = &mesh->tria[k];
-    if ( MG_EOK(pt) ) {
-      for (i=0; i<3; i++) {
-        if ( !MG_EDG(pt->tag[i]) )  continue;
+  if ( na ) {
+    _MMG5_ADD_MEM(mesh,(na+1)*sizeof(MMG5_Edge),"final edges",
+                  na = 0;
+                  printf("  ## Warning: uncomplete mesh\n")
+      );
+  }
 
-        adja = &mesh->adja[3*(k-1)+1];
-        jel  = adja[i] / 3;
-        if ( !jel || jel > k ) {
+  if ( na ) {
+    _MMG5_SAFE_CALLOC(mesh->edge,na+1,MMG5_Edge);
+    for (k=1; k<=mesh->nt; k++) {
+      pt = &mesh->tria[k];
+      if ( MG_EOK(pt) ) {
+        for (i=0; i<3; i++) {
+          if ( !MG_EDG(pt->tag[i]) )  continue;
+
+          adja = &mesh->adja[3*(k-1)+1];
+          jel  = adja[i] / 3;
+          if ( jel && jel <= k ) continue;
           i1 = _MMG5_inxt2[i];
           i2 = _MMG5_inxt2[i1];
           mesh->na++;
@@ -304,7 +315,12 @@ int MMGS_mmgslib(MMG5_pMesh mesh,MMG5_pSol met)
     _MMG5_RETURN_AND_PACK(mesh,met,MMG5_LOWFAILURE);
   }
 
-  if ( abs(mesh->info.imprim) > 0 )  _MMGS_inqua(mesh,met);
+  if ( abs(mesh->info.imprim) > 0 ) {
+    if ( !_MMGS_inqua(mesh,met) ) {
+      if ( !_MMG5_unscaleMesh(mesh,met) )  _LIBMMG5_RETURN(MMG5_STRONGFAILURE);
+      _MMG5_RETURN_AND_PACK(mesh,met,MMG5_LOWFAILURE);
+    }
+  }
 
   if ( mesh->info.imprim > 1 && !mesh->info.iso && met->m )
     _MMGS_prilen(mesh,met,0);
@@ -337,7 +353,11 @@ int MMGS_mmgslib(MMG5_pMesh mesh,MMG5_pSol met)
   }
 
   /* save file */
-  _MMGS_outqua(mesh,met);
+  if (!_MMGS_outqua(mesh,met) ) {
+    if ( !_MMG5_unscaleMesh(mesh,met) )  _LIBMMG5_RETURN(MMG5_STRONGFAILURE);
+    _MMG5_RETURN_AND_PACK(mesh,met,MMG5_LOWFAILURE);
+  }
+
   if ( mesh->info.imprim > 1 )
     _MMGS_prilen(mesh,met,1);
 

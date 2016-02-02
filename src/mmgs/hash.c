@@ -128,7 +128,13 @@ int _MMGS_hashTria(MMG5_pMesh mesh) {
   return(ier);
 }
 
-/* store edges in hash table */
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \return 1 if success, 0 
+ *
+ * Store edges in hash table
+ *
+ */
 int assignEdge(MMG5_pMesh mesh) {
   _MMG5_Hash  hash;
   MMG5_pTria  pt;
@@ -136,6 +142,7 @@ int assignEdge(MMG5_pMesh mesh) {
   int         k,ia;
   char        i,i1,i2;
 
+  if ( !mesh->na ) return(1);
 
   /* adjust hash table params */
   hash.siz  = mesh->na;
@@ -171,6 +178,7 @@ int assignEdge(MMG5_pMesh mesh) {
   /* reset edge structure */
   _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
   _MMG5_DEL_MEM(mesh,mesh->edge,(mesh->na+1)*sizeof(MMG5_Edge));
+  mesh->na = 0;
 
   return(1);
 }

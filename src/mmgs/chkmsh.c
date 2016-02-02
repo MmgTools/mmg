@@ -36,7 +36,15 @@
 #include "mmgs.h"
 
 
-
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param severe level of performed check
+ * \param base unused argument.
+ * \return 0 if fail, 1 if success.
+ *
+ * Check the mesh validity
+ *
+ */
 int _MMG5_mmgsChkmsh(MMG5_pMesh mesh,int severe,int base) {
     MMG5_pPoint         ppt;
     MMG5_pTria          pt1,pt2;
@@ -57,28 +65,28 @@ int _MMG5_mmgsChkmsh(MMG5_pMesh mesh,int severe,int base) {
             voy = adja[i] % 3;
             if ( !adj && !(pt1->tag[i] & MG_GEO) ) {
                 fprintf(stdout,"  0. Missing edge tag %d %d\n",k,adj);
-                printf("k %d: %d %d %d \n",k,pt1->v[0],pt1->v[1],pt1->v[2]);
+                printf("triangle %d: %d %d %d \n",k,pt1->v[0],pt1->v[1],pt1->v[2]);
                 printf("tag (%d): %d %d %d \n",k,pt1->tag[0],pt1->tag[1],pt1->tag[2]);
                 return(0);
             }
             if ( adj == k ) {
                 fprintf(stdout,"  1. Wrong adjacency %d %d\n",k,adj);
-                printf("k %d: %d %d %d \n",k,pt1->v[0],pt1->v[1],pt1->v[2]);
+                printf("triangle %d: %d %d %d \n",k,pt1->v[0],pt1->v[1],pt1->v[2]);
                 printf("adj (%d): %d %d %d \n",k,adja[0]/3,adja[1]/3,adja[2]/3);
-                //MMGS_saveMesh(mesh,mesh->nameout);
                 return(0);
             }
             pt2 = &mesh->tria[adj];
             if ( !MG_EOK(pt2) ) {
                 fprintf(stdout,"  4. Invalid adjacent %d %d\n",adj,k);
-                printf("sommets k   %d: %d %d %d\n",k,pt1->v[0],pt1->v[1],pt1->v[2]);
-                printf("sommets adj %d: %d %d %d \n",adj,pt2->v[0],pt2->v[1],pt2->v[2]);
-                //MMGS_saveMesh(mesh,mesh->nameout);
+                printf("vertices of k   %d: %d %d %d\n",
+                       k,pt1->v[0],pt1->v[1],pt1->v[2]);
+                printf("vertices of adj %d: %d %d %d \n",
+                       adj,pt2->v[0],pt2->v[1],pt2->v[2]);
                 return(0);
             }
             if ( (pt1->tag[i] != pt2->tag[voy]) || (pt1->edg[i] != pt2->edg[voy] ) ) {
-                fprintf(stdout,"  3. Wrong tag/ref %d %d  %d - %d\n",k,adj,pt1->tag[i],pt2->tag[voy]);
-                MMGS_saveMesh(mesh,mesh->nameout);
+                fprintf(stdout,"  3. Wrong tag/ref %d %d  %d - %d\n",
+                        k,adj,pt1->tag[i],pt2->tag[voy]);
                 return(0);
             }
             adjb = &mesh->adja[3*(adj-1)+1];
@@ -86,11 +94,12 @@ int _MMG5_mmgsChkmsh(MMG5_pMesh mesh,int severe,int base) {
             voy1 = adjb[voy] % 3;
             if ( adj1 != k || voy1 != i ) {
                 fprintf(stdout,"  2. Wrong adjacency %d %d\n",k,adj1);
-                printf("k %d: %d %d %d \n",k,pt1->v[0],pt1->v[1],pt1->v[2]);
-                printf("a %d: %d %d %d \n",adj,pt2->v[0],pt2->v[1],pt2->v[2]);
+                printf("vertices of %d: %d %d %d \n",k,
+                       pt1->v[0],pt1->v[1],pt1->v[2]);
+                printf("vertices of adj %d: %d %d %d \n",adj,
+                       pt2->v[0],pt2->v[1],pt2->v[2]);
                 printf("adj(%d): %d %d %d\n",k,adja[0]/3,adja[1]/3,adja[2]/3);
                 printf("adj(%d): %d %d %d\n",adj,adjb[0]/3,adjb[1]/3,adjb[2]/3);
-                //MMGS_saveMesh(mesh,mesh->nameout);
                 return(0);
             }
             if ( !MS_SIN(pt1->tag[i]) ) {
@@ -131,7 +140,6 @@ int _MMG5_mmgsChkmsh(MMG5_pMesh mesh,int severe,int base) {
                 pt2 = &mesh->tria[kk];
                 if ( pt2->v[nk] != ip ) {
                     fprintf(stdout,"  5. Wrong ball %d, %d\n",ip,pt2->v[nk]);
-                    //MMGS_saveMesh(mesh,mesh->nameout);
                     return(0);
                 }
             }

@@ -371,12 +371,13 @@ int _MMGS_prilen(MMG5_pMesh mesh, MMG5_pSol met, int metRidTyp) {
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
+ * \return 0 if the worst element has a nul quality, 1 otherwise.
  *
  * Print histogram of mesh qualities for classical storage of ridges
  * metrics (so before the the _MMG5_defsiz function call).
  *
  */
-void _MMGS_inqua(MMG5_pMesh mesh,MMG5_pSol met) {
+int _MMGS_inqua(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTria    pt;
   double        rap,rapmin,rapmax,rapavg,med;
   int           i,k,iel,ok,ir,imax,nex,his[5];
@@ -422,12 +423,9 @@ void _MMGS_inqua(MMG5_pMesh mesh,MMG5_pSol met) {
   if ( abs(mesh->info.imprim) < 4 ){
     if (rapmin == 0){
       fprintf(stdout,"  ## WARNING: TOO BAD QUALITY FOR THE WORST ELEMENT\n");
-      _MMG5_unscaleMesh(mesh,met);
-      MMGS_saveMesh(mesh,mesh->nameout);
-      MMGS_saveSol(mesh,met,met->nameout);
-      exit(EXIT_FAILURE);
+      return(0);
     }
-    return;
+    return(1);
   }
 
   /* print histo */
@@ -437,17 +435,19 @@ void _MMGS_inqua(MMG5_pMesh mesh,MMG5_pSol met) {
     fprintf(stdout,"     %5.1f < Q < %5.1f   %7d   %6.2f %%\n",
             i/5.,i/5.+0.2,his[i],100.*(his[i]/(float)(mesh->nt-nex)));
   }
+  return(1);
 }
 
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
+ * \return 0 if the worst element has a nul quality, 1 otherwise.
  *
  * Print histogram of mesh qualities for special storage of ridges metrics
  * (after the _MMG5_defsiz function call).
  *
  */
-void _MMGS_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
+int _MMGS_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTria    pt;
   double        rap,rapmin,rapmax,rapavg,med;
   int           i,k,iel,ok,ir,imax,nex,his[5];
@@ -493,12 +493,9 @@ void _MMGS_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
   if ( abs(mesh->info.imprim) < 4 ){
     if (rapmin == 0){
       fprintf(stdout,"  ## WARNING: TOO BAD QUALITY FOR THE WORST ELEMENT\n");
-      _MMG5_unscaleMesh(mesh,met);
-      MMGS_saveMesh(mesh,mesh->nameout);
-      MMGS_saveSol(mesh,met,met->nameout);
-      exit(EXIT_FAILURE);
+      return(0);
     }
-    return;
+    return(1);
   }
 
   /* print histo */
@@ -508,6 +505,7 @@ void _MMGS_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
     fprintf(stdout,"     %5.1f < Q < %5.1f   %7d   %6.2f %%\n",
             i/5.,i/5.+0.2,his[i],100.*(his[i]/(float)(mesh->nt-nex)));
   }
+  return(1);
 }
 
 #define COS145   -0.81915204428899

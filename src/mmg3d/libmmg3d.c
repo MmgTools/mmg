@@ -44,10 +44,10 @@
 /**
  * Pack the mesh \a mesh and its associated metric \a met and return \a val.
  */
-#define _MMG5_RETURN_AND_PACK(mesh,met,disp,val)do  \
-  {                                                 \
-    _MMG3D_packMesh(mesh,met,disp);                 \
-    _LIBMMG5_RETURN(val);                           \
+#define _MMG5_RETURN_AND_PACK(mesh,met,disp,val)do                      \
+  {                                                                     \
+    if ( !_MMG3D_packMesh(mesh,met,disp) )  return(MMG5_STRONGFAILURE); \
+    _LIBMMG5_RETURN(val);                                               \
   }while(0)
 
 /** Free adja, xtetra and xpoint tables */
@@ -75,6 +75,8 @@ void _MMG3D_Free_topoTables(MMG5_pMesh mesh) {
  * \param mesh pointer toward the mesh structure (unused).
  * \param met pointer toward the solution (metric or level-set) structure.
  * \param disp pointer toward the solution (displacement) structure.
+ * \param return 1 if success, 0 if chkmsh fail or if we are unable to build
+ * triangles.
  *
  * Pack the sparse mesh and create triangles and edges before getting
  * out of library
@@ -210,7 +212,8 @@ int _MMG3D_packMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
   if ( (mesh->memCur) > (mesh->memMax) ) {
     mesh->memCur -= (long long)((3*mesh->nt+2)*sizeof(MMG5_hgeom));
     fprintf(stdout,"  ## Warning:");
-    fprintf(stdout," unable to allocate htab.\n");
+    fprintf(stdout," unable to allocate an hash table to store the mesh edges."
+      "\n  ## Warning: uncomplete mesh\n");
   }
   else if ( _MMG5_hNew(&mesh->htab,mesh->nt,3*(mesh->nt),0) ) {
     for (k=1; k<=mesh->ne; k++) {
@@ -247,7 +250,13 @@ int _MMG3D_packMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
       mesh->na++;
     }
     if ( mesh->na ) {
-      _MMG5_ADD_MEM(mesh,(mesh->na+1)*sizeof(MMG5_Edge),"edges",);
+      _MMG5_ADD_MEM(mesh,(mesh->na+1)*sizeof(MMG5_Edge),"edges",
+                    mesh->na = 0;
+                    printf("  ## Warning: uncomplete mesh\n")
+        );
+    }
+
+    if ( mesh->na ) {
       _MMG5_SAFE_CALLOC(mesh->edge,mesh->na+1,MMG5_Edge);
 
       mesh->na = 0;
@@ -383,7 +392,12 @@ int MMG3D_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met) {
   /* scaling mesh */
   if ( !_MMG5_scaleMesh(mesh,met) ) _LIBMMG5_RETURN(MMG5_STRONGFAILURE);
 
-  if ( abs(mesh->info.imprim) > 0 )  _MMG3D_inqua(mesh,met);
+  if ( abs(mesh->info.imprim) > 0 ) {
+    if ( !_MMG3D_inqua(mesh,met) ) {
+      if ( !_MMG5_unscaleMesh(mesh,met) ) _LIBMMG5_RETURN(MMG5_STRONGFAILURE);
+      _MMG5_RETURN_AND_PACK(mesh,met,NULL,MMG5_LOWFAILURE);
+    }
+  }
 
   /* specific meshing */
   if ( mesh->info.optim && !met->np && !MMG3D_DoSol(mesh,met) ) {
@@ -445,7 +459,11 @@ int MMG3D_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met) {
   }
 
   /* save file */
-  _MMG3D_outqua(mesh,met);
+  if ( !_MMG3D_outqua(mesh,met) ) {
+    if ( !_MMG5_unscaleMesh(mesh,met) ) _LIBMMG5_RETURN(MMG5_STRONGFAILURE);
+    _MMG5_RETURN_AND_PACK(mesh,met,NULL,MMG5_LOWFAILURE);
+  }
+
   if ( mesh->info.imprim > 4 )
     _MMG3D_prilen(mesh,met,1);
 
@@ -537,7 +555,12 @@ int MMG3D_mmg3dls(MMG5_pMesh mesh,MMG5_pSol met) {
  /* scaling mesh */
   if ( !_MMG5_scaleMesh(mesh,met) ) _LIBMMG5_RETURN(MMG5_STRONGFAILURE);
 
-  if ( abs(mesh->info.imprim) > 0 )  _MMG3D_inqua(mesh,met);
+  if ( abs(mesh->info.imprim) > 0 ) {
+    if ( !_MMG3D_inqua(mesh,met) ) {
+      if ( !_MMG5_unscaleMesh(mesh,met) ) _LIBMMG5_RETURN(MMG5_STRONGFAILURE);
+      _MMG5_RETURN_AND_PACK(mesh,met,NULL,MMG5_LOWFAILURE);
+    }
+  }
 
   /* specific meshing */
   if ( !met->np ) {
@@ -599,7 +622,10 @@ int MMG3D_mmg3dls(MMG5_pMesh mesh,MMG5_pSol met) {
   }
 
   /* save file */
-  _MMG3D_outqua(mesh,met);
+  if ( !_MMG3D_outqua(mesh,met) ) {
+    if ( !_MMG5_unscaleMesh(mesh,met) ) _LIBMMG5_RETURN(MMG5_STRONGFAILURE);
+    _MMG5_RETURN_AND_PACK(mesh,met,NULL,MMG5_LOWFAILURE);
+  }
 
   chrono(ON,&(ctim[1]));
   if ( mesh->info.imprim )  fprintf(stdout,"\n  -- MESH PACKED UP\n");
@@ -707,7 +733,12 @@ int MMG3D_mmg3dmov(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp) {
   chrono(ON,&(ctim[2]));
   MMG3D_setfunc(mesh,met);
 
-  if ( abs(mesh->info.imprim) > 0 )  _MMG3D_inqua(mesh,met);
+  if ( abs(mesh->info.imprim) > 0 ) {
+    if ( !_MMG3D_inqua(mesh,met) ) {
+      if ( !_MMG5_unscaleMesh(mesh,met) ) _LIBMMG5_RETURN(MMG5_STRONGFAILURE);
+      _MMG5_RETURN_AND_PACK(mesh,met,disp,MMG5_LOWFAILURE);
+    }
+  }
 
   if ( mesh->info.imprim ) {
     fprintf(stdout,"\n  %s\n   MODULE MMG3D: IMB-LJLL : %s (%s)\n  %s\n",MG_STR,MG_VER,MG_REL,MG_STR);
@@ -800,7 +831,11 @@ int MMG3D_mmg3dmov(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp) {
   }
 
   /* save file */
-  _MMG3D_outqua(mesh,met);
+  if ( !_MMG3D_outqua(mesh,met) ) {
+    if ( !_MMG5_unscaleMesh(mesh,met) ) _LIBMMG5_RETURN(MMG5_STRONGFAILURE);
+    _MMG5_RETURN_AND_PACK(mesh,met,disp,MMG5_LOWFAILURE);
+  }
+
   if ( mesh->info.imprim > 1 && !mesh->info.iso )
     _MMG3D_prilen(mesh,met,1);
 

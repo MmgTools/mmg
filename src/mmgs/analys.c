@@ -790,6 +790,12 @@ static int regnor(MMG5_pMesh mesh) {
 /* preprocessing stage: mesh analysis */
 int _MMGS_analys(MMG5_pMesh mesh) {
 
+  /* set tria edges tags */
+  if ( !assignEdge(mesh) ) {
+    fprintf(stdout,"  ## Analysis problem. Exit program.\n");
+    return(0);
+  }
+
   /* create adjacency */
   if ( !_MMGS_hashTria(mesh) ) {
     fprintf(stdout,"  ## Hashing problem. Exit program.\n");

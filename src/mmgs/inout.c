@@ -528,8 +528,6 @@ int MMGS_loadMesh(MMG5_pMesh mesh, char *filename) {
         if ( ia > 0 && ia <= mesh->na )   mesh->edge[ia].tag |= MG_REQ;
       }
     }
-    /* set tria edges tags */
-    assignEdge(mesh);
   }
 
   /* read geometric entities */
@@ -614,6 +612,8 @@ int MMGS_loadMesh(MMG5_pMesh mesh, char *filename) {
  *
  * Save mesh data.
  *
+ * \warning you must call the \a _MMGS_packMesh function before saving your
+ * mesh.
  */
 
 int MMGS_saveMesh(MMG5_pMesh mesh, char* filename) {
@@ -622,7 +622,7 @@ int MMGS_saveMesh(MMG5_pMesh mesh, char* filename) {
   MMG5_pTria   pt;
   MMG5_pEdge   edge;
   MMG5_pxPoint go;
-  int          *adja,k,jel,np,nt,na,nc,ng,nn,nr,nre;
+  int          k,jel,np,nt,nc,ng,nn,nr,nre;
   int          bin,binch,bpos;
   // int          outm;
   char         data[128],*ptr,chaine[128],i,i1,i2;
@@ -724,19 +724,11 @@ int MMGS_saveMesh(MMG5_pMesh mesh, char* filename) {
     }
   }
 
-  nt = na = nr = 0;
+  nt = 0;
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
-    if ( MG_EOK(pt) ) {
-      nt++;
-      for (i=0; i<3; i++)
-        if ( MG_EDG(pt->tag[i]) )  na++;
-    }
-  }
-
-  /* memory alloc */
-  if ( na ) {
-    _MMG5_SAFE_CALLOC(edge,na+1,MMG5_Edge);
+    if ( !MG_EOK(pt) ) continue;
+    nt++;
   }
 
   /* write triangles */
@@ -751,7 +743,7 @@ int MMGS_saveMesh(MMG5_pMesh mesh, char* filename) {
     fwrite(&bpos,sw,1,inm);
     fwrite(&nt,sw,1,inm);
   }
-  na = 0;
+
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
     if ( MG_EOK(pt) ) {
@@ -762,24 +754,8 @@ int MMGS_saveMesh(MMG5_pMesh mesh, char* filename) {
         fwrite(&mesh->point[pt->v[0]].tmp,sw,1,inm);
         fwrite(&mesh->point[pt->v[1]].tmp,sw,1,inm);
         fwrite(&mesh->point[pt->v[2]].tmp,sw,1,inm);
-	pt->ref = abs(pt->ref);
+        pt->ref = abs(pt->ref);
         fwrite(&pt->ref,sw,1,inm);
-      }
-      for (i=0; i<3; i++) {
-        if ( !MG_EDG(pt->tag[i]) )  continue;
-
-        adja = &mesh->adja[3*(k-1)+1];
-        jel  = adja[i] / 3;
-        if ( !jel || jel > k ) {
-          i1 = _MMG5_inxt2[i];
-          i2 = _MMG5_inxt2[i1];
-          na++;
-          edge[na].a    = mesh->point[pt->v[i1]].tmp;
-          edge[na].b    = mesh->point[pt->v[i2]].tmp;
-          edge[na].ref  = pt->edg[i];
-          edge[na].tag |= pt->tag[i];
-          if ( pt->tag[i] & MG_GEO )  nr++;
-        }
       }
     }
   }
@@ -833,28 +809,30 @@ int MMGS_saveMesh(MMG5_pMesh mesh, char* filename) {
   }
 
   /* write edges, ridges */
-  if ( na ) {
+  if ( mesh->na ) {
     if(!bin) {
       strcpy(&chaine[0],"\n\nEdges\n");
       fprintf(inm,"%s",chaine);
-      fprintf(inm,"%d\n",na);
+      fprintf(inm,"%d\n",mesh->na);
     } else {
       binch = 5; //Edges
       fwrite(&binch,sw,1,inm);
-      bpos += 12 + 3*4*na;//Pos
+      bpos += 12 + 3*4*mesh->na;//Pos
       fwrite(&bpos,sw,1,inm);
-      fwrite(&na,sw,1,inm);
+      fwrite(&mesh->na,sw,1,inm);
     }
-    nre = 0;
-    for (k=1; k<=na; k++) {
+    nre = nr = 0;
+    for (k=1; k<=mesh->na; k++) {
       if(!bin) {
-        fprintf(inm,"%d %d %d \n",edge[k].a,edge[k].b,edge[k].ref);
+        fprintf(inm,"%d %d %d \n",
+                mesh->edge[k].a,mesh->edge[k].b,mesh->edge[k].ref);
       } else {
-        fwrite(&edge[k].a,sw,1,inm);
-        fwrite(&edge[k].b,sw,1,inm);
-        fwrite(&edge[k].ref,sw,1,inm);
+        fwrite(&mesh->edge[k].a,sw,1,inm);
+        fwrite(&mesh->edge[k].b,sw,1,inm);
+        fwrite(&mesh->edge[k].ref,sw,1,inm);
       }
-      if ( edge[k].tag & MG_REQ )  nre++;
+      if ( mesh->edge[k].tag & MG_REQ )  nre++;
+      if ( mesh->edge[k].tag & MG_GEO )  nr++;
     }
     /* ridges */
     if ( nr ) {
@@ -869,8 +847,8 @@ int MMGS_saveMesh(MMG5_pMesh mesh, char* filename) {
         fwrite(&bpos,sw,1,inm);
         fwrite(&nr,sw,1,inm);
       }
-      for (k=1; k<=na; k++) {
-        if ( edge[k].tag & MG_GEO ) {
+      for (k=1; k<=mesh->na; k++) {
+        if ( mesh->edge[k].tag & MG_GEO ) {
           if(!bin) {
             fprintf(inm,"%d \n",k);
           } else {
@@ -891,8 +869,8 @@ int MMGS_saveMesh(MMG5_pMesh mesh, char* filename) {
         fwrite(&bpos,sw,1,inm);
         fwrite(&nre,sw,1,inm);
       }
-      for (k=1; k<=na; k++)
-        if ( edge[k].tag & MG_REQ )  {
+      for (k=1; k<=mesh->na; k++)
+        if ( mesh->edge[k].tag & MG_REQ )  {
           if(!bin) {
             fprintf(inm,"%d \n",k);
           } else {
@@ -900,11 +878,10 @@ int MMGS_saveMesh(MMG5_pMesh mesh, char* filename) {
           }
         }
     }
-    _MMG5_SAFE_FREE(edge);
   }
 
   /* write normals */
-  if ( nn ) {
+  if ( nn && mesh->xp && mesh->xpoint ) {
     if(!bin) {
       strcpy(&chaine[0],"\n\nNormals\n");
       fprintf(inm,"%s",chaine);
@@ -986,8 +963,9 @@ int MMGS_saveMesh(MMG5_pMesh mesh, char* filename) {
 */
   }
 
-  /* write tangents */
-  if ( ng ) {
+  /* write tangents (only if we have already analyzed the mesh =>
+   * mesh->xpoint is allocated ) */
+  if ( ng && mesh->xpoint ) {
     /* Write tangents */
     if(!bin) {
       strcpy(&chaine[0],"\n\nTangents\n");
@@ -1040,8 +1018,8 @@ int MMGS_saveMesh(MMG5_pMesh mesh, char* filename) {
 
   if ( abs(mesh->info.imprim) > 4 ) {
     fprintf(stdout,"     NUMBER OF VERTICES   %8d  CORNERS    %6d\n",np,nc);
-    if ( na )
-      fprintf(stdout,"     NUMBER OF EDGES      %8d  RIDGES     %6d\n",na,nr);
+    if ( mesh->na )
+      fprintf(stdout,"     NUMBER OF EDGES      %8d  RIDGES     %6d\n",mesh->na,nr);
     fprintf(stdout,"     NUMBER OF TRIANGLES  %8d\n",nt);
     if ( nn+ng )
       fprintf(stdout,"     NUMBER OF NORMALS    %8d  TANGENTS   %6d\n",nn,ng);

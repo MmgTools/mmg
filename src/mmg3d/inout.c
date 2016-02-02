@@ -714,6 +714,8 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,char *filename) {
  *
  * Save mesh data.
  *
+ * \warning you must call the \a _MMG3D_packMesh function before saving your
+ * mesh.
  */
 int MMG3D_saveMesh(MMG5_pMesh mesh, char *filename) {
   FILE*        inm;
@@ -1047,131 +1049,86 @@ int MMG3D_saveMesh(MMG5_pMesh mesh, char *filename) {
         }
       }
     }
+  }
 
-    /* Release memory before htab allocation */
-    if ( mesh->adjt )
-      _MMG5_DEL_MEM(mesh,mesh->adjt,(3*mesh->nt+4)*sizeof(int));
-    if ( mesh->adja )
-      _MMG5_DEL_MEM(mesh,mesh->adja,(4*mesh->nemax+5)*sizeof(int));
-
-    /* build hash table for edges */
-    if ( mesh->htab.geom )
-      _MMG5_DEL_MEM(mesh,mesh->htab.geom,(mesh->htab.max+1)*sizeof(MMG5_hgeom));
-
-    /* in the worst case (all edges are marked), we will have around 1 edge per *
-     * triangle (we count edges only one time) */
-    na = nr = nedreq = 0;
-    mesh->memCur += (long long)((3*mesh->nt+2)*sizeof(MMG5_hgeom));
-    if ( (mesh->memCur) > (mesh->memMax) ) {
-      mesh->memCur -= (long long)((3*mesh->nt+2)*sizeof(MMG5_hgeom));
-      fprintf(stdout,"  ## Warning:");
-      fprintf(stdout," unable to allocate htab.\n");
+  nr = nedreq = 0;
+  if ( mesh->na ) {
+    if(!bin) {
+      strcpy(&chaine[0],"\n\nEdges\n");
+      fprintf(inm,"%s",chaine);
+      fprintf(inm,"%d\n",mesh->na);
+    } else {
+      binch = 5; //Edges
+      fwrite(&binch,sw,1,inm);
+      bpos += 12 + 3*4*mesh->na;//Pos
+      fwrite(&bpos,sw,1,inm);
+      fwrite(&mesh->na,sw,1,inm);
     }
-    else if ( _MMG5_hNew(&mesh->htab,mesh->nt,3*(mesh->nt),0) ) {
-      for (k=1; k<=mesh->ne; k++) {
-        pt   = &mesh->tetra[k];
-        if ( MG_EOK(pt) &&  pt->xt ) {
-          for (i=0; i<6; i++) {
-            if ( mesh->xtetra[pt->xt].edg[i] ||
-                 ( MG_EDG(mesh->xtetra[pt->xt].tag[i] ) ||
-                   (mesh->xtetra[pt->xt].tag[i] & MG_REQ) ) )
-              _MMG5_hEdge(mesh,pt->v[_MMG5_iare[i][0]],pt->v[_MMG5_iare[i][1]],
-                          mesh->xtetra[pt->xt].edg[i],mesh->xtetra[pt->xt].tag[i]);
-          }
-        }
+    for (k=1; k<=mesh->na; k++) {
+      if(!bin) {
+        fprintf(inm,"%d %d %d \n",mesh->point[mesh->edge[k].a].tmp,
+                mesh->point[mesh->edge[k].b].tmp,mesh->edge[k].ref);
+      } else {
+        fwrite(&mesh->point[mesh->edge[k].a].tmp,sw,1,inm);
+        fwrite(&mesh->point[mesh->edge[k].b].tmp,sw,1,inm);
+        fwrite(&mesh->edge[k].ref,sw,1,inm);
       }
-      /* edges + ridges + required edges */
-      for (k=0; k<=mesh->htab.max; k++) {
-        ph = &mesh->htab.geom[k];
-        if ( !ph->a )  continue;
+      if ( mesh->edge[k].tag & MG_GEO ) nr++;
+      if ( mesh->edge[k].tag & MG_REQ ) nedreq++;
+    }
+
+    if ( nr ) {
+      if(!bin) {
+        strcpy(&chaine[0],"\n\nRidges\n");
+        fprintf(inm,"%s",chaine);
+        fprintf(inm,"%d\n",nr);
+      } else {
+        binch = 14; //Ridges
+        fwrite(&binch,sw,1,inm);
+        bpos += 12 + 4*nr;//Pos
+        fwrite(&bpos,sw,1,inm);
+        fwrite(&nr,sw,1,inm);
+      }
+      na = 0;
+      for (k=1; k<=mesh->na; k++) {
         na++;
-        if ( ph->tag & MG_GEO )  nr++;
-        if ( ph->tag & MG_REQ )  nedreq++;
-      }
-      if ( na ) {
-        if(!bin) {
-          strcpy(&chaine[0],"\n\nEdges\n");
-          fprintf(inm,"%s",chaine);
-          fprintf(inm,"%d\n",na);
-        } else {
-          binch = 5; //Edges
-          fwrite(&binch,sw,1,inm);
-          bpos += 12 + 3*4*na;//Pos
-          fwrite(&bpos,sw,1,inm);
-          fwrite(&na,sw,1,inm);
-        }
-        for (k=0; k<=mesh->htab.max; k++) {
-          ph = &mesh->htab.geom[k];
-          if ( !ph->a )  continue;
+        if ( mesh->edge[k].tag & MG_GEO ) {
           if(!bin) {
-            fprintf(inm,"%d %d %d \n",mesh->point[ph->a].tmp,mesh->point[ph->b].tmp,ph->ref);
+            fprintf(inm,"%d \n",na);
           } else {
-            fwrite(&mesh->point[ph->a].tmp,sw,1,inm);
-            fwrite(&mesh->point[ph->b].tmp,sw,1,inm);
-            fwrite(&ph->ref,sw,1,inm);
-          }
-        }
-        if ( nr ) {
-          if(!bin) {
-            strcpy(&chaine[0],"\n\nRidges\n");
-            fprintf(inm,"%s",chaine);
-            fprintf(inm,"%d\n",nr);
-          } else {
-            binch = 14; //Ridges
-            fwrite(&binch,sw,1,inm);
-            bpos += 12 + 4*nr;//Pos
-            fwrite(&bpos,sw,1,inm);
-            fwrite(&nr,sw,1,inm);
-          }
-          na = 0;
-          for (k=0; k<=mesh->htab.max; k++) {
-            ph = &mesh->htab.geom[k];
-            if ( !ph->a )  continue;
-            na++;
-            if ( ph->tag & MG_GEO )  {
-              if(!bin) {
-                fprintf(inm,"%d \n",na);
-              } else {
-                fwrite(&na,sw,1,inm);
-              }
-            }
-          }
-        }
-        if ( nedreq ) {
-          if(!bin) {
-            strcpy(&chaine[0],"\n\nRequiredEdges\n");
-            fprintf(inm,"%s",chaine);
-            fprintf(inm,"%d\n",nedreq);
-          } else {
-            binch = 16; //RequiredEdges
-            fwrite(&binch,sw,1,inm);
-            bpos += 12 + 4*nedreq;//Pos
-            fwrite(&bpos,sw,1,inm);
-            fwrite(&nedreq,sw,1,inm);
-          }
-          na = 0;
-          for (k=0; k<=mesh->htab.max; k++) {
-            ph = &mesh->htab.geom[k];
-            if ( !ph->a )  continue;
-            na++;
-            if ( ph->tag & MG_REQ )  {
-              if(!bin) {
-                fprintf(inm,"%d \n",na);
-              } else {
-                fwrite(&na,sw,1,inm);
-              }
-            }
+            fwrite(&na,sw,1,inm);
           }
         }
       }
-      //_MMG5_freeXTets(mesh);
-      _MMG5_DEL_MEM(mesh,mesh->htab.geom,(mesh->htab.max+1)*sizeof(MMG5_hgeom));
     }
-    else
-      mesh->memCur -= (long long)((3*mesh->nt+2)*sizeof(MMG5_hgeom));
-  } //if bdrytria....
 
-    /* tetrahedra */
+    if ( nedreq ) {
+      if(!bin) {
+        strcpy(&chaine[0],"\n\nRequiredEdges\n");
+        fprintf(inm,"%s",chaine);
+        fprintf(inm,"%d\n",nedreq);
+      } else {
+        binch = 16; //RequiredEdges
+        fwrite(&binch,sw,1,inm);
+        bpos += 12 + 4*nedreq;//Pos
+        fwrite(&bpos,sw,1,inm);
+        fwrite(&nedreq,sw,1,inm);
+      }
+      na = 0;
+      for (k=1; k<=mesh->na; k++) {
+        na++;
+        if (  mesh->edge[k].tag & MG_REQ ) {
+          if(!bin) {
+            fprintf(inm,"%d \n",na);
+          } else {
+            fwrite(&na,sw,1,inm);
+          }
+        }
+      }
+    }
+  }
+
+  /* tetrahedra */
   ne = nereq = 0;
   for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];

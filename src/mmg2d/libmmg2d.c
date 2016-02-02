@@ -77,9 +77,7 @@ int MMG2_tassage(MMG5_pMesh mesh,MMG5_pSol sol) {
 
       if ( memWarn ) {
         if ( mesh->info.ddebug )
-          printf("  ## Warning: unable to allocate an edge table at the size"
-                 " of the maximal number of edges.\n"
-                 "              Attempt to decrease this number...\n");
+          printf("  -- Attempt to allocate a smallest edge table...\n");
         mesh->namax = mesh->na;
         memWarn = 0;
         _MMG5_ADD_MEM(mesh,(mesh->namax+1)*sizeof(MMG5_Edge),"final edges",

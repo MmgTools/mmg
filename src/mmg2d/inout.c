@@ -678,8 +678,16 @@ int MMG2D_loadSol(MMG5_pMesh mesh,MMG5_pSol sol,char *filename,int msh) {
   return(1);
 }
 
-
-/* save mesh to disk */
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param filename name of file.
+ * \return 0 if failed, 1 otherwise.
+ *
+ * Save mesh data.
+ *
+ * \warning you must call the \a MMG2_tassage function before saving your
+ * mesh.
+ */
 int MMG2D_saveMesh(MMG5_pMesh mesh,char *filename) {
   FILE*             inm;
   MMG5_pPoint       ppt;

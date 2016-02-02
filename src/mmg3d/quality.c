@@ -219,22 +219,7 @@ inline double _MMG5_caltet_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt) {
   num = sqrt(rap) * rap;
 
   cal = det / num;
-  if ( cal <= _MMG5_NULKAL ) {
-    /* if ( mesh->info.ddebug ) { */
-    /*   // Remark: we can pass here in chkswpgen: the bad element is not created */
-    /*   // thus this is not a problem. */
-    /*   fprintf(stdout,"  ## WARNING: TOO BAD QUALITY FOR AT LEAST ONE ELEMENT\n"); */
-    /*   fprintf(stdout," Element volume=%e\n metric det=%e\n" */
-    /*           " edges lengths sum=%e\n computed quality=%e\n",vol,det,num,cal); */
 
-    /*   // exit added to avoid memory consumption in CDash outputs. */
-    /*   /\* _MMG5_unscaleMesh(mesh,met); *\/ */
-    /*   /\* MMG3D_saveMesh(mesh,mesh->nameout); *\/ */
-    /*   /\* MMG3D_saveSol(mesh,met,met->nameout); *\/ */
-    /*   /\* exit(EXIT_FAILURE); *\/ */
-    /* } */
-    return(0.0);
-  }
   return(cal);
 }
 
@@ -339,21 +324,6 @@ inline double _MMG5_caltet33_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt) {
 
   cal = det / num;
 
-  if ( cal <= _MMG5_NULKAL ) {
-    /* if ( mesh->info.ddebug ) { */
-    /*   // Remark: we can pass here in chkswpgen, this not a problem since the elt */
-    /*   // is not created */
-    /*   fprintf(stdout,"  ## WARNING: TOO BAD QUALITY FOR AT LEAST ONE ELEMENT\n"); */
-    /*   fprintf(stdout," Element volume=%e\n metric det=%e\n" */
-    /*           " edges lengths sum=%e\n computed quality=%e\n",vol,det,num,cal); */
-    /*   // exit added to avoid memory consumption in CDash outputs. */
-    /*   /\* _MMG5_unscaleMesh(mesh,met); *\/ */
-    /*   /\* MMG3D_saveMesh(mesh,mesh->nameout); *\/ */
-    /*   /\* MMG3D_saveSol(mesh,met,met->nameout); *\/ */
-    /*   /\* exit(EXIT_FAILURE); *\/ */
-    /*   return(0.0); */
-    /* } */
-  }
   return(cal);
 }
 
@@ -468,11 +438,12 @@ int _MMG3D_prilen(MMG5_pMesh mesh, MMG5_pSol met, char metRidTyp) {
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
+ * \return 0 if the worst element has a nul quality, 1 otherwise.
  *
  * Print histogram of mesh qualities for classic storage of metric at ridges.
  *
  */
-void _MMG3D_inqua(MMG5_pMesh mesh,MMG5_pSol met) {
+int _MMG3D_inqua(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTetra    pt;
   double   rap,rapmin,rapmax,rapavg,med,good;
   int      i,k,iel,ok,ir,imax,nex,his[5];
@@ -492,7 +463,7 @@ void _MMG3D_inqua(MMG5_pMesh mesh,MMG5_pSol met) {
      else // -A option
        pt->qual = _MMG5_caltet_iso(mesh,met,pt);
   }
-  if ( abs(mesh->info.imprim) <= 0 ) return;
+  if ( abs(mesh->info.imprim) <= 0 ) return(1);
 
   rapmin  = 2.0;
   rapmax  = 0.0;
@@ -539,12 +510,9 @@ void _MMG3D_inqua(MMG5_pMesh mesh,MMG5_pSol met) {
   if ( abs(mesh->info.imprim) < 3 ){
     if (rapmin == 0){
       fprintf(stdout,"  ## WARNING: TOO BAD QUALITY FOR THE WORST ELEMENT\n");
-      _MMG5_unscaleMesh(mesh,met);
-      MMG3D_saveMesh(mesh,mesh->nameout);
-      MMG3D_saveSol(mesh,met,met->nameout);
-      exit(EXIT_FAILURE);
+      return(0);
     }
-    return;
+    return(1);
   }
 
   /* print histo */
@@ -560,21 +528,20 @@ void _MMG3D_inqua(MMG5_pMesh mesh,MMG5_pSol met) {
   }
   if (rapmin == 0){
     fprintf(stdout,"  ## WARNING: TOO BAD QUALITY FOR THE WORST ELEMENT\n");
-    _MMG5_unscaleMesh(mesh,met);
-    MMG3D_saveMesh(mesh,mesh->nameout);
-    MMG3D_saveSol(mesh,met,met->nameout);
-    exit(EXIT_FAILURE);
+    return(0);
   }
+  return(1);
 }
 
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
+ * \return 0 if the worst element has a nul quality, 1 otherwise.
  *
  * Print histogram of mesh qualities for special storage of metric at ridges.
  *
  */
-void _MMG3D_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
+int _MMG3D_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTetra    pt;
   double   rap,rapmin,rapmax,rapavg,med,good;
   int      i,k,iel,ok,ir,imax,nex,his[5];
@@ -585,7 +552,7 @@ void _MMG3D_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
      if( !MG_EOK(pt) )   continue;
      pt->qual = _MMG5_orcal(mesh,met,k);
   }
-  if ( abs(mesh->info.imprim) <= 0 ) return;
+  if ( abs(mesh->info.imprim) <= 0 ) return(1);
 
   rapmin  = 2.0;
   rapmax  = 0.0;
@@ -603,7 +570,7 @@ void _MMG3D_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
     }
     ok++;
     if ( _MMG5_orvol(mesh->point,pt->v) < 0.0 ) {
-      fprintf(stdout,"dans quality vol negatif\n");
+      fprintf(stdout," ## Warning: negative volume\n");
     }
     rap = _MMG5_ALPHAD * pt->qual;
     if ( rap < rapmin ) {
@@ -632,12 +599,9 @@ void _MMG3D_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
   if ( abs(mesh->info.imprim) < 3 ){
     if (rapmin == 0){
       fprintf(stdout,"  ## WARNING: TOO BAD QUALITY FOR THE WORST ELEMENT\n");
-      _MMG5_unscaleMesh(mesh,met);
-      MMG3D_saveMesh(mesh,mesh->nameout);
-      MMG3D_saveSol(mesh,met,met->nameout);
-      exit(EXIT_FAILURE);
+      return(0);
     }
-    return;
+    return(1);
   }
 
   /* print histo */
@@ -653,11 +617,9 @@ void _MMG3D_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
   }
   if (rapmin == 0){
     fprintf(stdout,"  ## WARNING: TOO BAD QUALITY FOR THE WORST ELEMENT\n");
-    _MMG5_unscaleMesh(mesh,met);
-    MMG3D_saveMesh(mesh,mesh->nameout);
-    MMG3D_saveSol(mesh,met,met->nameout);
-    exit(EXIT_FAILURE);
+    return(0);
   }
+  return(1);
 }
 
 /**

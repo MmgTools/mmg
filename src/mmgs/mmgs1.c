@@ -297,7 +297,6 @@ int chkedg(MMG5_pMesh mesh,int iel) {
       }
       else{
         if(!((p[i2]->tag & MG_NOM) || MG_EDG(p[i2]->tag) ) ) {
-          //MMG5_saveMesh(mesh, mesh->nameout);
           fprintf(stdout,"2. warning geometrical problem\n");
           return(0);
         }
