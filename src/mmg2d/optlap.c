@@ -119,7 +119,7 @@ int MMG2_optlap(MMG5_pMesh mesh,MMG5_pSol sol) {
       cold[iadr + 0] = ppt->c[0];
       cold[iadr + 1] = ppt->c[1];
       if ( ppt->tag & M_BDRY )  continue;
-//printf("point %d : %e %e %e %e\n",k,cnew[iadr],ppt->c[0],ncount[k],cnew[iadr + 0]/ncount[k]);
+
       cnew[iadr + 0] = ppt->c[0] + omega * (cnew[iadr + 0] / ncount[k] - ppt->c[0]);
       cnew[iadr + 1] = ppt->c[1] + omega * (cnew[iadr + 1] / ncount[k] - ppt->c[1]);
       ppt->c[0] = 0;
@@ -180,8 +180,10 @@ int MMG2_optlap(MMG5_pMesh mesh,MMG5_pSol sol) {
     }
 
     if (it==1) res0=res;
-    if (res0 > 1e-10)
-      fprintf(stdout,"iteration : %d, residu = %e \r",it,res/res0);
+    if ( res0 > 1e-10 ) {
+      if ( mesh->info.imprim > 4 || mesh->info.ddebug )
+        fprintf(stdout,"iteration : %d, residu = %e \r",it,res/res0);
+    }
 
   } while((res0 > 1e-10) && (res/res0 > 1e-10) && (it++ < maxtou));
 

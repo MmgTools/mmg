@@ -178,7 +178,7 @@ void _MMG2D_memOption(MMG5_pMesh mesh) {
       mesh->memMax = 2000*million;
     else {
       /* default value = 800 Mo */
-      printf("  Maximum memory set to default value: %d Mo.\n",_MMG5_MEMMAX);
+      printf(" ## Maximum memory set to default value: %d Mo.\n",_MMG5_MEMMAX);
       mesh->memMax = _MMG5_MEMMAX*million;
     }
   }

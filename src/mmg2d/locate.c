@@ -22,7 +22,6 @@
 */
 /**
  * \file mmg2d/locate.c
- * \brief 
  * \author Charles Dapogny (LJLL, UPMC)
  * \author Cécile Dobrzynski (Inria / IMB, Université de Bordeaux)
  * \author Pascal Frey (LJLL, UPMC)
@@ -522,7 +521,8 @@ int MMG2_locateEdge(MMG5_pMesh mesh,int ia,int ib,int* kdep,int* list) {
     if(ibreak>1) break;
     /*a-t-on un pts sur l'arete iaib ?*/
     if (fabs(aire1) < EPSNULL || fabs(aire2) < EPSNULL || fabs(aire3) < EPSNULL) {
-      fprintf(stdout,"  ##Error: unexpected failure. Check your initial data and/or report the bug\n");
+      fprintf(stdout,"  ## Error: unexpected failure."
+              " Check your initial data and/or report the bug\n");
       exit(EXIT_FAILURE);
     }
 

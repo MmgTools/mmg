@@ -386,7 +386,8 @@ int MMG2_splitbdry(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int k1,int voy1,double *
 
   /*si dep alors on met la moy des dep dans ip*/
   if(mesh->info.lag >=0) {
-    printf("comment for merge needs option 9\n");
+    printf("  ## Error: option not implemented: merge option 9\n");
+    exit(EXIT_FAILURE);
     /* mesh->disp.mv[2*(ip-1) + 1 + 0] = 0.5*(mesh->disp.mv[2*(piar1-1) + 1 + 0] + mesh->disp.mv[2*(piar2-1) + 1 + 0]); */
     /* mesh->disp.mv[2*(ip-1) + 1 + 1] = 0.5*(mesh->disp.mv[2*(piar1-1) + 1 + 1] + mesh->disp.mv[2*(piar2-1) + 1 + 1]);     */
     /* d1 = mesh->disp.mv[2*(ip-1) + 1 + 0]*mesh->disp.mv[2*(ip-1) + 1 + 0] */

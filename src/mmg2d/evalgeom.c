@@ -44,7 +44,7 @@ int MMG2_evalgeom(MMG5_pMesh mesh) {
       ppt = &mesh->point[pt->v[j]];
       if(!(ppt->tag & M_BDRY)) continue;
       if(ppt->tagdel == mesh->base) continue;
-      //printf("k %d %d %d %d %d\n",k,j,ppt->tag,ppt->tagdel,mesh->base);
+
       lon = MMG2_boulep(mesh,k,j,list);
       assert(lon);
       /*bdry triangles*/
@@ -58,6 +58,7 @@ int MMG2_evalgeom(MMG5_pMesh mesh) {
         iadr = 3*(iel-1) + 1;
         adja = &mesh->adja[iadr];
         if(!adja[MMG2_iopp[ip][0]] || (mesh->tria[adja[MMG2_iopp[ip][0]]/3].ref != ref)) {
+
           if(nbdry>=2) fprintf(stdout,"NON MANIFOLD MESH\n");
           if(MMG2_iare[MMG2_iopp[ip][0]][0]==ip)
             ibdry[nbdry++] = pt1->v[MMG2_iare[MMG2_iopp[ip][0]][1]];

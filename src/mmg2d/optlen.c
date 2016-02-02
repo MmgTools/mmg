@@ -59,13 +59,12 @@ int optlen_ani(MMG5_pMesh mesh,MMG5_pSol sol,double declic,int base) {
 
   do {
     k = MMG2_kiupop(queue);
-    //printf("le tr %d (%d)\n",k,queue->cur);
+
     if ( !k )  break;
     npp++;
 
     pt = &mesh->tria[k];
     if ( !M_EOK(pt) )  continue;
-    //printf("le tr %d : %e\n",k,pt->qual);
 
     for (i=0; i<3; i++) {
       ipa = pt->v[i];
@@ -133,11 +132,6 @@ int optlen_ani(MMG5_pMesh mesh,MMG5_pSol sol,double declic,int base) {
 
           cal = MMG2_caltri_in(mesh,sol,pt1);
           if ( cal > ctg )  {
-            /*if(k==931) {
-              printf("coord %e %e \n",ppa->c[0],ppa->c[1]);
-              printf("pour %d on rejette %d (%e) : %e  > %e\n",ipa,iel,pt1->qual,cal,ctg);
-              } */
-
             break;  }
           qual[l] = cal;
         }
@@ -158,7 +152,7 @@ int optlen_ani(MMG5_pMesh mesh,MMG5_pSol sol,double declic,int base) {
         iel = list[l] / 3;
         nk  = list[l] % 3;
         pt1 = &mesh->tria[iel];
-        //printf("qual %d : %e %e -- %e\n",iel,pt1->qual,qual[l],declic);
+
         if ( (iel!=k) && (pt1->qual > declic) ) /*k est enleve par le pop*/
           MMG2_kiudel(queue,iel);
         /*else if ( coe > 0.1 )
@@ -209,13 +203,12 @@ int optlen_iso(MMG5_pMesh mesh,MMG5_pSol sol,double declic,int base) {
 
   do {
     k = MMG2_kiupop(queue);
-    //printf("le tr %d\n",k);
+
     if ( !k )  break;
     npp++;
 
     pt = &mesh->tria[k];
     if ( !M_EOK(pt) )  continue;
-    //if (k==931) printf("le tr %d : %e\n",k,pt->qual);
 
     for (i=0; i<3; i++) {
       ipa = pt->v[i];
@@ -299,10 +292,6 @@ int optlen_iso(MMG5_pMesh mesh,MMG5_pSol sol,double declic,int base) {
 
           cal = MMG2_caltri_in(mesh,sol,pt1);
           if ( cal > ctg )  {
-            /*if(k==931) {
-              printf("coord %e %e \n",ppa->c[0],ppa->c[1]);
-              printf("pour %d on rejette %d (%e) : %e  > %e\n",ipa,iel,pt1->qual,cal,ctg);
-              } */
 
             break;  }
           qual[l] = cal;
@@ -378,13 +367,12 @@ int optlen_iso_bar(MMG5_pMesh mesh,MMG5_pSol sol,double declic,int base) {
 
   do {
     k = MMG2_kiupop(queue);
-    //printf("le tr %d\n",k);
+
     if ( !k )  break;
     npp++;
 
     pt = &mesh->tria[k];
     if ( !M_EOK(pt) )  continue;
-    //if (k==931) printf("le tr %d : %e\n",k,pt->qual);
 
     for (i=0; i<3; i++) {
       ipa = pt->v[i];
@@ -460,11 +448,6 @@ int optlen_iso_bar(MMG5_pMesh mesh,MMG5_pSol sol,double declic,int base) {
 
           cal = MMG2_caltri_in(mesh,sol,pt1);
           if ( cal > ctg )  {
-            /*if(k==931) {
-              printf("coord %e %e \n",ppa->c[0],ppa->c[1]);
-              printf("pour %d on rejette %d (%e) : %e  > %e\n",ipa,iel,pt1->qual,cal,ctg);
-              } */
-
             break;  }
           qual[l] = cal;
         }

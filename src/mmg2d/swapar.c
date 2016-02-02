@@ -67,7 +67,7 @@ int MMG2_swapar(MMG5_pMesh mesh,MMG5_pSol sol,int k,int i,double crit,int *list)
   if ( cal2 > crit )  return(0);
 
   if( airn1 < 0 || airn2 < 0 || fabs((air1+air2)-(airn1+airn2)) > EPSD) {
-    if(mesh->info.ddebug) printf("config non convex\n");
+    if(mesh->info.ddebug) printf("  ## Warning: non convex configuration\n");
     return(0);
   }
 

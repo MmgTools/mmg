@@ -149,7 +149,7 @@ int _MMG2_hashEdgeDelone(MMG5_pMesh mesh,HashTable *hash,int iel,int i,int *v) {
     ha->nxt   = 0;
 
     if ( hash->hnxt >= hash->nxtmax ) {
-      if(mesh->info.imprim > 6) fprintf(stdout," ##Warning: OVERFLOW\n");
+      if(mesh->info.imprim > 6) fprintf(stdout," ## Warning: overflow\n");
       return(0);
     }
     return(1);
@@ -241,12 +241,6 @@ int _MMG2_cavity(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list) {
   }
   while ( ipil < ilist );
 
-  /* /\* global overflow: obsolete avec la reallocation *\/ */
-  /* if ( mesh->nt + 2*ilist >= mesh->ntmax ) { */
-  /*   fprintf(stdout,"OVERFLOW HERE\n"); */
-  /*   return(0); */
-  /* } */
-  //printf("here %d in the cavity\n",ilist);
   ilist = _MMG2_correction_iso(mesh,ip,list,ilist,1);
 
   //if ( isreq ) ilist = -fabs(ilist);

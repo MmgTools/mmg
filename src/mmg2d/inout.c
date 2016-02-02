@@ -457,7 +457,8 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,char *filename) {
 
   /*maill periodique : remettre toutes les coord entre 0 et 1*/
   if(mesh->info.renum==-10) {
-    printf("on passe la , on a %d points %d triangles\n",mesh->np,mesh->nt);
+    if ( mesh->info.imprim > 4 || mesh->info.ddebug )
+      printf("  ## Periodic mesh: %d points %d triangles\n",mesh->np,mesh->nt);
     for (k=1; k<=mesh->np; k++) {
       ppt = &mesh->point[k];
       while (ppt->c[0] > 1 + 5e-3) {

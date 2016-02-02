@@ -265,7 +265,8 @@ int MMG2_colpoi(MMG5_pMesh mesh, MMG5_pSol sol,int iel,int iar,int ia,int ib,dou
       /* printf("on a un soucis 1\n"); */
       /* printf("pnum %d %d dans %d %d %d\n",mesh->edge[num].a,mesh->edge[num].b,pt1->v[0],pt1->v[1],pt1->v[2]); */
       /* printf("edgea %d %d\n",mesh->tria[a2].v[MMG2_iare[v2][0]],mesh->tria[a2].v[MMG2_iare[v2][1]]); */
-      if(mesh->info.imprim > 6) fprintf(stdout," ##Warning: BAD CONFIGURATION FOR COLLAPSE\n");
+      if(mesh->info.imprim > 6)
+        fprintf(stdout," ## Warning: bad configuration for collapse\n");
     }
     mesh->tria[a2].edg[v2] = num;
   }
@@ -279,7 +280,7 @@ int MMG2_colpoi(MMG5_pMesh mesh, MMG5_pSol sol,int iel,int iar,int ia,int ib,dou
       /* printf("on a un soucis\n"); */
       /* printf("pnum %d %d dans %d %d %d\n",mesh->edge[num].a,mesh->edge[num].b,pt1->v[0],pt1->v[1],pt1->v[2]); */
       /* printf("edgea %d %d\n",mesh->tria[a].v[MMG2_iare[voy][0]],mesh->tria[a].v[MMG2_iare[voy][1]]); */
-      if(mesh->info.imprim > 6) fprintf(stdout," ##Warning: BAD CONFIGURATION FOR COLLAPSE\n");
+      if(mesh->info.imprim > 6) fprintf(stdout," ## Warning: bad configuration for collapse\n");
     }
     mesh->tria[a].edg[voy] = num;
   }
@@ -573,7 +574,8 @@ int MMG2_colpoibdry(MMG5_pMesh mesh, MMG5_pSol sol,int iel,int iar,int ia,int ib
     /* printf("la edge %d %d iar %d tr %d\n",pia,pib,iar,iel); */
     /* printf("pt %d %d %d\n",pt->v[0],pt->v[1],pt->v[2]); */
     /* printf("pt->ned %d %d %d\n",pt->edg[0],pt->edg[1],pt->edg[2]); */
-    fprintf(stdout," ##Error: PROBLEM WITH AN EDGE. Check your data and/or report the bug\n");
+    fprintf(stdout," ## Error: problem with an edge."
+            " Check your data and/or report the bug\n");
     return(-1);
   }
   assert(num);

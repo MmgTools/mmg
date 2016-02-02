@@ -88,8 +88,8 @@ int MMG2_scaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
     mesh->info.hmax  = 1.;
   if ( mesh->info.hmax < mesh->info.hmin ) {
     if ( sethmin && sethmax ) {
-      fprintf(stdout,"  ## ERROR: MISMATCH PARAMETERS:"
-              "MINIMAL MESH SIZE LARGER THAN MAXIMAL ONE.\n");
+      fprintf(stdout,"  ## Error: mismatch parameters:"
+              " minimal mesh size larger than maximal one.\n");
       fprintf(stdout,"  Exit program.\n");
       exit(EXIT_FAILURE);
     }
@@ -121,7 +121,7 @@ int MMG2_scaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
 
   case 3:
     if(sethmin || sethmax) {
-      printf("warning imposed hmin and/or hmax ignored\n");
+      printf(" ## Warning: imposed hmin and/or hmax ignored\n");
     }
     dd = 1.0 / (dd*dd);
     for (k=1; k<=mesh->np; k++) {

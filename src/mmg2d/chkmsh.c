@@ -53,7 +53,7 @@ int _MMG5_mmg2dChkmsh(MMG5_pMesh mesh, int severe,int base) {
 
       if ( adj == k ) {
         fprintf(stdout,"  1. Wrong adjacency %d %d\n",k,adj);
-        printf("k %d: %d %d %d \n",k,pt1->v[0],pt1->v[1],pt1->v[2]);
+        printf("vertices of %d: %d %d %d \n",k,pt1->v[0],pt1->v[1],pt1->v[2]);
         printf("adj of %d: %d %d %d \n",
                k,adja[0]/3,adja[1]/3,adja[2]/3);
         return(0);
@@ -61,11 +61,11 @@ int _MMG5_mmg2dChkmsh(MMG5_pMesh mesh, int severe,int base) {
       pt2 = &mesh->tria[adj];
       if ( !M_EOK(pt2) ) {
         fprintf(stdout,"  4. Invalid adjacent %d %d\n",adj,k);
-        printf("sommets k   %d: %d %d %d\n",
+        printf("vertices of %d: %d %d %d\n",
                k,pt1->v[0],pt1->v[1],pt1->v[2]);
-        printf("sommets adj %d: %d %d %d \n",
+        printf("vertices adj %d: %d %d %d \n",
                adj,pt2->v[0],pt2->v[1],pt2->v[2]);
-        printf("numeros adj %d: %d %d %d\n",k,adja[0]/3,adja[1]/3,adja[2]/3);
+        printf("adj of %d: %d %d %d\n",k,adja[0]/3,adja[1]/3,adja[2]/3);
         return(0);
       }
       iadr  = (adj-1)*3 + 1;
@@ -74,7 +74,7 @@ int _MMG5_mmg2dChkmsh(MMG5_pMesh mesh, int severe,int base) {
       voy1  = adja1[voy] % 3;
       if ( adj1 != k || voy1 != i ) {
         fprintf(stdout,"  2. Wrong adjacency %d %d\n",k,adj1);
-        printf("tr k %d: %d %d %d \n",k,pt1->v[0],pt1->v[1],pt1->v[2]);
+        printf("vertices of %d: %d %d %d \n",k,pt1->v[0],pt1->v[1],pt1->v[2]);
         printf("adj(k) %d: %d %d %d \n",adj,pt2->v[0],pt2->v[1],pt2->v[2]);
         printf("adj(%d): %d %d %d\n",
                k,adja[0]/3,adja[1]/3,adja[2]/3);
@@ -88,8 +88,8 @@ int _MMG5_mmg2dChkmsh(MMG5_pMesh mesh, int severe,int base) {
         ped = &mesh->edge[pt1->edg[i]];
         if(!(((ped->a==pt1->v[MMG2_iare[i][0]]) || (ped->a==pt1->v[MMG2_iare[i][1]]))
              || ((ped->b==pt1->v[MMG2_iare[i][0]]) || (ped->b==pt1->v[MMG2_iare[i][1]])))) {
-          printf(" Wrong edge in triangle %d\n",k);
-          printf("tr k %d: %d %d %d \n",k,pt1->v[0],pt1->v[1],pt1->v[2]);
+          printf("  3. Wrong edge in triangle %d\n",k);
+          printf("vertices of %d: %d %d %d \n",k,pt1->v[0],pt1->v[1],pt1->v[2]);
           printf("edge %d : %d %d\n",i,ped->a,ped->b);
           return(0);
         }
