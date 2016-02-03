@@ -579,7 +579,7 @@ int _MMG3D_hashTria(MMG5_pMesh mesh, _MMG5_Hash *hash) {
   _MMG5_ADD_MEM(mesh,(3*mesh->nt+4)*sizeof(int),"surfacic adjacency table",return(0));
   _MMG5_SAFE_CALLOC(mesh->adjt,3*mesh->nt+4,int);
 
-  return( _MMG5_mmgHashTria(mesh, mesh->adjt, hash, 1) );
+  return( _MMG5_mmgHashTria(mesh, mesh->adjt, hash, mesh->info.iso) );
 }
 
 
