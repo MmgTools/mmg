@@ -169,7 +169,7 @@ int _MMG5_buildridmet(MMG5_pMesh mesh,MMG5_pSol met,int np0,
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the sol structure.
  * \param np0 index of edge's extremity.
- * \param nt.
+ * \param nt normal direction at the ridge point.
  * \param mr computed metric tensor.
  *
  * Build metric tensor at ridge point \a p0, when the 'good' normal direction is

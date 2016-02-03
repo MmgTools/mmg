@@ -802,8 +802,21 @@ int _MMG5_chkmani2(MMG5_pMesh mesh,MMG5_pSol sol) {
   return(1);
 }
 
-/** Check whether collapse of point np to nq does not create a non manifold situation at nq
-    ndepmin, ndepplus = tetra of ref minus, plus in ball of np, not in shell of (np,nq). */
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param k index of element in which we collapse.
+ * \param iface
+ * \param iedge
+ * \param ndepmin
+ * \param ndepplus
+ * \param isminp
+ * \param isplp
+ *
+ * Check whether collapse of point np to nq does not create a non manifold
+ * situation at nq ndepmin, ndepplus = tetra of ref minus, plus in ball of np,
+ * not in shell of (np,nq).
+ *
+ */
 int _MMG5_chkmanicoll(MMG5_pMesh mesh,int k,int iface,int iedg,int ndepmin,int ndepplus,char isminp,char isplp) {
   MMG5_pTetra    pt,pt1;
   int       nump,numq,ilist,ref,cur,stor,iel,jel,base,ndepmq,ndeppq;

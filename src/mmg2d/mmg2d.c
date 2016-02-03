@@ -54,6 +54,7 @@ static void usage(char *name) {
 
 /**
  * \param mesh pointer toward the mesh structure.
+ * \param qdegrad optimization thresholds.
  * \return 0 if fail, 1 if success.
  *
  * Print the default parameters values.

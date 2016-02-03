@@ -73,11 +73,8 @@ inline int _MMG5_nonUnitNorPts(MMG5_pMesh mesh,
 
 /**
  * \param mesh pointer toward the mesh stucture.
- * \param ip1 first point of face.
- * \param ip2 second point of face.
- * \param ip3 third point of face.
- * \param n pointer to store the computed normal.
- * \return 1
+ * \param pt triangle for which we compute the surface.
+ * \return the computed surface
  *
  * Compute non-oriented surface area of a triangle.
  *

@@ -160,7 +160,7 @@ int MMG2D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val);
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the sol structure.
  * \param dparam double parameter to set (see \a MMG2D_Param structure).
- * \val value of the parameter.
+ * \param val value of the parameter.
  * \return 0 if failed, 1 otherwise.
  *
  * Set double parameter \a dparam at value \a val.
@@ -290,7 +290,7 @@ int MMG2D_Set_tensorSol(MMG5_pSol met, double* s, int pos);
 
 /**
  * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the sol structure.
+ * \param met pointer toward the sol structure.
  * \return 0 if failed, 1 otherwise.
  *
  * Check if the number of given entities match with mesh and sol size
@@ -385,13 +385,12 @@ int MMG2D_saveMesh(MMG5_pMesh ,char *);
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the solution structure..
  * \param filename name of the solution file.
- * \param msh if 1, read the 2D solution saved in 3D (.sol files saved by gmsh)
  * \return 0 or -1 if fail, 1 otherwise.
  *
  * Save metric field.
  *
  */
-int MMG2D_saveSol(MMG5_pMesh ,MMG5_pSol ,char *);
+int MMG2D_saveSol(MMG5_pMesh  mesh,MMG5_pSol sol ,char *filename);
 int MMG2D_saveVect(MMG5_pMesh mesh,MMG5_pSol sol,char *filename,double lambda);
 
 /**

@@ -1104,7 +1104,7 @@ double _MMG5_ridSizeInNormalDir(MMG5_pMesh mesh,int i0,double* bcu,
  * with respect to the other, along the direction of the associated support
  * curve first, then along the normal direction.
  *
- * \Warning The gradation along the direction normal to the surface is made in
+ * \warning The gradation along the direction normal to the surface is made in
  * an "isotropic way".
  *
  */
