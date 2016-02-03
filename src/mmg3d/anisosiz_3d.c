@@ -1,7 +1,7 @@
 /* =============================================================================
 **  This file is part of the mmg software package for the tetrahedral
 **  mesh modification.
-**  Copyright (c) Inria - IMB (Université de Bordeaux) - LJLL (UPMC), 2004- .
+**  Copyright (c) Bx INP/Inria/UBordeaux/UPMC, 2004- .
 **
 **  mmg is free software: you can redistribute it and/or modify it
 **  under the terms of the GNU Lesser General Public License as published
@@ -22,12 +22,12 @@
 */
 
 /**
- * \file mmg3d/anisosiz.c
+ * \file mmg3d/anisosiz_3d.c
  * \brief Fonctions for anisotropic size map computation.
- * \author Charles Dapogny (LJLL, UPMC)
- * \author Cécile Dobrzynski (Inria / IMB, Université de Bordeaux)
- * \author Pascal Frey (LJLL, UPMC)
- * \author Algiane Froehly (Inria / IMB, Université de Bordeaux)
+ * \author Charles Dapogny (UPMC)
+ * \author Cécile Dobrzynski (Bx INP/Inria/UBordeaux)
+ * \author Pascal Frey (UPMC)
+ * \author Algiane Froehly (Inria/UBordeaux)
  * \version 5
  * \copyright GNU Lesser General Public License.
  * \todo doxygen documentation.
@@ -204,10 +204,10 @@ inline double _MMG5_lenedgspl_ani(MMG5_pMesh mesh ,MMG5_pSol met, int ia,
 
 /**
  * \brief Compute edge length from edge's coordinates.
- * \param *ca pointer toward the coordinates of the first edge's extremity.
- * \param *cb pointer toward the coordinates of the second edge's extremity.
- * \param *ma pointer toward the metric associated to the first edge's extremity.
- * \param *mb pointer toward the metric associated to the second edge's extremity.
+ * \param ca pointer toward the coordinates of the first edge's extremity.
+ * \param cb pointer toward the coordinates of the second edge's extremity.
+ * \param sa pointer toward the metric associated to the first edge's extremity.
+ * \param sb pointer toward the metric associated to the second edge's extremity.
  * \return edge length.
  *
  * Compute length of edge \f$[ca,cb]\f$ (with \a ca and \a cb
@@ -764,11 +764,11 @@ static int _MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,int kel, int iface, int
 
     _MMG5_bezierCP(mesh,&ptt,&b,MG_GET(pxt->ori,ifac));
 
-    /* 1. Fill matrice tAA and second member tAb with A=(\sum X_{P_i}^2 \sum
-     * Y_{P_i}^2 \sum X_{P_i}Y_{P_i}) and b=\sum Z_{P_i} with P_i the physical
-     * points at edge [i0;i1] extremities and middle.
-     * 2. Compute the physical coor \a c of the curve edge's
-     * mid-point.
+    /* 1. Fill matrice tAA and second member tAb with \f$A=(\sum X_{P_i}^2 \sum
+     * Y_{P_i}^2 \sum X_{P_i}Y_{P_i})\f$ and \f$b=\sum Z_{P_i}\f$ with \f$P_i\f$
+     * the physical points at edge [i0;i1] extremities and middle.
+     *
+     * 2. Compute the physical coor \a c of the curve edge's mid-point.
      */
     _MMG5_fillDefmetregSys(k,p0,i,b,r,c,lispoi,tAA,tAb);
 
@@ -943,11 +943,11 @@ static int _MMG5_defmetreg(MMG5_pMesh mesh,MMG5_pSol met,int kel,int iface, int 
 
     _MMG5_bezierCP(mesh,&ptt,&b,MG_GET(pxt->ori,ifac));
 
-    /* 1. Fill matrice tAA and second member tAb with A=(\sum X_{P_i}^2 \sum
-     * Y_{P_i}^2 \sum X_{P_i}Y_{P_i}) and b=\sum Z_{P_i} with P_i the physical
-     * points at edge [i0;i1] extremities and middle.
-     * 2. Compute the physical coor \a c of the curve edge's
-     * mid-point.
+    /* 1. Fill matrice tAA and second member tAb with \f$A=(\sum X_{P_i}^2 \sum
+     * Y_{P_i}^2 \sum X_{P_i}Y_{P_i})\f$ and \f$b=\sum Z_{P_i}\f$ with P_i the
+     * physical points at edge [i0;i1] extremities and middle.
+     *
+     * 2. Compute the physical coor \a c of the curve edge's mid-point.
      */
     _MMG5_fillDefmetregSys(k,p0,i,b,r,c,lispoi,tAA,tAb);
 
@@ -985,7 +985,6 @@ static int _MMG5_defmetreg(MMG5_pMesh mesh,MMG5_pSol met,int kel,int iface, int 
  * \param met pointer toward the metric structure.
  * \param np global index of vertex in which we intersect the metrics.
  * \param me physical metric at point \a np.
- * \param n normal or tangent at point np.
  * \return 0 if fail, 1 otherwise.
  *
  * Intersect the surface metric held in np (supported in tangent plane of \a np)

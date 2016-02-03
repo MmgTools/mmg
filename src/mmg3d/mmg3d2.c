@@ -1,7 +1,7 @@
 /* =============================================================================
 **  This file is part of the mmg software package for the tetrahedral
 **  mesh modification.
-**  Copyright (c) Inria - IMB (Université de Bordeaux) - LJLL (UPMC), 2004- .
+**  Copyright (c) Bx INP/Inria/UBordeaux/UPMC, 2004- .
 **
 **  mmg is free software: you can redistribute it and/or modify it
 **  under the terms of the GNU Lesser General Public License as published
@@ -22,12 +22,12 @@
 */
 
 /**
- * \file mmg3d/mmg3d2_3d.c
+ * \file mmg3d/mmg3d2.c
  * \brief Create implicit surface in mesh.
- * \author Charles Dapogny (LJLL, UPMC)
- * \author Cécile Dobrzynski (Inria / IMB, Université de Bordeaux)
- * \author Pascal Frey (LJLL, UPMC)
- * \author Algiane Froehly (Inria / IMB, Université de Bordeaux)
+ * \author Charles Dapogny (UPMC)
+ * \author Cécile Dobrzynski (Bx INP/Inria/UBordeaux)
+ * \author Pascal Frey (UPMC)
+ * \author Algiane Froehly (Inria/UBordeaux)
  * \version 5
  * \copyright GNU Lesser General Public License.
  * \todo Doxygen documentation
@@ -805,12 +805,13 @@ int _MMG5_chkmani2(MMG5_pMesh mesh,MMG5_pSol sol) {
 /**
  * \param mesh pointer toward the mesh structure.
  * \param k index of element in which we collapse.
- * \param iface
- * \param iedge
- * \param ndepmin
- * \param ndepplus
- * \param isminp
- * \param isplp
+ * \param iface face through wich we perform the collapse
+ * \param iedg edge to collapse
+ * \param ndepmin index of an elt with ref MG_MINUS and outside the shell of edge.
+ * \param ndepplus ndex of an elt with ref MG_PLUS and outside the shell of edge.
+ * \param isminp 1 if we have found a tetra with ref MG_MINUS
+ * \param isplp 1 if we have found a tetra with ref MG_PLUS
+ * \return 0 if we create a non manifold situation, 1 otherwise
  *
  * Check whether collapse of point np to nq does not create a non manifold
  * situation at nq ndepmin, ndepplus = tetra of ref minus, plus in ball of np,

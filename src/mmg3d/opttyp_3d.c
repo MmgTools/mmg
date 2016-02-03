@@ -1,7 +1,7 @@
 /* =============================================================================
 **  This file is part of the mmg software package for the tetrahedral
 **  mesh modification.
-**  Copyright (c) Inria - IMB (Université de Bordeaux) - LJLL (UPMC), 2004- .
+**  Copyright (c) Bx INP/Inria/UBordeaux/UPMC, 2004- .
 **
 **  mmg is free software: you can redistribute it and/or modify it
 **  under the terms of the GNU Lesser General Public License as published
@@ -24,8 +24,8 @@
 /**
  * \file mmg3d/opttyp_3d.c
  * \brief Functions for the optimization of very bad elements.
- * \author Cécile Dobrzynski (Inria / IMB, Université de Bordeaux)
- * \author Algiane Froehly
+ * \author Cécile Dobrzynski (Bx INP/Inria/UBordeaux)
+ * \author Algiane Froehly (Inria/UBordeaux)
  * \version 5
  * \copyright GNU Lesser General Public License.
  */
@@ -392,7 +392,7 @@ int _MMG3D_swpalmostall(MMG5_pMesh mesh,  MMG5_pSol met,_MMG5_pBucket bucket,
  * \param bucket pointer toward the bucket structure.
  * \param k elt index.
  * \param iar index of edge to split.
- * \param quality threshold.
+ * \param OCRIT quality threshold.
  * \return 1 if success, 0 otherwise
  *
  * Try to split edge number \a iar of tetra \a k

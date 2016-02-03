@@ -1,7 +1,7 @@
 /* =============================================================================
 **  This file is part of the mmg software package for the tetrahedral
 **  mesh modification.
-**  Copyright (c) Inria - IMB (Université de Bordeaux) - LJLL (UPMC), 2004- .
+**  Copyright (c) Bx INP/Inria/UBordeaux/UPMC, 2004- .
 **
 **  mmg is free software: you can redistribute it and/or modify it
 **  under the terms of the GNU Lesser General Public License as published
@@ -22,9 +22,9 @@
 */
 
 /**
- * \file common/mmg_API_functions.c
+ * \file common/API_functionsf.c
  * \brief Fortran API functions for MMG library.
- * \author Algiane Froehly (Inria / IMB, Université de Bordeaux)
+ * \author Algiane Froehly  (Inria/UBordeaux)
  * \version 5
  * \date 01 2014
  * \copyright GNU Lesser General Public License.
@@ -123,7 +123,7 @@ FORTRAN_NAME(MMG5_SET_OUTPUTSOLNAME,mmg5_set_outputsolname,
 }
 
 /**
- * See \ref MMG5_Free_names function in \ref common/libmmgcommon.h file.
+ * See \a MMG5_Free_names function in \ref common/libmmgcommon.h file.
  */
 FORTRAN_NAME(MMG5_MMGFREE_NAMES,mmg5_mmgfree_names,(MMG5_pMesh *mesh
                                                     ,MMG5_pSol *met

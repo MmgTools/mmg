@@ -1,7 +1,7 @@
 /* =============================================================================
 **  This file is part of the mmg software package for the tetrahedral
 **  mesh modification.
-**  Copyright (c) Inria - IMB (Université de Bordeaux) - LJLL (UPMC), 2004- .
+**  Copyright (c) Bx INP/Inria/UBordeaux/UPMC, 2004- .
 **
 **  mmg is free software: you can redistribute it and/or modify it
 **  under the terms of the GNU Lesser General Public License as published
@@ -24,10 +24,10 @@
 /**
  * \file common/anisosiz.c
  * \brief Fonctions for anisotropic size map computation.
- * \author Charles Dapogny (LJLL, UPMC)
- * \author Cécile Dobrzynski (Inria / IMB, Université de Bordeaux)
- * \author Pascal Frey (LJLL, UPMC)
- * \author Algiane Froehly (Inria / IMB, Université de Bordeaux)
+ * \author Charles Dapogny (UPMC)
+ * \author Cécile Dobrzynski (Bx INP/Inria/UBordeaux)
+ * \author Pascal Frey (UPMC)
+ * \author Algiane Froehly (Inria/UBordeaux)
  * \version 5
  * \copyright GNU Lesser General Public License.
  */
@@ -36,7 +36,6 @@
 
 /**
  * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the sol structure.
  * \param np0 index of edge's extremity.
  * \param np1 index of edge's extremity.
  * \param m0 metric at point np0.
@@ -361,8 +360,10 @@ double _MMG5_surftri_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt) {
 
 /**
  * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
  * \param ptt pointer toward the triangle structure.
+ * \param ma metric at triangle vertex.
+ * \param mb metric at triangle vertex.
+ * \param mc metric at triangle vertex.
  * \return The double of the triangle area.
  *
  * Compute the double of the area of the surface triangle \a ptt with respect to
@@ -475,8 +476,8 @@ void _MMG5_defUninitSize(MMG5_pMesh mesh,MMG5_pSol met,char ismet)
  * \param tAA matrix to fill
  * \param tAb second member
  *
- * Fill matrice tAA and second member tAb with \$f A=(\sum X_{P_i}^2 \sum
- * Y_{P_i}^2 \sum X_{P_i}Y_{P_i}) \$f and \$f b=\sum Z_{P_i}\$f with P_i the
+ * Fill matrice tAA and second member tAb with \f$ A=(\sum X_{P_i}^2 \sum
+ * Y_{P_i}^2 \sum X_{P_i}Y_{P_i}) \f$ and \f$ b=\sum Z_{P_i}\f$ with P_i the
  * physical points at edge [i0;i1] extremities and middle.  Compute the physical
  * coor \a c of the curve edge's mid-point for a regular or reference point.
  *
@@ -520,9 +521,9 @@ void _MMG5_fillDefmetregSys( int k, MMG5_pPoint p0, int i0, _MMG5_Bezier b,
   c[1] = 3.0/8.0*b0[1] + 3.0/8.0*b1[1] + 1.0/8.0*lispoi[3*k+2];
   c[2] = 3.0/8.0*b0[2] + 3.0/8.0*b1[2] + 1.0/8.0*lispoi[3*k+3];
 
-/* Fill matrice tAA and second member tAb with A=(\sum X_{P_i}^2 \sum
- * Y_{P_i}^2 \sum X_{P_i}Y_{P_i}) and b=\sum Z_{P_i} with P_i the physical
- * points at edge [i0;i1] extremities and middle. */
+/* Fill matrice tAA and second member tAb with \f$A=(\sum X_{P_i}^2 \sum
+ * Y_{P_i}^2 \sum X_{P_i}Y_{P_i})\f$ and \f$b=\sum Z_{P_i}\f$ with P_i the
+ * physical points at edge [i0;i1] extremities and middle. */
   tAA[0] += c[0]*c[0]*c[0]*c[0];
   tAA[1] += c[0]*c[0]*c[1]*c[1];
   tAA[2] += c[0]*c[0]*c[0]*c[1];

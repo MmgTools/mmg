@@ -1,7 +1,7 @@
 /* =============================================================================
 **  This file is part of the mmg software package for the tetrahedral
 **  mesh modification.
-**  Copyright (c) Inria - IMB (Université de Bordeaux) - LJLL (UPMC), 2004- .
+**  Copyright (c) Bx INP/Inria/UBordeaux/UPMC, 2004- .
 **
 **  mmg is free software: you can redistribute it and/or modify it
 **  under the terms of the GNU Lesser General Public License as published
@@ -24,10 +24,10 @@
 /**
  * \file mmg3d/anisomovpt_3d.c
  * \brief Functions to move a point in the mesh.
- * \author Charles Dapogny (LJLL, UPMC)
- * \author Cécile Dobrzynski (Inria / IMB, Université de Bordeaux)
- * \author Pascal Frey (LJLL, UPMC)
- * \author Algiane Froehly (Inria / IMB, Université de Bordeaux)
+ * \author Charles Dapogny (UPMC)
+ * \author Cécile Dobrzynski (Bx INP/Inria/UBordeaux)
+ * \author Pascal Frey (UPMC)
+ * \author Algiane Froehly (Inria/UBordeaux)
  * \version 5
  * \copyright GNU Lesser General Public License.
  * \todo Doxygen documentation
@@ -47,8 +47,8 @@
  *
  * Move internal point whose volumic is passed.
  *
- * \Remark the metric is not interpolated at the new position.
- * \Remark we don't check if we break the hausdorff criterion.
+ * \remark the metric is not interpolated at the new position.
+ * \remark we don't check if we break the hausdorff criterion.
  *
  */
 int _MMG5_movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,
@@ -172,8 +172,8 @@ int _MMG5_movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,
 
  * \return 0 if we can't move the point, 1 if we can.
  *
- * \Remark we don't check if we break the hausdorff criterion.
- * \Remark the metric is not interpolated at the new position.
+ * \remark we don't check if we break the hausdorff criterion.
+ * \remark the metric is not interpolated at the new position.
  *
  * Move boundary regular point, whose volumic and surfacic balls are passed.
  *
@@ -562,7 +562,7 @@ int _MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met,int *listv,
 
  * \return 0 if fail, 1 if success.
  *
- * \Remark we don't check if we break the hausdorff criterion.
+ * \remark we don't check if we break the hausdorff criterion.
  *
  * Move boundary reference point, whose volumic and surfacic balls are passed.
  *
@@ -881,7 +881,7 @@ int _MMG5_movbdyrefpt_ani(MMG5_pMesh mesh, MMG5_pSol met, int *listv,
  * Move boundary non manifold point, whose volumic and (exterior)
  * surfacic balls are passed
  *
- * \Remark we don't check if we break the hausdorff criterion.
+ * \remark we don't check if we break the hausdorff criterion.
  *
  */
 int _MMG5_movbdynompt_ani(MMG5_pMesh mesh,MMG5_pSol met, int *listv,
@@ -1190,9 +1190,10 @@ int _MMG5_movbdynompt_ani(MMG5_pMesh mesh,MMG5_pSol met, int *listv,
  * \param ilistv size of the volumic ball.
  * \param lists pointer toward the surfacic ball of the point.
  * \param ilists size of the surfacic ball.
+ * \param improve force the new minimum element quality to be greater or equal
  * \return 0 if fail, 1 if success.
  *
- * \Remark we don't check if we break the hausdorff criterion.
+ * \remark we don't check if we break the hausdorff criterion.
  *
  * Move boundary ridge point, whose volumic and surfacic balls are passed.
  *

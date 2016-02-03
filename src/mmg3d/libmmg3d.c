@@ -1,7 +1,7 @@
 /* =============================================================================
 **  This file is part of the mmg software package for the tetrahedral
 **  mesh modification.
-**  Copyright (c) Inria - IMB (Université de Bordeaux) - LJLL (UPMC), 2004- .
+**  Copyright (c) Bx INP/Inria/UBordeaux/UPMC, 2004- .
 **
 **  mmg is free software: you can redistribute it and/or modify it
 **  under the terms of the GNU Lesser General Public License as published
@@ -24,10 +24,10 @@
 /**
  * \file mmg3d/libmmg3d.c
  * \brief Most of the API functions of the MMG3D library.
- * \author Charles Dapogny (LJLL, UPMC)
- * \author Cécile Dobrzynski (Inria / IMB, Université de Bordeaux)
- * \author Pascal Frey (LJLL, UPMC)
- * \author Algiane Froehly (Inria / IMB, Université de Bordeaux)
+ * \author Charles Dapogny (UPMC)
+ * \author Cécile Dobrzynski (Bx INP/Inria/UBordeaux)
+ * \author Pascal Frey (UPMC)
+ * \author Algiane Froehly (Inria/UBordeaux)
  * \version 5
  * \date 01 2014
  * \copyright GNU Lesser General Public License.
@@ -75,7 +75,7 @@ void _MMG3D_Free_topoTables(MMG5_pMesh mesh) {
  * \param mesh pointer toward the mesh structure (unused).
  * \param met pointer toward the solution (metric or level-set) structure.
  * \param disp pointer toward the solution (displacement) structure.
- * \param return 1 if success, 0 if chkmsh fail or if we are unable to build
+ * \return 1 if success, 0 if chkmsh fail or if we are unable to build
  * triangles.
  *
  * Pack the sparse mesh and create triangles and edges before getting
@@ -858,7 +858,6 @@ int MMG3D_mmg3dmov(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp) {
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward a sol structure (metric or solution).
- * \param disp pointer toward a sol structure (displacement for the
  * lagrangian motion mode).
  * \return Return \ref MMG5_SUCCESS if success, \ref MMG5_LOWFAILURE if failed
  * but a conform mesh is saved and \ref MMG5_STRONGFAILURE if failed and we

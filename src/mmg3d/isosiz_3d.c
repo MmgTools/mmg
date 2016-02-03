@@ -1,7 +1,7 @@
 /* =============================================================================
 **  This file is part of the mmg software package for the tetrahedral
 **  mesh modification.
-**  Copyright (c) Inria - IMB (Université de Bordeaux) - LJLL (UPMC), 2004- .
+**  Copyright (c) Bx INP/Inria/UBordeaux/UPMC, 2004- .
 **
 **  mmg is free software: you can redistribute it and/or modify it
 **  under the terms of the GNU Lesser General Public License as published
@@ -24,10 +24,10 @@
 /**
  * \file mmg3d/isosiz_3d.c
  * \brief Fonctions for isotropic size map computation.
- * \author Charles Dapogny (LJLL, UPMC)
- * \author Cécile Dobrzynski (Inria / IMB, Université de Bordeaux)
- * \author Pascal Frey (LJLL, UPMC)
- * \author Algiane Froehly (Inria / IMB, Université de Bordeaux)
+ * \author Charles Dapogny (UPMC)
+ * \author Cécile Dobrzynski (Bx INP/Inria/UBordeaux)
+ * \author Pascal Frey (UPMC)
+ * \author Algiane Froehly (Inria/UBordeaux)
  * \version 5
  * \copyright GNU Lesser General Public License.
  */
@@ -111,6 +111,8 @@ inline double _MMG5_lenedgCoor_iso(double *ca,double *cb,double *ma,double *mb) 
  * \param nump index of point in which the size must be computed.
  * \param lists pointer toward the surfacic ball of \a nump.
  * \param ilists size of surfacic ball of \a nump.
+ * \param hmin minimal edge size.
+ * \param hmax maximal edge size.
  * \param hausd hausdorff value.
  * \return the isotropic size at the point.
  *

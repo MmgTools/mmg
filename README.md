@@ -75,7 +75,7 @@ Contact: contact@mmgtools.org
 ## License and copyright
 Code is under the [terms of the GNU Lesser General Public License](https://raw.githubusercontent.com/MmgTools/mmg/master/LICENSE).
 
-Copyright © Inria - IMB (Université de Bordeaux) - LJLL (UPMC), 2004- .
+Copyright © Bx INP/Inria/UBordeaux/UPMC, 2004- .
 
 ## Reference
 [Three-dimensional adaptive domain remeshing, implicit domain meshing, and applications to free and moving boundary problems - _C. Dapogny, C. Dobrzynski and P. Frey_ - April 1, 2014 - _JCP_](http://www.sciencedirect.com/science/article/pii/S0021999114000266)

@@ -1,7 +1,7 @@
 /* =============================================================================
 **  This file is part of the mmg software package for the tetrahedral
 **  mesh modification.
-**  Copyright (c) Inria - IMB (Université de Bordeaux) - LJLL (UPMC), 2004- .
+**  Copyright (c) Bx INP/Inria/UBordeaux/UPMC, 2004- .
 **
 **  mmg is free software: you can redistribute it and/or modify it
 **  under the terms of the GNU Lesser General Public License as published
@@ -24,16 +24,16 @@
 /**
  * \file common/API_functions.c
  * \brief C API functions definitions for MMG library.
- * \author Charles Dapogny (LJLL, UPMC)
- * \author Cécile Dobrzynski (Inria / IMB, Université de Bordeaux)
- * \author Pascal Frey (LJLL, UPMC)
- * \author Algiane Froehly (Inria / IMB, Université de Bordeaux)
+ * \author Charles Dapogny (UPMC)
+ * \author Cécile Dobrzynski (Bx INP/Inria/UBordeaux)
+ * \author Pascal Frey (UPMC)
+ * \author Algiane Froehly (Inria/UBordeaux)
  * \version 5
  * \date 03 2014
  * \copyright GNU Lesser General Public License.
  *
- * \note This file contains some internal functions for the API, see the \ref
- * common/libmmgcommon.h, \ref mmgs/libmmgs.h and \ref mmg3d/libmmg3d.h header files
+ * \note This file contains some internal functions for the API, see the \a
+ * common/libmmgcommon.h, \a mmgs/libmmgs.h and \a mmg3d/libmmg3d.h header files
  * for the documentation of all the usefull user's API functions.
  *
  * C API for MMG library.

@@ -1,7 +1,7 @@
 /* =============================================================================
 **  This file is part of the mmg software package for the tetrahedral
 **  mesh modification.
-**  Copyright (c) Inria - IMB (Université de Bordeaux) - LJLL (UPMC), 2004- .
+**  Copyright (c) Bx INP/Inria/UBordeaux/UPMC, 2004- .
 **
 **  mmg is free software: you can redistribute it and/or modify it
 **  under the terms of the GNU Lesser General Public License as published
@@ -24,7 +24,7 @@
 /**
  * \file mmg2d/API_functions_2d.c
  * \brief C API functions definitions for MMG2D library.
- * \author Algiane Froehly (Inria / IMB, Université de Bordeaux)
+ * \author Algiane Froehly (Bx INP/Inria/UBordeaux)
  * \version 5
  * \date 01 2014
  * \copyright GNU Lesser General Public License.
@@ -255,7 +255,7 @@ int MMG2D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the sol structure.
  * \param dparam double parameter to set (see \a MMG2D_Param structure).
- * \val value of the parameter.
+ * \param val value of the parameter.
  * \return 0 if failed, 1 otherwise.
  *
  * Set double parameter \a dparam at value \a val.
@@ -525,7 +525,7 @@ int MMG2D_Set_vertex(MMG5_pMesh mesh, double c0, double c1, int ref, int pos) {
  * \param c1 pointer toward the coordinate of the point along the second dimension.
  * \param ref poiter to the point reference.
  * \param isCorner pointer toward the flag saying if point is corner.
- * \param isCorner pointer toward the flag saying if point is required.
+ * \param isRequired pointer toward the flag saying if point is required.
  * \return 1.
  *
  * Get coordinates \a c0, \a c1 and reference \a ref of
@@ -751,7 +751,7 @@ int MMG2D_Set_tensorSol(MMG5_pSol met, double* s, int pos) {
 
 /**
  * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the sol structure.
+ * \param met pointer toward the sol structure.
  * \return 0 if failed, 1 otherwise.
  *
  * Check if the number of given entities match with mesh and sol size

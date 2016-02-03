@@ -1,7 +1,7 @@
 /* =============================================================================
 **  This file is part of the mmg software package for the tetrahedral
 **  mesh modification.
-**  Copyright (c) Inria - IMB (Université de Bordeaux) - LJLL (UPMC), 2004- .
+**  Copyright (c) Bx INP/Inria/UBordeaux/UPMC, 2004- .
 **
 **  mmg is free software: you can redistribute it and/or modify it
 **  under the terms of the GNU Lesser General Public License as published
@@ -22,9 +22,9 @@
 */
 
 /**
- * \file mmg3d/mmg3d1_delone_3d.c
+ * \file mmg3d/mmg3d1_delone.c
  * \brief Perform volume and surface mesh adaptation in delaunay mode.
- * \author Cécile Dobrzynski (Inria / IMB, Université de Bordeaux)
+ * \author Cécile Dobrzynski (Bx INP/Inria/UBordeaux)
  * \version 5
  * \copyright GNU Lesser General Public License.
  * \todo Doxygen documentation

@@ -1,7 +1,7 @@
 /* =============================================================================
 **  This file is part of the mmg software package for the tetrahedral
 **  mesh modification.
-**  Copyright (c) Inria - IMB (Université de Bordeaux) - LJLL (UPMC), 2004- .
+**  Copyright (c) Bx INP/Inria/UBordeaux/UPMC, 2004- .
 **
 **  mmg is free software: you can redistribute it and/or modify it
 **  under the terms of the GNU Lesser General Public License as published
@@ -24,10 +24,10 @@
 /**
  * \file mmg3d/split_3d.c
  * \brief Functions to create new points.
- * \author Charles Dapogny (LJLL, UPMC)
- * \author Cécile Dobrzynski (Inria / IMB, Université de Bordeaux)
- * \author Pascal Frey (LJLL, UPMC)
- * \author Algiane Froehly (Inria / IMB, Université de Bordeaux)
+ * \author Charles Dapogny (UPMC)
+ * \author Cécile Dobrzynski (Bx INP/Inria/UBordeaux)
+ * \author Pascal Frey (UPMC)
+ * \author Algiane Froehly (Inria/UBordeaux)
  * \version 5
  * \copyright GNU Lesser General Public License.
  * \todo Doxygen documentation
@@ -126,6 +126,7 @@ int _MMG3D_split1_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
  * \param met pointer toward the metric structure.
  * \param k index of element to split.
  * \param vx \f$vx[i]\f$ is the index of the point to add on the edge \a i.
+ * \param metRidTyp metric storage (classic or special)
  *
  * Split 1 edge of tetra \a k.
  *
@@ -265,7 +266,7 @@ nextstep1:
  * \return 0 if final position is invalid, 1 if all checks are ok.
  *
  * Simulate at the same time creation and bulging of one point, with new
- * position o and tag \tag, to be inserted at an edge, whose shell is passed.
+ * position o and tag \a tag, to be inserted at an edge, whose shell is passed.
  *
  */
 int _MMG3D_simbulgept(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int ip) {
@@ -2591,6 +2592,7 @@ void _MMG5_split3op(MMG5_pMesh mesh, MMG5_pSol met, int k, int vx[6],char metRid
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
  * \param k tetra index.
+ * \param metRidTyp metric storage (classic or special)
  *
  * Split a tetra in 4 tetras by introducing its barycenter. FOR NOW : flags,
  * that tell which edge should be split, are not updated (erased) : UPDATE

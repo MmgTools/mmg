@@ -1,7 +1,7 @@
 /* =============================================================================
 **  This file is part of the mmg software package for the tetrahedral
 **  mesh modification.
-**  Copyright (c) Inria - IMB (Université de Bordeaux) - LJLL (UPMC), 2004- .
+**  Copyright (c) Bx INP/Inria/UBordeaux/UPMC, 2004- .
 **
 **  mmg is free software: you can redistribute it and/or modify it
 **  under the terms of the GNU Lesser General Public License as published
@@ -162,25 +162,25 @@
 #define MG_MINUS   3
 
 
-/*! \var next vertex of tetra: {1,2,3,0,1,2,3} */
+/** \brief next vertex of tetra: {1,2,3,0,1,2,3} */
 static const unsigned char _MMG5_inxt3[7] = { 1,2,3,0,1,2,3 };
-/*! \var previous vertex of tetra: {3,0,1,2,3,0,1} */
+/** \brief previous vertex of tetra: {3,0,1,2,3,0,1} */
 static const unsigned char _MMG5_iprv3[7] = { 3,0,1,2,3,0,1 };
-/*! \var idir[i] : vertices of face opposite to vertex i */
+/** \brief idir[i]: vertices of face opposite to vertex i */
 static const unsigned char _MMG5_idir[4][3] = { {1,2,3}, {0,3,2}, {0,1,3}, {0,2,1} };
-/* \var< idirinv[i][j] : num of the jth point in the ith face */
+/* \var idirinv[i][j]: num of the jth point in the ith face */
 static const          char _MMG5_idirinv[4][4] = {{-1,0,1,2},{0,-1,2,1},{0,1,-1,2},{0,2,1,-1}};
-/*! \var iarf[i]: edges of face opposite to vertex i */
+/** \brief iarf[i]: edges of face opposite to vertex i */
 static const unsigned char _MMG5_iarf[4][3] = { {5,4,3}, {5,1,2}, {4,2,0}, {3,0,1} };
-/*! \var num of the j^th edge in the i^th face */
+/** \brief num of the j^th edge in the i^th face */
 static const unsigned char _MMG5_iarfinv[4][6] = { {-1,-1,-1,2,1,0}, {-1,1,2,-1,-1,0},{2,-1,1,-1,0,-1},{1,2,-1,0,-1,-1}};
-/*! \var vertices of extremities of the edges of the tetra */
+/** \brief vertices of extremities of the edges of the tetra */
 static const unsigned char _MMG5_iare[6][2] = { {0,1}, {0,2}, {0,3}, {1,2}, {1,3}, {2,3} };
-/*! \var ifar[i][]: faces sharing the ith edge of the tetra */
+/** \brief ifar[i][]: faces sharing the ith edge of the tetra */
 static const unsigned char _MMG5_ifar[6][2] = { {2,3}, {1,3}, {1,2}, {0,3}, {0,2}, {0,1} };
-/*! \var isar[i][]: vertices of extremities of the edge opposite to the ith edge */
+/** \brief isar[i][]: vertices of extremities of the edge opposite to the ith edge */
 static const unsigned char _MMG5_isar[6][2] = { {2,3}, {3,1}, {1,2}, {0,3}, {2,0}, {0,1} };
-/*! \var arpt[i]: edges passing through vertex i */
+/** \brief arpt[i]: edges passing through vertex i */
 static const unsigned char _MMG5_arpt[4][3] = { {0,1,2}, {0,4,3}, {1,3,5}, {2,5,4} };
 
 

@@ -1,7 +1,7 @@
 /* =============================================================================
 **  This file is part of the mmg software package for the tetrahedral
 **  mesh modification.
-**  Copyright (c) Inria - IMB (Université de Bordeaux) - LJLL (UPMC), 2004- .
+**  Copyright (c) Bx INP/Inria/UBordeaux/UPMC, 2004- .
 **
 **  mmg is free software: you can redistribute it and/or modify it
 **  under the terms of the GNU Lesser General Public License as published
@@ -24,8 +24,8 @@
 /**
  * \file mmg3d/delaunay_3d.c
  * \brief Functions for mesh modifications in Delaunay mode.
- * \author Cécile Dobrzynski (Inria / IMB, Université de Bordeaux)
- * \author Pascal Frey (LJLL, UPMC)
+ * \author Cécile Dobrzynski (Bx INP/Inria/UBordeaux)
+ * \author Pascal Frey (UPMC)
  * \version 5
  * \copyright GNU Lesser General Public License.
  * \remark Delaunay mode only (\a PATTERN flag set to \a OFF).
@@ -726,7 +726,7 @@ int _MMG5_cavity_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel,int ip,int* list,int 
 
 /**
  * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the sol structure.
+ * \param sol pointer toward the sol structure.
  * \param iel tetra index.
  * \param ip point local index in \a iel.
  * \param list pointer toward the list of tetra in the shell of edge where

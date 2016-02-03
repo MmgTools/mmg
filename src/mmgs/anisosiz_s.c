@@ -1,7 +1,7 @@
 /* =============================================================================
 **  This file is part of the mmg software package for the tetrahedral
 **  mesh modification.
-**  Copyright (c) Inria - IMB (Université de Bordeaux) - LJLL (UPMC), 2004- .
+**  Copyright (c) Bx INP/Inria/UBordeaux/UPMC, 2004- .
 **
 **  mmg is free software: you can redistribute it and/or modify it
 **  under the terms of the GNU Lesser General Public License as published
@@ -24,10 +24,10 @@
 /**
  * \file mmgs/anisosiz_s.c
  * \brief Fonctions for anisotropic size map computation.
- * \author Charles Dapogny (LJLL, UPMC)
- * \author Cécile Dobrzynski (Inria / IMB, Université de Bordeaux)
- * \author Pascal Frey (LJLL, UPMC)
- * \author Algiane Froehly (Inria / IMB, Université de Bordeaux)
+ * \author Charles Dapogny (UPMC)
+ * \author Cécile Dobrzynski (Bx INP/Inria/UBordeaux)
+ * \author Pascal Frey (UPMC)
+ * \author Algiane Froehly (Inria/UBordeaux)
  * \version 5
  * \copyright GNU Lesser General Public License.
  * \todo doxygen documentation.
@@ -176,9 +176,9 @@ static int _MMG5_defmetsin(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
  * \a p->m[1] is the specific size in direction \f$ u_1 = n_1^{}t\f$,
  * \a p->m[2] is the specific size in direction \f$ u_2 = n_2^{}t\f$,
  * \a p->m[3] is the specific size in direction \f$ n_1\f$
- * (computed by the \ref _MMG5_intextmet function),
+ * (computed by the \a _MMG5_intextmet function),
  * \a p->m[4] is the specific size in direction \f$ n_2\f$,
- * (computed by the \ref _MMG5_intextmet function),
+ * (computed by the \a _MMG5_intextmet function),
  * and at each time, metric tensor has to be recomputed, depending on the side.
  *
  */
@@ -686,7 +686,6 @@ static int _MMG5_defmetreg(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
  * \param met pointer toward the metric structure.
  * \param np global index of vertex in which we intersect the metrics.
  * \param me physical metric at point \a np.
- * \param n normal or tangent at point np.
  * \return 0 if fail, 1 otherwise.
  *
  * Intersect the surface metric held in np (supported in tangent plane of \a np)

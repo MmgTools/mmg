@@ -1,7 +1,7 @@
 /* =============================================================================
 **  This file is part of the mmg software package for the tetrahedral
 **  mesh modification.
-**  Copyright (c) Inria - IMB (Université de Bordeaux) - LJLL (UPMC), 2004- .
+**  Copyright (c) Bx INP/Inria/UBordeaux/UPMC, 2004- .
 **
 **  mmg is free software: you can redistribute it and/or modify it
 **  under the terms of the GNU Lesser General Public License as published
@@ -24,10 +24,10 @@
 /**
  * \file mmg3d/colver_3d.c
  * \brief Functions for vertices collapsing.
- * \author Charles Dapogny (LJLL, UPMC)
- * \author Cécile Dobrzynski (Inria / IMB, Université de Bordeaux)
- * \author Pascal Frey (LJLL, UPMC)
- * \author Algiane Froehly (Inria / IMB, Université de Bordeaux)
+ * \author Charles Dapogny (UPMC)
+ * \author Cécile Dobrzynski (Bx INP/Inria/UBordeaux)
+ * \author Pascal Frey (UPMC)
+ * \author Algiane Froehly (Inria/UBordeaux)
  * \version 5
  * \copyright GNU Lesser General Public License.
  * \todo doxygen documentation.
@@ -411,10 +411,22 @@ _MMG5_topchkcol_bdy(MMG5_pMesh mesh,int k,int iface,char iedg,int *lists,int ili
   return(1);
 }
 
-/** Check whether collapse ip -> iq could be performed, ip boundary point ;
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param k index of element in which we collapse.
+ * \param iface face through wich we perform the collapse
+ * \param iedg edge to collapse
+ * \param listv pointer toward the list of the tetra in the ball of \a p0.
+ * \param typchk  typchk type of checking permformed for edge length
+ * (hmax or _MMG5_LLONG criterion).
+ *
+ * Check whether collapse ip -> iq could be performed, ip boundary point ;
  *  'mechanical' tests (positive jacobian) are not performed here ;
  *  iface = boundary face on which lie edge iedg - in local face num.
- *  (pq, or ia in local tet notation) */
+ *  (pq, or ia in local tet notation).
+ *
+ */
 int _MMG5_chkcol_bdy(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
                      char iedg,int *listv,char typchk) {
   MMG5_pTetra        pt,pt0;

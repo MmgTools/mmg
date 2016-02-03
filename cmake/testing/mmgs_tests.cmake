@@ -1,7 +1,7 @@
 ## =============================================================================
 ##  This file is part of the Mmg software package for the tetrahedral
 ##  mesh modification.
-##  Copyright (c) Inria - IMB (Université de Bordeaux) - LJLL (UPMC), 2004- .
+##**  Copyright (c) Bx INP/Inria/UBordeaux/UPMC, 2004- .
 ##
 ##  Mmg is free software: you can redistribute it and/or modify it
 ##  under the terms of the GNU Lesser General Public License as published

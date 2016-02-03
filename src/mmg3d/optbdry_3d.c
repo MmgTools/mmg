@@ -1,7 +1,7 @@
 /* =============================================================================
 **  This file is part of the mmg software package for the tetrahedral
 **  mesh modification.
-**  Copyright (c) Inria - IMB (Université de Bordeaux) - LJLL (UPMC), 2004- .
+**  Copyright (c) Bx INP/Inria/UBordeaux/UPMC, 2004- .
 **
 **  mmg is free software: you can redistribute it and/or modify it
 **  under the terms of the GNU Lesser General Public License as published
@@ -24,8 +24,8 @@
 /**
  * \file mmg3d/optbdry_3d.c
  * \brief Functions for the optimization of very bad elements.
- * \author Cécile Dobrzynski (Inria / IMB, Université de Bordeaux)
- * \author Algiane Froehly
+ * \author Cécile Dobrzynski (Bx INP/Inria/UBordeaux)
+ * \author Algiane Froehly (Inria/UBordeaux)
  * \version 5
  * \copyright GNU Lesser General Public License.
  */

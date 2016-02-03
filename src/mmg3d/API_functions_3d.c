@@ -1,7 +1,7 @@
 /* =============================================================================
 **  This file is part of the mmg software package for the tetrahedral
 **  mesh modification.
-**  Copyright (c) Inria - IMB (Université de Bordeaux) - LJLL (UPMC), 2004- .
+**  Copyright (c) Bx INP/Inria/UBordeaux/UPMC, 2004- .
 **
 **  mmg is free software: you can redistribute it and/or modify it
 **  under the terms of the GNU Lesser General Public License as published
@@ -24,7 +24,7 @@
 /**
  * \file mmg3d/API_functions_3d.c
  * \brief C API functions definitions for MMG3D library.
- * \author Algiane Froehly (Inria / IMB, Université de Bordeaux)
+ * \author Algiane Froehly (Inria/UBordeaux)
  * \version 5
  * \date 01 2014
  * \copyright GNU Lesser General Public License.
@@ -1488,7 +1488,9 @@ int MMG3D_Set_dparameter(MMG5_pMesh mesh, MMG5_pSol sol, int dparam, double val)
  * \param sol pointer toward the sol structure.
  * \param typ type of entity (triangle, edge,...).
  * \param ref reference of the entity.
- * \param val value of the Hausdorff number.
+ * \param hmin minimal edge size.
+ * \param hmax maximal edge size.
+ * \param hausd value of the Hausdorff number.
  * \return 0 if failed, 1 otherwise.
  *
  * Set local parameters: set the hausdorff value at \a val for all

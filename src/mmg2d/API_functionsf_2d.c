@@ -1,7 +1,7 @@
 /* =============================================================================
 **  This file is part of the mmg software package for the tetrahedral
 **  mesh modification.
-**  Copyright (c) Inria - IMB (Université de Bordeaux) - LJLL (UPMC), 2004- .
+**  Copyright (c) Bx INP/Inria/UBordeaux/UPMC, 2004- .
 **
 **  mmg is free software: you can redistribute it and/or modify it
 **  under the terms of the GNU Lesser General Public License as published
@@ -24,7 +24,7 @@
 /**
  * \file mmg2d/API_functionsf_2d.c
  * \brief Fortran API functions for MMG2D library.
- * \author Cecile Dobrzynski (Inria / IMB, Université de Bordeaux)
+ * \author Cecile Dobrzynski (Bx INP/Inria/UBordeaux)
  * \version 5
  * \date 07 2015
  * \copyright GNU Lesser General Public License.
@@ -256,7 +256,7 @@ FORTRAN_NAME(MMG2D_CHK_MESHDATA,mmg2d_chk_meshdata,
 }
 
 /**
- * See \ref MMG5_Free_all function in \ref mmg2d/libmmg2d.h file.
+ * See \ref MMG2D_Free_all function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_VARIADIC(MMG2D_FREE_ALL,mmg2d_free_all,
                  (enum MMG5_arg starter,...),

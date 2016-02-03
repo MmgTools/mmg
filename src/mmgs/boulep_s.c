@@ -1,7 +1,7 @@
 /* =============================================================================
 **  This file is part of the mmg software package for the tetrahedral
 **  mesh modification.
-**  Copyright (c) Inria - IMB (Université de Bordeaux) - LJLL (UPMC), 2004- .
+**  Copyright (c) Bx INP/Inria/UBordeaux/UPMC, 2004- .
 **
 **  mmg is free software: you can redistribute it and/or modify it
 **  under the terms of the GNU Lesser General Public License as published
@@ -24,10 +24,10 @@
 /**
  * \file mmgs/boulep_s.c
  * \brief Functions for ball of points computation.
- * \author Charles Dapogny (LJLL, UPMC)
- * \author Cécile Dobrzynski (Inria / IMB, Université de Bordeaux)
- * \author Pascal Frey (LJLL, UPMC)
- * \author Algiane Froehly (Inria / IMB, Université de Bordeaux)
+ * \author Charles Dapogny (UPMC)
+ * \author Cécile Dobrzynski (Bx INP/Inria/UBordeaux)
+ * \author Pascal Frey (UPMC)
+ * \author Algiane Froehly (Inria/UBordeaux)
  * \version 5
  * \copyright GNU Lesser General Public License.
  * \todo doxygen documentation.
@@ -100,9 +100,9 @@ int boulet(MMG5_pMesh mesh,int start,int ip,int *list) {
 /**
  * \param mesh pointer toward the mesh structure.
  * \param start index of tetra to start to compute the ball.
- * \param ip index of point in tetra \ref start for which we want to compute
+ * \param ip index of point in tetra \a start for which we want to compute
  * the ball.
- * \list pointer toward the computed ball of point.
+ * \param list pointer toward the computed ball of point.
  *
  * Find all triangles sharing \a ip, \f$list[0] = start\f$. Do not stop when
  * crossing ridge. Check whether resulting configuration is manifold.
@@ -300,8 +300,8 @@ int boulep(MMG5_pMesh mesh,int start,int ip,int *list) {
  * \param il2 pointer toward the second ball size.
  * \param l2 pointer toward the second computed ball (associated to \a n2's
  * side).
- * \param ip1 index of the first extremity of the ridge.
- * \param ip2 index of the second extremity of the ridge.
+ * \param ip0 index of the first extremity of the ridge.
+ * \param ip1 index of the second extremity of the ridge.
  * \return 0 if fail, 1 otherwise.
  *
  * Computation of the two balls of a ridge point: the list \a l1 is associated

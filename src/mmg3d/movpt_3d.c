@@ -1,7 +1,7 @@
 /* =============================================================================
 **  This file is part of the mmg software package for the tetrahedral
 **  mesh modification.
-**  Copyright (c) Inria - IMB (Université de Bordeaux) - LJLL (UPMC), 2004- .
+**  Copyright (c) Bx INP/Inria/UBordeaux/UPMC, 2004- .
 **
 **  mmg is free software: you can redistribute it and/or modify it
 **  under the terms of the GNU Lesser General Public License as published
@@ -24,10 +24,10 @@
 /**
  * \file mmg3d/movpt_3d.c
  * \brief Functions to move a point in the mesh.
- * \author Charles Dapogny (LJLL, UPMC)
- * \author Cécile Dobrzynski (Inria / IMB, Université de Bordeaux)
- * \author Pascal Frey (LJLL, UPMC)
- * \author Algiane Froehly (Inria / IMB, Université de Bordeaux)
+ * \author Charles Dapogny (UPMC)
+ * \author Cécile Dobrzynski (Bx INP/Inria/UBordeaux)
+ * \author Pascal Frey (UPMC)
+ * \author Algiane Froehly (Inria/UBordeaux)
  * \version 5
  * \copyright GNU Lesser General Public License.
  * \todo Doxygen documentation
@@ -48,8 +48,8 @@
  *
  * Move internal point whose volumic is passed.
  *
- * \Remark the metric is not interpolated at the new position.
- * \Remark we don't check if we break the hausdorff criterion.
+ * \remark the metric is not interpolated at the new position.
+ * \remark we don't check if we break the hausdorff criterion.
  *
  */
 int _MMG5_movintpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,int improve) {
@@ -155,7 +155,7 @@ int _MMG5_movintpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,int imp
  *
  * Move boundary regular point, whose volumic and surfacic balls are passed.
  *
- * \Remark the metric is not interpolated at the new position.
+ * \remark the metric is not interpolated at the new position.
  */
 int _MMG5_movbdyregpt_iso(MMG5_pMesh mesh, MMG5_pSol met,int *listv,
                           int ilistv,int *lists,int ilists,
@@ -547,7 +547,7 @@ int _MMG5_movbdyregpt_iso(MMG5_pMesh mesh, MMG5_pSol met,int *listv,
  *
  * Move boundary reference point, whose volumic and surfacic balls are passed.
  *
- * \Remark the metric is not interpolated at the new position.
+ * \remark the metric is not interpolated at the new position.
  */
 int _MMG5_movbdyrefpt_iso(MMG5_pMesh mesh, MMG5_pSol met, int *listv,
                           int ilistv, int *lists, int ilists,
@@ -858,7 +858,7 @@ int _MMG5_movbdyrefpt_iso(MMG5_pMesh mesh, MMG5_pSol met, int *listv,
  * Move boundary non manifold point, whose volumic and (exterior)
  * surfacic balls are passed
  *
- * \Remark the metric is not interpolated at the new position.
+ * \remark the metric is not interpolated at the new position.
  */
 int _MMG5_movbdynompt_iso(MMG5_pMesh mesh,MMG5_pSol met, int *listv,
                           int ilistv, int *lists, int ilists,

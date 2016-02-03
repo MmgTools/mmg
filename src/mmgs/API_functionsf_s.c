@@ -1,7 +1,7 @@
 /* =============================================================================
 **  This file is part of the mmg software package for the tetrahedral
 **  mesh modification.
-**  Copyright (c) Inria - IMB (Université de Bordeaux) - LJLL (UPMC), 2004- .
+**  Copyright (c) Bx INP/Inria/UBordeaux/UPMC, 2004- .
 **
 **  mmg is free software: you can redistribute it and/or modify it
 **  under the terms of the GNU Lesser General Public License as published
@@ -24,7 +24,7 @@
 /**
  * \file mmgs/API_functionsf_s.c
  * \brief Fortran API functions for MMGS library.
- * \author Algiane Froehly (Inria / IMB, Université de Bordeaux)
+ * \author Algiane Froehly (Inria/UBordeaux)
  * \version 5
  * \date 01 2014
  * \copyright GNU Lesser General Public License.
@@ -56,7 +56,7 @@ FORTRAN_VARIADIC ( MMGS_INIT_MESH, mmgs_init_mesh,
   )
 
 /**
- * See \ref MMGS_Init_parameters function in \ref mmg3d/libmmg3d.h file.
+ * See \ref MMGS_Init_parameters function in \ref mmgs/libmmgs.h file.
  */
 FORTRAN_NAME(MMGS_INIT_PARAMETERS,mmgs_init_parameters,(MMG5_pMesh *mesh),(mesh)) {
   MMGS_Init_parameters(*mesh);
@@ -133,7 +133,7 @@ FORTRAN_NAME(MMGS_SET_OUTPUTSOLNAME,mmgs_set_outputsolname,
 }
 
 /**
- * See \ref MMGS_Set_meshSize function in \ref mmg3d/libmmg3d.h file.
+ * See \ref MMGS_Set_meshSize function in \ref mmgs/libmmgs.h file.
  */
 FORTRAN_NAME(MMGS_SET_MESHSIZE,mmgs_set_meshsize,
              (MMG5_pMesh *mesh, int *np, int *nt, int *na, int *retval),
@@ -143,7 +143,7 @@ FORTRAN_NAME(MMGS_SET_MESHSIZE,mmgs_set_meshsize,
 }
 
 /**
- * See \ref MMGS_Get_solSize function in \ref mmg3d/libmmg3d.h file.
+ * See \ref MMGS_Get_solSize function in \ref mmgs/libmmgs.h file.
  */
 FORTRAN_NAME(MMGS_GET_SOLSIZE,mmgs_get_solsize,
              (MMG5_pMesh *mesh, MMG5_pSol *sol, int* typEntity, int* np, int* typSol, int* retval),
@@ -154,7 +154,7 @@ FORTRAN_NAME(MMGS_GET_SOLSIZE,mmgs_get_solsize,
 }
 
 /**
- * See \ref MMGS_Get_meshSize function in \ref mmg3d/libmmg3d.h file.
+ * See \ref MMGS_Get_meshSize function in \ref mmgs/libmmgs.h file.
  */
 FORTRAN_NAME(MMGS_GET_MESHSIZE,mmgs_get_meshsize,
              (MMG5_pMesh *mesh, int* np, int* nt, int* na, int* retval),
@@ -165,7 +165,7 @@ FORTRAN_NAME(MMGS_GET_MESHSIZE,mmgs_get_meshsize,
 }
 
 /**
- * See \ref MMGS_Set_vertex function in \ref mmg3d/libmmg3d.h file.
+ * See \ref MMGS_Set_vertex function in \ref mmgs/libmmgs.h file.
  */
 FORTRAN_NAME(MMGS_SET_VERTEX,mmgs_set_vertex,
              (MMG5_pMesh *mesh, double* c0, double* c1, double* c2, int* ref,
@@ -177,7 +177,7 @@ FORTRAN_NAME(MMGS_SET_VERTEX,mmgs_set_vertex,
 }
 
 /**
- * See \ref MMGS_Get_vertex function in \ref mmg3d/libmmg3d.h file.
+ * See \ref MMGS_Get_vertex function in \ref mmgs/libmmgs.h file.
  */
 FORTRAN_NAME(MMGS_GET_VERTEX,mmgs_get_vertex,
              (MMG5_pMesh *mesh, double* c0, double* c1, double* c2, int* ref,
@@ -187,7 +187,7 @@ FORTRAN_NAME(MMGS_GET_VERTEX,mmgs_get_vertex,
   return;
 }
 /**
- * See \ref MMGS_Set_triangle function in \ref mmg3d/libmmg3d.h file.
+ * See \ref MMGS_Set_triangle function in \ref mmgs/libmmgs.h file.
  */
 FORTRAN_NAME(MMGS_SET_TRIANGLE,mmgs_set_triangle,
              (MMG5_pMesh *mesh, int* v0, int* v1, int* v2, int* ref,int* pos,
@@ -198,7 +198,7 @@ FORTRAN_NAME(MMGS_SET_TRIANGLE,mmgs_set_triangle,
 }
 
 /**
- * See \ref MMGS_Get_triangle function in \ref mmg3d/libmmg3d.h file.
+ * See \ref MMGS_Get_triangle function in \ref mmgs/libmmgs.h file.
  */
 FORTRAN_NAME(MMGS_GET_TRIANGLE,mmgs_get_triangle,
              (MMG5_pMesh *mesh, int* v0, int* v1, int* v2, int* ref
@@ -209,7 +209,7 @@ FORTRAN_NAME(MMGS_GET_TRIANGLE,mmgs_get_triangle,
 }
 
 /**
- * See \ref MMGS_Set_edge function in \ref mmg3d/libmmg3d.h file.
+ * See \ref MMGS_Set_edge function in \ref mmgs/libmmgs.h file.
  */
 FORTRAN_NAME(MMGS_SET_EDGE,mmgs_set_edge,
              (MMG5_pMesh *mesh, int *v0, int *v1, int *ref, int *pos, int* retval),
@@ -219,7 +219,7 @@ FORTRAN_NAME(MMGS_SET_EDGE,mmgs_set_edge,
 }
 
 /**
- * See \ref MMGS_Get_edge function in \ref mmg3d/libmmg3d.h file.
+ * See \ref MMGS_Get_edge function in \ref mmgs/libmmgs.h file.
  */
 FORTRAN_NAME(MMGS_GET_EDGE,mmgs_get_edge,(MMG5_pMesh *mesh, int* e0, int* e1, int* ref
                                           ,int* isRidge, int* isRequired, int* retval),
@@ -229,7 +229,7 @@ FORTRAN_NAME(MMGS_GET_EDGE,mmgs_get_edge,(MMG5_pMesh *mesh, int* e0, int* e1, in
 }
 
 /**
- * See \ref MMGS_Set_corner function in \ref mmg3d/libmmg3d.h file.
+ * See \ref MMGS_Set_corner function in \ref mmgs/libmmgs.h file.
  */
 FORTRAN_NAME(MMGS_SET_CORNER,mmgs_set_corner,(MMG5_pMesh *mesh, int *k, int* retval),
              (mesh,k,retval)) {
@@ -238,7 +238,7 @@ FORTRAN_NAME(MMGS_SET_CORNER,mmgs_set_corner,(MMG5_pMesh *mesh, int *k, int* ret
 }
 
 /**
- * See \ref MMGS_Set_requiredVertex function in \ref mmg3d/libmmg3d.h file.
+ * See \ref MMGS_Set_requiredVertex function in \ref mmgs/libmmgs.h file.
  */
 FORTRAN_NAME(MMGS_SET_REQUIREDVERTEX,mmgs_set_requiredvertex,
              (MMG5_pMesh *mesh, int *k, int* retval),
@@ -247,7 +247,7 @@ FORTRAN_NAME(MMGS_SET_REQUIREDVERTEX,mmgs_set_requiredvertex,
   return;
 }
 /**
- * See \ref MMGS_Set_requiredTriangle function in \ref mmg3d/libmmg3d.h file.
+ * See \ref MMGS_Set_requiredTriangle function in \ref mmgs/libmmgs.h file.
  */
 FORTRAN_NAME(MMGS_SET_REQUIREDTRIANGLE,mmgs_set_requiredtriangle,
              (MMG5_pMesh *mesh, int *k, int* retval),
@@ -257,7 +257,7 @@ FORTRAN_NAME(MMGS_SET_REQUIREDTRIANGLE,mmgs_set_requiredtriangle,
 }
 
 /**
- * See \ref MMGS_Set_ridge function in \ref mmg3d/libmmg3d.h file.
+ * See \ref MMGS_Set_ridge function in \ref mmgs/libmmgs.h file.
  */
 FORTRAN_NAME(MMGS_SET_RIDGE,mmgs_set_ridge,
              (MMG5_pMesh *mesh, int *k, int* retval),
@@ -267,7 +267,7 @@ FORTRAN_NAME(MMGS_SET_RIDGE,mmgs_set_ridge,
 }
 
 /**
- * See \ref MMGS_Set_requiredEdge function in \ref mmg3d/libmmg3d.h file.
+ * See \ref MMGS_Set_requiredEdge function in \ref mmgs/libmmgs.h file.
  */
 FORTRAN_NAME(MMGS_SET_REQUIREDEDGE,mmgs_set_requirededge,
              (MMG5_pMesh *mesh, int *k, int* retval),
@@ -277,7 +277,7 @@ FORTRAN_NAME(MMGS_SET_REQUIREDEDGE,mmgs_set_requirededge,
 }
 
 /**
- * See \ref MMGS_Set_scalarSol function in \ref mmg3d/libmmg3d.h file.
+ * See \ref MMGS_Set_scalarSol function in \ref mmgs/libmmgs.h file.
  */
 FORTRAN_NAME(MMGS_SET_SCALARSOL,mmgs_set_scalarsol,
              (MMG5_pSol *met, double *s, int *pos, int* retval),
@@ -287,7 +287,7 @@ FORTRAN_NAME(MMGS_SET_SCALARSOL,mmgs_set_scalarsol,
 }
 
 /**
- * See \ref MMGS_Get_scalarSol function in \ref mmg3d/libmmg3d.h file.
+ * See \ref MMGS_Get_scalarSol function in \ref mmgs/libmmgs.h file.
  */
 FORTRAN_NAME(MMGS_GET_SCALARSOL,mmgs_get_scalarsol,
              (MMG5_pSol *met, double* s, int* retval),
@@ -297,7 +297,7 @@ FORTRAN_NAME(MMGS_GET_SCALARSOL,mmgs_get_scalarsol,
 }
 
 /**
- * See \ref MMGS_Set_vectorSol function in \ref mmg3d/libmmg3d.h file.
+ * See \ref MMGS_Set_vectorSol function in \ref mmgs/libmmgs.h file.
  */
 FORTRAN_NAME(MMGS_SET_VECTORSOL,mmgs_set_vectorsol,
              (MMG5_pSol *met, double *vx, double *vy, double *vz,
@@ -308,7 +308,7 @@ FORTRAN_NAME(MMGS_SET_VECTORSOL,mmgs_set_vectorsol,
 }
 
 /**
- * See \ref MMGS_Get_vectorSol function in \ref mmg3d/libmmg3d.h file.
+ * See \ref MMGS_Get_vectorSol function in \ref mmgs/libmmgs.h file.
  */
 FORTRAN_NAME(MMGS_GET_VECTORSOL,mmgs_get_vectorsol,
              (MMG5_pSol *met, double* vx,double *vy, double *vz, int* retval),
@@ -318,7 +318,7 @@ FORTRAN_NAME(MMGS_GET_VECTORSOL,mmgs_get_vectorsol,
 }
 
 /**
- * See \ref MMGS_Set_tensorSol function in \ref mmg3d/libmmg3d.h file.
+ * See \ref MMGS_Set_tensorSol function in \ref mmgs/libmmgs.h file.
  */
 FORTRAN_NAME(MMGS_SET_TENSORSOL,mmgs_set_tensorsol,
              (MMG5_pSol *met, double* m11,double *m12, double *m13,
@@ -329,7 +329,7 @@ FORTRAN_NAME(MMGS_SET_TENSORSOL,mmgs_set_tensorsol,
 }
 
 /**
- * See \ref MMGS_Get_tensorSol function in \ref mmg3d/libmmg3d.h file.
+ * See \ref MMGS_Get_tensorSol function in \ref mmgs/libmmgs.h file.
  */
 FORTRAN_NAME(MMGS_GET_TENSORSOL,mmgs_get_tensorsol,
              (MMG5_pSol *met, double* m11,double *m12, double *m13,
@@ -340,7 +340,7 @@ FORTRAN_NAME(MMGS_GET_TENSORSOL,mmgs_get_tensorsol,
 }
 
 /**
- * See \ref MMGS_Chk_meshData function in \ref mmg3d/libmmg3d.h file.
+ * See \ref MMGS_Chk_meshData function in \ref mmgs/libmmgs.h file.
  */
 FORTRAN_NAME(MMGS_CHK_MESHDATA,mmgs_chk_meshdata,
              (MMG5_pMesh *mesh,MMG5_pSol *met, int* retval),
@@ -350,7 +350,7 @@ FORTRAN_NAME(MMGS_CHK_MESHDATA,mmgs_chk_meshdata,
 }
 
 /**
- * See \ref MMGS_Set_iparameter function in \ref mmg3d/libmmg3d.h file.
+ * See \ref MMGS_Set_iparameter function in \ref mmgs/libmmgs.h file.
  */
 FORTRAN_NAME(MMGS_SET_IPARAMETER,mmgs_set_iparameter,
              (MMG5_pMesh *mesh, MMG5_pSol *sol, int *iparam, int *val, int* retval),
@@ -360,7 +360,7 @@ FORTRAN_NAME(MMGS_SET_IPARAMETER,mmgs_set_iparameter,
 }
 
 /**
- * See \ref MMGS_Get_iparameter function in \ref mmg3d/libmmg3d.h file.
+ * See \ref MMGS_Get_iparameter function in \ref mmgs/libmmgs.h file.
  */
 FORTRAN_NAME(MMGS_GET_IPARAMETER,mmgs_get_iparameter,
              (MMG5_pMesh *mesh, int *iparam, int* retval),
@@ -370,7 +370,7 @@ FORTRAN_NAME(MMGS_GET_IPARAMETER,mmgs_get_iparameter,
 }
 
 /**
- * See \ref MMGS_Set_dparameter function in \ref mmg3d/libmmg3d.h file.
+ * See \ref MMGS_Set_dparameter function in \ref mmgs/libmmgs.h file.
  */
 FORTRAN_NAME(MMGS_SET_DPARAMETER,mmgs_set_dparameter,
              (MMG5_pMesh *mesh, MMG5_pSol *sol, int *dparam, double *val, int* retval),
@@ -380,7 +380,7 @@ FORTRAN_NAME(MMGS_SET_DPARAMETER,mmgs_set_dparameter,
 }
 
 /**
- * See \ref MMGS_Set_localParameter function in \ref mmg3d/libmmg3d.h file.
+ * See \ref MMGS_Set_localParameter function in \ref mmgs/libmmgs.h file.
  */
 FORTRAN_NAME(MMGS_SET_LOCALPARAMETER,mmgs_set_localparameter,
              (MMG5_pMesh *mesh,MMG5_pSol *sol, int *typ, int *ref,
@@ -391,7 +391,7 @@ FORTRAN_NAME(MMGS_SET_LOCALPARAMETER,mmgs_set_localparameter,
 }
 
 /**
- * See \ref MMG5_Free_all function in \ref mmgs/libmmgs.h file.
+ * See \ref MMGS_Free_all function in \ref mmgs/libmmgs.h file.
  */
 FORTRAN_VARIADIC(MMGS_FREE_ALL,mmgs_free_all,
                  (enum MMG5_arg starter,...),
@@ -439,7 +439,7 @@ FORTRAN_VARIADIC(MMGS_FREE_NAMES,mmgs_free_names,
   )
 
 /**
- * See \ref MMGS_loadMesh function in \ref mmg3d/libmmg3d.h file.
+ * See \ref MMGS_loadMesh function in \ref mmgs/libmmgs.h file.
  */
 FORTRAN_NAME(MMGS_LOADMESH,mmgs_loadmesh,
              (MMG5_pMesh *mesh,char* meshin, int *strlen,int* retval),
@@ -459,7 +459,7 @@ FORTRAN_NAME(MMGS_LOADMESH,mmgs_loadmesh,
 }
 
 /**
- * See \ref MMGS_loadSol function in \ref mmg3d/libmmg3d.h file.
+ * See \ref MMGS_loadSol function in \ref mmgs/libmmgs.h file.
  */
 FORTRAN_NAME(MMGS_LOADSOL,mmgs_loadsol,
              (MMG5_pMesh *mesh,MMG5_pSol *met,char* meshin, int *strlen,int* retval),
@@ -498,7 +498,7 @@ FORTRAN_NAME(MMGS_SAVEMESH,mmgs_savemesh,
 }
 
 /**
- * See \ref MMGS_saveSol function in \ref mmg3d/libmmg3d.h file.
+ * See \ref MMGS_saveSol function in \ref mmgs/libmmgs.h file.
  */
 FORTRAN_NAME(MMGS_SAVESOL,mmgs_savesol,
              (MMG5_pMesh *mesh,MMG5_pSol *met,char *meshin,int *strlen,int* retval),

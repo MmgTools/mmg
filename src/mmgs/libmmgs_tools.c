@@ -1,7 +1,7 @@
 /* =============================================================================
 **  This file is part of the mmg software package for the tetrahedral
 **  mesh modification.
-**  Copyright (c) Inria - IMB (Université de Bordeaux) - LJLL (UPMC), 2004- .
+**  Copyright (c) Bx INP/Inria/UBordeaux/UPMC, 2004- .
 **
 **  mmg is free software: you can redistribute it and/or modify it
 **  under the terms of the GNU Lesser General Public License as published
@@ -22,15 +22,18 @@
 */
 
 /**
- * \file mmg3d/libmmg2d_tools_2d.c
- * \brief Tools functions for the mmg3d library.
- * \author Algiane Froehly (Inria / IMB, Université de Bordeaux)
+ * \file mmgs/libmmgs_tools.c
+ * \brief Tools functions for the mmgs library
+ * \author Charles Dapogny (UPMC)
+ * \author Cécile Dobrzynski (Bx INP/Inria/UBordeaux)
+ * \author Pascal Frey (UPMC)
+ * \author Algiane Froehly (Inria/UBordeaux)
  * \version 5
- * \date 01 2014
  * \copyright GNU Lesser General Public License.
- **/
+ * \todo Doxygen documentation
+ */
 
-#include "mmg2d.h"
+#include "mmgs.h"
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -39,29 +42,96 @@
  * Set function pointers depending if case is iso or aniso.
  *
  */
-void MMG2D_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
-  if ( met->size == 3 ) {
-    MMG2_length    = long_ani;
-    MMG2_caltri    = caltri_ani;
-    MMG2_caltri_in = caltri_ani_in;
-    MMG2_buckin    = buckin_ani;
-    MMG2_lissmet   = lissmet_ani;
-    MMG2_optlen    = optlen_ani;
-/*    interp     = interp_ani;
- */
+void MMGS_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
+  if ( met->size < 6 ) {
+    _MMG5_calelt  = _MMG5_caltri_iso;
+    _MMG5_defsiz  = _MMGS_defsiz_iso;
+    gradsiz = gradsiz_iso;
+    _MMG5_lenSurfEdg  = _MMG5_lenSurfEdg_iso;
+    intmet  = intmet_iso;
+    movintpt= movintpt_iso;
+    movridpt= movridpt_iso;
   }
   else {
-    MMG2_length     = long_iso;
-    MMG2_caltri     = caltri_iso;
-    MMG2_caltri_in  = caltri_iso_in;
-    MMG2_buckin     = buckin_iso;
-    MMG2_lissmet    = lissmet_iso;
-
-    MMG2_optlen     = optlen_iso;
-/*    interp     = interp_iso;
- */
+    _MMG5_calelt  = _MMG5_caltri_ani;
+    _MMG5_defsiz  = _MMGS_defsiz_ani;
+    gradsiz = gradsiz_ani;
+    _MMG5_lenSurfEdg  = _MMG5_lenSurfEdg_ani;
+    intmet  = intmet_ani;
+    movintpt= movintpt_ani;
+    movridpt= movridpt_ani;
   }
+}
 
+/**
+ * \param prog pointer toward the program name.
+ *
+ * Print help for mmgs options.
+ *
+ */
+void MMGS_usage(char *prog) {
+  _MMG5_mmgUsage(prog);
+  fprintf(stdout,"-A           enable anisotropy (without metric file).\n");
+
+  fprintf(stdout,"-nreg        normal regul.\n");
+#ifdef USE_SCOTCH
+  fprintf(stdout,"-rn [n]      Turn on or off the renumbering using SCOTCH [0/1] \n");
+#endif
+  fprintf(stdout,"\n\n");
+
+  exit(EXIT_FAILURE);
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \return 0 if fail, 1 if success.
+ *
+ * Print the default parameters values.
+ *
+ */
+void MMGS_defaultValues(MMG5_pMesh mesh) {
+
+  _MMG5_mmgDefaultValues(mesh);
+#ifdef USE_SCOTCH
+  fprintf(stdout,"SCOTCH renumbering                  : enabled\n");
+#else
+  fprintf(stdout,"SCOTCH renumbering                  : disabled\n");
+#endif
+  fprintf(stdout,"\n\n");
+
+  exit(EXIT_FAILURE);
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param info pointer toward the info structure.
+ * \return 1.
+ *
+ * Store the info structure in the mesh structure.
+ *
+ */
+int MMGS_stockOptions(MMG5_pMesh mesh, MMG5_Info *info) {
+
+  memcpy(&mesh->info,info,sizeof(MMG5_Info));
+  _MMGS_memOption(mesh);
+  if( mesh->info.mem > 0) {
+    if ( mesh->npmax < mesh->np || mesh->ntmax < mesh->nt ) {
+      return(0);
+    } else if(mesh->info.mem < 39)
+      return(0);
+  }
+  return(1);
+}
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param info pointer toward the info structure.
+ *
+ * Recover the info structure stored in the mesh structure.
+ *
+ */
+void MMGS_destockOptions(MMG5_pMesh mesh, MMG5_Info *info) {
+
+  memcpy(info,&mesh->info,sizeof(MMG5_Info));
   return;
 }
 
@@ -71,17 +141,17 @@ void MMG2D_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
  * \param kel triangle index.
  * \param listri pointer toward the table of the indices of the three adjacent
  * triangles of the elt \a kel (the index is 0 if there is no adjacent).
- * \return 1.
+ * \return 1 if success
  *
  * Find the indices of the 3 adjacent elements of triangle \a
- * kel. \f$listri[i] = 0\f$ if the \f$i^{th}\f$ face has no adjacent element
+ * kel. \f$listr[i] = 0\f$ if the \f$i^{th}\f$ face has no adjacent element
  * (so we are on a boundary face).
  *
  */
-int MMG2D_Get_adjaTri(MMG5_pMesh mesh, int kel, int listri[3]) {
+int MMGS_Get_adjaTri(MMG5_pMesh mesh, int kel, int listri[3]) {
 
   if ( ! mesh->adja ) {
-    if (! MMG2_hashel(mesh))
+    if (! _MMGS_hashTria(mesh))
       return(0);
   }
 
@@ -96,33 +166,8 @@ int MMG2D_Get_adjaTri(MMG5_pMesh mesh, int kel, int listri[3]) {
  * \brief Return adjacent elements of a triangle.
  * \param mesh pointer toward the mesh structure.
  * \param ip vertex index.
- * \param lispoi pointer toward an array of size MMG2D_LMAX that will contain
- * the indices of adjacent vertices to the vertex \a k.
- * \return 1 if success.
- *
- * Find the indices of the adjacent vertices of the vertex \a
- * ip.
- *
- */
-inline
-int MMG2D_Get_adjaVertices(MMG5_pMesh mesh, int ip, int lispoi[MMG2D_LMAX])
-{
-  int start;
-
-  if ( !mesh->tria ) return 0;
-
-  start=MMG2_findTria(mesh,ip);
-  if ( !start ) return 0;
-
-  return MMG2D_Get_adjaVerticesFast(mesh,ip,start,lispoi);
-}
-
-/**
- * \brief Return adjacent elements of a triangle.
- * \param mesh pointer toward the mesh structure.
- * \param ip vertex index.
  * \param start index of a triangle holding \a ip.
- * \param lispoi pointer toward an array of size MMG2D_LMAX that will contain
+ * \param lispoi pointer toward an array of size MMGS_LMAX that will contain
  * the indices of adjacent vertices to the vertex \a ip.
  * \return nbpoi the number of adjacent points if success, 0 if fail.
  *
@@ -131,7 +176,7 @@ int MMG2D_Get_adjaVertices(MMG5_pMesh mesh, int ip, int lispoi[MMG2D_LMAX])
  *
  */
 inline
-int MMG2D_Get_adjaVerticesFast(MMG5_pMesh mesh, int ip,int start, int lispoi[MMG2D_LMAX])
+int MMGS_Get_adjaVerticesFast(MMG5_pMesh mesh, int ip,int start, int lispoi[MMGS_LMAX])
 {
   MMG5_pTria pt;
   int k,prevk,nbpoi,iploc,i,i1,i2,*adja;
@@ -148,7 +193,7 @@ int MMG2D_Get_adjaVerticesFast(MMG5_pMesh mesh, int ip,int start, int lispoi[MMG
   i = iploc;
   nbpoi = 0;
   do {
-    if ( nbpoi == MMG2D_LMAX ) {
+    if ( nbpoi == MMGS_LMAX ) {
       fprintf(stdout,"  ## Warning: unable to compute adjacent vertices of the"
               " vertex %d:\nthe ball of point contain too many elements.\n",ip);
       return(0);
@@ -168,7 +213,7 @@ int MMG2D_Get_adjaVerticesFast(MMG5_pMesh mesh, int ip,int start, int lispoi[MMG
   if ( k > 0 ) return(nbpoi);
 
   /* store the last point of the boundary triangle */
-  if ( nbpoi == MMG2D_LMAX ) {
+  if ( nbpoi == MMGS_LMAX ) {
     fprintf(stdout,"  ## Warning: unable to compute adjacent vertices of the"
             " vertex %d:\nthe ball of point contain too many elements.\n",ip);
     return(0);
@@ -186,7 +231,7 @@ int MMG2D_Get_adjaVerticesFast(MMG5_pMesh mesh, int ip,int start, int lispoi[MMG
     k  = adja[i2] / 3;
     if ( k == 0 )  break;
 
-    if ( nbpoi == MMG2D_LMAX ) {
+    if ( nbpoi == MMGS_LMAX ) {
       fprintf(stdout,"  ## Warning: unable to compute adjacent vertices of the"
               " vertex %d:\nthe ball of point contain too many elements.\n",ip);
       return(0);
@@ -200,64 +245,4 @@ int MMG2D_Get_adjaVerticesFast(MMG5_pMesh mesh, int ip,int start, int lispoi[MMG
   while ( k );
 
   return nbpoi;
-}
-
-/**
- * \param mesh pointer toward the mesh structure
- *
- * Free the mesh elements (and the adjacency).
- *
- */
-void MMG2D_Free_Triangles(MMG5_pMesh mesh) {
-
-  if ( mesh->adja )
-    _MMG5_DEL_MEM(mesh,mesh->adja,(3*mesh->ntmax+5)*sizeof(int));
-
-  if ( mesh->tria )
-    _MMG5_DEL_MEM(mesh,mesh->tria,(mesh->ntmax+1)*sizeof(MMG5_Tria));
-
-  mesh->nt = 0;
-  mesh->nti = 0;
-  mesh->nenil = 0;
-
-  return;
-}
-
-/**
- * \param mesh pointer toward the mesh structure
- *
- * Free the mesh edges (and the associated xpoints).
- *
- */
-void MMG2D_Free_Edges(MMG5_pMesh mesh) {
-
-  if ( mesh->edge )
-    _MMG5_DEL_MEM(mesh,mesh->edge,(mesh->namax+1)*sizeof(MMG5_Edge));
-
-  if ( mesh->xpoint )
-    _MMG5_DEL_MEM(mesh,mesh->xpoint,(mesh->xpmax+1)*sizeof(MMG5_xPoint));
-
-  mesh->na = 0;
-  mesh->nai = 0;
-  mesh->nanil = 0;
-
-  mesh->xp = 0;
-
-  return;
-}
-
-/**
- * \param mesh pointer toward the mesh structure
- * \param sol pointer toward the solution structure
- *
- * Free the solution.
- *
- */
-void MMG2D_Free_Solutions(MMG5_pMesh mesh,MMG5_pSol sol) {
-
-  /* sol */
-  if ( sol && sol->m )
-    _MMG5_DEL_MEM(mesh,sol->m,(sol->size*(sol->npmax+1))*sizeof(double));
-
-  return;
 }

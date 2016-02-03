@@ -1,7 +1,7 @@
 /* =============================================================================
 **  This file is part of the mmg software package for the tetrahedral
 **  mesh modification.
-**  Copyright (c) Inria - IMB (Université de Bordeaux) - LJLL (UPMC), 2004- .
+**  Copyright (c) Bx INP/Inria/UBordeaux/UPMC, 2004- .
 **
 **  mmg is free software: you can redistribute it and/or modify it
 **  under the terms of the GNU Lesser General Public License as published
@@ -24,7 +24,7 @@
 /**
  * \file mmg3d/libmmg3d.h
  * \brief API headers for the mmg3d library
- * \author Algiane Froehly (Inria / IMB, Université de Bordeaux)
+ * \author Algiane Froehly (Inria/UBordeaux)
  * \version 5
  * \date 01 2014
  * \copyright GNU Lesser General Public License.
@@ -32,14 +32,14 @@
  * name and the opening brace (it creates errors under windows)
  * \warning Use the MMG3D_ prefix: MMG5_ prefix will became obsolete...
  *
- * \include mmg3d/example0/example0_a/main.c
- * \include mmg3d/example0/example0_b/main.c
- * \include mmg3d/example0_fortran/example0_a/main.F90
- * \include mmg3d/example0_fortran/example0_b/main.F90
- * \include mmg3d/example1/main.c
- * \include mmg3d/example2/main.c
- * \include mmg3d/example3/mmg3d.c
- * \include mmg3d/example4/main.c
+ * \include libexamples/mmg3d/adaptation_example0/example0_a/main.c
+ * \include libexamples/mmg3d/example0/adaptation_example0_b/main.c
+ * \include libexamples/mmg3d/adaptation_example0_fortran/example0_a/main.F90
+ * \include libexamples/mmg3d/adaptation_example0_fortran/example0_b/main.F90
+ * \include libexamples/mmg3d/adaptation_example1/main.c
+ * \include libexamples/mmg3d/adaptation_example2/main.c
+ * \include libexamples/mmg3d/IsosurfDiscretization_example0/main.c
+ * \include libexamples/mmg3d/LagrangianMotion_example0/main.c
  */
 
 #ifndef _MMG3DLIB_H
@@ -547,7 +547,7 @@ int MMG3D_Get_iparameter(MMG5_pMesh mesh, int iparam);
 int MMG3D_loadMesh(MMG5_pMesh mesh,char *filename);
 /**
  * \param mesh pointer toward the mesh structure.
- * \param gilename pointer toward the name of file.
+ * \param filename pointer toward the name of file.
 
  * \return 0 if failed, 1 otherwise.
  *
