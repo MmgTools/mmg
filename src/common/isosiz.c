@@ -1,7 +1,7 @@
 /* =============================================================================
 **  This file is part of the mmg software package for the tetrahedral
 **  mesh modification.
-**  Copyright (c) Inria - IMB (Université de Bordeaux) - LJLL (UPMC), 2004- .
+**  Copyright (c) Bx INP/Inria/UBordeaux/UPMC, 2004- .
 **
 **  mmg is distributed in the hope that it will be useful, but WITHOUT
 **  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -19,10 +19,10 @@
 /**
  * \file common/isosiz.c
  * \brief Fonctions for isotropic size map computation.
- * \author Charles Dapogny (LJLL, UPMC)
- * \author Cécile Dobrzynski (Inria / IMB, Université de Bordeaux)
- * \author Pascal Frey (LJLL, UPMC)
- * \author Algiane Froehly (Inria / IMB, Université de Bordeaux)
+ * \author Charles Dapogny (UPMC)
+ * \author Cécile Dobrzynski (Bx INP/Inria/UBordeaux)
+ * \author Pascal Frey (UPMC)
+ * \author Algiane Froehly (Inria/UBordeaux)
  * \version 5
  * \copyright GNU Lesser General Public License.
  */

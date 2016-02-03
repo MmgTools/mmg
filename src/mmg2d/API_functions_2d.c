@@ -1,7 +1,7 @@
 /* =============================================================================
 **  This file is part of the mmg software package for the tetrahedral
 **  mesh modification.
-**  Copyright (c) Inria - IMB (Université de Bordeaux) - LJLL (UPMC), 2004- .
+**  Copyright (c) Bx INP/Inria/UBordeaux/UPMC, 2004- .
 **
 **  mmg is free software: you can redistribute it and/or modify it
 **  under the terms of the GNU Lesser General Public License as published
@@ -24,7 +24,7 @@
 /**
  * \file mmg2d/API_functions_2d.c
  * \brief C API functions definitions for MMG2D library.
- * \author Algiane Froehly (Inria / IMB, Université de Bordeaux)
+ * \author Algiane Froehly (Bx INP/Inria/UBordeaux)
  * \version 5
  * \date 01 2014
  * \copyright GNU Lesser General Public License.

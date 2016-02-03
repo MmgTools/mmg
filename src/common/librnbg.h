@@ -1,7 +1,7 @@
 /* =============================================================================
 **  This file is part of the mmg software package for the tetrahedral
 **  mesh modification.
-**  Copyright (c) Inria - IMB (Université de Bordeaux) - LJLL (UPMC), 2004- .
+**  Copyright (c) Bx INP/Inria/UBordeaux/UPMC, 2004- .
 **
 **  mmg is free software: you can redistribute it and/or modify it
 **  under the terms of the GNU Lesser General Public License as published
@@ -23,7 +23,7 @@
 /**
  * \file common/librnbg.h
  * \brief header file for the librnbg.c librnbg_s.c librnbg_3d.c files
- * \author Cedric Lachat (Inria / Labri, Université de Bordeaux)
+ * \author Cedric Lachat  (Inria/UBordeaux)
  * \version 5
  * \date 2013
  * \copyright GNU Lesser General Public License.

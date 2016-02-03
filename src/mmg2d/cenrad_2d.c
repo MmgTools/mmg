@@ -1,7 +1,7 @@
 /* =============================================================================
 **  This file is part of the mmg software package for the tetrahedral
 **  mesh modification.
-**  Copyright (c) Inria - IMB (Université de Bordeaux) - LJLL (UPMC), 2004- .
+**  Copyright (c) Bx INP/Inria/UBordeaux/UPMC, 2004- .
 **
 **  mmg is free software: you can redistribute it and/or modify it
 **  under the terms of the GNU Lesser General Public License as published
@@ -21,9 +21,9 @@
 ** =============================================================================
 */
 /**
- * \file mmg2d/cenrad.c
+ * \file mmg2d/cenrad_2d.c
  * \brief Compute radius and center of circumscribing circle to the element.
- * \author Cécile Dobrzynski (Inria / IMB, Université de Bordeaux)
+ * \author Cécile Dobrzynski (Bx INP/Inria/UBordeaux)
  * \date 2015
  * \copyright GNU Lesser General Public License.
  */

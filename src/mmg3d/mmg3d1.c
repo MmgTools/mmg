@@ -1,7 +1,7 @@
 /* =============================================================================
 **  This file is part of the mmg software package for the tetrahedral
 **  mesh modification.
-**  Copyright (c) Inria - IMB (Université de Bordeaux) - LJLL (UPMC), 2004- .
+**  Copyright (c) Bx INP/Inria/UBordeaux/UPMC, 2004- .
 **
 **  mmg is free software: you can redistribute it and/or modify it
 **  under the terms of the GNU Lesser General Public License as published
@@ -22,12 +22,12 @@
 */
 
 /**
- * \file mmg3d/mmg3d1_3d.c
+ * \file mmg3d/mmg3d1.c
  * \brief Perform volume and surface mesh adaptation with pattern splitting.
- * \author Charles Dapogny (LJLL, UPMC)
- * \author Cécile Dobrzynski (Inria / IMB, Université de Bordeaux)
- * \author Pascal Frey (LJLL, UPMC)
- * \author Algiane Froehly (Inria / IMB, Université de Bordeaux)
+ * \author Charles Dapogny (UPMC)
+ * \author Cécile Dobrzynski (Bx INP/Inria/UBordeaux)
+ * \author Pascal Frey (UPMC)
+ * \author Algiane Froehly (Inria/UBordeaux)
  * \version 5
  * \copyright GNU Lesser General Public License.
  *
