@@ -45,7 +45,7 @@ int MMG2_tassage(MMG5_pMesh mesh,MMG5_pSol sol) {
   MMG5_pEdge         ped;
   MMG5_pTria         pt,ptnew;
   MMG5_pPoint        ppt,pptnew;
-  int                np,nt,k,nbl,isol,isolnew,i,memWarn,num,jel;
+  int                np,nt,k,nbl,isol,isolnew,i,memWarn,num;
   int                iadr,iadrnew,iadrv,*adjav,*adja,*adjanew,voy;
 
   /* compact vertices */

@@ -23,7 +23,7 @@ int main(int argc,char *argv[]) {
   MMG5_pSol       mmgSol;
   char            *pwd,*filename;
 
-  int             ier,k;
+  int             ier;
 
   fprintf(stdout,"  -- TEST MMG2DMESH \n");
 
