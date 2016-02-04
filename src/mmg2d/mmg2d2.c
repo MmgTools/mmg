@@ -161,7 +161,6 @@ int MMG2_insertpointdelone(MMG5_pMesh mesh,MMG5_pSol sol) {
   return(1);
 }
 
-#warning unused?? ask Cecile
 /*insertion of the list of points inside the mesh*/
 /*return 0 if pbs occur*/
 int MMG2_insertpoint(MMG5_pMesh mesh,MMG5_pSol sol) {

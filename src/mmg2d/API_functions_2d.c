@@ -215,10 +215,6 @@ int MMG2D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
     break;
   case MMG2D_IPARAM_iso :
     mesh->info.iso      = val;
-//#warning : iso case
-    // if ( mesh->info.iso )
-    //if ( mesh->nt && !MMG5_skipIso(mesh) )
-    //  exit(EXIT_FAILURE);
     break;
   case MMG2D_IPARAM_lag :
     if ( val < 0 || val > 2 )

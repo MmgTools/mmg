@@ -906,7 +906,6 @@ int MMG2D_saveMesh(MMG5_pMesh mesh,char *filename) {
       ppt = &mesh->point[k];
       if ( M_VOK(ppt) ) {
         if ( mesh->info.nosurf && ( ppt->tag & M_NOSURF )) continue;
-#warning ask Cecile
         if ((ppt->tag & M_REQUIRED)
             /*&& ( (ppt->tag & M_BDRY) || (ppt->tag & M_SD) ) */ ) {
           if(!bin)
