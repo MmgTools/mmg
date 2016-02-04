@@ -722,8 +722,7 @@ int MMG3D_saveMesh(MMG5_pMesh mesh, char *filename) {
   MMG5_pTetra  pt;
   MMG5_pTria   ptt;
   MMG5_xPoint *pxp;
-  MMG5_hgeom  *ph;
-  int          k,i,na,nc,np,ne,nn,nr,nre,nedreq,ntreq,nt,nereq;
+  int          k,na,nc,np,ne,nn,nr,nre,nedreq,ntreq,nt,nereq;
   int          bin,binch,bpos;
   char         data[128],chaine[128],*ptr;
 

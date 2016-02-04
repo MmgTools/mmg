@@ -620,14 +620,12 @@ int MMGS_saveMesh(MMG5_pMesh mesh, char* filename) {
   FILE         *inm;
   MMG5_pPoint  ppt;
   MMG5_pTria   pt;
-  MMG5_pEdge   edge;
   MMG5_pxPoint go;
-  int          k,jel,np,nt,nc,ng,nn,nr,nre;
+  int          k,np,nt,nc,ng,nn,nr,nre;
   int          bin,binch,bpos;
   // int          outm;
-  char         data[128],*ptr,chaine[128],i,i1,i2;
+  char         data[128],*ptr,chaine[128];
 
-  edge = 0;
   mesh->ver = 2;
 
   bin = 0;

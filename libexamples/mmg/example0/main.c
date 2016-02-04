@@ -51,7 +51,7 @@
 int main(int argc,char *argv[]) {
   MMG5_pMesh      mmgMesh;
   MMG5_pSol       mmgSol;
-  int             ier,k;
+  int             ier;
   char            *pwd,*filename,*filename_os,*filename_o3d;
 
   fprintf(stdout,"  -- TEST MMGLIB \n");
