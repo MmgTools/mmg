@@ -1159,7 +1159,7 @@ _MMG5_anatets(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
         pxp = &mesh->xpoint[ppt->xp];
 
         dd = no[0]*pxp->n1[0]+no[1]*pxp->n1[1]+no[2]*pxp->n1[2];
-        if ( dd > 1.0-_MMG5_EPS ) printf("warning angle ??\n");//continue;
+        if ( dd > 1.0-_MMG5_EPS ) continue;
 
         memcpy(pxp->n2,no,3*sizeof(double));
         /* a computation of the tangent with respect to these two normals is possible */
