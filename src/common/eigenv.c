@@ -1,7 +1,7 @@
 /* =============================================================================
 **  This file is part of the mmg software package for the tetrahedral
 **  mesh modification.
-**  Copyright (c) Inria - IMB (Université de Bordeaux) - LJLL (UPMC), 2004- .
+**  Copyright (c) Bx INP/Inria/UBordeaux/UPMC, 2004- .
 **
 **  mmg is free software: you can redistribute it and/or modify it
 **  under the terms of the GNU Lesser General Public License as published
@@ -24,8 +24,8 @@
 /**
  * \file common/eigenv.c
  * \brief Find eigenvalues and eigenvectors of matrix.
- * \author Cécile Dobrzynski (Inria / IMB, Université de Bordeaux)
- * \author Pascal Frey (LJLL, UPMC)
+ * \author Cécile Dobrzynski (Bx INP/Inria/UBordeaux)
+ * \author Pascal Frey (UPMC)
  * \version 5
  * \copyright GNU Lesser General Public License.
  *
@@ -246,7 +246,6 @@ static int newton3(double p[4],double x[3]) {
 
   return(n);
 }
-
 
 /**
  * \brief Find eigenvalues and vectors of a 3x3 matrix.

@@ -1,7 +1,7 @@
 /* =============================================================================
 **  This file is part of the mmg software package for the tetrahedral
 **  mesh modification.
-**  Copyright (c) Inria - IMB (Université de Bordeaux) - LJLL (UPMC), 2004- .
+**  Copyright (c) Bx INP/Inria/UBordeaux/UPMC, 2004- .
 **
 **  mmg is free software: you can redistribute it and/or modify it
 **  under the terms of the GNU Lesser General Public License as published
@@ -24,22 +24,22 @@
 /**
  * \file common/scalem.c
  * \brief Scale and unscale mesh and solution.
- * \author Charles Dapogny (LJLL, UPMC)
- * \author Cécile Dobrzynski (Inria / IMB, Université de Bordeaux)
- * \author Pascal Frey (LJLL, UPMC)
- * \author Algiane Froehly (Inria / IMB, Université de Bordeaux)
+ * \author Charles Dapogny (UPMC)
+ * \author Cécile Dobrzynski (Bx INP/Inria/UBordeaux)
+ * \author Pascal Frey (UPMC)
+ * \author Algiane Froehly (Inria/UBordeaux)
  * \version 5
  * \copyright GNU Lesser General Public License.
  */
 
-#include "mmg.h"
+#include "mmgcommon.h"
 
 /**
  * \param mesh pointer toward the mesh structure.
  * \return 1 if success, 0 if fail (computed bounding box too small).
  *
  * Compute the mesh bounding box and fill the \a min, \a max and \a delta fields
- * of the \ref _MMG5_info structure.
+ * of the \a _MMG5_info structure.
  *
  */
 int _MMG5_boundingBox(MMG5_pMesh mesh) {
@@ -85,8 +85,10 @@ int _MMG5_boundingBox(MMG5_pMesh mesh) {
 int _MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pPoint    ppt;
   double         dd,d1;
-  int            k,sethmin,sethmax;
+  int            k,i,sethmin,sethmax;
   MMG5_pPar      par;
+  double         *m;
+  double         lambda[3],v[3][3];
 
 
   /* compute bounding box */
@@ -140,13 +142,36 @@ int _MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met) {
     }
     else if ( met->size==3 ){
       for (k=1; k<=mesh->np; k++) {
-        met->m[3*(k-1)+1] *= dd;
-        met->m[3*(k-1)+2] *= dd;
-        met->m[3*(k-1)+3] *= dd;
+        met->m[3*k]   *= dd;
+        met->m[3*k+1] *= dd;
+        met->m[3*k+2] *= dd;
       }
     } else { //met->size==6
       d1 = 1.0 / (dd*dd);
-      for (k=1; k<=6*mesh->np; k++)  met->m[k] *= d1;
+      for (k=1; k<mesh->np+1; k++) {
+        for ( i=0; i<met->size; ++i ) {
+          met->m[6*k+i] *= d1;
+        }
+
+        m    = &met->m[6*k];
+        /*calcul du log de M*/
+        if ( !_MMG5_eigenv(1,m,lambda,v) ) {
+          printf("  ## ERROR: WRONG METRIC AT POINT %d -- \n",k);
+          return(0);
+        }
+        for (i=0; i<3; i++) {
+          if(lambda[i]<=0) {
+            printf("  ## ERROR: WRONG METRIC AT POINT %d -- eigenvalue :"
+                   " %e %e %e -- det %e\n",k,lambda[0],lambda[1],lambda[2],
+                   m[0]*(m[3]*m[5]-m[4]*m[4])-m[1]*(m[1]*m[5]-m[2]*m[4])+
+                   m[2]*(m[1]*m[4]-m[2]*m[3]));
+            printf("WRONG METRIC AT POINT %d -- metric %e %e %e %e %e %e\n",
+                   k,m[0],m[1],m[2],m[3],m[4],m[5]);
+            return(0);
+          }
+          lambda[i] = log(lambda[i]);
+        }
+      }
     }
   }
 
@@ -192,7 +217,7 @@ int _MMG5_unscaleMesh(MMG5_pMesh mesh,MMG5_pSol met) {
       for (k=1; k<=mesh->np; k++) {
         ppt = &mesh->point[k];
         if ( !MG_VOK(ppt) )  continue;
-        for (i=0; i<6; i++)  met->m[6*(k)+1+i] *= dd;
+        for (i=0; i<6; i++)  met->m[6*k+i] *= dd;
       }
     }
     else {
@@ -211,6 +236,8 @@ int _MMG5_unscaleMesh(MMG5_pMesh mesh,MMG5_pSol met) {
   /* normalize local parameters */
   for (k=0; k<mesh->info.npar; k++) {
     par = &mesh->info.par[k];
+    par->hmin  *= dd;
+    par->hmax  *= dd;
     par->hausd *= dd;
   }
 

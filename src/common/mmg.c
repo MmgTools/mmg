@@ -1,7 +1,7 @@
 /* =============================================================================
 **  This file is part of the mmg software package for the tetrahedral
 **  mesh modification.
-**  Copyright (c) Inria - IMB (Université de Bordeaux) - LJLL (UPMC), 2004- .
+**  Copyright (c) Bx INP/Inria/UBordeaux/UPMC, 2004- .
 **
 **  mmg is free software: you can redistribute it and/or modify it
 **  under the terms of the GNU Lesser General Public License as published
@@ -24,16 +24,16 @@
 /**
  * \file common/mmg.c
  * \brief Common part for functions used in mmgs.c and mmg3d.c files.
- * \author Charles Dapogny (LJLL, UPMC)
- * \author Cécile Dobrzynski (Inria / IMB, Université de Bordeaux)
- * \author Pascal Frey (LJLL, UPMC)
- * \author Algiane Froehly (Inria / IMB, Université de Bordeaux)
+ * \author Charles Dapogny (UPMC)
+ * \author Cécile Dobrzynski (Bx INP/Inria/UBordeaux)
+ * \author Pascal Frey (UPMC)
+ * \author Algiane Froehly (Inria/UBordeaux)
  * \version 5
  * \date 04 2015
  * \copyright GNU Lesser General Public License.
  **/
 
-#include "mmg.h"
+#include "mmgcommon.h"
 
 /**
  * \param *prog pointer toward the program name.
@@ -88,8 +88,8 @@ void _MMG5_mmgDefaultValues(MMG5_pMesh mesh) {
     /* default value = 800 Mo */
     memMax = _MMG5_MEMMAX;
   }
-  fprintf(stdout,"maximal memory size       (-m)      : %lld MBytes\n",
-          memMax);
+  fprintf(stdout,"maximal memory size       (-m)      : %ld MBytes\n",
+          _MMG5_safeLL2LCast(memMax));
 
 
   fprintf(stdout,"\n**  Parameters\n");

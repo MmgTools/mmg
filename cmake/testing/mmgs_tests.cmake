@@ -1,7 +1,7 @@
 ## =============================================================================
 ##  This file is part of the Mmg software package for the tetrahedral
 ##  mesh modification.
-##  Copyright (c) Inria - IMB (Université de Bordeaux) - LJLL (UPMC), 2004- .
+##**  Copyright (c) Bx INP/Inria/UBordeaux/UPMC, 2004- .
 ##
 ##  Mmg is free software: you can redistribute it and/or modify it
 ##  under the terms of the GNU Lesser General Public License as published
@@ -28,17 +28,17 @@
 
 # Simple tests: must already pass
 ADD_TEST(NAME SimpleTeapot
-  COMMAND ${EXECUT_MMGS} -v 6 -d
+  COMMAND ${EXECUT_MMGS}
   ${MMGS_CI_TESTS}/Teapot/teapot
   -out ${MMGS_CI_TESTS}/Teapot/teapot.d.meshb)
 
 ADD_TEST(NAME CubeAni
-  COMMAND ${EXECUT_MMGS} -v 6 -d
+  COMMAND ${EXECUT_MMGS}
   ${MMGS_CI_TESTS}/CubeAni/cube
   -out ${MMGS_CI_TESTS}/CubeAni/cube.d.meshb)
 
 ADD_TEST(NAME SphereAni
-  COMMAND ${EXECUT_MMGS} -v 6 -d
+  COMMAND ${EXECUT_MMGS}
   ${MMGS_CI_TESTS}/SphereAni/sphere
   -out ${MMGS_CI_TESTS}/SphereAni/sphere.d.meshb)
 
@@ -55,7 +55,7 @@ ADD_TEST(NAME SphereAni
 #####
 ###############################################################################
 ADD_TEST(NAME Rhino_M
-  COMMAND ${EXECUT_MMGS}
+  COMMAND ${EXECUT_MMGS} -v 5
   ${MMGS_CI_TESTS}/Rhino_M/rhino -hausd 1
   -out ${MMGS_CI_TESTS}/Rhino_M/rhino.d.meshb)
 
@@ -65,7 +65,7 @@ ADD_TEST(NAME Rhino_M
 #####
 ###############################################################################
 ADD_TEST(NAME Cow_NM_hausd10
-  COMMAND ${EXECUT_MMGS}
+  COMMAND ${EXECUT_MMGS} -v 5
   ${MMGS_CI_TESTS}/Cow_NM/cow -hausd 10
   -out ${MMGS_CI_TESTS}/Cow_NM/cow.d.meshb)
 
@@ -76,11 +76,11 @@ ADD_TEST(NAME Cow_NM_hausd10
 #####
 ###############################################################################
 ADD_TEST(NAME Car_NM
-  COMMAND ${EXECUT_MMGS}
+  COMMAND ${EXECUT_MMGS} -v 5
   ${MMGS_CI_TESTS}/Car_NM/car
   -out ${MMGS_CI_TESTS}/Car_NM/car.d.meshb)
 
 ADD_TEST(NAME Cow_NM_hausd20
-  COMMAND ${EXECUT_MMGS}
+  COMMAND ${EXECUT_MMGS} -v 5
   ${MMGS_CI_TESTS}/Cow_NM/cow -hausd 20
   -out ${MMGS_CI_TESTS}/Cow_NM/cow.d.meshb)

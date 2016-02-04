@@ -6,14 +6,14 @@
 #
 ###############################################################################
 #
-#   A script that converts <libmmg3d.h> file into a Fortran include file.
+#   A script that converts <libmmg*.h> file into a Fortran include file.
 #
 #   Usage:
-#    > ./genfort.pl -f libmmg3d.h
-#    >    converts the libmmg3d.h into a fortran header.
+#    > ./genfort.pl -f libmmg*.h
+#    >    converts the libmmg*.h into a fortran header.
 #    >     -h          Shows this help
 #    >     -r <size>   Defines REAL kind (4 or 8 usually)
-#    >     -s <size>   Defines MMG3D_INT  kind (4 or 8 usually)
+#    >     -s <size>   Defines MMG_INT  kind (4 or 8 usually)
 #
 #   Authors:
 #     Xavier Lacoste - lacoste@labri.fr
@@ -31,10 +31,10 @@ use Getopt::Std;
 #     Kind of the reals
 #
 #   integer: int
-#     Kind of the MMG3D_INT
+#     Kind of the MMG_INT
 #
 #   string: fichier
-#     Path to the <libmmg3d.h> file
+#     Path to the <libmmg*.h> file
 #
 #   string: format
 #     Format to print PARAMETERs.
@@ -44,8 +44,9 @@ use Getopt::Std;
 my $real     = 0;
 my $int      = 0;
 my $fichier;
-#my $format = "MMG3D_INTEGER, PARAMETER :: %-30s = %d";
+#my $format = "MMG_INTEGER, PARAMETER :: %-30s = %d";
 my $format = "#define %-30s %d";
+my $formatbyval = "#define %-30s \%val(%d)";
 my %opts;
 
 ###############################################################################
@@ -58,8 +59,8 @@ my %opts;
 #
 sub Usage {
 
-    print "./genfort.pl -f libmmg3d.h\n";
-    print "  converts the file libmmg3d.h into a fortran header.\n";
+    print "./genfort.pl -f libmmg*.h\n";
+    print "  converts the file libmmg*.h into a fortran header.\n";
     print "   -h          Shows this help\n";
     print "   -r <size>   Defines COEF/REAL kind (4 or 8 usually)\n";
     print "   -s <size>   Defines INT kind (4 or 8 usually)\n";
@@ -88,11 +89,11 @@ sub printTab # ($chaine, $tabcount, $comm)
     {
         if ($int != 0)
         {
-            $chaine =~ s/MMG3D_INTEGER,/INTEGER(KIND=$int),/g;
+            $chaine =~ s/MMG5_INTEGER,/INTEGER(KIND=$int),/g;
         }
         else
         {
-            $chaine =~ s/MMG3D_INTEGER,/INTEGER,/g;
+            $chaine =~ s/MMG5_INTEGER,/INTEGER,/g;
         }
         if ($real != 0)
         {
@@ -116,13 +117,14 @@ sub printTab # ($chaine, $tabcount, $comm)
 #
 # Main function.
 #
-# Converts the header <libmmg3d.h> file into a Fortran include.
+# Converts the header <libmmg*.h> file into a Fortran include.
 #
 sub Convert {
 
     my $startcom  = 0;
     my $startenum = 0;
     my $countenum = 0;
+    my $byvalue   = 0;
     my $chaine;
     my $tabcount = 0;
     my $interfaceprinted = 0;
@@ -151,11 +153,21 @@ sub Convert {
                         printTab( $chaine, $tabcount, 1);
                     }
                 }
+                elsif($line =~ /^\s*enum MMG5_arg/)
+                {
+                    # We start an enum and we want fortran to pass directly its
+                    # value and not its reference.
+                    $startenum = 1;
+                    $countenum = 0;
+                    $byvalue = 1;
+                    #$countenum = $countenum + 1 if (/PARAM/);
+                }
                 elsif($line =~ /^\s*enum/)
                 {
                     # We start an enum
                     $startenum = 1;
                     $countenum = 0;
+                    $byvalue = 0;
                     #$countenum = $countenum + 1 if (/PARAM/);
                 }
                 elsif ( $line =~ /^\s*$/ )
@@ -169,6 +181,24 @@ sub Convert {
                     {
                         #print "\#ifndef \_MMG3DLIBF\_H\n";
                         #print "\#define \_MMG3DLIBF\_H\n\n";
+                        #$startdef = 1;
+                    }
+                    elsif ($line =~ /\_MMG2DLIB\_H/ )
+                    {
+                        #print "\#ifndef \_MMG2DLIBF\_H\n";
+                        #print "\#define \_MMG2DLIBF\_H\n\n";
+                        #$startdef = 1;
+                    }
+                    elsif ($line =~ /\_MMGSLIB\_H/ )
+                    {
+                        #print "\#ifndef \_MMGSLIBF\_H\n";
+                        #print "\#define \_MMGSLIBF\_H\n\n";
+                        #$startdef = 1;
+                    }
+                   elsif ($line =~ /\_MMGLIB\_H/ )
+                    {
+                        #print "\#ifndef \_MMGLIBF\_H\n";
+                        #print "\#define \_MMGLIBF\_H\n\n";
                         #$startdef = 1;
                     }
                     else
@@ -223,12 +253,26 @@ sub Convert {
 
                     if ( $key =~ /(.*)(\/\*.*\*\/)/ )
                     {
-                        $chaine = sprintf($format, $1, $countenum);
+                        if ( $byvalue ) {
+                            # Fortran code must pass an value and not a
+                            # reference over a value
+                            $chaine = sprintf($formatbyval, $1,$countenum);
+                        }
+                        else {
+                            $chaine = sprintf($format, $1, $countenum);
+                        }
                         $chaine = "$2\n$chaine\n";
                     }
                     else
                     {
-                        $chaine = sprintf($format, $key, $countenum);
+                        if ( 0 && $byvalue ) {
+                            # Fortran code must pass an value and not a
+                            # reference over a value
+                            $chaine = sprintf($formatbyval, $key, $countenum,);
+                        }
+                        else {
+                            $chaine = sprintf($format, $key, $countenum);
+                        }
                         $chaine = "$chaine\n";
                     }
                     printTab($chaine,$tabcount, 0);
@@ -282,16 +326,16 @@ sub Convert {
                     $chaine2 .= "!   Type kinds\n";
                     $chaine2 .= "!\n";
                     $chaine2 .= "!   Contains:\n";
-                    $chaine2 .= "!     MMG3D_REAL_KIND - Kind to use for REAL\n";
-                    $chaine2 .= "!     MMG3D_INT_KIND  - Kind to use for INT\n";
+                    $chaine2 .= "!     MMG5_REAL_KIND - Kind to use for REAL\n";
+                    $chaine2 .= "!     MMG5_INT_KIND  - Kind to use for INT\n";
                     $chaine2 .= "!\n";
                     if ($real != 0)
                     {
-                        $chaine2 .= "INTEGER, PARAMETER :: MMG3D_REAL_KIND                = $real\n";
+                        $chaine2 .= "INTEGER, PARAMETER :: MMG5_REAL_KIND                = $real\n";
                     }
                     if ($int != 0)
                     {
-                        $chaine2 .= "INTEGER, PARAMETER :: MMG3D_INT_KIND                = $int\n";
+                        $chaine2 .= "INTEGER, PARAMETER :: MMG5_INT_KIND                = $int\n";
                     }
                     $tabcount --;
                     printTab($chaine2, $tabcount, 0);

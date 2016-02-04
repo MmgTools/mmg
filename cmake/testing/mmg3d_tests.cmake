@@ -1,7 +1,7 @@
 ## =============================================================================
 ##  This file is part of the mmg software package for the tetrahedral
 ##  mesh modification.
-##  Copyright (c) Inria - IMB (Université de Bordeaux) - LJLL (UPMC), 2004- .
+##**  Copyright (c) Bx INP/Inria/UBordeaux/UPMC, 2004- .
 ##
 ##  mmg is free software: you can redistribute it and/or modify it
 ##  under the terms of the GNU Lesser General Public License as published
@@ -28,7 +28,7 @@
 
 # Simple test: must already pass
 ADD_TEST(NAME SimpleCube
-  COMMAND ${EXECUT_MMG3D} -v 6 -d
+  COMMAND ${EXECUT_MMG3D}
   ${MMG3D_CI_TESTS}/Cube/cube
   -out ${MMG3D_CI_TESTS}/Cube/cube.o.meshb)
 
@@ -43,14 +43,14 @@ FOREACH(EXEC ${LISTEXEC_MMG3D})
   ADD_TEST(NAME LeakCheck_AbnormalEnd3_${EXEC}
     COMMAND ${EXEC} -v 5
     ${MMG3D_CI_TESTS}/LeakCheck_AbnormalEnd3/d -sol
-    ${MMG3D_CI_TESTS}/LeakCheck_AbnormalEnd3/dsol.sol -ls 2
+    ${MMG3D_CI_TESTS}/LeakCheck_AbnormalEnd3/dsol.sol -ls
     -out ${MMG3D_CI_TESTS}/LeakCheck_AbnormalEnd3/d.o.meshb)
   SET(passRegex "## ERROR: WRONG DATA TYPE OR WRONG SOLUTION NUMBER")
   SET_PROPERTY(TEST LeakCheck_AbnormalEnd3_${EXEC}
     PROPERTY PASS_REGULAR_EXPRESSION "${passRegex}")
   #####
   ADD_TEST(NAME LeakCheck_optLevelSet_${EXEC}
-    COMMAND ${EXEC} -v 5 -ls 0 -hgrad 1.5
+    COMMAND ${EXEC} -v 5  -ls -hgrad 1.5
     ${MMG3D_CI_TESTS}/LeakCheck_optLevelSet/rect03d
     -out ${MMG3D_CI_TESTS}/LeakCheck_optLevelSet/rect03d.o.meshb)
 
@@ -62,7 +62,7 @@ FOREACH(EXEC ${LISTEXEC_MMG3D})
   ###############################################################################
   #####
   ADD_TEST(NAME ChkBdry_optls_test4_${EXEC}
-    COMMAND ${EXEC} -v 5 -ls -hgrad 1.5
+    COMMAND ${EXEC} -v 5  -ls -hgrad 1.5
     -in ${MMG3D_CI_TESTS}/ChkBdry_optls_test4/test4
     -sol ${MMG3D_CI_TESTS}/ChkBdry_optls_test4/test4.sol
     -out ${MMG3D_CI_TESTS}/ChkBdry_optls_test4/test4.o.meshb)
@@ -75,35 +75,42 @@ FOREACH(EXEC ${LISTEXEC_MMG3D})
     -out ${MMG3D_CI_TESTS}/ChkBdry_optls_temp/temp.o.meshb)
   ####
   ADD_TEST(NAME ChkBdry_optls_temp2_${EXEC}
-    COMMAND ${EXEC} -v 5 -ls -hmin 5 -hmax 6
+    COMMAND ${EXEC} -v 5  -ls -hmin 5 -hmax 6
     -nr -hausd 0.5 -hgrad 1.2
     -in ${MMG3D_CI_TESTS}/ChkBdry_optls_temp/temp
     -sol ${MMG3D_CI_TESTS}/ChkBdry_optls_temp/temp.sol
     -out ${MMG3D_CI_TESTS}/ChkBdry_optls_temp/temp.o.meshb)
   #####
   ADD_TEST(NAME ChkBdry_cube_${EXEC}
-    COMMAND ${EXEC}
+    COMMAND ${EXEC} -v 5
     ${MMG3D_CI_TESTS}/ChkBdry_cube/cube)
   #####
   ADD_TEST(NAME ChkBdry_multidomCube_${EXEC}
-    COMMAND ${EXEC} -hmax 0.1
+    COMMAND ${EXEC} -v 5 -hmax 0.1
     ${MMG3D_CI_TESTS}/ChkBdry_multidomCube/c)
   #####
   ADD_TEST(NAME ChkBdry_multidomCube2_${EXEC}
-    COMMAND ${EXEC} -hmax 0.1
+    COMMAND ${EXEC} -v 5 -hmax 0.1
     ${MMG3D_CI_TESTS}/ChkBdry_multidomCube2/c)
   #####
   ADD_TEST(NAME ChkBdry_multidomCube3_${EXEC}
-    COMMAND ${EXEC} -hmax 0.1
+    COMMAND ${EXEC} -v 5 -hmax 0.1
     ${MMG3D_CI_TESTS}/ChkBdry_multidomCube3/c)
-  #####
-  ADD_TEST(NAME HausdLoc_2Spheres${EXEC}
-    COMMAND ${EXEC} -hgrad 2
-    ${MMG3D_CI_TESTS}/HausdLoc_2Spheres/2spheres
-    ${MMG3D_CI_TESTS}/HausdLoc_2Spheres/2spheres.o.meshb
-    -hgrad 2
-    )
 
+  ###############################################################################
+  #####
+  #####         Check Lagrangian motion option
+  #####
+  ###############################################################################
+  #####
+  IF ( USE_SUSCELAS )
+    ADD_TEST(NAME LagMotion1_tinyBoxt_${EXEC}
+      COMMAND ${EXEC} -v 5  -lag 1
+      -in ${MMG3D_CI_TESTS}/LagMotion1_tinyBoxt/tinyBoxt
+      -sol ${MMG3D_CI_TESTS}/LagMotion1_tinyBoxt/tinyBoxt.sol
+      -out ${MMG3D_CI_TESTS}/LagMotion1_tinyBoxt/tinyBoxt.o.meshb
+      )
+  ENDIF()
 
 ENDFOREACH(EXEC)
 
@@ -320,13 +327,13 @@ IF ( LONG_TESTS )
 
   # Test the Ls option
   ADD_TEST(NAME OptLs_cube303d_hminMax_hgrad1.2_hausd0.005
-    COMMAND ${EXECUT_MMG3D} -ls
+    COMMAND ${EXECUT_MMG3D} -v 5 -ls
     ${MMG3D_CI_TESTS}/OptLs_cube303d_hminMax_hgrad1.2_hausd0.005/cube303d
     -sol ${MMG3D_CI_TESTS}/OptLs_cube303d_hminMax_hgrad1.2_hausd0.005/cube303d.sol
     -hausd 0.005 -nr -hgrad 1.2 -hmin 0.001 -hmax 0.1
     ${MMG3D_CI_TESTS}/OptLs_cube303d_hminMax_hgrad1.2_hausd0.005/cube303d.o.meshb)
   ADD_TEST(NAME OptLs_temp_hminMax_hgrad1.2_hausd0.1
-    COMMAND ${EXECUT_MMG3D} -v 6 -d -ls
+    COMMAND ${EXECUT_MMG3D} -v 5 -ls
     ${MMG3D_CI_TESTS}/OptLs_temp_hminMax_hgrad1.2_hausd0.1/temp
     -sol ${MMG3D_CI_TESTS}/OptLs_temp_hminMax_hgrad1.2_hausd0.1/temp.sol
     -hausd 0.1 -nr -hgrad 1.2 -hmin 3 -hmax 4
@@ -335,23 +342,41 @@ IF ( LONG_TESTS )
 
   # Test multi-domain remeshing
   ADD_TEST(NAME MultiDom_Cube
-    COMMAND ${EXECUT_MMG3D} -v 6 -hmax 0.02 ${MMG3D_CI_TESTS}/MultiDom_Cube/c
+    COMMAND ${EXECUT_MMG3D} -v 5 -hmax 0.02 ${MMG3D_CI_TESTS}/MultiDom_Cube/c
     -out ${MMG3D_CI_TESTS}/MultiDom_Cube/c.o.meshb)
 
   ADD_TEST(NAME MultiDom_Ellipse
-    COMMAND ${EXECUT_MMG3D} -v 6 -hausd 0.0003 ${MMG3D_CI_TESTS}/MultiDom_Ellipse/c.d
+    COMMAND ${EXECUT_MMG3D} -v 5 -hausd 0.0003 ${MMG3D_CI_TESTS}/MultiDom_Ellipse/c.d
     -out ${MMG3D_CI_TESTS}/MultiDom_Ellipse/c.d.o.meshb)
 
   # Non-manifold test case
   ADD_TEST(NAME NM_Cube
-    COMMAND ${EXECUT_MMG3D} -v 6 -d -hmax 0.05 ${MMG3D_CI_TESTS}/NM_Cube/nm
+    COMMAND ${EXECUT_MMG3D} -v 5 -hmax 0.05 ${MMG3D_CI_TESTS}/NM_Cube/nm
     -out ${MMG3D_CI_TESTS}/NM_Cube/nm.o.meshb)
+  ADD_TEST(NAME NM_Complex
+    COMMAND ${EXECUT_MMG3D} -v 5 ${MMG3D_CI_TESTS}/NM_Complex/nm4
+    -out ${MMG3D_CI_TESTS}/NM_Complex/nm4.o.mesh)
 
 
   # Compare with a reference result when we run
   #ADD_TEST(NAME RefCube
   #  COMMAND ${EXECUT_MMG3D} -v 5
   #  ${MMG3D_CI_TESTS}/RefCube/cube) marre... a finir
+
+  ###############################################################################
+  #####
+  #####         Check Lagrangian motion option
+  #####
+  ###############################################################################
+  #####
+  IF ( USE_SUSCELAS )
+    ADD_TEST(NAME LagMotion1_boxt_${EXEC}
+      COMMAND ${EXEC} -v 5  -lag 1
+      -in ${MMG3D_CI_TESTS}/LagMotion1_boxt/boxt
+      -sol ${MMG3D_CI_TESTS}/LagMotion1_boxt/boxt.sol
+      -out ${MMG3D_CI_TESTS}/LagMotion1_boxt/boxt.o.meshb
+      )
+  ENDIF()
 
 ENDIF()
 
@@ -362,11 +387,11 @@ ENDIF()
 ###############################################################################
 #####
 #ADD_TEST(NAME BUG_OptLsSingularities
-# COMMAND ${EXECUT_MMG3D} -v 5 -ls
+# COMMAND ${EXECUT_MMG3D} -v 5  -ls
 # ${MMG3D_CI_TESTS}/BUG_OptLsSingularities/test4
 # ${MMG3D_CI_TESTS}/BUG_OptLsSingularities/test4.o.meshb)
 #
 #ADD_TEST(NAME TestDoSol_1
-# COMMAND ${EXECUT_MMG3D} -v 5 -hgrad -1 -hausd 1 -m 100
+# COMMAND ${EXECUT_MMG3D} -v 5  -hgrad -1 -hausd 1 -m 100
 # ${MMG3D_CI_TESTS}/TestDoSol_1/66_shaver3.mesh
 # ${MMG3D_CI_TESTS}/TestDoSol_1/66_shaver3.o.meshb)

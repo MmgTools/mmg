@@ -1,7 +1,7 @@
 /* =============================================================================
 **  This file is part of the mmg software package for the tetrahedral
 **  mesh modification.
-**  Copyright (c) Inria - IMB (Université de Bordeaux) - LJLL (UPMC), 2004- .
+**  Copyright (c) Bx INP/Inria/UBordeaux/UPMC, 2004- .
 **
 **  mmg is free software: you can redistribute it and/or modify it
 **  under the terms of the GNU Lesser General Public License as published
@@ -21,8 +21,8 @@
 ** =============================================================================
 */
 
-#include "mmg.h"
+#include "mmgcommon.h"
 
 int _MMG5_eigenv(int symmat,double *mat,double lambda[3],double v[3][3]);
 int _MMG5_eigen2(double *mm,double *lambda,double vp[2][2]);
-int _MMG5_eigensym(double m[3],double lambda[2],double vp[2][2]);
+extern int _MMG5_eigensym(double m[3],double lambda[2],double vp[2][2]);

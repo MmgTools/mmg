@@ -1,7 +1,7 @@
 /* =============================================================================
 **  This file is part of the mmg software package for the tetrahedral
 **  mesh modification.
-**  Copyright (c) Inria - IMB (Université de Bordeaux) - LJLL (UPMC), 2004- .
+**  Copyright (c) Bx INP/Inria/UBordeaux/UPMC, 2004- .
 **
 **  mmg is free software: you can redistribute it and/or modify it
 **  under the terms of the GNU Lesser General Public License as published
@@ -25,8 +25,14 @@
 #define _CHRONO_H
 
 #include <time.h>
+#include "mmgcommon.h"
+
+#ifndef POSIX
+#include <windows.h>
+#else
 #include <sys/time.h>
 #include <sys/resource.h>
+#endif
 
 #ifndef  ON
 #define  RESET  0
@@ -47,8 +53,16 @@
  */
 typedef struct mytime {
   double  gini,gend,gdif,uini,uend,udif,sini,send,sdif;
+#ifdef POSIX
   struct  timeval rutim;
   struct  rusage  ru;
+#else
+  HANDLE        thisProcess;
+  FILETIME      ftIni, ftEnd, ftSys, ftUser;
+  SYSTEMTIME    stSys, stUser;
+  LARGE_INTEGER frequency;
+  LARGE_INTEGER rutim;
+#endif
   int     call;
 } mytime;
 
