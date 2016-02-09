@@ -986,6 +986,98 @@ static int _MMG5_defmetreg(MMG5_pMesh mesh,MMG5_pSol met,int kel,int iface, int 
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
+ * \return 1 if success, 0 otherwise.
+ *
+ * Define metric map at a non-boundary vertex of the mesh.
+ * Allocate the metric if needed.
+ * Truncate the metric at the hmin/hmax values.
+ *
+ */
+static inline
+int _MMG5_defmetvol(MMG5_pMesh mesh,MMG5_pSol met) {
+  MMG5_pPoint   ppt;
+  double        v[3][3],lambda[3],isqhmax,isqhmin,*m;
+  int           k,i;
+
+  isqhmin = 1./(mesh->info.hmin*mesh->info.hmin);
+  isqhmax = 1./(mesh->info.hmax*mesh->info.hmax);
+
+  if ( !met->m ) {
+    met->np    = mesh->np;
+    met->npmax = mesh->npmax;
+    met->size  = 6;
+    met->dim   = 3;
+    _MMG5_ADD_MEM(mesh,(6*(met->npmax+1))*sizeof(double),"solution",return(0));
+    _MMG5_SAFE_MALLOC(met->m,(6*(mesh->npmax+1)),double);
+
+    for (k=1; k<=mesh->np; k++) {
+      ppt = &mesh->point[k];
+
+      if ( ppt->tag & MG_BDY || !MG_VOK(ppt) ) continue;
+
+      /** 1. no metric is provided: Set isotropic hmax size at the vertex */
+
+     /* Local parameters at vertex: warning do no take care about local param at
+      * triangles */
+      /* for (i=0; i<mesh->info.npar; i++) { */
+      /*   par = &mesh->info.par[i]; */
+      /*   if ( (par->elt == MMG5_Vertex) && (ppt->ref == par->ref ) ) { */
+      /*     hausd_v = par->hausd; */
+      /*     isqhmin = 1./(par->hmin*par->hmin); */
+      /*     isqhmax = 1./(par->hmax*par->hmax); */
+      /*   } */
+      /* } */
+      m = &met->m[met->size*k];
+      m[0] = isqhmax;
+      m[1] = 0.;
+      m[2] = 0.;
+      m[3] = isqhmax;
+      m[4] = 0.;
+      m[5] = isqhmax;
+    }
+  }
+  else {
+    for (k=1; k<=mesh->np; k++) {
+      ppt = &mesh->point[k];
+
+      if ( ppt->tag & MG_BDY || !MG_VOK(ppt) ) continue;
+
+      /** 2. A metric is provided: truncate it by hmax/hmin */
+      m = &met->m[met->size*k];
+      _MMG5_eigenv(1,m,lambda,v);
+
+      for (i=0; i<3; i++) {
+        if(lambda[i]<=0) {
+          printf("%s:%d:Error: wrong metric at point %d -- eigenvalues :"
+                 " %e %e %e\n",__FILE__,__LINE__,
+                 k,lambda[0],lambda[1],lambda[2]);
+          return(0);
+        }
+        lambda[i]=MG_MIN(isqhmin,lambda[i]);
+        lambda[i]=MG_MAX(isqhmax,lambda[i]);
+      }
+
+      m[0] = v[0][0]*v[0][0]*lambda[0] + v[1][0]*v[1][0]*lambda[1]
+        + v[2][0]*v[2][0]*lambda[2];
+      m[1] = v[0][0]*v[0][1]*lambda[0] + v[1][0]*v[1][1]*lambda[1]
+        + v[2][0]*v[2][1]*lambda[2];
+      m[2] = v[0][0]*v[0][2]*lambda[0] + v[1][0]*v[1][2]*lambda[1]
+        + v[2][0]*v[2][2]*lambda[2];
+      m[3] = v[0][1]*v[0][1]*lambda[0] + v[1][1]*v[1][1]*lambda[1]
+        + v[2][1]*v[2][1]*lambda[2];
+      m[4] = v[0][1]*v[0][2]*lambda[0] + v[1][1]*v[1][2]*lambda[1]
+        + v[2][1]*v[2][2]*lambda[2];
+      m[5] = v[0][2]*v[0][2]*lambda[0] + v[1][2]*v[1][2]*lambda[1]
+        + v[2][2]*v[2][2]*lambda[2];
+    }
+  }
+
+  return(1);
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
  * \param np global index of vertex in which we intersect the metrics.
  * \param me physical metric at point \a np.
  * \return 0 if fail, 1 otherwise.
@@ -1025,6 +1117,8 @@ int _MMG3D_intextmet(MMG5_pMesh mesh,MMG5_pSol met,int np,double me[6]) {
 
 }
 
+
+
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric stucture.
@@ -1053,15 +1147,7 @@ int _MMG3D_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
 
   ismet = (met->m > 0);
 
-  if ( !met->m ) {
-    met->np    = mesh->np;
-    met->npmax = mesh->npmax;
-    met->size  = 6;
-    met->dim   = 3;
-    _MMG5_ADD_MEM(mesh,(6*(met->npmax+1))*sizeof(double),"solution",return(0));
-    _MMG5_SAFE_MALLOC(met->m,(6*(mesh->npmax+1)),double);
-
-  }
+  if ( !_MMG5_defmetvol(mesh,met) )  return(0);
 
   for (k=1; k<=mesh->np; k++) {
     ppt = &mesh->point[k];

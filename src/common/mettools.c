@@ -529,6 +529,7 @@ int _MMG5_mmgIntextmet(MMG5_pMesh mesh,MMG5_pSol met,int np,double me[6],
     metan[0] = mrot[0];
     metan[1] = mrot[1];
     metan[2] = mrot[3];
+
     /* printf("metsurf %e %e %e\n",mtan[0],mtan[1],mtan[2]); */
     /* printf("metphys %e %e %e\n",metan[0],metan[1],metan[2]); */
 
@@ -545,7 +546,8 @@ int _MMG5_mmgIntextmet(MMG5_pMesh mesh,MMG5_pSol met,int np,double me[6],
       return(0);
     }
 
-    /* Back to the canonical basis of \mathbb{R}^3 : me = ^tR*mr*R : mtan and metan are reused */
+    /* Back to the canonical basis of \mathbb{R}^3 : me = ^tR*mr*R : mtan and
+     * metan are reused */
     mtan[0]  = mr[0]*r[0][0] + mr[1]*r[1][0] + r[2][0]*mrot[2];
     mtan[1]  = mr[0]*r[0][1] + mr[1]*r[1][1] + r[2][1]*mrot[2];
     mtan[2]  = mr[0]*r[0][2] + mr[1]*r[1][2] + r[2][2]*mrot[2];
@@ -563,6 +565,40 @@ int _MMG5_mmgIntextmet(MMG5_pMesh mesh,MMG5_pSol met,int np,double me[6],
     m[4] = r[0][1] * mtan[2] + r[1][1] * metan[2] + r[2][1]*alpha3;
     m[5] = r[0][2] * mtan[2] + r[1][2] * metan[2] + r[2][2]*alpha3;
 
+    /* Truncate the metric in the third direction (because me was not
+     * truncated) */
+    _MMG5_eigenv(1,m,lambda,vp);
+
+    for (i=0; i<3; i++) {
+      if(lambda[i]<=0) {
+        printf("%s:%d:Error: wrong metric at point %d -- eigenvalues :"
+               " %e %e %e\n",__FILE__,__LINE__,
+               np,lambda[0],lambda[1],lambda[2]);
+        printf("  ## Surfacic metric skipped. \n");
+        m[0] = me[0];
+        m[1] = me[1];
+        m[2] = me[2];
+        m[3] = me[3];
+        m[4] = me[4];
+        m[5] = me[5];
+        return(0);
+      }
+      lambda[i]=MG_MIN(isqhmin,lambda[i]);
+      lambda[i]=MG_MAX(isqhmax,lambda[i]);
+    }
+
+    m[0] = vp[0][0]*vp[0][0]*lambda[0] + vp[1][0]*vp[1][0]*lambda[1]
+      + vp[2][0]*vp[2][0]*lambda[2];
+    m[1] = vp[0][0]*vp[0][1]*lambda[0] + vp[1][0]*vp[1][1]*lambda[1]
+      + vp[2][0]*vp[2][1]*lambda[2];
+    m[2] = vp[0][0]*vp[0][2]*lambda[0] + vp[1][0]*vp[1][2]*lambda[1]
+      + vp[2][0]*vp[2][2]*lambda[2];
+    m[3] = vp[0][1]*vp[0][1]*lambda[0] + vp[1][1]*vp[1][1]*lambda[1]
+      + vp[2][1]*vp[2][1]*lambda[2];
+    m[4] = vp[0][1]*vp[0][2]*lambda[0] + vp[1][1]*vp[1][2]*lambda[1]
+      + vp[2][1]*vp[2][2]*lambda[2];
+    m[5] = vp[0][2]*vp[0][2]*lambda[0] + vp[1][2]*vp[1][2]*lambda[1]
+      + vp[2][2]*vp[2][2]*lambda[2];
   }
 
   return(1);
