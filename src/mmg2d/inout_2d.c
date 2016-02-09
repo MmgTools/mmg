@@ -918,18 +918,27 @@ int MMG2D_saveMesh(MMG5_pMesh mesh,char *filename) {
   }
 
   /* edges */
+  // Warning : edges are not packed
+  ne = 0;
   if ( mesh->na ) {
+    for (k=1; k<=mesh->na; k++) {
+      ped = &mesh->edge[k];
+      if ( ped->a ) ++ne;
+    }
+  }
+
+  if ( ne ) {
     if(!bin) {
       strcpy(&chaine[0],"\n\nEdges\n");
       fprintf(inm,"%s",chaine);
-      fprintf(inm,"%d\n",mesh->na);
+      fprintf(inm,"%d\n",ne);
     }
     else {
       binch = 5; //Edges
       fwrite(&binch,sw,1,inm);
-      bpos += 12 + 3*4*mesh->na;//Pos
+      bpos += 12 + 3*4*ne;//Pos
       fwrite(&bpos,sw,1,inm);
-      fwrite(&mesh->na,sw,1,inm);
+      fwrite(&ne,sw,1,inm);
     }
     for (k=1; k<=mesh->na; k++) {
       ped = &mesh->edge[k];
