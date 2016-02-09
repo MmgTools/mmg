@@ -445,6 +445,9 @@ static int _MMG5_defmetrid(MMG5_pMesh mesh,MMG5_pSol met,int kel,
     }
   }
 
+  isqhmin = 1.0 / (isqhmin*isqhmin);
+  isqhmax = 1.0 / (isqhmax*isqhmax);
+
   n1 = &mesh->xpoint[p0->xp].n1[0];
   n2 = &mesh->xpoint[p0->xp].n2[0];
   t  = p0->n;

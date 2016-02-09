@@ -92,6 +92,11 @@ int main(int argc,char *argv[]) {
                    MMG5_ARG_ppDisp,&disp,
                    MMG5_ARG_end);
 
+
+  /* Set default metric size */
+  if ( !MMG3D_Set_solSize(mesh,met,MMG5_Vertex,0,MMG5_Scalar) )
+    _MMG5_RETURN_AND_FREE(mesh,met,disp,MMG5_STRONGFAILURE);
+
   /* command line */
   if ( !MMG3D_parsar(argc,argv,mesh,met) )  return(MMG5_STRONGFAILURE);
 
@@ -100,10 +105,6 @@ int main(int argc,char *argv[]) {
   chrono(ON,&MMG5_ctim[1]);
   /* read mesh file */
   if ( MMG3D_loadMesh(mesh,mesh->namein)<1 )
-    _MMG5_RETURN_AND_FREE(mesh,met,disp,MMG5_STRONGFAILURE);
-
-  /* Set default metric size */
-  if ( !MMG3D_Set_solSize(mesh,met,MMG5_Vertex,0,MMG5_Scalar) )
     _MMG5_RETURN_AND_FREE(mesh,met,disp,MMG5_STRONGFAILURE);
 
   /* read displacement if any */
