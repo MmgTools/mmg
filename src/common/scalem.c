@@ -156,7 +156,7 @@ int _MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met) {
         }
 
         m    = &met->m[6*k];
-        /*calcul du log de M*/
+        /* Check the input metric */
         if ( !_MMG5_eigenv(1,m,lambda,v) ) {
           printf("  ## ERROR: WRONG METRIC AT POINT %d -- \n",k);
           return(0);
@@ -171,7 +171,6 @@ int _MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met) {
                    k,m[0],m[1],m[2],m[3],m[4],m[5]);
             return(0);
           }
-          lambda[i] = log(lambda[i]);
         }
       }
     }
