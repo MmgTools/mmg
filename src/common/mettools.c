@@ -234,7 +234,7 @@ int _MMG5_buildridmetnor(MMG5_pMesh mesh,MMG5_pSol met,int np0,double nt[3],doub
  * simultaneous reduction, and proceed to truncation in sizes.
  *
  */
-static int _MMG5_intersecmet22(MMG5_pMesh mesh, double *m,double *n,double *mr) {
+int _MMG5_intersecmet22(MMG5_pMesh mesh, double *m,double *n,double *mr) {
   double  det,imn[4],dd,sqDelta,trimn,lambda[2],vp0[2],vp1[2],dm[2],dn[2],vnorm,d0,d1,ip[4];
   double  isqhmin,isqhmax;
 

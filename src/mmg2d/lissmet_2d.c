@@ -32,9 +32,8 @@
  */
 #include "mmg2d.h"
 
-/*h-correction procedure*/
 /**
- * Anisotropic gradation. See:
+ * Anisotropic gradation (h-gradation procedure). See:
  * http://www.ann.jussieu.fr/frey/publications/ijnme4398.pdf
  */
 int lissmet_ani(MMG5_pMesh mesh,MMG5_pSol sol) {
@@ -95,7 +94,7 @@ int lissmet_ani(MMG5_pMesh mesh,MMG5_pSol sol) {
         iadr = (b-1)*sol->size + 1;
         mb   = &sol->m[iadr];
 
-        if ( p1->tagdel < mesh->base && p2->tagdel < mesh->base ) {
+        if ( (p1->tagdel < mesh->base) && (p2->tagdel < mesh->base) ) {
           pht = pht->nxt ? &edgeTable.item[pht->nxt] : 0;
           continue;
         }
@@ -105,11 +104,13 @@ int lissmet_ani(MMG5_pMesh mesh,MMG5_pSol sol) {
         uy = p2->c[1] - p1->c[1];
 
         d1 = ma[0]*ux*ux + ma[2]*uy*uy + 2.0*ma[1]*ux*uy;
-        if ( d1 <= 0.0 )  d1 = 0.0;
+        assert(d1 >=0);
+        if ( d1 < 0.0 )  d1 = 0.0;
         dd1 = M_MAX(EPSD,sqrt(d1));
 
-        d2 = mb[0]*ux*ux + mb[2]*uy*uy + 2.0*mb[1]*ux*uy;
-        if ( d2 <= 0.0 )  d2 = 0.0;
+        d2 = mb[0]*ux*ux + mb[2]*uy*uy+ 2.0*mb[1]*ux*uy;
+        assert(d2 >=0);
+        if ( d2 < 0.0 )  d2 = 0.0;
         dd2 = M_MAX(EPSD,sqrt(d2));
 
         /* swap vertices */
@@ -151,14 +152,16 @@ int lissmet_ani(MMG5_pMesh mesh,MMG5_pSol sol) {
               ma1[i] = coef * ma[i];
               mb1[i] = coef * mb[i];
             }
-            if ( simred(ma,mb1,m) )
+
+            if ( _MMG5_intersecmet22(mesh,ma,mb1,m) ) {
               for (i=0; i<3; i++)  ma[i] = m[i];
+            }
             else {
               for (i=0; i<3; i++)  ma[i]  = SQRT3DIV2 * (ma[i]+mb1[i]);
             }
-
-            if ( simred(ma1,mb,m) )
+            if ( _MMG5_intersecmet22(mesh,ma1,mb,m) ) {
               for (i=0; i<3; i++)  mb[i] = m[i];
+            }
             else {
               for (i=0; i<3; i++)  mb[i] = SQRT3DIV2 * (mb[i]+ma1[i]);
             }
@@ -172,6 +175,11 @@ int lissmet_ani(MMG5_pMesh mesh,MMG5_pSol sol) {
     ncor += nc;
   } while ( nc && ++itour < maxtou );
   _MMG5_SAFE_FREE(edgeTable.item);
+
+  if ( abs(mesh->info.imprim) > 3 ) {
+    fprintf(stdout,"    gradation: %7d updated, %d iter\n",ncor,itour);
+  }
+
   return(1);
 }
 

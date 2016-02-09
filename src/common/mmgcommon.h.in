@@ -455,8 +455,9 @@ double _MMG5_surftri33_ani(MMG5_pMesh,MMG5_pTria,double*,double*,double*);
 double _MMG5_surftri_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt);
 extern int    _MMG5_sys33sym(double a[6], double b[3], double r[3]);
 int    _MMG5_unscaleMesh(MMG5_pMesh mesh,MMG5_pSol met);
-int    _MMG5_interpreg_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt,char i,double s,double mr[6]);
+int    _MMG5_interpreg_ani(MMG5_pMesh,MMG5_pSol,MMG5_pTria,char,double,double *mr);
 int    _MMG5_interp_iso(double *ma,double *mb,double *mp,double t);
+int    _MMG5_intersecmet22(MMG5_pMesh mesh, double *m,double *n,double *mr);
 
 #ifndef POSIX
 extern DOUBLE_COMPLEX _MMG5_opp_complex(DOUBLE_COMPLEX z1);
