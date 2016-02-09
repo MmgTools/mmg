@@ -414,6 +414,7 @@ int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol sol)
   if ( mesh->info.imprim )
     fprintf(stdout,"\n  -- PHASE 2 : MESH ADAPTATION\n");
   if ( (!mesh->info.noinsert) && !MMG2_mmg2d1(mesh,sol) ) {
+    if ( !MMG2_unscaleMesh(mesh,sol) )  _LIBMMG5_RETURN(MMG5_STRONGFAILURE);
     _MMG2D_RETURN_AND_PACK(mesh,sol,MMG5_LOWFAILURE);
   }
 
@@ -422,6 +423,7 @@ int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol sol)
   if ( mesh->info.imprim )
     fprintf(stdout,"\n  -- PHASE 3 : MESH OPTIMISATION\n");
   if ( !MMG2_mmg2d0(mesh,sol) ) {
+    if ( !MMG2_unscaleMesh(mesh,sol) )  _LIBMMG5_RETURN(MMG5_STRONGFAILURE);
     _MMG2D_RETURN_AND_PACK(mesh,sol,MMG5_LOWFAILURE);
   }
 
