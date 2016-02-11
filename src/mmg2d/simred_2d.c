@@ -47,9 +47,7 @@ int simred(double *m1,double *m2,double *m) {
   }
   if ( !MMG2_invmat(m1,m1i) )  return(0);
 
-  _MMG5_eigensym(m1,lambda,pp);
 
-  _MMG5_eigensym(m2,lambda,pp);
 
 
   /* n = (m1)^-1*m2 : stocke en ligne*/

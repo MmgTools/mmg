@@ -33,14 +33,26 @@
  **/
 #include "mmg2d.h"
 
-
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param sol pointer toward the metric or solution structure.
+ * \return 1 if success, 0 if fail (computed bounding box too small
+ * or one af the anisotropic input metric is not valid).
+ *
+ * Scale the mesh and the size informations between 0 and 1.
+ * Compute a default value for the hmin/hmax parameters if needed.
+ * Truncate the metric sizes between hmin/hmax
+ *
+ */
 int MMG2_scaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
   MMG5_pTria     pt;
   //Displ     pd;
   MMG5_pPoint    ppt;
   MMG5_Info     *info;
-  double    dd;
-  int       i,k,iadr,sethmin,sethmax;
+  int            i,k,iadr,sethmin,sethmax;
+  double         dd,isqhmin,isqhmax;
+  double         *m;
+  double         lambda[2],v[2][2];
 
   // pd  = mesh->disp;
 
@@ -109,28 +121,46 @@ int MMG2_scaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
     ppt->c[1] = dd * (ppt->c[1] - info->min[1]);
   }
 
-  /* normalize metric */
+  /* metric truncature and normalization */
   if ( !sol->np )  return(1);
   switch (sol->size) {
   case 1:
     for (k=1; k<=mesh->np; k++)  {
       sol->m[k] *= dd;
-      if(sethmin) sol->m[k]=MG_MAX(mesh->info.hmin,sol->m[k]);
-      if(sethmax) sol->m[k]=MG_MIN(mesh->info.hmax,sol->m[k]);
+      sol->m[k]=MG_MAX(mesh->info.hmin,sol->m[k]);
+      sol->m[k]=MG_MIN(mesh->info.hmax,sol->m[k]);
     }
     break;
 
   case 3:
-    if(sethmin || sethmax) {
-      printf(" ## Warning: imposed hmin and/or hmax ignored\n");
-    }
     dd = 1.0 / (dd*dd);
+    isqhmin  = 1.0 / (mesh->info.hmin*mesh->info.hmin);
+    isqhmax  = 1.0 / (mesh->info.hmax*mesh->info.hmax);
     for (k=1; k<=mesh->np; k++) {
       iadr = (k-1)*sol->size + 1;
       for (i=0; i<sol->size; i++)  sol->m[iadr+i] *= dd;
-      if(sethmin || sethmax) {
-//#warning todo : metric troncature
+
+      m    = &sol->m[iadr];
+      /* Check the input metric */
+      if ( !_MMG5_eigensym(m,lambda,v) ) {
+        printf("  ## ERROR: WRONG METRIC AT POINT %d -- \n",k);
+        return(0);
       }
+      for (i=0; i<2; i++) {
+        if(lambda[i]<=0) {
+          printf("  ## ERROR: WRONG METRIC AT POINT %d -- eigenvalue :"
+                 " %e %e -- det %e\n",k,lambda[0],lambda[1],
+                 m[0]*m[2]-m[1]*m[1]);
+          printf("WRONG METRIC AT POINT %d -- metric %e %e %e\n",
+                 k,m[0],m[1],m[2]);
+          return(0);
+        }
+        lambda[i]=MG_MIN(isqhmin,lambda[i]);
+        lambda[i]=MG_MAX(isqhmax,lambda[i]);
+      }
+      m[0] = v[0][0]*v[0][0]*lambda[0] + v[1][0]*v[1][0]*lambda[1];
+      m[1] = v[0][0]*v[0][1]*lambda[0] + v[1][0]*v[1][1]*lambda[1];
+      m[2] = v[0][1]*v[0][1]*lambda[0] + v[1][1]*v[1][1]*lambda[1];
     }
     break;
   }

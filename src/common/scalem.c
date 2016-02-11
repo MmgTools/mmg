@@ -77,9 +77,11 @@ int _MMG5_boundingBox(MMG5_pMesh mesh) {
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric or solution structure.
- * \return 1 if success, 0 if fail (computed bounding box too small).
+ * \return 1 if success, 0 if fail (computed bounding box too small
+ * or one af the anisotropic input metric is not valid).
  *
  * Scale the mesh and the size informations between 0 and 1.
+ * Compute a default value for the hmin/hmax parameters if needed.
  *
  */
 int _MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met) {
@@ -154,7 +156,7 @@ int _MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met) {
         }
 
         m    = &met->m[6*k];
-        /*calcul du log de M*/
+        /* Check the input metric */
         if ( !_MMG5_eigenv(1,m,lambda,v) ) {
           printf("  ## ERROR: WRONG METRIC AT POINT %d -- \n",k);
           return(0);
@@ -169,7 +171,6 @@ int _MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met) {
                    k,m[0],m[1],m[2],m[3],m[4],m[5]);
             return(0);
           }
-          lambda[i] = log(lambda[i]);
         }
       }
     }

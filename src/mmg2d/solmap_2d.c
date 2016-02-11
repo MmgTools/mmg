@@ -34,9 +34,15 @@
 
 #include "mmg2d.h"
 
-
-
-/* compute iso size map */
+/**
+ * \param mesh pointer toward the mesh structure
+ * \param sol pointer toward the sol structure
+ * \return 1 if success
+ *
+ * Compute isotropic size map according to the mean of the length of the edges
+ * passing through a point.
+ *
+ */
 int MMG2_doSol(MMG5_pMesh mesh,MMG5_pSol sol) {
   MMG5_pTria      ptt,pt;
   MMG5_pPoint     p1,p2;
