@@ -120,16 +120,23 @@
 /* Domain refs in iso mode */
 #define MG_ISO    10
 
-#define _LIBMMG5_RETURN(val)do \
-{                              \
-  signal(SIGABRT,SIG_DFL);     \
-  signal(SIGFPE,SIG_DFL);      \
-  signal(SIGILL,SIG_DFL);      \
-  signal(SIGSEGV,SIG_DFL);     \
-  signal(SIGTERM,SIG_DFL);     \
-  signal(SIGINT,SIG_DFL);      \
-                               \
-  return(val);                 \
+/** Reset the customized signals and set the internal counters of points, edges,
+ * tria and tetra to the suitable value (needed by users to recover their mesh
+ * using the API) */
+#define _LIBMMG5_RETURN(mesh,met,val)do          \
+{                                                \
+  signal(SIGABRT,SIG_DFL);                       \
+  signal(SIGFPE,SIG_DFL);                        \
+  signal(SIGILL,SIG_DFL);                        \
+  signal(SIGSEGV,SIG_DFL);                       \
+  signal(SIGTERM,SIG_DFL);                       \
+  signal(SIGINT,SIG_DFL);                        \
+  mesh->npi = mesh->np;                          \
+  mesh->nti = mesh->nt;                          \
+  mesh->nai = mesh->na;                          \
+  mesh->nei = mesh->ne;                          \
+  met->npi  = met->np;                           \
+  return(val);                                   \
 }while(0)
 
 /* Macros for memory management */

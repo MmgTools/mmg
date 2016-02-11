@@ -81,7 +81,7 @@ int main(int argc,char *argv[]) {
   /** 3) Build sol in MMG5 format */
   /** Two solutions: just use the MMG2D_loadSol function that will read a .sol(b)
       file formatted or manually set your sol using the MMG2D_Set* functions */
-  if ( MMG2D_loadSol(mmgMesh,mmgSol,"init",0) != 1 )  exit(EXIT_FAILURE);
+  if ( MMG2D_loadSol(mmgMesh,mmgSol,"init") != 1 )  exit(EXIT_FAILURE);
 
   /** ------------------------------ STEP  II -------------------------- */
   /** library call */

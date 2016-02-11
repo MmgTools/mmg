@@ -1,4 +1,4 @@
-# Example of basic use of library libmmg3d5 for a level-set discretization test case
+# Example of basic use of library **libmmg3d** for a level-set discretization test case
 
 ## I/ Implementation
   We read the mesh and level-set values at the mesh nodes in the **_test.mesh_** and **_test.sol_** files and then, we discretize the implicit function and optimize the mesh. we save results in the **_test.o.mesh/sol_** files.

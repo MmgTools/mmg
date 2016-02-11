@@ -330,10 +330,6 @@ int MMGS_Get_meshSize(MMG5_pMesh mesh, int* np, int* nt, int* na) {
   if ( na != NULL )
     *na = mesh->na;
 
-  mesh->npi = 0;
-  mesh->nti = 0;
-  mesh->nai = 0;
-
   return(1);
 }
 
@@ -400,6 +396,17 @@ int MMGS_Set_vertex(MMG5_pMesh mesh, double c0, double c1, double c2, int ref, i
  */
 int MMGS_Get_vertex(MMG5_pMesh mesh, double* c0, double* c1, double* c2, int* ref,
                     int* isCorner, int* isRequired) {
+
+ if ( mesh->npi == mesh->np ) {
+   mesh->npi = 0;
+   if ( mesh->info.ddebug ) {
+    fprintf(stdout,"  ## Warning: reset the internal counter of points.\n");
+    fprintf(stdout,"     You must pass here exactly one time (the first time ");
+    fprintf(stdout,"you call the MMGS_Get_vertex function).\n");
+    fprintf(stdout,"     If not, the number of call of this function");
+    fprintf(stdout," exceed the number of points: %d\n ",mesh->np);
+   }
+ }
 
   mesh->npi++;
 
@@ -495,6 +502,17 @@ int MMGS_Get_triangle(MMG5_pMesh mesh, int* v0, int* v1, int* v2, int* ref
                       ,int* isRequired) {
   MMG5_pTria  ptt;
 
+  if ( mesh->nti == mesh->nt ) {
+    mesh->nti = 0;
+    if ( mesh->info.ddebug ) {
+      fprintf(stdout,"  ## Warning: reset the internal counter of triangles.\n");
+      fprintf(stdout,"     You must pass here exactly one time (the first time ");
+      fprintf(stdout,"you call the MMGS_Get_triangle function).\n");
+      fprintf(stdout,"     If not, the number of call of this function");
+      fprintf(stdout," exceed the number of triangles: %d\n ",mesh->nt);
+    }
+  }
+
   mesh->nti++;
 
   if ( mesh->nti > mesh->nt ) {
@@ -577,6 +595,17 @@ int MMGS_Set_edge(MMG5_pMesh mesh, int v0, int v1, int ref, int pos) {
  */
 int MMGS_Get_edge(MMG5_pMesh mesh, int* e0, int* e1, int* ref
                   ,int* isRidge, int* isRequired) {
+
+  if ( mesh->nai == mesh->na ) {
+    mesh->nai = 0;
+    if ( mesh->info.ddebug ) {
+      fprintf(stdout,"  ## Warning: reset the internal counter of edges.\n");
+      fprintf(stdout,"     You must pass here exactly one time (the first time ");
+      fprintf(stdout,"you call the MMGS_Get_edge function).\n");
+      fprintf(stdout,"     If not, the number of call of this function");
+      fprintf(stdout," exceed the number of edges: %d\n ",mesh->na);
+    }
+  }
 
   mesh->nai++;
 
@@ -744,6 +773,18 @@ int MMGS_Set_scalarSol(MMG5_pSol met, double s, int pos) {
  *
  */
 int MMGS_Get_scalarSol(MMG5_pSol met, double* s) {
+  int ddebug = 0;
+
+  if ( met->npi == met->np ) {
+    met->npi = 0;
+    if ( ddebug ) {
+      fprintf(stdout,"  ## Warning: reset the internal counter of points.\n");
+      fprintf(stdout,"     You must pass here exactly one time (the first time ");
+      fprintf(stdout,"you call the MMGS_Get_scalarSol function).\n");
+      fprintf(stdout,"     If not, the number of call of this function");
+      fprintf(stdout," exceed the number of points: %d\n ",met->np);
+    }
+  }
 
   met->npi++;
 
@@ -816,12 +857,24 @@ int MMGS_Set_vectorSol(MMG5_pSol met, double vx,double vy, double vz, int pos) {
  *
  */
 int MMGS_Get_vectorSol(MMG5_pSol met, double* vx, double* vy, double* vz) {
+  int ddebug = 0;
+
+  if ( met->npi == met->np ) {
+    met->npi = 0;
+    if ( ddebug ) {
+      fprintf(stdout,"  ## Warning: reset the internal counter of points.\n");
+      fprintf(stdout,"     You must pass here exactly one time (the first time ");
+      fprintf(stdout,"you call the MMGS_Get_vectorSol function).\n");
+      fprintf(stdout,"     If not, the number of call of this function");
+      fprintf(stdout," exceed the number of points: %d\n ",met->np);
+    }
+  }
 
   met->npi++;
 
   if ( met->npi > met->np ) {
     fprintf(stdout,"  ## Error: unable to get solution.\n");
-    fprintf(stdout,"     The number of call of MMGS_Get_scalarSol function");
+    fprintf(stdout,"     The number of call of MMGS_Get_vectorSol function");
     fprintf(stdout," can not exceed the number of points: %d\n ",met->np);
     return(0);
   }
@@ -901,11 +954,24 @@ int MMGS_Set_tensorSol(MMG5_pSol met, double m11,double m12, double m13,
 int MMGS_Get_tensorSol(MMG5_pSol met, double *m11,double *m12, double *m13,
                        double *m22,double *m23, double *m33) {
 
+  int ddebug = 0;
+
+  if ( met->npi == met->np ) {
+    met->npi = 0;
+    if ( ddebug ) {
+      fprintf(stdout,"  ## Warning: reset the internal counter of points.\n");
+      fprintf(stdout,"     You must pass here exactly one time (the first time ");
+      fprintf(stdout,"you call the MMG3D_Get_tensorSol function).\n");
+      fprintf(stdout,"     If not, the number of call of this function");
+      fprintf(stdout," exceed the number of points: %d\n ",met->np);
+    }
+  }
+
   met->npi++;
 
   if ( met->npi > met->np ) {
     fprintf(stdout,"  ## Error: unable to get solution.\n");
-    fprintf(stdout,"     The number of call of MMGS_Get_scalarSol function");
+    fprintf(stdout,"     The number of call of MMGS_Get_tensorSol function");
     fprintf(stdout," can not exceed the number of points: %d\n ",met->np);
     return(0);
   }

@@ -43,10 +43,17 @@
 /**
  * Pack the mesh \a mesh and its associated metric \a met and return \a val.
  */
-#define _MMG5_RETURN_AND_PACK(mesh,met,val)do                     \
-  {                                                               \
-    if ( !_MMGS_packMesh(mesh,met) ) return(MMG5_STRONGFAILURE);  \
-    _LIBMMG5_RETURN(val);                                         \
+#define _MMG5_RETURN_AND_PACK(mesh,met,val)do                           \
+  {                                                                     \
+    if ( !_MMGS_packMesh(mesh,met) )  {                                 \
+      mesh->npi = mesh->np;                                             \
+      mesh->nti = mesh->nt;                                             \
+      mesh->nai = mesh->na;                                             \
+      mesh->nei = mesh->ne;                                             \
+      met->npi  = met->np;                                              \
+      return(MMG5_LOWFAILURE);                                          \
+    }                                                                   \
+    _LIBMMG5_RETURN(mesh,met,val);                                      \
   }while(0)
 
 /** Free adja, xtetra and xpoint tables */
@@ -289,7 +296,7 @@ int MMGS_mmgslib(MMG5_pMesh mesh,MMG5_pSol met)
   }
   else if ( met->size!=1 && met->size!=6 ) {
     fprintf(stdout,"  ## ERROR: WRONG DATA TYPE.\n");
-    _LIBMMG5_RETURN(MMG5_STRONGFAILURE);
+    _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
   }
 
   chrono(OFF,&(ctim[1]));
@@ -306,17 +313,18 @@ int MMGS_mmgslib(MMG5_pMesh mesh,MMG5_pSol met)
     fprintf(stdout,"\n  -- PHASE 1 : ANALYSIS\n");
   }
 
-  if ( !_MMG5_scaleMesh(mesh,met) ) _LIBMMG5_RETURN(MMG5_STRONGFAILURE);
+  if ( !_MMG5_scaleMesh(mesh,met) ) _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
 
   /* mesh analysis */
   if ( !_MMGS_analys(mesh) ) {
-    if ( !_MMG5_unscaleMesh(mesh,met) )  _LIBMMG5_RETURN(MMG5_STRONGFAILURE);
+    if ( !_MMG5_unscaleMesh(mesh,met) )
+      _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
     _MMG5_RETURN_AND_PACK(mesh,met,MMG5_LOWFAILURE);
   }
 
   if ( abs(mesh->info.imprim) > 0 ) {
     if ( !_MMGS_inqua(mesh,met) ) {
-      if ( !_MMG5_unscaleMesh(mesh,met) )  _LIBMMG5_RETURN(MMG5_STRONGFAILURE);
+      if ( !_MMG5_unscaleMesh(mesh,met) )  _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
       _MMG5_RETURN_AND_PACK(mesh,met,MMG5_LOWFAILURE);
     }
   }
@@ -338,9 +346,9 @@ int MMGS_mmgslib(MMG5_pMesh mesh,MMG5_pSol met)
   if ( !_MMG5_mmgs1(mesh,met) ) {
     if ( (!mesh->adja) && !_MMGS_hashTria(mesh) ) {
       fprintf(stdout,"  ## Hashing problem. Invalid mesh.\n");
-      _LIBMMG5_RETURN(MMG5_STRONGFAILURE);
+      _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
     }
-    if ( !_MMG5_unscaleMesh(mesh,met) )  _LIBMMG5_RETURN(MMG5_STRONGFAILURE);
+    if ( !_MMG5_unscaleMesh(mesh,met) )  _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
     _MMG5_RETURN_AND_PACK(mesh,met,MMG5_LOWFAILURE);
   }
 
@@ -353,7 +361,7 @@ int MMGS_mmgslib(MMG5_pMesh mesh,MMG5_pSol met)
 
   /* save file */
   if (!_MMGS_outqua(mesh,met) ) {
-    if ( !_MMG5_unscaleMesh(mesh,met) )  _LIBMMG5_RETURN(MMG5_STRONGFAILURE);
+    if ( !_MMG5_unscaleMesh(mesh,met) )  _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
     _MMG5_RETURN_AND_PACK(mesh,met,MMG5_LOWFAILURE);
   }
 
@@ -363,14 +371,14 @@ int MMGS_mmgslib(MMG5_pMesh mesh,MMG5_pSol met)
   chrono(ON,&(ctim[1]));
   if ( mesh->info.imprim )  fprintf(stdout,"\n  -- MESH PACKED UP\n");
 
-  if ( !_MMG5_unscaleMesh(mesh,met) )  _LIBMMG5_RETURN(MMG5_STRONGFAILURE);
+  if ( !_MMG5_unscaleMesh(mesh,met) )  _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
 
-  if ( !_MMGS_packMesh(mesh,met) )     _LIBMMG5_RETURN(MMG5_STRONGFAILURE);
+  if ( !_MMGS_packMesh(mesh,met) )     _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
   chrono(OFF,&(ctim[1]));
 
   chrono(OFF,&ctim[0]);
   printim(ctim[0].gdif,stim);
   if ( mesh->info.imprim )
     fprintf(stdout,"\n   MMGSLIB: ELAPSED TIME  %s\n",stim);
-  _LIBMMG5_RETURN(MMG5_SUCCESS);
+  _LIBMMG5_RETURN(mesh,met,MMG5_SUCCESS);
 }

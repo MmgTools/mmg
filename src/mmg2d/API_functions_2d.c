@@ -444,6 +444,37 @@ int MMG2D_Set_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int typEntity, int np, int
   return(1);
 }
 
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param sol pointer toward the sol structure.
+ * \param typEntity pointer toward the type of entities to which solutions are applied.
+ * \param np pointer toward the number of solutions.
+ * \param typSol pointer toward the type of the solutions (scalar, vectorial...)
+ * \return 1.
+ *
+ * Get the solution number, dimension and type.
+ *
+ */
+int MMG2D_Get_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int* typEntity, int* np,
+                      int* typSol) {
+
+  *typEntity = MMG5_Vertex;
+  if ( sol->size == 1 )
+    *typSol    = MMG5_Scalar;
+  else if ( sol->size == 2 )
+    *typSol    = MMG5_Vector;
+  else if ( sol->size == 3 )
+    *typSol    = MMG5_Tensor;
+  else
+    *typSol    = MMG5_Notype;
+
+  assert( (!sol->np) || (sol->np == mesh->np));
+
+  *np = sol->np;
+
+  return(1);
+}
+
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -454,15 +485,25 @@ int MMG2D_Set_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int typEntity, int np, int
  *
  * Get the number of vertices, triangles and edges of the mesh.
  *
+ * \warning special treatment for edges because they are not packed.
  */
 int MMG2D_Get_meshSize(MMG5_pMesh mesh, int* np, int* nt, int* na) {
+  int k;
 
   if ( np != NULL )
     *np = mesh->np;
   if ( nt != NULL )
     *nt = mesh->nt;
-  if ( na != NULL )
-    *na = mesh->na;
+
+  if ( na != NULL ) {
+    // Edges are not packed, thus we must count it.
+    *na = 0;
+    if ( mesh->na ) {
+      for (k=1; k<=mesh->na; k++) {
+        if ( mesh->edge[k].a ) ++(*na);
+      }
+    }
+  }
 
   return(1);
 }
@@ -514,9 +555,35 @@ int MMG2D_Set_vertex(MMG5_pMesh mesh, double c0, double c1, int ref, int pos) {
 
   return(1);
 }
+/* /\** */
+/*  * \param mesh pointer toward the mesh structure. */
+/*  * \param k vertex index. */
+/*  * \return 1. */
+/*  * */
+/*  * Set corner at point \a k. */
+/*  * */
+/*  *\/ */
+/* int MMG2D_Set_corner(MMG5_pMesh mesh, int k) { */
+/*   assert ( k <= mesh->np ); */
+/*   mesh->point[k].tag |= M_CORNER; */
+/*   return(1); */
+/* } */
+/* /\** */
+/*  * \param mesh pointer toward the mesh structure. */
+/*  * \param k vertex index. */
+/*  * \return 1. */
+/*  * */
+/*  * Set point \a k as required. */
+/*  * */
+/*  *\/ */
+/* int MMG2D_Set_requiredVertex(MMG5_pMesh mesh, int k) { */
+/*   assert ( k <= mesh->np ); */
+/*   mesh->point[k].tag |= M_REQUIRED; */
+/*   return(1); */
+/* } */
+
 /**
  * \param mesh pointer toward the mesh structure.
- * \param num integer
  * \param c0 pointer toward the coordinate of the point along the first dimension.
  * \param c1 pointer toward the coordinate of the point along the second dimension.
  * \param ref poiter to the point reference.
@@ -528,30 +595,43 @@ int MMG2D_Set_vertex(MMG5_pMesh mesh, double c0, double c1, int ref, int pos) {
  * vertex num of mesh.
  *
  */
-int MMG2D_Get_vertex(MMG5_pMesh mesh,int num, double* c0, double* c1, int* ref,
+int MMG2D_Get_vertex(MMG5_pMesh mesh, double* c0, double* c1, int* ref,
                     int* isCorner, int* isRequired) {
 
-  if ( num > mesh->np ) {
+ if ( mesh->npi == mesh->np ) {
+   mesh->npi = 0;
+   if ( mesh->info.ddebug ) {
+    fprintf(stdout,"  ## Warning: reset the internal counter of points.\n");
+    fprintf(stdout,"     You must pass here exactly one time (the first time ");
+    fprintf(stdout,"you call the MMG2D_Get_vertex function).\n");
+    fprintf(stdout,"     If not, the number of call of this function");
+    fprintf(stdout," exceed the number of points: %d\n ",mesh->np);
+   }
+ }
+
+  mesh->npi++;
+
+  if ( mesh->npi > mesh->np ) {
     fprintf(stdout,"  ## Error: unable to get point.\n");
-    fprintf(stdout,"     The number %d in MMG2D_Get_vertex function",num);
-    fprintf(stdout,"  exceed the max number of points: %d\n ",mesh->np);
+    fprintf(stdout,"     The number of call of MMG2D_Get_vertex function");
+    fprintf(stdout," exceed the number of points: %d\n ",mesh->np);
     return(0);
   }
 
-  *c0  = mesh->point[num].c[0];
-  *c1  = mesh->point[num].c[1];
+  *c0  = mesh->point[mesh->npi].c[0];
+  *c1  = mesh->point[mesh->npi].c[1];
   if ( ref != NULL )
-    *ref = mesh->point[num].ref;
+    *ref = mesh->point[mesh->npi].ref;
 
   if ( isCorner != NULL ) {
-    if ( mesh->point[num].tag & M_CORNER )
+    if ( mesh->point[mesh->npi].tag & M_CORNER )
       *isCorner = 1;
     else
       *isCorner = 0;
   }
 
   if ( isRequired != NULL ) {
-    if ( mesh->point[num].tag & M_REQUIRED )
+    if ( mesh->point[mesh->npi].tag & M_REQUIRED )
       *isRequired = 1;
     else
       *isRequired = 0;
@@ -622,9 +702,85 @@ int MMG2D_Set_triangle(MMG5_pMesh mesh, int v0, int v1, int v2, int ref, int pos
     /* mesh->xt temporary used to count reoriented tetra */
     mesh->xt++;
   }
+  if ( mesh->info.ddebug && (mesh->nt == pos) && mesh->xt > 0 ) {
+    fprintf(stdout,"  ## %d triangles reoriented\n",mesh->xt);
+    mesh->xt = 0;
+  }
 
   return(1);
 }
+/* /\** */
+/*  * \param mesh pointer toward the mesh structure. */
+/*  * \param k triangle index. */
+/*  * \return 1. */
+/*  * */
+/*  * Set triangle \a k as required. */
+/*  * */
+/*  *\/ */
+/* int MMG2D_Set_requiredTriangle(MMG5_pMesh mesh, int k) { */
+/*   assert ( k <= mesh->nt ); */
+/*   mesh->tria[k].tag[0] |= M_REQUIRED; */
+/*   mesh->tria[k].tag[1] |= M_REQUIRED; */
+/*   mesh->tria[k].tag[2] |= M_REQUIRED; */
+/*   return(1); */
+/* } */
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param v0 pointer toward the first vertex of triangle.
+ * \param v1 pointer toward the second vertex of triangle.
+ * \param v2 pointer toward the third vertex of triangle.
+ * \param ref pointer toward the triangle reference.
+ * \param isRequired pointer toward the flag saying if triangle is required.
+ * \return 0 if failed, 1 otherwise.
+ *
+ * Get vertices \a v0,\a v1,\a v2 and reference \a ref of next
+ * triangle of mesh.
+ *
+ */
+int MMG2D_Get_triangle(MMG5_pMesh mesh, int* v0, int* v1, int* v2, int* ref
+                       ,int* isRequired) {
+  MMG5_pTria  ptt;
+
+  if ( mesh->nti == mesh->nt ) {
+    mesh->nti = 0;
+    if ( mesh->info.ddebug ) {
+      fprintf(stdout,"  ## Warning: reset the internal counter of triangles.\n");
+      fprintf(stdout,"     You must pass here exactly one time (the first time ");
+      fprintf(stdout,"you call the MMG2D_Get_triangle function).\n");
+      fprintf(stdout,"     If not, the number of call of this function");
+      fprintf(stdout," exceed the number of triangles: %d\n ",mesh->nt);
+    }
+  }
+
+  mesh->nti++;
+
+  if ( mesh->nti > mesh->nt ) {
+    fprintf(stdout,"  ## Error: unable to get triangle.\n");
+    fprintf(stdout,"    The number of call of MMG2D_Get_triangle function");
+    fprintf(stdout," can not exceed the number of triangles: %d\n ",mesh->nt);
+    return(0);
+  }
+
+  ptt = &mesh->tria[mesh->nti];
+
+  *v0  = ptt->v[0];
+  *v1  = ptt->v[1];
+  *v2  = ptt->v[2];
+  if ( ref != NULL )
+    *ref = ptt->ref;
+
+  if ( isRequired != NULL ) {
+    if ( (ptt->tag[0] & MG_REQ) && (ptt->tag[1] & MG_REQ) &&
+         (ptt->tag[2] & MG_REQ) )
+      *isRequired = 1;
+    else
+      *isRequired = 0;
+  }
+
+  return(1);
+}
+
 /**
  * \param mesh pointer toward the mesh structure.
  * \param v0 first vertex of edge.
@@ -671,6 +827,90 @@ int MMG2D_Set_edge(MMG5_pMesh mesh, int v0, int v1, int ref, int pos) {
 
   return(1);
 }
+/* /\** */
+/*  * \param mesh pointer toward the mesh structure. */
+/*  * \param k edge index. */
+/*  * \return 1. */
+/*  * */
+/*  * Set edge \a k as required. */
+/*  * */
+/*  *\/ */
+/* int MMG2D_Set_requiredEdge(MMG5_pMesh mesh, int k) { */
+/*   assert ( k <= mesh->na ); */
+/*   mesh->edge[k].tag |= M_REQUIRED; */
+/*   return(1); */
+/* } */
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param e0 pointer toward the first extremity of the edge.
+ * \param e1 pointer toward the second  extremity of the edge.
+ * \param ref pointer toward the edge reference.
+ * \param isRidge pointer toward the flag saying if the edge is ridge.
+ * \param isRequired pointer toward the flag saying if the edge is required.
+ * \return 0 if failed, 1 otherwise.
+ *
+ * Get extremities \a e0, \a e1 and reference \a ref of next edge of mesh.
+ *
+ * \warning edges are not packed.
+ */
+int MMG2D_Get_edge(MMG5_pMesh mesh, int* e0, int* e1, int* ref
+                   ,int* isRidge, int* isRequired) {
+  MMG5_pEdge        ped;
+
+  if ( mesh->nai == mesh->na ) {
+    mesh->nai = 0;
+    if ( mesh->info.ddebug ) {
+      fprintf(stdout,"  ## Warning: reset the internal counter of edges.\n");
+      fprintf(stdout,"     You must pass here exactly one time (the first time ");
+      fprintf(stdout,"you call the MMG2D_Get_edge function).\n");
+      fprintf(stdout,"     If not, the number of call of this function");
+      fprintf(stdout," exceed the number of edges.\n ");
+      fprintf(stdout,"     Please, call the MMG2D_Get_meshSize function to get"
+              " this number.\n ");
+    }
+  }
+
+  mesh->nai++;
+
+  if ( mesh->nai > mesh->na ) {
+    fprintf(stdout,"  ## Error: unable to get edge.\n");
+    fprintf(stdout,"    The number of call of MMG2D_Get_edge function");
+    fprintf(stdout," can not exceed the number of edges: %d\n ",mesh->na);
+    return(0);
+  }
+
+  ped = &mesh->edge[mesh->nai];
+
+  while ( !ped->a && ++mesh->nai <= mesh->na ) {
+    ped = &mesh->edge[mesh->nai];
+  }
+
+
+  *e0  = ped->a;
+  *e1  = ped->b;
+
+  if ( ref!=NULL )
+    *ref = mesh->edge[mesh->nai].ref;
+
+  if ( isRidge != NULL ) {
+    if ( mesh->edge[mesh->nai].tag & MG_GEO )
+      *isRidge = 1;
+    else
+      *isRidge = 0;
+  }
+
+  if ( isRequired != NULL ) {
+    if ( mesh->edge[mesh->nai].tag & MG_REQ )
+      *isRequired = 1;
+    else
+      *isRequired = 0;
+  }
+
+  return(1);
+}
+
+
 /**
  * \param met pointer toward the sol structure.
  * \param s solution scalar value.
@@ -708,14 +948,54 @@ int MMG2D_Set_scalarSol(MMG5_pSol met, double s, int pos) {
 }
 /**
  * \param met pointer toward the sol structure.
- * \param s solution symetric tensor value (s11 s12 s22)
+ * \param s pointer toward the scalar solution value.
+ * \return 0 if failed, 1 otherwise.
+ *
+ * Get solution \a s of next vertex of mesh.
+ *
+ */
+int  MMG2D_Get_scalarSol(MMG5_pSol met, double* s)
+{
+  int ddebug = 0;
+
+  if ( met->npi == met->np ) {
+    met->npi = 0;
+    if ( ddebug ) {
+      fprintf(stdout,"  ## Warning: reset the internal counter of points.\n");
+      fprintf(stdout,"     You must pass here exactly one time (the first time ");
+      fprintf(stdout,"you call the MMG2D_Get_scalarSol function).\n");
+      fprintf(stdout,"     If not, the number of call of this function");
+      fprintf(stdout," exceed the number of points: %d\n ",met->np);
+    }
+  }
+
+  met->npi++;
+
+  if ( met->npi > met->np ) {
+    fprintf(stdout,"  ## Error: unable to get solution.\n");
+    fprintf(stdout,"     The number of call of MMG2D_Get_scalarSol function");
+    fprintf(stdout," can not exceed the number of points: %d\n ",met->np);
+    return(0);
+  }
+
+  *s  = met->m[met->npi];
+
+  return(1);
+}
+
+/**
+ * \param met pointer toward the sol structure.
+ * \param m11 value at position (1,1) in the solution tensor.
+ * \param m12 value at position (1,2) in the solution tensor.
+ * \param m22 value at position (2,2) in the solution tensor.
  * \param pos position of the solution in the mesh.
  * \return 0 if failed, 1 otherwise.
  *
  * Set tensor value \a s at position \a pos in solution structure
  *
  */
-int MMG2D_Set_tensorSol(MMG5_pSol met, double* s, int pos) {
+int MMG2D_Set_tensorSol(MMG5_pSol met, double m11, double m12, double m22,
+                        int pos) {
   int isol;
 
   if ( !met->np ) {
@@ -739,9 +1019,49 @@ int MMG2D_Set_tensorSol(MMG5_pSol met, double* s, int pos) {
     return(0);
   }
   isol = (pos-1) * met->size + 1;
-  met->m[isol + 0] = s[0];
-  met->m[isol + 1] = s[1];
-  met->m[isol + 2] = s[2];
+  met->m[isol + 0] = m11;
+  met->m[isol + 1] = m12;
+  met->m[isol + 2] = m22;
+  return(1);
+}
+/**
+ * \param met pointer toward the sol structure.
+ * \param m11 pointer toward the position (1,1) in the solution tensor.
+ * \param m12 pointer toward the position (1,2) in the solution tensor.
+ * \param m22 pointer toward the position (2,2) in the solution tensor.
+ * \return 0 if failed, 1 otherwise.
+ *
+ * Get tensorial solution of next vertex of mesh.
+ *
+ */
+int MMG2D_Get_tensorSol(MMG5_pSol met, double *m11,double *m12,double *m22)
+{
+  int ddebug = 0;
+
+  if ( met->npi == met->np ) {
+    met->npi = 0;
+    if ( ddebug ) {
+      fprintf(stdout,"  ## Warning: reset the internal counter of points.\n");
+      fprintf(stdout,"     You must pass here exactly one time (the first time ");
+      fprintf(stdout,"you call the MMG2D_Get_tensorSol function).\n");
+      fprintf(stdout,"     If not, the number of call of this function");
+      fprintf(stdout," exceed the number of points: %d\n ",met->np);
+    }
+  }
+
+  met->npi++;
+
+  if ( met->npi > met->np ) {
+    fprintf(stdout,"  ## Error: unable to get solution.\n");
+    fprintf(stdout,"     The number of call of MMG2D_Get_tensorSol function");
+    fprintf(stdout," can not exceed the number of points: %d\n ",met->np);
+    return(0);
+  }
+
+  *m11 = met->m[6*(met->npi-1)+1];
+  *m12 = met->m[6*(met->npi-1)+2];
+  *m22 = met->m[6*(met->npi-1)+3];
+
   return(1);
 }
 

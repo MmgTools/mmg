@@ -482,7 +482,7 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,char *filename) {
 
 
 /* load metric */
-int MMG2D_loadSol(MMG5_pMesh mesh,MMG5_pSol sol,char *filename,int msh) {
+int MMG2D_loadSol(MMG5_pMesh mesh,MMG5_pSol sol,char *filename) {
   FILE       *inm;
   float       fsol;
   double      dsol,lambda[2],eigenv[2][2];
@@ -491,6 +491,9 @@ int MMG2D_loadSol(MMG5_pMesh mesh,MMG5_pSol sol,char *filename,int msh) {
   int         compute_hmin, compute_hmax;
   long        posnp;
   char        *ptr,data[128],chaine[128];
+  int         msh;
+
+  msh = mesh->info.nreg;
 
   bin = 0;
 
@@ -739,6 +742,8 @@ int MMG2D_loadSol(MMG5_pMesh mesh,MMG5_pSol sol,char *filename,int msh) {
       mesh->info.hmax = 10.*mesh->info.hmin;
     }
   }
+
+  sol->npi = sol->np;
 
   fclose(inm);
   return(1);

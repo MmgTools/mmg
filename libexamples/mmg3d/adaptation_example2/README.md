@@ -1,4 +1,4 @@
-# Example of advanced use of library libmmg3d5
+# Example of advanced use of library libmmg3d
 
 ## I/ Implementation
   We read the mesh and solution in the **_2spheres.mesh_** and **_2spheres.sol_** files.

@@ -418,7 +418,7 @@ int main(int argc,char *argv[]) {
 
   /* read displacement if any */
   if ( mesh->info.lag >= 0 ) {
-    ier = MMG2D_loadSol(mesh,sol,sol->namein,mesh->info.nreg);
+    ier = MMG2D_loadSol(mesh,sol,sol->namein);
     if ( ier < 1 ) {
       fprintf(stdout,"  ## ERROR: UNABLE TO LOAD DISPLACEMENT.\n");
       _MMG2D_RETURN_AND_FREE(mesh,sol,MMG5_STRONGFAILURE);
@@ -429,7 +429,7 @@ int main(int argc,char *argv[]) {
   }
   /* read metric if any */
   else {
-    ier = MMG2D_loadSol(mesh,sol,sol->namein,mesh->info.nreg);
+    ier = MMG2D_loadSol(mesh,sol,sol->namein);
     if ( ier == -1 ) {
       if ( (sol->size != MMG5_Scalar) && (sol->size != MMG5_Tensor) ) {
         fprintf(stdout,"  ## ERROR: WRONG DATA TYPE OR WRONG SOLUTION NUMBER.\n");

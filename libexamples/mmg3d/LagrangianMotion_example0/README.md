@@ -1,4 +1,4 @@
-# Example of basic use of library libmmg3d5 for a lagrangian motion test case
+# Example of basic use of library libmmg3d for a lagrangian motion test case
 
 ## I/ Implementation
   We read the mesh and displacement in the **_tinyBoxt.mesh_** and **_tinyBoxt.sol_** files and then, we compute the volume displacement. we save results in the **_tinyBoxt.o.mesh/sol_** files.

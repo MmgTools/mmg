@@ -3,14 +3,14 @@
 ## I/ Implementation
 To call the **mmg3d** library, you must:  
   1. build mesh and sol at MMG5 format;
-  2. call the MMG5 library;
+  2. call the MMG3D library;
   3. get the final mesh and sol.
 
   Results are saved in the **_mesh.o.mesh_** and **_mesh.o.sol_** files.  
 
 ### example0_a  
-  We read mesh and solution files (**_cube.mesh_** and **_cube.sol_**) using the **MMG5_loadMesh** and **MMG5_loadMet** functions.
-  Results are saved using **MMG5_saveMesh** and **MMG5_saveMet** functions.
+  We read mesh and solution files (**_cube.mesh_** and **_cube.sol_**) using the **MMG3D_loadMesh** and **MMG3D_loadSol** functions.
+  Results are saved using **MMG3D_saveMesh** and **MMG3D_saveSol** functions.
 
 ### example0_b
   The mesh and solution are hard coded.    

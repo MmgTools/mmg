@@ -211,6 +211,8 @@
 !  */
 
 ! int MMG2D_Set_dparameter(MMG5_pMesh mesh, MMG5_pSol sol, int dparam, double val);
+
+! /* init structure datas */
 ! /**
 !  * \param mesh pointer toward the mesh structure.
 !  * \param np number of vertices.
@@ -239,7 +241,7 @@
 
 ! int MMG2D_Set_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int typEntity,
 !                       int np, int typSol);
-! /* init structure datas */
+
 ! /**
 !  * \param mesh pointer toward the mesh structure.
 !  * \param c0 coordinate of the point along the first dimension.
@@ -255,23 +257,25 @@
 
 ! int  MMG2D_Set_vertex(MMG5_pMesh mesh, double c0, double c1,
 !                       int ref,int pos);
-! /**
-!  * \param mesh pointer toward the mesh structure.
-!  * \param num integer
-!  * \param c0 pointer toward the coordinate of the point along the first dimension.
-!  * \param c1 pointer toward the coordinate of the point along the second dimension.
-!  * \param ref pointer to the point reference.
-!  * \param isCorner pointer toward the flag saying if point is corner.
-!  * \param isRequired pointer toward the flag saying if point is required.
-!  * \return 1.
-!  *
-!  * Get coordinates \a c0, \a c1 and reference \a ref of
-!  * vertex num of mesh.
-!  *
-!  */
+! /* /\** */
+! /*  * \param mesh pointer toward the mesh structure. */
+! /*  * \param k vertex index. */
+! /*  * \return 1. */
+! /*  * */
+! /*  * Set corner at point \a pos. */
+! /*  * */
+! /*  *\/ */
+! /* int  MMG2D_Set_corner(MMG5_pMesh mesh, int k); */
+! /* /\** */
+! /*  * \param mesh pointer toward the mesh structure. */
+! /*  * \param k vertex index. */
+! /*  * \return 1. */
+! /*  * */
+! /*  * Set point \a k as required. */
+! /*  * */
+! /*  *\/ */
+! /* int  MMG2D_Set_requiredVertex(MMG5_pMesh mesh, int k); */
 
-! int  MMG2D_Get_vertex(MMG5_pMesh mesh, int num,double* c0, double* c1, int* ref,
-!                       int* isCorner, int* isRequired);
 ! /**
 !  * \param mesh pointer toward the mesh structure.
 !  * \param v0 first vertex of triangle.
@@ -288,6 +292,15 @@
 
 ! int MMG2D_Set_triangle(MMG5_pMesh mesh, int v0, int v1,
 !                        int v2, int ref, int pos);
+! /* /\** */
+! /*  * \param mesh pointer toward the mesh structure. */
+! /*  * \param k triangle index. */
+! /*  * \return 1. */
+! /*  * */
+! /*  * Set triangle \a k as required. */
+! /*  * */
+! /*  *\/ */
+! /* int  MMG2D_Set_requiredTriangle(MMG5_pMesh mesh, int k); */
 
 ! /**
 !  * \param mesh pointer toward the mesh structure.
@@ -303,6 +316,41 @@
 !  */
 
 ! int MMG2D_Set_edge(MMG5_pMesh mesh, int v0, int v1, int ref, int pos);
+! /* /\** */
+! /*  * \param mesh pointer toward the mesh structure. */
+! /*  * \param k edge index. */
+! /*  * \return 1. */
+! /*  * */
+! /*  * Set edge \a k as required. */
+! /*  * */
+! /*  *\/ */
+! /* int  MMG2D_Set_requiredEdge(MMG5_pMesh mesh, int k); */
+! /**
+!  * \param met pointer toward the sol structure.
+!  * \param s solution scalar value.
+!  * \param pos position of the solution in the mesh.
+!  * \return 0 if failed, 1 otherwise.
+!  *
+!  * Set scalar value \a s at position \a pos in solution structure
+!  *
+!  */
+
+! int MMG2D_Set_scalarSol(MMG5_pSol met, double s, int pos);
+
+! /**
+!  * \param met pointer toward the sol structure.
+!  * \param m11 value at position (1,1) in the solution tensor.
+!  * \param m12 value at position (1,2) in the solution tensor.
+!  * \param m22 value at position (2,2) in the solution tensor.
+!  * \param pos position of the solution in the mesh.
+!  * \return 0 if failed, 1 otherwise.
+!  *
+!  * Set tensor value \a s at position \a pos in solution structure
+!  *
+!  */
+
+! int MMG2D_Set_tensorSol(MMG5_pSol met, double m11, double m12, double m22,
+!                         int pos);
 
 ! /** recover datas */
 ! /**
@@ -318,28 +366,89 @@
 
 ! int  MMG2D_Get_meshSize(MMG5_pMesh mesh, int* np, int* nt, int* na);
 ! /**
-!  * \param met pointer toward the sol structure.
-!  * \param s solution scalar value.
-!  * \param pos position of the solution in the mesh.
-!  * \return 0 if failed, 1 otherwise.
+!  * \param mesh pointer toward the mesh structure.
+!  * \param sol pointer toward the sol structure.
+!  * \param typEntity pointer toward the type of entities to which solutions are applied.
+!  * \param np pointer toward the number of solutions.
+!  * \param typSol pointer toward the type of the solutions (scalar, vectorial...)
+!  * \return 1.
 !  *
-!  * Set scalar value \a s at position \a pos in solution structure
+!  * Get the solution number, dimension and type.
 !  *
 !  */
 
-! int MMG2D_Set_scalarSol(MMG5_pSol met, double s, int pos);
+! int  MMG2D_Get_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int* typEntity, int* np,
+!                       int* typSol);
+! /**
+!  * \param mesh pointer toward the mesh structure.
+!  * \param c0 pointer toward the coordinate of the point along the first dimension.
+!  * \param c1 pointer toward the coordinate of the point along the second dimension.
+!  * \param ref pointer to the point reference.
+!  * \param isCorner pointer toward the flag saying if point is corner.
+!  * \param isRequired pointer toward the flag saying if point is required.
+!  * \return 1.
+!  *
+!  * Get coordinates \a c0, \a c1 and reference \a ref of
+!  * vertex num of mesh.
+!  *
+!  */
 
+! int  MMG2D_Get_vertex(MMG5_pMesh mesh, double* c0, double* c1, int* ref,
+!                       int* isCorner, int* isRequired);
+! /**
+!  * \param mesh pointer toward the mesh structure.
+!  * \param v0 pointer toward the first vertex of triangle.
+!  * \param v1 pointer toward the second vertex of triangle.
+!  * \param v2 pointer toward the third vertex of triangle.
+!  * \param ref pointer toward the triangle reference.
+!  * \param isRequired pointer toward the flag saying if triangle is required.
+!  * \return 0 if failed, 1 otherwise.
+!  *
+!  * Get vertices \a v0,\a v1,\a v2 and reference \a ref of next
+!  * triangle of mesh.
+!  *
+!  */
+
+! int MMG2D_Get_triangle(MMG5_pMesh mesh, int* v0, int* v1, int* v2, int* ref
+!                        ,int* isRequired);
+! /**
+!  * \param mesh pointer toward the mesh structure.
+!  * \param e0 pointer toward the first extremity of the edge.
+!  * \param e1 pointer toward the second  extremity of the edge.
+!  * \param ref pointer toward the edge reference.
+!  * \param isRidge pointer toward the flag saying if the edge is ridge.
+!  * \param isRequired pointer toward the flag saying if the edge is required.
+!  * \return 0 if failed, 1 otherwise.
+!  *
+!  * Get extremities \a e0, \a e1 and reference \a ref of next edge of mesh.
+!  *
+!  * \warning edges are not packed.
+!  */
+
+! int MMG2D_Get_edge(MMG5_pMesh mesh, int* e0, int* e1, int* ref
+!                    ,int* isRidge, int* isRequired);
 ! /**
 !  * \param met pointer toward the sol structure.
-!  * \param s solution symetric tensor value (s11 s12 s22)
-!  * \param pos position of the solution in the mesh.
+!  * \param s pointer toward the scalar solution value.
 !  * \return 0 if failed, 1 otherwise.
 !  *
-!  * Set tensor value \a s at position \a pos in solution structure
+!  * Get solution \a s of next vertex of mesh.
 !  *
 !  */
 
-! int MMG2D_Set_tensorSol(MMG5_pSol met, double* s, int pos);
+! int  MMG2D_Get_scalarSol(MMG5_pSol met, double* s);
+! /**
+!  * \param met pointer toward the sol structure.
+!  * \param m11 pointer toward the position (1,1) in the solution tensor.
+!  * \param m12 pointer toward the position (1,2) in the solution tensor.
+!  * \param m22 pointer toward the position (2,2) in the solution tensor.
+!  * \return 0 if failed, 1 otherwise.
+!  *
+!  * Get tensorial solution of next vertex of mesh.
+!  *
+!  */
+
+! int MMG2D_Get_tensorSol(MMG5_pSol met, double *m11,double *m12,double *m22);
 
 ! /**
 !  * \param mesh pointer toward the mesh structure.
@@ -420,14 +529,13 @@
 !  * \param mesh pointer toward the mesh structure.
 !  * \param sol pointer toward the solution structure..
 !  * \param filename name of the solution file.
-!  * \param msh if 1, read the 2D solution saved in 3D (.sol files saved by gmsh)
 !  * \return 0 or -1 if fail, 1 otherwise.
 !  *
 !  * Load solution field.
 !  *
 !  */
 
-! int MMG2D_loadSol(MMG5_pMesh mesh,MMG5_pSol sol,char * filename,int msh);
+! int MMG2D_loadSol(MMG5_pMesh mesh,MMG5_pSol sol,char * filename);
 
 ! int MMG2D_loadVect(MMG5_pMesh ,char *);
 
