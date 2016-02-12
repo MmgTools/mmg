@@ -80,6 +80,10 @@ void _MMG5_Init_parameters(MMG5_pMesh mesh) {
   /** MMG5_DPARAM_hgrad = 1.3 */
   mesh->info.hgrad    = 0.26236426446;      /* control gradation; */
 
+  /** MMG3D_IPARAM_lag = -1 used by mmg3d only but need to be negative in the
+   * scaleMesh function */
+  mesh->info.lag      = -1;
+
   /* initial value for memMax and gap */
   mesh->gap = 0.2;
   mesh->memMax = _MMG5_memSize();
