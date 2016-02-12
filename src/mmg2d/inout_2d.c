@@ -485,10 +485,9 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,char *filename) {
 int MMG2D_loadSol(MMG5_pMesh mesh,MMG5_pSol sol,char *filename) {
   FILE       *inm;
   float       fsol;
-  double      dsol,lambda[2],eigenv[2][2];
+  double      dsol;
   int         binch,bdim,iswp;
   int         k,i,isol,type,bin,dim,btyp,bpos;
-  int         compute_hmin, compute_hmax;
   long        posnp;
   char        *ptr,data[128],chaine[128];
   int         msh;
@@ -627,23 +626,6 @@ int MMG2D_loadSol(MMG5_pMesh mesh,MMG5_pSol sol,char *filename) {
                 "initial solution",return(0));
   _MMG5_SAFE_CALLOC(sol->m,(sol->size*(mesh->npmax+1)),double);
 
-  /* If they are not provided by the user, enforce default values for hmin and
-   * hmax:
-   *    - for hmin we take 0.1 \times the minimum of the metric sizes.
-   *    - for hmax we take 10 \times the max of the metric sizes. */
-  compute_hmin = compute_hmax = 0;
-
-  if ( !mesh->info.iso ) {
-    if ( mesh->info.hmin < 0. ) {
-      compute_hmin=1;
-      mesh->info.hmin = FLT_MAX;
-    }
-    if ( mesh->info.hmax < 0. ){
-      compute_hmax=1;
-      mesh->info.hmax = 0.;
-    }
-  }
-
   /* read mesh solutions */
   rewind(inm);
   fseek(inm,posnp,SEEK_SET);
@@ -692,54 +674,6 @@ int MMG2D_loadSol(MMG5_pMesh mesh,MMG5_pSol sol,char *filename) {
           fread(&dsol,sw,1,inm);
         }
       }
-    }
-  }
-
-  /* Find the minimum and maximum of the metric sizes. */
-  if ( sol->size == 3 ) {
-    for (k=1; k<=sol->np; k++) {
-      if ( ! _MMG5_eigensym(&sol->m[3*(k-1)+1],lambda,eigenv ) ) {
-        printf("Error: metric diagonalisation fail,"
-               " unable to compute the sizes associated to the vertex %d.\n",
-               k);
-        return(0);
-      }
-      if ( compute_hmin ) {
-        mesh->info.hmin = MG_MIN(mesh->info.hmin,1./sqrt(lambda[0]));
-        mesh->info.hmin = MG_MIN(mesh->info.hmin,1./sqrt(lambda[1]));
-      }
-      if ( compute_hmax ) {
-        mesh->info.hmax = MG_MAX(mesh->info.hmax,1./sqrt(lambda[0]));
-        mesh->info.hmax = MG_MAX(mesh->info.hmax,1./sqrt(lambda[1]));
-      }
-    }
-  }
-  else if ( sol->size ==1 ) {
-    if ( compute_hmin ) {
-      for (k=1; k<=sol->np; k++) {
-        mesh->info.hmin = MG_MIN(mesh->info.hmin,sol->m[k]);
-      }
-    }
-    if ( compute_hmax ) {
-      for (k=1; k<=sol->np; k++) {
-        mesh->info.hmax = MG_MAX(mesh->info.hmax,sol->m[k]);
-      }
-    }
-  }
-  if ( compute_hmin ) {
-    mesh->info.hmin *=.1;
-    /* Check that user has not given a hmax value lower that the founded
-     * hmin. */
-    if ( mesh->info.hmin > mesh->info.hmax ) {
-      mesh->info.hmin = 0.1*mesh->info.hmax;
-    }
-  }
-  if ( compute_hmax ) {
-    mesh->info.hmax *=10.;
-    /* Check that user has not given a hmin value bigger that the founded
-     * hmax. */
-    if ( mesh->info.hmax < mesh->info.hmin ) {
-      mesh->info.hmax = 10.*mesh->info.hmin;
     }
   }
 

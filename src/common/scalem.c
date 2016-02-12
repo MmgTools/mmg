@@ -106,41 +106,73 @@ int _MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met) {
     ppt->c[2] = dd * (ppt->c[2] - mesh->info.min[2]);
   }
 
-  /* normalize values */
+  mesh->info.hausd *= dd;
+
+  /* Check if hmin/hmax have been provided by the user and scale it if yes */
   sethmin = 0;
   sethmax = 0;
+
   if ( mesh->info.hmin > 0. ) {
     mesh->info.hmin  *= dd;
     sethmin = 1;
   }
-  else mesh->info.hmin  = 0.01;
-
   if ( mesh->info.hmax > 0. ) {
     mesh->info.hmax  *= dd;
     sethmax = 1;
   }
-  else mesh->info.hmax  = 1.;
 
-  if ( mesh->info.hmax < mesh->info.hmin ) {
-    if ( sethmin && sethmax ) {
-      fprintf(stdout,"  ## ERROR: MISMATCH PARAMETERS:"
-              "MINIMAL MESH SIZE LARGER THAN MAXIMAL ONE.\n");
-      fprintf(stdout,"  Exit program.\n");
-      exit(EXIT_FAILURE);
+  /* Warning: we don't want to compute hmin/hmax from the level-set or the
+   * displacement! */
+  if ( mesh->info.iso || (mesh->info.lag>-1) || (!met->m) ) {
+    /* Set default values to hmin/hmax from the bounding box if not provided by
+     * the user */
+    if ( !sethmin )  mesh->info.hmin  = 0.01;
+
+    if ( !sethmax )  mesh->info.hmax  = 1.;
+
+    if ( mesh->info.hmax < mesh->info.hmin ) {
+      if ( sethmin && sethmax ) {
+        fprintf(stdout,"  ## Error: mismatch parameters:"
+                " minimal mesh size larger than maximal one.\n");
+        fprintf(stdout,"  Exit program.\n");
+        exit(EXIT_FAILURE);
+      }
+      else if ( sethmin )
+        mesh->info.hmax = 100. * mesh->info.hmin;
+      else
+        mesh->info.hmin = 0.01 * mesh->info.hmax;
     }
-    else if ( sethmin )
-      mesh->info.hmax = 100. * mesh->info.hmin;
-    else
-      mesh->info.hmin = 0.01 * mesh->info.hmax;
+    sethmin = 1;
+    sethmax = 1;
   }
 
 
-  mesh->info.hausd *= dd;
-
-  /* normalize sizes */
+  /* normalize sizes and if not provided by user, compute hmin/hmax */
   if ( met->m ) {
     if ( met->size == 1 ) {
-      for (k=1; k<=mesh->np; k++)    met->m[k] *= dd;
+      for (k=1; k<=mesh->np; k++) {
+        met->m[k] *= dd;
+        /* Check the metric */
+        if ( (!mesh->info.iso) && met->m[k] <= 0) {
+          printf("  ## ERROR: WRONG METRIC AT POINT %d -- \n",k);
+          return(0);
+        }
+      }
+
+      /* compute hmin and hmax parameters if not provided by the user */
+      if ( !sethmin ) {
+        mesh->info.hmin = FLT_MAX;
+        for (k=1; k<=mesh->np; k++)  {
+          mesh->info.hmin = MG_MIN(mesh->info.hmin,met->m[k]);
+        }
+      }
+      if ( !sethmax ) {
+        mesh->info.hmax = 0.;
+        for (k=1; k<=mesh->np; k++)  {
+          mesh->info.hmax = MG_MAX(mesh->info.hmax,met->m[k]);
+        }
+      }
+
     }
     else if ( met->size==3 ){
       for (k=1; k<=mesh->np; k++) {
@@ -154,8 +186,21 @@ int _MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met) {
         for ( i=0; i<met->size; ++i ) {
           met->m[6*k+i] *= d1;
         }
+      }
 
+      /* compute hmin and hmax parameters if not provided by the user and check
+       * the input metric */
+      if ( !sethmin ) {
+        mesh->info.hmin = FLT_MAX;
+      }
+
+      if ( !sethmax ) {
+        mesh->info.hmax = 0.;
+      }
+
+      for (k=1; k<mesh->np+1; k++) {
         m    = &met->m[6*k];
+
         /* Check the input metric */
         if ( !_MMG5_eigenv(1,m,lambda,v) ) {
           printf("  ## ERROR: WRONG METRIC AT POINT %d -- \n",k);
@@ -171,7 +216,27 @@ int _MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met) {
                    k,m[0],m[1],m[2],m[3],m[4],m[5]);
             return(0);
           }
+          if ( !sethmin )
+            mesh->info.hmin = MG_MIN(mesh->info.hmin,1./sqrt(lambda[i]));
+          if ( !sethmax )
+            mesh->info.hmax = MG_MAX(mesh->info.hmax,1./sqrt(lambda[i]));
         }
+      }
+    }
+    if ( !sethmin ) {
+      mesh->info.hmin *=.1;
+      /* Check that user has not given a hmax value lower that the founded
+       * hmin. */
+      if ( mesh->info.hmin > mesh->info.hmax ) {
+        mesh->info.hmin = 0.1*mesh->info.hmax;
+      }
+    }
+    if ( !sethmax ) {
+      mesh->info.hmax *=10.;
+      /* Check that user has not given a hmin value bigger that the founded
+       * hmax. */
+      if ( mesh->info.hmax < mesh->info.hmin ) {
+        mesh->info.hmax = 10.*mesh->info.hmin;
       }
     }
   }

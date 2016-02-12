@@ -83,35 +83,6 @@ int MMG2_scaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
   /* normalize coordinates */
   dd = PRECI / info->delta;
 
-
-  sethmin = 0;
-  sethmax = 0;
-  if ( mesh->info.hmin > 0. ) {
-    mesh->info.hmin  *= dd;
-    sethmin = 1;
-  }
-  else
-    mesh->info.hmin  = 0.01;
-
-  if ( mesh->info.hmax > 0. ) {
-    mesh->info.hmax  *= dd;
-    sethmax = 1;
-  }
-  else
-    mesh->info.hmax  = 1.;
-  if ( mesh->info.hmax < mesh->info.hmin ) {
-    if ( sethmin && sethmax ) {
-      fprintf(stdout,"  ## Error: mismatch parameters:"
-              " minimal mesh size larger than maximal one.\n");
-      fprintf(stdout,"  Exit program.\n");
-      exit(EXIT_FAILURE);
-    }
-    else if ( sethmin )
-      mesh->info.hmax = 100. * mesh->info.hmin;
-    else
-      mesh->info.hmin = 0.01 * mesh->info.hmax;
-  }
-
   mesh->info.hausd *= dd;
 
   for (k=1; k<=mesh->np; k++) {
@@ -121,24 +92,180 @@ int MMG2_scaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
     ppt->c[1] = dd * (ppt->c[1] - info->min[1]);
   }
 
-  /* metric truncature and normalization */
+  /* Check if hmin/hmax have been provided by the user and scale it if yes */
+  sethmin = 0;
+  sethmax = 0;
+
+  if ( mesh->info.hmin > 0. ) {
+    mesh->info.hmin  *= dd;
+    sethmin = 1;
+  }
+  if ( mesh->info.hmax > 0. ) {
+    mesh->info.hmax  *= dd;
+    sethmax = 1;
+  }
+
+  /* Warning: we don't want to compute hmin/hmax from the level-set! */
+  if ( mesh->info.iso || (!sol->np) ) {
+    /* Set default values to hmin/hmax from the bounding box if not provided by
+     * the user */
+    if ( !sethmin )  mesh->info.hmin  = 0.01;
+
+    if ( !sethmax )  mesh->info.hmax  = 1.;
+
+    if ( mesh->info.hmax < mesh->info.hmin ) {
+      if ( sethmin && sethmax ) {
+        fprintf(stdout,"  ## Error: mismatch parameters:"
+                " minimal mesh size larger than maximal one.\n");
+        fprintf(stdout,"  Exit program.\n");
+        exit(EXIT_FAILURE);
+      }
+      else if ( sethmin )
+        mesh->info.hmax = 100. * mesh->info.hmin;
+      else
+        mesh->info.hmin = 0.01 * mesh->info.hmax;
+    }
+    sethmin = 1;
+    sethmax = 1;
+  }
+
   if ( !sol->np )  return(1);
+
+  /* metric truncature and normalization and default values for hmin/hmax if not
+   * provided by the user ( 0.1 \times the minimum of the metric sizes for hmin
+   * and 10 \times the max of the metric sizes for hmax ). */
+
   switch (sol->size) {
   case 1:
+    /* normalization */
     for (k=1; k<=mesh->np; k++)  {
       sol->m[k] *= dd;
-      sol->m[k]=MG_MAX(mesh->info.hmin,sol->m[k]);
-      sol->m[k]=MG_MIN(mesh->info.hmax,sol->m[k]);
+      /* Check the metric */
+      if (  (!mesh->info.iso) && sol->m[k] <= 0) {
+        printf("  ## ERROR: WRONG METRIC AT POINT %d -- \n",k);
+        return(0);
+      }
+    }
+
+    /* compute hmin and hmax parameters if not provided by the user */
+    if ( !sethmin ) {
+      mesh->info.hmin = FLT_MAX;
+      for (k=1; k<=mesh->np; k++)  {
+        mesh->info.hmin = MG_MIN(mesh->info.hmin,sol->m[k]);
+      }
+    }
+    if ( !sethmax ) {
+      mesh->info.hmax = 0.;
+      for (k=1; k<=mesh->np; k++)  {
+        mesh->info.hmax = MG_MAX(mesh->info.hmax,sol->m[k]);
+      }
+    }
+    if ( !sethmin ) {
+      mesh->info.hmin *=.1;
+      /* Check that user has not given a hmax value lower that the founded
+       * hmin. */
+      if ( mesh->info.hmin > mesh->info.hmax ) {
+        mesh->info.hmin = 0.1*mesh->info.hmax;
+      }
+    }
+    if ( !sethmax ) {
+      mesh->info.hmax *=10.;
+      /* Check that user has not given a hmin value bigger that the founded
+       * hmax. */
+      if ( mesh->info.hmax < mesh->info.hmin ) {
+        mesh->info.hmax = 10.*mesh->info.hmin;
+      }
+    }
+
+    /* Truncature... if we have a metric (not a level-set) */
+    if ( !mesh->info.iso ) {
+      for (k=1; k<=mesh->np; k++)  {
+        sol->m[k]=MG_MAX(mesh->info.hmin,sol->m[k]);
+        sol->m[k]=MG_MIN(mesh->info.hmax,sol->m[k]);
+      }
     }
     break;
 
   case 3:
     dd = 1.0 / (dd*dd);
+    /* Normalization */
+    for (k=1; k<=mesh->np; k++) {
+      iadr = (k-1)*sol->size + 1;
+      for (i=0; i<sol->size; i++)  sol->m[iadr+i] *= dd;
+    }
+
+    /* compute hmin and hmax parameters if not provided by the user */
+    if ( !sethmin ) {
+      mesh->info.hmin = FLT_MAX;
+      for (k=1; k<=mesh->np; k++)  {
+        iadr = (k-1)*sol->size + 1;
+        m    = &sol->m[iadr];
+
+        /* Check the input metric */
+        if ( !_MMG5_eigensym(m,lambda,v) ) {
+          printf("  ## ERROR: WRONG METRIC AT POINT %d -- \n",k);
+          return(0);
+        }
+        for (i=0; i<2; i++) {
+          if(lambda[i]<=0) {
+            printf("  ## ERROR: WRONG METRIC AT POINT %d -- eigenvalue :"
+                   " %e %e -- det %e\n",k,lambda[0],lambda[1],
+                   m[0]*m[2]-m[1]*m[1]);
+            printf("WRONG METRIC AT POINT %d -- metric %e %e %e\n",
+                   k,m[0],m[1],m[2]);
+            return(0);
+          }
+          mesh->info.hmin = MG_MIN(mesh->info.hmin,1./sqrt(lambda[i]));
+        }
+      }
+    }
+    if ( !sethmax ) {
+      mesh->info.hmax = 0.;
+      for (k=1; k<=mesh->np; k++)  {
+        iadr = (k-1)*sol->size + 1;
+        m    = &sol->m[iadr];
+
+        /* Check the input metric */
+        if ( !_MMG5_eigensym(m,lambda,v) ) {
+          printf("  ## ERROR: WRONG METRIC AT POINT %d -- \n",k);
+          return(0);
+        }
+        for (i=0; i<2; i++) {
+          if(lambda[i]<=0) {
+            printf("  ## ERROR: WRONG METRIC AT POINT %d -- eigenvalue :"
+                   " %e %e -- det %e\n",k,lambda[0],lambda[1],
+                   m[0]*m[2]-m[1]*m[1]);
+            printf("WRONG METRIC AT POINT %d -- metric %e %e %e\n",
+                   k,m[0],m[1],m[2]);
+            return(0);
+          }
+          mesh->info.hmax = MG_MAX(mesh->info.hmax,1./sqrt(lambda[i]));
+        }
+      }
+    }
+    if ( !sethmin ) {
+      mesh->info.hmin *=.1;
+      /* Check that user has not given a hmax value lower that the founded
+       * hmin. */
+      if ( mesh->info.hmin > mesh->info.hmax ) {
+        mesh->info.hmin = 0.1*mesh->info.hmax;
+      }
+    }
+    if ( !sethmax ) {
+      mesh->info.hmax *=10.;
+      /* Check that user has not given a hmin value bigger that the founded
+       * hmax. */
+      if ( mesh->info.hmax < mesh->info.hmin ) {
+        mesh->info.hmax = 10.*mesh->info.hmin;
+      }
+    }
+
+    /* Truncature... if we have a metric, not a level-set */
+    assert( !mesh->info.iso );
     isqhmin  = 1.0 / (mesh->info.hmin*mesh->info.hmin);
     isqhmax  = 1.0 / (mesh->info.hmax*mesh->info.hmax);
     for (k=1; k<=mesh->np; k++) {
       iadr = (k-1)*sol->size + 1;
-      for (i=0; i<sol->size; i++)  sol->m[iadr+i] *= dd;
 
       m    = &sol->m[iadr];
       /* Check the input metric */
@@ -209,6 +336,11 @@ int MMG2_unscaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
     }
     break;
   }
+
+  /* unscale paramter values */
+  mesh->info.hmin  *= dd;
+  mesh->info.hmax  *= dd;
+  mesh->info.hausd *= dd;
 
   return(1);
 }
