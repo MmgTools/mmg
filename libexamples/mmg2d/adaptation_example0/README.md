@@ -6,7 +6,7 @@ To call the **mmg2d** library, you must:
   2. call the MMG2D library;
   3. get the final mesh and sol.
 
-  Results are saved in the **_result.o.mesh_** and **_result.o.sol_** files.  
+  Results are saved in the **_result.mesh_** and **_result.sol_** files.  
 
 ### example0_a  
   We read mesh and solution files (**_init.mesh_** and **_init.sol_**) using the **MMG2D_loadMesh** and **MMG2D_loadSol** functions.
@@ -25,13 +25,12 @@ To call the **mmg2d** library, you must:
     * the **mmg2d** include directory with the **-I** option;
     * the **mmg2d** library location with the **-L** option;
     * the **mmg2d** library name with the **-l** option;
-    * for the static library you must also link the executable with, if used for the **mmg2d** library compilation, the scotch and scotcherr libraries and with the math library;
     * with the shared library, you must add the ***_$CMAKE_INSTALL_PREFIX_** directory to your **LD_LIBRARY_PATH**.
 
 > Example 1  
->  Command line to link the application with the **mmg2d** static library (we supposed here that the scotch library is installed in the **_$SCOTCH_PATH_** directory):  
+>  Command line to link the application with the **mmg2d** static library
 > ```Shell
-> gcc -I$CMAKE_INSTALL_PREFIX/include/mmg/mmg2d main.c -L$CMAKE_INSTALL_PREFIX/lib -L$SCOTCH_PATH -lmmg2d -lscotch -lscotcherr -lm
+> gcc -I$CMAKE_INSTALL_PREFIX/include/mmg/mmg2d main.c -L$CMAKE_INSTALL_PREFIX/lib -lmmg2d -lm
 > ```
 
 > Example 2  

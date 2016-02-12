@@ -744,7 +744,6 @@ int MMG3D_mmg3dmov(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp) {
 
   if ( abs(mesh->info.imprim) > 0 ) {
     if ( !_MMG3D_inqua(mesh,met) ) {
-      if ( !_MMG5_unscaleMesh(mesh,met) ) _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
       _MMG5_RETURN_AND_PACK(mesh,met,disp,MMG5_LOWFAILURE);
     }
   }
