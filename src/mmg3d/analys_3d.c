@@ -104,14 +104,14 @@ static int _MMG5_setadj(MMG5_pMesh mesh){
               mesh->point[ip1].tag |= pt->tag[i];
               // Warning: in -nosurf option : we loose the corner points and the
               // (corner + required) points provided by the user.
-              if ( (tag & MG_REQ) && (!(tag & MG_GEO)) ) {
+              if ( mesh->info.nosurf && ((tag & MG_REQ) && (!(tag & MG_GEO))) ) {
                 mesh->point[ip1].tag &= ~MG_GEO;
               }
               tag = mesh->point[ip2].tag;
               mesh->point[ip2].tag |= pt->tag[i];
               // Warning: in -nosurf option : we loose the corner points and the
               // (corner + required) points provided by the user.
-              if ( (tag & MG_REQ) && (!(tag & MG_GEO)) ) {
+              if ( mesh->info.nosurf && ((tag & MG_REQ) && (!(tag & MG_GEO))) ) {
                 mesh->point[ip2].tag &= ~MG_GEO;
               }
         }

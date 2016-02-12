@@ -8,7 +8,7 @@
     * we save results in 2spheres_1.o.mesh/sol.
 
   * Second, we remesh in normal mode, with specified memory and lower verbosity:
-    * in addition to previous parameters, we ask that all boundary triangles of ref 36 respect a hasdorff number of 0.01 and all boundary triangles of ref 38 a hasdorff number of 1.  
+    * in addition to previous parameters, we ask that all boundary triangles of ref 36 respect a hasdorff number of 0.01 and all boundary triangles of ref 38 a hasdorff number of 1. For both reference, we set the minimal (resp. maximal) edge size to 0.00001 (resp. 40).  
       The local hausdorff number on ref 38 has no effects because it is higher than the previous value (without local value, we apply global hausdorff (0.1)) and this value is now contained in the metric;
     * we don't save results but we reset the computed metric and reapply the initial constant metric of size 10;
     * we perform the last wave of refinment. Now we can see the effect of the local hausdorff number on ref 38;
