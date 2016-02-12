@@ -41,7 +41,7 @@
 #include "eigenv.h"
 
 /* seeking 1.e-05 accuracy */
-#define  _MG_EPSD           1.e-15
+#define  _MG_EPSD           1.e-13
 #define  _MG_EPSD2          1.e-10
 #define  _MG_EPS6           5.e-06
 #define  _MG_EPS            1.e-06
