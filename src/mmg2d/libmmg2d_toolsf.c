@@ -90,7 +90,7 @@ FORTRAN_NAME(MMG2D_GET_ADJAVERTICESFAST,mmg2d_get_adjaverticesfast,
 FORTRAN_NAME(MMG2D_FREE_TRIANGLES,mmg2d_free_triangles,
              (MMG5_pMesh *mesh),(mesh)) {
 
-  MMG2D_Free_Triangles(*mesh);
+  MMG2D_Free_triangles(*mesh);
 
   return;
 }
@@ -101,7 +101,7 @@ FORTRAN_NAME(MMG2D_FREE_TRIANGLES,mmg2d_free_triangles,
 FORTRAN_NAME(MMG2D_FREE_EDGES,mmg2d_free_edges,
              (MMG5_pMesh *mesh),(mesh)) {
 
-  MMG2D_Free_Edges(*mesh);
+  MMG2D_Free_edges(*mesh);
 
   return;
 }
@@ -112,7 +112,7 @@ FORTRAN_NAME(MMG2D_FREE_EDGES,mmg2d_free_edges,
 FORTRAN_NAME(MMG2D_FREE_SOLUTIONS,mmg2d_free_solutions,
              (MMG5_pMesh *mesh,MMG5_pSol *sol),(mesh,sol)) {
 
-  MMG2D_Free_Solutions(*mesh,*sol);
+  MMG2D_Free_solutions(*mesh,*sol);
 
   return;
 }

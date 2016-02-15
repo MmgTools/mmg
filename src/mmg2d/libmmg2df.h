@@ -682,7 +682,7 @@
 !  *
 !  */
 
-! void MMG2D_Free_Triangles(MMG5_pMesh mesh);
+! void MMG2D_Free_triangles(MMG5_pMesh mesh);
 
 ! /**
 !  * \param mesh pointer toward the mesh structure
@@ -691,7 +691,7 @@
 !  *
 !  */
 
-! void MMG2D_Free_Edges(MMG5_pMesh mesh);
+! void MMG2D_Free_edges(MMG5_pMesh mesh);
 
 ! /**
 !  * \param mesh pointer toward the mesh structure
@@ -701,6 +701,6 @@
 !  *
 !  */
 
-! void MMG2D_Free_Solutions(MMG5_pMesh mesh,MMG5_pSol sol);
+! void MMG2D_Free_solutions(MMG5_pMesh mesh,MMG5_pSol sol);
 
 ! #endif

@@ -69,10 +69,10 @@ int main(int argc,char *argv[]) {
   ier = MMG2D_mmg2dmesh(mmgMesh,mmgSol);
 
   if ( ier == MMG5_STRONGFAILURE ) {
-    fprintf(stdout,"BAD ENDING OF MMG3DLIB: UNABLE TO SAVE MESH\n");
+    fprintf(stdout,"BAD ENDING OF MMG2DMESH: UNABLE TO SAVE MESH\n");
     return(ier);
   } else if ( ier == MMG5_LOWFAILURE )
-    fprintf(stdout,"BAD ENDING OF MMG3DLIB\n");
+    fprintf(stdout,"BAD ENDING OF MMG2DMESH\n");
 
   /*save result*/
   if ( MMG2D_saveMesh(mmgMesh,"result.mesh") != 1 )

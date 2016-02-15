@@ -607,7 +607,7 @@ int MMG2D_Get_adjaVerticesFast(MMG5_pMesh mesh, int ip,int start,
  * Free the mesh elements (and the adjacency).
  *
  */
-void MMG2D_Free_Triangles(MMG5_pMesh mesh);
+void MMG2D_Free_triangles(MMG5_pMesh mesh);
 
 /**
  * \param mesh pointer toward the mesh structure
@@ -615,7 +615,7 @@ void MMG2D_Free_Triangles(MMG5_pMesh mesh);
  * Free the mesh edges (and the associated xpoints).
  *
  */
-void MMG2D_Free_Edges(MMG5_pMesh mesh);
+void MMG2D_Free_edges(MMG5_pMesh mesh);
 
 /**
  * \param mesh pointer toward the mesh structure
@@ -624,6 +624,6 @@ void MMG2D_Free_Edges(MMG5_pMesh mesh);
  * Free the solution.
  *
  */
-void MMG2D_Free_Solutions(MMG5_pMesh mesh,MMG5_pSol sol);
+void MMG2D_Free_solutions(MMG5_pMesh mesh,MMG5_pSol sol);
 
 #endif
