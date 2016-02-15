@@ -208,7 +208,7 @@ int MMG2D_Get_adjaVerticesFast(MMG5_pMesh mesh, int ip,int start, int lispoi[MMG
  * Free the mesh elements (and the adjacency).
  *
  */
-void MMG2D_Free_Triangles(MMG5_pMesh mesh) {
+void MMG2D_Free_triangles(MMG5_pMesh mesh) {
 
   if ( mesh->adja )
     _MMG5_DEL_MEM(mesh,mesh->adja,(3*mesh->ntmax+5)*sizeof(int));
@@ -229,7 +229,7 @@ void MMG2D_Free_Triangles(MMG5_pMesh mesh) {
  * Free the mesh edges (and the associated xpoints).
  *
  */
-void MMG2D_Free_Edges(MMG5_pMesh mesh) {
+void MMG2D_Free_edges(MMG5_pMesh mesh) {
 
   if ( mesh->edge )
     _MMG5_DEL_MEM(mesh,mesh->edge,(mesh->namax+1)*sizeof(MMG5_Edge));
@@ -253,7 +253,7 @@ void MMG2D_Free_Edges(MMG5_pMesh mesh) {
  * Free the solution.
  *
  */
-void MMG2D_Free_Solutions(MMG5_pMesh mesh,MMG5_pSol sol) {
+void MMG2D_Free_solutions(MMG5_pMesh mesh,MMG5_pSol sol) {
 
   /* sol */
   if ( sol && sol->m )
