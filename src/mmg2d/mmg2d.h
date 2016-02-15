@@ -232,12 +232,12 @@ static const unsigned int MMG2_inxt[5] = {1,2,0,1,2};
      mesh->tria[klink].v[2]  = klink+1;                                 \
                                                                         \
    if ( mesh->adja ) {                                                  \
-                      /* adja table */                                  \
-                      _MMG5_ADD_MEM(mesh,3*(mesh->ntmax-oldSiz)*sizeof(int), \
-                                      "larger adja table",law);         \
-                      _MMG5_SAFE_RECALLOC(mesh->adja,3*mesh->nt+5,3*mesh->ntmax+5,int \
-                                            ,"larger adja table");      \
-                      }                                                 \
+     /* adja table */                                                   \
+     _MMG5_ADD_MEM(mesh,3*(mesh->ntmax-oldSiz)*sizeof(int),             \
+                   "larger adja table",law);                            \
+     _MMG5_SAFE_RECALLOC(mesh->adja,3*oldSiz+5,3*mesh->ntmax+5,int      \
+                         ,"larger adja table");                         \
+   }                                                                    \
                                                                         \
    /* We try again to add the point */                                  \
    jel = _MMG2D_newElt(mesh);                                           \
