@@ -166,7 +166,8 @@ typedef struct {
   int      v[3]; /*!< Vertices of the triangle */
   int      ref; /*!< Reference of the triangle */
   int      base;
-  int      cc;
+  int      cc; /*!< used to store the tetra + tetra face indices
+                 that allow to access to the tria */
   int      edg[3]; /*!< edg[i] contains the ref of the \f$i^{th}\f$ edge
                      of triangle */
   int      flag;

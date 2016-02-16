@@ -1424,5 +1424,20 @@ int MMG5_searchlen(MMG5_pMesh,MMG5_pSol, double, double, int *,char);
  *
  */
 int MMG3D_Get_adjaVertices(MMG5_pMesh mesh, int ip, int vtab[MMG3D_LMAX]);
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param ktri index of the boundary triangle.
+ * \param ktet pointer toward the index of the tetra (filled by the function).
+ * \param iface pointer toward the index of the face of the tetra \a ktet that
+ * correspond to the boundary tria \a ktri.
+ * \return 0 if fail, 1 otherwise
+ *
+ * Fill \a ktet by the index of the tetra to which belong a boundary triangle
+ * and \a iface by the index ofthe face of the tetra that correspond to the
+ * triangle.
+ *
+ */
+int MMG3D_Get_tetFromTria(MMG5_pMesh mesh, int ktri, int *ktet, int *iface);
+
 
 #endif

@@ -245,6 +245,15 @@ int main(int argc,char *argv[]) {
   if ( MMG3D_saveSol(mmgMesh,mmgSol,outname) != 1 )
     exit(EXIT_FAILURE);
 
+
+  for (int i=1; i<=mmgMesh->nt; ++i ) {
+    int ktet, iface;
+    MMG3D_Get_tetFromTria(mmgMesh,i,&ktet,&iface);
+    printf("Bdry Tria %d ->  %d %d\n",i,ktet, iface);
+
+  }
+
+
   /* 9) free the MMG3D5 structures */
   MMG3D_Free_all(MMG5_ARG_start,
                  MMG5_ARG_ppMesh,&mmgMesh,MMG5_ARG_ppMet,&mmgSol,

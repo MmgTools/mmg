@@ -1022,6 +1022,11 @@ int _MMG5_bdryTria(MMG5_pMesh mesh) {
       ptt->v[0] = pt->v[_MMG5_idir[i][0]];
       ptt->v[1] = pt->v[_MMG5_idir[i][1]];
       ptt->v[2] = pt->v[_MMG5_idir[i][2]];
+
+      /* the cc field is used to be able to recover the tetra (and its face)
+       * from which comes a boundary triangle */
+      ptt->cc = 4*k + i;
+
       if ( !adj ) {
         if ( pxt ) {
           if ( pxt->tag[_MMG5_iarf[i][0]] )  ptt->tag[0] = pxt->tag[_MMG5_iarf[i][0]];
