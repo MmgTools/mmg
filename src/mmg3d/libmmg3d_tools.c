@@ -683,6 +683,34 @@ void MMG3D_searchqua(MMG5_pMesh mesh,MMG5_pSol met,double critmin, int *eltab,
 
 /**
  * \param mesh pointer toward the mesh structure.
+ * \param ktri index of the boundary triangle.
+ * \param ktet pointer toward the index of the tetra (filled by the function).
+ * \param iface pointer toward the index of the face of the tetra \a ktet that
+ * correspond to the boundary tria \a ktri.
+ * \return 0 if fail, 1 otherwise
+ *
+ * Fill \a ktet by the index of the tetra to which belong a boundary triangle
+ * and \a iface by the index ofthe face of the tetra that correspond to the
+ * triangle.
+ *
+ */
+int MMG3D_Get_tetFromTria(MMG5_pMesh mesh, int ktri, int *ktet, int *iface)
+{
+  int val;
+
+  val = mesh->tria[ktri].cc;
+
+  if ( !val ) return(0);
+
+  *ktet = val/4;
+
+  *iface = val%4;
+
+  return 1;
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the sol structure.
  * \param lmin minimum edge length.
  * \param lmax maximum ede length.
@@ -909,3 +937,4 @@ int MMG3D_DoSol(MMG5_pMesh mesh,MMG5_pSol met) {
     _MMG5_SAFE_FREE(mark);
     return(1);
 }
+
