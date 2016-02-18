@@ -503,8 +503,8 @@ int MMG3D_Get_vertex(MMG5_pMesh mesh, double* c0, double* c1, double* c2, int* r
 int MMG3D_Set_tetrahedron(MMG5_pMesh mesh, int v0, int v1, int v2, int v3, int ref, int pos) {
   MMG5_pTetra pt;
   MMG5_pPoint ppt;
-  double aux, vol;
-  int    j, ip;
+  double vol;
+  int    aux,j, ip;
 
   if ( !mesh->ne ) {
     fprintf(stdout,"  ## Error: You must set the number of elements with the");
@@ -1476,7 +1476,12 @@ int MMG3D_Get_iparameter(MMG5_pMesh mesh, int iparam) {
     return ( mesh->info.ddebug );
     break;
   case MMG3D_IPARAM_angle :
-    return ( mesh->info.dhd );
+    if ( mesh->info.dhd <= 0. ) {
+      return ( 0 );
+    }
+    else {
+      return ( 1 );
+    }
     break;
   case MMG3D_IPARAM_iso :
     return ( mesh->info.iso );

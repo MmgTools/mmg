@@ -1155,7 +1155,12 @@ int MMGS_Get_iparameter(MMG5_pMesh mesh, int iparam) {
     return ( mesh->info.ddebug );
     break;
   case MMGS_IPARAM_angle :
-    return ( mesh->info.dhd );
+    if ( mesh->info.dhd <= 0. ) {
+      return ( 0 );
+    }
+    else {
+      return ( 1 );
+    }
     break;
   case MMGS_IPARAM_noinsert :
     return ( mesh->info.noinsert );
