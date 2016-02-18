@@ -473,6 +473,50 @@ int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol sol)
 
 /**
  * \param mesh pointer toward the mesh structure.
+ * \return 0 if fail (lack of memory), 1 otherwise.
+ *
+ * Clean the mesh structure when we just call the MMG2D_Free_Triangles and
+ * MMG2D_Free_Edges functions between 2 call of the MMG2D_mmg2dmesh function:
+ *   - Allocate the tria and edge structures if needed;
+ *   - Reset the tags at vertices.
+ *
+ */
+static inline
+int _MMG2D_restart(MMG5_pMesh mesh){
+  int k;
+
+ /** If needed, reallocate the missing structures */
+  if ( !mesh->tria ) {
+    /* If we call the library more than one time and if we free the triangles
+     * using the MMG2D_Free_triangles function we need to reallocate it */
+    _MMG5_ADD_MEM(mesh,(mesh->ntmax+1)*sizeof(MMG5_Tria),
+                  "initial triangles",return(0));
+    _MMG5_SAFE_CALLOC(mesh->tria,mesh->ntmax+1,MMG5_Tria);
+    mesh->nenil = mesh->nt + 1;
+    for ( k=mesh->nenil; k<mesh->ntmax-1; k++) {
+      mesh->tria[k].v[2] = k+1;
+    }
+  }
+  if ( !mesh->edge ) {
+    /* If we call the library more than one time and if we free the triangles
+     * using the MMG2D_Free_triangles function we need to reallocate it */
+    _MMG5_ADD_MEM(mesh,(mesh->namax+1)*sizeof(MMG5_Edge),
+                  "initial edges",return(0));
+    _MMG5_SAFE_CALLOC(mesh->edge,mesh->namax+1,MMG5_Edge);
+    mesh->nanil = mesh->na + 1;
+    for ( k=mesh->nanil; k<mesh->namax-1; k++) {
+      mesh->edge[k].b = k+1;
+    }
+  }
+
+  for ( k=1; k<=mesh->np;  ++k ) {
+    mesh->point[k].tag = 0;
+  }
+  return 1;
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward a sol structure (metric).
  * \return \ref MMG5_SUCCESS if success, \ref MMG5_LOWFAILURE if failed
  * but a conform mesh is saved and \ref MMG5_STRONGFAILURE if failed and we
@@ -484,7 +528,6 @@ int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol sol)
 int MMG2D_mmg2dmesh(MMG5_pMesh mesh,MMG5_pSol sol) {
   mytime    ctim[TIMEMAX];
   char      stim[32];
-  int       k;
 
   fprintf(stdout,"  -- MMG2D, Release %s (%s) \n",MG_VER,MG_REL);
   fprintf(stdout,"     %s\n",MG_CPY);
@@ -554,27 +597,9 @@ int MMG2D_mmg2dmesh(MMG5_pMesh mesh,MMG5_pSol sol) {
   /* analysis */
   chrono(ON,&ctim[2]);
 
-  /** If needed, reallocate the missing structures */
-  if ( !mesh->tria ) {
-    /* If we call the library more than one time and if we free the triangles
-     * using the MMG2D_Free_triangles function we need to reallocate it */
-    _MMG5_ADD_MEM(mesh,(mesh->ntmax+1)*sizeof(MMG5_Tria),"initial triangles",return(0));
-    _MMG5_SAFE_CALLOC(mesh->tria,mesh->ntmax+1,MMG5_Tria);
-    mesh->nenil = mesh->nt + 1;
-    for ( k=mesh->nenil; k<mesh->ntmax-1; k++) {
-      mesh->tria[k].v[2] = k+1;
-    }
-  }
-  if ( !mesh->edge ) {
-    /* If we call the library more than one time and if we free the triangles
-     * using the MMG2D_Free_triangles function we need to reallocate it */
-    _MMG5_ADD_MEM(mesh,(mesh->namax+1)*sizeof(MMG5_Edge),"initial edges",return(0));
-    _MMG5_SAFE_CALLOC(mesh->edge,mesh->namax+1,MMG5_Edge);
-    mesh->nanil = mesh->na + 1;
-    for ( k=mesh->nanil; k<mesh->namax-1; k++) {
-      mesh->edge[k].b = k+1;
-    }
-  }
+  if ( !_MMG2D_restart(mesh) ) {
+    _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
+  };
 
   if ( mesh->info.imprim )   fprintf(stdout,"\n  -- PHASE 1 : DATA ANALYSIS\n");
   if ( abs(mesh->info.imprim) > 4 )
