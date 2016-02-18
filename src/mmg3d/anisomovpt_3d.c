@@ -190,9 +190,11 @@ int _MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met,int *listv,
   double            *n,r[3][3],lispoi[3*MMG3D_LMAX+1],ux,uy,uz,det2d;
   double            detloc,gv[2],step,lambda[3];
   double            uv[2],o[3],no[3],to[3],*m0;
-  double            calold,calnew,caltmp,callist[ilistv];
+  double            calold,calnew,caltmp,*callist;
   int               k,kel,iel,l,n0,na,nb,ntempa,ntempb,ntempc,nxp;
   unsigned char     i0,iface,i;
+  // Dynamic alloc for windows comptibility
+  _MMG5_SAFE_MALLOC(callist, ilistv, double);
 
   step = 0.1;
   if ( ilists < 2 )      return(0);
@@ -208,7 +210,10 @@ int _MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met,int *listv,
   n = &(mesh->xpoint[p0->xp].n1[0]);
 
   /** Step 1 : rotation matrix that sends normal n to the third coordinate vector of R^3 */
-  if ( !_MMG5_rotmatrix(n,r) ) return(0);
+  if ( !_MMG5_rotmatrix(n,r) ) {
+    _MMG5_SAFE_FREE(callist);
+    return(0);
+  }
 
   /** Step 2 : rotation of the oriented surfacic ball with r : lispoi[k] is the common edge
       between faces lists[k-1] and lists[k] */
@@ -303,10 +308,16 @@ int _MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met,int *listv,
   /* Check all projections over tangent plane. */
   for (k=0; k<ilists-1; k++) {
     det2d = lispoi[3*k+1]*lispoi[3*(k+1)+2] - lispoi[3*k+2]*lispoi[3*(k+1)+1];
-    if ( det2d < 0.0 )  return(0);
+    if ( det2d < 0.0 ) {
+      _MMG5_SAFE_FREE(callist);
+      return(0);
+    }
   }
   det2d = lispoi[3*(ilists-1)+1]*lispoi[3*0+2] - lispoi[3*(ilists-1)+2]*lispoi[3*0+1];
-  if ( det2d < 0.0 )    return(0);
+  if ( det2d < 0.0 ) {
+    _MMG5_SAFE_FREE(callist);
+    return(0);
+  }
 
   /** Step 3 :  Compute gradient towards optimal position = centre of mass of the
       ball, projected to tangent plane */
@@ -322,11 +333,15 @@ int _MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met,int *listv,
     _MMG5_tet2tri(mesh,iel,iface,&tt);
 
     if(!_MMG5_bezierCP(mesh,&tt,&pb,MG_GET(pxt->ori,iface))){
+      _MMG5_SAFE_FREE(callist);
       return(0);
     }
 
     /* Compute integral of sqrt(T^J(xi)  M(P(xi)) J(xi)) * P(xi) over the triangle */
-    if ( !_MMG5_elementWeight(mesh,met,&tt,p0,&pb,r,gv) )  return(0);
+    if ( !_MMG5_elementWeight(mesh,met,&tt,p0,&pb,r,gv) ) {
+      _MMG5_SAFE_FREE(callist);
+      return(0);
+    }
   }
 
   /* At this point : gv = - gradient of V = direction to follow */
@@ -341,7 +356,10 @@ int _MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met,int *listv,
         break;
       }
     }
-    if ( k == ilists ) return(0);
+    if ( k == ilists ) {
+      _MMG5_SAFE_FREE(callist);
+      return(0);
+    }
   }
   else {
     for (k=ilists-1; k>=0; k--) {
@@ -351,13 +369,19 @@ int _MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met,int *listv,
         break;
       }
     }
-    if ( k == -1 ) return(0);
+    if ( k == -1 ) {
+      _MMG5_SAFE_FREE(callist);
+      return(0);
+    }
   }
 
   /* Sizing of time step : make sure point does not go out corresponding triangle. */
   det2d = -gv[1]*(lispoi[3*(kel+1)+1] - lispoi[3*(kel)+1]) + \
     gv[0]*(lispoi[3*(kel+1)+2] - lispoi[3*(kel)+2]);
-  if ( fabs(det2d) < _MMG5_EPSD ) return(0);
+  if ( fabs(det2d) < _MMG5_EPSD ) {
+    _MMG5_SAFE_FREE(callist);
+    return(0);
+  }
 
   det2d = 1.0 / det2d;
   step *= det2d;
@@ -371,7 +395,10 @@ int _MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met,int *listv,
 
   /* Computation of the barycentric coordinates of the new point in the corresponding triangle. */
   det2d = lispoi[3*kel+1]*lispoi[3*(kel+1)+2] - lispoi[3*kel+2]*lispoi[3*(kel+1)+1];
-  if ( det2d < _MMG5_EPSD )    return(0);
+  if ( det2d < _MMG5_EPSD ) {
+    _MMG5_SAFE_FREE(callist);
+    return(0);
+  }
   det2d = 1.0 / det2d;
   lambda[1] = lispoi[3*(kel+1)+2]*gv[0] - lispoi[3*(kel+1)+1]*gv[1];
   lambda[2] = -lispoi[3*(kel)+2]*gv[0] + lispoi[3*(kel)+1]*gv[1];
@@ -388,6 +415,7 @@ int _MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met,int *listv,
   _MMG5_tet2tri(mesh,iel,iface,&tt);
 
   if(!_MMG5_bezierCP(mesh,&tt,&pb,MG_GET(pxt->ori,iface))){
+    _MMG5_SAFE_FREE(callist);
     return(0);
   }
 
@@ -452,6 +480,7 @@ int _MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met,int *listv,
     }
   }
   if(!_MMG3D_bezierInt(&pb,uv,o,no,to)){
+    _MMG5_SAFE_FREE(callist);
     return(0);
   }
 
@@ -469,6 +498,7 @@ int _MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met,int *listv,
   if ( nxp > mesh->xpmax ) {
     _MMG5_TAB_RECALLOC(mesh,mesh->xpoint,mesh->xpmax,0.2,MMG5_xPoint,
                        "larger xpoint table",
+                       _MMG5_SAFE_FREE(callist);
                        return(0));
     n = &(mesh->xpoint[p0->xp].n1[0]);
   }
@@ -480,7 +510,10 @@ int _MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met,int *listv,
   pxp->n1[2] = no[2];
 
   // parallel transport of metric at p0 to new point.
-  if ( !_MMG5_paratmet(p0->c,n,m0,o,no,&met->m[0]) ) return 0;
+  if ( !_MMG5_paratmet(p0->c,n,m0,o,no,&met->m[0]) ) {
+    _MMG5_SAFE_FREE(callist);
+    return 0;
+  }
 
   /* For each surfacic triangle, build a virtual displaced triangle for check purposes */
   calold = calnew = DBL_MAX;
@@ -495,13 +528,28 @@ int _MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met,int *listv,
     assert(i<3);
     tt.v[i] = 0;
     caltmp = _MMG5_caltri(mesh,met,&tt);
-    if ( caltmp < _MMG5_EPSD )        return(0);
+    if ( caltmp < _MMG5_EPSD ) {
+      _MMG5_SAFE_FREE(callist);
+      return(0);
+    }
     calnew = MG_MIN(calnew,caltmp);
   }
-  if ( calold < _MMG5_NULKAL && calnew <= calold )    return(0);
-  else if (calnew < _MMG5_NULKAL) return(0);
-  else if (improve && calnew < 1.02*calold) return(0);
-  else if ( calnew < 0.3*calold )        return(0);
+  if ( calold < _MMG5_NULKAL && calnew <= calold ) {
+    _MMG5_SAFE_FREE(callist);
+    return(0);
+  }
+  else if (calnew < _MMG5_NULKAL) {
+    _MMG5_SAFE_FREE(callist);
+    return(0);
+  }
+  else if (improve && calnew < 1.02*calold) {
+    _MMG5_SAFE_FREE(callist);
+    return(0);
+  }
+  else if ( calnew < 0.3*calold ) {
+    _MMG5_SAFE_FREE(callist);
+    return(0);
+  }
   memset(pxp,0,sizeof(MMG5_xPoint));
 
   /* Test : check whether all volumes remain positive with new position of the point */
@@ -515,20 +563,27 @@ int _MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met,int *listv,
     pt0->v[i0] = 0;
     calold = MG_MIN(calold, pt->qual);
     callist[l]=_MMG5_orcal(mesh,met,0);
-    if ( callist[l] < _MMG5_EPSD )        return(0);
+    if ( callist[l] < _MMG5_EPSD )  {
+      _MMG5_SAFE_FREE(callist);
+      return(0);
+    }
     calnew = MG_MIN(calnew,callist[l]);
   }
 
   if ( calold < _MMG5_NULKAL && calnew <= calold ) {
+    _MMG5_SAFE_FREE(callist);
     return(0);
   }
   else if (calnew < _MMG5_NULKAL) {
+    _MMG5_SAFE_FREE(callist);
     return(0);
   }
   else if (improve && calnew < calold) {
+    _MMG5_SAFE_FREE(callist);
     return(0);
   }
   else if ( calnew < 0.3*calold ) {
+    _MMG5_SAFE_FREE(callist);
     return(0);
   }
 
@@ -546,6 +601,7 @@ int _MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met,int *listv,
   for(l=0; l<ilistv; l++){
     (&mesh->tetra[listv[l]/4])->qual= callist[l];
   }
+  _MMG5_SAFE_FREE(callist);
   return(1);
 }
 

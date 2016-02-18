@@ -986,7 +986,7 @@ double _MMG5_ridSizeInTangentDir(MMG5_pMesh mesh, MMG5_pPoint p0, int idp,
  *
  **/
 double _MMG5_ridSizeInNormalDir(MMG5_pMesh mesh,int i0,double* bcu,
-                                _MMG5_Bezier *b,int isqhmin,int isqhmax)
+                                _MMG5_Bezier *b,double isqhmin,double isqhmax)
 {
   double lambda[2],Jacb[3][2],Hb[3][3],tau[3],ll,l,gammasec[3],c[3];
   double ps,kappacur;
