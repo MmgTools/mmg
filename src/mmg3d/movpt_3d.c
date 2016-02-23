@@ -471,7 +471,7 @@ int _MMG5_movbdyregpt_iso(MMG5_pMesh mesh, MMG5_pSol met,int *listv,
     assert(i<3);
     tt.v[i] = 0;
     caltmp = _MMG5_caltri(mesh,met,&tt);
-    if ( caltmp < _MMG5_EPSD )        return(0.0);
+    if ( caltmp < _MMG5_EPSD )        return(0);
     calnew = MG_MIN(calnew,caltmp);
   }
   if ( calold < _MMG5_NULKAL && calnew <= calold )    return(0);

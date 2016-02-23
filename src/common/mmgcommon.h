@@ -446,7 +446,7 @@ void   _MMG5_printTria(MMG5_pMesh mesh,char* fileName);
 extern int    _MMG5_rotmatrix(double n[3],double r[3][3]);
 int    _MMG5_invmat(double *m,double *mi);
 int    _MMG5_invmatg(double m[9],double mi[9]);
-double _MMG5_ridSizeInNormalDir(MMG5_pMesh,int,double*,_MMG5_pBezier,int,int);
+double _MMG5_ridSizeInNormalDir(MMG5_pMesh,int,double*,_MMG5_pBezier,double,double);
 double _MMG5_ridSizeInTangentDir(MMG5_pMesh, MMG5_pPoint,int,int*,double,double);
 int    _MMG5_rootDeg3(double a[4],DOUBLE_COMPLEX r[3]);
 extern long _MMG5_safeLL2LCast(long long val);

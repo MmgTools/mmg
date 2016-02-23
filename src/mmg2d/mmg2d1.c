@@ -369,7 +369,7 @@ static int analar(MMG5_pMesh mesh,MMG5_pSol sol,pBucket bucket,
   (*ni)  = 0;
   (*nc)  = 0;
   nt  = mesh->nt;
-  npp = 0.0;
+  npp = 0;
 
   for (k=1; k<=nt; k++) {
     pt = &mesh->tria[k];

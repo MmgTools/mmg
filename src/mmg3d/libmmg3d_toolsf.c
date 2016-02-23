@@ -145,6 +145,17 @@ FORTRAN_NAME(MMG3D_SEARCHLEN,mmg3d_searchlen,
 }
 
 /**
+ * See \ref MMG3D_Get_tetFromTria function in \ref mmg3d/libmmg3d.h file.
+ */
+FORTRAN_NAME(MMG3D_GET_TETFROMTRIA,mmg3d_get_tetfromtria,
+             (MMG5_pMesh *mesh,int *ktri, int *ktet, int *iface,int *retval),
+             (mesh,ktri,ktet,iface,retval)) {
+
+  *retval = MMG3D_Get_tetFromTria(*mesh,*ktri,ktet,iface);
+  return;
+}
+
+/**
  * See \ref MMG3D_Get_adjaTet function in \ref mmg3d/libmmg3d.h file.
  */
 FORTRAN_NAME(MMG3D_GET_ADJATET,mmg3d_get_adjatet,

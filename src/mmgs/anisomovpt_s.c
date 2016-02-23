@@ -230,7 +230,7 @@ int movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
     caltmp = caleltsig_ani(mesh,met,iel);
     calold = MG_MIN(calold,caltmp);
     caltmp = caleltsig_ani(mesh,met,0);
-    if ( caltmp < _MMG5_EPSD )        return(0.0);
+    if ( caltmp < _MMG5_EPSD )        return(0);
     calnew = MG_MIN(calnew,caltmp);
 
     if ( calold < NULKAL && calnew <= calold )  return(0);
