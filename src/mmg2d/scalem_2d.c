@@ -319,6 +319,12 @@ int MMG2_unscaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
     ppt->c[1] = ppt->c[1] * dd + info->min[1];
   }
 
+
+  /* unscale paramter values */
+  mesh->info.hmin  *= dd;
+  mesh->info.hmax  *= dd;
+  mesh->info.hausd *= dd;
+
   /* de-normalize metric */
   if ( !sol->np )  return(1);
   switch (sol->size) {
@@ -337,11 +343,5 @@ int MMG2_unscaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
     break;
   }
 
-  /* unscale paramter values */
-  mesh->info.hmin  *= dd;
-  mesh->info.hmax  *= dd;
-  mesh->info.hausd *= dd;
-
   return(1);
 }
-

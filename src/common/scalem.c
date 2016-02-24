@@ -108,6 +108,14 @@ int _MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met) {
 
   mesh->info.hausd *= dd;
 
+  /* normalize local parameters */
+  for (k=0; k<mesh->info.npar; k++) {
+    par = &mesh->info.par[k];
+    par->hmin  *= dd;
+    par->hmax  *= dd;
+    par->hausd *= dd;
+  }
+
   /* Check if hmin/hmax have been provided by the user and scale it if yes */
   sethmin = 0;
   sethmax = 0;
@@ -241,14 +249,6 @@ int _MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met) {
     }
   }
 
-  /* normalize local parameters */
-  for (k=0; k<mesh->info.npar; k++) {
-    par = &mesh->info.par[k];
-    par->hmin  *= dd;
-    par->hmax  *= dd;
-    par->hausd *= dd;
-  }
-
   return(1);
 }
 
@@ -276,6 +276,19 @@ int _MMG5_unscaleMesh(MMG5_pMesh mesh,MMG5_pSol met) {
     ppt->c[2] = ppt->c[2] * dd + mesh->info.min[2];
   }
 
+  /* unscale paramter values */
+  mesh->info.hmin  *= dd;
+  mesh->info.hmax  *= dd;
+  mesh->info.hausd *= dd;
+
+  /* normalize local parameters */
+  for (k=0; k<mesh->info.npar; k++) {
+    par = &mesh->info.par[k];
+    par->hmin  *= dd;
+    par->hmax  *= dd;
+    par->hausd *= dd;
+  }
+
   /* unscale sizes */
   if ( met->m ) {
     if ( met->size == 6 ) {
@@ -292,19 +305,6 @@ int _MMG5_unscaleMesh(MMG5_pMesh mesh,MMG5_pSol met) {
         if ( MG_VOK(ppt) )  met->m[k] *= dd;
       }
     }
-  }
-
-  /* unscale paramter values */
-  mesh->info.hmin  *= dd;
-  mesh->info.hmax  *= dd;
-  mesh->info.hausd *= dd;
-
-  /* normalize local parameters */
-  for (k=0; k<mesh->info.npar; k++) {
-    par = &mesh->info.par[k];
-    par->hmin  *= dd;
-    par->hmax  *= dd;
-    par->hausd *= dd;
   }
 
   return(1);

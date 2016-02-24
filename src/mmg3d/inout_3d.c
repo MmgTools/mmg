@@ -92,7 +92,8 @@ static double _MMG5_swapd(double sbin)
 /**
  * \param mesh pointer toward the mesh structure.
  * \param filename name of file.
- * \return 0 if failed, 1 otherwise.
+ * \return 0 if the file is not found, -1 if we detect mismatch parameters,
+ * 1 otherwise.
  *
  * Read mesh data.
  *
