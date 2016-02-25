@@ -755,3 +755,101 @@ long _MMG5_safeLL2LCast(long long val)
 /* 	return(_MMG5_mult_complex(z1,_MMG5_inv_complex(z2))); */
 /* } */
 /* #endif */
+
+
+/**
+ * \param mesh pointer toward the mesh structure (for count of used memory).
+ * \param node pointer toward a _MMG5_Node (cell for linked list)
+ * \return 1 if we can alloc the node \a node, 0 otherwise.
+ *
+ * Node allocation.
+ *
+ */
+inline
+int _MMG5_Alloc_node( MMG5_pMesh mesh, _MMG5_Node **node ) {
+
+  _MMG5_ADD_MEM(mesh,sizeof(_MMG5_Node),"boundary reference node",
+                return(0););
+
+  _MMG5_SAFE_MALLOC(*node,1,_MMG5_Node);
+
+  return(1);
+}
+
+/**
+ * \param mesh pointer toward the mesh structure (for count of used memory).
+ * \param liLi pointer toward the address of the root of the linked list.
+ * \param val value to add to the linked list.
+ * \return 1 if the node is inserted, 0 if the node is not inserted, -1 if fail.
+ *
+ * Add a node with value \a val to a sorted linked list with unique entries.
+ *
+ * \Remark as the linked list had unique entries, we don't insert a node if it
+ * exists.
+ *
+ */
+inline
+int _MMG5_Add_node( MMG5_pMesh mesh, _MMG5_Node **liLi, int val ) {
+  _MMG5_Node  *newNode, *cur;
+
+  cur = *liLi;
+
+  /* Travel through the linked list and search if the value val exist or, if
+   * not, where to insert it */
+  if ( cur ) {
+    if ( val < (*liLi)->val ) {
+      /* Add a value at the list head */
+      if ( !_MMG5_Alloc_node(mesh,&newNode) ) return(-1);
+
+      newNode->val = val;
+      newNode->nxt = (*liLi);
+
+      (*liLi) = newNode;
+
+      return 1;
+
+    }
+    else if (val == (*liLi)->val ) return(0);
+
+    while ( cur->nxt && ( val >= (cur->nxt)->val) )
+      cur = cur->nxt;
+
+    if ( val == cur->val ) return(0);
+
+    if ( !_MMG5_Alloc_node(mesh,&newNode) ) return(-1);
+
+    newNode->val = val;
+    newNode->nxt = cur->nxt;
+    cur->nxt = newNode;
+  }
+  else {
+    if ( !_MMG5_Alloc_node(mesh,&newNode) ) return(-1);
+
+    newNode->val = val;
+    newNode->nxt = NULL;
+
+    *liLi = newNode;
+  }
+
+  return(1);
+}
+
+/**
+ * \param mesh pointer toward the mesh structure (for count of used memory).
+ * \param liLi pointer toward the root of the linked list.
+ *
+ * Free the memory used by the linked list whose root is \a liLi.
+ *
+ */
+inline
+void _MMG5_Free_linkedList( MMG5_pMesh mesh, _MMG5_Node *liLi ) {
+  _MMG5_Node *cur,*nxt;
+
+  cur = liLi;
+  while (cur) {
+    nxt = cur;
+    cur = cur->nxt;
+
+    _MMG5_DEL_MEM(mesh,nxt,sizeof(_MMG5_Node));
+  }
+}

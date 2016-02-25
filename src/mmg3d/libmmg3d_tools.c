@@ -170,6 +170,81 @@ void MMG3D_defaultValues(MMG5_pMesh mesh) {
   exit(EXIT_FAILURE);
 }
 
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \return 1 if success, 0 otherwise.
+ *
+ * Write a DEFAULT.mmg3d file containing the default values of parameters that
+ * can be locally defined.
+ *
+ */
+static inline
+int _MMG3D_writeLocalParam( MMG5_pMesh mesh ) {
+  _MMG5_Node *bdyRefs, *cur;
+  int        npar,k,ier;
+  char       data[]="DEFAULT.mmg3d";
+  FILE       *out;
+
+
+  /** Count the number of different boundary references and list it */
+  bdyRefs = NULL;
+  npar = 0;
+
+  k = mesh->nt? mesh->tria[1].ref : 0;
+
+  /* Try to alloc the first node */
+  ier = _MMG5_Add_node( mesh, &bdyRefs, k );
+  if ( ier < 0 ) {
+    printf("  ## Error: unable to allocate the first boundary"
+           " reference node.\n");
+    return(0);
+  }
+  else {
+    assert(ier);
+    npar = 1;
+  }
+
+  for ( k=2; k<=mesh->nt; ++k ) {
+    ier = _MMG5_Add_node( mesh, &bdyRefs, mesh->tria[k].ref );
+
+    if ( ier < 0 ) {
+      printf("  ## Warning: unable to list the boundary references.\n"
+             "              Uncomplete parameters file.\n" );
+      break;
+    }
+    else if ( ier ) ++npar;
+    else puts("not ier");
+  }
+
+  printf("npar %d\n",npar);
+
+  /** Save the local parameters file */
+  if ( !(out = fopen(data,"wb")) ) {
+    fprintf(stderr,"  ** UNABLE TO OPEN %s.\n",data);
+    return(0);
+  }
+
+  fprintf(stdout,"  %%%% %s OPENED\n",data);
+
+  fprintf(out,"parameters\n %d",npar);
+
+  cur = bdyRefs;
+  while( cur ) {
+    printf(" %p %p %d \n", cur,cur->nxt, cur->val);
+    fprintf(out,"%d MMG5_Triangle %e %e %e \n",cur->val,
+            mesh->info.hmin, mesh->info.hmax,mesh->info.hausd);
+    cur = cur->nxt;
+  }
+
+  fclose(out);
+
+  _MMG5_Free_linkedList(mesh,bdyRefs);
+
+  return(1);
+}
+
+
 /**
  * \param argc number of command line arguments.
  * \param argv command line arguments.
@@ -218,9 +293,16 @@ int MMG3D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
             exit(EXIT_FAILURE);
         break;
 #endif
-      case 'd':  /* debug */
-        if ( !MMG3D_Set_iparameter(mesh,met,MMG3D_IPARAM_debug,1) )
-          exit(EXIT_FAILURE);
+      case 'd':
+        if ( !strcmp(argv[i],"-default") ) {
+          mesh->mark=1;
+        }
+        else {
+          /* debug */
+          if ( !MMG3D_Set_iparameter(mesh,met,MMG3D_IPARAM_debug,1) ) {
+            exit(EXIT_FAILURE);
+          }
+        }
         break;
       case 'h':
         if ( !strcmp(argv[i],"-hmin") && ++i < argc ) {
@@ -440,6 +522,7 @@ int MMG3D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
     if ( !MMG3D_Set_outputSolName(mesh,met,"") )
       exit(EXIT_FAILURE);
   }
+
   return(1);
 }
 

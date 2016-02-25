@@ -45,11 +45,13 @@ void _MMG5_mmgUsage(char *prog) {
   fprintf(stdout,"\nUsage: %s [-v [n]] [opts..] filein [fileout]\n",prog);
 
   fprintf(stdout,"\n** Generic options :\n");
-  fprintf(stdout,"-h      Print this message\n");
-  fprintf(stdout,"-v [n]  Tune level of verbosity, [-10..10]\n");
-  fprintf(stdout,"-m [n]  Set maximal memory size to n Mbytes\n");
-  fprintf(stdout,"-d      Turn on debug mode\n");
-  fprintf(stdout,"-val    Print the default parameters values\n");
+  fprintf(stdout,"-h        Print this message\n");
+  fprintf(stdout,"-v [n]    Tune level of verbosity, [-10..10]\n");
+  fprintf(stdout,"-m [n]    Set maximal memory size to n Mbytes\n");
+  fprintf(stdout,"-d        Turn on debug mode\n");
+  fprintf(stdout,"-val      Print the default parameters values\n");
+  fprintf(stdout,"-default  Save a local parameters file for default parameters"
+          " values\n");
 
   fprintf(stdout,"\n**  File specifications\n");
   fprintf(stdout,"-in  file  input triangulation\n");
@@ -107,3 +109,61 @@ void _MMG5_mmgDefaultValues(MMG5_pMesh mesh) {
           exp(mesh->info.hgrad));
 }
 
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param out pointer toward the file in which to write.
+ * \return 1 if success, 0 otherwise.
+ *
+ * Write a default file containing the default values of parameters that
+ * can be locally defined.
+ *
+ */
+inline
+int _MMG5_writeLocalParam( MMG5_pMesh mesh, FILE *out ) {
+  _MMG5_Node *bdyRefs, *cur;
+  double     dd;
+  int        npar,k,ier;
+
+  /** Count the number of different boundary references and list it */
+  bdyRefs = NULL;
+  npar = 0;
+
+  k = mesh->nt? mesh->tria[1].ref : 0;
+
+  /* Try to alloc the first node */
+  ier = _MMG5_Add_node( mesh, &bdyRefs, k );
+  if ( ier < 0 ) {
+    printf("  ## Error: unable to allocate the first boundary"
+           " reference node.\n");
+    return(0);
+  }
+  else {
+    assert(ier);
+    npar = 1;
+  }
+
+  for ( k=1; k<=mesh->nt; ++k ) {
+    ier = _MMG5_Add_node( mesh, &bdyRefs, mesh->tria[k].ref );
+
+    if ( ier < 0 ) {
+      printf("  ## Warning: unable to list the boundary references.\n"
+             "              Uncomplete parameters file.\n" );
+      break;
+    }
+    else if ( ier ) ++npar;
+  }
+
+  fprintf(out,"parameters\n %d\n",npar);
+
+  dd = mesh->info.delta;
+  cur = bdyRefs;
+  while( cur ) {
+    fprintf(out,"%d Triangle %e %e %e \n",cur->val,
+            mesh->info.hmin, mesh->info.hmax,mesh->info.hausd);
+    cur = cur->nxt;
+  }
+
+  _MMG5_Free_linkedList(mesh,bdyRefs);
+
+  return(1);
+}

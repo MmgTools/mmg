@@ -49,6 +49,115 @@ static void _MMG5_endcod() {
 }
 
 /**
+ * \param mesh pointer toward the mesh structure.
+ * \return 1 if success, 0 otherwise.
+ *
+ * Write a DEFAULT.mmg3d file containing the default values of parameters that
+ * can be locally defined.
+ *
+ */
+static inline
+int _MMG3D_writeLocalParam( MMG5_pMesh mesh ) {
+  char       data[]="DEFAULT.mmg3d";
+  FILE       *out;
+
+  /** Save the local parameters file */
+  if ( !(out = fopen(data,"wb")) ) {
+    fprintf(stderr,"\n  ** UNABLE TO OPEN %s.\n",data);
+    return(0);
+  }
+
+  fprintf(stdout,"\n  %%%% %s OPENED\n",data);
+
+  if (! _MMG5_writeLocalParam(mesh, out) ) return 0;
+
+  fclose(out);
+  fprintf(stdout,"  -- WRITING COMPLETED\n");
+
+  return(1);
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward a sol structure (metric).
+ * \return \ref MMG5_SUCCESS if success, \ref MMG5_LOWFAILURE if failed
+ * but a conform mesh is saved and \ref MMG5_STRONGFAILURE if failed and we
+ * can't save the mesh.
+ *
+ * Program to save the local default parameter file: read the mesh and metric
+ * (needed to compite the hmax/hmin parameters), scale the mesh and compute the
+ * hmax/hmin param, unscale the mesh and write the default parameter file.
+ *
+ */
+static inline
+int _MMG3D_defaultOption(MMG5_pMesh mesh,MMG5_pSol met) {
+  mytime    ctim[TIMEMAX];
+  char      stim[32];
+
+  _MMG3D_Set_commonFunc();
+
+  signal(SIGABRT,_MMG5_excfun);
+  signal(SIGFPE,_MMG5_excfun);
+  signal(SIGILL,_MMG5_excfun);
+  signal(SIGSEGV,_MMG5_excfun);
+  signal(SIGTERM,_MMG5_excfun);
+  signal(SIGINT,_MMG5_excfun);
+
+  tminit(ctim,TIMEMAX);
+  chrono(ON,&(ctim[0]));
+
+  if ( mesh->info.npar ) {
+    fprintf(stdout,"\n  ## Error: "
+            "unable to save of a local parameter file with"
+            " the default parameters values because local parameters"
+            " are provided.\n");
+    _LIBMMG5_RETURN(mesh,met,MMG5_LOWFAILURE);
+  }
+
+
+  if ( mesh->info.imprim ) fprintf(stdout,"\n  -- INPUT DATA\n");
+  /* load data */
+  chrono(ON,&(ctim[1]));
+
+  if ( met->np && (met->np != mesh->np) ) {
+    fprintf(stdout,"  ## WARNING: WRONG SOLUTION NUMBER. IGNORED\n");
+    _MMG5_DEL_MEM(mesh,met->m,(met->size*(met->npmax+1))*sizeof(double));
+    met->np = 0;
+  }
+
+  chrono(OFF,&(ctim[1]));
+  printim(ctim[1].gdif,stim);
+  if ( mesh->info.imprim )
+    fprintf(stdout,"  --  INPUT DATA COMPLETED.     %s\n",stim);
+
+  /* analysis */
+  chrono(ON,&(ctim[2]));
+  MMG3D_setfunc(mesh,met);
+
+  if ( mesh->info.imprim ) {
+    fprintf(stdout,"\n  %s\n   MODULE MMG3D: IMB-LJLL : %s (%s)\n  %s\n",MG_STR,MG_VER,MG_REL,MG_STR);
+    fprintf(stdout,"\n  -- DEFAULT PARAMETERS COMPUTATION\n");
+  }
+
+  /* scaling mesh and hmin/hmax computation*/
+  if ( !_MMG5_scaleMesh(mesh,met) ) _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
+
+  /* unscaling mesh */
+  if ( !_MMG5_unscaleMesh(mesh,met) ) _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
+
+  /* Save the local parameters file */
+  mesh->mark = 0;
+  if ( !_MMG3D_writeLocalParam(mesh) ) {
+    fprintf(stderr,"  ## Error: Unable to save the local parameters file.\n"
+            "            Exit program.\n");
+     _LIBMMG5_RETURN(mesh,met,MMG5_LOWFAILURE);
+  }
+
+  _LIBMMG5_RETURN(mesh,met,MMG5_SUCCESS);
+}
+
+
+/**
  * \param argc number of command line arguments.
  * \param argv command line arguments.
  * \return \ref MMG5_SUCCESS if success.
@@ -144,7 +253,12 @@ int main(int argc,char *argv[]) {
   printim(MMG5_ctim[1].gdif,stim);
   fprintf(stdout,"  -- DATA READING COMPLETED.     %s\n",stim);
 
-  if ( mesh->info.lag > -1 ) {
+  if ( mesh->mark ) {
+    /* Save a local parameters file containing the default parameters */
+    ier = _MMG3D_defaultOption(mesh,met);
+    _MMG5_RETURN_AND_FREE(mesh,met,disp,ier);
+  }
+  else if ( mesh->info.lag > -1 ) {
     ier = MMG3D_mmg3dmov(mesh,met,disp);
   }
   else if ( mesh->info.iso ) {
