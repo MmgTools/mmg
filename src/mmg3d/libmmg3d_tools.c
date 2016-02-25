@@ -784,6 +784,73 @@ int MMG3D_searchlen(MMG5_pMesh mesh, MMG5_pSol met, double lmin,
   return(1);
 }
 
+/**
+ * \param mesh pointer toward the mesh structure
+ * \param met pointer toward the sol structure
+ * \return 1 if success
+ *
+ * Compute isotropic size map according to the mean of the length of the edges
+ * passing through a point.
+ *
+ */
+int MMG3D_DoSol(MMG5_pMesh mesh,MMG5_pSol met) {
+    MMG5_pTetra     pt;
+    MMG5_pPoint     p1,p2;
+    double     ux,uy,uz,dd;
+    int        i,k,ia,ib,ipa,ipb;
+    int       *mark;
+
+    _MMG5_SAFE_CALLOC(mark,mesh->np+1,int);
+
+    /* Memory alloc */
+    met->np     = mesh->np;
+    met->npmax  = mesh->npmax;
+    met->size   = 1;
+    met->dim    = mesh->dim;
+
+    _MMG5_ADD_MEM(mesh,(met->size*(met->npmax+1))*sizeof(double),"solution",return(0));
+    _MMG5_SAFE_CALLOC(met->m,met->size*(met->npmax+1),double);
+
+    /* internal edges */
+    for (k=1; k<=mesh->ne; k++) {
+        pt = &mesh->tetra[k];
+        if ( !pt->v[0] )  continue;
+
+        /* internal edges */
+        for (i=0; i<6; i++) {
+            ia  = _MMG5_iare[i][0];
+            ib  = _MMG5_iare[i][1];
+            ipa = pt->v[ia];
+            ipb = pt->v[ib];
+            p1  = &mesh->point[ipa];
+            p2  = &mesh->point[ipb];
+
+            ux  = p1->c[0] - p2->c[0];
+            uy  = p1->c[1] - p2->c[1];
+            uz  = p1->c[2] - p2->c[2];
+            dd  = sqrt(ux*ux + uy*uy + uz*uz);
+
+            met->m[ipa] += dd;
+            mark[ipa]++;
+            met->m[ipb] += dd;
+            mark[ipb]++;
+        }
+    }
+
+    /* vertex size */
+    for (k=1; k<=mesh->np; k++) {
+        p1 = &mesh->point[k];
+        if ( !mark[k] ) {
+            met->m[k] = mesh->info.hmax;
+            continue;
+        }
+        else
+            met->m[k] = MG_MIN(mesh->info.hmax,MG_MAX(mesh->info.hmin,met->m[k] / (double)mark[k]));
+    }
+    _MMG5_SAFE_FREE(mark);
+    return(1);
+}
+
 /** Old API °°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°*/
 int MMG5_Get_adjaTet(MMG5_pMesh mesh, int kel, int *v0, int *v1, int *v2, int *v3) {
   printf("  ##  MMG5_Get_adjaTet: "
@@ -870,71 +937,3 @@ int MMG5_searchlen(MMG5_pMesh mesh, MMG5_pSol met, double lmin,
 
   return(MMG3D_searchlen(mesh, met,  lmin,lmax,eltab,metRidTyp));
 }
-
-/**
- * \param mesh pointer toward the mesh structure
- * \param met pointer toward the sol structure
- * \return 1 if success
- *
- * Compute isotropic size map according to the mean of the length of the edges
- * passing through a point.
- *
- */
-int MMG3D_DoSol(MMG5_pMesh mesh,MMG5_pSol met) {
-    MMG5_pTetra     pt;
-    MMG5_pPoint     p1,p2;
-    double     ux,uy,uz,dd;
-    int        i,k,ia,ib,ipa,ipb;
-    int       *mark;
-
-    _MMG5_SAFE_CALLOC(mark,mesh->np+1,int);
-
-    /* Memory alloc */
-    met->np     = mesh->np;
-    met->npmax  = mesh->npmax;
-    met->size   = 1;
-    met->dim    = mesh->dim;
-
-    _MMG5_ADD_MEM(mesh,(met->size*(met->npmax+1))*sizeof(double),"solution",return(0));
-    _MMG5_SAFE_CALLOC(met->m,met->size*(met->npmax+1),double);
-
-    /* internal edges */
-    for (k=1; k<=mesh->ne; k++) {
-        pt = &mesh->tetra[k];
-        if ( !pt->v[0] )  continue;
-
-        /* internal edges */
-        for (i=0; i<6; i++) {
-            ia  = _MMG5_iare[i][0];
-            ib  = _MMG5_iare[i][1];
-            ipa = pt->v[ia];
-            ipb = pt->v[ib];
-            p1  = &mesh->point[ipa];
-            p2  = &mesh->point[ipb];
-
-            ux  = p1->c[0] - p2->c[0];
-            uy  = p1->c[1] - p2->c[1];
-            uz  = p1->c[2] - p2->c[2];
-            dd  = sqrt(ux*ux + uy*uy + uz*uz);
-
-            met->m[ipa] += dd;
-            mark[ipa]++;
-            met->m[ipb] += dd;
-            mark[ipb]++;
-        }
-    }
-
-    /* vertex size */
-    for (k=1; k<=mesh->np; k++) {
-        p1 = &mesh->point[k];
-        if ( !mark[k] ) {
-            met->m[k] = mesh->info.hmax;
-            continue;
-        }
-        else
-            met->m[k] = MG_MIN(mesh->info.hmax,MG_MAX(mesh->info.hmin,met->m[k] / (double)mark[k]));
-    }
-    _MMG5_SAFE_FREE(mark);
-    return(1);
-}
-

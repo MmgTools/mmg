@@ -402,20 +402,20 @@ int MMG3D_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met) {
   if ( abs(mesh->info.imprim) > 0 ) {
     if ( !_MMG3D_inqua(mesh,met) ) {
       if ( !_MMG5_unscaleMesh(mesh,met) ) _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
-      _MMG5_RETURN_AND_PACK(mesh,met,NULL,MMG5_LOWFAILURE);
+      _LIBMMG5_RETURN(mesh,met,MMG5_LOWFAILURE);
     }
   }
 
   /* specific meshing */
   if ( mesh->info.optim && !met->np && !MMG3D_DoSol(mesh,met) ) {
     if ( !_MMG5_unscaleMesh(mesh,met) )  _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
-    _MMG5_RETURN_AND_PACK(mesh,met,NULL,MMG5_LOWFAILURE);
+    _LIBMMG5_RETURN(mesh,met,MMG5_LOWFAILURE);
   }
 
   /* mesh analysis */
   if ( !_MMG3D_analys(mesh) ) {
     if ( !_MMG5_unscaleMesh(mesh,met) )  _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
-    _MMG5_RETURN_AND_PACK(mesh,met,NULL,MMG5_LOWFAILURE);
+    _LIBMMG5_RETURN(mesh,met,MMG5_LOWFAILURE);
   }
 
   if ( mesh->info.imprim > 1 && met->m ) _MMG3D_prilen(mesh,met,0);
@@ -565,7 +565,7 @@ int MMG3D_mmg3dls(MMG5_pMesh mesh,MMG5_pSol met) {
   if ( abs(mesh->info.imprim) > 0 ) {
     if ( !_MMG3D_inqua(mesh,met) ) {
       if ( !_MMG5_unscaleMesh(mesh,met) ) _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
-      _MMG5_RETURN_AND_PACK(mesh,met,NULL,MMG5_LOWFAILURE);
+      _LIBMMG5_RETURN(mesh,met,MMG5_LOWFAILURE);
     }
   }
 
@@ -744,7 +744,7 @@ int MMG3D_mmg3dmov(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp) {
 
   if ( abs(mesh->info.imprim) > 0 ) {
     if ( !_MMG3D_inqua(mesh,met) ) {
-      _MMG5_RETURN_AND_PACK(mesh,met,disp,MMG5_LOWFAILURE);
+      _LIBMMG5_RETURN(mesh,met,MMG5_LOWFAILURE);
     }
   }
 
