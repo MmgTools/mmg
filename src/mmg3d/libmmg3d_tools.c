@@ -214,7 +214,6 @@ int _MMG3D_writeLocalParam( MMG5_pMesh mesh ) {
       break;
     }
     else if ( ier ) ++npar;
-    else puts("not ier");
   }
 
   printf("npar %d\n",npar);
