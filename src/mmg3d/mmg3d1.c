@@ -916,7 +916,10 @@ _MMG5_anatetv(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
           else
             ier = _MMG5_intmet(mesh,met,k,i,ip,0.5);
 
-          if (!ier) return(-1);
+          if (!ier) {
+            // Unable to compute the metric
+            return(-1);
+          }
           else if ( ier < 0 ) {
             _MMG3D_delPt(mesh,ip);
             continue;

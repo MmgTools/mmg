@@ -58,11 +58,23 @@ int intregmet(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,double s,double mr[6]) 
   MMG5_pTria     pt;
 
   pt  = &mesh->tria[k];
+
   return(_MMG5_interpreg_ani(mesh,met,pt,i,s,mr));
 }
 
-/* linear interpolation of sizemap along edge i of tria k */
-void intmet_iso(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int ip,double s) {
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param k triangle in which we interpole the metrics.
+ * \param i edge along which we interpole the metrics.
+ * \param ip index of point in which we compute the interpolated metric.
+ * \param s parameter at which we compute the interpolation.
+ * \return 1 if success, 0 otherwise.
+ *
+ * Linear interpolation of sizemap along edge i of tria k.
+ *
+ */
+int intmet_iso(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int ip,double s) {
   MMG5_pTria  pt;
   int    ip1,ip2;
   char   i1,i2;
@@ -73,6 +85,7 @@ void intmet_iso(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int ip,double s) {
   ip1 = pt->v[i1];
   ip2 = pt->v[i2];
   met->m[ip] = s * (met->m[ip1] + met->m[ip2]);
+  return(1);
 }
 
 /**
@@ -88,7 +101,7 @@ void intmet_iso(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int ip,double s) {
  * \a k for special storage of ridges metrics (after defsiz call).
  *
  */
-void intmet_ani(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int ip,double s) {
+int intmet_ani(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int ip,double s) {
   MMG5_pTria    pt;
   MMG5_pPoint   ppt;
   MMG5_pxPoint  go;
@@ -106,11 +119,12 @@ void intmet_ani(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int ip,double s) {
     ppt = &mesh->point[ip];
     assert(ppt->xp);
     go = &mesh->xpoint[ppt->xp];
-    _MMG5_intridmet(mesh,met,ip1,ip2,s,go->n1,m);
+    return(_MMG5_intridmet(mesh,met,ip1,ip2,s,go->n1,m));
   }
   else {
-    intregmet(mesh,met,k,i,s,m);
+    return(intregmet(mesh,met,k,i,s,m));
   }
+  return(1);
 }
 
 /**

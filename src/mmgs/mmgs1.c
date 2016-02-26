@@ -554,9 +554,17 @@ static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
         }
         if ( met->m ) {
           if ( typchk == 1 && (met->size>1) )
-            _MMGS_intmet33_ani(mesh,met,k,i,ip,s);
+            ier = _MMGS_intmet33_ani(mesh,met,k,i,ip,s);
           else
-            intmet(mesh,met,k,i,ip,s);
+            ier = intmet(mesh,met,k,i,ip,s);
+        }
+
+        if ( !ier ) {
+          // Unable to compute the metric
+          do {
+            _MMGS_delPt(mesh,mesh->np);
+          } while ( mesh->np>npinit );
+          return(-1);
         }
       }
       else if ( pt->tag[i] & MG_GEO ) {
@@ -810,7 +818,7 @@ int chkspl(MMG5_pMesh mesh,MMG5_pSol met,int k,int i) {
   }
   s = 0.5;
 
-  intmet(mesh,met,k,i,ip,s); 
+  if ( !intmet(mesh,met,k,i,ip,s) ) return(0);
 
   return(ip);
 }

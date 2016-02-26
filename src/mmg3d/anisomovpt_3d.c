@@ -193,6 +193,8 @@ int _MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met,int *listv,
   double            calold,calnew,caltmp,*callist;
   int               k,kel,iel,l,n0,na,nb,ntempa,ntempb,ntempc,nxp;
   unsigned char     i0,iface,i;
+  static int        warn = 0;
+
   // Dynamic alloc for windows comptibility
   _MMG5_SAFE_MALLOC(callist, ilistv, double);
 
@@ -339,6 +341,11 @@ int _MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met,int *listv,
 
     /* Compute integral of sqrt(T^J(xi)  M(P(xi)) J(xi)) * P(xi) over the triangle */
     if ( !_MMG5_elementWeight(mesh,met,&tt,p0,&pb,r,gv) ) {
+      if ( !warn ) {
+        ++warn;
+        printf("  ## Warning: unable to compute optimal position for at least"
+               " 1 point.\n" );
+      }
       _MMG5_SAFE_FREE(callist);
       return(0);
     }

@@ -190,8 +190,6 @@ int _MMG5_intregmet(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,double s,
 }
 
 
-
- 
 /**
  * \param ma pointer on a metric
  * \param mb pointer on a metric
