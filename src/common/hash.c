@@ -268,15 +268,15 @@ int _MMG5_hashNew(MMG5_pMesh mesh,_MMG5_Hash *hash,int hsiz,int hmax) {
   int   k;
 
   /* adjust hash table params */
-  hash->siz  = hsiz;
-  hash->max  = hmax + 1;
-  hash->nxt  = hsiz;
+  hash->siz  = hsiz+1;
+  hash->max  = hmax + 2;
+  hash->nxt  = hash->siz;
 
   _MMG5_ADD_MEM(mesh,(hash->max+1)*sizeof(_MMG5_hedge),"hash table",
                 return(0));
   _MMG5_SAFE_CALLOC(hash->item,hmax+2,_MMG5_hedge);
 
-  for (k=hsiz; k<hash->max; k++)
+  for (k=hash->siz; k<hash->max; k++)
     hash->item[k].nxt = k+1;
 
   return(1);
