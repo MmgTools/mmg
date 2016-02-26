@@ -120,9 +120,9 @@ void _MMG5_mmgDefaultValues(MMG5_pMesh mesh) {
  */
 inline
 int _MMG5_writeLocalParam( MMG5_pMesh mesh, FILE *out ) {
-  _MMG5_Node *bdyRefs, *cur;
-  double     dd;
-  int        npar,k,ier;
+  _MMG5_iNode *bdyRefs, *cur;
+  double      dd;
+  int         npar,k,ier;
 
   /** Count the number of different boundary references and list it */
   bdyRefs = NULL;
@@ -131,7 +131,7 @@ int _MMG5_writeLocalParam( MMG5_pMesh mesh, FILE *out ) {
   k = mesh->nt? mesh->tria[1].ref : 0;
 
   /* Try to alloc the first node */
-  ier = _MMG5_Add_node( mesh, &bdyRefs, k );
+  ier = _MMG5_Add_inode( mesh, &bdyRefs, k );
   if ( ier < 0 ) {
     printf("  ## Error: unable to allocate the first boundary"
            " reference node.\n");
@@ -143,7 +143,7 @@ int _MMG5_writeLocalParam( MMG5_pMesh mesh, FILE *out ) {
   }
 
   for ( k=1; k<=mesh->nt; ++k ) {
-    ier = _MMG5_Add_node( mesh, &bdyRefs, mesh->tria[k].ref );
+    ier = _MMG5_Add_inode( mesh, &bdyRefs, mesh->tria[k].ref );
 
     if ( ier < 0 ) {
       printf("  ## Warning: unable to list the boundary references.\n"
@@ -163,7 +163,7 @@ int _MMG5_writeLocalParam( MMG5_pMesh mesh, FILE *out ) {
     cur = cur->nxt;
   }
 
-  _MMG5_Free_linkedList(mesh,bdyRefs);
+  _MMG5_Free_ilinkedList(mesh,bdyRefs);
 
   return(1);
 }
