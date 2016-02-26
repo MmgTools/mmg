@@ -216,6 +216,12 @@ int MMGS_Set_meshSize(MMG5_pMesh mesh, int np, int nt, int na) {
   mesh->nti = mesh->nt;
   mesh->nai = mesh->na;
 
+  if ( !np || !nt ) {
+    fprintf(stdout,"  ** MISSING DATA:\n");
+    fprintf(stdout,"     Your mesh must contains at least points and triangles.\n");
+    return(0);
+  }
+
   if ( mesh->point )
     _MMG5_DEL_MEM(mesh,mesh->point,(mesh->npmax+1)*sizeof(MMG5_Point));
   if ( mesh->tria )
