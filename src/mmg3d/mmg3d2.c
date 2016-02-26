@@ -1349,15 +1349,15 @@ int _MMG5_mmg3d2(MMG5_pMesh mesh,MMG5_pSol sol) {
     fprintf(stdout,"  ## Hashing problem. Exit program.\n");
     return(0);
   }
-  if ( !_MMG5_chkNumberOfTri(mesh) ) {
-    if ( !_MMG5_bdryTria(mesh) ) {
-      fprintf(stdout,"  ## Boundary problem. Exit program.\n");
-      return(0);
-    }
-    _MMG5_freeXTets(mesh);
-  }
-  else if ( !_MMG5_bdryPerm(mesh) ) {
+
+  /* compatibility triangle orientation w/r tetras */
+  if ( !_MMG5_bdryPerm(mesh) ) {
     fprintf(stdout,"  ## Boundary orientation problem. Exit program.\n");
+    return(0);
+  }
+
+  if ( !_MMG5_chkBdryTria(mesh) ) {
+    fprintf(stdout,"  ## Boundary problem. Exit program.\n");
     return(0);
   }
 

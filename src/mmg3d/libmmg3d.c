@@ -202,8 +202,7 @@ int _MMG3D_packMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
 
   /* rebuild triangles*/
   mesh->nt = 0;
-  _MMG5_chkNumberOfTri(mesh);
-  if ( !_MMG5_bdryTria(mesh) ) {
+  if ( !_MMG5_chkBdryTria(mesh) ) {
     fprintf(stdout," ## Error: unable to rebuild triangles\n");
     return(0);
   }

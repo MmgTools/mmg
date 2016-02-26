@@ -237,6 +237,7 @@ int main(int argc,char *argv[]) {
   /* read metric if any */
   else {
     ier = MMG3D_loadSol(mesh,met,met->namein);
+
     if ( ier == -1 ) {
       fprintf(stdout,"  ## ERROR: WRONG DATA TYPE OR WRONG SOLUTION NUMBER.\n");
       _MMG5_RETURN_AND_FREE(mesh,met,disp,MMG5_STRONGFAILURE);

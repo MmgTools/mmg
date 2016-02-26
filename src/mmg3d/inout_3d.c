@@ -456,7 +456,7 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,char *filename) {
         _MMG5_DEL_MEM(mesh,mesh->tria,(mesh->nt+1)*sizeof(MMG5_Tria));
 
       else if ( mesh->nt < nt ) {
-        _MMG5_ADD_MEM(mesh,(mesh->nt+1)*sizeof(MMG5_Tria),"triangles",
+        _MMG5_ADD_MEM(mesh,(mesh->nt-nt)*sizeof(MMG5_Tria),"triangles",
                       printf("  Exit program.\n");
                       exit(EXIT_FAILURE));
         _MMG5_SAFE_RECALLOC(mesh->tria,nt+1,(mesh->nt+1),MMG5_Tria,"triangles");
@@ -511,7 +511,7 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,char *filename) {
     }
     if ( mesh->info.iso )
       _MMG5_SAFE_FREE(ina);
-  } //end if mesh->Nt
+  } //end if mesh->nt
 
     /* read mesh edges */
   if ( mesh->na ) {
@@ -546,6 +546,17 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,char *filename) {
         }
       }
     }
+    if ( mesh->info.iso ) {
+      if( !mesh->na )
+        _MMG5_DEL_MEM(mesh,mesh->edge,(mesh->na+1)*sizeof(MMG5_Edge));
+      else if ( mesh->na < na ) {
+        _MMG5_ADD_MEM(mesh,(mesh->na-na)*sizeof(MMG5_Edge),"edges",
+                      printf("  Exit program.\n");
+                      exit(EXIT_FAILURE));
+        _MMG5_SAFE_RECALLOC(mesh->edge,na+1,(mesh->na+1),MMG5_Edge,"edges");
+      }
+    }
+
 
     /* get ridges */
     if ( nr ) {
