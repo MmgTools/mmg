@@ -402,17 +402,30 @@ typedef struct {
 
 
 /**
- * \struct _MMG5_Node
- * \brief Cell for linked list.
+ * \struct _MMG5_iNode
+ * \brief Cell for linked list of integer value.
  */
-typedef struct _MMG5_Node_s {
+typedef struct _MMG5_iNode_s {
   int val;
-  struct _MMG5_Node_s *nxt;
-} _MMG5_Node;
+  struct _MMG5_iNode_s *nxt;
+} _MMG5_iNode;
+
+/**
+ * \struct _MMG5_dNode
+ * \brief Cell for linked list of double value.
+ */
+typedef struct _MMG5_dNode_s {
+  int    k;
+  double val;
+  struct _MMG5_dNode_s *nxt;
+} _MMG5_dNode;
+
 
 /* Functions declarations */
-extern int _MMG5_Add_node( MMG5_pMesh mesh, _MMG5_Node **liLi, int val );
-extern int _MMG5_Alloc_node( MMG5_pMesh mesh, _MMG5_Node **node );
+extern int _MMG5_Add_inode( MMG5_pMesh mesh, _MMG5_iNode **liLi, int val );
+extern int _MMG5_Alloc_inode( MMG5_pMesh mesh, _MMG5_iNode **node );
+extern int _MMG5_Add_dnode( MMG5_pMesh mesh, _MMG5_dNode **liLi, int, double);
+extern int _MMG5_Alloc_dnode( MMG5_pMesh mesh, _MMG5_dNode **node );
 extern void   _MMG5_bezierEdge(MMG5_pMesh, int, int, double*, double*, char,double*);
 int    _MMG5_buildridmet(MMG5_pMesh,MMG5_pSol,int,double,double,double,double*);
 extern int    _MMG5_buildridmetfic(MMG5_pMesh,double*,double*,double,double,double,double*);
@@ -433,7 +446,8 @@ int    _MMG5_elementWeight(MMG5_pMesh,MMG5_pSol,MMG5_pTria,MMG5_pPoint,
                            _MMG5_Bezier*,double r[3][3],double gv[2]);
 void   _MMG5_fillDefmetregSys( int, MMG5_pPoint, int, _MMG5_Bezier,double r[3][3],
                                double *, double *, double *, double *);
-extern void _MMG5_Free_linkedList( MMG5_pMesh mesh, _MMG5_Node *liLi );
+extern void _MMG5_Free_ilinkedList( MMG5_pMesh mesh, _MMG5_iNode *liLi );
+extern void _MMG5_Free_dlinkedList( MMG5_pMesh mesh, _MMG5_dNode *liLi );
 int    _MMG5_grad2metSurf(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int i);
 int    _MMG5_hashEdge(MMG5_pMesh mesh,_MMG5_Hash *hash,int a,int b,int k);
 int    _MMG5_hashGet(_MMG5_Hash *hash,int a,int b);
