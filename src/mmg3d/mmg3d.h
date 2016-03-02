@@ -191,6 +191,44 @@ typedef struct {
 } _MMG5_Bucket;
 typedef _MMG5_Bucket * _MMG5_pBucket;
 
+#warning nbVer utilise?
+/**
+ * Octree cell.
+ */
+typedef struct _MMG3D_octree_s
+{
+  int* v;      /*!< vertex index */
+  int  nbVer;  /*!< number of vertices in the sub tree */
+  unsigned char depth; /*!< sub tree depth */
+  struct _MMG3D_octree_s* branches; /*!< pointer toward the subtrees of the current octree */
+} _MMG3D_octree_s;
+
+/**
+ * Octree global structure (enriched by global variables).
+ */
+typedef struct _MMG3D_octree
+{
+  int nv;  /*!< Max number of points per octree cell */
+  _MMG3D_octree_s* q0; /*!<  Pointer toward the first octree cell */
+} _MMG3D_octree;
+
+
+/* octree */
+void _MMG3D_initOctree_s( _MMG3D_octree_s* q);
+void _MMG3D_initOctree(_MMG3D_octree* q, int nv);
+void _MMG3D_freeOctree_s(_MMG3D_octree_s* q, int nv,int dim);
+void _MMG3D_freeOctree(_MMG3D_octree* q,int dim);
+void _MMG3D_countListSquareRec(_MMG3D_octree_s*, double*, double*,int,int,int*);
+void _MMG3D_getListSquareRec(_MMG3D_octree_s*,double*,double*,
+                             _MMG3D_octree_s***,int, int, int*);
+int  _MMG3D_getListSquare(_MMG3D_octree*, double*, _MMG3D_octree_s***,int);
+void _MMG3D_addVertexRec3d(MMG5_pMesh,_MMG3D_octree_s*,double*, const int, int);
+void _MMG3D_addVertex3d(MMG5_pMesh mesh, _MMG3D_octree* q, const int no);
+void _MMG3D_printArbreDepth(_MMG3D_octree_s* q, int depth, int nv, int dim);
+void _MMG3D_printArbre(_MMG3D_octree* q);
+int  _MMG3D_sizeArbreRec(_MMG3D_octree_s* q, int nv, int dim);
+int  _MMG3D_sizeArbre(_MMG3D_octree* q, int dim);
+
 /* bucket */
 _MMG5_pBucket _MMG5_newBucket(MMG5_pMesh ,int );
 int     _MMG5_addBucket(MMG5_pMesh ,_MMG5_pBucket ,int );
