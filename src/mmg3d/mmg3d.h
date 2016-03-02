@@ -191,7 +191,6 @@ typedef struct {
 } _MMG5_Bucket;
 typedef _MMG5_Bucket * _MMG5_pBucket;
 
-#warning nbVer utilise?
 /**
  * Octree cell.
  */
@@ -206,11 +205,12 @@ typedef struct _MMG3D_octree_s
 /**
  * Octree global structure (enriched by global variables).
  */
-typedef struct _MMG3D_octree
+typedef struct
 {
   int nv;  /*!< Max number of points per octree cell */
   _MMG3D_octree_s* q0; /*!<  Pointer toward the first octree cell */
 } _MMG3D_octree;
+typedef _MMG3D_octree * _MMG3D_pOctree;
 
 
 /* octree */
@@ -222,12 +222,13 @@ void _MMG3D_countListSquareRec(_MMG3D_octree_s*, double*, double*,int,int,int*);
 void _MMG3D_getListSquareRec(_MMG3D_octree_s*,double*,double*,
                              _MMG3D_octree_s***,int, int, int*);
 int  _MMG3D_getListSquare(_MMG3D_octree*, double*, _MMG3D_octree_s***,int);
-void _MMG3D_addVertexRec3d(MMG5_pMesh,_MMG3D_octree_s*,double*, const int, int);
-void _MMG3D_addVertex3d(MMG5_pMesh mesh, _MMG3D_octree* q, const int no);
+void _MMG3D_addOctreeRec(MMG5_pMesh,_MMG3D_octree_s*,double*, const int, int);
+void _MMG3D_addOctree(MMG5_pMesh mesh, _MMG3D_octree* q, const int no);
 void _MMG3D_printArbreDepth(_MMG3D_octree_s* q, int depth, int nv, int dim);
 void _MMG3D_printArbre(_MMG3D_octree* q);
 int  _MMG3D_sizeArbreRec(_MMG3D_octree_s* q, int nv, int dim);
 int  _MMG3D_sizeArbre(_MMG3D_octree* q, int dim);
+int  _MMG3D_octreein_iso(MMG5_pMesh,MMG5_pSol,_MMG3D_pOctree,int);
 
 /* bucket */
 _MMG5_pBucket _MMG5_newBucket(MMG5_pMesh ,int );
@@ -340,14 +341,14 @@ int    _MMG5_movbdyridpt_iso(MMG5_pMesh, MMG5_pSol, int*, int, int*, int ,int);
 int    _MMG5_movbdyridpt_ani(MMG5_pMesh, MMG5_pSol, int*, int, int*, int ,int);
 int    _MMG3D_movv_ani(MMG5_pMesh ,MMG5_pSol ,int ,int );
 int  _MMG5_chkswpbdy(MMG5_pMesh, MMG5_pSol,int*, int, int, int,char);
-int  _MMG5_swpbdy(MMG5_pMesh,MMG5_pSol,int*,int,int,_MMG5_pBucket,char);
-int  _MMG5_swpgen(MMG5_pMesh,MMG5_pSol,int, int, int*,_MMG5_pBucket,char);
+int  _MMG5_swpbdy(MMG5_pMesh,MMG5_pSol,int*,int,int,_MMG3D_pOctree,char);
+int  _MMG5_swpgen(MMG5_pMesh,MMG5_pSol,int, int, int*,_MMG3D_pOctree,char);
 int  _MMG5_chkswpgen(MMG5_pMesh,MMG5_pSol,int,int,int*,int*,double,char);
 int  _MMG5_srcface(MMG5_pMesh mesh,int n0,int n1,int n2);
 int _MMG5_chkptonbdy(MMG5_pMesh,int);
 double _MMG5_orcal_poi(double a[3],double b[3],double c[3],double d[3]);
 int _MMG5_countelt(MMG5_pMesh mesh,MMG5_pSol sol, double *weightelt, long *npcible);
-int MMG3D_opttyp(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket);
+int MMG3D_opttyp(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree);
 int _MMG5_trydisp(MMG5_pMesh,double *,short);
 int _MMG5_dichodisp(MMG5_pMesh,double *);
 int _MMG5_lapantilap(MMG5_pMesh,double *);
@@ -398,8 +399,8 @@ int  _MMG3D_dichoto1b(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int);
 char _MMG5_chkedg(MMG5_pMesh mesh,MMG5_Tria *pt,char ori);
 int  _MMG5_anatet(MMG5_pMesh mesh,MMG5_pSol met,char typchk, int patternMode) ;
 int  _MMG5_movtet(MMG5_pMesh mesh,MMG5_pSol met,int maxitin);
-int  _MMG5_swpmsh(MMG5_pMesh mesh,MMG5_pSol met,_MMG5_pBucket bucket, int);
-int  _MMG5_swptet(MMG5_pMesh mesh,MMG5_pSol met,double,_MMG5_pBucket, int);
+int  _MMG5_swpmsh(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pOctree octree, int);
+int  _MMG5_swptet(MMG5_pMesh mesh,MMG5_pSol met,double,_MMG3D_pOctree, int);
 
 /* pointers */
 /* init structures */
@@ -441,6 +442,7 @@ int    (*_MMG5_movbdynompt)(MMG5_pMesh, MMG5_pSol, int*, int, int*, int ,int);
 int    (*_MMG5_movbdyridpt)(MMG5_pMesh, MMG5_pSol, int*, int, int*, int ,int);
 int    (*_MMG5_cavity)(MMG5_pMesh ,MMG5_pSol ,int ,int ,int *,int );
 int    (*_MMG5_buckin)(MMG5_pMesh ,MMG5_pSol ,_MMG5_pBucket ,int );
+int    (*_MMG3D_octreein)(MMG5_pMesh ,MMG5_pSol ,_MMG3D_pOctree ,int );
 
 /**
  * \param mesh pointer toward the mesh structure.

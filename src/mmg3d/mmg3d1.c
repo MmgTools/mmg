@@ -415,7 +415,7 @@ char _MMG5_chkedg(MMG5_pMesh mesh,MMG5_Tria *pt,char ori) {
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
- * \param bucket pointer toward the bucket structure (only for delaunay).
+ * \param octree pointer toward the octree structure (only for delaunay).
  * \param typchk type of checking permformed for edge length (hmin or LSHORT
  * criterion).
  * \return -1 if failed and swap number otherwise.
@@ -424,7 +424,7 @@ char _MMG5_chkedg(MMG5_pMesh mesh,MMG5_Tria *pt,char ori) {
  * approximation.
  *
  */
-int _MMG5_swpmsh(MMG5_pMesh mesh,MMG5_pSol met,_MMG5_pBucket bucket, int typchk) {
+int _MMG5_swpmsh(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pOctree octree, int typchk) {
   MMG5_pTetra   pt;
   MMG5_pxTetra  pxt;
   int      k,it,list[MMG3D_LMAX+2],ilist,ret,it1,it2,ns,nns,maxit;
@@ -458,7 +458,7 @@ int _MMG5_swpmsh(MMG5_pMesh mesh,MMG5_pSol met,_MMG5_pBucket bucket, int typchk)
           if ( ilist <= 1 )  continue;
           ier = _MMG5_chkswpbdy(mesh,met,list,ilist,it1,it2,typchk);
           if ( ier ) {
-            ier = _MMG5_swpbdy(mesh,met,list,ret,it1,bucket,typchk);
+            ier = _MMG5_swpbdy(mesh,met,list,ret,it1,octree,typchk);
             if ( ier > 0 )  ns++;
             else if ( ier < 0 )  return(-1);
             break;
@@ -480,7 +480,7 @@ int _MMG5_swpmsh(MMG5_pMesh mesh,MMG5_pSol met,_MMG5_pBucket bucket, int typchk)
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
  * \param crit coefficient of quality improvment.
- * \param bucket pointer toward the bucket structure in delaunay mode and
+ * \param octree pointer toward the octree structure in delaunay mode and
  * toward the \a NULL pointer otherwise
  * \param typchk type of checking permformed for edge length (hmin or LSHORT
  * criterion).
@@ -489,7 +489,7 @@ int _MMG5_swpmsh(MMG5_pMesh mesh,MMG5_pSol met,_MMG5_pBucket bucket, int typchk)
  *
  */
 int _MMG5_swptet(MMG5_pMesh mesh,MMG5_pSol met,double crit,
-                 _MMG5_pBucket bucket,int typchk) {
+                 _MMG3D_pOctree octree,int typchk) {
   MMG5_pTetra   pt;
   MMG5_pxTetra  pxt;
   int      list[MMG3D_LMAX+2],ilist,k,it,nconf,maxit,ns,nns,ier;
@@ -514,7 +514,7 @@ int _MMG5_swptet(MMG5_pMesh mesh,MMG5_pSol met,double crit,
 
         nconf = _MMG5_chkswpgen(mesh,met,k,i,&ilist,list,crit,typchk);
         if ( nconf ) {
-          ier = _MMG5_swpgen(mesh,met,nconf,ilist,list,bucket,typchk);
+          ier = _MMG5_swpgen(mesh,met,nconf,ilist,list,octree,typchk);
           if ( ier > 0 )  ns++;
           else if ( ier < 0 ) return(-1);
           break;

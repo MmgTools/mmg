@@ -337,7 +337,7 @@ int _MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, int *list,int ilist,
  * \param ret dobble of the number of tetrahedra in the shell
  * \param it1 boundary face carrying the beforehand tested terminal
  * point for collapse
- * \param bucket pointer toward the bucket structure in Delaunay mode,
+ * \param octree pointer toward the octree structure in Delaunay mode,
  * NULL pointer in pattern mode.
  * \param typchk type of checking permformed for edge length (hmin or LSHORT
  * criterion).
@@ -347,7 +347,7 @@ int _MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, int *list,int ilist,
  *
  */
 int _MMG5_swpbdy(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int it1,
-                 _MMG5_pBucket bucket, char typchk) {
+                 _MMG3D_pOctree octree, char typchk) {
   MMG5_pTetra   pt,pt1;
   MMG5_pPoint   p0,p1;
   int           iel,iel1,ilist,np,nq,nm;
@@ -394,20 +394,11 @@ int _MMG5_swpbdy(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int it1,
   c[2] = 0.5*( p0->c[2] + p1->c[2]);
   nm = _MMG3D_newPt(mesh,c,MG_BDY);
   if ( !nm ) {
-    if ( bucket ) {
-      _MMG5_POINT_AND_BUCKET_REALLOC(mesh,met,nm,mesh->gap,
-                                     printf("  ## Error: unable to allocate a new point\n");
-                                     _MMG5_INCREASE_MEM_MESSAGE();
-                                     return(-1)
-                                     ,c,MG_BDY);
-    }
-    else{
-      _MMG5_POINT_REALLOC(mesh,met,np,mesh->gap,
-                          printf("  ## Error: unable to allocate a new point\n");
-                          _MMG5_INCREASE_MEM_MESSAGE();
-                          return(-1)
-                          ,c,MG_BDY);
-    }
+    _MMG5_POINT_REALLOC(mesh,met,np,mesh->gap,
+                        printf("  ## Error: unable to allocate a new point\n");
+                        _MMG5_INCREASE_MEM_MESSAGE();
+                        return(-1)
+                        ,c,MG_BDY);
   }
   if ( met->m ) {
     if ( typchk == 1 && (met->size>1) ) {

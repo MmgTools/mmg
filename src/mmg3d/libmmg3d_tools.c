@@ -59,6 +59,7 @@ void MMG3D_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
 #ifndef PATTERN
     _MMG5_cavity          = _MMG5_cavity_iso;
     _MMG5_buckin          = _MMG5_buckin_iso;
+    _MMG3D_octreein       = _MMG3D_octreein_iso;
 #endif
   }
   else if ( met->size == 6 ) {
@@ -80,6 +81,8 @@ void MMG3D_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
 #ifndef PATTERN
     _MMG5_cavity         = _MMG5_cavity_ani;
     _MMG5_buckin         = _MMG5_buckin_ani;
+#warning aniso
+    _MMG3D_octreein      = _MMG3D_octreein_iso;
 #endif
   }
 }

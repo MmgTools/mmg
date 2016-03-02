@@ -226,7 +226,7 @@ int _MMG5_chkswpgen(MMG5_pMesh mesh,MMG5_pSol met,int start,int ia,
  * \param ilist number of tetrahedra in the shell of the edge that we want
  *  to swap.
  * \param list pointer toward the shell of the edge that we want to swap.
- * \param bucket pointer toward the bucket structure in Delaunay mode,
+ * \param octree pointer toward the octree structure in Delaunay mode,
  * NULL pointer in pattern mode.
  * \param typchk type of checking permformed for edge length (hmin or LSHORT
  * criterion).
@@ -236,7 +236,7 @@ int _MMG5_chkswpgen(MMG5_pMesh mesh,MMG5_pSol met,int start,int ia,
  *
  */
 int _MMG5_swpgen(MMG5_pMesh mesh,MMG5_pSol met,int nconf,int ilist,int *list,
-                 _MMG5_pBucket bucket, char typchk) {
+                 _MMG3D_pOctree octree, char typchk) {
   MMG5_pTetra    pt;
   MMG5_pPoint    p0,p1;
   int       iel,na,nb,np,nball,ret,start;
@@ -260,20 +260,11 @@ int _MMG5_swpgen(MMG5_pMesh mesh,MMG5_pSol met,int nconf,int ilist,int *list,
 
   np  = _MMG3D_newPt(mesh,m,0);
   if(!np){
-    if ( bucket ) {
-      _MMG5_POINT_AND_BUCKET_REALLOC(mesh,met,np,mesh->gap,
-                                     printf("  ## Error: unable to allocate a new point\n");
-                                     _MMG5_INCREASE_MEM_MESSAGE();
-                                     return(-1)
-                                     ,m,0);
-    }
-    else {
-      _MMG5_POINT_REALLOC(mesh,met,np,mesh->gap,
-                          printf("  ## Error: unable to allocate a new point\n");
-                          _MMG5_INCREASE_MEM_MESSAGE();
-                          return(-1)
-                          ,m,0);
-    }
+    _MMG5_POINT_REALLOC(mesh,met,np,mesh->gap,
+                        printf("  ## Error: unable to allocate a new point\n");
+                        _MMG5_INCREASE_MEM_MESSAGE();
+                        return(-1)
+                        ,m,0);
   }
   if ( met->m ) {
     if ( typchk == 1 && (met->size>1) ) {

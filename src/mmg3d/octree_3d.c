@@ -1,5 +1,7 @@
 #include "mmg3d.h"
 
+#define LFILT 0.2
+
 #warning nbVer utilise? to remove?
 
 /* double _MMG3D_distMet(double* x, double* metric, int dim) */
@@ -95,7 +97,7 @@ void _MMG3D_initOctree_s( _MMG3D_octree_s* q)
  * Initialisation of the octree cell.
  *
  */
-void _MMG3D_initOctree(_MMG3D_octree* q, int nv)
+void _MMG3D_initOctree(_MMG3D_pOctree q, int nv)
 {
   q->nv = nv;
 
@@ -136,7 +138,7 @@ void _MMG3D_freeOctree_s(_MMG3D_octree_s* q, int nv, int dim)
  * Free the global octree structure.
  *
  */
-void _MMG3D_freeOctree(_MMG3D_octree* q, int dim)
+void _MMG3D_freeOctree(_MMG3D_pOctree q, int dim)
 {
   _MMG3D_freeOctree_s(q->q0, q->nv, dim);
   _MMG5_SAFE_FREE(q->q0);
@@ -524,7 +526,7 @@ void _MMG3D_getListSquareRec(_MMG3D_octree_s* q, double* center, double* rect,
  * List the number of octree cells that intersect the rectangle \a rect.
  *
  */
-int _MMG3D_getListSquare(_MMG3D_octree* q, double* rect,
+int _MMG3D_getListSquare(_MMG3D_pOctree q, double* rect,
                          _MMG3D_octree_s*** qlist, int dim)
 {
   double *rect2, *center;
@@ -576,7 +578,7 @@ int _MMG3D_getListSquare(_MMG3D_octree* q, double* rect,
  * coordinates are scaled such as the quadrant is the [0;1]x[0;1]x[0;1] box.
  *
  */
-void _MMG3D_addVertexRec3d(MMG5_pMesh mesh, _MMG3D_octree_s* q, double* ver,
+void _MMG3D_addOctreeRec(MMG5_pMesh mesh, _MMG3D_octree_s* q, double* ver,
                            const int no, int nv)
 {
   double   *pt;
@@ -633,10 +635,10 @@ void _MMG3D_addVertexRec3d(MMG5_pMesh mesh, _MMG3D_octree_s* q, double* ver,
           }
         }
         //~ addVertexRec(mesh, q, mesh->point[q->v[i]].c, q->v[i]);
-        _MMG3D_addVertexRec3d(mesh, q, pt, q->v[i],nv);
+        _MMG3D_addOctreeRec(mesh, q, pt, q->v[i],nv);
         q->nbVer--;
       }
-      _MMG3D_addVertexRec3d(mesh, q, ver, no, nv);
+      _MMG3D_addOctreeRec(mesh, q, ver, no, nv);
       q->nbVer--;
       _MMG5_SAFE_FREE(q->v);
 
@@ -651,7 +653,7 @@ void _MMG3D_addVertexRec3d(MMG5_pMesh mesh, _MMG3D_octree_s* q, double* ver,
       }
 
       q->nbVer++;
-      _MMG3D_addVertexRec3d(mesh, &(q->branches[quadrant]), ver, no, nv);
+      _MMG3D_addOctreeRec(mesh, &(q->branches[quadrant]), ver, no, nv);
     }
   }else
   {
@@ -673,7 +675,7 @@ void _MMG3D_addVertexRec3d(MMG5_pMesh mesh, _MMG3D_octree_s* q, double* ver,
 * Add the vertex of index \a no to the octree.
 *
 */
-void _MMG3D_addVertex3d(MMG5_pMesh mesh, _MMG3D_octree* q, const int no)
+void _MMG3D_addOctree(MMG5_pMesh mesh, _MMG3D_pOctree q, const int no)
 {
   double *pt;
   int    dim;
@@ -683,7 +685,7 @@ void _MMG3D_addVertex3d(MMG5_pMesh mesh, _MMG3D_octree* q, const int no)
 
   memcpy(pt, &mesh->point[no] ,dim*sizeof(double));
   //~ fprintf(stdout, "ajout du point %f %f %f\n", pt[0], pt[1], pt[2]);
-  _MMG3D_addVertexRec3d(mesh, q->q0, pt , no, q->nv);
+  _MMG3D_addOctreeRec(mesh, q->q0, pt , no, q->nv);
 
   _MMG5_SAFE_FREE(pt);
 }
@@ -722,7 +724,7 @@ void _MMG3D_printArbreDepth(_MMG3D_octree_s* q, int depth, int nv, int dim)
 * \warning debug function, not safe
 *
 */
-void _MMG3D_printArbre(_MMG3D_octree* q)
+void _MMG3D_printArbre(_MMG3D_pOctree q)
 {
   int dim;
 
@@ -779,7 +781,7 @@ int _MMG3D_sizeArbreRec(_MMG3D_octree_s* q, int nv, int dim)
 * \warning debug function, not safe
 *
 */
-int _MMG3D_sizeArbre(_MMG3D_octree* q,int dim)
+int _MMG3D_sizeArbre(_MMG3D_pOctree q,int dim)
 {
   return _MMG3D_sizeArbreRec(q->q0, q->nv, dim);
 }
@@ -826,7 +828,7 @@ int _MMG3D_sizeArbreLinkRec(_MMG3D_octree_s* q, int nv, int dim)
 * \warning debug function, not safe
 */
 static inline
-int _MMG3D_sizeArbreLink(_MMG3D_octree* q)
+int _MMG3D_sizeArbreLink(_MMG3D_pOctree q)
 {
   int dim;
 
@@ -871,7 +873,7 @@ int NearNeighborBrutForce(MMG5_pMesh mesh, int no, double l, int dim, int nb_pt)
 }
 
 static inline
-int NearNeighborSquare(MMG5_pMesh mesh, _MMG3D_octree* q, int no, double l, int dim)
+int NearNeighborSquare(MMG5_pMesh mesh, _MMG3D_pOctree q, int no, double l, int dim)
 {
   MMG5_pPoint   ppt,ppt1;
   _MMG3D_octree_s** qlist;
@@ -941,7 +943,7 @@ int NearNeighborSquare(MMG5_pMesh mesh, _MMG3D_octree* q, int no, double l, int 
 
 
 //~
-//~ void plotOctree( MMG5_pMesh mesh, _MMG3D_octree* q, char* name)
+//~ void plotOctree( MMG5_pMesh mesh, _MMG3D_pOctree q, char* name)
 //~ {
 //~ //Declare postscript
 //~ MMG2D_postscript ps;
@@ -1014,3 +1016,65 @@ int NearNeighborSquare(MMG5_pMesh mesh, _MMG3D_octree* q, int no, double l, int 
 //~ MMG2D_closePostscript(&ps);
 //~ }
 
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param sol pointer toward the solution structure.
+ * \param octree pointer toward the octree structure.
+ * \param ip index of point to check.
+ *
+ * \return 1 if we can insert \a ip, 0 otherwise
+ *
+ * Check if the vertex \a ip is not too close from another one.
+ *
+ */
+int _MMG3D_octreein_iso(MMG5_pMesh mesh,MMG5_pSol sol,_MMG3D_pOctree octree,int ip) {
+  MMG5_pPoint     ppt,pp1;
+  _MMG3D_octree_s **lococ;
+  double          d2,ux,uy,uz,hpi,hp1,hpi2,methalo[6];
+  int             ip1,i,j;
+  int             ncells;
+
+  ppt = &mesh->point[ip];
+
+  hpi = LFILT * sol->m[ip];
+  hp1 = hpi*hpi;
+
+  /* methalo is the box that we want to intersect with the octree, thus, the limit
+   * of the filter. We give: the coordinates of one of the corner of the box and
+   * the length of the box in each direction. */
+  methalo[0] = ppt->c[0] - hpi;
+  methalo[1] = ppt->c[1] - hpi;
+  methalo[2] = ppt->c[2] - hpi;
+  methalo[3] = methalo[4] = methalo[5] = 2.*hpi;
+
+  ncells = _MMG3D_getListSquare(octree, methalo, &lococ,3);
+
+  /* Check the octree cells */
+  for ( i=0; i<ncells; ++i ) {
+    for (j=0; j<lococ[i]->nbVer; ++j)
+    {
+      ip1  = lococ[i]->v[j];
+      pp1  = &mesh->point[ip1];
+
+
+#warning to remove when delOctree will be implemented
+      if ( !MG_VOK(pp1) ) continue;
+
+      hpi2 = LFILT * sol->m[ip1];
+
+      ux = pp1->c[0] - ppt->c[0];
+      uy = pp1->c[1] - ppt->c[1];
+      uz = pp1->c[2] - ppt->c[2];
+
+      d2 = ux*ux + uy*uy + uz*uz;
+
+      if ( d2 < hp1 || d2 < hpi2*hpi2 )  {
+        //printf("filtre current %d : %e %e %e %e\n",ip1,d2,hp1,d2,hpi2*hpi2);
+        return(0);
+      }
+    }
+
+  }
+
+  return(1);
+}
