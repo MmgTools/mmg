@@ -137,13 +137,17 @@ void _MMG3D_freeOctree_s(MMG5_pMesh mesh,_MMG3D_octree_s* q, int nv)
     }
     _MMG5_DEL_MEM(mesh,q->branches,sizBr*sizeof(_MMG3D_octree_s));
   }
-  if (q->nbVer>0 ) {
+  if (q->nbVer>0 && q->depth>0 ) {
     if ( q->nbVer<= nv )
       _MMG5_DEL_MEM(mesh,q->v,nv*sizeof(int));
     else {
-      assert(q->depth == depthMax);
-      sizTab = nv * ((int)(q->nbVer/nv) + (q->nbVer%nv != 0 ));
-      printf("AJETER nv %d SizTab %d\n", nv,sizTab);
+      if ( q->depth != depthMax ) {
+        sizTab = nv;
+      }
+      else {
+        sizTab = (q->nbVer%nv != 0)? 1 : 0;
+        sizTab = nv * ((int)(q->nbVer/nv) + sizTab);
+      }
       _MMG5_DEL_MEM(mesh,q->v,sizTab*sizeof(int));
     }
   }
@@ -565,11 +569,11 @@ int _MMG3D_getListSquare(MMG5_pMesh mesh,_MMG3D_pOctree q, double* rect,
   _MMG3D_countListSquareRec(q->q0,center, rect2, q->nv, dim, &index);
   //~ fprintf(stdout, "index : %i\n", index);
 
-  _MMG5_ADD_MEM(mesh,index*sizeof(_MMG3D_octree_s**),"octree cell",
+  _MMG5_ADD_MEM(mesh,index*sizeof(_MMG3D_octree_s*),"octree cell",
                 printf("  Exit program.\n");
                 exit(EXIT_FAILURE));
 
-  _MMG5_SAFE_MALLOC(qlist,index,_MMG3D_octree_s**);
+  _MMG5_SAFE_MALLOC(*qlist,index,_MMG3D_octree_s*);
 
   for (i = 0; i<index; i++)
     (*qlist)[i] = NULL;
@@ -677,7 +681,7 @@ void _MMG3D_addOctreeRec(MMG5_pMesh mesh, _MMG3D_octree_s* q, double* ver,
       }
       _MMG3D_addOctreeRec(mesh, q, ver, no, nv);
       q->nbVer--;
-      _MMG5_DEL_MEM(mesh,q->v,nv);
+      _MMG5_DEL_MEM(mesh,q->v,nv*sizeof(int));
 
     }else
     {
