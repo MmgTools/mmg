@@ -215,13 +215,13 @@ typedef _MMG3D_octree * _MMG3D_pOctree;
 
 /* octree */
 void _MMG3D_initOctree_s( _MMG3D_octree_s* q);
-void _MMG3D_initOctree(_MMG3D_octree* q, int nv);
-void _MMG3D_freeOctree_s(_MMG3D_octree_s* q, int nv,int dim);
-void _MMG3D_freeOctree(_MMG3D_octree* q,int dim);
+void _MMG3D_initOctree(MMG5_pMesh,_MMG3D_octree* q, int nv);
+void _MMG3D_freeOctree_s(MMG5_pMesh,_MMG3D_octree_s* q, int nv);
+void _MMG3D_freeOctree(MMG5_pMesh,_MMG3D_octree* q);
 void _MMG3D_countListSquareRec(_MMG3D_octree_s*, double*, double*,int,int,int*);
 void _MMG3D_getListSquareRec(_MMG3D_octree_s*,double*,double*,
                              _MMG3D_octree_s***,int, int, int*);
-int  _MMG3D_getListSquare(_MMG3D_octree*, double*, _MMG3D_octree_s***,int);
+int  _MMG3D_getListSquare(MMG5_pMesh,_MMG3D_octree*,double*,_MMG3D_octree_s***);
 void _MMG3D_addOctreeRec(MMG5_pMesh,_MMG3D_octree_s*,double*, const int, int);
 void _MMG3D_addOctree(MMG5_pMesh mesh, _MMG3D_octree* q, const int no);
 void _MMG3D_printArbreDepth(_MMG3D_octree_s* q, int depth, int nv, int dim);

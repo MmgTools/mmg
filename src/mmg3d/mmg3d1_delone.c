@@ -178,16 +178,10 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree,int ne,
         ip = _MMG3D_newPt(mesh,o,tag);
         if ( !ip ) {
           /* reallocation of point table */
-          if ( octree ) {
-            _MMG5_POINT_REALLOC(mesh,met,ip,mesh->gap,
-                                *warn=1;
-                                goto collapse,
-                                o,tag);
-          }
-          else {
-            printf("ERROR: function not available in delaunay mode. Exiting\n");
-            exit(EXIT_FAILURE);
-          }
+          _MMG5_POINT_REALLOC(mesh,met,ip,mesh->gap,
+                              *warn=1;
+                              goto collapse,
+                              o,tag);
         }
         if ( met->m ) {
           if ( _MMG5_intmet(mesh,met,k,imax,ip,0.5) <=0 ) {
@@ -257,17 +251,10 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree,int ne,
 
         if ( !ip )  {
           /* reallocation of point table */
-          if ( octree ) {
-            _MMG5_POINT_REALLOC(mesh,met,ip,mesh->gap,
-                                *warn=1;
-                                goto collapse,
-                                o,MG_NOTAG);
-          }
-          else {
-            printf("ERROR: function not available in delaunay mode. Exiting\n");
-            exit(EXIT_FAILURE);
-          }
-
+          _MMG5_POINT_REALLOC(mesh,met,ip,mesh->gap,
+                              *warn=1;
+                              goto collapse,
+                              o,MG_NOTAG);
         }
         ppt = &mesh->point[ip];
         if ( met->m ) {
@@ -305,16 +292,10 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree,int ne,
 
         if ( !ip )  {
           /* reallocation of point table */
-          if ( octree ) {
-            _MMG5_POINT_REALLOC(mesh,met,ip,mesh->gap,
-                                *warn=1;
-                                goto collapse,
-                                o,MG_NOTAG);
-          }
-          else {
-            printf("ERROR: function not available in delaunay mode. Exiting\n");
-            exit(EXIT_FAILURE);
-          }
+          _MMG5_POINT_REALLOC(mesh,met,ip,mesh->gap,
+                              *warn=1;
+                              goto collapse,
+                              o,MG_NOTAG);
         }
         ppt = &mesh->point[ip];
         if ( met->m ) {
@@ -500,16 +481,10 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree,int ne,
           ip = _MMG3D_newPt(mesh,o,tag);
           if ( !ip ){
             /* reallocation of point table */
-            if ( octree ) {
-              _MMG5_POINT_REALLOC(mesh,met,ip,mesh->gap,
-                                  *warn=1;
-                                  goto collapse2//break
-                                  ,o,tag);
-            }
-            else {
-              printf("ERROR: function not available in delaunay mode. Exiting\n");
-              exit(EXIT_FAILURE);
-            }
+            _MMG5_POINT_REALLOC(mesh,met,ip,mesh->gap,
+                                *warn=1;
+                                goto collapse2//break
+                                ,o,tag);
           }
           if ( met->m ) {
             if ( _MMG5_intmet(mesh,met,k,imax,ip,0.5)<=0 ) {
@@ -536,7 +511,7 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree,int ne,
             goto collapse2;//continue;
           } else {
             (*ns)++;
-            //_MMG3D_addOctree(mesh,octree,ip);
+            _MMG3D_addOctree(mesh,octree,ip);
 
             ppt = &mesh->point[ip];
 
@@ -579,16 +554,10 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree,int ne,
 
           if ( !ip )  {
             /* reallocation of point table */
-            if ( octree ) {
-              _MMG5_POINT_REALLOC(mesh,met,ip,mesh->gap,
-                                  *warn=1;
-                                  goto collapse2
-                                  ,o,MG_NOTAG);
-            }
-            else {
-              printf("ERROR: function not available in delaunay mode. Exiting\n");
-              exit(EXIT_FAILURE);
-            }
+            _MMG5_POINT_REALLOC(mesh,met,ip,mesh->gap,
+                                *warn=1;
+                                goto collapse2
+                                ,o,MG_NOTAG);
           }
           ppt = &mesh->point[ip];
           if ( met->m ) {
@@ -626,15 +595,10 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree,int ne,
 
           if ( !ip )  {
             /* reallocation of point table */
-            if ( octree ) {
-              _MMG5_POINT_REALLOC(mesh,met,ip,mesh->gap,
-                                  *warn=1;
-                                  goto collapse2,
-                                  o,MG_NOTAG);
-            } else {
-              printf("ERROR: function not available in delaunay mode. Exiting\n");
-              exit(EXIT_FAILURE);
-            }
+            _MMG5_POINT_REALLOC(mesh,met,ip,mesh->gap,
+                                *warn=1;
+                                goto collapse2,
+                                o,MG_NOTAG);
           }
           ppt = &mesh->point[ip];
           if ( met->m ) {
@@ -989,7 +953,7 @@ _MMG5_adptet_delone(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pOctree octree) {
  *
  */
 int _MMG5_mmg3d1_delone(MMG5_pMesh mesh,MMG5_pSol met) {
-  _MMG3D_pOctree octree;
+  _MMG3D_octree octree;
 
   if ( abs(mesh->info.imprim) > 4 )
     fprintf(stdout,"  ** MESH ANALYSIS\n");
@@ -1045,10 +1009,9 @@ int _MMG5_mmg3d1_delone(MMG5_pMesh mesh,MMG5_pSol met) {
     return(0);
 
   /* CEC : create filter */
-  _MMG3D_initOctree(octree,mesh->info.bucket);
-  if ( !octree )  return(0);
+  _MMG3D_initOctree(mesh,&octree,mesh->info.bucket);
 
-  if ( !_MMG5_adptet_delone(mesh,met,octree) ) {
+  if ( !_MMG5_adptet_delone(mesh,met,&octree) ) {
     fprintf(stdout,"  ## Unable to adapt. Exit program.\n");
     return(0);
   }
@@ -1069,7 +1032,7 @@ int _MMG5_mmg3d1_delone(MMG5_pMesh mesh,MMG5_pSol met) {
   }
 
   /*free octree*/
-  _MMG3D_freeOctree(octree,3);
+  _MMG3D_freeOctree(mesh,&octree);
 
   return(1);
 }
