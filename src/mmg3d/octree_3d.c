@@ -641,6 +641,7 @@ void _MMG3D_addOctreeRec(MMG5_pMesh mesh, _MMG3D_octree_s* q, double* ver,
         q->v[q->nbVer] = no;
       // intéressant seulement si nv est grand
         q->nbVer++;
+        _MMG5_SAFE_FREE(pt);
       return;
     }
     else if (q->nbVer == nv && q->branches==NULL)
@@ -1111,6 +1112,7 @@ int _MMG3D_octreein_iso(MMG5_pMesh mesh,MMG5_pSol sol,_MMG3D_pOctree octree,int 
 
       if ( d2 < hp1 || d2 < hpi2*hpi2 )  {
         //printf("filtre current %d : %e %e %e %e\n",ip1,d2,hp1,d2,hpi2*hpi2);
+        _MMG5_DEL_MEM(mesh,lococ,ncells*sizeof(_MMG3D_octree_s**));
         return(0);
       }
     }
