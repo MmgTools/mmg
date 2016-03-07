@@ -742,8 +742,8 @@ static int _MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,int kel, int iface, int
 
   /* Second step : reconstitution of the curvature tensor at p0 in the tangent
      plane, with a quadric fitting approach */
-  memset(tAA,0.0,6*sizeof(double));
-  memset(tAb,0.0,3*sizeof(double));
+  memset(tAA,0x00,6*sizeof(double));
+  memset(tAb,0x00,3*sizeof(double));
 
   for (k=0; k<ilists; k++) {
     /* Approximation of the curvature in the normal section associated to tau :
@@ -921,8 +921,8 @@ static int _MMG5_defmetreg(MMG5_pMesh mesh,MMG5_pSol met,int kel,int iface, int 
 
   /* Second step : reconstitution of the curvature tensor at p0 in the tangent
      plane, with a quadric fitting approach */
-  memset(tAA,0.0,6*sizeof(double));
-  memset(tAb,0.0,3*sizeof(double));
+  memset(tAA,0x00,6*sizeof(double));
+  memset(tAb,0x00,3*sizeof(double));
 
   for (k=0; k<ilists; k++) {
     /* Approximation of the curvature in the normal section associated to tau :

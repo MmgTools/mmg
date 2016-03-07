@@ -634,7 +634,7 @@ int _MMG5_solveDefmetregSys( MMG5_pMesh mesh, double r[3][3], double c[3],
 {
   double intm[3], kappa[2], vp[2][2], b0[3], b1[3], b2[3];
 
-  memset(intm,0.0,3*sizeof(double));
+  memset(intm,0x0,3*sizeof(double));
 
   /* case planar surface : tAb = 0 => no curvature */
   /* isotropic metric with hmax size*/
@@ -754,7 +754,7 @@ int _MMG5_solveDefmetrefSys( MMG5_pMesh mesh, MMG5_pPoint p0, int ipref[2],
   double       gammasec[3],tau[2], ux, uy, uz, ps1, l, ll, *t, *t1;
   int          i;
 
-  memset(intm,0.0,3*sizeof(double));
+  memset(intm,0x0,3*sizeof(double));
 
   /* case planar surface : tAb = 0 => no curvature */
   /* isotropic metric with hmax size*/

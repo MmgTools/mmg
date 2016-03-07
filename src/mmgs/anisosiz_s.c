@@ -476,9 +476,9 @@ static int _MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
 
   /* Second step : reconstitution of the curvature tensor at p0 in the tangent plane,
      with a quadric fitting approach */
-  memset(intm,0.0,3*sizeof(double));
-  memset(tAA,0.0,6*sizeof(double));
-  memset(tAb,0.0,3*sizeof(double));
+  memset(intm,0x00,3*sizeof(double));
+  memset(tAA,0x00,6*sizeof(double));
+  memset(tAb,0x00,3*sizeof(double));
 
   hausd   = mesh->info.hausd;
   isqhmin = mesh->info.hmin;
@@ -627,8 +627,8 @@ static int _MMG5_defmetreg(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
 
   /* Second step : reconstitution of the curvature tensor at p0 in the tangent
      plane, with a quadric fitting approach */
-  memset(tAA,0.0,6*sizeof(double));
-  memset(tAb,0.0,3*sizeof(double));
+  memset(tAA,0x00,6*sizeof(double));
+  memset(tAb,0x00,3*sizeof(double));
 
   hausd   = mesh->info.hausd;
   isqhmin = mesh->info.hmin;
