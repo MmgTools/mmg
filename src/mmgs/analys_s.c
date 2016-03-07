@@ -39,7 +39,7 @@
 static int setadj(MMG5_pMesh mesh){
   MMG5_pTria   pt,pt1;
   int          *adja,*adjb,adji1,adji2,*pile,iad,ipil,ip1,ip2,gen;
-  int          k,kk,iel,jel,nf,nr,nt,nre,ncc,ned,ref;
+  int          k,kk,iel,jel,nvf,nf,nr,nt,nre,ncc,ned,ref;
   char         i,ii,i1,i2,ii1,ii2,tag,voy;
 
   if ( abs(mesh->info.imprim) > 5  || mesh->info.ddebug )
@@ -49,7 +49,7 @@ static int setadj(MMG5_pMesh mesh){
 
   pile[1]  = 1;
   ipil     = 1;
-  nre = nr = nf = nt = ncc = ned = 0;
+  nvf = nre = nr = nf = nt = ncc = ned = 0;
 
   while ( ipil > 0 ) {
     ncc++;
@@ -68,6 +68,9 @@ static int setadj(MMG5_pMesh mesh){
         i2  = _MMG5_iprv2[i];
         ip1 = pt->v[i1];
         ip2 = pt->v[i2];
+
+        if ( !mesh->point[ip1].tmp )  mesh->point[ip1].tmp = ++nvf;
+        if ( !mesh->point[ip2].tmp )  mesh->point[ip2].tmp = ++nvf;
 
         if ( MG_EDG(pt->tag[i]) ) {
           mesh->point[ip1].tag |= pt->tag[i];
@@ -207,7 +210,7 @@ static int setadj(MMG5_pMesh mesh){
     fprintf(stdout,"  a- orient: %d flipped\n",nf);
   }
   else if ( abs(mesh->info.imprim) > 4 ) {
-    gen = (2 - mesh->np + ned - nt) / 2;
+    gen = (2 - nvf + ned - nt) / 2;
     fprintf(stdout,"     Connected component: %d,  genus: %d,   reoriented: %d\n",ncc,gen,nf);
     fprintf(stdout,"     Edges: %d,  tagged: %d,  ridges: %d,  refs: %d\n",ned,nr+nre,nr,nre);
   }
