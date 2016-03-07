@@ -167,161 +167,6 @@ void _MMG3D_freeOctree(MMG5_pMesh mesh,_MMG3D_pOctree q)
 }
 
 
-/**
- * \param q pointer toward the octree cell.
- * \param centre coordinates of the centre of the current subtree.
- * \param rect rectangle that we want to intersect with the subtree. We define
- * it given: the coordinates of one corner of the rectange and the length of
- * the rectangle in each dimension.
- * \param nv number of vertices in the subtree.
- * \param dim dimension work.
- * \param index number of octree cells that intersect \a rect
- *
- * Count the number of octree cells that intersect the rectangle \a rect. Result
- * is put in the \a index variable.
- *
- */
-void _MMG3D_countListSquareRec(_MMG3D_octree_s* q, double* center, double rect[6],
-                               int nv, int dim, int* index)
-{
-  double *recttemp;
-  double *centertemp;
-
-  double l = 1./(1<<(q->depth+1));
-
-  _MMG5_SAFE_MALLOC(recttemp,2*dim,double);
-  _MMG5_SAFE_MALLOC(centertemp,dim,double);
-
-  if (q->branches==NULL)
-  {
-    (*index)++;
-    //~ fprintf(stdout,"Indexe incrémenté %i\n", *index);
-  }else
-  {
-    if (rect[0]<center[0]&&rect[1]<center[1]) // branch 0
-    {
-
-      recttemp[0] = rect[0];
-      recttemp[1] = rect[1];
-      recttemp[3] = rect[0]+rect[3] < center[0] ? rect[3]:center[0]-rect[0];
-      recttemp[4] = rect[1]+rect[4] < center[1] ? rect[4]:center[1]-rect[1];
-      centertemp[0] = center[0]-l/2;
-      centertemp[1] = center[1]-l/2;
-      if (rect[2] < center[2]) // branch 0
-      {
-
-        recttemp[2] = rect[2];
-        recttemp[5] = rect[2]+rect[5] < center[2] ? rect[5]:center[2]-rect[2];
-
-        centertemp[2] = center[2]-l/2;
-
-        _MMG3D_countListSquareRec(&(q->branches[0]), centertemp, recttemp, nv, dim, index);
-      }
-      if (rect[2]+rect[5] > center[2]) // branch 4
-      {
-        recttemp[2] = rect[2]<center[2] ? center[2]:rect[2];
-        recttemp[5] = rect[2]+ rect[5] - recttemp[2];
-
-        centertemp[2] = center[2]+l/2;
-
-        _MMG3D_countListSquareRec(&(q->branches[4]), centertemp, recttemp, nv, dim, index);
-      }
-    }
-    if (rect[0]+rect[2] >center[0] && rect[1]<center[1]) // branch 1
-    {
-      recttemp[0] = rect[0]<center[0] ? center[0]:rect[0];
-      recttemp[1] = rect[1];
-
-      recttemp[3] = rect[0]+rect[3]-recttemp[0];
-      recttemp[4] = rect[1]+rect[4] < center[1] ? rect[4]:center[1]-rect[1];
-
-      centertemp[0] = center[0]+l/2;
-      centertemp[1] = center[1]-l/2;
-
-      if(rect[2] < center[2]) // branch 1
-      {
-
-        recttemp[2] = rect[2];
-
-        recttemp[5] = rect[2]+rect[5] < center[2] ? rect[5]:center[2]-rect[2];
-
-        centertemp[2] = center[2]-l/2;
-
-        _MMG3D_countListSquareRec(&(q->branches[1]), centertemp, recttemp, nv, dim, index);
-      }
-      if (rect[2]+rect[5] > center[2]) // branch 5
-      {
-        recttemp[2] = rect[2]<center[2] ? center[2]:rect[2];
-        recttemp[5] = rect[2]+ rect[5] - recttemp[2];
-
-        centertemp[2] = center[2]+l/2;
-
-        _MMG3D_countListSquareRec(&(q->branches[5]), centertemp, recttemp, nv, dim, index);
-      }
-    }
-    if (rect[0]<center[0] && rect[1]+rect[3]>center[1]) // branch 2
-    {
-      recttemp[0] = rect[0];
-      recttemp[1] = rect[1]>center[1] ? rect[1]:center[1];
-      recttemp[3] = rect[0]+rect[3] < center[0] ? rect[3]:center[0]-rect[0];
-      recttemp[4] = rect[1] + rect[4]- recttemp[1];
-      centertemp[0] = center[0]-l/2;
-      centertemp[1] = center[1]+l/2;
-
-      if(rect[2] < center[2]) // branch 2
-      {
-
-        recttemp[2] = rect[2];
-        recttemp[5] = rect[2] + rect[5]< center[2] ? rect[5]:center[2]-rect[2];
-
-        centertemp[2] = center[2]-l/2;
-
-        _MMG3D_countListSquareRec(&(q->branches[2]), centertemp, recttemp, nv, dim, index);
-      }
-      if (rect[2]+rect[5] >= center[2]) // branch 6
-      {
-        recttemp[2] = rect[2]<center[2] ? center[2]:rect[2];
-        recttemp[5] = rect[2]+ rect[5] - recttemp[2];
-
-        centertemp[2] = center[2]+l/2;
-
-        _MMG3D_countListSquareRec(&(q->branches[6]), centertemp, recttemp, nv, dim, index);
-      }
-    }
-    if (rect[0]+rect[2] >center[0] && rect[1]+rect[3]>center[1]) // branch 3
-    {
-
-
-      recttemp[0] = rect[0]>center[0] ? rect[0]:center[0];
-      recttemp[1] = rect[1]>center[1] ? rect[1]:center[1];
-      recttemp[3] = rect[0]+rect[3]-recttemp[0];
-      recttemp[4] = rect[1]+rect[4]-recttemp[1];
-      centertemp[0] = center[0]+l/2;
-      centertemp[1] = center[1]+l/2;
-      if(rect[2] < center[2]) // branch 3
-      {
-
-        recttemp[2] = rect[2];
-        recttemp[5] = rect[2] + rect[5]< center[2] ? rect[5]:center[2]-rect[2];
-
-        centertemp[2] = center[2]-l/2;
-
-        _MMG3D_countListSquareRec(&(q->branches[3]), centertemp, recttemp, nv, dim, index);
-      }
-      if (rect[2]+rect[5] > center[2]) // branch 7
-      {
-        recttemp[2] = rect[2]<center[2] ? center[2]:rect[2];
-        recttemp[5] = rect[2]+ rect[5] - recttemp[2];
-
-        centertemp[2] = center[2]+l/2;
-
-        _MMG3D_countListSquareRec(&(q->branches[7]), centertemp, recttemp, nv, dim, index);
-      }
-    }
-  }
-  _MMG5_SAFE_FREE(recttemp);
-  _MMG5_SAFE_FREE(centertemp);
-}
 
 #warning remove one pointer on qlist +  try to mutualize the code with the previous one.
 /**
@@ -336,7 +181,8 @@ void _MMG3D_countListSquareRec(_MMG3D_octree_s* q, double* center, double rect[6
  * \param dim dimension work.
  * \param index number of octree cells that intersect \a rect
  *
- * Count and list the number of octree cells that intersect the rectangle \a rect.
+ * Count or list the number of octree cells that intersect the rectangle
+ * \a rect depending on initialization of value on which \a qlist points on.
  *
  */
 void _MMG3D_getListSquareRec(_MMG3D_octree_s* q, double* center, double* rect,
@@ -351,7 +197,8 @@ void _MMG3D_getListSquareRec(_MMG3D_octree_s* q, double* center, double* rect,
 
   if (q->branches==NULL)
   {
-    (*qlist)[*index] = q;
+    if ((*qlist)!= NULL)
+      (*qlist)[*index] = q;
     (*index)++;
     //~ fprintf(stdout,"Indexe incrémenté %i\n", *index);
   }else
@@ -566,7 +413,8 @@ int _MMG3D_getListSquare(MMG5_pMesh mesh,_MMG3D_pOctree q, double* rect,
     center[i] = 0.5;
 
   //~ fprintf(stdout,"q nulle ? %i\n", q->branches == NULL);
-  _MMG3D_countListSquareRec(q->q0,center, rect2, q->nv, dim, &index);
+  assert(!(*qlist));
+  _MMG3D_getListSquareRec(q->q0,center, rect2, qlist, q->nv, dim, &index);
   //~ fprintf(stdout, "index : %i\n", index);
 
   _MMG5_ADD_MEM(mesh,index*sizeof(_MMG3D_octree_s*),"octree cell",
@@ -742,10 +590,11 @@ void _MMG3D_addOctree(MMG5_pMesh mesh, _MMG3D_pOctree q, const int no)
 */
 void _MMG3D_printArbreDepth(_MMG3D_octree_s* q, int depth, int nv, int dim)
 {
+  int i;
   if ( q->depth < depth && q->nbVer > nv)
   {
 
-    for (int i = 0; i < (1<<dim); i++)
+    for (i = 0; i < (1<<dim); i++)
     {
       _MMG3D_printArbreDepth(&(q->branches[i]),depth, nv, dim);
     }
@@ -769,8 +618,8 @@ void _MMG3D_printArbre(_MMG3D_pOctree q)
   int dim;
 
   dim = 3;
-
-  for (int i = 0; i<sizeof(int)*8/dim; i++)
+  int i;
+  for (i = 0; i<sizeof(int)*8/dim; i++)
   {
     fprintf(stdout,"\n profondeur %i \n", i);
     _MMG3D_printArbreDepth(q->q0, i, q->nv, dim);
@@ -884,17 +733,18 @@ int NearNeighborBrutForce(MMG5_pMesh mesh, int no, double l, int dim, int nb_pt)
   double lmin =10;
   int nmin = -1;
   double x[dim], norm;
-  for(int i = 1; i <= nb_pt; i++)
+  int i, j;
+  for(i = 1; i <= nb_pt; i++)
   {
     norm = 0;
     if(i != no)
     {
-      for (int j = 0; j<dim; j++)
+      for (j = 0; j<dim; j++)
       {
 
         x[j] =  mesh->point[i].c[j] - mesh->point[no].c[j];
       }
-      for (int j = 0; j<dim; j++)
+      for (j = 0; j<dim; j++)
       {
         norm += x[j]*x[j];
       }
@@ -923,6 +773,7 @@ int NearNeighborSquare(MMG5_pMesh mesh, _MMG3D_pOctree q, int no, double l, int 
   double lmin =10;
   double x,y,z;
   int nmin;
+  int i, j;
 
   ppt = &mesh->point[no];
   rect[0] = ppt->c[0]-l;
@@ -932,6 +783,7 @@ int NearNeighborSquare(MMG5_pMesh mesh, _MMG3D_pOctree q, int no, double l, int 
   rect[4] = 2*l;
   rect[5] = 2*l;
   //~ fprintf(stdout,"q nulle ? %i\n", q->branches == NULL);
+  qlist = NULL;
   ns = _MMG3D_getListSquare(mesh,q, rect, &qlist);
 
   //~ fprintf(stdout, "OK %i\n",ns);
@@ -942,9 +794,10 @@ int NearNeighborSquare(MMG5_pMesh mesh, _MMG3D_pOctree q, int no, double l, int 
   //~ fprintf(stdout, "OK %i\n",ns);
   //~
   //~ }
-  for (int i = 0; i < ns; i++)
+  
+  for (i = 0; i < ns; i++)
   {
-    for (int j = 0; j<qlist[i]->nbVer; j++)
+    for (j = 0; j<qlist[i]->nbVer; j++)
     {
       nver = qlist[i]->v[j];
       //~ fprintf(stdout,"nver %i\n",nver);
@@ -1075,6 +928,7 @@ int _MMG3D_octreein_iso(MMG5_pMesh mesh,MMG5_pSol sol,_MMG3D_pOctree octree,int 
   int             ip1,i,j;
   int             ncells;
 
+  lococ = NULL;
   ppt = &mesh->point[ip];
 
   hpi = LFILT * sol->m[ip];

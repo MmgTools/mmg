@@ -218,7 +218,6 @@ void _MMG3D_initOctree_s( _MMG3D_octree_s* q);
 void _MMG3D_initOctree(MMG5_pMesh,_MMG3D_octree* q, int nv);
 void _MMG3D_freeOctree_s(MMG5_pMesh,_MMG3D_octree_s* q, int nv);
 void _MMG3D_freeOctree(MMG5_pMesh,_MMG3D_octree* q);
-void _MMG3D_countListSquareRec(_MMG3D_octree_s*, double*, double*,int,int,int*);
 void _MMG3D_getListSquareRec(_MMG3D_octree_s*,double*,double*,
                              _MMG3D_octree_s***,int, int, int*);
 int  _MMG3D_getListSquare(MMG5_pMesh,_MMG3D_octree*,double*,_MMG3D_octree_s***);
