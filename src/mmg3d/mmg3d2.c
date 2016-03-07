@@ -82,7 +82,7 @@ _MMG5_ismaniball(MMG5_pMesh mesh,MMG5_pSol sol,int k,int indp) {
 
   pt = &mesh->tetra[k];
   np = pt->v[indp];
-  if ( fabs(sol->m[np]) > _MMG5_EPSD2 )  return(1);
+  if ( fabs(sol->m[np]-mesh->info.ls) > _MMG5_EPSD2 )  return(1);
 
   memset(bdy,0,(MMG3D_LMAX+1)*sizeof(int));
 
@@ -91,14 +91,14 @@ _MMG5_ismaniball(MMG5_pMesh mesh,MMG5_pSol sol,int k,int indp) {
   /* Sign of a starting point in ball of np */
   for (j=0; j<3; j++) {
     ip = _MMG5_idir[indp][j];
-    if ( sol->m[pt->v[ip]] != 0.0 )  break;
+    if ( sol->m[pt->v[ip]]-mesh->info.ls != 0.0 )  break;
   }
   if ( j == 3) {
     fprintf(stdout,"  *** Problem in function _MMG5_ismaniball : tetra %d : 4 null values",k);
     exit(EXIT_FAILURE);
   }
 
-  v = sol->m[pt->v[ip]];
+  v = sol->m[pt->v[ip]]-mesh->info.ls;
   base = ++mesh->base;
   pt->flag = base;
   ilist = 0;
@@ -118,7 +118,7 @@ _MMG5_ismaniball(MMG5_pMesh mesh,MMG5_pSol sol,int k,int indp) {
     if ( !res ) {
       for (j=0; j<3; j++) {
         i1 = _MMG5_idir[i][j];
-        v1 = sol->m[pt->v[i1]];
+        v1 = sol->m[pt->v[i1]]-mesh->info.ls;
         if ( ( v1 != 0.0 ) && !MG_SMSGN(v,v1) ) {
           res = 4*iel + i;
           break;
@@ -130,8 +130,8 @@ _MMG5_ismaniball(MMG5_pMesh mesh,MMG5_pSol sol,int k,int indp) {
     for (j=0; j<3; j++) {
       i1 = _MMG5_idir[i][_MMG5_inxt2[j]];
       i2 = _MMG5_idir[i][_MMG5_iprv2[j]];
-      v1 = sol->m[pt->v[i1]];
-      v2 = sol->m[pt->v[i2]];
+      v1 = sol->m[pt->v[i1]]-mesh->info.ls;
+      v2 = sol->m[pt->v[i2]]-mesh->info.ls;
 
       if ( ( ( v1 != 0.0 ) && MG_SMSGN(v,v1) ) ||
            ( ( v2 != 0.0 ) && MG_SMSGN(v,v2) ) ) {
@@ -171,9 +171,9 @@ _MMG5_ismaniball(MMG5_pMesh mesh,MMG5_pSol sol,int k,int indp) {
     i1 = _MMG5_idir[i][1];
     i2 = _MMG5_idir[i][2];
 
-    v0 = sol->m[pt->v[i0]];
-    v1 = sol->m[pt->v[i1]];
-    v2 = sol->m[pt->v[i2]];
+    v0 = sol->m[pt->v[i0]]-mesh->info.ls;
+    v1 = sol->m[pt->v[i1]]-mesh->info.ls;
+    v2 = sol->m[pt->v[i2]]-mesh->info.ls;
 
     if ( v0 == 0.0 )
       nzeros++;
@@ -222,8 +222,8 @@ _MMG5_ismaniball(MMG5_pMesh mesh,MMG5_pSol sol,int k,int indp) {
     for (j=0; j<3; j++) {
       i1 = _MMG5_idir[i][_MMG5_inxt2[j]];
       i2 = _MMG5_idir[i][_MMG5_iprv2[j]];
-      v1 = sol->m[pt->v[i1]];
-      v2 = sol->m[pt->v[i2]];
+      v1 = sol->m[pt->v[i1]]-mesh->info.ls;
+      v2 = sol->m[pt->v[i2]]-mesh->info.ls;
 
       if ( v1 == 0.0 && v2 == 0.0 ) {
         jel = adja[_MMG5_idir[i][j]] / 4;
@@ -241,9 +241,9 @@ _MMG5_ismaniball(MMG5_pMesh mesh,MMG5_pSol sol,int k,int indp) {
         j1 = _MMG5_idir[i][1];
         j2 = _MMG5_idir[i][2];
 
-        v0 = sol->m[pt1->v[j0]];
-        v1 = sol->m[pt1->v[j1]];
-        v2 = sol->m[pt1->v[j2]];
+        v0 = sol->m[pt1->v[j0]]-mesh->info.ls;
+        v1 = sol->m[pt1->v[j1]]-mesh->info.ls;
+        v2 = sol->m[pt1->v[j2]]-mesh->info.ls;
 
         nzeros = nsame = nopp = 0;
 
@@ -296,9 +296,17 @@ _MMG5_ismaniball(MMG5_pMesh mesh,MMG5_pSol sol,int k,int indp) {
   return(1);
 }
 
-/** Snap values of the level set function very close to 0 to exactly 0,
-    and prevent nonmanifold patterns from being generated */
-static int _MMG5_snpval_ls(MMG5_pMesh mesh,MMG5_pSol sol,double *tmp) {
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param sol pointer toward the level-set function.
+ * \param tmp saving of the level-set values before the snap.
+ * \return 1 if success, 0 if fail.
+ *
+ * Snap values of the level set function very close to 0 to exactly 0,
+ * and prevent nonmanifold patterns from being generated.
+ *
+ */
+static int _MMG3D_snpval_ls(MMG5_pMesh mesh,MMG5_pSol sol,double *tmp) {
   MMG5_pTetra   pt;
   MMG5_pPoint   p0;
   int      k,nc,ns,ip;
@@ -319,11 +327,11 @@ static int _MMG5_snpval_ls(MMG5_pMesh mesh,MMG5_pSol sol,double *tmp) {
   for (k=1; k<=mesh->np; k++) {
     p0 = &mesh->point[k];
     if ( !MG_VOK(p0) ) continue;
-    if ( fabs(sol->m[k]) < _MMG5_EPS ) {
+    if ( fabs(sol->m[k]-mesh->info.ls) < _MMG5_EPS ) {
       if ( mesh->info.ddebug )  fprintf(stdout,"  Snapping value %d ; previous value : %E\n",k,fabs(sol->m[k]));
-      tmp[k] = ( fabs(sol->m[k]) < _MMG5_EPSD ) ? (-100.0*_MMG5_EPS) : sol->m[k];
+      tmp[k] = ( fabs(sol->m[k]-mesh->info.ls) < _MMG5_EPSD ) ? (mesh->info.ls-100.0*_MMG5_EPS) : sol->m[k];
       p0->flag = 1;
-      sol->m[k] = 0.0;
+      sol->m[k] = mesh->info.ls;
       ns++;
     }
   }
@@ -341,7 +349,7 @@ static int _MMG5_snpval_ls(MMG5_pMesh mesh,MMG5_pSol sol,double *tmp) {
           nc++;
         }
         p0->flag = 0;
-        tmp[ip]  = 0.0;
+        tmp[ip]  = mesh->info.ls;
       }
     }
   }
@@ -353,9 +361,16 @@ static int _MMG5_snpval_ls(MMG5_pMesh mesh,MMG5_pSol sol,double *tmp) {
   return(1);
 }
 
-/** Proceed to discretization of the implicit function carried by sol into mesh, once values
-    of sol have been snapped/checked */
-static int _MMG5_cuttet_ls(MMG5_pMesh mesh, MMG5_pSol sol/*,double *tmp*/){
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param sol pointer toward the level-set values.
+ * \return 1 if success, 0 otherwise.
+ *
+ * Proceed to discretization of the implicit function carried by sol into mesh,
+ * once values of sol have been snapped/checked
+ *
+ */
+static int _MMG3D_cuttet_ls(MMG5_pMesh mesh, MMG5_pSol sol/*,double *tmp*/){
   MMG5_pTetra   pt;
   MMG5_pPoint   p0,p1;
   _MMG5_Hash     hash;
@@ -382,8 +397,8 @@ static int _MMG5_cuttet_ls(MMG5_pMesh mesh, MMG5_pSol sol/*,double *tmp*/){
       p0  = &mesh->point[ip0];
       p1  = &mesh->point[ip1];
       if ( p0->flag && p1->flag )  continue;
-      v0  = sol->m[ip0];
-      v1  = sol->m[ip1];
+      v0  = sol->m[ip0]-mesh->info.ls;
+      v1  = sol->m[ip1]-mesh->info.ls;
       if ( fabs(v0) > _MMG5_EPSD2 && fabs(v1) > _MMG5_EPSD2 && v0*v1 < 0.0 ) {
         if ( !p0->flag ) {
           p0->flag = nb;
@@ -461,8 +476,8 @@ static int _MMG5_cuttet_ls(MMG5_pMesh mesh, MMG5_pSol sol/*,double *tmp*/){
 
       p0 = &mesh->point[ip0];
       p1 = &mesh->point[ip1];
-      v0 = sol->m[ip0];
-      v1 = sol->m[ip1];
+      v0 = sol->m[ip0]-mesh->info.ls;
+      v1 = sol->m[ip1]-mesh->info.ls;
       if ( fabs(v0) < _MMG5_EPSD2 || fabs(v1) < _MMG5_EPSD2 )  continue;
       else if ( MG_SMSGN(v0,v1) )  continue;
       else if ( !p0->flag || !p1->flag )  continue;
@@ -503,7 +518,7 @@ static int _MMG5_cuttet_ls(MMG5_pMesh mesh, MMG5_pSol sol/*,double *tmp*/){
                             return(0)
                             ,c,0);
       }
-      sol->m[np] = 0.0;
+      sol->m[np] = mesh->info.ls;
       _MMG5_hashEdge(mesh,&hash,ip0,ip1,np);
     }
   }
@@ -555,9 +570,17 @@ static int _MMG5_cuttet_ls(MMG5_pMesh mesh, MMG5_pSol sol/*,double *tmp*/){
 }
 
 
-/** Set references to tets according to the sign of the level set function */
-static int _MMG5_setref_ls(MMG5_pMesh mesh, MMG5_pSol sol) {
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param sol pointer toward the level-set values.
+ * \return 1.
+ *
+ * Set references to tets according to the sign of the level set function.
+ *
+ */
+static int _MMG3D_setref_ls(MMG5_pMesh mesh, MMG5_pSol sol) {
   MMG5_pTetra   pt;
+  double        v;
   int      k,ip;
   char     nmns,npls,nz,i;
 
@@ -566,9 +589,10 @@ static int _MMG5_setref_ls(MMG5_pMesh mesh, MMG5_pSol sol) {
     nmns = npls = nz = 0;
     for (i=0; i<4; i++) {
       ip = pt->v[i];
-      if ( sol->m[ip] > 0.0 )
+      v  = sol->m[ip]-mesh->info.ls;
+      if ( v > 0.0 )
         npls++;
-      else if ( sol->m[ip] < 0.0 )
+      else if ( v < 0.0 )
         nmns++;
       else
         nz ++;
@@ -768,7 +792,7 @@ int _MMG5_chkmani2(MMG5_pMesh mesh,MMG5_pSol sol) {
 
     cnt = 0;
     for(j=0; j<4; j++) {
-      if( sol->m[pt->v[j]] == 0.0 ) cnt++;
+      if( sol->m[pt->v[j]]-mesh->info.ls == 0.0 ) cnt++;
     }
     if(cnt == 4) {
       fprintf(stdout,"Problem in tetra %d : 4 vertices on implicit boundary",k);
@@ -1326,8 +1350,15 @@ int _MMG5_chkmanicoll(MMG5_pMesh mesh,int k,int iface,int iedg,int ndepmin,int n
   return(1);
 }
 
-/** Create implicit surface in mesh */
-int _MMG5_mmg3d2(MMG5_pMesh mesh,MMG5_pSol sol) {
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param sol pointer toward the solution structure
+ * \return 0 if fail, 1 otherwise.
+ *
+ * Create implicit surface in mesh.
+ *
+ */
+int _MMG3D_mmg3d2(MMG5_pMesh mesh,MMG5_pSol sol) {
   double   *tmp;
 
   if ( abs(mesh->info.imprim) > 3 )
@@ -1339,7 +1370,7 @@ int _MMG5_mmg3d2(MMG5_pMesh mesh,MMG5_pSol sol) {
   _MMG5_SAFE_CALLOC(tmp,mesh->npmax+1,double);
 
   /* Snap values of level set function if need be, then discretize it */
-  if ( !_MMG5_snpval_ls(mesh,sol,tmp) ) {
+  if ( !_MMG3D_snpval_ls(mesh,sol,tmp) ) {
     fprintf(stdout,"  ## Problem with implicit function. Exit program.\n");
     return(0);
   }
@@ -1372,7 +1403,7 @@ int _MMG5_mmg3d2(MMG5_pMesh mesh,MMG5_pSol sol) {
     return(0);
   }
 
-  if ( !_MMG5_cuttet_ls(mesh,sol/*,tmp*/) ) {
+  if ( !_MMG3D_cuttet_ls(mesh,sol/*,tmp*/) ) {
     fprintf(stdout,"  ## Problem in discretizing implicit function. Exit program.\n");
     return(0);
   }
@@ -1381,7 +1412,7 @@ int _MMG5_mmg3d2(MMG5_pMesh mesh,MMG5_pSol sol) {
   _MMG5_DEL_MEM(mesh,mesh->tria,(mesh->nt+1)*sizeof(MMG5_Tria));
   mesh->nt = 0;
 
-  if ( !_MMG5_setref_ls(mesh,sol) ) {
+  if ( !_MMG3D_setref_ls(mesh,sol) ) {
     fprintf(stdout,"  ## Problem in setting references. Exit program.\n");
     return(0);
   }

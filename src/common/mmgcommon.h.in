@@ -62,11 +62,18 @@
 #define MG_CPY   "Copyright (c) IMB-LJLL, 2004-"
 #define MG_STR   "&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&"
 
+/** Check if \a a and \a b have the same sign */
+#define MG_SMSGN(a,b)  (((double)(a)*(double)(b) > (0.0)) ? (1) : (0))
+
 /** size of box for renumbering with scotch. */
 #define _MMG5_BOXSIZE 500
 
 /** Maximal memory used if available memory compitation fail. */
 #define _MMG5_MEMMAX  800
+
+/* Domain refs in iso mode */
+#define MG_PLUS    2
+#define MG_MINUS   3
 
 /* numerical accuracy */
 #define _MMG5_ANGEDG    0.707106781186548   /*0.573576436351046 */

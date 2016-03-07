@@ -55,6 +55,8 @@ void _MMG5_Init_parameters(MMG5_pMesh mesh) {
   /* default values for integers */
   /** MMG5_IPARAM_verbose = 1 */
   mesh->info.imprim   =  1;  /* [-10..10],Tune level of imprim */
+  /** MMG*_IPARAM_iso = 0 */
+  mesh->info.iso      =  0;  /* [0/1]    ,Turn on/off levelset meshing */
   /** MMG5_IPARAM_mem = -1 */
   mesh->info.mem      = -1;  /* [n/-1]   ,Set memory size to n Mbytes/keep the default value */
   /** MMG5_IPARAM_debug = 0 */

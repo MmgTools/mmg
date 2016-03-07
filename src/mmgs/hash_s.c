@@ -130,7 +130,7 @@ int _MMGS_hashTria(MMG5_pMesh mesh) {
 
 /**
  * \param mesh pointer toward the mesh structure.
- * \return 1 if success, 0 
+ * \return 1 if success, 0.
  *
  * Store edges in hash table
  *

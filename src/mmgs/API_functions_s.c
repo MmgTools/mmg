@@ -1091,6 +1091,9 @@ int MMGS_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
       mesh->info.dhd    = _MMG5_ANGEDG;
     }
     break;
+  case MMGS_IPARAM_iso :
+    mesh->info.iso      = val;
+    break;
   case MMGS_IPARAM_noinsert :
     mesh->info.noinsert = val;
     break;
@@ -1233,6 +1236,9 @@ int MMGS_Set_dparameter(MMG5_pMesh mesh, MMG5_pSol sol, int dparam, double val){
     }
     else
       mesh->info.hausd    = val;
+    break;
+  case MMGS_DPARAM_ls :
+    mesh->info.ls       = val;
     break;
   default :
     fprintf(stdout,"  ## Error: unknown type of parameter\n");

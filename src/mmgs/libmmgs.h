@@ -57,6 +57,7 @@ enum MMGS_Param {
   MMGS_IPARAM_mem,               /*!< [n/-1], Set memory size to n Mbytes or keep the default value */
   MMGS_IPARAM_debug,             /*!< [1/0], Turn on/off debug mode */
   MMGS_IPARAM_angle,             /*!< [1/0], Turn on/off angle detection */
+  MMGS_IPARAM_iso,               /*!< [1/0], Level-set meshing */
   MMGS_IPARAM_noinsert,          /*!< [1/0], Avoid/allow point insertion */
   MMGS_IPARAM_noswap,            /*!< [1/0], Avoid/allow edge or face flipping */
   MMGS_IPARAM_nomove,            /*!< [1/0], Avoid/allow point relocation */
@@ -68,6 +69,7 @@ enum MMGS_Param {
   MMGS_DPARAM_hmax,              /*!< [val], Maximal mesh size */
   MMGS_DPARAM_hausd,             /*!< [val], Control global Hausdorff distance (on all the boundary surfaces of the mesh) */
   MMGS_DPARAM_hgrad,             /*!< [val], Control gradation */
+  MMGS_DPARAM_ls,                /*!< [val], Value of level-set (not use for now) */
   MMGS_PARAM_size,               /*!< [n], Number of parameters */
 };
 
@@ -569,6 +571,18 @@ void MMGS_Free_names(enum MMG5_arg starter,...);
  *
  */
 int  MMGS_mmgslib(MMG5_pMesh mesh, MMG5_pSol met);
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the sol (metric) structure.
+ * \return \ref MMG5_SUCCESS if success, \ref MMG5_LOWFAILURE if fail but a
+ * conform mesh is saved or \ref MMG5_STRONGFAILURE if fail and we can't save
+ * the mesh.
+ *
+ * Main program for level set discretization library.
+ *
+ */
+int  MMGS_mmgsls(MMG5_pMesh mesh, MMG5_pSol met);
 
 /** To associate function pointers without calling MMGS_mmg3dlib */
 /**

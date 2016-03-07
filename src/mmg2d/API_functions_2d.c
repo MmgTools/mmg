@@ -138,8 +138,6 @@ void MMG2D_Init_parameters(MMG5_pMesh mesh) {
   _MMG5_Init_parameters(mesh);
 
  /* default values for integers */
-  /** MMG2D_IPARAM_iso = 0 */
-  mesh->info.iso      =  0;  /* [0/1]    ,Turn on/off levelset meshing */
   /** MMG2D_IPARAM_lag = -1 */
   mesh->info.lag      = -1;
   /** MMG2D_IPARAM_optim = 0 */

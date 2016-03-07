@@ -83,7 +83,7 @@ int _MMGS_split1_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int i,int *vx) {
  * Split element \a k along edge \a i.
  *
  */
-int split1(MMG5_pMesh mesh,MMG5_pSol met,int k,int i,int *vx) {
+int _MMGS_split1(MMG5_pMesh mesh,MMG5_pSol met,int k,int i,int *vx) {
   MMG5_pTria      pt,pt1;
   MMG5_pPoint     ppt;
   int             iel;
@@ -357,7 +357,7 @@ int _MMG5_split2_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
  * Split element \a k along the 2 edges \a i1 and \a i2.
  *
  */
-int split2(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
+int _MMGS_split2(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
   MMG5_pTria    pt,pt1,pt2;
   MMG5_pPoint   p3,p4;
   int           iel,jel;
@@ -474,7 +474,7 @@ int _MMGS_split3_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
  * Split element \a k along the 3 edges.
  *
  */
-int split3(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
+int _MMGS_split3(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
   MMG5_pTria    pt,pt1,pt2,pt3;
   MMG5_pPoint   p3,p4,p5;
   int           iel,jel,kel;
