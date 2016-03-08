@@ -223,6 +223,11 @@ void _MMG3D_getListSquareRec(_MMG3D_octree_s*,double*,double*,
 int  _MMG3D_getListSquare(MMG5_pMesh,_MMG3D_octree*,double*,_MMG3D_octree_s***);
 void _MMG3D_addOctreeRec(MMG5_pMesh,_MMG3D_octree_s*,double*, const int, int);
 void _MMG3D_addOctree(MMG5_pMesh mesh, _MMG3D_octree* q, const int no);
+void _MMG3D_delOctreeVertex(_MMG3D_octree_s* q, int no);
+void _MMG3D_mergeBranchesRec(_MMG3D_octree_s* q0, _MMG3D_octree_s* q, int dim, int nv, int* index);
+void _MMG3D_mergeBranches(MMG5_pMesh mesh,_MMG3D_octree_s* q, int dim, int nv);
+void _MMG3D_delOctreeRec(MMG5_pMesh mesh, _MMG3D_octree_s* q, double* ver, const int no, const int nv);
+void _MMG3D_delOctree(MMG5_pMesh mesh, _MMG3D_pOctree q, const int no);
 void _MMG3D_printArbreDepth(_MMG3D_octree_s* q, int depth, int nv, int dim);
 void _MMG3D_printArbre(_MMG3D_octree* q);
 int  _MMG3D_sizeArbreRec(_MMG3D_octree_s* q, int nv, int dim);

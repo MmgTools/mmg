@@ -384,8 +384,8 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree,int ne,
           if ( ilist < 0 ) continue;
           if ( ier < 0 ) return(-1);
           else if(ier) {
-#warning to add
-//            _MMG5_delOctree(mesh,octree,ier);
+#warning to be tested
+            _MMG3D_delOctree(mesh, octree, ier);
             _MMG3D_delPt(mesh,ier);
             (*nc)++;
             continue;
