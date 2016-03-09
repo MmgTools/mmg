@@ -534,7 +534,7 @@ int _MMG5_mmg3d1_pattern(MMG5_pMesh mesh,MMG5_pSol met) {
   if ( abs(mesh->info.imprim) > 4 || mesh->info.ddebug )
     fprintf(stdout,"  ** GEOMETRIC MESH\n");
 
-  if ( !_MMG5_anatet(mesh,met,1,1) ) {
+  if ( !_MMG5_anatet(mesh,met,NULL,1,1) ) {
     fprintf(stdout,"  ## Unable to split mesh. Exiting.\n");
     return(0);
   }
@@ -561,7 +561,7 @@ int _MMG5_mmg3d1_pattern(MMG5_pMesh mesh,MMG5_pSol met) {
     }
   }
 
-  if ( !_MMG5_anatet(mesh,met,2,1) ) {
+  if ( !_MMG5_anatet(mesh,met,NULL,2,1) ) {
     fprintf(stdout,"  ## Unable to split mesh. Exiting.\n");
     return(0);
   }

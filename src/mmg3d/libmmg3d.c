@@ -89,7 +89,7 @@ void _MMG3D_Free_topoTables(MMG5_pMesh mesh) {
  * out of library
  *
  */
-static inline
+//~ static inline
 int _MMG3D_packMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
   MMG5_pTetra   pt,ptnew;
   MMG5_pPoint   ppt,pptnew;

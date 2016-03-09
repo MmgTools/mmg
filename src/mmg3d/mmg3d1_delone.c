@@ -380,11 +380,23 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree,int ne,
         if ( p0->tag & MG_BDY )  continue;
         ilist = _MMG5_chkcol_int(mesh,met,k,i,j,list,2);
         if ( ilist > 0 ) {
+          
+          double ver[3];
+          int no;
+          int verif;
+          for (no = 1; no<=mesh->np; ++no)
+          {
+            ver[0] = mesh->point[no].c[0];
+            ver[1] = mesh->point[no].c[1];
+            ver[2] = mesh->point[no].c[2];
+            verif = _MMG3D_verifOctreeRec(mesh, octree->q0, ver, no, 64);
+          }
+          //~ _MMG3D_packMesh(mesh, met, NULL);
+          //~ MMG3D_saveMesh(mesh,"truc2.mesh");
           ier = _MMG5_colver(mesh,met,list,ilist,i2,2);
           if ( ilist < 0 ) continue;
           if ( ier < 0 ) return(-1);
           else if(ier) {
-#warning to be tested
             _MMG3D_delOctree(mesh, octree, ier);
             _MMG3D_delPt(mesh,ier);
             (*nc)++;
@@ -953,8 +965,8 @@ _MMG5_adptet_delone(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pOctree octree) {
  *
  */
 int _MMG5_mmg3d1_delone(MMG5_pMesh mesh,MMG5_pSol met) {
-  _MMG3D_octree octree;
-
+  _MMG3D_pOctree octree;
+#warning intitial points not inserted in octree, could be done here
   if ( abs(mesh->info.imprim) > 4 )
     fprintf(stdout,"  ** MESH ANALYSIS\n");
 
@@ -966,8 +978,11 @@ int _MMG5_mmg3d1_delone(MMG5_pMesh mesh,MMG5_pSol met) {
   /**--- stage 1: geometric mesh */
   if ( abs(mesh->info.imprim) > 4 || mesh->info.ddebug )
     fprintf(stdout,"  ** GEOMETRIC MESH\n");
-
-  if ( !_MMG5_anatet(mesh,met,1,0) ) {
+      
+    /* CEC : create filter */
+  _MMG3D_initOctree(mesh,&octree,mesh->info.bucket);
+    
+  if ( !_MMG5_anatet(mesh,met,octree,1,0) ) {
     fprintf(stdout,"  ## Unable to split mesh. Exiting.\n");
     return(0);
   }
@@ -994,7 +1009,7 @@ int _MMG5_mmg3d1_delone(MMG5_pMesh mesh,MMG5_pSol met) {
     }
   }
 
-  if ( !_MMG5_anatet(mesh,met,2,0) ) {
+  if ( !_MMG5_anatet(mesh,met,octree,2,0) ) {
     fprintf(stdout,"  ## Unable to split mesh. Exiting.\n");
     return(0);
   }
@@ -1008,10 +1023,8 @@ int _MMG5_mmg3d1_delone(MMG5_pMesh mesh,MMG5_pSol met) {
   if ( !_MMG5_scotchCall(mesh,met) )
     return(0);
 
-  /* CEC : create filter */
-  _MMG3D_initOctree(mesh,&octree,mesh->info.bucket);
 
-  if ( !_MMG5_adptet_delone(mesh,met,&octree) ) {
+  if ( !_MMG5_adptet_delone(mesh,met,octree) ) {
     fprintf(stdout,"  ## Unable to adapt. Exit program.\n");
     return(0);
   }
@@ -1032,7 +1045,7 @@ int _MMG5_mmg3d1_delone(MMG5_pMesh mesh,MMG5_pSol met) {
   }
 
   /*free octree*/
-  _MMG3D_freeOctree(mesh,&octree);
+  _MMG3D_freeOctree(mesh,octree);
 
   return(1);
 }

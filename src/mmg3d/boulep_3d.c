@@ -965,6 +965,8 @@ int _MMG5_coquil(MMG5_pMesh mesh,int start,int ia,int * list) {
       if ( (pt->v[ipa] == na && pt->v[ipb] == nb) ||
            (pt->v[ipa] == nb && pt->v[ipb] == na))  break;
     }
+    if (i==6)
+      MMG3D_saveMesh(mesh,"truc.mesh");
     assert(i<6);
     list[ilist] = 6*adj +i;
     ilist++;

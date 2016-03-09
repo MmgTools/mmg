@@ -215,7 +215,7 @@ typedef _MMG3D_octree * _MMG3D_pOctree;
 
 /* octree */
 void _MMG3D_initOctree_s( _MMG3D_octree_s* q);
-void _MMG3D_initOctree(MMG5_pMesh,_MMG3D_octree* q, int nv);
+void _MMG3D_initOctree(MMG5_pMesh,_MMG3D_pOctree* q, int nv);
 void _MMG3D_freeOctree_s(MMG5_pMesh,_MMG3D_octree_s* q, int nv);
 void _MMG3D_freeOctree(MMG5_pMesh,_MMG3D_octree* q);
 void _MMG3D_getListSquareRec(_MMG3D_octree_s*,double*,double*,
@@ -226,6 +226,7 @@ void _MMG3D_addOctree(MMG5_pMesh mesh, _MMG3D_octree* q, const int no);
 void _MMG3D_delOctreeVertex(_MMG3D_octree_s* q, int no);
 void _MMG3D_mergeBranchesRec(_MMG3D_octree_s* q0, _MMG3D_octree_s* q, int dim, int nv, int* index);
 void _MMG3D_mergeBranches(MMG5_pMesh mesh,_MMG3D_octree_s* q, int dim, int nv);
+int _MMG3D_verifOctreeRec(MMG5_pMesh mesh, _MMG3D_octree_s* q, double* ver, const int no, const int nv);
 void _MMG3D_delOctreeRec(MMG5_pMesh mesh, _MMG3D_octree_s* q, double* ver, const int no, const int nv);
 void _MMG3D_delOctree(MMG5_pMesh mesh, _MMG3D_pOctree q, const int no);
 void _MMG3D_printArbreDepth(_MMG3D_octree_s* q, int depth, int nv, int dim);
@@ -401,7 +402,7 @@ void _MMG5_tet2tri(MMG5_pMesh mesh,int k,char ie,MMG5_Tria *ptt);
 int  _MMG3D_dichoto(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx);
 int  _MMG3D_dichoto1b(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int);
 char _MMG5_chkedg(MMG5_pMesh mesh,MMG5_Tria *pt,char ori);
-int  _MMG5_anatet(MMG5_pMesh mesh,MMG5_pSol met,char typchk, int patternMode) ;
+int  _MMG5_anatet(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree, char typchk, int patternMode) ;
 int  _MMG5_movtet(MMG5_pMesh mesh,MMG5_pSol met,int maxitin);
 int  _MMG5_swpmsh(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pOctree octree, int);
 int  _MMG5_swptet(MMG5_pMesh mesh,MMG5_pSol met,double,_MMG3D_pOctree, int);
