@@ -422,13 +422,12 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,char *filename) {
   }
 
   /* read mesh triangles */
-  nt = 0;
+  nt = mesh->nt;
   if ( mesh->nt ) {
     rewind(inm);
     fseek(inm,posnt,SEEK_SET);
     /* Skip triangles with MG_ISO refs */
     if( mesh->info.iso ) {
-      nt = mesh->nt;
       mesh->nt = 0;
       _MMG5_SAFE_CALLOC(ina,nt+1,int);
 
@@ -489,7 +488,7 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,char *filename) {
           if(iswp) i=_MMG5_swapbin(i);
         }
         if ( i>mesh->nt ) {
-          fprintf(stdout,"   Warning: Required MMG5_Triangles number %8d IGNORED\n",i);
+          fprintf(stdout,"   Warning: required triangle number %8d IGNORED\n",i);
         } else {
           if( mesh->info.iso ){
             if( ina[i] == 0 ) continue;

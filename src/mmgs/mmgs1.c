@@ -731,17 +731,17 @@ static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
       }
     }
     if ( pt->flag == 1 || pt->flag == 2 || pt->flag == 4 ) {
-      ier = split1(mesh,met,k,j,vx);
+      ier = _MMGS_split1(mesh,met,k,j,vx);
       assert(ier);
       ns++;
     }
     else if ( pt->flag == 7 ) {
-      ier = split3(mesh,met,k,vx);
+      ier = _MMGS_split3(mesh,met,k,vx);
       assert(ier);
       ns++;
     }
     else {
-      ier = split2(mesh,met,k,vx);
+      ier = _MMGS_split2(mesh,met,k,vx);
       assert(ier);
       ns++;
     }

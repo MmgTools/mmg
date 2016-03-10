@@ -88,6 +88,7 @@ double swapd(double sbin)
   //printf("CONVERTION DOUBLE\n");
   return(out);
 }
+
 /**
  * \param mesh pointer toward the mesh structure.
  * \param filename name of file.
@@ -99,14 +100,17 @@ double swapd(double sbin)
 int MMGS_loadMesh(MMG5_pMesh mesh, char *filename) {
   FILE        *inm;
   MMG5_pTria  pt1,pt2;
+  MMG5_pEdge  ped;
   MMG5_pPoint ppt;
   double      *norm,*n,dd;
   float       fc;
   int         i,k,ia,nq,nri,nr,ip,idn,ng;
-  char        *ptr,data[256],chaine[128];
   int         posnp,posnt,posne,posncor,posnq,posned,posnr;
   int         posnpreq,npreq,ntreq,posnormal,posnc1,posntreq;
   int         ncor,bin,iswp,nedreq,posnedreq,bdim,binch,bpos;
+  int         na,*ina,a,b,ref;
+  char        *ptr,data[256],chaine[128];
+
 
   posnp = posnt = posne = posncor = posnq = posntreq = 0;
   posned = posnr = posnpreq = posnc1 = npreq = 0;
@@ -480,26 +484,65 @@ int MMGS_loadMesh(MMG5_pMesh mesh, char *filename) {
     }
   }
 
-  nri = 0;
+  /* Read mesh edges */
+  na = mesh->na;
   if ( mesh->na ) {
-    _MMG5_ADD_MEM(mesh,(mesh->na+1)*sizeof(MMG5_Edge),"initial edges",return(0));
-    _MMG5_SAFE_CALLOC(mesh->edge,mesh->na+1,MMG5_Edge);
     rewind(inm);
     fseek(inm,posned,SEEK_SET);
-    for (k=1; k<=mesh->na; k++) {
-      if (!bin)
-        fscanf(inm,"%d %d %d",&mesh->edge[k].a,&mesh->edge[k].b,&mesh->edge[k].ref);
-      else {
-        fread(&mesh->edge[k].a,sw,1,inm);
-        if(iswp) mesh->edge[k].a=swapbin(mesh->edge[k].a);
-        fread(&mesh->edge[k].b,sw,1,inm);
-        if(iswp) mesh->edge[k].b=swapbin(mesh->edge[k].b);
-        fread(&mesh->edge[k].ref,sw,1,inm);
-        if(iswp) mesh->edge[k].ref=swapbin(mesh->edge[k].ref);
+
+    _MMG5_ADD_MEM(mesh,(mesh->na+1)*sizeof(MMG5_Edge),"initial edges",return(0));
+    _MMG5_SAFE_CALLOC(mesh->edge,mesh->na+1,MMG5_Edge);
+
+    /* Skip edges with MG_ISO refs */
+    if( mesh->info.iso ) {
+      mesh->na = 0;
+      _MMG5_SAFE_CALLOC(ina,na+1,int);
+
+      for (k=1; k<=na; k++) {
+        if (!bin)
+          fscanf(inm,"%d %d %d",&a,&b,&ref);
+        else {
+          fread(&a,sw,1,inm);
+          if(iswp) a=swapbin(a);
+          fread(&b,sw,1,inm);
+          if(iswp) b=swapbin(b);
+          fread(&ref,sw,1,inm);
+          if(iswp) ref=swapbin(ref);
+        }
+        if ( abs(ref) != MG_ISO ) {
+          ped = &mesh->edge[++mesh->na];
+          ped->a   = a;
+          ped->b   = b;
+          ped->ref = ref;
+          ina[k]   = mesh->na;
+        }
       }
-      mesh->edge[k].tag |= MG_REF;
-      mesh->point[mesh->edge[k].a].tag |= MG_REF;
-      mesh->point[mesh->edge[k].b].tag |= MG_REF;
+      if( !mesh->na )
+        _MMG5_DEL_MEM(mesh,mesh->edge,(mesh->na+1)*sizeof(MMG5_Edge));
+
+      else if ( mesh->na < na ) {
+        _MMG5_ADD_MEM(mesh,(mesh->na-na)*sizeof(MMG5_Edge),"edges",
+                      printf("  Exit program.\n");
+                      exit(EXIT_FAILURE));
+        _MMG5_SAFE_RECALLOC(mesh->edge,na+1,(mesh->na+1),MMG5_Edge,"Edges");
+      }
+    }
+    else {
+      for (k=1; k<=mesh->na; k++) {
+        if (!bin)
+          fscanf(inm,"%d %d %d",&mesh->edge[k].a,&mesh->edge[k].b,&mesh->edge[k].ref);
+        else {
+          fread(&mesh->edge[k].a,sw,1,inm);
+          if(iswp) mesh->edge[k].a=swapbin(mesh->edge[k].a);
+          fread(&mesh->edge[k].b,sw,1,inm);
+          if(iswp) mesh->edge[k].b=swapbin(mesh->edge[k].b);
+          fread(&mesh->edge[k].ref,sw,1,inm);
+          if(iswp) mesh->edge[k].ref=swapbin(mesh->edge[k].ref);
+        }
+        mesh->edge[k].tag |= MG_REF;
+        mesh->point[mesh->edge[k].a].tag |= MG_REF;
+        mesh->point[mesh->edge[k].b].tag |= MG_REF;
+      }
     }
 
     if ( nri ) {
@@ -512,9 +555,21 @@ int MMGS_loadMesh(MMG5_pMesh mesh, char *filename) {
           fread(&ia,sw,1,inm);
           if(iswp) ia=swapbin(ia);
         }
-        if ( ia > 0 && ia <= mesh->na )  mesh->edge[ia].tag |= MG_GEO;
+        if ( (ia>na) || (ia<0) ) {
+          fprintf(stdout,"   Warning: ridge number %8d IGNORED\n",ia);
+        }
+        else {
+          if( mesh->info.iso ){
+            if( ina[ia] == 0 ) continue;
+            else
+              mesh->edge[ina[ia]].tag |= MG_GEO;
+          }
+          else
+            mesh->edge[ia].tag |= MG_GEO;
+        }
       }
     }
+
     if ( nedreq ) {
       rewind(inm);
       fseek(inm,posnedreq,SEEK_SET);
@@ -525,9 +580,22 @@ int MMGS_loadMesh(MMG5_pMesh mesh, char *filename) {
           fread(&ia,sw,1,inm);
           if(iswp) ia=swapbin(ia);
         }
-        if ( ia > 0 && ia <= mesh->na )   mesh->edge[ia].tag |= MG_REQ;
+        if ( (ia>na) || (ia<0) ) {
+          fprintf(stdout,"   Warning: required edge number %8d IGNORED\n",ia);
+        }
+        else {
+          if( mesh->info.iso ){
+            if( ina[ia] == 0 ) continue;
+            else
+              mesh->edge[ina[ia]].tag |= MG_REQ;
+          }
+          else
+            mesh->edge[ia].tag |= MG_REQ;
+        }
       }
     }
+    if ( mesh->info.iso )
+      _MMG5_SAFE_FREE(ina);
   }
 
   /* read geometric entities */

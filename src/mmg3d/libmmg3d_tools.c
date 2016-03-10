@@ -122,7 +122,6 @@ void MMG3D_usage(char *prog) {
 
   _MMG5_mmgUsage(prog);
   fprintf(stdout,"-A           enable anisotropy (without metric file).\n");
-  fprintf(stdout,"-ls     val  create mesh of isovalue val\n");
 
 #ifdef USE_SUSCELAS
   fprintf(stdout,"-lag [0/1/2] Lagrangian mesh displacement according to mode 0/1/2\n");
@@ -286,10 +285,13 @@ int MMG3D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
         else if ( !strcmp(argv[i],"-ls") ) {
           if ( !MMG3D_Set_iparameter(mesh,met,MMG3D_IPARAM_iso,1) )
             exit(EXIT_FAILURE);
-          /* if ( ++i < argc && isdigit(argv[i][0]) ) { */
-          /*   if ( !MMG3D_Set_dparameter(mesh,met,MMG3D_DPARAM_ls,atof(argv[i])) ) */
-          /*     exit(EXIT_FAILURE); */
-          /* } */
+          if ( ++i < argc && (isdigit(argv[i][0]) ||
+                              (argv[i][0]=='-' && isdigit(argv[i][1])) ) ) {
+            if ( !MMG3D_Set_dparameter(mesh,met,MMG3D_DPARAM_ls,atof(argv[i])) )
+              exit(EXIT_FAILURE);
+          }
+          else i--;
+
           /* else if ( i == argc ) { */
           /*   fprintf(stderr,"Missing argument option %c%c\n",argv[i-1][1],argv[i-1][2]); */
           /*   MMG3D_usage(argv[0]); */
@@ -640,7 +642,7 @@ int MMG3D_mmg3dcheck(MMG5_pMesh mesh,MMG5_pSol met,double critmin, double lmin,
       fprintf(stdout,"\n  ## ERROR: A VALID SOLUTION FILE IS NEEDED \n");
       return(MMG5_STRONGFAILURE);
     }
-    if ( !_MMG5_mmg3d2(mesh,met) ) return(MMG5_STRONGFAILURE);
+    if ( !_MMG3D_mmg3d2(mesh,met) ) return(MMG5_STRONGFAILURE);
   }
 
   MMG3D_searchqua(mesh,met,critmin,eltab,metRidTyp);

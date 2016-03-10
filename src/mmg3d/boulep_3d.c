@@ -118,8 +118,8 @@ int _MMG5_boulenm(MMG5_pMesh mesh,int start,int ip,int iface,
   nr  = nnm = 0;
   ip0 = ip1 = 0;
 
-  memset(n,0.0,3*sizeof(double));
-  memset(t,0.0,3*sizeof(double));
+  memset(n,0x00,3*sizeof(double));
+  memset(t,0x00,3*sizeof(double));
 
   pt   = &mesh->tetra[start];
   nump = pt->v[ip];

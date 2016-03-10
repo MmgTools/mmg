@@ -231,9 +231,11 @@ IF ( BUILD_TESTING )
     IF ( TEST_LIBMMGS )
       SET(LIBMMGS_EXEC0 ${EXECUTABLE_OUTPUT_PATH}/libmmgs_example0)
       SET(LIBMMGS_EXEC1   ${EXECUTABLE_OUTPUT_PATH}/libmmgs_example1)
+      SET(LIBMMGS_EXEC2   ${EXECUTABLE_OUTPUT_PATH}/libmmgs_example2)
 
       ADD_TEST(NAME libmmgs_example0   COMMAND ${LIBMMGS_EXEC0})
       ADD_TEST(NAME libmmgs_example1   COMMAND ${LIBMMGS_EXEC1})
+      ADD_TEST(NAME libmmgs_example2   COMMAND ${LIBMMGS_EXEC2})
 
       IF ( CMAKE_Fortran_COMPILER)
         SET(LIBMMGS_EXECFORTRAN ${EXECUTABLE_OUTPUT_PATH}/libmmgs_fortran)

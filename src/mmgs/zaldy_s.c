@@ -46,7 +46,8 @@ int _MMGS_newPt(MMG5_pMesh mesh,double c[3],double n[3]) {
   if ( mesh->npnil > mesh->np )  mesh->np = mesh->npnil;
   ppt   = &mesh->point[curpt];
   memcpy(ppt->c,c,3*sizeof(double));
-  memcpy(ppt->n,n,3*sizeof(double));
+  if ( n )
+    memcpy(ppt->n,n,3*sizeof(double));
   ppt->tag   &= ~MG_NUL;
   mesh->npnil = ppt->tmp;
   ppt->tmp    = 0;

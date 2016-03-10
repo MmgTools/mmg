@@ -138,6 +138,30 @@ int _MMG5_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
           }
         }
         break;
+      case 'k':
+        if ( !strcmp(argv[i],"-keep-ref") ) {
+          if ( !MMGS_Set_iparameter(mesh,met,MMGS_IPARAM_keepRef,1) )
+            exit(EXIT_FAILURE);
+        }
+        break;
+      case 'l':
+        if ( !strcmp(argv[i],"-ls") ) {
+          if ( !MMGS_Set_iparameter(mesh,met,MMGS_IPARAM_iso,1) )
+            exit(EXIT_FAILURE);
+          if ( ++i < argc && (isdigit(argv[i][0]) ||
+                              (argv[i][0]=='-' && isdigit(argv[i][1])) ) ) {
+            if ( !MMGS_Set_dparameter(mesh,met,MMGS_DPARAM_ls,atof(argv[i])) )
+              exit(EXIT_FAILURE);
+          }
+          else i--;
+
+          /* else if ( i == argc ) { */
+          /*   fprintf(stderr,"Missing argument option %c%c\n",argv[i-1][1],argv[i-1][2]); */
+          /*   MMGS_usage(argv[0]); */
+          /* } */
+          /* else i--; */
+        }
+        break;
       case 'm':
         if ( ++i < argc && isdigit(argv[i][0]) ) {
           if ( !MMGS_Set_iparameter(mesh,met,MMGS_IPARAM_mem,atoi(argv[i])) )
@@ -523,6 +547,9 @@ int main(int argc,char *argv[]) {
     /* Save a local parameters file containing the default parameters */
     ier = _MMGS_defaultOption(mesh,met);
     _MMG5_RETURN_AND_FREE(mesh,met,ier);
+  }
+  else if ( mesh->info.iso ) {
+    ier = MMGS_mmgsls(mesh,met);
   }
   else {
     ier = MMGS_mmgslib(mesh,met);

@@ -78,41 +78,56 @@
 #define   MMGS_IPARAM_debug              2
 ! /*!< [1/0] Turn on/off angle detection */
 #define   MMGS_IPARAM_angle              3
+! /*!< [1/0] Level-set meshing */
+#define   MMGS_IPARAM_iso                4
+! /*!< [1/0] Preserve the initial domain references in level-set mode */
+#define   MMGS_IPARAM_keepRef            5
 ! /*!< [1/0] Avoid/allow point insertion */
-#define   MMGS_IPARAM_noinsert           4
+#define   MMGS_IPARAM_noinsert           6
 ! /*!< [1/0] Avoid/allow edge or face flipping */
-#define   MMGS_IPARAM_noswap             5
+#define   MMGS_IPARAM_noswap             7
 ! /*!< [1/0] Avoid/allow point relocation */
-#define   MMGS_IPARAM_nomove             6
+#define   MMGS_IPARAM_nomove             8
 ! /*!< [0/1] Disabled/enabled normal regularization */
-#define   MMGS_IPARAM_nreg               7
+#define   MMGS_IPARAM_nreg               9
 ! /*!< [n] Number of local parameters */
-#define   MMGS_IPARAM_numberOfLocalParam 8
+#define   MMGS_IPARAM_numberOfLocalParam 10
 ! /*!< [1/0] Turn on/off point relocation with Scotch */
-#define   MMGS_IPARAM_renum              9
+#define   MMGS_IPARAM_renum              11
 ! /*!< [val] Value for angle detection */
-#define   MMGS_DPARAM_angleDetection     10
+#define   MMGS_DPARAM_angleDetection     12
 ! /*!< [val] Minimal mesh size */
-#define   MMGS_DPARAM_hmin               11
+#define   MMGS_DPARAM_hmin               13
 ! /*!< [val] Maximal mesh size */
-#define   MMGS_DPARAM_hmax               12
+#define   MMGS_DPARAM_hmax               14
 ! /*!< [val] Control global Hausdorff distance (on all the boundary surfaces of the mesh) */
-#define   MMGS_DPARAM_hausd              13
+#define   MMGS_DPARAM_hausd              15
 ! /*!< [val] Control gradation */
-#define   MMGS_DPARAM_hgrad              14
+#define   MMGS_DPARAM_hgrad              16
+! /*!< [val] Value of level-set (not use for now) */
+#define   MMGS_DPARAM_ls                 17
 ! /*!< [n] Number of parameters */
-#define   MMGS_PARAM_size                15
+#define   MMGS_PARAM_size                18
 
 ! /*----------------------------- functions header -----------------------------*/
 ! /* Initialization functions */
 ! /* init structures */
 ! /**
 !  * \param starter dummy argument used to initialize the variadic argument list
-!  * \param ... variadic arguments. For now, you need to call the \a
-!  * MMGS_Init_mesh function with the following arguments :
-!  * MMGS_Init_mesh(MMG5_ARG_start,MMG5_ARG_ppMesh, your_mesh,
-!  * MMG5_ARG_ppMet, your_metric,MMG5_ARG_end). Here, \a your_mesh is a pointer
-!  * toward \a MMG5_pMesh and \a your_metric a pointer toward \a MMG5_pSol.
+!  * \param ... variadic arguments.
+!  *
+!  * For the MMGS_mmgslib function, you need
+!  * to call the \a MMGS_Init_mesh function with the following arguments :
+!  * MMGS_Init_mesh(MMG5_ARG_start,MMG5_ARG_ppMesh, &your_mesh, MMG5_ARG_ppMet,
+!  * &your_metric,MMG5_ARG_end).
+!  *
+!  * For the MMGS_mmgsls function, you need
+!  * to call the \a MMGS_Init_mesh function with the following arguments :
+!  * MMGS_Init_mesh(MMG5_ARG_start,MMG5_ARG_ppMesh, &your_mesh, MMG5_ARG_ppLs,
+!  * &your_level_set,MMG5_ARG_end).
+!  *
+!  * Here,\a your_mesh is a \a MMG5_pMesh, \a your_metric and \a your_level_set
+!  * are \a MMG5_pSol.
 !  *
 !  * MMG structures allocation and initialization.
 !  *
@@ -580,11 +595,20 @@
 ! /* deallocations */
 ! /**
 !  * \param starter dummy argument used to initialize the variadic argument list.
-!  * \param ... variadic arguments. For now, you need to call the \a
-!  * MMGS_Free_all function with the following arguments :
-!  * MMGS_Free_all(MMG5_ARG_start,MMG5_ARG_ppMesh, your_mesh,
-!  * MMG5_ARG_ppMet, your_metric,MMG5_ARG_end). Here, \a your_mesh is a pointer
-!  * toward \a MMG5_pMesh and \a your_metric a pointer toward \a MMG5_pSol.
+!  * \param ... variadic arguments.
+!  *
+!  * For the MMGS_mmgslib function, you need
+!  * to call the \a MMGS_Init_mesh function with the following arguments :
+!  * MMGS_Init_mesh(MMG5_ARG_start,MMG5_ARG_ppMesh, &your_mesh, MMG5_ARG_ppMet,
+!  * &your_metric,MMG5_ARG_end).
+!  *
+!  * For the MMGS_mmgsls function, you need
+!  * to call the \a MMGS_Init_mesh function with the following arguments :
+!  * MMGS_Init_mesh(MMG5_ARG_start,MMG5_ARG_ppMesh, &your_mesh, MMG5_ARG_ppLs,
+!  * &your_level_set,MMG5_ARG_end).
+!  *
+!  * Here,\a your_mesh is a \a MMG5_pMesh, \a your_metric and \a your_level_set
+!  * are \a MMG5_pSol.
 !  *
 !  * Deallocations before return.
 !  *
@@ -597,11 +621,23 @@
 
 ! /**
 !  * \param starter dummy argument used to initialize the variadic argument list.
-!  * \param ... variadic arguments. For now, you need to call the \a
-!  * MMGS_Free_structures function with the following arguments :
-!  * MMGS_Free_structures(MMG5_ARG_start,MMG5_ARG_ppMesh, your_mesh,
-!  * MMG5_ARG_ppMet, your_metric,MMG5_ARG_end). Here, \a your_mesh is a pointer
-!  * toward \a MMG5_pMesh and \a your_metric a pointer toward \a MMG5_pSol.
+!  * \param ... variadic arguments.
+!  *
+!  * For the MMGS_mmgslib function, you need
+!  * to call the \a MMGS_Init_mesh function with the following arguments :
+!  * MMGS_Init_mesh(MMG5_ARG_start,MMG5_ARG_ppMesh, &your_mesh, MMG5_ARG_ppMet,
+!  * &your_metric,MMG5_ARG_end).
+!  *
+!  * For the MMGS_mmgsls function, you need
+!  * to call the \a MMGS_Init_mesh function with the following arguments :
+!  * MMGS_Init_mesh(MMG5_ARG_start,MMG5_ARG_ppMesh, &your_mesh, MMG5_ARG_ppLs,
+!  * &your_level_set,MMG5_ARG_end).
+!  *
+!  * Here,\a your_mesh is a \a MMG5_pMesh, \a your_metric and \a your_level_set
+!  * are \a MMG5_pSol.
+!  *
+!  * Here, \a your_mesh is a pointer toward \a MMG5_pMesh and \a your_metric and
+!  * \a your_level_set a pointer toward \a MMG5_pSol.
 !  *
 !  * Structure deallocations before return.
 !  *
@@ -614,11 +650,20 @@
 
 ! /**
 !  * \param starter dummy argument used to initialize the variadic argument list.
-!  * \param ... variadic arguments. For now, you need to call the \a
-!  * MMGS_Free_names function with the following arguments :
-!  * MMGS_Free_names(MMG5_ARG_start,MMG5_ARG_ppMesh, your_mesh,
-!  * MMG5_ARG_ppMet, your_metric,MMG5_ARG_end). Here, \a your_mesh is a pointer
-!  * toward \a MMG5_pMesh and \a your_metric a pointer toward \a MMG5_pSol.
+!  * \param ... variadic arguments.
+!  *
+!  * For the MMGS_mmgslib function, you need
+!  * to call the \a MMGS_Init_mesh function with the following arguments :
+!  * MMGS_Init_mesh(MMG5_ARG_start,MMG5_ARG_ppMesh, &your_mesh, MMG5_ARG_ppMet,
+!  * &your_metric,MMG5_ARG_end).
+!  *
+!  * For the MMGS_mmgsls function, you need
+!  * to call the \a MMGS_Init_mesh function with the following arguments :
+!  * MMGS_Init_mesh(MMG5_ARG_start,MMG5_ARG_ppMesh, &your_mesh, MMG5_ARG_ppLs,
+!  * &your_level_set,MMG5_ARG_end).
+!  *
+!  * Here,\a your_mesh is a \a MMG5_pMesh, \a your_metric and \a your_level_set
+!  * are \a MMG5_pSol.
 !  *
 !  * Structure deallocations before return.
 !  *
@@ -643,7 +688,20 @@
 
 ! int  MMGS_mmgslib(MMG5_pMesh mesh, MMG5_pSol met);
 
-! /** To associate function pointers without calling MMGS_mmg3dlib */
+! /**
+!  * \param mesh pointer toward the mesh structure.
+!  * \param met pointer toward the sol (metric) structure.
+!  * \return \ref MMG5_SUCCESS if success, \ref MMG5_LOWFAILURE if fail but a
+!  * conform mesh is saved or \ref MMG5_STRONGFAILURE if fail and we can't save
+!  * the mesh.
+!  *
+!  * Main program for level set discretization library.
+!  *
+!  */
+
+! int  MMGS_mmgsls(MMG5_pMesh mesh, MMG5_pSol met);
+
+! /** To associate function pointers without calling MMGS_mmgslib */
 ! /**
 !  * \param mesh pointer toward the mesh structure (unused).
 !  *

@@ -39,17 +39,6 @@
 
 #include "mmgs.h"
 
-/**
- * \param starter dummy argument used to initialize the variadic argument list
- * \param ... variadic arguments. For now, you need to call the \a
- * MMGS_Init_mesh function with the following arguments :
- * MMGS_Init_mesh(MMG5_ARG_start,MMG5_ARG_ppMesh, your_mesh,
- * MMG5_ARG_ppMet, your_metric,MMG5_ARG_end). Here, \a your_mesh is a pointer
- * toward \a MMG5_pMesh and \a your_metric a pointer toward \a MMG5_pSol.
- *
- * MMG structures allocation and initialization.
- *
- */
 void MMGS_Init_mesh(enum MMG5_arg starter,...) {
   va_list argptr;
 
@@ -1012,7 +1001,6 @@ int MMGS_Chk_meshData(MMG5_pMesh mesh,MMG5_pSol met) {
     return(0);
   }
 
-  printf("%d %d\n",met->npi,met->np);
   if ( met->npi != met->np ) {
     fprintf(stdout,"  ## Error: if you don't use the MMGS_loadSol function,");
     fprintf(stdout," you must call the MMGS_Set_solSize function to have a");
@@ -1090,6 +1078,14 @@ int MMGS_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
         fprintf(stdout,"  ## Warning: angle detection parameter set to default value\n");
       mesh->info.dhd    = _MMG5_ANGEDG;
     }
+    break;
+  case MMGS_IPARAM_iso :
+    if ( !mesh->info.iso )
+      mesh->info.iso      = val;
+    break;
+  case MMGS_IPARAM_keepRef :
+    if ( val )
+      mesh->info.iso      = 2;
     break;
   case MMGS_IPARAM_noinsert :
     mesh->info.noinsert = val;
@@ -1234,6 +1230,9 @@ int MMGS_Set_dparameter(MMG5_pMesh mesh, MMG5_pSol sol, int dparam, double val){
     else
       mesh->info.hausd    = val;
     break;
+  case MMGS_DPARAM_ls :
+    mesh->info.ls       = val;
+    break;
   default :
     fprintf(stdout,"  ## Error: unknown type of parameter\n");
     return(0);
@@ -1320,20 +1319,6 @@ int MMGS_Set_localParameter(MMG5_pMesh mesh,MMG5_pSol sol, int typ, int ref,
   return(1);
 }
 
-/**
- * \param starter dummy argument used to initialize the variadic argument list.
- * \param ... variadic arguments. For now, you need to call the \a
- * MMGS_Free_all function with the following arguments :
- * MMGS_Free_all(MMG5_ARG_start,MMG5_ARG_ppMesh, your_mesh,
- * MMG5_ARG_ppMet, your_metric,MMG5_ARG_end). Here, \a your_mesh is a pointer
- * toward \a MMG5_pMesh and \a your_metric a pointer toward \a MMG5_pSol.
- *
- * Deallocations before return.
- *
- * \remark we pass the structures by reference in order to have argument
- * compatibility between the library call from a Fortran code and a C code.
- *
- */
 void MMGS_Free_all(enum MMG5_arg starter,...)
 {
 
@@ -1348,20 +1333,6 @@ void MMGS_Free_all(enum MMG5_arg starter,...)
   return;
 }
 
-/**
- * \param starter dummy argument used to initialize the variadic argument list.
- * \param ... variadic arguments. For now, you need to call the \a
- * MMGS_Free_structures function with the following arguments :
- * MMGS_Free_structures(MMG5_ARG_start,MMG5_ARG_ppMesh, your_mesh,
- * MMG5_ARG_ppMet, your_metric,MMG5_ARG_end). Here, \a your_mesh is a pointer
- * toward \a MMG5_pMesh and \a your_metric a pointer toward \a MMG5_pSol.
- *
- * Structure deallocations before return.
- *
- * \remark we pass the structures by reference in order to have argument
- * compatibility between the library call from a Fortran code and a C code.
- *
- */
 void MMGS_Free_structures(enum MMG5_arg starter,...)
 {
 
@@ -1376,20 +1347,6 @@ void MMGS_Free_structures(enum MMG5_arg starter,...)
   return;
 }
 
-/**
- * \param starter dummy argument used to initialize the variadic argument list.
- * \param ... variadic arguments. For now, you need to call the \a
- * MMGS_Free_names function with the following arguments :
- * MMGS_Free_names(MMG5_ARG_start,MMG5_ARG_ppMesh, your_mesh,
- * MMG5_ARG_ppMet, your_metric,MMG5_ARG_end). Here, \a your_mesh is a pointer
- * toward \a MMG5_pMesh and \a your_metric a pointer toward \a MMG5_pSol.
- *
- * Structure deallocations before return.
- *
- * \remark we pass the structures by reference in order to have argument
- * compatibility between the library call from a Fortran code and a C code.
- *
- */
 void MMGS_Free_names(enum MMG5_arg starter,...)
 {
 
