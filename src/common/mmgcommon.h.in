@@ -124,8 +124,6 @@
 #define _MMG5_KA 7 /*!< Key for hash tables. */
 #define _MMG5_KB 11  /*!< Key for hash tables. */
 
-/* Domain refs in iso mode */
-#define MG_ISO    10
 
 /** Reset the customized signals and set the internal counters of points, edges,
  * tria and tetra to the suitable value (needed by users to recover their mesh

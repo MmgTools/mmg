@@ -82,6 +82,14 @@
 #define MMG5_STRONGFAILURE 2
 
 ! /**
+!  * Domain refs in iso mode
+!  *
+!  */
+
+#define MG_ISO    10
+
+
+! /**
 !  * \enum MMG5_arg
 !  * \brief Argument type of mmg3d structures.
 !  */
