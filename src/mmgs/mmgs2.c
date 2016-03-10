@@ -213,7 +213,7 @@ int _MMGS_snpval_ls(MMG5_pMesh mesh,MMG5_pSol sol) {
  * \warning i inxt[i] is one edge of the implicit boundary.
  *
  */
-int _MMG2_chkmaniball(MMG5_pMesh mesh, int start, char istart) {
+int _MMGS_chkmaniball(MMG5_pMesh mesh, int start, char istart) {
   MMG5_pTria         pt;
   int                *adja,k,iel;
   char               i,i1;
@@ -276,6 +276,7 @@ int _MMG2_chkmaniball(MMG5_pMesh mesh, int start, char istart) {
   }
 
   /* General case: go on travelling until another implicit boundary is met */
+  i = _MMG5_inxt2[i];
   do {
     adja = &mesh->adja[3*(k-1)+1];
     i1 = _MMG5_inxt2[i];
@@ -305,7 +306,7 @@ int _MMG2_chkmaniball(MMG5_pMesh mesh, int start, char istart) {
  */
 static
 int _MMGS_chkmanimesh(MMG5_pMesh mesh) {
-  MMG5_pTria      pt,pt1;
+  MMG5_pTria      pt;
   int             *adja,k,cnt,iel;
   char            i,i1;
 
@@ -315,6 +316,7 @@ int _MMGS_chkmanimesh(MMG5_pMesh mesh) {
     pt = &mesh->tria[k];
     if ( !MG_EOK(pt) ) continue;
 
+    cnt = 0;
     adja = &mesh->adja[3*(k-1)+1];
     for (i=0; i<3; i++) {
       iel = adja[i] / 3;
@@ -324,8 +326,7 @@ int _MMGS_chkmanimesh(MMG5_pMesh mesh) {
         continue;
       }
       else {
-        pt1 = &mesh->tria[iel];
-        if ( pt1->ref != pt->ref ) cnt++;
+        if ( pt->edg[i] == MG_ISO ) cnt++;
       }
     }
     if( cnt == 3 ) {
@@ -345,12 +346,10 @@ int _MMGS_chkmanimesh(MMG5_pMesh mesh) {
       adja = &mesh->adja[3*(k-1)+1];
       iel = adja[i] / 3;
 
-      if (! iel ) continue;
-      pt1 = &mesh->tria[iel];
-      if ( pt->ref == pt1->ref ) continue;
+      if ( (!iel) || (pt->edg[i] != MG_ISO) ) continue;
 
       i1 = _MMG5_inxt2[i];
-      if ( !_MMG2_chkmaniball(mesh,k,i1) )
+      if ( !_MMGS_chkmaniball(mesh,k,i1) )
         return(0);
     }
   }
@@ -570,6 +569,12 @@ int _MMGS_mmgs2(MMG5_pMesh mesh,MMG5_pSol sol) {
 
   if ( abs(mesh->info.imprim) > 3 )
     fprintf(stdout,"  ** ISOSURFACE EXTRACTION\n");
+
+  /* set tria edges tags */
+  if ( !assignEdge(mesh) ) {
+    fprintf(stdout,"  ## Analysis problem. Exit program.\n");
+    return(0);
+  }
 
   /* Snap values of level set function if need be, then discretize it */
   if ( !_MMGS_snpval_ls(mesh,sol) ) {
