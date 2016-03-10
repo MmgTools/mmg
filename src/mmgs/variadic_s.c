@@ -330,13 +330,13 @@ void _MMGS_Free_structures_var(va_list argptr)
     _MMG5_DEL_MEM((*mesh),(*mesh)->edge,((*mesh)->na+1)*sizeof(MMG5_Edge));
 
   if ( (*mesh)->adja )
-    _MMG5_DEL_MEM((*mesh),(*mesh)->adja,(4*(*mesh)->nemax+5)*sizeof(int));
+    _MMG5_DEL_MEM((*mesh),(*mesh)->adja,(3*(*mesh)->ntmax+5)*sizeof(int));
 
   if ( (*mesh)->xpoint )
     _MMG5_DEL_MEM((*mesh),(*mesh)->xpoint,((*mesh)->xpmax+1)*sizeof(MMG5_xPoint));
 
   if ( (*mesh)->tria )
-    _MMG5_DEL_MEM((*mesh),(*mesh)->tria,((*mesh)->nt+1)*sizeof(MMG5_Tria));
+    _MMG5_DEL_MEM((*mesh),(*mesh)->tria,((*mesh)->ntmax+1)*sizeof(MMG5_Tria));
 
   /* sol */
   if ( sol && (*sol) && (*sol)->m )

@@ -63,7 +63,7 @@ void _MMGS_Free_topoTables(MMG5_pMesh mesh) {
 
   mesh->xp = 0;
   if ( mesh->adja )
-    _MMG5_DEL_MEM(mesh,mesh->adja,(4*mesh->nemax+5)*sizeof(int));
+    _MMG5_DEL_MEM(mesh,mesh->adja,(3*mesh->ntmax+5)*sizeof(int));
 
   if ( mesh->xpoint )
     _MMG5_DEL_MEM(mesh,mesh->xpoint,(mesh->xpmax+1)*sizeof(MMG5_xPoint));
