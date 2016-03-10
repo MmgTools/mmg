@@ -22,7 +22,7 @@
 */
 
 /**
- * Example of use of the mmg3dls function of the mmg3d library (basic use of
+ * Example of use of the mmgsls function of the mmgs library (basic use of
  * level-set discretization option)
  *
  * \author Charles Dapogny (LJLL, UPMC)
@@ -42,19 +42,19 @@
 #include <math.h>
 #include <float.h>
 
-/** Include the mmg3d library hader file */
+/** Include the mmgs library hader file */
 // if the header file is in the "include" directory
-// #include "libmmg3d.h"
-// if the header file is in "include/mmg/mmg3d"
-#include "mmg/mmg3d/libmmg3d.h"
+// #include "libmmgs.h"
+// if the header file is in "include/mmg/mmgs"
+#include "mmg/mmgs/libmmgs.h"
 
 int main(int argc,char *argv[]) {
   MMG5_pMesh      mmgMesh;
   MMG5_pSol       mmgSol;
   int             ier;
-  char            *pwd,*inname,*outname;
+  char            *pwd,*inname;
 
-  fprintf(stdout,"  -- TEST MMG3DLS \n");
+  fprintf(stdout,"  -- TEST MMGSLS \n");
 
   /* Name and path of the mesh files */
   pwd = getenv("PWD");
@@ -63,12 +63,8 @@ int main(int argc,char *argv[]) {
     perror("  ## Memory problem: calloc");
     exit(EXIT_FAILURE);
   }
-  outname = (char *) calloc(strlen(pwd) + 70, sizeof(char));
-  if ( outname == NULL ) {
-    perror("  ## Memory problem: calloc");
-    exit(EXIT_FAILURE);
-  }
-  sprintf(inname, "%s%s%s", pwd, "/../libexamples/mmg3d/IsosurfDiscretization_example0/", "test");
+
+  sprintf(inname, "%s%s%s", pwd, "/../libexamples/mmgs/IsosurfDiscretization_example0/", "teapot");
 
   /** 1) Initialisation of mesh and sol structures */
   /* args of InitMesh:
@@ -79,88 +75,81 @@ int main(int argc,char *argv[]) {
    * &mmgSol: pointer toward your MMG5_pSol (that store your metric) */
   mmgMesh = NULL;
   mmgSol  = NULL;
-  MMG3D_Init_mesh(MMG5_ARG_start,
-                  MMG5_ARG_ppMesh,&mmgMesh,MMG5_ARG_ppMet,&mmgSol,
-                  MMG5_ARG_end);
+  MMGS_Init_mesh(MMG5_ARG_start,
+                 MMG5_ARG_ppMesh,&mmgMesh,MMG5_ARG_ppLs,&mmgSol,
+                 MMG5_ARG_end);
 
   /** 2) Build mesh in MMG5 format */
-  /** Two solutions: just use the MMG3D_loadMesh function that will read a .mesh(b)
-     file formatted or manually set your mesh using the MMG3D_Set* functions */
+  /** Two solutions: just use the MMGS_loadMesh function that will read a .mesh(b)
+      file formatted or manually set your mesh using the MMGS_Set* functions */
 
-  /** with MMG3D_loadMesh function */
+  /** with MMGS_loadMesh function */
   /** a) (not mandatory): give the mesh name
-     (by default, the "mesh.mesh" file is oppened)*/
-  if ( MMG3D_Set_inputMeshName(mmgMesh,inname) != 1 )
+      (by default, the "mesh.mesh" file is oppened)*/
+  if ( MMGS_Set_inputMeshName(mmgMesh,inname) != 1 )
     exit(EXIT_FAILURE);
   /** b) function calling */
-  if ( MMG3D_loadMesh(mmgMesh,inname) != 1 )  exit(EXIT_FAILURE);
+  if ( MMGS_loadMesh(mmgMesh,inname) != 1 )  exit(EXIT_FAILURE);
 
   /** 3) Build solution in MMG5 format */
-  /** Two solutions: just use the MMG3D_loadSol function that will read a .sol(b)
-      file formatted or manually set your sol using the MMG3D_Set* functions */
+  /** Two solutions: just use the MMGS_loadSol function that will read a .sol(b)
+      file formatted or manually set your sol using the MMGS_Set* functions */
 
   /**------------------- Level set discretization option ---------------------*/
   /* Ask for level set discretization */
-  if ( MMG3D_Set_iparameter(mmgMesh,mmgSol,MMG3D_IPARAM_iso, 1) != 1 )
+  if ( MMGS_Set_iparameter(mmgMesh,mmgSol,MMGS_IPARAM_iso, 1) != 1 )
     exit(EXIT_FAILURE);
 
-  /** With MMG3D_loadSol function */
+  /* Ask to preserve the initial references of the domain */
+  if ( MMGS_Set_iparameter(mmgMesh,mmgSol,MMGS_IPARAM_keepRef, 1) != 1 )
+    exit(EXIT_FAILURE);
+
+  /** With MMGS_loadSol function */
   /** a) (not mandatory): give the sol name
-     (by default, the "mesh.sol" file is oppened)*/
-  if ( MMG3D_Set_inputSolName(mmgMesh,mmgSol,inname) != 1 )
+      (by default, the "mesh.sol" file is oppened)*/
+  if ( MMGS_Set_inputSolName(mmgMesh,mmgSol,inname) != 1 )
     exit(EXIT_FAILURE);
 
   /** b) function calling */
-  if ( MMG3D_loadSol(mmgMesh,mmgSol,inname) != 1 )
+  if ( MMGS_loadSol(mmgMesh,mmgSol,inname) != 1 )
     exit(EXIT_FAILURE);
 
   /** 4) (not mandatory): check if the number of given entities match with mesh size */
-  if ( MMG3D_Chk_meshData(mmgMesh,mmgSol) != 1 ) exit(EXIT_FAILURE);
+  if ( MMGS_Chk_meshData(mmgMesh,mmgSol) != 1 ) exit(EXIT_FAILURE);
 
   /** 5) (not mandatory): set your global parameters using the
-      MMG3D_Set_iparameter and MMG3D_Set_dparameter function
+      MMGS_Set_iparameter and MMGS_Set_dparameter function
       (resp. for integer parameters and double param)*/
 
 
   /**------------------- level set discretization ---------------------------*/
 
   /* debug mode ON (default value = OFF) */
-  if ( MMG3D_Set_iparameter(mmgMesh,mmgSol,MMG3D_IPARAM_debug, 1) != 1 )
+  if ( MMGS_Set_iparameter(mmgMesh,mmgSol,MMGS_IPARAM_debug, 1) != 1 )
     exit(EXIT_FAILURE);
 
   /** library call */
-  ier = MMG3D_mmg3dls(mmgMesh,mmgSol);
+  ier = MMGS_mmgsls(mmgMesh,mmgSol);
 
   if ( ier == MMG5_STRONGFAILURE ) {
-    fprintf(stdout,"BAD ENDING OF MMG3DLS: UNABLE TO SAVE MESH\n");
+    fprintf(stdout,"BAD ENDING OF MMGSLS: UNABLE TO SAVE MESH\n");
     return(ier);
   } else if ( ier == MMG5_LOWFAILURE )
-    fprintf(stdout,"BAD ENDING OF MMG3DLS\n");
+    fprintf(stdout,"BAD ENDING OF MMGSLS\n");
 
-  /* (Not mandatory) Automatically save the mesh */
-  sprintf(outname, "%s%s%s", pwd, "/../libexamples/mmg3d/IsosurfDiscretization_example0/", "test.o");
-  if ( MMG3D_Set_outputMeshName(mmgMesh,outname) != 1 )
+  if ( MMGS_saveMesh(mmgMesh,"teapot.o.meshb") != 1 )
     exit(EXIT_FAILURE);
 
-  if ( MMG3D_saveMesh(mmgMesh,outname) != 1 )
+  if ( MMGS_saveSol(mmgMesh,mmgSol,"teapot.o.sol") != 1 )
     exit(EXIT_FAILURE);
 
-  /* (Not mandatory) Automatically save the solution */
-  if ( MMG3D_Set_outputSolName(mmgMesh,mmgSol,outname) != 1 )
-    exit(EXIT_FAILURE);
-
-  if ( MMG3D_saveSol(mmgMesh,mmgSol,outname) != 1 )
-    exit(EXIT_FAILURE);
-
-  /* 9) free the MMG3D5 structures */
-  MMG3D_Free_all(MMG5_ARG_start,
-                 MMG5_ARG_ppMesh,&mmgMesh,MMG5_ARG_ppMet,&mmgSol,
-                 MMG5_ARG_end);
+  /* 9) free the MMGS5 structures */
+  MMGS_Free_all(MMG5_ARG_start,
+                MMG5_ARG_ppMesh,&mmgMesh,MMG5_ARG_ppMet,&mmgSol,
+                MMG5_ARG_end);
 
   free(inname);
   inname = NULL;
-  free(outname);
-  outname = NULL;
 
   return(ier);
 }

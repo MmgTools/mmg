@@ -91,7 +91,7 @@ ADD_TEST(NAME OptLs_teapot_0.5_keepRef
   ${MMGS_CI_TESTS}/OptLs_teapot/teapot.0.5.keep-ref.o.meshb)
 
 ADD_TEST(NAME OptLs_teapot2
-  COMMAND ${EXECUT_MMGS} -v 5 -ls
+  COMMAND ${EXECUT_MMGS} -v 5 -ls -nr
   ${MMGS_CI_TESTS}/OptLs_teapot/teapot
   ${MMGS_CI_TESTS}/OptLs_teapot/teapot.o.meshb)
 

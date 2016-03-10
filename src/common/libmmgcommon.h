@@ -69,6 +69,7 @@
 enum MMG5_arg {
   MMG5_ARG_start,  /*!< To begin a list of variadic arguments (mandatory first arg for all our variadic functions) */
   MMG5_ARG_ppMesh, /*!< Pointer toward a MMG5_pMesh structure (for structure allocations purposes) */
+  MMG5_ARG_ppLs,   /*!< Pointer toward a MMG5_pSol structure storing a level-set (for structure allocations purposes)  */
   MMG5_ARG_ppMet,  /*!< Pointer toward a MMG5_pSol structure storing a metric (for structure allocations purposes)  */
   MMG5_ARG_ppDisp, /*!< Pointer toward a MMG5_pSol structure storing a displacement (for structure allocations purposes)  */
   MMG5_ARG_pMesh,  /*!< MMG5_pMesh structure */
