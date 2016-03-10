@@ -71,8 +71,9 @@ void MMGS_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
  */
 void MMGS_usage(char *prog) {
   _MMG5_mmgUsage(prog);
-  fprintf(stdout,"-A           enable anisotropy (without metric file).\n");
 
+  fprintf(stdout,"-A           enable anisotropy (without metric file).\n");
+  fprintf(stdout,"-keep-ref    preserve initial domain references in level-set mode.\n");
   fprintf(stdout,"-nreg        normal regul.\n");
 #ifdef USE_SCOTCH
   fprintf(stdout,"-rn [n]      Turn on or off the renumbering using SCOTCH [0/1] \n");

@@ -72,7 +72,21 @@ _MMG5_invsl(double A[3][3],double b[3],double r[3]) {
   return(1);
 }
 
-/** Check ball of point np, return 0 if a nonmanifold situation is created */
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param sol pointer toward the level-set values.
+ * \param k index of the starting tetra.
+ * \param indp local index (inside the tria \a k) of the vertex that we check.
+ * \return 1 if success, 0 if fail
+ *
+ * Check whether snapping the value of vertex \a indp to 0 exactly
+ * leads to a non manifold situation.
+ *
+ * \warning: we assume that the triangle \a start has vertex \a istart
+ * with value 0 and the other two with changing values.
+ *
+ */
+
 static int
 _MMG5_ismaniball(MMG5_pMesh mesh,MMG5_pSol sol,int k,int indp) {
   MMG5_pTetra   pt,pt1;

@@ -80,32 +80,34 @@
 #define   MMGS_IPARAM_angle              3
 ! /*!< [1/0] Level-set meshing */
 #define   MMGS_IPARAM_iso                4
+! /*!< [1/0] Preserve the initial domain references in level-set mode */
+#define   MMGS_IPARAM_keepRef            5
 ! /*!< [1/0] Avoid/allow point insertion */
-#define   MMGS_IPARAM_noinsert           5
+#define   MMGS_IPARAM_noinsert           6
 ! /*!< [1/0] Avoid/allow edge or face flipping */
-#define   MMGS_IPARAM_noswap             6
+#define   MMGS_IPARAM_noswap             7
 ! /*!< [1/0] Avoid/allow point relocation */
-#define   MMGS_IPARAM_nomove             7
+#define   MMGS_IPARAM_nomove             8
 ! /*!< [0/1] Disabled/enabled normal regularization */
-#define   MMGS_IPARAM_nreg               8
+#define   MMGS_IPARAM_nreg               9
 ! /*!< [n] Number of local parameters */
-#define   MMGS_IPARAM_numberOfLocalParam 9
+#define   MMGS_IPARAM_numberOfLocalParam 10
 ! /*!< [1/0] Turn on/off point relocation with Scotch */
-#define   MMGS_IPARAM_renum              10
+#define   MMGS_IPARAM_renum              11
 ! /*!< [val] Value for angle detection */
-#define   MMGS_DPARAM_angleDetection     11
+#define   MMGS_DPARAM_angleDetection     12
 ! /*!< [val] Minimal mesh size */
-#define   MMGS_DPARAM_hmin               12
+#define   MMGS_DPARAM_hmin               13
 ! /*!< [val] Maximal mesh size */
-#define   MMGS_DPARAM_hmax               13
+#define   MMGS_DPARAM_hmax               14
 ! /*!< [val] Control global Hausdorff distance (on all the boundary surfaces of the mesh) */
-#define   MMGS_DPARAM_hausd              14
+#define   MMGS_DPARAM_hausd              15
 ! /*!< [val] Control gradation */
-#define   MMGS_DPARAM_hgrad              15
+#define   MMGS_DPARAM_hgrad              16
 ! /*!< [val] Value of level-set (not use for now) */
-#define   MMGS_DPARAM_ls                 16
+#define   MMGS_DPARAM_ls                 17
 ! /*!< [n] Number of parameters */
-#define   MMGS_PARAM_size                17
+#define   MMGS_PARAM_size                18
 
 ! /*----------------------------- functions header -----------------------------*/
 ! /* Initialization functions */

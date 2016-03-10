@@ -58,6 +58,7 @@ enum MMGS_Param {
   MMGS_IPARAM_debug,             /*!< [1/0], Turn on/off debug mode */
   MMGS_IPARAM_angle,             /*!< [1/0], Turn on/off angle detection */
   MMGS_IPARAM_iso,               /*!< [1/0], Level-set meshing */
+  MMGS_IPARAM_keepRef,           /*!< [1/0], Preserve the initial domain references in level-set mode */
   MMGS_IPARAM_noinsert,          /*!< [1/0], Avoid/allow point insertion */
   MMGS_IPARAM_noswap,            /*!< [1/0], Avoid/allow edge or face flipping */
   MMGS_IPARAM_nomove,            /*!< [1/0], Avoid/allow point relocation */

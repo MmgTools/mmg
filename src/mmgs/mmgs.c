@@ -138,6 +138,12 @@ int _MMG5_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
           }
         }
         break;
+      case 'k':
+        if ( !strcmp(argv[i],"-keep-ref") ) {
+          if ( !MMGS_Set_iparameter(mesh,met,MMGS_IPARAM_keepRef,1) )
+            exit(EXIT_FAILURE);
+        }
+        break;
       case 'l':
         if ( !strcmp(argv[i],"-ls") ) {
           if ( !MMGS_Set_iparameter(mesh,met,MMGS_IPARAM_iso,1) )
