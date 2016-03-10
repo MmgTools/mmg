@@ -570,12 +570,6 @@ int _MMGS_mmgs2(MMG5_pMesh mesh,MMG5_pSol sol) {
   if ( abs(mesh->info.imprim) > 3 )
     fprintf(stdout,"  ** ISOSURFACE EXTRACTION\n");
 
-  /* set tria edges tags */
-  if ( !assignEdge(mesh) ) {
-    fprintf(stdout,"  ## Analysis problem. Exit program.\n");
-    return(0);
-  }
-
   /* Snap values of level set function if need be, then discretize it */
   if ( !_MMGS_snpval_ls(mesh,sol) ) {
     fprintf(stdout,"  ## Problem with implicit function. Exit program.\n");
