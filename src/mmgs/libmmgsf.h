@@ -739,6 +739,18 @@
 
 ! void MMGS_usage(char *prog);
 ! /**
+!  * \param argc number of command line arguments.
+!  * \param argv command line arguments.
+!  * \param mesh pointer toward the mesh structure.
+!  * \param met pointer toward the sol structure.
+!  * \return 1.
+!  *
+!  * Store command line arguments.
+!  *
+!  */
+
+! int  MMGS_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met);
+! /**
 !  * \param mesh pointer toward the mesh structure.
 !  * \return 0 if fail, 1 if success.
 !  *
