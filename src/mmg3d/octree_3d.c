@@ -2,79 +2,42 @@
 
 #define LFILT 0.2
 
-#warning nbVer utilise? to remove?
+#warning fonction to be deleted after debug (and in mmg3d.h too)
+int _MMG3D_verifOctreeRec(MMG5_pMesh mesh, _MMG3D_octree_s* q, double* ver, const int no, const int nv)
+{
+  int i;
+  int quadrant;
+  int dim = mesh->dim;
+  int test = 0;
 
-/* double _MMG3D_distMet(double* x, double* metric, int dim) */
-/* { */
-/*   double dist = 0; */
-/*   int ind = 0; */
-/*   for(int i = 0; i< dim; i++) */
-/*   { */
-/*     for (int j = i; j<dim; j++) */
-/*     { */
-/*       dist += metric[ind]*x[i]*x[j]; */
-/*       ind++; */
-/*     } */
-/*   } */
-/*   return dist; */
-/* } */
 
-/* void sorties_vtk(MMG5_pMesh mesh, int* connectionList, int nb_pt, char* fich) */
-/* { */
-/*   MMG5_pPoint ppt; */
-/*   int imax = nb_pt, jmax = nb_pt; */
+  if (q->v != NULL)
+  {
+    for ( i = 0; i<q->nbVer; ++i)
+    {
+      if (q->v[i] == no)
+      {
+        test = 1;
+        break;
+      } 
+    }
+    //~ assert(test);
+    return test;
+    assert(1);
+   
+  }else if (q->branches != NULL)
+  {
+    quadrant = 0;
+    for ( i = 0; i<dim; ++i)
+    {
+      quadrant += ((double) (ver[i]>0.5))*(1<<i);
+      ver[i] -= ((double) (ver[i]>0.5))*0.5;
+      ver[i] *= 2;
+    }
 
-/*   FILE* fileVtk; */
-
-/*   if (!(fileVtk = fopen(fich,"wb"))) */
-/*     fprintf(stdout,"sorties_vtk: unable to open fije %s\n", fich); */
-
-/*   // ----------------------Header------------------------------------- */
-/*   fprintf(fileVtk,"# vtk DataFile Version 3.1\n"); */
-/*   fprintf(fileVtk,"Mesh nodes\n"); */
-/*   fprintf(fileVtk,"ASCII\n"); */
-/*   fprintf(fileVtk,"DATASET UNSTRUCTURED_GRID\n\n"); */
-
-/*   //----------------------Nodes position------------------------------ */
-/*   fprintf(fileVtk,"POINTS    %i    float\n", nb_pt); */
-/*   for (int i = 1; i<=nb_pt; i++) */
-/*   { */
-/*     ppt = &mesh->point[i]; */
-/*     fprintf(fileVtk,"%g    %g    %g\n",ppt->c[0],ppt->c[1],ppt->c[2]); */
-/*   } */
-
-/*   fprintf(fileVtk,"\n"); */
-
-/*   //---------------------Elements------------------------------------- */
-/*   fprintf(fileVtk,"CELLS    %i    %i\n", nb_pt, 3*nb_pt); */
-/*   for (int j = 1; j<=nb_pt; j++) */
-/*   { */
-/*     fprintf(fileVtk, "2    %i    %i\n", j-1, connectionList[j]-1); */
-/*   } */
-
-/*   fprintf(fileVtk,"\n"); */
-
-/*   fprintf(fileVtk,"CELL_TYPES    %i\n",nb_pt); */
-/*   for (int j = 1; j<=nb_pt; j++) */
-/*   { */
-/*     fprintf(fileVtk,"3 "); */
-/*   } */
-/*   fprintf(fileVtk, "\n\n"); */
-
-/*   //---------------------Data----------------------------------------- */
-/*   fprintf(fileVtk,"POINT_DATA    %i\n", nb_pt); */
-/*   fprintf(fileVtk,"SCALARS data float 1\n"); */
-/*   fprintf(fileVtk,"LOOKUP_TABLE default\n"); */
-/*   for (int j = 1; j<=nb_pt; j++) */
-/*   { */
-/*     fprintf(fileVtk, "%i\n",(int) (j == connectionList[j])); */
-/*   } */
-
-/*   fprintf(fileVtk,"\n"); */
-
-/*   fclose(fileVtk); */
-/* } */
-
+    _MMG3D_verifOctreeRec(mesh, &(q->branches[quadrant]), ver, no, nv);
+  }
+}
 
 /**
  * \param q pointer toward the octree cell
@@ -98,19 +61,22 @@ void _MMG3D_initOctree_s( _MMG3D_octree_s* q)
  * Initialisation of the octree cell.
  *
  */
-void _MMG3D_initOctree(MMG5_pMesh mesh,_MMG3D_pOctree q, int nv)
+void _MMG3D_initOctree(MMG5_pMesh mesh,_MMG3D_pOctree* q, int nv)
 {
+  _MMG5_SAFE_MALLOC(*q,1, _MMG3D_octree);
+
 #warning ajeter
   if ( mesh->info.imprim > 4 ) printf("OCTREE INIT\n");
 
-  q->nv = nv;
+  (*q)->nv = nv;
 
   _MMG5_ADD_MEM(mesh,sizeof(_MMG3D_octree_s),"octree structure",
                 printf("  Exit program.\n");
                 exit(EXIT_FAILURE));
-  _MMG5_SAFE_MALLOC(q->q0,1, _MMG3D_octree_s);
+  
+  _MMG5_SAFE_MALLOC((*q)->q0,1, _MMG3D_octree_s);
+  _MMG3D_initOctree_s((*q)->q0);
 
-  _MMG3D_initOctree_s(q->q0);
 }
 
 /**
@@ -136,10 +102,14 @@ void _MMG3D_freeOctree_s(MMG5_pMesh mesh,_MMG3D_octree_s* q, int nv)
       _MMG3D_freeOctree_s(mesh,&(q->branches[i]), nv);
     }
     _MMG5_DEL_MEM(mesh,q->branches,sizBr*sizeof(_MMG3D_octree_s));
+    q->branches = NULL;
   }
   if (q->nbVer>0 && q->depth>0 ) {
     if ( q->nbVer<= nv )
+    {
       _MMG5_DEL_MEM(mesh,q->v,nv*sizeof(int));
+      q->v = NULL;
+    }
     else {
       if ( q->depth != depthMax ) {
         sizTab = nv;
@@ -149,6 +119,7 @@ void _MMG3D_freeOctree_s(MMG5_pMesh mesh,_MMG3D_octree_s* q, int nv)
         sizTab = nv * ((int)(q->nbVer/nv) + sizTab);
       }
       _MMG5_DEL_MEM(mesh,q->v,sizTab*sizeof(int));
+      q->v = NULL;
     }
   }
 }
@@ -164,166 +135,108 @@ void _MMG3D_freeOctree(MMG5_pMesh mesh,_MMG3D_pOctree q)
 {
   _MMG3D_freeOctree_s(mesh,q->q0, q->nv);
   _MMG5_DEL_MEM(mesh,q->q0,sizeof(_MMG3D_octree_s));
+  q->q0 = NULL;
+  _MMG5_DEL_MEM(mesh,q,sizeof(_MMG3D_octree));
 }
-
 
 /**
- * \param q pointer toward the octree cell.
- * \param centre coordinates of the centre of the current subtree.
- * \param rect rectangle that we want to intersect with the subtree. We define
- * it given: the coordinates of one corner of the rectange and the length of
- * the rectangle in each dimension.
- * \param nv number of vertices in the subtree.
- * \param dim dimension work.
- * \param index number of octree cells that intersect \a rect
+ * \param q pointer toward an octree cell.
+ * \param ver coordinates of the point.
+ * \param dim space dimension (should be 3).
+ * \param coordinate coordinate in the octree, should be 0 at first call.
  *
- * Count the number of octree cells that intersect the rectangle \a rect. Result
- * is put in the \a index variable.
+ * Get the integer containing the coordinates.
  *
  */
-void _MMG3D_countListSquareRec(_MMG3D_octree_s* q, double* center, double rect[6],
-                               int nv, int dim, int* index)
-{
-  double *recttemp;
-  double *centertemp;
-
-  double l = 1./(1<<(q->depth+1));
-
-  _MMG5_SAFE_MALLOC(recttemp,2*dim,double);
-  _MMG5_SAFE_MALLOC(centertemp,dim,double);
-
-  if (q->branches==NULL)
+void _MMG3D_getOctreeCoordinateRec(_MMG3D_octree_s* q, double* ver, int dim, int* coordinate)
+{  
+  int i;
+  int quadrant;
+  if (q->branches != NULL)
   {
-    (*index)++;
-    //~ fprintf(stdout,"Indexe incrémenté %i\n", *index);
-  }else
-  {
-    if (rect[0]<center[0]&&rect[1]<center[1]) // branch 0
+    quadrant = 0;
+    for ( i = 0; i<dim; ++i)
     {
-
-      recttemp[0] = rect[0];
-      recttemp[1] = rect[1];
-      recttemp[3] = rect[0]+rect[3] < center[0] ? rect[3]:center[0]-rect[0];
-      recttemp[4] = rect[1]+rect[4] < center[1] ? rect[4]:center[1]-rect[1];
-      centertemp[0] = center[0]-l/2;
-      centertemp[1] = center[1]-l/2;
-      if (rect[2] < center[2]) // branch 0
-      {
-
-        recttemp[2] = rect[2];
-        recttemp[5] = rect[2]+rect[5] < center[2] ? rect[5]:center[2]-rect[2];
-
-        centertemp[2] = center[2]-l/2;
-
-        _MMG3D_countListSquareRec(&(q->branches[0]), centertemp, recttemp, nv, dim, index);
-      }
-      if (rect[2]+rect[5] > center[2]) // branch 4
-      {
-        recttemp[2] = rect[2]<center[2] ? center[2]:rect[2];
-        recttemp[5] = rect[2]+ rect[5] - recttemp[2];
-
-        centertemp[2] = center[2]+l/2;
-
-        _MMG3D_countListSquareRec(&(q->branches[4]), centertemp, recttemp, nv, dim, index);
-      }
+      quadrant += ((double) (ver[i]>0.5))*(1<<i);
+      ver[i] -= ((double) (ver[i]>0.5))*0.5;
+      ver[i] *= 2;
     }
-    if (rect[0]+rect[2] >center[0] && rect[1]<center[1]) // branch 1
-    {
-      recttemp[0] = rect[0]<center[0] ? center[0]:rect[0];
-      recttemp[1] = rect[1];
-
-      recttemp[3] = rect[0]+rect[3]-recttemp[0];
-      recttemp[4] = rect[1]+rect[4] < center[1] ? rect[4]:center[1]-rect[1];
-
-      centertemp[0] = center[0]+l/2;
-      centertemp[1] = center[1]-l/2;
-
-      if(rect[2] < center[2]) // branch 1
-      {
-
-        recttemp[2] = rect[2];
-
-        recttemp[5] = rect[2]+rect[5] < center[2] ? rect[5]:center[2]-rect[2];
-
-        centertemp[2] = center[2]-l/2;
-
-        _MMG3D_countListSquareRec(&(q->branches[1]), centertemp, recttemp, nv, dim, index);
-      }
-      if (rect[2]+rect[5] > center[2]) // branch 5
-      {
-        recttemp[2] = rect[2]<center[2] ? center[2]:rect[2];
-        recttemp[5] = rect[2]+ rect[5] - recttemp[2];
-
-        centertemp[2] = center[2]+l/2;
-
-        _MMG3D_countListSquareRec(&(q->branches[5]), centertemp, recttemp, nv, dim, index);
-      }
-    }
-    if (rect[0]<center[0] && rect[1]+rect[3]>center[1]) // branch 2
-    {
-      recttemp[0] = rect[0];
-      recttemp[1] = rect[1]>center[1] ? rect[1]:center[1];
-      recttemp[3] = rect[0]+rect[3] < center[0] ? rect[3]:center[0]-rect[0];
-      recttemp[4] = rect[1] + rect[4]- recttemp[1];
-      centertemp[0] = center[0]-l/2;
-      centertemp[1] = center[1]+l/2;
-
-      if(rect[2] < center[2]) // branch 2
-      {
-
-        recttemp[2] = rect[2];
-        recttemp[5] = rect[2] + rect[5]< center[2] ? rect[5]:center[2]-rect[2];
-
-        centertemp[2] = center[2]-l/2;
-
-        _MMG3D_countListSquareRec(&(q->branches[2]), centertemp, recttemp, nv, dim, index);
-      }
-      if (rect[2]+rect[5] >= center[2]) // branch 6
-      {
-        recttemp[2] = rect[2]<center[2] ? center[2]:rect[2];
-        recttemp[5] = rect[2]+ rect[5] - recttemp[2];
-
-        centertemp[2] = center[2]+l/2;
-
-        _MMG3D_countListSquareRec(&(q->branches[6]), centertemp, recttemp, nv, dim, index);
-      }
-    }
-    if (rect[0]+rect[2] >center[0] && rect[1]+rect[3]>center[1]) // branch 3
-    {
-
-
-      recttemp[0] = rect[0]>center[0] ? rect[0]:center[0];
-      recttemp[1] = rect[1]>center[1] ? rect[1]:center[1];
-      recttemp[3] = rect[0]+rect[3]-recttemp[0];
-      recttemp[4] = rect[1]+rect[4]-recttemp[1];
-      centertemp[0] = center[0]+l/2;
-      centertemp[1] = center[1]+l/2;
-      if(rect[2] < center[2]) // branch 3
-      {
-
-        recttemp[2] = rect[2];
-        recttemp[5] = rect[2] + rect[5]< center[2] ? rect[5]:center[2]-rect[2];
-
-        centertemp[2] = center[2]-l/2;
-
-        _MMG3D_countListSquareRec(&(q->branches[3]), centertemp, recttemp, nv, dim, index);
-      }
-      if (rect[2]+rect[5] > center[2]) // branch 7
-      {
-        recttemp[2] = rect[2]<center[2] ? center[2]:rect[2];
-        recttemp[5] = rect[2]+ rect[5] - recttemp[2];
-
-        centertemp[2] = center[2]+l/2;
-
-        _MMG3D_countListSquareRec(&(q->branches[7]), centertemp, recttemp, nv, dim, index);
-      }
-    }
+    (*coordinate) += quadrant<<(dim*q->depth);
+    _MMG3D_getOctreeCoordinateRec(&(q->branches[quadrant]), dim, ver, coordinate);
   }
-  _MMG5_SAFE_FREE(recttemp);
-  _MMG5_SAFE_FREE(centertemp);
 }
 
-#warning remove one pointer on qlist +  try to mutualize the code with the previous one.
+/**
+ * \param q pointer toward the global octree.
+ * \param ver coordinates of the point.
+ * \param dim space dimension (should be 3).
+ *
+ * Get the integer containing the coordinates
+ *
+ */
+int _MMG3D_getOctreeCoordinate(_MMG3D_pOctree q, double* ver, int dim)
+{
+  double *pt;
+  int coordinate;
+  coordinate = 0;
+  
+  _MMG5_SAFE_MALLOC(pt,dim,double);
+  memcpy(pt, ver ,dim*sizeof(double));
+  
+  _MMG3D_getOctreeCoordinateRec(q->q0, dim, pt, &coordinate);
+
+  _MMG5_SAFE_FREE(pt);
+  return coordinate;
+}
+
+
+
+#warning this function has not been tested
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param q pointer toward the global octree.
+ * \param no index of the moved point.
+ * \param newVer new coordinates for the moved point.
+ * \param oldVer old coordinates for the moved point.
+ *
+ * Move one point in the octree structure. /!\ the vertex of index \a no
+ * can have either the new or the old coordinates in the mesh but all
+ * other vertices should have the same coordinates as when they were inserted
+ * into the octree. (ie: one move at a time in the mesh and the octree)
+ *
+ */
+void _MMG3D_moveOctree(MMG5_pMesh mesh, _MMG3D_pOctree q, int no, double* newVer, double* oldVer)
+{
+  int oldCoor, newCoor;
+  double *pt;
+  int dim;  
+  dim = mesh->dim;
+    
+  _MMG5_SAFE_MALLOC(pt,dim,double);
+  
+  memcpy(pt, oldVer ,dim*sizeof(double));
+  oldCoor = _MMG3D_getOctreeCoordinate(q, oldVer, dim);
+  memcpy(pt, newVer ,dim*sizeof(double));
+  newCoor = _MMG3D_getOctreeCoordinate(q, mesh->point[no].c, dim);
+  
+  if (newCoor == oldCoor)
+    return;
+  else // it could be possible to combine delOctree and addOctree to keep it local...
+  {
+    _MMG5_SAFE_MALLOC(pt,dim,double);
+          
+    /* delOctree */
+    memcpy(pt, oldVer ,dim*sizeof(double));
+    _MMG3D_delOctreeRec(mesh, q->q0, pt , no, q->nv);
+
+    /* addOctree */
+    memcpy(pt, newVer ,dim*sizeof(double));
+    _MMG3D_addOctreeRec(mesh, q->q0, pt , no, q->nv);
+  }
+  _MMG5_SAFE_FREE(pt);
+}
+
+#warning remove one pointer on qlist ?
 /**
  * \param q pointer toward the octree cell.
  * \param centre coordinates of the centre of the current subtree.
@@ -336,25 +249,27 @@ void _MMG3D_countListSquareRec(_MMG3D_octree_s* q, double* center, double rect[6
  * \param dim dimension work.
  * \param index number of octree cells that intersect \a rect
  *
- * Count and list the number of octree cells that intersect the rectangle \a rect.
+ * Count or list the number of octree cells that intersect the rectangle
+ * \a rect depending on initialization of value on which \a qlist points on.
  *
  */
 void _MMG3D_getListSquareRec(_MMG3D_octree_s* q, double* center, double* rect,
                              _MMG3D_octree_s*** qlist, int nv, int dim, int* index)
 {
   double *recttemp;
-  double *centertemp;
+  double *centertemp;  
   double l = 1./(1<<(q->depth+1));
 
   _MMG5_SAFE_MALLOC(recttemp,2*dim,double);
   _MMG5_SAFE_MALLOC(centertemp,dim,double);
 
-  if (q->branches==NULL)
+  if (q->branches==NULL && q->v != NULL)
   {
-    (*qlist)[*index] = q;
+    if ((*qlist)!= NULL)
+      (*qlist)[*index] = q;
     (*index)++;
     //~ fprintf(stdout,"Indexe incrémenté %i\n", *index);
-  }else
+  }else if (q->branches!=NULL)
   {
 
     if (dim == 2)
@@ -566,7 +481,8 @@ int _MMG3D_getListSquare(MMG5_pMesh mesh,_MMG3D_pOctree q, double* rect,
     center[i] = 0.5;
 
   //~ fprintf(stdout,"q nulle ? %i\n", q->branches == NULL);
-  _MMG3D_countListSquareRec(q->q0,center, rect2, q->nv, dim, &index);
+  assert(!(*qlist));
+  _MMG3D_getListSquareRec(q->q0,center, rect2, qlist, q->nv, dim, &index);
   //~ fprintf(stdout, "index : %i\n", index);
 
   _MMG5_ADD_MEM(mesh,index*sizeof(_MMG3D_octree_s*),"octree cell",
@@ -578,8 +494,7 @@ int _MMG3D_getListSquare(MMG5_pMesh mesh,_MMG3D_pOctree q, double* rect,
   for (i = 0; i<index; i++)
     (*qlist)[i] = NULL;
 
-  //~ if (qlist == NULL)
-  //~ fprintf(stdout, "niuratisecuinserirt");
+
   index = 0;
   memcpy(rect2, rect, sizeof(double)*dim*2);
   for (i = 0; i < dim; i++)
@@ -599,7 +514,7 @@ int _MMG3D_getListSquare(MMG5_pMesh mesh,_MMG3D_pOctree q, double* rect,
  * \param q pointer toward an octree cell.
  * \param ver vertex coordinates scaled such that the quadrant is [0;1]x[0;1]x[0;1]
  * \param no vertex index in the mesh.
- * \param nv subtree number of points.
+ * \param nv maximum number of points in an octree cell. 
  *
  * Add vertex in the suitable quadrant of the octree. This function is
  * recursively called until we reach the last one. At each step, the vertex
@@ -612,6 +527,8 @@ void _MMG3D_addOctreeRec(MMG5_pMesh mesh, _MMG3D_octree_s* q, double* ver,
   double   *pt;
   int      dim, nbBitsInt,depthMax,i,j,k;
   int      quadrant,sizBr;
+
+  //~ if ( no == 1796 ) puts("ADDDD");
 
   nbBitsInt = sizeof(int)*8;
   dim       = mesh->dim;
@@ -641,7 +558,7 @@ void _MMG3D_addOctreeRec(MMG5_pMesh mesh, _MMG3D_octree_s* q, double* ver,
         q->v[q->nbVer] = no;
       // intéressant seulement si nv est grand
         q->nbVer++;
-        _MMG5_SAFE_FREE(pt);
+      _MMG5_SAFE_FREE(pt); 
       return;
     }
     else if (q->nbVer == nv && q->branches==NULL)
@@ -658,16 +575,11 @@ void _MMG3D_addOctreeRec(MMG5_pMesh mesh, _MMG3D_octree_s* q, double* ver,
         _MMG3D_initOctree_s(&(q->branches[i]));
         q->branches[i].depth = q->depth+1;
       }
-      //~ unsigned char quadrant = ver[0]>0.5+2*(ver[1]>0.5);
-      //~ if ((q->branches[quadrant].v = (int *) malloc(nv*sizeof(int)))==NULL)
-      //~ fprintf(stdout, "Probleme allocation vertex\n");
-      //~ q->branches[quadrant].v[0] = no;
-      //~ q->branches[quadrant].nbVer++;
       q->nbVer++;
       for (i = 0; i<nv; i++)
       {
 
-        memcpy(pt,&mesh->point[q->v[i]] ,dim*sizeof(double));
+        memcpy(pt, mesh->point[q->v[i]].c ,dim*sizeof(double));
         for ( j =0; j < q->depth; j++)
         {
           for (k = 0; k<dim; k++)
@@ -683,6 +595,7 @@ void _MMG3D_addOctreeRec(MMG5_pMesh mesh, _MMG3D_octree_s* q, double* ver,
       _MMG3D_addOctreeRec(mesh, q, ver, no, nv);
       q->nbVer--;
       _MMG5_DEL_MEM(mesh,q->v,nv*sizeof(int));
+      q->v = NULL;
 
     }else
     {
@@ -724,12 +637,233 @@ void _MMG3D_addOctree(MMG5_pMesh mesh, _MMG3D_pOctree q, const int no)
   dim = mesh->dim;
   _MMG5_SAFE_MALLOC(pt,dim,double);
 
-  memcpy(pt, &mesh->point[no] ,dim*sizeof(double));
-  //~ fprintf(stdout, "ajout du point %f %f %f\n", pt[0], pt[1], pt[2]);
+  memcpy(pt, mesh->point[no].c ,dim*sizeof(double));
   _MMG3D_addOctreeRec(mesh, q->q0, pt , no, q->nv);
+  memcpy(pt, mesh->point[no].c ,dim*sizeof(double));
+  #warning to be removed
+  _MMG3D_verifOctreeRec(mesh, q->q0,pt,no,q->nv);
+  _MMG5_SAFE_FREE(pt);
+}
+
+/**
+* \param q pointer toward a terminal octree cell (containing vertex)
+* \param no index of the point to delete from the octree
+*
+* Delete the vertex of index \a no from the terminal octree cell.
+*
+*/
+void _MMG3D_delOctreeVertex(_MMG3D_octree_s* q, int indNo)
+{
+  int i;
+  assert(q->v);
+  assert(q->nbVer>indNo);
+  for(i=0; i<q->nbVer; ++i)
+    assert(q->v[i]>0);
+  memmove(&q->v[indNo],&q->v[indNo+1], (q->nbVer-indNo-1)*sizeof(int));
+  --q->nbVer;
+  #warning to be removed
+  for(i=0; i<q->nbVer; ++i)
+    assert(q->v[i]>0);
+}
+
+/**
+ * \param q0 pointer toward an octree cell.
+ * \param q pointer toward an octree cell.
+ * \param dim dimension of the space (=3).
+ * \param nv maximum number of points in an octree cell.
+ * \param index next index in the array to be filled.
+ *
+ * Merge sub-branches \a q of \a q0, in their parent \a q0. \a q0 should
+ * contain no more than nv vertices.
+ *
+ */
+void _MMG3D_mergeBranchesRec(_MMG3D_octree_s* q0, _MMG3D_octree_s* q, int dim, int nv, int* index)
+{
+  int i;
+  
+  if (q->v != NULL)
+  {
+    //~ if (*index+q->nbVer == nv+1)
+      //~ fprintf(stdout, "Index too high %i\n", *index+q->nbVer);
+    //~ fprintf(stdout, "Index %i nbVer %i\n", *index,q->nbVer);
+    assert(*index+q->nbVer<=nv);
+    #warning loops to be removed
+    for(i = 0; i<(*index); ++i)
+      assert(q0->v[i]>0);
+    for(i = 0; i<q->nbVer; ++i)
+      assert(q->v[i]>0);
+    memcpy(&(q0->v[*index]), q->v, q->nbVer*sizeof(int));
+    (*index)+= q->nbVer;
+    for(i = 0; i<(*index); ++i)
+      assert(q0->v[i]>0);
+  }else if (q->branches != NULL)
+  {
+    for (i = 0; i<(1<<dim); ++i)
+      _MMG3D_mergeBranchesRec(q0, &(q->branches[i]), dim, nv, index);
+  }
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param q pointer toward an octree cell.
+ * \param dim dimension of the space (=3)
+ * \param nv maximum number of points in an octree cell. 
+ *
+ * Merge branches that have a parent counting less than nv vertices.
+ *
+ */
+void _MMG3D_mergeBranches(MMG5_pMesh mesh,_MMG3D_octree_s* q, int dim, int nv)
+{
+  int index;
+  int i;
+  int sizBr;
+  sizBr = 1<<dim;
+  index = 0;
+  assert(q->v);
+  assert(q->branches);
+  assert(q->nbVer==nv);
+
+  for (i = 0; i<(1<<dim); ++i)
+  {
+    //~ _MMG3D_printSubArbre(&(q->branches[i]),nv,dim);
+    _MMG3D_mergeBranchesRec(q, &(q->branches[i]), dim, nv, &index); 
+    _MMG3D_freeOctree_s(mesh,&(q->branches[i]), nv);
+  }
+  _MMG5_DEL_MEM(mesh,q->branches,sizBr*sizeof(_MMG3D_octree_s));
+  q->branches = NULL;
+  //~ q->nbVer = index;
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param q pointer toward an octree cell.
+ * \param ver vertex coordinates scaled such that the quadrant is [0;1]x[0;1]x[0;1]
+ * \param no vertex index in the mesh.
+ * \param nv maximum number of points in an octree cell. 
+ *
+ * Delete vertex \a no from the octree. This function is recursively 
+ * called until we reach the terminal octree cell containing the vertex 
+ * \a no. At each step, the vertex coordinates are scaled such as the
+ * quadrant is the [0;1]x[0;1]x[0;1] box.
+ *
+ */
+void _MMG3D_delOctreeRec(MMG5_pMesh mesh, _MMG3D_octree_s* q, double* ver, const int no, const int nv)
+{
+  int i;
+  int quadrant;
+  int dim = mesh->dim;
+  int depthMax;
+  int nbBitsInt;
+  int nbVerTemp;
+  #warning test to delete
+  int test = 0;
+  nbBitsInt = sizeof(int)*8;
+
+  depthMax  = nbBitsInt/dim - 1;
+
+  if (q->v != NULL)
+  {
+    assert(q->v);
+    for ( i = 0; i<q->nbVer; ++i)
+    {
+      if (q->v[i] == no)
+      {
+        _MMG3D_delOctreeVertex(q, i);
+        if ( q->nbVer == 0)
+        {
+          _MMG5_DEL_MEM(mesh,q->v,nv*sizeof(int));
+          q->v = NULL;
+        }
+        test = 1;
+        break;
+      } 
+    }
+    //~ if (!test)
+    //~ {
+      //~ fprintf(stdout,"Le petit %i est attendu à l'accueil\n Accueil : ", no);
+      //~ for ( i = 0; i<q->nbVer; ++i)
+        //~ fprintf(stdout,"%i ",q->v[i]);
+      //~ fprintf(stdout,"\n");
+    //~ }else
+    //~ {
+      //~ fprintf(stdout,"OK :)\n");
+    //~ }
+      //assert(test);
+   
+  }else if ( q->nbVer == nv+1)
+  {
+    quadrant = 0;
+    for ( i = 0; i<dim; ++i)
+    {
+      quadrant += ((double) (ver[i]>0.5))*(1<<i);
+      ver[i] -= ((double) (ver[i]>0.5))*0.5;
+      ver[i] *= 2;
+    }
+    --q->nbVer;
+    //~ fprintf(stdout,"quadrant %i nbVer %i\n", quadrant,q->branches[quadrant].nbVer);
+    nbVerTemp = q->branches[quadrant].nbVer;
+    #warning calling recursively here is not optimal
+    _MMG3D_delOctreeRec(mesh, &(q->branches[quadrant]), ver, no, nv);
+    //~ fprintf(stdout,"quadrant %i nbVer %i\n", quadrant,q->branches[quadrant].nbVer);
+    if (nbVerTemp > q->branches[quadrant].nbVer)
+    {
+      _MMG5_ADD_MEM(mesh,nv*sizeof(int),"octree vertices table",
+                  printf("  Exit program.\n");
+                  exit(EXIT_FAILURE));
+      _MMG5_SAFE_MALLOC(q->v,nv,int);
+      _MMG3D_mergeBranches(mesh,q,dim,nv);
+    }else
+    {
+      ++q->nbVer;
+    }
+      
+  }else if (q->branches != NULL)
+  {
+    quadrant = 0;
+    for ( i = 0; i<dim; ++i)
+    {
+      quadrant += ((double) (ver[i]>0.5))*(1<<i);
+      ver[i] -= ((double) (ver[i]>0.5))*0.5;
+      ver[i] *= 2;
+    }
+
+    --q->nbVer;    
+    nbVerTemp = q->branches[quadrant].nbVer;
+    _MMG3D_delOctreeRec(mesh, &(q->branches[quadrant]), ver, no, nv);
+    if (nbVerTemp <= q->branches[quadrant].nbVer) // test if deletion worked
+    {
+      ++q->nbVer;
+    }
+  }
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param q pointer toward the global octree.
+ * \param no reference of the vertex to be deleted.
+ *
+ * Delete the vertex \a no from the octree structure.
+ *
+ */
+void _MMG3D_delOctree(MMG5_pMesh mesh, _MMG3D_pOctree q, const int no)
+{
+  double *pt;
+  int    dim;
+
+  dim = mesh->dim;
+  _MMG5_SAFE_MALLOC(pt,dim,double);
+
+  assert(MG_VOK(&mesh->point[no]));
+  
+  //~ memcpy(pt, mesh->point[no].c ,dim*sizeof(double));
+  //~ if (!_MMG3D_verifOctreeRec(mesh, q->q0, pt, no, q->nv))
+    //~ fprintf(stdout,"pneaiut\n");
+  memcpy(pt, mesh->point[no].c ,dim*sizeof(double));
+  _MMG3D_delOctreeRec(mesh, q->q0, pt , no, q->nv);
 
   _MMG5_SAFE_FREE(pt);
 }
+
 
 /**
 * \param q pointer toward an octree cell
@@ -743,10 +877,11 @@ void _MMG3D_addOctree(MMG5_pMesh mesh, _MMG3D_pOctree q, const int no)
 */
 void _MMG3D_printArbreDepth(_MMG3D_octree_s* q, int depth, int nv, int dim)
 {
+  int i;
   if ( q->depth < depth && q->nbVer > nv)
   {
 
-    for (int i = 0; i < (1<<dim); i++)
+    for (i = 0; i < (1<<dim); i++)
     {
       _MMG3D_printArbreDepth(&(q->branches[i]),depth, nv, dim);
     }
@@ -770,8 +905,8 @@ void _MMG3D_printArbre(_MMG3D_pOctree q)
   int dim;
 
   dim = 3;
-
-  for (int i = 0; i<sizeof(int)*8/dim; i++)
+  int i;
+  for (i = 0; i<sizeof(int)*8/dim; i++)
   {
     fprintf(stdout,"\n profondeur %i \n", i);
     _MMG3D_printArbreDepth(q->q0, i, q->nv, dim);
@@ -780,10 +915,32 @@ void _MMG3D_printArbre(_MMG3D_pOctree q)
   fprintf(stdout,"\n fin \n");
 }
 
+/**
+* \param q pointer toward an octree cell
+* \param nv maximum number of vertices in an octree leaf
+* \param dim spacial dimension 
+* 
+* Print the octree.
+*
+* \warning debug function, not safe
+*
+*/
+void _MMG3D_printSubArbre(_MMG3D_octree_s* q, int nv, int dim)
+{
+  int i;
+  for (i = 0; i<sizeof(int)*8/dim; i++)
+  {
+    fprintf(stdout,"\n profondeur %i \n", i);
+    _MMG3D_printArbreDepth(q, i, nv, dim);
+
+  }
+  fprintf(stdout,"\n fin \n");
+}
+
 
 /**
 * \param q pointer toward an octree cell
-* \param nv number of vertices in the subtree
+* \param nv maximum number of vertices in an octree leaf
 * \param dim dimension in which we work
 *
 * Print the memory size of the octree.
@@ -885,17 +1042,18 @@ int NearNeighborBrutForce(MMG5_pMesh mesh, int no, double l, int dim, int nb_pt)
   double lmin =10;
   int nmin = -1;
   double x[dim], norm;
-  for(int i = 1; i <= nb_pt; i++)
+  int i, j;
+  for(i = 1; i <= nb_pt; i++)
   {
     norm = 0;
     if(i != no)
     {
-      for (int j = 0; j<dim; j++)
+      for (j = 0; j<dim; j++)
       {
 
         x[j] =  mesh->point[i].c[j] - mesh->point[no].c[j];
       }
-      for (int j = 0; j<dim; j++)
+      for (j = 0; j<dim; j++)
       {
         norm += x[j]*x[j];
       }
@@ -924,6 +1082,7 @@ int NearNeighborSquare(MMG5_pMesh mesh, _MMG3D_pOctree q, int no, double l, int 
   double lmin =10;
   double x,y,z;
   int nmin;
+  int i, j;
 
   ppt = &mesh->point[no];
   rect[0] = ppt->c[0]-l;
@@ -932,23 +1091,15 @@ int NearNeighborSquare(MMG5_pMesh mesh, _MMG3D_pOctree q, int no, double l, int 
   rect[3] = 2*l;
   rect[4] = 2*l;
   rect[5] = 2*l;
-  //~ fprintf(stdout,"q nulle ? %i\n", q->branches == NULL);
+  qlist = NULL;
   ns = _MMG3D_getListSquare(mesh,q, rect, &qlist);
 
-  //~ fprintf(stdout, "OK %i\n",ns);
-  //~ if (ns>0)
-  //~ {
-  //~ fprintf(stdout, "OK %i\n",ns);
-  //~ fprintf(stdout,"qlist %i\n", qlist[0]->nbVer);
-  //~ fprintf(stdout, "OK %i\n",ns);
-  //~
-  //~ }
-  for (int i = 0; i < ns; i++)
+  
+  for (i = 0; i < ns; i++)
   {
-    for (int j = 0; j<qlist[i]->nbVer; j++)
+    for (j = 0; j<qlist[i]->nbVer; j++)
     {
       nver = qlist[i]->v[j];
-      //~ fprintf(stdout,"nver %i\n",nver);
       if(nver != no)
       {
         ppt  = &mesh->point[nver];
@@ -966,14 +1117,6 @@ int NearNeighborSquare(MMG5_pMesh mesh, _MMG3D_pOctree q, int no, double l, int 
       }
     }
   }
-  //~ for (int i = 0; i < ns; i++)
-  //~ {
-  //~ for (int j = i+1; j < ns; j++)
-  //~ {
-  //~ if (qlist[i] == qlist[j])
-  //~ fprintf(stdout,"Problème\n");
-  //~ }
-  //~ }
 
   _MMG5_SAFE_FREE(qlist);
 
@@ -983,80 +1126,6 @@ int NearNeighborSquare(MMG5_pMesh mesh, _MMG3D_pOctree q, int no, double l, int 
     return -1;
 }
 
-
-//~
-//~ void plotOctree( MMG5_pMesh mesh, _MMG3D_pOctree q, char* name)
-//~ {
-//~ //Declare postscript
-//~ MMG2D_postscript ps;
-//~ //Open postscript file
-//~ MMG2D_openPostscript(&ps,name);
-//~ double ver[2];
-//~ int NN;
-//~ double color[3];
-//~ color[0] = 0;
-//~ color[1] = 0;
-//~ color[2] = 0;
-//~ double lmoy = 0.3*sqrt(2./(3*sqrt(3)*q->q0->nbVer));
-//~ lmoy = lmoy<0.05 ? lmoy:0.05;
-//~
-//~ MMG2D_sethueColor(&ps, 0.);
-//~ fprintf(ps.file,"/Helvetica findfont\n");
-//~ fprintf(ps.file,"%i scalefont setfont\n", 8);
-//~ plotOctreePointRec(&ps, mesh, q->q0, lmoy, 0, 0);
-//~ MMG2D_sethsbColor(&ps, color);
-//~ MMG2D_setLineWidth(&ps, 0.0001);
-//~ plotOctreeSquareRec(&ps, mesh, q->q0, lmoy, 0, 0);
-//~ double x,y,r;
-//~ MMG2D_setLineWidth(&ps, 0.3);
-//~ int NNBF;
-//~
-//~
-//~ struct timeval tm1;
-//~ start(&tm1);
-//~ for (int i = 1; i<= mesh->np; i++)
-//~ NNBF = NearNeighborBrutForce(mesh, i, 0.01, q->dim, mesh->np);
-//~ fprintf(stdout,"temps brutForce : ");
-//~ stop(&tm1);
-//~ start(&tm1);
-//~ for (int i = 1; i<= mesh->np; i++)
-//~ NN = NearNeighborSquare(mesh,q,i,0.01);
-//~ fprintf(stdout,"temps _MMG3D_octree_s : ");
-//~ stop(&tm1);
-//~ for (int i = 1; i<= mesh->np; i++)
-//~ {
-//~ memcpy(ver,mesh->point[i].c,sizeof(double)*2);
-//NN = getNearestNeighbor( mesh, q, ver, i);
-//int NNBF = NearestNeighborBrutForce(mesh, i);
-//~
-//~ NN = NearNeighborSquare(mesh,q,i,0.001);
-//~ NNBF = NearNeighborBrutForce(mesh, i, 0.001, q->dim);
-//~
-//~ if (NN != NNBF)
-//~ {
-//~ x = mesh->point[i].c[0] - mesh->point[NN].c[0];
-//~ y = mesh->point[i].c[1] - mesh->point[NN].c[1];
-//~ r = x*x+y*y;
-//~ x = mesh->point[i].c[0] - mesh->point[NNBF].c[0];
-//~ y = mesh->point[i].c[1] - mesh->point[NNBF].c[1];
-//~ x = y*y+x*x;
-//~ fprintf(stdout," erreur %i trouvé %i (%f) au lieu de %i (%f)\n", i, NN, r, NNBF, x);
-//~ MMG2D_setLineWidth(&ps, 1.8);
-//~ }
-//~
-//~ if (NN > 0)
-//~ MMG2D_drawLine( mesh, &ps, i, NN);
-//~ else
-//fprintf(stdout, "Noeud non relié %i\n", i);
-//~
-//~ if (NN != NNBF)
-//~ {
-//~ MMG2D_setLineWidth(&ps, 0.3);
-//~ }
-//~ }
-
-//~ MMG2D_closePostscript(&ps);
-//~ }
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -1076,6 +1145,7 @@ int _MMG3D_octreein_iso(MMG5_pMesh mesh,MMG5_pSol sol,_MMG3D_pOctree octree,int 
   int             ip1,i,j;
   int             ncells;
 
+  lococ = NULL;
   ppt = &mesh->point[ip];
 
   hpi = LFILT * sol->m[ip];
@@ -1100,7 +1170,7 @@ int _MMG3D_octreein_iso(MMG5_pMesh mesh,MMG5_pSol sol,_MMG3D_pOctree octree,int 
 
 
 #warning to remove when delOctree will be implemented
-      if ( !MG_VOK(pp1) ) continue;
+      //~ if ( !MG_VOK(pp1) ) continue;
 
       hpi2 = LFILT * sol->m[ip1];
 
@@ -1111,7 +1181,7 @@ int _MMG3D_octreein_iso(MMG5_pMesh mesh,MMG5_pSol sol,_MMG3D_pOctree octree,int 
       d2 = ux*ux + uy*uy + uz*uz;
 
       if ( d2 < hp1 || d2 < hpi2*hpi2 )  {
-        //printf("filtre current %d : %e %e %e %e\n",ip1,d2,hp1,d2,hpi2*hpi2);
+        //printf("filtre current %d : %e %e %e %e\n",ip1,d2,hp1,d2,hpi2*hpi2);  
         _MMG5_DEL_MEM(mesh,lococ,ncells*sizeof(_MMG3D_octree_s**));
         return(0);
       }
