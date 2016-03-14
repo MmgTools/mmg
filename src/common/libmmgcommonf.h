@@ -11,7 +11,7 @@
 ! ** See the "libmmg*.h" file for a correct displaying of the documentation.
 ! */
 
-#define MMG5_DATA_PTR_T INTEGER(kind=4)
+#define MMG5_DATA_PTR_T INTEGER(kind=8)
 ! /* =============================================================================
 ! **  This file is part of the mmg software package for the tetrahedral
 ! **  mesh modification.
@@ -264,7 +264,7 @@
 !   int           renum;
 !   char          imprim,ddebug,badkal,iso,fem,lag;
 !   unsigned char optim, noinsert, noswap, nomove, nosurf;
-!   int           bucket;
+!   int           octree;
 !   MMG5_pPar     par;
 ! } MMG5_Info;
 

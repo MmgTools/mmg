@@ -160,8 +160,8 @@ void MMG3D_Init_parameters(MMG5_pMesh mesh) {
 
 
 #ifndef PATTERN
-  /** MMG3D_IPARAM_bucket = 64 */
-  mesh->info.bucket = 64;
+  /** MMG3D_IPARAM_octree = 64 */
+  mesh->info.octree = 64;
 #endif
 }
 
@@ -1362,8 +1362,8 @@ int MMG3D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam,int val){
       return(0);
     break;
 #ifndef PATTERN
-  case MMG3D_IPARAM_bucket :
-    mesh->info.bucket   = val;
+  case MMG3D_IPARAM_octree :
+    mesh->info.octree   = val;
     break;
 #endif
   case MMG3D_IPARAM_debug :
@@ -1474,8 +1474,8 @@ int MMG3D_Get_iparameter(MMG5_pMesh mesh, int iparam) {
     return ( mesh->info.mem );
     break;
 #ifndef PATTERN
-  case MMG3D_IPARAM_bucket :
-    return ( mesh->info.bucket );
+  case MMG3D_IPARAM_octree :
+    return ( mesh->info.octree );
     break;
 #endif
   case MMG3D_IPARAM_debug :

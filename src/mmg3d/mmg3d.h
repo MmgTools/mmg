@@ -64,52 +64,6 @@
     if ( !ip ) {law;}                                                   \
   }while(0)
 
-/** Reallocation of point table, sol table and bucket table and creation
-    of point ip with coordinates o and tag tag*/
-#define _MMG5_POINT_AND_BUCKET_REALLOC(mesh,sol,ip,wantedGap,law,o,tag ) do \
-  {                                                                     \
-    int klink,gap;                                                      \
-                                                                        \
-    if ( (mesh->memMax-mesh->memCur) <                                  \
-         (long long) (wantedGap*mesh->npmax*                            \
-                      (sizeof(MMG5_Point)+sol->size*sizeof(int))) ) {   \
-      gap = (int)((mesh->memMax-mesh->memCur)/                          \
-                  (sizeof(MMG5_Point)+sol->size*sizeof(int)));          \
-      if(gap < 1) {                                                     \
-        fprintf(stdout,"  ## Error:");                                  \
-        fprintf(stdout," unable to allocate %s.\n","larger point/bucket table"); \
-        fprintf(stdout,"  ## Check the mesh size or ");                 \
-        fprintf(stdout,"increase maximal authorized memory with the -m option.\n"); \
-        law;                                                            \
-      }                                                                 \
-    }                                                                   \
-    else                                                                \
-      gap = (int)(wantedGap*mesh->npmax);                               \
-                                                                        \
-    _MMG5_ADD_MEM(mesh,gap*(sizeof(MMG5_Point)+sizeof(int)),            \
-                  "point and bucket",law);                              \
-    _MMG5_SAFE_RECALLOC(mesh->point,mesh->npmax+1,                      \
-                        mesh->npmax+gap+1,MMG5_Point,"larger point table"); \
-    _MMG5_SAFE_RECALLOC(bucket->link,mesh->npmax+1,                     \
-                        mesh->npmax+gap+1,int,"larger bucket table");   \
-    mesh->npmax = mesh->npmax+gap;                                      \
-                                                                        \
-    mesh->npnil = mesh->np+1;                                           \
-    for (klink=mesh->npnil; klink<mesh->npmax-1; klink++)               \
-      mesh->point[klink].tmp  = klink+1;                                \
-                                                                        \
-    /* solution */                                                      \
-    if ( sol->m ) {                                                     \
-      _MMG5_ADD_MEM(mesh,(sol->size*(mesh->npmax-sol->npmax))*sizeof(double), \
-                    "larger solution",law);                             \
-      _MMG5_SAFE_REALLOC(sol->m,sol->size*(mesh->npmax+1),double,"larger solution"); \
-    }                                                                   \
-    sol->npmax = mesh->npmax;                                           \
-                                                                        \
-    /* We try again to add the point */                                 \
-    ip = _MMG3D_newPt(mesh,o,tag);                                       \
-    if ( !ip ) {law;}                                                   \
-  }while(0)
 
 /** Reallocation of tetra table and creation
     of tetra jel */
@@ -183,14 +137,6 @@ static const unsigned char _MMG5_isar[6][2] = { {2,3}, {3,1}, {1,2}, {0,3}, {2,0
 /** \brief arpt[i]: edges passing through vertex i */
 static const unsigned char _MMG5_arpt[4][3] = { {0,1,2}, {0,4,3}, {1,3,5}, {2,5,4} };
 
-
-typedef struct {
-  int     size;
-  int    *head;
-  int    *link;
-} _MMG5_Bucket;
-typedef _MMG5_Bucket * _MMG5_pBucket;
-
 /**
  * Octree cell.
  */
@@ -234,13 +180,7 @@ void _MMG3D_printArbre(_MMG3D_octree* q);
 int  _MMG3D_sizeArbreRec(_MMG3D_octree_s* q, int nv, int dim);
 int  _MMG3D_sizeArbre(_MMG3D_octree* q, int dim);
 int  _MMG3D_octreein_iso(MMG5_pMesh,MMG5_pSol,_MMG3D_pOctree,int);
-
-/* bucket */
-_MMG5_pBucket _MMG5_newBucket(MMG5_pMesh ,int );
-int     _MMG5_addBucket(MMG5_pMesh ,_MMG5_pBucket ,int );
-int     _MMG5_delBucket(MMG5_pMesh ,_MMG5_pBucket ,int );
-int     _MMG5_buckin_iso(MMG5_pMesh mesh,MMG5_pSol sol,_MMG5_pBucket bucket,int ip);
-int     _MMG5_buckin_ani(MMG5_pMesh mesh,MMG5_pSol sol,_MMG5_pBucket bucket,int ip);
+int  _MMG3D_octreein_ani(MMG5_pMesh,MMG5_pSol,_MMG3D_pOctree,int);
 
 /* prototypes */
 extern double _MMG5_det3pt1vec(double c0[3],double c1[3],double c2[3],double v[3]);
@@ -446,7 +386,6 @@ int    (*_MMG5_movbdyrefpt)(MMG5_pMesh, MMG5_pSol, int*, int, int*, int ,int);
 int    (*_MMG5_movbdynompt)(MMG5_pMesh, MMG5_pSol, int*, int, int*, int ,int);
 int    (*_MMG5_movbdyridpt)(MMG5_pMesh, MMG5_pSol, int*, int, int*, int ,int);
 int    (*_MMG5_cavity)(MMG5_pMesh ,MMG5_pSol ,int ,int ,int *,int );
-int    (*_MMG5_buckin)(MMG5_pMesh ,MMG5_pSol ,_MMG5_pBucket ,int );
 int    (*_MMG3D_octreein)(MMG5_pMesh ,MMG5_pSol ,_MMG3D_pOctree ,int );
 
 /**

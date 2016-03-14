@@ -2,6 +2,13 @@
 
 #define LFILT 0.2
 
+#warning to trash
+static int nalloc=0;
+static int nunalloc=0;
+static int specalloc=0;
+static int specunalloc=0;
+
+
 #warning fonction to be deleted after debug (and in mmg3d.h too)
 int _MMG3D_verifOctreeRec(MMG5_pMesh mesh, _MMG3D_octree_s* q, double* ver, const int no, const int nv)
 {
@@ -63,6 +70,10 @@ void _MMG3D_initOctree_s( _MMG3D_octree_s* q)
  */
 void _MMG3D_initOctree(MMG5_pMesh mesh,_MMG3D_pOctree* q, int nv)
 {
+
+  _MMG5_ADD_MEM(mesh,sizeof(_MMG3D_octree),"octree structure",
+                printf("  Exit program.\n");
+                exit(EXIT_FAILURE));
   _MMG5_SAFE_MALLOC(*q,1, _MMG3D_octree);
 
 #warning ajeter
@@ -70,7 +81,7 @@ void _MMG3D_initOctree(MMG5_pMesh mesh,_MMG3D_pOctree* q, int nv)
 
   (*q)->nv = nv;
 
-  _MMG5_ADD_MEM(mesh,sizeof(_MMG3D_octree_s),"octree structure",
+  _MMG5_ADD_MEM(mesh,sizeof(_MMG3D_octree_s),"initial octree cell",
                 printf("  Exit program.\n");
                 exit(EXIT_FAILURE));
   
@@ -102,24 +113,30 @@ void _MMG3D_freeOctree_s(MMG5_pMesh mesh,_MMG3D_octree_s* q, int nv)
       _MMG3D_freeOctree_s(mesh,&(q->branches[i]), nv);
     }
     _MMG5_DEL_MEM(mesh,q->branches,sizBr*sizeof(_MMG3D_octree_s));
-    q->branches = NULL;
   }
   if (q->nbVer>0 && q->depth>0 ) {
     if ( q->nbVer<= nv )
     {
+      nunalloc++;
       _MMG5_DEL_MEM(mesh,q->v,nv*sizeof(int));
-      q->v = NULL;
+      q->nbVer = 0;
     }
     else {
       if ( q->depth != depthMax ) {
+#warning to trash
+//        printf("UNALLOC FREEOCTREE_S depth %d\n",q->depth);
+        nunalloc++;
         sizTab = nv;
       }
       else {
+        specunalloc++;
         sizTab = (q->nbVer%nv != 0)? 1 : 0;
         sizTab = nv * ((int)(q->nbVer/nv) + sizTab);
       }
-      _MMG5_DEL_MEM(mesh,q->v,sizTab*sizeof(int));
-      q->v = NULL;
+      if (q->v) {
+        _MMG5_DEL_MEM(mesh,q->v,sizTab*sizeof(int));
+        q->nbVer = 0;
+      }
     }
   }
 }
@@ -135,8 +152,9 @@ void _MMG3D_freeOctree(MMG5_pMesh mesh,_MMG3D_pOctree q)
 {
   _MMG3D_freeOctree_s(mesh,q->q0, q->nv);
   _MMG5_DEL_MEM(mesh,q->q0,sizeof(_MMG3D_octree_s));
-  q->q0 = NULL;
   _MMG5_DEL_MEM(mesh,q,sizeof(_MMG3D_octree));
+#warning to trash
+//  printf("IN FREE OCTREE %d %d %d %d\n",nalloc,nunalloc, specalloc, specunalloc );
 }
 
 /**
@@ -170,6 +188,7 @@ void _MMG3D_getOctreeCoordinateRec(_MMG3D_octree_s* q, double* ver, int dim, int
  * \param q pointer toward the global octree.
  * \param ver coordinates of the point.
  * \param dim space dimension (should be 3).
+ * \return the integer containing the coordinates
  *
  * Get the integer containing the coordinates
  *
@@ -219,12 +238,12 @@ void _MMG3D_moveOctree(MMG5_pMesh mesh, _MMG3D_pOctree q, int no, double* newVer
   memcpy(pt, newVer ,dim*sizeof(double));
   newCoor = _MMG3D_getOctreeCoordinate(q, mesh->point[no].c, dim);
   
-  if (newCoor == oldCoor)
+  if (newCoor == oldCoor) {
+    _MMG5_SAFE_FREE(pt);
     return;
+  }
   else // it could be possible to combine delOctree and addOctree to keep it local...
   {
-    _MMG5_SAFE_MALLOC(pt,dim,double);
-          
     /* delOctree */
     memcpy(pt, oldVer ,dim*sizeof(double));
     _MMG3D_delOctreeRec(mesh, q->q0, pt , no, q->nv);
@@ -545,6 +564,9 @@ void _MMG3D_addOctreeRec(MMG5_pMesh mesh, _MMG3D_octree_s* q, double* ver,
       if (q->v == NULL)
       {
         //~ fprintf(stdout, "ok1bis\n");
+        nalloc++;
+#warning to trash
+//        printf("ALLOC ADDOCTREE depth %d\n",q->depth);
         _MMG5_ADD_MEM(mesh,nv*sizeof(int),"octree vertices table",
                       printf("  Exit program.\n");
                       exit(EXIT_FAILURE));
@@ -558,7 +580,7 @@ void _MMG3D_addOctreeRec(MMG5_pMesh mesh, _MMG3D_octree_s* q, double* ver,
         q->v[q->nbVer] = no;
       // intéressant seulement si nv est grand
         q->nbVer++;
-      _MMG5_SAFE_FREE(pt); 
+      _MMG5_SAFE_FREE(pt);
       return;
     }
     else if (q->nbVer == nv && q->branches==NULL)
@@ -594,8 +616,12 @@ void _MMG3D_addOctreeRec(MMG5_pMesh mesh, _MMG3D_octree_s* q, double* ver,
       }
       _MMG3D_addOctreeRec(mesh, q, ver, no, nv);
       q->nbVer--;
+#warning to trash
+//      printf("UNALLOC ADDOCTREE_S depth %d %d\n",q->depth,q->nbVer);
+      nunalloc++;
       _MMG5_DEL_MEM(mesh,q->v,nv*sizeof(int));
-      q->v = NULL;
+#warning ALGIANE why does this not work?
+      // q->nbVer = 0;
 
     }else
     {
@@ -612,8 +638,13 @@ void _MMG3D_addOctreeRec(MMG5_pMesh mesh, _MMG3D_octree_s* q, double* ver,
     }
   }else
   {
-    if (q->nbVer%nv == 0)
+    if (q->nbVer%nv == 0) {
+      specalloc++;
+      _MMG5_ADD_MEM(mesh,nv*sizeof(int),"octree realloc",
+                    printf("  Exit program.\n");
+                    exit(EXIT_FAILURE));
       _MMG5_SAFE_REALLOC(q->v,q->nbVer+nv,int,"octree");
+    }
 
     q->v[q->nbVer] = no;
     q->nbVer++;
@@ -730,7 +761,6 @@ void _MMG3D_mergeBranches(MMG5_pMesh mesh,_MMG3D_octree_s* q, int dim, int nv)
     _MMG3D_freeOctree_s(mesh,&(q->branches[i]), nv);
   }
   _MMG5_DEL_MEM(mesh,q->branches,sizBr*sizeof(_MMG3D_octree_s));
-  q->branches = NULL;
   //~ q->nbVer = index;
 }
 
@@ -771,8 +801,10 @@ void _MMG3D_delOctreeRec(MMG5_pMesh mesh, _MMG3D_octree_s* q, double* ver, const
         _MMG3D_delOctreeVertex(q, i);
         if ( q->nbVer == 0)
         {
+#warning to trash
+//          printf("UNALLOC DELOCTREEREC depth %d\n",q->depth);
+          nunalloc++;
           _MMG5_DEL_MEM(mesh,q->v,nv*sizeof(int));
-          q->v = NULL;
         }
         test = 1;
         break;
@@ -807,6 +839,9 @@ void _MMG3D_delOctreeRec(MMG5_pMesh mesh, _MMG3D_octree_s* q, double* ver, const
     //~ fprintf(stdout,"quadrant %i nbVer %i\n", quadrant,q->branches[quadrant].nbVer);
     if (nbVerTemp > q->branches[quadrant].nbVer)
     {
+      nalloc++;
+#warning to trash
+//      printf("ALLOC DELOCTREEREC depth %d\n",q->depth);
       _MMG5_ADD_MEM(mesh,nv*sizeof(int),"octree vertices table",
                   printf("  Exit program.\n");
                   exit(EXIT_FAILURE));
@@ -1135,7 +1170,8 @@ int NearNeighborSquare(MMG5_pMesh mesh, _MMG3D_pOctree q, int no, double l, int 
  *
  * \return 1 if we can insert \a ip, 0 otherwise
  *
- * Check if the vertex \a ip is not too close from another one.
+ * Check if the vertex \a ip is not too close from another one (for an isotropic
+ * metric).
  *
  */
 int _MMG3D_octreein_iso(MMG5_pMesh mesh,MMG5_pSol sol,_MMG3D_pOctree octree,int ip) {
@@ -1168,10 +1204,6 @@ int _MMG3D_octreein_iso(MMG5_pMesh mesh,MMG5_pSol sol,_MMG3D_pOctree octree,int 
       ip1  = lococ[i]->v[j];
       pp1  = &mesh->point[ip1];
 
-
-#warning to remove when delOctree will be implemented
-      //~ if ( !MG_VOK(pp1) ) continue;
-
       hpi2 = LFILT * sol->m[ip1];
 
       ux = pp1->c[0] - ppt->c[0];
@@ -1181,13 +1213,101 @@ int _MMG3D_octreein_iso(MMG5_pMesh mesh,MMG5_pSol sol,_MMG3D_pOctree octree,int 
       d2 = ux*ux + uy*uy + uz*uz;
 
       if ( d2 < hp1 || d2 < hpi2*hpi2 )  {
-        //printf("filtre current %d : %e %e %e %e\n",ip1,d2,hp1,d2,hpi2*hpi2);  
-        _MMG5_DEL_MEM(mesh,lococ,ncells*sizeof(_MMG3D_octree_s**));
+        //printf("filtre current %d : %e %e %e %e\n",ip1,d2,hp1,d2,hpi2*hpi2);
+        _MMG5_DEL_MEM(mesh,lococ,ncells*sizeof(_MMG3D_octree_s*));
         return(0);
       }
     }
 
   }
-  _MMG5_DEL_MEM(mesh,lococ,ncells*sizeof(_MMG3D_octree_s**));
+  _MMG5_DEL_MEM(mesh,lococ,ncells*sizeof(_MMG3D_octree_s*));
+  return(1);
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param sol pointer toward the solution structure.
+ * \param octree pointer toward the octree structure.
+ * \param ip index of point to check.
+ *
+ * \return 1 if we can insert \a ip, 0 otherwise
+ *
+ * Check if the vertex \a ip is not too close from another one (for an
+ * anisotropic metric).
+ *
+ */
+int _MMG3D_octreein_ani(MMG5_pMesh mesh,MMG5_pSol sol,_MMG3D_pOctree octree,int ip) {
+  MMG5_pPoint     ppt,pp1;
+  _MMG3D_octree_s **lococ;
+  double          d2,ux,uy,uz,hpi,hp1,methalo[6];
+  double          det,dmi, *ma, *mb,m1,m2,m3,dx,dy,dz;
+  int             iadr,ip1,i,j;
+  int             ncells;
+
+  lococ = NULL;
+  ppt = &mesh->point[ip];
+
+  iadr = ip*sol->size;
+  ma   = &sol->m[iadr];
+  dmi  = LFILT*LFILT;
+
+  hpi = LFILT * sol->m[ip];
+  hp1 = hpi*hpi;
+
+  det = ma[0] * (ma[3]*ma[5] - ma[4]*ma[4])
+    - ma[1] * (ma[1]*ma[5] - ma[2]*ma[4])
+    + ma[2] * (ma[1]*ma[4] - ma[3]*ma[2]);
+
+  if ( det <= 0. ) return(1);
+
+  det = 1.0 / det;
+  m1 = ma[3]*ma[5] - ma[4]*ma[4];
+  m2 = ma[0]*ma[5] - ma[2]*ma[2];
+  m3 = ma[0]*ma[3] - ma[1]*ma[1];
+
+  if ( m1<=0. || m2<=0. || m3<=0. ) return(1);
+
+  dx = LFILT * sqrt(m1 * det) ;
+  dy = LFILT * sqrt(m2 * det) ;
+  dz = LFILT * sqrt(m3 * det) ;
+
+  /* methalo is the box that we want to intersect with the octree, thus, the limit
+   * of the filter. We give: the coordinates of one of the corner of the box and
+   * the length of the box in each direction. */
+
+  methalo[0] = ppt->c[0] - dx;
+  methalo[1] = ppt->c[1] - dy;
+  methalo[2] = ppt->c[2] - dz;
+  methalo[3] = methalo[4] = methalo[5] = 2.*hpi;
+
+  ncells = _MMG3D_getListSquare(mesh,octree, methalo, &lococ);
+
+  /* Check the octree cells */
+  for ( i=0; i<ncells; ++i ) {
+    for (j=0; j<lococ[i]->nbVer; ++j)
+    {
+      ip1  = lococ[i]->v[j];
+      pp1  = &mesh->point[ip1];
+
+      ux = pp1->c[0] - ppt->c[0];
+      uy = pp1->c[1] - ppt->c[1];
+      uz = pp1->c[2] - ppt->c[2];
+
+      d2 = ma[0]*ux*ux + ma[3]*uy*uy + ma[5]*uz*uz
+        + 2.0*(ma[1]*ux*uy + ma[2]*ux*uz + ma[4]*uy*uz);
+      if ( d2 < dmi ) {
+        iadr = ip1*sol->size;
+        mb   = &sol->m[iadr];
+        d2   = mb[0]*ux*ux + mb[3]*uy*uy + mb[5]*uz*uz
+          + 2.0*(mb[1]*ux*uy + mb[2]*ux*uz + mb[4]*uy*uz);
+        if ( d2 < dmi ) {
+          _MMG5_DEL_MEM(mesh,lococ,ncells*sizeof(_MMG3D_octree_s*));
+          return(0);
+        }
+      }
+    }
+  }
+
+  _MMG5_DEL_MEM(mesh,lococ,ncells*sizeof(_MMG3D_octree_s*));
   return(1);
 }

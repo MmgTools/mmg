@@ -650,7 +650,7 @@ int MMG2_mmg2d1(MMG5_pMesh mesh,MMG5_pSol sol) {
     fprintf(stdout,"     %8d splitted\n",ngeom);
 
   /* 2. field points */
-  bucket = MMG2_newBucket(mesh,M_MAX(mesh->info.bucket,BUCKSIZ));
+  bucket = MMG2_newBucket(mesh,M_MAX(mesh->info.octree,BUCKSIZ));
   assert(bucket);
   declic = 1.5 / ALPHA;
   maxtou = 30;

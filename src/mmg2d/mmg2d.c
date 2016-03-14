@@ -68,7 +68,7 @@ static inline void _MMG5_defaultValues(MMG5_pMesh mesh, double qdegrad[2]) {
   fprintf(stdout,"Optimization threshold "
           "   (-degrad) : %e %e\n",qdegrad[0],qdegrad[1]);
   fprintf(stdout,"Bucket size per dimension (-bucket) : %d\n",
-          mesh->info.bucket);
+          mesh->info.octree);
   fprintf(stdout,"\n\n");
 
   exit(EXIT_FAILURE);

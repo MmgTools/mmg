@@ -58,7 +58,6 @@ void MMG3D_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
     _MMG5_gradsiz         = _MMG5_gradsiz_iso;
 #ifndef PATTERN
     _MMG5_cavity          = _MMG5_cavity_iso;
-    _MMG5_buckin          = _MMG5_buckin_iso;
     _MMG3D_octreein       = _MMG3D_octreein_iso;
 #endif
   }
@@ -80,9 +79,7 @@ void MMG3D_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
     _MMG5_gradsiz        = _MMG5_gradsiz_ani;
 #ifndef PATTERN
     _MMG5_cavity         = _MMG5_cavity_ani;
-    _MMG5_buckin         = _MMG5_buckin_ani;
-#warning aniso
-    _MMG3D_octreein      = _MMG3D_octreein_iso;
+    _MMG3D_octreein      = _MMG3D_octreein_ani;
 #endif
   }
 }
@@ -131,7 +128,7 @@ void MMG3D_usage(char *prog) {
   fprintf(stdout,"-lag [0/1/2] Lagrangian mesh displacement according to mode 0/1/2\n");
 #endif
 #ifndef PATTERN
-  fprintf(stdout,"-bucket val  Specify the size of bucket per dimension \n");
+  fprintf(stdout,"-octree val  Specify the max number of points per octree cell \n");
 #endif
 #ifdef USE_SCOTCH
   fprintf(stdout,"-rn [n]      Turn on or off the renumbering using SCOTCH [1/0] \n");
@@ -160,8 +157,8 @@ void MMG3D_defaultValues(MMG5_pMesh mesh) {
   _MMG5_mmgDefaultValues(mesh);
 
 #ifndef PATTERN
-  fprintf(stdout,"Bucket size per dimension (-bucket) : %d\n",
-          mesh->info.bucket);
+  fprintf(stdout,"Max number of point per octree cell (-octree) : %d\n",
+          mesh->info.octree);
 #endif
 #ifdef USE_SCOTCH
   fprintf(stdout,"SCOTCH renumbering                  : enabled\n");
@@ -215,8 +212,8 @@ int MMG3D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
         break;
 #ifndef PATTERN
       case 'b':
-        if ( !strcmp(argv[i],"-bucket") && ++i < argc )
-          if ( !MMG3D_Set_iparameter(mesh,met,MMG3D_IPARAM_bucket,
+        if ( !strcmp(argv[i],"-octree") && ++i < argc )
+          if ( !MMG3D_Set_iparameter(mesh,met,MMG3D_IPARAM_octree,
                                     atoi(argv[i])) )
             exit(EXIT_FAILURE);
         break;

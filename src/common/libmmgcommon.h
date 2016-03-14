@@ -225,7 +225,7 @@ typedef struct {
   int           renum;
   char          imprim,ddebug,badkal,iso,fem,lag;
   unsigned char optim, noinsert, noswap, nomove, nosurf;
-  int           bucket;
+  int           octree;
   MMG5_pPar     par;
 } MMG5_Info;
 

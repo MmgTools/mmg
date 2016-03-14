@@ -966,7 +966,9 @@ _MMG5_adptet_delone(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pOctree octree) {
  */
 int _MMG5_mmg3d1_delone(MMG5_pMesh mesh,MMG5_pSol met) {
   _MMG3D_pOctree octree;
+
 #warning intitial points not inserted in octree, could be done here
+
   if ( abs(mesh->info.imprim) > 4 )
     fprintf(stdout,"  ** MESH ANALYSIS\n");
 
@@ -978,10 +980,10 @@ int _MMG5_mmg3d1_delone(MMG5_pMesh mesh,MMG5_pSol met) {
   /**--- stage 1: geometric mesh */
   if ( abs(mesh->info.imprim) > 4 || mesh->info.ddebug )
     fprintf(stdout,"  ** GEOMETRIC MESH\n");
-      
+
     /* CEC : create filter */
-  _MMG3D_initOctree(mesh,&octree,mesh->info.bucket);
-    
+  _MMG3D_initOctree(mesh,&octree,mesh->info.octree);
+
   if ( !_MMG5_anatet(mesh,met,octree,1,0) ) {
     fprintf(stdout,"  ## Unable to split mesh. Exiting.\n");
     return(0);
