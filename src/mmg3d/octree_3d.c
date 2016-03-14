@@ -620,8 +620,6 @@ void _MMG3D_addOctreeRec(MMG5_pMesh mesh, _MMG3D_octree_s* q, double* ver,
 //      printf("UNALLOC ADDOCTREE_S depth %d %d\n",q->depth,q->nbVer);
       nunalloc++;
       _MMG5_DEL_MEM(mesh,q->v,nv*sizeof(int));
-#warning ALGIANE why does this not work?
-      // q->nbVer = 0;
 
     }else
     {
