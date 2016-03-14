@@ -284,7 +284,7 @@ sub Convert {
         }
         else
         {
-            if ($line =~ /^[ ]*> (.*)/)
+            if ($line =~ /^[ \*]*> (.*)\\n/ )
             {
                 if ($interfaceprinted == 0)
                 {
@@ -293,7 +293,14 @@ sub Convert {
                     $tabcount = 1;
                     $interfaceprinted = 1;
                 }
-                $chaine = sprintf("%s\n", $line);
+
+                $chaine = sprintf("%s\n", $1);
+                if ( $interfaceprinted == 1 && $1=~/.*END SUBROUTINE/  )
+                {
+                    $chaine = sprintf("%s%s\n",$chaine,"END INTERFACE");
+                    $interfaceprinted = 0;
+                }
+
                 printTab($chaine, $tabcount, 0);
             }
             elsif ($line =~ /(.*)\*\//)
@@ -314,20 +321,17 @@ sub Convert {
             }
             elsif($line =~ /(.*)/)
             {
-
-
                 $chaine = sprintf("! %s\n", $line);
-                if ($line =~ /mmg3d's constants/)
+                if ($line =~ /Mmg's constants/)
                 {
-                    my $chaine2 = "END INTERFACE\n\n";
-                    $chaine2 .= "!\n";
-                    $chaine2 .= "!   Enum: KINDS\n";
+                    my $chaine2 .= "!   Enum: KINDS\n";
                     $chaine2 .= "!\n";
                     $chaine2 .= "!   Type kinds\n";
                     $chaine2 .= "!\n";
                     $chaine2 .= "!   Contains:\n";
-                    $chaine2 .= "!     MMG5_REAL_KIND - Kind to use for REAL\n";
-                    $chaine2 .= "!     MMG5_INT_KIND  - Kind to use for INT\n";
+                    $chaine2 .= "!     MMG5_DATA_PTR_T - Kind to use for POINTERS\n";
+                   # $chaine2 .= "!     MMG5_REAL_KIND  - Kind to use for REAL\n";
+                   # $chaine2 .= "!     MMG5_INT_KIND   - Kind to use for INT\n";
                     $chaine2 .= "!\n";
                     if ($real != 0)
                     {

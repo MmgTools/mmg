@@ -32,13 +32,6 @@
 
 #include "mmg3d.h"
 
-/**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the sol structure.
- *
- * Set function pointers depending if case is iso or aniso.
- *
- */
 void MMG3D_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
   if ( met->size == 1 || ( met->size == 3 && mesh->info.lag >= 0 ) ) {
     _MMG5_caltet          = _MMG5_caltet_iso;
@@ -84,19 +77,6 @@ void MMG3D_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
   }
 }
 
-/**
- * \brief Return adjacent elements of a tetrahedron.
- * \param mesh pointer toward the mesh structure.
- * \param kel tetrahedron index.
- * \param listet pointer toward the table of the 4 adjacent tetra to \a kel.
- * (the index is 0 if there is no adjacent)
- * \return 1.
- *
- * Find the indices of the 4 adjacent elements of tetrahedron \a
- * kel. \f$v_i = 0\f$ if the \f$i^{th}\f$ face has no adjacent element
- * (so we are on a boundary face).
- *
- */
 int MMG3D_Get_adjaTet(MMG5_pMesh mesh, int kel, int listet[4]) {
 
   if ( ! mesh->adja ) {
@@ -112,12 +92,6 @@ int MMG3D_Get_adjaTet(MMG5_pMesh mesh, int kel, int listet[4]) {
   return(1);
 }
 
-/**
- * \param prog pointer toward the program name.
- *
- * Print help for mmg3d options.
- *
- */
 void MMG3D_usage(char *prog) {
 
   _MMG5_mmgUsage(prog);
@@ -144,13 +118,6 @@ void MMG3D_usage(char *prog) {
   exit(EXIT_FAILURE);
 }
 
-/**
- * \param mesh pointer toward the mesh structure.
- * \return 0 if fail, 1 if success.
- *
- * Print the default parameters values.
- *
- */
 void MMG3D_defaultValues(MMG5_pMesh mesh) {
 
   _MMG5_mmgDefaultValues(mesh);
@@ -169,16 +136,6 @@ void MMG3D_defaultValues(MMG5_pMesh mesh) {
   exit(EXIT_FAILURE);
 }
 
-/**
- * \param argc number of command line arguments.
- * \param argv command line arguments.
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the sol structure.
- * \return 1.
- *
- * Store command line arguments.
- *
- */
 int MMG3D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
   int     i;
   char    namein[128];
@@ -453,16 +410,6 @@ int MMG3D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
   return(1);
 }
 
-/**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the sol structure.
- * \return 1.
- *
- * Read local parameters file. This file must have the same name as
- * the mesh with the \a .mmg3d extension or must be named \a
- * DEFAULT.mmg3d.
- *
- */
 int MMG3D_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
   float       fp1,fp2,hausd;
   int         ref,i,j,ret,npar;
@@ -531,14 +478,6 @@ int MMG3D_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
   return(1);
 }
 
-/**
- * \param mesh pointer toward the mesh structure.
- * \param *info pointer toward the info structure.
- * \return 1.
- *
- * Store the info structure in the mesh structure.
- *
- */
 int MMG3D_stockOptions(MMG5_pMesh mesh, MMG5_Info *info) {
 
   memcpy(&mesh->info,info,sizeof(MMG5_Info));
@@ -552,32 +491,12 @@ int MMG3D_stockOptions(MMG5_pMesh mesh, MMG5_Info *info) {
   return(1);
 }
 
-/**
- * \param mesh pointer toward the mesh structure.
- * \param info pointer toward the info structure.
- *
- * Recover the info structure stored in the mesh structure.
- *
- */
 void MMG3D_destockOptions(MMG5_pMesh mesh, MMG5_Info *info) {
 
   memcpy(info,&mesh->info,sizeof(MMG5_Info));
   return;
 }
 
-/**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the sol structure.
- * \param critmin minimum quality for elements.
- * \param lmin minimum edge length.
- * \param lmax maximum ede length.
- * \param eltab pointer toward the table of invalid elements.
- * \param metRidTyp Type of storage of ridges metrics: 0 for classic storage
- * (before the _MMG5_defsiz call), 1 for special storage (after this call).
- *
- * Search invalid elements (in term of quality or edge length).
- *
- */
 int MMG3D_mmg3dcheck(MMG5_pMesh mesh,MMG5_pSol met,double critmin, double lmin,
                     double lmax, int *eltab,char metRidTyp) {
 
@@ -653,18 +572,6 @@ int MMG3D_mmg3dcheck(MMG5_pMesh mesh,MMG5_pSol met,double critmin, double lmin,
   return(MMG5_SUCCESS);
 }
 
-/**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the sol structure.
- * \param critmin minimum quality for elements.
- * \param *eltab pointer toward the table of invalid elements.
- * \param metRidTyp Type of storage of ridges metrics: 0 for classic storage
- * (before the _MMG5_defsiz call), 1 for special storage (after this call).
- *
- * Store elements which have worse quality than \a critmin in \a eltab,
- * \a eltab is allocated and could contain \a mesh->ne elements.
- *
- */
 void MMG3D_searchqua(MMG5_pMesh mesh,MMG5_pSol met,double critmin, int *eltab,
                     char metRidTyp) {
   MMG5_pTetra   pt;
@@ -691,19 +598,6 @@ void MMG3D_searchqua(MMG5_pMesh mesh,MMG5_pSol met,double critmin, int *eltab,
   return;
 }
 
-/**
- * \param mesh pointer toward the mesh structure.
- * \param ktri index of the boundary triangle.
- * \param ktet pointer toward the index of the tetra (filled by the function).
- * \param iface pointer toward the index of the face of the tetra \a ktet that
- * correspond to the boundary tria \a ktri.
- * \return 0 if fail, 1 otherwise
- *
- * Fill \a ktet by the index of the tetra to which belong a boundary triangle
- * and \a iface by the index ofthe face of the tetra that correspond to the
- * triangle.
- *
- */
 int MMG3D_Get_tetFromTria(MMG5_pMesh mesh, int ktri, int *ktet, int *iface)
 {
   int val;
@@ -719,20 +613,6 @@ int MMG3D_Get_tetFromTria(MMG5_pMesh mesh, int ktri, int *ktet, int *iface)
   return 1;
 }
 
-/**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the sol structure.
- * \param lmin minimum edge length.
- * \param lmax maximum ede length.
- * \param *eltab table of invalid elements.
- * \param metRidTyp Type of storage of ridges metrics: 0 for classic storage
- * (before the _MMG5_defsiz call), 1 for special storage (after this call).
- *
- * Store in \a eltab elements which have edge lengths shorter than \a lmin
- * or longer than \a lmax, \a eltab is allocated and could contain \a mesh->ne
- * elements.
- *
- */
 int MMG3D_searchlen(MMG5_pMesh mesh, MMG5_pSol met, double lmin,
                    double lmax, int *eltab,char metRidTyp) {
   MMG5_pTetra          pt;
@@ -794,15 +674,6 @@ int MMG3D_searchlen(MMG5_pMesh mesh, MMG5_pSol met, double lmin,
   return(1);
 }
 
-/**
- * \param mesh pointer toward the mesh structure
- * \param met pointer toward the sol structure
- * \return 1 if success
- *
- * Compute isotropic size map according to the mean of the length of the edges
- * passing through a point.
- *
- */
 int MMG3D_DoSol(MMG5_pMesh mesh,MMG5_pSol met) {
     MMG5_pTetra     pt;
     MMG5_pPoint     p1,p2;

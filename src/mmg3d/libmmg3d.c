@@ -311,16 +311,6 @@ int _MMG3D_packMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
   return(1);
 }
 
-/**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward a sol structure (metric).
- * \return \ref MMG5_SUCCESS if success, \ref MMG5_LOWFAILURE if failed
- * but a conform mesh is saved and \ref MMG5_STRONGFAILURE if failed and we
- * can't save the mesh.
- *
- * Main program for the remesh library .
- *
- */
 int MMG3D_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met) {
   mytime    ctim[TIMEMAX];
   char      stim[32];
@@ -486,16 +476,6 @@ int MMG3D_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met) {
   _LIBMMG5_RETURN(mesh,met,MMG5_SUCCESS);
 }
 
-/**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward a sol structure (level-set).
- * \return \ref MMG5_SUCCESS if success, \ref MMG5_LOWFAILURE if failed
- * but a conform mesh is saved and \ref MMG5_STRONGFAILURE if failed and we
- * can't save the mesh.
- *
- * Main program for the levelset discretization library .
- *
- */
 int MMG3D_mmg3dls(MMG5_pMesh mesh,MMG5_pSol met) {
   mytime    ctim[TIMEMAX];
   char      stim[32];
@@ -647,20 +627,6 @@ int MMG3D_mmg3dls(MMG5_pMesh mesh,MMG5_pSol met) {
 }
 
 
-/**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward a sol structure (for the output metric).
- * \param disp pointer toward a sol structure (displacement for the
- * lagrangian motion mode).
- * \return \ref MMG5_SUCCESS if success, \ref MMG5_LOWFAILURE if failed
- * but a conform mesh is saved and \ref MMG5_STRONGFAILURE if failed and we
- * can't save the mesh.
- *
- * Main program for the rigidbody moving library.
- *
- * \warning set the disp->npi field at the good value at the good moment (needed
- * by API).
- */
 int MMG3D_mmg3dmov(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp) {
   mytime    ctim[TIMEMAX];
   char      stim[32];
@@ -888,18 +854,6 @@ int MMG3D_mmg3dmov(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp) {
 
 /** Old API °°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°*/
 
-/**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward a sol structure (metric or solution).
- * lagrangian motion mode).
- * \return Return \ref MMG5_SUCCESS if success, \ref MMG5_LOWFAILURE if failed
- * but a conform mesh is saved and \ref MMG5_STRONGFAILURE if failed and we
- * can't save the mesh.
- * \warning Do not use: will became obsolete
- *
- * Main program for the library .
- *
- */
 int MMG5_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met)
 {
   printf("  ## MMG5_mmg3dlib: "

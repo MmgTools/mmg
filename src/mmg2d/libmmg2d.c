@@ -49,6 +49,7 @@
  *
  * \warning edges are not packed.
  */
+static inline
 int MMG2_tassage(MMG5_pMesh mesh,MMG5_pSol sol) {
   MMG5_pEdge         ped;
   MMG5_pTria         pt,ptnew;
@@ -260,16 +261,6 @@ triangles:
   optdbl[1] =ar
 */
 
-/**
- * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward a sol structure (metric).
- * \return \ref MMG5_SUCCESS if success, \ref MMG5_LOWFAILURE if failed
- * but a conform mesh is saved and \ref MMG5_STRONGFAILURE if failed and we
- * can't save the mesh.
- *
- * Main program for the mesh adaptation library .
- *
- */
 int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol sol)
 //,void (*titi)(int ,int ,int,int,int)
 {
@@ -515,16 +506,6 @@ int _MMG2D_restart(MMG5_pMesh mesh){
   return 1;
 }
 
-/**
- * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward a sol structure (metric).
- * \return \ref MMG5_SUCCESS if success, \ref MMG5_LOWFAILURE if failed
- * but a conform mesh is saved and \ref MMG5_STRONGFAILURE if failed and we
- * can't save the mesh.
- *
- * Main program for the mesh generation library .
- *
- */
 int MMG2D_mmg2dmesh(MMG5_pMesh mesh,MMG5_pSol sol) {
   mytime    ctim[TIMEMAX];
   char      stim[32];
@@ -709,16 +690,6 @@ int MMG2D_mmg2dmesh(MMG5_pMesh mesh,MMG5_pSol sol) {
 
 }
 
-/**
- * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward a sol structure (metric).
- * \return \ref MMG5_SUCCESS if success, \ref MMG5_LOWFAILURE if failed
- * but a conform mesh is saved and \ref MMG5_STRONGFAILURE if failed and we
- * can't save the mesh.
- *
- * Main program for the level-set discretization library .
- *
- */
 int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol)
 {
   mytime    ctim[TIMEMAX];
@@ -890,16 +861,6 @@ int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol)
 
 }
 
-/**
- * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward a sol structure (displacement).
- * \return \ref MMG5_SUCCESS if success, \ref MMG5_LOWFAILURE if failed
- * but a conform mesh is saved and \ref MMG5_STRONGFAILURE if failed and we
- * can't save the mesh.
- *
- * Main program for the rigid body movement library .
- *
- */
 int MMG2D_mmg2dmov(MMG5_pMesh mesh,MMG5_pSol sol)
 // MMG5_pSol,met)
 {
