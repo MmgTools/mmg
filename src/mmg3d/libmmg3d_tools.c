@@ -210,14 +210,6 @@ int MMG3D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
         if ( !MMG3D_Set_solSize(mesh,met,MMG5_Vertex,0,MMG5_Tensor) )
           exit(EXIT_FAILURE);
         break;
-#ifndef PATTERN
-      case 'b':
-        if ( !strcmp(argv[i],"-octree") && ++i < argc )
-          if ( !MMG3D_Set_iparameter(mesh,met,MMG3D_IPARAM_octree,
-                                    atoi(argv[i])) )
-            exit(EXIT_FAILURE);
-        break;
-#endif
       case 'd':
         if ( !strcmp(argv[i],"-default") ) {
           mesh->mark=1;
@@ -340,8 +332,15 @@ int MMG3D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
             MMG3D_usage(argv[0]);
           }
         }
+#ifndef PATTERN
+        else if ( !strcmp(argv[i],"-octree") && ++i < argc ) {
+          if ( !MMG3D_Set_iparameter(mesh,met,MMG3D_IPARAM_octree,
+                                     atoi(argv[i])) )
+            exit(EXIT_FAILURE);
+        }
+#endif
         else if( !strcmp(argv[i],"-optim") ) {
-          if ( !MMG3D_Set_iparameter(mesh,met,MMG3D_IPARAM_optim,1) )
+        if ( !MMG3D_Set_iparameter(mesh,met,MMG3D_IPARAM_optim,1) )
             exit(EXIT_FAILURE);
         }
         break;
