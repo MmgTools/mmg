@@ -613,6 +613,12 @@ int MMG2D_loadSol(MMG5_pMesh mesh,MMG5_pSol sol,char *filename) {
     fprintf(stdout,"  ** MISSING DATA.\n");
     return(-1);
   }
+
+  if ( sol->np != mesh->np ) {
+    fprintf(stdout,"  ** WRONG DATA. IGNORED\n");
+    return(-1);
+  }
+
   if ( btyp!= 1 && btyp!=3 ) {
     fprintf(stdout,"  ** DATA IGNORED\n");
     sol->size = 1;

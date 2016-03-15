@@ -26,8 +26,6 @@
 
 #include "libmmg3d.h"
 
-#define MG_SMSGN(a,b)  (((double)(a)*(double)(b) > (0.0)) ? (1) : (0))
-
 /** Free allocated pointers of mesh and sol structure and return value val */
 #define _MMG5_RETURN_AND_FREE(mesh,met,disp,val)do            \
   {                                                           \
@@ -110,10 +108,6 @@
 #define _MMG5_BOXSIZE 500
 
 #define _MMG5_SHORTMAX     0x7fff
-
-/* Domain refs in iso mode */
-#define MG_PLUS    2
-#define MG_MINUS   3
 
 
 /** \brief next vertex of tetra: {1,2,3,0,1,2,3} */
@@ -253,7 +247,7 @@ long long _MMG5_memSize(void);
 void _MMG3D_memOption(MMG5_pMesh mesh);
 int  _MMG5_mmg3d1_pattern(MMG5_pMesh ,MMG5_pSol );
 int  _MMG5_mmg3d1_delone(MMG5_pMesh ,MMG5_pSol );
-int  _MMG5_mmg3d2(MMG5_pMesh ,MMG5_pSol );
+int  _MMG3D_mmg3d2(MMG5_pMesh ,MMG5_pSol );
 int  _MMG5_mmg3dChkmsh(MMG5_pMesh,int,int);
 int  _MMG3D_split1_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]);
 void _MMG5_split1(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp);

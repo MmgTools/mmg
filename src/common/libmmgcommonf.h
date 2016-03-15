@@ -82,6 +82,14 @@
 #define MMG5_STRONGFAILURE 2
 
 ! /**
+!  * Domain refs in iso mode
+!  *
+!  */
+
+#define MG_ISO    10
+
+
+! /**
 !  * \enum MMG5_arg
 !  * \brief Argument type of mmg3d structures.
 !  */
@@ -90,18 +98,20 @@
 #define   MMG5_ARG_start               %val(0)
 ! /*!< Pointer toward a MMG5_pMesh structure (for structure allocations purposes) */
 #define   MMG5_ARG_ppMesh              %val(1)
+! /*!< Pointer toward a MMG5_pSol structure storing a level-set (for structure allocations purposes)  */
+#define   MMG5_ARG_ppLs                %val(2)
 ! /*!< Pointer toward a MMG5_pSol structure storing a metric (for structure allocations purposes)  */
-#define   MMG5_ARG_ppMet               %val(2)
+#define   MMG5_ARG_ppMet               %val(3)
 ! /*!< Pointer toward a MMG5_pSol structure storing a displacement (for structure allocations purposes)  */
-#define   MMG5_ARG_ppDisp              %val(3)
+#define   MMG5_ARG_ppDisp              %val(4)
 ! /*!< MMG5_pMesh structure */
-#define   MMG5_ARG_pMesh               %val(4)
+#define   MMG5_ARG_pMesh               %val(5)
 ! /*!< MMG5_pSol structure storing a metric field */
-#define   MMG5_ARG_pMet                %val(5)
+#define   MMG5_ARG_pMet                %val(6)
 ! /*!< MMG5_pSol structure storing a displacement field */
-#define   MMG5_ARG_pDisp               %val(6)
+#define   MMG5_ARG_pDisp               %val(7)
 ! /*!< To end a list of variadic argument (mandatory last argument for all our variadic functions) */
-#define   MMG5_ARG_end                 %val(7)
+#define   MMG5_ARG_end                 %val(8)
 ! /**
 !  * \enum MMG5_type
 !  * \brief Type of solutions.

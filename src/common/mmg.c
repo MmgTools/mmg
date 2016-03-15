@@ -65,6 +65,8 @@ void _MMG5_mmgUsage(char *prog) {
   fprintf(stdout,"-hmax   val  maximal mesh size\n");
   fprintf(stdout,"-hausd  val  control Hausdorff distance\n");
   fprintf(stdout,"-hgrad  val  control gradation\n");
+  fprintf(stdout,"-ls     val  create mesh of isovalue val (0 if no argument provided)\n");
+
 }
 
 /**

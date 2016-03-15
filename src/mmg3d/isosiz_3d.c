@@ -264,9 +264,9 @@ _MMG5_defsizreg(MMG5_pMesh mesh,MMG5_pSol met,int nump,int *lists,
 
   /* Reconstitution of the curvature tensor at p0 in the tangent plane,
      with a quadric fitting approach */
-  memset(intm,0.0,3*sizeof(double));
-  memset(tAA,0.0,6*sizeof(double));
-  memset(tAb,0.0,3*sizeof(double));
+  memset(intm,0x00,3*sizeof(double));
+  memset(tAA,0x00,6*sizeof(double));
+  memset(tAb,0x00,3*sizeof(double));
 
   for (k=0; k<ilists; k++) {
     iel   = lists[k] / 4;

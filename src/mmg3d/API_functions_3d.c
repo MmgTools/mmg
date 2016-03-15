@@ -40,21 +40,6 @@
 
 #include "mmg3d.h"
 
-/**
- * \param starter dummy argument used to initialize the variadic argument list
- * \param ... variadic arguments that depend to the library function that you
- * want to call. For the MMG3D_mmg3dlib or the MMG3D_mmg3dls functions, you need
- * to call the \a MMG3D_Init_mesh function with the following arguments :
- * MMG3D_Init_mesh(MMG5_ARG_start,MMG5_ARG_ppMesh, &your_mesh, MMG5_ARG_ppSol,
- * &your_metric,MMG5_ARG_end). For the MMG3D_mmg3dmov function, you must call
- * : MMG3D_Init_mesh(MMG5_ARG_start,MMG5_ARG_ppMesh, &your_mesh, MMG5_ARG_ppSol,
- * &your_metric,MMG5_ARG_ppDisp, &your_displacement,MMG5_ARG_end). Here,
- * \a your_mesh is a \a MMG5_pMesh, \a your_metric a \a MMG5_pSol and \a
- * your_displacement a \a MMG5_pSol.
- *
- * MMG structures allocation and initialization.
- *
- */
 void MMG3D_Init_mesh(enum MMG5_arg starter,...) {
   va_list argptr;
 
@@ -66,13 +51,6 @@ void MMG3D_Init_mesh(enum MMG5_arg starter,...) {
 
   return;
 }
-/**
- * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the sol structure.
- *
- * Initialize file names to their default values.
- *
- */
 void MMG3D_Init_fileNames(MMG5_pMesh mesh,MMG5_pSol sol
   ) {
 
@@ -80,74 +58,35 @@ void MMG3D_Init_fileNames(MMG5_pMesh mesh,MMG5_pSol sol
   return;
 }
 
-/**
- * \param mesh pointer toward the mesh structure.
- * \param meshin input mesh name.
- * \return 1.
- *
- * Set the name of input mesh.
- *
- */
 int MMG3D_Set_inputMeshName(MMG5_pMesh mesh, char* meshin) {
 
   return(MMG5_Set_inputMeshName(mesh,meshin));
 }
 
-/**
- * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the sol structure.
- * \param solin name of the input solution file.
- * \return 1.
- *
- * Set the name of input solution file.
- *
- */
 int MMG3D_Set_inputSolName(MMG5_pMesh mesh,MMG5_pSol sol, char* solin) {
   return(MMG5_Set_inputSolName(mesh,sol,solin));
 }
-/**
- * \param mesh pointer toward the mesh structure.
- * \param meshout output mesh name.
- * \return 1.
- *
- * Set the name of output mesh.
- *
- */
+
 int MMG3D_Set_outputMeshName(MMG5_pMesh mesh, char* meshout) {
 
   return(MMG5_Set_outputMeshName(mesh,meshout));
 }
-/**
- * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the sol structure.
- * \param solout name of the output solution file.
- * \return 0 if failed, 1 otherwise.
- *
- *  Set the name of output solution file.
- *
- */
+
 int MMG3D_Set_outputSolName(MMG5_pMesh mesh,MMG5_pSol sol, char* solout) {
   return(MMG5_Set_outputSolName(mesh,sol,solout));
 }
-/**
- * \param mesh pointer toward the mesh structure.
- *
- * Initialization of the input parameters (stored in the Info structure).
- *
- */
+
 void MMG3D_Init_parameters(MMG5_pMesh mesh) {
 
   /* Init common parameters for mmgs and mmg3d. */
   _MMG5_Init_parameters(mesh);
 
   /* default values for integers */
-  /** MMG3D_IPARAM_iso = 0 */
-  mesh->info.iso      =  0;  /* [0/1]    ,Turn on/off levelset meshing */
-  /** MMG3D_IPARAM_lag = -1 */
+  /* MMG3D_IPARAM_lag = -1 */
   mesh->info.lag      = -1;
-  /** MMG3D_IPARAM_optim = 0 */
+  /* MMG3D_IPARAM_optim = 0 */
   mesh->info.optim    =  0;
-  /** MMG3D_IPARAM_nosurf = 0 */
+  /* MMG3D_IPARAM_nosurf = 0 */
   mesh->info.nosurf   =  0;  /* [0/1]    ,avoid/allow surface modifications */
 #ifdef USE_SCOTCH
   mesh->info.renum    = 1;   /* [1/0]    , Turn on/off the renumbering using SCOTCH; */
@@ -160,22 +99,11 @@ void MMG3D_Init_parameters(MMG5_pMesh mesh) {
 
 
 #ifndef PATTERN
-  /** MMG3D_IPARAM_octree = 64 */
+  /* MMG3D_IPARAM_octree = 64 */
   mesh->info.octree = 64;
 #endif
 }
 
-/**
- * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the sol structure.
- * \param typEntity type of solutions entities (vertices, triangles...).
- * \param np number of solutions.
- * \param typSol type of solution (scalar, vectorial...).
- * \return 0 if failed, 1 otherwise.
- *
- * Set the solution number, dimension and type.
- *
- */
 int MMG3D_Set_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int typEntity, int np, int typSol) {
 
   if ( ( (mesh->info.imprim > 5) || mesh->info.ddebug ) && sol->m )
@@ -215,19 +143,6 @@ int MMG3D_Set_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int typEntity, int np, int
   return(1);
 }
 
-/**
- * \param mesh pointer toward the mesh structure.
- * \param np number of vertices.
- * \param ne number of elements (tetrahedra).
- * \param nt number of triangles.
- * \param na number of edges.
- * \return 0 if failed, 1 otherwise.
- *
- * Set the number of vertices, tetrahedra, triangles and edges of the
- * mesh and allocate the associated tables. If call twice, reset the
- * whole mesh to realloc it at the new size
- *
- */
 int MMG3D_Set_meshSize(MMG5_pMesh mesh, int np, int ne, int nt, int na) {
   int k;
 
@@ -329,18 +244,6 @@ int MMG3D_Set_meshSize(MMG5_pMesh mesh, int np, int ne, int nt, int na) {
   return(1);
 }
 
-
-/**
- * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the sol structure.
- * \param typEntity pointer toward the type of entities to which solutions are applied.
- * \param np pointer toward the number of solutions.
- * \param typSol pointer toward the type of the solutions (scalar, vectorial...)
- * \return 1.
- *
- * Get the solution number, dimension and type.
- *
- */
 int MMG3D_Get_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int* typEntity, int* np, int* typSol) {
 
   *typEntity = MMG5_Vertex;
@@ -360,17 +263,6 @@ int MMG3D_Get_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int* typEntity, int* np, i
   return(1);
 }
 
-/**
- * \param mesh pointer toward the mesh structure.
- * \param np pointer toward the number of vertices.
- * \param ne pointer toward the number of elements (tetrahedra).
- * \param nt pointer toward the number of triangles.
- * \param na pointer toward the number of edges.
- * \return 1.
- *
- * Get the number of vertices, tetrahedra, triangles and edges of the mesh.
- *
- */
 int MMG3D_Get_meshSize(MMG5_pMesh mesh, int* np, int* ne, int* nt, int* na) {
 
   if ( np != NULL )
@@ -385,19 +277,6 @@ int MMG3D_Get_meshSize(MMG5_pMesh mesh, int* np, int* ne, int* nt, int* na) {
   return(1);
 }
 
-/**
- * \param mesh pointer toward the mesh structure.
- * \param c0 coordinate of the point along the first dimension.
- * \param c1 coordinate of the point along the second dimension.
- * \param c2 coordinate of the point along the third dimension.
- * \param ref point reference.
- * \param pos position of the point in the mesh.
- * \return 1.
- *
- * Set vertex of coordinates \a c0, \a c1,\a c2 and reference \a ref
- * at position \a pos in mesh structure
- *
- */
 int MMG3D_Set_vertex(MMG5_pMesh mesh, double c0, double c1, double c2, int ref, int pos) {
 
   if ( !mesh->np ) {
@@ -432,20 +311,6 @@ int MMG3D_Set_vertex(MMG5_pMesh mesh, double c0, double c1, double c2, int ref, 
   return(1);
 }
 
-/**
- * \param mesh pointer toward the mesh structure.
- * \param c0 pointer toward the coordinate of the point along the first dimension.
- * \param c1 pointer toward the coordinate of the point along the second dimension.
- * \param c2 pointer toward the coordinate of the point along the third dimension.
- * \param ref poiter to the point reference.
- * \param isCorner pointer toward the flag saying if point is corner.
- * \param isRequired pointer toward the flag saying if point is required.
- * \return 1.
- *
- * Get coordinates \a c0, \a c1,\a c2 and reference \a ref of next
- * vertex of mesh.
- *
- */
 int MMG3D_Get_vertex(MMG5_pMesh mesh, double* c0, double* c1, double* c2, int* ref,
                     int* isCorner, int* isRequired) {
 
@@ -492,20 +357,6 @@ int MMG3D_Get_vertex(MMG5_pMesh mesh, double* c0, double* c1, double* c2, int* r
   return(1);
 }
 
-/**
- * \param mesh pointer toward the mesh structure.
- * \param v0 first vertex of tetrahedron.
- * \param v1 second vertex of tetrahedron.
- * \param v2 third vertex of tetrahedron.
- * \param v3 fourth vertex of tetrahedron.
- * \param ref tetrahedron reference (must be positive).
- * \param pos tetrahedron position in the mesh.
- * \return 0 if failed, 1 otherwise.
- *
- * Set tetrahedra of vertices \a v0, \a v1,\a v2,\a v3 and reference
- * \a ref at position \a pos in mesh structure.
- *
- */
 int MMG3D_Set_tetrahedron(MMG5_pMesh mesh, int v0, int v1, int v2, int v3, int ref, int pos) {
   MMG5_pTetra pt;
   MMG5_pPoint ppt;
@@ -573,20 +424,6 @@ int MMG3D_Set_tetrahedron(MMG5_pMesh mesh, int v0, int v1, int v2, int v3, int r
   return(1);
 }
 
-/**
- * \param mesh pointer toward the mesh structure.
- * \param v0 pointer toward the first vertex of tetrahedron.
- * \param v1 pointer toward the second vertex of tetrahedron.
- * \param v2 pointer toward the third vertex of tetrahedron.
- * \param v3 pointer toward the fourth vertex of tetrahedron.
- * \param ref pointer toward the tetrahedron reference.
- * \param isRequired pointer toward the flag saying if tetrahedron is required.
- * \return 0 if failed, 1 otherwise.
- *
- * Get vertices \a v0, \a v1, \a v2, \a v3 and reference \a ref of
- * next tetra of mesh.
- *
- */
 int MMG3D_Get_tetrahedron(MMG5_pMesh mesh, int* v0, int* v1, int* v2, int* v3,
                          int* ref, int* isRequired) {
 
@@ -628,19 +465,6 @@ int MMG3D_Get_tetrahedron(MMG5_pMesh mesh, int* v0, int* v1, int* v2, int* v3,
   return(1);
 }
 
-/**
- * \param mesh pointer toward the mesh structure.
- * \param v0 first vertex of triangle.
- * \param v1 second vertex of triangle.
- * \param v2 third vertex of triangle.
- * \param ref triangle reference.
- * \param pos triangle position in the mesh.
- * \return 0 if failed, 1 otherwise.
- *
- * Set triangle of vertices \a v0, \a v1, \a v2 and reference \a ref
- * at position \a pos in mesh structure.
- *
- */
 int MMG3D_Set_triangle(MMG5_pMesh mesh, int v0, int v1, int v2, int ref,int pos) {
 
   if ( !mesh->nt ) {
@@ -672,19 +496,6 @@ int MMG3D_Set_triangle(MMG5_pMesh mesh, int v0, int v1, int v2, int ref,int pos)
   return(1);
 }
 
-/**
- * \param mesh pointer toward the mesh structure.
- * \param v0 pointer toward the first vertex of triangle.
- * \param v1 pointer toward the second vertex of triangle.
- * \param v2 pointer toward the third vertex of triangle.
- * \param ref pointer toward the triangle reference.
- * \param isRequired pointer toward the flag saying if triangle is required.
- * \return 0 if failed, 1 otherwise.
- *
- * Get vertices \a v0,\a v1,\a v2 and reference \a ref of next
- * triangle of mesh.
- *
- */
 int MMG3D_Get_triangle(MMG5_pMesh mesh, int* v0, int* v1, int* v2, int* ref
                       ,int* isRequired) {
   MMG5_pTria  ptt;
@@ -727,18 +538,6 @@ int MMG3D_Get_triangle(MMG5_pMesh mesh, int* v0, int* v1, int* v2, int* ref
   return(1);
 }
 
-/**
- * \param mesh pointer toward the mesh structure.
- * \param v0 first extremity of the edge.
- * \param v1 second extremity of the edge.
- * \param ref edge reference.
- * \param pos edge position in the mesh.
- * \return 0 if failed, 1 otherwise.
- *
- * Set edge of extremities \a v0, \a v1 and reference \a ref at
- * position \a pos in mesh structure
- *
- */
 int MMG3D_Set_edge(MMG5_pMesh mesh, int v0, int v1, int ref, int pos) {
 
   if ( !mesh->na ) {
@@ -768,18 +567,6 @@ int MMG3D_Set_edge(MMG5_pMesh mesh, int v0, int v1, int ref, int pos) {
   return(1);
 }
 
-/**
- * \param mesh pointer toward the mesh structure.
- * \param e0 pointer toward the first extremity of the edge.
- * \param e1 pointer toward the second  extremity of the edge.
- * \param ref pointer toward the edge reference.
- * \param isRidge pointer toward the flag saying if the edge is ridge.
- * \param isRequired pointer toward the flag saying if the edge is required.
- * \return 0 if failed, 1 otherwise.
- *
- * Get extremities \a e0, \a e1 and reference \a ref of next edge of mesh.
- *
- */
 int MMG3D_Get_edge(MMG5_pMesh mesh, int* e0, int* e1, int* ref
                   ,int* isRidge, int* isRequired) {
 
@@ -825,56 +612,24 @@ int MMG3D_Get_edge(MMG5_pMesh mesh, int* e0, int* e1, int* ref
   return(1);
 }
 
-/**
- * \param mesh pointer toward the mesh structure.
- * \param k vertex index.
- * \return 1.
- *
- * Set corner at point \a k.
- *
- */
 int MMG3D_Set_corner(MMG5_pMesh mesh, int k) {
   assert ( k <= mesh->np );
   mesh->point[k].tag |= MG_CRN;
   return(1);
 }
 
-/**
- * \param mesh pointer toward the mesh structure.
- * \param k vertex index.
- * \return 1.
- *
- * Set point \a k as required.
- *
- */
 int MMG3D_Set_requiredVertex(MMG5_pMesh mesh, int k) {
   assert ( k <= mesh->np );
   mesh->point[k].tag |= MG_REQ;
   return(1);
 }
 
-/**
- * \param mesh pointer toward the mesh structure.
- * \param k element index.
- * \return 1.
- *
- * Set element \a k as required.
- *
- */
 int MMG3D_Set_requiredTetrahedron(MMG5_pMesh mesh, int k) {
   assert ( k <= mesh->ne );
   mesh->tetra[k].tag |= MG_REQ;
   return(1);
 }
 
-/**
- * \param mesh pointer toward the mesh structure.
- * \param k triangle index.
- * \return 1.
- *
- * Set triangle \a k as required.
- *
- */
 int MMG3D_Set_requiredTriangle(MMG5_pMesh mesh, int k) {
   assert ( k <= mesh->nt );
   mesh->tria[k].tag[0] |= MG_REQ;
@@ -883,43 +638,18 @@ int MMG3D_Set_requiredTriangle(MMG5_pMesh mesh, int k) {
   return(1);
 }
 
-/**
- * \param mesh pointer toward the mesh structure.
- * \param k edge index.
- * \return 1.
- *
- * Set ridge at edge \a k.
- *
- */
 int MMG3D_Set_ridge(MMG5_pMesh mesh, int k) {
   assert ( k <= mesh->na );
   mesh->edge[k].tag |= MG_GEO;
   return(1);
 }
 
-/**
- * \param mesh pointer toward the mesh structure.
- * \param k edge index.
- * \return 1.
- *
- * Set edge \a k as required.
- *
- */
 int MMG3D_Set_requiredEdge(MMG5_pMesh mesh, int k) {
   assert ( k <= mesh->na );
   mesh->edge[k].tag |= MG_REQ;
   return(1);
 }
 
-/**
- * \param met pointer toward the sol structure.
- * \param s solution scalar value.
- * \param pos position of the solution in the mesh (begin to 1).
- * \return 0 if failed, 1 otherwise.
- *
- * Set scalar value \a s at position \a pos in solution structure
- *
- */
 int MMG3D_Set_scalarSol(MMG5_pSol met, double s, int pos) {
 
   if ( !met->np ) {
@@ -951,14 +681,6 @@ int MMG3D_Set_scalarSol(MMG5_pSol met, double s, int pos) {
   return(1);
 }
 
-/**
- * \param met pointer toward the sol structure.
- * \param s pointer toward the scalar solution value.
- * \return 0 if failed, 1 otherwise.
- *
- * Get solution \a s of next vertex of mesh.
- *
- */
 int MMG3D_Get_scalarSol(MMG5_pSol met, double* s) {
 
   int ddebug = 0;
@@ -988,18 +710,6 @@ int MMG3D_Get_scalarSol(MMG5_pSol met, double* s) {
   return(1);
 }
 
-/**
- * \param met pointer toward the sol structure.
- * \param vx x value of the vectorial solution.
- * \param vy y value of the vectorial solution.
- * \param vz z value of the vectorial solution.
- * \param pos position of the solution in the mesh (begin to 1).
- * \return 0 if failed, 1 otherwise.
- *
- * Set vectorial value \f$(v_x,v_y,v_z)\f$ at position \a pos in solution
- * structure.
- *
- */
 int MMG3D_Set_vectorSol(MMG5_pSol met, double vx,double vy, double vz, int pos) {
 
   if ( !met->np ) {
@@ -1034,16 +744,6 @@ int MMG3D_Set_vectorSol(MMG5_pSol met, double vx,double vy, double vz, int pos) 
   return(1);
 }
 
-/**
- * \param met pointer toward the sol structure.
- * \param vx x value of the vectorial solution.
- * \param vy y value of the vectorial solution.
- * \param vz z value of the vectorial solution.
- * \return 0 if failed, 1 otherwise.
- *
- * Get vectorial solution \f$(v_x,v_y,vz)\f$ of next vertex of mesh.
- *
- */
 int MMG3D_Get_vectorSol(MMG5_pSol met, double* vx, double* vy, double* vz) {
 
   int ddebug = 0;
@@ -1074,21 +774,7 @@ int MMG3D_Get_vectorSol(MMG5_pSol met, double* vx, double* vy, double* vz) {
 
   return(1);
 }
-/**
- * \param met pointer toward the sol structure.
- * \param m11 value of the tensorial solution at position (1,1) in the tensor.
- * \param m12 value of the tensorial solution at position (1,2) in the tensor.
- * \param m13 value of the tensorial solution at position (1,3) in the tensor.
- * \param m22 value of the tensorial solution at position (2,2) in the tensor.
- * \param m23 value of the tensorial solution at position (2,3) in the tensor.
- * \param m33 value of the tensorial solution at position (3,3) in the tensor.
- * \param pos position of the solution in the mesh (begin to 1).
- * \return 0 if failed, 1 otherwise.
- *
- * Set tensorial values at position \a pos in solution
- * structure.
- *
- */
+
 int MMG3D_Set_tensorSol(MMG5_pSol met, double m11,double m12, double m13,
                        double m22,double m23, double m33, int pos) {
 
@@ -1127,19 +813,6 @@ int MMG3D_Set_tensorSol(MMG5_pSol met, double m11,double m12, double m13,
   return(1);
 }
 
-/**
- * \param met pointer toward the sol structure.
- * \param m11 pointer toward the position (1,1) in the solution tensor.
- * \param m12 pointer toward the position (1,2) in the solution tensor.
- * \param m13 pointer toward the position (1,3) in the solution tensor.
- * \param m22 pointer toward the position (2,2) in the solution tensor.
- * \param m23 pointer toward the position (2,3) in the solution tensor.
- * \param m33 pointer toward the position (3,3) in the solution tensor.
- * \return 0 if failed, 1 otherwise.
- *
- * Get tensorial solution of next vertex of mesh.
- *
- */
 int MMG3D_Get_tensorSol(MMG5_pSol met, double *m11,double *m12, double *m13,
                        double *m22,double *m23, double *m33) {
 
@@ -1175,13 +848,6 @@ int MMG3D_Get_tensorSol(MMG5_pSol met, double *m11,double *m12, double *m13,
   return(1);
 }
 
-/**
- * \param mesh pointer toward the mesh structure.
- *
- * To mark as ended a mesh given without using the API functions
- * (for example, mesh given by mesh->point[i] = 0 ...). Not recommanded.
- *
- */
 void MMG3D_Set_handGivenMesh(MMG5_pMesh mesh) {
   int k, aux;
 
@@ -1198,15 +864,6 @@ void MMG3D_Set_handGivenMesh(MMG5_pMesh mesh) {
   return;
 }
 
-/**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the sol structure.
- * \return 0 if failed, 1 otherwise.
- *
- * Check if the number of given entities match with mesh and sol size
- * (not mandatory) and check mesh datas.
- *
- */
 int MMG3D_Chk_meshData(MMG5_pMesh mesh,MMG5_pSol met) {
 
   if ( (mesh->npi != mesh->np) || (mesh->nei != mesh->ne) ) {
@@ -1250,13 +907,6 @@ int MMG3D_Chk_meshData(MMG5_pMesh mesh,MMG5_pSol met) {
   return(1);
 }
 
-/**
- * \param mesh pointer toward the mesh structure.
- * \return 0 if failed, 1 otherwise.
- *
- * Skip the \a MG_ISO references in an input mesh.
- *
- */
 static inline
 int _MMG3D_skipIso(MMG5_pMesh mesh) {
   MMG5_pTria  ptt,ptt1;
@@ -1330,16 +980,6 @@ int _MMG3D_skipIso(MMG5_pMesh mesh) {
   return(1);
 }
 
-/**
- * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the sol structure.
- * \param iparam integer parameter to set (see \a MMG3D_Param structure).
- * \param val value for the parameter.
- * \return 0 if failed, 1 otherwise.
- *
- * Set integer parameter \a iparam at value \a val.
- *
- */
 int MMG3D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam,int val){
   int k;
 
@@ -1455,14 +1095,6 @@ int MMG3D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam,int val){
   return(1);
 }
 
-/**
- * \param mesh pointer toward the mesh structure.
- * \param iparam integer parameter to set (see \a MMG3D_Param structure).
- * \return The value of integer parameter.
- *
- * Get the value of integer parameter \a iparam.
- *
- */
 int MMG3D_Get_iparameter(MMG5_pMesh mesh, int iparam) {
 
   switch ( iparam ) {
@@ -1521,16 +1153,6 @@ int MMG3D_Get_iparameter(MMG5_pMesh mesh, int iparam) {
   }
 }
 
-/**
- * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the sol structure.
- * \param dparam double parameter to set (see \a MMG3D_Param structure).
- * \param val value of the parameter.
- * \return 0 if failed, 1 otherwise.
- *
- * Set double parameter \a dparam at value \a val.
- *
- */
 int MMG3D_Set_dparameter(MMG5_pMesh mesh, MMG5_pSol sol, int dparam, double val){
 
   switch ( dparam ) {
@@ -1571,20 +1193,6 @@ int MMG3D_Set_dparameter(MMG5_pMesh mesh, MMG5_pSol sol, int dparam, double val)
   return(1);
 }
 
-/**
- * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the sol structure.
- * \param typ type of entity (triangle, edge,...).
- * \param ref reference of the entity.
- * \param hmin minimal edge size.
- * \param hmax maximal edge size.
- * \param hausd value of the Hausdorff number.
- * \return 0 if failed, 1 otherwise.
- *
- * Set local parameters: set the hausdorff value at \a val for all
- * elements of type \a typ and reference \a ref.
- *
- */
 int MMG3D_Set_localParameter(MMG5_pMesh mesh,MMG5_pSol sol, int typ, int ref,
                              double hmin,double hmax,double hausd){
   int k;
@@ -1648,24 +1256,6 @@ int MMG3D_Set_localParameter(MMG5_pMesh mesh,MMG5_pSol sol, int typ, int ref,
   return(1);
 }
 
-/**
- * \param starter dummy argument used to initialize the variadic argument list.
- * \param ... variadic arguments that depend to the library function that you
- * have call. For the MMG3D_mmg3dlib or the MMG3D_mmg3dls functions, you need to
- * call the \a MMG3D_Free_all function with the following arguments :
- * MMG3D_Free_all(MMG5_ARG_start,MMG5_ARG_ppMesh, your_mesh, MMG5_ARG_ppMet,
- * your_metric,MMG5_ARG_end). For the MMG3D_mmg3dmov function, you must call :
- * MMG3D_Free_all(MMG5_ARG_start,MMG5_ARG_ppMesh, your_mesh, MMG5_ARG_ppMet,
- * your_metric,MMG5_ARG_ppDisp, your_displacement,MMG5_ARG_end). Here,
- * \a your_mesh is a pointer toward \a MMG5_pMesh, \a your_metric a pointer
- * toward \a MMG5_pSol and \a your_displacement a pointer toward \a MMG5_pSol.
- *
- * Deallocations before return.
- *
- * \remark we pass the structures by reference in order to have argument
- * compatibility between the library call from a Fortran code and a C code.
- *
- */
 void MMG3D_Free_all(enum MMG5_arg starter,...)
 {
 
@@ -1680,24 +1270,6 @@ void MMG3D_Free_all(enum MMG5_arg starter,...)
   return;
 }
 
-/**
- * \param starter dummy argument used to initialize the variadic argument list.
- * \param ... variadic arguments that depend to the library function that you
- * have call. For the MMG3D_mmg3dlib or the MMG3D_mmg3dls functions, you need to
- * call the \a MMG3D_Free_structures function with the following arguments :
- * MMG3D_Free_structures(MMG5_ARG_start,MMG5_ARG_ppMesh, your_mesh, MMG5_ARG_ppMet,
- * your_metric,MMG5_ARG_end). For the MMG3D_mmg3dmov function, you must call :
- * MMG3D_Free_structures(MMG5_ARG_start,MMG5_ARG_ppMesh, your_mesh, MMG5_ARG_ppMet,
- * your_metric,MMG5_ARG_ppDisp, your_displacement,MMG5_ARG_end). Here,
- * \a your_mesh is a pointer toward \a MMG5_pMesh, \a your_metric a pointer
- * toward \a MMG5_pSol and \a your_displacement a pointer toward \a MMG5_pSol.
- *
- * Structure deallocations before return.
- *
- * \remark we pass the structures by reference in order to have argument
- * compatibility between the library call from a Fortran code and a C code.
- *
- */
 void MMG3D_Free_structures(enum MMG5_arg starter,...)
 {
 
@@ -1712,24 +1284,6 @@ void MMG3D_Free_structures(enum MMG5_arg starter,...)
   return;
 }
 
-/**
- * \param starter dummy argument used to initialize the variadic argument list.
- * \param ... variadic arguments that depend to the library function that you
- * have call. For the MMG3D_mmg3dlib or the MMG3D_mmg3dls functions, you need to
- * call the \a MMG3D_Free_names function with the following arguments :
- * MMG3D_Free_names(MMG5_ARG_start,MMG5_ARG_ppMesh, your_mesh, MMG5_ARG_ppMet,
- * your_metric,MMG5_ARG_end). For the MMG3D_mmg3dmov function, you must call :
- * MMG3D_Free_names(MMG5_ARG_start,MMG5_ARG_ppMesh, your_mesh, MMG5_ARG_ppMet,
- * your_metric,MMG5_ARG_ppDisp, your_displacement,MMG5_ARG_end). Here,
- * \a your_mesh is a pointer toward \a MMG5_pMesh, \a your_metric a pointer
- * toward \a MMG5_pSol and \a your_displacement a pointer toward \a MMG5_pSol.
- *
- * Structure deallocations before return.
- *
- * \remark we pass the structures by reference in order to have argument
- * compatibility between the library call from a Fortran code and a C code.
- *
- */
 void MMG3D_Free_names(enum MMG5_arg starter,...)
 {
 
@@ -1746,16 +1300,6 @@ void MMG3D_Free_names(enum MMG5_arg starter,...)
 
 /** Old API °°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°*/
 
-/**
- * \param mesh adress of a pointer toward a pointer toward the mesh structure.
- * \param sol adress of a pointer toward a sol structure (metric or level-set).
- * \param disp adress of a pointer toward a sol structure (displacement for
- * the lagrangian mode).
- *
- * Allocate the mesh and solution structures and initialize it to
- * their default values.
- *
- */
 void MMG5_Init_mesh(MMG5_pMesh *mesh, MMG5_pSol *sol, MMG5_pSol *disp ) {
   printf("  ## MMG5_Init_mesh: MMG5_ API is deprecated (replaced by the"
          " MMG3D_ one) and will be removed soon\n." );
@@ -1767,12 +1311,6 @@ void MMG5_Init_mesh(MMG5_pMesh *mesh, MMG5_pSol *sol, MMG5_pSol *disp ) {
   return;
 }
 
-/**
- * \param mesh pointer toward the mesh structure.
- *
- * Initialization of the input parameters (stored in the Info structure).
- *
- */
 void MMG5_Init_parameters(MMG5_pMesh mesh) {
   printf("  ##  MMG5_Init_parameters:"
          "MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
@@ -1782,17 +1320,6 @@ void MMG5_Init_parameters(MMG5_pMesh mesh) {
   return;
 }
 
-/**
- * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the sol structure.
- * \param typEntity type of solutions entities (vertices, triangles...).
- * \param np number of solutions.
- * \param typSol type of solution (scalar, vectorial...).
- * \return 0 if failed, 1 otherwise.
- *
- * Set the solution number, dimension and type.
- *
- */
 int MMG5_Set_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int typEntity, int np, int typSol) {
   printf("  ## MMG5_Set_solSize:"
          "MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
@@ -1801,19 +1328,6 @@ int MMG5_Set_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int typEntity, int np, int 
   return(MMG3D_Set_solSize(mesh,sol,typEntity,np,typSol));
 }
 
-/**
- * \param mesh pointer toward the mesh structure.
- * \param np number of vertices.
- * \param ne number of elements (tetrahedra).
- * \param nt number of triangles.
- * \param na number of edges.
- * \return 0 if failed, 1 otherwise.
- *
- * Set the number of vertices, tetrahedra, triangles and edges of the
- * mesh and allocate the associated tables. If call twice, reset the
- * whole mesh to realloc it at the new size
- *
- */
 int MMG5_Set_meshSize(MMG5_pMesh mesh, int np, int ne, int nt, int na) {
   printf("  ## MMG5_Set_meshSize:"
          "MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
@@ -1822,18 +1336,6 @@ int MMG5_Set_meshSize(MMG5_pMesh mesh, int np, int ne, int nt, int na) {
   return(MMG3D_Set_meshSize(mesh,np,ne,nt,na));
 }
 
-
-/**
- * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the sol structure.
- * \param typEntity pointer toward the type of entities to which solutions are applied.
- * \param np pointer toward the number of solutions.
- * \param typSol pointer toward the type of the solutions (scalar, vectorial...)
- * \return 1.
- *
- * Get the solution number, dimension and type.
- *
- */
 int MMG5_Get_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int* typEntity, int* np, int* typSol) {
   printf("  ## MMG5_Get_solSize:"
          "MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
@@ -1842,17 +1344,6 @@ int MMG5_Get_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int* typEntity, int* np, in
   return(MMG3D_Get_solSize(mesh,sol,typEntity,np,typSol));
 }
 
-/**
- * \param mesh pointer toward the mesh structure.
- * \param np pointer toward the number of vertices.
- * \param ne pointer toward the number of elements (tetrahedra).
- * \param nt pointer toward the number of triangles.
- * \param na pointer toward the number of edges.
- * \return 1.
- *
- * Get the number of vertices, tetrahedra, triangles and edges of the mesh.
- *
- */
 int MMG5_Get_meshSize(MMG5_pMesh mesh, int* np, int* ne, int* nt, int* na) {
   printf("  ## MMG5_Get_meshSize:"
          "MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
@@ -1861,19 +1352,6 @@ int MMG5_Get_meshSize(MMG5_pMesh mesh, int* np, int* ne, int* nt, int* na) {
   return(MMG3D_Get_meshSize(mesh,np,ne,nt,na));
 }
 
-/**
- * \param mesh pointer toward the mesh structure.
- * \param c0 coordinate of the point along the first dimension.
- * \param c1 coordinate of the point along the second dimension.
- * \param c2 coordinate of the point along the third dimension.
- * \param ref point reference.
- * \param pos position of the point in the mesh.
- * \return 1.
- *
- * Set vertex of coordinates \a c0, \a c1,\a c2 and reference \a ref
- * at position \a pos in mesh structure
- *
- */
 int MMG5_Set_vertex(MMG5_pMesh mesh, double c0, double c1, double c2, int ref, int pos) {
   printf("  ## MMG5_Set_vertex:"
          "MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
@@ -1882,20 +1360,6 @@ int MMG5_Set_vertex(MMG5_pMesh mesh, double c0, double c1, double c2, int ref, i
   return(MMG3D_Set_vertex(mesh,c0,c1,c2,ref,pos));
 }
 
-/**
- * \param mesh pointer toward the mesh structure.
- * \param c0 pointer toward the coordinate of the point along the first dimension.
- * \param c1 pointer toward the coordinate of the point along the second dimension.
- * \param c2 pointer toward the coordinate of the point along the third dimension.
- * \param ref poiter to the point reference.
- * \param isCorner pointer toward the flag saying if point is corner.
- * \param isRequired pointer toward the flag saying if point is required.
- * \return 1.
- *
- * Get coordinates \a c0, \a c1,\a c2 and reference \a ref of next
- * vertex of mesh.
- *
- */
 int MMG5_Get_vertex(MMG5_pMesh mesh, double* c0, double* c1, double* c2, int* ref,
                     int* isCorner, int* isRequired) {
   printf("  ## MMG5_Get_vertex:"
@@ -1905,20 +1369,6 @@ int MMG5_Get_vertex(MMG5_pMesh mesh, double* c0, double* c1, double* c2, int* re
   return(MMG3D_Get_vertex(mesh,c0,c1,c2,ref,isCorner,isRequired));
 }
 
-/**
- * \param mesh pointer toward the mesh structure.
- * \param v0 first vertex of tetrahedron.
- * \param v1 second vertex of tetrahedron.
- * \param v2 third vertex of tetrahedron.
- * \param v3 fourth vertex of tetrahedron.
- * \param ref tetrahedron reference (must be positive).
- * \param pos tetrahedron position in the mesh.
- * \return 0 if failed, 1 otherwise.
- *
- * Set tetrahedra of vertices \a v0, \a v1,\a v2,\a v3 and reference
- * \a ref at position \a pos in mesh structure.
- *
- */
 int MMG5_Set_tetrahedron(MMG5_pMesh mesh, int v0, int v1, int v2, int v3, int ref, int pos) {
   printf("  ## MMG5_Set_tetrahedron:"
          "MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
@@ -1927,20 +1377,6 @@ int MMG5_Set_tetrahedron(MMG5_pMesh mesh, int v0, int v1, int v2, int v3, int re
   return(MMG3D_Set_tetrahedron(mesh,v0,v1,v2,v3,ref,pos));
 }
 
-/**
- * \param mesh pointer toward the mesh structure.
- * \param v0 pointer toward the first vertex of tetrahedron.
- * \param v1 pointer toward the second vertex of tetrahedron.
- * \param v2 pointer toward the third vertex of tetrahedron.
- * \param v3 pointer toward the fourth vertex of tetrahedron.
- * \param ref pointer toward the tetrahedron reference.
- * \param isRequired pointer toward the flag saying if tetrahedron is required.
- * \return 0 if failed, 1 otherwise.
- *
- * Get vertices \a v0, \a v1, \a v2, \a v3 and reference \a ref of
- * next tetra of mesh.
- *
- */
 int MMG5_Get_tetrahedron(MMG5_pMesh mesh, int* v0, int* v1, int* v2, int* v3,
                          int* ref, int* isRequired) {
   printf("  ## MMG5_Get_tetrahedron:"
@@ -1950,19 +1386,6 @@ int MMG5_Get_tetrahedron(MMG5_pMesh mesh, int* v0, int* v1, int* v2, int* v3,
   return(MMG3D_Get_tetrahedron(mesh,v0,v1,v2,v3,ref,isRequired));
 }
 
-/**
- * \param mesh pointer toward the mesh structure.
- * \param v0 first vertex of triangle.
- * \param v1 second vertex of triangle.
- * \param v2 third vertex of triangle.
- * \param ref triangle reference.
- * \param pos triangle position in the mesh.
- * \return 0 if failed, 1 otherwise.
- *
- * Set triangle of vertices \a v0, \a v1, \a v2 and reference \a ref
- * at position \a pos in mesh structure.
- *
- */
 int MMG5_Set_triangle(MMG5_pMesh mesh, int v0, int v1, int v2, int ref,int pos) {
   printf("  ## MMG5_Set_triangle:"
          "MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
@@ -1971,19 +1394,6 @@ int MMG5_Set_triangle(MMG5_pMesh mesh, int v0, int v1, int v2, int ref,int pos) 
   return(MMG3D_Set_triangle(mesh,v0,v1,v2,ref,pos));
 }
 
-/**
- * \param mesh pointer toward the mesh structure.
- * \param v0 pointer toward the first vertex of triangle.
- * \param v1 pointer toward the second vertex of triangle.
- * \param v2 pointer toward the third vertex of triangle.
- * \param ref pointer toward the triangle reference.
- * \param isRequired pointer toward the flag saying if triangle is required.
- * \return 0 if failed, 1 otherwise.
- *
- * Get vertices \a v0,\a v1,\a v2 and reference \a ref of next
- * triangle of mesh.
- *
- */
 int MMG5_Get_triangle(MMG5_pMesh mesh, int* v0, int* v1, int* v2, int* ref
                       ,int* isRequired) {
   printf("  ## MMG5_Get_triangle: "
@@ -1993,18 +1403,6 @@ int MMG5_Get_triangle(MMG5_pMesh mesh, int* v0, int* v1, int* v2, int* ref
   return(MMG3D_Get_triangle(mesh,v0,v1,v2,ref,isRequired));
 }
 
-/**
- * \param mesh pointer toward the mesh structure.
- * \param v0 first extremity of the edge.
- * \param v1 second extremity of the edge.
- * \param ref edge reference.
- * \param pos edge position in the mesh.
- * \return 0 if failed, 1 otherwise.
- *
- * Set edge of extremities \a v0, \a v1 and reference \a ref at
- * position \a pos in mesh structure
- *
- */
 int MMG5_Set_edge(MMG5_pMesh mesh, int v0, int v1, int ref, int pos) {
   printf("  ## MMG5_Set_edge:"
          " MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
@@ -2013,18 +1411,6 @@ int MMG5_Set_edge(MMG5_pMesh mesh, int v0, int v1, int ref, int pos) {
   return(MMG3D_Set_edge(mesh,v0,v1,ref,pos));
 }
 
-/**
- * \param mesh pointer toward the mesh structure.
- * \param e0 pointer toward the first extremity of the edge.
- * \param e1 pointer toward the second  extremity of the edge.
- * \param ref pointer toward the edge reference.
- * \param isRidge pointer toward the flag saying if the edge is ridge.
- * \param isRequired pointer toward the flag saying if the edge is required.
- * \return 0 if failed, 1 otherwise.
- *
- * Get extremities \a e0, \a e1 and reference \a ref of next edge of mesh.
- *
- */
 int MMG5_Get_edge(MMG5_pMesh mesh, int* e0, int* e1, int* ref
                   ,int* isRidge, int* isRequired) {
   printf("  ## MMG5_Get_edge:"
@@ -2034,14 +1420,6 @@ int MMG5_Get_edge(MMG5_pMesh mesh, int* e0, int* e1, int* ref
   return(MMG3D_Get_edge(mesh,e0,e1,ref,isRidge,isRequired));
 }
 
-/**
- * \param mesh pointer toward the mesh structure.
- * \param k vertex index.
- * \return 1.
- *
- * Set corner at point \a k.
- *
- */
 int MMG5_Set_corner(MMG5_pMesh mesh, int k) {
   printf("  ## MMG5_Set_corner: "
          "MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
@@ -2050,14 +1428,6 @@ int MMG5_Set_corner(MMG5_pMesh mesh, int k) {
   return(MMG3D_Set_corner(mesh,k));
 }
 
-/**
- * \param mesh pointer toward the mesh structure.
- * \param k vertex index.
- * \return 1.
- *
- * Set point \a k as required.
- *
- */
 int MMG5_Set_requiredVertex(MMG5_pMesh mesh, int k) {
   printf("  ## MMG5_Set_requiredVertex:"
          " MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
@@ -2066,14 +1436,6 @@ int MMG5_Set_requiredVertex(MMG5_pMesh mesh, int k) {
   return(MMG3D_Set_requiredVertex(mesh,k));
 }
 
-/**
- * \param mesh pointer toward the mesh structure.
- * \param k element index.
- * \return 1.
- *
- * Set element \a k as required.
- *
- */
 int MMG5_Set_requiredTetrahedron(MMG5_pMesh mesh, int k) {
   printf("  ## MMG5_Set_requiredTetrahedron: "
          "MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
@@ -2082,14 +1444,6 @@ int MMG5_Set_requiredTetrahedron(MMG5_pMesh mesh, int k) {
   return(MMG3D_Set_requiredTetrahedron(mesh,k));
 }
 
-/**
- * \param mesh pointer toward the mesh structure.
- * \param k triangle index.
- * \return 1.
- *
- * Set triangle \a k as required.
- *
- */
 int MMG5_Set_requiredTriangle(MMG5_pMesh mesh, int k) {
   printf("  ## MMG5_Set_requiredTriangle: "
          "MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
@@ -2098,14 +1452,6 @@ int MMG5_Set_requiredTriangle(MMG5_pMesh mesh, int k) {
   return(MMG3D_Set_requiredTriangle(mesh,k));
 }
 
-/**
- * \param mesh pointer toward the mesh structure.
- * \param k edge index.
- * \return 1.
- *
- * Set ridge at edge \a k.
- *
- */
 int MMG5_Set_ridge(MMG5_pMesh mesh, int k) {
   printf("  ## MMG5_Set_ridge: "
          "MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
@@ -2114,14 +1460,6 @@ int MMG5_Set_ridge(MMG5_pMesh mesh, int k) {
   return(MMG3D_Set_ridge(mesh,k));
 }
 
-/**
- * \param mesh pointer toward the mesh structure.
- * \param k edge index.
- * \return 1.
- *
- * Set edge \a k as required.
- *
- */
 int MMG5_Set_requiredEdge(MMG5_pMesh mesh, int k) {
   printf("  ## MMG5_Set_requiredEdge: "
          "MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
@@ -2130,15 +1468,6 @@ int MMG5_Set_requiredEdge(MMG5_pMesh mesh, int k) {
   return(MMG3D_Set_requiredEdge(mesh,k));
 }
 
-/**
- * \param met pointer toward the sol structure.
- * \param s solution scalar value.
- * \param pos position of the solution in the mesh (begin to 1).
- * \return 0 if failed, 1 otherwise.
- *
- * Set scalar value \a s at position \a pos in solution structure
- *
- */
 int MMG5_Set_scalarSol(MMG5_pSol met, double s, int pos) {
   printf("  ## MMG5_Set_scalarSol: "
          "MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
@@ -2147,14 +1476,6 @@ int MMG5_Set_scalarSol(MMG5_pSol met, double s, int pos) {
   return(MMG3D_Set_scalarSol(met,s,pos));
 }
 
-/**
- * \param met pointer toward the sol structure.
- * \param s pointer toward the scalar solution value.
- * \return 0 if failed, 1 otherwise.
- *
- * Get solution \a s of next vertex of mesh.
- *
- */
 int MMG5_Get_scalarSol(MMG5_pSol met, double* s) {
   printf("  ## MMG5_Get_scalarSol: "
          "MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
@@ -2163,18 +1484,6 @@ int MMG5_Get_scalarSol(MMG5_pSol met, double* s) {
   return(MMG3D_Get_scalarSol(met,s));
 }
 
-/**
- * \param met pointer toward the sol structure.
- * \param vx x value of the vectorial solution.
- * \param vy y value of the vectorial solution.
- * \param vz z value of the vectorial solution.
- * \param pos position of the solution in the mesh (begin to 1).
- * \return 0 if failed, 1 otherwise.
- *
- * Set vectorial value \f$(v_x,v_y,v_z)\f$ at position \a pos in solution
- * structure.
- *
- */
 int MMG5_Set_vectorSol(MMG5_pSol met, double vx,double vy, double vz, int pos) {
   printf("  ## MMG5_Set_vectorSol: "
          "MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
@@ -2183,16 +1492,6 @@ int MMG5_Set_vectorSol(MMG5_pSol met, double vx,double vy, double vz, int pos) {
   return(MMG3D_Set_vectorSol(met,vx,vy,vz,pos));
 }
 
-/**
- * \param met pointer toward the sol structure.
- * \param vx x value of the vectorial solution.
- * \param vy y value of the vectorial solution.
- * \param vz z value of the vectorial solution.
- * \return 0 if failed, 1 otherwise.
- *
- * Get vectorial solution \f$(v_x,v_y,vz)\f$ of next vertex of mesh.
- *
- */
 int MMG5_Get_vectorSol(MMG5_pSol met, double* vx, double* vy, double* vz) {
   printf("  ## MMG5_Get_vectorSol: "
          "MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
@@ -2200,21 +1499,6 @@ int MMG5_Get_vectorSol(MMG5_pSol met, double* vx, double* vy, double* vz) {
 
   return(MMG3D_Get_vectorSol(met,vx,vy,vz));
 }
-/**
- * \param met pointer toward the sol structure.
- * \param m11 value of the tensorial solution at position (1,1) in the tensor.
- * \param m12 value of the tensorial solution at position (1,2) in the tensor.
- * \param m13 value of the tensorial solution at position (1,3) in the tensor.
- * \param m22 value of the tensorial solution at position (2,2) in the tensor.
- * \param m23 value of the tensorial solution at position (2,3) in the tensor.
- * \param m33 value of the tensorial solution at position (3,3) in the tensor.
- * \param pos position of the solution in the mesh (begin to 1).
- * \return 0 if failed, 1 otherwise.
- *
- * Set tensorial values at position \a pos in solution
- * structure.
- *
- */
 int MMG5_Set_tensorSol(MMG5_pSol met, double m11,double m12, double m13,
                        double m22,double m23, double m33, int pos) {
   printf("  ## MMG5_Set_tensorSol: "
@@ -2224,19 +1508,6 @@ int MMG5_Set_tensorSol(MMG5_pSol met, double m11,double m12, double m13,
   return(MMG3D_Set_tensorSol(met,m11,m12,m13,m22,m23,m33,pos));
 }
 
-/**
- * \param met pointer toward the sol structure.
- * \param m11 pointer toward the position (1,1) in the solution tensor.
- * \param m12 pointer toward the position (1,2) in the solution tensor.
- * \param m13 pointer toward the position (1,3) in the solution tensor.
- * \param m22 pointer toward the position (2,2) in the solution tensor.
- * \param m23 pointer toward the position (2,3) in the solution tensor.
- * \param m33 pointer toward the position (3,3) in the solution tensor.
- * \return 0 if failed, 1 otherwise.
- *
- * Get tensorial solution of next vertex of mesh.
- *
- */
 int MMG5_Get_tensorSol(MMG5_pSol met, double *m11,double *m12, double *m13,
                        double *m22,double *m23, double *m33) {
   printf("  ## MMG5_Get_tensorSol: "
@@ -2246,13 +1517,6 @@ int MMG5_Get_tensorSol(MMG5_pSol met, double *m11,double *m12, double *m13,
   return(MMG3D_Get_tensorSol(met,m11,m12,m13,m22,m23,m33));
 }
 
-/**
- * \param mesh pointer toward the mesh structure.
- *
- * To mark as ended a mesh given without using the API functions
- * (for example, mesh given by mesh->point[i] = 0 ...). Not recommanded.
- *
- */
 void MMG5_Set_handGivenMesh(MMG5_pMesh mesh) {
   printf("  ## MMG5_Set_handGivenMesh: "
          "MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
@@ -2262,15 +1526,6 @@ void MMG5_Set_handGivenMesh(MMG5_pMesh mesh) {
   return;
 }
 
-/**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the sol structure.
- * \return 0 if failed, 1 otherwise.
- *
- * Check if the number of given entities match with mesh and sol size
- * (not mandatory) and check mesh datas.
- *
- */
 int MMG5_Chk_meshData(MMG5_pMesh mesh,MMG5_pSol met) {
   printf("  ## MMG5_Chk_meshData: "
          "MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
@@ -2279,16 +1534,6 @@ int MMG5_Chk_meshData(MMG5_pMesh mesh,MMG5_pSol met) {
   return(MMG3D_Chk_meshData(mesh,met));
 }
 
-/**
- * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the sol structure.
- * \param iparam integer parameter to set (see \a MMG5_Param structure).
- * \param val value for the parameter.
- * \return 0 if failed, 1 otherwise.
- *
- * Set integer parameter \a iparam at value \a val.
- *
- */
 int MMG5_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
   printf("  ## MMG5_Set_iparameter: "
          "MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
@@ -2297,14 +1542,6 @@ int MMG5_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
   return(MMG3D_Set_iparameter(mesh,sol,iparam,val));
 }
 
-/**
- * \param mesh pointer toward the mesh structure.
- * \param iparam integer parameter to set (see \a MMG5_Param structure).
- * \return The value of integer parameter.
- *
- * Get the value of integer parameter \a iparam.
- *
- */
 int MMG5_Get_iparameter(MMG5_pMesh mesh, int iparam) {
   printf("  ## MMG5_Get_iparameter: "
          "MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
@@ -2313,16 +1550,6 @@ int MMG5_Get_iparameter(MMG5_pMesh mesh, int iparam) {
   return(MMG3D_Get_iparameter(mesh,iparam));
 }
 
-/**
- * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the sol structure.
- * \param dparam double parameter to set (see \a MMG5_Param structure).
- * \param val value of the parameter.
- * \return 0 if failed, 1 otherwise.
- *
- * Set double parameter \a dparam at value \a val.
- *
- */
 int MMG5_Set_dparameter(MMG5_pMesh mesh, MMG5_pSol sol, int dparam, double val){
   printf("  ## MMG5_Set_dparameter: "
          "MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
@@ -2331,18 +1558,6 @@ int MMG5_Set_dparameter(MMG5_pMesh mesh, MMG5_pSol sol, int dparam, double val){
   return(MMG3D_Set_dparameter(mesh,sol,dparam,val));
 }
 
-/**
- * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the sol structure.
- * \param typ type of entity (triangle, edge,...).
- * \param ref reference of the entity.
- * \param val value of the Hausdorff number.
- * \return 0 if failed, 1 otherwise.
- *
- * Set local parameters: set the hausdorff value at \a val for all
- * elements of type \a typ and reference \a ref.
- *
- */
 int MMG5_Set_localParameter(MMG5_pMesh mesh,MMG5_pSol sol, int typ, int ref, double val){
   printf("  ##  MMG5_Set_localParameter "
          "MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
@@ -2351,14 +1566,6 @@ int MMG5_Set_localParameter(MMG5_pMesh mesh,MMG5_pSol sol, int typ, int ref, dou
   return(MMG3D_Set_localParameter(mesh,sol,typ,ref,mesh->info.hmin,mesh->info.hmax,val));
 }
 
-/**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward a sol structure (metric or solution).
- * \param disp pointer toward a sol structure (displacement).
- *
- * Structure deallocations before return.
- *
- */
 void MMG5_Free_structures(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp
   ){
   printf("  ## MMG5_Free_structures: "
@@ -2371,14 +1578,6 @@ void MMG5_Free_structures(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp
                         MMG5_ARG_end);
 }
 
-/**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward a sol structure (metric or solution).
- * \param disp pointer toward a sol structure (displacement).
- *
- * Structure deallocations before return.
- *
- */
 void MMG5_Free_names(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp){
   printf("  ## MMG5_Free_names: "
          "MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
@@ -2391,14 +1590,6 @@ void MMG5_Free_names(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp){
 
 }
 
-/**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the sol structure (metric or solution).
- * \param disp pointer toward a sol structure (displacement).
- *
- * Deallocations before return.
- *
- */
 void MMG5_Free_all(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp)
 {
   printf("  ## MMG5_Free_all: "

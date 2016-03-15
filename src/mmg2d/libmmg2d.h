@@ -84,6 +84,8 @@ enum MMG2D_Param {
  * MMG5_ARG_ppMet, your_metric,MMG5_ARG_end). Here, \a your_mesh is a pointer
  * toward \a MMG5_pMesh and \a your_metric a pointer toward \a MMG5_pSol.
  *
+ * \remark No fortran interface to allow variadic arguments.
+ *
  * MMG structures allocation and initialization.
  *
  */
@@ -95,12 +97,22 @@ void MMG2D_Init_mesh(enum MMG5_arg starter,...);
  *
  * Initialize file names to their default values.
  *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMG2D_INIT_FILENAMES(mesh,sol)\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh,sol\n
+ * >   END SUBROUTINE\n
+ *
  */
 void  MMG2D_Init_fileNames(MMG5_pMesh mesh, MMG5_pSol sol);
 /**
  * \param mesh pointer toward the mesh structure.
  *
  * Initialization of the input parameters (stored in the Info structure).
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMG2D_INIT_PARAMETERS(mesh)\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
+ * >   END SUBROUTINE\n
  *
  */
 void  MMG2D_Init_parameters(MMG5_pMesh mesh);
@@ -112,6 +124,14 @@ void  MMG2D_Init_parameters(MMG5_pMesh mesh);
  * \return 1.
  *
  * Set the name of input mesh.
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMG2D_SET_INPUTMESHNAME(mesh,meshin,strlen,retval)\n
+ * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh\n
+ * >     CHARACTER(LEN=*), INTENT(IN)   :: meshin\n
+ * >     INTEGER, INTENT(IN)            :: strlen\n
+ * >     INTEGER, INTENT(OUT)           :: retval\n
+ * >   END SUBROUTINE\n
  *
  */
 int  MMG2D_Set_inputMeshName(MMG5_pMesh mesh, char* meshin);

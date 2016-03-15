@@ -119,6 +119,8 @@
 !  * MMG5_ARG_ppMet, your_metric,MMG5_ARG_end). Here, \a your_mesh is a pointer
 !  * toward \a MMG5_pMesh and \a your_metric a pointer toward \a MMG5_pSol.
 !  *
+!  * \remark No fortran interface to allow variadic arguments.
+!  *
 !  * MMG structures allocation and initialization.
 !  *
 !  */
@@ -131,6 +133,13 @@
 !  *
 !  * Initialize file names to their default values.
 !  *
+!  * \remark Fortran interface:
+INTERFACE
+  SUBROUTINE MMG2D_INIT_FILENAMES(mesh,sol)
+    MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh,sol
+  END SUBROUTINE
+END INTERFACE
+!  *
 !  */
 
 ! void  MMG2D_Init_fileNames(MMG5_pMesh mesh, MMG5_pSol sol);
@@ -138,6 +147,13 @@
 !  * \param mesh pointer toward the mesh structure.
 !  *
 !  * Initialization of the input parameters (stored in the Info structure).
+!  *
+!  * \remark Fortran interface:
+INTERFACE
+  SUBROUTINE MMG2D_INIT_PARAMETERS(mesh)
+    MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh
+  END SUBROUTINE
+END INTERFACE
 !  *
 !  */
 
@@ -150,6 +166,16 @@
 !  * \return 1.
 !  *
 !  * Set the name of input mesh.
+!  *
+!  * \remark Fortran interface:
+INTERFACE
+  SUBROUTINE MMG2D_SET_INPUTMESHNAME(mesh,meshin,strlen,retval)
+    MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh
+    CHARACTER(LEN=*), INTENT(IN)   :: meshin
+    INTEGER, INTENT(IN)            :: strlen
+    INTEGER, INTENT(OUT)           :: retval
+  END SUBROUTINE
+END INTERFACE
 !  *
 !  */
 
