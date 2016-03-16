@@ -112,6 +112,8 @@ enum MMG3D_Param {
  *
  * MMG structures allocation and initialization.
  *
+ * \remark No fortran interface to allow variadic arguments.
+ *
  */
 void MMG3D_Init_mesh(enum MMG5_arg starter,...);
 /**
@@ -120,12 +122,22 @@ void MMG3D_Init_mesh(enum MMG5_arg starter,...);
  *
  * Initialize file names to their default values.
  *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMG2D_INIT_FILENAMES(mesh,sol)\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh,sol\n
+ * >   END SUBROUTINE\n
+ *
  */
 void  MMG3D_Init_fileNames(MMG5_pMesh mesh, MMG5_pSol sol);
 /**
  * \param mesh pointer toward the mesh structure.
  *
  * Initialization of the input parameters (stored in the Info structure).
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMG2D_INIT_PARAMETERS(mesh)\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
+ * >   END SUBROUTINE\n
  *
  */
 void  MMG3D_Init_parameters(MMG5_pMesh mesh);

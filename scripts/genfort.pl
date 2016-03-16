@@ -128,7 +128,9 @@ sub Convert {
     my $chaine;
     my $tabcount = 0;
     my $interfaceprinted = 0;
+    my $moduleprinted = 0;
     my $startdef = 0;
+    my $modulename;
 
     open (APIc, $fichier);
 
@@ -179,24 +181,28 @@ sub Convert {
                 {
                     if ($line =~ /\_MMG3DLIB\_H/ )
                     {
+                        $modulename = "LIBMMG3D"
                         #print "\#ifndef \_MMG3DLIBF\_H\n";
                         #print "\#define \_MMG3DLIBF\_H\n\n";
                         #$startdef = 1;
                     }
                     elsif ($line =~ /\_MMG2DLIB\_H/ )
                     {
+                        $modulename = "LIBMMG2D"
                         #print "\#ifndef \_MMG2DLIBF\_H\n";
                         #print "\#define \_MMG2DLIBF\_H\n\n";
                         #$startdef = 1;
                     }
                     elsif ($line =~ /\_MMGSLIB\_H/ )
                     {
+                        $modulename = "LIBMMGS"
                         #print "\#ifndef \_MMGSLIBF\_H\n";
                         #print "\#define \_MMGSLIBF\_H\n\n";
                         #$startdef = 1;
                     }
                    elsif ($line =~ /\_MMGLIB\_H/ )
                     {
+                        $modulename = "LIBMMG"
                         #print "\#ifndef \_MMGLIBF\_H\n";
                         #print "\#define \_MMGLIBF\_H\n\n";
                         #$startdef = 1;
@@ -286,11 +292,28 @@ sub Convert {
         {
             if ($line =~ /^[ \*]*> (.*)\\n/ )
             {
+                if ($moduleprinted == 0 ) {
+# even if we are in a comment area, we want to have the interface uncommented
+                    if ( $startcom == 1 ) {
+                        $chaine = sprintf("!  */\nMODULE %s\n",$modulename);
+                    }
+                    else {
+                        $chaine = sprintf("MODULE %s\n",$modulename);
+                    }
+                    printTab($chaine,1,0);
+                    $tabcount = 1;
+                    $moduleprinted = 1;
+                }
                 if ($interfaceprinted == 0)
                 {
-                    $chaine = "INTERFACE\n";
+                    if ( $startcom == 1 ) {
+                        $chaine = "!  */\nINTERFACE\n";
+                    }
+                    else {
+                        $chaine = "INTERFACE\n";
+                    }
                     printTab($chaine, $tabcount);
-                    $tabcount = 1;
+                    $tabcount = $tabcount+1;
                     $interfaceprinted = 1;
                 }
 
@@ -351,6 +374,12 @@ sub Convert {
 
 
     }
+    if ( $moduleprinted==1 ) {
+        $chaine = "END MODULE";
+        printTab($chaine,0,0);
+        $moduleprinted = 0;
+    }
+
     close APIc;
     if ($startdef == 1)
     {

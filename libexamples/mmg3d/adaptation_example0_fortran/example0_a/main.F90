@@ -12,6 +12,9 @@
 
 PROGRAM main
 
+  ! Allow to detect errors if a subroutine is called with wrong arguments at build time
+  USE LIBMMG3D
+
   IMPLICIT NONE
 
   MMG5_DATA_PTR_T    :: mmgMesh
