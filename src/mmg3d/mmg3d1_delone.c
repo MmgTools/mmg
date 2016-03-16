@@ -380,7 +380,7 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree,int ne,
         if ( p0->tag & MG_BDY )  continue;
         ilist = _MMG5_chkcol_int(mesh,met,k,i,j,list,2);
         if ( ilist > 0 ) {
-          
+#ifndef NDEBUG          
           double ver[3];
           int no;
           int verif;
@@ -391,6 +391,7 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree,int ne,
             ver[2] = mesh->point[no].c[2];
             verif = _MMG3D_verifOctreeRec(mesh, octree->q0, ver, no, 64);
           }
+#endif
           //~ _MMG3D_packMesh(mesh, met, NULL);
           //~ MMG3D_saveMesh(mesh,"truc2.mesh");
           ier = _MMG5_colver(mesh,met,list,ilist,i2,2);

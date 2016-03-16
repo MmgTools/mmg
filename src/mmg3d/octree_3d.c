@@ -41,8 +41,9 @@ int _MMG3D_verifOctreeRec(MMG5_pMesh mesh, _MMG3D_octree_s* q, double* ver, cons
       ver[i] -= ((double) (ver[i]>0.5))*0.5;
       ver[i] *= 2;
     }
-
-    _MMG3D_verifOctreeRec(mesh, &(q->branches[quadrant]), ver, no, nv);
+#ifndef NDEBUG
+   _MMG3D_verifOctreeRec(mesh, &(q->branches[quadrant]), ver, no, nv);
+#endif
   }
 }
 
@@ -670,7 +671,9 @@ void _MMG3D_addOctree(MMG5_pMesh mesh, _MMG3D_pOctree q, const int no)
   _MMG3D_addOctreeRec(mesh, q->q0, pt , no, q->nv);
   memcpy(pt, mesh->point[no].c ,dim*sizeof(double));
   #warning to be removed
+#ifndef NDEBUG
   _MMG3D_verifOctreeRec(mesh, q->q0,pt,no,q->nv);
+#endif
   _MMG5_SAFE_FREE(pt);
 }
 
