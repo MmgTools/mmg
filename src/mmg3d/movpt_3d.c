@@ -52,7 +52,7 @@
  * \remark we don't check if we break the hausdorff criterion.
  *
  */
-int _MMG5_movintpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,int improve) {
+int _MMG5_movintpt_iso(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree octree, int *list,int ilist,int improve) {
   MMG5_pTetra               pt,pt0;
   MMG5_pPoint               p0,p1,p2,p3,ppt0;
   double               vol,totvol;
@@ -130,6 +130,8 @@ int _MMG5_movintpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,int imp
   }
 
   /* update position */
+  _MMG3D_moveOctree(mesh, octree, pt->v[i0], ppt0->c, p0->c);
+  
   p0 = &mesh->point[pt->v[i0]];
   p0->c[0] = ppt0->c[0];
   p0->c[1] = ppt0->c[1];
@@ -137,6 +139,7 @@ int _MMG5_movintpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,int imp
   for (k=0; k<ilist; k++) {
     (&mesh->tetra[list[k]/4])->qual=callist[k];
   }
+  
 
   _MMG5_SAFE_FREE(callist);
   return(1);
@@ -157,7 +160,7 @@ int _MMG5_movintpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,int imp
  *
  * \remark the metric is not interpolated at the new position.
  */
-int _MMG5_movbdyregpt_iso(MMG5_pMesh mesh, MMG5_pSol met,int *listv,
+int _MMG5_movbdyregpt_iso(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree, int *listv,
                           int ilistv,int *lists,int ilists,
                           int improve) {
   MMG5_pTetra       pt,pt0;
@@ -519,6 +522,8 @@ int _MMG5_movbdyregpt_iso(MMG5_pMesh mesh, MMG5_pSol met,int *listv,
   }
 
   /* When all tests have been carried out, update coordinates and normals */
+  _MMG3D_moveOctree(mesh, octree, n0, o, p0->c);
+
   p0->c[0] = o[0];
   p0->c[1] = o[1];
   p0->c[2] = o[2];
@@ -549,7 +554,7 @@ int _MMG5_movbdyregpt_iso(MMG5_pMesh mesh, MMG5_pSol met,int *listv,
  *
  * \remark the metric is not interpolated at the new position.
  */
-int _MMG5_movbdyrefpt_iso(MMG5_pMesh mesh, MMG5_pSol met, int *listv,
+int _MMG5_movbdyrefpt_iso(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree, int *listv,
                           int ilistv, int *lists, int ilists,
                           int improve){
   MMG5_pTetra           pt,pt0;
@@ -823,6 +828,8 @@ int _MMG5_movbdyrefpt_iso(MMG5_pMesh mesh, MMG5_pSol met, int *listv,
   }
 
   /* Update coordinates, normals, for new point */
+  _MMG3D_moveOctree(mesh, octree, ip0, o, p0->c);
+
   p0->c[0] = o[0];
   p0->c[1] = o[1];
   p0->c[2] = o[2];
@@ -860,7 +867,7 @@ int _MMG5_movbdyrefpt_iso(MMG5_pMesh mesh, MMG5_pSol met, int *listv,
  *
  * \remark the metric is not interpolated at the new position.
  */
-int _MMG5_movbdynompt_iso(MMG5_pMesh mesh,MMG5_pSol met, int *listv,
+int _MMG5_movbdynompt_iso(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree octree, int *listv,
                           int ilistv, int *lists, int ilists,
                           int improve){
   MMG5_pTetra       pt,pt0;
@@ -1133,6 +1140,7 @@ int _MMG5_movbdynompt_iso(MMG5_pMesh mesh,MMG5_pSol met, int *listv,
   }
 
   /* Update coordinates, normals, for new point */
+  _MMG3D_moveOctree(mesh, octree, ip0, o, p0->c);
   p0->c[0] = o[0];
   p0->c[1] = o[1];
   p0->c[2] = o[2];
@@ -1167,7 +1175,7 @@ int _MMG5_movbdynompt_iso(MMG5_pMesh mesh,MMG5_pSol met, int *listv,
  * Move boundary ridge point, whose volumic and surfacic balls are passed.
  *
  */
-int _MMG5_movbdyridpt_iso(MMG5_pMesh mesh, MMG5_pSol met, int *listv,
+int _MMG5_movbdyridpt_iso(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree, int *listv,
                           int ilistv,int *lists,int ilists,
                           int improve) {
   MMG5_pTetra          pt,pt0;
@@ -1445,6 +1453,8 @@ int _MMG5_movbdyridpt_iso(MMG5_pMesh mesh, MMG5_pSol met, int *listv,
   }
 
   /* Update coordinates, normals, for new point */
+  _MMG3D_moveOctree(mesh, octree, ip0, o, p0->c);
+
   p0->c[0] = o[0];
   p0->c[1] = o[1];
   p0->c[2] = o[2];
@@ -1470,7 +1480,7 @@ int _MMG5_movbdyridpt_iso(MMG5_pMesh mesh, MMG5_pSol met, int *listv,
 }
 
 
-int _MMG3D_movv_ani(MMG5_pMesh mesh,MMG5_pSol sol,int k,int ib) {
+int _MMG3D_movv_ani(MMG5_pMesh mesh,MMG5_pSol sol, int k,int ib) {
   MMG5_pTetra   pt,pt1;
   MMG5_pPoint   ppa,ppb,p1,p2,p3;
   int           j,iadr,ipb,iter,maxiter,l,lon,iel,i1,i2,i3,list[MMG3D_LMAX+2];

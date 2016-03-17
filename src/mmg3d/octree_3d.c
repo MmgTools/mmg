@@ -670,10 +670,6 @@ void _MMG3D_addOctree(MMG5_pMesh mesh, _MMG3D_pOctree q, const int no)
   memcpy(pt, mesh->point[no].c ,dim*sizeof(double));
   _MMG3D_addOctreeRec(mesh, q->q0, pt , no, q->nv);
   memcpy(pt, mesh->point[no].c ,dim*sizeof(double));
-  #warning to be removed
-#ifndef NDEBUG
-  _MMG3D_verifOctreeRec(mesh, q->q0,pt,no,q->nv);
-#endif
   _MMG5_SAFE_FREE(pt);
 }
 
@@ -693,9 +689,6 @@ void _MMG3D_delOctreeVertex(_MMG3D_octree_s* q, int indNo)
     assert(q->v[i]>0);
   memmove(&q->v[indNo],&q->v[indNo+1], (q->nbVer-indNo-1)*sizeof(int));
   --q->nbVer;
-  #warning to be removed
-  for(i=0; i<q->nbVer; ++i)
-    assert(q->v[i]>0);
 }
 
 /**
@@ -719,11 +712,7 @@ void _MMG3D_mergeBranchesRec(_MMG3D_octree_s* q0, _MMG3D_octree_s* q, int dim, i
       //~ fprintf(stdout, "Index too high %i\n", *index+q->nbVer);
     //~ fprintf(stdout, "Index %i nbVer %i\n", *index,q->nbVer);
     assert(*index+q->nbVer<=nv);
-    #warning loops to be removed
-    for(i = 0; i<(*index); ++i)
-      assert(q0->v[i]>0);
-    for(i = 0; i<q->nbVer; ++i)
-      assert(q->v[i]>0);
+
     memcpy(&(q0->v[*index]), q->v, q->nbVer*sizeof(int));
     (*index)+= q->nbVer;
     for(i = 0; i<(*index); ++i)
@@ -786,8 +775,6 @@ void _MMG3D_delOctreeRec(MMG5_pMesh mesh, _MMG3D_octree_s* q, double* ver, const
   int depthMax;
   int nbBitsInt;
   int nbVerTemp;
-  #warning test to delete
-  int test = 0;
   nbBitsInt = sizeof(int)*8;
 
   depthMax  = nbBitsInt/dim - 1;
@@ -807,7 +794,6 @@ void _MMG3D_delOctreeRec(MMG5_pMesh mesh, _MMG3D_octree_s* q, double* ver, const
           nunalloc++;
           _MMG5_DEL_MEM(mesh,q->v,nv*sizeof(int));
         }
-        test = 1;
         break;
       } 
     }
@@ -1069,43 +1055,6 @@ int _MMG3D_sizeArbreLink(_MMG3D_pOctree q)
 
   dim = 3;
   return _MMG3D_sizeArbreLinkRec(q->q0, q->nv, dim)+q->q0->nbVer*sizeof(int);
-}
-
-
-static inline
-int NearNeighborBrutForce(MMG5_pMesh mesh, int no, double l, int dim, int nb_pt)
-{
-  double lmin =10;
-  int nmin = -1;
-  double x[dim], norm;
-  int i, j;
-  for(i = 1; i <= nb_pt; i++)
-  {
-    norm = 0;
-    if(i != no)
-    {
-      for (j = 0; j<dim; j++)
-      {
-
-        x[j] =  mesh->point[i].c[j] - mesh->point[no].c[j];
-      }
-      for (j = 0; j<dim; j++)
-      {
-        norm += x[j]*x[j];
-      }
-      //~ fprintf(stdout, "c'est la norme %g entre %i et %i\n", norm, i, no);
-      if(lmin>norm)
-      {
-        //~ fprintf(stdout,"Valide\n");
-        lmin = norm;
-        nmin = i;
-      }
-    }
-  }
-  if (sqrt(lmin)<l)
-    return nmin;
-  else
-    return -1;
 }
 
 static inline

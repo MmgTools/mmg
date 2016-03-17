@@ -51,7 +51,7 @@
  * \remark we don't check if we break the hausdorff criterion.
  *
  */
-int _MMG5_movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,
+int _MMG5_movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree octree, int *list,int ilist,
                        int improve) {
 
 
@@ -148,6 +148,7 @@ int _MMG5_movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,
   }
 
   /* update position */
+  _MMG3D_moveOctree(mesh, octree, pt->v[i0], ppt0->c, p0->c);
   p0 = &mesh->point[pt->v[i0]];
   p0->c[0] = ppt0->c[0];
   p0->c[1] = ppt0->c[1];
@@ -178,7 +179,7 @@ int _MMG5_movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,
  * Move boundary regular point, whose volumic and surfacic balls are passed.
  *
  */
-int _MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met,int *listv,
+int _MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree, int *listv,
                           int ilistv,int *lists,int ilists,
                           int improve) {
   MMG5_pTetra       pt,pt0;
@@ -595,6 +596,8 @@ int _MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met,int *listv,
   }
 
   /* When all tests have been carried out, update coordinates, normals and metrics*/
+  _MMG3D_moveOctree(mesh, octree, n0, o, p0->c);
+
   p0->c[0] = o[0];
   p0->c[1] = o[1];
   p0->c[2] = o[2];
@@ -630,7 +633,7 @@ int _MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met,int *listv,
  * Move boundary reference point, whose volumic and surfacic balls are passed.
  *
  */
-int _MMG5_movbdyrefpt_ani(MMG5_pMesh mesh, MMG5_pSol met, int *listv,
+int _MMG5_movbdyrefpt_ani(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree, int *listv,
                           int ilistv, int *lists, int ilists,
                           int improve){
   MMG5_pTetra           pt,pt0;
@@ -907,6 +910,8 @@ int _MMG5_movbdyrefpt_ani(MMG5_pMesh mesh, MMG5_pSol met, int *listv,
   }
 
   /* Update coordinates, normals, for new point */
+  _MMG3D_moveOctree(mesh, octree, ip0, o, p0->c);
+
   p0->c[0] = o[0];
   p0->c[1] = o[1];
   p0->c[2] = o[2];
@@ -947,7 +952,7 @@ int _MMG5_movbdyrefpt_ani(MMG5_pMesh mesh, MMG5_pSol met, int *listv,
  * \remark we don't check if we break the hausdorff criterion.
  *
  */
-int _MMG5_movbdynompt_ani(MMG5_pMesh mesh,MMG5_pSol met, int *listv,
+int _MMG5_movbdynompt_ani(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree octree, int *listv,
                           int ilistv, int *lists, int ilists,
                           int improve){
   MMG5_pTetra       pt,pt0;
@@ -1223,6 +1228,8 @@ int _MMG5_movbdynompt_ani(MMG5_pMesh mesh,MMG5_pSol met, int *listv,
   }
 
   /* Update coordinates, normals, for new point */
+  _MMG3D_moveOctree(mesh, octree, ip0, o, p0->c);
+
   p0->c[0] = o[0];
   p0->c[1] = o[1];
   p0->c[2] = o[2];
@@ -1261,7 +1268,7 @@ int _MMG5_movbdynompt_ani(MMG5_pMesh mesh,MMG5_pSol met, int *listv,
  * Move boundary ridge point, whose volumic and surfacic balls are passed.
  *
  */
-int _MMG5_movbdyridpt_ani(MMG5_pMesh mesh, MMG5_pSol met, int *listv,
+int _MMG5_movbdyridpt_ani(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree, int *listv,
                           int ilistv,int *lists,int ilists,
                           int improve) {
   MMG5_pTetra          pt,pt0;
@@ -1541,6 +1548,8 @@ int _MMG5_movbdyridpt_ani(MMG5_pMesh mesh, MMG5_pSol met, int *listv,
   }
 
   /* Update coordinates, normals, for new point */
+  _MMG3D_moveOctree(mesh, octree, ip0, o, p0->c);
+
   p0->c[0] = o[0];
   p0->c[1] = o[1];
   p0->c[2] = o[2];

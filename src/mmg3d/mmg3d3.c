@@ -317,7 +317,7 @@ int _MMG5_swptetlag(MMG5_pMesh mesh,MMG5_pSol met,double crit,_MMG3D_pOctree oct
  * Analyze tetrahedra marked with it and move internal points so as to make mesh more uniform.
  *
  */
-int _MMG5_movtetlag(MMG5_pMesh mesh,MMG5_pSol met,int itdeg) {
+int _MMG5_movtetlag(MMG5_pMesh mesh,MMG5_pSol met, int itdeg) {
   MMG5_pTetra        pt;
   MMG5_pPoint        ppt;
   int           k,ier,nm,nnm,ns,listv[MMG3D_LMAX+2],ilistv,it;
@@ -350,7 +350,7 @@ int _MMG5_movtetlag(MMG5_pMesh mesh,MMG5_pSol met,int itdeg) {
         ilistv = _MMG5_boulevolp(mesh,k,i,listv);
         if ( !ilistv )  continue;
         
-        ier = _MMG5_movintpt_iso(mesh,met,listv,ilistv,0);
+        ier = _MMG5_movintpt_iso(mesh,met, NULL, listv,ilistv,0);
           
         if ( ier ) {
           nm++;

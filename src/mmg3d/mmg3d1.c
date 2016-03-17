@@ -540,7 +540,7 @@ int _MMG5_swptet(MMG5_pMesh mesh,MMG5_pSol met,double crit,
  * In delaunay mode, a negative maxitin means that we don't move internal nodes.
  *
  */
-int _MMG5_movtet(MMG5_pMesh mesh,MMG5_pSol met,int maxitin) {
+int _MMG5_movtet(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree octree,int maxitin) {
   MMG5_pTetra        pt;
   MMG5_pPoint        ppt;
   MMG5_pxTetra       pxt;
@@ -603,7 +603,7 @@ int _MMG5_movtet(MMG5_pMesh mesh,MMG5_pSol met,int maxitin) {
               ier=_MMG5_boulesurfvolp(mesh,k,i0,i,listv,&ilistv,lists,&ilists,1);
               if( !ier )  continue;
               else if ( ier>0 )
-                ier = _MMG5_movbdynompt(mesh,met,listv,ilistv,lists,ilists,improve);
+                ier = _MMG5_movbdynompt(mesh,met,octree,listv,ilistv,lists,ilists,improve);
               else
                 return(-1);
             }
@@ -611,7 +611,7 @@ int _MMG5_movtet(MMG5_pMesh mesh,MMG5_pSol met,int maxitin) {
               ier=_MMG5_boulesurfvolp(mesh,k,i0,i,listv,&ilistv,lists,&ilists,0);
               if ( !ier )  continue;
               else if ( ier>0 )
-                ier = _MMG5_movbdyridpt(mesh,met,listv,ilistv,lists,ilists,improve);
+                ier = _MMG5_movbdyridpt(mesh,met,octree,listv,ilistv,lists,ilists,improve);
               else
                 return(-1);
             }
@@ -620,7 +620,7 @@ int _MMG5_movtet(MMG5_pMesh mesh,MMG5_pSol met,int maxitin) {
               if ( !ier )
                 continue;
               else if ( ier>0 )
-                ier = _MMG5_movbdyrefpt(mesh,met,listv,ilistv,lists,ilists,improve);
+                ier = _MMG5_movbdyrefpt(mesh,met,octree,listv,ilistv,lists,ilists,improve);
               else
                 return(-1);
             }
@@ -643,14 +643,14 @@ int _MMG5_movtet(MMG5_pMesh mesh,MMG5_pSol met,int maxitin) {
                 if ( !_MMG5_directsurfball(mesh,pt->v[i0],lists,ilists,n) )
                   continue;
               }
-              ier = _MMG5_movbdyregpt(mesh,met,listv,ilistv,lists,ilists,improve);
+              ier = _MMG5_movbdyregpt(mesh,met, octree, listv,ilistv,lists,ilists,improve);
               if ( ier )  ns++;
             }
           }
           else if ( internal ) {
             ilistv = _MMG5_boulevolp(mesh,k,i0,listv);
             if ( !ilistv )  continue;
-            ier = _MMG5_movintpt(mesh,met,listv,ilistv,improve);
+            ier = _MMG5_movintpt(mesh,met,octree,listv,ilistv,improve);
           }
           if ( ier ) {
             nm++;
