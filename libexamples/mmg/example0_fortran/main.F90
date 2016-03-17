@@ -3,16 +3,16 @@
 !> @brief
 !>  Example for using mmglib (basic use)
 
-!> Include the mmg library hader file
+PROGRAM main
+
+  IMPLICIT NONE
+
+!> Include here the mmg library hader file
 ! if the "include/mmg" dir is in your include path
 !#include "libmmgf.h"
 
 ! if your include path do not contain the "mmg/mmg" subdirectories
 #include "mmg/libmmgf.h"
-
-PROGRAM main
-
-  IMPLICIT NONE
 
   MMG5_DATA_PTR_T    :: mmgMesh
   MMG5_DATA_PTR_T    :: mmgSol

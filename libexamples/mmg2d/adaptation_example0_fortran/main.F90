@@ -3,18 +3,15 @@
 !> @brief
 !>  Example for using mmg2dlib (basic use)
 
-!> Include the mmg2d library hader file */
-! if the header file is in the "include" directory
-! #include "libmmg2df.h"
-! if the header file is in "include/mmg/mmg2d"
-#include "mmg/mmg2d/libmmg2df.h"
-!#include "test.h"
-
 PROGRAM main
-  ! Allow to detect errors if a subroutine is called with wrong arguments at build time
-  USE LIBMMG2D
-
   IMPLICIT NONE
+
+  !> Include here the mmg2d library hader file */
+  ! if the header file is in the "include" directory
+  ! #include "libmmg2df.h"
+  ! if the header file is in "include/mmg/mmg2d"
+#include "mmg/mmg2d/libmmg2df.h"
+
 
   MMG5_DATA_PTR_T  :: mmgMesh
   MMG5_DATA_PTR_T  :: mmgSol

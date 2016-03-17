@@ -208,6 +208,7 @@ void _MMG3D_delElt(MMG5_pMesh mesh,int iel);
 void _MMG3D_delPt(MMG5_pMesh mesh,int ip);
 int  _MMG5_zaldy(MMG5_pMesh mesh);
 void _MMG5_freeXTets(MMG5_pMesh mesh);
+extern void _MMG3D_Free_topoTables(MMG5_pMesh mesh);
 char _MMG5_chkedg(MMG5_pMesh mesh,MMG5_pTria pt,char ori);
 int  _MMG5_chkBdryTria(MMG5_pMesh mesh);
 void _MMG5_tet2tri(MMG5_pMesh mesh,int k,char ie,MMG5_Tria *ptt);

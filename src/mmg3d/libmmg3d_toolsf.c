@@ -111,16 +111,21 @@ FORTRAN_NAME(MMG3D_DESTOCKOPTIONS,mmg3d_destockoptions,
   MMG3D_destockOptions(*mesh,info);
   return;
 }
+
 /**
  * See \ref MMG3D_mmg3dcheck function in \ref mmg3d/libmmg3d.h file.
  */
 FORTRAN_NAME(MMG3D_MMG3DCHECK,mmg3d_mmg3dcheck,
              (MMG5_pMesh *mesh,MMG5_pSol *met,double *critmin, double *lmin,
-              double *lmax, int *eltab,char *metRidTyp,int *retval),
+              double *lmax, int *eltab,int *metRidTyp,int *retval),
              (mesh,met,critmin,lmin,lmax,eltab,metRidTyp,retval)) {
-  *retval = MMG3D_mmg3dcheck(*mesh,*met,*critmin,*lmin,*lmax,eltab,*metRidTyp);
+  char tmp = (char)(*metRidTyp);
+
+  *retval = MMG3D_mmg3dcheck(*mesh,*met,*critmin,*lmin,*lmax,eltab,tmp);
+
   return;
 }
+
 
 /**
  * See \ref MMG3D_searchqua function in \ref mmg3d/libmmg3d.h file.
@@ -159,7 +164,7 @@ FORTRAN_NAME(MMG3D_GET_TETFROMTRIA,mmg3d_get_tetfromtria,
  * See \ref MMG3D_Get_adjaTet function in \ref mmg3d/libmmg3d.h file.
  */
 FORTRAN_NAME(MMG3D_GET_ADJATET,mmg3d_get_adjatet,
-               (MMG5_pMesh *mesh,int* kel, int* listet, int* retval),
+               (MMG5_pMesh *mesh,int* kel, int listet[4], int* retval),
                (mesh,kel,listet,retval)) {
   *retval =  MMG3D_Get_adjaTet(*mesh,*kel,listet);
   return;

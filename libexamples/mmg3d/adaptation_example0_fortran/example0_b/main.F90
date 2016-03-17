@@ -3,19 +3,15 @@
 !> @brief
 !>  Example for using mmg3dlib (basic use)
 
+PROGRAM main
+
+  IMPLICIT NONE
 
 !> Include the mmg3d library hader file
 ! if the header file is in the "include" directory
 ! #include "libmmg3df.h"
 ! if the header file is in "include/mmg/mmg3d"
 #include "mmg/mmg3d/libmmg3df.h"
-
-PROGRAM main
-
-  ! Allow to detect errors if a subroutine is called with wrong arguments at build time
-  USE LIBMMG3D
-
-  IMPLICIT NONE
 
   MMG5_DATA_PTR_T  :: mmgMesh
   MMG5_DATA_PTR_T  :: mmgSol

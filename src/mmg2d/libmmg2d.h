@@ -353,7 +353,6 @@ int MMG2D_Set_triangle(MMG5_pMesh mesh, int v0, int v1,
  * Set edge of vertices \a v0, \a v1 and reference \a ref
  * at position \a pos in mesh structure.
  *
- *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG2D_SET_EDGE(mesh,v0,v1,ref,pos,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
@@ -426,7 +425,7 @@ int MMG2D_Set_tensorSol(MMG5_pSol met, double m11, double m12, double m22,
  * \remark Fortran interface:
  * >   SUBROUTINE MMG2D_GET_MESHSIZE(mesh,np,nt,na,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
- * >     INTEGER, INTENT(OUT)          :: np,nt,na\n
+ * >     INTEGER                       :: np,nt,na\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
  *

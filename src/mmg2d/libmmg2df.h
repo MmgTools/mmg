@@ -135,8 +135,6 @@
 !  *
 !  * \remark Fortran interface:
 !  */
-MODULE LIBMMG2D
-!  */
 INTERFACE
   SUBROUTINE MMG2D_INIT_FILENAMES(mesh,sol)
     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh,sol
@@ -439,7 +437,6 @@ END INTERFACE
 !  * Set edge of vertices \a v0, \a v1 and reference \a ref
 !  * at position \a pos in mesh structure.
 !  *
-!  *
 !  * \remark Fortran interface:
 !  */
 INTERFACE
@@ -526,7 +523,7 @@ END INTERFACE
 INTERFACE
   SUBROUTINE MMG2D_GET_MESHSIZE(mesh,np,nt,na,retval)
     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh
-    INTEGER, INTENT(OUT)          :: np,nt,na
+    INTEGER                       :: np,nt,na
     INTEGER, INTENT(OUT)          :: retval
   END SUBROUTINE
 END INTERFACE
@@ -1097,4 +1094,3 @@ END INTERFACE
 ! void MMG2D_Free_solutions(MMG5_pMesh mesh,MMG5_pSol sol);
 
 ! #endif
-END MODULE

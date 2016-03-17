@@ -500,15 +500,21 @@ void MMG3D_destockOptions(MMG5_pMesh mesh, MMG5_Info *info) {
 int MMG3D_mmg3dcheck(MMG5_pMesh mesh,MMG5_pSol met,double critmin, double lmin,
                     double lmax, int *eltab,char metRidTyp) {
 
-#ifdef UNIX
   mytime    ctim[TIMEMAX];
-  char      stim[32];
-#endif
   int       ier;
+  char      stim[32];
 
-  fprintf(stdout,"  -- MMG3d, Release %s (%s) \n",MG_VER,MG_REL);
-  fprintf(stdout,"     %s\n",MG_CPY);
-  fprintf(stdout,"    %s %s\n",__DATE__,__TIME__);
+  if ( mesh->info.imprim ) {
+    fprintf(stdout,"  -- MMG3d, Release %s (%s) \n",MG_VER,MG_REL);
+    fprintf(stdout,"     %s\n",MG_CPY);
+    fprintf(stdout,"     %s %s\n",__DATE__,__TIME__);
+  }
+
+  _MMG3D_Set_commonFunc();
+
+  /** Free topologic tables (adja, xpoint, xtetra) resulting from a previous
+   * run */
+  _MMG3D_Free_topoTables(mesh);
 
   signal(SIGABRT,_MMG5_excfun);
   signal(SIGFPE,_MMG5_excfun);
@@ -517,59 +523,67 @@ int MMG3D_mmg3dcheck(MMG5_pMesh mesh,MMG5_pSol met,double critmin, double lmin,
   signal(SIGTERM,_MMG5_excfun);
   signal(SIGINT,_MMG5_excfun);
 
-#ifdef UNIX
   tminit(ctim,TIMEMAX);
   chrono(ON,&(ctim[0]));
+
+  /* Check options */
+  if ( mesh->info.lag > -1 ) {
+    fprintf(stdout,"  ## Error: lagrangian mode unavailable (MMG3D_IPARAM_lag):\n"
+            "            You must call the MMG3D_mmg3dmov function to move a rigidbody.\n");
+    _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
+  }
+  else if ( mesh->info.iso ) {
+    fprintf(stdout,"  ## Error: level-set discretisation unavailable"
+            " (MMG3D_IPARAM_iso):\n"
+            "          You must call the MMG3D_mmg3dmov function to use this option.\n");
+    _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
+  }
+
+#ifdef USE_SCOTCH
+  _MMG5_warnScotch(mesh);
 #endif
 
-  fprintf(stdout,"\n  -- MMG3DLIB: INPUT DATA\n");
+  if ( mesh->info.imprim ) fprintf(stdout,"\n  -- MMG3DLIB: INPUT DATA\n");
   /* load data */
-#ifdef UNIX
   chrono(ON,&(ctim[1]));
-#endif
   _MMG5_warnOrientation(mesh);
+
+
 
   if ( met->np && (met->np != mesh->np) ) {
     fprintf(stdout,"  ## WARNING: WRONG SOLUTION NUMBER. IGNORED\n");
     _MMG5_DEL_MEM(mesh,met->m,(met->size*(met->npmax+1))*sizeof(double));
     met->np = 0;
   }
-  else if ( met->size!=1 ) {
-    fprintf(stdout,"  ## ERROR: ANISOTROPIC METRIC NOT IMPLEMENTED.\n");
-    return(MMG5_STRONGFAILURE);
+  else if ( met->size!=1 && met->size!=6 ) {
+    fprintf(stdout,"  ## ERROR: WRONG DATA TYPE.\n");
+    _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
   }
 
-#ifdef UNIX
-  chrono(OFF, &(ctim[1]));
-  printim(ctim[1].gdif, stim);
-  fprintf(stdout, "  --  INPUT DATA COMPLETED.     %s\n", stim);
-#else
-  fprintf(stdout, "  --  INPUT DATA COMPLETED.     \n");
-#endif
+  chrono(OFF,&(ctim[1]));
+  printim(ctim[1].gdif,stim);
+  if ( mesh->info.imprim )
+    fprintf(stdout,"  --  INPUT DATA COMPLETED.     %s\n",stim);
 
   /* analysis */
-#ifdef UNIX
   chrono(ON,&(ctim[2]));
-#endif
   MMG3D_setfunc(mesh,met);
 
-  fprintf(stdout,"\n  %s\n   MODULE MMG3D: IMB-LJLL : %s (%s)\n  %s\n",MG_STR,MG_VER,MG_REL,MG_STR);
-
-  if ( !_MMG5_scaleMesh(mesh,met) ) return(MMG5_STRONGFAILURE);
-  if ( mesh->info.iso ) {
-    if ( !met->np ) {
-      fprintf(stdout,"\n  ## ERROR: A VALID SOLUTION FILE IS NEEDED \n");
-      return(MMG5_STRONGFAILURE);
-    }
-    if ( !_MMG3D_mmg3d2(mesh,met) ) return(MMG5_STRONGFAILURE);
+  if ( mesh->info.imprim ) {
+    fprintf(stdout,"\n  %s\n   MODULE MMG3D: IMB-LJLL : %s (%s)\n  %s\n",MG_STR,MG_VER,MG_REL,MG_STR);
+    fprintf(stdout,"\n  -- PHASE 1 : ANALYSIS\n");
   }
+
+  /* scaling mesh */
+  if ( !_MMG5_scaleMesh(mesh,met) ) _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
+
 
   MMG3D_searchqua(mesh,met,critmin,eltab,metRidTyp);
   ier = MMG3D_searchlen(mesh,met,lmin,lmax,eltab,metRidTyp);
   if ( !ier )
-    return(MMG5_LOWFAILURE);
+    _LIBMMG5_RETURN(mesh,met,MMG5_LOWFAILURE);
 
-  return(MMG5_SUCCESS);
+  _LIBMMG5_RETURN(mesh,met,MMG5_SUCCESS);
 }
 
 void MMG3D_searchqua(MMG5_pMesh mesh,MMG5_pSol met,double critmin, int *eltab,

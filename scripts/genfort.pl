@@ -128,7 +128,6 @@ sub Convert {
     my $chaine;
     my $tabcount = 0;
     my $interfaceprinted = 0;
-    my $moduleprinted = 0;
     my $startdef = 0;
     my $modulename;
 
@@ -292,18 +291,6 @@ sub Convert {
         {
             if ($line =~ /^[ \*]*> (.*)\\n/ )
             {
-                if ($moduleprinted == 0 ) {
-# even if we are in a comment area, we want to have the interface uncommented
-                    if ( $startcom == 1 ) {
-                        $chaine = sprintf("!  */\nMODULE %s\n",$modulename);
-                    }
-                    else {
-                        $chaine = sprintf("MODULE %s\n",$modulename);
-                    }
-                    printTab($chaine,1,0);
-                    $tabcount = 1;
-                    $moduleprinted = 1;
-                }
                 if ($interfaceprinted == 0)
                 {
                     if ( $startcom == 1 ) {
@@ -373,11 +360,6 @@ sub Convert {
         }
 
 
-    }
-    if ( $moduleprinted==1 ) {
-        $chaine = "END MODULE";
-        printTab($chaine,0,0);
-        $moduleprinted = 0;
     }
 
     close APIc;

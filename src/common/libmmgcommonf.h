@@ -369,6 +369,14 @@
 !  *
 !  * Initialize file names to their default values.
 !  *
+!  * \remark Fortran interface:
+!  */
+INTERFACE
+  SUBROUTINE MMG5_INIT_FILENAMES(mesh,sol)
+    MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh,sol
+  END SUBROUTINE
+END INTERFACE
+!  *
 !  */
 
 ! void  MMG5_Init_fileNames(MMG5_pMesh mesh, MMG5_pSol sol);
@@ -376,6 +384,14 @@
 !  * \param mesh pointer toward the mesh structure.
 !  *
 !  * Initialization of the input parameters (stored in the Info structure).
+!  *
+!  * \remark Fortran interface:
+!  */
+INTERFACE
+  SUBROUTINE MMG5_INIT_PARAMETERS(mesh)
+    MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh
+  END SUBROUTINE
+END INTERFACE
 !  *
 !  */
 
@@ -389,6 +405,17 @@
 !  *
 !  * Set the name of input mesh.
 !  *
+!  * \remark Fortran interface:
+!  */
+INTERFACE
+  SUBROUTINE MMG5_SET_INPUTMESHNAME(mesh,meshin,strlen,retval)
+    MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh
+    CHARACTER(LEN=*), INTENT(IN)   :: meshin
+    INTEGER, INTENT(IN)            :: strlen
+    INTEGER, INTENT(OUT)           :: retval
+  END SUBROUTINE
+END INTERFACE
+!  *
 !  */
 
 ! int  MMG5_Set_inputMeshName(MMG5_pMesh mesh, char* meshin);
@@ -398,6 +425,17 @@
 !  * \return 1.
 !  *
 !  * Set the name of output mesh file.
+!  *
+!  * \remark Fortran interface:
+!  */
+INTERFACE
+  SUBROUTINE MMG5_SET_OUTPUTMESHNAME(mesh,meshout,strlen,retval)
+    MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh
+    CHARACTER(LEN=*), INTENT(IN)   :: meshout
+    INTEGER, INTENT(IN)            :: strlen
+    INTEGER, INTENT(OUT)           :: retval
+  END SUBROUTINE
+END INTERFACE
 !  *
 !  */
 
@@ -410,6 +448,17 @@
 !  *
 !  * Set the name of input solution file.
 !  *
+!  * \remark Fortran interface:
+!  */
+INTERFACE
+  SUBROUTINE MMG5_SET_INPUTSOLNAME(mesh,sol,solin,strlen,retval)
+    MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,sol
+    CHARACTER(LEN=*), INTENT(IN)   :: solin
+    INTEGER, INTENT(IN)            :: strlen
+    INTEGER, INTENT(OUT)           :: retval
+  END SUBROUTINE
+END INTERFACE
+!  *
 !  */
 
 ! int  MMG5_Set_inputSolName(MMG5_pMesh mesh,MMG5_pSol sol, char* solin);
@@ -421,6 +470,17 @@
 !  *
 !  *  Set the name of output solution file.
 !  *
+!  * \remark Fortran interface:
+!  */
+INTERFACE
+  SUBROUTINE MMG5_SET_OUTPUTSOLNAME(mesh,sol,solout,strlen,retval)
+    MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,sol
+    CHARACTER(LEN=*), INTENT(IN)   :: solout
+    INTEGER, INTENT(IN)            :: strlen
+    INTEGER, INTENT(OUT)           :: retval
+  END SUBROUTINE
+END INTERFACE
+!  *
 !  */
 
 ! int  MMG5_Set_outputSolName(MMG5_pMesh mesh,MMG5_pSol sol, char* solout);
@@ -431,6 +491,14 @@
 !  * \param met pointer toward the sol structure.
 !  *
 !  * File name deallocations before return.
+!  *
+!  * \remark Fortran interface:
+!  */
+INTERFACE
+  SUBROUTINE MMG5_SET_MMGFREE_NAMES(mesh,met)
+    MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,met
+  END SUBROUTINE
+END INTERFACE
 !  *
 !  */
 
