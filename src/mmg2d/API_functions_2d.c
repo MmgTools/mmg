@@ -345,19 +345,24 @@ int MMG2D_Set_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int typEntity, int np, int
 int MMG2D_Get_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int* typEntity, int* np,
                       int* typSol) {
 
-  *typEntity = MMG5_Vertex;
-  if ( sol->size == 1 )
-    *typSol    = MMG5_Scalar;
-  else if ( sol->size == 2 )
-    *typSol    = MMG5_Vector;
-  else if ( sol->size == 3 )
-    *typSol    = MMG5_Tensor;
-  else
-    *typSol    = MMG5_Notype;
+  if ( typEntity != NULL )
+    *typEntity = MMG5_Vertex;
+
+  if ( typSol != NULL ) {
+    if ( sol->size == 1 )
+      *typSol    = MMG5_Scalar;
+    else if ( sol->size == 2 )
+      *typSol    = MMG5_Vector;
+    else if ( sol->size == 3 )
+      *typSol    = MMG5_Tensor;
+    else
+      *typSol    = MMG5_Notype;
+  }
 
   assert( (!sol->np) || (sol->np == mesh->np));
 
-  *np = sol->np;
+  if ( np != NULL )
+    *np = sol->np;
 
   return(1);
 }
@@ -662,7 +667,7 @@ int MMG2D_Get_edge(MMG5_pMesh mesh, int* e0, int* e1, int* ref
   *e0  = ped->a;
   *e1  = ped->b;
 
-  if ( ref!=NULL )
+  if ( ref != NULL )
     *ref = mesh->edge[mesh->nai].ref;
 
   if ( isRidge != NULL ) {

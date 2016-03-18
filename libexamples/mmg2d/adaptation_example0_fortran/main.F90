@@ -3,13 +3,16 @@
 !> @brief
 !>  Example for using mmg2dlib (basic use)
 
-!> Include the mmg2d library hader file */
-! if the header file is in the "include" directory
-! #include "libmmg2df.h"
-! if the header file is in "include/mmg/mmg2d"
+PROGRAM main
+  IMPLICIT NONE
+
+  !> Include here the mmg2d library hader file */
+  ! if the header file is in the "include" directory
+  ! #include "libmmg2df.h"
+  ! if the header file is in "include/mmg/mmg2d"
 #include "mmg/mmg2d/libmmg2df.h"
 
-PROGRAM main
+
   MMG5_DATA_PTR_T  :: mmgMesh
   MMG5_DATA_PTR_T  :: mmgSol
   INTEGER          :: ier,k
@@ -19,7 +22,7 @@ PROGRAM main
   !> To manually recover the mesh
   INTEGER          :: np, nt, na, nc, nr, nreq, typEntity, typSol
   INTEGER          :: ref, Tria(3), Edge(2)
-  DOUBLE PRECISION :: Point(3),Sol
+  DOUBLE PRECISION :: Point(2),Sol
   INTEGER, DIMENSION(:), ALLOCATABLE :: corner, required, ridge
   CHARACTER(LEN=31) :: FMT="(E14.8,1X,E14.8,1X,I3)"
   CHARACTER(len=300) :: filename

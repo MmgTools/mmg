@@ -59,7 +59,8 @@
 !  */
 
 
-! #ifndef _MMG3DLIB_H
+#ifndef _MMG3DLIB_H
+#define _MMG3DLIB_H
 
 ! #include "mmgcommon.h"
 
@@ -149,6 +150,8 @@
 !  *
 !  * MMG structures allocation and initialization.
 !  *
+!  * \remark No fortran interface to allow variadic arguments.
+!  *
 !  */
 
 ! void MMG3D_Init_mesh(enum MMG5_arg starter,...);
@@ -158,6 +161,14 @@
 !  *
 !  * Initialize file names to their default values.
 !  *
+!  * \remark Fortran interface:
+!  */
+INTERFACE
+  SUBROUTINE MMG3D_INIT_FILENAMES(mesh,sol)
+    MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh,sol
+  END SUBROUTINE
+END INTERFACE
+!  *
 !  */
 
 ! void  MMG3D_Init_fileNames(MMG5_pMesh mesh, MMG5_pSol sol);
@@ -165,6 +176,14 @@
 !  * \param mesh pointer toward the mesh structure.
 !  *
 !  * Initialization of the input parameters (stored in the Info structure).
+!  *
+!  * \remark Fortran interface:
+!  */
+INTERFACE
+  SUBROUTINE MMG3D_INIT_PARAMETERS(mesh)
+    MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh
+  END SUBROUTINE
+END INTERFACE
 !  *
 !  */
 
@@ -178,6 +197,17 @@
 !  *
 !  * Set the name of input mesh.
 !  *
+!  * \remark Fortran interface:
+!  */
+INTERFACE
+  SUBROUTINE MMG3D_SET_INPUTMESHNAME(mesh,meshin,strlen,retval)
+    MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh
+    CHARACTER(LEN=*), INTENT(IN)   :: meshin
+    INTEGER, INTENT(IN)            :: strlen
+    INTEGER, INTENT(OUT)           :: retval
+  END SUBROUTINE
+END INTERFACE
+!  *
 !  */
 
 ! int  MMG3D_Set_inputMeshName(MMG5_pMesh mesh, char* meshin);
@@ -187,6 +217,17 @@
 !  * \return 1.
 !  *
 !  * Set the name of output mesh file.
+!  *
+!  * \remark Fortran interface:
+!  */
+INTERFACE
+  SUBROUTINE MMG3D_SET_OUTPUTMESHNAME(mesh,meshout,strlen,retval)
+    MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh
+    CHARACTER(LEN=*), INTENT(IN)   :: meshout
+    INTEGER, INTENT(IN)            :: strlen
+    INTEGER, INTENT(OUT)           :: retval
+  END SUBROUTINE
+END INTERFACE
 !  *
 !  */
 
@@ -199,6 +240,17 @@
 !  *
 !  * Set the name of input solution file.
 !  *
+!  * \remark Fortran interface:
+!  */
+INTERFACE
+  SUBROUTINE MMG3D_SET_INPUTSOLNAME(mesh,sol,solin,strlen,retval)
+    MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,sol
+    CHARACTER(LEN=*), INTENT(IN)   :: solin
+    INTEGER, INTENT(IN)            :: strlen
+    INTEGER, INTENT(OUT)           :: retval
+  END SUBROUTINE
+END INTERFACE
+!  *
 !  */
 
 ! int  MMG3D_Set_inputSolName(MMG5_pMesh mesh,MMG5_pSol sol, char* solin);
@@ -209,6 +261,17 @@
 !  * \return 0 if failed, 1 otherwise.
 !  *
 !  *  Set the name of output solution file.
+!  *
+!  * \remark Fortran interface:
+!  */
+INTERFACE
+  SUBROUTINE MMG3D_SET_OUTPUTSOLNAME(mesh,sol,solout,strlen,retval)
+    MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,sol
+    CHARACTER(LEN=*), INTENT(IN)   :: solout
+    INTEGER, INTENT(IN)            :: strlen
+    INTEGER, INTENT(OUT)           :: retval
+  END SUBROUTINE
+END INTERFACE
 !  *
 !  */
 
@@ -225,6 +288,16 @@
 !  *
 !  * Set the solution number, dimension and type.
 !  *
+!  * \remark Fortran interface:
+!  */
+INTERFACE
+  SUBROUTINE MMG3D_SET_SOLSIZE(mesh,sol,typEntity,np,typSol,retval)
+    MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh,sol
+    INTEGER, INTENT(IN)           :: typEntity,np,typSol
+    INTEGER, INTENT(OUT)          :: retval
+  END SUBROUTINE
+END INTERFACE
+!  *
 !  */
 
 ! int  MMG3D_Set_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int typEntity, int np, int typSol);
@@ -239,6 +312,16 @@
 !  * Set the number of vertices, tetrahedra, triangles and edges of the
 !  * mesh and allocate the associated tables. If call twice, reset the
 !  * whole mesh to realloc it at the new size
+!  *
+!  * \remark Fortran interface:
+!  */
+INTERFACE
+  SUBROUTINE MMG3D_SET_MESHSIZE(mesh,np,ne,nt,na,retval)
+    MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh
+    INTEGER                       :: np,ne,nt,na
+    INTEGER, INTENT(OUT)          :: retval
+  END SUBROUTINE
+END INTERFACE
 !  *
 !  */
 
@@ -257,6 +340,17 @@
 !  * Set vertex of coordinates \a c0, \a c1,\a c2 and reference \a ref
 !  * at position \a pos in mesh structure
 !  *
+!  * \remark Fortran interface:
+!  */
+INTERFACE
+  SUBROUTINE MMG3D_SET_VERTEX(mesh,c0,c1,c2,ref,pos,retval)
+    MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh
+    REAL(KIND=8), INTENT(IN)      :: c0,c1,c2
+    INTEGER, INTENT(IN)           :: ref,pos
+    INTEGER, INTENT(OUT)          :: retval
+  END SUBROUTINE
+END INTERFACE
+!  *
 !  */
 
 ! int  MMG3D_Set_vertex(MMG5_pMesh mesh, double c0, double c1,
@@ -274,6 +368,16 @@
 !  * Set tetrahedra of vertices \a v0, \a v1,\a v2,\a v3 and reference
 !  * \a ref at position \a pos in mesh structure.
 !  *
+!  * \remark Fortran interface:
+!  */
+INTERFACE
+  SUBROUTINE MMG3D_SET_TETRAHEDRON(mesh,v0,v1,v2,v3,ref,pos,retval)
+    MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh
+    INTEGER, INTENT(IN)           :: v0,v1,v2,v3,ref,pos
+    INTEGER, INTENT(OUT)          :: retval
+  END SUBROUTINE
+END INTERFACE
+!  *
 !  */
 
 ! int  MMG3D_Set_tetrahedron(MMG5_pMesh mesh, int v0, int v1,
@@ -290,6 +394,16 @@
 !  * Set triangle of vertices \a v0, \a v1, \a v2 and reference \a ref
 !  * at position \a pos in mesh structure.
 !  *
+!  * \remark Fortran interface:
+!  */
+INTERFACE
+  SUBROUTINE MMG3D_SET_TRIANGLE(mesh,v0,v1,v2,ref,pos,retval)
+    MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh
+    INTEGER, INTENT(IN)           :: v0,v1,v2,ref,pos
+    INTEGER, INTENT(OUT)          :: retval
+  END SUBROUTINE
+END INTERFACE
+!  *
 !  */
 
 ! int  MMG3D_Set_triangle(MMG5_pMesh mesh, int v0, int v1,
@@ -305,6 +419,16 @@
 !  * Set edges of extremities \a v0, \a v1 and reference \a ref at
 !  * position \a pos in mesh structure
 !  *
+!  * \remark Fortran interface:
+!  */
+INTERFACE
+  SUBROUTINE MMG3D_SET_EDGE(mesh,v0,v1,ref,pos,retval)
+    MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh
+    INTEGER, INTENT(IN)           :: v0,v1,ref,pos
+    INTEGER, INTENT(OUT)          :: retval
+  END SUBROUTINE
+END INTERFACE
+!  *
 !  */
 
 ! int  MMG3D_Set_edge(MMG5_pMesh mesh, int v0, int v1, int ref,int pos);
@@ -314,6 +438,16 @@
 !  * \return 1.
 !  *
 !  * Set corner at point \a pos.
+!  *
+!  * \remark Fortran interface:
+!  */
+INTERFACE
+  SUBROUTINE MMG3D_SET_CORNER(mesh,k,retval)
+    MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh
+    INTEGER, INTENT(IN)           :: k
+    INTEGER, INTENT(OUT)          :: retval
+  END SUBROUTINE
+END INTERFACE
 !  *
 !  */
 
@@ -325,6 +459,16 @@
 !  *
 !  * Set point \a k as required.
 !  *
+!  * \remark Fortran interface:
+!  */
+INTERFACE
+  SUBROUTINE MMG3D_SET_REQUIREDVERTEX(mesh,k,retval)
+    MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh
+    INTEGER, INTENT(IN)           :: k
+    INTEGER, INTENT(OUT)          :: retval
+  END SUBROUTINE
+END INTERFACE
+!  *
 !  */
 
 ! int  MMG3D_Set_requiredVertex(MMG5_pMesh mesh, int k);
@@ -334,6 +478,16 @@
 !  * \return 1.
 !  *
 !  * Set element \a k as required.
+!  *
+!  * \remark Fortran interface:
+!  */
+INTERFACE
+  SUBROUTINE MMG3D_SET_REQUIREDTETRAHEDRON(mesh,k,retval)
+    MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh
+    INTEGER, INTENT(IN)           :: k
+    INTEGER, INTENT(OUT)          :: retval
+  END SUBROUTINE
+END INTERFACE
 !  *
 !  */
 
@@ -345,6 +499,16 @@
 !  *
 !  * Set triangle \a k as required.
 !  *
+!  * \remark Fortran interface:
+!  */
+INTERFACE
+  SUBROUTINE MMG3D_SET_REQUIREDTRIANGLE(mesh,k,retval)
+    MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh
+    INTEGER, INTENT(IN)           :: k
+    INTEGER, INTENT(OUT)          :: retval
+  END SUBROUTINE
+END INTERFACE
+!  *
 !  */
 
 ! int  MMG3D_Set_requiredTriangle(MMG5_pMesh mesh, int k);
@@ -354,6 +518,16 @@
 !  * \return 1.
 !  *
 !  * Set ridge at edge \a k.
+!  *
+!  * \remark Fortran interface:
+!  */
+INTERFACE
+  SUBROUTINE MMG3D_SET_RIDGE(mesh,k,retval)
+    MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh
+    INTEGER, INTENT(IN)           :: k
+    INTEGER, INTENT(OUT)          :: retval
+  END SUBROUTINE
+END INTERFACE
 !  *
 !  */
 
@@ -365,6 +539,16 @@
 !  *
 !  * Set edge \a k as required.
 !  *
+!  * \remark Fortran interface:
+!  */
+INTERFACE
+  SUBROUTINE MMG3D_SET_REQUIREDEDGE(mesh,k,retval)
+    MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh
+    INTEGER, INTENT(IN)           :: k
+    INTEGER, INTENT(OUT)          :: retval
+  END SUBROUTINE
+END INTERFACE
+!  *
 !  */
 
 ! int  MMG3D_Set_requiredEdge(MMG5_pMesh mesh, int k);
@@ -375,6 +559,17 @@
 !  * \return 0 if failed, 1 otherwise.
 !  *
 !  * Set scalar value \a s at position \a pos in solution structure
+!  *
+!  * \remark Fortran interface:
+!  */
+INTERFACE
+  SUBROUTINE MMG3D_SET_SCALARSOL(met,s,pos,retval)
+    MMG5_DATA_PTR_T,INTENT(INOUT) :: met
+    REAL(KIND=8), INTENT(IN)      :: s
+    INTEGER, INTENT(IN)           :: pos
+    INTEGER, INTENT(OUT)          :: retval
+  END SUBROUTINE
+END INTERFACE
 !  *
 !  */
 
@@ -389,6 +584,17 @@
 !  *
 !  * Set vectorial value \f$(v_x,v_y,v_z)\f$ at position \a pos in solution
 !  * structure.
+!  *
+!  * \remark Fortran interface:
+!  */
+INTERFACE
+  SUBROUTINE MMG3D_SET_VECTORSOL(met,vx,vy,vz,pos,retval)
+    MMG5_DATA_PTR_T,INTENT(INOUT) :: met
+    REAL(KIND=8), INTENT(IN)      :: vx,vy,vz
+    INTEGER, INTENT(IN)           :: pos
+    INTEGER, INTENT(OUT)          :: retval
+  END SUBROUTINE
+END INTERFACE
 !  *
 !  */
 
@@ -407,6 +613,17 @@
 !  * Set tensorial values at position \a pos in solution
 !  * structure.
 !  *
+!  * \remark Fortran interface:
+!  */
+INTERFACE
+  SUBROUTINE MMG3D_SET_TENSORSOL(met,m11,m12,m13,m22,m23,m33,pos,retval)
+    MMG5_DATA_PTR_T,INTENT(INOUT) :: met
+    REAL(KIND=8), INTENT(IN)      :: m11,m12,m13,m22,m23,m33
+    INTEGER, INTENT(IN)           :: pos
+    INTEGER, INTENT(OUT)          :: retval
+  END SUBROUTINE
+END INTERFACE
+!  *
 !  */
 
 ! int MMG3D_Set_tensorSol(MMG5_pSol met, double m11,double m12, double m13,
@@ -416,6 +633,14 @@
 !  *
 !  * To mark as ended a mesh given without using the API functions
 !  * (for example, mesh given by mesh->point[i] = 0 ...). Not recommanded.
+!  *
+!  * \remark Fortran interface:
+!  */
+INTERFACE
+  SUBROUTINE MMG3D_SET_HANDGIVENMESH(mesh)
+    MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh
+  END SUBROUTINE
+END INTERFACE
 !  *
 !  */
 
@@ -429,6 +654,15 @@
 !  *
 !  * Check if the number of given entities match with mesh and sol size
 !  * (not mandatory) and check mesh datas.
+!  *
+!  * \remark Fortran interface:
+!  */
+INTERFACE
+  SUBROUTINE MMG3D_CHK_MESHDATA(mesh,met,retval)
+    MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh,met
+    INTEGER, INTENT(OUT)          :: retval
+  END SUBROUTINE
+END INTERFACE
 !  *
 !  */
 
@@ -444,6 +678,16 @@
 !  *
 !  * Set integer parameter \a iparam at value \a val.
 !  *
+!  * \remark Fortran interface:
+!  */
+INTERFACE
+  SUBROUTINE MMG3D_SET_IPARAMETERS(mesh,sol,iparam,val,retval)
+    MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh,sol
+    INTEGER, INTENT(IN)           :: iparam,val
+    INTEGER, INTENT(OUT)          :: retval
+  END SUBROUTINE
+END INTERFACE
+!  *
 !  */
 
 ! int  MMG3D_Set_iparameter(MMG5_pMesh mesh,MMG5_pSol sol, int iparam, int val);
@@ -455,6 +699,17 @@
 !  * \return 0 if failed, 1 otherwise.
 !  *
 !  * Set double parameter \a dparam at value \a val.
+!  *
+!  * \remark Fortran interface:
+!  */
+INTERFACE
+  SUBROUTINE MMG3D_SET_DPARAMETERS(mesh,sol,dparam,val,retval)
+    MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh,sol
+    INTEGER, INTENT(IN)           :: dparam
+    REAL(KIND=8), INTENT(IN)      :: val
+    INTEGER, INTENT(OUT)          :: retval
+  END SUBROUTINE
+END INTERFACE
 !  *
 !  */
 
@@ -472,6 +727,17 @@
 !  * Set local parameters: set the hausdorff value at \a val for all
 !  * elements of type \a typ and reference \a ref.
 !  *
+!  * \remark Fortran interface:
+!  */
+INTERFACE
+  SUBROUTINE MMG3D_SET_LOCALPARAMETER(mesh,sol,typ,ref,hmin,hmax,hausd,retval)
+    MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh,sol
+    INTEGER, INTENT(IN)           :: typ,ref
+    REAL(KIND=8), INTENT(IN)      :: hmin,hmax,hausd
+    INTEGER, INTENT(OUT)          :: retval
+  END SUBROUTINE
+END INTERFACE
+!  *
 !  */
 
 ! int  MMG3D_Set_localParameter(MMG5_pMesh mesh, MMG5_pSol sol, int typ, int ref,
@@ -488,6 +754,16 @@
 !  *
 !  * Get the number of vertices, tetrahedra, triangles and edges of the mesh.
 !  *
+!  * \remark Fortran interface:
+!  */
+INTERFACE
+  SUBROUTINE MMG3D_GET_MESHSIZE(mesh,np,ne,nt,na,retval)
+    MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh
+    INTEGER                       :: np,ne,nt,na
+    INTEGER, INTENT(OUT)          :: retval
+  END SUBROUTINE
+END INTERFACE
+!  *
 !  */
 
 ! int  MMG3D_Get_meshSize(MMG5_pMesh mesh, int* np, int* ne, int* nt, int* na);
@@ -500,6 +776,16 @@
 !  * \return 1.
 !  *
 !  * Get the solution number, dimension and type.
+!  *
+!  * \remark Fortran interface:
+!  */
+INTERFACE
+  SUBROUTINE MMG3D_GET_SOLSIZE(mesh,sol,typEntity,np,typSol,retval)
+    MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh,sol
+    INTEGER                       :: typEntity,np,typSol
+    INTEGER, INTENT(OUT)          :: retval
+  END SUBROUTINE
+END INTERFACE
 !  *
 !  */
 
@@ -518,6 +804,17 @@
 !  * Get coordinates \a c0, \a c1,\a c2 and reference \a ref of next
 !  * vertex of mesh.
 !  *
+!  * \remark Fortran interface:
+!  */
+INTERFACE
+  SUBROUTINE MMG3D_GET_VERTEX(mesh,c0,c1,c2,ref,isCorner,isRequired,retval)
+    MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh
+    REAL(KIND=8), INTENT(OUT)     :: c0,c1,c2
+    INTEGER                       :: ref,isCorner,isRequired
+    INTEGER, INTENT(OUT)          :: retval
+  END SUBROUTINE
+END INTERFACE
+!  *
 !  */
 
 ! int  MMG3D_Get_vertex(MMG5_pMesh mesh, double* c0, double* c1, double* c2, int* ref,
@@ -535,6 +832,17 @@
 !  * Get vertices \a v0, \a v1, \a v2, \a v3 and reference \a ref of
 !  * next tetra of mesh.
 !  *
+!  * \remark Fortran interface:
+!  */
+INTERFACE
+  SUBROUTINE MMG3D_GET_TETRAHEDRON(mesh,v0,v1,v2,v3,ref,isRequired,retval)
+    MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh
+    INTEGER, INTENT(OUT)          :: v0,v1,v2,v3
+    INTEGER                       :: ref,isRequired
+    INTEGER, INTENT(OUT)          :: retval
+  END SUBROUTINE
+END INTERFACE
+!  *
 !  */
 
 ! int  MMG3D_Get_tetrahedron(MMG5_pMesh mesh, int* v0, int* v1, int* v2, int* v3,
@@ -551,6 +859,17 @@
 !  * Get vertices \a v0,\a v1,\a v2 and reference \a ref of next
 !  * triangle of mesh.
 !  *
+!  * \remark Fortran interface:
+!  */
+INTERFACE
+  SUBROUTINE MMG3D_GET_TRIANGLE(mesh,v0,v1,v2,ref,isRequired,retval)
+    MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh
+    INTEGER, INTENT(OUT)          :: v0,v1,v2
+    INTEGER                       :: ref,isRequired
+    INTEGER, INTENT(OUT)          :: retval
+  END SUBROUTINE
+END INTERFACE
+!  *
 !  */
 
 ! int  MMG3D_Get_triangle(MMG5_pMesh mesh, int* v0, int* v1, int* v2, int* ref,
@@ -566,6 +885,17 @@
 !  *
 !  * Get extremities \a e0, \a e1 and reference \a ref of next edge of mesh.
 !  *
+!  * \remark Fortran interface:
+!  */
+INTERFACE
+  SUBROUTINE MMG3D_GET_EDGE(mesh,e0,e1,ref,isRidge,isRequired,retval)
+    MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh
+    INTEGER, INTENT(OUT)          :: e0,e1
+    INTEGER                       :: ref,isRidge,isRequired
+    INTEGER, INTENT(OUT)          :: retval
+  END SUBROUTINE
+END INTERFACE
+!  *
 !  */
 
 ! int  MMG3D_Get_edge(MMG5_pMesh mesh, int* e0, int* e1, int* ref,
@@ -576,6 +906,16 @@
 !  * \return 0 if failed, 1 otherwise.
 !  *
 !  * Get solution \a s of next vertex of mesh.
+!  *
+!  * \remark Fortran interface:
+!  */
+INTERFACE
+  SUBROUTINE MMG3D_GET_SCALARSOL(met,s,retval)
+    MMG5_DATA_PTR_T,INTENT(INOUT) :: met
+    REAL(KIND=8), INTENT(OUT)     :: s
+    INTEGER, INTENT(OUT)          :: retval
+  END SUBROUTINE
+END INTERFACE
 !  *
 !  */
 
@@ -588,6 +928,16 @@
 !  * \return 0 if failed, 1 otherwise.
 !  *
 !  * Get vectorial solution \f$(v_x,v_y,vz)\f$ of next vertex of mesh.
+!  *
+!  * \remark Fortran interface:
+!  */
+INTERFACE
+  SUBROUTINE MMG3D_GET_VECTORSOL(met,vx,vy,vz,retval)
+    MMG5_DATA_PTR_T,INTENT(INOUT) :: met
+    REAL(KIND=8), INTENT(OUT)     :: vx,vy,vz
+    INTEGER, INTENT(OUT)          :: retval
+  END SUBROUTINE
+END INTERFACE
 !  *
 !  */
 
@@ -604,6 +954,16 @@
 !  *
 !  * Get tensorial solution of next vertex of mesh.
 !  *
+!  * \remark Fortran interface:
+!  */
+INTERFACE
+  SUBROUTINE MMG3D_GET_TENSORSOL(met,m11,m12,m13,m22,m23,m33,retval)
+    MMG5_DATA_PTR_T,INTENT(INOUT) :: met
+    REAL(KIND=8), INTENT(OUT)     :: m11,m12,m13,m22,m23,m33
+    INTEGER, INTENT(OUT)          :: retval
+  END SUBROUTINE
+END INTERFACE
+!  *
 !  */
 
 ! int MMG3D_Get_tensorSol(MMG5_pSol met, double *m11,double *m12, double *m13,
@@ -614,6 +974,16 @@
 !  * \return The value of integer parameter.
 !  *
 !  * Get the value of integer parameter \a iparam.
+!  *
+!  * \remark Fortran interface:
+!  */
+INTERFACE
+  SUBROUTINE MMG3D_GET_IPARAMETER(mesh,iparam,retval)
+    MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh
+    INTEGER, INTENT(IN)           :: iparam
+    INTEGER, INTENT(OUT)          :: retval
+  END SUBROUTINE
+END INTERFACE
 !  *
 !  */
 
@@ -627,6 +997,17 @@
 !  *
 !  * Read mesh data.
 !  *
+!  * \remark Fortran interface:
+!  */
+INTERFACE
+  SUBROUTINE MMG3D_LOADMESH(mesh,filename,strlen,retval)
+    MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh
+    CHARACTER(LEN=*), INTENT(IN)   :: filename
+    INTEGER, INTENT(IN)            :: strlen
+    INTEGER, INTENT(OUT)           :: retval
+  END SUBROUTINE
+END INTERFACE
+!  *
 !  */
 
 ! int MMG3D_loadMesh(MMG5_pMesh mesh,char *filename);
@@ -639,6 +1020,17 @@
 !  *
 !  * Save mesh data.
 !  *
+!  * \remark Fortran interface:
+!  */
+INTERFACE
+  SUBROUTINE MMG3D_SAVEMESH(mesh,filename,strlen,retval)
+    MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh
+    CHARACTER(LEN=*), INTENT(IN)   :: filename
+    INTEGER, INTENT(IN)            :: strlen
+    INTEGER, INTENT(OUT)           :: retval
+  END SUBROUTINE
+END INTERFACE
+!  *
 !  */
 
 ! int MMG3D_saveMesh(MMG5_pMesh mesh, char *filename);
@@ -650,6 +1042,17 @@
 !  *
 !  * Load metric field.
 !  *
+!  * \remark Fortran interface:
+!  */
+INTERFACE
+  SUBROUTINE MMG3D_LOADSOL(mesh,met,filename,strlen,retval)
+    MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,met
+    CHARACTER(LEN=*), INTENT(IN)   :: filename
+    INTEGER, INTENT(IN)            :: strlen
+    INTEGER, INTENT(OUT)           :: retval
+  END SUBROUTINE
+END INTERFACE
+!  *
 !  */
 
 ! int MMG3D_loadSol(MMG5_pMesh mesh,MMG5_pSol met, char *filename);
@@ -660,6 +1063,17 @@
 !  * \return 0 if failed, 1 otherwise.
 !  *
 !  * Write isotropic or anisotropic metric.
+!  *
+!  * \remark Fortran interface:
+!  */
+INTERFACE
+  SUBROUTINE MMG3D_SAVESOL(mesh,met,filename,strlen,retval)
+    MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,met
+    CHARACTER(LEN=*), INTENT(IN)   :: filename
+    INTEGER, INTENT(IN)            :: strlen
+    INTEGER, INTENT(OUT)           :: retval
+  END SUBROUTINE
+END INTERFACE
 !  *
 !  */
 
@@ -690,6 +1104,8 @@
 !  * \remark we pass the structures by reference in order to have argument
 !  * compatibility between the library call from a Fortran code and a C code.
 !  *
+!  * \remark no Fortran interface to allow variadic args.
+!  *
 !  */
 
 ! void MMG3D_Free_all(enum MMG5_arg starter,...);
@@ -717,6 +1133,10 @@
 !  *
 !  * \remark we pass the structures by reference in order to have argument
 !  * compatibility between the library call from a Fortran code and a C code.
+!  *
+!  * \remark No fortran interface to allow variadic arguments.
+!  *
+!  * \remark no Fortran interface to allow variadic args.
 !  *
 !  */
 
@@ -746,6 +1166,10 @@
 !  * \remark we pass the structures by reference in order to have argument
 !  * compatibility between the library call from a Fortran code and a C code.
 !  *
+!  * \remark No fortran interface to allow variadic arguments.
+!  *
+!  * \remark no Fortran interface to allow variadic args.
+!  *
 !  */
 
 ! void MMG3D_Free_names(enum MMG5_arg starter,...);
@@ -760,6 +1184,15 @@
 !  *
 !  * Main program for the remesh library.
 !  *
+!  * \remark Fortran interface:
+!  */
+INTERFACE
+  SUBROUTINE MMG3D_MMG3DLIB(mesh,met,retval)
+    MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,met
+    INTEGER, INTENT(OUT)           :: retval
+  END SUBROUTINE
+END INTERFACE
+!  *
 !  */
 
 ! int  MMG3D_mmg3dlib(MMG5_pMesh mesh, MMG5_pSol met );
@@ -772,6 +1205,15 @@
 !  * the mesh.
 !  *
 !  * Main program for the level-set discretization library.
+!  *
+!  * \remark Fortran interface:
+!  */
+INTERFACE
+  SUBROUTINE MMG3D_MMG3DLS(mesh,met,retval)
+    MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,met
+    INTEGER, INTENT(OUT)           :: retval
+  END SUBROUTINE
+END INTERFACE
 !  *
 !  */
 
@@ -788,6 +1230,15 @@
 !  *
 !  * Main program for the rigidbody movement library.
 !  *
+!  * \remark Fortran interface:
+!  */
+INTERFACE
+  SUBROUTINE MMG3D_MMG3DMOV(mesh,met,disp,retval)
+    MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,met,disp
+    INTEGER, INTENT(OUT)           :: retval
+  END SUBROUTINE
+END INTERFACE
+!  *
 !  */
 
 ! int  MMG3D_mmg3dmov(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pSol disp );
@@ -798,6 +1249,14 @@
 !  * \return 0 if fail, 1 if success.
 !  *
 !  * Print the default parameters values.
+!  *
+!  * \remark Fortran interface:
+!  */
+INTERFACE
+  SUBROUTINE MMG3D_DEFAULTVALUES(mesh)
+    MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh
+  END SUBROUTINE
+END INTERFACE
 !  *
 !  */
 
@@ -812,9 +1271,12 @@
 !  *
 !  * Store command line arguments.
 !  *
+!  * \remark no matching fortran function.
+!  *
 !  */
 
 ! int  MMG3D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met);
+
 ! /**
 !  * \param mesh pointer toward the mesh structure.
 !  * \param met pointer toward the sol structure.
@@ -824,6 +1286,15 @@
 !  * the mesh with the \a .mmg3d extension or must be named \a
 !  * DEFAULT.mmg3d.
 !  *
+!  * \remark Fortran interface:
+!  */
+INTERFACE
+  SUBROUTINE MMG3D_PARSOP(mesh,met,retval)
+    MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,met
+    INTEGER, INTENT(OUT)           :: retval
+  END SUBROUTINE
+END INTERFACE
+!  *
 !  */
 
 ! int  MMG3D_parsop(MMG5_pMesh mesh,MMG5_pSol met);
@@ -831,6 +1302,15 @@
 !  * \param prog pointer toward the program name.
 !  *
 !  * Print help for mmg3d options.
+!  *
+!  * \remark Fortran interface:
+!  */
+INTERFACE
+  SUBROUTINE MMG3D_USAGE(prog,strlen)
+    CHARACTER(LEN=*), INTENT(IN)   :: prog
+    INTEGER, INTENT(IN)            :: strlen
+  END SUBROUTINE
+END INTERFACE
 !  *
 !  */
 
@@ -842,6 +1322,15 @@
 !  *
 !  * Store the info structure in the mesh structure.
 !  *
+!  * \remark Fortran interface:
+!  */
+INTERFACE
+  SUBROUTINE MMG3D_STOCKOPTIONS(mesh,info,retval)
+    MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,info
+    INTEGER, INTENT(OUT)           :: retval
+  END SUBROUTINE
+END INTERFACE
+!  *
 !  */
 
 ! int  MMG3D_stockOptions(MMG5_pMesh mesh, MMG5_Info *info);
@@ -850,6 +1339,14 @@
 !  * \param info pointer toward the info structure.
 !  *
 !  * Recover the info structure stored in the mesh structure.
+!  *
+!  * \remark Fortran interface:
+!  */
+INTERFACE
+  SUBROUTINE MMG3D_DESTOCKOPTIONS(mesh,info)
+    MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,info
+  END SUBROUTINE
+END INTERFACE
 !  *
 !  */
 
@@ -868,6 +1365,18 @@
 !  *
 !  * Search invalid elements (in term of quality or edge length).
 !  *
+!  * \remark Fortran interface:
+!  */
+INTERFACE
+  SUBROUTINE MMG3D_MMG3DCHECK(mesh,met,critmin,lmin,lmax,eltab,metridtyp,retval)
+    MMG5_DATA_PTR_T, INTENT(INOUT)      :: mesh,met
+    REAL(KIND=8), INTENT(IN)            :: critmin,lmin,lmax
+    INTEGER,DIMENSION(*), INTENT(OUT)   :: eltab
+    INTEGER, INTENT(IN)                 :: metridtyp
+    INTEGER, INTENT(OUT)                :: retval
+  END SUBROUTINE
+END INTERFACE
+!  *
 !  */
 
 ! int MMG3D_mmg3dcheck(MMG5_pMesh mesh,MMG5_pSol met,double critmin,
@@ -883,10 +1392,21 @@
 !  * Store elements which have worse quality than \a critmin in \a eltab,
 !  * \a eltab is allocated and could contain \a mesh->ne elements.
 !  *
+!  * \remark Fortran interface:
+!  */
+INTERFACE
+  SUBROUTINE MMG3D_SEARCHQUA(mesh,met,critmin,eltab,metridtyp)
+    MMG5_DATA_PTR_T, INTENT(INOUT)      :: mesh,met
+    REAL(KIND=8), INTENT(IN)            :: critmin
+    INTEGER,DIMENSION(*), INTENT(OUT)   :: eltab
+    INTEGER, INTENT(IN)                 :: metridtyp
+  END SUBROUTINE
+END INTERFACE
+!  *
 !  */
 
 ! void  MMG3D_searchqua(MMG5_pMesh mesh, MMG5_pSol met, double critmin, int *eltab,
-!                      char metRidTyp);
+!                       char metRidTyp);
 ! /**
 !  * \param mesh pointer toward the mesh structure.
 !  * \param met pointer toward the sol structure.
@@ -901,6 +1421,19 @@
 !  * Store in \a eltab elements which have edge lengths shorter than \a lmin
 !  * or longer than \a lmax, \a eltab is allocated and could contain \a mesh->ne
 !  * elements.
+!  *
+!  * \remark Fortran interface:
+!  */
+INTERFACE
+  SUBROUTINE MMG3D_SEARCHLEN(mesh,met,lmin,lmax,eltab,metridtyp,retval)
+    MMG5_DATA_PTR_T, INTENT(INOUT)      :: mesh,met
+    REAL(KIND=8), INTENT(IN)            :: lmin,lmax
+    INTEGER,DIMENSION(*), INTENT(OUT)   :: eltab
+    INTEGER, INTENT(IN)                 :: metridtyp
+    INTEGER, INTENT(OUT)                :: retval
+  END SUBROUTINE
+END INTERFACE
+!  *
 !  *
 !  */
 
@@ -920,6 +1453,17 @@
 !  * kel. \f$listet[i] = 0\f$ if the \f$i^{th}\f$ face has no adjacent element
 !  * (so we are on a boundary face).
 !  *
+!  * \remark Fortran interface:
+!  */
+INTERFACE
+  SUBROUTINE MMG3D_GET_ADJATET(mesh,kel,listet,retval)
+    MMG5_DATA_PTR_T, INTENT(INOUT)     :: mesh
+    INTEGER, INTENT(IN)                :: kel
+    INTEGER, DIMENSION(4), INTENT(OUT) :: listet
+    INTEGER, INTENT(OUT)               :: retval
+  END SUBROUTINE
+END INTERFACE
+!  *
 !  */
 
 ! int MMG3D_Get_adjaTet(MMG5_pMesh mesh,int kel, int listet[4]);
@@ -934,6 +1478,15 @@
 !  * coordinates of edge extremities) according to the size
 !  * prescription.
 !  *
+!  * \remark Fortran interface:
+!  */
+INTERFACE
+  SUBROUTINE MMG3D_LENEDGCOOR(ca,cb,sa,sb,retval)
+    REAL(KIND=8), INTENT(IN)           :: ca,cb,sa,sb
+    REAL(KIND=8), INTENT(OUT)          :: retval
+  END SUBROUTINE
+END INTERFACE
+!  *
 !  */
 
 ! double (*MMG3D_lenedgCoor)(double *ca,double *cb,double *sa,double *sb);
@@ -945,6 +1498,16 @@
 !  *
 !  * Create table of adjacency. Set pack variable to 0 for a compact
 !  * mesh and to 1 for a mesh that need to be packed.
+!  *
+!  * \remark Fortran interface:
+!  */
+INTERFACE
+  SUBROUTINE MMG3D_HASHTETRA(mesh,pack,retval)
+    MMG5_DATA_PTR_T, INTENT(INOUT)     :: mesh
+    INTEGER, INTENT(IN)                :: pack
+    INTEGER, INTENT(OUT)               :: retval
+  END SUBROUTINE
+END INTERFACE
 !  *
 !  */
 
@@ -958,6 +1521,15 @@
 !  * Compute isotropic size map according to the mean of the length of the edges
 !  * passing through a point.
 !  *
+!  * \remark Fortran interface:
+!  */
+INTERFACE
+  SUBROUTINE MMG3D_DOSOL(mesh,met,retval)
+    MMG5_DATA_PTR_T, INTENT(INOUT)     :: mesh,met
+    INTEGER, INTENT(OUT)               :: retval
+  END SUBROUTINE
+END INTERFACE
+!  *
 !  */
 
 ! int MMG3D_DoSol(MMG5_pMesh mesh,MMG5_pSol met);
@@ -969,6 +1541,14 @@
 !  *
 !  * Set function pointers for caltet, lenedg, lenedgCoor defsiz, gradsiz...
 !  * depending if the readed metric is anisotropic or isotropic
+!  *
+!  * \remark Fortran interface:
+!  */
+INTERFACE
+  SUBROUTINE MMG3D_SETFUNC(mesh,met)
+    MMG5_DATA_PTR_T, INTENT(INOUT)     :: mesh,met
+  END SUBROUTINE
+END INTERFACE
 !  *
 !  */
 
@@ -1636,4 +2216,4 @@
 ! int MMG3D_Get_tetFromTria(MMG5_pMesh mesh, int ktri, int *ktet, int *iface);
 
 
-! #endif
+#endif

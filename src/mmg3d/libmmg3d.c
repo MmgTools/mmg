@@ -58,7 +58,7 @@
   }while(0)
 
 /** Free adja, xtetra and xpoint tables */
-static inline
+inline
 void _MMG3D_Free_topoTables(MMG5_pMesh mesh) {
   int k;
 

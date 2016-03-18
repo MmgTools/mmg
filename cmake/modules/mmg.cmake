@@ -135,7 +135,7 @@ IF ( LIBMMG_STATIC OR LIBMMG_SHARED )
   ADD_CUSTOM_COMMAND(OUTPUT ${MMG_INCLUDE}/libmmgcommonf.h
     COMMAND ${CMAKE_COMMAND} -E copy ${COMMON_SOURCE_DIR}/libmmgcommonf.h ${MMG_INCLUDE}/libmmgcommonf.h
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-    DEPENDS ${COMMON_SOURCE_DIR}/libmmgcommonf.h) 
+    DEPENDS ${COMMON_SOURCE_DIR}/libmmgcommonf.h)
 
   IF ( NOT BUILD_MMG2D )
     ADD_CUSTOM_COMMAND(OUTPUT ${MMG2D_INCLUDE}/libmmg2df.h
@@ -186,3 +186,30 @@ ENDIF()
 IF ( TEST_LIBMMG )
   INCLUDE(cmake/testing/libmmg_tests.cmake)
 ENDIF()
+
+###############################################################################
+#####
+#####         Continuous integration
+#####
+###############################################################################
+
+IF ( BUILD_TESTING )
+  ##-------------------------------------------------------------------##
+  ##--------------------------- Add tests and configure it ------------##
+  ##-------------------------------------------------------------------##
+  # Add runtime that we want to test for mmg
+  IF( MMG_CI )
+    # Add libqmg tests
+    IF ( TEST_LIBMMG )
+      SET(LIBMMG_EXEC0_a ${EXECUTABLE_OUTPUT_PATH}/libmmg_example0_a)
+      ADD_TEST(NAME libmmg_example0_a   COMMAND ${LIBMMG_EXEC0_a})
+
+      IF ( CMAKE_Fortran_COMPILER)
+        SET(LIBMMG_EXECFORTRAN ${EXECUTABLE_OUTPUT_PATH}/libmmg_fortran_a)
+        ADD_TEST(NAME libmmg_fortran   COMMAND ${LIBMMG2D_EXECFORTRAN})
+      ENDIF()
+    ENDIF ()
+
+  ENDIF( MMG_CI )
+
+ENDIF ( BUILD_TESTING )

@@ -3,6 +3,9 @@
 !> @brief
 !>  Example for using mmg3dlib (basic use)
 
+PROGRAM main
+
+  IMPLICIT NONE
 
 !> Include the mmg3d library hader file
 ! if the header file is in the "include" directory
@@ -10,7 +13,6 @@
 ! if the header file is in "include/mmg/mmg3d"
 #include "mmg/mmg3d/libmmg3df.h"
 
-PROGRAM main
   MMG5_DATA_PTR_T  :: mmgMesh
   MMG5_DATA_PTR_T  :: mmgSol
   INTEGER          :: ier,k
