@@ -128,7 +128,6 @@ sub Convert {
     my $chaine;
     my $tabcount = 0;
     my $interfaceprinted = 0;
-    my $startdef = 0;
     my $modulename;
 
     open (APIc, $fichier);
@@ -176,40 +175,17 @@ sub Convert {
                     # Discard line and replace it by a white line
                     print "\n";
                 }
+                elsif($line =~ /\#ifndef/ )
+                {
+                    printTab($line,0,0 );
+                }
+                elsif($line =~ /\#endif/ )
+                {
+                    printTab($line,0,0 );
+                }
                 elsif ($line =~ /\#define/)
                 {
-                    if ($line =~ /\_MMG3DLIB\_H/ )
-                    {
-                        $modulename = "LIBMMG3D"
-                        #print "\#ifndef \_MMG3DLIBF\_H\n";
-                        #print "\#define \_MMG3DLIBF\_H\n\n";
-                        #$startdef = 1;
-                    }
-                    elsif ($line =~ /\_MMG2DLIB\_H/ )
-                    {
-                        $modulename = "LIBMMG2D"
-                        #print "\#ifndef \_MMG2DLIBF\_H\n";
-                        #print "\#define \_MMG2DLIBF\_H\n\n";
-                        #$startdef = 1;
-                    }
-                    elsif ($line =~ /\_MMGSLIB\_H/ )
-                    {
-                        $modulename = "LIBMMGS"
-                        #print "\#ifndef \_MMGSLIBF\_H\n";
-                        #print "\#define \_MMGSLIBF\_H\n\n";
-                        #$startdef = 1;
-                    }
-                   elsif ($line =~ /\_MMGLIB\_H/ )
-                    {
-                        $modulename = "LIBMMG"
-                        #print "\#ifndef \_MMGLIBF\_H\n";
-                        #print "\#define \_MMGLIBF\_H\n\n";
-                        #$startdef = 1;
-                    }
-                    else
-                    {
-                        printTab($line,1,0 );
-                    }
+                    printTab($line,1,0 );
                 }
                 elsif($line =~ /typedef/)
                 {
@@ -363,11 +339,6 @@ sub Convert {
     }
 
     close APIc;
-    if ($startdef == 1)
-    {
-        #print "\#endif\n";
-        #$startdef = 0;
-    }
 }
 
 

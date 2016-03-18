@@ -59,7 +59,8 @@
 !  */
 
 
-! #ifndef _MMG3DLIB_H
+#ifndef _MMG3DLIB_H
+#define _MMG3DLIB_H
 
 ! #include "mmgcommon.h"
 
@@ -217,7 +218,6 @@ END INTERFACE
 !  *
 !  * Set the name of output mesh file.
 !  *
-!  *
 !  * \remark Fortran interface:
 !  */
 INTERFACE
@@ -239,7 +239,6 @@ END INTERFACE
 !  * \return 1.
 !  *
 !  * Set the name of input solution file.
-!  *
 !  *
 !  * \remark Fortran interface:
 !  */
@@ -701,6 +700,17 @@ END INTERFACE
 !  *
 !  * Set double parameter \a dparam at value \a val.
 !  *
+!  * \remark Fortran interface:
+!  */
+INTERFACE
+  SUBROUTINE MMG3D_SET_DPARAMETERS(mesh,sol,dparam,val,retval)
+    MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh,sol
+    INTEGER, INTENT(IN)           :: dparam
+    REAL(KIND=8), INTENT(IN)      :: val
+    INTEGER, INTENT(OUT)          :: retval
+  END SUBROUTINE
+END INTERFACE
+!  *
 !  */
 
 ! int  MMG3D_Set_dparameter(MMG5_pMesh mesh,MMG5_pSol sol, int dparam, double val);
@@ -720,10 +730,10 @@ END INTERFACE
 !  * \remark Fortran interface:
 !  */
 INTERFACE
-  SUBROUTINE MMG3D_SET_DPARAMETERS(mesh,sol,dparam,val,retval)
+  SUBROUTINE MMG3D_SET_LOCALPARAMETER(mesh,sol,typ,ref,hmin,hmax,hausd,retval)
     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh,sol
-    INTEGER, INTENT(IN)           :: dparam
-    REAL(KIND=8), INTENT(IN)      :: val
+    INTEGER, INTENT(IN)           :: typ,ref
+    REAL(KIND=8), INTENT(IN)      :: hmin,hmax,hausd
     INTEGER, INTENT(OUT)          :: retval
   END SUBROUTINE
 END INTERFACE
@@ -1094,6 +1104,8 @@ END INTERFACE
 !  * \remark we pass the structures by reference in order to have argument
 !  * compatibility between the library call from a Fortran code and a C code.
 !  *
+!  * \remark no Fortran interface to allow variadic args.
+!  *
 !  */
 
 ! void MMG3D_Free_all(enum MMG5_arg starter,...);
@@ -1124,6 +1136,8 @@ END INTERFACE
 !  *
 !  * \remark No fortran interface to allow variadic arguments.
 !  *
+!  * \remark no Fortran interface to allow variadic args.
+!  *
 !  */
 
 ! void MMG3D_Free_structures(enum MMG5_arg starter,...);
@@ -1153,6 +1167,8 @@ END INTERFACE
 !  * compatibility between the library call from a Fortran code and a C code.
 !  *
 !  * \remark No fortran interface to allow variadic arguments.
+!  *
+!  * \remark no Fortran interface to allow variadic args.
 !  *
 !  */
 
@@ -2200,4 +2216,4 @@ END INTERFACE
 ! int MMG3D_Get_tetFromTria(MMG5_pMesh mesh, int ktri, int *ktet, int *iface);
 
 
-! #endif
+#endif

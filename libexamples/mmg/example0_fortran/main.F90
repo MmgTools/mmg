@@ -65,7 +65,7 @@ PROGRAM main
   !> 3) Build sol in MMG5 format
   !! Two solutions: just use the MMG2D_loadSol function that will read a .sol(b)
   !!    file formatted or manually set your sol using the MMG2D_Set* functions
-  CALL MMG2D_loadSol(mmgMesh,mmgSol,TRIM(ADJUSTL(bdfile)),LEN(TRIM(ADJUSTL(bdfile))),0,ier)
+  CALL MMG2D_loadSol(mmgMesh,mmgSol,TRIM(ADJUSTL(bdfile)),LEN(TRIM(ADJUSTL(bdfile))),ier)
   IF ( ier /= 1 ) THEN
      CALL EXIT(104)
   ENDIF
@@ -94,7 +94,7 @@ PROGRAM main
   !!   (by default, the mesh is saved in the "mesh.o.mesh" file
   !!call MMG2D_Set_outputMeshName(mmgMesh,"output.mesh",len("output.mesh"),ier)
   CALL MMG2D_Set_outputMeshName(mmgMesh,TRIM(ADJUSTL(bdfileout)),&
-       LEN(TRIM(ADJUSTL(bdfile))),ier)
+       LEN(TRIM(ADJUSTL(bdfileout))),ier)
   IF ( ier /= 1 ) THEN
      CALL EXIT(105)
   ENDIF
@@ -155,7 +155,8 @@ PROGRAM main
   ENDIF
 
   !> b) function calling
-  CALL MMGS_loadMesh(mmgMesh,ier)
+  CALL MMGS_loadMesh(mmgMesh,TRIM(ADJUSTL(tdfile)),&
+       LEN(TRIM(ADJUSTL(tdfile))),ier);
   IF ( ier /= 1 )  CALL EXIT(102)
 
   !> 3) Build sol in MMG5 format
@@ -172,7 +173,8 @@ PROGRAM main
   ENDIF
 
   !> b) function calling
-  CALL MMGS_loadSol(mmgMesh,mmgSol,ier)
+  CALL MMGS_loadSol(mmgMesh,mmgSol,TRIM(ADJUSTL(tdfile)),&
+       LEN(TRIM(ADJUSTL(tdfile))),ier);
   IF ( ier /= 1 ) THEN
      CALL EXIT(104)
   ENDIF
@@ -209,7 +211,8 @@ PROGRAM main
   ENDIF
 
   !! b) function calling
-  CALL MMGS_saveMesh(mmgMesh,ier)
+  CALL MMGS_saveMesh(mmgMesh,TRIM(ADJUSTL(tdfileout)),&
+       LEN(TRIM(ADJUSTL(tdfileout))),ier);
   IF ( ier /= 1 ) THEN
      CALL EXIT(108)
   ENDIF
@@ -224,7 +227,8 @@ PROGRAM main
   ENDIF
 
   !! b) function calling
-  CALL MMGS_saveSol(mmgMesh,mmgSol,ier)
+  CALL MMGS_saveSol(mmgMesh,mmgSol,TRIM(ADJUSTL(tdfileout)),&
+       LEN(TRIM(ADJUSTL(tdfileout))),ier);
   IF ( ier /= 1 ) THEN
      CALL EXIT(107)
   ENDIF
@@ -267,7 +271,8 @@ PROGRAM main
   ENDIF
 
   !> b) function calling
-  CALL MMG3D_loadMesh(mmgMesh,ier)
+  CALL MMG3D_loadMesh(mmgMesh,TRIM(ADJUSTL(tdfile)),&
+       LEN(TRIM(ADJUSTL(tdfile))),ier)
   IF ( ier /= 1 )  CALL EXIT(102)
 
   !> 3) Build sol in MMG5 format
@@ -284,7 +289,7 @@ PROGRAM main
   ENDIF
 
   !> b) function calling
-  CALL MMG3D_loadSol(mmgMesh,mmgSol,ier)
+  CALL MMG3D_loadSol(mmgMesh,mmgSol,TRIM(ADJUSTL(tdfile)),LEN(TRIM(ADJUSTL(tdfile))),ier)
   IF ( ier /= 1 ) THEN
      CALL EXIT(104)
   ENDIF
@@ -321,7 +326,8 @@ PROGRAM main
   ENDIF
 
   !! b) function calling
-  CALL MMG3D_saveMesh(mmgMesh,ier)
+  CALL MMG3D_saveMesh(mmgMesh,TRIM(ADJUSTL(tdfileout)),&
+       LEN(TRIM(ADJUSTL(tdfileout))),ier)
   IF ( ier /= 1 ) THEN
      CALL EXIT(108)
   ENDIF
@@ -336,7 +342,8 @@ PROGRAM main
   ENDIF
 
   !! b) function calling
-  CALL MMG3D_saveSol(mmgMesh,mmgSol,ier)
+  CALL MMG3D_saveSol(mmgMesh,mmgSol,TRIM(ADJUSTL(tdfileout)),&
+       LEN(TRIM(ADJUSTL(tdfileout))),ier)
   IF ( ier /= 1 ) THEN
      CALL EXIT(107)
   ENDIF
@@ -344,7 +351,7 @@ PROGRAM main
 
   !> 3) Free the MMG3D5 structures
   CALL MMG3D_Free_all(MMG5_ARG_start, &
-       MMG5_ARG_pMesh,mmgMesh,MMG5_ARG_pMet,mmgSol, &
+       MMG5_ARG_ppMesh,mmgMesh,MMG5_ARG_ppMet,mmgSol, &
        MMG5_ARG_end)
 
 END PROGRAM main

@@ -48,7 +48,8 @@
 !  */
 
 
-! #ifndef _MMG2DLIB_H
+#ifndef _MMG2DLIB_H
+#define _MMG2DLIB_H
 
 ! #include "mmgcommon.h"
 
@@ -1093,4 +1094,4 @@ END INTERFACE
 
 ! void MMG2D_Free_solutions(MMG5_pMesh mesh,MMG5_pSol sol);
 
-! #endif
+#endif

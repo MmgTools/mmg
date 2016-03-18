@@ -48,7 +48,7 @@
 !  */
 
 
-! #ifndef _MMGLIBCOMMON_H
+#ifndef _MMGLIBCOMMON_H
 #define _MMGLIBCOMMON_H
 
 ! #include "stdarg.h"
@@ -504,4 +504,4 @@ END INTERFACE
 
 ! void MMG5_mmgFree_names(MMG5_pMesh mesh, MMG5_pSol met);
 
-! #endif
+#endif

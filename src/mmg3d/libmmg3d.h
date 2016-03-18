@@ -167,7 +167,6 @@ int  MMG3D_Set_inputMeshName(MMG5_pMesh mesh, char* meshin);
  *
  * Set the name of output mesh file.
  *
- *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_SET_OUTPUTMESHNAME(mesh,meshout,strlen,retval)\n
  * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh\n
@@ -185,7 +184,6 @@ int  MMG3D_Set_outputMeshName(MMG5_pMesh mesh, char* meshout);
  * \return 1.
  *
  * Set the name of input solution file.
- *
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_SET_INPUTSOLNAME(mesh,sol,solin,strlen,retval)\n
@@ -567,6 +565,14 @@ int  MMG3D_Set_iparameter(MMG5_pMesh mesh,MMG5_pSol sol, int iparam, int val);
  *
  * Set double parameter \a dparam at value \a val.
  *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMG3D_SET_DPARAMETERS(mesh,sol,dparam,val,retval)\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh,sol\n
+ * >     INTEGER, INTENT(IN)           :: dparam\n
+ * >     REAL(KIND=8), INTENT(IN)      :: val\n
+ * >     INTEGER, INTENT(OUT)          :: retval\n
+ * >   END SUBROUTINE\n
+ *
  */
 int  MMG3D_Set_dparameter(MMG5_pMesh mesh,MMG5_pSol sol, int dparam, double val);
 /**
@@ -583,10 +589,10 @@ int  MMG3D_Set_dparameter(MMG5_pMesh mesh,MMG5_pSol sol, int dparam, double val)
  * elements of type \a typ and reference \a ref.
  *
  * \remark Fortran interface:
- * >   SUBROUTINE MMG3D_SET_DPARAMETERS(mesh,sol,dparam,val,retval)\n
+ * >   SUBROUTINE MMG3D_SET_LOCALPARAMETER(mesh,sol,typ,ref,hmin,hmax,hausd,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh,sol\n
- * >     INTEGER, INTENT(IN)           :: dparam\n
- * >     REAL(KIND=8), INTENT(IN)      :: val\n
+ * >     INTEGER, INTENT(IN)           :: typ,ref\n
+ * >     REAL(KIND=8), INTENT(IN)      :: hmin,hmax,hausd\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
  *
@@ -898,6 +904,8 @@ int MMG3D_saveSol(MMG5_pMesh mesh,MMG5_pSol met, char *filename);
  * \remark we pass the structures by reference in order to have argument
  * compatibility between the library call from a Fortran code and a C code.
  *
+ * \remark no Fortran interface to allow variadic args.
+ *
  */
 void MMG3D_Free_all(enum MMG5_arg starter,...);
 
@@ -927,6 +935,8 @@ void MMG3D_Free_all(enum MMG5_arg starter,...);
  *
  * \remark No fortran interface to allow variadic arguments.
  *
+ * \remark no Fortran interface to allow variadic args.
+ *
  */
 void MMG3D_Free_structures(enum MMG5_arg starter,...);
 
@@ -955,6 +965,8 @@ void MMG3D_Free_structures(enum MMG5_arg starter,...);
  * compatibility between the library call from a Fortran code and a C code.
  *
  * \remark No fortran interface to allow variadic arguments.
+ *
+ * \remark no Fortran interface to allow variadic args.
  *
  */
 void MMG3D_Free_names(enum MMG5_arg starter,...);
