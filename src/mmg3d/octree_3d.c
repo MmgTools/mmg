@@ -181,7 +181,7 @@ void _MMG3D_getOctreeCoordinateRec(_MMG3D_octree_s* q, double* ver, int dim, int
       ver[i] *= 2;
     }
     (*coordinate) += quadrant<<(dim*q->depth);
-    _MMG3D_getOctreeCoordinateRec(&(q->branches[quadrant]), dim, ver, coordinate);
+    _MMG3D_getOctreeCoordinateRec(&(q->branches[quadrant]),  ver, dim, coordinate);
   }
 }
 
@@ -203,7 +203,7 @@ int _MMG3D_getOctreeCoordinate(_MMG3D_pOctree q, double* ver, int dim)
   _MMG5_SAFE_MALLOC(pt,dim,double);
   memcpy(pt, ver ,dim*sizeof(double));
 
-  _MMG3D_getOctreeCoordinateRec(q->q0, dim, pt, &coordinate);
+  _MMG3D_getOctreeCoordinateRec(q->q0,  pt, dim, &coordinate);
 
   _MMG5_SAFE_FREE(pt);
   return coordinate;
