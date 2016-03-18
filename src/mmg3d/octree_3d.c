@@ -26,12 +26,12 @@ int _MMG3D_verifOctreeRec(MMG5_pMesh mesh, _MMG3D_octree_s* q, double* ver, cons
       {
         test = 1;
         break;
-      } 
+      }
     }
     //~ assert(test);
     return test;
     assert(1);
-   
+
   }else if (q->branches != NULL)
   {
     quadrant = 0;
@@ -42,7 +42,7 @@ int _MMG3D_verifOctreeRec(MMG5_pMesh mesh, _MMG3D_octree_s* q, double* ver, cons
       ver[i] *= 2;
     }
 #ifndef NDEBUG
-   _MMG3D_verifOctreeRec(mesh, &(q->branches[quadrant]), ver, no, nv);
+    _MMG3D_verifOctreeRec(mesh, &(q->branches[quadrant]), ver, no, nv);
 #endif
   }
 }
@@ -85,7 +85,7 @@ void _MMG3D_initOctree(MMG5_pMesh mesh,_MMG3D_pOctree* q, int nv)
   _MMG5_ADD_MEM(mesh,sizeof(_MMG3D_octree_s),"initial octree cell",
                 printf("  Exit program.\n");
                 exit(EXIT_FAILURE));
-  
+
   _MMG5_SAFE_MALLOC((*q)->q0,1, _MMG3D_octree_s);
   _MMG3D_initOctree_s((*q)->q0);
 
@@ -168,7 +168,7 @@ void _MMG3D_freeOctree(MMG5_pMesh mesh,_MMG3D_pOctree q)
  *
  */
 void _MMG3D_getOctreeCoordinateRec(_MMG3D_octree_s* q, double* ver, int dim, int* coordinate)
-{  
+{
   int i;
   int quadrant;
   if (q->branches != NULL)
@@ -199,10 +199,10 @@ int _MMG3D_getOctreeCoordinate(_MMG3D_pOctree q, double* ver, int dim)
   double *pt;
   int coordinate;
   coordinate = 0;
-  
+
   _MMG5_SAFE_MALLOC(pt,dim,double);
   memcpy(pt, ver ,dim*sizeof(double));
-  
+
   _MMG3D_getOctreeCoordinateRec(q->q0, dim, pt, &coordinate);
 
   _MMG5_SAFE_FREE(pt);
@@ -229,16 +229,16 @@ void _MMG3D_moveOctree(MMG5_pMesh mesh, _MMG3D_pOctree q, int no, double* newVer
 {
   int oldCoor, newCoor;
   double *pt;
-  int dim;  
+  int dim;
   dim = mesh->dim;
-    
+
   _MMG5_SAFE_MALLOC(pt,dim,double);
-  
+
   memcpy(pt, oldVer ,dim*sizeof(double));
   oldCoor = _MMG3D_getOctreeCoordinate(q, oldVer, dim);
   memcpy(pt, newVer ,dim*sizeof(double));
   newCoor = _MMG3D_getOctreeCoordinate(q, mesh->point[no].c, dim);
-  
+
   if (newCoor == oldCoor) {
     _MMG5_SAFE_FREE(pt);
     return;
@@ -277,7 +277,7 @@ void _MMG3D_getListSquareRec(_MMG3D_octree_s* q, double* center, double* rect,
                              _MMG3D_octree_s*** qlist, int nv, int dim, int* index)
 {
   double *recttemp;
-  double *centertemp;  
+  double *centertemp;
   double l = 1./(1<<(q->depth+1));
 
   _MMG5_SAFE_MALLOC(recttemp,2*dim,double);
@@ -534,7 +534,7 @@ int _MMG3D_getListSquare(MMG5_pMesh mesh,_MMG3D_pOctree q, double* rect,
  * \param q pointer toward an octree cell.
  * \param ver vertex coordinates scaled such that the quadrant is [0;1]x[0;1]x[0;1]
  * \param no vertex index in the mesh.
- * \param nv maximum number of points in an octree cell. 
+ * \param nv maximum number of points in an octree cell.
  *
  * Add vertex in the suitable quadrant of the octree. This function is
  * recursively called until we reach the last one. At each step, the vertex
@@ -542,7 +542,7 @@ int _MMG3D_getListSquare(MMG5_pMesh mesh,_MMG3D_pOctree q, double* rect,
  *
  */
 void _MMG3D_addOctreeRec(MMG5_pMesh mesh, _MMG3D_octree_s* q, double* ver,
-                           const int no, int nv)
+                         const int no, int nv)
 {
   double   *pt;
   int      dim, nbBitsInt,depthMax,i,j,k;
@@ -578,9 +578,9 @@ void _MMG3D_addOctreeRec(MMG5_pMesh mesh, _MMG3D_octree_s* q, double* ver,
 // faire directement descendre les points à leur place lorsque l'on dépasse le
 // nombre de points dans la feuille et de rechercher plus rapidement dans la
 // feuille
-        q->v[q->nbVer] = no;
+      q->v[q->nbVer] = no;
       // intéressant seulement si nv est grand
-        q->nbVer++;
+      q->nbVer++;
       _MMG5_SAFE_FREE(pt);
       return;
     }
@@ -652,13 +652,13 @@ void _MMG3D_addOctreeRec(MMG5_pMesh mesh, _MMG3D_octree_s* q, double* ver,
 }
 
 /**
-* \param pointer toward the mesh structure
-* \param q pointer toward the global octree structure
-* \param no index of the point to add to the octree
-*
-* Add the vertex of index \a no to the octree.
-*
-*/
+ * \param pointer toward the mesh structure
+ * \param q pointer toward the global octree structure
+ * \param no index of the point to add to the octree
+ *
+ * Add the vertex of index \a no to the octree.
+ *
+ */
 void _MMG3D_addOctree(MMG5_pMesh mesh, _MMG3D_pOctree q, const int no)
 {
   double *pt;
@@ -674,12 +674,12 @@ void _MMG3D_addOctree(MMG5_pMesh mesh, _MMG3D_pOctree q, const int no)
 }
 
 /**
-* \param q pointer toward a terminal octree cell (containing vertex)
-* \param no index of the point to delete from the octree
-*
-* Delete the vertex of index \a no from the terminal octree cell.
-*
-*/
+ * \param q pointer toward a terminal octree cell (containing vertex)
+ * \param no index of the point to delete from the octree
+ *
+ * Delete the vertex of index \a no from the terminal octree cell.
+ *
+ */
 void _MMG3D_delOctreeVertex(_MMG3D_octree_s* q, int indNo)
 {
   int i;
@@ -705,11 +705,11 @@ void _MMG3D_delOctreeVertex(_MMG3D_octree_s* q, int indNo)
 void _MMG3D_mergeBranchesRec(_MMG3D_octree_s* q0, _MMG3D_octree_s* q, int dim, int nv, int* index)
 {
   int i;
-  
+
   if (q->v != NULL)
   {
     //~ if (*index+q->nbVer == nv+1)
-      //~ fprintf(stdout, "Index too high %i\n", *index+q->nbVer);
+    //~ fprintf(stdout, "Index too high %i\n", *index+q->nbVer);
     //~ fprintf(stdout, "Index %i nbVer %i\n", *index,q->nbVer);
     assert(*index+q->nbVer<=nv);
 
@@ -728,7 +728,7 @@ void _MMG3D_mergeBranchesRec(_MMG3D_octree_s* q0, _MMG3D_octree_s* q, int dim, i
  * \param mesh pointer toward the mesh structure.
  * \param q pointer toward an octree cell.
  * \param dim dimension of the space (=3)
- * \param nv maximum number of points in an octree cell. 
+ * \param nv maximum number of points in an octree cell.
  *
  * Merge branches that have a parent counting less than nv vertices.
  *
@@ -747,7 +747,7 @@ void _MMG3D_mergeBranches(MMG5_pMesh mesh,_MMG3D_octree_s* q, int dim, int nv)
   for (i = 0; i<(1<<dim); ++i)
   {
     //~ _MMG3D_printSubArbre(&(q->branches[i]),nv,dim);
-    _MMG3D_mergeBranchesRec(q, &(q->branches[i]), dim, nv, &index); 
+    _MMG3D_mergeBranchesRec(q, &(q->branches[i]), dim, nv, &index);
     _MMG3D_freeOctree_s(mesh,&(q->branches[i]), nv);
   }
   _MMG5_DEL_MEM(mesh,q->branches,sizBr*sizeof(_MMG3D_octree_s));
@@ -759,10 +759,10 @@ void _MMG3D_mergeBranches(MMG5_pMesh mesh,_MMG3D_octree_s* q, int dim, int nv)
  * \param q pointer toward an octree cell.
  * \param ver vertex coordinates scaled such that the quadrant is [0;1]x[0;1]x[0;1]
  * \param no vertex index in the mesh.
- * \param nv maximum number of points in an octree cell. 
+ * \param nv maximum number of points in an octree cell.
  *
- * Delete vertex \a no from the octree. This function is recursively 
- * called until we reach the terminal octree cell containing the vertex 
+ * Delete vertex \a no from the octree. This function is recursively
+ * called until we reach the terminal octree cell containing the vertex
  * \a no. At each step, the vertex coordinates are scaled such as the
  * quadrant is the [0;1]x[0;1]x[0;1] box.
  *
@@ -795,20 +795,20 @@ void _MMG3D_delOctreeRec(MMG5_pMesh mesh, _MMG3D_octree_s* q, double* ver, const
           _MMG5_DEL_MEM(mesh,q->v,nv*sizeof(int));
         }
         break;
-      } 
+      }
     }
     //~ if (!test)
     //~ {
-      //~ fprintf(stdout,"Le petit %i est attendu à l'accueil\n Accueil : ", no);
-      //~ for ( i = 0; i<q->nbVer; ++i)
-        //~ fprintf(stdout,"%i ",q->v[i]);
-      //~ fprintf(stdout,"\n");
+    //~ fprintf(stdout,"Le petit %i est attendu à l'accueil\n Accueil : ", no);
+    //~ for ( i = 0; i<q->nbVer; ++i)
+    //~ fprintf(stdout,"%i ",q->v[i]);
+    //~ fprintf(stdout,"\n");
     //~ }else
     //~ {
-      //~ fprintf(stdout,"OK :)\n");
+    //~ fprintf(stdout,"OK :)\n");
     //~ }
-      //assert(test);
-   
+    //assert(test);
+
   }else if ( q->nbVer == nv+1)
   {
     quadrant = 0;
@@ -821,7 +821,7 @@ void _MMG3D_delOctreeRec(MMG5_pMesh mesh, _MMG3D_octree_s* q, double* ver, const
     --q->nbVer;
     //~ fprintf(stdout,"quadrant %i nbVer %i\n", quadrant,q->branches[quadrant].nbVer);
     nbVerTemp = q->branches[quadrant].nbVer;
-    #warning calling recursively here is not optimal
+#warning calling recursively here is not optimal
     _MMG3D_delOctreeRec(mesh, &(q->branches[quadrant]), ver, no, nv);
     //~ fprintf(stdout,"quadrant %i nbVer %i\n", quadrant,q->branches[quadrant].nbVer);
     if (nbVerTemp > q->branches[quadrant].nbVer)
@@ -830,15 +830,15 @@ void _MMG3D_delOctreeRec(MMG5_pMesh mesh, _MMG3D_octree_s* q, double* ver, const
 #warning to trash
 //      printf("ALLOC DELOCTREEREC depth %d\n",q->depth);
       _MMG5_ADD_MEM(mesh,nv*sizeof(int),"octree vertices table",
-                  printf("  Exit program.\n");
-                  exit(EXIT_FAILURE));
+                    printf("  Exit program.\n");
+                    exit(EXIT_FAILURE));
       _MMG5_SAFE_MALLOC(q->v,nv,int);
       _MMG3D_mergeBranches(mesh,q,dim,nv);
     }else
     {
       ++q->nbVer;
     }
-      
+
   }else if (q->branches != NULL)
   {
     quadrant = 0;
@@ -849,7 +849,7 @@ void _MMG3D_delOctreeRec(MMG5_pMesh mesh, _MMG3D_octree_s* q, double* ver, const
       ver[i] *= 2;
     }
 
-    --q->nbVer;    
+    --q->nbVer;
     nbVerTemp = q->branches[quadrant].nbVer;
     _MMG3D_delOctreeRec(mesh, &(q->branches[quadrant]), ver, no, nv);
     if (nbVerTemp <= q->branches[quadrant].nbVer) // test if deletion worked
@@ -876,10 +876,10 @@ void _MMG3D_delOctree(MMG5_pMesh mesh, _MMG3D_pOctree q, const int no)
   _MMG5_SAFE_MALLOC(pt,dim,double);
 
   assert(MG_VOK(&mesh->point[no]));
-  
+
   //~ memcpy(pt, mesh->point[no].c ,dim*sizeof(double));
   //~ if (!_MMG3D_verifOctreeRec(mesh, q->q0, pt, no, q->nv))
-    //~ fprintf(stdout,"pneaiut\n");
+  //~ fprintf(stdout,"pneaiut\n");
   memcpy(pt, mesh->point[no].c ,dim*sizeof(double));
   _MMG3D_delOctreeRec(mesh, q->q0, pt , no, q->nv);
 
@@ -888,15 +888,15 @@ void _MMG3D_delOctree(MMG5_pMesh mesh, _MMG3D_pOctree q, const int no)
 
 
 /**
-* \param q pointer toward an octree cell
-* \param depth depth of the subtree
-* \param nv number of vertices in the subtree
-* \param dim dimension in which we work
-*
-* Print the depth \a depth of the subtree of \a q.
-*
-* \warning debug function, not safe
-*/
+ * \param q pointer toward an octree cell
+ * \param depth depth of the subtree
+ * \param nv number of vertices in the subtree
+ * \param dim dimension in which we work
+ *
+ * Print the depth \a depth of the subtree of \a q.
+ *
+ * \warning debug function, not safe
+ */
 void _MMG3D_printArbreDepth(_MMG3D_octree_s* q, int depth, int nv, int dim)
 {
   int i;
@@ -915,13 +915,13 @@ void _MMG3D_printArbreDepth(_MMG3D_octree_s* q, int depth, int nv, int dim)
 }
 
 /**
-* \param q pointer toward the global octree structure
-*
-* Print the octree.
-*
-* \warning debug function, not safe
-*
-*/
+ * \param q pointer toward the global octree structure
+ *
+ * Print the octree.
+ *
+ * \warning debug function, not safe
+ *
+ */
 void _MMG3D_printArbre(_MMG3D_pOctree q)
 {
   int dim;
@@ -938,15 +938,15 @@ void _MMG3D_printArbre(_MMG3D_pOctree q)
 }
 
 /**
-* \param q pointer toward an octree cell
-* \param nv maximum number of vertices in an octree leaf
-* \param dim spacial dimension 
-* 
-* Print the octree.
-*
-* \warning debug function, not safe
-*
-*/
+ * \param q pointer toward an octree cell
+ * \param nv maximum number of vertices in an octree leaf
+ * \param dim spacial dimension
+ *
+ * Print the octree.
+ *
+ * \warning debug function, not safe
+ *
+ */
 void _MMG3D_printSubArbre(_MMG3D_octree_s* q, int nv, int dim)
 {
   int i;
@@ -961,14 +961,14 @@ void _MMG3D_printSubArbre(_MMG3D_octree_s* q, int nv, int dim)
 
 
 /**
-* \param q pointer toward an octree cell
-* \param nv maximum number of vertices in an octree leaf
-* \param dim dimension in which we work
-*
-* Print the memory size of the octree.
-*
-* \warning debug function, not safe
-*/
+ * \param q pointer toward an octree cell
+ * \param nv maximum number of vertices in an octree leaf
+ * \param dim dimension in which we work
+ *
+ * Print the memory size of the octree.
+ *
+ * \warning debug function, not safe
+ */
 int _MMG3D_sizeArbreRec(_MMG3D_octree_s* q, int nv, int dim)
 {
   int i, sizeBranches;
@@ -994,13 +994,13 @@ int _MMG3D_sizeArbreRec(_MMG3D_octree_s* q, int nv, int dim)
 }
 
 /**
-* \param q pointer toward the global octree structure
-*
-* Print the octree memory size.
-*
-* \warning debug function, not safe
-*
-*/
+ * \param q pointer toward the global octree structure
+ *
+ * Print the octree memory size.
+ *
+ * \warning debug function, not safe
+ *
+ */
 int _MMG3D_sizeArbre(_MMG3D_pOctree q,int dim)
 {
   return _MMG3D_sizeArbreRec(q->q0, q->nv, dim);
@@ -1008,14 +1008,14 @@ int _MMG3D_sizeArbre(_MMG3D_pOctree q,int dim)
 
 
 /**
-* \param q pointer toward an octree cell
-* \param nv number of vertices in the subtree
-* \param dim dimension in which we work
-*
-* Print the memory size of the octree for point stored with a linked list.
-*
-* \warning debug function, not safe
-*/
+ * \param q pointer toward an octree cell
+ * \param nv number of vertices in the subtree
+ * \param dim dimension in which we work
+ *
+ * Print the memory size of the octree for point stored with a linked list.
+ *
+ * \warning debug function, not safe
+ */
 static inline
 int _MMG3D_sizeArbreLinkRec(_MMG3D_octree_s* q, int nv, int dim)
 {
@@ -1042,12 +1042,12 @@ int _MMG3D_sizeArbreLinkRec(_MMG3D_octree_s* q, int nv, int dim)
 }
 
 /**
-* \param q pointer toward the global octree
-*
-* Print the memory size of the octree for point stored with a linked list.
-*
-* \warning debug function, not safe
-*/
+ * \param q pointer toward the global octree
+ *
+ * Print the memory size of the octree for point stored with a linked list.
+ *
+ * \warning debug function, not safe
+ */
 static inline
 int _MMG3D_sizeArbreLink(_MMG3D_pOctree q)
 {
@@ -1079,7 +1079,7 @@ int NearNeighborSquare(MMG5_pMesh mesh, _MMG3D_pOctree q, int no, double l, int 
   qlist = NULL;
   ns = _MMG3D_getListSquare(mesh,q, rect, &qlist);
 
-  
+
   for (i = 0; i < ns; i++)
   {
     for (j = 0; j<qlist[i]->nbVer; j++)
