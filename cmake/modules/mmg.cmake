@@ -92,11 +92,8 @@ IF ( LIBMMG_STATIC OR LIBMMG_SHARED )
     ${MMGS_SOURCE_DIR}/libmmgsf.h
     )
   SET( mmg_headers
-    ${COMMON_SOURCE_DIR}/mmgcommon.h
-    ${COMMON_SOURCE_DIR}/eigenv.h
-    ${COMMON_SOURCE_DIR}/libmmgcommon.h
-    ${COMMON_SOURCE_DIR}/libmmgcommonf.h
-    ${COMMON_SOURCE_DIR}/chrono.h
+    ${COMMON_SOURCE_DIR}/libmmgtypes.h
+    ${COMMON_SOURCE_DIR}/libmmgtypesf.h
     ${CMAKE_SOURCE_DIR}/src/mmg/libmmg.h
     ${CMAKE_SOURCE_DIR}/src/mmg/libmmgf.h
     )
@@ -119,11 +116,8 @@ IF ( LIBMMG_STATIC OR LIBMMG_SHARED )
   SET( mmg_includes
     ${MMG_INCLUDE}/libmmg.h
     ${MMG_INCLUDE}/libmmgf.h
-    ${MMG_INCLUDE}/mmgcommon.h
-    ${MMG_INCLUDE}/eigenv.h
-    ${MMG_INCLUDE}/libmmgcommon.h
-    ${MMG_INCLUDE}/libmmgcommonf.h
-    ${MMG_INCLUDE}/chrono.h
+    ${MMG_INCLUDE}/libmmgtypes.h
+    ${MMG_INCLUDE}/libmmgtypesf.h
     )
 
   # Install header files in /usr/local or equivalent
@@ -132,10 +126,10 @@ IF ( LIBMMG_STATIC OR LIBMMG_SHARED )
   INSTALL(FILES ${mmg3d_headers} DESTINATION include/mmg/mmg3d)
   INSTALL(FILES ${mmg_headers} DESTINATION include/mmg)
 
-  ADD_CUSTOM_COMMAND(OUTPUT ${MMG_INCLUDE}/libmmgcommonf.h
-    COMMAND ${CMAKE_COMMAND} -E copy ${COMMON_SOURCE_DIR}/libmmgcommonf.h ${MMG_INCLUDE}/libmmgcommonf.h
+  ADD_CUSTOM_COMMAND(OUTPUT ${MMG_INCLUDE}/libmmgtypesf.h
+    COMMAND ${CMAKE_COMMAND} -E copy ${COMMON_SOURCE_DIR}/libmmgtypesf.h ${MMG_INCLUDE}/libmmgtypesf.h
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-    DEPENDS ${COMMON_SOURCE_DIR}/libmmgcommonf.h) 
+    DEPENDS ${COMMON_SOURCE_DIR}/libmmgtypesf.h) 
 
   IF ( NOT BUILD_MMG2D )
     ADD_CUSTOM_COMMAND(OUTPUT ${MMG2D_INCLUDE}/libmmg2df.h

@@ -34,6 +34,11 @@
 #include <float.h>
 
 #include "libmmg2d.h"
+#include "mmgcommon.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /* constantes */
 
@@ -383,5 +388,8 @@ void _MMG2D_Set_commonFunc() {
   return;
 }
 
+#ifdef __cplusplus
+}
+#endif
 
 #endif

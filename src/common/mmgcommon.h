@@ -47,11 +47,9 @@
 #include <windows.h>
 #endif
 
-#ifdef GNU
-#define DOUBLE_COMPLEX double complex
-#else
-#define inline __inline
-#define DOUBLE_COMPLEX _Dcomplex
+
+#ifdef __cplusplus
+extern "C" {
 #endif
 
 #include "eigenv.h"
@@ -448,7 +446,6 @@ int    _MMG5_invmat(double *m,double *mi);
 int    _MMG5_invmatg(double m[9],double mi[9]);
 double _MMG5_ridSizeInNormalDir(MMG5_pMesh,int,double*,_MMG5_pBezier,int,int);
 double _MMG5_ridSizeInTangentDir(MMG5_pMesh, MMG5_pPoint,int,int*,double,double);
-int    _MMG5_rootDeg3(double a[4],DOUBLE_COMPLEX r[3]);
 extern long _MMG5_safeLL2LCast(long long val);
 int    _MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met);
 int    _MMG5_scotchCall(MMG5_pMesh mesh, MMG5_pSol sol);
@@ -466,16 +463,6 @@ int    _MMG5_interpreg_ani(MMG5_pMesh,MMG5_pSol,MMG5_pTria,char,double,double *m
 int    _MMG5_interp_iso(double *ma,double *mb,double *mp,double t);
 int    _MMG5_intersecmet22(MMG5_pMesh mesh, double *m,double *n,double *mr);
 
-#ifndef POSIX
-extern DOUBLE_COMPLEX _MMG5_opp_complex(DOUBLE_COMPLEX z1);
-extern DOUBLE_COMPLEX _MMG5_inv_complex(DOUBLE_COMPLEX z1);
-extern DOUBLE_COMPLEX _MMG5_add_complex(DOUBLE_COMPLEX z1,DOUBLE_COMPLEX z2);
-extern DOUBLE_COMPLEX _MMG5_substract_complex(DOUBLE_COMPLEX z1, DOUBLE_COMPLEX z2);
-extern DOUBLE_COMPLEX _MMG5_mult_complex(DOUBLE_COMPLEX z1, DOUBLE_COMPLEX z2);
-extern DOUBLE_COMPLEX _MMG5_div_complex(DOUBLE_COMPLEX z1, DOUBLE_COMPLEX z2);
-extern DOUBLE_COMPLEX _MMG5_mult_cr(DOUBLE_COMPLEX z1, double r);
-#endif
-
 /* function pointers */
 int    (*_MMG5_chkmsh)(MMG5_pMesh,int,int);
 int    (*_MMG5_bezierCP)(MMG5_pMesh ,MMG5_Tria *,_MMG5_pBezier ,char );
@@ -486,5 +473,9 @@ int    (*_MMG5_renumbering)(int vertBoxNbr, MMG5_pMesh mesh, MMG5_pSol sol);
 #endif
 
 void   _MMG5_Set_commonFunc();
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

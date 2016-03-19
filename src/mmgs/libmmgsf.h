@@ -11,7 +11,7 @@
 ! ** See the "libmmg*.h" file for a correct displaying of the documentation.
 ! */
 
-#include "libmmgcommonf.h"
+#include "libmmgtypesf.h"
 
 ! /* =============================================================================
 ! **  This file is part of the mmg software package for the tetrahedral
@@ -52,7 +52,12 @@
 
 ! #ifndef _MMGSLIB_H
 
-! #include "mmgcommon.h"
+
+! #ifdef __cplusplus
+! extern "C" {
+! #endif
+
+! #include "libmmgtypes.h"
 
 ! /**
 !  * Maximum array size when storing adjacent points (or ball) of a vertex.
@@ -741,5 +746,9 @@
 
 ! extern
 ! int MMGS_Get_adjaVerticesFast(MMG5_pMesh mesh, int ip,int start, int lispoi[MMGS_LMAX]);
+
+! #ifdef __cplusplus
+! }
+! #endif
 
 ! #endif

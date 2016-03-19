@@ -138,6 +138,8 @@ int main(int argc,char *argv[]) {
 
   /** ------------------------------ STEP  II -------------------------- */
   /** library call */
+  // WARNING: the MMG3D_mmg3dlib function returns 1 if success, 0 if fail.
+  // The MMG3D4 library was working opposite.
   ier = MMG3D_mmg3dlib(mmgMesh,mmgSol);
 
   if ( ier == MMG5_STRONGFAILURE ) {
