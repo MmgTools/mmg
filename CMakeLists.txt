@@ -170,13 +170,13 @@ ENDIF()
 
 IF ( NOT WIN32 )
   ADD_EXECUTABLE(genheader ${CMAKE_SOURCE_DIR}/scripts/genheader.c)
-  ADD_CUSTOM_COMMAND(OUTPUT ${COMMON_SOURCE_DIR}/libmmgcommonf.h
-    COMMAND genheader ${COMMON_SOURCE_DIR}/libmmgcommonf.h
-    ${COMMON_SOURCE_DIR}/libmmgcommon.h ${CMAKE_SOURCE_DIR}/scripts/genfort.pl
+  ADD_CUSTOM_COMMAND(OUTPUT ${COMMON_SOURCE_DIR}/libmmgtypesf.h
+    COMMAND genheader ${COMMON_SOURCE_DIR}/libmmgtypesf.h
+    ${COMMON_SOURCE_DIR}/libmmgtypes.h ${CMAKE_SOURCE_DIR}/scripts/genfort.pl
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-    DEPENDS genheader ${COMMON_SOURCE_DIR}/libmmgcommon.h
+    DEPENDS genheader ${COMMON_SOURCE_DIR}/libmmgtypes.h
     ${CMAKE_SOURCE_DIR}/scripts/genfort.pl
-    COMMENT "Generating Fortran header for libmmgcommon.h file"
+    COMMENT "Generating Fortran header for libmmgtypes.h file"
     )
 ENDIF()
 
@@ -577,7 +577,7 @@ SET(CPACK_PACKAGE_FILE_NAME ${CPACK_PACKAGE_INSTALL_DIRECTORY}-${CMAKE_SYSTEM})
 SET(CPACK_PACKAGE_EXECUTABLES "${PROJECT_NAME}")
 SET(CPACK_OUTPUT_FILE_PREFIX "../archives")
 
-#SET(CPACK_SOURCE_IGNORE_FILES ";src/common/mmgcommon.h$" ${CPACK_SOURCE_IGNORE_FILE})
+#SET(CPACK_SOURCE_IGNORE_FILES ";src/common/mmgtypes.h$" ${CPACK_SOURCE_IGNORE_FILE})
 #SET(CPACK_SOURCE_IGNORE_FILES ";.\\\\\\\\.#;/\\\\\\\\.git;.~;.#;.-e;.DS_Store"
 #  ${CPACK_SOURCE_IGNORE_FILES})
 #SET(CPACK_SOURCE_IGNORE_FILES ";lib/;bin;archives;def"

@@ -39,7 +39,9 @@ IF ( NOT WIN32 )
     COMMAND genheader ${MMG2D_SOURCE_DIR}/libmmg2df.h
     ${MMG2D_SOURCE_DIR}/libmmg2d.h ${CMAKE_SOURCE_DIR}/scripts/genfort.pl
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-    DEPENDS genheader ${MMG2D_SOURCE_DIR}/libmmg2d.h ${COMMON_SOURCE_DIR}/libmmgcommonf.h
+    DEPENDS genheader ${MMG2D_SOURCE_DIR}/libmmg2d.h
+    ${COMMON_SOURCE_DIR}/libmmgtypesf.h
+    ${COMMON_SOURCE_DIR}/libmmgtypes.h
     ${CMAKE_SOURCE_DIR}/scripts/genfort.pl
     COMMENT "Generating Fortran header for mmg2d"
     )
@@ -117,29 +119,23 @@ IF ( LIBMMG2D_STATIC OR LIBMMG2D_SHARED )
   SET( mmg2d_headers
     ${MMG2D_SOURCE_DIR}/libmmg2d.h
     ${MMG2D_SOURCE_DIR}/libmmg2df.h
-    ${COMMON_SOURCE_DIR}/mmgcommon.h
-    ${COMMON_SOURCE_DIR}/eigenv.h
-    ${COMMON_SOURCE_DIR}/libmmgcommon.h
-    ${COMMON_SOURCE_DIR}/libmmgcommonf.h
-    ${COMMON_SOURCE_DIR}/chrono.h
+    ${COMMON_SOURCE_DIR}/libmmgtypes.h
+    ${COMMON_SOURCE_DIR}/libmmgtypesf.h
     )
   SET(MMG2D_INCLUDE ${CMAKE_SOURCE_DIR}/include/mmg/mmg2d )
   SET( mmg2d_includes
     ${MMG2D_INCLUDE}/libmmg2d.h
     ${MMG2D_INCLUDE}/libmmg2df.h
-    ${MMG2D_INCLUDE}/mmgcommon.h
-    ${MMG2D_INCLUDE}/eigenv.h
-    ${MMG2D_INCLUDE}/libmmgcommon.h
-    ${MMG2D_INCLUDE}/libmmgcommonf.h
-    ${MMG2D_INCLUDE}/chrono.h
+    ${MMG2D_INCLUDE}/libmmgtypes.h
+    ${MMG2D_INCLUDE}/libmmgtypesf.h
     ) 
   # Install header files in /usr/local or equivalent
   INSTALL(FILES ${mmg2d_headers} DESTINATION include/mmg/mmg2d)
 
-  ADD_CUSTOM_COMMAND(OUTPUT ${MMG2D_INCLUDE}/libmmgcommonf.h
-    COMMAND ${CMAKE_COMMAND} -E copy ${COMMON_SOURCE_DIR}/libmmgcommonf.h ${MMG2D_INCLUDE}/libmmgcommonf.h
+  ADD_CUSTOM_COMMAND(OUTPUT ${MMG2D_INCLUDE}/libmmgtypesf.h
+    COMMAND ${CMAKE_COMMAND} -E copy ${COMMON_SOURCE_DIR}/libmmgtypesf.h ${MMG2D_INCLUDE}/libmmgtypesf.h
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-    DEPENDS ${COMMON_SOURCE_DIR}/libmmgcommonf.h)
+    DEPENDS ${COMMON_SOURCE_DIR}/libmmgtypesf.h)
   ADD_CUSTOM_COMMAND(OUTPUT ${MMG2D_INCLUDE}/libmmg2df.h
     COMMAND ${CMAKE_COMMAND} -E copy ${MMG2D_SOURCE_DIR}/libmmg2df.h ${MMG2D_INCLUDE}/libmmg2df.h
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}

@@ -34,6 +34,10 @@
 #include <sys/resource.h>
 #endif
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #ifndef  ON
 #define  RESET  0
 #define  ON     1
@@ -71,5 +75,9 @@ typedef struct mytime {
 void   chrono(int cmode,mytime *ptt);
 void   tminit(mytime *t,int maxtim);
 void   printim(double ,char *);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

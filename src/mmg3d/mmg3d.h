@@ -25,6 +25,11 @@
 #define _MMG3D_H
 
 #include "libmmg3d.h"
+#include "libmmgcommon.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #define MG_SMSGN(a,b)  (((double)(a)*(double)(b) > (0.0)) ? (1) : (0))
 
@@ -437,5 +442,9 @@ void _MMG3D_Set_commonFunc() {
   _MMG5_renumbering       = _MMG5_mmg3dRenumbering;
 #endif
 }
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
