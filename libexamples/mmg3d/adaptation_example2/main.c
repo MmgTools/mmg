@@ -139,7 +139,7 @@ int main(int argc,char *argv[]) {
   if ( MMG3D_Set_dparameter(mmgMesh,mmgSol,MMG3D_DPARAM_hausd, 0.1) != 1 )
     exit(EXIT_FAILURE);
 
-  /* Gradation control (default value 1.105) */
+  /* Gradation control*/
   if ( MMG3D_Set_dparameter(mmgMesh,mmgSol,MMG3D_DPARAM_hgrad, 2) != 1 )
     exit(EXIT_FAILURE);
 

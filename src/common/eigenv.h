@@ -21,8 +21,22 @@
 ** =============================================================================
 */
 
-#include "mmgcommon.h"
+#ifndef MMGEIGENV_H
+#define MMGEIGENV_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#define _MMG5_EPSD      1.e-30
+#define _MMG5_EPS       1.e-06
 
 int _MMG5_eigenv(int symmat,double *mat,double lambda[3],double v[3][3]);
 int _MMG5_eigen2(double *mm,double *lambda,double vp[2][2]);
 extern int _MMG5_eigensym(double m[3],double lambda[2],double vp[2][2]);
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif

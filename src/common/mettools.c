@@ -423,14 +423,7 @@ int _MMG5_mmgIntextmet(MMG5_pMesh mesh,MMG5_pSol met,int np,double me[6],
   /* Case of a singular point : take smallest size prescribed by met, or me in
    * every direction */
   if ( MG_SIN(p0->tag) || (p0->tag & MG_NOM) ) {
-    /* /\* Characteristic polynomial of me *\/ */
-    /* a[3] = -1.0; */
-    /* a[2] = me[0]+me[3]+me[5]; */
-    /* a[1] = -(me[0]*me[3]+me[0]*me[5]+me[3]*me[5]) + (me[1]*me[1]+me[2]*me[2]+me[4]*me[4]); */
-    /* a[0] = me[0]*(me[3]*me[5]-me[4]*me[4]) -me[1]*(me[1]*me[5]-me[2]*me[4]) \ */
-    /*   + me[2]*(me[1]*me[4]-me[2]*me[3]); */
-    /* _MMG5_rootDeg3(a,ro); */
-
+    /* Characteristic polynomial of me */
     _MMG5_eigenv(1,me,lambda,vp);
 
     hu = m[0];

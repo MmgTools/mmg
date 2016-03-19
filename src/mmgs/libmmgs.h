@@ -36,7 +36,12 @@
 #ifndef _MMGSLIB_H
 #define _MMGSLIB_H
 
-#include "mmgcommon.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#include "libmmgtypes.h"
 
 /**
  * Maximum array size when storing adjacent points (or ball) of a vertex.
@@ -1038,5 +1043,9 @@ int MMGS_Get_adjaTri(MMG5_pMesh mesh, int kel, int listri[3]);
  */
 extern
 int MMGS_Get_adjaVerticesFast(MMG5_pMesh mesh, int ip,int start, int lispoi[MMGS_LMAX]);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

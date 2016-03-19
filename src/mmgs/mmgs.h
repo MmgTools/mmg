@@ -25,6 +25,11 @@
 #define _MMGS_H
 
 #include "libmmgs.h"
+#include "mmgcommon.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /* numerical accuracy */
 #define ALPHAD    3.464101615137755   /* 6.0 / sqrt(3.0)  */
@@ -152,7 +157,6 @@ int  swpedg(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,char typchk);
 char typelt(MMG5_pPoint p[3],char *ia);
 int  litswp(MMG5_pMesh mesh,int k,char i,double kal);
 int  litcol(MMG5_pMesh mesh,int k,char i,double kal);
-int  rootDeg2(DOUBLE_COMPLEX a[3], DOUBLE_COMPLEX r[2]);
 int  _MMG5_mmgsChkmsh(MMG5_pMesh,int,int);
 int  paratmet(double c0[3],double n0[3],double m[6],double c1[3],double n1[3],double mt[6]);
 int  intregmet(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,double s,double mr[6]);
@@ -211,5 +215,9 @@ void _MMGS_Set_commonFunc() {
   _MMG5_renumbering       = _MMG5_mmgsRenumbering;
 #endif
 }
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

@@ -39,7 +39,9 @@ IF ( NOT WIN32 )
     COMMAND genheader ${MMGS_SOURCE_DIR}/libmmgsf.h
     ${MMGS_SOURCE_DIR}/libmmgs.h ${CMAKE_SOURCE_DIR}/scripts/genfort.pl
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-    DEPENDS genheader ${MMGS_SOURCE_DIR}/libmmgs.h ${COMMON_SOURCE_DIR}/libmmgcommonf.h
+    DEPENDS genheader ${MMGS_SOURCE_DIR}/libmmgs.h
+    ${COMMON_SOURCE_DIR}/libmmgtypesf.h
+    ${COMMON_SOURCE_DIR}/libmmgtypes.h
     ${CMAKE_SOURCE_DIR}/scripts/genfort.pl
     COMMENT "Generating Fortran header for mmgs"
     )
@@ -117,30 +119,24 @@ IF ( LIBMMGS_STATIC OR LIBMMGS_SHARED )
   SET( mmgs_headers
     ${MMGS_SOURCE_DIR}/libmmgs.h
     ${MMGS_SOURCE_DIR}/libmmgsf.h
-    ${COMMON_SOURCE_DIR}/mmgcommon.h
-    ${COMMON_SOURCE_DIR}/eigenv.h
-    ${COMMON_SOURCE_DIR}/libmmgcommon.h
-    ${COMMON_SOURCE_DIR}/libmmgcommonf.h
-    ${COMMON_SOURCE_DIR}/chrono.h
+    ${COMMON_SOURCE_DIR}/libmmgtypes.h
+    ${COMMON_SOURCE_DIR}/libmmgtypesf.h
     )
   SET(MMGS_INCLUDE ${CMAKE_SOURCE_DIR}/include/mmg/mmgs )
   SET( mmgs_includes
     ${MMGS_INCLUDE}/libmmgs.h
     ${MMGS_INCLUDE}/libmmgsf.h
-    ${MMGS_INCLUDE}/mmgcommon.h
-    ${MMGS_INCLUDE}/eigenv.h
-    ${MMGS_INCLUDE}/libmmgcommon.h
-    ${MMGS_INCLUDE}/libmmgcommonf.h
-    ${MMGS_INCLUDE}/chrono.h
+    ${MMGS_INCLUDE}/libmmgtypes.h
+    ${MMGS_INCLUDE}/libmmgtypesf.h
     )
 
   # Install header files in /usr/local or equivalent
   INSTALL(FILES ${mmgs_headers} DESTINATION include/mmg/mmgs)
 
-  ADD_CUSTOM_COMMAND(OUTPUT ${MMGS_INCLUDE}/libmmgcommonf.h
-    COMMAND ${CMAKE_COMMAND} -E copy ${COMMON_SOURCE_DIR}/libmmgcommonf.h ${MMGS_INCLUDE}/libmmgcommonf.h
+  ADD_CUSTOM_COMMAND(OUTPUT ${MMGS_INCLUDE}/libmmgtypesf.h
+    COMMAND ${CMAKE_COMMAND} -E copy ${COMMON_SOURCE_DIR}/libmmgtypesf.h ${MMGS_INCLUDE}/libmmgtypesf.h
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-    DEPENDS ${COMMON_SOURCE_DIR}/libmmgcommonf.h)
+    DEPENDS ${COMMON_SOURCE_DIR}/libmmgtypesf.h)
   ADD_CUSTOM_COMMAND(OUTPUT ${MMGS_INCLUDE}/libmmgsf.h
     COMMAND ${CMAKE_COMMAND} -E copy ${MMGS_SOURCE_DIR}/libmmgsf.h ${MMGS_INCLUDE}/libmmgsf.h
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
