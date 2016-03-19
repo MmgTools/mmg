@@ -11,7 +11,7 @@
 ! ** See the "libmmg*.h" file for a correct displaying of the documentation.
 ! */
 
-#define MMG5_DATA_PTR_T INTEGER(kind=4)
+#define MMG5_DATA_PTR_T INTEGER(kind=8)
 ! /* =============================================================================
 ! **  This file is part of the mmg software package for the tetrahedral
 ! **  mesh modification.
@@ -37,22 +37,12 @@
 
 
 ! /**
-!  * \file common/libmmgcommon.h
-!  * \brief API header for the common part of the MMG libraries.
-!  * \author Algiane Froehly  (Inria/UBordeaux)
-!  * \version 5
-!  * \date 01 2014
-!  * \copyright GNU Lesser General Public License.
-!  * \warning To keep the genheader working, don't break line between the enum
-!  * name and the opening brace (it creates errors under windows)
+!  * Types
 !  */
 
 
-#ifndef _MMGLIBCOMMON_H
-#define _MMGLIBCOMMON_H
-
-! #include "stdarg.h"
-! #include "chrono.h"
+#ifndef _LIBMMGTYPES_H
+#define _LIBMMGTYPES_H
 
 ! /**
 !  * \def MMG5_SUCCESS
@@ -82,12 +72,13 @@
 #define MMG5_STRONGFAILURE 2
 
 ! /**
-!  * Domain refs in iso mode
+!  * Implicite domain ref in iso mode
 !  *
 !  */
 
 #define MG_ISO    10
 
+! #include <stdarg.h>
 
 ! /**
 !  * \enum MMG5_arg
@@ -95,23 +86,24 @@
 !  */
 
 ! /*!< To begin a list of variadic arguments (mandatory first arg for all our variadic functions) */
-#define   MMG5_ARG_start               %val(0)
+#define    MMG5_ARG_start              %val(0)
 ! /*!< Pointer toward a MMG5_pMesh structure (for structure allocations purposes) */
-#define   MMG5_ARG_ppMesh              %val(1)
+#define    MMG5_ARG_ppMesh             %val(1)
 ! /*!< Pointer toward a MMG5_pSol structure storing a level-set (for structure allocations purposes)  */
-#define   MMG5_ARG_ppLs                %val(2)
+#define    MMG5_ARG_ppLs               %val(2)
 ! /*!< Pointer toward a MMG5_pSol structure storing a metric (for structure allocations purposes)  */
-#define   MMG5_ARG_ppMet               %val(3)
+#define    MMG5_ARG_ppMet              %val(3)
 ! /*!< Pointer toward a MMG5_pSol structure storing a displacement (for structure allocations purposes)  */
-#define   MMG5_ARG_ppDisp              %val(4)
+#define    MMG5_ARG_ppDisp             %val(4)
 ! /*!< MMG5_pMesh structure */
-#define   MMG5_ARG_pMesh               %val(5)
+#define    MMG5_ARG_pMesh              %val(5)
 ! /*!< MMG5_pSol structure storing a metric field */
-#define   MMG5_ARG_pMet                %val(6)
+#define    MMG5_ARG_pMet               %val(6)
 ! /*!< MMG5_pSol structure storing a displacement field */
-#define   MMG5_ARG_pDisp               %val(7)
+#define    MMG5_ARG_pDisp              %val(7)
 ! /*!< To end a list of variadic argument (mandatory last argument for all our variadic functions) */
-#define   MMG5_ARG_end                 %val(8)
+#define    MMG5_ARG_end                %val(8)
+
 ! /**
 !  * \enum MMG5_type
 !  * \brief Type of solutions.
@@ -212,8 +204,7 @@
 !   int      v[3]; /*!< Vertices of the triangle */
 !   int      ref; /*!< Reference of the triangle */
 !   int      base;
-!   int      cc; /*!< used to store the tetra + tetra face indices
-!                  that allow to access to the tria */
+!   int      cc;
 !   int      edg[3]; /*!< edg[i] contains the ref of the \f$i^{th}\f$ edge
 !                      of triangle */
 !   int      flag;
@@ -360,148 +351,5 @@
 !   char     *nameout; /*!< Output solution file name */
 ! } MMG5_Sol;
 ! typedef MMG5_Sol * MMG5_pSol;
-
-! /*----------------------------- functions header -----------------------------*/
-! /* Initialization functions */
-! /**
-!  * \param mesh pointer toward the mesh structure.
-!  * \param sol pointer toward the sol structure.
-!  *
-!  * Initialize file names to their default values.
-!  *
-!  * \remark Fortran interface:
-!  */
-INTERFACE
-  SUBROUTINE MMG5_INIT_FILENAMES(mesh,sol)
-    MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh,sol
-  END SUBROUTINE
-END INTERFACE
-!  *
-!  */
-
-! void  MMG5_Init_fileNames(MMG5_pMesh mesh, MMG5_pSol sol);
-! /**
-!  * \param mesh pointer toward the mesh structure.
-!  *
-!  * Initialization of the input parameters (stored in the Info structure).
-!  *
-!  * \remark Fortran interface:
-!  */
-INTERFACE
-  SUBROUTINE MMG5_INIT_PARAMETERS(mesh)
-    MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh
-  END SUBROUTINE
-END INTERFACE
-!  *
-!  */
-
-! void  (_MMG5_Init_parameters)(MMG5_pMesh mesh);
-
-! /* init file names */
-! /**
-!  * \param mesh pointer toward the mesh structure.
-!  * \param meshin input mesh name.
-!  * \return 1.
-!  *
-!  * Set the name of input mesh.
-!  *
-!  * \remark Fortran interface:
-!  */
-INTERFACE
-  SUBROUTINE MMG5_SET_INPUTMESHNAME(mesh,meshin,strlen,retval)
-    MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh
-    CHARACTER(LEN=*), INTENT(IN)   :: meshin
-    INTEGER, INTENT(IN)            :: strlen
-    INTEGER, INTENT(OUT)           :: retval
-  END SUBROUTINE
-END INTERFACE
-!  *
-!  */
-
-! int  MMG5_Set_inputMeshName(MMG5_pMesh mesh, char* meshin);
-! /**
-!  * \param mesh pointer toward the mesh structure.
-!  * \param meshout name of the output mesh file.
-!  * \return 1.
-!  *
-!  * Set the name of output mesh file.
-!  *
-!  * \remark Fortran interface:
-!  */
-INTERFACE
-  SUBROUTINE MMG5_SET_OUTPUTMESHNAME(mesh,meshout,strlen,retval)
-    MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh
-    CHARACTER(LEN=*), INTENT(IN)   :: meshout
-    INTEGER, INTENT(IN)            :: strlen
-    INTEGER, INTENT(OUT)           :: retval
-  END SUBROUTINE
-END INTERFACE
-!  *
-!  */
-
-! int  MMG5_Set_outputMeshName(MMG5_pMesh mesh, char* meshout);
-! /**
-!  * \param mesh pointer toward the mesh structure.
-!  * \param sol pointer toward the sol structure.
-!  * \param solin name of the input solution file.
-!  * \return 1.
-!  *
-!  * Set the name of input solution file.
-!  *
-!  * \remark Fortran interface:
-!  */
-INTERFACE
-  SUBROUTINE MMG5_SET_INPUTSOLNAME(mesh,sol,solin,strlen,retval)
-    MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,sol
-    CHARACTER(LEN=*), INTENT(IN)   :: solin
-    INTEGER, INTENT(IN)            :: strlen
-    INTEGER, INTENT(OUT)           :: retval
-  END SUBROUTINE
-END INTERFACE
-!  *
-!  */
-
-! int  MMG5_Set_inputSolName(MMG5_pMesh mesh,MMG5_pSol sol, char* solin);
-! /**
-!  * \param mesh pointer toward the mesh structure.
-!  * \param sol pointer toward the sol structure.
-!  * \param solout name of the output solution file.
-!  * \return 0 if failed, 1 otherwise.
-!  *
-!  *  Set the name of output solution file.
-!  *
-!  * \remark Fortran interface:
-!  */
-INTERFACE
-  SUBROUTINE MMG5_SET_OUTPUTSOLNAME(mesh,sol,solout,strlen,retval)
-    MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,sol
-    CHARACTER(LEN=*), INTENT(IN)   :: solout
-    INTEGER, INTENT(IN)            :: strlen
-    INTEGER, INTENT(OUT)           :: retval
-  END SUBROUTINE
-END INTERFACE
-!  *
-!  */
-
-! int  MMG5_Set_outputSolName(MMG5_pMesh mesh,MMG5_pSol sol, char* solout);
-
-! /* deallocations */
-! /**
-!  * \param mesh pointer toward the mesh structure.
-!  * \param met pointer toward the sol structure.
-!  *
-!  * File name deallocations before return.
-!  *
-!  * \remark Fortran interface:
-!  */
-INTERFACE
-  SUBROUTINE MMG5_SET_MMGFREE_NAMES(mesh,met)
-    MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,met
-  END SUBROUTINE
-END INTERFACE
-!  *
-!  */
-
-! void MMG5_mmgFree_names(MMG5_pMesh mesh, MMG5_pSol met);
 
 #endif

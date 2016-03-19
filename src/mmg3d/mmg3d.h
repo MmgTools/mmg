@@ -25,6 +25,11 @@
 #define _MMG3D_H
 
 #include "libmmg3d.h"
+#include "libmmgcommon.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /** Free allocated pointers of mesh and sol structure and return value val */
 #define _MMG5_RETURN_AND_FREE(mesh,met,disp,val)do            \
@@ -417,5 +422,9 @@ void _MMG3D_Set_commonFunc() {
   _MMG5_renumbering       = _MMG5_mmg3dRenumbering;
 #endif
 }
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
