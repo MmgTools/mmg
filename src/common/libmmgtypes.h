@@ -128,10 +128,10 @@ typedef struct {
   int      tmp; /*!< Index of point in the saved mesh (we don't count
                   the unused points)*/
   int      flag; /*!< Flag to know if we have already treated the point */
+  int      s;
   char     tag; /*!< Contains binary flags : if \f$tag=23=16+4+2+1\f$, then
                   the point is \a MG_REF, \a MG_GEO, \a MG_REQ and \a MG_BDY */
   char     tagdel; /*!< Tag for delaunay */
-  int      s;
 } MMG5_Point;
 typedef MMG5_Point * MMG5_pPoint;
 
@@ -152,8 +152,8 @@ typedef MMG5_xPoint * MMG5_pxPoint;
 typedef struct {
   int      a,b; /*!< Extremities of the edge */
   int      ref; /*!< Reference of the edge */
-  char     tag; /*!< Binary flags */
   int      base;//2Donly
+  char     tag; /*!< Binary flags */
 } MMG5_Edge;
 typedef MMG5_Edge * MMG5_pEdge;
 
@@ -163,16 +163,17 @@ typedef MMG5_Edge * MMG5_pEdge;
  * \todo try to remove cc.
  */
 typedef struct {
+  double   qual;   /*Quality of the triangle*/
   int      v[3]; /*!< Vertices of the triangle */
   int      ref; /*!< Reference of the triangle */
   int      base;
-  int      cc;
+  int      cc; /*!< used to store the tetra + tetra face indices
+                 that allow to access to the tria */
   int      edg[3]; /*!< edg[i] contains the ref of the \f$i^{th}\f$ edge
                      of triangle */
   int      flag;
   char     tag[3]; /*!< tag[i] contains the tag associated to the
                      \f$i^{th}\f$ edge of triangle */
-  double   qual;   /*Quality of the triangle*/
 } MMG5_Tria;
 typedef MMG5_Tria * MMG5_pTria;
 
@@ -181,6 +182,7 @@ typedef MMG5_Tria * MMG5_pTria;
  * \brief Structure to store tetrahedra of a MMG mesh.
  */
 typedef struct {
+  double   qual; /*!< Quality of the element */
   int      v[4]; /*!< Vertices of the tetrahedron */
   int      ref; /*!< Reference of the tetrahedron */
   int      base;
@@ -189,10 +191,8 @@ typedef struct {
                  the tetrahedron*/
   int      flag;
   char     tag;
-  double   qual; /*!< Quality of the element */
 } MMG5_Tetra;
 typedef MMG5_Tetra * MMG5_pTetra;
-
 
 /**
  * \struct MMG5_xTetra
@@ -214,18 +214,32 @@ typedef struct {
 typedef MMG5_xTetra * MMG5_pxTetra;
 
 /**
+ * \struct MMG5_Prism
+ * \brief Structure to store prsim of a MMG mesh.
+ * \wqrning prisms are not modified
+ */
+typedef struct {
+  int      v[6]; /*!< Vertices of the prism */
+  int      ref; /*!< Reference of the prism */
+  int      base;
+  int      flag;
+  char     tag;
+} MMG5_Prism;
+typedef MMG5_Prism * MMG5_pPrism;
+
+/**
  * \struct MMG5_Info
  * \brief Store input parameters of the run.
  */
 typedef struct {
+  MMG5_pPar     par;
   double        dhd,hmin,hmax,hgrad,hausd,min[3],max[3],delta,ls;
   int           mem,npar,npari;
-  char          nreg;
   int           renum;
+  int           bucket;
+  char          nreg;
   char          imprim,ddebug,badkal,iso,fem,lag;
   unsigned char optim, noinsert, noswap, nomove, nosurf;
-  int           bucket;
-  MMG5_pPar     par;
 } MMG5_Info;
 
 /**
@@ -241,8 +255,8 @@ typedef struct {
 } MMG5_hgeom;
 
 typedef struct {
-  int         siz,max,nxt;
   MMG5_hgeom  *geom;
+  int         siz,max,nxt;
 } MMG5_HGeom;
 
 /**
@@ -251,13 +265,14 @@ typedef struct {
  * \todo try to remove nc1;
  */
 typedef struct {
-  int       ver; /*!< Version of the mesh file */
-  int       dim; /*!< Dimension of the mesh */
-  int       type; /*!< Type of the mesh */
   long long memMax; /*!< Maximum memory available */
   long long memCur; /*!< Current memory used */
   double    gap; /*!< Gap for table reallocation */
+  int       ver; /*!< Version of the mesh file */
+  int       dim; /*!< Dimension of the mesh */
+  int       type; /*!< Type of the mesh */
   int       npi,nti,nai,nei,np,na,nt,ne,npmax,namax,ntmax,nemax,xpmax,xtmax;
+  int       nprism;
   int       nc1;
 
   int       base; /*!< Used with \a flag to know if an entity has been
@@ -276,17 +291,19 @@ typedef struct {
                     \f$adjt[3*i+1+j]=3*k+l\f$ then the \f$i^{th}\f$ and
                     \f$k^th\f$ triangles are adjacent and share their
                     edges \a j and \a l (resp.) */
-  char     *namein; /*!< Input mesh name */
-  char     *nameout; /*!< Output mesh name */
 
   MMG5_pPoint    point; /*!< Pointer toward the \ref MMG5_Point structure */
   MMG5_pxPoint   xpoint; /*!< Pointer toward the \ref MMG5_xPoint structure */
   MMG5_pTetra    tetra; /*!< Pointer toward the \ref MMG5_Tetra structure */
   MMG5_pxTetra   xtetra; /*!< Pointer toward the \ref MMG5_xTetra structure */
+  MMG5_pPrism    prism; /*!< Pointer toward the \ref MMG5_Prism structure */
   MMG5_pTria     tria; /*!< Pointer toward the \ref MMG5_Tria structure */
   MMG5_pEdge     edge; /*!< Pointer toward the \ref MMG5_Edge structure */
   MMG5_HGeom     htab; /*!< \ref MMG5_HGeom structure */
   MMG5_Info      info; /*!< \ref MMG5_Info structure */
+  char     *namein; /*!< Input mesh name */
+  char     *nameout; /*!< Output mesh name */
+
 } MMG5_Mesh;
 typedef MMG5_Mesh  * MMG5_pMesh;
 
