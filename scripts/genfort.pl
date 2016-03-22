@@ -122,6 +122,7 @@ sub printTab # ($chaine, $tabcount, $comm)
 sub Convert {
 
     my $startcom  = 0;
+    my $cppdef    = 0;
     my $startenum = 0;
     my $countenum = 0;
     my $byvalue   = 0;
@@ -179,9 +180,21 @@ sub Convert {
                 {
                     printTab($line,0,0 );
                 }
+                elsif ($line =~ /\#ifdef __cplusplus/ ) {
+                    $cppdef = 1;
+                    $chaine = sprintf("! %s",$line);
+                    printTab($chaine,0,0 );
+                }
                 elsif($line =~ /\#endif/ )
                 {
-                    printTab($line,0,0 );
+                    if ( $cppdef ) {
+                        $cppdef = 0;
+                        $chaine = sprintf("! %s",$line);
+                        printTab($chaine,0,0 );
+                    }
+                    else {
+                        printTab($line,0,0 );
+                    }
                 }
                 elsif ($line =~ /\#define/)
                 {

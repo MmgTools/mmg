@@ -56,7 +56,7 @@
 
 ! #ifdef __cplusplus
 ! extern "C" {
-#endif
+! #endif
 
 ! #include "libmmgtypes.h"
 
@@ -1267,6 +1267,6 @@ END INTERFACE
 
 ! #ifdef __cplusplus
 ! }
-#endif
+! #endif
 
 #endif
