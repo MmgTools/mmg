@@ -200,7 +200,7 @@ int MMGS_loadMesh(MMG5_pMesh mesh, char *filename) {
         fscanf(inm,"%d",&ng);
         posnormal = ftell(inm);
         continue;
-      } else if(!strncmp(chaine,"NormalsAtVertices",strlen("NormalsAtVertices"))) {
+      } else if(!strncmp(chaine,"NormalAtVertices",strlen("NormalAtVertices"))) {
         fscanf(inm,"%d",&mesh->nc1);
         posnc1 = ftell(inm);
         continue;
@@ -322,7 +322,7 @@ int MMGS_loadMesh(MMG5_pMesh mesh, char *filename) {
         rewind(inm);
         fseek(inm,bpos,SEEK_SET);
         continue;
-      } else if(binch==20) {  //NormalsAtVertices
+      } else if(binch==20) {  //NormalAtVertices
         fread(&bpos,sw,1,inm); //NulPos
         if(iswp) bpos=swapbin(bpos);
         fread(&mesh->nc1,sw,1,inm);
