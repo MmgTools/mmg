@@ -102,7 +102,7 @@ int MMGS_loadMesh(MMG5_pMesh mesh, char *filename) {
   MMG5_pPoint ppt;
   double      *norm,*n,dd;
   float       fc;
-  int         i,k,ia,nq,nri,nr,ip,idn,ng;
+  int         i,k,ia,nq,nri,ip,idn,ng;
   char        *ptr,data[256],chaine[128];
   int         posnp,posnt,posne,posncor,posnq,posned,posnr;
   int         posnpreq,npreq,ntreq,posnormal,posnc1,posntreq;
@@ -111,7 +111,7 @@ int MMGS_loadMesh(MMG5_pMesh mesh, char *filename) {
   posnp = posnt = posne = posncor = posnq = posntreq = 0;
   posned = posnr = posnpreq = posnc1 = npreq = 0;
   posnedreq = posnormal = 0;
-  ncor = nr = ng = nedreq = nq = ntreq = 0;
+  ncor = nri = ng = nedreq = nq = ntreq = 0;
   bin = 0;
   iswp = 0;
   mesh->np = mesh->nt = mesh->nti = mesh->npi = 0;
@@ -196,7 +196,7 @@ int MMGS_loadMesh(MMG5_pMesh mesh, char *filename) {
         fscanf(inm,"%d",&ng);
         posnormal = ftell(inm);
         continue;
-      } else if(!strncmp(chaine,"NormalsAtVertices",strlen("NormalsAtVertices"))) {
+      } else if(!strncmp(chaine,"NormalAtVertices",strlen("NormalAtVertices"))) {
         fscanf(inm,"%d",&mesh->nc1);
         posnc1 = ftell(inm);
         continue;
@@ -318,7 +318,7 @@ int MMGS_loadMesh(MMG5_pMesh mesh, char *filename) {
         rewind(inm);
         fseek(inm,bpos,SEEK_SET);
         continue;
-      } else if(binch==20) {  //NormalsAtVertices
+      } else if(binch==20) {  //NormalAtVertices
         fread(&bpos,sw,1,inm); //NulPos
         if(iswp) bpos=swapbin(bpos);
         fread(&mesh->nc1,sw,1,inm);
@@ -480,7 +480,6 @@ int MMGS_loadMesh(MMG5_pMesh mesh, char *filename) {
     }
   }
 
-  nri = 0;
   if ( mesh->na ) {
     _MMG5_ADD_MEM(mesh,(mesh->na+1)*sizeof(MMG5_Edge),"initial edges",return(0));
     _MMG5_SAFE_CALLOC(mesh->edge,mesh->na+1,MMG5_Edge);
