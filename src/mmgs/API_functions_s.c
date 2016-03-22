@@ -175,8 +175,8 @@ int MMGS_Set_meshSize(MMG5_pMesh mesh, int np, int nt, int na) {
                 exit(EXIT_FAILURE));
   _MMG5_SAFE_CALLOC(mesh->point,mesh->npmax+1,MMG5_Point);
 
-  _MMG5_ADD_MEM(mesh,(mesh->nt+1)*sizeof(MMG5_Tria),"initial triangles",return(0));
-  _MMG5_SAFE_CALLOC(mesh->tria,mesh->nt+1,MMG5_Tria);
+  _MMG5_ADD_MEM(mesh,(mesh->ntmax+1)*sizeof(MMG5_Tria),"initial triangles",return(0));
+  _MMG5_SAFE_CALLOC(mesh->tria,mesh->ntmax+1,MMG5_Tria);
 
 
   mesh->namax = mesh->na;
@@ -192,7 +192,7 @@ int MMGS_Set_meshSize(MMG5_pMesh mesh, int np, int nt, int na) {
     mesh->point[k].tmp  = k+1;
   }
   for (k=mesh->nenil; k<mesh->ntmax-1; k++) {
-    mesh->tetra[k].v[3] = k+1;
+    mesh->tria[k].v[2] = k+1;
   }
 
   /* stats */

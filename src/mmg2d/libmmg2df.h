@@ -51,8 +51,6 @@
 #ifndef _MMG2DLIB_H
 #define _MMG2DLIB_H
 
-! #include "mmgcommon.h"
-
 ! #ifdef __cplusplus
 ! extern "C" {
 #endif
