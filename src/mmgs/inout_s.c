@@ -104,7 +104,7 @@ int MMGS_loadMesh(MMG5_pMesh mesh, char *filename) {
   MMG5_pPoint ppt;
   double      *norm,*n,dd;
   float       fc;
-  int         i,k,ia,nq,nri,nr,ip,idn,ng;
+  int         i,k,ia,nq,nri,ip,idn,ng;
   int         posnp,posnt,posne,posncor,posnq,posned,posnr;
   int         posnpreq,npreq,ntreq,posnormal,posnc1,posntreq;
   int         ncor,bin,iswp,nedreq,posnedreq,bdim,binch,bpos;
@@ -115,7 +115,7 @@ int MMGS_loadMesh(MMG5_pMesh mesh, char *filename) {
   posnp = posnt = posne = posncor = posnq = posntreq = 0;
   posned = posnr = posnpreq = posnc1 = npreq = 0;
   posnedreq = posnormal = 0;
-  ncor = nr = ng = nedreq = nq = ntreq = 0;
+  ncor = nri = ng = nedreq = nq = ntreq = 0;
   bin = 0;
   iswp = 0;
   mesh->np = mesh->nt = mesh->nti = mesh->npi = 0;
@@ -227,7 +227,7 @@ int MMGS_loadMesh(MMG5_pMesh mesh, char *filename) {
         if(iswp) bdim=swapbin(bdim);
         mesh->dim = bdim;
         if(bdim!=3) {
-          fprintf(stdout,"BAD SOL DIMENSION : %d\n",mesh->dim);
+          fprintf(stdout,"BAD MESH DIMENSION : %d\n",mesh->dim);
           exit(0);
           return(1);
         }
@@ -545,6 +545,7 @@ int MMGS_loadMesh(MMG5_pMesh mesh, char *filename) {
       }
     }
 
+    /* get ridges */
     if ( nri ) {
       rewind(inm);
       fseek(inm,posnr,SEEK_SET);
@@ -564,8 +565,9 @@ int MMGS_loadMesh(MMG5_pMesh mesh, char *filename) {
             else
               mesh->edge[ina[ia]].tag |= MG_GEO;
           }
-          else
+          else {
             mesh->edge[ia].tag |= MG_GEO;
+          }
         }
       }
     }
