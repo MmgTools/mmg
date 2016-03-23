@@ -379,7 +379,7 @@ static int _MMG5_norver(MMG5_pMesh mesh) {
   MMG5_pPoint    ppt;
   MMG5_xPoint    *pxp;
   double         n[3],dd;
-  int            *adja,k,kk,ng,nn,nt,nf;
+  int            *adja,k,kk,ng,nn,nt,nf,nnr;
   char           i,ii,i1;
 
   /* recomputation of normals only if mesh->xpoint has been freed */
@@ -395,6 +395,7 @@ static int _MMG5_norver(MMG5_pMesh mesh) {
   /* identify boundary points */
   ++mesh->base;
   mesh->xp = 0;
+  nnr      = 0;
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
     if ( !MG_EOK(pt) )  continue;
@@ -405,6 +406,15 @@ static int _MMG5_norver(MMG5_pMesh mesh) {
       else {
         ++mesh->xp;
         ppt->flag = mesh->base;
+        if ( mesh->nc1 ) {
+          if ( ppt->n[0]*ppt->n[0] + ppt->n[1]*ppt->n[1] + ppt->n[2]*ppt->n[2] > 0 ) {
+            if ( ppt->tag & MG_CRN || ppt->tag & MG_NOM || MG_EDG(ppt->tag) ) {
+              ++nnr;
+              continue;
+            }
+            ppt->xp = -1;
+          }
+        }
       }
     }
   }
@@ -430,24 +440,28 @@ static int _MMG5_norver(MMG5_pMesh mesh) {
 
       /* C1 point */
       if ( !MG_EDG(ppt->tag) ) {
-        if ( !_MMG5_boulen(mesh,mesh->adjt,k,i,n) ) {
-          ++nf;
-          continue;
-        }
-        else {
-          ++mesh->xp;
-          if(mesh->xp > mesh->xpmax){
-            _MMG5_TAB_RECALLOC(mesh,mesh->xpoint,mesh->xpmax,0.2,MMG5_xPoint,
-                               "larger xpoint table",
-                               mesh->xp--;
-                               return(0));
+
+        if ( (!mesh->nc1) ||
+             ppt->n[0]*ppt->n[0]+ppt->n[1]*ppt->n[1]+ppt->n[2]*ppt->n[2]<=_MMG5_EPSD2 ) {
+          if ( !_MMG5_boulen(mesh,mesh->adjt,k,i,ppt->n) ) {
+            ++nf;
+            continue;
           }
-          ppt->xp = mesh->xp;
-          pxp = &mesh->xpoint[ppt->xp];
-          memcpy(pxp->n1,n,3*sizeof(double));
-          ppt->flag = mesh->base;
-          nn++;
+          else ++nn;
         }
+
+        ++mesh->xp;
+        if(mesh->xp > mesh->xpmax){
+          _MMG5_TAB_RECALLOC(mesh,mesh->xpoint,mesh->xpmax,0.2,MMG5_xPoint,
+                             "larger xpoint table",
+                             mesh->xp--;
+                             return(0));
+        }
+        ppt->xp = mesh->xp;
+        pxp = &mesh->xpoint[ppt->xp];
+        memcpy(pxp->n1,ppt->n,3*sizeof(double));
+        ppt->n[0] = ppt->n[1] = ppt->n[2] = 0.;
+        ppt->flag = mesh->base;
       }
 
       /* along ridge-curve */
@@ -514,8 +528,11 @@ static int _MMG5_norver(MMG5_pMesh mesh) {
       }
     }
   }
-  if ( abs(mesh->info.imprim) > 3 && nn+nt > 0 )
+  if ( abs(mesh->info.imprim) > 3 && nn+nt > 0 ) {
+    if ( nnr )
+      fprintf(stdout,"     %d input normals ignored\n",nnr);
     fprintf(stdout,"     %d normals,  %d tangents updated  (%d failed)\n",nn,nt,nf);
+  }
 
   return(1);
 }

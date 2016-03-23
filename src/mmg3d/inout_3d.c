@@ -811,8 +811,8 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,const char *filename) {
         fread(&idn,sw,1,inm);
         if(iswp) idn=_MMG5_swapbin(idn);
       }
-      /* if ( idn > 0 && ip < mesh->np+1 ) */
-      /*   memcpy(&mesh->point[ip].n,&norm[3*(idn-1)+1],3*sizeof(double)); */
+      if ( idn > 0 && ip < mesh->np+1 )
+        memcpy(&mesh->point[ip].n,&norm[3*(idn-1)+1],3*sizeof(double));
     }
     _MMG5_SAFE_FREE(norm);
   }
