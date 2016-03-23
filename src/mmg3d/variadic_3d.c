@@ -390,6 +390,9 @@ void _MMG3D_Free_structures_var(va_list argptr)
   if ( (*mesh)->tetra )
     _MMG5_DEL_MEM((*mesh),(*mesh)->tetra,((*mesh)->nemax+1)*sizeof(MMG5_Tetra));
 
+  if ( (*mesh)->prism )
+    _MMG5_DEL_MEM((*mesh),(*mesh)->prism,((*mesh)->nprism+1)*sizeof(MMG5_Prism));
+
   if ( (*mesh)->edge )
     _MMG5_DEL_MEM((*mesh),(*mesh)->edge,((*mesh)->na+1)*sizeof(MMG5_Edge));
 

@@ -129,7 +129,7 @@ void _MMG3D_delElt(MMG5_pMesh mesh,int iel) {
 /** memory repartition for the -m option */
 void _MMG3D_memOption(MMG5_pMesh mesh) {
   long long  million = 1048576L;
-  int        ctri,npask,bytes,memtmp;
+  int        ctri,npask,bytes,memtmp,reservedMem;
 
   mesh->memMax = _MMG5_memSize();
 
@@ -173,27 +173,29 @@ void _MMG3D_memOption(MMG5_pMesh mesh) {
     bytes = bytes + 3*6*sizeof(int);
 #endif
 
-    /*init allocation need 38Mo*/
-    npask = (int)((double)(mesh->info.mem-38) / bytes * (int)million);
+    /* init allocation need 38 Mo*/
+    reservedMem = 38 + mesh->nprism*sizeof(MMG5_Prism);
+
+    npask = (int)((double)(mesh->info.mem-reservedMem) / bytes * (int)million);
     mesh->npmax = MG_MIN(npask,mesh->npmax);
     mesh->ntmax = MG_MIN(ctri*npask,mesh->ntmax);
     mesh->nemax = MG_MIN(6*npask,mesh->nemax);
-    /*check if the memory asked is enough to load the mesh*/
+    /* check if the memory asked is enough to load the mesh*/
     if(mesh->np &&
        (mesh->npmax < mesh->np || mesh->ntmax < mesh->nt || mesh->nemax < mesh->ne)) {
-      memtmp = (int)(mesh->np * bytes /(int)million + 38);
-      memtmp = MG_MAX(memtmp, (int)(mesh->nt * bytes /(ctri* (int)million) + 38));
-      memtmp = MG_MAX(memtmp, (int)(mesh->ne * bytes /(6*(int)million) + 38));
+      memtmp = (int)(mesh->np * bytes /(int)million + reservedMem);
+      memtmp = MG_MAX(memtmp, (int)(mesh->nt * bytes /(ctri* (int)million) + reservedMem));
+      memtmp = MG_MAX(memtmp, (int)(mesh->ne * bytes /(6*(int)million) + reservedMem));
       mesh->memMax = (long long) memtmp+1;
       fprintf(stdout,"  ## ERROR: asking for %d Mo of memory ",mesh->info.mem);
       fprintf(stdout,"is not enough to load mesh. You need to ask %d Mo minimum\n",
               memtmp+1);
     }
-    if(mesh->info.mem < 39) {
-      mesh->memMax = (long long) 39;
+    if(mesh->info.mem < reservedMem) {
+      mesh->memMax = (long long) reservedMem;
       fprintf(stdout,"  ## ERROR: asking for %d Mo of memory ",mesh->info.mem);
       fprintf(stdout,"is not enough to load mesh. You need to ask %d Mo minimum\n",
-              39);
+              reservedMem);
     }
   }
 
@@ -235,6 +237,11 @@ int _MMG5_zaldy(MMG5_pMesh mesh) {
     _MMG5_ADD_MEM(mesh,(mesh->na+1)*sizeof(MMG5_Edge),"initial edges",return(0));
     _MMG5_SAFE_CALLOC(mesh->edge,(mesh->na+1),MMG5_Edge);
   }
+  if ( mesh->nprism ) {
+    _MMG5_ADD_MEM(mesh,(mesh->nprism+1)*sizeof(MMG5_Prism),"initial prisms",return(0));
+    _MMG5_SAFE_CALLOC(mesh->prism,(mesh->nprism+1),MMG5_Prism);
+  }
+
 
   /* keep track of empty links */
   mesh->npnil = mesh->np + 1;

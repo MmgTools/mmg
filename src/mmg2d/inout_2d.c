@@ -195,7 +195,7 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
         if(iswp) bdim=MMG_swapbin(bdim);
         mesh->dim = bdim;
         if(bdim!=2) {
-          fprintf(stdout,"BAD SOL DIMENSION : %d\n",mesh->dim);
+          fprintf(stdout,"BAD MESH DIMENSION : %d\n",mesh->dim);
           exit(EXIT_FAILURE);
           return(1);
         }
