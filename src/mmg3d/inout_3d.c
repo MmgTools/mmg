@@ -98,7 +98,7 @@ static double _MMG5_swapd(double sbin)
  * Read mesh data.
  *
  */
-int MMG3D_loadMesh(MMG5_pMesh mesh,char *filename) {
+int MMG3D_loadMesh(MMG5_pMesh mesh,const char *filename) {
   FILE*       inm;
   MMG5_pTetra pt;
   MMG5_pTria  pt1;
@@ -727,7 +727,7 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,char *filename) {
  * \warning you must call the \a _MMG3D_packMesh function before saving your
  * mesh.
  */
-int MMG3D_saveMesh(MMG5_pMesh mesh, char *filename) {
+int MMG3D_saveMesh(MMG5_pMesh mesh, const char *filename) {
   FILE*        inm;
   MMG5_pPoint  ppt;
   MMG5_pTetra  pt;
@@ -1233,7 +1233,7 @@ int MMG3D_saveMesh(MMG5_pMesh mesh, char *filename) {
  * Load metric field.
  *
  */
-int MMG3D_loadSol(MMG5_pMesh mesh,MMG5_pSol met, char *filename) {
+int MMG3D_loadSol(MMG5_pMesh mesh,MMG5_pSol met, const char *filename) {
   FILE       *inm;
   float       fbuf[6],tmpf;
   double      dbuf[6],tmpd;
@@ -1500,7 +1500,7 @@ int MMG3D_loadSol(MMG5_pMesh mesh,MMG5_pSol met, char *filename) {
  * Write isotropic or anisotropic metric.
  *
  */
-int MMG3D_saveSol(MMG5_pMesh mesh,MMG5_pSol met, char *filename) {
+int MMG3D_saveSol(MMG5_pMesh mesh,MMG5_pSol met, const char *filename) {
   FILE*        inm;
   MMG5_pPoint  ppt;
   double       dbuf[6],mtmp[3],r[3][3],tmp;

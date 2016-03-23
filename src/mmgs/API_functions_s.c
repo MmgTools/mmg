@@ -58,21 +58,21 @@ void MMGS_Init_fileNames(MMG5_pMesh mesh,MMG5_pSol sol
   return;
 }
 
-int MMGS_Set_inputMeshName(MMG5_pMesh mesh, char* meshin) {
+int MMGS_Set_inputMeshName(MMG5_pMesh mesh, const char* meshin) {
 
   return(MMG5_Set_inputMeshName(mesh,meshin));
 }
 
-int MMGS_Set_inputSolName(MMG5_pMesh mesh,MMG5_pSol sol, char* solin) {
+int MMGS_Set_inputSolName(MMG5_pMesh mesh,MMG5_pSol sol, const char* solin) {
   return(MMG5_Set_inputSolName(mesh,sol,solin));
 }
 
-int MMGS_Set_outputMeshName(MMG5_pMesh mesh, char* meshout) {
+int MMGS_Set_outputMeshName(MMG5_pMesh mesh, const char* meshout) {
 
   return(MMG5_Set_outputMeshName(mesh,meshout));
 }
 
-int MMGS_Set_outputSolName(MMG5_pMesh mesh,MMG5_pSol sol, char* solout) {
+int MMGS_Set_outputSolName(MMG5_pMesh mesh,MMG5_pSol sol, const char* solout) {
   return(MMG5_Set_outputSolName(mesh,sol,solout));
 }
 void MMGS_Init_parameters(MMG5_pMesh mesh) {

@@ -97,7 +97,7 @@ double swapd(double sbin)
  * Read mesh data.
  *
  */
-int MMGS_loadMesh(MMG5_pMesh mesh, char *filename) {
+int MMGS_loadMesh(MMG5_pMesh mesh, const char *filename) {
   FILE        *inm;
   MMG5_pTria  pt1,pt2;
   MMG5_pEdge  ped;
@@ -686,7 +686,7 @@ int MMGS_loadMesh(MMG5_pMesh mesh, char *filename) {
  * mesh.
  */
 
-int MMGS_saveMesh(MMG5_pMesh mesh, char* filename) {
+int MMGS_saveMesh(MMG5_pMesh mesh, const char* filename) {
   FILE         *inm;
   MMG5_pPoint  ppt;
   MMG5_pTria   pt;
@@ -1113,7 +1113,7 @@ int MMGS_saveMesh(MMG5_pMesh mesh, char* filename) {
  * Load metric field.
  *
  */
-int MMGS_loadSol(MMG5_pMesh mesh,MMG5_pSol met,char* filename) {
+int MMGS_loadSol(MMG5_pMesh mesh,MMG5_pSol met,const char* filename) {
   FILE       *inm;
   float       fbuf[6],tmpf;
   double      dbuf[6],tmpd;
@@ -1336,7 +1336,7 @@ int MMGS_loadSol(MMG5_pMesh mesh,MMG5_pSol met,char* filename) {
  * Write isotropic or anisotropic metric.
  *
  */
-int MMGS_saveSol(MMG5_pMesh mesh,MMG5_pSol met, char *filename) {
+int MMGS_saveSol(MMG5_pMesh mesh,MMG5_pSol met, const char *filename) {
   FILE*        inm;
   MMG5_pPoint  ppt;
   double       dbuf[6],mtmp[3],r[3][3],tmp;

@@ -128,7 +128,7 @@ void MMG5_Init_fileNames(MMG5_pMesh mesh,MMG5_pSol sol
  * Set the name of input mesh.
  *
  */
-int MMG5_Set_inputMeshName(MMG5_pMesh mesh, char* meshin) {
+int MMG5_Set_inputMeshName(MMG5_pMesh mesh, const char* meshin) {
 
   if ( mesh->namein ){
     _MMG5_DEL_MEM(mesh,mesh->namein,(strlen(mesh->namein)+1)*sizeof(char));
@@ -164,7 +164,7 @@ int MMG5_Set_inputMeshName(MMG5_pMesh mesh, char* meshin) {
  * Set the name of input solution file.
  *
  */
-int MMG5_Set_inputSolName(MMG5_pMesh mesh,MMG5_pSol sol, char* solin) {
+int MMG5_Set_inputSolName(MMG5_pMesh mesh,MMG5_pSol sol, const char* solin) {
   char *ptr;
 
   if ( sol->namein )
@@ -209,7 +209,7 @@ int MMG5_Set_inputSolName(MMG5_pMesh mesh,MMG5_pSol sol, char* solin) {
  * Set the name of output mesh file.
  *
  */
-int MMG5_Set_outputMeshName(MMG5_pMesh mesh, char* meshout) {
+int MMG5_Set_outputMeshName(MMG5_pMesh mesh, const char* meshout) {
   char *ptr;
 
   if ( mesh->nameout )
@@ -269,7 +269,7 @@ int MMG5_Set_outputMeshName(MMG5_pMesh mesh, char* meshout) {
  *  Set the name of output solution file.
  *
  */
-int MMG5_Set_outputSolName(MMG5_pMesh mesh,MMG5_pSol sol, char* solout) {
+int MMG5_Set_outputSolName(MMG5_pMesh mesh,MMG5_pSol sol, const char* solout) {
   char *ptr;
 
   if ( sol->nameout )

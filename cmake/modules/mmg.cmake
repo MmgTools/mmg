@@ -180,3 +180,33 @@ ENDIF()
 IF ( TEST_LIBMMG )
   INCLUDE(cmake/testing/libmmg_tests.cmake)
 ENDIF()
+
+###############################################################################
+#####
+#####         Continuous integration
+#####
+###############################################################################
+
+IF ( BUILD_TESTING )
+  ##-------------------------------------------------------------------##
+  ##--------------------------- Add tests and configure it ------------##
+  ##-------------------------------------------------------------------##
+  # Add runtime that we want to test for mmg
+  IF( MMG_CI )
+    # Add libqmg tests
+    IF ( TEST_LIBMMG )
+      SET(LIBMMG_EXEC0_a ${EXECUTABLE_OUTPUT_PATH}/libmmg_example0_a)
+      SET(LIBMMG_CPP_a   ${EXECUTABLE_OUTPUT_PATH}/libmmg_cpp_a)
+
+     ADD_TEST(NAME libmmg_example0_a   COMMAND ${LIBMMG_EXEC0_a})
+     ADD_TEST(NAME libmmg_cpp_a        COMMAND ${LIBMMG_CPP_a})
+
+      IF ( CMAKE_Fortran_COMPILER)
+        SET(LIBMMG_FORTRAN_a ${EXECUTABLE_OUTPUT_PATH}/libmmg_fortran_a)
+        ADD_TEST(NAME libmmg_fortran   COMMAND ${LIBMMG_FORTRAN_a})
+      ENDIF()
+    ENDIF ()
+
+  ENDIF( MMG_CI )
+
+ENDIF ( BUILD_TESTING )

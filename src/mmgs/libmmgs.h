@@ -149,7 +149,7 @@ void  MMGS_Init_parameters(MMG5_pMesh mesh);
  * >   END SUBROUTINE\n
  *
  */
-int  MMGS_Set_inputMeshName(MMG5_pMesh mesh, char* meshin);
+int  MMGS_Set_inputMeshName(MMG5_pMesh mesh, const char* meshin);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param meshout name of the output mesh file.
@@ -166,7 +166,7 @@ int  MMGS_Set_inputMeshName(MMG5_pMesh mesh, char* meshin);
  * >   END SUBROUTINE\n
  *
  */
-int  MMGS_Set_outputMeshName(MMG5_pMesh mesh, char* meshout);
+int  MMGS_Set_outputMeshName(MMG5_pMesh mesh, const char* meshout);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the sol structure.
@@ -184,7 +184,7 @@ int  MMGS_Set_outputMeshName(MMG5_pMesh mesh, char* meshout);
  * >   END SUBROUTINE\n
  *
  */
-int  MMGS_Set_inputSolName(MMG5_pMesh mesh,MMG5_pSol sol, char* solin);
+int  MMGS_Set_inputSolName(MMG5_pMesh mesh,MMG5_pSol sol, const char* solin);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the sol structure.
@@ -202,7 +202,7 @@ int  MMGS_Set_inputSolName(MMG5_pMesh mesh,MMG5_pSol sol, char* solin);
  * >   END SUBROUTINE\n
  *
  */
-int  MMGS_Set_outputSolName(MMG5_pMesh mesh,MMG5_pSol sol, char* solout);
+int  MMGS_Set_outputSolName(MMG5_pMesh mesh,MMG5_pSol sol, const char* solout);
 
 /* init structure sizes */
 /**
@@ -736,7 +736,7 @@ int MMGS_Get_iparameter(MMG5_pMesh mesh, int iparam);
  * >   END SUBROUTINE\n
  *
  */
-int  MMGS_loadMesh(MMG5_pMesh mesh, char* filename);
+int  MMGS_loadMesh(MMG5_pMesh mesh, const char* filename);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param filename name of file.
@@ -753,7 +753,7 @@ int  MMGS_loadMesh(MMG5_pMesh mesh, char* filename);
  * >   END SUBROUTINE\n
  *
  */
-int  MMGS_saveMesh(MMG5_pMesh mesh, char *filename);
+int  MMGS_saveMesh(MMG5_pMesh mesh, const char *filename);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the sol structure.
@@ -771,7 +771,7 @@ int  MMGS_saveMesh(MMG5_pMesh mesh, char *filename);
  * >   END SUBROUTINE\n
  *
  */
-int  MMGS_loadSol(MMG5_pMesh mesh,MMG5_pSol met, char* filename);
+int  MMGS_loadSol(MMG5_pMesh mesh,MMG5_pSol met, const char* filename);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the sol structure.
@@ -789,7 +789,7 @@ int  MMGS_loadSol(MMG5_pMesh mesh,MMG5_pSol met, char* filename);
  * >   END SUBROUTINE\n
  *
  */
-int  MMGS_saveSol(MMG5_pMesh mesh, MMG5_pSol met, char *filename);
+int  MMGS_saveSol(MMG5_pMesh mesh, MMG5_pSol met, const char *filename);
 
 /* deallocations */
 /**

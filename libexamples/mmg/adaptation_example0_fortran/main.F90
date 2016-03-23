@@ -18,7 +18,7 @@ PROGRAM main
   MMG5_DATA_PTR_T    :: mmgSol
   INTEGER            :: ier
   CHARACTER(len=255) :: pwd
-  CHARACTER(len=300) :: tdfile,tdfileout, bdfile, bdfileout
+  CHARACTER(len=350) :: tdfile,tdfileout, bdfile, bdfileout
 
   WRITE(*,*) "  -- TEST MMGLIB"
   ! get path of the run
@@ -34,8 +34,8 @@ PROGRAM main
   !! MMG5_ARG_ppMet: next arg will be a pointer over a MMG5_pSol storing a metric
   !! mmgSol: your MMG5_pSol (that store your metric) */
 
-  WRITE(bdfile,*) TRIM(pwd),"/../libexamples/mmg/example0_fortran/init"
-  WRITE(bdfileout,*) TRIM(pwd),"/../libexamples/mmg/example0_fortran/result.mesh"
+  WRITE(bdfile,*) TRIM(pwd),"/../libexamples/mmg/adaptation_example0_fortran/init"
+  WRITE(bdfileout,*) TRIM(pwd),"/../libexamples/mmg/adaptation_example0_fortran/result.mesh"
 
   mmgMesh = 0
   mmgSol  = 0
@@ -131,8 +131,8 @@ PROGRAM main
   !! MMG5_ARG_ppMet: next arg will be a pointer over a MMG5_pSol storing a metric
   !! mmgSol: your MMG5_pSol (that store your metric) */
 
-  WRITE(tdfile,*) TRIM(pwd),"/../libexamples/mmg/example0_fortran/cube"
-  WRITE(tdfileout,*) TRIM(pwd),"/../libexamples/mmg/example0_fortran/cube.s"
+  WRITE(tdfile,*) TRIM(pwd),"/../libexamples/mmg/adaptation_example0_fortran/cube"
+  WRITE(tdfileout,*) TRIM(pwd),"/../libexamples/mmg/adaptation_example0_fortran/cube.s"
 
   mmgMesh = 0
   mmgSol  = 0
@@ -248,7 +248,7 @@ PROGRAM main
   !! mmgMesh: your MMG5_pMesh (that store your mesh)
   !! MMG5_ARG_ppMet: next arg will be a pointer over a MMG5_pSol storing a metric
   !! mmgSol: your MMG5_pSol (that store your metric) */
-  WRITE(tdfileout,*) TRIM(pwd),"/../libexamples/mmg/example0_fortran/cube.3d"
+  WRITE(tdfileout,*) TRIM(pwd),"/../libexamples/mmg/adaptation_example0_fortran/cube.3d"
 
   mmgMesh = 0
   mmgSol  = 0
