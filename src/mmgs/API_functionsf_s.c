@@ -277,6 +277,25 @@ FORTRAN_NAME(MMGS_SET_REQUIREDEDGE,mmgs_set_requirededge,
 }
 
 /**
+ * See \ref MMGS_Set_normalAtVertex function in \ref mmgs/libmmgs.h file.
+ */
+FORTRAN_NAME(MMGS_SET_NORMALATVERTEX,mmgs_set_normalatvertex,
+             (MMG5_pMesh *mesh, int *k, double* n0, double* n1, double* n2,int* retval),
+             (mesh,k,n0,n1,n2,retval)) {
+  *retval = MMGS_Set_normalAtVertex(*mesh,*k, *n0, *n1, *n2);
+  return;
+}
+/**
+ * See \ref MMGS_Get_normalAtVertex function in \ref mmgs/libmmgs.h file.
+ */
+FORTRAN_NAME(MMGS_GET_NORMALATVERTEX,mmgs_get_normalatvertex,
+             (MMG5_pMesh *mesh, int *k, double* n0, double* n1, double* n2,int* retval),
+             (mesh,k,n0,n1,n2,retval)) {
+  *retval = MMGS_Get_normalAtVertex(*mesh,*k, n0, n1, n2);
+  return;
+}
+
+/**
  * See \ref MMGS_Set_scalarSol function in \ref mmgs/libmmgs.h file.
  */
 FORTRAN_NAME(MMGS_SET_SCALARSOL,mmgs_set_scalarsol,

@@ -510,6 +510,28 @@ int MMGS_Set_requiredEdge(MMG5_pMesh mesh, int k) {
   return(1);
 }
 
+int MMGS_Set_normalAtVertex(MMG5_pMesh mesh, int k, double n0, double n1, double n2) {
+
+  assert ( k <= mesh->np );
+  mesh->point[k].n[0] = n0;
+  mesh->point[k].n[1] = n1;
+  mesh->point[k].n[2] = n2;
+
+  ++mesh->nc1;
+
+  return(1);
+}
+
+int MMGS_Get_normalAtVertex(MMG5_pMesh mesh, int k, double *n0, double *n1, double *n2) {
+
+  assert ( k <= mesh->np );
+  (*n0) = mesh->point[k].n[0];
+  (*n1) = mesh->point[k].n[1];
+  (*n2) = mesh->point[k].n[2];
+
+  return(1);
+}
+
 int MMGS_Set_scalarSol(MMG5_pSol met, double s, int pos) {
 
   if ( !met->np ) {

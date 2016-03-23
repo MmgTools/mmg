@@ -557,6 +557,32 @@ END INTERFACE
 
 ! int  MMG3D_Set_requiredEdge(MMG5_pMesh mesh, int k);
 ! /**
+!  * \param mesh pointer toward the mesh structure.
+!  * \param k point index
+!  * \param n0 x componant of the normal at point \a k.
+!  * \param n1 y componant of the normal at point \a k.
+!  * \param n2 z componant of the normal at point \a k.
+!  *
+!  * \return 1 if success.
+!  *
+!  * Set normals (n0,n1,n2) at point \a k.
+!  *
+!  * \remark Fortran interface:
+!  */
+INTERFACE
+  SUBROUTINE MMG3D_SET_NORMALATVERTEX(mesh,k,n0,n1,n2,retval)
+    MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh
+    INTEGER, INTENT(IN)           :: k
+    REAL(KIND=8), INTENT(IN)      :: n0,n1,n2
+    INTEGER, INTENT(OUT)          :: retval
+  END SUBROUTINE
+END INTERFACE
+!  *
+!  */
+
+! int  MMG3D_Set_normalAtVertex(MMG5_pMesh mesh, int k, double n0, double n1, double n2) ;
+
+! /**
 !  * \param met pointer toward the sol structure.
 !  * \param s solution scalar value.
 !  * \param pos position of the solution in the mesh.
@@ -904,6 +930,32 @@ END INTERFACE
 
 ! int  MMG3D_Get_edge(MMG5_pMesh mesh, int* e0, int* e1, int* ref,
 !                    int* isRidge, int* isRequired);
+! /**
+!  * \param mesh pointer toward the mesh structure.
+!  * \param k point index
+!  * \param n0 x componant of the normal at point \a k.
+!  * \param n1 y componant of the normal at point \a k.
+!  * \param n2 z componant of the normal at point \a k.
+!  *
+!  * \return 1 if success.
+!  *
+!  * Get normals (n0,n1,n2) at point \a k.
+!  *
+!  * \remark Fortran interface:
+!  */
+INTERFACE
+  SUBROUTINE MMG3D_GET_NORMALATVERTEX(mesh,k,n0,n1,n2,retval)
+    MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh
+    INTEGER, INTENT(IN)           :: k
+    REAL(KIND=8)                  :: n0,n1,n2
+    INTEGER, INTENT(OUT)          :: retval
+  END SUBROUTINE
+END INTERFACE
+!  *
+!  */
+
+! int  MMG3D_Get_normalAtVertex(MMG5_pMesh mesh, int k, double *n0, double *n1, double *n2) ;
+
 ! /**
 !  * \param met pointer toward the sol structure.
 !  * \param s pointer toward the scalar solution value.
@@ -1791,6 +1843,7 @@ END INTERFACE
 !  */
 
 ! int  MMG5_Set_requiredEdge(MMG5_pMesh mesh, int k);
+
 ! /**
 !  * \param met pointer toward the sol structure.
 !  * \param s solution scalar value.
@@ -2154,7 +2207,7 @@ END INTERFACE
 ! /**
 !  * \param prog pointer toward the program name.
 !  *
-!  * Print help for mmgs options.
+!  * Print help for mmg3d options.
 !  *
 !  */
 

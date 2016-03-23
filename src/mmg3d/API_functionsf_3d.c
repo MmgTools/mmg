@@ -325,6 +325,25 @@ FORTRAN_NAME(MMG3D_SET_REQUIREDEDGE,mmg3d_set_requirededge,
 }
 
 /**
+ * See \ref MMG3D_Set_normalAtVertex function in \ref mmg3d/libmmg3d.h file.
+ */
+FORTRAN_NAME(MMG3D_SET_NORMALATVERTEX,mmg3d_set_normalatvertex,
+             (MMG5_pMesh *mesh, int *k, double* n0, double* n1, double* n2,int* retval),
+             (mesh,k,n0,n1,n2,retval)) {
+  *retval = MMG3D_Set_normalAtVertex(*mesh,*k, *n0, *n1, *n2);
+  return;
+}
+/**
+ * See \ref MMG3D_Get_normalAtVertex function in \ref mmg3d/libmmg3d.h file.
+ */
+FORTRAN_NAME(MMG3D_GET_NORMALATVERTEX,mmg3d_get_normalatvertex,
+             (MMG5_pMesh *mesh, int *k, double* n0, double* n1, double* n2,int* retval),
+             (mesh,k,n0,n1,n2,retval)) {
+  *retval = MMG3D_Get_normalAtVertex(*mesh,*k, n0, n1, n2);
+  return;
+}
+
+/**
  * See \ref MMG3D_Set_scalarSol function in \ref mmg3d/libmmg3d.h file.
  */
 FORTRAN_NAME(MMG3D_SET_SCALARSOL,mmg3d_set_scalarsol,

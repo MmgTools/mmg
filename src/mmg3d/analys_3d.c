@@ -462,6 +462,7 @@ static int _MMG5_norver(MMG5_pMesh mesh) {
         memcpy(pxp->n1,ppt->n,3*sizeof(double));
         ppt->n[0] = ppt->n[1] = ppt->n[2] = 0.;
         ppt->flag = mesh->base;
+
       }
 
       /* along ridge-curve */
@@ -533,7 +534,6 @@ static int _MMG5_norver(MMG5_pMesh mesh) {
       fprintf(stdout,"     %d input normals ignored\n",nnr);
     fprintf(stdout,"     %d normals,  %d tangents updated  (%d failed)\n",nn,nt,nf);
   }
-
   return(1);
 }
 

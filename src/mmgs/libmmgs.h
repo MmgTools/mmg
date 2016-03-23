@@ -391,6 +391,29 @@ int  MMGS_Set_ridge(MMG5_pMesh mesh, int k);
  *
  */
 int  MMGS_Set_requiredEdge(MMG5_pMesh mesh, int k);
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param k point index
+ * \param n0 x componant of the normal at point \a k.
+ * \param n1 y componant of the normal at point \a k.
+ * \param n2 z componant of the normal at point \a k.
+ *
+ * \return 1 if success.
+ *
+ * Set normals (n0,n1,n2) at point \a k.
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMGS_SET_NORMALATVERTEX(mesh,k,n0,n1,n2,retval)\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
+ * >     INTEGER, INTENT(IN)           :: k\n
+ * >     REAL(KIND=8), INTENT(IN)      :: n0,n1,n2\n
+ * >     INTEGER, INTENT(OUT)          :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+int  MMGS_Set_normalAtVertex(MMG5_pMesh mesh, int k, double n0, double n1, double n2) ;
+
 /**
  * \param met pointer toward the sol structure.
  * \param s solution scalar value.
@@ -646,6 +669,29 @@ int  MMGS_Get_triangle(MMG5_pMesh mesh, int* v0, int* v1, int* v2, int* ref,
  */
 int  MMGS_Get_edge(MMG5_pMesh mesh, int* e0, int* e1, int* ref,
                    int* isRidge, int* isRequired);
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param k point index
+ * \param n0 x componant of the normal at point \a k.
+ * \param n1 y componant of the normal at point \a k.
+ * \param n2 z componant of the normal at point \a k.
+ *
+ * \return 1 if success.
+ *
+ * Get normals (n0,n1,n2) at point \a k.
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMGS_GET_NORMALATVERTEX(mesh,k,n0,n1,n2,retval)\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
+ * >     INTEGER, INTENT(IN)           :: k\n
+ * >     REAL(KIND=8)                  :: n0,n1,n2\n
+ * >     INTEGER, INTENT(OUT)          :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+int  MMGS_Get_normalAtVertex(MMG5_pMesh mesh, int k, double *n0, double *n1, double *n2) ;
+
 /**
  * \param met pointer toward the sol structure.
  * \param s pointer toward the scalar solution value.
