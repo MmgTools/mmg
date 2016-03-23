@@ -70,6 +70,19 @@ _MMG5_paktet(MMG5_pMesh mesh) {
   }
 }
 
+/**
+ * \param mesh pointer toward the mesh.
+ * \param hash pointer toward the hash table to fill.
+ * \param ia first vertex of face to hash.
+ * \param ib second vertex of face to hash.
+ * \param ic third vertex of face to hash.
+ * \param k index of face to hash.
+ *
+ * \return 0 if fail, -1 if the face is newly hashed, index of the first face
+ * hashed if another face with same vertices exist.
+ *
+ *
+ **/
 static int _MMG5_hashFace(MMG5_pMesh mesh,_MMG5_Hash *hash,int ia,int ib,int ic,int k) {
   _MMG5_hedge     *ph;
   int        key,mins,maxs,sum,j;
@@ -104,7 +117,7 @@ static int _MMG5_hashFace(MMG5_pMesh mesh,_MMG5_Hash *hash,int ia,int ib,int ic,
       _MMG5_TAB_RECALLOC(mesh,hash->item,hash->max,0.2,_MMG5_hedge,"face",return(0));
       for (j=hash->nxt; j<hash->max; j++)  hash->item[j].nxt = j+1;
     }
-    return(1);
+    return(-1);
   }
 
   /* insert new face */
@@ -114,7 +127,7 @@ static int _MMG5_hashFace(MMG5_pMesh mesh,_MMG5_Hash *hash,int ia,int ib,int ic,
   ph->k = k;
   ph->nxt = 0;
 
-  return(1);
+  return(-1);
 }
 
 /** return index of triangle ia ib ic */
@@ -953,9 +966,9 @@ int _MMG5_hGeom(MMG5_pMesh mesh) {
 int _MMG5_chkBdryTria(MMG5_pMesh mesh) {
   MMG5_pTetra    pt,pt1;
   MMG5_pTria     ptt,pttnew;
-  int            *adja,adj,k,i,ntmesh;
+  int            *adja,adj,k,i,j,ntmesh;
   int            ia,ib,ic, nbl,nt;
-  _MMG5_Hash     hash;
+  _MMG5_Hash     hashTet, hashTri;
 
   /** Step 1: scan the mesh and count th boundaries */
   ntmesh = 0;
@@ -974,7 +987,7 @@ int _MMG5_chkBdryTria(MMG5_pMesh mesh) {
   /** Step 2: detect the extra boundaries (that will be ignored) provided by the
    * user */
   if ( mesh->nt ) {
-    if ( ! _MMG5_hashNew(mesh,&hash,0.51*ntmesh,1.51*ntmesh) ) return(0);
+    if ( ! _MMG5_hashNew(mesh,&hashTet,0.51*ntmesh,1.51*ntmesh) ) return(0);
     // Hash the boundaries founded in the mesh
     for (k=1; k<=mesh->ne; k++) {
       pt = &mesh->tetra[k];
@@ -987,18 +1000,34 @@ int _MMG5_chkBdryTria(MMG5_pMesh mesh) {
           ia = pt->v[_MMG5_idir[i][0]];
           ib = pt->v[_MMG5_idir[i][1]];
           ic = pt->v[_MMG5_idir[i][2]];
-          _MMG5_hashFace(mesh,&hash,ia,ib,ic,k);
+          if ( !_MMG5_hashFace(mesh,&hashTet,ia,ib,ic,k) ) return(0);
         }
       }
     }
+
     // Travel through the tria, delete those that are not in the hash tab and
-    // pack the mesh.
+    // pack the tria.
     nt=0; nbl=1;
+
+    if ( ! _MMG5_hashNew(mesh,&hashTri,0.51*mesh->nt,1.51*mesh->nt) ) return(0);
+
     for (k=1; k<=mesh->nt; k++) {
       ptt = &mesh->tria[k];
-      i = _MMG5_hashGetFace(&hash,ptt->v[0],ptt->v[1],ptt->v[2]);
+
+      ia = ptt->v[0];
+      ib = ptt->v[1];
+      ic = ptt->v[2];
+
+      i = _MMG5_hashGetFace(&hashTet,ia,ib,ic);
+      j = _MMG5_hashFace(mesh,&hashTri,ia,ib,ic,k);
+
+      if ( !j ) return(0);
+      else if ( j > 0 ) {
+        continue;
+      }
 
       if ( !i ) continue;
+
       ++nt;
       if ( k!=nbl ) {
         pttnew = &mesh->tria[nbl];
@@ -1011,7 +1040,8 @@ int _MMG5_chkBdryTria(MMG5_pMesh mesh) {
       printf("  ## Warning: %d extra boundaries provided. Ignored\n",nbl);
       mesh->nt = nt;
     }
-    _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
+    _MMG5_DEL_MEM(mesh,hashTet.item,(hashTet.max+1)*sizeof(_MMG5_hedge));
+    _MMG5_DEL_MEM(mesh,hashTri.item,(hashTri.max+1)*sizeof(_MMG5_hedge));
   }
 
   /** Step 3: add the missing boundary triangles if needed */
@@ -1060,7 +1090,7 @@ int _MMG5_bdryTria(MMG5_pMesh mesh) {
     tofree=1;
     for (k=1; k<=mesh->nt; k++) {
       ptt = &mesh->tria[k];
-      _MMG5_hashFace(mesh,&hash,ptt->v[0],ptt->v[1],ptt->v[2],k);
+      if ( !_MMG5_hashFace(mesh,&hash,ptt->v[0],ptt->v[1],ptt->v[2],k) ) return(0);
     }
   }
   else hash.item = NULL;
@@ -1156,7 +1186,7 @@ int _MMG5_bdrySet(MMG5_pMesh mesh) {
   if ( ! _MMG5_hashNew(mesh,&hash,0.51*mesh->nt,1.51*mesh->nt) ) return(0);
   for (k=1; k<=mesh->nt; k++) {
     ptt = &mesh->tria[k];
-    _MMG5_hashFace(mesh,&hash,ptt->v[0],ptt->v[1],ptt->v[2],k);
+    if ( !_MMG5_hashFace(mesh,&hash,ptt->v[0],ptt->v[1],ptt->v[2],k) ) return(0);
   }
   na = 0;
 
@@ -1253,7 +1283,7 @@ int _MMG5_bdryUpdate(MMG5_pMesh mesh) {
   if ( !_MMG5_hashNew(mesh,&hash,0.51*mesh->nt,1.51*mesh->nt) )  return(0);
   for (k=1; k<=mesh->nt; k++) {
     ptt = &mesh->tria[k];
-    _MMG5_hashFace(mesh,&hash,ptt->v[0],ptt->v[1],ptt->v[2],k);
+    if ( !_MMG5_hashFace(mesh,&hash,ptt->v[0],ptt->v[1],ptt->v[2],k) ) return(0);
   }
 
   for (k=1; k<=mesh->ne; k++) {
