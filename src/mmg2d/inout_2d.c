@@ -1676,3 +1676,195 @@ int MMG2D_saveVect(MMG5_pMesh mesh,MMG5_pSol sol,char *filename,double lambda) {
   /* fclose(inm2); */
   return(1);
 }
+
+/* Custom version of Savemesh for debugging purpose */
+int _MMG2_savemesh_db(MMG5_pMesh mesh,char *filename,char pack) {
+  MMG5_pTria         pt;
+  MMG5_pEdge         pa;
+  MMG5_pPoint        ppt,p0,p1,p2;
+  int                k,np,nt,nc;
+  FILE               *out;
+  
+  out = fopen(filename,"w");
+  
+  np = nt = 0;
+  /* Write Header */
+  fprintf(out,"MeshVersionFormatted %d\n\nDimension %d\n\n",1,2);
+  
+  /* Print vertices */
+  for (k=1; k<=mesh->np; k++) {
+    ppt = &mesh->point[k];
+    if ( pack && MG_VOK(ppt) ) {
+      np++;
+      ppt->tmp = np;
+    }
+    else if ( !pack ) {
+      np++;
+      ppt->tmp = np;
+    }
+  }
+  
+  fprintf(out,"Vertices\n %d\n\n",np);
+  for (k=1; k<=mesh->np; k++) {
+    ppt = &mesh->point[k];
+    if ( ( pack && MG_VOK(ppt) ) || !pack )
+      fprintf(out,"%f %f %d\n",ppt->c[0],ppt->c[1],ppt->ref);
+  }
+
+  /* Print Triangles */
+  for (k=1; k<=mesh->nt; k++) {
+    pt = &mesh->tria[k];
+    if ( MG_EOK(pt) ) nt++;
+  }
+  
+  fprintf(out,"Triangles\n %d\n\n",nt);
+  for (k=1; k<=mesh->nt; k++) {
+    pt = &mesh->tria[k];
+    if ( MG_EOK(pt) ) {
+      p0 = &mesh->point[pt->v[0]];
+      p1 = &mesh->point[pt->v[1]];
+      p2 = &mesh->point[pt->v[2]];
+      fprintf(out,"%d %d %d %d\n",p0->tmp,p1->tmp,p2->tmp,pt->ref);
+    }
+  }
+  
+  /* Print Edges */
+  if ( mesh->na ) {
+    fprintf(out,"Edges\n %d\n\n",mesh->na);
+    for (k=1; k<=mesh->na; k++) {
+      pa = &mesh->edge[k];
+      p1 = &mesh->point[pa->a];
+      p2 = &mesh->point[pa->b];
+      if ( pack ) fprintf(out,"%d %d %d\n",p1->tmp,p2->tmp,pa->ref);
+      else        fprintf(out,"%d %d %d\n",pa->a,pa->b,pa->ref);
+    }
+  }
+  
+  /* Print corners */
+  nc = 0;
+  for (k=1; k<=mesh->np; k++) {
+    ppt = &mesh->point[k];
+    if ( MG_VOK(ppt) && ppt->tag & MG_CRN ) nc++;
+  }
+  
+  if ( nc ) {
+    fprintf(out,"Corners\n %d\n\n",nc);
+    for (k=1; k<=mesh->np; k++) {
+      ppt = &mesh->point[k];
+      if ( MG_VOK(ppt) && ppt->tag & MG_CRN ) {
+        if ( pack )   fprintf(out,"%d\n",ppt->tmp);
+        else          fprintf(out,"%d\n",k);
+      }
+    }
+  }
+  
+  /* End keyword */
+  fprintf(out,"End\n");
+
+  fclose(out);
+  
+  return(1);
+}
+
+/* Custom version of Savemet for debugging purpose */
+int _MMG2_savemet_db(MMG5_pMesh mesh,MMG5_pSol met,char *filename,char pack) {
+  MMG5_pPoint        ppt;
+  int                k,np;
+  char               *ptr,data[128];
+  FILE               *out;
+  
+  strcpy(data,filename);
+  ptr = strstr(data,".mesh");
+  if ( ptr )
+    *ptr = '\0';
+  
+  strcat(data,".sol");
+  out = fopen(data,"w");
+  
+  np = 0;
+  for (k=1; k<=mesh->np; k++)
+    mesh->point[k].tmp = 0;
+  
+  /* Write Header */
+  fprintf(out,"MeshVersionFormatted %d\n\nDimension %d\n\n",1,2);
+
+  /* Print vertices */
+  for (k=1; k<=mesh->np; k++) {
+    ppt = &mesh->point[k];
+    if ( pack && MG_VOK(ppt) ) {
+      np++;
+      ppt->tmp = np;
+    }
+    else if ( !pack ) {
+      np++;
+      ppt->tmp = np;
+    }
+  }
+  
+  fprintf(out,"SolAtVertices\n %d\n%d %d\n\n",np,1,1);
+  for (k=1; k<=mesh->np; k++) {
+    ppt = &mesh->point[k];
+    if ( ( pack && MG_VOK(ppt) ) || !pack )
+      fprintf(out,"%f\n",met->m[k]);
+  }
+  
+  /* End keyword */
+  fprintf(out,"End\n");
+  
+  fclose(out);
+  
+  return(1);
+}
+
+/* Save normal vector field for debugging purpose */
+int _MMG2_savenor_db(MMG5_pMesh mesh,char *filename,char pack) {
+  MMG5_pPoint        ppt;
+  int                k,np;
+  char               *ptr,data[128];
+  FILE               *out;
+  
+  strcpy(data,filename);
+  ptr = strstr(data,".mesh");
+  if ( ptr )
+    *ptr = '\0';
+  
+  strcat(data,".nor.sol");
+  out = fopen(data,"w");
+  
+  np = 0;
+  for (k=1; k<=mesh->np; k++)
+    mesh->point[k].tmp = 0;
+  
+  /* Write Header */
+  fprintf(out,"MeshVersionFormatted %d\n\nDimension %d\n\n",1,2);
+  
+  /* Print vertices */
+  for (k=1; k<=mesh->np; k++) {
+    ppt = &mesh->point[k];
+    if ( pack && MG_VOK(ppt) ) {
+      np++;
+      ppt->tmp = np;
+    }
+    else if ( !pack ) {
+      np++;
+      ppt->tmp = np;
+    }
+  }
+  
+  fprintf(out,"SolAtVertices\n %d\n%d %d\n\n",np,1,2);
+  for (k=1; k<=mesh->np; k++) {
+    ppt = &mesh->point[k];
+    if ( ( pack && MG_VOK(ppt) ) || !pack ) {
+      if ( MG_EDG(ppt->tag) && ! MG_SIN(ppt->tag) ) fprintf(out,"%f %f\n",ppt->n[0],ppt->n[1]);
+      else fprintf(out,"%f %f\n",0.0,0.0);
+    }
+  }
+  
+  /* End keyword */
+  fprintf(out,"End\n");
+  
+  fclose(out);
+  
+  return(1);
+}
+

@@ -345,6 +345,7 @@ static int _MMG5_snpval_ls(MMG5_pMesh mesh,MMG5_pSol sol,double *tmp) {
       }
     }
   }
+  
   if ( (abs(mesh->info.imprim) > 5 || mesh->info.ddebug) && ns+nc > 0 )
     fprintf(stdout,"     %8d points snapped, %d corrected\n",ns,nc);
 

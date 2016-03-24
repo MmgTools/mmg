@@ -23,7 +23,7 @@
 #include "mmg2d.h"
 
 
-/* compute iso edge length */
+/* Compute isotropic edge length */
 double long_iso(double *ca,double *cb,double *ma,double *mb) {
   double   ha,hb,ux,uy,dd,rap,len;
 
@@ -34,7 +34,7 @@ double long_iso(double *ca,double *cb,double *ma,double *mb) {
   dd = sqrt(ux*ux + uy*uy);
 
   rap = (hb - ha) / ha;
-  if ( fabs(rap) < EPSD )
+  if ( fabs(rap) < _MMG2_EPSD )
     len = dd / ha;
   else
     len = dd * (1.0/ha + 1.0/hb + 8.0 / (ha+hb)) / 6.0;
@@ -58,6 +58,27 @@ double long_ani(double *ca,double *cb,double *ma,double *mb) {
 
   return(len);
 }
+
+/* Calculate length of a curve in the considered isotropic metric */
+double _MMG2_lencurv_iso(MMG5_pMesh mesh,MMG5_pSol met, int ip1, int ip2) {
+  MMG5_pPoint     p1,p2;
+  double          h1,h2,len,l,r;
+  
+  p1 = &mesh->point[ip1];
+  p2 = &mesh->point[ip2];
+  
+  h1 = met->m[ip1];
+  h2 = met->m[ip2];
+  
+  l = (p2->c[0]-p1->c[0])*(p2->c[0]-p1->c[0]) + (p2->c[1]-p1->c[1])*(p2->c[1]-p1->c[1]);
+  l = sqrt(l);
+  r = h2 / h1 - 1.0;
+  len = ( fabs(r) < _MMG5_EPS ) ? ( l/h1 ) : ( l / (h2-h1) * log(r+1.0) );
+    
+  return(len);
+}
+
+
 /* print histo of edge lengths */
 int MMG2_prilen(MMG5_pMesh mesh,MMG5_pSol sol) {
   MMG5_pTria       pt;

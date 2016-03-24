@@ -37,6 +37,8 @@
 
 /* constantes */
 
+#define MS_SMSGN(a,b)  (((double)(a)*(double)(b) > (0.0)) ? (1) : (0))
+
 #define M_MAX(a,b) (((a) > (b)) ? (a) : (b))
 #define M_MIN(a,b) (((a) < (b)) ? (a) : (b))
 
@@ -44,7 +46,7 @@
 #define M_MU      0.33
 
 #define EPS30  1.e-30
-#define EPSD   1.e-10 //e-20??
+#define _MMG2_EPSD   1.e-10 //e-20??
 #define EPSA   1.e-12
 #define TGV    1.e15
 #define PRECI  1.
@@ -54,6 +56,13 @@
 #define ALPHAD 3.464101615137755   /* 6.0 / sqrt(3.0)  */
 #define MMG2_LONMAX 1024
 #define _MMG5_BADKAL    0.2
+#define _MMG2_NULKAL    1.e-6
+#define _MMG2_ANGCORN   -1.e-6
+
+#define MMG2_LLONG  2.0
+#define MMG2_LSHRT  0.3
+#define MMG2_LOPTL      1.4
+#define MMG2_LOPTS     0.71
 
 #define M_NOSURF   (1 << 0) /**< 1 Mark for the nosurf option */
 #define M_BDRY     (1 << 1) /**< 2 Boundary */
@@ -69,6 +78,36 @@
 
 #define M_VOK(ppt)    (ppt && (ppt->tag < M_NUL))
 #define M_EOK(pt)     (pt && (pt->v[0] > 0))
+
+/* Domain refs in iso mode */
+#define MS_PLUS    2
+#define MS_MINUS   3
+
+/** Reallocation of point table and sol table and creation
+ of point ip with coordinates o and tag tag*/
+#define _MMG5_POINT_REALLOC(mesh,sol,ip,wantedGap,law,o,tag ) do        \
+{                                                                     \
+int klink;                                                          \
+\
+_MMG5_TAB_RECALLOC(mesh,mesh->point,mesh->npmax,wantedGap,MMG5_Point, \
+"larger point table",law);                       \
+\
+mesh->npnil = mesh->np+1;                                           \
+for (klink=mesh->npnil; klink<mesh->npmax-1; klink++)               \
+mesh->point[klink].tmp  = klink+1;                                \
+\
+/* solution */                                                      \
+if ( sol->m ) {                                                     \
+_MMG5_ADD_MEM(mesh,(sol->size*(mesh->npmax-sol->npmax))*sizeof(double), \
+"larger solution",law);                             \
+_MMG5_SAFE_REALLOC(sol->m,sol->size*(mesh->npmax+1),double,"larger solution"); \
+}                                                                   \
+sol->npmax = mesh->npmax;                                           \
+\
+/* We try again to add the point */                                 \
+ip = _MMG2D_newPt(mesh,o,tag);                                       \
+if ( !ip ) {law;}                                                   \
+}while(0)
 
 /** Free allocated pointers of mesh and sol structure and return value val */
 #define _MMG2D_RETURN_AND_FREE(mesh,met,val)do                \
@@ -282,10 +321,10 @@ int MMG2_unscaleMesh(MMG5_pMesh ,MMG5_pSol );
 void MMG2_outqua(MMG5_pMesh ,MMG5_pSol );
 int MMG2_mmg2d0(MMG5_pMesh ,MMG5_pSol );
 int MMG2_mmg2d1(MMG5_pMesh ,MMG5_pSol );
-int MMG2_split(MMG5_pMesh ,MMG5_pSol ,int ,int ,int );
-int MMG2_splitbdry(MMG5_pMesh ,MMG5_pSol ,int ,int ,int,double*);
-int MMG2_colpoi(MMG5_pMesh ,MMG5_pSol , int ,int ,int ,int ,double );
-int MMG2_colpoibdry(MMG5_pMesh ,MMG5_pSol , int ,int ,int ,int ,double );
+//int MMG2_split(MMG5_pMesh ,MMG5_pSol ,int ,int ,int );
+//int MMG2_splitbdry(MMG5_pMesh ,MMG5_pSol ,int ,int ,int,double*);
+//int MMG2_colpoi(MMG5_pMesh ,MMG5_pSol , int ,int ,int ,int ,double );
+//int MMG2_colpoibdry(MMG5_pMesh ,MMG5_pSol , int ,int ,int ,int ,double );
 
 void _MMG2D_Init_mesh_var( va_list argptr );
 void _MMG2D_Free_all_var( va_list argptr );
@@ -295,23 +334,22 @@ void _MMG2D_Free_names_var( va_list argptr );
 int MMG2_mmg2d2(MMG5_pMesh , MMG5_pSol);
 int MMG2_mmg2d6(MMG5_pMesh ,MMG5_pSol );
 int MMG2_mmg2d9(MMG5_pMesh ,MMG5_pSol );
-int MMG2_cendel(MMG5_pMesh ,MMG5_pSol ,double ,int );
-int MMG2_swapar(MMG5_pMesh ,MMG5_pSol ,int ,int ,double ,int *);
+//int MMG2_cendel(MMG5_pMesh ,MMG5_pSol ,double ,int );
+int _MMG2_swapdelone(MMG5_pMesh ,MMG5_pSol ,int ,char ,double ,int *);
 int _MMG5_mmg2dChkmsh(MMG5_pMesh , int, int );
 int MMG2_boulep(MMG5_pMesh , int , int , int * );
 int MMG2_markBdry(MMG5_pMesh );
 int MMG2_doSol(MMG5_pMesh ,MMG5_pSol );
 int MMG2_prilen(MMG5_pMesh ,MMG5_pSol );
 
-void MMG2_coorbary(MMG5_pMesh ,MMG5_pTria ,double c[2],double* ,double* ,double* );
+int MMG2_coorbary(MMG5_pMesh ,MMG5_pTria ,double c[2],double* ,double* ,double* );
 int MMG2_isInTriangle(MMG5_pMesh ,int,double c[2]);
 int MMG2_cutEdge(MMG5_pMesh ,MMG5_pTria ,MMG5_pPoint ,MMG5_pPoint );
 int MMG2_cutEdgeTriangle(MMG5_pMesh ,int ,int ,int );
 int MMG2_findTria(MMG5_pMesh ,int );
-int MMG2_findpos(MMG5_pMesh ,MMG5_pTria ,int ,int ,int ,int ,int );
+//int MMG2_findpos(MMG5_pMesh ,MMG5_pTria ,int ,int ,int ,int ,int );
 int MMG2_locateEdge(MMG5_pMesh ,int ,int ,int* ,int* ) ;
 int MMG2_bdryenforcement(MMG5_pMesh ,MMG5_pSol);
-int MMG2_insertpoint(MMG5_pMesh ,MMG5_pSol );
 int MMG2_settagtriangles(MMG5_pMesh ,MMG5_pSol );
 int MMG2_findtrianglestate(MMG5_pMesh ,int ,int ,int ,int ,int ,int );
 
@@ -340,6 +378,61 @@ int _MMG2_cavity(MMG5_pMesh ,MMG5_pSol ,int ,int *);
 int _MMG2_delone(MMG5_pMesh ,MMG5_pSol ,int ,int *,int );
 int _MMG2_cenrad_iso(MMG5_pMesh ,double *,double *,double *);
 
+/* Adds Charles */
+int _MMG2_ismaniball(MMG5_pMesh , MMG5_pSol , int , char );
+int _MMG2_snapval(MMG5_pMesh ,MMG5_pSol ,double *);
+int _MMG2_chkmanimesh(MMG5_pMesh );
+int MMG2_hashTria(MMG5_pMesh );
+int _MMG2_cuttri_ls(MMG5_pMesh ,MMG5_pSol );
+int _MMG2_setref_ls(MMG5_pMesh ,MMG5_pSol );
+int _MMG2_split1_sim(MMG5_pMesh ,MMG5_pSol ,int ,int vx[3]);
+int _MMG2_split2_sim(MMG5_pMesh ,MMG5_pSol ,int ,int vx[3]);
+int _MMG2_split3_sim(MMG5_pMesh ,MMG5_pSol ,int ,int vx[3]);
+int _MMG2_split1(MMG5_pMesh ,MMG5_pSol ,int ,int vx[3]);
+int _MMG2_split2(MMG5_pMesh ,MMG5_pSol ,int ,int vx[3]);
+int _MMG2_split3(MMG5_pMesh ,MMG5_pSol ,int ,int vx[3]);
+int  MMG2_assignEdge(MMG5_pMesh );
+int  MMG2_bdryEdge(MMG5_pMesh );
+int _MMG2_setadj(MMG5_pMesh );
+int _MMG2_singul(MMG5_pMesh );
+int _MMG2_analys(MMG5_pMesh );
+int _MMG2_norver(MMG5_pMesh );
+int _MMG2_regnor(MMG5_pMesh );
+int _MMG2_boulen(MMG5_pMesh , int ,char ,int *,int *,double *);
+int MMG2_mmg2d1n(MMG5_pMesh ,MMG5_pSol );
+int _MMG2_anatri(MMG5_pMesh ,MMG5_pSol ,char );
+int _MMG2_adptri(MMG5_pMesh ,MMG5_pSol );
+int _MMG2_defsiz_iso(MMG5_pMesh ,MMG5_pSol );
+int _MMG2_gradsiz_iso(MMG5_pMesh ,MMG5_pSol );
+int _MMG2_anaelt(MMG5_pMesh ,MMG5_pSol ,int );
+int _MMG2_colelt(MMG5_pMesh ,MMG5_pSol ,int );
+int _MMG2_swpmsh(MMG5_pMesh ,MMG5_pSol ,int );
+double _MMG2_lencurv_iso(MMG5_pMesh ,MMG5_pSol , int , int );
+int _MMG2_chkedg(MMG5_pMesh , int );
+int _MMG2_bezierCurv(MMG5_pMesh ,int ,char ,double ,double *,double *);
+int _MMG2_dichoto(MMG5_pMesh ,MMG5_pSol ,int ,int *);
+double _MMG2_quickcal(MMG5_pMesh , MMG5_pTria );
+int _MMG2_chkcol(MMG5_pMesh,MMG5_pSol,int,char,int *,char);
+int _MMG2_colver(MMG5_pMesh,int,int*);
+int _MMG2_colver3(MMG5_pMesh,int*);
+int _MMG2_colver2(MMG5_pMesh,int*);
+int _MMG2_boulet(MMG5_pMesh,int,char,int*);
+int _MMG2_bouleendp(MMG5_pMesh,int,char,int*,int*);
+int _MMG2_savemesh_db(MMG5_pMesh ,char* ,char );
+int _MMG2_savemet_db(MMG5_pMesh ,MMG5_pSol ,char* ,char );
+int _MMG2_chkswp(MMG5_pMesh , MMG5_pSol ,int ,char ,char );
+int _MMG2_swapar(MMG5_pMesh ,int ,char );
+int _MMG2_intmet_iso(MMG5_pMesh ,MMG5_pSol ,int ,char ,int ,double );
+int _MMG2_adpspl(MMG5_pMesh ,MMG5_pSol );
+int _MMG2_adpcol(MMG5_pMesh ,MMG5_pSol );
+int _MMG2_movtri(MMG5_pMesh ,MMG5_pSol ,int ,char );
+int _MMG2_chkspl(MMG5_pMesh ,MMG5_pSol ,int ,char );
+int _MMG2_split1b(MMG5_pMesh ,int ,char ,int );
+int _MMG2_movedgpt(MMG5_pMesh ,MMG5_pSol ,int ,int *,char );
+int _MMG2_movintpt(MMG5_pMesh ,MMG5_pSol ,int ,int *,char );
+int _MMG2_chkmsh(MMG5_pMesh );
+int _MMG2_savenor_db(MMG5_pMesh ,char *,char );
+
 /* functions pointers */
 double long_ani(double *ca,double *cb,double *ma,double *mb);
 double long_iso(double *ca,double *cb,double *ma,double *mb);
@@ -358,7 +451,7 @@ int    buckin_ani(MMG5_pMesh mesh,MMG5_pSol sol,pBucket bucket,int ip);
 int    lissmet_iso(MMG5_pMesh mesh,MMG5_pSol sol);
 int    lissmet_ani(MMG5_pMesh mesh,MMG5_pSol sol);
 
-int MMG2_chkedg(MMG5_pMesh mesh, MMG5_pPoint ppa,MMG5_pPoint ppb) ;
+//int MMG2_chkedg(MMG5_pMesh mesh, MMG5_pPoint ppa,MMG5_pPoint ppb) ;
 
 double (*MMG2_length)(double *,double *,double *,double *);
 double (*MMG2_caltri)(MMG5_pMesh ,MMG5_pSol ,MMG5_pTria );

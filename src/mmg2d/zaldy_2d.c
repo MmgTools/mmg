@@ -34,7 +34,7 @@
 #include "mmg2d.h"
 
 
-/* get new point address */
+/* Create a new vertex in the mesh, and return its number */
 int _MMG2D_newPt(MMG5_pMesh mesh,double c[2],int tag) {
   MMG5_pPoint  ppt;
   int     curpt;
@@ -45,16 +45,15 @@ int _MMG2D_newPt(MMG5_pMesh mesh,double c[2],int tag) {
   if ( mesh->npnil > mesh->np )  mesh->np = mesh->npnil;
   ppt   = &mesh->point[curpt];
   memcpy(ppt->c,c,2*sizeof(double));
-  ppt->tag   &= ~M_NUL;
   mesh->npnil = ppt->tmp;
   ppt->tmp    = 0;
   ppt->xp     = 0;
-  //ppt->fla   = mesh->flag;
-
+  ppt->tag = tag;
+  
   return(curpt);
 }
 
-
+/* Delete a point in the mesh and update the garbage collector accordingly */
 void _MMG2D_delPt(MMG5_pMesh mesh,int ip) {
   MMG5_pPoint   ppt;
   MMG5_pxPoint  pxp;
@@ -66,14 +65,14 @@ void _MMG2D_delPt(MMG5_pMesh mesh,int ip) {
   }
 
   memset(ppt,0,sizeof(MMG5_Point));
-  ppt->tag    = M_NUL;
+  ppt->tag    = MG_NUL;
   ppt->tmp    = mesh->npnil;
 
   mesh->npnil = ip;
   if ( ip == mesh->np )  mesh->np--;
 }
 
-/* get new elt address */
+/* Create a new edge in the mesh and return its address */
 int _MMG5_newEdge(MMG5_pMesh mesh) {
   int     curiel;
 
@@ -103,7 +102,7 @@ void _MMG5_delEdge(MMG5_pMesh mesh,int iel) {
   if ( iel == mesh->na )  mesh->na--;
 }
 
-/* get new elt address */
+/* Create a new triangle in the mesh and return its address */
 int _MMG2D_newElt(MMG5_pMesh mesh) {
   int     curiel;
 
@@ -120,17 +119,16 @@ int _MMG2D_newElt(MMG5_pMesh mesh) {
   mesh->tria[curiel].edg[1] = 0;
   mesh->tria[curiel].edg[2] = 0;
 
-
   return(curiel);
 }
 
-
+/* Delete a triangle in the mesh and update the garbage collector accordingly */
 void _MMG2D_delElt(MMG5_pMesh mesh,int iel) {
   MMG5_pTria    pt;
   int      iadr;
 
   pt = &mesh->tria[iel];
-  if ( !M_EOK(pt) ) {
+  if ( !MG_EOK(pt) ) {
     fprintf(stdout,"  ## INVALID ELEMENT.\n");
     return;
   }

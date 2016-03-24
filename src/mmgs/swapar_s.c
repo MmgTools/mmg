@@ -235,6 +235,7 @@ int chkswp(MMG5_pMesh mesh,MMG5_pSol met,int k,int i,char typchk) {
     pt0->tag[2] = pt->tag[i2];
     cal1 = _MMG5_calelt(mesh,met,pt0);
 
+    /* BUG ??? pt1 should be here !*/
     pt0->v[0]= ip1;  pt0->v[1]= iq;   pt0->v[2]= ip2;
     pt0->tag[0] = pt->tag[i1];
     pt0->tag[1] = pt->tag[ii];

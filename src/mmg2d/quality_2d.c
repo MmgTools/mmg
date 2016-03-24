@@ -32,30 +32,41 @@
  */
 
 #include "mmg2d.h"
-/* compute tria area */
+
+/* Compute the area of a triangle supplied by its points */
 double MMG2_quickarea(double a[2],double b[2],double c[2]) {
-  double     abx,aby,acx,acy;//,bcx,bcy;
-  double     aire;
+  double     abx,aby,acx,acy;
+  double     area;
 
   abx = b[0] - a[0];
   aby = b[1] - a[1];
   acx = c[0] - a[0];
   acy = c[1] - a[1];
-  // bcx = c[0] - b[0];
-  // bcy = c[1] - b[1];
-  //
-  /* orientation */
-  aire = abx*acy - aby*acx;
 
-  return(aire);
+  area= abx*acy - aby*acx;
+
+  return(area);
 }
 
-/* compute tria quality iso */
+/* Fast calculation of the quality of Tria pt */
+double _MMG2_quickcal(MMG5_pMesh mesh, MMG5_pTria pt) {
+  MMG5_pPoint        p0,p1,p2;
+  double             cal;
+  
+  p0 = &mesh->point[pt->v[0]];
+  p1 = &mesh->point[pt->v[1]];
+  p2 = &mesh->point[pt->v[2]];
+  
+  cal = fabs(MMG2_quickarea(p0->c,p1->c,p2->c));
+  return(cal);
+}
+
+/* Calculate isotropic quality for triangle pt */
 double caltri_iso_in(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pTria pt) {
   double     cal,abx,aby,acx,acy,bcx,bcy;
-  double    *a,*b,*c,h1,h2,h3,aire,peri,hm;
+  double     *a,*b,*c,h1,h2,h3,area,per,hm;
 
-  cal = 1e+9;
+  cal = 1.0e+9;
 
   a  = mesh->point[pt->v[0]].c;
   b  = mesh->point[pt->v[1]].c;
@@ -69,8 +80,8 @@ double caltri_iso_in(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pTria pt) {
   bcy = c[1] - b[1];
 
   /* orientation */
-  aire = abx*acy - aby*acx;
-  if ( aire <= 0 ) return(cal);
+  area = abx*acy - aby*acx;
+  if ( area <= 0.0 ) return(cal);
 
   /* edge lengths */
   h1 = abx*abx + aby*aby;
@@ -80,24 +91,28 @@ double caltri_iso_in(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pTria pt) {
   h3 = bcx*bcx + bcy*bcy;
   h3 = sqrt(h3);
 
-  peri = 0.5 * (h1 + h2 + h3);
+  per  = 0.5 * (h1 + h2 + h3);
   hm   = M_MAX(h1,M_MAX(h2,h3));
-  cal  = hm * peri;
-  if ( peri > EPSD ) {
-    aire = aire * 0.5;//(peri-h1) * (peri-h2) * (peri-h3);
-    if ( aire > 0.0 ) {
-      cal = cal / aire;//sqrt(aire*peri);
-    } else {
-      cal = 1e+9;
+  cal  = hm * per;
+  if ( per > _MMG2_EPSD ) {
+    area = area * 0.5;
+    if ( area > 0.0 ) {
+      cal = cal / area;//sqrt(aire*peri);
     }
-  } else {
-    cal = 1e+9;
+    else {
+      cal = 1.0e+9;
+    }
+  }
+  else {
+    cal = 1.0e+9;
   }
 
   return(cal);
 }
 
 
+/* Compute quality of the triangle pt when the supplied metric is anisotropic;
+ return 0 in the case that the triangle has inverted orientation */
 double caltri_ani_in(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pTria pt) {
   double     cal,abx,aby,acx,acy,bcx,bcy;
   double    *a,*b,*c;
@@ -139,7 +154,7 @@ double caltri_ani_in(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pTria pt) {
   peri = 0.5 * (h1 + h2 + h3);
   hm   = M_MAX(h1,M_MAX(h2,h3));
   cal  = hm * peri;
-  if ( peri > EPSD ) {
+  if ( peri > _MMG2_EPSD ) {
     aire = peri * (peri-h1) * (peri-h2) * (peri-h3);
     if ( aire > 0.0 ) {
       cal /= sqrt(aire);
@@ -152,10 +167,11 @@ double caltri_ani_in(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pTria pt) {
   return(cal);
 }
 
-/* compute tria quality iso */
+/* Compute quality of the triangle pt when the supplied metric is isotropic; 
+   return 0 in the case that the triangle has inverted orientation */
 double caltri_iso(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pTria pt) {
   double     cal,abx,aby,acx,acy,bcx,bcy;
-  double    *a,*b,*c,h1,h2,h3,aire,hm;
+  double    *a,*b,*c,h1,h2,h3,area,hm;
 
   cal = 0;
 
@@ -171,8 +187,8 @@ double caltri_iso(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pTria pt) {
   bcy = c[1] - b[1];
 
   /* orientation */
-  aire = abx*acy - aby*acx;
-  if ( aire <= 0 ) return(cal);
+  area = abx*acy - aby*acx;
+  if ( area <= 0 ) return(cal);
 
   /* edge lengths */
   h1 = abx*abx + aby*aby;
@@ -183,14 +199,13 @@ double caltri_iso(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pTria pt) {
   h3 = sqrt(h3);
 
   hm = h1*h1 + h2*h2 + h3*h3;
-  if (hm > EPSD) {
+  if (hm > _MMG2_EPSD) {
     //return(1./MMG2_caltri_in(mesh,sol,pt));
-    return(aire/hm);
+    return(area/hm);
   } else {
     return(0.0);
   }
 }
-
 
 double caltri_ani(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pTria pt) {
   double     cal,abx,aby,acx,acy,bcx,bcy;
@@ -233,7 +248,7 @@ double caltri_ani(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pTria pt) {
   hm = h1*h1 + h2*h2 + h3*h3;
   peri = 0.5 * (h1 + h2 + h3);
   aire = peri * (peri-h1) * (peri-h2) * (peri-h3);
-  if (hm > EPSD) {
+  if (hm > _MMG2_EPSD) {
     return(2*sqrt(aire)/hm);
     //return(1./MMG2_caltri_in(mesh,sol,pt));
   } else {

@@ -106,12 +106,12 @@ int lissmet_ani(MMG5_pMesh mesh,MMG5_pSol sol) {
         d1 = ma[0]*ux*ux + ma[2]*uy*uy + 2.0*ma[1]*ux*uy;
         assert(d1 >=0);
         if ( d1 < 0.0 )  d1 = 0.0;
-        dd1 = M_MAX(EPSD,sqrt(d1));
+        dd1 = M_MAX(_MMG2_EPSD,sqrt(d1));
 
         d2 = mb[0]*ux*ux + mb[2]*uy*uy+ 2.0*mb[1]*ux*uy;
         assert(d2 >=0);
         if ( d2 < 0.0 )  d2 = 0.0;
-        dd2 = M_MAX(EPSD,sqrt(d2));
+        dd2 = M_MAX(_MMG2_EPSD,sqrt(d2));
 
         /* swap vertices */
         if ( dd1 > dd2 ) {
@@ -126,7 +126,7 @@ int lissmet_ani(MMG5_pMesh mesh,MMG5_pSol sol) {
         }
         rap = dd2 / dd1;
         dh = rap - 1.0;
-        if ( fabs(dh) > EPSD ) {
+        if ( fabs(dh) > _MMG2_EPSD ) {
           // Edge length in the metric
           tail = (dd1+dd2+4*sqrt(0.5*(d1+d2))) / 6.0;
           coef = log(rap) / tail;
