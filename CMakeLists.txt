@@ -32,7 +32,7 @@ PROJECT (mmg)
 ###############################################################################
 SET (CMAKE_RELEASE_VERSION_MAJOR "5" )
 SET (CMAKE_RELEASE_VERSION_MINOR "1" )
-SET (CMAKE_RELEASE_VERSION_PATCH "0-beta4" )
+SET (CMAKE_RELEASE_VERSION_PATCH "0-beta5" )
 SET (CMAKE_RELEASE_DATE "Dec 4, 2015" )
 
 SET (CMAKE_RELEASE_VERSION
