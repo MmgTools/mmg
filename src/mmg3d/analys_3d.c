@@ -611,6 +611,11 @@ int _MMG3D_analys(MMG5_pMesh mesh) {
     return(0);
   }
 
+  /* create prism adjacency */
+  if ( !MMG3D_hashPrism(mesh) ) {
+    fprintf(stdout,"  ## Prism hashing problem. Exit program.\n");
+    return(0);
+  }
   /* compatibility triangle orientation w/r tetras */
   if ( !_MMG5_bdryPerm(mesh) ) {
     fprintf(stdout,"  ## Boundary orientation problem. Exit program.\n");
@@ -624,8 +629,8 @@ int _MMG3D_analys(MMG5_pMesh mesh) {
   }
   _MMG5_freeXTets(mesh);
 
-  if ( mesh->info.nosurf ) {
-    /* Set all boundary triangles to required */
+  if ( mesh->info.nosurf || mesh->nprism ) {
+    /* Set surface triangles or prism triangles to required */
     _MMG5_reqBoundaries(mesh);
   }
 

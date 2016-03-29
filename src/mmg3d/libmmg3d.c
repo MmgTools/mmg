@@ -68,6 +68,11 @@ void _MMG3D_Free_topoTables(MMG5_pMesh mesh) {
 
   _MMG5_freeXTets(mesh);
 
+  if ( mesh->adjapr )
+    _MMG5_DEL_MEM(mesh,mesh->adjapr,(5*mesh->nprism+6)*sizeof(int));
+
+  _MMG5_freeXPrisms(mesh);
+
   if ( mesh->xpoint )
     _MMG5_DEL_MEM(mesh,mesh->xpoint,(mesh->xpmax+1)*sizeof(MMG5_xPoint));
 

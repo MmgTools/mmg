@@ -280,3 +280,22 @@ void _MMG5_freeXTets(MMG5_pMesh mesh) {
     _MMG5_DEL_MEM(mesh,mesh->xtetra,(mesh->xtmax+1)*sizeof(MMG5_xTetra));
   mesh->xt = 0;
 }
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ *
+ * Free xprism structure.
+ *
+ */
+void _MMG5_freeXPrisms(MMG5_pMesh mesh) {
+  MMG5_pPrism pp;
+  int    k;
+
+  for (k=1; k<=mesh->nprism; k++) {
+    pp      = &mesh->prism[k];
+    pp->xpr = 0;
+  }
+  if ( mesh->xprism )
+    _MMG5_DEL_MEM(mesh,mesh->xprism,(mesh->xpr+1)*sizeof(MMG5_xPrism));
+  mesh->xpr = 0;
+}

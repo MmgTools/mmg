@@ -182,6 +182,11 @@ static const unsigned char _MMG5_isar[6][2] = { {2,3}, {3,1}, {1,2}, {0,3}, {2,0
 /** \brief arpt[i]: edges passing through vertex i */
 static const unsigned char _MMG5_arpt[4][3] = { {0,1,2}, {0,4,3}, {1,3,5}, {2,5,4} };
 
+/** \brief idir[i]: vertices of face i for a prism */
+static const unsigned char _MMG5_idir_pr[5][4] = { {0,1,2,0}, {3,5,4,3}, {0,3,4,1}, {0,2,5,3},{1,4,5,2} };
+/** \brief iarf[i]: edges of face i for a prism */
+static const unsigned char _MMG5_iarf_pr[5][4] = { {0,3,1,0}, {6,8,7,6}, {0,2,6,4,0}, {1,5,7,2} };
+
 
 typedef struct {
   int     size;
@@ -213,6 +218,7 @@ void _MMG3D_delElt(MMG5_pMesh mesh,int iel);
 void _MMG3D_delPt(MMG5_pMesh mesh,int ip);
 int  _MMG5_zaldy(MMG5_pMesh mesh);
 void _MMG5_freeXTets(MMG5_pMesh mesh);
+void _MMG5_freeXPrisms(MMG5_pMesh mesh);
 extern void _MMG3D_Free_topoTables(MMG5_pMesh mesh);
 char _MMG5_chkedg(MMG5_pMesh mesh,MMG5_pTria pt,char ori);
 int  _MMG5_chkBdryTria(MMG5_pMesh mesh);
@@ -256,7 +262,7 @@ int  _MMG5_hGet(MMG5_HGeom *hash,int a,int b,int *ref,char *tag);
 void _MMG5_hEdge(MMG5_pMesh mesh,int a,int b,int ref,char tag);
 int  _MMG5_hNew(MMG5_HGeom *hash,int hsiz,int hmax,int secure);
 int  _MMG5_hGeom(MMG5_pMesh mesh);
-int  _MMG5_bdryTria(MMG5_pMesh );
+  int  _MMG5_bdryTria(MMG5_pMesh);
 int  _MMG5_bdryIso(MMG5_pMesh );
 int  _MMG5_bdrySet(MMG5_pMesh );
 int  _MMG5_bdryUpdate(MMG5_pMesh );

@@ -372,6 +372,7 @@ static int _MMG3D_snpval_ls(MMG5_pMesh mesh,MMG5_pSol sol,double *tmp) {
 
   /* memory free */
   _MMG5_DEL_MEM(mesh,mesh->adja,(4*mesh->nemax+5)*sizeof(int));
+#warning adjapr ok??
   return(1);
 }
 
@@ -1424,6 +1425,7 @@ int _MMG3D_mmg3d2(MMG5_pMesh mesh,MMG5_pSol sol) {
 
   _MMG5_DEL_MEM(mesh,mesh->adja,(4*mesh->nemax+5)*sizeof(int));
   _MMG5_DEL_MEM(mesh,mesh->tria,(mesh->nt+1)*sizeof(MMG5_Tria));
+#warning adjapr ok??
   mesh->nt = 0;
 
   if ( !_MMG3D_setref_ls(mesh,sol) ) {

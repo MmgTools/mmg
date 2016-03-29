@@ -1406,7 +1406,7 @@ int _MMG5_anatet(MMG5_pMesh mesh,MMG5_pSol met,char typchk, int patternMode) {
   do {
     /* memory free */
     _MMG5_DEL_MEM(mesh,mesh->adja,(4*mesh->nemax+5)*sizeof(int));
-
+#warning after anatet, is the prism adja always good?
     if ( !mesh->info.noinsert ) {
 
       /* split tetra with more than 2 bdry faces */

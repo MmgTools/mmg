@@ -159,8 +159,21 @@ typedef MMG5_Edge * MMG5_pEdge;
 
 /**
  * \struct MMG5_Tria
- * \brief Structure to store triangles of a MMG mesh.
- * \todo try to remove cc.
+ *
+ * Structure to store triangles of a MMG mesh.
+ *
+ * \remark Numbering convention
+ * \verbatim
+ *  Vertices            Edges                                  *
+ *  2                    .                                     *
+ *  |`\                  |`\                                   *
+ *  |  `\                |  `\                                 *
+ *  |    `\              1    `2                               *
+ *  |      `\            |      `\                             *
+ *  |        `\          |        `\                           *
+ *  0----------1         .--- 0 ----.
+ * \endverbatim
+ *
  */
 typedef struct {
   double   qual;   /*Quality of the triangle*/
@@ -179,7 +192,26 @@ typedef MMG5_Tria * MMG5_pTria;
 
 /**
  * \struct MMG5_Tetra
- * \brief Structure to store tetrahedra of a MMG mesh.
+ *
+ * Structure to store tetrahedra of a MMG mesh.
+ *
+ * \remark Numbering convention
+ * \verbatim
+ *      Vertices                     Edges                       Faces           *
+ *           3                          .                           .            *
+ *         ,/|`\                      ,/|`\                       ,/|`\          *
+ *       ,/  |  `\                  ,/  |  `\                   ,/  |  `\        *
+ *     ,/    '.   `\              ,2    '.   `5               ,/    '.   `\      *
+ *   ,/       |     `\          ,/       4     `\           ,/       1     `\    *
+ * ,/         |       `\      ,/         |       `\       ,/         |   0   `\  *
+ * 0-----------'.--------2    .--------1--'.--------.     .------2---'.--------. *
+ * `\.         |      ,/      `\.         |      ,/       `\.         |      ,/  *
+ *    `\.      |    ,/           `\.      |    ,3            `\.     3|    ,/    *
+ *       `\.   '. ,/                `0.   '. ,/                 `\.   '. ,/      *
+ *          `\. |/                     `\. |/                      `\. |/        *
+ *             `1                         `.                          `.         *
+ * \endverbatim
+ *
  */
 typedef struct {
   double   qual; /*!< Quality of the element */
@@ -215,18 +247,61 @@ typedef MMG5_xTetra * MMG5_pxTetra;
 
 /**
  * \struct MMG5_Prism
- * \brief Structure to store prsim of a MMG mesh.
- * \wqrning prisms are not modified
+ *
+ * Structure to store prsim of a MMG mesh.
+ *
+ * \warning prisms are not modified
+ *
+ * \remark Numbering convention
+ * \verbatim
+ *      Vertices                   Edges                  Faces          *
+ *           3                       .                      .            *
+ *         ,/|`\                   ,/|`\                  ,/|`\          *
+ *       ,/  |  `\                6  |   7              ,/  |  `\        *
+ *     ,/    |    `\           ,/    |    `\          ,/    1    `\      *
+ *    4------+------5         .------8------.        .------+------.     *
+ *    |      |      |         |      |      |        |      |      |     *
+ *    |      |      |         |      2      |        |      |      |     *
+ *    |      |      |         |      |      |        |      |      |     *
+ *    |      |      |         |      |      |        |  2   |   3  |     *
+ *    |      |      |         4      |      5        |      4      |     *
+ *    |      0      |         |      .      |        |      .      |     *
+ *    |    ,/ `\    |         |    ,/ `\    |        |    ,/ `\    |     *
+ *    |  ,/     `\  |         |  ,0     `1  |        |  ,/     `\  |     *
+ *    |,/         `\|         |,/         `\|        |,/     0   `\|     *
+ *    1-------------2         .------3------.        .-------------.     *
+ *
+ * \endverbatim
+ *
  */
 typedef struct {
   int      v[6]; /*!< Vertices of the prism */
   int      ref; /*!< Reference of the prism */
   int      base;
   int      flag;
+  int      xp; /*!< Index of the surface \ref MMG5_xPrism associated to
+                 the prism*/
   char     tag;
 } MMG5_Prism;
 typedef MMG5_Prism * MMG5_pPrism;
 
+/**
+ * \struct MMG5_xPrism
+ * \brief Structure to store the surface prism of a MMG mesh.
+ */
+typedef struct {
+  int      ref[5]; /*!< face references: ref[0]={0,1,2}, ref[1]={3,4,5},
+                    * ref[2]={0,3,4,1}, ref[3]={0,2,5,1} */
+  int      edg[9]; /*!< edges references:
+                    * edg[0]={0,1},edg[1]={0,2},edg[2]={0,3},edg[3]={1,2},
+                    * edg[4]={1,4},edg[5]={2,5},edg[6]={3,4},edg[7]={3,5},
+                    * edg[8]={4,5}*/
+  char     ftag[5]; /*!< ftag[i] contains the tag associated to the
+                      \f$i^{th}\f$ face of the prism */
+  char     tag[9]; /*!< tag[i] contains the tag associated to the
+                     \f$i^{th}\f$ edge of the prism */
+} MMG5_xPrism;
+typedef MMG5_xPrism * MMG5_pxPrism;
 /**
  * \struct MMG5_Info
  * \brief Store input parameters of the run.
@@ -279,19 +354,22 @@ typedef struct {
                     treated */
   int       mark; /*!< Flag for delaunay (to know if an entity has
                     been treated) */
-  int       xp,xt; /*!< Number of surfaces points/triangles */
+  int       xp,xt,xpr; /*!< Number of surfaces points, triangles/tetrahedra and prisms */
   int       npnil; /*!< Index of first unused point */
   int       nenil; /*!< Index of first unused element */
   int       nanil; /*!< Index of first unused edge (2d only)*/
   int      *adja; /*!< Table of tetrahedron adjacency: if
-                    \f$adjt[4*i+1+j]=4*k+l\f$ then the \f$i^{th}\f$ and
+                    \f$adja[4*i+1+j]=4*k+l\f$ then the \f$i^{th}\f$ and
                     \f$k^th\f$ tetrahedra are adjacent and share their
                     faces \a j and \a l (resp.) */
   int      *adjt; /*!< Table of triangles adjacency: if
                     \f$adjt[3*i+1+j]=3*k+l\f$ then the \f$i^{th}\f$ and
                     \f$k^th\f$ triangles are adjacent and share their
                     edges \a j and \a l (resp.) */
-
+  int      *adjapr; /*!< Table of prisms adjacency: if
+                    \f$adjapr[5*i+1+j]=5*k+l\f$ then the \f$i^{th}\f$ and
+                    \f$k^th\f$ prism are adjacent and share their
+                    faces \a j and \a l (resp.) */
   MMG5_pPoint    point; /*!< Pointer toward the \ref MMG5_Point structure */
   MMG5_pxPoint   xpoint; /*!< Pointer toward the \ref MMG5_xPoint structure */
   MMG5_pTetra    tetra; /*!< Pointer toward the \ref MMG5_Tetra structure */
