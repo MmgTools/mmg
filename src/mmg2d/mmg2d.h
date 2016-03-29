@@ -310,7 +310,7 @@ int MMG2_prilen(MMG5_pMesh ,MMG5_pSol );
 
 void MMG2_coorbary(MMG5_pMesh ,MMG5_pTria ,double c[2],double* ,double* ,double* );
 int MMG2_isInTriangle(MMG5_pMesh ,int,double c[2]);
-int MMG2_cutEdge(MMG5_pMesh ,MMG5_pTria ,MMG5_pPoint ,MMG5_pPoint );
+  int MMG2_cutEdge(MMG5_pMesh ,MMG5_pTria ,MMG5_pPoint ,MMG5_pPoint,int );
 int MMG2_cutEdgeTriangle(MMG5_pMesh ,int ,int ,int );
 int MMG2_findTria(MMG5_pMesh ,int );
 int MMG2_findpos(MMG5_pMesh ,MMG5_pTria ,int ,int ,int ,int ,int );

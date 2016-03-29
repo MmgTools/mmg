@@ -103,7 +103,7 @@ int MMG2_isInTriangle(MMG5_pMesh mesh,int k,double c[2]) {
 }
 
 
-int MMG2_cutEdge(MMG5_pMesh mesh,MMG5_pTria pt,MMG5_pPoint ppa,MMG5_pPoint ppb) {
+int MMG2_cutEdge(MMG5_pMesh mesh,MMG5_pTria pt,MMG5_pPoint ppa,MMG5_pPoint ppb,int ivert) {
   double      la[3],lb[3],det;
   int         icompt,i,ireturn;
 
@@ -111,20 +111,26 @@ int MMG2_cutEdge(MMG5_pMesh mesh,MMG5_pTria pt,MMG5_pPoint ppa,MMG5_pPoint ppb) 
   la[2] = 1.-(la[0]+la[1]);
   MMG2_coorbary(mesh,pt,ppb->c,&det,&lb[0],&lb[1]);
   lb[2] = 1.-(lb[0]+lb[1]);
-  /* if(ddebug) printf("barya %e %e %e\n",la[0],la[1],la[2]); */
-  /* if(ddebug) printf("baryb %e %e %e\n",lb[0],lb[1],lb[2]); */
+  if(mesh->info.ddebug) printf("barya %e %e %e\n",la[0],la[1],la[2]); 
+  if(mesh->info.ddebug) printf("baryb %e %e %e\n",lb[0],lb[1],lb[2]); 
   //if(ddebug) exit(EXIT_FAILURE);
   /*if ia ou ib sommets de pt*/
-  for(i=0 ; i<3 ; i++) {
-    if(fabs(la[i]-1.)<1e-12) {
-      if(lb[i]<0) return(i+1);
-      else return(0);
+  if(ivert==1) { /*ia sommets*/
+    for(i=0 ; i<3 ; i++) {
+      if(fabs(la[i]-1.)<1e-12) {
+        if(lb[i]<0) return(i+1);
+        else return(0);
+      }
     }
-    if(fabs(lb[i]-1.)<1e-12) {
-      if(la[i]<0) return(i+1);
-      else return(0);
+  } else if(ivert==2) { /*ib sommets*/
+    for(i=0 ; i<3 ; i++) {
+      if(fabs(lb[i]-1.)<1e-12) {
+        if(la[i]<0) return(i+1);
+        else return(0);
+      }
     }
   }
+
 
   icompt = 0;
   for(i=0 ; i<3 ; i++) {
@@ -133,8 +139,8 @@ int MMG2_cutEdge(MMG5_pMesh mesh,MMG5_pTria pt,MMG5_pPoint ppa,MMG5_pPoint ppb) 
       icompt++;
     }
   }
-  //printf("coor bary %e %e %e\n",la[0],la[1],la[2]);
-  //printf("coor bary %e %e %e\n",lb[0],lb[1],lb[2]);
+  if(mesh->info.ddebug) printf("coor bary %e %e %e\n",la[0],la[1],la[2]);
+  if(mesh->info.ddebug)printf("coor bary %e %e %e\n",lb[0],lb[1],lb[2]);
 
   if(icompt>1) return(ireturn);
   return(0);
@@ -145,7 +151,7 @@ int MMG2_cutEdgeTriangle(MMG5_pMesh mesh,int k,int ia,int ib) {
   MMG5_pTria   pt;
   MMG5_pPoint  pt1,pt2,pt3,ppa,ppb;
   double  a11,a21,a12,a22,aire1,aire2,aire3,prod1,prod2,prod3;
-  int     ibreak,iare,i;
+  int     ibreak,iare,i,ivert;
 
   ppa = &mesh->point[ia];
   ppb = &mesh->point[ib];
@@ -153,8 +159,12 @@ int MMG2_cutEdgeTriangle(MMG5_pMesh mesh,int k,int ia,int ib) {
   pt = &mesh->tria[k];
   if(!pt->v[0]) return(0);
   ibreak = 0;
-
-  if(pt->v[0]==ib || pt->v[1]==ib || pt->v[2]==ib) ibreak = 1;
+  ivert  = 0;
+  if(pt->v[0]==ib || pt->v[1]==ib || pt->v[2]==ib) {
+    ibreak = 1;
+    ivert  = 2;
+  }
+  if(pt->v[0]==ia || pt->v[1]==ia || pt->v[2]==ia) ivert = 1;
 
   pt1 = &mesh->point[pt->v[0]];
   pt2 = &mesh->point[pt->v[1]];
@@ -180,18 +190,18 @@ int MMG2_cutEdgeTriangle(MMG5_pMesh mesh,int k,int ia,int ib) {
   prod3 = aire3*aire1;
 
   if ( prod1 > 0 && ((prod2 < 0 || prod3 < 0))) { /*le tr est coupe par la droite ia-ib*/
-    if ((iare = MMG2_cutEdge(mesh,pt,ppa,ppb))) {
+    if ((iare = MMG2_cutEdge(mesh,pt,ppa,ppb,ivert))) {
       return(iare);
     }
   }
 
   if ( prod2 > 0 && ((prod1 < 0 || prod3 < 0))) {
-    if ((iare = MMG2_cutEdge(mesh,pt,ppa,ppb))) {
+    if ((iare = MMG2_cutEdge(mesh,pt,ppa,ppb,ivert))) {
       return(iare);
     }
   }
   if ( prod3 > 0 && ((prod2 < 0 || prod1 < 0))) {
-    if ((iare = MMG2_cutEdge(mesh,pt,ppa,ppb))) {
+    if ((iare = MMG2_cutEdge(mesh,pt,ppa,ppb,ivert))) {
       return(iare);
     }
   }
@@ -199,7 +209,7 @@ int MMG2_cutEdgeTriangle(MMG5_pMesh mesh,int k,int ia,int ib) {
   for(i=0 ; i<3 ; i++){
     if(pt->v[i]==ia || ibreak) {
       if((prod1 < 0) || (prod2 < 0) || (prod3 < 0)) {
-        if ((iare = MMG2_cutEdge(mesh,pt,ppa,ppb))) {
+        if ((iare = MMG2_cutEdge(mesh,pt,ppa,ppb,ivert))) {
           return(iare);
         }
       } else {
@@ -315,7 +325,7 @@ int MMG2_locateEdge(MMG5_pMesh mesh,int ia,int ib,int* kdep,int* list) {
   MMG5_pPoint    pt1,pt2,pt3,ppa,ppb,pt4;
   double    a[3],a11,a21,a12,a22,aire1,aire2,aire3,prod1,prod2,prod3;
   double     niaib,npti;
-  int       iadr,*adja,k,ibreak,i,ncompt,lon,iare;
+  int       iadr,*adja,k,ibreak,i,ncompt,lon,iare,ivert;
   //int       ktemp;
 
   mesh->base += 2;
@@ -333,8 +343,12 @@ int MMG2_locateEdge(MMG5_pMesh mesh,int ia,int ib,int* kdep,int* list) {
     adja = &mesh->adja[iadr];
     ibreak = 0;
     ncompt++;
-
-    if(pt->v[0]==ib || pt->v[1]==ib || pt->v[2]==ib) ibreak = 1;
+    ivert = 0;
+    if(pt->v[0]==ib || pt->v[1]==ib || pt->v[2]==ib) {
+      ibreak = 1;
+      ivert  = 2;
+    }
+    if(pt->v[0]==ia || pt->v[1]==ia || pt->v[2]==ia) ivert = 1;
 
     pt1 = &mesh->point[pt->v[0]];
     pt2 = &mesh->point[pt->v[1]];
@@ -364,7 +378,7 @@ int MMG2_locateEdge(MMG5_pMesh mesh,int ia,int ib,int* kdep,int* list) {
     a[2] = aire3;
 
     if ( prod1 > 0 && ((prod2 < 0 || prod3 < 0))) { /*le tr est coupe par la droite ia-ib*/
-      if ((iare = MMG2_cutEdge(mesh,pt,ppa,ppb))) {
+      if ((iare = MMG2_cutEdge(mesh,pt,ppa,ppb,ivert))) {
         pt->base = mesh->base+1;
         list[lon++] = 3*k + iare-1;
       }
@@ -381,7 +395,7 @@ int MMG2_locateEdge(MMG5_pMesh mesh,int ia,int ib,int* kdep,int* list) {
     }
 
     if ( prod2 > 0 && ((prod1 < 0 || prod3 < 0))) {
-      if ((iare = MMG2_cutEdge(mesh,pt,ppa,ppb))) {
+      if ((iare = MMG2_cutEdge(mesh,pt,ppa,ppb,ivert))) {
         pt->base = mesh->base+1;
         list[lon++] = 3*k + iare-1;
       }
@@ -397,7 +411,7 @@ int MMG2_locateEdge(MMG5_pMesh mesh,int ia,int ib,int* kdep,int* list) {
       continue;
     }
     if ( prod3 > 0 && ((prod2 < 0 || prod1 < 0))) {
-      if ((iare = MMG2_cutEdge(mesh,pt,ppa,ppb))) {
+      if ((iare = MMG2_cutEdge(mesh,pt,ppa,ppb,ivert))) {
         pt->base = mesh->base+1;
         list[lon++] = 3*k + iare-1;
       }
@@ -417,7 +431,7 @@ int MMG2_locateEdge(MMG5_pMesh mesh,int ia,int ib,int* kdep,int* list) {
       iare = 0;
       if(pt->v[i]==ia || ibreak) {
         if((prod1 < 0) || (prod2 < 0) || (prod3 < 0)) {
-          if ((iare = MMG2_cutEdge(mesh,pt,ppa,ppb))) {
+          if ((iare = MMG2_cutEdge(mesh,pt,ppa,ppb,ivert))) {
             pt->base = mesh->base+1;
             list[lon++] = 3*k + iare-1;
           }
@@ -443,7 +457,7 @@ int MMG2_locateEdge(MMG5_pMesh mesh,int ia,int ib,int* kdep,int* list) {
               ibreak = 3;
             } else if(a[MMG2_inxt[i]]>0 && a[MMG2_inxt[MMG2_inxt[i]]]>0){
               k = adja[MMG2_inxt[MMG2_inxt[i]]]/3;
-              //ibreak = 1;
+              ibreak = 1;
               break;
             } else {
               //calcul de ||iaib|| et de ||ptiib|| avec aire(iaibpti)==0
@@ -462,7 +476,7 @@ int MMG2_locateEdge(MMG5_pMesh mesh,int ia,int ib,int* kdep,int* list) {
                 // ibreak = 3;
               }
               k = adja[MMG2_inxt[i]]/3;
-              //ibreak = 1;
+              ibreak = 1;
               break;
             }
             /*            k = adja[ktemp]/3;
@@ -484,7 +498,7 @@ int MMG2_locateEdge(MMG5_pMesh mesh,int ia,int ib,int* kdep,int* list) {
               iare=MMG2_inxt[i];
             }
             k = adja[iare]/3;
-            // if(mesh->info.ddebug) printf("on trouve adj %d (%d\n)\n",iare,k);
+            if(mesh->info.ddebug) printf("on trouve adj %d (%d\n)\n",iare,k);
             ibreak = 1;
             break;
           }
