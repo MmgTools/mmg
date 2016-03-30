@@ -98,34 +98,36 @@
 #define   MMG3D_IPARAM_lag                5
 ! /*!< [1/0] Optimize mesh keeping its initial edge sizes */
 #define   MMG3D_IPARAM_optim              6
+! /*!< [1/0] Strong mesh optimization for Les computations */
+#define   MMG3D_IPARAM_optimLES           7
 ! /*!< [1/0] Avoid/allow point insertion */
-#define   MMG3D_IPARAM_noinsert           7
+#define   MMG3D_IPARAM_noinsert           8
 ! /*!< [1/0] Avoid/allow edge or face flipping */
-#define   MMG3D_IPARAM_noswap             8
+#define   MMG3D_IPARAM_noswap             9
 ! /*!< [1/0] Avoid/allow point relocation */
-#define   MMG3D_IPARAM_nomove             9
+#define   MMG3D_IPARAM_nomove             10
 ! /*!< [1/0] Avoid/allow surface modifications */
-#define   MMG3D_IPARAM_nosurf             10
+#define   MMG3D_IPARAM_nosurf             11
 ! /*!< [n] Number of local parameters */
-#define   MMG3D_IPARAM_numberOfLocalParam 11
+#define   MMG3D_IPARAM_numberOfLocalParam 12
 ! /*!< [1/0] Turn on/off point relocation with Scotch */
-#define   MMG3D_IPARAM_renum              12
+#define   MMG3D_IPARAM_renum              13
 ! /*!< [n] Specify the size of the bucket per dimension (DELAUNAY) */
-#define   MMG3D_IPARAM_bucket             13
+#define   MMG3D_IPARAM_bucket             14
 ! /*!< [val] Value for angle detection */
-#define   MMG3D_DPARAM_angleDetection     14
+#define   MMG3D_DPARAM_angleDetection     15
 ! /*!< [val] Minimal mesh size */
-#define   MMG3D_DPARAM_hmin               15
+#define   MMG3D_DPARAM_hmin               16
 ! /*!< [val] Maximal mesh size */
-#define   MMG3D_DPARAM_hmax               16
+#define   MMG3D_DPARAM_hmax               17
 ! /*!< [val] Control global Hausdorff distance (on all the boundary surfaces of the mesh) */
-#define   MMG3D_DPARAM_hausd              17
+#define   MMG3D_DPARAM_hausd              18
 ! /*!< [val] Control gradation */
-#define   MMG3D_DPARAM_hgrad              18
+#define   MMG3D_DPARAM_hgrad              19
 ! /*!< [val] Value of level-set (not use for now) */
-#define   MMG3D_DPARAM_ls                 19
+#define   MMG3D_DPARAM_ls                 20
 ! /*!< [n] Number of parameters */
-#define   MMG3D_PARAM_size                20
+#define   MMG3D_PARAM_size                21
 
 ! /*----------------------------- functions header -----------------------------*/
 ! /* Initialization functions */

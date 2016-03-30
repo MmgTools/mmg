@@ -572,7 +572,7 @@ int _MMG5_mmg3d1_pattern(MMG5_pMesh mesh,MMG5_pSol met) {
 
 #ifdef DEBUG
   puts("---------------------------Fin anatet---------------------");
-  _MMG3D_outqua(mesh,met);
+  _MMG3D_outqua(mesh,met,mesh->info.optimLES);
 #endif
   if ( !_MMG5_adptet(mesh,met) ) {
     fprintf(stdout,"  ## Unable to adapt. Exit program.\n");
@@ -581,7 +581,7 @@ int _MMG5_mmg3d1_pattern(MMG5_pMesh mesh,MMG5_pSol met) {
 
 #ifdef DEBUG
   puts("---------------------Fin adptet-----------------");
-  _MMG3D_outqua(mesh,met);
+  _MMG3D_outqua(mesh,met,mesh->info.optimLES);
 #endif
   /* in test phase: check if no element with 2 bdry faces */
   if ( !_MMG5_chkfemtopo(mesh) ) {

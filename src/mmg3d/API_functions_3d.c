@@ -86,6 +86,8 @@ void MMG3D_Init_parameters(MMG5_pMesh mesh) {
   mesh->info.lag      = -1;
   /* MMG3D_IPARAM_optim = 0 */
   mesh->info.optim    =  0;
+  /* MMG3D_IPARAM_optimLES = 0 */
+  mesh->info.optimLES  =  0;
   /* MMG3D_IPARAM_nosurf = 0 */
   mesh->info.nosurf   =  0;  /* [0/1]    ,avoid/allow surface modifications */
 #ifdef USE_SCOTCH
@@ -1073,6 +1075,9 @@ int MMG3D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam,int val){
     break;
   case MMG3D_IPARAM_optim :
     mesh->info.optim = val;
+    break;
+  case MMG3D_IPARAM_optimLES :
+    mesh->info.optimLES = val;
     break;
   case MMG3D_IPARAM_noinsert :
     mesh->info.noinsert = val;

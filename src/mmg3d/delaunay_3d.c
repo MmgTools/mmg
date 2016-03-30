@@ -623,7 +623,7 @@ int _MMG5_cavity_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel,int ip,int* list,int 
   }
   for (k=0; k<lon; k++)
     list[k] = list[k] / 6;
-  
+
   /* grow cavity by adjacency */
   eps   = _MMG5_EPSRAD * _MMG5_EPSRAD;
   ilist = lon;

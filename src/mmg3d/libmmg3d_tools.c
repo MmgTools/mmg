@@ -34,7 +34,12 @@
 
 void MMG3D_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
   if ( met->size == 1 || ( met->size == 3 && mesh->info.lag >= 0 ) ) {
-    _MMG5_caltet          = _MMG5_caltet_iso;
+    if ( mesh->info.optimLES ) {
+      _MMG5_caltet          = _MMG5_caltetLES_iso;
+    }
+    else {
+      _MMG5_caltet          = _MMG5_caltet_iso;
+    }
     _MMG5_caltri          = _MMG5_caltri_iso;
     _MMG5_lenedg          = _MMG5_lenedg_iso;
     MMG3D_lenedgCoor      = _MMG5_lenedgCoor_iso;
@@ -109,6 +114,7 @@ void MMG3D_usage(char *prog) {
   fprintf(stdout,"\n");
 
   fprintf(stdout,"-optim       mesh optimization\n");
+  fprintf(stdout,"-optimLES    strong mesh optimization for LES computations\n");
   fprintf(stdout,"-noinsert    no point insertion/deletion \n");
   fprintf(stdout,"-noswap      no edge or face flipping\n");
   fprintf(stdout,"-nomove      no point relocation\n");
@@ -298,6 +304,10 @@ int MMG3D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
                     argv[i-1][1],argv[i-1][2],argv[i-1][3]);
             MMG3D_usage(argv[0]);
           }
+        }
+        else if( !strcmp(argv[i],"-optimLES") ) {
+          if ( !MMG3D_Set_iparameter(mesh,met,MMG3D_IPARAM_optimLES,1) )
+            exit(EXIT_FAILURE);
         }
         else if( !strcmp(argv[i],"-optim") ) {
           if ( !MMG3D_Set_iparameter(mesh,met,MMG3D_IPARAM_optim,1) )

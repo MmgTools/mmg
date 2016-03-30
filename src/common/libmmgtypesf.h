@@ -281,7 +281,7 @@
 !   int           bucket;
 !   char          nreg;
 !   char          imprim,ddebug,badkal,iso,fem,lag;
-!   unsigned char optim, noinsert, noswap, nomove, nosurf;
+!   unsigned char optim, optimLES, noinsert, noswap, nomove, nosurf;
 ! } MMG5_Info;
 
 ! /**

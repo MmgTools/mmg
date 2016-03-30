@@ -349,6 +349,11 @@ int MMG3D_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met) {
             "          You must call the MMG3D_mmg3dmov function to use this option.\n");
     _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
   }
+  else if ( mesh->info.optimLES && met->size==6 ) {
+    fprintf(stdout,"  ## Error: strong mesh optimization for LES methods"
+            " unavailable (MMG3D_IPARAM_optimLES) with an anisotropic metric.\n");
+    _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
+  }
 
 #ifdef USE_SCOTCH
   _MMG5_warnScotch(mesh);
@@ -389,8 +394,12 @@ int MMG3D_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met) {
   if ( !_MMG5_scaleMesh(mesh,met) ) _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
 
   if ( abs(mesh->info.imprim) > 0 ) {
-    if ( !_MMG3D_inqua(mesh,met) ) {
+    if ( !_MMG3D_inqua(mesh,met,0) ) {
       if ( !_MMG5_unscaleMesh(mesh,met) ) _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
+      _LIBMMG5_RETURN(mesh,met,MMG5_LOWFAILURE);
+    }
+    if ( mesh->info.optimLES && !_MMG3D_inqua(mesh,met,1) ) {
+      if ( !_MMG5_unscaleMesh(mesh,met) )  _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
       _LIBMMG5_RETURN(mesh,met,MMG5_LOWFAILURE);
     }
   }
@@ -455,10 +464,15 @@ int MMG3D_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met) {
   }
 
   /* save file */
-  if ( !_MMG3D_outqua(mesh,met) ) {
+  if ( !_MMG3D_outqua(mesh,met,0) ) {
     if ( !_MMG5_unscaleMesh(mesh,met) ) _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
     _MMG5_RETURN_AND_PACK(mesh,met,NULL,MMG5_LOWFAILURE);
   }
+  if ( mesh->info.optimLES && !_MMG3D_outqua(mesh,met,1) ) {
+    if ( !_MMG5_unscaleMesh(mesh,met) )  _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
+    _MMG5_RETURN_AND_PACK(mesh,met,NULL,MMG5_LOWFAILURE);
+  }
+
 
   if ( mesh->info.imprim > 4 )
     _MMG3D_prilen(mesh,met,1);
@@ -504,6 +518,12 @@ int MMG3D_mmg3dls(MMG5_pMesh mesh,MMG5_pSol met) {
             "            You must call the MMG3D_mmg3dmov function to move a rigidbody.\n");
     _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
   }
+  else if ( mesh->info.optimLES ) {
+    fprintf(stdout,"  ## Error: strong mesh optimization for LES methods"
+            " unavailable (MMG3D_IPARAM_optimLES) in isosurface"
+            " discretization mode.\n");
+    _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
+  }
 
 #ifdef USE_SCOTCH
   _MMG5_warnScotch(mesh);
@@ -542,7 +562,7 @@ int MMG3D_mmg3dls(MMG5_pMesh mesh,MMG5_pSol met) {
   if ( !_MMG5_scaleMesh(mesh,met) ) _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
 
   if ( abs(mesh->info.imprim) > 0 ) {
-    if ( !_MMG3D_inqua(mesh,met) ) {
+    if ( !_MMG3D_inqua(mesh,met,0) ) {
       if ( !_MMG5_unscaleMesh(mesh,met) ) _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
       _LIBMMG5_RETURN(mesh,met,MMG5_LOWFAILURE);
     }
@@ -608,7 +628,7 @@ int MMG3D_mmg3dls(MMG5_pMesh mesh,MMG5_pSol met) {
   }
 
   /* save file */
-  if ( !_MMG3D_outqua(mesh,met) ) {
+  if ( !_MMG3D_outqua(mesh,met,0) ) {
     if ( !_MMG5_unscaleMesh(mesh,met) ) _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
     _MMG5_RETURN_AND_PACK(mesh,met,NULL,MMG5_LOWFAILURE);
   }
@@ -654,6 +674,11 @@ int MMG3D_mmg3dmov(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp) {
     fprintf(stdout,"  ## Error: level-set discretisation unavailable"
             " (MMG3D_IPARAM_iso):\n"
             "          You must call the MMG3D_mmg3dmov function to use this option.\n");
+    _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
+  }
+  else if ( mesh->info.optimLES ) {
+    fprintf(stdout,"  ## Error: strong mesh optimization for LES methods"
+            " unavailable (MMG3D_IPARAM_optimLES) in lagrangian mode.\n");
     _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
   }
 
@@ -708,7 +733,7 @@ int MMG3D_mmg3dmov(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp) {
   MMG3D_setfunc(mesh,met);
 
   if ( abs(mesh->info.imprim) > 0 ) {
-    if ( !_MMG3D_inqua(mesh,met) ) {
+    if ( !_MMG3D_inqua(mesh,met,0) ) {
       _LIBMMG5_RETURN(mesh,met,MMG5_LOWFAILURE);
     }
   }
@@ -820,7 +845,7 @@ int MMG3D_mmg3dmov(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp) {
   }
 
   /* save file */
-  if ( !_MMG3D_outqua(mesh,met) ) {
+  if ( !_MMG3D_outqua(mesh,met,0) ) {
     if ( !_MMG5_unscaleMesh(mesh,met) ) {
       disp->npi = disp->np;
       _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
