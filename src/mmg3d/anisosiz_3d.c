@@ -1144,7 +1144,17 @@ int _MMG3D_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
     return(0);
   }
 
-  ismet = (met->m > 0);
+  if ( met->m )
+    ismet = 1;
+  else {
+    ismet = 0;
+
+    _MMG5_caltet         = _MMG5_caltet_ani;
+    _MMG5_caltri         = _MMG5_caltri_ani;
+    _MMG5_lenedg         = _MMG5_lenedg_ani;
+    MMG3D_lenedgCoor     = _MMG5_lenedgCoor_ani;
+    _MMG5_lenSurfEdg     = _MMG5_lenSurfEdg_ani;
+  }
 
   if ( !_MMG5_defmetvol(mesh,met) )  return(0);
 

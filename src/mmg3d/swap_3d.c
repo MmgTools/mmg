@@ -192,20 +192,13 @@ int _MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, int *list,int ilist,
 
   if ( dischg > disnat )   return(0);
 
-  if ( met->m ) {
-    if ( typchk==1 && met->size > 1 ) {
-      cal1 = _MMG5_caltri33_ani(mesh,met,&tt1);
-      cal2 = _MMG5_caltri33_ani(mesh,met,&tt2);
-    }
-    else {
-      cal1 = _MMG5_caltri(mesh,met,&tt1);
-      cal2 = _MMG5_caltri(mesh,met,&tt2);
-    }
+  if ( typchk==1 && met->size > 1 && met->m ) {
+    cal1 = _MMG5_caltri33_ani(mesh,met,&tt1);
+    cal2 = _MMG5_caltri33_ani(mesh,met,&tt2);
   }
-  else { // with -A option we don't have the metric here so we always use the
-         // iso func.
-    cal1 = _MMG5_caltri_iso(mesh,met,&tt1);
-    cal2 = _MMG5_caltri_iso(mesh,met,&tt2);
+  else {
+    cal1 = _MMG5_caltri(mesh,met,&tt1);
+    cal2 = _MMG5_caltri(mesh,met,&tt2);
   }
 
   calnat = MG_MIN(cal1,cal2);
@@ -214,20 +207,13 @@ int _MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, int *list,int ilist,
     if ( tt2.v[j] == np )  tt2.v[j] = na1;
   }
 
-  if ( met->m ) {
-    if ( typchk==1 && met->size > 1 ) {
-      cal1 = _MMG5_caltri33_ani(mesh,met,&tt1);
-      cal2 = _MMG5_caltri33_ani(mesh,met,&tt2);
-    }
-    else {
-      cal1 = _MMG5_caltri(mesh,met,&tt1);
-      cal2 = _MMG5_caltri(mesh,met,&tt2);
-    }
+  if ( typchk==1 && met->size > 1 && met->m ) {
+    cal1 = _MMG5_caltri33_ani(mesh,met,&tt1);
+    cal2 = _MMG5_caltri33_ani(mesh,met,&tt2);
   }
-  else { // with -A option we don't have the metric here so we always use the
-    // iso func.
-    cal1 = _MMG5_caltri_iso(mesh,met,&tt1);
-    cal2 = _MMG5_caltri_iso(mesh,met,&tt2);
+  else {
+    cal1 = _MMG5_caltri(mesh,met,&tt1);
+    cal2 = _MMG5_caltri(mesh,met,&tt2);
   }
 
   calchg = MG_MIN(cal1,cal2);
@@ -272,54 +258,41 @@ int _MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, int *list,int ilist,
     /* 2 elts resulting from split and collapse */
     pt0->v[ip] = 0;
 
-    if ( met->m ) {
-      if ( typchk==1 && met->size > 1 )
-        caltmp = _MMG5_caltet33_ani(mesh,met,pt0);
-      else
-        caltmp = _MMG5_orcal(mesh,met,0);
-    }
-    else // -A option
-      caltmp = _MMG5_caltet_iso(mesh,met,pt0);
+    if ( typchk==1 && met->size > 1 && met->m )
+      caltmp = _MMG5_caltet33_ani(mesh,met,pt0);
+    else
+      caltmp = _MMG5_orcal(mesh,met,0);
+
 
     if ( caltmp < _MMG5_NULKAL )  return(0);
 
     if ( !isshell ) {
       pt0->v[ip] = na1;
-      if ( met->m ) {
-        if ( typchk==1 && met->size > 1 )
-          caltmp = _MMG5_caltet33_ani(mesh,met,pt0);
-        else
-          caltmp = _MMG5_orcal(mesh,met,0);
-      }
-      else // -A option
-        caltmp = _MMG5_caltet_iso(mesh,met,pt0);
+
+      if ( typchk==1 && met->size > 1 && met->m )
+        caltmp = _MMG5_caltet33_ani(mesh,met,pt0);
+      else
+        caltmp = _MMG5_orcal(mesh,met,0);
 
       calnew = MG_MIN(calnew,caltmp);
     }
     memcpy(pt0,pt,sizeof(MMG5_Tetra));
     pt0->v[iq] = 0;
 
-    if ( met->m ) {
-      if ( typchk==1 && met->size > 1 )
-        caltmp = _MMG5_caltet33_ani(mesh,met,pt0);
-      else
-        caltmp = _MMG5_orcal(mesh,met,0);
-    }
-    else // -A option
-      caltmp = _MMG5_caltet_iso(mesh,met,pt0);
+    if ( typchk==1 && met->size > 1 && met->m )
+      caltmp = _MMG5_caltet33_ani(mesh,met,pt0);
+    else
+      caltmp = _MMG5_orcal(mesh,met,0);
 
     if ( caltmp < _MMG5_NULKAL )  return(0);
 
     if ( !isshell ) {
       pt0->v[iq] = na1;
-      if ( met->m ) {
-        if ( typchk==1 && met->size > 1 )
-          caltmp = _MMG5_caltet33_ani(mesh,met,pt0);
-        else
-          caltmp = _MMG5_orcal(mesh,met,0);
-      }
-      else // -A option
-        caltmp = _MMG5_caltet_iso(mesh,met,pt0);
+
+      if ( typchk==1 && met->size > 1 && met->m )
+        caltmp = _MMG5_caltet33_ani(mesh,met,pt0);
+      else
+        caltmp = _MMG5_orcal(mesh,met,0);
 
       calnew = MG_MIN(calnew,caltmp);
     }

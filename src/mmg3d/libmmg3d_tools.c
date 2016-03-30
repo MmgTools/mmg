@@ -55,11 +55,20 @@ void MMG3D_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
 #endif
   }
   else if ( met->size == 6 ) {
-    _MMG5_caltet         = _MMG5_caltet_ani;
-    _MMG5_caltri         = _MMG5_caltri_ani;
-    _MMG5_lenedg         = _MMG5_lenedg_ani;
-    MMG3D_lenedgCoor     = _MMG5_lenedgCoor_ani;
-    _MMG5_lenSurfEdg     = _MMG5_lenSurfEdg_ani;
+    if ( !met->m ) {
+      _MMG5_caltet          = _MMG5_caltet_iso;
+      _MMG5_caltri          = _MMG5_caltri_iso;
+      _MMG5_lenedg         = _MMG5_lenedg_iso;
+      MMG3D_lenedgCoor     = _MMG5_lenedgCoor_iso;
+      _MMG5_lenSurfEdg     = _MMG5_lenSurfEdg_iso;
+    }
+    else {
+      _MMG5_caltet         = _MMG5_caltet_ani;
+      _MMG5_caltri         = _MMG5_caltri_ani;
+      _MMG5_lenedg         = _MMG5_lenedg_ani;
+      MMG3D_lenedgCoor     = _MMG5_lenedgCoor_ani;
+      _MMG5_lenSurfEdg     = _MMG5_lenSurfEdg_ani;
+    }
     _MMG5_intmet         = _MMG5_intmet_ani;
     _MMG5_lenedgspl      = _MMG5_lenedg_ani;
     _MMG5_movintpt       = _MMG5_movintpt_ani;

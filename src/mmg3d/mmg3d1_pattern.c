@@ -378,11 +378,6 @@ static int _MMG5_adptet(MMG5_pMesh mesh,MMG5_pSol met) {
         fprintf(stderr,"  ## Unable to complete mesh. Exit program.\n");
         return(0);
       }
-#ifdef DEBUG
-      if ( nc ) { printf("APS ADPCOL == %d\n",nc);
-        _MMG3D_prilen(mesh,met,1);
-      }
-#endif
     }
     else  nc = 0;
 

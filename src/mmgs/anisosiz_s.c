@@ -740,15 +740,20 @@ int _MMGS_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
     return(0);
   }
 
-  ismet = (met->m > 0);
+  if ( met->m )
+    ismet = 1;
+  else {
+    ismet = 0;
 
-  if ( !met->m ) {
-    met->np    = mesh->np;
-    met->npmax = mesh->npmax;
-    met->size  = 6;
-    met->dim   = 3;
-    _MMG5_ADD_MEM(mesh,(6*(met->npmax+1))*sizeof(double),"solution",return(0));
-    _MMG5_SAFE_CALLOC(met->m,6*(mesh->npmax+1),double);
+     _MMG5_calelt     = _MMG5_caltri_ani;
+     _MMG5_lenSurfEdg = _MMG5_lenSurfEdg_ani;
+
+     met->np    = mesh->np;
+     met->npmax = mesh->npmax;
+     met->size  = 6;
+     met->dim   = 3;
+     _MMG5_ADD_MEM(mesh,(6*(met->npmax+1))*sizeof(double),"solution",return(0));
+     _MMG5_SAFE_CALLOC(met->m,6*(mesh->npmax+1),double);
   }
 
   for (k=1; k<=mesh->np; k++) {

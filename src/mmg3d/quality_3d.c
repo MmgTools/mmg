@@ -50,10 +50,7 @@ inline double _MMG5_orcal(MMG5_pMesh mesh,MMG5_pSol met,int iel) {
 
   pt = &mesh->tetra[iel];
 
-  if ( met->m )
-    return(_MMG5_caltet(mesh,met,pt));
-  else // with -A option we are in aniso but without metric.
-    return(_MMG5_caltet_iso(mesh,met,pt));
+  return(_MMG5_caltet(mesh,met,pt));
 }
 
 /**
@@ -390,15 +387,11 @@ int _MMG3D_prilen(MMG5_pMesh mesh, MMG5_pSol met, char metRidTyp) {
       ier = _MMG5_hashPop(&hash,np,nq);
       if( ier ) {
         ned ++;
-        if ( met->m ) {
-          if ( (!metRidTyp) && met->size>1 ) {
-            len = _MMG5_lenedg33_ani(mesh,met,ia,pt);
-          }
-          else
-            len = _MMG5_lenedg(mesh,met,ia,pt);
+        if ( (!metRidTyp) && met->size==6 && met->m ) {
+          len = _MMG5_lenedg33_ani(mesh,met,ia,pt);
         }
-        else // -A option
-          len = _MMG5_lenedg_iso(mesh,met,ia,pt);
+        else
+          len = _MMG5_lenedg(mesh,met,ia,pt);
 
         assert( len!=0 );
         avlen += len;
@@ -453,15 +446,12 @@ int _MMG3D_inqua(MMG5_pMesh mesh,MMG5_pSol met) {
     pt = &mesh->tetra[k];
      if( !MG_EOK(pt) )   continue;
 
-     if ( met->m ) {
-       if ( met->size == 6) {
-         pt->qual = _MMG5_caltet33_ani(mesh,met,pt);
-       }
-       else
-         pt->qual = _MMG5_orcal(mesh,met,k);
+     if ( met->size == 6 && met->m ) {
+       pt->qual = _MMG5_caltet33_ani(mesh,met,pt);
      }
-     else // -A option
-       pt->qual = _MMG5_caltet_iso(mesh,met,pt);
+     else
+       pt->qual = _MMG5_orcal(mesh,met,k);
+
   }
   if ( abs(mesh->info.imprim) <= 0 ) return(1);
 

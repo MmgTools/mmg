@@ -402,7 +402,7 @@ int _MMGS_inqua(MMG5_pMesh mesh,MMG5_pSol met) {
       rap = ALPHAD * _MMG5_caltri33_ani(mesh,met,pt);
     }
     else
-      rap = ALPHAD * _MMG5_caltri_iso(mesh,NULL,pt);
+      rap = ALPHAD * _MMG5_calelt(mesh,NULL,pt);
 
     if ( rap < rapmin ) {
       rapmin = rap;
@@ -468,11 +468,7 @@ int _MMGS_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
     }
     ok++;
 
-    if ( met->m ) {
-      rap = ALPHAD * _MMG5_calelt(mesh,met,pt);
-    }
-    else // with -A option we are in aniso but without metric.
-      rap = ALPHAD * _MMG5_caltri_iso(mesh,met,pt);
+    rap = ALPHAD * _MMG5_calelt(mesh,met,pt);
 
     if ( rap < rapmin ) {
       rapmin = rap;
