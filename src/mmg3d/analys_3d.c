@@ -155,7 +155,7 @@ static int _MMG5_setadj(MMG5_pMesh mesh){
         if ( pt1->v[ii1] == ip1 ) {
           /* Moebius strip */
           if ( pt1->base < 0 ) {
-            fprintf(stdout,"  ## Orientation problem (1).\n");
+            fprintf(stderr,"  ## Orientation problem (1).\n");
             return(0);
           }
           /* flip orientation */

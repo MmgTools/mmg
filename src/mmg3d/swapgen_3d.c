@@ -262,14 +262,14 @@ int _MMG5_swpgen(MMG5_pMesh mesh,MMG5_pSol met,int nconf,int ilist,int *list,
   if(!np){
     if ( bucket ) {
       _MMG5_POINT_AND_BUCKET_REALLOC(mesh,met,np,mesh->gap,
-                                     printf("  ## Error: unable to allocate a new point\n");
+                                     fprintf(stderr,"  ## Error: unable to allocate a new point\n");
                                      _MMG5_INCREASE_MEM_MESSAGE();
                                      return(-1)
                                      ,m,0);
     }
     else {
       _MMG5_POINT_REALLOC(mesh,met,np,mesh->gap,
-                          printf("  ## Error: unable to allocate a new point\n");
+                          fprintf(stderr,"  ## Error: unable to allocate a new point\n");
                           _MMG5_INCREASE_MEM_MESSAGE();
                           return(-1)
                           ,m,0);

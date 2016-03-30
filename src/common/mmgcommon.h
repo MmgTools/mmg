@@ -149,10 +149,10 @@ extern "C" {
   {                                                                     \
     if ( ((mesh)->memCur) > ((mesh)->memMax) ||                         \
          ((mesh)->memCur < 0 )) {                                       \
-      fprintf(stdout,"  ## Error:");                                    \
-      fprintf(stdout," unable to allocate %s.\n",string);               \
-      fprintf(stdout,"  ## Check the mesh size or ");                   \
-      fprintf(stdout,"increase maximal authorized memory with the -m option.\n"); \
+      fprintf(stderr,"  ## Error:");                                    \
+      fprintf(stderr," unable to allocate %s.\n",string);               \
+      fprintf(stderr,"  ## Check the mesh size or ");                   \
+      fprintf(stderr,"increase maximal authorized memory with the -m option.\n"); \
       (mesh)->memCur -= (long long)(size);                              \
       law;                                                              \
     }                                                                   \
@@ -257,10 +257,10 @@ extern "C" {
          (long long) (wantedGap*initSize*sizeof(type)) ) {              \
       gap = (int)((mesh->memMax-mesh->memCur)/sizeof(type));            \
       if(gap<1) {                                                       \
-        fprintf(stdout,"  ## Error:");                                  \
-        fprintf(stdout," unable to allocate %s.\n",message);            \
-        fprintf(stdout,"  ## Check the mesh size or ");                 \
-        fprintf(stdout,"increase maximal authorized memory with the -m option.\n"); \
+        fprintf(stderr,"  ## Error:");                                  \
+        fprintf(stderr," unable to allocate %s.\n",message);            \
+        fprintf(stderr,"  ## Check the mesh size or ");                 \
+        fprintf(stderr,"increase maximal authorized memory with the -m option.\n"); \
         law;                                                            \
       }                                                                 \
     }                                                                   \

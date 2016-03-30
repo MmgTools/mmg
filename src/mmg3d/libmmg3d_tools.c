@@ -468,7 +468,7 @@ int MMG3D_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
         /*   } */
         /* } */
         else {
-          fprintf(stdout,"  %%%% Wrong format: %s\n",buf);
+          fprintf(stderr,"  %%%% Wrong format: %s\n",buf);
           continue;
         }
       }
@@ -528,12 +528,12 @@ int MMG3D_mmg3dcheck(MMG5_pMesh mesh,MMG5_pSol met,double critmin, double lmin,
 
   /* Check options */
   if ( mesh->info.lag > -1 ) {
-    fprintf(stdout,"  ## Error: lagrangian mode unavailable (MMG3D_IPARAM_lag):\n"
+    fprintf(stderr,"  ## Error: lagrangian mode unavailable (MMG3D_IPARAM_lag):\n"
             "            You must call the MMG3D_mmg3dmov function to move a rigidbody.\n");
     _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
   }
   else if ( mesh->info.iso ) {
-    fprintf(stdout,"  ## Error: level-set discretisation unavailable"
+    fprintf(stderr,"  ## Error: level-set discretisation unavailable"
             " (MMG3D_IPARAM_iso):\n"
             "          You must call the MMG3D_mmg3dmov function to use this option.\n");
     _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
@@ -556,7 +556,7 @@ int MMG3D_mmg3dcheck(MMG5_pMesh mesh,MMG5_pSol met,double critmin, double lmin,
     met->np = 0;
   }
   else if ( met->size!=1 && met->size!=6 ) {
-    fprintf(stdout,"  ## ERROR: WRONG DATA TYPE.\n");
+    fprintf(stderr,"  ## ERROR: WRONG DATA TYPE.\n");
     _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
   }
 
@@ -649,7 +649,7 @@ int MMG3D_searchlen(MMG5_pMesh mesh, MMG5_pSol met, double lmin,
       nq = pt->v[i1];
 
       if(!_MMG5_hashEdge(mesh,&hash,np,nq,0)){
-        fprintf(stdout,"%s:%d: Error: function _MMG5_hashEdge return 0\n",
+        fprintf(stderr,"%s:%d: Error: function _MMG5_hashEdge return 0\n",
                 __FILE__,__LINE__);
         exit(EXIT_FAILURE);
       }

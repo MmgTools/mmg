@@ -79,7 +79,7 @@ extern "C" {
       gap = (int)((mesh->memMax-mesh->memCur)/                          \
                   (sizeof(MMG5_Point)+sol->size*sizeof(int)));          \
       if(gap < 1) {                                                     \
-        fprintf(stdout,"  ## Error:");                                  \
+        fprintf(stdout,"  ## Warning:");                                \
         fprintf(stdout," unable to allocate %s.\n","larger point/bucket table"); \
         fprintf(stdout,"  ## Check the mesh size or ");                 \
         fprintf(stdout,"increase maximal authorized memory with the -m option.\n"); \

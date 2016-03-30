@@ -112,7 +112,7 @@ void _MMG3D_delElt(MMG5_pMesh mesh,int iel) {
 
   pt = &mesh->tetra[iel];
   if ( !MG_EOK(pt) ) {
-    fprintf(stdout,"  ## INVALID ELEMENT %d.\n",iel);
+    fprintf(stderr,"  ## INVALID ELEMENT %d.\n",iel);
     exit(EXIT_FAILURE);
   }
   memset(pt,0,sizeof(MMG5_Tetra));
@@ -187,14 +187,14 @@ void _MMG3D_memOption(MMG5_pMesh mesh) {
       memtmp = MG_MAX(memtmp, (int)(mesh->nt * bytes /(ctri* (int)million) + reservedMem));
       memtmp = MG_MAX(memtmp, (int)(mesh->ne * bytes /(6*(int)million) + reservedMem));
       mesh->memMax = (long long) memtmp+1;
-      fprintf(stdout,"  ## ERROR: asking for %d Mo of memory ",mesh->info.mem);
-      fprintf(stdout,"is not enough to load mesh. You need to ask %d Mo minimum\n",
+      fprintf(stderr,"  ## ERROR: asking for %d Mo of memory ",mesh->info.mem);
+      fprintf(stderr,"is not enough to load mesh. You need to ask %d Mo minimum\n",
               memtmp+1);
     }
     if(mesh->info.mem < reservedMem) {
       mesh->memMax = (long long) reservedMem;
-      fprintf(stdout,"  ## ERROR: asking for %d Mo of memory ",mesh->info.mem);
-      fprintf(stdout,"is not enough to load mesh. You need to ask %d Mo minimum\n",
+      fprintf(stderr,"  ## ERROR: asking for %d Mo of memory ",mesh->info.mem);
+      fprintf(stderr,"is not enough to load mesh. You need to ask %d Mo minimum\n",
               reservedMem);
     }
   }
@@ -219,12 +219,12 @@ int _MMG5_zaldy(MMG5_pMesh mesh) {
   _MMG3D_memOption(mesh);
 
   _MMG5_ADD_MEM(mesh,(mesh->npmax+1)*sizeof(MMG5_Point),"initial vertices",
-                printf("  Exit program.\n");
+                fprintf(stderr,"  Exit program.\n");
                 exit(EXIT_FAILURE));
   _MMG5_SAFE_CALLOC(mesh->point,mesh->npmax+1,MMG5_Point);
 
   _MMG5_ADD_MEM(mesh,(mesh->nemax+1)*sizeof(MMG5_Tetra),"initial tetrahedra",
-                printf("  Exit program.\n");
+                fprintf(stderr,"  Exit program.\n");
                 exit(EXIT_FAILURE));
   _MMG5_SAFE_CALLOC(mesh->tetra,mesh->nemax+1,MMG5_Tetra);
 

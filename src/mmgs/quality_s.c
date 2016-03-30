@@ -308,7 +308,7 @@ int _MMGS_prilen(MMG5_pMesh mesh, MMG5_pSol met, int metRidTyp) {
       nq = pt->v[i1];
 
       if(!_MMG5_hashEdge(mesh,&hash,np,nq,0)){
-        fprintf(stdout,"%s:%d: Error: function _MMG5_hashEdge return 0\n",
+        fprintf(stderr,"%s:%d: Error: function _MMG5_hashEdge return 0\n",
                 __FILE__,__LINE__);
         exit(EXIT_FAILURE);
       }
@@ -422,7 +422,7 @@ int _MMGS_inqua(MMG5_pMesh mesh,MMG5_pSol met) {
 
   if ( abs(mesh->info.imprim) < 4 ){
     if (rapmin == 0){
-      fprintf(stdout,"  ## WARNING: TOO BAD QUALITY FOR THE WORST ELEMENT\n");
+      fprintf(stderr,"  ## WARNING: TOO BAD QUALITY FOR THE WORST ELEMENT\n");
       return(0);
     }
     return(1);
@@ -492,7 +492,7 @@ int _MMGS_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
 
   if ( abs(mesh->info.imprim) < 4 ){
     if (rapmin == 0){
-      fprintf(stdout,"  ## WARNING: TOO BAD QUALITY FOR THE WORST ELEMENT\n");
+      fprintf(stderr,"  ## WARNING: TOO BAD QUALITY FOR THE WORST ELEMENT\n");
       return(0);
     }
     return(1);

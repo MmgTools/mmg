@@ -107,7 +107,7 @@ int _MMG3D_defaultOption(MMG5_pMesh mesh,MMG5_pSol met) {
   chrono(ON,&(ctim[0]));
 
   if ( mesh->info.npar ) {
-    fprintf(stdout,"\n  ## Error: "
+    fprintf(stderr,"\n  ## Error: "
             "unable to save of a local parameter file with"
             " the default parameters values because local parameters"
             " are provided.\n");
@@ -120,7 +120,7 @@ int _MMG3D_defaultOption(MMG5_pMesh mesh,MMG5_pSol met) {
   chrono(ON,&(ctim[1]));
 
   if ( met->np && (met->np != mesh->np) ) {
-    fprintf(stdout,"  ## WARNING: WRONG SOLUTION NUMBER. IGNORED\n");
+    fprintf(stderr,"  ## WARNING: WRONG SOLUTION NUMBER. IGNORED\n");
     _MMG5_DEL_MEM(mesh,met->m,(met->size*(met->npmax+1))*sizeof(double));
     met->np = 0;
   }
@@ -226,11 +226,11 @@ int main(int argc,char *argv[]) {
 
     ier = MMG3D_loadSol(mesh,disp,disp->namein);
     if ( ier == 0 ) {
-      fprintf(stdout,"  ## ERROR: NO DISPLACEMENT FOUND.\n");
+      fprintf(stderr,"  ## ERROR: NO DISPLACEMENT FOUND.\n");
       _MMG5_RETURN_AND_FREE(mesh,met,disp,MMG5_STRONGFAILURE);
     }
     else if ( ier == -1 ) {
-      fprintf(stdout,"  ## ERROR: WRONG DATA TYPE OR WRONG SOLUTION NUMBER.\n");
+      fprintf(stderr,"  ## ERROR: WRONG DATA TYPE OR WRONG SOLUTION NUMBER.\n");
       _MMG5_RETURN_AND_FREE(mesh,met,disp,MMG5_STRONGFAILURE);
     }
   }
@@ -239,11 +239,11 @@ int main(int argc,char *argv[]) {
     ier = MMG3D_loadSol(mesh,met,met->namein);
 
     if ( ier == -1 ) {
-      fprintf(stdout,"  ## ERROR: WRONG DATA TYPE OR WRONG SOLUTION NUMBER.\n");
+      fprintf(stderr,"  ## ERROR: WRONG DATA TYPE OR WRONG SOLUTION NUMBER.\n");
       _MMG5_RETURN_AND_FREE(mesh,met,disp,MMG5_STRONGFAILURE);
     }
     if ( mesh->info.iso && !ier ) {
-      fprintf(stdout,"  ## ERROR: NO ISOVALUE DATA.\n");
+      fprintf(stderr,"  ## ERROR: NO ISOVALUE DATA.\n");
       _MMG5_RETURN_AND_FREE(mesh,met,disp,MMG5_STRONGFAILURE);
     }
     if ( !MMG3D_parsop(mesh,met) )

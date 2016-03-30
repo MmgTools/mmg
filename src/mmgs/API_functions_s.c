@@ -90,7 +90,7 @@ int MMGS_Set_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int typEntity, int np, int 
     fprintf(stdout,"  ## Warning: new solution\n");
 
   if ( typEntity != MMG5_Vertex ) {
-    fprintf(stdout,"  ## Error: MMG3D5 need a solution imposed on vertices\n");
+    fprintf(stderr,"  ## Error: MMG3D5 need a solution imposed on vertices\n");
     return(0);
   }
   if ( typSol == MMG5_Scalar ) {
@@ -103,7 +103,7 @@ int MMGS_Set_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int typEntity, int np, int 
     sol->size = 6;
   }
   else {
-    fprintf(stdout,"  ## Error: type of solution not yet implemented\n");
+    fprintf(stderr,"  ## Error: type of solution not yet implemented\n");
     return(0);
   }
 
@@ -116,7 +116,7 @@ int MMGS_Set_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int typEntity, int np, int 
 
     sol->npmax = mesh->npmax;
     _MMG5_ADD_MEM(mesh,(sol->size*(sol->npmax+1))*sizeof(double),"initial solution",
-                  printf("  Exit program.\n");
+                  fprintf(stderr,"  Exit program.\n");
                   exit(EXIT_FAILURE));
     _MMG5_SAFE_CALLOC(sol->m,(sol->size*(sol->npmax+1)),double);
   }
@@ -138,8 +138,8 @@ int MMGS_Set_meshSize(MMG5_pMesh mesh, int np, int nt, int na) {
   mesh->nai = mesh->na;
 
   if ( !np || !nt ) {
-    fprintf(stdout,"  ** MISSING DATA:\n");
-    fprintf(stdout,"     Your mesh must contains at least points and triangles.\n");
+    fprintf(stderr,"  ** MISSING DATA:\n");
+    fprintf(stderr,"     Your mesh must contains at least points and triangles.\n");
     return(0);
   }
 
@@ -154,15 +154,14 @@ int MMGS_Set_meshSize(MMG5_pMesh mesh, int np, int nt, int na) {
   if( mesh->info.mem > 0) {
     if ( mesh->npmax < mesh->np || mesh->ntmax < mesh->nt) {
       _MMGS_memOption(mesh);
-      //     printf("pas de pbs ? %d %d %d %d %d %d -- %d\n",mesh->npmax,mesh->np,
-      //     mesh->ntmax,mesh->nt,mesh->nemax,mesh->ne,mesh->info.mem);
+
       if ( mesh->npmax < mesh->np || mesh->ntmax < mesh->nt) {
-        fprintf(stdout,"not enough memory: np : %d %d nt : %d %d \n"
+        fprintf(stderr,"not enough memory: np : %d %d nt : %d %d \n"
                 ,mesh->npmax,mesh->np, mesh->ntmax,mesh->nt);
         return(0);
       }
     } else if(mesh->info.mem < 39) {
-      printf("not enough memory  %d\n",mesh->info.mem);
+      fprintf(stderr,"not enough memory  %d\n",mesh->info.mem);
       return(0);
     }
   } else {
@@ -171,7 +170,7 @@ int MMGS_Set_meshSize(MMG5_pMesh mesh, int np, int nt, int na) {
 
   }
   _MMG5_ADD_MEM(mesh,(mesh->npmax+1)*sizeof(MMG5_Point),"initial vertices",
-                printf("  Exit program.\n");
+                fprintf(stderr,"  Exit program.\n");
                 exit(EXIT_FAILURE));
   _MMG5_SAFE_CALLOC(mesh->point,mesh->npmax+1,MMG5_Point);
 
@@ -247,23 +246,23 @@ int MMGS_Get_meshSize(MMG5_pMesh mesh, int* np, int* nt, int* na) {
 int MMGS_Set_vertex(MMG5_pMesh mesh, double c0, double c1, double c2, int ref, int pos) {
 
   if ( !mesh->np ) {
-    fprintf(stdout,"  ## Error: you must set the number of points with the");
-    fprintf(stdout," MMGS_Set_meshSize function before setting vertices in mesh\n");
+    fprintf(stderr,"  ## Error: you must set the number of points with the");
+    fprintf(stderr," MMGS_Set_meshSize function before setting vertices in mesh\n");
     return(0);
   }
 
   if ( pos > mesh->npmax ) {
-    fprintf(stdout,"  ## Error: unable to allocate a new point.\n");
-    fprintf(stdout,"    max number of points: %d\n",mesh->npmax);
+    fprintf(stderr,"  ## Error: unable to allocate a new point.\n");
+    fprintf(stderr,"    max number of points: %d\n",mesh->npmax);
     _MMG5_INCREASE_MEM_MESSAGE();
     return(0);
   }
 
   if ( pos > mesh->np ) {
-    fprintf(stdout,"  ## Error: attempt to set new vertex at position %d.",pos);
-    fprintf(stdout," Overflow of the given number of vertices: %d\n",mesh->np);
-    fprintf(stdout,"  ## Check the mesh size, its compactness or the position");
-    fprintf(stdout," of the vertex.\n");
+    fprintf(stderr,"  ## Error: attempt to set new vertex at position %d.",pos);
+    fprintf(stderr," Overflow of the given number of vertices: %d\n",mesh->np);
+    fprintf(stderr,"  ## Check the mesh size, its compactness or the position");
+    fprintf(stderr," of the vertex.\n");
     return(0);
   }
 
@@ -295,9 +294,9 @@ int MMGS_Get_vertex(MMG5_pMesh mesh, double* c0, double* c1, double* c2, int* re
   mesh->npi++;
 
   if ( mesh->npi > mesh->np ) {
-    fprintf(stdout,"  ## Error: unable to get point.\n");
-    fprintf(stdout,"     The number of call of MMGS_Get_vertex function");
-    fprintf(stdout," can not exceed the number of points: %d\n ",mesh->np);
+    fprintf(stderr,"  ## Error: unable to get point.\n");
+    fprintf(stderr,"     The number of call of MMGS_Get_vertex function");
+    fprintf(stderr," can not exceed the number of points: %d\n ",mesh->np);
     return(0);
   }
 
@@ -328,23 +327,23 @@ int MMGS_Get_vertex(MMG5_pMesh mesh, double* c0, double* c1, double* c2, int* re
 int MMGS_Set_triangle(MMG5_pMesh mesh, int v0, int v1, int v2, int ref,int pos) {
 
   if ( !mesh->nt ) {
-    fprintf(stdout,"  ## Error: You must set the number of triangles with the");
-    fprintf(stdout," MMGS_Set_meshSize function before setting triangles in mesh\n");
+    fprintf(stderr,"  ## Error: You must set the number of triangles with the");
+    fprintf(stderr," MMGS_Set_meshSize function before setting triangles in mesh\n");
     return(0);
   }
 
   if ( pos > mesh->ntmax ) {
-    fprintf(stdout,"  ## Error: unable to allocate a new triangle.\n");
-    fprintf(stdout,"    max number of triangle: %d\n",mesh->ntmax);
+    fprintf(stderr,"  ## Error: unable to allocate a new triangle.\n");
+    fprintf(stderr,"    max number of triangle: %d\n",mesh->ntmax);
     _MMG5_INCREASE_MEM_MESSAGE();
     return(0);
   }
 
   if ( pos > mesh->nt ) {
-    fprintf(stdout,"  ## Error: attempt to set new triangle at position %d.",pos);
-    fprintf(stdout," Overflow of the given number of triangles: %d\n",mesh->nt);
-    fprintf(stdout,"  ## Check the mesh size, its compactness or the position");
-    fprintf(stdout," of the triangle.\n");
+    fprintf(stderr,"  ## Error: attempt to set new triangle at position %d.",pos);
+    fprintf(stderr," Overflow of the given number of triangles: %d\n",mesh->nt);
+    fprintf(stderr,"  ## Check the mesh size, its compactness or the position");
+    fprintf(stderr," of the triangle.\n");
     return(0);
   }
 
@@ -374,9 +373,9 @@ int MMGS_Get_triangle(MMG5_pMesh mesh, int* v0, int* v1, int* v2, int* ref
   mesh->nti++;
 
   if ( mesh->nti > mesh->nt ) {
-    fprintf(stdout,"  ## Error: unable to get triangle.\n");
-    fprintf(stdout,"    The number of call of MMGS_Get_triangle function");
-    fprintf(stdout," can not exceed the number of triangles: %d\n ",mesh->nt);
+    fprintf(stderr,"  ## Error: unable to get triangle.\n");
+    fprintf(stderr,"    The number of call of MMGS_Get_triangle function");
+    fprintf(stderr," can not exceed the number of triangles: %d\n ",mesh->nt);
     return(0);
   }
 
@@ -401,21 +400,21 @@ int MMGS_Get_triangle(MMG5_pMesh mesh, int* v0, int* v1, int* v2, int* ref
 int MMGS_Set_edge(MMG5_pMesh mesh, int v0, int v1, int ref, int pos) {
 
   if ( !mesh->na ) {
-    fprintf(stdout,"  ## Error: You must set the number of edges with the");
-    fprintf(stdout," MMGS_Set_meshSize function before setting edges in mesh\n");
+    fprintf(stderr,"  ## Error: You must set the number of edges with the");
+    fprintf(stderr," MMGS_Set_meshSize function before setting edges in mesh\n");
     return(0);
   }
   if ( pos > mesh->namax ) {
-    fprintf(stdout,"  ## Error: unable to allocate a new edge.\n");
-    fprintf(stdout,"    max number of edge: %d\n",mesh->namax);
+    fprintf(stderr,"  ## Error: unable to allocate a new edge.\n");
+    fprintf(stderr,"    max number of edge: %d\n",mesh->namax);
     _MMG5_INCREASE_MEM_MESSAGE();
     return(0);
   }
   if ( pos > mesh->na ) {
-    fprintf(stdout,"  ## Error: attempt to set new edge at position %d.",pos);
-    fprintf(stdout," Overflow of the given number of edges: %d\n",mesh->na);
-    fprintf(stdout,"  ## Check the mesh size, its compactness or the position");
-    fprintf(stdout," of the edge.\n");
+    fprintf(stderr,"  ## Error: attempt to set new edge at position %d.",pos);
+    fprintf(stderr," Overflow of the given number of edges: %d\n",mesh->na);
+    fprintf(stderr,"  ## Check the mesh size, its compactness or the position");
+    fprintf(stderr," of the edge.\n");
     return(0);
   }
 
@@ -444,9 +443,9 @@ int MMGS_Get_edge(MMG5_pMesh mesh, int* e0, int* e1, int* ref
   mesh->nai++;
 
   if ( mesh->nai > mesh->na ) {
-    fprintf(stdout,"  ## Error: unable to get edge.\n");
-    fprintf(stdout,"    The number of call of MMGS_Get_edge function");
-    fprintf(stdout," can not exceed the number of edges: %d\n ",mesh->na);
+    fprintf(stderr,"  ## Error: unable to get edge.\n");
+    fprintf(stderr,"    The number of call of MMGS_Get_edge function");
+    fprintf(stderr," can not exceed the number of edges: %d\n ",mesh->na);
     return(0);
   }
 
@@ -535,27 +534,27 @@ int MMGS_Get_normalAtVertex(MMG5_pMesh mesh, int k, double *n0, double *n1, doub
 int MMGS_Set_scalarSol(MMG5_pSol met, double s, int pos) {
 
   if ( !met->np ) {
-    fprintf(stdout,"  ## Error: You must set the number of solution with the");
-    fprintf(stdout," MMGS_Set_solSize function before setting values");
-    fprintf(stdout," in solution structure \n");
+    fprintf(stderr,"  ## Error: You must set the number of solution with the");
+    fprintf(stderr," MMGS_Set_solSize function before setting values");
+    fprintf(stderr," in solution structure \n");
     return(0);
   }
   if ( pos < 1 ) {
-    fprintf(stdout,"  ## Error: unable to set a new solution.\n");
-    fprintf(stdout,"    Minimal index of the solution position must be 1.\n");
+    fprintf(stderr,"  ## Error: unable to set a new solution.\n");
+    fprintf(stderr,"    Minimal index of the solution position must be 1.\n");
     return(0);
   }
   if ( pos >= met->npmax ) {
-    fprintf(stdout,"  ## Error: unable to set a new solution.\n");
-    fprintf(stdout,"    max number of solutions: %d\n",met->npmax);
+    fprintf(stderr,"  ## Error: unable to set a new solution.\n");
+    fprintf(stderr,"    max number of solutions: %d\n",met->npmax);
     return(0);
   }
 
   if ( pos > met->np ) {
-    fprintf(stdout,"  ## Error: attempt to set new solution at position %d.",pos);
-    fprintf(stdout," Overflow of the given number of solutions: %d\n",met->np);
-    fprintf(stdout,"  ## Check the solution size, its compactness or the position");
-    fprintf(stdout," of the solution.\n");
+    fprintf(stderr,"  ## Error: attempt to set new solution at position %d.",pos);
+    fprintf(stderr," Overflow of the given number of solutions: %d\n",met->np);
+    fprintf(stderr,"  ## Check the solution size, its compactness or the position");
+    fprintf(stderr," of the solution.\n");
     return(0);
   }
 
@@ -580,9 +579,9 @@ int MMGS_Get_scalarSol(MMG5_pSol met, double* s) {
   met->npi++;
 
   if ( met->npi > met->np ) {
-    fprintf(stdout,"  ## Error: unable to get solution.\n");
-    fprintf(stdout,"     The number of call of MMGS_Get_scalarSol function");
-    fprintf(stdout," can not exceed the number of points: %d\n ",met->np);
+    fprintf(stderr,"  ## Error: unable to get solution.\n");
+    fprintf(stderr,"     The number of call of MMGS_Get_scalarSol function");
+    fprintf(stderr," can not exceed the number of points: %d\n ",met->np);
     return(0);
   }
 
@@ -594,27 +593,27 @@ int MMGS_Get_scalarSol(MMG5_pSol met, double* s) {
 int MMGS_Set_vectorSol(MMG5_pSol met, double vx,double vy, double vz, int pos) {
 
   if ( !met->np ) {
-    fprintf(stdout,"  ## Error: You must set the number of solution with the");
-    fprintf(stdout," MMGS_Set_solSize function before setting values");
-    fprintf(stdout," in solution structure \n");
+    fprintf(stderr,"  ## Error: You must set the number of solution with the");
+    fprintf(stderr," MMGS_Set_solSize function before setting values");
+    fprintf(stderr," in solution structure \n");
     return(0);
   }
   if ( pos < 1 ) {
-    fprintf(stdout,"  ## Error: unable to set a new solution.\n");
-    fprintf(stdout,"    Minimal index of the solution position must be 1.\n");
+    fprintf(stderr,"  ## Error: unable to set a new solution.\n");
+    fprintf(stderr,"    Minimal index of the solution position must be 1.\n");
     return(0);
   }
   if ( pos >= met->npmax ) {
-    fprintf(stdout,"  ## Error: unable to set a new solution.\n");
-    fprintf(stdout,"    max number of solutions: %d\n",met->npmax);
+    fprintf(stderr,"  ## Error: unable to set a new solution.\n");
+    fprintf(stderr,"    max number of solutions: %d\n",met->npmax);
     return(0);
   }
 
   if ( pos > met->np ) {
-    fprintf(stdout,"  ## Error: attempt to set new solution at position %d.",pos);
-    fprintf(stdout," Overflow of the given number of solutions: %d\n",met->np);
-    fprintf(stdout,"  ## Check the solution size, its compactness or the position");
-    fprintf(stdout," of the solution.\n");
+    fprintf(stderr,"  ## Error: attempt to set new solution at position %d.",pos);
+    fprintf(stderr," Overflow of the given number of solutions: %d\n",met->np);
+    fprintf(stderr,"  ## Check the solution size, its compactness or the position");
+    fprintf(stderr," of the solution.\n");
     return(0);
   }
 
@@ -642,9 +641,9 @@ int MMGS_Get_vectorSol(MMG5_pSol met, double* vx, double* vy, double* vz) {
   met->npi++;
 
   if ( met->npi > met->np ) {
-    fprintf(stdout,"  ## Error: unable to get solution.\n");
-    fprintf(stdout,"     The number of call of MMGS_Get_vectorSol function");
-    fprintf(stdout," can not exceed the number of points: %d\n ",met->np);
+    fprintf(stderr,"  ## Error: unable to get solution.\n");
+    fprintf(stderr,"     The number of call of MMGS_Get_vectorSol function");
+    fprintf(stderr," can not exceed the number of points: %d\n ",met->np);
     return(0);
   }
 
@@ -658,27 +657,27 @@ int MMGS_Set_tensorSol(MMG5_pSol met, double m11,double m12, double m13,
                        double m22,double m23, double m33, int pos) {
 
   if ( !met->np ) {
-    fprintf(stdout,"  ## Error: You must set the number of solution with the");
-    fprintf(stdout," MMGS_Set_solSize function before setting values");
-    fprintf(stdout," in solution structure \n");
+    fprintf(stderr,"  ## Error: You must set the number of solution with the");
+    fprintf(stderr," MMGS_Set_solSize function before setting values");
+    fprintf(stderr," in solution structure \n");
     return(0);
   }
   if ( pos < 1 ) {
-    fprintf(stdout,"  ## Error: unable to set a new solution.\n");
-    fprintf(stdout,"    Minimal index of the solution position must be 1.\n");
+    fprintf(stderr,"  ## Error: unable to set a new solution.\n");
+    fprintf(stderr,"    Minimal index of the solution position must be 1.\n");
     return(0);
   }
   if ( pos >= met->npmax ) {
-    fprintf(stdout,"  ## Error: unable to set a new solution.\n");
-    fprintf(stdout,"    max number of solutions: %d\n",met->npmax);
+    fprintf(stderr,"  ## Error: unable to set a new solution.\n");
+    fprintf(stderr,"    max number of solutions: %d\n",met->npmax);
     return(0);
   }
 
   if ( pos > met->np ) {
-    fprintf(stdout,"  ## Error: attempt to set new solution at position %d.",pos);
-    fprintf(stdout," Overflow of the given number of solutions: %d\n",met->np);
-    fprintf(stdout,"  ## Check the solution size, its compactness or the position");
-    fprintf(stdout," of the solution.\n");
+    fprintf(stderr,"  ## Error: attempt to set new solution at position %d.",pos);
+    fprintf(stderr," Overflow of the given number of solutions: %d\n",met->np);
+    fprintf(stderr,"  ## Check the solution size, its compactness or the position");
+    fprintf(stderr," of the solution.\n");
     return(0);
   }
 
@@ -711,9 +710,9 @@ int MMGS_Get_tensorSol(MMG5_pSol met, double *m11,double *m12, double *m13,
   met->npi++;
 
   if ( met->npi > met->np ) {
-    fprintf(stdout,"  ## Error: unable to get solution.\n");
-    fprintf(stdout,"     The number of call of MMGS_Get_tensorSol function");
-    fprintf(stdout," can not exceed the number of points: %d\n ",met->np);
+    fprintf(stderr,"  ## Error: unable to get solution.\n");
+    fprintf(stderr,"     The number of call of MMGS_Get_tensorSol function");
+    fprintf(stderr," can not exceed the number of points: %d\n ",met->np);
     return(0);
   }
 
@@ -731,18 +730,18 @@ int MMGS_Get_tensorSol(MMG5_pSol met, double *m11,double *m12, double *m13,
 int MMGS_Chk_meshData(MMG5_pMesh mesh,MMG5_pSol met) {
 
   if ( (mesh->npi != mesh->np) || (mesh->nti != mesh->nt) ) {
-    fprintf(stdout,"  ## Error: if you don't use the MMGS_loadMesh function,");
-    fprintf(stdout," you must call the MMGS_Set_meshSize function to have a");
-    fprintf(stdout," valid mesh.\n");
-    fprintf(stdout," Missing datas.\n");
+    fprintf(stderr,"  ## Error: if you don't use the MMGS_loadMesh function,");
+    fprintf(stderr," you must call the MMGS_Set_meshSize function to have a");
+    fprintf(stderr," valid mesh.\n");
+    fprintf(stderr," Missing datas.\n");
     return(0);
   }
 
   if ( met->npi != met->np ) {
-    fprintf(stdout,"  ## Error: if you don't use the MMGS_loadSol function,");
-    fprintf(stdout," you must call the MMGS_Set_solSize function to have a");
-    fprintf(stdout," valid solution.\n");
-    fprintf(stdout," Missing datas.\n");
+    fprintf(stderr,"  ## Error: if you don't use the MMGS_loadSol function,");
+    fprintf(stderr," you must call the MMGS_Set_solSize function to have a");
+    fprintf(stderr," valid solution.\n");
+    fprintf(stderr," Missing datas.\n");
     return(0);
   }
 
@@ -750,19 +749,19 @@ int MMGS_Chk_meshData(MMG5_pMesh mesh,MMG5_pSol met) {
   if ( mesh->info.ddebug ) {
     if ( (!mesh->np) || (!mesh->point) ||
          (!mesh->nt) || (!mesh->tria) ) {
-      fprintf(stdout,"  ** MISSING DATA.\n");
-      fprintf(stdout," Check that your mesh contains points and triangles.\n");
-      fprintf(stdout," Exit program.\n");
+      fprintf(stderr,"  ** MISSING DATA.\n");
+      fprintf(stderr," Check that your mesh contains points and triangles.\n");
+      fprintf(stderr," Exit program.\n");
       return(0);
     }
   }
 
   if ( mesh->dim != 3 ) {
-    fprintf(stdout,"  ** 3 DIMENSIONAL MESH NEEDED. Exit program.\n");
+    fprintf(stderr,"  ** 3 DIMENSIONAL MESH NEEDED. Exit program.\n");
     return(0);
   }
   if ( met->dim != 3 ) {
-    fprintf(stdout,"  ** WRONG DIMENSION FOR METRIC. Exit program.\n");
+    fprintf(stderr,"  ** WRONG DIMENSION FOR METRIC. Exit program.\n");
     return(0);
   }
   if ( !mesh->ver )  mesh->ver = 2;
@@ -835,7 +834,7 @@ int MMGS_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
     mesh->info.npar  = val;
     mesh->info.npari = 0;
     _MMG5_ADD_MEM(mesh,mesh->info.npar*sizeof(MMG5_Par),"parameters",
-                  printf("  Exit program.\n");
+                  fprintf(stderr,"  Exit program.\n");
                   exit(EXIT_FAILURE));
     _MMG5_SAFE_CALLOC(mesh->info.par,mesh->info.npar,MMG5_Par);
 
@@ -854,7 +853,7 @@ int MMGS_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
     break;
 #endif
   default :
-    fprintf(stdout,"  ## Error: unknown type of parameter\n");
+    fprintf(stderr,"  ## Error: unknown type of parameter\n");
     return(0);
   }
   /* other options */
@@ -904,7 +903,7 @@ int MMGS_Get_iparameter(MMG5_pMesh mesh, int iparam) {
     break;
 #endif
   default :
-    fprintf(stdout,"  ## Error: unknown type of parameter\n");
+    fprintf(stderr,"  ## Error: unknown type of parameter\n");
     exit(EXIT_FAILURE);
   }
 }
@@ -933,7 +932,7 @@ int MMGS_Set_dparameter(MMG5_pMesh mesh, MMG5_pSol sol, int dparam, double val){
     break;
   case MMGS_DPARAM_hausd :
     if ( val <=0 ) {
-      fprintf(stdout,"  ## Error: hausdorff number must be strictly positive.\n");
+      fprintf(stderr,"  ## Error: hausdorff number must be strictly positive.\n");
       return(0);
     }
     else
@@ -943,7 +942,7 @@ int MMGS_Set_dparameter(MMG5_pMesh mesh, MMG5_pSol sol, int dparam, double val){
     mesh->info.ls       = val;
     break;
   default :
-    fprintf(stdout,"  ## Error: unknown type of parameter\n");
+    fprintf(stderr,"  ## Error: unknown type of parameter\n");
     return(0);
   }
   return(1);
@@ -954,14 +953,14 @@ int MMGS_Set_localParameter(MMG5_pMesh mesh,MMG5_pSol sol, int typ, int ref,
   int k;
 
   if ( !mesh->info.npar ) {
-    fprintf(stdout,"  ## Error: You must set the number of local parameters");
-    fprintf(stdout," with the MMGS_Set_iparameters function before setting");
-    fprintf(stdout," values in local parameters structure. \n");
+    fprintf(stderr,"  ## Error: You must set the number of local parameters");
+    fprintf(stderr," with the MMGS_Set_iparameters function before setting");
+    fprintf(stderr," values in local parameters structure. \n");
     return(0);
   }
   if ( mesh->info.npari > mesh->info.npar ) {
-    fprintf(stdout,"  ## Error: unable to set a new local parameter.\n");
-    fprintf(stdout,"    max number of local parameters: %d\n",mesh->info.npar);
+    fprintf(stderr,"  ## Error: unable to set a new local parameter.\n");
+    fprintf(stderr,"    max number of local parameters: %d\n",mesh->info.npar);
     return(0);
   }
 
@@ -988,8 +987,8 @@ int MMGS_Set_localParameter(MMG5_pMesh mesh,MMG5_pSol sol, int typ, int ref,
       }
     }
     if ( mesh->info.npari == mesh->info.npar ) {
-      fprintf(stdout,"  ## Error: unable to set a new local parameter.\n");
-      fprintf(stdout,"    max number of local parameters: %d\n",mesh->info.npar);
+      fprintf(stderr,"  ## Error: unable to set a new local parameter.\n");
+      fprintf(stderr,"    max number of local parameters: %d\n",mesh->info.npar);
       return(0);
     }
     mesh->info.par[mesh->info.npari].elt   = typ;

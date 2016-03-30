@@ -244,7 +244,7 @@ static int _MMG5_spllag(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int itdeg, 
     /* Il y a un check sur la taille des arêtes ici aussi ! */
     ier = _MMG5_split1b(mesh,met,list,ilist,ip,1,1);
     if ( ier < 0 ) {
-      fprintf(stdout,"  ## Error: unable to split.\n");
+      fprintf(stderr,"  ## Error: unable to split.\n");
       return(-1);
     }
     else if ( !ier ) {
@@ -630,7 +630,7 @@ int _MMG5_mmg3d3(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met) {
 
     /* Extension of the velocity field */
     if ( !_MMG5_velextLS(mesh,disp) ) {
-      fprintf(stdout,"  ## Problem in func. _MMG5_packLS. Exit program.\n");
+      fprintf(stderr,"  ## Problem in func. _MMG5_packLS. Exit program.\n");
       return(0);
     }
   
@@ -649,7 +649,7 @@ int _MMG5_mmg3d3(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met) {
   
       ier = _MMG5_dispmesh(mesh,disp,t,itdc);
       if ( !ier ) {
-        fprintf(stdout,"  ** Impossible motion\n");
+        fprintf(stderr,"  ** Impossible motion\n");
         return(0);
       }
     
@@ -667,14 +667,14 @@ int _MMG5_mmg3d3(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met) {
             /* Split of points */
             nspl = _MMG5_spllag(mesh,disp,met,itdc,&warn);
             if ( nspl < 0 ) {
-              fprintf(stdout,"  ## Problem in spllag. Exiting.\n");
+              fprintf(stderr,"  ## Problem in spllag. Exiting.\n");
               return(0);
             }
   
             /* Collapse of points */
             nc = _MMG5_coltetlag(mesh,met,itdc);
             if ( nc < 0 ) {
-              fprintf(stdout,"  ## Problem in coltetlag. Exiting.\n");
+              fprintf(stderr,"  ## Problem in coltetlag. Exiting.\n");
               return(0);
             }
           }
@@ -684,14 +684,14 @@ int _MMG5_mmg3d3(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met) {
            * priori ok, since there is no vertex creation or suppression) */
           ns = _MMG5_swptetlag(mesh,met,1.1,NULL,itdc);
           if ( ns < 0 ) {
-            fprintf(stdout,"  ## Problem in swaptetlag. Exiting.\n");
+            fprintf(stderr,"  ## Problem in swaptetlag. Exiting.\n");
             return(0);
           }
       
           /* Relocate vertices of tetra which have been distorted in the displacement process */
           nm = _MMG5_movtetlag(mesh,met,itdc);
           if ( nm < 0 ) {
-            fprintf(stdout,"  ## Problem in movtetlag. Exiting.\n");
+            fprintf(stderr,"  ## Problem in movtetlag. Exiting.\n");
             return(0);
           }
   
