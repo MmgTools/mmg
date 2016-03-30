@@ -323,7 +323,7 @@ int _MMG3D_simbulgept(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int ip) {
  * 1 for special storage.
  * \return -1 if lack of memory, 0 if we don't split the edge, 1 if success.
  *
- * Split edge \f$list[0]%6\f$, whose shell list is passed, introducing point \a
+ * Split edge \f$list[0]\%6\f$, whose shell list is passed, introducing point \a
  * ip Beware : shell has to be enumerated in ONLY ONE TRAVEL (always same
  * sense).
  *

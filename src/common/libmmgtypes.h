@@ -216,7 +216,7 @@ typedef MMG5_xTetra * MMG5_pxTetra;
 /**
  * \struct MMG5_Prism
  * \brief Structure to store prsim of a MMG mesh.
- * \wqrning prisms are not modified
+ * \warning prisms are not modified
  */
 typedef struct {
   int      v[6]; /*!< Vertices of the prism */

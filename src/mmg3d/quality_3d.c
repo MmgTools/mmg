@@ -367,7 +367,7 @@ int _MMG3D_prilen(MMG5_pMesh mesh, MMG5_pSol met, char metRidTyp) {
       nq = pt->v[i1];
 
       if(!_MMG5_hashEdge(mesh,&hash,np,nq,0)){
-        fprintf(stdout,"%s:%d: Error: function _MMG5_hashEdge return 0\n",
+        fprintf(stderr,"%s:%d: Error: function _MMG5_hashEdge return 0\n",
                 __FILE__,__LINE__);
         exit(EXIT_FAILURE);
       }
@@ -481,7 +481,7 @@ int _MMG3D_inqua(MMG5_pMesh mesh,MMG5_pSol met) {
     }
     ok++;
     if ( _MMG5_orvol(mesh->point,pt->v) < 0.0 ) {
-      fprintf(stdout,"dans quality vol negatif\n");
+      fprintf(stdout," ## Warning: negative volume\n");
     }
     rap = _MMG5_ALPHAD * pt->qual;
     if ( rap < rapmin ) {
@@ -509,7 +509,7 @@ int _MMG3D_inqua(MMG5_pMesh mesh,MMG5_pSol met) {
 #endif
   if ( abs(mesh->info.imprim) < 3 ){
     if (rapmin == 0){
-      fprintf(stdout,"  ## WARNING: TOO BAD QUALITY FOR THE WORST ELEMENT\n");
+      fprintf(stderr,"  ## ERROR: TOO BAD QUALITY FOR THE WORST ELEMENT\n");
       return(0);
     }
     return(1);
@@ -527,7 +527,7 @@ int _MMG3D_inqua(MMG5_pMesh mesh,MMG5_pSol met) {
     }
   }
   if (rapmin == 0){
-    fprintf(stdout,"  ## WARNING: TOO BAD QUALITY FOR THE WORST ELEMENT\n");
+    fprintf(stderr,"  ## ERROR: TOO BAD QUALITY FOR THE WORST ELEMENT\n");
     return(0);
   }
   return(1);
@@ -598,7 +598,7 @@ int _MMG3D_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
 #endif
   if ( abs(mesh->info.imprim) < 3 ){
     if (rapmin == 0){
-      fprintf(stdout,"  ## WARNING: TOO BAD QUALITY FOR THE WORST ELEMENT\n");
+      fprintf(stderr,"  ## ERROR: TOO BAD QUALITY FOR THE WORST ELEMENT\n");
       return(0);
     }
     return(1);
@@ -616,7 +616,7 @@ int _MMG3D_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
     }
   }
   if (rapmin == 0){
-    fprintf(stdout,"  ## WARNING: TOO BAD QUALITY FOR THE WORST ELEMENT\n");
+    fprintf(stderr,"  ## ERROR: TOO BAD QUALITY FOR THE WORST ELEMENT\n");
     return(0);
   }
   return(1);

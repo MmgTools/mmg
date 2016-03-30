@@ -256,7 +256,7 @@
 ! /**
 !  * \struct MMG5_Prism
 !  * \brief Structure to store prsim of a MMG mesh.
-!  * \wqrning prisms are not modified
+!  * \warning prisms are not modified
 !  */
 
 ! typedef struct {

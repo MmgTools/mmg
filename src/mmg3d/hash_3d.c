@@ -192,7 +192,7 @@ int MMG3D_hashTetra(MMG5_pMesh mesh, int pack) {
 
   /* memory alloc */
   _MMG5_ADD_MEM(mesh,(4*mesh->nemax+5)*sizeof(int),"adjacency table",
-                printf("  Exit program.\n");
+                fprintf(stderr,"  Exit program.\n");
                 exit(EXIT_FAILURE));
   _MMG5_SAFE_CALLOC(mesh->adja,4*mesh->nemax+5,int);
   _MMG5_SAFE_CALLOC(hcode,mesh->ne+5,int);
@@ -795,7 +795,7 @@ void _MMG5_hEdge(MMG5_pMesh mesh,int a,int b,int ref,char tag) {
         fprintf(stdout,"  ## Memory alloc problem (edge): %d\n",mesh->htab.max);
       _MMG5_TAB_RECALLOC(mesh,mesh->htab.geom,mesh->htab.max,0.2,MMG5_hgeom,
                          "larger htab table",
-                         printf("  Exit program.\n");
+                         fprintf(stderr,"  Exit program.\n");
                          exit(EXIT_FAILURE));
       for (j=mesh->htab.nxt; j<mesh->htab.max; j++)  mesh->htab.geom[j].nxt = j+1;
     }
@@ -1194,7 +1194,7 @@ int _MMG5_bdrySet(MMG5_pMesh mesh) {
   mesh->xtmax  = mesh->ntmax + 2*na;
 
   _MMG5_ADD_MEM(mesh,(mesh->xtmax+1)*sizeof(MMG5_xTetra),"boundary tetrahedra",
-                printf("  Exit program.\n");
+                fprintf(stderr,"  Exit program.\n");
                 exit(EXIT_FAILURE));
   _MMG5_SAFE_CALLOC(mesh->xtetra,mesh->xtmax+1,MMG5_xTetra);
 
@@ -1218,7 +1218,7 @@ int _MMG5_bdrySet(MMG5_pMesh mesh) {
             _MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
                                "larger xtetra table",
                                mesh->xt--;
-                               printf("  Exit program.\n");
+                               fprintf(stderr,"  Exit program.\n");
                                exit(EXIT_FAILURE));
           }
           pt->xt = mesh->xt;
