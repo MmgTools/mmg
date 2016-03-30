@@ -61,6 +61,12 @@ int MMG2_colpoi(MMG5_pMesh mesh, MMG5_pSol sol,int iel,int iar,int ia,int ib,dou
       free(list);
       return(0);
     }
+    /*check pia-pib edge exist otherwise the collapse is forbidden (ex: naca trailing edge)*/
+    if(!pt->edg[iar]) {
+      free(list);
+      return(0);
+    }
+
     /*check geom*/
     cbound = 178.*M_PI/180.;
     nbdry = 0;
@@ -93,7 +99,10 @@ int MMG2_colpoi(MMG5_pMesh mesh, MMG5_pSol sol,int iel,int iar,int ia,int ib,dou
       }
       ref = pt1->ref;
     }
-    if(nbdry!=2) return(0);
+    if(nbdry!=2) {
+      _MMG5_SAFE_FREE(list);
+      return(0);
+    }
     //assert(nbdry==2); //sinon non manifold
     //calcul de l'angle forme par les 3 points
     ppa1  = &mesh->point[ibdry[0]];
