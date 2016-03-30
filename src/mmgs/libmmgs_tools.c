@@ -37,22 +37,28 @@
 
 void MMGS_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
   if ( met->size < 6 ) {
-    _MMG5_calelt  = _MMG5_caltri_iso;
-    _MMG5_defsiz  = _MMGS_defsiz_iso;
-    gradsiz = gradsiz_iso;
+    _MMG5_calelt      = _MMG5_caltri_iso;
     _MMG5_lenSurfEdg  = _MMG5_lenSurfEdg_iso;
-    intmet  = intmet_iso;
-    movintpt= movintpt_iso;
-    movridpt= movridpt_iso;
+    _MMG5_defsiz      = _MMGS_defsiz_iso;
+    gradsiz           = gradsiz_iso;
+    intmet            = intmet_iso;
+    movintpt          = movintpt_iso;
+    movridpt          = movridpt_iso;
   }
   else {
-    _MMG5_calelt  = _MMG5_caltri_ani;
+    if ( !met->m ) {
+      _MMG5_calelt     = _MMG5_caltri_iso;
+      _MMG5_lenSurfEdg = _MMG5_lenSurfEdg_iso;
+    }
+    else {
+      _MMG5_calelt     = _MMG5_caltri_ani;
+      _MMG5_lenSurfEdg = _MMG5_lenSurfEdg_ani;
+    }
     _MMG5_defsiz  = _MMGS_defsiz_ani;
-    gradsiz = gradsiz_ani;
-    _MMG5_lenSurfEdg  = _MMG5_lenSurfEdg_ani;
-    intmet  = intmet_ani;
-    movintpt= movintpt_ani;
-    movridpt= movridpt_ani;
+    gradsiz       = gradsiz_ani;
+    intmet        = intmet_ani;
+    movintpt      = movintpt_ani;
+    movridpt      = movridpt_ani;
   }
 }
 
@@ -385,7 +391,7 @@ int MMGS_Get_adjaVerticesFast(MMG5_pMesh mesh, int ip,int start, int lispoi[MMGS
   nbpoi = 0;
   do {
     if ( nbpoi == MMGS_LMAX ) {
-      fprintf(stdout,"  ## Warning: unable to compute adjacent vertices of the"
+      fprintf(stderr,"  ## Warning: unable to compute adjacent vertices of the"
               " vertex %d:\nthe ball of point contain too many elements.\n",ip);
       return(0);
     }
@@ -405,7 +411,7 @@ int MMGS_Get_adjaVerticesFast(MMG5_pMesh mesh, int ip,int start, int lispoi[MMGS
 
   /* store the last point of the boundary triangle */
   if ( nbpoi == MMGS_LMAX ) {
-    fprintf(stdout,"  ## Warning: unable to compute adjacent vertices of the"
+    fprintf(stderr,"  ## Warning: unable to compute adjacent vertices of the"
             " vertex %d:\nthe ball of point contain too many elements.\n",ip);
     return(0);
   }
@@ -423,7 +429,7 @@ int MMGS_Get_adjaVerticesFast(MMG5_pMesh mesh, int ip,int start, int lispoi[MMGS
     if ( k == 0 )  break;
 
     if ( nbpoi == MMGS_LMAX ) {
-      fprintf(stdout,"  ## Warning: unable to compute adjacent vertices of the"
+      fprintf(stderr,"  ## Warning: unable to compute adjacent vertices of the"
               " vertex %d:\nthe ball of point contain too many elements.\n",ip);
       return(0);
     }

@@ -244,7 +244,7 @@ int _MMG5_intersecmet22(MMG5_pMesh mesh, double *m,double *n,double *mr) {
   /* Compute imn = M^{-1}N */
   det = m[0]*m[2] - m[1]*m[1];
   if ( fabs(det) < _MMG5_EPS*_MMG5_EPS ) {
-    printf("  ## Function intersecmet : null metric det : %E \n",det);
+    fprintf(stderr,"  ## Function intersecmet : null metric det : %E \n",det);
     return(0);
   }
   det = 1.0 / det;
@@ -259,7 +259,7 @@ int _MMG5_intersecmet22(MMG5_pMesh mesh, double *m,double *n,double *mr) {
 
   lambda[0] = 0.5 * (trimn - sqDelta);
   if ( lambda[0] < 0.0 ) {
-    printf(" ## Eigenvalues : %f \n",lambda[0]);
+    fprintf(stderr," ## Eigenvalues : %f \n",lambda[0]);
     return(0);
   }
 
@@ -523,12 +523,9 @@ int _MMG5_mmgIntextmet(MMG5_pMesh mesh,MMG5_pSol met,int np,double me[6],
     metan[1] = mrot[1];
     metan[2] = mrot[3];
 
-    /* printf("metsurf %e %e %e\n",mtan[0],mtan[1],mtan[2]); */
-    /* printf("metphys %e %e %e\n",metan[0],metan[1],metan[2]); */
-
     /* Intersection of metrics in the tangent plane */
     if ( !_MMG5_intersecmet22(mesh,mtan,metan,mr) ) {
-      fprintf(stdout,"WARNING IMPOSSIBLE INTERSECTION : SURFACIC METRIC SKIPPED \n");
+      fprintf(stderr,"WARNING IMPOSSIBLE INTERSECTION : SURFACIC METRIC SKIPPED \n");
       m[0] = me[0];
       m[1] = me[1];
       m[2] = me[2];
@@ -564,10 +561,10 @@ int _MMG5_mmgIntextmet(MMG5_pMesh mesh,MMG5_pSol met,int np,double me[6],
 
     for (i=0; i<3; i++) {
       if(lambda[i]<=0) {
-        printf("%s:%d:Error: wrong metric at point %d -- eigenvalues :"
+        fprintf(stderr,"%s:%d:Error: wrong metric at point %d -- eigenvalues :"
                " %e %e %e\n",__FILE__,__LINE__,
                np,lambda[0],lambda[1],lambda[2]);
-        printf("  ## Surfacic metric skipped. \n");
+        fprintf(stderr,"  ## Surfacic metric skipped. \n");
         m[0] = me[0];
         m[1] = me[1];
         m[2] = me[2];

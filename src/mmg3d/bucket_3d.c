@@ -366,7 +366,8 @@ int _MMG5_delBucket(MMG5_pMesh mesh,_MMG5_pBucket bucket,int ip) {
         bucket->link[ip1] = bucket->link[ip];
         bucket->link[ip] = 0;
       } else {
-        printf("point non trouve %d %c -- %d\n",ip,mesh->point[ip].tag,ic);
+        printf("  ## Warning: Vertex not found %d %c -- %d\n",
+               ip,mesh->point[ip].tag,ic);
       }
     }
   }

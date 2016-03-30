@@ -50,10 +50,7 @@ inline double _MMG5_orcal(MMG5_pMesh mesh,MMG5_pSol met,int iel) {
 
   pt = &mesh->tetra[iel];
 
-  if ( met->m )
-    return(_MMG5_caltet(mesh,met,pt));
-  else // with -A option we are in aniso but without metric.
-    return(_MMG5_caltet_iso(mesh,met,pt));
+  return(_MMG5_caltet(mesh,met,pt));
 }
 
 /**
@@ -327,23 +324,6 @@ inline double _MMG5_caltet33_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt) {
   return(cal);
 }
 
-/**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the meric structure.
- * \param iel index of element.
- * \return The oriented quality of element \a iel or 0.0 if \a iel is inverted.
- *
- * Compute tetra oriented quality of \a iel in the LES quality measure.
- *
- */
-inline double _MMG3D_orcalLES(MMG5_pMesh mesh,MMG5_pSol met,int iel) {
-  MMG5_pTetra     pt;
-
-  pt = &mesh->tetra[iel];
-
-  return(_MMG3D_caltetLES_iso(mesh,met,pt));
-}
-
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -463,15 +443,11 @@ int _MMG3D_prilen(MMG5_pMesh mesh, MMG5_pSol met, char metRidTyp) {
       ier = _MMG5_hashPop(&hash,np,nq);
       if( ier ) {
         ned ++;
-        if ( met->m ) {
-          if ( (!metRidTyp) && met->size>1 ) {
-            len = _MMG5_lenedg33_ani(mesh,met,ia,pt);
-          }
-          else
-            len = _MMG5_lenedg(mesh,met,ia,pt);
+        if ( (!metRidTyp) && met->size==6 && met->m ) {
+          len = _MMG5_lenedg33_ani(mesh,met,ia,pt);
         }
-        else // -A option
-          len = _MMG5_lenedg_iso(mesh,met,ia,pt);
+        else
+          len = _MMG5_lenedg(mesh,met,ia,pt);
 
         assert( len!=0 );
         avlen += len;
@@ -511,42 +487,27 @@ int _MMG3D_prilen(MMG5_pMesh mesh, MMG5_pSol met, char metRidTyp) {
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
- * \param LESqual 1 if we compute the quality in the LES measure, 0 otherwise.
- *
  * \return 0 if the worst element has a nul quality, 1 otherwise.
  *
  * Print histogram of mesh qualities for classic storage of metric at ridges.
  *
  */
-int _MMG3D_inqua(MMG5_pMesh mesh,MMG5_pSol met, int LESqual ) {
+int _MMG3D_inqua(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTetra    pt;
-  double         rap,rapmin,rapmax,rapavg,med,good;
-  int            i,k,iel,ok,ir,imax,nex,his[5];
+  double   rap,rapmin,rapmax,rapavg,med,good;
+  int      i,k,iel,ok,ir,imax,nex,his[5];
 
   /*compute tet quality*/
-  if ( LESqual ) {
-    for (k=1; k<=mesh->ne; k++) {
-      pt = &mesh->tetra[k];
-      if( !MG_EOK(pt) )   continue;
+  for (k=1; k<=mesh->ne; k++) {
+    pt = &mesh->tetra[k];
+     if( !MG_EOK(pt) )   continue;
 
-      pt->qual = _MMG3D_caltetLES_iso(mesh,met,pt);
-    }
-  }
-  else {
-    for (k=1; k<=mesh->ne; k++) {
-      pt = &mesh->tetra[k];
-      if( !MG_EOK(pt) )   continue;
+     if ( met->size == 6 && met->m ) {
+       pt->qual = _MMG5_caltet33_ani(mesh,met,pt);
+     }
+     else
+       pt->qual = _MMG5_orcal(mesh,met,k);
 
-      if ( met->m ) {
-        if ( met->size == 6) {
-          pt->qual = _MMG5_caltet33_ani(mesh,met,pt);
-        }
-        else
-          pt->qual = _MMG5_orcal(mesh,met,k);
-      }
-      else // -A option
-        pt->qual = _MMG5_caltet_iso(mesh,met,pt);
-    }
   }
   if ( abs(mesh->info.imprim) <= 0 ) return(1);
 
@@ -583,7 +544,7 @@ int _MMG3D_inqua(MMG5_pMesh mesh,MMG5_pSol met, int LESqual ) {
   }
 
   fprintf(stdout,"\n  -- MESH QUALITY");
-  if ( LESqual )
+  if ( mesh->info.optimLES )
     fprintf(stdout," (LES)");
   fprintf(stdout,"  %d\n",mesh->ne - nex);
 

@@ -363,7 +363,7 @@ int _MMG5_movbdyregpt_iso(MMG5_pMesh mesh, MMG5_pSol met,int *listv,
   _MMG5_tet2tri(mesh,iel,iface,&tt);
 
   if(!_MMG5_bezierCP(mesh,&tt,&b,MG_GET(pxt->ori,iface))){
-    fprintf(stdout,"%s:%d: Error: function _MMG5_bezierCP return 0\n",
+    fprintf(stderr,"%s:%d: Error: function _MMG5_bezierCP return 0\n",
             __FILE__,__LINE__);
     exit(EXIT_FAILURE);
   }
@@ -429,7 +429,7 @@ int _MMG5_movbdyregpt_iso(MMG5_pMesh mesh, MMG5_pSol met,int *listv,
     }
   }
   if(!_MMG3D_bezierInt(&b,uv,o,no,to)){
-    fprintf(stdout,"%s:%d: Error: function _MMG3D_bezierInt return 0\n",
+    fprintf(stderr,"%s:%d: Error: function _MMG3D_bezierInt return 0\n",
             __FILE__,__LINE__);
     exit(EXIT_FAILURE);
   }

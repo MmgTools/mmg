@@ -185,14 +185,10 @@ int _MMG5_chkswpgen(MMG5_pMesh mesh,MMG5_pSol met,int start,int ia,
       pt0->v[_MMG5_iare[i][0]] = np;
 
 
-      if ( met->m ) {
-        if ( typchk==1 && met->size > 1 )
-          caltmp = _MMG5_caltet33_ani(mesh,met,pt0);
-        else
-          caltmp = _MMG5_orcal(mesh,met,0);
-      }
-      else // - A option
-        caltmp = _MMG5_caltet_iso(mesh,met, pt0);
+      if ( typchk==1 && met->size > 1 && met->m )
+        caltmp = _MMG5_caltet33_ani(mesh,met,pt0);
+      else
+        caltmp = _MMG5_orcal(mesh,met,0);
 
       calnew = MG_MIN(calnew,caltmp);
 
@@ -200,14 +196,10 @@ int _MMG5_chkswpgen(MMG5_pMesh mesh,MMG5_pSol met,int start,int ia,
       memcpy(pt0,pt,sizeof(MMG5_Tetra));
       pt0->v[_MMG5_iare[i][1]] = np;
 
-      if ( met->m ) {
-        if ( typchk==1 && met->size > 1 )
-          caltmp = _MMG5_caltet33_ani(mesh,met,pt0);
-        else
-          caltmp = _MMG5_orcal(mesh,met,0);
-      }
-      else // - A option
-        caltmp = _MMG5_caltet_iso(mesh,met, pt0);
+      if ( typchk==1 && met->size > 1 && met->m )
+        caltmp = _MMG5_caltet33_ani(mesh,met,pt0);
+      else
+        caltmp = _MMG5_orcal(mesh,met,0);
 
       calnew = MG_MIN(calnew,caltmp);
 
@@ -262,14 +254,14 @@ int _MMG5_swpgen(MMG5_pMesh mesh,MMG5_pSol met,int nconf,int ilist,int *list,
   if(!np){
     if ( bucket ) {
       _MMG5_POINT_AND_BUCKET_REALLOC(mesh,met,np,mesh->gap,
-                                     printf("  ## Error: unable to allocate a new point\n");
+                                     fprintf(stderr,"  ## Error: unable to allocate a new point\n");
                                      _MMG5_INCREASE_MEM_MESSAGE();
                                      return(-1)
                                      ,m,0);
     }
     else {
       _MMG5_POINT_REALLOC(mesh,met,np,mesh->gap,
-                          printf("  ## Error: unable to allocate a new point\n");
+                          fprintf(stderr,"  ## Error: unable to allocate a new point\n");
                           _MMG5_INCREASE_MEM_MESSAGE();
                           return(-1)
                           ,m,0);

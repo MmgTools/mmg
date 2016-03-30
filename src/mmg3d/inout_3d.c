@@ -85,7 +85,7 @@ static double _MMG5_swapd(double sbin)
   {
     p_out[i] = p_in[7-i];
   }
-  //printf("CONVERTION DOUBLE\n");
+
   return(out);
 }
 
@@ -160,7 +160,7 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,const char *filename) {
       } else if(!strncmp(chaine,"Dimension",strlen("Dimension"))) {
         fscanf(inm,"%d",&mesh->dim);
         if(mesh->dim!=3) {
-          fprintf(stdout,"BAD DIMENSION : %d\n",mesh->dim);
+          fprintf(stderr,"BAD DIMENSION : %d\n",mesh->dim);
           return(-1);
         }
         continue;
@@ -225,7 +225,7 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,const char *filename) {
     if(mesh->ver==16777216)
       iswp=1;
     else if(mesh->ver!=1) {
-      fprintf(stdout,"BAD FILE ENCODING\n");
+      fprintf(stderr,"BAD FILE ENCODING\n");
     }
     fread(&mesh->ver,sw,1,inm);
     if(iswp) mesh->ver = _MMG5_swapbin(mesh->ver);
@@ -239,8 +239,8 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,const char *filename) {
         if(iswp) bdim=_MMG5_swapbin(bdim);
         mesh->dim = bdim;
         if(bdim!=3) {
-          fprintf(stdout,"BAD MESH DIMENSION : %d\n",mesh->dim);
-          fprintf(stdout," Exit program.\n");
+          fprintf(stderr,"BAD MESH DIMENSION : %d\n",mesh->dim);
+          fprintf(stderr," Exit program.\n");
           return(-1);
         }
         continue;
@@ -362,10 +362,9 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,const char *filename) {
         fseek(inm,bpos,SEEK_SET);
         continue;
       } else {
-        //printf("on traite ? %d\n",binch);
         fread(&bpos,sw,1,inm); //NulPos
         if(iswp) bpos=_MMG5_swapbin(bpos);
-        //printf("on avance... Nulpos %d\n",bpos);
+
         rewind(inm);
         fseek(inm,bpos,SEEK_SET);
       }
@@ -373,9 +372,9 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,const char *filename) {
   }
 
   if ( !mesh->npi || !mesh->nei ) {
-    fprintf(stdout,"  ** MISSING DATA.\n");
-    fprintf(stdout," Check that your mesh contains points and tetrahedra.\n");
-    fprintf(stdout," Exit program.\n");
+    fprintf(stderr,"  ** MISSING DATA.\n");
+    fprintf(stderr," Check that your mesh contains points and tetrahedra.\n");
+    fprintf(stderr," Exit program.\n");
     return(-1);
   }
   /* memory allocation */
@@ -498,7 +497,7 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,const char *filename) {
 
       else if ( mesh->nt < nt ) {
         _MMG5_ADD_MEM(mesh,(mesh->nt-nt)*sizeof(MMG5_Tria),"triangles",
-                      printf("  Exit program.\n");
+                      fprintf(stderr,"  Exit program.\n");
                       exit(EXIT_FAILURE));
         _MMG5_SAFE_RECALLOC(mesh->tria,nt+1,(mesh->nt+1),MMG5_Tria,"triangles");
       }
@@ -592,7 +591,7 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,const char *filename) {
         _MMG5_DEL_MEM(mesh,mesh->edge,(mesh->na+1)*sizeof(MMG5_Edge));
       else if ( mesh->na < na ) {
         _MMG5_ADD_MEM(mesh,(mesh->na-na)*sizeof(MMG5_Edge),"edges",
-                      printf("  Exit program.\n");
+                      fprintf(stderr,"  Exit program.\n");
                       exit(EXIT_FAILURE));
         _MMG5_SAFE_RECALLOC(mesh->edge,na+1,(mesh->na+1),MMG5_Edge,"edges");
       }
@@ -1463,7 +1462,7 @@ int MMG3D_loadSol(MMG5_pMesh mesh,MMG5_pSol met, const char *filename) {
       if(!strncmp(chaine,"Dimension",strlen("Dimension"))) {
         fscanf(inm,"%d",&met->dim);
         if(met->dim!=3) {
-          fprintf(stdout,"BAD SOL DIMENSION : %d\n",met->dim);
+          fprintf(stderr,"BAD SOL DIMENSION : %d\n",met->dim);
           return(-1);
         }
         continue;
@@ -1471,7 +1470,7 @@ int MMG3D_loadSol(MMG5_pMesh mesh,MMG5_pSol met, const char *filename) {
         fscanf(inm,"%d",&met->np);
         fscanf(inm,"%d",&met->type);
         if(met->type!=1) {
-          fprintf(stdout,"SEVERAL SOLUTION => IGNORED : %d\n",met->type);
+          fprintf(stderr,"SEVERAL SOLUTION => IGNORED : %d\n",met->type);
           return(-1);
         }
         fscanf(inm,"%d",&met->size);
@@ -1497,7 +1496,7 @@ int MMG3D_loadSol(MMG5_pMesh mesh,MMG5_pSol met, const char *filename) {
         fread(&met->dim,sw,1,inm);
         if(iswp) met->dim=_MMG5_swapbin(met->dim);
         if(met->dim!=3) {
-          fprintf(stdout,"BAD SOL DIMENSION : %d\n",met->dim);
+          fprintf(stderr,"BAD SOL DIMENSION : %d\n",met->dim);
           printf("  Exit program.\n");
           return(-1);
         }
@@ -1510,7 +1509,7 @@ int MMG3D_loadSol(MMG5_pMesh mesh,MMG5_pSol met, const char *filename) {
         fread(&met->type,sw,1,inm); //nb sol
         if(iswp) met->type=_MMG5_swapbin(met->type);
         if(met->type!=1) {
-          fprintf(stdout,"SEVERAL SOLUTION => IGNORED : %d\n",met->type);
+          fprintf(stderr,"SEVERAL SOLUTION => IGNORED : %d\n",met->type);
           return(-1);
         }
         fread(&met->size,sw,1,inm); //typsol
@@ -1527,7 +1526,7 @@ int MMG3D_loadSol(MMG5_pMesh mesh,MMG5_pSol met, const char *filename) {
 
   }
   if ( mesh->np != met->np ) {
-    fprintf(stdout,"  ** MISMATCHES DATA: THE NUMBER OF VERTICES IN "
+    fprintf(stderr,"  ** MISMATCHES DATA: THE NUMBER OF VERTICES IN "
             "THE MESH (%d) DIFFERS FROM THE NUMBER OF VERTICES IN "
             "THE SOLUTION (%d) \n",mesh->np,met->np);
     return(-1);
@@ -1535,7 +1534,7 @@ int MMG3D_loadSol(MMG5_pMesh mesh,MMG5_pSol met, const char *filename) {
 
   if ( mesh->info.lag == -1 ) {
     if(met->size!=1 && met->size!=3) {
-      fprintf(stdout,"  ** DATA TYPE IGNORED %d \n",met->size);
+      fprintf(stderr,"  ** DATA TYPE IGNORED %d \n",met->size);
       return(-1);
     }
     if(met->size > 1) met->size = 6;
@@ -1554,7 +1553,7 @@ int MMG3D_loadSol(MMG5_pMesh mesh,MMG5_pSol met, const char *filename) {
   met->npmax = mesh->npmax;
 
   _MMG5_ADD_MEM(mesh,(met->size*(met->npmax+1))*sizeof(double),"initial solution",
-                printf("  Exit program.\n");
+                fprintf(stderr,"  Exit program.\n");
                 exit(EXIT_FAILURE));
   _MMG5_SAFE_CALLOC(met->m,met->size*(met->npmax+1),double);
 

@@ -100,43 +100,6 @@ double _MMG5_caltri33_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt) {
     return(0.0);
 }
 
-/* /\** */
-/*  * \param mesh pointer toward the mesh structure. */
-/*  * \param met pointer toward the meric structure. */
-/*  * \param ptt pointer toward the triangle structure. */
-/*  * \return The computed quality. */
-/*  * */
-/*  * Compute the quality of the surface triangle \a ptt with respect to */
-/*  * an anisotropic metric. */
-/*  * */
-/*  * \warning commentated because seems to be non consistant on curve element */
-/*  * (quality > 1) */
-/*  * */
-/*  *\/ */
-/* inline double _MMG5_caltri_aniOLD(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt) { */
-/*   double        rap,anisurf,l[3]; */
-/*   int           ia,ib,ic; */
-
-/*   ia = ptt->v[0]; */
-/*   ib = ptt->v[1]; */
-/*   ic = ptt->v[2]; */
-
-/*   anisurf = _MMG5_surftri_ani(mesh,met,ptt); */
-
-/*   l[0] = _MMG5_lenSurfEdg_ani(mesh,met,ib,ic,( ptt->tag[0] & MG_GEO )); */
-/*   l[1] = _MMG5_lenSurfEdg_ani(mesh,met,ia,ic,( ptt->tag[1] & MG_GEO )); */
-/*   l[2] = _MMG5_lenSurfEdg_ani(mesh,met,ia,ib,( ptt->tag[2] & MG_GEO )); */
-
-/*   rap = l[0]*l[0] + l[1]*l[1] + l[2]*l[2]; */
-
-/*   printf("anisurf -- l: %e -- %e %e %e \n" ,anisurf, l[0],l[1],l[2]); */
-
-/*   if ( rap < _MMG5_EPSD ) return(0.0); */
-
-/*   /\* quality = 2*area/length *\/ */
-/*   return (anisurf / rap); */
-/* } */
-
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the meric structure.
@@ -298,9 +261,6 @@ void _MMG5_displayHisto(MMG5_pMesh mesh, int ned, double *avlen,
           lmax,amax,bmax);
   if ( abs(mesh->info.imprim) < 3 ) return;
 
-  /* if ( hl[3]+hl[4]+hl[5] ) */
-  /*   fprintf(stdout,"   %6.2f < L <%5.2f  %8d   %5.2f %%  \n", */
-  /*           bd[3],bd[6],hl[3]+hl[4]+hl[5],100.*(hl[3]+hl[4]+hl[5])/(double)ned); */
   if ( hl[2]+hl[3]+hl[4] )
     fprintf(stdout,"   %6.2f < L <%5.2f  %8d   %5.2f %%  \n",
             bd[2],bd[5],hl[2]+hl[3]+hl[4],100.*(hl[2]+hl[3]+hl[4])/(double)ned);

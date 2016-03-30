@@ -79,7 +79,7 @@ extern "C" {
       gap = (int)((mesh->memMax-mesh->memCur)/                          \
                   (sizeof(MMG5_Point)+sol->size*sizeof(int)));          \
       if(gap < 1) {                                                     \
-        fprintf(stdout,"  ## Error:");                                  \
+        fprintf(stdout,"  ## Warning:");                                \
         fprintf(stdout," unable to allocate %s.\n","larger point/bucket table"); \
         fprintf(stdout,"  ## Check the mesh size or ");                 \
         fprintf(stdout,"increase maximal authorized memory with the -m option.\n"); \
@@ -316,8 +316,8 @@ int _MMG5_dichodisp(MMG5_pMesh,double *);
 int _MMG5_lapantilap(MMG5_pMesh,double *);
 int _MMG5_ppgdisp(MMG5_pMesh,double *);
 int _MMG5_denoisbdy(MMG5_pMesh);
-int  _MMG3D_inqua(MMG5_pMesh mesh,MMG5_pSol met,int);
-int  _MMG3D_outqua(MMG5_pMesh mesh,MMG5_pSol met,int);
+int  _MMG3D_inqua(MMG5_pMesh mesh,MMG5_pSol met);
+int  _MMG3D_outqua(MMG5_pMesh mesh,MMG5_pSol met);
 int  _MMG3D_prilen(MMG5_pMesh mesh,MMG5_pSol met,char);
 void _MMG5_defaultValues(MMG5_pMesh);
 int  _MMG5_intridmet(MMG5_pMesh,MMG5_pSol,int,int,double,double*,double*);

@@ -412,7 +412,7 @@ long long _MMG5_memSize (void) {
   if (mem == status.ullTotalPhys) return(mem);
   else return(LLONG_MAX);
 #else
-  printf("  ## WARNING: UNKNOWN SYSTEM, RECOVER OF MAXIMAL MEMORY NOT AVAILABLE.\n");
+  fprintf(stderr,"  ## WARNING: UNKNOWN SYSTEM, RECOVER OF MAXIMAL MEMORY NOT AVAILABLE.\n");
   return(0);
 #endif
 
@@ -429,10 +429,10 @@ long _MMG5_safeLL2LCast(long long val)
   tmp_l  = (long)(val);
 
   if ( (long long)(tmp_l) != val ) {
-        fprintf(stdout,"  ## Error:");
-        fprintf(stdout," unable to cast value.n");
-		exit(EXIT_FAILURE);
-		}
+        fprintf(stderr,"  ## Error:");
+        fprintf(stderr," unable to cast value.n");
+        exit(EXIT_FAILURE);
+  }
   return(tmp_l);
 }
 

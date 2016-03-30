@@ -67,7 +67,7 @@ int _MMG5_boundingBox(MMG5_pMesh mesh) {
     if ( dd > mesh->info.delta )  mesh->info.delta = dd;
   }
   if ( mesh->info.delta < _MMG5_EPSD ) {
-    fprintf(stdout,"  ## Unable to scale mesh.\n");
+    fprintf(stderr,"  ## Unable to scale mesh.\n");
     return(0);
   }
 
@@ -141,9 +141,9 @@ int _MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met) {
 
     if ( mesh->info.hmax < mesh->info.hmin ) {
       if ( sethmin && sethmax ) {
-        fprintf(stdout,"  ## Error: mismatch parameters:"
+        fprintf(stderr,"  ## Error: mismatch parameters:"
                 " minimal mesh size larger than maximal one.\n");
-        fprintf(stdout,"  Exit program.\n");
+        fprintf(stderr,"  Exit program.\n");
         exit(EXIT_FAILURE);
       }
       else if ( sethmin )
@@ -163,7 +163,7 @@ int _MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met) {
         met->m[k] *= dd;
         /* Check the metric */
         if ( (!mesh->info.iso) && met->m[k] <= 0) {
-          printf("  ## ERROR: WRONG METRIC AT POINT %d -- \n",k);
+          fprintf(stderr,"  ## ERROR: WRONG METRIC AT POINT %d -- \n",k);
           return(0);
         }
       }
@@ -212,16 +212,16 @@ int _MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met) {
 
         /* Check the input metric */
         if ( !_MMG5_eigenv(1,m,lambda,v) ) {
-          printf("  ## ERROR: WRONG METRIC AT POINT %d -- \n",k);
+          fprintf(stderr,"  ## ERROR: WRONG METRIC AT POINT %d -- \n",k);
           return(0);
         }
         for (i=0; i<3; i++) {
           if(lambda[i]<=0) {
-            printf("  ## ERROR: WRONG METRIC AT POINT %d -- eigenvalue :"
+            fprintf(stderr,"  ## ERROR: WRONG METRIC AT POINT %d -- eigenvalue :"
                    " %e %e %e -- det %e\n",k,lambda[0],lambda[1],lambda[2],
                    m[0]*(m[3]*m[5]-m[4]*m[4])-m[1]*(m[1]*m[5]-m[2]*m[4])+
                    m[2]*(m[1]*m[4]-m[2]*m[3]));
-            printf("WRONG METRIC AT POINT %d -- metric %e %e %e %e %e %e\n",
+            fprintf(stderr,"WRONG METRIC AT POINT %d -- metric %e %e %e %e %e %e\n",
                    k,m[0],m[1],m[2],m[3],m[4],m[5]);
             return(0);
           }
