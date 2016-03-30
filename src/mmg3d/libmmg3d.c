@@ -764,53 +764,7 @@ int MMG3D_mmg3dmov(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp) {
     _MMG5_RETURN_AND_PACK(mesh,met,disp,MMG5_LOWFAILURE);
   }
 
-/*   /\* ******************* Part to skip in lag mode ? *************************** *\/ */
-/* #ifdef PATTERN */
-/*   if ( !_MMG5_mmg3d1_pattern(mesh,met) ) { */
-/*     if ( !(mesh->adja) && !MMG3D_hashTetra(mesh,1) ) { */
-/*       fprintf(stdout,"  ## Hashing problem. Invalid mesh.\n"); */
-/*       disp->npi = disp->np; */
-/*       _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE); */
-/*     } */
-/*     if ( !_MMG5_unscaleMesh(mesh,met) ) { */
-/*       disp->npi = disp->np; */
-/*       _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE); */
-/*     } */
-/*     _MMG5_RETURN_AND_PACK(mesh,met,disp,MMG5_LOWFAILURE); */
-/*   } */
-/* #else */
-/*   /\** Patterns in iso mode, delauney otherwise *\/ */
-/*   if ( !mesh->info.iso ) { */
-/*     if ( !_MMG5_mmg3d1_delone(mesh,met) ) { */
-/*       if ( !(mesh->adja) && !MMG3D_hashTetra(mesh,1) ) { */
-/*         fprintf(stdout,"  ## Hashing problem. Invalid mesh.\n"); */
-/*         disp->npi = disp->np; */
-/*         _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE); */
-/*       } */
-/*       if ( !_MMG5_unscaleMesh(mesh,met) ) { */
-/*         disp->npi = disp->np; */
-/*         _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE); */
-/*       } */
-/*       _MMG5_RETURN_AND_PACK(mesh,met,disp,MMG5_LOWFAILURE); */
-/*     } */
-/*   } */
-/*   else { */
-/*     if ( !_MMG5_mmg3d1_pattern(mesh,met) ) { */
-/*       if ( !(mesh->adja) && !MMG3D_hashTetra(mesh,1) ) { */
-/*         fprintf(stdout,"  ## Hashing problem. Invalid mesh.\n"); */
-/*         disp->npi = disp->np; */
-/*         _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE); */
-/*       } */
-/*       if ( !_MMG5_unscaleMesh(mesh,met) ) { */
-/*         disp->npi = disp->np; */
-/*         _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE); */
-/*       } */
-/*       _MMG5_RETURN_AND_PACK(mesh,met,disp,MMG5_LOWFAILURE); */
-/*     } */
-/*   } */
-/* #endif */
-
-/* *************************************** End of part to skip in lag mode ? *************************** */
+/* ******************* Add mesh improvement ? *************************** */
 
   chrono(OFF,&(ctim[3]));
   printim(ctim[3].gdif,stim);
