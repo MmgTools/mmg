@@ -231,7 +231,7 @@ int _MMGS_packMesh(MMG5_pMesh mesh,MMG5_pSol met) {
 
   /* to could save the mesh, the adjacency have to be correct */
   if ( mesh->info.ddebug && (!_MMG5_chkmsh(mesh,1,1) ) ) {
-    fprintf(stdout,"  ##  Problem. Invalid mesh.\n");
+    fprintf(stderr,"  ##  Problem. Invalid mesh.\n");
     return(0);
   }
 
@@ -279,12 +279,12 @@ int MMGS_mmgsls(MMG5_pMesh mesh,MMG5_pSol met)
   chrono(ON,&(ctim[1]));
 
   if ( met->np && (met->np != mesh->np) ) {
-    fprintf(stdout,"  ## WARNING: WRONG SOLUTION NUMBER. IGNORED\n");
+    fprintf(stderr,"  ## WARNING: WRONG SOLUTION NUMBER. IGNORED\n");
     _MMG5_DEL_MEM(mesh,met->m,(met->size*(met->npmax+1))*sizeof(double));
     met->np = 0;
   }
   else if ( met->size!=1 ) {
-    fprintf(stdout,"  ## ERROR: WRONG DATA TYPE.\n");
+    fprintf(stderr,"  ## ERROR: WRONG DATA TYPE.\n");
     _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
   }
 
@@ -313,7 +313,7 @@ int MMGS_mmgsls(MMG5_pMesh mesh,MMG5_pSol met)
 
   /* specific meshing */
   if ( !met->np ) {
-    fprintf(stdout,"\n  ## ERROR: A VALID SOLUTION FILE IS NEEDED \n");
+    fprintf(stderr,"\n  ## ERROR: A VALID SOLUTION FILE IS NEEDED \n");
     _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
   }
   if ( !_MMGS_mmgs2(mesh,met) ) _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
@@ -338,7 +338,7 @@ int MMGS_mmgsls(MMG5_pMesh mesh,MMG5_pSol met)
 
   if ( !_MMG5_mmgs1(mesh,met) ) {
     if ( (!mesh->adja) && !_MMGS_hashTria(mesh) ) {
-      fprintf(stdout,"  ## Hashing problem. Invalid mesh.\n");
+      fprintf(stderr,"  ## Hashing problem. Invalid mesh.\n");
       _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
     }
     if ( !_MMG5_unscaleMesh(mesh,met) )  _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
@@ -400,7 +400,7 @@ int MMGS_mmgslib(MMG5_pMesh mesh,MMG5_pSol met)
   chrono(ON,&(ctim[0]));
 
   if ( mesh->info.iso ) {
-    fprintf(stdout,"  ## Error: level-set discretisation unavailable"
+    fprintf(stderr,"  ## Error: level-set discretisation unavailable"
             " (MMGS_IPARAM_iso):\n"
             "          You must call the MMGS_mmgsls function to use this option.\n");
     _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
@@ -420,7 +420,7 @@ int MMGS_mmgslib(MMG5_pMesh mesh,MMG5_pSol met)
     met->np = 0;
   }
   else if ( met->size!=1 && met->size!=6 ) {
-    fprintf(stdout,"  ## ERROR: WRONG DATA TYPE.\n");
+    fprintf(stderr,"  ## ERROR: WRONG DATA TYPE.\n");
     _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
   }
 
@@ -470,7 +470,7 @@ int MMGS_mmgslib(MMG5_pMesh mesh,MMG5_pSol met)
 
   if ( !_MMG5_mmgs1(mesh,met) ) {
     if ( (!mesh->adja) && !_MMGS_hashTria(mesh) ) {
-      fprintf(stdout,"  ## Hashing problem. Invalid mesh.\n");
+      fprintf(stderr,"  ## Hashing problem. Invalid mesh.\n");
       _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
     }
     if ( !_MMG5_unscaleMesh(mesh,met) )  _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);

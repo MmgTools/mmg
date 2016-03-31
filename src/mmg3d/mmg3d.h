@@ -79,7 +79,7 @@ extern "C" {
       gap = (int)((mesh->memMax-mesh->memCur)/                          \
                   (sizeof(MMG5_Point)+sol->size*sizeof(int)));          \
       if(gap < 1) {                                                     \
-        fprintf(stdout,"  ## Error:");                                  \
+        fprintf(stdout,"  ## Warning:");                                \
         fprintf(stdout," unable to allocate %s.\n","larger point/bucket table"); \
         fprintf(stdout,"  ## Check the mesh size or ");                 \
         fprintf(stdout,"increase maximal authorized memory with the -m option.\n"); \
@@ -185,7 +185,7 @@ static const unsigned char _MMG5_arpt[4][3] = { {0,1,2}, {0,4,3}, {1,3,5}, {2,5,
 /** \brief idir[i]: vertices of face i for a prism */
 static const unsigned char _MMG5_idir_pr[5][4] = { {0,1,2,0}, {3,5,4,3}, {0,3,4,1}, {0,2,5,3},{1,4,5,2} };
 /** \brief iarf[i]: edges of face i for a prism */
-static const unsigned char _MMG5_iarf_pr[5][4] = { {0,3,1,0}, {6,8,7,6}, {0,2,6,4,0}, {1,5,7,2} };
+static const unsigned char _MMG5_iarf_pr[5][4] = { {0,3,1,0}, {6,8,7,6}, {0,2,6,4}, {1,5,7,2} };
 
 
 typedef struct {
@@ -296,6 +296,7 @@ int  _MMG5_split4bar(MMG5_pMesh mesh,MMG5_pSol met,int k,char);
 int  _MMG3D_simbulgept(MMG5_pMesh mesh,MMG5_pSol met, int *list, int ilist,int);
 void _MMG5_nsort(int ,double *,char *);
 extern double _MMG5_orcal(MMG5_pMesh mesh,MMG5_pSol met,int iel);
+extern double _MMG3D_orcalLES(MMG5_pMesh mesh,MMG5_pSol met,int iel);
 int    _MMG5_movintpt_iso(MMG5_pMesh ,MMG5_pSol, int *, int , int);
 int    _MMG5_movintpt_ani(MMG5_pMesh ,MMG5_pSol, int *, int , int);
 int    _MMG5_movbdyregpt_iso(MMG5_pMesh, MMG5_pSol, int*, int, int*, int ,int);
@@ -375,6 +376,7 @@ void  _MMG5_Init_parameters(MMG5_pMesh mesh);
 /* iso/aniso computations */
 extern double _MMG5_caltet_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt);
 extern double _MMG5_caltet_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt);
+extern double _MMG3D_caltetLES_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt);
 double _MMG5_caltet33_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt);
 extern double _MMG5_lenedgCoor_ani(double*, double*, double*, double*);
 extern double _MMG5_lenedgCoor_iso(double*, double*, double*, double*);

@@ -174,15 +174,15 @@ static int _MMG5_hashGetFace(_MMG5_Hash *hash,int ia,int ib,int ic) {
 static
 int _MMG5_hashPopFace(_MMG5_Hash *hash,int a,int b, int c) {
   _MMG5_hedge  *ph,*php;
-  int          key,mins,maxs,sum,iph;
+  int          key,mins,maxs,sum,iph,iphp;
 
   if ( !hash->item )  return(0);
 
-  mins = MG_MIN(ia,MG_MIN(ib,ic));
-  maxs = MG_MAX(ia,MG_MAX(ib,ic));
+  mins = MG_MIN(a,MG_MIN(b,c));
+  maxs = MG_MAX(a,MG_MAX(b,c));
 
   /* compute key */
-  sum = ia + ib + ic;
+  sum = a + b + c;
   key = (_MMG5_KA*mins + _MMG5_KB*maxs) % hash->siz;
   ph  = &hash->item[key];
 
@@ -261,7 +261,7 @@ int MMG3D_hashTetra(MMG5_pMesh mesh, int pack) {
 
   /* memory alloc */
   _MMG5_ADD_MEM(mesh,(4*mesh->nemax+5)*sizeof(int),"adjacency table",
-                printf("  Exit program.\n");
+                fprintf(stderr,"  Exit program.\n");
                 exit(EXIT_FAILURE));
   _MMG5_SAFE_CALLOC(mesh->adja,4*mesh->nemax+5,int);
   _MMG5_SAFE_CALLOC(hcode,mesh->ne+5,int);
@@ -363,7 +363,7 @@ int MMG3D_hashPrism(MMG5_pMesh mesh) {
   unsigned char  i,ii,i1,i2,i3,i4;
   unsigned int   key;
 
-  if ( !mesh->nprims ) return 1;
+  if ( !mesh->nprism ) return 1;
 
   /* default */
   if ( mesh->adjapr ) {
@@ -399,10 +399,10 @@ int MMG3D_hashPrism(MMG5_pMesh mesh) {
     pp = &mesh->prism[k];
     assert ( MG_EOK(pp) );
     for (i=0; i<5; i++) {
-      i1 = _MMG5_idir[i][0];
-      i2 = _MMG5_idir[i][1];
-      i3 = _MMG5_idir[i][2];
-      i4 = _MMG5_idir[i][3];
+      i1 = _MMG5_idir_pr[i][0];
+      i2 = _MMG5_idir_pr[i][1];
+      i3 = _MMG5_idir_pr[i][2];
+      i4 = _MMG5_idir_pr[i][3];
 
       min12 = MG_MIN(pp->v[i1],pp->v[i2]);
       min34 = MG_MIN(pp->v[i3],pp->v[i4]);
@@ -432,10 +432,10 @@ int MMG3D_hashPrism(MMG5_pMesh mesh) {
     /* current element */
     k = (l-1) / 5 + 1;
     i = (l-1) % 5;
-    i1 = _MMG5_idir[i][0];
-    i2 = _MMG5_idir[i][1];
-    i3 = _MMG5_idir[i][2];
-    i4 = _MMG5_idir[i][3];
+    i1 = _MMG5_idir_pr[i][0];
+    i2 = _MMG5_idir_pr[i][1];
+    i3 = _MMG5_idir_pr[i][2];
+    i4 = _MMG5_idir_pr[i][3];
     pp = &mesh->prism[k];
 
     min12 = MG_MIN(pp->v[i1],pp->v[i2]);
@@ -457,10 +457,10 @@ int MMG3D_hashPrism(MMG5_pMesh mesh) {
     while ( ll != inival ) {
       kk = (ll-1) / 4 + 1;
       ii = (ll-1) % 4;
-      i1 = _MMG5_idir[ii][0];
-      i2 = _MMG5_idir[ii][1];
-      i3 = _MMG5_idir[ii][2];
-      i4 = _MMG5_idir[ii][4];
+      i1 = _MMG5_idir_pr[ii][0];
+      i2 = _MMG5_idir_pr[ii][1];
+      i3 = _MMG5_idir_pr[ii][2];
+      i4 = _MMG5_idir_pr[ii][3];
       pp1  = &mesh->prism[kk];
 
       sum1 = pp1->v[i1] + pp1->v[i2] + pp1->v[i3] + pp1->v[i4];
@@ -1012,7 +1012,7 @@ void _MMG5_hEdge(MMG5_pMesh mesh,int a,int b,int ref,char tag) {
         fprintf(stdout,"  ## Memory alloc problem (edge): %d\n",mesh->htab.max);
       _MMG5_TAB_RECALLOC(mesh,mesh->htab.geom,mesh->htab.max,0.2,MMG5_hgeom,
                          "larger htab table",
-                         printf("  Exit program.\n");
+                         fprintf(stderr,"  Exit program.\n");
                          exit(EXIT_FAILURE));
       for (j=mesh->htab.nxt; j<mesh->htab.max; j++)  mesh->htab.geom[j].nxt = j+1;
     }
@@ -1328,11 +1328,12 @@ int _MMG5_bdryTria(MMG5_pMesh mesh) {
 
   if ( mesh->nt ) {
     /* Hash given bdry triangles */
-    if ( ! _MMG5_hashNew(mesh,&hash,0.51*mesh->nt,1.51*mesh->nt ) return(0);
+    if ( ! _MMG5_hashNew(mesh,&hash,0.51*mesh->nt,1.51*mesh->nt) ) return(0);
     tofree=1;
     for (k=1; k<=mesh->nt; k++) {
       ptt = &mesh->tria[k];
-      if ( !_MMG5_hashFace(mesh,&hash,ptt->v[0],ptt->v[1],ptt->v[2],k) ) return(0);
+      if ( !_MMG5_hashFace(mesh,&hash,ptt->v[0],ptt->v[1],ptt->v[2],k) )
+        return(0);
     }
 
   }
@@ -1407,7 +1408,7 @@ int _MMG5_bdryTria(MMG5_pMesh mesh) {
         ib = pp->v[1+i*3];
         ic = pp->v[2+i*3];
 
-        kt = _MMG5_hashGetFace(mesh,&hash,ia,ib,ic);
+        kt = _MMG5_hashGetFace(&hash,ia,ib,ic);
         if ( kt ) {
           continue;
         }
@@ -1492,7 +1493,7 @@ int _MMG5_bdrySet(MMG5_pMesh mesh) {
   mesh->xtmax  = mesh->ntmax + 2*na;
 
   _MMG5_ADD_MEM(mesh,(mesh->xtmax+1)*sizeof(MMG5_xTetra),"boundary tetrahedra",
-                printf("  Exit program.\n");
+                fprintf(stderr,"  Exit program.\n");
                 exit(EXIT_FAILURE));
   _MMG5_SAFE_CALLOC(mesh->xtetra,mesh->xtmax+1,MMG5_xTetra);
 
@@ -1516,7 +1517,7 @@ int _MMG5_bdrySet(MMG5_pMesh mesh) {
             _MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
                                "larger xtetra table",
                                mesh->xt--;
-                               printf("  Exit program.\n");
+                               fprintf(stderr,"  Exit program.\n");
                                exit(EXIT_FAILURE));
           }
           pt->xt = mesh->xt;

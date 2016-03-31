@@ -55,9 +55,9 @@ void _MMGS_Alloc_mesh(MMG5_pMesh *mesh, MMG5_pSol *sol) {
 
   /* sol allocation */
   if ( !sol ) {
-    printf("  ## Error: an allocatable solution structure of type \"MMG5_pSol\""
+    fprintf(stderr,"  ## Error: an allocatable solution structure of type \"MMG5_pSol\""
            " is needed.\n");
-    printf("            Exit program.\n");
+    fprintf(stderr,"            Exit program.\n");
     exit(EXIT_FAILURE);
   }
 

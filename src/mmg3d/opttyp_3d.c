@@ -483,7 +483,7 @@ int MMG3D_opttyp(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket) {
     _MMG5_DEL_MEM(mesh,mesh->adja,(4*mesh->nemax+5)*sizeof(int));
     // Attention, faut-il recalculer la table d'adjacence des prisme ici?
     if ( !MMG3D_hashTetra(mesh,1) ) {
-      fprintf(stdout,"  ## Hashing problem. Exit program.\n");
+      fprintf(stderr,"  ## Hashing problem. Exit program.\n");
       return(0);
     }
   }

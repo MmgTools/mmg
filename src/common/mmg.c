@@ -135,7 +135,7 @@ int _MMG5_writeLocalParam( MMG5_pMesh mesh, FILE *out ) {
   /* Try to alloc the first node */
   ier = _MMG5_Add_inode( mesh, &bdyRefs, k );
   if ( ier < 0 ) {
-    printf("  ## Error: unable to allocate the first boundary"
+    fprintf(stderr,"  ## Error: unable to allocate the first boundary"
            " reference node.\n");
     return(0);
   }

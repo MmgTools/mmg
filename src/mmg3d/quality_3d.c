@@ -50,10 +50,7 @@ inline double _MMG5_orcal(MMG5_pMesh mesh,MMG5_pSol met,int iel) {
 
   pt = &mesh->tetra[iel];
 
-  if ( met->m )
-    return(_MMG5_caltet(mesh,met,pt));
-  else // with -A option we are in aniso but without metric.
-    return(_MMG5_caltet_iso(mesh,met,pt));
+  return(_MMG5_caltet(mesh,met,pt));
 }
 
 /**
@@ -327,6 +324,62 @@ inline double _MMG5_caltet33_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt) {
   return(cal);
 }
 
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the meric structure.
+ * \param pt pointer toward a tetrahedra.
+ * \return The isotropic quality of the tet in LES measure, 0 if fail
+ *
+ * Compute the quality of the tet pt with respect to the LES quality measure.
+ * \f$Q=\frac{V}{V_{ref}}\f$ with \f$V_{ref}=8\frac{\sqrt{3}}{27}R
+ * \sqrt{R}\f$ and R the radius of the circumscribe circle.
+ *
+ */
+inline double _MMG3D_caltetLES_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt) {
+  double    *a,*b,*c,*d,ct[12],cs[3],rad,lref,Vref,V,cal;
+  int        ia,ib,ic,id,j,l;
+
+  ia = pt->v[0];
+  ib = pt->v[1];
+  ic = pt->v[2];
+  id = pt->v[3];
+  a  = mesh->point[ia].c;
+  b  = mesh->point[ib].c;
+  c  = mesh->point[ic].c;
+  d  = mesh->point[id].c;
+
+  for (j=0,l=0; j<4; j++,l+=3) {
+    memcpy(&ct[l],mesh->point[pt->v[j]].c,3*sizeof(double));
+  }
+
+  if(!_MMG5_cenrad_iso(mesh,ct,cs,&rad)) {
+    return(cal);
+  }
+
+  if ( rad < 0 ) return(2);
+
+  /* Vref volume */
+  Vref = 8*sqrt(3)/27 * rad*sqrt(rad);
+
+  V = _MMG5_orvol(mesh->point,pt->v)/6.;
+
+  if ( V<0 ) {
+    fprintf(stdout," ## Warning: negative volume\n");
+    return(0.0);
+  }
+
+  cal =  V/Vref;
+
+  if ( cal > 1. ) {
+    fprintf(stderr," ## Warning: unexpected LES quality measure.\n");
+      return(0.0);
+  }
+
+  return(cal/_MMG5_ALPHAD);
+}
+
+
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
@@ -367,7 +420,7 @@ int _MMG3D_prilen(MMG5_pMesh mesh, MMG5_pSol met, char metRidTyp) {
       nq = pt->v[i1];
 
       if(!_MMG5_hashEdge(mesh,&hash,np,nq,0)){
-        fprintf(stdout,"%s:%d: Error: function _MMG5_hashEdge return 0\n",
+        fprintf(stderr,"%s:%d: Error: function _MMG5_hashEdge return 0\n",
                 __FILE__,__LINE__);
         exit(EXIT_FAILURE);
       }
@@ -390,15 +443,11 @@ int _MMG3D_prilen(MMG5_pMesh mesh, MMG5_pSol met, char metRidTyp) {
       ier = _MMG5_hashPop(&hash,np,nq);
       if( ier ) {
         ned ++;
-        if ( met->m ) {
-          if ( (!metRidTyp) && met->size>1 ) {
-            len = _MMG5_lenedg33_ani(mesh,met,ia,pt);
-          }
-          else
-            len = _MMG5_lenedg(mesh,met,ia,pt);
+        if ( (!metRidTyp) && met->size==6 && met->m ) {
+          len = _MMG5_lenedg33_ani(mesh,met,ia,pt);
         }
-        else // -A option
-          len = _MMG5_lenedg_iso(mesh,met,ia,pt);
+        else
+          len = _MMG5_lenedg(mesh,met,ia,pt);
 
         assert( len!=0 );
         avlen += len;
@@ -453,104 +502,12 @@ int _MMG3D_inqua(MMG5_pMesh mesh,MMG5_pSol met) {
     pt = &mesh->tetra[k];
      if( !MG_EOK(pt) )   continue;
 
-     if ( met->m ) {
-       if ( met->size == 6) {
-         pt->qual = _MMG5_caltet33_ani(mesh,met,pt);
-       }
-       else
-         pt->qual = _MMG5_orcal(mesh,met,k);
+     if ( met->size == 6 && met->m ) {
+       pt->qual = _MMG5_caltet33_ani(mesh,met,pt);
      }
-     else // -A option
-       pt->qual = _MMG5_caltet_iso(mesh,met,pt);
-  }
-  if ( abs(mesh->info.imprim) <= 0 ) return(1);
+     else
+       pt->qual = _MMG5_orcal(mesh,met,k);
 
-  rapmin  = 2.0;
-  rapmax  = 0.0;
-  rapavg  = med = good = 0.0;
-  iel     = 0;
-
-  for (k=0; k<5; k++)  his[k] = 0;
-
-  nex = ok = 0;
-  for (k=1; k<=mesh->ne; k++) {
-    pt = &mesh->tetra[k];
-    if( !MG_EOK(pt) ) {
-      nex++;
-      continue;
-    }
-    ok++;
-    if ( _MMG5_orvol(mesh->point,pt->v) < 0.0 ) {
-      fprintf(stdout,"dans quality vol negatif\n");
-    }
-    rap = _MMG5_ALPHAD * pt->qual;
-    if ( rap < rapmin ) {
-      rapmin = rap;
-      iel    = ok;
-    }
-    if ( rap > 0.5 )  med++;
-    if ( rap > 0.12 ) good++;
-    if ( rap < _MMG5_BADKAL )  mesh->info.badkal = 1;
-    rapavg += rap;
-    rapmax  = MG_MAX(rapmax,rap);
-    ir = MG_MIN(4,(int)(5.0*rap));
-    his[ir] += 1;
-  }
-
-#ifndef DEBUG
-  fprintf(stdout,"\n  -- MESH QUALITY   %d\n",mesh->ne - nex);
-  fprintf(stdout,"     BEST   %8.6f  AVRG.   %8.6f  WRST.   %8.6f (%d)\n",
-          rapmax,rapavg / (mesh->ne-nex),rapmin,iel);
-#else
-  fprintf(stdout,"     BEST   %e  AVRG.   %e  WRST.   %e (%d)\n => %d %d %d %d\n",
-          rapmax,rapavg / (mesh->ne-nex),rapmin,iel,
-          _MMG3D_indPt(mesh,mesh->tetra[iel].v[0]),_MMG3D_indPt(mesh,mesh->tetra[iel].v[1]),
-          _MMG3D_indPt(mesh,mesh->tetra[iel].v[2]),_MMG3D_indPt(mesh,mesh->tetra[iel].v[3]));
-#endif
-  if ( abs(mesh->info.imprim) < 3 ){
-    if (rapmin == 0){
-      fprintf(stdout,"  ## WARNING: TOO BAD QUALITY FOR THE WORST ELEMENT\n");
-      return(0);
-    }
-    return(1);
-  }
-
-  /* print histo */
-  fprintf(stdout,"     HISTOGRAMM:");
-  fprintf(stdout,"  %6.2f %% > 0.12\n",100.0*(good/(float)(mesh->ne-nex)));
-  if ( abs(mesh->info.imprim) > 3 ) {
-    fprintf(stdout,"                  %6.2f %% >  0.5\n",100.0*( med/(float)(mesh->ne-nex)));
-    imax = MG_MIN(4,(int)(5.*rapmax));
-    for (i=imax; i>=(int)(5*rapmin); i--) {
-      fprintf(stdout,"     %5.1f < Q < %5.1f   %7d   %6.2f %%\n",
-              i/5.,i/5.+0.2,his[i],100.*(his[i]/(float)(mesh->ne-nex)));
-    }
-  }
-  if (rapmin == 0){
-    fprintf(stdout,"  ## WARNING: TOO BAD QUALITY FOR THE WORST ELEMENT\n");
-    return(0);
-  }
-  return(1);
-}
-
-/**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
- * \return 0 if the worst element has a nul quality, 1 otherwise.
- *
- * Print histogram of mesh qualities for special storage of metric at ridges.
- *
- */
-int _MMG3D_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
-  MMG5_pTetra    pt;
-  double   rap,rapmin,rapmax,rapavg,med,good;
-  int      i,k,iel,ok,ir,imax,nex,his[5];
-
-  /*compute tet quality*/
-  for (k=1; k<=mesh->ne; k++) {
-    pt = &mesh->tetra[k];
-     if( !MG_EOK(pt) )   continue;
-     pt->qual = _MMG5_orcal(mesh,met,k);
   }
   if ( abs(mesh->info.imprim) <= 0 ) return(1);
 
@@ -586,8 +543,12 @@ int _MMG3D_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
     his[ir] += 1;
   }
 
+  fprintf(stdout,"\n  -- MESH QUALITY");
+  if ( mesh->info.optimLES )
+    fprintf(stdout," (LES)");
+  fprintf(stdout,"  %d\n",mesh->ne - nex);
+
 #ifndef DEBUG
-  fprintf(stdout,"\n  -- MESH QUALITY   %d\n",mesh->ne - nex);
   fprintf(stdout,"     BEST   %8.6f  AVRG.   %8.6f  WRST.   %8.6f (%d)\n",
           rapmax,rapavg / (mesh->ne-nex),rapmin,iel);
 #else
@@ -598,7 +559,7 @@ int _MMG3D_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
 #endif
   if ( abs(mesh->info.imprim) < 3 ){
     if (rapmin == 0){
-      fprintf(stdout,"  ## WARNING: TOO BAD QUALITY FOR THE WORST ELEMENT\n");
+      fprintf(stderr,"  ## ERROR: TOO BAD QUALITY FOR THE WORST ELEMENT\n");
       return(0);
     }
     return(1);
@@ -616,7 +577,102 @@ int _MMG3D_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
     }
   }
   if (rapmin == 0){
-    fprintf(stdout,"  ## WARNING: TOO BAD QUALITY FOR THE WORST ELEMENT\n");
+    fprintf(stderr,"  ## ERROR: TOO BAD QUALITY FOR THE WORST ELEMENT\n");
+    return(0);
+  }
+  return(1);
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ *
+ * \return 0 if the worst element has a nul quality, 1 otherwise.
+ *
+ * Print histogram of mesh qualities for special storage of metric at ridges.
+ *
+ */
+int _MMG3D_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
+  MMG5_pTetra    pt;
+  double   rap,rapmin,rapmax,rapavg,med,good;
+  int      i,k,iel,ok,ir,imax,nex,his[5];
+
+  /*compute tet quality*/
+  for (k=1; k<=mesh->ne; k++) {
+    pt = &mesh->tetra[k];
+    if( !MG_EOK(pt) )   continue;
+    pt->qual = _MMG5_orcal(mesh,met,k);
+  }
+
+  if ( abs(mesh->info.imprim) <= 0 ) return(1);
+
+  rapmin  = 2.0;
+  rapmax  = 0.0;
+  rapavg  = med = good = 0.0;
+  iel     = 0;
+
+  for (k=0; k<5; k++)  his[k] = 0;
+
+  nex = ok = 0;
+  for (k=1; k<=mesh->ne; k++) {
+    pt = &mesh->tetra[k];
+    if( !MG_EOK(pt) ) {
+      nex++;
+      continue;
+    }
+    ok++;
+    if ( _MMG5_orvol(mesh->point,pt->v) < 0.0 ) {
+      fprintf(stdout," ## Warning: negative volume\n");
+    }
+    rap = _MMG5_ALPHAD * pt->qual;
+    if ( rap < rapmin ) {
+      rapmin = rap;
+      iel    = ok;
+    }
+    if ( rap > 0.5 )  med++;
+    if ( rap > 0.12 ) good++;
+    if ( rap < _MMG5_BADKAL )  mesh->info.badkal = 1;
+    rapavg += rap;
+    rapmax  = MG_MAX(rapmax,rap);
+    ir = MG_MIN(4,(int)(5.0*rap));
+    his[ir] += 1;
+  }
+
+  fprintf(stdout,"\n  -- MESH QUALITY");
+  if ( mesh->info.optimLES )
+    fprintf(stdout," (LES)");
+  fprintf(stdout,"  %d\n",mesh->ne - nex);
+
+#ifndef DEBUG
+  fprintf(stdout,"     BEST   %8.6f  AVRG.   %8.6f  WRST.   %8.6f (%d)\n",
+          rapmax,rapavg / (mesh->ne-nex),rapmin,iel);
+#else
+  fprintf(stdout,"     BEST   %e  AVRG.   %e  WRST.   %e (%d)\n => %d %d %d %d\n",
+          rapmax,rapavg / (mesh->ne-nex),rapmin,iel,
+          _MMG3D_indPt(mesh,mesh->tetra[iel].v[0]),_MMG3D_indPt(mesh,mesh->tetra[iel].v[1]),
+          _MMG3D_indPt(mesh,mesh->tetra[iel].v[2]),_MMG3D_indPt(mesh,mesh->tetra[iel].v[3]));
+#endif
+  if ( abs(mesh->info.imprim) < 3 ){
+    if (rapmin == 0){
+      fprintf(stderr,"  ## ERROR: TOO BAD QUALITY FOR THE WORST ELEMENT\n");
+      return(0);
+    }
+    return(1);
+  }
+
+  /* print histo */
+  fprintf(stdout,"     HISTOGRAMM:");
+  fprintf(stdout,"  %6.2f %% > 0.12\n",100.0*(good/(float)(mesh->ne-nex)));
+  if ( abs(mesh->info.imprim) > 3 ) {
+    fprintf(stdout,"                  %6.2f %% >  0.5\n",100.0*( med/(float)(mesh->ne-nex)));
+    imax = MG_MIN(4,(int)(5.*rapmax));
+    for (i=imax; i>=(int)(5*rapmin); i--) {
+      fprintf(stdout,"     %5.1f < Q < %5.1f   %7d   %6.2f %%\n",
+              i/5.,i/5.+0.2,his[i],100.*(his[i]/(float)(mesh->ne-nex)));
+    }
+  }
+  if (rapmin == 0){
+    fprintf(stderr,"  ## ERROR: TOO BAD QUALITY FOR THE WORST ELEMENT\n");
     return(0);
   }
   return(1);

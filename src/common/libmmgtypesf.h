@@ -332,12 +332,15 @@
 !  */
 
 ! typedef struct {
-!   int      ref[2]; /*!< face references: ref[0]={0,1,2}, ref[1]={3,4,5} */
-!   int      edg[6]; /*!< edges references: edg[0]={1,1},
-!                     * edg[1]={0,2},edg[2]={0,1},edg[3]={4,5},edg[4]={5,3},edg[5]={3,4}*/
-!   char     ftag[2]; /*!< ftag[i] contains the tag associated to the
+!   int      ref[5]; /*!< face references: ref[0]={0,1,2}, ref[1]={3,4,5},
+!                     * ref[2]={0,3,4,1}, ref[3]={0,2,5,1} */
+!   int      edg[9]; /*!< edges references:
+!                     * edg[0]={0,1},edg[1]={0,2},edg[2]={0,3},edg[3]={1,2},
+!                     * edg[4]={1,4},edg[5]={2,5},edg[6]={3,4},edg[7]={3,5},
+!                     * edg[8]={4,5}*/
+!   char     ftag[5]; /*!< ftag[i] contains the tag associated to the
 !                       \f$i^{th}\f$ face of the prism */
-!   char     tag[6]; /*!< tag[i] contains the tag associated to the
+!   char     tag[9]; /*!< tag[i] contains the tag associated to the
 !                      \f$i^{th}\f$ edge of the prism */
 ! } MMG5_xPrism;
 ! typedef MMG5_xPrism * MMG5_pxPrism;
@@ -354,7 +357,7 @@
 !   int           bucket;
 !   char          nreg;
 !   char          imprim,ddebug,badkal,iso,fem,lag;
-!   unsigned char optim, noinsert, noswap, nomove, nosurf;
+!   unsigned char optim, optimLES, noinsert, noswap, nomove, nosurf;
 ! } MMG5_Info;
 
 ! /**
@@ -396,24 +399,28 @@
 !                     treated */
 !   int       mark; /*!< Flag for delaunay (to know if an entity has
 !                     been treated) */
-!   int       xp,xt; /*!< Number of surfaces points/triangles */
+!   int       xp,xt,xpr; /*!< Number of surfaces points, triangles/tetrahedra and prisms */
 !   int       npnil; /*!< Index of first unused point */
 !   int       nenil; /*!< Index of first unused element */
 !   int       nanil; /*!< Index of first unused edge (2d only)*/
 !   int      *adja; /*!< Table of tetrahedron adjacency: if
-!                     \f$adjt[4*i+1+j]=4*k+l\f$ then the \f$i^{th}\f$ and
+!                     \f$adja[4*i+1+j]=4*k+l\f$ then the \f$i^{th}\f$ and
 !                     \f$k^th\f$ tetrahedra are adjacent and share their
 !                     faces \a j and \a l (resp.) */
 !   int      *adjt; /*!< Table of triangles adjacency: if
 !                     \f$adjt[3*i+1+j]=3*k+l\f$ then the \f$i^{th}\f$ and
 !                     \f$k^th\f$ triangles are adjacent and share their
 !                     edges \a j and \a l (resp.) */
-
+!   int      *adjapr; /*!< Table of prisms adjacency: if
+!                     \f$adjapr[5*i+1+j]=5*k+l\f$ then the \f$i^{th}\f$ and
+!                     \f$k^th\f$ prism are adjacent and share their
+!                     faces \a j and \a l (resp.) */
 !   MMG5_pPoint    point; /*!< Pointer toward the \ref MMG5_Point structure */
 !   MMG5_pxPoint   xpoint; /*!< Pointer toward the \ref MMG5_xPoint structure */
 !   MMG5_pTetra    tetra; /*!< Pointer toward the \ref MMG5_Tetra structure */
 !   MMG5_pxTetra   xtetra; /*!< Pointer toward the \ref MMG5_xTetra structure */
 !   MMG5_pPrism    prism; /*!< Pointer toward the \ref MMG5_Prism structure */
+!   MMG5_pxPrism   xprism; /*!< Pointer toward the \ref MMG5_pxPrism structure */
 !   MMG5_pTria     tria; /*!< Pointer toward the \ref MMG5_Tria structure */
 !   MMG5_pEdge     edge; /*!< Pointer toward the \ref MMG5_Edge structure */
 !   MMG5_HGeom     htab; /*!< \ref MMG5_HGeom structure */

@@ -208,7 +208,7 @@ int _MMG3D_packMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
   /* rebuild triangles*/
   mesh->nt = 0;
   if ( !_MMG5_chkBdryTria(mesh) ) {
-    fprintf(stdout," ## Error: unable to rebuild triangles\n");
+    fprintf(stderr," ## Error: unable to rebuild triangles\n");
     return(0);
   }
 
@@ -301,7 +301,7 @@ int _MMG3D_packMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
 
   /* to could save the mesh, the adjacency have to be correct */
   if ( mesh->info.ddebug && (!_MMG5_chkmsh(mesh,1,1) ) ) {
-    fprintf(stdout,"  ##  Problem. Invalid mesh.\n");
+    fprintf(stderr,"  ##  Problem. Invalid mesh.\n");
     return(0);
   }
 
@@ -344,14 +344,19 @@ int MMG3D_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met) {
 
   /* Check options */
   if ( mesh->info.lag > -1 ) {
-    fprintf(stdout,"  ## Error: lagrangian mode unavailable (MMG3D_IPARAM_lag):\n"
+    fprintf(stderr,"  ## Error: lagrangian mode unavailable (MMG3D_IPARAM_lag):\n"
             "            You must call the MMG3D_mmg3dmov function to move a rigidbody.\n");
     _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
   }
   else if ( mesh->info.iso ) {
-    fprintf(stdout,"  ## Error: level-set discretisation unavailable"
+    fprintf(stderr,"  ## Error: level-set discretisation unavailable"
             " (MMG3D_IPARAM_iso):\n"
             "          You must call the MMG3D_mmg3dmov function to use this option.\n");
+    _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
+  }
+  else if ( mesh->info.optimLES && met->size==6 ) {
+    fprintf(stdout,"  ## Error: strong mesh optimization for LES methods"
+            " unavailable (MMG3D_IPARAM_optimLES) with an anisotropic metric.\n");
     _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
   }
 
@@ -372,7 +377,7 @@ int MMG3D_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met) {
     met->np = 0;
   }
   else if ( met->size!=1 && met->size!=6 ) {
-    fprintf(stdout,"  ## ERROR: WRONG DATA TYPE.\n");
+    fprintf(stderr,"  ## ERROR: WRONG DATA TYPE.\n");
     _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
   }
 
@@ -435,7 +440,7 @@ int MMG3D_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met) {
 #ifdef PATTERN
   if ( !_MMG5_mmg3d1_pattern(mesh,met) ) {
     if ( !(mesh->adja) && !MMG3D_hashTetra(mesh,1) ) {
-      fprintf(stdout,"  ## Hashing problem. Invalid mesh.\n");
+      fprintf(stderr,"  ## Hashing problem. Invalid mesh.\n");
       _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
     }
     if ( !_MMG5_unscaleMesh(mesh,met) )  _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
@@ -444,7 +449,7 @@ int MMG3D_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met) {
 #else
   if ( !_MMG5_mmg3d1_delone(mesh,met) ) {
     if ( (!mesh->adja) && !MMG3D_hashTetra(mesh,1) ) {
-      fprintf(stdout,"  ## Hashing problem. Invalid mesh.\n");
+      fprintf(stderr,"  ## Hashing problem. Invalid mesh.\n");
       _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
     }
     if ( !_MMG5_unscaleMesh(mesh,met) )  _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
@@ -505,8 +510,14 @@ int MMG3D_mmg3dls(MMG5_pMesh mesh,MMG5_pSol met) {
 
   /* Check options */
   if ( mesh->info.lag > -1 ) {
-    fprintf(stdout,"  ## Error: lagrangian mode unavailable (MMG3D_IPARAM_lag):\n"
+    fprintf(stderr,"  ## Error: lagrangian mode unavailable (MMG3D_IPARAM_lag):\n"
             "            You must call the MMG3D_mmg3dmov function to move a rigidbody.\n");
+    _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
+  }
+  else if ( mesh->info.optimLES ) {
+    fprintf(stdout,"  ## Error: strong mesh optimization for LES methods"
+            " unavailable (MMG3D_IPARAM_optimLES) in isosurface"
+            " discretization mode.\n");
     _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
   }
 
@@ -525,7 +536,7 @@ int MMG3D_mmg3dls(MMG5_pMesh mesh,MMG5_pSol met) {
     met->np = 0;
   }
   else if ( met->size!=1 ) {
-    fprintf(stdout,"  ## ERROR: WRONG DATA TYPE.\n");
+    fprintf(stderr,"  ## ERROR: WRONG DATA TYPE.\n");
     _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
   }
 
@@ -555,7 +566,7 @@ int MMG3D_mmg3dls(MMG5_pMesh mesh,MMG5_pSol met) {
 
   /* specific meshing */
   if ( !met->np ) {
-    fprintf(stdout,"\n  ## ERROR: A VALID SOLUTION FILE IS NEEDED \n");
+    fprintf(stderr,"\n  ## ERROR: A VALID SOLUTION FILE IS NEEDED \n");
     _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
   }
   if ( !_MMG3D_mmg3d2(mesh,met) ) _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
@@ -588,7 +599,7 @@ int MMG3D_mmg3dls(MMG5_pMesh mesh,MMG5_pSol met) {
 #ifdef PATTERN
   if ( !_MMG5_mmg3d1_pattern(mesh,met) ) {
     if ( !(mesh->adja) && !MMG3D_hashTetra(mesh,1) ) {
-      fprintf(stdout,"  ## Hashing problem. Invalid mesh.\n");
+      fprintf(stderr,"  ## Hashing problem. Invalid mesh.\n");
       _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
     }
     if ( !_MMG5_unscaleMesh(mesh,met) )  _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
@@ -597,7 +608,7 @@ int MMG3D_mmg3dls(MMG5_pMesh mesh,MMG5_pSol met) {
 #else
   if ( !_MMG5_mmg3d1_pattern(mesh,met) ) {
     if ( !(mesh->adja) && !MMG3D_hashTetra(mesh,1) ) {
-      fprintf(stdout,"  ## Hashing problem. Invalid mesh.\n");
+      fprintf(stderr,"  ## Hashing problem. Invalid mesh.\n");
       _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
     }
     if ( !_MMG5_unscaleMesh(mesh,met) )  _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
@@ -656,9 +667,14 @@ int MMG3D_mmg3dmov(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp) {
 
   /* Check options */
   if ( mesh->info.iso ) {
-    fprintf(stdout,"  ## Error: level-set discretisation unavailable"
+    fprintf(stderr,"  ## Error: level-set discretisation unavailable"
             " (MMG3D_IPARAM_iso):\n"
             "          You must call the MMG3D_mmg3dmov function to use this option.\n");
+    _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
+  }
+  else if ( mesh->info.optimLES ) {
+    fprintf(stdout,"  ## Error: strong mesh optimization for LES methods"
+            " unavailable (MMG3D_IPARAM_optimLES) in lagrangian mode.\n");
     _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
   }
 
@@ -681,13 +697,13 @@ int MMG3D_mmg3dmov(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp) {
   }
 
 #ifndef USE_SUSCELAS
-  fprintf(stdout,"  ## Error: you need to compile with the USE_SUSCELAS"
+  fprintf(stderr,"  ## Error: you need to compile with the USE_SUSCELAS"
     " CMake's flag set to ON to use the rigidbody movement library.\n");
   _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
 #endif
 
   if ( !disp ) {
-    fprintf(stdout,"  ## Error: in lagrangian mode, a structure of type"
+    fprintf(stderr,"  ## Error: in lagrangian mode, a structure of type"
             " \"MMG5_pSol\" is needed to store the displacement field.\n"
             "            This structure must be different from the one used"
             " to store the metric.\n");
@@ -699,7 +715,7 @@ int MMG3D_mmg3dmov(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp) {
     disp->np = 0;
   }
   else if (disp->size!=3) {
-    fprintf(stdout,"  ## ERROR: LAGRANGIAN MOTION OPTION NEED A VECTORIAL DISPLACEMENT\n");
+    fprintf(stderr,"  ## ERROR: LAGRANGIAN MOTION OPTION NEED A VECTORIAL DISPLACEMENT\n");
     _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
   }
 
@@ -769,53 +785,7 @@ int MMG3D_mmg3dmov(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp) {
     _MMG5_RETURN_AND_PACK(mesh,met,disp,MMG5_LOWFAILURE);
   }
 
-/*   /\* ******************* Part to skip in lag mode ? *************************** *\/ */
-/* #ifdef PATTERN */
-/*   if ( !_MMG5_mmg3d1_pattern(mesh,met) ) { */
-/*     if ( !(mesh->adja) && !MMG3D_hashTetra(mesh,1) ) { */
-/*       fprintf(stdout,"  ## Hashing problem. Invalid mesh.\n"); */
-/*       disp->npi = disp->np; */
-/*       _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE); */
-/*     } */
-/*     if ( !_MMG5_unscaleMesh(mesh,met) ) { */
-/*       disp->npi = disp->np; */
-/*       _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE); */
-/*     } */
-/*     _MMG5_RETURN_AND_PACK(mesh,met,disp,MMG5_LOWFAILURE); */
-/*   } */
-/* #else */
-/*   /\** Patterns in iso mode, delauney otherwise *\/ */
-/*   if ( !mesh->info.iso ) { */
-/*     if ( !_MMG5_mmg3d1_delone(mesh,met) ) { */
-/*       if ( !(mesh->adja) && !MMG3D_hashTetra(mesh,1) ) { */
-/*         fprintf(stdout,"  ## Hashing problem. Invalid mesh.\n"); */
-/*         disp->npi = disp->np; */
-/*         _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE); */
-/*       } */
-/*       if ( !_MMG5_unscaleMesh(mesh,met) ) { */
-/*         disp->npi = disp->np; */
-/*         _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE); */
-/*       } */
-/*       _MMG5_RETURN_AND_PACK(mesh,met,disp,MMG5_LOWFAILURE); */
-/*     } */
-/*   } */
-/*   else { */
-/*     if ( !_MMG5_mmg3d1_pattern(mesh,met) ) { */
-/*       if ( !(mesh->adja) && !MMG3D_hashTetra(mesh,1) ) { */
-/*         fprintf(stdout,"  ## Hashing problem. Invalid mesh.\n"); */
-/*         disp->npi = disp->np; */
-/*         _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE); */
-/*       } */
-/*       if ( !_MMG5_unscaleMesh(mesh,met) ) { */
-/*         disp->npi = disp->np; */
-/*         _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE); */
-/*       } */
-/*       _MMG5_RETURN_AND_PACK(mesh,met,disp,MMG5_LOWFAILURE); */
-/*     } */
-/*   } */
-/* #endif */
-
-/* *************************************** End of part to skip in lag mode ? *************************** */
+/* ******************* Add mesh improvement ? *************************** */
 
   chrono(OFF,&(ctim[3]));
   printim(ctim[3].gdif,stim);

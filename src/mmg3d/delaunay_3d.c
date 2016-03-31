@@ -197,7 +197,7 @@ int _MMG5_delone(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist) {
   /* hash table params */
   if ( size > 3*LONMAX )  return(0);
   if ( !_MMG5_hashNew(mesh,&hedg,size,3*size) ) { /*3*size suffit */
-    fprintf(stdout,"  ## Unable to complete mesh.\n");
+    fprintf(stderr,"  ## Unable to complete mesh.\n");
     return(-1);
   }
 
@@ -208,7 +208,8 @@ int _MMG5_delone(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist) {
 
     if ( !ielnum[k] ) {
       _MMG5_TETRA_REALLOC(mesh,ielnum[k],mesh->gap,
-                          printf("  ## Warning: unable to allocate a new element but the mesh will be valid.\n");
+                          fprintf(stderr,"  ## Error: unable to allocate a new"
+                                  " element but the mesh will be valid.\n");
                           for(ll=1 ; ll<k ; ll++) {
                             mesh->tetra[ielnum[ll]].v[0] = 1;
                             _MMG3D_delElt(mesh,ielnum[ll]);
@@ -264,13 +265,6 @@ int _MMG5_delone(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist) {
 
         if(ixt) {
           if( xt.ref[i] || xt.ftag[i]) {
-            // if(!adja[i] || (mesh->tetra[jel].ref != pt1->ref)) {
-            /*  if((old==20329) || (iel==20329)) { */
-            /*  printf("eh eh on en a un!!!"); */
-            /*  printf("adj of %d : %d %d %d %d\n",old,adja[0],adja[1],adja[2],adja[3]); */
-            /*  printf("adj of %d : %d %d %d %d\n",iel,adjb[0],adjb[1],adjb[2],adjb[3]); */
-            /* printf("on traite %d\n",i); */
-            /*  } */
             if(!isused) {
               pt1->xt = pt->xt;
               pt->xt = 0;
@@ -291,7 +285,7 @@ int _MMG5_delone(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist) {
                 _MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
                                    "larger xtetra table",
                                    mesh->xt--;
-                                   printf("  Exit program.\n");
+                                   fprintf(stderr,"  Exit program.\n");
                                    exit(EXIT_FAILURE));
               }
               pt1->xt = mesh->xt;
@@ -336,8 +330,7 @@ int _MMG5_delone(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist) {
   /* remove old tetra */
   tref = mesh->tetra[list[0]].ref;
   for (k=0; k<ilist; k++) {
-    if(tref!=mesh->tetra[list[k]].ref)
-      printf("arg ref ???? %d %d\n",tref,mesh->tetra[list[k]].ref);
+    assert(tref==mesh->tetra[list[k]].ref);
     _MMG3D_delElt(mesh,list[k]);
   }
 
@@ -623,7 +616,7 @@ int _MMG5_cavity_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel,int ip,int* list,int 
   }
   for (k=0; k<lon; k++)
     list[k] = list[k] / 6;
-  
+
   /* grow cavity by adjacency */
   eps   = _MMG5_EPSRAD * _MMG5_EPSRAD;
   ilist = lon;

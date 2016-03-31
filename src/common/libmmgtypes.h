@@ -314,7 +314,7 @@ typedef struct {
   int           bucket;
   char          nreg;
   char          imprim,ddebug,badkal,iso,fem,lag;
-  unsigned char optim, noinsert, noswap, nomove, nosurf;
+  unsigned char optim, optimLES, noinsert, noswap, nomove, nosurf;
 } MMG5_Info;
 
 /**
@@ -375,6 +375,7 @@ typedef struct {
   MMG5_pTetra    tetra; /*!< Pointer toward the \ref MMG5_Tetra structure */
   MMG5_pxTetra   xtetra; /*!< Pointer toward the \ref MMG5_xTetra structure */
   MMG5_pPrism    prism; /*!< Pointer toward the \ref MMG5_Prism structure */
+  MMG5_pxPrism   xprism; /*!< Pointer toward the \ref MMG5_pxPrism structure */
   MMG5_pTria     tria; /*!< Pointer toward the \ref MMG5_Tria structure */
   MMG5_pEdge     edge; /*!< Pointer toward the \ref MMG5_Edge structure */
   MMG5_HGeom     htab; /*!< \ref MMG5_HGeom structure */

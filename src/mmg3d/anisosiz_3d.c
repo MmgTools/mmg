@@ -65,7 +65,7 @@ inline int _MMG5_moymet(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,double *m1)
   }
 
   if(!n) {
-    // printf("  ## Warning: 4 ridges points... Unable to compute metric.\n");
+    // fprintf(stderr,"  ## Warning: 4 ridges points... Unable to compute metric.\n");
     return(0);
   }
   dd = 1./n;
@@ -233,7 +233,6 @@ inline double _MMG5_lenedgCoor_ani(double *ca,double *cb,double *sa,double *sb) 
   /*longueur approchee*/
   /*precision a 3.5 10e-3 pres*/
   if(fabs(dd1-dd2) < 0.05 ) {
-    //printf("bonne precision %e \n",sqrt(0.5*(dd1+dd2)) - (sqrt(dd1)+sqrt(dd2)+4.0*sqrt(0.5*(dd1+dd2))) / 6.0 );
     len = sqrt(0.5*(dd1+dd2));
     return(len);
   }
@@ -293,8 +292,8 @@ static int _MMG5_defmetsin(MMG5_pMesh mesh,MMG5_pSol met,int kel, int iface, int
                               listv,&ilistv,lists,&ilists,(p0->tag & MG_NOM));
 
   if ( ilist!=1 ) {
-    printf("Error; unable to compute the ball af the point %d.\n", idp);
-    printf("Exit program.\n");
+    fprintf(stderr,"Error; unable to compute the ball af the point %d.\n", idp);
+    fprintf(stderr,"Exit program.\n");
     exit(EXIT_FAILURE);
   }
 
@@ -464,7 +463,7 @@ static int _MMG5_defmetrid(MMG5_pMesh mesh,MMG5_pSol met,int kel,
   ier = _MMG5_bouletrid(mesh,kel,iface,ip,&ilist1,list1,&ilist2,list2,
                         &iprid[0],&iprid[1] );
   if ( !ier ) {
-    printf("%s:%d:Error: unable to compute the two balls at the ridge"
+    fprintf(stderr,"%s:%d:Error: unable to compute the two balls at the ridge"
            " point %d.\n",__FILE__,__LINE__, idp);
     return(0);
   }
@@ -640,9 +639,9 @@ static int _MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,int kel, int iface, int
   ilist = _MMG5_boulesurfvolp(mesh,kel,ip,iface,listv,&ilistv,lists,&ilists,0);
 
   if ( ilist!=1 ) {
-    printf("%s:%d:Error: unable to compute the ball af the point %d.\n",
+    fprintf(stderr,"%s:%d:Error: unable to compute the ball af the point %d.\n",
            __FILE__,__LINE__, idp);
-    printf("Exit program.\n");
+    fprintf(stderr,"Exit program.\n");
     exit(EXIT_FAILURE);
   }
 
@@ -685,7 +684,7 @@ static int _MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,int kel, int iface, int
         ipref[1] = pt->v[i2];
       }
       else if ( (pt->v[i2] != ipref[0]) && (pt->v[i2] != ipref[1]) ) {
-        printf("%s:%d:Error: three adjacent ref at a non singular point.\n",
+        fprintf(stderr,"%s:%d:Error: three adjacent ref at a non singular point.\n",
                __FILE__,__LINE__);
         exit(EXIT_FAILURE);
       }
@@ -699,7 +698,7 @@ static int _MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,int kel, int iface, int
         ipref[1] = pt->v[i1];
       }
       else if ( (pt->v[i1] != ipref[0]) && (pt->v[i1] != ipref[1]) ) {
-        printf("%s:%d:Error: three adjacent ref at a non singular point.\n",
+        fprintf(stderr,"%s:%d:Error: three adjacent ref at a non singular point.\n",
                __FILE__,__LINE__);
         exit(EXIT_FAILURE);
       }
@@ -724,14 +723,14 @@ static int _MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,int kel, int iface, int
     det2d = lispoi[3*k+1]*lispoi[3*(k+1)+2] - lispoi[3*k+2]*lispoi[3*(k+1)+1];
     assert(det2d);
     if ( det2d <= 0.0 ) {
-      //printf("PROBLEM : BAD PROJECTION OVER TANGENT PLANE %f \n", det2d);
+      //fprintf(stderr,"PROBLEM : BAD PROJECTION OVER TANGENT PLANE %f \n", det2d);
       return(0);
     }
   }
   det2d = lispoi[3*(ilists-1)+1]*lispoi[3*0+2] - lispoi[3*(ilists-1)+2]*lispoi[3*0+1];
   assert(det2d);
   if ( det2d <= 0.0 ) {
-    //printf("PROBLEM : BAD PROJECTION OVER TANGENT PLANE %f \n", det2d);
+    //fprintf(stderr,"PROBLEM : BAD PROJECTION OVER TANGENT PLANE %f \n", det2d);
     return(0);
   }
   assert(ipref[0] && ipref[1]);
@@ -854,9 +853,9 @@ static int _MMG5_defmetreg(MMG5_pMesh mesh,MMG5_pSol met,int kel,int iface, int 
   ilist = _MMG5_boulesurfvolp(mesh,kel,ip,iface,listv,&ilistv,lists,&ilists,0);
 
   if ( ilist!=1 ) {
-    printf("%s:%d:Error: unable to compute the ball af the point %d.\n",
+    fprintf(stderr,"%s:%d:Error: unable to compute the ball af the point %d.\n",
            __FILE__,__LINE__, idp);
-    printf("Exit program.\n");
+    fprintf(stderr,"Exit program.\n");
     exit(EXIT_FAILURE);
   }
 
@@ -905,14 +904,14 @@ static int _MMG5_defmetreg(MMG5_pMesh mesh,MMG5_pSol met,int kel,int iface, int 
     det2d = lispoi[3*k+1]*lispoi[3*(k+1)+2] - lispoi[3*k+2]*lispoi[3*(k+1)+1];
     assert(det2d);
     if ( det2d <= 0.0 ) {
-      //printf("PROBLEM : BAD PROJECTION OVER TANGENT PLANE %f \n", det2d);
+      //fprintf(stderr,"PROBLEM : BAD PROJECTION OVER TANGENT PLANE %f \n", det2d);
       return(0);
     }
   }
   det2d = lispoi[3*(ilists-1)+1]*lispoi[3*0+2] - lispoi[3*(ilists-1)+2]*lispoi[3*0+1];
   assert(det2d);
   if ( det2d <= 0.0 ) {
-    //printf("PROBLEM : BAD PROJECTION OVER TANGENT PLANE %f \n", det2d);
+    //fprintf(stderr,"PROBLEM : BAD PROJECTION OVER TANGENT PLANE %f \n", det2d);
     return(0);
   }
 
@@ -1048,7 +1047,7 @@ int _MMG5_defmetvol(MMG5_pMesh mesh,MMG5_pSol met) {
 
       for (i=0; i<3; i++) {
         if(lambda[i]<=0) {
-          printf("%s:%d:Error: wrong metric at point %d -- eigenvalues :"
+          fprintf(stderr,"%s:%d:Error: wrong metric at point %d -- eigenvalues :"
                  " %e %e %e\n",__FILE__,__LINE__,
                  k,lambda[0],lambda[1],lambda[2]);
           return(0);
@@ -1141,11 +1140,21 @@ int _MMG3D_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
 
   if ( mesh->info.hmax < 0.0 ) {
     //  mesh->info.hmax = 0.5 * mesh->info.delta;
-    fprintf(stdout,"%s:%d:Error: negative hmax value.\n",__FILE__,__LINE__);
+    fprintf(stderr,"%s:%d:Error: negative hmax value.\n",__FILE__,__LINE__);
     return(0);
   }
 
-  ismet = (met->m > 0);
+  if ( met->m )
+    ismet = 1;
+  else {
+    ismet = 0;
+
+    _MMG5_caltet         = _MMG5_caltet_ani;
+    _MMG5_caltri         = _MMG5_caltri_ani;
+    _MMG5_lenedg         = _MMG5_lenedg_ani;
+    MMG3D_lenedgCoor     = _MMG5_lenedgCoor_ani;
+    _MMG5_lenSurfEdg     = _MMG5_lenSurfEdg_ani;
+  }
 
   if ( !_MMG5_defmetvol(mesh,met) )  return(0);
 
@@ -1188,7 +1197,7 @@ int _MMG3D_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
         }
         if ( ismet ) {
           if ( !_MMG3D_intextmet(mesh,met,pt->v[iploc],mm) ) {
-            fprintf(stdout,"%s:%d:Error: unable to intersect metrics"
+            fprintf(stderr,"%s:%d:Error: unable to intersect metrics"
                     " at point %d.\n",__FILE__,__LINE__, pt->v[iploc]);
             return(0);
           }

@@ -36,10 +36,10 @@
  * \param mesh pointer toward the mesh structure.
  * \param ct coordinates of vertices of the element.
  * \param c center of circumscribing circle to the element.
- * \param rad radius of circumscribing circle to the element.
+ * \param rad squared radius of circumscribing circle to the element.
  * \return 0 if failed, 1 otherwise.
  *
- * Compute radius and center of circumscribing circle to the element.
+ * Compute radius (squared) and center of circumscribing circle to the element.
  *
  */
 int _MMG5_cenrad_iso(MMG5_pMesh mesh,double *ct,double *c,double *rad) {
@@ -120,11 +120,11 @@ int _MMG5_cenrad_iso(MMG5_pMesh mesh,double *ct,double *c,double *rad) {
  * \param ct coordinates of vertices of the element.
  * \param m metric at the point for which we compute the cavity.
  * \param c center of circumscribing circle to the element.
- * \param rad radius of circumscribing circle to the element.
+ * \param rad squared radius of circumscribing circle to the element.
  * \return 0 if failed, 1 otherwise.
  *
- * Compute radius and center of circumscribing circle to the element for
- * an anisotropic metric \a m.
+ * Compute radius (squared) and center of circumscribing circle to the element
+ * for an anisotropic metric \a m.
  *
  */
 int _MMG5_cenrad_ani(MMG5_pMesh mesh,double *ct,double *m,double *c,double *rad) {
