@@ -318,8 +318,9 @@ void _MMG2D_memOption(MMG5_pMesh mesh);
 
 int MMG2_scaleMesh(MMG5_pMesh ,MMG5_pSol );
 int MMG2_unscaleMesh(MMG5_pMesh ,MMG5_pSol );
+int MMG2_pack(MMG5_pMesh ,MMG5_pSol );
 void MMG2_outqua(MMG5_pMesh ,MMG5_pSol );
-int MMG2_mmg2d0(MMG5_pMesh ,MMG5_pSol );
+//int MMG2_mmg2d0(MMG5_pMesh ,MMG5_pSol );
 int MMG2_mmg2d1(MMG5_pMesh ,MMG5_pSol );
 //int MMG2_split(MMG5_pMesh ,MMG5_pSol ,int ,int ,int );
 //int MMG2_splitbdry(MMG5_pMesh ,MMG5_pSol ,int ,int ,int,double*);
@@ -338,8 +339,8 @@ int MMG2_mmg2d9(MMG5_pMesh ,MMG5_pSol );
 int _MMG2_swapdelone(MMG5_pMesh ,MMG5_pSol ,int ,char ,double ,int *);
 int _MMG5_mmg2dChkmsh(MMG5_pMesh , int, int );
 int MMG2_boulep(MMG5_pMesh , int , int , int * );
-int MMG2_markBdry(MMG5_pMesh );
-int MMG2_doSol(MMG5_pMesh ,MMG5_pSol );
+//int MMG2_markBdry(MMG5_pMesh );
+//int MMG2_doSol(MMG5_pMesh ,MMG5_pSol );
 int MMG2_prilen(MMG5_pMesh ,MMG5_pSol );
 
 int MMG2_coorbary(MMG5_pMesh ,MMG5_pTria ,double c[2],double* ,double* ,double* );
@@ -365,14 +366,14 @@ int  MMG2_addBucket(MMG5_pMesh mesh,pBucket bucket,int ip);
 int  MMG2_delBucket(MMG5_pMesh mesh,pBucket bucket,int ip);
 
 int MMG2_hashEdge(pHashTable edgeTable,int iel,int ia, int ib);
-int MMG2_hashel(MMG5_pMesh mesh);
+//int MMG2_hashel(MMG5_pMesh mesh);
 int MMG2_hashNew(HashTable *hash,int hsize,int hmax);
 int MMG2_baseBdry(MMG5_pMesh mesh);
 
 int MMG2_invmat(double *m,double *minv);
 int simred(double *m1,double *m2,double *m);
 
-int MMG2_evalgeom(MMG5_pMesh mesh);
+//int MMG2_evalgeom(MMG5_pMesh mesh);
 
 int _MMG2_cavity(MMG5_pMesh ,MMG5_pSol ,int ,int *);
 int _MMG2_delone(MMG5_pMesh ,MMG5_pSol ,int ,int *,int );
@@ -408,7 +409,7 @@ int _MMG2_anaelt(MMG5_pMesh ,MMG5_pSol ,int );
 int _MMG2_colelt(MMG5_pMesh ,MMG5_pSol ,int );
 int _MMG2_swpmsh(MMG5_pMesh ,MMG5_pSol ,int );
 double _MMG2_lencurv_iso(MMG5_pMesh ,MMG5_pSol , int , int );
-int _MMG2_chkedg(MMG5_pMesh , int );
+int _MMG2_chkedg(MMG5_pMesh ,int );
 int _MMG2_bezierCurv(MMG5_pMesh ,int ,char ,double ,double *,double *);
 int _MMG2_dichoto(MMG5_pMesh ,MMG5_pSol ,int ,int *);
 double _MMG2_quickcal(MMG5_pMesh , MMG5_pTria );
@@ -451,8 +452,6 @@ int    buckin_ani(MMG5_pMesh mesh,MMG5_pSol sol,pBucket bucket,int ip);
 int    lissmet_iso(MMG5_pMesh mesh,MMG5_pSol sol);
 int    lissmet_ani(MMG5_pMesh mesh,MMG5_pSol sol);
 
-//int MMG2_chkedg(MMG5_pMesh mesh, MMG5_pPoint ppa,MMG5_pPoint ppb) ;
-
 double (*MMG2_length)(double *,double *,double *,double *);
 double (*MMG2_caltri)(MMG5_pMesh ,MMG5_pSol ,MMG5_pTria );
 double (*MMG2_caltri_in)(MMG5_pMesh ,MMG5_pSol ,MMG5_pTria );
@@ -460,8 +459,6 @@ int    (*MMG2_optlen)(MMG5_pMesh ,MMG5_pSol ,double ,int );
 int    (*MMG2_interp)(double *,double *,double *,double );
 int    (*MMG2_buckin)(MMG5_pMesh ,MMG5_pSol ,pBucket ,int );
 int    (*MMG2_lissmet)(MMG5_pMesh ,MMG5_pSol );
-
-int MMG2_tassage(MMG5_pMesh ,MMG5_pSol );
 
 /* init structures */
 void  _MMG2_Init_parameters(MMG5_pMesh mesh);

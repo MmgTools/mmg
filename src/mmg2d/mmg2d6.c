@@ -32,7 +32,6 @@
  */
 #include "mmg2d.h"
 
-
 /**
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the sol structure.
@@ -516,7 +515,8 @@ int MMG2_mmg2d6(MMG5_pMesh mesh, MMG5_pSol sol) {
   
   /* Clean memory */
   _MMG5_DEL_MEM(mesh,sol->m,(sol->size*(sol->npmax+1))*sizeof(double));
-  
+  sol->np = 0;
+    
   return(1);
 }
 

@@ -66,12 +66,26 @@ int _MMG2_anatri(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
         return(0);
       }
       
+      /*if ( it==4 ){
+        printf("Saving mesh...\n");
+        if ( !MMG2_hashTria(mesh) ) {
+          fprintf(stdout,"  ## Hashing problem. Exit program.\n");
+          return(0);
+        }
+        
+        MMG2_bdryEdge(mesh);
+        _MMG2_savemesh_db(mesh,mesh->nameout,0);
+        _MMG2_savemet_db(mesh,met,mesh->nameout,0);
+        exit(0);
+      }*/
+      
       /* Collapse short edges */
       nc = _MMG2_colelt(mesh,met,typchk);
       if ( nc < 0 ) {
         fprintf(stdout,"  ## Unable to collapse mesh. Exiting.\n");
         return(0);
       }
+
     }
     else {
       ns = 0;
@@ -423,9 +437,6 @@ int _MMG2_colelt(MMG5_pMesh mesh,MMG5_pSol met,int typchk) {
   double             ux,uy,ll,hmin2;
   int                list[MMG2_LONMAX+2],ilist,nc,k;
   unsigned char      i,i1,i2,open;
-  
-int nc2;
-nc2 = 0;
   
   nc = 0;
   hmin2 = mesh->info.hmin * mesh->info.hmin;

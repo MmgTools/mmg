@@ -81,7 +81,7 @@ void MMG2D_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
 int MMG2D_Get_adjaTri(MMG5_pMesh mesh, int kel, int listri[3]) {
 
   if ( ! mesh->adja ) {
-    if (! MMG2_hashel(mesh))
+    if (! MMG2_hashTria(mesh))
       return(0);
   }
 

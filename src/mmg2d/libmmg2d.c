@@ -27,7 +27,7 @@
  */
 #define _MMG2D_RETURN_AND_PACK(mesh,met,val)do                          \
   {                                                                     \
-  if ( !MMG2_tassage(mesh,met) ) {                                      \
+  if ( !MMG2_pack(mesh,met) ) {                                         \
     mesh->npi = mesh->np;                                               \
     mesh->nti = mesh->nt;                                               \
     mesh->nai = mesh->na;                                               \
@@ -39,226 +39,6 @@
     }while(0)
 
 
-/**
- * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the solution structure.
- * \return 0 if memory problem (uncomplete mesh), 1 otherwise.
- *
- * Pack the mesh and metric and create explicitly all the mesh structures
- * (edges).
- *
- * \warning edges are not packed.
- */
-int MMG2_tassage(MMG5_pMesh mesh,MMG5_pSol sol) {
-  MMG5_pEdge         ped;
-  MMG5_pTria         pt,ptnew;
-  MMG5_pPoint        ppt,pptnew;
-  int                np,nt,k,nbl,isol,isolnew,i,memWarn,num;
-  int                iadr,iadrnew,iadrv,*adjav,*adja,*adjanew,voy;
-
-  /* compact vertices */
-  np=0;
-  for (k=1; k<=mesh->np; k++) {
-    ppt = &mesh->point[k];
-    if ( ppt->tag & M_NUL )  continue;
-    ppt->tmp = ++np;
-  }
-
-
-  /* compact edges */
-  memWarn = 0; num = 0;
-
-  if ( (!mesh->na) && mesh->adja ) {
-    //printf("NO EDGES\n");
-    for (k=1; k<=mesh->nt; k++) {
-      pt = &mesh->tria[k];
-      if (!pt->v[0]) continue;
-      for (i=0 ; i<3 ; i++) {
-        if (!(&mesh->adja[3*(k-1)+1])[i]) ++mesh->na;
-      }
-    }
-
-    if ( mesh->na ) {
-      assert(!mesh->edge);
-      _MMG5_ADD_MEM(mesh,(mesh->namax+1)*sizeof(MMG5_Edge),"final edges",
-                    memWarn=1);
-
-      if ( memWarn ) {
-        if ( mesh->info.ddebug )
-          printf("  -- Attempt to allocate a smallest edge table...\n");
-        mesh->namax = mesh->na;
-        memWarn = 0;
-        _MMG5_ADD_MEM(mesh,(mesh->namax+1)*sizeof(MMG5_Edge),"final edges",
-                      printf("  ## Warning: uncomplete mesh.\n");
-                      memWarn=1);
-      }
-
-      if ( memWarn ) {
-        mesh->na = 0;
-        goto triangles;
-      }
-
-      /* We have enough memory to allocate the edge table */
-      _MMG5_SAFE_CALLOC(mesh->edge,(mesh->namax+1),MMG5_Edge);
-
-      for (k=1; k<=mesh->nt; k++) {
-        pt = &mesh->tria[k];
-        if (!pt->v[0]) continue;
-        for (i=0 ; i<3 ; i++) {
-          if ((&mesh->adja[3*(k-1)+1])[i]) continue;
-          ++num;
-          ped = &mesh->edge[num];
-          ped->a = pt->v[MMG2_iare[i][0]];
-          ped->b = pt->v[MMG2_iare[i][1]];
-          ped->ref  = M_MIN(mesh->point[pt->v[MMG2_iare[i][0]]].ref,
-                            mesh->point[pt->v[MMG2_iare[i][1]]].ref);
-        }
-      }
-    }
-  }
-
-  nbl = 0;
-  for (k=1; k<=mesh->na; k++) {
-    ped  = &mesh->edge[k];
-    if(!ped->a) continue;
-    ped->a = mesh->point[ped->a].tmp;
-    ped->b = mesh->point[ped->b].tmp;
-    /* impossible to do that without update triangle....*/
-    /* if(k!=nbl) { */
-    /*   pednew = &mesh->edge[nbl]; */
-    /*   memcpy(pednew,ped,sizeof(MMG5_Edge)); */
-    /*   memset(ped,0,sizeof(MMG5_Tria)); */
-    /* } */
-    /*nbl++;*/
-  }
-  /* mesh->na = nbl;*/
-
-  /* compact triangle */
-triangles:
-  nt  = 0;
-  nbl = 1;
-  for (k=1; k<=mesh->nt; k++) {
-    pt = &mesh->tria[k];
-    if ( !pt->v[0] )  {
-      continue;
-    }
-    pt->v[0] = mesh->point[pt->v[0]].tmp;
-    pt->v[1] = mesh->point[pt->v[1]].tmp;
-    pt->v[2] = mesh->point[pt->v[2]].tmp;
-    nt++;
-    if(k!=nbl) {
-      ptnew = &mesh->tria[nbl];
-      memcpy(ptnew,pt,sizeof(MMG5_Tria));
-      //and the adjacency
-      iadr = 3*(k-1) + 1;
-      adja = &mesh->adja[iadr];
-      iadrnew = 3*(nbl-1) + 1;
-      adjanew = &mesh->adja[iadrnew];
-      for(i=0 ; i<3 ; i++) {
-        adjanew[i] = adja[i];
-        if(!adja[i]) continue;
-        iadrv = 3*(adja[i]/3-1) +1;
-        adjav = &mesh->adja[iadrv];
-        voy = i;
-        adjav[adja[i]%3] = 3*nbl + voy;
-
-        adja[i] = 0;
-      }
-      memset(pt,0,sizeof(MMG5_Tria));
-    }
-    nbl++;
-  }
-  mesh->nt = nt;
-
-  /* compact metric */
-  if ( sol->m ) {
-    nbl = 1;
-    for (k=1; k<=mesh->np; k++) {
-      ppt = &mesh->point[k];
-      if ( ppt->tag & M_NUL )  continue;
-      isol    = (k-1) * sol->size + 1;
-      isolnew = (nbl-1) * sol->size + 1;
-
-      for (i=0; i<sol->size; i++)
-        sol->m[isolnew + i] = sol->m[isol + i];
-      ++nbl;
-    }
-  }
-
-  /*compact vertices*/
-  np  = 0;
-  nbl = 1;
-  for (k=1; k<=mesh->np; k++) {
-    ppt = &mesh->point[k];
-    if ( ppt->tag & M_NUL )  continue;
-
-    /* remove the required tag at vertices in -nosurf mode */
-    if ( mesh->info.nosurf && (ppt->tag & M_NOSURF) ) {
-      ppt->tag &= ~M_REQUIRED;
-    }
-
-    if(k!=nbl) {
-      pptnew = &mesh->point[nbl];
-      memcpy(pptnew,ppt,sizeof(MMG5_Point));
-      ppt->tag   &= ~M_NUL;
-      assert(ppt->tmp == nbl);
-    }
-    np++;
-    if(k != nbl) {
-      ppt = &mesh->point[k];
-      memset(ppt,0,sizeof(MMG5_Point));
-      ppt->tag    = M_NUL;
-    }
-    nbl++;
-  }
-  mesh->np = np;
-  if ( sol->m ) sol->np  = np;
-
-  for(k=1 ; k<=mesh->np ; k++)
-    mesh->point[k].tmp = 0;
-
-  if(mesh->np < mesh->npmax - 3) {
-    mesh->npnil = mesh->np + 1;
-    for (k=mesh->npnil; k<mesh->npmax-1; k++)
-      mesh->point[k].tmp  = k+1;
-  } else {
-    mesh->npnil = 0;
-  }
-
-  /*to do only if the edges are packed*/
-  /* if(mesh->na < mesh->namax - 3) { */
-  /*   mesh->nanil = mesh->na + 1; */
-  /*   for (k=mesh->nanil; k<mesh->namax-1; k++) */
-  /*     mesh->edge[k].b = k+1; */
-  /* } else { */
-  /*   mesh->nanil = 0; */
-  /* } */
-
-  if(mesh->nt < mesh->ntmax - 3) {
-    mesh->nenil = mesh->nt + 1;
-    for (k=mesh->nenil; k<mesh->ntmax-1; k++)
-      mesh->tria[k].v[2] = k+1;
-  } else {
-    mesh->nenil = 0;
-  }
-
-  if ( memWarn ) return 0;
-
-  return(1);
-}
-
-/*
-  opt[0] = option
-  opt[1] = ddebug
-  opt[2] = noswap
-  opt[3] = noinsert
-  opt[4] = nomove
-  opt[5] = imprim
-  opt[6] = nr
-
-  optdbl[0] = hgrad
-  optdbl[1] =ar
-*/
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -304,31 +84,36 @@ int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol sol)
             " (MMG2D_IPARAM_iso):\n"
             "          You must call the MMG2D_mmg2dls function to use this option.\n");
     _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
-  } else if ( mesh->info.lag >= 0 ) {
+  }
+  else if ( mesh->info.lag >= 0 ) {
     fprintf(stdout,"  ## Error: lagrangian mode unavailable (MMG2D_IPARAM_lag):\n"
             "            You must call the MMG2D_mmg2dmov function to move a rigidbody.\n");
     _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
   }
 
   if ( mesh->info.imprim ) fprintf(stdout,"\n  -- MMG2DLIB: INPUT DATA\n");
-  /* load data */
+  
+  /* Load data */
   chrono(ON,&(ctim[1]));
 
-  sol->np = mesh->np;
+  sol->np   = mesh->np;
   sol->ver  = mesh->ver;
 
+  /* Allocate memory if no metric is supplied */
   if ( !sol->m ) {
-    /* mem alloc */
     _MMG5_ADD_MEM(mesh,(sol->size*(mesh->npmax+1))*sizeof(double),
                   "initial solution",return(0));
     _MMG5_SAFE_CALLOC(sol->m,sol->size*(mesh->npmax+1),double);
     sol->np = 0;
-  } else   if ( sol->np && (sol->np != mesh->np) ) {
+  }
+  else if ( sol->np && ( sol->np != mesh->np ) ) {
     fprintf(stdout,"  ## WARNING: WRONG SOLUTION NUMBER : %d != %d\n",sol->np,mesh->np);
     //exit(EXIT_FAILURE);
   }
+  
   chrono(OFF,&(ctim[1]));
   printim(ctim[1].gdif,stim);
+  
   if ( mesh->info.imprim )
     fprintf(stdout,"  --  INPUT DATA COMPLETED.     %s\n",stim);
 
@@ -372,6 +157,7 @@ int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol sol)
 
   /* sol->type = 1; */
 
+  /* Set function pointers */
   MMG2D_setfunc(mesh,sol);
   _MMG2D_Set_commonFunc();
 
@@ -382,33 +168,23 @@ int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol sol)
     fprintf(stdout,"  MAXIMUM NUMBER OF TRIANGLES (NTMAX) : %8d\n",mesh->ntmax);
   }
 
-  /* analysis */
+  /* Data analysis */
   chrono(ON,&ctim[2]);
   if ( mesh->info.imprim )   fprintf(stdout,"\n  -- PHASE 1 : DATA ANALYSIS\n");
   if ( abs(mesh->info.imprim) > 4 )
     fprintf(stdout,"  ** SETTING ADJACENCIES\n");
 
+  /* Scale input mesh */
   if ( !MMG2_scaleMesh(mesh,sol) )  _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
-  if ( !sol->np && !MMG2_doSol(mesh,sol) )  _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
 
-  if ( !MMG2_hashel(mesh) )
+  /* Create adjacency relations in the mesh */
+  if ( !MMG2_hashTria(mesh) )
     _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
 
   if ( mesh->info.ddebug && !_MMG5_chkmsh(mesh,1,0) )  _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
-  /*geom : corner detection*/
-  if ( mesh->info.dhd>0 )
-    if( !MMG2_evalgeom(mesh) ) _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
 
-  /*mesh gradation*/
-  if( mesh->info.hgrad > 0 ) {
-    if ( mesh->info.imprim )   fprintf(stdout,"\n  -- GRADATION : %8f\n",mesh->info.hgrad);
-    MMG2_lissmet(mesh,sol);
-  }
+  /* Print initial quality history */
   MMG2_outqua(mesh,sol);
-
-  if ( abs(mesh->info.imprim) > 1 )  {
-    MMG2_prilen(mesh,sol);
-  }
 
   chrono(OFF,&(ctim[2]));
   printim(ctim[2].gdif,stim);
@@ -420,22 +196,17 @@ int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol sol)
 
   if ( mesh->info.imprim )
     fprintf(stdout,"\n  -- PHASE 2 : MESH ADAPTATION\n");
-  if ( (!mesh->info.noinsert) && !MMG2_mmg2d1(mesh,sol) ) {
+  
+  /* Mesh analysis */
+  if (! _MMG2_analys(mesh) )
+    _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
+  
+  /* Mesh improvement */
+  if ( (!mesh->info.noinsert) && !MMG2_mmg2d1n(mesh,sol) ) {
     if ( !MMG2_unscaleMesh(mesh,sol) )  _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
     _MMG2D_RETURN_AND_PACK(mesh,sol,MMG5_LOWFAILURE);
   }
-
-  /* optimisation */
-  chrono(ON,&ctim[4]);
-  if ( mesh->info.imprim )
-    fprintf(stdout,"\n  -- PHASE 3 : MESH OPTIMISATION\n");
-  if ( !MMG2_mmg2d0(mesh,sol) ) {
-    if ( !MMG2_unscaleMesh(mesh,sol) )  _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
-    _MMG2D_RETURN_AND_PACK(mesh,sol,MMG5_LOWFAILURE);
-  }
-
-  chrono(OFF,&(ctim[4]));
-  printim(ctim[4].gdif,stim);
+  
   if ( mesh->info.imprim ) {
     fprintf(stdout,"  -- PHASE 3 COMPLETED.     %s\n",stim);
   }
@@ -447,10 +218,13 @@ int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol sol)
     fprintf(stdout,"\n  %s\n   END OF MODULE MMGS: IMB-LJLL \n  %s\n",MG_STR,MG_STR);
   }
 
+  /* Unscale mesh */
   if ( !MMG2_unscaleMesh(mesh,sol) )  _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
 
+  /* Print output quality history */
   MMG2_outqua(mesh,sol);
 
+  /* Print edge length histories */
   if ( abs(mesh->info.imprim) > 1 )  {
     MMG2_prilen(mesh,sol);
   }
@@ -458,7 +232,7 @@ int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol sol)
   chrono(ON,&(ctim[1]));
   if ( mesh->info.imprim )  fprintf(stdout,"\n  -- MESH PACKED UP\n");
 
-  if (!MMG2_tassage(mesh,sol) ) _LIBMMG5_RETURN(mesh,sol,MMG5_LOWFAILURE);
+  if (!MMG2_pack(mesh,sol) ) _LIBMMG5_RETURN(mesh,sol,MMG5_LOWFAILURE);
 
   chrono(OFF,&(ctim[1]));
 
@@ -585,12 +359,8 @@ int MMG2D_mmg2dmesh(MMG5_pMesh mesh,MMG5_pSol sol) {
   if ( abs(mesh->info.imprim) > 4 )
     fprintf(stdout,"  ** SETTING ADJACENCIES\n");
   if ( !MMG2_scaleMesh(mesh,sol) )  _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
-  
-  /* I am not sure it is needed at this point; should be created after */
-  if ( !sol->np && !MMG2_doSol(mesh,sol) )  _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
 
   if ( mesh->info.ddebug && !_MMG5_chkmsh(mesh,1,0) )  _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
-
 
   chrono(OFF,&(ctim[2]));
   printim(ctim[2].gdif,stim);
@@ -635,34 +405,6 @@ int MMG2D_mmg2dmesh(MMG5_pMesh mesh,MMG5_pSol sol) {
     _MMG2D_RETURN_AND_PACK(mesh,sol,MMG5_LOWFAILURE);
   }
   
-  /* analysis */
-  /*geom : corner detection*/
-  /*if ( mesh->info.dhd>0 )
-    if( !MMG2_evalgeom(mesh) ) _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);*/
-
-
-  /*mesh gradation*/
-  /*if( mesh->nt && mesh->info.hgrad > 0 ) {
-    if ( mesh->info.imprim )   fprintf(stdout,"\n  -- GRADATION : %8f\n",mesh->info.hgrad);
-    MMG2_lissmet(mesh,sol);
-  }
-  if ( mesh->nt )  MMG2_outqua(mesh,sol);
-
-  if ( mesh->nt && abs(mesh->info.imprim) > 1 )  {
-    MMG2_prilen(mesh,sol);
-  }
-  if ( (!mesh->info.noinsert) && !MMG2_mmg2d1(mesh,sol) ) {
-    _MMG2D_RETURN_AND_PACK(mesh,sol,MMG5_LOWFAILURE);
-  }*/
-
-  /* optimisation */
-  /*chrono(ON,&ctim[5]);
-  if ( mesh->info.imprim )
-    fprintf(stdout,"\n  -- PHASE 4 : MESH OPTIMISATION\n");
-  if ( !MMG2_mmg2d0(mesh,sol) ) {
-    _MMG2D_RETURN_AND_PACK(mesh,sol,MMG5_LOWFAILURE);
-  }*/
-
   chrono(OFF,&(ctim[5]));
   printim(ctim[5].gdif,stim);
   if ( mesh->info.imprim ) {
@@ -690,7 +432,7 @@ int MMG2D_mmg2dmesh(MMG5_pMesh mesh,MMG5_pSol sol) {
   chrono(ON,&(ctim[1]));
   if ( mesh->info.imprim )  fprintf(stdout,"\n  -- MESH PACKED UP\n");
 
-  if (!MMG2_tassage(mesh,sol) ) _LIBMMG5_RETURN(mesh,sol,MMG5_LOWFAILURE);
+  if (!MMG2_pack(mesh,sol) ) _LIBMMG5_RETURN(mesh,sol,MMG5_LOWFAILURE);
 
   chrono(OFF,&(ctim[1]));
 
@@ -834,17 +576,18 @@ int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol)
     fprintf(stdout,"  -- PHASE 3 COMPLETED.     %s\n",stim);
     fprintf(stdout,"\n  %s\n   END OF MODULE MMG2D: IMB-LJLL \n  %s\n",MG_STR,MG_STR);
   }
-
+  
   /* Unscale mesh */
   if ( !MMG2_unscaleMesh(mesh,sol) )  _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
-
+  
   /* Print quality histories */
   MMG2_outqua(mesh,sol);
 
   chrono(ON,&(ctim[1]));
   if ( mesh->info.imprim )  fprintf(stdout,"\n  -- MESH PACKED UP\n");
-
-  if (!MMG2_tassage(mesh,sol) ) _LIBMMG5_RETURN(mesh,sol,MMG5_LOWFAILURE);
+  
+  /* Pack mesh */
+  if (!MMG2_pack(mesh,sol) ) _LIBMMG5_RETURN(mesh,sol,MMG5_LOWFAILURE);
 
   chrono(OFF,&(ctim[1]));
 

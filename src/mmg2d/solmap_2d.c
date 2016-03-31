@@ -34,78 +34,12 @@
 
 #include "mmg2d.h"
 
-/**
- * \param mesh pointer toward the mesh structure
- * \param sol pointer toward the sol structure
- * \return 1 if success
- *
- * Compute isotropic size map according to the mean of the length of the edges
- * passing through a point.
- *
- */
-int MMG2_doSol(MMG5_pMesh mesh,MMG5_pSol sol) {
-  MMG5_pTria      ptt,pt;
-  MMG5_pPoint     p1,p2;
-  double          ux,uy,dd;
-  int             i,k,ib,ipa,ipb;
-  int             MMG_inxtt[5] = {0,1,2,0,1};
-
-  sol->np = mesh->np;
-  for (k=1; k<=mesh->np; k++) {
-    p1 = &mesh->point[k];
-    p1->tagdel = 0;
-  }
-  for (k=1; k<=mesh->nt; k++) {
-    ptt = &mesh->tria[k];
-    if ( !ptt->v[0] )  continue;
-
-    for (i=0; i<3; i++) {
-      ib  = MMG_inxtt[i+1];
-      ipa = ptt->v[i];
-      ipb = ptt->v[ib];
-      p1  = &mesh->point[ipa];
-      p2  = &mesh->point[ipb];
-
-      ux  = p1->c[0] - p2->c[0];
-      uy  = p1->c[1] - p2->c[1];
-      dd  = sqrt(ux*ux + uy*uy);
-
-      sol->m[ipa] += dd;
-      p1->tagdel++;
-      sol->m[ipb] += dd;
-      p2->tagdel++;
-    }
-  }
-
-  /* vertex size */
-  for (k=1; k<=mesh->np; k++) {
-    p1 = &mesh->point[k];
-    if ( !p1->tagdel )  {
-      sol->m[k] = mesh->info.hmax;
-      continue;
-    }
-
-    sol->m[k] = MG_MIN(mesh->info.hmax,MG_MAX(mesh->info.hmin,sol->m[k] / (double)p1->tagdel));
-    p1->tagdel = 0;
-  }
-
-/* compute quality */
-  for (k=1; k<=mesh->nt; k++) {
-    pt = &mesh->tria[k];
-    pt->qual = MMG2_caltri_in(mesh,sol,pt);
-  }
-
-  if ( mesh->info.imprim < -4 )
-    fprintf(stdout,"     HMIN %f   HMAX %f\n",mesh->info.hmin,mesh->info.hmax);
-  return(1);
-}
-
 /* New version for the definition of a size map; takes into account the curvature of the 
  external and internal curves present in the mesh */
 int _MMG2_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTria       pt;
   MMG5_pPoint      p1,p2;
-  double           t1[2],t2[2],b1[0],b2[0],gpp1[2],gpp2[2],pv,M1,M2,ps,ux,uy,ll,li,lm,hmax,hausd,hmin;
+  double           t1[2],t2[2],b1[0],b2[0],gpp1[2],gpp2[2],pv,cosn,M1,M2,ps1,ps2,ux,uy,ll,li,lm,hmax,hausd,hmin;
   int              k,ip1,ip2;
   unsigned char    i,i1,i2;
   
@@ -120,15 +54,17 @@ int _MMG2_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
   hmin = mesh->info.hmin;
   
   /* Allocate the structure */
-  if ( !met->m ) {
+  if ( !met->np ) {
     met->npmax = mesh->npmax;
     met->np    = mesh->np;
     met->size  = 1;
     
-    _MMG5_ADD_MEM(mesh,(met->npmax+1)*sizeof(double),"solution",return(0));
-    _MMG5_SAFE_MALLOC(met->m,mesh->npmax+1,double);
-    
-    /* Initialize metric with a constant size */
+    if ( !met->m ) {
+      _MMG5_ADD_MEM(mesh,(met->npmax+1)*sizeof(double),"solution",return(0));
+      _MMG5_SAFE_MALLOC(met->m,mesh->npmax+1,double);
+
+    }
+    /* Initialize metric with a constant size in the case met->np = 0 (meaning that no metric was supplied) */
     for (k=1; k<=mesh->np; k++)
       met->m[k] = hmax;
   }
@@ -175,29 +111,34 @@ int _MMG2_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
       }
       
       /* Calculation of the two Bezier coefficients along the curve */
-      ps = ux*t1[0] + uy*t1[1];
-      b1[0] = p1->c[0] + _MMG5_ATHIRD*ps*t1[0];
-      b1[1] = p1->c[1] + _MMG5_ATHIRD*ps*t1[1];
+      ps1   = ux*t1[0] + uy*t1[1];
+      b1[0] = p1->c[0] + _MMG5_ATHIRD*ps1*t1[0];
+      b1[1] = p1->c[1] + _MMG5_ATHIRD*ps1*t1[1];
       
-      ps = ux*t2[0]+uy*t2[1];
-      b2[0] = p2->c[0] - _MMG5_ATHIRD*ps*t2[0];
-      b2[1] = p2->c[1] - _MMG5_ATHIRD*ps*t2[1];
+      ps2   = ux*t2[0]+uy*t2[1];
+      b2[0] = p2->c[0] - _MMG5_ATHIRD*ps2*t2[0];
+      b2[1] = p2->c[1] - _MMG5_ATHIRD*ps2*t2[1];
       
-      /* \gamma^{\prime\prime}(0); \gamma^\prime(0) = t1 by construction */
+      ps1 *= ps1;
+      ps2 *= ps2;
+      
+      if ( ps1 < _MMG5_EPSD || ps2 < _MMG5_EPSD ) continue;
+      
+      /* \gamma^{\prime\prime}(0); \gamma^\prime(0) = ps*t1 by construction */
       gpp1[0] = 6.0*(p1->c[0] - 2.0*b1[0] + b2[0]);
       gpp1[1] = 6.0*(p1->c[1] - 2.0*b1[1] + b2[1]);
       
       /* Vector product gpp1 ^ t1 */
       pv = gpp1[0]*t1[1] - gpp1[1]*t1[0];
-      M1 = fabs(pv)/ll;
+      M1 = fabs(pv)/ps1;
       
-      /* \gamma^{\prime\prime}(1); \gamma^\prime(1) = -t2 by construction */
+      /* \gamma^{\prime\prime}(1); \gamma^\prime(1) = -ps*t2 by construction */
       gpp2[0] = 6.0*(p2->c[0] - 2.0*b2[0] + b1[0]);
       gpp2[1] = 6.0*(p2->c[1] - 2.0*b2[1] + b1[1]);
       
-      /* Vector product gpp1 ^ t1 */
+      /* Vector product gpp2 ^ t2 */
       pv = gpp2[0]*t2[1] - gpp2[1]*t2[0];
-      M2 = fabs(pv)/ll;
+      M2 = fabs(pv)/ps2;
       
       M1 = MG_MAX(M1,M2);
       if ( M1 < _MMG5_EPSD)

@@ -107,9 +107,7 @@ int MMG2_bdryenforcement(MMG5_pMesh mesh,MMG5_pSol sol) {
       ped->base = kdep;
     }
   }
-  
-  printf("number of missing edges %d\n",mesh->na -nex);
-  
+    
   /* Now treat the missing edges */
   if ( nex != mesh->na ) {
     if(mesh->info.imprim > 5)

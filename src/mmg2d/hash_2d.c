@@ -143,111 +143,6 @@ int MMG2_hashTria(MMG5_pMesh mesh) {
   return(1);
 }
 
-int MMG2_hashel(MMG5_pMesh mesh) {
-  MMG5_pTria     pt,pt1;
-  int       k,kk,pp,l,ll,mins,mins1,maxs,maxs1;
-  int      *hcode,*link,inival,hsize,iadr;
-  unsigned char  *hvoy,i,ii,i1,i2;
-  unsigned int    key;
-
-  if ( mesh->adja )  return(1);
-  if ( !mesh->nt )  return(0);
-
-  /* memory alloc */
-  _MMG5_SAFE_CALLOC(hcode,mesh->nt+1,int);
-
-  /* memory alloc */
-  _MMG5_ADD_MEM(mesh,(3*mesh->ntmax+5)*sizeof(int),"adjacency table",
-                printf("  Exit program.\n");
-                exit(EXIT_FAILURE));
-  _MMG5_SAFE_CALLOC(mesh->adja,3*mesh->ntmax+5,int);
-
-  link  = mesh->adja;
-  hsize = mesh->nt;
-  hvoy  = (unsigned char*)hcode;
-
-  /* init */
-  inival = 2147483647;
-  for (k=0; k<=mesh->nt; k++)
-    hcode[k] = -inival;
-
-  /* build hash table */
-  for (k=1; k<=mesh->nt; k++) {
-    pt = &mesh->tria[k];
-
-    if ( !pt->v[0] )  continue;
-    for (i=0; i<3; i++) {
-      i1 = MMG2_idir[i+1];
-      i2 = MMG2_idir[i+2];
-      if ( pt->v[i1] < pt->v[i2] ) {
-        mins = pt->v[i1];
-        maxs = pt->v[i2];
-      }
-      else {
-        mins = pt->v[i2];
-        maxs = pt->v[i1];
-      }
-
-      /* compute key */
-      key = KTA*mins + KTB*maxs;
-      key = key % hsize + 1;
-
-      /* insert */
-      iadr = 3*(k-1) + i+1;
-      link[iadr] = hcode[key];
-      hcode[key] = -iadr;
-    }
-  }
-
-  /* set adjacency */
-  for (l=3*mesh->nt; l>0; l--) {
-    if ( link[l] >= 0 )  continue;
-    k = (l-1) / 3 + 1;
-    i = (l-1) % 3;
-    i1 = MMG2_idir[i+1];
-    i2 = MMG2_idir[i+2];
-    pt = &mesh->tria[k];
-
-    mins = M_MIN(pt->v[i1],pt->v[i2]);
-    maxs = M_MAX(pt->v[i1],pt->v[i2]);
-
-    /* accross link */
-    ll = -link[l];
-    pp = 0;
-    link[l] = 0;
-    hvoy[l] = 0;
-    while ( ll != inival ) {
-      kk = (ll-1) / 3 + 1;
-      ii = (ll-1) % 3;
-      i1 = MMG2_idir[ii+1];
-      i2 = MMG2_idir[ii+2];
-      pt1  = &mesh->tria[kk];
-      if ( pt1->v[i1] < pt1->v[i2] ) {
-        mins1 = pt1->v[i1];
-        maxs1 = pt1->v[i2];
-      }
-      else {
-        mins1 = pt1->v[i2];
-        maxs1 = pt1->v[i1];
-      }
-
-      if ( mins1 == mins  && maxs1 == maxs ) {
-        /* adjacent found */
-        if ( pp != 0 )  link[pp] = link[ll];
-        link[l] = 3*kk + ii;
-        link[ll]= 3*k + i;
-        break;
-      }
-      pp = ll;
-      ll = -link[ll];
-    }
-  }
-  _MMG5_SAFE_FREE(hcode);
-
-  MMG2_baseBdry(mesh);
-  return(1);
-}
-
 /*hash edge :
   return 1 if edge exist in the table*/
 int MMG2_hashEdge(pHashTable edgeTable,int iel,int ia, int ib) {
@@ -427,6 +322,239 @@ int MMG2_bdryEdge(MMG5_pMesh mesh) {
   return(1);
 }
 
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param sol pointer toward the solution structure.
+ * \return 0 if memory problem (uncomplete mesh), 1 otherwise.
+ *
+ * Pack the mesh and metric and create explicitly all the mesh structures
+ * (edges).
+ *
+ * \warning edges are not packed.
+ */
+int MMG2_pack(MMG5_pMesh mesh,MMG5_pSol sol) {
+  MMG5_pTria         pt,pt1,ptnew;
+  MMG5_pEdge         ped;
+  MMG5_pPoint        ppt,pptnew;
+  int                np,ned,nt,k,iel,nbl,isol,isolnew,memWarn;
+  int                iadr,iadrnew,iadrv,*adjav,*adja,*adjanew,voy;
+  char               i,i1,i2;
+  
+  /* Recreate adjacencies if need be */
+  if ( !MMG2_hashTria(mesh) ) {
+    fprintf(stdout,"  ## Hashing problem. Exit program.\n");
+    return(0);
+  }
+  
+  /* Pack vertex indices */
+  np = 0;
+  for (k=1; k<=mesh->np; k++) {
+    ppt = &mesh->point[k];
+    if ( !MG_VOK(ppt) )  continue;
+    ppt->tmp = ++np;
+  }
+  
+  /* Count the number of edges in the mesh */
+  memWarn = 0;
+  ned = 0;
+  
+  mesh->na = 0;
+  for (k=1; k<=mesh->nt; k++) {
+    pt = &mesh->tria[k];
+    if ( !MG_EOK(pt) ) continue;
+    adja = &mesh->adja[3*(k-1)+1];
+    
+    for (i=0; i<3; i++) {
+      iel = adja[i] / 3;
+      if ( !iel ) ++mesh->na;
+      else if ( iel < k ) {
+        pt1 = &mesh->tria[iel];
+        if ( pt->ref != pt1->ref ) ++mesh->na;
+      }
+    }
+  }
+  
+  /* Pack edges */
+  if ( mesh->na ) {
+    assert ( !mesh->edge );
+    _MMG5_ADD_MEM(mesh,(mesh->namax+1)*sizeof(MMG5_Edge),"final edges", memWarn=1);
+    
+    if ( memWarn ) {
+      if ( mesh->info.ddebug )
+        printf("  -- Attempt to allocate a smallest edge table...\n");
+      mesh->namax = mesh->na;
+      memWarn = 0;
+      _MMG5_ADD_MEM(mesh,(mesh->namax+1)*sizeof(MMG5_Edge),"final edges",
+                    printf("  ## Warning: uncomplete mesh.\n");
+                    memWarn=1);
+    }
+    
+    if ( memWarn )
+      mesh->na = 0;
+    else {
+      /* We have enough memory to allocate the edge table */
+      _MMG5_SAFE_CALLOC(mesh->edge,(mesh->namax+1),MMG5_Edge);
+      
+      for (k=1; k<=mesh->nt; k++) {
+        pt = &mesh->tria[k];
+        if ( !MG_EOK(pt) ) continue;
+        adja = &mesh->adja[3*(k-1)+1];
+        
+        for (i=0; i<3; i++) {
+          i1 = _MMG5_inxt2[i];
+          i2 = _MMG5_iprv2[i];
+          iel = adja[i] / 3;
+          pt1 = &mesh->tria[iel];
+          if ( !iel || ( iel < k && pt->ref != pt1->ref) ) {
+            ++ned;
+            ped = &mesh->edge[ned];
+            ped->a = pt->v[i1];
+            ped->b = pt->v[i2];
+            if ( !iel ) {
+              ped->ref = pt1->edg[i];
+            }
+            else {
+              ped->ref = mesh->info.iso ? MG_ISO : pt1->edg[i];
+            }
+          }
+        }
+      }
+    }
+  }
+  
+  for (k=1; k<=mesh->na; k++) {
+    ped  = &mesh->edge[k];
+    if ( !ped->a ) continue;
+    ped->a = mesh->point[ped->a].tmp;
+    ped->b = mesh->point[ped->b].tmp;
+  }
+  
+  /* Pack triangles */
+  nt  = 0;
+  nbl = 1;
+  for (k=1; k<=mesh->nt; k++) {
+    pt = &mesh->tria[k];
+    if ( !MG_EOK(pt) ) continue;
+    
+    pt->v[0] = mesh->point[pt->v[0]].tmp;
+    pt->v[1] = mesh->point[pt->v[1]].tmp;
+    pt->v[2] = mesh->point[pt->v[2]].tmp;
+    nt++;
+    
+    if ( k != nbl ) {
+      ptnew = &mesh->tria[nbl];
+      memcpy(ptnew,pt,sizeof(MMG5_Tria));
+      
+      /* Update the adjacency */
+      iadr = 3*(k-1) + 1;
+      adja = &mesh->adja[iadr];
+      iadrnew = 3*(nbl-1) + 1;
+      adjanew = &mesh->adja[iadrnew];
+      
+      for(i=0; i<3; i++) {
+        adjanew[i] = adja[i];
+        if ( !adja[i] ) continue;
+        iadrv = 3*(adja[i]/3-1)+1;
+        adjav = &mesh->adja[iadrv];
+        voy = i;
+        adjav[adja[i]%3] = 3*nbl + voy;
+        adja[i] = 0;
+      }
+      memset(pt,0,sizeof(MMG5_Tria));
+    }
+    nbl++;
+  }
+  mesh->nt = nt;
+  
+  /* Pack metric map */
+  if ( sol->m ) {
+    nbl = 1;
+    for (k=1; k<=mesh->np; k++) {
+      ppt = &mesh->point[k];
+      if ( !MG_VOK(ppt) )  continue;
+      isol    = (k-1) * sol->size + 1;
+      isolnew = (nbl-1) * sol->size + 1;
+      
+      for (i=0; i<sol->size; i++)
+        sol->m[isolnew + i] = sol->m[isol + i];
+      ++nbl;
+    }
+  }
+  
+  /* Pack vertices*/
+  np  = 0;
+  nbl = 1;
+  for (k=1; k<=mesh->np; k++) {
+    ppt = &mesh->point[k];
+    if ( !MG_VOK(ppt) )  continue;
+    
+    if ( k != nbl ) {
+      pptnew = &mesh->point[nbl];
+      memcpy(pptnew,ppt,sizeof(MMG5_Point));
+      ppt->tag   = 0;
+      assert ( ppt->tmp == nbl );
+    }
+    np++;
+    if ( k != nbl ) {
+      ppt = &mesh->point[k];
+      memset(ppt,0,sizeof(MMG5_Point));
+      ppt->tag    = 0;
+    }
+    nbl++;
+  }
+  mesh->np = np;
+  if ( sol->m ) sol->np  = np;
+  
+  /* Reset ppt->tmp field */
+  for(k=1 ; k<=mesh->np ; k++)
+    mesh->point[k].tmp = 0;
+  
+  if(mesh->np < mesh->npmax - 3) {
+    mesh->npnil = mesh->np + 1;
+    for (k=mesh->npnil; k<mesh->npmax-1; k++)
+      mesh->point[k].tmp  = k+1;
+  }
+  else {
+    mesh->npnil = 0;
+  }
+  
+  /*to do only if the edges are packed*/
+  /* if(mesh->na < mesh->namax - 3) { */
+  /*   mesh->nanil = mesh->na + 1; */
+  /*   for (k=mesh->nanil; k<mesh->namax-1; k++) */
+  /*     mesh->edge[k].b = k+1; */
+  /* } else { */
+  /*   mesh->nanil = 0; */
+  /* } */
+  
+  /* Reset garbage collector */
+  if ( mesh->nt < mesh->ntmax - 3 ) {
+    mesh->nenil = mesh->nt + 1;
+    for (k=mesh->nenil; k<mesh->ntmax-1; k++)
+      mesh->tria[k].v[2] = k+1;
+  }
+  else {
+    mesh->nenil = 0;
+  }
+  
+  if ( memWarn ) return 0;
+  
+  return(1);
+}
+
+/*
+ opt[0] = option
+ opt[1] = ddebug
+ opt[2] = noswap
+ opt[3] = noinsert
+ opt[4] = nomove
+ opt[5] = imprim
+ opt[6] = nr
+ 
+ optdbl[0] = hgrad
+ optdbl[1] =ar
+ */
 
 
 

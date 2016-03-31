@@ -301,7 +301,7 @@ int MMG2_scaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
   return(1);
 }
 
-
+/* Unscale mesh coordinates */
 int MMG2_unscaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
   MMG5_pPoint     ppt;
   MMG5_Info      *info;

@@ -412,6 +412,7 @@ int main(int argc,char *argv[]) {
   chrono(ON,&MMG5_ctim[1]);
   if ( MMG2D_loadMesh(mesh,mesh->namein) < 1)
     _MMG2D_RETURN_AND_FREE(mesh,sol,MMG5_STRONGFAILURE);
+  
   /* Set default metric size */
   if ( !MMG2D_Set_solSize(mesh,sol,MMG5_Vertex,0,MMG5_Scalar) )
     _MMG2D_RETURN_AND_FREE(mesh,sol,MMG5_STRONGFAILURE);
