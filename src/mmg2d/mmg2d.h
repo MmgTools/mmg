@@ -110,7 +110,7 @@ if ( !ip ) {law;}                                                   \
 }while(0)
 
 /** Free allocated pointers of mesh and sol structure and return value val */
-#define _MMG2D_RETURN_AND_FREE(mesh,met,val)do                \
+#define _MMG2D_RETURN_AND_FREE(mesh,met,disp,val)do                \
   {                                                           \
     MMG2D_Free_all(MMG5_ARG_start,                            \
                    MMG5_ARG_ppMesh,&mesh,MMG5_ARG_ppMet,&met, \
@@ -334,7 +334,7 @@ void _MMG2D_Free_names_var( va_list argptr );
 
 int MMG2_mmg2d2(MMG5_pMesh , MMG5_pSol);
 int MMG2_mmg2d6(MMG5_pMesh ,MMG5_pSol );
-int MMG2_mmg2d9(MMG5_pMesh ,MMG5_pSol );
+int MMG2_mmg2d9(MMG5_pMesh ,MMG5_pSol ,MMG5_pSol );
 //int MMG2_cendel(MMG5_pMesh ,MMG5_pSol ,double ,int );
 int _MMG2_swapdelone(MMG5_pMesh ,MMG5_pSol ,int ,char ,double ,int *);
 int _MMG5_mmg2dChkmsh(MMG5_pMesh , int, int );
@@ -433,6 +433,7 @@ int _MMG2_movedgpt(MMG5_pMesh ,MMG5_pSol ,int ,int *,char );
 int _MMG2_movintpt(MMG5_pMesh ,MMG5_pSol ,int ,int *,char );
 int _MMG2_chkmsh(MMG5_pMesh );
 int _MMG2_savenor_db(MMG5_pMesh ,char *,char );
+int _MMG2_savedisp_db(MMG5_pMesh mesh,MMG5_pSol ,char *,char );
 
 /* functions pointers */
 double long_ani(double *ca,double *cb,double *ma,double *mb);

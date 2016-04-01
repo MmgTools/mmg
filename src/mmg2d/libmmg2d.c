@@ -609,17 +609,130 @@ int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol)
  * Main program for the rigid body movement library .
  *
  */
-int MMG2D_mmg2dmov(MMG5_pMesh mesh,MMG5_pSol sol)
-// MMG5_pSol,met)
-{
-  //mytime    ctim[TIMEMAX];
-  //char      stim[32];
+int MMG2D_mmg2dmov(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
+  mytime    ctim[TIMEMAX];
+  char      stim[32];
 
   fprintf(stdout,"  -- MMG2D, Release %s (%s) \n",MG_VER,MG_REL);
   fprintf(stdout,"     %s\n",MG_CPY);
   fprintf(stdout,"     %s %s\n",__DATE__,__TIME__);
+  
+  /*uncomment for callback*/
+  //MMG2D_callbackinsert = titi;
+  
+  /* interrupts */
+  signal(SIGABRT,_MMG2_excfun);
+  signal(SIGFPE,_MMG2_excfun);
+  signal(SIGILL,_MMG2_excfun);
+  signal(SIGSEGV,_MMG2_excfun);
+  signal(SIGTERM,_MMG2_excfun);
+  signal(SIGINT,_MMG2_excfun);
+  
+  tminit(ctim,TIMEMAX);
+  chrono(ON,&(ctim[0]));
+  
+  /* Check data compatibility */
+  if ( mesh->info.imprim ) fprintf(stdout,"\n  -- MMG2DMOV: INPUT DATA\n");
+  chrono(ON,&(ctim[1]));
+  
+  disp->ver  = mesh->ver;
+  
+  if ( !mesh->nt ) {
+    fprintf(stdout,"\n  ## ERROR: NO TRIANGLES IN THE MESH \n");
+    _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
+  }
+  else if ( !disp->m ) {
+    fprintf(stdout,"\n  ## ERROR: A VALID SOLUTION FILE IS NEEDED \n");
+    _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
+  }
+  else if ( disp->size != 2 ) {
+    fprintf(stdout,"  ## ERROR: LAGRANGIAN MOTION OPTION NEED A VECTOR DISPLACEMENT.\n");
+    _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
+  }
+  else if ( disp->np && (disp->np != mesh->np) ) {
+    fprintf(stdout,"  ## WARNING: WRONG SOLUTION NUMBER. IGNORED\n");
+    _MMG5_DEL_MEM(mesh,disp->m,(disp->size*(disp->npmax+1))*sizeof(double));
+    disp->np = 0;
+  }
+  
+  chrono(OFF,&(ctim[1]));
+  printim(ctim[1].gdif,stim);
+  if ( mesh->info.imprim )
+    fprintf(stdout,"  --  INPUT DATA COMPLETED.     %s\n",stim);
+  
+  /* Set pointers */
+  MMG2D_setfunc(mesh,met);
+  _MMG2D_Set_commonFunc();
+  
+  fprintf(stdout,"\n  %s\n   MODULE MMG2D-IMB/LJLL : %s (%s) %s\n  %s\n",
+          MG_STR,MG_VER,MG_REL,met->size == 1 ? "ISO" : "ANISO",MG_STR);
+  if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug ) {
+    fprintf(stdout,"  MAXIMUM NUMBER OF POINTS    (NPMAX) : %8d\n",mesh->npmax);
+    fprintf(stdout,"  MAXIMUM NUMBER OF TRIANGLES (NTMAX) : %8d\n",mesh->ntmax);
+  }
+  
+  /* Analysis */
+  chrono(ON,&ctim[2]);
+  if ( mesh->info.imprim )   fprintf(stdout,"\n  -- PHASE 1 : DATA ANALYSIS\n");
+  if ( abs(mesh->info.imprim) > 4 )
+    fprintf(stdout,"  ** SETTING ADJACENCIES\n");
+  if ( !MMG2_scaleMesh(mesh,disp) )  _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
+  
+  if ( mesh->nt && !MMG2_hashTria(mesh) )  _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
+  if ( mesh->info.ddebug && !_MMG5_chkmsh(mesh,1,0) )  _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
+  
+  /* Print initial quality */
+  MMG2_outqua(mesh,met);
+  
+  /* Mesh analysis */
+  if (! _MMG2_analys(mesh) )
+    _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
+  
+  chrono(OFF,&(ctim[2]));
+  printim(ctim[2].gdif,stim);
+  if ( mesh->info.imprim )
+    fprintf(stdout,"  -- PHASE 1 COMPLETED.     %s\n",stim);
 
-  fprintf(stdout,"\n  ## ERROR: OPTION NOT YET IMPLEMENTED. \n");
+  /* Lagrangian motion */
+  chrono(ON,&(ctim[3]));
+  if ( mesh->info.imprim ) {
+    fprintf(stdout,"\n  -- PHASE 2 : LAGRANGIAN MOTION\n");
+  }
+  
+#ifdef USE_SUSCELAS
+  /* Lagrangian mode */
+  if ( !MMG2_mmg2d9(mesh,disp,met) ) {
+    disp->npi = disp->np;
+    _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
+  }
+#endif
+  disp->npi = disp->np;
 
-  _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
+  chrono(OFF,&(ctim[3]));
+  printim(ctim[3].gdif,stim);
+  if ( mesh->info.imprim ) {
+    fprintf(stdout,"  -- PHASE 2 COMPLETED.     %s\n",stim);
+    fprintf(stdout,"\n  %s\n   END OF MODULE MMG3D: IMB-LJLL \n  %s\n",MG_STR,MG_STR);
+  }
+  
+  /* Unscale mesh */
+  if ( !MMG2_unscaleMesh(mesh,met) )  _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
+  
+  /* Print quality histories */
+  MMG2_outqua(mesh,met);
+  
+  chrono(ON,&(ctim[1]));
+  if ( mesh->info.imprim )  fprintf(stdout,"\n  -- MESH PACKED UP\n");
+  
+  /* Pack mesh */
+  if (!MMG2_pack(mesh,met) ) _LIBMMG5_RETURN(mesh,met,MMG5_LOWFAILURE);
+  
+  chrono(OFF,&(ctim[1]));
+  
+  chrono(OFF,&ctim[0]);
+  printim(ctim[0].gdif,stim);
+  if ( mesh->info.imprim )
+    fprintf(stdout,"\n   MMG2DMOV: ELAPSED TIME  %s\n",stim);
+  
+  _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
 }

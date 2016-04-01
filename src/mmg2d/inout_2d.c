@@ -502,7 +502,6 @@ int MMG2D_loadSol(MMG5_pMesh mesh,MMG5_pSol sol,char *filename) {
   if ( ptr ) {
     // filename contains the solution extension
     ptr = strstr(data,".solb");
-
     if ( ptr )  bin = 1;
 
     if( !(inm = fopen(data,"rb")) ) {
@@ -512,7 +511,7 @@ int MMG2D_loadSol(MMG5_pMesh mesh,MMG5_pSol sol,char *filename) {
   }
   else
   {
-    // filename don't contains the solution extension
+    /* Filename does not contain the solution extension */
     ptr = strstr(data,".mesh");
     if ( ptr ) *ptr = '\0';
 
@@ -531,16 +530,17 @@ int MMG2D_loadSol(MMG5_pMesh mesh,MMG5_pSol sol,char *filename) {
 
   fprintf(stdout,"  %%%% %s OPENED\n",data);
 
-  if(!bin) {
+  if ( !bin ) {
     strcpy(chaine,"DDD");
-    while(fscanf(inm,"%s",&chaine[0])!=EOF && strncmp(chaine,"End",strlen("End")) ) {
-      if(!strncmp(chaine,"Dimension",strlen("Dimension"))) {
+    while ( fscanf(inm,"%s",&chaine[0])!=EOF && strncmp(chaine,"End",strlen("End")) ) {
+      if ( !strncmp(chaine,"Dimension",strlen("Dimension")) ) {
         fscanf(inm,"%d",&dim);
-        if(dim!=2 && !msh) {
+        if ( dim != 2 && !msh ) {
           fprintf(stdout,"  -- BAD SOL DIMENSION : %d\n",dim);
           return(-1);
-        } else if(dim!=2 && msh) {
-          if(dim==3)
+        }
+        else if( dim != 2 && msh ) {
+          if ( dim == 3 )
             fprintf(stdout,"  -- READ 3D SOLUTION : %d\n",dim);
           else {
             fprintf(stdout,"  -- BAD SOL DIMENSION : %d\n",dim);
@@ -548,10 +548,11 @@ int MMG2D_loadSol(MMG5_pMesh mesh,MMG5_pSol sol,char *filename) {
           }
         }
         continue;
-      } else if(!strncmp(chaine,"SolAtVertices",strlen("SolAtVertices"))) {
+      }
+      else if ( !strncmp(chaine,"SolAtVertices",strlen("SolAtVertices")) ) {
         fscanf(inm,"%d",&sol->np);
         fscanf(inm,"%d",&type);
-        if(type!=1) {
+        if ( type != 1 ) {
           fprintf(stdout,"SEVERAL SOLUTION => IGNORED : %d\n",type);
           return(-1);
         }
@@ -560,7 +561,8 @@ int MMG2D_loadSol(MMG5_pMesh mesh,MMG5_pSol sol,char *filename) {
         break;
       }
     }
-  } else {
+  }
+  else {
     fread(&binch,sw,1,inm);
     iswp=0;
     if(binch==16777216) iswp=1;
@@ -613,7 +615,10 @@ int MMG2D_loadSol(MMG5_pMesh mesh,MMG5_pSol sol,char *filename) {
     fprintf(stdout,"  ** MISSING DATA.\n");
     return(-1);
   }
-  if ( btyp!= 1 && btyp!=3 ) {
+  /* btyp = 1: scalar solution (isotropic metric or ls function, 
+     btyp = 2: vector field (displacement in Lagrangian mode), 
+     btyp = 3: anisotropic metric */
+  if ( btyp!= 1 && btyp != 2 && btyp != 3 ) {
     fprintf(stdout,"  ** DATA IGNORED\n");
     sol->size = 1;
     sol->np = 0;
@@ -626,7 +631,7 @@ int MMG2D_loadSol(MMG5_pMesh mesh,MMG5_pSol sol,char *filename) {
                 "initial solution",return(0));
   _MMG5_SAFE_CALLOC(sol->m,(sol->size*(mesh->npmax+1)),double);
 
-  /* read mesh solutions */
+  /* Read mesh solutions */
   rewind(inm);
   fseek(inm,posnp,SEEK_SET);
   for (k=1; k<=sol->np; k++) {
@@ -1838,7 +1843,7 @@ int _MMG2_savenor_db(MMG5_pMesh mesh,char *filename,char pack) {
   /* Write Header */
   fprintf(out,"MeshVersionFormatted %d\n\nDimension %d\n\n",1,2);
   
-  /* Print vertices */
+  /* Pack vertices or not for writing */
   for (k=1; k<=mesh->np; k++) {
     ppt = &mesh->point[k];
     if ( pack && MG_VOK(ppt) ) {
@@ -1858,6 +1863,57 @@ int _MMG2_savenor_db(MMG5_pMesh mesh,char *filename,char pack) {
       if ( MG_EDG(ppt->tag) && ! MG_SIN(ppt->tag) ) fprintf(out,"%f %f\n",ppt->n[0],ppt->n[1]);
       else fprintf(out,"%f %f\n",0.0,0.0);
     }
+  }
+  
+  /* End keyword */
+  fprintf(out,"End\n");
+  
+  fclose(out);
+  
+  return(1);
+}
+
+/* Save displacement field for debugging purpose */
+int _MMG2_savedisp_db(MMG5_pMesh mesh,MMG5_pSol disp,char *filename,char pack) {
+  MMG5_pPoint        ppt;
+  int                k,np;
+  char               *ptr,data[128];
+  FILE               *out;
+  
+  strcpy(data,filename);
+  ptr = strstr(data,".sol");
+  if ( ptr )
+    *ptr = '\0';
+  
+  strcat(data,".disp.sol");
+  out = fopen(data,"w");
+  
+  np = 0;
+  for (k=1; k<=mesh->np; k++)
+    mesh->point[k].tmp = 0;
+  
+  /* Write Header */
+  fprintf(out,"MeshVersionFormatted %d\n\nDimension %d\n\n",1,2);
+  
+  /* Pack vertices or not for writing */
+  for (k=1; k<=mesh->np; k++) {
+    ppt = &mesh->point[k];
+    if ( pack && MG_VOK(ppt) ) {
+      np++;
+      ppt->tmp = np;
+    }
+    else if ( !pack ) {
+      np++;
+      ppt->tmp = np;
+    }
+  }
+  
+  fprintf(out,"SolAtVertices\n %d\n%d %d\n\n",np,1,2);
+  for (k=1; k<=mesh->np; k++) {
+    ppt = &mesh->point[k];
+    if ( ( pack && MG_VOK(ppt) ) || !pack )
+      fprintf(out,"%f %f\n",disp->m[2*(k-1)+1],disp->m[2*(k-1)+2]);
+    
   }
   
   /* End keyword */

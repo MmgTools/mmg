@@ -279,7 +279,7 @@ int MMG_chkmov(MMG5_pMesh mesh,char level) {
 
 
 /*rigid bodies moving*/
-int MMG2_mmg2d9(MMG5_pMesh mesh,MMG5_pSol sol) {
+int MMG2_mmg2d9(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met) {
   printf("comment because of the merge needs\n");
   exit(EXIT_FAILURE);
   /* MMG5_pPoint   ppt;    */

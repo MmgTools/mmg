@@ -611,7 +611,7 @@
 !  *
 !  */
 
-! int MMG2D_mmg2dmov(MMG5_pMesh mesh,MMG5_pSol sol);
+! int MMG2D_mmg2dmov(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp);
 
 ! /* Tools for the library */
 ! void (*MMG2D_callbackinsert) (int ,int ,int ,int, int);

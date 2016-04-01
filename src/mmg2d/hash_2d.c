@@ -304,7 +304,7 @@ int MMG2_bdryEdge(MMG5_pMesh mesh) {
       }
       /* Case of an internal boundary edge */
       else {
-        pa->ref = mesh->info.iso ? MG_ISO : 0;
+        pa->ref = mesh->info.iso ? MG_ISO : pt->edg[i];
       }
     }
   }
@@ -412,10 +412,10 @@ int MMG2_pack(MMG5_pMesh mesh,MMG5_pSol sol) {
             ped->a = pt->v[i1];
             ped->b = pt->v[i2];
             if ( !iel ) {
-              ped->ref = pt1->edg[i];
+              ped->ref = pt->edg[i];
             }
             else {
-              ped->ref = mesh->info.iso ? MG_ISO : pt1->edg[i];
+              ped->ref = mesh->info.iso ? MG_ISO : pt->edg[i];
             }
           }
         }

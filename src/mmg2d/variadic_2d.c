@@ -47,16 +47,29 @@
  *
  */
 static inline
-void _MMG2D_Alloc_mesh(MMG5_pMesh *mesh, MMG5_pSol *sol
-  ) {
+void _MMG2D_Alloc_mesh(MMG5_pMesh *mesh, MMG5_pSol *sol, MMG5_pSol *disp) {
 
   /* mesh allocation */
   if ( *mesh )  _MMG5_SAFE_FREE(*mesh);
   _MMG5_SAFE_CALLOC(*mesh,1,MMG5_Mesh);
 
   /* sol allocation */
+  if ( !sol ) {
+    printf("  ## Error: an allocatable solution structure of type \"MMG5_pSol\""
+           " is needed.\n");
+    printf("            Exit program.\n");
+    exit(EXIT_FAILURE);
+  }
+  
   if ( *sol )  _MMG5_DEL_MEM(*mesh,*sol,sizeof(MMG5_Sol));
   _MMG5_SAFE_CALLOC(*sol,1,MMG5_Sol);
+  
+  /* Displacement allocation */
+  if ( disp ) {
+    if ( *disp )
+      _MMG5_DEL_MEM(*mesh,*disp,sizeof(MMG5_Sol));
+    _MMG5_SAFE_CALLOC(*disp,1,MMG5_Sol);
+  }
 
   return;
 }
@@ -69,8 +82,7 @@ void _MMG2D_Alloc_mesh(MMG5_pMesh *mesh, MMG5_pSol *sol
  *
  */
 static inline
-void _MMG2D_Init_woalloc_mesh(MMG5_pMesh mesh, MMG5_pSol sol
-  ) {
+void _MMG2D_Init_woalloc_mesh(MMG5_pMesh mesh, MMG5_pSol sol, MMG5_pSol disp) {
 
   _MMG2D_Set_commonFunc();
 
@@ -79,12 +91,23 @@ void _MMG2D_Init_woalloc_mesh(MMG5_pMesh mesh, MMG5_pSol sol
   (sol)->dim  = 2;
   (sol)->ver  = 2;
   (sol)->size = 1;
+  
+  if ( disp ) {
+    (disp)->dim  = 2;
+    (disp)->ver  = 2;
+    (disp)->size = 2;
+  }
 
   /* Default parameters values */
   MMG2D_Init_parameters(mesh);
 
   /* Default vaules for file names */
   MMG2D_Init_fileNames(mesh,sol);
+  
+  if ( disp ) {
+    MMG2D_Set_inputSolName(mesh,disp,"");
+    MMG2D_Set_outputSolName(mesh,disp,"");
+  }
 
   return;
 }
@@ -103,7 +126,7 @@ void _MMG2D_Init_woalloc_mesh(MMG5_pMesh mesh, MMG5_pSol sol
  */
 void _MMG2D_Init_mesh_var( va_list argptr ) {
   MMG5_pMesh     *mesh;
-  MMG5_pSol      *sol;
+  MMG5_pSol      *sol,*disp;
   enum MMG5_arg  typArg;
   int            meshCount;
 
@@ -121,6 +144,9 @@ void _MMG2D_Init_mesh_var( va_list argptr ) {
       break;
     case(MMG5_ARG_ppMet):
       sol = va_arg(argptr,MMG5_pSol*);
+      break;
+    case(MMG5_ARG_ppDisp):
+      disp = va_arg(argptr,MMG5_pSol*);
       break;
     default:
       fprintf(stderr,"  ## Error: MMG2D_Init_mesh:\n"
@@ -148,10 +174,13 @@ void _MMG2D_Init_mesh_var( va_list argptr ) {
   }
 
   /* allocations */
-  _MMG2D_Alloc_mesh(mesh,sol);
+  _MMG2D_Alloc_mesh(mesh,sol,disp);
 
   /* initialisations */
-  _MMG2D_Init_woalloc_mesh(*mesh,*sol);
+  if ( disp )
+    _MMG2D_Init_woalloc_mesh(*mesh,*sol,*disp);
+  else
+    _MMG2D_Init_woalloc_mesh(*mesh,*sol,NULL);
 
   return;
 }
@@ -339,7 +368,7 @@ void _MMG2D_Free_names_var(va_list argptr)
 {
 
   MMG5_pMesh     *mesh;
-  MMG5_pSol      *sol;
+  MMG5_pSol      *sol,*disp;
   enum MMG5_arg  typArg;
   int            meshCount;
 
@@ -357,11 +386,15 @@ void _MMG2D_Free_names_var(va_list argptr)
     case(MMG5_ARG_ppMet):
       sol = va_arg(argptr,MMG5_pSol*);
       break;
+    case(MMG5_ARG_ppDisp):
+      disp = va_arg(argptr,MMG5_pSol*);
+      break;
     default:
       fprintf(stderr,"  ## Error: MMG2D_Free_names:\n"
               " unexpected argument type: %d\n",typArg);
       fprintf(stderr," Argument type must be one of the following members"
-              " of the MMG5_arg enum: MMG5_ARG_ppMesh or MMG5_ARG_ppMet\n");
+              " of the MMG5_arg enum: MMG5_ARG_ppMesh, MMG5_ARG_ppMet"
+              " MMG5_ARG_ppDisp\n");
       exit(EXIT_FAILURE);
     }
   }
@@ -381,6 +414,17 @@ void _MMG2D_Free_names_var(va_list argptr)
 
   /* mesh & met */
   MMG5_mmgFree_names(*mesh,*sol);
+  
+  /* disp */
+  if ( disp && *disp ) {
+    if ( (*disp)->namein ) {
+      _MMG5_DEL_MEM(*mesh,(*disp)->namein,(strlen((*disp)->namein)+1)*sizeof(char));
+    }
+    
+    if ( (*disp)->nameout ) {
+      _MMG5_DEL_MEM(*mesh,(*disp)->nameout,(strlen((*disp)->nameout)+1)*sizeof(char));
+    }
+  }
 
   return;
 }
