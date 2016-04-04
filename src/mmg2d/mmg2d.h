@@ -58,6 +58,7 @@
 #define _MMG5_BADKAL    0.2
 #define _MMG2_NULKAL    1.e-6
 #define _MMG2_ANGCORN   -1.e-6
+#define _MMG2_SHORTMAX     0x7fff
 
 #define MMG2_LLONG  2.0
 #define MMG2_LSHRT  0.3
@@ -303,7 +304,7 @@ static const unsigned int MMG2_inxt[5] = {1,2,0,1,2};
   }while(0)
 
 
-/* prototypes */
+/* Prototypes */
 /*zaldy*/
 int _MMG2D_newPt(MMG5_pMesh mesh,double c[2],int tag);
 void _MMG2D_delPt(MMG5_pMesh mesh,int ip) ;
@@ -434,6 +435,7 @@ int _MMG2_movintpt(MMG5_pMesh ,MMG5_pSol ,int ,int *,char );
 int _MMG2_chkmsh(MMG5_pMesh );
 int _MMG2_savenor_db(MMG5_pMesh ,char *,char );
 int _MMG2_savedisp_db(MMG5_pMesh mesh,MMG5_pSol ,char *,char );
+int _MMG2_velextLS(MMG5_pMesh ,MMG5_pSol );
 
 /* functions pointers */
 double long_ani(double *ca,double *cb,double *ma,double *mb);

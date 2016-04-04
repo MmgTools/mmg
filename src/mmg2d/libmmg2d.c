@@ -699,7 +699,9 @@ int MMG2D_mmg2dmov(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
     fprintf(stdout,"\n  -- PHASE 2 : LAGRANGIAN MOTION\n");
   }
   
-#ifdef USE_SUSCELAS
+#ifdef USE_ELAS
+  
+  printf("coucou \n");
   /* Lagrangian mode */
   if ( !MMG2_mmg2d9(mesh,disp,met) ) {
     disp->npi = disp->np;

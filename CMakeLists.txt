@@ -292,6 +292,13 @@ CMAKE_DEPENDENT_OPTION(
   MMG2D_CI "Enable/Disable continuous integration for mmg2d" ON
   "BUILD_TESTING;BUILD_MMG2D" OFF)
 
+# add LinearElasticity library?
+SET(ELAS_DIR "" CACHE PATH "Installation directory for Elas")
+INCLUDE(cmake/modules/FindElas.cmake)
+CMAKE_DEPENDENT_OPTION (
+  USE_ELAS "Use the Elas library for lagrangian motion option" ON
+  "BUILD_MMG2D;ELAS_FOUND" OFF)
+
 #------------------------------- mmgs
 CMAKE_DEPENDENT_OPTION ( LIBMMGS_STATIC "Compile the mmgs static library" ON
   "BUILD_MMGS" OFF)
@@ -336,12 +343,12 @@ CMAKE_DEPENDENT_OPTION ( PATTERN
 #-- Remove the next line to have this option visible in basic cmake mode
 MARK_AS_ADVANCED(PATTERN)
 
-# add SUscElas library?
-SET(SUSCELAS_DIR "" CACHE PATH "Installation directory for SUscElas")
-INCLUDE(cmake/modules/FindSUscElas.cmake)
+# add Elas library?
+SET(ELAS_DIR "" CACHE PATH "Installation directory for Elas")
+INCLUDE(cmake/modules/FindElas.cmake)
 CMAKE_DEPENDENT_OPTION (
-  USE_SUSCELAS "Use the Elas library for lagrangian motion option" ON
-  "BUILD_MMG3D;SUSCELAS_FOUND" OFF)
+  USE_ELAS "Use the Elas library for lagrangian motion option" ON
+  "BUILD_MMG3D;ELAS_FOUND" OFF)
 
 # add Scotch library?
 SET(SCOTCH_DIR "" CACHE PATH "Installation directory for scotch")

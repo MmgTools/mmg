@@ -81,6 +81,35 @@ FILE(
 
 ############################################################################
 #####
+#####         Elastic
+#####
+############################################################################
+
+IF( USE_ELAS )
+# Set flags for building test program
+INCLUDE_DIRECTORIES(${ELAS_INCLUDE_DIR})
+
+SET(CMAKE_REQUIRED_INCLUDES ${ELAS_INCLUDE_DIR})
+SET(CMAKE_REQUIRED_LIBRARIES ${ELAS_LIBRARY})
+
+SET(CMAKE_C_FLAGS "-DUSE_ELAS ${CMAKE_C_FLAGS}")
+MESSAGE(STATUS
+"Compilation with the Elas library: ${ELAS_LIBRARY} ")
+SET( LIBRARIES ${ELAS_LINK_FLAGS} ${LIBRARIES})
+SET( LIBRARIES ${ELAS_LIBRARY} ${LIBRARIES})
+ENDIF()
+
+IF (ELAS_NOTFOUND)
+MESSAGE ( WARNING "Elas is a library to solve the linear elasticity "
+"problem (see https://github.com/SUscTools/SUscElas to download it). "
+"This library is needed to use the lagrangian motion option. "
+"If you have already installed SUscElas and want to use it, "
+"please set the CMake variable or environment variable ELAS_DIR "
+"to your SUscElas directory.")
+ENDIF ( )
+
+############################################################################
+#####
 #####         Compile mmg2d libraries
 #####
 ############################################################################

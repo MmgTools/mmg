@@ -20,490 +20,401 @@
 **  use this copy of the mmg distribution only if you accept them.
 ** =============================================================================
 */
+
+/**
+ * \file mmg2d/mmg2d9.c
+ * \brief Lagrangian meshing.
+ * \author Charles Dapogny (UPMC)
+ * \author Cécile Dobrzynski (Bx INP/Inria/UBordeaux)
+ * \author Pascal Frey (UPMC)
+ * \author Algiane Froehly (Inria/UBordeaux)
+ * \version 5
+ * \copyright GNU Lesser General Public License.
+ * \todo Doxygen documentation
+ */
+
 #include "mmg2d.h"
+//#include "ls_calls.h"
+#define _MMG2_DEGTOL  1.e-1
 
-#define SHORT_MAX    0x7f //127
-
-
-int optlen_iso_bar(MMG5_pMesh mesh,MMG5_pSol sol,double declic,int base);
-
-//return le facteur rendant le deplacement valide
-// si > 1 --> on bouge sans soucis
-// si < 1 --> on ne reussira pas a bouger sans croiser!
-double MMG_maxdep(MMG5_pMesh mesh,MMG5_pSol sol) {
-  printf("comment because of the merge needs\n");
-  exit(EXIT_FAILURE);
-  /* MMG5_pTria pt; */
-  /* MMG5_pPoint ppt; */
-  /* Displ pd; */
-  /* double    c[3][2],aire,grad11,grad12,grad21,grad22,degrad; */
-  /* double    u1x,u1y,u2x,u2y,u3x,u3y,lambda,lambdamin,mod,lambda1,lambda2;    */
-  /* double    lambdamax,airenew,airemin; */
-  /* double    a,b,ce,delta,xba,xca,yba,yca,dd;    */
-  /* int k,i,imin;   */
-  /* airemin = 1e20; */
-  /* imin    = 0; */
-  /* for (k=1; k<=mesh->nt; k++) { */
-  /*   pt = &mesh->tria[k]; */
-  /*   if ( !pt->v[0] )  continue; */
-  /*   for (i=0; i<3; i++) {   */
-  /*     ppt = &mesh->point[pt->v[i]]; */
-  /*     memcpy(c[i],ppt->c,2*sizeof(double));   */
-  /*   } */
-  /*   aire = MMG2_quickarea(c[0],c[1],c[2]);; */
-  /*   airemin = (airemin<aire)?airemin:aire; */
-  /*   imin = (airemin<aire)?imin:k; */
-  /* } */
-  /* degrad = 0.9;//0.95; */
-  /* printf("aire min : %e %e : %d %d %d\n",airemin,airemin*degrad,mesh->tria[imin].v[0], */
-  /*   mesh->tria[imin].v[1],mesh->tria[imin].v[2]); */
-  /* airemin*=degrad;  */
-  /* pd = mesh->disp; */
-  /* lambdamax = 1e20; */
-  /* lambdamin = -1e20; */
-  /* for (k=1; k<=mesh->nt; k++) { */
-  /*   pt = &mesh->tria[k]; */
-  /*   if ( !pt->v[0] )  continue; */
-  /*   //if(k==5) exit(EXIT_FAILURE); */
-  /*   //printf("triangle %d %d %d\n",pt->v[0],pt->v[1],pt->v[2]); */
-  /*   mod = 0; */
-  /*   for (i=0; i<3; i++) {   */
-  /*     ppt = &mesh->point[pt->v[i]]; */
-  /*     memcpy(c[i],ppt->c,2*sizeof(double));   */
-  /*     mod += pd.mv[2*(pt->v[i]-1) + 1 + 0]*pd.mv[2*(pt->v[i]-1) + 1 + 0] + */
-  /*  pd.mv[2*(pt->v[i]-1) + 1 + 1]*pd.mv[2*(pt->v[i]-1) + 1 + 1];  */
-  /*   } */
-  /*   // printf("mod %e\n",mod);   */
-  /*   if(sqrt(mod) < 1e-24) continue; */
-  /*   aire = MMG2_quickarea(c[0],c[1],c[2]);  */
-  /*   dd = 1./sqrt(aire);    */
-  /*   //printf("pour %d aire intiale %e -- normalisation by %e\n",k,aire,dd);  */
-  /*   xba = dd*(c[1][0]-c[0][0]); */
-  /*   yba = dd*(c[1][1]-c[0][1]); */
-  /*   xca = dd*(c[2][0]-c[0][0]); */
-  /*   yca = dd*(c[2][1]-c[0][1]); */
-  /*   u1x = dd*pd.mv[2*(pt->v[0]-1) + 1 + 0]; */
-  /*   u1y = dd*pd.mv[2*(pt->v[0]-1) + 1 + 1]; */
-  /*   u2x = dd*pd.mv[2*(pt->v[1]-1) + 1 + 0]; */
-  /*   u2y = dd*pd.mv[2*(pt->v[1]-1) + 1 + 1]; */
-  /*   u3x = dd*pd.mv[2*(pt->v[2]-1) + 1 + 0]; */
-  /*   u3y = dd*pd.mv[2*(pt->v[2]-1) + 1 + 1];    */
-
-  /*   grad11 = (u2x-u1x); */
-  /*   grad21 = (u3x-u1x); */
-  /*   grad12 = (u2y-u1y);              */
-  /*   grad22 = (u3y-u1y);     */
-  /*   // printf("grad %e %e %e %e\n",grad11,grad21,grad12,grad22);  */
-
-  /*   b = xba*grad22+yca*grad11-(yba*grad21+xca*grad12);   */
-  /*   a = grad11*grad22-grad21*grad12;          */
-  /*   ce = xba*yca-yba*xca-airemin*dd*dd; */
-  /*   if(fabs(a)<1e-20) { */
-  /*     //printf("poly de degre 1!!!!! derive %e -- %e %e\n",b,a,ce);    */
-  /*     //printf("si lambda = 1 : %e\n",a+b+ce); */
-  /*     lambda = -1./b;  */
-  /*     if(b > 0) { */
-  /*  //printf("positif si lambda > %e -- lambdamin %e\n",lambda,lambdamin);  */
-  /*  assert(lambda < 0); */
-  /*  lambda = lambdamax;   */
-  /*     } else { */
-  /*  //printf("positif si lambda < %e -- lambdamax %e\n",lambda,lambdamax);  */
-  /*  if(lambdamax < lambda) { */
-  /*    lambda = lambdamax; */
-  /*  }        */
-  /*     } */
-  /*   } else{ */
-  /*     delta = b*b-4*a*ce; */
-  /*     //printf("resolution : %e\n",delta); */
-  /*     if(delta < 0) {   */
-  /*  //printf("pour %d aire %e -- ",k,aire); */
-  /*  //printf("pas de solution!!!!!!!!!!! %e\n",delta); */
-  /*  //printf("a b %e %e %e\n",a,b,ce);  */
-  /*  //printf("grad %e %e %e %e --- lmax %e\n",grad11,grad21,grad12,grad22,lambdamax);  */
-  /*  airenew = 1./(dd*dd)*(a+b+ce); */
-  /*  //printf("avec notre methode on trouve %e\n",airenew); */
-  /*  for (i=0; i<3; i++) {   */
-  /*    ppt = &mesh->point[pt->v[i]];   */
-  /*    c[i][0] = ppt->c[0] + pd.mv[2*(pt->v[i]-1) + 1 + 0]; */
-  /*    c[i][1] = ppt->c[1] + pd.mv[2*(pt->v[i]-1) + 1 + 1];  */
-  /*  }      */
-  /*  //printf("le triangle marche ?? %e\n",MMG2_quickarea(c[0],c[1],c[2]));      */
-  /*  if(airenew > 0) continue;  */
-  /*  printf("delta negatif on sait pas quoi faire!!!!!\n"); */
-  /*  exit(EXIT_FAILURE); */
-  /*     }           */
-  /*     delta = sqrt(delta); */
-
-  /*     lambda1 = (-b - delta)/(2.*a); */
-  /*     lambda2 = (-b + delta)/(2.*a); */
-  /*     //exit(EXIT_FAILURE);  */
-  /*     lambda = 0.5*(lambda1+lambda2);  */
-  /*     // printf("lambdamilieu %e -- %e et %e\n",lambda,1+lambda*b+lambda*lambda*a,1+b+a); */
-  /*     if((ce+lambda*b+lambda*lambda*a) > 0) { */
-  /*  lambda = ((lambda1) > (lambda2)) ? (lambda1):(lambda2); */
-  /*     } else { */
-  /*  // printf("eh eh autre cas!!!!\n"); */
-  /*  // printf("  on trouve lambda %e %e ---- lambdamax %e\n",aire*lambda1,aire*lambda2,lambdamax);  */
-  /*  lambda = ((lambda1) > (lambda2)) ? (lambda1):(lambda2);  */
-  /*  if(lambda < 0) { */
-  /*    lambda = lambdamax; */
-  /*  } else { */
-  /*    lambdamin = (lambdamin > lambda)? lambdamin : lambda; */
-  /*    lambda1 = ((lambda1) < (lambda2)) ? (lambda1):(lambda2); */
-  /*    if(!(lambdamax<lambda1)) { */
-  /*      lambda = lambda1; */
-  /*    } */
-  /*  } */
-  /*     }   */
-  /*   } */
-  /*   //     if(lambda < 1) {   */
-  /*   //   airenew = ce+b+a; */
-  /*   //   //printf("lambda < 1!!! avec notre methode on trouve %e\n",airenew); */
-  /*   //   airenew = (xba+u2x-u1x)*(yca+u3y-u1y)-((yba+u2y-u1y)*(xca+u3x-u1x)); */
-  /*   //   //printf("2e methode --  %e\n",airenew); */
-  /*   //   for (i=0; i<3; i++) {   */
-  /*   //     ppt = &mesh->point[pt->v[i]];   */
-  /*   //     c[i][0] = ppt->c[0] + pd.mv[2*(pt->v[i]-1) + 1 + 0]; */
-  /*   //         c[i][1] = ppt->c[1] + pd.mv[2*(pt->v[i]-1) + 1 + 1];  */
-  /*   //       }      */
-  /*   //   //printf("le triangle marche ?? %e\n",MMG2_quickarea(c[0],c[1],c[2]));   */
-  /*   //   //printf("  on trouve lambda %e %e ---- lambdamax %e\n",lambda1,lambda2,lambdamax);  */
-  /*   //   //exit(EXIT_FAILURE);   */
-  /*   // } */
-  /*   lambdamax = (lambdamax < (lambda)) ? lambdamax:(lambda);     */
-  /*   if(lambdamax<0) {printf("heu lambdamax < 0!!! %e tr %d -- dep %e\n",lambdamax,k,mod);exit(EXIT_FAILURE);   } */
-  /*   //printf("  on trouve lambda %e %e ---- lambdamax %e\n",lambda1,lambda2,lambdamax);  */
-  /* }   */
-  /* printf("%e < dep or dep < %e\n",lambdamin,lambdamax); */
-  /* //assert(lambdamin > lambdamax); */
-  //  return(lambdamax);
-}
-/* dichotomy: check if nodes can move */
-int MMG_dikomv(MMG5_pMesh mesh,MMG5_pSol sol,short t) {
-  printf("comment because of the merge needs\n");
-  exit(EXIT_FAILURE);
-  /*  MMG5_pTria     pt; */
-/*   MMG5_pPoint    ppt; */
-/*   Displ     pd; */
-/*   double    c[3][2],alpha,aire; */
-/*   int       k,i,nm; */
-
-/*   pd = mesh->disp; */
-
-/*   alpha = (double) t / SHORT_MAX;   */
-/*   for (k=1; k<=mesh->nt; k++) { */
-/*     pt = &mesh->tria[k]; */
-/*     if ( !pt->v[0] )  continue; */
-/*     for (i=0; i<3; i++) { */
-/*       ppt      = &mesh->point[ pt->v[i] ]; */
-/*       ppt->tmp = k; */
-/*       if ( ppt->tag & M_MOVE ) { */
-/*         c[i][0] = ppt->c[0] + alpha * pd.mv[2*(pt->v[i]-1) + 1 + 0]; */
-/*         c[i][1] = ppt->c[1] + alpha * pd.mv[2*(pt->v[i]-1) + 1 + 1];  */
-/*       } */
-/*       else */
-/*         memcpy(c[i],ppt->c,2*sizeof(double)); */
-/*     } */
-
-/*     aire = MMG2_quickarea(c[0],c[1],c[2]); */
-/*     if ( aire < 1e-24 )  { */
-/*       // if(mesh->info.imprim < 0)  */
-/* printf("aire reject %d %e %e\n",k,aire,pt->qual * ALPHA); */
-/*       return(0); */
-/*     } */
-/*   } */
-
-/*   /\* update metrics *\/ */
-
-/*   /\* update point coords *\/ */
-/*   nm = 0; */
-/*   for (k=1; k<=mesh->np; k++) { */
-/*     ppt = &mesh->point[k]; */
-/*     if ( ppt->tag & M_MOVE ) { */
-/*       ppt->c[0] += alpha * pd.mv[2*(k-1) + 1 + 0]; */
-/*       ppt->c[1] += alpha * pd.mv[2*(k-1) + 1 + 1]; */
-/*       pd.alpha[k]  = t; */
-/*       if ( t == SHORT_MAX )  ppt->tag &= ~M_MOVE;        */
-/*       nm++; */
-/*     } */
-/*   } */
-
-/*   /\*MAJ qual*\/ */
-/*   for (k=1; k<=mesh->nt; k++) { */
-/*     pt = &mesh->tria[k]; */
-/*  if ( !pt->v[0] ) continue;  */
-/*     pt->qual = MMG2_caltri_in(mesh,sol,pt); */
-/*   } */
-
-/*   if ( mesh->info.imprim < 0 )  fprintf(stdout,"     %7d NODES UPDATED\n",nm); */
-/*   return(nm); */
+/* Calculate an estimate of the average (isotropic) length of edges in the mesh */
+double _MMG2_estavglen(MMG5_pMesh mesh) {
+  MMG5_pTria     pt;
+  MMG5_pPoint    p1,p2;
+  int            k,na;
+  double         len,lent,dna;
+  char           i,i1,i2;
+  
+  na = 0;
+  lent = 0.0;
+  
+  for (k=1; k<=mesh->nt; k++) {
+    pt = &mesh->tria[k];
+    for (i=0; i<3; i++) {
+      i1 = _MMG5_inxt2[i];
+      i1 = _MMG5_iprv2[i];
+      
+      p1 = &mesh->point[pt->v[i1]];
+      p2 = &mesh->point[pt->v[i2]];
+      
+      len = (p2->c[0]-p1->c[0])*(p2->c[0]-p1->c[0]) + (p2->c[1]-p1->c[1])*(p2->c[1]-p1->c[1]);
+      
+      lent += sqrt(len);
+      na++;
+    }
+  }
+  
+  dna = (double)na;
+  dna = 1.0 / dna;
+  lent *= dna;
+  
+  return(lent);
 }
 
+/** Compute quality of a triangle from the datum of its 3 vertices */
+static
+inline double _MMG2_caltri_iso_3pt(double *a,double *b,double *c) {
+  double        abx,aby,acx,acy,bcx,bcy,area,h1,h2,h3,hm;
+  
+  abx = b[0] - a[0];
+  aby = b[1] - a[1];
+  acx = c[0] - a[0];
+  acy = c[1] - a[1];
+  bcx = c[0] - b[0];
+  bcy = c[1] - b[1];
+  
+  /* orientation */
+  area = abx*acy - aby*acx;
+  if ( area <= 0.0 ) return(0.0);
+  
+  /* edge lengths */
+  h1 = abx*abx + aby*aby;
+  h2 = acx*acx + acy*acy;
+  h3 = bcx*bcx + bcy*bcy;
+  
+  hm = h1 + h2 + h3;
+  h1 = sqrt(h1);
+  h2 = sqrt(h2);
+  h3 = sqrt(h3);
 
-/* check if displacement ok */
-int MMG_chkmov(MMG5_pMesh mesh,char level) {
-  printf("comment because of the merge needs\n");
-  exit(EXIT_FAILURE);
-  /* MMG5_pTria      pt; */
-  /* MMG5_pPoint     ppt; */
-  /* // Displ      pd; */
-  /* int        k,nc; */
-
-  /* pd  = mesh->disp; */
-
-  /* nc = 0; */
-  /* for (k=1; k<=mesh->np; k++) { */
-  /*   ppt = &mesh->point[k]; */
-  /*   if ( ppt->tag & M_MOVE ) { */
-  /*     if ( pd.alpha[k] )  return(pd.alpha[k]); */
-  /*     ppt->tag &= ~M_MOVE; */
-  /*     nc++; */
-  /*   } */
-  /* } */
-
-  /* /\* check element validity *\/ */
-  /* /\*if ( level > 0 ) { */
-  /*   for (k=1 ; k<=mesh->ne; k++) { */
-  /*     pt = &mesh->tetra[k]; */
-  /*     if ( !pt->v[0] )  continue; */
-  /*     vol = MMG_voltet(mesh,k); */
-  /*     if ( vol < 0.0 )  return(0); */
-  /*   } */
-  /* }*\/ */
-
-  /* return(0); */
+  if ( hm > _MMG2_EPSD ) {
+    return ( area / hm );
+  }
+  else {
+    return(0.0);
+  }
 }
 
+/** Check if moving mesh with disp for a fraction t yields a valid mesh */
+int _MMG2_chkmovmesh(MMG5_pMesh mesh,MMG5_pSol disp,short t) {
+  MMG5_pTria   pt;
+  MMG5_pPoint  ppt;
+  double       *v,c[3][2],tau,cal;
+  int          k,np;
+  char         i,j;
+  
+  /* Pseudo time-step = fraction of disp to perform */
+  tau = (double)t / _MMG2_SHORTMAX;
+  
+  for (k=1; k<=mesh->nt; k++) {
+    pt = &mesh->tria[k];
+    if ( !MG_EOK(pt) ) continue;
+    
+    for (i=0; i<3; i++) {
+      np = pt->v[i];
+      ppt = &mesh->point[np];
+      v = &disp->m[2*(np-1)+1];
+      for (j=0; j<2; j++)
+        c[i][j] = ppt->c[j]+tau*v[j];
+    }
+    
+    if( _MMG2_caltri_iso_3pt(c[0],c[1],c[2]) < _MMG2_NULKAL) return(0);  //     Other criteria : eg. a rate of degradation, etc... ?
+  }
+  
+  return(1);
+}
 
+/* Return the largest fraction t that makes the motion along disp valid */
+short _MMG2_dikomv(MMG5_pMesh mesh,MMG5_pSol disp) {
+  int     it,maxit;
+  short   t,tmin,tmax;
+  char    ier;
+  
+  maxit = 200;
+  it    = 0;
+  
+  tmin  = 0;
+  tmax  = _MMG2_SHORTMAX;
+  
+  /* If full displacement can be achieved */
+  if ( _MMG2_chkmovmesh(mesh,disp,tmax) )
+    return(tmax);
+  
+  /* Else, find the largest displacement by dichotomy */
+  while( tmin != tmax && it < maxit ) {
+    t = (tmin+tmax)/2;
+    
+    /* Case that tmax = tmin +1 : check move with tmax */
+    if ( t == tmin ) {
+      ier = _MMG2_chkmovmesh(mesh,disp,tmax);
+      if ( ier )
+        return(tmax);
+      else
+        return(tmin);
+    }
+    
+    /* General case: check move with t */
+    ier = _MMG2_chkmovmesh(mesh,disp,t);
+    if ( ier )
+      tmin = t;
+    else
+      tmax = t;
+    
+    it++;
+  }
+  
+  return(tmin);
+}
 
+/** Perform mesh motion along disp, for a fraction t, and the corresponding updates */
+int _MMG2_dispmesh(MMG5_pMesh mesh,MMG5_pSol disp,short t,int itdeg) {
+  MMG5_pTria    pt;
+  MMG5_pPoint   ppt;
+  double        *v,tau,ctau,c[3][2],ocal,ncal;
+  int           k,np;
+  char          i,j;
+  
+  tau = (double)t /_MMG2_SHORTMAX;
+  ctau = 1.0 - tau;
+  
+  /* Identify elements which are very distorted in the process */
+  for (k=1; k<=mesh->nt; k++) {
+    pt  = &mesh->tria[k];
+    if ( !MG_EOK(pt) ) continue;
+    
+    for (i=0; i<3; i++) {
+      np = pt->v[i];
+      ppt = &mesh->point[np];
+      v = &disp->m[2*(np-1)+1];
+      for (j=0; j<2; j++)
+        c[i][j] = ppt->c[j];
+    }
+    
+    ocal = _MMG2_caltri_iso_3pt(c[0],c[1],c[2]);
+    
+    for (i=0; i<3; i++) {
+      np = pt->v[i];
+      v = &disp->m[2*(np-1)+1];
+      for (j=0; j<2; j++)
+        c[i][j] += tau*v[j];
+    }
+    
+    ncal = _MMG2_caltri_iso_3pt(c[0],c[1],c[2]);
+    
+    if ( ncal < _MMG2_DEGTOL*ocal )
+      pt->cc = itdeg;
+    
+  }
+  
+  /* Perform physical displacement */
+  for (k=1; k<=mesh->np; k++) {
+    ppt = &mesh->point[k];
+    
+    if ( !MG_VOK(ppt) ) continue;
+    v = &disp->m[2*(k-1)+1];
+    
+    for (i=0; i<2; i++) {
+      ppt->c[i] = ppt->c[i] + tau*v[i];
+      v[i] *= ctau;
+    }
+  }
+  
+  return(1);
+}
 
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param disp pointer toward the displacement structure.
+ * \param met pointer toward the metric structure.
+ * \param itdeg degraded elements.
+ * \param *warn \a warn is set to 1 if not enough memory is available to complete mesh.
+ * \return -1 if failed.
+ * \return number of new points.
+ *
+ * Split edges of length bigger than _MMG5_LOPTL, in the Lagrangian mode. 
+ * Only affects triangles with cc itdeg
+ *
+ */
+int _MMG2_spllag(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int itdeg,int *warn) {
+  return(1);
+}
 
-/*rigid bodies moving*/
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param itdeg degraded elements.
+ * \return -1 if failed.
+ * \return number of collapsed points.
+ *
+ * Attempt to collapse small internal edges in the Lagrangian mode; only affects tetras with cc itdeg.
+ *
+ */
+static int _MMG2_coleltlag(MMG5_pMesh mesh,MMG5_pSol met,int itdeg) {
+  return(1);
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param crit coefficient of quality improvment.
+ * \param bucket pointer toward the bucket structure in delaunay mode and
+ * toward the \a NULL pointer otherwise.
+ * \param itdeg degraded elements.
+ *
+ * Internal edge flipping in the Lagrangian mode; only affects trias with cc itdeg
+ *
+ */
+int _MMG2_swpmshlag(MMG5_pMesh mesh,MMG5_pSol met,double crit,int itdeg) {
+  return(1);
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param itdeg degraded elements.
+ * \return -1 if failed, number of moved points otherwise.
+ *
+ * Analyze trias with cc = itdeg and move internal points so as to make mesh more uniform.
+ *
+ */
+int _MMG2_movtrilag(MMG5_pMesh mesh,MMG5_pSol met,int itdeg) {
+  return(1);
+}
+
+/* Lagrangian node displacement */
 int MMG2_mmg2d9(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met) {
-  printf("comment because of the merge needs\n");
-  exit(EXIT_FAILURE);
-  /* MMG5_pPoint   ppt;    */
-  /* MMG5_pTria    pt; */
-  /* Displ    pd; */
-  /* double   d1,declic,dd,qworstbef,qworst,qavg,qavgbef; */
-  /* int      iter,maxiter,it,maxtou,ntreal; */
-  /* int      iold,k,base,ns,nsiter,nm,nmiter,nmbar;   */
-  /*  double lambda; */
-  /* short    t,i,alpha; */
+  double             avlen,tau;
+  int                k,itmn,itdc,maxitmn,maxitdc,iit,warn;
+  int                nspl,nnspl,nnnspl,nc,nnc,nnnc,ns,nns,nnns,nm,nnm,nnnm;
+  short              t;
+  char               ier;
+  
+  maxitmn = 10;
+  maxitdc = 100;
+  t = 0;
+  
+  if ( abs(mesh->info.imprim) > 4 || mesh->info.ddebug )
+    fprintf(stdout,"  ** LAGRANGIAN MOTION\n");
+  
+  /* Field cc stores information about whether a triangle has been greatly distorted during current step */
+  for (k=1; k<=mesh->nt; k++)
+    mesh->tria[k].cc = 0;
+  
+  /* Estimate of the average, maximum and minimum edge lengths */
+  avlen = _MMG2_estavglen(mesh);
+  mesh->info.hmax = MMG2_LLONG*avlen;
+  mesh->info.hmin = MMG2_LSHRT*avlen;
+  
+  for (itmn=0; itmn<maxitmn; itmn++) {
+    
+    /* Extension of the displacement field */
+    if ( !_MMG2_velextLS(mesh,disp) ) {
+      fprintf(stdout,"  ## Problem in func. _MMG2_velextLS. Exit program.\n");
+      return(0);
+    }
+    
+    /* Sequence of dichotomy loops to find the largest admissible displacements */
+    for (itdc=0; itdc<maxitdc; itdc++) {
+      nnspl = nnc = nns = nnm = 0;
+      
+      t = _MMG2_dikomv(mesh,disp);
+      if ( t == 0 ) {
+        if ( abs(mesh->info.imprim) > 4 || mesh->info.ddebug )
+          printf("   *** Stop: impossible to proceed further\n");
+        break;
+      }
+      
+      ier = _MMG2_dispmesh(mesh,disp,t,itdc);
+      if ( !ier ) {
+        fprintf(stdout,"  ** Impossible motion\n");
+        return(0);
+      }
+      
+      tau = tau + ((double)t /_MMG2_SHORTMAX)*(1.0-tau);
+      if ( (abs(mesh->info.imprim) > 3 ) || mesh->info.ddebug )
+        printf("   ---> Realized displacement: %f\n",tau);
+    
+      /* Local remeshing depending on the option */
+      if ( mesh->info.lag > 0 ) {
+        for (iit=0; iit<5; iit++) {
+          
+          nspl = nc = ns = nm = 0;
+          
+          if ( mesh->info.lag > 1 ) {
+            /* Split of points */
+            nspl = _MMG2_spllag(mesh,disp,met,itdc,&warn);
+            if ( nspl < 0 ) {
+              fprintf(stdout,"  ## Problem in spllag. Exiting.\n");
+              return(0);
+            }
+            
+            /* Collapse of points */
+            nc = _MMG2_coleltlag(mesh,met,itdc);
+            if ( nc < 0 ) {
+              fprintf(stdout,"  ## Problem in coltetlag. Exiting.\n");
+              return(0);
+            }
+          }
+          
+          /* Swap of edges in tetra that have resulted distorted from the process */
+          /* I do not know whether it is safe to put NULL in metric here (a
+           * priori ok, since there is no vertex creation or suppression) */
+          ns = _MMG2_swpmshlag(mesh,met,1.1,itdc);
+          if ( ns < 0 ) {
+            fprintf(stdout,"  ## Problem in swaptetlag. Exiting.\n");
+            return(0);
+          }
+          
+          /* Relocate vertices of tetra which have been distorted in the displacement process */
+          nm = _MMG2_movtrilag(mesh,met,itdc);
+          if ( nm < 0 ) {
+            fprintf(stdout,"  ## Problem in movtetlag. Exiting.\n");
+            return(0);
+          }
+          
+          if ( (abs(mesh->info.imprim) > 4 || mesh->info.ddebug) && (nspl+nc+ns+nm > 0) )
+            printf(" %d edges splitted, %d vertices collapsed, %d elements"
+                   " swapped, %d vertices moved.\n",nspl,nc,ns,nm);
+          nnspl+= nspl;
+          nnm  += nm;
+          nnc  += nc;
+          nns  += ns;
+        }
+        
+        if ( abs(mesh->info.imprim) > 3 && abs(mesh->info.imprim) < 5 && (nnspl+nnm+nns+nnc > 0) )
+          printf(" %d edges splitted, %d vertices collapsed, %d elements"
+                 " swapped, %d vertices moved.\n",nnspl,nnc,nns,nnm);
+        
+        
+      }
+      
+      nnnspl += nnspl;
+      nnnm   += nnm;
+      nnnc   += nnc;
+      nnns   += nns;
+    
+      if ( t == _MMG2_SHORTMAX ) break;
+    }
 
-  /* if ( mesh->info.imprim < 0 ) { */
-  /*   MMG2_outqua(mesh,sol); */
-  /*   MMG2_prilen(mesh,sol); */
-  /* } */
-  /* /\* normalize coordinates *\/ */
-  /* dd = 1;//PRECI / (mesh->info).delta;  */
-  /* printf("dd %e\n",dd); */
-  /* pd  = mesh->disp; */
-  /* for (k=1; k<=mesh->np; k++) { */
-  /*   ppt = &mesh->point[k]; */
-  /*   if ( !M_VOK(ppt) )  continue; */
-  /*   pd.mv[2*(k-1) + 1 + 0] *= /\*20**\/dd; */
-  /*   pd.mv[2*(k-1) + 1 + 1] *= /\*20**\/dd; */
-  /*   d1 = pd.mv[2*(k-1) + 1 + 0]*pd.mv[2*(k-1) + 1 + 0] */
-  /*     + pd.mv[2*(k-1) + 1 + 1]*pd.mv[2*(k-1) + 1 + 1];    */
-  /*   if(k==140561) printf("dep %e %e %e\n",d1,pd.mv[2*(k-1) + 1 + 0],pd.mv[2*(k-1) + 1 + 1]); */
-  /*   if ( d1 > 1e-24 )  ppt->tag  |= M_MOVE; */
-  /* } */
-  /* lambda =  MMG_maxdep(mesh,sol); */
-  /* printf("le dep max est %e\n",lambda);  */
-  /* if((mesh->info.option)==99) {       */
-  /*   for (k=1; k<=mesh->np; k++) { */
-  /*     ppt = &mesh->point[k]; */
-  /*     if ( !M_VOK(ppt) )  continue; */
-  /*     pd.mv[2*(k-1) + 1 + 0] /= dd; */
-  /*     pd.mv[2*(k-1) + 1 + 1] /= dd; */
-  /*   } */
-  /*   if(!MMG2D_saveVect(mesh,sol,mesh->namedep,lambda)) return(0); */
-  /*   return(1); */
-  /* } */
-  /* /\*seuil declenchement du post-traitement : qdegradbef qworstbef*\/ */
-  /* qworstbef = 1.;  */
-  /* qavgbef   = 0.;  */
-  /* ntreal = 0; */
-  /* for(k=1 ; k<=mesh->nt ; k++) { */
-  /*   pt = &mesh->tria[k];  */
-  /*   if(!pt->v[0] )  continue; */
-  /*   if(pt->qual > qworstbef) qworstbef = pt->qual;     */
-  /*   ntreal++; */
-  /*   qavgbef += pt->qual; */
-
-  /* }                        */
-  /* qavgbef /= (double) ntreal; */
-
-
-
-  /* /\* move grid nodes *\/ */
-  /* t       = SHORT_MAX; */
-  /* alpha   = 0; */
-  /* iter    = 0; */
-  /* maxiter = 110; */
-  /* iold    = 1; */
-  /* ns      = 0; */
-
-  /* /\* move grid nodes *\/ */
-  /* t = SHORT_MAX; */
-  /* if (  MMG_dikomv(mesh,sol,t) ) { */
-  /*   if ( mesh->info.imprim )  fprintf(stdout,"     %7d NODES MOVED\n",mesh->np); */
-  /* } */
-  /* else { */
-  /*   if ( mesh->info.imprim < 0) fprintf(stdout,"     TRYING DICHO\n"); */
-  /*   while (t && alpha < SHORT_MAX && iter++ < maxiter) {   */
-  /*     if ( mesh->info.imprim < 0)  */
-  /*  printf("ITER %d  : alpha %d / %d\n",iter,alpha,SHORT_MAX);   */
-
-  /*     /\*optim*\/  */
-  /*     ns     = 0; */
-  /*     nm     = 0; */
-  /*     nmiter = 0; */
-  /*     nsiter = 0;  */
-  /*     it     = 0; */
-  /*     maxtou = 0; */
-  /*     do { */
-  /*       /\*adaptation : insertion/collapse*\/ */
-  /*       if(!mesh->info.noinsert) { */
-  /*         fprintf(stdout,"\n  -- LENGTH ANALYSIS\n"); */
-  /*         if ( !MMG2_mmg2d1(mesh,sol) )  { */
-  /*      return(0);  */
-  /*    }   */
-  /*       } */
-  /*       /\*edge flip*\/   */
-  /*       if(!mesh->info.noswap) { */
-  /*         declic = 1.1 / ALPHA; */
-  /*         nsiter = MMG2_cendel(mesh,sol,declic,-1); */
-  /*         if ( nsiter && mesh->info.imprim < 0) */
-  /*      fprintf(stdout,"     %7d SWAPPED\n",nsiter);  */
-
-  /*    ns+=nsiter;     */
-  /*       } */
-  /*       /\*point relocation*\/ */
-  /*       if(!mesh->info.nomove) {  */
-  /*         declic = 1.1 / ALPHA; */
-  /*         base   = mesh->flag; */
-  /*         nmiter = MMG2_optlen(mesh,sol,declic,-1); */
-  /*         nmbar  = optlen_iso_bar(mesh,sol,declic,-1); */
-  /*         nm += nmiter + nmbar; */
-  /*         if ( mesh->info.imprim < 0) */
-  /*           fprintf(stdout,"     %7d + %7d MOVED\n",nmiter,nmbar); */
-  /*       }      */
-  /*     } while( (nmiter+nsiter > 0) && (++it <= maxtou) ); */
-  /*     if ( mesh->info.imprim ) */
-  /*       fprintf(stdout,"     %7d SWAPPED %7d MOVED\n",ns,nm);     */
-
-
-  /*     t = SHORT_MAX - alpha; */
-  /*     i = 0; */
-  /*     do {          */
-  /*       nm = MMG_dikomv(mesh,sol,t); */
-  /*       if ( nm )  { */
-  /*         fprintf(stdout,"              ---- MOVE %d (%d)\n",t,i);                  */
-  /*    alpha += t; */
-  /*    break; */
-  /*  } */
-  /*  t = t >> 1;    */
-
-  /*     } while (t && (++i < 8)); //en combien est-ce qu'on accepte de decouper */
-  /*   } */
-  /* } */
-
-  /* /\* check mesh *\/  */
-  /* if(alpha < SHORT_MAX) { */
-  /*   if ( MMG_chkmov(mesh,1) ) { */
-  /*     fprintf(stdout,"  ## UNCOMPLETE DISPLACEMENT (%d / %d)\n",alpha,SHORT_MAX); */
-  /*     return(0); */
-  /*   } */
-  /* }  */
-
-  /* /\*seuil declenchement du post-traitement : qdegrad qworst*\/ */
-  /* qworst = 1.;  */
-  /* qavg   = 0.;  */
-  /* ntreal = 0; */
-  /* for(k=1 ; k<=mesh->nt ; k++) { */
-  /*   pt = &mesh->tria[k];  */
-  /*   if(!pt->v[0] )  continue; */
-  /*   if(pt->qual > qworst) qworst = pt->qual;     */
-  /*   ntreal++; */
-  /*   qavg += pt->qual; */
-  /* }                        */
-  /* qavg /= (double) ntreal; */
-
-  /* if(abs(mesh->info.imprim) > 3) { */
-  /*   fprintf(stdout,"\n     AVERAGE QUALITY %8f  ---> %8f  (%8f >? %8f)\n",qavgbef*ALPHA,qavg*ALPHA,qavg/qavgbef,mesh->info.qdegrad[1]);   */
-  /*   fprintf(stdout,"     WORST QUALITY   %8f ---> %8f >? %8f\n",qworstbef*ALPHA,qworst*ALPHA,mesh->info.qdegrad[0]*ALPHA);   */
-  /* } */
-
-  /* if( (qworst < mesh->info.qdegrad[0]) && (qavg < qavgbef*mesh->info.qdegrad[1]) ) { */
-  /*   /\*point relocation*\/ */
-  /*   if(!mesh->info.nomove) {  */
-  /*     fprintf(stdout,"\n  -- MESH OPTIMISATION\n"); */
-  /*     nm     = 0; */
-  /*     nmiter = 0; */
-  /*     it     = 0; */
-  /*     maxtou = 10; */
-  /*     do { */
-  /*       declic = 1.1 / ALPHA; */
-  /*       base   = mesh->flag; */
-  /*       nmiter = MMG2_optlen(mesh,sol,declic,-1); */
-  /*       nmbar =  optlen_iso_bar(mesh,sol,declic,-1); */
-  /*       nm += nmiter+nmbar; */
-  /*       if ( mesh->info.imprim < 0) */
-  /*         fprintf(stdout,"     %7d + %7d MOVED \n",nmiter,nmbar);   */
-
-  /*     } while((nmiter+nsiter > 0) && (++it <= maxtou)); */
-
-  /*     if ( mesh->info.imprim ) */
-  /*  fprintf(stdout,"     %7d SWAPPED %7d MOVED\n",ns,nm); */
-  /*   } */
-  /*   return(1); */
-  /* } */
-
-  /* /\*adaptation : insertion/collapse*\/ */
-  /* if(!mesh->info.noinsert) { */
-  /*   fprintf(stdout,"\n  -- LENGTH ANALYSIS\n"); */
-  /*   if ( !MMG2_mmg2d1(mesh,sol) )  { */
-
-  /*     return(0); */
-  /*   }    */
-  /* } */
-
-  /* /\*optim*\/  */
-  /* fprintf(stdout,"\n  -- MESH OPTIMISATION\n"); */
-  /* ns     = 0; */
-  /* nm     = 0; */
-  /* nmiter = 0; */
-  /* nsiter = 0;  */
-  /* it     = 0; */
-  /* maxtou = 10; */
-  /* do { */
-  /*   /\*edge flip*\/   */
-  /*   if(!mesh->info.noswap) { */
-  /*     declic = 1.1 / ALPHA; */
-  /*     nsiter = MMG2_cendel(mesh,sol,declic,-1); */
-  /*     if ( nsiter && mesh->info.imprim < 0) */
-  /*       fprintf(stdout,"     %7d SWAPPED\n",nsiter);  */
-
-  /*     ns+=nsiter;     */
-  /*   } */
-  /*   /\*point relocation*\/ */
-  /*   if(!mesh->info.nomove) {  */
-  /*     declic = 1.1 / ALPHA; */
-  /*     base   = mesh->flag; */
-  /*     nmiter = MMG2_optlen(mesh,sol,declic,-1); */
-  /*     nmbar =  optlen_iso_bar(mesh,sol,declic,-1); */
-  /*     nm += nmiter+nmbar; */
-  /*     if ( mesh->info.imprim < 0) */
-  /*       fprintf(stdout,"     %7d + %7d MOVED \n",nmiter,nmbar); */
-  /*   } */
-
-
-  /* } while((nmiter+nsiter > 0) && (++it <= maxtou)); */
-  /* if ( mesh->info.imprim ) */
-  /*   fprintf(stdout,"     %7d SWAPPED %7d MOVED\n",ns,nm);  */
-
-
+    if ( abs(mesh->info.imprim) > 2 )
+      printf(" %d edges splitted, %d vertices collapsed, %d elements"
+               " swapped, %d vertices moved.\n",nnnspl,nnnc,nnns,nnnm);
+    
+    if ( t == _MMG2_SHORTMAX ) break;
+  }
+  
+  /* Clean memory */
+  _MMG5_DEL_MEM(mesh,disp->m,(disp->size*(disp->npmax+1))*sizeof(double));
+  
   return(1);
 }

@@ -171,10 +171,8 @@ double caltri_ani_in(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pTria pt) {
 /* Compute quality of the triangle pt when the supplied metric is isotropic; 
    return 0 in the case that the triangle has inverted orientation */
 double caltri_iso(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pTria pt) {
-  double     cal,abx,aby,acx,acy,bcx,bcy;
+  double    abx,aby,acx,acy,bcx,bcy;
   double    *a,*b,*c,h1,h2,h3,area,hm;
-
-  cal = 0;
 
   a  = mesh->point[pt->v[0]].c;
   b  = mesh->point[pt->v[1]].c;
@@ -189,21 +187,22 @@ double caltri_iso(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pTria pt) {
 
   /* orientation */
   area = abx*acy - aby*acx;
-  if ( area <= 0 ) return(cal);
+  if ( area <= 0.0 ) return(0.0);
 
   /* edge lengths */
   h1 = abx*abx + aby*aby;
-  h1 = sqrt(h1);
   h2 = acx*acx + acy*acy;
-  h2 = sqrt(h2);
   h3 = bcx*bcx + bcy*bcy;
-  h3 = sqrt(h3);
 
-  hm = h1*h1 + h2*h2 + h3*h3;
+  hm = h1 + h2 + h3;
+  h1 = sqrt(h1);
+  h2 = sqrt(h2);
+  h3 = sqrt(h3);
+  
   if (hm > _MMG2_EPSD) {
-    //return(1./MMG2_caltri_in(mesh,sol,pt));
-    return(area/hm);
-  } else {
+    return ( area / hm );
+  }
+  else {
     return(0.0);
   }
 }
