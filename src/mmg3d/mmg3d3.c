@@ -320,7 +320,7 @@ int _MMG5_swptetlag(MMG5_pMesh mesh,MMG5_pSol met,double crit,_MMG5_pBucket buck
 int _MMG5_movtetlag(MMG5_pMesh mesh,MMG5_pSol met,int itdeg) {
   MMG5_pTetra        pt;
   MMG5_pPoint        ppt;
-  int           k,ier,nm,nnm,ns,listv[MMG3D_LMAX+2],ilistv,it;
+  int           k,ier,nm,nnm,listv[MMG3D_LMAX+2],ilistv,it;
   unsigned char i,base;
   int           maxit;
   
@@ -333,7 +333,7 @@ int _MMG5_movtetlag(MMG5_pMesh mesh,MMG5_pSol met,int itdeg) {
   
   do {
     base++;
-    nm = ns = 0;
+    nm = 0;
     for (k=1; k<=mesh->ne; k++) {
       pt = &mesh->tetra[k];
       if ( !MG_EOK(pt) || pt->ref < 0 || (pt->tag & MG_REQ) )   continue;
@@ -428,7 +428,7 @@ static int _MMG5_coltetlag(MMG5_pMesh mesh,MMG5_pSol met,int itdeg) {
             break;
           }
         }
-        else if (ilist < 0 ) return(-1);
+        else if ( ilist < 0 ) return(-1);
       }
       if ( ier ) {
         p1->flag = base;

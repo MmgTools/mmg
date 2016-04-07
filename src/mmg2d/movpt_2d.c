@@ -220,7 +220,7 @@ int _MMG2_movintpt(MMG5_pMesh mesh,MMG5_pSol met,int ilist,int *list,char improv
     
     calnew = MG_MIN(caltri_iso(mesh,NULL,pt0),calnew);
   }
-  
+    
   if (calold < _MMG2_NULKAL && calnew <= calold) return(0);
   else if (calnew < _MMG2_NULKAL) return(0);
   else if ( improve && calnew < 1.02 * calold ) return(0);

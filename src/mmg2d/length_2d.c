@@ -22,7 +22,6 @@
 */
 #include "mmg2d.h"
 
-
 /* Compute isotropic edge length */
 double long_iso(double *ca,double *cb,double *ma,double *mb) {
   double   ha,hb,ux,uy,dd,rap,len;

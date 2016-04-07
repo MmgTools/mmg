@@ -701,14 +701,17 @@ int MMG2D_mmg2dmov(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
   
 #ifdef USE_ELAS
   
-  printf("coucou \n");
   /* Lagrangian mode */
   if ( !MMG2_mmg2d9(mesh,disp,met) ) {
     disp->npi = disp->np;
     _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
   }
 #endif
-  disp->npi = disp->np;
+  
+  /* End with a classical remeshing stage, provided mesh->info.lag > 1 */
+  if ( (mesh->info.lag > 1) && !MMG2_mmg2d1n(mesh,met) ) {
+    _MMG2D_RETURN_AND_PACK(mesh,met,MMG5_LOWFAILURE);
+  }
 
   chrono(OFF,&(ctim[3]));
   printim(ctim[3].gdif,stim);

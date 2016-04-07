@@ -640,7 +640,7 @@ int _MMG2_adpspl(MMG5_pMesh mesh,MMG5_pSol met) {
     if ( lmax < MMG2_LOPTL ) continue;
     else if ( MG_SIN(pt->tag[imax]) ) continue;
     
-    /* Check the length of the curve */
+    /* Check the feasibility of splitting */
     i1 = _MMG5_inxt2[imax];
     i2 = _MMG5_iprv2[imax];
     p1 = &mesh->point[pt->v[i1]];

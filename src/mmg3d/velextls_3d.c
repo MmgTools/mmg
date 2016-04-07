@@ -328,7 +328,6 @@ int _MMG5_velextLS(MMG5_pMesh mesh,MMG5_pSol disp) {
   /* Free memory */
   free(invperm);
   
-  
   if ( !LS_stop(lsst) ) {
     fprintf(stdout,"  ## Problem in fn LS_stop. Exiting.\n");
     return(0);
