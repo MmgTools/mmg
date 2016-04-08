@@ -35,7 +35,7 @@
 
 #include "mmg2d.h"
 //#include "ls_calls.h"
-#define _MMG2_DEGTOL  3.e-1
+#define _MMG2_DEGTOL  5.e-1
 
 /* Calculate an estimate of the average (isotropic) length of edges in the mesh */
 double _MMG2_estavglen(MMG5_pMesh mesh) {
