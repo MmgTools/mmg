@@ -561,7 +561,8 @@ int MMG2_mmg2d9(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met) {
           
           nspl = nc = ns = nm = 0;
           
-          if ( mesh->info.lag > 1 ) {
+          if ( !mesh->info.noinsert ) {
+            
             /* Split of points */
             nspl = _MMG2_spllag(mesh,disp,met,itdc,&warn);
             if ( nspl < 0 ) {

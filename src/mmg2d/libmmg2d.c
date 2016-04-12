@@ -709,7 +709,7 @@ int MMG2D_mmg2dmov(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
 #endif
   
   /* End with a classical remeshing stage, provided mesh->info.lag > 1 */
-  if ( (mesh->info.lag > 1) && !MMG2_mmg2d1n(mesh,met) ) {
+  if ( (mesh->info.lag >= 1) && !MMG2_mmg2d1n(mesh,met) ) {
     _MMG2D_RETURN_AND_PACK(mesh,met,MMG5_LOWFAILURE);
   }
 
