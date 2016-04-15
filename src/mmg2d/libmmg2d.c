@@ -54,6 +54,7 @@ int MMG2_tassage(MMG5_pMesh mesh,MMG5_pSol sol) {
   MMG5_pEdge         ped;
   MMG5_pTria         pt,ptnew;
   MMG5_pPoint        ppt,pptnew;
+  _MMG5_Hash         hash;
   int                np,nt,k,nbl,isol,isolnew,i,memWarn,num;
   int                iadr,iadrnew,iadrv,*adjav,*adja,*adjanew,voy;
 
@@ -61,7 +62,10 @@ int MMG2_tassage(MMG5_pMesh mesh,MMG5_pSol sol) {
   np=0;
   for (k=1; k<=mesh->np; k++) {
     ppt = &mesh->point[k];
-    if ( ppt->tag & M_NUL )  continue;
+    if ( ppt->tag & M_NUL ) {
+      ppt->tmp = 0;
+      continue;
+    }
     ppt->tmp = ++np;
   }
 
@@ -111,6 +115,7 @@ int MMG2_tassage(MMG5_pMesh mesh,MMG5_pSol sol) {
           ped = &mesh->edge[num];
           ped->a = pt->v[MMG2_iare[i][0]];
           ped->b = pt->v[MMG2_iare[i][1]];
+          ped->base = 3*k+i;
           ped->ref  = M_MIN(mesh->point[pt->v[MMG2_iare[i][0]]].ref,
                             mesh->point[pt->v[MMG2_iare[i][1]]].ref);
         }
@@ -119,11 +124,13 @@ int MMG2_tassage(MMG5_pMesh mesh,MMG5_pSol sol) {
   }
 
   nbl = 0;
+
   for (k=1; k<=mesh->na; k++) {
     ped  = &mesh->edge[k];
     if(!ped->a) continue;
     ped->a = mesh->point[ped->a].tmp;
     ped->b = mesh->point[ped->b].tmp;
+
     /* impossible to do that without update triangle....*/
     /* if(k!=nbl) { */
     /*   pednew = &mesh->edge[nbl]; */
@@ -170,6 +177,34 @@ triangles:
     nbl++;
   }
   mesh->nt = nt;
+
+  /* Travel through the tria and hash the boundary edges in order to recover
+   * from which tria comes a boundary edges */
+  hash.item = NULL;
+  if ( _MMG5_hashNew(mesh,&hash,mesh->nt,3*mesh->nt) ) {
+
+    for (k=1; k<=mesh->nt; k++) {
+      pt = &mesh->tria[k];
+      if (!pt->v[0]) continue;
+      for (i=0 ; i<3 ; i++) {
+        if ( !_MMG5_hashEdge(mesh,&hash,pt->v[_MMG5_inxt2[i]],pt->v[_MMG5_iprv2[i]],3*k+i) ) {
+          fprintf(stdout,"  ## Warning: unable hash boundary edges.\n");
+          break;
+        }
+      }
+    }
+
+  }
+
+  for (k=1; k<=mesh->na; k++) {
+    ped  = &mesh->edge[k];
+    if(!ped->a || !ped->b) continue;
+
+    ped->base = _MMG5_hashGet(&hash,ped->a,ped->b);
+  }
+
+  if ( hash.item )  _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
+
 
   /* compact metric */
   if ( sol->m ) {

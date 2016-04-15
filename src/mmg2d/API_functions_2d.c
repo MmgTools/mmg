@@ -625,11 +625,23 @@ int MMG2D_Set_edge(MMG5_pMesh mesh, int v0, int v1, int ref, int pos) {
   return(1);
 }
 
-/* int MMG2D_Set_requiredEdge(MMG5_pMesh mesh, int k) { */
-/*   assert ( k <= mesh->na ); */
-/*   mesh->edge[k].tag |= M_REQUIRED; */
-/*   return(1); */
-/* } */
+int MMG2D_Set_requiredEdge(MMG5_pMesh mesh, int k) {
+  MMG5_pPoint ppt;
+  MMG5_pEdge  ped;
+
+  assert ( k <= mesh->na );
+
+  ped = &mesh->edge[k];
+
+  ped->tag |= M_REQUIRED;
+
+  ppt = &mesh->point[ped->a];
+  ppt->tag |= M_REQUIRED;
+  ppt = &mesh->point[ped->b];
+  ppt->tag |= M_REQUIRED;
+
+  return(1);
+}
 
 int MMG2D_Get_edge(MMG5_pMesh mesh, int* e0, int* e1, int* ref
                    ,int* isRidge, int* isRequired) {

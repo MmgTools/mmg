@@ -2270,6 +2270,16 @@ END INTERFACE
 !  * and \a iface by the index ofthe face of the tetra that correspond to the
 !  * triangle.
 !  *
+!  * \remark Fortran interface:
+!  */
+INTERFACE
+  SUBROUTINE MMG2D_GET_TETFROMTRIA(mesh,ktri,ktet,iface,retval)
+    MMG5_DATA_PTR_T, INTENT(IN)              :: mesh
+    INTEGER, INTENT(IN)                      :: ktri
+    INTEGER, INTENT(OUT)                     :: ktet,iface,retval
+  END SUBROUTINE
+END INTERFACE
+!  *
 !  */
 
 ! int MMG3D_Get_tetFromTria(MMG5_pMesh mesh, int ktri, int *ktet, int *iface);

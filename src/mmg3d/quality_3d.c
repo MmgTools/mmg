@@ -354,18 +354,18 @@ inline double _MMG3D_caltetLES_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt)
   }
 
   if(!_MMG5_cenrad_iso(mesh,ct,cs,&rad)) {
-    return(cal);
+    return(0.0);
   }
 
-  if ( rad < 0 ) return(2);
+  assert(rad>0.);
 
   /* Vref volume */
-  Vref = 8*sqrt(3)/27 * rad*sqrt(rad);
+  Vref = 8.*sqrt(3)/27.*rad*sqrt(rad);
 
   V = _MMG5_orvol(mesh->point,pt->v)/6.;
 
-  if ( V<0 ) {
-    fprintf(stdout," ## Warning: negative volume\n");
+  if ( V<0. ) {
+    // fprintf(stdout," ## Warning: negative volume\n");
     return(0.0);
   }
 

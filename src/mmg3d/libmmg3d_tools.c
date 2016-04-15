@@ -230,8 +230,6 @@ int MMG3D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
             if ( !MMG3D_Set_inputMeshName(mesh, argv[i]) )
               exit(EXIT_FAILURE);
 
-            if ( !MMG3D_Set_iparameter(mesh,met,MMG3D_IPARAM_verbose,5) )
-              exit(EXIT_FAILURE);
           }else{
             fprintf(stderr,"Missing filname for %c%c\n",argv[i-1][1],argv[i-1][2]);
             MMG3D_usage(argv[0]);

@@ -1253,7 +1253,7 @@ int MMG3D_Set_localParameter(MMG5_pMesh mesh,MMG5_pSol sol, int typ, int ref,
             fprintf(stdout," for triangles of ref %d\n",ref);
           }
           else {
-            fprintf(stdout,"  ## Warning: new new parameters (hausd, hmin and hmax)");
+            fprintf(stdout,"  ## Warning: new parameters (hausd, hmin and hmax)");
             fprintf(stdout," for vertices of ref %d\n",ref);
           }
         }

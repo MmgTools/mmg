@@ -366,15 +366,15 @@ int MMG2D_Set_triangle(MMG5_pMesh mesh, int v0, int v1,
  *
  */
 int MMG2D_Set_edge(MMG5_pMesh mesh, int v0, int v1, int ref, int pos);
-/* /\** */
-/*  * \param mesh pointer toward the mesh structure. */
-/*  * \param k edge index. */
-/*  * \return 1. */
-/*  * */
-/*  * Set edge \a k as required. */
-/*  * */
-/*  *\/ */
-/* int  MMG2D_Set_requiredEdge(MMG5_pMesh mesh, int k); */
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param k edge index.
+ * \return 1.
+ *
+ * Set edge \a k as required.
+ *
+ */
+int  MMG2D_Set_requiredEdge(MMG5_pMesh mesh, int k);
 /**
  * \param met pointer toward the sol structure.
  * \param s solution scalar value.
@@ -865,6 +865,27 @@ int MMG2D_Get_adjaVertices(MMG5_pMesh mesh, int ip, int lispoi[MMG2D_LMAX]);
  */
 int MMG2D_Get_adjaVerticesFast(MMG5_pMesh mesh, int ip,int start,
                                int lispoi[MMG2D_LMAX]);
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param ked index of the boundary edge.
+ * \param ktri pointer toward the index of the tri (filled by the function).
+ * \param ied pointer toward the index of the edge of the triangle \a ktri that
+ * correspond to the boundary edge \a ked.
+ * \return 0 if fail, 1 otherwise
+ *
+ * Fill \a ktri by the index of the triangle to which belong a boundary edge
+ * and \a ied by the index of the edge of the triangle that correspond to the
+ * edge.
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMG2D_GET_TRIFROMEDGE(mesh,ked,ktri,ied,retval)\n
+ * >     MMG5_DATA_PTR_T, INTENT(IN)              :: mesh\n
+ * >     INTEGER, INTENT(IN)                      :: ked\n
+ * >     INTEGER, INTENT(OUT)                     :: ktri,ied,retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+int MMG2D_Get_triFromEdge(MMG5_pMesh mesh, int ked, int *ktri, int *ied);
 
 /**
  * \param mesh pointer toward the mesh structure
@@ -905,6 +926,7 @@ void MMG2D_Free_edges(MMG5_pMesh mesh);
  *
  */
 void MMG2D_Free_solutions(MMG5_pMesh mesh,MMG5_pSol sol);
+
 
 #ifdef __cplusplus
 }

@@ -157,6 +157,23 @@ int MMG2D_Get_adjaVerticesFast(MMG5_pMesh mesh, int ip,int start, int lispoi[MMG
   return nbpoi;
 }
 
+int MMG2D_Get_triFromEdge(MMG5_pMesh mesh, int ked, int *ktri, int *ied)
+{
+  int val;
+
+  val = mesh->edge[ked].base;
+
+  if ( !val ) return(0);
+
+  *ktri = val/3;
+
+  *ied = val%3;
+
+  return 1;
+
+
+}
+
 void MMG2D_Free_triangles(MMG5_pMesh mesh) {
 
   if ( mesh->adja )

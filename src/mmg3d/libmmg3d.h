@@ -1928,6 +1928,13 @@ int MMG3D_Get_adjaVertices(MMG5_pMesh mesh, int ip, int vtab[MMG3D_LMAX]);
  * and \a iface by the index ofthe face of the tetra that correspond to the
  * triangle.
  *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMG2D_GET_TETFROMTRIA(mesh,ktri,ktet,iface,retval)\n
+ * >     MMG5_DATA_PTR_T, INTENT(IN)              :: mesh\n
+ * >     INTEGER, INTENT(IN)                      :: ktri\n
+ * >     INTEGER, INTENT(OUT)                     :: ktet,iface,retval\n
+ * >   END SUBROUTINE\n
+ *
  */
 int MMG3D_Get_tetFromTria(MMG5_pMesh mesh, int ktri, int *ktet, int *iface);
 
