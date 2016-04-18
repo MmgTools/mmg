@@ -421,7 +421,7 @@ int MMG2D_Set_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int typEntity, int np, int
     sol->size = 1;
   }
   else if ( typSol == MMG5_Tensor ) {
-    sol->size = 6;
+    sol->size = 3;
   }
   else {
     fprintf(stdout,"  ## Error: type of solution not yet implemented\n");
@@ -1058,9 +1058,9 @@ int MMG2D_Get_tensorSol(MMG5_pSol met, double *m11,double *m12,double *m22)
     return(0);
   }
 
-  *m11 = met->m[6*(met->npi-1)+1];
-  *m12 = met->m[6*(met->npi-1)+2];
-  *m22 = met->m[6*(met->npi-1)+3];
+  *m11 = met->m[3*(met->npi-1)+1];
+  *m12 = met->m[3*(met->npi-1)+2];
+  *m22 = met->m[3*(met->npi-1)+3];
 
   return(1);
 }
