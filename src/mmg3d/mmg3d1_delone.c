@@ -848,6 +848,10 @@ _MMG5_optet(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket) {
 
   /* shape optim */
   it = nnm = nnf = 0;
+  /* if ( mesh->info.optimLES ) { */
+  /*   maxit = 8; */
+  /* } */
+  /* else */
   maxit = 4;
   declic = 1.053;
   do {
@@ -905,6 +909,19 @@ _MMG5_optet(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket) {
             "                                ");
     fprintf(stdout,"     %8d moved\n",nm);
   }
+
+
+  /* treatment of bad elements*/
+//  if ( mesh->info.optimLES ) {
+//    nw = MMG3D_opttyp(mesh,met,bucket);
+//  }
+//  else
+//    nw = 0;
+//  if ( (abs(mesh->info.imprim) > 4 || mesh->info.ddebug) && nw > 0 ) {
+//    fprintf(stdout,"                                            "
+//            "                                ");
+//    fprintf(stdout,"     %8d improved\n",nw);
+//  }
 
   if ( mesh->info.imprim ) {
     if ( abs(mesh->info.imprim) < 5 && (nnf > 0 || nnm > 0) )

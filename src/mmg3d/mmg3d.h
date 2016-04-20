@@ -292,6 +292,7 @@ void _MMG5_nsort(int ,double *,char *);
 extern double _MMG5_orcal(MMG5_pMesh mesh,MMG5_pSol met,int iel);
 extern double _MMG3D_orcalLES(MMG5_pMesh mesh,MMG5_pSol met,int iel);
 int    _MMG5_movintpt_iso(MMG5_pMesh ,MMG5_pSol, int *, int , int);
+int    _MMG5_movintptLES_iso(MMG5_pMesh mesh,MMG5_pSol met,int *,int,int);
 int    _MMG5_movintpt_ani(MMG5_pMesh ,MMG5_pSol, int *, int , int);
 int    _MMG5_movbdyregpt_iso(MMG5_pMesh, MMG5_pSol, int*, int, int*, int ,int);
 int    _MMG5_movbdyregpt_ani(MMG5_pMesh, MMG5_pSol, int*, int, int*, int ,int);

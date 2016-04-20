@@ -36,9 +36,11 @@ void MMG3D_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
   if ( met->size == 1 || ( met->size == 3 && mesh->info.lag >= 0 ) ) {
     if ( mesh->info.optimLES ) {
       _MMG5_caltet          = _MMG3D_caltetLES_iso;
+      _MMG5_movintpt        = _MMG5_movintpt_iso;
     }
     else {
       _MMG5_caltet          = _MMG5_caltet_iso;
+      _MMG5_movintpt        = _MMG5_movintpt_iso;
     }
     _MMG5_caltri          = _MMG5_caltri_iso;
     _MMG5_lenedg          = _MMG5_lenedg_iso;
@@ -46,7 +48,6 @@ void MMG3D_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
     _MMG5_lenSurfEdg      = _MMG5_lenSurfEdg_iso;
     _MMG5_intmet          = _MMG5_intmet_iso;
     _MMG5_lenedgspl       = _MMG5_lenedg_iso;
-    _MMG5_movintpt        = _MMG5_movintpt_iso;
     _MMG5_movbdyregpt     = _MMG5_movbdyregpt_iso;
     _MMG5_movbdyrefpt     = _MMG5_movbdyrefpt_iso;
     _MMG5_movbdynompt     = _MMG5_movbdynompt_iso;

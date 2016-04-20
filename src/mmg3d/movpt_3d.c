@@ -125,8 +125,175 @@ int _MMG5_movintpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,int imp
     return(0);
   }
   else if ( calnew < 0.3 * calold ) {
-	  _MMG5_SAFE_FREE(callist);
-	  return(0);
+    _MMG5_SAFE_FREE(callist);
+    return(0);
+  }
+
+  /* update position */
+  p0 = &mesh->point[pt->v[i0]];
+  p0->c[0] = ppt0->c[0];
+  p0->c[1] = ppt0->c[1];
+  p0->c[2] = ppt0->c[2];
+  for (k=0; k<ilist; k++) {
+    (&mesh->tetra[list[k]/4])->qual=callist[k];
+  }
+
+  _MMG5_SAFE_FREE(callist);
+  return(1);
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param list pointer toward the volumic ball of the point.
+ * \param ilist size of the volumic ball.
+ * \param improve force the new minimum element quality to be greater or equal
+ * than 0.9 of the old minimum element quality.
+ *
+ * \return 0 if we can't move the point, 1 if we can.
+ *
+ * Move internal point whose volumic ball is passed (for LES optimization).  The
+ * optimal point position is computed as the barycenter of the optimal point
+ * position for each tetra. The optimal point position for a tetra is the point
+ * located over the normal of the face at the face barycenter and at the
+ * distance 1 of the face.
+ *
+ * \remark the metric is not interpolated at the new position.
+ * \remark we don't check if we break the hausdorff criterion.
+ *
+ */
+int _MMG5_movintptLES_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,int improve) {
+  MMG5_pTetra               pt,pt0;
+  MMG5_pPoint               p0,p1,p2,p3,ppt0;
+  double               vol,totvol;
+  double               calold,calnew,*callist;
+  double               x21,y21,z21,x31,y31,z31,nx,ny,nz,bary[3],dd,len;
+  double               u10[3],u20[3],u30[3];
+  int                  k,iel,ifac,i0;
+
+  // Dynamic alloc for windows comptibility
+  _MMG5_SAFE_MALLOC(callist, ilist, double);
+
+  pt0    = &mesh->tetra[0];
+  ppt0   = &mesh->point[0];
+  memset(ppt0,0,sizeof(MMG5_Point));
+
+  iel = list[0] / 4;
+  i0  = list[0] % 4;
+
+  /* Coordinates of optimal point */
+  calold = DBL_MAX;
+  totvol = 0.0;
+  for (k=0; k<ilist; k++) {
+    iel  = list[k] / 4;
+    ifac = list[k] % 4;
+    pt = &mesh->tetra[iel];
+
+    p0 = &mesh->point[pt->v[ifac]];
+    p1 = &mesh->point[pt->v[_MMG5_idir[ifac][0]]];
+    p2 = &mesh->point[pt->v[_MMG5_idir[ifac][1]]];
+    p3 = &mesh->point[pt->v[_MMG5_idir[ifac][2]]];
+
+    vol= _MMG5_det4pt(p0->c,p1->c,p2->c,p3->c);
+    totvol += vol;
+
+    /* local optimal point : length 1 over the normal of the face */
+    x21 = p2->c[0]-p1->c[0];
+    y21 = p2->c[1]-p1->c[1];
+    z21 = p2->c[2]-p1->c[2];
+
+    x31 = p3->c[0]-p1->c[0];
+    y31 = p3->c[1]-p1->c[1];
+    z31 = p3->c[2]-p1->c[2];
+
+    nx = (y31*z21 - z31*y21);
+    ny = (z31*x21 - x31*z21);
+    nz = (x31*y21 - y31*x21);
+
+    dd = sqrt(nx*nx+ny*ny+nz*nz);
+    dd = 1./dd;
+    nx *= dd;
+    ny *= dd;
+    nz *= dd;
+
+    u10[0] = p1->c[0]-p0->c[0];
+    u10[1] = p1->c[1]-p0->c[1];
+    u10[2] = p1->c[2]-p0->c[2];
+
+    u20[0] = p2->c[0]-p0->c[0];
+    u20[1] = p2->c[1]-p0->c[1];
+    u20[2] = p2->c[2]-p0->c[2];
+
+    u30[0] = p3->c[0]-p0->c[0];
+    u30[1] = p3->c[1]-p0->c[1];
+    u30[2] = p3->c[2]-p0->c[2];
+
+    /* len =  sqrt(u10[0]*u10[0]+u10[1]*u10[1]+u10[2]*u10[2])/met->m[pt->v[_MMG5_idir[ifac][0]]] */
+    /*   + sqrt(u20[0]*u20[0]+u20[1]*u20[1]+u20[2]*u20[2])/met->m[pt->v[_MMG5_idir[ifac][1]]] */
+    /*   + sqrt(u30[0]*u30[0]+u30[1]*u30[1]+u30[2]*u30[2])/met->m[pt->v[_MMG5_idir[ifac][2]]]; */
+
+    /* len /= 3.; */
+
+    /* len = 1./len; */
+
+    /* face barycenter */
+    bary[0] = (p1->c[0]+p2->c[0]+p3->c[0])/3.;
+    bary[1] = (p1->c[1]+p2->c[1]+p3->c[1])/3.;
+    bary[2] = (p1->c[2]+p2->c[2]+p3->c[2])/3.;
+
+    len = (0.25*(p0->c[0]+p1->c[0]+p2->c[0]+p3->c[0]) - bary[0])*nx
+      +  (0.25*(p0->c[1]+p1->c[1]+p2->c[1]+p3->c[1]) - bary[1])*ny
+      +  (0.25*(p0->c[2]+p1->c[2]+p2->c[2]+p3->c[2]) - bary[2])*nz;
+
+    len = (p0->c[0]-bary[0])*nx +  (p0->c[1]-bary[1])*ny + (p0->c[2]-bary[2])*nz;
+
+
+    /* Optimal point: barycenter of local optimal points */
+    ppt0->c[0] += vol* ( bary[0] + nx * len );
+    ppt0->c[1] += vol* ( bary[1] + ny * len );
+    ppt0->c[2] += vol* ( bary[2] + nz * len );
+    calold = MG_MIN(calold, pt->qual);
+  }
+  if (totvol < _MMG5_EPSD2) {
+    _MMG5_SAFE_FREE(callist);
+    return(0);
+  }
+
+  totvol = 1.0 / totvol;
+  ppt0->c[0] *= totvol;
+  ppt0->c[1] *= totvol;
+  ppt0->c[2] *= totvol;
+
+  /* Check new position validity */
+  calnew = DBL_MAX;
+  for (k=0; k<ilist; k++) {
+    iel = list[k] / 4;
+    i0  = list[k] % 4;
+    pt  = &mesh->tetra[iel];
+    memcpy(pt0,pt,sizeof(MMG5_Tetra));
+    pt0->v[i0] = 0;
+    callist[k] = _MMG5_orcal(mesh,met,0);
+  if (callist[k] < _MMG5_EPSD2) {
+    _MMG5_SAFE_FREE(callist);
+    return(0);
+  }
+    calnew = MG_MIN(calnew,callist[k]);
+  }
+  if (calold < _MMG5_NULKAL && calnew <= calold) {
+    _MMG5_SAFE_FREE(callist);
+    return(0);
+  }
+  else if (calnew < _MMG5_NULKAL) {
+    _MMG5_SAFE_FREE(callist);
+    return(0);
+  }
+  else if ( improve && calnew < 1.02 * calold ) {
+    _MMG5_SAFE_FREE(callist);
+    return(0);
+  }
+  else if ( calnew < 0.3 * calold ) {
+    _MMG5_SAFE_FREE(callist);
+    return(0);
   }
 
   /* update position */
