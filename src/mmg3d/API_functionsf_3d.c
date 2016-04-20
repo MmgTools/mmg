@@ -593,7 +593,7 @@ FORTRAN_NAME(MMG3D_SAVESOL,mmg3d_savesol,
 }
 
 
-/** Old API °°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°*/
+/** Old API ======================================================*/
 
 /**
  * See \ref MMG5_Init_mesh function in common/libmmgcommon.h file.
