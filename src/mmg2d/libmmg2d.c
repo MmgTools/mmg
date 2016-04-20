@@ -41,6 +41,24 @@
 
 /**
  * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the solution structure.
+ *
+ * Truncate a scalar metric by hmax and hmin values.
+ *
+ */
+static inline
+void _MMG2D_scalarSolTruncature(MMG5_pMesh mesh, MMG5_pSol met) {
+  int         k;
+
+  /* vertex size */
+  for (k=1; k<=mesh->np; k++) {
+    met->m[k] = MG_MIN(mesh->info.hmax,MG_MAX(mesh->info.hmin,met->m[k]));
+  }
+  return;
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the solution structure.
  * \return 0 if memory problem (uncomplete mesh), 1 otherwise.
  *
@@ -416,7 +434,11 @@ int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol sol)
     fprintf(stdout,"  ** SETTING ADJACENCIES\n");
 
   if ( !MMG2_scaleMesh(mesh,sol) )  _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
-  if ( !sol->np && !MMG2_doSol(mesh,sol) )  _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
+
+  if ( !sol->np ) {
+    if ( !MMG2D_doSol(mesh,sol) )  _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
+    _MMG2D_scalarSolTruncature(mesh,sol);
+  }
 
    if ( (mesh)->adja )
      _MMG5_DEL_MEM((mesh),(mesh)->adja,(3*(mesh)->ntmax+5)*sizeof(int));
@@ -624,7 +646,11 @@ int MMG2D_mmg2dmesh(MMG5_pMesh mesh,MMG5_pSol sol) {
   if ( abs(mesh->info.imprim) > 4 )
     fprintf(stdout,"  ** SETTING ADJACENCIES\n");
   if ( !MMG2_scaleMesh(mesh,sol) )  _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
-  if ( !sol->np && !MMG2_doSol(mesh,sol) )  _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
+
+  if ( !sol->np ) {
+    if ( !MMG2D_doSol(mesh,sol) )  _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
+    _MMG2D_scalarSolTruncature(mesh,sol);
+  }
 
   if ( mesh->info.ddebug && !_MMG5_chkmsh(mesh,1,0) )  _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
   /*geom : corner detection*/
@@ -842,7 +868,8 @@ int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol)
                 "initial solution",return(0));
   _MMG5_SAFE_CALLOC(sol->m,sol->size*(mesh->npmax+1),double);
   sol->np = 0;
-  if ( !MMG2_doSol(mesh,sol) )  _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
+  if ( !MMG2D_doSol(mesh,sol) )  _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
+  _MMG2D_scalarSolTruncature(mesh,sol);
 
   /*geom : corner detection*/
   if ( mesh->info.dhd>0 )

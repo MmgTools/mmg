@@ -948,6 +948,27 @@ END INTERFACE
 ! void (*MMG2D_callbackinsert) (int ,int ,int ,int, int);
 
 ! /**
+!  * \param mesh pointer toward the mesh structure
+!  * \param met pointer toward the sol structure
+!  * \return 1 if success
+!  *
+!  * Compute isotropic size map according to the mean of the length of the
+!  * edges passing through a point.
+!  *
+!  * \remark Fortran interface:
+!  */
+INTERFACE
+  SUBROUTINE MMG2D_DOSOL(mesh,met,retval)
+    MMG5_DATA_PTR_T, INTENT(INOUT)     :: mesh,met
+    INTEGER, INTENT(OUT)               :: retval
+  END SUBROUTINE
+END INTERFACE
+!  *
+!  */
+
+! int MMG2D_doSol(MMG5_pMesh mesh ,MMG5_pSol met );
+
+! /**
 !  * \param mesh pointer toward the mesh structure.
 !  * \param met pointer toward a sol structure.
 !  *

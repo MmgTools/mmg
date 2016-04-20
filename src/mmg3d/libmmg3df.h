@@ -1590,7 +1590,7 @@ END INTERFACE
 !  *
 !  */
 
-! int MMG3D_DoSol(MMG5_pMesh mesh,MMG5_pSol met);
+! int MMG3D_doSol(MMG5_pMesh mesh,MMG5_pSol met);
 
 ! /** To associate function pointers without calling MMG3D_mmg3dlib */
 ! /**
