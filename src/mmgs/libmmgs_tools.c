@@ -34,6 +34,7 @@
  */
 
 #include "mmgs.h"
+#include "inlined_functions.h"
 
 void MMGS_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
   if ( met->size < 6 ) {

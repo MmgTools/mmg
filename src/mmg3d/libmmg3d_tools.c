@@ -30,7 +30,7 @@
  * \copyright GNU Lesser General Public License.
  **/
 
-#include "mmg3d.h"
+#include "inlined_functions_3d.h"
 
 void MMG3D_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
   if ( met->size == 1 || ( met->size == 3 && mesh->info.lag >= 0 ) ) {

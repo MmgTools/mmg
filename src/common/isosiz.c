@@ -31,36 +31,6 @@
 
 /**
  * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the sol structure.
- * \param ip1 index of edge's extremity.
- * \param ip2 index of edge's extremity.
- * \param isedg 1 if the edge is a ridge, 0 otherwise (dummy arg for
- * compatibility with \a lenedg_ani).
- * \return length of edge according to the prescribed metric.
- *
- * Compute length of surface edge \f$[i0;i1]\f$ according to the prescribed iso
- * metric.
- *
- */
-inline double _MMG5_lenSurfEdg_iso(MMG5_pMesh mesh,MMG5_pSol met,int ip1,int ip2, char isedg) {
-  MMG5_pPoint   p1,p2;
-  double   h1,h2,l,r,len;
-
-  p1 = &mesh->point[ip1];
-  p2 = &mesh->point[ip2];
-  h1 = met->m[ip1];
-  h2 = met->m[ip2];
-  l = (p2->c[0]-p1->c[0])*(p2->c[0]-p1->c[0]) + (p2->c[1]-p1->c[1])*(p2->c[1]-p1->c[1]) \
-    + (p2->c[2]-p1->c[2])*(p2->c[2]-p1->c[2]);
-  l = sqrt(l);
-  r = h2 / h1 - 1.0;
-  len = fabs(r) < _MMG5_EPS ? l / h1 : l / (h2-h1) * log(r+1.0);
-
-  return(len);
-}
-
-/**
- * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the meric structure.
  * \param ptt pointer toward the triangle structure.
  * \return The computed area.
