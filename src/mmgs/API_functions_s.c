@@ -77,7 +77,7 @@ int MMGS_Set_outputSolName(MMG5_pMesh mesh,MMG5_pSol sol, const char* solout) {
 }
 void MMGS_Init_parameters(MMG5_pMesh mesh) {
 
-  /* Init common parameters for mmgs and mmg3d. */
+  /* Init common parameters for mmgs and mmgs. */
   _MMG5_Init_parameters(mesh);
 
   mesh->info.renum    = 0;   /* [0/1], Turn off/on the renumbering using SCOTCH; */
@@ -90,7 +90,7 @@ int MMGS_Set_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int typEntity, int np, int 
     fprintf(stdout,"  ## Warning: new solution\n");
 
   if ( typEntity != MMG5_Vertex ) {
-    fprintf(stderr,"  ## Error: MMG3D5 need a solution imposed on vertices\n");
+    fprintf(stderr,"  ## Error: MMGS5 need a solution imposed on vertices\n");
     return(0);
   }
   if ( typSol == MMG5_Scalar ) {
@@ -277,6 +277,33 @@ int MMGS_Set_vertex(MMG5_pMesh mesh, double c0, double c1, double c2, int ref, i
   return(1);
 }
 
+int  MMGS_Set_vertices(MMG5_pMesh mesh, double *vertices,int *refs) {
+
+  MMG5_pPoint ppt;
+  int i,j;
+
+  /*coordinates vertices*/
+  for (i=1;i<=mesh->np;i++)
+  {
+    ppt = &mesh->point[i];
+
+    j = (i-1)*3;
+    ppt->c[0]  = vertices[j];
+    ppt->c[1]  = vertices[j+1];
+    ppt->c[2]  = vertices[j+2];
+
+    ppt->tag  = MG_NUL;
+    ppt->flag = 0;
+    ppt->tmp = 0;
+
+    if ( refs != NULL )
+      ppt->ref   = refs[i-1];
+  }
+
+  return 1;
+}
+
+
 int MMGS_Get_vertex(MMG5_pMesh mesh, double* c0, double* c1, double* c2, int* ref,
                     int* isCorner, int* isRequired) {
 
@@ -323,6 +350,41 @@ int MMGS_Get_vertex(MMG5_pMesh mesh, double* c0, double* c1, double* c2, int* re
   return(1);
 }
 
+int  MMGS_Get_vertices(MMG5_pMesh mesh, double* vertices, int* refs,
+                        int* areCorners, int* areRequired) {
+  MMG5_pPoint ppt;
+  int i,j;
+
+  for (i=1;i<=mesh->np;i++)
+  {
+    ppt = &mesh->point[i];
+
+    j = (i-1)*3;
+    vertices[j] = ppt->c[0];
+    vertices[j+1] = ppt->c[1];
+    vertices[j+2] = ppt->c[2];
+
+    j = i-1;
+    if ( refs != NULL )
+      refs[j] = ppt->ref;
+
+    if ( areCorners !=NULL ) {
+      if ( ppt->tag & MG_CRN )
+        areCorners[j] = 1;
+      else
+        areCorners[j] = 0;
+    }
+
+    if ( areRequired != NULL ) {
+      if ( ppt->tag & MG_REQ )
+        areRequired[j] = 1;
+      else
+        areRequired[j] = 0;
+    }
+  }
+
+  return 1;
+}
 
 int MMGS_Set_triangle(MMG5_pMesh mesh, int v0, int v1, int v2, int ref,int pos) {
 
@@ -396,6 +458,54 @@ int MMGS_Get_triangle(MMG5_pMesh mesh, int* v0, int* v1, int* v2, int* ref
 
   return(1);
 }
+
+int  MMGS_Set_triangles(MMG5_pMesh mesh, int *tria, int *refs) {
+  MMG5_pTria ptt;
+  int         i, j;
+
+   for (i=1;i<=mesh->nt;i++)
+   {
+      j = (i-1)*3;
+      ptt = &mesh->tria[i];
+      ptt->v[0] = tria[j]  ;
+      ptt->v[1] = tria[j+2];
+      ptt->v[2] = tria[j+1];
+
+      mesh->point[ptt->v[0]].tag &= ~MG_NUL;
+      mesh->point[ptt->v[1]].tag &= ~MG_NUL;
+      mesh->point[ptt->v[2]].tag &= ~MG_NUL;
+
+      if ( refs != NULL )
+        ptt->ref  = refs[i-1];
+   }
+   return 1;
+}
+
+int  MMGS_Get_triangles(MMG5_pMesh mesh, int *tria, int *refs, int *areRequired) {
+  MMG5_pTria ptt;
+  int         i, j;
+
+   for (i=1;i<=mesh->nt;i++)
+   {
+      j = (i-1)*3;
+      ptt = &mesh->tria[i];
+      tria[j]   = ptt->v[0];
+      tria[j+2] = ptt->v[1];
+      tria[j+1] = ptt->v[2];
+
+      if ( refs!=NULL )
+        refs[i-1]  = ptt->ref ;
+      if ( areRequired != NULL ) {
+        if ( (ptt->tag[0] & MG_REQ) && (ptt->tag[1] & MG_REQ) &&
+             (ptt->tag[2] & MG_REQ) )
+          areRequired[i-1] = 1;
+        else
+          areRequired[i-1] = 0;
+      }
+   }
+   return 1;
+}
+
 
 int MMGS_Set_edge(MMG5_pMesh mesh, int v0, int v1, int ref, int pos) {
 
@@ -590,6 +700,32 @@ int MMGS_Get_scalarSol(MMG5_pSol met, double* s) {
   return(1);
 }
 
+int MMGS_Set_scalarSols(MMG5_pSol met, double *s ) {
+  int k;
+
+  if ( !met->np ) {
+    fprintf(stderr,"  ## Error: You must set the number of solution with the");
+    fprintf(stderr," MMGS_Set_solSize function before setting values");
+    fprintf(stderr," in solution structure \n");
+    return(0);
+  }
+
+  for ( k=0; k<met->np; ++k )
+    met->m[k+1] = s[k];
+
+  return(1);
+}
+
+int MMGS_Get_scalarSols(MMG5_pSol met, double* s) {
+  int k;
+
+  for ( k=0; k<met->np; ++k )
+    s[k]  = met->m[k+1];
+
+  return(1);
+}
+
+
 int MMGS_Set_vectorSol(MMG5_pSol met, double vx,double vy, double vz, int pos) {
 
   if ( !met->np ) {
@@ -653,6 +789,45 @@ int MMGS_Get_vectorSol(MMG5_pSol met, double* vx, double* vy, double* vz) {
 
   return(1);
 }
+
+
+int MMGS_Set_vectorSols(MMG5_pSol met, double *sols) {
+  double *m;
+  int k,j;
+
+  if ( !met->np ) {
+    fprintf(stderr,"  ## Error: You must set the number of solution with the");
+    fprintf(stderr," MMGS_Set_solSize function before setting values");
+    fprintf(stderr," in solution structure \n");
+    return(0);
+  }
+
+  for ( k=0; k<met->np; ++k ) {
+    j = 3*k;
+    m = &met->m[j+3];
+    m[0] = sols[j];
+    m[1] = sols[j+1];
+    m[2] = sols[j+2];
+  }
+
+  return(1);
+}
+
+int MMGS_Get_vectorSols(MMG5_pSol met, double* sols) {
+  double *m;
+  int k, j;
+
+  for ( k=0; k<met->np; ++k ) {
+    j = 3*k;
+    m = &met->m[j+3];
+    sols[j]   = m[0];
+    sols[j+1] = m[1];
+    sols[j+2] = m[2];
+  }
+
+  return(1);
+}
+
 int MMGS_Set_tensorSol(MMG5_pSol met, double m11,double m12, double m13,
                        double m22,double m23, double m33, int pos) {
 
@@ -701,7 +876,7 @@ int MMGS_Get_tensorSol(MMG5_pSol met, double *m11,double *m12, double *m13,
     if ( ddebug ) {
       fprintf(stdout,"  ## Warning: reset the internal counter of points.\n");
       fprintf(stdout,"     You must pass here exactly one time (the first time ");
-      fprintf(stdout,"you call the MMG3D_Get_tensorSol function).\n");
+      fprintf(stdout,"you call the MMGS_Get_tensorSol function).\n");
       fprintf(stdout,"     If not, the number of call of this function");
       fprintf(stdout," exceed the number of points: %d\n ",met->np);
     }
@@ -722,6 +897,51 @@ int MMGS_Get_tensorSol(MMG5_pSol met, double *m11,double *m12, double *m13,
   *m22 = met->m[6*met->npi+3];
   *m13 = met->m[6*met->npi+4];
   *m33 = met->m[6*met->npi+5];
+
+  return(1);
+}
+
+
+int MMGS_Set_tensorSols(MMG5_pSol met, double *sols) {
+  double *m;
+  int k,j;
+
+  if ( !met->np ) {
+    fprintf(stderr,"  ## Error: You must set the number of solution with the");
+    fprintf(stderr," MMGS_Set_solSize function before setting values");
+    fprintf(stderr," in solution structure \n");
+    return(0);
+  }
+
+  for ( k=0; k<met->np; ++k ) {
+    j = 6*k;
+    m = &met->m[j+6];
+
+    m[0] = sols[j];
+    m[1] = sols[j+1];
+    m[2] = sols[j+2];
+    m[3] = sols[j+3];
+    m[4] = sols[j+4];
+    m[5] = sols[j+5];
+  }
+  return(1);
+}
+
+int MMGS_Get_tensorSols(MMG5_pSol met, double *sols) {
+  double *m;
+  int k,j;
+
+  for ( k=0; k<met->np; ++k ) {
+    j = 6*k;
+    m = &met->m[j+6];
+
+    sols[j]   = m[0];
+    sols[j+1] = m[1];
+    sols[j+2] = m[2];
+    sols[j+3] = m[3];
+    sols[j+4] = m[4];
+    sols[j+5] = m[5];
+  }
 
   return(1);
 }

@@ -482,6 +482,69 @@ int MMG2D_Get_vertex(MMG5_pMesh mesh, double* c0, double* c1, int* ref,
   return(1);
 }
 
+int  MMG2D_Set_vertices(MMG5_pMesh mesh, double *vertices,int *refs) {
+  MMG5_pPoint ppt;
+  int i,j;
+
+  /*coordinates vertices*/
+  for (i=1;i<=mesh->np;i++)
+  {
+    ppt = &mesh->point[i];
+
+    j = (i-1)*2;
+    ppt->c[0]  = vertices[j];
+    ppt->c[1]  = vertices[j+1];
+
+    ppt->flag = 0;
+    ppt->tmp = 0;
+
+    if ( refs != NULL )
+      ppt->ref   = refs[i-1];
+
+    if ( mesh->nt )
+      ppt->tag  = MG_NUL;
+    else
+      ppt->tag  &= ~MG_NUL;
+  }
+
+  return 1;
+}
+
+int  MMG2D_Get_vertices(MMG5_pMesh mesh, double* vertices, int* refs,
+                        int* areCorners, int* areRequired) {
+  MMG5_pPoint ppt;
+  int i,j;
+
+  for (i=1;i<=mesh->np;i++)
+  {
+    ppt = &mesh->point[i];
+
+    j = (i-1)*2;
+    vertices[j] = ppt->c[0];
+    vertices[j+1] = ppt->c[1];
+
+    j = i-1;
+    if ( refs != NULL )
+      refs[j] = ppt->ref;
+
+    if ( areCorners !=NULL ) {
+      if ( ppt->tag & MG_CRN )
+        areCorners[j] = 1;
+      else
+        areCorners[j] = 0;
+    }
+
+    if ( areRequired != NULL ) {
+      if ( ppt->tag & MG_REQ )
+        areRequired[j] = 1;
+      else
+        areRequired[j] = 0;
+    }
+  }
+
+  return 1;
+}
+
 int MMG2D_Set_triangle(MMG5_pMesh mesh, int v0, int v1, int v2, int ref, int pos) {
   MMG5_pTria pt;
   double  vol;
@@ -588,6 +651,72 @@ int MMG2D_Get_triangle(MMG5_pMesh mesh, int* v0, int* v1, int* v2, int* ref
   }
 
   return(1);
+}
+
+int  MMG2D_Set_triangles(MMG5_pMesh mesh, int *tria, int *refs) {
+  MMG5_pTria ptt;
+  double vol;
+  int i, j,tmp;
+
+  mesh->xt = 0;
+  for (i=1;i<=mesh->nt;i++)
+  {
+      j = (i-1)*3;
+      ptt = &mesh->tria[i];
+      ptt->v[0] = tria[j]  ;
+      ptt->v[1] = tria[j+2];
+      ptt->v[2] = tria[j+1];
+      if ( refs != NULL )
+        ptt->ref  = refs[i-1];
+
+      mesh->point[ptt->v[0]].tag &= ~MG_NUL;
+      mesh->point[ptt->v[1]].tag &= ~MG_NUL;
+      mesh->point[ptt->v[2]].tag &= ~MG_NUL;
+
+      for(i=0 ; i<3 ; i++)
+        ptt->edg[i] = 0;
+
+      vol = MMG2_quickarea(mesh->point[ptt->v[0]].c,mesh->point[ptt->v[1]].c,
+                           mesh->point[ptt->v[2]].c);
+      if(vol < 0) {
+        printf("Tr %d bad oriented\n",i);
+        tmp = ptt->v[2];
+        ptt->v[2] = ptt->v[1];
+        ptt->v[1] = tmp;
+        /* mesh->xt temporary used to count reoriented tetra */
+        mesh->xt++;
+      }
+      if ( mesh->info.ddebug && mesh->xt > 0 ) {
+        fprintf(stdout,"  ## %d triangles reoriented\n",mesh->xt);
+      }
+  }
+  return 1;
+}
+
+int  MMG2D_Get_triangles(MMG5_pMesh mesh, int* tria, int* refs,
+                         int* areRequired) {
+  MMG5_pTria ptt;
+  int        i, j;
+
+   for (i=1;i<=mesh->nt;i++)
+   {
+      j = (i-1)*3;
+      ptt = &mesh->tria[i];
+      tria[j]   = ptt->v[0];
+      tria[j+2] = ptt->v[1];
+      tria[j+1] = ptt->v[2];
+
+      if ( refs!=NULL )
+        refs[i-1]  = ptt->ref ;
+      if ( areRequired != NULL ) {
+        if ( (ptt->tag[0] & MG_REQ) && (ptt->tag[1] & MG_REQ) &&
+             (ptt->tag[2] & MG_REQ) )
+          areRequired[i-1] = 1;
+        else
+          areRequired[i-1] = 0;
+      }
+   }
+   return 1;
 }
 
 int MMG2D_Set_edge(MMG5_pMesh mesh, int v0, int v1, int ref, int pos) {
@@ -755,6 +884,31 @@ int  MMG2D_Get_scalarSol(MMG5_pSol met, double* s)
   return(1);
 }
 
+int  MMG2D_Set_scalarSols(MMG5_pSol met, double *s) {
+  int k;
+
+  if ( !met->np ) {
+    fprintf(stderr,"  ## Error: You must set the number of solution with the");
+    fprintf(stderr," MMG3D_Set_solSize function before setting values");
+    fprintf(stderr," in solution structure \n");
+    return(0);
+  }
+
+  for ( k=0; k<met->np; ++k )
+    met->m[k+1] = s[k];
+
+  return 1;
+}
+
+int  MMG2D_Get_scalarSols(MMG5_pSol met, double* s) {
+  int k;
+
+  for ( k=0; k<met->np; ++k )
+    s[k]  = met->m[k+1];
+
+  return(1);
+}
+
 int MMG2D_Set_tensorSol(MMG5_pSol met, double m11, double m12, double m22,
                         int pos) {
   int isol;
@@ -810,9 +964,47 @@ int MMG2D_Get_tensorSol(MMG5_pSol met, double *m11,double *m12,double *m22)
     return(0);
   }
 
-  *m11 = met->m[6*(met->npi-1)+1];
-  *m12 = met->m[6*(met->npi-1)+2];
-  *m22 = met->m[6*(met->npi-1)+3];
+  *m11 = met->m[met->size*(met->npi-1)+1];
+  *m12 = met->m[met->size*(met->npi-1)+2];
+  *m22 = met->m[met->size*(met->npi-1)+3];
+
+  return(1);
+}
+
+int MMG2D_Set_tensorSols(MMG5_pSol met, double *sols) {
+  double *m;
+  int k,j;
+
+  if ( !met->np ) {
+    fprintf(stderr,"  ## Error: You must set the number of solution with the");
+    fprintf(stderr," MMG3D_Set_solSize function before setting values");
+    fprintf(stderr," in solution structure \n");
+    return(0);
+  }
+
+  for ( k=0; k<met->np; ++k ) {
+    j = 3*k;
+    m = &met->m[j];
+
+    m[1] = sols[j];
+    m[2] = sols[j+1];
+    m[3] = sols[j+2];
+  }
+  return(1);
+}
+
+int MMG2D_Get_tensorSols(MMG5_pSol met, double *sols) {
+  double *m;
+  int k,j;
+
+  for ( k=0; k<met->np; ++k ) {
+    j = 3*k;
+    m = &met->m[j];
+
+    sols[j]   = m[1];
+    sols[j+1] = m[2];
+    sols[j+2] = m[3];
+  }
 
   return(1);
 }

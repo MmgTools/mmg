@@ -22,7 +22,7 @@
 */
 
 /**
- * \file common/inlined_functions.c
+ * \file common/inlined_functions.h
  * \brief inlined Functions
  * \author Charles Dapogny (UPMC)
  * \author Cécile Dobrzynski (Bx INP/Inria/UBordeaux)

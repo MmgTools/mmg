@@ -123,7 +123,6 @@ void _MMG5_mmgDefaultValues(MMG5_pMesh mesh) {
 inline
 int _MMG5_writeLocalParam( MMG5_pMesh mesh, FILE *out ) {
   _MMG5_iNode *bdyRefs, *cur;
-  double      dd;
   int         npar,k,ier;
 
   /** Count the number of different boundary references and list it */
@@ -157,7 +156,6 @@ int _MMG5_writeLocalParam( MMG5_pMesh mesh, FILE *out ) {
 
   fprintf(out,"parameters\n %d\n",npar);
 
-  dd = mesh->info.delta;
   cur = bdyRefs;
   while( cur ) {
     fprintf(out,"%d Triangle %e %e %e \n",cur->val,

@@ -368,6 +368,33 @@ END INTERFACE
 !                      double c2, int ref,int pos);
 ! /**
 !  * \param mesh pointer toward the mesh structure.
+!  * \param vertices table of the points coor.
+!  * The coordinates of the \f$i^{th}\f$ point are stored in
+!  * vertices[(i-1)*3]\@3.
+!  * \param refs table of points references.
+!  * The ref of the \f$i^th\f$ point is stored in refs[i-1].
+!  * \return 1.
+!  *
+!  * Set vertices coordinates and references in mesh structure
+!  *
+!  * \remark Fortran interface: (commentated in order to allow to pass
+!  * \%val(0) instead of the refs array)
+!  *
+!  */
+INTERFACE
+!  SUBROUTINE MMG3D_SET_VERTICES(mesh,vertices,refs,retval)
+!    MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh
+!    REAL(KIND=8), INTENT(IN) :: vertices(*)
+!    INTEGER,INTENT(IN)       :: refs(*)
+!    INTEGER, INTENT(OUT)          :: retval
+!  END SUBROUTINE
+END INTERFACE
+!  *
+!  */
+
+!  int  MMG3D_Set_vertices(MMG5_pMesh mesh, double *vertices,int *refs);
+! /**
+!  * \param mesh pointer toward the mesh structure.
 !  * \param v0 first vertex of tetrahedron.
 !  * \param v1 second vertex of tetrahedron.
 !  * \param v2 third vertex of tetrahedron.
@@ -395,6 +422,32 @@ END INTERFACE
 !                           int v2, int v3, int ref, int pos);
 ! /**
 !  * \param mesh pointer toward the mesh structure.
+!  * \param tetra vertices of the tetras of the mesh
+!  * Vertices of the \f$i^{th}\f$ tetra are stored in tetra[(i-1)*4]\@4.
+!  * \param refs table of the tetrahedra references.
+!  * References of the \f$i^{th}\f$ tetra is stored in refs[i-1].
+!  * \return 0 if failed, 1 otherwise.
+!  *
+!  * Set vertices and references of the mesh tetrahedra.
+!  *
+!  * \remark Fortran interface: (commentated in
+!  * order to allow to pass \%val(0) instead of the refs array)
+!  *
+!  */
+INTERFACE
+!  SUBROUTINE MMG3D_SET_TETRAHEDRA(mesh,tetra,refs,retval)
+!    MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh
+!    INTEGER, DIMENSION(*), INTENT(IN) :: tetra,refs
+!    INTEGER, INTENT(OUT)          :: retval
+!  END SUBROUTINE
+END INTERFACE
+!  *
+!  */
+
+!   int  MMG3D_Set_tetrahedra(MMG5_pMesh mesh, int *tetra,
+!                             int *refs);
+! /**
+!  * \param mesh pointer toward the mesh structure.
 !  * \param v0 first vertex of triangle.
 !  * \param v1 second vertex of triangle.
 !  * \param v2 third vertex of triangle.
@@ -419,6 +472,31 @@ END INTERFACE
 
 ! int  MMG3D_Set_triangle(MMG5_pMesh mesh, int v0, int v1,
 !                        int v2, int ref,int pos);
+! /**
+!  * \param mesh pointer toward the mesh structure.
+!  * \param tria pointer toward the table of the tria vertices
+!  * Vertices of the \f$i^{th}\f$ tria are stored in tria[(i-1)*3]\@3.
+!  * \param refs pointer toward the table of the triangle references.
+!  * refs[i-1] is the ref of the \f$i^{th}\f$ tria.
+!  * \return 0 if failed, 1 otherwise.
+!  *
+!  * Set vertices and references of the mesh triangles.
+!  *
+!  * \remark Fortran interface: (commentated in
+!  * order to allow to pass \%val(0) instead of the refs array)
+!  *
+!  */
+INTERFACE
+!  SUBROUTINE MMG3D_SET_TRIANGLES(mesh,tria,refs,retval)
+!    MMG5_DATA_PTR_T,INTENT(INOUT)    :: mesh
+!    INTEGER,DIMENSION(*), INTENT(IN) :: tria,refs
+!    INTEGER, INTENT(OUT)             :: retval
+!  END SUBROUTINE
+END INTERFACE
+!  *
+!  */
+
+!   int  MMG3D_Set_triangles(MMG5_pMesh mesh, int *tria, int *refs);
 ! /**
 !  * \param mesh pointer toward the mesh structure.
 !  * \param v0 first extremity of the edge.
@@ -505,6 +583,28 @@ END INTERFACE
 ! int  MMG3D_Set_requiredTetrahedron(MMG5_pMesh mesh, int k);
 ! /**
 !  * \param mesh pointer toward the mesh structure.
+!  * \param reqIdx table of the indices of the required elements.
+!  * \param nreq number of required elements
+!  * \return 1.
+!  *
+!  * Set the required Tetra.
+!  *
+!  * \remark Fortran interface:
+!  */
+INTERFACE
+  SUBROUTINE MMG3D_SET_REQUIREDTETRAHEDRA(mesh,reqIdx,nreq,retval)
+    MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh
+    INTEGER, DIMENSION(*),INTENT(IN) :: reqIdx
+    INTEGER, INTENT(IN)           :: nreq
+    INTEGER, INTENT(OUT)          :: retval
+  END SUBROUTINE
+END INTERFACE
+!  *
+!  */
+
+!   int  MMG3D_Set_requiredTetrahedra(MMG5_pMesh mesh, int *reqIdx, int nreq);
+! /**
+!  * \param mesh pointer toward the mesh structure.
 !  * \param k triangle index.
 !  * \return 1.
 !  *
@@ -523,6 +623,29 @@ END INTERFACE
 !  */
 
 ! int  MMG3D_Set_requiredTriangle(MMG5_pMesh mesh, int k);
+! /**
+!  * \param mesh pointer toward the mesh structure.
+!  * \param reqIdx table of the indices of the required trias.
+!  * \param nreq number of required trias
+!  * \return 1.
+!  *
+!  * Set the required triangles
+!  *
+!  * \remark Fortran interface:
+!  */
+INTERFACE
+  SUBROUTINE MMG3D_SET_REQUIREDTRIANGLES(mesh,reqIdx,nreq,retval)
+    MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh
+    INTEGER, DIMENSION(*),INTENT(IN) :: reqIdx
+    INTEGER, INTENT(IN)           :: nreq
+    INTEGER, INTENT(OUT)          :: retval
+  END SUBROUTINE
+END INTERFACE
+!  *
+!  */
+
+!   int  MMG3D_Set_requiredTriangles(MMG5_pMesh mesh, int *reqIdx, int nreq);
+
 ! /**
 !  * \param mesh pointer toward the mesh structure.
 !  * \param k edge index.
@@ -614,6 +737,27 @@ END INTERFACE
 ! int  MMG3D_Set_scalarSol(MMG5_pSol met, double s,int pos);
 ! /**
 !  * \param met pointer toward the sol structure.
+!  * \param s table of the scalar solutions values.
+!  * s[i-1] is the solution at vertex i.
+!  * \return 0 if failed, 1 otherwise.
+!  *
+!  * Set scalar solutions at mesh vertices.
+!  *
+!  * \remark Fortran interface:
+!  */
+INTERFACE
+  SUBROUTINE MMG3D_SET_SCALARSOLS(met,s,retval)
+    MMG5_DATA_PTR_T,INTENT(INOUT) :: met
+    REAL(KIND=8),DIMENSION(*), INTENT(IN) :: s
+    INTEGER, INTENT(OUT)          :: retval
+  END SUBROUTINE
+END INTERFACE
+!  *
+!  */
+
+! int  MMG3D_Set_scalarSols(MMG5_pSol met, double *s);
+! /**
+!  * \param met pointer toward the sol structure.
 !  * \param vx x value of the vectorial solution.
 !  * \param vy y value of the vectorial solution.
 !  * \param vz z value of the vectorial solution.
@@ -638,6 +782,27 @@ END INTERFACE
 
 ! int MMG3D_Set_vectorSol(MMG5_pSol met, double vx,double vy, double vz,
 !                         int pos);
+! /**
+!  * \param met pointer toward the sol structure.
+!  * \param sols table of the vectorial solutions
+!  * sols[3*(i-1)]\@3 is the solution at vertex i
+!  * \return 0 if failed, 1 otherwise.
+!  *
+!  * Set vectorial solutions at mesh vertices
+!  *
+!  * \remark Fortran interface:
+!  */
+INTERFACE
+  SUBROUTINE MMG3D_SET_VECTORSOLS(met,sols,retval)
+    MMG5_DATA_PTR_T,INTENT(INOUT) :: met
+    REAL(KIND=8),DIMENSION(*), INTENT(IN)      :: sols
+    INTEGER, INTENT(OUT)          :: retval
+  END SUBROUTINE
+END INTERFACE
+!  *
+!  */
+
+! int MMG3D_Set_vectorSols(MMG5_pSol met, double *sols);
 ! /**
 !  * \param met pointer toward the sol structure.
 !  * \param m11 value of the tensorial solution at position (1,1) in the tensor
@@ -667,6 +832,28 @@ END INTERFACE
 
 ! int MMG3D_Set_tensorSol(MMG5_pSol met, double m11,double m12, double m13,
 !                        double m22,double m23, double m33, int pos);
+! /**
+!  * \param met pointer toward the sol structure.
+!  * \param sols table of the tensorial solutions.
+!  * sols[6*(i-1)]\@6 is the solution at vertex i
+!  * \return 0 if failed, 1 otherwise.
+!  *
+!  * Set tensorial values at position \a pos in solution
+!  * structure.
+!  *
+!  * \remark Fortran interface:
+!  */
+INTERFACE
+  SUBROUTINE MMG3D_SET_TENSORSOLS(met,sols,retval)
+    MMG5_DATA_PTR_T,INTENT(INOUT) :: met
+    REAL(KIND=8),DIMENSION(*), INTENT(IN) :: sols
+    INTEGER, INTENT(OUT)          :: retval
+  END SUBROUTINE
+END INTERFACE
+!  *
+!  */
+
+! int MMG3D_Set_tensorSols(MMG5_pSol met, double *sols);
 ! /**
 !  * \param mesh pointer toward the mesh structure.
 !  *
@@ -720,7 +907,7 @@ END INTERFACE
 !  * \remark Fortran interface:
 !  */
 INTERFACE
-  SUBROUTINE MMG3D_SET_IPARAMETERS(mesh,sol,iparam,val,retval)
+  SUBROUTINE MMG3D_SET_IPARAMETER(mesh,sol,iparam,val,retval)
     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh,sol
     INTEGER, INTENT(IN)           :: iparam,val
     INTEGER, INTENT(OUT)          :: retval
@@ -743,7 +930,7 @@ END INTERFACE
 !  * \remark Fortran interface:
 !  */
 INTERFACE
-  SUBROUTINE MMG3D_SET_DPARAMETERS(mesh,sol,dparam,val,retval)
+  SUBROUTINE MMG3D_SET_DPARAMETER(mesh,sol,dparam,val,retval)
     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh,sol
     INTEGER, INTENT(IN)           :: dparam
     REAL(KIND=8), INTENT(IN)      :: val
@@ -867,6 +1054,41 @@ END INTERFACE
 
 ! int  MMG3D_Get_vertex(MMG5_pMesh mesh, double* c0, double* c1, double* c2,
 !                       int* ref,int* isCorner, int* isRequired);
+
+! /**
+!  * \param mesh pointer toward the mesh structure.
+!  * \param vertices pointer toward the table of the points coordinates.
+!  * The coordinates of the \f$i^{th}\f$ point are stored in
+!  * vertices[(i-1)*3]\@3.
+!  * \param refs pointer to the table of the point references.
+!  * The ref of the \f$i^th\f$ point is stored in refs[i-1].
+!  * \param areCorners pointer toward the table of the flags saying if
+!  * points are corners.
+!  * areCorners[i-1]=1 if the \f$i^{th}\f$ point is corner.
+!  * \param areRequired pointer toward the table of flags saying if points
+!  * are required. areRequired[i-1]=1 if the \f$i^{th}\f$ point is required.
+!  * \return 1.
+!  *
+!  * Get the coordinates and references of the mesh vertices.
+!  *
+!  * \remark Fortran interface: (commentated in order to allow to pass \%val(0)
+!  * instead of the refs, areCorners or areRequired arrays)
+!  *
+!  */
+INTERFACE
+! SUBROUTINE MMG3D_GET_VERTICES(mesh,vertices,refs,areCorners,&
+!                               areRequired,retval)
+!   MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh
+!   REAL(KIND=8),DIMENSION(*), INTENT(OUT) :: vertices
+!   INTEGER, DIMENSION(*)                  :: refs,areCorners,areRequired
+!   INTEGER, INTENT(OUT)          :: retval
+! END SUBROUTINE
+END INTERFACE
+!  *
+!  */
+
+! int  MMG3D_Get_vertices(MMG5_pMesh mesh, double* vertices, int* refs,
+!                         int* areCorners, int* areRequired);
 ! /**
 !  * \param mesh pointer toward the mesh structure.
 !  * \param v0 pointer toward the first vertex of tetrahedron.
@@ -899,6 +1121,37 @@ END INTERFACE
 !                            int* v3,int* ref, int* isRequired);
 ! /**
 !  * \param mesh pointer toward the mesh structure.
+!  * \param tetra pointer toward the table of the tetrahedra vertices.
+!  * Vertices of the \f$i^{th}\f$ tetra are stored in tetra[(i-1)*4]\@4.
+!  * \param refs pointer toward the table of the tetrahedron references.
+!  * References of the \f$i^{th}\f$ tetra is stored in refs[i-1].
+!  * \param areRequired pointer toward the table of the flags saying if the
+!  *  tetrahedra are required. areRequired[i-1]=1 if the \f$i^{th}\f$ tetra
+!  * is required.
+!  * \return 0 if failed, 1 otherwise.
+!  *
+!  * Get vertices and references of the mesh tetrahedra.
+!  *
+!  * \remark Fortran interface: (commentated in order to allow to pass \%val(0)
+!  * instead of the refs, areCorners or areRequired arrays)
+!  *
+!  */
+INTERFACE
+!  SUBROUTINE MMG3D_GET_TETRAHEDRA(mesh,tetra,refs,areRequired,&
+!                                   retval)
+!    MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh
+!    INTEGER, DIMENSION(*),INTENT(OUT) :: tetra
+!    INTEGER, DIMENSION(*)         :: refs,areRequired
+!    INTEGER, INTENT(OUT)          :: retval
+!  END SUBROUTINE
+END INTERFACE
+!  *
+!  */
+
+! int  MMG3D_Get_tetrahedra(MMG5_pMesh mesh, int* tetra,int* refs,
+!                           int* areRequired);
+! /**
+!  * \param mesh pointer toward the mesh structure.
 !  * \param v0 pointer toward the first vertex of triangle.
 !  * \param v1 pointer toward the second vertex of triangle.
 !  * \param v2 pointer toward the third vertex of triangle.
@@ -924,6 +1177,36 @@ END INTERFACE
 
 ! int  MMG3D_Get_triangle(MMG5_pMesh mesh, int* v0, int* v1, int* v2, int* ref,
 !                        int* isRequired);
+! /**
+!  * \param mesh pointer toward the mesh structure.
+!  * \param tria pointer toward the table of the triangles vertices
+!  * Vertices of the \f$i^{th}\f$ tria are stored in tria[(i-1)*3]\@3.
+!  * \param refs pointer toward the table of the triangles references.
+!  * refs[i-1] is the ref of the \f$i^{th}\f$ tria.
+!  * \param areRequired pointer toward table of the flags saying if triangles
+!  * are required. areRequired[i-1]=1 if the \f$i^{th}\f$ tria
+!  * is required.
+!  * \return 0 if failed, 1 otherwise.
+!  *
+!  * Get vertices and references of the mesh triangles.
+!  *
+!  * \remark Fortran interface: (Commentated in order to allow to pass \%val(0)
+!  * instead of the refs or areRequired arrays)
+!  *
+!  */
+INTERFACE
+!  SUBROUTINE MMG3D_GET_TRIANGLES(mesh,tria,refs,areRequired,retval)
+!    MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh
+!    INTEGER, DIMENSION(*),INTENT(OUT) :: tria
+!    INTEGER, DIMENSION(*)         :: refs,areRequired
+!    INTEGER, INTENT(OUT)          :: retval
+!  END SUBROUTINE
+END INTERFACE
+!  *
+!  */
+
+! int  MMG3D_Get_triangles(MMG5_pMesh mesh, int* tria, int* refs,
+!                          int* areRequired);
 ! /**
 !  * \param mesh pointer toward the mesh structure.
 !  * \param e0 pointer toward the first extremity of the edge.
@@ -999,6 +1282,27 @@ END INTERFACE
 ! int  MMG3D_Get_scalarSol(MMG5_pSol met, double* s);
 ! /**
 !  * \param met pointer toward the sol structure.
+!  * \param s table of the scalar solutions at mesh vertices. s[i-1] is
+!  * the solution at vertex i.
+!  * \return 0 if failed, 1 otherwise.
+!  *
+!  * Get solutions at mesh vertices.
+!  *
+!  * \remark Fortran interface:
+!  */
+INTERFACE
+  SUBROUTINE MMG3D_GET_SCALARSOLS(met,s,retval)
+    MMG5_DATA_PTR_T,INTENT(INOUT) :: met
+    REAL(KIND=8), DIMENSION(*),INTENT(OUT) :: s
+    INTEGER, INTENT(OUT)          :: retval
+  END SUBROUTINE
+END INTERFACE
+!  *
+!  */
+
+! int  MMG3D_Get_scalarSols(MMG5_pSol met, double* s);
+! /**
+!  * \param met pointer toward the sol structure.
 !  * \param vx x value of the vectorial solution.
 !  * \param vy y value of the vectorial solution.
 !  * \param vz z value of the vectorial solution.
@@ -1019,6 +1323,27 @@ END INTERFACE
 !  */
 
 ! int MMG3D_Get_vectorSol(MMG5_pSol met, double* vx, double* vy, double* vz);
+! /**
+!  * \param met pointer toward the sol structure.
+!  * \param sols table of the solutions at mesh vertices. sols[3*(i-1)]\@3 is
+!  * the solution at vertex i.
+!  * \return 0 if failed, 1 otherwise.
+!  *
+!  * Get vectorial solutions at mesh vertices
+!  *
+!  * \remark Fortran interface:
+!  */
+INTERFACE
+  SUBROUTINE MMG3D_GET_VECTORSOLS(met,sols,retval)
+    MMG5_DATA_PTR_T,INTENT(INOUT) :: met
+    REAL(KIND=8), DIMENSION(*),INTENT(OUT) :: sols
+    INTEGER, INTENT(OUT)          :: retval
+  END SUBROUTINE
+END INTERFACE
+!  *
+!  */
+
+! int MMG3D_Get_vectorSols(MMG5_pSol met, double* sols);
 ! /**
 !  * \param met pointer toward the sol structure.
 !  * \param m11 pointer toward the position (1,1) in the solution tensor.
@@ -1045,6 +1370,27 @@ END INTERFACE
 
 ! int MMG3D_Get_tensorSol(MMG5_pSol met, double *m11,double *m12, double *m13,
 !                        double *m22,double *m23, double *m33);
+! /**
+!  * \param met pointer toward the sol structure.
+!  * \param sols table of the solutions at mesh vertices.
+!  * sols[6*(i-1)]\@6 is the solution at vertex i.
+!  * \return 0 if failed, 1 otherwise.
+!  *
+!  * Get tensorial solutions at mesh vertices.
+!  *
+!  * \remark Fortran interface:
+!  */
+INTERFACE
+  SUBROUTINE MMG3D_GET_TENSORSOLS(met,sols,retval)
+    MMG5_DATA_PTR_T,INTENT(INOUT) :: met
+    REAL(KIND=8), DIMENSION(*), INTENT(OUT) :: sols
+    INTEGER, INTENT(OUT)          :: retval
+  END SUBROUTINE
+END INTERFACE
+!  *
+!  */
+
+! int MMG3D_Get_tensorSols(MMG5_pSol met, double *sols);
 ! /**
 !  * \param mesh pointer toward the mesh structure.
 !  * \param iparam integer parameter to set (see \a MMG3D_Param structure).

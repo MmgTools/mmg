@@ -22,7 +22,7 @@
 */
 
 /**
- * \file mmg3d/inlined_functions_3d.c
+ * \file mmg3d/inlined_functions_3d.h
  * \brief inlined Functions
  * \author Charles Dapogny (UPMC)
  * \author Cécile Dobrzynski (Bx INP/Inria/UBordeaux)
@@ -287,17 +287,13 @@ inline double _MMG5_orcal(MMG5_pMesh mesh,MMG5_pSol met,int iel) {
  */
 static
 inline double _MMG3D_caltetLES_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt) {
-  double    *a,*b,*c,*d,ct[12],cs[3],rad,lref,Vref,V,cal;
+  double    ct[12],cs[3],rad,Vref,V,cal;
   int        ia,ib,ic,id,j,l;
 
   ia = pt->v[0];
   ib = pt->v[1];
   ic = pt->v[2];
   id = pt->v[3];
-  a  = mesh->point[ia].c;
-  b  = mesh->point[ib].c;
-  c  = mesh->point[ic].c;
-  d  = mesh->point[id].c;
 
   for (j=0,l=0; j<4; j++,l+=3) {
     memcpy(&ct[l],mesh->point[pt->v[j]].c,3*sizeof(double));
@@ -315,7 +311,6 @@ inline double _MMG3D_caltetLES_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt)
   V = _MMG5_orvol(mesh->point,pt->v)/6.;
 
   if ( V<0. ) {
-    // fprintf(stdout," ## Warning: negative volume\n");
     return(0.0);
   }
 

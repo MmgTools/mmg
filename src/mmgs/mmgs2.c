@@ -216,7 +216,7 @@ int _MMGS_snpval_ls(MMG5_pMesh mesh,MMG5_pSol sol) {
  */
 int _MMGS_chkmaniball(MMG5_pMesh mesh, int start, char istart) {
   MMG5_pTria         pt;
-  int                *adja,k,iel;
+  int                *adja,k;
   char               i,i1;
 
   pt = &mesh->tria[start];

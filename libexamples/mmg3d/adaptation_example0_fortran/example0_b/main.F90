@@ -43,6 +43,7 @@ PROGRAM main
   CALL MMG3D_Init_mesh(MMG5_ARG_start, &
        MMG5_ARG_ppMesh,mmgMesh,MMG5_ARG_ppMet,mmgSol, &
        MMG5_ARG_end)
+  CALL MMG3D_SET_IPARAMETER(mmgMesh,mmgSol,MMG3D_IPARAM_verbose,5,ier)
 
   !> 2) Build mesh in MMG5 format
   !! Two solutions: just use the MMG3D_loadMesh function that will read a .mesh(b)
