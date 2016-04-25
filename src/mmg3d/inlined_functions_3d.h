@@ -288,12 +288,7 @@ inline double _MMG5_orcal(MMG5_pMesh mesh,MMG5_pSol met,int iel) {
 static
 inline double _MMG3D_caltetLES_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt) {
   double    ct[12],cs[3],rad,Vref,V,cal;
-  int        ia,ib,ic,id,j,l;
-
-  ia = pt->v[0];
-  ib = pt->v[1];
-  ic = pt->v[2];
-  id = pt->v[3];
+  int j,l;
 
   for (j=0,l=0; j<4; j++,l+=3) {
     memcpy(&ct[l],mesh->point[pt->v[j]].c,3*sizeof(double));
