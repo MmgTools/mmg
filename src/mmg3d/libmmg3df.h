@@ -13,7 +13,7 @@
 
 #include "libmmgtypesf.h"
 
-! /* =============================================================================
+! /* ===========================================================================
 ! **  This file is part of the mmg software package for the tetrahedral
 ! **  mesh modification.
 ! **  Copyright (c) Bx INP/Inria/UBordeaux/UPMC, 2004- .
@@ -33,7 +33,7 @@
 ! **  files COPYING.LESSER and COPYING). If not, see
 ! **  <http://www.gnu.org/licenses/>. Please read their terms carefully and
 ! **  use this copy of the mmg distribution only if you accept them.
-! ** =============================================================================
+! ** ===========================================================================
 ! */
 
 
@@ -129,18 +129,19 @@
 ! /*!< [n] Number of parameters */
 #define   MMG3D_PARAM_size                21
 
-! /*----------------------------- functions header -----------------------------*/
+! /*--------------------------- functions header ---------------------------*/
 ! /* Initialization functions */
 ! /* init structures */
 ! /**
-!  * \param starter dummy argument used to initialize the variadic argument list
+!  * \param starter dummy argument used to initialize the variadic argument
+!  * list
 !  * \param ... variadic arguments that depend to the library function that you
 !  * want to call.
 !  *
 !  * For the MMG3D_mmg3dlib function, you need
 !  * to call the \a MMG3D_Init_mesh function with the following arguments :
-!  * MMG3D_Init_mesh(MMG5_ARG_start,MMG5_ARG_ppMesh, &your_mesh, MMG5_ARG_ppMet,
-!  * &your_metric,MMG5_ARG_end).
+!  * MMG3D_Init_mesh(MMG5_ARG_start,MMG5_ARG_ppMesh, &your_mesh, MMG5_ARG_ppMet
+!  * MMG5_ARG_ppMet, &your_metric,MMG5_ARG_end).
 !  *
 !  * For the MMG3D_mmg3dls function, you need
 !  * to call the \a MMG3D_Init_mesh function with the following arguments :
@@ -148,8 +149,9 @@
 !  * &your_level_set,MMG5_ARG_end).
 !  *
 !  * For the MMG3D_mmg3dmov function, you must call
-!  * : MMG3D_Init_mesh(MMG5_ARG_start,MMG5_ARG_ppMesh, &your_mesh, MMG5_ARG_ppMet,
-!  * &empty_metric,MMG5_ARG_ppDisp, &your_displacement,MMG5_ARG_end).
+!  * : MMG3D_Init_mesh(MMG5_ARG_start,MMG5_ARG_ppMesh, &your_mesh,
+!  * MMG5_ARG_ppMet,&empty_metric,MMG5_ARG_ppDisp, &your_displacement,
+!  * MMG5_ARG_end).
 !  *
 !  * Here,\a your_mesh is a \a MMG5_pMesh, \a your_metric \a your_level_set and
 !  * \a your_displacement are \a MMG5_pSol.
@@ -259,7 +261,8 @@ END INTERFACE
 !  *
 !  */
 
-! int  MMG3D_Set_inputSolName(MMG5_pMesh mesh,MMG5_pSol sol, const char* solin);
+! int  MMG3D_Set_inputSolName(MMG5_pMesh mesh,MMG5_pSol sol,
+!                             const char* solin);
 ! /**
 !  * \param mesh pointer toward the mesh structure.
 !  * \param sol pointer toward the sol structure.
@@ -281,7 +284,8 @@ END INTERFACE
 !  *
 !  */
 
-! int  MMG3D_Set_outputSolName(MMG5_pMesh mesh,MMG5_pSol sol, const char* solout);
+! int  MMG3D_Set_outputSolName(MMG5_pMesh mesh,MMG5_pSol sol,
+!                              const char* solout);
 
 ! /* init structure sizes */
 ! /**
@@ -306,7 +310,8 @@ END INTERFACE
 !  *
 !  */
 
-! int  MMG3D_Set_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int typEntity, int np, int typSol);
+! int  MMG3D_Set_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int typEntity,
+!                        int np, int typSol);
 ! /**
 !  * \param mesh pointer toward the mesh structure.
 !  * \param np number of vertices.
@@ -363,6 +368,33 @@ END INTERFACE
 !                      double c2, int ref,int pos);
 ! /**
 !  * \param mesh pointer toward the mesh structure.
+!  * \param vertices table of the points coor.
+!  * The coordinates of the \f$i^{th}\f$ point are stored in
+!  * vertices[(i-1)*3]\@3.
+!  * \param refs table of points references.
+!  * The ref of the \f$i^th\f$ point is stored in refs[i-1].
+!  * \return 1.
+!  *
+!  * Set vertices coordinates and references in mesh structure
+!  *
+!  * \remark Fortran interface: (commentated in order to allow to pass
+!  * \%val(0) instead of the refs array)
+!  *
+!  */
+INTERFACE
+!  SUBROUTINE MMG3D_SET_VERTICES(mesh,vertices,refs,retval)
+!    MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh
+!    REAL(KIND=8), INTENT(IN) :: vertices(*)
+!    INTEGER,INTENT(IN)       :: refs(*)
+!    INTEGER, INTENT(OUT)          :: retval
+!  END SUBROUTINE
+END INTERFACE
+!  *
+!  */
+
+!  int  MMG3D_Set_vertices(MMG5_pMesh mesh, double *vertices,int *refs);
+! /**
+!  * \param mesh pointer toward the mesh structure.
 !  * \param v0 first vertex of tetrahedron.
 !  * \param v1 second vertex of tetrahedron.
 !  * \param v2 third vertex of tetrahedron.
@@ -390,6 +422,32 @@ END INTERFACE
 !                           int v2, int v3, int ref, int pos);
 ! /**
 !  * \param mesh pointer toward the mesh structure.
+!  * \param tetra vertices of the tetras of the mesh
+!  * Vertices of the \f$i^{th}\f$ tetra are stored in tetra[(i-1)*4]\@4.
+!  * \param refs table of the tetrahedra references.
+!  * References of the \f$i^{th}\f$ tetra is stored in refs[i-1].
+!  * \return 0 if failed, 1 otherwise.
+!  *
+!  * Set vertices and references of the mesh tetrahedra.
+!  *
+!  * \remark Fortran interface: (commentated in
+!  * order to allow to pass \%val(0) instead of the refs array)
+!  *
+!  */
+INTERFACE
+!  SUBROUTINE MMG3D_SET_TETRAHEDRA(mesh,tetra,refs,retval)
+!    MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh
+!    INTEGER, DIMENSION(*), INTENT(IN) :: tetra,refs
+!    INTEGER, INTENT(OUT)          :: retval
+!  END SUBROUTINE
+END INTERFACE
+!  *
+!  */
+
+!   int  MMG3D_Set_tetrahedra(MMG5_pMesh mesh, int *tetra,
+!                             int *refs);
+! /**
+!  * \param mesh pointer toward the mesh structure.
 !  * \param v0 first vertex of triangle.
 !  * \param v1 second vertex of triangle.
 !  * \param v2 third vertex of triangle.
@@ -414,6 +472,31 @@ END INTERFACE
 
 ! int  MMG3D_Set_triangle(MMG5_pMesh mesh, int v0, int v1,
 !                        int v2, int ref,int pos);
+! /**
+!  * \param mesh pointer toward the mesh structure.
+!  * \param tria pointer toward the table of the tria vertices
+!  * Vertices of the \f$i^{th}\f$ tria are stored in tria[(i-1)*3]\@3.
+!  * \param refs pointer toward the table of the triangle references.
+!  * refs[i-1] is the ref of the \f$i^{th}\f$ tria.
+!  * \return 0 if failed, 1 otherwise.
+!  *
+!  * Set vertices and references of the mesh triangles.
+!  *
+!  * \remark Fortran interface: (commentated in
+!  * order to allow to pass \%val(0) instead of the refs array)
+!  *
+!  */
+INTERFACE
+!  SUBROUTINE MMG3D_SET_TRIANGLES(mesh,tria,refs,retval)
+!    MMG5_DATA_PTR_T,INTENT(INOUT)    :: mesh
+!    INTEGER,DIMENSION(*), INTENT(IN) :: tria,refs
+!    INTEGER, INTENT(OUT)             :: retval
+!  END SUBROUTINE
+END INTERFACE
+!  *
+!  */
+
+!   int  MMG3D_Set_triangles(MMG5_pMesh mesh, int *tria, int *refs);
 ! /**
 !  * \param mesh pointer toward the mesh structure.
 !  * \param v0 first extremity of the edge.
@@ -500,6 +583,28 @@ END INTERFACE
 ! int  MMG3D_Set_requiredTetrahedron(MMG5_pMesh mesh, int k);
 ! /**
 !  * \param mesh pointer toward the mesh structure.
+!  * \param reqIdx table of the indices of the required elements.
+!  * \param nreq number of required elements
+!  * \return 1.
+!  *
+!  * Set the required Tetra.
+!  *
+!  * \remark Fortran interface:
+!  */
+INTERFACE
+  SUBROUTINE MMG3D_SET_REQUIREDTETRAHEDRA(mesh,reqIdx,nreq,retval)
+    MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh
+    INTEGER, DIMENSION(*),INTENT(IN) :: reqIdx
+    INTEGER, INTENT(IN)           :: nreq
+    INTEGER, INTENT(OUT)          :: retval
+  END SUBROUTINE
+END INTERFACE
+!  *
+!  */
+
+!   int  MMG3D_Set_requiredTetrahedra(MMG5_pMesh mesh, int *reqIdx, int nreq);
+! /**
+!  * \param mesh pointer toward the mesh structure.
 !  * \param k triangle index.
 !  * \return 1.
 !  *
@@ -518,6 +623,29 @@ END INTERFACE
 !  */
 
 ! int  MMG3D_Set_requiredTriangle(MMG5_pMesh mesh, int k);
+! /**
+!  * \param mesh pointer toward the mesh structure.
+!  * \param reqIdx table of the indices of the required trias.
+!  * \param nreq number of required trias
+!  * \return 1.
+!  *
+!  * Set the required triangles
+!  *
+!  * \remark Fortran interface:
+!  */
+INTERFACE
+  SUBROUTINE MMG3D_SET_REQUIREDTRIANGLES(mesh,reqIdx,nreq,retval)
+    MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh
+    INTEGER, DIMENSION(*),INTENT(IN) :: reqIdx
+    INTEGER, INTENT(IN)           :: nreq
+    INTEGER, INTENT(OUT)          :: retval
+  END SUBROUTINE
+END INTERFACE
+!  *
+!  */
+
+!   int  MMG3D_Set_requiredTriangles(MMG5_pMesh mesh, int *reqIdx, int nreq);
+
 ! /**
 !  * \param mesh pointer toward the mesh structure.
 !  * \param k edge index.
@@ -582,7 +710,8 @@ END INTERFACE
 !  *
 !  */
 
-! int  MMG3D_Set_normalAtVertex(MMG5_pMesh mesh, int k, double n0, double n1, double n2) ;
+! int  MMG3D_Set_normalAtVertex(MMG5_pMesh mesh, int k, double n0, double n1,
+!                               double n2) ;
 
 ! /**
 !  * \param met pointer toward the sol structure.
@@ -608,6 +737,27 @@ END INTERFACE
 ! int  MMG3D_Set_scalarSol(MMG5_pSol met, double s,int pos);
 ! /**
 !  * \param met pointer toward the sol structure.
+!  * \param s table of the scalar solutions values.
+!  * s[i-1] is the solution at vertex i.
+!  * \return 0 if failed, 1 otherwise.
+!  *
+!  * Set scalar solutions at mesh vertices.
+!  *
+!  * \remark Fortran interface:
+!  */
+INTERFACE
+  SUBROUTINE MMG3D_SET_SCALARSOLS(met,s,retval)
+    MMG5_DATA_PTR_T,INTENT(INOUT) :: met
+    REAL(KIND=8),DIMENSION(*), INTENT(IN) :: s
+    INTEGER, INTENT(OUT)          :: retval
+  END SUBROUTINE
+END INTERFACE
+!  *
+!  */
+
+! int  MMG3D_Set_scalarSols(MMG5_pSol met, double *s);
+! /**
+!  * \param met pointer toward the sol structure.
 !  * \param vx x value of the vectorial solution.
 !  * \param vy y value of the vectorial solution.
 !  * \param vz z value of the vectorial solution.
@@ -630,15 +780,37 @@ END INTERFACE
 !  *
 !  */
 
-! int MMG3D_Set_vectorSol(MMG5_pSol met, double vx,double vy, double vz, int pos);
+! int MMG3D_Set_vectorSol(MMG5_pSol met, double vx,double vy, double vz,
+!                         int pos);
 ! /**
 !  * \param met pointer toward the sol structure.
-!  * \param m11 value of the tensorial solution at position (1,1) in the tensor.
-!  * \param m12 value of the tensorial solution at position (1,2) in the tensor.
-!  * \param m13 value of the tensorial solution at position (1,3) in the tensor.
-!  * \param m22 value of the tensorial solution at position (2,2) in the tensor.
-!  * \param m23 value of the tensorial solution at position (2,3) in the tensor.
-!  * \param m33 value of the tensorial solution at position (3,3) in the tensor.
+!  * \param sols table of the vectorial solutions
+!  * sols[3*(i-1)]\@3 is the solution at vertex i
+!  * \return 0 if failed, 1 otherwise.
+!  *
+!  * Set vectorial solutions at mesh vertices
+!  *
+!  * \remark Fortran interface:
+!  */
+INTERFACE
+  SUBROUTINE MMG3D_SET_VECTORSOLS(met,sols,retval)
+    MMG5_DATA_PTR_T,INTENT(INOUT) :: met
+    REAL(KIND=8),DIMENSION(*), INTENT(IN)      :: sols
+    INTEGER, INTENT(OUT)          :: retval
+  END SUBROUTINE
+END INTERFACE
+!  *
+!  */
+
+! int MMG3D_Set_vectorSols(MMG5_pSol met, double *sols);
+! /**
+!  * \param met pointer toward the sol structure.
+!  * \param m11 value of the tensorial solution at position (1,1) in the tensor
+!  * \param m12 value of the tensorial solution at position (1,2) in the tensor
+!  * \param m13 value of the tensorial solution at position (1,3) in the tensor
+!  * \param m22 value of the tensorial solution at position (2,2) in the tensor
+!  * \param m23 value of the tensorial solution at position (2,3) in the tensor
+!  * \param m33 value of the tensorial solution at position (3,3) in the tensor
 !  * \param pos position of the solution in the mesh (begin to 1).
 !  * \return 0 if failed, 1 otherwise.
 !  *
@@ -660,6 +832,28 @@ END INTERFACE
 
 ! int MMG3D_Set_tensorSol(MMG5_pSol met, double m11,double m12, double m13,
 !                        double m22,double m23, double m33, int pos);
+! /**
+!  * \param met pointer toward the sol structure.
+!  * \param sols table of the tensorial solutions.
+!  * sols[6*(i-1)]\@6 is the solution at vertex i
+!  * \return 0 if failed, 1 otherwise.
+!  *
+!  * Set tensorial values at position \a pos in solution
+!  * structure.
+!  *
+!  * \remark Fortran interface:
+!  */
+INTERFACE
+  SUBROUTINE MMG3D_SET_TENSORSOLS(met,sols,retval)
+    MMG5_DATA_PTR_T,INTENT(INOUT) :: met
+    REAL(KIND=8),DIMENSION(*), INTENT(IN) :: sols
+    INTEGER, INTENT(OUT)          :: retval
+  END SUBROUTINE
+END INTERFACE
+!  *
+!  */
+
+! int MMG3D_Set_tensorSols(MMG5_pSol met, double *sols);
 ! /**
 !  * \param mesh pointer toward the mesh structure.
 !  *
@@ -713,7 +907,7 @@ END INTERFACE
 !  * \remark Fortran interface:
 !  */
 INTERFACE
-  SUBROUTINE MMG3D_SET_IPARAMETERS(mesh,sol,iparam,val,retval)
+  SUBROUTINE MMG3D_SET_IPARAMETER(mesh,sol,iparam,val,retval)
     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh,sol
     INTEGER, INTENT(IN)           :: iparam,val
     INTEGER, INTENT(OUT)          :: retval
@@ -722,7 +916,8 @@ END INTERFACE
 !  *
 !  */
 
-! int  MMG3D_Set_iparameter(MMG5_pMesh mesh,MMG5_pSol sol, int iparam, int val);
+! int  MMG3D_Set_iparameter(MMG5_pMesh mesh,MMG5_pSol sol, int iparam,
+!                           int val);
 ! /**
 !  * \param mesh pointer toward the mesh structure.
 !  * \param sol pointer toward the sol structure.
@@ -735,7 +930,7 @@ END INTERFACE
 !  * \remark Fortran interface:
 !  */
 INTERFACE
-  SUBROUTINE MMG3D_SET_DPARAMETERS(mesh,sol,dparam,val,retval)
+  SUBROUTINE MMG3D_SET_DPARAMETER(mesh,sol,dparam,val,retval)
     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh,sol
     INTEGER, INTENT(IN)           :: dparam
     REAL(KIND=8), INTENT(IN)      :: val
@@ -745,7 +940,8 @@ END INTERFACE
 !  *
 !  */
 
-! int  MMG3D_Set_dparameter(MMG5_pMesh mesh,MMG5_pSol sol, int dparam, double val);
+! int  MMG3D_Set_dparameter(MMG5_pMesh mesh,MMG5_pSol sol, int dparam,
+!                           double val);
 ! /**
 !  * \param mesh pointer toward the mesh structure.
 !  * \param sol pointer toward the sol structure.
@@ -762,7 +958,8 @@ END INTERFACE
 !  * \remark Fortran interface:
 !  */
 INTERFACE
-  SUBROUTINE MMG3D_SET_LOCALPARAMETER(mesh,sol,typ,ref,hmin,hmax,hausd,retval)
+  SUBROUTINE MMG3D_SET_LOCALPARAMETER(mesh,sol,typ,ref,& 
+                                      hmin,hmax,hausd,retval)
     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh,sol
     INTEGER, INTENT(IN)           :: typ,ref
     REAL(KIND=8), INTENT(IN)      :: hmin,hmax,hausd
@@ -772,8 +969,8 @@ END INTERFACE
 !  *
 !  */
 
-! int  MMG3D_Set_localParameter(MMG5_pMesh mesh, MMG5_pSol sol, int typ, int ref,
-!                               double hmin,double hmax,double hausd);
+! int  MMG3D_Set_localParameter(MMG5_pMesh mesh, MMG5_pSol sol, int typ,
+!                               int ref,double hmin,double hmax,double hausd);
 
 ! /** recover datas */
 ! /**
@@ -802,9 +999,11 @@ END INTERFACE
 ! /**
 !  * \param mesh pointer toward the mesh structure.
 !  * \param sol pointer toward the sol structure.
-!  * \param typEntity pointer toward the type of entities to which solutions are applied.
+!  * \param typEntity pointer toward the type of entities to which solutions
+!  * are applied.
 !  * \param np pointer toward the number of solutions.
-!  * \param typSol pointer toward the type of the solutions (scalar, vectorial...)
+!  * \param typSol pointer toward the type of the solutions (scalar, vectorial,
+!  * ...)
 !  * \return 1.
 !  *
 !  * Get the solution number, dimension and type.
@@ -821,13 +1020,16 @@ END INTERFACE
 !  *
 !  */
 
-! int  MMG3D_Get_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int* typEntity, int* np,
-!                       int* typSol);
+! int  MMG3D_Get_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int* typEntity,
+!                        int* np,int* typSol);
 ! /**
 !  * \param mesh pointer toward the mesh structure.
-!  * \param c0 pointer toward the coordinate of the point along the first dimension.
-!  * \param c1 pointer toward the coordinate of the point along the second dimension.
-!  * \param c2 pointer toward the coordinate of the point along the third dimension.
+!  * \param c0 pointer toward the coordinate of the point along the first
+!  * dimension.
+!  * \param c1 pointer toward the coordinate of the point along the second
+!  * dimension.
+!  * \param c2 pointer toward the coordinate of the point along the third
+!  * dimension.
 !  * \param ref pointer to the point reference.
 !  * \param isCorner pointer toward the flag saying if point is corner.
 !  * \param isRequired pointer toward the flag saying if point is required.
@@ -839,7 +1041,8 @@ END INTERFACE
 !  * \remark Fortran interface:
 !  */
 INTERFACE
-  SUBROUTINE MMG3D_GET_VERTEX(mesh,c0,c1,c2,ref,isCorner,isRequired,retval)
+  SUBROUTINE MMG3D_GET_VERTEX(mesh,c0,c1,c2,ref,isCorner,isRequired, &
+                              retval)
     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh
     REAL(KIND=8), INTENT(OUT)     :: c0,c1,c2
     INTEGER                       :: ref,isCorner,isRequired
@@ -849,8 +1052,43 @@ END INTERFACE
 !  *
 !  */
 
-! int  MMG3D_Get_vertex(MMG5_pMesh mesh, double* c0, double* c1, double* c2, int* ref,
-!                      int* isCorner, int* isRequired);
+! int  MMG3D_Get_vertex(MMG5_pMesh mesh, double* c0, double* c1, double* c2,
+!                       int* ref,int* isCorner, int* isRequired);
+
+! /**
+!  * \param mesh pointer toward the mesh structure.
+!  * \param vertices pointer toward the table of the points coordinates.
+!  * The coordinates of the \f$i^{th}\f$ point are stored in
+!  * vertices[(i-1)*3]\@3.
+!  * \param refs pointer to the table of the point references.
+!  * The ref of the \f$i^th\f$ point is stored in refs[i-1].
+!  * \param areCorners pointer toward the table of the flags saying if
+!  * points are corners.
+!  * areCorners[i-1]=1 if the \f$i^{th}\f$ point is corner.
+!  * \param areRequired pointer toward the table of flags saying if points
+!  * are required. areRequired[i-1]=1 if the \f$i^{th}\f$ point is required.
+!  * \return 1.
+!  *
+!  * Get the coordinates and references of the mesh vertices.
+!  *
+!  * \remark Fortran interface: (commentated in order to allow to pass \%val(0)
+!  * instead of the refs, areCorners or areRequired arrays)
+!  *
+!  */
+INTERFACE
+! SUBROUTINE MMG3D_GET_VERTICES(mesh,vertices,refs,areCorners,&
+!                               areRequired,retval)
+!   MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh
+!   REAL(KIND=8),DIMENSION(*), INTENT(OUT) :: vertices
+!   INTEGER, DIMENSION(*)                  :: refs,areCorners,areRequired
+!   INTEGER, INTENT(OUT)          :: retval
+! END SUBROUTINE
+END INTERFACE
+!  *
+!  */
+
+! int  MMG3D_Get_vertices(MMG5_pMesh mesh, double* vertices, int* refs,
+!                         int* areCorners, int* areRequired);
 ! /**
 !  * \param mesh pointer toward the mesh structure.
 !  * \param v0 pointer toward the first vertex of tetrahedron.
@@ -858,7 +1096,8 @@ END INTERFACE
 !  * \param v2 pointer toward the third vertex of tetrahedron.
 !  * \param v3 pointer toward the fourth vertex of tetrahedron.
 !  * \param ref pointer toward the tetrahedron reference.
-!  * \param isRequired pointer toward the flag saying if tetrahedron is required.
+!  * \param isRequired pointer toward the flag saying if tetrahedron is
+!  *  required.
 !  * \return 0 if failed, 1 otherwise.
 !  *
 !  * Get vertices \a v0, \a v1, \a v2, \a v3 and reference \a ref of
@@ -867,7 +1106,8 @@ END INTERFACE
 !  * \remark Fortran interface:
 !  */
 INTERFACE
-  SUBROUTINE MMG3D_GET_TETRAHEDRON(mesh,v0,v1,v2,v3,ref,isRequired,retval)
+  SUBROUTINE MMG3D_GET_TETRAHEDRON(mesh,v0,v1,v2,v3,ref,isRequired,&
+                                   retval)
     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh
     INTEGER, INTENT(OUT)          :: v0,v1,v2,v3
     INTEGER                       :: ref,isRequired
@@ -877,8 +1117,39 @@ END INTERFACE
 !  *
 !  */
 
-! int  MMG3D_Get_tetrahedron(MMG5_pMesh mesh, int* v0, int* v1, int* v2, int* v3,
-!                           int* ref, int* isRequired);
+! int  MMG3D_Get_tetrahedron(MMG5_pMesh mesh, int* v0, int* v1, int* v2,
+!                            int* v3,int* ref, int* isRequired);
+! /**
+!  * \param mesh pointer toward the mesh structure.
+!  * \param tetra pointer toward the table of the tetrahedra vertices.
+!  * Vertices of the \f$i^{th}\f$ tetra are stored in tetra[(i-1)*4]\@4.
+!  * \param refs pointer toward the table of the tetrahedron references.
+!  * References of the \f$i^{th}\f$ tetra is stored in refs[i-1].
+!  * \param areRequired pointer toward the table of the flags saying if the
+!  *  tetrahedra are required. areRequired[i-1]=1 if the \f$i^{th}\f$ tetra
+!  * is required.
+!  * \return 0 if failed, 1 otherwise.
+!  *
+!  * Get vertices and references of the mesh tetrahedra.
+!  *
+!  * \remark Fortran interface: (commentated in order to allow to pass \%val(0)
+!  * instead of the refs, areCorners or areRequired arrays)
+!  *
+!  */
+INTERFACE
+!  SUBROUTINE MMG3D_GET_TETRAHEDRA(mesh,tetra,refs,areRequired,&
+!                                   retval)
+!    MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh
+!    INTEGER, DIMENSION(*),INTENT(OUT) :: tetra
+!    INTEGER, DIMENSION(*)         :: refs,areRequired
+!    INTEGER, INTENT(OUT)          :: retval
+!  END SUBROUTINE
+END INTERFACE
+!  *
+!  */
+
+! int  MMG3D_Get_tetrahedra(MMG5_pMesh mesh, int* tetra,int* refs,
+!                           int* areRequired);
 ! /**
 !  * \param mesh pointer toward the mesh structure.
 !  * \param v0 pointer toward the first vertex of triangle.
@@ -906,6 +1177,36 @@ END INTERFACE
 
 ! int  MMG3D_Get_triangle(MMG5_pMesh mesh, int* v0, int* v1, int* v2, int* ref,
 !                        int* isRequired);
+! /**
+!  * \param mesh pointer toward the mesh structure.
+!  * \param tria pointer toward the table of the triangles vertices
+!  * Vertices of the \f$i^{th}\f$ tria are stored in tria[(i-1)*3]\@3.
+!  * \param refs pointer toward the table of the triangles references.
+!  * refs[i-1] is the ref of the \f$i^{th}\f$ tria.
+!  * \param areRequired pointer toward table of the flags saying if triangles
+!  * are required. areRequired[i-1]=1 if the \f$i^{th}\f$ tria
+!  * is required.
+!  * \return 0 if failed, 1 otherwise.
+!  *
+!  * Get vertices and references of the mesh triangles.
+!  *
+!  * \remark Fortran interface: (Commentated in order to allow to pass \%val(0)
+!  * instead of the refs or areRequired arrays)
+!  *
+!  */
+INTERFACE
+!  SUBROUTINE MMG3D_GET_TRIANGLES(mesh,tria,refs,areRequired,retval)
+!    MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh
+!    INTEGER, DIMENSION(*),INTENT(OUT) :: tria
+!    INTEGER, DIMENSION(*)         :: refs,areRequired
+!    INTEGER, INTENT(OUT)          :: retval
+!  END SUBROUTINE
+END INTERFACE
+!  *
+!  */
+
+! int  MMG3D_Get_triangles(MMG5_pMesh mesh, int* tria, int* refs,
+!                          int* areRequired);
 ! /**
 !  * \param mesh pointer toward the mesh structure.
 !  * \param e0 pointer toward the first extremity of the edge.
@@ -956,7 +1257,8 @@ END INTERFACE
 !  *
 !  */
 
-! int  MMG3D_Get_normalAtVertex(MMG5_pMesh mesh, int k, double *n0, double *n1, double *n2) ;
+! int  MMG3D_Get_normalAtVertex(MMG5_pMesh mesh, int k, double *n0, double *n1,
+!                               double *n2) ;
 
 ! /**
 !  * \param met pointer toward the sol structure.
@@ -980,6 +1282,27 @@ END INTERFACE
 ! int  MMG3D_Get_scalarSol(MMG5_pSol met, double* s);
 ! /**
 !  * \param met pointer toward the sol structure.
+!  * \param s table of the scalar solutions at mesh vertices. s[i-1] is
+!  * the solution at vertex i.
+!  * \return 0 if failed, 1 otherwise.
+!  *
+!  * Get solutions at mesh vertices.
+!  *
+!  * \remark Fortran interface:
+!  */
+INTERFACE
+  SUBROUTINE MMG3D_GET_SCALARSOLS(met,s,retval)
+    MMG5_DATA_PTR_T,INTENT(INOUT) :: met
+    REAL(KIND=8), DIMENSION(*),INTENT(OUT) :: s
+    INTEGER, INTENT(OUT)          :: retval
+  END SUBROUTINE
+END INTERFACE
+!  *
+!  */
+
+! int  MMG3D_Get_scalarSols(MMG5_pSol met, double* s);
+! /**
+!  * \param met pointer toward the sol structure.
 !  * \param vx x value of the vectorial solution.
 !  * \param vy y value of the vectorial solution.
 !  * \param vz z value of the vectorial solution.
@@ -1000,6 +1323,27 @@ END INTERFACE
 !  */
 
 ! int MMG3D_Get_vectorSol(MMG5_pSol met, double* vx, double* vy, double* vz);
+! /**
+!  * \param met pointer toward the sol structure.
+!  * \param sols table of the solutions at mesh vertices. sols[3*(i-1)]\@3 is
+!  * the solution at vertex i.
+!  * \return 0 if failed, 1 otherwise.
+!  *
+!  * Get vectorial solutions at mesh vertices
+!  *
+!  * \remark Fortran interface:
+!  */
+INTERFACE
+  SUBROUTINE MMG3D_GET_VECTORSOLS(met,sols,retval)
+    MMG5_DATA_PTR_T,INTENT(INOUT) :: met
+    REAL(KIND=8), DIMENSION(*),INTENT(OUT) :: sols
+    INTEGER, INTENT(OUT)          :: retval
+  END SUBROUTINE
+END INTERFACE
+!  *
+!  */
+
+! int MMG3D_Get_vectorSols(MMG5_pSol met, double* sols);
 ! /**
 !  * \param met pointer toward the sol structure.
 !  * \param m11 pointer toward the position (1,1) in the solution tensor.
@@ -1026,6 +1370,27 @@ END INTERFACE
 
 ! int MMG3D_Get_tensorSol(MMG5_pSol met, double *m11,double *m12, double *m13,
 !                        double *m22,double *m23, double *m33);
+! /**
+!  * \param met pointer toward the sol structure.
+!  * \param sols table of the solutions at mesh vertices.
+!  * sols[6*(i-1)]\@6 is the solution at vertex i.
+!  * \return 0 if failed, 1 otherwise.
+!  *
+!  * Get tensorial solutions at mesh vertices.
+!  *
+!  * \remark Fortran interface:
+!  */
+INTERFACE
+  SUBROUTINE MMG3D_GET_TENSORSOLS(met,sols,retval)
+    MMG5_DATA_PTR_T,INTENT(INOUT) :: met
+    REAL(KIND=8), DIMENSION(*), INTENT(OUT) :: sols
+    INTEGER, INTENT(OUT)          :: retval
+  END SUBROUTINE
+END INTERFACE
+!  *
+!  */
+
+! int MMG3D_Get_tensorSols(MMG5_pSol met, double *sols);
 ! /**
 !  * \param mesh pointer toward the mesh structure.
 !  * \param iparam integer parameter to set (see \a MMG3D_Param structure).
@@ -1139,14 +1504,15 @@ END INTERFACE
 
 ! /* deallocations */
 ! /**
-!  * \param starter dummy argument used to initialize the variadic argument list.
+!  * \param starter dummy argument used to initialize the variadic argument
+!  * list.
 !  * \param ... variadic arguments that depend to the library function that you
 !  * have call.
 !  *
 !  * For the MMG3D_mmg3dlib function, you need
 !  * to call the \a MMG3D_Init_mesh function with the following arguments :
-!  * MMG3D_Init_mesh(MMG5_ARG_start,MMG5_ARG_ppMesh, &your_mesh, MMG5_ARG_ppMet,
-!  * &your_metric,MMG5_ARG_end).
+!  * MMG3D_Init_mesh(MMG5_ARG_start,MMG5_ARG_ppMesh, &your_mesh,
+!  * MMG5_ARG_ppMet,&your_metric,MMG5_ARG_end).
 !  *
 !  * For the MMG3D_mmg3dls function, you need
 !  * to call the \a MMG3D_Init_mesh function with the following arguments :
@@ -1154,8 +1520,9 @@ END INTERFACE
 !  * &your_level_set,MMG5_ARG_end).
 !  *
 !  * For the MMG3D_mmg3dmov function, you must call
-!  * : MMG3D_Init_mesh(MMG5_ARG_start,MMG5_ARG_ppMesh, &your_mesh, MMG5_ARG_ppMet,
-!  * &empty_metric,MMG5_ARG_ppDisp, &your_displacement,MMG5_ARG_end).
+!  * : MMG3D_Init_mesh(MMG5_ARG_start,MMG5_ARG_ppMesh, &your_mesh,
+!  * MMG5_ARG_ppMet,&empty_metric,MMG5_ARG_ppDisp, &your_displacement,
+!  * MMG5_ARG_end).
 !  *
 !  * Deallocations before return.
 !  *
@@ -1169,14 +1536,15 @@ END INTERFACE
 ! void MMG3D_Free_all(enum MMG5_arg starter,...);
 
 ! /**
-!  * \param starter dummy argument used to initialize the variadic argument list.
+!  * \param starter dummy argument used to initialize the variadic argument
+!  * list.
 !  * \param ... variadic arguments that depend to the library function that you
 !  * have call.
 !  *
 !  * For the MMG3D_mmg3dlib function, you need
 !  * to call the \a MMG3D_Init_mesh function with the following arguments :
-!  * MMG3D_Init_mesh(MMG5_ARG_start,MMG5_ARG_ppMesh, &your_mesh, MMG5_ARG_ppMet,
-!  * &your_metric,MMG5_ARG_end).
+!  * MMG3D_Init_mesh(MMG5_ARG_start,MMG5_ARG_ppMesh, &your_mesh,
+!  *  MMG5_ARG_ppMet,&your_metric,MMG5_ARG_end).
 !  *
 !  * For the MMG3D_mmg3dls function, you need
 !  * to call the \a MMG3D_Init_mesh function with the following arguments :
@@ -1184,8 +1552,9 @@ END INTERFACE
 !  * &your_level_set,MMG5_ARG_end).
 !  *
 !  * For the MMG3D_mmg3dmov function, you must call
-!  * : MMG3D_Init_mesh(MMG5_ARG_start,MMG5_ARG_ppMesh, &your_mesh, MMG5_ARG_ppMet,
-!  * &empty_metric,MMG5_ARG_ppDisp, &your_displacement,MMG5_ARG_end).
+!  * : MMG3D_Init_mesh(MMG5_ARG_start,MMG5_ARG_ppMesh, &your_mesh,
+!  *  MMG5_ARG_ppMet,&empty_metric,MMG5_ARG_ppDisp, &your_displacement,
+!  * MMG5_ARG_end).
 !  *
 !  * Structure deallocations before return.
 !  *
@@ -1201,14 +1570,15 @@ END INTERFACE
 ! void MMG3D_Free_structures(enum MMG5_arg starter,...);
 
 ! /**
-!  * \param starter dummy argument used to initialize the variadic argument list.
+!  * \param starter dummy argument used to initialize the variadic argument
+!  * list.
 !  * \param ... variadic arguments that depend to the library function that you
 !  * have call.
 !  *
 !  * For the MMG3D_mmg3dlib function, you need
 !  * to call the \a MMG3D_Init_mesh function with the following arguments :
-!  * MMG3D_Init_mesh(MMG5_ARG_start,MMG5_ARG_ppMesh, &your_mesh, MMG5_ARG_ppMet,
-!  * &your_metric,MMG5_ARG_end).
+!  * MMG3D_Init_mesh(MMG5_ARG_start,MMG5_ARG_ppMesh, &your_mesh,
+!  *  MMG5_ARG_ppMet,&your_metric,MMG5_ARG_end).
 !  *
 !  * For the MMG3D_mmg3dls function, you need
 !  * to call the \a MMG3D_Init_mesh function with the following arguments :
@@ -1216,8 +1586,9 @@ END INTERFACE
 !  * &your_level_set,MMG5_ARG_end).
 !  *
 !  * For the MMG3D_mmg3dmov function, you must call
-!  * : MMG3D_Init_mesh(MMG5_ARG_start,MMG5_ARG_ppMesh, &your_mesh, MMG5_ARG_ppMet,
-!  * &empty_metric,MMG5_ARG_ppDisp, &your_displacement,MMG5_ARG_end).
+!  * : MMG3D_Init_mesh(MMG5_ARG_start,MMG5_ARG_ppMesh, &your_mesh,
+!  *  MMG5_ARG_ppMet,&empty_metric,MMG5_ARG_ppDisp, &your_displacement,
+!  * MMG5_ARG_end).
 !  *
 !  * Structure deallocations before return.
 !  *
@@ -1426,7 +1797,8 @@ END INTERFACE
 !  * \remark Fortran interface:
 !  */
 INTERFACE
-  SUBROUTINE MMG3D_MMG3DCHECK(mesh,met,critmin,lmin,lmax,eltab,metridtyp,retval)
+  SUBROUTINE MMG3D_MMG3DCHECK(mesh,met,critmin,lmin,lmax,eltab,&
+                              metridtyp,retval)
     MMG5_DATA_PTR_T, INTENT(INOUT)      :: mesh,met
     REAL(KIND=8), INTENT(IN)            :: critmin,lmin,lmax
     INTEGER,DIMENSION(*), INTENT(OUT)   :: eltab
@@ -1463,8 +1835,8 @@ END INTERFACE
 !  *
 !  */
 
-! void  MMG3D_searchqua(MMG5_pMesh mesh, MMG5_pSol met, double critmin, int *eltab,
-!                       char metRidTyp);
+! void  MMG3D_searchqua(MMG5_pMesh mesh, MMG5_pSol met, double critmin,
+!                       int *eltab,char metRidTyp);
 ! /**
 !  * \param mesh pointer toward the mesh structure.
 !  * \param met pointer toward the sol structure.
@@ -1477,8 +1849,8 @@ END INTERFACE
 !  * \return 1 if success, 0 otherwise.
 !  *
 !  * Store in \a eltab elements which have edge lengths shorter than \a lmin
-!  * or longer than \a lmax, \a eltab is allocated and could contain \a mesh->ne
-!  * elements.
+!  * or longer than \a lmax, \a eltab is allocated and could contain
+!  * \a mesh->ne elements.
 !  *
 !  * \remark Fortran interface:
 !  */
@@ -1495,8 +1867,8 @@ END INTERFACE
 !  *
 !  */
 
-! int  MMG3D_searchlen(MMG5_pMesh mesh, MMG5_pSol met, double lmin, double lmax,
-!                     int *eltab,char  metRidTyp);
+! int  MMG3D_searchlen(MMG5_pMesh mesh, MMG5_pSol met, double lmin,
+!                      double lmax,int *eltab,char  metRidTyp);
 
 ! /** Utils */
 ! /**
@@ -1528,8 +1900,10 @@ END INTERFACE
 ! /**
 !  * \param ca pointer toward the coordinates of the first edge's extremity.
 !  * \param cb pointer toward the coordinates of the second edge's extremity.
-!  * \param ma pointer toward the metric associated to the first edge's extremity.
-!  * \param mb pointer toward the metric associated to the second edge's extremity.
+!  * \param ma pointer toward the metric associated to the first edge's
+!  * extremity.
+!  * \param mb pointer toward the metric associated to the second edge's
+!  * extremity.
 !  * \return edge length.
 !  *
 !  * Compute length of edge \f$[ca,cb]\f$ (with \a ca and \a cb
@@ -1576,8 +1950,8 @@ END INTERFACE
 !  * \param met pointer toward the sol structure
 !  * \return 1 if success
 !  *
-!  * Compute isotropic size map according to the mean of the length of the edges
-!  * passing through a point.
+!  * Compute isotropic size map according to the mean of the length of the
+!  * edges passing through a point.
 !  *
 !  * \remark Fortran interface:
 !  */
@@ -1590,7 +1964,7 @@ END INTERFACE
 !  *
 !  */
 
-! int MMG3D_DoSol(MMG5_pMesh mesh,MMG5_pSol met);
+! int MMG3D_doSol(MMG5_pMesh mesh,MMG5_pSol met);
 
 ! /** To associate function pointers without calling MMG3D_mmg3dlib */
 ! /**
@@ -1612,7 +1986,34 @@ END INTERFACE
 
 ! void  MMG3D_setfunc(MMG5_pMesh mesh,MMG5_pSol met);
 
-! /** Old API °°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°*/
+! /**
+!  * \param mesh pointer toward the mesh structure.
+!  * \param ktri index of the boundary triangle.
+!  * \param ktet pointer toward the index of the tetra (filled by the function)
+!  * \param iface pointer toward the index of the face of the tetra \a ktet
+!  * that correspond to the boundary tria \a ktri.
+!  * \return 0 if fail, 1 otherwise
+!  *
+!  * Fill \a ktet by the index of the tetra to which belong a boundary triangle
+!  * and \a iface by the index ofthe face of the tetra that correspond to the
+!  * triangle.
+!  *
+!  * \remark Fortran interface:
+!  */
+INTERFACE
+  SUBROUTINE MMG2D_GET_TETFROMTRIA(mesh,ktri,ktet,iface,retval)
+    MMG5_DATA_PTR_T, INTENT(IN)              :: mesh
+    INTEGER, INTENT(IN)                      :: ktri
+    INTEGER, INTENT(OUT)                     :: ktet,iface,retval
+  END SUBROUTINE
+END INTERFACE
+!  *
+!  */
+
+! int MMG3D_Get_tetFromTria(MMG5_pMesh mesh, int ktri, int *ktet, int *iface);
+
+
+! /** Old API ******************************************************** */
 
 ! /**
 !  * \enum MMG5_Param
@@ -1624,55 +2025,35 @@ END INTERFACE
 !  *
 !  */
 
-! /*!< [-10..10] Tune level of verbosity */
-#define   MMG5_IPARAM_verbose            0
-! /*!< [n/-1] Set memory size to n Mbytes or keep the default value */
-#define   MMG5_IPARAM_mem                1
-! /*!< [1/0] Turn on/off debug mode */
-#define   MMG5_IPARAM_debug              2
-! /*!< [1/0] Turn on/off angle detection */
-#define   MMG5_IPARAM_angle              3
-! /*!< [1/0] Level-set meshing */
-#define   MMG5_IPARAM_iso                4
-! /*!< [-1/0/1/2] Lagrangian option */
-#define   MMG5_IPARAM_lag                5
-! /*!< [1/0] Optimize mesh keeping its initial edge sizes */
-#define   MMG5_IPARAM_optim              6
-! /*!< [1/0] Avoid/allow point insertion */
-#define   MMG5_IPARAM_noinsert           7
-! /*!< [1/0] Avoid/allow edge or face flipping */
-#define   MMG5_IPARAM_noswap             8
-! /*!< [1/0] Avoid/allow point relocation */
-#define   MMG5_IPARAM_nomove             9
-! /*!< [1/0] Avoid/allow surface modifications */
-#define   MMG5_IPARAM_nosurf             10
-! /*!< [n] Number of local parameters */
+#define   MMG5_IPARAM_verbose          0
+#define   MMG5_IPARAM_mem              1
+#define   MMG5_IPARAM_debug            2
+#define   MMG5_IPARAM_angle            3
+#define   MMG5_IPARAM_iso              4
+#define   MMG5_IPARAM_lag              5
+#define   MMG5_IPARAM_optim            6
+#define   MMG5_IPARAM_noinsert         7
+#define   MMG5_IPARAM_noswap           8
+#define   MMG5_IPARAM_nomove           9
+#define   MMG5_IPARAM_nosurf           10
 #define   MMG5_IPARAM_numberOfLocalParam 11
-! /*!< [1/0] Turn on/off point relocation with Scotch */
-#define   MMG5_IPARAM_renum              12
-! /*!< [n] Specify the size of the bucket per dimension (DELAUNAY) */
-#define   MMG5_IPARAM_bucket             13
-! /*!< [val] Value for angle detection */
-#define   MMG5_DPARAM_angleDetection     14
-! /*!< [val] Minimal mesh size */
-#define   MMG5_DPARAM_hmin               15
-! /*!< [val] Maximal mesh size */
-#define   MMG5_DPARAM_hmax               16
-! /*!< [val] Control global Hausdorff distance (on all the boundary surfaces of the mesh) */
-#define   MMG5_DPARAM_hausd              17
-! /*!< [val] Control gradation */
-#define   MMG5_DPARAM_hgrad              18
-! /*!< [val] Value of level-set (not use for now) */
-#define   MMG5_DPARAM_ls                 19
-! /*!< [n] Number of parameters */
-#define   MMG5_PARAM_size                20
+#define   MMG5_IPARAM_renum            12
+#define   MMG5_IPARAM_bucket           13
+#define   MMG5_DPARAM_angleDetection   14
+#define   MMG5_DPARAM_hmin             15
+#define   MMG5_DPARAM_hmax             16
+#define   MMG5_DPARAM_hausd            17
+#define   MMG5_DPARAM_hgrad            18
+#define   MMG5_DPARAM_ls               19
+#define   MMG5_PARAM_size              20
 
-! /*----------------------------- functions header -----------------------------*/
+! /*----------------------------- functions header --------------------------*/
 ! /* Initialization functions */
 ! /* init structures */
 ! /**
-!  * \param mesh adress of a pointer toward a pointer toward the mesh structure.
-!  * \param sol adress of a pointer toward a sol structure (metric or level-set).
+!  * \param mesh adress of a pointer toward a pointer toward the mesh structure
+!  * \param sol adress of a pointer toward a sol structure
+!  * (metric or level-set)
 !  * \param disp adress of a pointer toward a sol structure
 !  * (displacement for the lagrangian mode).
 !  *
@@ -1696,7 +2077,8 @@ END INTERFACE
 !  *
 !  */
 
-! int  MMG5_Set_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int typEntity, int np, int typSol);
+!   int  MMG5_Set_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int typEntity,int np,
+!                         int typSol);
 ! /**
 !  * \param mesh pointer toward the mesh structure.
 !  * \param np number of vertices.
@@ -1870,15 +2252,16 @@ END INTERFACE
 !  *
 !  */
 
-! int MMG5_Set_vectorSol(MMG5_pSol met, double vx,double vy, double vz, int pos);
+! int MMG5_Set_vectorSol(MMG5_pSol met, double vx,double vy, double vz,
+!                        int pos);
 ! /**
 !  * \param met pointer toward the sol structure.
-!  * \param m11 value of the tensorial solution at position (1,1) in the tensor.
-!  * \param m12 value of the tensorial solution at position (1,2) in the tensor.
-!  * \param m13 value of the tensorial solution at position (1,3) in the tensor.
-!  * \param m22 value of the tensorial solution at position (2,2) in the tensor.
-!  * \param m23 value of the tensorial solution at position (2,3) in the tensor.
-!  * \param m33 value of the tensorial solution at position (3,3) in the tensor.
+!  * \param m11 value of the tensorial solution at position (1,1) in the tensor
+!  * \param m12 value of the tensorial solution at position (1,2) in the tensor
+!  * \param m13 value of the tensorial solution at position (1,3) in the tensor
+!  * \param m22 value of the tensorial solution at position (2,2) in the tensor
+!  * \param m23 value of the tensorial solution at position (2,3) in the tensor
+!  * \param m33 value of the tensorial solution at position (3,3) in the tensor
 !  * \param pos position of the solution in the mesh (begin to 1).
 !  * \return 0 if failed, 1 otherwise.
 !  *
@@ -1936,7 +2319,8 @@ END INTERFACE
 !  *
 !  */
 
-! int  MMG5_Set_dparameter(MMG5_pMesh mesh,MMG5_pSol sol, int dparam, double val);
+! int  MMG5_Set_dparameter(MMG5_pMesh mesh,MMG5_pSol sol, int dparam,
+!                          double val);
 ! /**
 !  * \param mesh pointer toward the mesh structure.
 !  * \param sol pointer toward the sol structure.
@@ -1950,7 +2334,8 @@ END INTERFACE
 !  *
 !  */
 
-! int  MMG5_Set_localParameter(MMG5_pMesh mesh, MMG5_pSol sol, int typ, int ref, double val);
+! int  MMG5_Set_localParameter(MMG5_pMesh mesh, MMG5_pSol sol, int typ,
+!                              int ref, double val);
 
 ! /** recover datas */
 ! /**
@@ -1969,22 +2354,27 @@ END INTERFACE
 ! /**
 !  * \param mesh pointer toward the mesh structure.
 !  * \param sol pointer toward the sol structure.
-!  * \param typEntity pointer toward the type of entities to which solutions are applied.
+!  * \param typEntity pointer toward the type of entities to which solutions
+!  * are applied.
 !  * \param np pointer toward the number of solutions.
-!  * \param typSol pointer toward the type of the solutions (scalar, vectorial...)
+!  * \param typSol pointer toward the type of the solutions (scalar,
+!  * vectorial...)
 !  * \return 1.
 !  *
 !  * Get the solution number, dimension and type.
 !  *
 !  */
 
-! int  MMG5_Get_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int* typEntity, int* np,
+! int  MMG5_Get_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int* typEntity,int* np,
 !                       int* typSol);
 ! /**
 !  * \param mesh pointer toward the mesh structure.
-!  * \param c0 pointer toward the coordinate of the point along the first dimension.
-!  * \param c1 pointer toward the coordinate of the point along the second dimension.
-!  * \param c2 pointer toward the coordinate of the point along the third dimension.
+!  * \param c0 pointer toward the coordinate of the point along the first
+!  * dimension.
+!  * \param c1 pointer toward the coordinate of the point along the second
+!  * dimension.
+!  * \param c2 pointer toward the coordinate of the point along the third
+!  * dimension.
 !  * \param ref pointer to the point reference.
 !  * \param isCorner pointer toward the flag saying if point is corner.
 !  * \param isRequired pointer toward the flag saying if point is required.
@@ -1995,8 +2385,8 @@ END INTERFACE
 !  *
 !  */
 
-! int  MMG5_Get_vertex(MMG5_pMesh mesh, double* c0, double* c1, double* c2, int* ref,
-!                      int* isCorner, int* isRequired);
+! int  MMG5_Get_vertex(MMG5_pMesh mesh, double* c0,double* c1,double* c2,
+!                      int* ref,int* isCorner, int* isRequired);
 ! /**
 !  * \param mesh pointer toward the mesh structure.
 !  * \param v0 pointer toward the first vertex of tetrahedron.
@@ -2004,7 +2394,8 @@ END INTERFACE
 !  * \param v2 pointer toward the third vertex of tetrahedron.
 !  * \param v3 pointer toward the fourth vertex of tetrahedron.
 !  * \param ref pointer toward the tetrahedron reference.
-!  * \param isRequired pointer toward the flag saying if tetrahedron is required.
+!  * \param isRequired pointer toward the flag saying if tetrahedron is
+!  * required.
 !  * \return 0 if failed, 1 otherwise.
 !  *
 !  * Get vertices \a v0, \a v1, \a v2, \a v3 and reference \a ref of
@@ -2012,8 +2403,8 @@ END INTERFACE
 !  *
 !  */
 
-! int  MMG5_Get_tetrahedron(MMG5_pMesh mesh, int* v0, int* v1, int* v2, int* v3,
-!                           int* ref, int* isRequired);
+! int  MMG5_Get_tetrahedron(MMG5_pMesh mesh, int* v0, int* v1, int* v2,
+!                           int* v3, int* ref, int* isRequired);
 ! /**
 !  * \param mesh pointer toward the mesh structure.
 !  * \param v0 pointer toward the first vertex of triangle.
@@ -2189,14 +2580,14 @@ END INTERFACE
 !  * \brief Return adjacent elements of a tetrahedron.
 !  * \param mesh pointer toward the mesh structure.
 !  * \param kel tetrahedron index.
-!  * \param v0 pointer toward the index of the adjacent element of \a kel through
-!  * its face number 0.
-!  * \param v1 pointer toward the index of the adjacent element of \a kel through
-!  * its face number 1.
-!  * \param v2 pointer toward the index of the adjacent element of \a kel through
-!  * its face number 2.
-!  * \param v3 pointer toward the index of the adjacent element of \a kel through
-!  * its face number 3.
+!  * \param v0 pointer toward the index of the adjacent element of \a kel
+!  * through its face number 0.
+!  * \param v1 pointer toward the index of the adjacent element of \a kel
+!  * through its face number 1.
+!  * \param v2 pointer toward the index of the adjacent element of \a kel
+!  * through its face number 2.
+!  * \param v3 pointer toward the index of the adjacent element of \a kel
+!  * through its face number 3.
 !  * \return 1.
 !  *
 !  * Find the indices of the 4 adjacent elements of tetrahedron \a
@@ -2205,7 +2596,8 @@ END INTERFACE
 !  *
 !  */
 
-! int MMG5_Get_adjaTet(MMG5_pMesh mesh, int kel, int *v0, int *v1, int *v2, int *v3);
+! int MMG5_Get_adjaTet(MMG5_pMesh mesh, int kel, int *v0, int *v1, int *v2,
+!                      int *v3);
 ! /**
 !  * \param prog pointer toward the program name.
 !  *
@@ -2243,47 +2635,6 @@ END INTERFACE
 ! void MMG5_searchqua(MMG5_pMesh,MMG5_pSol,double, int *, char);
 
 ! int MMG5_searchlen(MMG5_pMesh,MMG5_pSol, double, double, int *,char);
-
-! /**
-!  * \brief Return adjacent elements of a triangle.
-!  * \param mesh pointer toward the mesh structure.
-!  * \param ip vertex index.
-!  * \param vtab pointer toward an array of size MMG3D_LMAX that will contain
-!  * the indices of adjacent vertices to the vertex \a k.
-!  * \return 1 if success.
-!  *
-!  * Find the indices of the adjacent vertices of the vertex \a
-!  * ip.
-!  *
-!  */
-
-! int MMG3D_Get_adjaVertices(MMG5_pMesh mesh, int ip, int vtab[MMG3D_LMAX]);
-! /**
-!  * \param mesh pointer toward the mesh structure.
-!  * \param ktri index of the boundary triangle.
-!  * \param ktet pointer toward the index of the tetra (filled by the function).
-!  * \param iface pointer toward the index of the face of the tetra \a ktet that
-!  * correspond to the boundary tria \a ktri.
-!  * \return 0 if fail, 1 otherwise
-!  *
-!  * Fill \a ktet by the index of the tetra to which belong a boundary triangle
-!  * and \a iface by the index ofthe face of the tetra that correspond to the
-!  * triangle.
-!  *
-!  * \remark Fortran interface:
-!  */
-INTERFACE
-  SUBROUTINE MMG2D_GET_TETFROMTRIA(mesh,ktri,ktet,iface,retval)
-    MMG5_DATA_PTR_T, INTENT(IN)              :: mesh
-    INTEGER, INTENT(IN)                      :: ktri
-    INTEGER, INTENT(OUT)                     :: ktet,iface,retval
-  END SUBROUTINE
-END INTERFACE
-!  *
-!  */
-
-! int MMG3D_Get_tetFromTria(MMG5_pMesh mesh, int ktri, int *ktet, int *iface);
-
 
 ! #ifdef __cplusplus
 ! }

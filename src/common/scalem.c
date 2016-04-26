@@ -137,7 +137,7 @@ int _MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met) {
      * the user */
     if ( !sethmin )  mesh->info.hmin  = 0.01;
 
-    if ( !sethmax )  mesh->info.hmax  = 1.;
+    if ( !sethmax )  mesh->info.hmax  = 2.;
 
     if ( mesh->info.hmax < mesh->info.hmin ) {
       if ( sethmin && sethmax ) {

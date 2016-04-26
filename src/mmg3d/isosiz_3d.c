@@ -41,42 +41,6 @@ extern char   ddb;
 #define A16TH     0.0625
 #define A32TH     0.03125
 
-/**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the sol structure.
- * \param ia index of edge in tetra \a pt .
- * \param pt pointer toward the tetra from which we come.
- * \return length of edge according to the prescribed metric.
- *
- * Compute length of edge \f$[i0;i1]\f$ according to the prescribed iso
- * metric (length identic for internal edges than for surface edges).
- *
- */
-inline double _MMG5_lenedg_iso(MMG5_pMesh mesh,MMG5_pSol met,int ia,
-                               MMG5_pTetra pt) {
-  int ip1,ip2;
-
-  ip1 = pt->v[_MMG5_iare[ia][0]];
-  ip2 = pt->v[_MMG5_iare[ia][1]];
-//#warning CECILE : on ne tient pas compte du fait que ca peut etre une ridge
-  /* if(pt->xt) { */
-  /*    pxt = pt->xt ? &mesh->xtetra[pt->xt] : 0; */
-  /*   return(_MMG5_lenSurfEdg_iso(mesh,met,ip1,ip2,(pxt->tag[ia] & MG_GEO))); */
-  /* } */
-  /* else */
-    return(_MMG5_lenSurfEdg_iso(mesh,met,ip1,ip2,0));
-}
-
-inline double _MMG5_lenedgspl_iso(MMG5_pMesh mesh ,MMG5_pSol met, int ia,
-                                  MMG5_pTetra pt) {
-  int ip1,ip2;
-
-  ip1 = pt->v[_MMG5_iare[ia][0]];
-  ip2 = pt->v[_MMG5_iare[ia][1]];
-
-  return(_MMG5_lenSurfEdg_iso(mesh,met,ip1,ip2,0));
-
-}
 
 /**
  * \brief Compute edge length from edge's coordinates.

@@ -465,7 +465,7 @@ int _MMG5_Alloc_inode( MMG5_pMesh mesh, _MMG5_iNode **node ) {
  *
  * Add a node with value \a val to a sorted linked list with unique entries.
  *
- * \Remark as the linked list had unique entries, we don't insert a node if it
+ * \remark as the linked list had unique entries, we don't insert a node if it
  * exists.
  *
  */
@@ -562,10 +562,10 @@ int _MMG5_Alloc_dnode( MMG5_pMesh mesh, _MMG5_dNode **node ) {
  * \param val real value to add to the linked list.
  * \return 1 if the node is inserted, 0 if the node is not inserted, -1 if fail.
  *
- * Add a node with integer value \k and real value \a val to a sorted linked
+ * Add a node with integer value \a k and real value \a val to a sorted linked
  * list with unique entries.
  *
- * \Remark as the linked list had unique entries, we don't insert a node if it
+ * \remark as the linked list had unique entries, we don't insert a node if it
  * exists.
  *
  */

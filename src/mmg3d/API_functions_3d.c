@@ -318,18 +318,18 @@ int MMG3D_Set_vertex(MMG5_pMesh mesh, double c0, double c1, double c2, int ref, 
 }
 
 int MMG3D_Get_vertex(MMG5_pMesh mesh, double* c0, double* c1, double* c2, int* ref,
-                    int* isCorner, int* isRequired) {
+                     int* isCorner, int* isRequired) {
 
- if ( mesh->npi == mesh->np ) {
-   mesh->npi = 0;
-   if ( mesh->info.ddebug ) {
-    fprintf(stdout,"  ## Warning: reset the internal counter of points.\n");
-    fprintf(stdout,"     You must pass here exactly one time (the first time ");
-    fprintf(stdout,"you call the MMG3D_Get_vertex function).\n");
-    fprintf(stdout,"     If not, the number of call of this function");
-    fprintf(stdout," exceed the number of points: %d\n ",mesh->np);
-   }
- }
+  if ( mesh->npi == mesh->np ) {
+    mesh->npi = 0;
+    if ( mesh->info.ddebug ) {
+      fprintf(stdout,"  ## Warning: reset the internal counter of points.\n");
+      fprintf(stdout,"     You must pass here exactly one time (the first time ");
+      fprintf(stdout,"you call the MMG3D_Get_vertex function).\n");
+      fprintf(stdout,"     If not, the number of call of this function");
+      fprintf(stdout," exceed the number of points: %d\n ",mesh->np);
+    }
+  }
 
   mesh->npi++;
 
@@ -361,6 +361,69 @@ int MMG3D_Get_vertex(MMG5_pMesh mesh, double* c0, double* c1, double* c2, int* r
   }
 
   return(1);
+}
+
+int  MMG3D_Set_vertices(MMG5_pMesh mesh, double *vertices,int *refs) {
+
+  MMG5_pPoint ppt;
+  int i,j;
+
+  /*coordinates vertices*/
+  for (i=1;i<=mesh->np;i++)
+  {
+    ppt = &mesh->point[i];
+
+    j = (i-1)*3;
+    ppt->c[0]  = vertices[j];
+    ppt->c[1]  = vertices[j+1];
+    ppt->c[2]  = vertices[j+2];
+
+    ppt->tag = MG_NUL;
+    ppt->flag = 0;
+    ppt->tmp = 0;
+
+    if ( refs != NULL )
+      ppt->ref   = refs[i-1];
+  }
+
+  return 1;
+}
+
+
+int  MMG3D_Get_vertices(MMG5_pMesh mesh, double* vertices, int* refs,
+                        int* areCorners, int* areRequired) {
+  MMG5_pPoint ppt;
+  int i,j;
+
+  for (i=1;i<=mesh->np;i++)
+  {
+    ppt = &mesh->point[i];
+
+    j = (i-1)*3;
+    vertices[j] = ppt->c[0];
+    vertices[j+1] = ppt->c[1];
+    vertices[j+2] = ppt->c[2];
+
+    j = i-1;
+    if ( refs != NULL )
+      refs[j] = ppt->ref;
+
+    if ( areCorners !=NULL ) {
+      if ( ppt->tag & MG_CRN )
+        areCorners[j] = 1;
+      else
+        areCorners[j] = 0;
+    }
+
+    if ( areRequired != NULL ) {
+      if ( ppt->tag & MG_REQ )
+        areRequired[j] = 1;
+      else
+        areRequired[j] = 0;
+    }
+  }
+
+  return 1;
 }
 
 int MMG3D_Set_tetrahedron(MMG5_pMesh mesh, int v0, int v1, int v2, int v3, int ref, int pos) {
@@ -431,7 +494,7 @@ int MMG3D_Set_tetrahedron(MMG5_pMesh mesh, int v0, int v1, int v2, int v3, int r
 }
 
 int MMG3D_Get_tetrahedron(MMG5_pMesh mesh, int* v0, int* v1, int* v2, int* v3,
-                         int* ref, int* isRequired) {
+                          int* ref, int* isRequired) {
 
   if ( mesh->nei == mesh->ne ) {
     mesh->nei = 0;
@@ -471,6 +534,88 @@ int MMG3D_Get_tetrahedron(MMG5_pMesh mesh, int* v0, int* v1, int* v2, int* v3,
   return(1);
 }
 
+int  MMG3D_Set_tetrahedra(MMG5_pMesh mesh, int *tetra, int *refs) {
+  MMG5_pPoint ppt;
+  MMG5_pTetra pt;
+  double     vol;
+  int        i,ip,aux, j;
+
+  mesh->xp = 0;
+  for (i=1;i<=mesh->ne;i++)
+  {
+    j = (i-1)*4;
+    pt = &mesh->tetra[i];
+    pt->v[0]  = tetra[j];
+    pt->v[1]  = tetra[j+1];
+    pt->v[2]  = tetra[j+2];
+    pt->v[3]  = tetra[j+3];
+
+    if ( refs != NULL )
+      pt->ref   = abs(refs[i-1]);
+
+    mesh->point[pt->v[0]].tag &= ~MG_NUL;
+    mesh->point[pt->v[1]].tag &= ~MG_NUL;
+    mesh->point[pt->v[2]].tag &= ~MG_NUL;
+    mesh->point[pt->v[3]].tag &= ~MG_NUL;
+
+    vol = _MMG5_orvol(mesh->point,pt->v);
+
+    if ( vol == 0.0 ) {
+      fprintf(stderr,"  ## Error: tetrahedron %d has volume null.\n",i);
+
+      for ( ip=0; ip<4; ip++ ) {
+        ppt = &mesh->point[pt->v[ip]];
+        for ( j=0; j<3; j++ ) {
+          if ( fabs(ppt->c[j])>0. ) {
+            fprintf(stderr," Check that you don't have a sliver tetrahedron.\n");
+            return(0);
+          }
+        }
+      }
+
+      fprintf(stderr,"  All vertices have zero coordinates.");
+      fprintf(stderr," Check that you have set the vertices before the tetrahedra.\n");
+      return(0);
+    }
+    else if ( vol < 0.0 ) {
+      /* Possibly switch 2 vertices number so that each tet is positively oriented */
+      aux = pt->v[2];
+      pt->v[2] = pt->v[3];
+      pt->v[3] = aux;
+
+      ++mesh->xp;
+    }
+  }
+
+  return 1;
+}
+
+int  MMG3D_Get_tetrahedra(MMG5_pMesh mesh, int *tetra, int *refs, int * areRequired) {
+  MMG5_pTetra pt;
+  int         i, j;
+
+  for (i=1;i<=mesh->ne;i++)
+  {
+    j = (i-1)*4;
+    pt = &mesh->tetra[i];
+    tetra[j]   = pt->v[0];
+    tetra[j+2] = pt->v[1];
+    tetra[j+1] = pt->v[2];
+    tetra[j+3] = pt->v[3];
+    if ( refs!=NULL )
+      refs[i-1]  = pt->ref ;
+    if ( areRequired != NULL ) {
+      if ( pt->tag & MG_REQ )
+        areRequired[i-1] = 1;
+      else
+        areRequired[i-1] = 0;
+    }
+  }
+  return 1;
+}
+
+
+
 int MMG3D_Set_triangle(MMG5_pMesh mesh, int v0, int v1, int v2, int ref,int pos) {
 
   if ( !mesh->nt ) {
@@ -503,7 +648,7 @@ int MMG3D_Set_triangle(MMG5_pMesh mesh, int v0, int v1, int v2, int ref,int pos)
 }
 
 int MMG3D_Get_triangle(MMG5_pMesh mesh, int* v0, int* v1, int* v2, int* ref
-                      ,int* isRequired) {
+                       ,int* isRequired) {
   MMG5_pTria  ptt;
 
   if ( mesh->nti == mesh->nt ) {
@@ -544,6 +689,48 @@ int MMG3D_Get_triangle(MMG5_pMesh mesh, int* v0, int* v1, int* v2, int* ref
   return(1);
 }
 
+int  MMG3D_Set_triangles(MMG5_pMesh mesh, int *tria, int *refs) {
+  MMG5_pTria ptt;
+  int         i, j;
+
+  for (i=1;i<=mesh->nt;i++)
+  {
+    j = (i-1)*3;
+    ptt = &mesh->tria[i];
+    ptt->v[0] = tria[j]  ;
+    ptt->v[1] = tria[j+2];
+    ptt->v[2] = tria[j+1];
+    if ( refs != NULL )
+      ptt->ref  = refs[i-1];
+  }
+  return 1;
+}
+
+int  MMG3D_Get_triangles(MMG5_pMesh mesh, int *tria, int *refs, int *areRequired) {
+  MMG5_pTria ptt;
+  int         i, j;
+
+  for (i=1;i<=mesh->nt;i++)
+  {
+    j = (i-1)*3;
+    ptt = &mesh->tria[i];
+    tria[j]   = ptt->v[0];
+    tria[j+2] = ptt->v[1];
+    tria[j+1] = ptt->v[2];
+
+    if ( refs!=NULL )
+      refs[i-1]  = ptt->ref ;
+    if ( areRequired != NULL ) {
+      if ( (ptt->tag[0] & MG_REQ) && (ptt->tag[1] & MG_REQ) &&
+           (ptt->tag[2] & MG_REQ) )
+        areRequired[i-1] = 1;
+      else
+        areRequired[i-1] = 0;
+    }
+  }
+  return 1;
+}
+
 int MMG3D_Set_edge(MMG5_pMesh mesh, int v0, int v1, int ref, int pos) {
 
   if ( !mesh->na ) {
@@ -574,7 +761,7 @@ int MMG3D_Set_edge(MMG5_pMesh mesh, int v0, int v1, int ref, int pos) {
 }
 
 int MMG3D_Get_edge(MMG5_pMesh mesh, int* e0, int* e1, int* ref
-                  ,int* isRidge, int* isRequired) {
+                   ,int* isRidge, int* isRequired) {
 
   if ( mesh->nai == mesh->na ) {
     mesh->nai = 0;
@@ -636,11 +823,32 @@ int MMG3D_Set_requiredTetrahedron(MMG5_pMesh mesh, int k) {
   return(1);
 }
 
+int MMG3D_Set_requiredTetrahedra(MMG5_pMesh mesh, int *reqIdx, int nreq) {
+  int k;
+
+  for ( k=0; k<nreq; ++k ){
+    mesh->tetra[reqIdx[k]].tag |= MG_REQ;
+  }
+
+  return(1);
+}
+
 int MMG3D_Set_requiredTriangle(MMG5_pMesh mesh, int k) {
   assert ( k <= mesh->nt );
   mesh->tria[k].tag[0] |= MG_REQ;
   mesh->tria[k].tag[1] |= MG_REQ;
   mesh->tria[k].tag[2] |= MG_REQ;
+  return(1);
+}
+
+int MMG3D_Set_requiredTriangles(MMG5_pMesh mesh, int* reqIdx, int nreq) {
+  int k;
+
+  for ( k=0; k<nreq; ++k ){
+    mesh->tria[reqIdx[k]].tag[0] |= MG_REQ;
+    mesh->tria[reqIdx[k]].tag[1] |= MG_REQ;
+    mesh->tria[reqIdx[k]].tag[2] |= MG_REQ;
+  }
   return(1);
 }
 
@@ -709,6 +917,7 @@ int MMG3D_Set_scalarSol(MMG5_pSol met, double s, int pos) {
   return(1);
 }
 
+
 int MMG3D_Get_scalarSol(MMG5_pSol met, double* s) {
 
   int ddebug = 0;
@@ -734,6 +943,31 @@ int MMG3D_Get_scalarSol(MMG5_pSol met, double* s) {
   }
 
   *s  = met->m[met->npi];
+
+  return(1);
+}
+
+int MMG3D_Set_scalarSols(MMG5_pSol met, double *s ) {
+  int k;
+
+  if ( !met->np ) {
+    fprintf(stderr,"  ## Error: You must set the number of solution with the");
+    fprintf(stderr," MMG3D_Set_solSize function before setting values");
+    fprintf(stderr," in solution structure \n");
+    return(0);
+  }
+
+  for ( k=0; k<met->np; ++k )
+    met->m[k+1] = s[k];
+
+  return(1);
+}
+
+int MMG3D_Get_scalarSols(MMG5_pSol met, double* s) {
+  int k;
+
+  for ( k=0; k<met->np; ++k )
+    s[k]  = met->m[k+1];
 
   return(1);
 }
@@ -772,6 +1006,7 @@ int MMG3D_Set_vectorSol(MMG5_pSol met, double vx,double vy, double vz, int pos) 
   return(1);
 }
 
+
 int MMG3D_Get_vectorSol(MMG5_pSol met, double* vx, double* vy, double* vz) {
 
   int ddebug = 0;
@@ -803,8 +1038,45 @@ int MMG3D_Get_vectorSol(MMG5_pSol met, double* vx, double* vy, double* vz) {
   return(1);
 }
 
+int MMG3D_Set_vectorSols(MMG5_pSol met, double *sols) {
+  double *m;
+  int k,j;
+
+  if ( !met->np ) {
+    fprintf(stderr,"  ## Error: You must set the number of solution with the");
+    fprintf(stderr," MMG3D_Set_solSize function before setting values");
+    fprintf(stderr," in solution structure \n");
+    return(0);
+  }
+
+  for ( k=0; k<met->np; ++k ) {
+    j = 3*k;
+    m = &met->m[j+3];
+    m[0] = sols[j];
+    m[1] = sols[j+1];
+    m[2] = sols[j+2];
+  }
+
+  return(1);
+}
+
+int MMG3D_Get_vectorSols(MMG5_pSol met, double* sols) {
+  double *m;
+  int k, j;
+
+  for ( k=0; k<met->np; ++k ) {
+    j = 3*k;
+    m = &met->m[j+3];
+    sols[j]   = m[0];
+    sols[j+1] = m[1];
+    sols[j+2] = m[2];
+  }
+
+  return(1);
+}
+
 int MMG3D_Set_tensorSol(MMG5_pSol met, double m11,double m12, double m13,
-                       double m22,double m23, double m33, int pos) {
+                        double m22,double m23, double m33, int pos) {
 
   if ( !met->np ) {
     fprintf(stderr,"  ## Error: You must set the number of solution with the");
@@ -841,8 +1113,9 @@ int MMG3D_Set_tensorSol(MMG5_pSol met, double m11,double m12, double m13,
   return(1);
 }
 
+
 int MMG3D_Get_tensorSol(MMG5_pSol met, double *m11,double *m12, double *m13,
-                       double *m22,double *m23, double *m33) {
+                        double *m22,double *m23, double *m33) {
 
   int ddebug = 0;
 
@@ -872,6 +1145,50 @@ int MMG3D_Get_tensorSol(MMG5_pSol met, double *m11,double *m12, double *m13,
   *m22 = met->m[6*met->npi+3];
   *m13 = met->m[6*met->npi+4];
   *m33 = met->m[6*met->npi+5];
+
+  return(1);
+}
+
+int MMG3D_Set_tensorSols(MMG5_pSol met, double *sols) {
+  double *m;
+  int k,j;
+
+  if ( !met->np ) {
+    fprintf(stderr,"  ## Error: You must set the number of solution with the");
+    fprintf(stderr," MMG3D_Set_solSize function before setting values");
+    fprintf(stderr," in solution structure \n");
+    return(0);
+  }
+
+  for ( k=0; k<met->np; ++k ) {
+    j = 6*k;
+    m = &met->m[j+6];
+
+    m[0] = sols[j];
+    m[1] = sols[j+1];
+    m[2] = sols[j+2];
+    m[3] = sols[j+3];
+    m[4] = sols[j+4];
+    m[5] = sols[j+5];
+  }
+  return(1);
+}
+
+int MMG3D_Get_tensorSols(MMG5_pSol met, double *sols) {
+  double *m;
+  int k,j;
+
+  for ( k=0; k<met->np; ++k ) {
+    j = 6*k;
+    m = &met->m[j+6];
+
+    sols[j]   = m[0];
+    sols[j+1] = m[1];
+    sols[j+2] = m[2];
+    sols[j+3] = m[3];
+    sols[j+4] = m[4];
+    sols[j+5] = m[5];
+  }
 
   return(1);
 }
@@ -1345,7 +1662,7 @@ void MMG5_Init_mesh(MMG5_pMesh *mesh, MMG5_pSol *sol, MMG5_pSol *disp ) {
 void MMG5_Init_parameters(MMG5_pMesh mesh) {
   printf("  ##  MMG5_Init_parameters:"
          "MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
-        " be removed soon\n." );
+         " be removed soon\n." );
 
   MMG3D_Init_parameters(mesh);
   return;
@@ -1354,7 +1671,7 @@ void MMG5_Init_parameters(MMG5_pMesh mesh) {
 int MMG5_Set_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int typEntity, int np, int typSol) {
   printf("  ## MMG5_Set_solSize:"
          "MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
-        " be removed soon\n." );
+         " be removed soon\n." );
 
   return(MMG3D_Set_solSize(mesh,sol,typEntity,np,typSol));
 }
@@ -1362,7 +1679,7 @@ int MMG5_Set_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int typEntity, int np, int 
 int MMG5_Set_meshSize(MMG5_pMesh mesh, int np, int ne, int nt, int na) {
   printf("  ## MMG5_Set_meshSize:"
          "MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
-        " be removed soon\n." );
+         " be removed soon\n." );
 
   return(MMG3D_Set_meshSize(mesh,np,ne,nt,na));
 }
@@ -1370,7 +1687,7 @@ int MMG5_Set_meshSize(MMG5_pMesh mesh, int np, int ne, int nt, int na) {
 int MMG5_Get_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int* typEntity, int* np, int* typSol) {
   printf("  ## MMG5_Get_solSize:"
          "MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
-        " be removed soon\n." );
+         " be removed soon\n." );
 
   return(MMG3D_Get_solSize(mesh,sol,typEntity,np,typSol));
 }
@@ -1378,7 +1695,7 @@ int MMG5_Get_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int* typEntity, int* np, in
 int MMG5_Get_meshSize(MMG5_pMesh mesh, int* np, int* ne, int* nt, int* na) {
   printf("  ## MMG5_Get_meshSize:"
          "MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
-        " be removed soon\n." );
+         " be removed soon\n." );
 
   return(MMG3D_Get_meshSize(mesh,np,ne,nt,na));
 }
@@ -1386,7 +1703,7 @@ int MMG5_Get_meshSize(MMG5_pMesh mesh, int* np, int* ne, int* nt, int* na) {
 int MMG5_Set_vertex(MMG5_pMesh mesh, double c0, double c1, double c2, int ref, int pos) {
   printf("  ## MMG5_Set_vertex:"
          "MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
-        " be removed soon\n." );
+         " be removed soon\n." );
 
   return(MMG3D_Set_vertex(mesh,c0,c1,c2,ref,pos));
 }
@@ -1395,7 +1712,7 @@ int MMG5_Get_vertex(MMG5_pMesh mesh, double* c0, double* c1, double* c2, int* re
                     int* isCorner, int* isRequired) {
   printf("  ## MMG5_Get_vertex:"
          "MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
-        " be removed soon\n." );
+         " be removed soon\n." );
 
   return(MMG3D_Get_vertex(mesh,c0,c1,c2,ref,isCorner,isRequired));
 }
@@ -1403,7 +1720,7 @@ int MMG5_Get_vertex(MMG5_pMesh mesh, double* c0, double* c1, double* c2, int* re
 int MMG5_Set_tetrahedron(MMG5_pMesh mesh, int v0, int v1, int v2, int v3, int ref, int pos) {
   printf("  ## MMG5_Set_tetrahedron:"
          "MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
-        " be removed soon\n." );
+         " be removed soon\n." );
 
   return(MMG3D_Set_tetrahedron(mesh,v0,v1,v2,v3,ref,pos));
 }
@@ -1412,7 +1729,7 @@ int MMG5_Get_tetrahedron(MMG5_pMesh mesh, int* v0, int* v1, int* v2, int* v3,
                          int* ref, int* isRequired) {
   printf("  ## MMG5_Get_tetrahedron:"
          "MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
-        " be removed soon\n." );
+         " be removed soon\n." );
 
   return(MMG3D_Get_tetrahedron(mesh,v0,v1,v2,v3,ref,isRequired));
 }
@@ -1420,7 +1737,7 @@ int MMG5_Get_tetrahedron(MMG5_pMesh mesh, int* v0, int* v1, int* v2, int* v3,
 int MMG5_Set_triangle(MMG5_pMesh mesh, int v0, int v1, int v2, int ref,int pos) {
   printf("  ## MMG5_Set_triangle:"
          "MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
-        " be removed soon\n." );
+         " be removed soon\n." );
 
   return(MMG3D_Set_triangle(mesh,v0,v1,v2,ref,pos));
 }
@@ -1429,7 +1746,7 @@ int MMG5_Get_triangle(MMG5_pMesh mesh, int* v0, int* v1, int* v2, int* ref
                       ,int* isRequired) {
   printf("  ## MMG5_Get_triangle: "
          "MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
-        " be removed soon\n." );
+         " be removed soon\n." );
 
   return(MMG3D_Get_triangle(mesh,v0,v1,v2,ref,isRequired));
 }
@@ -1437,7 +1754,7 @@ int MMG5_Get_triangle(MMG5_pMesh mesh, int* v0, int* v1, int* v2, int* ref
 int MMG5_Set_edge(MMG5_pMesh mesh, int v0, int v1, int ref, int pos) {
   printf("  ## MMG5_Set_edge:"
          " MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
-        " be removed soon\n." );
+         " be removed soon\n." );
 
   return(MMG3D_Set_edge(mesh,v0,v1,ref,pos));
 }
@@ -1446,7 +1763,7 @@ int MMG5_Get_edge(MMG5_pMesh mesh, int* e0, int* e1, int* ref
                   ,int* isRidge, int* isRequired) {
   printf("  ## MMG5_Get_edge:"
          " MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
-        " be removed soon\n." );
+         " be removed soon\n." );
 
   return(MMG3D_Get_edge(mesh,e0,e1,ref,isRidge,isRequired));
 }
@@ -1454,7 +1771,7 @@ int MMG5_Get_edge(MMG5_pMesh mesh, int* e0, int* e1, int* ref
 int MMG5_Set_corner(MMG5_pMesh mesh, int k) {
   printf("  ## MMG5_Set_corner: "
          "MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
-        " be removed soon\n." );
+         " be removed soon\n." );
 
   return(MMG3D_Set_corner(mesh,k));
 }
@@ -1462,7 +1779,7 @@ int MMG5_Set_corner(MMG5_pMesh mesh, int k) {
 int MMG5_Set_requiredVertex(MMG5_pMesh mesh, int k) {
   printf("  ## MMG5_Set_requiredVertex:"
          " MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
-        " be removed soon\n." );
+         " be removed soon\n." );
 
   return(MMG3D_Set_requiredVertex(mesh,k));
 }
@@ -1470,7 +1787,7 @@ int MMG5_Set_requiredVertex(MMG5_pMesh mesh, int k) {
 int MMG5_Set_requiredTetrahedron(MMG5_pMesh mesh, int k) {
   printf("  ## MMG5_Set_requiredTetrahedron: "
          "MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
-        " be removed soon\n." );
+         " be removed soon\n." );
 
   return(MMG3D_Set_requiredTetrahedron(mesh,k));
 }
@@ -1478,7 +1795,7 @@ int MMG5_Set_requiredTetrahedron(MMG5_pMesh mesh, int k) {
 int MMG5_Set_requiredTriangle(MMG5_pMesh mesh, int k) {
   printf("  ## MMG5_Set_requiredTriangle: "
          "MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
-        " be removed soon\n." );
+         " be removed soon\n." );
 
   return(MMG3D_Set_requiredTriangle(mesh,k));
 }
@@ -1486,7 +1803,7 @@ int MMG5_Set_requiredTriangle(MMG5_pMesh mesh, int k) {
 int MMG5_Set_ridge(MMG5_pMesh mesh, int k) {
   printf("  ## MMG5_Set_ridge: "
          "MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
-        " be removed soon\n." );
+         " be removed soon\n." );
 
   return(MMG3D_Set_ridge(mesh,k));
 }
@@ -1494,7 +1811,7 @@ int MMG5_Set_ridge(MMG5_pMesh mesh, int k) {
 int MMG5_Set_requiredEdge(MMG5_pMesh mesh, int k) {
   printf("  ## MMG5_Set_requiredEdge: "
          "MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
-        " be removed soon\n." );
+         " be removed soon\n." );
 
   return(MMG3D_Set_requiredEdge(mesh,k));
 }
@@ -1502,7 +1819,7 @@ int MMG5_Set_requiredEdge(MMG5_pMesh mesh, int k) {
 int MMG5_Set_scalarSol(MMG5_pSol met, double s, int pos) {
   printf("  ## MMG5_Set_scalarSol: "
          "MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
-        " be removed soon\n." );
+         " be removed soon\n." );
 
   return(MMG3D_Set_scalarSol(met,s,pos));
 }
@@ -1510,7 +1827,7 @@ int MMG5_Set_scalarSol(MMG5_pSol met, double s, int pos) {
 int MMG5_Get_scalarSol(MMG5_pSol met, double* s) {
   printf("  ## MMG5_Get_scalarSol: "
          "MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
-        " be removed soon\n." );
+         " be removed soon\n." );
 
   return(MMG3D_Get_scalarSol(met,s));
 }
@@ -1518,7 +1835,7 @@ int MMG5_Get_scalarSol(MMG5_pSol met, double* s) {
 int MMG5_Set_vectorSol(MMG5_pSol met, double vx,double vy, double vz, int pos) {
   printf("  ## MMG5_Set_vectorSol: "
          "MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
-        " be removed soon\n." );
+         " be removed soon\n." );
 
   return(MMG3D_Set_vectorSol(met,vx,vy,vz,pos));
 }
@@ -1526,7 +1843,7 @@ int MMG5_Set_vectorSol(MMG5_pSol met, double vx,double vy, double vz, int pos) {
 int MMG5_Get_vectorSol(MMG5_pSol met, double* vx, double* vy, double* vz) {
   printf("  ## MMG5_Get_vectorSol: "
          "MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
-        " be removed soon\n." );
+         " be removed soon\n." );
 
   return(MMG3D_Get_vectorSol(met,vx,vy,vz));
 }
@@ -1534,7 +1851,7 @@ int MMG5_Set_tensorSol(MMG5_pSol met, double m11,double m12, double m13,
                        double m22,double m23, double m33, int pos) {
   printf("  ## MMG5_Set_tensorSol: "
          "MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
-        " be removed soon\n." );
+         " be removed soon\n." );
 
   return(MMG3D_Set_tensorSol(met,m11,m12,m13,m22,m23,m33,pos));
 }
@@ -1543,7 +1860,7 @@ int MMG5_Get_tensorSol(MMG5_pSol met, double *m11,double *m12, double *m13,
                        double *m22,double *m23, double *m33) {
   printf("  ## MMG5_Get_tensorSol: "
          "MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
-        " be removed soon\n." );
+         " be removed soon\n." );
 
   return(MMG3D_Get_tensorSol(met,m11,m12,m13,m22,m23,m33));
 }
@@ -1551,7 +1868,7 @@ int MMG5_Get_tensorSol(MMG5_pSol met, double *m11,double *m12, double *m13,
 void MMG5_Set_handGivenMesh(MMG5_pMesh mesh) {
   printf("  ## MMG5_Set_handGivenMesh: "
          "MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
-        " be removed soon\n." );
+         " be removed soon\n." );
 
   MMG3D_Set_handGivenMesh(mesh);
   return;
@@ -1560,7 +1877,7 @@ void MMG5_Set_handGivenMesh(MMG5_pMesh mesh) {
 int MMG5_Chk_meshData(MMG5_pMesh mesh,MMG5_pSol met) {
   printf("  ## MMG5_Chk_meshData: "
          "MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
-        " be removed soon\n." );
+         " be removed soon\n." );
 
   return(MMG3D_Chk_meshData(mesh,met));
 }
@@ -1568,7 +1885,7 @@ int MMG5_Chk_meshData(MMG5_pMesh mesh,MMG5_pSol met) {
 int MMG5_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
   printf("  ## MMG5_Set_iparameter: "
          "MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
-        " be removed soon\n." );
+         " be removed soon\n." );
 
   return(MMG3D_Set_iparameter(mesh,sol,iparam,val));
 }
@@ -1576,7 +1893,7 @@ int MMG5_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
 int MMG5_Get_iparameter(MMG5_pMesh mesh, int iparam) {
   printf("  ## MMG5_Get_iparameter: "
          "MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
-        " be removed soon\n." );
+         " be removed soon\n." );
 
   return(MMG3D_Get_iparameter(mesh,iparam));
 }
@@ -1584,7 +1901,7 @@ int MMG5_Get_iparameter(MMG5_pMesh mesh, int iparam) {
 int MMG5_Set_dparameter(MMG5_pMesh mesh, MMG5_pSol sol, int dparam, double val){
   printf("  ## MMG5_Set_dparameter: "
          "MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
-        " be removed soon\n." );
+         " be removed soon\n." );
 
   return(MMG3D_Set_dparameter(mesh,sol,dparam,val));
 }
@@ -1592,7 +1909,7 @@ int MMG5_Set_dparameter(MMG5_pMesh mesh, MMG5_pSol sol, int dparam, double val){
 int MMG5_Set_localParameter(MMG5_pMesh mesh,MMG5_pSol sol, int typ, int ref, double val){
   printf("  ##  MMG5_Set_localParameter "
          "MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
-        " be removed soon\n." );
+         " be removed soon\n." );
 
   return(MMG3D_Set_localParameter(mesh,sol,typ,ref,mesh->info.hmin,mesh->info.hmax,val));
 }
@@ -1601,7 +1918,7 @@ void MMG5_Free_structures(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp
   ){
   printf("  ## MMG5_Free_structures: "
          "MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
-        " be removed soon\n." );
+         " be removed soon\n." );
 
   MMG3D_Free_structures(MMG5_ARG_start,
                         MMG5_ARG_ppMesh,&mesh,MMG5_ARG_ppMet,&met,
@@ -1612,7 +1929,7 @@ void MMG5_Free_structures(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp
 void MMG5_Free_names(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp){
   printf("  ## MMG5_Free_names: "
          "MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
-        " be removed soon\n." );
+         " be removed soon\n." );
 
   MMG3D_Free_names(MMG5_ARG_start,
                    MMG5_ARG_ppMesh,&mesh,MMG5_ARG_ppMet,&met,
@@ -1625,7 +1942,7 @@ void MMG5_Free_all(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp)
 {
   printf("  ## MMG5_Free_all: "
          "MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
-        " be removed soon\n." );
+         " be removed soon\n." );
   MMG3D_Free_all(MMG5_ARG_start,
                  MMG5_ARG_ppMesh,&mesh,MMG5_ARG_ppMet,&met,MMG5_ARG_ppDisp,&disp,
                  MMG5_ARG_end);

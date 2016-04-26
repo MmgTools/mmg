@@ -34,6 +34,7 @@
  */
 
 #include "mmgs.h"
+#include "inlined_functions.h"
 
 extern char  ddb;
 
