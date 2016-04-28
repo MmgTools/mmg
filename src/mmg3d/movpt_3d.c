@@ -227,24 +227,27 @@ int _MMG5_movintptLES_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,int 
     u30[1] = p3->c[1]-p0->c[1];
     u30[2] = p3->c[2]-p0->c[2];
 
-    /* len =  sqrt(u10[0]*u10[0]+u10[1]*u10[1]+u10[2]*u10[2])/met->m[pt->v[_MMG5_idir[ifac][0]]] */
-    /*   + sqrt(u20[0]*u20[0]+u20[1]*u20[1]+u20[2]*u20[2])/met->m[pt->v[_MMG5_idir[ifac][1]]] */
-    /*   + sqrt(u30[0]*u30[0]+u30[1]*u30[1]+u30[2]*u30[2])/met->m[pt->v[_MMG5_idir[ifac][2]]]; */
+// mmg3d4
+    len =  sqrt(u10[0]*u10[0]+u10[1]*u10[1]+u10[2]*u10[2])/met->m[pt->v[_MMG5_idir[ifac][0]]]
+      + sqrt(u20[0]*u20[0]+u20[1]*u20[1]+u20[2]*u20[2])/met->m[pt->v[_MMG5_idir[ifac][1]]]
+      + sqrt(u30[0]*u30[0]+u30[1]*u30[1]+u30[2]*u30[2])/met->m[pt->v[_MMG5_idir[ifac][2]]];
 
-    /* len /= 3.; */
+    len /= 3.;
 
-    /* len = 1./len; */
+    len = 1./len;
 
     /* face barycenter */
     bary[0] = (p1->c[0]+p2->c[0]+p3->c[0])/3.;
     bary[1] = (p1->c[1]+p2->c[1]+p3->c[1])/3.;
     bary[2] = (p1->c[2]+p2->c[2]+p3->c[2])/3.;
 
-    len = (0.25*(p0->c[0]+p1->c[0]+p2->c[0]+p3->c[0]) - bary[0])*nx
-      +  (0.25*(p0->c[1]+p1->c[1]+p2->c[1]+p3->c[1]) - bary[1])*ny
-      +  (0.25*(p0->c[2]+p1->c[2]+p2->c[2]+p3->c[2]) - bary[2])*nz;
 
-    len = (p0->c[0]-bary[0])*nx +  (p0->c[1]-bary[1])*ny + (p0->c[2]-bary[2])*nz;
+// vecteur bary_face->bary_tet projeté sur la normale
+    /* len = (0.25*(p0->c[0]+p1->c[0]+p2->c[0]+p3->c[0]) - bary[0])*nx */
+    /*   +  (0.25*(p0->c[1]+p1->c[1]+p2->c[1]+p3->c[1]) - bary[1])*ny */
+    /*   +  (0.25*(p0->c[2]+p1->c[2]+p2->c[2]+p3->c[2]) - bary[2])*nz; */
+
+    /* len = (p0->c[0]-bary[0])*nx +  (p0->c[1]-bary[1])*ny + (p0->c[2]-bary[2])*nz; */
 
 
     /* Optimal point: barycenter of local optimal points */
