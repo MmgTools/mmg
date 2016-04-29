@@ -1038,7 +1038,7 @@ int _MMG5_bdryTria(MMG5_pMesh mesh) {
           if ( pxt->tag[_MMG5_iarf[i][2]] )  ptt->tag[2] = pxt->tag[_MMG5_iarf[i][2]];
           /* useful only when saving mesh */
         }
-        ptt->ref = mesh->info.iso ? MG_ISO : 0;
+        ptt->ref = mesh->info.iso ? MG_ISO : pxt?pxt->ref[i]:0;
       }
     }
   }
