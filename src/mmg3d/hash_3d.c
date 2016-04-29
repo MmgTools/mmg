@@ -297,6 +297,8 @@ int _MMG5_setEdgeNmTag(MMG5_pMesh mesh, _MMG5_Hash *hash) {
   for (k=1; k<=mesh->nt; k++) {
     pt  = &mesh->tria[k];
 
+    if ( !MG_EOK(pt) ) continue;
+
     for (i=0; i<3; i++) {
       if ( pt->tag[i] & MG_NOM ) {
         i1 = _MMG5_inxt2[i];
@@ -327,6 +329,9 @@ int _MMG5_setEdgeNmTag(MMG5_pMesh mesh, _MMG5_Hash *hash) {
               ptet = &mesh->tetra[kel];
               if ( !MG_EOK(ptet) || !ptet->xt ) continue;
               for ( iface=0; iface<4; ++iface) {
+
+                if ( !mesh->xtetra[ptet->xt].ftag[iface] ) continue;
+
                 v0 = ptet->v[_MMG5_idir[iface][0]];
                 v1 = ptet->v[_MMG5_idir[iface][1]];
                 v2 = ptet->v[_MMG5_idir[iface][2]];
@@ -475,6 +480,10 @@ int _MMG5_setEdgeNmTag(MMG5_pMesh mesh, _MMG5_Hash *hash) {
   }
   if ( mesh->info.ddebug || abs(mesh->info.imprim) > 3 )
     fprintf(stdout,"     %d required edges added\n",nr);
+
+  /* Free the face hash table */
+  if ( ok )
+    _MMG5_DEL_MEM(mesh,hashF.item,(hashF.max+1)*sizeof(_MMG5_hedge));
 
   /* Free the edge hash table */
   _MMG5_DEL_MEM(mesh,hash->item,(hash->max+1)*sizeof(_MMG5_hedge));
