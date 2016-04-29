@@ -600,20 +600,18 @@ int _MMG3D_analys(MMG5_pMesh mesh) {
     return(0);
   }
 
-  /* identify surface mesh */
-  if ( !_MMG5_chkNumberOfTri(mesh) ) {
-    if ( !_MMG5_bdryTria(mesh) ) {
-      fprintf(stdout,"  ## Boundary problem. Exit program.\n");
-      return(0);
-    }
-    _MMG5_freeXTets(mesh);
-  }
-
   /* compatibility triangle orientation w/r tetras */
-  else if ( !_MMG5_bdryPerm(mesh) ) {
-    fprintf(stdout,"  ## Boundary orientation problem. Exit program.\n");
+  if ( !_MMG5_bdryPerm(mesh) ) {
+    fprintf(stderr,"  ## Boundary orientation problem. Exit program.\n");
     return(0);
   }
+
+  /* identify surface mesh */
+  if ( !_MMG5_chkBdryTria(mesh) ) {
+      fprintf(stderr,"  ## Boundary problem. Exit program.\n");
+      return(0);
+  }
+  _MMG5_freeXTets(mesh);
 
   if ( mesh->info.nosurf ) {
     /* Set all boundary triangles to required */
