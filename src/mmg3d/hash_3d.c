@@ -952,7 +952,7 @@ int _MMG5_chkBdryTria(MMG5_pMesh mesh) {
   int            ia,ib,ic, nbl,nt;
   _MMG5_Hash     hashTet, hashTri;
 
-  /** Step 1: scan the mesh and count th boundaries */
+  /** Step 1: scan the mesh and count the boundaries */
   ntmesh = 0;
   for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
@@ -962,7 +962,7 @@ int _MMG5_chkBdryTria(MMG5_pMesh mesh) {
       adj = adja[i] / 4;
       pt1 = &mesh->tetra[adj];
       if ( !adj || ( pt->ref > pt1->ref) )
-        ntmesh++;
+        ++ntmesh;
     }
   }
 
@@ -1005,7 +1005,11 @@ int _MMG5_chkBdryTria(MMG5_pMesh mesh) {
 
       ptt->cc = i;
 
-      if ( !j ) return(0);
+      if ( !j ) {
+        _MMG5_DEL_MEM(mesh,hashTet.item,(hashTet.max+1)*sizeof(_MMG5_hedge));
+        _MMG5_DEL_MEM(mesh,hashTri.item,(hashTri.max+1)*sizeof(_MMG5_hedge));
+        return(0);
+      }
       else if ( j > 0 ) {
         /* the face already exist in the tria table */
         continue;
@@ -1029,6 +1033,7 @@ int _MMG5_chkBdryTria(MMG5_pMesh mesh) {
       printf("  ## Warning: %d extra boundaries provided. Ignored\n",nbl);
       mesh->nt = nt;
     }
+    _MMG5_DEL_MEM(mesh,hashTet.item,(hashTet.max+1)*sizeof(_MMG5_hedge));
     _MMG5_DEL_MEM(mesh,hashTri.item,(hashTri.max+1)*sizeof(_MMG5_hedge));
   }
 
