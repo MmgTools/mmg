@@ -30,7 +30,7 @@
  * \copyright GNU Lesser General Public License.
  **/
 
-#include "mmg3d.h"
+#include "inlined_functions_3d.h"
 
 void MMG3D_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
   if ( met->size == 1 || ( met->size == 3 && mesh->info.lag >= 0 ) ) {
@@ -230,8 +230,6 @@ int MMG3D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
             if ( !MMG3D_Set_inputMeshName(mesh, argv[i]) )
               exit(EXIT_FAILURE);
 
-            if ( !MMG3D_Set_iparameter(mesh,met,MMG3D_IPARAM_verbose,5) )
-              exit(EXIT_FAILURE);
           }else{
             fprintf(stderr,"Missing filname for %c%c\n",argv[i-1][1],argv[i-1][2]);
             MMG3D_usage(argv[0]);
@@ -707,7 +705,7 @@ int MMG3D_searchlen(MMG5_pMesh mesh, MMG5_pSol met, double lmin,
   return(1);
 }
 
-int MMG3D_DoSol(MMG5_pMesh mesh,MMG5_pSol met) {
+int MMG3D_doSol(MMG5_pMesh mesh,MMG5_pSol met) {
     MMG5_pTetra     pt;
     MMG5_pPoint     p1,p2;
     double     ux,uy,uz,dd;
@@ -725,12 +723,11 @@ int MMG3D_DoSol(MMG5_pMesh mesh,MMG5_pSol met) {
     _MMG5_ADD_MEM(mesh,(met->size*(met->npmax+1))*sizeof(double),"solution",return(0));
     _MMG5_SAFE_CALLOC(met->m,met->size*(met->npmax+1),double);
 
-    /* internal edges */
+    /* edges */
     for (k=1; k<=mesh->ne; k++) {
         pt = &mesh->tetra[k];
         if ( !pt->v[0] )  continue;
 
-        /* internal edges */
         for (i=0; i<6; i++) {
             ia  = _MMG5_iare[i][0];
             ib  = _MMG5_iare[i][1];
@@ -755,11 +752,11 @@ int MMG3D_DoSol(MMG5_pMesh mesh,MMG5_pSol met) {
     for (k=1; k<=mesh->np; k++) {
         p1 = &mesh->point[k];
         if ( !mark[k] ) {
-            met->m[k] = mesh->info.hmax;
+            met->m[k] = FLT_MAX;
             continue;
         }
         else
-            met->m[k] = MG_MIN(mesh->info.hmax,MG_MAX(mesh->info.hmin,met->m[k] / (double)mark[k]));
+            met->m[k] = met->m[k] / (double)mark[k];
     }
     _MMG5_SAFE_FREE(mark);
     return(1);

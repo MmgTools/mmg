@@ -248,7 +248,7 @@ sub Convert {
                     if ( $key =~ /(.*)(\/\*.*\*\/)/ )
                     {
                         if ( $byvalue ) {
-                            # Fortran code must pass an value and not a
+                            # Fortran code must pass a value and not a
                             # reference over a value
                             $chaine = sprintf($formatbyval, $1,$countenum);
                         }
@@ -259,8 +259,8 @@ sub Convert {
                     }
                     else
                     {
-                        if ( 0 && $byvalue ) {
-                            # Fortran code must pass an value and not a
+                        if ( $byvalue ) {
+                            # Fortran code must pass a value and not a
                             # reference over a value
                             $chaine = sprintf($formatbyval, $key, $countenum,);
                         }

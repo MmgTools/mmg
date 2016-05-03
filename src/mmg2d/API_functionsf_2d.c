@@ -229,6 +229,30 @@ FORTRAN_NAME(MMG2D_GET_VERTEX,mmg2d_get_vertex,
   return;
 }
 /**
+ * See \ref MMG2D_Set_vertices function in \ref mmg2d/libmmg2d.h file.
+ */
+FORTRAN_NAME(MMG2D_SET_VERTICES,mmg2d_set_vertices,
+             (MMG5_pMesh *mesh, double* vertices, int* refs, int* retval),
+             (mesh,vertices,refs,retval)) {
+
+  *retval = MMG2D_Set_vertices(*mesh,vertices,refs);
+  return;
+}
+
+
+/**
+ * See \ref MMG2D_Get_vertices function in \ref mmg2d/libmmg2d.h file.
+ */
+FORTRAN_NAME(MMG2D_GET_VERTICES,mmg2d_get_vertices,
+             (MMG5_pMesh *mesh, double* vertices, int* refs,
+              int* areCorners, int* areRequired, int* retval),
+             (mesh,vertices,refs,areCorners,areRequired, retval)) {
+  *retval = MMG2D_Get_vertices(*mesh,vertices,refs,areCorners,areRequired);
+  return;
+}
+
+
+/**
  * See \ref MMG2D_Set_triangle function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_SET_TRIANGLE,mmg2d_set_triangle,
@@ -258,6 +282,28 @@ FORTRAN_NAME(MMG2D_GET_TRIANGLE,mmg2d_get_triangle,
   *retval = MMG2D_Get_triangle(*mesh,v0,v1,v2,ref,isRequired);
   return;
 }
+/**
+ * See \ref MMG2D_Set_triangles function in \ref mmg2d/libmmg2d.h file.
+ */
+FORTRAN_NAME(MMG2D_SET_TRIANGLES,mmg2d_set_triangles,
+             (MMG5_pMesh *mesh, int* tria, int* refs,
+              int* retval),
+             (mesh,tria,refs,retval)) {
+  *retval = MMG2D_Set_triangles(*mesh, tria, refs);
+  return;
+}
+
+/**
+ * See \ref MMG2D_Get_triangles function in \ref mmg2d/libmmg2d.h file.
+ */
+FORTRAN_NAME(MMG2D_GET_TRIANGLES,mmg2d_get_triangles,
+             (MMG5_pMesh *mesh, int* tria, int* refs,int* areRequired,
+              int* retval),
+             (mesh,tria,refs,areRequired,retval)) {
+  *retval = MMG2D_Get_triangles(*mesh,tria,refs,areRequired);
+  return;
+}
+
 /**
  * See \ref MMG2D_Set_edge function in \ref mmg2d/libmmg2d.h file.
  */
@@ -314,6 +360,26 @@ FORTRAN_NAME(MMG2D_GET_SCALARSOL,mmg2d_get_scalarsol,
   *retval = MMG2D_Get_scalarSol(*met,s);
   return;
 }
+/**
+ * See \ref MMG2D_Set_scalarSols function in \ref mmg2d/libmmg2d.h file.
+ */
+FORTRAN_NAME(MMG2D_SET_SCALARSOLS,mmg2d_set_scalarsols,
+             (MMG5_pSol *met, double *s, int* retval),
+             (met,s,retval)) {
+  *retval = MMG2D_Set_scalarSols(*met,s);
+  return;
+}
+
+/**
+ * See \ref MMG2D_Get_scalarSols function in \ref mmg2d/libmmg2d.h file.
+ */
+FORTRAN_NAME(MMG2D_GET_SCALARSOLS,mmg2d_get_scalarsols,
+             (MMG5_pSol *met, double* s, int* retval),
+             (met,s,retval)) {
+  *retval = MMG2D_Get_scalarSols(*met,s);
+  return;
+}
+
 
 /**
  * See \ref MMG2D_Set_tensorSol function in \ref mmg2d/libmmg2d.h file.
@@ -333,6 +399,25 @@ FORTRAN_NAME(MMG2D_GET_TENSORSOL,mmg2d_get_tensorsol,
               int* retval),
              (met,m11,m12,m22,retval)) {
   *retval = MMG2D_Get_tensorSol(*met,m11,m12,m22);
+  return;
+}
+/**
+ * See \ref MMG2D_Set_tensorSol function in \ref mmg2d/libmmg2d.h file.
+ */
+FORTRAN_NAME(MMG2D_SET_TENSORSOLS,mmg2d_set_tensorsols,
+             (MMG5_pSol *met, double* sols,int* retval),
+             (met,sols,retval)) {
+  *retval = MMG2D_Set_tensorSols(*met,sols);
+  return;
+}
+
+/**
+ * See \ref MMG2D_Get_tensorSol function in \ref mmg2d/libmmg2d.h file.
+ */
+FORTRAN_NAME(MMG2D_GET_TENSORSOLS,mmg2d_get_tensorsols,
+             (MMG5_pSol *met, double* sols, int* retval),
+             (met,sols,retval)) {
+  *retval = MMG2D_Get_tensorSols(*met,sols);
   return;
 }
 

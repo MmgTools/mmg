@@ -84,6 +84,24 @@ void _MMG3D_Free_topoTables(MMG5_pMesh mesh) {
 }
 
 /**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the solution structure.
+ *
+ * Truncate a scalar metric by hmax and hmin values.
+ *
+ */
+static inline
+void _MMG3D_scalarSolTruncature(MMG5_pMesh mesh, MMG5_pSol met) {
+  int         k;
+
+  /* vertex size */
+  for (k=1; k<=mesh->np; k++) {
+    met->m[k] = MG_MIN(mesh->info.hmax,MG_MAX(mesh->info.hmin,met->m[k]));
+  }
+  return;
+}
+
+/**
  * \param mesh pointer toward the mesh structure (unused).
  * \param met pointer toward the solution (metric or level-set) structure.
  * \param disp pointer toward the solution (displacement) structure.
@@ -231,25 +249,17 @@ int _MMG3D_packMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
       pt   = &mesh->tetra[k];
       if ( MG_EOK(pt) &&  pt->xt ) {
         for (i=0; i<6; i++) {
-          if ( mesh->xtetra[pt->xt].edg[i] )
-            _MMG5_hEdge(mesh,pt->v[_MMG5_iare[i][0]],pt->v[_MMG5_iare[i][1]],
-                        mesh->xtetra[pt->xt].edg[i],mesh->xtetra[pt->xt].tag[i]);
-          else if ( mesh->xtetra[pt->xt].tag[i] & MG_REQ ) {
-            if ( mesh->info.nosurf ) {
-              if ( mesh->xtetra[pt->xt].tag[i]==MG_REQ+MG_CRN+MG_GEO )
-                continue;
-              else if ( mesh->xtetra[pt->xt].tag[i] & MG_CRN ) {
-                mesh->xtetra[pt->xt].tag[i] &= ~MG_CRN;
-                mesh->xtetra[pt->xt].tag[i] &= ~MG_REQ;
-              }
-              _MMG5_hEdge(mesh,pt->v[_MMG5_iare[i][0]],pt->v[_MMG5_iare[i][1]],
-                          mesh->xtetra[pt->xt].edg[i],mesh->xtetra[pt->xt].tag[i]);
+          if ( mesh->info.nosurf ) {
+            if ( mesh->xtetra[pt->xt].tag[i] & MG_CRN ) {
+              mesh->xtetra[pt->xt].tag[i] &= ~MG_CRN;
+              mesh->xtetra[pt->xt].tag[i] &= ~MG_REQ;
             }
           }
-          else if ( MG_EDG(mesh->xtetra[pt->xt].tag[i] ) ) {
+          if ( mesh->xtetra[pt->xt].edg[i] ||
+               ( mesh->xtetra[pt->xt].tag[i] & MG_REQ ||
+                 MG_EDG(mesh->xtetra[pt->xt].tag[i])) )
             _MMG5_hEdge(mesh,pt->v[_MMG5_iare[i][0]],pt->v[_MMG5_iare[i][1]],
                         mesh->xtetra[pt->xt].edg[i],mesh->xtetra[pt->xt].tag[i]);
-          }
         }
       }
     }
@@ -406,9 +416,14 @@ int MMG3D_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met) {
   }
 
   /* specific meshing */
-  if ( mesh->info.optim && !met->np && !MMG3D_DoSol(mesh,met) ) {
-    if ( !_MMG5_unscaleMesh(mesh,met) )  _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
-    _LIBMMG5_RETURN(mesh,met,MMG5_LOWFAILURE);
+  if ( mesh->info.optim && !met->np ) {
+    if ( !MMG3D_doSol(mesh,met) ) {
+      if ( !_MMG5_unscaleMesh(mesh,met) )  _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
+      _LIBMMG5_RETURN(mesh,met,MMG5_LOWFAILURE);
+    }
+    MMG3D_saveSol(mesh,met, "sol0.sol");
+    _MMG3D_scalarSolTruncature(mesh,met);
+    MMG3D_saveSol(mesh,met, "sol2.sol");
   }
 
   /* mesh analysis */
@@ -778,11 +793,14 @@ int MMG3D_mmg3dmov(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp) {
 #endif
   disp->npi = disp->np;
 
-  if ( !met->np && !MMG3D_DoSol(mesh,met) ) {
-    if ( !_MMG5_unscaleMesh(mesh,disp) ) {
-      _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
+  if ( !met->np ) {
+    if ( !MMG3D_doSol(mesh,met) ) {
+      if ( !_MMG5_unscaleMesh(mesh,disp) ) {
+        _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
+      }
+      _MMG5_RETURN_AND_PACK(mesh,met,disp,MMG5_LOWFAILURE);
     }
-    _MMG5_RETURN_AND_PACK(mesh,met,disp,MMG5_LOWFAILURE);
+    _MMG3D_scalarSolTruncature(mesh,met);
   }
 
 /* ******************* Add mesh improvement ? *************************** */

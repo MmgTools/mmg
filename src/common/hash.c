@@ -240,6 +240,8 @@ int _MMG5_hashGet(_MMG5_Hash *hash,int a,int b) {
   _MMG5_hedge  *ph;
   int          key,ia,ib;
 
+  if ( !hash->item ) return(0);
+
   ia  = MG_MIN(a,b);
   ib  = MG_MAX(a,b);
   key = (_MMG5_KA*ia + _MMG5_KB*ib) % hash->siz;

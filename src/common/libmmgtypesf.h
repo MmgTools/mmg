@@ -189,7 +189,8 @@
 ! typedef struct {
 !   int      a,b; /*!< Extremities of the edge */
 !   int      ref; /*!< Reference of the edge */
-!   int      base;//2Donly
+!   int      base; /*!< 2Donly: used to store the tria+ tria edge indices
+!                    that allow to access to the edge */
 !   char     tag; /*!< Binary flags */
 ! } MMG5_Edge;
 ! typedef MMG5_Edge * MMG5_pEdge;

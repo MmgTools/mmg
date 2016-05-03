@@ -934,7 +934,7 @@ int MMG2D_saveMesh(MMG5_pMesh mesh,const char *filename) {
   if ( mesh->na ) {
     for (k=1; k<=mesh->na; k++) {
       ped = &mesh->edge[k];
-      if ( ped->a ) ++ne;
+      if ( ped->a && ped->b ) ++ne;
     }
   }
 
@@ -953,7 +953,8 @@ int MMG2D_saveMesh(MMG5_pMesh mesh,const char *filename) {
     }
     for (k=1; k<=mesh->na; k++) {
       ped = &mesh->edge[k];
-      if(!ped->a) continue;
+      if((!ped->a)||(!ped->b)) continue;
+
       ref = ped->ref;
       if(!bin)
         fprintf(inm,"%d %d %d\n",mesh->point[ped->a].tmp,mesh->point[ped->b].tmp,ref);

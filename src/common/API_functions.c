@@ -75,7 +75,7 @@ void _MMG5_Init_parameters(MMG5_pMesh mesh) {
   mesh->info.dhd      = _MMG5_ANGEDG;   /* angle detection; */
   /** MMG5_DPARAM_hmin = 0.01 \f$\times\f$ bounding box size; */
   mesh->info.hmin     = -1.;      /* minimal mesh size; */
-  /** MMG5_DPARAM_hmax = bounding box size */
+  /** MMG5_DPARAM_hmax = double of the bounding box size */
   mesh->info.hmax     = -1.;      /* maximal mesh size; */
   /** MMG5_DPARAM_hausd = 0.01 */
   mesh->info.hausd    = 0.01;     /* control Hausdorff */

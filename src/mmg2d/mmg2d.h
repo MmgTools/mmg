@@ -305,7 +305,6 @@ int MMG2_swapar(MMG5_pMesh ,MMG5_pSol ,int ,int ,double ,int *);
 int _MMG5_mmg2dChkmsh(MMG5_pMesh , int, int );
 int MMG2_boulep(MMG5_pMesh , int , int , int * );
 int MMG2_markBdry(MMG5_pMesh );
-int MMG2_doSol(MMG5_pMesh ,MMG5_pSol );
 int MMG2_prilen(MMG5_pMesh ,MMG5_pSol );
 
 void MMG2_coorbary(MMG5_pMesh ,MMG5_pTria ,double c[2],double* ,double* ,double* );
