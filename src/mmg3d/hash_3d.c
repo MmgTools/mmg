@@ -295,21 +295,21 @@ int _MMG5_setEdgeNmTag(MMG5_pMesh mesh, _MMG5_Hash *hash) {
   MMG5_pTetra         ptet;
   MMG5_pxTetra        pxt;
   MMG5_pTria          pt;
-  _MMG5_Hash          hashF;
   _MMG5_hedge         *ph;
   int                 *adja,adj,pradj,piv,ilist;
   int                 k,i,i1,i2,ia,ib,l,it1,it2, nr;
-  int                 v0,v1,v2,ipa,ipb,ok, kel,count,start;
+  int                 ipa,ipb,count,start;
   unsigned int        key;
   char                isbdy,iface;
 
-  ok = 0;
   nr = 0;
 
   /* First: seek edges at the interface of two distinct domains and mark it as
    * required */
   for (k=1; k<=mesh->nt; k++) {
     pt  = &mesh->tria[k];
+
+    if ( !MG_EOK(pt) ) continue;
 
     for (i=0; i<3; i++) {
       if ( pt->tag[i] & MG_NOM ) {
@@ -331,28 +331,11 @@ int _MMG5_setEdgeNmTag(MMG5_pMesh mesh, _MMG5_Hash *hash) {
         /* Set edge tag and point tags to MG_REQ if the non-manifold edge shared
          * separated domains */
         if ( ph->s > 3 ) {
-          if ( !ok ) {
-
-            /* If not already done, hash all the boundary tetra faces. */
-            if ( ! _MMG5_hashNew(mesh,&hashF,0.51*mesh->nt,1.51*mesh->nt) )
-              return(0);
-
-            for ( kel=1; kel<=mesh->ne; ++kel ) {
-              ptet = &mesh->tetra[kel];
-              if ( !MG_EOK(ptet) || !ptet->xt ) continue;
-              for ( iface=0; iface<4; ++iface) {
-                v0 = ptet->v[_MMG5_idir[iface][0]];
-                v1 = ptet->v[_MMG5_idir[iface][1]];
-                v2 = ptet->v[_MMG5_idir[iface][2]];
-                if ( !_MMG5_hashFace(mesh,&hashF,v0,v1,v2,kel) ) return(0);
-              }
-            }
-            ok = 1;
-          }
-          /* Find the starting tetra, and the edge [ia,ib] in it. */
-          start = _MMG5_hashGetFace(&hashF,pt->v[i],ia,ib);
+          start = pt->cc/4;
           assert(start);
           ptet = &mesh->tetra[start];
+
+
           for (l=0; l<6; ++l) {
             ipa = _MMG5_iare[l][0];
             ipb = _MMG5_iare[l][1];
@@ -970,7 +953,7 @@ int _MMG5_chkBdryTria(MMG5_pMesh mesh) {
   int            ia,ib,ic, nbl,nt;
   _MMG5_Hash     hashTet, hashTri;
 
-  /** Step 1: scan the mesh and count th boundaries */
+  /** Step 1: scan the mesh and count the boundaries */
   ntmesh = 0;
   for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
@@ -980,7 +963,7 @@ int _MMG5_chkBdryTria(MMG5_pMesh mesh) {
       adj = adja[i] / 4;
       pt1 = &mesh->tetra[adj];
       if ( !adj || ( pt->ref > pt1->ref) )
-        ntmesh++;
+        ++ntmesh;
     }
   }
 
@@ -1000,7 +983,7 @@ int _MMG5_chkBdryTria(MMG5_pMesh mesh) {
           ia = pt->v[_MMG5_idir[i][0]];
           ib = pt->v[_MMG5_idir[i][1]];
           ic = pt->v[_MMG5_idir[i][2]];
-          if ( !_MMG5_hashFace(mesh,&hashTet,ia,ib,ic,k) ) return(0);
+          if ( !_MMG5_hashFace(mesh,&hashTet,ia,ib,ic,4*k+i) ) return(0);
         }
       }
     }
@@ -1021,12 +1004,23 @@ int _MMG5_chkBdryTria(MMG5_pMesh mesh) {
       i = _MMG5_hashGetFace(&hashTet,ia,ib,ic);
       j = _MMG5_hashFace(mesh,&hashTri,ia,ib,ic,k);
 
-      if ( !j ) return(0);
+      ptt->cc = i;
+
+      if ( !j ) {
+        _MMG5_DEL_MEM(mesh,hashTet.item,(hashTet.max+1)*sizeof(_MMG5_hedge));
+        _MMG5_DEL_MEM(mesh,hashTri.item,(hashTri.max+1)*sizeof(_MMG5_hedge));
+        return(0);
+      }
       else if ( j > 0 ) {
+        /* the face already exist in the tria table */
         continue;
       }
 
-      if ( !i ) continue;
+      if ( !i ) {
+        /* the triangle is not a boundary tri or a tri at the interface of two
+         * subdomains with different references */
+        continue;
+      }
 
       ++nt;
       if ( k!=nbl ) {
@@ -1135,11 +1129,11 @@ int _MMG5_bdryTria(MMG5_pMesh mesh) {
       if ( adj ) {
         if ( mesh->info.iso ) ptt->ref = MG_ISO;
         /* useful only when saving mesh */
-        else ptt->ref  = pxt ? pxt->ref[i] : 0;
+        else ptt->ref  = pxt ? pxt->ref[i] : MG_MIN(pt->ref,pt1->ref);
       }
       else {
         /* useful only when saving mesh */
-        ptt->ref  = pxt ? pxt->ref[i] : 0;
+        ptt->ref  = pxt ? pxt->ref[i] : pt->ref;
       }
     }
   }

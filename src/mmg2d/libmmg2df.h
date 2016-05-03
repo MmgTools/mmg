@@ -1140,7 +1140,7 @@ END INTERFACE
 ! int MMG2D_mmg2dmov(MMG5_pMesh mesh,MMG5_pSol sol);
 
 ! /* Tools for the library */
-! void (*MMG2D_callbackinsert) (int ,int ,int ,int, int);
+! // void (*MMG2D_callbackinsert) (int ,int ,int ,int, int);
 
 ! /**
 !  * \param mesh pointer toward the mesh structure

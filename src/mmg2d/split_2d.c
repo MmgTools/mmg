@@ -296,10 +296,8 @@ int MMG2_split(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int k1,int adj1) {
     pt2->edg[2] = 0;
   }
 
-
-
-  if(MMG2D_callbackinsert)
-    MMG2D_callbackinsert((int) ip,(int) k1,(int) k2,(int)jel,(int) kel);
+  /* if(MMG2D_callbackinsert) */
+  /*   MMG2D_callbackinsert((int) ip,(int) k1,(int) k2,(int)jel,(int) kel); */
 
   return(1);
 }

@@ -244,25 +244,17 @@ int _MMG3D_packMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
       pt   = &mesh->tetra[k];
       if ( MG_EOK(pt) &&  pt->xt ) {
         for (i=0; i<6; i++) {
-          if ( mesh->xtetra[pt->xt].edg[i] )
-            _MMG5_hEdge(mesh,pt->v[_MMG5_iare[i][0]],pt->v[_MMG5_iare[i][1]],
-                        mesh->xtetra[pt->xt].edg[i],mesh->xtetra[pt->xt].tag[i]);
-          else if ( mesh->xtetra[pt->xt].tag[i] & MG_REQ ) {
-            if ( mesh->info.nosurf ) {
-              if ( mesh->xtetra[pt->xt].tag[i]==MG_REQ+MG_CRN+MG_GEO )
-                continue;
-              else if ( mesh->xtetra[pt->xt].tag[i] & MG_CRN ) {
-                mesh->xtetra[pt->xt].tag[i] &= ~MG_CRN;
-                mesh->xtetra[pt->xt].tag[i] &= ~MG_REQ;
-              }
-              _MMG5_hEdge(mesh,pt->v[_MMG5_iare[i][0]],pt->v[_MMG5_iare[i][1]],
-                          mesh->xtetra[pt->xt].edg[i],mesh->xtetra[pt->xt].tag[i]);
+          if ( mesh->info.nosurf ) {
+            if ( mesh->xtetra[pt->xt].tag[i] & MG_CRN ) {
+              mesh->xtetra[pt->xt].tag[i] &= ~MG_CRN;
+              mesh->xtetra[pt->xt].tag[i] &= ~MG_REQ;
             }
           }
-          else if ( MG_EDG(mesh->xtetra[pt->xt].tag[i] ) ) {
+          if ( mesh->xtetra[pt->xt].edg[i] ||
+               ( mesh->xtetra[pt->xt].tag[i] & MG_REQ ||
+                 MG_EDG(mesh->xtetra[pt->xt].tag[i])) )
             _MMG5_hEdge(mesh,pt->v[_MMG5_iare[i][0]],pt->v[_MMG5_iare[i][1]],
                         mesh->xtetra[pt->xt].edg[i],mesh->xtetra[pt->xt].tag[i]);
-          }
         }
       }
     }

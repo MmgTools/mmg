@@ -414,6 +414,10 @@ int MMGS_Set_triangle(MMG5_pMesh mesh, int v0, int v1, int v2, int ref,int pos) 
   mesh->tria[pos].v[2] = v2;
   mesh->tria[pos].ref  = ref;
 
+  mesh->point[v0].tag &= ~MG_NUL;
+  mesh->point[v1].tag &= ~MG_NUL;
+  mesh->point[v2].tag &= ~MG_NUL;
+
   return(1);
 }
 

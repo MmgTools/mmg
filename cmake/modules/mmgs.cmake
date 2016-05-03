@@ -143,9 +143,13 @@ IF ( LIBMMGS_STATIC OR LIBMMGS_SHARED )
     DEPENDS ${MMGS_SOURCE_DIR}/libmmgsf.h)
 
   # Install header files in project directory
-  FILE ( INSTALL ${mmgs_headers}
-    DESTINATION ${CMAKE_SOURCE_DIR}/include/mmg/mmgs
+  FILE(INSTALL  ${mmgs_headers} DESTINATION ${MMGS_INCLUDE}
     PATTERN "libmmg*f.h"  EXCLUDE)
+
+  ADD_CUSTOM_TARGET(copy_s_headers ALL
+    DEPENDS  ${MMGS_INCLUDE}/libmmgsf.h  ${MMGS_INCLUDE}/libmmgs.h
+     ${MMGS_INCLUDE}/libmmgtypesf.h  ${MMGS_INCLUDE}/libmmgtypes.h )
+
 
 ENDIF()
 
