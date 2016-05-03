@@ -838,6 +838,88 @@ _MMG5_adpsplcol(MMG5_pMesh mesh,MMG5_pSol met,_MMG5_pBucket bucket, int* warn) {
  * \param bucket pointer toward the bucket structure.
  * \return 0 if failed, 1 otherwise.
  *
+ * Mesh optimization for LES computation (improve the element skewness).
+ *
+ */
+static int
+_MMG5_optetLES(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket) {
+  int it,nnm,nnf,maxit,nm,nf,nw;
+  double declic;
+
+  it = 0;
+  maxit = 10; 
+  declic = 1.01;
+  printf("------------------------------------\n");
+  do {
+    /* treatment of bad elements*/
+    if(it < 5) {
+      nw = MMG3D_opttyp(mesh,met,bucket);
+    }
+    else
+      nw = 0;
+    /* badly shaped process */
+    if ( !mesh->info.noswap ) {
+      nf = _MMG5_swptet(mesh,met,declic,bucket,2);
+      if ( nf < 0 ) {
+        fprintf(stderr,"  ## Unable to improve mesh. Exiting.\n");
+        return(0);
+      }
+    }
+    else  nf = 0;
+
+    if ( !mesh->info.nomove ) {
+      nm = _MMG5_movtet(mesh,met,3);
+      if ( nm < 0 ) {
+        fprintf(stderr,"  ## Unable to improve mesh.\n");
+        return(0);
+      }
+    }
+    else  nm = 0;
+    nnm += nm;
+
+//be careful, this procedure can degrade the worst elt
+    if ( !mesh->info.nomove && (it==2)) {
+      _MMG3D_optlap(mesh,met);
+      printf("movelap\n");
+    }
+
+    if ( (abs(mesh->info.imprim) > 4 || mesh->info.ddebug) && nw+nf+nm > 0 ){
+      fprintf(stdout,"                                          ");
+      fprintf(stdout,"  %8d improved, %8d swapped, %8d moved\n",nw,nf,nm);
+    }
+  }
+  while( ++it < maxit && nw+nm+nf > 0 );
+
+  if ( !mesh->info.nomove ) {
+    nm = _MMG5_movtet(mesh,met,3);
+    if ( nm < 0 ) {
+      fprintf(stderr,"  ## Unable to improve mesh.\n");
+      return(0);
+    }
+  }
+  else  nm = 0;
+  nnm += nm;
+  if ( (abs(mesh->info.imprim) > 4 || mesh->info.ddebug) && nm > 0 ) {
+    fprintf(stdout,"                                            "
+            "                                ");
+    fprintf(stdout,"     %8d moved\n",nm);
+  }
+
+
+  if ( mesh->info.imprim ) {
+    if ( abs(mesh->info.imprim) < 5 && (nnf > 0 || nnm > 0) )
+      fprintf(stdout,"                                                 "
+              "        "
+              "      %8d swapped, %8d moved, %d iter. \n",nnf,nnm,it);
+  }
+  return(1);
+}
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param bucket pointer toward the bucket structure.
+ * \return 0 if failed, 1 otherwise.
+ *
  * Mesh optimization using egde swapping and point relocation.
  *
  */
@@ -990,9 +1072,13 @@ _MMG5_adptet_delone(MMG5_pMesh mesh,MMG5_pSol met,_MMG5_pBucket bucket) {
   /* renumerotation if available */
   if ( !_MMG5_scotchCall(mesh,met) )
     return(0);
-
-  if(!_MMG5_optet(mesh,met,bucket)) return(0);
-
+  
+  if(mesh->info.optimLES) {
+    if(!_MMG5_optetLES(mesh,met,bucket)) return(0);
+  }
+  else {
+    if(!_MMG5_optet(mesh,met,bucket)) return(0);
+  }
   return(1);
 }
 

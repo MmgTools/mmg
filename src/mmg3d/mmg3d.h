@@ -287,6 +287,7 @@ void _MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char);
 int  _MMG5_split4bar(MMG5_pMesh mesh,MMG5_pSol met,int k,char);
 int  _MMG3D_simbulgept(MMG5_pMesh mesh,MMG5_pSol met, int *list, int ilist,int);
 void _MMG5_nsort(int ,double *,char *);
+int    _MMG3D_optlap(MMG5_pMesh ,MMG5_pSol );
 int    _MMG5_movintpt_iso(MMG5_pMesh ,MMG5_pSol, int *, int , int);
 int    _MMG5_movintptLES_iso(MMG5_pMesh mesh,MMG5_pSol met,int *,int,int);
 int    _MMG5_movintpt_ani(MMG5_pMesh ,MMG5_pSol, int *, int , int);

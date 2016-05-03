@@ -167,8 +167,8 @@ int _MMG5_movintptLES_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,int 
   double               vol,totvol;
   double               calold,calnew,*callist;
   double               x21,y21,z21,x31,y31,z31,nx,ny,nz,bary[3],dd,len;
-  double               u10[3],u20[3],u30[3];
-  int                  k,iel,ifac,i0;
+  double               u10[3],u20[3],u30[3],oldc[3],coe;
+  int                  k,iel,ifac,i0,iter,maxtou;
 
   // Dynamic alloc for windows comptibility
   _MMG5_SAFE_MALLOC(callist, ilist, double);
@@ -189,6 +189,8 @@ int _MMG5_movintptLES_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,int 
     pt = &mesh->tetra[iel];
 
     p0 = &mesh->point[pt->v[ifac]];
+    memcpy(oldc,p0->c,3*sizeof(double));
+
     p1 = &mesh->point[pt->v[_MMG5_idir[ifac][0]]];
     p2 = &mesh->point[pt->v[_MMG5_idir[ifac][1]]];
     p3 = &mesh->point[pt->v[_MMG5_idir[ifac][2]]];
@@ -251,6 +253,7 @@ int _MMG5_movintptLES_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,int 
 
 
     /* Optimal point: barycenter of local optimal points */
+    vol = 1;
     ppt0->c[0] += vol* ( bary[0] + nx * len );
     ppt0->c[1] += vol* ( bary[1] + ny * len );
     ppt0->c[2] += vol* ( bary[2] + nz * len );
@@ -261,54 +264,61 @@ int _MMG5_movintptLES_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,int 
     return(0);
   }
 
-  totvol = 1.0 / totvol;
-  ppt0->c[0] *= totvol;
-  ppt0->c[1] *= totvol;
-  ppt0->c[2] *= totvol;
+  /* totvol = 1.0 / totvol; */
+  /* ppt0->c[0] *= totvol; */
+  /* ppt0->c[1] *= totvol; */
+  /* ppt0->c[2] *= totvol; */
+  ppt0->c[0] *= 1./(double) ilist;
+  ppt0->c[1] *= 1./(double) ilist;
+  ppt0->c[2] *= 1./(double) ilist;
+ 
+   coe = 0.9;
+   maxtou = 10;
+   iter = 0;
+   do {
+     p0->c[0] = (1. - coe) *oldc[0] + coe * ppt0->c[0] ;
+     p0->c[1] = (1. - coe) *oldc[1] + coe * ppt0->c[1];
+     p0->c[2] = (1. - coe) *oldc[2] + coe * ppt0->c[2];
+     
+   
+     /* Check new position validity */
+     calnew = DBL_MAX;
+     for (k=0; k<ilist; k++) {
+       iel = list[k] / 4;
+       i0  = list[k] % 4;
+       pt  = &mesh->tetra[iel];
+       memcpy(pt0,pt,sizeof(MMG5_Tetra));
+       callist[k] = _MMG5_caltet(mesh,met,pt0);//_MMG5_orcal(mesh,met,0);
+       if (calold < _MMG5_NULKAL && callist[k] <= calold) {
+         break;
+       } else if ((callist[k] < _MMG5_EPSD2) || (callist[k] < _MMG5_NULKAL)) {
+         break;
+       } else if( callist[k] < 0.1) {
+         if (callist[k] < 1.01*calold) break;
+       } else {
+         if (callist[k] < 1.02*calold) break;
+       }
+       calnew = MG_MIN(calnew,callist[k]);
+     }
+     if(k<ilist) {
+       coe *= 0.5;
+       continue;
+     }
+     break;
+   } while(++iter <= maxtou );
 
-  /* Check new position validity */
-  calnew = DBL_MAX;
-  for (k=0; k<ilist; k++) {
-    iel = list[k] / 4;
-    i0  = list[k] % 4;
-    pt  = &mesh->tetra[iel];
-    memcpy(pt0,pt,sizeof(MMG5_Tetra));
-    pt0->v[i0] = 0;
-    callist[k] = _MMG5_orcal(mesh,met,0);
-  if (callist[k] < _MMG5_EPSD2) {
-    _MMG5_SAFE_FREE(callist);
-    return(0);
-  }
-    calnew = MG_MIN(calnew,callist[k]);
-  }
-  if (calold < _MMG5_NULKAL && calnew <= calold) {
-    _MMG5_SAFE_FREE(callist);
-    return(0);
-  }
-  else if (calnew < _MMG5_NULKAL) {
-    _MMG5_SAFE_FREE(callist);
-    return(0);
-  }
-  else if ( improve && calnew < 1.02 * calold ) {
-    _MMG5_SAFE_FREE(callist);
-    return(0);
-  }
-  else if ( calnew < 0.3 * calold ) {
-    _MMG5_SAFE_FREE(callist);
-    return(0);
-  }
+   if ( iter > maxtou ) {
+     memcpy(p0->c,oldc,3*sizeof(double));
+     _MMG5_SAFE_FREE(callist);
+     return(0);
+   }
+   /* update position */
+   for (k=0; k<ilist; k++) {
+     (&mesh->tetra[list[k]/4])->qual=callist[k];
+   }
 
-  /* update position */
-  p0 = &mesh->point[pt->v[i0]];
-  p0->c[0] = ppt0->c[0];
-  p0->c[1] = ppt0->c[1];
-  p0->c[2] = ppt0->c[2];
-  for (k=0; k<ilist; k++) {
-    (&mesh->tetra[list[k]/4])->qual=callist[k];
-  }
-
-  _MMG5_SAFE_FREE(callist);
-  return(1);
+   _MMG5_SAFE_FREE(callist);
+   return(1);
 }
 
 /**
