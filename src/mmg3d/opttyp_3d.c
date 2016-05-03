@@ -418,7 +418,11 @@ int _MMG3D_splitItem(MMG5_pMesh mesh,  MMG5_pSol met,_MMG5_pBucket bucket,
       if(pt->v[j] == ier) break;
     }
     assert(j<4);
-    ier = _MMG3D_movv_ani(mesh,met,k,j);
+    if(met->size!=1)
+      ier = _MMG3D_movv_ani(mesh,met,k,j);
+    else
+      ier = _MMG3D_movv_iso(mesh,met,k,j);
+
   }
   return(ier);
 }
@@ -586,15 +590,22 @@ int MMG3D_opttyp(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket) {
             break;
           }
         }
+        for(i=0 ; i<4 ; i++) {
+          if(((met->size!=1) && _MMG3D_movv_ani(mesh,met,k,i)) || ((met->size==1) && _MMG3D_movv_iso(mesh,met,k,i))) {
+            nd++;
+            ds[ityp]++;
+            break;
+          }
+        }
         break;
       case 2: /*chapeau*/
-        if((met->size!=1) && _MMG3D_movv_ani(mesh,met,k,item[0])) {
+        if(((met->size!=1) && _MMG3D_movv_ani(mesh,met,k,item[0])) || ((met->size==1) && _MMG3D_movv_iso(mesh,met,k,item[0]))) {
           nd++;
           ds[ityp]++;
         } else {
           for(i=0 ; i<4 ; i++) {
             if(item[0]==i) continue;
-            if((met->size!=1) && _MMG3D_movv_ani(mesh,met,k,i)) {
+            if(((met->size!=1) && _MMG3D_movv_ani(mesh,met,k,i)) || ((met->size==1) && _MMG3D_movv_iso(mesh,met,k,i))) {
               nd++;
               ds[ityp]++;
               break;

@@ -1649,6 +1649,7 @@ int _MMG3D_movv_ani(MMG5_pMesh mesh,MMG5_pSol sol,int k,int ib) {
   assert(ib<4);
   pt = &mesh->tetra[k];
   ppa  = &mesh->point[pt->v[ib]];
+  if(ppa->tag & MG_BDY) return(0);
   iadr = pt->v[ib]*sol->size + 0;
   mp   = &sol->m[iadr];
 
@@ -1715,6 +1716,121 @@ int _MMG3D_movv_ani(MMG5_pMesh mesh,MMG5_pSol sol,int k,int ib) {
 
       qual = _MMG5_caltet(mesh,sol,pt1);
       if ( !((qual > pt1->qual) || (qual > pt->qual /2.)) )  break;
+      qualtet[l] = qual;
+
+    }
+    if ( l >= lon )  break;
+    coe *= 0.5;
+  }
+  while ( ++iter <= maxiter );
+  if ( iter > maxiter) {
+    memcpy(ppa->c,oldc,3*sizeof(double));
+    return(0);
+  }
+
+  for (l=0; l<lon; l++) {
+    iel = list[l] / 4;
+    pt1 = &mesh->tetra[iel];
+    pt1->qual = qualtet[l];
+    //    if ( pt1->qual < declic )
+    //  MMG_kiudel(queue,iel);
+  }
+  return(1);
+
+}
+
+
+int _MMG3D_movv_iso(MMG5_pMesh mesh,MMG5_pSol sol,int k,int ib) {
+  MMG5_pTetra pt,pt1;
+  MMG5_pPoint ppa,ppb,p1,p2,p3;
+  int    j,iadr,ipb,iter,maxiter,l,lon,iel,i1,i2,i3,list[MMG3D_LMAX+2];;
+  double  hp,coe,crit,qualtet[MMG3D_LMAX+2];;
+  double ax,ay,az,bx,by,bz,nx,ny,nz,dd,len,qual,oldc[3];
+
+  assert(k);
+  assert(ib<4);
+  pt = &mesh->tetra[k];
+
+  ppa  = &mesh->point[pt->v[ib]];
+  if(ppa->tag & MG_BDY) return(0);
+
+  iadr = (pt->v[ib])*sol->size;
+  hp   = sol->m[iadr];
+
+  /*compute normal*/
+  i1 = pt->v[_MMG5_idir[ib][0]];
+  i2 = pt->v[_MMG5_idir[ib][1]];
+  i3 = pt->v[_MMG5_idir[ib][2]];
+  p1 = &mesh->point[i1];
+  p2 = &mesh->point[i2];
+  p3 = &mesh->point[i3];
+
+  ax = p3->c[0] - p1->c[0];
+  ay = p3->c[1] - p1->c[1];
+  az = p3->c[2] - p1->c[2];
+
+  bx = p2->c[0] - p1->c[0];
+  by = p2->c[1] - p1->c[1];
+  bz = p2->c[2] - p1->c[2];
+
+  nx = (ay*bz - az*by);
+  ny = (az*bx - ax*bz);
+  nz = (ax*by - ay*bx);
+
+  dd = sqrt(nx*nx+ny*ny+nz*nz);
+  dd = 1./dd;
+  nx *=dd;
+  ny *=dd;
+  nz *=dd;
+  len = 0;
+  for (j=0; j<3; j++) {
+    ipb = pt->v[ _MMG5_idir[ib][j] ];
+    ppb = &mesh->point[ipb];
+
+    ax  = ppb->c[0] - ppa->c[0];
+    ay  = ppb->c[1] - ppa->c[1];
+    az  = ppb->c[2] - ppa->c[2];
+
+    dd    =   sqrt(ax*ax +ay*ay +az*az);
+    len  +=   dd/hp;
+  }
+
+  dd  = 1.0 / (double)3.;
+  len *= dd;
+  if(len > 0.) len = 1.0 / len;
+  else printf("MMG_movevertex len %e\n",len);
+
+  memcpy(oldc,ppa->c,3*sizeof(double));
+
+  lon = _MMG5_boulevolp(mesh,k,ib,&list[0]);
+  if(mesh->info.imprim < 0) if(lon < 4 && lon) printf("lon petit : %d\n",lon);
+  if(!lon) return(0);
+
+  /*qual crit*/
+  crit = pt->qual;
+  for (l=1; l<lon; l++) {
+    iel = list[l] / 4;
+    pt1 = &mesh->tetra[iel];
+    if ( crit > pt1->qual )  crit = pt1->qual;
+  }
+  /* if ( (crit > 100/ALPHAD) ) {
+     crit *= 1.1;
+     } else
+  */ crit *= 0.99;
+
+  coe     = 1.;
+  iter    = 0;
+  maxiter = 20;
+  do {
+
+    ppa->c[0] = oldc[0] + coe * nx * len;
+    ppa->c[1] = oldc[1] + coe * ny * len;
+    ppa->c[2] = oldc[2] + coe * nz * len;
+    for (l=0; l<lon; l++) {
+      iel = list[l] / 4;
+      pt1 = &mesh->tetra[iel];
+      qual = _MMG5_caltet(mesh,sol,pt1);
+      if ( qual < crit )  break;
       qualtet[l] = qual;
 
     }

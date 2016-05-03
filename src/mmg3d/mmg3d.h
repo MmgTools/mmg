@@ -299,6 +299,7 @@ int    _MMG5_movbdynompt_ani(MMG5_pMesh, MMG5_pSol, int*, int, int*, int ,int);
 int    _MMG5_movbdyridpt_iso(MMG5_pMesh, MMG5_pSol, int*, int, int*, int ,int);
 int    _MMG5_movbdyridpt_ani(MMG5_pMesh, MMG5_pSol, int*, int, int*, int ,int);
 int    _MMG3D_movv_ani(MMG5_pMesh ,MMG5_pSol ,int ,int );
+int    _MMG3D_movv_iso(MMG5_pMesh ,MMG5_pSol ,int ,int );
 int  _MMG5_chkswpbdy(MMG5_pMesh, MMG5_pSol,int*, int, int, int,char);
 int  _MMG5_swpbdy(MMG5_pMesh,MMG5_pSol,int*,int,int,_MMG5_pBucket,char);
 int  _MMG5_swpgen(MMG5_pMesh,MMG5_pSol,int, int, int*,_MMG5_pBucket,char);
