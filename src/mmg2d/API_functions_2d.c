@@ -319,7 +319,7 @@ int MMG2D_Set_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int typEntity, int np, int
     sol->size = 1;
   }
   else if ( typSol == MMG5_Tensor ) {
-    sol->size = 6;
+    sol->size = 3;
   }
   else {
     fprintf(stdout,"  ## Error: type of solution not yet implemented\n");

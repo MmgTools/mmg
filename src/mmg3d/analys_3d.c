@@ -51,14 +51,20 @@ static inline void _MMG5_reqBoundaries(MMG5_pMesh mesh) {
    * but that are not really required (-nosurf option) */
   for (k=1; k<=mesh->nt; k++) {
     ptt = &mesh->tria[k];
-    ptt->tag[0] |= MG_REQ;
-    ptt->tag[1] |= MG_REQ;
-    ptt->tag[2] |= MG_REQ;
+    if ( !(ptt->tag[0] & MG_REQ) ) {
+      ptt->tag[0] |= MG_REQ;
+      ptt->tag[0] |= MG_CRN;
+    }
 
-    ptt->tag[0] |= MG_CRN;
-    ptt->tag[1] |= MG_CRN;
-    ptt->tag[2] |= MG_CRN;
+    if ( !(ptt->tag[1] & MG_REQ) ) {
+      ptt->tag[1] |= MG_REQ;
+      ptt->tag[1] |= MG_CRN;
+    }
 
+    if ( !(ptt->tag[1] & MG_REQ) ) {
+      ptt->tag[2] |= MG_REQ;
+      ptt->tag[2] |= MG_CRN;
+    }
   }
   return;
 }

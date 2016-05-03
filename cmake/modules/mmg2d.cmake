@@ -128,7 +128,7 @@ IF ( LIBMMG2D_STATIC OR LIBMMG2D_SHARED )
     ${MMG2D_INCLUDE}/libmmg2df.h
     ${MMG2D_INCLUDE}/libmmgtypes.h
     ${MMG2D_INCLUDE}/libmmgtypesf.h
-    ) 
+    )
   # Install header files in /usr/local or equivalent
   INSTALL(FILES ${mmg2d_headers} DESTINATION include/mmg/mmg2d)
 
@@ -142,9 +142,12 @@ IF ( LIBMMG2D_STATIC OR LIBMMG2D_SHARED )
     DEPENDS ${MMG2D_SOURCE_DIR}/libmmg2df.h)
 
   # Install header files in project directory
-  FILE (INSTALL ${mmg2d_headers}    
-  DESTINATION ${CMAKE_SOURCE_DIR}/include/mmg/mmg2d  
-  PATTERN "libmmg*f.h"  EXCLUDE)
+  FILE(INSTALL  ${mmg2d_headers} DESTINATION ${MMG2D_INCLUDE}
+    PATTERN "libmmg*f.h"  EXCLUDE)
+
+  ADD_CUSTOM_TARGET(copy_2d_headers ALL
+    DEPENDS  ${MMG2D_INCLUDE}/libmmg2df.h  ${MMG2D_INCLUDE}/libmmg2d.h
+     ${MMG2D_INCLUDE}/libmmgtypesf.h  ${MMG2D_INCLUDE}/libmmgtypes.h )
 
 ENDIF()
 
