@@ -6,9 +6,16 @@ To call the **mmg3d** library, you must:
   2. call the MMG5 library;
   3. get the final mesh and sol.
 
-  The input mesh and solution are hard coded.    
+  Results are saved in the **_sortie.o.mesh_** and **_sortie.o.sol_** files.  
+
+### example0_a  
+  We read mesh and solution files (**_init.mesh_** and **_init.sol_**) using the **MMG2D_loadMesh** and **MMG2D_loadSol** functions.
+  Results are saved using **MMG2D_saveMesh** and **MMG2D_saveSol** functions.
+
+### example0_b
+  The mesh and solution are hard coded.    
   They are build in MMG5 format using API functions and are recovered by the same way.  
-  Resulting mesh is saved in the **_sortie.mesh_** file using the **MMG2D_saveMesh** function.
+  We show how to recover the mesh/sol by writting it in sortie.o.mesh/sol file.
 
 ## II/ Compilation
   1. Build and install the **mmg2d** shared and static library. We suppose in the following that you have installed the **mmg2d** library in the **_$CMAKE_INSTALL_PREFIX_** directory (see the [installation](https://github.com/MmgTools/Mmg/wiki/Setup-guide#iii-installation) section of the setup guide);

@@ -229,15 +229,19 @@ IF ( BUILD_TESTING )
     SET ( LISTEXEC_MMGS ${EXECUT_MMGS} )
 
     IF ( TEST_LIBMMGS )
-      SET(LIBMMGS_EXEC0 ${EXECUTABLE_OUTPUT_PATH}/libmmgs_example0)
+      SET(LIBMMGS_EXEC0_a ${EXECUTABLE_OUTPUT_PATH}/libmmgs_example0_a)
+      SET(LIBMMGS_EXEC0_b ${EXECUTABLE_OUTPUT_PATH}/libmmgs_example0_b)
       SET(LIBMMGS_EXEC1   ${EXECUTABLE_OUTPUT_PATH}/libmmgs_example1)
 
-      ADD_TEST(NAME libmmgs_example0   COMMAND ${LIBMMGS_EXEC0})
+      ADD_TEST(NAME libmmgs_example0_a   COMMAND ${LIBMMGS_EXEC0_a})
+      ADD_TEST(NAME libmmgs_example0_b   COMMAND ${LIBMMGS_EXEC0_b})
       ADD_TEST(NAME libmmgs_example1   COMMAND ${LIBMMGS_EXEC1})
 
       IF ( CMAKE_Fortran_COMPILER)
-        SET(LIBMMGS_EXECFORTRAN ${EXECUTABLE_OUTPUT_PATH}/libmmgs_fortran)
-        ADD_TEST(NAME libmmgs_fortran   COMMAND ${LIBMMGS_EXECFORTRAN})
+        SET(LIBMMGS_EXECFORTRAN_a ${EXECUTABLE_OUTPUT_PATH}/libmmgs_fortran_a)
+        SET(LIBMMGS_EXECFORTRAN_b ${EXECUTABLE_OUTPUT_PATH}/libmmgs_fortran_b)
+        ADD_TEST(NAME libmmgs_fortran_a   COMMAND ${LIBMMGS_EXECFORTRAN_a})
+        ADD_TEST(NAME libmmgs_fortran_b   COMMAND ${LIBMMGS_EXECFORTRAN_b})
       ENDIF()
 
     ENDIF()

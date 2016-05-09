@@ -133,6 +133,17 @@ FORTRAN_NAME(MMGS_SET_OUTPUTSOLNAME,mmgs_set_outputsolname,
 }
 
 /**
+ * See \ref MMGS_Set_solSize function in \ref mmgs/libmmgs.h file.
+ */
+FORTRAN_NAME(MMGS_SET_SOLSIZE,mmgs_set_solsize,
+             (MMG5_pMesh *mesh, MMG5_pSol *sol, int* typEntity,
+              int* np, int* typSol, int* retval),
+             (mesh, sol, typEntity, np, typSol, retval)) {
+  *retval = MMGS_Set_solSize(*mesh,*sol,*typEntity,*np,*typSol);
+  return;
+}
+
+/**
  * See \ref MMGS_Set_meshSize function in \ref mmgs/libmmgs.h file.
  */
 FORTRAN_NAME(MMGS_SET_MESHSIZE,mmgs_set_meshsize,
