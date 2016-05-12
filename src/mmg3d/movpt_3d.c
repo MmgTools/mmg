@@ -1826,7 +1826,7 @@ int _MMG3D_movv_iso(MMG5_pMesh mesh,MMG5_pSol sol,int k,int ib) {
   /* if ( (crit > 100/ALPHAD) ) {
      crit *= 1.1;
      } else
-  */ crit *= 0.99;
+  */ crit *= 1.01;
 
   coe     = 1.;
   iter    = 0;
