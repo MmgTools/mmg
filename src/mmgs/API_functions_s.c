@@ -1,5 +1,5 @@
 /* =============================================================================
-**  This file is part of the mmg software package for the tetrahedral
+**  This file is part of the mmg software package for the triangular
 **  mesh modification.
 **  Copyright (c) Bx INP/Inria/UBordeaux/UPMC, 2004- .
 **
@@ -594,12 +594,6 @@ int MMGS_Set_corner(MMG5_pMesh mesh, int k) {
 int MMGS_Set_requiredVertex(MMG5_pMesh mesh, int k) {
   assert ( k <= mesh->np );
   mesh->point[k].tag |= MG_REQ;
-  return(1);
-}
-
-int MMGS_Set_requiredTetrahedron(MMG5_pMesh mesh, int k) {
-  assert ( k <= mesh->ne );
-  mesh->tetra[k].tag |= MG_REQ;
   return(1);
 }
 

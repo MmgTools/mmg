@@ -87,7 +87,42 @@ void _MMG3D_Free_topoTables(MMG5_pMesh mesh) {
  */
 static inline
 void _MMG3D_scalarSolTruncature(MMG5_pMesh mesh, MMG5_pSol met) {
-  int         k;
+  int         k,sethmin,sethmax;
+
+  /* If not provided by the user, compute hmin/hmax from the metric computed by
+   * the DoSol function (isotropic metric) */
+  sethmin = sethmax = 1;
+  if ( mesh->info.hmin < 0 ) {
+    sethmin = 0;
+    mesh->info.hmin = FLT_MAX;
+    for (k=1; k<=mesh->np; k++)  {
+      mesh->info.hmin = MG_MIN(mesh->info.hmin,met->m[k]);
+    }
+  }
+  if ( mesh->info.hmax < 0 ) {
+    sethmax = 1;
+    mesh->info.hmax = 0.;
+    for (k=1; k<=mesh->np; k++)  {
+      mesh->info.hmax = MG_MAX(mesh->info.hmax,met->m[k]);
+    }
+  }
+
+  if ( !sethmin ) {
+    mesh->info.hmin *=.1;
+    /* Check that user has not given a hmax value lower that the founded
+     * hmin. */
+    if ( mesh->info.hmin > mesh->info.hmax ) {
+      mesh->info.hmin = 0.1*mesh->info.hmax;
+    }
+  }
+  if ( !sethmax ) {
+    mesh->info.hmax *=10.;
+    /* Check that user has not given a hmin value bigger that the founded
+     * hmax. */
+    if ( mesh->info.hmax < mesh->info.hmin ) {
+      mesh->info.hmax = 10.*mesh->info.hmin;
+    }
+  }
 
   /* vertex size */
   for (k=1; k<=mesh->np; k++) {
@@ -416,9 +451,7 @@ int MMG3D_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met) {
       if ( !_MMG5_unscaleMesh(mesh,met) )  _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
       _LIBMMG5_RETURN(mesh,met,MMG5_LOWFAILURE);
     }
-    MMG3D_saveSol(mesh,met, "sol0.sol");
     _MMG3D_scalarSolTruncature(mesh,met);
-    MMG3D_saveSol(mesh,met, "sol2.sol");
   }
 
   /* mesh analysis */
