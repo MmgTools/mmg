@@ -181,9 +181,7 @@ int _MMG3D_optlap(MMG5_pMesh mesh,MMG5_pSol sol) {
       pos[3*(i-1) + 1 + 1] = 0.;
       pos[3*(i-1) + 1 + 2] = 0.;
     }
-    /*    printf("---------- iter %d  res %e\r",it,res);
-          fflush(stdout);
-    */
+
     /*check new coor*/
     for(k = 1 ; k<=mesh->ne ; k++) {
       pt = &mesh->tetra[k];
@@ -258,9 +256,9 @@ int _MMG3D_optlap(MMG5_pMesh mesh,MMG5_pSol sol) {
         if(!pt->v[0]) continue;
         pt->qual = _MMG5_caltet(mesh,sol,pt);
       }
-      if(1 || mesh->info.imprim < 0) fprintf(stdout,"              LAPLACIAN : %8f\n",res);
+      if( mesh->info.imprim > 5) fprintf(stdout,"              LAPLACIAN : %8f\n",res);
     } else {
-      if(1 || mesh->info.imprim < 0) fprintf(stdout,"              NO LAPLACIAN\n");
+      if( mesh->info.imprim > 5) fprintf(stdout,"              NO LAPLACIAN\n");
       break;
     }
     if(res<1e-5) break;

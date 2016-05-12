@@ -846,10 +846,9 @@ _MMG5_optetLES(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket) {
   int it,nnm,nnf,maxit,nm,nf,nw;
   double declic;
 
-  it = 0;
-  maxit = 10; 
+  it = nnm = nnf = 0;
+  maxit = 10;
   declic = 1.01;
-  printf("------------------------------------\n");
   do {
     /* treatment of bad elements*/
     if(it < 5) {
@@ -880,7 +879,6 @@ _MMG5_optetLES(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket) {
 //be careful, this procedure can degrade the worst elt
     if ( !mesh->info.nomove && (it==2)) {
       _MMG3D_optlap(mesh,met);
-      printf("movelap\n");
     }
 
     if ( (abs(mesh->info.imprim) > 4 || mesh->info.ddebug) && nw+nf+nm > 0 ){
@@ -930,10 +928,6 @@ _MMG5_optet(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket) {
 
   /* shape optim */
   it = nnm = nnf = 0;
-  /* if ( mesh->info.optimLES ) { */
-  /*   maxit = 8; */
-  /* } */
-  /* else */
   maxit = 4;
   declic = 1.053;
   do {
@@ -991,19 +985,6 @@ _MMG5_optet(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket) {
             "                                ");
     fprintf(stdout,"     %8d moved\n",nm);
   }
-
-
-  /* treatment of bad elements*/
-//  if ( mesh->info.optimLES ) {
-//    nw = MMG3D_opttyp(mesh,met,bucket);
-//  }
-//  else
-//    nw = 0;
-//  if ( (abs(mesh->info.imprim) > 4 || mesh->info.ddebug) && nw > 0 ) {
-//    fprintf(stdout,"                                            "
-//            "                                ");
-//    fprintf(stdout,"     %8d improved\n",nw);
-//  }
 
   if ( mesh->info.imprim ) {
     if ( abs(mesh->info.imprim) < 5 && (nnf > 0 || nnm > 0) )
