@@ -834,6 +834,17 @@ int _MMG5_colver(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,char indq,cha
                   break;
               }
             }
+            if ( i==3 ) {
+              printf("Args : %d \n",ilist);
+              for ( int kkk=0; kkk< ilist; ++kkk ) {
+                printf("%d ",list[kkk]);
+              }
+              printf("\n");
+              printf("indq, typchk : %d %d\n", indq, typchk);
+
+            }
+
+
             assert(i!=3);
             pxt1->tag[iav] = pxt1->tag[iav] | pxt->tag[ia];
             pxt1->edg[iav] = MG_MAX(pxt1->edg[iav],pxt->edg[ia]);

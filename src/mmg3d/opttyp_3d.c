@@ -248,12 +248,12 @@ int MMG3D_typelt(MMG5_pMesh mesh,int iel,int *item) {
     for (k=0; k<4; k++) {
       for (i=0; i<3; i++) {
         i0 = _MMG5_idir[k][i];
-        i1 = _MMG5_idir[k][_MMG5_inxt3[i]];
-        i2 = _MMG5_idir[k][_MMG5_inxt3[i+1]];
+        i1 = _MMG5_idir[k][_MMG5_inxt2[i]];
+        i2 = _MMG5_idir[k][_MMG5_inxt2[i+1]];
         if ( h[i0]+h[i1] < 1.2*h[i2] ) {/*1.4 ie une face obtus*/
           nobtus++;
           item[0] = i2;
-          item[1] = _MMG5_idir[k][_MMG5_inxt3[i+1]];
+          item[1] = _MMG5_idir[k][_MMG5_inxt2[i+1]];
         }
       }
     }
@@ -283,8 +283,8 @@ int MMG3D_typelt(MMG5_pMesh mesh,int iel,int *item) {
     for (k=0; k<4; k++) {
       for (i=0; i<3; i++) {
         i0 = _MMG5_idir[k][i];
-        i1 = _MMG5_idir[k][_MMG5_inxt3[i]];
-        i2 = _MMG5_idir[k][_MMG5_inxt3[i+1]];
+        i1 = _MMG5_idir[k][_MMG5_inxt2[i]];
+        i2 = _MMG5_idir[k][_MMG5_inxt2[i+1]];
         if ( h[i0]+h[i1] > 1.5*h[i2] )  naigu++;/*1.5*/
       }
     }

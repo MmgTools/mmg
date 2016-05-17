@@ -366,7 +366,7 @@ void _MMG5_excfun(int sigid) {
 
 
 /* Global variables */
-static const unsigned char _MMG5_inxt2[3] = {1,2,0}; /*!< next vertex of triangle: {1,2,0} */
+  static const unsigned char _MMG5_inxt2[6] = {1,2,0,1,2}; /*!< next vertex of triangle: {1,2,0} */
 static const unsigned char _MMG5_iprv2[3] = {2,0,1}; /*!< previous vertex of triangle: {2,0,1} */
 
 /* Private structures */
