@@ -852,7 +852,7 @@ _MMG5_optetLES(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket) {
   do {
     /* treatment of bad elements*/
     if(it < 5) {
-      nw = MMG3D_opttyp(mesh,met,bucket);
+      // nw = MMG3D_opttyp(mesh,met,bucket);
     }
     else
       nw = 0;
@@ -933,7 +933,7 @@ _MMG5_optet(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket) {
   do {
     /* treatment of bad elements*/
     if(it < 5) {
-      nw = MMG3D_opttyp(mesh,met,bucket);
+      // nw = MMG3D_opttyp(mesh,met,bucket);
     }
     else
       nw = 0;
