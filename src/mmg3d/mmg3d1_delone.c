@@ -1087,17 +1087,17 @@ int _MMG5_mmg3d1_delone(MMG5_pMesh mesh,MMG5_pSol met) {
     fprintf(stdout,"  ** GEOMETRIC MESH\n");
 
 #warning to trash
-  printf(" avt anatet : %d %d %d %d \n", mesh->tetra[183217].v[0], mesh->tetra[183217].v[1],
-         mesh->tetra[183217].v[2], mesh->tetra[183217].v[3]);
+  /* printf(" avt anatet : %d %d %d %d \n", mesh->tetra[183217].v[0], mesh->tetra[183217].v[1], */
+  /*        mesh->tetra[183217].v[2], mesh->tetra[183217].v[3]); */
 
-  printf(" avt anatet :  xt faces : %d -> %d %d %d %d \n", mesh->tetra[183217].xt,
-         mesh->xtetra[mesh->tetra[183217].xt].ftag[0], mesh->xtetra[mesh->tetra[183217].xt].ftag[1],
-         mesh->xtetra[mesh->tetra[183217].xt].ftag[2], mesh->xtetra[mesh->tetra[183217].xt].ftag[3]);
+  /* printf(" avt anatet :  xt faces : %d -> %d %d %d %d \n", mesh->tetra[183217].xt, */
+  /*        mesh->xtetra[mesh->tetra[183217].xt].ftag[0], mesh->xtetra[mesh->tetra[183217].xt].ftag[1], */
+  /*        mesh->xtetra[mesh->tetra[183217].xt].ftag[2], mesh->xtetra[mesh->tetra[183217].xt].ftag[3]); */
 
-  printf(" avt anatet :  xt edg :  %d %d %d %d %d %d \n",
-         mesh->xtetra[mesh->tetra[183217].xt].tag[0], mesh->xtetra[mesh->tetra[183217].xt].tag[1],
-         mesh->xtetra[mesh->tetra[183217].xt].tag[2], mesh->xtetra[mesh->tetra[183217].xt].tag[3],
-         mesh->xtetra[mesh->tetra[183217].xt].tag[4], mesh->xtetra[mesh->tetra[183217].xt].tag[5]);
+  /* printf(" avt anatet :  xt edg :  %d %d %d %d %d %d \n", */
+  /*        mesh->xtetra[mesh->tetra[183217].xt].tag[0], mesh->xtetra[mesh->tetra[183217].xt].tag[1], */
+  /*        mesh->xtetra[mesh->tetra[183217].xt].tag[2], mesh->xtetra[mesh->tetra[183217].xt].tag[3], */
+  /*        mesh->xtetra[mesh->tetra[183217].xt].tag[4], mesh->xtetra[mesh->tetra[183217].xt].tag[5]); */
 
 
 
@@ -1130,17 +1130,17 @@ int _MMG5_mmg3d1_delone(MMG5_pMesh mesh,MMG5_pSol met) {
   }
 
 #warning to trash
-  printf(" avt anatet2 : %d %d %d %d \n", mesh->tetra[183217].v[0], mesh->tetra[183217].v[1],
-         mesh->tetra[183217].v[2], mesh->tetra[183217].v[3]);
+  /* printf(" avt anatet2 : %d %d %d %d \n", mesh->tetra[183217].v[0], mesh->tetra[183217].v[1], */
+  /*        mesh->tetra[183217].v[2], mesh->tetra[183217].v[3]); */
 
-  printf(" avt anatet2 :  xt faces : %d -> %d %d %d %d \n", mesh->tetra[183217].xt,
-         mesh->xtetra[mesh->tetra[183217].xt].ftag[0], mesh->xtetra[mesh->tetra[183217].xt].ftag[1],
-         mesh->xtetra[mesh->tetra[183217].xt].ftag[2], mesh->xtetra[mesh->tetra[183217].xt].ftag[3]);
+  /* printf(" avt anatet2 :  xt faces : %d -> %d %d %d %d \n", mesh->tetra[183217].xt, */
+  /*        mesh->xtetra[mesh->tetra[183217].xt].ftag[0], mesh->xtetra[mesh->tetra[183217].xt].ftag[1], */
+  /*        mesh->xtetra[mesh->tetra[183217].xt].ftag[2], mesh->xtetra[mesh->tetra[183217].xt].ftag[3]); */
 
-  printf(" avt anatet2 :  xt edg : %d %d %d %d %d %d \n",
-         mesh->xtetra[mesh->tetra[183217].xt].tag[0], mesh->xtetra[mesh->tetra[183217].xt].tag[1],
-         mesh->xtetra[mesh->tetra[183217].xt].tag[2], mesh->xtetra[mesh->tetra[183217].xt].tag[3],
-         mesh->xtetra[mesh->tetra[183217].xt].tag[4], mesh->xtetra[mesh->tetra[183217].xt].tag[5]);
+  /* printf(" avt anatet2 :  xt edg : %d %d %d %d %d %d \n", */
+  /*        mesh->xtetra[mesh->tetra[183217].xt].tag[0], mesh->xtetra[mesh->tetra[183217].xt].tag[1], */
+  /*        mesh->xtetra[mesh->tetra[183217].xt].tag[2], mesh->xtetra[mesh->tetra[183217].xt].tag[3], */
+  /*        mesh->xtetra[mesh->tetra[183217].xt].tag[4], mesh->xtetra[mesh->tetra[183217].xt].tag[5]); */
 
 
   if ( !_MMG5_anatet(mesh,met,2,0) ) {
@@ -1162,17 +1162,17 @@ int _MMG5_mmg3d1_delone(MMG5_pMesh mesh,MMG5_pSol met) {
   if ( !bucket )  return(0);
 
 #warning to trash
-  printf(" avt adptet : %d %d %d %d \n", mesh->tetra[183217].v[0], mesh->tetra[183217].v[1],
-         mesh->tetra[183217].v[2], mesh->tetra[183217].v[3]);
+  /* printf(" avt adptet : %d %d %d %d \n", mesh->tetra[183217].v[0], mesh->tetra[183217].v[1], */
+  /*        mesh->tetra[183217].v[2], mesh->tetra[183217].v[3]); */
 
-  printf(" avt adptet :  xt faces : %d -> %d %d %d %d \n", mesh->tetra[183217].xt,
-         mesh->xtetra[mesh->tetra[183217].xt].ftag[0], mesh->xtetra[mesh->tetra[183217].xt].ftag[1],
-         mesh->xtetra[mesh->tetra[183217].xt].ftag[2], mesh->xtetra[mesh->tetra[183217].xt].ftag[3]);
+  /* printf(" avt adptet :  xt faces : %d -> %d %d %d %d \n", mesh->tetra[183217].xt, */
+  /*        mesh->xtetra[mesh->tetra[183217].xt].ftag[0], mesh->xtetra[mesh->tetra[183217].xt].ftag[1], */
+  /*        mesh->xtetra[mesh->tetra[183217].xt].ftag[2], mesh->xtetra[mesh->tetra[183217].xt].ftag[3]); */
 
-  printf(" avt adptet :  xt edg :  %d %d %d %d %d %d \n",
-         mesh->xtetra[mesh->tetra[183217].xt].tag[0], mesh->xtetra[mesh->tetra[183217].xt].tag[1],
-         mesh->xtetra[mesh->tetra[183217].xt].tag[2], mesh->xtetra[mesh->tetra[183217].xt].tag[3],
-         mesh->xtetra[mesh->tetra[183217].xt].tag[4], mesh->xtetra[mesh->tetra[183217].xt].tag[5]);
+  /* printf(" avt adptet :  xt edg :  %d %d %d %d %d %d \n", */
+  /*        mesh->xtetra[mesh->tetra[183217].xt].tag[0], mesh->xtetra[mesh->tetra[183217].xt].tag[1], */
+  /*        mesh->xtetra[mesh->tetra[183217].xt].tag[2], mesh->xtetra[mesh->tetra[183217].xt].tag[3], */
+  /*        mesh->xtetra[mesh->tetra[183217].xt].tag[4], mesh->xtetra[mesh->tetra[183217].xt].tag[5]); */
 
 
   if ( !_MMG5_adptet_delone(mesh,met,bucket) ) {
