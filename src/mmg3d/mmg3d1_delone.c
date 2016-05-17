@@ -105,10 +105,10 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
         imin = ii;
       }
     }
-    if ( imax==-1 )
+    if ( imax==-1 && (mesh->info.ddebug || mesh->info.imprim > 5 ) )
       fprintf(stdout,"%s:%d: Warning: all edges of tetra %d are boundary and required\n",
               __FILE__,__LINE__,k);
-    if ( imin==-1 )
+    if ( imin==-1  && (mesh->info.ddebug || mesh->info.imprim > 5 ) )
       fprintf(stdout,"%s:%d: Warning: all edges of tetra %d are boundary and required\n",
               __FILE__,__LINE__,k);
 
