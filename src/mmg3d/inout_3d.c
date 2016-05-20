@@ -935,10 +935,6 @@ int MMG3D_saveMesh(MMG5_pMesh mesh, const char *filename) {
       if ( ppt->tag & MG_CRN )  nc++;
       if ( ppt->tag & MG_REQ )  nre++;
     }
-    else {
-      printf("IGNORED VERTEX %d\n",k);
-      // exit(EXIT_FAILURE);
-    }
   }
 
   if(!bin) {
@@ -1280,8 +1276,6 @@ int MMG3D_saveMesh(MMG5_pMesh mesh, const char *filename) {
   for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
     if ( !MG_EOK(pt) ) {
-      printf("IGNORED TETRA %d\n",k);
-      // exit(EXIT_FAILURE);
       continue;
     }
     ne++;

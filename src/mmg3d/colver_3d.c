@@ -834,17 +834,6 @@ int _MMG5_colver(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,char indq,cha
                   break;
               }
             }
-            if ( i==3 ) {
-              printf("Args : %d \n",ilist);
-              for ( int kkk=0; kkk< ilist; ++kkk ) {
-                printf("%d ",list[kkk]);
-              }
-              printf("\n");
-              printf("indq, typchk : %d %d\n", indq, typchk);
-
-            }
-
-
             assert(i!=3);
             pxt1->tag[iav] = pxt1->tag[iav] | pxt->tag[ia];
             pxt1->edg[iav] = MG_MAX(pxt1->edg[iav],pxt->edg[ia]);
@@ -916,7 +905,7 @@ int _MMG5_colver(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,char indq,cha
 
             /* update tags for edges */
             for ( j=0; j<3; j++ ) {
-              ia = _MMG5_iarf[ip][j];
+              ia = _MMG5_iarf[iq][j];
               p0 = pt->v[_MMG5_iare[ia][0]];
               p1 = pt->v[_MMG5_iare[ia][1]];
               for ( i=0; i<3; i++ ) {

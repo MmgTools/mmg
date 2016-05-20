@@ -259,20 +259,6 @@ int _MMG3D_inqua(MMG5_pMesh mesh,MMG5_pSol met) {
   double   rap,rapmin,rapmax,rapavg,med,good;
   int      i,k,iel,ok,ir,imax,nex,his[5];
 
-  /*compute tet quality*/
-  for (k=1; k<=mesh->ne; k++) {
-    pt = &mesh->tetra[k];
-     if( !MG_EOK(pt) )   continue;
-
-     if ( met->size == 6 && met->m ) {
-       pt->qual = _MMG5_caltet33_ani(mesh,met,pt);
-     }
-     else
-       pt->qual = _MMG5_orcal(mesh,met,k);
-
-  }
-  if ( abs(mesh->info.imprim) <= 0 ) return(1);
-
   rapmin  = 2.0;
   rapmax  = 0.0;
   rapavg  = med = good = 0.0;
