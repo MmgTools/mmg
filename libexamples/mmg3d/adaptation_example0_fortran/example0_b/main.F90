@@ -3,6 +3,9 @@
 !> @brief
 !>  Example for using mmg3dlib (basic use)
 
+PROGRAM main
+
+  IMPLICIT NONE
 
 !> Include the mmg3d library hader file
 ! if the header file is in the "include" directory
@@ -10,7 +13,6 @@
 ! if the header file is in "include/mmg/mmg3d"
 #include "mmg/mmg3d/libmmg3df.h"
 
-PROGRAM main
   MMG5_DATA_PTR_T  :: mmgMesh
   MMG5_DATA_PTR_T  :: mmgSol
   INTEGER          :: ier,k
@@ -41,6 +43,7 @@ PROGRAM main
   CALL MMG3D_Init_mesh(MMG5_ARG_start, &
        MMG5_ARG_ppMesh,mmgMesh,MMG5_ARG_ppMet,mmgSol, &
        MMG5_ARG_end)
+  CALL MMG3D_SET_IPARAMETER(mmgMesh,mmgSol,MMG3D_IPARAM_verbose,5,ier)
 
   !> 2) Build mesh in MMG5 format
   !! Two solutions: just use the MMG3D_loadMesh function that will read a .mesh(b)

@@ -39,7 +39,9 @@ IF ( NOT WIN32 )
     COMMAND genheader ${MMG3D_SOURCE_DIR}/libmmg3df.h
     ${MMG3D_SOURCE_DIR}/libmmg3d.h ${CMAKE_SOURCE_DIR}/scripts/genfort.pl
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-    DEPENDS genheader ${MMG3D_SOURCE_DIR}/libmmg3d.h ${COMMON_SOURCE_DIR}/libmmgcommonf.h
+    DEPENDS genheader ${MMG3D_SOURCE_DIR}/libmmg3d.h
+    ${COMMON_SOURCE_DIR}/libmmgtypesf.h
+    ${COMMON_SOURCE_DIR}/libmmgtypes.h
     ${CMAKE_SOURCE_DIR}/scripts/genfort.pl
     COMMENT "Generating Fortran header for mmg3d"
     )
@@ -160,37 +162,37 @@ IF ( LIBMMG3D_STATIC OR LIBMMG3D_SHARED )
   SET( mmg3d_headers
     ${MMG3D_SOURCE_DIR}/libmmg3d.h
     ${MMG3D_SOURCE_DIR}/libmmg3df.h
-    ${COMMON_SOURCE_DIR}/mmgcommon.h
-    ${COMMON_SOURCE_DIR}/eigenv.h
-    ${COMMON_SOURCE_DIR}/libmmgcommon.h
-    ${COMMON_SOURCE_DIR}/libmmgcommonf.h
-    ${COMMON_SOURCE_DIR}/chrono.h
+    ${COMMON_SOURCE_DIR}/libmmgtypes.h
+    ${COMMON_SOURCE_DIR}/libmmgtypesf.h
     )
   SET(MMG3D_INCLUDE ${CMAKE_SOURCE_DIR}/include/mmg/mmg3d )
   SET( mmg3d_includes
     ${MMG3D_INCLUDE}/libmmg3d.h
     ${MMG3D_INCLUDE}/libmmg3df.h
-    ${MMG3D_INCLUDE}/mmgcommon.h
-    ${MMG3D_INCLUDE}/eigenv.h
-    ${MMG3D_INCLUDE}/libmmgcommon.h
-    ${MMG3D_INCLUDE}/libmmgcommonf.h
-    ${MMG3D_INCLUDE}/chrono.h
-    ) 
+    ${MMG3D_INCLUDE}/libmmgtypes.h
+    ${MMG3D_INCLUDE}/libmmgtypesf.h
+    )
   # Install header files in /usr/local or equivalent
   INSTALL(FILES ${mmg3d_headers} DESTINATION include/mmg/mmg3d)
 
-  ADD_CUSTOM_COMMAND(OUTPUT ${MMG3D_INCLUDE}/libmmgcommonf.h
-    COMMAND ${CMAKE_COMMAND} -E copy ${COMMON_SOURCE_DIR}/libmmgcommonf.h ${MMG3D_INCLUDE}/libmmgcommonf.h
+  ADD_CUSTOM_COMMAND(OUTPUT ${MMG3D_INCLUDE}/libmmgtypesf.h
+    COMMAND ${CMAKE_COMMAND} -E copy ${COMMON_SOURCE_DIR}/libmmgtypesf.h
+    ${MMG3D_INCLUDE}/libmmgtypesf.h
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-    DEPENDS ${COMMON_SOURCE_DIR}/libmmgcommonf.h)
+    DEPENDS ${COMMON_SOURCE_DIR}/libmmgtypesf.h)
   ADD_CUSTOM_COMMAND(OUTPUT ${MMG3D_INCLUDE}/libmmg3df.h
     COMMAND ${CMAKE_COMMAND} -E copy ${MMG3D_SOURCE_DIR}/libmmg3df.h ${MMG3D_INCLUDE}/libmmg3df.h
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
     DEPENDS ${MMG3D_SOURCE_DIR}/libmmg3df.h)
 
   # Install header files in project directory
-  FILE ( INSTALL ${mmg3d_headers} DESTINATION ${CMAKE_SOURCE_DIR}/include/mmg/mmg3d
+  FILE(INSTALL  ${mmg3d_headers} DESTINATION ${MMG3D_INCLUDE}
     PATTERN "libmmg*f.h"  EXCLUDE)
+
+  ADD_CUSTOM_TARGET(copy_3d_headers ALL
+    DEPENDS  ${MMG3D_INCLUDE}/libmmg3df.h  ${MMG3D_INCLUDE}/libmmg3d.h
+    ${MMG3D_INCLUDE}/libmmgtypesf.h ${MMG3D_INCLUDE}/libmmgtypes.h )
+
 ENDIF()
 
 ############################################################################

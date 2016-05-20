@@ -170,13 +170,13 @@ ENDIF()
 
 IF ( NOT WIN32 )
   ADD_EXECUTABLE(genheader ${CMAKE_SOURCE_DIR}/scripts/genheader.c)
-  ADD_CUSTOM_COMMAND(OUTPUT ${COMMON_SOURCE_DIR}/libmmgcommonf.h
-    COMMAND genheader ${COMMON_SOURCE_DIR}/libmmgcommonf.h
-    ${COMMON_SOURCE_DIR}/libmmgcommon.h ${CMAKE_SOURCE_DIR}/scripts/genfort.pl
+  ADD_CUSTOM_COMMAND(OUTPUT ${COMMON_SOURCE_DIR}/libmmgtypesf.h
+    COMMAND genheader ${COMMON_SOURCE_DIR}/libmmgtypesf.h
+    ${COMMON_SOURCE_DIR}/libmmgtypes.h ${CMAKE_SOURCE_DIR}/scripts/genfort.pl
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-    DEPENDS genheader ${COMMON_SOURCE_DIR}/libmmgcommon.h
+    DEPENDS genheader ${COMMON_SOURCE_DIR}/libmmgtypes.h
     ${CMAKE_SOURCE_DIR}/scripts/genfort.pl
-    COMMENT "Generating Fortran header for libmmgcommon.h file"
+    COMMENT "Generating Fortran header for libmmgtypes.h file"
     )
 ENDIF()
 
@@ -515,11 +515,11 @@ IF(DOXYGEN_FOUND)
     # COMMAND ${CMAKE_COMMAND} -E chdir
     # ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmg2d/latex make
     # COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmg2d/latex/refman.pdf
-    # ${CMAKE_CURRENT_SOURCE_DIR}
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmg2d
-    COMMENT "Generating MMG2D API documentation with Doxygen.
-    Open up the doc/doxygen/mmg2d/html/index.html file to see it." VERBATIM
-    )
+    # ${CMAKE_CURRENT_SOURCE_DIR} WORKING_DIRECTORY
+    ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmg2d COMMENT "Generating MMG2D API
+    documentation with Doxygen.  Open up the
+    ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmg2d/html/index.html file to see
+    it." VERBATIM )
 
   # MMGS Documentation
   CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmgs/Doxyfile.in
@@ -530,11 +530,11 @@ IF(DOXYGEN_FOUND)
     # COMMAND ${CMAKE_COMMAND} -E chdir
     # ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmgs/latex make
     # COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmgs/latex/refman.pdf
-    # ${CMAKE_CURRENT_SOURCE_DIR}
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmgs
-    COMMENT "Generating MMGS API documentation with Doxygen.
-    Open up the doc/doxygen/mmgs/html/index.html file to see it." VERBATIM
-    )
+    # ${CMAKE_CURRENT_SOURCE_DIR} WORKING_DIRECTORY
+    ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmgs COMMENT "Generating MMGS API
+    documentation with Doxygen.  Open up the
+    ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmgs/html/index.html file to see
+    it." VERBATIM )
 
   # MMG3D Documentation
   CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmg3d/Doxyfile.in
@@ -545,17 +545,16 @@ IF(DOXYGEN_FOUND)
     # COMMAND ${CMAKE_COMMAND} -E chdir
     # ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmg3d/latex make
     # COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmg3d/latex/refman.pdf
-    # ${CMAKE_CURRENT_SOURCE_DIR}
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmg3d
-    COMMENT "Generating MMG3D API documentation with Doxygen.
-     Open up the doc/doxygen/mmg3d/html/index.html file to see it" VERBATIM
-    )
+    # ${CMAKE_CURRENT_SOURCE_DIR} WORKING_DIRECTORY
+    ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmg3d
+    COMMENT "Generating MMG3D API documentation with Doxygen. Open up the
+    ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmg3d/html/index.html file to see
+    it" VERBATIM )
 
-  ADD_CUSTOM_TARGET(doc
-    DEPENDS mmgs_doc mmg3d_doc mmg2d_doc
-    COMMENT "Generating MMG API documentation with Doxygen.
-     Open up the doc/doxygen/mmg*/html/index.html file to see it" VERBATIM
-    )
+  ADD_CUSTOM_TARGET(doc DEPENDS mmgs_doc mmg3d_doc mmg2d_doc COMMENT "Generating
+    MMG API documentation with Doxygen.  Open up the
+    ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmg*/html/index.html file to see it"
+    VERBATIM )
 ENDIF ( DOXYGEN_FOUND )
 
 ###############################################################################
@@ -584,7 +583,7 @@ SET(CPACK_PACKAGE_FILE_NAME ${CPACK_PACKAGE_INSTALL_DIRECTORY}-${CMAKE_SYSTEM})
 SET(CPACK_PACKAGE_EXECUTABLES "${PROJECT_NAME}")
 SET(CPACK_OUTPUT_FILE_PREFIX "../archives")
 
-#SET(CPACK_SOURCE_IGNORE_FILES ";src/common/mmgcommon.h$" ${CPACK_SOURCE_IGNORE_FILE})
+#SET(CPACK_SOURCE_IGNORE_FILES ";src/common/mmgtypes.h$" ${CPACK_SOURCE_IGNORE_FILE})
 #SET(CPACK_SOURCE_IGNORE_FILES ";.\\\\\\\\.#;/\\\\\\\\.git;.~;.#;.-e;.DS_Store"
 #  ${CPACK_SOURCE_IGNORE_FILES})
 #SET(CPACK_SOURCE_IGNORE_FILES ";lib/;bin;archives;def"

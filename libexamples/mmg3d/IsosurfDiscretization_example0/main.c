@@ -101,7 +101,7 @@ int main(int argc,char *argv[]) {
 
   /**------------------- Level set discretization option ---------------------*/
   /* Ask for level set discretization */
-  if ( MMG3D_Set_iparameter(mmgMesh,mmgSol,MMG5_IPARAM_iso, 1) != 1 )
+  if ( MMG3D_Set_iparameter(mmgMesh,mmgSol,MMG3D_IPARAM_iso, 1) != 1 )
     exit(EXIT_FAILURE);
 
   /** With MMG3D_loadSol function */

@@ -42,6 +42,7 @@
  */
 
 #include "libmmg2d.h"
+#include "mmgcommon.h"
 
 /**
  * See \ref MMG2D_saveMesh function in \ref mmg2d/libmmg2d.h file.

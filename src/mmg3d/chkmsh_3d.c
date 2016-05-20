@@ -88,7 +88,7 @@ int _MMG5_chkmshsurf(MMG5_pMesh mesh){
       adja1 = &mesh->adjt[3*(k1-1)+1];
 
       if(adja1[voy] / 3 != k){
-        printf("Wrong adjacency relation for triangles : %d %d \n",k,k1);
+        fprintf(stderr,"Wrong adjacency relation for triangles : %d %d \n",k,k1);
         exit(EXIT_FAILURE);
       }
     }
@@ -131,19 +131,19 @@ int _MMG5_mmg3dChkmsh(MMG5_pMesh mesh,int severe,int base) {
       if ( !adj )  continue;
 
       if ( adj == k ) {
-        fprintf(stdout,"  1. Wrong adjacency %d %d\n",k,adj);
-        printf("triangle %d: %d %d %d %d\n",k,pt1->v[0],pt1->v[1],pt1->v[2],pt1->v[3]);
-        printf("adj (%d): %d %d %d %d\n",k,adja[0]/4,adja[1]/4,adja[2]/4,adja[3]/4);
+        fprintf(stderr,"  1. Wrong adjacency %d %d\n",k,adj);
+        fprintf(stderr,"triangle %d: %d %d %d %d\n",k,pt1->v[0],pt1->v[1],pt1->v[2],pt1->v[3]);
+        fprintf(stderr,"adj (%d): %d %d %d %d\n",k,adja[0]/4,adja[1]/4,adja[2]/4,adja[3]/4);
         return(0);
       }
       pt2 = &mesh->tetra[adj];
       if ( !MG_EOK(pt2) || pt2->ref < 0 ){
-        fprintf(stdout,"  4. Invalid adjacent %d %d\n",adj,k);
-        printf("vertices of k   %d: %d %d %d %d\n",k,
+        fprintf(stderr,"  4. Invalid adjacent %d %d\n",adj,k);
+        fprintf(stderr,"vertices of k   %d: %d %d %d %d\n",k,
                pt1->v[0],pt1->v[1],pt1->v[2],pt1->v[3]);
-        printf("vertices of adj %d: %d %d %d %d\n",adj,
+        fprintf(stderr,"vertices of adj %d: %d %d %d %d\n",adj,
                pt2->v[0],pt2->v[1],pt2->v[2],pt2->v[3]);
-        printf("adj(%d): %d %d %d %d\n",k,
+        fprintf(stderr,"adj(%d): %d %d %d %d\n",k,
                adja[0]/4,adja[1]/4,adja[2]/4,adja[3]/4);
         return(0);
       }
@@ -152,13 +152,13 @@ int _MMG5_mmg3dChkmsh(MMG5_pMesh mesh,int severe,int base) {
       adj1  = adja1[voy] / 4;
       voy1  = adja1[voy] % 4;
       if ( adj1 != k || voy1 != i ) {
-        fprintf(stdout,"  2. Wrong adjacency %d %d\n",k,adj1);
-        printf("vertices of %d: %d %d %d %d\n",k,
+        fprintf(stderr,"  2. Wrong adjacency %d %d\n",k,adj1);
+        fprintf(stderr,"vertices of %d: %d %d %d %d\n",k,
                pt1->v[0],pt1->v[1],pt1->v[2],pt1->v[3]);
-        printf("vertices of adj %d: %d %d %d %d\n",adj,
+        fprintf(stderr,"vertices of adj %d: %d %d %d %d\n",adj,
                pt2->v[0],pt2->v[1],pt2->v[2],pt2->v[3]);
-        printf("adj(%d): %d %d %d %d\n",k,adja[0]/4,adja[1]/4,adja[2]/4,adja[3]/4);
-        printf("adj(%d): %d %d %d %d\n",adj,adja1[0]/4,adja1[1]/4,adja1[2]/4,adja1[3]/4);
+        fprintf(stderr,"adj(%d): %d %d %d %d\n",k,adja[0]/4,adja[1]/4,adja[2]/4,adja[3]/4);
+        fprintf(stderr,"adj(%d): %d %d %d %d\n",adj,adja1[0]/4,adja1[1]/4,adja1[2]/4,adja1[3]/4);
         return(0);
       }
 
@@ -173,10 +173,10 @@ int _MMG5_mmg3dChkmsh(MMG5_pMesh mesh,int severe,int base) {
       if(!(((a0 == b0)&&(a1 == b1)&&(a2 ==b2))||((a0 == b0)&&(a1 == b2)&&(a2 ==b1))\
            || ((a0 == b1)&&(a1 == b0)&&(a2 ==b2)) || ((a0 == b1)&&(a1 == b2)&&(a2 ==b0)) \
            || ((a0 == b2)&&(a1 == b0)&&(a2 ==b1)) || ((a0 == b2)&&(a1 == b1)&&(a2 ==b0)) )){
-        printf("  ## Warning: Inconsistent faces : tetra %d face %d;"
+        fprintf(stderr,"  ## Warning: Inconsistent faces : tetra %d face %d;"
                " tetra %d face %i \n",k,i,adj,voy);
-        printf("Tet 1 : %d %d %d \n",a0,a1,a2);
-        printf("Tet 2 : %d %d %d \n",b0,b1,b2);
+        fprintf(stderr,"Tet 1 : %d %d %d \n",a0,a1,a2);
+        fprintf(stderr,"Tet 2 : %d %d %d \n",b0,b1,b2);
         return(0);
       }
     }
@@ -191,13 +191,13 @@ int _MMG5_mmg3dChkmsh(MMG5_pMesh mesh,int severe,int base) {
     for(i=0;i<4;i++){
       if(!adja[i]){
         if(!pt->xt){
-          printf("Tetra %d : boundary face not tagged : %d \n",k,i);
+          fprintf(stderr,"Tetra %d : boundary face not tagged : %d \n",k,i);
           return(0);
         }
         else{
           pxt = &mesh->xtetra[pt->xt];
           if(!(pxt->ftag[i] & MG_BDY)){
-            printf("Tetra %d : boundary face not tagged : %d \n",k,i);
+            fprintf(stderr,"Tetra %d : boundary face not tagged : %d \n",k,i);
             return(0);
           }
         }
@@ -219,7 +219,7 @@ int _MMG5_mmg3dChkmsh(MMG5_pMesh mesh,int severe,int base) {
 
       if(pt->ref != pt1->ref){
         if(!pt->xt){
-          printf("Tetra %d face %d : common face is a limit of two subdomains"
+          fprintf(stderr,"Tetra %d face %d : common face is a limit of two subdomains"
                  " and has not xt : %d %d %d  \n",k,i,
                  pt->v[_MMG5_idir[i][0]],pt->v[_MMG5_idir[i][1]],
                  pt->v[_MMG5_idir[i][2]]);
@@ -228,7 +228,7 @@ int _MMG5_mmg3dChkmsh(MMG5_pMesh mesh,int severe,int base) {
         else{
           pxt = &mesh->xtetra[pt->xt];
           if(!(pxt->ftag[i] & MG_BDY)){
-            printf("Tetra %d %d : common face is a limit of two subdomains"
+            fprintf(stderr,"Tetra %d %d : common face is a limit of two subdomains"
                    " and is not tagged %d %d %d -->%d\n",
                    k,i,pt->v[_MMG5_idir[i][0]],pt->v[_MMG5_idir[i][1]],
                    pt->v[_MMG5_idir[i][2]], pxt->ftag[i]);
@@ -275,7 +275,7 @@ int _MMG5_mmg3dChkmsh(MMG5_pMesh mesh,int severe,int base) {
     nump = pt->v[ip];
 
     if(!_MMG5_boulesurfvolp(mesh,k,ip,i,listv,&ilistv,lists,&ilists)){
-    printf("%s:%d: Error: function _MMG5_boulesurfvolp return 0\n",__FILE__,__LINE__)
+    fprintf(stderr,"%s:%d: Error: function _MMG5_boulesurfvolp return 0\n",__FILE__,__LINE__)
     return(0);
     }
 
@@ -339,8 +339,8 @@ int _MMG5_mmg3dChkmsh(MMG5_pMesh mesh,int severe,int base) {
     tag1 = (pxt1->tag[_MMG5_iarf[ifaceprv][inxt2[indpprv]]]) & (~MG_BDY);
 
     if(tag0 != tag1){
-    printf("Unconsistent tag of edge : tetra %d %d pour le point %d\n",iel,ielprv,nump);
-    printf("tags : %d %d \n",tag0,tag1);
+    fprintf(stderr,"Unconsistent tag of edge : tetra %d %d pour le point %d\n",iel,ielprv,nump);
+    fprintf(stderr,"tags : %d %d \n",tag0,tag1);
 
     return(0);
     }
@@ -349,8 +349,8 @@ int _MMG5_mmg3dChkmsh(MMG5_pMesh mesh,int severe,int base) {
     tag2 = (pxt2->tag[_MMG5_iarf[ifacenxt][_MMG5_iprv2[indpnxt]]]) & (~MG_BDY);
 
     if(tag0 != tag2){
-    printf("Unconsistent tag of edge : tetra %d %d pour le point %d\n",iel,ielnxt,nump);
-    printf("tags : %d %d \n",tag0,tag2);
+    fprintf(stderr,"Unconsistent tag of edge : tetra %d %d pour le point %d\n",iel,ielnxt,nump);
+    fprintf(stderr,"tags : %d %d \n",tag0,tag2);
     return(0);
     }
     }
@@ -379,7 +379,7 @@ int _MMG5_mmg3dChkmsh(MMG5_pMesh mesh,int severe,int base) {
     + (ppt->c[1] - c[1]) * (ppt->c[1] - c[1]) \
     + (ppt->c[2] - c[2]) * (ppt->c[2] - c[2]);
     if ( _MMG5_EPSLOC*_MMG5_EPSLOC*dd < ray ) {
-    fprintf(stdout,"  ## Non-Delaunay mesh:  %.14f < %.14f\n",dd,ray);
+    fprintf(stderr,"  ## Non-Delaunay mesh:  %.14f < %.14f\n",dd,ray);
     return(0);
     }
     }
@@ -403,7 +403,7 @@ int _MMG5_mmg3dChkmsh(MMG5_pMesh mesh,int severe,int base) {
       ip  = pt1->v[i];
       ppt = &mesh->point[ip];
       if ( ppt->tag & M_UNUSED ) {
-      fprintf(stdout,"  6. Unused vertex %d  %d\n",k,ip);
+      fprintf(stderr,"  6. Unused vertex %d  %d\n",k,ip);
       printf("%d %d %d %d\n",pt1->v[0],pt1->v[1],pt1->v[2],pt1->v[3]);
       return(0);
       }
@@ -413,7 +413,7 @@ int _MMG5_mmg3dChkmsh(MMG5_pMesh mesh,int severe,int base) {
       nk  = list.tetra[l] % 4;
       pt2 = &mesh->tetra[kk];
       if ( pt2->v[nk] != ip ) {
-      fprintf(stdout,"  5. Wrong ball %d, %d\n",ip,pt2->v[nk]);
+      fprintf(stderr,"  5. Wrong ball %d, %d\n",ip,pt2->v[nk]);
       return(0);
       }
       }
@@ -429,7 +429,7 @@ int _MMG5_mmg3dChkmsh(MMG5_pMesh mesh,int severe,int base) {
       }
       }
       if ( len != lon ) {
-      fprintf(stdout,"  7. Incorrect ball %d: %d %d\n",pt1->v[i],lon,len);
+      fprintf(stderr,"  7. Incorrect ball %d: %d %d\n",pt1->v[i],lon,len);
       return(0);
       }
       }
@@ -477,7 +477,7 @@ int _MMG5_chkptonbdy(MMG5_pMesh mesh,int np){
     if(!MG_VOK(p0)) continue;
     if(p0->flag) continue;
     if(p0->tag & MG_BDY){
-      printf("      Fct. chkptonbdy : point %d tagged bdy while belonging to no BDY face\n",k);
+      fprintf(stderr,"      Fct. chkptonbdy : point %d tagged bdy while belonging to no BDY face\n",k);
       exit(EXIT_FAILURE);
     }
   }

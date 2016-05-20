@@ -111,16 +111,21 @@ FORTRAN_NAME(MMG3D_DESTOCKOPTIONS,mmg3d_destockoptions,
   MMG3D_destockOptions(*mesh,info);
   return;
 }
+
 /**
  * See \ref MMG3D_mmg3dcheck function in \ref mmg3d/libmmg3d.h file.
  */
 FORTRAN_NAME(MMG3D_MMG3DCHECK,mmg3d_mmg3dcheck,
              (MMG5_pMesh *mesh,MMG5_pSol *met,double *critmin, double *lmin,
-              double *lmax, int *eltab,char *metRidTyp,int *retval),
+              double *lmax, int *eltab,int *metRidTyp,int *retval),
              (mesh,met,critmin,lmin,lmax,eltab,metRidTyp,retval)) {
-  *retval = MMG3D_mmg3dcheck(*mesh,*met,*critmin,*lmin,*lmax,eltab,*metRidTyp);
+  char tmp = (char)(*metRidTyp);
+
+  *retval = MMG3D_mmg3dcheck(*mesh,*met,*critmin,*lmin,*lmax,eltab,tmp);
+
   return;
 }
+
 
 /**
  * See \ref MMG3D_searchqua function in \ref mmg3d/libmmg3d.h file.
@@ -145,30 +150,32 @@ FORTRAN_NAME(MMG3D_SEARCHLEN,mmg3d_searchlen,
 }
 
 /**
+ * See \ref MMG3D_Get_tetFromTria function in \ref mmg3d/libmmg3d.h file.
+ */
+FORTRAN_NAME(MMG3D_GET_TETFROMTRIA,mmg3d_get_tetfromtria,
+             (MMG5_pMesh *mesh,int *ktri, int *ktet, int *iface,int *retval),
+             (mesh,ktri,ktet,iface,retval)) {
+
+  *retval = MMG3D_Get_tetFromTria(*mesh,*ktri,ktet,iface);
+  return;
+}
+
+/**
  * See \ref MMG3D_Get_adjaTet function in \ref mmg3d/libmmg3d.h file.
  */
 FORTRAN_NAME(MMG3D_GET_ADJATET,mmg3d_get_adjatet,
-               (MMG5_pMesh *mesh,int* kel, int* listet, int* retval),
+               (MMG5_pMesh *mesh,int* kel, int listet[4], int* retval),
                (mesh,kel,listet,retval)) {
   *retval =  MMG3D_Get_adjaTet(*mesh,*kel,listet);
   return;
 }
 
-/* /\** */
-/*  * See \ref MMG3D_Get_adjaVerticesFast function in \ref mmg3d/libmmg3d.h file. */
-/*  *\/ */
-/* FORTRAN_NAME(MMG3D_GET_ADJAVERTICESFAST,mmg3d_get_adjaverticesfast, */
-/*                (MMG5_pMesh *mesh,int* ip, int *start, int* lispoi, int* retval), */
-/*                (mesh,ip,start,lispoi,retval)) { */
-/*   *retval =  MMG3D_Get_adjaVerticesFast(*mesh,*ip, *start,lispoi); */
-/*   return; */
-/* } */
 /**
- * See \ref MMG3D_DoSol function in \ref mmg3d/libmmg3d.h file.
+ * See \ref MMG3D_doSol function in \ref mmg3d/libmmg3d.h file.
  */
 FORTRAN_NAME(MMG3D_DOSOL,mmg3d_dosol,
              (MMG5_pMesh *mesh,MMG5_pSol *met,int *retval),
              (mesh,met,retval)) {
-  *retval = MMG3D_DoSol(*mesh,*met);
+  *retval = MMG3D_doSol(*mesh,*met);
   return;
 }

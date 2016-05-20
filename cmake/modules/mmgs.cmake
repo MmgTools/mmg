@@ -39,7 +39,9 @@ IF ( NOT WIN32 )
     COMMAND genheader ${MMGS_SOURCE_DIR}/libmmgsf.h
     ${MMGS_SOURCE_DIR}/libmmgs.h ${CMAKE_SOURCE_DIR}/scripts/genfort.pl
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-    DEPENDS genheader ${MMGS_SOURCE_DIR}/libmmgs.h ${COMMON_SOURCE_DIR}/libmmgcommonf.h
+    DEPENDS genheader ${MMGS_SOURCE_DIR}/libmmgs.h
+    ${COMMON_SOURCE_DIR}/libmmgtypesf.h
+    ${COMMON_SOURCE_DIR}/libmmgtypes.h
     ${CMAKE_SOURCE_DIR}/scripts/genfort.pl
     COMMENT "Generating Fortran header for mmgs"
     )
@@ -117,39 +119,37 @@ IF ( LIBMMGS_STATIC OR LIBMMGS_SHARED )
   SET( mmgs_headers
     ${MMGS_SOURCE_DIR}/libmmgs.h
     ${MMGS_SOURCE_DIR}/libmmgsf.h
-    ${COMMON_SOURCE_DIR}/mmgcommon.h
-    ${COMMON_SOURCE_DIR}/eigenv.h
-    ${COMMON_SOURCE_DIR}/libmmgcommon.h
-    ${COMMON_SOURCE_DIR}/libmmgcommonf.h
-    ${COMMON_SOURCE_DIR}/chrono.h
+    ${COMMON_SOURCE_DIR}/libmmgtypes.h
+    ${COMMON_SOURCE_DIR}/libmmgtypesf.h
     )
   SET(MMGS_INCLUDE ${CMAKE_SOURCE_DIR}/include/mmg/mmgs )
   SET( mmgs_includes
     ${MMGS_INCLUDE}/libmmgs.h
     ${MMGS_INCLUDE}/libmmgsf.h
-    ${MMGS_INCLUDE}/mmgcommon.h
-    ${MMGS_INCLUDE}/eigenv.h
-    ${MMGS_INCLUDE}/libmmgcommon.h
-    ${MMGS_INCLUDE}/libmmgcommonf.h
-    ${MMGS_INCLUDE}/chrono.h
+    ${MMGS_INCLUDE}/libmmgtypes.h
+    ${MMGS_INCLUDE}/libmmgtypesf.h
     )
 
   # Install header files in /usr/local or equivalent
   INSTALL(FILES ${mmgs_headers} DESTINATION include/mmg/mmgs)
 
-  ADD_CUSTOM_COMMAND(OUTPUT ${MMGS_INCLUDE}/libmmgcommonf.h
-    COMMAND ${CMAKE_COMMAND} -E copy ${COMMON_SOURCE_DIR}/libmmgcommonf.h ${MMGS_INCLUDE}/libmmgcommonf.h
+  ADD_CUSTOM_COMMAND(OUTPUT ${MMGS_INCLUDE}/libmmgtypesf.h
+    COMMAND ${CMAKE_COMMAND} -E copy ${COMMON_SOURCE_DIR}/libmmgtypesf.h ${MMGS_INCLUDE}/libmmgtypesf.h
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-    DEPENDS ${COMMON_SOURCE_DIR}/libmmgcommonf.h)
+    DEPENDS ${COMMON_SOURCE_DIR}/libmmgtypesf.h)
   ADD_CUSTOM_COMMAND(OUTPUT ${MMGS_INCLUDE}/libmmgsf.h
     COMMAND ${CMAKE_COMMAND} -E copy ${MMGS_SOURCE_DIR}/libmmgsf.h ${MMGS_INCLUDE}/libmmgsf.h
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
     DEPENDS ${MMGS_SOURCE_DIR}/libmmgsf.h)
 
   # Install header files in project directory
-  FILE ( INSTALL ${mmgs_headers}
-    DESTINATION ${CMAKE_SOURCE_DIR}/include/mmg/mmgs
+  FILE(INSTALL  ${mmgs_headers} DESTINATION ${MMGS_INCLUDE}
     PATTERN "libmmg*f.h"  EXCLUDE)
+
+  ADD_CUSTOM_TARGET(copy_s_headers ALL
+    DEPENDS  ${MMGS_INCLUDE}/libmmgsf.h  ${MMGS_INCLUDE}/libmmgs.h
+     ${MMGS_INCLUDE}/libmmgtypesf.h  ${MMGS_INCLUDE}/libmmgtypes.h )
+
 
 ENDIF()
 
@@ -231,9 +231,11 @@ IF ( BUILD_TESTING )
     IF ( TEST_LIBMMGS )
       SET(LIBMMGS_EXEC0 ${EXECUTABLE_OUTPUT_PATH}/libmmgs_example0)
       SET(LIBMMGS_EXEC1   ${EXECUTABLE_OUTPUT_PATH}/libmmgs_example1)
+      SET(LIBMMGS_EXEC2   ${EXECUTABLE_OUTPUT_PATH}/libmmgs_example2)
 
       ADD_TEST(NAME libmmgs_example0   COMMAND ${LIBMMGS_EXEC0})
       ADD_TEST(NAME libmmgs_example1   COMMAND ${LIBMMGS_EXEC1})
+      ADD_TEST(NAME libmmgs_example2   COMMAND ${LIBMMGS_EXEC2})
 
       IF ( CMAKE_Fortran_COMPILER)
         SET(LIBMMGS_EXECFORTRAN ${EXECUTABLE_OUTPUT_PATH}/libmmgs_fortran)

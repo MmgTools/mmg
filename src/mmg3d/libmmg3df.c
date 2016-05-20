@@ -42,6 +42,7 @@
  */
 
 #include "libmmg3d.h"
+#include "mmgcommon.h"
 
 /**
  * See \ref MMG3D_mmg3dlib function in \ref mmg3d/libmmg3d.h file.
@@ -79,7 +80,7 @@ FORTRAN_NAME(MMG3D_MMG3DMOV,mmg3d_mmg3dmov,(MMG5_pMesh *mesh,MMG5_pSol *met
   return;
 }
 
-/** Old API °°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°*/
+/** Old API ========================================================*/
 /**
  * See \ref MMG5_Free_all function in \ref mmg3d/libmmg3d.h file.
  */

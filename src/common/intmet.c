@@ -617,6 +617,7 @@ int _MMG5_interpreg_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt,char i,
   double         *n1,*n2,step,u,r[3][3],dd;
   int            ip1,ip2,nstep,l;
   char           i1,i2;
+  static int     warn=0;
 
   /* Number of steps for parallel transport */
   nstep = 4;
@@ -750,14 +751,16 @@ int _MMG5_interpreg_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt,char i,
 
   /* Interpolate both metrics expressed in the same tangent plane. */
   if ( !_MMG5_mmgIntmet33_ani(m1old,m2old,mr,s) ) {
-    printf("Impossible interpolation between points : %d %d\n",pt->v[i1],pt->v[i2]);
-    printf("m1 : %E %E %E %E %E %E \n",m1[0],m1[1],m1[2],m1[3],m1[4],m1[5]);
-    printf("m2 : %E %E %E %E %E %E \n",m2[0],m2[1],m2[2],m2[3],m2[4],m2[5]);
-    printf("m1old : %E %E %E %E %E %E \n",m1old[0],m1old[1],
-           m1old[2],m1old[3],m1old[4],m1old[5]);
-    printf("m2old : %E %E %E %E %E %E \n",m2old[0],m2old[1],
-           m2old[2],m1old[3],m2old[4],m2old[5]);
-    exit(EXIT_FAILURE);
+    if ( !warn ) {
+      ++warn;
+      fprintf(stderr,"Impossible interpolation between points : %d %d\n",pt->v[i1],pt->v[i2]);
+      fprintf(stderr,"m1 : %E %E %E %E %E %E \n",m1[0],m1[1],m1[2],m1[3],m1[4],m1[5]);
+      fprintf(stderr,"m2 : %E %E %E %E %E %E \n",m2[0],m2[1],m2[2],m2[3],m2[4],m2[5]);
+      fprintf(stderr,"m1old : %E %E %E %E %E %E \n",m1old[0],m1old[1],
+             m1old[2],m1old[3],m1old[4],m1old[5]);
+      fprintf(stderr,"m2old : %E %E %E %E %E %E \n",m2old[0],m2old[1],
+             m2old[2],m1old[3],m2old[4],m2old[5]);
+    }
     return(0);
   }
 

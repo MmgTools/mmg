@@ -321,7 +321,7 @@ int _MMG2_delone(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist) {
   for (k=1; k<=size; k++) {
     ielnum[k] = _MMG2D_newElt(mesh);
     if ( !ielnum[k] ) {
-      _MMG5_TRIA_REALLOC(mesh,ielnum[k],mesh->gap,
+      _MMG2D_TRIA_REALLOC(mesh,ielnum[k],mesh->gap,
                          printf("  ## Error: unable to allocate a new element.\n");
                          _MMG5_INCREASE_MEM_MESSAGE();
                          printf("  Exit program.\n");

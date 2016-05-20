@@ -34,10 +34,13 @@
 #include <float.h>
 
 #include "libmmg2d.h"
+#include "mmgcommon.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /* constantes */
-
-#define MS_SMSGN(a,b)  (((double)(a)*(double)(b) > (0.0)) ? (1) : (0))
 
 #define M_MAX(a,b) (((a) > (b)) ? (a) : (b))
 #define M_MIN(a,b) (((a) < (b)) ? (a) : (b))
@@ -80,36 +83,6 @@
 #define M_VOK(ppt)    (ppt && (ppt->tag < M_NUL))
 #define M_EOK(pt)     (pt && (pt->v[0] > 0))
 
-/* Domain refs in iso mode */
-#define MS_PLUS    2
-#define MS_MINUS   3
-
-/** Reallocation of point table and sol table and creation
- of point ip with coordinates o and tag tag*/
-#define _MMG5_POINT_REALLOC(mesh,sol,ip,wantedGap,law,o,tag ) do        \
-{                                                                     \
-int klink;                                                          \
-\
-_MMG5_TAB_RECALLOC(mesh,mesh->point,mesh->npmax,wantedGap,MMG5_Point, \
-"larger point table",law);                       \
-\
-mesh->npnil = mesh->np+1;                                           \
-for (klink=mesh->npnil; klink<mesh->npmax-1; klink++)               \
-mesh->point[klink].tmp  = klink+1;                                \
-\
-/* solution */                                                      \
-if ( sol->m ) {                                                     \
-_MMG5_ADD_MEM(mesh,(sol->size*(mesh->npmax-sol->npmax))*sizeof(double), \
-"larger solution",law);                             \
-_MMG5_SAFE_REALLOC(sol->m,sol->size*(mesh->npmax+1),double,"larger solution"); \
-}                                                                   \
-sol->npmax = mesh->npmax;                                           \
-\
-/* We try again to add the point */                                 \
-ip = _MMG2D_newPt(mesh,o,tag);                                       \
-if ( !ip ) {law;}                                                   \
-}while(0)
-
 /** Free allocated pointers of mesh and sol structure and return value val */
 #define _MMG2D_RETURN_AND_FREE(mesh,met,disp,val)do                \
   {                                                           \
@@ -143,65 +116,6 @@ void _MMG2_excfun(int sigid) {
   }
   exit(EXIT_FAILURE);
 }
-
-
-/* /\* data structures *\/ */
-/* typedef struct { */
-/*   double    c[2]; */
-/*   int       tmp,mark,tas; */
-/*   int       ref; */
-/*   int       tag,tagdel; */
-/*   char      flag; */
-/* } Point; */
-/* typedef Point * MMG5_pPoint; */
-
-/* typedef struct { */
-/*   double    qual; */
-/*   int       v[3],ref,flag,mark; */
-/*   int       ned[3]; //if 0 no bdry edge else edg number */
-/* } Tria; */
-/* typedef Tria * MMG5_pTria; */
-
-/* typedef struct { */
-/*   int       v[2],ref,flag,mark;  */
-/*   double    t0[2],t1[2]; //tangents */
-/*   char     tag;  */
-/* } Edge; */
-/* typedef Edge * pEdge; */
-
-/* typedef struct { */
-/*   double   delta,hgrad,ridge,ang; */
-/*   double   min[2],max[2],qdegrad[2]; */
-/*   int      mem,bucket,nsd,msh; */
-/*   char     imprim,option,ddebug,noswap,nomove,nr,noinsert,per; */
-/* } Info; */
-
-/* typedef struct { */
-/*   int      np,ver; */
-/*   double   *mv; */
-/*   short    *alpha;   */
-/* } Displ; */
-
-/* typedef struct { */
-/*   int        np,nt,ned,npfixe,nedfixe,ntfixe,npmax,nedmax,ntmax; */
-/*   int        npnil,nednil,ntnil,ver,dim,mark; */
-/*   int       *adja; */
-/*   MMG5_pPoint     point; */
-/*   Displ      disp; */
-/*   MMG5_pTria      tria; */
-/*   pEdge     edge; */
-/*   Info       info; */
-/*   char       flag; */
-/*   char      *namein,*nameout,*namedep; */
-/* } Mesh; */
-/* typedef Mesh * MMG5_pMesh; */
-
-/* typedef struct { */
-/*   double    *met,hmin,hmax; */
-/*   int        np,dim,ver,type,size,typtab[20]; */
-/*   char      *name; */
-/* } Sol; */
-/* typedef Sol * MMG5_pSol; */
 
 typedef struct squeue {
   int    *stack,cur;
@@ -259,7 +173,7 @@ static const unsigned int MMG2_inxt[5] = {1,2,0,1,2};
 
 /** Reallocation of tria table and creation
     of tria jel */
-#define _MMG5_TRIA_REALLOC(mesh,jel,wantedGap,law ) do                  \
+#define _MMG2D_TRIA_REALLOC(mesh,jel,wantedGap,law ) do                  \
   {                                                                     \
    int klink,oldSiz;                                                    \
                                                                         \
@@ -286,7 +200,7 @@ static const unsigned int MMG2_inxt[5] = {1,2,0,1,2};
 
 /** Reallocation of edge table and creation
     of edge jel */
-#define _MMG5_EDGE_REALLOC(mesh,jel,wantedGap,law ) do                  \
+#define _MMG2D_EDGE_REALLOC(mesh,jel,wantedGap,law ) do                  \
   {                                                                     \
    int klink;                                                           \
                                                                         \
@@ -341,7 +255,6 @@ int _MMG2_swapdelone(MMG5_pMesh ,MMG5_pSol ,int ,char ,double ,int *);
 int _MMG5_mmg2dChkmsh(MMG5_pMesh , int, int );
 int MMG2_boulep(MMG5_pMesh , int , int , int * );
 //int MMG2_markBdry(MMG5_pMesh );
-//int MMG2_doSol(MMG5_pMesh ,MMG5_pSol );
 int MMG2_prilen(MMG5_pMesh ,MMG5_pSol );
 
 int MMG2_coorbary(MMG5_pMesh ,MMG5_pTria ,double c[2],double* ,double* ,double* );
@@ -476,5 +389,8 @@ void _MMG2D_Set_commonFunc() {
   return;
 }
 
+#ifdef __cplusplus
+}
+#endif
 
 #endif

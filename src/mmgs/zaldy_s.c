@@ -46,7 +46,8 @@ int _MMGS_newPt(MMG5_pMesh mesh,double c[3],double n[3]) {
   if ( mesh->npnil > mesh->np )  mesh->np = mesh->npnil;
   ppt   = &mesh->point[curpt];
   memcpy(ppt->c,c,3*sizeof(double));
-  memcpy(ppt->n,n,3*sizeof(double));
+  if ( n )
+    memcpy(ppt->n,n,3*sizeof(double));
   ppt->tag   &= ~MG_NUL;
   mesh->npnil = ppt->tmp;
   ppt->tmp    = 0;
@@ -86,7 +87,7 @@ void _MMGS_delElt(MMG5_pMesh mesh,int iel) {
 
   pt = &mesh->tria[iel];
   if ( !MG_EOK(pt) ) {
-    fprintf(stdout,"  ## INVALID ELEMENT %d.\n",iel);
+    fprintf(stderr,"  ## INVALID ELEMENT %d.\n",iel);
     exit(EXIT_FAILURE);
   }
   memset(pt,0,sizeof(MMG5_Tria));
@@ -176,11 +177,11 @@ int zaldy(MMG5_pMesh mesh) {
   _MMGS_memOption(mesh);
 
   _MMG5_ADD_MEM(mesh,(mesh->npmax+1)*sizeof(MMG5_Point),"initial vertices",
-                printf("  Exit program.\n");
+                fprintf(stderr,"  Exit program.\n");
                 exit(EXIT_FAILURE));
   _MMG5_SAFE_CALLOC(mesh->point,mesh->npmax+1,MMG5_Point);
   _MMG5_ADD_MEM(mesh,(mesh->ntmax+1)*sizeof(MMG5_Tria),"initial triangles",
-                printf("  Exit program.\n");
+                fprintf(stderr,"  Exit program.\n");
                 exit(EXIT_FAILURE));
   _MMG5_SAFE_CALLOC(mesh->tria,mesh->ntmax+1,MMG5_Tria);
 

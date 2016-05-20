@@ -33,7 +33,7 @@
  * \todo Doxygen documentation
  */
 
-#include "mmg3d.h"
+#include "inlined_functions_3d.h"
 
 extern char  ddb;
 
@@ -144,9 +144,9 @@ void _MMG5_split1(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) 
   iel = _MMG3D_newElt(mesh);
   if ( !iel ) {
     _MMG5_TETRA_REALLOC(mesh,iel,mesh->gap,
-                        printf("  ## Error: unable to allocate a new element.\n");
+                        fprintf(stderr,"  ## Error: unable to allocate a new element.\n");
                         _MMG5_INCREASE_MEM_MESSAGE();
-                        printf("  Exit program.\n");
+                        fprintf(stderr,"  Exit program.\n");
                         exit(EXIT_FAILURE));
     pt = &mesh->tetra[k];
   }
@@ -231,7 +231,7 @@ nextstep1:
         _MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
                            "larger xtetra table",
                            mesh->xt--;
-                           printf("  Exit program.\n");
+                           fprintf(stderr,"  Exit program.\n");
                            exit(EXIT_FAILURE));
         pxt0 = &mesh->xtetra[pt->xt];
       }
@@ -323,7 +323,7 @@ int _MMG3D_simbulgept(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int ip) {
  * 1 for special storage.
  * \return -1 if lack of memory, 0 if we don't split the edge, 1 if success.
  *
- * Split edge \f$list[0]%6\f$, whose shell list is passed, introducing point \a
+ * Split edge \f$list[0]\%6\f$, whose shell list is passed, introducing point \a
  * ip Beware : shell has to be enumerated in ONLY ONE TRAVEL (always same
  * sense).
  *
@@ -449,7 +449,7 @@ int _MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,
     jel = _MMG3D_newElt(mesh);
     if ( !jel ) {
       _MMG5_TETRA_REALLOC(mesh,jel,mesh->gap,
-                          printf("  ## Error: unable to allocate a new element.\n");
+                          fprintf(stderr,"  ## Error: unable to allocate a new element.\n");
                           _MMG5_INCREASE_MEM_MESSAGE();
                           k--;
                           for ( ; k>=0 ; --k ) {
@@ -1017,9 +1017,9 @@ void _MMG5_split2sf(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp
   iel = _MMG3D_newElt(mesh);
   if ( !iel ) {
     _MMG5_TETRA_REALLOC(mesh,iel,mesh->gap,
-                        printf("  ## Error: unable to allocate a new element.\n");
+                        fprintf(stderr,"  ## Error: unable to allocate a new element.\n");
                         _MMG5_INCREASE_MEM_MESSAGE();
-                        printf("  Exit program.\n");
+                        fprintf(stderr,"  Exit program.\n");
                         exit(EXIT_FAILURE));
     pt[0] = &mesh->tetra[newtet[0]];
   }
@@ -1030,9 +1030,9 @@ void _MMG5_split2sf(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp
   iel = _MMG3D_newElt(mesh);
   if ( !iel ) {
     _MMG5_TETRA_REALLOC(mesh,iel,mesh->gap,
-                        printf("  ## Error: unable to allocate a new element.\n");
+                        fprintf(stderr,"  ## Error: unable to allocate a new element.\n");
                         _MMG5_INCREASE_MEM_MESSAGE();
-                        printf("  Exit program.\n");
+                        fprintf(stderr,"  Exit program.\n");
                         exit(EXIT_FAILURE));
     pt[0] = &mesh->tetra[newtet[0]];
     pt[1] = &mesh->tetra[newtet[1]];
@@ -1164,7 +1164,7 @@ void _MMG5_split2sf(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp
             _MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
                                "larger xtetra table",
                                mesh->xt--;
-                               printf("  Exit program.\n");
+                               fprintf(stderr,"  Exit program.\n");
                                exit(EXIT_FAILURE));
           }
           pt[i]->xt = mesh->xt;
@@ -1191,7 +1191,7 @@ void _MMG5_split2sf(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp
               _MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
                                  "larger xtetra table",
                                  mesh->xt--;
-                                 printf("  Exit program.\n");
+                                 fprintf(stderr,"  Exit program.\n");
                                  exit(EXIT_FAILURE));
             }
             pt[i]->xt = mesh->xt;
@@ -1236,9 +1236,9 @@ void _MMG5_split2(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) 
   iel = _MMG3D_newElt(mesh);
   if ( !iel ) {
     _MMG5_TETRA_REALLOC(mesh,iel,mesh->gap,
-                        printf("  ## Error: unable to allocate a new element.\n");
+                        fprintf(stderr,"  ## Error: unable to allocate a new element.\n");
                         _MMG5_INCREASE_MEM_MESSAGE();
-                        printf("  Exit program.\n");
+                        fprintf(stderr,"  Exit program.\n");
                         exit(EXIT_FAILURE));
     pt[0] = &mesh->tetra[newtet[0]];
   }
@@ -1249,9 +1249,9 @@ void _MMG5_split2(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) 
   iel = _MMG3D_newElt(mesh);
   if ( !iel ) {
     _MMG5_TETRA_REALLOC(mesh,iel,mesh->gap,
-                        printf("  ## Error: unable to allocate a new element.\n");
+                        fprintf(stderr,"  ## Error: unable to allocate a new element.\n");
                         _MMG5_INCREASE_MEM_MESSAGE();
-                        printf("  Exit program.\n");
+                        fprintf(stderr,"  Exit program.\n");
                         exit(EXIT_FAILURE));
     pt[0] = &mesh->tetra[newtet[0]];
     pt[1] = &mesh->tetra[newtet[1]];
@@ -1263,9 +1263,9 @@ void _MMG5_split2(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) 
   iel = _MMG3D_newElt(mesh);
   if ( !iel ) {
     _MMG5_TETRA_REALLOC(mesh,iel,mesh->gap,
-                        printf("  ## Error: unable to allocate a new element.\n");
+                        fprintf(stderr,"  ## Error: unable to allocate a new element.\n");
                         _MMG5_INCREASE_MEM_MESSAGE();
-                        printf("  Exit program.\n");
+                        fprintf(stderr,"  Exit program.\n");
                         exit(EXIT_FAILURE));
     pt[0] = &mesh->tetra[newtet[0]];
     pt[1] = &mesh->tetra[newtet[1]];
@@ -1357,7 +1357,7 @@ void _MMG5_split2(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) 
             _MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
                                "larger xtetra table",
                                mesh->xt--;
-                               printf("  Exit program.\n");
+                               fprintf(stderr,"  Exit program.\n");
                                exit(EXIT_FAILURE));
           }
           pt[i]->xt = mesh->xt;
@@ -1386,7 +1386,7 @@ void _MMG5_split2(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) 
               _MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
                                  "larger xtetra table",
                                  mesh->xt--;
-                                 printf("  Exit program.\n");
+                                 fprintf(stderr,"  Exit program.\n");
                                  exit(EXIT_FAILURE));
             }
             pt[i]->xt = mesh->xt;
@@ -1497,9 +1497,9 @@ void _MMG5_split3(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) 
   iel = _MMG3D_newElt(mesh);
   if ( !iel ) {
     _MMG5_TETRA_REALLOC(mesh,iel,mesh->gap,
-                        printf("  ## Error: unable to allocate a new element.\n");
+                        fprintf(stderr,"  ## Error: unable to allocate a new element.\n");
                         _MMG5_INCREASE_MEM_MESSAGE();
-                        printf("  Exit program.\n");
+                        fprintf(stderr,"  Exit program.\n");
                         exit(EXIT_FAILURE));
     pt[0] = &mesh->tetra[newtet[0]];
   }
@@ -1510,9 +1510,9 @@ void _MMG5_split3(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) 
   iel = _MMG3D_newElt(mesh);
   if ( !iel ) {
     _MMG5_TETRA_REALLOC(mesh,iel,mesh->gap,
-                        printf("  ## Error: unable to allocate a new element.\n");
+                        fprintf(stderr,"  ## Error: unable to allocate a new element.\n");
                         _MMG5_INCREASE_MEM_MESSAGE();
-                        printf("  Exit program.\n");
+                        fprintf(stderr,"  Exit program.\n");
                         exit(EXIT_FAILURE));
     pt[0] = &mesh->tetra[newtet[0]];
     pt[1] = &mesh->tetra[newtet[1]];
@@ -1524,9 +1524,9 @@ void _MMG5_split3(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) 
   iel = _MMG3D_newElt(mesh);
   if ( !iel ) {
     _MMG5_TETRA_REALLOC(mesh,iel,mesh->gap,
-                        printf("  ## Error: unable to allocate a new element.\n");
+                        fprintf(stderr,"  ## Error: unable to allocate a new element.\n");
                         _MMG5_INCREASE_MEM_MESSAGE();
-                        printf("  Exit program.\n");
+                        fprintf(stderr,"  Exit program.\n");
                         exit(EXIT_FAILURE));
     pt[0] = &mesh->tetra[newtet[0]];
     pt[1] = &mesh->tetra[newtet[1]];
@@ -1621,7 +1621,7 @@ void _MMG5_split3(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) 
             _MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
                                "larger xtetra table",
                                mesh->xt--;
-                               printf("  Exit program.\n");
+                               fprintf(stderr,"  Exit program.\n");
                                exit(EXIT_FAILURE));
           }
           pt[i]->xt = mesh->xt;
@@ -1648,7 +1648,7 @@ void _MMG5_split3(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) 
               _MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
                                  "larger xtetra table",
                                  mesh->xt--;
-                                 printf("  Exit program.\n");
+                                 fprintf(stderr,"  Exit program.\n");
                                  exit(EXIT_FAILURE));
             }
             pt[i]->xt = mesh->xt;
@@ -1694,9 +1694,9 @@ void _MMG5_split3cone(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidT
   iel = _MMG3D_newElt(mesh);
   if ( !iel ) {
     _MMG5_TETRA_REALLOC(mesh,iel,mesh->gap,
-                        printf("  ## Error: unable to allocate a new element.\n");
+                        fprintf(stderr,"  ## Error: unable to allocate a new element.\n");
                         _MMG5_INCREASE_MEM_MESSAGE();
-                        printf("  Exit program.\n");
+                        fprintf(stderr,"  Exit program.\n");
                         exit(EXIT_FAILURE));
     pt[0] = &mesh->tetra[newtet[0]];
   }
@@ -1707,9 +1707,9 @@ void _MMG5_split3cone(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidT
   iel = _MMG3D_newElt(mesh);
   if ( !iel ) {
     _MMG5_TETRA_REALLOC(mesh,iel,mesh->gap,
-                        printf("  ## Error: unable to allocate a new element.\n");
+                        fprintf(stderr,"  ## Error: unable to allocate a new element.\n");
                         _MMG5_INCREASE_MEM_MESSAGE();
-                        printf("  Exit program.\n");
+                        fprintf(stderr,"  Exit program.\n");
                         exit(EXIT_FAILURE));
     pt[0] = &mesh->tetra[newtet[0]];
     pt[1] = &mesh->tetra[newtet[1]];
@@ -1721,9 +1721,9 @@ void _MMG5_split3cone(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidT
   iel = _MMG3D_newElt(mesh);
   if ( !iel ) {
     _MMG5_TETRA_REALLOC(mesh,iel,mesh->gap,
-                        printf("  ## Error: unable to allocate a new element.\n");
+                        fprintf(stderr,"  ## Error: unable to allocate a new element.\n");
                         _MMG5_INCREASE_MEM_MESSAGE();
-                        printf("  Exit program.\n");
+                        fprintf(stderr,"  Exit program.\n");
                         exit(EXIT_FAILURE));
     pt[0] = &mesh->tetra[newtet[0]];
     pt[1] = &mesh->tetra[newtet[1]];
@@ -1970,7 +1970,7 @@ void _MMG5_split3cone(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidT
             _MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
                                "larger xtetra table",
                                mesh->xt--;
-                               printf("  Exit program.\n");
+                               fprintf(stderr,"  Exit program.\n");
                                exit(EXIT_FAILURE));
           }
           pt[i]->xt = mesh->xt;
@@ -1997,7 +1997,7 @@ void _MMG5_split3cone(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidT
               _MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
                                  "larger xtetra table",
                                  mesh->xt--;
-                                 printf("  Exit program.\n");
+                                 fprintf(stderr,"  Exit program.\n");
                                  exit(EXIT_FAILURE));
             }
             pt[i]->xt = mesh->xt;
@@ -2179,9 +2179,9 @@ void _MMG5_split3op(MMG5_pMesh mesh, MMG5_pSol met, int k, int vx[6],char metRid
   iel = _MMG3D_newElt(mesh);
   if ( !iel ) {
     _MMG5_TETRA_REALLOC(mesh,iel,mesh->gap,
-                        printf("  ## Error: unable to allocate a new element.\n");
+                        fprintf(stderr,"  ## Error: unable to allocate a new element.\n");
                         _MMG5_INCREASE_MEM_MESSAGE();
-                        printf("  Exit program.\n");
+                        fprintf(stderr,"  Exit program.\n");
                         exit(EXIT_FAILURE));
     pt[0] = &mesh->tetra[newtet[0]];
   }
@@ -2193,9 +2193,9 @@ void _MMG5_split3op(MMG5_pMesh mesh, MMG5_pSol met, int k, int vx[6],char metRid
   iel = _MMG3D_newElt(mesh);
   if ( !iel ) {
     _MMG5_TETRA_REALLOC(mesh,iel,mesh->gap,
-                        printf("  ## Error: unable to allocate a new element.\n");
+                        fprintf(stderr,"  ## Error: unable to allocate a new element.\n");
                         _MMG5_INCREASE_MEM_MESSAGE();
-                        printf("  Exit program.\n");
+                        fprintf(stderr,"  Exit program.\n");
                         exit(EXIT_FAILURE));
     pt[0] = &mesh->tetra[newtet[0]];
     pt[1] = &mesh->tetra[newtet[1]];
@@ -2207,9 +2207,9 @@ void _MMG5_split3op(MMG5_pMesh mesh, MMG5_pSol met, int k, int vx[6],char metRid
   iel = _MMG3D_newElt(mesh);
   if ( !iel ) {
     _MMG5_TETRA_REALLOC(mesh,iel,mesh->gap,
-                        printf("  ## Error: unable to allocate a new element.\n");
+                        fprintf(stderr,"  ## Error: unable to allocate a new element.\n");
                         _MMG5_INCREASE_MEM_MESSAGE();
-                        printf("  Exit program.\n");
+                        fprintf(stderr,"  Exit program.\n");
                         exit(EXIT_FAILURE));
     pt[0] = &mesh->tetra[newtet[0]];
     pt[1] = &mesh->tetra[newtet[1]];
@@ -2238,9 +2238,9 @@ void _MMG5_split3op(MMG5_pMesh mesh, MMG5_pSol met, int k, int vx[6],char metRid
     iel = _MMG3D_newElt(mesh);
     if ( !iel ) {
       _MMG5_TETRA_REALLOC(mesh,iel,mesh->gap,
-                          printf("  ## Error: unable to allocate a new element.\n");
+                          fprintf(stderr,"  ## Error: unable to allocate a new element.\n");
                           _MMG5_INCREASE_MEM_MESSAGE();
-                          printf("  Exit program.\n");
+                          fprintf(stderr,"  Exit program.\n");
                           exit(EXIT_FAILURE));
       pt[0] = &mesh->tetra[newtet[0]];
       pt[1] = &mesh->tetra[newtet[1]];
@@ -2458,7 +2458,7 @@ void _MMG5_split3op(MMG5_pMesh mesh, MMG5_pSol met, int k, int vx[6],char metRid
               _MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
                                  "larger xtetra table",
                                  mesh->xt--;
-                                 printf("  Exit program.\n");
+                                 fprintf(stderr,"  Exit program.\n");
                                  exit(EXIT_FAILURE));
             }
             pt[i]->xt = mesh->xt;
@@ -2486,7 +2486,7 @@ void _MMG5_split3op(MMG5_pMesh mesh, MMG5_pSol met, int k, int vx[6],char metRid
                 _MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
                                    "larger xtetra table",
                                    mesh->xt--;
-                                   printf("  Exit program.\n");
+                                   fprintf(stderr,"  Exit program.\n");
                                    exit(EXIT_FAILURE));
               }
               pt[i]->xt = mesh->xt;
@@ -2524,7 +2524,7 @@ void _MMG5_split3op(MMG5_pMesh mesh, MMG5_pSol met, int k, int vx[6],char metRid
               _MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
                                  "larger xtetra table",
                                  mesh->xt--;
-                                 printf("  Exit program.\n");
+                                 fprintf(stderr,"  Exit program.\n");
                                  exit(EXIT_FAILURE));
             }
             pt[i]->xt = mesh->xt;
@@ -2552,7 +2552,7 @@ void _MMG5_split3op(MMG5_pMesh mesh, MMG5_pSol met, int k, int vx[6],char metRid
                 _MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
                                    "larger xtetra table",
                                    mesh->xt--;
-                                   printf("  Exit program.\n");
+                                   fprintf(stderr,"  Exit program.\n");
                                    exit(EXIT_FAILURE));
               }
               pt[i]->xt = mesh->xt;
@@ -2629,7 +2629,7 @@ int _MMG5_split4bar(MMG5_pMesh mesh, MMG5_pSol met, int k,char metRidTyp) {
   ib = _MMG3D_newPt(mesh,o,0);
   if ( !ib ) {
     _MMG5_POINT_REALLOC(mesh,met,ib,mesh->gap,
-                        printf("  ## Error: unable to allocate a new point\n");
+                        fprintf(stderr,"  ## Error: unable to allocate a new point\n");
                         _MMG5_INCREASE_MEM_MESSAGE();
                         return(0)
                         ,o,0);
@@ -2645,7 +2645,7 @@ int _MMG5_split4bar(MMG5_pMesh mesh, MMG5_pSol met, int k,char metRidTyp) {
   iel = _MMG3D_newElt(mesh);
   if ( !iel ) {
     _MMG5_TETRA_REALLOC(mesh,iel,mesh->gap,
-                        printf("  ## Error: unable to allocate a new element.\n");
+                        fprintf(stderr,"  ## Error: unable to allocate a new element.\n");
                         _MMG5_INCREASE_MEM_MESSAGE();
                         _MMG3D_delPt(mesh,ib);
                         return(0));
@@ -2658,7 +2658,7 @@ int _MMG5_split4bar(MMG5_pMesh mesh, MMG5_pSol met, int k,char metRidTyp) {
   iel = _MMG3D_newElt(mesh);
   if ( !iel ) {
     _MMG5_TETRA_REALLOC(mesh,iel,mesh->gap,
-                        printf("  ## Error: unable to allocate a new element.\n");
+                        fprintf(stderr,"  ## Error: unable to allocate a new element.\n");
                         _MMG5_INCREASE_MEM_MESSAGE();
                         _MMG3D_delPt(mesh,ib);
                         _MMG3D_delElt(mesh,newtet[1]);
@@ -2673,7 +2673,7 @@ int _MMG5_split4bar(MMG5_pMesh mesh, MMG5_pSol met, int k,char metRidTyp) {
   iel = _MMG3D_newElt(mesh);
   if ( !iel ) {
     _MMG5_TETRA_REALLOC(mesh,iel,mesh->gap,
-                        printf("  ## Error: unable to allocate a new element.\n");
+                        fprintf(stderr,"  ## Error: unable to allocate a new element.\n");
                         _MMG5_INCREASE_MEM_MESSAGE();
                         _MMG3D_delPt(mesh,ib);
                         _MMG3D_delElt(mesh,newtet[1]);
@@ -2893,9 +2893,9 @@ void _MMG5_split4sf(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp
     iel = _MMG3D_newElt(mesh);
     if ( !iel ) {
       _MMG5_TETRA_REALLOC(mesh,iel,mesh->gap,
-                          printf("  ## Error: unable to allocate a new element.\n");
+                          fprintf(stderr,"  ## Error: unable to allocate a new element.\n");
                           _MMG5_INCREASE_MEM_MESSAGE();
-                          printf("  Exit program.\n");
+                          fprintf(stderr,"  Exit program.\n");
                           exit(EXIT_FAILURE));
       for ( i=0; i<j; i++)
         pt[i] = &mesh->tetra[newtet[i]];
@@ -3042,7 +3042,7 @@ void _MMG5_split4sf(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp
             _MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
                                "larger xtetra table",
                                mesh->xt--;
-                               printf("  Exit program.\n");
+                               fprintf(stderr,"  Exit program.\n");
                                exit(EXIT_FAILURE));
           }
           pt[i]->xt = mesh->xt;
@@ -3070,7 +3070,7 @@ void _MMG5_split4sf(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp
               _MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
                                  "larger xtetra table",
                                  mesh->xt--;
-                                 printf("  Exit program.\n");
+                                 fprintf(stderr,"  Exit program.\n");
                                  exit(EXIT_FAILURE));
             }
             pt[i]->xt = mesh->xt;
@@ -3134,9 +3134,9 @@ void _MMG5_split4op(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp
     iel = _MMG3D_newElt(mesh);
     if ( !iel ) {
       _MMG5_TETRA_REALLOC(mesh,iel,mesh->gap,
-                          printf("  ## Error: unable to allocate a new element.\n");
+                          fprintf(stderr,"  ## Error: unable to allocate a new element.\n");
                           _MMG5_INCREASE_MEM_MESSAGE();
-                          printf("  Exit program.\n");
+                          fprintf(stderr,"  Exit program.\n");
                           exit(EXIT_FAILURE));
       for ( i=0; i<j; i++)
         pt[i] = &mesh->tetra[newtet[i]];
@@ -3299,7 +3299,7 @@ void _MMG5_split4op(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp
             _MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
                                "larger xtetra table",
                                mesh->xt--;
-                               printf("  Exit program.\n");
+                               fprintf(stderr,"  Exit program.\n");
                                exit(EXIT_FAILURE));
           }
           pt[i]->xt = mesh->xt;
@@ -3327,7 +3327,7 @@ void _MMG5_split4op(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp
               _MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
                                  "larger xtetra table",
                                  mesh->xt--;
-                                 printf("  Exit program.\n");
+                                 fprintf(stderr,"  Exit program.\n");
                                  exit(EXIT_FAILURE));
             }
             pt[i]->xt = mesh->xt;
@@ -3372,9 +3372,9 @@ void _MMG5_split5(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) 
     iel = _MMG3D_newElt(mesh);
     if ( !iel ) {
       _MMG5_TETRA_REALLOC(mesh,iel,mesh->gap,
-                          printf("  ## Error: unable to allocate a new element.\n");
+                          fprintf(stderr,"  ## Error: unable to allocate a new element.\n");
                           _MMG5_INCREASE_MEM_MESSAGE();
-                          printf("  Exit program.\n");
+                          fprintf(stderr,"  Exit program.\n");
                           exit(EXIT_FAILURE));
       for ( j=0; j<i; j++)
         pt[j] = &mesh->tetra[newtet[j]];
@@ -3555,7 +3555,7 @@ void _MMG5_split5(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) 
             _MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
                                "larger xtetra table",
                                mesh->xt--;
-                               printf("  Exit program.\n");
+                               fprintf(stderr,"  Exit program.\n");
                                exit(EXIT_FAILURE));
           }
           pt[i]->xt = mesh->xt;
@@ -3583,7 +3583,7 @@ void _MMG5_split5(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) 
               _MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
                                  "larger xtetra table",
                                  mesh->xt--;
-                                 printf("  Exit program.\n");
+                                 fprintf(stderr,"  Exit program.\n");
                                  exit(EXIT_FAILURE));
             }
             pt[i]->xt = mesh->xt;
@@ -3630,9 +3630,9 @@ void _MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) 
     iel = _MMG3D_newElt(mesh);
     if ( !iel ) {
       _MMG5_TETRA_REALLOC(mesh,iel,mesh->gap,
-                          printf("  ## Error: unable to allocate a new element.\n");
+                          fprintf(stderr,"  ## Error: unable to allocate a new element.\n");
                           _MMG5_INCREASE_MEM_MESSAGE();
-                          printf("  Exit program.\n");
+                          fprintf(stderr,"  Exit program.\n");
                           exit(EXIT_FAILURE));
       for ( j=0; j<i; j++ )
         pt[j] = &mesh->tetra[newtet[j]];
@@ -3694,7 +3694,7 @@ void _MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) 
           _MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
                              "larger xtetra table",
                              mesh->xt--;
-                             printf("  Exit program.\n");
+                             fprintf(stderr,"  Exit program.\n");
                              exit(EXIT_FAILURE));
         }
         pt[1]->xt = mesh->xt;
@@ -3734,7 +3734,7 @@ void _MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) 
           _MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
                              "larger xtetra table",
                              mesh->xt--;
-                             printf("  Exit program.\n");
+                             fprintf(stderr,"  Exit program.\n");
                              exit(EXIT_FAILURE));
         }
         pt[2]->xt = mesh->xt;
@@ -3775,7 +3775,7 @@ void _MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) 
           _MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
                              "larger xtetra table",
                              mesh->xt--;
-                             printf("  Exit program.\n");
+                             fprintf(stderr,"  Exit program.\n");
                              exit(EXIT_FAILURE));
         }
         pt[3]->xt = mesh->xt;
@@ -3819,7 +3819,7 @@ void _MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) 
           _MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
                              "larger xtetra table",
                              mesh->xt--;
-                             printf("  Exit program.\n");
+                             fprintf(stderr,"  Exit program.\n");
                              exit(EXIT_FAILURE));
         }
         pt[4]->xt = mesh->xt;
@@ -3863,7 +3863,7 @@ void _MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) 
           _MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
                              "larger xtetra table",
                              mesh->xt--;
-                             printf("  Exit program.\n");
+                             fprintf(stderr,"  Exit program.\n");
                              exit(EXIT_FAILURE));
         }
         pt[5]->xt = mesh->xt;
@@ -3907,7 +3907,7 @@ void _MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) 
           _MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
                              "larger xtetra table",
                              mesh->xt--;
-                             printf("  Exit program.\n");
+                             fprintf(stderr,"  Exit program.\n");
                              exit(EXIT_FAILURE));
         }
         pt[6]->xt = mesh->xt;
@@ -3951,7 +3951,7 @@ void _MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) 
           _MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
                              "larger xtetra table",
                              mesh->xt--;
-                             printf("  Exit program.\n");
+                             fprintf(stderr,"  Exit program.\n");
                              exit(EXIT_FAILURE));
         }
         pt[7]->xt = mesh->xt;
@@ -4090,7 +4090,7 @@ int _MMG5_splitedg(MMG5_pMesh mesh, MMG5_pSol met,int iel, int iar, double crit)
   if(!ier) return(0);
   ier = _MMG5_split1b(mesh,met,list,lon,ip,0,1);
   if ( ier < 0 ) {
-    fprintf(stdout,"  ## Error: unable to split.\n");
+    fprintf(stderr,"  ## Error: unable to split.\n");
     return(-1);
   }
   else if ( !ier ) {

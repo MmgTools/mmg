@@ -97,7 +97,7 @@ int _MMG5_mmg2dChkmsh(MMG5_pMesh mesh, int severe,int base) {
 
     }
   }
-  
+
   if ( !severe )  return(1);
 
   _MMG5_SAFE_CALLOC(list,MMG2D_LMAX,int);
@@ -156,18 +156,18 @@ int _MMG2_chkmsh(MMG5_pMesh mesh) {
   MMG5_pTria        pt,pt1;
   int               *adja,*adjaj,k,jel;
   char              i,i1,i2,j;
-  
+
   /* Check adjacencies */
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
     if ( !MG_EOK(pt) ) continue;
-    
+
     adja = &mesh->adja[3*(k-1)+1];
-    
+
     for (i=0; i<3; i++) {
       jel = adja[i] / 3;
       j   = adja[i] % 3;
-      
+
       if ( !jel ) {
         if ( !(pt->tag[i] & MG_GEO ) ) {
           printf("Wrong tag of edge %d in tria %d \n",i,k);
@@ -184,7 +184,7 @@ int _MMG2_chkmsh(MMG5_pMesh mesh) {
       }
     }
   }
-  
+
   /* Check consistency between tags of edges and vertices */
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
@@ -203,7 +203,7 @@ int _MMG2_chkmsh(MMG5_pMesh mesh) {
           exit(0);
         }
       }
-      
+
       if ( pt->tag[i] & MG_REF ) {
         if ( !(mesh->point[pt->v[i1]].tag & MG_REF) && !( MG_SIN(mesh->point[pt->v[i1]].tag)) ) {
           printf("Tag inconsistency in triangle %d: edge ref %d, vertex %d\n",k,i,pt->v[i1]);
@@ -214,49 +214,49 @@ int _MMG2_chkmsh(MMG5_pMesh mesh) {
           exit(0);
         }
       }
-      
+
     }
   }
-  
+
   /* Check consistency between edge tags and triangle refs */
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
     if ( !MG_EOK(pt) ) continue;
-    
+
     adja = &mesh->adja[3*(k-1)+1];
     for (i=0; i<3; i++) {
       i1 = _MMG5_inxt2[i];
       i2 = _MMG5_iprv2[i];
-      
+
       jel = adja[i] / 3;
-      
+
       if ( ( pt->tag[i] & MG_GEO ) && jel ) {
         printf("edge %d %d is tagged boundary while it has a neighbour\n",pt->v[i1],pt->v[i2]);
         exit(0);
       }
-      
+
       if ( pt->tag[i] & MG_REF ) {
         pt1 = &mesh->tria[jel];
         if ( pt->ref == pt1->ref ) {
           printf("edge %d %d is tagged ref while both corresponding triangles have same ref\n",pt->v[i1],pt->v[i2]);
-         
+
           {
             printf("Saving mesh...\n");
             if ( !MMG2_hashTria(mesh) ) {
               fprintf(stdout,"  ## Hashing problem. Exit program.\n");
               return(0);
             }
-          
+
             MMG2_bdryEdge(mesh);
             _MMG2_savemesh_db(mesh,mesh->nameout,0);
             exit(0);
           }
-          
+
           exit(0);
         }
       }
     }
   }
-  
+
   return(1);
 }

@@ -34,6 +34,74 @@
 
 #include "mmg2d.h"
 
+/**
+ * \param mesh pointer toward the mesh structure
+ * \param sol pointer toward the sol structure
+ * \return 1 if success
+ *
+ * Compute isotropic size map according to the mean of the length of the edges
+ * passing through a point.
+ *
+ */
+int MMG2D_doSol(MMG5_pMesh mesh,MMG5_pSol sol) {
+  MMG5_pTria      ptt,pt;
+  MMG5_pPoint     p1,p2;
+  double          ux,uy,dd;
+  int             i,k,ib,ipa,ipb;
+  int             MMG_inxtt[5] = {0,1,2,0,1};
+
+  sol->np = mesh->np;
+  for (k=1; k<=mesh->np; k++) {
+    p1 = &mesh->point[k];
+    p1->tagdel = 0;
+  }
+  for (k=1; k<=mesh->nt; k++) {
+    ptt = &mesh->tria[k];
+    if ( !ptt->v[0] )  continue;
+
+    for (i=0; i<3; i++) {
+      ib  = MMG_inxtt[i+1];
+      ipa = ptt->v[i];
+      ipb = ptt->v[ib];
+      p1  = &mesh->point[ipa];
+      p2  = &mesh->point[ipb];
+
+      ux  = p1->c[0] - p2->c[0];
+      uy  = p1->c[1] - p2->c[1];
+      dd  = sqrt(ux*ux + uy*uy);
+
+      sol->m[ipa] += dd;
+      p1->tagdel++;
+      sol->m[ipb] += dd;
+      p2->tagdel++;
+    }
+  }
+
+  /* vertex size */
+  for (k=1; k<=mesh->np; k++) {
+    p1 = &mesh->point[k];
+    if ( !p1->tagdel )  {
+      sol->m[k] = FLT_MAX;
+      continue;
+    }
+
+    sol->m[k] = sol->m[k] / (double)p1->tagdel;
+    p1->tagdel = 0;
+  }
+
+  /* compute quality */
+  if ( MMG2_caltri_in ) {
+    for (k=1; k<=mesh->nt; k++) {
+      pt = &mesh->tria[k];
+      pt->qual = MMG2_caltri_in(mesh,sol,pt);
+    }
+  }
+
+  if ( mesh->info.imprim < -4 )
+    fprintf(stdout,"     HMIN %f   HMAX %f\n",mesh->info.hmin,mesh->info.hmax);
+  return(1);
+}
+
 /* New version for the definition of a size map; takes into account the curvature of the 
  external and internal curves present in the mesh */
 int _MMG2_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
@@ -223,3 +291,4 @@ int _MMG2_gradsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
   if ( abs(mesh->info.imprim) > 4 )  fprintf(stdout,"     gradation: %7d updated, %d iter.\n",nup,it);
   return(1);
 }
+

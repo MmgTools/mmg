@@ -190,8 +190,6 @@ int _MMG5_intregmet(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,double s,
 }
 
 
-
- 
 /**
  * \param ma pointer on a metric
  * \param mb pointer on a metric
@@ -274,13 +272,13 @@ int _MMG5_intvolmet(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,double s,
 
   _MMG5_intregvolmet(m1,m2,mr,s);
   if(fabs(mr[5]) < 1e-6) {
-    printf("%s:%d : Error\n",__FILE__,__LINE__);
-    printf("pp1 : %d %d \n",MG_SIN(pp1->tag) || (MG_NOM & pp1->tag),pp1->tag & MG_GEO);
-printf("m1 %e %e %e %e %e %e\n",m1[0],m1[1],m1[2],m1[3],m1[4],m1[5]);
-    printf("pp2 : %d %d \n",MG_SIN(pp2->tag) || (MG_NOM & pp2->tag),pp2->tag & MG_GEO);
- printf("m2 %e %e %e %e %e %e\n",m2[0],m2[1],m2[2],m2[3],m2[4],m2[5]);
-    printf("mr %e %e %e %e %e %e\n",mr[0],mr[1],mr[2],mr[3],mr[4],mr[5]);
-    exit(0);
+    fprintf(stderr,"%s:%d : Error\n",__FILE__,__LINE__);
+    fprintf(stderr,"pp1 : %d %d \n",MG_SIN(pp1->tag) || (MG_NOM & pp1->tag),pp1->tag & MG_GEO);
+fprintf(stderr,"m1 %e %e %e %e %e %e\n",m1[0],m1[1],m1[2],m1[3],m1[4],m1[5]);
+    fprintf(stderr,"pp2 : %d %d \n",MG_SIN(pp2->tag) || (MG_NOM & pp2->tag),pp2->tag & MG_GEO);
+ fprintf(stderr,"m2 %e %e %e %e %e %e\n",m2[0],m2[1],m2[2],m2[3],m2[4],m2[5]);
+    fprintf(stderr,"mr %e %e %e %e %e %e\n",mr[0],mr[1],mr[2],mr[3],mr[4],mr[5]);
+    exit(EXIT_FAILURE);
   }
  
 

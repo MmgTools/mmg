@@ -92,11 +92,8 @@ IF ( LIBMMG_STATIC OR LIBMMG_SHARED )
     ${MMGS_SOURCE_DIR}/libmmgsf.h
     )
   SET( mmg_headers
-    ${COMMON_SOURCE_DIR}/mmgcommon.h
-    ${COMMON_SOURCE_DIR}/eigenv.h
-    ${COMMON_SOURCE_DIR}/libmmgcommon.h
-    ${COMMON_SOURCE_DIR}/libmmgcommonf.h
-    ${COMMON_SOURCE_DIR}/chrono.h
+    ${COMMON_SOURCE_DIR}/libmmgtypes.h
+    ${COMMON_SOURCE_DIR}/libmmgtypesf.h
     ${CMAKE_SOURCE_DIR}/src/mmg/libmmg.h
     ${CMAKE_SOURCE_DIR}/src/mmg/libmmgf.h
     )
@@ -119,11 +116,8 @@ IF ( LIBMMG_STATIC OR LIBMMG_SHARED )
   SET( mmg_includes
     ${MMG_INCLUDE}/libmmg.h
     ${MMG_INCLUDE}/libmmgf.h
-    ${MMG_INCLUDE}/mmgcommon.h
-    ${MMG_INCLUDE}/eigenv.h
-    ${MMG_INCLUDE}/libmmgcommon.h
-    ${MMG_INCLUDE}/libmmgcommonf.h
-    ${MMG_INCLUDE}/chrono.h
+    ${MMG_INCLUDE}/libmmgtypes.h
+    ${MMG_INCLUDE}/libmmgtypesf.h
     )
 
   # Install header files in /usr/local or equivalent
@@ -132,28 +126,44 @@ IF ( LIBMMG_STATIC OR LIBMMG_SHARED )
   INSTALL(FILES ${mmg3d_headers} DESTINATION include/mmg/mmg3d)
   INSTALL(FILES ${mmg_headers} DESTINATION include/mmg)
 
-  ADD_CUSTOM_COMMAND(OUTPUT ${MMG_INCLUDE}/libmmgcommonf.h
-    COMMAND ${CMAKE_COMMAND} -E copy ${COMMON_SOURCE_DIR}/libmmgcommonf.h ${MMG_INCLUDE}/libmmgcommonf.h
+  ADD_CUSTOM_COMMAND(OUTPUT ${MMG_INCLUDE}/libmmgtypesf.h
+    COMMAND ${CMAKE_COMMAND} -E copy ${COMMON_SOURCE_DIR}/libmmgtypesf.h ${MMG_INCLUDE}/libmmgtypesf.h
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-    DEPENDS ${COMMON_SOURCE_DIR}/libmmgcommonf.h) 
+    DEPENDS ${COMMON_SOURCE_DIR}/libmmgtypesf.h)
 
   IF ( NOT BUILD_MMG2D )
     ADD_CUSTOM_COMMAND(OUTPUT ${MMG2D_INCLUDE}/libmmg2df.h
       COMMAND ${CMAKE_COMMAND} -E copy ${COMMON_SOURCE_DIR}/libmmg2df.h ${MMG2D_INCLUDE}/libmmg2df.h
       WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
       DEPENDS ${MMG2D_SOURCE_DIR}/libmmg2df.h)
+    ADD_CUSTOM_TARGET(copy_2d_headers ALL
+      DEPENDS   ${CMAKE_SOURCE_DIR}/include/mmg/mmg2d/libmmg2df.h
+      ${CMAKE_SOURCE_DIR}/include/mmg/mmg2d/libmmg2d.h
+      ${CMAKE_SOURCE_DIR}/include/mmg/mmg2d/libmmgtypesf.h
+      ${CMAKE_SOURCE_DIR}/include/mmg/mmg2d/libmmgtypes.h )
   ENDIF ()
+
   IF ( NOT BUILD_MMGS )
     ADD_CUSTOM_COMMAND(OUTPUT ${MMGS_INCLUDE}/libmmgsf.h
       COMMAND ${CMAKE_COMMAND} -E copy ${COMMON_SOURCE_DIR}/libmmgsf.h ${MMGS_INCLUDE}/libmmgsf.h
       WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
       DEPENDS ${MMGS_SOURCE_DIR}/libmmgsf.h)
+    ADD_CUSTOM_TARGET(copy_s_headers ALL
+      DEPENDS   ${CMAKE_SOURCE_DIR}/include/mmg/mmgs/libmmgsf.h
+      ${CMAKE_SOURCE_DIR}/include/mmg/mmgs/libmmgs.h
+      ${CMAKE_SOURCE_DIR}/include/mmg/mmgs/libmmgtypesf.h
+      ${CMAKE_SOURCE_DIR}/include/mmg/mmgs/libmmgtypes.h )
   ENDIF()
   IF ( NOT BUILD_MMG3D )
     ADD_CUSTOM_COMMAND(OUTPUT ${MMG3D_INCLUDE}/libmmg3df.h
       COMMAND ${CMAKE_COMMAND} -E copy ${COMMON_SOURCE_DIR}/libmmg3df.h ${MMG3D_INCLUDE}/libmmg3df.h
       WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
       DEPENDS ${MMG3D_SOURCE_DIR}/libmmg3df.h)
+    ADD_CUSTOM_TARGET(copy_3d_headers ALL
+      DEPENDS  ${CMAKE_SOURCE_DIR}/include/mmg/mmg3d/libmmg3df.h
+      ${CMAKE_SOURCE_DIR}/include/mmg/mmg3d/libmmg3d.h
+      ${CMAKE_SOURCE_DIR}/include/mmg/mmg3d/libmmgtypesf.h
+      ${CMAKE_SOURCE_DIR}/include/mmg/mmg3d/libmmgtypes.h )
   ENDIF()
 
   ADD_CUSTOM_COMMAND(OUTPUT ${MMG_INCLUDE}/libmmgf.h
@@ -166,15 +176,26 @@ IF ( LIBMMG_STATIC OR LIBMMG_SHARED )
 
 
   # Install header files in project directory
-  FILE (INSTALL ${mmg2d_headers}
-    DESTINATION ${CMAKE_SOURCE_DIR}/include/mmg/mmg2d
+  FILE(INSTALL  ${mmg2d_headers}
+    DESTINATION ${CMAKE_SOURCE_DIR}/include/mmg/mmg2d/
     PATTERN "libmmg*f.h"  EXCLUDE)
-  FILE (INSTALL ${mmgs_headers} DESTINATION ${CMAKE_SOURCE_DIR}/include/mmg/mmgs
+  FILE(INSTALL  ${mmgs_headers}
+    DESTINATION ${CMAKE_SOURCE_DIR}/include/mmg/mmgs/
     PATTERN "libmmg*f.h"  EXCLUDE)
-  FILE (INSTALL ${mmg3d_headers} DESTINATION ${CMAKE_SOURCE_DIR}/include/mmg/mmg3d
+  FILE(INSTALL  ${mmg3d_headers}
+    DESTINATION ${CMAKE_SOURCE_DIR}/include/mmg/mmg3d/
     PATTERN "libmmg*f.h"  EXCLUDE)
-  FILE (INSTALL ${mmg_headers} DESTINATION ${CMAKE_SOURCE_DIR}/include/mmg
+  FILE(INSTALL  ${mmg_headers}
+    DESTINATION ${CMAKE_SOURCE_DIR}/include/mmg/
     PATTERN "libmmg*f.h"  EXCLUDE)
+
+
+  ADD_CUSTOM_TARGET(copy_mmg_headers ALL
+    DEPENDS  ${CMAKE_SOURCE_DIR}/include/mmg/libmmgf.h
+    ${CMAKE_SOURCE_DIR}/include/mmg/libmmg.h
+    ${CMAKE_SOURCE_DIR}/include/mmg/libmmgtypesf.h
+    ${CMAKE_SOURCE_DIR}/include/mmg/libmmgtypes.h )
+
 ENDIF()
 
 ############################################################################
@@ -186,3 +207,33 @@ ENDIF()
 IF ( TEST_LIBMMG )
   INCLUDE(cmake/testing/libmmg_tests.cmake)
 ENDIF()
+
+###############################################################################
+#####
+#####         Continuous integration
+#####
+###############################################################################
+
+IF ( BUILD_TESTING )
+  ##-------------------------------------------------------------------##
+  ##--------------------------- Add tests and configure it ------------##
+  ##-------------------------------------------------------------------##
+  # Add runtime that we want to test for mmg
+  IF( MMG_CI )
+    # Add libqmg tests
+    IF ( TEST_LIBMMG )
+      SET(LIBMMG_EXEC0_a ${EXECUTABLE_OUTPUT_PATH}/libmmg_example0_a)
+      SET(LIBMMG_CPP_a   ${EXECUTABLE_OUTPUT_PATH}/libmmg_cpp_a)
+
+     ADD_TEST(NAME libmmg_example0_a   COMMAND ${LIBMMG_EXEC0_a})
+     ADD_TEST(NAME libmmg_cpp_a        COMMAND ${LIBMMG_CPP_a})
+
+      IF ( CMAKE_Fortran_COMPILER)
+        SET(LIBMMG_FORTRAN_a ${EXECUTABLE_OUTPUT_PATH}/libmmg_fortran_a)
+        ADD_TEST(NAME libmmg_fortran   COMMAND ${LIBMMG_FORTRAN_a})
+      ENDIF()
+    ENDIF ()
+
+  ENDIF( MMG_CI )
+
+ENDIF ( BUILD_TESTING )

@@ -27,7 +27,6 @@ mytime   MMG5_ctim[TIMEMAX];
 static void usage(char *name) {
   _MMG5_mmgUsage(name);
 
-  //fprintf(stdout,"-ls     val     create mesh of isovalue 0\n");
   fprintf(stdout,"-lag [0/1/2]    Lagrangian mesh displacement according to mode 0/1/2\n");
   fprintf(stdout,"-mov filedep    (with -lag option)\n");
   fprintf(stdout,"-nsd val        only if no given triangle, save the subdomain nb (0==all subdomain)\n");
@@ -37,10 +36,9 @@ static void usage(char *name) {
   /* fprintf(stdout,"-per          obsolete : to deal with periodic mesh on a square\n");*/
 
   fprintf(stdout,"\n");
-  /*
 
-    fprintf(stdout,"-optim       mesh optimization\n");
-  */
+  fprintf(stdout,"-optim        mesh optimization\n");
+
   fprintf(stdout,"-nosurf       no surfacic modifications\n");
 
   fprintf(stdout,"-noinsert     no insertion/suppression point\n");
@@ -251,6 +249,10 @@ int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,double *qdegrad) 
                     argv[i-1][1],argv[i-1][2],argv[i-1][3]);
             usage(argv[0]);
           }
+        }
+        else if( !strcmp(argv[i],"-optim") ) {
+          if ( !MMG2D_Set_iparameter(mesh,met,MMG2D_IPARAM_optim,1) )
+            exit(EXIT_FAILURE);
         }
         break;
       case 'p':

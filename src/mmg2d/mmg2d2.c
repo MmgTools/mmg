@@ -49,12 +49,12 @@ int MMG2_removeBBtriangles(MMG5_pMesh mesh) {
   ip2 = mesh->np-2;
   ip3 = mesh->np-1;
   ip4 = mesh->np;
-  
+
   nd = 0;
   for(k=1; k<=mesh->nt; k++) {
     pt  = &mesh->tria[k];
     if ( !MG_EOK(pt) ) continue;
-    
+
     if ( pt->base < 0 ) {
       iadr = 3*(k-1) + 1;
       adja = &mesh->adja[iadr];
@@ -89,7 +89,7 @@ int MMG2_removeBBtriangles(MMG5_pMesh mesh) {
   return(1);
 }
 
-/* Set tag to triangles in the case where there are no constrained edge 
+/* Set tag to triangles in the case where there are no constrained edge
    in the supplied mesh: in = base ; out = -base ; undetermined = 0*/
 int MMG2_settagtriangles(MMG5_pMesh mesh,MMG5_pSol sol) {
   MMG5_pTria        pt;
@@ -112,7 +112,7 @@ int MMG2_settagtriangles(MMG5_pMesh mesh,MMG5_pSol sol) {
       if ( !M_EOK(pt) )  continue;
       if ( !MMG2_findtrianglestate(mesh,k,ip1,ip2,ip3,ip4,base) ) nd++ ;
     }
-    
+
     if(mesh->info.ddebug) printf(" ** how many undetermined triangles ? %d\n",nd);
   }
   while (nd && ++iter<maxiter);
@@ -126,14 +126,14 @@ int MMG2_findtrianglestate(MMG5_pMesh mesh,int k,int ip1,int ip2,int ip3,int ip4
   MMG5_pTria       pt,pt1;
   int              l,nb;
   char             i;
-  
+
   pt = &mesh->tria[k];
-  
+
   /* Count how many vertices of pt are vertices of the boundary box */
   nb = 0;
   for(i=0; i<3; i++)
     if ( pt->v[i] == ip1 || pt->v[i] == ip2 || pt->v[i] == ip3 || pt->v[i] == ip4 ) nb++;
-  
+
   /* Triangle to be deleted */
   if ( nb ) {
     pt->base = -base;
@@ -166,7 +166,7 @@ int MMG2_insertpointdelone(MMG5_pMesh mesh,MMG5_pSol sol) {
 
     /* Find the triangle lel of the mesh containing ppt */
     list[0] = MMG2_findTria(mesh,k);
-    
+
     /* Exhaustive search if not found */
     if ( !list[0] ) {
       if ( mesh->info.ddebug )
@@ -181,7 +181,7 @@ int MMG2_insertpointdelone(MMG5_pMesh mesh,MMG5_pSol sol) {
         return(0);
       }
     }
-    
+
     /* Create the cavity of point k starting from list[0] */
     lon = _MMG2_cavity(mesh,sol,k,list);
 
@@ -189,7 +189,7 @@ int MMG2_insertpointdelone(MMG5_pMesh mesh,MMG5_pSol sol) {
       fprintf(stdout,"  ## Error: unable to insert vertex %d\n",k);
       return(0);
     }
-    
+
     else {
       _MMG2_delone(mesh,sol,k,list,lon);
     }
@@ -210,12 +210,12 @@ int MMG2_markSD(MMG5_pMesh mesh) {
   /* Reset flag field for triangles */
   for(k=1 ; k<=mesh->nt ; k++)
     mesh->tria[k].flag = mesh->mark;
-  
+
   _MMG5_SAFE_CALLOC(list,mesh->nt,int);
   kinit = 0;
   nref  = 0;
   ip1   =  mesh->np;
-  
+
   /* Catch first triangle with vertex ip1 */
   for(k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
@@ -224,7 +224,7 @@ int MMG2_markSD(MMG5_pMesh mesh) {
     pt->ref  = 0;
     if ( (!kinit) && ( pt->v[0]==ip1 || pt->v[1]==ip1 || pt->v[2]==ip1) ) kinit = k;
   }
-  
+
   /* Travel mesh by adjacencies to set references on triangles as long as no boundary is met */
   do {
     nref++;
@@ -242,12 +242,12 @@ int MMG2_markSD(MMG5_pMesh mesh) {
         pt1 = &mesh->tria[iel];
 
         if( !iel || pt1->ref == nref ) continue;
-        
+
         i1 = _MMG5_inxt2[i];
         i2 = _MMG5_iprv2[i];
         ped0 = pt->v[i1];
         ped1 = pt->v[i2];
-        
+
 /* WARNING: exhaustive search among edges, to be optimized with a hashing structure */
         for(l=1; l<=mesh->na; l++) {
           ped = &mesh->edge[l];
@@ -261,7 +261,7 @@ int MMG2_markSD(MMG5_pMesh mesh) {
       ++ipil ;
     }
     while ( ipil <= ncurc );
-    
+
     kinit = 0;
     for(k=1; k<=mesh->nt; k++) {
       pt = &mesh->tria[k];
@@ -271,10 +271,10 @@ int MMG2_markSD(MMG5_pMesh mesh) {
     }
   }
   while ( kinit );
-  
+
   /* nref - 1 subdomains because Bounding Box triangles have been counted */
   fprintf(stdout," %8d SUB-DOMAINS\n",nref-1);
-  
+
   _MMG5_SAFE_FREE(list);
 
   /* Remove BB triangles and vertices */
@@ -292,7 +292,7 @@ int MMG2_markSD(MMG5_pMesh mesh) {
       if ( !MG_EOK(pt) ) continue;
       for(i=0; i<3; i++)
         mesh->point[pt->v[i]].tag = 0;
-      
+
       if ( pt->ref != 1 ) continue;
       /*update adjacencies*/
       iadr = 3*(k-1)+1;
@@ -318,7 +318,7 @@ int MMG2_markSD(MMG5_pMesh mesh) {
            pt->v[0]==ip2 || pt->v[1]==ip2 || pt->v[2]==ip2 ||
            pt->v[0]==ip3 || pt->v[1]==ip3 || pt->v[2]==ip3 ||
            pt->v[0]==ip4 || pt->v[1]==ip4 || pt->v[2]==ip4 ) ) continue;
-      
+
       /*update adjacencies*/
       iadr = 3*(k-1)+1;
       adja = &mesh->adja[iadr];
@@ -392,7 +392,7 @@ int MMG2_mmg2d2(MMG5_pMesh mesh,MMG5_pSol sol) {
   double    c[2],dd;
   int       j,k,kk,ip1,ip2,ip3,ip4,jel,kel,nt,iadr,*adja;
   int       *numper;
-  
+
   mesh->base = 0;
   /* If triangles already exist, delete them */
   if ( mesh->nt ) {
@@ -406,7 +406,7 @@ int MMG2_mmg2d2(MMG5_pMesh mesh,MMG5_pSol sol) {
       adja[2] = 0;
     }
   }
-  
+
   /* This part seems useless */
   /* Deal with periodic vertices */
   if ( mesh->info.renum == -10 ) {
@@ -436,7 +436,7 @@ int MMG2_mmg2d2(MMG5_pMesh mesh,MMG5_pSol sol) {
       }
     }
   }
-  
+
   /* Create the 4 vertices of the bounding box */
   /* Bottom left corner */
   c[0] = -0.5; //mesh->info.min[0] - 1.;
@@ -494,11 +494,11 @@ int MMG2_mmg2d2(MMG5_pMesh mesh,MMG5_pSol sol) {
   assert ( ip2 == mesh->np-2 );
   assert ( ip3 == mesh->np-1 );
   assert ( ip4 == mesh->np );
-  
+
   /* Create the first two triangles in the mesh and the adjacency relations */
   jel  = _MMG2D_newElt(mesh);
   if ( !jel ) {
-    _MMG5_TRIA_REALLOC(mesh,jel,mesh->gap,
+    _MMG2D_TRIA_REALLOC(mesh,jel,mesh->gap,
                        printf("  ## Error: unable to allocate a new element.\n");
                        _MMG5_INCREASE_MEM_MESSAGE();
                        printf("  Exit program.\n");
@@ -512,7 +512,7 @@ int MMG2_mmg2d2(MMG5_pMesh mesh,MMG5_pSol sol) {
 
   kel  = _MMG2D_newElt(mesh);
   if ( !kel ) {
-    _MMG5_TRIA_REALLOC(mesh,kel,mesh->gap,
+    _MMG2D_TRIA_REALLOC(mesh,kel,mesh->gap,
                        printf("  ## Error: unable to allocate a new element.\n");
                        _MMG5_INCREASE_MEM_MESSAGE();
                        printf("  Exit program.\n");
@@ -534,7 +534,7 @@ int MMG2_mmg2d2(MMG5_pMesh mesh,MMG5_pSol sol) {
 
   /* Insertion of vertices in the mesh */
   if ( !MMG2_insertpointdelone(mesh,sol) ) return(0);
-  
+
   fprintf(stdout,"  -- END OF INSERTION PHASE\n");
 
   /* Enforcement of the boundary edges */
@@ -554,6 +554,6 @@ int MMG2_mmg2d2(MMG5_pMesh mesh,MMG5_pSol sol) {
     if ( !MMG2_settagtriangles(mesh,sol) ) return(0);
     if ( !MMG2_removeBBtriangles(mesh) ) return(0);
   }
-  
+
   return(1);
 }

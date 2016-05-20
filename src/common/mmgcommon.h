@@ -47,11 +47,9 @@
 #include <windows.h>
 #endif
 
-#ifdef GNU
-#define DOUBLE_COMPLEX double complex
-#else
-#define inline __inline
-#define DOUBLE_COMPLEX _Dcomplex
+
+#ifdef __cplusplus
+extern "C" {
 #endif
 
 #include "eigenv.h"
@@ -62,11 +60,18 @@
 #define MG_CPY   "Copyright (c) IMB-LJLL, 2004-"
 #define MG_STR   "&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&"
 
+/** Check if \a a and \a b have the same sign */
+#define MG_SMSGN(a,b)  (((double)(a)*(double)(b) > (0.0)) ? (1) : (0))
+
 /** size of box for renumbering with scotch. */
 #define _MMG5_BOXSIZE 500
 
 /** Maximal memory used if available memory compitation fail. */
 #define _MMG5_MEMMAX  800
+
+/* Domain refs in iso mode */
+#define MG_PLUS    2
+#define MG_MINUS   3
 
 /* numerical accuracy */
 #define _MMG5_ANGEDG    0.707106781186548   /*0.573576436351046 */
@@ -117,8 +122,6 @@
 #define _MMG5_KA 7 /*!< Key for hash tables. */
 #define _MMG5_KB 11  /*!< Key for hash tables. */
 
-/* Domain refs in iso mode */
-#define MG_ISO    10
 
 /** Reset the customized signals and set the internal counters of points, edges,
  * tria and tetra to the suitable value (needed by users to recover their mesh
@@ -146,10 +149,10 @@
   {                                                                     \
     if ( ((mesh)->memCur) > ((mesh)->memMax) ||                         \
          ((mesh)->memCur < 0 )) {                                       \
-      fprintf(stdout,"  ## Error:");                                    \
-      fprintf(stdout," unable to allocate %s.\n",string);               \
-      fprintf(stdout,"  ## Check the mesh size or ");                   \
-      fprintf(stdout,"increase maximal authorized memory with the -m option.\n"); \
+      fprintf(stderr,"  ## Error:");                                    \
+      fprintf(stderr," unable to allocate %s.\n",string);               \
+      fprintf(stderr,"  ## Check the mesh size or ");                   \
+      fprintf(stderr,"increase maximal authorized memory with the -m option.\n"); \
       (mesh)->memCur -= (long long)(size);                              \
       law;                                                              \
     }                                                                   \
@@ -254,10 +257,10 @@
          (long long) (wantedGap*initSize*sizeof(type)) ) {              \
       gap = (int)((mesh->memMax-mesh->memCur)/sizeof(type));            \
       if(gap<1) {                                                       \
-        fprintf(stdout,"  ## Error:");                                  \
-        fprintf(stdout," unable to allocate %s.\n",message);            \
-        fprintf(stdout,"  ## Check the mesh size or ");                 \
-        fprintf(stdout,"increase maximal authorized memory with the -m option.\n"); \
+        fprintf(stderr,"  ## Error:");                                  \
+        fprintf(stderr," unable to allocate %s.\n",message);            \
+        fprintf(stderr,"  ## Check the mesh size or ");                 \
+        fprintf(stderr,"increase maximal authorized memory with the -m option.\n"); \
         law;                                                            \
       }                                                                 \
     }                                                                   \
@@ -401,7 +404,31 @@ typedef struct {
 } _MMG5_Hash;
 
 
+/**
+ * \struct _MMG5_iNode
+ * \brief Cell for linked list of integer value.
+ */
+typedef struct _MMG5_iNode_s {
+  int val;
+  struct _MMG5_iNode_s *nxt;
+} _MMG5_iNode;
+
+/**
+ * \struct _MMG5_dNode
+ * \brief Cell for linked list of double value.
+ */
+typedef struct _MMG5_dNode_s {
+  int    k;
+  double val;
+  struct _MMG5_dNode_s *nxt;
+} _MMG5_dNode;
+
+
 /* Functions declarations */
+extern int _MMG5_Add_inode( MMG5_pMesh mesh, _MMG5_iNode **liLi, int val );
+extern int _MMG5_Alloc_inode( MMG5_pMesh mesh, _MMG5_iNode **node );
+extern int _MMG5_Add_dnode( MMG5_pMesh mesh, _MMG5_dNode **liLi, int, double);
+extern int _MMG5_Alloc_dnode( MMG5_pMesh mesh, _MMG5_dNode **node );
 extern void   _MMG5_bezierEdge(MMG5_pMesh, int, int, double*, double*, char,double*);
 int    _MMG5_buildridmet(MMG5_pMesh,MMG5_pSol,int,double,double,double,double*);
 extern int    _MMG5_buildridmetfic(MMG5_pMesh,double*,double*,double,double,double,double*);
@@ -422,6 +449,8 @@ int    _MMG5_elementWeight(MMG5_pMesh,MMG5_pSol,MMG5_pTria,MMG5_pPoint,
                            _MMG5_Bezier*,double r[3][3],double gv[2]);
 void   _MMG5_fillDefmetregSys( int, MMG5_pPoint, int, _MMG5_Bezier,double r[3][3],
                                double *, double *, double *, double *);
+extern void _MMG5_Free_ilinkedList( MMG5_pMesh mesh, _MMG5_iNode *liLi );
+extern void _MMG5_Free_dlinkedList( MMG5_pMesh mesh, _MMG5_dNode *liLi );
 int    _MMG5_grad2metSurf(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int i);
 int    _MMG5_hashEdge(MMG5_pMesh mesh,_MMG5_Hash *hash,int a,int b,int k);
 int    _MMG5_hashGet(_MMG5_Hash *hash,int a,int b);
@@ -430,9 +459,6 @@ int    _MMG5_intmetsavedir(MMG5_pMesh mesh, double *m,double *n,double *mr);
 int    _MMG5_intridmet(MMG5_pMesh,MMG5_pSol,int,int,double,double*,double*);
 int    _MMG5_mmgIntmet33_ani(double*,double*,double*,double);
 int    _MMG5_mmgIntextmet(MMG5_pMesh,MMG5_pSol,int,double *,double *);
-double _MMG5_lenSurfEdg_ani(MMG5_pMesh mesh,MMG5_pSol met,int ip1,int ip2,char);
-double _MMG5_lenSurfEdg33_ani(MMG5_pMesh,MMG5_pSol,int,int,char);
-extern double _MMG5_lenSurfEdg_iso(MMG5_pMesh ,MMG5_pSol ,int ,int, char );
 long long _MMG5_memSize(void);
 void   _MMG5_mmgDefaultValues(MMG5_pMesh mesh);
 int    _MMG5_mmgHashTria(MMG5_pMesh mesh, int *adja, _MMG5_Hash*, int chkISO);
@@ -446,9 +472,8 @@ void   _MMG5_printTria(MMG5_pMesh mesh,char* fileName);
 extern int    _MMG5_rotmatrix(double n[3],double r[3][3]);
 int    _MMG5_invmat(double *m,double *mi);
 int    _MMG5_invmatg(double m[9],double mi[9]);
-double _MMG5_ridSizeInNormalDir(MMG5_pMesh,int,double*,_MMG5_pBezier,int,int);
+double _MMG5_ridSizeInNormalDir(MMG5_pMesh,int,double*,_MMG5_pBezier,double,double);
 double _MMG5_ridSizeInTangentDir(MMG5_pMesh, MMG5_pPoint,int,int*,double,double);
-int    _MMG5_rootDeg3(double a[4],DOUBLE_COMPLEX r[3]);
 extern long _MMG5_safeLL2LCast(long long val);
 int    _MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met);
 int    _MMG5_scotchCall(MMG5_pMesh mesh, MMG5_pSol sol);
@@ -465,16 +490,7 @@ int    _MMG5_unscaleMesh(MMG5_pMesh mesh,MMG5_pSol met);
 int    _MMG5_interpreg_ani(MMG5_pMesh,MMG5_pSol,MMG5_pTria,char,double,double *mr);
 int    _MMG5_interp_iso(double *ma,double *mb,double *mp,double t);
 int    _MMG5_intersecmet22(MMG5_pMesh mesh, double *m,double *n,double *mr);
-
-#ifndef POSIX
-extern DOUBLE_COMPLEX _MMG5_opp_complex(DOUBLE_COMPLEX z1);
-extern DOUBLE_COMPLEX _MMG5_inv_complex(DOUBLE_COMPLEX z1);
-extern DOUBLE_COMPLEX _MMG5_add_complex(DOUBLE_COMPLEX z1,DOUBLE_COMPLEX z2);
-extern DOUBLE_COMPLEX _MMG5_substract_complex(DOUBLE_COMPLEX z1, DOUBLE_COMPLEX z2);
-extern DOUBLE_COMPLEX _MMG5_mult_complex(DOUBLE_COMPLEX z1, DOUBLE_COMPLEX z2);
-extern DOUBLE_COMPLEX _MMG5_div_complex(DOUBLE_COMPLEX z1, DOUBLE_COMPLEX z2);
-extern DOUBLE_COMPLEX _MMG5_mult_cr(DOUBLE_COMPLEX z1, double r);
-#endif
+extern int _MMG5_writeLocalParam( MMG5_pMesh mesh, FILE *out);
 
 /* function pointers */
 int    (*_MMG5_chkmsh)(MMG5_pMesh,int,int);
@@ -486,5 +502,9 @@ int    (*_MMG5_renumbering)(int vertBoxNbr, MMG5_pMesh mesh, MMG5_pSol sol);
 #endif
 
 void   _MMG5_Set_commonFunc();
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
