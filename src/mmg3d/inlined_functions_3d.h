@@ -500,7 +500,10 @@ inline double _MMG5_caltet_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt) {
 static inline
 int _MMG3D_meshQua(MMG5_pMesh mesh, MMG5_pSol met) {
   MMG5_pTetra pt;
-  int         k;
+  double      minqual;
+  int         k,iel;
+
+  minqual = 2./_MMG5_ALPHAD;
 
   /*compute tet quality*/
   for (k=1; k<=mesh->ne; k++) {
@@ -513,7 +516,17 @@ int _MMG3D_meshQua(MMG5_pMesh mesh, MMG5_pSol met) {
      else
        pt->qual = _MMG5_orcal(mesh,met,k);
 
+    if ( pt->qual < minqual ) {
+      minqual = pt->qual;
+      iel     = k;
+    }
   }
+
+  if ( minqual == 0.0 ) {
+    fprintf(stderr,"  ## ERROR: TOO BAD QUALITY FOR THE WORST ELEMENT (%d)\n",iel);
+    return(0);
+  }
+
   return(1);
 }
 
