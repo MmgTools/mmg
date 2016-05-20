@@ -302,7 +302,7 @@ int MMG2_colpoi(MMG5_pMesh mesh, MMG5_pSol sol,int iel,int iar,int ia,int ib,dou
 
   _MMG2D_delElt(mesh,iel);
   _MMG2D_delElt(mesh,jel);
-  memcpy(ppb->c,coor,3*sizeof(double));
+  memcpy(ppb->c,coor,2*sizeof(double));
   memcpy(&sol->m[sol->size*(pib-1) + 1],solu,sol->size*sizeof(double));
 
   free(list);
