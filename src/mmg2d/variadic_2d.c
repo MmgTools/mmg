@@ -91,12 +91,12 @@ void _MMG2D_Init_woalloc_mesh(MMG5_pMesh mesh, MMG5_pSol sol
 
 /**
  * \param argptr list of the mmg structures that must be initialized. Each
- * structure must follow a member of the \a MMG5_arg enum that allow to identify
- * it.  \a argptr contains at least a pointer toward a \a MMG5_pMesh structure
- * (that will contain the mesh and identified by the MMG5_ARG_ppMesh keyword)
- * and a pointer toward a \a MMG5_pSol structure (that will contain the ouput
- * metric (and the input one, if provided) and identified by the MMG5_ARG_ppMet
- * keyword).
+ * structure must follow one of the \a MMG5_ARG* preprocessor variable that
+ * allow to identify it.  \a argptr contains at least a pointer toward a \a
+ * MMG5_pMesh structure (that will contain the mesh and identified by the
+ * MMG5_ARG_ppMesh keyword) and a pointer toward a \a MMG5_pSol structure (that
+ * will contain the ouput metric (and the input one, if provided) and identified
+ * by the MMG5_ARG_ppMet keyword).
  *
  * Internal function for structure allocations (taking a va_list argument).
  *
@@ -125,8 +125,8 @@ void _MMG2D_Init_mesh_var( va_list argptr ) {
     default:
       fprintf(stderr,"  ## Error: MMG2D_Init_mesh:\n"
               " unexpected argument type: %d\n",typArg);
-      fprintf(stderr," Argument type must be one of the following members"
-              " of the MMG5_arg enum: MMG5_ARG_ppMesh, MMG5_ARG_ppMet.\n");
+      fprintf(stderr," Argument type must be one of the following"
+              " preprocessor variable: MMG5_ARG_ppMesh, MMG5_ARG_ppMet.\n");
       exit(EXIT_FAILURE);
     }
   }
@@ -141,8 +141,9 @@ void _MMG2D_Init_mesh_var( va_list argptr ) {
   if ( !sol ) {
     fprintf(stderr,"  ## Error: MMG2D_Init_mesh:\n"
             " you need to initialize a solution structure"
-            " (of type MMG5_pSol and indentified by the MMG5_ARG_ppMet member"
-            " of the MMG5_arg enum) that will contain the output mesh metric"
+            " (of type MMG5_pSol and indentified by the MMG5_ARG_ppMet"
+            " preprocessor variable)"
+            " that will contain the output mesh metric"
             " informations, and the input one, if provided.\n.");
     exit(EXIT_FAILURE);
   }
@@ -158,12 +159,12 @@ void _MMG2D_Init_mesh_var( va_list argptr ) {
 
 /**
  * \param argptr list of the mmg structures that must be deallocated. Each
- * structure must follow a member of the \a MMG5_arg enum that allow to identify
- * it.  \a argptr contains at least a pointer toward a \a MMG5_pMesh structure
- * (that will contain the mesh and identified by the MMG5_ARG_ppMesh keyword)
- * and a pointer toward a \a MMG5_pSol structure (that will contain the ouput
- * metric (and the input one, if provided) and identified by the MMG5_ARG_ppMet
- * keyword).
+ * structure must follow one of the \a MMG5_ARG preprocessor variable that allow
+ * to identify it.  \a argptr contains at least a pointer toward a \a MMG5_pMesh
+ * structure (that will contain the mesh and identified by the MMG5_ARG_ppMesh
+ * keyword) and a pointer toward a \a MMG5_pSol structure (that will contain the
+ * ouput metric (and the input one, if provided) and identified by the
+ * MMG5_ARG_ppMet keyword).
  *
  * Internal function for deallocations before return (taking a va_list as
  * argument).
@@ -196,8 +197,9 @@ void _MMG2D_Free_all_var(va_list argptr)
     default:
       fprintf(stderr,"  ## Error: MMG2D_Free_all:\n"
               " unexpected argument type: %d\n",typArg);
-      fprintf(stderr," Argument type must be one of the following members"
-              " of the MMG5_arg enum: MMG5_ARG_ppMesh or MMG5_ARG_ppMet\n");
+      fprintf(stderr," Argument type must be one of the following preprocessor"
+              " variable:"
+              " MMG5_ARG_ppMesh or MMG5_ARG_ppMet\n");
       exit(EXIT_FAILURE);
     }
   }
@@ -212,8 +214,8 @@ void _MMG2D_Free_all_var(va_list argptr)
   if ( !sol ) {
     fprintf(stderr,"  ## Error: MMG2D_Free_all:\n"
             " you need to provide your metric structure"
-            " (of type MMG5_pSol and indentified by the MMG5_ARG_ppMet member"
-            " of the MMG5_arg enum) to allow to free the associated memory.\n");
+            " (of type MMG5_pSol and indentified by the MMG5_ARG_ppMet"
+            " preprocessor variable) to allow to free the associated memory.\n");
   }
 
 
@@ -231,12 +233,12 @@ void _MMG2D_Free_all_var(va_list argptr)
 
 /**
  * \param argptr list of the mmg structures that must be deallocated. Each
- * structure must follow a member of the \a MMG5_arg enum that allow to identify
- * it.  \a argptr contains at least a pointer toward a \a MMG5_pMesh structure
- * (that will contain the mesh and identified by the MMG5_ARG_ppMesh keyword)
- * and a pointer toward a \a MMG5_pSol structure (that will contain the ouput
- * metric (and the input one, if provided) and identified by the MMG5_ARG_ppMet
- * keyword).
+ * structure must follow one of the \a MMG5_ARG* preprocessor variable that allow
+ * to identify it.  \a argptr contains at least a pointer toward a \a MMG5_pMesh
+ * structure (that will contain the mesh and identified by the MMG5_ARG_ppMesh
+ * keyword) and a pointer toward a \a MMG5_pSol structure (that will contain the
+ * ouput metric (and the input one, if provided) and identified by the
+ * MMG5_ARG_ppMet keyword).
  *
  * Internal function for structures deallocations before return (taking a
  * va_list as argument).
@@ -270,8 +272,8 @@ void _MMG2D_Free_structures_var(va_list argptr)
     default:
       fprintf(stderr,"  ## Error: MMG2D_Free_structures:\n"
               " unexpected argument type: %d\n",typArg);
-      fprintf(stderr," Argument type must be one of the following members"
-              " of the MMG5_arg enum: MMG5_ARG_ppMesh or MMG5_ARG_ppMet\n");
+      fprintf(stderr," Argument type must be one of the following"
+              " preprocessor variable: MMG5_ARG_ppMesh or MMG5_ARG_ppMet\n");
       exit(EXIT_FAILURE);
     }
   }
@@ -321,12 +323,12 @@ void _MMG2D_Free_structures_var(va_list argptr)
 
 /**
  * \param argptr list of the mmg structures for whose we want to deallocate the
- * name. Each structure must follow a member of the \a MMG5_arg enum that allow
- * to identify it.  \a argptr contains at least a pointer toward a \a MMG5_pMesh
- * structure (that will contain the mesh and identified by the MMG5_ARG_ppMesh
- * keyword) and a pointer toward a \a MMG5_pSol structure (that will contain the
- * ouput metric (and the input one, if provided) and identified by the
- * MMG5_ARG_ppMet keyword).
+ * name. Each structure must follow one of the \a MMG5_ARG* preprocessor variable
+ * that allow to identify it.  \a argptr contains at least a pointer toward a \a
+ * MMG5_pMesh structure (that will contain the mesh and identified by the
+ * MMG5_ARG_ppMesh keyword) and a pointer toward a \a MMG5_pSol structure (that
+ * will contain the ouput metric (and the input one, if provided) and identified
+ * by the MMG5_ARG_ppMet keyword).
  *
  * Internal function for name deallocations before return (taking a va_list as
  * argument).
@@ -360,8 +362,8 @@ void _MMG2D_Free_names_var(va_list argptr)
     default:
       fprintf(stderr,"  ## Error: MMG2D_Free_names:\n"
               " unexpected argument type: %d\n",typArg);
-      fprintf(stderr," Argument type must be one of the following members"
-              " of the MMG5_arg enum: MMG5_ARG_ppMesh or MMG5_ARG_ppMet\n");
+      fprintf(stderr," Argument type must be one of the following"
+              " preprocessor variable: MMG5_ARG_ppMesh or MMG5_ARG_ppMet\n");
       exit(EXIT_FAILURE);
     }
   }
@@ -375,8 +377,8 @@ void _MMG2D_Free_names_var(va_list argptr)
   if ( !sol ) {
     fprintf(stderr,"  ## Error: MMG2D_Free_names:\n"
             " you need to provide your metric structure"
-            " (of type MMG5_pSol and indentified by the MMG5_ARG_ppMet member"
-            " of the MMG5_arg enum) to allow to free the associated memory.\n");
+            " (of type MMG5_pSol and indentified by the MMG5_ARG_ppMet"
+            " preprocessor variable) to allow to free the associated memory.\n");
   }
 
   /* mesh & met */
