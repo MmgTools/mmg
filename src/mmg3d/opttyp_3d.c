@@ -216,8 +216,9 @@ int MMG3D_typelt(MMG5_pMesh mesh,int iel,int *item) {
 
     if ( isur > 2 ) {
       dd = rapmin / rapmax;
-      item[0] = iarmin;
-      item[1] = _MMG5_idir[iarmin][0];
+      item[0] = 0; //iarmin;
+      // Changed by 0 because we overflow idir
+      item[1] = 0; //_MMG5_idir[iarmin][0];
       if ( dd < 0.01 )  return(4);
       if ( s[0]+s[1] > ssmall ) {
         item[0] = 0;
@@ -248,12 +249,12 @@ int MMG3D_typelt(MMG5_pMesh mesh,int iel,int *item) {
     for (k=0; k<4; k++) {
       for (i=0; i<3; i++) {
         i0 = _MMG5_idir[k][i];
-        i1 = _MMG5_idir[k][_MMG5_inxt3[i]];
-        i2 = _MMG5_idir[k][_MMG5_inxt3[i+1]];
+        i1 = _MMG5_idir[k][_MMG5_inxt2[i]];
+        i2 = _MMG5_idir[k][_MMG5_inxt2[i+1]];
         if ( h[i0]+h[i1] < 1.2*h[i2] ) {/*1.4 ie une face obtus*/
           nobtus++;
           item[0] = i2;
-          item[1] = _MMG5_idir[k][_MMG5_inxt3[i+1]];
+          item[1] = _MMG5_idir[k][_MMG5_inxt2[i+1]];
         }
       }
     }
@@ -283,8 +284,8 @@ int MMG3D_typelt(MMG5_pMesh mesh,int iel,int *item) {
     for (k=0; k<4; k++) {
       for (i=0; i<3; i++) {
         i0 = _MMG5_idir[k][i];
-        i1 = _MMG5_idir[k][_MMG5_inxt3[i]];
-        i2 = _MMG5_idir[k][_MMG5_inxt3[i+1]];
+        i1 = _MMG5_idir[k][_MMG5_inxt2[i]];
+        i2 = _MMG5_idir[k][_MMG5_inxt2[i+1]];
         if ( h[i0]+h[i1] > 1.5*h[i2] )  naigu++;/*1.5*/
       }
     }

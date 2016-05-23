@@ -489,4 +489,45 @@ inline double _MMG5_caltet_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt) {
   return(cal);
 }
 
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the meric structure.
+ * \return 1 if success, 0 if fail.
+ *
+ * Compute the quality of the tetras over the mesh.
+ *
+ */
+static inline
+int _MMG3D_meshQua(MMG5_pMesh mesh, MMG5_pSol met) {
+  MMG5_pTetra pt;
+  double      minqual;
+  int         k,iel;
+
+  minqual = 2./_MMG5_ALPHAD;
+
+  /*compute tet quality*/
+  for (k=1; k<=mesh->ne; k++) {
+    pt = &mesh->tetra[k];
+     if( !MG_EOK(pt) )   continue;
+
+     if ( met->size == 6 && met->m ) {
+       pt->qual = _MMG5_caltet33_ani(mesh,met,pt);
+     }
+     else
+       pt->qual = _MMG5_orcal(mesh,met,k);
+
+    if ( pt->qual < minqual ) {
+      minqual = pt->qual;
+      iel     = k;
+    }
+  }
+
+  if ( minqual == 0.0 ) {
+    fprintf(stderr,"  ## ERROR: TOO BAD QUALITY FOR THE WORST ELEMENT (%d)\n",iel);
+    return(0);
+  }
+
+  return(1);
+}
+
 #endif

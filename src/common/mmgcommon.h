@@ -55,7 +55,7 @@ extern "C" {
 #include "eigenv.h"
 #include "libmmgcommon.h"
 
-#define MG_VER   "5.1.0"
+#define MG_VER   "5.1.1"
 #define MG_REL   "Dec 4, 2015"
 #define MG_CPY   "Copyright (c) IMB-LJLL, 2004-"
 #define MG_STR   "&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&"
@@ -366,7 +366,7 @@ void _MMG5_excfun(int sigid) {
 
 
 /* Global variables */
-static const unsigned char _MMG5_inxt2[3] = {1,2,0}; /*!< next vertex of triangle: {1,2,0} */
+  static const unsigned char _MMG5_inxt2[6] = {1,2,0,1,2}; /*!< next vertex of triangle: {1,2,0} */
 static const unsigned char _MMG5_iprv2[3] = {2,0,1}; /*!< previous vertex of triangle: {2,0,1} */
 
 /* Private structures */

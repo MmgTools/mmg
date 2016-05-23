@@ -162,7 +162,7 @@
 !  *
 !  */
 
-! void MMG3D_Init_mesh(enum MMG5_arg starter,...);
+! void MMG3D_Init_mesh(const int starter,...);
 ! /**
 !  * \param mesh pointer toward the mesh structure.
 !  * \param sol pointer toward the sol structure.
@@ -1533,7 +1533,7 @@ END INTERFACE
 !  *
 !  */
 
-! void MMG3D_Free_all(enum MMG5_arg starter,...);
+! void MMG3D_Free_all(const int starter,...);
 
 ! /**
 !  * \param starter dummy argument used to initialize the variadic argument
@@ -1567,7 +1567,7 @@ END INTERFACE
 !  *
 !  */
 
-! void MMG3D_Free_structures(enum MMG5_arg starter,...);
+! void MMG3D_Free_structures(const int starter,...);
 
 ! /**
 !  * \param starter dummy argument used to initialize the variadic argument
@@ -1601,7 +1601,7 @@ END INTERFACE
 !  *
 !  */
 
-! void MMG3D_Free_names(enum MMG5_arg starter,...);
+! void MMG3D_Free_names(const int starter,...);
 
 ! /* library */
 ! /**

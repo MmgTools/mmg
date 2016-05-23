@@ -45,7 +45,7 @@
  * See \ref MMG3D_Init_mesh function in common/libmmgcommon.h file.
  */
 FORTRAN_VARIADIC ( MMG3D_INIT_MESH, mmg3d_init_mesh,
-                 (enum MMG5_arg starter, ... ),
+                 (const int starter, ... ),
                  va_list argptr;
 
                  va_start(argptr, starter);
@@ -609,7 +609,7 @@ FORTRAN_NAME(MMG3D_SET_LOCALPARAMETER,mmg3d_set_localparameter,
  * See \ref MMG5_Free_all function in \ref mmg3d/libmmg3d.h file.
  */
 FORTRAN_VARIADIC(MMG3D_FREE_ALL,mmg3d_free_all,
-                 (enum MMG5_arg starter,...),
+                 (const int starter,...),
                  va_list argptr;
 
                  va_start(argptr, starter);
@@ -625,7 +625,7 @@ FORTRAN_VARIADIC(MMG3D_FREE_ALL,mmg3d_free_all,
  * See \ref MMG3D_Free_structures function in \ref mmg3d/libmmg3d.h file.
  */
 FORTRAN_VARIADIC(MMG3D_FREE_STRUCTURES,mmg3d_free_structures,
-                 (enum MMG5_arg starter,...),
+                 (const int starter,...),
                  va_list argptr;
 
                  va_start(argptr, starter);
@@ -641,7 +641,7 @@ FORTRAN_VARIADIC(MMG3D_FREE_STRUCTURES,mmg3d_free_structures,
  * See \ref MMG3D_Free_names function in \ref mmg3d/libmmg3d.h file.
  */
 FORTRAN_VARIADIC(MMG3D_FREE_NAMES,mmg3d_free_names,
-             (enum MMG5_arg starter,...),
+             (const int starter,...),
              va_list argptr;
 
              va_start(argptr, starter);

@@ -264,12 +264,15 @@ int _MMG3D_inqua(MMG5_pMesh mesh,MMG5_pSol met) {
     pt = &mesh->tetra[k];
      if( !MG_EOK(pt) )   continue;
 
-     if ( met->size == 6 && met->m ) {
-       pt->qual = _MMG5_caltet33_ani(mesh,met,pt);
+     if ( met->m ) {
+       if ( met->size == 6) {
+         pt->qual = _MMG5_caltet33_ani(mesh,met,pt);
+       }
+       else
+         pt->qual = _MMG5_orcal(mesh,met,k);
      }
-     else
-       pt->qual = _MMG5_orcal(mesh,met,k);
-
+     else // -A option
+       pt->qual = _MMG5_caltet_iso(mesh,met,pt);
   }
   if ( abs(mesh->info.imprim) <= 0 ) return(1);
 

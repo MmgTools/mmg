@@ -43,7 +43,7 @@
  * See \ref MMGS_Init_mesh function in common/libmmgcommon.h file.
  */
 FORTRAN_VARIADIC ( MMGS_INIT_MESH, mmgs_init_mesh,
-                 (enum MMG5_arg starter, ... ),
+                 (const int starter, ... ),
                  va_list argptr;
 
                  va_start(argptr, starter);
@@ -511,7 +511,7 @@ FORTRAN_NAME(MMGS_SET_LOCALPARAMETER,mmgs_set_localparameter,
  * See \ref MMGS_Free_all function in \ref mmgs/libmmgs.h file.
  */
 FORTRAN_VARIADIC(MMGS_FREE_ALL,mmgs_free_all,
-                 (enum MMG5_arg starter,...),
+                 (const int starter,...),
                  va_list argptr;
 
                  va_start(argptr, starter);
@@ -527,7 +527,7 @@ FORTRAN_VARIADIC(MMGS_FREE_ALL,mmgs_free_all,
  * See \ref MMGS_Free_structures function in \ref mmgs/libmmgs.h file.
  */
 FORTRAN_VARIADIC(MMGS_FREE_STRUCTURES,mmgs_free_structures,
-                 (enum MMG5_arg starter,...),
+                 (const int starter,...),
                  va_list argptr;
 
                  va_start(argptr, starter);
@@ -543,7 +543,7 @@ FORTRAN_VARIADIC(MMGS_FREE_STRUCTURES,mmgs_free_structures,
  * See \ref MMGS_Free_names function in \ref mmgs/libmmgs.h file.
  */
 FORTRAN_VARIADIC(MMGS_FREE_NAMES,mmgs_free_names,
-             (enum MMG5_arg starter,...),
+             (const int starter,...),
              va_list argptr;
 
              va_start(argptr, starter);

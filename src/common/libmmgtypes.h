@@ -61,20 +61,91 @@
 #include <stdarg.h>
 
 /**
- * \enum MMG5_arg
- * \brief Argument type of mmg3d structures.
+ * \def MMG5_ARG_start
+ *
+ * To begin a list of variadic arguments (mandatory first arg for all our
+ * variadic functions)
+ *
+ * \remark we cannot use an enum because used in
+ * variadic functions).
  */
-enum MMG5_arg {
-   MMG5_ARG_start,  /*!< To begin a list of variadic arguments (mandatory first arg for all our variadic functions) */
-   MMG5_ARG_ppMesh, /*!< Pointer toward a MMG5_pMesh structure (for structure allocations purposes) */
-   MMG5_ARG_ppLs,   /*!< Pointer toward a MMG5_pSol structure storing a level-set (for structure allocations purposes)  */
-   MMG5_ARG_ppMet,  /*!< Pointer toward a MMG5_pSol structure storing a metric (for structure allocations purposes)  */
-   MMG5_ARG_ppDisp, /*!< Pointer toward a MMG5_pSol structure storing a displacement (for structure allocations purposes)  */
-   MMG5_ARG_pMesh,  /*!< MMG5_pMesh structure */
-   MMG5_ARG_pMet,   /*!< MMG5_pSol structure storing a metric field */
-   MMG5_ARG_pDisp,  /*!< MMG5_pSol structure storing a displacement field */
-   MMG5_ARG_end     /*!< To end a list of variadic argument (mandatory last argument for all our variadic functions) */
-};
+#define MMG5_ARG_start  1
+/**
+ * \def MMG5_ARG_ppMesh
+ *
+ * Pointer toward a MMG5_pMesh structure (for structure allocations purposes)
+ *
+ * \remark we cannot use an enum because used in
+ * variadic functions).
+ */
+#define MMG5_ARG_ppMesh 2
+/**
+ * \def MMG5_ARG_ppLs
+ *
+ * Pointer toward a MMG5_pSol structure storing a level-set (for structure
+ * allocations purposes)
+ *
+ * \remark we cannot use an enum because used in
+ * variadic functions).
+ */
+#define MMG5_ARG_ppLs   3
+/**
+ * \def MMG5_ARG_ppMet
+ *
+ * Pointer toward a MMG5_pSol structure storing a metric (for structure
+ * allocations purposes)
+ *
+ * \remark we cannot use an enum because used in
+ * variadic functions).
+ */
+#define MMG5_ARG_ppMet  4
+/**
+ * \def MMG5_ARG_ppDisp
+ *
+ * Pointer toward a MMG5_pSol structure storing a displacement (for structure
+ * allocations purposes)
+ *
+ * \remark we cannot use an enum because used in
+ * variadic functions).
+ */
+#define MMG5_ARG_ppDisp 5
+/**
+ * \def MMG5_ARG_pMesh
+ *
+ * MMG5_pMesh structure
+ *
+ * \remark we cannot use an enum because used in
+ * variadic functions).
+ */
+#define MMG5_ARG_pMesh  6
+/**
+ * \def MMG5_ARG_pMet
+ *
+ * MMG5_pSol structure storing a metric field
+ *
+ * \remark we cannot use an enum because used in
+ * variadic functions).
+ */
+#define MMG5_ARG_pMet   7
+/**
+ * \def MMG5_ARG_pDisp
+ *
+ * MMG5_pSol structure storing a displacement field
+ *
+ * \remark we cannot use an enum because used in
+ * variadic functions).
+ */
+#define MMG5_ARG_pDisp  8
+/**
+ * \def MMG5_ARG_end
+ *
+ * To end a list of variadic argument (mandatory last argument for all our
+ * variadic functions)
+ *
+ * \remark we cannot use an enum because used in
+ * variadic functions).
+ */
+#define MMG5_ARG_end    9
 
 /**
  * \enum MMG5_type

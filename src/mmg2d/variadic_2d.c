@@ -115,7 +115,7 @@ void _MMG2D_Init_woalloc_mesh(MMG5_pMesh mesh, MMG5_pSol sol, MMG5_pSol disp) {
 
 /**
  * \param argptr list of the mmg structures that must be initialized. Each
- * structure must follow a member of the \a MMG5_arg enum that allow to identify
+ * structure must follow one of the \a MMG5_ARG* preprocessor variable that allow to identify
  * it.
  *
  * \a argptr contains at least a pointer toward a \a MMG5_pMesh structure
@@ -256,8 +256,7 @@ void _MMG2D_Free_all_var(va_list argptr)
       fprintf(stderr,"  ## Error: MMG2D_Free_all:\n"
               " unexpected argument type: %d\n",typArg);
       fprintf(stderr," Argument type must be one of the following members"
-              " of the MMG5_arg enum: MMG5_ARG_ppMesh, MMG5_ARG_ppMet,"
-              " MMG5_ppLs, MMG5_ARG_ppDisp\n");
+              " of the MMG5_arg enum: MMG5_ARG_ppMesh or MMG5_ARG_ppMet\n");
       exit(EXIT_FAILURE);
     }
   }
@@ -272,8 +271,7 @@ void _MMG2D_Free_all_var(va_list argptr)
   if ( !sol ) {
     fprintf(stderr,"  ## Error: MMG2D_Free_all:\n"
             " you need to provide your metric structure"
-            " (of type MMG5_pSol and indentified by the MMG5_ARG_ppMet or"
-            " MMG5_ARG_ppLs member"
+            " (of type MMG5_pSol and indentified by the MMG5_ARG_ppMet member"
             " of the MMG5_arg enum) to allow to free the associated memory.\n");
   }
 
@@ -302,13 +300,9 @@ void _MMG2D_Free_all_var(va_list argptr)
 /**
  * \param argptr list of the mmg structures that must be deallocated. Each
  * structure must follow a member of the \a MMG5_arg enum that allow to identify
- * it.
- *
- * \a argptr contains at least a pointer toward a \a MMG5_pMesh structure
+ * it.  \a argptr contains at least a pointer toward a \a MMG5_pMesh structure
  * (that will contain the mesh and identified by the MMG5_ARG_ppMesh keyword)
- *
- *  To call the \a MMG2D_mmg2dlib function, you must also provide
- * a pointer toward a \a MMG5_pSol structure (that will contain the ouput
+ * and a pointer toward a \a MMG5_pSol structure (that will contain the ouput
  * metric (and the input one, if provided) and identified by the MMG5_ARG_ppMet
  * keyword).
  *
@@ -356,8 +350,7 @@ void _MMG2D_Free_structures_var(va_list argptr)
       fprintf(stderr,"  ## Error: MMG2D_Free_structures:\n"
               " unexpected argument type: %d\n",typArg);
       fprintf(stderr," Argument type must be one of the following members"
-              " of the MMG5_arg enum: MMG5_ARG_ppMesh, MMG5_ARG_ppMet,"
-              " MMG5_ppLs, MMG5_ARG_ppDisp\n");
+              " of the MMG5_arg enum: MMG5_ARG_ppMesh or MMG5_ARG_ppMet\n");
       exit(EXIT_FAILURE);
     }
   }
@@ -418,23 +411,11 @@ void _MMG2D_Free_structures_var(va_list argptr)
 /**
  * \param argptr list of the mmg structures for whose we want to deallocate the
  * name. Each structure must follow a member of the \a MMG5_arg enum that allow
- * to identify it.
- *
- * \a argptr contains at least a pointer toward a \a MMG5_pMesh structure
- * (that will contain the mesh and identified by the MMG5_ARG_ppMesh keyword)
- *
- *  To call the \a MMG2D_mmg2dlib function, you must also provide
- * a pointer toward a \a MMG5_pSol structure (that will contain the ouput
- * metric (and the input one, if provided) and identified by the MMG5_ARG_ppMet
- * keyword).
- *
- *  To call the \a MMG2D_mmg2dls function, you must also provide a pointer
- * toward a \a MMG5_pSol structure (that will contain the level-set function and
- * identified by the MMG5_ARG_ppLs keyword).
- *
- *  To call the \a MMG2D_mmg2dmov library, you must also provide a
- * pointer toward a \a MMG5_pSol structure storing the displacement (and
- * identified by the MMG5_ARG_ppDisp keyword).
+ * to identify it.  \a argptr contains at least a pointer toward a \a MMG5_pMesh
+ * structure (that will contain the mesh and identified by the MMG5_ARG_ppMesh
+ * keyword) and a pointer toward a \a MMG5_pSol structure (that will contain the
+ * ouput metric (and the input one, if provided) and identified by the
+ * MMG5_ARG_ppMet keyword).
  *
  * Internal function for name deallocations before return (taking a va_list as
  * argument).
@@ -472,8 +453,7 @@ void _MMG2D_Free_names_var(va_list argptr)
       fprintf(stderr,"  ## Error: MMG2D_Free_names:\n"
               " unexpected argument type: %d\n",typArg);
       fprintf(stderr," Argument type must be one of the following members"
-              " of the MMG5_arg enum: MMG5_ARG_ppMesh, MMG5_ARG_ppMet,"
-              " MMG5_ppLs, MMG5_ARG_ppDisp\n");
+              " of the MMG5_arg enum: MMG5_ARG_ppMesh or MMG5_ARG_ppMet\n");
       exit(EXIT_FAILURE);
     }
   }
