@@ -43,7 +43,7 @@
 /**
  * Pack the mesh \a mesh and its associated metric \a met and return \a val.
  */
-#define _MMG5_RETURN_AND_PACK(mesh,met,val)do                           \
+#define _MMGS_RETURN_AND_PACK(mesh,met,val)do                           \
   {                                                                     \
     if ( !_MMGS_packMesh(mesh,met) )  {                                 \
       mesh->npi = mesh->np;                                             \
@@ -307,7 +307,7 @@ int MMGS_mmgsls(MMG5_pMesh mesh,MMG5_pSol met)
   if ( abs(mesh->info.imprim) > 0 ) {
     if ( !_MMGS_inqua(mesh,met) ) {
       if ( !_MMG5_unscaleMesh(mesh,met) )  _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
-      _MMG5_RETURN_AND_PACK(mesh,met,MMG5_LOWFAILURE);
+      _MMGS_RETURN_AND_PACK(mesh,met,MMG5_LOWFAILURE);
     }
   }
 
@@ -322,7 +322,7 @@ int MMGS_mmgsls(MMG5_pMesh mesh,MMG5_pSol met)
   if ( !_MMGS_analys(mesh) ) {
     if ( !_MMG5_unscaleMesh(mesh,met) )
       _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
-    _MMG5_RETURN_AND_PACK(mesh,met,MMG5_LOWFAILURE);
+    _MMGS_RETURN_AND_PACK(mesh,met,MMG5_LOWFAILURE);
   }
 
   chrono(OFF,&(ctim[2]));
@@ -342,7 +342,7 @@ int MMGS_mmgsls(MMG5_pMesh mesh,MMG5_pSol met)
       _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
     }
     if ( !_MMG5_unscaleMesh(mesh,met) )  _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
-    _MMG5_RETURN_AND_PACK(mesh,met,MMG5_LOWFAILURE);
+    _MMGS_RETURN_AND_PACK(mesh,met,MMG5_LOWFAILURE);
   }
 
   chrono(OFF,&(ctim[3]));
@@ -355,7 +355,7 @@ int MMGS_mmgsls(MMG5_pMesh mesh,MMG5_pSol met)
   /* save file */
   if (!_MMGS_outqua(mesh,met) ) {
     if ( !_MMG5_unscaleMesh(mesh,met) )  _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
-    _MMG5_RETURN_AND_PACK(mesh,met,MMG5_LOWFAILURE);
+    _MMGS_RETURN_AND_PACK(mesh,met,MMG5_LOWFAILURE);
   }
 
   chrono(ON,&(ctim[1]));
@@ -444,13 +444,13 @@ int MMGS_mmgslib(MMG5_pMesh mesh,MMG5_pSol met)
   if ( !_MMGS_analys(mesh) ) {
     if ( !_MMG5_unscaleMesh(mesh,met) )
       _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
-    _MMG5_RETURN_AND_PACK(mesh,met,MMG5_LOWFAILURE);
+    _MMGS_RETURN_AND_PACK(mesh,met,MMG5_LOWFAILURE);
   }
 
   if ( abs(mesh->info.imprim) > 0 ) {
     if ( !_MMGS_inqua(mesh,met) ) {
       if ( !_MMG5_unscaleMesh(mesh,met) )  _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
-      _MMG5_RETURN_AND_PACK(mesh,met,MMG5_LOWFAILURE);
+      _MMGS_RETURN_AND_PACK(mesh,met,MMG5_LOWFAILURE);
     }
   }
 
@@ -474,7 +474,7 @@ int MMGS_mmgslib(MMG5_pMesh mesh,MMG5_pSol met)
       _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
     }
     if ( !_MMG5_unscaleMesh(mesh,met) )  _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
-    _MMG5_RETURN_AND_PACK(mesh,met,MMG5_LOWFAILURE);
+    _MMGS_RETURN_AND_PACK(mesh,met,MMG5_LOWFAILURE);
   }
 
   chrono(OFF,&(ctim[3]));
@@ -487,7 +487,7 @@ int MMGS_mmgslib(MMG5_pMesh mesh,MMG5_pSol met)
   /* save file */
   if (!_MMGS_outqua(mesh,met) ) {
     if ( !_MMG5_unscaleMesh(mesh,met) )  _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
-    _MMG5_RETURN_AND_PACK(mesh,met,MMG5_LOWFAILURE);
+    _MMGS_RETURN_AND_PACK(mesh,met,MMG5_LOWFAILURE);
   }
 
   if ( mesh->info.imprim > 1 )

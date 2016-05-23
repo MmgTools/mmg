@@ -161,10 +161,14 @@ int MMG3D_Set_meshSize(MMG5_pMesh mesh, int np, int ne, int nt, int na) {
   mesh->nti = mesh->nt;
   mesh->nai = mesh->na;
 
-  if ( !np || !ne ) {
+  if ( !np ) {
     fprintf(stderr,"  ** MISSING DATA:\n");
-    fprintf(stderr,"     Your mesh must contains at least points and tetra.\n");
+    fprintf(stderr,"     Your mesh must contains at least points.\n");
     return(0);
+  }
+  if ( !ne && (mesh->info.imprim > 4 || mesh->info.ddebug) ) {
+    fprintf(stdout,"  ** WARNING:\n");
+    fprintf(stdout,"     Your mesh don't contains tetrahedra.\n");
   }
 
   if ( mesh->point )

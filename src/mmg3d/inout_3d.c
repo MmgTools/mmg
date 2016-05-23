@@ -1275,7 +1275,9 @@ int MMG3D_saveMesh(MMG5_pMesh mesh, const char *filename) {
   ne = nereq = 0;
   for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
-    if ( !MG_EOK(pt) ) continue;
+    if ( !MG_EOK(pt) ) {
+      continue;
+    }
     ne++;
     if ( pt->tag & MG_REQ ){
       nereq++;
