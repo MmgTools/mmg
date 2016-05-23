@@ -895,7 +895,7 @@ int  MMG2D_Set_scalarSols(MMG5_pSol met, double *s) {
 
   if ( !met->np ) {
     fprintf(stderr,"  ## Error: You must set the number of solution with the");
-    fprintf(stderr," MMG3D_Set_solSize function before setting values");
+    fprintf(stderr," MMG2D_Set_solSize function before setting values");
     fprintf(stderr," in solution structure \n");
     return(0);
   }
@@ -914,6 +914,110 @@ int  MMG2D_Get_scalarSols(MMG5_pSol met, double* s) {
 
   return(1);
 }
+
+int MMG2D_Set_vectorSol(MMG5_pSol met, double vx,double vy, int pos) {
+  int isol;
+
+  if ( !met->np ) {
+    fprintf(stderr,"  ## Error: You must set the number of solution with the");
+    fprintf(stderr," MMG2D_Set_solSize function before setting values");
+    fprintf(stderr," in solution structure \n");
+    return(0);
+  }
+  if ( pos < 1 ) {
+    fprintf(stderr,"  ## Error: unable to set a new solution.\n");
+    fprintf(stderr,"    Minimal index of the solution position must be 1.\n");
+    return(0);
+  }
+  if ( pos >= met->npmax ) {
+    fprintf(stderr,"  ## Error: unable to set a new solution.\n");
+    fprintf(stderr,"    max number of solutions: %d\n",met->npmax);
+    return(0);
+  }
+
+  if ( pos > met->np ) {
+    fprintf(stderr,"  ## Error: attempt to set new solution at position %d.",pos);
+    fprintf(stderr," Overflow of the given number of solutions: %d\n",met->np);
+    fprintf(stderr,"  ## Check the solution size, its compactness or the position");
+    fprintf(stderr," of the solution.\n");
+    return(0);
+  }
+
+  isol = (pos-1) * met->size + 1;
+
+  met->m[isol]   = vx;
+  met->m[isol+1] = vy;
+
+  return(1);
+}
+
+
+int MMG2D_Get_vectorSol(MMG5_pSol met, double* vx, double* vy) {
+
+  int ddebug = 0;
+
+  if ( met->npi == met->np ) {
+    met->npi = 0;
+    if ( ddebug ) {
+      fprintf(stdout,"  ## Warning: reset the internal counter of points.\n");
+      fprintf(stdout,"     You must pass here exactly one time (the first time ");
+      fprintf(stdout,"you call the MMG2D_Get_vectorSol function).\n");
+      fprintf(stdout,"     If not, the number of call of this function");
+      fprintf(stdout," exceed the number of points: %d\n ",met->np);
+    }
+  }
+
+  met->npi++;
+
+  if ( met->npi > met->np ) {
+    fprintf(stderr,"  ## Error: unable to get solution.\n");
+    fprintf(stderr,"     The number of call of MMG2D_Get_vectorSol function");
+    fprintf(stderr," can not exceed the number of points: %d\n ",met->np);
+    return(0);
+  }
+
+  *vx = met->m[met->size*(met->npi-1)+1];
+  *vy = met->m[met->size*(met->npi-1)+2];
+
+  return(1);
+}
+
+int MMG2D_Set_vectorSols(MMG5_pSol met, double *sols) {
+  double *m;
+  int k,j;
+
+  if ( !met->np ) {
+    fprintf(stderr,"  ## Error: You must set the number of solution with the");
+    fprintf(stderr," MMG2D_Set_solSize function before setting values");
+    fprintf(stderr," in solution structure \n");
+    return(0);
+  }
+
+  for ( k=0; k<met->np; ++k ) {
+    j = 2*k;
+    m = &met->m[j];
+    m[1] = sols[j];
+    m[2] = sols[j+1];
+  }
+
+  return(1);
+}
+
+int MMG2D_Get_vectorSols(MMG5_pSol met, double* sols) {
+  double *m;
+  int k, j;
+
+  for ( k=0; k<met->np; ++k ) {
+    j = 2*k;
+    m = &met->m[j];
+
+    sols[j]   = m[1];
+    sols[j+1] = m[2];
+  }
+
+  return(1);
+}
+
 
 int MMG2D_Set_tensorSol(MMG5_pSol met, double m11, double m12, double m22,
                         int pos) {
@@ -983,7 +1087,7 @@ int MMG2D_Set_tensorSols(MMG5_pSol met, double *sols) {
 
   if ( !met->np ) {
     fprintf(stderr,"  ## Error: You must set the number of solution with the");
-    fprintf(stderr," MMG3D_Set_solSize function before setting values");
+    fprintf(stderr," MMG2D_Set_solSize function before setting values");
     fprintf(stderr," in solution structure \n");
     return(0);
   }

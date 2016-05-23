@@ -380,6 +380,45 @@ FORTRAN_NAME(MMG2D_GET_SCALARSOLS,mmg2d_get_scalarsols,
   return;
 }
 
+/**
+ * See \ref MMG2D_Set_vectorSol function in \ref mmg2d/libmmg2d.h file.
+ */
+FORTRAN_NAME(MMG2D_SET_VECTORSOL,mmg2d_set_vectorsol,
+             (MMG5_pSol *met, double *vx, double *vy,
+              int *pos, int* retval),
+             (met,vx,vy,pos,retval)) {
+  *retval = MMG2D_Set_vectorSol(*met,*vx,*vy,*pos);
+  return;
+}
+
+/**
+ * See \ref MMG2D_Get_vectorSol function in \ref mmg2d/libmmg2d.h file.
+ */
+FORTRAN_NAME(MMG2D_GET_VECTORSOL,mmg2d_get_vectorsol,
+             (MMG5_pSol *met, double* vx,double *vy, int* retval),
+             (met,vx,vy,retval)) {
+  *retval = MMG2D_Get_vectorSol(*met,vx,vy);
+  return;
+}
+/**
+ * See \ref MMG2D_Set_vectorSols function in \ref mmg2d/libmmg2d.h file.
+ */
+FORTRAN_NAME(MMG2D_SET_VECTORSOLS,mmg2d_set_vectorsols,
+             (MMG5_pSol *met, double *sols, int* retval),
+             (met,sols,retval)) {
+  *retval = MMG2D_Set_vectorSols(*met,sols);
+  return;
+}
+
+/**
+ * See \ref MMG2D_Get_vectorSols function in \ref mmg2d/libmmg2d.h file.
+ */
+FORTRAN_NAME(MMG2D_GET_VECTORSOLS,mmg2d_get_vectorsols,
+             (MMG5_pSol *met, double* sols, int* retval),
+             (met,sols,retval)) {
+  *retval = MMG2D_Get_vectorSols(*met,sols);
+  return;
+}
 
 /**
  * See \ref MMG2D_Set_tensorSol function in \ref mmg2d/libmmg2d.h file.

@@ -102,12 +102,13 @@ int MMG2D_doSol(MMG5_pMesh mesh,MMG5_pSol sol) {
   return(1);
 }
 
-/* New version for the definition of a size map; takes into account the curvature of the 
- external and internal curves present in the mesh */
+/* New version for the definition of a size map; takes into account the
+ curvature of the external and internal curves present in the mesh */
 int _MMG2_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTria       pt;
   MMG5_pPoint      p1,p2;
-  double           t1[2],t2[2],b1[0],b2[0],gpp1[2],gpp2[2],pv,cosn,M1,M2,ps1,ps2,ux,uy,ll,li,lm,hmax,hausd,hmin;
+  double           t1[2],t2[2],b1[2],b2[2],gpp1[2],gpp2[2],pv,cosn,M1,M2;
+  double           ps1,ps2,ux,uy,ll,li,lm,hmax,hausd,hmin;
   int              k,ip1,ip2;
   unsigned char    i,i1,i2;
   

@@ -116,7 +116,6 @@ int _MMG2_anatri(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
     if ( (abs(mesh->info.imprim) < 5 || mesh->info.ddebug ) && nns+nnc > 0 )
       fprintf(stdout,"     %8d splitted, %8d collapsed, %8d swapped, %d iter.\n",nns,nnc,nnsw,it);
   }
-
   return(1);
 }
 
