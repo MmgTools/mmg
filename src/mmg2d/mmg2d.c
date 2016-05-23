@@ -177,15 +177,12 @@ int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,double *qdegrad) 
         else if ( !strcmp(argv[i],"-ls") ) {
           if ( !MMG2D_Set_iparameter(mesh,met,MMG2D_IPARAM_iso,1) )
             exit(EXIT_FAILURE);
-          /* if ( ++i < argc && isdigit(argv[i][0]) ) { */
-          /*   if ( !MMG2D_Set_dparameter(mesh,met,MMG2D_DPARAM_ls,atof(argv[i])) ) */
-          /*     exit(EXIT_FAILURE); */
-          /* } */
-          /* else if ( i == argc ) { */
-          /*   fprintf(stderr,"Missing argument option %c%c\n",argv[i-1][1],argv[i-1][2]); */
-          /*   usage(argv[0]); */
-          /* } */
-          /* else i--; */
+          if ( ++i < argc && (isdigit(argv[i][0]) ||
+                              (argv[i][0]=='-' && isdigit(argv[i][1])) ) ) {
+            if ( !MMG2D_Set_dparameter(mesh,met,MMG2D_DPARAM_ls,atof(argv[i])) )
+              exit(EXIT_FAILURE);
+          }
+          else i--;
         }
         break;
       case 'm':  /* memory */

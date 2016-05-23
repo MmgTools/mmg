@@ -45,6 +45,7 @@
  assumption: the triangle k has vertex i with value 0 and the other two with changing values */
 int _MMG2_ismaniball(MMG5_pMesh mesh, MMG5_pSol sol, int start, char istart) {
   MMG5_pTria       pt;
+  double           v1, v2;
   int              *adja,k,ip1,ip2,end1;
   char             i,i1,smsgn;
 
@@ -64,8 +65,11 @@ int _MMG2_ismaniball(MMG5_pMesh mesh, MMG5_pSol sol, int start, char istart) {
     pt = &mesh->tria[k];
     ip1 = pt->v[i1];
     ip2 = pt->v[i];
+    
+    v1 = sol->m[ip1]-mesh->info.ls;
+    v2 = sol->m[ip2]-mesh->info.ls;
 
-    smsgn = MG_SMSGN(sol->m[ip1],sol->m[ip2]) ? 1 : 0;
+    smsgn = MG_SMSGN(v1,v2) ? 1 : 0;
   }
   while ( smsgn );
 
@@ -85,8 +89,11 @@ int _MMG2_ismaniball(MMG5_pMesh mesh, MMG5_pSol sol, int start, char istart) {
     pt = &mesh->tria[k];
     ip1 = pt->v[i1];
     ip2 = pt->v[i];
+    
+    v1 = sol->m[ip1]-mesh->info.ls;
+    v2 = sol->m[ip2]-mesh->info.ls;
 
-    smsgn = MG_SMSGN(sol->m[ip1],sol->m[ip2]) ? 1 : 0;
+    smsgn = MG_SMSGN(v1,v2) ? 1 : 0;
   }
   while ( smsgn );
 
@@ -103,6 +110,7 @@ int _MMG2_ismaniball(MMG5_pMesh mesh, MMG5_pSol sol, int start, char istart) {
 int _MMG2_snapval(MMG5_pMesh mesh, MMG5_pSol sol, double *tmp) {
   MMG5_pTria       pt;
   MMG5_pPoint      p0;
+  double           v1,v2;
   int              k,ns,nc,ip,ip1,ip2;
   char             i;
 
@@ -115,8 +123,9 @@ int _MMG2_snapval(MMG5_pMesh mesh, MMG5_pSol sol, double *tmp) {
   for (k=1; k<=mesh->np; k++) {
     p0 = &mesh->point[k];
     if ( !MG_VOK(p0) ) continue;
-    if ( fabs(sol->m[k]) < _MMG5_EPS ) {
-      tmp[k] = ( fabs(sol->m[k]) < _MMG5_EPSD ) ? (-100.0*_MMG5_EPS) : sol->m[k];
+    if ( fabs(sol->m[k]-mesh->info.ls) < _MMG5_EPS ) {
+      tmp[k] = ( fabs(sol->m[k]-mesh->info.ls) < _MMG5_EPSD ) ?
+        (mesh->info.ls-100.0*_MMG5_EPS) : sol->m[k];
       p0->flag = 1;
       sol->m[k] = 0.0;
       ns++;
@@ -133,16 +142,20 @@ int _MMG2_snapval(MMG5_pMesh mesh, MMG5_pSol sol, double *tmp) {
       ip = pt->v[i];
       ip1 = pt->v[_MMG5_inxt2[i]];
       ip2 = pt->v[_MMG5_iprv2[i]];
+      
+      p0 = &mesh->point[ip];
+      v1 = sol->m[ip1]-mesh->info.ls;
+      v2 = sol->m[ip2]-mesh->info.ls;
 
       p0 = &mesh->point[ip];
       /* Catch a snapped point by a triangle where there is a sign change */
-      if ( p0->flag && !(MG_SMSGN(sol->m[ip1],sol->m[ip2])) ) {
+      if ( p0->flag && !(MG_SMSGN(v1,v2)) ) {
         if ( !_MMG2_ismaniball(mesh,sol,k,i) ) {
           sol->m[ip] = tmp[ip];
           nc++;
         }
         p0->flag = 0;
-        tmp[ip] = 0.0;
+        tmp[ip] = mesh->info.ls;
       }
     }
   }
@@ -237,6 +250,7 @@ int _MMG2_chkmanimesh(MMG5_pMesh mesh) {
     if ( !MG_EOK(pt) ) continue;
 
     adja = &mesh->adja[3*(k-1)+1];
+    cnt = 0;
     for (i=0; i<3; i++) {
       iel = adja[i] / 3;
 
@@ -274,7 +288,6 @@ int _MMG2_chkmanimesh(MMG5_pMesh mesh) {
       if ( !_MMG2_chkmaniball(mesh,k,i1) )
         return(0);
     }
-
   }
 
   if ( mesh->info.imprim || mesh->info.ddebug )
@@ -313,8 +326,8 @@ int _MMG2_cuttri_ls(MMG5_pMesh mesh, MMG5_pSol sol){
 
       if ( p0->flag && p1->flag ) continue;
 
-      v0 = sol->m[ip0];
-      v1 = sol->m[ip1];
+      v0 = sol->m[ip0]-mesh->info.ls;
+      v1 = sol->m[ip1]-mesh->info.ls;
 
       if ( fabs(v0) > _MMG5_EPSD2 && fabs(v1) > _MMG5_EPSD2 && v0*v1 < 0.0 ) {
         nb++;
@@ -345,8 +358,8 @@ int _MMG2_cuttri_ls(MMG5_pMesh mesh, MMG5_pSol sol){
       np = _MMG5_hashGet(&hash,ip0,ip1);
       if ( np ) continue;
 
-      v0 = sol->m[ip0];
-      v1 = sol->m[ip1];
+      v0 = sol->m[ip0]-mesh->info.ls;
+      v1 = sol->m[ip1]-mesh->info.ls;
 
       if ( fabs(v0) < _MMG5_EPSD2 || fabs(v1) < _MMG5_EPSD2 )  continue;
       else if ( MG_SMSGN(v0,v1) )  continue;
@@ -364,7 +377,7 @@ int _MMG2_cuttri_ls(MMG5_pMesh mesh, MMG5_pSol sol){
         printf("*** Insufficient memory; abort\n");
         return(0);
       }
-      sol->m[np] = 0.0;
+      sol->m[np] = mesh->info.ls;
       _MMG5_hashEdge(mesh,&hash,ip0,ip1,np);
     }
   }
@@ -421,7 +434,8 @@ int _MMG2_cuttri_ls(MMG5_pMesh mesh, MMG5_pSol sol){
 /* Set references to the new triangles */
 int _MMG2_setref_ls(MMG5_pMesh mesh, MMG5_pSol sol){
   MMG5_pTria    pt;
-  int           k,ip;
+  double        v,v1;
+  int           k,ip,ip1;
   char          i,nmn,npl,nz;
 
   for (k=1; k<=mesh->nt; k++) {
@@ -431,10 +445,11 @@ int _MMG2_setref_ls(MMG5_pMesh mesh, MMG5_pSol sol){
     nmn = npl = nz = 0;
     for (i=0; i<3; i++) {
       ip = pt->v[i];
-
-      if ( sol->m[ip] > 0.0 )
+      v = sol->m[ip]-mesh->info.ls;
+ 
+      if ( v > 0.0 )
         npl++;
-      else if ( sol->m[ip] < 0.0 )
+      else if ( v < 0.0 )
         nmn++;
       else
         nz++;
@@ -449,6 +464,21 @@ int _MMG2_setref_ls(MMG5_pMesh mesh, MMG5_pSol sol){
       assert ( !npl );
       pt->ref = MG_MINUS;
     }
+
+    // Set MG_ISO ref at ls edges
+    if ( nz == 2 ) {
+      for (i=0; i<3; i++) {
+        ip  = pt->v[_MMG5_inxt2[i]];
+        ip1 = pt->v[_MMG5_iprv2[i]];
+        v   = sol->m[ip] -mesh->info.ls;
+        v1  = sol->m[ip1]-mesh->info.ls;
+        if ( v == 0.0 && v1 == 0.0) {
+          pt->edg[i]  = MG_ISO;
+          pt->tag[i] |= MG_REF;
+        }
+      }
+    }
+
   }
 
   return(1);
