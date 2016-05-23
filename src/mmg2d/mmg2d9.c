@@ -530,12 +530,10 @@ int MMG2_mmg2d9(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met) {
   for (itmn=1; itmn<=maxitmn; itmn++) {
 
     /* Extension of the displacement field */
-#ifdef JAMAIS
     if ( !_MMG2_velextLS(mesh,disp) ) {
       fprintf(stdout,"  ## Problem in func. _MMG2_velextLS. Exit program.\n");
       return(0);
     }
-#endif
 
     /* Sequence of dichotomy loops to find the largest admissible displacements */
     for (itdc=1; itdc<=maxitdc; itdc++) {

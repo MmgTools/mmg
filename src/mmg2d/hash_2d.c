@@ -46,31 +46,31 @@ int MMG2_hashTria(MMG5_pMesh mesh) {
   int      *hcode,*link,inival,hsize,iadr;
   unsigned char   i,ii,i1,i2;
   unsigned int    key;
-  
+
   if ( mesh->adja )  return(1);
   if ( !mesh->nt )  return(0);
-  
+
   /* memory alloc */
   _MMG5_SAFE_CALLOC(hcode,mesh->nt+1,int);
-  
+
   /* memory alloc */
   _MMG5_ADD_MEM(mesh,(3*mesh->ntmax+5)*sizeof(int),"adjacency table",
                 printf("  Exit program.\n");
                 exit(EXIT_FAILURE));
   _MMG5_SAFE_CALLOC(mesh->adja,3*mesh->ntmax+5,int);
-  
+
   link  = mesh->adja;
   hsize = mesh->nt;
-  
+
   /* init */
   inival = 2147483647;
   for (k=0; k<=mesh->nt; k++)
     hcode[k] = -inival;
-  
+
   /* build hash table */
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
-    
+
     if ( !pt->v[0] )  continue;
     for (i=0; i<3; i++) {
       i1 = MMG2_idir[i+1];
@@ -83,18 +83,18 @@ int MMG2_hashTria(MMG5_pMesh mesh) {
         mins = pt->v[i2];
         maxs = pt->v[i1];
       }
-      
+
       /* compute key */
       key = KTA*mins + KTB*maxs;
       key = key % hsize + 1;
-      
+
       /* insert */
       iadr = 3*(k-1) + i+1;
       link[iadr] = hcode[key];
       hcode[key] = -iadr;
     }
   }
-  
+
   /* set adjacency */
   for (l=3*mesh->nt; l>0; l--) {
     if ( link[l] >= 0 )  continue;
@@ -103,10 +103,10 @@ int MMG2_hashTria(MMG5_pMesh mesh) {
     i1 = MMG2_idir[i+1];
     i2 = MMG2_idir[i+2];
     pt = &mesh->tria[k];
-    
+
     mins = M_MIN(pt->v[i1],pt->v[i2]);
     maxs = M_MAX(pt->v[i1],pt->v[i2]);
-    
+
     /* accross link */
     ll = -link[l];
     pp = 0;
@@ -126,7 +126,7 @@ int MMG2_hashTria(MMG5_pMesh mesh) {
         mins1 = pt1->v[i2];
         maxs1 = pt1->v[i1];
       }
-      
+
       if ( mins1 == mins  && maxs1 == maxs ) {
         /* adjacent found */
         if ( pp != 0 )  link[pp] = link[ll];
@@ -139,7 +139,7 @@ int MMG2_hashTria(MMG5_pMesh mesh) {
     }
   }
   _MMG5_SAFE_FREE(hcode);
-  
+
   return(1);
 }
 
@@ -200,30 +200,30 @@ int MMG2_assignEdge(MMG5_pMesh mesh) {
   MMG5_pEdge      pa;
   int             k,ia;
   char            i,i1,i2;
-  
+
   if ( !mesh->na ) return(1);
-  
+
   /* Temporarily allocate a hash structure for storing edges */
   hash.siz = mesh->na;
   hash.max = 3*mesh->na+1;
-  
+
   _MMG5_ADD_MEM(mesh,(hash.max+1)*sizeof(_MMG5_Hash),"hash table",return(0));
   _MMG5_SAFE_CALLOC(hash.item,hash.max+1,_MMG5_hedge);
-  
+
   hash.nxt = mesh->na;
-  
+
   for (k=mesh->na; k<hash.max; k++)
     hash.item[k].nxt = k+1;
-  
+
   /* hash mesh edges */
   for (k=1; k<=mesh->na; k++)
     _MMG5_hashEdge(mesh,&hash,mesh->edge[k].a,mesh->edge[k].b,k);
-  
+
   /* set references to triangles */
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
     if ( !MG_EOK(pt) )  continue;
-    
+
     for (i=0; i<3; i++) {
       i1 = _MMG5_inxt2[i];
       ia = _MMG5_hashGet(&hash,pt->v[i],pt->v[i1]);
@@ -235,17 +235,17 @@ int MMG2_assignEdge(MMG5_pMesh mesh) {
       }
     }
   }
-  
+
   /* Delete the hash for edges */
   _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
   _MMG5_DEL_MEM(mesh,mesh->edge,(mesh->na+1)*sizeof(MMG5_Edge));
   mesh->na = 0;
-  
+
   return(1);
 }
 
-/* Create the edges in the mesh from the information stored in the triangles, or 
- by identifying the different components of the mesh 
+/* Create the edges in the mesh from the information stored in the triangles, or
+ by identifying the different components of the mesh
 ******* Possible extension needed to take into account constrained edges *********** */
 int MMG2_bdryEdge(MMG5_pMesh mesh) {
   MMG5_pTria      pt,pt1;
@@ -253,50 +253,50 @@ int MMG2_bdryEdge(MMG5_pMesh mesh) {
   MMG5_pPoint     p0;
   int             k,*adja,natmp,iel;
   char            i,i1,i2;
-  
+
   natmp = 0;
   mesh->na = 0;
-  
+
   /* First step: Count number of boundary edges */
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
     if ( !MG_EOK(pt) ) continue;
-    
+
     adja = &mesh->adja[3*(k-1)+1];
-    
+
     for (i=0; i<3; i++) {
       iel = adja[i] / 3;
       pt1 = &mesh->tria[iel];
-      
+
       if ( iel && pt->ref <= pt1->ref ) continue;
       natmp++;
     }
   }
-  
+
   /* Second step: Create edge mesh and store the corresponding edges */
   _MMG5_ADD_MEM(mesh,(natmp+1)*sizeof(MMG5_Edge),"edges",return(0));
   _MMG5_SAFE_CALLOC(mesh->edge,natmp+1,MMG5_Edge);
-  
+
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
     if ( !MG_EOK(pt) ) continue;
-    
+
     adja = &mesh->adja[3*(k-1)+1];
-    
+
     for (i=0; i<3; i++) {
       iel = adja[i] / 3;
       pt1 = &mesh->tria[iel];
-      
+
       if ( iel && pt->ref <= pt1->ref ) continue;
-      
+
       i1 = _MMG5_inxt2[i];
       i2 = _MMG5_inxt2[i1];
-      
+
       mesh->na++;
       pa = &mesh->edge[mesh->na];
       pa->a = pt->v[i1];
       pa->b = pt->v[i2];
-      
+
       /* Case of an external boundary edge */
       if ( !iel ) {
         pa->tag = pt->tag[i];
@@ -308,7 +308,7 @@ int MMG2_bdryEdge(MMG5_pMesh mesh) {
       }
     }
   }
-  
+
   /* Set point tags */
   for (k=1; k<=mesh->na; k++) {
     pa = &mesh->edge[k];
@@ -318,7 +318,7 @@ int MMG2_bdryEdge(MMG5_pMesh mesh) {
     p0 = &mesh->point[pa->b];
     p0->tag |= MG_BDY;
   }
-  
+
   return(1);
 }
 
@@ -331,7 +331,6 @@ int MMG2_bdryEdge(MMG5_pMesh mesh) {
  * Pack the mesh and metric and create explicitly all the mesh structures
  * (edges).
  *
- * \warning edges are not packed.
  */
 int MMG2_pack(MMG5_pMesh mesh,MMG5_pSol sol) {
   MMG5_pTria         pt,pt1,ptnew;
@@ -340,13 +339,13 @@ int MMG2_pack(MMG5_pMesh mesh,MMG5_pSol sol) {
   int                np,ned,nt,k,iel,nbl,isol,isolnew,memWarn;
   int                iadr,iadrnew,iadrv,*adjav,*adja,*adjanew,voy;
   char               i,i1,i2;
-  
+
   /* Recreate adjacencies if need be */
   if ( !MMG2_hashTria(mesh) ) {
     fprintf(stdout,"  ## Hashing problem. Exit program.\n");
     return(0);
   }
-  
+
   /* Pack vertex indices */
   np = 0;
   for (k=1; k<=mesh->np; k++) {
@@ -354,17 +353,17 @@ int MMG2_pack(MMG5_pMesh mesh,MMG5_pSol sol) {
     if ( !MG_VOK(ppt) )  continue;
     ppt->tmp = ++np;
   }
-  
+
   /* Count the number of edges in the mesh */
   memWarn = 0;
   ned = 0;
-  
+
   mesh->na = 0;
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
     if ( !MG_EOK(pt) ) continue;
     adja = &mesh->adja[3*(k-1)+1];
-    
+
     for (i=0; i<3; i++) {
       iel = adja[i] / 3;
       if ( !iel ) ++mesh->na;
@@ -374,12 +373,12 @@ int MMG2_pack(MMG5_pMesh mesh,MMG5_pSol sol) {
       }
     }
   }
-  
+
   /* Pack edges */
   if ( mesh->na ) {
     assert ( !mesh->edge );
     _MMG5_ADD_MEM(mesh,(mesh->namax+1)*sizeof(MMG5_Edge),"final edges", memWarn=1);
-    
+
     if ( memWarn ) {
       if ( mesh->info.ddebug )
         printf("  -- Attempt to allocate a smallest edge table...\n");
@@ -389,18 +388,18 @@ int MMG2_pack(MMG5_pMesh mesh,MMG5_pSol sol) {
                     printf("  ## Warning: uncomplete mesh.\n");
                     memWarn=1);
     }
-    
+
     if ( memWarn )
       mesh->na = 0;
     else {
       /* We have enough memory to allocate the edge table */
       _MMG5_SAFE_CALLOC(mesh->edge,(mesh->namax+1),MMG5_Edge);
-      
+
       for (k=1; k<=mesh->nt; k++) {
         pt = &mesh->tria[k];
         if ( !MG_EOK(pt) ) continue;
         adja = &mesh->adja[3*(k-1)+1];
-        
+
         for (i=0; i<3; i++) {
           i1 = _MMG5_inxt2[i];
           i2 = _MMG5_iprv2[i];
@@ -411,6 +410,9 @@ int MMG2_pack(MMG5_pMesh mesh,MMG5_pSol sol) {
             ped = &mesh->edge[ned];
             ped->a = pt->v[i1];
             ped->b = pt->v[i2];
+            /* the base field is used to be able to recover the tria (and its face)
+             * from which comes a boundary edge */
+            ped->base = 3*k+i;
             if ( !iel ) {
               ped->ref = pt->edg[i];
             }
@@ -422,36 +424,36 @@ int MMG2_pack(MMG5_pMesh mesh,MMG5_pSol sol) {
       }
     }
   }
-  
+
   for (k=1; k<=mesh->na; k++) {
     ped  = &mesh->edge[k];
     if ( !ped->a ) continue;
     ped->a = mesh->point[ped->a].tmp;
     ped->b = mesh->point[ped->b].tmp;
   }
-  
+
   /* Pack triangles */
   nt  = 0;
   nbl = 1;
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
     if ( !MG_EOK(pt) ) continue;
-    
+
     pt->v[0] = mesh->point[pt->v[0]].tmp;
     pt->v[1] = mesh->point[pt->v[1]].tmp;
     pt->v[2] = mesh->point[pt->v[2]].tmp;
     nt++;
-    
+
     if ( k != nbl ) {
       ptnew = &mesh->tria[nbl];
       memcpy(ptnew,pt,sizeof(MMG5_Tria));
-      
+
       /* Update the adjacency */
       iadr = 3*(k-1) + 1;
       adja = &mesh->adja[iadr];
       iadrnew = 3*(nbl-1) + 1;
       adjanew = &mesh->adja[iadrnew];
-      
+
       for(i=0; i<3; i++) {
         adjanew[i] = adja[i];
         if ( !adja[i] ) continue;
@@ -466,7 +468,7 @@ int MMG2_pack(MMG5_pMesh mesh,MMG5_pSol sol) {
     nbl++;
   }
   mesh->nt = nt;
-  
+
   /* Pack metric map */
   if ( sol->m ) {
     nbl = 1;
@@ -475,20 +477,20 @@ int MMG2_pack(MMG5_pMesh mesh,MMG5_pSol sol) {
       if ( !MG_VOK(ppt) )  continue;
       isol    = (k-1) * sol->size + 1;
       isolnew = (nbl-1) * sol->size + 1;
-      
+
       for (i=0; i<sol->size; i++)
         sol->m[isolnew + i] = sol->m[isol + i];
       ++nbl;
     }
   }
-  
+
   /* Pack vertices*/
   np  = 0;
   nbl = 1;
   for (k=1; k<=mesh->np; k++) {
     ppt = &mesh->point[k];
     if ( !MG_VOK(ppt) )  continue;
-    
+
     if ( k != nbl ) {
       pptnew = &mesh->point[nbl];
       memcpy(pptnew,ppt,sizeof(MMG5_Point));
@@ -505,11 +507,11 @@ int MMG2_pack(MMG5_pMesh mesh,MMG5_pSol sol) {
   }
   mesh->np = np;
   if ( sol->m ) sol->np  = np;
-  
+
   /* Reset ppt->tmp field */
   for(k=1 ; k<=mesh->np ; k++)
     mesh->point[k].tmp = 0;
-  
+
   if(mesh->np < mesh->npmax - 3) {
     mesh->npnil = mesh->np + 1;
     for (k=mesh->npnil; k<mesh->npmax-1; k++)
@@ -518,7 +520,7 @@ int MMG2_pack(MMG5_pMesh mesh,MMG5_pSol sol) {
   else {
     mesh->npnil = 0;
   }
-  
+
   /*to do only if the edges are packed*/
   /* if(mesh->na < mesh->namax - 3) { */
   /*   mesh->nanil = mesh->na + 1; */
@@ -527,7 +529,7 @@ int MMG2_pack(MMG5_pMesh mesh,MMG5_pSol sol) {
   /* } else { */
   /*   mesh->nanil = 0; */
   /* } */
-  
+
   /* Reset garbage collector */
   if ( mesh->nt < mesh->ntmax - 3 ) {
     mesh->nenil = mesh->nt + 1;
@@ -537,9 +539,9 @@ int MMG2_pack(MMG5_pMesh mesh,MMG5_pSol sol) {
   else {
     mesh->nenil = 0;
   }
-  
+
   if ( memWarn ) return 0;
-  
+
   return(1);
 }
 
@@ -551,7 +553,7 @@ int MMG2_pack(MMG5_pMesh mesh,MMG5_pSol sol) {
  opt[4] = nomove
  opt[5] = imprim
  opt[6] = nr
- 
+
  optdbl[0] = hgrad
  optdbl[1] =ar
  */
