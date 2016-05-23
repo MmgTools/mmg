@@ -436,7 +436,7 @@ static int _MMGS_cuttri_ls(MMG5_pMesh mesh, MMG5_pSol sol){
 
       np = _MMGS_newPt(mesh,c,NULL);
       if ( !np ) {
-        _MMG5_POINT_REALLOC(mesh,sol,np,0.2,
+        _MMGS_POINT_REALLOC(mesh,sol,np,0.2,
                             fprintf(stderr,"  ## Error: unable to allocate a new point\n");
                             _MMG5_INCREASE_MEM_MESSAGE();
                             return(0)

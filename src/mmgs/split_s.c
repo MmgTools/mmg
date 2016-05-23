@@ -91,7 +91,7 @@ int _MMGS_split1(MMG5_pMesh mesh,MMG5_pSol met,int k,int i,int *vx) {
 
   iel = _MMGS_newElt(mesh);
   if ( !iel ) {
-    _MMG5_TRIA_REALLOC(mesh,iel,mesh->gap,
+    _MMGS_TRIA_REALLOC(mesh,iel,mesh->gap,
                        fprintf(stderr,"  ## Error: unable to allocate a new element.\n");
                        _MMG5_INCREASE_MEM_MESSAGE();
                        fprintf(stderr,"  Exit program.\n");
@@ -205,7 +205,7 @@ int split1b(MMG5_pMesh mesh,int k,char i,int ip) {
 
   iel = _MMGS_newElt(mesh);
   if ( !iel )  {
-    _MMG5_TRIA_REALLOC(mesh,iel,mesh->gap,
+    _MMGS_TRIA_REALLOC(mesh,iel,mesh->gap,
                        _MMG5_INCREASE_MEM_MESSAGE();
                        return(0));
   }
@@ -262,7 +262,7 @@ int split1b(MMG5_pMesh mesh,int k,char i,int ip) {
   if ( jel ) {
     kel = _MMGS_newElt(mesh);
     if ( !kel )  {
-      _MMG5_TRIA_REALLOC(mesh,kel,mesh->gap,
+      _MMGS_TRIA_REALLOC(mesh,kel,mesh->gap,
                          _MMG5_INCREASE_MEM_MESSAGE();
                          _MMGS_delElt(mesh,iel);
                          return(0));
@@ -366,7 +366,7 @@ int _MMGS_split2(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
   /* create 2 elements */
   iel = _MMGS_newElt(mesh);
   if ( !iel ) {
-    _MMG5_TRIA_REALLOC(mesh,iel,mesh->gap,
+    _MMGS_TRIA_REALLOC(mesh,iel,mesh->gap,
                        fprintf(stderr,"  ## Error: unable to allocate a new element.\n");
                        _MMG5_INCREASE_MEM_MESSAGE();
                        fprintf(stderr,"  Exit program.\n");
@@ -374,7 +374,7 @@ int _MMGS_split2(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
   }
   jel = _MMGS_newElt(mesh);
   if ( !jel ) {
-    _MMG5_TRIA_REALLOC(mesh,jel,mesh->gap,
+    _MMGS_TRIA_REALLOC(mesh,jel,mesh->gap,
                        fprintf(stderr,"  ## Error: unable to allocate a new element.\n");
                        _MMG5_INCREASE_MEM_MESSAGE();
                        fprintf(stderr,"  Exit program.\n");
@@ -482,7 +482,7 @@ int _MMGS_split3(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
   /* create 3 elements */
   iel = _MMGS_newElt(mesh);
   if ( !iel ) {
-    _MMG5_TRIA_REALLOC(mesh,iel,mesh->gap,
+    _MMGS_TRIA_REALLOC(mesh,iel,mesh->gap,
                        fprintf(stderr,"  ## Error: unable to allocate a new element.\n");
                        _MMG5_INCREASE_MEM_MESSAGE();
                        fprintf(stderr,"  Exit program.\n");
@@ -490,7 +490,7 @@ int _MMGS_split3(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
   }
   jel = _MMGS_newElt(mesh);
   if ( !jel ) {
-    _MMG5_TRIA_REALLOC(mesh,jel,mesh->gap,
+    _MMGS_TRIA_REALLOC(mesh,jel,mesh->gap,
                        fprintf(stderr,"  ## Error: unable to allocate a new element.\n");
                        _MMG5_INCREASE_MEM_MESSAGE();
                        fprintf(stderr,"  Exit program.\n");
@@ -498,7 +498,7 @@ int _MMGS_split3(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
   }
   kel = _MMGS_newElt(mesh);
   if ( !kel ) {
-    _MMG5_TRIA_REALLOC(mesh,kel,mesh->gap,
+    _MMGS_TRIA_REALLOC(mesh,kel,mesh->gap,
                        fprintf(stderr,"  ## Error: unable to allocate a new element.\n");
                        _MMG5_INCREASE_MEM_MESSAGE();
                        fprintf(stderr,"  Exit program.\n");

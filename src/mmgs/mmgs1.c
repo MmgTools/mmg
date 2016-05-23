@@ -505,7 +505,7 @@ static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
         ip = _MMGS_newPt(mesh,o,MG_EDG(pt->tag[i]) ? to : no);
         if ( !ip ) {
           /* reallocation of point table */
-          _MMG5_POINT_REALLOC(mesh,met,ip,mesh->gap,
+          _MMGS_POINT_REALLOC(mesh,met,ip,mesh->gap,
                               fprintf(stderr,"  ## Error: unable to allocate a new point.\n");
                               _MMG5_INCREASE_MEM_MESSAGE();
                               do {
@@ -802,7 +802,7 @@ int chkspl(MMG5_pMesh mesh,MMG5_pSol met,int k,int i) {
   ip = _MMGS_newPt(mesh,o,MG_EDG(pt->tag[i]) ? to : no);
   if ( !ip ) {
     /* reallocation of point table */
-    _MMG5_POINT_REALLOC(mesh,met,ip,mesh->gap,
+    _MMGS_POINT_REALLOC(mesh,met,ip,mesh->gap,
                         _MMG5_INCREASE_MEM_MESSAGE();
                         return(-1)
                         ,o,MG_EDG(pt->tag[i]) ? to : no);
