@@ -216,9 +216,9 @@ int MMG3D_typelt(MMG5_pMesh mesh,int iel,int *item) {
 
     if ( isur > 2 ) {
       dd = rapmin / rapmax;
-      item[0] = iarmin;
-#warning valgrind error : iarmin overflow the idir size
-      item[1] = _MMG5_idir[iarmin][0];
+      item[0] = 0; //iarmin;
+      // Changed by 0 because we overflow idir
+      item[1] = 0; //_MMG5_idir[iarmin][0];
       if ( dd < 0.01 )  return(4);
       if ( s[0]+s[1] > ssmall ) {
         item[0] = 0;
