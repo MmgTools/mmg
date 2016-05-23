@@ -104,14 +104,14 @@ void _MMG2D_Init_woalloc_mesh(MMG5_pMesh mesh, MMG5_pSol sol
 void _MMG2D_Init_mesh_var( va_list argptr ) {
   MMG5_pMesh     *mesh;
   MMG5_pSol      *sol;
-  enum MMG5_arg  typArg;
+  int            typArg;
   int            meshCount;
 
   meshCount = 0;
   sol = NULL;
 
 
-  while ( (typArg = va_arg(argptr,enum MMG5_arg)) != MMG5_ARG_end )
+  while ( (typArg = va_arg(argptr,int)) != MMG5_ARG_end )
   {
     switch ( typArg )
     {
@@ -176,13 +176,13 @@ void _MMG2D_Free_all_var(va_list argptr)
 
   MMG5_pMesh     *mesh;
   MMG5_pSol      *sol;
-  enum MMG5_arg  typArg;
+  int            typArg;
   int            meshCount;
 
   meshCount = 0;
   sol = NULL;
 
-  while ( (typArg = va_arg(argptr,enum MMG5_arg)) != MMG5_ARG_end )
+  while ( (typArg = va_arg(argptr,int)) != MMG5_ARG_end )
   {
     switch ( typArg )
     {
@@ -250,13 +250,13 @@ void _MMG2D_Free_structures_var(va_list argptr)
 
   MMG5_pMesh     *mesh;
   MMG5_pSol      *sol;
-  enum MMG5_arg  typArg;
+  int            typArg;
   int            meshCount;
 
   meshCount = 0;
   sol = NULL;
 
-  while ( (typArg = va_arg(argptr,enum MMG5_arg)) != MMG5_ARG_end )
+  while ( (typArg = va_arg(argptr,int)) != MMG5_ARG_end )
   {
     switch ( typArg )
     {
@@ -340,13 +340,13 @@ void _MMG2D_Free_names_var(va_list argptr)
 
   MMG5_pMesh     *mesh;
   MMG5_pSol      *sol;
-  enum MMG5_arg  typArg;
+  int            typArg;
   int            meshCount;
 
   meshCount = 0;
   sol = NULL;
 
-  while ( (typArg = va_arg(argptr,enum MMG5_arg)) != MMG5_ARG_end )
+  while ( (typArg = va_arg(argptr,int)) != MMG5_ARG_end )
   {
     switch ( typArg )
     {

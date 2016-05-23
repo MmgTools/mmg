@@ -122,7 +122,7 @@ enum MMG3D_Param {
  * \remark No fortran interface to allow variadic arguments.
  *
  */
-void MMG3D_Init_mesh(enum MMG5_arg starter,...);
+void MMG3D_Init_mesh(const int starter,...);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the sol structure.
@@ -1267,7 +1267,7 @@ int MMG3D_saveSol(MMG5_pMesh mesh,MMG5_pSol met, const char *filename);
  * \remark no Fortran interface to allow variadic args.
  *
  */
-void MMG3D_Free_all(enum MMG5_arg starter,...);
+void MMG3D_Free_all(const int starter,...);
 
 /**
  * \param starter dummy argument used to initialize the variadic argument
@@ -1300,7 +1300,7 @@ void MMG3D_Free_all(enum MMG5_arg starter,...);
  * \remark no Fortran interface to allow variadic args.
  *
  */
-void MMG3D_Free_structures(enum MMG5_arg starter,...);
+void MMG3D_Free_structures(const int starter,...);
 
 /**
  * \param starter dummy argument used to initialize the variadic argument
@@ -1333,7 +1333,7 @@ void MMG3D_Free_structures(enum MMG5_arg starter,...);
  * \remark no Fortran interface to allow variadic args.
  *
  */
-void MMG3D_Free_names(enum MMG5_arg starter,...);
+void MMG3D_Free_names(const int starter,...);
 
 /* library */
 /**

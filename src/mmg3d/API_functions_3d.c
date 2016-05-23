@@ -40,7 +40,7 @@
 
 #include "mmg3d.h"
 
-void MMG3D_Init_mesh(enum MMG5_arg starter,...) {
+void MMG3D_Init_mesh(const int starter,...) {
   va_list argptr;
 
   va_start(argptr, starter);
@@ -1608,7 +1608,7 @@ int MMG3D_Set_localParameter(MMG5_pMesh mesh,MMG5_pSol sol, int typ, int ref,
   return(1);
 }
 
-void MMG3D_Free_all(enum MMG5_arg starter,...)
+void MMG3D_Free_all(const int starter,...)
 {
 
   va_list argptr;
@@ -1622,7 +1622,7 @@ void MMG3D_Free_all(enum MMG5_arg starter,...)
   return;
 }
 
-void MMG3D_Free_structures(enum MMG5_arg starter,...)
+void MMG3D_Free_structures(const int starter,...)
 {
 
   va_list argptr;
@@ -1636,7 +1636,7 @@ void MMG3D_Free_structures(enum MMG5_arg starter,...)
   return;
 }
 
-void MMG3D_Free_names(enum MMG5_arg starter,...)
+void MMG3D_Free_names(const int starter,...)
 {
 
   va_list argptr;

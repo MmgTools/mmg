@@ -93,7 +93,7 @@ enum MMG2D_Param {
  * MMG structures allocation and initialization.
  *
  */
-void MMG2D_Init_mesh(enum MMG5_arg starter,...);
+void MMG2D_Init_mesh(const int starter,...);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -757,7 +757,7 @@ int MMG2D_Chk_meshData(MMG5_pMesh mesh,MMG5_pSol met);
  * \remark No fortran interface to allow variadic arguments.
  *
  */
-void MMG2D_Free_all(enum MMG5_arg starter,...);
+void MMG2D_Free_all(const int starter,...);
 
 /**
  * \param starter dummy argument used to initialize the variadic argument list.
@@ -775,7 +775,7 @@ void MMG2D_Free_all(enum MMG5_arg starter,...);
  * \remark No fortran interface to allow variadic arguments.
  *
  */
-void MMG2D_Free_structures(enum MMG5_arg starter,...);
+void MMG2D_Free_structures(const int starter,...);
 
 /**
  * \param starter dummy argument used to initialize the variadic argument list.
@@ -793,7 +793,7 @@ void MMG2D_Free_structures(enum MMG5_arg starter,...);
  * \remark No fortran interface to allow variadic arguments.
  *
  */
-void MMG2D_Free_names(enum MMG5_arg starter,...);
+void MMG2D_Free_names(const int starter,...);
 
 /**
  * \param mesh pointer toward the mesh structure.
