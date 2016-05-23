@@ -437,16 +437,15 @@ int _MMG3D_prilen(MMG5_pMesh mesh, MMG5_pSol met, char metRidTyp) {
 
 /**
  * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
- * \return 0 if the worst element has a nul quality, 1 otherwise.
+ * \param met pointer toward the meric structure.
+ * \return 1 if success, 0 if fail.
  *
- * Print histogram of mesh qualities for classic storage of metric at ridges.
+ * Compute the quality of the tetras over the mesh.
  *
  */
-int _MMG3D_inqua(MMG5_pMesh mesh,MMG5_pSol met) {
-  MMG5_pTetra    pt;
-  double   rap,rapmin,rapmax,rapavg,med,good;
-  int      i,k,iel,ok,ir,imax,nex,his[5];
+int _MMG3D_meshQua(MMG5_pMesh mesh, MMG5_pSol met) {
+  MMG5_pTetra pt;
+  int         k;
 
   /*compute tet quality*/
   for (k=1; k<=mesh->ne; k++) {
@@ -463,7 +462,21 @@ int _MMG3D_inqua(MMG5_pMesh mesh,MMG5_pSol met) {
      else // -A option
        pt->qual = _MMG5_caltet_iso(mesh,met,pt);
   }
-  if ( abs(mesh->info.imprim) <= 0 ) return(1);
+  return(1);
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \return 0 if the worst element has a nul quality, 1 otherwise.
+ *
+ * Print histogram of mesh qualities for classic storage of metric at ridges.
+ *
+ */
+int _MMG3D_inqua(MMG5_pMesh mesh,MMG5_pSol met) {
+  MMG5_pTetra    pt;
+  double   rap,rapmin,rapmax,rapavg,med,good;
+  int      i,k,iel,ok,ir,imax,nex,his[5];
 
   rapmin  = 2.0;
   rapmax  = 0.0;
