@@ -1,18 +1,17 @@
 !> @author
 !> Cecile Dobrzynski, Charles Dapogny, Pascal Frey and Algiane Froehly
 !> @brief
-!>  Example for using mmgslib (basic use)
+!>  Example for using mmg2dlib (basic use)
+
+!> Include the mmg2d library hader file */
+! if the header file is in the "include" directory
+! #include "libmmg2df.h"
+! if the header file is in "include/mmg/mmg2d"
+#include "mmg/mmg2d/libmmg2df.h"
 
 PROGRAM main
 
   IMPLICIT NONE
-
-!> Include the mmgs library hader file
-! if the header file is in the "include" directory
-! #include "libmmgsf.h"
-
-! if the header file is in "include/mmg/mmgs"
-#include "mmg/mmgs/libmmgsf.h"
 
   MMG5_DATA_PTR_T    :: mmgMesh
   MMG5_DATA_PTR_T    :: mmgSol
@@ -20,105 +19,107 @@ PROGRAM main
   CHARACTER(len=255) :: pwd
   CHARACTER(len=300) :: filename
 
-  WRITE(*,*) "  -- TEST MMGSLIB"
+  PRINT*,"  -- TEST MMG2DLIB"
 
   ! Name and path of the mesh file
   CALL getenv("PWD",pwd)
-  WRITE(filename,*) TRIM(pwd),"/../libexamples/mmgs/adaptation_example0_fortran/cube"
+  WRITE(filename,*) TRIM(pwd),"/../libexamples/mmg2d/adaptation_example0_fortran/example0_a/init"
 
   !> ------------------------------ STEP   I --------------------------
   !! 1) Initialisation of mesh and sol structures
-  !! args of InitMesh:
+  !!   args of InitMesh:
   !! MMG5_ARG_start: we start to give the args of a variadic func
   !! MMG5_ARG_ppMesh: next arg will be a pointer over a MMG5_pMesh
   !! mmgMesh: your MMG5_pMesh (that store your mesh)
   !! MMG5_ARG_ppMet: next arg will be a pointer over a MMG5_pSol storing a metric
   !! mmgSol: your MMG5_pSol (that store your metric) */
+
   mmgMesh = 0
   mmgSol  = 0
 
-  CALL MMGS_Init_mesh(MMG5_ARG_start, &
+  CALL MMG2D_Init_mesh(MMG5_ARG_start, &
        MMG5_ARG_ppMesh,mmgMesh,MMG5_ARG_ppMet,mmgSol, &
        MMG5_ARG_end)
 
   !> 2) Build mesh in MMG5 format
-  !! Two solutions: just use the MMGS_loadMesh function that will read a .mesh(b)
-  !!    file formatted or manually set your mesh using the MMGS_Set* functions
+  !! Two solutions: just use the MMG2D_loadMesh function that will read a .mesh(b)
+  !! file formatted or manually set your mesh using the MMG2D_Set* functions
 
-  !> with MMGS_loadMesh function
+  !> with MMG2D_loadMesh function
   !! a) (not mandatory): give the mesh name
   !!   (by default, the "mesh.mesh" file is oppened)
-  CALL MMGS_Set_inputMeshName(mmgMesh,TRIM(ADJUSTL(filename)),&
+  CALL MMG2D_Set_inputMeshName(mmgMesh,TRIM(ADJUSTL(filename)),&
        LEN(TRIM(ADJUSTL(filename))),ier)
   IF ( ier /= 1 ) THEN
      CALL EXIT(101)
   ENDIF
 
   !> b) function calling
-  CALL MMGS_loadMesh(mmgMesh,TRIM(ADJUSTL(filename)),&
+  CALL MMG2D_loadMesh(mmgMesh,TRIM(ADJUSTL(filename)),&
        LEN(TRIM(ADJUSTL(filename))),ier)
   IF ( ier /= 1 )  CALL EXIT(102)
 
   !> 3) Build sol in MMG5 format
-  !! Two solutions: just use the MMGS_loadSol function that will read a .sol(b)
-  !!    file formatted or manually set your sol using the MMGS_Set* functions
+  !! Two solutions: just use the MMG2D_loadMet function that will read a .sol(b)
+  !!    file formatted or manually set your sol using the MMG2D_Set* functions
 
-  !> With MMGS_loadSol function
+  !> With MMG2D_loadSol function
   !! a) (not mandatory): give the sol name
   !!   (by default, the "mesh.sol" file is oppened)
-  CALL MMGS_Set_inputSolName(mmgMesh,mmgSol,TRIM(ADJUSTL(filename)),&
+  CALL MMG2D_Set_inputSolName(mmgMesh,mmgSol,TRIM(ADJUSTL(filename)),&
        LEN(TRIM(ADJUSTL(filename))),ier)
   IF ( ier /= 1 ) THEN
      CALL EXIT(103)
   ENDIF
 
   !> b) function calling
-  CALL MMGS_loadSol(mmgMesh,mmgSol,TRIM(ADJUSTL(filename)),&
+  CALL MMG2D_loadSol(mmgMesh,mmgSol,TRIM(ADJUSTL(filename)),&
        LEN(TRIM(ADJUSTL(filename))),ier)
   IF ( ier /= 1 ) THEN
      CALL EXIT(104)
   ENDIF
 
   !> 4) (not mandatory): check if the number of given entities match with mesh size
-  CALL MMGS_Chk_meshData(mmgMesh,mmgSol,ier)
-  IF ( ier /= 1 ) CALL EXIT(105)
+  CALL MMG2D_Chk_meshData(mmgMesh,mmgSol,ier)
+  IF ( ier /= 1 ) CALL EXIT(107)
 
   !> ------------------------------ STEP  II --------------------------
   !! library call
-  !! Remark: %val(0) allow to pass the value 0 (i.e. NULL) instead of a pointer
-  !! toward NULL.
-  CALL MMGS_mmgslib(mmgMesh,mmgSol,ier)
+ ! NULLIFY(va)
+  CALL MMG2D_mmg2dlib(mmgMesh,mmgSol,ier)
   IF ( ier == MMG5_STRONGFAILURE ) THEN
-     PRINT*,"BAD ENDING OF MMGSLIB: UNABLE TO SAVE MESH"
-     STOP 2
+    PRINT*,"BAD ENDING OF MMG2DLIB: UNABLE TO SAVE MESH"
+    STOP MMG5_STRONGFAILURE
   ELSE IF ( ier == MMG5_LOWFAILURE ) THEN
-     PRINT*,"BAD ENDING OF MMGSLIB"
+     PRINT*,"BAD ENDING OF MMG2DLIB"
+  ELSE
+     PRINT*,"MMG2DLIB SUCCEED"
   ENDIF
 
   !> ------------------------------ STEP III --------------------------
   !! get results
-  !! Two solutions: just use the MMGS_saveMesh/MMGS_saveSol functions
+  !! Two solutions: just use the MMG2D_saveMesh/MMG2D_saveSol functions
   !!    that will write .mesh(b)/.sol formatted files or manually get your mesh/sol
-  !!    using the MMGS_getMesh/MMGS_getSol functions
+  !!    using the MMG2D_getMesh/MMG2D_getSol functions
 
   !> 1) Automatically save the mesh
-  !! a)  (not mandatory): give the ouptut mesh name using MMGS_Set_outputMeshName
+  !! a)  (not mandatory): give the ouptut mesh name using MMG2D_Set_outputMeshName
   !!   (by default, the mesh is saved in the "mesh.o.mesh" file
-  !!call MMGS_Set_outputMeshName(mmgMesh,"output.mesh",len("output.mesh"),ier)
+  !!call MMG2D_Set_outputMeshName(mmgMesh,"output.mesh",len("output.mesh"),ier)
   !! b) function calling
-  CALL MMGS_saveMesh(mmgMesh,"cube.o.mesh",LEN("cube.o.mesh"),ier)
+  CALL MMG2D_saveMesh(mmgMesh,"sortie.o.mesh",LEN("sortie.o.mesh"),ier)
   IF ( ier /= 1 ) CALL EXIT(106)
 
   !> 2) Automatically save the solution
-  !! a)  (not mandatory): give the ouptut sol name using MMGS_Set_outputSolName
+  !! a)  (not mandatory): give the ouptut sol name using MMG2D_Set_outputSolName
   !!   (by default, the mesh is saved in the "mesh.o.sol" file
-  !!call MMGS_Set_outputSolName(mmgMesh,mmgSol,"output.sol",len("output.sol"),ier)
+  !!call MMG2D_Set_outputSolName(mmgMesh,mmgSol,"output.sol",len("output.sol"),ier)
   !! b) function calling
-  CALL MMGS_saveSol(mmgMesh,mmgSol,"cube.o.sol",LEN("cube.o.sol"),ier)
+  CALL MMG2D_saveSol(mmgMesh,mmgSol,"sortie.o.sol",LEN("sortie.o.sol"),ier)
   IF ( ier /= 1 ) CALL EXIT(107)
 
-  !> 3) Free the MMGS5 structures
-  CALL MMGS_Free_all(MMG5_ARG_start, &
+  !> 3) Free the MMG2D5 structures
+  CALL MMG2D_Free_all(MMG5_ARG_start, &
        MMG5_ARG_ppMesh,mmgMesh,MMG5_ARG_ppMet,mmgSol, &
        MMG5_ARG_end)
 
