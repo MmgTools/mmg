@@ -34,18 +34,18 @@
 
 #include "mmg2d.h"
 
-/** Set tags GEO and REF to triangles and points by traveling the mesh; 
+/** Set tags GEO and REF to triangles and points by traveling the mesh;
     count number of subdomains or connected components */
 int _MMG2_setadj(MMG5_pMesh mesh) {
   MMG5_pTria       pt,pt1;
   int              *pile,*adja,ipil,k,kk,ncc,ip1,ip2,nr,nref,nt;
   char             i,ii,i1,i2;
-  
+
   if ( abs(mesh->info.imprim) > 5  || mesh->info.ddebug )
     fprintf(stdout,"  ** SETTING TOPOLOGY\n");
-  
+
   _MMG5_SAFE_MALLOC(pile,mesh->nt+1,int);
-  
+
   /* Initialization of the pile */
   ncc = 1;
   pile[1] = 1;
@@ -54,11 +54,11 @@ int _MMG2_setadj(MMG5_pMesh mesh) {
   nr = nref =0;
 
   while ( ipil > 0 ) {
-    
+
     while ( ipil > 0 ) {
       k = pile[ipil];
       ipil--;
-      
+
       pt = &mesh->tria[k];
       if ( !MG_EOK(pt) )  continue;
       adja = &mesh->adja[3*(k-1)+1];
@@ -68,13 +68,13 @@ int _MMG2_setadj(MMG5_pMesh mesh) {
         i2  = _MMG5_iprv2[i];
         ip1 = pt->v[i1];
         ip2 = pt->v[i2];
-        
+
         /* Transfer tags if i is already an edge (e.g. supplied by the user) */
         if ( MG_EDG(pt->tag[i]) ) {
           mesh->point[ip1].tag |= pt->tag[i];
           mesh->point[ip2].tag |= pt->tag[i];
         }
-      
+
         /* Case of an external boundary */
         if ( !adja[i] ) {
           pt->tag[i] |= MG_GEO;
@@ -83,11 +83,11 @@ int _MMG2_setadj(MMG5_pMesh mesh) {
           nr++;
           continue;
         }
-        
+
         kk = adja[i] / 3;
         ii = adja[i] % 3;
         pt1 = &mesh->tria[kk];
-        
+
         /* Case of a boundary between two subdomains */
         if ( abs(pt1->ref) != abs(pt->ref) ) {
           pt->tag[i]   |= MG_REF;
@@ -97,14 +97,14 @@ int _MMG2_setadj(MMG5_pMesh mesh) {
           if ( kk > k ) nref++;
           continue;
         }
-        
+
         if ( pt1->cc > 0 )  continue;
         ipil++;
         pile[ipil] = kk;
         pt1->cc = ncc;
       }
     }
-    
+
     /* Find the starting triangle for the next connected component */
     ipil = 0;
     for (kk=1; kk<=mesh->nt; kk++) {
@@ -118,12 +118,12 @@ int _MMG2_setadj(MMG5_pMesh mesh) {
       }
     }
   }
-  
+
   if ( abs(mesh->info.imprim) > 4 ) {
     fprintf(stdout,"     Connected component or subdomains: %d \n",ncc);
     fprintf(stdout,"     Tagged edges: %d,  ridges: %d,  refs: %d\n",nr+nref,nr,nref);
   }
- 
+
   _MMG5_SAFE_FREE(pile);
   return(1);
 }
@@ -135,13 +135,13 @@ int _MMG2_singul(MMG5_pMesh mesh) {
   double              ux,uy,uz,vx,vy,vz,dd;
   int                 list[MMG2_LONMAX+2],k,ns,ng,nr,nm,nre,nc;
   char                i;
-  
+
   nre = nc = nm = 0;
-  
+
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
     if ( ! MG_EOK(pt) ) continue;
-    
+
     for (i=0; i<3; i++) {
       ppt = &mesh->point[pt->v[i]];
       if ( ppt->s ) continue;
@@ -149,7 +149,7 @@ int _MMG2_singul(MMG5_pMesh mesh) {
       if ( !MG_VOK(ppt) || MG_SIN(ppt->tag) )  continue;
       else if ( MG_EDG(ppt->tag) ) {
         ns = _MMG5_bouler(mesh,mesh->adja,k,i,list,&ng,&nr,MMG2_LONMAX);
-        
+
         if ( !ns )  continue;
         if ( (ng+nr) > 2 ) {
           /* Two ridge curves and one ref curve: non manifold situation */
@@ -193,7 +193,7 @@ int _MMG2_singul(MMG5_pMesh mesh) {
           vy = p2->c[1] - ppt->c[1];
           vz = p2->c[2] - ppt->c[2];
           dd = (ux*ux + uy*uy + uz*uz) * (vx*vx + vy*vy + vz*vz);
-          
+
           /*** To change: what is the mechanism for dhd in mmg2d ? ***/
           if ( fabs(dd) > _MMG5_EPSD ) {
             dd = (ux*vx + uy*vy + uz*vz) / sqrt(dd);
@@ -206,15 +206,15 @@ int _MMG2_singul(MMG5_pMesh mesh) {
       }
     }
   }
-  
+
   /* reset the ppt->s tag */
   for (k=1; k<=mesh->np; ++k) {
     mesh->point[k].s = 0;
   }
-  
+
   if ( abs(mesh->info.imprim) > 3 && nc+nre+nm > 0 )
     fprintf(stdout,"     %d corners, %d singular points and %d non manifold points detected\n",nc,nre,nm);
-  
+
   return(1);
 }
 
@@ -224,18 +224,18 @@ int _MMG2_norver(MMG5_pMesh mesh) {
   MMG5_pPoint      ppt;
   int              k,kk,nn,pleft,pright;
   char             i,ii;
-  
+
   nn = 0;
-  
+
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
     if ( !MG_EOK(pt) ) continue;
-    
+
     for (i=0; i<3; i++) {
       ppt = &mesh->point[pt->v[i]];
       if ( !MG_EDG(ppt->tag) ) continue;
       if ( ppt->s || MG_SIN(ppt->tag) || (ppt->tag & MG_NOM) ) continue;
-      
+
       /* Travel the curve ppt belongs to from left to right until a singularity is met */
       kk = k;
       ii = i;
@@ -254,7 +254,7 @@ int _MMG2_norver(MMG5_pMesh mesh) {
         ppt = &mesh->point[pt1->v[ii]];
       }
       while ( !ppt->s && !MG_SIN(ppt->tag) && !(ppt->tag & MG_NOM) );
-      
+
       /* Now travel the curve ppt belongs to from right to left until a singularity is met */
       ppt = &mesh->point[pt->v[i]];
       kk = k;
@@ -266,7 +266,7 @@ int _MMG2_norver(MMG5_pMesh mesh) {
           return(0);
         }
         nn++;
-        
+
         kk = pleft / 3;
         ii = pleft % 3;
         ii = _MMG5_inxt2[ii];
@@ -284,7 +284,7 @@ int _MMG2_norver(MMG5_pMesh mesh) {
 
   if ( abs(mesh->info.imprim) > 3 && nn > 0 )
     fprintf(stdout,"     %d calculated normal vectors\n",nn);
-  
+
   return(1);
 }
 
@@ -295,28 +295,28 @@ int _MMG2_regnor(MMG5_pMesh mesh) {
   double                *tmp,dd,ps,lm1,lm2,nx,ny,ux,uy,nxt,nyt,res,res0,n[2];
   int                   *adja,k,iel,ip1,ip2,nn,it,maxit;
   char                  i,i1,i2,ier;
-  
+
   it = 0;
   maxit = 10;
   res0 = 0.0;
   nn = 0;
   lm1 = 0.4;
   lm2 = 0.399;
-  
+
   /* Temporary table for normal vectors */
   _MMG5_SAFE_CALLOC(tmp,2*mesh->np+1,double);
-  
+
   /* Allocate a seed to each point */
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
     if ( !MG_EOK(pt) ) continue;
-    
+
     for (i=0; i<3; i++) {
       ppt = &mesh->point[pt->v[i]];
       ppt->s = k;
     }
   }
-  
+
   do {
     /* Step 1: Laplacian */
     for (k=1; k<=mesh->np; k++) {
@@ -324,24 +324,24 @@ int _MMG2_regnor(MMG5_pMesh mesh) {
       if ( !MG_VOK(ppt) ) continue;
       if ( MG_SIN(ppt->tag) || ppt->tag & MG_NOM ) continue;
       if ( !MG_EDG(ppt->tag) ) continue;
-      
+
       nx = ny = 0;
       iel = ppt->s;
       pt  = &mesh->tria[iel];
       i = 0;
       if ( pt->v[1] == k ) i = 1;
       if ( pt->v[2] == k ) i = 2;
-      
+
       ier = _MMG2_bouleendp(mesh,iel,i,&ip1,&ip2);
 
       if ( !ier ) {
         printf("*** problem in func. _MMG2_bouleendp. Abort.\n");
         exit(0);
       }
-      
+
       p1 = &mesh->point[ip1];
       p2 = &mesh->point[ip2];
-  
+
       /* If p1 is singular, update with the (adequately oriented) normal to the edge ppt-p1 */
       if ( MG_SIN(p1->tag) || p1->tag & MG_NOM ) {
         ux = p1->c[0] - ppt->c[0];
@@ -354,7 +354,7 @@ int _MMG2_regnor(MMG5_pMesh mesh) {
         }
         nxt = -uy;
         nyt = ux;
-        
+
         ps = nxt*ppt->n[0] + nyt*ppt->n[1];
         if ( ps < 0.0 ) {
           nx += -nxt;
@@ -369,7 +369,7 @@ int _MMG2_regnor(MMG5_pMesh mesh) {
         nx += p1->n[0];
         ny += p1->n[1];
       }
-      
+
       /* If p2 is singular, update with the (adequately oriented) normal to the edge ppt-p1 */
       if ( MG_SIN(p2->tag) || p2->tag & MG_NOM ) {
         ux = p2->c[0] - ppt->c[0];
@@ -382,7 +382,7 @@ int _MMG2_regnor(MMG5_pMesh mesh) {
         }
         nxt = -uy;
         nyt = ux;
-        
+
         ps = nxt*ppt->n[0] + nyt*ppt->n[1];
         if ( ps < 0.0 ) {
           nx += -nxt;
@@ -397,37 +397,37 @@ int _MMG2_regnor(MMG5_pMesh mesh) {
         nx += p2->n[0];
         ny += p2->n[1];
       }
-     
+
       /* Laplacian operation */
       tmp[2*(k-1)+1] = ppt->n[0] + lm1 * (nx - ppt->n[0]);
       tmp[2*(k-1)+2] = ppt->n[1] + lm1 * (ny - ppt->n[1]);
     }
-    
+
     /* Antilaplacian operation */
     res = 0.0;
     for (k=1; k<=mesh->np; k++) {
-      
+
       ppt = &mesh->point[k];
       if ( !MG_VOK(ppt) ) continue;
       if ( MG_SIN(ppt->tag) || ppt->tag & MG_NOM ) continue;
       if ( !MG_EDG(ppt->tag) ) continue;
-      
+
       nx = ny = 0;
       iel = ppt->s;
       pt  = &mesh->tria[iel];
       i = 0;
       if ( pt->v[1] == k ) i = 1;
       if ( pt->v[2] == k ) i = 2;
-      
+
       ier = _MMG2_bouleendp(mesh,iel,i,&ip1,&ip2);
       if ( !ier ) {
         printf("*** problem in func. _MMG2_bouleendp. Abort.\n");
         exit(0);
       }
-      
+
       p1 = &mesh->point[ip1];
       p2 = &mesh->point[ip2];
-      
+
       /* If p1 is singular, update with the (adequately oriented) normal to the edge ppt-p1 */
       if ( MG_SIN(p1->tag) || p1->tag & MG_NOM ) {
         ux = p1->c[0] - ppt->c[0];
@@ -440,7 +440,7 @@ int _MMG2_regnor(MMG5_pMesh mesh) {
         }
         nxt = -uy;
         nyt = ux;
-        
+
         ps = nxt*ppt->n[0] + nyt*ppt->n[1];
         if ( ps < 0.0 ) {
           nx += -nxt;
@@ -455,7 +455,7 @@ int _MMG2_regnor(MMG5_pMesh mesh) {
         nx += tmp[2*(ip1-1)+1];
         ny += tmp[2*(ip1-1)+2];
       }
-      
+
       /* If p2 is singular, update with the (adequately oriented) normal to the edge ppt-p1 */
       if ( MG_SIN(p2->tag) || p2->tag & MG_NOM ) {
         ux = p2->c[0] - ppt->c[0];
@@ -468,7 +468,7 @@ int _MMG2_regnor(MMG5_pMesh mesh) {
         }
         nxt = -uy;
         nyt = ux;
-        
+
         ps = nxt*ppt->n[0] + nyt*ppt->n[1];
         if ( ps < 0.0 ) {
           nx += -nxt;
@@ -483,7 +483,7 @@ int _MMG2_regnor(MMG5_pMesh mesh) {
         nx += tmp[2*(ip2-1)+1];
         ny += tmp[2*(ip2-1)+2];
       }
-      
+
       /* Anti Laplacian operation */
       n[0] = tmp[2*(k-1)+1] - lm2 * (nx - tmp[2*(k-1)+1]);
       n[1] = tmp[2*(k-1)+2] - lm2 * (ny - tmp[2*(k-1)+2]);
@@ -492,14 +492,14 @@ int _MMG2_regnor(MMG5_pMesh mesh) {
       ppt->n[1] = n[1];
       nn++;
     }
-    
+
     /* Normalization */
     for (k=1; k<=mesh->np; k++) {
       ppt = &mesh->point[k];
       if ( !MG_VOK(ppt) ) continue;
       if ( MG_SIN(ppt->tag) || ppt->tag & MG_NOM ) continue;
       if ( !MG_EDG(ppt->tag) ) continue;
-      
+
       dd = ppt->n[0]*ppt->n[0] + ppt->n[1]*ppt->n[1];
       if ( dd > _MMG5_EPSD ) {
         dd = 1.0 / sqrt(dd);
@@ -507,59 +507,59 @@ int _MMG2_regnor(MMG5_pMesh mesh) {
         ppt->n[1] *= dd;
       }
     }
-    
+
     if ( it == 0 ) res0 = res;
     if ( res0 > _MMG5_EPSD ) res = res / res0;
   }
   while ( ++it < maxit && res > _MMG5_EPS );
-  
+
   /* reset the ppt->s tag */
   for (k=1; k<=mesh->np; ++k) {
     mesh->point[k].s = 0;
   }
-    
+
   if ( mesh->info.imprim < 0 || mesh->info.ddebug )  fprintf(stdout,"\n");
-  
+
   if ( abs(mesh->info.imprim) > 4 )
     fprintf(stdout,"     %d normals regularized: %.3e\n",nn,res);
-  
+
   _MMG5_SAFE_FREE(tmp);
   return(1);
 }
 
 /** preprocessing stage: mesh analysis */
 int _MMG2_analys(MMG5_pMesh mesh) {
-  
+
   /* Transfer the boundary edge references to the triangles, if it has not been already done (option 1) */
   if ( !MMG2_assignEdge(mesh) ) {
     fprintf(stdout,"  ## Problem in setting boundary. Exit program.\n");
     return(0);
   }
-  
+
   /* Creation of adjacency relations in the mesh */
   if ( !MMG2_hashTria(mesh) ) {
     fprintf(stdout,"  ## Hashing problem. Exit program.\n");
     return(0);
   }
-  
+
   /* Set tags to triangles from geometric configuration */
   if ( !_MMG2_setadj(mesh) ) {
     fprintf(stdout,"  ## Problem in function setadj. Exit program.\n");
     return(0);
   }
-  
+
   /* Identify singularities in the mesh */
   if ( !_MMG2_singul(mesh) ) {
     fprintf(stdout,"  ## Problem in identifying singularities. Exit program.\n");
     return(0);
   }
-  
+
   /* Define normal vectors at vertices on curves */
   if ( !_MMG2_norver(mesh) ) {
     fprintf(stdout,"  ## Problem in calculating normal vectors. Exit program.\n");
     return(0);
   }
-  
+
   /* Regularize normal vector field with a Laplacian / anti-laplacian smoothing */
   /*if ( !_MMG2_regnor(mesh) ) {
     fprintf(stdout,"  ## Problem in regularizing normal vectors. Exit program.\n");
