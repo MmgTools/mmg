@@ -163,6 +163,7 @@ int chkcol(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int *list,char typchk) {
 
   /* specific test: no collapse if any interior edge is EDG */
   else if ( ilist == 3 ) {
+
     p1 = &mesh->point[pt->v[i1]];
     if ( MS_SIN(p1->tag) )  return(0);
     else if ( MG_EDG(pt->tag[i2]) && !MG_EDG(pt->tag[i]) )  return(0);
@@ -185,11 +186,19 @@ int chkcol(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int *list,char typchk) {
     pt0->tag[jj] |= pt1->tag[j];
     pt0->tag[j2] |= pt1->tag[_MMG5_inxt2[j]];
     if ( chkedg(mesh,0) )  return(0);
+
+    /* check quality */
+    if ( typchk == 2 && met->m )
+      kal = ALPHAD*_MMG5_calelt(mesh,met,pt0);
+    else
+      kal = ALPHAD*_MMG5_caltri_iso(mesh,NULL,pt0);
+    if ( kal < NULKAL )  return(0);
   }
 
   /* for specific configurations along open ridge */
   else if ( ilist == 2 ) {
     if ( !open )  return(0);
+
     jel = list[1] / 3;
     j   = list[1] % 3;
 
@@ -215,7 +224,16 @@ int chkcol(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int *list,char typchk) {
     pt0 = &mesh->tria[0];
     memcpy(pt0,pt,sizeof(MMG5_Tria));
     pt0->v[i1] = pt1->v[j2];
+
     if ( chkedg(mesh,0) )  return(0);
+
+    /* check quality */
+    if ( typchk == 2 && met->m )
+      kal = ALPHAD*_MMG5_calelt(mesh,met,pt0);
+    else
+      kal = ALPHAD*_MMG5_caltri_iso(mesh,NULL,pt0);
+    if ( kal < NULKAL )  return(0);
+
   }
 
   return(ilist);
