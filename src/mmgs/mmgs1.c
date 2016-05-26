@@ -465,6 +465,7 @@ static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
   s  = 0.5;
   npinit = mesh->np;
   for (k=1; k<=mesh->nt; k++) {
+
     pt = &mesh->tria[k];
     if ( !MG_EOK(pt) || pt->ref < 0 )  continue;
     if ( MS_SIN(pt->tag[0]) || MS_SIN(pt->tag[1]) || MS_SIN(pt->tag[2]) )  continue;
@@ -497,12 +498,14 @@ static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
       ip1 = pt->v[i1];
       ip2 = pt->v[i2];
       ip = _MMG5_hashGet(&hash,ip1,ip2);
+
       if ( !MG_EDG(pt->tag[i]) && ip > 0 )  continue;
 
       /* new point along edge */
       ier = _MMGS_bezierInt(&pb,uv[i],o,no,to);
       if ( !ip ) {
         ip = _MMGS_newPt(mesh,o,MG_EDG(pt->tag[i]) ? to : no);
+
         if ( !ip ) {
           /* reallocation of point table */
           _MMGS_POINT_REALLOC(mesh,met,ip,mesh->gap,
@@ -1173,7 +1176,6 @@ int _MMG5_mmgs1(MMG5_pMesh mesh,MMG5_pSol met) {
     fprintf(stderr,"  ## Unable to split mesh-> Exiting.\n");
     return(0);
   }
-
   /* renumbering if available */
   if ( !_MMG5_scotchCall(mesh,met) )
     return(0);
