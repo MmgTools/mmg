@@ -149,8 +149,10 @@ _MMG5_ismaniball(MMG5_pMesh mesh,MMG5_pSol sol,int k,int indp) {
 
       if ( ( ( v1 != 0.0 ) && MG_SMSGN(v,v1) ) ||
            ( ( v2 != 0.0 ) && MG_SMSGN(v,v2) ) ) {
-        jel = adja[_MMG5_idir[i][j]] / 4;
+        jel = adja[_MMG5_idir[i][j]];
         if( !jel ) continue;
+
+        jel /= 4;
         pt1 = &mesh->tetra[jel];
 
         if ( pt1->flag == base )  continue;
@@ -240,15 +242,17 @@ _MMG5_ismaniball(MMG5_pMesh mesh,MMG5_pSol sol,int k,int indp) {
       v2 = sol->m[pt->v[i2]]-mesh->info.ls;
 
       if ( v1 == 0.0 && v2 == 0.0 ) {
-        jel = adja[_MMG5_idir[i][j]] / 4;
+        jel = adja[_MMG5_idir[i][j]];
         if( !jel ) continue;
+        jel /=4 ;
         pt1 = &mesh->tetra[jel];
         pt1->flag = base;
       }
 
       else if ( ( ( v1 != 0.0 ) && (!MG_SMSGN(v,v1)) ) || ( ( v2 != 0.0 ) && (!MG_SMSGN(v,v2)) ) ) {
-        jel = adja[_MMG5_idir[i][j]] / 4;
+        jel = adja[_MMG5_idir[i][j]];
         if( !jel ) continue;
+        jel /= 4;
         pt1 = &mesh->tetra[jel];
 
         j0 = _MMG5_idir[i][0];
@@ -656,8 +660,9 @@ int _MMG5_chkmaniball(MMG5_pMesh mesh, int start, char ip){
       i = _MMG5_inxt3[i];
 
       /* Travel only through non boundary faces. */
-      k1 = adja[i] / 4;
+      k1 = adja[i];
       if(!k1) continue;
+      k1 /= 4;
       pt1 = &mesh->tetra[k1];
 
       if( pt1 ->ref != ref ) continue;
@@ -693,8 +698,10 @@ int _MMG5_chkmaniball(MMG5_pMesh mesh, int start, char ip){
     for(l=0; l<3; l++){
       i = _MMG5_inxt3[i];
 
-      k1 = adja[i]/4;
-      if(!k1) continue;
+      k1 = adja[i];
+      if ( !k1 ) continue;
+      k1/=4;
+
       pt1 = &mesh->tetra[k1];
       if(pt1->flag == base) continue;
       pt1->flag = base;
@@ -898,9 +905,10 @@ int _MMG5_chkmanicoll(MMG5_pMesh mesh,int k,int iface,int iedg,int ndepmin,int n
 
       for (j=0; j<3; j++) {
         i = _MMG5_inxt3[i];
-        jel = adja[i] / 4;
+        jel = adja[i];
         if ( !jel ) continue;
 
+        jel /= 4;
         pt1 = &mesh->tetra[jel];
 
         if ( pt1->ref == MG_MINUS ) isminq = 1;
@@ -993,9 +1001,11 @@ int _MMG5_chkmanicoll(MMG5_pMesh mesh,int k,int iface,int iedg,int ndepmin,int n
       jp = ip;
       for (i=0; i<3; i++) {
         jp = _MMG5_inxt3[jp];
-        jel = adja[jp] / 4;
-        voy = adja[jp] % 4;
+        jel = adja[jp];
         if ( !jel ) continue;
+
+        jel /= 4;
+        voy = adja[jp] % 4;
 
         pt1 = &mesh->tetra[jel];
         if ( pt1->ref != ref ) continue;
@@ -1007,9 +1017,10 @@ int _MMG5_chkmanicoll(MMG5_pMesh mesh,int k,int iface,int iedg,int ndepmin,int n
             if (pt1->v[j] == nump ) break;
           assert( j< 4);
 
-          jel = adja1[j] / 4;
+          jel = adja1[j];
           if (!jel ) continue;
 
+          jel /= 4;
           pt1 = &mesh->tetra[jel];
 
           if ( pt1->ref != ref) continue;   // ICI, il ne faut pas autoriser à passer si on a à nouveau un tet de la coquille (avant de marquer)
@@ -1055,9 +1066,11 @@ int _MMG5_chkmanicoll(MMG5_pMesh mesh,int k,int iface,int iedg,int ndepmin,int n
       jq = iq;
       for (i=0; i<3; i++) {
         jq = _MMG5_inxt3[jq];
-        jel = adja[jq] / 4;
-        voy = adja[jq] % 4;
+        jel = adja[jq];
         if ( !jel ) continue;
+
+        jel /= 4;
+        voy = adja[jq] % 4;
 
         pt1 = &mesh->tetra[jel];
         if ( pt1->ref != ref ) continue;
@@ -1069,8 +1082,10 @@ int _MMG5_chkmanicoll(MMG5_pMesh mesh,int k,int iface,int iedg,int ndepmin,int n
             if (pt1->v[j] == numq ) break;
           assert( j< 4);
 
-          jel = adja1[j] / 4;
+          jel = adja1[j];
           if (!jel ) continue;
+
+          jel /= 4;
 
           pt1 = &mesh->tetra[jel];
           if ( pt1->ref != ref) continue;
@@ -1156,9 +1171,12 @@ int _MMG5_chkmanicoll(MMG5_pMesh mesh,int k,int iface,int iedg,int ndepmin,int n
 
       for (i=0; i<3; i++) {
         jp = _MMG5_inxt3[jp];
-        jel = adja[jp] / 4;
-        voy = adja[jp] % 4;
+        jel = adja[jp];
+
         if ( !jel ) continue;
+
+        jel /=4;
+        voy = adja[jp] % 4;
 
         pt1 = &mesh->tetra[jel];
         if ( pt1->ref != ref ) continue;
@@ -1170,9 +1188,10 @@ int _MMG5_chkmanicoll(MMG5_pMesh mesh,int k,int iface,int iedg,int ndepmin,int n
             if (pt1->v[j] == nump ) break;
           assert( j< 4);
 
-          jel = adja1[j] / 4;
+          jel = adja1[j];
           if (!jel ) continue;
 
+          jel /= 4;
           pt1 = &mesh->tetra[jel];
           if ( pt1->ref != ref) continue;
           if ( pt1->flag == base ) continue;
@@ -1217,10 +1236,12 @@ int _MMG5_chkmanicoll(MMG5_pMesh mesh,int k,int iface,int iedg,int ndepmin,int n
 
       for (i=0; i<3; i++) {
         jq = _MMG5_inxt3[jq];
-        jel = adja[jq] / 4;
-        voy = adja[jq] % 4;
+        jel = adja[jq];
 
         if ( !jel ) continue;
+
+        jel /= 4;
+        voy = adja[jq] % 4;
 
         pt1 = &mesh->tetra[jel];
 
@@ -1233,9 +1254,10 @@ int _MMG5_chkmanicoll(MMG5_pMesh mesh,int k,int iface,int iedg,int ndepmin,int n
             if (pt1->v[j] == numq ) break;
           assert( j< 4);
 
-          jel = adja1[j] / 4;
+          jel = adja1[j];
           if (!jel ) continue;
 
+          jel /= 4;
           pt1 = &mesh->tetra[jel];
           if ( pt1->ref != ref) continue;
           if ( pt1->flag == base ) continue;
@@ -1288,9 +1310,11 @@ int _MMG5_chkmanicoll(MMG5_pMesh mesh,int k,int iface,int iedg,int ndepmin,int n
       jp = ip;
       for(i=0; i<3; i++) {
         jp = _MMG5_inxt3[jp];
-        jel = adja[jp] / 4;
+        jel = adja[jp];
 
         if ( !jel ) continue;
+
+        jel /= 4;
         pt1 = &mesh->tetra[jel];
         if (pt1->flag == base ) continue;
         pt1->flag = base;
@@ -1327,9 +1351,11 @@ int _MMG5_chkmanicoll(MMG5_pMesh mesh,int k,int iface,int iedg,int ndepmin,int n
       jq = iq;
       for(i=0; i<3; i++) {
         jq = _MMG5_inxt3[jq];
-        jel = adja[jq] / 4;
+        jel = adja[jq];
 
         if ( !jel ) continue;
+
+        jel /= 4;
         pt1 = &mesh->tetra[jel];
         if (pt1->flag == base ) continue;
         pt1->flag = base;
