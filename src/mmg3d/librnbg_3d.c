@@ -259,9 +259,11 @@ int _MMG5_mmg3dRenumbering(int boxVertNbr, MMG5_pMesh mesh, MMG5_pSol sol) {
     iadr = 4*(tetraIdx-1) + 1;
     adja = &mesh->adja[iadr];
     for (i=0; i<4; i++) {
-      ballTetIdx = adja[i] / 4;
+      ballTetIdx = adja[i];
 
       if (!ballTetIdx) continue;
+
+      ballTetIdx /= 4;
 
       /* Testing if one neighbour of tetraIdx has already been added */
       if (vertTab[vertOldTab[tetraIdx]] < 0)

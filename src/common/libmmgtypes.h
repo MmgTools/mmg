@@ -160,12 +160,13 @@ enum MMG5_type {
 
 /**
  * \enum MMG5_entities
- * \brief Type of mesh entities to which solutions are applied.
+ * \brief Type of mesh entities.
  */
 enum MMG5_entities {
   MMG5_Noentity, /*!< Undefined type (unusable) */
   MMG5_Vertex, /*!< Vertex entity */
   MMG5_Triangle, /*!< Triangle entity */
+  MMG5_Tetrahedron, /*!< Tetra entity */
 };
 
 /**

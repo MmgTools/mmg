@@ -464,7 +464,7 @@ void   _MMG5_mmgDefaultValues(MMG5_pMesh mesh);
 int    _MMG5_mmgHashTria(MMG5_pMesh mesh, int *adja, _MMG5_Hash*, int chkISO);
 void   _MMG5_mmgInit_parameters(MMG5_pMesh mesh);
 void   _MMG5_mmgUsage(char *prog);
-int    _MMG5_nonUnitNorPts(MMG5_pMesh,int,int,int,double*);
+extern int    _MMG5_nonUnitNorPts(MMG5_pMesh,int,int,int,double*);
 extern double _MMG5_nonorsurf(MMG5_pMesh mesh,MMG5_pTria pt);
 extern int    _MMG5_norpts(MMG5_pMesh,int,int,int,double *);
 extern int    _MMG5_nortri(MMG5_pMesh mesh,MMG5_pTria pt,double *n);

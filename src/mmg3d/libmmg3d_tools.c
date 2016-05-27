@@ -93,16 +93,18 @@ void MMG3D_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
 }
 
 int MMG3D_Get_adjaTet(MMG5_pMesh mesh, int kel, int listet[4]) {
+  int idx;
 
   if ( ! mesh->adja ) {
     if (! MMG3D_hashTetra(mesh, 0))
       return(0);
   }
 
-  listet[0] = mesh->adja[4*(kel-1)+1]/4;
-  listet[1] = mesh->adja[4*(kel-1)+2]/4;
-  listet[2] = mesh->adja[4*(kel-1)+3]/4;
-  listet[3] = mesh->adja[4*(kel-1)+4]/4;
+  idx = 4*(kel-1);
+  listet[0] = mesh->adja[idx+1]/4;
+  listet[1] = mesh->adja[idx+2]/4;
+  listet[2] = mesh->adja[idx+3]/4;
+  listet[3] = mesh->adja[idx+4]/4;
 
   return(1);
 }
@@ -485,6 +487,11 @@ int MMG3D_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
         /*     exit(EXIT_FAILURE); */
         /*   } */
         /* } */
+        else if ( !strcmp(buf,"tetrahedra") || !strcmp(buf,"tetrahedron") ) {
+          if ( !MMG3D_Set_localParameter(mesh,met,MMG5_Tetrahedron,ref,fp1,fp2,hausd) ) {
+            exit(EXIT_FAILURE);
+          }
+        }
         else {
           fprintf(stderr,"  %%%% Wrong format: %s\n",buf);
           continue;
