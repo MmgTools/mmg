@@ -126,9 +126,11 @@ int _MMG5_mmg3dChkmsh(MMG5_pMesh mesh,int severe,int base) {
     adja = &mesh->adja[iadr];
 
     for (i=0; i<4; i++) {
-      adj = adja[i] / 4;
-      voy = adja[i] % 4;
+      adj = adja[i];
+
       if ( !adj )  continue;
+      adj /= 4;
+      voy = adja[i] % 4;
 
       if ( adj == k ) {
         fprintf(stderr,"  1. Wrong adjacency %d %d\n",k,adj);
