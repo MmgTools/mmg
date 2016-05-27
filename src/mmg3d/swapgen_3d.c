@@ -75,12 +75,15 @@ int _MMG5_chkswpgen(MMG5_pMesh mesh,MMG5_pSol met,int start,int ia,
   list[(*ilist)] = 6*start+ia;
   (*ilist)++;
   adja = &mesh->adja[4*(start-1)+1];
-  adj  = adja[_MMG5_ifar[ia][0]] / 4;      // start travelling by face (ia,0)
+  adj  = adja[_MMG5_ifar[ia][0]];      // start travelling by face (ia,0)
   piv  = pt->v[_MMG5_ifar[ia][1]];
   pol[npol] = 4*start + _MMG5_ifar[ia][1];
   npol++;
 
-  while ( adj && adj != start ) {
+  while ( adj ) {
+    adj /= 4;
+    if ( adj ==start ) break;
+
     pt = &mesh->tetra[adj];
     if ( pt->tag & MG_REQ ) return(0);
 
@@ -105,14 +108,14 @@ int _MMG5_chkswpgen(MMG5_pMesh mesh,MMG5_pSol met,int start,int ia,
     if ( pt->v[ _MMG5_ifar[i][0] ] == piv ) {
       pol[npol] = 4*adj + _MMG5_ifar[i][1];
       npol++;
-      adj = adja[ _MMG5_ifar[i][0] ] / 4;
+      adj = adja[ _MMG5_ifar[i][0] ];
       piv = pt->v[ _MMG5_ifar[i][1] ];
     }
     else {
       assert(pt->v[ _MMG5_ifar[i][1] ] == piv);
       pol[npol] = 4*adj + _MMG5_ifar[i][0];
       npol++;
-      adj = adja[ _MMG5_ifar[i][1] ] /4;
+      adj = adja[ _MMG5_ifar[i][1] ];
       piv = pt->v[ _MMG5_ifar[i][0] ];
     }
   }

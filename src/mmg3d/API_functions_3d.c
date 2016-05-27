@@ -40,7 +40,7 @@
 
 #include "mmg3d.h"
 
-void MMG3D_Init_mesh(enum MMG5_arg starter,...) {
+void MMG3D_Init_mesh(const int starter,...) {
   va_list argptr;
 
   va_start(argptr, starter);
@@ -1547,6 +1547,7 @@ int MMG3D_Set_dparameter(MMG5_pMesh mesh, MMG5_pSol sol, int dparam, double val)
 
 int MMG3D_Set_localParameter(MMG5_pMesh mesh,MMG5_pSol sol, int typ, int ref,
                              double hmin,double hmax,double hausd){
+  MMG5_pPar par;
   int k;
 
   if ( !mesh->info.npar ) {
@@ -1555,60 +1556,45 @@ int MMG3D_Set_localParameter(MMG5_pMesh mesh,MMG5_pSol sol, int typ, int ref,
     fprintf(stderr," values in local parameters structure. \n");
     return(0);
   }
-  if ( mesh->info.npari > mesh->info.npar ) {
+  if ( mesh->info.npari >= mesh->info.npar ) {
     fprintf(stderr,"  ## Error: unable to set a new local parameter.\n");
     fprintf(stderr,"    max number of local parameters: %d\n",mesh->info.npar);
     return(0);
   }
-
-  switch ( typ ) {
-    /* double parameters */
-  case MMG5_Triangle :
-// case MMG5_Vertex :
-    for (k=0; k<mesh->info.npari; k++) {
-      if ( mesh->info.par[k].ref == ref ) {
-        mesh->info.par[k].hausd = hausd;
-        if ( (mesh->info.imprim > 5) || mesh->info.ddebug ) {
-          if ( typ == MMG5_Triangle ) {
-            fprintf(stdout,"  ## Warning: new parameters (hausd, hmin and hmax)");
-            fprintf(stdout," for triangles of ref %d\n",ref);
-          }
-          else {
-            fprintf(stdout,"  ## Warning: new parameters (hausd, hmin and hmax)");
-            fprintf(stdout," for vertices of ref %d\n",ref);
-          }
-        }
-        return(1);
-      }
-    }
-    if ( mesh->info.npari == mesh->info.npar ) {
-      fprintf(stderr,"  ## Error: unable to set a new local parameter.\n");
-      fprintf(stderr,"    max number of local parameters: %d\n",mesh->info.npar);
-      return(0);
-    }
-    mesh->info.par[mesh->info.npari].elt   = typ;
-    mesh->info.par[mesh->info.npari].ref   = ref;
-    mesh->info.par[mesh->info.npari].hmin  = hmin;
-    mesh->info.par[mesh->info.npari].hmax  = hmax;
-    mesh->info.par[mesh->info.npari].hausd = hausd;
-    mesh->info.npari++;
-    break;
-  default :
-    /* fprintf(stdout,"  ## Warning: you must apply your local parameters"); */
-    /* fprintf(stdout," on triangles (MMG5_Triangle or %d) or vertices" */
-    /*         " (MMG5_Vertex or %d).\n",MMG5_Triangle,MMG5_Vertex); */
+  if ( typ != MMG5_Triangle && typ != MMG5_Tetrahedron ) {
     fprintf(stdout,"  ## Warning: you must apply your local parameters");
-    fprintf(stdout," on triangles (MMG5_Triangle or %d).\n",
-            MMG5_Triangle);
-
-    fprintf(stdout,"  ## Ignored.\n");
-    return(1);
+    fprintf(stdout," on triangles (MMG5_Triangle or %d) or tetrahedron"
+            " (MMG5_Tetrahedron or %d).\n",MMG5_Triangle,MMG5_Tetrahedron);
+    fprintf(stdout,"  ## Unknown type of entity: ignored.\n");
+    return(0);
   }
+
+  for (k=0; k<mesh->info.npari; k++) {
+    par = &mesh->info.par[k];
+
+    if ( par->elt == typ && par->ref == ref ) {
+      par->hausd = hausd;
+      par->hmin  = hmin;
+      par->hmax  = hmax;
+      if ( (mesh->info.imprim > 5) || mesh->info.ddebug ) {
+          fprintf(stdout,"  ## Warning: new parameters (hausd, hmin and hmax)");
+          fprintf(stdout," for entities of type %d and of ref %d\n",typ,ref);
+      }
+      return 1;
+    }
+  }
+
+  mesh->info.par[mesh->info.npari].elt   = typ;
+  mesh->info.par[mesh->info.npari].ref   = ref;
+  mesh->info.par[mesh->info.npari].hmin  = hmin;
+  mesh->info.par[mesh->info.npari].hmax  = hmax;
+  mesh->info.par[mesh->info.npari].hausd = hausd;
+  mesh->info.npari++;
 
   return(1);
 }
 
-void MMG3D_Free_all(enum MMG5_arg starter,...)
+void MMG3D_Free_all(const int starter,...)
 {
 
   va_list argptr;
@@ -1622,7 +1608,7 @@ void MMG3D_Free_all(enum MMG5_arg starter,...)
   return;
 }
 
-void MMG3D_Free_structures(enum MMG5_arg starter,...)
+void MMG3D_Free_structures(const int starter,...)
 {
 
   va_list argptr;
@@ -1636,7 +1622,7 @@ void MMG3D_Free_structures(enum MMG5_arg starter,...)
   return;
 }
 
-void MMG3D_Free_names(enum MMG5_arg starter,...)
+void MMG3D_Free_names(const int starter,...)
 {
 
   va_list argptr;

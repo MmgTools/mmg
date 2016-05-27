@@ -168,7 +168,7 @@ int _MMG5_movintptLES_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,int 
   double               calold,calnew,*callist;
   double               x21,y21,z21,x31,y31,z31,nx,ny,nz,bary[3],dd,len;
   double               u10[3],u20[3],u30[3],oldc[3],coe;
-  int                  k,iel,ifac,i0,iter,maxtou;
+  int                  k,iel,ifac,iter,maxtou;
 
   // Dynamic alloc for windows comptibility
   _MMG5_SAFE_MALLOC(callist, ilist, double);
@@ -176,9 +176,6 @@ int _MMG5_movintptLES_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,int 
   pt0    = &mesh->tetra[0];
   ppt0   = &mesh->point[0];
   memset(ppt0,0,sizeof(MMG5_Point));
-
-  iel = list[0] / 4;
-  i0  = list[0] % 4;
 
   /* Coordinates of optimal point */
   calold = DBL_MAX;
@@ -285,7 +282,6 @@ int _MMG5_movintptLES_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,int 
      calnew = DBL_MAX;
      for (k=0; k<ilist; k++) {
        iel = list[k] / 4;
-       i0  = list[k] % 4;
        pt  = &mesh->tetra[iel];
        memcpy(pt0,pt,sizeof(MMG5_Tetra));
        callist[k] = _MMG5_caltet(mesh,met,pt0);//_MMG5_orcal(mesh,met,0);

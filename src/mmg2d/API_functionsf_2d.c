@@ -42,7 +42,7 @@
  * See \ref MMG2D_Init_mesh function in common/libmmgcommon.h file.
  */
 FORTRAN_VARIADIC ( MMG2D_INIT_MESH, mmg2d_init_mesh,
-                 (enum MMG5_arg starter, ... ),
+                 (const int starter, ... ),
                  va_list argptr;
 
                  va_start(argptr, starter);
@@ -435,7 +435,7 @@ FORTRAN_NAME(MMG2D_CHK_MESHDATA,mmg2d_chk_meshdata,
  * See \ref MMG2D_Free_all function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_VARIADIC(MMG2D_FREE_ALL,mmg2d_free_all,
-                 (enum MMG5_arg starter,...),
+                 (const int starter,...),
                  va_list argptr;
 
                  va_start(argptr, starter);
@@ -451,7 +451,7 @@ FORTRAN_VARIADIC(MMG2D_FREE_ALL,mmg2d_free_all,
  * See \ref MMG2D_Free_structures function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_VARIADIC(MMG2D_FREE_STRUCTURES,mmg2d_free_structures,
-                 (enum MMG5_arg starter,...),
+                 (const int starter,...),
                  va_list argptr;
 
                  va_start(argptr, starter);
@@ -467,7 +467,7 @@ FORTRAN_VARIADIC(MMG2D_FREE_STRUCTURES,mmg2d_free_structures,
  * See \ref MMG2D_Free_names function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_VARIADIC(MMG2D_FREE_NAMES,mmg2d_free_names,
-             (enum MMG5_arg starter,...),
+             (const int starter,...),
              va_list argptr;
 
              va_start(argptr, starter);

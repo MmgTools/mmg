@@ -118,8 +118,8 @@ void _MMG3D_Init_woalloc_mesh(MMG5_pMesh mesh, MMG5_pSol sol, MMG5_pSol disp
 
 /**
  * \param argptr list of the mmg structures that must be initialized. Each
- * structure must follow a member of the \a MMG5_arg enum that allow to identify
- * it.
+ * structure must follow one of the MMG5_ARG* preprocessor variable that allow
+ * to identify it.
  *
  * \a argptr contains at least a pointer toward a \a MMG5_pMesh structure
  * (that will contain the mesh and identified by the MMG5_ARG_ppMesh keyword)
@@ -143,14 +143,14 @@ void _MMG3D_Init_woalloc_mesh(MMG5_pMesh mesh, MMG5_pSol sol, MMG5_pSol disp
 void _MMG3D_Init_mesh_var( va_list argptr ) {
   MMG5_pMesh     *mesh;
   MMG5_pSol      *sol,*disp;
-  enum MMG5_arg  typArg;
+  int            typArg;
   int            meshCount;
 
   meshCount = 0;
   disp = sol = NULL;
 
 
-  while ( (typArg = va_arg(argptr,enum MMG5_arg)) != MMG5_ARG_end )
+  while ( (typArg = va_arg(argptr,int)) != MMG5_ARG_end )
   {
     switch ( typArg )
     {
@@ -167,8 +167,9 @@ void _MMG3D_Init_mesh_var( va_list argptr ) {
     default:
       fprintf(stderr,"  ## Error: MMG3D_Init_mesh:\n"
               " unexpected argument type: %d\n",typArg);
-      fprintf(stderr," Argument type must be one of the following members"
-              " of the MMG5_arg enum: MMG5_ARG_ppMesh, MMG5_ARG_ppMet,"
+      fprintf(stderr," Argument type must be one"
+              " of the MMG5_ARG* preprocessor variable:"
+              " MMG5_ARG_ppMesh, MMG5_ARG_ppMet,"
               "  MMG5_ARG_ppLs, MMG5_ARG_ppDisp\n");
       exit(EXIT_FAILURE);
     }
@@ -185,8 +186,8 @@ void _MMG3D_Init_mesh_var( va_list argptr ) {
     fprintf(stderr,"  ## Error: MMG3D_Init_mesh:\n"
             " you need to initialize a solution structure"
             " (of type MMG5_pSol and indentified by the MMG5_ARG_ppMet or"
-            " MMG5_ARG_ppLs member"
-            " of the MMG5_arg enum) that will contain the output mesh metric"
+            " MMG5_ARG_ppLs preprocessor variable) that will contain the output"
+            " mesh metric"
             " informations, and the input one, if provided.\n.");
     exit(EXIT_FAILURE);
   }
@@ -205,8 +206,8 @@ void _MMG3D_Init_mesh_var( va_list argptr ) {
 
 /**
  * \param argptr list of the mmg structures that must be deallocated. Each
- * structure must follow a member of the \a MMG5_arg enum that allow to identify
- * it.
+ * structure must follow one of the MMG5_ARG* preprocessor variable that allow
+ * to identify it.
  *
  * \a argptr contains at least a pointer toward a \a MMG5_pMesh structure
  * (that will contain the mesh and identified by the MMG5_ARG_ppMesh keyword)
@@ -235,13 +236,13 @@ void _MMG3D_Free_all_var(va_list argptr)
 
   MMG5_pMesh     *mesh;
   MMG5_pSol      *sol,*disp;
-  enum MMG5_arg  typArg;
+  int            typArg;
   int            meshCount;
 
   meshCount = 0;
   disp = sol = NULL;
 
-  while ( (typArg = va_arg(argptr,enum MMG5_arg)) != MMG5_ARG_end )
+  while ( (typArg = va_arg(argptr,int)) != MMG5_ARG_end )
   {
     switch ( typArg )
     {
@@ -258,9 +259,10 @@ void _MMG3D_Free_all_var(va_list argptr)
     default:
       fprintf(stderr,"  ## Error: MMG3D_Free_all:\n"
               " unexpected argument type: %d\n",typArg);
-      fprintf(stderr," Argument type must be one of the following members"
-              " of the MMG5_arg enum: MMG5_ARG_ppMesh, MMG5_ARG_ppMet,"
-              " MMG5_ppLs, MMG5_ARG_ppDisp\n");
+      fprintf(stderr," Argument type must be one of the following preprocessor"
+              " variable:"
+              " MMG5_ARG_ppMesh, MMG5_ARG_ppMet,"
+              " MMG5_ARG_ppLs, MMG5_ARG_ppDisp\n");
       exit(EXIT_FAILURE);
     }
   }
@@ -276,8 +278,8 @@ void _MMG3D_Free_all_var(va_list argptr)
     fprintf(stderr,"  ## Error: MMG3D_Free_all:\n"
             " you need to provide your metric structure"
             " (of type MMG5_pSol and indentified by the MMG5_ARG_ppMet or"
-            " MMG5_ARG_ppLs member"
-            " of the MMG5_arg enum) to allow to free the associated memory.\n");
+            " MMG5_ARG_ppLs preprocessor variable)"
+            " to allow to free the associated memory.\n");
   }
 
 
@@ -304,8 +306,8 @@ void _MMG3D_Free_all_var(va_list argptr)
 
 /**
  * \param argptr list of the mmg structures that must be deallocated. Each
- * structure must follow a member of the \a MMG5_arg enum that allow to identify
- * it.
+ * structure must follow one of the MMG5_ARG* preprocessor variable that allow
+ * to identify it.
  *
  * \a argptr contains at least a pointer toward a \a MMG5_pMesh structure
  * (that will contain the mesh and identified by the MMG5_ARG_ppMesh keyword)
@@ -335,13 +337,13 @@ void _MMG3D_Free_structures_var(va_list argptr)
 
   MMG5_pMesh     *mesh;
   MMG5_pSol      *sol,*disp;
-  enum MMG5_arg  typArg;
+  int            typArg;
   int            meshCount;
 
   meshCount = 0;
   disp = sol = NULL;
 
-  while ( (typArg = va_arg(argptr,enum MMG5_arg)) != MMG5_ARG_end )
+  while ( (typArg = va_arg(argptr,int)) != MMG5_ARG_end )
   {
     switch ( typArg )
     {
@@ -358,9 +360,10 @@ void _MMG3D_Free_structures_var(va_list argptr)
     default:
       fprintf(stderr,"  ## Error: MMG3D_Free_structures:\n"
               " unexpected argument type: %d\n",typArg);
-      fprintf(stderr," Argument type must be one of the following members"
-              " of the MMG5_arg enum: MMG5_ARG_ppMesh, MMG5_ARG_ppMet,"
-              " MMG5_ppLs, MMG5_ARG_ppDisp\n");
+      fprintf(stderr," Argument type must be one of the following preprocessor"
+              " variable:"
+              " MMG5_ARG_ppMesh, MMG5_ARG_ppMet,"
+              " MMG5_ARG_ppLs, MMG5_ARG_ppDisp\n");
       exit(EXIT_FAILURE);
     }
   }
@@ -440,8 +443,8 @@ void _MMG3D_Free_structures_var(va_list argptr)
 
 /**
  * \param argptr list of the mmg structures for whose we want to deallocate the
- * name. Each structure must follow a member of the \a MMG5_arg enum that allow
- * to identify it.
+ * name. Each structure must follow one of the \a MMG5_ARG* preprocessor
+ * variable that allow to identify it.
  *
  * \a argptr contains at least a pointer toward a \a MMG5_pMesh structure
  * (that will contain the mesh and identified by the MMG5_ARG_ppMesh keyword)
@@ -471,13 +474,13 @@ void _MMG3D_Free_names_var(va_list argptr)
 
   MMG5_pMesh     *mesh;
   MMG5_pSol      *sol,*disp;
-  enum MMG5_arg  typArg;
+  int            typArg;
   int            meshCount;
 
   meshCount = 0;
   disp = sol = NULL;
 
-  while ( (typArg = va_arg(argptr,enum MMG5_arg)) != MMG5_ARG_end )
+  while ( (typArg = va_arg(argptr,int)) != MMG5_ARG_end )
   {
     switch ( typArg )
     {
@@ -494,9 +497,10 @@ void _MMG3D_Free_names_var(va_list argptr)
     default:
       fprintf(stderr,"  ## Error: MMG3D_Free_names:\n"
               " unexpected argument type: %d\n",typArg);
-      fprintf(stderr," Argument type must be one of the following members"
-              " of the MMG5_arg enum: MMG5_ARG_ppMesh, MMG5_ARG_ppMet,"
-              " MMG5_ppLs, MMG5_ARG_ppDisp\n");
+      fprintf(stderr," Argument type must be one of the following preprocessor"
+              " variable:"
+              " MMG5_ARG_ppMesh, MMG5_ARG_ppMet,"
+              " MMG5_ARG_ppLs, MMG5_ARG_ppDisp\n");
       exit(EXIT_FAILURE);
     }
   }
@@ -511,8 +515,8 @@ void _MMG3D_Free_names_var(va_list argptr)
     fprintf(stderr,"  ## Error: MMG3D_Free_names:\n"
             " you need to provide your metric structure"
             " (of type MMG5_pSol and indentified by the MMG5_ARG_ppMet or"
-            " MMG5_ppLs member"
-            " of the MMG5_arg enum) to allow to free the associated memory.\n");
+            " MMG5_ARG_ppLs preprocessor variable)"
+            " to allow to free the associated memory.\n");
   }
 
   /* mesh & met */

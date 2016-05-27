@@ -40,7 +40,7 @@
 
 #include "mmg2d.h"
 
-void MMG2D_Init_mesh(enum MMG5_arg starter,...) {
+void MMG2D_Init_mesh(const int starter,...) {
   va_list argptr;
 
   va_start(argptr, starter);
@@ -1052,7 +1052,7 @@ int MMG2D_Chk_meshData(MMG5_pMesh mesh,MMG5_pSol met) {
   return(1);
 }
 
-void MMG2D_Free_all(enum MMG5_arg starter,...)
+void MMG2D_Free_all(const int starter,...)
 {
 
   va_list argptr;
@@ -1066,7 +1066,7 @@ void MMG2D_Free_all(enum MMG5_arg starter,...)
   return;
 }
 
-void MMG2D_Free_structures(enum MMG5_arg starter,...)
+void MMG2D_Free_structures(const int starter,...)
 {
 
   va_list argptr;
@@ -1080,7 +1080,7 @@ void MMG2D_Free_structures(enum MMG5_arg starter,...)
   return;
 }
 
-void MMG2D_Free_names(enum MMG5_arg starter,...)
+void MMG2D_Free_names(const int starter,...)
 {
 
   va_list argptr;

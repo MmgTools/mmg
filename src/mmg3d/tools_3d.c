@@ -142,7 +142,6 @@ int _MMG5_startedgsurfball(MMG5_pMesh mesh,int nump,int numq,int *list,int ilist
     }
     assert(ip<4);
 
-    pt = &mesh->tetra[iel];
     ipt = _MMG5_idirinv[iface][ip]; // index of ip in face iface
     ipt = _MMG5_inxt2[ipt];         // next index in this face
     ipt = _MMG5_idir[iface][ipt];  // index of this point in local num of tetra

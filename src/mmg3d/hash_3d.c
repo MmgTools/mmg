@@ -1178,9 +1178,13 @@ int _MMG5_chkBdryTria(MMG5_pMesh mesh) {
     if ( !MG_EOK(pt) )  continue;
     adja = &mesh->adja[4*(k-1)+1];
     for (i=0; i<4; i++) {
-      adj = adja[i] / 4;
+      adj = adja[i];
+
+      if ( !adj ) ++ntmesh;
+
+      adj /= 4;
       pt1 = &mesh->tetra[adj];
-      if ( !adj || ( pt->ref > pt1->ref) )
+      if ( pt->ref > pt1->ref )
         ++ntmesh;
     }
   }
@@ -1216,9 +1220,17 @@ int _MMG5_chkBdryTria(MMG5_pMesh mesh) {
       if ( !MG_EOK(pt) )  continue;
       adja = &mesh->adja[4*(k-1)+1];
       for (i=0; i<4; i++) {
-        adj = adja[i] / 4;
+        adj = adja[i];
+        if ( !adj ) {
+          ia = pt->v[_MMG5_idir[i][0]];
+          ib = pt->v[_MMG5_idir[i][1]];
+          ic = pt->v[_MMG5_idir[i][2]];
+          if ( !_MMG5_hashFace(mesh,&hashTet,ia,ib,ic,4*k+i) ) return(0);
+        }
+        adj /= 4;
+
         pt1 = &mesh->tetra[adj];
-        if ( !adj || ( pt->ref > pt1->ref) ) {
+        if ( pt->ref > pt1->ref ) {
           ia = pt->v[_MMG5_idir[i][0]];
           ib = pt->v[_MMG5_idir[i][1]];
           ic = pt->v[_MMG5_idir[i][2]];

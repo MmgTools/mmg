@@ -631,9 +631,12 @@ int _MMG5_cavity_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel,int ip,int* list,int 
     ptc  = &mesh->tetra[jel];
 
     for (i=0; i<4; i++) {
-      adj = vois[i] >> 2;
-      voy = vois[i] % 4;
+      adj = vois[i];
+
       if ( !adj )  continue;
+
+      adj >>= 2;
+      voy = vois[i] % 4;
       pt  = &mesh->tetra[adj];
       /* boundary face */
       if ( pt->mark == base || pt->ref != ptc->ref )  continue;
@@ -676,9 +679,13 @@ int _MMG5_cavity_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel,int ip,int* list,int 
 
       for (j=0; j<4; j++) {
         if ( j == voy )  continue;
-        adi = adjb[j] >> 2;
-        assert(adi !=jel);
+        adi = adjb[j];
+
         if ( !adi )  continue;
+
+        adi >>= 2;
+        assert(adi !=jel);
+
         pt1 = &mesh->tetra[adi];
 //#warning demander a cecile quand ca arrive??
         if ( pt1->mark == base ) {
@@ -770,9 +777,11 @@ int _MMG5_cavity_iso(MMG5_pMesh mesh,MMG5_pSol sol,int iel,int ip,int *list,int 
     ptc  = &mesh->tetra[jel];
 
     for (i=0; i<4; i++) {
-      adj = vois[i] >> 2;
-      voy = vois[i] % 4;
+      adj = vois[i];
       if ( !adj )  continue;
+
+      adj >>= 2;
+      voy = vois[i] % 4;
       pt  = &mesh->tetra[adj];
       /* boundary face */
       if ( pt->mark == base || pt->ref != ptc->ref )  continue;
@@ -796,9 +805,12 @@ int _MMG5_cavity_iso(MMG5_pMesh mesh,MMG5_pSol sol,int iel,int ip,int *list,int 
 
       for (j=0; j<4; j++) {
         if ( j == voy )  continue;
-        adi = adjb[j] >> 2;
-        assert(adi !=jel);
+        adi = adjb[j];
         if ( !adi )  continue;
+
+        adi >>= 2;
+        assert(adi !=jel);
+
         pt1 = &mesh->tetra[adi];
         if ( pt1->mark == base ) {
           if ( pt1->ref != tref )  break;

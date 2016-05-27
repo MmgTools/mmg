@@ -73,8 +73,9 @@ int _MMG5_boulevolp (MMG5_pMesh mesh, int start, int ip, int * list){
 
     for (l=0; l<3; l++) {
       i  = _MMG5_inxt3[i];
-      k1 = adja[i] / 4;
+      k1 = adja[i];
       if ( !k1 )  continue;
+      k1 /= 4;
       pt1 = &mesh->tetra[k1];
       if ( pt1->flag == base )  continue;
       pt1->flag = base;
@@ -377,8 +378,9 @@ int _MMG5_boulernm(MMG5_pMesh mesh, int start, int ip, int *ng, int *nr){
 
     for (l=0; l<3; l++) {
       i  = _MMG5_inxt3[i];
-      k1 = adja[i] / 4;
+      k1 = adja[i];
       if ( !k1 )  continue;
+      k1 /= 4;
       pt1 = &mesh->tetra[k1];
       if ( pt1->flag == base )  continue;
       pt1->flag = base;
@@ -526,8 +528,9 @@ int _MMG5_boulesurfvolp(MMG5_pMesh mesh,int start,int ip,int iface,
 
     for (l=0; l<3; l++) {
       i  = _MMG5_inxt3[i];
-      k1 = adja[i]/4;
+      k1 = adja[i];
       if ( !k1 )  continue;
+      k1/=4;
       pt1 = &mesh->tetra[k1];
       if ( pt1->flag == base )  continue;
       pt1->flag = base;
@@ -1015,15 +1018,16 @@ int _MMG5_coquil(MMG5_pMesh mesh,int start,int ia,int * list) {
 
   adja = &mesh->adja[4*(adj-1)+1];
   if ( pt->v[ _MMG5_ifar[i][0] ] == piv ) {
-    adj = adja[ _MMG5_ifar[i][0] ] / 4;
+    adj = adja[ _MMG5_ifar[i][0] ];
     piv = pt->v[ _MMG5_ifar[i][1] ];
   }
   else {
-    adj = adja[ _MMG5_ifar[i][1] ] /4;
+    adj = adja[ _MMG5_ifar[i][1] ];
     piv = pt->v[ _MMG5_ifar[i][0] ];
   }
 
   while ( adj ) {
+    adj /= 4;
     pt = &mesh->tetra[adj];
     if ( pt->tag & MG_REQ )  return(0);
     /* identification of edge number in tetra adj */
@@ -1049,11 +1053,11 @@ int _MMG5_coquil(MMG5_pMesh mesh,int start,int ia,int * list) {
     /* set new triangle for travel */
     adja = &mesh->adja[4*(adj-1)+1];
     if ( pt->v[ _MMG5_ifar[i][0] ] == piv ) {
-      adj = adja[ _MMG5_ifar[i][0] ] / 4;
+      adj = adja[ _MMG5_ifar[i][0] ];
       piv = pt->v[ _MMG5_ifar[i][1] ];
     }
     else {
-      adj = adja[ _MMG5_ifar[i][1] ] /4;
+      adj = adja[ _MMG5_ifar[i][1] ];
       piv = pt->v[ _MMG5_ifar[i][0] ];
     }
   }
