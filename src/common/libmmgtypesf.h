@@ -192,7 +192,7 @@
 
 ! /**
 !  * \enum MMG5_entities
-!  * \brief Type of mesh entities to which solutions are applied.
+!  * \brief Type of mesh entities.
 !  */
 
 ! /*!< Undefined type (unusable) */
@@ -201,6 +201,8 @@
 #define   MMG5_Vertex                  1
 ! /*!< Triangle entity */
 #define   MMG5_Triangle                2
+! /*!< Tetra entity */
+#define   MMG5_Tetrahedron             3
 
 ! /**
 !  * \struct MMG5_Par

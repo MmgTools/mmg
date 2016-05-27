@@ -485,6 +485,11 @@ int MMG3D_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
         /*     exit(EXIT_FAILURE); */
         /*   } */
         /* } */
+        else if ( !strcmp(buf,"tetrahedra") || !strcmp(buf,"tetrahedron") ) {
+          if ( !MMG3D_Set_localParameter(mesh,met,MMG5_Tetrahedron,ref,fp1,fp2,hausd) ) {
+            exit(EXIT_FAILURE);
+          }
+        }
         else {
           fprintf(stderr,"  %%%% Wrong format: %s\n",buf);
           continue;
