@@ -47,6 +47,7 @@ my $fichier;
 #my $format = "MMG_INTEGER, PARAMETER :: %-30s = %d";
 my $format = "#define %-30s %d";
 my $formatbyval = "#define %-30s \%val(%d)";
+my $definebyval = "#define MMG5_ARG_%-30s \%val(%d)\n";
 my %opts;
 
 ###############################################################################
@@ -122,6 +123,7 @@ sub printTab # ($chaine, $tabcount, $comm)
 sub Convert {
 
     my $startcom  = 0;
+    my $cppdef    = 0;
     my $startenum = 0;
     my $countenum = 0;
     my $byvalue   = 0;
@@ -179,9 +181,26 @@ sub Convert {
                 {
                     printTab($line,0,0 );
                 }
+                elsif ($line =~ /\#ifdef __cplusplus/ ) {
+                    $cppdef = 1;
+                    $chaine = sprintf("! %s",$line);
+                    printTab($chaine,0,0 );
+                }
                 elsif($line =~ /\#endif/ )
                 {
-                    printTab($line,0,0 );
+                    if ( $cppdef ) {
+                        $cppdef = 0;
+                        $chaine = sprintf("! %s",$line);
+                        printTab($chaine,0,0 );
+                    }
+                    else {
+                        printTab($line,0,0 );
+                    }
+                }
+                elsif ($line =~ /\#define MMG5_ARG_(\w*)\s+(.*)/)
+                {
+                    $chaine = sprintf($definebyval,$1,$2);
+                    printTab($chaine,1,0 );
                 }
                 elsif ($line =~ /\#define/)
                 {
@@ -235,7 +254,7 @@ sub Convert {
                     if ( $key =~ /(.*)(\/\*.*\*\/)/ )
                     {
                         if ( $byvalue ) {
-                            # Fortran code must pass an value and not a
+                            # Fortran code must pass a value and not a
                             # reference over a value
                             $chaine = sprintf($formatbyval, $1,$countenum);
                         }
@@ -246,8 +265,8 @@ sub Convert {
                     }
                     else
                     {
-                        if ( 0 && $byvalue ) {
-                            # Fortran code must pass an value and not a
+                        if ( $byvalue ) {
+                            # Fortran code must pass a value and not a
                             # reference over a value
                             $chaine = sprintf($formatbyval, $key, $countenum,);
                         }

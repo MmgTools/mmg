@@ -170,21 +170,12 @@ FORTRAN_NAME(MMG3D_GET_ADJATET,mmg3d_get_adjatet,
   return;
 }
 
-/* /\** */
-/*  * See \ref MMG3D_Get_adjaVerticesFast function in \ref mmg3d/libmmg3d.h file. */
-/*  *\/ */
-/* FORTRAN_NAME(MMG3D_GET_ADJAVERTICESFAST,mmg3d_get_adjaverticesfast, */
-/*                (MMG5_pMesh *mesh,int* ip, int *start, int* lispoi, int* retval), */
-/*                (mesh,ip,start,lispoi,retval)) { */
-/*   *retval =  MMG3D_Get_adjaVerticesFast(*mesh,*ip, *start,lispoi); */
-/*   return; */
-/* } */
 /**
- * See \ref MMG3D_DoSol function in \ref mmg3d/libmmg3d.h file.
+ * See \ref MMG3D_doSol function in \ref mmg3d/libmmg3d.h file.
  */
 FORTRAN_NAME(MMG3D_DOSOL,mmg3d_dosol,
              (MMG5_pMesh *mesh,MMG5_pSol *met,int *retval),
              (mesh,met,retval)) {
-  *retval = MMG3D_DoSol(*mesh,*met);
+  *retval = MMG3D_doSol(*mesh,*met);
   return;
 }

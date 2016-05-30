@@ -30,7 +30,7 @@
  * \copyright GNU Lesser General Public License.
  */
 
-#include "mmg3d.h"
+#include "inlined_functions_3d.h"
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -216,8 +216,9 @@ int MMG3D_typelt(MMG5_pMesh mesh,int iel,int *item) {
 
     if ( isur > 2 ) {
       dd = rapmin / rapmax;
-      item[0] = iarmin;
-      item[1] = _MMG5_idir[iarmin][0];
+      item[0] = 0; //iarmin;
+      // Changed by 0 because we overflow idir
+      item[1] = 0; //_MMG5_idir[iarmin][0];
       if ( dd < 0.01 )  return(4);
       if ( s[0]+s[1] > ssmall ) {
         item[0] = 0;
@@ -248,12 +249,12 @@ int MMG3D_typelt(MMG5_pMesh mesh,int iel,int *item) {
     for (k=0; k<4; k++) {
       for (i=0; i<3; i++) {
         i0 = _MMG5_idir[k][i];
-        i1 = _MMG5_idir[k][_MMG5_inxt3[i]];
-        i2 = _MMG5_idir[k][_MMG5_inxt3[i+1]];
+        i1 = _MMG5_idir[k][_MMG5_inxt2[i]];
+        i2 = _MMG5_idir[k][_MMG5_inxt2[i+1]];
         if ( h[i0]+h[i1] < 1.2*h[i2] ) {/*1.4 ie une face obtus*/
           nobtus++;
           item[0] = i2;
-          item[1] = _MMG5_idir[k][_MMG5_inxt3[i+1]];
+          item[1] = _MMG5_idir[k][_MMG5_inxt2[i+1]];
         }
       }
     }
@@ -283,8 +284,8 @@ int MMG3D_typelt(MMG5_pMesh mesh,int iel,int *item) {
     for (k=0; k<4; k++) {
       for (i=0; i<3; i++) {
         i0 = _MMG5_idir[k][i];
-        i1 = _MMG5_idir[k][_MMG5_inxt3[i]];
-        i2 = _MMG5_idir[k][_MMG5_inxt3[i+1]];
+        i1 = _MMG5_idir[k][_MMG5_inxt2[i]];
+        i2 = _MMG5_idir[k][_MMG5_inxt2[i+1]];
         if ( h[i0]+h[i1] > 1.5*h[i2] )  naigu++;/*1.5*/
       }
     }
@@ -418,7 +419,11 @@ int _MMG3D_splitItem(MMG5_pMesh mesh,  MMG5_pSol met,_MMG3D_pOctree octree,
       if(pt->v[j] == ier) break;
     }
     assert(j<4);
-    ier = _MMG3D_movv_ani(mesh,met,k,j);
+    if(met->size!=1)
+      ier = _MMG3D_movv_ani(mesh,met,k,j);
+    else
+      ier = _MMG3D_movv_iso(mesh,met,k,j);
+
   }
   return(ier);
 }
@@ -482,7 +487,7 @@ int MMG3D_opttyp(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree) {
     /* memory free */
     _MMG5_DEL_MEM(mesh,mesh->adja,(4*mesh->nemax+5)*sizeof(int));
     if ( !MMG3D_hashTetra(mesh,1) ) {
-      fprintf(stdout,"  ## Hashing problem. Exit program.\n");
+      fprintf(stderr,"  ## Hashing problem. Exit program.\n");
       return(0);
     }
   }
@@ -586,15 +591,22 @@ int MMG3D_opttyp(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree) {
             break;
           }
         }
+        for(i=0 ; i<4 ; i++) {
+          if(((met->size!=1) && _MMG3D_movv_ani(mesh,met,k,i)) || ((met->size==1) && _MMG3D_movv_iso(mesh,met,k,i))) {
+            nd++;
+            ds[ityp]++;
+            break;
+          }
+        }
         break;
       case 2: /*chapeau*/
-        if((met->size!=1) && _MMG3D_movv_ani(mesh,met,k,item[0])) {
+        if(((met->size!=1) && _MMG3D_movv_ani(mesh,met,k,item[0])) || ((met->size==1) && _MMG3D_movv_iso(mesh,met,k,item[0]))) {
           nd++;
           ds[ityp]++;
         } else {
           for(i=0 ; i<4 ; i++) {
             if(item[0]==i) continue;
-            if((met->size!=1) && _MMG3D_movv_ani(mesh,met,k,i)) {
+            if(((met->size!=1) && _MMG3D_movv_ani(mesh,met,k,i)) || ((met->size==1) && _MMG3D_movv_iso(mesh,met,k,i))) {
               nd++;
               ds[ityp]++;
               break;

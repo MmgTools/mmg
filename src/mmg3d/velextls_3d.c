@@ -157,7 +157,7 @@ int* _MMG5_packLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,int *npfin) {
   
   /* Step 4: creation of the mesh for elasticity */
   if ( !LS_mesh(lsst,npf,0,ntf,ilist) ) {
-    fprintf(stdout,"  ## Problem in fn LS_mesh. Exiting.\n");
+    fprintf(stderr,"  ## Problem in fn LS_mesh. Exiting.\n");
     return(0);
   }
 
@@ -176,7 +176,7 @@ int* _MMG5_packLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,int *npfin) {
     p0 = &mesh->point[k];
     invperm[ip] = k;
     if ( !LS_addVer(lsst,ip,p0->c,p0->ref) ) {
-      fprintf(stdout,"  ## Problem in fn LS_addVer. Exiting.\n");
+      fprintf(stderr,"  ## Problem in fn LS_addVer. Exiting.\n");
       return(0);
     }
   }
@@ -190,7 +190,7 @@ int* _MMG5_packLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,int *npfin) {
       vper[i] = perm[pt->v[i]];
     
     if (!LS_addTet(lsst,k,vper,0) ) {
-      fprintf(stdout,"  ## Problem in fn LS_addTet. Exiting.\n");
+      fprintf(stderr,"  ## Problem in fn LS_addTet. Exiting.\n");
       return(0);
     }
   }
@@ -216,7 +216,7 @@ int* _MMG5_packLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,int *npfin) {
           vper[j] = perm[pt->v[_MMG5_idir[i][j]]];
         
         if ( !LS_addTri(lsst,ntf,vper,refdirnh) ) {
-          fprintf(stdout,"  ## Problem in fn LS_addTri. Exiting.\n");
+          fprintf(stderr,"  ## Problem in fn LS_addTri. Exiting.\n");
           return(0);
         }
       }
@@ -227,7 +227,7 @@ int* _MMG5_packLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,int *npfin) {
           vper[j] = perm[pt->v[_MMG5_idir[i][j]]];
         
         if ( !LS_addTri(lsst,ntf,vper,refdirh) ) {
-          fprintf(stdout,"  ## Problem in fn LS_addTri. Exiting.\n");
+          fprintf(stderr,"  ## Problem in fn LS_addTri. Exiting.\n");
           return(0);
         }
       }
@@ -239,24 +239,24 @@ int* _MMG5_packLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,int *npfin) {
   
   /* Add boundary conditions */
   if ( !LS_setBC(lsst,Dirichlet,refdirnh,'f',LS_tri,NULL) ) {
-    fprintf(stdout,"  ## Problem in fn LS_set BC. Exiting.\n");
+    fprintf(stderr,"  ## Problem in fn LS_set BC. Exiting.\n");
     return(0);
   }
   
   if ( !LS_setBC(lsst,Dirichlet,refdirh,'v',LS_tri,u) ) {
-    fprintf(stdout,"  ## Problem in fn LS_set BC. Exiting.\n");
+    fprintf(stderr,"  ## Problem in fn LS_set BC. Exiting.\n");
     return(0);
   }
   
   /* Add materials */
   if ( !LS_setLame(lsst,0,_LS_LAMBDA,_LS_MU) ) {
-    fprintf(stdout,"  ## Problem in fn LS_setLame. Exiting.\n");
+    fprintf(stderr,"  ## Problem in fn LS_setLame. Exiting.\n");
     return(0);
   }
   
   /* Transfer displacement */
   if ( !LS_CreaSol(lsst) ) {
-    fprintf(stdout,"  ## Problem in fn LS_CreaSol. Exiting.\n");
+    fprintf(stderr,"  ## Problem in fn LS_CreaSol. Exiting.\n");
     return(0);
   }
   
@@ -265,7 +265,7 @@ int* _MMG5_packLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,int *npfin) {
     if ( !ip ) continue;
     
     if ( !LS_addSol(lsst,ip,&disp->m[3*k]) ) {
-      fprintf(stdout,"  ## Problem in fn LS_addSol. Exiting.\n");
+      fprintf(stderr,"  ## Problem in fn LS_addSol. Exiting.\n");
       return(0);
     }
   }
@@ -309,19 +309,19 @@ int _MMG5_velextLS(MMG5_pMesh mesh,MMG5_pSol disp) {
   invperm = _MMG5_packLS(mesh,disp,lsst,&npf);
   
   if ( !npf ) {
-    fprintf(stdout,"  ## Problem in fn MMG5_packLS. Exiting.\n");
+    fprintf(stderr,"  ## Problem in fn MMG5_packLS. Exiting.\n");
     return(0);
   }
   
   /* Resolution of the elasticity system on the submesh */
   if ( !LS_elastic(lsst) ) {
-    fprintf(stdout,"  ## Problem in fn elasti1. Exiting.\n");
+    fprintf(stderr,"  ## Problem in fn elasti1. Exiting.\n");
     return(0);
   }
   
   /* Update of the displacement */
   if ( !_MMG5_unpackLS(mesh,disp,lsst,npf,invperm) ) {
-    fprintf(stdout,"  ## Problem in fn _MMG5_unpackLS. Exiting.\n");
+    fprintf(stderr,"  ## Problem in fn _MMG5_unpackLS. Exiting.\n");
     return(0);
   }
   
@@ -330,7 +330,7 @@ int _MMG5_velextLS(MMG5_pMesh mesh,MMG5_pSol disp) {
   
   
   if ( !LS_stop(lsst) ) {
-    fprintf(stdout,"  ## Problem in fn LS_stop. Exiting.\n");
+    fprintf(stderr,"  ## Problem in fn LS_stop. Exiting.\n");
     return(0);
   }
   

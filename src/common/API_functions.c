@@ -75,7 +75,7 @@ void _MMG5_Init_parameters(MMG5_pMesh mesh) {
   mesh->info.dhd      = _MMG5_ANGEDG;   /* angle detection; */
   /** MMG5_DPARAM_hmin = 0.01 \f$\times\f$ bounding box size; */
   mesh->info.hmin     = -1.;      /* minimal mesh size; */
-  /** MMG5_DPARAM_hmax = bounding box size */
+  /** MMG5_DPARAM_hmax = double of the bounding box size */
   mesh->info.hmax     = -1.;      /* maximal mesh size; */
   /** MMG5_DPARAM_hausd = 0.01 */
   mesh->info.hausd    = 0.01;     /* control Hausdorff */
@@ -128,7 +128,7 @@ void MMG5_Init_fileNames(MMG5_pMesh mesh,MMG5_pSol sol
  * Set the name of input mesh.
  *
  */
-int MMG5_Set_inputMeshName(MMG5_pMesh mesh, char* meshin) {
+int MMG5_Set_inputMeshName(MMG5_pMesh mesh, const char* meshin) {
 
   if ( mesh->namein ){
     _MMG5_DEL_MEM(mesh,mesh->namein,(strlen(mesh->namein)+1)*sizeof(char));
@@ -136,14 +136,14 @@ int MMG5_Set_inputMeshName(MMG5_pMesh mesh, char* meshin) {
 
   if ( strlen(meshin) ) {
     _MMG5_ADD_MEM(mesh,(strlen(meshin)+1)*sizeof(char),"input mesh name",
-                  printf("  Exit program.\n");
+                  fprintf(stderr,"  Exit program.\n");
                   exit(EXIT_FAILURE));
     _MMG5_SAFE_CALLOC(mesh->namein,strlen(meshin)+1,char);
     strcpy(mesh->namein,meshin);
   }
   else {
     _MMG5_ADD_MEM(mesh,10*sizeof(char),"input mesh name",
-                  printf("  Exit program.\n");
+                  fprintf(stderr,"  Exit program.\n");
                   exit(EXIT_FAILURE));
     _MMG5_SAFE_CALLOC(mesh->namein,10,char);
     strcpy(mesh->namein,"mesh.mesh");
@@ -164,14 +164,14 @@ int MMG5_Set_inputMeshName(MMG5_pMesh mesh, char* meshin) {
  * Set the name of input solution file.
  *
  */
-int MMG5_Set_inputSolName(MMG5_pMesh mesh,MMG5_pSol sol, char* solin) {
+int MMG5_Set_inputSolName(MMG5_pMesh mesh,MMG5_pSol sol, const char* solin) {
   char *ptr;
 
   if ( sol->namein )
     _MMG5_DEL_MEM(mesh,sol->namein,(strlen(sol->namein)+1)*sizeof(char));
   if ( strlen(solin) ) {
     _MMG5_ADD_MEM(mesh,(strlen(solin)+1)*sizeof(char),"input sol name",
-                  printf("  Exit program.\n");
+                  fprintf(stderr,"  Exit program.\n");
                   exit(EXIT_FAILURE));
     _MMG5_SAFE_CALLOC(sol->namein,strlen(solin)+1,char);
     strcpy(sol->namein,solin);
@@ -187,12 +187,12 @@ int MMG5_Set_inputSolName(MMG5_pMesh mesh,MMG5_pSol sol, char* solin) {
         _MMG5_SAFE_REALLOC(sol->namein,(strlen(sol->namein)+1),char,"input sol name");
       }
       _MMG5_ADD_MEM(mesh,(strlen(sol->namein)+1)*sizeof(char),"input sol name",
-                    printf("  Exit program.\n");
+                    fprintf(stderr,"  Exit program.\n");
                     exit(EXIT_FAILURE));
     }
     else {
       _MMG5_ADD_MEM(mesh,9*sizeof(char),"input sol name",
-                    printf("  Exit program.\n");
+                    fprintf(stderr,"  Exit program.\n");
                     exit(EXIT_FAILURE));
       _MMG5_SAFE_CALLOC(sol->namein,9,char);
       strcpy(sol->namein,"mesh.sol");
@@ -209,7 +209,7 @@ int MMG5_Set_inputSolName(MMG5_pMesh mesh,MMG5_pSol sol, char* solin) {
  * Set the name of output mesh file.
  *
  */
-int MMG5_Set_outputMeshName(MMG5_pMesh mesh, char* meshout) {
+int MMG5_Set_outputMeshName(MMG5_pMesh mesh, const char* meshout) {
   char *ptr;
 
   if ( mesh->nameout )
@@ -217,7 +217,7 @@ int MMG5_Set_outputMeshName(MMG5_pMesh mesh, char* meshout) {
 
   if ( strlen(meshout) ) {
     _MMG5_ADD_MEM(mesh,(strlen(meshout)+1)*sizeof(char),"output mesh name",
-                  printf("  Exit program.\n");
+                  fprintf(stderr,"  Exit program.\n");
                   exit(EXIT_FAILURE));
     _MMG5_SAFE_CALLOC(mesh->nameout,strlen(meshout)+1,char);
     strcpy(mesh->nameout,meshout);
@@ -225,7 +225,7 @@ int MMG5_Set_outputMeshName(MMG5_pMesh mesh, char* meshout) {
   else {
     if ( strlen(mesh->namein) ) {
       _MMG5_ADD_MEM(mesh,(strlen(mesh->namein)+3)*sizeof(char),"output mesh name",
-                    printf("  Exit program.\n");
+                    fprintf(stderr,"  Exit program.\n");
                     exit(EXIT_FAILURE));
       _MMG5_SAFE_CALLOC(mesh->nameout,strlen(mesh->namein)+3,char);
       strcpy(mesh->nameout,mesh->namein);
@@ -246,7 +246,7 @@ int MMG5_Set_outputMeshName(MMG5_pMesh mesh, char* meshout) {
     }
     else {
       _MMG5_ADD_MEM(mesh,7*sizeof(char),"output mesh name",
-                    printf("  Exit program.\n");
+                    fprintf(stderr,"  Exit program.\n");
                     exit(EXIT_FAILURE));
       _MMG5_SAFE_CALLOC(mesh->nameout,7,char);
       if ( (mesh->info.imprim > 5) || mesh->info.ddebug ) {
@@ -269,7 +269,7 @@ int MMG5_Set_outputMeshName(MMG5_pMesh mesh, char* meshout) {
  *  Set the name of output solution file.
  *
  */
-int MMG5_Set_outputSolName(MMG5_pMesh mesh,MMG5_pSol sol, char* solout) {
+int MMG5_Set_outputSolName(MMG5_pMesh mesh,MMG5_pSol sol, const char* solout) {
   char *ptr;
 
   if ( sol->nameout )
@@ -277,7 +277,7 @@ int MMG5_Set_outputSolName(MMG5_pMesh mesh,MMG5_pSol sol, char* solout) {
 
   if ( strlen(solout) ) {
     _MMG5_ADD_MEM(mesh,(strlen(solout)+1)*sizeof(char),"output sol name",
-                  printf("  Exit program.\n");
+                  fprintf(stderr,"  Exit program.\n");
                   exit(EXIT_FAILURE));
     _MMG5_SAFE_CALLOC(sol->nameout,strlen(solout)+1,char);
     strcpy(sol->nameout,solout);
@@ -296,7 +296,7 @@ int MMG5_Set_outputSolName(MMG5_pMesh mesh,MMG5_pSol sol, char* solout) {
         *ptr = '\0';
       strcat(sol->nameout,".sol");
       _MMG5_ADD_MEM(mesh,(strlen(sol->nameout)+1)*sizeof(char),"output sol name",
-                    printf("  Exit program.\n");
+                    fprintf(stderr,"  Exit program.\n");
                     exit(EXIT_FAILURE));
       _MMG5_SAFE_REALLOC(sol->nameout,(strlen(sol->nameout)+1),char,"output sol name");
     }

@@ -412,7 +412,7 @@ long long _MMG5_memSize (void) {
   if (mem == status.ullTotalPhys) return(mem);
   else return(LLONG_MAX);
 #else
-  printf("  ## WARNING: UNKNOWN SYSTEM, RECOVER OF MAXIMAL MEMORY NOT AVAILABLE.\n");
+  fprintf(stderr,"  ## WARNING: UNKNOWN SYSTEM, RECOVER OF MAXIMAL MEMORY NOT AVAILABLE.\n");
   return(0);
 #endif
 
@@ -429,10 +429,10 @@ long _MMG5_safeLL2LCast(long long val)
   tmp_l  = (long)(val);
 
   if ( (long long)(tmp_l) != val ) {
-        fprintf(stdout,"  ## Error:");
-        fprintf(stdout," unable to cast value.n");
-		exit(EXIT_FAILURE);
-		}
+        fprintf(stderr,"  ## Error:");
+        fprintf(stderr," unable to cast value.n");
+        exit(EXIT_FAILURE);
+  }
   return(tmp_l);
 }
 
@@ -465,7 +465,7 @@ int _MMG5_Alloc_inode( MMG5_pMesh mesh, _MMG5_iNode **node ) {
  *
  * Add a node with value \a val to a sorted linked list with unique entries.
  *
- * \Remark as the linked list had unique entries, we don't insert a node if it
+ * \remark as the linked list had unique entries, we don't insert a node if it
  * exists.
  *
  */
@@ -562,10 +562,10 @@ int _MMG5_Alloc_dnode( MMG5_pMesh mesh, _MMG5_dNode **node ) {
  * \param val real value to add to the linked list.
  * \return 1 if the node is inserted, 0 if the node is not inserted, -1 if fail.
  *
- * Add a node with integer value \k and real value \a val to a sorted linked
+ * Add a node with integer value \a k and real value \a val to a sorted linked
  * list with unique entries.
  *
- * \Remark as the linked list had unique entries, we don't insert a node if it
+ * \remark as the linked list had unique entries, we don't insert a node if it
  * exists.
  *
  */

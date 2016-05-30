@@ -33,7 +33,7 @@
  * \todo Doxygen documentation
  */
 
-#include "mmg3d.h"
+#include "inlined_functions_3d.h"
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -68,11 +68,11 @@ int _MMG5_movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree octree, int
   ppt0   = &mesh->point[0];
   memset(ppt0,0,sizeof(MMG5_Point));
 
-  iel = list[0] / 4;
-  i0  = list[0] % 4;
-
-  if ( met->m )
+  if ( met->m ) {
+    iel = list[0] / 4;
+    i0  = list[0] % 4;
     memcpy(&met->m[0],&met->m[met->size*mesh->tetra[iel].v[i0]],met->size*sizeof(double));
+  }
 
   /* Coordinates of optimal point */
   calold = DBL_MAX;

@@ -36,7 +36,7 @@
  *
  */
 
-#include "mmg3d.h"
+#include "inlined_functions_3d.h"
 
 char  ddb;
 
@@ -253,10 +253,6 @@ char _MMG5_chkedg(MMG5_pMesh mesh,MMG5_Tria *pt,char ori) {
   p[2] = &mesh->point[ic];
   pt->flag = 0;
 
-  /* for (i=0; i<3; i++) { */
-  /*   for (i1=0; i1<3; i1++)  */
-  /*     t[i][i1] = 10000000; */
-  /* } */
   /* normal recovery */
   for (i=0; i<3; i++) {
     if ( MG_SIN(p[i]->tag) ) {
@@ -901,7 +897,7 @@ _MMG5_anatetv(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
           /* reallocation of point table */
 
           _MMG5_POINT_REALLOC(mesh,met,ip,mesh->gap,
-                              printf("  ## Error: unable to allocate a new point\n");
+                              printf("  ## Warning: unable to allocate a new point\n");
                               _MMG5_INCREASE_MEM_MESSAGE();
                               memlack=1;
                               goto split
@@ -1116,7 +1112,7 @@ _MMG5_anatets(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
         if ( !ip ) {
           /* reallocation of point table */
           _MMG5_POINT_REALLOC(mesh,met,ip,mesh->gap,
-                              printf("  ## Error: unable to allocate a new point.\n");
+                              fprintf(stderr,"  ## Error: unable to allocate a new point.\n");
                               _MMG5_INCREASE_MEM_MESSAGE();
                               do {
                                 _MMG3D_delPt(mesh,mesh->np);
@@ -1424,7 +1420,7 @@ int _MMG5_anatet(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pOctree octree,
       ier = _MMG5_anatets(mesh,met,typchk);
 
       if ( ier < 0 ) {
-        fprintf(stdout,"  ## Unable to complete surface mesh. Exit program.\n");
+        fprintf(stderr,"  ## Unable to complete surface mesh. Exit program.\n");
         return(0);
       }
       ns += ier;
@@ -1432,7 +1428,7 @@ int _MMG5_anatet(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pOctree octree,
         /* analyze internal tetras */
         ier = _MMG5_anatetv(mesh,met,typchk);
         if ( ier < 0 ) {
-          fprintf(stdout,"  ## Unable to complete volume mesh. Exit program.\n");
+          fprintf(stderr,"  ## Unable to complete volume mesh. Exit program.\n");
           return(0);
         }
         ns += ier;
@@ -1441,7 +1437,7 @@ int _MMG5_anatet(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pOctree octree,
     else  ns = 0;
 
     if ( !MMG3D_hashTetra(mesh,1) ) {
-      fprintf(stdout,"  ## Hashing problem. Exit program.\n");
+      fprintf(stderr,"  ## Hashing problem. Exit program.\n");
       return(0);
     }
     if ( typchk == 2 && it == maxit-1 )  mesh->info.fem = 1;
@@ -1450,7 +1446,7 @@ int _MMG5_anatet(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pOctree octree,
     if ( !mesh->info.noinsert ) {
       nc = _MMG5_coltet(mesh,met,typchk);
       if ( nc < 0 ) {
-        fprintf(stdout,"  ## Unable to collapse mesh. Exiting.\n");
+        fprintf(stderr,"  ## Unable to collapse mesh. Exiting.\n");
         return(0);
       }
     }
@@ -1460,14 +1456,14 @@ int _MMG5_anatet(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pOctree octree,
     if ( !mesh->info.noswap ) {
       nf = _MMG5_swpmsh(mesh,met,NULL,typchk);
       if ( nf < 0 ) {
-        fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
+        fprintf(stderr,"  ## Unable to improve mesh. Exiting.\n");
         return(0);
       }
       nnf += nf;
 
       nf = _MMG5_swptet(mesh,met,1.1,NULL,typchk);
       if ( nf < 0 ) {
-        fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
+        fprintf(stderr,"  ## Unable to improve mesh. Exiting.\n");
         return(0);
       }
     }

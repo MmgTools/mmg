@@ -125,7 +125,7 @@ int movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
     if ( !_MMG5_elementWeight(mesh,met,pt,p0,&pb,r,gv) ) {
       if ( !warn ) {
         ++warn;
-        printf("  ## Warning: unable to compute optimal position for at least"
+        fprintf(stderr,"  ## Warning: unable to compute optimal position for at least"
                " 1 point.\n" );
       }
       return(0);
@@ -302,7 +302,7 @@ int movridpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
         }
       }
       else if ( it1 && it2 && (pt->v[i2] != ip1) && (pt->v[i2] != ip2) ) {
-        printf("   *** function movridptaniso : 3 ridge edges landing on point %d\n",pt->v[i0]);
+        fprintf(stderr,"   *** function movridptaniso : 3 ridge edges landing on point %d\n",pt->v[i0]);
         return(0);
       }
     }
@@ -323,7 +323,7 @@ int movridpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
         }
       }
       else if ( it1 && it2 && (pt->v[i1] != ip1) && (pt->v[i1] != ip2) ) {
-        printf("   *** function movridptaniso : 3 ridge edges landing on point %d\n",pt->v[i0]);
+        fprintf(stderr,"   *** function movridptaniso : 3 ridge edges landing on point %d\n",pt->v[i0]);
         return(0);
       }
     }

@@ -69,6 +69,11 @@ ADD_TEST(NAME SquareGeneration
   ${MMG2D_CI_TESTS}/SquareGeneration/carretest
   -out ${MMG2D_CI_TESTS}/SquareGeneration/carretest.o.meshb)
 
+ADD_TEST(NAME NacaGeneration
+  COMMAND ${EXECUT_MMG2D} -v 5
+  ${MMG2D_CI_TESTS}/NacaGeneration/naca
+  -out ${MMG2D_CI_TESTS}/NacaGeneration/naca.o.meshb)
+
 ###############################################################################
 #####
 #####         Implicit domain discretization

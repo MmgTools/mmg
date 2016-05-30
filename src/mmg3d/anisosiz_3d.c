@@ -33,7 +33,7 @@
  * \todo doxygen documentation.
  */
 
-#include "mmg3d.h"
+#include "inlined_functions_3d.h"
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -65,181 +65,12 @@ inline int _MMG5_moymet(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,double *m1)
   }
 
   if(!n) {
-    // printf("  ## Warning: 4 ridges points... Unable to compute metric.\n");
+    // fprintf(stderr,"  ## Warning: 4 ridges points... Unable to compute metric.\n");
     return(0);
   }
   dd = 1./n;
   for (k=0; k<6; ++k) m1[k] = mm[k]*dd;
   return(n);
-}
-/**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the sol structure.
- * \param ia index of edge in tetra \a pt .
- * \param pt pointer toward the tetra from which we come.
- * \return length of edge according to the prescribed metric.
- *
- * Compute length of edge \f$[i0;i1]\f$ according to the prescribed aniso
- * metric (for special storage of metrics at ridges points).
- *
- */
-inline double _MMG5_lenedg_ani(MMG5_pMesh mesh ,MMG5_pSol met, int ia,
-                               MMG5_pTetra pt)
-{
-  int ip1,ip2;
-  char isedg;
-
-  ip1 = pt->v[_MMG5_iare[ia][0]];
-  ip2 = pt->v[_MMG5_iare[ia][1]];
-
-  if ( pt->xt && (mesh->xtetra[pt->xt].tag[ia] & MG_BDY)) {
-    isedg = ( mesh->xtetra[pt->xt].tag[ia] & MG_GEO);
-    return(_MMG5_lenSurfEdg_ani(mesh, met, ip1, ip2, isedg));
-  } else {
-    return(_MMG5_lenedgspl_ani(mesh ,met, ia, pt));
-  }
-  exit(EXIT_FAILURE);
-}
-
-/**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the sol structure.
- * \param ia index of edge in tetra \a pt .
- * \param pt pointer toward the tetra from which we come.
- * \return length of edge according to the prescribed metric.
- *
- * Compute length of edge \f$[i0;i1]\f$ according to the prescribed aniso
- * metric (for classic storage of metrics at ridges points).
- *
- */
-inline double _MMG5_lenedg33_ani(MMG5_pMesh mesh ,MMG5_pSol met, int ia,
-                                 MMG5_pTetra pt)
-{
-  int ip1,ip2;
-  char isedg;
-
-  ip1 = pt->v[_MMG5_iare[ia][0]];
-  ip2 = pt->v[_MMG5_iare[ia][1]];
-
-  if ( pt->xt && (mesh->xtetra[pt->xt].tag[ia] & MG_BDY)) {
-    isedg = ( mesh->xtetra[pt->xt].tag[ia] & MG_GEO);
-    return(_MMG5_lenSurfEdg33_ani(mesh, met, ip1, ip2, isedg));
-  } else {
-    return( _MMG5_lenedgCoor_ani(mesh->point[ip1].c,mesh->point[ip2].c,
-                                 &met->m[6*ip1],&met->m[6*ip2]) );
-  }
-  exit(EXIT_FAILURE);
-}
-
-/**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the sol structure.
- * \param ia index of edge in tetra \a pt .
- * \param pt pointer toward the tetra from which we come.
- * \return length of edge according to the prescribed metric.
- *
- * Compute length of edge \f$[i0;i1]\f$ according to the prescribed aniso
- * metric (for classic storage of metrics at ridges points).
- *
- */
-inline double _MMG5_lenedgspl33_ani(MMG5_pMesh mesh ,MMG5_pSol met, int ia,
-                                    MMG5_pTetra pt)
-{
-  MMG5_pPoint pp1,pp2;
-  double      *m1,*m2;
-  int         ip1,ip2;
-
-  ip1 = pt->v[_MMG5_iare[ia][0]];
-  ip2 = pt->v[_MMG5_iare[ia][1]];
-
-  pp1 = &mesh->point[ip1];
-  pp2 = &mesh->point[ip2];
-
-  m1 = &met->m[6*ip1];
-  m2 = &met->m[6*ip2];
-
-  return(_MMG5_lenedgCoor_ani(pp1->c,pp2->c,m1,m2));
-}
-
-/**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the sol structure.
- * \param ia index of edge in tetra \a pt .
- * \param pt pointer toward the tetra from which we come.
- * \return length of edge according to the prescribed metric, 0 if fail.
- *
- * Compute length of edge \f$[i0;i1]\f$ according to the prescribed aniso
- * metric (for special storage of metrics at ridges points).
- *
- */
-inline double _MMG5_lenedgspl_ani(MMG5_pMesh mesh ,MMG5_pSol met, int ia,
-                                  MMG5_pTetra pt)
-{
-  MMG5_pPoint pp1,pp2;
-  double      m1[6],m2[6];
-  int         ip1,ip2,i;
-
-  ip1 = pt->v[_MMG5_iare[ia][0]];
-  ip2 = pt->v[_MMG5_iare[ia][1]];
-
-  pp1 = &mesh->point[ip1];
-  pp2 = &mesh->point[ip2];
-
-  if ( !(MG_SIN(pp1->tag) || (MG_NOM & pp1->tag)) && (pp1->tag & MG_GEO) ) {
-    if ( !_MMG5_moymet(mesh,met,pt,m1) ) return(0);
-  } else {
-    for ( i=0; i<6; ++i )
-      m1[i] = met->m[6*ip1+i];
-  }
-
-  if ( !(MG_SIN(pp2->tag)|| (MG_NOM & pp2->tag)) && (pp2->tag & MG_GEO) ) {
-    if ( !_MMG5_moymet(mesh,met,pt,m2) ) return(0);
-  } else {
-    for ( i=0; i<6; ++i )
-      m2[i] = met->m[6*ip2+i];
-  }
-
-  return(_MMG5_lenedgCoor_ani(pp1->c,pp2->c,m1,m2));
-}
-
-/**
- * \brief Compute edge length from edge's coordinates.
- * \param ca pointer toward the coordinates of the first edge's extremity.
- * \param cb pointer toward the coordinates of the second edge's extremity.
- * \param sa pointer toward the metric associated to the first edge's extremity.
- * \param sb pointer toward the metric associated to the second edge's extremity.
- * \return edge length.
- *
- * Compute length of edge \f$[ca,cb]\f$ (with \a ca and \a cb
- * coordinates of edge extremities) according to the anisotropic size
- * prescription.
- *
- */
-inline double _MMG5_lenedgCoor_ani(double *ca,double *cb,double *sa,double *sb) {
-  double   ux,uy,uz,dd1,dd2,len;
-
-  ux = cb[0] - ca[0];
-  uy = cb[1] - ca[1];
-  uz = cb[2] - ca[2];
-
-  dd1 =      sa[0]*ux*ux + sa[3]*uy*uy + sa[5]*uz*uz \
-    + 2.0*(sa[1]*ux*uy + sa[2]*ux*uz + sa[4]*uy*uz);
-  if ( dd1 <= 0.0 )  dd1 = 0.0;
-
-  dd2 =      sb[0]*ux*ux + sb[3]*uy*uy + sb[5]*uz*uz \
-    + 2.0*(sb[1]*ux*uy + sb[2]*ux*uz + sb[4]*uy*uz);
-  if ( dd2 <= 0.0 )  dd2 = 0.0;
-
-  /*longueur approchee*/
-  /*precision a 3.5 10e-3 pres*/
-  if(fabs(dd1-dd2) < 0.05 ) {
-    //printf("bonne precision %e \n",sqrt(0.5*(dd1+dd2)) - (sqrt(dd1)+sqrt(dd2)+4.0*sqrt(0.5*(dd1+dd2))) / 6.0 );
-    len = sqrt(0.5*(dd1+dd2));
-    return(len);
-  }
-  len = (sqrt(dd1)+sqrt(dd2)+4.0*sqrt(0.5*(dd1+dd2))) / 6.0;
-
-  return(len);
 }
 
 /**
@@ -293,8 +124,8 @@ static int _MMG5_defmetsin(MMG5_pMesh mesh,MMG5_pSol met,int kel, int iface, int
                               listv,&ilistv,lists,&ilists,(p0->tag & MG_NOM));
 
   if ( ilist!=1 ) {
-    printf("Error; unable to compute the ball af the point %d.\n", idp);
-    printf("Exit program.\n");
+    fprintf(stderr,"Error; unable to compute the ball af the point %d.\n", idp);
+    fprintf(stderr,"Exit program.\n");
     exit(EXIT_FAILURE);
   }
 
@@ -464,7 +295,7 @@ static int _MMG5_defmetrid(MMG5_pMesh mesh,MMG5_pSol met,int kel,
   ier = _MMG5_bouletrid(mesh,kel,iface,ip,&ilist1,list1,&ilist2,list2,
                         &iprid[0],&iprid[1] );
   if ( !ier ) {
-    printf("%s:%d:Error: unable to compute the two balls at the ridge"
+    fprintf(stderr,"%s:%d:Error: unable to compute the two balls at the ridge"
            " point %d.\n",__FILE__,__LINE__, idp);
     return(0);
   }
@@ -640,9 +471,9 @@ static int _MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,int kel, int iface, int
   ilist = _MMG5_boulesurfvolp(mesh,kel,ip,iface,listv,&ilistv,lists,&ilists,0);
 
   if ( ilist!=1 ) {
-    printf("%s:%d:Error: unable to compute the ball af the point %d.\n",
+    fprintf(stderr,"%s:%d:Error: unable to compute the ball af the point %d.\n",
            __FILE__,__LINE__, idp);
-    printf("Exit program.\n");
+    fprintf(stderr,"Exit program.\n");
     exit(EXIT_FAILURE);
   }
 
@@ -685,7 +516,7 @@ static int _MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,int kel, int iface, int
         ipref[1] = pt->v[i2];
       }
       else if ( (pt->v[i2] != ipref[0]) && (pt->v[i2] != ipref[1]) ) {
-        printf("%s:%d:Error: three adjacent ref at a non singular point.\n",
+        fprintf(stderr,"%s:%d:Error: three adjacent ref at a non singular point.\n",
                __FILE__,__LINE__);
         exit(EXIT_FAILURE);
       }
@@ -699,7 +530,7 @@ static int _MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,int kel, int iface, int
         ipref[1] = pt->v[i1];
       }
       else if ( (pt->v[i1] != ipref[0]) && (pt->v[i1] != ipref[1]) ) {
-        printf("%s:%d:Error: three adjacent ref at a non singular point.\n",
+        fprintf(stderr,"%s:%d:Error: three adjacent ref at a non singular point.\n",
                __FILE__,__LINE__);
         exit(EXIT_FAILURE);
       }
@@ -724,14 +555,14 @@ static int _MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,int kel, int iface, int
     det2d = lispoi[3*k+1]*lispoi[3*(k+1)+2] - lispoi[3*k+2]*lispoi[3*(k+1)+1];
     assert(det2d);
     if ( det2d <= 0.0 ) {
-      //printf("PROBLEM : BAD PROJECTION OVER TANGENT PLANE %f \n", det2d);
+      //fprintf(stderr,"PROBLEM : BAD PROJECTION OVER TANGENT PLANE %f \n", det2d);
       return(0);
     }
   }
   det2d = lispoi[3*(ilists-1)+1]*lispoi[3*0+2] - lispoi[3*(ilists-1)+2]*lispoi[3*0+1];
   assert(det2d);
   if ( det2d <= 0.0 ) {
-    //printf("PROBLEM : BAD PROJECTION OVER TANGENT PLANE %f \n", det2d);
+    //fprintf(stderr,"PROBLEM : BAD PROJECTION OVER TANGENT PLANE %f \n", det2d);
     return(0);
   }
   assert(ipref[0] && ipref[1]);
@@ -854,9 +685,9 @@ static int _MMG5_defmetreg(MMG5_pMesh mesh,MMG5_pSol met,int kel,int iface, int 
   ilist = _MMG5_boulesurfvolp(mesh,kel,ip,iface,listv,&ilistv,lists,&ilists,0);
 
   if ( ilist!=1 ) {
-    printf("%s:%d:Error: unable to compute the ball af the point %d.\n",
+    fprintf(stderr,"%s:%d:Error: unable to compute the ball af the point %d.\n",
            __FILE__,__LINE__, idp);
-    printf("Exit program.\n");
+    fprintf(stderr,"Exit program.\n");
     exit(EXIT_FAILURE);
   }
 
@@ -905,14 +736,14 @@ static int _MMG5_defmetreg(MMG5_pMesh mesh,MMG5_pSol met,int kel,int iface, int 
     det2d = lispoi[3*k+1]*lispoi[3*(k+1)+2] - lispoi[3*k+2]*lispoi[3*(k+1)+1];
     assert(det2d);
     if ( det2d <= 0.0 ) {
-      //printf("PROBLEM : BAD PROJECTION OVER TANGENT PLANE %f \n", det2d);
+      //fprintf(stderr,"PROBLEM : BAD PROJECTION OVER TANGENT PLANE %f \n", det2d);
       return(0);
     }
   }
   det2d = lispoi[3*(ilists-1)+1]*lispoi[3*0+2] - lispoi[3*(ilists-1)+2]*lispoi[3*0+1];
   assert(det2d);
   if ( det2d <= 0.0 ) {
-    //printf("PROBLEM : BAD PROJECTION OVER TANGENT PLANE %f \n", det2d);
+    //fprintf(stderr,"PROBLEM : BAD PROJECTION OVER TANGENT PLANE %f \n", det2d);
     return(0);
   }
 
@@ -1048,7 +879,7 @@ int _MMG5_defmetvol(MMG5_pMesh mesh,MMG5_pSol met) {
 
       for (i=0; i<3; i++) {
         if(lambda[i]<=0) {
-          printf("%s:%d:Error: wrong metric at point %d -- eigenvalues :"
+          fprintf(stderr,"%s:%d:Error: wrong metric at point %d -- eigenvalues :"
                  " %e %e %e\n",__FILE__,__LINE__,
                  k,lambda[0],lambda[1],lambda[2]);
           return(0);
@@ -1141,11 +972,21 @@ int _MMG3D_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
 
   if ( mesh->info.hmax < 0.0 ) {
     //  mesh->info.hmax = 0.5 * mesh->info.delta;
-    fprintf(stdout,"%s:%d:Error: negative hmax value.\n",__FILE__,__LINE__);
+    fprintf(stderr,"%s:%d:Error: negative hmax value.\n",__FILE__,__LINE__);
     return(0);
   }
 
-  ismet = (met->m > 0);
+  if ( met->m )
+    ismet = 1;
+  else {
+    ismet = 0;
+
+    _MMG5_caltet         = _MMG5_caltet_ani;
+    _MMG5_caltri         = _MMG5_caltri_ani;
+    _MMG5_lenedg         = _MMG5_lenedg_ani;
+    MMG3D_lenedgCoor     = _MMG5_lenedgCoor_ani;
+    _MMG5_lenSurfEdg     = _MMG5_lenSurfEdg_ani;
+  }
 
   if ( !_MMG5_defmetvol(mesh,met) )  return(0);
 
@@ -1188,7 +1029,7 @@ int _MMG3D_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
         }
         if ( ismet ) {
           if ( !_MMG3D_intextmet(mesh,met,pt->v[iploc],mm) ) {
-            fprintf(stdout,"%s:%d:Error: unable to intersect metrics"
+            fprintf(stderr,"%s:%d:Error: unable to intersect metrics"
                     " at point %d.\n",__FILE__,__LINE__, pt->v[iploc]);
             return(0);
           }

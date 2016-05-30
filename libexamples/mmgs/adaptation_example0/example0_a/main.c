@@ -62,7 +62,7 @@ int main(int argc,char *argv[]) {
     perror("  ## Memory problem: calloc");
     exit(EXIT_FAILURE);
   }
-  sprintf(filename, "%s%s%s", pwd, "/../libexamples/mmgs/adaptation_example0/", "cube");
+  sprintf(filename, "%s%s%s", pwd, "/../libexamples/mmgs/adaptation_example0/example0_a/", "cube");
 
   /** ------------------------------ STEP   I -------------------------- */
   /** 1) Initialisation of mesh and sol structures */

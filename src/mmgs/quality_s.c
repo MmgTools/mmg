@@ -34,6 +34,7 @@
  */
 
 #include "mmgs.h"
+#include "inlined_functions.h"
 
 extern char  ddb;
 
@@ -308,7 +309,7 @@ int _MMGS_prilen(MMG5_pMesh mesh, MMG5_pSol met, int metRidTyp) {
       nq = pt->v[i1];
 
       if(!_MMG5_hashEdge(mesh,&hash,np,nq,0)){
-        fprintf(stdout,"%s:%d: Error: function _MMG5_hashEdge return 0\n",
+        fprintf(stderr,"%s:%d: Error: function _MMG5_hashEdge return 0\n",
                 __FILE__,__LINE__);
         exit(EXIT_FAILURE);
       }
@@ -402,7 +403,7 @@ int _MMGS_inqua(MMG5_pMesh mesh,MMG5_pSol met) {
       rap = ALPHAD * _MMG5_caltri33_ani(mesh,met,pt);
     }
     else
-      rap = ALPHAD * _MMG5_caltri_iso(mesh,NULL,pt);
+      rap = ALPHAD * _MMG5_calelt(mesh,NULL,pt);
 
     if ( rap < rapmin ) {
       rapmin = rap;
@@ -422,7 +423,7 @@ int _MMGS_inqua(MMG5_pMesh mesh,MMG5_pSol met) {
 
   if ( abs(mesh->info.imprim) < 4 ){
     if (rapmin == 0){
-      fprintf(stdout,"  ## WARNING: TOO BAD QUALITY FOR THE WORST ELEMENT\n");
+      fprintf(stderr,"  ## WARNING: TOO BAD QUALITY FOR THE WORST ELEMENT\n");
       return(0);
     }
     return(1);
@@ -468,11 +469,7 @@ int _MMGS_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
     }
     ok++;
 
-    if ( met->m ) {
-      rap = ALPHAD * _MMG5_calelt(mesh,met,pt);
-    }
-    else // with -A option we are in aniso but without metric.
-      rap = ALPHAD * _MMG5_caltri_iso(mesh,met,pt);
+    rap = ALPHAD * _MMG5_calelt(mesh,met,pt);
 
     if ( rap < rapmin ) {
       rapmin = rap;
@@ -492,7 +489,7 @@ int _MMGS_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
 
   if ( abs(mesh->info.imprim) < 4 ){
     if (rapmin == 0){
-      fprintf(stdout,"  ## WARNING: TOO BAD QUALITY FOR THE WORST ELEMENT\n");
+      fprintf(stderr,"  ## WARNING: TOO BAD QUALITY FOR THE WORST ELEMENT\n");
       return(0);
     }
     return(1);

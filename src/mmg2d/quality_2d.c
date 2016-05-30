@@ -55,7 +55,7 @@ double caltri_iso_in(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pTria pt) {
   double     cal,abx,aby,acx,acy,bcx,bcy;
   double    *a,*b,*c,h1,h2,h3,aire,peri,hm;
 
-  cal = 1e+9;
+  cal = 1e+24;
 
   a  = mesh->point[pt->v[0]].c;
   b  = mesh->point[pt->v[1]].c;

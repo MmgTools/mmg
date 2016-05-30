@@ -41,6 +41,24 @@
 
 /**
  * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the solution structure.
+ *
+ * Truncate a scalar metric by hmax and hmin values.
+ *
+ */
+static inline
+void _MMG2D_scalarSolTruncature(MMG5_pMesh mesh, MMG5_pSol met) {
+  int         k;
+
+  /* vertex size */
+  for (k=1; k<=mesh->np; k++) {
+    met->m[k] = MG_MIN(mesh->info.hmax,MG_MAX(mesh->info.hmin,met->m[k]));
+  }
+  return;
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the solution structure.
  * \return 0 if memory problem (uncomplete mesh), 1 otherwise.
  *
@@ -54,6 +72,7 @@ int MMG2_tassage(MMG5_pMesh mesh,MMG5_pSol sol) {
   MMG5_pEdge         ped;
   MMG5_pTria         pt,ptnew;
   MMG5_pPoint        ppt,pptnew;
+  _MMG5_Hash         hash;
   int                np,nt,k,nbl,isol,isolnew,i,memWarn,num;
   int                iadr,iadrnew,iadrv,*adjav,*adja,*adjanew,voy;
 
@@ -61,7 +80,10 @@ int MMG2_tassage(MMG5_pMesh mesh,MMG5_pSol sol) {
   np=0;
   for (k=1; k<=mesh->np; k++) {
     ppt = &mesh->point[k];
-    if ( ppt->tag & M_NUL )  continue;
+    if ( ppt->tag & M_NUL ) {
+      ppt->tmp = 0;
+      continue;
+    }
     ppt->tmp = ++np;
   }
 
@@ -111,6 +133,7 @@ int MMG2_tassage(MMG5_pMesh mesh,MMG5_pSol sol) {
           ped = &mesh->edge[num];
           ped->a = pt->v[MMG2_iare[i][0]];
           ped->b = pt->v[MMG2_iare[i][1]];
+          ped->base = 3*k+i;
           ped->ref  = M_MIN(mesh->point[pt->v[MMG2_iare[i][0]]].ref,
                             mesh->point[pt->v[MMG2_iare[i][1]]].ref);
         }
@@ -119,11 +142,13 @@ int MMG2_tassage(MMG5_pMesh mesh,MMG5_pSol sol) {
   }
 
   nbl = 0;
+
   for (k=1; k<=mesh->na; k++) {
     ped  = &mesh->edge[k];
     if(!ped->a) continue;
     ped->a = mesh->point[ped->a].tmp;
     ped->b = mesh->point[ped->b].tmp;
+
     /* impossible to do that without update triangle....*/
     /* if(k!=nbl) { */
     /*   pednew = &mesh->edge[nbl]; */
@@ -170,6 +195,34 @@ triangles:
     nbl++;
   }
   mesh->nt = nt;
+
+  /* Travel through the tria and hash the boundary edges in order to recover
+   * from which tria comes a boundary edges */
+  hash.item = NULL;
+  if ( _MMG5_hashNew(mesh,&hash,mesh->nt,3*mesh->nt) ) {
+
+    for (k=1; k<=mesh->nt; k++) {
+      pt = &mesh->tria[k];
+      if (!pt->v[0]) continue;
+      for (i=0 ; i<3 ; i++) {
+        if ( !_MMG5_hashEdge(mesh,&hash,pt->v[_MMG5_inxt2[i]],pt->v[_MMG5_iprv2[i]],3*k+i) ) {
+          fprintf(stdout,"  ## Warning: unable hash boundary edges.\n");
+          break;
+        }
+      }
+    }
+
+  }
+
+  for (k=1; k<=mesh->na; k++) {
+    ped  = &mesh->edge[k];
+    if(!ped->a || !ped->b) continue;
+
+    ped->base = _MMG5_hashGet(&hash,ped->a,ped->b);
+  }
+
+  if ( hash.item )  _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
+
 
   /* compact metric */
   if ( sol->m ) {
@@ -381,7 +434,14 @@ int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol sol)
     fprintf(stdout,"  ** SETTING ADJACENCIES\n");
 
   if ( !MMG2_scaleMesh(mesh,sol) )  _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
-  if ( !sol->np && !MMG2_doSol(mesh,sol) )  _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
+
+  if ( !sol->np ) {
+    if ( !MMG2D_doSol(mesh,sol) )  _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
+    _MMG2D_scalarSolTruncature(mesh,sol);
+  }
+
+   if ( (mesh)->adja )
+     _MMG5_DEL_MEM((mesh),(mesh)->adja,(3*(mesh)->ntmax+5)*sizeof(int));
 
   if ( !MMG2_hashel(mesh) )
     _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
@@ -586,7 +646,11 @@ int MMG2D_mmg2dmesh(MMG5_pMesh mesh,MMG5_pSol sol) {
   if ( abs(mesh->info.imprim) > 4 )
     fprintf(stdout,"  ** SETTING ADJACENCIES\n");
   if ( !MMG2_scaleMesh(mesh,sol) )  _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
-  if ( !sol->np && !MMG2_doSol(mesh,sol) )  _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
+
+  if ( !sol->np ) {
+    if ( !MMG2D_doSol(mesh,sol) )  _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
+    _MMG2D_scalarSolTruncature(mesh,sol);
+  }
 
   if ( mesh->info.ddebug && !_MMG5_chkmsh(mesh,1,0) )  _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
   /*geom : corner detection*/
@@ -804,7 +868,8 @@ int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol)
                 "initial solution",return(0));
   _MMG5_SAFE_CALLOC(sol->m,sol->size*(mesh->npmax+1),double);
   sol->np = 0;
-  if ( !MMG2_doSol(mesh,sol) )  _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
+  if ( !MMG2D_doSol(mesh,sol) )  _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
+  _MMG2D_scalarSolTruncature(mesh,sol);
 
   /*geom : corner detection*/
   if ( mesh->info.dhd>0 )

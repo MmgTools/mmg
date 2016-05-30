@@ -114,7 +114,8 @@ _MMGS_ismaniball(MMG5_pMesh mesh, MMG5_pSol sol, int start, char istart) {
      else, the final triangle for the first travel must be that
      of the second one */
   if ( k != end1 ) {
-    printf("triangle %d, point %d ; unsnap \n",start,mesh->tria[start].v[istart]);
+    fprintf(stderr,"  ## Warning: triangle %d, point %d ; unsnap \n",
+            start,mesh->tria[start].v[istart]);
     return(0);
   }
   return(1);
@@ -139,13 +140,13 @@ int _MMGS_snpval_ls(MMG5_pMesh mesh,MMG5_pSol sol) {
   char          i;
 
   _MMG5_ADD_MEM(mesh,(mesh->npmax+1)*sizeof(double),"temporary table",
-                printf("  Exit program.\n");
+                fprintf(stderr,"  Exit program.\n");
                 exit(EXIT_FAILURE));
   _MMG5_SAFE_CALLOC(tmp,mesh->npmax+1,double);
 
   /* create tetra adjacency */
   if ( !_MMGS_hashTria(mesh) ) {
-    fprintf(stdout,"  ## Hashing problem (1). Exit program.\n");
+    fprintf(stderr,"  ## Hashing problem (1). Exit program.\n");
     return(0);
   }
 
@@ -215,7 +216,7 @@ int _MMGS_snpval_ls(MMG5_pMesh mesh,MMG5_pSol sol) {
  */
 int _MMGS_chkmaniball(MMG5_pMesh mesh, int start, char istart) {
   MMG5_pTria         pt;
-  int                *adja,k,iel;
+  int                *adja,k;
   char               i,i1;
 
   pt = &mesh->tria[start];
@@ -330,7 +331,7 @@ int _MMGS_chkmanimesh(MMG5_pMesh mesh) {
       }
     }
     if( cnt == 3 ) {
-      printf("Triangle %d: 3 boundary edges\n",k);
+      fprintf(stderr,"Triangle %d: 3 boundary edges\n",k);
       return(0);
     }
   }
@@ -435,8 +436,8 @@ static int _MMGS_cuttri_ls(MMG5_pMesh mesh, MMG5_pSol sol){
 
       np = _MMGS_newPt(mesh,c,NULL);
       if ( !np ) {
-        _MMG5_POINT_REALLOC(mesh,sol,np,0.2,
-                            printf("  ## Error: unable to allocate a new point\n");
+        _MMGS_POINT_REALLOC(mesh,sol,np,0.2,
+                            fprintf(stderr,"  ## Error: unable to allocate a new point\n");
                             _MMG5_INCREASE_MEM_MESSAGE();
                             return(0)
                             ,c,NULL);
@@ -572,37 +573,37 @@ int _MMGS_mmgs2(MMG5_pMesh mesh,MMG5_pSol sol) {
 
   /* Snap values of level set function if need be, then discretize it */
   if ( !_MMGS_snpval_ls(mesh,sol) ) {
-    fprintf(stdout,"  ## Problem with implicit function. Exit program.\n");
+    fprintf(stderr,"  ## Problem with implicit function. Exit program.\n");
     return(0);
   }
 
   /* Check the initial mesh adjacencies */
   if ( !_MMGS_hashTria(mesh) ) {
-    fprintf(stdout,"  ## Hashing problem. Exit program.\n");
+    fprintf(stderr,"  ## Hashing problem. Exit program.\n");
     return(0);
   }
 
   _MMG5_DEL_MEM(mesh,mesh->adja,(3*mesh->ntmax+5)*sizeof(int));
 
   if ( !_MMGS_cuttri_ls(mesh,sol) ) {
-    fprintf(stdout,"  ## Problem in discretizing implicit function. Exit program.\n");
+    fprintf(stderr,"  ## Problem in discretizing implicit function. Exit program.\n");
     return(0);
   }
 
   if ( !_MMGS_setref_ls(mesh,sol) ) {
-    fprintf(stdout,"  ## Problem in setting references. Exit program.\n");
+    fprintf(stderr,"  ## Problem in setting references. Exit program.\n");
     return(0);
   }
 
   /* Creation of adjacency relations in the mesh */
   if ( !_MMGS_hashTria(mesh) ) {
-    fprintf(stdout,"  ## Hashing problem. Exit program.\n");
+    fprintf(stderr,"  ## Hashing problem. Exit program.\n");
     return(0);
   }
 
   /* Check that the resulting mesh is manifold */
   if ( !_MMGS_chkmanimesh(mesh) ) {
-    fprintf(stdout,"  ## No manifold resulting situation. Exit program.\n");
+    fprintf(stderr,"  ## No manifold resulting situation. Exit program.\n");
     return(0);
   }
 

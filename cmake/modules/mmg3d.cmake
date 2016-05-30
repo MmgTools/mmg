@@ -186,8 +186,13 @@ IF ( LIBMMG3D_STATIC OR LIBMMG3D_SHARED )
     DEPENDS ${MMG3D_SOURCE_DIR}/libmmg3df.h)
 
   # Install header files in project directory
-  FILE ( INSTALL ${mmg3d_headers} DESTINATION ${CMAKE_SOURCE_DIR}/include/mmg/mmg3d
+  FILE(INSTALL  ${mmg3d_headers} DESTINATION ${MMG3D_INCLUDE}
     PATTERN "libmmg*f.h"  EXCLUDE)
+
+  ADD_CUSTOM_TARGET(copy_3d_headers ALL
+    DEPENDS  ${MMG3D_INCLUDE}/libmmg3df.h  ${MMG3D_INCLUDE}/libmmg3d.h
+    ${MMG3D_INCLUDE}/libmmgtypesf.h ${MMG3D_INCLUDE}/libmmgtypes.h )
+
 ENDIF()
 
 ############################################################################

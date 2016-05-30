@@ -43,7 +43,7 @@
  * passing through a point.
  *
  */
-int MMG2_doSol(MMG5_pMesh mesh,MMG5_pSol sol) {
+int MMG2D_doSol(MMG5_pMesh mesh,MMG5_pSol sol) {
   MMG5_pTria      ptt,pt;
   MMG5_pPoint     p1,p2;
   double          ux,uy,dd;
@@ -81,18 +81,20 @@ int MMG2_doSol(MMG5_pMesh mesh,MMG5_pSol sol) {
   for (k=1; k<=mesh->np; k++) {
     p1 = &mesh->point[k];
     if ( !p1->tagdel )  {
-      sol->m[k] = mesh->info.hmax;
+      sol->m[k] = FLT_MAX;
       continue;
     }
 
-    sol->m[k] = MG_MIN(mesh->info.hmax,MG_MAX(mesh->info.hmin,sol->m[k] / (double)p1->tagdel));
+    sol->m[k] = sol->m[k] / (double)p1->tagdel;
     p1->tagdel = 0;
   }
 
-/* compute quality */
-  for (k=1; k<=mesh->nt; k++) {
-    pt = &mesh->tria[k];
-    pt->qual = MMG2_caltri_in(mesh,sol,pt);
+  /* compute quality */
+  if ( MMG2_caltri_in ) {
+    for (k=1; k<=mesh->nt; k++) {
+      pt = &mesh->tria[k];
+      pt->qual = MMG2_caltri_in(mesh,sol,pt);
+    }
   }
 
   if ( mesh->info.imprim < -4 )

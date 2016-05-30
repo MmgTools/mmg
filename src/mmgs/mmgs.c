@@ -179,7 +179,7 @@ int _MMGS_defaultOption(MMG5_pMesh mesh,MMG5_pSol met) {
   chrono(ON,&(ctim[0]));
 
   if ( mesh->info.npar ) {
-    fprintf(stdout,"\n  ## Error: "
+    fprintf(stderr,"\n  ## Error: "
             "unable to save of a local parameter file with"
             " the default parameters values because local parameters"
             " are provided.\n");
@@ -192,7 +192,7 @@ int _MMGS_defaultOption(MMG5_pMesh mesh,MMG5_pSol met) {
   chrono(ON,&(ctim[1]));
 
   if ( met->np && (met->np != mesh->np) ) {
-    fprintf(stdout,"  ## WARNING: WRONG SOLUTION NUMBER. IGNORED\n");
+    fprintf(stderr,"  ## WARNING: WRONG SOLUTION NUMBER. IGNORED\n");
     _MMG5_DEL_MEM(mesh,met->m,(met->size*(met->npmax+1))*sizeof(double));
     met->np = 0;
   }
@@ -268,16 +268,16 @@ int main(int argc,char *argv[]) {
   chrono(ON,&MMG5_ctim[1]);
 
   if ( !MMGS_loadMesh(mesh,mesh->namein) )
-    _MMG5_RETURN_AND_FREE(mesh,met,MMG5_STRONGFAILURE);
+    _MMGS_RETURN_AND_FREE(mesh,met,MMG5_STRONGFAILURE);
 
   ier = MMGS_loadSol(mesh,met,met->namein);
   if ( ier==-1 ) {
-      fprintf(stdout,"  ## ERROR: WRONG DATA TYPE OR WRONG SOLUTION NUMBER.\n");
-      _MMG5_RETURN_AND_FREE(mesh,met,MMG5_STRONGFAILURE);
+      fprintf(stderr,"  ## ERROR: WRONG DATA TYPE OR WRONG SOLUTION NUMBER.\n");
+      _MMGS_RETURN_AND_FREE(mesh,met,MMG5_STRONGFAILURE);
   }
 
   if ( !_MMG5_parsop(mesh,met) )
-    _MMG5_RETURN_AND_FREE(mesh,met,MMG5_LOWFAILURE);
+    _MMGS_RETURN_AND_FREE(mesh,met,MMG5_LOWFAILURE);
 
   chrono(OFF,&MMG5_ctim[1]);
   printim(MMG5_ctim[1].gdif,stim);
@@ -286,7 +286,7 @@ int main(int argc,char *argv[]) {
   if ( mesh->mark ) {
     /* Save a local parameters file containing the default parameters */
     ier = _MMGS_defaultOption(mesh,met);
-    _MMG5_RETURN_AND_FREE(mesh,met,ier);
+    _MMGS_RETURN_AND_FREE(mesh,met,ier);
   }
   else if ( mesh->info.iso ) {
     ier = MMGS_mmgsls(mesh,met);
@@ -300,10 +300,10 @@ int main(int argc,char *argv[]) {
     if ( mesh->info.imprim )
       fprintf(stdout,"\n  -- WRITING DATA FILE %s\n",mesh->nameout);
     if ( !MMGS_saveMesh(mesh,mesh->nameout) )
-      _MMG5_RETURN_AND_FREE(mesh,met,MMG5_STRONGFAILURE);
+      _MMGS_RETURN_AND_FREE(mesh,met,MMG5_STRONGFAILURE);
 
     if ( !MMGS_saveSol(mesh,met,met->nameout) )
-      _MMG5_RETURN_AND_FREE(mesh,met,MMG5_STRONGFAILURE);
+      _MMGS_RETURN_AND_FREE(mesh,met,MMG5_STRONGFAILURE);
 
     chrono(OFF,&MMG5_ctim[1]);
     if ( mesh->info.imprim )  fprintf(stdout,"  -- WRITING COMPLETED\n");
@@ -311,7 +311,7 @@ int main(int argc,char *argv[]) {
 
   /* release memory */
   /* free mem */
-  _MMG5_RETURN_AND_FREE(mesh,met,ier);
+  _MMGS_RETURN_AND_FREE(mesh,met,ier);
 
   return(0);
 }

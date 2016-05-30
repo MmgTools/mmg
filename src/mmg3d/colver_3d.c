@@ -33,7 +33,7 @@
  * \todo doxygen documentation.
  */
 
-#include "mmg3d.h"
+#include "inlined_functions_3d.h"
 
 extern char  ddb;
 
@@ -742,14 +742,16 @@ int _MMG5_colver(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,char indq,cha
       }
     }
     adja = &mesh->adja[4*(iel-1)+1];
-    jel  = adja[ip] / 4;
-    voy  = adja[ip] % 4;
+    jel  = adja[ip];
     if ( !jel )  continue;
+
+    jel /= 4;
+    voy  = adja[ip] % 4;
     pt = &mesh->tetra[jel];
-	if (pt->v[voy] == nq) {
-		_MMG5_SAFE_FREE(ind); _MMG5_SAFE_FREE(p0_c); _MMG5_SAFE_FREE(p1_c);
-		return(0);
-	}
+    if (pt->v[voy] == nq) {
+      _MMG5_SAFE_FREE(ind); _MMG5_SAFE_FREE(p0_c); _MMG5_SAFE_FREE(p1_c);
+      return(0);
+    }
   }
 
   /* deal with the shell of edge (pq) and the implied updates */
@@ -773,16 +775,6 @@ int _MMG5_colver(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,char indq,cha
     voyp = adja[iq] % 4;
     qel  = adja[ip] / 4;
     voyq = adja[ip] % 4;
-    /*op = 0;
-      if ( pel ) {
-      pt1 = &mesh->tetra[pel];
-      op  = pt1->v[voyp];
-      }
-      if ( qel ) {
-      pt1 = &mesh->tetra[qel];
-      oq  = pt1->v[voyq];
-      //assert(op != oq);
-      }*/
 
     /* Update adjacency relations */
     if ( pel ) {
@@ -905,7 +897,7 @@ int _MMG5_colver(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,char indq,cha
 
             /* update tags for edges */
             for ( j=0; j<3; j++ ) {
-              ia = _MMG5_iarf[ip][j];
+              ia = _MMG5_iarf[iq][j];
               p0 = pt->v[_MMG5_iare[ia][0]];
               p1 = pt->v[_MMG5_iare[ia][1]];
               for ( i=0; i<3; i++ ) {

@@ -32,7 +32,7 @@ PROJECT (mmg)
 ###############################################################################
 SET (CMAKE_RELEASE_VERSION_MAJOR "5" )
 SET (CMAKE_RELEASE_VERSION_MINOR "1" )
-SET (CMAKE_RELEASE_VERSION_PATCH "0" )
+SET (CMAKE_RELEASE_VERSION_PATCH "1" )
 SET (CMAKE_RELEASE_DATE "Dec 4, 2015" )
 
 SET (CMAKE_RELEASE_VERSION
@@ -508,11 +508,11 @@ IF(DOXYGEN_FOUND)
     # COMMAND ${CMAKE_COMMAND} -E chdir
     # ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmg2d/latex make
     # COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmg2d/latex/refman.pdf
-    # ${CMAKE_CURRENT_SOURCE_DIR}
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmg2d
-    COMMENT "Generating MMG2D API documentation with Doxygen.
-    Open up the doc/doxygen/mmg2d/html/index.html file to see it." VERBATIM
-    )
+    # ${CMAKE_CURRENT_SOURCE_DIR} WORKING_DIRECTORY
+    ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmg2d COMMENT "Generating MMG2D API
+    documentation with Doxygen.  Open up the
+    ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmg2d/html/index.html file to see
+    it." VERBATIM )
 
   # MMGS Documentation
   CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmgs/Doxyfile.in
@@ -523,11 +523,11 @@ IF(DOXYGEN_FOUND)
     # COMMAND ${CMAKE_COMMAND} -E chdir
     # ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmgs/latex make
     # COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmgs/latex/refman.pdf
-    # ${CMAKE_CURRENT_SOURCE_DIR}
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmgs
-    COMMENT "Generating MMGS API documentation with Doxygen.
-    Open up the doc/doxygen/mmgs/html/index.html file to see it." VERBATIM
-    )
+    # ${CMAKE_CURRENT_SOURCE_DIR} WORKING_DIRECTORY
+    ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmgs COMMENT "Generating MMGS API
+    documentation with Doxygen.  Open up the
+    ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmgs/html/index.html file to see
+    it." VERBATIM )
 
   # MMG3D Documentation
   CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmg3d/Doxyfile.in
@@ -538,17 +538,16 @@ IF(DOXYGEN_FOUND)
     # COMMAND ${CMAKE_COMMAND} -E chdir
     # ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmg3d/latex make
     # COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmg3d/latex/refman.pdf
-    # ${CMAKE_CURRENT_SOURCE_DIR}
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmg3d
-    COMMENT "Generating MMG3D API documentation with Doxygen.
-     Open up the doc/doxygen/mmg3d/html/index.html file to see it" VERBATIM
-    )
+    # ${CMAKE_CURRENT_SOURCE_DIR} WORKING_DIRECTORY
+    ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmg3d
+    COMMENT "Generating MMG3D API documentation with Doxygen. Open up the
+    ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmg3d/html/index.html file to see
+    it" VERBATIM )
 
-  ADD_CUSTOM_TARGET(doc
-    DEPENDS mmgs_doc mmg3d_doc mmg2d_doc
-    COMMENT "Generating MMG API documentation with Doxygen.
-     Open up the doc/doxygen/mmg*/html/index.html file to see it" VERBATIM
-    )
+  ADD_CUSTOM_TARGET(doc DEPENDS mmgs_doc mmg3d_doc mmg2d_doc COMMENT "Generating
+    MMG API documentation with Doxygen.  Open up the
+    ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmg*/html/index.html file to see it"
+    VERBATIM )
 ENDIF ( DOXYGEN_FOUND )
 
 ###############################################################################

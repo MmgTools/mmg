@@ -85,7 +85,7 @@ static double _MMG5_swapd(double sbin)
   {
     p_out[i] = p_in[7-i];
   }
-  //printf("CONVERTION DOUBLE\n");
+
   return(out);
 }
 
@@ -98,23 +98,26 @@ static double _MMG5_swapd(double sbin)
  * Read mesh data.
  *
  */
-int MMG3D_loadMesh(MMG5_pMesh mesh,char *filename) {
+int MMG3D_loadMesh(MMG5_pMesh mesh,const char *filename) {
   FILE*       inm;
   MMG5_pTetra pt;
+  MMG5_pPrism pp;
   MMG5_pTria  pt1;
   MMG5_pEdge  pa;
   MMG5_pPoint ppt;
+  double      *norm,*n,dd;
   int         posnp,posnt,posne,posned,posncor,posnpreq,posntreq,posnereq,posnedreq;
-  int         posnr;
-  int         npreq,ntreq,nereq,nedreq,ncor,ned,bin,iswp;
-  int         binch,bdim,bpos,i,k;
+  int         posnr,posnprism,posnormal,posnc1;
+  int         npreq,ntreq,nereq,nedreq,ncor,ned,ng,bin,iswp;
+  int         binch,bdim,bpos,i,k,ip,idn;
   int         *ina,v[3],ref,nt,na,nr,ia,aux,nref;
-  float            fc;
+  float       fc;
   char        *ptr,data[128],chaine[128];
 
   posnp = posnt = posne = posncor = 0;
   posnpreq = posntreq = posnereq = posned = posnedreq = posnr = 0;
-  ncor = ned = npreq = ntreq = nereq = nedreq = nr = 0;
+  posnprism = posnormal= posnc1 = 0;
+  ncor = ned = npreq = ntreq = nereq = nedreq = nr = ng = 0;
   bin = 0;
   iswp = 0;
   ina = NULL;
@@ -157,7 +160,7 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,char *filename) {
       } else if(!strncmp(chaine,"Dimension",strlen("Dimension"))) {
         fscanf(inm,"%d",&mesh->dim);
         if(mesh->dim!=3) {
-          fprintf(stdout,"BAD DIMENSION : %d\n",mesh->dim);
+          fprintf(stderr,"BAD DIMENSION : %d\n",mesh->dim);
           return(-1);
         }
         continue;
@@ -181,6 +184,10 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,char *filename) {
         fscanf(inm,"%d",&mesh->nei);
         posne = ftell(inm);
         continue;
+      } else if(!strncmp(chaine,"Prisms",strlen("Prisms"))) {
+        fscanf(inm,"%d",&mesh->nprism);
+        posnprism = ftell(inm);
+        continue;
       } else if(!strncmp(chaine,"RequiredTetrahedra",strlen("RequiredTetrahedra"))) {
         fscanf(inm,"%d",&nereq);
         posnereq = ftell(inm);
@@ -201,6 +208,14 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,char *filename) {
         fscanf(inm,"%d",&nr);
         posnr = ftell(inm);
         continue;
+      } else if(!ng && !strncmp(chaine,"Normals",strlen("Normals"))) {
+        fscanf(inm,"%d",&ng);
+        posnormal = ftell(inm);
+        continue;
+      } else if(!strncmp(chaine,"NormalAtVertices",strlen("NormalAtVertices"))) {
+        fscanf(inm,"%d",&mesh->nc1);
+        posnc1 = ftell(inm);
+        continue;
       }
     }
   } else { //binary file
@@ -210,7 +225,7 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,char *filename) {
     if(mesh->ver==16777216)
       iswp=1;
     else if(mesh->ver!=1) {
-      fprintf(stdout,"BAD FILE ENCODING\n");
+      fprintf(stderr,"BAD FILE ENCODING\n");
     }
     fread(&mesh->ver,sw,1,inm);
     if(iswp) mesh->ver = _MMG5_swapbin(mesh->ver);
@@ -224,8 +239,8 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,char *filename) {
         if(iswp) bdim=_MMG5_swapbin(bdim);
         mesh->dim = bdim;
         if(bdim!=3) {
-          fprintf(stdout,"BAD SOL DIMENSION : %d\n",mesh->dim);
-          fprintf(stdout," Exit program.\n");
+          fprintf(stderr,"BAD MESH DIMENSION : %d\n",mesh->dim);
+          fprintf(stderr," Exit program.\n");
           return(-1);
         }
         continue;
@@ -274,6 +289,15 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,char *filename) {
         rewind(inm);
         fseek(inm,bpos,SEEK_SET);
         continue;
+      } else if(!mesh->nprism && binch==9) {//Prism
+        fread(&bpos,sw,1,inm); //NulPos
+        if(iswp) bpos=_MMG5_swapbin(bpos);
+        fread(&mesh->nprism,sw,1,inm);
+        if(iswp) mesh->nprism=_MMG5_swapbin(mesh->nprism);
+        posnprism = ftell(inm);
+        rewind(inm);
+        fseek(inm,bpos,SEEK_SET);
+        continue;
       } else if(binch==12) {  //RequiredTetra
         fread(&bpos,sw,1,inm); //NulPos
         if(iswp) bpos=_MMG5_swapbin(bpos);
@@ -319,11 +343,28 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,char *filename) {
         rewind(inm);
         fseek(inm,bpos,SEEK_SET);
         continue;
-      } else {
-        //printf("on traite ? %d\n",binch);
+      } else if(!ng && binch==60) {  //Normals
         fread(&bpos,sw,1,inm); //NulPos
         if(iswp) bpos=_MMG5_swapbin(bpos);
-        //printf("on avance... Nulpos %d\n",bpos);
+        fread(&ng,sw,1,inm);
+        if(iswp) ng=_MMG5_swapbin(ng);
+        posnormal = ftell(inm);
+        rewind(inm);
+        fseek(inm,bpos,SEEK_SET);
+        continue;
+      } else if(binch==20) {  //NormalAtVertices
+        fread(&bpos,sw,1,inm); //NulPos
+        if(iswp) bpos=_MMG5_swapbin(bpos);
+        fread(&mesh->nc1,sw,1,inm);
+        if(iswp) mesh->nc1=_MMG5_swapbin(mesh->nc1);
+        posnc1 = ftell(inm);
+        rewind(inm);
+        fseek(inm,bpos,SEEK_SET);
+        continue;
+      } else {
+        fread(&bpos,sw,1,inm); //NulPos
+        if(iswp) bpos=_MMG5_swapbin(bpos);
+
         rewind(inm);
         fseek(inm,bpos,SEEK_SET);
       }
@@ -331,9 +372,9 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,char *filename) {
   }
 
   if ( !mesh->npi || !mesh->nei ) {
-    fprintf(stdout,"  ** MISSING DATA.\n");
-    fprintf(stdout," Check that your mesh contains points and tetrahedra.\n");
-    fprintf(stdout," Exit program.\n");
+    fprintf(stderr,"  ** MISSING DATA.\n");
+    fprintf(stderr," Check that your mesh contains points and tetrahedra.\n");
+    fprintf(stderr," Exit program.\n");
     return(-1);
   }
   /* memory allocation */
@@ -456,7 +497,7 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,char *filename) {
 
       else if ( mesh->nt < nt ) {
         _MMG5_ADD_MEM(mesh,(mesh->nt-nt)*sizeof(MMG5_Tria),"triangles",
-                      printf("  Exit program.\n");
+                      fprintf(stderr,"  Exit program.\n");
                       exit(EXIT_FAILURE));
         _MMG5_SAFE_RECALLOC(mesh->tria,nt+1,(mesh->nt+1),MMG5_Tria,"triangles");
       }
@@ -550,7 +591,7 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,char *filename) {
         _MMG5_DEL_MEM(mesh,mesh->edge,(mesh->na+1)*sizeof(MMG5_Edge));
       else if ( mesh->na < na ) {
         _MMG5_ADD_MEM(mesh,(mesh->na-na)*sizeof(MMG5_Edge),"edges",
-                      printf("  Exit program.\n");
+                      fprintf(stderr,"  Exit program.\n");
                       exit(EXIT_FAILURE));
         _MMG5_SAFE_RECALLOC(mesh->edge,na+1,(mesh->na+1),MMG5_Edge,"edges");
       }
@@ -686,6 +727,94 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,char *filename) {
       pt->tag |= MG_REQ;
     }
   }
+  /* read mesh prisms */
+  rewind(inm);
+  fseek(inm,posnprism,SEEK_SET);
+  nref = 0;
+  for (k=1; k<=mesh->nprism; k++) {
+    pp = &mesh->prism[k];
+    if (!bin)
+      fscanf(inm,"%d %d %d %d %d %d %d",&pp->v[0],&pp->v[1],&pp->v[2],
+             &pp->v[3],&pp->v[4],&pp->v[5],&ref);
+    else {
+      for (i=0 ; i<6 ; i++) {
+        fread(&pp->v[i],sw,1,inm);
+        if(iswp) pp->v[i]=_MMG5_swapbin(pp->v[i]);
+      }
+      fread(&ref,sw,1,inm);
+      if(iswp) ref=_MMG5_swapbin(ref);
+    }
+    pp->ref  = ref;
+    for (i=0; i<6; i++) {
+      ppt = &mesh->point[pp->v[i]];
+      ppt->tag &= ~MG_NUL;
+    }
+  }
+
+  /* read geometric entities */
+  if ( mesh->nc1 && !ng ) {
+    printf("  ## Warning: Your mesh don't contains Normals but contains"
+             " NormalAtVertices. The NormalAtVertices are deleted. \n");
+    mesh->nc1 = 0;
+  }
+
+  if ( ng > 0 ) {
+    _MMG5_SAFE_CALLOC(norm,3*ng+1,double);
+
+    rewind(inm);
+    fseek(inm,posnormal,SEEK_SET);
+    for (k=1; k<=ng; k++) {
+      n = &norm[3*(k-1)+1];
+      if ( mesh->ver == 1 ) {
+        if (!bin) {
+          for (i=0 ; i<3 ; i++) {
+            fscanf(inm,"%f",&fc);
+            n[i] = (double) fc;
+          }
+        } else {
+          for (i=0 ; i<3 ; i++) {
+            fread(&fc,sw,1,inm);
+            if(iswp) fc=_MMG5_swapf(fc);
+            n[i] = (double) fc;
+          }
+        }
+      }
+      else {
+        if (!bin)
+          fscanf(inm,"%lf %lf %lf",&n[0],&n[1],&n[2]);
+        else {
+          for (i=0 ; i<3 ; i++) {
+            fread(&n[i],sd,1,inm);
+            if(iswp) n[i]=_MMG5_swapd(n[i]);
+          }
+        }
+      }
+      dd = n[0]*n[0] + n[1]*n[1] + n[2]*n[2];
+      if ( dd > _MMG5_EPSD2 ) {
+        dd = 1.0 / sqrt(dd);
+        n[0] *= dd;
+        n[1] *= dd;
+        n[2] *= dd;
+      }
+    }
+
+    rewind(inm);
+    fseek(inm,posnc1,SEEK_SET);
+
+    for (k=1; k<=mesh->nc1; k++) {
+      if (!bin)
+        fscanf(inm,"%d %d",&ip,&idn);
+      else {
+        fread(&ip,sw,1,inm);
+        if(iswp) ip=_MMG5_swapbin(ip);
+        fread(&idn,sw,1,inm);
+        if(iswp) idn=_MMG5_swapbin(idn);
+      }
+      if ( idn > 0 && ip < mesh->np+1 )
+        memcpy(&mesh->point[ip].n,&norm[3*(idn-1)+1],3*sizeof(double));
+    }
+    _MMG5_SAFE_FREE(norm);
+  }
 
 
   /* stats */
@@ -698,7 +827,11 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,char *filename) {
     }
     if ( mesh->nt )
       fprintf(stdout,"     NUMBER OF TRIANGLES    %8d\n",mesh->nt);
-    fprintf(stdout,"     NUMBER OF ELEMENTS     %8d\n",mesh->ne);
+    if ( mesh->nprism )
+      fprintf(stdout,"     NUMBER OF PRISMS    %8d\n",mesh->nprism);
+
+    fprintf(stdout,"     NUMBER OF TETRAHEDRA     %8d\n",mesh->ne);
+
 
     if ( npreq || nedreq || ntreq || nereq ) {
       fprintf(stdout,"     NUMBER OF REQUIRED ENTITIES: \n");
@@ -727,10 +860,11 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,char *filename) {
  * \warning you must call the \a _MMG3D_packMesh function before saving your
  * mesh.
  */
-int MMG3D_saveMesh(MMG5_pMesh mesh, char *filename) {
+int MMG3D_saveMesh(MMG5_pMesh mesh, const char *filename) {
   FILE*        inm;
   MMG5_pPoint  ppt;
   MMG5_pTetra  pt;
+  MMG5_pPrism  pp;
   MMG5_pTria   ptt;
   MMG5_xPoint *pxp;
   int          k,na,nc,np,ne,nn,nr,nre,nedreq,ntreq,nt,nereq;
@@ -1141,7 +1275,9 @@ int MMG3D_saveMesh(MMG5_pMesh mesh, char *filename) {
   ne = nereq = 0;
   for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
-    if ( !MG_EOK(pt) ) continue;
+    if ( !MG_EOK(pt) ) {
+      continue;
+    }
     ne++;
     if ( pt->tag & MG_REQ ){
       nereq++;
@@ -1202,6 +1338,46 @@ int MMG3D_saveMesh(MMG5_pMesh mesh, char *filename) {
     }
   }
 
+  /* tetrahedra */
+  ne = nereq = 0;
+  for (k=1; k<=mesh->ne; k++) {
+    pt = &mesh->tetra[k];
+    if ( !MG_EOK(pt) ) continue;
+    ne++;
+    if ( pt->tag & MG_REQ ){
+      nereq++;
+    }
+  }
+
+  if(!bin) {
+    strcpy(&chaine[0],"\n\nPrisms\n");
+    fprintf(inm,"%s",chaine);
+    fprintf(inm,"%d\n",mesh->nprism);
+  } else {
+    binch = 9; //Prism
+    fwrite(&binch,sw,1,inm);
+    bpos += 12 + 20*ne;//Pos
+    fwrite(&bpos,sw,1,inm);
+    fwrite((unsigned char*)&ne,sw,1,inm);
+  }
+  for (k=1; k<=mesh->nprism; k++) {
+    pp = &mesh->prism[k];
+    if(!bin) {
+      fprintf(inm,"%d %d %d %d %d %d %d\n"
+              ,mesh->point[pp->v[0]].tmp,mesh->point[pp->v[1]].tmp
+              ,mesh->point[pp->v[2]].tmp,mesh->point[pp->v[3]].tmp
+              ,mesh->point[pp->v[4]].tmp,mesh->point[pp->v[5]].tmp,pp->ref);
+    } else {
+      fwrite(&mesh->point[pp->v[0]].tmp,sw,1,inm);
+      fwrite(&mesh->point[pp->v[1]].tmp,sw,1,inm);
+      fwrite(&mesh->point[pp->v[2]].tmp,sw,1,inm);
+      fwrite(&mesh->point[pp->v[3]].tmp,sw,1,inm);
+      fwrite(&mesh->point[pp->v[4]].tmp,sw,1,inm);
+      fwrite(&mesh->point[pp->v[5]].tmp,sw,1,inm);
+      fwrite(&pp->ref,sw,1,inm);
+    }
+  }
+
   if ( mesh->info.imprim > 4 ) {
     fprintf(stdout,"     NUMBER OF VERTICES   %8d   CORNERS %8d"
             "   REQUIRED %8d\n",np,nc,nre);
@@ -1209,7 +1385,10 @@ int MMG3D_saveMesh(MMG5_pMesh mesh, char *filename) {
       fprintf(stdout,"     NUMBER OF EDGES      %8d   RIDGES  %8d\n",na,nr);
     if ( mesh->nt )
       fprintf(stdout,"     NUMBER OF TRIANGLES  %8d\n",mesh->nt);
-    fprintf(stdout,"     NUMBER OF ELEMENTS   %8d\n",mesh->ne);
+    fprintf(stdout,"     NUMBER OF TETRAHEDRA   %8d\n",mesh->ne);
+    if ( mesh->nprism )
+      fprintf(stdout,"     NUMBER OF PRISMS  %8d\n",mesh->nprism);
+
   }
 
   /*fin fichier*/
@@ -1233,7 +1412,7 @@ int MMG3D_saveMesh(MMG5_pMesh mesh, char *filename) {
  * Load metric field.
  *
  */
-int MMG3D_loadSol(MMG5_pMesh mesh,MMG5_pSol met, char *filename) {
+int MMG3D_loadSol(MMG5_pMesh mesh,MMG5_pSol met, const char *filename) {
   FILE       *inm;
   float       fbuf[6],tmpf;
   double      dbuf[6],tmpd;
@@ -1285,7 +1464,7 @@ int MMG3D_loadSol(MMG5_pMesh mesh,MMG5_pSol met, char *filename) {
       if(!strncmp(chaine,"Dimension",strlen("Dimension"))) {
         fscanf(inm,"%d",&met->dim);
         if(met->dim!=3) {
-          fprintf(stdout,"BAD SOL DIMENSION : %d\n",met->dim);
+          fprintf(stderr,"BAD SOL DIMENSION : %d\n",met->dim);
           return(-1);
         }
         continue;
@@ -1293,7 +1472,7 @@ int MMG3D_loadSol(MMG5_pMesh mesh,MMG5_pSol met, char *filename) {
         fscanf(inm,"%d",&met->np);
         fscanf(inm,"%d",&met->type);
         if(met->type!=1) {
-          fprintf(stdout,"SEVERAL SOLUTION => IGNORED : %d\n",met->type);
+          fprintf(stderr,"SEVERAL SOLUTION => IGNORED : %d\n",met->type);
           return(-1);
         }
         fscanf(inm,"%d",&met->size);
@@ -1319,7 +1498,7 @@ int MMG3D_loadSol(MMG5_pMesh mesh,MMG5_pSol met, char *filename) {
         fread(&met->dim,sw,1,inm);
         if(iswp) met->dim=_MMG5_swapbin(met->dim);
         if(met->dim!=3) {
-          fprintf(stdout,"BAD SOL DIMENSION : %d\n",met->dim);
+          fprintf(stderr,"BAD SOL DIMENSION : %d\n",met->dim);
           printf("  Exit program.\n");
           return(-1);
         }
@@ -1332,7 +1511,7 @@ int MMG3D_loadSol(MMG5_pMesh mesh,MMG5_pSol met, char *filename) {
         fread(&met->type,sw,1,inm); //nb sol
         if(iswp) met->type=_MMG5_swapbin(met->type);
         if(met->type!=1) {
-          fprintf(stdout,"SEVERAL SOLUTION => IGNORED : %d\n",met->type);
+          fprintf(stderr,"SEVERAL SOLUTION => IGNORED : %d\n",met->type);
           return(-1);
         }
         fread(&met->size,sw,1,inm); //typsol
@@ -1349,7 +1528,7 @@ int MMG3D_loadSol(MMG5_pMesh mesh,MMG5_pSol met, char *filename) {
 
   }
   if ( mesh->np != met->np ) {
-    fprintf(stdout,"  ** MISMATCHES DATA: THE NUMBER OF VERTICES IN "
+    fprintf(stderr,"  ** MISMATCHES DATA: THE NUMBER OF VERTICES IN "
             "THE MESH (%d) DIFFERS FROM THE NUMBER OF VERTICES IN "
             "THE SOLUTION (%d) \n",mesh->np,met->np);
     return(-1);
@@ -1357,7 +1536,7 @@ int MMG3D_loadSol(MMG5_pMesh mesh,MMG5_pSol met, char *filename) {
 
   if ( mesh->info.lag == -1 ) {
     if(met->size!=1 && met->size!=3) {
-      fprintf(stdout,"  ** DATA TYPE IGNORED %d \n",met->size);
+      fprintf(stderr,"  ** DATA TYPE IGNORED %d \n",met->size);
       return(-1);
     }
     if(met->size > 1) met->size = 6;
@@ -1376,7 +1555,7 @@ int MMG3D_loadSol(MMG5_pMesh mesh,MMG5_pSol met, char *filename) {
   met->npmax = mesh->npmax;
 
   _MMG5_ADD_MEM(mesh,(met->size*(met->npmax+1))*sizeof(double),"initial solution",
-                printf("  Exit program.\n");
+                fprintf(stderr,"  Exit program.\n");
                 exit(EXIT_FAILURE));
   _MMG5_SAFE_CALLOC(met->m,met->size*(met->npmax+1),double);
 
@@ -1481,7 +1660,7 @@ int MMG3D_loadSol(MMG5_pMesh mesh,MMG5_pSol met, char *filename) {
 
   /* stats */
   if ( abs(mesh->info.imprim) > 3 ) {
-    if ( met->size == 1 ) 
+    if ( met->size == 1 )
       fprintf(stdout,"     NUMBER OF SCALAR VALUES %8d\n",met->np);
     else if ( met->size == 3 )
       fprintf(stdout,"     NUMBER OF VECTOR VALUES %8d\n",met->np);
@@ -1500,7 +1679,7 @@ int MMG3D_loadSol(MMG5_pMesh mesh,MMG5_pSol met, char *filename) {
  * Write isotropic or anisotropic metric.
  *
  */
-int MMG3D_saveSol(MMG5_pMesh mesh,MMG5_pSol met, char *filename) {
+int MMG3D_saveSol(MMG5_pMesh mesh,MMG5_pSol met, const char *filename) {
   FILE*        inm;
   MMG5_pPoint  ppt;
   double       dbuf[6],mtmp[3],r[3][3],tmp;

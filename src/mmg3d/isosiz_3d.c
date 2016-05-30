@@ -41,42 +41,6 @@ extern char   ddb;
 #define A16TH     0.0625
 #define A32TH     0.03125
 
-/**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the sol structure.
- * \param ia index of edge in tetra \a pt .
- * \param pt pointer toward the tetra from which we come.
- * \return length of edge according to the prescribed metric.
- *
- * Compute length of edge \f$[i0;i1]\f$ according to the prescribed iso
- * metric (length identic for internal edges than for surface edges).
- *
- */
-inline double _MMG5_lenedg_iso(MMG5_pMesh mesh,MMG5_pSol met,int ia,
-                               MMG5_pTetra pt) {
-  int ip1,ip2;
-
-  ip1 = pt->v[_MMG5_iare[ia][0]];
-  ip2 = pt->v[_MMG5_iare[ia][1]];
-//#warning CECILE : on ne tient pas compte du fait que ca peut etre une ridge
-  /* if(pt->xt) { */
-  /*    pxt = pt->xt ? &mesh->xtetra[pt->xt] : 0; */
-  /*   return(_MMG5_lenSurfEdg_iso(mesh,met,ip1,ip2,(pxt->tag[ia] & MG_GEO))); */
-  /* } */
-  /* else */
-    return(_MMG5_lenSurfEdg_iso(mesh,met,ip1,ip2,0));
-}
-
-inline double _MMG5_lenedgspl_iso(MMG5_pMesh mesh ,MMG5_pSol met, int ia,
-                                  MMG5_pTetra pt) {
-  int ip1,ip2;
-
-  ip1 = pt->v[_MMG5_iare[ia][0]];
-  ip2 = pt->v[_MMG5_iare[ia][1]];
-
-  return(_MMG5_lenSurfEdg_iso(mesh,met,ip1,ip2,0));
-
-}
 
 /**
  * \brief Compute edge length from edge's coordinates.
@@ -136,7 +100,7 @@ _MMG5_defsizreg(MMG5_pMesh mesh,MMG5_pSol met,int nump,int *lists,
   p0 = &mesh->point[nump];
 
   if ( !p0->xp || MG_EDG(p0->tag) || (p0->tag & MG_NOM) || (p0->tag & MG_REQ))  {
-    fprintf(stdout,"    ## Func. _MMG5_defsizreg : wrong point qualification : xp ? %d\n",p0->xp);
+    fprintf(stderr,"    ## Func. _MMG5_defsizreg : wrong point qualification : xp ? %d\n",p0->xp);
     return(0);
   }
   isqhmin = 1.0 / (hmin*hmin);
@@ -146,7 +110,7 @@ _MMG5_defsizreg(MMG5_pMesh mesh,MMG5_pSol met,int nump,int *lists,
 
   /* Step 1 : rotation matrix that sends normal n to the third coordinate vector of R^3 */
   if ( !_MMG5_rotmatrix(n,r) ) {
-    fprintf(stdout,"%s:%d: Error: function _MMG5_rotmatrix return 0\n",
+    fprintf(stderr,"%s:%d: Error: function _MMG5_rotmatrix return 0\n",
             __FILE__,__LINE__);
     exit(EXIT_FAILURE);
   }
@@ -276,7 +240,7 @@ _MMG5_defsizreg(MMG5_pMesh mesh,MMG5_pSol met,int nump,int *lists,
 
     pxt   = &mesh->xtetra[mesh->tetra[iel].xt];
     if ( !_MMG5_bezierCP(mesh,&tt,&b,MG_GET(pxt->ori,iface)) ) {
-      fprintf(stdout,"%s:%d: Error: function _MMG5_bezierCP return 0\n",
+      fprintf(stderr,"%s:%d: Error: function _MMG5_bezierCP return 0\n",
               __FILE__,__LINE__);
       exit(EXIT_FAILURE);
     }
@@ -418,7 +382,7 @@ _MMG5_defsizreg(MMG5_pMesh mesh,MMG5_pSol met,int nump,int *lists,
   /* At this point, intm stands for the integral matrix of Taubin's approach : vp[0] and vp[1]
      are the two pr. directions of curvature, and the two curvatures can be inferred from lambdas*/
   if( !_MMG5_eigensym(intm,kappa,vp) ){
-    fprintf(stdout,"%s:%d: Error: function _MMG5_eigensym return 0\n",
+    fprintf(stderr,"%s:%d: Error: function _MMG5_eigensym return 0\n",
             __FILE__,__LINE__);
     exit(EXIT_FAILURE);
   }
@@ -491,7 +455,7 @@ int _MMG3D_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
 
   if ( mesh->info.hmax < 0.0 ) {
     //  mesh->info.hmax = 0.5 * mesh->info.delta;
-    fprintf(stdout,"%s:%d:Error: negative hmax value.\n",__FILE__,__LINE__);
+    fprintf(stderr,"%s:%d:Error: negative hmax value.\n",__FILE__,__LINE__);
     return(0);
   }
 

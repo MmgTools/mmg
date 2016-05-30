@@ -260,7 +260,6 @@ int chkswp(MMG5_pMesh mesh,MMG5_pSol met,int k,int i,char typchk) {
     calchg = MG_MIN(cal1,cal2);
   }
   else {
-    // warning if typchk==1 iso??
     pt0->v[0]= ip0;  pt0->v[1]= ip1;  pt0->v[2]= ip2;
     cal1 = _MMG5_caltri_iso(mesh,NULL,pt0);
     pt0->v[0]= ip1;  pt0->v[1]= iq;   pt0->v[2]= ip2;
@@ -397,8 +396,13 @@ int litswp(MMG5_pMesh mesh,int k,char i,double kali) {
 }
 
 
-/* attempt to swap any edge below quality value
-   list goes from 0 to ilist-1 */
+/**
+ * attempt to swap any edge below quality value
+ * list goes from 0 to ilist-1.
+ *
+ * \warning not used
+ *
+ */
 int swpedg(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,char typchk) {
   int      k,ns,iel;
   char     i,i1;

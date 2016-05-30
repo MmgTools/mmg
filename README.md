@@ -44,7 +44,7 @@ It provides 3 applications and 4 libraries:
 Project's actualities and software tutorials can be found on the [mmgtools](http://www.mmgtools.org) web page.
 
 ### **Mmg**'s forum
-Share your comments and issues with other members of the Mmg community on the Mmg forum.
+Share your comments and issues with other members of the Mmg community on the [Mmg forum](https://forum.mmgtools.org/).
 
 ### GitHub's Wiki
 More detailed informations about the compilation and configuration of the mmg's applications are available on the project [wiki](https://github.com/MmgTools/mmg/wiki).
@@ -68,7 +68,7 @@ The **mmg** applications are validated on OS X and on most of the Linux platform
 Your contributions to the **mmg** project are welcomed. You can help us to improve
 our code by many means:
   * pull requests: please follow the [wiki's guideline](https://github.com/MmgTools/Mmg/wiki/Developers-wiki#pull-requests);
-  * feature requests: please use the [GitHub issue tracker](https://github.com/MmgTools/mmg/issues/new);
+  * feature requests: please use the [Mmg forum](https://forum.mmgtools.org/);
   * bug reports: please use the [GitHub issue tracker](https://github.com/MmgTools/mmg/issues/new);
 
 ## About the team

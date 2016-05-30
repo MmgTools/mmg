@@ -541,14 +541,14 @@ static int norver(MMG5_pMesh mesh) {
   MMG5_pPoint    ppt;
   MMG5_pxPoint   go;
   double         n[3],dd;
-  int            *adja,k,kk,ier,xp,nn,nt,nf;
+  int            *adja,k,kk,ier,xp,nn,nt,nf,nnr;
   char           i,ii,i1;
 
   if ( abs(mesh->info.imprim) > 4 || mesh->info.ddebug )
     fprintf(stdout,"  ** DEFINING GEOMETRY\n");
 
   /* 1. process C1 vertices, normals */
-  nn = xp = nt = nf = 0;
+  nn = xp = nt = nf = nnr = 0;
   ++mesh->base;
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
@@ -556,13 +556,21 @@ static int norver(MMG5_pMesh mesh) {
 
     for (i=0; i<3; i++) {
       ppt = &mesh->point[pt->v[i]];
-      if ( MS_SIN(ppt->tag) )  continue;
-      else if ( MG_EDG(ppt->tag) ) {
-        xp++;
+      if ( MS_SIN(ppt->tag) || MG_EDG(ppt->tag) ) {
+        if ( mesh->nc1 ) {
+          if ( ppt->n[0]*ppt->n[0]+ppt->n[1]*ppt->n[1]+ppt->n[2]*ppt->n[2] > 0 )
+            ++nnr;
+        }
+
+        if ( MG_EDG(ppt->tag) )  xp++;
+
         continue;
       }
       else if ( ppt->flag == mesh->base )  continue;
-      else if ( mesh->nc1 )  continue;
+      else if ( mesh->nc1 ) {
+        if ( ppt->n[0]*ppt->n[0] + ppt->n[1]*ppt->n[1] + ppt->n[2]*ppt->n[2] > 0 )
+        continue;
+      }
 
       ier = _MMG5_boulen(mesh,mesh->adja,k,i,ppt->n);
       if ( ier ) {
@@ -655,8 +663,11 @@ static int norver(MMG5_pMesh mesh) {
     }
   }
 
-  if ( abs(mesh->info.imprim) > 4 && nn+nt > 0 )
+  if ( abs(mesh->info.imprim) > 4 && nn+nt > 0 ) {
+    if ( nnr )
+      fprintf(stdout,"     %d input normals ignored\n",nnr);
     fprintf(stdout,"     %d normals,  %d tangents updated  (%d failed)\n",nn,nt,nf);
+  }
 
   return(1);
 }
@@ -795,25 +806,25 @@ int _MMGS_analys(MMG5_pMesh mesh) {
 
   /* set tria edges tags */
   if ( !assignEdge(mesh) ) {
-    fprintf(stdout,"  ## Analysis problem. Exit program.\n");
+    fprintf(stderr,"  ## Analysis problem. Exit program.\n");
     return(0);
   }
 
   /* create adjacency */
   if ( !_MMGS_hashTria(mesh) ) {
-    fprintf(stdout,"  ## Hashing problem. Exit program.\n");
+    fprintf(stderr,"  ## Hashing problem. Exit program.\n");
     return(0);
   }
 
   /* delete badly shaped elts */
   /*if ( mesh->info.badkal && !delbad(mesh) ) {
-    fprintf(stdout,"  ## Geometry trouble. Exit program.\n");
+    fprintf(stderr,"  ## Geometry trouble. Exit program.\n");
     return(0);
     }*/
 
   /* identify connexity */
   if ( !setadj(mesh) ) {
-    fprintf(stdout,"  ## Topology problem. Exit program.\n");
+    fprintf(stderr,"  ## Topology problem. Exit program.\n");
     return(0);
   }
 
@@ -822,25 +833,25 @@ int _MMGS_analys(MMG5_pMesh mesh) {
 
   /* check for ridges */
   if ( mesh->info.dhd > _MMG5_ANGLIM && !setdhd(mesh) ) {
-    fprintf(stdout,"  ## Geometry problem. Exit program.\n");
+    fprintf(stderr,"  ## Geometry problem. Exit program.\n");
     return(0);
   }
 
   /* identify singularities */
   if ( !_MMG5_singul(mesh) ) {
-    fprintf(stdout,"  ## Singularity problem. Exit program.\n");
+    fprintf(stderr,"  ## Singularity problem. Exit program.\n");
     return(0);
   }
 
   /* define normals */
   if ( !mesh->xp ) {
     if ( !norver(mesh) ) {
-      fprintf(stdout,"  ## Normal problem. Exit program.\n");
+      fprintf(stderr,"  ## Normal problem. Exit program.\n");
       return(0);
     }
     /* regularize normals */
     if ( mesh->info.nreg && !regnor(mesh) ) {
-      fprintf(stdout,"  ## Normal regularization problem. Exit program.\n");
+      fprintf(stderr,"  ## Normal regularization problem. Exit program.\n");
       return(0);
     }
   }

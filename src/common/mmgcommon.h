@@ -55,7 +55,7 @@ extern "C" {
 #include "eigenv.h"
 #include "libmmgcommon.h"
 
-#define MG_VER   "5.1.0"
+#define MG_VER   "5.1.1"
 #define MG_REL   "Dec 4, 2015"
 #define MG_CPY   "Copyright (c) IMB-LJLL, 2004-"
 #define MG_STR   "&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&"
@@ -149,10 +149,10 @@ extern "C" {
   {                                                                     \
     if ( ((mesh)->memCur) > ((mesh)->memMax) ||                         \
          ((mesh)->memCur < 0 )) {                                       \
-      fprintf(stdout,"  ## Error:");                                    \
-      fprintf(stdout," unable to allocate %s.\n",string);               \
-      fprintf(stdout,"  ## Check the mesh size or ");                   \
-      fprintf(stdout,"increase maximal authorized memory with the -m option.\n"); \
+      fprintf(stderr,"  ## Error:");                                    \
+      fprintf(stderr," unable to allocate %s.\n",string);               \
+      fprintf(stderr,"  ## Check the mesh size or ");                   \
+      fprintf(stderr,"increase maximal authorized memory with the -m option.\n"); \
       (mesh)->memCur -= (long long)(size);                              \
       law;                                                              \
     }                                                                   \
@@ -257,10 +257,10 @@ extern "C" {
          (long long) (wantedGap*initSize*sizeof(type)) ) {              \
       gap = (int)((mesh->memMax-mesh->memCur)/sizeof(type));            \
       if(gap<1) {                                                       \
-        fprintf(stdout,"  ## Error:");                                  \
-        fprintf(stdout," unable to allocate %s.\n",message);            \
-        fprintf(stdout,"  ## Check the mesh size or ");                 \
-        fprintf(stdout,"increase maximal authorized memory with the -m option.\n"); \
+        fprintf(stderr,"  ## Error:");                                  \
+        fprintf(stderr," unable to allocate %s.\n",message);            \
+        fprintf(stderr,"  ## Check the mesh size or ");                 \
+        fprintf(stderr,"increase maximal authorized memory with the -m option.\n"); \
         law;                                                            \
       }                                                                 \
     }                                                                   \
@@ -366,7 +366,7 @@ void _MMG5_excfun(int sigid) {
 
 
 /* Global variables */
-static const unsigned char _MMG5_inxt2[3] = {1,2,0}; /*!< next vertex of triangle: {1,2,0} */
+  static const unsigned char _MMG5_inxt2[6] = {1,2,0,1,2}; /*!< next vertex of triangle: {1,2,0} */
 static const unsigned char _MMG5_iprv2[3] = {2,0,1}; /*!< previous vertex of triangle: {2,0,1} */
 
 /* Private structures */
@@ -459,15 +459,12 @@ int    _MMG5_intmetsavedir(MMG5_pMesh mesh, double *m,double *n,double *mr);
 int    _MMG5_intridmet(MMG5_pMesh,MMG5_pSol,int,int,double,double*,double*);
 int    _MMG5_mmgIntmet33_ani(double*,double*,double*,double);
 int    _MMG5_mmgIntextmet(MMG5_pMesh,MMG5_pSol,int,double *,double *);
-double _MMG5_lenSurfEdg_ani(MMG5_pMesh mesh,MMG5_pSol met,int ip1,int ip2,char);
-double _MMG5_lenSurfEdg33_ani(MMG5_pMesh,MMG5_pSol,int,int,char);
-extern double _MMG5_lenSurfEdg_iso(MMG5_pMesh ,MMG5_pSol ,int ,int, char );
 long long _MMG5_memSize(void);
 void   _MMG5_mmgDefaultValues(MMG5_pMesh mesh);
 int    _MMG5_mmgHashTria(MMG5_pMesh mesh, int *adja, _MMG5_Hash*, int chkISO);
 void   _MMG5_mmgInit_parameters(MMG5_pMesh mesh);
 void   _MMG5_mmgUsage(char *prog);
-int    _MMG5_nonUnitNorPts(MMG5_pMesh,int,int,int,double*);
+extern int    _MMG5_nonUnitNorPts(MMG5_pMesh,int,int,int,double*);
 extern double _MMG5_nonorsurf(MMG5_pMesh mesh,MMG5_pTria pt);
 extern int    _MMG5_norpts(MMG5_pMesh,int,int,int,double *);
 extern int    _MMG5_nortri(MMG5_pMesh mesh,MMG5_pTria pt,double *n);

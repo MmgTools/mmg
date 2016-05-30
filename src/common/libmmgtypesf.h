@@ -81,28 +81,100 @@
 ! #include <stdarg.h>
 
 ! /**
-!  * \enum MMG5_arg
-!  * \brief Argument type of mmg3d structures.
+!  * \def MMG5_ARG_start
+!  *
+!  * To begin a list of variadic arguments (mandatory first arg for all our
+!  * variadic functions)
+!  *
+!  * \remark we cannot use an enum because used in
+!  * variadic functions).
 !  */
 
-! /*!< To begin a list of variadic arguments (mandatory first arg for all our variadic functions) */
-#define    MMG5_ARG_start              %val(0)
-! /*!< Pointer toward a MMG5_pMesh structure (for structure allocations purposes) */
-#define    MMG5_ARG_ppMesh             %val(1)
-! /*!< Pointer toward a MMG5_pSol structure storing a level-set (for structure allocations purposes)  */
-#define    MMG5_ARG_ppLs               %val(2)
-! /*!< Pointer toward a MMG5_pSol structure storing a metric (for structure allocations purposes)  */
-#define    MMG5_ARG_ppMet              %val(3)
-! /*!< Pointer toward a MMG5_pSol structure storing a displacement (for structure allocations purposes)  */
-#define    MMG5_ARG_ppDisp             %val(4)
-! /*!< MMG5_pMesh structure */
-#define    MMG5_ARG_pMesh              %val(5)
-! /*!< MMG5_pSol structure storing a metric field */
-#define    MMG5_ARG_pMet               %val(6)
-! /*!< MMG5_pSol structure storing a displacement field */
-#define    MMG5_ARG_pDisp              %val(7)
-! /*!< To end a list of variadic argument (mandatory last argument for all our variadic functions) */
-#define    MMG5_ARG_end                %val(8)
+#define MMG5_ARG_start                          %val(1)
+! /**
+!  * \def MMG5_ARG_ppMesh
+!  *
+!  * Pointer toward a MMG5_pMesh structure (for structure allocations purposes)
+!  *
+!  * \remark we cannot use an enum because used in
+!  * variadic functions).
+!  */
+
+#define MMG5_ARG_ppMesh                         %val(2)
+! /**
+!  * \def MMG5_ARG_ppLs
+!  *
+!  * Pointer toward a MMG5_pSol structure storing a level-set (for structure
+!  * allocations purposes)
+!  *
+!  * \remark we cannot use an enum because used in
+!  * variadic functions).
+!  */
+
+#define MMG5_ARG_ppLs                           %val(3)
+! /**
+!  * \def MMG5_ARG_ppMet
+!  *
+!  * Pointer toward a MMG5_pSol structure storing a metric (for structure
+!  * allocations purposes)
+!  *
+!  * \remark we cannot use an enum because used in
+!  * variadic functions).
+!  */
+
+#define MMG5_ARG_ppMet                          %val(4)
+! /**
+!  * \def MMG5_ARG_ppDisp
+!  *
+!  * Pointer toward a MMG5_pSol structure storing a displacement (for structure
+!  * allocations purposes)
+!  *
+!  * \remark we cannot use an enum because used in
+!  * variadic functions).
+!  */
+
+#define MMG5_ARG_ppDisp                         %val(5)
+! /**
+!  * \def MMG5_ARG_pMesh
+!  *
+!  * MMG5_pMesh structure
+!  *
+!  * \remark we cannot use an enum because used in
+!  * variadic functions).
+!  */
+
+#define MMG5_ARG_pMesh                          %val(6)
+! /**
+!  * \def MMG5_ARG_pMet
+!  *
+!  * MMG5_pSol structure storing a metric field
+!  *
+!  * \remark we cannot use an enum because used in
+!  * variadic functions).
+!  */
+
+#define MMG5_ARG_pMet                           %val(7)
+! /**
+!  * \def MMG5_ARG_pDisp
+!  *
+!  * MMG5_pSol structure storing a displacement field
+!  *
+!  * \remark we cannot use an enum because used in
+!  * variadic functions).
+!  */
+
+#define MMG5_ARG_pDisp                          %val(8)
+! /**
+!  * \def MMG5_ARG_end
+!  *
+!  * To end a list of variadic argument (mandatory last argument for all our
+!  * variadic functions)
+!  *
+!  * \remark we cannot use an enum because used in
+!  * variadic functions).
+!  */
+
+#define MMG5_ARG_end                            %val(9)
 
 ! /**
 !  * \enum MMG5_type
@@ -120,7 +192,7 @@
 
 ! /**
 !  * \enum MMG5_entities
-!  * \brief Type of mesh entities to which solutions are applied.
+!  * \brief Type of mesh entities.
 !  */
 
 ! /*!< Undefined type (unusable) */
@@ -129,6 +201,8 @@
 #define   MMG5_Vertex                  1
 ! /*!< Triangle entity */
 #define   MMG5_Triangle                2
+! /*!< Tetra entity */
+#define   MMG5_Tetrahedron             3
 
 ! /**
 !  * \struct MMG5_Par
@@ -163,10 +237,10 @@
 !   int      tmp; /*!< Index of point in the saved mesh (we don't count
 !                   the unused points)*/
 !   int      flag; /*!< Flag to know if we have already treated the point */
+!   int      s;
 !   char     tag; /*!< Contains binary flags : if \f$tag=23=16+4+2+1\f$, then
 !                   the point is \a MG_REF, \a MG_GEO, \a MG_REQ and \a MG_BDY */
 !   char     tagdel; /*!< Tag for delaunay */
-!   int      s;
 ! } MMG5_Point;
 ! typedef MMG5_Point * MMG5_pPoint;
 
@@ -189,8 +263,9 @@
 ! typedef struct {
 !   int      a,b; /*!< Extremities of the edge */
 !   int      ref; /*!< Reference of the edge */
+!   int      base; /*!< 2Donly: used to store the tria+ tria edge indices
+!                    that allow to access to the edge */
 !   char     tag; /*!< Binary flags */
-!   int      base;//2Donly
 ! } MMG5_Edge;
 ! typedef MMG5_Edge * MMG5_pEdge;
 
@@ -201,16 +276,17 @@
 !  */
 
 ! typedef struct {
+!   double   qual;   /*Quality of the triangle*/
 !   int      v[3]; /*!< Vertices of the triangle */
 !   int      ref; /*!< Reference of the triangle */
 !   int      base;
-!   int      cc;
+!   int      cc; /*!< used to store the tetra + tetra face indices
+!                  that allow to access to the tria */
 !   int      edg[3]; /*!< edg[i] contains the ref of the \f$i^{th}\f$ edge
 !                      of triangle */
 !   int      flag;
 !   char     tag[3]; /*!< tag[i] contains the tag associated to the
 !                      \f$i^{th}\f$ edge of triangle */
-!   double   qual;   /*Quality of the triangle*/
 ! } MMG5_Tria;
 ! typedef MMG5_Tria * MMG5_pTria;
 
@@ -220,6 +296,7 @@
 !  */
 
 ! typedef struct {
+!   double   qual; /*!< Quality of the element */
 !   int      v[4]; /*!< Vertices of the tetrahedron */
 !   int      ref; /*!< Reference of the tetrahedron */
 !   int      base;
@@ -228,10 +305,8 @@
 !                  the tetrahedron*/
 !   int      flag;
 !   char     tag;
-!   double   qual; /*!< Quality of the element */
 ! } MMG5_Tetra;
 ! typedef MMG5_Tetra * MMG5_pTetra;
-
 
 ! /**
 !  * \struct MMG5_xTetra
@@ -254,19 +329,34 @@
 ! typedef MMG5_xTetra * MMG5_pxTetra;
 
 ! /**
+!  * \struct MMG5_Prism
+!  * \brief Structure to store prsim of a MMG mesh.
+!  * \warning prisms are not modified
+!  */
+
+! typedef struct {
+!   int      v[6]; /*!< Vertices of the prism */
+!   int      ref; /*!< Reference of the prism */
+!   int      base;
+!   int      flag;
+!   char     tag;
+! } MMG5_Prism;
+! typedef MMG5_Prism * MMG5_pPrism;
+
+! /**
 !  * \struct MMG5_Info
 !  * \brief Store input parameters of the run.
 !  */
 
 ! typedef struct {
+!   MMG5_pPar     par;
 !   double        dhd,hmin,hmax,hgrad,hausd,min[3],max[3],delta,ls;
 !   int           mem,npar,npari;
-!   char          nreg;
 !   int           renum;
-!   char          imprim,ddebug,badkal,iso,fem,lag;
-!   unsigned char optim, noinsert, noswap, nomove, nosurf;
 !   int           octree;
-!   MMG5_pPar     par;
+!   char          nreg;
+!   char          imprim,ddebug,badkal,iso,fem,lag;
+!   unsigned char optim, optimLES, noinsert, noswap, nomove, nosurf;
 ! } MMG5_Info;
 
 ! /**
@@ -283,8 +373,8 @@
 ! } MMG5_hgeom;
 
 ! typedef struct {
-!   int         siz,max,nxt;
 !   MMG5_hgeom  *geom;
+!   int         siz,max,nxt;
 ! } MMG5_HGeom;
 
 ! /**
@@ -294,13 +384,14 @@
 !  */
 
 ! typedef struct {
-!   int       ver; /*!< Version of the mesh file */
-!   int       dim; /*!< Dimension of the mesh */
-!   int       type; /*!< Type of the mesh */
 !   long long memMax; /*!< Maximum memory available */
 !   long long memCur; /*!< Current memory used */
 !   double    gap; /*!< Gap for table reallocation */
+!   int       ver; /*!< Version of the mesh file */
+!   int       dim; /*!< Dimension of the mesh */
+!   int       type; /*!< Type of the mesh */
 !   int       npi,nti,nai,nei,np,na,nt,ne,npmax,namax,ntmax,nemax,xpmax,xtmax;
+!   int       nprism;
 !   int       nc1;
 
 !   int       base; /*!< Used with \a flag to know if an entity has been
@@ -319,17 +410,19 @@
 !                     \f$adjt[3*i+1+j]=3*k+l\f$ then the \f$i^{th}\f$ and
 !                     \f$k^th\f$ triangles are adjacent and share their
 !                     edges \a j and \a l (resp.) */
-!   char     *namein; /*!< Input mesh name */
-!   char     *nameout; /*!< Output mesh name */
 
 !   MMG5_pPoint    point; /*!< Pointer toward the \ref MMG5_Point structure */
 !   MMG5_pxPoint   xpoint; /*!< Pointer toward the \ref MMG5_xPoint structure */
 !   MMG5_pTetra    tetra; /*!< Pointer toward the \ref MMG5_Tetra structure */
 !   MMG5_pxTetra   xtetra; /*!< Pointer toward the \ref MMG5_xTetra structure */
+!   MMG5_pPrism    prism; /*!< Pointer toward the \ref MMG5_Prism structure */
 !   MMG5_pTria     tria; /*!< Pointer toward the \ref MMG5_Tria structure */
 !   MMG5_pEdge     edge; /*!< Pointer toward the \ref MMG5_Edge structure */
 !   MMG5_HGeom     htab; /*!< \ref MMG5_HGeom structure */
 !   MMG5_Info      info; /*!< \ref MMG5_Info structure */
+!   char     *namein; /*!< Input mesh name */
+!   char     *nameout; /*!< Output mesh name */
+
 ! } MMG5_Mesh;
 ! typedef MMG5_Mesh  * MMG5_pMesh;
 

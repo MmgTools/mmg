@@ -76,7 +76,7 @@ ELSE ( )
     SET ( OLD_MMG2D_MD5 "0" )
   ENDIF ( )
 
-  FILE(DOWNLOAD https://drive.google.com/uc?export=download&id=0B3X6EwOEKqHmLVd5NWQyQUE5Um8
+  FILE(DOWNLOAD https://drive.google.com/uc?export=download&id=0B3X6EwOEKqHmV3BlUER4M0Z4MGs
     ${CMAKE_SOURCE_DIR}/ci_tests/mmg2d.version
     STATUS MMG2D_VERSION_STATUS
     INACTIVITY_TIMEOUT 5)
@@ -93,7 +93,7 @@ ELSE ( )
     MESSAGE(WARNING "Failed to load a simple text file, download status:"
       " ${MMG2D_VERSION_STATUS_1}.
  Try to get it at the following link:
-        https://drive.google.com/uc?export=download&id=0B3X6EwOEKqHmLVd5NWQyQUE5Um8
+        https://drive.google.com/uc?export=download&id=0B3X6EwOEKqHmV3BlUER4M0Z4MGs
  then untar it in the project directory (mmg/ by default).")
   ENDIF()
 
