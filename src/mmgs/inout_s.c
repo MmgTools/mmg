@@ -946,7 +946,7 @@ int MMGS_saveMesh(MMG5_pMesh mesh, const char* filename) {
   }
 
   /* write normals */
-  if ( nn && mesh->xp && mesh->xpoint ) {
+  if ( nn ) {
     if(!bin) {
       strcpy(&chaine[0],"\n\nNormals\n");
       fprintf(inm,"%s",chaine);
@@ -963,6 +963,7 @@ int MMGS_saveMesh(MMG5_pMesh mesh, const char* filename) {
       if ( !MG_VOK(ppt) )  continue;
       else if ( !(ppt->tag & MG_GEO) ) {
         if ( ppt->tag & MG_REF ) {
+          assert (mesh->xp && mesh->xpoint);
           go = &mesh->xpoint[ppt->xp];
           if(!bin) {
             fprintf(inm,"%.15lg %.15lg %.15lg \n",go->n1[0],go->n1[1],go->n1[2]);

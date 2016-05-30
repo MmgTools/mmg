@@ -7,12 +7,13 @@ PROGRAM main
 
   IMPLICIT NONE
 
-!> Include the mmgs library hader file
-! if the header file is in the "include" directory
-! #include "libmmgsf.h"
+  !> Include the mmgs library hader file
+  ! if the header file is in the "include" directory
+  ! #include "libmmgsf.h"
 
-! if the header file is in "include/mmg/mmgs"
+  ! if the header file is in "include/mmg/mmgs"
 #include "mmg/mmgs/libmmgsf.h"
+
 
   MMG5_DATA_PTR_T    :: mmgMesh
   MMG5_DATA_PTR_T    :: mmgSol
