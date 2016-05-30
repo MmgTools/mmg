@@ -90,7 +90,7 @@
 !  * variadic functions).
 !  */
 
-#define MMG5_ARG_start  1
+#define MMG5_ARG_start                          %val(1)
 ! /**
 !  * \def MMG5_ARG_ppMesh
 !  *
@@ -100,7 +100,7 @@
 !  * variadic functions).
 !  */
 
-#define MMG5_ARG_ppMesh 2
+#define MMG5_ARG_ppMesh                         %val(2)
 ! /**
 !  * \def MMG5_ARG_ppLs
 !  *
@@ -111,7 +111,7 @@
 !  * variadic functions).
 !  */
 
-#define MMG5_ARG_ppLs   3
+#define MMG5_ARG_ppLs                           %val(3)
 ! /**
 !  * \def MMG5_ARG_ppMet
 !  *
@@ -122,7 +122,7 @@
 !  * variadic functions).
 !  */
 
-#define MMG5_ARG_ppMet  4
+#define MMG5_ARG_ppMet                          %val(4)
 ! /**
 !  * \def MMG5_ARG_ppDisp
 !  *
@@ -133,7 +133,7 @@
 !  * variadic functions).
 !  */
 
-#define MMG5_ARG_ppDisp 5
+#define MMG5_ARG_ppDisp                         %val(5)
 ! /**
 !  * \def MMG5_ARG_pMesh
 !  *
@@ -143,7 +143,7 @@
 !  * variadic functions).
 !  */
 
-#define MMG5_ARG_pMesh  6
+#define MMG5_ARG_pMesh                          %val(6)
 ! /**
 !  * \def MMG5_ARG_pMet
 !  *
@@ -153,7 +153,7 @@
 !  * variadic functions).
 !  */
 
-#define MMG5_ARG_pMet   7
+#define MMG5_ARG_pMet                           %val(7)
 ! /**
 !  * \def MMG5_ARG_pDisp
 !  *
@@ -163,7 +163,7 @@
 !  * variadic functions).
 !  */
 
-#define MMG5_ARG_pDisp  8
+#define MMG5_ARG_pDisp                          %val(8)
 ! /**
 !  * \def MMG5_ARG_end
 !  *
@@ -174,7 +174,7 @@
 !  * variadic functions).
 !  */
 
-#define MMG5_ARG_end    9
+#define MMG5_ARG_end                            %val(9)
 
 ! /**
 !  * \enum MMG5_type

@@ -7,12 +7,13 @@ PROGRAM main
 
   IMPLICIT NONE
 
-!> Include the mmgs library hader file
-! if the header file is in the "include" directory
-! #include "libmmgsf.h"
+  !> Include the mmgs library hader file
+  ! if the header file is in the "include" directory
+  ! #include "libmmgsf.h"
 
-! if the header file is in "include/mmg/mmgs"
+  ! if the header file is in "include/mmg/mmgs"
 #include "mmg/mmgs/libmmgsf.h"
+
 
   MMG5_DATA_PTR_T    :: mmgMesh
   MMG5_DATA_PTR_T    :: mmgSol
@@ -24,7 +25,7 @@ PROGRAM main
 
   ! Name and path of the mesh file
   CALL getenv("PWD",pwd)
-  WRITE(filename,*) TRIM(pwd),"/../libexamples/mmgs/adaptation_example0_fortran/cube"
+  WRITE(filename,*) TRIM(pwd),"/../libexamples/mmgs/adaptation_example0_fortran/example0_a/cube"
 
   !> ------------------------------ STEP   I --------------------------
   !! 1) Initialisation of mesh and sol structures

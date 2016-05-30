@@ -47,6 +47,7 @@ my $fichier;
 #my $format = "MMG_INTEGER, PARAMETER :: %-30s = %d";
 my $format = "#define %-30s %d";
 my $formatbyval = "#define %-30s \%val(%d)";
+my $definebyval = "#define MMG5_ARG_%-30s \%val(%d)\n";
 my %opts;
 
 ###############################################################################
@@ -195,6 +196,11 @@ sub Convert {
                     else {
                         printTab($line,0,0 );
                     }
+                }
+                elsif ($line =~ /\#define MMG5_ARG_(\w*)\s+(.*)/)
+                {
+                    $chaine = sprintf($definebyval,$1,$2);
+                    printTab($chaine,1,0 );
                 }
                 elsif ($line =~ /\#define/)
                 {
