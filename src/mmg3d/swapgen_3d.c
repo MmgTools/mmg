@@ -122,13 +122,13 @@ int _MMG5_chkswpgen(MMG5_pMesh mesh,MMG5_pSol met,int start,int ia,
   //CECILE : je vois pas pourquoi ca ameliore de faire ce test
   //plus rapide mais du coup on elimine des swap...
   //4/01/14 commentaire
-  //if ( calold*_MMG5_ALPHAD > 0.5 )  return(0);
-  
+  // if ( calold*_MMG5_ALPHAD > 0.5 )  return(0);
+
   /* Prevent swap of an external boundary edge */
   if ( !adj )  return(0);
-  
+
   assert(npol == (*ilist)); // du coup, apres on pourra virer npol
-  
+
   /* Find a configuration that enhances the worst quality within the shell */
   for (k=0; k<npol; k++) {
     iel = pol[k] / 4;
@@ -194,6 +194,9 @@ int _MMG5_chkswpgen(MMG5_pMesh mesh,MMG5_pSol met,int start,int ia,
         caltmp = _MMG5_orcal(mesh,met,0);
 
       calnew = MG_MIN(calnew,caltmp);
+
+      ier = (calnew > crit*calold);
+      if ( !ier )  break;
 
       /* Second tetra obtained from iel */
       memcpy(pt0,pt,sizeof(MMG5_Tetra));

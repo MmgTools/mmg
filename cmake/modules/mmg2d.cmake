@@ -260,8 +260,10 @@ IF ( BUILD_TESTING )
       ADD_TEST(NAME libmmg2d_example1   COMMAND ${LIBMMG2D_EXEC1})
 
       IF ( CMAKE_Fortran_COMPILER)
-        SET(LIBMMG2D_EXECFORTRAN ${EXECUTABLE_OUTPUT_PATH}/libmmg2d_fortran_a)
-        ADD_TEST(NAME libmmg2d_fortran   COMMAND ${LIBMMG2D_EXECFORTRAN})
+        SET(LIBMMG2D_EXECFORTRAN_a ${EXECUTABLE_OUTPUT_PATH}/libmmg2d_fortran_a)
+        SET(LIBMMG2D_EXECFORTRAN_b ${EXECUTABLE_OUTPUT_PATH}/libmmg2d_fortran_b)
+        ADD_TEST(NAME libmmg2d_fortran_a   COMMAND ${LIBMMG2D_EXECFORTRAN_a})
+        ADD_TEST(NAME libmmg2d_fortran_b   COMMAND ${LIBMMG2D_EXECFORTRAN_b})
       ENDIF()
 
     ENDIF()
