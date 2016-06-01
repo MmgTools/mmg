@@ -243,7 +243,7 @@ char _MMG5_chkedg(MMG5_pMesh mesh,MMG5_Tria *pt,char ori, double hmax,
                   double hausd, int locPar) {
   MMG5_pPoint   p[3];
   MMG5_xPoint  *pxp;
-  MMG5_pPar     par;
+//  MMG5_pPar     par;
   double   n[3][3],t[3][3],nt[3],*n1,*n2,t1[3],t2[3];
   double   ps,ps2,ux,uy,uz,ll,il,alpha,dis,hma2;
   int      ia,ib,ic;//l,info;
@@ -998,7 +998,7 @@ _MMG5_anatetv(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
           uy = p2->c[1] - p1->c[1];
           uz = p2->c[2] - p1->c[2];
           ll = ux*ux + uy*uy + uz*uz;
-#warning add local param here
+
           hma2 = mesh->info.hmax;
           /* Local parameters */
           /* Local param at vertices ip1 and ip2 */

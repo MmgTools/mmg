@@ -420,7 +420,7 @@ static int _MMG5_coltetlag(MMG5_pMesh mesh,MMG5_pSol met,int itdeg) {
 
         isnm = 0;
         ilist = _MMG5_boulevolp(mesh,k,ip,list);
-        ilist = _MMG5_chkcol_int(mesh,met,k,i,j,ilist,list,2);
+        ilist = _MMG5_chkcol_int(mesh,met,k,i,j,list,ilist,2);
       
         if ( ilist > 0 ) {
           ier = _MMG5_colver(mesh,met,list,ilist,iq,2);

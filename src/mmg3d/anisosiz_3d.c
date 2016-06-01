@@ -319,34 +319,37 @@ static int _MMG5_defmetrid(MMG5_pMesh mesh,MMG5_pSol met,int kel,
   /* local parameters */
   isqhmin = mesh->info.hmin;
   isqhmax = mesh->info.hmax;
-  isloc   = 0;
 
-  i = 0;
-  do
-  {
-    if ( isloc )  break;
+  if ( mesh->info.parTyp ) {
+    isloc   = 0;
 
-    par = &mesh->info.par[i];
-    if ( /*( (par->elt != MMG5_Vertex) || (p0->ref != par->ref ) ) && */
-      ( (par->elt != MMG5_Triangle)    || (pxt->ref[iface] != par->ref ) ) &&
-      ( (par->elt != MMG5_Tetrahedron) || (pt->ref != par->ref )         ) )
-      continue;
+    i = 0;
+    do
+    {
+      if ( isloc )  break;
 
-    isqhmin = par->hmin;
-    isqhmax = par->hmax;
-    isloc = 1;
-  } while ( ++i<mesh->info.npar );
+      par = &mesh->info.par[i];
+      if ( /*( (par->elt != MMG5_Vertex) || (p0->ref != par->ref ) ) && */
+        ( (par->elt != MMG5_Triangle)    || (pxt->ref[iface] != par->ref ) ) &&
+        ( (par->elt != MMG5_Tetrahedron) || (pt->ref != par->ref )         ) )
+        continue;
 
-  for ( ; i<mesh->info.npar; ++i) {
-    par = &mesh->info.par[i];
+      isqhmin = par->hmin;
+      isqhmax = par->hmax;
+      isloc = 1;
+    } while ( ++i<mesh->info.npar );
 
-   if ( /*( (par->elt != MMG5_Vertex) || (p0->ref != par->ref ) ) && */
-     ( (par->elt != MMG5_Triangle)    || (pxt->ref[iface] != par->ref ) ) &&
-     ( (par->elt != MMG5_Tetrahedron) || (pt->ref != par->ref )         ) )
-     continue;
+    for ( ; i<mesh->info.npar; ++i) {
+      par = &mesh->info.par[i];
 
-   isqhmin = MG_MAX(isqhmin,par->hmin);
-   isqhmax = MG_MIN(isqhmax,par->hmax);
+      if ( /*( (par->elt != MMG5_Vertex) || (p0->ref != par->ref ) ) && */
+        ( (par->elt != MMG5_Triangle)    || (pxt->ref[iface] != par->ref ) ) &&
+        ( (par->elt != MMG5_Tetrahedron) || (pt->ref != par->ref )         ) )
+        continue;
+
+      isqhmin = MG_MAX(isqhmin,par->hmin);
+      isqhmax = MG_MIN(isqhmax,par->hmax);
+    }
   }
 
   isqhmin = 1.0 / (isqhmin*isqhmin);
