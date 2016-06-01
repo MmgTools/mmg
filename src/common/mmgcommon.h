@@ -109,6 +109,11 @@ extern "C" {
 #define  MG_CRN       (1 << 5)        /**< 32  corner         */
 #define  MG_NUL       (1 << 6)        /**< 64  vertex removed */
 
+/* binary tags for local parameters */
+#define  MG_Vert   (1 << 0 )  /**< 1 local parameter applied over vertex */
+#define  MG_Tria   (1 << 1 )  /**< 2 local parameter applied over triangle */
+#define  MG_Tetra  (1 << 2 )  /**< 4 local parameter applied over tetrahedron */
+
 #define MG_VOK(ppt)      (ppt && ((ppt)->tag < MG_NUL)) /**< Vertex OK */
 #define MG_EOK(pt)       (pt && ((pt)->v[0] > 0))       /**< Element OK */
 
