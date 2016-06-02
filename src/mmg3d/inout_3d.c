@@ -1338,13 +1338,13 @@ int MMG3D_saveMesh(MMG5_pMesh mesh, const char *filename) {
     }
   }
 
-  /* tetrahedra */
+  /* prisms */
   ne = nereq = 0;
-  for (k=1; k<=mesh->ne; k++) {
-    pt = &mesh->tetra[k];
-    if ( !MG_EOK(pt) ) continue;
+  for (k=1; k<=mesh->nprism; k++) {
+    pp = &mesh->prism[k];
+    if ( !MG_EOK(pp) ) continue;
     ne++;
-    if ( pt->tag & MG_REQ ){
+    if ( pp->tag & MG_REQ ){
       nereq++;
     }
   }
@@ -1352,7 +1352,7 @@ int MMG3D_saveMesh(MMG5_pMesh mesh, const char *filename) {
   if(!bin) {
     strcpy(&chaine[0],"\n\nPrisms\n");
     fprintf(inm,"%s",chaine);
-    fprintf(inm,"%d\n",mesh->nprism);
+    fprintf(inm,"%d\n",ne);
   } else {
     binch = 9; //Prism
     fwrite(&binch,sw,1,inm);
