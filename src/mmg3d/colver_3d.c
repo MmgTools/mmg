@@ -437,7 +437,7 @@ int _MMG5_chkcol_bdy(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
   MMG5_pPar          par;
   double        calold,calnew,caltmp,nprvold[3],nprvnew[3],ncurold[3],ncurnew[3];
   double        ps,devold,devnew,hmax,hausd;
-  int           ipp,nump,numq,l,iel;
+  int           ipp,nump,numq,l,iel,kk;
   int           nr,nbbdy,ndepmin,ndepplus,isloc;
   char          iopp,ia,ip,tag,i,iq,i0,i1,ier,isminp,isplp;
 
@@ -618,8 +618,8 @@ int _MMG5_chkcol_bdy(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
     hausd = mesh->info.hausd;
     isloc = 0;
     if ( mesh->info.parTyp & MG_Tetra ) {
-      for ( l=0; l<mesh->info.npar; ++l ) {
-        par = &mesh->info.par[l];
+      for ( kk=0; kk<mesh->info.npar; ++kk ) {
+        par = &mesh->info.par[kk];
 
         if ( par->elt != MMG5_Tetrahedron )  continue;
         if ( par->ref != pt->ref ) continue;
@@ -632,8 +632,8 @@ int _MMG5_chkcol_bdy(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
     }
     if ( mesh->info.parTyp & MG_Tria ) {
       if ( isloc ) {
-        for ( l=0; l<mesh->info.npar; ++l ) {
-          par = &mesh->info.par[l];
+        for ( kk=0; kk<mesh->info.npar; ++kk ) {
+          par = &mesh->info.par[kk];
 
           if ( par->elt != MMG5_Triangle )  continue;
           if ( par->ref != tt.ref ) continue;
@@ -644,8 +644,8 @@ int _MMG5_chkcol_bdy(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
         }
       }
       else {
-        for ( l=0; l<mesh->info.npar; ++l ) {
-          par = &mesh->info.par[l];
+        for ( kk=0; kk<mesh->info.npar; ++kk ) {
+          par = &mesh->info.par[kk];
 
           if ( par->elt != MMG5_Triangle )  continue;
           if ( par->ref != tt.ref ) continue;

@@ -613,6 +613,11 @@ int _MMG3D_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
     }
   }
 
+ for (k=1; k<=mesh->np; k++) {
+    p0 = &mesh->point[k];
+    p0->flag = 0;
+  }
+
   /** 2) size at regular surface points */
   for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
