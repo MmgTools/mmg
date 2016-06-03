@@ -306,7 +306,7 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree,int ne,
         }
 
         /* Delaunay */
-        if ( !_MMG3D_octreein(mesh,met,octree,ip) ) {
+        if ( !_MMG3D_octreein(mesh,met,octree,ip,lmax) ) {
           _MMG3D_delPt(mesh,ip);
           (*ifilt)++;
           goto collapse;
@@ -620,7 +620,7 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree,int ne,
               goto collapse2;
             }
           }
-          if ( /*lmax>4 &&*/ /*it &&*/  !_MMG3D_octreein_iso(mesh,met,octree,ip) ) {
+          if ( /*lmax>4 &&*/ /*it &&*/  !_MMG3D_octreein_iso(mesh,met,octree,ip,lmax) ) {
             _MMG3D_delPt(mesh,ip);
             (*ifilt)++;
             goto collapse2;

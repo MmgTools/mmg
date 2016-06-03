@@ -177,10 +177,10 @@ void _MMG3D_delOctreeRec(MMG5_pMesh,_MMG3D_octree_s*,double*, const int,const in
 void _MMG3D_delOctree(MMG5_pMesh mesh, _MMG3D_pOctree q, const int no);
 void _MMG3D_printArbreDepth(_MMG3D_octree_s* q, int depth, int nv, int dim);
 void _MMG3D_printArbre(_MMG3D_octree* q);
-int  _MMG3D_sizeArbreRec(_MMG3D_octree_s* q, int nv, int dim);
-int  _MMG3D_sizeArbre(_MMG3D_octree* q, int dim);
-int  _MMG3D_octreein_iso(MMG5_pMesh,MMG5_pSol,_MMG3D_pOctree,int);
-int  _MMG3D_octreein_ani(MMG5_pMesh,MMG5_pSol,_MMG3D_pOctree,int);
+void  _MMG3D_sizeArbreRec(_MMG3D_octree_s* q, int nv, int dim, int*,int*);
+int*  _MMG3D_sizeArbre(_MMG3D_octree* q, int dim);
+  int  _MMG3D_octreein_iso(MMG5_pMesh,MMG5_pSol,_MMG3D_pOctree,int,double);
+  int  _MMG3D_octreein_ani(MMG5_pMesh,MMG5_pSol,_MMG3D_pOctree,int,double);
 
 /* prototypes */
 extern double _MMG5_det3pt1vec(double c0[3],double c1[3],double c2[3],double v[3]);
@@ -380,7 +380,7 @@ int    (*_MMG5_movbdyrefpt)(MMG5_pMesh, MMG5_pSol, _MMG3D_pOctree ,int*, int, in
 int    (*_MMG5_movbdynompt)(MMG5_pMesh, MMG5_pSol, _MMG3D_pOctree ,int*, int, int*, int ,int);
 int    (*_MMG5_movbdyridpt)(MMG5_pMesh, MMG5_pSol, _MMG3D_pOctree ,int*, int, int*, int ,int);
 int    (*_MMG5_cavity)(MMG5_pMesh ,MMG5_pSol ,int ,int ,int *,int );
-int    (*_MMG3D_octreein)(MMG5_pMesh ,MMG5_pSol ,_MMG3D_pOctree ,int );
+  int    (*_MMG3D_octreein)(MMG5_pMesh ,MMG5_pSol ,_MMG3D_pOctree ,int,double );
 
 /**
  * \param mesh pointer toward the mesh structure.
