@@ -164,6 +164,7 @@ void _MMG3D_initOctree(MMG5_pMesh,_MMG3D_pOctree* q, int nv);
 void _MMG3D_freeOctree_s(MMG5_pMesh,_MMG3D_octree_s* q, int nv);
 void _MMG3D_freeOctree(MMG5_pMesh,_MMG3D_octree* q);
 int _MMG3D_isCellIncluded(double* rect, double* center, double cellWidth);
+int _MMG3D_isCellIncluded2(double* rect, double* center, double cellWidth);
 void _MMG3D_placeInListDouble(double*, double, int, int);
 void _MMG3D_placeInListOctree(_MMG3D_octree_s**, _MMG3D_octree_s*, int, int);
 int _MMG3D_seekIndex (double* distList, double dist, int indexMin, int indexMax);

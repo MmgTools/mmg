@@ -258,6 +258,30 @@ int _MMG3D_isCellIncluded(double* rect, double* center, double cellWidth)
   return res;
 }
 
+/**
+ * 
+ * \param rect rectangle that we want to intersect with the subtree. We define
+ * it given: the coordinates of one corner of the rectange and the length of
+ * the rectangle in each dimension.
+ * \param center coordinates of the centre of the cell.
+ * \param cellWidth width of the cell.
+ * \return wether the cell is included in the largest circle included in rect.
+ * 
+ */
+int _MMG3D_isCellIncluded2(double* rect, double* center, double cellWidth)
+{
+  double dist,x,y,z;
+  double rectWidth = MG_MIN(MG_MIN(rect[0],rect[1]),rect[2]);
+  
+  x = rect[0]-center[0]+rect[3]/2;
+  y = rect[1]-center[1]+rect[4]/2;
+  z = rect[2]-center[2]+rect[5]/2;
+  
+  dist = sqrt(x*x+y*y+z*z);
+  
+  return dist<rectWidth;
+}
+
 
 /**
  * \param distList list of values.
@@ -381,9 +405,9 @@ void _MMG3D_getListSquareRec(_MMG3D_octree_s* q, double* center, double* rect,
     _MMG5_SAFE_MALLOC(centertemp,dim,double);
   }
 
-  if (_MMG3D_isCellIncluded(rect, center, l))
+  if (_MMG3D_isCellIncluded2(rect, center, l))
   {
-	(*index)=61;
+    (*index)=61;
     return;
   }
   
@@ -1256,7 +1280,8 @@ int _MMG3D_octreein_iso(MMG5_pMesh mesh,MMG5_pSol sol,_MMG3D_pOctree octree,int 
       ip1  = lococ[i]->v[j];
       pp1  = &mesh->point[ip1];
 
-      hpi2 = LFILT * sol->m[ip1];
+      //~ hpi2 = LFILT * sol->m[ip1];
+      hpi2 = dmax * sol->m[ip1];
 
       ux = pp1->c[0] - ppt->c[0];
       uy = pp1->c[1] - ppt->c[1];
@@ -1322,9 +1347,12 @@ int _MMG3D_octreein_ani(MMG5_pMesh mesh,MMG5_pSol sol,_MMG3D_pOctree octree,int 
 
   if ( m1<=0. || m2<=0. || m3<=0. ) return(1);
 
-  dx = LFILT * sqrt(m1 * det) ;
-  dy = LFILT * sqrt(m2 * det) ;
-  dz = LFILT * sqrt(m3 * det) ;
+  //~ dx = LFILT * sqrt(m1 * det) ;
+  //~ dy = LFILT * sqrt(m2 * det) ;
+  //~ dz = LFILT * sqrt(m3 * det) ;
+  dx = dmax * sqrt(m1 * det) ;
+  dy = dmax * sqrt(m2 * det) ;
+  dz = dmax * sqrt(m3 * det) ;
 
   /* methalo is the box that we want to intersect with the octree, thus, the limit
    * of the filter. We give: the coordinates of one of the corner of the box and
