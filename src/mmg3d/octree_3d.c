@@ -2,13 +2,6 @@
 
 #define LFILT 0.7
 
-#warning to trash
-static int nalloc=0;
-static int nunalloc=0;
-static int specalloc=0;
-static int specunalloc=0;
-
-
 #warning fonction to be deleted after debug (and in mmg3d.h too)
 int _MMG3D_verifOctreeRec(MMG5_pMesh mesh, _MMG3D_octree_s* q, double* ver, const int no, const int nv)
 {
@@ -126,19 +119,14 @@ void _MMG3D_freeOctree_s(MMG5_pMesh mesh,_MMG3D_octree_s* q, int nv)
   if (q->nbVer>0 && q->depth>0 ) {
     if ( q->nbVer<= nv )
     {
-      nunalloc++;
       _MMG5_DEL_MEM(mesh,q->v,nv*sizeof(int));
       q->nbVer = 0;
     }
     else {
       if ( q->depth != depthMax ) {
-#warning to trash
-//        printf("UNALLOC FREEOCTREE_S depth %d\n",q->depth);
-        nunalloc++;
         sizTab = nv;
       }
       else {
-        specunalloc++;
         sizTab = (q->nbVer%nv != 0)? 1 : 0;
         sizTab = nv * ((int)(q->nbVer/nv) + sizTab);
       }
@@ -162,8 +150,6 @@ void _MMG3D_freeOctree(MMG5_pMesh mesh,_MMG3D_pOctree q)
   _MMG3D_freeOctree_s(mesh,q->q0, q->nv);
   _MMG5_DEL_MEM(mesh,q->q0,sizeof(_MMG3D_octree_s));
   _MMG5_DEL_MEM(mesh,q,sizeof(_MMG3D_octree));
-#warning to trash
-//  printf("IN FREE OCTREE %d %d %d %d\n",nalloc,nunalloc, specalloc, specunalloc );
 }
 
 /**
@@ -571,7 +557,6 @@ void _MMG3D_addOctreeRec(MMG5_pMesh mesh, _MMG3D_octree_s* q, double* ver,
 
       if(q->nbVer == 0)
       {
-        nalloc++;
         _MMG5_ADD_MEM(mesh,2*sizeof(int),"octree vertices table",
                       printf("  Exit program.\n");
                       exit(EXIT_FAILURE));
@@ -579,7 +564,6 @@ void _MMG3D_addOctreeRec(MMG5_pMesh mesh, _MMG3D_octree_s* q, double* ver,
       }
       else if(!(q->nbVer & (q->nbVer - 1)))
       {
-        specalloc++;
         sizeRealloc = q->nbVer;
         sizeRealloc<<=1;
         _MMG5_ADD_MEM(mesh,sizeRealloc*sizeof(int),"octree realloc",
@@ -625,9 +609,6 @@ void _MMG3D_addOctreeRec(MMG5_pMesh mesh, _MMG3D_octree_s* q, double* ver,
       }
       _MMG3D_addOctreeRec(mesh, q, ver, no, nv);
       q->nbVer--;
-#warning to trash
-//      printf("UNALLOC ADDOCTREE_S depth %d %d\n",q->depth,q->nbVer);
-      nunalloc++;
       _MMG5_DEL_MEM(mesh,q->v,nv*sizeof(int));
 
     }else
@@ -646,7 +627,6 @@ void _MMG3D_addOctreeRec(MMG5_pMesh mesh, _MMG3D_octree_s* q, double* ver,
   }else
   {
     if (q->nbVer%nv == 0) {
-      specalloc++;
       _MMG5_ADD_MEM(mesh,nv*sizeof(int),"octree realloc",
                     printf("  Exit program.\n");
                     exit(EXIT_FAILURE));
@@ -797,9 +777,6 @@ void _MMG3D_delOctreeRec(MMG5_pMesh mesh, _MMG3D_octree_s* q, double* ver, const
         _MMG3D_delOctreeVertex(q, i);
         if ( q->nbVer == 0)
         {
-#warning to trash
-//          printf("UNALLOC DELOCTREEREC depth %d\n",q->depth);
-          nunalloc++;
           _MMG5_DEL_MEM(mesh,q->v,nv*sizeof(int));
         }
         break;
@@ -834,9 +811,6 @@ void _MMG3D_delOctreeRec(MMG5_pMesh mesh, _MMG3D_octree_s* q, double* ver, const
     //~ fprintf(stdout,"quadrant %i nbVer %i\n", quadrant,q->branches[quadrant].nbVer);
     if (nbVerTemp > q->branches[quadrant].nbVer)
     {
-      nalloc++;
-#warning to trash
-//      printf("ALLOC DELOCTREEREC depth %d\n",q->depth);
       _MMG5_ADD_MEM(mesh,nv*sizeof(int),"octree vertices table",
                     printf("  Exit program.\n");
                     exit(EXIT_FAILURE));

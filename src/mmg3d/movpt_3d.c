@@ -317,9 +317,8 @@ int _MMG5_movintptLES_iso(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree octree,
    }
 
    /* update position */
-#warning add the movoctree here
-  /* if ( octree ) */
-  /*   _MMG3D_moveOctree(mesh, octree, pt->v[i0], ppt0->c, p0->c); */
+  if ( octree )
+    _MMG3D_moveOctree(mesh, octree, mesh->tetra[list[0]/4].v[list[0]%4], ppt0->c, p0->c);
 
    for (k=0; k<ilist; k++) {
      (&mesh->tetra[list[k]/4])->qual=callist[k];
