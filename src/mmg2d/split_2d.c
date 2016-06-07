@@ -75,6 +75,7 @@ int _MMG2_chkspl(MMG5_pMesh mesh,MMG5_pSol met,int k,char i) {
                            } while ( mesh->np>npinit );
                            return(-1)
                            ,mid,pt->tag[i]);
+
     }
 
     ppt = &mesh->point[ip];
@@ -368,6 +369,7 @@ int _MMG2_split1(MMG5_pMesh mesh, MMG5_pSol sol, int k, int vx[3]) {
                         printf("  Exit program.\n");
                         exit(EXIT_FAILURE)
       );
+    pt = &mesh->tria[k];
   }
   pt1 = &mesh->tria[iel];
   memcpy(pt1,pt,sizeof(MMG5_Tria));
@@ -468,6 +470,7 @@ int _MMG2_split2(MMG5_pMesh mesh, MMG5_pSol sol, int k, int vx[3]) {
                         printf("  Exit program.\n");
                         exit(EXIT_FAILURE)
       );
+    pt = &mesh->tria[k];
   }
 
   jel = _MMG2D_newElt(mesh);
@@ -478,6 +481,7 @@ int _MMG2_split2(MMG5_pMesh mesh, MMG5_pSol sol, int k, int vx[3]) {
                         printf("  Exit program.\n");
                         exit(EXIT_FAILURE)
       );
+    pt = &mesh->tria[k];
   }
 
   pt1 = &mesh->tria[iel];
@@ -563,6 +567,8 @@ int _MMG2_split3(MMG5_pMesh mesh, MMG5_pSol sol, int k, int vx[3]) {
                         _MMG5_INCREASE_MEM_MESSAGE();
                         printf("  Exit program.\n");
                         exit(EXIT_FAILURE));
+
+    pt = &mesh->tria[k];
   }
 
   jel = _MMG2D_newElt(mesh);
@@ -573,6 +579,7 @@ int _MMG2_split3(MMG5_pMesh mesh, MMG5_pSol sol, int k, int vx[3]) {
                         _MMG5_INCREASE_MEM_MESSAGE();
                         printf("  Exit program.\n");
                         exit(EXIT_FAILURE));
+    pt = &mesh->tria[k];
   }
 
   kel = _MMG2D_newElt(mesh);
@@ -583,6 +590,7 @@ int _MMG2_split3(MMG5_pMesh mesh, MMG5_pSol sol, int k, int vx[3]) {
                         _MMG5_INCREASE_MEM_MESSAGE();
                         printf("  Exit program.\n");
                         exit(EXIT_FAILURE));
+    pt = &mesh->tria[k];
   }
 
   pt1 = &mesh->tria[iel];
