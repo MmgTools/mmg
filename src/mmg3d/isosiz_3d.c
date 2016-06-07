@@ -831,7 +831,11 @@ int _MMG3D_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
         /*   } */
         /* } */
 
-        ilistv = _MMG5_coquilface( mesh,k, ia,listv,&ifac1,&ifac2);
+        /* Warning : rough eval of the local param at triangles if coquilface
+         * fails because we have more than 2 boundaries in the edge shell
+         * (non-manifold domain). In this case, we just take into account 2
+         * boundaries of the shell */
+        ilistv = _MMG5_coquilface( mesh,k, ia,listv,&ifac1,&ifac2,1);
         if ( ilistv < 0 ) {
           fprintf(stdout, "  ## Warning: unable to take into account local"
                   " parameters at vertices %d and %d.\n",ip0,ip1 );

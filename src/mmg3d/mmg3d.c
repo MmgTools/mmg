@@ -133,10 +133,15 @@ static inline
 int _MMG3D_writeLocalParam( MMG5_pMesh mesh ) {
   _MMG5_iNode  *triRefs,*tetRefs;
   int          nparTri,nparTet;
-  char         data[]="DEFAULT.mmg3d";
+  char         *ptr,data[128];
   FILE         *out;
 
   /** Save the local parameters file */
+  strcpy(data,mesh->namein);
+  ptr = strstr(data,".mesh");
+  if ( ptr ) *ptr = '\0';
+  strcat(data,".mmg3d");
+
   if ( !(out = fopen(data,"wb")) ) {
     fprintf(stderr,"\n  ** UNABLE TO OPEN %s.\n",data);
     return(0);

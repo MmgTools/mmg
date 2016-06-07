@@ -132,10 +132,13 @@ static inline
 int _MMGS_writeLocalParam( MMG5_pMesh mesh ) {
   _MMG5_iNode  *triRefs;
   int          npar;
-  char         data[]="DEFAULT.mmgs";
+  char         *ptr,data[128];
   FILE         *out;
 
-
+  strcpy(data,mesh->namein);
+  ptr = strstr(data,".mesh");
+  if ( ptr ) *ptr = '\0';
+  strcat(data,".mmgs");
 
   /** Save the local parameters file */
   if ( !(out = fopen(data,"wb")) ) {
