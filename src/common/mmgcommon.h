@@ -495,7 +495,8 @@ int    _MMG5_unscaleMesh(MMG5_pMesh mesh,MMG5_pSol met);
 int    _MMG5_interpreg_ani(MMG5_pMesh,MMG5_pSol,MMG5_pTria,char,double,double *mr);
 int    _MMG5_interp_iso(double *ma,double *mb,double *mp,double t);
 int    _MMG5_intersecmet22(MMG5_pMesh mesh, double *m,double *n,double *mr);
-extern int _MMG5_writeLocalParam( MMG5_pMesh mesh, FILE *out);
+extern int _MMG5_countLocalParamAtTri( MMG5_pMesh,_MMG5_iNode **);
+extern int _MMG5_writeLocalParamAtTri( MMG5_pMesh,_MMG5_iNode *,FILE*);
 
 /* function pointers */
 int    (*_MMG5_chkmsh)(MMG5_pMesh,int,int);
