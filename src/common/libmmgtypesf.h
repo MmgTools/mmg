@@ -220,8 +220,7 @@
 !   double   hausd; /*!< Hausdorff value */
 !   int      ref; /*!< Reference value */
 !   char     elt; /*!< Element type */
-! } MMG5_Par;
-! typedef MMG5_Par * MMG5_pPar;
+! } MMG5_Par; typedef MMG5_Par * MMG5_pPar;
 
 ! /**
 !  * \struct MMG5_Point
@@ -432,6 +431,9 @@
 !   int           bucket;
 !   char          nreg;
 !   char          imprim,ddebug,badkal,iso,fem,lag;
+!   char          parTyp; /*!< Contains binary flags to say which kind of local
+!                           param are setted: if \f$tag = 1+2+4\f$ then the point
+!                           is \a MG_Vert, MG_Tria and MG_Tetra */
 !   unsigned char optim, optimLES, noinsert, noswap, nomove, nosurf;
 ! } MMG5_Info;
 

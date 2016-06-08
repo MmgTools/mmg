@@ -167,6 +167,7 @@ void _MMG3D_memOption(MMG5_pMesh mesh) {
       6*sizeof(MMG5_Tetra) + ctri*sizeof(MMG5_xTetra) +
       4*6*sizeof(int) + ctri*3*sizeof(int) +
       sizeof(MMG5_Sol)+4*sizeof(_MMG5_hedge);
+
 #ifdef USE_SCOTCH
     /* bytes = bytes + vertTab + edgeTab + PermVrtTab *
      * + vertOldTab + sortPartTab - adja */
