@@ -1417,8 +1417,10 @@ int MMG3D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam,int val){
       if ( (mesh->info.imprim > 5) || mesh->info.ddebug )
         fprintf(stdout,"  ## Warning: new local parameter values\n");
     }
-    mesh->info.npar  = val;
-    mesh->info.npari = 0;
+    mesh->info.npar   = val;
+    mesh->info.npari  = 0;
+    mesh->info.parTyp = 0;
+
     _MMG5_ADD_MEM(mesh,mesh->info.npar*sizeof(MMG5_Par),"parameters",
                   printf("  Exit program.\n");
                   exit(EXIT_FAILURE));
@@ -1562,10 +1564,14 @@ int MMG3D_Set_localParameter(MMG5_pMesh mesh,MMG5_pSol sol, int typ, int ref,
     return(0);
   }
   if ( typ != MMG5_Triangle && typ != MMG5_Tetrahedron ) {
-    fprintf(stdout,"  ## Warning: you must apply your local parameters");
-    fprintf(stdout," on triangles (MMG5_Triangle or %d) or tetrahedron"
+    fprintf(stderr,"  ## Warning: you must apply your local parameters");
+    fprintf(stderr," on triangles (MMG5_Triangle or %d) or tetrahedron"
             " (MMG5_Tetrahedron or %d).\n",MMG5_Triangle,MMG5_Tetrahedron);
-    fprintf(stdout,"  ## Unknown type of entity: ignored.\n");
+    fprintf(stderr,"  ## Unknown type of entity: ignored.\n");
+    return(0);
+  }
+  if ( ref < 0 ) {
+    fprintf(stderr,"  ## Error: negative references are not allowed.\n");
     return(0);
   }
 
@@ -1589,6 +1595,20 @@ int MMG3D_Set_localParameter(MMG5_pMesh mesh,MMG5_pSol sol, int typ, int ref,
   mesh->info.par[mesh->info.npari].hmin  = hmin;
   mesh->info.par[mesh->info.npari].hmax  = hmax;
   mesh->info.par[mesh->info.npari].hausd = hausd;
+
+  switch ( typ )
+  {
+  case ( MMG5_Vertex ):
+    mesh->info.parTyp |= MG_Vert;
+    break;
+  case ( MMG5_Triangle ):
+    mesh->info.parTyp |= MG_Tria;
+    break;
+  case ( MMG5_Tetrahedron ):
+    mesh->info.parTyp |= MG_Tetra;
+    break;
+  }
+
   mesh->info.npari++;
 
   return(1);

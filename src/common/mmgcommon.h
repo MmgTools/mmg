@@ -109,6 +109,11 @@ extern "C" {
 #define  MG_CRN       (1 << 5)        /**< 32  corner         */
 #define  MG_NUL       (1 << 6)        /**< 64  vertex removed */
 
+/* binary tags for local parameters */
+#define  MG_Vert   (1 << 0 )  /**< 1 local parameter applied over vertex */
+#define  MG_Tria   (1 << 1 )  /**< 2 local parameter applied over triangle */
+#define  MG_Tetra  (1 << 2 )  /**< 4 local parameter applied over tetrahedron */
+
 #define MG_VOK(ppt)      (ppt && ((ppt)->tag < MG_NUL)) /**< Vertex OK */
 #define MG_EOK(pt)       (pt && ((pt)->v[0] > 0))       /**< Element OK */
 
@@ -490,7 +495,8 @@ int    _MMG5_unscaleMesh(MMG5_pMesh mesh,MMG5_pSol met);
 int    _MMG5_interpreg_ani(MMG5_pMesh,MMG5_pSol,MMG5_pTria,char,double,double *mr);
 int    _MMG5_interp_iso(double *ma,double *mb,double *mp,double t);
 int    _MMG5_intersecmet22(MMG5_pMesh mesh, double *m,double *n,double *mr);
-extern int _MMG5_writeLocalParam( MMG5_pMesh mesh, FILE *out);
+extern int _MMG5_countLocalParamAtTri( MMG5_pMesh,_MMG5_iNode **);
+extern int _MMG5_writeLocalParamAtTri( MMG5_pMesh,_MMG5_iNode *,FILE*);
 
 /* function pointers */
 int    (*_MMG5_chkmsh)(MMG5_pMesh,int,int);

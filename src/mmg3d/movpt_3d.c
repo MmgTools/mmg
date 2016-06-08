@@ -748,11 +748,13 @@ int _MMG5_movbdyrefpt_iso(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree,
   MMG5_pPoint           p0,p1,p2,ppt0;
   MMG5_Tria             tt;
   MMG5_pxPoint          pxp;
+  MMG5_pPar             par;
   double                step,ll1old,ll2old,o[3],no[3],to[3];
-  double                calold,calnew,caltmp,*callist;
+  double                calold,calnew,caltmp,*callist,hmax,hausd;
   int                   l,iel,ip0,ipa,ipb,iptmpa,iptmpb,it1,it2,ip1,ip2,ip,nxp;
-  unsigned char         i,i0,ie,iface,iface1,iface2,iea,ieb,ie1,ie2;
+  int                   isloc,j;
   char                  tag;
+  unsigned char         i,i0,ie,iface,iface1,iface2,iea,ieb,ie1,ie2;
 
   step = 0.1;
   ip1 = ip2 = 0;
@@ -972,10 +974,54 @@ int _MMG5_movbdyrefpt_iso(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree,
     caltmp = _MMG5_caltri(mesh,met,&tt);
     if ( caltmp < _MMG5_EPSD )        return(0);
     calnew = MG_MIN(calnew,caltmp);
-    if ( _MMG5_chkedg(mesh,&tt,MG_GET(pxt->ori,iface)) ) {
-      // Algiane: 09/12/2013 commit: we break the hausdorff criteria so we dont want
-      // the point to move? (modification not tested because I could not find a case
-      // passing here)
+
+    /* Local parameters for tt and iel */
+    hmax  = mesh->info.hmax;
+    hausd = mesh->info.hausd;
+
+    isloc = 0;
+    if ( mesh->info.parTyp & MG_Tetra ) {
+      for ( j=0; j<mesh->info.npar; ++j ) {
+        par = &mesh->info.par[j];
+
+        if ( par->elt != MMG5_Tetrahedron )  continue;
+        if ( par->ref != pt->ref ) continue;
+
+        hmax = par->hmax;
+        hausd = par->hausd;
+        isloc = 1;
+        break;
+      }
+    }
+    if ( mesh->info.parTyp & MG_Tria ) {
+      if ( isloc ) {
+        for ( j=0; j<mesh->info.npar; ++j ) {
+          par = &mesh->info.par[j];
+
+          if ( par->elt != MMG5_Triangle )  continue;
+          if ( par->ref != tt.ref ) continue;
+
+          hmax = MG_MIN(hmax,par->hmax);
+          hausd = MG_MIN(hausd,par->hausd);
+          break;
+        }
+      }
+      else {
+        for ( j=0; j<mesh->info.npar; ++j ) {
+          par = &mesh->info.par[j];
+
+          if ( par->elt != MMG5_Triangle )  continue;
+          if ( par->ref != tt.ref ) continue;
+
+          hmax  = par->hmax;
+          hausd = par->hausd;
+          isloc = 1;
+          break;
+        }
+      }
+    }
+
+    if ( _MMG5_chkedg(mesh,&tt,MG_GET(pxt->ori,iface),hmax,hausd,isloc) ) {
       memset(pxp,0,sizeof(MMG5_xPoint));
       return(0);
     }
@@ -998,14 +1044,14 @@ int _MMG5_movbdyrefpt_iso(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree,
     pt0->v[i0] = 0;
     calold = MG_MIN(calold, pt->qual);
     callist[l] = _MMG5_orcal(mesh,met,0);
-  if (callist[l] < _MMG5_EPSD) {
-    _MMG5_SAFE_FREE(callist);
-    return(0);
-  }
+    if (callist[l] < _MMG5_EPSD) {
+      _MMG5_SAFE_FREE(callist);
+      return(0);
+    }
     calnew = MG_MIN(calnew,callist[l]);
   }
   if ((calold < _MMG5_NULKAL && calnew <= calold) ||
-    (calnew < _MMG5_NULKAL) || (calnew <= 0.3*calold)) {
+      (calnew < _MMG5_NULKAL) || (calnew <= 0.3*calold)) {
     _MMG5_SAFE_FREE(callist);
     return(0);
   } else if (improve && calnew < calold) {
@@ -1063,9 +1109,11 @@ int _MMG5_movbdynompt_iso(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree octree, 
   MMG5_pPoint       p0,p1,p2,ppt0;
   MMG5_pxPoint      pxp;
   MMG5_Tria         tt;
+  MMG5_pPar         par;
   double            step,ll1old,ll2old,calold,calnew,caltmp,*callist;
-  double            o[3],no[3],to[3];
+  double            o[3],no[3],to[3],hmax,hausd;
   int               ip0,ip1,ip2,ip,iel,ipa,ipb,l,iptmpa,iptmpb,it1,it2,nxp;
+  int               j,isloc;
   char              iface,i,i0,iea,ieb,ie,tag,ie1,ie2,iface1,iface2;
 
   step = 0.1;
@@ -1286,10 +1334,55 @@ int _MMG5_movbdynompt_iso(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree octree, 
     caltmp = _MMG5_caltri(mesh,met,&tt);
     if ( caltmp < _MMG5_EPSD )        return(0);
     calnew = MG_MIN(calnew,caltmp);
-    if ( _MMG5_chkedg(mesh,&tt,MG_GET(pxt->ori,iface)) ) {
-      // Algiane: 09/12/2013 commit: we break the hausdorff criteria so we dont want
-      // the point to move? (modification not tested because I could not find a case
-      // passing here)
+
+
+    /* Local parameters for tt and iel */
+    hmax  = mesh->info.hmax;
+    hausd = mesh->info.hausd;
+
+    isloc = 0;
+    if ( mesh->info.parTyp & MG_Tetra ) {
+      for ( j=0; j<mesh->info.npar; ++j ) {
+        par = &mesh->info.par[j];
+
+        if ( par->elt != MMG5_Tetrahedron )  continue;
+        if ( par->ref != pt->ref ) continue;
+
+        hmax = par->hmax;
+        hausd = par->hausd;
+        isloc = 1;
+        break;
+      }
+    }
+    if ( mesh->info.parTyp & MG_Tria ) {
+      if ( isloc ) {
+        for ( j=0; j<mesh->info.npar; ++j ) {
+          par = &mesh->info.par[j];
+
+          if ( par->elt != MMG5_Triangle )  continue;
+          if ( par->ref != tt.ref ) continue;
+
+          hmax = MG_MIN(hmax,par->hmax);
+          hausd = MG_MIN(hausd,par->hausd);
+          break;
+        }
+      }
+      else {
+        for ( j=0; j<mesh->info.npar; ++j ) {
+          par = &mesh->info.par[j];
+
+          if ( par->elt != MMG5_Triangle )  continue;
+          if ( par->ref != tt.ref ) continue;
+
+          hmax  = par->hmax;
+          hausd = par->hausd;
+          isloc = 1;
+          break;
+        }
+      }
+    }
+
+    if ( _MMG5_chkedg(mesh,&tt,MG_GET(pxt->ori,iface),hmax,hausd,isloc) ) {
       memset(pxp,0,sizeof(MMG5_xPoint));
       return(0);
     }
@@ -1373,11 +1466,13 @@ int _MMG5_movbdyridpt_iso(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree,
   MMG5_pPoint          p0,p1,p2,ppt0;
   MMG5_Tria            tt;
   MMG5_pxPoint         pxp;
+  MMG5_pPar            par;
   double               step,ll1old,ll2old,o[3],no1[3],no2[3],to[3];
-  double               calold,calnew,caltmp,*callist;
+  double               calold,calnew,caltmp,*callist,hmax,hausd;
   int                  l,iel,ip0,ipa,ipb,iptmpa,iptmpb,it1,it2,ip1,ip2,ip,nxp;
-  unsigned char        i,i0,ie,iface,iface1,iface2,iea,ieb,ie1,ie2;
+  int                  j,isloc;
   char                 tag;
+  unsigned char        i,i0,ie,iface,iface1,iface2,iea,ieb,ie1,ie2;
 
   step = 0.1;
   ip1 = ip2 = 0;
@@ -1601,10 +1696,54 @@ int _MMG5_movbdyridpt_iso(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree,
     caltmp = _MMG5_caltri(mesh,met,&tt);
     if ( caltmp < _MMG5_EPSD )        return(0);
     calnew = MG_MIN(calnew,caltmp);
-    if ( _MMG5_chkedg(mesh,&tt,MG_GET(pxt->ori,iface)) ) {            //MAYBE CHECKEDG ASKS STH FOR _MMG5_POINTS !!!!!
-      // Algiane: 09/12/2013 commit: we break the hausdorff criteria so we dont want
-      // the point to move? (modification not tested because I could not find a case
-      // passing here)
+
+    /* Local parameters for tt and iel */
+    hmax  = mesh->info.hmax;
+    hausd = mesh->info.hausd;
+
+    isloc = 0;
+    if ( mesh->info.parTyp & MG_Tetra ) {
+      for ( j=0; j<mesh->info.npar; ++j ) {
+        par = &mesh->info.par[j];
+
+        if ( par->elt != MMG5_Tetrahedron )  continue;
+        if ( par->ref != pt->ref ) continue;
+
+        hmax = par->hmax;
+        hausd = par->hausd;
+        isloc = 1;
+        break;
+      }
+    }
+    if ( mesh->info.parTyp & MG_Tria ) {
+      if ( isloc ) {
+        for ( j=0; j<mesh->info.npar; ++j ) {
+          par = &mesh->info.par[j];
+
+          if ( par->elt != MMG5_Triangle )  continue;
+          if ( par->ref != tt.ref ) continue;
+
+          hmax = MG_MIN(hmax,par->hmax);
+          hausd = MG_MIN(hausd,par->hausd);
+          break;
+        }
+      }
+      else {
+        for ( j=0; j<mesh->info.npar; ++j ) {
+          par = &mesh->info.par[j];
+
+          if ( par->elt != MMG5_Triangle )  continue;
+          if ( par->ref != tt.ref ) continue;
+
+          hmax  = par->hmax;
+          hausd = par->hausd;
+          isloc = 1;
+          break;
+        }
+      }
+    }
+
+    if ( _MMG5_chkedg(mesh,&tt,MG_GET(pxt->ori,iface),hmax,hausd,isloc) ) {
       memset(pxp,0,sizeof(MMG5_xPoint));
       return(0);
     }

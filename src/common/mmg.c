@@ -113,26 +113,26 @@ void _MMG5_mmgDefaultValues(MMG5_pMesh mesh) {
 
 /**
  * \param mesh pointer toward the mesh structure.
- * \param out pointer toward the file in which to write.
- * \return 1 if success, 0 otherwise.
+ * \param bdryRefs pointer toward the list of the boundary references.
+ * \return npar, the number of local parameters at triangles if success,
+ * 0 otherwise.
  *
- * Write a default file containing the default values of parameters that
- * can be locally defined.
+ * Count the local default values at triangles and fill the list of the boundary
+ * references.
  *
  */
 inline
-int _MMG5_writeLocalParam( MMG5_pMesh mesh, FILE *out ) {
-  _MMG5_iNode *bdyRefs, *cur;
+int _MMG5_countLocalParamAtTri( MMG5_pMesh mesh,_MMG5_iNode **bdryRefs) {
   int         npar,k,ier;
 
   /** Count the number of different boundary references and list it */
-  bdyRefs = NULL;
+  (*bdryRefs) = NULL;
   npar = 0;
 
   k = mesh->nt? mesh->tria[1].ref : 0;
 
   /* Try to alloc the first node */
-  ier = _MMG5_Add_inode( mesh, &bdyRefs, k );
+  ier = _MMG5_Add_inode( mesh, bdryRefs, k );
   if ( ier < 0 ) {
     fprintf(stderr,"  ## Error: unable to allocate the first boundary"
            " reference node.\n");
@@ -144,26 +144,42 @@ int _MMG5_writeLocalParam( MMG5_pMesh mesh, FILE *out ) {
   }
 
   for ( k=1; k<=mesh->nt; ++k ) {
-    ier = _MMG5_Add_inode( mesh, &bdyRefs, mesh->tria[k].ref );
+    ier = _MMG5_Add_inode( mesh, bdryRefs, mesh->tria[k].ref );
 
     if ( ier < 0 ) {
-      printf("  ## Warning: unable to list the boundary references.\n"
+      printf("  ## Warning: unable to list the tria references.\n"
              "              Uncomplete parameters file.\n" );
       break;
     }
     else if ( ier ) ++npar;
   }
 
-  fprintf(out,"parameters\n %d\n",npar);
+  return(npar);
+}
 
-  cur = bdyRefs;
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param bdryRefs pointer toward the list of the boundary references.
+ * \param npar number of local param at triangles.
+ * \param out pointer toward the file in which to write.
+ * \return 1 if success, 0 otherwise.
+ *
+ * Write the local default values at triangles in the parameter file.
+ *
+ */
+inline
+int _MMG5_writeLocalParamAtTri( MMG5_pMesh mesh, _MMG5_iNode *bdryRefs,
+                                FILE *out ) {
+  _MMG5_iNode *cur;
+
+  cur = bdryRefs;
   while( cur ) {
     fprintf(out,"%d Triangle %e %e %e \n",cur->val,
             mesh->info.hmin, mesh->info.hmax,mesh->info.hausd);
     cur = cur->nxt;
   }
 
-  _MMG5_Free_ilinkedList(mesh,bdyRefs);
+  _MMG5_Free_ilinkedList(mesh,bdryRefs);
 
   return(1);
 }
