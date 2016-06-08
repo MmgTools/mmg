@@ -302,6 +302,38 @@
 ! } MMG5_Tria;
 ! typedef MMG5_Tria * MMG5_pTria;
 
+
+! /**
+!  * \struct MMG5_Quad
+!  *
+!  * Structure to store quadrangles of a MMG mesh.
+!  *
+!  * \remark Numbering convention
+!  * \verbatim
+!  *  Vertices            Edges                                  *
+!  *  2                    .                                     *
+!  *  |`\                  |`\                                   *
+!  *  |  `\                |  `\                                 *
+!  *  |    `\              1    `2                               *
+!  *  |      `\            |      `\                             *
+!  *  |        `\          |        `\                           *
+!  *  0----------1         .--- 0 ----.
+!  * \endverbatim
+!  *
+!  */
+
+! typedef struct {
+!   int      v[4]; /*!< Vertices of the quadrangle */
+!   int      ref; /*!< Reference of the quadrangle */
+!   int      base;
+!   int      edg[4]; /*!< edg[i] contains the ref of the \f$i^{th}\f$ edge
+!                      of quadrangle */
+!   char     tag[4]; /*!< tag[i] contains the tag associated to the
+!                      \f$i^{th}\f$ edge of quadrangle */
+! } MMG5_Quad;
+! typedef MMG5_Quad * MMG5_pQuad;
+
+
 ! /**
 !  * \struct MMG5_Tetra
 !  *
@@ -469,7 +501,7 @@
 !   int       dim; /*!< Dimension of the mesh */
 !   int       type; /*!< Type of the mesh */
 !   int       npi,nti,nai,nei,np,na,nt,ne,npmax,namax,ntmax,nemax,xpmax,xtmax;
-!   int       nprism;
+!   int       nquad,nprism; /* number of quadrangles an prisms */
 !   int       nc1;
 
 !   int       base; /*!< Used with \a flag to know if an entity has been
@@ -499,6 +531,7 @@
 !   MMG5_pPrism    prism; /*!< Pointer toward the \ref MMG5_Prism structure */
 !   MMG5_pxPrism   xprism; /*!< Pointer toward the \ref MMG5_pxPrism structure */
 !   MMG5_pTria     tria; /*!< Pointer toward the \ref MMG5_Tria structure */
+!   MMG5_pQuad     quad; /*!< Pointer toward the \ref MMG5_Quad structure */
 !   MMG5_pEdge     edge; /*!< Pointer toward the \ref MMG5_Edge structure */
 !   MMG5_HGeom     htab; /*!< \ref MMG5_HGeom structure */
 !   MMG5_Info      info; /*!< \ref MMG5_Info structure */

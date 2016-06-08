@@ -103,12 +103,13 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,const char *filename) {
   MMG5_pTetra pt;
   MMG5_pPrism pp;
   MMG5_pTria  pt1;
+  MMG5_pQuad  pq1;
   MMG5_pEdge  pa;
   MMG5_pPoint ppt;
   double      *norm,*n,dd;
   int         posnp,posnt,posne,posned,posncor,posnpreq,posntreq,posnereq,posnedreq;
-  int         posnr,posnprism,posnormal,posnc1;
-  int         npreq,ntreq,nereq,nedreq,ncor,ned,ng,bin,iswp;
+  int         posnr,posnprism,posnormal,posnc1,posnq,posnqreq;
+  int         npreq,ntreq,nereq,nedreq,nqreq,ncor,ned,ng,bin,iswp;
   int         binch,bdim,bpos,i,k,ip,idn;
   int         *ina,v[3],ref,nt,na,nr,ia,aux,nref;
   float       fc;
@@ -180,6 +181,16 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,const char *filename) {
         fscanf(inm,"%d",&ntreq);
         posntreq = ftell(inm);
         continue;
+      }
+        else if(!strncmp(chaine,"Quadrilaterals",strlen("Quadrilaterals"))) {
+        fscanf(inm,"%d",&mesh->nquad);
+        posnt = ftell(inm);
+        continue;
+      } else if(!strncmp(chaine,"RequiredQuadrilaterals",strlen("RequiredQuadrilaterals"))) {
+        fscanf(inm,"%d",&nqreq);
+        posntreq = ftell(inm);
+        continue;
+
       } else if(!strncmp(chaine,"Tetrahedra",strlen("Tetrahedra"))) {
         fscanf(inm,"%d",&mesh->nei);
         posne = ftell(inm);
@@ -277,6 +288,25 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,const char *filename) {
         fread(&ntreq,sw,1,inm);
         if(iswp) ntreq=_MMG5_swapbin(ntreq);
         posntreq = ftell(inm);
+        rewind(inm);
+        fseek(inm,bpos,SEEK_SET);
+        continue;
+      }
+        else if(!mesh->nquad && binch==7) {//Quadrilaterals
+        fread(&bpos,sw,1,inm); //NulPos
+        if(iswp) bpos=_MMG5_swapbin(bpos);
+        fread(&mesh->nquad,sw,1,inm);
+        if(iswp) mesh->nquad=_MMG5_swapbin(mesh->nquad);
+        posnq = ftell(inm);
+        rewind(inm);
+        fseek(inm,bpos,SEEK_SET);
+        continue;
+      } else if(binch==18) {  //RequiredQuadrilaterals
+        fread(&bpos,sw,1,inm); //NulPos
+        if(iswp) bpos=_MMG5_swapbin(bpos);
+        fread(&nqreq,sw,1,inm);
+        if(iswp) nqreq=_MMG5_swapbin(nqreq);
+        posnqreq = ftell(inm);
         rewind(inm);
         fseek(inm,bpos,SEEK_SET);
         continue;
@@ -553,6 +583,51 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,const char *filename) {
       _MMG5_SAFE_FREE(ina);
   } //end if mesh->nt
 
+  /* read mesh quadrilaterals */
+  if ( mesh->nquad ) {
+    rewind(inm);
+    fseek(inm,posnq,SEEK_SET);
+
+    for (k=1; k<=mesh->nquad; k++) {
+      pq1 = &mesh->quad[k];
+      if (!bin)
+        fscanf(inm,"%d %d %d %d %d",&pq1->v[0],&pq1->v[1],&pq1->v[2],
+               &pq1->v[3],&pq1->ref);
+      else {
+        for (i=0 ; i<4 ; i++) {
+          fread(&pq1->v[i],sw,1,inm);
+          if(iswp) pq1->v[i]=_MMG5_swapbin(pq1->v[i]);
+        }
+        fread(&pq1->ref,sw,1,inm);
+        if(iswp) pq1->ref=_MMG5_swapbin(pq1->ref);
+      }
+    }
+
+    /* get required quadrilaterals */
+    if(nqreq) {
+      rewind(inm);
+      fseek(inm,posnqreq,SEEK_SET);
+      for (k=1; k<=nqreq; k++) {
+        if(!bin)
+          fscanf(inm,"%d",&i);
+        else {
+          fread(&i,sw,1,inm);
+          if(iswp) i=_MMG5_swapbin(i);
+        }
+        if ( i>mesh->nquad ) {
+          fprintf(stdout,"   Warning: required quadrilaterals number"
+                  " %8d IGNORED\n",i);
+        } else {
+            pq1 = &mesh->quad[i];
+            pq1->tag[0] |= MG_REQ;
+            pq1->tag[1] |= MG_REQ;
+            pq1->tag[2] |= MG_REQ;
+            pq1->tag[3] |= MG_REQ;
+        }
+      }
+    }
+  } //end if mesh->nquad
+
     /* read mesh edges */
   if ( mesh->na ) {
     na = mesh->na;
@@ -827,13 +902,15 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,const char *filename) {
     }
     if ( mesh->nt )
       fprintf(stdout,"     NUMBER OF TRIANGLES    %8d\n",mesh->nt);
+    if ( mesh->nt )
+      fprintf(stdout,"     NUMBER OF QUADRILATERALS    %8d\n",mesh->nquad);
     if ( mesh->nprism )
       fprintf(stdout,"     NUMBER OF PRISMS    %8d\n",mesh->nprism);
 
     fprintf(stdout,"     NUMBER OF TETRAHEDRA     %8d\n",mesh->ne);
 
 
-    if ( npreq || nedreq || ntreq || nereq ) {
+    if ( npreq || nedreq || ntreq || nereq || nqreq ) {
       fprintf(stdout,"     NUMBER OF REQUIRED ENTITIES: \n");
       if ( npreq )
         fprintf(stdout,"                  VERTICES    %8d \n",npreq);
@@ -841,6 +918,8 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,const char *filename) {
         fprintf(stdout,"                  EDGES       %8d \n",nedreq);
       if ( ntreq )
         fprintf(stdout,"                  TRIANGLES   %8d \n",ntreq);
+      if ( nqreq )
+        fprintf(stdout,"                  QUADRILATERALS   %8d \n",nqreq);
       if ( nereq )
         fprintf(stdout,"                  TETRAHEDRAS %8d \n",nereq);
     }
@@ -866,8 +945,10 @@ int MMG3D_saveMesh(MMG5_pMesh mesh, const char *filename) {
   MMG5_pTetra  pt;
   MMG5_pPrism  pp;
   MMG5_pTria   ptt;
+  MMG5_pQuad   pq;
   MMG5_xPoint *pxp;
   int          k,na,nc,np,ne,nn,nr,nre,nedreq,ntreq,nt,nereq;
+  int          nqreq;
   int          bin,binch,bpos;
   char         data[128],chaine[128],*ptr;
 
@@ -1184,6 +1265,65 @@ int MMG3D_saveMesh(MMG5_pMesh mesh, const char *filename) {
         ptt = &mesh->tria[k];
         if ( (ptt->tag[0] & MG_REQ) && (ptt->tag[1] & MG_REQ)
              && ptt->tag[2] & MG_REQ ) {
+          if(!bin) {
+            fprintf(inm,"%d \n",k);
+          } else {
+            fwrite(&k,sw,1,inm);
+          }
+        }
+      }
+    }
+  }
+
+ /* quad + required quad */
+  nqreq = 0;
+
+  if ( mesh->nquad ) {
+    if(!bin) {
+      strcpy(&chaine[0],"\n\nQuadrilaterals\n");
+      fprintf(inm,"%s",chaine);
+      fprintf(inm,"%d \n",mesh->nquad);
+    } else {
+      binch = 7; //Quadrilaterals
+      fwrite(&binch,sw,1,inm);
+      bpos += 12+20*mesh->nquad; //Pos
+      fwrite(&bpos,sw,1,inm);
+      fwrite(&mesh->nt,sw,1,inm);
+    }
+    for (k=1; k<=mesh->nquad; k++) {
+      pq = &mesh->quad[k];
+      if ( pq->tag[0] & MG_REQ && pq->tag[1] & MG_REQ &&
+           pq->tag[2] & MG_REQ && pq->tag[3] & MG_REQ ) {
+        nqreq++;
+      }
+      if(!bin) {
+        fprintf(inm,"%d %d %d %d %d\n",mesh->point[pq->v[0]].tmp,
+                mesh->point[pq->v[1]].tmp,mesh->point[pq->v[2]].tmp,
+                mesh->point[pq->v[3]].tmp, pq->ref);
+      } else {
+        fwrite(&mesh->point[pq->v[0]].tmp,sw,1,inm);
+        fwrite(&mesh->point[pq->v[1]].tmp,sw,1,inm);
+        fwrite(&mesh->point[pq->v[2]].tmp,sw,1,inm);
+        fwrite(&mesh->point[pq->v[3]].tmp,sw,1,inm);
+        fwrite(&pq->ref,sw,1,inm);
+      }
+    }
+    if ( nqreq ) {
+      if(!bin) {
+        strcpy(&chaine[0],"\n\nRequiredQuadrilaterals\n");
+        fprintf(inm,"%s",chaine);
+        fprintf(inm,"%d \n",nqreq);
+      } else {
+        binch = 18; //ReqQuad
+        fwrite(&binch,sw,1,inm);
+        bpos += 12+4*nqreq; //Pos
+        fwrite(&bpos,sw,1,inm);
+        fwrite(&nqreq,sw,1,inm);
+      }
+      for (k=0; k<=mesh->nquad; k++) {
+        pq = &mesh->quad[k];
+        if ( (pq->tag[0] & MG_REQ) && (pq->tag[1] & MG_REQ)
+             && pq->tag[2] & MG_REQ && pq->tag[3] & MG_REQ ) {
           if(!bin) {
             fprintf(inm,"%d \n",k);
           } else {

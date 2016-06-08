@@ -20,6 +20,7 @@
 **  use this copy of the mmg distribution only if you accept them.
 ** =============================================================================
 */
+#warning  add setPrism/setQuad function
 
 /**
  * \file mmg3d/API_functions_3d.c

@@ -128,8 +128,8 @@ void _MMG3D_delElt(MMG5_pMesh mesh,int iel) {
 
 /** memory repartition for the -m option */
 void _MMG3D_memOption(MMG5_pMesh mesh) {
-  long long  million = 1048576L;
-  int        ctri,npask,bytes,memtmp,reservedMem;
+  long long  million = 1048576L,memtmp,reservedMem;
+  int        ctri,npask,bytes;
 
   mesh->memMax = _MMG5_memSize();
 
@@ -140,7 +140,7 @@ void _MMG3D_memOption(MMG5_pMesh mesh) {
   if ( mesh->info.mem <= 0 ) {
     if ( mesh->memMax )
       /* maximal memory = 50% of total physical memory */
-      mesh->memMax = (long long)(mesh->memMax*50/100);
+      mesh->memMax = (long long)(mesh->memMax*0.5);
     else {
       /* default value = 800 Mo */
       printf("  Maximum memory set to default value: %d Mo.\n",_MMG5_MEMMAX);
@@ -151,7 +151,8 @@ void _MMG3D_memOption(MMG5_pMesh mesh) {
     /* memory asked by user if possible, otherwise total physical memory */
     if ( (long long)(mesh->info.mem)*million > mesh->memMax && mesh->memMax ) {
       fprintf(stdout,"  ## Warning: asking for %d Mo of memory ",mesh->info.mem);
-      fprintf(stdout,"when only %ld available.\n",_MMG5_safeLL2LCast((long long)(mesh->memMax/million)));
+      fprintf(stdout,"when only %ld available.\n",
+              _MMG5_safeLL2LCast(mesh->memMax/million));
     }
     else {
       mesh->memMax= (long long)(mesh->info.mem)*million;
@@ -175,34 +176,35 @@ void _MMG3D_memOption(MMG5_pMesh mesh) {
 #endif
 
     /* init allocation need 38 Mo*/
-    reservedMem = 38 + mesh->nprism*sizeof(MMG5_Prism);
+    reservedMem = 38*million +
+      (long long)(mesh->nprism*sizeof(MMG5_Prism)+mesh->nquad*sizeof(MMG5_Quad));
 
-    npask = (int)((double)(mesh->info.mem-reservedMem) / bytes * (int)million);
+    npask = (int) ( (double)(mesh->info.mem*million-reservedMem)/bytes );
     mesh->npmax = MG_MIN(npask,mesh->npmax);
     mesh->ntmax = MG_MIN(ctri*npask,mesh->ntmax);
     mesh->nemax = MG_MIN(6*npask,mesh->nemax);
     /* check if the memory asked is enough to load the mesh*/
     if(mesh->np &&
        (mesh->npmax < mesh->np || mesh->ntmax < mesh->nt || mesh->nemax < mesh->ne)) {
-      memtmp = (int)(mesh->np * bytes /(int)million + reservedMem);
-      memtmp = MG_MAX(memtmp, (int)(mesh->nt * bytes /(ctri* (int)million) + reservedMem));
-      memtmp = MG_MAX(memtmp, (int)(mesh->ne * bytes /(6*(int)million) + reservedMem));
-      mesh->memMax = (long long) memtmp+1;
+      memtmp = (mesh->np * bytes + reservedMem)/million;
+      memtmp = MG_MAX(memtmp, (mesh->nt*bytes/ctri + reservedMem)/million );
+      memtmp = MG_MAX(memtmp, (mesh->ne*bytes/6* + reservedMem)/million );
+      mesh->memMax = memtmp+1;
       fprintf(stderr,"  ## ERROR: asking for %d Mo of memory ",mesh->info.mem);
       fprintf(stderr,"is not enough to load mesh. You need to ask %d Mo minimum\n",
-              memtmp+1);
+              (int)mesh->memMax);
     }
-    if(mesh->info.mem < reservedMem) {
-      mesh->memMax = (long long) reservedMem;
+    if(mesh->info.mem*million < reservedMem) {
+      mesh->memMax = reservedMem;
       fprintf(stderr,"  ## ERROR: asking for %d Mo of memory ",mesh->info.mem);
       fprintf(stderr,"is not enough to load mesh. You need to ask %d Mo minimum\n",
-              reservedMem);
+              (int)(mesh->memMax/million));
     }
   }
 
   if ( abs(mesh->info.imprim) > 4 || mesh->info.ddebug )
     fprintf(stdout,"  MAXIMUM MEMORY AUTHORIZED (Mo)    %ld\n",
-            _MMG5_safeLL2LCast((long long)(mesh->memMax/million)));
+            _MMG5_safeLL2LCast(mesh->memMax/million));
 
   if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug ) {
     fprintf(stdout,"  _MMG5_NPMAX    %d\n",mesh->npmax);

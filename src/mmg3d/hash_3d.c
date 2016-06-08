@@ -363,6 +363,8 @@ int MMG3D_hashPrism(MMG5_pMesh mesh) {
   unsigned char  i,ii,i1,i2,i3,i4;
   unsigned int   key;
 
+#warning eval key collisions
+
   if ( !mesh->nprism ) return 1;
 
   /* default */
@@ -1331,6 +1333,7 @@ int _MMG5_bdryTria(MMG5_pMesh mesh) {
   int      *adja,adj,k,ia,ib,ic,kt, tofree=0;
   char      i;
 
+#warning  add prisms
 
   if ( mesh->nt ) {
     /* Hash given bdry triangles */
@@ -1478,6 +1481,7 @@ int _MMG5_bdrySet(MMG5_pMesh mesh) {
   int      *adja,adj,k,kt,ia,ib,ic,j,na;
   char     i,tag;
 
+#warning add prisms
   if ( !mesh->nt )  return(1);
 
   if ( mesh->xtetra ) {
