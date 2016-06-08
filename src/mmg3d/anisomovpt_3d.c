@@ -863,15 +863,6 @@ int _MMG5_movbdyrefpt_ani(MMG5_pMesh mesh, MMG5_pSol met, int *listv,
     caltmp = _MMG5_caltri(mesh,met,&tt);
     if ( caltmp < _MMG5_EPSD )        return(0);
     calnew = MG_MIN(calnew,caltmp);
-    // The check that we don't break the Hausdorf criterion is comentated to
-    // match with the surface model of mmgs
-    /* if ( _MMG5_chkedg(mesh,&tt,MG_GET(pxt->ori,iface)) ) { */
-    /*   // Algiane: 09/12/2013 commit: we break the hausdorff criteria so we dont want */
-    /*   // the point to move? (modification not tested because I could not find a case */
-    /*   // passing here) */
-    /*   memset(pxp,0,sizeof(MMG5_xPoint)); */
-    /*   return(0); */
-    /* } */
   }
   if ( calold < _MMG5_NULKAL && calnew <= calold )    return(0);
   else if ( calnew < calold )    return(0);
@@ -1179,15 +1170,6 @@ int _MMG5_movbdynompt_ani(MMG5_pMesh mesh,MMG5_pSol met, int *listv,
     caltmp = _MMG5_caltri(mesh,met,&tt);
     if ( caltmp < _MMG5_EPSD )        return(0);
     calnew = MG_MIN(calnew,caltmp);
-    // The check that we don't break the Hausdorf criterion is comentated to
-    // match with the surface model of mmgs
-    /* if ( _MMG5_chkedg(mesh,&tt,MG_GET(pxt->ori,iface)) ) { */
-    /*   // Algiane: 09/12/2013 commit: we break the hausdorff criteria so we dont want */
-    /*   // the point to move? (modification not tested because I could not find a case */
-    /*   // passing here) */
-    /*   memset(pxp,0,sizeof(MMG5_xPoint)); */
-    /*   return(0); */
-    /* } */
   }
   if ( calold < _MMG5_NULKAL && calnew <= calold )    return(0);
   else if ( calnew < calold )    return(0);
@@ -1500,12 +1482,6 @@ int _MMG5_movbdyridpt_ani(MMG5_pMesh mesh, MMG5_pSol met, int *listv,
     caltmp = _MMG5_caltri(mesh,met,&tt);
     if ( caltmp < _MMG5_EPSD )        return(0);
     calnew = MG_MIN(calnew,caltmp);
-    // The check that we don't break the Hausdorf criterion is comentated to
-    // match with the surface model of mmgs
-    /* if ( _MMG5_chkedg(mesh,&tt,MG_GET(pxt->ori,iface)) ) { */
-    /*   memset(pxp,0,sizeof(MMG5_xPoint)); */
-    /*   return(0); */
-    /* } */
   }
   if ( calold < _MMG5_NULKAL && calnew <= calold )    return(0);
   else if ( calnew <= calold )  return(0);
