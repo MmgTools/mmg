@@ -183,9 +183,9 @@ static const unsigned char _MMG5_isar[6][2] = { {2,3}, {3,1}, {1,2}, {0,3}, {2,0
 static const unsigned char _MMG5_arpt[4][3] = { {0,1,2}, {0,4,3}, {1,3,5}, {2,5,4} };
 
 /** \brief idir[i]: vertices of face i for a prism */
-static const unsigned char _MMG5_idir_pr[5][4] = { {0,1,2,0}, {3,5,4,3}, {0,3,4,1}, {0,2,5,3},{1,4,5,2} };
+static const unsigned char _MMG5_idir_pr[5][4] = { {0,1,2,0},{3,5,4,3},{1,4,5,2},{0,2,5,3},{0,3,4,1} };
 /** \brief iarf[i]: edges of face i for a prism */
-static const unsigned char _MMG5_iarf_pr[5][4] = { {0,3,1,0}, {6,8,7,6}, {0,2,6,4}, {1,5,7,2} };
+static const unsigned char _MMG5_iarf_pr[5][5] = { {0,1,3,0}, {6,8,7,6}, {3,5,8,4}, {5,1,2,7},{0,4,6,2} };
 
 
 typedef struct {
@@ -255,6 +255,7 @@ int  _MMG5_chkmani(MMG5_pMesh mesh);
 int  _MMG5_colver(MMG5_pMesh,MMG5_pSol,int *,int,char,char);
 int  _MMG3D_analys(MMG5_pMesh mesh);
 int  _MMG3D_hashTria(MMG5_pMesh mesh, _MMG5_Hash*);
+int   MMG3D_hashPrism(MMG5_pMesh mesh);
 int  _MMG5_hashPop(_MMG5_Hash *hash,int a,int b);
 int  _MMG5_hPop(MMG5_HGeom *hash,int a,int b,int *ref,char *tag);
 int  _MMG5_hTag(MMG5_HGeom *hash,int a,int b,int ref,char tag);

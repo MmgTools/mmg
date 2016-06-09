@@ -46,9 +46,6 @@ static inline void _MMG5_reqBoundaries(MMG5_pMesh mesh) {
   MMG5_pTria     ptt;
   int            k;
 
-#warning to implement for prisms : we don t  want to mark all the tria (as for nosurf option)
-
-
   /* The MG_REQ+MG_CRN tag mark the boundary edges that we dont want to touch
    * but that are not really required (-nosurf option) */
   for (k=1; k<=mesh->nt; k++) {
@@ -68,6 +65,7 @@ static inline void _MMG5_reqBoundaries(MMG5_pMesh mesh) {
       ptt->tag[2] |= MG_CRN;
     }
   }
+
   return;
 }
 
@@ -637,9 +635,10 @@ int _MMG3D_analys(MMG5_pMesh mesh) {
       return(0);
   }
   _MMG5_freeXTets(mesh);
+  _MMG5_freeXPrisms(mesh);
 
-  if ( mesh->info.nosurf || mesh->nprism ) {
-    /* Set surface triangles or prism triangles to required */
+  if ( mesh->info.nosurf ) {
+    /* Set surface triangles */
     _MMG5_reqBoundaries(mesh);
   }
 

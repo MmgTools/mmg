@@ -366,8 +366,8 @@ typedef MMG5_xTetra * MMG5_pxTetra;
  *    |      |      |         |      |      |        |      |      |     *
  *    |      |      |         |      2      |        |      |      |     *
  *    |      |      |         |      |      |        |      |      |     *
- *    |      |      |         |      |      |        |  2   |   3  |     *
- *    |      |      |         4      |      5        |      4      |     *
+ *    |      |      |         |      |      |        |  4   |   3  |     *
+ *    |      |      |         4      |      5        |      2      |     *
  *    |      0      |         |      .      |        |      .      |     *
  *    |    ,/ `\    |         |    ,/ `\    |        |    ,/ `\    |     *
  *    |  ,/     `\  |         |  ,0     `1  |        |  ,/     `\  |     *
@@ -382,8 +382,8 @@ typedef struct {
   int      ref; /*!< Reference of the prism */
   int      base;
   int      flag;
-  int      xp; /*!< Index of the surface \ref MMG5_xPrism associated to
-                 the prism*/
+  int      xpr; /*!< Index of the surface \ref MMG5_xPrism associated to
+                  the prism*/
   char     tag;
 } MMG5_Prism;
 typedef MMG5_Prism * MMG5_pPrism;
@@ -453,7 +453,7 @@ typedef struct {
   int       dim; /*!< Dimension of the mesh */
   int       type; /*!< Type of the mesh */
   int       npi,nti,nai,nei,np,na,nt,ne,npmax,namax,ntmax,nemax,xpmax,xtmax;
-  int       nquad,nprism; /* number of quadrangles an prisms */
+  int       nquad,nprism; /* number of quadrangles and prisms */
   int       nc1;
 
   int       base; /*!< Used with \a flag to know if an entity has been

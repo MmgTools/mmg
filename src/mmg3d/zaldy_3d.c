@@ -296,7 +296,7 @@ void _MMG5_freeXPrisms(MMG5_pMesh mesh) {
 
   for (k=1; k<=mesh->nprism; k++) {
     pp      = &mesh->prism[k];
-    pp->xp  = 0;
+    pp->xpr = 0;
   }
   if ( mesh->xprism )
     _MMG5_DEL_MEM(mesh,mesh->xprism,(mesh->xpr+1)*sizeof(MMG5_xPrism));
