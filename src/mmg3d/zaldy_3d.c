@@ -244,6 +244,10 @@ int _MMG5_zaldy(MMG5_pMesh mesh) {
     _MMG5_ADD_MEM(mesh,(mesh->nprism+1)*sizeof(MMG5_Prism),"initial prisms",return(0));
     _MMG5_SAFE_CALLOC(mesh->prism,(mesh->nprism+1),MMG5_Prism);
   }
+  if ( mesh->nquad ) {
+    _MMG5_ADD_MEM(mesh,(mesh->nquad+1)*sizeof(MMG5_Quad),"initial quadrilaterals",return(0));
+    _MMG5_SAFE_CALLOC(mesh->quad,(mesh->nquad+1),MMG5_Quad);
+  }
 
 
   /* keep track of empty links */

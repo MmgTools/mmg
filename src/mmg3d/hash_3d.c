@@ -362,8 +362,6 @@ int MMG3D_hashPrism(MMG5_pMesh mesh) {
   int            hole, crash;
   unsigned char  i,ii,i1,i2,i3,i4;
   unsigned int   key;
-#warning remove debug things : hole, crash
-#warning eval key collisions
 
   if ( !mesh->nprism ) return 1;
 
@@ -407,7 +405,6 @@ int MMG3D_hashPrism(MMG5_pMesh mesh) {
       i3 = _MMG5_idir_pr[i][2];
 
       min12 = MG_MIN(pp->v[i1],pp->v[i2]);
-      min34 = MG_MIN(pp->v[i3],pp->v[i4]);
       /* mins = minimum index of triangle vertices */
       mins = MG_MIN(min12,pp->v[i3]);
 
@@ -453,15 +450,6 @@ int MMG3D_hashPrism(MMG5_pMesh mesh) {
       hcode[key] = -iadr;
     }
   }
-
-  // debug : count holes and collisions
-  hole = crash = 0;
-  for (l=iadr; l>0; l--) {
-    if ( link[l] >= 0 ) {
-      ++hole;
-    }
-  }
-
 
   /* set adjacency */
   if ( mesh->info.ddebug )  fprintf(stdout,"  h- stage 2: adjacencies\n");
@@ -514,8 +502,8 @@ int MMG3D_hashPrism(MMG5_pMesh mesh) {
     jj      = 0;
     link[l] = 0;
     while ( ll != inival ) {
-      kk = (ll-1) / 4 + 1;
-      ii = (ll-1) % 4;
+      kk = (ll-1) / 5 + 1;
+      ii = (ll-1) % 5;
 
       switch (ii)
       {
@@ -546,12 +534,12 @@ int MMG3D_hashPrism(MMG5_pMesh mesh) {
 
         ++crash;
 
-        min12  = MG_MIN(pp->v[i1],pp->v[i2]);
-        min34  = MG_MIN(pp->v[i3],pp->v[i4]);
+        min12  = MG_MIN(pp1->v[i1],pp1->v[i2]);
+        min34  = MG_MIN(pp1->v[i3],pp1->v[i4]);
         mins1  = MG_MIN(min12,min34);
 
-        max12  = MG_MAX(pp->v[i1],pp->v[i2]);
-        max34  = MG_MAX(pp->v[i3],pp->v[i4]);
+        max12  = MG_MAX(pp1->v[i1],pp1->v[i2]);
+        max34  = MG_MAX(pp1->v[i3],pp1->v[i4]);
         maxs1  = MG_MAX(max12,max34);
 
         mins_b1 = MG_MIN( MG_MIN(max12,max34),MG_MAX(min12,min34));
@@ -570,15 +558,6 @@ int MMG3D_hashPrism(MMG5_pMesh mesh) {
     }
   }
   _MMG5_SAFE_FREE(hcode);
-
-// debug
-  for ( k = 0; k<mesh->nprism ; ++k ) {
-    printf("prism %d: -> %d %d %d %d %d\n",k+1, mesh->adjapr[5*k+1],
-           mesh->adjapr[5*k+2],mesh->adjapr[5*k+3],mesh->adjapr[5*k+4],
-           mesh->adjapr[5*k+5]);
-
-  }
-
   return(1);
 }
 
@@ -884,7 +863,6 @@ int _MMG3D_hashTria(MMG5_pMesh mesh, _MMG5_Hash *hash) {
 
   return( _MMG5_mmgHashTria(mesh, mesh->adjt, hash, mesh->info.iso) );
 }
-
 
 
 /** remove edge from hash table */
@@ -1196,7 +1174,7 @@ int _MMG5_hGeom(MMG5_pMesh mesh) {
         kk  = adja[i] / 3;
         if ( !kk || pt->tag[i] & MG_NOM )
           mesh->na++;
-        else if ( (k < kk) && ( pt->edg[i] || pt->tag[i] ) )  mesh->na++;
+         else if ( (k < kk) && ( pt->edg[i] || pt->tag[i] ) )  mesh->na++;
       }
     }
 
@@ -1223,7 +1201,7 @@ int _MMG5_hGeom(MMG5_pMesh mesh) {
           }
           _MMG5_hEdge(mesh,pt->v[i1],pt->v[i2],pt->edg[i],pt->tag[i]);
         }
-        else if ( k < kk && ( pt->edg[i] || pt->tag[i] ) )
+         else if ( k < kk && ( pt->edg[i] || pt->tag[i] ) )
           _MMG5_hEdge(mesh,pt->v[i1],pt->v[i2],pt->edg[i],pt->tag[i]);
       }
     }
@@ -1269,7 +1247,10 @@ int _MMG5_chkBdryTria(MMG5_pMesh mesh) {
     for (i=0; i<4; i++) {
       adj = adja[i];
 
-      if ( !adj ) ++ntmesh;
+      if ( !adj ) {
+        ++ntmesh;
+        continue;
+      }
 
       adj /= 4;
       pt1 = &mesh->tetra[adj];
@@ -1284,14 +1265,17 @@ int _MMG5_chkBdryTria(MMG5_pMesh mesh) {
       if ( !MG_EOK(pp) )  continue;
 
       adja = &mesh->adjapr[5*(k-1)+1];
-      for (i=0; i<5; i++) {
+      for (i=0; i<2; i++) {
         adj = adja[i];
 
         if ( !adj ) {
           ++ntmesh;
+          continue;
         }
+        else if ( adj<0 ) continue;
+
         adj /= 5;
-        pp1 = &mesh->prism[adj];
+        pp1 = &mesh->prism[abs(adj)];
         if ( pp->ref > pp1->ref) {
           ++ntmesh;
         }
@@ -1314,7 +1298,10 @@ int _MMG5_chkBdryTria(MMG5_pMesh mesh) {
       ia = pt->v[_MMG5_idir[i][0]];
       ib = pt->v[_MMG5_idir[i][1]];
       ic = pt->v[_MMG5_idir[i][2]];
-      if ( !_MMG5_hashFace(mesh,&hashTri,ia,ib,ic,5*k+i) ) return(0);
+      if ( !_MMG5_hashFace(mesh,&hashTri,ia,ib,ic,5*k+i) ) {
+        _MMG5_DEL_MEM(mesh,hashTri.item,(hashTri.max+1)*sizeof(_MMG5_hedge));
+        return(0);
+      }
     }
   }
   for (k=1; k<=mesh->nprism; k++) {
@@ -1379,13 +1366,15 @@ int _MMG5_chkBdryTria(MMG5_pMesh mesh) {
           ic = pp->v[_MMG5_idir_pr[i][2]];
           if ( !_MMG5_hashFace(mesh,&hashElt,ia,ib,ic,5*k+i) ) return(0);
         }
+        else if ( adj<0 ) continue;
+
         adj /= 5;
 
-        pp1 = &mesh->prism[adj];
+        pp1 = &mesh->prism[abs(adj)];
         if ( pp->ref > pp1->ref ) {
-          ia = pp->v[_MMG5_idir[i][0]];
-          ib = pp->v[_MMG5_idir[i][1]];
-          ic = pp->v[_MMG5_idir[i][2]];
+          ia = pp->v[_MMG5_idir_pr[i][0]];
+          ib = pp->v[_MMG5_idir_pr[i][1]];
+          ic = pp->v[_MMG5_idir_pr[i][2]];
           if ( !_MMG5_hashFace(mesh,&hashElt,ia,ib,ic,5*k+i) ) return(0);
         }
       }
@@ -1436,7 +1425,10 @@ int _MMG5_chkBdryTria(MMG5_pMesh mesh) {
     nbl = mesh->nt-nt;
     if ( nbl ) {
       printf("  ## Warning: %d extra boundaries provided. Ignored\n",nbl);
+      _MMG5_ADD_MEM(mesh,(-nbl)*sizeof(MMG5_Tria),"triangles",return(0));
       mesh->nt = nt;
+      _MMG5_SAFE_REALLOC(mesh->tria,mesh->nt+1,MMG5_Tria,"triangles");
+
     }
     _MMG5_DEL_MEM(mesh,hashElt.item,(hashElt.max+1)*sizeof(_MMG5_hedge));
     _MMG5_DEL_MEM(mesh,hashTri.item,(hashTri.max+1)*sizeof(_MMG5_hedge));
@@ -1490,8 +1482,10 @@ int _MMG5_bdryTria(MMG5_pMesh mesh) {
     tofree=1;
     for (k=1; k<=mesh->nt; k++) {
       ptt = &mesh->tria[k];
-      if ( !_MMG5_hashFace(mesh,&hash,ptt->v[0],ptt->v[1],ptt->v[2],k) )
+      if ( !_MMG5_hashFace(mesh,&hash,ptt->v[0],ptt->v[1],ptt->v[2],k) ) {
+        _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
         return(0);
+      }
     }
 
   }
@@ -1560,9 +1554,7 @@ int _MMG5_bdryTria(MMG5_pMesh mesh) {
       for (i=0; i<2; i++) {
         adj = adja[i]/5;
 
-        if ( adj < 0 ) {
-          ref = mesh->tetra[abs(adj)].ref;
-        }
+        if ( adj<0 )  continue;
         else {
           ref = mesh->prism[adj].ref;
         }
@@ -1579,6 +1571,7 @@ int _MMG5_bdryTria(MMG5_pMesh mesh) {
         }
 
         mesh->nt++;
+
         ptt = &mesh->tria[mesh->nt];
         ptt->v[0] = ia;
         ptt->v[1] = ib;
@@ -1609,7 +1602,7 @@ int _MMG5_bdryTria(MMG5_pMesh mesh) {
               ptt->tag[1] |= MG_REQ;
               ptt->tag[1] |= MG_CRN;
             }
-            if ( !(ptt->tag[1] & MG_REQ) ) {
+            if ( !(ptt->tag[2] & MG_REQ) ) {
               ptt->tag[2] |= MG_REQ;
               ptt->tag[2] |= MG_CRN;
             }
@@ -1770,7 +1763,7 @@ int _MMG5_bdrySet(MMG5_pMesh mesh) {
     adja = &mesh->adjapr[5*(k-1)+1];
     for (i=0; i<2; i++) {
       adj = adja[i] / 5;
-      if ( adj < 0 ) {
+      if ( adj<0 ) {
         ref = mesh->tetra[abs(adj)].ref;
       } else {
         ref = mesh->prism[adj].ref;
@@ -1819,7 +1812,10 @@ int _MMG5_bdryUpdate(MMG5_pMesh mesh) {
   if ( !_MMG5_hashNew(mesh,&hash,0.51*mesh->nt,1.51*mesh->nt) )  return(0);
   for (k=1; k<=mesh->nt; k++) {
     ptt = &mesh->tria[k];
-    if ( !_MMG5_hashFace(mesh,&hash,ptt->v[0],ptt->v[1],ptt->v[2],k) ) return(0);
+    if ( !_MMG5_hashFace(mesh,&hash,ptt->v[0],ptt->v[1],ptt->v[2],k) ) {
+      _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
+      return(0);
+    }
   }
 
   for (k=1; k<=mesh->ne; k++) {
@@ -1892,7 +1888,10 @@ int _MMG5_bdryPerm(MMG5_pMesh mesh) {
 
   for (k=1; k<=mesh->nt; k++) {
     ptt = &mesh->tria[k];
-    if ( !_MMG5_hashFace(mesh,&hash,ptt->v[0],ptt->v[1],ptt->v[2],k) )  return(0);
+    if ( !_MMG5_hashFace(mesh,&hash,ptt->v[0],ptt->v[1],ptt->v[2],k) ) {
+      _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
+      return(0);
+    }
     for (i=0; i<3; i++) {
       ppt = &mesh->point[ptt->v[i]];
       if ( !mesh->info.iso ) ppt->tag |= MG_BDY;

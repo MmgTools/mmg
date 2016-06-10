@@ -480,6 +480,7 @@ int MMG3D_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met) {
     fprintf(stdout,"\n  -- PHASE 2 : %s MESHING\n",met->size < 6 ? "ISOTROPIC" : "ANISOTROPIC");
   }
 
+
   /* renumerotation if available */
   if ( !_MMG5_scotchCall(mesh,met) )
   {

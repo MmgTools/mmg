@@ -406,7 +406,7 @@ void _MMG3D_Free_structures_var(va_list argptr)
     _MMG5_DEL_MEM((*mesh),(*mesh)->adja,(4*(*mesh)->nemax+5)*sizeof(int));
 
   if ( (*mesh)->adjapr )
-    _MMG5_DEL_MEM((*mesh),(*mesh)->adjapr,(4*(*mesh)->nprism+6)*sizeof(int));
+    _MMG5_DEL_MEM((*mesh),(*mesh)->adjapr,(5*(*mesh)->nprism+6)*sizeof(int));
 
   if ( (*mesh)->xpoint )
     _MMG5_DEL_MEM((*mesh),(*mesh)->xpoint,((*mesh)->xpmax+1)*sizeof(MMG5_xPoint));
@@ -416,6 +416,9 @@ void _MMG3D_Free_structures_var(va_list argptr)
 
   if ( (*mesh)->tria )
     _MMG5_DEL_MEM((*mesh),(*mesh)->tria,((*mesh)->nt+1)*sizeof(MMG5_Tria));
+
+ if ( (*mesh)->quad )
+    _MMG5_DEL_MEM((*mesh),(*mesh)->quad,((*mesh)->nquad+1)*sizeof(MMG5_Quad));
 
   if ( (*mesh)->xtetra )
     _MMG5_DEL_MEM((*mesh),(*mesh)->xtetra,((*mesh)->xtmax+1)*sizeof(MMG5_xTetra));

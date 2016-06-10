@@ -674,6 +674,25 @@ FORTRAN_NAME(MMG3D_LOADMESH,mmg3d_loadmesh,
 }
 
 /**
+ * See \ref MMG3D_loadMshMesh function in \ref mmg3d/libmmg3d.h file.
+ */
+FORTRAN_NAME(MMG3D_LOADMSHMESH,mmg3d_loadmshmesh,
+             (MMG5_pMesh *mesh, MMG5_pSol *sol,char* filename, int *strlen,int* retval),
+             (mesh,sol,filename,strlen, retval)){
+  char *tmp = NULL;
+
+  tmp = (char*)malloc((*strlen+1)*sizeof(char));
+  strncpy(tmp,filename,*strlen);
+  tmp[*strlen] = '\0';
+
+  *retval = MMG3D_loadMshMesh(*mesh,*sol,tmp);
+
+  _MMG5_SAFE_FREE(tmp);
+
+  return;
+}
+
+/**
  * See \ref MMG3D_saveMesh function in \ref mmg3d/libmmg3d.h file.
  */
 FORTRAN_NAME(MMG3D_SAVEMESH,mmg3d_savemesh,
