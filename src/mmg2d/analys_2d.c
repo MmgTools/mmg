@@ -336,7 +336,7 @@ int _MMG2_regnor(MMG5_pMesh mesh) {
 
       if ( !ier ) {
         printf("*** problem in func. _MMG2_bouleendp. Abort.\n");
-        exit(0);
+        exit(EXIT_FAILURE);
       }
 
       p1 = &mesh->point[ip1];
@@ -422,7 +422,7 @@ int _MMG2_regnor(MMG5_pMesh mesh) {
       ier = _MMG2_bouleendp(mesh,iel,i,&ip1,&ip2);
       if ( !ier ) {
         printf("*** problem in func. _MMG2_bouleendp. Abort.\n");
-        exit(0);
+        exit(EXIT_FAILURE);
       }
 
       p1 = &mesh->point[ip1];

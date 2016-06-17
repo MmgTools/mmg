@@ -171,7 +171,7 @@ int _MMG2_chkmsh(MMG5_pMesh mesh) {
       if ( !jel ) {
         if ( !(pt->tag[i] & MG_GEO ) ) {
           printf("Wrong tag of edge %d in tria %d \n",i,k);
-          exit(0);
+          exit(EXIT_FAILURE);
         }
       }
       else {
@@ -179,7 +179,7 @@ int _MMG2_chkmsh(MMG5_pMesh mesh) {
         adjaj = &mesh->adja[3*(jel-1)+1];
         if ( adjaj[j] / 3 != k ) {
           printf("Wrong adjacencies %d %d \n",k,jel);
-          exit(0);
+          exit(EXIT_FAILURE);
         }
       }
     }
@@ -196,22 +196,22 @@ int _MMG2_chkmsh(MMG5_pMesh mesh) {
       if ( pt->tag[i] & MG_GEO ) {
         if ( !(mesh->point[pt->v[i1]].tag & MG_GEO) && !( MG_SIN(mesh->point[pt->v[i1]].tag) )) {
           printf("Tag inconsistency in triangle %d: edge %d, vertex %d\n",k,i,pt->v[i1]);
-          exit(0);
+          exit(EXIT_FAILURE);
         }
         if ( !(mesh->point[pt->v[i2]].tag & MG_GEO) && !( MG_SIN(mesh->point[pt->v[i2]].tag) )) {
           printf("Tag inconsistency in triangle %d: edge %d, vertex %d\n",k,i,pt->v[i2]);
-          exit(0);
+          exit(EXIT_FAILURE);
         }
       }
 
       if ( pt->tag[i] & MG_REF ) {
         if ( !(mesh->point[pt->v[i1]].tag & MG_REF) && !( MG_SIN(mesh->point[pt->v[i1]].tag)) ) {
           printf("Tag inconsistency in triangle %d: edge ref %d, vertex %d\n",k,i,pt->v[i1]);
-          exit(0);
+          exit(EXIT_FAILURE);
         }
         if ( !(mesh->point[pt->v[i2]].tag & MG_REF) && !( MG_SIN(mesh->point[pt->v[i2]].tag)) ) {
           printf("Tag inconsistency in triangle %d: edge ref %d, vertex %d\n",k,i,pt->v[i2]);
-          exit(0);
+          exit(EXIT_FAILURE);
         }
       }
 
@@ -232,7 +232,7 @@ int _MMG2_chkmsh(MMG5_pMesh mesh) {
 
       if ( ( pt->tag[i] & MG_GEO ) && jel ) {
         printf("edge %d %d is tagged boundary while it has a neighbour\n",pt->v[i1],pt->v[i2]);
-        exit(0);
+        exit(EXIT_FAILURE);
       }
 
       if ( pt->tag[i] & MG_REF ) {
@@ -249,10 +249,10 @@ int _MMG2_chkmsh(MMG5_pMesh mesh) {
 
             MMG2_bdryEdge(mesh);
             _MMG2_savemesh_db(mesh,mesh->nameout,0);
-            exit(0);
+            exit(EXIT_FAILURE);
           }
 
-          exit(0);
+          exit(EXIT_FAILURE);
         }
       }
     }
