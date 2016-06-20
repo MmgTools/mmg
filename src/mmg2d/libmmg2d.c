@@ -447,9 +447,14 @@ int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol sol)
     _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
 
   if ( mesh->info.ddebug && !_MMG5_chkmsh(mesh,1,0) )  _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
+
   /*geom : corner detection*/
   if ( mesh->info.dhd>0 )
     if( !MMG2_evalgeom(mesh) ) _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
+
+  /* Update the metric definition by taking into accounts the
+     curvature of the external and internal curves present in the mesh */
+  if ( !_MMG2D_defBdrySiz(mesh,sol) ) return(0);
 
   /*mesh gradation*/
   if( mesh->info.hgrad > 0 ) {

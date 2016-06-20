@@ -315,13 +315,16 @@ int MMG2_colpoi(MMG5_pMesh mesh, MMG5_pSol sol,int iel,int iar,int ia,int ib,dou
  */
 int MMG2_chkedg(MMG5_pMesh mesh, MMG5_pPoint ppa,MMG5_pPoint ppb) {
   double t0[2],t1[2];
-  double l,ux,uy,cosn,ps;
+  double ll,l,ux,uy,cosn,ps;
   int    i;
 
   ux = ppa->c[0] - ppb->c[0];
   uy = ppa->c[1] - ppb->c[1];
-  l = ux*ux + uy*uy;
-  l = sqrt(l);
+  ll = ux*ux + uy*uy;
+  l = sqrt(ll);
+
+  if ( l > mesh->info.hmax*mesh->info.hmax ) return(1);
+  else if ( l < _MMG5_EPSD ) return(0);
 
   //with tangent, compute control point
   for(i=0 ; i<2 ; i++) {
@@ -356,15 +359,15 @@ int MMG2_chkedg(MMG5_pMesh mesh, MMG5_pPoint ppa,MMG5_pPoint ppb) {
   cosn = ps*ps ;
   cosn *= fabs(1.0-cosn);
 
-  cosn *= (0.25*l);
-  if(cosn > mesh->info.hausd*mesh->info.hausd) return(1);
+  cosn *= ll;
+  if(cosn > 9.*mesh->info.hausd*mesh->info.hausd) return(1);
   //idem for ppb
   ps = -(t1[0]*ux + t1[1]*uy);
-  ps /= l*l;
+  ps /= ll;
   cosn = ps*ps ;
   cosn *= fabs(1.0-cosn);
-  cosn *= (0.25*l);
-  if(cosn > mesh->info.hausd*mesh->info.hausd) return(1);
+  cosn *=  ll;
+  if(cosn > 9.*mesh->info.hausd*mesh->info.hausd) return(1);
 
 
 
