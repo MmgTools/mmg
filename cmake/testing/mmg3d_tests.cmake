@@ -112,6 +112,20 @@ FOREACH(EXEC ${LISTEXEC_MMG3D})
       )
   ENDIF()
 
+  ##############################################################################
+  #####
+  #####         Check Local parameters at tetra
+  #####
+  ##############################################################################
+  #####
+  ADD_TEST(NAME TetLoc_Ellipse${EXEC}
+    COMMAND ${EXEC} -v 5 -hgrad -1
+    ${MMG3D_CI_TESTS}/TetLoc_Ellipse/c
+    ${MMG3D_CI_TESTS}/TetLoc_Ellipse/c.o.meshb
+    -hgrad 2
+    )
+
+
 ENDFOREACH(EXEC)
 
 
@@ -362,6 +376,7 @@ IF ( LONG_TESTS )
   #ADD_TEST(NAME RefCube
   #  COMMAND ${EXECUT_MMG3D} -v 5
   #  ${MMG3D_CI_TESTS}/RefCube/cube) marre... a finir
+
 
   ###############################################################################
   #####
