@@ -323,21 +323,21 @@ int MMG2_chkedg(MMG5_pMesh mesh, MMG5_pPoint ppa,MMG5_pPoint ppb) {
   ll = ux*ux + uy*uy;
   l = sqrt(ll);
 
-  if ( l > mesh->info.hmax*mesh->info.hmax ) return(1);
+  if ( l > mesh->info.hmax ) return(1);
   else if ( l < _MMG5_EPSD ) return(0);
 
   //with tangent, compute control point
   for(i=0 ; i<2 ; i++) {
-    t0[i] = l*ppa->n[i];
-    t1[i] = l*ppb->n[i];
+    t0[i] = ppa->n[i];
+    t1[i] = ppb->n[i];
   }
   if(ppa->tag & M_CORNER) {
     for(i=0 ; i<2 ; i++)
-      t0[i] = ppa->c[i] - ppb->c[i];
+      t0[i] = (ppa->c[i] - ppb->c[i])/l;
   }
   if(ppb->tag & M_CORNER) {
     for(i=0 ; i<2 ; i++)
-      t1[i] = ppa->c[i] - ppb->c[i];
+      t1[i] = (ppa->c[i] - ppb->c[i])/l;
   }
   /*check if t0 has the same sens of vect(P0P1)*/
   if(t0[0]/(ppb->c[0]-ppa->c[0]) < 0 || t0[1]/(ppb->c[1]-ppa->c[1])<0) {
@@ -355,21 +355,20 @@ int MMG2_chkedg(MMG5_pMesh mesh, MMG5_pPoint ppa,MMG5_pPoint ppb) {
   }
   //compute the distance between mid point and curve (with angle between edge and tang)
   ps = t0[0]*ux + t0[1]*uy;
-  ps /= l*l;
-  cosn = ps*ps ;
-  cosn *= fabs(1.0-cosn);
 
+  ps *= ps;
+  cosn = ps/ll ;
+  cosn *= fabs(1.0-cosn);
   cosn *= ll;
+
   if(cosn > 9.*mesh->info.hausd*mesh->info.hausd) return(1);
   //idem for ppb
   ps = -(t1[0]*ux + t1[1]*uy);
-  ps /= ll;
-  cosn = ps*ps ;
+  ps *= ps;
+  cosn = ps/ll;
   cosn *= fabs(1.0-cosn);
   cosn *=  ll;
   if(cosn > 9.*mesh->info.hausd*mesh->info.hausd) return(1);
-
-
 
   return(0);
 }
@@ -389,6 +388,7 @@ int MMG2_colpoibdry(MMG5_pMesh mesh, MMG5_pSol sol,int iel,int iar,int ia,int ib
   double    declic,*cal,air,coor[2],solu[3],*c1,*c2,*m1,*m2,len;
   //double    capx,capy,cbpx,cbpy,alpha,cbound;
   int       iadri,*adjai,nbdry,ibdry[2],ip;
+
   pt  = &mesh->tria[iel];
   pib = pt->v[ib];
   pia = pt->v[ia];
@@ -440,20 +440,20 @@ int MMG2_colpoibdry(MMG5_pMesh mesh, MMG5_pSol sol,int iel,int iar,int ia,int ib
   ppa1  = &mesh->point[ibdry[0]];
   ppb1  = &mesh->point[ibdry[1]];
 
-  if(MMG2_chkedg(mesh,ppb,ppa1))   {
-    _MMG5_SAFE_FREE(list);
-    return(0);
-  }
-  if(MMG2_chkedg(mesh,ppb,ppb1))  {
-    _MMG5_SAFE_FREE(list);
-    return(0);
-  }
+  /* if(MMG2_chkedg(mesh,ppb,ppa1))   { */
+  /*   _MMG5_SAFE_FREE(list); */
+  /*   return(0); */
+  /* } */
+  /* if(MMG2_chkedg(mesh,ppb,ppb1))  { */
+  /*   _MMG5_SAFE_FREE(list); */
+  /*   return(0); */
+  /* } */
 
-  /*second check that the new edge verify the hausd criteron*/
-  if(MMG2_chkedg(mesh,ppb1,ppa1))  {
-    _MMG5_SAFE_FREE(list);
-    return(0);
-  }
+  /* /\*second check that the new edge verify the hausd criteron*\/ */
+  /* if(MMG2_chkedg(mesh,ppb1,ppa1))  { */
+  /*   _MMG5_SAFE_FREE(list); */
+  /*   return(0); */
+  /* } */
 
 /* //comment from here */
 /*   //calcul de l'angle forme par les 3 points  */
