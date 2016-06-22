@@ -394,7 +394,8 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
         pt->v[1] = tmp;
       }
     }
-    fprintf(stdout," %8d triangles reoriented \n",norient);
+    if ( norient )
+      fprintf(stdout," %8d triangles reoriented \n",norient);
   } else {
     for (k=1; k<=mesh->np; k++) {
       ppt = &mesh->point[ k ];
