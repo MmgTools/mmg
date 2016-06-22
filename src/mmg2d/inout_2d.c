@@ -393,7 +393,8 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
         pt->v[1] = tmp;
       }
     }
-    if ( norient ) fprintf(stdout," %8d triangles reoriented \n",norient);
+    if ( norient )
+      fprintf(stdout," %8d triangles reoriented \n",norient);
   } else {
     for (k=1; k<=mesh->np; k++) {
       ppt = &mesh->point[ k ];
@@ -616,6 +617,12 @@ int MMG2D_loadSol(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
     fprintf(stdout,"  ** MISSING DATA.\n");
     return(-1);
   }
+
+  if ( sol->np != mesh->np ) {
+    fprintf(stdout,"  ** WRONG DATA. IGNORED\n");
+    return(-1);
+  }
+
   /* btyp = 1: scalar solution (isotropic metric or ls function, 
      btyp = 2: vector field (displacement in Lagrangian mode), 
      btyp = 3: anisotropic metric */
