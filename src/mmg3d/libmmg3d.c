@@ -150,6 +150,8 @@ void _MMG3D_scalarSolTruncature(MMG5_pMesh mesh, MMG5_pSol met) {
 static inline
 int _MMG3D_packMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
   MMG5_pTetra   pt,ptnew;
+  MMG5_pPrism   pp;
+  MMG5_pQuad    pq;
   MMG5_pPoint   ppt,pptnew;
   MMG5_hgeom   *ph;
   int     np,nc,nr, k,ne,nbl,imet,imetnew,i;
@@ -207,6 +209,28 @@ int _MMG3D_packMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
   }
   mesh->ne = ne;
 
+  /* update prisms and quads vertex indices */
+  for (k=1; k<=mesh->nprism; k++) {
+    pp = &mesh->prism[k];
+    if ( !MG_EOK(pp) )  continue;
+
+    pp->v[0] = mesh->point[pp->v[0]].tmp;
+    pp->v[1] = mesh->point[pp->v[1]].tmp;
+    pp->v[2] = mesh->point[pp->v[2]].tmp;
+    pp->v[3] = mesh->point[pp->v[3]].tmp;
+    pp->v[4] = mesh->point[pp->v[4]].tmp;
+    pp->v[5] = mesh->point[pp->v[5]].tmp;
+  }
+  for (k=1; k<=mesh->nquad; k++) {
+    pq = &mesh->quad[k];
+    if ( !MG_EOK(pq) )  continue;
+
+    pq->v[0] = mesh->point[pq->v[0]].tmp;
+    pq->v[1] = mesh->point[pq->v[1]].tmp;
+    pq->v[2] = mesh->point[pq->v[2]].tmp;
+    pq->v[3] = mesh->point[pq->v[3]].tmp;
+  }
+
   /* compact metric */
   nbl = 1;
   if ( met && met->m ) {
@@ -258,6 +282,11 @@ int _MMG3D_packMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
   if ( disp && disp->m )
     disp->np = np;
 
+  /* create prism adjacency */
+  if ( !MMG3D_hashPrism(mesh) ) {
+    fprintf(stderr,"  ## Prism hashing problem. Exit program.\n");
+    return(0);
+  }
   /* rebuild triangles*/
   mesh->nt = 0;
   if ( !_MMG5_chkBdryTria(mesh) ) {

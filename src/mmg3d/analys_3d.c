@@ -638,7 +638,7 @@ int _MMG3D_analys(MMG5_pMesh mesh) {
   _MMG5_freeXPrisms(mesh);
 
   if ( mesh->info.nosurf ) {
-    /* Set surface triangles */
+    /* Set surface triangles to required*/
     _MMG5_reqBoundaries(mesh);
   }
 
@@ -733,6 +733,7 @@ int _MMG3D_analys(MMG5_pMesh mesh) {
   _MMG5_DEL_MEM(mesh,mesh->htab.geom,(mesh->htab.max+1)*sizeof(MMG5_hgeom));
   _MMG5_DEL_MEM(mesh,mesh->adjt,(3*mesh->nt+4)*sizeof(int));
   _MMG5_DEL_MEM(mesh,mesh->tria,(mesh->nt+1)*sizeof(MMG5_Tria));
+  _MMG5_DEL_MEM(mesh,mesh->adjapr,(5*mesh->nprism+6)*sizeof(int));
 
   return(1);
 }

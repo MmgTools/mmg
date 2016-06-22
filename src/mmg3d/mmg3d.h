@@ -263,7 +263,6 @@ int  _MMG5_hGet(MMG5_HGeom *hash,int a,int b,int *ref,char *tag);
 void _MMG5_hEdge(MMG5_pMesh mesh,int a,int b,int ref,char tag);
 int  _MMG5_hNew(MMG5_HGeom *hash,int hsiz,int hmax,int secure);
 int  _MMG5_hGeom(MMG5_pMesh mesh);
-  int  _MMG5_bdryTria(MMG5_pMesh);
 int  _MMG5_bdryIso(MMG5_pMesh );
 int  _MMG5_bdrySet(MMG5_pMesh );
 int  _MMG5_bdryUpdate(MMG5_pMesh );

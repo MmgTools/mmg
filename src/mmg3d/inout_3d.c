@@ -184,11 +184,11 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,const char *filename) {
       }
       else if(!strncmp(chaine,"Quadrilaterals",strlen("Quadrilaterals"))) {
         fscanf(inm,"%d",&mesh->nquad);
-        posnt = ftell(inm);
+        posnq = ftell(inm);
         continue;
       } else if(!strncmp(chaine,"RequiredQuadrilaterals",strlen("RequiredQuadrilaterals"))) {
         fscanf(inm,"%d",&nqreq);
-        posntreq = ftell(inm);
+        posnqreq = ftell(inm);
         continue;
 
       } else if(!strncmp(chaine,"Tetrahedra",strlen("Tetrahedra"))) {
@@ -894,18 +894,18 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,const char *filename) {
 
   /* stats */
   if ( abs(mesh->info.imprim) > 3 ) {
-    fprintf(stdout,"     NUMBER OF VERTICES     %8d\n",mesh->np);
+    fprintf(stdout,"     NUMBER OF VERTICES       %8d\n",mesh->np);
     if ( mesh->na ) {
-      fprintf(stdout,"     NUMBER OF EDGES        %8d\n",mesh->na);
+      fprintf(stdout,"     NUMBER OF EDGES          %8d\n",mesh->na);
       if ( nr )
-        fprintf(stdout,"     NUMBER OF RIDGES       %8d\n",nr);
+        fprintf(stdout,"     NUMBER OF RIDGES         %8d\n",nr);
     }
     if ( mesh->nt )
-      fprintf(stdout,"     NUMBER OF TRIANGLES    %8d\n",mesh->nt);
+      fprintf(stdout,"     NUMBER OF TRIANGLES      %8d\n",mesh->nt);
     if ( mesh->nt )
-      fprintf(stdout,"     NUMBER OF QUADRILATERALS    %8d\n",mesh->nquad);
+      fprintf(stdout,"     NUMBER OF QUADRILATERALS %8d\n",mesh->nquad);
     if ( mesh->nprism )
-      fprintf(stdout,"     NUMBER OF PRISMS    %8d\n",mesh->nprism);
+      fprintf(stdout,"     NUMBER OF PRISMS         %8d\n",mesh->nprism);
 
     fprintf(stdout,"     NUMBER OF TETRAHEDRA     %8d\n",mesh->ne);
 
@@ -913,17 +913,17 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,const char *filename) {
     if ( npreq || nedreq || ntreq || nereq || nqreq ) {
       fprintf(stdout,"     NUMBER OF REQUIRED ENTITIES: \n");
       if ( npreq )
-        fprintf(stdout,"                  VERTICES    %8d \n",npreq);
+        fprintf(stdout,"                  VERTICES       %8d \n",npreq);
       if ( nedreq )
-        fprintf(stdout,"                  EDGES       %8d \n",nedreq);
+        fprintf(stdout,"                  EDGES          %8d \n",nedreq);
       if ( ntreq )
-        fprintf(stdout,"                  TRIANGLES   %8d \n",ntreq);
+        fprintf(stdout,"                  TRIANGLES      %8d \n",ntreq);
       if ( nqreq )
-        fprintf(stdout,"                  QUADRILATERALS   %8d \n",nqreq);
+        fprintf(stdout,"                  QUADRILATERALS %8d \n",nqreq);
       if ( nereq )
-        fprintf(stdout,"                  TETRAHEDRAS %8d \n",nereq);
+        fprintf(stdout,"                  TETRAHEDRAS    %8d \n",nereq);
     }
-    if(ncor) fprintf(stdout,"     NUMBER OF CORNERS        %8d \n",ncor);
+    if(ncor) fprintf(stdout,"     NUMBER OF CORNERS           %8d \n",ncor);
   }
   fclose(inm);
   return(1);
@@ -1022,7 +1022,6 @@ int MMG3D_loadMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
   }
 
   /* Remove the .msh extension from the filenames */
-#warning mem count + valgrind
   ptr = strstr(mesh->namein,".msh");
   if ( ptr ) {
     len = strlen(mesh->namein);
@@ -1836,16 +1835,16 @@ int MMG3D_loadMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
 
   /* stats */
   if ( abs(mesh->info.imprim) > 3 ) {
-    fprintf(stdout,"     NUMBER OF VERTICES     %8d\n",mesh->np);
+    fprintf(stdout,"     NUMBER OF VERTICES       %8d\n",mesh->np);
     if ( mesh->na ) {
-      fprintf(stdout,"     NUMBER OF EDGES        %8d\n",mesh->na);
+      fprintf(stdout,"     NUMBER OF EDGES          %8d\n",mesh->na);
     }
     if ( mesh->nt )
-      fprintf(stdout,"     NUMBER OF TRIANGLES    %8d\n",mesh->nt);
+      fprintf(stdout,"     NUMBER OF TRIANGLES      %8d\n",mesh->nt);
     if ( mesh->nt )
-      fprintf(stdout,"     NUMBER OF QUADRILATERALS    %8d\n",mesh->nquad);
+      fprintf(stdout,"     NUMBER OF QUADRILATERALS %8d\n",mesh->nquad);
     if ( mesh->nprism )
-      fprintf(stdout,"     NUMBER OF PRISMS    %8d\n",mesh->nprism);
+      fprintf(stdout,"     NUMBER OF PRISMS         %8d\n",mesh->nprism);
 
     fprintf(stdout,"     NUMBER OF TETRAHEDRA     %8d\n",mesh->ne);
   }
@@ -2069,7 +2068,7 @@ int MMG3D_saveMesh(MMG5_pMesh mesh, const char *filename) {
   MMG5_pQuad   pq;
   MMG5_xPoint *pxp;
   int          k,na,nc,np,ne,nn,nr,nre,nedreq,ntreq,nt,nereq;
-  int          nqreq;
+  int          npr,nprreq,nq,nqreq;
   int          bin,binch,bpos;
   char         data[128],chaine[128],*ptr;
 
@@ -2133,7 +2132,8 @@ int MMG3D_saveMesh(MMG5_pMesh mesh, const char *filename) {
   for (k=1; k<=mesh->np; k++) {
     ppt = &mesh->point[k];
     if ( MG_VOK(ppt) ) {
-      ppt->tmp = ++np;
+      ppt->tmp  = ++np;
+      ppt->flag = 0;
       if ( ppt->tag & MG_CRN )  nc++;
       if ( ppt->tag & MG_REQ )  nre++;
     }
@@ -2214,12 +2214,133 @@ int MMG3D_saveMesh(MMG5_pMesh mesh, const char *filename) {
     }
   }
 
+  /* tetrahedra */
+  ne = nereq = 0;
+  for (k=1; k<=mesh->ne; k++) {
+    pt = &mesh->tetra[k];
+    if ( !MG_EOK(pt) ) {
+      continue;
+    }
+    ne++;
+    if ( pt->tag & MG_REQ ){
+      nereq++;
+    }
+  }
+
+  if(!bin) {
+    strcpy(&chaine[0],"\n\nTetrahedra\n");
+    fprintf(inm,"%s",chaine);
+    fprintf(inm,"%d\n",ne);
+  } else {
+    binch = 8; //Tetra
+    fwrite(&binch,sw,1,inm);
+    bpos += 12 + 20*ne;//Pos
+    fwrite(&bpos,sw,1,inm);
+    fwrite((unsigned char*)&ne,sw,1,inm);
+  }
+  for (k=1; k<=mesh->ne; k++) {
+    pt = &mesh->tetra[k];
+
+    /* Tag the tetra vertices to detect points belonging to prisms only (because
+     * we don't know the normals/tangents at this points, thus we don't want to
+     * save it). */
+    mesh->point[pt->v[0]].flag = 1;
+    mesh->point[pt->v[1]].flag = 1;
+    mesh->point[pt->v[2]].flag = 1;
+    mesh->point[pt->v[3]].flag = 1;
+
+    if ( MG_EOK(pt) ) {
+      if(!bin) {
+        fprintf(inm,"%d %d %d %d %d\n",mesh->point[pt->v[0]].tmp,mesh->point[pt->v[1]].tmp
+                ,mesh->point[pt->v[2]].tmp,mesh->point[pt->v[3]].tmp,pt->ref);
+      } else {
+        fwrite(&mesh->point[pt->v[0]].tmp,sw,1,inm);
+        fwrite(&mesh->point[pt->v[1]].tmp,sw,1,inm);
+        fwrite(&mesh->point[pt->v[2]].tmp,sw,1,inm);
+        fwrite(&mesh->point[pt->v[3]].tmp,sw,1,inm);
+        fwrite(&pt->ref,sw,1,inm);
+      }
+    }
+  }
+
+  if ( nereq ) {
+    if(!bin) {
+      strcpy(&chaine[0],"\n\nRequiredTetrahedra\n");
+      fprintf(inm,"%s",chaine);
+      fprintf(inm,"%d\n",nereq);
+    } else {
+      binch = 12; //RequiredTetra
+      fwrite(&binch,sw,1,inm);
+      bpos += 12 + 4*nereq;//Pos
+      fwrite(&bpos,sw,1,inm);
+      fwrite(&nereq,sw,1,inm);
+    }
+    ne = 0;
+    for (k=1; k<=mesh->ne; k++) {
+      pt = &mesh->tetra[k];
+      if ( !MG_EOK(pt) ) continue;
+      ne++;
+      if ( pt->tag & MG_REQ ) {
+        if(!bin) {
+          fprintf(inm,"%d \n",ne);
+        } else {
+          fwrite(&ne,sw,1,inm);
+        }
+      }
+    }
+  }
+
+  /* prisms */
+  npr = nprreq = 0;
+  for (k=1; k<=mesh->nprism; k++) {
+    pp = &mesh->prism[k];
+    if ( !MG_EOK(pp) ) continue;
+    npr++;
+    if ( pp->tag & MG_REQ ){
+      nprreq++;
+    }
+  }
+
+  if ( npr ) {
+    if(!bin) {
+      strcpy(&chaine[0],"\n\nPrisms\n");
+      fprintf(inm,"%s",chaine);
+      fprintf(inm,"%d\n",npr);
+    } else {
+      binch = 9; //Prism
+      fwrite(&binch,sw,1,inm);
+      bpos += 12 + 20*npr;//Pos
+      fwrite(&bpos,sw,1,inm);
+      fwrite((unsigned char*)&npr,sw,1,inm);
+    }
+    for (k=1; k<=mesh->nprism; k++) {
+      pp = &mesh->prism[k];
+      if ( !MG_EOK(pp) ) continue;
+
+      if(!bin) {
+        fprintf(inm,"%d %d %d %d %d %d %d\n"
+                ,mesh->point[pp->v[0]].tmp,mesh->point[pp->v[1]].tmp
+                ,mesh->point[pp->v[2]].tmp,mesh->point[pp->v[3]].tmp
+                ,mesh->point[pp->v[4]].tmp,mesh->point[pp->v[5]].tmp,pp->ref);
+      } else {
+        fwrite(&mesh->point[pp->v[0]].tmp,sw,1,inm);
+        fwrite(&mesh->point[pp->v[1]].tmp,sw,1,inm);
+        fwrite(&mesh->point[pp->v[2]].tmp,sw,1,inm);
+        fwrite(&mesh->point[pp->v[3]].tmp,sw,1,inm);
+        fwrite(&mesh->point[pp->v[4]].tmp,sw,1,inm);
+        fwrite(&mesh->point[pp->v[5]].tmp,sw,1,inm);
+        fwrite(&pp->ref,sw,1,inm);
+      }
+    }
+  }
+
+
   nn = nt = 0;
   if ( mesh->xp ) {
     /* Count tangents and normals */
     for (k=1; k<=mesh->np; k++) {
       ppt = &mesh->point[k];
-      if ( !MG_VOK(ppt) || MG_SIN(ppt->tag) )  continue;
+      if ( !MG_VOK(ppt) || (!ppt->flag) || MG_SIN(ppt->tag) )  continue;
       else if ( (ppt->tag & MG_BDY)
                 && (!(ppt->tag & MG_GEO) || (ppt->tag & MG_NOM)) )
         nn++;
@@ -2240,7 +2361,7 @@ int MMG3D_saveMesh(MMG5_pMesh mesh, const char *filename) {
 
     for (k=1; k<=mesh->np; k++) {
       ppt = &mesh->point[k];
-      if ( !MG_VOK(ppt) || MG_SIN(ppt->tag) )  continue;
+      if ( !MG_VOK(ppt) || (!ppt->flag) || MG_SIN(ppt->tag) )  continue;
       else if ( (ppt->tag & MG_BDY)
                 && (!(ppt->tag & MG_GEO) || (ppt->tag & MG_NOM)) ) {
         pxp = &mesh->xpoint[ppt->xp];
@@ -2268,7 +2389,7 @@ int MMG3D_saveMesh(MMG5_pMesh mesh, const char *filename) {
     nn = 0;
     for (k=1; k<=mesh->np; k++) {
       ppt = &mesh->point[k];
-      if ( !MG_VOK(ppt) || MG_SIN(ppt->tag) )  continue;
+      if ( !MG_VOK(ppt) || (!ppt->flag) || MG_SIN(ppt->tag) )  continue;
       else if ( (ppt->tag & MG_BDY)
                 && (!(ppt->tag & MG_GEO) || (ppt->tag & MG_NOM)) ) {
         if(!bin) {
@@ -2297,7 +2418,7 @@ int MMG3D_saveMesh(MMG5_pMesh mesh, const char *filename) {
 
       for (k=1; k<=mesh->np; k++) {
         ppt = &mesh->point[k];
-        if ( !MG_VOK(ppt) || MG_SIN(ppt->tag) )  continue;
+        if ( !MG_VOK(ppt) || (!ppt->flag) || MG_SIN(ppt->tag) )  continue;
         else if ( MG_EDG(ppt->tag) || (ppt->tag & MG_NOM) ) {
           pxp = &mesh->xpoint[ppt->xp];
           if(!bin) {
@@ -2325,7 +2446,7 @@ int MMG3D_saveMesh(MMG5_pMesh mesh, const char *filename) {
       nt = 0;
       for (k=1; k<=mesh->np; k++) {
         ppt = &mesh->point[k];
-        if ( !MG_VOK(ppt) || MG_SIN(ppt->tag) )  continue;
+        if ( !MG_VOK(ppt) || (!ppt->flag) || MG_SIN(ppt->tag) )  continue;
         else if ( MG_EDG(ppt->tag) || (ppt->tag & MG_NOM) ) {
           if(!bin) {
             fprintf(inm,"%d %d\n",ppt->tmp,++nt);
@@ -2397,26 +2518,39 @@ int MMG3D_saveMesh(MMG5_pMesh mesh, const char *filename) {
   }
 
   /* quad + required quad */
-  nqreq = 0;
+  nq = nqreq = 0;
 
   if ( mesh->nquad ) {
-    if(!bin) {
-      strcpy(&chaine[0],"\n\nQuadrilaterals\n");
-      fprintf(inm,"%s",chaine);
-      fprintf(inm,"%d \n",mesh->nquad);
-    } else {
-      binch = 7; //Quadrilaterals
-      fwrite(&binch,sw,1,inm);
-      bpos += 12+20*mesh->nquad; //Pos
-      fwrite(&bpos,sw,1,inm);
-      fwrite(&mesh->nt,sw,1,inm);
-    }
+
     for (k=1; k<=mesh->nquad; k++) {
       pq = &mesh->quad[k];
+      if ( !MG_EOK(pq) ) {
+        continue;
+      }
+      nq++;
       if ( pq->tag[0] & MG_REQ && pq->tag[1] & MG_REQ &&
            pq->tag[2] & MG_REQ && pq->tag[3] & MG_REQ ) {
         nqreq++;
       }
+    }
+  }
+
+  if ( nq ) {
+    if(!bin) {
+      strcpy(&chaine[0],"\n\nQuadrilaterals\n");
+      fprintf(inm,"%s",chaine);
+      fprintf(inm,"%d \n",nq);
+    } else {
+      binch = 7; //Quadrilaterals
+      fwrite(&binch,sw,1,inm);
+      bpos += 12+20*nq; //Pos
+      fwrite(&bpos,sw,1,inm);
+      fwrite(&nq,sw,1,inm);
+    }
+    for (k=1; k<=mesh->nquad; k++) {
+      pq = &mesh->quad[k];
+      if ( !MG_EOK(pq) ) continue;
+
       if(!bin) {
         fprintf(inm,"%d %d %d %d %d\n",mesh->point[pq->v[0]].tmp,
                 mesh->point[pq->v[1]].tmp,mesh->point[pq->v[2]].tmp,
@@ -2532,123 +2666,20 @@ int MMG3D_saveMesh(MMG5_pMesh mesh, const char *filename) {
     }
   }
 
-  /* tetrahedra */
-  ne = nereq = 0;
-  for (k=1; k<=mesh->ne; k++) {
-    pt = &mesh->tetra[k];
-    if ( !MG_EOK(pt) ) {
-      continue;
-    }
-    ne++;
-    if ( pt->tag & MG_REQ ){
-      nereq++;
-    }
-  }
-
-  if(!bin) {
-    strcpy(&chaine[0],"\n\nTetrahedra\n");
-    fprintf(inm,"%s",chaine);
-    fprintf(inm,"%d\n",ne);
-  } else {
-    binch = 8; //Tetra
-    fwrite(&binch,sw,1,inm);
-    bpos += 12 + 20*ne;//Pos
-    fwrite(&bpos,sw,1,inm);
-    fwrite((unsigned char*)&ne,sw,1,inm);
-  }
-  for (k=1; k<=mesh->ne; k++) {
-    pt = &mesh->tetra[k];
-    if ( MG_EOK(pt) ) {
-      if(!bin) {
-        fprintf(inm,"%d %d %d %d %d\n",mesh->point[pt->v[0]].tmp,mesh->point[pt->v[1]].tmp
-                ,mesh->point[pt->v[2]].tmp,mesh->point[pt->v[3]].tmp,pt->ref);
-      } else {
-        fwrite(&mesh->point[pt->v[0]].tmp,sw,1,inm);
-        fwrite(&mesh->point[pt->v[1]].tmp,sw,1,inm);
-        fwrite(&mesh->point[pt->v[2]].tmp,sw,1,inm);
-        fwrite(&mesh->point[pt->v[3]].tmp,sw,1,inm);
-        fwrite(&pt->ref,sw,1,inm);
-      }
-    }
-  }
-
-  if ( nereq ) {
-    if(!bin) {
-      strcpy(&chaine[0],"\n\nRequiredTetrahedra\n");
-      fprintf(inm,"%s",chaine);
-      fprintf(inm,"%d\n",nereq);
-    } else {
-      binch = 12; //RequiredTetra
-      fwrite(&binch,sw,1,inm);
-      bpos += 12 + 4*nereq;//Pos
-      fwrite(&bpos,sw,1,inm);
-      fwrite(&nereq,sw,1,inm);
-    }
-    ne = 0;
-    for (k=1; k<=mesh->ne; k++) {
-      pt = &mesh->tetra[k];
-      if ( !MG_EOK(pt) ) continue;
-      ne++;
-      if ( pt->tag & MG_REQ ) {
-        if(!bin) {
-          fprintf(inm,"%d \n",ne);
-        } else {
-          fwrite(&ne,sw,1,inm);
-        }
-      }
-    }
-  }
-
-  /* prisms */
-  ne = nereq = 0;
-  for (k=1; k<=mesh->nprism; k++) {
-    pp = &mesh->prism[k];
-    if ( !MG_EOK(pp) ) continue;
-    ne++;
-    if ( pp->tag & MG_REQ ){
-      nereq++;
-    }
-  }
-
-  if(!bin) {
-    strcpy(&chaine[0],"\n\nPrisms\n");
-    fprintf(inm,"%s",chaine);
-    fprintf(inm,"%d\n",ne);
-  } else {
-    binch = 9; //Prism
-    fwrite(&binch,sw,1,inm);
-    bpos += 12 + 20*ne;//Pos
-    fwrite(&bpos,sw,1,inm);
-    fwrite((unsigned char*)&ne,sw,1,inm);
-  }
-  for (k=1; k<=mesh->nprism; k++) {
-    pp = &mesh->prism[k];
-    if(!bin) {
-      fprintf(inm,"%d %d %d %d %d %d %d\n"
-              ,mesh->point[pp->v[0]].tmp,mesh->point[pp->v[1]].tmp
-              ,mesh->point[pp->v[2]].tmp,mesh->point[pp->v[3]].tmp
-              ,mesh->point[pp->v[4]].tmp,mesh->point[pp->v[5]].tmp,pp->ref);
-    } else {
-      fwrite(&mesh->point[pp->v[0]].tmp,sw,1,inm);
-      fwrite(&mesh->point[pp->v[1]].tmp,sw,1,inm);
-      fwrite(&mesh->point[pp->v[2]].tmp,sw,1,inm);
-      fwrite(&mesh->point[pp->v[3]].tmp,sw,1,inm);
-      fwrite(&mesh->point[pp->v[4]].tmp,sw,1,inm);
-      fwrite(&mesh->point[pp->v[5]].tmp,sw,1,inm);
-      fwrite(&pp->ref,sw,1,inm);
-    }
-  }
 
   if ( mesh->info.imprim > 4 ) {
-    fprintf(stdout,"     NUMBER OF VERTICES   %8d   CORNERS %8d"
+    fprintf(stdout,"     NUMBER OF VERTICES       %8d   CORNERS %8d"
             "   REQUIRED %8d\n",np,nc,nre);
     if ( na )
-      fprintf(stdout,"     NUMBER OF EDGES      %8d   RIDGES  %8d\n",na,nr);
+      fprintf(stdout,"     NUMBER OF EDGES          %8d   RIDGES  %8d\n",na,nr);
     if ( mesh->nt )
-      fprintf(stdout,"     NUMBER OF TRIANGLES  %8d\n",mesh->nt);
-    fprintf(stdout,"     NUMBER OF TETRAHEDRA   %8d\n",mesh->ne);
-    if ( mesh->nprism )
-      fprintf(stdout,"     NUMBER OF PRISMS  %8d\n",mesh->nprism);
+      fprintf(stdout,"     NUMBER OF TRIANGLES      %8d\n",mesh->nt);
+    if ( nq )
+      fprintf(stdout,"     NUMBER OF QUADRILATERALS %8d\n",nq);
+
+    fprintf(stdout,"     NUMBER OF TETRAHEDRA     %8d\n",ne);
+    if ( npr )
+      fprintf(stdout,"     NUMBER OF PRISMS         %8d\n",npr);
 
   }
 
