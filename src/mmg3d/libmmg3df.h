@@ -315,28 +315,31 @@ END INTERFACE
 ! /**
 !  * \param mesh pointer toward the mesh structure.
 !  * \param np number of vertices.
-!  * \param ne number of elements (tetrahedra).
+!  * \param ne number of tetrahedra.
+!  * \param nprism number of prisms.
 !  * \param nt number of triangles.
+!  * \param nquad number of quads.
 !  * \param na number of edges.
 !  * \return 0 if failed, 1 otherwise.
 !  *
-!  * Set the number of vertices, tetrahedra, triangles and edges of the
-!  * mesh and allocate the associated tables. If call twice, reset the
-!  * whole mesh to realloc it at the new size
+!  * Set the number of vertices, tetrahedra, prisms, triangles, quadrangles and
+!  * edges of the mesh and allocate the associated tables. If call twice, reset
+!  * the whole mesh to realloc it at the new size
 !  *
 !  * \remark Fortran interface:
 !  */
 INTERFACE
-  SUBROUTINE MMG3D_SET_MESHSIZE(mesh,np,ne,nt,na,retval)
+  SUBROUTINE MMG3D_SET_MESHSIZE(mesh,np,ne,nprism,nt,nquad,na,retval)
     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh
-    INTEGER                       :: np,ne,nt,na
+    INTEGER                       :: np,ne,nprism,nt,nquad,na
     INTEGER, INTENT(OUT)          :: retval
   END SUBROUTINE
 END INTERFACE
 !  *
 !  */
 
-! int  MMG3D_Set_meshSize(MMG5_pMesh mesh, int np, int ne, int nt, int na);
+! int  MMG3D_Set_meshSize(MMG5_pMesh mesh,int np,int ne,int nprism,
+!                         int nt,int nquad,int na);
 
 ! /* init structure datas */
 ! /**
@@ -448,6 +451,62 @@ END INTERFACE
 !                             int *refs);
 ! /**
 !  * \param mesh pointer toward the mesh structure.
+!  * \param v0 first vertex of prism.
+!  * \param v1 second vertex of prism.
+!  * \param v2 third vertex of prism.
+!  * \param v3 fourth vertex of prism.
+!  * \param v4 fifth vertex of prism.
+!  * \param v5 sixth vertex of prism.
+!  * \param ref prism reference.
+!  * \param pos prism position in the mesh.
+!  * \return 0 if failed, 1 otherwise.
+!  *
+!  * Set prisms of vertices \a v0, \a v1,\a v2,\a v3,\a v4,\a v5 and reference
+!  * \a ref at position \a pos in mesh structure.
+!  *
+!  * \remark Fortran interface:
+!  */
+INTERFACE
+  SUBROUTINE MMG3D_SET_PRISM(mesh,v0,v1,v2,v3,v4,v5,ref,pos,retval)
+    MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh
+    INTEGER, INTENT(IN)           :: v0,v1,v2,v3,v4,v5,ref,pos
+    INTEGER, INTENT(OUT)          :: retval
+  END SUBROUTINE
+END INTERFACE
+!  *
+!  */
+
+! int  MMG3D_Set_prism(MMG5_pMesh mesh, int v0, int v1,
+!                      int v2, int v3, int v4, int v5, int ref, int pos);
+! /**
+!  * \param mesh pointer toward the mesh structure.
+!  * \param prisms vertices of the prisms of the mesh
+!  * Vertices of the \f$i^{th}\f$ prism are stored in prism[(i-1)*6]\@6.
+!  * \param refs table of the prisms references.
+!  * References of the \f$i^{th}\f$ prisms is stored in refs[i-1].
+!  * \return 0 if failed, 1 otherwise.
+!  *
+!  * Set vertices and references of the mesh prisms.
+!  *
+!  * \remark Fortran interface: (commentated in
+!  * order to allow to pass \%val(0) instead of the refs array)
+!  *
+!  */
+INTERFACE
+!  SUBROUTINE MMG3D_SET_PRISMS(mesh,prisms,refs,retval)
+!    MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh
+!    INTEGER, DIMENSION(*), INTENT(IN) :: prisms,refs
+!    INTEGER, INTENT(OUT)          :: retval
+!  END SUBROUTINE
+END INTERFACE
+!  *
+!  */
+
+!   int  MMG3D_Set_prisms(MMG5_pMesh mesh, int *prisms,
+!                         int *refs);
+
+! /**
+!  * \param mesh pointer toward the mesh structure.
 !  * \param v0 first vertex of triangle.
 !  * \param v1 second vertex of triangle.
 !  * \param v2 third vertex of triangle.
@@ -497,6 +556,58 @@ END INTERFACE
 !  */
 
 !   int  MMG3D_Set_triangles(MMG5_pMesh mesh, int *tria, int *refs);
+! /**
+!  * \param mesh pointer toward the mesh structure.
+!  * \param v0 first vertex of quadrilateral.
+!  * \param v1 second vertex of quadrilateral.
+!  * \param v2 third vertex of quadrilateral.
+!  * \param v3 fourth vertex of quadrilateral.
+!  * \param ref quadrilateral reference.
+!  * \param pos quadrilateral position in the mesh.
+!  * \return 0 if failed, 1 otherwise.
+!  *
+!  * Set quadrilateral of vertices \a v0, \a v1, \a v2, \a v3 and reference \a ref
+!  * at position \a pos in mesh structure.
+!  *
+!  * \remark Fortran interface:
+!  */
+INTERFACE
+  SUBROUTINE MMG3D_SET_QUADRILATERAL(mesh,v0,v1,v2,v3,ref,pos,retval)
+    MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh
+    INTEGER, INTENT(IN)           :: v0,v1,v2,v3,ref,pos
+    INTEGER, INTENT(OUT)          :: retval
+  END SUBROUTINE
+END INTERFACE
+!  *
+!  */
+
+! int  MMG3D_Set_quadrangle(MMG5_pMesh mesh, int v0, int v1,
+!                           int v2, int v3, int ref,int pos);
+! /**
+!  * \param mesh pointer toward the mesh structure.
+!  * \param quads pointer toward the table of the quads vertices
+!  * Vertices of the \f$i^{th}\f$ quad are stored in quads[(i-1)*3]\@3.
+!  * \param refs pointer toward the table of the quadrangle references.
+!  * refs[i-1] is the ref of the \f$i^{th}\f$ quad.
+!  * \return 0 if failed, 1 otherwise.
+!  *
+!  * Set vertices and references of the mesh quadrangles.
+!  *
+!  * \remark Fortran interface: (commentated in
+!  * order to allow to pass \%val(0) instead of the refs array)
+!  *
+!  */
+INTERFACE
+!  SUBROUTINE MMG3D_SET_QUADRANGLES(mesh,quads,refs,retval)
+!    MMG5_DATA_PTR_T,INTENT(INOUT)    :: mesh
+!    INTEGER,DIMENSION(*), INTENT(IN) :: quads,refs
+!    INTEGER, INTENT(OUT)             :: retval
+!  END SUBROUTINE
+END INTERFACE
+!  *
+!  */
+
+!   int  MMG3D_Set_quadrangles(MMG5_pMesh mesh, int *quads, int *refs);
 ! /**
 !  * \param mesh pointer toward the mesh structure.
 !  * \param v0 first extremity of the edge.
@@ -976,26 +1087,30 @@ END INTERFACE
 ! /**
 !  * \param mesh pointer toward the mesh structure.
 !  * \param np pointer toward the number of vertices.
-!  * \param ne pointer toward the number of elements (tetrahedra).
+!  * \param ne pointer toward the number of tetrahedra.
+!  * \param nprism pointer toward the number of prisms.
 !  * \param nt pointer toward the number of triangles.
+!  * \param nquad pointer toward the number of quads.
 !  * \param na pointer toward the number of edges.
 !  * \return 1.
 !  *
-!  * Get the number of vertices, tetrahedra, triangles and edges of the mesh.
+!  * Get the number of vertices, tetrahedra, prisms, triangles, quadrangles and
+!  * edges of the mesh.
 !  *
 !  * \remark Fortran interface:
 !  */
 INTERFACE
-  SUBROUTINE MMG3D_GET_MESHSIZE(mesh,np,ne,nt,na,retval)
+  SUBROUTINE MMG3D_GET_MESHSIZE(mesh,np,ne,nprism,nt,nquad,na,retval)
     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh
-    INTEGER                       :: np,ne,nt,na
+    INTEGER                       :: np,ne,nprism,nt,nquad,na
     INTEGER, INTENT(OUT)          :: retval
   END SUBROUTINE
 END INTERFACE
 !  *
 !  */
 
-! int  MMG3D_Get_meshSize(MMG5_pMesh mesh, int* np, int* ne, int* nt, int* na);
+! int  MMG3D_Get_meshSize(MMG5_pMesh mesh, int* np, int* ne,int *nprism, int* nt,
+!                         int* nquad, int* na);
 ! /**
 !  * \param mesh pointer toward the mesh structure.
 !  * \param sol pointer toward the sol structure.
@@ -1152,6 +1267,69 @@ END INTERFACE
 !                           int* areRequired);
 ! /**
 !  * \param mesh pointer toward the mesh structure.
+!  * \param v0 pointer toward the first vertex of prism.
+!  * \param v1 pointer toward the second vertex of prism.
+!  * \param v2 pointer toward the third vertex of prism.
+!  * \param v3 pointer toward the fourth vertex of prism.
+!  * \param v4 pointer toward the fifth vertex of prism.
+!  * \param v5 pointer toward the sixth vertex of prism.
+!  * \param ref pointer toward the prism reference.
+!  * \param isRequired pointer toward the flag saying if prism is
+!  *  required.
+!  * \return 0 if failed, 1 otherwise.
+!  *
+!  * Get vertices \a v0, \a v1, \a v2, \a v3, \a v4, \a v5 and reference \a ref of
+!  * next prism of mesh.
+!  *
+!  * \remark Fortran interface:
+!  */
+INTERFACE
+  SUBROUTINE MMG3D_GET_PRISM(mesh,v0,v1,v2,v3,v4,v5,ref,isRequired,&
+                                   retval)
+    MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh
+    INTEGER, INTENT(OUT)          :: v0,v1,v2,v3,v4,v5
+    INTEGER                       :: ref,isRequired
+    INTEGER, INTENT(OUT)          :: retval
+  END SUBROUTINE
+END INTERFACE
+!  *
+!  */
+
+! int  MMG3D_Get_prism(MMG5_pMesh mesh, int* v0, int* v1, int* v2,
+!                      int* v3,int* v4,int* v5,int* ref, int* isRequired);
+! /**
+!  * \param mesh pointer toward the mesh structure.
+!  * \param prisms pointer toward the table of the prisms vertices.
+!  * Vertices of the \f$i^{th}\f$ prism are stored in prisms[(i-1)*6]\@6.
+!  * \param refs pointer toward the table of the prism references.
+!  * References of the \f$i^{th}\f$ prism is stored in refs[i-1].
+!  * \param areRequired pointer toward the table of the flags saying if the
+!  *  prisms are required. areRequired[i-1]=1 if the \f$i^{th}\f$ prism
+!  * is required.
+!  * \return 0 if failed, 1 otherwise.
+!  *
+!  * Get vertices and references of the mesh prisms.
+!  *
+!  * \remark Fortran interface: (commentated in order to allow to pass \%val(0)
+!  * instead of the refs, areCorners or areRequired arrays)
+!  *
+!  */
+INTERFACE
+!  SUBROUTINE MMG3D_GET_PRISMS(mesh,prisms,refs,areRequired,&
+!                              retval)
+!    MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh
+!    INTEGER, DIMENSION(*),INTENT(OUT) :: prisms
+!    INTEGER, DIMENSION(*)         :: refs,areRequired
+!    INTEGER, INTENT(OUT)          :: retval
+!  END SUBROUTINE
+END INTERFACE
+!  *
+!  */
+
+! int  MMG3D_Get_prisms(MMG5_pMesh mesh, int* prisms,int* refs,
+!                           int* areRequired);
+! /**
+!  * \param mesh pointer toward the mesh structure.
 !  * \param v0 pointer toward the first vertex of triangle.
 !  * \param v1 pointer toward the second vertex of triangle.
 !  * \param v2 pointer toward the third vertex of triangle.
@@ -1207,6 +1385,64 @@ END INTERFACE
 
 ! int  MMG3D_Get_triangles(MMG5_pMesh mesh, int* tria, int* refs,
 !                          int* areRequired);
+! /**
+!  * \param mesh pointer toward the mesh structure.
+!  * \param v0 pointer toward the first vertex of quadrangle.
+!  * \param v1 pointer toward the second vertex of quadrangle.
+!  * \param v2 pointer toward the third vertex of quadrangle.
+!  * \param v3 pointer toward the fourth vertex of quadrangle.
+!  * \param ref pointer toward the quadrangle reference.
+!  * \param isRequired pointer toward the flag saying if quadrangle is required.
+!  * \return 0 if failed, 1 otherwise.
+!  *
+!  * Get vertices \a v0,\a v1,\a v2,\a v3 and reference \a ref of next
+!  * quadrangle of mesh.
+!  *
+!  * \remark Fortran interface:
+!  */
+INTERFACE
+  SUBROUTINE MMG3D_GET_QUADRANGLE(mesh,v0,v1,v2,v3,ref,isRequired,retval)
+    MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh
+    INTEGER, INTENT(OUT)          :: v0,v1,v2,v3
+    INTEGER                       :: ref,isRequired
+    INTEGER, INTENT(OUT)          :: retval
+  END SUBROUTINE
+END INTERFACE
+!  *
+!  */
+
+! int  MMG3D_Get_quadrangle(MMG5_pMesh mesh, int* v0, int* v1, int* v2,int* v3,
+!                           int* ref, int* isRequired);
+! /**
+!  * \param mesh pointer toward the mesh structure.
+!  * \param quads pointer toward the table of the quadrangles vertices
+!  * Vertices of the \f$i^{th}\f$ quad are stored in tria[(i-1)*4]\@4.
+!  * \param refs pointer toward the table of the quadrangles references.
+!  * refs[i-1] is the ref of the \f$i^{th}\f$ quad.
+!  * \param areRequired pointer toward table of the flags saying if quadrangles
+!  * are required. areRequired[i-1]=1 if the \f$i^{th}\f$ quad
+!  * is required.
+!  * \return 0 if failed, 1 otherwise.
+!  *
+!  * Get vertices and references of the mesh quadrangles.
+!  *
+!  * \remark Fortran interface: (Commentated in order to allow to pass \%val(0)
+!  * instead of the refs or areRequired arrays)
+!  *
+!  */
+INTERFACE
+!  SUBROUTINE MMG3D_GET_QUADRANGLES(mesh,quads,refs,areRequired,retval)
+!    MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh
+!    INTEGER, DIMENSION(*),INTENT(OUT) :: quads
+!    INTEGER, DIMENSION(*)         :: refs,areRequired
+!    INTEGER, INTENT(OUT)          :: retval
+!  END SUBROUTINE
+END INTERFACE
+!  *
+!  */
+
+! int  MMG3D_Get_quadrangles(MMG5_pMesh mesh, int* quads, int* refs,
+!                            int* areRequired);
 ! /**
 !  * \param mesh pointer toward the mesh structure.
 !  * \param e0 pointer toward the first extremity of the edge.
@@ -1446,7 +1682,7 @@ END INTERFACE
 !  * \remark Fortran interface:
 !  */
 INTERFACE
-  SUBROUTINE MMG3D_LOADMESH(mesh,sol,filename,strlen,retval)
+  SUBROUTINE MMG3D_LOADMSHMESH(mesh,sol,filename,strlen,retval)
     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,sol
     CHARACTER(LEN=*), INTENT(IN)   :: filename
     INTEGER, INTENT(IN)            :: strlen

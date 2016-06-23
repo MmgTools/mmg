@@ -159,7 +159,8 @@ int _MMG2D_defBdrySiz(MMG5_pMesh mesh,MMG5_pSol met) {
       if ( ll < _MMG5_EPSD ) continue;
       li = 1.0 / sqrt(ll);
 
-      /* Recovery of the two tangent vectors associated to points p1,p2; they need not be oriented in the same fashion */
+      /* Recovery of the two tangent vectors associated to points p1,p2; they
+       * need not be oriented in the same fashion */
       if ( M_SIN(p1->tag) /* || (p1->tag & MG_NOM) */ ) {
         t1[0] = li*ux;
         t1[1] = li*uy;

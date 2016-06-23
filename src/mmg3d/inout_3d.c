@@ -902,12 +902,13 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,const char *filename) {
     }
     if ( mesh->nt )
       fprintf(stdout,"     NUMBER OF TRIANGLES      %8d\n",mesh->nt);
-    if ( mesh->nt )
+    if ( mesh->nquad )
       fprintf(stdout,"     NUMBER OF QUADRILATERALS %8d\n",mesh->nquad);
-    if ( mesh->nprism )
-      fprintf(stdout,"     NUMBER OF PRISMS         %8d\n",mesh->nprism);
 
     fprintf(stdout,"     NUMBER OF TETRAHEDRA     %8d\n",mesh->ne);
+
+    if ( mesh->nprism )
+      fprintf(stdout,"     NUMBER OF PRISMS         %8d\n",mesh->nprism);
 
 
     if ( npreq || nedreq || ntreq || nereq || nqreq ) {
@@ -1841,12 +1842,14 @@ int MMG3D_loadMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
     }
     if ( mesh->nt )
       fprintf(stdout,"     NUMBER OF TRIANGLES      %8d\n",mesh->nt);
-    if ( mesh->nt )
+    if ( mesh->nquad )
       fprintf(stdout,"     NUMBER OF QUADRILATERALS %8d\n",mesh->nquad);
+
+    fprintf(stdout,"     NUMBER OF TETRAHEDRA     %8d\n",mesh->ne);
+
     if ( mesh->nprism )
       fprintf(stdout,"     NUMBER OF PRISMS         %8d\n",mesh->nprism);
 
-    fprintf(stdout,"     NUMBER OF TETRAHEDRA     %8d\n",mesh->ne);
   }
 
   /** Read the solution at nodes */

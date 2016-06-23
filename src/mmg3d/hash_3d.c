@@ -1244,6 +1244,8 @@ int _MMG5_bdryTria(MMG5_pMesh mesh, int ntmesh) {
   int       ref,*adja,adj,k,ia,ib,ic,kt, tofree=0,ntinit;
   char      i;
 
+  hash.item = NULL;
+
   ntinit = mesh->nt;
   if ( mesh->nt ) {
     /* Hash given bdry triangles */
@@ -1258,7 +1260,6 @@ int _MMG5_bdryTria(MMG5_pMesh mesh, int ntmesh) {
     }
 
   }
-  else hash.item = NULL;
 
   /* Add boundary triangles stored on tetra */
   if ( ntmesh != ntinit ) {
@@ -1633,6 +1634,7 @@ int _MMG5_chkBdryTria(MMG5_pMesh mesh) {
     return(1);
   }
 
+
   nbl = 0;
   if ( !mesh->nt ) {
     _MMG5_ADD_MEM(mesh,(ntmesh+1)*sizeof(MMG5_Tria),"triangles",return(0));
@@ -1814,6 +1816,9 @@ int _MMG5_bdrySet(MMG5_pMesh mesh) {
       }
     }
   }
+  _MMG5_ADD_MEM(mesh,(mesh->xpr-mesh->nprism)*sizeof(MMG5_xPrism),"boundary prisms",
+                fprintf(stderr,"  Exit program.\n");
+                exit(EXIT_FAILURE));
   _MMG5_SAFE_RECALLOC(mesh->xprism,mesh->nprism+1,mesh->xpr+1,MMG5_xPrism,
                       "boundary prisms");
 

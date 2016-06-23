@@ -197,6 +197,7 @@ void _MMG5_swapTet(MMG5_pTetra tetras/*, int* adja*/, int* perm, int ind1, int i
 int _MMG5_mmg3dRenumbering(int boxVertNbr, MMG5_pMesh mesh, MMG5_pSol sol) {
   MMG5_pPoint ppt;
   MMG5_pTetra ptet;
+  MMG5_pPrism pp;
   SCOTCH_Num  edgeNbr;
   SCOTCH_Num  *vertTab, *edgeTab, *permVrtTab;
   SCOTCH_Graph graf ;
@@ -396,6 +397,24 @@ int _MMG5_mmg3dRenumbering(int boxVertNbr, MMG5_pMesh mesh, MMG5_pSol sol) {
         permNodTab[nodeGlbIdx] = ++npreal;
     }
   }
+  for( k = 1; k <= mesh->nprism; ++k) {
+    pp = &mesh->prism[k];
+
+    if ( !MG_EOK(pp) ) continue;
+
+    for(j = 0; j<6 ; j++) {
+      nodeGlbIdx = pp->v[j];
+
+      if ( permNodTab[nodeGlbIdx] ) continue;
+
+      ppt = &mesh->point[nodeGlbIdx];
+
+      if ( !(ppt->tag & MG_NUL) )
+        /* Building the new point list */
+        permNodTab[nodeGlbIdx] = ++npreal;
+    }
+  }
+
   _MMG5_DEL_MEM(mesh,vertOldTab,(mesh->ne+1)*sizeof(int));
 
   /* Modify the numbering of the nodes of each tetra */
@@ -405,7 +424,19 @@ int _MMG5_mmg3dRenumbering(int boxVertNbr, MMG5_pMesh mesh, MMG5_pSol sol) {
     }
   }
 
-#warning update prisms and quads after the renumbering
+  /* Modify the numbering of the nodes of each prism */
+  for( k = 1; k <= mesh->nprism; ++k) {
+    for(j = 0; j<6 ; j++) {
+      mesh->prism[k].v[j] = permNodTab[mesh->prism[k].v[j]];
+    }
+  }
+
+  /* Modify the numbering of the nodes of each quad */
+  for( k = 1; k <= mesh->nquad; ++k) {
+    for(j = 0; j<4 ; j++) {
+      mesh->quad[k].v[j] = permNodTab[mesh->quad[k].v[j]];
+    }
+  }
 
   /* Permute nodes and sol */
   for (j=1; j<= mesh->np; j++) {
