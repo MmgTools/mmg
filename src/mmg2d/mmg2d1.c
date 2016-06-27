@@ -76,7 +76,7 @@ int _MMG2_anatri(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
         MMG2_bdryEdge(mesh);
         _MMG2_savemesh_db(mesh,mesh->nameout,0);
         _MMG2_savemet_db(mesh,met,mesh->nameout,0);
-        exit(0);
+        exit(EXIT_FAILURE);
       }*/
 
       /* Collapse short edges */
@@ -800,7 +800,7 @@ int MMG2_mmg2d1n(MMG5_pMesh mesh,MMG5_pSol met) {
   }
 
   if ( mesh->info.hgrad > 0. ) {
-    if ( mesh->info.imprim )   fprintf(stdout,"\n  -- GRADATION : %8f\n",exp(mesh->info.hgrad));
+    if ( mesh->info.imprim )   fprintf(stdout,"\n  -- GRADATION : %8f\n",mesh->info.hgrad);
     if (!_MMG2_gradsiz_iso(mesh,met) ) {
       fprintf(stdout,"  ## Gradation problem. Exit program.\n");
       return(0);
@@ -829,7 +829,7 @@ int MMG2_mmg2d1n(MMG5_pMesh mesh,MMG5_pSol met) {
     MMG2_bdryEdge(mesh);
     _MMG2_savemesh_db(mesh,mesh->nameout,0);
     _MMG2_savemet_db(mesh,met,mesh->nameout,0);
-    exit(0);
+    exit(EXIT_FAILURE);
   }*/
 
   return(1);

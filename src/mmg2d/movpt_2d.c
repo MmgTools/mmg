@@ -70,7 +70,7 @@ int _MMG2_movedgpt(MMG5_pMesh mesh,MMG5_pSol met,int ilist,int *list, char impro
         }
         else if ( ip2 != pt->v[i2] ) {
           printf("   *** Function movedgpt: three edges connected at point %d - abort.\n",pt->v[i]);
-          exit(0);
+          exit(EXIT_FAILURE);
         }
       }
     }
@@ -87,7 +87,7 @@ int _MMG2_movedgpt(MMG5_pMesh mesh,MMG5_pSol met,int ilist,int *list, char impro
         }
         else if ( ip2 != pt->v[i1] ) {
           printf("   *** Function movedgpt: three edges connected at point %d - abort.\n",pt->v[i]);
-          exit(0);
+          exit(EXIT_FAILURE);
         }
       }
     }
@@ -96,7 +96,7 @@ int _MMG2_movedgpt(MMG5_pMesh mesh,MMG5_pSol met,int ilist,int *list, char impro
   /* Check that there are exactly two boundary points connected at p0 */
   if ( ip1 == 0 || ip2 == 0 ) {
     printf("   *** Function movedgpt: no two edges connected at edge, non singular point %d - abort.\n",pt->v[i]);
-    exit(0);
+    exit(EXIT_FAILURE);
   }
   
   ip0 = pt->v[i];

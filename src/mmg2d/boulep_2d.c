@@ -274,7 +274,7 @@ int _MMG2_bouleendp(MMG5_pMesh mesh,int start,char ip,int *ip1,int *ip2) {
         if ( *ip2 != 0 && *ip1 != pt->v[i2] && *ip2 != pt->v[i2] ) {
           printf("Func. _MMG2_bouleendp: three boundary edges at non singular point %d: %d %d, and %d. Abort\n",\
                  np,*ip1,*ip2,pt->v[i2]);
-          exit(0);
+          exit(EXIT_FAILURE);
         }
         if ( *ip1 != pt->v[i2] ) *ip2 = pt->v[i2];
       }
@@ -287,7 +287,7 @@ int _MMG2_bouleendp(MMG5_pMesh mesh,int start,char ip,int *ip1,int *ip2) {
         if ( *ip2 != 0 && *ip1 != pt->v[i1] && *ip2 != pt->v[i1] ) {
           printf("Func. _MMG2_bouleendp: three boundary edges at non singular point %d: %d %d, and %d. Abort\n",\
                  np,*ip1,*ip2,pt->v[i1]);
-          exit(0);
+          exit(EXIT_FAILURE);
         }
         if ( *ip1 != pt->v[i1] ) *ip2 = pt->v[i1];
       }
@@ -327,7 +327,7 @@ int _MMG2_bouleendp(MMG5_pMesh mesh,int start,char ip,int *ip1,int *ip2) {
         if ( *ip2 != 0 && *ip1 != pt->v[i2] && *ip2 != pt->v[i2] ) {
           printf("Func. _MMG2_bouleendp: three boundary edges at non singular point %d: %d %d, and %d. Abort\n",\
                  np,*ip1,*ip2,pt->v[i2]);
-          exit(0);
+          exit(EXIT_FAILURE);
         }
         if ( *ip1 != pt->v[i2] ) *ip2 = pt->v[i2];
       }
@@ -339,7 +339,7 @@ int _MMG2_bouleendp(MMG5_pMesh mesh,int start,char ip,int *ip1,int *ip2) {
         if ( *ip2 != 0 && *ip1 != pt->v[i1] && *ip2 != pt->v[i1] ) {
           printf("Func. _MMG2_bouleendp: three boundary edges at non singular point %d: %d %d, and %d. Abort\n",\
                  np,*ip1,*ip2,pt->v[i1]);
-          exit(0);
+          exit(EXIT_FAILURE);
         }
         if ( *ip1 != pt->v[i1] ) *ip2 = pt->v[i1];
       }
