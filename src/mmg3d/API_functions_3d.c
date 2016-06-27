@@ -673,8 +673,8 @@ int MMG3D_Set_prism(MMG5_pMesh mesh, int v0, int v1, int v2,
   pp->v[1] = v1;
   pp->v[2] = v2;
   pp->v[3] = v3;
-  pp->v[2] = v4;
-  pp->v[3] = v5;
+  pp->v[4] = v4;
+  pp->v[5] = v5;
   pp->ref  = ref;
 
   mesh->point[pp->v[0]].tag &= ~MG_NUL;
@@ -909,20 +909,20 @@ int  MMG3D_Get_triangles(MMG5_pMesh mesh, int *tria, int *refs, int *areRequired
   return 1;
 }
 
-int MMG3D_Set_quadrangle(MMG5_pMesh mesh, int v0, int v1, int v2, int v3,
+int MMG3D_Set_quadrilateral(MMG5_pMesh mesh, int v0, int v1, int v2, int v3,
                          int ref,int pos) {
 
   if ( !mesh->nquad ) {
-    fprintf(stderr,"  ## Error: You must set the number of quadrangles with the");
-    fprintf(stderr," MMG3D_Set_meshSize function before setting quadrangles in mesh\n");
+    fprintf(stderr,"  ## Error: You must set the number of quadrilaterals with the");
+    fprintf(stderr," MMG3D_Set_meshSize function before setting quadrilaterals in mesh\n");
     return(0);
   }
 
   if ( pos > mesh->nquad ) {
-    fprintf(stderr,"  ## Error: attempt to set new quadrangle at position %d.",pos);
-    fprintf(stderr," Overflow of the given number of quadrangles: %d\n",mesh->nquad);
+    fprintf(stderr,"  ## Error: attempt to set new quadrilateral at position %d.",pos);
+    fprintf(stderr," Overflow of the given number of quadrilaterals: %d\n",mesh->nquad);
     fprintf(stderr,"  ## Check the mesh size, its compactness or the position");
-    fprintf(stderr," of the quadrangle.\n");
+    fprintf(stderr," of the quadrilateral.\n");
     return(0);
   }
 
@@ -935,7 +935,7 @@ int MMG3D_Set_quadrangle(MMG5_pMesh mesh, int v0, int v1, int v2, int v3,
   return(1);
 }
 
-int MMG3D_Get_quadrangle(MMG5_pMesh mesh, int* v0, int* v1, int* v2, int* v3,
+int MMG3D_Get_quadrilateral(MMG5_pMesh mesh, int* v0, int* v1, int* v2, int* v3,
                        int* ref,int* isRequired) {
   MMG5_pQuad  pq;
   static int nqi = 0;
@@ -943,20 +943,20 @@ int MMG3D_Get_quadrangle(MMG5_pMesh mesh, int* v0, int* v1, int* v2, int* v3,
   if ( nqi == mesh->nquad ) {
     nqi = 0;
     if ( mesh->info.ddebug ) {
-      fprintf(stdout,"  ## Warning: reset the internal counter of quadrangles.\n");
+      fprintf(stdout,"  ## Warning: reset the internal counter of quadrilaterals.\n");
       fprintf(stdout,"     You must pass here exactly one time (the first time ");
-      fprintf(stdout,"you call the MMG3D_Get_quadrangle function).\n");
+      fprintf(stdout,"you call the MMG3D_Get_quadrilateral function).\n");
       fprintf(stdout,"     If not, the number of call of this function");
-      fprintf(stdout," exceed the number of quadrangles: %d\n ",mesh->nquad);
+      fprintf(stdout," exceed the number of quadrilaterals: %d\n ",mesh->nquad);
     }
   }
 
   nqi++;
 
   if ( nqi > mesh->nquad ) {
-    fprintf(stderr,"  ## Error: unable to get quadrangle.\n");
-    fprintf(stderr,"    The number of call of MMG3D_Get_quadrangle function");
-    fprintf(stderr," can not exceed the number of quadrangles: %d\n ",mesh->nquad);
+    fprintf(stderr,"  ## Error: unable to get quadrilateral.\n");
+    fprintf(stderr,"    The number of call of MMG3D_Get_quadrilateral function");
+    fprintf(stderr," can not exceed the number of quadrilaterals: %d\n ",mesh->nquad);
     return(0);
   }
 
@@ -979,7 +979,7 @@ int MMG3D_Get_quadrangle(MMG5_pMesh mesh, int* v0, int* v1, int* v2, int* v3,
   return(1);
 }
 
-int  MMG3D_Set_quadrangles(MMG5_pMesh mesh, int *quads, int *refs) {
+int  MMG3D_Set_quadrilaterals(MMG5_pMesh mesh, int *quads, int *refs) {
   MMG5_pQuad  pq;
   int         i, j;
 
@@ -997,7 +997,7 @@ int  MMG3D_Set_quadrangles(MMG5_pMesh mesh, int *quads, int *refs) {
   return 1;
 }
 
-int  MMG3D_Get_quadrangles(MMG5_pMesh mesh, int *quads, int *refs, int *areRequired) {
+int  MMG3D_Get_quadrilaterals(MMG5_pMesh mesh, int *quads, int *refs, int *areRequired) {
   MMG5_pQuad  pq;
   int         i, j;
 

@@ -352,45 +352,45 @@ FORTRAN_NAME(MMG3D_GET_TRIANGLES,mmg3d_get_triangles,
   return;
 }
 /**
- * See \ref MMG3D_Set_quadrangle function in \ref mmg3d/libmmg3d.h file.
+ * See \ref MMG3D_Set_quadrilateral function in \ref mmg3d/libmmg3d.h file.
  */
-FORTRAN_NAME(MMG3D_SET_QUADRANGLE,mmg3d_set_quadrangle,
+FORTRAN_NAME(MMG3D_SET_QUADRILATERAL,mmg3d_set_quadrilateral,
              (MMG5_pMesh *mesh, int* v0, int* v1, int* v2,int *v3,
               int* ref,int* pos,int* retval),
              (mesh,v0,v1,v2,v3,ref,pos,retval)) {
-  *retval = MMG3D_Set_quadrangle(*mesh, *v0, *v1, *v2, *v3,*ref, *pos);
+  *retval = MMG3D_Set_quadrilateral(*mesh, *v0, *v1, *v2, *v3,*ref, *pos);
   return;
 }
 
 /**
- * See \ref MMG3D_Get_quadrangle function in \ref mmg3d/libmmg3d.h file.
+ * See \ref MMG3D_Get_quadrilateral function in \ref mmg3d/libmmg3d.h file.
  */
-FORTRAN_NAME(MMG3D_GET_QUADRANGLE,mmg3d_get_quadrangle,
+FORTRAN_NAME(MMG3D_GET_QUADRILATERAL,mmg3d_get_quadrilateral,
              (MMG5_pMesh *mesh, int* v0, int* v1, int* v2,int *v3,
                int* ref,int* isRequired, int* retval),
              (mesh,v0,v1,v2,v3,ref,isRequired,retval)) {
-  *retval = MMG3D_Get_quadrangle(*mesh,v0,v1,v2,v3,ref,isRequired);
+  *retval = MMG3D_Get_quadrilateral(*mesh,v0,v1,v2,v3,ref,isRequired);
   return;
 }
 /**
- * See \ref MMG3D_Set_quadrangles function in \ref mmg3d/libmmg3d.h file.
+ * See \ref MMG3D_Set_quadrilaterals function in \ref mmg3d/libmmg3d.h file.
  */
-FORTRAN_NAME(MMG3D_SET_QUADRANGLES,mmg3d_set_quadrangles,
+FORTRAN_NAME(MMG3D_SET_QUADRILATERALS,mmg3d_set_quadrilaterals,
              (MMG5_pMesh *mesh, int* quads, int* refs,
               int* retval),
              (mesh,quads,refs,retval)) {
-  *retval = MMG3D_Set_quadrangles(*mesh, quads, refs);
+  *retval = MMG3D_Set_quadrilaterals(*mesh, quads, refs);
   return;
 }
 
 /**
- * See \ref MMG3D_Get_quadrangles function in \ref mmg3d/libmmg3d.h file.
+ * See \ref MMG3D_Get_quadrilaterals function in \ref mmg3d/libmmg3d.h file.
  */
-FORTRAN_NAME(MMG3D_GET_QUADRANGLES,mmg3d_get_quadrangles,
+FORTRAN_NAME(MMG3D_GET_QUADRILATERALS,mmg3d_get_quadrilaterals,
              (MMG5_pMesh *mesh, int* quads, int* refs,int* areRequired,
               int* retval),
              (mesh,quads,refs,areRequired,retval)) {
-  *retval = MMG3D_Get_quadrangles(*mesh,quads,refs,areRequired);
+  *retval = MMG3D_Get_quadrilaterals(*mesh,quads,refs,areRequired);
   return;
 }
 

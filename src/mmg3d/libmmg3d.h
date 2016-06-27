@@ -254,7 +254,7 @@ int  MMG3D_Set_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int typEntity,
  * \param na number of edges.
  * \return 0 if failed, 1 otherwise.
  *
- * Set the number of vertices, tetrahedra, prisms, triangles, quadrangles and
+ * Set the number of vertices, tetrahedra, prisms, triangles, quadrilaterals and
  * edges of the mesh and allocate the associated tables. If call twice, reset
  * the whole mesh to realloc it at the new size
  *
@@ -473,29 +473,29 @@ int  MMG3D_Set_triangle(MMG5_pMesh mesh, int v0, int v1,
  * >   END SUBROUTINE\n
  *
  */
-int  MMG3D_Set_quadrangle(MMG5_pMesh mesh, int v0, int v1,
+int  MMG3D_Set_quadrilateral(MMG5_pMesh mesh, int v0, int v1,
                           int v2, int v3, int ref,int pos);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param quads pointer toward the table of the quads vertices
  * Vertices of the \f$i^{th}\f$ quad are stored in quads[(i-1)*3]\@3.
- * \param refs pointer toward the table of the quadrangle references.
+ * \param refs pointer toward the table of the quadrilateral references.
  * refs[i-1] is the ref of the \f$i^{th}\f$ quad.
  * \return 0 if failed, 1 otherwise.
  *
- * Set vertices and references of the mesh quadrangles.
+ * Set vertices and references of the mesh quadrilaterals.
  *
  * \remark Fortran interface: (commentated in
  * order to allow to pass \%val(0) instead of the refs array)
  *
- * > !  SUBROUTINE MMG3D_SET_QUADRANGLES(mesh,quads,refs,retval)\n
+ * > !  SUBROUTINE MMG3D_SET_QUADRILATERALS(mesh,quads,refs,retval)\n
  * > !    MMG5_DATA_PTR_T,INTENT(INOUT)    :: mesh\n
  * > !    INTEGER,DIMENSION(*), INTENT(IN) :: quads,refs\n
  * > !    INTEGER, INTENT(OUT)             :: retval\n
  * > !  END SUBROUTINE\n
  *
  */
-  int  MMG3D_Set_quadrangles(MMG5_pMesh mesh, int *quads, int *refs);
+  int  MMG3D_Set_quadrilaterals(MMG5_pMesh mesh, int *quads, int *refs);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param v0 first extremity of the edge.
@@ -898,7 +898,7 @@ int  MMG3D_Set_localParameter(MMG5_pMesh mesh, MMG5_pSol sol, int typ,
  * \param na pointer toward the number of edges.
  * \return 1.
  *
- * Get the number of vertices, tetrahedra, prisms, triangles, quadrangles and
+ * Get the number of vertices, tetrahedra, prisms, triangles, quadrilaterals and
  * edges of the mesh.
  *
  * \remark Fortran interface:
@@ -1151,19 +1151,19 @@ int  MMG3D_Get_triangles(MMG5_pMesh mesh, int* tria, int* refs,
                          int* areRequired);
 /**
  * \param mesh pointer toward the mesh structure.
- * \param v0 pointer toward the first vertex of quadrangle.
- * \param v1 pointer toward the second vertex of quadrangle.
- * \param v2 pointer toward the third vertex of quadrangle.
- * \param v3 pointer toward the fourth vertex of quadrangle.
- * \param ref pointer toward the quadrangle reference.
- * \param isRequired pointer toward the flag saying if quadrangle is required.
+ * \param v0 pointer toward the first vertex of quadrilateral.
+ * \param v1 pointer toward the second vertex of quadrilateral.
+ * \param v2 pointer toward the third vertex of quadrilateral.
+ * \param v3 pointer toward the fourth vertex of quadrilateral.
+ * \param ref pointer toward the quadrilateral reference.
+ * \param isRequired pointer toward the flag saying if quadrilateral is required.
  * \return 0 if failed, 1 otherwise.
  *
  * Get vertices \a v0,\a v1,\a v2,\a v3 and reference \a ref of next
- * quadrangle of mesh.
+ * quadrilateral of mesh.
  *
  * \remark Fortran interface:
- * >   SUBROUTINE MMG3D_GET_QUADRANGLE(mesh,v0,v1,v2,v3,ref,isRequired,retval)\n
+ * >   SUBROUTINE MMG3D_GET_QUADRILATERAL(mesh,v0,v1,v2,v3,ref,isRequired,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
  * >     INTEGER, INTENT(OUT)          :: v0,v1,v2,v3\n
  * >     INTEGER                       :: ref,isRequired\n
@@ -1171,25 +1171,25 @@ int  MMG3D_Get_triangles(MMG5_pMesh mesh, int* tria, int* refs,
  * >   END SUBROUTINE\n
  *
  */
-int  MMG3D_Get_quadrangle(MMG5_pMesh mesh, int* v0, int* v1, int* v2,int* v3,
+int  MMG3D_Get_quadrilateral(MMG5_pMesh mesh, int* v0, int* v1, int* v2,int* v3,
                           int* ref, int* isRequired);
 /**
  * \param mesh pointer toward the mesh structure.
- * \param quads pointer toward the table of the quadrangles vertices
+ * \param quads pointer toward the table of the quadrilaterals vertices
  * Vertices of the \f$i^{th}\f$ quad are stored in tria[(i-1)*4]\@4.
- * \param refs pointer toward the table of the quadrangles references.
+ * \param refs pointer toward the table of the quadrilaterals references.
  * refs[i-1] is the ref of the \f$i^{th}\f$ quad.
- * \param areRequired pointer toward table of the flags saying if quadrangles
+ * \param areRequired pointer toward table of the flags saying if quadrilaterals
  * are required. areRequired[i-1]=1 if the \f$i^{th}\f$ quad
  * is required.
  * \return 0 if failed, 1 otherwise.
  *
- * Get vertices and references of the mesh quadrangles.
+ * Get vertices and references of the mesh quadrilaterals.
  *
  * \remark Fortran interface: (Commentated in order to allow to pass \%val(0)
  * instead of the refs or areRequired arrays)
  *
- * > !  SUBROUTINE MMG3D_GET_QUADRANGLES(mesh,quads,refs,areRequired,retval)\n
+ * > !  SUBROUTINE MMG3D_GET_QUADRILATERALS(mesh,quads,refs,areRequired,retval)\n
  * > !    MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
  * > !    INTEGER, DIMENSION(*),INTENT(OUT) :: quads\n
  * > !    INTEGER, DIMENSION(*)         :: refs,areRequired\n
@@ -1197,7 +1197,7 @@ int  MMG3D_Get_quadrangle(MMG5_pMesh mesh, int* v0, int* v1, int* v2,int* v3,
  * > !  END SUBROUTINE\n
  *
  */
-int  MMG3D_Get_quadrangles(MMG5_pMesh mesh, int* quads, int* refs,
+int  MMG3D_Get_quadrilaterals(MMG5_pMesh mesh, int* quads, int* refs,
                            int* areRequired);
 /**
  * \param mesh pointer toward the mesh structure.
