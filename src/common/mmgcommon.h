@@ -395,7 +395,8 @@ typedef _MMG5_Bezier * _MMG5_pBezier;
  */
 typedef struct {
   int   a,b,nxt;
-  int   s,k; /*!< k = point along edge a b or triangle index */
+  int   k; /*!< k = point along edge a b or triangle index */
+  int   s;
 } _MMG5_hedge;
 
 /**

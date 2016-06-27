@@ -454,7 +454,7 @@ int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol sol)
 
   /* Update the metric definition by taking into accounts the
      curvature of the external and internal curves present in the mesh */
-  if ( !_MMG2D_defBdrySiz(mesh,sol) ) return(0);
+  if ( sol->size==1 && !_MMG2D_defBdrySiz(mesh,sol) ) return(0);
 
   /*mesh gradation*/
   if( mesh->info.hgrad > 0 ) {
@@ -700,6 +700,9 @@ int MMG2D_mmg2dmesh(MMG5_pMesh mesh,MMG5_pSol sol) {
   if ( mesh->info.dhd>0 )
     if( !MMG2_evalgeom(mesh) ) _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
 
+  /* Update the metric definition by taking into accounts the
+     curvature of the external and internal curves present in the mesh */
+  if ( sol->size==1 && !_MMG2D_defBdrySiz(mesh,sol) ) return(0);
 
   /*mesh gradation*/
   if( mesh->nt && mesh->info.hgrad > 0 ) {
@@ -879,6 +882,10 @@ int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol)
   /*geom : corner detection*/
   if ( mesh->info.dhd>0 )
     if( !MMG2_evalgeom(mesh) ) _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
+
+  /* Update the metric definition by taking into accounts the
+     curvature of the external and internal curves present in the mesh */
+  if ( sol->size==1 && !_MMG2D_defBdrySiz(mesh,sol) ) return(0);
 
   /*mesh gradation*/
   if( mesh->info.hgrad > 0 ) {
