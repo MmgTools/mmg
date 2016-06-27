@@ -161,6 +161,21 @@ int main(int argc,char *argv[]) {
   /** b) function calling */
   if ( MMGS_loadSol(mmgMesh,mmgSol,filename.c_str()) != 1 )  exit(EXIT_FAILURE);
 
+
+#warning to trash
+
+  int np,nt;
+  MMGS_Get_meshSize(mmgMesh,&np,&nt,0);
+
+  MMGS_Set_iparameter(mmgMesh, mmgSol, MMGS_IPARAM_numberOfLocalParam, nt);
+  for (int i=0; i< nt; ++i) {
+      mmgMesh->tria[i+1].ref = i;
+      printf("%d\n",i);
+      MMGS_Set_localParameter(mmgMesh,mmgSol, MMG5_Triangle, i,
+                              0.005,0.01,0.005);
+
+  }
+
   /** ------------------------------ STEP  II -------------------------- */
   /** library call */
   ier = MMGS_mmgslib(mmgMesh,mmgSol);

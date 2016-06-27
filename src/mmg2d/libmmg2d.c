@@ -583,7 +583,27 @@ int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol)
     fprintf(stdout,"\n  -- PHASE 3 : MESH IMPROVEMENT\n");
   }
 
-  if ( (!mesh->info.noinsert) && !MMG2_mmg2d1n(mesh,sol) ) {
+  /* analysis */
+  /* metric creation */
+  _MMG5_ADD_MEM(mesh,(sol->size*(mesh->npmax+1))*sizeof(double),
+                "initial solution",return(0));
+  _MMG5_SAFE_CALLOC(sol->m,sol->size*(mesh->npmax+1),double);
+  sol->np = 0;
+  if ( !MMG2D_doSol(mesh,sol) )  _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
+  _MMG2D_scalarSolTruncature(mesh,sol);
+
+  /*geom : corner detection*/
+  if ( mesh->info.dhd>0 )
+    if( !MMG2_evalgeom(mesh) ) _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
+
+  /*mesh gradation*/
+  if( mesh->info.hgrad > 0 ) {
+    if ( mesh->info.imprim )   fprintf(stdout,"\n  -- GRADATION : %8f\n",
+                                       mesh->info.hgrad);
+    MMG2_lissmet(mesh,sol);
+  }
+
+  if ( (!mesh->info.noinsert) && !MMG2_mmg2d1(mesh,sol) ) {
     _MMG2D_RETURN_AND_PACK(mesh,sol,MMG5_LOWFAILURE);
   }
 
