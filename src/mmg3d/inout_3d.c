@@ -944,7 +944,7 @@ int MMG3D_loadMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
   int         posNodes,posEndNodes,posElts,posEndElts,posFormat,posEndFormat;
   int         posNodeData, posEndNodeData;
   int         nelts,bin,iswp,ver,oneBin,k,i,l,nref;
-  int         *ina_t,*ina_a,v[3],nt,na,nq,ne,npr,np;
+  int         *ina_t,*ina_a,nt,na,nq,ne,npr,np;
   int         nbl_t,nbl_a,typ,tagNum,ref,idx,num;
   char        *line,*ptr,data[128],chaine[128],verNum[3];
 

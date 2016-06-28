@@ -382,12 +382,12 @@ int MMG2_chkedg(MMG5_pMesh mesh, MMG5_pPoint ppa,MMG5_pPoint ppb) {
 int MMG2_colpoibdry(MMG5_pMesh mesh, MMG5_pSol sol,int iel,int iar,int ia,int ib,double coe) {
   MMG5_pTria     pt,pt1;
   MMG5_pEdge     ped;
-  MMG5_pPoint    ppa,ppb,pp1,pp2,ppa1,ppb1;
+  MMG5_pPoint    ppa,ppb,pp1,pp2;//ppa1,ppb1;
   int       pib,pia,jel,iadr,a1,v1,*adja,voy,a,adj;
   int     *list,lon,i,kel,num,i1,i2,ed;
   double    declic,*cal,air,coor[2],solu[3],*c1,*c2,*m1,*m2,len;
   //double    capx,capy,cbpx,cbpy,alpha,cbound;
-  int       iadri,*adjai,nbdry,ibdry[2],ip;
+//  int       iadri,*adjai,nbdry,ip,ibdry;
 
   pt  = &mesh->tria[iel];
   pib = pt->v[ib];
@@ -409,36 +409,36 @@ int MMG2_colpoibdry(MMG5_pMesh mesh, MMG5_pSol sol,int iel,int iar,int ia,int ib
   }
 
   /*check geom*/
-  nbdry = 0;
-  for(i=1 ; i<=lon ; i++) {
-    kel = list[i]/3;
-    ip  = list[i]%3;
-    pt1 = &mesh->tria[kel];
-    iadri = 3*(kel-1) + 1;
-    adjai = &mesh->adja[iadri];
-    if(!adjai[MMG2_iopp[ip][0]]) {
-      assert(nbdry<2);
-      if(MMG2_iare[MMG2_iopp[ip][0]][0]==ip)
-        ibdry[nbdry++] = pt1->v[MMG2_iare[MMG2_iopp[ip][0]][1]];
-      else {
-        assert(MMG2_iare[MMG2_iopp[ip][0]][1]==ip) ;
-        ibdry[nbdry++] = pt1->v[MMG2_iare[MMG2_iopp[ip][0]][0]];
-      }
-    }
-    if(!adjai[MMG2_iopp[ip][1]]) {
-      assert(nbdry<2); //sinon non manifold
-      if(MMG2_iare[MMG2_iopp[ip][1]][0]==ip)
-        ibdry[nbdry++] = pt1->v[MMG2_iare[MMG2_iopp[ip][1]][1]];
-      else {
-        assert(MMG2_iare[MMG2_iopp[ip][1]][1]==ip) ;
-        ibdry[nbdry++] = pt1->v[MMG2_iare[MMG2_iopp[ip][1]][0]];
-      }
-    }
-  }
-  assert(nbdry==2); //sinon non manifold
-  /*first check that the two edges verify the hausd criterion*/
-  ppa1  = &mesh->point[ibdry[0]];
-  ppb1  = &mesh->point[ibdry[1]];
+  /* nbdry = 0; */
+  /* for(i=1 ; i<=lon ; i++) { */
+  /*   kel = list[i]/3; */
+  /*   ip  = list[i]%3; */
+  /*   pt1 = &mesh->tria[kel]; */
+  /*   iadri = 3*(kel-1) + 1; */
+  /*   adjai = &mesh->adja[iadri]; */
+  /*   if(!adjai[MMG2_iopp[ip][0]]) { */
+  /*     assert(nbdry<2); */
+  /*     if(MMG2_iare[MMG2_iopp[ip][0]][0]==ip) */
+  /*       ibdry[nbdry++] = pt1->v[MMG2_iare[MMG2_iopp[ip][0]][1]]; */
+  /*     else { */
+  /*       assert(MMG2_iare[MMG2_iopp[ip][0]][1]==ip) ; */
+  /*       ibdry[nbdry++] = pt1->v[MMG2_iare[MMG2_iopp[ip][0]][0]]; */
+  /*     } */
+  /*   } */
+  /*   if(!adjai[MMG2_iopp[ip][1]]) { */
+  /*     assert(nbdry<2); //sinon non manifold */
+  /*     if(MMG2_iare[MMG2_iopp[ip][1]][0]==ip) */
+  /*       ibdry[nbdry++] = pt1->v[MMG2_iare[MMG2_iopp[ip][1]][1]]; */
+  /*     else { */
+  /*       assert(MMG2_iare[MMG2_iopp[ip][1]][1]==ip) ; */
+  /*       ibdry[nbdry++] = pt1->v[MMG2_iare[MMG2_iopp[ip][1]][0]]; */
+  /*     } */
+  /*   } */
+  /* } */
+  /* assert(nbdry==2); //sinon non manifold */
+/*first check that the two edges verify the hausd criterion*/
+  /* ppa1  = &mesh->point[ibdry[0]]; */
+  /* ppb1  = &mesh->point[ibdry[1]]; */
 
   /* if(MMG2_chkedg(mesh,ppb,ppa1))   { */
   /*   _MMG5_SAFE_FREE(list); */

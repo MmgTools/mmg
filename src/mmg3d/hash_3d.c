@@ -359,7 +359,6 @@ int MMG3D_hashPrism(MMG5_pMesh mesh) {
   int            max12,min12,max34,min34,mins,mins1,mins_b, mins_b1,maxs,maxs1;
   int            iadr;
   int           *hcode,*link,hsize,inival;
-  int            hole, crash;
   unsigned char  i,ii,i1,i2,i3,i4;
   unsigned int   key;
 
@@ -531,8 +530,6 @@ int MMG3D_hashPrism(MMG5_pMesh mesh) {
         i3 = _MMG5_idir_pr[ii][2];
         i4 = _MMG5_idir_pr[ii][3];
         pp1  = &mesh->prism[kk];
-
-        ++crash;
 
         min12  = MG_MIN(pp1->v[i1],pp1->v[i2]);
         min34  = MG_MIN(pp1->v[i3],pp1->v[i4]);

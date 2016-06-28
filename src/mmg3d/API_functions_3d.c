@@ -651,8 +651,6 @@ int  MMG3D_Get_tetrahedra(MMG5_pMesh mesh, int *tetra, int *refs, int * areRequi
 int MMG3D_Set_prism(MMG5_pMesh mesh, int v0, int v1, int v2,
                     int v3, int v4, int v5, int ref, int pos) {
   MMG5_pPrism pp;
-  MMG5_pPoint ppt;
-  int    aux,j, ip;
 
   if ( !mesh->nprism ) {
     fprintf(stderr,"  ## Error: You must set the number of prisms with the");
@@ -734,10 +732,8 @@ int MMG3D_Get_prism(MMG5_pMesh mesh, int* v0, int* v1, int* v2, int* v3,
 }
 
 int  MMG3D_Set_prisms(MMG5_pMesh mesh, int *prisms, int *refs) {
-  MMG5_pPoint ppt;
   MMG5_pPrism pp;
-  double      vol;
-  int         i,ip,aux, j;
+  int         i,j;
 
   for (i=1;i<=mesh->nprism;i++)
   {
