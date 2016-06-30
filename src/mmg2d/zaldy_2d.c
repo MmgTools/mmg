@@ -167,7 +167,7 @@ void _MMG2D_memOption(MMG5_pMesh mesh) {
 
   mesh->npmax = MG_MAX(1.5*mesh->np,_MMG2D_NPMAX);
   mesh->ntmax = MG_MAX(1.5*mesh->nt,_MMG2D_NEMAX);
-  mesh->namax = M_MAX(1.5*mesh->na,_MMG2D_NEDMAX);
+  mesh->namax = mesh->na;
   mesh->xpmax  = M_MAX(0.1*mesh->xp,0.1*_MMG2D_NPMAX);
 
   if ( mesh->info.mem <= 0 ) {
@@ -234,7 +234,6 @@ void _MMG2D_memOption(MMG5_pMesh mesh) {
   if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug ) {
     fprintf(stdout,"  _MMG2D_NPMAX    %d\n",mesh->npmax);
     fprintf(stdout,"  _MMG2D_NTMAX    %d\n",mesh->ntmax);
-    fprintf(stdout,"  _MMG2D_NAMAX    %d\n",mesh->namax);
   }
 
   return;
@@ -269,8 +268,6 @@ int MMG2_zaldy(MMG5_pMesh mesh) {
   mesh->npnil = mesh->np + 1;
   mesh->nenil = mesh->nt + 1;
 
-  if ( mesh->na )
-    mesh->nanil = mesh->na + 1;
 
   for (k=mesh->npnil; k<mesh->npmax-1; k++) {
     /* Set tangent field of point to 0 */
@@ -279,11 +276,6 @@ int MMG2_zaldy(MMG5_pMesh mesh) {
     mesh->point[k].n[2] = 0;
     /* link */
     mesh->point[k].tmp  = k+1;
-  }
-
-  if ( mesh->na ) {
-    for (k=mesh->nanil; k<mesh->namax-1; k++)
-      mesh->edge[k].b = k+1;
   }
 
   for (k=mesh->nenil; k<mesh->ntmax-1; k++)

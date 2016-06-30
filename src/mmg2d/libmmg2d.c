@@ -282,16 +282,13 @@ int _MMG2D_restart(MMG5_pMesh mesh){
       mesh->tria[k].v[2] = k+1;
     }
   }
-  if ( !mesh->edge ) {
+  if ( mesh->na && !mesh->edge ) {
     /* If we call the library more than one time and if we free the triangles
      * using the MMG2D_Free_triangles function we need to reallocate it */
     _MMG5_ADD_MEM(mesh,(mesh->namax+1)*sizeof(MMG5_Edge),
                   "initial edges",return(0));
     _MMG5_SAFE_CALLOC(mesh->edge,mesh->namax+1,MMG5_Edge);
     mesh->nanil = mesh->na + 1;
-    for ( k=mesh->nanil; k<mesh->namax-1; k++) {
-      mesh->edge[k].b = k+1;
-    }
   }
 
   for ( k=1; k<=mesh->np;  ++k ) {
@@ -381,7 +378,7 @@ int MMG2D_mmg2dmesh(MMG5_pMesh mesh,MMG5_pSol sol) {
 
   if ( !_MMG2D_restart(mesh) ) {
     _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
-  };
+  }
 
   if ( mesh->info.imprim )   fprintf(stdout,"\n  -- PHASE 1 : DATA ANALYSIS\n");
   if ( abs(mesh->info.imprim) > 4 )
@@ -433,14 +430,8 @@ int MMG2D_mmg2dmesh(MMG5_pMesh mesh,MMG5_pSol sol) {
     _MMG2D_RETURN_AND_PACK(mesh,sol,MMG5_LOWFAILURE);
   }
 
-  chrono(OFF,&(ctim[5]));
-  printim(ctim[5].gdif,stim);
-  if ( mesh->info.imprim ) {
-    fprintf(stdout,"  -- PHASE 4 COMPLETED.     %s\n",stim);
-  }
-
   chrono(OFF,&(ctim[4]));
-  printim(ctim[4].gdif,stim);
+  printim(ctim[5].gdif,stim);
   if ( mesh->info.imprim ) {
     fprintf(stdout,"  -- PHASE 3 COMPLETED.     %s\n",stim);
     fprintf(stdout,"\n  %s\n   END OF MODULE MMGS: IMB-LJLL \n  %s\n",MG_STR,MG_STR);

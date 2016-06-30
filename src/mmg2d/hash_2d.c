@@ -358,6 +358,12 @@ int MMG2_pack(MMG5_pMesh mesh,MMG5_pSol sol) {
   memWarn = 0;
   ned = 0;
 
+  if ( mesh->edge ) {
+    fprintf(stdout,"  ## warning: unexpected edge table... Ignored data.\n");
+    _MMG5_DEL_MEM(mesh,mesh->edge,(mesh->na+1)*sizeof(MMG5_Edge));
+    mesh->na = 0;
+  }
+
   mesh->na = 0;
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
@@ -376,7 +382,7 @@ int MMG2_pack(MMG5_pMesh mesh,MMG5_pSol sol) {
 
   /* Pack edges */
   if ( mesh->na ) {
-    assert ( !mesh->edge );
+
     _MMG5_ADD_MEM(mesh,(mesh->namax+1)*sizeof(MMG5_Edge),"final edges", memWarn=1);
 
     if ( memWarn ) {
