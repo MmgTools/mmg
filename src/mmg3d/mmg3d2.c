@@ -377,6 +377,7 @@ static int _MMG3D_snpval_ls(MMG5_pMesh mesh,MMG5_pSol sol,double *tmp) {
 
   /* memory free */
   _MMG5_DEL_MEM(mesh,mesh->adja,(4*mesh->nemax+5)*sizeof(int));
+
   return(1);
 }
 
@@ -1405,6 +1406,12 @@ int _MMG3D_mmg3d2(MMG5_pMesh mesh,MMG5_pSol sol) {
   if ( abs(mesh->info.imprim) > 3 )
     fprintf(stdout,"  ** ISOSURFACE EXTRACTION\n");
 
+  if ( mesh->nprism || mesh->nquad ) {
+    fprintf(stderr,"  ## Error: Isosurface extraction not available with hybrid"
+            " meshes. Exit program.\n");
+    return(0);
+  }
+
   _MMG5_ADD_MEM(mesh,(mesh->npmax+1)*sizeof(double),"temporary table",
                 fprintf(stderr,"  Exit program.\n");
                 exit(EXIT_FAILURE));
@@ -1451,6 +1458,7 @@ int _MMG3D_mmg3d2(MMG5_pMesh mesh,MMG5_pSol sol) {
 
   _MMG5_DEL_MEM(mesh,mesh->adja,(4*mesh->nemax+5)*sizeof(int));
   _MMG5_DEL_MEM(mesh,mesh->tria,(mesh->nt+1)*sizeof(MMG5_Tria));
+
   mesh->nt = 0;
 
   if ( !_MMG3D_setref_ls(mesh,sol) ) {

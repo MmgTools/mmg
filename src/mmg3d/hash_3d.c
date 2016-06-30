@@ -160,6 +160,74 @@ static int _MMG5_hashGetFace(_MMG5_Hash *hash,int ia,int ib,int ic) {
 }
 
 /**
+ * \param hash pointer toward the hashTable.
+ * \param a first vertex of the face.
+ * \param b second vertex of the face.
+ * \param c third vertex of the face.
+ *
+ * \return 1 if success, 0 if fail.
+ *
+ * remove face from hash table.
+ *
+ */
+static
+int _MMG5_hashPopFace(_MMG5_Hash *hash,int a,int b, int c) {
+  _MMG5_hedge  *ph,*php;
+  int          key,mins,maxs,sum,iph,iphp;
+
+  if ( !hash->item )  return(0);
+
+  mins = MG_MIN(a,MG_MIN(b,c));
+  maxs = MG_MAX(a,MG_MAX(b,c));
+
+  /* compute key */
+  sum = a + b + c;
+  key = (_MMG5_KA*mins + _MMG5_KB*maxs) % hash->siz;
+  ph  = &hash->item[key];
+
+  if ( !ph->a ) return(0);
+
+  else if ( ph->a == mins && ph->b == maxs && ph->s == sum ) {
+    if ( !ph->nxt ) {
+      memset(ph,0,sizeof(_MMG5_hedge));
+      return(1);
+    }
+    else {
+      iph = ph->nxt;
+      php = ph;
+      ph  = &hash->item[ph->nxt];
+      memcpy(php,ph,sizeof(_MMG5_hedge));
+      memset(ph,0,sizeof(_MMG5_hedge));
+      ph->nxt   = hash->nxt;
+      hash->nxt = iph;
+      return(1);
+    }
+  }
+  while ( ph->nxt ) {
+    php = ph;
+    ph  = &hash->item[ph->nxt];
+    if ( ph->a == mins && ph->b == maxs && ph->s == sum ) {
+      if ( !ph->nxt ) {
+        memset(ph,0,sizeof(_MMG5_hedge));
+        ph->nxt   = hash->nxt;
+        hash->nxt = php->nxt;
+        php->nxt  = 0;
+      }
+      else {
+        iph  = ph->nxt;
+        iphp = php->nxt;
+        php->nxt = iph;
+        memset(ph,0,sizeof(_MMG5_hedge));
+        ph->nxt   = hash->nxt;
+        hash->nxt = iphp;
+      }
+      return(1);
+    }
+  }
+  return(0);
+}
+
+/**
  * \param mesh pointer toward the mesh structure.
  * \param pack we pack the mesh at function begining if \f$pack=1\f$.
  * \return 0 if failed, 1 otherwise.
@@ -269,6 +337,220 @@ int MMG3D_hashTetra(MMG5_pMesh mesh, int pack) {
         }
       }
       pp = ll;
+      ll = -link[ll];
+    }
+  }
+  _MMG5_SAFE_FREE(hcode);
+  return(1);
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ *
+ * \return 0 if failed, 1 otherwise.
+ *
+ * Create table of adjacency for prisms.
+ *
+ * \warning check the hashtable efficiency
+ */
+int MMG3D_hashPrism(MMG5_pMesh mesh) {
+  MMG5_pPrism    pp,pp1;
+  int            k,kk,l,ll,jj;
+  int            max12,min12,max34,min34,mins,mins1,mins_b, mins_b1,maxs,maxs1;
+  int            iadr;
+  int           *hcode,*link,hsize,inival;
+  unsigned char  i,ii,i1,i2,i3,i4;
+  unsigned int   key;
+
+  if ( !mesh->nprism ) return 1;
+
+  /* default */
+  if ( mesh->adjapr ) {
+    if ( abs(mesh->info.imprim) > 3 || mesh->info.ddebug ) {
+      fprintf(stdout,"  ## Warning: no re-build of adjacencies of prisms. ");
+      fprintf(stdout,"mesh->adjapr must be freed to enforce analysis.\n");
+    }
+    return(1);
+  }
+
+  if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug )
+    fprintf(stdout,"  ** SETTING PRISMS ADJACENCY\n");
+
+  /* memory alloc */
+  _MMG5_ADD_MEM(mesh,(5*mesh->nprism+6)*sizeof(int),"prism adjacency table",
+                printf("  Exit program.\n");
+                exit(EXIT_FAILURE));
+  _MMG5_SAFE_CALLOC(mesh->adjapr,5*mesh->nprism+6,int);
+  _MMG5_SAFE_CALLOC(hcode,mesh->nprism+6,int);
+
+  link  = mesh->adjapr;
+  hsize = mesh->nprism;
+
+  /* init */
+  if ( mesh->info.ddebug )  fprintf(stdout,"  h- stage 1: init\n");
+  inival = 2147483647;
+  iadr   = 0;
+  for (k=0; k<=mesh->nprism; k++)
+    hcode[k] = -inival;
+
+  /* hash prism */
+  for (k=1; k<=mesh->nprism; k++) {
+    pp = &mesh->prism[k];
+    assert ( MG_EOK(pp) );
+    for (i=0; i<2; i++) {
+      /* Triangular face */
+      i1 = _MMG5_idir_pr[i][0];
+      i2 = _MMG5_idir_pr[i][1];
+      i3 = _MMG5_idir_pr[i][2];
+
+      min12 = MG_MIN(pp->v[i1],pp->v[i2]);
+      /* mins = minimum index of triangle vertices */
+      mins = MG_MIN(min12,pp->v[i3]);
+
+      max12  = MG_MAX(pp->v[i1],pp->v[i2]);
+      /* maxs = maximum index of triangle vertices */
+      maxs   = MG_MAX(max12,pp->v[i3]);
+
+      /* mins_b = second minimum index of triangle vertices */
+      mins_b = pp->v[i1] + pp->v[i2] + pp->v[i3] -mins -maxs;
+
+      /* compute key and insert */
+      key = _MMG5_KA*mins + _MMG5_KB*mins_b + KC*maxs;
+      key = key % hsize + 1;
+      iadr++;
+      link[iadr] = hcode[key];
+      hcode[key] = -iadr;
+    }
+    for ( ; i<5; ++i) {
+      /* Quadrilateral face */
+      i1 = _MMG5_idir_pr[i][0];
+      i2 = _MMG5_idir_pr[i][1];
+      i3 = _MMG5_idir_pr[i][2];
+      i4 = _MMG5_idir_pr[i][3];
+
+      min12 = MG_MIN(pp->v[i1],pp->v[i2]);
+      min34 = MG_MIN(pp->v[i3],pp->v[i4]);
+      /* mins = minimum index of quadrilateral vertices */
+      mins = MG_MIN(min12,min34);
+
+      max12  = MG_MAX(pp->v[i1],pp->v[i2]);
+      max34  = MG_MAX(pp->v[i3],pp->v[i4]);
+      /* maxs = maximum index of quadrilateral vertices */
+      maxs   = MG_MAX(max12,max34);
+
+      /* mins_b = second minimum index of quadrilateral vertices */
+      mins_b = MG_MIN( MG_MIN(max12,max34),MG_MAX(min12,min34));
+
+      /* compute key and insert */
+      key = _MMG5_KA*mins + _MMG5_KB*mins_b + KC*maxs;
+      key = key % hsize + 1;
+      iadr++;
+      link[iadr] = hcode[key];
+      hcode[key] = -iadr;
+    }
+  }
+
+  /* set adjacency */
+  if ( mesh->info.ddebug )  fprintf(stdout,"  h- stage 2: adjacencies\n");
+  for (l=iadr; l>0; l--) {
+    if ( link[l] >= 0 )  continue;
+
+    /* current element */
+    k = (l-1) / 5 + 1;
+    i = (l-1) % 5;
+
+    switch (i)
+    {
+    case 0:
+    case 1:
+      i1 = _MMG5_idir_pr[i][0];
+      i2 = _MMG5_idir_pr[i][1];
+      i3 = _MMG5_idir_pr[i][2];
+      pp = &mesh->prism[k];
+
+      min12 = MG_MIN(pp->v[i1],pp->v[i2]);
+      mins  = MG_MIN(min12,pp->v[i3]);
+
+      max12 = MG_MAX(pp->v[i1],pp->v[i2]);
+      maxs  = MG_MAX(max12,pp->v[i3]);
+
+      mins_b = pp->v[i1] + pp->v[i2] + pp->v[i3] - mins - maxs;
+
+      break;
+
+    default:
+      i1 = _MMG5_idir_pr[i][0];
+      i2 = _MMG5_idir_pr[i][1];
+      i3 = _MMG5_idir_pr[i][2];
+      i4 = _MMG5_idir_pr[i][3];
+      pp = &mesh->prism[k];
+
+      min12 = MG_MIN(pp->v[i1],pp->v[i2]);
+      min34 = MG_MIN(pp->v[i3],pp->v[i4]);
+      mins  = MG_MIN(min12,min34);
+
+      max12 = MG_MAX(pp->v[i1],pp->v[i2]);
+      max34 = MG_MAX(pp->v[i3],pp->v[i4]);
+      maxs  = MG_MAX(max12,max34);
+
+      mins_b = MG_MIN( MG_MIN(max12,max34),MG_MAX(min12,min34));
+    }
+
+    /* accross link */
+    ll      = -link[l];
+    jj      = 0;
+    link[l] = 0;
+    while ( ll != inival ) {
+      kk = (ll-1) / 5 + 1;
+      ii = (ll-1) % 5;
+
+      switch (ii)
+      {
+      case 0:
+      case 1:
+        i1 = _MMG5_idir_pr[ii][0];
+        i2 = _MMG5_idir_pr[ii][1];
+        i3 = _MMG5_idir_pr[ii][2];
+
+        pp1  = &mesh->prism[kk];
+
+        min12 = MG_MIN(pp1->v[i1],pp1->v[i2]);
+        mins1  = MG_MIN(min12,pp1->v[i3]);
+
+        max12 = MG_MAX(pp1->v[i1],pp1->v[i2]);
+        maxs1  = MG_MAX(max12,pp1->v[i3]);
+
+        mins_b1 =  pp1->v[i1] + pp1->v[i2] + pp1->v[i3] - mins1 - maxs1;
+
+        break;
+
+      default:
+        i1 = _MMG5_idir_pr[ii][0];
+        i2 = _MMG5_idir_pr[ii][1];
+        i3 = _MMG5_idir_pr[ii][2];
+        i4 = _MMG5_idir_pr[ii][3];
+        pp1  = &mesh->prism[kk];
+
+        min12  = MG_MIN(pp1->v[i1],pp1->v[i2]);
+        min34  = MG_MIN(pp1->v[i3],pp1->v[i4]);
+        mins1  = MG_MIN(min12,min34);
+
+        max12  = MG_MAX(pp1->v[i1],pp1->v[i2]);
+        max34  = MG_MAX(pp1->v[i3],pp1->v[i4]);
+        maxs1  = MG_MAX(max12,max34);
+
+        mins_b1 = MG_MIN( MG_MIN(max12,max34),MG_MAX(min12,min34));
+      }
+
+      /* adjacent found */
+      if ( mins1 == mins && maxs1 == maxs && mins_b1 == mins_b ) {
+        if ( jj != 0 )  link[jj] = link[ll];
+        link[l]  = 5*kk + ii;
+        link[ll] = 5*k + i;
+        break;
+      }
+
+      jj = ll;
       ll = -link[ll];
     }
   }
@@ -580,7 +862,6 @@ int _MMG3D_hashTria(MMG5_pMesh mesh, _MMG5_Hash *hash) {
 }
 
 
-
 /** remove edge from hash table */
 int _MMG5_hashPop(_MMG5_Hash *hash,int a,int b) {
   _MMG5_hedge  *ph,*php;
@@ -890,7 +1171,7 @@ int _MMG5_hGeom(MMG5_pMesh mesh) {
         kk  = adja[i] / 3;
         if ( !kk || pt->tag[i] & MG_NOM )
           mesh->na++;
-        else if ( (k < kk) && ( pt->edg[i] || pt->tag[i] ) )  mesh->na++;
+         else if ( (k < kk) && ( pt->edg[i] || pt->tag[i] ) )  mesh->na++;
       }
     }
 
@@ -917,7 +1198,7 @@ int _MMG5_hGeom(MMG5_pMesh mesh) {
           }
           _MMG5_hEdge(mesh,pt->v[i1],pt->v[i2],pt->edg[i],pt->tag[i]);
         }
-        else if ( k < kk && ( pt->edg[i] || pt->tag[i] ) )
+         else if ( k < kk && ( pt->edg[i] || pt->tag[i] ) )
           _MMG5_hEdge(mesh,pt->v[i1],pt->v[i2],pt->edg[i],pt->tag[i]);
       }
     }
@@ -937,6 +1218,200 @@ int _MMG5_hGeom(MMG5_pMesh mesh) {
 }
 
 /**
+ * \param mesh pointer to the mesh structure.
+ * \param ntmesh number of boundary tria found in the mesh.
+ *
+ * \return 0 if failed, 1 otherwise.
+ *
+ * Identify boundary triangles.
+ *
+ * \remark mesh->xtetra is not allocated when \ref _MMG5_bdryTria is called by
+ * \ref _MMG3D_analys but it is allocated when called by packMesh.
+ *
+ */
+static inline
+int _MMG5_bdryTria(MMG5_pMesh mesh, int ntmesh) {
+  MMG5_pTetra    pt,pt1;
+  MMG5_pPrism    pp;
+  MMG5_pTria     ptt;
+  MMG5_pPoint    ppt;
+  MMG5_pxTetra   pxt;
+  MMG5_pxPrism   pxpr;
+  _MMG5_Hash     hash;
+  int       ref,*adja,adj,k,ia,ib,ic,kt, tofree=0,ntinit;
+  char      i;
+
+  hash.item = NULL;
+
+  ntinit = mesh->nt;
+  if ( mesh->nt ) {
+    /* Hash given bdry triangles */
+    if ( ! _MMG5_hashNew(mesh,&hash,0.51*mesh->nt,1.51*mesh->nt) ) return(0);
+    tofree=1;
+    for (k=1; k<=mesh->nt; k++) {
+      ptt = &mesh->tria[k];
+      if ( !_MMG5_hashFace(mesh,&hash,ptt->v[0],ptt->v[1],ptt->v[2],k) ) {
+        _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
+        return(0);
+      }
+    }
+
+  }
+
+  /* Add boundary triangles stored on tetra */
+  if ( ntmesh != ntinit ) {
+    for (k=1; k<=mesh->ne; k++) {
+      pt = &mesh->tetra[k];
+      if ( !MG_EOK(pt) )  continue;
+      adja = &mesh->adja[4*(k-1)+1];
+      pxt = 0;
+      if ( pt->xt )  pxt = &mesh->xtetra[pt->xt];
+      for (i=0; i<4; i++) {
+        adj = adja[i] / 4;
+        pt1 = &mesh->tetra[adj];
+        if ( adj && ( pt->ref <= pt1->ref) )  continue;
+
+        ia = pt->v[_MMG5_idir[i][0]];
+        ib = pt->v[_MMG5_idir[i][1]];
+        ic = pt->v[_MMG5_idir[i][2]];
+
+        kt = _MMG5_hashGetFace(&hash,ia,ib,ic);
+        if ( kt ) {
+          continue;
+        }
+
+        mesh->nt++;
+        ptt = &mesh->tria[mesh->nt];
+        ptt->v[0] = pt->v[_MMG5_idir[i][0]];
+        ptt->v[1] = pt->v[_MMG5_idir[i][1]];
+        ptt->v[2] = pt->v[_MMG5_idir[i][2]];
+
+        /* the cc field is used to be able to recover the tetra (and its face)
+         * from which comes a boundary triangle (when called by packmesh =>
+         * mesh->nt=0 at the beginning of the function) */
+        ptt->cc = 4*k + i;
+
+        if ( pxt ) {
+          /* useful only when saving mesh */
+          if ( pxt->tag[_MMG5_iarf[i][0]] )  ptt->tag[0] = pxt->tag[_MMG5_iarf[i][0]];
+          if ( pxt->tag[_MMG5_iarf[i][1]] )  ptt->tag[1] = pxt->tag[_MMG5_iarf[i][1]];
+          if ( pxt->tag[_MMG5_iarf[i][2]] )  ptt->tag[2] = pxt->tag[_MMG5_iarf[i][2]];
+        }
+        if ( adj ) {
+          if ( mesh->info.iso ) ptt->ref = MG_ISO;
+          /* useful only when saving mesh */
+          else ptt->ref  = pxt ? pxt->ref[i] : MG_MIN(pt->ref,pt1->ref);
+        }
+        else {
+          /* useful only when saving mesh */
+          ptt->ref  = pxt ? pxt->ref[i] : pt->ref;
+        }
+      }
+    }
+  }
+
+  /* Add boundary triangles stored on prisms */
+  if ( mesh->nprism ) {
+    for (k=1; k<=mesh->nprism; k++) {
+      pp = &mesh->prism[k];
+      if ( !MG_EOK(pp) )  continue;
+
+      adja = &mesh->adjapr[5*(k-1)+1];
+      pxpr = 0;
+      if ( pp->xpr )  pxpr = &mesh->xprism[pp->xpr];
+
+      for (i=0; i<2; i++) {
+        adj = adja[i]/5;
+
+
+        if ( adj < 0 ) {
+          if ( !mesh->nt ) continue;
+
+          /* Tria at the interface of a prism and a tetra: mark it as required */
+          ia = pp->v[0+i*3];
+          ib = pp->v[1+i*3];
+          ic = pp->v[2+i*3];
+
+          kt = _MMG5_hashGetFace(&hash,ia,ib,ic);
+          if ( !kt ) continue;
+
+          ptt = &mesh->tria[kt];
+
+          if ( !(ptt->tag[0] & MG_REQ) ) {
+            ptt->tag[0] |= MG_REQ;
+            ptt->tag[0] |= MG_CRN;
+          }
+          if ( !(ptt->tag[1] & MG_REQ) ) {
+            ptt->tag[1] |= MG_REQ;
+            ptt->tag[1] |= MG_CRN;
+          }
+          if ( !(ptt->tag[2] & MG_REQ) ) {
+            ptt->tag[2] |= MG_REQ;
+            ptt->tag[2] |= MG_CRN;
+          }
+
+          continue;
+        }
+
+        ref = mesh->prism[adj].ref;
+        if ( adj && ( pp->ref <= ref) )  continue;
+
+        ia = pp->v[0+i*3];
+        ib = pp->v[1+i*3];
+        ic = pp->v[2+i*3];
+
+        kt = _MMG5_hashGetFace(&hash,ia,ib,ic);
+        if ( kt ) {
+          continue;
+        }
+
+        mesh->nt++;
+
+        ptt = &mesh->tria[mesh->nt];
+        ptt->v[0] = ia;
+        ptt->v[1] = ib;
+        ptt->v[2] = ic;
+
+        /* the cc field is used to be able to recover the prism (and its face)
+         * from which comes a boundary triangle (when called by packmesh =>
+         * mesh->nt=0 at the beginning of the function) */
+        ptt->cc = 5*k + i;
+        if ( pxpr ) {
+          /* useful only when saving mesh */
+          if ( pxpr->tag[_MMG5_iarf_pr[i][0]] )  ptt->tag[0] = pxpr->tag[_MMG5_iarf_pr[i][0]];
+          if ( pxpr->tag[_MMG5_iarf_pr[i][1]] )  ptt->tag[1] = pxpr->tag[_MMG5_iarf_pr[i][1]];
+          if ( pxpr->tag[_MMG5_iarf_pr[i][2]] )  ptt->tag[2] = pxpr->tag[_MMG5_iarf_pr[i][2]];
+        }
+        if ( adj ) {
+          if ( mesh->info.iso ) ptt->ref = MG_ISO;
+          /* useful only when saving mesh */
+          else ptt->ref  = pxpr ? pxpr->ref[i] : 0;
+        }
+        else {
+          /* useful only when saving mesh */
+          ptt->ref  = pxpr ? pxpr->ref[i] : 0;
+        }
+      }
+    }
+  }
+
+  if ( ntmesh != ntinit ) {
+    /* set point tag */
+    for (k=1; k<=mesh->nt; k++) {
+      ptt = &mesh->tria[k];
+      for (i=0; i<3; i++) {
+        ppt = &mesh->point[ptt->v[i]];
+        ppt->tag |= MG_BDY;
+      }
+    }
+  }
+
+  if ( tofree ) _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
+
+  return(1);
+}
+
+/**
  * \param mesh pointer toward the mesh structure.
  * \return 1 if success, 0 otherwise.
  *
@@ -948,10 +1423,11 @@ int _MMG5_hGeom(MMG5_pMesh mesh) {
  */
 int _MMG5_chkBdryTria(MMG5_pMesh mesh) {
   MMG5_pTetra    pt,pt1;
+  MMG5_pPrism    pp,pp1;
   MMG5_pTria     ptt,pttnew;
   int            *adja,adj,k,i,j,ntmesh;
   int            ia,ib,ic, nbl,nt;
-  _MMG5_Hash     hashTet, hashTri;
+  _MMG5_Hash     hashElt, hashTri;
 
   /** Step 1: scan the mesh and count the boundaries */
   ntmesh = 0;
@@ -962,7 +1438,10 @@ int _MMG5_chkBdryTria(MMG5_pMesh mesh) {
     for (i=0; i<4; i++) {
       adj = adja[i];
 
-      if ( !adj ) ++ntmesh;
+      if ( !adj ) {
+        ++ntmesh;
+        continue;
+      }
 
       adj /= 4;
       pt1 = &mesh->tetra[adj];
@@ -971,10 +1450,77 @@ int _MMG5_chkBdryTria(MMG5_pMesh mesh) {
     }
   }
 
+  if ( mesh->nprism ) {
+    for (k=1; k<=mesh->nprism; k++) {
+      pp = &mesh->prism[k];
+      if ( !MG_EOK(pp) )  continue;
+
+      adja = &mesh->adjapr[5*(k-1)+1];
+      for (i=0; i<2; i++) {
+        adj = adja[i];
+
+        if ( !adj ) {
+          ++ntmesh;
+          continue;
+        }
+        else if ( adj<0 ) continue;
+
+        adj /= 5;
+        pp1 = &mesh->prism[abs(adj)];
+        if ( pp->ref > pp1->ref) {
+          ++ntmesh;
+        }
+      }
+    }
+  }
+
+  /* Detect the triangles at the interface of the tri and tetra (it have been
+   * counted twice) */
+  if ( ! _MMG5_hashNew(mesh,&hashTri,0.51*ntmesh,1.51*ntmesh) ) return(0);
+  for (k=1; k<=mesh->ne; k++) {
+    pt = &mesh->tetra[k];
+    if ( !MG_EOK(pt) )  continue;
+
+    adja = &mesh->adja[4*(k-1)+1];
+    for (i=0; i<4; i++) {
+      adj = adja[i];
+      if ( adj ) continue;
+
+      ia = pt->v[_MMG5_idir[i][0]];
+      ib = pt->v[_MMG5_idir[i][1]];
+      ic = pt->v[_MMG5_idir[i][2]];
+      if ( !_MMG5_hashFace(mesh,&hashTri,ia,ib,ic,5*k+i) ) {
+        _MMG5_DEL_MEM(mesh,hashTri.item,(hashTri.max+1)*sizeof(_MMG5_hedge));
+        return(0);
+      }
+    }
+  }
+  for (k=1; k<=mesh->nprism; k++) {
+    pp = &mesh->prism[k];
+    if ( !MG_EOK(pp) )  continue;
+
+    adja = &mesh->adjapr[5*(k-1)+1];
+    for (i=0; i<2; i++) {
+      adj = adja[i];
+      if ( adj ) continue;
+
+      ia = pp->v[_MMG5_idir_pr[i][0]];
+      ib = pp->v[_MMG5_idir_pr[i][1]];
+      ic = pp->v[_MMG5_idir_pr[i][2]];
+
+      j = _MMG5_hashGetFace(&hashTri,ia,ib,ic);
+      if ( !j ) continue;
+
+      --ntmesh;
+      adja[i] = -j;
+    }
+  }
+  _MMG5_DEL_MEM(mesh,hashTri.item,(hashTri.max+1)*sizeof(_MMG5_hedge));
+
   /** Step 2: detect the extra boundaries (that will be ignored) provided by the
    * user */
   if ( mesh->nt ) {
-    if ( ! _MMG5_hashNew(mesh,&hashTet,0.51*ntmesh,1.51*ntmesh) ) return(0);
+    if ( ! _MMG5_hashNew(mesh,&hashElt,0.51*ntmesh,1.51*ntmesh) ) return(0);
     // Hash the boundaries founded in the mesh
     for (k=1; k<=mesh->ne; k++) {
       pt = &mesh->tetra[k];
@@ -986,7 +1532,7 @@ int _MMG5_chkBdryTria(MMG5_pMesh mesh) {
           ia = pt->v[_MMG5_idir[i][0]];
           ib = pt->v[_MMG5_idir[i][1]];
           ic = pt->v[_MMG5_idir[i][2]];
-          if ( !_MMG5_hashFace(mesh,&hashTet,ia,ib,ic,4*k+i) ) return(0);
+          if ( !_MMG5_hashFace(mesh,&hashElt,ia,ib,ic,4*k+i) ) return(0);
         }
         adj /= 4;
 
@@ -995,13 +1541,39 @@ int _MMG5_chkBdryTria(MMG5_pMesh mesh) {
           ia = pt->v[_MMG5_idir[i][0]];
           ib = pt->v[_MMG5_idir[i][1]];
           ic = pt->v[_MMG5_idir[i][2]];
-          if ( !_MMG5_hashFace(mesh,&hashTet,ia,ib,ic,4*k+i) ) return(0);
+          if ( !_MMG5_hashFace(mesh,&hashElt,ia,ib,ic,4*k+i) ) return(0);
+        }
+      }
+    }
+    for (k=1; k<=mesh->nprism; k++) {
+      pp = &mesh->prism[k];
+      if ( !MG_EOK(pp) )  continue;
+      adja = &mesh->adjapr[5*(k-1)+1];
+      for (i=0; i<2; i++) {
+        adj = adja[i];
+        if ( !adj ) {
+          ia = pp->v[_MMG5_idir_pr[i][0]];
+          ib = pp->v[_MMG5_idir_pr[i][1]];
+          ic = pp->v[_MMG5_idir_pr[i][2]];
+          if ( !_MMG5_hashFace(mesh,&hashElt,ia,ib,ic,5*k+i) ) return(0);
+        }
+        else if ( adj<0 ) continue;
+
+        adj /= 5;
+
+        pp1 = &mesh->prism[abs(adj)];
+        if ( pp->ref > pp1->ref ) {
+          ia = pp->v[_MMG5_idir_pr[i][0]];
+          ib = pp->v[_MMG5_idir_pr[i][1]];
+          ic = pp->v[_MMG5_idir_pr[i][2]];
+          if ( !_MMG5_hashFace(mesh,&hashElt,ia,ib,ic,5*k+i) ) return(0);
         }
       }
     }
 
-    // Travel through the tria, delete those that are not in the hash tab and
-    // pack the tria.
+
+    // Travel through the tria, delete those that are not in the hash tab or
+    // that are stored more that once.
     nt=0; nbl=1;
 
     if ( ! _MMG5_hashNew(mesh,&hashTri,0.51*mesh->nt,1.51*mesh->nt) ) return(0);
@@ -1013,13 +1585,13 @@ int _MMG5_chkBdryTria(MMG5_pMesh mesh) {
       ib = ptt->v[1];
       ic = ptt->v[2];
 
-      i = _MMG5_hashGetFace(&hashTet,ia,ib,ic);
+      i = _MMG5_hashGetFace(&hashElt,ia,ib,ic);
       j = _MMG5_hashFace(mesh,&hashTri,ia,ib,ic,k);
 
       ptt->cc = i;
 
       if ( !j ) {
-        _MMG5_DEL_MEM(mesh,hashTet.item,(hashTet.max+1)*sizeof(_MMG5_hedge));
+        _MMG5_DEL_MEM(mesh,hashElt.item,(hashElt.max+1)*sizeof(_MMG5_hedge));
         _MMG5_DEL_MEM(mesh,hashTri.item,(hashTri.max+1)*sizeof(_MMG5_hedge));
         return(0);
       }
@@ -1044,14 +1616,21 @@ int _MMG5_chkBdryTria(MMG5_pMesh mesh) {
     nbl = mesh->nt-nt;
     if ( nbl ) {
       printf("  ## Warning: %d extra boundaries provided. Ignored\n",nbl);
+      _MMG5_ADD_MEM(mesh,(-nbl)*sizeof(MMG5_Tria),"triangles",return(0));
       mesh->nt = nt;
+      _MMG5_SAFE_REALLOC(mesh->tria,mesh->nt+1,MMG5_Tria,"triangles");
+
     }
-    _MMG5_DEL_MEM(mesh,hashTet.item,(hashTet.max+1)*sizeof(_MMG5_hedge));
+    _MMG5_DEL_MEM(mesh,hashElt.item,(hashElt.max+1)*sizeof(_MMG5_hedge));
     _MMG5_DEL_MEM(mesh,hashTri.item,(hashTri.max+1)*sizeof(_MMG5_hedge));
   }
 
-  /** Step 3: add the missing boundary triangles if needed */
-  if ( mesh->nt == ntmesh ) return(1);
+  /** Step 3: add the missing boundary triangles or, if the mesh contains
+   * prisms, set to required the triangles at interface betwen prisms and tet */
+  if ( mesh->nt==ntmesh && !mesh->nprism ) {
+    return(1);
+  }
+
 
   nbl = 0;
   if ( !mesh->nt ) {
@@ -1059,110 +1638,19 @@ int _MMG5_chkBdryTria(MMG5_pMesh mesh) {
     _MMG5_SAFE_CALLOC(mesh->tria,ntmesh+1,MMG5_Tria);
   }
   else {
-    assert( ntmesh > mesh->nt );
-    _MMG5_ADD_MEM(mesh,(ntmesh-mesh->nt)*sizeof(MMG5_Tria),"triangles",return(0));
-    _MMG5_SAFE_RECALLOC(mesh->tria,mesh->nt+1,ntmesh+1,MMG5_Tria,"triangles");
-    nbl = ntmesh-mesh->nt;
+    assert((!mesh->nprism && ntmesh>mesh->nt)||(mesh->nprism && ntmesh>=mesh->nt));
+    if ( ntmesh > mesh->nt ) {
+      _MMG5_ADD_MEM(mesh,(ntmesh-mesh->nt)*sizeof(MMG5_Tria),"triangles",return(0));
+      _MMG5_SAFE_RECALLOC(mesh->tria,mesh->nt+1,ntmesh+1,MMG5_Tria,"triangles");
+      nbl = ntmesh-mesh->nt;
+    }
   }
   if ( nbl && (mesh->info.imprim > 5 || mesh->info.ddebug) )
     printf("  ## Warning: %d extra boundaries founded\n",nbl);
 
-  return(_MMG5_bdryTria(mesh));
+  return(_MMG5_bdryTria(mesh,ntmesh));
 }
 
-/**
- * \param mesh pointer to the mesh structure.
- * \return 0 if failed, 1 otherwise.
- *
- * Identify boundary triangles.
- *
- * \remark mesh->xtetra is not allocated when \ref _MMG5_bdryTria is called by
- * \ref _MMG3D_analys but it is allocated when called by saveMesh.
- *
- */
-int _MMG5_bdryTria(MMG5_pMesh mesh) {
-  MMG5_pTetra    pt,pt1;
-  MMG5_pTria     ptt;
-  MMG5_pPoint    ppt;
-  MMG5_pxTetra   pxt;
-  _MMG5_Hash     hash;
-  int      *adja,adj,k,ia,ib,ic,kt, tofree=0;
-  char      i;
-
-
-  if ( mesh->nt ) {
-    /* Hash given bdry triangles */
-    if ( ! _MMG5_hashNew(mesh,&hash,0.51*mesh->nt,1.51*mesh->nt) ) return(0);
-    tofree=1;
-    for (k=1; k<=mesh->nt; k++) {
-      ptt = &mesh->tria[k];
-      if ( !_MMG5_hashFace(mesh,&hash,ptt->v[0],ptt->v[1],ptt->v[2],k) ) return(0);
-    }
-  }
-  else hash.item = NULL;
-
-  for (k=1; k<=mesh->ne; k++) {
-    pt = &mesh->tetra[k];
-    if ( !MG_EOK(pt) )  continue;
-    adja = &mesh->adja[4*(k-1)+1];
-    pxt = 0;
-    if ( pt->xt )  pxt = &mesh->xtetra[pt->xt];
-    for (i=0; i<4; i++) {
-      adj = adja[i] / 4;
-      pt1 = &mesh->tetra[adj];
-      if ( adj && ( pt->ref <= pt1->ref) )  continue;
-
-      ia = pt->v[_MMG5_idir[i][0]];
-      ib = pt->v[_MMG5_idir[i][1]];
-      ic = pt->v[_MMG5_idir[i][2]];
-
-      kt = _MMG5_hashGetFace(&hash,ia,ib,ic);
-      if ( kt ) {
-        continue;
-      }
-
-      mesh->nt++;
-      ptt = &mesh->tria[mesh->nt];
-      ptt->v[0] = pt->v[_MMG5_idir[i][0]];
-      ptt->v[1] = pt->v[_MMG5_idir[i][1]];
-      ptt->v[2] = pt->v[_MMG5_idir[i][2]];
-
-      /* the cc field is used to be able to recover the tetra (and its face)
-       * from which comes a boundary triangle (when called by packmesh =>
-       * mesh->nt=0 at the beginning of the function) */
-      ptt->cc = 4*k + i;
-
-      if ( pxt ) {
-        /* useful only when saving mesh */
-        if ( pxt->tag[_MMG5_iarf[i][0]] )  ptt->tag[0] = pxt->tag[_MMG5_iarf[i][0]];
-        if ( pxt->tag[_MMG5_iarf[i][1]] )  ptt->tag[1] = pxt->tag[_MMG5_iarf[i][1]];
-        if ( pxt->tag[_MMG5_iarf[i][2]] )  ptt->tag[2] = pxt->tag[_MMG5_iarf[i][2]];
-      }
-      if ( adj ) {
-        if ( mesh->info.iso ) ptt->ref = MG_ISO;
-        /* useful only when saving mesh */
-        else ptt->ref  = pxt ? pxt->ref[i] : MG_MIN(pt->ref,pt1->ref);
-      }
-      else {
-        /* useful only when saving mesh */
-        ptt->ref  = pxt ? pxt->ref[i] : pt->ref;
-      }
-    }
-  }
-
-  /* set point tag */
-  for (k=1; k<=mesh->nt; k++) {
-    ptt = &mesh->tria[k];
-    for (i=0; i<3; i++) {
-      ppt = &mesh->point[ptt->v[i]];
-      ppt->tag |= MG_BDY;
-    }
-  }
-
-  if ( tofree ) _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
-
-  return(1);
-}
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -1173,20 +1661,27 @@ int _MMG5_bdryTria(MMG5_pMesh mesh) {
  */
 int _MMG5_bdrySet(MMG5_pMesh mesh) {
   MMG5_pTetra   pt,pt1;
+  MMG5_pPrism   pp;
   MMG5_pTria    ptt;
   MMG5_pxTetra  pxt;
+  MMG5_pxPrism  pxp;
   _MMG5_Hash     hash;
-  int      *adja,adj,k,kt,ia,ib,ic,j,na;
+  int      ref,*adja,adj,k,kt,ia,ib,ic,j,na;
   char     i,tag;
 
   if ( !mesh->nt )  return(1);
 
   if ( mesh->xtetra ) {
     if ( abs(mesh->info.imprim) > 3 || mesh->info.ddebug ) {
-      fprintf(stdout,"  ## Warning: no re-build of boundary tetras. ");
-      fprintf(stdout,"mesh->xtetra must be freed to enforce analysis.\n");
+      fprintf(stderr,"  ## Error: mesh->xtetra must be freed.\n");
     }
-    return(1);
+    return(0);
+  }
+  if ( mesh->xprism ) {
+    if ( abs(mesh->info.imprim) > 3 || mesh->info.ddebug ) {
+      fprintf(stderr,"  ## Error: mesh->xprism must be freed.\n");
+    }
+    return(0);
   }
 
   if ( ! _MMG5_hashNew(mesh,&hash,0.51*mesh->nt,1.51*mesh->nt) ) return(0);
@@ -1212,7 +1707,7 @@ int _MMG5_bdrySet(MMG5_pMesh mesh) {
     for (i=0; i<4; i++) {
       adj = adja[i] / 4;
       pt1 = &mesh->tetra[adj];
-      if ( !adj || (adj > 0 && pt->ref != pt1->ref) ) {
+      if ( !adj || ( pt->ref != pt1->ref) ) {
         ia = pt->v[_MMG5_idir[i][0]];
         ib = pt->v[_MMG5_idir[i][1]];
         ic = pt->v[_MMG5_idir[i][2]];
@@ -1271,6 +1766,59 @@ int _MMG5_bdrySet(MMG5_pMesh mesh) {
       }
     }
   }
+
+  if ( !mesh->nprism ) {
+    _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
+    return(1);
+  }
+
+  mesh->xpr     = 0;
+  _MMG5_ADD_MEM(mesh,(mesh->nprism+1)*sizeof(MMG5_xPrism),"boundary prisms",
+                fprintf(stderr,"  Exit program.\n");
+                exit(EXIT_FAILURE));
+  _MMG5_SAFE_CALLOC(mesh->xprism,mesh->nprism+1,MMG5_xPrism);
+
+  /* assign references to prism faces */
+  for (k=1; k<=mesh->nprism; k++) {
+    pp = &mesh->prism[k];
+    if ( !MG_EOK(pp) )  continue;
+    adja = &mesh->adjapr[5*(k-1)+1];
+    for (i=0; i<2; i++) {
+      adj = adja[i] / 5;
+      if ( adj<0 ) {
+        ref = mesh->tetra[abs(adj)].ref;
+      } else {
+        ref = mesh->prism[adj].ref;
+      }
+      if ( adj && (pp->ref == ref) ) continue;
+
+      ia = pp->v[_MMG5_idir_pr[i][0]];
+      ib = pp->v[_MMG5_idir_pr[i][1]];
+      ic = pp->v[_MMG5_idir_pr[i][2]];
+      kt = _MMG5_hashGetFace(&hash,ia,ib,ic);
+      assert(kt);
+      if ( !pp->xpr ) {
+        mesh->xpr++;
+        pp->xpr = mesh->xpr;
+      }
+      ptt = &mesh->tria[kt];
+      pxp = &mesh->xprism[mesh->xpr];
+      pxp->ref[i]   = ptt->ref;
+      pxp->ftag[i] |= MG_BDY;
+      pxp->ftag[i] |= (ptt->tag[0] & ptt->tag[1] & ptt->tag[2]);
+
+      for (j=0; j<3; j++) {
+        pxp->tag[_MMG5_iarf[i][j]] |= pxp->ftag[i] | ptt->tag[j];
+        pxp->edg[_MMG5_iarf[i][j]] = ptt->edg[j];
+      }
+    }
+  }
+  _MMG5_ADD_MEM(mesh,(mesh->xpr-mesh->nprism)*sizeof(MMG5_xPrism),"boundary prisms",
+                fprintf(stderr,"  Exit program.\n");
+                exit(EXIT_FAILURE));
+  _MMG5_SAFE_RECALLOC(mesh->xprism,mesh->nprism+1,mesh->xpr+1,MMG5_xPrism,
+                      "boundary prisms");
+
   _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
   return(1);
 }
@@ -1289,7 +1837,10 @@ int _MMG5_bdryUpdate(MMG5_pMesh mesh) {
   if ( !_MMG5_hashNew(mesh,&hash,0.51*mesh->nt,1.51*mesh->nt) )  return(0);
   for (k=1; k<=mesh->nt; k++) {
     ptt = &mesh->tria[k];
-    if ( !_MMG5_hashFace(mesh,&hash,ptt->v[0],ptt->v[1],ptt->v[2],k) ) return(0);
+    if ( !_MMG5_hashFace(mesh,&hash,ptt->v[0],ptt->v[1],ptt->v[2],k) ) {
+      _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
+      return(0);
+    }
   }
 
   for (k=1; k<=mesh->ne; k++) {
@@ -1362,7 +1913,10 @@ int _MMG5_bdryPerm(MMG5_pMesh mesh) {
 
   for (k=1; k<=mesh->nt; k++) {
     ptt = &mesh->tria[k];
-    if ( !_MMG5_hashFace(mesh,&hash,ptt->v[0],ptt->v[1],ptt->v[2],k) )  return(0);
+    if ( !_MMG5_hashFace(mesh,&hash,ptt->v[0],ptt->v[1],ptt->v[2],k) ) {
+      _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
+      return(0);
+    }
     for (i=0; i<3; i++) {
       ppt = &mesh->point[ptt->v[i]];
       if ( !mesh->info.iso ) ppt->tag |= MG_BDY;

@@ -440,6 +440,7 @@ _MMG5_defsizreg(MMG5_pMesh mesh,MMG5_pSol met,int nump,int *lists,
  */
 int _MMG3D_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTetra    pt,ptloc;
+  MMG5_pPrism    pp;
   MMG5_pxTetra   pxt;
   MMG5_pPoint    p0,p1;
   double         hp,v[3],b0[3],b1[3],b0p0[3],b1b0[3],p1b1[3],hausd,hmin,hmax;
@@ -539,6 +540,22 @@ int _MMG3D_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
         p0->flag    = 1;
       }
     }
+
+    /** Set size at points that cannot be reached from the tetra */
+    for (k=1; k<=mesh->nprism; k++) {
+      pp = &mesh->prism[k];
+      if ( !MG_EOK(pp) )  continue;
+
+      for (i=0; i<6; i++) {
+        ip0 = pp->v[i];
+        p0  = &mesh->point[ip0];
+
+        if ( p0->flag ) continue;
+
+        met->m[ip0] = hmax;
+        p0->flag    = 1;
+      }
+    }
   }
   else {
     /* size truncation */
@@ -611,9 +628,25 @@ int _MMG3D_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
         p0->flag    = 1;
       }
     }
+
+   /** Set size at points that cannot be reached from the tetra */
+    for (k=1; k<=mesh->nprism; k++) {
+      pp = &mesh->prism[k];
+      if ( !MG_EOK(pp) )  continue;
+
+      for (i=0; i<6; i++) {
+        ip0 = pp->v[i];
+        p0  = &mesh->point[ip0];
+
+        if ( p0->flag ) continue;
+
+        met->m[ip0] = MG_MIN(hmax,MG_MAX(hmin,met->m[ip0]));
+        p0->flag    = 1;
+      }
+    }
   }
 
- for (k=1; k<=mesh->np; k++) {
+  for (k=1; k<=mesh->np; k++) {
     p0 = &mesh->point[k];
     p0->flag = 0;
   }

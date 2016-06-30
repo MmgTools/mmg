@@ -927,14 +927,13 @@ static int _MMG5_coltet(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
  */
 static int
 _MMG5_anatetv(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
-  MMG5_pTetra   pt,ptloc;
+  MMG5_pTetra   pt;
   MMG5_pPoint   p1,p2;
   MMG5_xTetra  *pxt;
   _MMG5_Hash    hash;
   MMG5_pPar     par;
   double   ll,o[3],ux,uy,uz,hma2;
-  int      list[MMG3D_LMAX+2],ilist,l,kk,isloc;
-  int      vx[6],k,ip,ip1,ip2,nap,ns,ne,memlack,ier;
+  int      l,vx[6],k,ip,ip1,ip2,nap,ns,ne,memlack,ier;
   char     i,j,ia;
 
   /** 1. analysis */
@@ -1006,40 +1005,16 @@ _MMG5_anatetv(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
 
           /* Local parameters at tetra */
           if ( mesh->info.parTyp & MG_Tetra ) {
-            ilist = _MMG5_boulevolp(mesh,k,ip1,list);
-            l = 0;
-            do
-            {
-              if ( isloc )  break;
-
+            for ( l=0; l<mesh->info.npar; ++l ) {
               par = &mesh->info.par[l];
+
               if ( par->elt != MMG5_Tetrahedron )  continue;
+              if ( par->ref != pt->ref ) continue;
 
-              for ( kk=0; kk<ilist; ++kk ) {
-                ptloc = &mesh->tetra[list[kk]/4];
-                if ( par->ref == ptloc->ref ) {
-                  hma2 = par->hmax;
-                  isloc   = 1;
-                  break;
-                }
-              }
-            } while ( ++l<mesh->info.npar );
-
-            for ( ; l<mesh->info.npar; ++l ) {
-              par = &mesh->info.par[l];
-              if ( par->elt != MMG5_Tetrahedron ) continue;
-
-              for ( kk=0; kk<ilist; ++kk ) {
-                ptloc = &mesh->tetra[list[kk]/4];
-                if ( par->ref == ptloc->ref ) {
-                  hma2 = MG_MAX(hma2,par->hmax);
-                  break;
-                }
-              }
+              hma2  = par->hmax;
+              break;
             }
           }
-
-
           hma2 = _MMG5_LLONG*_MMG5_LLONG*hma2*hma2;
           if ( ll > hma2 )
             ip = _MMG5_hashGet(&hash,ip1,ip2);
