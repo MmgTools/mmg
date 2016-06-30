@@ -60,7 +60,7 @@ static inline void _MMG5_reqBoundaries(MMG5_pMesh mesh) {
       ptt->tag[1] |= MG_CRN;
     }
 
-    if ( !(ptt->tag[1] & MG_REQ) ) {
+    if ( !(ptt->tag[2] & MG_REQ) ) {
       ptt->tag[2] |= MG_REQ;
       ptt->tag[2] |= MG_CRN;
     }
