@@ -135,7 +135,7 @@ void _MMG3D_memOption(MMG5_pMesh mesh) {
 
   mesh->npmax = MG_MAX(1.5*mesh->np,_MMG5_NPMAX);
   mesh->nemax = MG_MAX(1.5*mesh->ne,_MMG5_NEMAX);
-  mesh->ntmax = mesh->nt;
+  mesh->ntmax = MG_MAX(1.5*mesh->nt,_MMG5_NTMAX);
 
   if ( mesh->info.mem <= 0 ) {
     if ( mesh->memMax )
