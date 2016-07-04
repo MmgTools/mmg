@@ -44,7 +44,7 @@ int _MMG2_anatri(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
   nns = nnc = nnsw = 0;
   ns = nc = nsw = 0;
   it = 0;
-  maxit = 1;
+  maxit = 5;
 
   /* Main routine; intertwine split, collapse and swaps */
   do {
