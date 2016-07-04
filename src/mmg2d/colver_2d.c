@@ -88,7 +88,6 @@ int _MMG2_chkcol(MMG5_pMesh mesh, MMG5_pSol met,int k,char i,int *list,char typc
     while ( jel && !MG_EDG(pt1->tag[j]) ) {
       adja = &mesh->adja[3*(jel-1)+1];
       jel = adja[j] / 3;
-      printf("on passe dnas %d \n",jel);
       pt1 = &mesh->tria[jel];
       j = _MMG5_inxt2[adja[j] % 3];
     }
@@ -107,7 +106,8 @@ int _MMG2_chkcol(MMG5_pMesh mesh, MMG5_pSol met,int k,char i,int *list,char typc
       pt1 = &mesh->tria[jel];
       if ( abs(pt->ref) != abs(pt1->ref) )  return(0);
     }*/
-    
+
+
     /* Travel the ball of i1 (but for the two elements 0 and ilist-1 (the last one in the case of
      a closed ball) which will disappear */
     for (l=1; l<ilist-1+open; l++) {
@@ -131,8 +131,9 @@ int _MMG2_chkcol(MMG5_pMesh mesh, MMG5_pSol met,int k,char i,int *list,char typc
       if ( l == 1 ) {
         pt0->tag[j2] = MG_MAX(pt0->tag[j2],pt->tag[i1]);
       }
-      else if ( l == ilist-2+open ) {
+      else if ( l == ilist-2 && !open ) {
         ll = list[ilist-1+open] / 3;
+
         if ( ll > mesh->nt )  return(0);
         lj = list[ilist-1+open] % 3;
         pt0->tag[jj] = MG_MAX(pt0->tag[jj],mesh->tria[ll].tag[lj]);
