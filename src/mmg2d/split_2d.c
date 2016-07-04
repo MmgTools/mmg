@@ -253,7 +253,7 @@ int _MMG2_split1b(MMG5_pMesh mesh,int k,char i,int ip) {
   if ( jel ) {
     kel = _MMG2D_newElt(mesh);
     if ( !kel ) {
-      _MMG2D_TRIA_REALLOC(mesh,iel,mesh->gap,
+      _MMG2D_TRIA_REALLOC(mesh,kel,mesh->gap,
                           printf("  ## Error: unable to allocate a new element.\n");
                           _MMG5_INCREASE_MEM_MESSAGE();
                           printf("  Exit program.\n");

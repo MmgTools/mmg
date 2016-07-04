@@ -59,7 +59,6 @@ static void usage(char *name) {
  *
  */
 static inline void _MMG5_defaultValues(MMG5_pMesh mesh, double qdegrad[2]) {
-  mesh->info.dhd = cos((135.*M_PI)/180.);
 
   _MMG5_mmgDefaultValues(mesh);
 

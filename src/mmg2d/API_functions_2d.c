@@ -95,7 +95,7 @@ void MMG2D_Init_parameters(MMG5_pMesh mesh) {
   mesh->info.ls       = 0.0;      /* level set value */
   mesh->info.hgrad    = 1.3;      /* control gradation; */
 
-  mesh->info.dhd  = 135.;
+  mesh->info.dhd  = _MMG5_ANGEDG;
 
   //mesh->info.imprim = -7;
 
@@ -190,7 +190,7 @@ int MMG2D_Set_dparameter(MMG5_pMesh mesh, MMG5_pSol sol, int dparam, double val)
   case MMG2D_DPARAM_angleDetection :
     mesh->info.dhd = val;
     mesh->info.dhd = MG_MAX(0.0, MG_MIN(180.0,mesh->info.dhd));
-    mesh->info.dhd = 180. - mesh->info.dhd;
+    mesh->info.dhd = cos(mesh->info.dhd*M_PI/180.0);
     break;
   case MMG2D_DPARAM_hmin :
     mesh->info.hmin     = val;

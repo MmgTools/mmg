@@ -197,7 +197,7 @@ int _MMG2_singul(MMG5_pMesh mesh) {
           /*** To change: what is the mechanism for dhd in mmg2d ? ***/
           if ( fabs(dd) > _MMG5_EPSD ) {
             dd = (ux*vx + uy*vy + uz*vz) / sqrt(dd);
-            if ( dd > _MMG2_ANGCORN ) {
+            if ( dd > -mesh->info.dhd ) {
               ppt->tag |= MG_CRN;
               nc++;
             }
