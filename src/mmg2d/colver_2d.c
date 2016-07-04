@@ -29,7 +29,7 @@ int _MMG2_chkcol(MMG5_pMesh mesh, MMG5_pSol met,int k,char i,int *list,char typc
   MMG5_pTria           pt0,pt,pt1,pt2;
   MMG5_pPoint          ppt,p1,p2;
   double               lon,len,calold,calnew,caltmp;
-  int                  ip1,ip2,l,ll,lj,jel,kel,ilist,*adja;
+  int                  ip1,ip2,ipb,l,ll,lj,jel,kel,ilist,*adja;
   unsigned char        i1,i2,j,jj,j2,voy,open;
   
   pt0 = &mesh->tria[0];
@@ -71,7 +71,33 @@ int _MMG2_chkcol(MMG5_pMesh mesh, MMG5_pSol met,int k,char i,int *list,char typc
   ilist = _MMG2_boulet(mesh,k,i1,list);
   if ( ilist <= 0 )
     return(0);
-
+  
+  /* Avoid collapsing a "void triangle" */
+  if ( open ) {
+    jel = list[ilist-1] / 3;
+    pt1 = &mesh->tria[jel];
+    j = list[ilist-1] % 3;
+    j2 = _MMG5_iprv2[j];
+    ipb = pt1->v[j2];
+    
+    /* Travel the ball of ip2 until a boundary is met */
+    jel = k;
+    pt1 = &mesh->tria[jel];
+    j = i1;
+    
+    while ( jel && !MG_EDG(pt1->tag[j]) ) {
+      adja = &mesh->adja[3*(jel-1)+1];
+      jel = adja[j] / 3;
+      printf("on passe dnas %d \n",jel);
+      pt1 = &mesh->tria[jel];
+      j = _MMG5_inxt2[adja[j] % 3];
+    }
+    j = _MMG5_iprv2[j];
+    
+    if ( ipb == pt1->v[j] ) return(0);
+  }
+  
+  
   if ( ilist > 3 || ( ilist == 3 && open ) ) {      // ADD : Second test should work too
     /* Avoid a collapse that would close one ref. component that consists only of one element */
     /* Useless test I believe */

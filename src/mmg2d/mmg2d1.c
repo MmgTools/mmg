@@ -44,7 +44,7 @@ int _MMG2_anatri(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
   nns = nnc = nnsw = 0;
   ns = nc = nsw = 0;
   it = 0;
-  maxit = 5;
+  maxit = 1;
 
   /* Main routine; intertwine split, collapse and swaps */
   do {
@@ -806,12 +806,12 @@ int MMG2_mmg2d1n(MMG5_pMesh mesh,MMG5_pSol met) {
       return(0);
     }
   }
-
+  
   if ( !_MMG2_anatri(mesh,met,2) ) {
     fprintf(stdout,"  ## Unable to proceed adaptation. Exit program.\n");
     return(0);
   }
-
+  
   /* Stage 3: fine mesh improvements */
   if ( !_MMG2_adptri(mesh,met) ) {
     fprintf(stdout,"  ## Unable to make fine improvements. Exit program.\n");
