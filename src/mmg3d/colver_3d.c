@@ -40,11 +40,11 @@ extern char  ddb;
 /** Check whether collapse ip -> iq could be performed, ip internal ;
  *  'mechanical' tests (positive jacobian) are not performed here */
 int _MMG5_chkcol_int(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
-                     char iedg,int *list,char typchk) {
+                     char iedg,int *list,int ilist,char typchk) {
   MMG5_pTetra   pt,pt0;
   MMG5_pPoint   p0;
   double   calold,calnew,caltmp,lon,ll;
-  int      j,iel,ilist,nq,nr;
+  int      j,iel,nq,nr;
   char     i,jj,ip,iq;
 
   ip  = _MMG5_idir[iface][_MMG5_inxt2[iedg]];
@@ -52,7 +52,7 @@ int _MMG5_chkcol_int(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
   pt  = &mesh->tetra[k];
   pt0 = &mesh->tetra[0];
   nq  = pt->v[iq];
-  ilist = _MMG5_boulevolp(mesh,k,ip,list);
+
   lon = 1.e20;
   if ( typchk == 2 && met->m ) {
     lon = _MMG5_lenedg(mesh,met,_MMG5_iarf[iface][iedg],pt);
@@ -428,14 +428,17 @@ _MMG5_topchkcol_bdy(MMG5_pMesh mesh,int k,int iface,char iedg,int *lists,int ili
  *
  */
 int _MMG5_chkcol_bdy(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
-                     char iedg,int *listv,char typchk) {
+                     char iedg,int *listv,int ilistv,int *lists,int ilists,
+                     char typchk) {
   MMG5_pTetra        pt,pt0;
   MMG5_pxTetra       pxt;
   MMG5_pPoint        p0;
   MMG5_Tria          tt;
-  double        calold,calnew,caltmp,nprvold[3],nprvnew[3],ncurold[3],ncurnew[3],ps,devold,devnew;
-  int           ipp,ilistv,nump,numq,ilists,lists[MMG3D_LMAX+2],l,iel,nbbdy,ndepmin,ndepplus;
-  int           nr;
+  MMG5_pPar          par;
+  double        calold,calnew,caltmp,nprvold[3],nprvnew[3],ncurold[3],ncurnew[3];
+  double        ps,devold,devnew,hmax,hausd;
+  int           ipp,nump,numq,l,iel,kk;
+  int           nr,nbbdy,ndepmin,ndepplus,isloc;
   char          iopp,ia,ip,tag,i,iq,i0,i1,ier,isminp,isplp;
 
   pt   = &mesh->tetra[k];
@@ -451,11 +454,6 @@ int _MMG5_chkcol_bdy(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
 
   ndepmin = ndepplus = 0;
   isminp  = isplp = 0;
-
-  /* collect triangles and tetras around ip */
-  if (_MMG5_boulesurfvolp(mesh,k,ip,iface,
-                          listv,&ilistv,lists,&ilists,(p0->tag & MG_NOM)) < 0 )
-    return(-1);
 
   /* prevent collapse in case surface ball has 3 triangles */
   if ( ilists <= 2 )  return(0);  // ATTENTION, Normalement, avec 2 c est bon !
@@ -614,7 +612,53 @@ int _MMG5_chkcol_bdy(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
     }
     assert(i<3);
     tt.v[i] = numq;
-    if ( _MMG5_chkedg(mesh,&tt,MG_GET(pxt->ori,iopp)) )  return(0);
+
+    /* Local parameters for tt and iel */
+    hmax  = mesh->info.hmax;
+    hausd = mesh->info.hausd;
+    isloc = 0;
+    if ( mesh->info.parTyp & MG_Tetra ) {
+      for ( kk=0; kk<mesh->info.npar; ++kk ) {
+        par = &mesh->info.par[kk];
+
+        if ( par->elt != MMG5_Tetrahedron )  continue;
+        if ( par->ref != pt->ref ) continue;
+
+        hmax = par->hmax;
+        hausd = par->hausd;
+        isloc = 1;
+        break;
+      }
+    }
+    if ( mesh->info.parTyp & MG_Tria ) {
+      if ( isloc ) {
+        for ( kk=0; kk<mesh->info.npar; ++kk ) {
+          par = &mesh->info.par[kk];
+
+          if ( par->elt != MMG5_Triangle )  continue;
+          if ( par->ref != tt.ref ) continue;
+
+          hmax = MG_MIN(hmax,par->hmax);
+          hausd = MG_MIN(hausd,par->hausd);
+          break;
+        }
+      }
+      else {
+        for ( kk=0; kk<mesh->info.npar; ++kk ) {
+          par = &mesh->info.par[kk];
+
+          if ( par->elt != MMG5_Triangle )  continue;
+          if ( par->ref != tt.ref ) continue;
+
+          hmax  = par->hmax;
+          hausd = par->hausd;
+          isloc = 1;
+          break;
+        }
+      }
+    }
+
+    if ( _MMG5_chkedg(mesh,&tt,MG_GET(pxt->ori,iopp),hmax,hausd,isloc) )  return(0);
 
     memcpy(nprvold,ncurold,3*sizeof(double));
     memcpy(nprvnew,ncurnew,3*sizeof(double));

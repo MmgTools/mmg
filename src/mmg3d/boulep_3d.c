@@ -1198,7 +1198,8 @@ int _MMG5_srcbdy(MMG5_pMesh mesh,int start,int ia) {
  *
  * \warning Don't work if \a ia has only one boundary face in its shell.
  */
-int _MMG5_coquilface(MMG5_pMesh mesh,int start,int ia,int *list,int *it1,int *it2) {
+int _MMG5_coquilface(MMG5_pMesh mesh,int start,int ia,int *list,int *it1,
+                     int *it2,int silent) {
   MMG5_pTetra   pt;
   MMG5_pxTetra  pxt;
   int     *adja,piv,adj,na,nb,ilist,pradj,i;
@@ -1235,7 +1236,7 @@ int _MMG5_coquilface(MMG5_pMesh mesh,int start,int ia,int *list,int *it1,int *it
       if ( *it1 == 0 )
         *it1 = 4*pradj+iface;
       else {
-        if ( *it2 ) {
+        if ( *it2 && !silent ) {
           // Algiane: (commentated assert) for a manifold edge 2 cases :
           // 1) the shell is open and we have more than 3 tri sharing the edge
           // (highly non-manifold)

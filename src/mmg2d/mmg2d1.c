@@ -645,6 +645,7 @@ int MMG2_mmg2d1(MMG5_pMesh mesh,MMG5_pSol sol) {
   /* 1. Geometric mesh */
   if ( mesh->info.imprim > 3 )
     fprintf(stdout,"  -- GEOMETRIC MESH\n");
+
   ngeom = analargeom(mesh,sol,&alert);
   if ( mesh->info.imprim && (abs(mesh->info.imprim) < 6) )
     fprintf(stdout,"     %8d splitted\n",ngeom);

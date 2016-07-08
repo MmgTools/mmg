@@ -384,6 +384,7 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
         pt->edg[i] = 0;
       air = MMG2_quickarea(mesh->point[pt->v[0]].c,mesh->point[pt->v[1]].c,
                            mesh->point[pt->v[2]].c);
+
       if(air < 0) {
         if ( mesh->info.ddebug || mesh->info.imprim > 6 )
           printf("Tr %d bad oriented\n",k);
@@ -393,7 +394,8 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
         pt->v[1] = tmp;
       }
     }
-    fprintf(stdout," %8d triangles reoriented \n",norient);
+    if ( norient )
+      fprintf(stdout," %8d triangles reoriented \n",norient);
   } else {
     for (k=1; k<=mesh->np; k++) {
       ppt = &mesh->point[ k ];

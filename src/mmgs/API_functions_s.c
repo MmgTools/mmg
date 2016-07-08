@@ -1049,8 +1049,10 @@ int MMGS_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
       if ( (mesh->info.imprim > 5) || mesh->info.ddebug )
         fprintf(stdout,"  ## Warning: new local parameter values\n");
     }
-    mesh->info.npar  = val;
-    mesh->info.npari = 0;
+    mesh->info.npar   = val;
+    mesh->info.npari  = 0;
+    mesh->info.parTyp = 0;
+
     _MMG5_ADD_MEM(mesh,mesh->info.npar*sizeof(MMG5_Par),"parameters",
                   fprintf(stderr,"  Exit program.\n");
                   exit(EXIT_FAILURE));
@@ -1188,6 +1190,10 @@ int MMGS_Set_localParameter(MMG5_pMesh mesh,MMG5_pSol sol, int typ, int ref,
     fprintf(stdout,"  ## Unknown type of entity: ignored.\n");
     return(0);
   }
+  if ( ref < 0 ) {
+    fprintf(stderr,"  ## Error: negative references are not allowed.\n");
+    return(0);
+  }
 
   for (k=0; k<mesh->info.npari; k++) {
     par = &mesh->info.par[k];
@@ -1209,6 +1215,17 @@ int MMGS_Set_localParameter(MMG5_pMesh mesh,MMG5_pSol sol, int typ, int ref,
   mesh->info.par[mesh->info.npari].hmin  = hmin;
   mesh->info.par[mesh->info.npari].hmax  = hmax;
   mesh->info.par[mesh->info.npari].hausd = hausd;
+
+  switch ( typ )
+  {
+  case ( MMG5_Vertex ):
+    mesh->info.parTyp |= MG_Vert;
+    break;
+  case ( MMG5_Triangle ):
+    mesh->info.parTyp |= MG_Tria;
+    break;
+  }
+
   mesh->info.npari++;
 
   return(1);

@@ -74,7 +74,7 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree,int ne,
   MMG5_pPoint     p0,p1,ppt;
   MMG5_pxPoint    pxp;
   double     dd,len,lmax,o[3],to[3],no1[3],no2[3],v[3];
-  int        k,ip,ip1,ip2,list[MMG3D_LMAX+2],ilist,ref;
+  int        k,ip,ip1,ip2,list[MMG3D_LMAX+2],ilist,lists[MMG3D_LMAX+2],ilists,ref;
   char       imax,tag,j,i,i1,i2,ifa0,ifa1;
   int        lon,ret,ier;
   double     lmin;
@@ -362,7 +362,12 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree,int ne,
         tag |= MG_BDY;
         if ( p0->tag > tag )   continue;
         if ( ( tag & MG_NOM ) && (mesh->adja[4*(k-1)+1+i]) ) continue;
-        ilist = _MMG5_chkcol_bdy(mesh,met,k,i,j,list,2);
+
+        if (_MMG5_boulesurfvolp(mesh,k,i1,i,
+                                list,&ilist,lists,&ilists,(p0->tag & MG_NOM)) < 0 )
+          return(-1);
+
+        ilist = _MMG5_chkcol_bdy(mesh,met,k,i,j,list,ilist,lists,ilists,2);
         if ( ilist > 0 ) {
           ier = _MMG5_colver(mesh,met,list,ilist,i2,2);
 
@@ -377,8 +382,10 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree,int ne,
       }
       /* Case of an internal face */
       else {
+        ilist = _MMG5_boulevolp(mesh,k,i1,list);
+
         if ( p0->tag & MG_BDY )  continue;
-        ilist = _MMG5_chkcol_int(mesh,met,k,i,j,list,2);
+        ilist = _MMG5_chkcol_int(mesh,met,k,i,j,list,ilist,2);
         if ( ilist > 0 ) {
 #ifndef NDEBUG          
           double ver[3];
@@ -676,7 +683,12 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree,int ne,
         tag |= MG_BDY;
         if ( p0->tag > tag )   continue;
         if ( ( tag & MG_NOM ) && (mesh->adja[4*(k-1)+1+i]) ) continue;
-        ilist = _MMG5_chkcol_bdy(mesh,met,k,i,j,list,2);
+
+        if (_MMG5_boulesurfvolp(mesh,k,i1,i,
+                                list,&ilist,lists,&ilists,(p0->tag & MG_NOM)) < 0 )
+          return(-1);
+
+        ilist = _MMG5_chkcol_bdy(mesh,met,k,i,j,list,ilist,lists,ilists,2);
         if ( ilist > 0 ) {
           ier = _MMG5_colver(mesh,met,list,ilist,i2,2);
           if ( ier < 0 ) return(-1);
@@ -691,7 +703,8 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree,int ne,
       /* Case of an internal face */
       else {
         if ( p0->tag & MG_BDY )  continue;
-        ilist = _MMG5_chkcol_int(mesh,met,k,i,j,list,2);
+        ilist = _MMG5_boulevolp(mesh,k,i1,list);
+        ilist = _MMG5_chkcol_int(mesh,met,k,i,j,list,ilist,2);
         if ( ilist > 0 ) {
           ier = _MMG5_colver(mesh,met,list,ilist,i2,2);
           if ( ilist < 0 ) continue;

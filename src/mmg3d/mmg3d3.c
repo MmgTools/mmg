@@ -415,10 +415,12 @@ static int _MMG5_coltetlag(MMG5_pMesh mesh,MMG5_pSol met,int itdeg) {
         uy = p1->c[1] - p0->c[1];
         uz = p1->c[2] - p0->c[2];
         ll = ux*ux + uy*uy + uz*uz;
+
         if ( ll > hmi2 )  continue;
 
         isnm = 0;
-        ilist = _MMG5_chkcol_int(mesh,met,k,i,j,list,2);
+        ilist = _MMG5_boulevolp(mesh,k,ip,list);
+        ilist = _MMG5_chkcol_int(mesh,met,k,i,j,list,ilist,2);
       
         if ( ilist > 0 ) {
           ier = _MMG5_colver(mesh,met,list,ilist,iq,2);

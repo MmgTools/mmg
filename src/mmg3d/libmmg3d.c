@@ -68,6 +68,11 @@ void _MMG3D_Free_topoTables(MMG5_pMesh mesh) {
 
   _MMG5_freeXTets(mesh);
 
+  if ( mesh->adjapr )
+    _MMG5_DEL_MEM(mesh,mesh->adjapr,(5*mesh->nprism+6)*sizeof(int));
+
+  _MMG5_freeXPrisms(mesh);
+
   if ( mesh->xpoint )
     _MMG5_DEL_MEM(mesh,mesh->xpoint,(mesh->xpmax+1)*sizeof(MMG5_xPoint));
 
@@ -87,7 +92,26 @@ void _MMG3D_Free_topoTables(MMG5_pMesh mesh) {
  */
 static inline
 void _MMG3D_scalarSolTruncature(MMG5_pMesh mesh, MMG5_pSol met) {
-  int         k,sethmin,sethmax;
+  MMG5_pTetra pt;
+  MMG5_pPoint ppt;
+  int         i,k,sethmin,sethmax;
+
+  /* Detect the point used only by prisms */
+  if ( mesh->nprism ) {
+    for (k=1; k<=mesh->np; k++) {
+      mesh->point[k].flag = 0;
+    }
+    for (k=1; k<=mesh->ne; k++) {
+      pt = &mesh->tetra[k];
+      if ( !MG_EOK(pt) ) continue;
+
+      for (i=0; i<4; i++) {
+        mesh->point[pt->v[i]].flag = 1;
+      }
+
+    }
+  }
+
 
   /* If not provided by the user, compute hmin/hmax from the metric computed by
    * the DoSol function (isotropic metric) */
@@ -96,6 +120,8 @@ void _MMG3D_scalarSolTruncature(MMG5_pMesh mesh, MMG5_pSol met) {
     sethmin = 0;
     mesh->info.hmin = FLT_MAX;
     for (k=1; k<=mesh->np; k++)  {
+      ppt = &mesh->point[k];
+      if ( !MG_VOK(ppt) || !ppt->flag ) continue;
       mesh->info.hmin = MG_MIN(mesh->info.hmin,met->m[k]);
     }
   }
@@ -103,6 +129,8 @@ void _MMG3D_scalarSolTruncature(MMG5_pMesh mesh, MMG5_pSol met) {
     sethmax = 1;
     mesh->info.hmax = 0.;
     for (k=1; k<=mesh->np; k++)  {
+      ppt = &mesh->point[k];
+      if ( !MG_VOK(ppt) || !ppt->flag ) continue;
       mesh->info.hmax = MG_MAX(mesh->info.hmax,met->m[k]);
     }
   }
@@ -126,6 +154,8 @@ void _MMG3D_scalarSolTruncature(MMG5_pMesh mesh, MMG5_pSol met) {
 
   /* vertex size */
   for (k=1; k<=mesh->np; k++) {
+    ppt = &mesh->point[k];
+    if ( !MG_VOK(ppt) ) continue;
     met->m[k] = MG_MIN(mesh->info.hmax,MG_MAX(mesh->info.hmin,met->m[k]));
   }
   return;
@@ -145,6 +175,8 @@ void _MMG3D_scalarSolTruncature(MMG5_pMesh mesh, MMG5_pSol met) {
 static inline
 int _MMG3D_packMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
   MMG5_pTetra   pt,ptnew;
+  MMG5_pPrism   pp;
+  MMG5_pQuad    pq;
   MMG5_pPoint   ppt,pptnew;
   MMG5_hgeom   *ph;
   int     np,nc,nr, k,ne,nbl,imet,imetnew,i;
@@ -202,6 +234,28 @@ int _MMG3D_packMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
   }
   mesh->ne = ne;
 
+  /* update prisms and quads vertex indices */
+  for (k=1; k<=mesh->nprism; k++) {
+    pp = &mesh->prism[k];
+    if ( !MG_EOK(pp) )  continue;
+
+    pp->v[0] = mesh->point[pp->v[0]].tmp;
+    pp->v[1] = mesh->point[pp->v[1]].tmp;
+    pp->v[2] = mesh->point[pp->v[2]].tmp;
+    pp->v[3] = mesh->point[pp->v[3]].tmp;
+    pp->v[4] = mesh->point[pp->v[4]].tmp;
+    pp->v[5] = mesh->point[pp->v[5]].tmp;
+  }
+  for (k=1; k<=mesh->nquad; k++) {
+    pq = &mesh->quad[k];
+    if ( !MG_EOK(pq) )  continue;
+
+    pq->v[0] = mesh->point[pq->v[0]].tmp;
+    pq->v[1] = mesh->point[pq->v[1]].tmp;
+    pq->v[2] = mesh->point[pq->v[2]].tmp;
+    pq->v[3] = mesh->point[pq->v[3]].tmp;
+  }
+
   /* compact metric */
   nbl = 1;
   if ( met && met->m ) {
@@ -253,6 +307,11 @@ int _MMG3D_packMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
   if ( disp && disp->m )
     disp->np = np;
 
+  /* create prism adjacency */
+  if ( !MMG3D_hashPrism(mesh) ) {
+    fprintf(stderr,"  ## Prism hashing problem. Exit program.\n");
+    return(0);
+  }
   /* rebuild triangles*/
   mesh->nt = 0;
   if ( !_MMG5_chkBdryTria(mesh) ) {
@@ -474,6 +533,7 @@ int MMG3D_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met) {
   if ( mesh->info.imprim ) {
     fprintf(stdout,"\n  -- PHASE 2 : %s MESHING\n",met->size < 6 ? "ISOTROPIC" : "ANISOTROPIC");
   }
+
 
   /* renumerotation if available */
   if ( !_MMG5_scotchCall(mesh,met) )

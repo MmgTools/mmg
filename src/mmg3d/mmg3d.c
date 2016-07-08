@@ -50,6 +50,79 @@ static void _MMG5_endcod() {
 
 /**
  * \param mesh pointer toward the mesh structure.
+ * \param bdyRefs pointer toward the list of the boundary references.
+ * \return npar, the number of local parameters at tetrahedra if success,
+ * 0 otherwise.
+ *
+ * Count the local default values at tetrahedra and fill the list of the boundary
+ * references.
+ *
+ */
+static inline
+int _MMG5_countLocalParamAtTet( MMG5_pMesh mesh,_MMG5_iNode **bdyRefs) {
+  int         npar,k,ier;
+
+  /** Count the number of different boundary references and list it */
+  (*bdyRefs) = NULL;
+  npar = 0;
+
+  k = mesh->ne? mesh->tetra[1].ref : 0;
+
+  /* Try to alloc the first node */
+  ier = _MMG5_Add_inode( mesh, bdyRefs, k );
+  if ( ier < 0 ) {
+    fprintf(stderr,"  ## Error: unable to allocate the first boundary"
+           " reference node.\n");
+    return(0);
+  }
+  else {
+    assert(ier);
+    npar = 1;
+  }
+
+  for ( k=1; k<=mesh->ne; ++k ) {
+    ier = _MMG5_Add_inode( mesh, bdyRefs, mesh->tetra[k].ref );
+
+    if ( ier < 0 ) {
+      printf("  ## Warning: unable to list the tetra references.\n"
+             "              Uncomplete parameters file.\n" );
+      break;
+    }
+    else if ( ier ) ++npar;
+  }
+
+  return(npar);
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param bdryRefs pointer toward the list of the boundary references.
+ * \param out pointer toward the file in which to write.
+ * \return 1 if success, 0 otherwise.
+ *
+ * Write the local default values at tetrahedra in the parameter file.
+ *
+ */
+static inline
+int _MMG5_writeLocalParamAtTet( MMG5_pMesh mesh, _MMG5_iNode *bdryRefs,
+                                FILE *out ) {
+  _MMG5_iNode *cur;
+
+  cur = bdryRefs;
+  while( cur ) {
+    fprintf(out,"%d Tetrahedron %e %e %e \n",cur->val,
+            mesh->info.hmin, mesh->info.hmax,mesh->info.hausd);
+    cur = cur->nxt;
+  }
+
+  _MMG5_Free_ilinkedList(mesh,bdryRefs);
+
+  return(1);
+}
+
+
+/**
+ * \param mesh pointer toward the mesh structure.
  * \return 1 if success, 0 otherwise.
  *
  * Write a DEFAULT.mmg3d file containing the default values of parameters that
@@ -58,10 +131,17 @@ static void _MMG5_endcod() {
  */
 static inline
 int _MMG3D_writeLocalParam( MMG5_pMesh mesh ) {
-  char       data[]="DEFAULT.mmg3d";
-  FILE       *out;
+  _MMG5_iNode  *triRefs,*tetRefs;
+  int          nparTri,nparTet;
+  char         *ptr,data[128];
+  FILE         *out;
 
   /** Save the local parameters file */
+  strcpy(data,mesh->namein);
+  ptr = strstr(data,".mesh");
+  if ( ptr ) *ptr = '\0';
+  strcat(data,".mmg3d");
+
   if ( !(out = fopen(data,"wb")) ) {
     fprintf(stderr,"\n  ** UNABLE TO OPEN %s.\n",data);
     return(0);
@@ -69,7 +149,19 @@ int _MMG3D_writeLocalParam( MMG5_pMesh mesh ) {
 
   fprintf(stdout,"\n  %%%% %s OPENED\n",data);
 
-  if (! _MMG5_writeLocalParam(mesh, out) ) return 0;
+  nparTri = _MMG5_countLocalParamAtTri( mesh, &triRefs);
+  if ( !nparTri ) return 0;
+
+  nparTet = _MMG5_countLocalParamAtTet( mesh, &tetRefs);
+  if ( !nparTet ) return 0;
+
+  fprintf(out,"parameters\n %d\n",nparTri+nparTet);
+
+  /** Write local param at triangles */
+  if (! _MMG5_writeLocalParamAtTri(mesh,triRefs,out) ) return 0;
+
+  /** Write local param at tetra */
+  if (! _MMG5_writeLocalParamAtTet(mesh,tetRefs,out) ) return 0;
 
   fclose(out);
   fprintf(stdout,"  -- WRITING COMPLETED\n");
@@ -171,7 +263,7 @@ int main(int argc,char *argv[]) {
 
   MMG5_pMesh      mesh;
   MMG5_pSol       met,disp;
-  int             ier;
+  int             ier,msh;
   char            stim[32];
 
   fprintf(stdout,"  -- MMG3d, Release %s (%s) \n",MG_VER,MG_REL);
@@ -212,8 +304,15 @@ int main(int argc,char *argv[]) {
   /* load data */
   fprintf(stdout,"\n  -- INPUT DATA\n");
   chrono(ON,&MMG5_ctim[1]);
+
   /* read mesh file */
-  if ( MMG3D_loadMesh(mesh,mesh->namein)<1 )
+  msh = 0;
+  ier = MMG3D_loadMesh(mesh,mesh->namein);
+  if ( !ier ) {
+    ier = MMG3D_loadMshMesh(mesh,met,mesh->namein);
+    msh = 1;
+  }
+  if ( ier<1 )
     _MMG5_RETURN_AND_FREE(mesh,met,disp,MMG5_STRONGFAILURE);
 
   /* read displacement if any */
@@ -224,27 +323,37 @@ int main(int argc,char *argv[]) {
     if ( !MMG3D_Set_inputSolName(mesh,disp,met->namein) )
       _MMG5_RETURN_AND_FREE(mesh,met,disp,MMG5_STRONGFAILURE);
 
-    ier = MMG3D_loadSol(mesh,disp,disp->namein);
-    if ( ier == 0 ) {
-      fprintf(stderr,"  ## ERROR: NO DISPLACEMENT FOUND.\n");
-      _MMG5_RETURN_AND_FREE(mesh,met,disp,MMG5_STRONGFAILURE);
-    }
-    else if ( ier == -1 ) {
-      fprintf(stderr,"  ## ERROR: WRONG DATA TYPE OR WRONG SOLUTION NUMBER.\n");
-      _MMG5_RETURN_AND_FREE(mesh,met,disp,MMG5_STRONGFAILURE);
+    if ( !msh ) {
+      ier = MMG3D_loadSol(mesh,disp,disp->namein);
+      if ( ier == 0 ) {
+        fprintf(stderr,"  ## ERROR: NO DISPLACEMENT FOUND.\n");
+        _MMG5_RETURN_AND_FREE(mesh,met,disp,MMG5_STRONGFAILURE);
+      }
+      else if ( ier == -1 ) {
+        fprintf(stderr,"  ## ERROR: WRONG DATA TYPE OR WRONG SOLUTION NUMBER.\n");
+        _MMG5_RETURN_AND_FREE(mesh,met,disp,MMG5_STRONGFAILURE);
+      }
     }
   }
   /* read metric if any */
   else {
-    ier = MMG3D_loadSol(mesh,met,met->namein);
+    if ( !msh ) {
+      ier = MMG3D_loadSol(mesh,met,met->namein);
 
-    if ( ier == -1 ) {
-      fprintf(stderr,"  ## ERROR: WRONG DATA TYPE OR WRONG SOLUTION NUMBER.\n");
-      _MMG5_RETURN_AND_FREE(mesh,met,disp,MMG5_STRONGFAILURE);
+      if ( ier == -1 ) {
+        fprintf(stderr,"  ## ERROR: WRONG DATA TYPE OR WRONG SOLUTION NUMBER.\n");
+        _MMG5_RETURN_AND_FREE(mesh,met,disp,MMG5_STRONGFAILURE);
+      }
+      if ( mesh->info.iso && !ier ) {
+        fprintf(stderr,"  ## ERROR: NO ISOVALUE DATA.\n");
+        _MMG5_RETURN_AND_FREE(mesh,met,disp,MMG5_STRONGFAILURE);
+      }
     }
-    if ( mesh->info.iso && !ier ) {
-      fprintf(stderr,"  ## ERROR: NO ISOVALUE DATA.\n");
-      _MMG5_RETURN_AND_FREE(mesh,met,disp,MMG5_STRONGFAILURE);
+    else {
+      if ( mesh->info.iso && met->m==0 ) {
+        fprintf(stderr,"  ## ERROR: NO ISOVALUE DATA.\n");
+        _MMG5_RETURN_AND_FREE(mesh,met,disp,MMG5_STRONGFAILURE);
+      }
     }
     if ( !MMG3D_parsop(mesh,met) )
       _MMG5_RETURN_AND_FREE(mesh,met,disp,MMG5_LOWFAILURE);

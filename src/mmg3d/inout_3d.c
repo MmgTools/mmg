@@ -103,12 +103,13 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,const char *filename) {
   MMG5_pTetra pt;
   MMG5_pPrism pp;
   MMG5_pTria  pt1;
+  MMG5_pQuad  pq1;
   MMG5_pEdge  pa;
   MMG5_pPoint ppt;
   double      *norm,*n,dd;
   int         posnp,posnt,posne,posned,posncor,posnpreq,posntreq,posnereq,posnedreq;
-  int         posnr,posnprism,posnormal,posnc1;
-  int         npreq,ntreq,nereq,nedreq,ncor,ned,ng,bin,iswp;
+  int         posnr,posnprism,posnormal,posnc1,posnq,posnqreq;
+  int         npreq,ntreq,nereq,nedreq,nqreq,ncor,ned,ng,bin,iswp;
   int         binch,bdim,bpos,i,k,ip,idn;
   int         *ina,v[3],ref,nt,na,nr,ia,aux,nref;
   float       fc;
@@ -116,8 +117,8 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,const char *filename) {
 
   posnp = posnt = posne = posncor = 0;
   posnpreq = posntreq = posnereq = posned = posnedreq = posnr = 0;
-  posnprism = posnormal= posnc1 = 0;
-  ncor = ned = npreq = ntreq = nereq = nedreq = nr = ng = 0;
+  posnprism = posnormal= posnc1 = posnq = 0;
+  ncor = ned = npreq = ntreq = nqreq = nereq = nedreq = nr = ng = 0;
   bin = 0;
   iswp = 0;
   ina = NULL;
@@ -143,10 +144,10 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,const char *filename) {
   else {
     ptr = strstr(data,".meshb");
     if ( ptr )  bin = 1;
-      if( !(inm = fopen(data,"rb")) ) {
-        fprintf(stderr,"  ** %s  NOT FOUND.\n",data);
-        return(0);
-      }
+    if( !(inm = fopen(data,"rb")) ) {
+      fprintf(stderr,"  ** %s  NOT FOUND.\n",data);
+      return(0);
+    }
   }
 
   fprintf(stdout,"  %%%% %s OPENED\n",data);
@@ -180,6 +181,16 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,const char *filename) {
         fscanf(inm,"%d",&ntreq);
         posntreq = ftell(inm);
         continue;
+      }
+      else if(!strncmp(chaine,"Quadrilaterals",strlen("Quadrilaterals"))) {
+        fscanf(inm,"%d",&mesh->nquad);
+        posnq = ftell(inm);
+        continue;
+      } else if(!strncmp(chaine,"RequiredQuadrilaterals",strlen("RequiredQuadrilaterals"))) {
+        fscanf(inm,"%d",&nqreq);
+        posnqreq = ftell(inm);
+        continue;
+
       } else if(!strncmp(chaine,"Tetrahedra",strlen("Tetrahedra"))) {
         fscanf(inm,"%d",&mesh->nei);
         posne = ftell(inm);
@@ -277,6 +288,25 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,const char *filename) {
         fread(&ntreq,sw,1,inm);
         if(iswp) ntreq=_MMG5_swapbin(ntreq);
         posntreq = ftell(inm);
+        rewind(inm);
+        fseek(inm,bpos,SEEK_SET);
+        continue;
+      }
+      else if(!mesh->nquad && binch==7) {//Quadrilaterals
+        fread(&bpos,sw,1,inm); //NulPos
+        if(iswp) bpos=_MMG5_swapbin(bpos);
+        fread(&mesh->nquad,sw,1,inm);
+        if(iswp) mesh->nquad=_MMG5_swapbin(mesh->nquad);
+        posnq = ftell(inm);
+        rewind(inm);
+        fseek(inm,bpos,SEEK_SET);
+        continue;
+      } else if(binch==18) {  //RequiredQuadrilaterals
+        fread(&bpos,sw,1,inm); //NulPos
+        if(iswp) bpos=_MMG5_swapbin(bpos);
+        fread(&nqreq,sw,1,inm);
+        if(iswp) nqreq=_MMG5_swapbin(nqreq);
+        posnqreq = ftell(inm);
         rewind(inm);
         fseek(inm,bpos,SEEK_SET);
         continue;
@@ -493,7 +523,7 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,const char *filename) {
         }
       }
       if( !mesh->nt )
-        _MMG5_DEL_MEM(mesh,mesh->tria,(mesh->nt+1)*sizeof(MMG5_Tria));
+        _MMG5_DEL_MEM(mesh,mesh->tria,(nt+1)*sizeof(MMG5_Tria));
 
       else if ( mesh->nt < nt ) {
         _MMG5_ADD_MEM(mesh,(mesh->nt-nt)*sizeof(MMG5_Tria),"triangles",
@@ -553,6 +583,51 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,const char *filename) {
       _MMG5_SAFE_FREE(ina);
   } //end if mesh->nt
 
+  /* read mesh quadrilaterals */
+  if ( mesh->nquad ) {
+    rewind(inm);
+    fseek(inm,posnq,SEEK_SET);
+
+    for (k=1; k<=mesh->nquad; k++) {
+      pq1 = &mesh->quad[k];
+      if (!bin)
+        fscanf(inm,"%d %d %d %d %d",&pq1->v[0],&pq1->v[1],&pq1->v[2],
+               &pq1->v[3],&pq1->ref);
+      else {
+        for (i=0 ; i<4 ; i++) {
+          fread(&pq1->v[i],sw,1,inm);
+          if(iswp) pq1->v[i]=_MMG5_swapbin(pq1->v[i]);
+        }
+        fread(&pq1->ref,sw,1,inm);
+        if(iswp) pq1->ref=_MMG5_swapbin(pq1->ref);
+      }
+    }
+
+    /* get required quadrilaterals */
+    if(nqreq) {
+      rewind(inm);
+      fseek(inm,posnqreq,SEEK_SET);
+      for (k=1; k<=nqreq; k++) {
+        if(!bin)
+          fscanf(inm,"%d",&i);
+        else {
+          fread(&i,sw,1,inm);
+          if(iswp) i=_MMG5_swapbin(i);
+        }
+        if ( i>mesh->nquad ) {
+          fprintf(stdout,"   Warning: required quadrilaterals number"
+                  " %8d IGNORED\n",i);
+        } else {
+          pq1 = &mesh->quad[i];
+          pq1->tag[0] |= MG_REQ;
+          pq1->tag[1] |= MG_REQ;
+          pq1->tag[2] |= MG_REQ;
+          pq1->tag[3] |= MG_REQ;
+        }
+      }
+    }
+  } //end if mesh->nquad
+
     /* read mesh edges */
   if ( mesh->na ) {
     na = mesh->na;
@@ -588,7 +663,7 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,const char *filename) {
     }
     if ( mesh->info.iso ) {
       if( !mesh->na )
-        _MMG5_DEL_MEM(mesh,mesh->edge,(mesh->na+1)*sizeof(MMG5_Edge));
+        _MMG5_DEL_MEM(mesh,mesh->edge,(na+1)*sizeof(MMG5_Edge));
       else if ( mesh->na < na ) {
         _MMG5_ADD_MEM(mesh,(mesh->na-na)*sizeof(MMG5_Edge),"edges",
                       fprintf(stderr,"  Exit program.\n");
@@ -754,7 +829,7 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,const char *filename) {
   /* read geometric entities */
   if ( mesh->nc1 && !ng ) {
     printf("  ## Warning: Your mesh don't contains Normals but contains"
-             " NormalAtVertices. The NormalAtVertices are deleted. \n");
+           " NormalAtVertices. The NormalAtVertices are deleted. \n");
     mesh->nc1 = 0;
   }
 
@@ -819,36 +894,1163 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,const char *filename) {
 
   /* stats */
   if ( abs(mesh->info.imprim) > 3 ) {
-    fprintf(stdout,"     NUMBER OF VERTICES     %8d\n",mesh->np);
+    fprintf(stdout,"     NUMBER OF VERTICES       %8d\n",mesh->np);
     if ( mesh->na ) {
-      fprintf(stdout,"     NUMBER OF EDGES        %8d\n",mesh->na);
+      fprintf(stdout,"     NUMBER OF EDGES          %8d\n",mesh->na);
       if ( nr )
-        fprintf(stdout,"     NUMBER OF RIDGES       %8d\n",nr);
+        fprintf(stdout,"     NUMBER OF RIDGES         %8d\n",nr);
     }
     if ( mesh->nt )
-      fprintf(stdout,"     NUMBER OF TRIANGLES    %8d\n",mesh->nt);
-    if ( mesh->nprism )
-      fprintf(stdout,"     NUMBER OF PRISMS    %8d\n",mesh->nprism);
+      fprintf(stdout,"     NUMBER OF TRIANGLES      %8d\n",mesh->nt);
+    if ( mesh->nquad )
+      fprintf(stdout,"     NUMBER OF QUADRILATERALS %8d\n",mesh->nquad);
 
     fprintf(stdout,"     NUMBER OF TETRAHEDRA     %8d\n",mesh->ne);
 
+    if ( mesh->nprism )
+      fprintf(stdout,"     NUMBER OF PRISMS         %8d\n",mesh->nprism);
 
-    if ( npreq || nedreq || ntreq || nereq ) {
+
+    if ( npreq || nedreq || ntreq || nereq || nqreq ) {
       fprintf(stdout,"     NUMBER OF REQUIRED ENTITIES: \n");
       if ( npreq )
-        fprintf(stdout,"                  VERTICES    %8d \n",npreq);
+        fprintf(stdout,"                  VERTICES       %8d \n",npreq);
       if ( nedreq )
-        fprintf(stdout,"                  EDGES       %8d \n",nedreq);
+        fprintf(stdout,"                  EDGES          %8d \n",nedreq);
       if ( ntreq )
-        fprintf(stdout,"                  TRIANGLES   %8d \n",ntreq);
+        fprintf(stdout,"                  TRIANGLES      %8d \n",ntreq);
+      if ( nqreq )
+        fprintf(stdout,"                  QUADRILATERALS %8d \n",nqreq);
       if ( nereq )
-        fprintf(stdout,"                  TETRAHEDRAS %8d \n",nereq);
+        fprintf(stdout,"                  TETRAHEDRAS    %8d \n",nereq);
     }
-    if(ncor) fprintf(stdout,"     NUMBER OF CORNERS        %8d \n",ncor);
+    if(ncor) fprintf(stdout,"     NUMBER OF CORNERS           %8d \n",ncor);
   }
   fclose(inm);
   return(1);
 }
+
+int MMG3D_loadMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
+  FILE*       inm;
+  MMG5_pTetra pt;
+  MMG5_pPrism pp;
+  MMG5_pTria  pt1;
+  MMG5_pQuad  pq1;
+  MMG5_pEdge  pa;
+  MMG5_pPoint ppt;
+  double      aux, dbuf[9];
+  float       fbuf[9],fc;
+  size_t      len;
+  int         posNodes,posEndNodes,posElts,posEndElts,posFormat,posEndFormat;
+  int         posNodeData, posEndNodeData;
+  int         nelts,bin,iswp,ver,oneBin,k,i,l,nref;
+  int         *ina_t,*ina_a,nt,na,nq,ne,npr,np;
+  int         nbl_t,nbl_a,typ,tagNum,ref,idx,num;
+  char        *line,*ptr,data[128],chaine[128],verNum[3];
+
+  ver = oneBin = 0;
+  posNodes = posEndNodes = posElts = posEndElts = posFormat = posEndFormat = 0;
+  posNodeData = posEndNodeData = 0;
+  nelts = 0;
+  bin = 0;
+  iswp = 0;
+  ina_t = ina_a = NULL;
+  line = NULL;
+  len = 0;
+  mesh->np = mesh->nt = mesh->ne = 0;
+  mesh->dim = 3;
+
+
+  strcpy(data,filename);
+  ptr = strstr(data,".msh");
+  if ( !ptr ) {
+    /* data contains the filename without extension */
+    strcat(data,".msh");
+    if( !(inm = fopen(data,"rb")) ) {
+      fprintf(stderr,"  ** %s  NOT FOUND.\n",data);
+      return(0);
+    }
+  }
+  else {
+    if( !(inm = fopen(data,"rb")) ) {
+      fprintf(stderr,"  ** %s  NOT FOUND.\n",data);
+      return(0);
+    }
+  }
+
+  fprintf(stdout,"  %%%% %s OPENED\n",data);
+
+
+
+  /* Detection of the different fields of the file */
+  strcpy(chaine,"D");
+  while(fscanf(inm,"%s",&chaine[0])!=EOF ) {
+    if(!strncmp(chaine,"$MeshFormat",strlen("$MeshFormat"))) {
+      fscanf(inm,"%s %d %d",verNum,&bin,&ver);
+      mesh->ver = ver/4;
+      if ( strncmp(verNum,"2.2",strlen("2.2") ) ) {
+        fprintf(stderr,"BAD FORMAT VERSION : %s\n",verNum);
+        fprintf(stderr," Please, use the format version 2.2\n");
+        return(-1);
+      }
+      posFormat = ftell(inm);
+      continue;
+    } else if(!strncmp(chaine,"$EndMeshFormat",strlen("EndMeshFormat"))) {
+      posEndFormat = ftell(inm);
+      continue;
+    } else if(!strncmp(chaine,"$Nodes",strlen("$Nodes"))) {
+      fscanf(inm,"%d",&mesh->npi);
+      posNodes = ftell(inm);
+      continue;
+    } else if(!strncmp(chaine,"$EndNodes",strlen("$EndNodes"))) {
+      posEndNodes = ftell(inm);
+      continue;
+    } else if(!strncmp(chaine,"$NodeData",strlen("$NodeData"))) {
+      posNodeData = ftell(inm);
+      continue;
+    } else if(!strncmp(chaine,"$EndNodeData",strlen("$EndNodeData"))) {
+      posEndNodeData = ftell(inm);
+      continue;
+    } else if(!strncmp(chaine,"$Elements",strlen("$Elements"))) {
+      fscanf(inm,"%d",&nelts);
+      posElts = ftell(inm);
+      continue;
+    }
+    else if(!strncmp(chaine,"$EndElements",strlen("$EndElements"))) {
+      posEndElts = ftell(inm);
+      continue;
+    }
+  }
+
+  /* Remove the .msh extension from the filenames */
+  ptr = strstr(mesh->namein,".msh");
+  if ( ptr ) {
+    len = strlen(mesh->namein);
+    *ptr = '\0';
+    _MMG5_ADD_MEM(mesh,(strlen(mesh->namein)-len)*sizeof(char),"input mesh name",
+                  fprintf(stderr,"  Exit program.\n");
+                  exit(EXIT_FAILURE));
+    _MMG5_SAFE_REALLOC(mesh->namein,(strlen(mesh->namein)+1),char,
+                       "input mesh name");
+
+  }
+
+  ptr = strstr(mesh->nameout,".msh.o");
+  if ( ptr ) {
+    len = strlen(mesh->nameout);
+    *ptr = '\0';
+    if ( bin ) {
+      _MMG5_ADD_MEM(mesh,(strlen(mesh->nameout)-len+8)*sizeof(char),"output mesh name",
+                    fprintf(stderr,"  Exit program.\n");
+                    exit(EXIT_FAILURE));
+      _MMG5_SAFE_REALLOC(mesh->nameout,(strlen(mesh->nameout)+9),char,"output mesh name");
+      ptr  = strcat(mesh->nameout,".o.meshb");
+
+    }
+    else {
+      _MMG5_ADD_MEM(mesh,(strlen(mesh->nameout)-len+7)*sizeof(char),"output mesh name",
+                    fprintf(stderr,"  Exit program.\n");
+                    exit(EXIT_FAILURE));
+      _MMG5_SAFE_REALLOC(mesh->nameout,(strlen(mesh->nameout)+8),char,"output mesh name");
+      ptr  = strcat(mesh->nameout,".o.mesh");
+    }
+  }
+  ptr = strstr(sol->namein,".msh");
+  if ( ptr ) {
+    len = strlen(sol->namein);
+    *ptr = '\0';
+    _MMG5_ADD_MEM(mesh,(strlen(sol->namein)-len)*sizeof(char),"input sol name",
+                  fprintf(stderr,"  Exit program.\n");
+                  exit(EXIT_FAILURE));
+    _MMG5_SAFE_REALLOC(sol->namein,(strlen(sol->namein)+1),char,
+                       "input sol name");
+  }
+
+
+  ptr = strstr(sol->nameout,".msh.o");
+  if ( ptr ) {
+    len = strlen(sol->nameout);
+    *ptr = '\0';
+    if ( bin ) {
+      _MMG5_ADD_MEM(mesh,(strlen(sol->nameout)-len+7)*sizeof(char),"output sol name",
+                    fprintf(stderr,"  Exit program.\n");
+                    exit(EXIT_FAILURE));
+      _MMG5_SAFE_REALLOC(sol->nameout,(strlen(sol->nameout)+8),char,
+                         "output sol name");
+      ptr  = strcat(sol->nameout,".o.solb");
+
+    }
+    else  {
+      _MMG5_ADD_MEM(mesh,(strlen(sol->nameout)-len+6)*sizeof(char),"output sol name",
+                    fprintf(stderr,"  Exit program.\n");
+                    exit(EXIT_FAILURE));
+      _MMG5_SAFE_REALLOC(sol->nameout,(strlen(sol->nameout)+7),char,
+                         "output sol name");
+      ptr  = strcat(sol->nameout,".o.sol");
+    }
+  }
+
+  assert(posFormat && posEndFormat);
+  assert(posNodes && posEndNodes);
+  assert(posElts && posEndElts);
+
+  if ( !nelts || !mesh->npi ) {
+    fprintf(stderr,"  ** MISSING DATA.\n");
+    fprintf(stderr," Check that your mesh contains points and elements.\n");
+    fprintf(stderr," Exit program.\n");
+    return(-1);
+  }
+
+  if ( bin ) {
+    rewind(inm);
+    fseek(inm,posFormat,SEEK_SET);
+    getline(&line, &len,inm); // skip \n character
+
+    fread(&oneBin,sw,1,inm);
+    if ( oneBin!=1 ) {
+      assert(oneBin==16777216);
+      iswp=1;
+      oneBin = _MMG5_swapbin(oneBin);
+    }
+  }
+
+  /* Data reading */
+  /** First step: Count the number of elements of each type */
+  rewind(inm);
+  fseek(inm,posElts,SEEK_SET);
+
+  nt = na = nq = ne = npr = np = 0;
+  if ( !bin ) {
+    for ( k=0; k<nelts; ++k) {
+      fscanf(inm,"%d %d",&i,&typ);
+      switch (typ) {
+      case 1:
+        /* Edge */
+        ++na;
+        break;
+      case 2:
+        /* Tria */
+        ++nt;
+        break;
+      case 3:
+        /* Quad */
+        ++nq;
+        break;
+      case 4:
+        /* Tetra */
+        ++ne;
+        break;
+      case 6:
+        /* Prism */
+        ++npr;
+        break;
+      case 15:
+        /* Node */
+        ++np;
+        break;
+      }
+      getline(&line,&len,inm);
+    }
+  }
+  else {
+    getline(&line,&len,inm);// skip \n
+    k = 0;
+
+    while ( k<nelts ) {
+      fread(&typ,sw,1,inm);
+      if(iswp) typ = _MMG5_swapbin(typ);
+
+      switch (typ) {
+      case 1:
+        /* Edge */
+        fread(&num,sw,1,inm);
+        fread(&tagNum,sw,1,inm);
+        if(iswp) {
+          num = _MMG5_swapbin(num);
+          tagNum = _MMG5_swapbin(tagNum);
+        }
+        for ( idx=0; idx<num; ++idx ) {
+          fread(&i,sw,1,inm);
+          for ( l=0; l<tagNum; ++l ) fread(&i,sw,1,inm);
+          fread(&i,sw,1,inm); // edge->a
+          fread(&i,sw,1,inm); // edge->b
+        }
+        na += num;
+        k  += num;
+        break;
+      case 2:
+        /* Tria */
+        fread(&num,sw,1,inm);
+        fread(&tagNum,sw,1,inm);
+        if(iswp) {
+          num = _MMG5_swapbin(num);
+          tagNum = _MMG5_swapbin(tagNum);
+        }
+        for ( idx=0; idx<num; ++idx ) {
+          fread(&i,sw,1,inm);
+          for ( l=0; l<tagNum; ++l ) fread(&i,sw,1,inm);
+          fread(&i,sw,1,inm); // tria->v[0]
+          fread(&i,sw,1,inm); // tria->v[1]
+          fread(&i,sw,1,inm); // tria->v[2]
+        }
+        nt += num;
+        k  += num;
+        break;
+      case 3:
+        /* Quad */
+        fread(&num,sw,1,inm);
+        fread(&tagNum,sw,1,inm);
+        if(iswp) {
+          num = _MMG5_swapbin(num);
+          tagNum = _MMG5_swapbin(tagNum);
+        }
+        for ( idx=0; idx<num; ++idx ) {
+          fread(&i,sw,1,inm);
+          for ( l=0; l<tagNum; ++l ) fread(&i,sw,1,inm);
+          fread(&i,sw,1,inm); // quad->v[0]
+          fread(&i,sw,1,inm); // quad->v[1]
+          fread(&i,sw,1,inm); // quad->v[2]
+          fread(&i,sw,1,inm); // quad->v[3]
+        }
+        nq += num;
+        k  += num;
+        break;
+      case 4:
+        /* Tetra */
+        fread(&num,sw,1,inm);
+        fread(&tagNum,sw,1,inm);
+        if(iswp) {
+          num = _MMG5_swapbin(num);
+          tagNum = _MMG5_swapbin(tagNum);
+        }
+        for ( idx=0; idx<num; ++idx ) {
+          fread(&i,sw,1,inm);
+          for ( l=0; l<tagNum; ++l ) fread(&i,sw,1,inm);
+          fread(&i,sw,1,inm); // tetra->v[0]
+          fread(&i,sw,1,inm); // tetra->v[1]
+          fread(&i,sw,1,inm); // tetra->v[2]
+          fread(&i,sw,1,inm); // tetra->v[3]
+        }
+        ne += num;
+        k  += num;
+        break;
+      case 6:
+        /* Prism */
+        fread(&num,sw,1,inm);
+        fread(&tagNum,sw,1,inm);
+        if(iswp) {
+          num = _MMG5_swapbin(num);
+          tagNum = _MMG5_swapbin(tagNum);
+        }
+        for ( idx=0; idx<num; ++idx ){
+          fread(&i,sw,1,inm);
+          for ( l=0; l<tagNum; ++l ) fread(&i,sw,1,inm);
+          fread(&i,sw,1,inm); // prism->v[0]
+          fread(&i,sw,1,inm); // prism->v[1]
+          fread(&i,sw,1,inm); // prism->v[2]
+          fread(&i,sw,1,inm); // prism->v[3]
+          fread(&i,sw,1,inm); // prism->v[4]
+          fread(&i,sw,1,inm); // prism->v[5]
+        }
+        npr += num;
+        k  += num;
+        break;
+      case 15:
+        /* Node */
+        fread(&num,sw,1,inm);
+        fread(&tagNum,sw,1,inm);
+        if(iswp) {
+          num = _MMG5_swapbin(num);
+          tagNum = _MMG5_swapbin(tagNum);
+        }
+        for ( idx=0; idx<=num; ++idx ){
+          fread(&i,sw,1,inm);
+          for ( l=0; l<tagNum; ++l ) fread(&i,sw,1,inm);
+          fread(&i,sw,1,inm); //node idx
+        }
+        break;
+        np += num;
+        k  += num;
+      default:
+        fprintf(stderr,"  ## Error: unexpected type of element (%d)\n",typ);
+        return(-1);
+      }
+    }
+  }
+
+  /* memory allocation */
+  mesh->np = mesh->npi;
+  mesh->nt = mesh->nti = nt;
+  mesh->ne = mesh->nei = ne;
+  mesh->na = mesh->nai = na;
+  mesh->nprism = npr;
+  mesh->nquad = nq;
+
+  if ( !mesh->np || !mesh->ne ) {
+    fprintf(stderr,"  ** MISSING DATA.\n");
+    fprintf(stderr," Check that your mesh contains points and tetrahedra.\n");
+    fprintf(stderr," Exit program.\n");
+    return(-1);
+  }
+
+  if ( !_MMG5_zaldy(mesh) )  return(0);
+  if (mesh->npmax < mesh->np || mesh->ntmax < mesh->nt || mesh->nemax < mesh->ne) {
+    return(-1);
+  }
+
+  /** Second step: read the nodes and elements */
+  rewind(inm);
+  fseek(inm,posNodes,SEEK_SET);
+
+  if ( mesh->ver < 2 ) {
+    for ( k=0; k< mesh->np; ++k)
+    {
+      if ( !bin ) {
+        fscanf(inm,"%d\n",&idx);
+        ppt = &mesh->point[idx];
+        for (i=0 ; i<3 ; i++) {
+          fscanf(inm,"%f",&fc);
+          ppt->c[i] = (double) fc;
+        }
+      }
+      else {
+        fread(&idx,sw,1,inm);
+        if ( iswp ) idx = _MMG5_swapbin(idx);
+        ppt = &mesh->point[idx];
+        for (i=0 ; i<3 ; i++) {
+          fread(&fc,sw,1,inm);
+          if(iswp) fc=_MMG5_swapf(fc);
+          ppt->c[i] = (double) fc;
+        }
+        ppt->tag  = MG_NUL;
+        ppt->tmp  = 0;
+        ppt->ref = 0;
+      }
+    }
+  }
+  else {
+    getline(&line,&len,inm);// skip \n
+    for ( k=0; k< mesh->np; ++k)
+    {
+      if ( !bin ) {
+        fscanf(inm,"%d\n",&i);
+        ppt = &mesh->point[i];
+        fscanf(inm,"%lf %lf %lf",&ppt->c[0],&ppt->c[1],&ppt->c[2]);
+      }
+      else {
+        fread(&i,sw,1,inm);
+        if ( iswp ) i = _MMG5_swapbin(i);
+        ppt = &mesh->point[i];
+        for (i=0 ; i<3 ; i++) {
+          fread(&ppt->c[i],sd,1,inm);
+          if(iswp) ppt->c[i]=_MMG5_swapd(ppt->c[i]);
+        }
+        ppt->tag  = MG_NUL;
+        ppt->tmp  = 0;
+        ppt->ref = 0;
+      }
+    }
+  }
+
+  rewind(inm);
+  fseek(inm,posElts,SEEK_SET);
+
+  nbl_a = nbl_t = nt = na = nq = ne = npr = np = 0;
+  nref = 0;
+
+  /* Skip triangles and edges with MG_ISO refs */
+  if( mesh->info.iso ) {
+    if ( mesh->nt ) {
+      _MMG5_SAFE_CALLOC(ina_t,mesh->nt+1,int);
+    }
+    if ( mesh->na ) {
+      _MMG5_SAFE_CALLOC(ina_a,mesh->na+1,int);
+    }
+  }
+
+  if ( !bin ) {
+    for ( k=0; k<nelts; ++k)
+    {
+      fscanf(inm,"%d %d %d",&i,&typ, &tagNum);
+      switch(tagNum){
+      case 2:
+        fscanf(inm,"%d %d",&i,&ref);
+        break;
+      case 3:
+        fscanf(inm,"%d %d %d",&i,&ref,&i);
+        break;
+      default:
+        fprintf(stderr,"  ## Error: elt %d: Expected 2 or 3 tags (%d given).",
+                k,tagNum);
+        return(-1);
+      }
+
+      switch (typ) {
+      case 1:
+        /* Edge */
+        /* Skip edges with MG_ISO refs */
+        if ( !mesh->info.iso ) {
+          pa = &mesh->edge[++na];
+          fscanf(inm,"%d %d",&pa->a,&pa->b);
+          pa->ref = abs(ref);
+          pa->tag |= MG_REF;
+        }
+        else {
+          if ( abs(ref)!= MG_ISO ) {
+            pa = &mesh->edge[++na];
+            fscanf(inm,"%d %d",&pa->a,&pa->b);
+            pa->ref = abs(ref);
+            pa->tag |= MG_REF;
+            ina_a[na+nbl_a]=na;
+          }
+          else {
+            ++nbl_a;
+          }
+        }
+        assert( na+nbl_a<=mesh->na );
+        break;
+      case 2:
+        /* Tria */
+        /* Skip triangles with MG_ISO refs */
+        if ( !mesh->info.iso ) {
+          pt1 = &mesh->tria[++nt];
+          fscanf(inm,"%d %d %d",&pt1->v[0],&pt1->v[1],&pt1->v[2]);
+          pt1->ref = abs(ref);
+        }
+        else {
+          if ( abs(ref)!= MG_ISO ) {
+            pt1 = &mesh->tria[++nt];
+            fscanf(inm,"%d %d %d",&pt1->v[0],&pt1->v[1],&pt1->v[2]);
+            pt1->ref = abs(ref);
+            ina_t[nt+nbl_t]=nt;
+          }
+          else {
+            ++nbl_t;
+          }
+        }
+        assert( nt+nbl_t<=mesh->nt );
+        break;
+      case 3:
+        /* Quad */
+        pq1 = &mesh->quad[++nq];
+        fscanf(inm,"%d %d %d %d",&pq1->v[0],&pq1->v[1],&pq1->v[2],&pq1->v[3]);
+        pq1->ref = ref;
+        assert( nq<=mesh->nquad );
+        break;
+      case 4:
+        /* Tetra */
+        pt = &mesh->tetra[++ne];
+        fscanf(inm,"%d %d %d %d",&pt->v[0],&pt->v[1],&pt->v[2],&pt->v[3]);
+        if(ref < 0) {
+          nref++;
+        }
+        pt->ref = abs(ref);
+        assert( ne<=mesh->ne );
+        break;
+      case 6:
+        /* Prism */
+        pp = &mesh->prism[++npr];
+        fscanf(inm,"%d %d %d %d %d %d",&pp->v[0],&pp->v[1],&pp->v[2],
+               &pp->v[3],&pp->v[4],&pp->v[5]);
+        if(ref < 0) {
+          nref++;
+        }
+        pp->ref = abs(ref);
+        assert( npr<=mesh->nprism );
+        break;
+      case 15:
+        /* Node */
+        ppt = &mesh->point[++np];
+        ppt->ref = ref;
+        break;
+      }
+      getline(&line, &len,inm);
+      assert( np<=mesh->np );
+    }
+  }
+  else {
+    getline(&line,&len,inm);// skip \n
+    k = 0;
+
+    while ( k<nelts ) {
+      fread(&typ,sw,1,inm);
+      if(iswp) typ = _MMG5_swapbin(typ);
+
+      switch (typ) {
+      case 1:
+        /* Edge */
+        fread(&num,sw,1,inm);
+        fread(&tagNum,sw,1,inm);
+        if(iswp) {
+          num = _MMG5_swapbin(num);
+          tagNum = _MMG5_swapbin(tagNum);
+        }
+        for ( idx=0; idx<num; ++idx ) {
+          fread(&i,sw,1,inm);
+          switch(tagNum){
+          case 2:
+            fread(&i,sw,1,inm);
+            fread(&ref,sw,1,inm);
+            break;
+          case 3:
+            fread(&i,sw,1,inm);
+            fread(&ref,sw,1,inm);
+            fread(&i,sw,1,inm);
+            break;
+          default:
+            fprintf(stderr,"  ## Error: elt %%d: Expected 2 or 3 tags (%d given).",
+                    tagNum);
+            return(-1);
+          }
+          if(iswp) ref = _MMG5_swapbin(ref);
+
+          /* Skip edges with MG_ISO refs */
+          if ( !mesh->info.iso ) {
+            pa = &mesh->edge[++na];
+            fread(&pa->a,sw,1,inm);
+            fread(&pa->b,sw,1,inm);
+            if ( iswp ) {
+              pa->a = _MMG5_swapbin(pa->a);
+              pa->b = _MMG5_swapbin(pa->b);
+            }
+            pa->ref = abs(ref);
+            pa->tag |= MG_REF;
+          }
+          else {
+            if( abs(ref)!= MG_ISO ) {
+              pa = &mesh->edge[++na];
+              fread(&pa->a,sw,1,inm);
+              fread(&pa->b,sw,1,inm);
+              if ( iswp ) {
+                pa->a = _MMG5_swapbin(pa->a);
+                pa->b = _MMG5_swapbin(pa->b);
+              }
+              pa->ref = abs(ref);
+              pa->tag |= MG_REF;
+              ina_a[na+nbl_a]=na;
+            }
+            else {
+              ++nbl_a;
+            }
+          }
+          assert( na+nbl_a<mesh->na );
+        }
+        k += num;
+
+        break;
+      case 2:
+        /* Tria */
+        fread(&num,sw,1,inm);
+        fread(&tagNum,sw,1,inm);
+        if(iswp) {
+          num = _MMG5_swapbin(num);
+          tagNum = _MMG5_swapbin(tagNum);
+        }
+        for ( idx=0; idx<num; ++idx ) {
+          fread(&i,sw,1,inm);
+          switch(tagNum){
+          case 2:
+            fread(&i,sw,1,inm);
+            fread(&ref,sw,1,inm);
+            break;
+          case 3:
+            fread(&i,sw,1,inm);
+            fread(&ref,sw,1,inm);
+            fread(&i,sw,1,inm);
+            break;
+          default:
+            fprintf(stderr,"  ## Error: elt %%d: Expected 2 or 3 tags (%d given).",
+                    tagNum);
+            return(-1);
+          }
+          if(iswp) ref = _MMG5_swapbin(ref);
+
+          /* Skip triangles with MG_ISO refs */
+          if ( !mesh->info.iso ) {
+            pt1 = &mesh->tria[++nt];
+            for ( i=0; i<3 ; ++i ) {
+              fread(&l,sw,1,inm);
+              if ( iswp ) l = _MMG5_swapbin(l);
+              pt1->v[i] = l;
+            }
+            pt1->ref = abs(ref);
+          }
+          else {
+            if( abs(ref)!= MG_ISO ) {
+              pt1 = &mesh->tria[++nt];
+              for ( i=0; i<3 ; ++i ) {
+                fread(&l,sw,1,inm);
+                if ( iswp ) l = _MMG5_swapbin(l);
+                pt1->v[i] = l;
+              }
+              pt1->ref = abs(ref);
+              ina_t[nt+nbl_t]=nt;
+            }
+            else {
+              ++nbl_t;
+            }
+          }
+          assert( nt+nbl_t<=mesh->nt );
+        }
+        k += num;
+        break;
+      case 3:
+        /* Quad */
+        fread(&num,sw,1,inm);
+        fread(&tagNum,sw,1,inm);
+        if(iswp) {
+          num = _MMG5_swapbin(num);
+          tagNum = _MMG5_swapbin(tagNum);
+        }
+        for ( idx=0; idx<num; ++idx ) {
+          fread(&i,sw,1,inm);
+          switch(tagNum){
+          case 2:
+            fread(&i,sw,1,inm);
+            fread(&ref,sw,1,inm);
+            break;
+          case 3:
+            fread(&i,sw,1,inm);
+            fread(&ref,sw,1,inm);
+            fread(&i,sw,1,inm);
+            break;
+          default:
+            fprintf(stderr,"  ## Error: elt %%d: Expected 2 or 3 tags (%d given).",
+                    tagNum);
+            return(-1);
+          }
+          if(iswp) ref = _MMG5_swapbin(ref);
+
+          pq1 = &mesh->quad[++nq];
+          for ( i=0; i<4 ; ++i ) {
+            fread(&l,sw,1,inm);
+            if ( iswp ) l = _MMG5_swapbin(l);
+            pq1->v[i] = l;
+          }
+          pq1->ref = ref;
+          assert( nq<=mesh->nquad );
+        }
+        k += num;
+        break;
+      case 4:
+        /* Tetra */
+        fread(&num,sw,1,inm);
+        fread(&tagNum,sw,1,inm);
+        if(iswp) {
+          num = _MMG5_swapbin(num);
+          tagNum = _MMG5_swapbin(tagNum);
+        }
+        for ( idx=0; idx<num; ++idx ) {
+          fread(&i,sw,1,inm);
+          switch(tagNum){
+          case 2:
+            fread(&i,sw,1,inm);
+            fread(&ref,sw,1,inm);
+            break;
+          case 3:
+            fread(&i,sw,1,inm);
+            fread(&ref,sw,1,inm);
+            fread(&i,sw,1,inm);
+            break;
+          default:
+            fprintf(stderr,"  ## Error: elt %%d: Expected 2 or 3 tags (%d given).",
+                    tagNum);
+            return(-1);
+          }
+          if(iswp) ref = _MMG5_swapbin(ref);
+
+          pt = &mesh->tetra[++ne];
+          for ( i=0; i<4 ; ++i ) {
+            fread(&l,sw,1,inm);
+            if ( iswp ) l = _MMG5_swapbin(l);
+            pt->v[i] = l;
+          }
+          if(ref < 0) {
+            nref++;
+          }
+          pt->ref = abs(ref);
+          assert( ne<=mesh->ne );
+        }
+        k += num;
+        break;
+      case 6:
+        /* Prism */
+        fread(&num,sw,1,inm);
+        fread(&tagNum,sw,1,inm);
+        if(iswp) {
+          num = _MMG5_swapbin(num);
+          tagNum = _MMG5_swapbin(tagNum);
+        }
+        for ( idx=0; idx<num; ++idx ){
+
+          fread(&i,sw,1,inm);
+          switch(tagNum){
+          case 2:
+            fread(&i,sw,1,inm);
+            fread(&ref,sw,1,inm);
+            break;
+          case 3:
+            fread(&i,sw,1,inm);
+            fread(&ref,sw,1,inm);
+            fread(&i,sw,1,inm);
+            break;
+          default:
+            fprintf(stderr,"  ## Error: elt %%d: Expected 2 or 3 tags (%d given).",
+                    tagNum);
+            return(-1);
+          }
+          if(iswp) ref = _MMG5_swapbin(ref);
+
+          pp = &mesh->prism[++npr];
+          for ( i=0; i<6 ; ++i ) {
+            fread(&l,sw,1,inm);
+            if ( iswp ) l = _MMG5_swapbin(l);
+            pp->v[i] = l;
+          }
+          if(ref < 0) {
+            nref++;
+          }
+          pp->ref = abs(ref);
+          assert( npr<=mesh->nprism );
+        }
+        k += num;
+        break;
+      case 15:
+        /* Node */
+        fread(&num,sw,1,inm);
+        fread(&tagNum,sw,1,inm);
+        if(iswp) {
+          num = _MMG5_swapbin(num);
+          tagNum = _MMG5_swapbin(tagNum);
+        }
+        for ( idx=0; idx<=num; ++idx ){
+          fread(&i,sw,1,inm);
+          switch(tagNum){
+          case 2:
+            fread(&i,sw,1,inm);
+            fread(&ref,sw,1,inm);
+            break;
+          case 3:
+            fread(&i,sw,1,inm);
+            fread(&ref,sw,1,inm);
+            fread(&i,sw,1,inm);
+            break;
+          default:
+            fprintf(stderr,"  ## Error: elt %%d: Expected 2 or 3 tags (%d given).",
+                    tagNum);
+            return(-1);
+          }
+          if(iswp) ref = _MMG5_swapbin(ref);
+
+          fread(&l,sw,1,inm);
+          if(iswp) l = _MMG5_swapbin(l);
+          ppt = &mesh->point[l];
+          ppt->ref = ref;
+          assert( l<=mesh->np );
+        }
+        k += num;
+        break;
+      default:
+        fprintf(stderr,"  ## Error: unexpected type of element (%d)\n",typ);
+        return(-1);
+      }
+    }
+  }
+
+
+  if ( mesh->info.iso ) {
+    if ( mesh->nt ) {
+      if( !nt )
+        _MMG5_DEL_MEM(mesh,mesh->tria,(mesh->nt+1)*sizeof(MMG5_Tria));
+
+      else if ( nt < mesh->nt ) {
+        _MMG5_ADD_MEM(mesh,(nt-mesh->nt)*sizeof(MMG5_Tria),"triangles",
+                      fprintf(stderr,"  Exit program.\n");
+                      exit(EXIT_FAILURE));
+        _MMG5_SAFE_RECALLOC(mesh->tria,mesh->nt+1,(nt+1),MMG5_Tria,"triangles");
+      }
+      _MMG5_SAFE_FREE(ina_t);
+      mesh->nt = nt;
+    }
+    if ( mesh->na ) {
+      if( !mesh->na )
+        _MMG5_DEL_MEM(mesh,mesh->edge,(mesh->na+1)*sizeof(MMG5_Edge));
+      else if ( na < mesh->na ) {
+        _MMG5_ADD_MEM(mesh,(na-mesh->na)*sizeof(MMG5_Edge),"edges",
+                      fprintf(stderr,"  Exit program.\n");
+                      exit(EXIT_FAILURE));
+        _MMG5_SAFE_RECALLOC(mesh->edge,mesh->na+1,(na+1),MMG5_Edge,"edges");
+      }
+      _MMG5_SAFE_FREE(ina_a);
+      mesh->na = na;
+    }
+  }
+
+
+  if(nref) {
+    fprintf(stdout,"\n     $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ \n");
+    fprintf(stdout,"         WARNING : %d elements (tetra or prisms) with ref < 0.",nref);
+    fprintf(stdout," We take their absolute values.\n");
+    fprintf(stdout,"     $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ \n\n");
+  }
+
+  /* Cross the tetra, mark their vertices as used, reorient the tetra with
+   * negative orientation and set the tetra references to 0 in iso mode */
+  mesh->xt = 0;
+  for ( k=1; k<=mesh->ne; k++ ) {
+    pt = &mesh->tetra[k];
+    if ( !MG_EOK(pt) ) continue;
+
+    for (i=0; i<4; i++) {
+      ppt = &mesh->point[pt->v[i]];
+      ppt->tag &= ~MG_NUL;
+    }
+
+    if ( mesh->info.iso )  pt->ref = 0;
+
+    /* Possibly switch 2 vertices number so that each tet is positively oriented */
+    if ( _MMG5_orvol(mesh->point,pt->v) < 0.0 ) {
+      /* mesh->xt temporary used to count reoriented tetra */
+      mesh->xt++;
+      aux = pt->v[2];
+      pt->v[2] = pt->v[3];
+      pt->v[3] = aux;
+    }
+  }
+
+  if(mesh->xt) {
+    fprintf(stdout,"\n     $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ \n");
+    fprintf(stdout,"         BAD ORIENTATION : vol < 0 -- %8d tetra reoriented\n",mesh->xt);
+    fprintf(stdout,"     $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ \n\n");
+  }
+  mesh->xt = 0;
+
+  /* Cross the prisms and mark their vertices as used */
+  for ( k=1; k<=mesh->nprism; k++ ) {
+    pp = &mesh->prism[k];
+    for (i=0; i<6; i++) {
+      ppt = &mesh->point[pp->v[i]];
+      ppt->tag &= ~MG_NUL;
+    }
+  }
+
+  /* stats */
+  if ( abs(mesh->info.imprim) > 3 ) {
+    fprintf(stdout,"     NUMBER OF VERTICES       %8d\n",mesh->np);
+    if ( mesh->na ) {
+      fprintf(stdout,"     NUMBER OF EDGES          %8d\n",mesh->na);
+    }
+    if ( mesh->nt )
+      fprintf(stdout,"     NUMBER OF TRIANGLES      %8d\n",mesh->nt);
+    if ( mesh->nquad )
+      fprintf(stdout,"     NUMBER OF QUADRILATERALS %8d\n",mesh->nquad);
+
+    fprintf(stdout,"     NUMBER OF TETRAHEDRA     %8d\n",mesh->ne);
+
+    if ( mesh->nprism )
+      fprintf(stdout,"     NUMBER OF PRISMS         %8d\n",mesh->nprism);
+
+  }
+
+  /** Read the solution at nodes */
+  if ( posNodeData ) {
+    sol->ver = mesh->ver;
+    sol->dim = mesh->dim;
+    sol->type = 1;
+
+    assert(posEndNodeData);
+
+    rewind(inm);
+    fseek(inm,posNodeData,SEEK_SET);
+
+    /* String tags ignored */
+    fscanf(inm,"%d",&tagNum);
+    for ( k=0; k<=tagNum; ++k ) {
+      getline(&line, &len,inm);
+    }
+
+    /* Real tags ignored */
+    fscanf(inm,"%d",&tagNum);
+    for ( k=0; k<=tagNum; ++k ) {
+      getline(&line, &len,inm);
+    }
+
+    /* Integer tags : allow to recover the number of sols and their types */
+    fscanf(inm,"%d",&tagNum);
+    if ( tagNum != 4 && tagNum !=3 ) {
+      fprintf(stderr,"   Error: node data: Expected 3 tags (%d given).",
+              tagNum);
+      return(-1);
+    }
+
+    fscanf(inm,"%d",&i); //time step;
+    fscanf(inm,"%d",&sol->size); //type de solution: 1=scalar, 3=vector, 9=tensor ;
+
+    fscanf(inm,"%d",&sol->np);
+    if ( mesh->np != sol->np ) {
+      fprintf(stderr,"  ** MISMATCHES DATA: THE NUMBER OF VERTICES IN "
+              "THE MESH (%d) DIFFERS FROM THE NUMBER OF VERTICES IN "
+              "THE SOLUTION (%d) \n",mesh->np,sol->np);
+      return(-1);
+    }
+
+    if ( mesh->info.lag == -1 ) {
+      if(sol->size!=1 && sol->size!=9) {
+        fprintf(stderr,"  ** DATA TYPE IGNORED %d \n",sol->size);
+        return(-1);
+      }
+      if(sol->size > 1) sol->size = 6;
+    }
+    else {
+      if ( sol->size != 3 ) {
+        return(-1);
+      }
+    }
+
+    /* mem alloc */
+    if ( sol->m )  _MMG5_DEL_MEM(mesh,sol->m,(sol->size*(sol->npmax+1))*sizeof(double));
+    sol->npmax = mesh->npmax;
+
+    _MMG5_ADD_MEM(mesh,(sol->size*(sol->npmax+1))*sizeof(double),"initial solution",
+                  fprintf(stderr,"  Exit program.\n");
+                  exit(EXIT_FAILURE));
+    _MMG5_SAFE_CALLOC(sol->m,sol->size*(sol->npmax+1),double);
+
+    /* isotropic solution */
+    if ( sol->size == 1 ) {
+      if ( sol->ver == 1 ) {
+        for (k=1; k<=sol->np; k++) {
+          if(!bin){
+            fscanf(inm,"%d",&idx);
+            fscanf(inm,"%f",&fbuf[0]);
+          } else {
+            fread(&idx,sw,1, inm);
+            if(iswp) idx = _MMG5_swapbin(idx);
+            fread(&fbuf[0],sw,1,inm);
+            if(iswp) fbuf[0]=_MMG5_swapf(fbuf[0]);
+          }
+          sol->m[idx] = fbuf[0];
+        }
+      }
+      else {
+        getline(&line,&len,inm);// skip \n
+        for (k=1; k<=sol->np; k++) {
+          if(!bin){
+            fscanf(inm,"%d",&idx);
+            fscanf(inm,"%lf",&dbuf[0]);
+          } else {
+            fread(&idx,sw,1, inm);
+            if(iswp) idx = _MMG5_swapbin(idx);
+            fread(&dbuf[0],sd,1,inm);
+            if(iswp) dbuf[0]=_MMG5_swapd(dbuf[0]);
+          }
+          sol->m[idx] = dbuf[0];
+        }
+      }
+    }
+    /* vector displacement only */
+    else if(sol->size==3) {
+      if ( sol->ver == 1 ) {
+        for (k=1; k<=sol->np; k++) {
+          if(!bin){
+            fscanf(inm,"%d",&idx);
+            for (i=0; i<3; i++) {
+              fscanf(inm,"%f",&fbuf[0]);
+              sol->m[3*idx+i] = dbuf[0];
+            }
+          } else {
+            fread(&idx,sw,1, inm);
+            if(iswp) idx = _MMG5_swapbin(idx);
+            for (i=0; i<3; i++) {
+              fread(&fbuf[0],sw,1,inm);
+              if(iswp) fbuf[0]=_MMG5_swapf(fbuf[0]);
+              sol->m[3*idx+i] = fbuf[0];
+            }
+          }
+        }
+      }
+      else {
+        for (k=1; k<=sol->np; k++) {
+          if(!bin){
+            fscanf(inm,"%d",&idx);
+            for (i=0; i<3; i++) {
+              fscanf(inm,"%lf",&dbuf[0]);
+              sol->m[3*idx+i] = dbuf[0];
+            }
+          } else {
+            fread(&idx,sw,1, inm);
+            if(iswp) idx = _MMG5_swapbin(idx);
+            for (i=0; i<3; i++) {
+              fread(&dbuf[0],sd,1,inm);
+              if(iswp) dbuf[0]=_MMG5_swapd(dbuf[0]);
+              sol->m[3*idx+i] = dbuf[0];
+            }
+          }
+        }
+      }
+    }
+    /* anisotropic solric */
+    else { //sol->size==6
+      if ( sol->ver == 1 ) {
+        for (k=1; k<=sol->np; k++) {
+          if(!bin){
+            fscanf(inm,"%d",&idx);
+            for(i=0 ; i<9 ; i++)
+              fscanf(inm,"%f",&fbuf[i]);
+          } else {
+            fread(&idx,sw,1, inm);
+            if(iswp) idx = _MMG5_swapbin(idx);
+            for(i=0 ; i<9 ; i++) {
+              fread(&fbuf[i],sw,1,inm);
+              if(iswp) fbuf[i]=_MMG5_swapf(fbuf[i]);
+            }
+          }
+          assert(fbuf[1]==fbuf[3] && fbuf[2]==fbuf[6] && fbuf[5]==fbuf[7]);
+
+          sol->m[6*idx+0] = fbuf[0];
+          sol->m[6*idx+1] = fbuf[1];
+          sol->m[6*idx+2] = fbuf[2];
+          sol->m[6*idx+3] = fbuf[4];
+          sol->m[6*idx+4] = fbuf[5];
+          sol->m[6*idx+5] = fbuf[8];
+        }
+      }
+    else {
+      for (k=1; k<=sol->np; k++) {
+        if(!bin){
+          fscanf(inm,"%d",&idx);
+          for(i=0 ; i<9 ; i++)
+            fscanf(inm,"%lf",&dbuf[i]);
+        } else {
+          fread(&idx,sw,1, inm);
+          if(iswp) idx = _MMG5_swapbin(idx);
+          for(i=0 ; i<9 ; i++) {
+            fread(&dbuf[i],sd,1,inm);
+            if(iswp) dbuf[i]=_MMG5_swapf(dbuf[i]);
+          }
+        }
+        assert(dbuf[1]==dbuf[3] && dbuf[2]==dbuf[6] && dbuf[5]==dbuf[7]);
+        sol->m[6*idx+0] = dbuf[0];
+        sol->m[6*idx+1] = dbuf[1];
+        sol->m[6*idx+2] = dbuf[2];
+        sol->m[6*idx+3] = dbuf[4];
+        sol->m[6*idx+4] = dbuf[5];
+        sol->m[6*idx+5] = dbuf[8];
+      }
+    }
+  }
+
+  sol->npi = sol->np;
+
+  }
+
+  fclose(inm);
+
+  if ( line ) _MMG5_SAFE_FREE(line);
+
+  return(1);
+}
+
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -866,8 +2068,10 @@ int MMG3D_saveMesh(MMG5_pMesh mesh, const char *filename) {
   MMG5_pTetra  pt;
   MMG5_pPrism  pp;
   MMG5_pTria   ptt;
+  MMG5_pQuad   pq;
   MMG5_xPoint *pxp;
   int          k,na,nc,np,ne,nn,nr,nre,nedreq,ntreq,nt,nereq;
+  int          npr,nprreq,nq,nqreq;
   int          bin,binch,bpos;
   char         data[128],chaine[128],*ptr;
 
@@ -931,7 +2135,8 @@ int MMG3D_saveMesh(MMG5_pMesh mesh, const char *filename) {
   for (k=1; k<=mesh->np; k++) {
     ppt = &mesh->point[k];
     if ( MG_VOK(ppt) ) {
-      ppt->tmp = ++np;
+      ppt->tmp  = ++np;
+      ppt->flag = 0;
       if ( ppt->tag & MG_CRN )  nc++;
       if ( ppt->tag & MG_REQ )  nre++;
     }
@@ -1012,12 +2217,133 @@ int MMG3D_saveMesh(MMG5_pMesh mesh, const char *filename) {
     }
   }
 
+  /* tetrahedra */
+  ne = nereq = 0;
+  for (k=1; k<=mesh->ne; k++) {
+    pt = &mesh->tetra[k];
+    if ( !MG_EOK(pt) ) {
+      continue;
+    }
+    ne++;
+    if ( pt->tag & MG_REQ ){
+      nereq++;
+    }
+  }
+
+  if(!bin) {
+    strcpy(&chaine[0],"\n\nTetrahedra\n");
+    fprintf(inm,"%s",chaine);
+    fprintf(inm,"%d\n",ne);
+  } else {
+    binch = 8; //Tetra
+    fwrite(&binch,sw,1,inm);
+    bpos += 12 + 20*ne;//Pos
+    fwrite(&bpos,sw,1,inm);
+    fwrite((unsigned char*)&ne,sw,1,inm);
+  }
+  for (k=1; k<=mesh->ne; k++) {
+    pt = &mesh->tetra[k];
+
+    /* Tag the tetra vertices to detect points belonging to prisms only (because
+     * we don't know the normals/tangents at this points, thus we don't want to
+     * save it). */
+    mesh->point[pt->v[0]].flag = 1;
+    mesh->point[pt->v[1]].flag = 1;
+    mesh->point[pt->v[2]].flag = 1;
+    mesh->point[pt->v[3]].flag = 1;
+
+    if ( MG_EOK(pt) ) {
+      if(!bin) {
+        fprintf(inm,"%d %d %d %d %d\n",mesh->point[pt->v[0]].tmp,mesh->point[pt->v[1]].tmp
+                ,mesh->point[pt->v[2]].tmp,mesh->point[pt->v[3]].tmp,pt->ref);
+      } else {
+        fwrite(&mesh->point[pt->v[0]].tmp,sw,1,inm);
+        fwrite(&mesh->point[pt->v[1]].tmp,sw,1,inm);
+        fwrite(&mesh->point[pt->v[2]].tmp,sw,1,inm);
+        fwrite(&mesh->point[pt->v[3]].tmp,sw,1,inm);
+        fwrite(&pt->ref,sw,1,inm);
+      }
+    }
+  }
+
+  if ( nereq ) {
+    if(!bin) {
+      strcpy(&chaine[0],"\n\nRequiredTetrahedra\n");
+      fprintf(inm,"%s",chaine);
+      fprintf(inm,"%d\n",nereq);
+    } else {
+      binch = 12; //RequiredTetra
+      fwrite(&binch,sw,1,inm);
+      bpos += 12 + 4*nereq;//Pos
+      fwrite(&bpos,sw,1,inm);
+      fwrite(&nereq,sw,1,inm);
+    }
+    ne = 0;
+    for (k=1; k<=mesh->ne; k++) {
+      pt = &mesh->tetra[k];
+      if ( !MG_EOK(pt) ) continue;
+      ne++;
+      if ( pt->tag & MG_REQ ) {
+        if(!bin) {
+          fprintf(inm,"%d \n",ne);
+        } else {
+          fwrite(&ne,sw,1,inm);
+        }
+      }
+    }
+  }
+
+  /* prisms */
+  npr = nprreq = 0;
+  for (k=1; k<=mesh->nprism; k++) {
+    pp = &mesh->prism[k];
+    if ( !MG_EOK(pp) ) continue;
+    npr++;
+    if ( pp->tag & MG_REQ ){
+      nprreq++;
+    }
+  }
+
+  if ( npr ) {
+    if(!bin) {
+      strcpy(&chaine[0],"\n\nPrisms\n");
+      fprintf(inm,"%s",chaine);
+      fprintf(inm,"%d\n",npr);
+    } else {
+      binch = 9; //Prism
+      fwrite(&binch,sw,1,inm);
+      bpos += 12 + 20*npr;//Pos
+      fwrite(&bpos,sw,1,inm);
+      fwrite((unsigned char*)&npr,sw,1,inm);
+    }
+    for (k=1; k<=mesh->nprism; k++) {
+      pp = &mesh->prism[k];
+      if ( !MG_EOK(pp) ) continue;
+
+      if(!bin) {
+        fprintf(inm,"%d %d %d %d %d %d %d\n"
+                ,mesh->point[pp->v[0]].tmp,mesh->point[pp->v[1]].tmp
+                ,mesh->point[pp->v[2]].tmp,mesh->point[pp->v[3]].tmp
+                ,mesh->point[pp->v[4]].tmp,mesh->point[pp->v[5]].tmp,pp->ref);
+      } else {
+        fwrite(&mesh->point[pp->v[0]].tmp,sw,1,inm);
+        fwrite(&mesh->point[pp->v[1]].tmp,sw,1,inm);
+        fwrite(&mesh->point[pp->v[2]].tmp,sw,1,inm);
+        fwrite(&mesh->point[pp->v[3]].tmp,sw,1,inm);
+        fwrite(&mesh->point[pp->v[4]].tmp,sw,1,inm);
+        fwrite(&mesh->point[pp->v[5]].tmp,sw,1,inm);
+        fwrite(&pp->ref,sw,1,inm);
+      }
+    }
+  }
+
+
   nn = nt = 0;
   if ( mesh->xp ) {
     /* Count tangents and normals */
     for (k=1; k<=mesh->np; k++) {
       ppt = &mesh->point[k];
-      if ( !MG_VOK(ppt) || MG_SIN(ppt->tag) )  continue;
+      if ( !MG_VOK(ppt) || (!ppt->flag) || MG_SIN(ppt->tag) )  continue;
       else if ( (ppt->tag & MG_BDY)
                 && (!(ppt->tag & MG_GEO) || (ppt->tag & MG_NOM)) )
         nn++;
@@ -1038,7 +2364,7 @@ int MMG3D_saveMesh(MMG5_pMesh mesh, const char *filename) {
 
     for (k=1; k<=mesh->np; k++) {
       ppt = &mesh->point[k];
-      if ( !MG_VOK(ppt) || MG_SIN(ppt->tag) )  continue;
+      if ( !MG_VOK(ppt) || (!ppt->flag) || MG_SIN(ppt->tag) )  continue;
       else if ( (ppt->tag & MG_BDY)
                 && (!(ppt->tag & MG_GEO) || (ppt->tag & MG_NOM)) ) {
         pxp = &mesh->xpoint[ppt->xp];
@@ -1066,7 +2392,7 @@ int MMG3D_saveMesh(MMG5_pMesh mesh, const char *filename) {
     nn = 0;
     for (k=1; k<=mesh->np; k++) {
       ppt = &mesh->point[k];
-      if ( !MG_VOK(ppt) || MG_SIN(ppt->tag) )  continue;
+      if ( !MG_VOK(ppt) || (!ppt->flag) || MG_SIN(ppt->tag) )  continue;
       else if ( (ppt->tag & MG_BDY)
                 && (!(ppt->tag & MG_GEO) || (ppt->tag & MG_NOM)) ) {
         if(!bin) {
@@ -1095,7 +2421,7 @@ int MMG3D_saveMesh(MMG5_pMesh mesh, const char *filename) {
 
       for (k=1; k<=mesh->np; k++) {
         ppt = &mesh->point[k];
-        if ( !MG_VOK(ppt) || MG_SIN(ppt->tag) )  continue;
+        if ( !MG_VOK(ppt) || (!ppt->flag) || MG_SIN(ppt->tag) )  continue;
         else if ( MG_EDG(ppt->tag) || (ppt->tag & MG_NOM) ) {
           pxp = &mesh->xpoint[ppt->xp];
           if(!bin) {
@@ -1123,7 +2449,7 @@ int MMG3D_saveMesh(MMG5_pMesh mesh, const char *filename) {
       nt = 0;
       for (k=1; k<=mesh->np; k++) {
         ppt = &mesh->point[k];
-        if ( !MG_VOK(ppt) || MG_SIN(ppt->tag) )  continue;
+        if ( !MG_VOK(ppt) || (!ppt->flag) || MG_SIN(ppt->tag) )  continue;
         else if ( MG_EDG(ppt->tag) || (ppt->tag & MG_NOM) ) {
           if(!bin) {
             fprintf(inm,"%d %d\n",ppt->tmp,++nt);
@@ -1184,6 +2510,78 @@ int MMG3D_saveMesh(MMG5_pMesh mesh, const char *filename) {
         ptt = &mesh->tria[k];
         if ( (ptt->tag[0] & MG_REQ) && (ptt->tag[1] & MG_REQ)
              && ptt->tag[2] & MG_REQ ) {
+          if(!bin) {
+            fprintf(inm,"%d \n",k);
+          } else {
+            fwrite(&k,sw,1,inm);
+          }
+        }
+      }
+    }
+  }
+
+  /* quad + required quad */
+  nq = nqreq = 0;
+
+  if ( mesh->nquad ) {
+
+    for (k=1; k<=mesh->nquad; k++) {
+      pq = &mesh->quad[k];
+      if ( !MG_EOK(pq) ) {
+        continue;
+      }
+      nq++;
+      if ( pq->tag[0] & MG_REQ && pq->tag[1] & MG_REQ &&
+           pq->tag[2] & MG_REQ && pq->tag[3] & MG_REQ ) {
+        nqreq++;
+      }
+    }
+  }
+
+  if ( nq ) {
+    if(!bin) {
+      strcpy(&chaine[0],"\n\nQuadrilaterals\n");
+      fprintf(inm,"%s",chaine);
+      fprintf(inm,"%d \n",nq);
+    } else {
+      binch = 7; //Quadrilaterals
+      fwrite(&binch,sw,1,inm);
+      bpos += 12+20*nq; //Pos
+      fwrite(&bpos,sw,1,inm);
+      fwrite(&nq,sw,1,inm);
+    }
+    for (k=1; k<=mesh->nquad; k++) {
+      pq = &mesh->quad[k];
+      if ( !MG_EOK(pq) ) continue;
+
+      if(!bin) {
+        fprintf(inm,"%d %d %d %d %d\n",mesh->point[pq->v[0]].tmp,
+                mesh->point[pq->v[1]].tmp,mesh->point[pq->v[2]].tmp,
+                mesh->point[pq->v[3]].tmp, pq->ref);
+      } else {
+        fwrite(&mesh->point[pq->v[0]].tmp,sw,1,inm);
+        fwrite(&mesh->point[pq->v[1]].tmp,sw,1,inm);
+        fwrite(&mesh->point[pq->v[2]].tmp,sw,1,inm);
+        fwrite(&mesh->point[pq->v[3]].tmp,sw,1,inm);
+        fwrite(&pq->ref,sw,1,inm);
+      }
+    }
+    if ( nqreq ) {
+      if(!bin) {
+        strcpy(&chaine[0],"\n\nRequiredQuadrilaterals\n");
+        fprintf(inm,"%s",chaine);
+        fprintf(inm,"%d \n",nqreq);
+      } else {
+        binch = 18; //ReqQuad
+        fwrite(&binch,sw,1,inm);
+        bpos += 12+4*nqreq; //Pos
+        fwrite(&bpos,sw,1,inm);
+        fwrite(&nqreq,sw,1,inm);
+      }
+      for (k=0; k<=mesh->nquad; k++) {
+        pq = &mesh->quad[k];
+        if ( (pq->tag[0] & MG_REQ) && (pq->tag[1] & MG_REQ)
+             && pq->tag[2] & MG_REQ && pq->tag[3] & MG_REQ ) {
           if(!bin) {
             fprintf(inm,"%d \n",k);
           } else {
@@ -1271,123 +2669,20 @@ int MMG3D_saveMesh(MMG5_pMesh mesh, const char *filename) {
     }
   }
 
-  /* tetrahedra */
-  ne = nereq = 0;
-  for (k=1; k<=mesh->ne; k++) {
-    pt = &mesh->tetra[k];
-    if ( !MG_EOK(pt) ) {
-      continue;
-    }
-    ne++;
-    if ( pt->tag & MG_REQ ){
-      nereq++;
-    }
-  }
-
-  if(!bin) {
-    strcpy(&chaine[0],"\n\nTetrahedra\n");
-    fprintf(inm,"%s",chaine);
-    fprintf(inm,"%d\n",ne);
-  } else {
-    binch = 8; //Tetra
-    fwrite(&binch,sw,1,inm);
-    bpos += 12 + 20*ne;//Pos
-    fwrite(&bpos,sw,1,inm);
-    fwrite((unsigned char*)&ne,sw,1,inm);
-  }
-  for (k=1; k<=mesh->ne; k++) {
-    pt = &mesh->tetra[k];
-    if ( MG_EOK(pt) ) {
-      if(!bin) {
-        fprintf(inm,"%d %d %d %d %d\n",mesh->point[pt->v[0]].tmp,mesh->point[pt->v[1]].tmp
-                ,mesh->point[pt->v[2]].tmp,mesh->point[pt->v[3]].tmp,pt->ref);
-      } else {
-        fwrite(&mesh->point[pt->v[0]].tmp,sw,1,inm);
-        fwrite(&mesh->point[pt->v[1]].tmp,sw,1,inm);
-        fwrite(&mesh->point[pt->v[2]].tmp,sw,1,inm);
-        fwrite(&mesh->point[pt->v[3]].tmp,sw,1,inm);
-        fwrite(&pt->ref,sw,1,inm);
-      }
-    }
-  }
-
-  if ( nereq ) {
-    if(!bin) {
-      strcpy(&chaine[0],"\n\nRequiredTetrahedra\n");
-      fprintf(inm,"%s",chaine);
-      fprintf(inm,"%d\n",nereq);
-    } else {
-      binch = 12; //RequiredTetra
-      fwrite(&binch,sw,1,inm);
-      bpos += 12 + 4*nereq;//Pos
-      fwrite(&bpos,sw,1,inm);
-      fwrite(&nereq,sw,1,inm);
-    }
-    ne = 0;
-    for (k=1; k<=mesh->ne; k++) {
-      pt = &mesh->tetra[k];
-      if ( !MG_EOK(pt) ) continue;
-      ne++;
-      if ( pt->tag & MG_REQ ) {
-        if(!bin) {
-          fprintf(inm,"%d \n",ne);
-        } else {
-          fwrite(&ne,sw,1,inm);
-        }
-      }
-    }
-  }
-
-  /* tetrahedra */
-  ne = nereq = 0;
-  for (k=1; k<=mesh->ne; k++) {
-    pt = &mesh->tetra[k];
-    if ( !MG_EOK(pt) ) continue;
-    ne++;
-    if ( pt->tag & MG_REQ ){
-      nereq++;
-    }
-  }
-
-  if(!bin) {
-    strcpy(&chaine[0],"\n\nPrisms\n");
-    fprintf(inm,"%s",chaine);
-    fprintf(inm,"%d\n",mesh->nprism);
-  } else {
-    binch = 9; //Prism
-    fwrite(&binch,sw,1,inm);
-    bpos += 12 + 20*ne;//Pos
-    fwrite(&bpos,sw,1,inm);
-    fwrite((unsigned char*)&ne,sw,1,inm);
-  }
-  for (k=1; k<=mesh->nprism; k++) {
-    pp = &mesh->prism[k];
-    if(!bin) {
-      fprintf(inm,"%d %d %d %d %d %d %d\n"
-              ,mesh->point[pp->v[0]].tmp,mesh->point[pp->v[1]].tmp
-              ,mesh->point[pp->v[2]].tmp,mesh->point[pp->v[3]].tmp
-              ,mesh->point[pp->v[4]].tmp,mesh->point[pp->v[5]].tmp,pp->ref);
-    } else {
-      fwrite(&mesh->point[pp->v[0]].tmp,sw,1,inm);
-      fwrite(&mesh->point[pp->v[1]].tmp,sw,1,inm);
-      fwrite(&mesh->point[pp->v[2]].tmp,sw,1,inm);
-      fwrite(&mesh->point[pp->v[3]].tmp,sw,1,inm);
-      fwrite(&mesh->point[pp->v[4]].tmp,sw,1,inm);
-      fwrite(&mesh->point[pp->v[5]].tmp,sw,1,inm);
-      fwrite(&pp->ref,sw,1,inm);
-    }
-  }
 
   if ( mesh->info.imprim > 4 ) {
-    fprintf(stdout,"     NUMBER OF VERTICES   %8d   CORNERS %8d"
+    fprintf(stdout,"     NUMBER OF VERTICES       %8d   CORNERS %8d"
             "   REQUIRED %8d\n",np,nc,nre);
     if ( na )
-      fprintf(stdout,"     NUMBER OF EDGES      %8d   RIDGES  %8d\n",na,nr);
+      fprintf(stdout,"     NUMBER OF EDGES          %8d   RIDGES  %8d\n",na,nr);
     if ( mesh->nt )
-      fprintf(stdout,"     NUMBER OF TRIANGLES  %8d\n",mesh->nt);
-    fprintf(stdout,"     NUMBER OF TETRAHEDRA   %8d\n",mesh->ne);
-    if ( mesh->nprism )
-      fprintf(stdout,"     NUMBER OF PRISMS  %8d\n",mesh->nprism);
+      fprintf(stdout,"     NUMBER OF TRIANGLES      %8d\n",mesh->nt);
+    if ( nq )
+      fprintf(stdout,"     NUMBER OF QUADRILATERALS %8d\n",nq);
+
+    fprintf(stdout,"     NUMBER OF TETRAHEDRA     %8d\n",ne);
+    if ( npr )
+      fprintf(stdout,"     NUMBER OF PRISMS         %8d\n",npr);
 
   }
 

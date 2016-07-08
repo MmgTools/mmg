@@ -130,8 +130,15 @@ static int _MMG5_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
  */
 static inline
 int _MMGS_writeLocalParam( MMG5_pMesh mesh ) {
-  char       data[]="DEFAULT.mmgs";
-  FILE       *out;
+  _MMG5_iNode  *triRefs;
+  int          npar;
+  char         *ptr,data[128];
+  FILE         *out;
+
+  strcpy(data,mesh->namein);
+  ptr = strstr(data,".mesh");
+  if ( ptr ) *ptr = '\0';
+  strcat(data,".mmgs");
 
   /** Save the local parameters file */
   if ( !(out = fopen(data,"wb")) ) {
@@ -141,7 +148,14 @@ int _MMGS_writeLocalParam( MMG5_pMesh mesh ) {
 
   fprintf(stdout,"\n  %%%% %s OPENED\n",data);
 
-  if (! _MMG5_writeLocalParam(mesh, out) ) return 0;
+
+  npar = _MMG5_countLocalParamAtTri( mesh, &triRefs);
+
+  if ( !npar ) return 0;
+
+  fprintf(out,"parameters\n %d\n",npar);
+
+  if ( !_MMG5_writeLocalParamAtTri(mesh, triRefs, out) ) return 0;
 
   fclose(out);
   fprintf(stdout,"  -- WRITING COMPLETED\n");

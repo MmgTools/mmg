@@ -50,8 +50,9 @@ PROGRAM main
   !! file formatted or manually set your mesh using the MMG3D_Set* functions
 
   !> Manually set of the mesh
-  !! a) give the size of the mesh: 12 vertices, 12 tetra, 20 triangles, 0 edges
-  CALL MMG3D_Set_meshSize(mmgMesh,12,12,20,0,ier)
+  !! a) give the size of the mesh: 12 vertices, 12 tetra,0 prisms, 20 triangles,
+  !! 0 quads, 0 edges
+  CALL MMG3D_Set_meshSize(mmgMesh,12,12,0,20,0,0,ier)
   IF ( ier /= 1 ) CALL EXIT(101)
 
   !> b) give the vertices: for each vertex, give the coordinates, the reference
@@ -197,8 +198,8 @@ PROGRAM main
   WRITE(inm,*),"MeshVersionFormatted 2"
   WRITE(inm,*),"Dimension 3"
 
-  !> a) get the size of the mesh: vertices, tetra, triangles, edges
-  CALL MMG3D_Get_meshSize(mmgMesh,np,ne,nt,na,ier)
+  !> a) get the size of the mesh: vertices, tetra,prisms, triangles, quads,edges
+  CALL MMG3D_Get_meshSize(mmgMesh,np,ne,%val(0),nt,%val(0),na,ier)
   IF ( ier /= 1 ) CALL EXIT(108)
 
   ! Table to know if a vertex is corner
