@@ -9,7 +9,7 @@
  * This helps deciding if a position is too close to other nodes to refine
  * with an insertion of a new node.
  * 
- * commande test : ctest -D Experimental avec tunel ssh ouvert
+ * commande test : ctest -D Experimental -VV avec tunel ssh ouvert
  * ssh : ssh -f -L 2000:vulcain.bordeaux.inria.fr:80 jmercat@vulcain.bordeaux.inria.fr sleep <temps voulu>
  * 
  *se connecter : localhost:2000/CDash
@@ -696,7 +696,7 @@ void _MMG3D_addOctreeRec(MMG5_pMesh mesh, _MMG3D_octree_s* q, double* ver,
       {
         sizeRealloc = q->nbVer;
         sizeRealloc<<=1;
-        _MMG5_ADD_MEM(mesh,sizeRealloc*sizeof(int),"octree realloc",
+        _MMG5_ADD_MEM(mesh,(sizeRealloc-sizeRealloc/2)*sizeof(int),"octree realloc",
                       printf("  Exit program.\n");
                       exit(EXIT_FAILURE));
         _MMG5_SAFE_REALLOC(q->v,sizeRealloc,int,"octree");
