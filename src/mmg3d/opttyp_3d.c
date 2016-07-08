@@ -486,6 +486,7 @@ int MMG3D_opttyp(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree) {
     printf("on a splitte %d\n",ier);
     /* memory free */
     _MMG5_DEL_MEM(mesh,mesh->adja,(4*mesh->nemax+5)*sizeof(int));
+    // Attention, faut-il recalculer la table d'adjacence des prisme ici?
     if ( !MMG3D_hashTetra(mesh,1) ) {
       fprintf(stderr,"  ## Hashing problem. Exit program.\n");
       return(0);

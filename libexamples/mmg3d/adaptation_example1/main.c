@@ -76,8 +76,9 @@ int main(int argc,char *argv[]) {
       file formatted or manually set your mesh using the MMG3D_Set* functions */
 
   /** Manually set of the mesh */
-  /** a) give the size of the mesh: 12 vertices, 12 tetra, 20 triangles, 0 edges */
-  if ( MMG3D_Set_meshSize(mmgMesh,12,12,20,0) != 1 )  exit(EXIT_FAILURE);
+  /** a) give the size of the mesh: 12 vertices, 12 tetra,0 prisms, 20
+   * triangles, 0 quads, 0 edges */
+  if ( MMG3D_Set_meshSize(mmgMesh,12,12,0,20,0,0) != 1 )  exit(EXIT_FAILURE);
 
   /** b) give the vertices: for each vertex, give the coordinates, the reference
       and the position in mesh of the vertex */

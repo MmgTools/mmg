@@ -145,7 +145,8 @@ int MMG3D_Set_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int typEntity, int np, int
   return(1);
 }
 
-int MMG3D_Set_meshSize(MMG5_pMesh mesh, int np, int ne, int nt, int na) {
+int MMG3D_Set_meshSize(MMG5_pMesh mesh, int np, int ne, int nprism,
+                       int nt, int nquad, int na ) {
   int k;
 
   if ( ( (mesh->info.imprim > 5) || mesh->info.ddebug ) &&
@@ -156,6 +157,9 @@ int MMG3D_Set_meshSize(MMG5_pMesh mesh, int np, int ne, int nt, int na) {
   mesh->ne  = ne;
   mesh->nt  = nt;
   mesh->na  = na;
+  mesh->nprism = nprism;
+  mesh->nquad  = nquad;
+
   mesh->npi = mesh->np;
   mesh->nei = mesh->ne;
   mesh->nti = mesh->nt;
@@ -175,10 +179,15 @@ int MMG3D_Set_meshSize(MMG5_pMesh mesh, int np, int ne, int nt, int na) {
     _MMG5_DEL_MEM(mesh,mesh->point,(mesh->npmax+1)*sizeof(MMG5_Point));
   if ( mesh->tetra )
     _MMG5_DEL_MEM(mesh,mesh->tetra,(mesh->nemax+1)*sizeof(MMG5_Tetra));
+  if ( mesh->prism )
+    _MMG5_DEL_MEM(mesh,mesh->prism,(mesh->nprism+1)*sizeof(MMG5_Prism));
   if ( mesh->tria )
     _MMG5_DEL_MEM(mesh,mesh->tria,(mesh->nt+1)*sizeof(MMG5_Tria));
+  if ( mesh->quad )
+    _MMG5_DEL_MEM(mesh,mesh->quad,(mesh->nquad+1)*sizeof(MMG5_Quad));
   if ( mesh->edge )
     _MMG5_DEL_MEM(mesh,mesh->edge,(mesh->na+1)*sizeof(MMG5_Edge));
+
 
   /*tester si -m definie : renvoie 0 si pas ok et met la taille min dans info.mem */
   if( mesh->info.mem > 0) {
@@ -214,11 +223,20 @@ int MMG3D_Set_meshSize(MMG5_pMesh mesh, int np, int ne, int nt, int na) {
   _MMG5_SAFE_CALLOC(mesh->tetra,mesh->nemax+1,MMG5_Tetra);
 
 
+  if ( mesh->nprism ) {
+    _MMG5_ADD_MEM(mesh,(mesh->nprism+1)*sizeof(MMG5_Prism),"initial prisms",return(0));
+    _MMG5_SAFE_CALLOC(mesh->prism,(mesh->nprism+1),MMG5_Prism);
+  }
+
   if ( mesh->nt ) {
     _MMG5_ADD_MEM(mesh,(mesh->nt+1)*sizeof(MMG5_Tria),"initial triangles",return(0));
     _MMG5_SAFE_CALLOC(mesh->tria,mesh->nt+1,MMG5_Tria);
   }
 
+  if ( mesh->nquad ) {
+    _MMG5_ADD_MEM(mesh,(mesh->nquad+1)*sizeof(MMG5_Quad),"initial quadrilaterals",return(0));
+    _MMG5_SAFE_CALLOC(mesh->quad,(mesh->nquad+1),MMG5_Quad);
+  }
 
   mesh->namax = mesh->na;
   if ( mesh->na ) {
@@ -238,14 +256,21 @@ int MMG3D_Set_meshSize(MMG5_pMesh mesh, int np, int ne, int nt, int na) {
 
   /* stats */
   if ( abs(mesh->info.imprim) > 6 ) {
-    fprintf(stdout,"     NUMBER OF VERTICES     %8d\n",mesh->np);
+    fprintf(stdout,"     NUMBER OF VERTICES       %8d\n",mesh->np);
     if ( mesh->na ) {
-      fprintf(stdout,"     NUMBER OF EDGES        %8d\n",mesh->na);
+      fprintf(stdout,"     NUMBER OF EDGES          %8d\n",mesh->na);
     }
     if ( mesh->nt )
-      fprintf(stdout,"     NUMBER OF TRIANGLES    %8d\n",mesh->nt);
-    fprintf(stdout,"     NUMBER OF ELEMENTS     %8d\n",mesh->ne);
+      fprintf(stdout,"     NUMBER OF TRIANGLES      %8d\n",mesh->nt);
+    if ( mesh->nquad )
+      fprintf(stdout,"     NUMBER OF QUADRILATERALS %8d\n",mesh->nquad);
+
+    fprintf(stdout,"     NUMBER OF TETRAHEDRA     %8d\n",mesh->ne);
+
+    if ( mesh->nprism )
+      fprintf(stdout,"     NUMBER OF PRISMS         %8d\n",mesh->nprism);
   }
+
   return(1);
 }
 
@@ -273,14 +298,19 @@ int MMG3D_Get_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int* typEntity, int* np, i
   return(1);
 }
 
-int MMG3D_Get_meshSize(MMG5_pMesh mesh, int* np, int* ne, int* nt, int* na) {
+int MMG3D_Get_meshSize(MMG5_pMesh mesh, int* np, int* ne, int* nprism,
+                       int* nt, int * nquad, int* na) {
 
   if ( np != NULL )
     *np = mesh->np;
   if ( ne != NULL )
     *ne = mesh->ne;
+  if ( nprism != NULL )
+    *nprism = mesh->nprism;
   if ( nt != NULL )
     *nt = mesh->nt;
+  if ( nquad != NULL )
+    *nquad = mesh->nquad;
   if ( na != NULL )
     *na = mesh->na;
 
@@ -618,6 +648,146 @@ int  MMG3D_Get_tetrahedra(MMG5_pMesh mesh, int *tetra, int *refs, int * areRequi
   return 1;
 }
 
+int MMG3D_Set_prism(MMG5_pMesh mesh, int v0, int v1, int v2,
+                    int v3, int v4, int v5, int ref, int pos) {
+  MMG5_pPrism pp;
+
+  if ( !mesh->nprism ) {
+    fprintf(stderr,"  ## Error: You must set the number of prisms with the");
+    fprintf(stderr," MMG3D_Set_meshSize function before setting elements in mesh\n");
+    return(0);
+  }
+
+  if ( pos > mesh->nprism ) {
+    fprintf(stderr,"  ## Error: attempt to set new prism at position %d.",pos);
+    fprintf(stderr," Overflow of the given number of prism: %d\n",mesh->nprism);
+    fprintf(stderr,"  ## Check the mesh size, its compactness or the position");
+    fprintf(stderr," of the prism.\n");
+    return(0);
+  }
+
+  pp = &mesh->prism[pos];
+  pp->v[0] = v0;
+  pp->v[1] = v1;
+  pp->v[2] = v2;
+  pp->v[3] = v3;
+  pp->v[4] = v4;
+  pp->v[5] = v5;
+  pp->ref  = ref;
+
+  mesh->point[pp->v[0]].tag &= ~MG_NUL;
+  mesh->point[pp->v[1]].tag &= ~MG_NUL;
+  mesh->point[pp->v[2]].tag &= ~MG_NUL;
+  mesh->point[pp->v[3]].tag &= ~MG_NUL;
+  mesh->point[pp->v[4]].tag &= ~MG_NUL;
+  mesh->point[pp->v[5]].tag &= ~MG_NUL;
+
+
+  return(1);
+}
+
+int MMG3D_Get_prism(MMG5_pMesh mesh, int* v0, int* v1, int* v2, int* v3,
+                    int* v4, int* v5, int* ref, int* isRequired) {
+  static int npri = 0;
+
+  if ( npri == mesh->nprism ) {
+    npri = 0;
+    if ( mesh->info.ddebug ) {
+      fprintf(stdout,"  ## Warning: reset the internal counter of prisms.\n");
+      fprintf(stdout,"     You must pass here exactly one time (the first time ");
+      fprintf(stdout,"you call the MMG3D_Get_prism function).\n");
+      fprintf(stdout,"     If not, the number of call of this function");
+      fprintf(stdout," exceed the number of prisms: %d\n ",mesh->nprism);
+    }
+  }
+
+  ++npri;
+
+  if ( npri > mesh->nprism ) {
+    fprintf(stderr,"  ## Error: unable to get prism.\n");
+    fprintf(stderr,"    The number of call of MMG3D_Get_prism function");
+    fprintf(stderr," can not exceed the number of prism: %d\n ",mesh->nprism);
+    return(0);
+  }
+
+  *v0  = mesh->prism[npri].v[0];
+  *v1  = mesh->prism[npri].v[1];
+  *v2  = mesh->prism[npri].v[2];
+  *v3  = mesh->prism[npri].v[3];
+  *v4  = mesh->prism[npri].v[4];
+  *v5  = mesh->prism[npri].v[5];
+
+  if ( ref != NULL ) {
+    *ref = mesh->prism[npri].ref;
+  }
+
+  if ( isRequired != NULL ) {
+    if ( mesh->prism[npri].tag & MG_REQ )
+      *isRequired = 1;
+    else
+      *isRequired = 0;
+  }
+
+  return(1);
+}
+
+int  MMG3D_Set_prisms(MMG5_pMesh mesh, int *prisms, int *refs) {
+  MMG5_pPrism pp;
+  int         i,j;
+
+  for (i=1;i<=mesh->nprism;i++)
+  {
+    j = (i-1)*6;
+    pp = &mesh->prism[i];
+    pp->v[0]  = prisms[j];
+    pp->v[1]  = prisms[j+1];
+    pp->v[2]  = prisms[j+2];
+    pp->v[3]  = prisms[j+3];
+    pp->v[4]  = prisms[j+4];
+    pp->v[5]  = prisms[j+5];
+
+    if ( refs != NULL )
+      pp->ref   = refs[i-1];
+
+    mesh->point[pp->v[0]].tag &= ~MG_NUL;
+    mesh->point[pp->v[1]].tag &= ~MG_NUL;
+    mesh->point[pp->v[2]].tag &= ~MG_NUL;
+    mesh->point[pp->v[3]].tag &= ~MG_NUL;
+    mesh->point[pp->v[4]].tag &= ~MG_NUL;
+    mesh->point[pp->v[5]].tag &= ~MG_NUL;
+
+  }
+
+  return 1;
+}
+
+int  MMG3D_Get_prisms(MMG5_pMesh mesh, int *prisms, int *refs, int * areRequired) {
+  MMG5_pPrism pp;
+  int         i, j;
+
+  for (i=1;i<=mesh->nprism;i++)
+  {
+    j = (i-1)*6;
+    pp = &mesh->prism[i];
+    prisms[j]   = pp->v[0];
+    prisms[j+2] = pp->v[1];
+    prisms[j+1] = pp->v[2];
+    prisms[j+3] = pp->v[3];
+    prisms[j+4] = pp->v[4];
+    prisms[j+5] = pp->v[5];
+
+    if ( refs!=NULL )
+      refs[i-1]  = pp->ref ;
+    if ( areRequired != NULL ) {
+      if ( pp->tag & MG_REQ )
+        areRequired[i-1] = 1;
+      else
+        areRequired[i-1] = 0;
+    }
+  }
+  return 1;
+}
+
 
 
 int MMG3D_Set_triangle(MMG5_pMesh mesh, int v0, int v1, int v2, int ref,int pos) {
@@ -727,6 +897,120 @@ int  MMG3D_Get_triangles(MMG5_pMesh mesh, int *tria, int *refs, int *areRequired
     if ( areRequired != NULL ) {
       if ( (ptt->tag[0] & MG_REQ) && (ptt->tag[1] & MG_REQ) &&
            (ptt->tag[2] & MG_REQ) )
+        areRequired[i-1] = 1;
+      else
+        areRequired[i-1] = 0;
+    }
+  }
+  return 1;
+}
+
+int MMG3D_Set_quadrilateral(MMG5_pMesh mesh, int v0, int v1, int v2, int v3,
+                         int ref,int pos) {
+
+  if ( !mesh->nquad ) {
+    fprintf(stderr,"  ## Error: You must set the number of quadrilaterals with the");
+    fprintf(stderr," MMG3D_Set_meshSize function before setting quadrilaterals in mesh\n");
+    return(0);
+  }
+
+  if ( pos > mesh->nquad ) {
+    fprintf(stderr,"  ## Error: attempt to set new quadrilateral at position %d.",pos);
+    fprintf(stderr," Overflow of the given number of quadrilaterals: %d\n",mesh->nquad);
+    fprintf(stderr,"  ## Check the mesh size, its compactness or the position");
+    fprintf(stderr," of the quadrilateral.\n");
+    return(0);
+  }
+
+  mesh->quad[pos].v[0] = v0;
+  mesh->quad[pos].v[1] = v1;
+  mesh->quad[pos].v[2] = v2;
+  mesh->quad[pos].v[3] = v3;
+  mesh->quad[pos].ref  = ref;
+
+  return(1);
+}
+
+int MMG3D_Get_quadrilateral(MMG5_pMesh mesh, int* v0, int* v1, int* v2, int* v3,
+                       int* ref,int* isRequired) {
+  MMG5_pQuad  pq;
+  static int nqi = 0;
+
+  if ( nqi == mesh->nquad ) {
+    nqi = 0;
+    if ( mesh->info.ddebug ) {
+      fprintf(stdout,"  ## Warning: reset the internal counter of quadrilaterals.\n");
+      fprintf(stdout,"     You must pass here exactly one time (the first time ");
+      fprintf(stdout,"you call the MMG3D_Get_quadrilateral function).\n");
+      fprintf(stdout,"     If not, the number of call of this function");
+      fprintf(stdout," exceed the number of quadrilaterals: %d\n ",mesh->nquad);
+    }
+  }
+
+  nqi++;
+
+  if ( nqi > mesh->nquad ) {
+    fprintf(stderr,"  ## Error: unable to get quadrilateral.\n");
+    fprintf(stderr,"    The number of call of MMG3D_Get_quadrilateral function");
+    fprintf(stderr," can not exceed the number of quadrilaterals: %d\n ",mesh->nquad);
+    return(0);
+  }
+
+  pq = &mesh->quad[nqi];
+  *v0  = pq->v[0];
+  *v1  = pq->v[1];
+  *v2  = pq->v[2];
+  *v3  = pq->v[3];
+  if ( ref != NULL )
+    *ref = pq->ref;
+
+  if ( isRequired != NULL ) {
+    if ( (pq->tag[0] & MG_REQ) && (pq->tag[1] & MG_REQ) &&
+         (pq->tag[2] & MG_REQ) && (pq->tag[3] & MG_REQ))
+      *isRequired = 1;
+    else
+      *isRequired = 0;
+  }
+
+  return(1);
+}
+
+int  MMG3D_Set_quadrilaterals(MMG5_pMesh mesh, int *quads, int *refs) {
+  MMG5_pQuad  pq;
+  int         i, j;
+
+  for (i=1;i<=mesh->nquad;i++)
+  {
+    j = (i-1)*4;
+    pq = &mesh->quad[i];
+    pq->v[0] = quads[j]  ;
+    pq->v[1] = quads[j+1];
+    pq->v[2] = quads[j+2];
+    pq->v[3] = quads[j+3];
+    if ( refs != NULL )
+      pq->ref  = refs[i-1];
+  }
+  return 1;
+}
+
+int  MMG3D_Get_quadrilaterals(MMG5_pMesh mesh, int *quads, int *refs, int *areRequired) {
+  MMG5_pQuad  pq;
+  int         i, j;
+
+  for (i=1;i<=mesh->nquad;i++)
+  {
+    j = (i-1)*4;
+    pq = &mesh->quad[i];
+    quads[j]   = pq->v[0];
+    quads[j+1] = pq->v[1];
+    quads[j+2] = pq->v[2];
+    quads[j+3] = pq->v[3];
+
+    if ( refs!=NULL )
+      refs[i-1]  = pq->ref ;
+    if ( areRequired != NULL ) {
+      if ( (pq->tag[0] & MG_REQ) && (pq->tag[1] & MG_REQ) &&
+           (pq->tag[2] & MG_REQ) && (pq->tag[3] & MG_REQ) )
         areRequired[i-1] = 1;
       else
         areRequired[i-1] = 0;
@@ -1691,7 +1975,7 @@ int MMG5_Set_meshSize(MMG5_pMesh mesh, int np, int ne, int nt, int na) {
          "MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
          " be removed soon\n." );
 
-  return(MMG3D_Set_meshSize(mesh,np,ne,nt,na));
+  return(MMG3D_Set_meshSize(mesh,np,ne,0,nt,0,na));
 }
 
 int MMG5_Get_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int* typEntity, int* np, int* typSol) {
@@ -1707,7 +1991,7 @@ int MMG5_Get_meshSize(MMG5_pMesh mesh, int* np, int* ne, int* nt, int* na) {
          "MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
          " be removed soon\n." );
 
-  return(MMG3D_Get_meshSize(mesh,np,ne,nt,na));
+  return(MMG3D_Get_meshSize(mesh,np,ne,NULL,nt,NULL,na));
 }
 
 int MMG5_Set_vertex(MMG5_pMesh mesh, double c0, double c1, double c2, int ref, int pos) {

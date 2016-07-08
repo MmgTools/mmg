@@ -1030,7 +1030,7 @@ int _MMG5_defmetvol(MMG5_pMesh mesh,MMG5_pSol met) {
     _MMG5_SAFE_MALLOC(met->m,(6*(mesh->npmax+1)),double);
 
 
-    for (k=1; k<=mesh->nt; k++) {
+    for (k=1; k<=mesh->ne; k++) {
       pt = &mesh->tetra[k];
       if ( !MG_EOK(pt) ) continue;
 
@@ -1112,7 +1112,7 @@ int _MMG5_defmetvol(MMG5_pMesh mesh,MMG5_pSol met) {
   }
 
   /** 2. A metric is provided: truncate it by hmax/hmin */
-  for (k=1; k<=mesh->nt; k++) {
+  for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
     if ( !MG_EOK(pt) ) continue;
 

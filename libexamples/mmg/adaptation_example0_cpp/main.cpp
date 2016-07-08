@@ -161,6 +161,7 @@ int main(int argc,char *argv[]) {
   /** b) function calling */
   if ( MMGS_loadSol(mmgMesh,mmgSol,filename.c_str()) != 1 )  exit(EXIT_FAILURE);
 
+
   /** ------------------------------ STEP  II -------------------------- */
   /** library call */
   ier = MMGS_mmgslib(mmgMesh,mmgSol);

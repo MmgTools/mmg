@@ -315,26 +315,29 @@ int MMG2_colpoi(MMG5_pMesh mesh, MMG5_pSol sol,int iel,int iar,int ia,int ib,dou
  */
 int MMG2_chkedg(MMG5_pMesh mesh, MMG5_pPoint ppa,MMG5_pPoint ppb) {
   double t0[2],t1[2];
-  double l,ux,uy,cosn,ps;
+  double ll,l,ux,uy,cosn,ps;
   int    i;
 
   ux = ppa->c[0] - ppb->c[0];
   uy = ppa->c[1] - ppb->c[1];
-  l = ux*ux + uy*uy;
-  l = sqrt(l);
+  ll = ux*ux + uy*uy;
+  l = sqrt(ll);
+
+  if ( l > mesh->info.hmax ) return(1);
+  else if ( l < _MMG5_EPSD ) return(0);
 
   //with tangent, compute control point
   for(i=0 ; i<2 ; i++) {
-    t0[i] = l*ppa->n[i];
-    t1[i] = l*ppb->n[i];
+    t0[i] = ppa->n[i];
+    t1[i] = ppb->n[i];
   }
   if(ppa->tag & M_CORNER) {
     for(i=0 ; i<2 ; i++)
-      t0[i] = ppa->c[i] - ppb->c[i];
+      t0[i] = (ppa->c[i] - ppb->c[i])/l;
   }
   if(ppb->tag & M_CORNER) {
     for(i=0 ; i<2 ; i++)
-      t1[i] = ppa->c[i] - ppb->c[i];
+      t1[i] = (ppa->c[i] - ppb->c[i])/l;
   }
   /*check if t0 has the same sens of vect(P0P1)*/
   if(t0[0]/(ppb->c[0]-ppa->c[0]) < 0 || t0[1]/(ppb->c[1]-ppa->c[1])<0) {
@@ -352,21 +355,20 @@ int MMG2_chkedg(MMG5_pMesh mesh, MMG5_pPoint ppa,MMG5_pPoint ppb) {
   }
   //compute the distance between mid point and curve (with angle between edge and tang)
   ps = t0[0]*ux + t0[1]*uy;
-  ps /= l*l;
-  cosn = ps*ps ;
-  cosn *= fabs(1.0-cosn);
 
-  cosn *= (0.25*l);
-  if(cosn > mesh->info.hausd*mesh->info.hausd) return(1);
+  ps *= ps;
+  cosn = ps/ll ;
+  cosn *= fabs(1.0-cosn);
+  cosn *= ll;
+
+  if(cosn > 9.*mesh->info.hausd*mesh->info.hausd) return(1);
   //idem for ppb
   ps = -(t1[0]*ux + t1[1]*uy);
-  ps /= l*l;
-  cosn = ps*ps ;
+  ps *= ps;
+  cosn = ps/ll;
   cosn *= fabs(1.0-cosn);
-  cosn *= (0.25*l);
-  if(cosn > mesh->info.hausd*mesh->info.hausd) return(1);
-
-
+  cosn *=  ll;
+  if(cosn > 9.*mesh->info.hausd*mesh->info.hausd) return(1);
 
   return(0);
 }
@@ -380,12 +382,13 @@ int MMG2_chkedg(MMG5_pMesh mesh, MMG5_pPoint ppa,MMG5_pPoint ppb) {
 int MMG2_colpoibdry(MMG5_pMesh mesh, MMG5_pSol sol,int iel,int iar,int ia,int ib,double coe) {
   MMG5_pTria     pt,pt1;
   MMG5_pEdge     ped;
-  MMG5_pPoint    ppa,ppb,pp1,pp2,ppa1,ppb1;
+  MMG5_pPoint    ppa,ppb,pp1,pp2;//ppa1,ppb1;
   int       pib,pia,jel,iadr,a1,v1,*adja,voy,a,adj;
   int     *list,lon,i,kel,num,i1,i2,ed;
   double    declic,*cal,air,coor[2],solu[3],*c1,*c2,*m1,*m2,len;
   //double    capx,capy,cbpx,cbpy,alpha,cbound;
-  int       iadri,*adjai,nbdry,ibdry[2],ip;
+//  int       iadri,*adjai,nbdry,ip,ibdry;
+
   pt  = &mesh->tria[iel];
   pib = pt->v[ib];
   pia = pt->v[ia];
@@ -406,51 +409,51 @@ int MMG2_colpoibdry(MMG5_pMesh mesh, MMG5_pSol sol,int iel,int iar,int ia,int ib
   }
 
   /*check geom*/
-  nbdry = 0;
-  for(i=1 ; i<=lon ; i++) {
-    kel = list[i]/3;
-    ip  = list[i]%3;
-    pt1 = &mesh->tria[kel];
-    iadri = 3*(kel-1) + 1;
-    adjai = &mesh->adja[iadri];
-    if(!adjai[MMG2_iopp[ip][0]]) {
-      assert(nbdry<2);
-      if(MMG2_iare[MMG2_iopp[ip][0]][0]==ip)
-        ibdry[nbdry++] = pt1->v[MMG2_iare[MMG2_iopp[ip][0]][1]];
-      else {
-        assert(MMG2_iare[MMG2_iopp[ip][0]][1]==ip) ;
-        ibdry[nbdry++] = pt1->v[MMG2_iare[MMG2_iopp[ip][0]][0]];
-      }
-    }
-    if(!adjai[MMG2_iopp[ip][1]]) {
-      assert(nbdry<2); //sinon non manifold
-      if(MMG2_iare[MMG2_iopp[ip][1]][0]==ip)
-        ibdry[nbdry++] = pt1->v[MMG2_iare[MMG2_iopp[ip][1]][1]];
-      else {
-        assert(MMG2_iare[MMG2_iopp[ip][1]][1]==ip) ;
-        ibdry[nbdry++] = pt1->v[MMG2_iare[MMG2_iopp[ip][1]][0]];
-      }
-    }
-  }
-  assert(nbdry==2); //sinon non manifold
-  /*first check that the two edges verify the hausd criterion*/
-  ppa1  = &mesh->point[ibdry[0]];
-  ppb1  = &mesh->point[ibdry[1]];
+  /* nbdry = 0; */
+  /* for(i=1 ; i<=lon ; i++) { */
+  /*   kel = list[i]/3; */
+  /*   ip  = list[i]%3; */
+  /*   pt1 = &mesh->tria[kel]; */
+  /*   iadri = 3*(kel-1) + 1; */
+  /*   adjai = &mesh->adja[iadri]; */
+  /*   if(!adjai[MMG2_iopp[ip][0]]) { */
+  /*     assert(nbdry<2); */
+  /*     if(MMG2_iare[MMG2_iopp[ip][0]][0]==ip) */
+  /*       ibdry[nbdry++] = pt1->v[MMG2_iare[MMG2_iopp[ip][0]][1]]; */
+  /*     else { */
+  /*       assert(MMG2_iare[MMG2_iopp[ip][0]][1]==ip) ; */
+  /*       ibdry[nbdry++] = pt1->v[MMG2_iare[MMG2_iopp[ip][0]][0]]; */
+  /*     } */
+  /*   } */
+  /*   if(!adjai[MMG2_iopp[ip][1]]) { */
+  /*     assert(nbdry<2); //sinon non manifold */
+  /*     if(MMG2_iare[MMG2_iopp[ip][1]][0]==ip) */
+  /*       ibdry[nbdry++] = pt1->v[MMG2_iare[MMG2_iopp[ip][1]][1]]; */
+  /*     else { */
+  /*       assert(MMG2_iare[MMG2_iopp[ip][1]][1]==ip) ; */
+  /*       ibdry[nbdry++] = pt1->v[MMG2_iare[MMG2_iopp[ip][1]][0]]; */
+  /*     } */
+  /*   } */
+  /* } */
+  /* assert(nbdry==2); //sinon non manifold */
+/*first check that the two edges verify the hausd criterion*/
+  /* ppa1  = &mesh->point[ibdry[0]]; */
+  /* ppb1  = &mesh->point[ibdry[1]]; */
 
-  if(MMG2_chkedg(mesh,ppb,ppa1))   {
-    _MMG5_SAFE_FREE(list);
-    return(0);
-  }
-  if(MMG2_chkedg(mesh,ppb,ppb1))  {
-    _MMG5_SAFE_FREE(list);
-    return(0);
-  }
+  /* if(MMG2_chkedg(mesh,ppb,ppa1))   { */
+  /*   _MMG5_SAFE_FREE(list); */
+  /*   return(0); */
+  /* } */
+  /* if(MMG2_chkedg(mesh,ppb,ppb1))  { */
+  /*   _MMG5_SAFE_FREE(list); */
+  /*   return(0); */
+  /* } */
 
-  /*second check that the new edge verify the hausd criteron*/
-  if(MMG2_chkedg(mesh,ppb1,ppa1))  {
-    _MMG5_SAFE_FREE(list);
-    return(0);
-  }
+  /* /\*second check that the new edge verify the hausd criteron*\/ */
+  /* if(MMG2_chkedg(mesh,ppb1,ppa1))  { */
+  /*   _MMG5_SAFE_FREE(list); */
+  /*   return(0); */
+  /* } */
 
 /* //comment from here */
 /*   //calcul de l'angle forme par les 3 points  */

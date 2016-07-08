@@ -546,9 +546,10 @@ int  MMG2D_Get_vertices(MMG5_pMesh mesh, double* vertices, int* refs,
 }
 
 int MMG2D_Set_triangle(MMG5_pMesh mesh, int v0, int v1, int v2, int ref, int pos) {
-  MMG5_pTria pt;
-  double  vol;
-  int    i,tmp;
+  MMG5_pPoint ppt;
+  MMG5_pTria  pt;
+  double      vol;
+  int         i,j,ip,tmp;
 
   if ( !mesh->nt ) {
     fprintf(stdout,"  ## Error: You must set the number of elements with the");
@@ -586,7 +587,20 @@ int MMG2D_Set_triangle(MMG5_pMesh mesh, int v0, int v1, int v2, int ref, int pos
 
   vol = MMG2_quickarea(mesh->point[pt->v[0]].c,mesh->point[pt->v[1]].c,
                            mesh->point[pt->v[2]].c);
-  if(vol < 0) {
+
+  if ( vol == 0.0 ) {
+    fprintf(stderr,"  ## Error: triangle %d has null area.\n",pos);
+    for ( ip=0; ip<3; ip++ ) {
+      ppt = &mesh->point[pt->v[ip]];
+      for ( j=0; j<3; j++ ) {
+        if ( fabs(ppt->c[j])>0. ) {
+          fprintf(stderr," Check that you don't have a sliver triangle.\n");
+          return(0);
+        }
+      }
+    }
+  }
+  else if(vol < 0) {
     printf("Tr %d bad oriented\n",pos);
     tmp = pt->v[2];
     pt->v[2] = pt->v[1];
@@ -654,9 +668,10 @@ int MMG2D_Get_triangle(MMG5_pMesh mesh, int* v0, int* v1, int* v2, int* ref
 }
 
 int  MMG2D_Set_triangles(MMG5_pMesh mesh, int *tria, int *refs) {
+  MMG5_pPoint ppt;
   MMG5_pTria ptt;
   double vol;
-  int i, j,tmp;
+  int i, j,ip,tmp;
 
   mesh->xt = 0;
   for (i=1;i<=mesh->nt;i++)
@@ -678,7 +693,20 @@ int  MMG2D_Set_triangles(MMG5_pMesh mesh, int *tria, int *refs) {
 
       vol = MMG2_quickarea(mesh->point[ptt->v[0]].c,mesh->point[ptt->v[1]].c,
                            mesh->point[ptt->v[2]].c);
-      if(vol < 0) {
+
+      if ( vol == 0.0 ) {
+        fprintf(stderr,"  ## Error: triangle %d has null area.\n",i);
+        for ( ip=0; ip<3; ip++ ) {
+          ppt = &mesh->point[ptt->v[ip]];
+          for ( j=0; j<3; j++ ) {
+            if ( fabs(ppt->c[j])>0. ) {
+              fprintf(stderr," Check that you don't have a sliver triangle.\n");
+              return(0);
+            }
+          }
+        }
+      }
+      else if(vol < 0) {
         printf("Tr %d bad oriented\n",i);
         tmp = ptt->v[2];
         ptt->v[2] = ptt->v[1];

@@ -62,11 +62,13 @@ extern "C" {
 
 #define M_NOSURF   (1 << 0) /**< 1 Mark for the nosurf option */
 #define M_BDRY     (1 << 1) /**< 2 Boundary */
-#define M_MOVE     (1 << 2) /**< 4 Moved point */
+#define M_MOVE     (1 << 2) /**< 4 Moved  */
 #define M_REQUIRED (1 << 3) /**< 8 Required entity */
 #define M_CORNER   (1 << 4) /**< 16 corner */
 #define M_SD       (1 << 5) /**< 32 interface between two domains */
 #define M_NUL      (1 << 6) /**< 64 vertex removed */
+
+#define M_SIN(tag) ((tag & M_CORNER) || (tag & M_REQUIRED)) /**< Corner or Required */
 
 #define _MMG2D_NPMAX   50000
 #define _MMG2D_NEDMAX  100000
@@ -306,6 +308,8 @@ int _MMG5_mmg2dChkmsh(MMG5_pMesh , int, int );
 int MMG2_boulep(MMG5_pMesh , int , int , int * );
 int MMG2_markBdry(MMG5_pMesh );
 int MMG2_prilen(MMG5_pMesh ,MMG5_pSol );
+
+int _MMG2D_defBdrySiz(MMG5_pMesh mesh,MMG5_pSol met);
 
 void MMG2_coorbary(MMG5_pMesh ,MMG5_pTria ,double c[2],double* ,double* ,double* );
 int MMG2_isInTriangle(MMG5_pMesh ,int,double c[2]);
