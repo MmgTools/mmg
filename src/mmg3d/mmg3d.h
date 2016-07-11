@@ -146,10 +146,11 @@ static const unsigned char _MMG5_iarf_pr[5][5] = { {0,1,3,0}, {6,8,7,6}, {3,5,8,
  */
 typedef struct _MMG3D_octree_s
 {
+  struct _MMG3D_octree_s* branches; /*!< pointer toward the subtrees of the current octree */
   int* v;      /*!< vertex index */
   int  nbVer;  /*!< number of vertices in the sub tree */
   unsigned char depth; /*!< sub tree depth */
-  struct _MMG3D_octree_s* branches; /*!< pointer toward the subtrees of the current octree */
+  
 } _MMG3D_octree_s;
 
 /**
@@ -158,6 +159,7 @@ typedef struct _MMG3D_octree_s
 typedef struct
 {
   int nv;  /*!< Max number of points per octree cell */
+  int nc; /*!< Max number of cells listed per local search in the octree (-3)*/
   _MMG3D_octree_s* q0; /*!<  Pointer toward the first octree cell */
 } _MMG3D_octree;
 typedef _MMG3D_octree * _MMG3D_pOctree;
@@ -174,7 +176,7 @@ void _MMG3D_placeInListDouble(double*, double, int, int);
 void _MMG3D_placeInListOctree(_MMG3D_octree_s**, _MMG3D_octree_s*, int, int);
 int _MMG3D_seekIndex (double* distList, double dist, int indexMin, int indexMax);
 void _MMG3D_getListSquareRec(_MMG3D_octree_s*,double*,double*,
-                             _MMG3D_octree_s***,double*,int, int, int*);
+                             _MMG3D_octree_s***,double*,int, int, int, int*);
 int  _MMG3D_getListSquare(MMG5_pMesh,_MMG3D_octree*,double*,_MMG3D_octree_s***);
 void _MMG3D_addOctreeRec(MMG5_pMesh,_MMG3D_octree_s*,double*, const int, int);
 void _MMG3D_addOctree(MMG5_pMesh mesh, _MMG3D_octree* q, const int no);

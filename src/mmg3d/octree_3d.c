@@ -65,6 +65,8 @@ void _MMG3D_initOctree(MMG5_pMesh mesh,_MMG3D_pOctree* q, int nv)
   nv++;
   (*q)->nv = nv;
 
+  (*q)->nc = 64;
+  
   _MMG5_ADD_MEM(mesh,sizeof(_MMG3D_octree_s),"initial octree cell",
                 printf("  Exit program.\n");
                 exit(EXIT_FAILURE));
@@ -84,7 +86,7 @@ void _MMG3D_initOctree(MMG5_pMesh mesh,_MMG3D_pOctree* q, int nv)
  */
 void _MMG3D_freeOctree_s(MMG5_pMesh mesh,_MMG3D_octree_s* q, int nv)
 {
-  int nbBitsInt,depthMax,dim,i,sizTab,sizBr;
+  int nbBitsInt,depthMax,dim,i,sizTab,sizBr,nvTemp;
 
   dim       = mesh->dim;
   sizBr     = 1<<dim;
@@ -93,26 +95,39 @@ void _MMG3D_freeOctree_s(MMG5_pMesh mesh,_MMG3D_octree_s* q, int nv)
 
   if (q->nbVer>nv && q->depth < depthMax )
   {
-    for ( i = 0; i<sizBr; i++) {
+    for ( i = 0; i<sizBr; i++) 
+    {
       _MMG3D_freeOctree_s(mesh,&(q->branches[i]), nv);
     }
     _MMG5_DEL_MEM(mesh,q->branches,sizBr*sizeof(_MMG3D_octree_s));
   }
-  if (q->nbVer>0 && q->depth>0 ) {
+  if (q->nbVer>0 && q->depth>0 ) 
+  {
     if ( q->nbVer<= nv )
     {
-      _MMG5_DEL_MEM(mesh,q->v,nv*sizeof(int));
+      nvTemp = q->nbVer;
+      nvTemp--;
+      nvTemp |= nvTemp >> 1;
+      nvTemp |= nvTemp >> 2;
+      nvTemp |= nvTemp >> 4;
+      nvTemp |= nvTemp >> 8;
+      nvTemp |= nvTemp >> 16;
+      nvTemp++;
+      
+      _MMG5_DEL_MEM(mesh,q->v,nvTemp*sizeof(int));
       q->nbVer = 0;
-    }
-    else {
-      if ( q->depth != depthMax ) {
+    }else 
+    {
+      if ( q->depth != depthMax ) 
+      {
         sizTab = nv;
-      }
-      else {
+      }else 
+      {
         sizTab = (q->nbVer%nv != 0)? 1 : 0;
         sizTab = nv * ((int)(q->nbVer/nv) + sizTab);
       }
-      if (q->v) {
+      if (q->v) 
+      {
         _MMG5_DEL_MEM(mesh,q->v,sizTab*sizeof(int));
         q->nbVer = 0;
       }
@@ -386,7 +401,7 @@ int _MMG3D_seekIndex (double* distList, double dist, int indexMin, int indexMax)
  *
  */
 void _MMG3D_getListSquareRec(_MMG3D_octree_s* q, double* center, double* rect,
-                             _MMG3D_octree_s*** qlist, double* dist, int nv, int dim, int* index)
+                             _MMG3D_octree_s*** qlist, double* dist, int nv, int nc, int dim, int* index)
 {
   double *recttemp;
   double *centertemp;
@@ -396,7 +411,7 @@ void _MMG3D_getListSquareRec(_MMG3D_octree_s* q, double* center, double* rect,
   int indexTemp;
 
   // number max of octree cells listed for one search
-  if ((*index)>60)
+  if ((*index)>nc-4)
   {
     return;
   }else
@@ -407,17 +422,18 @@ void _MMG3D_getListSquareRec(_MMG3D_octree_s* q, double* center, double* rect,
 
   if (_MMG3D_isCellIncluded2(rect, center, l))
   {
-    (*index)=61;
+    (*index)=nc-3;
     return;
   }
   
   if (q->branches==NULL && q->v != NULL)
   {
-    // the vector dist is of size 64 instead of 61 as qlist so the 3 last
-    // values can contain the coordinates of the center of the search volume. 
-    x = dist[61] - center[0];
-    y = dist[62] - center[1];
-    z = dist[63] - center[2];
+    // the vector dist is of size nc whereas qlist allows nc-3 inputs 
+    // so the 3 last values can contain the coordinates of the center 
+    // of the search volume. 
+    x = dist[nc-3] - center[0];
+    y = dist[nc-2] - center[1];
+    z = dist[nc-1] - center[2];
     #warning should be replaced with distance in metric
     distTemp = x*x+y*y+z*z;
     
@@ -463,7 +479,7 @@ void _MMG3D_getListSquareRec(_MMG3D_octree_s* q, double* center, double* rect,
 
         centertemp[2] = center[2]-l/2;
 
-        _MMG3D_getListSquareRec(&(q->branches[0]), centertemp, recttemp, qlist, dist, nv, dim, index);
+        _MMG3D_getListSquareRec(&(q->branches[0]), centertemp, recttemp, qlist, dist, nv, nc, dim, index);
       }
       if (rect[2]+rect[5] > center[2]) // branch 4
       {
@@ -472,7 +488,7 @@ void _MMG3D_getListSquareRec(_MMG3D_octree_s* q, double* center, double* rect,
 
         centertemp[2] = center[2]+l/2;
 
-        _MMG3D_getListSquareRec(&(q->branches[4]), centertemp, recttemp, qlist, dist, nv, dim, index);
+        _MMG3D_getListSquareRec(&(q->branches[4]), centertemp, recttemp, qlist, dist, nv, nc, dim, index);
       }
     }
     if (rect[0]+rect[2] >center[0] && rect[1]<center[1]) // branch 1
@@ -490,7 +506,7 @@ void _MMG3D_getListSquareRec(_MMG3D_octree_s* q, double* center, double* rect,
         recttemp[5] = rect[2]+rect[5] < center[2] ? rect[5]:center[2]-rect[2];
         centertemp[2] = center[2]-l/2;
 
-        _MMG3D_getListSquareRec(&(q->branches[1]), centertemp, recttemp, qlist, dist, nv, dim, index);
+        _MMG3D_getListSquareRec(&(q->branches[1]), centertemp, recttemp, qlist, dist, nv, nc, dim, index);
       }
       if (rect[2]+rect[5] > center[2]) // branch 5
       {
@@ -499,7 +515,7 @@ void _MMG3D_getListSquareRec(_MMG3D_octree_s* q, double* center, double* rect,
 
         centertemp[2] = center[2]+l/2;
 
-        _MMG3D_getListSquareRec(&(q->branches[5]), centertemp, recttemp, qlist, dist, nv, dim, index);
+        _MMG3D_getListSquareRec(&(q->branches[5]), centertemp, recttemp, qlist, dist, nv, nc, dim, index);
       }
     }
     if (rect[0]<center[0] && rect[1]+rect[3]>center[1]) // branch 2
@@ -521,7 +537,7 @@ void _MMG3D_getListSquareRec(_MMG3D_octree_s* q, double* center, double* rect,
 
         centertemp[2] = center[2]-l/2;
 
-        _MMG3D_getListSquareRec(&(q->branches[2]), centertemp, recttemp, qlist, dist, nv, dim, index);
+        _MMG3D_getListSquareRec(&(q->branches[2]), centertemp, recttemp, qlist, dist, nv, nc, dim, index);
       }
       if (rect[2]+rect[5] >= center[2]) // branch 6
       {
@@ -530,7 +546,7 @@ void _MMG3D_getListSquareRec(_MMG3D_octree_s* q, double* center, double* rect,
 
         centertemp[2] = center[2]+l/2;
 
-        _MMG3D_getListSquareRec(&(q->branches[6]), centertemp, recttemp, qlist, dist, nv, dim, index);
+        _MMG3D_getListSquareRec(&(q->branches[6]), centertemp, recttemp, qlist, dist, nv, nc, dim, index);
       }
     }
     if (rect[0]+rect[2] >center[0] && rect[1]+rect[3]>center[1]) // branch 3
@@ -551,7 +567,7 @@ void _MMG3D_getListSquareRec(_MMG3D_octree_s* q, double* center, double* rect,
 
         centertemp[2] = center[2]-l/2;
 
-        _MMG3D_getListSquareRec(&(q->branches[3]), centertemp, recttemp, qlist, dist, nv, dim, index);
+        _MMG3D_getListSquareRec(&(q->branches[3]), centertemp, recttemp, qlist, dist, nv, nc, dim, index);
       }
       if (rect[2]+rect[5] > center[2]) // branch 7
       {
@@ -560,7 +576,7 @@ void _MMG3D_getListSquareRec(_MMG3D_octree_s* q, double* center, double* rect,
 
         centertemp[2] = center[2]+l/2;
 
-        _MMG3D_getListSquareRec(&(q->branches[7]), centertemp, recttemp, qlist, dist, nv, dim, index);
+        _MMG3D_getListSquareRec(&(q->branches[7]), centertemp, recttemp, qlist, dist, nv, nc, dim, index);
       }
     }
   }
@@ -607,20 +623,20 @@ int _MMG3D_getListSquare(MMG5_pMesh mesh,_MMG3D_pOctree q, double* rect,
   //~ fprintf(stdout, "index : %i\n", index);
 
   //instead of counting exactly the number of cells to be listed, the
-  //maximum size is set to 61 (so the list dist can have 61 value + 3 coordinates of 
+  //maximum size is set to nc-3 (so the list dist can have nc-3 values + 3 coordinates of 
   //the center of the rectangle)
-  index = 61;
+  index = q->nc-3;
 
-  _MMG5_ADD_MEM(mesh,index*sizeof(_MMG3D_octree_s*),"octree cell",
+  _MMG5_ADD_MEM(mesh,q->nc*sizeof(_MMG3D_octree_s*),"octree cell",
                 printf("  Exit program.\n");
                 exit(EXIT_FAILURE));
 
   _MMG5_SAFE_MALLOC(*qlist,index,_MMG3D_octree_s*);
   _MMG5_SAFE_MALLOC(dist,index+3,double);
   
-  dist[61] = rect[0]+rect[3]/2;
-  dist[62] = rect[1]+rect[4]/2;
-  dist[63] = rect[2]+rect[5]/2;
+  dist[q->nc-3] = rect[0]+rect[3]/2;
+  dist[q->nc-2] = rect[1]+rect[4]/2;
+  dist[q->nc-1] = rect[2]+rect[5]/2;
   
   for (i = 0; i<index; i++)
     (*qlist)[i] = NULL;
@@ -631,12 +647,12 @@ int _MMG3D_getListSquare(MMG5_pMesh mesh,_MMG3D_pOctree q, double* rect,
   for (i = 0; i < dim; i++)
     center[i] = 0.5;
 
-  _MMG3D_getListSquareRec(q->q0, center, rect2, qlist, dist, q->nv, dim, &index);
+  _MMG3D_getListSquareRec(q->q0, center, rect2, qlist, dist, q->nv, q->nc, dim, &index);
   
   //~ distTemp = distance entre center et centre du rectangle;
   
 
-  if (index>60)
+  if (index>q->nc-4)
     return -1;
 
   //~ #warning to remove (intended to plot histogram of number of octree cell in the list)
@@ -687,12 +703,12 @@ void _MMG3D_addOctreeRec(MMG5_pMesh mesh, _MMG3D_octree_s* q, double* ver,
 
       if(q->nbVer == 0)
       {
-        _MMG5_ADD_MEM(mesh,2*sizeof(int),"octree vertices table",
+        _MMG5_ADD_MEM(mesh,sizeof(int),"octree vertices table",
                       printf("  Exit program.\n");
                       exit(EXIT_FAILURE));
-        _MMG5_SAFE_MALLOC(q->v,2,int);
+        _MMG5_SAFE_MALLOC(q->v,1,int);
       }
-      else if(!(q->nbVer & (q->nbVer - 1)))
+      else if(!(q->nbVer & (q->nbVer - 1))) //is a power of 2
       {
         sizeRealloc = q->nbVer;
         sizeRealloc<<=1;
@@ -1291,13 +1307,13 @@ int _MMG3D_octreein_iso(MMG5_pMesh mesh,MMG5_pSol sol,_MMG3D_pOctree octree,int 
 
       if ( d2 < hp1 || d2 < hpi2*hpi2 )  {
         //printf("filtre current %d : %e %e %e %e\n",ip1,d2,hp1,d2,hpi2*hpi2);
-        _MMG5_DEL_MEM(mesh,lococ,ncells*sizeof(_MMG3D_octree_s*));
+        _MMG5_DEL_MEM(mesh,lococ,octree->nc*sizeof(_MMG3D_octree_s*));
         return(0);
       }
     }
 
   }
-  _MMG5_DEL_MEM(mesh,lococ,ncells*sizeof(_MMG3D_octree_s*));
+  _MMG5_DEL_MEM(mesh,lococ,octree->nc*sizeof(_MMG3D_octree_s*));
   return(1);
 }
 
@@ -1384,13 +1400,13 @@ int _MMG3D_octreein_ani(MMG5_pMesh mesh,MMG5_pSol sol,_MMG3D_pOctree octree,int 
         d2   = mb[0]*ux*ux + mb[3]*uy*uy + mb[5]*uz*uz
           + 2.0*(mb[1]*ux*uy + mb[2]*ux*uz + mb[4]*uy*uz);
         if ( d2 < dmi ) {
-          _MMG5_DEL_MEM(mesh,lococ,ncells*sizeof(_MMG3D_octree_s*));
+          _MMG5_DEL_MEM(mesh,lococ,octree->nc*sizeof(_MMG3D_octree_s*));
           return(0);
         }
       }
     }
   }
 
-  _MMG5_DEL_MEM(mesh,lococ,ncells*sizeof(_MMG3D_octree_s*));
+  _MMG5_DEL_MEM(mesh,lococ,octree->nc*sizeof(_MMG3D_octree_s*));
   return(1);
 }
