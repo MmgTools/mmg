@@ -101,7 +101,8 @@ void _MMG3D_freeOctree_s(MMG5_pMesh mesh,_MMG3D_octree_s* q, int nv)
     }
     _MMG5_DEL_MEM(mesh,q->branches,sizBr*sizeof(_MMG3D_octree_s));
   }
-  if (q->nbVer>0 && q->depth>0 ) 
+  //~ if (q->nbVer>0 && q->depth>0 ) 
+  else if (q->nbVer>0) 
   {
     if ( q->nbVer<= nv )
     {
@@ -126,11 +127,9 @@ void _MMG3D_freeOctree_s(MMG5_pMesh mesh,_MMG3D_octree_s* q, int nv)
         sizTab = (q->nbVer%nv != 0)? 1 : 0;
         sizTab = nv * ((int)(q->nbVer/nv) + sizTab);
       }
-      if (q->v) 
-      {
-        _MMG5_DEL_MEM(mesh,q->v,sizTab*sizeof(int));
-        q->nbVer = 0;
-      }
+      assert(q->v);
+      _MMG5_DEL_MEM(mesh,q->v,sizTab*sizeof(int));
+      q->nbVer = 0;
     }
   }
 }
@@ -423,6 +422,8 @@ void _MMG3D_getListSquareRec(_MMG3D_octree_s* q, double* center, double* rect,
   if (_MMG3D_isCellIncluded2(rect, center, l))
   {
     (*index)=nc-3;
+    _MMG5_SAFE_FREE(recttemp);
+    _MMG5_SAFE_FREE(centertemp);
     return;
   }
   
@@ -653,8 +654,12 @@ int _MMG3D_getListSquare(MMG5_pMesh mesh,_MMG3D_pOctree q, double* rect,
   
 
   if (index>q->nc-4)
+  {
+    _MMG5_SAFE_FREE(rect2);
+    _MMG5_SAFE_FREE(dist);
+    _MMG5_SAFE_FREE(center);
     return -1;
-
+  }
   //~ #warning to remove (intended to plot histogram of number of octree cell in the list)
   //~ FILE *fp;
   //~ fp = fopen("/home/cardamom/Documents/nCases.csv","a");
@@ -814,15 +819,30 @@ void _MMG3D_addOctree(MMG5_pMesh mesh, _MMG3D_pOctree q, const int no)
  * Delete the vertex of index \a no from the terminal octree cell.
  *
  */
-void _MMG3D_delOctreeVertex(_MMG3D_octree_s* q, int indNo)
+void _MMG3D_delOctreeVertex(MMG5_pMesh mesh, _MMG3D_octree_s* q, int indNo)
 {
   int i;
+  int nvTemp;
+  int* vTemp;
+
   assert(q->v);
   assert(q->nbVer>indNo);
   for(i=0; i<q->nbVer; ++i)
     assert(q->v[i]>0);
   memmove(&q->v[indNo],&q->v[indNo+1], (q->nbVer-indNo-1)*sizeof(int));
   --q->nbVer;
+  if (!(q->nbVer & (q->nbVer - 1))) // is a power of 2
+  {
+    _MMG5_ADD_MEM(mesh,q->nbVer*sizeof(int),"octree index",
+                    printf("  Exit program.\n");
+                    exit(EXIT_FAILURE));
+    _MMG5_SAFE_MALLOC(vTemp,q->nbVer,int);
+    memcpy(vTemp, q->v,q->nbVer*sizeof(int));
+    _MMG5_DEL_MEM(mesh,q->v,2*q->nbVer*sizeof(int));
+    
+    q->v = vTemp;
+  }
+
 }
 
 /**
@@ -915,15 +935,14 @@ void _MMG3D_delOctreeRec(MMG5_pMesh mesh, _MMG3D_octree_s* q, double* ver, const
 
   if (q->v != NULL)
   {
-    assert(q->v);
     for ( i = 0; i<q->nbVer; ++i)
     {
       if (q->v[i] == no)
       {
-        _MMG3D_delOctreeVertex(q, i);
+        _MMG3D_delOctreeVertex(mesh, q, i);
         if ( q->nbVer == 0)
         {
-          _MMG5_DEL_MEM(mesh,q->v,nv*sizeof(int));
+          _MMG5_DEL_MEM(mesh,q->v,sizeof(int));
         }
         break;
       }

@@ -180,7 +180,7 @@ void _MMG3D_getListSquareRec(_MMG3D_octree_s*,double*,double*,
 int  _MMG3D_getListSquare(MMG5_pMesh,_MMG3D_octree*,double*,_MMG3D_octree_s***);
 void _MMG3D_addOctreeRec(MMG5_pMesh,_MMG3D_octree_s*,double*, const int, int);
 void _MMG3D_addOctree(MMG5_pMesh mesh, _MMG3D_octree* q, const int no);
-void _MMG3D_delOctreeVertex(_MMG3D_octree_s* q, int no);
+void _MMG3D_delOctreeVertex(MMG5_pMesh mesh, _MMG3D_octree_s* q, int no);
 void _MMG3D_moveOctree(MMG5_pMesh, _MMG3D_pOctree,int, double*, double*);
 void _MMG3D_mergeBranchesRec(_MMG3D_octree_s*, _MMG3D_octree_s*, int, int , int*);
 void _MMG3D_mergeBranches(MMG5_pMesh mesh,_MMG3D_octree_s* q, int dim, int nv);
