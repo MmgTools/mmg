@@ -148,32 +148,6 @@ void _MMG3D_freeOctree(MMG5_pMesh mesh,_MMG3D_pOctree q)
   _MMG5_DEL_MEM(mesh,q,sizeof(_MMG3D_octree));
 }
 
-/**
- * \param q pointer toward an octree cell.
- * \param ver coordinates of the point.
- * \param dim space dimension (should be 3).
- * \param coordinate coordinate in the octree, should be 0 at first call.
- *
- * Get the integer containing the coordinates.
- *
- */
-void _MMG3D_getOctreeCoordinateRec(_MMG3D_octree_s* q, double* ver, int dim, int* coordinate)
-{
-  int i;
-  int quadrant;
-  if (q->branches != NULL)
-  {
-    quadrant = 0;
-    for ( i = 0; i<dim; ++i)
-    {
-      quadrant += ((double) (ver[i]>0.5))*(1<<i);
-      ver[i] -= ((double) (ver[i]>0.5))*0.5;
-      ver[i] *= 2;
-    }
-    (*coordinate) += quadrant<<(dim*q->depth);
-    _MMG3D_getOctreeCoordinateRec(&(q->branches[quadrant]),  ver, dim, coordinate);
-  }
-}
 
 /**
  * \param q pointer toward the global octree.
@@ -186,17 +160,28 @@ void _MMG3D_getOctreeCoordinateRec(_MMG3D_octree_s* q, double* ver, int dim, int
  */
 int _MMG3D_getOctreeCoordinate(_MMG3D_pOctree q, double* ver, int dim)
 {
-  double *pt;
-  int coordinate;
-  coordinate = 0;
-
-  _MMG5_SAFE_MALLOC(pt,dim,double);
-  memcpy(pt, ver ,dim*sizeof(double));
-
-  _MMG3D_getOctreeCoordinateRec(q->q0,  pt, dim, &coordinate);
-
-  _MMG5_SAFE_FREE(pt);
-  return coordinate;
+  int s=1<<10;
+  double prec = 1./(1<<30);
+  int place = 0;
+  int ix = floor((ver[0]-prec)*s);
+  int iy = floor((ver[1]-prec)*s);
+  int iz = floor((ver[2]-prec)*s);
+  ix = (ix > 0) ? ix:0;
+  iy = (iy > 0) ? iy:0;
+  iz = (iz > 0) ? iz:0;
+  int i=0;
+  int j;
+  for(j=9; j>=0; j--)
+  {
+    s=s>>1;
+    i += ((ix & s) >> j)<<place;
+    place++;
+    i += ((iy & s) >> j)<<place;
+    place++;
+    i += ((iz & s) >> j)<<place;
+    place++;
+  }
+  return i;
 }
 
 
@@ -805,7 +790,7 @@ void _MMG3D_addOctree(MMG5_pMesh mesh, _MMG3D_pOctree q, const int no)
 
   dim = mesh->dim;
   _MMG5_SAFE_MALLOC(pt,dim,double);
-
+  assert(no<=mesh->np);
   memcpy(pt, mesh->point[no].c ,dim*sizeof(double));
   _MMG3D_addOctreeRec(mesh, q->q0, pt , no, q->nv);
   memcpy(pt, mesh->point[no].c ,dim*sizeof(double));
@@ -1312,6 +1297,7 @@ int _MMG3D_octreein_iso(MMG5_pMesh mesh,MMG5_pSol sol,_MMG3D_pOctree octree,int 
   for ( i=0; i<ncells; ++i ) {
     for (j=0; j<lococ[i]->nbVer; ++j)
     {
+      
       ip1  = lococ[i]->v[j];
       pp1  = &mesh->point[ip1];
 
