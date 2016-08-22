@@ -1391,8 +1391,6 @@ char _MMG5_coquilTravel(MMG5_pMesh mesh, int na, int nb, int* adj, int *piv,
  * (updated for the finish tet at the end).
  * \param iface traveling face of the tet (suspected to be boundary), updated.
  * \param i local index of the edge \f$[na,nb]\f$ in tet \a adj.
- * \return the tag of the face \a iface of the tetra \a adj or 0 if the tetra
- * is not boundary.
  *
  * Travel around the edge \f$[na,nb]\f$ from tetra \a adj and through the face
  * \a piv. The shell of the edge is open and the tetra \a adj has no neighbour
@@ -1429,5 +1427,4 @@ void _MMG5_openCoquilTravel(MMG5_pMesh mesh, int na, int nb, int* adj, int *piv,
       *adj = adja[ *iface ] /4;
       *piv = pt->v[ _MMG5_ifar[*i][0] ];
     }
-
 }

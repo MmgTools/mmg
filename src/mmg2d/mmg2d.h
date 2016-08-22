@@ -112,64 +112,6 @@ void _MMG2_excfun(int sigid) {
 }
 
 
-/* /\* data structures *\/ */
-/* typedef struct { */
-/*   double    c[2]; */
-/*   int       tmp,mark,tas; */
-/*   int       ref; */
-/*   int       tag,tagdel; */
-/*   char      flag; */
-/* } Point; */
-/* typedef Point * MMG5_pPoint; */
-
-/* typedef struct { */
-/*   double    qual; */
-/*   int       v[3],ref,flag,mark; */
-/*   int       ned[3]; //if 0 no bdry edge else edg number */
-/* } Tria; */
-/* typedef Tria * MMG5_pTria; */
-
-/* typedef struct { */
-/*   int       v[2],ref,flag,mark;  */
-/*   double    t0[2],t1[2]; //tangents */
-/*   char     tag;  */
-/* } Edge; */
-/* typedef Edge * pEdge; */
-
-/* typedef struct { */
-/*   double   delta,hgrad,ridge,ang; */
-/*   double   min[2],max[2],qdegrad[2]; */
-/*   int      mem,bucket,nsd,msh; */
-/*   char     imprim,option,ddebug,noswap,nomove,nr,noinsert,per; */
-/* } Info; */
-
-/* typedef struct { */
-/*   int      np,ver; */
-/*   double   *mv; */
-/*   short    *alpha;   */
-/* } Displ; */
-
-/* typedef struct { */
-/*   int        np,nt,ned,npfixe,nedfixe,ntfixe,npmax,nedmax,ntmax; */
-/*   int        npnil,nednil,ntnil,ver,dim,mark; */
-/*   int       *adja; */
-/*   MMG5_pPoint     point; */
-/*   Displ      disp; */
-/*   MMG5_pTria      tria; */
-/*   pEdge     edge; */
-/*   Info       info; */
-/*   char       flag; */
-/*   char      *namein,*nameout,*namedep; */
-/* } Mesh; */
-/* typedef Mesh * MMG5_pMesh; */
-
-/* typedef struct { */
-/*   double    *met,hmin,hmax; */
-/*   int        np,dim,ver,type,size,typtab[20]; */
-/*   char      *name; */
-/* } Sol; */
-/* typedef Sol * MMG5_pSol; */
-
 typedef struct squeue {
   int    *stack,cur;
 } Queue;
