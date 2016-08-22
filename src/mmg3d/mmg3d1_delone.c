@@ -1080,6 +1080,9 @@ int _MMG5_mmg3d1_delone(MMG5_pMesh mesh,MMG5_pSol met) {
 
   if ( !_MMG5_anatet(mesh,met,octree,1,0) ) {
     fprintf(stderr,"  ## Unable to split mesh. Exiting.\n");
+    if ( octree )
+      /*free octree*/
+      _MMG3D_freeOctree(mesh,octree);
     return(0);
   }
 
@@ -1094,6 +1097,9 @@ int _MMG5_mmg3d1_delone(MMG5_pMesh mesh,MMG5_pSol met) {
   /* define metric map */
   if ( !_MMG5_defsiz(mesh,met) ) {
     fprintf(stderr,"  ## Metric undefined. Exit program.\n");
+    if ( octree )
+      /*free octree*/
+      _MMG3D_freeOctree(mesh,octree);
     return(0);
   }
 
@@ -1101,12 +1107,18 @@ int _MMG5_mmg3d1_delone(MMG5_pMesh mesh,MMG5_pSol met) {
     if ( mesh->info.imprim )   fprintf(stdout,"\n  -- GRADATION : %8f\n",exp(mesh->info.hgrad));
     if ( !_MMG5_gradsiz(mesh,met) ) {
       fprintf(stderr,"  ## Gradation problem. Exit program.\n");
+      if ( octree )
+        /*free octree*/
+        _MMG3D_freeOctree(mesh,octree);
       return(0);
     }
   }
 
   if ( !_MMG5_anatet(mesh,met,octree,2,0) ) {
     fprintf(stderr,"  ## Unable to split mesh. Exiting.\n");
+    if ( octree )
+      /*free octree*/
+      _MMG3D_freeOctree(mesh,octree);
     return(0);
   }
 
@@ -1116,11 +1128,18 @@ int _MMG5_mmg3d1_delone(MMG5_pMesh mesh,MMG5_pSol met) {
 #endif
 
   /* renumerotation if available */
-  if ( !_MMG5_scotchCall(mesh,met) )
+  if ( !_MMG5_scotchCall(mesh,met) ) {
+    if ( octree )
+      /*free octree*/
+      _MMG3D_freeOctree(mesh,octree);
     return(0);
+  }
 
   if ( !_MMG5_adptet_delone(mesh,met,octree) ) {
     fprintf(stderr,"  ## Unable to adapt. Exit program.\n");
+    if ( octree )
+      /*free octree*/
+      _MMG3D_freeOctree(mesh,octree);
     return(0);
   }
 
@@ -1131,11 +1150,17 @@ int _MMG5_mmg3d1_delone(MMG5_pMesh mesh,MMG5_pSol met) {
   /* in test phase: check if no element with 2 bdry faces */
   if ( !_MMG5_chkfemtopo(mesh) ) {
     fprintf(stderr,"  ## Topology of mesh unsuited for fem computations. Exit program.\n");
+    if ( octree )
+      /*free octree*/
+      _MMG3D_freeOctree(mesh,octree);
     return(0);
   }
 
   if ( mesh->info.iso && !_MMG5_chkmani(mesh) ) {
     fprintf(stderr,"  ## Non orientable implicit surface. Exit program.\n");
+    if ( octree )
+      /*free octree*/
+      _MMG3D_freeOctree(mesh,octree);
     return(0);
   }
 
