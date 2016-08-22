@@ -82,7 +82,8 @@ static int _MMG5_setadj(MMG5_pMesh mesh){
   MMG5_pPoint  ppt;
   int    *adja,*adjb,adji1,adji2,*pile,iad,ipil,ip1,ip2,gen;
   int     k,kk,iel,jel,nf,np,nr,nt,nre,nreq,ncc,ned,nvf,edg;
-  char    i,ii,i1,i2,ii1,ii2,voy,tag;
+  int16_t tag;
+  char    i,ii,i1,i2,ii1,ii2,voy;
 
   nvf = nf = ncc = ned = 0;
   _MMG5_SAFE_MALLOC(pile,mesh->nt+1,int);

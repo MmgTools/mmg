@@ -40,7 +40,8 @@ static int setadj(MMG5_pMesh mesh){
   MMG5_pTria   pt,pt1;
   int          *adja,*adjb,adji1,adji2,*pile,iad,ipil,ip1,ip2,gen;
   int          k,kk,iel,jel,nvf,nf,nr,nt,nre,ncc,ned,ref;
-  char         i,ii,i1,i2,ii1,ii2,tag,voy;
+  int16_t      tag;
+  char         i,ii,i1,i2,ii1,ii2,voy;
 
   if ( abs(mesh->info.imprim) > 5  || mesh->info.ddebug )
     fprintf(stdout,"  ** SETTING TOPOLOGY\n");

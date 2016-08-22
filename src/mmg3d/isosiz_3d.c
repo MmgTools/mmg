@@ -33,6 +33,7 @@
  */
 
 #include "mmg3d.h"
+#include "inlined_functions.h"
 
 extern char   ddb;
 

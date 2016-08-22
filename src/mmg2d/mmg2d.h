@@ -215,7 +215,7 @@ static const unsigned int MMG2_inxt[5] = {1,2,0,1,2};
 
 /* prototypes */
 /*zaldy*/
-int _MMG2D_newPt(MMG5_pMesh mesh,double c[2],int tag);
+int _MMG2D_newPt(MMG5_pMesh mesh,double c[2],int16_t tag);
 void _MMG2D_delPt(MMG5_pMesh mesh,int ip) ;
 int _MMG5_newEdge(MMG5_pMesh mesh);
 void _MMG5_delEdge(MMG5_pMesh mesh,int iel);

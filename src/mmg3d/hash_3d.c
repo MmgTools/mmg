@@ -847,7 +847,7 @@ int _MMG5_hashPop(_MMG5_Hash *hash,int a,int b) {
 
 
 /** set tag to edge on geometry */
-int _MMG5_hTag(MMG5_HGeom *hash,int a,int b,int ref,char tag) {
+int _MMG5_hTag(MMG5_HGeom *hash,int a,int b,int ref,int16_t tag) {
   MMG5_hgeom  *ph;
   int     key,ia,ib;
 
@@ -875,7 +875,7 @@ int _MMG5_hTag(MMG5_HGeom *hash,int a,int b,int ref,char tag) {
 }
 
 /** remove edge from hash table */
-int _MMG5_hPop(MMG5_HGeom *hash,int a,int b,int *ref,char *tag) {
+int _MMG5_hPop(MMG5_HGeom *hash,int a,int b,int *ref,int16_t *tag) {
   MMG5_hgeom  *ph,*php;
   int     key,ia,ib,iph,iphp;
 
@@ -933,7 +933,7 @@ int _MMG5_hPop(MMG5_HGeom *hash,int a,int b,int *ref,char *tag) {
 }
 
 /** get ref and tag to edge on geometry */
-int _MMG5_hGet(MMG5_HGeom *hash,int a,int b,int *ref,char *tag) {
+int _MMG5_hGet(MMG5_HGeom *hash,int a,int b,int *ref,int16_t *tag) {
   MMG5_hgeom  *ph;
   int     key,ia,ib;
 
@@ -963,7 +963,7 @@ int _MMG5_hGet(MMG5_HGeom *hash,int a,int b,int *ref,char *tag) {
 }
 
 /** store edge on geometry */
-void _MMG5_hEdge(MMG5_pMesh mesh,int a,int b,int ref,char tag) {
+void _MMG5_hEdge(MMG5_pMesh mesh,int a,int b,int ref,int16_t tag) {
   MMG5_hgeom  *ph;
   int     key,ia,ib,j;
 
@@ -1035,7 +1035,8 @@ int _MMG5_hGeom(MMG5_pMesh mesh) {
   MMG5_pEdge   pa;
   _MMG5_Hash   hash;
   int         *adja,k,kk,edg,ier;
-  char         i,i1,i2,tag;
+  int16_t      tag;
+  char         i,i1,i2;
 
   /* if edges exist in mesh, hash special edges from existing field */
   if ( mesh->na ) {
@@ -1599,7 +1600,8 @@ int _MMG5_bdrySet(MMG5_pMesh mesh) {
   MMG5_pxPrism  pxp;
   _MMG5_Hash     hash;
   int      ref,*adja,adj,k,kt,ia,ib,ic,j,na;
-  char     i,tag;
+  int16_t  tag;
+  char     i;
 
   if ( !mesh->nt )  return(1);
 
@@ -1763,7 +1765,8 @@ int _MMG5_bdryUpdate(MMG5_pMesh mesh) {
   MMG5_pxTetra  pxt;
   _MMG5_Hash     hash;
   int      k,kt,ia,ib,ic,j;
-  char     i,tag;
+  int16_t  tag;
+  char     i;
 
   if ( !mesh->nt )  return(1);
   if ( !_MMG5_hashNew(mesh,&hash,0.51*mesh->nt,1.51*mesh->nt) )  return(0);

@@ -35,7 +35,7 @@
 
 
 /* get new point address */
-int _MMG2D_newPt(MMG5_pMesh mesh,double c[2],int tag) {
+int _MMG2D_newPt(MMG5_pMesh mesh,double c[2],int16_t tag) {
   MMG5_pPoint  ppt;
   int     curpt;
 

@@ -112,7 +112,8 @@ int _MMG5_boulenm(MMG5_pMesh mesh,int start,int ip,int iface,
   double   dd,nt[3],l0,l1;
   int      base,nump,nr,nnm,k,piv,na,nb,adj,nvstart,fstart,aux,ip0,ip1;
   int     *adja;
-  char     iopp,ipiv,indb,inda,i,ipa,ipb,isface,tag;
+  int16_t  tag;
+  char     iopp,ipiv,indb,inda,i,ipa,ipb,isface;
   char     indedg[4][4] = { {-1,0,1,2}, {0,-1,3,4}, {1,3,-1,5}, {2,4,5,-1} };
 
   base = ++mesh->base;
@@ -779,7 +780,7 @@ int _MMG5_bouletrid(MMG5_pMesh mesh,int start,int iface,int ip,int *il1,int *l1,
 
 /** Get tag of edge ia in tetra start by travelling its shell until meeting a boundary face */
 static inline int
-_MMG5_gettag(MMG5_pMesh mesh,int start,int ia,int *tag,int *edg) {
+_MMG5_gettag(MMG5_pMesh mesh,int start,int ia,int16_t *tag,int *edg) {
   MMG5_pTetra        pt;
   MMG5_pxTetra       pxt;
   int           na,nb,*adja,adj,piv;
@@ -840,7 +841,7 @@ _MMG5_gettag(MMG5_pMesh mesh,int start,int ia,int *tag,int *edg) {
 
 /** Set tag and edg of edge ia (if need be) in tetra start by travelling its shell */
 inline int
-_MMG5_settag(MMG5_pMesh mesh,int start,int ia,int tag,int edg) {
+_MMG5_settag(MMG5_pMesh mesh,int start,int ia,int16_t tag,int edg) {
   MMG5_pTetra        pt;
   MMG5_pxTetra       pxt;
   int           na,nb,*adja,adj,piv;
@@ -1341,13 +1342,13 @@ int _MMG5_coquilface(MMG5_pMesh mesh,int start,int ia,int *list,int *it1,
  * \a piv.
  *
  */
-char _MMG5_coquilTravel(MMG5_pMesh mesh, int na, int nb, int* adj, int *piv,
-                        char *iface, int *i )
+int16_t _MMG5_coquilTravel(MMG5_pMesh mesh, int na, int nb, int* adj, int *piv,
+                           char *iface, int *i )
 {
   MMG5_pTetra  pt;
   MMG5_pxTetra pxt;
   int          ipa,ipb,*adja;
-  char         isbdy;
+  int16_t      isbdy;
 
     pt = &mesh->tetra[*adj];
     pxt = 0;

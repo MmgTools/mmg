@@ -399,7 +399,8 @@ int srcface(MMG5_pMesh mesh,int n0,int n1,int n2) {
   MMG5_pTetra    pt;
   MMG5_pxTetra   pxt;
   int       k,ip0,ip1,ip2,minn,maxn,sn,mins,maxs,sum,ref;
-  char      i,tag;
+  int16_t   tag;
+  char      i;
 
   minn = MG_MIN(n0,MG_MIN(n1,n2));
   maxn = MG_MAX(n0,MG_MAX(n1,n2));
