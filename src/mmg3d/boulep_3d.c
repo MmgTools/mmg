@@ -845,6 +845,7 @@ _MMG5_settag(MMG5_pMesh mesh,int start,int ia,int16_t tag,int edg) {
   MMG5_pTetra        pt;
   MMG5_pxTetra       pxt;
   int           na,nb,*adja,adj,piv;
+  int16_t       taginit;
   unsigned char i,ipa,ipb;
 
   assert( start >= 1 );
@@ -862,7 +863,13 @@ _MMG5_settag(MMG5_pMesh mesh,int start,int ia,int16_t tag,int edg) {
     pxt = &mesh->xtetra[pt->xt];
     if ( (pxt->ftag[_MMG5_ifar[ia][0]] & MG_BDY) ||
          (pxt->ftag[_MMG5_ifar[ia][1]] & MG_BDY) ) {
+      taginit = pxt->tag[ia];
       pxt->tag[ia] |= tag;
+      /* Remove the potential nosurf tag if initially the edge is
+       * really required */
+      if ( (taginit & MG_REQ) && !(taginit & MG_NOSURF) ) {
+        pxt->tag[ia] &= ~MG_NOSURF;
+      }
       pxt->edg[ia]  = MG_MAX(pxt->edg[ia],edg);
     }
   }
@@ -880,7 +887,13 @@ _MMG5_settag(MMG5_pMesh mesh,int start,int ia,int16_t tag,int edg) {
       pxt = &mesh->xtetra[pt->xt];
       if ( (pxt->ftag[_MMG5_ifar[i][0]] & MG_BDY) ||
            (pxt->ftag[_MMG5_ifar[i][1]] & MG_BDY) ) {
+        taginit = pxt->tag[i];
         pxt->tag[i] |= tag;
+        /* Remove the potential nosurf tag if initially the edge is
+         * really required */
+        if ( (taginit & MG_REQ) && !(taginit & MG_NOSURF) ) {
+          pxt->tag[ia] &= ~MG_NOSURF;
+        }
         pxt->edg[i]  = MG_MAX(pxt->edg[i],edg);
       }
     }
@@ -919,8 +932,119 @@ _MMG5_settag(MMG5_pMesh mesh,int start,int ia,int16_t tag,int edg) {
       pxt = &mesh->xtetra[pt->xt];
       if ( (pxt->ftag[_MMG5_ifar[i][0]] & MG_BDY) ||
            (pxt->ftag[_MMG5_ifar[i][1]] & MG_BDY) ) {
+        taginit = pxt->tag[i];
         pxt->tag[i] |= tag;
+        /* Remove the potential nosurf tag if initially the edge is
+         * really required */
+        if ( (taginit & MG_REQ) && !(taginit & MG_NOSURF) ) {
+          pxt->tag[ia] &= ~MG_NOSURF;
+        }
         pxt->edg[i]  = MG_MAX(pxt->edg[i],edg);
+      }
+    }
+    /* set new triangle for travel */
+    adja = &mesh->adja[4*(adj-1)+1];
+    if ( pt->v[ _MMG5_ifar[i][0] ] == piv ) {
+      adj = adja[ _MMG5_ifar[i][0] ] / 4;
+      piv = pt->v[ _MMG5_ifar[i][1] ];
+    }
+    else {
+      adj = adja[ _MMG5_ifar[i][1] ] /4;
+      piv = pt->v[ _MMG5_ifar[i][0] ];
+    }
+  }
+  return(1);
+}
+
+/**
+ * \param mesh pointer toward the mesh structure
+ * \param start index of the starting tetra
+ * \param ia index of the edge in tetra \a start that we want to modify
+ * \param tag tag to remove
+ * \return 1 if success.
+ *
+ * Remove the tag \a tag of edge \a ia in tetra \a start by travelling its
+ * shell.
+ *
+ */
+inline int
+_MMG5_deltag(MMG5_pMesh mesh,int start,int ia,int16_t tag) {
+  MMG5_pTetra        pt;
+  MMG5_pxTetra       pxt;
+  int           na,nb,*adja,adj,piv;
+  unsigned char i,ipa,ipb;
+
+  assert( start >= 1 );
+  pt = &mesh->tetra[start];
+  assert ( MG_EOK(pt) );
+
+  na   = pt->v[ _MMG5_iare[ia][0] ];
+  nb   = pt->v[ _MMG5_iare[ia][1] ];
+
+  adja = &mesh->adja[4*(start-1)+1];
+  adj = adja[_MMG5_ifar[ia][0]] / 4;
+  piv = pt->v[_MMG5_ifar[ia][1]];
+
+  if ( pt->xt ) {
+    pxt = &mesh->xtetra[pt->xt];
+    if ( (pxt->ftag[_MMG5_ifar[ia][0]] & MG_BDY) ||
+         (pxt->ftag[_MMG5_ifar[ia][1]] & MG_BDY) ) {
+      pxt->tag[ia] &= ~tag;
+    }
+  }
+  while ( adj && (adj != start) ) {
+    pt = &mesh->tetra[adj];
+    /* identification of edge number in tetra adj */
+    for (i=0; i<6; i++) {
+      ipa = _MMG5_iare[i][0];
+      ipb = _MMG5_iare[i][1];
+      if ( (pt->v[ipa] == na && pt->v[ipb] == nb) ||
+           (pt->v[ipa] == nb && pt->v[ipb] == na))  break;
+    }
+    assert(i<6);
+    if ( pt->xt ) {
+      pxt = &mesh->xtetra[pt->xt];
+      if ( (pxt->ftag[_MMG5_ifar[i][0]] & MG_BDY) ||
+           (pxt->ftag[_MMG5_ifar[i][1]] & MG_BDY) ) {
+        pxt->tag[i] &= ~tag;
+      }
+    }
+    /* set new triangle for travel */
+    adja = &mesh->adja[4*(adj-1)+1];
+    if ( pt->v[ _MMG5_ifar[i][0] ] == piv ) {
+      adj = adja[ _MMG5_ifar[i][0] ] / 4;
+      piv = pt->v[ _MMG5_ifar[i][1] ];
+    }
+    else {
+      adj = adja[ _MMG5_ifar[i][1] ] /4;
+      piv = pt->v[ _MMG5_ifar[i][0] ];
+    }
+  }
+
+  /* If all shell has been travelled, stop, else, travel it the other sense */
+  if ( adj == start )  return(1);
+  assert(!adj);
+
+  pt = &mesh->tetra[start];
+  adja = &mesh->adja[4*(start-1)+1];
+  adj = adja[_MMG5_ifar[ia][1]] / 4;
+  piv = pt->v[_MMG5_ifar[ia][0]];
+
+  while ( adj && (adj != start) ) {
+    pt = &mesh->tetra[adj];
+    /* identification of edge number in tetra adj */
+    for (i=0; i<6; i++) {
+      ipa = _MMG5_iare[i][0];
+      ipb = _MMG5_iare[i][1];
+      if ( (pt->v[ipa] == na && pt->v[ipb] == nb) ||
+           (pt->v[ipa] == nb && pt->v[ipb] == na))  break;
+    }
+    assert(i<6);
+    if ( pt->xt ) {
+      pxt = &mesh->xtetra[pt->xt];
+      if ( (pxt->ftag[_MMG5_ifar[i][0]] & MG_BDY) ||
+           (pxt->ftag[_MMG5_ifar[i][1]] & MG_BDY) ) {
+        pxt->tag[i] &= ~tag;
       }
     }
     /* set new triangle for travel */

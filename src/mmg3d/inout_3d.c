@@ -924,7 +924,7 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,const char *filename) {
       if ( nereq )
         fprintf(stdout,"                  TETRAHEDRAS    %8d \n",nereq);
     }
-    if(ncor) fprintf(stdout,"     NUMBER OF CORNERS           %8d \n",ncor);
+    if(ncor) fprintf(stdout,"     NUMBER OF CORNERS        %8d \n",ncor);
   }
   fclose(inm);
   return(1);

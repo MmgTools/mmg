@@ -46,23 +46,23 @@ static inline void _MMG5_reqBoundaries(MMG5_pMesh mesh) {
   MMG5_pTria     ptt;
   int            k;
 
-  /* The MG_REQ+MG_CRN tag mark the boundary edges that we dont want to touch
+  /* The MG_REQ+MG_NOSURF tag mark the boundary edges that we dont want to touch
    * but that are not really required (-nosurf option) */
   for (k=1; k<=mesh->nt; k++) {
     ptt = &mesh->tria[k];
     if ( !(ptt->tag[0] & MG_REQ) ) {
       ptt->tag[0] |= MG_REQ;
-      ptt->tag[0] |= MG_CRN;
+      ptt->tag[0] |= MG_NOSURF;
     }
 
     if ( !(ptt->tag[1] & MG_REQ) ) {
       ptt->tag[1] |= MG_REQ;
-      ptt->tag[1] |= MG_CRN;
+      ptt->tag[1] |= MG_NOSURF;
     }
 
     if ( !(ptt->tag[2] & MG_REQ) ) {
       ptt->tag[2] |= MG_REQ;
-      ptt->tag[2] |= MG_CRN;
+      ptt->tag[2] |= MG_NOSURF;
     }
   }
 
@@ -112,15 +112,15 @@ static int _MMG5_setadj(MMG5_pMesh mesh){
               mesh->point[ip1].tag |= pt->tag[i];
               // Warning: in -nosurf option : we loose the corner points and the
               // (corner + required) points provided by the user.
-              if ( mesh->info.nosurf && ((tag & MG_REQ) && (!(tag & MG_GEO))) ) {
-                mesh->point[ip1].tag &= ~MG_GEO;
+              if ( (tag & MG_REQ) && !(tag & MG_NOSURF) ) {
+                mesh->point[ip1].tag &= ~MG_NOSURF;
               }
               tag = mesh->point[ip2].tag;
               mesh->point[ip2].tag |= pt->tag[i];
               // Warning: in -nosurf option : we loose the corner points and the
               // (corner + required) points provided by the user.
-              if ( mesh->info.nosurf && ((tag & MG_REQ) && (!(tag & MG_GEO))) ) {
-                mesh->point[ip2].tag &= ~MG_GEO;
+              if ( (tag & MG_REQ) && !(tag & MG_NOSURF) ) {
+                mesh->point[ip2].tag &= ~MG_NOSURF;
               }
         }
 
@@ -336,20 +336,24 @@ static int _MMG5_singul(MMG5_pMesh mesh) {
         if ( !ns )  continue;
         if ( (xp+nr) > 2 ) {
           ppt->tag |= MG_CRN + MG_REQ;
+          ppt->tag &= ~MG_NOSURF;
           nre++;
           nc++;
         }
         else if ( (xp == 1) && (nr == 1) ) {
           ppt->tag |= MG_REQ;
+          ppt->tag &= ~MG_NOSURF;
           nre++;
         }
         else if ( xp == 1 && !nr ){
           ppt->tag |= MG_CRN + MG_REQ;
+          ppt->tag &= ~MG_NOSURF;
           nre++;
           nc++;
         }
         else if ( nr == 1 && !xp ){
           ppt->tag |= MG_CRN + MG_REQ;
+          ppt->tag &= ~MG_NOSURF;
           nre++;
           nc++;
         }
@@ -572,6 +576,7 @@ static void _MMG5_nmgeom(MMG5_pMesh mesh){
 
         if ( !ier ) {
           p0->tag |= MG_REQ;
+          p0->tag &= ~MG_NOSURF;
           if ( p0->ref != 0 )
             p0->ref = -abs(p0->ref);
           else
@@ -602,6 +607,7 @@ static void _MMG5_nmgeom(MMG5_pMesh mesh){
     p0 = &mesh->point[k];
     if ( !(p0->tag & MG_NOM) || p0->xp ) continue;
     p0->tag |= MG_REQ;
+    p0->tag &= ~MG_NOSURF;
   }
 }
 

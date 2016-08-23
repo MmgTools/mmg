@@ -672,10 +672,13 @@ int _MMG5_setEdgeNmTag(MMG5_pMesh mesh, _MMG5_Hash *hash) {
           if ( count != ph->s ) {
             if ( !(pt->tag[i] & MG_REQ) ) {
               pt->tag[i] |= MG_REQ;
+              pt->tag[i] &= ~MG_NOSURF;
               ++nr;
             }
             mesh->point[pt->v[_MMG5_inxt2[i]]].tag |= MG_REQ;
             mesh->point[pt->v[_MMG5_iprv2[i]]].tag |= MG_REQ;
+            mesh->point[pt->v[_MMG5_inxt2[i]]].tag &= ~MG_NOSURF;
+            mesh->point[pt->v[_MMG5_iprv2[i]]].tag &= ~MG_NOSURF;
           }
 
           /* Work done for this edge: reset ph->s/ */
@@ -727,20 +730,24 @@ void _MMG5_setVertexNmTag(MMG5_pMesh mesh) {
       if ( !_MMG5_boulernm(mesh, k, i, &ng, &nrp) ) continue;
       if ( (ng+nrp) > 2 ) {
         ppt->tag |= MG_CRN + MG_REQ;
+        ppt->tag &= ~MG_NOSURF;
         nre++;
         nc++;
       }
       else if ( (ng == 1) && (nrp == 1) ) {
         ppt->tag |= MG_REQ;
+        ppt->tag &= ~MG_NOSURF;
         nre++;
       }
       else if ( ng == 1 && !nrp ){
         ppt->tag |= MG_CRN + MG_REQ;
+        ppt->tag &= ~MG_NOSURF;
         nre++;
         nc++;
       }
       else if ( ng == 1 && !nrp ){
         ppt->tag |= MG_CRN + MG_REQ;
+        ppt->tag &= ~MG_NOSURF;
         nre++;
         nc++;
       }
@@ -1273,14 +1280,17 @@ int _MMG5_bdryTria(MMG5_pMesh mesh, int ntmesh) {
           if ( !(ptt->tag[0] & MG_REQ) ) {
             ptt->tag[0] |= MG_REQ;
             ptt->tag[0] |= MG_CRN;
+            ptt->tag[0] &= ~MG_NOSURF;
           }
           if ( !(ptt->tag[1] & MG_REQ) ) {
             ptt->tag[1] |= MG_REQ;
             ptt->tag[1] |= MG_CRN;
+            ptt->tag[1] &= ~MG_NOSURF;
           }
           if ( !(ptt->tag[2] & MG_REQ) ) {
             ptt->tag[2] |= MG_REQ;
             ptt->tag[2] |= MG_CRN;
+            ptt->tag[2] &= ~MG_NOSURF;
           }
 
           continue;
@@ -1792,6 +1802,16 @@ int _MMG5_bdryUpdate(MMG5_pMesh mesh) {
       _MMG5_settag(mesh,k,3,MG_REQ,0);
       _MMG5_settag(mesh,k,4,MG_REQ,0);
       _MMG5_settag(mesh,k,5,MG_REQ,0);
+      mesh->point[mesh->tetra[k].v[0]].tag &= ~MG_NOSURF;
+      mesh->point[mesh->tetra[k].v[1]].tag &= ~MG_NOSURF;
+      mesh->point[mesh->tetra[k].v[2]].tag &= ~MG_NOSURF;
+      mesh->point[mesh->tetra[k].v[3]].tag &= ~MG_NOSURF;
+      _MMG5_deltag(mesh,k,0,MG_NOSURF);
+      _MMG5_deltag(mesh,k,1,MG_NOSURF);
+      _MMG5_deltag(mesh,k,2,MG_NOSURF);
+      _MMG5_deltag(mesh,k,3,MG_NOSURF);
+      _MMG5_deltag(mesh,k,4,MG_NOSURF);
+      _MMG5_deltag(mesh,k,5,MG_NOSURF);
     }
 
     if ( !pt->xt )  continue;
@@ -1812,6 +1832,10 @@ int _MMG5_bdryUpdate(MMG5_pMesh mesh) {
           ptt->tag[0]   = MG_REQ;
           ptt->tag[1]   = MG_REQ;
           ptt->tag[2]   = MG_REQ;
+          pxt->ftag[i] &= ~MG_NOSURF;
+          ptt->tag[0]  &= ~MG_NOSURF;
+          ptt->tag[1]  &= ~MG_NOSURF;
+          ptt->tag[2]  &= ~MG_NOSURF;
         }
         for ( j=0; j<3; j++ ) {
           tag = ptt->tag[j];

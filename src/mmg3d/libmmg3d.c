@@ -188,16 +188,12 @@ int _MMG3D_packMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
     ppt = &mesh->point[k];
     if ( !MG_VOK(ppt) )  continue;
     ppt->tmp = ++np;
-    if ( ppt->tag & MG_CRN ) {
-      if ( mesh->info.nosurf && (ppt->tag & MG_REQ) ) {
-        // Warning: in -nosurf option : we loose the corner and the required
-        // points
-        ppt->tag &= ~MG_CRN;
+
+    if ( mesh->info.nosurf && (ppt->tag & MG_NOSURF) )
         ppt->tag &= ~MG_REQ;
-        continue;
-      }
-      nc++;
-    }
+
+    if ( ppt->tag & MG_CRN )  nc++;
+
     ppt->ref = abs(ppt->ref);
   }
 
@@ -312,6 +308,28 @@ int _MMG3D_packMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
     fprintf(stderr,"  ## Prism hashing problem. Exit program.\n");
     return(0);
   }
+
+  /* Remove the MG_REQ tags added by the nosurf option */
+  if ( mesh->info.nosurf ) {
+    for (k=1; k<=mesh->ne; k++) {
+      pt   = &mesh->tetra[k];
+      if ( MG_EOK(pt) &&  pt->xt ) {
+
+        if ( pt->xt == 97 ) {
+          printf("%d %d %d\n",mesh->xtetra[pt->xt].tag[2],
+                 mesh->xtetra[pt->xt].tag[1],mesh->xtetra[pt->xt].tag[5]);
+        }
+
+        for (i=0; i<6; i++) {
+          if ( mesh->xtetra[pt->xt].tag[i] & MG_NOSURF ) {
+            mesh->xtetra[pt->xt].tag[i] &= ~MG_REQ;
+            mesh->xtetra[pt->xt].tag[i] &= ~MG_NOSURF;
+          }
+        }
+      }
+    }
+  }
+
   /* rebuild triangles*/
   mesh->nt = 0;
   if ( !_MMG5_chkBdryTria(mesh) ) {
@@ -338,12 +356,6 @@ int _MMG3D_packMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
       pt   = &mesh->tetra[k];
       if ( MG_EOK(pt) &&  pt->xt ) {
         for (i=0; i<6; i++) {
-          if ( mesh->info.nosurf ) {
-            if ( mesh->xtetra[pt->xt].tag[i] & MG_CRN ) {
-              mesh->xtetra[pt->xt].tag[i] &= ~MG_CRN;
-              mesh->xtetra[pt->xt].tag[i] &= ~MG_REQ;
-            }
-          }
           if ( mesh->xtetra[pt->xt].edg[i] ||
                ( mesh->xtetra[pt->xt].tag[i] & MG_REQ ||
                  MG_EDG(mesh->xtetra[pt->xt].tag[i])) )
