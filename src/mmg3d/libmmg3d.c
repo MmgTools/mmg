@@ -315,11 +315,6 @@ int _MMG3D_packMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
       pt   = &mesh->tetra[k];
       if ( MG_EOK(pt) &&  pt->xt ) {
 
-        if ( pt->xt == 97 ) {
-          printf("%d %d %d\n",mesh->xtetra[pt->xt].tag[2],
-                 mesh->xtetra[pt->xt].tag[1],mesh->xtetra[pt->xt].tag[5]);
-        }
-
         for (i=0; i<6; i++) {
           if ( mesh->xtetra[pt->xt].tag[i] & MG_NOSURF ) {
             mesh->xtetra[pt->xt].tag[i] &= ~MG_REQ;
