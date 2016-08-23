@@ -873,6 +873,26 @@ int _MMG3D_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
         if ( ilistv < 0 ) {
           fprintf(stdout, "  ## Warning: unable to take into account local"
                   " parameters at vertices %d and %d.\n",ip0,ip1 );
+          if ( mesh->info.parTyp & MG_Tria ) {
+            for ( l=0; l<mesh->info.npar; ++l) {
+              par = &mesh->info.par[l];
+              if ( par->elt != MMG5_Triangle ) continue;
+
+              if ( pxt->ref[i]!=par->ref ) continue;
+
+              if ( isloc ) {
+                hausd   = MG_MIN(hausd,par->hausd);
+                hmin    = MG_MAX(hmin,par->hmin);
+                hmax    = MG_MIN(hmax,par->hmax);
+              }
+              else {
+                hausd   = par->hausd;
+                hmin    = par->hmin;
+                hmax    = par->hmax;
+                isloc   = 1;
+              }
+            }
+          }
         }
         else {
 
