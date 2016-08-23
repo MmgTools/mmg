@@ -1550,9 +1550,9 @@ int MMG3D_Set_dparameter(MMG5_pMesh mesh, MMG5_pSol sol, int dparam, double val)
     else
       mesh->info.hausd    = val;
     break;
-  case MMG3D_DPARAM_ls :
-    mesh->info.ls       = val;
-    break;
+  /* case MMG3D_DPARAM_ls : */
+  /*   mesh->info.ls       = val; */
+  /*   break; */
   default :
     fprintf(stdout,"  ## Error: unknown type of parameter\n");
     return(0);
