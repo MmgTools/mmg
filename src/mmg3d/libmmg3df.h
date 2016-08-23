@@ -121,10 +121,8 @@
 #define   MMG3D_DPARAM_hausd              17
 ! /*!< [val] Control gradation */
 #define   MMG3D_DPARAM_hgrad              18
-! /*!< [val] Value of level-set (not use for now) */
-#define   MMG3D_DPARAM_ls                 19
 ! /*!< [n] Number of parameters */
-#define   MMG3D_PARAM_size                20
+#define   MMG3D_PARAM_size                19
 
 ! /*----------------------------- functions header -----------------------------*/
 ! /* Initialization functions */
