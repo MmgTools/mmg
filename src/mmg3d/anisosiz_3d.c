@@ -596,7 +596,8 @@ static int _MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,int kel, int iface, int
   }
 
   /* Computation of the rotation matrix T_p0 S -> [z = 0] */
-  assert( p0->xp && !MG_SIN(p0->tag) && MG_EDG(p0->tag) && !(MG_NOM & p0->tag) );
+  assert( p0->xp && !(p0->tag & MG_CRN) && MG_EDG(p0->tag) && !(MG_NOM & p0->tag) );
+
   px0 = &mesh->xpoint[p0->xp];
 
   n  = &px0->n1[0];
@@ -862,7 +863,14 @@ static int _MMG5_defmetreg(MMG5_pMesh mesh,MMG5_pSol met,int kel,int iface, int 
   }
 
   /* Computation of the rotation matrix T_p0 S -> [z = 0] */
-  assert( p0->xp && !MG_SIN(p0->tag) && !MG_EDG(p0->tag) && !(MG_NOM & p0->tag) );
+  if ( !(p0->tag & MG_NOSURF) ) {
+      assert( p0->xp && !MG_SIN(p0->tag) && !MG_EDG(p0->tag)
+              && !(MG_NOM & p0->tag) );
+  }
+  else {
+    assert( !(p0->tag & MG_CRN) && !MG_EDG(p0->tag) && !(MG_NOM & p0->tag) );
+  }
+
   px0 = &mesh->xpoint[p0->xp];
 
   n  = &px0->n1[0];
@@ -1325,17 +1333,32 @@ int _MMG3D_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
         if ( ppt->flag || !MG_VOK(ppt) )  continue;
         if ( ismet )  memcpy(mm,&met->m[6*(pt->v[iploc])],6*sizeof(double));
 
-        if ( MG_SIN(ppt->tag) || (ppt->tag & MG_NOM) ) {
-          if ( !_MMG5_defmetsin(mesh,met,k,l,iploc) )  continue;
-        }
-        else if ( ppt->tag & MG_GEO ) {
-          if ( !_MMG5_defmetrid(mesh,met,k,l,iploc))  continue;
-        }
-        else if ( ppt->tag & MG_REF ) {
-          if ( !_MMG5_defmetref(mesh,met,k,l,iploc) )  continue;
+        if ( ppt->tag & MG_NOSURF ) {
+          if ( ( (ppt->tag & MG_CRN) || (ppt->tag & MG_NOM) ) ) {
+            if ( !_MMG5_defmetsin(mesh,met,k,l,iploc) )  continue;
+          }
+          else if ( ppt->tag & MG_GEO ) {
+            continue;
+          }
+          else if ( ppt->tag & MG_REF ) {
+            if ( !_MMG5_defmetref(mesh,met,k,l,iploc) )  continue;
+          }
+          else {
+            if ( !_MMG5_defmetreg(mesh,met,k,l,iploc) )  continue;
+          }
         }
         else {
-          if ( !_MMG5_defmetreg(mesh,met,k,l,iploc) )  continue;
+          if ( (MG_SIN(ppt->tag) || (ppt->tag & MG_NOM) ) ) {
+            if ( !_MMG5_defmetsin(mesh,met,k,l,iploc) )  continue;
+          }
+          else if ( ppt->tag & MG_GEO ) {
+            if ( !_MMG5_defmetrid(mesh,met,k,l,iploc))  continue;
+          }
+          else if ( ppt->tag & MG_REF ) {
+            if ( !_MMG5_defmetref(mesh,met,k,l,iploc) )  continue;
+          } else {
+            if ( !_MMG5_defmetreg(mesh,met,k,l,iploc) )  continue;
+          }
         }
         if ( ismet ) {
           if ( !_MMG3D_intextmet(mesh,met,pt->v[iploc],mm) ) {

@@ -224,11 +224,25 @@ void _MMG5_defUninitSize(MMG5_pMesh mesh,MMG5_pSol met,char ismet)
 
     m = &met->m[6*k];
     if(ismet) {
+      if ( !(ppt->tag & MG_NOSURF) ) {
+        if ( !MG_SIN(ppt->tag) && (ppt->tag & MG_GEO) ) {
+          m[0] = m[1] = m[2] = m[3] = m[4] = isqhmax;
+        }
+      }
+      else {
+        if ( !(ppt->tag & MG_CRN) && (ppt->tag & MG_GEO) ) {
+          m[0] = m[1] = m[2] = m[3] = m[4] = isqhmax;
+        }
+      }
       ppt->flag = 1;
       continue;
     }
+
     memset(m,0,6*sizeof(double));
-    if ( MG_SIN(ppt->tag) || (MG_NOM & ppt->tag) ) {
+    if ( !(ppt->tag & MG_NOSURF) &&  (MG_SIN(ppt->tag) || (MG_NOM & ppt->tag)) ) {
+      m[0] = m[3] = m[5] = isqhmax;
+    }
+    else if ( (ppt->tag & MG_NOSURF) &&  ((ppt->tag & MG_CRN) || (MG_NOM & ppt->tag)) ) {
       m[0] = m[3] = m[5] = isqhmax;
     }
     else if ( ppt->tag & MG_GEO ) {
