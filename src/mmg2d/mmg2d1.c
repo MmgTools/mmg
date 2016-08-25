@@ -457,7 +457,9 @@ int _MMG2_colelt(MMG5_pMesh mesh,MMG5_pSol met,int typchk) {
 
       /* Impossible to collapse a surface point onto a non surface point -- impossible to
        collapse a surface point along a non geometric edge */
-      else if ( p1->tag > p2->tag || p1->tag > pt->tag[i] ) continue;
+      else if ( p1->tag & MG_GEO ) {
+        if ( ! (p2->tag & MG_GEO) || !(pt->tag[i] & MG_GEO) ) continue;
+      }
 
       open = (mesh->adja[3*(k-1)+1+i] == 0) ? 1 : 0;
 
@@ -695,7 +697,9 @@ int _MMG2_adpcol(MMG5_pMesh mesh,MMG5_pSol met) {
       p2 = &mesh->point[pt->v[i2]];
 
       if ( MG_SIN(p1->tag) ) continue;
-      else if (p1->tag > p2->tag || p1->tag > pt->tag[i] ) continue;
+      else if ( p1->tag & MG_GEO ) {
+        if ( ! (p2->tag & MG_GEO) || !(pt->tag[i] & MG_GEO) ) continue;
+      }
 
       len = _MMG2_lencurv_iso(mesh,met,pt->v[i1],pt->v[i2]);
 
@@ -806,7 +810,6 @@ int MMG2_mmg2d1n(MMG5_pMesh mesh,MMG5_pSol met) {
       return(0);
     }
   }
-  
   if ( !_MMG2_anatri(mesh,met,2) ) {
     fprintf(stdout,"  ## Unable to proceed adaptation. Exit program.\n");
     return(0);

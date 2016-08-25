@@ -365,7 +365,9 @@ static int _MMG2_coleltlag(MMG5_pMesh mesh,MMG5_pSol met,int itdeg) {
       p2 = &mesh->point[pt->v[i2]];
 
       if ( MG_SIN(p1->tag) ) continue;
-      else if (p1->tag > p2->tag || p1->tag > pt->tag[i] ) continue;
+      else if ( p1->tag & MG_GEO ) {
+        if ( ! (p2->tag & MG_GEO) || !(pt->tag[i] & MG_GEO) ) continue;
+      }
 
       /* Check length */
       len = (p2->c[0]-p1->c[0])*(p2->c[0]-p1->c[0]) + (p2->c[1]-p1->c[1])*(p2->c[1]-p1->c[1]);

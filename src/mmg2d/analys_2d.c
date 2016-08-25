@@ -69,6 +69,16 @@ int _MMG2_setadj(MMG5_pMesh mesh) {
         ip1 = pt->v[i1];
         ip2 = pt->v[i2];
 
+        if ( adja[i] ) {
+          /* Transfert edge tag to adjacent */
+          kk = adja[i] / 3;
+          ii = adja[i] % 3;
+          pt1 = &mesh->tria[kk];
+
+          pt1->tag[ii] |= pt->tag[i];
+          pt->tag[i] |= pt1->tag[ii];
+        }
+
         /* Transfer tags if i is already an edge (e.g. supplied by the user) */
         if ( MG_EDG(pt->tag[i]) ) {
           mesh->point[ip1].tag |= pt->tag[i];
@@ -83,7 +93,6 @@ int _MMG2_setadj(MMG5_pMesh mesh) {
           nr++;
           continue;
         }
-
         kk = adja[i] / 3;
         ii = adja[i] % 3;
         pt1 = &mesh->tria[kk];

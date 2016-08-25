@@ -129,14 +129,14 @@ int _MMG2_chkcol(MMG5_pMesh mesh, MMG5_pSol met,int k,char i,int *list,char typc
     
       /* Check that the newly created triangles will not have to be split again */
       if ( l == 1 ) {
-        pt0->tag[j2] = MG_MAX(pt0->tag[j2],pt->tag[i1]);
+        pt0->tag[j2] |= pt->tag[i1];
       }
       else if ( l == ilist-2 && !open ) {
         ll = list[ilist-1+open] / 3;
 
         if ( ll > mesh->nt )  return(0);
         lj = list[ilist-1+open] % 3;
-        pt0->tag[jj] = MG_MAX(pt0->tag[jj],mesh->tria[ll].tag[lj]);
+        pt0->tag[jj] |= mesh->tria[ll].tag[lj];
       }
       
       if ( typchk == 1 )
@@ -215,7 +215,6 @@ int _MMG2_chkcol(MMG5_pMesh mesh, MMG5_pSol met,int k,char i,int *list,char typc
     /* What is the meaning of this test ? see mmgs */
     p1 = &mesh->point[ip1];
     p2 = &mesh->point[pt1->v[jj]];
-    //if ( p2->tag > p1->tag || p2->ref != p1->ref )  return(0);
     
     /* Check geometric approximation */
     pt0 = &mesh->tria[0];
@@ -260,7 +259,7 @@ int _MMG2_colver(MMG5_pMesh mesh,int ilist,int *list) {
   jj  = list[1] % 3;
   j   = _MMG5_iprv2[jj];
   pt1 = &mesh->tria[jel];
-  pt1->tag[j] = MG_MAX(pt1->tag[j],pt->tag[i1]);
+  pt1->tag[j] |= pt->tag[i1];
   pt1->edg[j] = MG_MAX(pt1->edg[j],pt->edg[i1]);
   if ( adja[i1] ) {
     kel = adja[i1] / 3;
@@ -268,7 +267,7 @@ int _MMG2_colver(MMG5_pMesh mesh,int ilist,int *list) {
     mesh->adja[3*(kel-1)+1+k] = 3*jel+j;
     mesh->adja[3*(jel-1)+1+j] = 3*kel+k;
     pt2 = &mesh->tria[kel];
-    pt2->tag[k] = MG_MAX(pt1->tag[j],pt2->tag[k]);
+    pt2->tag[k] |= pt1->tag[j];
     pt2->edg[k] = MG_MAX(pt1->edg[j],pt2->edg[k]);
   }
   else
@@ -284,7 +283,7 @@ int _MMG2_colver(MMG5_pMesh mesh,int ilist,int *list) {
     jj  = list[ilist-2] % 3;
     j   = _MMG5_inxt2[jj];
     pt1 = &mesh->tria[jel];
-    pt1->tag[j] = MG_MAX(pt->tag[i1],pt1->tag[j]);
+    pt1->tag[j] |= pt->tag[i1];
     pt1->edg[j] = MG_MAX(pt->edg[i1],pt1->edg[j]);
     adja = &mesh->adja[3*(iel-1)+1];
     
@@ -294,7 +293,7 @@ int _MMG2_colver(MMG5_pMesh mesh,int ilist,int *list) {
       mesh->adja[3*(kel-1)+1+k] = 3*jel + j;
       mesh->adja[3*(jel-1)+1+j] = 3*kel + k;
       pt2 = &mesh->tria[kel];
-      pt2->tag[k] = MG_MAX(pt1->tag[j],pt2->tag[k]);
+      pt2->tag[k] |= pt1->tag[j];
       pt2->edg[k] = MG_MAX(pt1->edg[j],pt2->edg[k]);
     }
     else
@@ -322,7 +321,6 @@ int _MMG2_colver3(MMG5_pMesh mesh,int *list) {
   i1 = _MMG5_inxt2[i];
   pt = &mesh->tria[iel];
   ip = pt->v[i];
-  
   jel = list[1] / 3;
   j   = list[1] % 3;
   j1  = _MMG5_inxt2[j];
