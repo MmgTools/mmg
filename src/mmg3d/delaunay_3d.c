@@ -150,7 +150,7 @@ int _MMG5_delone(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist) {
 
   //obsolete avec la realloc
   // if ( mesh->ne + 2*ilist > mesh->nemax )  {printf("on passe ici boum\n");return(0);}
-  base = mesh->mark;
+  base = mesh->base;
   /* external faces */
   size = 0;
   for (k=0; k<ilist; k++) {
@@ -347,7 +347,7 @@ static int _MMG5_correction_ani(MMG5_pMesh mesh,MMG5_pSol met,int ip,int* list,i
 
   ppt  = &mesh->point[ip];
   if ( ppt->tag & MG_NUL )  return(ilist);
-  base = mesh->mark;
+  base = mesh->base;
   lon  = ilist;
   eps  = _MMG5_EPSCON;
   eps2 = eps*eps;
@@ -497,7 +497,7 @@ _MMG5_correction_iso(MMG5_pMesh mesh,int ip,int *list,int ilist,int nedep) {
 
   ppt  = &mesh->point[ip];
   if ( ppt->tag & MG_NUL )  return(ilist);
-  base = mesh->mark;
+  base = mesh->base;
   lon  = ilist;
   eps  = _MMG5_EPSCON;
   eps2 = eps*eps;
@@ -597,7 +597,7 @@ int _MMG5_cavity_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel,int ip,int* list,int 
   if ( lon < 1 )  return(0);
   ppt = &mesh->point[ip];
   if ( ppt->tag & MG_NUL )  return(0);
-  base  = ++mesh->mark;
+  base  = ++mesh->base;
 
   isreq = 0;
 
@@ -745,7 +745,7 @@ int _MMG5_cavity_iso(MMG5_pMesh mesh,MMG5_pSol sol,int iel,int ip,int *list,int 
   if ( lon < 1 )  return(0);
   ppt = &mesh->point[ip];
   if ( ppt->tag & MG_NUL )  return(0);
-  base  = ++mesh->mark;
+  base  = ++mesh->base;
 
   isreq = 0;
 
