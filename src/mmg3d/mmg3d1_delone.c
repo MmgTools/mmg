@@ -650,7 +650,7 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
               goto collapse2;
             }
           }
-          if ( /*lmax>4 &&*/ /*it &&*/  !_MMG5_buckin_iso(mesh,met,bucket,ip) ) {
+          if ( /*lmax>4 &&*/ /*it &&*/  !_MMG5_buckin(mesh,met,bucket,ip) ) {
             _MMG3D_delPt(mesh,ip);
             (*ifilt)++;
             goto collapse2;
