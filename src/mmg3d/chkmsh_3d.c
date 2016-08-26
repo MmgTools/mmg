@@ -111,13 +111,6 @@ int _MMG5_mmg3dChkmsh(MMG5_pMesh mesh,int severe,int base) {
   int            *adja,*adja1,adj,adj1,k,i,iadr;
   int            iel,a0,a1,a2,b0,b1,b2;
   unsigned char  voy,voy1;
-  /* commentated part variables
-     MMG5_pTetra        pt0;
-     MMG5_xTetra       pxt0,pxt1,pxt2;
-     int           ilists,ilistv,lists[MMG3D_LMAX+2],listv[MMG3D_LMAX+2];
-     int           ielprv,ielnxt,l,nump,np,nq;
-     unsigned char j,iface,ifaceprv,ifacenxt,indp,indpprv,indpnxt,tag0,tag1,tag2,ia;
-  */
 
   for (k=1; k<=mesh->ne; k++) {
     pt1 = &mesh->tetra[k];
@@ -240,204 +233,6 @@ int _MMG5_mmg3dChkmsh(MMG5_pMesh mesh,int severe,int base) {
       }
     }
   }
-
-  /*for(k=1;k<=mesh->ne;k++){
-    pt = &mesh->tetra[k];
-    if ( !MG_EOK(pt) || pt->ref < 0 )   continue;
-    if(!pt->xt) continue;
-
-    pxt = &mesh->xtetra[pt->xt];
-
-    for(ia = 0;ia<6;ia++){
-    np = pt->v[_MMG5_iare[ia][0]];
-    nq = pt->v[_MMG5_iare[ia][1]];
-
-    if(!(((np == 6)&&(nq == 3204))||((nq == 6)&&(np == 3204))))
-    continue;
-
-    if(!(pxt->tag[ia] & MG_REF)){
-    return(0);
-    }
-    }
-    }*/
-
-  /* Test Boundary references : do they match, from one face to its neighbour ? */
-  /*for(k=1;k<=mesh->ne;k++){
-    pt = &mesh->tetra[k];
-    if ( !MG_EOK(pt) || pt->ref < 0 )   continue;
-    if(!pt->xt) continue;
-
-    pxt = &mesh->xtetra[pt->xt];
-
-    for(i=0;i<4;i++){
-    if(!(pxt->ftag[i] & MG_BDY)) continue;
-
-    for(j=0;j<3;j++){
-    ip = _MMG5_idir[i][j];
-    nump = pt->v[ip];
-
-    if(!_MMG5_boulesurfvolp(mesh,k,ip,i,listv,&ilistv,lists,&ilists)){
-    fprintf(stderr,"%s:%d: Error: function _MMG5_boulesurfvolp return 0\n",__FILE__,__LINE__)
-    return(0);
-    }
-
-    for(l=0;l<ilists;l++){
-    iel = lists[l]/4;
-    iface = lists[l]%4;
-
-    if(l==0){
-    ielprv = lists[ilists-1]/4;
-    ifaceprv = lists[ilists-1]%4;
-    }
-    else{
-    ielprv = lists[l-1]/4;
-    ifaceprv = lists[l-1]%4;
-    }
-
-    if(l==ilists-1){
-    ielnxt = lists[0]/4;
-    ifacenxt = lists[0]%4;
-    }
-    else{
-    ielnxt = lists[l+1]/4;
-    ifacenxt = lists[l+1]%4;
-    }
-
-    pt0 = &mesh->tetra[iel];
-    pt1 = &mesh->tetra[ielprv];
-    pt2 = &mesh->tetra[ielnxt];
-    assert(pt0->xt && pt1->xt && pt2->xt);
-    pxt0 = &mesh->xtetra[pt0->xt];
-    pxt1 = &mesh->xtetra[pt1->xt];
-    pxt2 = &mesh->xtetra[pt2->xt];
-
-    for(indp = 0;indp<3;indp++){
-    if(pt0->v[_MMG5_idir[iface][indp]] == nump){
-    break;
-    }
-    }
-    assert(indp < 3);
-
-    for(indpprv = 0;indpprv<3;indpprv++){
-    if(pt1->v[_MMG5_idir[ifaceprv][indpprv]] == nump){
-    break;
-    }
-    }
-    assert(indpprv < 3);
-
-    for(indpnxt = 0;indpnxt<3;indpnxt++){
-    if(pt2->v[_MMG5_idir[ifacenxt][indpnxt]] == nump){
-    break;
-    }
-    }
-    assert(indpnxt < 3);
-
-    assert(pxt0->ftag[iface] & MG_BDY);
-    assert(pxt1->ftag[ifaceprv] & MG_BDY);
-    assert(pxt2->ftag[ifacenxt] & MG_BDY);*/
-
-  /* Cannot rely on tag boundary of edges */
-  /*tag0 = (pxt0->tag[_MMG5_iarf[iface][_MMG5_iprv2[indp]]]) & (~MG_BDY);
-    tag1 = (pxt1->tag[_MMG5_iarf[ifaceprv][inxt2[indpprv]]]) & (~MG_BDY);
-
-    if(tag0 != tag1){
-    fprintf(stderr,"Unconsistent tag of edge : tetra %d %d pour le point %d\n",iel,ielprv,nump);
-    fprintf(stderr,"tags : %d %d \n",tag0,tag1);
-
-    return(0);
-    }
-
-    tag0 = (pxt0->tag[_MMG5_iarf[iface][inxt2[indp]]]) & (~MG_BDY);
-    tag2 = (pxt2->tag[_MMG5_iarf[ifacenxt][_MMG5_iprv2[indpnxt]]]) & (~MG_BDY);
-
-    if(tag0 != tag2){
-    fprintf(stderr,"Unconsistent tag of edge : tetra %d %d pour le point %d\n",iel,ielnxt,nump);
-    fprintf(stderr,"tags : %d %d \n",tag0,tag2);
-    return(0);
-    }
-    }
-    }
-    }
-
-    }*/
-
-  /* Delaunay criterion */
-  /*
-    for (k=1; k<=mesh->ne; k++) {
-    pt1 = &mesh->tetra[k];
-    if ( !pt1->v[0] )  continue;
-    iadr = (k-1)*4 + 1;
-    adja = &mesh->adja[iadr];
-    if ( !cenrad(mesh,k,c,&ray) )  continue;
-
-    for (i=0; i<4; i++) {
-    if ( !adja[i] )  continue;
-    adj = adja[i] / 4;
-    voy = adja[i] % 4;
-    pt2 = &mesh->tetra[adj];
-
-    ppt = &mesh->point[ pt2->v[voy] ];
-    dd = (ppt->c[0] - c[0]) * (ppt->c[0] - c[0]) \
-    + (ppt->c[1] - c[1]) * (ppt->c[1] - c[1]) \
-    + (ppt->c[2] - c[2]) * (ppt->c[2] - c[2]);
-    if ( _MMG5_EPSLOC*_MMG5_EPSLOC*dd < ray ) {
-    fprintf(stderr,"  ## Non-Delaunay mesh:  %.14f < %.14f\n",dd,ray);
-    return(0);
-    }
-    }
-    }
-  */
-
-  /*  if ( !severe )  return(1);
-
-      for (k=1; k<=mesh->ne; k++) {
-      pt1 = &mesh->tetra[k];
-      if ( !pt1->v[0] )  continue;
-      else if (pt1->flag < base )  continue;
-      iadr = 4*(k-1) + 1;
-      adja = &mesh->adja[iadr];
-
-      for (i=0; i<4; i++) {
-      adj = (adja[i]-1) / 4 + 1;
-      voy = (adja[i]-1) % 4;
-      if ( !adj )  continue;
-
-      ip  = pt1->v[i];
-      ppt = &mesh->point[ip];
-      if ( ppt->tag & M_UNUSED ) {
-      fprintf(stderr,"  6. Unused vertex %d  %d\n",k,ip);
-      printf("%d %d %d %d\n",pt1->v[0],pt1->v[1],pt1->v[2],pt1->v[3]);
-      return(0);
-      }
-      lon = MMG_boulep(mesh,k,i,&list);
-      for (l=1; l<=lon; l++) {
-      kk  = list.tetra[l] / 4;
-      nk  = list.tetra[l] % 4;
-      pt2 = &mesh->tetra[kk];
-      if ( pt2->v[nk] != ip ) {
-      fprintf(stderr,"  5. Wrong ball %d, %d\n",ip,pt2->v[nk]);
-      return(0);
-      }
-      }
-      if ( lon < 1 )  continue;
-      len = 0;
-      for (kk=1; kk<=mesh->ne; kk++) {
-      pt2 = &mesh->tetra[kk];
-      if ( !pt2->v[0] )  continue;
-      for (j=0; j<4; j++)
-      if ( pt2->v[j] == ip ) {
-      len++;
-      break;
-      }
-      }
-      if ( len != lon ) {
-      fprintf(stderr,"  7. Incorrect ball %d: %d %d\n",pt1->v[i],lon,len);
-      return(0);
-      }
-      }
-      }*/
-
-  //fprintf(stdout,"  ** MESH STRUCTURE IS OK\n");
   return(1);
 }
 
@@ -604,7 +399,8 @@ int srcface(MMG5_pMesh mesh,int n0,int n1,int n2) {
   MMG5_pTetra    pt;
   MMG5_pxTetra   pxt;
   int       k,ip0,ip1,ip2,minn,maxn,sn,mins,maxs,sum,ref;
-  char      i,tag;
+  int16_t   tag;
+  char      i;
 
   minn = MG_MIN(n0,MG_MIN(n1,n2));
   maxn = MG_MAX(n0,MG_MAX(n1,n2));

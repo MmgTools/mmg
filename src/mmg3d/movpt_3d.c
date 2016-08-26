@@ -737,7 +737,7 @@ int _MMG5_movbdyrefpt_iso(MMG5_pMesh mesh, MMG5_pSol met, int *listv,
   double                calold,calnew,caltmp,*callist,hmax,hausd;
   int                   l,iel,ip0,ipa,ipb,iptmpa,iptmpb,it1,it2,ip1,ip2,ip,nxp;
   int                   isloc,j;
-  char                  tag;
+  int16_t               tag;
   unsigned char         i,i0,ie,iface,iface1,iface2,iea,ieb,ie1,ie2;
 
   step = 0.1;
@@ -1094,7 +1094,8 @@ int _MMG5_movbdynompt_iso(MMG5_pMesh mesh,MMG5_pSol met, int *listv,
   double            o[3],no[3],to[3],hmax,hausd;
   int               ip0,ip1,ip2,ip,iel,ipa,ipb,l,iptmpa,iptmpb,it1,it2,nxp;
   int               j,isloc;
-  char              iface,i,i0,iea,ieb,ie,tag,ie1,ie2,iface1,iface2;
+  int16_t           tag;
+  char              iface,i,i0,iea,ieb,ie,ie1,ie2,iface1,iface2;
 
   step = 0.1;
   ip1 = ip2 = 0;
@@ -1448,7 +1449,7 @@ int _MMG5_movbdyridpt_iso(MMG5_pMesh mesh, MMG5_pSol met, int *listv,
   double               calold,calnew,caltmp,*callist,hmax,hausd;
   int                  l,iel,ip0,ipa,ipb,iptmpa,iptmpb,it1,it2,ip1,ip2,ip,nxp;
   int                  j,isloc;
-  char                 tag;
+  int16_t              tag;
   unsigned char        i,i0,ie,iface,iface1,iface2,iea,ieb,ie1,ie2;
 
   step = 0.1;

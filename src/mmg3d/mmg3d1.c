@@ -727,7 +727,8 @@ static int _MMG5_coltet(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
   double     ll,ux,uy,uz,hmi2;
   int        k,nc,list[MMG3D_LMAX+2],ilist,ilists,lists[MMG3D_LMAX+2];
   int        base,nnm,l,kk,isloc,ifac1;
-  char       i,j,tag,ip,iq,isnm;
+  int16_t    tag,isnm;
+  char       i,j,ip,iq;
   int        ier;
 
   nc = nnm = 0;

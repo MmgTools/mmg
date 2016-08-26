@@ -35,7 +35,7 @@
 
 
 /* Create a new vertex in the mesh, and return its number */
-int _MMG2D_newPt(MMG5_pMesh mesh,double c[2],int tag) {
+int _MMG2D_newPt(MMG5_pMesh mesh,double c[2],int16_t tag) {
   MMG5_pPoint  ppt;
   int     curpt;
 
@@ -45,6 +45,7 @@ int _MMG2D_newPt(MMG5_pMesh mesh,double c[2],int tag) {
   if ( mesh->npnil > mesh->np )  mesh->np = mesh->npnil;
   ppt   = &mesh->point[curpt];
   memcpy(ppt->c,c,2*sizeof(double));
+  ppt->tag   &= ~MG_NUL;
   mesh->npnil = ppt->tmp;
   ppt->tmp    = 0;
   ppt->xp     = 0;

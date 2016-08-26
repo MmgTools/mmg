@@ -107,7 +107,8 @@ extern "C" {
 #define  MG_NOM       (1 << 3)        /**< 8  non manifold    */
 #define  MG_BDY       (1 << 4)        /**< 16  boundary entity */
 #define  MG_CRN       (1 << 5)        /**< 32  corner         */
-#define  MG_NUL       (1 << 6)        /**< 64  vertex removed */
+#define  MG_NOSURF    (1 << 6)        /**< 64  freezed boundary */
+#define  MG_NUL       (1 << 7)        /**< 128 vertex removed */
 
 /* binary tags for local parameters */
 #define  MG_Vert   (1 << 0 )  /**< 1 local parameter applied over vertex */

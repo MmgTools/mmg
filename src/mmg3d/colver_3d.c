@@ -439,7 +439,8 @@ int _MMG5_chkcol_bdy(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
   double        ps,devold,devnew,hmax,hausd;
   int           ipp,nump,numq,l,iel,kk;
   int           nr,nbbdy,ndepmin,ndepplus,isloc;
-  char          iopp,ia,ip,tag,i,iq,i0,i1,ier,isminp,isplp;
+  int16_t       tag;
+  char          iopp,ia,ip,i,iq,i0,i1,ier,isminp,isplp;
 
   pt   = &mesh->tetra[k];
   pxt  = 0;

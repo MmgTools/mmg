@@ -350,7 +350,7 @@ int main(int argc,char *argv[]) {
       }
     }
     else {
-      if ( mesh->info.iso && !met->m==0 ) {
+      if ( mesh->info.iso && met->m==0 ) {
         fprintf(stderr,"  ## ERROR: NO ISOVALUE DATA.\n");
         _MMG5_RETURN_AND_FREE(mesh,met,disp,MMG5_STRONGFAILURE);
       }
