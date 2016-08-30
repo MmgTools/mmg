@@ -37,7 +37,6 @@
 #ifndef PATTERN
 
 #define PRECI 1
-#define LFILT    0.2//0.7
 
 /* create bucket structure and store initial vertices */
 _MMG5_pBucket _MMG5_newBucket(MMG5_pMesh mesh,int nmax) {
