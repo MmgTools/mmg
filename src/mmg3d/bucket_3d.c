@@ -79,7 +79,7 @@ _MMG5_pBucket _MMG5_newBucket(MMG5_pMesh mesh,int nmax) {
 
 
 /* check and eventually insert vertex */
-int _MMG5_buckin_ani(MMG5_pMesh mesh,MMG5_pSol sol,_MMG5_pBucket bucket,int ip) {
+int _MMG5_buckin_ani(MMG5_pMesh mesh,MMG5_pSol sol,_MMG5_pBucket bucket,int ip,double lfilt) {
   MMG5_pPoint        ppt,pp1;
   double        dd,d2,det,ux,uy,uz,dmi,m1,m2,m3,dx,dy,dz;
   double        *ma,*mb;
@@ -92,7 +92,7 @@ int _MMG5_buckin_ani(MMG5_pMesh mesh,MMG5_pSol sol,_MMG5_pBucket bucket,int ip) 
 
   iadr = ip*sol->size;
   ma   = &sol->m[iadr];
-  dmi  = LFILT*LFILT;
+  dmi  = lfilt*lfilt;
 
   ii = MG_MAX(0,(int)(dd * ppt->c[0])-1);
   jj = MG_MAX(0,(int)(dd * ppt->c[1])-1);
@@ -108,7 +108,10 @@ int _MMG5_buckin_ani(MMG5_pMesh mesh,MMG5_pSol sol,_MMG5_pBucket bucket,int ip) 
     uz = pp1->c[2] - ppt->c[2];
     d2 =      ma[0]*ux*ux + ma[3]*uy*uy + ma[5]*uz*uz \
       + 2.0*(ma[1]*ux*uy + ma[2]*ux*uz + ma[4]*uy*uz);
-    if ( d2 < dmi ) {
+
+    if ( d2 < dmi ) return(0);
+    else
+    {
       iadr = ip1*sol->size;
       mb = &sol->m[iadr];
       d2 =      mb[0]*ux*ux + mb[3]*uy*uy + mb[5]*uz*uz \
@@ -124,7 +127,10 @@ int _MMG5_buckin_ani(MMG5_pMesh mesh,MMG5_pSol sol,_MMG5_pBucket bucket,int ip) 
       uz = pp1->c[2] - ppt->c[2];
       d2 =      ma[0]*ux*ux + ma[3]*uy*uy + ma[5]*uz*uz \
         + 2.0*(ma[1]*ux*uy + ma[2]*ux*uz + ma[4]*uy*uz);
-      if ( d2 < dmi ) {
+      if ( d2 < dmi ) return(0);
+      else
+      {
+
         iadr = ip1*sol->size;
         mb = &sol->m[iadr];
         d2 =      mb[0]*ux*ux + mb[3]*uy*uy + mb[5]*uz*uz \
@@ -145,9 +151,9 @@ int _MMG5_buckin_ani(MMG5_pMesh mesh,MMG5_pSol sol,_MMG5_pBucket bucket,int ip) 
   if ( det < 0.0 || m1 < 0.0 )
     return(1);
   else {
-    dx = LFILT * sqrt(m1 * det) ;
-    dy = LFILT * sqrt(m2 * det) ;
-    dz = LFILT * sqrt(m3 * det) ;
+    dx = lfilt * sqrt(m1 * det) ;
+    dy = lfilt * sqrt(m2 * det) ;
+    dz = lfilt * sqrt(m3 * det) ;
   }
 
   imin = (int)(dd * (ppt->c[0]-dx))-1;
@@ -178,7 +184,10 @@ int _MMG5_buckin_ani(MMG5_pMesh mesh,MMG5_pSol sol,_MMG5_pBucket bucket,int ip) 
         uz = pp1->c[2] - ppt->c[2];
         d2 =      ma[0]*ux*ux + ma[3]*uy*uy + ma[5]*uz*uz \
           + 2.0*(ma[1]*ux*uy + ma[2]*ux*uz + ma[4]*uy*uz);
-        if ( d2 < dmi ) {
+
+        if ( d2 < dmi ) return(0);
+        else
+        {
           iadr = ip1*sol->size;
           mb = &sol->m[iadr];
           d2 =      mb[0]*ux*ux + mb[3]*uy*uy + mb[5]*uz*uz \
@@ -194,7 +203,9 @@ int _MMG5_buckin_ani(MMG5_pMesh mesh,MMG5_pSol sol,_MMG5_pBucket bucket,int ip) 
           uz = pp1->c[2] - ppt->c[2];
           d2 =      ma[0]*ux*ux + ma[3]*uy*uy + ma[5]*uz*uz \
             + 2.0*(ma[1]*ux*uy + ma[2]*ux*uz + ma[4]*uy*uz);
-          if ( d2 < dmi ) {
+          if ( d2 < dmi ) return(0);
+          else
+          {
             iadr = ip1*sol->size;
             mb = &sol->m[iadr];
             d2 =      mb[0]*ux*ux + mb[3]*uy*uy + mb[5]*uz*uz \
@@ -208,7 +219,7 @@ int _MMG5_buckin_ani(MMG5_pMesh mesh,MMG5_pSol sol,_MMG5_pBucket bucket,int ip) 
 }
 
 
-int _MMG5_buckin_iso(MMG5_pMesh mesh,MMG5_pSol sol,_MMG5_pBucket bucket,int ip) {
+int _MMG5_buckin_iso(MMG5_pMesh mesh,MMG5_pSol sol,_MMG5_pBucket bucket,int ip,double lfilt) {
   MMG5_pPoint        ppt,pp1;
   double        dd,d2,ux,uy,uz,hpi,hp1,hp2;
   int           i,j,k,ii,jj,kk,ic,icc,siz,ip1;
@@ -217,7 +228,7 @@ int _MMG5_buckin_iso(MMG5_pMesh mesh,MMG5_pSol sol,_MMG5_pBucket bucket,int ip) 
   ppt = &mesh->point[ip];
   siz = bucket->size;
   dd  = siz / (double)PRECI;
-  hpi = LFILT * sol->m[ip];
+  hpi = lfilt * sol->m[ip];
   hp1 = hpi*hpi;
 
   ii = MG_MAX(0,(int)(dd * ppt->c[0])-1);
@@ -229,7 +240,7 @@ int _MMG5_buckin_iso(MMG5_pMesh mesh,MMG5_pSol sol,_MMG5_pBucket bucket,int ip) 
   if ( bucket->head[ic] ) {
     ip1 = bucket->head[ic];
     pp1 = &mesh->point[ip1];
-    hp2 = LFILT * sol->m[ip1];
+    hp2 = lfilt * sol->m[ip1];
     ux = pp1->c[0] - ppt->c[0];
     uy = pp1->c[1] - ppt->c[1];
     uz = pp1->c[2] - ppt->c[2];
@@ -242,7 +253,7 @@ int _MMG5_buckin_iso(MMG5_pMesh mesh,MMG5_pSol sol,_MMG5_pBucket bucket,int ip) 
     while ( bucket->link[ip1] ) {
       ip1 = bucket->link[ip1];
       pp1 = &mesh->point[ip1];
-      hp2 = LFILT * sol->m[ip1];
+      hp2 = lfilt * sol->m[ip1];
       ux = pp1->c[0] - ppt->c[0];
       uy = pp1->c[1] - ppt->c[1];
       uz = pp1->c[2] - ppt->c[2];
@@ -277,7 +288,7 @@ int _MMG5_buckin_iso(MMG5_pMesh mesh,MMG5_pSol sol,_MMG5_pBucket bucket,int ip) 
         ip1 = bucket->head[icc];
         if ( !ip1 )  continue;
         pp1 = &mesh->point[ip1];
-        hp2 = LFILT * sol->m[ip1];
+        hp2 = lfilt * sol->m[ip1];
         ux = pp1->c[0] - ppt->c[0];
         uy = pp1->c[1] - ppt->c[1];
         uz = pp1->c[2] - ppt->c[2];
@@ -291,7 +302,7 @@ int _MMG5_buckin_iso(MMG5_pMesh mesh,MMG5_pSol sol,_MMG5_pBucket bucket,int ip) 
         while ( bucket->link[ip1] ) {
           ip1 = bucket->link[ip1];
           pp1 = &mesh->point[ip1];
-          hp2 = LFILT * sol->m[ip1];
+          hp2 = lfilt * sol->m[ip1];
           ux = pp1->c[0] - ppt->c[0];
           uy = pp1->c[1] - ppt->c[1];
           uz = pp1->c[2] - ppt->c[2];
