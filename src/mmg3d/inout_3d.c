@@ -3110,7 +3110,8 @@ int MMG3D_saveSol(MMG5_pMesh mesh,MMG5_pSol met, const char *filename) {
     for (k=1; k<=mesh->np; k++) {
       ppt = &mesh->point[k];
       if ( MG_VOK(ppt) ) {
-        if ( !(MG_SIN(ppt->tag) || (ppt->tag & MG_NOM)) && (ppt->tag & MG_GEO) ) {
+        if ( !(MG_SIN(ppt->tag) || (ppt->tag & MG_NOM) || (ppt->tag & MG_NOSURF))
+             && (ppt->tag & MG_GEO) ) {
           if ( mesh->xp ) {
             // Arbitrary, we take the metric associated to the surface ruled by n_1
             mtmp[0] = met->m[met->size*(k)];
