@@ -202,6 +202,7 @@ IF ( BUILD_TESTING )
   ##------- Set the continuous integration options --------------------##
   ##-------------------------------------------------------------------##
   SET(MMGS_CI_TESTS ${CMAKE_SOURCE_DIR}/ci_tests/mmgs )
+  SET(MMG_CI_TESTS ${CMAKE_SOURCE_DIR}/ci_tests/mmg )
 
   ##-------------------------------------------------------------------##
   ##--------------------------- Add tests and configure it ------------##
@@ -249,6 +250,11 @@ IF ( BUILD_TESTING )
     ENDIF()
     # Add mmgs tests
     INCLUDE( ${CMAKE_SOURCE_DIR}/cmake/testing/mmgs_tests.cmake )
+
+    IF ( RUN_AGAIN )
+      INCLUDE( ${CMAKE_SOURCE_DIR}/cmake/testing/mmg_rerun_tests.cmake )
+    ENDIF()
+
 
   ENDIF ( MMGS_CI )
 

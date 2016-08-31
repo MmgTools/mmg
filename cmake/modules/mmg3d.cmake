@@ -243,6 +243,7 @@ IF ( BUILD_TESTING )
   ##------- Set the continuous integration options --------------------##
   ##-------------------------------------------------------------------##
   SET(MMG3D_CI_TESTS ${CMAKE_SOURCE_DIR}/ci_tests/mmg3d )
+  SET(MMG_CI_TESTS ${CMAKE_SOURCE_DIR}/ci_tests/mmg )
 
   ##-------------------------------------------------------------------##
   ##--------------------------- Add tests and configure it ------------##
@@ -309,6 +310,7 @@ IF ( BUILD_TESTING )
 
     IF ( RUN_AGAIN )
       INCLUDE( ${CMAKE_SOURCE_DIR}/cmake/testing/mmg3d_rerun_tests.cmake )
+      INCLUDE( ${CMAKE_SOURCE_DIR}/cmake/testing/mmg_rerun_tests.cmake )
     ENDIF()
 
   ENDIF ( MMG3D_CI )

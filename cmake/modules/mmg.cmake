@@ -220,7 +220,7 @@ IF ( BUILD_TESTING )
   ##-------------------------------------------------------------------##
   # Add runtime that we want to test for mmg
   IF( MMG_CI )
-    # Add libqmg tests
+    # Add libmmg tests
     IF ( TEST_LIBMMG )
       SET(LIBMMG_EXEC0_a ${EXECUTABLE_OUTPUT_PATH}/libmmg_example0_a)
       SET(LIBMMG_CPP_a   ${EXECUTABLE_OUTPUT_PATH}/libmmg_cpp_a)
