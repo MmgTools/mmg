@@ -440,7 +440,7 @@ int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol sol)
     _MMG2D_scalarSolTruncature(mesh,sol);
   }
 
-   if ( (mesh)->adja )
+  if ( (mesh)->adja )
      _MMG5_DEL_MEM((mesh),(mesh)->adja,(3*(mesh)->ntmax+5)*sizeof(int));
 
   if ( !MMG2_hashel(mesh) )

@@ -321,8 +321,9 @@ inline int _MMG5_sys33sym(double a[6], double b[3], double r[3]){
     }
   }
 
-  if(m < _MMG5_EPSD)
+  if(m < _MMG5_EPSD) {
     return(0);
+  }
 
   m = 1.0/m;
 
