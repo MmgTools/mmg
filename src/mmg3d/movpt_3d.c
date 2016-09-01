@@ -135,6 +135,7 @@ int _MMG5_movintpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,int imp
   p0->c[2] = ppt0->c[2];
   for (k=0; k<ilist; k++) {
     (&mesh->tetra[list[k]/4])->qual=callist[k];
+    (&mesh->tetra[list[k]/4])->mark=mesh->mark;
   }
 
   _MMG5_SAFE_FREE(callist);
@@ -311,6 +312,7 @@ int _MMG5_movintptLES_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,int 
    /* update position */
    for (k=0; k<ilist; k++) {
      (&mesh->tetra[list[k]/4])->qual=callist[k];
+     (&mesh->tetra[list[k]/4])->mark=mesh->mark;
    }
 
    _MMG5_SAFE_FREE(callist);
@@ -704,6 +706,7 @@ int _MMG5_movbdyregpt_iso(MMG5_pMesh mesh, MMG5_pSol met,int *listv,
 
   for(l=0; l<ilistv; l++){
     (&mesh->tetra[listv[l]/4])->qual= callist[l];
+    (&mesh->tetra[listv[l]/4])->mark=mesh->mark;
   }
   _MMG5_SAFE_FREE(callist);
   return(1);
@@ -1059,6 +1062,7 @@ int _MMG5_movbdyrefpt_iso(MMG5_pMesh mesh, MMG5_pSol met, int *listv,
 
   for( l=0 ; l<ilistv ; l++ ){
     (&mesh->tetra[listv[l]/4])->qual = callist[l];
+    (&mesh->tetra[listv[l]/4])->mark = mesh->mark;
   }
   _MMG5_SAFE_FREE(callist);
   return(1);
@@ -1417,6 +1421,7 @@ int _MMG5_movbdynompt_iso(MMG5_pMesh mesh,MMG5_pSol met, int *listv,
 
   for(l=0; l<ilistv; l++){
     (&mesh->tetra[listv[l]/4])->qual = callist[l];
+    (&mesh->tetra[listv[l]/4])->mark = mesh->mark;
   }
   _MMG5_SAFE_FREE(callist);
   return(1);
@@ -1779,6 +1784,7 @@ int _MMG5_movbdyridpt_iso(MMG5_pMesh mesh, MMG5_pSol met, int *listv,
 
   for(l=0; l<ilistv; l++){
     (&mesh->tetra[listv[l]/4])->qual = callist[l];
+    (&mesh->tetra[listv[l]/4])->mark = mesh->mark;
   }
   _MMG5_SAFE_FREE(callist);
   return(1);
@@ -1878,6 +1884,7 @@ int _MMG3D_movv_ani(MMG5_pMesh mesh,MMG5_pSol sol,int k,int ib) {
     iel = list[l] / 4;
     pt1 = &mesh->tetra[iel];
     pt1->qual = qualtet[l];
+    pt1->mark = mesh->mark;
     //    if ( pt1->qual < declic )
     //  MMG_kiudel(queue,iel);
   }
@@ -1993,6 +2000,7 @@ int _MMG3D_movv_iso(MMG5_pMesh mesh,MMG5_pSol sol,int k,int ib) {
     iel = list[l] / 4;
     pt1 = &mesh->tetra[iel];
     pt1->qual = qualtet[l];
+    pt1->mark = mesh->mark;
     //    if ( pt1->qual < declic )
     //  MMG_kiudel(queue,iel);
   }
