@@ -2676,11 +2676,13 @@ int MMG3D_saveMesh(MMG5_pMesh mesh, const char *filename) {
     if ( na )
       fprintf(stdout,"     NUMBER OF EDGES          %8d   RIDGES  %8d\n",na,nr);
     if ( mesh->nt )
-      fprintf(stdout,"     NUMBER OF TRIANGLES      %8d\n",mesh->nt);
+      fprintf(stdout,"     NUMBER OF TRIANGLES      %8d   REQUIRED  %8d\n",
+              mesh->nt, ntreq);
     if ( nq )
       fprintf(stdout,"     NUMBER OF QUADRILATERALS %8d\n",nq);
 
-    fprintf(stdout,"     NUMBER OF TETRAHEDRA     %8d\n",ne);
+    fprintf(stdout,"     NUMBER OF TETRAHEDRA     %8d   REQUIRED  %8d\n",
+            ne,nereq);
     if ( npr )
       fprintf(stdout,"     NUMBER OF PRISMS         %8d\n",npr);
 
