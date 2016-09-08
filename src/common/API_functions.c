@@ -210,7 +210,9 @@ int MMG5_Set_inputSolName(MMG5_pMesh mesh,MMG5_pSol sol, const char* solin) {
  *
  */
 int MMG5_Set_outputMeshName(MMG5_pMesh mesh, const char* meshout) {
-  char *ptr;
+  char *ptrMed,*ptrGmsh;
+
+  ptrMed = ptrGmsh = NULL;
 
   if ( mesh->nameout )
     _MMG5_DEL_MEM(mesh,mesh->nameout,(strlen(mesh->nameout)+1)*sizeof(char));
@@ -229,20 +231,34 @@ int MMG5_Set_outputMeshName(MMG5_pMesh mesh, const char* meshout) {
                     exit(EXIT_FAILURE));
       _MMG5_SAFE_CALLOC(mesh->nameout,strlen(mesh->namein)+3,char);
       strcpy(mesh->nameout,mesh->namein);
-      ptr = strstr(mesh->nameout,".mesh");
-      if ( !ptr ) {
+
+      /* medit format? */
+      ptrMed = strstr(mesh->nameout,".mesh");
+      if ( !ptrMed )
+        /* Gmsh format? */
+        ptrGmsh = strstr(mesh->nameout,".msh");
+
+      if ( !ptrMed && !ptrGmsh ) {
         /* filename without extension */
         strcat(mesh->nameout,".o");
       }
-      else {
-        *ptr = '\0';
+      else if ( ptrMed ) {
+        *ptrMed = '\0';
         strcat(mesh->nameout,".o.mesh");
       }
-      ptr = strstr(mesh->namein,".meshb");
-      if ( ptr ) {
-        /* filename with .meshb extention */
+      else if ( ptrGmsh ) {
+        *ptrGmsh = '\0';
+        strcat(mesh->nameout,".o.msh");
+      }
+
+      ptrMed = strstr(mesh->namein,".meshb");
+      ptrGmsh = strstr(mesh->namein,".mshb");
+      if ( ptrMed || ptrGmsh ) {
+        /* binary file */
         strcat(mesh->nameout,"b");
       }
+
+
     }
     else {
       _MMG5_ADD_MEM(mesh,7*sizeof(char),"output mesh name",

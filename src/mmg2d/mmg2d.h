@@ -66,7 +66,6 @@ extern "C" {
 #define M_REQUIRED (1 << 3) /**< 8 Required entity */
 #define M_CORNER   (1 << 4) /**< 16 corner */
 #define M_SD       (1 << 5) /**< 32 interface between two domains */
-#define M_NUL      (1 << 6) /**< 64 vertex removed */
 
 #define M_SIN(tag) ((tag & M_CORNER) || (tag & M_REQUIRED)) /**< Corner or Required */
 
@@ -74,7 +73,7 @@ extern "C" {
 #define _MMG2D_NEDMAX  100000
 #define _MMG2D_NEMAX   100000
 
-#define M_VOK(ppt)    (ppt && (ppt->tag < M_NUL))
+#define M_VOK(ppt)    (ppt && (ppt->tag < MG_NUL))
 #define M_EOK(pt)     (pt && (pt->v[0] > 0))
 
 /** Free allocated pointers of mesh and sol structure and return value val */
@@ -222,7 +221,7 @@ void _MMG5_delEdge(MMG5_pMesh mesh,int iel);
 int _MMG2D_newElt(MMG5_pMesh mesh);
 void _MMG2D_delElt(MMG5_pMesh mesh,int iel);
 int _MMG5_getnElt(MMG5_pMesh mesh,int n);
-int MMG2_zaldy(MMG5_pMesh mesh);
+int MMG2D_zaldy(MMG5_pMesh mesh);
 long long _MMG5_memSize(void);
 void _MMG2D_memOption(MMG5_pMesh mesh);
 
@@ -293,7 +292,6 @@ int _MMG2_cenrad_iso(MMG5_pMesh ,double *,double *,double *);
 /* functions pointers */
 double long_ani(double *ca,double *cb,double *ma,double *mb);
 double long_iso(double *ca,double *cb,double *ma,double *mb);
-double MMG2_quickarea(double a[2],double b[2],double c[2]);
 double caltri_ani(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pTria );
 double caltri_iso(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pTria );
 double caltri_ani_in(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pTria );

@@ -635,3 +635,72 @@ void _MMG5_Free_dlinkedList( MMG5_pMesh mesh, _MMG5_dNode *liLi ) {
     _MMG5_DEL_MEM(mesh,nxt,sizeof(_MMG5_dNode));
   }
 }
+
+/** Compute 3 * 3 determinant : det(c1-c0,c2-c0,v) */
+inline double _MMG5_det3pt1vec(double c0[3],double c1[3],double c2[3],double v[3]) {
+    double m00,m10,m20,m01,m11,m21,det;
+
+    m00 = c1[0] - c0[0] ; m01 = c2[0] - c0[0];
+    m10 = c1[1] - c0[1] ; m11 = c2[1] - c0[1];
+    m20 = c1[2] - c0[2] ; m21 = c2[2] - c0[2];
+    det = v[0]*(m10*m21 - m20*m11) -v[1]*(m00*m21-m20*m01) + v[2]*(m00*m11-m10*m01);
+
+    return(det);
+}
+
+/** Compute 3 * 3 determinant : det(c1-c0,c2-c0,c3-c0) */
+inline double _MMG5_det4pt(double c0[3],double c1[3],double c2[3],double c3[3]) {
+  double m[3];
+
+  m[0] = c3[0] - c0[0];
+  m[1] = c3[1] - c0[1];
+  m[2] = c3[2] - c0[2];
+
+  return( _MMG5_det3pt1vec(c0,c1,c2,m) );
+}
+
+/**
+ * \param point Pointer toward the points array
+ * \param v pointer toward the point indices
+ *
+ * \return the oriented volume of tetra
+ *
+ * Compute oriented volume of a tetrahedron
+ *
+ */
+inline double _MMG5_orvol(MMG5_pPoint point,int *v) {
+    MMG5_pPoint  p0,p1,p2,p3;
+
+    p0 = &point[v[0]];
+    p1 = &point[v[1]];
+    p2 = &point[v[2]];
+    p3 = &point[v[3]];
+
+    return(_MMG5_det4pt(p0->c,p1->c,p2->c,p3->c));
+}
+
+
+/**
+ * \param a point coordinates
+ * \param b point coor
+ * \param c point coor
+ *
+ * Compute tria area.
+ *
+ */
+double MMG2_quickarea(double a[2],double b[2],double c[2]) {
+  double     abx,aby,acx,acy;//,bcx,bcy;
+  double     aire;
+
+  abx = b[0] - a[0];
+  aby = b[1] - a[1];
+  acx = c[0] - a[0];
+  acy = c[1] - a[1];
+  // bcx = c[0] - b[0];
+  // bcy = c[1] - b[1];
+  //
+  /* orientation */
+  aire = abx*acy - aby*acx;
+
+  return(aire);
+}

@@ -80,7 +80,7 @@ int MMG2_tassage(MMG5_pMesh mesh,MMG5_pSol sol) {
   np=0;
   for (k=1; k<=mesh->np; k++) {
     ppt = &mesh->point[k];
-    if ( ppt->tag & M_NUL ) {
+    if ( ppt->tag & MG_NUL ) {
       ppt->tmp = 0;
       continue;
     }
@@ -229,7 +229,7 @@ triangles:
     nbl = 1;
     for (k=1; k<=mesh->np; k++) {
       ppt = &mesh->point[k];
-      if ( ppt->tag & M_NUL )  continue;
+      if ( ppt->tag & MG_NUL )  continue;
       isol    = (k-1) * sol->size + 1;
       isolnew = (nbl-1) * sol->size + 1;
 
@@ -244,7 +244,7 @@ triangles:
   nbl = 1;
   for (k=1; k<=mesh->np; k++) {
     ppt = &mesh->point[k];
-    if ( ppt->tag & M_NUL )  continue;
+    if ( ppt->tag & MG_NUL )  continue;
 
     /* remove the required tag at vertices in -nosurf mode */
     if ( mesh->info.nosurf && (ppt->tag & M_NOSURF) ) {
@@ -254,14 +254,14 @@ triangles:
     if(k!=nbl) {
       pptnew = &mesh->point[nbl];
       memcpy(pptnew,ppt,sizeof(MMG5_Point));
-      ppt->tag   &= ~M_NUL;
+      ppt->tag   &= ~MG_NUL;
       assert(ppt->tmp == nbl);
     }
     np++;
     if(k != nbl) {
       ppt = &mesh->point[k];
       memset(ppt,0,sizeof(MMG5_Point));
-      ppt->tag    = M_NUL;
+      ppt->tag    = MG_NUL;
     }
     nbl++;
   }

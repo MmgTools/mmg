@@ -54,40 +54,6 @@ inline void _MMG5_nsort(int n,double *val,char *perm){
     }
 }
 
-/** Compute 3 * 3 determinant : det(c1-c0,c2-c0,v) */
-inline double _MMG5_det3pt1vec(double c0[3],double c1[3],double c2[3],double v[3]) {
-    double m00,m10,m20,m01,m11,m21,det;
-
-    m00 = c1[0] - c0[0] ; m01 = c2[0] - c0[0];
-    m10 = c1[1] - c0[1] ; m11 = c2[1] - c0[1];
-    m20 = c1[2] - c0[2] ; m21 = c2[2] - c0[2];
-    det = v[0]*(m10*m21 - m20*m11) -v[1]*(m00*m21-m20*m01) + v[2]*(m00*m11-m10*m01);
-
-    return(det);
-}
-
-/** Compute 3 * 3 determinant : det(c1-c0,c2-c0,c3-c0) */
-inline double _MMG5_det4pt(double c0[3],double c1[3],double c2[3],double c3[3]) {
-  double m[3];
-
-  m[0] = c3[0] - c0[0];
-  m[1] = c3[1] - c0[1];
-  m[2] = c3[2] - c0[2];
-
-  return( _MMG5_det3pt1vec(c0,c1,c2,m) );
-}
-
-/** Compute oriented volume of a tetrahedron */
-inline double _MMG5_orvol(MMG5_pPoint point,int *v) {
-    MMG5_pPoint  p0,p1,p2,p3;
-
-    p0 = &point[v[0]];
-    p1 = &point[v[1]];
-    p2 = &point[v[2]];
-    p3 = &point[v[3]];
-
-    return(_MMG5_det4pt(p0->c,p1->c,p2->c,p3->c));
-}
 
 /** Compute normal to face iface of tetra k, exterior to tetra k */
 inline int _MMG5_norface(MMG5_pMesh mesh,int k,int iface,double n[3]) {
@@ -1184,4 +1150,5 @@ int _MMG3D_localParamNm(MMG5_pMesh mesh,int iel,int iface,int ia,
   if ( hmin_ip ) *hmin_ip = hmin;
   if ( hmax_ip ) *hmax_ip = hmax;
 
+  return 1;
 }

@@ -45,7 +45,7 @@ int _MMG2D_newPt(MMG5_pMesh mesh,double c[2],int16_t tag) {
   if ( mesh->npnil > mesh->np )  mesh->np = mesh->npnil;
   ppt   = &mesh->point[curpt];
   memcpy(ppt->c,c,2*sizeof(double));
-  ppt->tag   &= ~M_NUL;
+  ppt->tag   &= ~MG_NUL;
   mesh->npnil = ppt->tmp;
   ppt->tmp    = 0;
   ppt->xp     = 0;
@@ -66,7 +66,7 @@ void _MMG2D_delPt(MMG5_pMesh mesh,int ip) {
   }
 
   memset(ppt,0,sizeof(MMG5_Point));
-  ppt->tag    = M_NUL;
+  ppt->tag    = MG_NUL;
   ppt->tmp    = mesh->npnil;
 
   mesh->npnil = ip;
@@ -243,7 +243,7 @@ void _MMG2D_memOption(MMG5_pMesh mesh) {
 }
 
 /* allocate main structure */
-int MMG2_zaldy(MMG5_pMesh mesh) {
+int MMG2D_zaldy(MMG5_pMesh mesh) {
   int     k;
 
   _MMG2D_memOption(mesh);

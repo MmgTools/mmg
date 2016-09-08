@@ -171,7 +171,7 @@ void _MMGS_memOption(MMG5_pMesh mesh) {
   return;
 }
 
-int zaldy(MMG5_pMesh mesh) {
+int _MMGS_zaldy(MMG5_pMesh mesh) {
   int     k;
 
   _MMGS_memOption(mesh);
@@ -184,6 +184,11 @@ int zaldy(MMG5_pMesh mesh) {
                 fprintf(stderr,"  Exit program.\n");
                 exit(EXIT_FAILURE));
   _MMG5_SAFE_CALLOC(mesh->tria,mesh->ntmax+1,MMG5_Tria);
+
+  if ( mesh->na ) {
+    _MMG5_ADD_MEM(mesh,(mesh->na+1)*sizeof(MMG5_Edge),"initial edges",return(0));
+    _MMG5_SAFE_CALLOC(mesh->edge,(mesh->na+1),MMG5_Edge);
+  }
 
   /* store empty links */
   mesh->npnil = mesh->np + 1;

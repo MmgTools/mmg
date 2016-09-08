@@ -502,7 +502,7 @@ int MMG2_markSD(MMG5_pMesh mesh) {
       if ( !mesh->tria[k].v[0] ) continue;
       pt = &mesh->tria[k];
       for(i=0 ; i<3 ; i++)
-        mesh->point[pt->v[i]].tag = M_NUL;
+        mesh->point[pt->v[i]].tag = MG_NUL;
       if(pt->ref != 1) continue;
       /*update adjacencies*/
       iadr = 3*(k-1)+1;
@@ -522,7 +522,7 @@ int MMG2_markSD(MMG5_pMesh mesh) {
       if ( !mesh->tria[k].v[0] ) continue;
       pt = &mesh->tria[k];
       for(i=0 ; i<3 ; i++)
-        mesh->point[pt->v[i]].tag = M_NUL;
+        mesh->point[pt->v[i]].tag = MG_NUL;
       if(!(pt->v[0]==ip1 || pt->v[1]==ip1 || pt->v[2]==ip1 ||
            pt->v[0]==ip2 || pt->v[1]==ip2 || pt->v[2]==ip2 ||
            pt->v[0]==ip3 || pt->v[1]==ip3 || pt->v[2]==ip3 ||
@@ -564,7 +564,7 @@ int MMG2_markSD(MMG5_pMesh mesh) {
     if ( !M_EOK(pt) )  continue;
     for (i=0; i<3; i++) {
       ppt = &mesh->point[ pt->v[i] ];
-      ppt->tag &= ~M_NUL;
+      ppt->tag &= ~MG_NUL;
     }
   }
   /*remove edge*/

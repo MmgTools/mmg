@@ -317,7 +317,7 @@ int main(int argc,char *argv[]) {
 
   /* read displacement if any */
   if ( mesh->info.lag > -1 ) {
-    if ( !MMG3D_Set_solSize(mesh,disp,MMG5_Vertex,0,MMG5_Vector) )
+    if ( !msh && !MMG3D_Set_solSize(mesh,disp,MMG5_Vertex,0,MMG5_Vector) )
       _MMG5_RETURN_AND_FREE(mesh,met,disp,MMG5_STRONGFAILURE);
 
     if ( !MMG3D_Set_inputSolName(mesh,disp,met->namein) )
@@ -379,13 +379,27 @@ int main(int argc,char *argv[]) {
   }
 
   if ( ier != MMG5_STRONGFAILURE ) {
+    /** Save files at medit or Gmsh format */
     chrono(ON,&MMG5_ctim[1]);
     if ( mesh->info.imprim )
       fprintf(stdout,"\n  -- WRITING DATA FILE %s\n",mesh->nameout);
-    if ( !MMG3D_saveMesh(mesh,mesh->nameout) )
+
+    if ( !strcmp(&mesh->nameout[strlen(mesh->nameout)-5],".mesh") ||
+         !strcmp(&mesh->nameout[strlen(mesh->nameout)-6],".meshb") )
+      msh = 0;
+    else if (!strcmp(&mesh->nameout[strlen(mesh->nameout)-4],".msh") ||
+             !strcmp(&mesh->nameout[strlen(mesh->nameout)-5],".mshb") )
+      msh = 1;
+
+    if ( !msh )
+      ier = MMG3D_saveMesh(mesh,mesh->nameout);
+    else
+      ier = MMG3D_saveMshMesh(mesh,met,mesh->nameout);
+
+    if ( !ier )
       _MMG5_RETURN_AND_FREE(mesh,met,disp,MMG5_STRONGFAILURE);
 
-    if ( !MMG3D_saveSol(mesh,met,met->nameout) )
+    if ( !msh && !MMG3D_saveSol(mesh,met,met->nameout) )
       _MMG5_RETURN_AND_FREE(mesh,met,disp,MMG5_STRONGFAILURE);
 
     chrono(OFF,&MMG5_ctim[1]);
