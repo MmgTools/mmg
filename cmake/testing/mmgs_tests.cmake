@@ -42,6 +42,24 @@ ADD_TEST(NAME SphereAni
   ${MMGS_CI_TESTS}/SphereAni/sphere
   -out ${MMGS_CI_TESTS}/SphereAni/sphere.d.meshb)
 
+
+###############################################################################
+#####
+#####         Input/Output
+#####
+###############################################################################
+
+# Binary gmsh
+ADD_TEST(NAME binary_gmsh_s
+  COMMAND ${EXECUT_MMGS} -v 5
+  ${MMGS_CI_TESTS}/GmshInout/cube.mshb)
+
+# Ascii gmsh
+ADD_TEST(NAME ascii_gmsh_s
+  COMMAND ${EXECUT_MMGS} -v 5
+  ${MMGS_CI_TESTS}/GmshInout/cube.msh)
+
+
 ###############################################################################
 #####
 #####         Check Memory Leaks

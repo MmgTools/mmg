@@ -34,6 +34,24 @@ ADD_TEST(NAME SimpleCube
 
 FOREACH(EXEC ${LISTEXEC_MMG3D})
 
+
+  ###############################################################################
+  #####
+  #####         Input/Output
+  #####
+  ###############################################################################
+
+  # Binary gmsh
+  ADD_TEST(NAME binary_gmsh_3d
+    COMMAND ${EXECUT_MMG3D} -v 5
+    ${MMG3D_CI_TESTS}/GmshInout/cube.mshb)
+
+  # Ascii gmsh
+  ADD_TEST(NAME ascii_gmsh_3d
+    COMMAND ${EXECUT_MMG3D} -v 5
+    ${MMG3D_CI_TESTS}/GmshInout/cube.msh)
+
+
   ##############################################################################
   #####
   #####         Check Memory Leak
