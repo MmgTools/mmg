@@ -115,13 +115,13 @@ static int cassar(MMG5_pMesh mesh,MMG5_pSol sol,int ia,int ib,double t) {
 
 
   /*interpol metric*/
-  iadr = (ia-1)*sol->size + 1;
+  iadr = ia*sol->size;
   ma  = &sol->m[iadr];
 
-  iadr = (ib-1)*sol->size + 1;
+  iadr = ib*sol->size;
   mb  = &sol->m[iadr];
 
-  iadr = (ip-1)*sol->size + 1;
+  iadr = ip*sol->size;
   mp  = &sol->m[iadr];
 
   if ( sol->size==1 ) {
@@ -312,13 +312,13 @@ static int cassarbdry(MMG5_pMesh mesh,MMG5_pSol sol,int ied,int ia,int ib,double
 /*   } */
 
   /*interpol metric*/
-  iadr = (ia-1)*sol->size + 1;
+  iadr = ia*sol->size;
   ma  = &sol->m[iadr];
 
-  iadr = (ib-1)*sol->size + 1;
+  iadr = ib*sol->size;
   mb  = &sol->m[iadr];
 
-  iadr = (ip-1)*sol->size + 1;
+  iadr = ip*sol->size;
   mp  = &sol->m[iadr];
 
   if ( sol->size==1 ) {
@@ -401,9 +401,9 @@ static int analar(MMG5_pMesh mesh,MMG5_pSol sol,pBucket bucket,
       }
       ca   = &ppa->c[0];
       cb   = &ppb->c[0];
-      iadr = (i1-1)*sol->size + 1;
+      iadr = i1*sol->size;
       ma   = &sol->m[iadr];
-      iadr = (i2-1)*sol->size + 1;
+      iadr = i2*sol->size;
       mb   = &sol->m[iadr];
       tail = MMG2_length(ca,cb,ma,mb);
 

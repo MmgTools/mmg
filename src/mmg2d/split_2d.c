@@ -111,11 +111,11 @@ int MMG2_split(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int k1,int adj1) {
 
   /*test length : pvoy1-ip and pvoy2-ip*/
   ca   = &mesh->point[ip].c[0];
-  iadr = (ip-1)*sol->size + 1;
+  iadr = ip*sol->size;
   ma   = &sol->m[iadr];
 
   cb  = &mesh->point[pvoy1].c[0];
-  iadr = (pvoy1-1)*sol->size + 1;
+  iadr = pvoy1*sol->size;
   mb   = &sol->m[iadr];
 
   len = MMG2_length(ca,cb,ma,mb);
@@ -123,7 +123,7 @@ int MMG2_split(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int k1,int adj1) {
   if(len < LSHORT1) return(0);
 
   cb  = &mesh->point[pvoy2].c[0];
-  iadr = (pvoy2-1)*sol->size + 1;
+  iadr = pvoy2*sol->size;
   mb   = &sol->m[iadr];
 
   len = MMG2_length(ca,cb,ma,mb);
@@ -132,7 +132,7 @@ int MMG2_split(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int k1,int adj1) {
 
   /*check*/
   cb  = &mesh->point[piara2].c[0];
-  iadr = (piara2-1)*sol->size + 1;
+  iadr = piara2*sol->size;
   mb   = &sol->m[iadr];
 
   len = MMG2_length(ca,cb,ma,mb);
@@ -140,7 +140,7 @@ int MMG2_split(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int k1,int adj1) {
   if(len < LSHORT1) return(0);
 
   cb  = &mesh->point[piar2].c[0];
-  iadr = (piar2-1)*sol->size + 1;
+  iadr = piar2*sol->size;
   mb   = &sol->m[iadr];
 
   len = MMG2_length(ca,cb,ma,mb);

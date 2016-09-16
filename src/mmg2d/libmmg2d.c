@@ -230,8 +230,8 @@ triangles:
     for (k=1; k<=mesh->np; k++) {
       ppt = &mesh->point[k];
       if ( ppt->tag & MG_NUL )  continue;
-      isol    = (k-1) * sol->size + 1;
-      isolnew = (nbl-1) * sol->size + 1;
+      isol    = k * sol->size;
+      isolnew = nbl* sol->size;
 
       for (i=0; i<sol->size; i++)
         sol->m[isolnew + i] = sol->m[isol + i];

@@ -477,7 +477,7 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol sol,FILE **inm,
   double      aux, dbuf[9];
   float       fbuf[9],fc;
   size_t      len;
-  int         k,i,l,nref;
+  int         k,i,l,nref,iadr;
   int         *ina_t,*ina_a,nt,na,nq,ne,npr;
   int         nbl_t,nbl_a,typ,tagNum,ref,idx,num;
   char        *line,*ptr,data[128],chaine[128],verNum[3];
@@ -1209,41 +1209,17 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol sol,FILE **inm,
         for (k=1; k<=sol->np; k++) {
           if(!bin){
             fscanf((*inm),"%d ",&idx);
-
-            if ( mesh->dim == 2 ) {
+            for (i=0; i<sol->dim; i++) {
               fscanf((*inm),"%f ",&fbuf[0]);
-              sol->m[2*(idx-1)+1+0] = fbuf[0];
-              fscanf((*inm),"%f ",&fbuf[0]);
-              sol->m[2*(idx-1)+1+1] = fbuf[0];
-              fscanf((*inm),"%f ",&fbuf[0]);
-            }
-            else {
-              for (i=0; i<sol->dim; i++) {
-                fscanf((*inm),"%f ",&fbuf[0]);
-                sol->m[sol->dim*idx+i] = fbuf[0];
-              }
+              sol->m[sol->dim*idx+i] = fbuf[0];
             }
           } else {
             fread(&idx,sw,1, (*inm));
             if(iswp) idx = _MMG5_swapbin(idx);
-
-            if ( mesh->dim == 2 ) {
-              fread(&fbuf[0],sd,1,(*inm));
-              if(iswp) fbuf[0]=_MMG5_swapd(fbuf[0]);
-              sol->m[2*(idx-1)+1+0] = fbuf[0];
-
-              fread(&fbuf[0],sd,1,(*inm));
-              if(iswp) fbuf[0]=_MMG5_swapd(fbuf[0]);
-              sol->m[2*(idx-1)+1+1] = fbuf[0];
-
-              fread(&fbuf[0],sd,1,(*inm));
-            }
-            else {
-              for (i=0; i<sol->dim; i++) {
-                fread(&fbuf[0],sw,1,(*inm));
-                if(iswp) fbuf[0]=_MMG5_swapf(fbuf[0]);
-                sol->m[sol->dim*idx+i] = fbuf[0];
-              }
+            for (i=0; i<sol->dim; i++) {
+              fread(&fbuf[0],sw,1,(*inm));
+              if(iswp) fbuf[0]=_MMG5_swapf(fbuf[0]);
+              sol->m[sol->dim*idx+i] = fbuf[0];
             }
           }
         }
@@ -1253,41 +1229,21 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol sol,FILE **inm,
           if(!bin){
             fscanf((*inm),"%d ",&idx);
 
-            if ( mesh->dim == 2 ) {
+            for (i=0; i<sol->dim; i++) {
               fscanf((*inm),"%lf ",&dbuf[0]);
-              sol->m[2*(idx-1)+1+0] = dbuf[0];
-              fscanf((*inm),"%lf ",&dbuf[0]);
-              sol->m[2*(idx-1)+1+1] = dbuf[0];
-              fscanf((*inm),"%lf ",&dbuf[0]);
+              sol->m[sol->dim*idx+i] = dbuf[0];
             }
-            else {
-              for (i=0; i<sol->dim; i++) {
-                fscanf((*inm),"%lf ",&dbuf[0]);
-                sol->m[sol->dim*idx+i] = dbuf[0];
-              }
-            }
+
           } else {
             fread(&idx,sw,1, (*inm));
             if(iswp) idx = _MMG5_swapbin(idx);
 
-            if ( mesh->dim == 2 ) {
+            for (i=0; i<sol->dim; i++) {
               fread(&dbuf[0],sd,1,(*inm));
               if(iswp) dbuf[0]=_MMG5_swapd(dbuf[0]);
-              sol->m[2*(idx-1)+1+0] = dbuf[0];
-
-              fread(&dbuf[0],sd,1,(*inm));
-              if(iswp) dbuf[0]=_MMG5_swapd(dbuf[0]);
-              sol->m[2*(idx-1)+1+1] = dbuf[0];
-
-              fread(&dbuf[0],sd,1,(*inm));
+              sol->m[sol->dim*idx+i] = dbuf[0];
             }
-            else {
-              for (i=0; i<sol->dim; i++) {
-                fread(&dbuf[0],sd,1,(*inm));
-                if(iswp) dbuf[0]=_MMG5_swapd(dbuf[0]);
-                sol->m[sol->dim*idx+i] = dbuf[0];
-              }
-            }
+
           }
         }
       }
@@ -1312,17 +1268,19 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol sol,FILE **inm,
           assert(fbuf[1]==fbuf[3] && fbuf[2]==fbuf[6] && fbuf[5]==fbuf[7]);
 
           if ( sol->dim ==2 ) {
-            sol->m[3*(idx-1)+1+0] = fbuf[0];
-            sol->m[3*(idx-1)+1+1] = fbuf[1];
-            sol->m[3*(idx-1)+1+2] = fbuf[4];
+            iadr = 3*idx;
+            sol->m[iadr] = fbuf[0];
+            sol->m[iadr+1] = fbuf[1];
+            sol->m[iadr+2] = fbuf[4];
           }
           else {
-            sol->m[6*idx+0] = fbuf[0];
-            sol->m[6*idx+1] = fbuf[1];
-            sol->m[6*idx+2] = fbuf[2];
-            sol->m[6*idx+3] = fbuf[4];
-            sol->m[6*idx+4] = fbuf[5];
-            sol->m[6*idx+5] = fbuf[8];
+            iadr = 6*idx;
+            sol->m[iadr+0] = fbuf[0];
+            sol->m[iadr+1] = fbuf[1];
+            sol->m[iadr+2] = fbuf[2];
+            sol->m[iadr+3] = fbuf[4];
+            sol->m[iadr+4] = fbuf[5];
+            sol->m[iadr+5] = fbuf[8];
           }
         }
       }
@@ -1344,17 +1302,19 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol sol,FILE **inm,
           assert(dbuf[1]==dbuf[3] && dbuf[2]==dbuf[6] && dbuf[5]==dbuf[7]);
 
           if ( sol->dim ==2 ) {
-            sol->m[3*(idx-1)+1+0] = dbuf[0];
-            sol->m[3*(idx-1)+1+1] = dbuf[1];
-            sol->m[3*(idx-1)+1+2] = dbuf[4];
+            iadr = 3*idx;
+            sol->m[iadr  ] = dbuf[0];
+            sol->m[iadr+1] = dbuf[1];
+            sol->m[iadr+2] = dbuf[4];
           }
           else {
-            sol->m[6*idx+0] = dbuf[0];
-            sol->m[6*idx+1] = dbuf[1];
-            sol->m[6*idx+2] = dbuf[2];
-            sol->m[6*idx+3] = dbuf[4];
-            sol->m[6*idx+4] = dbuf[5];
-            sol->m[6*idx+5] = dbuf[8];
+            iadr = 6*idx;
+            sol->m[iadr  ] = dbuf[0];
+            sol->m[iadr+1] = dbuf[1];
+            sol->m[iadr+2] = dbuf[2];
+            sol->m[iadr+3] = dbuf[4];
+            sol->m[iadr+4] = dbuf[5];
+            sol->m[iadr+5] = dbuf[8];
           }
         }
       }
@@ -1714,17 +1674,12 @@ int MMG5_saveMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
       ppt = &mesh->point[k];
       if ( !MG_VOK(ppt) ) continue;
 
-      if ( sol->dim == 3 ) {
-        iadr = k*sol->size;
-        for ( i=0; i<sol->size; ++i )
-          dbuf[i] = sol->m[iadr+i];
-      }
-      else {
-        iadr = (k-1)*sol->size+1;
+      iadr = k*sol->size;
+      if ( sol->dim == 2 )
         dbuf[2] = 0; // z-component for a vector field
-        for ( i=0; i<sol->size; ++i )
-          dbuf[i] = sol->m[iadr+i];
-      }
+
+      for ( i=0; i<sol->size; ++i )
+        dbuf[i] = sol->m[iadr+i];
 
       if ( !bin ) {
         fprintf(inm,"%d",ppt->tmp);
@@ -1748,9 +1703,10 @@ int MMG5_saveMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
              && (ppt->tag & MG_GEO) ) {
           if ( mesh->xp ) {
             // Arbitrary, we take the metric associated to the surface ruled by n_1
-            mtmp[0] = sol->m[sol->size*(k)];
-            mtmp[1] = sol->m[sol->size*(k)+1];
-            mtmp[2] = sol->m[sol->size*(k)+3];
+            iadr = sol->size*k;
+            mtmp[0] = sol->m[iadr];
+            mtmp[1] = sol->m[iadr+1];
+            mtmp[2] = sol->m[iadr+3];
 
             // Rotation matrix.
             r[0][0] = ppt->n[0];
@@ -1779,14 +1735,15 @@ int MMG5_saveMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
           }
         }
         else {
-          for (i=0; i<sol->size; i++)  dbuf[i] = sol->m[sol->size*k+i];
+          iadr = sol->size*k;
+          for (i=0; i<sol->size; i++)  dbuf[i] = sol->m[iadr+i];
         }
       }
 
       if(!bin) {
         fprintf(inm,"%d",ppt->tmp);
         if ( sol->dim==2 ) {
-          iadr = (k-1)*sol->size+1;
+          iadr = k*sol->size;
           fprintf(inm," %.15lg %.15lg %.15lg %.15lg %.15lg %.15lg"
                   " %.15lg %.15lg %.15lg \n",
                   sol->m[iadr],sol->m[iadr+1],0.,sol->m[iadr+1],sol->m[iadr+2],0.,0.,0.,1.);
@@ -1800,7 +1757,7 @@ int MMG5_saveMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
       else {
         fwrite(&ppt->tmp,sw,1,inm);
         if ( sol->dim==2 ) {
-          iadr = (k-1)*sol->size+1;
+          iadr = k*sol->size;
           fwrite(&sol->m[iadr],sd,2,inm);
           dbuf[0] = dbuf[1] = dbuf[2] = 0.;
           dbuf[3] = 1.;

@@ -689,7 +689,7 @@ int MMG2D_loadSol(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
   rewind(inm);
   fseek(inm,posnp,SEEK_SET);
   for (k=1; k<=sol->np; k++) {
-    isol = (k-1) * sol->size + 1;
+    isol = k * sol->size;
     if (sol->ver == 1) {
       for (i=0; i<sol->size; i++) {
         if(!bin){
@@ -1475,7 +1475,7 @@ int MMG2D_saveSol(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
   for (k=1; k<=mesh->np; k++) {
     ppt = &mesh->point[k];
     if ( !M_VOK(ppt) )  continue;
-    isol = (k-1) * sol->size + 1;
+    isol = k * sol->size;
     if (sol->ver < 2) {
       if(!bin) {
         if(msh && sol->size > 1) {

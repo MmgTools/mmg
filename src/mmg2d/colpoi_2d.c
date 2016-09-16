@@ -127,13 +127,13 @@ int MMG2_colpoi(MMG5_pMesh mesh, MMG5_pSol sol,int iel,int iar,int ia,int ib,dou
   /*simu colps ppb-->ppa*/
   memcpy(coor, ppb->c,2*sizeof(double));
   memcpy(ppb->c,ppa->c,2*sizeof(double));
-  //memcpy(solu,&sol->m[3*(pib-1) + 1],sol->size*sizeof(double));
+  //memcpy(solu,&sol->m[3*pib],sol->size*sizeof(double));
   for(i=0 ; i<sol->size ; i++) {
-    solu[i] = sol->m[sol->size*(pib-1) + 1 + i];
-    sol->m[sol->size*(pib-1) + 1 + i] = sol->m[sol->size*(pia-1) + 1 + i];
+    solu[i] = sol->m[sol->size*pib + i];
+    sol->m[sol->size*pib + i] = sol->m[sol->size*pia + i];
   }
 
-  //memcpy(&sol->m[3*(pib-1) + 1],&sol->m[3*(pia-1) + 1],sol->size*sizeof(double));
+  //memcpy(&sol->m[3*pib],&sol->m[3*pia],sol->size*sizeof(double));
 
 
   /*check config*/
@@ -146,7 +146,7 @@ int MMG2_colpoi(MMG5_pMesh mesh, MMG5_pSol sol,int iel,int iar,int ia,int ib,dou
                           mesh->point[pt1->v[2]].c);
     if(air < EPSA) {
       memcpy(ppb->c,coor,2*sizeof(double));
-      memcpy(&sol->m[sol->size*(pib-1) + 1],solu,sol->size*sizeof(double));
+      memcpy(&sol->m[sol->size*pib],solu,sol->size*sizeof(double));
       free(cal);
       free(list);
       return(0);
@@ -155,7 +155,7 @@ int MMG2_colpoi(MMG5_pMesh mesh, MMG5_pSol sol,int iel,int iar,int ia,int ib,dou
     cal[i] = MMG2_caltri_in(mesh,sol,pt1);
     if (cal[i] > declic) {
       memcpy(ppb->c,coor,2*sizeof(double));
-      memcpy(&sol->m[sol->size*(pib-1) + 1],solu,sol->size*sizeof(double));
+      memcpy(&sol->m[sol->size*pib],solu,sol->size*sizeof(double));
       free(cal);
       free(list);
       return(0);
@@ -176,15 +176,15 @@ int MMG2_colpoi(MMG5_pMesh mesh, MMG5_pSol sol,int iel,int iar,int ia,int ib,dou
     pp2  = &mesh->point[i2];
     c1   = &pp1->c[0];
     c2   = &pp2->c[0];
-    iadr = (i1-1)*sol->size + 1;
+    iadr = i1*sol->size;
     m1   = &sol->m[iadr];
-    iadr = (i2-1)*sol->size + 1;
+    iadr = i2*sol->size;
     m2   = &sol->m[iadr];
 
     len = MMG2_length(c1,c2,m1,m2);
     if (len > LLONG1) {
       memcpy(ppb->c,coor,2*sizeof(double));
-      memcpy(&sol->m[sol->size*(pib-1) + 1],solu,sol->size*sizeof(double));
+      memcpy(&sol->m[sol->size*pib],solu,sol->size*sizeof(double));
       free(cal);
       free(list);
       return(0);
@@ -303,7 +303,7 @@ int MMG2_colpoi(MMG5_pMesh mesh, MMG5_pSol sol,int iel,int iar,int ia,int ib,dou
   _MMG2D_delElt(mesh,iel);
   _MMG2D_delElt(mesh,jel);
   memcpy(ppb->c,coor,2*sizeof(double));
-  memcpy(&sol->m[sol->size*(pib-1) + 1],solu,sol->size*sizeof(double));
+  memcpy(&sol->m[sol->size*pib],solu,sol->size*sizeof(double));
 
   free(list);
   free(cal);
@@ -480,8 +480,8 @@ int MMG2_colpoibdry(MMG5_pMesh mesh, MMG5_pSol sol,int iel,int iar,int ia,int ib
   /*simu colps ppb-->ppa*/
   memcpy(coor, ppb->c,2*sizeof(double));
   memcpy(ppb->c,ppa->c,2*sizeof(double));
-  memcpy(solu,&sol->m[sol->size*(pib-1) + 1],sol->size*sizeof(double));
-  memcpy(&sol->m[sol->size*(pib-1) + 1],&sol->m[sol->size*(pia-1) + 1],sol->size*sizeof(double));
+  memcpy(solu,&sol->m[sol->size*pib],sol->size*sizeof(double));
+  memcpy(&sol->m[sol->size*pib],&sol->m[sol->size*pia],sol->size*sizeof(double));
 
   /*check config*/
   for(i=2 ; i<=lon ; i++) {
@@ -492,7 +492,7 @@ int MMG2_colpoibdry(MMG5_pMesh mesh, MMG5_pSol sol,int iel,int iar,int ia,int ib
                           mesh->point[pt1->v[2]].c);
     if(air < EPSA) {
       memcpy(ppb->c,coor,2*sizeof(double));
-      memcpy(&sol->m[sol->size*(pib-1) + 1],solu,sol->size*sizeof(double));
+      memcpy(&sol->m[sol->size*pib],solu,sol->size*sizeof(double));
       _MMG5_SAFE_FREE(cal);
       _MMG5_SAFE_FREE(list);
       return(0);
@@ -501,7 +501,7 @@ int MMG2_colpoibdry(MMG5_pMesh mesh, MMG5_pSol sol,int iel,int iar,int ia,int ib
     cal[i] = MMG2_caltri_in(mesh,sol,pt1);
     if (cal[i] > declic) {
       memcpy(ppb->c,coor,2*sizeof(double));
-      memcpy(&sol->m[sol->size*(pib-1) + 1],solu,sol->size*sizeof(double));
+      memcpy(&sol->m[sol->size*pib],solu,sol->size*sizeof(double));
       _MMG5_SAFE_FREE(cal);
       _MMG5_SAFE_FREE(list);
       return(0);
@@ -522,15 +522,15 @@ int MMG2_colpoibdry(MMG5_pMesh mesh, MMG5_pSol sol,int iel,int iar,int ia,int ib
     pp2  = &mesh->point[i2];
     c1   = &pp1->c[0];
     c2   = &pp2->c[0];
-    iadr = (i1-1)*sol->size + 1;
+    iadr = i1*sol->size;
     m1   = &sol->m[iadr];
-    iadr = (i2-1)*sol->size + 1;
+    iadr = i2*sol->size;
     m2   = &sol->m[iadr];
 
     len = MMG2_length(c1,c2,m1,m2);
     if (len > LLONG1) {
       memcpy(ppb->c,coor,2*sizeof(double));
-      memcpy(&sol->m[sol->size*(pib-1) + 1],solu,sol->size*sizeof(double));
+      memcpy(&sol->m[sol->size*pib],solu,sol->size*sizeof(double));
       _MMG5_SAFE_FREE(cal);
       _MMG5_SAFE_FREE(list);
       return(0);
@@ -612,7 +612,7 @@ int MMG2_colpoibdry(MMG5_pMesh mesh, MMG5_pSol sol,int iel,int iar,int ia,int ib
   }
   _MMG2D_delElt(mesh,iel);
   memcpy(ppb->c,coor,2*sizeof(double));
-  memcpy(&sol->m[sol->size*(pib-1) + 1],solu,sol->size*sizeof(double));
+  memcpy(&sol->m[sol->size*pib],solu,sol->size*sizeof(double));
 
   _MMG5_SAFE_FREE(cal);
   _MMG5_SAFE_FREE(list);
