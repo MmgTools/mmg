@@ -164,7 +164,7 @@ int _MMG5_delone(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist) {
     vois[3]  = adja[3] >> 2;
     for (i=0; i<4; i++) {
       jel = vois[i];
-      if ( !jel || mesh->tetra[jel].mark != base ) {
+      if ( !jel || mesh->tetra[jel].flag != base ) {
         for (j=0; j<3; j++) {
           i1  = _MMG5_idir[i][j];
           ppt = &mesh->point[ pt1->v[i1] ];
@@ -245,7 +245,7 @@ int _MMG5_delone(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist) {
       j   = vois[i] % 4;
 
       /* external face */
-      if ( !jel || (mesh->tetra[jel].mark != base) ) {
+      if ( !jel || (mesh->tetra[jel].flag != base) ) {
         iel = ielnum[size++];
         assert(iel);
 
@@ -254,7 +254,7 @@ int _MMG5_delone(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist) {
         pt1->v[i] = ip;
         pt1->qual = _MMG5_orcal(mesh,sol,iel);
         pt1->ref = mesh->tetra[old].ref;
-
+        pt1->mark = mesh->mark;
         iadr = (iel-1)*4 + 1;
         adjb = &mesh->adja[iadr];
         adjb[i] = adja[i];
@@ -374,7 +374,7 @@ static int _MMG5_correction_ani(MMG5_pMesh mesh,MMG5_pSol met,int ip,int* list,i
       for (i=0; i<4; i++) {
         adj = vois[i];
         // MMG_cas = 0;// uncomment to debug
-        if ( adj && mesh->tetra[adj].mark == base)  continue;
+        if ( adj && mesh->tetra[adj].flag == base)  continue;
 
         ib = pt->v[ _MMG5_idir[i][0] ];
         ic = pt->v[ _MMG5_idir[i][1] ];
@@ -471,7 +471,7 @@ static int _MMG5_correction_ani(MMG5_pMesh mesh,MMG5_pSol met,int ip,int* list,i
       if ( i < 4 || pt->tag & MG_REQ ) {
         if ( ipil <= nedep )   {/*printf("on veut tout retirer ? %d %d\n",ipil,nedep);*/return(0);   }
         /* remove iel from list */
-        pt->mark = base-1;
+        pt->flag = base-1;
         list[ipil] = list[--lon];
         ncor = 1;
         break;
@@ -518,7 +518,7 @@ _MMG5_correction_iso(MMG5_pMesh mesh,int ip,int *list,int ilist,int nedep) {
       for (i=0; i<4; i++) {
         adj = vois[i];
         // MMG_cas = 0; // uncomment to debug
-        if ( adj && mesh->tetra[adj].mark == base )  continue;
+        if ( adj && mesh->tetra[adj].flag == base )  continue;
 
         ib = pt->v[ _MMG5_idir[i][0] ];
         ic = pt->v[ _MMG5_idir[i][1] ];
@@ -556,7 +556,7 @@ _MMG5_correction_iso(MMG5_pMesh mesh,int ip,int *list,int ilist,int nedep) {
       if ( i < 4 ||  pt->tag & MG_REQ ) {
         if ( ipil <= nedep )  {/*printf("on veut tout retirer ? %d %d\n",ipil,nedep);*/return(0);   }
         /* remove iel from list */
-        pt->mark = base-1;
+        pt->flag = base-1;
         list[ipil] = list[--lon];
 
         ncor = 1;
@@ -603,7 +603,7 @@ int _MMG5_cavity_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel,int ip,int* list,int 
 
   tref = mesh->tetra[list[0]/6].ref;
   for (k=0; k<lon; k++) {
-    mesh->tetra[list[k]/6].mark = base;
+    mesh->tetra[list[k]/6].flag = base;
 
     if (tref!=mesh->tetra[list[k]/6].ref) {
       //printf("pbs coquil %d %d tet %d\n",tref,mesh->tetra[list[k]/6].ref,list[k]/6);
@@ -639,7 +639,7 @@ int _MMG5_cavity_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel,int ip,int* list,int 
       voy = vois[i] % 4;
       pt  = &mesh->tetra[adj];
       /* boundary face */
-      if ( pt->mark == base || pt->ref != ptc->ref )  continue;
+      if ( pt->flag == base || pt->ref != ptc->ref )  continue;
       for (j=0,l=0; j<4; j++,l+=3) {
         memcpy(&ct[l],mesh->point[pt->v[j]].c,3*sizeof(double));
       }
@@ -688,14 +688,14 @@ int _MMG5_cavity_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel,int ip,int* list,int 
 
         pt1 = &mesh->tetra[adi];
 //#warning demander a cecile quand ca arrive??
-        if ( pt1->mark == base ) {
+        if ( pt1->flag == base ) {
           if ( pt1->ref != tref )  break;
         }
       }
       /* store tetra */
       if ( j == 4 ) {
         if ( pt->tag & MG_REQ ) isreq = 1;
-        pt->mark = base;
+        pt->flag = base;
         list[ilist++] = adj;
       }
     }
@@ -751,7 +751,7 @@ int _MMG5_cavity_iso(MMG5_pMesh mesh,MMG5_pSol sol,int iel,int ip,int *list,int 
 
   tref = mesh->tetra[list[0]/6].ref;
   for (k=0; k<lon; k++) {
-    mesh->tetra[list[k]/6].mark = base;
+    mesh->tetra[list[k]/6].flag = base;
 
     if (tref!=mesh->tetra[list[k]/6].ref) {
       //printf("pbs coquil %d %d tet %d\n",tref,mesh->tetra[list[k]/6].ref,list[k]/6);
@@ -784,7 +784,7 @@ int _MMG5_cavity_iso(MMG5_pMesh mesh,MMG5_pSol sol,int iel,int ip,int *list,int 
       voy = vois[i] % 4;
       pt  = &mesh->tetra[adj];
       /* boundary face */
-      if ( pt->mark == base || pt->ref != ptc->ref )  continue;
+      if ( pt->flag == base || pt->ref != ptc->ref )  continue;
 
       for (j=0,l=0; j<4; j++,l+=3) {
         memcpy(&ct[l],mesh->point[pt->v[j]].c,3*sizeof(double));
@@ -812,14 +812,14 @@ int _MMG5_cavity_iso(MMG5_pMesh mesh,MMG5_pSol sol,int iel,int ip,int *list,int 
         assert(adi !=jel);
 
         pt1 = &mesh->tetra[adi];
-        if ( pt1->mark == base ) {
+        if ( pt1->flag == base ) {
           if ( pt1->ref != tref )  break;
         }
       }
       /* store tetra */
       if ( j == 4 ) {
         if ( pt->tag & MG_REQ ) isreq = 1;
-        pt->mark = base;
+        pt->flag = base;
         list[ilist++] = adj;
       }
     }

@@ -78,16 +78,17 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
   int16_t    tag;
   char       imax,j,i,i1,i2,ifa0,ifa1;
   int        lon,ret,ier;
-  double     lmin;
+  double     lmin,lfilt;
   int        imin,iq;
   int        ii;
   double     lmaxtet,lmintet;
-  int        imaxtet,imintet;
+  int        imaxtet,imintet,base;
 
+  base  = ++mesh->mark;
   for (k=1; k<=ne; k++) {
     pt = &mesh->tetra[k];
     if ( !MG_EOK(pt)  || (pt->tag & MG_REQ) )   continue;
-
+    else if ( pt->mark < base-1 )  continue;
     pxt = pt->xt ? &mesh->xtetra[pt->xt] : 0;
 
     /* 1) find longest and shortest edge  and try to manage it*/
@@ -326,7 +327,12 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
         }
 
         /* Delaunay */
-        if ( !_MMG5_buckin(mesh,met,bucket,ip) ) {
+        if ( lmax<1.6 ) {
+          lfilt = 0.7;
+        }
+        else lfilt = 0.2;
+
+        if ( !_MMG5_buckin(mesh,met,bucket,ip,lfilt) ) {
           _MMG3D_delPt(mesh,ip);
           (*ifilt)++;
           goto collapse;
@@ -650,7 +656,13 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
               goto collapse2;
             }
           }
-          if ( /*lmax>4 &&*/ /*it &&*/  !_MMG5_buckin(mesh,met,bucket,ip) ) {
+
+          if ( lmaxtet<1.6 ) {
+            lfilt = 0.7;
+          }
+          else lfilt = 0.2;
+
+          if (  /*it &&*/  !_MMG5_buckin(mesh,met,bucket,ip,lfilt) ) {
             _MMG3D_delPt(mesh,ip);
             (*ifilt)++;
             goto collapse2;
@@ -832,7 +844,6 @@ _MMG5_adpsplcol(MMG5_pMesh mesh,MMG5_pSol met,_MMG5_pBucket bucket, int* warn) {
 
     if ( ns < 10 && abs(nc-ns) < 3 )  break;
     else if ( it > 3 && abs(nc-ns) < 0.3 * MG_MAX(nc,ns) )  break;
-
   }
   while( ++it < maxit && nc+ns > 0 );
 
