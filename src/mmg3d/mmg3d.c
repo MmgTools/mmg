@@ -263,7 +263,7 @@ int main(int argc,char *argv[]) {
 
   MMG5_pMesh      mesh;
   MMG5_pSol       met,disp;
-  int             ier,msh;
+  int             ier,ierSave,msh;
   char            stim[32];
 
   fprintf(stdout,"  -- MMG3d, Release %s (%s) \n",MG_VER,MG_REL);
@@ -392,11 +392,11 @@ int main(int argc,char *argv[]) {
       msh = 1;
 
     if ( !msh )
-      ier = MMG3D_saveMesh(mesh,mesh->nameout);
+      ierSave = MMG3D_saveMesh(mesh,mesh->nameout);
     else
-      ier = MMG3D_saveMshMesh(mesh,met,mesh->nameout);
+      ierSave = MMG3D_saveMshMesh(mesh,met,mesh->nameout);
 
-    if ( !ier )
+    if ( !ierSave )
       _MMG5_RETURN_AND_FREE(mesh,met,disp,MMG5_STRONGFAILURE);
 
     if ( !msh && !MMG3D_saveSol(mesh,met,met->nameout) )

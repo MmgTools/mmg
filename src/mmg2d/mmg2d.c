@@ -376,7 +376,7 @@ int main(int argc,char *argv[]) {
   MMG5_pMesh    mesh;
   MMG5_pSol     sol;
   double        qdegrad[2];
-  int           ier,msh;
+  int           ier,ierSave,msh;
   char          stim[32];
 
   /* interrupts */
@@ -480,11 +480,11 @@ int main(int argc,char *argv[]) {
     msh = 1;
 
   if ( !msh )
-    ier = MMG2D_saveMesh(mesh,mesh->nameout);
+    ierSave = MMG2D_saveMesh(mesh,mesh->nameout);
   else
-    ier = MMG2D_saveMshMesh(mesh,sol,mesh->nameout);
+    ierSave = MMG2D_saveMshMesh(mesh,sol,mesh->nameout);
 
-  if ( !ier )
+  if ( !ierSave )
     _MMG2D_RETURN_AND_FREE(mesh,sol,MMG5_STRONGFAILURE);
 
   if( !msh &&  sol->np )
@@ -497,5 +497,6 @@ int main(int argc,char *argv[]) {
   chrono(OFF,&MMG5_ctim[0]);
   printim(MMG5_ctim[0].gdif,stim);
   fprintf(stdout,"\n   MMG2D: ELAPSED TIME  %s\n",stim);
+
   _MMG2D_RETURN_AND_FREE(mesh,sol,ier);
 }

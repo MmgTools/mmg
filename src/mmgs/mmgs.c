@@ -246,7 +246,7 @@ int _MMGS_defaultOption(MMG5_pMesh mesh,MMG5_pSol met) {
 int main(int argc,char *argv[]) {
   MMG5_pMesh mesh;
   MMG5_pSol  met;
-  int        ier,msh;
+  int        ier,ierSave,msh;
   char       stim[32];
 
   fprintf(stdout,"  -- MMGS, Release %s (%s) \n",MG_VER,MG_REL);
@@ -330,11 +330,11 @@ int main(int argc,char *argv[]) {
       msh = 1;
 
     if ( !msh )
-      ier = MMGS_saveMesh(mesh,mesh->nameout);
+      ierSave = MMGS_saveMesh(mesh,mesh->nameout);
     else
-      ier = MMGS_saveMshMesh(mesh,met,mesh->nameout);
+      ierSave = MMGS_saveMshMesh(mesh,met,mesh->nameout);
 
-    if ( !ier )
+    if ( !ierSave )
       _MMGS_RETURN_AND_FREE(mesh,met,MMG5_STRONGFAILURE);
 
     if ( !msh && !MMGS_saveSol(mesh,met,met->nameout) )
