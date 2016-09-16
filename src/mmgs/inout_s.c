@@ -993,7 +993,7 @@ int MMGS_saveMesh(MMG5_pMesh mesh, const char* filename) {
     for (k=1; k<=mesh->np; k++) {
       ppt = &mesh->point[k];
       if ( !MG_VOK(ppt) )  continue;
-      else if ( !(ppt->tag & MG_GEO) ) {
+      else if ( !(ppt->tag & MG_GEO) && !(ppt->tag & MG_CRN) ) {
         if ( ppt->tag & MG_REF ) {
           assert (mesh->xp && mesh->xpoint);
           go = &mesh->xpoint[ppt->xp];
