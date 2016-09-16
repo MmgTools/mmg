@@ -199,8 +199,8 @@ typedef _MMG5_Bucket * _MMG5_pBucket;
 _MMG5_pBucket _MMG5_newBucket(MMG5_pMesh ,int );
 int     _MMG5_addBucket(MMG5_pMesh ,_MMG5_pBucket ,int );
 int     _MMG5_delBucket(MMG5_pMesh ,_MMG5_pBucket ,int );
-int     _MMG5_buckin_iso(MMG5_pMesh mesh,MMG5_pSol sol,_MMG5_pBucket bucket,int ip);
-int     _MMG5_buckin_ani(MMG5_pMesh mesh,MMG5_pSol sol,_MMG5_pBucket bucket,int ip);
+int     _MMG5_buckin_iso(MMG5_pMesh mesh,MMG5_pSol sol,_MMG5_pBucket bucket,int ip,double lfilt);
+int     _MMG5_buckin_ani(MMG5_pMesh mesh,MMG5_pSol sol,_MMG5_pBucket bucket,int ip,double lfilt);
 
 /* prototypes */
 extern double _MMG5_det3pt1vec(double c0[3],double c1[3],double c2[3],double v[3]);
@@ -402,7 +402,7 @@ int    (*_MMG5_movbdyrefpt)(MMG5_pMesh, MMG5_pSol, int*, int, int*, int ,int);
 int    (*_MMG5_movbdynompt)(MMG5_pMesh, MMG5_pSol, int*, int, int*, int ,int);
 int    (*_MMG5_movbdyridpt)(MMG5_pMesh, MMG5_pSol, int*, int, int*, int ,int);
 int    (*_MMG5_cavity)(MMG5_pMesh ,MMG5_pSol ,int ,int ,int *,int );
-int    (*_MMG5_buckin)(MMG5_pMesh ,MMG5_pSol ,_MMG5_pBucket ,int );
+int    (*_MMG5_buckin)(MMG5_pMesh ,MMG5_pSol ,_MMG5_pBucket ,int ,double );
 
 /**
  * \param mesh pointer toward the mesh structure.

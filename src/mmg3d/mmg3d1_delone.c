@@ -78,7 +78,7 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
   int16_t    tag;
   char       imax,j,i,i1,i2,ifa0,ifa1;
   int        lon,ret,ier;
-  double     lmin;
+  double     lmin,lfilt;
   int        imin,iq;
   int        ii;
   double     lmaxtet,lmintet;
@@ -326,7 +326,12 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
         }
 
         /* Delaunay */
-        if ( !_MMG5_buckin(mesh,met,bucket,ip) ) {
+        if ( lmax<1.6 ) {
+          lfilt = 0.7;
+        }
+        else lfilt = 0.2;
+
+        if ( !_MMG5_buckin(mesh,met,bucket,ip,lfilt) ) {
           _MMG3D_delPt(mesh,ip);
           (*ifilt)++;
           goto collapse;
@@ -650,7 +655,13 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
               goto collapse2;
             }
           }
-          if ( /*lmax>4 &&*/ /*it &&*/  !_MMG5_buckin_iso(mesh,met,bucket,ip) ) {
+
+          if ( lmaxtet<1.6 ) {
+            lfilt = 0.7;
+          }
+          else lfilt = 0.2;
+
+          if (  /*it &&*/  !_MMG5_buckin(mesh,met,bucket,ip,lfilt) ) {
             _MMG3D_delPt(mesh,ip);
             (*ifilt)++;
             goto collapse2;

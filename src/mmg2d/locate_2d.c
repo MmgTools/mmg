@@ -217,7 +217,7 @@ int MMG2_cutEdgeTriangle(MMG5_pMesh mesh,int k,int ia,int ib) {
 int MMG2_findTria(MMG5_pMesh mesh,int ip) {
   MMG5_pTria     pt;
   MMG5_pPoint    ppt,p0,p1,p2;
-  int       find,iel,base,iadr,*adja,isign;
+  int       find,iel,base,iadr,*adja,isign,k;
   double    ax,ay,bx,by,dd,epsra,cx,cy,area1,area2,area3;
 
   ppt  = &mesh->point[ip];
@@ -299,7 +299,17 @@ int MMG2_findTria(MMG5_pMesh mesh,int ip) {
       cb[2] = aire3 * dd;*/
 
   } while (!find);
-  return(iel);
+
+  /*exhaustive search*/
+  for (k=1 ; k<=mesh->nt ; k++) {
+    pt = &mesh->tria[k];
+    if(!MG_EOK(pt)) continue;
+    if (pt->v[0]==ip || pt->v[1]==ip || pt->v[2]==ip) break;
+  }
+  if(k<=mesh->nt) {
+    return(k);
+  }
+  return(0);
 }
 
 /* Calculate the list of all the triangles intersected by edge (ia,ib), starting from 
