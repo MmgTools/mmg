@@ -255,3 +255,18 @@ ADD_TEST(NAME MultiDom_Ellipse_2
 ADD_TEST(NAME NM_Cube2
   COMMAND ${EXECUT_MMG3D} -v 6 -d -hmax 0.05 ${MMG3D_CI_TESTS}/NM_Cube/nm.o
   -out ${MMG3D_CI_TESTS}/NM_Cube/nm.o.o.meshb)
+
+
+ADD_TEST(NAME TorusholesAni_${EXECUT_MMG3D}_2
+ COMMAND ${EXECUT_MMG3D} -v 5 -hgrad 1.15
+ ${MMG_CI_TESTS}/TorusholesAni/torusholes.o.meshb
+ -out ${MMG_CI_TESTS}/TorusholesAni/torusholes.o.o.meshb)
+
+SET_TESTS_PROPERTIES(TorusholesAni_${EXECUT_MMG3D}_2 PROPERTIES DEPENDS TorusholesAni_${EXECUT_MMG3D})
+
+ADD_TEST(NAME TorusholesAni_chocCyl_${EXECUT_MMG3D}_2
+ COMMAND ${EXECUT_MMG3D} -v 5 -hgrad 1.15
+ ${MMG_CI_TESTS}/TorusholesAni_chocCyl/torusholesTiny.o.meshb
+ -out ${MMG_CI_TESTS}/TorusholesAni_chocCyl/torusholesTiny.o.o.meshb)
+
+SET_TESTS_PROPERTIES(TorusholesAni_chocCyl_${EXECUT_MMG3D}_2 PROPERTIES DEPENDS TorusholesAni_chocCyl_${EXECUT_MMG3D})

@@ -310,7 +310,6 @@ IF ( BUILD_TESTING )
 
     IF ( RUN_AGAIN )
       INCLUDE( ${CMAKE_SOURCE_DIR}/cmake/testing/mmg3d_rerun_tests.cmake )
-      INCLUDE( ${CMAKE_SOURCE_DIR}/cmake/testing/mmg_rerun_tests.cmake )
     ENDIF()
 
   ENDIF ( MMG3D_CI )
