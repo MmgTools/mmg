@@ -252,7 +252,7 @@ IF ( BUILD_TESTING )
     INCLUDE( ${CMAKE_SOURCE_DIR}/cmake/testing/mmgs_tests.cmake )
 
     IF ( RUN_AGAIN )
-      INCLUDE( ${CMAKE_SOURCE_DIR}/cmake/testing/mmg_rerun_tests.cmake )
+      INCLUDE( ${CMAKE_SOURCE_DIR}/cmake/testing/mmgs_rerun_tests.cmake )
     ENDIF()
 
 
