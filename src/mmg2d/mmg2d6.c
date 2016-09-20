@@ -57,7 +57,7 @@ int MMG2_mmg2d6(MMG5_pMesh mesh, MMG5_pSol sol) {
     if ( !M_EOK(pt) )  continue;
     for (i=0; i<3; i++) {
       ppt = &mesh->point[ pt->v[i] ];
-      ppt->tag &= ~M_NUL;
+      ppt->tag &= ~MG_NUL;
     }
   }
 
@@ -86,7 +86,7 @@ int MMG2_mmg2d6(MMG5_pMesh mesh, MMG5_pSol sol) {
   for (k=1; k<=mesh->np; k++) {
     ppt = &mesh->point[k];
 
-    ppt->tag |= M_NUL;
+    ppt->tag |= MG_NUL;
 
   }
 
@@ -96,7 +96,7 @@ int MMG2_mmg2d6(MMG5_pMesh mesh, MMG5_pSol sol) {
     if ( !M_EOK(pt) )  continue;
     for (i=0; i<3; i++) {
       ppt = &mesh->point[ pt->v[i] ];
-      ppt->tag &= ~M_NUL;
+      ppt->tag &= ~MG_NUL;
     }
   }
 

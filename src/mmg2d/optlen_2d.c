@@ -77,7 +77,7 @@ int optlen_ani(MMG5_pMesh mesh,MMG5_pSol sol,double declic,int base) {
 
       /* optimal point */
       ca   = &ppa->c[0];
-      iadr = (ipa-1)*sol->size + 1;
+      iadr = ipa*sol->size;
       mp   = &sol->m[iadr];
       cx   = 0.0;
       cy   = 0.0;
@@ -95,7 +95,7 @@ int optlen_ani(MMG5_pMesh mesh,MMG5_pSol sol,double declic,int base) {
           ipb  = pt1->v[ MMG2_idir[nk + j] ];
           ppb  = &mesh->point[ipb];
           cb   = &ppb->c[0];
-          iadr = (ipb-1)*sol->size + 1;
+          iadr = ipb*sol->size;
           mb   = &sol->m[iadr];
 
           len = MMG2_length(ca,cb,mp,mb);
@@ -221,7 +221,7 @@ int optlen_iso(MMG5_pMesh mesh,MMG5_pSol sol,double declic,int base) {
 
       /* optimal point */
       ca   = &ppa->c[0];
-      iadr = (ipa-1)*sol->size + 1;
+      iadr = ipa*sol->size;
       hp   = sol->m[iadr];
       cx   = 0.0;
       cy   = 0.0;
@@ -239,7 +239,7 @@ int optlen_iso(MMG5_pMesh mesh,MMG5_pSol sol,double declic,int base) {
           ipb  = pt1->v[ MMG2_idir[nk + j] ];
           ppb  = &mesh->point[ipb];
           cb   = &ppb->c[0];
-          iadr = (ipb-1)*sol->size + 1;
+          iadr = ipb*sol->size;
           hb   = sol->m[iadr];
 
           len = MMG2_length(ca,cb,&hp,&hb);

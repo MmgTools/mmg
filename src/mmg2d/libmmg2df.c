@@ -45,21 +45,6 @@
 #include "mmgcommon.h"
 
 /**
- * See \ref MMG2D_saveMesh function in \ref mmg2d/libmmg2d.h file.
- */
-FORTRAN_NAME(MMG2D_SAVEMESH,mmg2d_savemesh,(MMG5_pMesh *mesh,char *meshin,int *strlen, int* retval),
-             (mesh,meshin,strlen,retval)){
-  char *tmp = NULL;
-
-  tmp = (char*)malloc((*strlen+1)*sizeof(char));
-  strncpy(tmp,meshin,*strlen);
-  tmp[*strlen] = '\0';
-  *retval = MMG2D_saveMesh(*mesh,tmp);
-  _MMG5_SAFE_FREE(tmp);
-
-  return;
-}
-/**
  * See \ref MMG2D_mmg2dlib function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_MMG2DLIB,mmg2d_mmg2dlib,(MMG5_pMesh *mesh,MMG5_pSol *met

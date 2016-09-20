@@ -119,7 +119,7 @@ void _MMGS_Free_all_var( va_list argptr );
 void _MMGS_Free_structures_var( va_list argptr );
 void _MMGS_Free_names_var( va_list argptr );
 
-int  zaldy(MMG5_pMesh mesh);
+int  _MMGS_zaldy(MMG5_pMesh mesh);
 int  assignEdge(MMG5_pMesh mesh);
 int  _MMGS_analys(MMG5_pMesh mesh);
 int  _MMGS_inqua(MMG5_pMesh,MMG5_pSol);

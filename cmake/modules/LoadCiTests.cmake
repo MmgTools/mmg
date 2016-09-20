@@ -266,6 +266,9 @@ SET(ADDRESS
   https://drive.google.com/uc?export=download&id=0B3X6EwOEKqHmbFhOaE5UVlNQOFk
   https://drive.google.com/uc?export=download&id=0B3X6EwOEKqHmLWp4SFpyN3c4d0U
   https://drive.google.com/uc?export=download&id=0B3X6EwOEKqHmZm0tODJtRXM2eHc
+  https://drive.google.com/uc?export=download&id=0B3X6EwOEKqHmZ29NVVpyRlFob1k
+  https://drive.google.com/uc?export=download&id=0B3X6EwOEKqHmd0lmd1pHR1VKUlU
+  https://drive.google.com/uc?export=download&id=0B3X6EwOEKqHmY0VWR2pCbXRWLWM
   )
 
 SET(FILENAME
@@ -289,6 +292,9 @@ SET(FILENAME
   ${CMAKE_SOURCE_DIR}/ci_tests/mmg3d.tgz.ar
   ${CMAKE_SOURCE_DIR}/ci_tests/mmg3d.tgz.as
   ${CMAKE_SOURCE_DIR}/ci_tests/mmg3d.tgz.at
+  ${CMAKE_SOURCE_DIR}/ci_tests/mmg3d.tgz.au
+  ${CMAKE_SOURCE_DIR}/ci_tests/mmg3d.tgz.av
+  ${CMAKE_SOURCE_DIR}/ci_tests/mmg3d.tgz.aw
   )
 
 
@@ -297,7 +303,7 @@ IF ( GET_MMG3D_TESTS MATCHES "TRUE" )
 
   SET(LOAD_OK 1)
 
-  FOREACH( i RANGE 0 19)
+  FOREACH( i RANGE 0 22)
     LIST(GET ADDRESS  ${i} ADDRESS_i)
     LIST(GET FILENAME ${i} FILENAME_i)
 
@@ -321,6 +327,7 @@ then untar it in the project directory mmg/ by default).")
       COMMAND cat ${FILENAME}
       COMMAND tar -xzf -
       WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/ci_tests/
+      TIMEOUT 10000
       )
     IF ( NOT EXISTS ${CMAKE_SOURCE_DIR}/ci_tests/mmg3d )
       MESSAGE("\n")

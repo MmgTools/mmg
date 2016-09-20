@@ -1676,7 +1676,7 @@ END INTERFACE
 !  * \param filename name of file.
 !  * \return 0 if failed, 1 otherwise.
 !  *
-!  * Read mesh and sol at MSH ASCII file format (.msh extension). We read only
+!  * Read mesh and sol at MSH file format (.msh extension). We read only
 !  * low-order points, edges, tria, quad, tetra and prisms.
 !  *
 !  * \remark Fortran interface:
@@ -1717,6 +1717,29 @@ END INTERFACE
 
 
 ! int MMG3D_saveMesh(MMG5_pMesh mesh, const char *filename);
+! /**
+!  * \param mesh pointer toward the mesh structure.
+!  * \param sol pointer toward the solution structure.
+!  * \param filename name of file.
+!  * \return 0 if failed, 1 otherwise.
+!  *
+!  * Write mesh and sol at MSH file format (.msh extension). Write binary file for
+!  * .mshb extension and ASCII for .msh one.
+!  *
+!  * \remark Fortran interface:
+!  */
+INTERFACE
+  SUBROUTINE MMG3D_SAVEMSHMESH(mesh,sol,filename,strlen,retval)
+    MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,sol
+    CHARACTER(LEN=*), INTENT(IN)   :: filename
+    INTEGER, INTENT(IN)            :: strlen
+    INTEGER, INTENT(OUT)           :: retval
+  END SUBROUTINE
+END INTERFACE
+!  *
+!  */
+
+!   int MMG3D_saveMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename);
 ! /**
 !  * \param mesh pointer toward the mesh structure.
 !  * \param met pointer toward the sol structure.

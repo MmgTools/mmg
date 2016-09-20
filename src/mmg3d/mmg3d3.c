@@ -382,9 +382,10 @@ static int _MMG5_coltetlag(MMG5_pMesh mesh,MMG5_pSol met,int itdeg) {
   MMG5_pPoint     p0,p1;
   double     ll,ux,uy,uz,hmi2;
   int        k,nc,list[MMG3D_LMAX+2],ilist,base,nnm;
-  char       i,j,tag,ip,iq,isnm;
+  int16_t    tag;
   int        ier;
-  
+  char       i,j,ip,iq,isnm;
+
   nc = nnm = 0;
   hmi2 = mesh->info.hmin*mesh->info.hmin;
   

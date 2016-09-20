@@ -91,9 +91,9 @@ int MMG2_prilen(MMG5_pMesh mesh,MMG5_pSol sol) {
       ca  = &mesh->point[pt->v[ipa]].c[0];
       cb  = &mesh->point[pt->v[ipb]].c[0];
 
-      iadr = (pt->v[ipa]-1)*sol->size + 1;
+      iadr = pt->v[ipa]*sol->size;
       ma   = &sol->m[iadr];
-      iadr = (pt->v[ipb]-1)*sol->size + 1;
+      iadr = pt->v[ipb]*sol->size;
       mb   = &sol->m[iadr];
 
       len = MMG2_length(ca,cb,ma,mb);

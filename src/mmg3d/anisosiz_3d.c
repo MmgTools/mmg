@@ -596,7 +596,8 @@ static int _MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,int kel, int iface, int
   }
 
   /* Computation of the rotation matrix T_p0 S -> [z = 0] */
-  assert( p0->xp && !MG_SIN(p0->tag) && MG_EDG(p0->tag) && !(MG_NOM & p0->tag) );
+  assert( p0->xp && !(p0->tag & MG_CRN) && MG_EDG(p0->tag) && !(MG_NOM & p0->tag) );
+
   px0 = &mesh->xpoint[p0->xp];
 
   n  = &px0->n1[0];
@@ -862,7 +863,14 @@ static int _MMG5_defmetreg(MMG5_pMesh mesh,MMG5_pSol met,int kel,int iface, int 
   }
 
   /* Computation of the rotation matrix T_p0 S -> [z = 0] */
-  assert( p0->xp && !MG_SIN(p0->tag) && !MG_EDG(p0->tag) && !(MG_NOM & p0->tag) );
+  if ( !(p0->tag & MG_NOSURF) ) {
+      assert( p0->xp && !MG_SIN(p0->tag) && !MG_EDG(p0->tag)
+              && !(MG_NOM & p0->tag) );
+  }
+  else {
+    assert( !(p0->tag & MG_CRN) && !MG_EDG(p0->tag) && !(MG_NOM & p0->tag) );
+  }
+
   px0 = &mesh->xpoint[p0->xp];
 
   n  = &px0->n1[0];
@@ -1259,6 +1267,117 @@ int _MMG3D_intextmet(MMG5_pMesh mesh,MMG5_pSol met,int np,double me[6]) {
 }
 
 
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param iel tetra in which we work
+ * \param iploc local index of point where metric must be defined
+ * \param iface face to which belong \a iploc
+ * \return 0 if fail, 1 otherwise.
+ *
+ * Define metric at point \a iploc of tetra \a iel for \a iploc a surface point
+ * marked by option nosurf.
+ *
+ * If a metric is provided, preserve it except on
+ * ridges points where a metric with hmax size and directions normal to the
+ * ridges is intersected with the user metric.
+ *
+ * Without initial metric, an isotropic metric is computed from the mean of the
+ * lengths of the edges passing through the point (except on ridges points).
+ *
+ */
+static inline
+int _MMG3D_nosurfsiz_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel, int iploc,
+                         int iface,int ismet) {
+
+  MMG5_pTetra   pt;
+  MMG5_pPoint   ppt,p0,p1;
+  double        mm[6],hmin, hmax,isqhmax,ux,uy,uz,lm;
+  int           lists[MMG3D_LMAX+2],listv[MMG3D_LMAX+2],ilists,ilistv;
+  int           iadr,i0,ip0,ip1,i1,ia,j;
+
+  pt = &mesh->tetra[iel];
+  iadr  = pt->v[iploc]*6;
+  ppt   = &mesh->point[pt->v[iploc]];
+
+  if ( ismet ) {
+    /* Keep the metric provided by the user except over the ridges */
+    if ( !( (ppt->tag & MG_CRN) || (ppt->tag & MG_NOM) )
+         && ppt->tag & MG_GEO ) {
+      memcpy(mm,&met->m[6*(pt->v[iploc])],6*sizeof(double));
+
+      /** First step: search for local parameters */
+      if ( _MMG5_boulesurfvolp(mesh,iel,iploc,iface,listv,&ilistv,lists,&ilists,0)!=1 ||
+           !_MMG3D_localParamReg(mesh,pt->v[iploc],listv,ilistv,lists,ilists,NULL,NULL,&hmax) ) {
+        hmax = mesh->info.hmax;
+      }
+      isqhmax =  1.0 / (hmax*hmax);
+
+      met->m[iadr]   = met->m[iadr+1] = met->m[iadr+2] = isqhmax;
+      met->m[iadr+3] = met->m[iadr+4] = isqhmax;
+      met->m[iadr+5] = 0;
+      if ( !_MMG3D_intextmet(mesh,met,pt->v[iploc],mm) ) {
+        fprintf(stderr,"%s:%d:Error: unable to intersect metrics"
+                " at point %d.\n",__FILE__,__LINE__, pt->v[iploc]);
+        return(0);
+      }
+    }
+  }
+  else {
+    // To improve: compute the volume and surface ball af the non-manifold
+    // point to apply local parameters
+    if ( !ppt->tag & MG_NOM ) {
+      if ( _MMG5_boulesurfvolp(mesh,iel,iploc,iface,listv,&ilistv,lists,&ilists,0)!=1 ||
+        !_MMG3D_localParamReg(mesh,pt->v[iploc],listv,ilistv,lists,ilists,NULL,&hmin,&hmax) ) {
+        hmax = mesh->info.hmax;
+      }
+    }
+
+    /* Compute the metric as the mean edge length except over the ridges */
+    if ( !( (ppt->tag & MG_CRN) || (ppt->tag & MG_NOM) ) && ppt->tag & MG_GEO )
+    {
+      isqhmax =  1.0 / (hmax*hmax);
+      met->m[iadr  ] = met->m[iadr+1] = met->m[iadr+2] = isqhmax;
+      met->m[iadr+3] = met->m[iadr+4] = isqhmax;
+      met->m[iadr+5] = 0;
+    }
+    else if ( ppt->tag & MG_NOM ) {
+      i0 = _MMG5_idirinv[iface][iploc];
+      j = _MMG5_inxt2[i0];
+      ia = _MMG5_iarf[iface][j];
+      i0 = _MMG5_iare[ia][0];
+      i1 = _MMG5_iare[ia][1];
+      ip0 = pt->v[i0];
+      ip1 = pt->v[i1];
+      p0  = &mesh->point[ip0];
+      p1  = &mesh->point[ip1];
+      if ( !MG_EDG(mesh->xtetra[pt->xt].tag[ia]) ) return(0);
+
+      /** First step: search for local parameters */
+      if ( !_MMG3D_localParamNm(mesh,iel,iface,ia,NULL,&hmin,&hmax) ) {
+        hmin  = mesh->info.hmin;
+        hmax  = mesh->info.hmax;
+      }
+      /** Second step: Very rough eval of the metric at edge/ridge point */
+      ux = (p0->c[0]-p1->c[0]);
+      uy = (p0->c[1]-p1->c[1]);
+      uz = (p0->c[2]-p1->c[2]);
+      lm = sqrt(ux*ux + uy*uy + uz*uz);
+
+      lm = MG_MIN(hmax,MG_MAX(hmin,lm));
+      met->m[ip0] = MG_MIN(met->m[ip0],lm);
+    }
+    else {
+      met->m[iadr] = _MMG5_meansizreg_iso(mesh,met,iploc,lists,ilists,hmin,hmax);
+      met->m[iadr+3] = met->m[iadr+5] = met->m[iadr+0];
+      met->m[iadr+1] = met->m[iadr+2] = met->m[iadr+4] = 0;
+    }
+  }
+
+  return(1);
+
+}
+
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -1273,7 +1392,7 @@ int _MMG3D_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTetra   pt;
   MMG5_pxTetra  pxt;
   MMG5_pPoint   ppt;
-  double        mm[6];
+  double        mm[6],isqhmax;
   int           k,l,iploc;
   char          i,ismet;
 
@@ -1323,25 +1442,30 @@ int _MMG3D_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
         ppt   = &mesh->point[pt->v[iploc]];
 
         if ( ppt->flag || !MG_VOK(ppt) )  continue;
-        if ( ismet )  memcpy(mm,&met->m[6*(pt->v[iploc])],6*sizeof(double));
 
-        if ( MG_SIN(ppt->tag) || (ppt->tag & MG_NOM) ) {
-          if ( !_MMG5_defmetsin(mesh,met,k,l,iploc) )  continue;
-        }
-        else if ( ppt->tag & MG_GEO ) {
-          if ( !_MMG5_defmetrid(mesh,met,k,l,iploc))  continue;
-        }
-        else if ( ppt->tag & MG_REF ) {
-          if ( !_MMG5_defmetref(mesh,met,k,l,iploc) )  continue;
+        if ( ppt->tag & MG_NOSURF ) {
+          if ( !_MMG3D_nosurfsiz_ani(mesh,met,k,iploc,l,ismet) ) continue;
         }
         else {
-          if ( !_MMG5_defmetreg(mesh,met,k,l,iploc) )  continue;
-        }
-        if ( ismet ) {
-          if ( !_MMG3D_intextmet(mesh,met,pt->v[iploc],mm) ) {
-            fprintf(stderr,"%s:%d:Error: unable to intersect metrics"
-                    " at point %d.\n",__FILE__,__LINE__, pt->v[iploc]);
-            return(0);
+          if ( ismet )  memcpy(mm,&met->m[6*(pt->v[iploc])],6*sizeof(double));
+
+          if ( (MG_SIN(ppt->tag) || (ppt->tag & MG_NOM) ) ) {
+            if ( !_MMG5_defmetsin(mesh,met,k,l,iploc) )  continue;
+          }
+          else if ( ppt->tag & MG_GEO ) {
+            if ( !_MMG5_defmetrid(mesh,met,k,l,iploc))  continue;
+          }
+          else if ( ppt->tag & MG_REF ) {
+            if ( !_MMG5_defmetref(mesh,met,k,l,iploc) )  continue;
+          } else {
+            if ( !_MMG5_defmetreg(mesh,met,k,l,iploc) )  continue;
+          }
+          if ( ismet ) {
+            if ( !_MMG3D_intextmet(mesh,met,pt->v[iploc],mm) ) {
+              fprintf(stderr,"%s:%d:Error: unable to intersect metrics"
+                      " at point %d.\n",__FILE__,__LINE__, pt->v[iploc]);
+              return(0);
+            }
           }
         }
         ppt->flag = 1;

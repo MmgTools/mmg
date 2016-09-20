@@ -75,18 +75,20 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree,int ne,
   MMG5_pxPoint    pxp;
   double     dd,len,lmax,o[3],to[3],no1[3],no2[3],v[3];
   int        k,ip,ip1,ip2,list[MMG3D_LMAX+2],ilist,lists[MMG3D_LMAX+2],ilists,ref;
-  char       imax,tag,j,i,i1,i2,ifa0,ifa1;
+  int16_t    tag;
+  char       imax,j,i,i1,i2,ifa0,ifa1;
   int        lon,ret,ier;
-  double     lmin;
+  double     lmin,lfilt;
   int        imin,iq;
   int        ii;
   double     lmaxtet,lmintet;
-  int        imaxtet,imintet;
+  int        imaxtet,imintet,base;
 
+  base  = ++mesh->mark;
   for (k=1; k<=ne; k++) {
     pt = &mesh->tetra[k];
     if ( !MG_EOK(pt)  || (pt->tag & MG_REQ) )   continue;
-
+    else if ( pt->mark < base-1 )  continue;
     pxt = pt->xt ? &mesh->xtetra[pt->xt] : 0;
 
     /* 1) find longest and shortest edge  and try to manage it*/
@@ -307,6 +309,11 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree,int ne,
         }
 
         /* Delaunay */
+        if ( lmax<1.6 ) {
+          lfilt = 0.7;
+        }
+        else lfilt = 0.2;
+
         if ( octree && !_MMG3D_octreein(mesh,met,octree,ip,lmax) ) {
           _MMG3D_delPt(mesh,ip);
           (*ifilt)++;
@@ -389,8 +396,6 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree,int ne,
         if ( p0->tag & MG_BDY )  continue;
         ilist = _MMG5_chkcol_int(mesh,met,k,i,j,list,ilist,2);
         if ( ilist > 0 ) {
-          //~ _MMG3D_packMesh(mesh, met, NULL);
-          //~ MMG3D_saveMesh(mesh,"truc2.mesh");
           ier = _MMG5_colver(mesh,met,list,ilist,i2,2);
           if ( ilist < 0 ) continue;
           if ( ier < 0 ) return(-1);
@@ -620,7 +625,13 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree,int ne,
               goto collapse2;
             }
           }
-          if ( /*lmax>4 &&*/ /*it &&*/  octree && !_MMG3D_octreein_iso(mesh,met,octree,ip,lmax) ) {
+
+          if ( lmaxtet<1.6 ) {
+            lfilt = 0.7;
+          }
+          else lfilt = 0.2;
+
+          if (  /*it &&*/  octree && !_MMG3D_octreein(mesh,met,octree,ip,lmax) ) {
             _MMG3D_delPt(mesh,ip);
             (*ifilt)++;
             goto collapse2;

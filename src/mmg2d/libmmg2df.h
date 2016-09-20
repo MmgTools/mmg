@@ -981,6 +981,29 @@ END INTERFACE
 !  */
 
 ! int MMG2D_loadMesh(MMG5_pMesh mesh,const char * filename);
+! /**
+!  * \param mesh pointer toward the mesh structure.
+!  * \param sol pointer toward the solution structure.
+!  * \param filename name of file.
+!  * \return 0 if failed, 1 otherwise.
+!  *
+!  * Read mesh and sol at MSH file format (.msh extension). We read only
+!  * low-order points, edges, tria, quad, tetra and prisms.
+!  *
+!  * \remark Fortran interface:
+!  */
+INTERFACE
+  SUBROUTINE MMG2D_LOADMSHMESH(mesh,sol,filename,strlen,retval)
+    MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,sol
+    CHARACTER(LEN=*), INTENT(IN)   :: filename
+    INTEGER, INTENT(IN)            :: strlen
+    INTEGER, INTENT(OUT)           :: retval
+  END SUBROUTINE
+END INTERFACE
+!  *
+!  */
+
+! int MMG2D_loadMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename);
 
 ! /**
 !  * \param mesh pointer toward the mesh structure.
@@ -1028,6 +1051,29 @@ END INTERFACE
 !  */
 
 ! int MMG2D_saveMesh(MMG5_pMesh ,const char *);
+! /**
+!  * \param mesh pointer toward the mesh structure.
+!  * \param sol pointer toward the solution structure.
+!  * \param filename name of file.
+!  * \return 0 if failed, 1 otherwise.
+!  *
+!  * Write mesh and sol at MSH file format (.msh extension). Save file at ASCII
+!  * format for .msh extension, at binary format for .msh one.
+!  *
+!  * \remark Fortran interface:
+!  */
+INTERFACE
+  SUBROUTINE MMG2D_SAVEMSHMESH(mesh,sol,filename,strlen,retval)
+    MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,sol
+    CHARACTER(LEN=*), INTENT(IN)   :: filename
+    INTEGER, INTENT(IN)            :: strlen
+    INTEGER, INTENT(OUT)           :: retval
+  END SUBROUTINE
+END INTERFACE
+!  *
+!  */
+
+! int MMG2D_saveMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename);
 ! /**
 !  * \param mesh pointer toward the mesh structure.
 !  * \param sol pointer toward the solution structure..

@@ -107,7 +107,8 @@ extern "C" {
 #define  MG_NOM       (1 << 3)        /**< 8  non manifold    */
 #define  MG_BDY       (1 << 4)        /**< 16  boundary entity */
 #define  MG_CRN       (1 << 5)        /**< 32  corner         */
-#define  MG_NUL       (1 << 6)        /**< 64  vertex removed */
+#define  MG_NOSURF    (1 << 6)        /**< 64  freezed boundary */
+#define  MG_NUL       (1 << 7)        /**< 128 vertex removed */
 
 /* binary tags for local parameters */
 #define  MG_Vert   (1 << 0 )  /**< 1 local parameter applied over vertex */
@@ -431,6 +432,9 @@ typedef struct _MMG5_dNode_s {
 
 
 /* Functions declarations */
+extern double _MMG5_det3pt1vec(double c0[3],double c1[3],double c2[3],double v[3]);
+extern double _MMG5_det4pt(double c0[3],double c1[3],double c2[3],double c3[3]);
+extern double _MMG5_orvol(MMG5_pPoint point,int *v);
 extern int _MMG5_Add_inode( MMG5_pMesh mesh, _MMG5_iNode **liLi, int val );
 extern int _MMG5_Alloc_inode( MMG5_pMesh mesh, _MMG5_iNode **node );
 extern int _MMG5_Add_dnode( MMG5_pMesh mesh, _MMG5_dNode **liLi, int, double);
@@ -498,6 +502,17 @@ int    _MMG5_interp_iso(double *ma,double *mb,double *mp,double t);
 int    _MMG5_intersecmet22(MMG5_pMesh mesh, double *m,double *n,double *mr);
 extern int _MMG5_countLocalParamAtTri( MMG5_pMesh,_MMG5_iNode **);
 extern int _MMG5_writeLocalParamAtTri( MMG5_pMesh,_MMG5_iNode *,FILE*);
+double MMG2_quickarea(double a[2],double b[2],double c[2]);
+
+int MMG5_loadMshMesh_part1(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename,
+                           FILE **inm,int *posNodes, int *posElts,
+                           int *posNodeData, int *bin, int *iswp,
+                           int *nelts);
+
+int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol sol,FILE **inm,
+                           const int posNodes,const int posElts,
+                           const int posNodeData,const int bin,const int iswp,
+                           const int nelts);
 
 /* function pointers */
 int    (*_MMG5_chkmsh)(MMG5_pMesh,int,int);

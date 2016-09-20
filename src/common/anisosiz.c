@@ -224,11 +224,17 @@ void _MMG5_defUninitSize(MMG5_pMesh mesh,MMG5_pSol met,char ismet)
 
     m = &met->m[6*k];
     if(ismet) {
+      if ( !MG_SIN(ppt->tag) && (ppt->tag & MG_GEO) ) {
+        m[0] = m[1] = m[2] = m[3] = m[4] = isqhmax;
+        m[5] = 0;
+      }
+
       ppt->flag = 1;
       continue;
     }
+
     memset(m,0,6*sizeof(double));
-    if ( MG_SIN(ppt->tag) || (MG_NOM & ppt->tag) ) {
+    if (  (MG_SIN(ppt->tag) || (MG_NOM & ppt->tag)) ) {
       m[0] = m[3] = m[5] = isqhmax;
     }
     else if ( ppt->tag & MG_GEO ) {
@@ -261,8 +267,8 @@ void _MMG5_defUninitSize(MMG5_pMesh mesh,MMG5_pSol met,char ismet)
  * \param tAA matrix to fill
  * \param tAb second member
  *
- * Fill matrice tAA and second member tAb with \f$ A=(\sum X_{P_i}^2 \sum
- * Y_{P_i}^2 \sum X_{P_i}Y_{P_i}) \f$ and \f$ b=\sum Z_{P_i}\f$ with P_i the
+ * Fill matrice \sum tAA and second member \sum tAb with \f$ A=( X_{P_i}^2
+ * Y_{P_i}^2 X_{P_i}Y_{P_i}) \f$ and \f$ b= Z_{P_i}\f$ with P_i the
  * physical points at edge [i0;i1] extremities and middle.  Compute the physical
  * coor \a c of the curve edge's mid-point for a regular or reference point.
  *
@@ -306,8 +312,8 @@ void _MMG5_fillDefmetregSys( int k, MMG5_pPoint p0, int i0, _MMG5_Bezier b,
   c[1] = 3.0/8.0*b0[1] + 3.0/8.0*b1[1] + 1.0/8.0*lispoi[3*k+2];
   c[2] = 3.0/8.0*b0[2] + 3.0/8.0*b1[2] + 1.0/8.0*lispoi[3*k+3];
 
-/* Fill matrice tAA and second member tAb with \f$A=(\sum X_{P_i}^2 \sum
- * Y_{P_i}^2 \sum X_{P_i}Y_{P_i})\f$ and \f$b=\sum Z_{P_i}\f$ with P_i the
+/* Fill matrice \sum tAA and second member \sum tAb with \f$A=( X_{P_i}^2
+ * Y_{P_i}^2 X_{P_i}Y_{P_i})\f$ and \f$b= Z_{P_i}\f$ with P_i the
  * physical points at edge [i0;i1] extremities and middle. */
   tAA[0] += c[0]*c[0]*c[0]*c[0];
   tAA[1] += c[0]*c[0]*c[1]*c[1];

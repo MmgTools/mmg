@@ -19,9 +19,6 @@
 #include "mmg3d.h"
 #include <stdio.h>
 
-#define LFILT 0.7
-
-
 /**
  * \param q pointer toward the octree cell
  *
@@ -1301,7 +1298,7 @@ int _MMG3D_octreein_iso(MMG5_pMesh mesh,MMG5_pSol sol,_MMG3D_pOctree octree,int 
       ip1  = lococ[i]->v[j];
       pp1  = &mesh->point[ip1];
 
-      //~ hpi2 = LFILT * sol->m[ip1];
+      //~ hpi2 = lfilt * sol->m[ip1];
       hpi2 = dmax * sol->m[ip1];
 
       ux = pp1->c[0] - ppt->c[0];
@@ -1368,9 +1365,9 @@ int _MMG3D_octreein_ani(MMG5_pMesh mesh,MMG5_pSol sol,_MMG3D_pOctree octree,int 
 
   if ( m1<=0. || m2<=0. || m3<=0. ) return(1);
 
-  //~ dx = LFILT * sqrt(m1 * det) ;
-  //~ dy = LFILT * sqrt(m2 * det) ;
-  //~ dz = LFILT * sqrt(m3 * det) ;
+  //~ dx = lfilt * sqrt(m1 * det) ;
+  //~ dy = lfilt * sqrt(m2 * det) ;
+  //~ dz = lfilt * sqrt(m3 * det) ;
   dx = dmax * sqrt(m1 * det) ;
   dy = dmax * sqrt(m2 * det) ;
   dz = dmax * sqrt(m3 * det) ;

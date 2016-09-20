@@ -140,6 +140,7 @@ int _MMG5_movintpt_iso(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree octree,
   p0->c[2] = ppt0->c[2];
   for (k=0; k<ilist; k++) {
     (&mesh->tetra[list[k]/4])->qual=callist[k];
+    (&mesh->tetra[list[k]/4])->mark=mesh->mark;
   }
 
 
@@ -322,6 +323,7 @@ int _MMG5_movintptLES_iso(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree octree,
 
    for (k=0; k<ilist; k++) {
      (&mesh->tetra[list[k]/4])->qual=callist[k];
+     (&mesh->tetra[list[k]/4])->mark=mesh->mark;
    }
 
    _MMG5_SAFE_FREE(callist);
@@ -719,6 +721,7 @@ int _MMG5_movbdyregpt_iso(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree,
 
   for(l=0; l<ilistv; l++){
     (&mesh->tetra[listv[l]/4])->qual= callist[l];
+    (&mesh->tetra[listv[l]/4])->mark=mesh->mark;
   }
   _MMG5_SAFE_FREE(callist);
   return(1);
@@ -753,7 +756,7 @@ int _MMG5_movbdyrefpt_iso(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree,
   double                calold,calnew,caltmp,*callist,hmax,hausd;
   int                   l,iel,ip0,ipa,ipb,iptmpa,iptmpb,it1,it2,ip1,ip2,ip,nxp;
   int                   isloc,j;
-  char                  tag;
+  int16_t               tag;
   unsigned char         i,i0,ie,iface,iface1,iface2,iea,ieb,ie1,ie2;
 
   step = 0.1;
@@ -1078,6 +1081,7 @@ int _MMG5_movbdyrefpt_iso(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree,
 
   for( l=0 ; l<ilistv ; l++ ){
     (&mesh->tetra[listv[l]/4])->qual = callist[l];
+    (&mesh->tetra[listv[l]/4])->mark = mesh->mark;
   }
   _MMG5_SAFE_FREE(callist);
   return(1);
@@ -1114,7 +1118,8 @@ int _MMG5_movbdynompt_iso(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree octree, 
   double            o[3],no[3],to[3],hmax,hausd;
   int               ip0,ip1,ip2,ip,iel,ipa,ipb,l,iptmpa,iptmpb,it1,it2,nxp;
   int               j,isloc;
-  char              iface,i,i0,iea,ieb,ie,tag,ie1,ie2,iface1,iface2;
+  int16_t           tag;
+  char              iface,i,i0,iea,ieb,ie,ie1,ie2,iface1,iface2;
 
   step = 0.1;
   ip1 = ip2 = 0;
@@ -1438,6 +1443,7 @@ int _MMG5_movbdynompt_iso(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree octree, 
 
   for(l=0; l<ilistv; l++){
     (&mesh->tetra[listv[l]/4])->qual = callist[l];
+    (&mesh->tetra[listv[l]/4])->mark = mesh->mark;
   }
   _MMG5_SAFE_FREE(callist);
   return(1);
@@ -1471,7 +1477,7 @@ int _MMG5_movbdyridpt_iso(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree,
   double               calold,calnew,caltmp,*callist,hmax,hausd;
   int                  l,iel,ip0,ipa,ipb,iptmpa,iptmpb,it1,it2,ip1,ip2,ip,nxp;
   int                  j,isloc;
-  char                 tag;
+  int16_t              tag;
   unsigned char        i,i0,ie,iface,iface1,iface2,iea,ieb,ie1,ie2;
 
   step = 0.1;
@@ -1804,6 +1810,7 @@ int _MMG5_movbdyridpt_iso(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree,
 
   for(l=0; l<ilistv; l++){
     (&mesh->tetra[listv[l]/4])->qual = callist[l];
+    (&mesh->tetra[listv[l]/4])->mark = mesh->mark;
   }
   _MMG5_SAFE_FREE(callist);
   return(1);
@@ -1903,6 +1910,7 @@ int _MMG3D_movv_ani(MMG5_pMesh mesh,MMG5_pSol sol,int k,int ib) {
     iel = list[l] / 4;
     pt1 = &mesh->tetra[iel];
     pt1->qual = qualtet[l];
+    pt1->mark = mesh->mark;
     //    if ( pt1->qual < declic )
     //  MMG_kiudel(queue,iel);
   }
@@ -2018,6 +2026,7 @@ int _MMG3D_movv_iso(MMG5_pMesh mesh,MMG5_pSol sol,int k,int ib) {
     iel = list[l] / 4;
     pt1 = &mesh->tetra[iel];
     pt1->qual = qualtet[l];
+    pt1->mark = mesh->mark;
     //    if ( pt1->qual < declic )
     //  MMG_kiudel(queue,iel);
   }

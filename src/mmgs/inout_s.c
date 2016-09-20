@@ -347,7 +347,7 @@ int MMGS_loadMesh(MMG5_pMesh mesh, const char *filename) {
   mesh->nt = mesh->nti + 2*nq;
 
   /* mem alloc */
-  if ( !zaldy(mesh) )  return(0);
+  if ( !_MMGS_zaldy(mesh) )  return(0);
 
   /* read vertices */
 
@@ -672,6 +672,38 @@ int MMGS_loadMesh(MMG5_pMesh mesh, const char *filename) {
   return(1);
 }
 
+int MMGS_loadMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
+  FILE*       inm;
+  int         ier;
+  int         posNodes,posElts,posNodeData,bin,iswp,nelts;
+
+  mesh->dim = 3;
+
+  ier = MMG5_loadMshMesh_part1(mesh,sol,filename,&inm,
+                               &posNodes,&posElts,&posNodeData,
+                               &bin,&iswp,&nelts);
+  if ( ier < 1 ) return (ier);
+
+  if ( !_MMGS_zaldy(mesh) )  return(0);
+
+  mesh->ne = mesh->nprism = 0;
+
+  if ( !mesh->nt ) {
+    fprintf(stderr,"  ** MISSING DATA.\n");
+    fprintf(stderr," Check that your mesh contains triangles.\n");
+    fprintf(stderr," Exit program.\n");
+    return(-1);
+  }
+
+
+  if (mesh->npmax < mesh->np || mesh->ntmax < mesh->nt )
+    return(-1);
+
+  return ( MMG5_loadMshMesh_part2( mesh, sol,&inm,
+                                   posNodes,posElts,posNodeData,
+                                   bin,iswp,nelts) );
+}
+
 /**
  * \param mesh pointer toward the mesh structure.
  * \param filename name of file.
@@ -961,7 +993,7 @@ int MMGS_saveMesh(MMG5_pMesh mesh, const char* filename) {
     for (k=1; k<=mesh->np; k++) {
       ppt = &mesh->point[k];
       if ( !MG_VOK(ppt) )  continue;
-      else if ( !(ppt->tag & MG_GEO) ) {
+      else if ( !(ppt->tag & MG_GEO) && !(ppt->tag & MG_CRN) ) {
         if ( ppt->tag & MG_REF ) {
           assert (mesh->xp && mesh->xpoint);
           go = &mesh->xpoint[ppt->xp];
@@ -1101,6 +1133,11 @@ int MMGS_saveMesh(MMG5_pMesh mesh, const char* filename) {
   fclose(inm);
   return(1);
 }
+
+int MMGS_saveMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
+  return(MMG5_saveMshMesh(mesh,sol,filename));
+}
+
 
 /**
  * \param mesh pointer toward the mesh structure.

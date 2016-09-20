@@ -89,9 +89,9 @@ int lissmet_ani(MMG5_pMesh mesh,MMG5_pSol sol) {
         b  = pht->max;
         p1 = &mesh->point[a];
         p2 = &mesh->point[b];
-        iadr = (a-1)*sol->size + 1;
+        iadr = a*sol->size;
         ma   = &sol->m[iadr];
-        iadr = (b-1)*sol->size + 1;
+        iadr = b*sol->size;
         mb   = &sol->m[iadr];
 
         if ( (p1->tagdel < mesh->base) && (p2->tagdel < mesh->base) ) {
@@ -118,7 +118,7 @@ int lissmet_ani(MMG5_pMesh mesh,MMG5_pSol sol) {
           p1   = &mesh->point[b];
           p2   = &mesh->point[a];
           mb   = ma;
-          iadr = (b-1)*sol->size + 1;
+          iadr = b*sol->size;
           ma   = &sol->m[iadr];
           dd   = dd1;
           dd1  = dd2;

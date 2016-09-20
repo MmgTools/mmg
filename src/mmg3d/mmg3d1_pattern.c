@@ -57,7 +57,8 @@ static int _MMG5_adpspl(MMG5_pMesh mesh,MMG5_pSol met, int* warn) {
   double     dd,len,lmax,o[3],to[3],no1[3],no2[3],v[3];
   int        k,ip,ip1,ip2,list[MMG3D_LMAX+2],ilist;
   int        ns,ref,ier;
-  char       imax,tag,j,i,i1,i2,ifa0,ifa1;
+  int16_t    tag;
+  char       imax,j,i,i1,i2,ifa0,ifa1;
 
   *warn=0;
   ns = 0;
@@ -270,8 +271,9 @@ static int _MMG5_adpcol(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pPoint     p0,p1;
   double     len,lmin;
   int        k,ip,iq,list[MMG3D_LMAX+2],ilist,lists[MMG3D_LMAX+2],ilists,nc;
-  char       imin,tag,j,i,i1,i2,ifa0,ifa1;
   int        ier;
+  int16_t    tag;
+  char       imin,j,i,i1,i2,ifa0,ifa1;
 
   nc = 0;
   for (k=1; k<=mesh->ne; k++) {

@@ -650,8 +650,8 @@ int _MMG5_movbdyrefpt_ani(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree,
   double                o[3],no[3],to[3];
   double                calold,calnew,caltmp,*callist;
   int                   l,iel,ip0,ipa,ipb,iptmpa,iptmpb,it1,it2,ip1,ip2,ip,nxp;
+  int16_t               tag;
   unsigned char         i,i0,ie,iface,iface1,iface2,iea,ieb,ie1,ie2;
-  char                  tag;
 
   step = 0.1;
   ip1 = ip2 = 0;
@@ -962,7 +962,8 @@ int _MMG5_movbdynompt_ani(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree octree, 
   double            calold,calnew,caltmp,*callist;
   double            o[3],no[3],to[3];
   int               ip0,ip1,ip2,ip,iel,ipa,ipb,l,iptmpa,iptmpb,it1,it2,nxp;
-  char              iface,i,i0,iea,ieb,ie,tag,ie1,ie2,iface1,iface2;
+  int16_t           tag;
+  char              iface,i,i0,iea,ieb,ie,ie1,ie2,iface1,iface2;
 
   step = 0.1;
   ip1 = ip2 = 0;
@@ -1271,8 +1272,8 @@ int _MMG5_movbdyridpt_ani(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree,
   double               o[3],no1[3],no2[3],to[3];
   double               calold,calnew,caltmp,*callist;
   int                  l,iel,ip0,ipa,ipb,iptmpa,iptmpb,it1,it2,ip1,ip2,ip,nxp;
+  int16_t              tag;
   unsigned char        i,i0,ie,iface,iface1,iface2,iea,ieb,ie1,ie2;
-  char                 tag;
 
   step = 0.1;
   ip1 = ip2 = 0;

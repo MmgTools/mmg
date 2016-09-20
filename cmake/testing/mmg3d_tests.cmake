@@ -34,6 +34,24 @@ ADD_TEST(NAME SimpleCube
 
 FOREACH(EXEC ${LISTEXEC_MMG3D})
 
+
+  ###############################################################################
+  #####
+  #####         Input/Output
+  #####
+  ###############################################################################
+
+  # Binary gmsh
+  ADD_TEST(NAME binary_gmsh_3d
+    COMMAND ${EXECUT_MMG3D} -v 5
+    ${MMG3D_CI_TESTS}/GmshInout/cube.mshb)
+
+  # Ascii gmsh
+  ADD_TEST(NAME ascii_gmsh_3d
+    COMMAND ${EXECUT_MMG3D} -v 5
+    ${MMG3D_CI_TESTS}/GmshInout/cube.msh)
+
+
   ##############################################################################
   #####
   #####         Check Memory Leak
@@ -173,6 +191,10 @@ IF ( LONG_TESTS )
     COMMAND ${EXECUT_MMG3D} -v 5
     ${MMG3D_CI_TESTS}/CubeIso_0.125h_met/CubeIso0.1
     -out ${MMG3D_CI_TESTS}/CubeIso_0.125h_met/CubeIso0.1.o.meshb)
+  ADD_TEST(NAME CubeAniIso_0.125h_met
+    COMMAND ${EXECUT_MMG3D} -v 5
+    ${MMG3D_CI_TESTS}/CubeAniIso_0.125h_met/CubeIso0.1
+    -out ${MMG3D_CI_TESTS}/CubeAniIso_0.125h_met/CubeIso0.1.o.meshb)
 
   #####
 
@@ -196,6 +218,8 @@ IF ( LONG_TESTS )
   #  ${MMG3D_CI_TESTS}/SphereIso_0.125h_hminMax/SphereIso0.5
   #  -hmax 0.0625 -hmin 0.0625 -hausd 0.1)
   #---Second with sol file
+
+
   ADD_TEST(NAME SphereIso_h_met
     COMMAND ${EXECUT_MMG3D} -v 5
     ${MMG3D_CI_TESTS}/SphereIso_h_met/SphereIso0.5 -hausd 0.1
@@ -212,6 +236,19 @@ IF ( LONG_TESTS )
     COMMAND ${EXECUT_MMG3D} -v 5
     ${MMG3D_CI_TESTS}/SphereIso_0.125h_met/SphereIso0.5 -hausd 0.1
     -out ${MMG3D_CI_TESTS}/SphereIso_0.125h_met/SphereIso0.5.o.meshb)
+  ADD_TEST(NAME SphereIso_0.020_met
+    COMMAND ${EXECUT_MMG3D} -v 5
+    ${MMG3D_CI_TESTS}/SphereIso_0.020_met/SphereIso0.5 -hausd 0.1
+    -out ${MMG3D_CI_TESTS}/SphereIso_0.020_met/SphereIso0.5.o.meshb)
+  ADD_TEST(NAME SphereIso_0.020-0.015_met
+    COMMAND ${EXECUT_MMG3D} -v 5
+    ${MMG3D_CI_TESTS}/SphereIso_0.020-0.015_met/SphereIso0.020 -hausd 0.1
+    -out ${MMG3D_CI_TESTS}/SphereIso_0.020-0.015_met/SphereIso0.020.o.meshb)
+  ADD_TEST(NAME SphereAni_0.02
+    COMMAND ${EXECUT_MMG3D} -v 5
+    ${MMG3D_CI_TESTS}/SphereAni_0.02/sphere
+    -out ${MMG3D_CI_TESTS}/SphereAni_0.02/sphere.o.meshb)
+
 
   # Check what happend when we unrefine a sphere of size smallh with a constant metric
   # (2*smallh, 4*smallh and 8*smallh)
