@@ -360,6 +360,7 @@ int _MMG3D_seekIndex (double* distList, double dist, int indexMin, int indexMax)
     else
       _MMG3D_seekIndex(distList, dist, indexMin, indexMed);
   }
+  return 1;
 }
 
 
@@ -1272,12 +1273,13 @@ int _MMG3D_octreein_iso(MMG5_pMesh mesh,MMG5_pSol sol,_MMG3D_pOctree octree,int 
   double          d2,ux,uy,uz,hpi,hp1,hpi2,methalo[6];
   int             ip1,i,j;
   int             ncells;
-  double          dmax;
+  //double          dmax;
 
   lococ = NULL;
   ppt = &mesh->point[ip];
-  dmax = MG_MAX(0.1,2-lmax);
-  hpi = dmax*sol->m[ip];
+  // dmax = MG_MAX(0.1,2-lmax);
+  //hpi = dmax*sol->m[ip];
+  hpi = lmax*sol->m[ip];
   hp1 = hpi*hpi;
 
   /* methalo is the box that we want to intersect with the octree, thus, the limit
@@ -1298,8 +1300,8 @@ int _MMG3D_octreein_iso(MMG5_pMesh mesh,MMG5_pSol sol,_MMG3D_pOctree octree,int 
       ip1  = lococ[i]->v[j];
       pp1  = &mesh->point[ip1];
 
-      //~ hpi2 = lfilt * sol->m[ip1];
-      hpi2 = dmax * sol->m[ip1];
+      hpi2 = lmax * sol->m[ip1];
+      //hpi2 = dmax * sol->m[ip1];
 
       ux = pp1->c[0] - ppt->c[0];
       uy = pp1->c[1] - ppt->c[1];
@@ -1338,18 +1340,19 @@ int _MMG3D_octreein_ani(MMG5_pMesh mesh,MMG5_pSol sol,_MMG3D_pOctree octree,int 
   double          det,dmi, *ma, *mb,m1,m2,m3,dx,dy,dz;
   int             iadr,ip1,i,j;
   int             ncells;
-  double          dmax;
+  // double          dmax;
 
   lococ = NULL;
   ppt = &mesh->point[ip];
 
   iadr = ip*sol->size;
   ma   = &sol->m[iadr];
-  dmax = MG_MAX(0.1,2-lmax);
-  //~ dmi  =1./(lmax*lmax);
-  dmi  =dmax*dmax;
+  // dmax = MG_MAX(0.1,2-lmax);
+  dmi  =(lmax*lmax);
+  //dmi  =dmax*dmax;
 
-  hpi = sol->m[ip]*dmax;
+  // hpi = sol->m[ip]*dmax;
+  hpi = sol->m[ip]*lmax;
   hp1 = hpi*hpi;
 
   det = ma[0] * (ma[3]*ma[5] - ma[4]*ma[4])
@@ -1365,12 +1368,12 @@ int _MMG3D_octreein_ani(MMG5_pMesh mesh,MMG5_pSol sol,_MMG3D_pOctree octree,int 
 
   if ( m1<=0. || m2<=0. || m3<=0. ) return(1);
 
-  //~ dx = lfilt * sqrt(m1 * det) ;
-  //~ dy = lfilt * sqrt(m2 * det) ;
-  //~ dz = lfilt * sqrt(m3 * det) ;
-  dx = dmax * sqrt(m1 * det) ;
-  dy = dmax * sqrt(m2 * det) ;
-  dz = dmax * sqrt(m3 * det) ;
+   dx = lmax * sqrt(m1 * det) ;
+   dy = lmax * sqrt(m2 * det) ;
+   dz = lmax * sqrt(m3 * det) ;
+  /* dx = dmax * sqrt(m1 * det) ; */
+  /* dy = dmax * sqrt(m2 * det) ; */
+  /* dz = dmax * sqrt(m3 * det) ; */
 
   /* methalo is the box that we want to intersect with the octree, thus, the limit
    * of the filter. We give: the coordinates of one of the corner of the box and
@@ -1396,7 +1399,9 @@ int _MMG3D_octreein_ani(MMG5_pMesh mesh,MMG5_pSol sol,_MMG3D_pOctree octree,int 
 
       d2 = ma[0]*ux*ux + ma[3]*uy*uy + ma[5]*uz*uz
         + 2.0*(ma[1]*ux*uy + ma[2]*ux*uz + ma[4]*uy*uz);
-      if ( d2 < dmi ) {
+      if ( d2 < dmi ) return 0;
+      else
+      {
         iadr = ip1*sol->size;
         mb   = &sol->m[iadr];
         d2   = mb[0]*ux*ux + mb[3]*uy*uy + mb[5]*uz*uz

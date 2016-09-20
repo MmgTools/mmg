@@ -314,7 +314,7 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree,int ne,
         }
         else lfilt = 0.2;
 
-        if ( octree && !_MMG3D_octreein(mesh,met,octree,ip,lmax) ) {
+        if ( octree && !_MMG3D_octreein(mesh,met,octree,ip,lfilt) ) {
           _MMG3D_delPt(mesh,ip);
           (*ifilt)++;
           goto collapse;
@@ -631,7 +631,7 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree,int ne,
           }
           else lfilt = 0.2;
 
-          if (  /*it &&*/  octree && !_MMG3D_octreein(mesh,met,octree,ip,lmax) ) {
+          if (  /*it &&*/  octree && !_MMG3D_octreein(mesh,met,octree,ip,lfilt) ) {
             _MMG3D_delPt(mesh,ip);
             (*ifilt)++;
             goto collapse2;
