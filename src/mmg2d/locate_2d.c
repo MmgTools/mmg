@@ -314,18 +314,17 @@ int MMG2_findTria(MMG5_pMesh mesh,int ip) {
       cb[2] = aire3 * dd;*/
 
   } while (!find);
+
   /*exhaustive search*/
   for (k=1 ; k<=mesh->nt ; k++) {
     pt = &mesh->tria[k];
     if(!M_EOK(pt)) continue;
     if (pt->v[0]==ip || pt->v[1]==ip || pt->v[2]==ip) break;
   }
-  if(k>mesh->nt) {
-    fprintf(stdout,"Warning problem in findTria, please make a bug report\n");
-    return(0);
+  if(k<=mesh->nt) {
+    return(k);
   }
-  return(k);
-  return(iel);
+  return(0);
 }
 
 
