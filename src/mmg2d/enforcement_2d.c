@@ -42,24 +42,28 @@ int MMG2_bdryenforcement(MMG5_pMesh mesh,MMG5_pSol sol) {
 
   nex = 0;
 
+  /** Liste edges to enforce */
   for(i=1 ; i<=mesh->na ; i++) {
+    /* Edge to create */
     ped = &mesh->edge[i];
     if(!ped->a) continue;
     if(ped->base < 0) {
       nex++;
       continue;
     }
-    kdep = mesh->nt;
+    /* Find first edge extremity */
     kdep = MMG2_findTria(mesh,ped->a);
     assert(kdep);
+
     if(mesh->tria[kdep].v[0]==ped->a)
       j=0;
     else if(mesh->tria[kdep].v[1]==ped->a)
       j=1;
     else
       j=2;
+
     lon = MMG2_boulep(mesh,kdep,j,list);
-    if(lon>1000) {
+    if(lon>MMG2D_LMAX) {
       printf("  ## Error: too many triangles (%d) around the vertex %d\n",
              lon,ped->a);
       exit(EXIT_FAILURE);
@@ -70,6 +74,8 @@ int MMG2_bdryenforcement(MMG5_pMesh mesh,MMG5_pSol sol) {
       return(0);
     }
     assert(lon);
+
+    /* Find second edge extremity */
     for (j=1 ; j<=lon ; j++) {
       iel = list[j];
       pt = &mesh->tria[iel/3];
@@ -85,21 +91,25 @@ int MMG2_bdryenforcement(MMG5_pMesh mesh,MMG5_pSol sol) {
         break;
       }
     }
+
+
     if(j>lon) {
+      /* Missing edge */
       if(mesh->info.imprim > 5) printf("  ** missing edge %d %d \n",
                                        ped->a,ped->b);
       ped->base = kdep;
     }
-
   }
 
+  /** Enforce edges */
   if(nex!=mesh->na) {
     if(mesh->info.imprim > 4)
       printf(" ** number of missing edges : %d\n",mesh->na-nex);
+
     nbug = 0;
     for(kk=1 ; kk<=mesh->na ; kk++) {
       ped = &mesh->edge[kk];
-      if(!ped->a || ped->base < 0) continue;
+    if( !ped->a || ped->base < 0) continue;
       ia = ped->a;
       ib = ped->b;
       kdep = ped->base;
@@ -122,7 +132,7 @@ int MMG2_bdryenforcement(MMG5_pMesh mesh,MMG5_pSol sol) {
         if(mesh->info.ddebug) printf("  ** Existing edge\n");
         //exit(EXIT_FAILURE);
       }
-      if(lon>1000) {
+      if(lon>MMG2D_LMAX) {
         printf(" ## Error: too many triangles (%d)\n",lon);
         exit(EXIT_FAILURE);
       }
@@ -200,7 +210,7 @@ int MMG2_bdryenforcement(MMG5_pMesh mesh,MMG5_pSol sol) {
           break;
         }
      }
-    }/*end k --> mesh->na*/
+  }/*end k --> mesh->na*/
   }
 
   _MMG5_SAFE_FREE(list);

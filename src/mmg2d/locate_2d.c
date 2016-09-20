@@ -360,11 +360,14 @@ int MMG2_locateEdge(MMG5_pMesh mesh,int ia,int ib,int* kdep,int* list) {
     }
     if(pt->v[0]==ia || pt->v[1]==ia || pt->v[2]==ia) ivert = 1;
 
+    if ( ibreak == 1 && ivert == 1 ) return 1;
+    if ( !ivert ) return 0;
+
     pt1 = &mesh->point[pt->v[0]];
     pt2 = &mesh->point[pt->v[1]];
     pt3 = &mesh->point[pt->v[2]];
 
-    /*calcul des aire iaibPi*/
+    /*calcul des aire ia-ib-Pi*/
     a11 = ppb->c[0] - ppa->c[0];
     a21 = ppb->c[1] - ppa->c[1];
     a12 = pt1->c[0] - ppa->c[0];
