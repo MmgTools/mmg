@@ -314,18 +314,17 @@ int MMG2_findTria(MMG5_pMesh mesh,int ip) {
       cb[2] = aire3 * dd;*/
 
   } while (!find);
+
   /*exhaustive search*/
   for (k=1 ; k<=mesh->nt ; k++) {
     pt = &mesh->tria[k];
     if(!M_EOK(pt)) continue;
     if (pt->v[0]==ip || pt->v[1]==ip || pt->v[2]==ip) break;
   }
-  if(k>mesh->nt) {
-    fprintf(stdout,"Warning problem in findTria, please make a bug report\n");
-    return(0);
+  if(k<=mesh->nt) {
+    return(k);
   }
-  return(k);
-  return(iel);
+  return(0);
 }
 
 
@@ -361,11 +360,14 @@ int MMG2_locateEdge(MMG5_pMesh mesh,int ia,int ib,int* kdep,int* list) {
     }
     if(pt->v[0]==ia || pt->v[1]==ia || pt->v[2]==ia) ivert = 1;
 
+    if ( ibreak == 1 && ivert == 1 ) return 1;
+    if ( !ivert ) return 0;
+
     pt1 = &mesh->point[pt->v[0]];
     pt2 = &mesh->point[pt->v[1]];
     pt3 = &mesh->point[pt->v[2]];
 
-    /*calcul des aire iaibPi*/
+    /*calcul des aire ia-ib-Pi*/
     a11 = ppb->c[0] - ppa->c[0];
     a21 = ppb->c[1] - ppa->c[1];
     a12 = pt1->c[0] - ppa->c[0];

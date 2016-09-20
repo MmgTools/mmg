@@ -991,7 +991,7 @@ int _MMG3D_localParamNm(MMG5_pMesh mesh,int iel,int iface,int ia,
   hmax  = mesh->info.hmax;
   isloc = 0;
 
-  pt = &mesh->tetra[k];
+  pt = &mesh->tetra[iel];
   pxt = &mesh->xtetra[pt->xt];
 
   i0 = _MMG5_iare[ia][0];
