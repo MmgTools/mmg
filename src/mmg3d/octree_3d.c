@@ -760,7 +760,28 @@ void _MMG3D_addOctreeRec(MMG5_pMesh mesh, _MMG3D_octree_s* q, double* ver,
     }
   }else
   {
-    if (q->nbVer%nv == 0) {
+    if (q->nbVer < nv)
+    {
+
+      if(q->nbVer == 0)
+      {
+        _MMG5_ADD_MEM(mesh,sizeof(int),"octree vertices table",
+                      printf("  Exit program.\n");
+                      exit(EXIT_FAILURE));
+        _MMG5_SAFE_MALLOC(q->v,1,int);
+      }
+      else if(!(q->nbVer & (q->nbVer - 1))) //is a power of 2
+      {
+        sizeRealloc = q->nbVer;
+        sizeRealloc<<=1;
+        _MMG5_ADD_MEM(mesh,(sizeRealloc-sizeRealloc/2)*sizeof(int),"octree realloc",
+                      printf("  Exit program.\n");
+                      exit(EXIT_FAILURE));
+        _MMG5_SAFE_REALLOC(q->v,sizeRealloc,int,"octree");
+      }
+    }
+    else if (q->nbVer%nv == 0) 
+    {
       _MMG5_ADD_MEM(mesh,nv*sizeof(int),"octree realloc",
                     printf("  Exit program.\n");
                     exit(EXIT_FAILURE));
@@ -813,8 +834,8 @@ void _MMG3D_delOctreeVertex(MMG5_pMesh mesh, _MMG3D_octree_s* q, int indNo)
   for(i=0; i<q->nbVer; ++i)
     assert(q->v[i]>0);
   memmove(&q->v[indNo],&q->v[indNo+1], (q->nbVer-indNo-1)*sizeof(int));
-  --q->nbVer;
-  if (!(q->nbVer & (q->nbVer - 1))) // is a power of 2
+  --(q->nbVer);
+  if (!(q->nbVer & (q->nbVer - 1)) && q->nbVer > 0) // is a power of 2
   {
     _MMG5_ADD_MEM(mesh,q->nbVer*sizeof(int),"octree index",
                     printf("  Exit program.\n");
