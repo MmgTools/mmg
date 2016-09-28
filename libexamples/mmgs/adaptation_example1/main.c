@@ -141,7 +141,7 @@ int main(int argc,char *argv[]) {
   if ( MMGS_Set_dparameter(mmgMesh,mmgSol,MMGS_DPARAM_hgrad, 2) != 1 )
     exit(EXIT_FAILURE);
 
-  /** library call */
+  /** remesh function */
   ier = MMGS_mmgslib(mmgMesh,mmgSol);
   if ( ier == MMG5_STRONGFAILURE ) {
     fprintf(stdout,"BAD ENDING OF MMGSLIB: UNABLE TO SAVE MESH\n");
@@ -202,7 +202,7 @@ int main(int argc,char *argv[]) {
   if ( MMGS_Set_localParameter(mmgMesh,mmgSol,MMG5_Triangle,38,0.1,1,1) != 1 )
     exit(EXIT_FAILURE);
 
-  /** library call */
+  /** remesh function */
   ier = MMGS_mmgslib(mmgMesh,mmgSol);
   if ( ier == MMG5_STRONGFAILURE ) {
     fprintf(stdout,"BAD ENDING OF MMGSLIB: UNABLE TO SAVE MESH\n");

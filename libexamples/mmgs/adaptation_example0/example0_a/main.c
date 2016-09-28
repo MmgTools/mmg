@@ -107,7 +107,7 @@ int main(int argc,char *argv[]) {
   if ( MMGS_Chk_meshData(mmgMesh,mmgSol) != 1 ) exit(EXIT_FAILURE);
 
   /** ------------------------------ STEP  II -------------------------- */
-  /** library call */
+  /** remesh function */
   ier = MMGS_mmgslib(mmgMesh,mmgSol);
   if ( ier == MMG5_STRONGFAILURE ) {
     fprintf(stdout,"BAD ENDING OF MMGSLIB: UNABLE TO SAVE MESH\n");

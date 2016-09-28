@@ -73,7 +73,7 @@ PROGRAM main
   !> 4) (not mandatory): check if the number of given entities match with mesh size
 
   !> ------------------------------ STEP  II --------------------------
-  !! library call
+  !! remesh function
   CALL MMG2D_mmg2dlib(mmgMesh,mmgSol,ier)
 
   IF ( ier == MMG5_STRONGFAILURE ) THEN
@@ -184,7 +184,7 @@ PROGRAM main
   IF ( ier /=1 ) CALL EXIT(105)
 
   !> ------------------------------ STEP  II --------------------------
-  !! library call
+  !! remesh function
   CALL MMGS_mmgslib(mmgMesh,mmgSol,ier)
 
   IF ( ier == MMG5_STRONGFAILURE ) THEN
@@ -299,7 +299,7 @@ PROGRAM main
   IF ( ier /= 1 ) CALL EXIT(105)
 
   !> ------------------------------ STEP  II --------------------------
-  !! library call
+  !! remesh function
   CALL MMG3D_mmg3dlib(mmgMesh,mmgSol,ier)
 
   IF ( ier == MMG5_STRONGFAILURE ) THEN

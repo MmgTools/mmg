@@ -128,7 +128,7 @@ int main(int argc,char *argv[]) {
   if ( MMG3D_Set_iparameter(mmgMesh,mmgSol,MMG3D_IPARAM_debug, 1) != 1 )
     exit(EXIT_FAILURE);
 
-  /** library call */
+  /** isovalue discretization */
   ier = MMG3D_mmg3dls(mmgMesh,mmgSol);
 
   if ( ier == MMG5_STRONGFAILURE ) {

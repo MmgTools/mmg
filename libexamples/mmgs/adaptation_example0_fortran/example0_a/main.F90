@@ -85,7 +85,7 @@ PROGRAM main
   IF ( ier /= 1 ) CALL EXIT(105)
 
   !> ------------------------------ STEP  II --------------------------
-  !! library call
+  !! remesh function
   !! Remark: %val(0) allow to pass the value 0 (i.e. NULL) instead of a pointer
   !! toward NULL.
   CALL MMGS_mmgslib(mmgMesh,mmgSol,ier)

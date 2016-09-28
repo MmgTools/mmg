@@ -160,7 +160,7 @@ int main(int argc,char *argv[]) {
   if ( MMG3D_Chk_meshData(mmgMesh,mmgSol) != 1 ) exit(EXIT_FAILURE);
 
   /** ------------------------------ STEP  II -------------------------- */
-  /** library call */
+  /** remesh function */
   ier = MMG3D_mmg3dlib(mmgMesh,mmgSol);
 
   if ( ier == MMG5_STRONGFAILURE ) {

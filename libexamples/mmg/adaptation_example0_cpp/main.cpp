@@ -89,7 +89,7 @@ int main(int argc,char *argv[]) {
   if ( MMG2D_loadSol(mmgMesh,mmgSol,"init") != 1 )  exit(EXIT_FAILURE);
 
   /** ------------------------------ STEP  II -------------------------- */
-  /** library call */
+  /** remesh function */
   ier = MMG2D_mmg2dlib(mmgMesh,mmgSol);
 
   if ( ier == MMG5_STRONGFAILURE ) {
@@ -163,7 +163,7 @@ int main(int argc,char *argv[]) {
 
 
   /** ------------------------------ STEP  II -------------------------- */
-  /** library call */
+  /** remesh function */
   ier = MMGS_mmgslib(mmgMesh,mmgSol);
 
   if ( ier == MMG5_STRONGFAILURE ) {
@@ -243,7 +243,7 @@ int main(int argc,char *argv[]) {
   if ( MMG3D_loadSol(mmgMesh,mmgSol,filename.c_str()) != 1 )  exit(EXIT_FAILURE);
 
   /** ------------------------------ STEP  II -------------------------- */
-  /** library call */
+  /** remesh function */
   ier = MMG3D_mmg3dlib(mmgMesh,mmgSol);
 
   if ( ier == MMG5_STRONGFAILURE ) {

@@ -128,7 +128,7 @@ int main(int argc,char *argv[]) {
   if ( MMGS_Set_iparameter(mmgMesh,mmgSol,MMGS_IPARAM_debug, 1) != 1 )
     exit(EXIT_FAILURE);
 
-  /** library call */
+  /** Isovalue discretization */
   ier = MMGS_mmgsls(mmgMesh,mmgSol);
 
   if ( ier == MMG5_STRONGFAILURE ) {

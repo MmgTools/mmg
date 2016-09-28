@@ -138,7 +138,7 @@ int main(int argc,char *argv[]) {
   if ( MMG3D_Chk_meshData(mmgMesh,mmgSol) != 1 ) exit(EXIT_FAILURE);
 
   /** ------------------------------ STEP  II -------------------------- */
-  /** library call */
+  /** remesh function */
   // WARNING: the MMG3D_mmg3dlib function returns 1 if success, 0 if fail.
   // The MMG3D4 library was working opposite.
   ier = MMG3D_mmg3dlib(mmgMesh,mmgSol);

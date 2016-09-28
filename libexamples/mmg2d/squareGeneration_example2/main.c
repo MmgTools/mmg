@@ -65,7 +65,7 @@ int main(int argc,char *argv[]) {
   MMG2D_Set_iparameter(mmgMesh,mmgSol,MMG2D_IPARAM_verbose,5);
 
 
-  /** Call the library */
+  /** Generate the mesh */
   ier = MMG2D_mmg2dmesh(mmgMesh,mmgSol);
 
   if ( ier == MMG5_STRONGFAILURE ) {

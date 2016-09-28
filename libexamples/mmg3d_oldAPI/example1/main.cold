@@ -109,7 +109,7 @@ int main(int argc,char *argv[]) {
   opt[8]=500; //renum size of the box
 
   /** ------------------------------ STEP  II -------------------------- */
-  /** library call */
+  /** remesh function */
   if(MMG_mmg3dlib(opt,mmgMesh,mmgSol)) {
     fprintf(stdout,"BAD ENDING OF MMG3DLIB\n");
   }
