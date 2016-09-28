@@ -56,6 +56,9 @@ int _MMG2_chkcol(MMG5_pMesh mesh, MMG5_pSol met,int k,char i,int *list,char typc
   /* First test: avoid closing one ref. component consisting of only one element */
   if ( MG_EDG(pt->tag[i1]) && MG_EDG(pt->tag[i2]) ) return(0);
   
+  /* avoid collapsing a bondary point over a regular one */
+  if ( (mesh->point[ip1].tag) && !(mesh->point[ip2].tag) ) return(0);
+
   jel = adja[i] / 3;
   if ( jel ) {
     open = 0;
@@ -246,6 +249,9 @@ int _MMG2_colver(MMG5_pMesh mesh,int ilist,int *list) {
   open = adja[i] == 0;
   
   /* Update of the vertex ip1 -> ip2 */
+  mesh->point[ip2].tag |= mesh->point[ip1].tag;
+  mesh->point[ip2].ref = MG_MAX(mesh->point[ip1].ref,mesh->point[ip2].ref);
+
   for (k=1; k<ilist-1+open; k++) {
     jel = list[k] / 3;
     jj  = list[k] % 3;
