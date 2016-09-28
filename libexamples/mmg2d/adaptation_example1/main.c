@@ -56,11 +56,6 @@ int main(int argc,char *argv[]) {
       file formatted or manually set your mesh using the MMG2D_Set* functions */
 
   /** with MMG2D_loadMesh function */
-  /** a) (not mandatory): give the mesh name
-     (by default, the "mesh.mesh" file is oppened)*/
-  if ( MMG2D_Set_inputMeshName(mmgMesh,filename) != 1 )
-    exit(EXIT_FAILURE);
-  /** b) function calling */
   if ( MMG2D_loadMesh(mmgMesh,filename) != 1 )  exit(EXIT_FAILURE);
 
 

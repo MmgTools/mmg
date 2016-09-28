@@ -85,11 +85,6 @@ int main(int argc,char *argv[]) {
       file formatted or manually set your mesh using the MMG3D_Set* functions */
 
   /** with MMG3D_loadMesh function */
-  /** a) (not mandatory): give the mesh name
-     (by default, the "mesh.mesh" file is oppened)*/
-  if ( MMG3D_Set_inputMeshName(mmgMesh,filename) != 1 )
-    exit(EXIT_FAILURE);
-  /** b) function calling */
   if ( MMG3D_loadMesh(mmgMesh,filename) != 1 )  exit(EXIT_FAILURE);
 
   /** 3) Build sol in MMG5 format */
@@ -97,11 +92,6 @@ int main(int argc,char *argv[]) {
       file formatted or manually set your sol using the MMG3D_Set* functions */
 
   /** With MMG3D_loadSol function */
-  /** a) (not mandatory): give the sol name
-     (by default, the "mesh.sol" file is oppened)*/
-  if ( MMG3D_Set_inputSolName(mmgMesh,mmgSol,filename) != 1 )
-    exit(EXIT_FAILURE);
-  /** b) function calling */
   if ( MMG3D_loadSol(mmgMesh,mmgSol,filename) != 1 )
     exit(EXIT_FAILURE);
 
@@ -127,20 +117,12 @@ int main(int argc,char *argv[]) {
       using the MMG3D_getMesh/MMG3D_getSol functions */
 
   /** 1) Automatically save the mesh */
-  /** a)  (not mandatory): give the ouptut mesh name using MMG3D_Set_outputMeshName
-     (by default, the mesh is saved in the "mesh.o.mesh" file */
-  // MMG3D_Set_outputMeshName(mmgMesh,"output.mesh");
-  /** b) function calling */
   if ( MMG3D_saveMesh(mmgMesh,"cube.o.mesh") != 1 ) {
     fprintf(stdout,"UNABLE TO SAVE MESH\n");
     return(MMG5_STRONGFAILURE);
   }
 
   /** 2) Automatically save the solution */
-  /** a)  (not mandatory): give the ouptut sol name using MMG3D_Set_outputSolName
-     (by default, the mesh is saved in the "mesh.o.sol" file */
-  // MMG3D_Set_outputSolName(mmgMesh,mmgSol,"output.sol");
-  /** b) function calling */
   if ( MMG3D_saveSol(mmgMesh,mmgSol,"cube.o.sol") != 1 ) {
     fprintf(stdout,"UNABLE TO SAVE SOL\n");
     return(MMG5_LOWFAILURE);
