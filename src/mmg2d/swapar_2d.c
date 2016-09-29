@@ -53,7 +53,9 @@ int _MMG2_swapdelone(MMG5_pMesh mesh,MMG5_pSol sol,int k,char i,double crit,int 
   pt   = &mesh->tria[k];
   pt1  = &mesh->tria[k1];
 
-  if ( pt->ref != pt1->ref ) return(0);
+  if(pt->ref!=pt1->ref) {
+    return(0);
+  }
 
   area1 = MMG2_quickarea(mesh->point[pt->v[0]].c,mesh->point[pt->v[1]].c,mesh->point[pt->v[2]].c);
   area2 = MMG2_quickarea(mesh->point[pt1->v[0]].c,mesh->point[pt1->v[1]].c,mesh->point[pt1->v[2]].c);
