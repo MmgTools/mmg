@@ -45,7 +45,9 @@ int MMG2_swapar(MMG5_pMesh mesh,MMG5_pSol sol,int k,int i,double crit,int *list)
   pt  = &mesh->tria[k];
   pt1 = &mesh->tria[adj[i] / 3];
 
-  if(pt->ref!=pt1->ref) return(0);
+  if(pt->ref!=pt1->ref) {
+    return(0);
+  }
 
   air1 = MMG2_quickarea(mesh->point[pt->v[0]].c,mesh->point[pt->v[1]].c,mesh->point[pt->v[2]].c);
   air2 = MMG2_quickarea(mesh->point[pt1->v[0]].c,mesh->point[pt1->v[1]].c,mesh->point[pt1->v[2]].c);

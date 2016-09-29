@@ -309,7 +309,10 @@ int main(int argc,char *argv[]) {
   msh = 0;
   ier = MMG3D_loadMesh(mesh,mesh->namein);
   if ( !ier ) {
-    ier = MMG3D_loadMshMesh(mesh,met,mesh->namein);
+    if ( mesh->info.lag > -1 )
+      ier = MMG3D_loadMshMesh(mesh,disp,mesh->namein);
+    else
+      ier = MMG3D_loadMshMesh(mesh,met,mesh->namein);
     msh = 1;
   }
   if ( ier<1 )
