@@ -217,8 +217,8 @@ int MMG2_cutEdgeTriangle(MMG5_pMesh mesh,int k,int ia,int ib) {
 int MMG2_findTria(MMG5_pMesh mesh,int ip) {
   MMG5_pTria     pt;
   MMG5_pPoint    ppt,p0,p1,p2;
-  int       find,iel,base,iadr,*adja,isign,k;
-  double    ax,ay,bx,by,dd,epsra,cx,cy,area1,area2,area3;
+  int       k,find,iel,base,iadr,*adja,isign;
+  double    ax,ay,bx,by,dd,epsra,cx,cy,aire1,aire2,aire3;
 
   ppt  = &mesh->point[ip];
   ++mesh->base;
@@ -265,16 +265,16 @@ int MMG2_findTria(MMG5_pMesh mesh,int ip) {
     cy = p2->c[1] - ppt->c[1];
 
     /* p in 1 */
-    area1 = isign*(bx*cy - by*cx);
-    if ( area1 < epsra && adja[0] ) {
+    aire1 = isign*(bx*cy - by*cx);
+    if ( aire1 < epsra && adja[0] ) {
       iel = adja[0] / 3;
       continue;
     }
 
     ax = p0->c[0] - ppt->c[0];
     ay = p0->c[1] - ppt->c[1];
-    area2 = isign*(cx*ay - cy*ax);
-    if ( area2 < epsra && adja[1] ) {
+    aire2 = isign*(cx*ay - cy*ax);
+    if ( aire2 < epsra && adja[1] ) {
       iel = adja[1] / 3;
       continue;
     }
@@ -282,8 +282,8 @@ int MMG2_findTria(MMG5_pMesh mesh,int ip) {
     //aire3 = -epsra*EPSR - (aire1 + aire2);
     /*try to be more robust...*/
     // aire3 = M_MAX(aire3,isign*(bx*ay - by*ax));
-    area3 = (isign*(ax*by - ay*bx));
-    if ( area3 < epsra && adja[2] ) {
+    aire3 = (isign*(ax*by - ay*bx));
+    if ( aire3 < epsra && adja[2] ) {
       iel = adja[2] / 3;
       continue;
     }
@@ -303,7 +303,7 @@ int MMG2_findTria(MMG5_pMesh mesh,int ip) {
   /*exhaustive search*/
   for (k=1 ; k<=mesh->nt ; k++) {
     pt = &mesh->tria[k];
-    if(!MG_EOK(pt)) continue;
+    if(!M_EOK(pt)) continue;
     if (pt->v[0]==ip || pt->v[1]==ip || pt->v[2]==ip) break;
   }
   if(k<=mesh->nt) {
@@ -321,17 +321,33 @@ int MMG2_locateEdge(MMG5_pMesh mesh,int ia,int ib,int* kdep,int* list) {
   MMG5_pPoint        ppt1,ppt2,ppt3,ppt4,ppa,ppb;
   double             a[3],a11,a21,a12,a22,area1,area2,area3,prod1,prod2,prod3;
   double             niaib,npti;
-  int                iadr,*adja,k,ibreak,i,ncompt,lon,iare;
+  int                iadr,*adja,k,ibreak,i,ncompt,lon,iare,ivert;
   //int       ktemp;
 
-  mesh->base += 2;
   k = *kdep;
   ncompt = 0;
   ibreak = 0;
   lon = 0;
   ppa = &mesh->point[ia];
   ppb = &mesh->point[ib];
-  
+
+  pt = &mesh->tria[k];
+
+  ivert = 0;
+  if(pt->v[0]==ia || pt->v[1]==ia || pt->v[2]==ia) ivert = 1;
+
+  if ( !ivert ) {
+
+    if ( !(k = MMG2_findTria(mesh,ia) ) ) {
+       return 0;
+    }
+    *kdep = k;
+  }
+
+  if ( mesh->info.ddebug || mesh->info.imprim > 6 )
+    printf(" Try to enforce edge %d %d\n",ia,ib);
+
+  mesh->base += 2;
   do {
     pt = &mesh->tria[k];
 
@@ -340,6 +356,12 @@ int MMG2_locateEdge(MMG5_pMesh mesh,int ia,int ib,int* kdep,int* list) {
     adja = &mesh->adja[iadr];
     ibreak = 0;
     ncompt++;
+    ivert = 0;
+    if(pt->v[0]==ib || pt->v[1]==ib || pt->v[2]==ib) {
+      ibreak = 1;
+      ivert  = 2;
+    }
+    if(pt->v[0]==ia || pt->v[1]==ia || pt->v[2]==ia) ivert = 1;
 
     /* Current triangle has one vertex = to the last one of the processed edge */
     if ( pt->v[0] == ib || pt->v[1] == ib || pt->v[2] == ib ) ibreak = 1;

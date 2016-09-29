@@ -536,6 +536,61 @@ FORTRAN_NAME(MMG2D_LOADMESH,mmg2d_loadmesh,(MMG5_pMesh *mesh,char* meshin,int* s
 }
 
 /**
+ * See \ref MMG2D_loadMshMesh function in \ref mmg2d/libmmg2d.h file.
+ */
+FORTRAN_NAME(MMG2D_LOADMSHMESH,mmg2d_loadmshmesh,
+             (MMG5_pMesh *mesh, MMG5_pSol *sol,char* filename, int *strlen,int* retval),
+             (mesh,sol,filename,strlen, retval)){
+  char *tmp = NULL;
+
+  tmp = (char*)malloc((*strlen+1)*sizeof(char));
+  strncpy(tmp,filename,*strlen);
+  tmp[*strlen] = '\0';
+
+  *retval = MMG2D_loadMshMesh(*mesh,*sol,tmp);
+
+  _MMG5_SAFE_FREE(tmp);
+
+  return;
+}
+
+/**
+ * See \ref MMG2D_saveMesh function in \ref mmg2d/libmmg2d.h file.
+ */
+FORTRAN_NAME(MMG2D_SAVEMESH,mmg2d_savemesh,(MMG5_pMesh *mesh,char *meshin,int *strlen, int* retval),
+             (mesh,meshin,strlen,retval)){
+  char *tmp = NULL;
+
+  tmp = (char*)malloc((*strlen+1)*sizeof(char));
+  strncpy(tmp,meshin,*strlen);
+  tmp[*strlen] = '\0';
+  *retval = MMG2D_saveMesh(*mesh,tmp);
+  _MMG5_SAFE_FREE(tmp);
+
+  return;
+}
+
+/**
+ * See \ref MMG3D_saveMshMesh function in \ref mmg3d/libmmg3d.h file.
+ */
+FORTRAN_NAME(MMG2D_SAVEMSHMESH,mmg2d_savemshmesh,
+             (MMG5_pMesh *mesh, MMG5_pSol *sol,char* filename, int *strlen,
+              int* retval),
+             (mesh,sol,filename,strlen,retval)){
+  char *tmp = NULL;
+
+  tmp = (char*)malloc((*strlen+1)*sizeof(char));
+  strncpy(tmp,filename,*strlen);
+  tmp[*strlen] = '\0';
+
+  *retval = MMG2D_saveMshMesh(*mesh,*sol,tmp);
+
+  _MMG5_SAFE_FREE(tmp);
+
+  return;
+}
+
+/**
  * See \ref MMG2D_loadSol function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_LOADSOL,mmg2d_loadsol,

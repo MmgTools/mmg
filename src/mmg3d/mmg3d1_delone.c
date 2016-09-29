@@ -82,12 +82,13 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
   int        imin,iq;
   int        ii;
   double     lmaxtet,lmintet;
-  int        imaxtet,imintet;
+  int        imaxtet,imintet,base;
 
+  base  = ++mesh->mark;
   for (k=1; k<=ne; k++) {
     pt = &mesh->tetra[k];
     if ( !MG_EOK(pt)  || (pt->tag & MG_REQ) )   continue;
-
+    else if ( pt->mark < base-1 )  continue;
     pxt = pt->xt ? &mesh->xtetra[pt->xt] : 0;
 
     /* 1) find longest and shortest edge  and try to manage it*/
@@ -843,7 +844,6 @@ _MMG5_adpsplcol(MMG5_pMesh mesh,MMG5_pSol met,_MMG5_pBucket bucket, int* warn) {
 
     if ( ns < 10 && abs(nc-ns) < 3 )  break;
     else if ( it > 3 && abs(nc-ns) < 0.3 * MG_MAX(nc,ns) )  break;
-
   }
   while( ++it < maxit && nc+ns > 0 );
 

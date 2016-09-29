@@ -381,7 +381,7 @@ int main(int argc,char *argv[]) {
   MMG5_pMesh    mesh;
   MMG5_pSol     met,disp;
   double        qdegrad[2];
-  int           ier;
+  int           ier,ierSave,msh;
   char          stim[32];
 
   /* interrupts */
@@ -417,31 +417,45 @@ int main(int argc,char *argv[]) {
   /* load data */
   fprintf(stdout,"\n  -- INPUT DATA\n");
   chrono(ON,&MMG5_ctim[1]);
-  if ( MMG2D_loadMesh(mesh,mesh->namein) < 1)
+
+  /* read mesh file */
+  msh = 0;
+  ier = MMG2D_loadMesh(mesh,mesh->namein);
+  if ( !ier ) {
+    if ( mesh->info.lag >= 0 )
+      ier = MMG2D_loadMshMesh(mesh,disp,mesh->namein);
+    else
+      ier = MMG2D_loadMshMesh(mesh,met,mesh->namein);
+    msh = 1;
+  }
+  if ( ier < 1)
     _MMG2D_RETURN_AND_FREE(mesh,met,disp,MMG5_STRONGFAILURE);
-  
+
   /* Set default metric size */
-  if ( !MMG2D_Set_solSize(mesh,met,MMG5_Vertex,0,MMG5_Scalar) )
+  if ( !msh && !MMG2D_Set_solSize(mesh,met,MMG5_Vertex,0,MMG5_Scalar) )
     _MMG2D_RETURN_AND_FREE(mesh,met,disp,MMG5_STRONGFAILURE);
 
   /* Read displacement if any */
   if ( mesh->info.lag >= 0 ) {
+
     /* In Lagrangian mode, the name of the displacement file has been parsed in met */
     if ( !MMG2D_Set_inputSolName(mesh,disp,met->namein) )
       _MMG2D_RETURN_AND_FREE(mesh,met,disp,MMG5_STRONGFAILURE);
-    
-    ier = MMG2D_loadSol(mesh,disp,disp->namein);
-    if ( ier < 1 ) {
-      fprintf(stdout,"  ## ERROR: UNABLE TO LOAD DISPLACEMENT.\n");
-      _MMG2D_RETURN_AND_FREE(mesh,met,disp,MMG5_STRONGFAILURE);
+
+    if ( !msh ) {
+      ier = MMG2D_loadSol(mesh,disp,disp->namein);
+      if ( ier < 1 ) {
+        fprintf(stdout,"  ## ERROR: UNABLE TO LOAD DISPLACEMENT.\n");
+        _MMG2D_RETURN_AND_FREE(mesh,met,disp,MMG5_STRONGFAILURE);
+      }
     }
-    else if ( disp->size != 2 ) {
+    if ( disp->size != 2 ) {
       fprintf(stdout,"  ## ERROR: WRONG DATA TYPE.\n");
       _MMG2D_RETURN_AND_FREE(mesh,met,disp,MMG5_STRONGFAILURE);
     }
   }
   /* Read metric if any */
-  else {
+  else if ( !msh ) {
     ier = MMG2D_loadSol(mesh,met,met->namein);
     if ( ier == -1 ) {
       if ( (met->size != MMG5_Scalar) && (met->size != MMG5_Tensor) ) {
@@ -476,8 +490,22 @@ int main(int argc,char *argv[]) {
     ier = MMG2D_mmg2dlib(mesh,met);
   }
 
-  MMG2D_saveMesh(mesh,mesh->nameout);
-  if( met->np )
+  if ( !strcmp(&mesh->nameout[strlen(mesh->nameout)-5],".mesh") ||
+       !strcmp(&mesh->nameout[strlen(mesh->nameout)-6],".meshb") )
+    msh = 0;
+  else if (!strcmp(&mesh->nameout[strlen(mesh->nameout)-4],".msh") ||
+           !strcmp(&mesh->nameout[strlen(mesh->nameout)-5],".mshb") )
+    msh = 1;
+
+  if ( !msh )
+    ierSave = MMG2D_saveMesh(mesh,mesh->nameout);
+  else
+    ierSave = MMG2D_saveMshMesh(mesh,met,mesh->nameout);
+
+  if ( !ierSave )
+    _MMG2D_RETURN_AND_FREE(mesh,met,disp,MMG5_STRONGFAILURE);
+
+  if( !msh && met->np )
     MMG2D_saveSol(mesh,met,mesh->nameout);
 
   chrono(OFF,&MMG5_ctim[1]);

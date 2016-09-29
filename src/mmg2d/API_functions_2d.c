@@ -1070,8 +1070,8 @@ int MMG2D_Set_tensorSol(MMG5_pSol met, double m11, double m12, double m22,
     fprintf(stdout," of the solution.\n");
     return(0);
   }
-  isol = (pos-1) * met->size + 1;
-  met->m[isol + 0] = m11;
+  isol = pos * met->size;
+  met->m[isol    ] = m11;
   met->m[isol + 1] = m12;
   met->m[isol + 2] = m22;
   return(1);
@@ -1080,6 +1080,7 @@ int MMG2D_Set_tensorSol(MMG5_pSol met, double m11, double m12, double m22,
 int MMG2D_Get_tensorSol(MMG5_pSol met, double *m11,double *m12,double *m22)
 {
   int ddebug = 0;
+  int isol;
 
   if ( met->npi == met->np ) {
     met->npi = 0;
@@ -1101,9 +1102,10 @@ int MMG2D_Get_tensorSol(MMG5_pSol met, double *m11,double *m12,double *m22)
     return(0);
   }
 
-  *m11 = met->m[met->size*(met->npi-1)+1];
-  *m12 = met->m[met->size*(met->npi-1)+2];
-  *m22 = met->m[met->size*(met->npi-1)+3];
+  isol = met->size*(met->npi);
+  *m11 = met->m[isol  ];
+  *m12 = met->m[isol+1];
+  *m22 = met->m[isol+2];
 
   return(1);
 }

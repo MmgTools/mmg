@@ -286,7 +286,7 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
   }
 
   /* mem alloc */
-  if ( !MMG2_zaldy(mesh) )  return(0);
+  if ( !MMG2D_zaldy(mesh) )  return(0);
 
   /* read vertices */
   rewind(inm);
@@ -339,7 +339,7 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
       }
     }
     ppt->tag = 0;
-    ppt->tag = M_NUL;
+    ppt->tag = MG_NUL;
   }
 
   /* read edges */
@@ -378,7 +378,7 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
       }
       for (i=0; i<3; i++) {
         ppt = &mesh->point[ pt->v[i] ];
-        ppt->tag &= ~M_NUL;
+        ppt->tag &= ~MG_NUL;
       }
       for(i=0 ; i<3 ; i++)
         pt->edg[i] = 0;
@@ -394,12 +394,15 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
         pt->v[1] = tmp;
       }
     }
-    if ( norient )
-      fprintf(stdout," %8d triangles reoriented \n",norient);
+    if ( norient ) {
+      fprintf(stdout,"\n     $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ \n");
+      fprintf(stdout,"         BAD ORIENTATION : vol < 0 -- %8d element(s) reoriented\n",norient);
+      fprintf(stdout,"     $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ \n\n");
+    }
   } else {
     for (k=1; k<=mesh->np; k++) {
       ppt = &mesh->point[ k ];
-      ppt->tag &= ~M_NUL;
+      ppt->tag &= ~MG_NUL;
     }
   }
 
@@ -478,6 +481,54 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
     }
   }
 
+
+  return(1);
+}
+
+/* Load mesh file at gmsh format */
+int MMG2D_loadMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
+  FILE*       inm;
+  MMG5_pPoint ppt;
+  double      z;
+  int         ier,k;
+  int         posNodes,posElts,posNodeData,bin,iswp,nelts;
+
+  mesh->dim = 2;
+
+  ier = MMG5_loadMshMesh_part1(mesh,sol,filename,&inm,
+                               &posNodes,&posElts,&posNodeData,
+                               &bin,&iswp,&nelts);
+  if ( ier < 1 ) return (ier);
+
+  if ( !MMG2D_zaldy(mesh) )  return(0);
+
+  if ( mesh->ne || mesh->nprism ) {
+    fprintf(stderr,"  ## Error: Input mesh must be a two-dimensional mesh.\n");
+    return(-1);
+  }
+  if ( !mesh->nt )
+      fprintf(stdout,"  **WARNING NO GIVEN TRIANGLE\n");
+
+  if (mesh->npmax < mesh->np || mesh->ntmax < mesh->nt )
+    return(-1);
+
+  ier = MMG5_loadMshMesh_part2( mesh, sol,&inm,
+                                posNodes,posElts,posNodeData,
+                                bin,iswp,nelts);
+
+  if ( ier < 1 ) return ( ier );
+
+  z = 0.;
+  for ( k=1; k<=mesh->np; ++k ) {
+    ppt = &mesh->point[k];
+    if ( !MG_VOK(ppt) ) continue;
+
+    z += fabs(ppt->c[2]);
+  }
+  if ( z > _MMG5_EPSOK ) {
+    fprintf(stderr,"  ## Error: Input mesh must be a two-dimensional mesh.\n");
+    return(-1);
+  }
 
   return(1);
 }
@@ -644,7 +695,7 @@ int MMG2D_loadSol(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
   rewind(inm);
   fseek(inm,posnp,SEEK_SET);
   for (k=1; k<=sol->np; k++) {
-    isol = (k-1) * sol->size + 1;
+    isol = k * sol->size;
     if (sol->ver == 1) {
       for (i=0; i<sol->size; i++) {
         if(!bin){
@@ -777,15 +828,15 @@ int MMG2D_saveMesh(MMG5_pMesh mesh,const char *filename) {
   // //HACK SAVE ONLY SD ref 2
   //   for (k=1; k<=mesh->np; k++) {
   //     ppt = &mesh->point[k];
-  //     ppt->tag = M_NUL;
+  //     ppt->tag = MG_NUL;
   //   }
   //   for (k=1; k<=mesh->nt; k++) {
   //     pt = &mesh->tria[k];
   //  if (!M_EOK(pt)) continue;
   //     if (pt->ref==2) {
-  //    mesh->point[pt->v[0]].tag &= ~M_NUL;
-  //    mesh->point[pt->v[1]].tag &= ~M_NUL;
-  //    mesh->point[pt->v[2]].tag &= ~M_NUL;
+  //    mesh->point[pt->v[0]].tag &= ~MG_NUL;
+  //    mesh->point[pt->v[1]].tag &= ~MG_NUL;
+  //    mesh->point[pt->v[2]].tag &= ~MG_NUL;
   //     } else {
   //    pt->v[0] = 0;
   //     }
@@ -1153,6 +1204,9 @@ int MMG2D_saveMesh(MMG5_pMesh mesh,const char *filename) {
   return(1);
 }
 
+int MMG2D_saveMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
+  return(MMG5_saveMshMesh(mesh,sol,filename));
+}
 
 int MMG2_loadVect(MMG5_pMesh mesh,const char *filename) {
   printf("comment for merge of the data structure\n");
@@ -1426,7 +1480,7 @@ int MMG2D_saveSol(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
   for (k=1; k<=mesh->np; k++) {
     ppt = &mesh->point[k];
     if ( !M_VOK(ppt) )  continue;
-    isol = (k-1) * sol->size + 1;
+    isol = k * sol->size;
     if (sol->ver < 2) {
       if(!bin) {
         if(msh && sol->size > 1) {

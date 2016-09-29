@@ -355,7 +355,7 @@ int MMG2_markSD(MMG5_pMesh mesh) {
     if ( !M_EOK(pt) )  continue;
     for (i=0; i<3; i++) {
       ppt = &mesh->point[ pt->v[i] ];
-      ppt->tag &= ~M_NUL;
+      ppt->tag &= ~MG_NUL;
     }
   }
   /* Remove edge*/

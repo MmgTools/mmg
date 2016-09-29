@@ -131,7 +131,7 @@ int MMG2_bdryenforcement(MMG5_pMesh mesh,MMG5_pSol sol) {
       
       if ( !( lon < 0 || lon == 4 ) ) {
         if(mesh->info.ddebug)
-          printf("  ** Unexpected situation: edge %d %d -- %d\n",ia,ib,lon);
+          printf("  ** Unable to force edge: %d %d -- %d\n",ia,ib,lon);
         exit(EXIT_FAILURE);
       }
       
@@ -140,16 +140,14 @@ int MMG2_bdryenforcement(MMG5_pMesh mesh,MMG5_pSol sol) {
         if(mesh->info.ddebug) printf("  ** Existing edge\n");
         //exit(EXIT_FAILURE);
       }
-      
-      if ( -lon > 1000 ) {
+      if(lon>MMG2_LONMAX) {
         printf(" ## Error: too many triangles (%d)\n",lon);
         exit(EXIT_FAILURE);
       }
-      if ( lon < 2 ) {
+      if(lon<2) {
         if(mesh->info.ddebug) printf("  ** few edges... %d\n",lon);
         //exit(EXIT_FAILURE);
       }
-      
       lon = -lon;
       ilon = lon;
 

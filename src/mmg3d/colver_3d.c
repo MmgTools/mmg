@@ -1127,6 +1127,7 @@ int _MMG5_colver(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,char indq,cha
       pt->qual=_MMG5_caltet33_ani(mesh,met,pt);
     else
       pt->qual=_MMG5_orcal(mesh,met,iel);
+    pt->mark=mesh->mark;
   }
 
   _MMG5_SAFE_FREE(ind); _MMG5_SAFE_FREE(p0_c); _MMG5_SAFE_FREE(p1_c);

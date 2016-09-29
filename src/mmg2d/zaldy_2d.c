@@ -241,7 +241,7 @@ void _MMG2D_memOption(MMG5_pMesh mesh) {
 }
 
 /* allocate main structure */
-int MMG2_zaldy(MMG5_pMesh mesh) {
+int MMG2D_zaldy(MMG5_pMesh mesh) {
   int     k;
 
   _MMG2D_memOption(mesh);

@@ -100,7 +100,7 @@ int _MMG3D_newElt(MMG5_pMesh mesh) {
   if ( mesh->nenil > mesh->ne )  mesh->ne = mesh->nenil;
   mesh->nenil = mesh->tetra[curiel].v[3];
   mesh->tetra[curiel].v[3] = 0;
-  mesh->tetra[curiel].mark=0;
+  mesh->tetra[curiel].mark=mesh->mark;
 
   return(curiel);
 }
@@ -216,7 +216,7 @@ void _MMG3D_memOption(MMG5_pMesh mesh) {
 }
 
 /** allocate main structure */
-int _MMG5_zaldy(MMG5_pMesh mesh) {
+int _MMG3D_zaldy(MMG5_pMesh mesh) {
   int     k;
 
   _MMG3D_memOption(mesh);

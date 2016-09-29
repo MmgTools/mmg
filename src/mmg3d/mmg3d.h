@@ -203,9 +203,6 @@ int     _MMG5_buckin_iso(MMG5_pMesh mesh,MMG5_pSol sol,_MMG5_pBucket bucket,int 
 int     _MMG5_buckin_ani(MMG5_pMesh mesh,MMG5_pSol sol,_MMG5_pBucket bucket,int ip,double lfilt);
 
 /* prototypes */
-extern double _MMG5_det3pt1vec(double c0[3],double c1[3],double c2[3],double v[3]);
-extern double _MMG5_det4pt(double c0[3],double c1[3],double c2[3],double c3[3]);
-extern double _MMG5_orvol(MMG5_pPoint point,int *v);
 extern int _MMG5_directsurfball(MMG5_pMesh mesh, int ip, int *list, int ilist, double n[3]);
 
 void _MMG3D_Init_mesh_var( va_list argptr );
@@ -216,7 +213,7 @@ int  _MMG3D_newPt(MMG5_pMesh mesh,double c[3],int16_t tag);
 int  _MMG3D_newElt(MMG5_pMesh mesh);
 void _MMG3D_delElt(MMG5_pMesh mesh,int iel);
 void _MMG3D_delPt(MMG5_pMesh mesh,int ip);
-int  _MMG5_zaldy(MMG5_pMesh mesh);
+int  _MMG3D_zaldy(MMG5_pMesh mesh);
 void _MMG5_freeXTets(MMG5_pMesh mesh);
 void _MMG5_freeXPrisms(MMG5_pMesh mesh);
 extern void _MMG3D_Free_topoTables(MMG5_pMesh mesh);
@@ -329,6 +326,8 @@ void _MMG5_defaultValues(MMG5_pMesh);
 int  _MMG5_intridmet(MMG5_pMesh,MMG5_pSol,int,int,double,double*,double*);
 int  _MMG5_intregmet(MMG5_pMesh,MMG5_pSol,int,char,double, double*);
 int  _MMG5_intvolmet(MMG5_pMesh,MMG5_pSol,int,char,double, double*);
+int _MMG3D_localParamReg(MMG5_pMesh,int,int*,int,int*,int,double*,double*,double*);
+int _MMG3D_localParamNm(MMG5_pMesh,int,int,int,double*,double*,double*);
 
 /* useful functions to debug */
 int  _MMG3D_indElt(MMG5_pMesh mesh,int kel);
@@ -386,6 +385,7 @@ int    _MMG3D_defsiz_iso(MMG5_pMesh,MMG5_pSol );
 int    _MMG3D_defsiz_ani(MMG5_pMesh ,MMG5_pSol );
 int    _MMG5_gradsiz_iso(MMG5_pMesh ,MMG5_pSol );
 int    _MMG5_gradsiz_ani(MMG5_pMesh ,MMG5_pSol );
+double    _MMG5_meansizreg_iso(MMG5_pMesh,MMG5_pSol,int,int*,int,double,double);
 extern int    _MMG5_moymet(MMG5_pMesh ,MMG5_pSol ,MMG5_pTetra ,double *);
 
 double (*_MMG5_lenedg)(MMG5_pMesh ,MMG5_pSol ,int, MMG5_pTetra );

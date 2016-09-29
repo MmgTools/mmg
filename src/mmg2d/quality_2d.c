@@ -33,21 +33,6 @@
 
 #include "mmg2d.h"
 
-/* Compute the area of a triangle supplied by its points */
-double MMG2_quickarea(double a[2],double b[2],double c[2]) {
-  double     abx,aby,acx,acy;
-  double     area;
-
-  abx = b[0] - a[0];
-  aby = b[1] - a[1];
-  acx = c[0] - a[0];
-  acy = c[1] - a[1];
-
-  area= abx*acy - aby*acx;
-
-  return(area);
-}
-
 /* Fast calculation of the quality of Tria pt */
 double _MMG2_quickcal(MMG5_pMesh mesh, MMG5_pTria pt) {
   MMG5_pPoint        p0,p1,p2;

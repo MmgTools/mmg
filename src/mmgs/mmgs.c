@@ -246,7 +246,7 @@ int _MMGS_defaultOption(MMG5_pMesh mesh,MMG5_pSol met) {
 int main(int argc,char *argv[]) {
   MMG5_pMesh mesh;
   MMG5_pSol  met;
-  int        ier;
+  int        ier,ierSave,msh;
   char       stim[32];
 
   fprintf(stdout,"  -- MMGS, Release %s (%s) \n",MG_VER,MG_REL);
@@ -281,13 +281,20 @@ int main(int argc,char *argv[]) {
   fprintf(stdout,"\n  -- INPUT DATA\n");
   chrono(ON,&MMG5_ctim[1]);
 
-  if ( !MMGS_loadMesh(mesh,mesh->namein) )
-    _MMGS_RETURN_AND_FREE(mesh,met,MMG5_STRONGFAILURE);
+  /* read mesh file */
+  msh = 0;
+  ier = MMGS_loadMesh(mesh,mesh->namein);
+  if ( !ier ) {
+    ier = MMGS_loadMshMesh(mesh,met,mesh->namein);
+    msh = 1;
+  }
 
-  ier = MMGS_loadSol(mesh,met,met->namein);
-  if ( ier==-1 ) {
+  if ( !msh ) {
+    ier = MMGS_loadSol(mesh,met,met->namein);
+    if ( ier==-1 ) {
       fprintf(stderr,"  ## ERROR: WRONG DATA TYPE OR WRONG SOLUTION NUMBER.\n");
       _MMGS_RETURN_AND_FREE(mesh,met,MMG5_STRONGFAILURE);
+    }
   }
 
   if ( !_MMG5_parsop(mesh,met) )
@@ -313,10 +320,24 @@ int main(int argc,char *argv[]) {
     chrono(ON,&MMG5_ctim[1]);
     if ( mesh->info.imprim )
       fprintf(stdout,"\n  -- WRITING DATA FILE %s\n",mesh->nameout);
-    if ( !MMGS_saveMesh(mesh,mesh->nameout) )
+
+    if ( !strcmp(&mesh->nameout[strlen(mesh->nameout)-5],".mesh") ||
+         !strcmp(&mesh->nameout[strlen(mesh->nameout)-6],".meshb") )
+      msh = 0;
+
+    else if (!strcmp(&mesh->nameout[strlen(mesh->nameout)-4],".msh") ||
+             !strcmp(&mesh->nameout[strlen(mesh->nameout)-5],".mshb") )
+      msh = 1;
+
+    if ( !msh )
+      ierSave = MMGS_saveMesh(mesh,mesh->nameout);
+    else
+      ierSave = MMGS_saveMshMesh(mesh,met,mesh->nameout);
+
+    if ( !ierSave )
       _MMGS_RETURN_AND_FREE(mesh,met,MMG5_STRONGFAILURE);
 
-    if ( !MMGS_saveSol(mesh,met,met->nameout) )
+    if ( !msh && !MMGS_saveSol(mesh,met,met->nameout) )
       _MMGS_RETURN_AND_FREE(mesh,met,MMG5_STRONGFAILURE);
 
     chrono(OFF,&MMG5_ctim[1]);

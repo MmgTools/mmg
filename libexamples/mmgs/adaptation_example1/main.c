@@ -87,11 +87,6 @@ int main(int argc,char *argv[]) {
      file formatted or manually set your mesh using the MMGS_Set* functions */
 
   /** with MMGS_loadMesh function */
-  /** a) (not mandatory): give the mesh name
-     (by default, the "mesh.mesh" file is oppened)*/
-  if ( MMGS_Set_inputMeshName(mmgMesh,inname) != 1 )
-    exit(EXIT_FAILURE);
-  /** b) function calling */
   if ( MMGS_loadMesh(mmgMesh,inname) != 1 )  exit(EXIT_FAILURE);
 
   /** 3) Build sol in MMG5 format */
@@ -99,11 +94,6 @@ int main(int argc,char *argv[]) {
       file formatted or manually set your sol using the MMGS_Set* functions */
 
   /** With MMGS_loadSol function */
-  /** a) (not mandatory): give the sol name
-     (by default, the "mesh.sol" file is oppened)*/
-  if ( MMGS_Set_inputSolName(mmgMesh,mmgSol,inname) != 1 )
-    exit(EXIT_FAILURE);
-  /** b) function calling */
   if ( MMGS_loadSol(mmgMesh,mmgSol,inname) != 1 )
     exit(EXIT_FAILURE);
 
@@ -141,7 +131,7 @@ int main(int argc,char *argv[]) {
   if ( MMGS_Set_dparameter(mmgMesh,mmgSol,MMGS_DPARAM_hgrad, 2) != 1 )
     exit(EXIT_FAILURE);
 
-  /** library call */
+  /** remesh function */
   ier = MMGS_mmgslib(mmgMesh,mmgSol);
   if ( ier == MMG5_STRONGFAILURE ) {
     fprintf(stdout,"BAD ENDING OF MMGSLIB: UNABLE TO SAVE MESH\n");
@@ -151,15 +141,9 @@ int main(int argc,char *argv[]) {
 
   /* (Not mandatory) Automatically save the mesh */
   sprintf(outname, "%s%s%s", pwd, "/../libexamples/mmgs/adaptation_example1/", "2spheres_1.o.mesh");
-  if ( MMGS_Set_outputMeshName(mmgMesh,outname) != 1 )
-    exit(EXIT_FAILURE);
-
   MMGS_saveMesh(mmgMesh,"2spheres_1.o");
 
   /* (Not mandatory) Automatically save the solution */
-  if ( MMGS_Set_outputSolName(mmgMesh,mmgSol,outname) != 1 )
-    exit(EXIT_FAILURE);
-
   if ( MMGS_saveSol(mmgMesh,mmgSol,"2spheres_1.o") != 1 )
     exit(EXIT_FAILURE);
 
@@ -202,7 +186,7 @@ int main(int argc,char *argv[]) {
   if ( MMGS_Set_localParameter(mmgMesh,mmgSol,MMG5_Triangle,38,0.1,1,1) != 1 )
     exit(EXIT_FAILURE);
 
-  /** library call */
+  /** remesh function */
   ier = MMGS_mmgslib(mmgMesh,mmgSol);
   if ( ier == MMG5_STRONGFAILURE ) {
     fprintf(stdout,"BAD ENDING OF MMGSLIB: UNABLE TO SAVE MESH\n");
@@ -212,16 +196,10 @@ int main(int argc,char *argv[]) {
 
   /* (Not mandatory) Automatically save the mesh */
   sprintf(outname, "%s%s%s", pwd, "/../libexamples/mmgs/adaptation_example1/", "2spheres_2.o.mesh");
-  if ( MMGS_Set_outputMeshName(mmgMesh,outname) != 1 )
-    exit(EXIT_FAILURE);
-
   if ( MMGS_saveMesh(mmgMesh,"2spheres_2.o") != 1 )
     exit(EXIT_FAILURE);
 
   /* (Not mandatory) Automatically save the solution */
-  if ( MMGS_Set_outputSolName(mmgMesh,mmgSol,outname) != 1 )
-    exit(EXIT_FAILURE);
-
   if ( MMGS_saveSol(mmgMesh,mmgSol,"2spheres_2.o") != 1 )
     exit(EXIT_FAILURE);
 

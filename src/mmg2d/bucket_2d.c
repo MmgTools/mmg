@@ -79,7 +79,7 @@ int buckin_ani(MMG5_pMesh mesh,MMG5_pSol sol,pBucket bucket,int ip) {
   ppt  = &mesh->point[ip];
   siz  = bucket->size;
   dd   = siz / (double)PRECI;
-  iadr = (ip-1)*sol->size + 1;
+  iadr = ip*sol->size;
   ma   = &sol->m[iadr];
   dmi  = LFILT*LFILT;
 
@@ -95,7 +95,7 @@ int buckin_ani(MMG5_pMesh mesh,MMG5_pSol sol,pBucket bucket,int ip) {
     uy = pp1->c[1] - ppt->c[1];
     d2 = ma[0]*ux*ux + ma[2]*uy*uy + 2.0*ma[1]*ux*uy;
     if ( d2 < dmi ) {
-      iadr = (ip1-1)*sol->size + 1;
+      iadr = ip1*sol->size;
       mb = &sol->m[iadr];
       d2 = mb[0]*ux*ux + mb[2]*uy*uy + 2.0*mb[1]*ux*uy;
       if ( d2 < dmi )  return(0);
@@ -108,7 +108,7 @@ int buckin_ani(MMG5_pMesh mesh,MMG5_pSol sol,pBucket bucket,int ip) {
       uy = pp1->c[1] - ppt->c[1];
       d2 = ma[0]*ux*ux + ma[2]*uy*uy + 2.0*ma[1]*ux*uy;
       if ( d2 < dmi ) {
-        iadr = (ip1-1)*sol->size + 1;
+        iadr = ip1*sol->size;
         mb = &sol->m[iadr];
         d2 = mb[0]*ux*ux + mb[2]*uy*uy + 2.0*mb[1]*ux*uy;
         if ( d2 < dmi )  return(0);
@@ -148,7 +148,7 @@ int buckin_ani(MMG5_pMesh mesh,MMG5_pSol sol,pBucket bucket,int ip) {
       uy = pp1->c[1] - ppt->c[1];
       d2 = ma[0]*ux*ux + ma[2]*uy*uy + 2.0*ma[1]*ux*uy;
       if ( d2 < dmi ) {
-        iadr = (ip1-1)*sol->size + 1;
+        iadr = ip1*sol->size;
         mb = &sol->m[iadr];
         d2 = mb[0]*ux*ux + mb[2]*uy*uy + 2.0*mb[1]*ux*uy;
         if ( d2 < dmi )  return(0);
@@ -161,7 +161,7 @@ int buckin_ani(MMG5_pMesh mesh,MMG5_pSol sol,pBucket bucket,int ip) {
         uy = pp1->c[1] - ppt->c[1];
         d2 = ma[0]*ux*ux + ma[2]*uy*uy + 2.0*ma[1]*ux*uy;
         if ( d2 < dmi ) {
-          iadr = (ip1-1)*sol->size + 1;
+          iadr = ip1*sol->size;
           mb = &sol->m[iadr];
           d2 = mb[0]*ux*ux + mb[2]*uy*uy + 2.0*mb[1]*ux*uy;
           if ( d2 < dmi )  return(0);

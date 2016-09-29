@@ -90,11 +90,6 @@ int main(int argc,char *argv[]) {
      file formatted or manually set your mesh using the MMG3D_Set* functions */
 
   /** with MMG3D_loadMesh function */
-  /** a) (not mandatory): give the mesh name
-     (by default, the "mesh.mesh" file is oppened)*/
-  if ( MMG3D_Set_inputMeshName(mmgMesh,inname) != 1 )
-    exit(EXIT_FAILURE);
-  /** b) function calling */
   if ( MMG3D_loadMesh(mmgMesh,inname) != 1 )  exit(EXIT_FAILURE);
 
   /** 3) Build displacement in MMG5 format */
@@ -107,12 +102,6 @@ int main(int argc,char *argv[]) {
     exit(EXIT_FAILURE);
 
   /** With MMG3D_loadSol function */
-  /** a) (not mandatory): give the sol name
-     (by default, the "mesh.sol" file is oppened)*/
-  if ( MMG3D_Set_inputSolName(mmgMesh,mmgDisp,inname) != 1 )
-    exit(EXIT_FAILURE);
-
-  /** b) function calling */
   if ( MMG3D_loadSol(mmgMesh,mmgDisp,inname) != 1 )
     exit(EXIT_FAILURE);
 
@@ -130,7 +119,7 @@ int main(int argc,char *argv[]) {
   if ( MMG3D_Set_iparameter(mmgMesh,mmgDisp,MMG3D_IPARAM_debug, 1) != 1 )
     exit(EXIT_FAILURE);
 
-  /** library call */
+  /** remesh function */
   ier = MMG3D_mmg3dmov(mmgMesh,mmgSol,mmgDisp);
 
   if ( ier == MMG5_STRONGFAILURE ) {
@@ -141,16 +130,10 @@ int main(int argc,char *argv[]) {
 
   /* (Not mandatory) Automatically save the mesh */
   sprintf(outname, "%s%s%s", pwd, "/../libexamples/mmg3d/LagrangianMotion_example0/", "tinyBoxt.o");
-  if ( MMG3D_Set_outputMeshName(mmgMesh,outname) != 1 )
-    exit(EXIT_FAILURE);
-
   if ( MMG3D_saveMesh(mmgMesh,outname) != 1 )
     exit(EXIT_FAILURE);
 
   /* (Not mandatory) Automatically save the solution */
-  if ( MMG3D_Set_outputSolName(mmgMesh,mmgSol,outname) != 1 )
-    exit(EXIT_FAILURE);
-
   if ( MMG3D_saveSol(mmgMesh,mmgSol,outname) != 1 )
     exit(EXIT_FAILURE);
 

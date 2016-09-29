@@ -147,7 +147,7 @@ PROGRAM main
   IF ( ier /= 1 ) CALL EXIT(107)
 
   !> ------------------------------ STEP  II --------------------------
-  !! library call
+  !! remesh function
   CALL MMGS_mmgslib(mmgMesh,mmgSol,ier)
 
   IF ( ier == MMG5_STRONGFAILURE ) THEN
