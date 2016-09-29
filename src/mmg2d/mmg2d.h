@@ -236,7 +236,7 @@ int MMG2_pack(MMG5_pMesh ,MMG5_pSol );
 void MMG2_outqua(MMG5_pMesh ,MMG5_pSol );
 //int MMG2_mmg2d0(MMG5_pMesh ,MMG5_pSol );
 int MMG2_mmg2d1(MMG5_pMesh ,MMG5_pSol );
-//int MMG2_split(MMG5_pMesh ,MMG5_pSol ,int ,int ,int );
+//int MMG2_split(MMG5_pMesh ,MMG5_pSol ,int ,int ,int,double );
 //int MMG2_splitbdry(MMG5_pMesh ,MMG5_pSol ,int ,int ,int,double*);
 //int MMG2_colpoi(MMG5_pMesh ,MMG5_pSol , int ,int ,int ,int ,double );
 //int MMG2_colpoibdry(MMG5_pMesh ,MMG5_pSol , int ,int ,int ,int ,double );
