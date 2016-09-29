@@ -56,8 +56,12 @@ int _MMG2_chkcol(MMG5_pMesh mesh, MMG5_pSol met,int k,char i,int *list,char typc
   /* First test: avoid closing one ref. component consisting of only one element */
   if ( MG_EDG(pt->tag[i1]) && MG_EDG(pt->tag[i2]) ) return(0);
   
-  /* avoid collapsing a bondary point over a regular one */
-  if ( (mesh->point[ip1].tag) && !(mesh->point[ip2].tag) ) return(0);
+  /* Avoid collapsing a bondary point over a regular one (leads to boundary degeneration) */
+  if ( MG_EDG(mesh->point[ip1].tag) && !MG_EDG(mesh->point[ip2].tag) ) return(0);
+
+  /* Avoid subdivising one ref. component consisting of only one layer of elements */
+  if ( MG_EDG(mesh->point[ip1].tag) && (pt->tag[i1]||pt->tag[i2]) ) return(0);
+
 
   jel = adja[i] / 3;
   if ( jel ) {
