@@ -197,7 +197,9 @@ int _MMG2_chkcol(MMG5_pMesh mesh, MMG5_pSol met,int k,char i,int *list,char typc
   
   /* Particular case when there are two triangles in the ball of the collapsed point ip1 */
   else {
-    assert ( ilist == 2 );  // Not necessarily! Check for that case too!
+#warning algiane : commentated assert
+    // assert ( ilist == 2 );  // Not necessarily! Check for that case too!
+    if ( ilist !=2 ) return(0);
     if ( !open )  return(0);
     
     jel = list[1] / 3;
