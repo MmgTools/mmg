@@ -1025,7 +1025,7 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol sol,FILE **inm,
                           mesh->point[ptt->v[2]].c) < 0.0 ) {
         /* mesh->xt temporary used to count reoriented tetra*/
         mesh->xt++;
-        aux = pt->v[2];
+        aux = ptt->v[2];
         ptt->v[2] = ptt->v[1];
         ptt->v[1] = aux;
       }
@@ -1379,8 +1379,9 @@ int MMG5_saveMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
   if ( bin ) {
     word = 1;
     fwrite(&word,sw,1,inm);
+    fprintf(inm,"\n");
   }
-  fprintf(inm,"\n$EndMeshFormat\n");
+  fprintf(inm,"$EndMeshFormat\n");
 
   /* Vertices */
   np = 0;
@@ -1391,7 +1392,7 @@ int MMG5_saveMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
       if ( mesh->dim==2 ) ppt->c[2] = 0.;
     }
   }
-  fprintf(inm,"\n$Nodes\n");
+  fprintf(inm,"$Nodes\n");
   fprintf(inm,"%d\n",np);
 
   for (k=1; k<=mesh->np; k++) {
@@ -1408,7 +1409,8 @@ int MMG5_saveMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
       }
     }
   }
-  fprintf(inm,"\n$EndNodes\n");
+  if ( bin )  fprintf(inm,"\n");
+  fprintf(inm,"$EndNodes\n");
 
   /* Data reading */
   /** First step: Count the number of elements of each type */
@@ -1443,7 +1445,7 @@ int MMG5_saveMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
     na++;
   }
 
-  fprintf(inm,"\n$Elements\n");
+  fprintf(inm,"$Elements\n");
   fprintf(inm,"%d\n", np + ne + npr + nt + nq + na );
 
   /** Second step: save the elements at following format:
@@ -1620,7 +1622,8 @@ int MMG5_saveMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
       fwrite(&mesh->point[pp->v[5]].tmp,sw,1,inm);
     }
   }
-  fprintf(inm,"\n$EndElements\n");
+  if ( bin )  fprintf(inm,"\n");
+  fprintf(inm,"$EndElements\n");
 
   /* stats */
   if ( abs(mesh->info.imprim) > 3 ) {
@@ -1640,7 +1643,7 @@ int MMG5_saveMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
   }
 
   /** Write solution */
-  fprintf(inm,"\n$NodeData\n");
+  fprintf(inm,"$NodeData\n");
 
   /* One string tag saying the type of solution saved */
   fprintf(inm,"1\n");
@@ -1775,7 +1778,8 @@ int MMG5_saveMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
       }
     }
   }
-  fprintf(inm,"\n$EndNodeData\n");
+  if ( bin ) fprintf(inm,"\n");
+  fprintf(inm,"$EndNodeData\n");
   fclose(inm);
 
   return(1);

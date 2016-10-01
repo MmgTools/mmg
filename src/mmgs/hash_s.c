@@ -117,7 +117,14 @@ int _MMGS_hashTria(MMG5_pMesh mesh) {
  * \param mesh pointer toward the mesh structure.
  * \return 1 if success, 0.
  *
- * Store edges in hash table
+ * Copy the properties (ref and tag) of the declared edges to the triangles,
+ * where they are assigned to the individual corners of the triangle. First a
+ * hash is created for rapid lookup of the edges. Then in a loop over all edges
+ * of all triangles, the hash is probed for each edge, and if it exists its
+ * properties are copied. Thus, declared edges that do not occur in any triangle
+ * will be silently ignored.
+ *
+ * \remark this function handle all the provided edges.
  *
  */
 int assignEdge(MMG5_pMesh mesh) {
