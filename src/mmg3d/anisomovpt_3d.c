@@ -94,7 +94,10 @@ int _MMG5_movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,
 
     det = m[0] * ( m[3]*m[5] - m[4]*m[4]) - m[1] * ( m[1]*m[5] - m[2]*m[4])
       + m[2] * ( m[1]*m[4] - m[2]*m[3]);
-    if ( det < _MMG5_EPSOK ) return(0);
+    if ( det < _MMG5_EPSOK ) {
+      _MMG5_SAFE_FREE(callist);
+      return(0);
+    }
 
     vol *= sqrt(det);
 
