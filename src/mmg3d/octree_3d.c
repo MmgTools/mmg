@@ -53,6 +53,7 @@ void _MMG3D_initOctree(MMG5_pMesh mesh,_MMG3D_pOctree* q, int nv)
   if ( mesh->info.imprim > 4 ) printf("OCTREE INIT\n");
   
   // set nv to the next power of 2  
+  //~ nv = 100000000;
   nv--;
   nv |= nv >> 1;
   nv |= nv >> 2;
@@ -62,7 +63,7 @@ void _MMG3D_initOctree(MMG5_pMesh mesh,_MMG3D_pOctree* q, int nv)
   nv++;
   (*q)->nv = nv;
 
-  (*q)->nc = 16;
+  (*q)->nc = 32;
   
   _MMG5_ADD_MEM(mesh,sizeof(_MMG3D_octree_s),"initial octree cell",
                 printf("  Exit program.\n");
@@ -367,7 +368,49 @@ int _MMG3D_seekIndex (double* distList, double dist, int indexMin, int indexMax)
   }
   return 1;
 }
+/**
+ * \param rectin rectangle to intersect, is not modified.
+ * \param rectinout rectangle to intersect, is set to the intersection.
+ * 
+ *  Rectangles are defined by: the coordinates of the lower left corner 
+ * of the rectange and the length of the rectangle in each dimension.
+*/
+void _MMG3D_intersectRect(double *rectin, double *rectinout)
+{
+  double *rect1Temp, *rect2Temp;
+  _MMG5_SAFE_MALLOC(rect1Temp,6,double);
+  _MMG5_SAFE_MALLOC(rect2Temp,6,double);
+  
+  rect1Temp[0] = rectin[0];
+  rect1Temp[1] = rectin[1];
+  rect1Temp[2] = rectin[2];
+  rect1Temp[3] = rectin[3]+rectin[0];
+  rect1Temp[4] = rectin[4]+rectin[1];
+  rect1Temp[5] = rectin[5]+rectin[2];
 
+  rect2Temp[0] = rectinout[0];
+  rect2Temp[1] = rectinout[1];
+  rect2Temp[2] = rectinout[2];
+  rect2Temp[3] = rectinout[3]+rectinout[0];
+  rect2Temp[4] = rectinout[4]+rectinout[1];
+  rect2Temp[5] = rectinout[5]+rectinout[2];
+  
+  rectinout[0] = rect1Temp[0]>rect2Temp[0] ? rect1Temp[0]:rect2Temp[0];
+  rectinout[1] = rect1Temp[1]>rect2Temp[1] ? rect1Temp[1]:rect2Temp[1];
+  rectinout[2] = rect1Temp[2]>rect2Temp[2] ? rect1Temp[2]:rect2Temp[2];
+  rectinout[3] = rect1Temp[3]<rect2Temp[3] ? rect1Temp[3]:rect2Temp[3];
+  rectinout[4] = rect1Temp[4]<rect2Temp[4] ? rect1Temp[4]:rect2Temp[4];
+  rectinout[5] = rect1Temp[5]<rect2Temp[5] ? rect1Temp[5]:rect2Temp[5];
+  
+  rectinout[3] = rectinout[3] - rectinout[0];
+  rectinout[4] = rectinout[4] - rectinout[1];
+  rectinout[5] = rectinout[5] - rectinout[2];
+  
+  assert(!(rectinout[3]<0 || rectinout[4]<0 ||rectinout[5]<0));
+  
+  _MMG5_SAFE_FREE(rect1Temp);
+  _MMG5_SAFE_FREE(rect2Temp);
+}
 
 /**
  * \param q pointer toward the octree cell.
@@ -377,10 +420,10 @@ int _MMG3D_seekIndex (double* distList, double dist, int indexMin, int indexMax)
  * the rectangle in each dimension.
  * \param qlist pointer toward the list of pointer over the sub octrees that
  *  intersect \a rect.
- * \param dist pointer toward a the list of distances between center of 
+ * \param dist pointer toward the list of distances between center of 
  * the octree cells in qlist and the center of the whole recangle.
  * \param nv number of vertices in the subtree.
- * \param dim dimension work.
+ * \param dim dimension =3.
  * \param index number of octree cells that intersect \a rect
  *
  * Count or list the number of octree cells that intersect the rectangle
@@ -392,10 +435,11 @@ void _MMG3D_getListSquareRec(_MMG3D_octree_s* q, double* center, double* rect,
 {
   double *recttemp;
   double *centertemp;
+  int *recCenter;
   double l = 1./(1<<(q->depth+1));
   double distTemp;
   double x,y,z;
-  int indexTemp;
+  int indexTemp,i;
 
   // number max of octree cells listed for one search
   if ((*index)>nc-4)
@@ -405,6 +449,7 @@ void _MMG3D_getListSquareRec(_MMG3D_octree_s* q, double* center, double* rect,
   {
     _MMG5_SAFE_MALLOC(recttemp,2*dim,double);
     _MMG5_SAFE_MALLOC(centertemp,dim,double);
+    _MMG5_SAFE_MALLOC(recCenter,2*dim,int);
   }
 
   //~ if (q->nbVer>0 && _MMG3D_isCellIncluded(rect, center, l))
@@ -424,11 +469,11 @@ void _MMG3D_getListSquareRec(_MMG3D_octree_s* q, double* center, double* rect,
     x = dist[nc-3] - center[0];
     y = dist[nc-2] - center[1];
     z = dist[nc-1] - center[2];
-    //~ #warning should be replaced with distance in metric
-    //~ distTemp = x*x+y*y+z*z;
-    #warning anisotropic distance not tested (not so important, this only reorders the cells)
-    distTemp = ani[0]*x*x+ani[3]*y*y+ani[5]*z*z+
-                2*(ani[1]*x*y+ani[2]*x*z+ani[4]*y*z);
+    #warning should be replaced with distance in metric
+    distTemp = x*x+y*y+z*z;
+    //~ #warning anisotropic distance not tested (not so important, this only reorders the cells)
+    //~ distTemp = ani[0]*x*x+ani[3]*y*y+ani[5]*z*z+
+                //~ 2*(ani[1]*x*y+ani[2]*x*z+ani[4]*y*z);
     if (*index > 0)
     {
       indexTemp = _MMG3D_seekIndex(dist,distTemp,0, *index-1);    
@@ -441,7 +486,8 @@ void _MMG3D_getListSquareRec(_MMG3D_octree_s* q, double* center, double* rect,
         dist[*index]=distTemp;
         (*qlist)[*index]=q;
       }
-    }else
+    }
+    else
     {
       dist[*index]=distTemp;
       (*qlist)[*index]=q;
@@ -451,129 +497,151 @@ void _MMG3D_getListSquareRec(_MMG3D_octree_s* q, double* center, double* rect,
 
   }else if (q->branches!=NULL)
   {
-
-    if (rect[0]<center[0]&&rect[1]<center[1]) // branch 0
+    for (i=0;i<3;i++)
     {
-      recttemp[0] = rect[0];
-      recttemp[1] = rect[1];
-
-      recttemp[3] = rect[0]+rect[3] < center[0] ? rect[3]:center[0]-rect[0];
-      recttemp[4] = rect[1]+rect[4] < center[1] ? rect[4]:center[1]-rect[1];
-
+      recCenter[i] = (rect[i]>center[i]);
+      recCenter[i+3] = ((rect[i]+rect[i+3])>center[i]);
+    }
+    
+    if (recCenter[0]==0 && recCenter[1]==0 && recCenter[2]==0) //branch 0
+    {
+      //~ recttemp is set to the cell dimensions
+      recttemp[0] = center[0]-l;
+      recttemp[1] = center[1]-l;  
+      recttemp[2] = center[2]-l;
+      recttemp[3] = l;
+      recttemp[4] = l;
+      recttemp[5] = l;
+      // recttemp is set to the intersection between rect and the cell
+      _MMG3D_intersectRect(rect,recttemp);
       centertemp[0] = center[0]-l/2;
       centertemp[1] = center[1]-l/2;
-      if (rect[2] < center[2]) // branch 0
-      {
-
-        recttemp[2] = rect[2];
-        recttemp[5] = rect[2]+rect[5] < center[2] ? rect[5]:center[2]-rect[2];
-
-
-        centertemp[2] = center[2]-l/2;
-
-        _MMG3D_getListSquareRec(&(q->branches[0]), centertemp, recttemp, qlist, dist, ani, nv, nc, dim, index);
-      }
-      if (rect[2]+rect[5] > center[2]) // branch 4
-      {
-        recttemp[2] = rect[2]<center[2] ? center[2]:rect[2];
-        recttemp[5] = rect[2]+ rect[5] - recttemp[2];
-
-        centertemp[2] = center[2]+l/2;
-
-        _MMG3D_getListSquareRec(&(q->branches[4]), centertemp, recttemp, qlist, dist, ani, nv, nc, dim, index);
-      }
+      centertemp[2] = center[2]-l/2;
+      _MMG3D_getListSquareRec(&(q->branches[0]), centertemp, recttemp, qlist, dist, ani, nv, nc, dim, index);
     }
-    if (rect[0]+rect[3] >center[0] && rect[1]<center[1]) // branch 1
+      
+    if (recCenter[1]==0 && recCenter[2]==0 && recCenter[3]==1) //branch 1
     {
-      recttemp[0] = rect[0]<center[0] ? center[0]:rect[0];
-      recttemp[1] = rect[1];
-      recttemp[3] = rect[0]+rect[3]-recttemp[0];
-      recttemp[4] = rect[1]+rect[4] < center[1] ? rect[4]:center[1]-rect[1];
+      //~ recttemp is set to the cell dimensions
+      recttemp[0] = center[0];
+      recttemp[1] = center[1]-l;  
+      recttemp[2] = center[2]-l;
+      recttemp[3] = l;
+      recttemp[4] = l;
+      recttemp[5] = l;
+      // recttemp is set to the intersection between rect and the cell
+      _MMG3D_intersectRect(rect,recttemp);
       centertemp[0] = center[0]+l/2;
       centertemp[1] = center[1]-l/2;
-
-      if(rect[2] < center[2]) // branch 1
-      {
-        recttemp[2] = rect[2];
-        recttemp[5] = rect[2]+rect[5] < center[2] ? rect[5]:center[2]-rect[2];
-        centertemp[2] = center[2]-l/2;
-
-        _MMG3D_getListSquareRec(&(q->branches[1]), centertemp, recttemp, qlist, dist, ani, nv, nc, dim, index);
-      }
-      if (rect[2]+rect[5] > center[2]) // branch 5
-      {
-        recttemp[2] = rect[2]<center[2] ? center[2]:rect[2];
-        recttemp[5] = rect[2]+ rect[5] - recttemp[2];
-
-        centertemp[2] = center[2]+l/2;
-
-        _MMG3D_getListSquareRec(&(q->branches[5]), centertemp, recttemp, qlist, dist, ani, nv, nc, dim, index);
-      }
+      centertemp[2] = center[2]-l/2;
+      _MMG3D_getListSquareRec(&(q->branches[1]), centertemp, recttemp, qlist, dist, ani, nv, nc, dim, index);
     }
-    if (rect[0]<center[0] && rect[1]+rect[4]>center[1]) // branch 2
+      
+    if (recCenter[0]==0 && recCenter[2]==0 && recCenter[4]==1) //branch 2
     {
-      recttemp[0] = rect[0];
-      recttemp[1] = rect[1]>center[1] ? rect[1]:center[1];
-      recttemp[3] = rect[0]+rect[3] < center[0] ? rect[3]:center[0]-rect[0];
-      recttemp[4] = rect[1] + rect[4]- recttemp[1];
-
+      //~ recttemp is set to the cell dimensions
+      recttemp[0] = center[0]-l;
+      recttemp[1] = center[1];  
+      recttemp[2] = center[2]-l;
+      recttemp[3] = l;
+      recttemp[4] = l;
+      recttemp[5] = l;
+      // recttemp is set to the intersection between rect and the cell
+      _MMG3D_intersectRect(rect,recttemp);
       centertemp[0] = center[0]-l/2;
       centertemp[1] = center[1]+l/2;
-
-
-      if(rect[2] < center[2]) // branch 2
-      {
-
-        recttemp[2] = rect[2];
-        recttemp[5] = rect[2] + rect[5]< center[2] ? rect[5]:center[2]-rect[2];
-
-        centertemp[2] = center[2]-l/2;
-
-        _MMG3D_getListSquareRec(&(q->branches[2]), centertemp, recttemp, qlist, dist, ani, nv, nc, dim, index);
-      }
-      if (rect[2]+rect[5] >= center[2]) // branch 6
-      {
-        recttemp[2] = rect[2]<center[2] ? center[2]:rect[2];
-        recttemp[5] = rect[2]+ rect[5] - recttemp[2];
-
-        centertemp[2] = center[2]+l/2;
-
-        _MMG3D_getListSquareRec(&(q->branches[6]), centertemp, recttemp, qlist, dist, ani, nv, nc, dim, index);
-      }
+      centertemp[2] = center[2]-l/2;
+      _MMG3D_getListSquareRec(&(q->branches[2]), centertemp, recttemp, qlist, dist, ani, nv, nc, dim, index);
     }
-    if (rect[0]+rect[3] >center[0] && rect[1]+rect[4]>center[1]) // branch 3
+
+    if (recCenter[2]==0 && recCenter[3]==1 && recCenter[4]==1) //branch 3
     {
-      recttemp[0] = rect[0]>center[0] ? rect[0]:center[0];
-      recttemp[1] = rect[1]>center[1] ? rect[1]:center[1];
-      recttemp[3] = rect[0]+rect[3]-recttemp[0];
-      recttemp[4] = rect[1]+rect[4]-recttemp[1];
+      //~ recttemp is set to the cell dimensions
+      recttemp[0] = center[0];
+      recttemp[1] = center[1];  
+      recttemp[2] = center[2]-l;
+      recttemp[3] = l;
+      recttemp[4] = l;
+      recttemp[5] = l;
+      // recttemp is set to the intersection between rect and the cell
+      _MMG3D_intersectRect(rect,recttemp);
       centertemp[0] = center[0]+l/2;
       centertemp[1] = center[1]+l/2;
+      centertemp[2] = center[2]-l/2;
+      _MMG3D_getListSquareRec(&(q->branches[3]), centertemp, recttemp, qlist, dist, ani, nv, nc, dim, index);
+    }
+    
+    if (recCenter[0]==0 && recCenter[1]==0 && recCenter[5]==1) //branch 4
+    {
+      //~ recttemp is set to the cell dimensions
+      recttemp[0] = center[0]-l;
+      recttemp[1] = center[1]-l;  
+      recttemp[2] = center[2];
+      recttemp[3] = l;
+      recttemp[4] = l;
+      recttemp[5] = l;      
+      // recttemp is set to the intersection between rect and the cell
+      _MMG3D_intersectRect(rect,recttemp);
+      centertemp[0] = center[0]-l/2;
+      centertemp[1] = center[1]-l/2;
+      centertemp[2] = center[2]+l/2;
+      _MMG3D_getListSquareRec(&(q->branches[4]), centertemp, recttemp, qlist, dist, ani, nv, nc, dim, index);
+    }
+    
+    if (recCenter[1]==0 && recCenter[3]==1 && recCenter[5]==1) //branch 5
+    {
+      //~ recttemp is set to the cell dimensions
+      recttemp[0] = center[0];
+      recttemp[1] = center[1]-l;  
+      recttemp[2] = center[2];
+      recttemp[3] = l;
+      recttemp[4] = l;
+      recttemp[5] = l;
+      // recttemp is set to the intersection between rect and the cell
+      _MMG3D_intersectRect(rect,recttemp);
+      centertemp[0] = center[0]+l/2;
+      centertemp[1] = center[1]-l/2;
+      centertemp[2] = center[2]+l/2;
+      _MMG3D_getListSquareRec(&(q->branches[5]), centertemp, recttemp, qlist, dist, ani, nv, nc, dim, index);
+    }
 
-      if(rect[2] < center[2]) // branch 3
-      {
-
-        recttemp[2] = rect[2];
-
-        recttemp[5] = rect[2] + rect[5]< center[2] ? rect[5]:center[2]-rect[2];
-
-        centertemp[2] = center[2]-l/2;
-
-        _MMG3D_getListSquareRec(&(q->branches[3]), centertemp, recttemp, qlist, dist, ani, nv, nc, dim, index);
-      }
-      if (rect[2]+rect[5] > center[2]) // branch 7
-      {
-        recttemp[2] = rect[2]<center[2] ? center[2]:rect[2];
-        recttemp[5] = rect[2]+ rect[5] - recttemp[2];
-
-        centertemp[2] = center[2]+l/2;
-
-        _MMG3D_getListSquareRec(&(q->branches[7]), centertemp, recttemp, qlist, dist, ani, nv, nc, dim, index);
-      }
+    if (recCenter[0]==0 && recCenter[4]==1 && recCenter[5]==1) //branch 6
+    {
+      //~ recttemp is set to the cell dimensions
+      recttemp[0] = center[0]-l;
+      recttemp[1] = center[1];  
+      recttemp[2] = center[2];
+      recttemp[3] = l;
+      recttemp[4] = l;
+      recttemp[5] = l;
+      // recttemp is set to the intersection between rect and the cell
+      _MMG3D_intersectRect(rect,recttemp);
+      centertemp[0] = center[0]-l/2;
+      centertemp[1] = center[1]+l/2;
+      centertemp[2] = center[2]+l/2;
+      _MMG3D_getListSquareRec(&(q->branches[6]), centertemp, recttemp, qlist, dist, ani, nv, nc, dim, index);
+    }
+    
+    if (recCenter[3]==1 && recCenter[4]==1 && recCenter[5]==1) //branch 7
+    {
+      //~ recttemp is set to the cell dimensions
+      recttemp[0] = center[0];
+      recttemp[1] = center[1];  
+      recttemp[2] = center[2];
+      recttemp[3] = l;
+      recttemp[4] = l;
+      recttemp[5] = l;
+      // recttemp is set to the intersection between rect and the cell
+      _MMG3D_intersectRect(rect,recttemp);
+      centertemp[0] = center[0]+l/2;
+      centertemp[1] = center[1]+l/2;
+      centertemp[2] = center[2]+l/2;
+      _MMG3D_getListSquareRec(&(q->branches[7]), centertemp, recttemp, qlist, dist, ani, nv, nc, dim, index);
     }
   }
   _MMG5_SAFE_FREE(recttemp);
   _MMG5_SAFE_FREE(centertemp);
+  _MMG5_SAFE_FREE(recCenter);
 
 }
 
@@ -1302,9 +1370,9 @@ int _MMG3D_octreein_iso(MMG5_pMesh mesh,MMG5_pSol sol,_MMG3D_pOctree octree,int 
   //double          dmax;
 
   _MMG5_SAFE_MALLOC(ani,6,double);
-  ani[0] = 1;
-  ani[3] = 1;
-  ani[5] = 1;
+  ani[0] = sol->m[ip];
+  ani[3] = sol->m[ip];
+  ani[5] = sol->m[ip];
   ani[1] = 0;
   ani[2] = 0;
   ani[4] = 0;
@@ -1331,7 +1399,8 @@ int _MMG3D_octreein_iso(MMG5_pMesh mesh,MMG5_pSol sol,_MMG3D_pOctree octree,int 
     //~ {
       //~ fprintf(stdout,"Number of points in the cell %d\n", lococ[i]->nbVer);
     //~ }
-     //~ fprintf(stdout,"Number of cells too big\n");
+     fprintf(stdout,"Number of cells too big\n");
+     
     _MMG5_DEL_MEM(mesh,ani,6*sizeof(double));    
     _MMG5_DEL_MEM(mesh,lococ,octree->nc*sizeof(_MMG3D_octree_s*));
     return(0);
@@ -1354,7 +1423,8 @@ int _MMG3D_octreein_iso(MMG5_pMesh mesh,MMG5_pSol sol,_MMG3D_pOctree octree,int 
 
       d2 = ux*ux + uy*uy + uz*uz;
 
-      if ( d2 < hp1 || d2 < hpi2*hpi2 )  {
+      if ( d2 < hp1 || d2 < hpi2*hpi2 )  
+      {
         //printf("filtre current %d : %e %e %e %e\n",ip1,d2,hp1,d2,hpi2*hpi2);
         _MMG5_DEL_MEM(mesh,ani,6*sizeof(double));
         _MMG5_DEL_MEM(mesh,lococ,octree->nc*sizeof(_MMG3D_octree_s*));
@@ -1382,7 +1452,7 @@ int _MMG3D_octreein_iso(MMG5_pMesh mesh,MMG5_pSol sol,_MMG3D_pOctree octree,int 
 int _MMG3D_octreein_ani(MMG5_pMesh mesh,MMG5_pSol sol,_MMG3D_pOctree octree,int ip,double lmax) {
   MMG5_pPoint     ppt,pp1;
   _MMG3D_octree_s **lococ;
-  double          d2,ux,uy,uz,hpi,hp1,methalo[6];
+  double          d2,ux,uy,uz,methalo[6];
   double          det,dmi, *ma, *mb,m1,m2,m3,dx,dy,dz;
   int             iadr,ip1,i,j;
   int             ncells;
@@ -1398,8 +1468,6 @@ int _MMG3D_octreein_ani(MMG5_pMesh mesh,MMG5_pSol sol,_MMG3D_pOctree octree,int 
   //dmi  =dmax*dmax;
 
   // hpi = sol->m[ip]*dmax;
-  hpi = sol->m[ip]*lmax;
-  hp1 = hpi*hpi;
 
   det = ma[0] * (ma[3]*ma[5] - ma[4]*ma[4])
     - ma[1] * (ma[1]*ma[5] - ma[2]*ma[4])
@@ -1424,16 +1492,18 @@ int _MMG3D_octreein_ani(MMG5_pMesh mesh,MMG5_pSol sol,_MMG3D_pOctree octree,int 
   /* methalo is the box that we want to intersect with the octree, thus, the limit
    * of the filter. We give: the coordinates of one of the corner of the box and
    * the length of the box in each direction. */
-
   methalo[0] = ppt->c[0] - dx;
   methalo[1] = ppt->c[1] - dy;
   methalo[2] = ppt->c[2] - dz;
-  methalo[3] = methalo[4] = methalo[5] = 2.*hpi;
+  methalo[3] = 2*dx;
+  methalo[4] = 2*dy;
+  methalo[5] = 2*dz;
 
   ncells = _MMG3D_getListSquare(mesh,ma,octree, methalo, &lococ);
   if (ncells < 0)
   {
     _MMG5_DEL_MEM(mesh,lococ,octree->nc*sizeof(_MMG3D_octree_s*));
+    //~ fprintf(stdout,"too many cells\n");
     return(0);
   }
   /* Check the octree cells */

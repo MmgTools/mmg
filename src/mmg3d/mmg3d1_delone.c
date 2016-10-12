@@ -527,8 +527,8 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree,int ne,
             goto collapse2;//continue;
           } else {
             (*ns)++;
-            if ( octree )
-              _MMG3D_addOctree(mesh,octree,ip);
+            //~ if ( octree )
+              //~ _MMG3D_addOctree(mesh,octree,ip);
 
             ppt = &mesh->point[ip];
 
