@@ -34,10 +34,9 @@
 #include "mmg2d.h"
 
 #define QSEUIL 1e4
-#define LSHORT1 0.65
 
 /*insert ip on edge between k1 and adj1/3 */
-int MMG2_split(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int k1,int adj1) {
+int MMG2_split(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int k1,int adj1,double lshort) {
   MMG5_pTria     pt1,pt2,pt3,pt4,ptmp;
   MMG5_pEdge     ped,ped1;
   int       k2,adj2,jel,kel,voy1,voy2,iar1,iar2,iara1,iara2;
@@ -120,7 +119,7 @@ int MMG2_split(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int k1,int adj1) {
 
   len = MMG2_length(ca,cb,ma,mb);
   //printf("edg %d %d : %e\n",pvoy1,ip,len);
-  if(len < LSHORT1) return(0);
+  if(len < lshort) return(0);
 
   cb  = &mesh->point[pvoy2].c[0];
   iadr = pvoy2*sol->size;
@@ -128,7 +127,7 @@ int MMG2_split(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int k1,int adj1) {
 
   len = MMG2_length(ca,cb,ma,mb);
   //printf("edg %d %d : %e\n",pvoy2,ip,len);
-  if(len < LSHORT1) return(0);
+  if(len < lshort) return(0);
 
   /*check*/
   cb  = &mesh->point[piara2].c[0];
@@ -137,7 +136,7 @@ int MMG2_split(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int k1,int adj1) {
 
   len = MMG2_length(ca,cb,ma,mb);
   //printf("edg %d (%d)  %d : %e\n",piar1,piara2,ip,len);
-  if(len < LSHORT1) return(0);
+  if(len < lshort) return(0);
 
   cb  = &mesh->point[piar2].c[0];
   iadr = piar2*sol->size;
@@ -145,7 +144,7 @@ int MMG2_split(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int k1,int adj1) {
 
   len = MMG2_length(ca,cb,ma,mb);
   //printf("edg %d %d : %e\n",piar2,ip,len);
-  if(len < LSHORT1) return(0);
+  if(len < lshort) return(0);
 
   pt1->v[0] = piar2;
   pt1->v[1] = pvoy1;

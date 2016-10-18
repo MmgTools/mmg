@@ -121,7 +121,7 @@ int main(int argc,char *argv[]) {
   if ( !MMG5_Set_iparameter(mmgMesh,mmgDisp,MMG5_IPARAM_debug, 1) )
     exit(EXIT_FAILURE);
 
-  /** library call */
+  /** remesh function */
   ier = MMG5_mmg3dmov(mmgMesh,mmgSol,mmgDisp);
   if ( ier == MMG5_STRONGFAILURE ) {
     fprintf(stdout,"BAD ENDING OF MMG3DLIB: UNABLE TO SAVE MESH\n");

@@ -66,7 +66,6 @@ CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/src/common/mmgcommon.h.in
 
 # Executable path
 SET(EXECUTABLE_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/bin)
-SET(MMGS_SOURCE_DIR ${CMAKE_SOURCE_DIR}/src/mmgs)
 SET(COMMON_SOURCE_DIR ${CMAKE_SOURCE_DIR}/src/common)
 
 # Find "exotic" compilers

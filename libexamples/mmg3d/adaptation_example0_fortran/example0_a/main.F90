@@ -47,15 +47,6 @@ PROGRAM main
   !!    file formatted or manually set your mesh using the MMG3D_Set* functions
 
   !> with MMG3D_loadMesh function
-  !! a) (not mandatory): give the mesh name
-  !!   (by default, the "mesh.mesh" file is oppened)
-  CALL MMG3D_Set_inputMeshName(mmgMesh,TRIM(ADJUSTL(filename)),&
-       LEN(TRIM(ADJUSTL(filename))),ier)
-  IF ( ier == 0 ) THEN
-     CALL EXIT(101)
-  ENDIF
-
-  !> b) function calling
   CALL MMG3D_loadMesh(mmgMesh,TRIM(ADJUSTL(filename)),&
        LEN(TRIM(ADJUSTL(filename))),ier)
   IF ( ier == 0 )  CALL EXIT(102)
@@ -65,15 +56,6 @@ PROGRAM main
   !!    file formatted or manually set your sol using the MMG3D_Set* functions
 
   !> With MMG3D_loadSol function
-  !! a) (not mandatory): give the sol name
-  !!   (by default, the "mesh.sol" file is oppened)
-  CALL MMG3D_Set_inputSolName(mmgMesh,mmgSol,TRIM(ADJUSTL(filename)),&
-       LEN(TRIM(ADJUSTL(filename))),ier)
-  IF ( ier /= 1 ) THEN
-     CALL EXIT(103)
-  ENDIF
-
-  !> b) function calling
   CALL MMG3D_loadSol(mmgMesh,mmgSol,TRIM(ADJUSTL(filename)),&
        LEN(TRIM(ADJUSTL(filename))),ier)
   IF ( ier /= 1 ) THEN
@@ -85,7 +67,7 @@ PROGRAM main
   IF ( ier /= 1 ) CALL EXIT(105)
 
   !> ------------------------------ STEP  II --------------------------
-  !! library call
+  !! remesh function
   CALL MMG3D_mmg3dlib(mmgMesh,mmgSol,ier)
 
   IF ( ier == MMG5_STRONGFAILURE ) THEN
@@ -102,20 +84,12 @@ PROGRAM main
   !!    using the MMG3D_getMesh/MMG3D_getSol functions
 
   !> 1) Automatically save the mesh
-  !! a)  (not mandatory): give the ouptut mesh name using MMG3D_Set_outputMeshName
-  !!   (by default, the mesh is saved in the "mesh.o.mesh" file
-  !!call MMG3D_Set_outputMeshName(mmgMesh,"output.mesh",len("output.mesh"),ier)
-  !! b) function calling
   CALL MMG3D_saveMesh(mmgMesh,"cube.o.mesh",LEN("cube.o.mesh"),ier)
   IF ( ier /= 1 ) THEN
      CALL EXIT(106)
   ENDIF
 
   !> 2) Automatically save the solution
-  !! a)  (not mandatory): give the ouptut sol name using MMG3D_Set_outputSolName
-  !!   (by default, the mesh is saved in the "mesh.o.sol" file
-  !!call MMG3D_Set_outputSolName(mmgMesh,mmgSol,"output.sol",len("output.sol"),ier)
-  !! b) function calling
   CALL MMG3D_saveSol(mmgMesh,mmgSol,"cube.o.sol",LEN("cube.o.sol"),ier)
   IF ( ier /= 1 ) THEN
      CALL EXIT(107)

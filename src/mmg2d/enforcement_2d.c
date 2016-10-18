@@ -124,7 +124,7 @@ int MMG2_bdryenforcement(MMG5_pMesh mesh,MMG5_pSol sol) {
       }
       if(!(lon<0 || lon==4)) {
         if(mesh->info.ddebug)
-          printf("  ** Unexpected situation: edge %d %d -- %d\n",ia,ib,lon);
+          printf("  ** Unable to force edge: %d %d -- %d\n",ia,ib,lon);
         exit(EXIT_FAILURE);
       }
       /*edge exist*/
@@ -148,6 +148,7 @@ int MMG2_bdryenforcement(MMG5_pMesh mesh,MMG5_pSol sol) {
       iter=0;
       while (ilon>0 && iter++<2*lon) {
         rnd = (rand()%lon);
+
         k = list[rnd]/3;
         if(mesh->info.ddebug) {
           printf("  ** Random edge swap\n");

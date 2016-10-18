@@ -450,7 +450,7 @@ static int analar(MMG5_pMesh mesh,MMG5_pSol sol,pBucket bucket,
               break;
             } else {
               mesh->point[ip].tag |= M_SD;
-              ins = MMG2_split(mesh,sol,ip,k,voi[i]);
+              ins = MMG2_split(mesh,sol,ip,k,voi[i],0.05);
               if(!ins) {
                 _MMG2D_delPt(mesh,ip);
                 continue;
@@ -460,7 +460,7 @@ static int analar(MMG5_pMesh mesh,MMG5_pSol sol,pBucket bucket,
             }
             continue;
           } else {
-            ins = MMG2_split(mesh,sol,ip,k,voi[i]);
+            ins = MMG2_split(mesh,sol,ip,k,voi[i],0.65);
             if(!ins) {
               _MMG2D_delPt(mesh,ip);
               continue;

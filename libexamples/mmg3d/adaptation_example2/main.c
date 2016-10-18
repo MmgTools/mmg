@@ -89,11 +89,6 @@ int main(int argc,char *argv[]) {
      file formatted or manually set your mesh using the MMG3D_Set* functions */
 
   /** with MMG3D_loadMesh function */
-  /** a) (not mandatory): give the mesh name
-     (by default, the "mesh.mesh" file is oppened)*/
-  if ( MMG3D_Set_inputMeshName(mmgMesh,inname) != 1 )
-    exit(EXIT_FAILURE);
-  /** b) function calling */
   if ( MMG3D_loadMesh(mmgMesh,inname) != 1 )  exit(EXIT_FAILURE);
 
   /** 3) Build sol in MMG5 format */
@@ -101,11 +96,6 @@ int main(int argc,char *argv[]) {
       file formatted or manually set your sol using the MMG3D_Set* functions */
 
   /** With MMG3D_loadSol function */
-  /** a) (not mandatory): give the sol name
-     (by default, the "mesh.sol" file is oppened)*/
-  if ( MMG3D_Set_inputSolName(mmgMesh,mmgSol,inname) != 1 )
-    exit(EXIT_FAILURE);
-  /** b) function calling */
   if ( MMG3D_loadSol(mmgMesh,mmgSol,inname) != 1 )
     exit(EXIT_FAILURE);
 
@@ -143,7 +133,7 @@ int main(int argc,char *argv[]) {
   if ( MMG3D_Set_dparameter(mmgMesh,mmgSol,MMG3D_DPARAM_hgrad, 2) != 1 )
     exit(EXIT_FAILURE);
 
-  /** library call */
+  /** remesh function */
   ier = MMG3D_mmg3dlib(mmgMesh,mmgSol);
 
   if ( ier == MMG5_STRONGFAILURE ) {
@@ -154,14 +144,7 @@ int main(int argc,char *argv[]) {
 
   /* (Not mandatory) Automatically save the mesh */
   sprintf(outname, "%s%s%s", pwd, "/../libexamples/mmg3d/adaptation_example2/", "2spheres_1.o");
-  if ( MMG3D_Set_outputMeshName(mmgMesh,outname) != 1 )
-    exit(EXIT_FAILURE);
-
   MMG3D_saveMesh(mmgMesh,outname);
-
-  /* (Not mandatory) Automatically save the solution */
-  if ( MMG3D_Set_outputSolName(mmgMesh,mmgSol,outname) != 1 )
-    exit(EXIT_FAILURE);
 
   if ( MMG3D_saveSol(mmgMesh,mmgSol,outname) != 1 )
     exit(EXIT_FAILURE);
@@ -203,7 +186,7 @@ int main(int argc,char *argv[]) {
   if ( MMG3D_Set_localParameter(mmgMesh,mmgSol,MMG5_Triangle,38,0.00001,40.,1) != 1 )
     exit(EXIT_FAILURE);
 
-  /** library call */
+  /** remesh function */
   ier = MMG3D_mmg3dlib(mmgMesh,mmgSol);
 
   if ( ier == MMG5_STRONGFAILURE ) {
@@ -213,7 +196,7 @@ int main(int argc,char *argv[]) {
     fprintf(stdout,"BAD ENDING OF MMG3DLIB\n");
 
   /**------------------- Last wave of refinment---------------------*/
-  /** library call */
+  /** remesh function */
 
   /* New metric to see the effect of the local hausdorff number on triangles
      of ref 38: constant and of size 10 */
@@ -232,16 +215,10 @@ int main(int argc,char *argv[]) {
 
   /* 7) Automatically save the mesh */
   sprintf(outname, "%s%s%s", pwd, "/../libexamples/mmg3d/adaptation_example2/", "2spheres_2.o");
-  if ( MMG3D_Set_outputMeshName(mmgMesh,outname) != 1 )
-    exit(EXIT_FAILURE);
-
   if ( MMG3D_saveMesh(mmgMesh,outname) != 1 )
     exit(EXIT_FAILURE);
 
   /* 8) Automatically save the solution */
-  if ( MMG3D_Set_outputSolName(mmgMesh,mmgSol,outname) != 1 )
-    exit(EXIT_FAILURE);
-
   if ( MMG3D_saveSol(mmgMesh,mmgSol,outname) != 1 )
     exit(EXIT_FAILURE);
 

@@ -134,7 +134,7 @@ int main(int argc,char *argv[]) {
   if ( !MMG5_Set_dparameter(mmgMesh,mmgSol,MMG5_DPARAM_hgrad, 2) )
     exit(EXIT_FAILURE);
 
-  /** library call */
+  /** remesh function */
   ier = MMG5_mmg3dlib(mmgMesh,mmgSol);
   if ( ier == MMG5_STRONGFAILURE ) {
     fprintf(stdout,"BAD ENDING OF MMG3DLIB: UNABLE TO SAVE MESH\n");
@@ -192,7 +192,7 @@ int main(int argc,char *argv[]) {
   if ( !MMG5_Set_localParameter(mmgMesh,mmgSol,MMG5_Triangle,38,1) )
     exit(EXIT_FAILURE);
 
-  /** library call */
+  /** remesh function */
   ier = MMG5_mmg3dlib(mmgMesh,mmgSol);
   if ( ier == MMG5_STRONGFAILURE ) {
     fprintf(stdout,"BAD ENDING OF MMG3DLIB: UNABLE TO SAVE MESH\n");
@@ -201,7 +201,7 @@ int main(int argc,char *argv[]) {
     fprintf(stdout,"BAD ENDING OF MMG3DLIB\n");
 
   /**------------------- Last wave of refinment---------------------*/
-  /** library call */
+  /** remesh function */
 
   /* New metric to see the effect of the local hausdorff number on triangles
      of ref 38: constant and of size 10 */

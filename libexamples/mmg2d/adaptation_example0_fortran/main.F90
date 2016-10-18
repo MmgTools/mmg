@@ -96,7 +96,7 @@ PROGRAM main
   IF ( ier /= 1 ) CALL EXIT(107)
 
   !> ------------------------------ STEP  II --------------------------
-  !! library call
+  !! remesh function
  ! NULLIFY(va)
   CALL MMG2D_mmg2dlib(mmgMesh,mmgSol,ier)
   IF ( ier == MMG5_STRONGFAILURE ) THEN

@@ -42,7 +42,7 @@ int MMG2_evalgeom(MMG5_pMesh mesh) {
     if(!M_EOK(pt)) continue;
     for(j=0 ; j<3 ; j++) {
       ppt = &mesh->point[pt->v[j]];
-      if(!(ppt->tag & M_BDRY)) continue;
+      if( (!(ppt->tag & M_BDRY)) && !(ppt->tag & M_SD)) continue;
       if(ppt->tagdel == mesh->base) continue;
 
       lon = MMG2_boulep(mesh,k,j,list);

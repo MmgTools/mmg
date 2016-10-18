@@ -166,6 +166,7 @@ int MMG2_cutEdgeTriangle(MMG5_pMesh mesh,int k,int ia,int ib) {
   }
   if(pt->v[0]==ia || pt->v[1]==ia || pt->v[2]==ia) ivert = 1;
 
+
   pt1 = &mesh->point[pt->v[0]];
   pt2 = &mesh->point[pt->v[1]];
   pt3 = &mesh->point[pt->v[2]];
@@ -338,13 +339,30 @@ int MMG2_locateEdge(MMG5_pMesh mesh,int ia,int ib,int* kdep,int* list) {
   int       iadr,*adja,k,ibreak,i,ncompt,lon,iare,ivert;
   //int       ktemp;
 
-  mesh->base += 2;
   k = *kdep;
   ncompt = 0;
   ibreak = 0;
   lon = 0;
   ppa = &mesh->point[ia];
   ppb = &mesh->point[ib];
+
+  pt = &mesh->tria[k];
+
+  ivert = 0;
+  if(pt->v[0]==ia || pt->v[1]==ia || pt->v[2]==ia) ivert = 1;
+
+  if ( !ivert ) {
+
+    if ( !(k = MMG2_findTria(mesh,ia) ) ) {
+       return 0;
+    }
+    *kdep = k;
+  }
+
+  if ( mesh->info.ddebug || mesh->info.imprim > 6 )
+    printf(" Try to enforce edge %d %d\n",ia,ib);
+
+  mesh->base += 2;
   do {
     pt = &mesh->tria[k];
 
@@ -360,8 +378,7 @@ int MMG2_locateEdge(MMG5_pMesh mesh,int ia,int ib,int* kdep,int* list) {
     }
     if(pt->v[0]==ia || pt->v[1]==ia || pt->v[2]==ia) ivert = 1;
 
-    if ( ibreak == 1 && ivert == 1 ) return 1;
-    if ( !ivert ) return 0;
+    if ( ibreak == 1 && ivert == 1 ) return 4;
 
     pt1 = &mesh->point[pt->v[0]];
     pt2 = &mesh->point[pt->v[1]];
@@ -390,7 +407,8 @@ int MMG2_locateEdge(MMG5_pMesh mesh,int ia,int ib,int* kdep,int* list) {
     a[1] = aire2;
     a[2] = aire3;
 
-    if ( prod1 > 0 && ((prod2 < 0 || prod3 < 0))) { /*le tr est coupe par la droite ia-ib*/
+    if ( prod1 > 0 && ((prod2 < 0 || prod3 < 0))) {
+      /* ia-ib cut the 0th edge of the tria */
       if ((iare = MMG2_cutEdge(mesh,pt,ppa,ppb,ivert))) {
         pt->base = mesh->base+1;
         list[lon++] = 3*k + iare-1;
@@ -406,7 +424,6 @@ int MMG2_locateEdge(MMG5_pMesh mesh,int ia,int ib,int* kdep,int* list) {
       if(ibreak) break;
       continue;
     }
-
     if ( prod2 > 0 && ((prod1 < 0 || prod3 < 0))) {
       if ((iare = MMG2_cutEdge(mesh,pt,ppa,ppb,ivert))) {
         pt->base = mesh->base+1;
@@ -439,6 +456,8 @@ int MMG2_locateEdge(MMG5_pMesh mesh,int ia,int ib,int* kdep,int* list) {
       if(ibreak) break;
       continue;
     }
+
+
     /*sommet == pt arete ou pts alignes avec arete*/
     for(i=0 ; i<3 ; i++){
       iare = 0;
@@ -553,10 +572,8 @@ int MMG2_locateEdge(MMG5_pMesh mesh,int ia,int ib,int* kdep,int* list) {
       exit(EXIT_FAILURE);
     }
 
-    //ktemp = k;
-    /* printf("adj (base) pour le tri %d : %d(%d) %d(%d) %d(%d)\n",k,adja[0]/3,mesh->tria[adja[0]/3].base>=mesh->base */
-    /*        ,adja[1]/3,mesh->tria[adja[1]/3].base>=mesh->base,adja[2]/3,mesh->tria[adja[2]/3].base>=mesh->base); */
     k = adja[0]/3;
+
     if ((mesh->tria[k].base>=mesh->base) || !k || !mesh->tria[k].v[0]) {
       k = adja[1]/3;
       if ((mesh->tria[k].base>=mesh->base) || !k || !mesh->tria[k].v[0]) {
@@ -568,7 +585,10 @@ int MMG2_locateEdge(MMG5_pMesh mesh,int ia,int ib,int* kdep,int* list) {
     }
 
   } while (ncompt < mesh->nt);
+
   assert(ibreak);
+
   lon = (ibreak==4)?4:((-1)*lon);
+
   return(lon);
 }

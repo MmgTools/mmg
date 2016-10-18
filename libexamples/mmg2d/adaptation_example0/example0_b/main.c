@@ -108,7 +108,7 @@ int main(int argc,char *argv[]) {
     exit(EXIT_FAILURE);
 
   /** ------------------------------ STEP  II -------------------------- */
-  /** library call */
+  /** remesh function */
   ier = MMG2D_mmg2dlib(mmgMesh,mmgSol);
 
   if ( ier == MMG5_STRONGFAILURE ) {

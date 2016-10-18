@@ -47,15 +47,6 @@ PROGRAM main
   !!    file formatted or manually set your mesh using the MMGS_Set* functions
 
   !> with MMGS_loadMesh function
-  !! a) (not mandatory): give the mesh name
-  !!   (by default, the "mesh.mesh" file is oppened)
-  CALL MMGS_Set_inputMeshName(mmgMesh,TRIM(ADJUSTL(filename)),&
-       LEN(TRIM(ADJUSTL(filename))),ier)
-  IF ( ier /= 1 ) THEN
-     CALL EXIT(101)
-  ENDIF
-
-  !> b) function calling
   CALL MMGS_loadMesh(mmgMesh,TRIM(ADJUSTL(filename)),&
        LEN(TRIM(ADJUSTL(filename))),ier)
   IF ( ier /= 1 )  CALL EXIT(102)
@@ -65,15 +56,6 @@ PROGRAM main
   !!    file formatted or manually set your sol using the MMGS_Set* functions
 
   !> With MMGS_loadSol function
-  !! a) (not mandatory): give the sol name
-  !!   (by default, the "mesh.sol" file is oppened)
-  CALL MMGS_Set_inputSolName(mmgMesh,mmgSol,TRIM(ADJUSTL(filename)),&
-       LEN(TRIM(ADJUSTL(filename))),ier)
-  IF ( ier /= 1 ) THEN
-     CALL EXIT(103)
-  ENDIF
-
-  !> b) function calling
   CALL MMGS_loadSol(mmgMesh,mmgSol,TRIM(ADJUSTL(filename)),&
        LEN(TRIM(ADJUSTL(filename))),ier)
   IF ( ier /= 1 ) THEN
@@ -85,7 +67,7 @@ PROGRAM main
   IF ( ier /= 1 ) CALL EXIT(105)
 
   !> ------------------------------ STEP  II --------------------------
-  !! library call
+  !! remesh function
   !! Remark: %val(0) allow to pass the value 0 (i.e. NULL) instead of a pointer
   !! toward NULL.
   CALL MMGS_mmgslib(mmgMesh,mmgSol,ier)
@@ -103,18 +85,10 @@ PROGRAM main
   !!    using the MMGS_getMesh/MMGS_getSol functions
 
   !> 1) Automatically save the mesh
-  !! a)  (not mandatory): give the ouptut mesh name using MMGS_Set_outputMeshName
-  !!   (by default, the mesh is saved in the "mesh.o.mesh" file
-  !!call MMGS_Set_outputMeshName(mmgMesh,"output.mesh",len("output.mesh"),ier)
-  !! b) function calling
   CALL MMGS_saveMesh(mmgMesh,"cube.o.mesh",LEN("cube.o.mesh"),ier)
   IF ( ier /= 1 ) CALL EXIT(106)
 
   !> 2) Automatically save the solution
-  !! a)  (not mandatory): give the ouptut sol name using MMGS_Set_outputSolName
-  !!   (by default, the mesh is saved in the "mesh.o.sol" file
-  !!call MMGS_Set_outputSolName(mmgMesh,mmgSol,"output.sol",len("output.sol"),ier)
-  !! b) function calling
   CALL MMGS_saveSol(mmgMesh,mmgSol,"cube.o.sol",LEN("cube.o.sol"),ier)
   IF ( ier /= 1 ) CALL EXIT(107)
 
