@@ -1556,7 +1556,7 @@ static int _MMG5_anatet4(MMG5_pMesh mesh, MMG5_pSol met,
     if ( nf > 1 ) {
       ier  = _MMG5_split4bar(mesh,met,k,typchk-1);
       if ( !ier ) return(-1);
-      //~ if ( octree ) _MMG3D_addOctree(mesh, octree, ier);
+      if ( octree ) _MMG3D_addOctree(mesh, octree, ier);
       ns++;
     }
     else {
@@ -1568,7 +1568,7 @@ static int _MMG5_anatet4(MMG5_pMesh mesh, MMG5_pSol met,
       if ( nf == 4 ) {
         ier  = _MMG5_split4bar(mesh,met,k,typchk-1);
         if ( !ier ) return(-1);
-        //~ if ( octree ) _MMG3D_addOctree(mesh, octree, ier);
+        if ( octree ) _MMG3D_addOctree(mesh, octree, ier);
         ns++;
       }
     }
