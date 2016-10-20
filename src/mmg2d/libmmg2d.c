@@ -864,6 +864,7 @@ int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol)
   if ( mesh->info.imprim )
     fprintf(stdout,"  -- PHASE 2 COMPLETED.     %s\n",stim);
 
+
   /* mesh improvement */
   chrono(ON,&ctim[4]);
   if ( mesh->info.imprim ) {

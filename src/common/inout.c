@@ -1643,6 +1643,11 @@ int MMG5_saveMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
   }
 
   /** Write solution */
+  if ( !sol->m ) {
+    fclose(inm);
+    return(1);
+  }
+
   fprintf(inm,"$NodeData\n");
 
   /* One string tag saying the type of solution saved */
