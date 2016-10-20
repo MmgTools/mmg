@@ -235,15 +235,6 @@ int MMG3D_Set_meshSize(MMG5_pMesh mesh, int np, int ne, int nt, int na) {
        ( mesh->point || mesh->tria || mesh->tetra || mesh->edge) )
     fprintf(stdout,"  ## Warning: new mesh\n");
 
-  mesh->np  = np;
-  mesh->ne  = ne;
-  mesh->nt  = nt;
-  mesh->na  = na;
-  mesh->npi = mesh->np;
-  mesh->nei = mesh->ne;
-  mesh->nti = mesh->nt;
-  mesh->nai = mesh->na;
-
   if ( mesh->point )
     _MMG5_DEL_MEM(mesh,mesh->point,(mesh->npmax+1)*sizeof(MMG5_Point));
   if ( mesh->tetra )
@@ -252,6 +243,15 @@ int MMG3D_Set_meshSize(MMG5_pMesh mesh, int np, int ne, int nt, int na) {
     _MMG5_DEL_MEM(mesh,mesh->tria,(mesh->nt+1)*sizeof(MMG5_Tria));
   if ( mesh->edge )
     _MMG5_DEL_MEM(mesh,mesh->edge,(mesh->na+1)*sizeof(MMG5_Edge));
+
+  mesh->np  = np;
+  mesh->ne  = ne;
+  mesh->nt  = nt;
+  mesh->na  = na;
+  mesh->npi = mesh->np;
+  mesh->nei = mesh->ne;
+  mesh->nti = mesh->nt;
+  mesh->nai = mesh->na;
 
   /*tester si -m definie : renvoie 0 si pas ok et met la taille min dans info.mem */
   if( mesh->info.mem > 0) {
