@@ -102,7 +102,7 @@ void MMG3D_Init_parameters(MMG5_pMesh mesh) {
 
 #ifndef PATTERN
   /* MMG3D_IPARAM_octree = 64 */
-  mesh->info.octree = 64;
+  mesh->info.octree = 32;
 #endif
 }
 

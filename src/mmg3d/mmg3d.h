@@ -167,25 +167,25 @@ typedef _MMG3D_octree * _MMG3D_pOctree;
 
 /* octree */
 void _MMG3D_initOctree_s( _MMG3D_octree_s* q);
-void _MMG3D_initOctree(MMG5_pMesh,_MMG3D_pOctree* q, int nv);
+int _MMG3D_initOctree(MMG5_pMesh,_MMG3D_pOctree* q, int nv);
 void _MMG3D_freeOctree_s(MMG5_pMesh,_MMG3D_octree_s* q, int nv);
 void _MMG3D_freeOctree(MMG5_pMesh,_MMG3D_octree* q);
-int _MMG3D_isCellIncluded(double* rect, double* center, double cellWidth);
-int _MMG3D_isCellIncluded2(double* rect, double* center, double cellWidth);
+int _MMG3D_isCellIncluded(double* cellCenter, double l, double* zoneCenter, double l0);
 void _MMG3D_placeInListDouble(double*, double, int, int);
 void _MMG3D_placeInListOctree(_MMG3D_octree_s**, _MMG3D_octree_s*, int, int);
 int _MMG3D_seekIndex (double* distList, double dist, int indexMin, int indexMax);
+void _MMG3D_intersectRect(double *rectin, double *rectinout);
 void _MMG3D_getListSquareRec(_MMG3D_octree_s*,double*,double*,
-                             _MMG3D_octree_s***,double*,double*,int, int, int, int*);
+                             _MMG3D_octree_s***,double*,double*,double, int, int, int*);
 int  _MMG3D_getListSquare(MMG5_pMesh,double*,_MMG3D_octree*,double*,_MMG3D_octree_s***);
-void _MMG3D_addOctreeRec(MMG5_pMesh,_MMG3D_octree_s*,double*, const int, int);
-void _MMG3D_addOctree(MMG5_pMesh mesh, _MMG3D_octree* q, const int no);
-void _MMG3D_delOctreeVertex(MMG5_pMesh,_MMG3D_octree_s* q, int no);
-void _MMG3D_moveOctree(MMG5_pMesh, _MMG3D_pOctree,int, double*, double*);
+int _MMG3D_addOctreeRec(MMG5_pMesh,_MMG3D_octree_s*,double*, const int, int);
+int _MMG3D_addOctree(MMG5_pMesh mesh, _MMG3D_octree* q, const int no);
+int _MMG3D_delOctreeVertex(MMG5_pMesh,_MMG3D_octree_s* q, int no);
+int _MMG3D_moveOctree(MMG5_pMesh, _MMG3D_pOctree,int, double*, double*);
 void _MMG3D_mergeBranchesRec(_MMG3D_octree_s*, _MMG3D_octree_s*, int, int , int*);
 void _MMG3D_mergeBranches(MMG5_pMesh mesh,_MMG3D_octree_s* q, int dim, int nv);
-void _MMG3D_delOctreeRec(MMG5_pMesh,_MMG3D_octree_s*,double*, const int,const int);
-void _MMG3D_delOctree(MMG5_pMesh mesh, _MMG3D_pOctree q, const int no);
+int _MMG3D_delOctreeRec(MMG5_pMesh,_MMG3D_octree_s*,double*, const int,const int);
+int _MMG3D_delOctree(MMG5_pMesh mesh, _MMG3D_pOctree q, const int no);
 void _MMG3D_printArbreDepth(_MMG3D_octree_s* q, int depth, int nv, int dim);
 void _MMG3D_printArbre(_MMG3D_octree* q);
 void  _MMG3D_sizeArbreRec(_MMG3D_octree_s* q, int nv, int dim, int*,int*);
