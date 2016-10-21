@@ -153,18 +153,6 @@ int MMG3D_Set_meshSize(MMG5_pMesh mesh, int np, int ne, int nprism,
        ( mesh->point || mesh->tria || mesh->tetra || mesh->edge) )
     fprintf(stdout,"  ## Warning: new mesh\n");
 
-  mesh->np  = np;
-  mesh->ne  = ne;
-  mesh->nt  = nt;
-  mesh->na  = na;
-  mesh->nprism = nprism;
-  mesh->nquad  = nquad;
-
-  mesh->npi = mesh->np;
-  mesh->nei = mesh->ne;
-  mesh->nti = mesh->nt;
-  mesh->nai = mesh->na;
-
   if ( !np ) {
     fprintf(stderr,"  ** MISSING DATA:\n");
     fprintf(stderr,"     Your mesh must contains at least points.\n");
@@ -174,7 +162,6 @@ int MMG3D_Set_meshSize(MMG5_pMesh mesh, int np, int ne, int nprism,
     fprintf(stdout,"  ** WARNING:\n");
     fprintf(stdout,"     Your mesh don't contains tetrahedra.\n");
   }
-
   if ( mesh->point )
     _MMG5_DEL_MEM(mesh,mesh->point,(mesh->npmax+1)*sizeof(MMG5_Point));
   if ( mesh->tetra )
@@ -188,6 +175,17 @@ int MMG3D_Set_meshSize(MMG5_pMesh mesh, int np, int ne, int nprism,
   if ( mesh->edge )
     _MMG5_DEL_MEM(mesh,mesh->edge,(mesh->na+1)*sizeof(MMG5_Edge));
 
+  mesh->np  = np;
+  mesh->ne  = ne;
+  mesh->nt  = nt;
+  mesh->na  = na;
+  mesh->nprism = nprism;
+  mesh->nquad  = nquad;
+
+  mesh->npi = mesh->np;
+  mesh->nei = mesh->ne;
+  mesh->nti = mesh->nt;
+  mesh->nai = mesh->na;
 
   /*tester si -m definie : renvoie 0 si pas ok et met la taille min dans info.mem */
   if( mesh->info.mem > 0) {
@@ -1821,9 +1819,9 @@ int MMG3D_Set_dparameter(MMG5_pMesh mesh, MMG5_pSol sol, int dparam, double val)
     else
       mesh->info.hausd    = val;
     break;
-  case MMG3D_DPARAM_ls :
-    mesh->info.ls       = val;
-    break;
+  /* case MMG3D_DPARAM_ls : */
+  /*   mesh->info.ls       = val; */
+  /*   break; */
   default :
     fprintf(stderr,"  ## Error: unknown type of parameter\n");
     return(0);
