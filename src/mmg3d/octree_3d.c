@@ -27,14 +27,14 @@
  * \author Jean Mercat (Inria/UBordeaux)
  * \version 1
  * \copyright GNU Lesser General Public License.
- * 
+ *
  * An octree of the nodes is created and used for local neighbor search.
  * This helps deciding if a position is too close to other nodes to refine
  * with an insertion of a new node.
- * 
+ *
  * commande test : ctest -D Experimental -VV avec tunel ssh ouvert
  * ssh : ssh -f -L 2000:vulcain.bordeaux.inria.fr:80 jmercat@vulcain.bordeaux.inria.fr sleep <temps voulu>
- * 
+ *
  *se connecter : localhost:2000/CDash
 
  */
@@ -73,8 +73,8 @@ int _MMG3D_initOctree(MMG5_pMesh mesh,_MMG3D_pOctree* q, int nv)
                 return 0);
   _MMG5_SAFE_MALLOC(*q,1, _MMG3D_octree);
 
- 
-  // set nv to the next power of 2  
+
+  // set nv to the next power of 2
   nv--;
   nv |= nv >> 1;
   nv |= nv >> 2;
@@ -86,13 +86,13 @@ int _MMG3D_initOctree(MMG5_pMesh mesh,_MMG3D_pOctree* q, int nv)
 
   // Number maximum of cells listed for the zone search
   (*q)->nc = MG_MAX(2048/nv,16);
-  
+
   _MMG5_ADD_MEM(mesh,sizeof(_MMG3D_octree_s),"initial octree cell",
                 return 0);
 
   _MMG5_SAFE_MALLOC((*q)->q0,1, _MMG3D_octree_s);
   _MMG3D_initOctree_s((*q)->q0);
-  
+
   for (i=1;i<=mesh->np; ++i)
   {
     if ( !MG_VOK(&mesh->point[i]) )  continue;
@@ -122,13 +122,13 @@ void _MMG3D_freeOctree_s(MMG5_pMesh mesh,_MMG3D_octree_s* q, int nv)
 
   if (q->nbVer>nv && q->depth < depthMax )
   {
-    for ( i = 0; i<sizBr; i++) 
+    for ( i = 0; i<sizBr; i++)
     {
       _MMG3D_freeOctree_s(mesh,&(q->branches[i]), nv);
     }
     _MMG5_DEL_MEM(mesh,q->branches,sizBr*sizeof(_MMG3D_octree_s));
   }
-  else if (q->nbVer>0) 
+  else if (q->nbVer>0)
   {
     if ( q->nbVer<= nv )
     {
@@ -140,15 +140,15 @@ void _MMG3D_freeOctree_s(MMG5_pMesh mesh,_MMG3D_octree_s* q, int nv)
       nvTemp |= nvTemp >> 8;
       nvTemp |= nvTemp >> 16;
       nvTemp++;
-      
+
       _MMG5_DEL_MEM(mesh,q->v,nvTemp*sizeof(int));
       q->nbVer = 0;
-    }else 
+    }else
     {
-      if ( q->depth != depthMax ) 
+      if ( q->depth != depthMax )
       {
         sizTab = nv;
-      }else 
+      }else
       {
         sizTab = (q->nbVer%nv != 0)? 1 : 0;
         sizTab = nv * ((int)(q->nbVer/nv) + sizTab);
@@ -266,13 +266,13 @@ int _MMG3D_moveOctree(MMG5_pMesh mesh, _MMG3D_pOctree q, int no, double* newVer,
 }
 
 /**
- * 
+ *
  * \param cellCenter 3 coordinates of the center of the octree cell to test.
  * \param l size of the cell
  * \param zoneCenter 3 coordinates of the center of the search zone
  * \param radius of the search zone
  * \return wether the cell is included in the search zone.
- * 
+ *
  */
 int _MMG3D_isCellIncluded(double* cellCenter, double l, double* zoneCenter, double l0)
 {
@@ -282,16 +282,16 @@ int _MMG3D_isCellIncluded(double* cellCenter, double l, double* zoneCenter, doub
   x = cellCenter[0]-zoneCenter[0];
   y = cellCenter[1]-zoneCenter[1];
   z = cellCenter[2]-zoneCenter[2];
-  
+
   r1 = sqrt(x*x+y*y+z*z);
-  
+
   // to avoid sqrt :
   //~ r1 = x*x+y*y+z*z;
   //~ r2 = 3*l*l;
   //~ rmax = MG_MAX(r1,r2);
   //sqrt(3)=1.7320508...
   //~ return (r1+r2+2*rmax<l0*l0);
-  
+
   return (r1+1.732051*l<l0);
 }
 
@@ -299,14 +299,14 @@ int _MMG3D_isCellIncluded(double* cellCenter, double l, double* zoneCenter, doub
 /**
  * \param distList list of values.
  * \param dist value to insert in the list.
- * \param index position of the element before the place where \a dist 
+ * \param index position of the element before the place where \a dist
  * should be inserted.
  * \param size size of the list before insertion.
- * 
+ *
  * Insert the value \a dist in the list \a distList at position \a index+1.
  * Moves other data so nothing is lost. No memory check performed, this
  * function should be called with coherent parameters.
- * 
+ *
 */
 void _MMG3D_placeInListDouble(double* distList, double dist, int index, int size)
 {
@@ -317,14 +317,14 @@ void _MMG3D_placeInListDouble(double* distList, double dist, int index, int size
 /**
  * \param qList list of pointer on octree.
  * \param q pointer on octree to be inserted in the list.
- * \param index position of the element before the place where \a q 
+ * \param index position of the element before the place where \a q
  * should be inserted.
  * \param size size of the list before insertion.
- * 
+ *
  * Insert the pointer \a q in the list \a qList at position \a index+1.
  * Moves other data so nothing is lost. No memory check performed, this
  * function should be called with coherent parameters.
- * 
+ *
 */
 void _MMG3D_placeInListOctree(_MMG3D_octree_s** qlist, _MMG3D_octree_s* q, int index, int size)
 {
@@ -341,15 +341,15 @@ void _MMG3D_placeInListOctree(_MMG3D_octree_s** qlist, _MMG3D_octree_s* q, int i
  * \param dist value to be compared to elements in the list.
  * \param indexMin minimum index of the list.
  * \param indexMax maximum index of the list.
- * 
- * Returns the index of the biggest value of disList that is strictly 
+ *
+ * Returns the index of the biggest value of disList that is strictly
  * smaller than dist. Only search in the bounds of indexMin and indexMax.
- * 
+ *
 */
 int _MMG3D_seekIndex (double* distList, double dist, int indexMin, int indexMax)
 {
   int indexMed;
-  
+
   if (indexMin > indexMax)
     _MMG3D_seekIndex(distList, dist, indexMax, indexMin);
   else if (indexMax - indexMin <2)
@@ -366,12 +366,12 @@ int _MMG3D_seekIndex (double* distList, double dist, int indexMin, int indexMax)
   else
   {
     indexMed = (indexMin + indexMax)/2;
-    
+
     #ifdef DEBUG
       if (indexMed >= 60 || indexMed < 0)
         fprintf(stdout,"Error: in seekIndex, index should not be that large %i\n",indexMed);
     #endif
-    
+
     if (dist > distList[indexMed])
       _MMG3D_seekIndex(distList, dist, indexMed, indexMax);
     else
@@ -383,9 +383,9 @@ int _MMG3D_seekIndex (double* distList, double dist, int indexMin, int indexMax)
 /**
  * \param rectin rectangle to intersect, is not modified.
  * \param rectinout rectangle to intersect, is set to the intersection.
- * 
+ *
  * Set rectinout to the intersection of the two rectangles.
- *  Rectangles are defined by: the coordinates of the lower left corner 
+ *  Rectangles are defined by: the coordinates of the lower left corner
  * of the rectange and the length of the rectangle in each dimension.
 */
 void _MMG3D_intersectRect(double *rectin, double *rectinout)
@@ -393,7 +393,7 @@ void _MMG3D_intersectRect(double *rectin, double *rectinout)
   double *rect1Temp, *rect2Temp;
   _MMG5_SAFE_MALLOC(rect1Temp,6,double);
   _MMG5_SAFE_MALLOC(rect2Temp,6,double);
-  
+
   rect1Temp[0] = rectin[0];
   rect1Temp[1] = rectin[1];
   rect1Temp[2] = rectin[2];
@@ -407,20 +407,20 @@ void _MMG3D_intersectRect(double *rectin, double *rectinout)
   rect2Temp[3] = rectinout[3]+rectinout[0];
   rect2Temp[4] = rectinout[4]+rectinout[1];
   rect2Temp[5] = rectinout[5]+rectinout[2];
-  
+
   rectinout[0] = rect1Temp[0]>rect2Temp[0] ? rect1Temp[0]:rect2Temp[0];
   rectinout[1] = rect1Temp[1]>rect2Temp[1] ? rect1Temp[1]:rect2Temp[1];
   rectinout[2] = rect1Temp[2]>rect2Temp[2] ? rect1Temp[2]:rect2Temp[2];
   rectinout[3] = rect1Temp[3]<rect2Temp[3] ? rect1Temp[3]:rect2Temp[3];
   rectinout[4] = rect1Temp[4]<rect2Temp[4] ? rect1Temp[4]:rect2Temp[4];
   rectinout[5] = rect1Temp[5]<rect2Temp[5] ? rect1Temp[5]:rect2Temp[5];
-  
+
   rectinout[3] = rectinout[3] - rectinout[0];
   rectinout[4] = rectinout[4] - rectinout[1];
   rectinout[5] = rectinout[5] - rectinout[2];
-  
+
   assert((rectinout[3]>0 && rectinout[4]>0 && rectinout[5]>0));
-  
+
   _MMG5_SAFE_FREE(rect1Temp);
   _MMG5_SAFE_FREE(rect2Temp);
 }
@@ -433,7 +433,7 @@ void _MMG3D_intersectRect(double *rectin, double *rectinout)
  * the rectangle in each dimension.
  * \param qlist pointer toward the list of pointer over the sub octrees that
  *  intersect \a rect.
- * \param dist pointer toward the list of distances between center of 
+ * \param dist pointer toward the list of distances between center of
  * the octree cells in qlist and the last 3 elements are the coordinates
  * of the center of the whole recangle.
  * \param ani metric of the point.
@@ -479,12 +479,12 @@ void _MMG3D_getListSquareRec(_MMG3D_octree_s* q, double* center, double* rect,
     //~ fprintf(stdout,"Included cell found\n");
     //~ return;
   //~ }
-  
+
   if (q->branches==NULL && q->v != NULL)
   {
-    // the vector dist is of size nc whereas qlist allows nc-3 inputs 
-    // so the 3 last values can contain the coordinates of the center 
-    // of the search volume. 
+    // the vector dist is of size nc whereas qlist allows nc-3 inputs
+    // so the 3 last values can contain the coordinates of the center
+    // of the search volume.
     x = dist[nc-3] - center[0];
     y = dist[nc-2] - center[1];
     z = dist[nc-1] - center[2];
@@ -495,7 +495,7 @@ void _MMG3D_getListSquareRec(_MMG3D_octree_s* q, double* center, double* rect,
                 //~ 2*(ani[1]*x*y+ani[2]*x*z+ani[4]*y*z);
     if (*index > 0)
     {
-      indexTemp = _MMG3D_seekIndex(dist,distTemp,0, *index-1);    
+      indexTemp = _MMG3D_seekIndex(dist,distTemp,0, *index-1);
       if (indexTemp+1<*index)
       {
         _MMG3D_placeInListDouble(dist, distTemp, indexTemp, *index);
@@ -511,26 +511,26 @@ void _MMG3D_getListSquareRec(_MMG3D_octree_s* q, double* center, double* rect,
       dist[*index]=distTemp;
       (*qlist)[*index]=q;
     }
-    
+
     (*index)++;
 
   }else if (q->branches!=NULL)
   {
-    
+
     // check the position of the search zone in the current cell
     for (i=0;i<3;i++)
     {
       recCenter[i] = (rect[i]>center[i]);
       recCenter[i+3] = ((rect[i]+rect[i+3])>center[i]);
     }
-    
+
     // each of the 8 possible cases are tested to recursively call the branches :
-    
+
     if (recCenter[0]==0 && recCenter[1]==0 && recCenter[2]==0) //branch 0
     {
       //~ recttemp is set to the sub-cell dimensions
       recttemp[0] = center[0]-l;
-      recttemp[1] = center[1]-l;  
+      recttemp[1] = center[1]-l;
       recttemp[2] = center[2]-l;
       recttemp[3] = l;
       recttemp[4] = l;
@@ -542,12 +542,12 @@ void _MMG3D_getListSquareRec(_MMG3D_octree_s* q, double* center, double* rect,
       centertemp[2] = center[2]-l/2;
       _MMG3D_getListSquareRec(&(q->branches[0]), centertemp, recttemp, qlist, dist, ani, l0, nc, dim, index);
     }
-      
+
     if (recCenter[1]==0 && recCenter[2]==0 && recCenter[3]==1) //branch 1
     {
       //~ recttemp is set to the sub-cell dimensions
       recttemp[0] = center[0];
-      recttemp[1] = center[1]-l;  
+      recttemp[1] = center[1]-l;
       recttemp[2] = center[2]-l;
       recttemp[3] = l;
       recttemp[4] = l;
@@ -559,12 +559,12 @@ void _MMG3D_getListSquareRec(_MMG3D_octree_s* q, double* center, double* rect,
       centertemp[2] = center[2]-l/2;
       _MMG3D_getListSquareRec(&(q->branches[1]), centertemp, recttemp, qlist, dist, ani, l0, nc, dim, index);
     }
-      
+
     if (recCenter[0]==0 && recCenter[2]==0 && recCenter[4]==1) //branch 2
     {
       //~ recttemp is set to the sub-cell dimensions
       recttemp[0] = center[0]-l;
-      recttemp[1] = center[1];  
+      recttemp[1] = center[1];
       recttemp[2] = center[2]-l;
       recttemp[3] = l;
       recttemp[4] = l;
@@ -581,7 +581,7 @@ void _MMG3D_getListSquareRec(_MMG3D_octree_s* q, double* center, double* rect,
     {
       //~ recttemp is set to the sub-cell dimensions
       recttemp[0] = center[0];
-      recttemp[1] = center[1];  
+      recttemp[1] = center[1];
       recttemp[2] = center[2]-l;
       recttemp[3] = l;
       recttemp[4] = l;
@@ -593,16 +593,16 @@ void _MMG3D_getListSquareRec(_MMG3D_octree_s* q, double* center, double* rect,
       centertemp[2] = center[2]-l/2;
       _MMG3D_getListSquareRec(&(q->branches[3]), centertemp, recttemp, qlist, dist, ani, l0, nc, dim, index);
     }
-    
+
     if (recCenter[0]==0 && recCenter[1]==0 && recCenter[5]==1) //branch 4
     {
       //~ recttemp is set to the sub-cell dimensions
       recttemp[0] = center[0]-l;
-      recttemp[1] = center[1]-l;  
+      recttemp[1] = center[1]-l;
       recttemp[2] = center[2];
       recttemp[3] = l;
       recttemp[4] = l;
-      recttemp[5] = l;      
+      recttemp[5] = l;
       // recttemp is set to the intersection between rect and the cell
       _MMG3D_intersectRect(rect,recttemp);
       centertemp[0] = center[0]-l/2;
@@ -610,12 +610,12 @@ void _MMG3D_getListSquareRec(_MMG3D_octree_s* q, double* center, double* rect,
       centertemp[2] = center[2]+l/2;
       _MMG3D_getListSquareRec(&(q->branches[4]), centertemp, recttemp, qlist, dist, ani, l0, nc, dim, index);
     }
-    
+
     if (recCenter[1]==0 && recCenter[3]==1 && recCenter[5]==1) //branch 5
     {
       //~ recttemp is set to the sub-cell dimensions
       recttemp[0] = center[0];
-      recttemp[1] = center[1]-l;  
+      recttemp[1] = center[1]-l;
       recttemp[2] = center[2];
       recttemp[3] = l;
       recttemp[4] = l;
@@ -632,7 +632,7 @@ void _MMG3D_getListSquareRec(_MMG3D_octree_s* q, double* center, double* rect,
     {
       //~ recttemp is set to the sub-cell dimensions
       recttemp[0] = center[0]-l;
-      recttemp[1] = center[1];  
+      recttemp[1] = center[1];
       recttemp[2] = center[2];
       recttemp[3] = l;
       recttemp[4] = l;
@@ -644,12 +644,12 @@ void _MMG3D_getListSquareRec(_MMG3D_octree_s* q, double* center, double* rect,
       centertemp[2] = center[2]+l/2;
       _MMG3D_getListSquareRec(&(q->branches[6]), centertemp, recttemp, qlist, dist, ani, l0, nc, dim, index);
     }
-    
+
     if (recCenter[3]==1 && recCenter[4]==1 && recCenter[5]==1) //branch 7
     {
       //~ recttemp is set to the sub-cell dimensions
       recttemp[0] = center[0];
-      recttemp[1] = center[1];  
+      recttemp[1] = center[1];
       recttemp[2] = center[2];
       recttemp[3] = l;
       recttemp[4] = l;
@@ -670,7 +670,7 @@ void _MMG3D_getListSquareRec(_MMG3D_octree_s* q, double* center, double* rect,
 
 /**
  * \param mesh pointer toward the mesh structure
- * \param ani metric to use for the cell ordering from closest to farthest  
+ * \param ani metric to use for the cell ordering from closest to farthest
  * \param q pointer toward the global octree structure.
  * \param rect rectangle that we want to intersect with the subtree. We define
  * it given: the coordinates of one corner of the rectangle and the length of
@@ -693,14 +693,14 @@ int _MMG3D_getListSquare(MMG5_pMesh mesh, double* ani, _MMG3D_pOctree q, double*
   dim = mesh->dim;
   index = 0;
 
-  
+
   _MMG5_SAFE_MALLOC(rect2,2*dim,double);
   _MMG5_SAFE_MALLOC(center,dim,double);
-  
+
   memcpy(rect2, rect, sizeof(double)*dim*2);
 
   //instead of counting exactly the number of cells to be listed, the
-  //maximum size is set to nc-3 (so the list dist can have nc-3 values + 3 coordinates of 
+  //maximum size is set to nc-3 (so the list dist can have nc-3 values + 3 coordinates of
   //the center of the rectangle)
   index = q->nc-3;
 
@@ -711,21 +711,21 @@ int _MMG3D_getListSquare(MMG5_pMesh mesh, double* ani, _MMG3D_pOctree q, double*
 
   _MMG5_SAFE_MALLOC(*qlist,index,_MMG3D_octree_s*);
   _MMG5_SAFE_MALLOC(dist,index+3,double);
-  
+
   // Set the center of the zone search
   dist[q->nc-3] = rect[0]+rect[3]/2;
   dist[q->nc-2] = rect[1]+rect[4]/2;
   dist[q->nc-1] = rect[2]+rect[5]/2;
-  
+
   // Set the radius of the zone search (used for cell inclusion test if activated)
   l0 = rect[3]/2;
-    
+
   // Initialization of the octree cell list
   for (i = 0; i<index; i++)
     (*qlist)[i] = NULL;
 
   index = 0;
-  
+
   // Set center of the first octree cell
   for (i = 0; i < dim; ++i)
     center[i] = 0.5;
@@ -734,7 +734,7 @@ int _MMG3D_getListSquare(MMG5_pMesh mesh, double* ani, _MMG3D_pOctree q, double*
   memcpy(rect2, rect, sizeof(double)*dim*2);
 
   _MMG3D_getListSquareRec(q->q0, center, rect2, qlist, dist, ani, l0, q->nc, dim, &index);
-    
+
 
   if (index>q->nc-4)
   {
@@ -888,7 +888,7 @@ int _MMG3D_addOctreeRec(MMG5_pMesh mesh, _MMG3D_octree_s* q, double* ver,
     q->nbVer++;
   }
   _MMG5_SAFE_FREE(pt);
-  
+
   return 1;
 }
 
@@ -916,7 +916,7 @@ int _MMG3D_addOctree(MMG5_pMesh mesh, _MMG3D_pOctree q, const int no)
   }
   memcpy(pt, mesh->point[no].c ,dim*sizeof(double));
   _MMG5_SAFE_FREE(pt);
-  
+
   return 1;
 }
 
@@ -948,7 +948,7 @@ int _MMG3D_delOctreeVertex(MMG5_pMesh mesh, _MMG3D_octree_s* q, int indNo)
     _MMG5_SAFE_MALLOC(vTemp,q->nbVer,int);
     memcpy(vTemp, q->v,q->nbVer*sizeof(int));
     _MMG5_DEL_MEM(mesh,q->v,2*q->nbVer*sizeof(int));
-    
+
     q->v = vTemp;
   }
   return 1;
@@ -1210,7 +1210,7 @@ void _MMG3D_printSubArbre(_MMG3D_octree_s* q, int nv, int dim)
  * \param q pointer toward an octree cell
  * \param nv maximum number of vertices in an octree leaf
  * \param dim dimension in which we work
- * \param s size of the octree 
+ * \param s size of the octree
  *
  * Print the memory size of the octree.
  *
@@ -1418,17 +1418,17 @@ int _MMG3D_octreein_iso(MMG5_pMesh mesh,MMG5_pSol sol,_MMG3D_pOctree octree,int 
   ncells = _MMG3D_getListSquare(mesh, ani, octree, methalo, &lococ);
   if (ncells < 0)
   {
-     
-    _MMG5_DEL_MEM(mesh,ani,6*sizeof(double));    
+
+    _MMG5_DEL_MEM(mesh,ani,6*sizeof(double));
     _MMG5_DEL_MEM(mesh,lococ,octree->nc*sizeof(_MMG3D_octree_s*));
     return(0);
   }
   /* Check the octree cells */
-  for ( i=0; i<ncells; ++i ) 
+  for ( i=0; i<ncells; ++i )
   {
     for (j=0; j<lococ[i]->nbVer; ++j)
     {
-      
+
       ip1  = lococ[i]->v[j];
       pp1  = &mesh->point[ip1];
 
@@ -1441,7 +1441,7 @@ int _MMG3D_octreein_iso(MMG5_pMesh mesh,MMG5_pSol sol,_MMG3D_pOctree octree,int 
 
       d2 = ux*ux + uy*uy + uz*uz;
 
-      if ( d2 < hp1 || d2 < hpi2*hpi2 )  
+      if ( d2 < hp1 || d2 < hpi2*hpi2 )
       {
         _MMG5_DEL_MEM(mesh,ani,6*sizeof(double));
         _MMG5_DEL_MEM(mesh,lococ,octree->nc*sizeof(_MMG3D_octree_s*));
@@ -1525,7 +1525,7 @@ int _MMG3D_octreein_ani(MMG5_pMesh mesh,MMG5_pSol sol,_MMG3D_pOctree octree,int 
     return(0);
   }
   /* Check the octree cells */
-  for ( i=0; i<ncells; ++i ) 
+  for ( i=0; i<ncells; ++i )
   {
     for (j=0; j<lococ[i]->nbVer; ++j)
     {
@@ -1539,7 +1539,7 @@ int _MMG3D_octreein_ani(MMG5_pMesh mesh,MMG5_pSol sol,_MMG3D_pOctree octree,int 
       d2 = ma[0]*ux*ux + ma[3]*uy*uy + ma[5]*uz*uz
         + 2.0*(ma[1]*ux*uy + ma[2]*ux*uz + ma[4]*uy*uz);
       if ( d2 < dmi )
-      { 
+      {
         _MMG5_DEL_MEM(mesh,lococ,octree->nc*sizeof(_MMG3D_octree_s*));
         return 0;
       }
