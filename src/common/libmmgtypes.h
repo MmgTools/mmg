@@ -415,7 +415,7 @@ typedef struct {
   double        dhd,hmin,hmax,hgrad,hausd,min[3],max[3],delta,ls;
   int           mem,npar,npari;
   int           renum;
-  int           bucket;
+  int           octree;
   char          nreg;
   char          imprim,ddebug,badkal,iso,fem,lag;
   char          parTyp; /*!< Contains binary flags to say which kind of local

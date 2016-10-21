@@ -231,14 +231,14 @@ ELSE ()
     COMMAND ${EXECUT_MMG3D}
     ${MMG3D_CI_TESTS}/Various_adpsol_hgrad1_M6Mach_Eps0.001_hmin0.001_hmax2/M6.o
     -sol ${MMG3D_CI_TESTS}/Various_adpsol_hgrad1_M6Mach_Eps0.001_hmin0.001_hmax2/M6.o.sol
-    -hausd 0.1 -ar 60 -hgrad 1 -bucket 800 -v 5
+    -hausd 0.1 -ar 60 -hgrad 1
     ${MMG3D_CI_TESTS}/Various_adpsol_hgrad1_M6Mach_Eps0.001_hmin0.001_hmax2/M6.o.o.meshb)
   ADD_TEST(NAME Various_adpsol_hgrad1_M6Mach_Eps0.0005_hmin0.0001_hmax3_2
     COMMAND ${EXECUT_MMG3D}
     ${MMG3D_CI_TESTS}/Various_adpsol_hgrad1_M6Mach_Eps0.0005_hmin0.0001_hmax3/M6.o -v 5
     -sol
     ${MMG3D_CI_TESTS}/Various_adpsol_hgrad1_M6Mach_Eps0.0005_hmin0.0001_hmax3/M6.o.sol
-    -hausd 0.1 -ar 60 -hgrad 1 -bucket 800
+    -hausd 0.1 -ar 60 -hgrad 1
     ${MMG3D_CI_TESTS}/Various_adpsol_hgrad1_M6Mach_Eps0.0005_hmin0.0001_hmax3/M6.o.o.meshb)
 ENDIF ()
 

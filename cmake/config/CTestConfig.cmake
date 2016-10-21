@@ -20,7 +20,7 @@
 ##  use this copy of the mmg distribution only if you accept them.
 ## =============================================================================
 
-SET(CTEST_PROJECT_NAME "mmg3d5")
+SET(CTEST_PROJECT_NAME "forkJean")
 SET(UPDATE_COMMAND "${GITCOMMAND}")
 
 SET(CTEST_CONTINUOUS_DURATION 600) # duration of Continuous dashboard
@@ -31,5 +31,5 @@ SET(CTEST_NIGHTLY_START_TIME "01:00AM")
 SET(CTEST_DROP_METHOD "http")
 SET(CTEST_DROP_SITE "localhost:2000")
 #SET(CTEST_DROP_SITE "vulcain.bordeaux.inria.fr")
-SET(CTEST_DROP_LOCATION "/CDash/submit.php?project=Mmg3d5")
+SET(CTEST_DROP_LOCATION "/CDash/submit.php?project=forkMmg")
 SET(CTEST_DROP_SITE_CDASH TRUE)

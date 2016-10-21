@@ -253,7 +253,11 @@ static int newton3(double p[4],double x[3]) {
  * \param mat pointer toward the matrix.
  * \param lambda eigenvalues.
  * \param v eigenvectors.
+ *
  * \return order of eigenvalues (1,2,3) or 0 if failed.
+ *
+ * \remark the i^{th} eigenvector is stored in v[i][.].
+ *
  */
 int _MMG5_eigenv(int symmat,double *mat,double lambda[3],double v[3][3]) {
   double    a11,a12,a13,a21,a22,a23,a31,a32,a33;

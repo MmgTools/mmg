@@ -112,8 +112,8 @@
 #define   MMG3D_IPARAM_numberOfLocalParam 12
 ! /*!< [1/0] Turn on/off point relocation with Scotch */
 #define   MMG3D_IPARAM_renum              13
-! /*!< [n] Specify the size of the bucket per dimension (DELAUNAY) */
-#define   MMG3D_IPARAM_bucket             14
+! /*!< [n] Specify the max number of points per octree cell (DELAUNAY) */
+#define   MMG3D_IPARAM_octree             14
 ! /*!< [val] Value for angle detection */
 #define   MMG3D_DPARAM_angleDetection     15
 ! /*!< [val] Minimal mesh size */
@@ -2321,7 +2321,7 @@ END INTERFACE
 #define   MMG5_IPARAM_nosurf           10
 #define   MMG5_IPARAM_numberOfLocalParam 11
 #define   MMG5_IPARAM_renum            12
-#define   MMG5_IPARAM_bucket           13
+#define   MMG5_IPARAM_octree           13
 #define   MMG5_DPARAM_angleDetection   14
 #define   MMG5_DPARAM_hmin             15
 #define   MMG5_DPARAM_hmax             16
