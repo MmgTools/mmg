@@ -38,6 +38,7 @@
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
+ * \param octree pointer toward the octree structure.
  * \param list pointer toward the volumic ball of the point.
  * \param ilist size of the volumic ball.
  * \param improve force the new minimum element quality to be greater or equal
@@ -51,7 +52,8 @@
  * \remark we don't check if we break the hausdorff criterion.
  *
  */
-int _MMG5_movintpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,int improve) {
+int _MMG5_movintpt_iso(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree octree,
+                       int *list,int ilist,int improve) {
   MMG5_pTetra               pt,pt0;
   MMG5_pPoint               p0,p1,p2,p3,ppt0;
   double               vol,totvol;
@@ -129,6 +131,9 @@ int _MMG5_movintpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,int imp
   }
 
   /* update position */
+  if ( octree )
+    _MMG3D_moveOctree(mesh, octree, pt->v[i0], ppt0->c, p0->c);
+
   p0 = &mesh->point[pt->v[i0]];
   p0->c[0] = ppt0->c[0];
   p0->c[1] = ppt0->c[1];
@@ -138,6 +143,7 @@ int _MMG5_movintpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,int imp
     (&mesh->tetra[list[k]/4])->mark=mesh->mark;
   }
 
+
   _MMG5_SAFE_FREE(callist);
   return(1);
 }
@@ -145,6 +151,7 @@ int _MMG5_movintpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,int imp
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
+ * \param octree pointer toward the octree structure.
  * \param list pointer toward the volumic ball of the point.
  * \param ilist size of the volumic ball.
  * \param improve force the new minimum element quality to be greater or equal
@@ -162,7 +169,8 @@ int _MMG5_movintpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,int imp
  * \remark we don't check if we break the hausdorff criterion.
  *
  */
-int _MMG5_movintptLES_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,int improve) {
+int _MMG5_movintptLES_iso(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree octree,
+                          int *list,int ilist,int improve) {
   MMG5_pTetra               pt,pt0;
   MMG5_pPoint               p0,p1,p2,p3,ppt0;
   double               vol,totvol;
@@ -269,7 +277,7 @@ int _MMG5_movintptLES_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,int 
   ppt0->c[0] *= 1./(double) ilist;
   ppt0->c[1] *= 1./(double) ilist;
   ppt0->c[2] *= 1./(double) ilist;
- 
+
    coe = 0.9;
    maxtou = 10;
    iter = 0;
@@ -277,8 +285,7 @@ int _MMG5_movintptLES_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,int 
      p0->c[0] = (1. - coe) *oldc[0] + coe * ppt0->c[0] ;
      p0->c[1] = (1. - coe) *oldc[1] + coe * ppt0->c[1];
      p0->c[2] = (1. - coe) *oldc[2] + coe * ppt0->c[2];
-     
-   
+
      /* Check new position validity */
      calnew = DBL_MAX;
      for (k=0; k<ilist; k++) {
@@ -309,7 +316,11 @@ int _MMG5_movintptLES_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,int 
      _MMG5_SAFE_FREE(callist);
      return(0);
    }
+
    /* update position */
+  if ( octree )
+    _MMG3D_moveOctree(mesh, octree, mesh->tetra[list[0]/4].v[list[0]%4], ppt0->c, p0->c);
+
    for (k=0; k<ilist; k++) {
      (&mesh->tetra[list[k]/4])->qual=callist[k];
      (&mesh->tetra[list[k]/4])->mark=mesh->mark;
@@ -322,6 +333,7 @@ int _MMG5_movintptLES_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,int 
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
+ * \param octree pointer toward the octree structure.
  * \param listv pointer toward the volumic ball of the point.
  * \param ilistv size of the volumic ball.
  * \param lists pointer toward the surfacic ball of the point.
@@ -334,7 +346,7 @@ int _MMG5_movintptLES_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,int 
  *
  * \remark the metric is not interpolated at the new position.
  */
-int _MMG5_movbdyregpt_iso(MMG5_pMesh mesh, MMG5_pSol met,int *listv,
+int _MMG5_movbdyregpt_iso(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree, int *listv,
                           int ilistv,int *lists,int ilists,
                           int improve) {
   MMG5_pTetra       pt,pt0;
@@ -696,6 +708,9 @@ int _MMG5_movbdyregpt_iso(MMG5_pMesh mesh, MMG5_pSol met,int *listv,
   }
 
   /* When all tests have been carried out, update coordinates and normals */
+  if ( octree )
+    _MMG3D_moveOctree(mesh, octree, n0, o, p0->c);
+
   p0->c[0] = o[0];
   p0->c[1] = o[1];
   p0->c[2] = o[2];
@@ -715,6 +730,7 @@ int _MMG5_movbdyregpt_iso(MMG5_pMesh mesh, MMG5_pSol met,int *listv,
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
+ * \param octree pointer toward the octree structure.
  * \param listv pointer toward the volumic ball of the point.
  * \param ilistv size of the volumic ball.
  * \param lists pointer toward the surfacic ball of the point.
@@ -727,7 +743,7 @@ int _MMG5_movbdyregpt_iso(MMG5_pMesh mesh, MMG5_pSol met,int *listv,
  *
  * \remark the metric is not interpolated at the new position.
  */
-int _MMG5_movbdyrefpt_iso(MMG5_pMesh mesh, MMG5_pSol met, int *listv,
+int _MMG5_movbdyrefpt_iso(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree, int *listv,
                           int ilistv, int *lists, int ilists,
                           int improve){
   MMG5_pTetra           pt,pt0;
@@ -1047,6 +1063,9 @@ int _MMG5_movbdyrefpt_iso(MMG5_pMesh mesh, MMG5_pSol met, int *listv,
   }
 
   /* Update coordinates, normals, for new point */
+  if ( octree )
+    _MMG3D_moveOctree(mesh, octree, ip0, o, p0->c);
+
   p0->c[0] = o[0];
   p0->c[1] = o[1];
   p0->c[2] = o[2];
@@ -1072,6 +1091,7 @@ int _MMG5_movbdyrefpt_iso(MMG5_pMesh mesh, MMG5_pSol met, int *listv,
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
+ * \param octree pointer toward the octree structure.
  * \param listv pointer toward the volumic ball of the point.
  * \param ilistv size of the volumic ball.
  * \param lists pointer toward the surfacic ball of the point.
@@ -1085,7 +1105,7 @@ int _MMG5_movbdyrefpt_iso(MMG5_pMesh mesh, MMG5_pSol met, int *listv,
  *
  * \remark the metric is not interpolated at the new position.
  */
-int _MMG5_movbdynompt_iso(MMG5_pMesh mesh,MMG5_pSol met, int *listv,
+int _MMG5_movbdynompt_iso(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree octree, int *listv,
                           int ilistv, int *lists, int ilists,
                           int improve){
   MMG5_pTetra       pt,pt0;
@@ -1390,14 +1410,14 @@ int _MMG5_movbdynompt_iso(MMG5_pMesh mesh,MMG5_pSol met, int *listv,
     pt0->v[i0] = 0;
     calold = MG_MIN(calold, pt->qual);
     callist[l]= _MMG5_orcal(mesh,met,0);
-  if (callist[l] < _MMG5_EPSD) {
-    _MMG5_SAFE_FREE(callist);
-    return(0);
-  }
+    if (callist[l] < _MMG5_EPSD) {
+      _MMG5_SAFE_FREE(callist);
+      return(0);
+    }
     calnew = MG_MIN(calnew,callist[l]);
   }
   if ((calold < _MMG5_NULKAL && calnew <= calold) ||
-    (calnew < _MMG5_NULKAL) || (calnew <= 0.3*calold)) {
+      (calnew < _MMG5_NULKAL) || (calnew <= 0.3*calold)) {
     _MMG5_SAFE_FREE(callist);
     return(0);
   } else if (improve && calnew < calold) {
@@ -1406,6 +1426,8 @@ int _MMG5_movbdynompt_iso(MMG5_pMesh mesh,MMG5_pSol met, int *listv,
   }
 
   /* Update coordinates, normals, for new point */
+  if ( octree )
+    _MMG3D_moveOctree(mesh, octree, ip0, o, p0->c);
   p0->c[0] = o[0];
   p0->c[1] = o[1];
   p0->c[2] = o[2];
@@ -1430,6 +1452,7 @@ int _MMG5_movbdynompt_iso(MMG5_pMesh mesh,MMG5_pSol met, int *listv,
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
+ * \param octree pointer toward the octree structure.
  * \param listv pointer toward the volumic ball of the point.
  * \param ilistv size of the volumic ball.
  * \param lists pointer toward the surfacic ball of the point.
@@ -1441,7 +1464,7 @@ int _MMG5_movbdynompt_iso(MMG5_pMesh mesh,MMG5_pSol met, int *listv,
  * Move boundary ridge point, whose volumic and surfacic balls are passed.
  *
  */
-int _MMG5_movbdyridpt_iso(MMG5_pMesh mesh, MMG5_pSol met, int *listv,
+int _MMG5_movbdyridpt_iso(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree, int *listv,
                           int ilistv,int *lists,int ilists,
                           int improve) {
   MMG5_pTetra          pt,pt0;
@@ -1749,14 +1772,14 @@ int _MMG5_movbdyridpt_iso(MMG5_pMesh mesh, MMG5_pSol met, int *listv,
     pt0->v[i0] = 0;
     calold = MG_MIN(calold, pt->qual);
     callist[l]=_MMG5_orcal(mesh,met,0);
-  if (callist[l] < _MMG5_EPSD) {
-    _MMG5_SAFE_FREE(callist);
-    return(0);
-  }
+    if (callist[l] < _MMG5_EPSD) {
+      _MMG5_SAFE_FREE(callist);
+      return(0);
+    }
     calnew = MG_MIN(calnew,callist[l]);
   }
   if ((calold < _MMG5_NULKAL && calnew <= calold) ||
-    (calnew < _MMG5_NULKAL) || (calnew <= 0.3*calold)) {
+      (calnew < _MMG5_NULKAL) || (calnew <= 0.3*calold)) {
     _MMG5_SAFE_FREE(callist);
     return(0);
   } else if (improve && calnew < calold) {
@@ -1765,6 +1788,9 @@ int _MMG5_movbdyridpt_iso(MMG5_pMesh mesh, MMG5_pSol met, int *listv,
   }
 
   /* Update coordinates, normals, for new point */
+  if ( octree )
+    _MMG3D_moveOctree(mesh, octree, ip0, o, p0->c);
+
   p0->c[0] = o[0];
   p0->c[1] = o[1];
   p0->c[2] = o[2];
