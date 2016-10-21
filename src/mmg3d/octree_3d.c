@@ -97,8 +97,10 @@ int _MMG3D_initOctree(MMG5_pMesh mesh,_MMG3D_pOctree* q, int nv)
   {
     if ( !MG_VOK(&mesh->point[i]) )  continue;
     if (mesh->point[i].tag & MG_BDY) continue;
+
     if(!_MMG3D_addOctree(mesh, (*q), i))
       return 0;
+
   }
   return 1;
 }
@@ -127,6 +129,7 @@ void _MMG3D_freeOctree_s(MMG5_pMesh mesh,_MMG3D_octree_s* q, int nv)
       _MMG3D_freeOctree_s(mesh,&(q->branches[i]), nv);
     }
     _MMG5_DEL_MEM(mesh,q->branches,sizBr*sizeof(_MMG3D_octree_s));
+    q->branches = NULL;
   }
   else if (q->nbVer>0)
   {
@@ -142,6 +145,7 @@ void _MMG3D_freeOctree_s(MMG5_pMesh mesh,_MMG3D_octree_s* q, int nv)
       nvTemp++;
 
       _MMG5_DEL_MEM(mesh,q->v,nvTemp*sizeof(int));
+      q->v = NULL;
       q->nbVer = 0;
     }else
     {
@@ -155,6 +159,7 @@ void _MMG3D_freeOctree_s(MMG5_pMesh mesh,_MMG3D_octree_s* q, int nv)
       }
       assert(q->v);
       _MMG5_DEL_MEM(mesh,q->v,sizTab*sizeof(int));
+      q->v = NULL;
       q->nbVer = 0;
     }
   }
@@ -162,16 +167,18 @@ void _MMG3D_freeOctree_s(MMG5_pMesh mesh,_MMG3D_octree_s* q, int nv)
 
 /**
  * \param mesh pointer toward the mesh structure.
- * \param q pointer toward the global octree.
+ * \param q pointer toward a pointer toward the global octree.
  *
  * Free the global octree structure.
  *
  */
-void _MMG3D_freeOctree(MMG5_pMesh mesh,_MMG3D_pOctree q)
+void _MMG3D_freeOctree(MMG5_pMesh mesh,_MMG3D_pOctree *q)
 {
-  _MMG3D_freeOctree_s(mesh,q->q0, q->nv);
-  _MMG5_DEL_MEM(mesh,q->q0,sizeof(_MMG3D_octree_s));
-  _MMG5_DEL_MEM(mesh,q,sizeof(_MMG3D_octree));
+  _MMG3D_freeOctree_s(mesh,(*q)->q0, (*q)->nv);
+  _MMG5_DEL_MEM(mesh,(*q)->q0,sizeof(_MMG3D_octree_s));
+  (*q)->q0 = NULL;
+  _MMG5_DEL_MEM(mesh,*q,sizeof(_MMG3D_octree));
+  *q = NULL;
 }
 
 
@@ -1039,7 +1046,7 @@ int _MMG3D_delOctreeRec(MMG5_pMesh mesh, _MMG3D_octree_s* q, double* ver, const 
 
   depthMax  = nbBitsInt/dim - 1;
 
-  if (q->v != NULL)
+  if (q->v)
   {
     for ( i = 0; i<q->nbVer; ++i)
     {

@@ -571,6 +571,7 @@ int _MMG5_swptet(MMG5_pMesh mesh,MMG5_pSol met,double crit,
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
+ * \param octree pointer toward the octree structure.
  * \param maxitin maximum number of iteration.
  * \return -1 if failed, number of moved points otherwise.
  *
@@ -1535,8 +1536,7 @@ _MMG5_anatets(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
  * Split tetra into 4 when more than 1 boundary face.
  *
  */
-static int _MMG5_anatet4(MMG5_pMesh mesh, MMG5_pSol met,
-  _MMG3D_pOctree octree, char typchk) {
+static int _MMG5_anatet4(MMG5_pMesh mesh, MMG5_pSol met, char typchk) {
   MMG5_pTetra      pt;
   MMG5_pPoint      ppt;
   MMG5_pxTetra     pxt;
@@ -1556,7 +1556,6 @@ static int _MMG5_anatet4(MMG5_pMesh mesh, MMG5_pSol met,
     if ( nf > 1 ) {
       ier  = _MMG5_split4bar(mesh,met,k,typchk-1);
       if ( !ier ) return(-1);
-      //~ if ( octree ) _MMG3D_addOctree(mesh, octree, ier);
       ns++;
     }
     else {
@@ -1568,7 +1567,6 @@ static int _MMG5_anatet4(MMG5_pMesh mesh, MMG5_pSol met,
       if ( nf == 4 ) {
         ier  = _MMG5_split4bar(mesh,met,k,typchk-1);
         if ( !ier ) return(-1);
-        //~ if ( octree ) _MMG3D_addOctree(mesh, octree, ier);
         ns++;
       }
     }
@@ -1590,8 +1588,7 @@ static int _MMG5_anatet4(MMG5_pMesh mesh, MMG5_pSol met,
  * Analyze tetrahedra and split if needed.
  *
  */
-int _MMG5_anatet(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pOctree octree,
-  char typchk, int patternMode) {
+int _MMG5_anatet(MMG5_pMesh mesh,MMG5_pSol met,char typchk, int patternMode) {
   int     ier,nc,ns,nf,nnc,nns,nnf,it,maxit;
 
   /* analyze tetras : initial splitting */
@@ -1605,7 +1602,7 @@ int _MMG5_anatet(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pOctree octree,
     if ( !mesh->info.noinsert ) {
 
       /* split tetra with more than 2 bdry faces */
-      ier = _MMG5_anatet4(mesh,met,octree,typchk);
+      ier = _MMG5_anatet4(mesh,met,typchk);
       if ( ier < 0 )  return(0);
       ns = ier;
 

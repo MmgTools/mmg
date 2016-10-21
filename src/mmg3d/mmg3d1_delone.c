@@ -276,8 +276,10 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree,int ne,
           goto collapse;
         }
         else {
-          if ( octree )
+          if ( octree ) {
             _MMG3D_addOctree(mesh,octree,ip);
+          }
+
           (*ns)++;
           continue;
         }
@@ -327,8 +329,9 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree,int ne,
           } else {
             ret = _MMG5_delone(mesh,met,ip,list,lon);
             if ( ret > 0 ) {
-              if ( octree )
+              if ( octree ) {
                 _MMG3D_addOctree(mesh,octree,ip);
+              }
               (*ns)++;
               continue;
             }
@@ -1083,15 +1086,11 @@ int _MMG5_mmg3d1_delone(MMG5_pMesh mesh,MMG5_pSol met) {
   if ( abs(mesh->info.imprim) > 4 || mesh->info.ddebug )
     fprintf(stdout,"  ** GEOMETRIC MESH\n");
 
-  /* CEC : create filter */
-  //~ if ( mesh->info.octree > 0 )
-    //~ _MMG3D_initOctree(mesh,&octree,mesh->info.octree);
-
-  if ( !_MMG5_anatet(mesh,met,octree,1,0) ) {
+  if ( !_MMG5_anatet(mesh,met,1,0) ) {
     fprintf(stderr,"  ## Unable to split mesh. Exiting.\n");
     if ( octree )
       /*free octree*/
-      _MMG3D_freeOctree(mesh,octree);
+      _MMG3D_freeOctree(mesh,&octree);
     return(0);
   }
 
@@ -1108,7 +1107,7 @@ int _MMG5_mmg3d1_delone(MMG5_pMesh mesh,MMG5_pSol met) {
     fprintf(stderr,"  ## Metric undefined. Exit program.\n");
     if ( octree )
       /*free octree*/
-      _MMG3D_freeOctree(mesh,octree);
+      _MMG3D_freeOctree(mesh,&octree);
     return(0);
   }
 
@@ -1118,16 +1117,16 @@ int _MMG5_mmg3d1_delone(MMG5_pMesh mesh,MMG5_pSol met) {
       fprintf(stderr,"  ## Gradation problem. Exit program.\n");
       if ( octree )
         /*free octree*/
-        _MMG3D_freeOctree(mesh,octree);
+        _MMG3D_freeOctree(mesh,&octree);
       return(0);
     }
   }
 
-  if ( !_MMG5_anatet(mesh,met,octree,2,0) ) {
+  if ( !_MMG5_anatet(mesh,met,2,0) ) {
     fprintf(stderr,"  ## Unable to split mesh. Exiting.\n");
     if ( octree )
       /*free octree*/
-      _MMG3D_freeOctree(mesh,octree);
+      _MMG3D_freeOctree(mesh,&octree);
     return(0);
   }
 
@@ -1140,19 +1139,23 @@ int _MMG5_mmg3d1_delone(MMG5_pMesh mesh,MMG5_pSol met) {
   if ( !_MMG5_scotchCall(mesh,met) ) {
     if ( octree )
       /*free octree*/
-      _MMG3D_freeOctree(mesh,octree);
+      _MMG3D_freeOctree(mesh,&octree);
     return(0);
   }
-  
-  if ( mesh->info.octree > 0 )
-    _MMG3D_initOctree(mesh,&octree,mesh->info.octree);
-    
+
+  if ( mesh->info.octree > 0 ) {
+    if ( !_MMG3D_initOctree(mesh,&octree,mesh->info.octree) ) {
+      if ( octree )
+        /*free octree*/
+        _MMG3D_freeOctree(mesh,&octree);
+    }
+  }
 
   if ( !_MMG5_adptet_delone(mesh,met,octree) ) {
     fprintf(stderr,"  ## Unable to adapt. Exit program.\n");
     if ( octree )
       /*free octree*/
-      _MMG3D_freeOctree(mesh,octree);
+      _MMG3D_freeOctree(mesh,&octree);
     return(0);
   }
 
@@ -1165,7 +1168,7 @@ int _MMG5_mmg3d1_delone(MMG5_pMesh mesh,MMG5_pSol met) {
     fprintf(stderr,"  ## Topology of mesh unsuited for fem computations. Exit program.\n");
     if ( octree )
       /*free octree*/
-      _MMG3D_freeOctree(mesh,octree);
+      _MMG3D_freeOctree(mesh,&octree);
     return(0);
   }
 
@@ -1173,13 +1176,13 @@ int _MMG5_mmg3d1_delone(MMG5_pMesh mesh,MMG5_pSol met) {
     fprintf(stderr,"  ## Non orientable implicit surface. Exit program.\n");
     if ( octree )
       /*free octree*/
-      _MMG3D_freeOctree(mesh,octree);
+      _MMG3D_freeOctree(mesh,&octree);
     return(0);
   }
 
   if ( octree )
     /*free octree*/
-    _MMG3D_freeOctree(mesh,octree);
+    _MMG3D_freeOctree(mesh,&octree);
 
   return(1);
 }
