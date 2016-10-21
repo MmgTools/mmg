@@ -124,7 +124,7 @@
 #define   MMG3D_DPARAM_hausd              18
 ! /*!< [val] Control gradation */
 #define   MMG3D_DPARAM_hgrad              19
-! /*!< [val] Value of level-set (not use for now) */
+! /*!< [val] Value of level-set */
 #define   MMG3D_DPARAM_ls                 20
 ! /*!< [n] Number of parameters */
 #define   MMG3D_PARAM_size                21
