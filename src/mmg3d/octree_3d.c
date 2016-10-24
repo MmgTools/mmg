@@ -1037,9 +1037,7 @@ int _MMG3D_delOctreeRec(MMG5_pMesh mesh, _MMG3D_octree_s* q, double* ver, const 
   int i;
   int quadrant;
   int dim = mesh->dim;
-  int nbBitsInt;
   int nbVerTemp;
-  nbBitsInt = sizeof(int)*8;
 
   if (q->v)
   {
