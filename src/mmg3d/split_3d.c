@@ -2594,6 +2594,7 @@ void _MMG5_split3op(MMG5_pMesh mesh, MMG5_pSol met, int k, int vx[6],char metRid
  * \param met pointer toward the metric structure.
  * \param k tetra index.
  * \param metRidTyp metric storage (classic or special)
+ * \return 0 if fail, index of created point otherwise (\a ib) 
  *
  * Split a tetra in 4 tetras by introducing its barycenter. FOR NOW : flags,
  * that tell which edge should be split, are not updated (erased) : UPDATE
@@ -2808,7 +2809,7 @@ int _MMG5_split4bar(MMG5_pMesh mesh, MMG5_pSol met, int k,char metRidTyp) {
     pt[3]->qual=_MMG5_orcal(mesh,met,newtet[3]);
   }
 
-  return(1);
+  return(ib);
 }
 
 /** Split 4 edges in a configuration when 3 lie on the same face */

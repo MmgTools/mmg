@@ -33,6 +33,27 @@
  **/
 #include "mmg2d.h"
 
+/**
+   Inversion of a symetric matrix m/.
+*/
+static inline
+int _MMG2_invmat(double *m,double *minv) {
+  double        det;
+
+  if(fabs(m[1]) < _MMG2_EPSD) { /*mat diago*/
+    minv[0] = 1./m[0];
+    minv[1] = 0;
+    minv[2] = 1./m[2];
+  } else {
+    det = m[0]*m[2] - m[1]*m[1];
+    det = 1. / det;
+    minv[0] = det * m[2];
+    minv[1] = - det * m[1];
+    minv[2] = det * m[0];
+  }
+  return(1);
+}
+
 /* Simultaneous reduction of matrices m1, m2; result is stored in m */
 int simred(double *m1,double *m2,double *m) {
   double  lambda[2],hh[2],det,pp[2][2];
@@ -45,7 +66,7 @@ int simred(double *m1,double *m2,double *m) {
     m[1] = 0.0;
     return(1);
   }
-  if ( !MMG2_invmat(m1,m1i) )  return(0);
+  if ( !_MMG2_invmat(m1,m1i) )  return(0);
 
   /* n = (m1)^-1*m2 : stocke en ligne*/
   n[0] = m1i[0]*m2[0] + m1i[1]*m2[1];

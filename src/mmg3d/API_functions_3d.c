@@ -101,8 +101,8 @@ void MMG3D_Init_parameters(MMG5_pMesh mesh) {
 
 
 #ifndef PATTERN
-  /* MMG3D_IPARAM_bucket = 64 */
-  mesh->info.bucket = 64;
+  /* MMG3D_IPARAM_octree = 64 */
+  mesh->info.octree = 32;
 #endif
 }
 
@@ -153,18 +153,6 @@ int MMG3D_Set_meshSize(MMG5_pMesh mesh, int np, int ne, int nprism,
        ( mesh->point || mesh->tria || mesh->tetra || mesh->edge) )
     fprintf(stdout,"  ## Warning: new mesh\n");
 
-  mesh->np  = np;
-  mesh->ne  = ne;
-  mesh->nt  = nt;
-  mesh->na  = na;
-  mesh->nprism = nprism;
-  mesh->nquad  = nquad;
-
-  mesh->npi = mesh->np;
-  mesh->nei = mesh->ne;
-  mesh->nti = mesh->nt;
-  mesh->nai = mesh->na;
-
   if ( !np ) {
     fprintf(stderr,"  ** MISSING DATA:\n");
     fprintf(stderr,"     Your mesh must contains at least points.\n");
@@ -174,7 +162,6 @@ int MMG3D_Set_meshSize(MMG5_pMesh mesh, int np, int ne, int nprism,
     fprintf(stdout,"  ** WARNING:\n");
     fprintf(stdout,"     Your mesh don't contains tetrahedra.\n");
   }
-
   if ( mesh->point )
     _MMG5_DEL_MEM(mesh,mesh->point,(mesh->npmax+1)*sizeof(MMG5_Point));
   if ( mesh->tetra )
@@ -188,6 +175,17 @@ int MMG3D_Set_meshSize(MMG5_pMesh mesh, int np, int ne, int nprism,
   if ( mesh->edge )
     _MMG5_DEL_MEM(mesh,mesh->edge,(mesh->na+1)*sizeof(MMG5_Edge));
 
+  mesh->np  = np;
+  mesh->ne  = ne;
+  mesh->nt  = nt;
+  mesh->na  = na;
+  mesh->nprism = nprism;
+  mesh->nquad  = nquad;
+
+  mesh->npi = mesh->np;
+  mesh->nei = mesh->ne;
+  mesh->nti = mesh->nt;
+  mesh->nai = mesh->na;
 
   /*tester si -m definie : renvoie 0 si pas ok et met la taille min dans info.mem */
   if( mesh->info.mem > 0) {
@@ -1635,8 +1633,8 @@ int MMG3D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam,int val){
       return(0);
     break;
 #ifndef PATTERN
-  case MMG3D_IPARAM_bucket :
-    mesh->info.bucket   = val;
+  case MMG3D_IPARAM_octree :
+    mesh->info.octree   = val;
     break;
 #endif
   case MMG3D_IPARAM_debug :
@@ -1744,8 +1742,8 @@ int MMG3D_Get_iparameter(MMG5_pMesh mesh, int iparam) {
     return ( mesh->info.mem );
     break;
 #ifndef PATTERN
-  case MMG3D_IPARAM_bucket :
-    return ( mesh->info.bucket );
+  case MMG3D_IPARAM_octree :
+    return ( mesh->info.octree );
     break;
 #endif
   case MMG3D_IPARAM_debug :

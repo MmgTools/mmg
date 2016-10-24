@@ -110,7 +110,7 @@
 #define   MMGS_DPARAM_hausd              15
 ! /*!< [val] Control gradation */
 #define   MMGS_DPARAM_hgrad              16
-! /*!< [val] Value of level-set (not use for now) */
+! /*!< [val] Value of level-set */
 #define   MMGS_DPARAM_ls                 17
 ! /*!< [n] Number of parameters */
 #define   MMGS_PARAM_size                18

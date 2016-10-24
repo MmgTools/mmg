@@ -100,7 +100,7 @@ void MMG2D_Init_parameters(MMG5_pMesh mesh) {
   //mesh->info.imprim = -7;
 
   /* MMG2D_IPARAM_bucket = 64 */
-  mesh->info.bucket = 64;
+  mesh->info.octree = 64;
 }
 
 int MMG2D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
@@ -124,7 +124,7 @@ int MMG2D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
       return(0);
     break;
   case MMG2D_IPARAM_bucket :
-    mesh->info.bucket   = val;
+    mesh->info.octree   = val;
     break;
   case MMG2D_IPARAM_debug :
     mesh->info.ddebug   = val;
@@ -229,19 +229,19 @@ int MMG2D_Set_meshSize(MMG5_pMesh mesh, int np, int nt, int na) {
        ( mesh->point || mesh->tria || mesh->edge) )
     fprintf(stdout,"  ## Warning: new mesh\n");
 
-  mesh->np  = np;
-  mesh->nt  = nt;
-  mesh->na  = na;
-  mesh->npi = mesh->np;
-  mesh->nti = mesh->nt;
-  mesh->nai = mesh->na;
-
   if ( mesh->point )
     _MMG5_DEL_MEM(mesh,mesh->point,(mesh->npmax+1)*sizeof(MMG5_Point));
   if ( mesh->tria )
     _MMG5_DEL_MEM(mesh,mesh->tria,(mesh->ntmax+1)*sizeof(MMG5_Tria));
   if ( mesh->edge )
     _MMG5_DEL_MEM(mesh,mesh->edge,(mesh->namax+1)*sizeof(MMG5_Edge));
+
+  mesh->np  = np;
+  mesh->nt  = nt;
+  mesh->na  = na;
+  mesh->npi = mesh->np;
+  mesh->nti = mesh->nt;
+  mesh->nai = mesh->na;
 
   /*tester si -m definie : renvoie 0 si pas ok et met la taille min dans info.mem */
   if( mesh->info.mem > 0) {

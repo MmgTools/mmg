@@ -644,9 +644,9 @@ FORTRAN_NAME(MMGS_SAVEMESH,mmgs_savemesh,
   return;
 }
 /**
- * See \ref MMGS_saveMshMesh function in \ref mmg3d/libmmg3d.h file.
+ * See \ref MMGS_saveMshMesh function in \ref mmgs/libmmgs.h file.
  */
-FORTRAN_NAME(MMGS_SAVEMSHMESH,mmg3d_savemshmesh,
+FORTRAN_NAME(MMGS_SAVEMSHMESH,mmgs_savemshmesh,
              (MMG5_pMesh *mesh, MMG5_pSol *sol,char* filename, int *strlen,
               int* retval),
              (mesh,sol,filename,strlen,retval)){

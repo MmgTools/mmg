@@ -104,9 +104,9 @@ int MMGS_loadMesh(MMG5_pMesh mesh, const char *filename) {
   MMG5_pPoint ppt;
   double      *norm,*n,dd;
   float       fc;
-  int         i,k,ia,nq,nri,ip,idn,ng;
-  int         posnp,posnt,posne,posncor,posnq,posned,posnr;
-  int         posnpreq,npreq,ntreq,posnormal,posnc1,posntreq;
+  long         posnp,posnt,posne,posncor,posnq,posned,posnr;
+  long         posnpreq,posnormal,posnc1,posntreq;
+  int         i,k,ia,nq,nri,ip,idn,ng,npreq,ntreq;
   int         ncor,bin,iswp,nedreq,posnedreq,bdim,binch,bpos;
   int         na,*ina,a,b,ref;
   char        *ptr,data[256],chaine[128];
@@ -674,8 +674,8 @@ int MMGS_loadMesh(MMG5_pMesh mesh, const char *filename) {
 
 int MMGS_loadMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
   FILE*       inm;
-  int         ier;
-  int         posNodes,posElts,posNodeData,bin,iswp,nelts;
+  long        posNodes,posElts,posNodeData;
+  int         ier,bin,iswp,nelts;
 
   mesh->dim = 3;
 
@@ -1152,9 +1152,9 @@ int MMGS_loadSol(MMG5_pMesh mesh,MMG5_pSol met,const char* filename) {
   FILE       *inm;
   float       fbuf[6],tmpf;
   double      dbuf[6],tmpd;
+  long        posnp;
   int         binch,bdim,iswp;
   int         k,i,type,bin,bpos;
-  long        posnp;
   char        *ptr,data[128],chaine[128];
 
   posnp = 0;

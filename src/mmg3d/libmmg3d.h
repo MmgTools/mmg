@@ -80,13 +80,13 @@ enum MMG3D_Param {
   MMG3D_IPARAM_nosurf,            /*!< [1/0], Avoid/allow surface modifications */
   MMG3D_IPARAM_numberOfLocalParam,/*!< [n], Number of local parameters */
   MMG3D_IPARAM_renum,             /*!< [1/0], Turn on/off point relocation with Scotch */
-  MMG3D_IPARAM_bucket,            /*!< [n], Specify the size of the bucket per dimension (DELAUNAY) */
+  MMG3D_IPARAM_octree,            /*!< [n], Specify the max number of points per octree cell (DELAUNAY) */
   MMG3D_DPARAM_angleDetection,    /*!< [val], Value for angle detection */
   MMG3D_DPARAM_hmin,              /*!< [val], Minimal mesh size */
   MMG3D_DPARAM_hmax,              /*!< [val], Maximal mesh size */
   MMG3D_DPARAM_hausd,             /*!< [val], Control global Hausdorff distance (on all the boundary surfaces of the mesh) */
   MMG3D_DPARAM_hgrad,             /*!< [val], Control gradation */
-  MMG3D_DPARAM_ls,                /*!< [val], Value of level-set (not use for now) */
+  MMG3D_DPARAM_ls,                /*!< [val], Value of level-set */
   MMG3D_PARAM_size,               /*!< [n], Number of parameters */
 };
 
@@ -1944,7 +1944,7 @@ enum MMG5_Param {
   MMG5_IPARAM_nosurf,
   MMG5_IPARAM_numberOfLocalParam,
   MMG5_IPARAM_renum,
-  MMG5_IPARAM_bucket,
+  MMG5_IPARAM_octree,
   MMG5_DPARAM_angleDetection,
   MMG5_DPARAM_hmin,
   MMG5_DPARAM_hmax,

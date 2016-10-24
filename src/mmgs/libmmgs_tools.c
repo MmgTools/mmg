@@ -183,12 +183,6 @@ int MMGS_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
               exit(EXIT_FAILURE);
           }
           else i--;
-
-          /* else if ( i == argc ) { */
-          /*   fprintf(stderr,"Missing argument option %c%c\n",argv[i-1][1],argv[i-1][2]); */
-          /*   MMGS_usage(argv[0]); */
-          /* } */
-          /* else i--; */
         }
         break;
       case 'm':
