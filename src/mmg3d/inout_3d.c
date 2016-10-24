@@ -107,12 +107,12 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,const char *filename) {
   MMG5_pEdge  pa;
   MMG5_pPoint ppt;
   double      *norm,*n,dd;
-  int         posnp,posnt,posne,posned,posncor,posnpreq,posntreq,posnereq,posnedreq;
-  int         posnr,posnprism,posnormal,posnc1,posnq,posnqreq;
+  float       fc;
+  long        posnp,posnt,posne,posned,posncor,posnpreq,posntreq,posnereq,posnedreq;
+  long        posnr,posnprism,posnormal,posnc1,posnq,posnqreq;
   int         npreq,ntreq,nereq,nedreq,nqreq,ncor,ned,ng,bin,iswp;
   int         binch,bdim,bpos,i,k,ip,idn;
   int         *ina,v[3],ref,nt,na,nr,ia,aux,nref;
-  float       fc;
   char        *ptr,data[128],chaine[128];
 
   posnp = posnt = posne = posncor = 0;
@@ -934,7 +934,8 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,const char *filename) {
 int MMG3D_loadMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
   FILE*       inm;
   int         ier;
-  int         posNodes,posElts,posNodeData,bin,iswp,nelts;
+  long        posNodes,posElts,posNodeData;
+  int         bin,iswp,nelts;
 
   mesh->dim = 3;
 

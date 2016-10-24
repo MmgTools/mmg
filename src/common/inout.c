@@ -237,8 +237,8 @@ int _MMG5_countBinaryElts(FILE **inm, const int nelts,const int iswp,
  */
 int MMG5_loadMshMesh_part1(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename,
                            FILE **inm,
-                           int *posNodes, int *posElts,
-                           int *posNodeData, int *bin, int *iswp,
+                           long *posNodes, long *posElts,
+                           long *posNodeData, int *bin, int *iswp,
                            int *nelts) {
   MMG5_pTetra pt;
   MMG5_pPrism pp;
@@ -465,8 +465,8 @@ int MMG5_loadMshMesh_part1(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename,
  *
  */
 int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol sol,FILE **inm,
-                           const int posNodes,const int posElts,
-                           const int posNodeData,const int bin,const int iswp,
+                           const long posNodes,const long posElts,
+                           const long posNodeData,const int bin,const int iswp,
                            const int nelts) {
   MMG5_pTetra pt;
   MMG5_pPrism pp;

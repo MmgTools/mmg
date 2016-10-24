@@ -82,8 +82,8 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
   MMG5_pEdge        ped;
   MMG5_pTria        pt;
   float             fc;
-  int          k,ref,tmp,ncor,norient,nreq,nreqed;
-  int          posnp,posnt,posncor,posned,posnq,posreq,posreqed,bin,iswp,nq;
+  long         posnp,posnt,posncor,posned,posnq,posreq,posreqed;
+  int          k,ref,tmp,ncor,norient,nreq,nreqed,bin,iswp,nq;
   char        *ptr,data[128],chaine[128];
   double       air,dtmp;
   int          i,bdim,binch,bpos;
@@ -490,8 +490,9 @@ int MMG2D_loadMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
   FILE*       inm;
   MMG5_pPoint ppt;
   double      z;
+  long        posNodes,posElts,posNodeData;
   int         ier,k;
-  int         posNodes,posElts,posNodeData,bin,iswp,nelts;
+  int         bin,iswp,nelts;
 
   mesh->dim = 2;
 
@@ -539,11 +540,11 @@ int MMG2D_loadSol(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
   FILE       *inm;
   float       fsol;
   double      dsol;
+  long        posnp;
   int         binch,bdim,iswp;
   int         k,i,isol,type,bin,dim,btyp,bpos;
-  long        posnp;
-  char        *ptr,data[128],chaine[128];
   int         msh;
+  char        *ptr,data[128],chaine[128];
 
   msh = mesh->info.nreg;
 

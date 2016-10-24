@@ -505,13 +505,13 @@ extern int _MMG5_writeLocalParamAtTri( MMG5_pMesh,_MMG5_iNode *,FILE*);
 double MMG2_quickarea(double a[2],double b[2],double c[2]);
 
 int MMG5_loadMshMesh_part1(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename,
-                           FILE **inm,int *posNodes, int *posElts,
-                           int *posNodeData, int *bin, int *iswp,
+                           FILE **inm,long *posNodes, long *posElts,
+                           long *posNodeData, int *bin, int *iswp,
                            int *nelts);
 
 int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol sol,FILE **inm,
-                           const int posNodes,const int posElts,
-                           const int posNodeData,const int bin,const int iswp,
+                           const long posNodes,const long posElts,
+                           const long posNodeData,const int bin,const int iswp,
                            const int nelts);
 
 /* function pointers */
