@@ -840,12 +840,9 @@ int _MMG3D_localParamReg(MMG5_pMesh mesh,int ip,int *listv,int ilistv,
                          double* hausd_ip,double *hmin_ip,double *hmax_ip) {
 
   MMG5_pTetra pt;
-  MMG5_pPoint p0;
   MMG5_pPar   par;
   double      hausd, hmin, hmax;
   int         l,k,isloc,ifac1;
-
-  p0 = &mesh->point[ip];
 
   hausd = mesh->info.hausd;
   hmin  = mesh->info.hmin;
@@ -978,10 +975,9 @@ int _MMG3D_localParamNm(MMG5_pMesh mesh,int iel,int iface,int ia,
 
   MMG5_pTetra  pt;
   MMG5_pxTetra pxt;
-  MMG5_pPoint  p0;
   MMG5_pPar    par;
   double       hausd, hmin, hmax;
-  int          l,k,isloc,ifac1,ifac2,info,ip0,ip1;
+  int          l,k,isloc,ifac1,ifac2,ip0,ip1;
   int          listv[MMG3D_LMAX+2],ilistv;
   char         i0,i1;
 

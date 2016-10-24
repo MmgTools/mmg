@@ -35,7 +35,7 @@ int MMG2_bdryenforcement(MMG5_pMesh mesh,MMG5_pSol sol) {
   MMG5_pTria      pt,pt1;
   MMG5_pEdge      ped;
   int       i,j,k,kk,nex,*list,kdep,lon,voy,iel,iare,ied;
-  int       ia,ib,ilon,rnd,idep,*adja,ir,adj,list2[3],iter,nbug;//,iadr,ped0,ped1;
+  int       ia,ib,ilon,rnd,idep,*adja,ir,adj,list2[3],iter;//,iadr,ped0,ped1;
 //  int       iadr2,*adja2,ndel;
 
   _MMG5_SAFE_CALLOC(list,MMG2D_LMAX,int);
@@ -106,7 +106,6 @@ int MMG2_bdryenforcement(MMG5_pMesh mesh,MMG5_pSol sol) {
     if(mesh->info.imprim > 4)
       printf(" ** number of missing edges : %d\n",mesh->na-nex);
 
-    nbug = 0;
     for(kk=1 ; kk<=mesh->na ; kk++) {
       ped = &mesh->edge[kk];
     if( !ped->a || ped->base < 0) continue;

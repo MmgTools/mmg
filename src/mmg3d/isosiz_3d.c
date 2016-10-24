@@ -498,7 +498,7 @@ int _MMG3D_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
   double         hp,v[3],b0[3],b1[3],b0p0[3],b1b0[3],p1b1[3],hausd,hmin,hmax;
   double         secder0[3],secder1[3],kappa,tau[3],gammasec[3],ntau2,intau,ps,lm;
   int            lists[MMG3D_LMAX+2],listv[MMG3D_LMAX+2],ilists,ilistv,k,ip0,ip1,l;
-  int            kk,isloc,ifac1,ifac2,ismet;
+  int            kk,isloc,ismet;
   char           i,j,ia,ised,i0,i1;
   MMG5_pPar      par;
 
