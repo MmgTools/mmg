@@ -67,7 +67,9 @@ int _MMG5_boundingBox(MMG5_pMesh mesh) {
     if ( dd > mesh->info.delta )  mesh->info.delta = dd;
   }
   if ( mesh->info.delta < _MMG5_EPSD ) {
-    fprintf(stderr,"  ## Unable to scale mesh.\n");
+    fprintf(stderr,"  ## Unable to scale mesh:\n");
+    fprintf(stderr,"  ## Check that your mesh contains non-zero points and "
+            "valid elements.\n");
     return(0);
   }
 
