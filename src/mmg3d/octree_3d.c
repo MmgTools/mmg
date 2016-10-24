@@ -283,8 +283,7 @@ int _MMG3D_moveOctree(MMG5_pMesh mesh, _MMG3D_pOctree q, int no, double* newVer,
  */
 int _MMG3D_isCellIncluded(double* cellCenter, double l, double* zoneCenter, double l0)
 {
-  int res,i;
-  double x,y,z,r1,r2,rmax;
+  double x,y,z,r1;//r2,rmax;
 
   x = cellCenter[0]-zoneCenter[0];
   y = cellCenter[1]-zoneCenter[1];
@@ -694,7 +693,7 @@ int _MMG3D_getListSquare(MMG5_pMesh mesh, double* ani, _MMG3D_pOctree q, double*
                          _MMG3D_octree_s*** qlist)
 {
   double *rect2, *center, *dist;
-  double distTemp,det,l0;
+  double l0;
   int    i,index,dim;
 
   dim = mesh->dim;
@@ -939,7 +938,6 @@ int _MMG3D_addOctree(MMG5_pMesh mesh, _MMG3D_pOctree q, const int no)
 int _MMG3D_delOctreeVertex(MMG5_pMesh mesh, _MMG3D_octree_s* q, int indNo)
 {
   int i;
-  int nvTemp;
   int* vTemp;
 
   assert(q->v);
@@ -1039,12 +1037,7 @@ int _MMG3D_delOctreeRec(MMG5_pMesh mesh, _MMG3D_octree_s* q, double* ver, const 
   int i;
   int quadrant;
   int dim = mesh->dim;
-  int depthMax;
-  int nbBitsInt;
   int nbVerTemp;
-  nbBitsInt = sizeof(int)*8;
-
-  depthMax  = nbBitsInt/dim - 1;
 
   if (q->v)
   {

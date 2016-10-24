@@ -1324,13 +1324,14 @@ int _MMG3D_nosurfsiz_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel, int iploc,
     }
   }
   else {
+    hmax = mesh->info.hmax;
+    hmin = mesh->info.hmin;
+
     // To improve: compute the volume and surface ball af the non-manifold
     // point to apply local parameters
-    if ( !ppt->tag & MG_NOM ) {
-      if ( _MMG5_boulesurfvolp(mesh,iel,iploc,iface,listv,&ilistv,lists,&ilists,0)!=1 ||
-        !_MMG3D_localParamReg(mesh,pt->v[iploc],listv,ilistv,lists,ilists,NULL,&hmin,&hmax) ) {
-        hmax = mesh->info.hmax;
-      }
+    if ( !(ppt->tag & MG_NOM) ) {
+      if ( _MMG5_boulesurfvolp(mesh,iel,iploc,iface,listv,&ilistv,lists,&ilists,0) )
+        _MMG3D_localParamReg(mesh,pt->v[iploc],listv,ilistv,lists,ilists,NULL,&hmin,&hmax);
     }
 
     /* Compute the metric as the mean edge length except over the ridges */
@@ -1392,7 +1393,7 @@ int _MMG3D_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTetra   pt;
   MMG5_pxTetra  pxt;
   MMG5_pPoint   ppt;
-  double        mm[6],isqhmax;
+  double        mm[6];
   int           k,l,iploc;
   char          i,ismet;
 

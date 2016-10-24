@@ -240,18 +240,12 @@ int MMG5_loadMshMesh_part1(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename,
                            long *posNodes, long *posElts,
                            long *posNodeData, int *bin, int *iswp,
                            int *nelts) {
-  MMG5_pTetra pt;
-  MMG5_pPrism pp;
-  MMG5_pTria  ptt;
-  MMG5_pQuad  pq1;
-  MMG5_pEdge  pa;
-  MMG5_pPoint ppt;
-  double      aux, dbuf[9];
-  float       fbuf[9],fc;
+  double      dbuf[9];
+  float       fbuf[9];
   size_t      len;
-  int         ver,oneBin,k,i,l,nref;
+  int         ver,oneBin,k,i;
   int         nt,na,nq,ne,npr,np;
-  int         typ,tagNum,ref,idx,num;
+  int         typ,tagNum;
   char        *line,*ptr,data[128],chaine[128],verNum[3];
 
   ver = oneBin = 0;
@@ -480,7 +474,7 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol sol,FILE **inm,
   int         k,i,l,nref,iadr;
   int         *ina_t,*ina_a,nt,na,nq,ne,npr;
   int         nbl_t,nbl_a,typ,tagNum,ref,idx,num;
-  char        *line,*ptr,data[128],chaine[128],verNum[3];
+  char        *line;
 
   ina_t = ina_a = NULL;
   line = NULL;
