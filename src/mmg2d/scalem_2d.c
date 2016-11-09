@@ -292,10 +292,10 @@ int MMG2_scaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
     break;
   }
 
-  /* compute quality */
+  /* Compute quality */
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
-    pt->qual = MMG2_caltri_in(mesh,sol,pt);
+    pt->qual = MMG2D_caltri(mesh,sol,pt);
   }
 
   return(1);

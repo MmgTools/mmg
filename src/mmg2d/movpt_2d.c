@@ -56,7 +56,7 @@ int _MMG2_movedgpt(MMG5_pMesh mesh,MMG5_pSol met,int ilist,int *list, char impro
     i2 = _MMG5_iprv2[i];
     
     pt = &mesh->tria[iel];
-    calold = MG_MIN(caltri_iso(mesh,NULL,pt),calold);
+    calold = MG_MIN(_MMG2_caltri_iso(mesh,NULL,pt),calold);
  
     if ( MG_EDG(pt->tag[i1]) ) {
       if ( ip1 == 0 ) {
@@ -143,7 +143,7 @@ int _MMG2_movedgpt(MMG5_pMesh mesh,MMG5_pSol met,int ilist,int *list, char impro
     memcpy(pt0,pt,sizeof(MMG5_Tria));
     pt0->v[i] = 0;
     
-    calnew = MG_MIN(caltri_iso(mesh,NULL,pt0),calnew);
+    calnew = MG_MIN(_MMG2_caltri_iso(mesh,NULL,pt0),calnew);
   }
   
   if (calold < _MMG2_NULKAL && calnew <= calold) return(0);
@@ -199,7 +199,7 @@ int _MMG2_movintpt(MMG5_pMesh mesh,MMG5_pSol met,int ilist,int *list,char improv
     b[1] += _MMG5_ATHIRD*vol*(p0->c[1]+p1->c[1]+p2->c[1]);
     
     /* Quality of pt */
-    calold = MG_MIN(caltri_iso(mesh,NULL,pt),calold);
+    calold = MG_MIN(_MMG2_caltri_iso(mesh,NULL,pt),calold);
   }
   
   if ( volbal < _MMG5_EPSD ) return(0);
@@ -218,7 +218,7 @@ int _MMG2_movintpt(MMG5_pMesh mesh,MMG5_pSol met,int ilist,int *list,char improv
     memcpy(pt0,pt,sizeof(MMG5_Tria));
     pt0->v[i] = 0;
     
-    calnew = MG_MIN(caltri_iso(mesh,NULL,pt0),calnew);
+    calnew = MG_MIN(_MMG2_caltri_iso(mesh,NULL,pt0),calnew);
   }
     
   if (calold < _MMG2_NULKAL && calnew <= calold) return(0);

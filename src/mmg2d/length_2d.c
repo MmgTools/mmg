@@ -59,7 +59,7 @@ double long_ani(double *ca,double *cb,double *ma,double *mb) {
 }
 
 /* Calculate length of a curve in the considered isotropic metric */
-double _MMG2_lencurv_iso(MMG5_pMesh mesh,MMG5_pSol met, int ip1, int ip2) {
+double _MMG2_lencurv_iso(MMG5_pMesh mesh,MMG5_pSol met,int ip1,int ip2) {
   MMG5_pPoint     p1,p2;
   double          h1,h2,len,l,r;
   
@@ -77,6 +77,12 @@ double _MMG2_lencurv_iso(MMG5_pMesh mesh,MMG5_pSol met, int ip1, int ip2) {
   return(len);
 }
 
+/* Calculate length of a curve in the considered anisotropic metric */
+double _MMG2_lencurv_ani(MMG5_pMesh mesh,MMG5_pSol met,int ip1,int ip2) {
+  double len;
+  
+  return(len);
+}
 
 /* print histo of edge lengths */
 int MMG2_prilen(MMG5_pMesh mesh,MMG5_pSol sol) {
@@ -116,7 +122,8 @@ int MMG2_prilen(MMG5_pMesh mesh,MMG5_pSol sol) {
       iadr = pt->v[ipb]*sol->size;
       mb   = &sol->m[iadr];
 
-      len = MMG2_length(ca,cb,ma,mb);
+      len = MMG2D_lencurv(mesh,sol,pt->v[ipa],pt->v[ipb]);
+      //len = MMG2_length(ca,cb,ma,mb);
       navg++;
       ecart = len;
       lavg += len;

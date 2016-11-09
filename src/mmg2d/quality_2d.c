@@ -46,116 +46,9 @@ double _MMG2_quickcal(MMG5_pMesh mesh, MMG5_pTria pt) {
   return(cal);
 }
 
-/* Calculate isotropic quality for triangle pt */
-double caltri_iso_in(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pTria pt) {
-  double     cal,abx,aby,acx,acy,bcx,bcy;
-  double     *a,*b,*c,h1,h2,h3,area,per,hm;
-
-  cal = 1e+24;
-
-  a  = mesh->point[pt->v[0]].c;
-  b  = mesh->point[pt->v[1]].c;
-  c  = mesh->point[pt->v[2]].c;
-
-  abx = b[0] - a[0];
-  aby = b[1] - a[1];
-  acx = c[0] - a[0];
-  acy = c[1] - a[1];
-  bcx = c[0] - b[0];
-  bcy = c[1] - b[1];
-
-  /* orientation */
-  area = abx*acy - aby*acx;
-  if ( area <= 0.0 ) return(cal);
-
-  /* edge lengths */
-  h1 = abx*abx + aby*aby;
-  h1 = sqrt(h1);
-  h2 = acx*acx + acy*acy;
-  h2 = sqrt(h2);
-  h3 = bcx*bcx + bcy*bcy;
-  h3 = sqrt(h3);
-
-  per  = 0.5 * (h1 + h2 + h3);
-  hm   = M_MAX(h1,M_MAX(h2,h3));
-  cal  = hm * per;
-  if ( per > _MMG2_EPSD ) {
-    area = area * 0.5;
-    if ( area > 0.0 ) {
-      cal = cal / area;//sqrt(aire*peri);
-    }
-    else {
-      cal = 1.0e+9;
-    }
-  }
-  else {
-    cal = 1.0e+9;
-  }
-
-  return(cal);
-}
-
-
-/* Compute quality of the triangle pt when the supplied metric is anisotropic;
- return 0 in the case that the triangle has inverted orientation */
-double caltri_ani_in(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pTria pt) {
-  double     cal,abx,aby,acx,acy,bcx,bcy;
-  double    *a,*b,*c;
-  double    *ma,*mb,*mc,m[6];
-  double     aire,h1,h2,h3,peri,hm,a1;
-  int        i;
-  cal = 1e+9;
-  
-  a  = mesh->point[pt->v[0]].c;
-  b  = mesh->point[pt->v[1]].c;
-  c  = mesh->point[pt->v[2]].c;
-
-  /* check orientation*/
-//#warning a optimiser???
-  a1 = MMG2_quickarea(a,b,c);
-  if(a1 < 0) return(cal) ;
-
-  /* average metric */
-  ma = &sol->m[(pt->v[0]-1)*sol->size+1];
-  mb = &sol->m[(pt->v[1]-1)*sol->size+1];
-  mc = &sol->m[(pt->v[2]-1)*sol->size+1];
-  for (i=0; i<3; i++)  m[i] = (ma[i]+mb[i]+mc[i]) / 3.0;
-
-  abx = b[0] - a[0];
-  aby = b[1] - a[1];
-  acx = c[0] - a[0];
-  acy = c[1] - a[1];
-  bcx = c[0] - b[0];
-  bcy = c[1] - b[1];
-
-  /* edge lengths */
-  h1 = m[0]*abx*abx + m[2]*aby*aby + 2.0*m[1]*abx*aby;
-  h1 = h1 > 0.0 ? sqrt(h1) : 0.0;
-  h2 = m[0]*acx*acx + m[2]*acy*acy + 2.0*m[1]*acx*acy;
-  h2 = h2 > 0.0 ? sqrt(h2) : 0.0;
-  h3 = m[0]*bcx*bcx + m[2]*bcy*bcy + 2.0*m[1]*bcx*bcy;
-  h3 = h3 > 0.0 ? sqrt(h3) : 0.0;
-
-  /* quality */
-  peri = 0.5 * (h1 + h2 + h3);
-  hm   = M_MAX(h1,M_MAX(h2,h3));
-  cal  = hm * peri;
-  if ( peri > _MMG2_EPSD ) {
-    aire = peri * (peri-h1) * (peri-h2) * (peri-h3);
-    if ( aire > 0.0 ) {
-      cal /= sqrt(aire);
-    } else {
-      cal = 1e+9;
-    }
-  } else {
-    cal = 1e+9;
-  }
-  return(cal);
-}
-
 /* Compute quality of the triangle pt when the supplied metric is isotropic; 
    return 0 in the case that the triangle has inverted orientation */
-double caltri_iso(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pTria pt) {
+double _MMG2_caltri_iso(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pTria pt) {
   double    abx,aby,acx,acy,bcx,bcy;
   double    *a,*b,*c,h1,h2,h3,area,hm;
 
@@ -192,7 +85,9 @@ double caltri_iso(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pTria pt) {
   }
 }
 
-double caltri_ani(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pTria pt) {
+/* Compute quality of the triangle pt when the supplied metric is anisotropic;
+ return 0 in the case that the triangle has inverted orientation */
+double _MMG2_caltri_ani(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pTria pt) {
   double     cal,abx,aby,acx,acy,bcx,bcy;
   double    *a,*b,*c;
   double    *ma,*mb,*mc,m[6];
@@ -242,7 +137,6 @@ double caltri_ani(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pTria pt) {
 
 }
 
-
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
@@ -254,12 +148,15 @@ void MMG2_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTria    pt;
   double   rap,rapmin,rapmax,rapavg,med,good;
   int      i,k,iel,ok,ir,imax,nex,his[5];
-
-  /*compute triangle quality*/
+  
+  /* Compute triangle quality*/
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
     if( !MG_EOK(pt) )   continue;
-    pt->qual = MMG2_caltri_in(mesh,met,pt);
+    
+#warning: add check for null quality
+    
+    pt->qual = MMG2D_caltri(mesh,met,pt);
   }
   if ( abs(mesh->info.imprim) <= 0 ) return;
 
@@ -278,7 +175,7 @@ void MMG2_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
       continue;
     }
     ok++;
-    rap = ALPHAD * MMG2_caltri(mesh,met,pt);
+    rap = ALPHAD * MMG2D_caltri(mesh,met,pt);
     if ( rap < rapmin ) {
       rapmin = rap;
       iel    = ok;
@@ -314,7 +211,6 @@ void MMG2_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
               i/5.,i/5.+0.2,his[i],100.*(his[i]/(float)(mesh->nt-nex)));
     }
   }
-
 }
 
 /* /\* print mesh quality histo *\/ */

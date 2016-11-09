@@ -33,7 +33,7 @@
  **/
 #include "mmg2d.h"
 
-/* Interpolation of metric met along edge i of triangle k, according to parameter s; 
+/* Interpolation of isotropic metric met along edge i of triangle k, according to parameter s;
    ip = index of the new point */
 int _MMG2_intmet_iso(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int ip,double s) {
   MMG5_pTria  pt;
@@ -45,7 +45,16 @@ int _MMG2_intmet_iso(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int ip,double s)
   i2  = _MMG5_iprv2[i];
   ip1 = pt->v[i1];
   ip2 = pt->v[i2];
-  met->m[ip] = s * (met->m[ip1] + met->m[ip2]);
+  met->m[ip] = (1.0-s)*met->m[ip1] + s*met->m[ip2];
+  
+  return(1);
+}
+
+/* Interpolation of anisotropic metric met along edge i of triangle k, according to parameter s;
+ ip = index of the new point */
+int _MMG2_intmet_ani(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int ip,double s) {
+  
+  printf("A FAIRE\n\n");
   
   return(1);
 }

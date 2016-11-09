@@ -34,27 +34,29 @@
 
 void MMG2D_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
   if ( met->size == 3 ) {
-    MMG2_length    = long_ani;
-    MMG2_caltri    = caltri_ani;
-    MMG2_caltri_in = caltri_ani_in;
-    MMG2_buckin    = buckin_ani;
-    MMG2_lissmet   = lissmet_ani;
-    MMG2_optlen    = optlen_ani;
-/*    interp     = interp_ani;
- */
+    MMG2D_lencurv  = _MMG2_lencurv_ani;
+    MMG2D_defsiz   = _MMG2_defsiz_ani;
+    MMG2D_gradsiz  = _MMG2_gradsiz_ani;
+    MMG2D_caltri   = _MMG2_caltri_ani;
+    MMG2D_intmet   = _MMG2_intmet_ani;
+    
+#warning : remove if not used
+    MMG2D_buckin   = buckin_ani;
+    //    MMG2_optlen    = optlen_ani;
+    
   }
   else {
-    MMG2_length     = long_iso;
-    MMG2_caltri     = caltri_iso;
-    MMG2_caltri_in  = caltri_iso_in;
-    MMG2_buckin     = buckin_iso;
-    MMG2_lissmet    = lissmet_iso;
-
-    MMG2_optlen     = optlen_iso;
-/*    interp     = interp_iso;
- */
+    MMG2D_lencurv   = _MMG2_lencurv_iso;
+    MMG2D_defsiz    = _MMG2_defsiz_iso;
+    MMG2D_gradsiz   = _MMG2_gradsiz_iso;
+    MMG2D_caltri    = _MMG2_caltri_iso;
+    MMG2D_intmet    = _MMG2_intmet_iso;
+    
+#warning : remove if not used
+    MMG2D_buckin    = buckin_iso;
+    //    MMG2_optlen     = optlen_iso;
   }
-
+  
   return;
 }
 

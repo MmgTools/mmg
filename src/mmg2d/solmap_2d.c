@@ -90,10 +90,10 @@ int MMG2D_doSol(MMG5_pMesh mesh,MMG5_pSol sol) {
   }
 
   /* compute quality */
-  if ( MMG2_caltri_in ) {
+  if ( MMG2D_caltri ) {
     for (k=1; k<=mesh->nt; k++) {
       pt = &mesh->tria[k];
-      pt->qual = MMG2_caltri_in(mesh,sol,pt);
+      pt->qual = MMG2D_caltri(mesh,sol,pt);
     }
   }
 
@@ -224,6 +224,15 @@ int _MMG2_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
   return(1);
 }
 
+/* Definition of an anisotropic metric tensor field based on the geometry of the domain; 
+   this tensor field is intersected by a user-defined tensor field */
+int _MMG2_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
+  
+  printf("A FAIRE \n\n");
+  
+  return(1);
+}
+
 /* Mesh gradation routine */
 int _MMG2_gradsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTria        pt;
@@ -293,3 +302,7 @@ int _MMG2_gradsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
   return(1);
 }
 
+/* Anisotropic mesh gradation routine */
+int _MMG2_gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
+  return(1);
+}

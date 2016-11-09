@@ -67,14 +67,14 @@ int _MMG2_swapdelone(MMG5_pMesh mesh,MMG5_pSol sol,int k,char i,double crit,int 
   pt0->v[0] = pt->v[i];
   pt0->v[1] = pt->v[i1];
   pt0->v[2] = pt1->v[j];
-  cal1 = MMG2_caltri_in(mesh,sol,pt0);
+  cal1 = MMG2D_caltri(mesh,sol,pt0);
   arean1 = MMG2_quickarea(mesh->point[pt0->v[0]].c,mesh->point[pt0->v[1]].c,mesh->point[pt0->v[2]].c);
   if ( cal1 > crit )  return(0);
 
   pt0->v[0] = pt->v[i];
   pt0->v[1] = pt1->v[j];
   pt0->v[2] = pt->v[i2];
-  cal2 = MMG2_caltri_in(mesh,sol,pt0);
+  cal2 = MMG2D_caltri(mesh,sol,pt0);
   arean2 = MMG2_quickarea(mesh->point[pt0->v[0]].c,mesh->point[pt0->v[1]].c,mesh->point[pt0->v[2]].c);
   if ( cal2 > crit )  return(0);
 
@@ -168,13 +168,13 @@ int _MMG2_chkswp(MMG5_pMesh mesh, MMG5_pSol met,int k,char i,char typchk) {
     pt0->tag[0] = pt->tag[i];
     pt0->tag[1] = pt->tag[i1];
     pt0->tag[2] = pt->tag[i2];
-    cal1 = caltri_iso(mesh,met,pt0);
+    cal1 = _MMG2_caltri_iso(mesh,met,pt0);
     
     pt0->v[0]= ip1;  pt0->v[1]= iq;   pt0->v[2]= ip2;
     pt0->tag[0] = pt1->tag[ii2];
     pt0->tag[1] = pt1->tag[ii];
     pt0->tag[2] = pt1->tag[ii1];
-    cal2 = caltri_iso(mesh,met,pt0);
+    cal2 = _MMG2_caltri_iso(mesh,met,pt0);
     
     calnat = MG_MIN(cal1,cal2);
     assert(calnat > 0.);
@@ -184,26 +184,26 @@ int _MMG2_chkswp(MMG5_pMesh mesh, MMG5_pSol met,int k,char i,char typchk) {
     pt0->tag[0] = pt1->tag[ii1];
     pt0->tag[1] = MG_NUL;
     pt0->tag[2] = pt->tag[i2];
-    cal1 = caltri_iso(mesh,met,pt0);
+    cal1 = _MMG2_caltri_iso(mesh,met,pt0);
     
     pt0->v[0]= ip;  pt0->v[1]= iq;   pt0->v[2]= ip2;
     pt0->tag[0] = pt1->tag[ii2];
     pt0->tag[1] = pt->tag[i1];
     pt0->tag[2] = MG_NUL;
-    cal2 = caltri_iso(mesh,met,pt0);
+    cal2 = _MMG2_caltri_iso(mesh,met,pt0);
     
     calchg = MG_MIN(cal1,cal2);
   }
   else {
     pt0->v[0]= ip;  pt0->v[1]= ip1;  pt0->v[2]= ip2;
-    cal1 = caltri_iso(mesh,NULL,pt0);
+    cal1 = _MMG2_caltri_iso(mesh,NULL,pt0);
     pt0->v[0]= ip1;  pt0->v[1]= iq;   pt0->v[2]= ip2;
-    cal2 = caltri_iso(mesh,NULL,pt0);
+    cal2 = _MMG2_caltri_iso(mesh,NULL,pt0);
     calnat = MG_MIN(cal1,cal2);
     pt0->v[0]= ip;  pt0->v[1]= ip1;  pt0->v[2]= iq;
-    cal1 = caltri_iso(mesh,NULL,pt0);
+    cal1 = _MMG2_caltri_iso(mesh,NULL,pt0);
     pt0->v[0]= ip;  pt0->v[1]= iq;   pt0->v[2]= ip2;
-    cal2 = caltri_iso(mesh,NULL,pt0);
+    cal2 = _MMG2_caltri_iso(mesh,NULL,pt0);
     calchg = MG_MIN(cal1,cal2);
   }
   

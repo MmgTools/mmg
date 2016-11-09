@@ -460,9 +460,6 @@ int _MMG2_colelt(MMG5_pMesh mesh,MMG5_pSol met,int typchk) {
       else if ( p1->tag & MG_GEO ) {
         if ( ! (p2->tag & MG_GEO) || !(pt->tag[i] & MG_GEO) ) continue;
       }
-      /* Avoid collapsing a boundary point over a regular one (leads to boundary
-       * degeneration) */
-      else if ( MG_EDG(p1->tag) && !MG_EDG(p2->tag) ) continue;
 
       open = (mesh->adja[3*(k-1)+1+i] == 0) ? 1 : 0;
 

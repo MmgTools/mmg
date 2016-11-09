@@ -535,7 +535,7 @@ int MMG2D_loadMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
 }
 
 
-/* load metric */
+/* Load metric; btyp = 1: scalar size function; btyp = 2: (vector) displacement; btyp = 3: anisotropic metric tensor */
 int MMG2D_loadSol(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
   FILE       *inm;
   float       fsol;
@@ -543,29 +543,22 @@ int MMG2D_loadSol(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
   long        posnp;
   int         binch,bdim,iswp;
   int         k,i,isol,type,bin,dim,btyp,bpos;
-  int         msh;
   char        *ptr,data[128],chaine[128];
 
-  msh = mesh->info.nreg;
-
   bin = 0;
-
   strcpy(data,filename);
 
   ptr = strstr(data,".sol");
   if ( ptr ) {
     // filename contains the solution extension
     ptr = strstr(data,".solb");
-
     if ( ptr )  bin = 1;
-
     if( !(inm = fopen(data,"rb")) ) {
       fprintf(stderr,"  ** %s  NOT FOUND.\n",data);
       return(0);
     }
   }
-  else
-  {
+  else {
     /* Filename does not contain the solution extension */
     ptr = strstr(data,".mesh");
     if ( ptr ) *ptr = '\0';
@@ -587,22 +580,13 @@ int MMG2D_loadSol(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
 
   if ( !bin ) {
     strcpy(chaine,"DDD");
-    while ( fscanf(inm,"%s",&chaine[0])!=EOF && strncmp(chaine,"End",strlen("End")) ) {
+    while ( fscanf(inm,"%s",&chaine[0])!= EOF && strncmp(chaine,"End",strlen("End")) ) {
       if ( !strncmp(chaine,"Dimension",strlen("Dimension")) ) {
         fscanf(inm,"%d",&dim);
-        if ( dim != 2 && !msh ) {
+        if ( dim != 2 ) {
           fprintf(stdout,"  -- BAD SOL DIMENSION : %d\n",dim);
           return(-1);
         }
-        else if( dim != 2 && msh ) {
-          if ( dim == 3 )
-            fprintf(stdout,"  -- READ 3D SOLUTION : %d\n",dim);
-          else {
-            fprintf(stdout,"  -- BAD SOL DIMENSION : %d\n",dim);
-            return(-1);
-          }
-        }
-        continue;
       }
       else if ( !strncmp(chaine,"SolAtVertices",strlen("SolAtVertices")) ) {
         fscanf(inm,"%d",&sol->np);
@@ -663,7 +647,6 @@ int MMG2D_loadSol(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
         fseek(inm,bpos,SEEK_SET);
       }
     }
-
   }
 
   if ( !sol->np ) {
@@ -697,54 +680,33 @@ int MMG2D_loadSol(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
   fseek(inm,posnp,SEEK_SET);
   for (k=1; k<=sol->np; k++) {
     isol = k * sol->size;
-    if (sol->ver == 1) {
+    if ( sol->ver == 1 ) {
       for (i=0; i<sol->size; i++) {
-        if(!bin){
+        if ( !bin ) {
           fscanf(inm,"%f",&fsol);
           sol->m[isol + i] = (double) fsol;
-        } else {
+        }
+        else {
           fread(&fsol,sw,1,inm);
           if(iswp) fsol=MMG_swapf(fsol);
           sol->m[isol + i] = (double) fsol;
         }
       }
-      if(dim==3 && (sol->size>1)) {
-        if(!bin){
-          fscanf(inm,"%f",&fsol);
-          fscanf(inm,"%f",&fsol);
-          fscanf(inm,"%f",&fsol);
-        } else {
-          fread(&fsol,sw,1,inm);
-          fread(&fsol,sw,1,inm);
-          fread(&fsol,sw,1,inm);
-        }
-      }
-    } else {
+    }
+    else {
       for (i=0; i<sol->size; i++) {
-        if(!bin){
+        if ( !bin ) {
           fscanf(inm,"%lf",&sol->m[isol + i]);
-
-        } else {
+        }
+        else {
           fread(&sol->m[isol + i],sd,1,inm);
           if(iswp) sol->m[isol + i]=MMG_swapd(sol->m[isol + i]);
-        }
-      }
-      if(dim==3 && (sol->size>1)) {
-        if(!bin){
-          fscanf(inm,"%lf",&dsol);
-          fscanf(inm,"%lf",&dsol);
-          fscanf(inm,"%lf",&dsol);
-        } else {
-          fread(&dsol,sw,1,inm);
-          fread(&dsol,sw,1,inm);
-          fread(&dsol,sw,1,inm);
         }
       }
     }
   }
 
   sol->npi = sol->np;
-
   fclose(inm);
   return(1);
 }
@@ -1209,164 +1171,7 @@ int MMG2D_saveMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
   return(MMG5_saveMshMesh(mesh,sol,filename));
 }
 
-int MMG2_loadVect(MMG5_pMesh mesh,const char *filename) {
-  printf("comment for merge of the data structure\n");
-  exit(EXIT_FAILURE);
-  /* FILE       *inm; */
-  /* Displ       pd; */
-  /* float       fsol; */
-  /* int         binch,bdim,iswp; */
-  /* int         k,i,type,bin,dim,btyp,bpos,iadr; */
-  /* long        posnp; */
-  /* char        *ptr,data[128],chaine[128]; */
-
-  /* pd = mesh->disp; */
-
-  /* posnp = 0; */
-  /* bin   = 0; */
-  /* iswp  = 0; */
-
-  /* strcpy(data,filename); */
-  /* ptr = strstr(data,".mesh"); */
-  /* if ( ptr )  *ptr = '\0'; */
-  /* strcat(data,".solb"); */
-  /* if( !(inm = fopen(data,"rb")) ) { */
-  /*   ptr  = strstr(data,".solb"); */
-  /*   *ptr = '\0'; */
-  /*   strcat(data,".sol"); */
-  /*   if( !(inm = fopen(data,"rb")) ) { */
-  /*     fprintf(stderr,"  ** %s  NOT FOUND.\n",data); */
-  /*     return(0); */
-  /*   } */
-  /* } else { */
-  /*   bin = 1; */
-  /* } */
-  /* fprintf(stdout,"  %%%% %s OPENED\n",data); */
-
-  /* if(!bin) { */
-  /*   strcpy(chaine,"DDD"); */
-  /*   while(fscanf(inm,"%s",&chaine[0])!=EOF && strncmp(chaine,"End",strlen("End")) ) { */
-  /*     if(!strncmp(chaine,"MeshVersionFormatted",strlen("MeshVersionFormatted"))) { */
-  /*       fscanf(inm,"%d",&pd.ver); */
-  /*       continue; */
-  /*     } if(!strncmp(chaine,"Dimension",strlen("Dimension"))) { */
-  /*  fscanf(inm,"%d",&dim); */
-  /*  if(dim!=2) { */
-  /*    fprintf(stdout,"BAD SOL DIMENSION : %d\n",dim); */
-  /*    return(0); */
-  /*  } */
-  /*  continue; */
-  /*     } else if(!strncmp(chaine,"SolAtVertices",strlen("SolAtVertices"))) { */
-  /*  fscanf(inm,"%d",&pd.np); */
-  /*  fscanf(inm,"%d",&type); */
-  /*  if(type!=1) { */
-  /*    fprintf(stdout,"SEVERAL SOLUTION => IGNORED : %d\n",type); */
-  /*    return(0); */
-  /*  } */
-  /*  fscanf(inm,"%d",&btyp); */
-  /*  posnp = ftell(inm); */
-  /*  break; */
-  /*     } */
-  /*   } */
-  /* } else { */
-  /*   fread(&pd.ver,sw,1,inm); */
-  /*   iswp=0; */
-  /*   if(pd.ver==16777216) iswp=1; */
-  /*   else if(pd.ver!=1) { */
-  /*     fprintf(stdout,"BAD FILE ENCODING\n"); */
-  /*   } */
-  /*   fread(&pd.ver,sw,1,inm); */
-  /*   if(iswp) pd.ver = MMG_swapbin(pd.ver); */
-  /*   while(fread(&binch,sw,1,inm)!=EOF && binch!=54 ) { */
-  /*     if(iswp) binch=MMG_swapbin(binch); */
-  /*     if(binch==54) break; */
-  /*     if(binch==3) {  //Dimension */
-  /*  fread(&bdim,sw,1,inm);  //Pos=>20 */
-  /*  if(iswp) bdim=MMG_swapbin(bdim); */
-  /*  fread(&bdim,sw,1,inm); */
-  /*  if(iswp) bdim=MMG_swapbin(bdim); */
-  /*  dim = bdim */
-  /*  if(bdim!=2) { */
-  /*    fprintf(stdout,"BAD SOL DIMENSION : %d\n",dim); */
-  /*    exit(EXIT_FAILURE); */
-  /*    return(0); */
-  /*  } */
-  /*  continue; */
-  /*     } else if(binch==62) {  //SolAtVertices */
-  /*  fread(&binch,sw,1,inm); //Pos */
-  /*  if(iswp) binch=MMG_swapbin(binch); */
-  /*  fread(&pd.np,sw,1,inm); */
-  /*  if(iswp) pd.np=MMG_swapbin(pd.np); */
-  /*  fread(&binch,sw,1,inm); //nb sol */
-  /*  if(iswp) binch=MMG_swapbin(binch); */
-  /*  if(binch!=1) { */
-  /*    fprintf(stdout,"SEVERAL SOLUTION => IGNORED : %d\n",type); */
-  /*    return(0); */
-  /*  } */
-  /*  fread(&btyp,sw,1,inm); //typsol */
-  /*  if(iswp) btyp=MMG_swapbin(btyp); */
-  /*  posnp = ftell(inm); */
-  /*  break; */
-  /*     } else { */
-  /*  fread(&bpos,sw,1,inm); //Pos */
-  /*  if(iswp) bpos=MMG_swapbin(bpos); */
-  /*  rewind(inm); */
-  /*  fseek(inm,bpos,SEEK_SET); */
-  /*     } */
-  /*   } */
-
-  /* } */
-  /* if ( !pd.np ) { */
-  /*   fprintf(stdout,"  ** MISSING DATA\n"); */
-  /*   return(0); */
-  /* } */
-  /* else if ( pd.np != mesh->np ) { */
-  /*   fprintf(stdout,"  ** WRONG DATA\n"); */
-  /*   return(0); */
-  /* } */
-
-  /* if ( btyp != 2 ) { */
-  /*   fprintf(stdout,"  ** DISPLACEMENT DATA IGNORED\n"); */
-  /*   return(0); */
-  /* } */
-
-  /* if ( abs(mesh->info.imprim) > 3 ) */
-  /*   fprintf(stdout,"  -- READING DISPLACEMENT FILE %s\n",data); */
-
-  /* /\* read mesh solutions *\/   */
-  /* rewind(inm); */
-  /* fseek(inm,posnp,SEEK_SET); */
-  /* for (k=1; k<=pd.np; k++) { */
-  /*   iadr = (k - 1) * btyp + 1; */
-  /*   if (pd.ver < 2) { */
-  /*     for (i=0; i<2; i++) { */
-  /*  if(!bin){ */
-  /*    fscanf(inm,"%f",&fsol); */
-  /*    pd.mv[iadr + i] = (double) fsol; */
-  /*  } else { */
-  /*    fread(&fsol,sw,1,inm); */
-  /*    if(iswp) fsol=MMG_swapf(fsol); */
-  /*    pd.mv[iadr + i] = (double) fsol; */
-  /*  } */
-  /*     } */
-  /*   } else { */
-  /*     for (i=0; i<2; i++) { */
-  /*  if(!bin){ */
-  /*    fscanf(inm,"%lf",&pd.mv[iadr + i]); */
-  /*  } else { */
-  /*    fread(&pd.mv[iadr + i],sd,1,inm); */
-  /*    if(iswp) pd.mv[iadr + i]=MMG_swapd(pd.mv[iadr + i]); */
-  /*  } */
-  /*     } */
-  /*   } */
-  /* } */
-
-  /* if ( abs(mesh->info.imprim) > 3 ) */
-  /*   fprintf(stdout,"     NUMBER OF GIVEN DATA       %8d\n",pd.np); */
-
-  /* fclose(inm); */
-  return(1);
-}
+/* Save solution file */
 int MMG2D_saveSol(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
   FILE*        inm;
   MMG5_pPoint       ppt;
@@ -1374,29 +1179,22 @@ int MMG2D_saveSol(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
   double       dsol;
   int          i,k,nbl,isol,bin,bpos,typ;
   char        *ptr,data[128],chaine[128];
-  int          binch,msh;
+  int          binch;
 
-  msh = mesh->info.nreg;
   if ( !sol->np )  return(1);
   bin = 0;
-
   strcpy(data,filename);
 
   ptr = strstr(data,".sol");
   if ( ptr ) {
-    // filename contains the solution extension
     ptr = strstr(data,".solb");
-
     if ( ptr )  bin = 1;
-
     if( !(inm = fopen(data,"wb")) ) {
       fprintf(stderr,"  ** UNABLE TO OPEN %s.\n",data);
       return(0);
     }
   }
-  else
-  {
-    // filename don't contains the solution extension
+  else  {
     ptr = strstr(data,".mesh");
     if ( ptr ) *ptr = '\0';
 
@@ -1415,17 +1213,15 @@ int MMG2D_saveSol(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
 
   fprintf(stdout,"  %%%% %s OPENED\n",data);
 
-  /*entete fichier*/
-  if(!bin) {
+  /* Entete fichier */
+  if ( !bin ) {
     strcpy(&chaine[0],"MeshVersionFormatted 2\n");
     fprintf(inm,"%s",chaine);
-    if(msh) {
-      strcpy(&chaine[0],"\n\nDimension 3\n");
-    } else {
-      strcpy(&chaine[0],"\n\nDimension 2\n");
-    }
+
+    strcpy(&chaine[0],"\n\nDimension 2\n");
     fprintf(inm,"%s ",chaine);
-  } else {
+  }
+  else {
     binch = 1; //MeshVersionFormatted
     fwrite(&binch,sw,1,inm);
     binch = 2; //version
@@ -1434,18 +1230,19 @@ int MMG2D_saveSol(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
     fwrite(&binch,sw,1,inm);
     bpos = 20; //Pos
     fwrite(&bpos,sw,1,inm);
-    if (msh )
-      binch = 3;
-    else
-      binch = 2;
+    binch = 2;
     fwrite(&binch,sw,1,inm);
-
   }
 
   switch(sol->size) {
+  /* Solution is a size map */
   case 1:
     typ = 1;
     break;
+  /* Solution is a displacement vector field */
+  case 2:
+    typ = 2;
+  /* Solution is a metric tensor */
   case 3:
     typ = 3;
     break;
@@ -1461,12 +1258,14 @@ int MMG2D_saveSol(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
     if ( !M_VOK(ppt) )  continue;
     nbl++;
   }
-  if(!bin) {
+  
+  if ( !bin ) {
     strcpy(&chaine[0],"\n\nSolAtVertices\n");
     fprintf(inm,"%s",chaine);
     fprintf(inm,"%d\n",nbl);
     fprintf(inm,"%d %d\n",1,typ);
-  } else {
+  }
+  else {
     binch = 62; //Vertices
     fwrite(&binch,sw,1,inm);
     bpos += 20+(sol->size*sol->ver)*4*nbl; //Pos
@@ -1482,267 +1281,45 @@ int MMG2D_saveSol(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
     ppt = &mesh->point[k];
     if ( !M_VOK(ppt) )  continue;
     isol = k * sol->size;
-    if (sol->ver < 2) {
-      if(!bin) {
-        if(msh && sol->size > 1) {
-          for (i=0; i<sol->size; i++) {
-            fsol = (float) sol->m[isol + i];
-            fprintf(inm,"%f ",fsol);
-          }
-          fprintf(inm,"%f %f %f",0.,0.,1.);
-        } else {
-          for (i=0; i<sol->size; i++) {
-            fsol = (float) sol->m[isol + i];
-            fprintf(inm,"%f ",fsol);
-          }
+    if ( sol->ver < 2 ) {
+      if ( !bin ) {
+        for (i=0; i<sol->size; i++) {
+          fsol = (float) sol->m[isol + i];
+          fprintf(inm,"%f ",fsol);
         }
         fprintf(inm,"\n");
-      } else {
-        if(msh && sol->size > 1) {
-          for (i=0; i<sol->size; i++) {
-            fsol = (float) sol->m[isol + i];
-            fwrite(&fsol,sw,1,inm);
-          }
-          fsol = 0;
+      }
+      else {
+        for (i=0; i<sol->size; i++) {
+          fsol = (float) sol->m[isol + i];
           fwrite(&fsol,sw,1,inm);
-          fsol = 0;
-          fwrite(&fsol,sw,1,inm);
-          fsol = 1;
-          fwrite(&fsol,sw,1,inm);
-        } else {
-          for (i=0; i<sol->size; i++) {
-            fsol = (float) sol->m[isol + i];
-            fwrite(&fsol,sw,1,inm);
-          }
         }
       }
-    } else {
-      if(!bin) {
-        if(msh && sol->size > 1) {
-          for (i=0; i<sol->size; i++)
-            fprintf(inm,"%.15lg ",sol->m[isol + i]);
-          fprintf(inm,"%.15lg %.15lg %.15lg",0.,0.,1.);
-        } else {
-          for (i=0; i<sol->size; i++)
-            fprintf(inm,"%.15lg ",sol->m[isol + i]);
-        }
+    }
+    else {
+      if ( !bin ) {
+        for (i=0; i<sol->size; i++)
+          fprintf(inm,"%.15lg ",sol->m[isol + i]);
         fprintf(inm,"\n");
-      } else {
-        if(msh && sol->size > 1) {
-          for (i=0; i<sol->size; i++)
-            fwrite(&sol->m[isol + i],sd,1,inm);
-          dsol = 0.;
-          fwrite(&dsol,sd,1,inm);
-          dsol = 0.;
-          fwrite(&dsol,sd,1,inm);
-          dsol = 0.;
-          fwrite(&dsol,sd,1,inm);
-        } else {
-          for (i=0; i<sol->size; i++)
-            fwrite(&sol->m[isol + i],sd,1,inm);
-        }
       }
-
+      else {
+        for (i=0; i<sol->size; i++)
+          fwrite(&sol->m[isol + i],sd,1,inm);
+      }
     }
   }
 
-  /*fin fichier*/
-  if(!bin) {
+  /* End file */
+  if ( !bin ) {
     strcpy(&chaine[0],"\n\nEnd\n");
     fprintf(inm,"%s",chaine);
-  } else {
+  }
+  else {
     binch = 54; //End
     fwrite(&binch,sw,1,inm);
   }
   fclose(inm);
 
-  return(1);
-}
-
-int MMG2D_saveVect(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename,double lambda) {
-  printf("comment for merge of the data structure\n");
-  exit(EXIT_FAILURE);
-  /* FILE        *inm,*f,*inm2; */
-  /* Displ        pd; */
-  /* MMG5_pPoint       ppt; */
-  /* double       dsol,dd,lreal; */
-  /* int          i,k,nbl,bin,bpos,typ; */
-  /* char        *ptr,data[128],data2[128],chaine[128]; */
-  /* unsigned char binch; */
-
-  /* if(lambda > 1) { */
-  /*   lreal = 1.; */
-  /* } else { */
-  /*   lreal = lambda; */
-  /* } */
-  /* /\*ecriture du lambda dans un fichier*\/ */
-  /* f = fopen("lambda.dat","w"); */
-  /* fprintf(f,"%10.12f\n",lambda); */
-  /* fclose(f); */
-
-  /* pd = mesh->disp; */
-  /* pd.ver = 2; */
-  /* bin = 0; */
-
-  /* strcpy(data,filename); */
-  /* strcpy(data2,filename); */
-  /* ptr = strstr(data,".meshb"); */
-  /* if ( ptr )  *ptr = '\0'; */
-  /* else { */
-  /*   ptr = strstr(data,".mesh"); */
-  /*   if ( ptr ) { */
-  /*     *ptr = '\0'; */
-  /*     bin  = 0; */
-  /*   } */
-  /* } */
-  /* strcat(data,"-lambda.sol"); */
-  /* ptr = strstr(data2,".meshb"); */
-  /* if ( ptr )  *ptr = '\0'; */
-  /* else { */
-  /*   ptr = strstr(data2,".mesh"); */
-  /*   if ( ptr ) { */
-  /*     *ptr = '\0'; */
-  /*     bin  = 0; */
-  /*   } */
-  /* } */
-  /* strcat(data2,"-1-lambda.sol"); */
-
-  /* if( bin && !(inm = fopen(data,"wb")) ) { */
-  /*   fprintf(stderr,"  ** UNABLE TO OPEN %s.\n",data); */
-  /*   return(0); */
-  /* } else { */
-  /*   if( !(inm = fopen(data,"w")) ) { */
-  /*     fprintf(stderr,"  ** UNABLE TO OPEN %s.\n",data); */
-  /*     return(0); */
-  /*   } */
-  /* } */
-  /* fprintf(stdout,"  %%%% %s OPENED\n",data); */
-
-  /*  if( bin && !(inm2 = fopen(data2,"wb")) ) { */
-  /*   fprintf(stderr,"  ** UNABLE TO OPEN %s.\n",data2); */
-  /*   return(0); */
-  /* } else { */
-  /*   if( !(inm2 = fopen(data2,"w")) ) { */
-  /*     fprintf(stderr,"  ** UNABLE TO OPEN %s.\n",data2); */
-  /*     return(0); */
-  /*   } */
-  /* } */
-  /* fprintf(stdout,"  %%%% %s OPENED\n",data2); */
-
-  /* /\*entete fichier*\/ */
-  /* if(!bin) { */
-  /*   strcpy(&chaine[0],"MeshVersionFormatted 2\n"); */
-  /*   fprintf(inm,"%s",chaine); */
-  /*   strcpy(&chaine[0],"\n\nDimension 2\n"); */
-  /*   fprintf(inm,"%s ",chaine); */
-  /* } else { */
-  /*   binch = 1; //MeshVersionFormatted */
-  /*   fwrite(&binch,sw,1,inm); */
-  /*   binch = pd.ver; //version */
-  /*   fwrite(&binch,sw,1,inm); */
-  /*   binch = 2; //Dimension */
-  /*   fwrite(&binch,sw,1,inm); */
-  /*   bpos = 20; //Pos */
-  /*   fwrite(&bpos,sw,1,inm); */
-  /*   binch = 3; */
-  /*   fwrite(&binch,sw,1,inm); */
-
-  /* } */
-  /* /\*entete fichier 2*\/ */
-  /* if(!bin) { */
-  /*   strcpy(&chaine[0],"MeshVersionFormatted 2\n"); */
-  /*   fprintf(inm2,"%s",chaine); */
-  /*   strcpy(&chaine[0],"\n\nDimension 2\n"); */
-  /*   fprintf(inm2,"%s ",chaine); */
-  /* } else { */
-  /*   binch = 1; //MeshVersionFormatted */
-  /*   fwrite(&binch,sw,1,inm2); */
-  /*   binch = pd.ver; //version */
-  /*   fwrite(&binch,sw,1,inm2); */
-  /*   binch = 2; //Dimension */
-  /*   fwrite(&binch,sw,1,inm2); */
-  /*   bpos = 20; //Pos */
-  /*   fwrite(&bpos,sw,1,inm2); */
-  /*   binch = 3; */
-  /*   fwrite(&binch,sw,1,inm2); */
-
-  /* } */
-  /* typ = 2; */
-
-  /* /\* write data *\/ */
-  /* nbl = 0; */
-  /* for (k=1; k<=mesh->np; k++) { */
-  /*   ppt = &mesh->point[k]; */
-  /*   if ( !M_VOK(ppt) )  continue; */
-  /*   nbl++; */
-  /* } */
-
-  /* if(!bin) { */
-  /*   strcpy(&chaine[0],"\n\nSolAtVertices\n"); */
-  /*   fprintf(inm,"%s",chaine); */
-  /*   fprintf(inm,"%d\n",nbl); */
-  /*   fprintf(inm,"%d %d\n",1,typ); */
-  /*   fprintf(inm2,"%s",chaine); */
-  /*   fprintf(inm2,"%d\n",nbl); */
-  /*   fprintf(inm2,"%d %d\n",1,typ); */
-  /* } else { */
-  /*   binch = 62; //SolAtVertices */
-  /*   fwrite(&binch,sw,1,inm); */
-  /*   bpos += 20+(2*pd.ver)*4*nbl; //Pos */
-  /*   fwrite(&bpos,sw,1,inm); */
-  /*   fwrite(&nbl,sw,1,inm); */
-  /*   binch = 1; //nb sol */
-  /*   fwrite(&binch,sw,1,inm); */
-  /*   binch = typ; //typ sol */
-  /*   fwrite(&binch,sw,1,inm); */
-  /*   binch = 62; //SolAtVertices */
-  /*   fwrite(&binch,sw,1,inm2); */
-  /*   bpos += 20+(2*pd.ver)*4*nbl; //Pos */
-  /*   fwrite(&bpos,sw,1,inm2); */
-  /*   fwrite(&nbl,sw,1,inm2); */
-  /*   binch = 1; //nb sol */
-  /*   fwrite(&binch,sw,1,inm2); */
-  /*   binch = typ; //typ sol */
-  /*   fwrite(&binch,sw,1,inm2); */
-  /* } */
-
-
-  /* for (k=1; k<=mesh->np; k++) { */
-  /*   ppt = &mesh->point[k]; */
-  /*   if ( !M_VOK(ppt) )  continue; */
-  /*   for (i=0; i<2; i++) { */
-  /*     dsol = lreal*pd.mv[2*(k-1) + 1 + i]; */
-  /*     if(!bin) { */
-  /*  fprintf(inm,"%.15lg ",dsol); */
-  /*     } else { */
-  /*  fwrite(&dsol,sd,1,inm); */
-  /*     } */
-  /*   } */
-  /*   for (i=0; i<2; i++) { */
-  /*     dsol = (1.-lreal)*pd.mv[2*(k-1) + 1 + i]; */
-  /*     if(!bin) { */
-  /*  fprintf(inm2,"%.15lg ",dsol); */
-  /*     } else { */
-  /*  fwrite(&dsol,sd,1,inm2); */
-  /*     } */
-  /*   } */
-  /*   if(!bin) { */
-  /*     fprintf(inm,"\n"); */
-  /*     fprintf(inm2,"\n"); */
-  /*   } */
-  /* } */
-  /* /\*fin fichier*\/ */
-  /* if(!bin) { */
-  /*   strcpy(&chaine[0],"\n\nEnd\n"); */
-  /*   fprintf(inm,"%s",chaine); */
-  /*   fprintf(inm2,"%s",chaine); */
-  /* } else { */
-  /*   binch = 54; //End */
-  /*   fwrite(&binch,sw,1,inm); */
-  /*   fwrite(&binch,sw,1,inm2); */
-  /* } */
-  /* fclose(inm); */
-  /* fclose(inm2); */
   return(1);
 }
 

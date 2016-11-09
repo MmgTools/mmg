@@ -52,7 +52,11 @@ int _MMG2_chkcol(MMG5_pMesh mesh, MMG5_pSol met,int k,char i,int *list,char typc
     lon = MG_MIN(lon,MMG2_LSHRT);
     lon = MG_MAX(1.0/lon,MMG2_LLONG);
   }
-    
+  
+  /* Avoid collapsing a boundary point over a regular one (leads to boundary
+   * degeneration) */
+  if ( MG_EDG(mesh->point[ip1].tag) && !MG_EDG(mesh->point[ip2].tag) ) return(0);
+  
   /* Avoid subdivising one ref. component consisting of only one layer of elements */
   if ( MG_EDG(mesh->point[ip1].tag) && (pt->tag[i1]||pt->tag[i2]) ) return(0);
 
@@ -149,16 +153,16 @@ int _MMG2_chkcol(MMG5_pMesh mesh, MMG5_pSol met,int k,char i,int *list,char typc
       
       /* Check quality and volume inversion */
       if ( typchk == 2 && met->m && met->size == 3 )
-        caltmp = ALPHAD*caltri_ani(mesh,met,pt1);
+        caltmp = ALPHAD*_MMG2_caltri_ani(mesh,met,pt1);
       else
-        caltmp = ALPHAD*caltri_iso(mesh,NULL,pt1);
+        caltmp = ALPHAD*_MMG2_caltri_iso(mesh,NULL,pt1);
       
       calold = MG_MIN(calold,caltmp);
       
       if ( typchk == 2 && met->m && met->size == 3 )
-        caltmp = ALPHAD*caltri_ani(mesh,met,pt0);
+        caltmp = ALPHAD*_MMG2_caltri_ani(mesh,met,pt0);
       else
-        caltmp = ALPHAD*caltri_iso(mesh,NULL,pt0);
+        caltmp = ALPHAD*_MMG2_caltri_iso(mesh,NULL,pt0);
       
       if ( caltmp < _MMG2_NULKAL )  return(0);
       calnew = MG_MIN(calnew,caltmp);
