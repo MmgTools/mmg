@@ -35,7 +35,7 @@
 
 #ifdef USE_ELAS
 
-#define _MMG2_DISPREF   10
+#define _MMG2_DISPREF   0
 #define _LS_LAMBDA      10.0e5
 #define _LS_MU          8.2e5
 
@@ -266,7 +266,7 @@ int* _MMG2_packLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,int *npfin) {
   for(k=1; k<=mesh->np; k++) {
     ip = perm[k];
     if ( !ip ) continue;
-    if ( !LS_addSol(lsst,ip,&disp->m[2*(k-1)+1]) ) {
+    if ( !LS_addSol(lsst,ip,&disp->m[2*k]) ) {
       fprintf(stdout,"  ## Problem in fn LS_addSol. Exiting.\n");
       return(0);
     }
@@ -287,13 +287,13 @@ int _MMG2_unpackLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,int npf,int *invper
   
   for (k=1; k<=mesh->np; k++) {
     for (i=0; i<2; i++)
-      disp->m[2*(k-1)+1+i] = 0.0;
+      disp->m[2*k+i] = 0.0;
   }
   
   for (k=1; k<=npf; k++) {
     ip = invperm[k];
     for (i=0; i<2; i++)
-      disp->m[2*(ip-1)+1+i] = u[2*(k-1)+i];
+      disp->m[2*ip+i] = u[2*(k-1)+i];
   }
   
   return(1);

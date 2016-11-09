@@ -123,7 +123,7 @@ int _MMG2_chkmovmesh(MMG5_pMesh mesh,MMG5_pSol disp,short t) {
     for (i=0; i<3; i++) {
       np = pt->v[i];
       ppt = &mesh->point[np];
-      v = &disp->m[2*(np-1)+1];
+      v = &disp->m[2*np];
       for (j=0; j<2; j++)
         c[i][j] = ppt->c[j]+tau*v[j];
     }
@@ -195,7 +195,6 @@ int _MMG2_dispmesh(MMG5_pMesh mesh,MMG5_pSol disp,short t,int itdeg) {
     for (i=0; i<3; i++) {
       np = pt->v[i];
       ppt = &mesh->point[np];
-      v = &disp->m[2*(np-1)+1];
       for (j=0; j<2; j++)
         c[i][j] = ppt->c[j];
     }
@@ -204,7 +203,7 @@ int _MMG2_dispmesh(MMG5_pMesh mesh,MMG5_pSol disp,short t,int itdeg) {
 
     for (i=0; i<3; i++) {
       np = pt->v[i];
-      v = &disp->m[2*(np-1)+1];
+      v = &disp->m[2*np];
       for (j=0; j<2; j++)
         c[i][j] += tau*v[j];
     }
@@ -221,7 +220,7 @@ int _MMG2_dispmesh(MMG5_pMesh mesh,MMG5_pSol disp,short t,int itdeg) {
     ppt = &mesh->point[k];
 
     if ( !MG_VOK(ppt) ) continue;
-    v = &disp->m[2*(k-1)+1];
+    v = &disp->m[2*k];
 
     for (i=0; i<2; i++) {
       ppt->c[i] = ppt->c[i] + tau*v[i];
@@ -322,7 +321,7 @@ int _MMG2_spllag(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int itdeg,int *war
     /* Interpolate displacement */
     if ( disp->m ) {
       for (i=0; i<2; i++)
-        disp->m[2*(ip-1)+1+i] = 0.5*(disp->m[2*(ip1-1)+1+i]+disp->m[2*(ip2-1)+1+i]);
+        disp->m[2*ip+i] = 0.5*(disp->m[2*ip1+i]+disp->m[2*ip2+i]);
     }
   }
 
@@ -615,7 +614,6 @@ int MMG2_mmg2d9(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met) {
         if ( abs(mesh->info.imprim) > 3 && abs(mesh->info.imprim) < 5 && (nnspl+nnm+nns+nnc > 0) )
           printf(" %d edges splitted, %d vertices collapsed, %d elements"
                  " swapped, %d vertices moved.\n",nnspl,nnc,nns,nnm);
-
 
       }
 
