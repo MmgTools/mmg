@@ -21,7 +21,7 @@
 ** =============================================================================
 */
 /**
- * \file mmg2d/intmet_2d.c
+ * \file mmg2d/anisosiz_2d.c
  * \brief Interpolation of metrics
  * \author Charles Dapogny (UPMC)
  * \author Cécile Dobrzynski (Bx INP/Inria/UBordeaux)
@@ -33,45 +33,30 @@
  **/
 #include "mmg2d.h"
 
-/* Interpolation of isotropic metric met along edge i of triangle k, according to parameter s;
-   ip = index of the new point */
-int _MMG2_intmet_iso(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int ip,double s) {
-  MMG5_pTria  pt;
-  int    ip1,ip2;
-  char   i1,i2;
-  
-  pt  = &mesh->tria[k];
-  i1  = _MMG5_inxt2[i];
-  i2  = _MMG5_iprv2[i];
-  ip1 = pt->v[i1];
-  ip2 = pt->v[i2];
-  met->m[ip] = (1.0-s)*met->m[ip1] + s*met->m[ip2];
-  
-  return(1);
-}
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric stucture.
+ * \return 0 if fail, 1 otherwise.
+ *
+ * Define size at points by intersecting the boundary metric and the
+ * physical metric.
+ *
+ */
+int _MMG2_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
+  MMG5_pTria       pt;
+  MMG5_pPoint      p1,p2;
+  double           t1[2],t2[2],b1[2],b2[2],gpp1[2],gpp2[2],pv,cosn,M1,M2;
+  double           ps1,ps2,ux,uy,ll,li,lm,hmax,hausd,hmin;
+  int              k,ip1,ip2;
+  unsigned char    i,i1,i2;
 
-/* Interpolation of anisotropic metric met along edge i of triangle k, according
-   to parameter s; ip = index of the new point */
-int _MMG2_intmet_ani(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int ip,double s) {
-  MMG5_pTria  pt;
-  double *h1,*h2,*h,m1[3],m2[3],m[3],m1_inv[3],m2_inv[3],m_inv[3];
-  int    iadr,ip1,ip2;
-  char   i1,i2;
 
-  pt  = &mesh->tria[k];
+  if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug )
+    fprintf(stdout,"  ** Defining anisotropic map\n");
 
-  i1  = _MMG5_inxt2[i];
-  i2  = _MMG5_iprv2[i];
+  printf("%s:%d: Not yet implemented\n",__FILE__,__LINE__);
 
-  ip1 = pt->v[i1];
-  ip2 = pt->v[i2];
-
-  h1 = &met->m[3*ip1];
-  h2 = &met->m[3*ip2];
-
-  printf("%s:%d To implement\n",__FILE__,__LINE__);
-
-  exit(EXIT_FAILURE);
+  exit (EXIT_FAILURE);
 
   return(1);
 }
