@@ -48,7 +48,7 @@ int _MMG2_chkcol(MMG5_pMesh mesh, MMG5_pSol met,int k,char i,int *list,char typc
   
   /* If typchk == 2, avoid recreating long edges */
   if ( typchk == 2 && met->m ) {
-    lon = _MMG2_lencurv_iso(mesh,met,ip1,ip2);
+    lon = MMG2D_lencurv(mesh,met,ip1,ip2);
     lon = MG_MIN(lon,MMG2_LSHRT);
     lon = MG_MAX(1.0/lon,MMG2_LLONG);
   }
@@ -131,7 +131,7 @@ int _MMG2_chkcol(MMG5_pMesh mesh, MMG5_pSol met,int k,char i,int *list,char typc
       /* Check length to avoid recreating long elements */
       if ( typchk == 2 && met->m && !MG_EDG(mesh->point[ip2].tag) ) {
         ip1 = pt1->v[j2];
-        len = _MMG2_lencurv_iso(mesh,met,ip1,ip2);
+        len = MMG2D_lencurv(mesh,met,ip1,ip2);
         if ( len > lon )  return(0);
       }
     

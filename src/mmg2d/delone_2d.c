@@ -353,7 +353,7 @@ int _MMG2_delone(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist) {
         pt1 = &mesh->tria[iel];
         memcpy(pt1,pt,sizeof(MMG5_Tria));
         pt1->v[i] = ip;
-        pt1->qual = MMG2D_caltri(mesh,sol,pt1);
+        pt1->qual = _MMG2_caltri_iso(mesh,sol,pt1);
         pt1->ref = pt->ref;
 
         if ( pt1->qual < 1e-10 ) {

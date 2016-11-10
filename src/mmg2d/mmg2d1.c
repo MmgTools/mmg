@@ -152,7 +152,7 @@ int _MMG2_anaelt(MMG5_pMesh mesh,MMG5_pSol met,int typchk) {
       for (i=0; i<3; i++) {
         i1 = _MMG5_inxt2[i];
         i2 = _MMG5_iprv2[i];
-        len = _MMG2_lencurv_iso(mesh,met,pt->v[i1],pt->v[i2]);
+        len = MMG2D_lencurv(mesh,met,pt->v[i1],pt->v[i2]);
         if ( len > MMG2_LLONG ) MG_SET(pt->flag,i);
       }
     }
@@ -471,7 +471,7 @@ int _MMG2_colelt(MMG5_pMesh mesh,MMG5_pSol met,int typchk) {
         if ( ll > hmin2 ) continue;
       }
       else {
-        ll = _MMG2_lencurv_iso(mesh,met,pt->v[i1],pt->v[i2]);
+        ll = MMG2D_lencurv(mesh,met,pt->v[i1],pt->v[i2]);
         if ( ll > MMG2_LSHRT ) continue;
       }
 
@@ -630,7 +630,7 @@ int _MMG2_adpspl(MMG5_pMesh mesh,MMG5_pSol met) {
     for (i=0; i<3; i++) {
       i1 = _MMG5_inxt2[i];
       i2 = _MMG5_iprv2[i];
-      len = _MMG2_lencurv_iso(mesh,met,pt->v[i1],pt->v[i2]);
+      len = MMG2D_lencurv(mesh,met,pt->v[i1],pt->v[i2]);
 
       if ( len > lmax ) {
         lmax = len;
@@ -701,7 +701,7 @@ int _MMG2_adpcol(MMG5_pMesh mesh,MMG5_pSol met) {
         if ( ! (p2->tag & MG_GEO) || !(pt->tag[i] & MG_GEO) ) continue;
       }
 
-      len = _MMG2_lencurv_iso(mesh,met,pt->v[i1],pt->v[i2]);
+      len = MMG2D_lencurv(mesh,met,pt->v[i1],pt->v[i2]);
 
       if ( len > MMG2_LOPTS ) continue;
 

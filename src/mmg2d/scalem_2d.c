@@ -293,9 +293,10 @@ int MMG2_scaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
   }
 
   /* Compute quality */
+#warning : Probably unused
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
-    pt->qual = MMG2D_caltri(mesh,sol,pt);
+    pt->qual = _MMG2_caltri_iso(mesh,sol,pt);
   }
 
   return(1);

@@ -67,14 +67,14 @@ int _MMG2_swapdelone(MMG5_pMesh mesh,MMG5_pSol sol,int k,char i,double crit,int 
   pt0->v[0] = pt->v[i];
   pt0->v[1] = pt->v[i1];
   pt0->v[2] = pt1->v[j];
-  cal1 = MMG2D_caltri(mesh,sol,pt0);
+  cal1 = _MMG2_caltri_iso(mesh,sol,pt0);
   arean1 = MMG2_quickarea(mesh->point[pt0->v[0]].c,mesh->point[pt0->v[1]].c,mesh->point[pt0->v[2]].c);
   if ( cal1 > crit )  return(0);
 
   pt0->v[0] = pt->v[i];
   pt0->v[1] = pt1->v[j];
   pt0->v[2] = pt->v[i2];
-  cal2 = MMG2D_caltri(mesh,sol,pt0);
+  cal2 = _MMG2_caltri_iso(mesh,sol,pt0);
   arean2 = MMG2_quickarea(mesh->point[pt0->v[0]].c,mesh->point[pt0->v[1]].c,mesh->point[pt0->v[2]].c);
   if ( cal2 > crit )  return(0);
 
@@ -154,8 +154,8 @@ int _MMG2_chkswp(MMG5_pMesh mesh, MMG5_pSol met,int k,char i,char typchk) {
    longer than the swapped one, and than the maximum authorized edge length */
   /* I believe this test is hindering the reach of good quality */
   if ( typchk == 2 && met->m ) {
-    loni = _MMG2_lencurv_iso(mesh,met,ip1,ip2);
-    lona = _MMG2_lencurv_iso(mesh,met,ip,iq);
+    loni = MMG2D_lencurv(mesh,met,ip1,ip2);
+    lona = MMG2D_lencurv(mesh,met,ip,iq);
     if ( loni > 1.0 )  loni = MG_MIN(1.0 / loni,MMG2_LSHRT);
     if ( lona > 1.0 )  lona = 1.0 / lona;
     //if ( lona < loni )  return(0);
@@ -168,13 +168,13 @@ int _MMG2_chkswp(MMG5_pMesh mesh, MMG5_pSol met,int k,char i,char typchk) {
     pt0->tag[0] = pt->tag[i];
     pt0->tag[1] = pt->tag[i1];
     pt0->tag[2] = pt->tag[i2];
-    cal1 = _MMG2_caltri_iso(mesh,met,pt0);
+    cal1 = _MMG2_caltri_ani(mesh,met,pt0);
     
     pt0->v[0]= ip1;  pt0->v[1]= iq;   pt0->v[2]= ip2;
     pt0->tag[0] = pt1->tag[ii2];
     pt0->tag[1] = pt1->tag[ii];
     pt0->tag[2] = pt1->tag[ii1];
-    cal2 = _MMG2_caltri_iso(mesh,met,pt0);
+    cal2 = _MMG2_caltri_ani(mesh,met,pt0);
     
     calnat = MG_MIN(cal1,cal2);
     assert(calnat > 0.);
@@ -184,13 +184,13 @@ int _MMG2_chkswp(MMG5_pMesh mesh, MMG5_pSol met,int k,char i,char typchk) {
     pt0->tag[0] = pt1->tag[ii1];
     pt0->tag[1] = MG_NUL;
     pt0->tag[2] = pt->tag[i2];
-    cal1 = _MMG2_caltri_iso(mesh,met,pt0);
+    cal1 = _MMG2_caltri_ani(mesh,met,pt0);
     
     pt0->v[0]= ip;  pt0->v[1]= iq;   pt0->v[2]= ip2;
     pt0->tag[0] = pt1->tag[ii2];
     pt0->tag[1] = pt->tag[i1];
     pt0->tag[2] = MG_NUL;
-    cal2 = _MMG2_caltri_iso(mesh,met,pt0);
+    cal2 = _MMG2_caltri_ani(mesh,met,pt0);
     
     calchg = MG_MIN(cal1,cal2);
   }
