@@ -58,7 +58,7 @@ double long_ani(double *ca,double *cb,double *ma,double *mb) {
   return(len);
 }
 
-/* Calculate length of a curve in the considered isotropic metric */
+/** Calculate length of a curve in the considered isotropic metric */
 double _MMG2_lencurv_iso(MMG5_pMesh mesh,MMG5_pSol met,int ip1,int ip2) {
   MMG5_pPoint     p1,p2;
   double          h1,h2,len,l,r;
@@ -108,6 +108,8 @@ double _MMG2_lencurv_ani(MMG5_pMesh mesh,MMG5_pSol met,int ip1,int ip2) {
   
   len = 0.5*(l1+l2);
   
+  printf("%s:%d: Not yet implemented\n",__FILE__,__LINE__);
+  exit(EXIT_FAILURE);
   return(len);
 }
 

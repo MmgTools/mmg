@@ -247,6 +247,30 @@ int _MMG2_intmet_ani(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int ip,double s)
     mr[2] = (1.0-s)*m1[2] + s*m2[2];
   }
   
+=======
+/* Interpolation of anisotropic metric met along edge i of triangle k, according
+   to parameter s; ip = index of the new point */
+int _MMG2_intmet_ani(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int ip,double s) {
+  MMG5_pTria  pt;
+  double *h1,*h2,*h,m1[3],m2[3],m[3],m1_inv[3],m2_inv[3],m_inv[3];
+  int    iadr,ip1,ip2;
+  char   i1,i2;
+
+  pt  = &mesh->tria[k];
+
+  i1  = _MMG5_inxt2[i];
+  i2  = _MMG5_iprv2[i];
+
+  ip1 = pt->v[i1];
+  ip2 = pt->v[i2];
+
+  h1 = &met->m[3*ip1];
+  h2 = &met->m[3*ip2];
+
+  printf("%s:%d To implement\n",__FILE__,__LINE__);
+
+  exit(EXIT_FAILURE);
+
+>>>>>>> ba18c503115889fa183da651b273191f7388e969
   return(1);
 }
-

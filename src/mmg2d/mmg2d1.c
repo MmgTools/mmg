@@ -195,7 +195,7 @@ int _MMG2_anaelt(MMG5_pMesh mesh,MMG5_pSol met,int typchk) {
 
       /* If there is a metric in the mesh, interpolate it at the new point */
       if ( met->m )
-        _MMG2_intmet_iso(mesh,met,k,i,ip,s);
+        MMG2D_intmet(mesh,met,k,i,ip,s);
 
       /* Add point to the hashing structure */
       _MMG5_hashEdge(mesh,&hash,ip1,ip2,ip);
@@ -798,14 +798,14 @@ int MMG2_mmg2d1n(MMG5_pMesh mesh,MMG5_pSol met) {
   if ( abs(mesh->info.imprim) > 4 || mesh->info.ddebug )
     fprintf(stdout,"  ** COMPUTATIONAL MESH\n");
 
-  if ( !_MMG2_defsiz_iso(mesh,met) ) {
+  if ( !MMG2D_defsiz(mesh,met) ) {
     fprintf(stdout,"  ## Metric undefined. Exit program.\n");
     return(0);
   }
 
   if ( mesh->info.hgrad > 0. ) {
     if ( mesh->info.imprim )   fprintf(stdout,"\n  -- GRADATION : %8f\n",mesh->info.hgrad);
-    if (!_MMG2_gradsiz_iso(mesh,met) ) {
+    if (!MMG2D_gradsiz(mesh,met) ) {
       fprintf(stdout,"  ## Gradation problem. Exit program.\n");
       return(0);
     }
