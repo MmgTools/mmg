@@ -50,11 +50,202 @@ int _MMG2_intmet_iso(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int ip,double s)
   return(1);
 }
 
+/* Interpolation of metrics m and n according to parameter s; result is stored in mr. A simultaneous reduction of both matrices is performed and the sizes are interpolated. */
+int _MMG5_interpmet22(MMG5_pMesh mesh,double *m,double *n,double s,double *mr) {
+  double  det,imn[4],dd,den,sqDelta,trimn,lambda[2],vp0[2],vp1[2],dm[2],dn[2],vnorm,d0,d1,ip[4];
+
+  /* Compute imn = M^{-1}N */
+  det = m[0]*m[2] - m[1]*m[1];
+  if ( fabs(det) < _MMG5_EPS*_MMG5_EPS ) {
+    fprintf(stderr,"  ## Function _MMG5_interpmet22: null metric det : %E \n",det);
+    return(0);
+  }
+  det = 1.0 / det;
+  
+  imn[0] = det * ( m[2]*n[0] - m[1]*n[1]);
+  imn[1] = det * ( m[2]*n[1] - m[1]*n[2]);
+  imn[2] = det * (-m[1]*n[0] + m[0]*n[1]);
+  imn[3] = det * (-m[1]*n[1] + m[0]*n[2]);
+  dd = imn[0] - imn[3];
+  sqDelta = sqrt(fabs(dd*dd + 4.0*imn[1]*imn[2]));
+  trimn = imn[0] + imn[3];
+  
+  lambda[0] = 0.5 * (trimn - sqDelta);
+  if ( lambda[0] < 0.0 ) {
+    fprintf(stderr," ## Function _MMG5_interpmet22: Eigenvalues : %f \n",lambda[0]);
+    return(0);
+  }
+  
+  /* First case : matrices m and n are homothetic: n = lambda0*m */
+  if ( sqDelta < _MMG5_EPS ) {
+    /* Diagonalize m and truncate eigenvalues : trimn, det, etc... are reused */
+    if ( fabs(m[1]) < _MMG5_EPS ) {
+      dm[0]   = m[0];
+      dm[1]   = m[2];
+      vp0[0] = 1;
+      vp0[1] = 0;
+      vp1[0] = 0;
+      vp1[1] = 1;
+    }
+    else {
+      dd    = m[0] - m[2];
+      trimn = m[0] + m[2];
+      det   = m[0]*m[2] - m[1]*m[1];
+      
+      sqDelta = sqrt(fabs(dd*dd +4*0*m[1]*m[1]));
+      dm[0]   = 0.5 * (trimn + sqDelta);
+      dm[1]   = 0.5 * (trimn - sqDelta);
+      
+      vp0[0] = m[1];
+      vp0[1] = (dm[0]-m[0]);
+      vnorm  = sqrt(vp0[0]*vp0[0] + vp0[1]*vp0[1]);
+      if ( vnorm < _MMG5_EPS ) {
+        vp0[0] = (dm[0] - m[2]);
+        vp0[1] = m[1];
+        vnorm  = sqrt(vp0[0]*vp0[0] + vp0[1]*vp0[1]);
+        if ( vnorm < _MMG5_EPS ) return(0);
+      }
+      
+      vnorm   = 1.0 / vnorm;
+      vp0[0] *= vnorm;
+      vp0[1] *= vnorm;
+      
+      vp1[0] = m[1];
+      vp1[1] = (dm[1]-m[0]);
+      vnorm  = sqrt(vp1[0]*vp1[0] + vp1[1]*vp1[1]);
+      
+      if ( vnorm < _MMG5_EPS ) {
+        vp1[0] = (dm[1] - m[2]);
+        vp1[1] = m[1];
+        vnorm  = sqrt(vp1[0]*vp1[0] + vp1[1]*vp1[1]);
+        if ( vnorm < _MMG5_EPS ) return(0);
+      }
+      
+      vnorm   = 1.0 / vnorm;
+      vp1[0] *= vnorm;
+      vp1[1] *= vnorm;
+    }
+    
+    /* Eigenvalues of metric n */
+    dn[0] = lambda[0]*dm[0];
+    dn[1] = lambda[0]*dm[1];
+    
+    /* Diagonal values of the intersected metric */
+    dd = dn[0]*dm[0];
+    den = (1.0-s)*(1.0-s)*dn[0] + s*s*dm[0] + 2.0*s*(1.0-s)*sqrt(dd);
+    
+    /* If den is too small (should not happen) simply interpolate diagonal values; else interpolate sizes */
+    if ( den < _MMG5_EPS ) d0 = (1.0-s)*dm[0] + s*dn[0];
+    else d0 = dd / den;
+    
+    dd = dn[1]*dm[1];
+    den = (1.0-s)*(1.0-s)*dn[1] + s*s*dm[1] + 2.0*s*(1.0-s)*sqrt(dd);
+
+    if ( den < _MMG5_EPS ) d1 = (1.0-s)*dm[1] + s*dn[1];
+    else d1 = dd / den;
+
+    /* Intersected metric = P diag(d0,d1){^t}P, P = (vp0, vp1) stored in columns */
+    mr[0] = d0*vp0[0]*vp0[0] + d1*vp1[0]*vp1[0];
+    mr[1] = d0*vp0[0]*vp0[1] + d1*vp1[0]*vp1[1];
+    mr[2] = d0*vp0[1]*vp0[1] + d1*vp1[1]*vp1[1];
+    
+    return(1);
+  }
+  
+  /* Second case: both eigenvalues of imn are distinct ; theory says qf associated to m and n
+   are diagonalizable in basis (vp0, vp1) - the coreduction basis */
+  else {
+    lambda[1] = 0.5 * (trimn + sqDelta);
+    assert(lambda[1] >= 0.0);
+    
+    vp0[0] = imn[1];
+    vp0[1] = (lambda[0] - imn[0]);
+    vnorm  = sqrt(vp0[0]*vp0[0] + vp0[1]*vp0[1]);
+    
+    if ( vnorm < _MMG5_EPS ) {
+      vp0[0] = (lambda[0] - imn[3]);
+      vp0[1] = imn[2];
+      vnorm  = sqrt(vp0[0]*vp0[0] + vp0[1]*vp0[1]);
+    }
+    
+    vnorm   = 1.0 / vnorm;
+    vp0[0] *= vnorm;
+    vp0[1] *= vnorm;
+    
+    vp1[0] = imn[1];
+    vp1[1] = (lambda[1] - imn[0]);
+    vnorm  = sqrt(vp1[0]*vp1[0] + vp1[1]*vp1[1]);
+    
+    if ( vnorm < _MMG5_EPS ) {
+      vp1[0] = (lambda[1] - imn[3]);
+      vp1[1] = imn[2];
+      vnorm  = sqrt(vp1[0]*vp1[0] + vp1[1]*vp1[1]);
+    }
+    
+    vnorm   = 1.0 / vnorm;
+    vp1[0] *= vnorm;
+    vp1[1] *= vnorm;
+    
+    /* Compute diagonal values in simultaneous reduction basis */
+    dm[0] = m[0]*vp0[0]*vp0[0] + 2.0*m[1]*vp0[0]*vp0[1] + m[2]*vp0[1]*vp0[1];
+    dm[1] = m[0]*vp1[0]*vp1[0] + 2.0*m[1]*vp1[0]*vp1[1] + m[2]*vp1[1]*vp1[1];
+    dn[0] = n[0]*vp0[0]*vp0[0] + 2.0*n[1]*vp0[0]*vp0[1] + n[2]*vp0[1]*vp0[1];
+    dn[1] = n[0]*vp1[0]*vp1[0] + 2.0*n[1]*vp1[0]*vp1[1] + n[2]*vp1[1]*vp1[1];
+    
+    /* Diagonal values of the intersected metric */
+    dd = dn[0]*dm[0];
+    den = (1.0-s)*(1.0-s)*dn[0] + s*s*dm[0] + 2.0*s*(1.0-s)*sqrt(dd);
+    
+    if ( den < _MMG5_EPS ) d0 = (1.0-s)*dm[0] + s*dn[0];
+    else d0 = dd / den;
+    
+    dd = dn[1]*dm[1];
+    den = (1.0-s)*(1.0-s)*dn[1] + s*s*dm[1] + 2.0*s*(1.0-s)*sqrt(dd);
+    
+    if ( den < _MMG5_EPS ) d1 = (1.0-s)*dm[1] + s*dn[1];
+    else d1 = dd / den;
+    
+    /* Intersected metric = tP^-1 diag(d0,d1)P^-1, P = (vp0, vp1) stored in columns */
+    det = vp0[0]*vp1[1] - vp0[1]*vp1[0];
+    if ( fabs(det) < _MMG5_EPS )  return(0);
+    det = 1.0 / det;
+    
+    ip[0] =  vp1[1]*det;
+    ip[1] = -vp1[0]*det;
+    ip[2] = -vp0[1]*det;
+    ip[3] =  vp0[0]*det;
+    
+    mr[0] = d0*ip[0]*ip[0] + d1*ip[2]*ip[2];
+    mr[1] = d0*ip[0]*ip[1] + d1*ip[2]*ip[3];
+    mr[2] = d0*ip[1]*ip[1] + d1*ip[3]*ip[3];
+  }
+  
+  return(1);
+}
+
 /* Interpolation of anisotropic metric met along edge i of triangle k, according to parameter s;
  ip = index of the new point */
 int _MMG2_intmet_ani(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int ip,double s) {
+  MMG5_pTria     pt;
+  double         *m1,*m2,*mr;
+  int            ip1,ip2;
+  char           i1,i2;
   
-  printf("A FAIRE\n\n");
+  pt = &mesh->tria[k];
+  i1 = _MMG5_inxt2[i];
+  i2 = _MMG5_iprv2[i];
+  ip1 = pt->v[i1];
+  ip2 = pt->v[i2];
+  m1 = &met->m[3*ip1];
+  m2 = &met->m[3*ip2];
+  mr = &met->m[3*ip];
+  
+  if ( !_MMG5_interpmet22(mesh,m1,m2,s,mr) ) {
+    fprintf(stdout,"  ## Problem in function _MMG5_interpmet22. Naive interpolation.\n");
+    mr[0] = (1.0-s)*m1[0] + s*m2[0];
+    mr[1] = (1.0-s)*m1[1] + s*m2[1];
+    mr[2] = (1.0-s)*m1[2] + s*m2[2];
+  }
   
   return(1);
 }

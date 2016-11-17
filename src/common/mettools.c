@@ -266,14 +266,15 @@ int _MMG5_intersecmet22(MMG5_pMesh mesh, double *m,double *n,double *mr) {
   /* First case : matrices m and n are homothetic : n = lambda0*m */
   if ( sqDelta < _MMG5_EPS ) {
     /* Diagonalize m and truncate eigenvalues : trimn, det, etc... are reused */
-    if (fabs(m[1]) < _MMG5_EPS) {
+    if ( fabs(m[1]) < _MMG5_EPS ) {
       dm[0]   = m[0];
       dm[1]   = m[2];
       vp0[0] = 1;
       vp0[1] = 0;
       vp1[0] = 0;
       vp1[1] = 1;
-    } else {
+    }
+    else {
       dd    = m[0] - m[2];
       trimn = m[0] + m[2];
       det   = m[0]*m[2] - m[1]*m[1];
@@ -289,7 +290,6 @@ int _MMG5_intersecmet22(MMG5_pMesh mesh, double *m,double *n,double *mr) {
         vp0[0] = (dm[0] - m[2]);
         vp0[1] = m[1];
         vnorm  = sqrt(vp0[0]*vp0[0] + vp0[1]*vp0[1]);
-
         if ( vnorm < _MMG5_EPS ) return(0);
       }
 
@@ -305,7 +305,6 @@ int _MMG5_intersecmet22(MMG5_pMesh mesh, double *m,double *n,double *mr) {
         vp1[0] = (dm[1] - m[2]);
         vp1[1] = m[1];
         vnorm  = sqrt(vp1[0]*vp1[0] + vp1[1]*vp1[1]);
-
         if ( vnorm < _MMG5_EPS ) return(0);
       }
 

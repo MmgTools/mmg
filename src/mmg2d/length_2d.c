@@ -77,9 +77,36 @@ double _MMG2_lencurv_iso(MMG5_pMesh mesh,MMG5_pSol met,int ip1,int ip2) {
   return(len);
 }
 
-/* Calculate length of a curve in the considered anisotropic metric */
+/* Calculate length of a curve in the considered anisotropic metric by using a two-point quadrature formula */
 double _MMG2_lencurv_ani(MMG5_pMesh mesh,MMG5_pSol met,int ip1,int ip2) {
-  double len;
+  MMG5_pPoint      p1,p2;
+  double           len,*m1,*m2,ux,uy,l1,l2;
+  
+  p1 = &mesh->point[ip1];
+  p2 = &mesh->point[ip2];
+  
+  m1 = &met->m[3*ip1];
+  m2 = &met->m[3*ip2];
+  
+  ux = p2->c[0] - p1->c[0];
+  uy = p2->c[1] - p1->c[1];
+  
+  l1 = m1[0]*ux*ux + 2.0*m1[1]*ux*uy + m1[2]*uy*uy;
+  l2 = m2[0]*ux*ux + 2.0*m2[1]*ux*uy + m2[2]*uy*uy;
+  
+  if ( l1 < 0.0 ) {
+    printf("%s:%d:Error: negative edge length (%e)\n",__FILE__,__LINE__,l1);
+    exit(EXIT_FAILURE);
+  }
+  if ( l2 < 0.0 ) {
+    printf("%s:%d:Error: negative edge length (%e)\n",__FILE__,__LINE__,l2);
+    exit(EXIT_FAILURE);
+  }
+  
+  l1 = sqrt(l1);
+  l2 = sqrt(l2);
+  
+  len = 0.5*(l1+l2);
   
   return(len);
 }

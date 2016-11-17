@@ -54,7 +54,6 @@ double _MMG5_surf(MMG5_pMesh mesh,double m[3][6],MMG5_pTria ptt) {
 
   if ( !_MMG5_bezierCP(mesh,ptt,&b,1) ) return(0.0);
 
-
   /* Compute density integrand of volume at the 3 vertices of T */
   for (i=0; i<3; i++) {
     if ( i == 0 ) {
