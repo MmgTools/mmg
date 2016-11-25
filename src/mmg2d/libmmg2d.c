@@ -78,7 +78,7 @@ int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol sol)
 
   tminit(ctim,TIMEMAX);
   chrono(ON,&(ctim[0]));
-
+  
   /* Check options */
   if ( !mesh->nt ) {
     fprintf(stdout,"\n  ## ERROR: NO TRIANGLES IN THE MESH. \n");

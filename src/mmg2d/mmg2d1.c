@@ -66,19 +66,6 @@ int _MMG2_anatri(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
         return(0);
       }
 
-      /*if ( it==4 ){
-        printf("Saving mesh...\n");
-        if ( !MMG2_hashTria(mesh) ) {
-          fprintf(stdout,"  ## Hashing problem. Exit program.\n");
-          return(0);
-        }
-
-        MMG2_bdryEdge(mesh);
-        _MMG2_savemesh_db(mesh,mesh->nameout,0);
-        _MMG2_savemet_db(mesh,met,mesh->nameout,0);
-        exit(EXIT_FAILURE);
-      }*/
-
       /* Collapse short edges */
       nc = _MMG2_colelt(mesh,met,typchk);
       if ( nc < 0 ) {
@@ -620,7 +607,7 @@ int _MMG2_adpspl(MMG5_pMesh mesh,MMG5_pSol met) {
   char               i,i1,i2,imax;
 
   ns = 0;
-
+  
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
     if ( !MG_EOK(pt) || pt->ref < 0 ) continue;
@@ -630,6 +617,7 @@ int _MMG2_adpspl(MMG5_pMesh mesh,MMG5_pSol met) {
     for (i=0; i<3; i++) {
       i1 = _MMG5_inxt2[i];
       i2 = _MMG5_iprv2[i];
+      
       len = MMG2D_lencurv(mesh,met,pt->v[i1],pt->v[i2]);
 
       if ( len > lmax ) {
@@ -733,7 +721,7 @@ int _MMG2_movtri(MMG5_pMesh mesh,MMG5_pSol met,int maxit,char improve) {
 
   it = nnm = 0;
   base = 0;
-
+  
   for (k=1; k<=mesh->np; k++)
     mesh->point[k].flag = base;
 
@@ -755,8 +743,12 @@ int _MMG2_movtri(MMG5_pMesh mesh,MMG5_pSol met,int maxit,char improve) {
           ier = _MMG2_movedgpt(mesh,met,ilist,list,improve);
           if ( ier ) ns++;
         }
-        else
-          ier = _MMG2_movintpt(mesh,met,ilist,list,improve);
+        else {
+          if ( met->size == 3 )
+            ier = _MMG2_movintpt_ani(mesh,met,ilist,list,improve);
+          else
+            ier = _MMG2_movintpt(mesh,met,ilist,list,improve);
+        }
 
         if ( ier ) {
           nm++;
@@ -784,7 +776,7 @@ int _MMG2_movtri(MMG5_pMesh mesh,MMG5_pSol met,int maxit,char improve) {
  *
  **/
 int MMG2_mmg2d1n(MMG5_pMesh mesh,MMG5_pSol met) {
-
+  
   /* Stage 1: creation of a geometric mesh */
   if ( abs(mesh->info.imprim) > 4 || mesh->info.ddebug )
     fprintf(stdout,"  ** GEOMETRIC MESH\n");
@@ -793,7 +785,7 @@ int MMG2_mmg2d1n(MMG5_pMesh mesh,MMG5_pSol met) {
     fprintf(stdout,"  ## Unable to split mesh-> Exiting.\n");
     return(0);
   }
-
+  
   /* Stage 2: creation of a computational mesh */
   if ( abs(mesh->info.imprim) > 4 || mesh->info.ddebug )
     fprintf(stdout,"  ** COMPUTATIONAL MESH\n");
@@ -810,6 +802,7 @@ int MMG2_mmg2d1n(MMG5_pMesh mesh,MMG5_pSol met) {
       return(0);
     }
   }
+  
   if ( !_MMG2_anatri(mesh,met,2) ) {
     fprintf(stdout,"  ## Unable to proceed adaptation. Exit program.\n");
     return(0);
@@ -821,6 +814,21 @@ int MMG2_mmg2d1n(MMG5_pMesh mesh,MMG5_pSol met) {
     return(0);
   }
 
+  /* To remove !!!!!!!!!!!!! */
+  {
+    printf("Saving mesh...\n");
+    if ( !MMG2_hashTria(mesh) ) {
+      fprintf(stdout,"  ## Hashing problem. Exit program.\n");
+      return(0);
+    }
+    
+    MMG2_bdryEdge(mesh);
+    _MMG2_savemesh_db(mesh,mesh->nameout,0);
+    _MMG2_savemet_db(mesh,met,mesh->nameout,0);
+    exit(EXIT_FAILURE);
+  }
+
+  
   /* To remove !!!!!!!!!!!!! */
   /*{
     printf("Saving mesh...\n");

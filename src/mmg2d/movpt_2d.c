@@ -35,7 +35,7 @@
 
 //extern char ddb;
 
-/* Relocate boundary vertex whose ball is passed */
+/* Relocate boundary vertex whose ball is passed; routine works both in the isotropic and anisotropic case */
 int _MMG2_movedgpt(MMG5_pMesh mesh,MMG5_pSol met,int ilist,int *list, char improve) {
   MMG5_pTria         pt,pt0;
   MMG5_pPoint        p0,p1,p2,ppt;
@@ -48,7 +48,7 @@ int _MMG2_movedgpt(MMG5_pMesh mesh,MMG5_pSol met,int ilist,int *list, char impro
   ip1 = ip2 = it1 = it2 = 0;
   calold = calnew = DBL_MAX;
   
-  /* First step: retrieve the two endpoints connected to p0 */
+  /* First step: retrieve the two boundary points connected to p0 */
   for (k=0; k<ilist; k++) {
     iel = list[k] / 3;
     i   = list[k] % 3;
@@ -56,7 +56,7 @@ int _MMG2_movedgpt(MMG5_pMesh mesh,MMG5_pSol met,int ilist,int *list, char impro
     i2 = _MMG5_iprv2[i];
     
     pt = &mesh->tria[iel];
-    calold = MG_MIN(_MMG2_caltri_iso(mesh,NULL,pt),calold);
+    calold = MG_MIN(MMG2D_caltri(mesh,met,pt),calold);
  
     if ( MG_EDG(pt->tag[i1]) ) {
       if ( ip1 == 0 ) {
@@ -105,8 +105,17 @@ int _MMG2_movedgpt(MMG5_pMesh mesh,MMG5_pSol met,int ilist,int *list, char impro
   p2 = &mesh->point[ip2];
   
   /* Calculate length of both edges */
-  ll1 = (p1->c[0]-p0->c[0])*(p1->c[0]-p0->c[0]) + (p1->c[1]-p0->c[1])*(p1->c[1]-p0->c[1]);
-  ll2 = (p2->c[0]-p0->c[0])*(p2->c[0]-p0->c[0]) + (p2->c[1]-p0->c[1])*(p2->c[1]-p0->c[1]);
+  /* Anisotropic case: ll1 and ll2 = anisotropic edge lengths */
+  if ( met->m && met->size == 3 ) {
+    ll1 = _MMG2_lencurv_ani(mesh,met,ip0,ip1);
+    ll2 = _MMG2_lencurv_ani(mesh,met,ip0,ip2);
+  }
+  /* In all the remaining cases, ll1 and ll2 = squared edge lengths; 
+     inconsistency between both cases is not problematic since these values serve only for comparison */
+  else {
+    ll1 = (p1->c[0]-p0->c[0])*(p1->c[0]-p0->c[0]) + (p1->c[1]-p0->c[1])*(p1->c[1]-p0->c[1]);
+    ll2 = (p2->c[0]-p0->c[0])*(p2->c[0]-p0->c[0]) + (p2->c[1]-p0->c[1])*(p2->c[1]-p0->c[1]);
+  }
   
   /* Relocate p0 slightly towards p1 */
   if ( ll1 > ll2 ) {
@@ -143,11 +152,11 @@ int _MMG2_movedgpt(MMG5_pMesh mesh,MMG5_pSol met,int ilist,int *list, char impro
     memcpy(pt0,pt,sizeof(MMG5_Tria));
     pt0->v[i] = 0;
     
-    calnew = MG_MIN(_MMG2_caltri_iso(mesh,NULL,pt0),calnew);
+    calnew = MG_MIN(MMG2D_caltri(mesh,met,pt0),calnew);
   }
   
-  if (calold < _MMG2_NULKAL && calnew <= calold) return(0);
-  else if (calnew < _MMG2_NULKAL) return(0);
+  if ( calold < _MMG2_NULKAL && calnew <= calold ) return(0);
+  else if ( calnew < _MMG2_NULKAL ) return(0);
   else if ( improve && calnew < 1.02 * calold ) return(0);
   else if ( calnew < 0.3 * calold ) return(0);
   

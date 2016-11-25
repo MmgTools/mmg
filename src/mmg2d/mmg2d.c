@@ -97,6 +97,10 @@ int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,double *qdegrad) 
                                      atof(argv[i])) )
             exit(EXIT_FAILURE);
         break;
+      case 'A': /* anisotropy */
+        if ( !MMG2D_Set_solSize(mesh,met,MMG5_Vertex,0,MMG5_Tensor) )
+          exit(EXIT_FAILURE);
+        break;
       case 'b':
         if ( !strcmp(argv[i],"-bucket") && ++i < argc )
           if ( !MMG2D_Set_iparameter(mesh,met,MMG2D_IPARAM_bucket,
@@ -384,6 +388,8 @@ int main(int argc,char *argv[]) {
   int           ier,ierSave,msh;
   char          stim[32];
 
+  msh = 0;
+
   /* interrupts */
   atexit(endcod);
 
@@ -411,7 +417,12 @@ int main(int argc,char *argv[]) {
   qdegrad[1] = 1.3;
 
 //  sol.type = 1;
+  
+  /* Set default metric size */
+  if ( !MMG2D_Set_solSize(mesh,met,MMG5_Vertex,0,MMG5_Scalar) )
+    _MMG2D_RETURN_AND_FREE(mesh,met,disp,MMG5_STRONGFAILURE);
 
+  /* Read command line */
   if ( !parsar(argc,argv,mesh,met,qdegrad) )  return(MMG5_STRONGFAILURE);
 
   /* load data */
@@ -419,7 +430,6 @@ int main(int argc,char *argv[]) {
   chrono(ON,&MMG5_ctim[1]);
 
   /* read mesh file */
-  msh = 0;
   ier = MMG2D_loadMesh(mesh,mesh->namein);
   if ( !ier ) {
     if ( mesh->info.lag >= 0 )
@@ -429,10 +439,6 @@ int main(int argc,char *argv[]) {
     msh = 1;
   }
   if ( ier < 1)
-    _MMG2D_RETURN_AND_FREE(mesh,met,disp,MMG5_STRONGFAILURE);
-
-  /* Set default metric size */
-  if ( !msh && !MMG2D_Set_solSize(mesh,met,MMG5_Vertex,0,MMG5_Scalar) )
     _MMG2D_RETURN_AND_FREE(mesh,met,disp,MMG5_STRONGFAILURE);
 
   /* Read displacement if any */

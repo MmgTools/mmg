@@ -1416,8 +1416,11 @@ int _MMG2_savemesh_db(MMG5_pMesh mesh,char *filename,char pack) {
 int _MMG2_savemet_db(MMG5_pMesh mesh,MMG5_pSol met,char *filename,char pack) {
   MMG5_pPoint        ppt;
   int                k,np;
-  char               *ptr,data[128];
+  char               *ptr,typ,data[128];
   FILE               *out;
+  
+  if ( met->size == 1 ) typ =1;
+  else if ( met->size == 3 ) typ = 3;
   
   strcpy(data,filename);
   ptr = strstr(data,".mesh");
@@ -1447,11 +1450,15 @@ int _MMG2_savemet_db(MMG5_pMesh mesh,MMG5_pSol met,char *filename,char pack) {
     }
   }
   
-  fprintf(out,"SolAtVertices\n %d\n%d %d\n\n",np,1,1);
+  fprintf(out,"SolAtVertices\n %d\n%d %d\n\n",np,1,typ);
   for (k=1; k<=mesh->np; k++) {
     ppt = &mesh->point[k];
-    if ( ( pack && MG_VOK(ppt) ) || !pack )
-      fprintf(out,"%f\n",met->m[k]);
+    if ( ( pack && MG_VOK(ppt) ) || !pack ) {
+      if ( met->size == 1 )
+        fprintf(out,"%f\n",met->m[k]);
+      else if ( met->size == 3 )
+        fprintf(out,"%f %f %f\n",met->m[3*k+0],met->m[3*k+1],met->m[3*k+2]);
+    }
   }
   
   /* End keyword */
@@ -1554,7 +1561,6 @@ int _MMG2_savedisp_db(MMG5_pMesh mesh,MMG5_pSol disp,char *filename,char pack) {
     ppt = &mesh->point[k];
     if ( ( pack && MG_VOK(ppt) ) || !pack )
       fprintf(out,"%f %f\n",disp->m[2*(k-1)+1],disp->m[2*(k-1)+2]);
-    
   }
   
   /* End keyword */

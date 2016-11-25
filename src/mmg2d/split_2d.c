@@ -53,6 +53,7 @@ int _MMG2_chkspl(MMG5_pMesh mesh,MMG5_pSol met,int k,char i) {
   p2 = &mesh->point[pt->v[i2]];
 
   adja = &mesh->adja[3*(k-1)+1];
+  
   jel  = adja[i] / 3;
   j    = adja[i] % 3;
   j1   = _MMG5_inxt2[j];
@@ -81,11 +82,12 @@ int _MMG2_chkspl(MMG5_pMesh mesh,MMG5_pSol met,int k,char i) {
     ppt = &mesh->point[ip];
     if ( pt->tag[i] ) ppt->tag = pt->tag[i];
     if ( pt->edg[i] ) ppt->ref = pt->edg[i];
-
+    
     /* Check quality of the four new elements */
     calnew = DBL_MAX;
     memcpy(pt0,pt,sizeof(MMG5_Tria));
     pt0->v[i2] = ip;
+    
     caltmp = ALPHAD*MMG2D_caltri(mesh,NULL,pt0);
     calnew = MG_MIN(calnew,caltmp);
 

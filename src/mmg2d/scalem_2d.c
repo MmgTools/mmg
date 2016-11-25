@@ -135,6 +135,8 @@ int MMG2_scaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
    * provided by the user ( 0.1 \times the minimum of the metric sizes for hmin
    * and 10 \times the max of the metric sizes for hmax ). */
 
+#warning : write scaling of displacement vector field (size = 2)
+  
   switch (sol->size) {
   case 1:
     /* normalization */

@@ -107,9 +107,7 @@ double _MMG2_lencurv_ani(MMG5_pMesh mesh,MMG5_pSol met,int ip1,int ip2) {
   l2 = sqrt(l2);
   
   len = 0.5*(l1+l2);
-  
-  printf("%s:%d: Not yet implemented\n",__FILE__,__LINE__);
-  exit(EXIT_FAILURE);
+
   return(len);
 }
 
