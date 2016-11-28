@@ -581,14 +581,14 @@ int _MMG2_adptri(MMG5_pMesh mesh,MMG5_pSol met) {
   while( ++it < maxit && (nc+ns+nsw+nm > 0) );
 
   /* Last iterations of vertex relocation only */
-  /*if ( !mesh->info.nomove ) {
+  if ( !mesh->info.nomove ) {
     nm = _MMG2_movtri(mesh,met,5,1);
     if ( nm < 0 ) {
       fprintf(stdout,"  ## Problem in function movtri. Unable to complete mesh. Exit program.\n");
       return(0);
     }
     nnm += nm;
-  }*/
+  }
 
   if ( mesh->info.imprim ) {
     if ( abs(mesh->info.imprim) < 5 && (nnc > 0 || nns > 0) )
