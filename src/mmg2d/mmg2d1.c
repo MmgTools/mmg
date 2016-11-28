@@ -814,34 +814,6 @@ int MMG2_mmg2d1n(MMG5_pMesh mesh,MMG5_pSol met) {
     return(0);
   }
 
-  /* To remove !!!!!!!!!!!!! */
-  {
-    printf("Saving mesh...\n");
-    if ( !MMG2_hashTria(mesh) ) {
-      fprintf(stdout,"  ## Hashing problem. Exit program.\n");
-      return(0);
-    }
-    
-    MMG2_bdryEdge(mesh);
-    _MMG2_savemesh_db(mesh,mesh->nameout,0);
-    _MMG2_savemet_db(mesh,met,mesh->nameout,0);
-    exit(EXIT_FAILURE);
-  }
-
-  
-  /* To remove !!!!!!!!!!!!! */
-  /*{
-    printf("Saving mesh...\n");
-    if ( !MMG2_hashTria(mesh) ) {
-      fprintf(stdout,"  ## Hashing problem. Exit program.\n");
-      return(0);
-    }
-
-    MMG2_bdryEdge(mesh);
-    _MMG2_savemesh_db(mesh,mesh->nameout,0);
-    _MMG2_savemet_db(mesh,met,mesh->nameout,0);
-    exit(EXIT_FAILURE);
-  }*/
 
   return(1);
 }

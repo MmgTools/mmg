@@ -88,22 +88,22 @@ int _MMG2_chkspl(MMG5_pMesh mesh,MMG5_pSol met,int k,char i) {
     memcpy(pt0,pt,sizeof(MMG5_Tria));
     pt0->v[i2] = ip;
     
-    caltmp = ALPHAD*MMG2D_caltri(mesh,NULL,pt0);
+    caltmp = ALPHAD*MMG2D_caltri(mesh,met,pt0);
     calnew = MG_MIN(calnew,caltmp);
 
     pt0->v[i1] = ip; pt0->v[i2] = pt->v[i2];
-    caltmp = ALPHAD*MMG2D_caltri(mesh,NULL,pt0);
+    caltmp = ALPHAD*MMG2D_caltri(mesh,met,pt0);
     calnew = MG_MIN(calnew,caltmp);
 
     if ( jel ) {
       pt1 = &mesh->tria[jel];
       memcpy(pt0,pt1,sizeof(MMG5_Tria));
       pt0->v[j1] = ip;
-      caltmp = ALPHAD*MMG2D_caltri(mesh,NULL,pt0);
+      caltmp = ALPHAD*MMG2D_caltri(mesh,met,pt0);
       calnew = MG_MIN(calnew,caltmp);
 
       pt0->v[j1] = pt1->v[j1] ; pt0->v[j2] = ip;
-      caltmp = ALPHAD*MMG2D_caltri(mesh,NULL,pt0);
+      caltmp = ALPHAD*MMG2D_caltri(mesh,met,pt0);
       calnew = MG_MIN(calnew,caltmp);
     }
 
@@ -152,22 +152,22 @@ int _MMG2_chkspl(MMG5_pMesh mesh,MMG5_pSol met,int k,char i) {
       calnew = DBL_MAX;
       memcpy(pt0,pt,sizeof(MMG5_Tria));
       pt0->v[i2] = ip;
-      caltmp = ALPHAD*MMG2D_caltri(mesh,NULL,pt0);
+      caltmp = ALPHAD*MMG2D_caltri(mesh,met,pt0);
       calnew = MG_MIN(calnew,caltmp);
 
       pt0->v[i1] = ip; pt0->v[i2] = pt->v[i2];
-      caltmp = ALPHAD*MMG2D_caltri(mesh,NULL,pt0);
+      caltmp = ALPHAD*MMG2D_caltri(mesh,met,pt0);
       calnew = MG_MIN(calnew,caltmp);
 
       if ( jel ) {
         pt1 = &mesh->tria[jel];
         memcpy(pt0,pt1,sizeof(MMG5_Tria));
         pt0->v[j1] = ip;
-        caltmp = ALPHAD*MMG2D_caltri(mesh,NULL,pt0);
+        caltmp = ALPHAD*MMG2D_caltri(mesh,met,pt0);
         calnew = MG_MIN(calnew,caltmp);
 
         pt0->v[j1] = pt1->v[j1] ; pt0->v[j2] = ip;
-        caltmp = ALPHAD*MMG2D_caltri(mesh,NULL,pt0);
+        caltmp = ALPHAD*MMG2D_caltri(mesh,met,pt0);
         calnew = MG_MIN(calnew,caltmp);
       }
 
