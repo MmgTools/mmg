@@ -451,7 +451,7 @@ static int _MMG5_singul(MMG5_pMesh mesh) {
   MMG5_pTria     pt;
   MMG5_pPoint    ppt,p1,p2;
   double         ux,uy,uz,vx,vy,vz,dd;
-  int            list[_MMG5_LMAX+2],k,nc,xp,nr,ns,nre;
+  int            list[_MMG5_LMAX+2],listref[_MMG5_LMAX+2],k,nc,xp,nr,ns,nre;
   char           i;
 
   nre = nc = 0;
@@ -464,7 +464,7 @@ static int _MMG5_singul(MMG5_pMesh mesh) {
       ppt->s++;
       if ( !MG_VOK(ppt) || ( ppt->tag & MG_CRN ) || ( ppt->tag & MG_NOM ) )  continue;
       else if ( MG_EDG(ppt->tag) ) {
-        ns = _MMG5_bouler(mesh,mesh->adja,k,i,list,&xp,&nr, _MMG5_LMAX);
+        ns = _MMG5_bouler(mesh,mesh->adja,k,i,list,listref,&xp,&nr, _MMG5_LMAX);
 
         if ( !ns )  continue;
         if ( (xp+nr) > 2 ) {

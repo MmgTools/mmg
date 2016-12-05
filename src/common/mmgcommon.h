@@ -448,7 +448,7 @@ extern int    _MMG5_rmtr(double r[3][3],double m[6], double mr[6]);
 int    _MMG5_boundingBox(MMG5_pMesh mesh);
 int    _MMG5_boulec(MMG5_pMesh, int*, int, int i,double *tt);
 int    _MMG5_boulen(MMG5_pMesh, int*, int, int i,double *nn);
-int    _MMG5_bouler(MMG5_pMesh, int*, int, int i,int *,int *,int *, int);
+int    _MMG5_bouler(MMG5_pMesh, int*, int, int i,int *,int *,int *,int *, int);
 double _MMG5_caltri33_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt);
 extern double _MMG5_caltri_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt);
 extern double _MMG5_caltri_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt);

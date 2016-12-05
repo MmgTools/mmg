@@ -780,7 +780,7 @@ int MMG2_mmg2d1n(MMG5_pMesh mesh,MMG5_pSol met) {
   /* Stage 1: creation of a geometric mesh */
   if ( abs(mesh->info.imprim) > 4 || mesh->info.ddebug )
     fprintf(stdout,"  ** GEOMETRIC MESH\n");
-
+  
   if ( !_MMG2_anatri(mesh,met,1) ) {
     fprintf(stdout,"  ## Unable to split mesh-> Exiting.\n");
     return(0);
@@ -813,7 +813,13 @@ int MMG2_mmg2d1n(MMG5_pMesh mesh,MMG5_pSol met) {
     fprintf(stdout,"  ## Unable to make fine improvements. Exit program.\n");
     return(0);
   }
-
+  
+  /* Debug save of the mesh */
+  /*{
+    MMG2_bdryEdge(mesh);
+    _MMG2_savemesh_db(mesh,mesh->nameout,0);
+    exit(0);
+  }*/
 
   return(1);
 }

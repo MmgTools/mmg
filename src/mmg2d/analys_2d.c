@@ -142,11 +142,11 @@ int _MMG2_singul(MMG5_pMesh mesh) {
   MMG5_pTria          pt;
   MMG5_pPoint         ppt,p1,p2;
   double              ux,uy,uz,vx,vy,vz,dd;
-  int                 list[MMG2_LONMAX+2],k,ns,ng,nr,nm,nre,nc;
+  int                 list[MMG2_LONMAX+2],listref[MMG2_LONMAX+2],k,ns,ng,nr,nm,nre,nc;
   char                i;
 
   nre = nc = nm = 0;
-
+  
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
     if ( ! MG_EOK(pt) ) continue;
@@ -157,7 +157,7 @@ int _MMG2_singul(MMG5_pMesh mesh) {
       ppt->s = 1;
       if ( !MG_VOK(ppt) || MG_SIN(ppt->tag) )  continue;
       else if ( MG_EDG(ppt->tag) ) {
-        ns = _MMG5_bouler(mesh,mesh->adja,k,i,list,&ng,&nr,MMG2_LONMAX);
+        ns = _MMG5_bouler(mesh,mesh->adja,k,i,list,listref,&ng,&nr,MMG2_LONMAX);
 
         if ( !ns )  continue;
         if ( (ng+nr) > 2 ) {
@@ -202,6 +202,12 @@ int _MMG2_singul(MMG5_pMesh mesh) {
           vy = p2->c[1] - ppt->c[1];
           vz = p2->c[2] - ppt->c[2];
           dd = (ux*ux + uy*uy + uz*uz) * (vx*vx + vy*vy + vz*vz);
+          
+          /* If both edges carry different refs, tag vertex as singular */
+          if ( listref[1] != listref[2] ) {
+            ppt->tag |= MG_CRN;
+            nc++;
+          }
 
           /*** To change: what is the mechanism for dhd in mmg2d ? ***/
           if ( fabs(dd) > _MMG5_EPSD ) {
@@ -538,7 +544,6 @@ int _MMG2_regnor(MMG5_pMesh mesh) {
 
 /** preprocessing stage: mesh analysis */
 int _MMG2_analys(MMG5_pMesh mesh) {
-
   /* Transfer the boundary edge references to the triangles, if it has not been already done (option 1) */
   if ( !MMG2_assignEdge(mesh) ) {
     fprintf(stdout,"  ## Problem in setting boundary. Exit program.\n");
