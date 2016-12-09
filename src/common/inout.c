@@ -310,7 +310,7 @@ int MMG5_loadMshMesh_part1(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename,
     } else if(!strncmp(chaine,"$Nodes",strlen("$Nodes"))) {
       fscanf((*inm),"%d ",&mesh->npi);
       *posNodes = ftell((*inm));
-      if ( bin ) {
+      if ( *bin ) {
         /* Skip the binary nodes data */
         if ( mesh->ver==1 ) {
           for ( k=1; k<=mesh->npi; ++k ) {
