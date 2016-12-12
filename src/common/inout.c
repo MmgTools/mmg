@@ -419,7 +419,7 @@ int MMG5_loadMshMesh_part1(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename,
     }
   }
 
-  if ( !*nelts || !mesh->npi ) {
+  if ( !mesh->npi ) {
     fprintf(stderr,"  ** MISSING DATA.\n");
     fprintf(stderr," Check that your mesh contains points and elements.\n");
     fprintf(stderr," Exit program.\n");
