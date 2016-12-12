@@ -503,10 +503,10 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol sol,FILE **inm,
           if(iswp) fc=_MMG5_swapf(fc);
           ppt->c[i] = (double) fc;
         }
-        ppt->tag  = MG_NUL;
-        ppt->tmp  = 0;
-        ppt->ref = 0;
       }
+      ppt->tag  = MG_NUL;
+      ppt->tmp  = 0;
+      ppt->ref = 0;
     }
   }
   else {
@@ -525,10 +525,10 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol sol,FILE **inm,
           fread(&ppt->c[i],sd,1,(*inm));
           if(iswp) ppt->c[i]=_MMG5_swapd(ppt->c[i]);
         }
-        ppt->tag  = MG_NUL;
-        ppt->tmp  = 0;
-        ppt->ref = 0;
       }
+      ppt->tag  = MG_NUL;
+      ppt->tmp  = 0;
+      ppt->ref = 0;
     }
   }
 
