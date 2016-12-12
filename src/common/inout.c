@@ -310,7 +310,7 @@ int MMG5_loadMshMesh_part1(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename,
     } else if(!strncmp(chaine,"$Nodes",strlen("$Nodes"))) {
       fscanf((*inm),"%d ",&mesh->npi);
       *posNodes = ftell((*inm));
-      if ( bin ) {
+      if ( *bin ) {
         /* Skip the binary nodes data */
         if ( mesh->ver==1 ) {
           for ( k=1; k<=mesh->npi; ++k ) {
@@ -330,7 +330,7 @@ int MMG5_loadMshMesh_part1(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename,
       continue;
     } else if(!strncmp(chaine,"$NodeData",strlen("$NodeData"))) {
       *posNodeData = ftell((*inm));
-      if ( bin ) {
+      if ( *bin ) {
         /* Skip the binary nodes data */
         /* String tags */
         fscanf((*inm),"%d ",&tagNum);
@@ -419,7 +419,7 @@ int MMG5_loadMshMesh_part1(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename,
     }
   }
 
-  if ( !*nelts || !mesh->npi ) {
+  if ( !mesh->npi ) {
     fprintf(stderr,"  ** MISSING DATA.\n");
     fprintf(stderr," Check that your mesh contains points and elements.\n");
     fprintf(stderr," Exit program.\n");
@@ -503,10 +503,10 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol sol,FILE **inm,
           if(iswp) fc=_MMG5_swapf(fc);
           ppt->c[i] = (double) fc;
         }
-        ppt->tag  = MG_NUL;
-        ppt->tmp  = 0;
-        ppt->ref = 0;
       }
+      ppt->tag  = MG_NUL;
+      ppt->tmp  = 0;
+      ppt->ref = 0;
     }
   }
   else {
@@ -525,10 +525,10 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol sol,FILE **inm,
           fread(&ppt->c[i],sd,1,(*inm));
           if(iswp) ppt->c[i]=_MMG5_swapd(ppt->c[i]);
         }
-        ppt->tag  = MG_NUL;
-        ppt->tmp  = 0;
-        ppt->ref = 0;
       }
+      ppt->tag  = MG_NUL;
+      ppt->tmp  = 0;
+      ppt->ref = 0;
     }
   }
 

@@ -172,7 +172,7 @@ void _MMG3D_scalarSolTruncature(MMG5_pMesh mesh, MMG5_pSol met) {
  * out of library
  *
  */
-static inline
+/* static inline */
 int _MMG3D_packMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
   MMG5_pTetra   pt,ptnew;
   MMG5_pPrism   pp;

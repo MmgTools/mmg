@@ -326,6 +326,7 @@ int  _MMG5_intregmet(MMG5_pMesh,MMG5_pSol,int,char,double, double*);
 int  _MMG5_intvolmet(MMG5_pMesh,MMG5_pSol,int,char,double, double*);
 int _MMG3D_localParamReg(MMG5_pMesh,int,int*,int,int*,int,double*,double*,double*);
 int _MMG3D_localParamNm(MMG5_pMesh,int,int,int,double*,double*,double*);
+int _MMG3D_packMesh(MMG5_pMesh,MMG5_pSol,MMG5_pSol);
 
 /* useful functions to debug */
 int  _MMG3D_indElt(MMG5_pMesh mesh,int kel);
