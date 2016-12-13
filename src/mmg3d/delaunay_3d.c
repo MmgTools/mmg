@@ -687,7 +687,6 @@ int _MMG5_cavity_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel,int ip,int* list,int 
         assert(adi !=jel);
 
         pt1 = &mesh->tetra[adi];
-//#warning demander a cecile quand ca arrive??
         if ( pt1->flag == base ) {
           if ( pt1->ref != tref )  break;
         }
