@@ -313,12 +313,12 @@ CMAKE_DEPENDENT_OPTION ( PATTERN
 #-- Remove the next line to have this option visible in basic cmake mode
 MARK_AS_ADVANCED(PATTERN)
 
-# add SUscElas library?
-SET(SUSCELAS_DIR "" CACHE PATH "Installation directory for SUscElas")
-INCLUDE(cmake/modules/FindSUscElas.cmake)
+# add Elastic library?
+SET(ELAS_DIR "" CACHE PATH "Installation directory for Elas")
+INCLUDE(cmake/modules/FindElas.cmake)
 CMAKE_DEPENDENT_OPTION (
-  USE_SUSCELAS "Use the Elas library for lagrangian motion option" ON
-  "BUILD_MMG3D;SUSCELAS_FOUND" OFF)
+  USE_ELAS "Use the Elas library for lagrangian motion option" ON
+  "BUILD_MMG3D;ELAS_FOUND" OFF)
 
 # add Scotch library?
 SET(SCOTCH_DIR "" CACHE PATH "Installation directory for scotch")
