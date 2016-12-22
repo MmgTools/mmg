@@ -130,7 +130,8 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
       if(!strncmp(chaine,"MeshVersionFormatted",strlen("MeshVersionFormatted"))) {
         fscanf(inm,"%d",&mesh->ver);
         continue;
-      } else if(!strncmp(chaine,"Dimension",strlen("Dimension"))) {
+      }
+      else if(!strncmp(chaine,"Dimension",strlen("Dimension"))) {
         fscanf(inm,"%d",&mesh->dim);
         if(mesh->info.nreg==2) {
           if(mesh->dim!=3) {
@@ -144,37 +145,45 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
           return(0);
         }
         continue;
-      } else if(!strncmp(chaine,"Vertices",strlen("Vertices"))) {
+      }
+      else if(!strncmp(chaine,"Vertices",strlen("Vertices"))) {
         fscanf(inm,"%d",&mesh->np);
         posnp = ftell(inm);
         continue;
-      } else if(!strncmp(chaine,"Triangles",strlen("Triangles"))) {
+      }
+      else if(!strncmp(chaine,"Triangles",strlen("Triangles"))) {
         fscanf(inm,"%d",&mesh->nt);
         posnt = ftell(inm);
         continue;
-      } else if(!strncmp(chaine,"Corners",strlen("Corners"))) {
+      }
+      else if(!strncmp(chaine,"Corners",strlen("Corners"))) {
         fscanf(inm,"%d",&ncor);
         posncor = ftell(inm);
         continue;
-      } else if(!strncmp(chaine,"RequiredVertices",strlen("RequiredVertices"))) {
+      }
+      else if(!strncmp(chaine,"RequiredVertices",strlen("RequiredVertices"))) {
         fscanf(inm,"%d",&nreq);
         posreq = ftell(inm);
         continue;
-      } else if(!strncmp(chaine,"Edges",strlen("Edges"))) {
+      }
+      else if(!strncmp(chaine,"Edges",strlen("Edges"))) {
         fscanf(inm,"%d",&mesh->na);
         posned = ftell(inm);
         continue;
-      } else if(!strncmp(chaine,"RequiredEdges",strlen("RequiredEdges"))) {
+      }
+      else if(!strncmp(chaine,"RequiredEdges",strlen("RequiredEdges"))) {
         fscanf(inm,"%d",&nreqed);
         posreqed = ftell(inm);
         continue;
-      } else if(!strncmp(chaine,"Quadrilaterals",strlen("Quadrilaterals"))) {
+      }
+      else if(!strncmp(chaine,"Quadrilaterals",strlen("Quadrilaterals"))) {
         fscanf(inm,"%d",&nq);
         posnq = ftell(inm);
         continue;
       }
     }
-  } else {
+  }
+  else {
     bdim = 0;
     fread(&mesh->ver,sw,1,inm);
     iswp=0;
@@ -285,10 +294,10 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
     return(0);
   }
 
-  /* mem alloc */
+  /* Memory allocation */
   if ( !MMG2D_zaldy(mesh) )  return(0);
 
-  /* read vertices */
+  /* Read vertices */
   rewind(inm);
   fseek(inm,posnp,SEEK_SET);
   for (k=1; k<=mesh->np; k++) {
@@ -342,7 +351,7 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
     ppt->tag = MG_NUL;
   }
 
-  /* read edges */
+  /* Read edges */
   rewind(inm);
   fseek(inm,posned,SEEK_SET);
   for (k=1; k<=mesh->na; k++) {
@@ -359,8 +368,8 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
     }
   }
 
-  /* read triangles */
-  if(mesh->nt) {
+  /* Read triangles */
+  if ( mesh->nt ) {
     rewind(inm);
     fseek(inm,posnt,SEEK_SET);
     norient = 0;
@@ -406,8 +415,8 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
     }
   }
 
-  /* read corners*/
-  if (ncor) {
+  /* Read corners */
+  if ( ncor ) {
     rewind(inm);
     fseek(inm,posncor,SEEK_SET);
     for (k=1; k<=ncor; k++) {
@@ -418,11 +427,11 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
         if(iswp) ref=MMG_swapbin(ref);
       }
       ppt = &mesh->point[ref];
-      ppt->tag |= M_CORNER;
+      ppt->tag |= MG_CRN;
     }
   }
 
-  /* read required vertices*/
+  /* Read required vertices*/
   if (nreq) {
     rewind(inm);
     fseek(inm,posreq,SEEK_SET);
