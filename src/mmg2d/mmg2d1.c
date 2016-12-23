@@ -65,14 +65,13 @@ int _MMG2_anatri(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
         fprintf(stdout,"  ## Hashing problem. Exit program.\n");
         return(0);
       }
-
+      
       /* Collapse short edges */
       nc = _MMG2_colelt(mesh,met,typchk);
       if ( nc < 0 ) {
         fprintf(stdout,"  ## Unable to collapse mesh. Exiting.\n");
         return(0);
       }
-
     }
     else {
       ns = 0;
@@ -447,6 +446,10 @@ int _MMG2_colelt(MMG5_pMesh mesh,MMG5_pSol met,int typchk) {
       else if ( p1->tag & MG_GEO ) {
         if ( ! (p2->tag & MG_GEO) || !(pt->tag[i] & MG_GEO) ) continue;
       }
+      /* Same test for REF points */
+      else if ( p1->tag & MG_REF ) {
+        if ( ! (p2->tag & MG_GEO || p2->tag & MG_REF) || !(pt->tag[i] & MG_REF) ) continue;
+      }
 
       open = (mesh->adja[3*(k-1)+1+i] == 0) ? 1 : 0;
 
@@ -461,7 +464,7 @@ int _MMG2_colelt(MMG5_pMesh mesh,MMG5_pSol met,int typchk) {
         ll = MMG2D_lencurv(mesh,met,pt->v[i1],pt->v[i2]);
         if ( ll > MMG2_LSHRT ) continue;
       }
-
+      
       /* Check whether the geometry is preserved */
       ilist = _MMG2_chkcol(mesh,met,k,i,list,typchk);
 
@@ -529,6 +532,7 @@ int _MMG2_adptri(MMG5_pMesh mesh,MMG5_pSol met) {
   maxit = 10;
 
   do {
+    
     _MMG2_chkmsh(mesh);
     if ( !mesh->info.noinsert ) {
       ns = _MMG2_adpspl(mesh,met);
@@ -547,7 +551,7 @@ int _MMG2_adptri(MMG5_pMesh mesh,MMG5_pSol met) {
       ns = 0;
       nc = 0;
     }
-
+    
     if ( !mesh->info.noswap ) {
       nsw = _MMG2_swpmsh(mesh,met,2);
       if ( nsw < 0 ) {
@@ -688,6 +692,9 @@ int _MMG2_adpcol(MMG5_pMesh mesh,MMG5_pSol met) {
       else if ( p1->tag & MG_GEO ) {
         if ( ! (p2->tag & MG_GEO) || !(pt->tag[i] & MG_GEO) ) continue;
       }
+      else if ( p1->tag & MG_REF ) {
+        if ( ! (p2->tag & MG_GEO || p2->tag & MG_REF) || !(pt->tag[i] & MG_REF) ) continue;
+      }
 
       len = MMG2D_lencurv(mesh,met,pt->v[i1],pt->v[i2]);
 
@@ -813,7 +820,7 @@ int MMG2_mmg2d1n(MMG5_pMesh mesh,MMG5_pSol met) {
     fprintf(stdout,"  ## Unable to make fine improvements. Exit program.\n");
     return(0);
   }
-  
+
   /* Debug save of the mesh */
   /*{
     MMG2_bdryEdge(mesh);

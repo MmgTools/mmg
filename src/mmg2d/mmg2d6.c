@@ -537,7 +537,7 @@ int MMG2_mmg2d6(MMG5_pMesh mesh, MMG5_pSol sol) {
     fprintf(stdout,"  ## Hashing problem. Exit program.\n");
     return(0);
   }
-
+  
   /* Check that the resulting mesh is manifold */
   if ( !_MMG2_chkmanimesh(mesh) ) {
     fprintf(stdout,"  ## No manifold resulting situation. Exit program.\n");

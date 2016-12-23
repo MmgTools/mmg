@@ -34,6 +34,8 @@
 
 #include "mmg2d.h"
 
+extern char ddb;
+
 /** Set tags GEO and REF to triangles and points by traveling the mesh;
     count number of subdomains or connected components */
 int _MMG2_setadj(MMG5_pMesh mesh) {
@@ -146,13 +148,14 @@ int _MMG2_singul(MMG5_pMesh mesh) {
   char                i;
 
   nre = nc = nm = 0;
-  
+
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
     if ( ! MG_EOK(pt) ) continue;
 
     for (i=0; i<3; i++) {
       ppt = &mesh->point[pt->v[i]];
+      
       if ( ppt->s ) continue;
       ppt->s = 1;
       if ( !MG_VOK(ppt) || MG_SIN(ppt->tag) )  continue;
@@ -209,7 +212,7 @@ int _MMG2_singul(MMG5_pMesh mesh) {
             nc++;
           }
 
-          /*** To change: what is the mechanism for dhd in mmg2d ? ***/
+          /* Check angle */
           if ( fabs(dd) > _MMG5_EPSD ) {
             dd = (ux*vx + uy*vy + uz*vz) / sqrt(dd);
             if ( dd > -mesh->info.dhd ) {

@@ -213,7 +213,8 @@ int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,double *qdegrad) 
         if ( !strcmp(argv[i],"-nr") ) {
           if ( !MMG2D_Set_iparameter(mesh,met,MMG2D_IPARAM_angle,0) )
             exit(EXIT_FAILURE);
-        } else if ( !strcmp(argv[i],"-nsd") ) {
+        }
+        else if ( !strcmp(argv[i],"-nsd") ) {
           if ( ++i < argc && isdigit(argv[i][0]) ) {
             if ( !MMG2D_Set_iparameter(mesh,met,MMG2D_IPARAM_numsubdomain,atoi(argv[i])) )
               exit(EXIT_FAILURE);

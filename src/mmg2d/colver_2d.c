@@ -53,8 +53,7 @@ int _MMG2_chkcol(MMG5_pMesh mesh, MMG5_pSol met,int k,char i,int *list,char typc
     lon = MG_MAX(1.0/lon,MMG2_LLONG);
   }
   
-  /* Avoid collapsing a boundary point over a regular one (leads to boundary
-   * degeneration) */
+  /* Avoid collapsing a boundary point over a regular one (leads to boundary degeneration) */
   if ( MG_EDG(mesh->point[ip1].tag) && !MG_EDG(mesh->point[ip2].tag) ) return(0);
   
   /* Avoid subdivising one ref. component consisting of only one layer of elements */
@@ -62,7 +61,7 @@ int _MMG2_chkcol(MMG5_pMesh mesh, MMG5_pSol met,int k,char i,int *list,char typc
 
   /* Avoid closing one ref. component consisting of only one element (maybe
    * redondant with previous test)*/
-  if ( MG_EDG(pt->tag[i1]) && MG_EDG(pt->tag[i2]) ) assert(0);
+  if ( MG_EDG(pt->tag[i1]) && MG_EDG(pt->tag[i2]) ) return(0);
 
   jel = adja[i] / 3;
   if ( jel ) {
