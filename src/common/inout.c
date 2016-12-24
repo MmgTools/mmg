@@ -474,6 +474,7 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol sol,FILE **inm,
   int         k,i,l,nref,iadr;
   int         *ina_t,*ina_a,nt,na,nq,ne,npr;
   int         nbl_t,nbl_a,typ,tagNum,ref,idx,num;
+  int         v[4];
   char        *line;
 
   ina_t = ina_a = NULL;
@@ -560,8 +561,8 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol sol,FILE **inm,
         fscanf((*inm),"%d %d %d ",&i,&ref,&i);
         break;
       default:
-        fprintf(stderr,"  ## Error: elt %d: Expected 2 or 3 tags (%d given).\n",
-                k,tagNum);
+        fprintf(stderr,"  ## Error: elt %d (type %d): Expected 2 or 3 tags (%d given).\n",
+                k,typ,tagNum);
         return(-1);
       }
 
@@ -623,6 +624,8 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol sol,FILE **inm,
           pt = &mesh->tetra[++ne];
           fscanf((*inm),"%d %d %d %d ",&pt->v[0],&pt->v[1],&pt->v[2],&pt->v[3]);
           pt->ref = abs(ref);
+        } else { /*skip tetra*/
+          fscanf((*inm),"%d %d %d %d ",&v[0],&v[1],&v[2],&v[3]);
         }
 
         if(ref < 0) {
@@ -687,7 +690,7 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol sol,FILE **inm,
             fread(&i,sw,1,(*inm));
             break;
           default:
-            fprintf(stderr,"  ## Error: elt %%d: Expected 2 or 3 tags (%d given).\n",
+            fprintf(stderr,"  ## Error: elt (edge) %%d: Expected 2 or 3 tags (%d given).\n",
                     tagNum);
             return(-1);
           }
@@ -748,7 +751,7 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol sol,FILE **inm,
             fread(&i,sw,1,(*inm));
             break;
           default:
-            fprintf(stderr,"  ## Error: elt %%d: Expected 2 or 3 tags (%d given).\n",
+            fprintf(stderr,"  ## Error: elt (tria) %%d: Expected 2 or 3 tags (%d given).\n",
                     tagNum);
             return(-1);
           }
@@ -804,7 +807,7 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol sol,FILE **inm,
             fread(&i,sw,1,(*inm));
             break;
           default:
-            fprintf(stderr,"  ## Error: elt %%d: Expected 2 or 3 tags (%d given).\n",
+            fprintf(stderr,"  ## Error: elt (quad) %%d: Expected 2 or 3 tags (%d given).\n",
                     tagNum);
             return(-1);
           }
@@ -842,7 +845,7 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol sol,FILE **inm,
             fread(&i,sw,1,(*inm));
             break;
           default:
-            fprintf(stderr,"  ## Error: elt %%d: Expected 2 or 3 tags (%d given).\n",
+            fprintf(stderr,"  ## Error: elt (tetra) %%d: Expected 2 or 3 tags (%d given).\n",
                     tagNum);
             return(-1);
           }
@@ -890,7 +893,7 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol sol,FILE **inm,
             fread(&i,sw,1,(*inm));
             break;
           default:
-            fprintf(stderr,"  ## Error: elt %%d: Expected 2 or 3 tags (%d given).\n",
+            fprintf(stderr,"  ## Error: elt (prism) %%d: Expected 2 or 3 tags (%d given).\n",
                     tagNum);
             return(-1);
           }
@@ -938,7 +941,7 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol sol,FILE **inm,
             fread(&i,sw,1,(*inm));
             break;
           default:
-            fprintf(stderr,"  ## Error: elt %%d: Expected 2 or 3 tags (%d given).\n",
+            fprintf(stderr,"  ## Error: elt (corner) %%d: Expected 2 or 3 tags (%d given).\n",
                     tagNum);
             return(-1);
           }
