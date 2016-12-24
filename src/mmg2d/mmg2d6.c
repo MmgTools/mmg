@@ -66,8 +66,8 @@ int _MMG2_ismaniball(MMG5_pMesh mesh, MMG5_pSol sol, int start, char istart) {
     ip1 = pt->v[i1];
     ip2 = pt->v[i];
     
-    v1 = sol->m[ip1]-mesh->info.ls;
-    v2 = sol->m[ip2]-mesh->info.ls;
+    v1 = sol->m[ip1];
+    v2 = sol->m[ip2];
 
     smsgn = MG_SMSGN(v1,v2) ? 1 : 0;
   }
@@ -90,8 +90,8 @@ int _MMG2_ismaniball(MMG5_pMesh mesh, MMG5_pSol sol, int start, char istart) {
     ip1 = pt->v[i1];
     ip2 = pt->v[i];
     
-    v1 = sol->m[ip1]-mesh->info.ls;
-    v2 = sol->m[ip2]-mesh->info.ls;
+    v1 = sol->m[ip1];
+    v2 = sol->m[ip2];
 
     smsgn = MG_SMSGN(v1,v2) ? 1 : 0;
   }
@@ -108,11 +108,11 @@ int _MMG2_ismaniball(MMG5_pMesh mesh, MMG5_pSol sol, int start, char istart) {
 
 /* Snap values of sol very close to 0 to 0 exactly (to avoid very small triangles in cutting) */
 int _MMG2_snapval(MMG5_pMesh mesh, MMG5_pSol sol, double *tmp) {
-  MMG5_pTria       pt;
+  MMG5_pTria       pt,pt1;
   MMG5_pPoint      p0;
   double           v1,v2;
-  int              k,ns,nc,ip,ip1,ip2;
-  char             i;
+  int              k,kk,iel,ns,nc,ip,ip1,ip2,npl,nmn,ilist,list[MMG2_LONMAX+2];
+  char             i,j,j1,j2;
 
   /* Reset point flags */
   for (k=1; k<=mesh->np; k++)
@@ -123,9 +123,8 @@ int _MMG2_snapval(MMG5_pMesh mesh, MMG5_pSol sol, double *tmp) {
   for (k=1; k<=mesh->np; k++) {
     p0 = &mesh->point[k];
     if ( !MG_VOK(p0) ) continue;
-    if ( fabs(sol->m[k]-mesh->info.ls) < _MMG5_EPS ) {
-      tmp[k] = ( fabs(sol->m[k]-mesh->info.ls) < _MMG5_EPSD ) ?
-        (mesh->info.ls-100.0*_MMG5_EPS) : sol->m[k];
+    if ( fabs(sol->m[k]) < _MMG5_EPS ) {
+      tmp[k] =  - 100.0*_MMG5_EPS;
       p0->flag = 1;
       sol->m[k] = 0.0;
       ns++;
@@ -134,7 +133,6 @@ int _MMG2_snapval(MMG5_pMesh mesh, MMG5_pSol sol, double *tmp) {
 
   /* Check that the snapping process has not led to a nonmanifold situation */
   /* TO DO: Check first that every snapped point corresponds to a change in signs */
-
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
     if ( !MG_EOK(pt) ) continue;
@@ -144,10 +142,9 @@ int _MMG2_snapval(MMG5_pMesh mesh, MMG5_pSol sol, double *tmp) {
       ip2 = pt->v[_MMG5_iprv2[i]];
       
       p0 = &mesh->point[ip];
-      v1 = sol->m[ip1]-mesh->info.ls;
-      v2 = sol->m[ip2]-mesh->info.ls;
+      v1 = sol->m[ip1];
+      v2 = sol->m[ip2];
 
-      p0 = &mesh->point[ip];
       /* Catch a snapped point by a triangle where there is a sign change */
       if ( p0->flag && !(MG_SMSGN(v1,v2)) ) {
         if ( !_MMG2_ismaniball(mesh,sol,k,i) ) {
@@ -155,11 +152,43 @@ int _MMG2_snapval(MMG5_pMesh mesh, MMG5_pSol sol, double *tmp) {
           nc++;
         }
         p0->flag = 0;
-        tmp[ip] = mesh->info.ls;
       }
     }
   }
+  
+  /* Check that the ls function does not show isolated spots with 0 values (without sign changes) */
+  for (k=1; k<=mesh->nt; k++) {
+    pt = &mesh->tria[k];
+    if ( !MG_EOK(pt) ) continue;
+    for (i=0; i<3; i++) {
+      ip = pt->v[i];
+      if ( fabs(sol->m[ip]) >= _MMG5_EPS ) continue;
+      npl = nmn = 0;
+      ilist = _MMG2_boulet(mesh,k,i,list);
+      for(kk=0; kk<ilist; kk++) {
+        iel = list[kk] / 3;
+        j = list[kk] % 3;
+        j1 = _MMG5_inxt2[j];
+        j2 = _MMG5_iprv2[i];
+        pt1 = &mesh->tria[iel];
+        ip1 = pt1->v[j1];
+        ip2 = pt1->v[j2];
+        if ( sol->m[ip1] >= _MMG5_EPS ) npl = 1;
+        else if ( sol->m[ip1] <= -_MMG5_EPS ) nmn = 1;
 
+        if ( sol->m[ip2] >= _MMG5_EPS ) npl = 1;
+        else if ( sol->m[ip2] <= -_MMG5_EPS ) nmn = 1;
+      }
+      
+      if ( npl == 1 && nmn == 0 )
+        sol->m[ip] = 100.0*_MMG5_EPS;
+      else if ( npl == 0 && nmn == 1 )
+        sol->m[ip] = 100.0*_MMG5_EPS;
+    }
+    
+  }
+  
+  
   if ( (abs(mesh->info.imprim) > 5 || mesh->info.ddebug) && ns+nc > 0 )
     fprintf(stdout,"     %8d points snapped, %d corrected\n",ns,nc);
 
@@ -326,8 +355,8 @@ int _MMG2_cuttri_ls(MMG5_pMesh mesh, MMG5_pSol sol){
 
       if ( p0->flag && p1->flag ) continue;
 
-      v0 = sol->m[ip0]-mesh->info.ls;
-      v1 = sol->m[ip1]-mesh->info.ls;
+      v0 = sol->m[ip0];
+      v1 = sol->m[ip1];
 
       if ( fabs(v0) > _MMG5_EPSD2 && fabs(v1) > _MMG5_EPSD2 && v0*v1 < 0.0 ) {
         nb++;
@@ -358,8 +387,8 @@ int _MMG2_cuttri_ls(MMG5_pMesh mesh, MMG5_pSol sol){
       np = _MMG5_hashGet(&hash,ip0,ip1);
       if ( np ) continue;
 
-      v0 = sol->m[ip0]-mesh->info.ls;
-      v1 = sol->m[ip1]-mesh->info.ls;
+      v0 = sol->m[ip0];
+      v1 = sol->m[ip1];
 
       if ( fabs(v0) < _MMG5_EPSD2 || fabs(v1) < _MMG5_EPSD2 )  continue;
       else if ( MG_SMSGN(v0,v1) )  continue;
@@ -377,7 +406,7 @@ int _MMG2_cuttri_ls(MMG5_pMesh mesh, MMG5_pSol sol){
         printf("*** Insufficient memory; abort\n");
         return(0);
       }
-      sol->m[np] = mesh->info.ls;
+      sol->m[np] = 0.0;
       _MMG5_hashEdge(mesh,&hash,ip0,ip1,np);
     }
   }
@@ -445,7 +474,7 @@ int _MMG2_setref_ls(MMG5_pMesh mesh, MMG5_pSol sol){
     nmn = npl = nz = 0;
     for (i=0; i<3; i++) {
       ip = pt->v[i];
-      v = sol->m[ip]-mesh->info.ls;
+      v = sol->m[ip];
  
       if ( v > 0.0 )
         npl++;
@@ -470,8 +499,8 @@ int _MMG2_setref_ls(MMG5_pMesh mesh, MMG5_pSol sol){
       for (i=0; i<3; i++) {
         ip  = pt->v[_MMG5_inxt2[i]];
         ip1 = pt->v[_MMG5_iprv2[i]];
-        v   = sol->m[ip] -mesh->info.ls;
-        v1  = sol->m[ip1]-mesh->info.ls;
+        v   = sol->m[ip];
+        v1  = sol->m[ip1];
         if ( v == 0.0 && v1 == 0.0) {
           pt->edg[i]  = MG_ISO;
           pt->tag[i] |= MG_REF;
@@ -487,9 +516,14 @@ int _MMG2_setref_ls(MMG5_pMesh mesh, MMG5_pSol sol){
 /* Main function of the -ls mode */
 int MMG2_mmg2d6(MMG5_pMesh mesh, MMG5_pSol sol) {
   double *tmp;
-
+  int k;
+  
   if ( abs(mesh->info.imprim) > 3 )
     fprintf(stdout,"  ** ISOSURFACE EXTRACTION\n");
+  
+  /* Work only with the 0 level set */
+  for (k=1; k<= sol->np; k++)
+    sol->m[k] -= mesh->info.ls;
 
   /* Allocate memory for tmp */
   _MMG5_ADD_MEM(mesh,(mesh->npmax+1)*sizeof(double),"temporary table",
