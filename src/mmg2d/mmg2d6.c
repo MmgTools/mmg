@@ -41,6 +41,27 @@
  *
  **/
 
+/* Reset MG_ISO vertex and edge references to 0 */
+int _MMG2_resetRef(MMG5_pMesh mesh) {
+  MMG5_pTria      pt;
+  MMG5_pPoint     p0;
+  int             k;
+  char            i;
+  
+  for (k=1; k<=mesh->nt; k++) {
+    pt = &mesh->tria[k];
+    if ( !pt->v[0] ) continue;
+    
+    for (i=0; i<3; i++) {
+      p0 = &mesh->point[pt->v[i]];
+      if ( pt->edg[i] == MG_ISO ) pt->edg[i] = 0;
+      if ( p0->ref == MG_ISO ) p0->ref = 0;
+    }
+  }
+  
+  return(1);
+}
+
 /* Check whether snapping the value of vertex i of k to 0 exactly leads to a non manifold situation
  assumption: the triangle k has vertex i with value 0 and the other two with changing values */
 int _MMG2_ismaniball(MMG5_pMesh mesh, MMG5_pSol sol, int start, char istart) {
@@ -551,6 +572,12 @@ int MMG2_mmg2d6(MMG5_pMesh mesh, MMG5_pSol sol) {
   /* Transfer the boundary edge references to the triangles */
   if ( !MMG2_assignEdge(mesh) ) {
     fprintf(stdout,"  ## Problem in setting boundary. Exit program.\n");
+    return(0);
+  }
+  
+  /* Reset the MG_ISO field everywhere it appears */
+  if ( !_MMG2_resetRef(mesh) ) {
+    fprintf(stdout,"  ## Problem in resetting references. Exit program.\n");
     return(0);
   }
 

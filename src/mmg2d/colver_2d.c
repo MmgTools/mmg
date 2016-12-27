@@ -270,8 +270,10 @@ int _MMG2_colver(MMG5_pMesh mesh,int ilist,int *list) {
   jj  = list[1] % 3;
   j   = _MMG5_iprv2[jj];
   pt1 = &mesh->tria[jel];
+  
   pt1->tag[j] |= pt->tag[i1];
   pt1->edg[j] = MG_MAX(pt1->edg[j],pt->edg[i1]);
+
   if ( adja[i1] ) {
     kel = adja[i1] / 3;
     k   = adja[i1] % 3;

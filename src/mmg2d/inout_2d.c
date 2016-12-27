@@ -408,7 +408,8 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
       fprintf(stdout,"         BAD ORIENTATION : vol < 0 -- %8d element(s) reoriented\n",norient);
       fprintf(stdout,"     $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ \n\n");
     }
-  } else {
+  }
+  else {
     for (k=1; k<=mesh->np; k++) {
       ppt = &mesh->point[ k ];
       ppt->tag &= ~MG_NUL;
@@ -736,15 +737,15 @@ int MMG2D_saveMesh(MMG5_pMesh mesh,const char *filename) {
   MMG5_pEdge        ped;
   MMG5_pTria        pt;
   double            dblb;
-  int               k,ne,np,nc,ref,ntang;
+  int               k,ne,np,nc,nreq,ref,ntang;
   int               bin, binch, bpos;
   char              *ptr,data[128],chaine[128];
 
   mesh->ver = 2;
   bin = 0;
 
+  /* Name of file */
   strcpy(data,filename);
-
   ptr = strstr(data,".mesh");
   if ( !ptr ) {
     strcat(data,".meshb");
@@ -833,7 +834,7 @@ int MMG2D_saveMesh(MMG5_pMesh mesh,const char *filename) {
   //
   // //END HACK
 
-  /* Print vertices */
+  /* Write vertices */
   np = 0;
   for (k=1; k<=mesh->np; k++) {
     ppt = &mesh->point[k];
@@ -841,14 +842,12 @@ int MMG2D_saveMesh(MMG5_pMesh mesh,const char *filename) {
     ppt->tmp = np;
   }
 
-  if(!bin)
-  {
+  if ( !bin ) {
     strcpy(&chaine[0],"\n\nVertices\n");
     fprintf(inm,"%s",chaine);
     fprintf(inm,"%d\n",np);
   }
-  else
-  {
+  else {
     binch = 4; //Vertices
     fwrite(&binch,sw,1,inm);
     if ( mesh->info.nreg )
@@ -865,7 +864,7 @@ int MMG2D_saveMesh(MMG5_pMesh mesh,const char *filename) {
     ppt = &mesh->point[k];
     if ( M_VOK(ppt) ) {
       ref = ppt->ref;
-      if(mesh->info.nreg) {
+      if ( mesh->info.nreg ) {
         if ( !bin )
           fprintf(inm,"%.15lg %.15lg 0. %d\n",ppt->c[0],ppt->c[1],ref);
         else {
@@ -925,25 +924,25 @@ int MMG2D_saveMesh(MMG5_pMesh mesh,const char *filename) {
     }
   }
 
-  /* required vertex */
-  ne = 0;
+  /* Required vertex */
+  nreq = 0;
   for (k=1; k<=mesh->np; k++) {
     ppt = &mesh->point[k];
     if ( M_VOK(ppt) ) {
       if ( mesh->info.nosurf && (ppt->tag & M_NOSURF) ) continue;
-      if (ppt->tag & M_REQUIRED) ne++;
+      if (ppt->tag & MG_REQ) nreq++;
     }
   }
-  if ( ne ) {
-    if(!bin) {
+  if ( nreq ) {
+    if ( !bin ) {
       strcpy(&chaine[0],"\n\nRequiredVertices\n");
       fprintf(inm,"%s",chaine);
-      fprintf(inm,"%d\n",ne);
+      fprintf(inm,"%d\n",nreq);
     }
     else {
       binch = 15; //
       fwrite(&binch,sw,1,inm);
-      bpos += 12+4*ne; //NullPos
+      bpos += 12+4*nreq; //NullPos
       fwrite(&bpos,sw,1,inm);
       fwrite(&ne,sw,1,inm);
     }
@@ -951,7 +950,7 @@ int MMG2D_saveMesh(MMG5_pMesh mesh,const char *filename) {
       ppt = &mesh->point[k];
       if ( M_VOK(ppt) ) {
         if ( mesh->info.nosurf && ( ppt->tag & M_NOSURF )) continue;
-        if ((ppt->tag & M_REQUIRED)
+        if ((ppt->tag & MG_REQ)
             /*&& ( (ppt->tag & M_BDRY) || (ppt->tag & M_SD) ) */ ) {
           if(!bin)
             fprintf(inm,"%d\n",ppt->tmp);

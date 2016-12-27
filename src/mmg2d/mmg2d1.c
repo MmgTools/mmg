@@ -529,7 +529,7 @@ int _MMG2_adptri(MMG5_pMesh mesh,MMG5_pSol met) {
   int                  maxit,it,nns,ns,nnc,nc,nnsw,nsw,nnm,nm;
 
   nns = nnc = nnsw = nnm = it = 0;
-  maxit = 10;
+  maxit = 5;
 
   do {
     
@@ -540,12 +540,15 @@ int _MMG2_adptri(MMG5_pMesh mesh,MMG5_pSol met) {
         fprintf(stdout,"  ## Problem in function adpspl. Unable to complete mesh. Exit program.\n");
         return(0);
       }
-
+      
       nc = _MMG2_adpcol(mesh,met);
       if ( nc < 0 ) {
         fprintf(stdout,"  ## Problem in function adpcol. Unable to complete mesh. Exit program.\n");
         return(0);
       }
+      if ( it == 1 ) break;
+
+      
     }
     else {
       ns = 0;
@@ -583,7 +586,7 @@ int _MMG2_adptri(MMG5_pMesh mesh,MMG5_pSol met) {
     else if ( it > 3 && abs(nc-ns) < 0.3 * MG_MAX(nc,ns) )  break;
   }
   while( ++it < maxit && (nc+ns+nsw+nm > 0) );
-
+  
   /* Last iterations of vertex relocation only */
   if ( !mesh->info.nomove ) {
     nm = _MMG2_movtri(mesh,met,5,1);
@@ -701,6 +704,7 @@ int _MMG2_adpcol(MMG5_pMesh mesh,MMG5_pSol met) {
       if ( len > MMG2_LOPTS ) continue;
 
       ilist = _MMG2_chkcol(mesh,met,k,i,list,2);
+
       if ( ilist > 3 || ( ilist==3 && open ) ) {
         nc += _MMG2_colver(mesh,ilist,list);
         break;

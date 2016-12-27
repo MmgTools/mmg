@@ -297,6 +297,7 @@ int _MMG2_ismaniball(MMG5_pMesh , MMG5_pSol , int , char );
 int _MMG2_snapval(MMG5_pMesh ,MMG5_pSol ,double *);
 int _MMG2_chkmanimesh(MMG5_pMesh );
 int MMG2_hashTria(MMG5_pMesh );
+int _MMG2_resetRef(MMG5_pMesh );
 int _MMG2_cuttri_ls(MMG5_pMesh ,MMG5_pSol );
 int _MMG2_setref_ls(MMG5_pMesh ,MMG5_pSol );
 int _MMG2_split1_sim(MMG5_pMesh ,MMG5_pSol ,int ,int vx[3]);
