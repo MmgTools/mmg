@@ -42,7 +42,7 @@ double _MMG2_quickcal(MMG5_pMesh mesh, MMG5_pTria pt) {
   p1 = &mesh->point[pt->v[1]];
   p2 = &mesh->point[pt->v[2]];
   
-  cal = fabs(MMG2_quickarea(p0->c,p1->c,p2->c));
+  cal = MMG2_quickarea(p0->c,p1->c,p2->c);
   return(cal);
 }
 

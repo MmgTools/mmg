@@ -546,9 +546,6 @@ int _MMG2_adptri(MMG5_pMesh mesh,MMG5_pSol met) {
         fprintf(stdout,"  ## Problem in function adpcol. Unable to complete mesh. Exit program.\n");
         return(0);
       }
-      if ( it == 1 ) break;
-
-      
     }
     else {
       ns = 0;
