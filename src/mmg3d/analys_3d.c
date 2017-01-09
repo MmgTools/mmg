@@ -110,15 +110,13 @@ static int _MMG5_setadj(MMG5_pMesh mesh){
         if ( MG_EDG(pt->tag[i]) || pt->tag[i] & MG_REQ ) {
               tag = mesh->point[ip1].tag;
               mesh->point[ip1].tag |= pt->tag[i];
-              // Warning: in -nosurf option : we loose the corner points and the
-              // (corner + required) points provided by the user.
+              // Remove the MG_NOSURF tag if the vertex is really required.
               if ( (tag & MG_REQ) && !(tag & MG_NOSURF) ) {
                 mesh->point[ip1].tag &= ~MG_NOSURF;
               }
               tag = mesh->point[ip2].tag;
               mesh->point[ip2].tag |= pt->tag[i];
-              // Warning: in -nosurf option : we loose the corner points and the
-              // (corner + required) points provided by the user.
+              // Remove the MG_NOSURF tag if the vertex is really required.
               if ( (tag & MG_REQ) && !(tag & MG_NOSURF) ) {
                 mesh->point[ip2].tag &= ~MG_NOSURF;
               }
