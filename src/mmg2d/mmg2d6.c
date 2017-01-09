@@ -315,7 +315,7 @@ int _MMG2_chkmanimesh(MMG5_pMesh mesh) {
     }
     if( cnt == 3 ) {
       printf("Triangle %d: 3 boundary edges\n",k);
-      return(0);
+      /* return(0); */
     }
   }
 
