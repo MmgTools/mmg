@@ -1358,6 +1358,7 @@ int MMG5_saveMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
         return(0);
       }
     }
+    else bin=1;
   }
   else {
     ptr = strstr(data,".mshb");
