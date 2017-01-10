@@ -154,6 +154,7 @@ int _MMG5_mmg2dChkmsh(MMG5_pMesh mesh, int severe,int base) {
 /* Check of adjacency relations and edge tags */
 int _MMG2_chkmsh(MMG5_pMesh mesh) {
   MMG5_pTria        pt,pt1;
+  MMG5_pPoint       p1,p2;
   int               *adja,*adjaj,k,jel;
   char              i,i1,i2,j;
 
@@ -257,6 +258,38 @@ int _MMG2_chkmsh(MMG5_pMesh mesh) {
       }
     }
   }
+  
+  /* Check consistency between REF, GEO and BDY tags between edges and points */
+  for (k=1; k<=mesh->nt; k++) {
+    pt = &mesh->tria[k];
+    if ( !MG_EOK(pt) ) continue;
+    
+    for (i=0; i<3; i++) {
+      if ( pt->tag[i] & MG_GEO || pt->tag[i] & MG_REF ) {
+        i1 = _MMG5_inxt2[i];
+        i2 = _MMG5_iprv2[i];
+        
+        if ( !(pt->tag[i] & MG_BDY) ) {
+          printf("edge %d %d is tagged %d, but not MG_BDY\n",pt->v[i1],pt->v[i2],pt->tag[i]);
+          return(0);
+        }
+        
+        p1 = &mesh->point[pt->v[i1]];
+        p2 = &mesh->point[pt->v[i2]];
+        
+        if ( !(p1->tag & MG_BDY) ) {
+          printf("edge %d %d is tagged %d, but point %d is not tagged BDY\n",pt->v[i1],pt->v[i2],pt->tag[i],pt->v[i1]);
+          return(0);
+        }
+        
+        if ( !(p2->tag & MG_BDY) ) {
+          printf("edge %d %d is tagged %d, but point %d is not tagged BDY\n",pt->v[i1],pt->v[i2],pt->tag[i],pt->v[i2]);
+          return(0);
+        }
+      }
+    }
+  }
+  
 
   return(1);
 }
