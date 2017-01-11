@@ -533,7 +533,6 @@ int _MMG2_adptri(MMG5_pMesh mesh,MMG5_pSol met) {
 
   do {
     
-    _MMG2_chkmsh(mesh);
     if ( !mesh->info.noinsert ) {
       ns = _MMG2_adpspl(mesh,met);
       if ( ns < 0 ) {
@@ -821,7 +820,7 @@ int MMG2_mmg2d1n(MMG5_pMesh mesh,MMG5_pSol met) {
     fprintf(stdout,"  ## Unable to make fine improvements. Exit program.\n");
     return(0);
   }
-
+  
   /* Debug save of the mesh */
   /*{
     MMG2_bdryEdge(mesh);

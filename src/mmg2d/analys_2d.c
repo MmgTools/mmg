@@ -89,9 +89,9 @@ int _MMG2_setadj(MMG5_pMesh mesh) {
 
         /* Case of an external boundary */
         if ( !adja[i] ) {
-          pt->tag[i] |= MG_GEO;
-          mesh->point[ip1].tag |= MG_GEO;
-          mesh->point[ip2].tag |= MG_GEO;
+          pt->tag[i] |= (MG_GEO+MG_BDY);
+          mesh->point[ip1].tag |= (MG_GEO+MG_BDY);
+          mesh->point[ip2].tag |= (MG_GEO+MG_BDY);
           nr++;
           continue;
         }
@@ -101,10 +101,10 @@ int _MMG2_setadj(MMG5_pMesh mesh) {
 
         /* Case of a boundary between two subdomains */
         if ( abs(pt1->ref) != abs(pt->ref) ) {
-          pt->tag[i]   |= MG_REF;
-          pt1->tag[ii] |= MG_REF;
-          mesh->point[ip1].tag |= MG_REF;
-          mesh->point[ip2].tag |= MG_REF;
+          pt->tag[i]   |= (MG_REF+MG_BDY);
+          pt1->tag[ii] |= (MG_REF+MG_BDY);
+          mesh->point[ip1].tag |= (MG_REF+MG_BDY);
+          mesh->point[ip2].tag |= (MG_REF+MG_BDY);
           if ( kk > k ) nref++;
           continue;
         }
