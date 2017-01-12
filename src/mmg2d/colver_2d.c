@@ -103,6 +103,22 @@ int _MMG2_chkcol(MMG5_pMesh mesh, MMG5_pSol met,int k,char i,int *list,char typc
     if ( ipb == pt1->v[j] ) return(0);
   }
   
+  /* Avoid creating edges with two BDY endpoints, which are not themselves BDY */
+  if ( mesh->info.fem ) {
+    p2 = &mesh->point[ip2];
+    if ( p2->tag & MG_BDY ) {
+      /* Travel all edges in the ball but for the first and last */
+      for (l=0; l<ilist-1; l++) {
+        jel = list[l] / 3;
+        j = list[l] % 3;
+        jj = _MMG5_inxt2[j];
+        j2 = _MMG5_iprv2[j];
+        pt1 = &mesh->tria[jel];
+        p2 = &mesh->point[pt1->v[j2]];
+        if ( (p2->tag & MG_BDY) && !(pt1->tag[jj] & MG_BDY) ) return(0);
+      }
+    }
+  }
   
   if ( ilist > 3 || ( ilist == 3 && open ) ) {      // ADD : Second test should work too
     /* Avoid a collapse that would close one ref. component that consists only of one element */

@@ -48,11 +48,13 @@ int _MMG2_anatri(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
 
   /* Main routine; intertwine split, collapse and swaps */
   do {
+    if ( typchk == 2 && it == 0 )  mesh->info.fem = 1;
+    
     if ( !mesh->info.noinsert ) {
       /* Memory free */
       _MMG5_DEL_MEM(mesh,mesh->adja,(3*mesh->ntmax+5)*sizeof(int));
       mesh->adja = 0;
-
+      
       /* Split long edges according to patterns */
       ns = _MMG2_anaelt(mesh,met,typchk);
       if ( ns < 0 ) {
@@ -120,7 +122,7 @@ int _MMG2_anaelt(MMG5_pMesh mesh,MMG5_pSol met,int typchk) {
 
   if ( !_MMG5_hashNew(mesh,&hash,mesh->np,3*mesh->np) ) return(0);
 
-  /* Step 1: travel mesh, check edges, and tags those to be split; create the new vertices in hash */
+  /* Step 1: travel mesh, check edges, and tag those to be split; create the new vertices in hash */
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
     if ( !MG_EOK(pt) || (pt->ref < 0) ) continue;
@@ -142,6 +144,18 @@ int _MMG2_anaelt(MMG5_pMesh mesh,MMG5_pSol met,int typchk) {
         if ( len > MMG2_LLONG ) MG_SET(pt->flag,i);
       }
     }
+    
+    /* mesh->info.fem : split edges which are not MG_BDY, but whose vertices are both MG_BDY */
+    if ( mesh->info.fem ) {
+      for (i=0; i<3; i++) {
+        i1 = _MMG5_inxt2[i];
+        i2 = _MMG5_iprv2[i];
+        p1 = &mesh->point[pt->v[i1]];
+        p2 = &mesh->point[pt->v[i2]];
+        if ( (p1->tag & MG_BDY) && (p2->tag & MG_BDY) && !(pt->tag[i] & MG_BDY) ) MG_SET(pt->flag,i);
+      }
+    }
+    
     if ( !pt->flag ) continue;
     ns++;
 

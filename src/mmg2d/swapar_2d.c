@@ -150,6 +150,11 @@ int _MMG2_chkswp(MMG5_pMesh mesh, MMG5_pSol met,int k,char i,char typchk) {
   pt1 = &mesh->tria[kk];
   iq = pt1->v[ii];
   
+  /* If mesh->info.fem : avoid creating a non BDY edge with BDY endpoints */
+  if ( mesh->info.fem ) {
+    if ( (mesh->point[ip].tag & MG_BDY) && (mesh->point[iq].tag & MG_BDY) ) return(0);
+  }
+  
   /* Check length in typchk = 2 mode ; prevent swap if the created edge is
    longer than the swapped one, and than the maximum authorized edge length */
   /* I believe this test is hindering the reach of good quality */
