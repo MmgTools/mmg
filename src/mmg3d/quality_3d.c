@@ -257,13 +257,13 @@ int _MMG3D_prilen(MMG5_pMesh mesh, MMG5_pSol met, char metRidTyp) {
 static int _MMG3D_printquaLES(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTetra    pt;
   double   rap,rapmin,rapmax,rapavg,med,good;
-  int      i,k,iel,ok,ir,imax,nex,his[5];
-  
+  int      k,iel,ok,nex,his[5];
+
   /*compute tet quality*/
   for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
      if( !MG_EOK(pt) )   continue;
-     
+
      pt->qual = _MMG5_orcal(mesh,met,k);
   }
   if ( abs(mesh->info.imprim) <= 0 ) return(1);
@@ -304,7 +304,7 @@ static int _MMG3D_printquaLES(MMG5_pMesh mesh,MMG5_pSol met) {
       his[2] += 1;
     else if(rap < 0.99)
       his[3] += 1;
-    else 
+    else
       his[4] += 1;
 
   }
@@ -339,7 +339,7 @@ static int _MMG3D_printquaLES(MMG5_pMesh mesh,MMG5_pSol met) {
     fprintf(stdout,"     %5.2f < Q           %7d   %6.2f %%\n",
             0.99,his[4],100.*(his[4]/(float)(mesh->ne-nex)));
   }
-  
+
   return(1);
 }
 
@@ -359,7 +359,7 @@ int _MMG3D_inqua(MMG5_pMesh mesh,MMG5_pSol met) {
   int      i,k,iel,ok,ir,imax,nex,his[5];
 
   if( mesh->info.optimLES ) return(_MMG3D_printquaLES(mesh,met));
-  
+
   /*compute tet quality*/
   for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
@@ -664,11 +664,11 @@ int _MMG5_countelt(MMG5_pMesh mesh,MMG5_pSol sol, double *weightelt, long *npcib
           if( (_MMG5_ALPHAD*pt->qual <= 1./50.) )
             dnaddloc = 0;
           else  if((_MMG5_ALPHAD*pt->qual <= 1./10.) )
-            dnaddloc =  0.2*dnaddloc; 
+            dnaddloc =  0.2*dnaddloc;
           else if((len > 10) && (_MMG5_ALPHAD*pt->qual >= 1./1.5) ) //on sous-estime uniquement pour les tres bons
-            dnaddloc = dnaddloc*0.3 + dnaddloc; 
-          else if(len < 6 && len>3) 
-            dnaddloc = 0.7*dnaddloc; 
+            dnaddloc = dnaddloc*0.3 + dnaddloc;
+          else if(len < 6 && len>3)
+            dnaddloc = 0.7*dnaddloc;
 
 
           dnadd += dnaddloc;
