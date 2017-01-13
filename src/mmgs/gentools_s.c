@@ -130,7 +130,7 @@ int _MMGS_indPt(MMG5_pMesh mesh, int kp) {
   int         np, k;
 
   np = 0;
-  for (k=1; k<=mesh->nt; k++) {
+  for (k=1; k<=mesh->np; k++) {
     ppt = &mesh->point[k];
     if ( MG_VOK(ppt) ) {
       np++;
