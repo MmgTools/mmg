@@ -303,13 +303,15 @@ inline double _MMG3D_caltetLES_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt)
     return(0.0);
   }
 
-  cal =  V/Vref;
+  cal =  V/Vref; //1-Qles in order to have the best quality equal to 1
 
   if ( cal > 1. ) {
     fprintf(stderr," ## Warning: unexpected LES quality measure.\n");
       return(0.0);
   }
 
+  // the normalization by ALPHAD
+  //in order to be coherent with the other quality measure
   return(cal/_MMG5_ALPHAD);
 }
 
