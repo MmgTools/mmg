@@ -25,6 +25,51 @@
 #define KTA     7
 #define KTB    11
 
+/*hash edge :
+  return 1 if edge exist in the table*/
+int MMG2_FindEdge(pHashTable edgeTable,int ia, int ib) {
+  int       key,mins,maxs;
+  Hedge     *ha;
+
+  /* compute key */
+  if ( ia < ib ) {
+    mins = ia;
+    maxs = ib;
+  }
+  else {
+    mins = ib;
+    maxs = ia;
+  }
+  key = KTA*mins + KTB*maxs;
+  key = key % edgeTable->size;
+  ha  = &edgeTable->item[key];
+  if ( ha->min ) {
+    /* edge exist*/
+    if ( ha->min == mins && ha->max == maxs ) {
+      return(ha->iel);
+    }
+    else {
+      while ( ha->nxt && ha->nxt < edgeTable->nxtmax ) {
+        ha = &edgeTable->item[ha->nxt];
+        if ( ha->min == mins && ha->max == maxs ) {
+          return(ha->iel);
+        }
+      }
+      ha->nxt = edgeTable->hnxt;
+      ha      = &edgeTable->item[edgeTable->hnxt];
+      ++edgeTable->hnxt;
+      if ( edgeTable->hnxt == edgeTable->nxtmax ) {
+        fprintf(stdout,"  ## Memory alloc problem (edge): %d\n",edgeTable->nxtmax);
+        assert(0);
+        return(0);
+      }
+    }
+  }
+ 
+  return(0);
+
+}
+
 int MMG2_hashNew(HashTable *hash,int hsize,int hmax) {
   int   k;
 
@@ -324,18 +369,19 @@ int MMG2_baseBdry(MMG5_pMesh mesh) {
   int      *adja,adj,iadr,k,i,ip,ned,num,i1,i2;
   HashTable edgeT;
 
+  /*edge treatment*/
+  edgeT.size  = mesh->namax;
+  edgeT.nxtmax = 3*mesh->namax+1;
+  edgeT.hnxt  = mesh->namax;
+  _MMG5_SAFE_CALLOC(edgeT.item,edgeT.nxtmax,Hedge);
+  
+  memset(edgeT.item,0,edgeT.nxtmax*sizeof(Hedge));
+  for (k=edgeT.size; k<edgeT.nxtmax; k++)
+    edgeT.item[k].nxt = k+1;
   ned = 0;
   if(mesh->na) {
     ned = mesh->na;
-    /*edge treatment*/
-    edgeT.size  = mesh->namax;
-    edgeT.nxtmax = 3*mesh->namax+1;
-    edgeT.hnxt  = mesh->namax;
-    _MMG5_SAFE_CALLOC(edgeT.item,edgeT.nxtmax,Hedge);
-
-    memset(edgeT.item,0,edgeT.nxtmax*sizeof(Hedge));
-    for (k=edgeT.size; k<edgeT.nxtmax; k++)
-      edgeT.item[k].nxt = k+1;
+ 
     for(k=1 ; k<=mesh->na ; k++) {
       ped = &mesh->edge[k];
       if(!ped->a) continue;
@@ -357,7 +403,7 @@ int MMG2_baseBdry(MMG5_pMesh mesh) {
       if ( !adj  ) {
         num = 0;
         if(ned) {
-          num = MMG2_hashEdge(&edgeT,k,pt->v[MMG2_iopp[i][0]],pt->v[MMG2_iopp[i][1]]);
+          num = MMG2_FindEdge(&edgeT,pt->v[MMG2_iopp[i][0]],pt->v[MMG2_iopp[i][1]]);
         }
         ip  = pt->v[MMG2_iopp[i][0]];
         mesh->point[ip].tag |= M_BDRY;
@@ -392,7 +438,7 @@ int MMG2_baseBdry(MMG5_pMesh mesh) {
       } else if(pt->ref != pt1->ref) {
         num = 0;
         if(ned) {
-          num = MMG2_hashEdge(&edgeT,k,pt->v[MMG2_iopp[i][0]],pt->v[MMG2_iopp[i][1]]);
+          num = MMG2_FindEdge(&edgeT,pt->v[MMG2_iopp[i][0]],pt->v[MMG2_iopp[i][1]]);
         }
         ip  = pt->v[MMG2_iopp[i][0]];
         mesh->point[ip].tag |= M_SD;
@@ -423,12 +469,14 @@ int MMG2_baseBdry(MMG5_pMesh mesh) {
           ped = &mesh->edge[num];
           ped->a = pt->v[MMG2_iopp[i][0]];
           ped->b = pt->v[MMG2_iopp[i][1]];
+          ned++;
+          MMG2_hashEdge(&edgeT,num,ped->a,ped->b);
         }
       }
     }
   }
 
-  if(ned && edgeT.item)  _MMG5_SAFE_FREE(edgeT.item);
+  if(edgeT.item)  _MMG5_SAFE_FREE(edgeT.item);
 
   /*compute tangents*/
   mesh->base++;
