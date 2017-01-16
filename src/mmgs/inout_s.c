@@ -817,7 +817,7 @@ int MMGS_saveMesh(MMG5_pMesh mesh, const char* filename) {
         ppt->ref = abs(ppt->ref);
         fwrite((unsigned char*)&ppt->ref,sw,1,inm);
       }
-      if ( !(ppt->tag & MG_GEO) )  nn++;
+      if ( !((ppt->tag & MG_GEO) || ppt->tag & MG_CRN) )  nn++;
     }
   }
 
@@ -1030,7 +1030,7 @@ int MMGS_saveMesh(MMG5_pMesh mesh, const char* filename) {
     nn = 0;
     for (k=1; k<=mesh->np; k++) {
       ppt = &mesh->point[k];
-      if ( MG_VOK(ppt) && !(ppt->tag & MG_GEO) ) {
+      if ( MG_VOK(ppt) && !((ppt->tag & MG_GEO) || (ppt->tag & MG_CRN) ) ) {
         if(!bin) {
           fprintf(inm,"%d %d\n",ppt->tmp,++nn);
         } else {
