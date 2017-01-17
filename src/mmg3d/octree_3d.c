@@ -1247,10 +1247,9 @@ int _MMG3D_octreein_iso(MMG5_pMesh mesh,MMG5_pSol sol,_MMG3D_pOctree octree,int 
   double          d2,ux,uy,uz,hpi,hp1,hpi2,methalo[6];
   int             ip1,i,j;
   int             ncells;
-  double* ani;
+  double          ani[6];
   //double          dmax;
 
-  _MMG5_SAFE_MALLOC(ani,6,double);
   ani[0] = sol->m[ip];
   ani[3] = sol->m[ip];
   ani[5] = sol->m[ip];
@@ -1277,7 +1276,6 @@ int _MMG3D_octreein_iso(MMG5_pMesh mesh,MMG5_pSol sol,_MMG3D_pOctree octree,int 
   if (ncells < 0)
   {
 
-    _MMG5_DEL_MEM(mesh,ani,6*sizeof(double));
     _MMG5_DEL_MEM(mesh,lococ,octree->nc*sizeof(_MMG3D_octree_s*));
     return(0);
   }
@@ -1301,13 +1299,11 @@ int _MMG3D_octreein_iso(MMG5_pMesh mesh,MMG5_pSol sol,_MMG3D_pOctree octree,int 
 
       if ( d2 < hp1 || d2 < hpi2*hpi2 )
       {
-        _MMG5_DEL_MEM(mesh,ani,6*sizeof(double));
         _MMG5_DEL_MEM(mesh,lococ,octree->nc*sizeof(_MMG3D_octree_s*));
         return(0);
       }
     }
   }
-  _MMG5_DEL_MEM(mesh,ani,6*sizeof(double));
   _MMG5_DEL_MEM(mesh,lococ,octree->nc*sizeof(_MMG3D_octree_s*));
   return(1);
 }
