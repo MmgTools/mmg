@@ -32,7 +32,7 @@
  * \copyright GNU Lesser General Public License.
  */
 
-#include "mmg3d.h"
+#include "inlined_functions_3d.h"
 
 /**
  * \param mesh pointer toward the mesh structure
@@ -75,12 +75,15 @@ int _MMG5_chkswpgen(MMG5_pMesh mesh,MMG5_pSol met,int start,int ia,
   list[(*ilist)] = 6*start+ia;
   (*ilist)++;
   adja = &mesh->adja[4*(start-1)+1];
-  adj  = adja[_MMG5_ifar[ia][0]] / 4;      // start travelling by face (ia,0)
+  adj  = adja[_MMG5_ifar[ia][0]];      // start travelling by face (ia,0)
   piv  = pt->v[_MMG5_ifar[ia][1]];
   pol[npol] = 4*start + _MMG5_ifar[ia][1];
   npol++;
 
-  while ( adj && adj != start ) {
+  while ( adj ) {
+    adj /= 4;
+    if ( adj ==start ) break;
+
     pt = &mesh->tetra[adj];
     if ( pt->tag & MG_REQ ) return(0);
 
@@ -105,27 +108,27 @@ int _MMG5_chkswpgen(MMG5_pMesh mesh,MMG5_pSol met,int start,int ia,
     if ( pt->v[ _MMG5_ifar[i][0] ] == piv ) {
       pol[npol] = 4*adj + _MMG5_ifar[i][1];
       npol++;
-      adj = adja[ _MMG5_ifar[i][0] ] / 4;
+      adj = adja[ _MMG5_ifar[i][0] ];
       piv = pt->v[ _MMG5_ifar[i][1] ];
     }
     else {
       assert(pt->v[ _MMG5_ifar[i][1] ] == piv);
       pol[npol] = 4*adj + _MMG5_ifar[i][0];
       npol++;
-      adj = adja[ _MMG5_ifar[i][1] ] /4;
+      adj = adja[ _MMG5_ifar[i][1] ];
       piv = pt->v[ _MMG5_ifar[i][0] ];
     }
   }
   //CECILE : je vois pas pourquoi ca ameliore de faire ce test
   //plus rapide mais du coup on elimine des swap...
   //4/01/14 commentaire
-  //if ( calold*_MMG5_ALPHAD > 0.5 )  return(0);
-  
+  // if ( calold*_MMG5_ALPHAD > 0.5 )  return(0);
+
   /* Prevent swap of an external boundary edge */
   if ( !adj )  return(0);
-  
+
   assert(npol == (*ilist)); // du coup, apres on pourra virer npol
-  
+
   /* Find a configuration that enhances the worst quality within the shell */
   for (k=0; k<npol; k++) {
     iel = pol[k] / 4;
@@ -185,29 +188,24 @@ int _MMG5_chkswpgen(MMG5_pMesh mesh,MMG5_pSol met,int start,int ia,
       pt0->v[_MMG5_iare[i][0]] = np;
 
 
-      if ( met->m ) {
-        if ( typchk==1 && met->size > 1 )
-          caltmp = _MMG5_caltet33_ani(mesh,met,pt0);
-        else
-          caltmp = _MMG5_orcal(mesh,met,0);
-      }
-      else // - A option
-        caltmp = _MMG5_caltet_iso(mesh,met, pt0);
+      if ( typchk==1 && met->size > 1 && met->m )
+        caltmp = _MMG5_caltet33_ani(mesh,met,pt0);
+      else
+        caltmp = _MMG5_orcal(mesh,met,0);
 
       calnew = MG_MIN(calnew,caltmp);
+
+      ier = (calnew > crit*calold);
+      if ( !ier )  break;
 
       /* Second tetra obtained from iel */
       memcpy(pt0,pt,sizeof(MMG5_Tetra));
       pt0->v[_MMG5_iare[i][1]] = np;
 
-      if ( met->m ) {
-        if ( typchk==1 && met->size > 1 )
-          caltmp = _MMG5_caltet33_ani(mesh,met,pt0);
-        else
-          caltmp = _MMG5_orcal(mesh,met,0);
-      }
-      else // - A option
-        caltmp = _MMG5_caltet_iso(mesh,met, pt0);
+      if ( typchk==1 && met->size > 1 && met->m )
+        caltmp = _MMG5_caltet33_ani(mesh,met,pt0);
+      else
+        caltmp = _MMG5_orcal(mesh,met,0);
 
       calnew = MG_MIN(calnew,caltmp);
 
@@ -226,7 +224,7 @@ int _MMG5_chkswpgen(MMG5_pMesh mesh,MMG5_pSol met,int start,int ia,
  * \param ilist number of tetrahedra in the shell of the edge that we want
  *  to swap.
  * \param list pointer toward the shell of the edge that we want to swap.
- * \param bucket pointer toward the bucket structure in Delaunay mode,
+ * \param octree pointer toward the octree structure in Delaunay mode,
  * NULL pointer in pattern mode.
  * \param typchk type of checking permformed for edge length (hmin or LSHORT
  * criterion).
@@ -236,7 +234,7 @@ int _MMG5_chkswpgen(MMG5_pMesh mesh,MMG5_pSol met,int start,int ia,
  *
  */
 int _MMG5_swpgen(MMG5_pMesh mesh,MMG5_pSol met,int nconf,int ilist,int *list,
-                 _MMG5_pBucket bucket, char typchk) {
+                 _MMG3D_pOctree octree, char typchk) {
   MMG5_pTetra    pt;
   MMG5_pPoint    p0,p1;
   int       iel,na,nb,np,nball,ret,start;
@@ -260,20 +258,11 @@ int _MMG5_swpgen(MMG5_pMesh mesh,MMG5_pSol met,int nconf,int ilist,int *list,
 
   np  = _MMG3D_newPt(mesh,m,0);
   if(!np){
-    if ( bucket ) {
-      _MMG5_POINT_AND_BUCKET_REALLOC(mesh,met,np,mesh->gap,
-                                     printf("  ## Error: unable to allocate a new point\n");
-                                     _MMG5_INCREASE_MEM_MESSAGE();
-                                     return(-1)
-                                     ,m,0);
-    }
-    else {
-      _MMG5_POINT_REALLOC(mesh,met,np,mesh->gap,
-                          printf("  ## Error: unable to allocate a new point\n");
-                          _MMG5_INCREASE_MEM_MESSAGE();
-                          return(-1)
-                          ,m,0);
-    }
+    _MMG5_POINT_REALLOC(mesh,met,np,mesh->gap,
+                        printf("  ## Error: unable to allocate a new point\n");
+                        _MMG5_INCREASE_MEM_MESSAGE();
+                        return(-1)
+                        ,m,0);
   }
   if ( met->m ) {
     if ( typchk == 1 && (met->size>1) ) {

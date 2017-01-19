@@ -244,7 +244,7 @@ int _MMG5_intersecmet22(MMG5_pMesh mesh, double *m,double *n,double *mr) {
   /* Compute imn = M^{-1}N */
   det = m[0]*m[2] - m[1]*m[1];
   if ( fabs(det) < _MMG5_EPS*_MMG5_EPS ) {
-    printf("  ## Function intersecmet : null metric det : %E \n",det);
+    fprintf(stderr,"  ## Function intersecmet : null metric det : %E \n",det);
     return(0);
   }
   det = 1.0 / det;
@@ -259,7 +259,7 @@ int _MMG5_intersecmet22(MMG5_pMesh mesh, double *m,double *n,double *mr) {
 
   lambda[0] = 0.5 * (trimn - sqDelta);
   if ( lambda[0] < 0.0 ) {
-    printf(" ## Eigenvalues : %f \n",lambda[0]);
+    fprintf(stderr," ## Eigenvalues : %f \n",lambda[0]);
     return(0);
   }
 
@@ -523,12 +523,9 @@ int _MMG5_mmgIntextmet(MMG5_pMesh mesh,MMG5_pSol met,int np,double me[6],
     metan[1] = mrot[1];
     metan[2] = mrot[3];
 
-    /* printf("metsurf %e %e %e\n",mtan[0],mtan[1],mtan[2]); */
-    /* printf("metphys %e %e %e\n",metan[0],metan[1],metan[2]); */
-
     /* Intersection of metrics in the tangent plane */
     if ( !_MMG5_intersecmet22(mesh,mtan,metan,mr) ) {
-      fprintf(stdout,"WARNING IMPOSSIBLE INTERSECTION : SURFACIC METRIC SKIPPED \n");
+      fprintf(stderr,"WARNING IMPOSSIBLE INTERSECTION : SURFACIC METRIC SKIPPED \n");
       m[0] = me[0];
       m[1] = me[1];
       m[2] = me[2];
@@ -541,15 +538,16 @@ int _MMG5_mmgIntextmet(MMG5_pMesh mesh,MMG5_pSol met,int np,double me[6],
 
     /* Back to the canonical basis of \mathbb{R}^3 : me = ^tR*mr*R : mtan and
      * metan are reused */
-    mtan[0]  = mr[0]*r[0][0] + mr[1]*r[1][0] + r[2][0]*mrot[2];
-    mtan[1]  = mr[0]*r[0][1] + mr[1]*r[1][1] + r[2][1]*mrot[2];
-    mtan[2]  = mr[0]*r[0][2] + mr[1]*r[1][2] + r[2][2]*mrot[2];
-    metan[0] = mr[1]*r[0][0] + mr[2]*r[1][0] + r[2][0]*mrot[4];
-    metan[1] = mr[1]*r[0][1] + mr[2]*r[1][1] + r[2][1]*mrot[4];
-    metan[2] = mr[1]*r[0][2] + mr[2]*r[1][2] + r[2][2]*mrot[4];
-    alpha1 = r[0][0]*mrot[2] + r[1][0]*mrot[4] + r[2][0]*mrot[5];
-    alpha2 = r[0][1]*mrot[2] + r[1][1]*mrot[4] + r[2][1]*mrot[5];
-    alpha3 = r[0][2]*mrot[2] + r[1][2]*mrot[4] + r[2][2]*mrot[5];
+    mtan[0]  = mr[0]*r[0][0] + mr[1]*r[1][0];
+    mtan[1]  = mr[0]*r[0][1] + mr[1]*r[1][1];
+    mtan[2]  = mr[0]*r[0][2] + mr[1]*r[1][2];
+    metan[0] = mr[1]*r[0][0] + mr[2]*r[1][0];
+    metan[1] = mr[1]*r[0][1] + mr[2]*r[1][1];
+    metan[2] = mr[1]*r[0][2] + mr[2]*r[1][2];
+ 
+    alpha1 = r[2][0]*mrot[5];
+    alpha2 = r[2][1]*mrot[5];
+    alpha3 = r[2][2]*mrot[5];
 
     m[0] = r[0][0] * mtan[0] + r[1][0] * metan[0] + r[2][0]*alpha1;
     m[1] = r[0][0] * mtan[1] + r[1][0] * metan[1] + r[2][0]*alpha2;
@@ -564,10 +562,10 @@ int _MMG5_mmgIntextmet(MMG5_pMesh mesh,MMG5_pSol met,int np,double me[6],
 
     for (i=0; i<3; i++) {
       if(lambda[i]<=0) {
-        printf("%s:%d:Error: wrong metric at point %d -- eigenvalues :"
+        fprintf(stderr,"%s:%d:Error: wrong metric at point %d -- eigenvalues :"
                " %e %e %e\n",__FILE__,__LINE__,
                np,lambda[0],lambda[1],lambda[2]);
-        printf("  ## Surfacic metric skipped. \n");
+        fprintf(stderr,"  ## Surfacic metric skipped. \n");
         m[0] = me[0];
         m[1] = me[1];
         m[2] = me[2];

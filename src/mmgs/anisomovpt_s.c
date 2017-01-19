@@ -54,6 +54,7 @@ int movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
   double         calold,calnew,caltmp;
   int            k,iel,kel,nump,nbeg,nend;
   char           i0,i1,i2,ier;
+  static int     warn=0;
   step = 0.1;
 
   /* Make sure ball of point is closed */
@@ -121,8 +122,14 @@ int movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
     if ( !_MMG5_bezierCP(mesh,pt,&pb,1) )  return(0);
 
     /* Compute integral of sqrt(T^J(xi)  M(P(xi)) J(xi)) * P(xi) over the triangle */
-    if ( !_MMG5_elementWeight(mesh,met,pt,p0,&pb,r,gv) )  return(0);
-
+    if ( !_MMG5_elementWeight(mesh,met,pt,p0,&pb,r,gv) ) {
+      if ( !warn ) {
+        ++warn;
+        fprintf(stderr,"  ## Warning: unable to compute optimal position for at least"
+               " 1 point.\n" );
+      }
+      return(0);
+    }
   }
 
   /* At this point : gv = - gradient of V = direction to follow */
@@ -230,7 +237,7 @@ int movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
     caltmp = caleltsig_ani(mesh,met,iel);
     calold = MG_MIN(calold,caltmp);
     caltmp = caleltsig_ani(mesh,met,0);
-    if ( caltmp < _MMG5_EPSD )        return(0.0);
+    if ( caltmp < _MMG5_EPSD )        return(0);
     calnew = MG_MIN(calnew,caltmp);
 
     if ( calold < NULKAL && calnew <= calold )  return(0);
@@ -295,7 +302,7 @@ int movridpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
         }
       }
       else if ( it1 && it2 && (pt->v[i2] != ip1) && (pt->v[i2] != ip2) ) {
-        printf("   *** function movridptaniso : 3 ridge edges landing on point %d\n",pt->v[i0]);
+        fprintf(stderr,"   *** function movridptaniso : 3 ridge edges landing on point %d\n",pt->v[i0]);
         return(0);
       }
     }
@@ -316,7 +323,7 @@ int movridpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
         }
       }
       else if ( it1 && it2 && (pt->v[i1] != ip1) && (pt->v[i1] != ip2) ) {
-        printf("   *** function movridptaniso : 3 ridge edges landing on point %d\n",pt->v[i0]);
+        fprintf(stderr,"   *** function movridptaniso : 3 ridge edges landing on point %d\n",pt->v[i0]);
         return(0);
       }
     }

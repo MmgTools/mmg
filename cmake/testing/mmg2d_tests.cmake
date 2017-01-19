@@ -32,6 +32,25 @@ ADD_TEST(NAME Circle
   ${MMG2D_CI_TESTS}/Circle/cercle
   -out ${MMG2D_CI_TESTS}/Circle/cercle.o.meshb)
 
+
+###############################################################################
+#####
+#####         Input/Output
+#####
+###############################################################################
+
+# Binary gmsh
+ADD_TEST(NAME binary_gmsh_2d
+  COMMAND ${EXECUT_MMG2D} -v 5
+  ${MMG2D_CI_TESTS}/GmshInout/cercle1.mshb)
+
+# Ascii gmsh
+ADD_TEST(NAME ascii_gmsh_2d
+  COMMAND ${EXECUT_MMG2D} -v 5
+  ${MMG2D_CI_TESTS}/GmshInout/cercle1.msh)
+
+
+
 ###############################################################################
 #####
 #####         Isotropic cases
@@ -68,6 +87,11 @@ ADD_TEST(NAME SquareGeneration
   COMMAND ${EXECUT_MMG2D} -v 5
   ${MMG2D_CI_TESTS}/SquareGeneration/carretest
   -out ${MMG2D_CI_TESTS}/SquareGeneration/carretest.o.meshb)
+
+ADD_TEST(NAME NacaGeneration
+  COMMAND ${EXECUT_MMG2D} -v 5
+  ${MMG2D_CI_TESTS}/NacaGeneration/naca
+  -out ${MMG2D_CI_TESTS}/NacaGeneration/naca.o.meshb)
 
 ###############################################################################
 #####

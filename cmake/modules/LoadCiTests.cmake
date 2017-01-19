@@ -48,7 +48,7 @@ ELSE ( )
     SET ( OLD_MMG_MD5 "0" )
   ENDIF ( )
 
-  FILE(DOWNLOAD https://www.dropbox.com/s/yevltsxy3hxyv5u/mmg.version?dl=0
+  FILE(DOWNLOAD https://drive.google.com/uc?export=download&id=0B3X6EwOEKqHmRktsVkFDTGlfdzQ
     ${CMAKE_SOURCE_DIR}/ci_tests/mmg.version
     STATUS MMG_VERSION_STATUS
     INACTIVITY_TIMEOUT 5)
@@ -65,7 +65,7 @@ ELSE ( )
     MESSAGE(WARNING "Failed to load a simple text file, download status:"
       " ${MMG_VERSION_STATUS_1}.
  Try to get it at the following link:
-        https://www.dropbox.com/s/yevltsxy3hxyv5u/mmg.version?dl=0
+        https://drive.google.com/uc?export=download&id=0B3X6EwOEKqHmRktsVkFDTGlfdzQ
  then untar it in the project directory (mmg/ by default).")
   ENDIF()
 
@@ -76,7 +76,7 @@ ELSE ( )
     SET ( OLD_MMG2D_MD5 "0" )
   ENDIF ( )
 
-  FILE(DOWNLOAD https://www.dropbox.com/s/dyu7v04n4v2hgus/mmg2d.version?dl=0
+  FILE(DOWNLOAD https://drive.google.com/uc?export=download&id=0B3X6EwOEKqHmV3BlUER4M0Z4MGs
     ${CMAKE_SOURCE_DIR}/ci_tests/mmg2d.version
     STATUS MMG2D_VERSION_STATUS
     INACTIVITY_TIMEOUT 5)
@@ -93,7 +93,7 @@ ELSE ( )
     MESSAGE(WARNING "Failed to load a simple text file, download status:"
       " ${MMG2D_VERSION_STATUS_1}.
  Try to get it at the following link:
-        https://www.dropbox.com/s/b94gyooe1do6uul/mmg2d.tgz?dl=0
+        https://drive.google.com/uc?export=download&id=0B3X6EwOEKqHmV3BlUER4M0Z4MGs
  then untar it in the project directory (mmg/ by default).")
   ENDIF()
 
@@ -104,7 +104,7 @@ ELSE ( )
     SET ( OLD_MMGS_MD5 "0" )
   ENDIF ( )
 
-  FILE(DOWNLOAD https://www.dropbox.com/s/j7om7gl7r5mlnvj/mmgs.version?dl=0
+  FILE(DOWNLOAD https://drive.google.com/uc?export=download&id=0B3X6EwOEKqHmSWtGV295a28wU2c
     ${CMAKE_SOURCE_DIR}/ci_tests/mmgs.version
     STATUS MMGS_VERSION_STATUS
     INACTIVITY_TIMEOUT 5)
@@ -121,7 +121,7 @@ ELSE ( )
     MESSAGE(WARNING "Failed to load a simple text file, download status:"
       " ${MMGS_VERSION_STATUS_1}.
  Try to get it at the following link:
-        https://www.dropbox.com/s/zusur5gzz1tvmvh/mmgs.tgz?dl=0
+       https://drive.google.com/uc?export=download&id=0B3X6EwOEKqHmSWtGV295a28wU2c
  then untar it in the project directory (mmg/ by default).")
   ENDIF()
 
@@ -132,7 +132,7 @@ ELSE ( )
     SET ( OLD_MMG3D_MD5 "0" )
   ENDIF ( )
 
-  FILE(DOWNLOAD https://www.dropbox.com/s/s723rs0xqu2j6k8/mmg3d.version?dl=0
+  FILE(DOWNLOAD https://drive.google.com/uc?export=download&id=0B3X6EwOEKqHmSWtGV295a28wU2c
     ${CMAKE_SOURCE_DIR}/ci_tests/mmg3d.version
     STATUS MMG3D_VERSION_STATUS
     INACTIVITY_TIMEOUT 5)
@@ -149,7 +149,7 @@ ELSE ( )
     MESSAGE(WARNING "Failed to load a simple text file, download status:"
       " ${MMG3D_VERSION_STATUS_1}.
  Try to get it at the following link:
-        https://www.dropbox.com/s/e9yuc46617jynku/mmg3d.tgz?dl=0
+        https://drive.google.com/uc?export=download&id=0B3X6EwOEKqHmSWtGV295a28wU2c
  then untar it in the project directory (mmg/ by default).")
   ENDIF()
 
@@ -159,14 +159,14 @@ ENDIF()
 #--------------> mmg
 IF ( GET_MMG_TESTS MATCHES "TRUE" )
   MESSAGE("-- Download the mmg test cases. May be very long...")
-  FILE(DOWNLOAD https://www.dropbox.com/s/hnodvsv56mdazyx/mmg.tgz?dl=0
+  FILE(DOWNLOAD https://drive.google.com/uc?export=download&id=0B3X6EwOEKqHmdXVkS3QzdWEtdFU
     ${CMAKE_SOURCE_DIR}/ci_tests/mmg.tgz
     SHOW_PROGRESS)
   IF ( NOT EXISTS ${CMAKE_SOURCE_DIR}/ci_tests/mmg.tgz )
     MESSAGE("\n")
     MESSAGE(WARNING "Fail to automatically download the mmg test cases.
 Try to get it at the following link:
-       https://www.dropbox.com/s/hnodvsv56mdazyx/mmg.tgz?dl=0
+       https://drive.google.com/uc?export=download&id=0B3X6EwOEKqHmdXVkS3QzdWEtdFU
 then untar it in the project directory (mmg/ by default).")
   ELSE()
     EXECUTE_PROCESS(
@@ -189,14 +189,14 @@ ENDIF ()
 #--------------> mmg2d
 IF ( GET_MMG2D_TESTS MATCHES "TRUE" )
   MESSAGE("-- Download the mmg2d test cases. May be very long...")
-  FILE(DOWNLOAD https://www.dropbox.com/s/b94gyooe1do6uul/mmg2d.tgz?dl=0
+  FILE(DOWNLOAD https://drive.google.com/uc?export=download&id=0B3X6EwOEKqHmX0hrRWJWTDBETHc
     ${CMAKE_SOURCE_DIR}/ci_tests/mmg2d.tgz
     SHOW_PROGRESS)
   IF ( NOT EXISTS ${CMAKE_SOURCE_DIR}/ci_tests/mmg2d.tgz )
     MESSAGE("\n")
     MESSAGE(WARNING "Fail to automatically download the mmg2d test cases.
 Try to get it at the following link:
-       https://www.dropbox.com/s/b94gyooe1do6uul/mmg2d.tgz?dl=0
+       https://drive.google.com/uc?export=download&id=0B3X6EwOEKqHmX0hrRWJWTDBETHc
 then untar it in the project directory (mmg/ by default).")
   ELSE()
     EXECUTE_PROCESS(
@@ -218,14 +218,14 @@ ENDIF ()
 #--------------> mmgs
 IF ( GET_MMGS_TESTS MATCHES "TRUE" )
   MESSAGE("-- Download the mmgs test cases. May be very long...")
-  FILE(DOWNLOAD https://www.dropbox.com/s/zusur5gzz1tvmvh/mmgs.tgz?dl=0
+  FILE(DOWNLOAD https://drive.google.com/uc?export=download&id=0B3X6EwOEKqHmcVdZb1EzaTR3ZlU
     ${CMAKE_SOURCE_DIR}/ci_tests/mmgs.tgz
     SHOW_PROGRESS)
   IF ( NOT EXISTS ${CMAKE_SOURCE_DIR}/ci_tests/mmgs.tgz )
     MESSAGE("\n")
     MESSAGE(WARNING "Fail to automatically download the mmgs test cases.
 Try to get it at the following link:
-       https://www.dropbox.com/s/zusur5gzz1tvmvh/mmgs.tgz?dl=0
+       https://drive.google.com/uc?export=download&id=0B3X6EwOEKqHmcVdZb1EzaTR3ZlU
 then untar it in the project directory (mmg/ by default).")
   ELSE()
     EXECUTE_PROCESS(
@@ -245,31 +245,100 @@ Try to untar it by hand in the project directory"
 ENDIF ()
 
 #--------------> mmg3d
+SET(ADDRESS
+  https://drive.google.com/uc?export=download&id=0B3X6EwOEKqHmWGxhMnAzMGFrNTg
+  https://drive.google.com/uc?export=download&id=0B3X6EwOEKqHmclVnbTRqUXVfNUE
+  https://drive.google.com/uc?export=download&id=0B3X6EwOEKqHmdWNLTFh1THl1U0k
+  https://drive.google.com/uc?export=download&id=0B3X6EwOEKqHmX1d2WGJkaHUxV1E
+  https://drive.google.com/uc?export=download&id=0B3X6EwOEKqHmbmY1R0EyelhETW8
+  https://drive.google.com/uc?export=download&id=0B3X6EwOEKqHmd3lnTTZQRTZxLW8
+  https://drive.google.com/uc?export=download&id=0B3X6EwOEKqHmRHk0ZTREdzJpYXc
+  https://drive.google.com/uc?export=download&id=0B3X6EwOEKqHmd09YVmtEcXZIWFU
+  https://drive.google.com/uc?export=download&id=0B3X6EwOEKqHmLTFXUGhGTVY2dEE
+  https://drive.google.com/uc?export=download&id=0B3X6EwOEKqHmUGI3UU1UMExJTTQ
+  https://drive.google.com/uc?export=download&id=0B3X6EwOEKqHmSWZJTEt1aGVCZDA
+  https://drive.google.com/uc?export=download&id=0B3X6EwOEKqHmLUZqNjhwajBKZWM
+  https://drive.google.com/uc?export=download&id=0B3X6EwOEKqHmZG9lUTdGa1d5ZjA
+  https://drive.google.com/uc?export=download&id=0B3X6EwOEKqHmU2l0N0N4X0lyRkE
+  https://drive.google.com/uc?export=download&id=0B3X6EwOEKqHmcmVnY2NsSzBxVkk
+  https://drive.google.com/uc?export=download&id=0B3X6EwOEKqHmRWIxRS1yMUJyZkk
+  https://drive.google.com/uc?export=download&id=0B3X6EwOEKqHmM05MVEhvZzdHckE
+  https://drive.google.com/uc?export=download&id=0B3X6EwOEKqHmbFhOaE5UVlNQOFk
+  https://drive.google.com/uc?export=download&id=0B3X6EwOEKqHmLWp4SFpyN3c4d0U
+  https://drive.google.com/uc?export=download&id=0B3X6EwOEKqHmZm0tODJtRXM2eHc
+  https://drive.google.com/uc?export=download&id=0B3X6EwOEKqHmZ29NVVpyRlFob1k
+  https://drive.google.com/uc?export=download&id=0B3X6EwOEKqHmd0lmd1pHR1VKUlU
+  https://drive.google.com/uc?export=download&id=0B3X6EwOEKqHmY0VWR2pCbXRWLWM
+  )
+
+SET(FILENAME
+  ${CMAKE_SOURCE_DIR}/ci_tests/mmg3d.tgz.aa
+  ${CMAKE_SOURCE_DIR}/ci_tests/mmg3d.tgz.ab
+  ${CMAKE_SOURCE_DIR}/ci_tests/mmg3d.tgz.ac
+  ${CMAKE_SOURCE_DIR}/ci_tests/mmg3d.tgz.ad
+  ${CMAKE_SOURCE_DIR}/ci_tests/mmg3d.tgz.ae
+  ${CMAKE_SOURCE_DIR}/ci_tests/mmg3d.tgz.af
+  ${CMAKE_SOURCE_DIR}/ci_tests/mmg3d.tgz.ag
+  ${CMAKE_SOURCE_DIR}/ci_tests/mmg3d.tgz.ah
+  ${CMAKE_SOURCE_DIR}/ci_tests/mmg3d.tgz.ai
+  ${CMAKE_SOURCE_DIR}/ci_tests/mmg3d.tgz.aj
+  ${CMAKE_SOURCE_DIR}/ci_tests/mmg3d.tgz.ak
+  ${CMAKE_SOURCE_DIR}/ci_tests/mmg3d.tgz.al
+  ${CMAKE_SOURCE_DIR}/ci_tests/mmg3d.tgz.am
+  ${CMAKE_SOURCE_DIR}/ci_tests/mmg3d.tgz.an
+  ${CMAKE_SOURCE_DIR}/ci_tests/mmg3d.tgz.ao
+  ${CMAKE_SOURCE_DIR}/ci_tests/mmg3d.tgz.ap
+  ${CMAKE_SOURCE_DIR}/ci_tests/mmg3d.tgz.aq
+  ${CMAKE_SOURCE_DIR}/ci_tests/mmg3d.tgz.ar
+  ${CMAKE_SOURCE_DIR}/ci_tests/mmg3d.tgz.as
+  ${CMAKE_SOURCE_DIR}/ci_tests/mmg3d.tgz.at
+  ${CMAKE_SOURCE_DIR}/ci_tests/mmg3d.tgz.au
+  ${CMAKE_SOURCE_DIR}/ci_tests/mmg3d.tgz.av
+  ${CMAKE_SOURCE_DIR}/ci_tests/mmg3d.tgz.aw
+  )
+
+
 IF ( GET_MMG3D_TESTS MATCHES "TRUE" )
   MESSAGE("-- Download the mmg3d test cases. May be very long...")
-  FILE(DOWNLOAD https://www.dropbox.com/s/e9yuc46617jynku/mmg3d.tgz?dl=0
-    ${CMAKE_SOURCE_DIR}/ci_tests/mmg3d.tgz
-    SHOW_PROGRESS)
-  IF ( NOT EXISTS ${CMAKE_SOURCE_DIR}/ci_tests/mmg3d.tgz )
-    MESSAGE("\n")
-    MESSAGE(WARNING "Fail to automatically download the mmg3d test cases
-Try to get it at the following link:
-       https://www.dropbox.com/s/e9yuc46617jynku/mmg3d.tgz?dl=0
-then untar it in the project directory mmg/ by default).")
-  ELSE()
-    EXECUTE_PROCESS(
-      COMMAND ${CMAKE_COMMAND} -E tar xzf
-      ${CMAKE_SOURCE_DIR}/ci_tests/mmg3d.tgz
-      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/ci_tests/
-      )
-    IF ( NOT EXISTS ${CMAKE_SOURCE_DIR}/ci_tests/mmg3d.tgz )
+
+  SET(LOAD_OK 1)
+
+  FOREACH( i RANGE 0 22)
+    LIST(GET ADDRESS  ${i} ADDRESS_i)
+    LIST(GET FILENAME ${i} FILENAME_i)
+
+    FILE(DOWNLOAD ${ADDRESS_i}
+      ${FILENAME_i}
+      SHOW_PROGRESS)
+    IF ( NOT EXISTS ${FILENAME_i} )
       MESSAGE("\n")
-      MESSAGE(WARNING "Fail to automatically untar the mmg3d"
-        "test cases directory (mmg3d.tgz).
-Try to untar it by hand in the project directory"
-        " (mmg/ci_tests/ by default).")
+      MESSAGE(WARNING "Fail to automatically download the mmg3d test cases
+Try to get it at the following link:
+       ${ADDRESS_i}
+then untar it in the project directory mmg/ by default).")
+      SET ( LOAD_OK 0 )
+      BREAK()
     ENDIF()
 
-    FILE(REMOVE ${CMAKE_SOURCE_DIR}/ci_tests/mmg3d.tgz)
+  ENDFOREACH()
+
+  IF ( ${LOAD_OK} )
+    EXECUTE_PROCESS(
+      COMMAND cat ${FILENAME}
+      COMMAND tar -xzf -
+      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/ci_tests/
+      TIMEOUT 10000
+      )
+    IF ( NOT EXISTS ${CMAKE_SOURCE_DIR}/ci_tests/mmg3d )
+      MESSAGE("\n")
+      MESSAGE(WARNING "Fail to automatically untar the mmg3d"
+        "test cases directory (mmg3d.tgz.*).
+Try to untar it by hand in the project directory"
+        " (mmg/ci_tests/ by default):
+        cat mmg3d.tgz.* | tar xzvf - ")
+    ENDIF()
+
+    FILE(REMOVE ${FILENAME})
   ENDIF()
+
 ENDIF()

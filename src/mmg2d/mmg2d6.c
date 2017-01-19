@@ -57,7 +57,7 @@ int MMG2_mmg2d6(MMG5_pMesh mesh, MMG5_pSol sol) {
     if ( !M_EOK(pt) )  continue;
     for (i=0; i<3; i++) {
       ppt = &mesh->point[ pt->v[i] ];
-      ppt->tag &= ~M_NUL;
+      ppt->tag &= ~MG_NUL;
     }
   }
 
@@ -86,7 +86,7 @@ int MMG2_mmg2d6(MMG5_pMesh mesh, MMG5_pSol sol) {
   for (k=1; k<=mesh->np; k++) {
     ppt = &mesh->point[k];
 
-    ppt->tag |= M_NUL;
+    ppt->tag |= MG_NUL;
 
   }
 
@@ -96,13 +96,16 @@ int MMG2_mmg2d6(MMG5_pMesh mesh, MMG5_pSol sol) {
     if ( !M_EOK(pt) )  continue;
     for (i=0; i<3; i++) {
       ppt = &mesh->point[ pt->v[i] ];
-      ppt->tag &= ~M_NUL;
+      ppt->tag &= ~MG_NUL;
     }
   }
 
   /* Clean memory */
   _MMG5_DEL_MEM(mesh,sol->m,(sol->size*(sol->npmax+1))*sizeof(double));
 
+  /* remove edges*/
+  for(k=1 ; k<=mesh->na ; k++)
+    _MMG5_delEdge(mesh,k);
   return(1);
 }
 

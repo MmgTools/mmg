@@ -32,7 +32,7 @@
  * \copyright GNU Lesser General Public License.
  */
 
-#include "mmg3d.h"
+#include "inlined_functions_3d.h"
 
 extern char ddb;
 
@@ -58,11 +58,11 @@ int _MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, int *list,int ilist,
   MMG5_pxTetra  pxt;
   MMG5_pPoint   p0,p1,ppt0;
   MMG5_Tria     tt1,tt2;
+  MMG5_pPar     par;
   double        b0[3],b1[3],v[3],c[3],ux,uy,uz,ps,disnat,dischg;
   double        cal1,cal2,calnat,calchg,calold,calnew,caltmp,hausd;
-  int           iel,iel1,iel2,np,nq,na1,na2,k,nminus,nplus,isloc;
+  int           iel,iel1,iel2,np,nq,na1,na2,k,nminus,nplus,isloc,l,info;
   char          ifa1,ifa2,ia,ip,iq,ia1,ia2,j,isshell;
-  MMG5_pPar     par;
 
   iel = list[0] / 6;
   ia  = list[0] % 6;
@@ -82,7 +82,7 @@ int _MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, int *list,int ilist,
   }
 
   /* No swap when either internal or external component has only 1 element */
-  //Algiane: pourquoi on ne check pas ca en multi-domaines?
+  //Algiane: warning, to check in multi-dom...
   if ( mesh->info.iso ) {
     nminus = nplus = 0;
     for (k=0; k<ilist; k++) {
@@ -134,20 +134,75 @@ int _MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, int *list,int ilist,
   /* local parameters */
   hausd = mesh->info.hausd;
   isloc = 0;
-  for (k=0; k<mesh->info.npar; k++) {
-    par = &mesh->info.par[k];
-    if ( ( (par->elt == MMG5_Triangle) &&
-           ((tt1.ref == par->ref ) || (tt2.ref == par->ref)) ) /*||
-         ( (par->elt == MMG5_Vertex) &&
-         ((p0->ref == par->ref ) || (p1->ref == par->ref)) ) */ ){
-      if ( !isloc ) {
-        hausd = par->hausd;
-        isloc = 1;
+
+  /* Local params at triangles containing the edge */
+  if ( mesh->info.parTyp & MG_Tria ) {
+    if ( tt1.ref == tt2.ref ) {
+      for ( l=0; l<mesh->info.npar; ++l ) {
+        par = &mesh->info.par[l];
+        if ( par->elt != MMG5_Triangle ) continue;
+
+        hausd   = par->hausd;
+        isloc   = 1;
+        break;
       }
-      else {
-        // take the minimum value between the two local hausdorff number asked
-        // by the user.
+    }
+    else {
+      l = 0;
+      info = -1000;
+      do {
+        if ( isloc ) break;
+        par = &mesh->info.par[l];
+        if ( par->elt != MMG5_Triangle ) continue;
+
+        if ( tt1.ref!=par->ref && tt2.ref !=par->ref )  continue;
+
+        hausd   = par->hausd;
+        isloc   = 1;
+        info = par->ref;
+      } while ( ++l < mesh->info.npar );
+
+      for ( ; l<mesh->info.npar; ++l ) {
+        par = &mesh->info.par[l];
+        if ( par->elt != MMG5_Triangle || par->ref==info ) continue;
+
+        if ( tt1.ref!=par->ref && tt2.ref !=par->ref )  continue;
+
         hausd = MG_MIN(hausd,par->hausd);
+        break;
+      }
+    }
+  }
+
+  /* Local params at tetra of the edge shell */
+  if ( mesh->info.parTyp & MG_Tetra ) {
+    l = 0;
+    do
+    {
+      if ( isloc )  break;
+
+      par = &mesh->info.par[l];
+      if ( par->elt != MMG5_Tetrahedron ) continue;
+
+      for ( k=0; k<ilist; ++k ) {
+        pt = &mesh->tetra[list[k]/6];
+        if ( par->ref != pt->ref ) continue;
+
+        hausd   = par->hausd;
+        isloc   = 1;
+      }
+    } while ( ++l<mesh->info.npar );
+
+    for ( ; l<mesh->info.npar; ++l ) {
+      par = &mesh->info.par[l];
+      if ( par->elt != MMG5_Tetrahedron ) continue;
+
+      for ( k=0; k<ilist; ++k ) {
+        pt = &mesh->tetra[list[k]/6];
+        if ( par->ref != pt->ref ) continue;
+
+        hausd = MG_MIN(hausd,par->hausd);
+        break;
       }
     }
   }
@@ -168,6 +223,9 @@ int _MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, int *list,int ilist,
   c[2] = b1[2] - (p1->c[2] - _MMG5_ATHIRD*uz);
 
   disnat = MG_MAX(disnat, c[0]*c[0] + c[1]*c[1] + c[2]*c[2]);
+
+  /* local param at vertices */
+  // hausd = min (hausd_ref, hausd_np,hausd_nq)
   disnat = MG_MAX(disnat,hausd * hausd);
 
   p0 = &mesh->point[na1];
@@ -176,6 +234,8 @@ int _MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, int *list,int ilist,
   uy = p1->c[1] - p0->c[1];
   uz = p1->c[2] - p0->c[2];
 
+  /* local param at vertices */
+  // hausd = min (hausd_ref, hausd_na1,hausd_na2)
   _MMG5_BezierEdge(mesh,na1,na2,b0,b1,0,v);
   c[0] = b0[0] - (p0->c[0] + _MMG5_ATHIRD*ux);
   c[1] = b0[1] - (p0->c[1] + _MMG5_ATHIRD*uy);
@@ -192,20 +252,13 @@ int _MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, int *list,int ilist,
 
   if ( dischg > disnat )   return(0);
 
-  if ( met->m ) {
-    if ( typchk==1 && met->size > 1 ) {
-      cal1 = _MMG5_caltri33_ani(mesh,met,&tt1);
-      cal2 = _MMG5_caltri33_ani(mesh,met,&tt2);
-    }
-    else {
-      cal1 = _MMG5_caltri(mesh,met,&tt1);
-      cal2 = _MMG5_caltri(mesh,met,&tt2);
-    }
+  if ( typchk==1 && met->size > 1 && met->m ) {
+    cal1 = _MMG5_caltri33_ani(mesh,met,&tt1);
+    cal2 = _MMG5_caltri33_ani(mesh,met,&tt2);
   }
-  else { // with -A option we don't have the metric here so we always use the
-         // iso func.
-    cal1 = _MMG5_caltri_iso(mesh,met,&tt1);
-    cal2 = _MMG5_caltri_iso(mesh,met,&tt2);
+  else {
+    cal1 = _MMG5_caltri(mesh,met,&tt1);
+    cal2 = _MMG5_caltri(mesh,met,&tt2);
   }
 
   calnat = MG_MIN(cal1,cal2);
@@ -214,20 +267,13 @@ int _MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, int *list,int ilist,
     if ( tt2.v[j] == np )  tt2.v[j] = na1;
   }
 
-  if ( met->m ) {
-    if ( typchk==1 && met->size > 1 ) {
-      cal1 = _MMG5_caltri33_ani(mesh,met,&tt1);
-      cal2 = _MMG5_caltri33_ani(mesh,met,&tt2);
-    }
-    else {
-      cal1 = _MMG5_caltri(mesh,met,&tt1);
-      cal2 = _MMG5_caltri(mesh,met,&tt2);
-    }
+  if ( typchk==1 && met->size > 1 && met->m ) {
+    cal1 = _MMG5_caltri33_ani(mesh,met,&tt1);
+    cal2 = _MMG5_caltri33_ani(mesh,met,&tt2);
   }
-  else { // with -A option we don't have the metric here so we always use the
-    // iso func.
-    cal1 = _MMG5_caltri_iso(mesh,met,&tt1);
-    cal2 = _MMG5_caltri_iso(mesh,met,&tt2);
+  else {
+    cal1 = _MMG5_caltri(mesh,met,&tt1);
+    cal2 = _MMG5_caltri(mesh,met,&tt2);
   }
 
   calchg = MG_MIN(cal1,cal2);
@@ -272,54 +318,41 @@ int _MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, int *list,int ilist,
     /* 2 elts resulting from split and collapse */
     pt0->v[ip] = 0;
 
-    if ( met->m ) {
-      if ( typchk==1 && met->size > 1 )
-        caltmp = _MMG5_caltet33_ani(mesh,met,pt0);
-      else
-        caltmp = _MMG5_orcal(mesh,met,0);
-    }
-    else // -A option
-      caltmp = _MMG5_caltet_iso(mesh,met,pt0);
+    if ( typchk==1 && met->size > 1 && met->m )
+      caltmp = _MMG5_caltet33_ani(mesh,met,pt0);
+    else
+      caltmp = _MMG5_orcal(mesh,met,0);
+
 
     if ( caltmp < _MMG5_NULKAL )  return(0);
 
     if ( !isshell ) {
       pt0->v[ip] = na1;
-      if ( met->m ) {
-        if ( typchk==1 && met->size > 1 )
-          caltmp = _MMG5_caltet33_ani(mesh,met,pt0);
-        else
-          caltmp = _MMG5_orcal(mesh,met,0);
-      }
-      else // -A option
-        caltmp = _MMG5_caltet_iso(mesh,met,pt0);
+
+      if ( typchk==1 && met->size > 1 && met->m )
+        caltmp = _MMG5_caltet33_ani(mesh,met,pt0);
+      else
+        caltmp = _MMG5_orcal(mesh,met,0);
 
       calnew = MG_MIN(calnew,caltmp);
     }
     memcpy(pt0,pt,sizeof(MMG5_Tetra));
     pt0->v[iq] = 0;
 
-    if ( met->m ) {
-      if ( typchk==1 && met->size > 1 )
-        caltmp = _MMG5_caltet33_ani(mesh,met,pt0);
-      else
-        caltmp = _MMG5_orcal(mesh,met,0);
-    }
-    else // -A option
-      caltmp = _MMG5_caltet_iso(mesh,met,pt0);
+    if ( typchk==1 && met->size > 1 && met->m )
+      caltmp = _MMG5_caltet33_ani(mesh,met,pt0);
+    else
+      caltmp = _MMG5_orcal(mesh,met,0);
 
     if ( caltmp < _MMG5_NULKAL )  return(0);
 
     if ( !isshell ) {
       pt0->v[iq] = na1;
-      if ( met->m ) {
-        if ( typchk==1 && met->size > 1 )
-          caltmp = _MMG5_caltet33_ani(mesh,met,pt0);
-        else
-          caltmp = _MMG5_orcal(mesh,met,0);
-      }
-      else // -A option
-        caltmp = _MMG5_caltet_iso(mesh,met,pt0);
+
+      if ( typchk==1 && met->size > 1 && met->m )
+        caltmp = _MMG5_caltet33_ani(mesh,met,pt0);
+      else
+        caltmp = _MMG5_orcal(mesh,met,0);
 
       calnew = MG_MIN(calnew,caltmp);
     }
@@ -337,7 +370,7 @@ int _MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, int *list,int ilist,
  * \param ret dobble of the number of tetrahedra in the shell
  * \param it1 boundary face carrying the beforehand tested terminal
  * point for collapse
- * \param bucket pointer toward the bucket structure in Delaunay mode,
+ * \param octree pointer toward the octree structure in Delaunay mode,
  * NULL pointer in pattern mode.
  * \param typchk type of checking permformed for edge length (hmin or LSHORT
  * criterion).
@@ -347,7 +380,7 @@ int _MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, int *list,int ilist,
  *
  */
 int _MMG5_swpbdy(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int it1,
-                 _MMG5_pBucket bucket, char typchk) {
+                 _MMG3D_pOctree octree, char typchk) {
   MMG5_pTetra   pt,pt1;
   MMG5_pPoint   p0,p1;
   int           iel,iel1,ilist,np,nq,nm;
@@ -394,20 +427,11 @@ int _MMG5_swpbdy(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int it1,
   c[2] = 0.5*( p0->c[2] + p1->c[2]);
   nm = _MMG3D_newPt(mesh,c,MG_BDY);
   if ( !nm ) {
-    if ( bucket ) {
-      _MMG5_POINT_AND_BUCKET_REALLOC(mesh,met,nm,mesh->gap,
-                                     printf("  ## Error: unable to allocate a new point\n");
-                                     _MMG5_INCREASE_MEM_MESSAGE();
-                                     return(-1)
-                                     ,c,MG_BDY);
-    }
-    else{
-      _MMG5_POINT_REALLOC(mesh,met,np,mesh->gap,
-                          printf("  ## Error: unable to allocate a new point\n");
-                          _MMG5_INCREASE_MEM_MESSAGE();
-                          return(-1)
-                          ,c,MG_BDY);
-    }
+    _MMG5_POINT_REALLOC(mesh,met,np,mesh->gap,
+                        printf("  ## Error: unable to allocate a new point\n");
+                        _MMG5_INCREASE_MEM_MESSAGE();
+                        return(-1)
+                        ,c,MG_BDY);
   }
   if ( met->m ) {
     if ( typchk == 1 && (met->size>1) ) {

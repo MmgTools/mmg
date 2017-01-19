@@ -4,13 +4,15 @@
 !>  Example for using mmgslib (basic use)
 
 
-!> Include the mmgs library hader file
-! if the header file is in the "include" directory
-! #include "libmmgsf.h"
-! if the header file is in "include/mmg/mmgs"
+PROGRAM main
+  IMPLICIT NONE
+
+  !> Include the mmgs library hader file
+  ! if the header file is in the "include" directory
+  ! #include "libmmgsf.h"
+  ! if the header file is in "include/mmg/mmgs"
 #include "mmg/mmgs/libmmgsf.h"
 
-PROGRAM main
   MMG5_DATA_PTR_T  :: mmgMesh
   MMG5_DATA_PTR_T  :: mmgSol
   INTEGER          :: ier,k
@@ -145,7 +147,7 @@ PROGRAM main
   IF ( ier /= 1 ) CALL EXIT(107)
 
   !> ------------------------------ STEP  II --------------------------
-  !! library call
+  !! remesh function
   CALL MMGS_mmgslib(mmgMesh,mmgSol,ier)
 
   IF ( ier == MMG5_STRONGFAILURE ) THEN

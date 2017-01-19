@@ -15,10 +15,15 @@ ADD_EXECUTABLE(libmmgs_example0_b
 ADD_EXECUTABLE(libmmgs_example1
   ${CMAKE_SOURCE_DIR}/libexamples/mmgs/adaptation_example1/main.c ${mmgs_includes})
 
+ADD_EXECUTABLE(libmmgs_example2
+  ${CMAKE_SOURCE_DIR}/libexamples/mmgs/IsosurfDiscretization_example0/main.c ${mmgs_includes})
+
+
  IF ( WIN32 AND ((NOT MINGW) AND USE_SCOTCH) )
     my_add_link_flags(libmmg3d_example0_a "/SAFESEH:NO")
     my_add_link_flags(libmmg3d_example0_b "/SAFESEH:NO")
     my_add_link_flags(libmmgs_example1 "/SAFESEH:NO")
+    my_add_link_flags(libmmgs_example2 "/SAFESEH:NO")
  ENDIF ( )
 
 IF ( LIBMMGS_STATIC )
@@ -26,12 +31,14 @@ IF ( LIBMMGS_STATIC )
   TARGET_LINK_LIBRARIES(libmmgs_example0_a ${PROJECT_NAME}s_a)
   TARGET_LINK_LIBRARIES(libmmgs_example0_b ${PROJECT_NAME}s_a)
   TARGET_LINK_LIBRARIES(libmmgs_example1 ${PROJECT_NAME}s_a)
+  TARGET_LINK_LIBRARIES(libmmgs_example2 ${PROJECT_NAME}s_a)
 
 ELSEIF ( LIBMMGS_SHARED )
 
   TARGET_LINK_LIBRARIES(libmmgs_example0_a ${PROJECT_NAME}s_so)
   TARGET_LINK_LIBRARIES(libmmgs_example0_b ${PROJECT_NAME}s_so)
   TARGET_LINK_LIBRARIES(libmmgs_example1 ${PROJECT_NAME}s_so)
+  TARGET_LINK_LIBRARIES(libmmgs_example2 ${PROJECT_NAME}s_so)
 
 ELSE ()
   MESSAGE(WARNING "You must activate the compilation of the static or"
@@ -41,6 +48,7 @@ ENDIF ()
 INSTALL(TARGETS libmmgs_example0_a  RUNTIME DESTINATION bin )
 INSTALL(TARGETS libmmgs_example0_b  RUNTIME DESTINATION bin )
 INSTALL(TARGETS libmmgs_example1  RUNTIME DESTINATION bin )
+INSTALL(TARGETS libmmgs_example2  RUNTIME DESTINATION bin )
 
 ###############################################################################
 #####

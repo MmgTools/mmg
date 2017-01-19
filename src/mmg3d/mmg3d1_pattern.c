@@ -36,7 +36,7 @@
  *
  */
 
-#include "mmg3d.h"
+#include "inlined_functions_3d.h"
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -55,8 +55,10 @@ static int _MMG5_adpspl(MMG5_pMesh mesh,MMG5_pSol met, int* warn) {
   MMG5_pPoint     p0,p1,ppt;
   MMG5_pxPoint    pxp;
   double     dd,len,lmax,o[3],to[3],no1[3],no2[3],v[3];
-  int        k,ip,ip1,ip2,list[MMG3D_LMAX+2],ilist,ns,ref,ier;
-  char       imax,tag,j,i,i1,i2,ifa0,ifa1;
+  int        k,ip,ip1,ip2,list[MMG3D_LMAX+2],ilist;
+  int        ns,ref,ier;
+  int16_t    tag;
+  char       imax,j,i,i1,i2,ifa0,ifa1;
 
   *warn=0;
   ns = 0;
@@ -173,7 +175,7 @@ static int _MMG5_adpspl(MMG5_pMesh mesh,MMG5_pSol met, int* warn) {
       pxt = pt->xt ? &mesh->xtetra[pt->xt] : 0;
 
       if ( ier < 0 ) {
-        fprintf(stdout," ## Error: unable to split.\n");
+        fprintf(stderr," ## Error: unable to split.\n");
         return(-1);
       }
       else if ( !ier ) {
@@ -238,7 +240,7 @@ static int _MMG5_adpspl(MMG5_pMesh mesh,MMG5_pSol met, int* warn) {
       }
       ier = _MMG5_split1b(mesh,met,list,ilist,ip,1,1);
       if ( ier < 0 ) {
-        fprintf(stdout,"  ## Error: unable to split.\n");
+        fprintf(stderr,"  ## Error: unable to split.\n");
         return(-1);
       }
       else if ( !ier ) {
@@ -268,9 +270,10 @@ static int _MMG5_adpcol(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pxTetra    pxt;
   MMG5_pPoint     p0,p1;
   double     len,lmin;
-  int        k,ip,iq,list[MMG3D_LMAX+2],ilist,nc;
-  char       imin,tag,j,i,i1,i2,ifa0,ifa1;
+  int        k,ip,iq,list[MMG3D_LMAX+2],ilist,lists[MMG3D_LMAX+2],ilists,nc;
   int        ier;
+  int16_t    tag;
+  char       imin,j,i,i1,i2,ifa0,ifa1;
 
   nc = 0;
   for (k=1; k<=mesh->ne; k++) {
@@ -319,12 +322,18 @@ static int _MMG5_adpcol(MMG5_pMesh mesh,MMG5_pSol met) {
       tag |= MG_BDY;
       if ( p0->tag > tag )   continue;
       if ( ( tag & MG_NOM ) && (mesh->adja[4*(k-1)+1+i]) ) continue;
-      ilist = _MMG5_chkcol_bdy(mesh,met,k,i,j,list,2);
+
+      if (_MMG5_boulesurfvolp(mesh,k,i1,i,
+                              list,&ilist,lists,&ilists,(p0->tag & MG_NOM)) < 0 )
+        return(-1);
+
+      ilist = _MMG5_chkcol_bdy(mesh,met,k,i,j,list,ilist,lists,ilists,2);
     }
     /* Case of an internal face */
     else {
       if ( p0->tag & MG_BDY )  continue;
-      ilist = _MMG5_chkcol_int(mesh,met,k,i,j,list,2);
+      ilist = _MMG5_boulevolp(mesh,k,i1,list);
+      ilist = _MMG5_chkcol_int(mesh,met,k,i,j,list,ilist,2);
     }
     if ( ilist > 0 ) {
       ier = _MMG5_colver(mesh,met,list,ilist,i2,2);
@@ -362,7 +371,7 @@ static int _MMG5_adptet(MMG5_pMesh mesh,MMG5_pSol met) {
     if ( !mesh->info.noinsert ) {
       ns = _MMG5_adpspl(mesh,met,&warn);
       if ( ns < 0 ) {
-        fprintf(stdout,"  ## Unable to complete mesh. Exit program.\n");
+        fprintf(stderr,"  ## Unable to complete mesh. Exit program.\n");
         return(0);
       }
     }
@@ -375,21 +384,16 @@ static int _MMG5_adptet(MMG5_pMesh mesh,MMG5_pSol met) {
     if ( !mesh->info.noinsert ) {
       nc = _MMG5_adpcol(mesh,met);
       if ( nc < 0 ) {
-        fprintf(stdout,"  ## Unable to complete mesh. Exit program.\n");
+        fprintf(stderr,"  ## Unable to complete mesh. Exit program.\n");
         return(0);
       }
-#ifdef DEBUG
-      if ( nc ) { printf("APS ADPCOL == %d\n",nc);
-        _MMG3D_prilen(mesh,met,1);
-      }
-#endif
     }
     else  nc = 0;
 
     if ( !mesh->info.nomove ) {
-      nm = _MMG5_movtet(mesh,met,1);
+      nm = _MMG5_movtet(mesh,met,NULL,1);
       if ( nm < 0 ) {
-        fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
+        fprintf(stderr,"  ## Unable to improve mesh. Exiting.\n");
         return(0);
       }
     }
@@ -398,14 +402,14 @@ static int _MMG5_adptet(MMG5_pMesh mesh,MMG5_pSol met) {
     if ( !mesh->info.noswap ) {
       nf = _MMG5_swpmsh(mesh,met,NULL,2);
       if ( nf < 0 ) {
-        fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
+        fprintf(stderr,"  ## Unable to improve mesh. Exiting.\n");
         return(0);
       }
       nnf += nf;
 
       nf = _MMG5_swptet(mesh,met,1.053,NULL,2);
       if ( nf < 0 ) {
-        fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
+        fprintf(stderr,"  ## Unable to improve mesh. Exiting.\n");
         return(0);
       }
     }
@@ -429,11 +433,11 @@ static int _MMG5_adptet(MMG5_pMesh mesh,MMG5_pSol met) {
   while( ++it < maxit && nc+ns > 0 );
 
   if ( warn ) {
-    fprintf(stdout,"  ## Error:");
-    fprintf(stdout," unable to allocate a new point in last call"
+    fprintf(stderr,"  ## Error:");
+    fprintf(stderr," unable to allocate a new point in last call"
             " of _MMG5_adpspl.\n");
     _MMG5_INCREASE_MEM_MESSAGE();
-    fprintf(stdout,"  ## Uncomplete mesh. Exiting\n" );
+    fprintf(stderr,"  ## Uncomplete mesh. Exiting\n" );
     return(0);
   }
 
@@ -454,9 +458,9 @@ static int _MMG5_adptet(MMG5_pMesh mesh,MMG5_pSol met) {
 /*       nw = 0; */
 
     if ( !mesh->info.nomove ) {
-      nm = _MMG5_movtet(mesh,met,0);
+      nm = _MMG5_movtet(mesh,met,NULL,0);
       if ( nm < 0 ) {
-        fprintf(stdout,"  ## Unable to improve mesh.\n");
+        fprintf(stderr,"  ## Unable to improve mesh.\n");
         return(0);
       }
       nnm += nm;
@@ -466,14 +470,14 @@ static int _MMG5_adptet(MMG5_pMesh mesh,MMG5_pSol met) {
     if ( !mesh->info.noswap ) {
       nf = _MMG5_swpmsh(mesh,met,NULL,2);
       if ( nf < 0 ) {
-        fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
+        fprintf(stderr,"  ## Unable to improve mesh. Exiting.\n");
         return(0);
       }
       nnf += nf;
 
       nf = _MMG5_swptet(mesh,met,1.053,NULL,2);
       if ( nf < 0 ) {
-        fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
+        fprintf(stderr,"  ## Unable to improve mesh. Exiting.\n");
         return(0);
       }
     }
@@ -489,9 +493,9 @@ static int _MMG5_adptet(MMG5_pMesh mesh,MMG5_pSol met) {
   while( ++it < maxit && /*nw+*/nm+nf > 0 );
 
   if ( !mesh->info.nomove ) {
-    nm = _MMG5_movtet(mesh,met,3);
+    nm = _MMG5_movtet(mesh,met,NULL,3);
     if ( nm < 0 ) {
-      fprintf(stdout,"  ## Unable to improve mesh.\n");
+      fprintf(stderr,"  ## Unable to improve mesh.\n");
       return(0);
     }
     nnm += nm;
@@ -526,7 +530,7 @@ int _MMG5_mmg3d1_pattern(MMG5_pMesh mesh,MMG5_pSol met) {
     fprintf(stdout,"  ** MESH ANALYSIS\n");
 
   if ( mesh->info.iso && !_MMG5_chkmani(mesh) ) {
-    fprintf(stdout,"  ## Non orientable implicit surface. Exit program.\n");
+    fprintf(stderr,"  ## Non orientable implicit surface. Exit program.\n");
     return(0);
   }
 
@@ -535,7 +539,7 @@ int _MMG5_mmg3d1_pattern(MMG5_pMesh mesh,MMG5_pSol met) {
     fprintf(stdout,"  ** GEOMETRIC MESH\n");
 
   if ( !_MMG5_anatet(mesh,met,1,1) ) {
-    fprintf(stdout,"  ## Unable to split mesh. Exiting.\n");
+    fprintf(stderr,"  ## Unable to split mesh. Exiting.\n");
     return(0);
   }
 
@@ -549,20 +553,20 @@ int _MMG5_mmg3d1_pattern(MMG5_pMesh mesh,MMG5_pSol met) {
 
   /* define metric map */
   if ( !_MMG5_defsiz(mesh,met) ) {
-    fprintf(stdout,"  ## Metric undefined. Exit program.\n");
+    fprintf(stderr,"  ## Metric undefined. Exit program.\n");
     return(0);
   }
 
   if ( mesh->info.hgrad > 0. ) {
     if ( mesh->info.imprim )   fprintf(stdout,"\n  -- GRADATION : %8f\n",exp(mesh->info.hgrad));
     if ( !_MMG5_gradsiz(mesh,met) ) {
-      fprintf(stdout,"  ## Gradation problem. Exit program.\n");
+      fprintf(stderr,"  ## Gradation problem. Exit program.\n");
       return(0);
     }
   }
 
   if ( !_MMG5_anatet(mesh,met,2,1) ) {
-    fprintf(stdout,"  ## Unable to split mesh. Exiting.\n");
+    fprintf(stderr,"  ## Unable to split mesh. Exiting.\n");
     return(0);
   }
 
@@ -572,25 +576,25 @@ int _MMG5_mmg3d1_pattern(MMG5_pMesh mesh,MMG5_pSol met) {
 
 #ifdef DEBUG
   puts("---------------------------Fin anatet---------------------");
-  _MMG3D_outqua(mesh,met);
+  _MMG3D_outqua(mesh,met,mesh->info.optimLES);
 #endif
   if ( !_MMG5_adptet(mesh,met) ) {
-    fprintf(stdout,"  ## Unable to adapt. Exit program.\n");
+    fprintf(stderr,"  ## Unable to adapt. Exit program.\n");
     return(0);
   }
 
 #ifdef DEBUG
   puts("---------------------Fin adptet-----------------");
-  _MMG3D_outqua(mesh,met);
+  _MMG3D_outqua(mesh,met,mesh->info.optimLES);
 #endif
   /* in test phase: check if no element with 2 bdry faces */
   if ( !_MMG5_chkfemtopo(mesh) ) {
-    fprintf(stdout,"  ## Topology of mesh unsuited for fem computations. Exit program.\n");
+    fprintf(stderr,"  ## Topology of mesh unsuited for fem computations. Exit program.\n");
     return(0);
   }
 
   if ( mesh->info.iso && !_MMG5_chkmani(mesh) ) {
-    fprintf(stdout,"  ## Non orientable implicit surface. Exit program.\n");
+    fprintf(stderr,"  ## Non orientable implicit surface. Exit program.\n");
     return(0);
   }
 

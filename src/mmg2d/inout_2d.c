@@ -76,14 +76,14 @@ double MMG_swapd(double sbin)
 }
 
 /* read mesh data */
-int MMG2D_loadMesh(MMG5_pMesh mesh,char *filename) {
+int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
   FILE        *inm;
   MMG5_pPoint       ppt;
   MMG5_pEdge        ped;
   MMG5_pTria        pt;
   float             fc;
-  int          k,ref,tmp,ncor,norient,nreq,nreqed;
-  int          posnp,posnt,posncor,posned,posnq,posreq,posreqed,bin,iswp,nq;
+  long         posnp,posnt,posncor,posned,posnq,posreq,posreqed;
+  int          k,ref,tmp,ncor,norient,nreq,nreqed,bin,iswp,nq;
   char        *ptr,data[128],chaine[128];
   double       air,dtmp;
   int          i,bdim,binch,bpos;
@@ -195,7 +195,7 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,char *filename) {
         if(iswp) bdim=MMG_swapbin(bdim);
         mesh->dim = bdim;
         if(bdim!=2) {
-          fprintf(stdout,"BAD SOL DIMENSION : %d\n",mesh->dim);
+          fprintf(stdout,"BAD MESH DIMENSION : %d\n",mesh->dim);
           exit(EXIT_FAILURE);
           return(1);
         }
@@ -286,7 +286,7 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,char *filename) {
   }
 
   /* mem alloc */
-  if ( !MMG2_zaldy(mesh) )  return(0);
+  if ( !MMG2D_zaldy(mesh) )  return(0);
 
   /* read vertices */
   rewind(inm);
@@ -339,7 +339,7 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,char *filename) {
       }
     }
     ppt->tag = 0;
-    ppt->tag = M_NUL;
+    ppt->tag = MG_NUL;
   }
 
   /* read edges */
@@ -378,12 +378,13 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,char *filename) {
       }
       for (i=0; i<3; i++) {
         ppt = &mesh->point[ pt->v[i] ];
-        ppt->tag &= ~M_NUL;
+        ppt->tag &= ~MG_NUL;
       }
       for(i=0 ; i<3 ; i++)
         pt->edg[i] = 0;
       air = MMG2_quickarea(mesh->point[pt->v[0]].c,mesh->point[pt->v[1]].c,
                            mesh->point[pt->v[2]].c);
+
       if(air < 0) {
         if ( mesh->info.ddebug || mesh->info.imprim > 6 )
           printf("Tr %d bad oriented\n",k);
@@ -393,11 +394,15 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,char *filename) {
         pt->v[1] = tmp;
       }
     }
-    fprintf(stdout," %8d triangles reoriented \n",norient);
+    if ( norient ) {
+      fprintf(stdout,"\n     $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ \n");
+      fprintf(stdout,"         BAD ORIENTATION : vol < 0 -- %8d element(s) reoriented\n",norient);
+      fprintf(stdout,"     $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ \n\n");
+    }
   } else {
     for (k=1; k<=mesh->np; k++) {
       ppt = &mesh->point[ k ];
-      ppt->tag &= ~M_NUL;
+      ppt->tag &= ~MG_NUL;
     }
   }
 
@@ -480,17 +485,66 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,char *filename) {
   return(1);
 }
 
+/* Load mesh file at gmsh format */
+int MMG2D_loadMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
+  FILE*       inm;
+  MMG5_pPoint ppt;
+  double      z;
+  long        posNodes,posElts,posNodeData;
+  int         ier,k;
+  int         bin,iswp,nelts;
+
+  mesh->dim = 2;
+
+  ier = MMG5_loadMshMesh_part1(mesh,sol,filename,&inm,
+                               &posNodes,&posElts,&posNodeData,
+                               &bin,&iswp,&nelts);
+  if ( ier < 1 ) return (ier);
+
+  if ( !MMG2D_zaldy(mesh) )  return(0);
+
+  if ( mesh->ne || mesh->nprism ) {
+    fprintf(stderr,"  ## Error: Input mesh must be a two-dimensional mesh.\n");
+    return(-1);
+  }
+  if ( !mesh->nt )
+      fprintf(stdout,"  **WARNING NO GIVEN TRIANGLE\n");
+
+  if (mesh->npmax < mesh->np || mesh->ntmax < mesh->nt )
+    return(-1);
+
+  ier = MMG5_loadMshMesh_part2( mesh, sol,&inm,
+                                posNodes,posElts,posNodeData,
+                                bin,iswp,nelts);
+
+  if ( ier < 1 ) return ( ier );
+
+  z = 0.;
+  for ( k=1; k<=mesh->np; ++k ) {
+    ppt = &mesh->point[k];
+    if ( !MG_VOK(ppt) ) continue;
+
+    z += fabs(ppt->c[2]);
+  }
+  if ( z > _MMG5_EPSOK ) {
+    fprintf(stderr,"  ## Error: Input mesh must be a two-dimensional mesh.\n");
+    return(-1);
+  }
+
+  return(1);
+}
+
 
 /* load metric */
-int MMG2D_loadSol(MMG5_pMesh mesh,MMG5_pSol sol,char *filename) {
+int MMG2D_loadSol(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
   FILE       *inm;
   float       fsol;
   double      dsol;
+  long        posnp;
   int         binch,bdim,iswp;
   int         k,i,isol,type,bin,dim,btyp,bpos;
-  long        posnp;
-  char        *ptr,data[128],chaine[128];
   int         msh;
+  char        *ptr,data[128],chaine[128];
 
   msh = mesh->info.nreg;
 
@@ -613,6 +667,12 @@ int MMG2D_loadSol(MMG5_pMesh mesh,MMG5_pSol sol,char *filename) {
     fprintf(stdout,"  ** MISSING DATA.\n");
     return(-1);
   }
+
+  if ( sol->np != mesh->np ) {
+    fprintf(stdout,"  ** WRONG DATA. IGNORED\n");
+    return(-1);
+  }
+
   if ( btyp!= 1 && btyp!=3 ) {
     fprintf(stdout,"  ** DATA IGNORED\n");
     sol->size = 1;
@@ -630,7 +690,7 @@ int MMG2D_loadSol(MMG5_pMesh mesh,MMG5_pSol sol,char *filename) {
   rewind(inm);
   fseek(inm,posnp,SEEK_SET);
   for (k=1; k<=sol->np; k++) {
-    isol = (k-1) * sol->size + 1;
+    isol = k * sol->size;
     if (sol->ver == 1) {
       for (i=0; i<sol->size; i++) {
         if(!bin){
@@ -693,7 +753,7 @@ int MMG2D_loadSol(MMG5_pMesh mesh,MMG5_pSol sol,char *filename) {
  * \warning you must call the \a MMG2_tassage function before saving your
  * mesh.
  */
-int MMG2D_saveMesh(MMG5_pMesh mesh,char *filename) {
+int MMG2D_saveMesh(MMG5_pMesh mesh,const char *filename) {
   FILE*             inm;
   MMG5_pPoint       ppt;
   MMG5_pEdge        ped;
@@ -763,15 +823,15 @@ int MMG2D_saveMesh(MMG5_pMesh mesh,char *filename) {
   // //HACK SAVE ONLY SD ref 2
   //   for (k=1; k<=mesh->np; k++) {
   //     ppt = &mesh->point[k];
-  //     ppt->tag = M_NUL;
+  //     ppt->tag = MG_NUL;
   //   }
   //   for (k=1; k<=mesh->nt; k++) {
   //     pt = &mesh->tria[k];
   //  if (!M_EOK(pt)) continue;
   //     if (pt->ref==2) {
-  //    mesh->point[pt->v[0]].tag &= ~M_NUL;
-  //    mesh->point[pt->v[1]].tag &= ~M_NUL;
-  //    mesh->point[pt->v[2]].tag &= ~M_NUL;
+  //    mesh->point[pt->v[0]].tag &= ~MG_NUL;
+  //    mesh->point[pt->v[1]].tag &= ~MG_NUL;
+  //    mesh->point[pt->v[2]].tag &= ~MG_NUL;
   //     } else {
   //    pt->v[0] = 0;
   //     }
@@ -928,7 +988,7 @@ int MMG2D_saveMesh(MMG5_pMesh mesh,char *filename) {
   if ( mesh->na ) {
     for (k=1; k<=mesh->na; k++) {
       ped = &mesh->edge[k];
-      if ( ped->a ) ++ne;
+      if ( ped->a && ped->b ) ++ne;
     }
   }
 
@@ -947,7 +1007,8 @@ int MMG2D_saveMesh(MMG5_pMesh mesh,char *filename) {
     }
     for (k=1; k<=mesh->na; k++) {
       ped = &mesh->edge[k];
-      if(!ped->a) continue;
+      if((!ped->a)||(!ped->b)) continue;
+
       ref = ped->ref;
       if(!bin)
         fprintf(inm,"%d %d %d\n",mesh->point[ped->a].tmp,mesh->point[ped->b].tmp,ref);
@@ -1139,8 +1200,11 @@ int MMG2D_saveMesh(MMG5_pMesh mesh,char *filename) {
   return(1);
 }
 
+int MMG2D_saveMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
+  return(MMG5_saveMshMesh(mesh,sol,filename));
+}
 
-int MMG2_loadVect(MMG5_pMesh mesh,char *filename) {
+int MMG2_loadVect(MMG5_pMesh mesh,const char *filename) {
   printf("comment for merge of the data structure\n");
   exit(EXIT_FAILURE);
   /* FILE       *inm; */
@@ -1298,7 +1362,7 @@ int MMG2_loadVect(MMG5_pMesh mesh,char *filename) {
   /* fclose(inm); */
   return(1);
 }
-int MMG2D_saveSol(MMG5_pMesh mesh,MMG5_pSol sol,char *filename) {
+int MMG2D_saveSol(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
   FILE*        inm;
   MMG5_pPoint       ppt;
   float        fsol;
@@ -1412,7 +1476,7 @@ int MMG2D_saveSol(MMG5_pMesh mesh,MMG5_pSol sol,char *filename) {
   for (k=1; k<=mesh->np; k++) {
     ppt = &mesh->point[k];
     if ( !M_VOK(ppt) )  continue;
-    isol = (k-1) * sol->size + 1;
+    isol = k * sol->size;
     if (sol->ver < 2) {
       if(!bin) {
         if(msh && sol->size > 1) {
@@ -1490,7 +1554,7 @@ int MMG2D_saveSol(MMG5_pMesh mesh,MMG5_pSol sol,char *filename) {
   return(1);
 }
 
-int MMG2D_saveVect(MMG5_pMesh mesh,MMG5_pSol sol,char *filename,double lambda) {
+int MMG2D_saveVect(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename,double lambda) {
   printf("comment for merge of the data structure\n");
   exit(EXIT_FAILURE);
   /* FILE        *inm,*f,*inm2; */

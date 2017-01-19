@@ -111,7 +111,7 @@ int MMG2_scaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
      * the user */
     if ( !sethmin )  mesh->info.hmin  = 0.01;
 
-    if ( !sethmax )  mesh->info.hmax  = 1.;
+    if ( !sethmax )  mesh->info.hmax  = 2.;
 
     if ( mesh->info.hmax < mesh->info.hmin ) {
       if ( sethmin && sethmax ) {
@@ -190,7 +190,7 @@ int MMG2_scaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
     dd = 1.0 / (dd*dd);
     /* Normalization */
     for (k=1; k<=mesh->np; k++) {
-      iadr = (k-1)*sol->size + 1;
+      iadr = k*sol->size;
       for (i=0; i<sol->size; i++)  sol->m[iadr+i] *= dd;
     }
 
@@ -198,7 +198,7 @@ int MMG2_scaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
     if ( !sethmin ) {
       mesh->info.hmin = FLT_MAX;
       for (k=1; k<=mesh->np; k++)  {
-        iadr = (k-1)*sol->size + 1;
+        iadr = k*sol->size;
         m    = &sol->m[iadr];
 
         /* Check the input metric */
@@ -222,7 +222,7 @@ int MMG2_scaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
     if ( !sethmax ) {
       mesh->info.hmax = 0.;
       for (k=1; k<=mesh->np; k++)  {
-        iadr = (k-1)*sol->size + 1;
+        iadr = k*sol->size;
         m    = &sol->m[iadr];
 
         /* Check the input metric */
@@ -265,7 +265,7 @@ int MMG2_scaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
     isqhmin  = 1.0 / (mesh->info.hmin*mesh->info.hmin);
     isqhmax  = 1.0 / (mesh->info.hmax*mesh->info.hmax);
     for (k=1; k<=mesh->np; k++) {
-      iadr = (k-1)*sol->size + 1;
+      iadr = k*sol->size;
 
       m    = &sol->m[iadr];
       /* Check the input metric */
@@ -319,6 +319,12 @@ int MMG2_unscaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
     ppt->c[1] = ppt->c[1] * dd + info->min[1];
   }
 
+
+  /* unscale paramter values */
+  mesh->info.hmin  *= dd;
+  mesh->info.hmax  *= dd;
+  mesh->info.hausd *= dd;
+
   /* de-normalize metric */
   if ( !sol->np )  return(1);
   switch (sol->size) {
@@ -331,17 +337,11 @@ int MMG2_unscaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
     for (k=1; k<=mesh->np; k++) {
       ppt = &mesh->point[k];
       if ( !M_VOK(ppt) )  continue;
-      iadr = (k-1)*sol->size + 1;
+      iadr = k*sol->size;
       for (i=0; i<sol->size; i++)  sol->m[iadr+i] *= dd;
     }
     break;
   }
 
-  /* unscale paramter values */
-  mesh->info.hmin  *= dd;
-  mesh->info.hmax  *= dd;
-  mesh->info.hausd *= dd;
-
   return(1);
 }
-

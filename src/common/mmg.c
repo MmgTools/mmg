@@ -45,11 +45,13 @@ void _MMG5_mmgUsage(char *prog) {
   fprintf(stdout,"\nUsage: %s [-v [n]] [opts..] filein [fileout]\n",prog);
 
   fprintf(stdout,"\n** Generic options :\n");
-  fprintf(stdout,"-h      Print this message\n");
-  fprintf(stdout,"-v [n]  Tune level of verbosity, [-10..10]\n");
-  fprintf(stdout,"-m [n]  Set maximal memory size to n Mbytes\n");
-  fprintf(stdout,"-d      Turn on debug mode\n");
-  fprintf(stdout,"-val    Print the default parameters values\n");
+  fprintf(stdout,"-h        Print this message\n");
+  fprintf(stdout,"-v [n]    Tune level of verbosity, [-10..10]\n");
+  fprintf(stdout,"-m [n]    Set maximal memory size to n Mbytes\n");
+  fprintf(stdout,"-d        Turn on debug mode\n");
+  fprintf(stdout,"-val      Print the default parameters values\n");
+  fprintf(stdout,"-default  Save a local parameters file for default parameters"
+          " values\n");
 
   fprintf(stdout,"\n**  File specifications\n");
   fprintf(stdout,"-in  file  input triangulation\n");
@@ -63,6 +65,8 @@ void _MMG5_mmgUsage(char *prog) {
   fprintf(stdout,"-hmax   val  maximal mesh size\n");
   fprintf(stdout,"-hausd  val  control Hausdorff distance\n");
   fprintf(stdout,"-hgrad  val  control gradation\n");
+  fprintf(stdout,"-ls     val  create mesh of isovalue val (0 if no argument provided)\n");
+
 }
 
 /**
@@ -107,3 +111,75 @@ void _MMG5_mmgDefaultValues(MMG5_pMesh mesh) {
           exp(mesh->info.hgrad));
 }
 
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param bdryRefs pointer toward the list of the boundary references.
+ * \return npar, the number of local parameters at triangles if success,
+ * 0 otherwise.
+ *
+ * Count the local default values at triangles and fill the list of the boundary
+ * references.
+ *
+ */
+inline
+int _MMG5_countLocalParamAtTri( MMG5_pMesh mesh,_MMG5_iNode **bdryRefs) {
+  int         npar,k,ier;
+
+  /** Count the number of different boundary references and list it */
+  (*bdryRefs) = NULL;
+  npar = 0;
+
+  k = mesh->nt? mesh->tria[1].ref : 0;
+
+  /* Try to alloc the first node */
+  ier = _MMG5_Add_inode( mesh, bdryRefs, k );
+  if ( ier < 0 ) {
+    fprintf(stderr,"  ## Error: unable to allocate the first boundary"
+           " reference node.\n");
+    return(0);
+  }
+  else {
+    assert(ier);
+    npar = 1;
+  }
+
+  for ( k=1; k<=mesh->nt; ++k ) {
+    ier = _MMG5_Add_inode( mesh, bdryRefs, mesh->tria[k].ref );
+
+    if ( ier < 0 ) {
+      printf("  ## Warning: unable to list the tria references.\n"
+             "              Uncomplete parameters file.\n" );
+      break;
+    }
+    else if ( ier ) ++npar;
+  }
+
+  return(npar);
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param bdryRefs pointer toward the list of the boundary references.
+ * \param npar number of local param at triangles.
+ * \param out pointer toward the file in which to write.
+ * \return 1 if success, 0 otherwise.
+ *
+ * Write the local default values at triangles in the parameter file.
+ *
+ */
+inline
+int _MMG5_writeLocalParamAtTri( MMG5_pMesh mesh, _MMG5_iNode *bdryRefs,
+                                FILE *out ) {
+  _MMG5_iNode *cur;
+
+  cur = bdryRefs;
+  while( cur ) {
+    fprintf(out,"%d Triangle %e %e %e \n",cur->val,
+            mesh->info.hmin, mesh->info.hmax,mesh->info.hausd);
+    cur = cur->nxt;
+  }
+
+  _MMG5_Free_ilinkedList(mesh,bdryRefs);
+
+  return(1);
+}

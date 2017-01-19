@@ -31,9 +31,9 @@ PROJECT (mmg)
 #####
 ###############################################################################
 SET (CMAKE_RELEASE_VERSION_MAJOR "5" )
-SET (CMAKE_RELEASE_VERSION_MINOR "1" )
-SET (CMAKE_RELEASE_VERSION_PATCH "4" )
-SET (CMAKE_RELEASE_DATE "Oct 18, 2016" )
+SET (CMAKE_RELEASE_VERSION_MINOR "2" )
+SET (CMAKE_RELEASE_VERSION_PATCH "0" )
+SET (CMAKE_RELEASE_DATE "Jan 20, 2017" )
 
 SET (CMAKE_RELEASE_VERSION
   "${CMAKE_RELEASE_VERSION_MAJOR}.${CMAKE_RELEASE_VERSION_MINOR}.${CMAKE_RELEASE_VERSION_PATCH}")
@@ -66,7 +66,6 @@ CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/src/common/mmgcommon.h.in
 
 # Executable path
 SET(EXECUTABLE_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/bin)
-SET(MMGS_SOURCE_DIR ${CMAKE_SOURCE_DIR}/src/mmgs)
 SET(COMMON_SOURCE_DIR ${CMAKE_SOURCE_DIR}/src/common)
 
 # Find "exotic" compilers
@@ -239,33 +238,11 @@ ENDIF ( )
 
 ############################################################################
 #####
-##### Set the full RPATH to find libraries independently from
-##### LD_LIBRARY_PATH (for MacOSX)
+##### RPATH for MacOSX
 #####
 ############################################################################
 
-SET(CMAKE_MACOSX_RPATH FALSE)
-
-# use, i.e. don't skip the full RPATH for the build tree
-SET(CMAKE_SKIP_BUILD_RPATH  FALSE)
-
-# when building, don't use the install RPATH already
-# (but later on when installing)
-SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
-
-SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
-
-# add the automatically determined parts of the RPATH
-# which point to directories outside the build tree to the install RPATH
-SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
-
-# the RPATH to be used when installing, but only if it's not a system
-# directory
-LIST(FIND CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES
-  "${CMAKE_INSTALL_PREFIX}/lib" isSystemDir)
-IF("${isSystemDir}" STREQUAL "-1")
-  SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
-ENDIF("${isSystemDir}" STREQUAL "-1")
+SET(CMAKE_MACOSX_RPATH 1)
 
 ###############################################################################
 #####
@@ -336,12 +313,12 @@ CMAKE_DEPENDENT_OPTION ( PATTERN
 #-- Remove the next line to have this option visible in basic cmake mode
 MARK_AS_ADVANCED(PATTERN)
 
-# add SUscElas library?
-SET(SUSCELAS_DIR "" CACHE PATH "Installation directory for SUscElas")
-INCLUDE(cmake/modules/FindSUscElas.cmake)
+# add Elastic library?
+SET(ELAS_DIR "" CACHE PATH "Installation directory for Elas")
+INCLUDE(cmake/modules/FindElas.cmake)
 CMAKE_DEPENDENT_OPTION (
-  USE_SUSCELAS "Use the Elas library for lagrangian motion option" ON
-  "BUILD_MMG3D;SUSCELAS_FOUND" OFF)
+  USE_ELAS "Use the Elas library for lagrangian motion option" ON
+  "BUILD_MMG3D;ELAS_FOUND" OFF)
 
 # add Scotch library?
 SET(SCOTCH_DIR "" CACHE PATH "Installation directory for scotch")
@@ -508,11 +485,11 @@ IF(DOXYGEN_FOUND)
     # COMMAND ${CMAKE_COMMAND} -E chdir
     # ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmg2d/latex make
     # COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmg2d/latex/refman.pdf
-    # ${CMAKE_CURRENT_SOURCE_DIR}
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmg2d
-    COMMENT "Generating MMG2D API documentation with Doxygen.
-    Open up the doc/doxygen/mmg2d/html/index.html file to see it." VERBATIM
-    )
+    # ${CMAKE_CURRENT_SOURCE_DIR} WORKING_DIRECTORY
+    ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmg2d COMMENT "Generating MMG2D API
+    documentation with Doxygen.  Open up the
+    ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmg2d/html/index.html file to see
+    it." VERBATIM )
 
   # MMGS Documentation
   CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmgs/Doxyfile.in
@@ -523,11 +500,11 @@ IF(DOXYGEN_FOUND)
     # COMMAND ${CMAKE_COMMAND} -E chdir
     # ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmgs/latex make
     # COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmgs/latex/refman.pdf
-    # ${CMAKE_CURRENT_SOURCE_DIR}
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmgs
-    COMMENT "Generating MMGS API documentation with Doxygen.
-    Open up the doc/doxygen/mmgs/html/index.html file to see it." VERBATIM
-    )
+    # ${CMAKE_CURRENT_SOURCE_DIR} WORKING_DIRECTORY
+    ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmgs COMMENT "Generating MMGS API
+    documentation with Doxygen.  Open up the
+    ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmgs/html/index.html file to see
+    it." VERBATIM )
 
   # MMG3D Documentation
   CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmg3d/Doxyfile.in
@@ -538,17 +515,16 @@ IF(DOXYGEN_FOUND)
     # COMMAND ${CMAKE_COMMAND} -E chdir
     # ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmg3d/latex make
     # COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmg3d/latex/refman.pdf
-    # ${CMAKE_CURRENT_SOURCE_DIR}
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmg3d
-    COMMENT "Generating MMG3D API documentation with Doxygen.
-     Open up the doc/doxygen/mmg3d/html/index.html file to see it" VERBATIM
-    )
+    # ${CMAKE_CURRENT_SOURCE_DIR} WORKING_DIRECTORY
+    ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmg3d
+    COMMENT "Generating MMG3D API documentation with Doxygen. Open up the
+    ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmg3d/html/index.html file to see
+    it" VERBATIM )
 
-  ADD_CUSTOM_TARGET(doc
-    DEPENDS mmgs_doc mmg3d_doc mmg2d_doc
-    COMMENT "Generating MMG API documentation with Doxygen.
-     Open up the doc/doxygen/mmg*/html/index.html file to see it" VERBATIM
-    )
+  ADD_CUSTOM_TARGET(doc DEPENDS mmgs_doc mmg3d_doc mmg2d_doc COMMENT "Generating
+    MMG API documentation with Doxygen.  Open up the
+    ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmg*/html/index.html file to see it"
+    VERBATIM )
 ENDIF ( DOXYGEN_FOUND )
 
 ###############################################################################

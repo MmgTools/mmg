@@ -33,7 +33,7 @@
  * \todo doxygen documentation.
  */
 
-#include "mmg3d.h"
+#include "inlined_functions_3d.h"
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -65,181 +65,12 @@ inline int _MMG5_moymet(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,double *m1)
   }
 
   if(!n) {
-    // printf("  ## Warning: 4 ridges points... Unable to compute metric.\n");
+    // fprintf(stderr,"  ## Warning: 4 ridges points... Unable to compute metric.\n");
     return(0);
   }
   dd = 1./n;
   for (k=0; k<6; ++k) m1[k] = mm[k]*dd;
   return(n);
-}
-/**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the sol structure.
- * \param ia index of edge in tetra \a pt .
- * \param pt pointer toward the tetra from which we come.
- * \return length of edge according to the prescribed metric.
- *
- * Compute length of edge \f$[i0;i1]\f$ according to the prescribed aniso
- * metric (for special storage of metrics at ridges points).
- *
- */
-inline double _MMG5_lenedg_ani(MMG5_pMesh mesh ,MMG5_pSol met, int ia,
-                               MMG5_pTetra pt)
-{
-  int ip1,ip2;
-  char isedg;
-
-  ip1 = pt->v[_MMG5_iare[ia][0]];
-  ip2 = pt->v[_MMG5_iare[ia][1]];
-
-  if ( pt->xt && (mesh->xtetra[pt->xt].tag[ia] & MG_BDY)) {
-    isedg = ( mesh->xtetra[pt->xt].tag[ia] & MG_GEO);
-    return(_MMG5_lenSurfEdg_ani(mesh, met, ip1, ip2, isedg));
-  } else {
-    return(_MMG5_lenedgspl_ani(mesh ,met, ia, pt));
-  }
-  exit(EXIT_FAILURE);
-}
-
-/**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the sol structure.
- * \param ia index of edge in tetra \a pt .
- * \param pt pointer toward the tetra from which we come.
- * \return length of edge according to the prescribed metric.
- *
- * Compute length of edge \f$[i0;i1]\f$ according to the prescribed aniso
- * metric (for classic storage of metrics at ridges points).
- *
- */
-inline double _MMG5_lenedg33_ani(MMG5_pMesh mesh ,MMG5_pSol met, int ia,
-                                 MMG5_pTetra pt)
-{
-  int ip1,ip2;
-  char isedg;
-
-  ip1 = pt->v[_MMG5_iare[ia][0]];
-  ip2 = pt->v[_MMG5_iare[ia][1]];
-
-  if ( pt->xt && (mesh->xtetra[pt->xt].tag[ia] & MG_BDY)) {
-    isedg = ( mesh->xtetra[pt->xt].tag[ia] & MG_GEO);
-    return(_MMG5_lenSurfEdg33_ani(mesh, met, ip1, ip2, isedg));
-  } else {
-    return( _MMG5_lenedgCoor_ani(mesh->point[ip1].c,mesh->point[ip2].c,
-                                 &met->m[6*ip1],&met->m[6*ip2]) );
-  }
-  exit(EXIT_FAILURE);
-}
-
-/**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the sol structure.
- * \param ia index of edge in tetra \a pt .
- * \param pt pointer toward the tetra from which we come.
- * \return length of edge according to the prescribed metric.
- *
- * Compute length of edge \f$[i0;i1]\f$ according to the prescribed aniso
- * metric (for classic storage of metrics at ridges points).
- *
- */
-inline double _MMG5_lenedgspl33_ani(MMG5_pMesh mesh ,MMG5_pSol met, int ia,
-                                    MMG5_pTetra pt)
-{
-  MMG5_pPoint pp1,pp2;
-  double      *m1,*m2;
-  int         ip1,ip2;
-
-  ip1 = pt->v[_MMG5_iare[ia][0]];
-  ip2 = pt->v[_MMG5_iare[ia][1]];
-
-  pp1 = &mesh->point[ip1];
-  pp2 = &mesh->point[ip2];
-
-  m1 = &met->m[6*ip1];
-  m2 = &met->m[6*ip2];
-
-  return(_MMG5_lenedgCoor_ani(pp1->c,pp2->c,m1,m2));
-}
-
-/**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the sol structure.
- * \param ia index of edge in tetra \a pt .
- * \param pt pointer toward the tetra from which we come.
- * \return length of edge according to the prescribed metric, 0 if fail.
- *
- * Compute length of edge \f$[i0;i1]\f$ according to the prescribed aniso
- * metric (for special storage of metrics at ridges points).
- *
- */
-inline double _MMG5_lenedgspl_ani(MMG5_pMesh mesh ,MMG5_pSol met, int ia,
-                                  MMG5_pTetra pt)
-{
-  MMG5_pPoint pp1,pp2;
-  double      m1[6],m2[6];
-  int         ip1,ip2,i;
-
-  ip1 = pt->v[_MMG5_iare[ia][0]];
-  ip2 = pt->v[_MMG5_iare[ia][1]];
-
-  pp1 = &mesh->point[ip1];
-  pp2 = &mesh->point[ip2];
-
-  if ( !(MG_SIN(pp1->tag) || (MG_NOM & pp1->tag)) && (pp1->tag & MG_GEO) ) {
-    if ( !_MMG5_moymet(mesh,met,pt,m1) ) return(0);
-  } else {
-    for ( i=0; i<6; ++i )
-      m1[i] = met->m[6*ip1+i];
-  }
-
-  if ( !(MG_SIN(pp2->tag)|| (MG_NOM & pp2->tag)) && (pp2->tag & MG_GEO) ) {
-    if ( !_MMG5_moymet(mesh,met,pt,m2) ) return(0);
-  } else {
-    for ( i=0; i<6; ++i )
-      m2[i] = met->m[6*ip2+i];
-  }
-
-  return(_MMG5_lenedgCoor_ani(pp1->c,pp2->c,m1,m2));
-}
-
-/**
- * \brief Compute edge length from edge's coordinates.
- * \param ca pointer toward the coordinates of the first edge's extremity.
- * \param cb pointer toward the coordinates of the second edge's extremity.
- * \param sa pointer toward the metric associated to the first edge's extremity.
- * \param sb pointer toward the metric associated to the second edge's extremity.
- * \return edge length.
- *
- * Compute length of edge \f$[ca,cb]\f$ (with \a ca and \a cb
- * coordinates of edge extremities) according to the anisotropic size
- * prescription.
- *
- */
-inline double _MMG5_lenedgCoor_ani(double *ca,double *cb,double *sa,double *sb) {
-  double   ux,uy,uz,dd1,dd2,len;
-
-  ux = cb[0] - ca[0];
-  uy = cb[1] - ca[1];
-  uz = cb[2] - ca[2];
-
-  dd1 =      sa[0]*ux*ux + sa[3]*uy*uy + sa[5]*uz*uz \
-    + 2.0*(sa[1]*ux*uy + sa[2]*ux*uz + sa[4]*uy*uz);
-  if ( dd1 <= 0.0 )  dd1 = 0.0;
-
-  dd2 =      sb[0]*ux*ux + sb[3]*uy*uy + sb[5]*uz*uz \
-    + 2.0*(sb[1]*ux*uy + sb[2]*ux*uz + sb[4]*uy*uz);
-  if ( dd2 <= 0.0 )  dd2 = 0.0;
-
-  /*longueur approchee*/
-  /*precision a 3.5 10e-3 pres*/
-  if(fabs(dd1-dd2) < 0.05 ) {
-    //printf("bonne precision %e \n",sqrt(0.5*(dd1+dd2)) - (sqrt(dd1)+sqrt(dd2)+4.0*sqrt(0.5*(dd1+dd2))) / 6.0 );
-    len = sqrt(0.5*(dd1+dd2));
-    return(len);
-  }
-  len = (sqrt(dd1)+sqrt(dd2)+4.0*sqrt(0.5*(dd1+dd2))) / 6.0;
-
-  return(len);
 }
 
 /**
@@ -277,28 +108,75 @@ static int _MMG5_defmetsin(MMG5_pMesh mesh,MMG5_pSol met,int kel, int iface, int
   hausd_v = mesh->info.hausd;
   isqhmin = mesh->info.hmin;
   isqhmax = mesh->info.hmax;
-  isloc     = 0;
-  /* for (i=0; i<mesh->info.npar; i++) { */
-  /*   par = &mesh->info.par[i]; */
-  /*   if ( (par->elt == MMG5_Vertex) && (p0->ref == par->ref ) ) { */
-  /*     hausd_v = par->hausd; */
-  /*     isqhmin = par->hmin; */
-  /*     isqhmax = par->hmax; */
-  /*     isloc   = 1; */
+  isloc   = 0;
+
+  /* if ( mesh->info.parTyp & MG_Vert ) { */
+  /*   for (i=0; i<mesh->info.npar; i++) { */
+  /*     par = &mesh->info.par[i]; */
+  /*     if ( (par->elt == MMG5_Vertex) && (p0->ref == par->ref ) ) { */
+  /*       hausd_v = par->hausd; */
+  /*       isqhmin = par->hmin; */
+  /*       isqhmax = par->hmax; */
+  /*       isloc   = 1; */
+  /*       break; */
+  /*     } */
   /*   } */
-  /* } */
+  /*  } */
 
   if ( mesh->adja[4*(kel-1)+iface+1] ) return(0);
   ilist = _MMG5_boulesurfvolp(mesh,kel,ip,iface,
                               listv,&ilistv,lists,&ilists,(p0->tag & MG_NOM));
 
   if ( ilist!=1 ) {
-    printf("Error; unable to compute the ball af the point %d.\n", idp);
-    printf("Exit program.\n");
+    fprintf(stderr,"Error; unable to compute the ball af the point %d.\n", idp);
+    fprintf(stderr,"Exit program.\n");
     exit(EXIT_FAILURE);
   }
 
+
+  /* travel across the ball of ip to find the minimal local params imposed on
+   * tetras */
+  if ( mesh->info.parTyp & MG_Tetra ) {
+    i = 0;
+    do
+    {
+      if ( isloc )  break;
+
+      par = &mesh->info.par[i];
+      if ( par->elt != MMG5_Tetrahedron )  continue;
+
+      for ( k=0; k<ilistv; ++k ) {
+        pt = &mesh->tetra[listv[k]/4];
+        if ( par->ref == pt->ref ) {
+          hausd_v = par->hausd;
+          isqhmin = par->hmin;
+          isqhmax = par->hmax;
+          isloc   = 1;
+          break;
+        }
+      }
+    } while ( ++i<mesh->info.npar );
+
+    for ( ; i<mesh->info.npar; ++i ) {
+      par = &mesh->info.par[i];
+      if ( par->elt != MMG5_Tetrahedron ) continue;
+
+      for ( k=0; k<ilistv; ++k ) {
+        pt = &mesh->tetra[listv[k]/4];
+        if ( par->ref == pt->ref ) {
+          hausd_v = MG_MIN(hausd_v,par->hausd);
+          isqhmin = MG_MAX(isqhmin,par->hmin);
+          isqhmax = MG_MIN(isqhmax,par->hmax);
+          break;
+        }
+      }
+    }
+  }
+
+
   maxkappa = 0.0;
+  init_s = 0;
+
   for (k=0; k<ilists; k++) {
     iel   = lists[k] / 4;
     ifac  = lists[k] % 4;
@@ -346,11 +224,15 @@ static int _MMG5_defmetsin(MMG5_pMesh mesh,MMG5_pSol met,int kel, int iface, int
 
     /* local parameters for triangle */
     hausd  = hausd_v;
-    init_s = 0;
-    for (i=0; i<mesh->info.npar; i++) {
-      par = &mesh->info.par[i];
-      if ( (par->elt == MMG5_Triangle) && (pxt->ref[ifac] == par->ref ) ) {
-        if ( !isloc ) {
+
+    if ( mesh->info.parTyp & MG_Tria ) {
+      if ( !isloc ) {
+        for ( i=0; i<mesh->info.npar; ++i ) {
+          par = &mesh->info.par[i];
+
+          if ( (par->elt != MMG5_Triangle) || (pxt->ref[ifac] != par->ref ) )
+            continue;
+
           hausd   = par->hausd;
           if ( !init_s ) {
             isqhmin = par->hmin;
@@ -361,11 +243,20 @@ static int _MMG5_defmetsin(MMG5_pMesh mesh,MMG5_pSol met,int kel, int iface, int
             isqhmin = MG_MAX(par->hmin,isqhmin);
             isqhmax = MG_MIN(par->hmax,isqhmax);
           }
+          break;
         }
-        else {
+      }
+      else {
+        for ( i=0 ; i<mesh->info.npar; ++i) {
+          par = &mesh->info.par[i];
+
+          if ( (par->elt != MMG5_Triangle) || (pxt->ref[ifac] != par->ref ) )
+            continue;
+
           hausd   = MG_MIN(par->hausd,hausd);
           isqhmin = MG_MAX(par->hmin,isqhmin);
           isqhmax = MG_MIN(par->hmax,isqhmax);
+          break;
         }
       }
     }
@@ -428,20 +319,36 @@ static int _MMG5_defmetrid(MMG5_pMesh mesh,MMG5_pSol met,int kel,
   /* local parameters */
   isqhmin = mesh->info.hmin;
   isqhmax = mesh->info.hmax;
-  isloc   = 0;
-  for (i=0; i<mesh->info.npar; i++) {
-    par = &mesh->info.par[i];
-    if ( /*( (par->elt == MMG5_Vertex) && (p0->ref == par->ref ) )
-           || */ ( (par->elt == MMG5_Triangle) && (pxt->ref[iface] == par->ref ) )) {
-      if ( !isloc ) {
-        isqhmin = par->hmin;
-        isqhmax = par->hmax;
-        isloc = 1;
-      }
-      else {
-        isqhmin = MG_MAX(isqhmin,par->hmin);
-        isqhmax = MG_MIN(isqhmax,par->hmax);
-      }
+
+  if ( mesh->info.parTyp ) {
+    isloc   = 0;
+
+    i = 0;
+    do
+    {
+      if ( isloc )  break;
+
+      par = &mesh->info.par[i];
+      if ( /*( (par->elt != MMG5_Vertex) || (p0->ref != par->ref ) ) && */
+        ( (par->elt != MMG5_Triangle)    || (pxt->ref[iface] != par->ref ) ) &&
+        ( (par->elt != MMG5_Tetrahedron) || (pt->ref != par->ref )         ) )
+        continue;
+
+      isqhmin = par->hmin;
+      isqhmax = par->hmax;
+      isloc = 1;
+    } while ( ++i<mesh->info.npar );
+
+    for ( ; i<mesh->info.npar; ++i) {
+      par = &mesh->info.par[i];
+
+      if ( /*( (par->elt != MMG5_Vertex) || (p0->ref != par->ref ) ) && */
+        ( (par->elt != MMG5_Triangle)    || (pxt->ref[iface] != par->ref ) ) &&
+        ( (par->elt != MMG5_Tetrahedron) || (pt->ref != par->ref )         ) )
+        continue;
+
+      isqhmin = MG_MAX(isqhmin,par->hmin);
+      isqhmax = MG_MIN(isqhmax,par->hmax);
     }
   }
 
@@ -464,7 +371,7 @@ static int _MMG5_defmetrid(MMG5_pMesh mesh,MMG5_pSol met,int kel,
   ier = _MMG5_bouletrid(mesh,kel,iface,ip,&ilist1,list1,&ilist2,list2,
                         &iprid[0],&iprid[1] );
   if ( !ier ) {
-    printf("%s:%d:Error: unable to compute the two balls at the ridge"
+    fprintf(stderr,"%s:%d:Error: unable to compute the two balls at the ridge"
            " point %d.\n",__FILE__,__LINE__, idp);
     return(0);
   }
@@ -627,6 +534,8 @@ static int _MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,int kel, int iface, int
   isqhmin = mesh->info.hmin;
   isqhmax = mesh->info.hmax;
   isloc = 0;
+
+  /* if ( mesh->info.parTyp & MG_Vert ) { */
   /* for (i=0; i<mesh->info.npar; i++) { */
   /*   par = &mesh->info.par[i]; */
   /*   if ( (par->elt == MMG5_Vertex) && (p0->ref == par->ref ) ) { */
@@ -636,18 +545,59 @@ static int _MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,int kel, int iface, int
   /*     isloc = 1; */
   /*   } */
   /* } */
+  /* } */
 
   ilist = _MMG5_boulesurfvolp(mesh,kel,ip,iface,listv,&ilistv,lists,&ilists,0);
 
   if ( ilist!=1 ) {
-    printf("%s:%d:Error: unable to compute the ball af the point %d.\n",
+    fprintf(stderr,"%s:%d:Error: unable to compute the ball af the point %d.\n",
            __FILE__,__LINE__, idp);
-    printf("Exit program.\n");
+    fprintf(stderr,"Exit program.\n");
     exit(EXIT_FAILURE);
+  }
+
+  /* travel across the ball of ip to find the minimal local params imposed on
+   * tetras */
+  if ( mesh->info.parTyp & MG_Tetra ) {
+    i = 0;
+    do
+    {
+      if ( isloc )  break;
+
+      par = &mesh->info.par[i];
+      if ( par->elt != MMG5_Tetrahedron )  continue;
+
+      for ( k=0; k<ilistv; ++k ) {
+        pt = &mesh->tetra[listv[k]/4];
+        if ( par->ref == pt->ref ) {
+          hausd   = par->hausd;
+          isqhmin = par->hmin;
+          isqhmax = par->hmax;
+          isloc   = 1;
+          break;
+        }
+      }
+    } while ( ++i<mesh->info.npar );
+
+    for ( ; i<mesh->info.npar; ++i ) {
+      par = &mesh->info.par[i];
+      if ( par->elt != MMG5_Tetrahedron ) continue;
+
+      for ( k=0; k<ilistv; ++k ) {
+        pt = &mesh->tetra[listv[k]/4];
+        if ( par->ref == pt->ref ) {
+          hausd   = MG_MIN(hausd  ,par->hausd);
+          isqhmin = MG_MAX(isqhmin,par->hmin);
+          isqhmax = MG_MIN(isqhmax,par->hmax);
+          break;
+        }
+      }
+    }
   }
 
   /* Computation of the rotation matrix T_p0 S -> [z = 0] */
   assert( p0->xp && !MG_SIN(p0->tag) && MG_EDG(p0->tag) && !(MG_NOM & p0->tag) );
+
   px0 = &mesh->xpoint[p0->xp];
 
   n  = &px0->n1[0];
@@ -685,7 +635,7 @@ static int _MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,int kel, int iface, int
         ipref[1] = pt->v[i2];
       }
       else if ( (pt->v[i2] != ipref[0]) && (pt->v[i2] != ipref[1]) ) {
-        printf("%s:%d:Error: three adjacent ref at a non singular point.\n",
+        fprintf(stderr,"%s:%d:Error: three adjacent ref at a non singular point.\n",
                __FILE__,__LINE__);
         exit(EXIT_FAILURE);
       }
@@ -699,7 +649,7 @@ static int _MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,int kel, int iface, int
         ipref[1] = pt->v[i1];
       }
       else if ( (pt->v[i1] != ipref[0]) && (pt->v[i1] != ipref[1]) ) {
-        printf("%s:%d:Error: three adjacent ref at a non singular point.\n",
+        fprintf(stderr,"%s:%d:Error: three adjacent ref at a non singular point.\n",
                __FILE__,__LINE__);
         exit(EXIT_FAILURE);
       }
@@ -724,14 +674,14 @@ static int _MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,int kel, int iface, int
     det2d = lispoi[3*k+1]*lispoi[3*(k+1)+2] - lispoi[3*k+2]*lispoi[3*(k+1)+1];
     assert(det2d);
     if ( det2d <= 0.0 ) {
-      //printf("PROBLEM : BAD PROJECTION OVER TANGENT PLANE %f \n", det2d);
+      //fprintf(stderr,"PROBLEM : BAD PROJECTION OVER TANGENT PLANE %f \n", det2d);
       return(0);
     }
   }
   det2d = lispoi[3*(ilists-1)+1]*lispoi[3*0+2] - lispoi[3*(ilists-1)+2]*lispoi[3*0+1];
   assert(det2d);
   if ( det2d <= 0.0 ) {
-    //printf("PROBLEM : BAD PROJECTION OVER TANGENT PLANE %f \n", det2d);
+    //fprintf(stderr,"PROBLEM : BAD PROJECTION OVER TANGENT PLANE %f \n", det2d);
     return(0);
   }
   assert(ipref[0] && ipref[1]);
@@ -742,8 +692,8 @@ static int _MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,int kel, int iface, int
 
   /* Second step : reconstitution of the curvature tensor at p0 in the tangent
      plane, with a quadric fitting approach */
-  memset(tAA,0.0,6*sizeof(double));
-  memset(tAb,0.0,3*sizeof(double));
+  memset(tAA,0x00,6*sizeof(double));
+  memset(tAb,0x00,3*sizeof(double));
 
   for (k=0; k<ilists; k++) {
     /* Approximation of the curvature in the normal section associated to tau :
@@ -776,21 +726,32 @@ static int _MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,int kel, int iface, int
     _MMG5_fillDefmetregSys(k,p0,i,b,r,c,lispoi,tAA,tAb);
 
     /* local parameters */
-    for (i=0; i<mesh->info.npar; i++) {
-      par = &mesh->info.par[i];
-      if ( (par->elt == MMG5_Triangle) && (pxt->ref[ifac] == par->ref ) ) {
-        if ( !isloc ) {
-          hausd =   par->hausd;
+    if ( mesh->info.parTyp & MG_Tria ) {
+      if ( isloc ) {
+        for ( i=0; i<mesh->info.npar; ++i ) {
+          par = &mesh->info.par[i];
+
+          if ( (par->elt != MMG5_Triangle) || (pxt->ref[ifac] != par->ref ) )
+            continue;
+
+          hausd   = MG_MIN(par->hausd,hausd);
+          isqhmin = MG_MAX(par->hmin,isqhmin);
+          isqhmax = MG_MIN(par->hmax,isqhmax);
+          break;
+        }
+      }
+      else {
+        for ( i=0; i<mesh->info.npar; ++i ) {
+          par = &mesh->info.par[i];
+
+          if ( (par->elt != MMG5_Triangle) || (pxt->ref[ifac] != par->ref ) )
+            continue;
+
+          hausd   = par->hausd;
           isqhmin = par->hmin;
           isqhmax = par->hmax;
-          isloc = 1;
-        }
-        else {
-          // take the wanted value between the local parameters asked by the
-          // user.
-          hausd = MG_MIN(hausd,par->hausd);
-          isqhmin = MG_MAX(isqhmin,par->hmin);
-          isqhmax = MG_MIN(isqhmax,par->hmax);
+          isloc   = 1;
+          break;
         }
       }
     }
@@ -841,27 +802,70 @@ static int _MMG5_defmetreg(MMG5_pMesh mesh,MMG5_pSol met,int kel,int iface, int 
   isqhmin = mesh->info.hmin;
   isqhmax = mesh->info.hmax;
   isloc     = 0;
-  for (i=0; i<mesh->info.npar; i++) {
-    par = &mesh->info.par[i];
-    if ( (par->elt == MMG5_Vertex) && (p0->ref == par->ref ) ) {
-      hausd   = par->hausd;
-      isqhmin = par->hmin;
-      isqhmax = par->hmax;
-      isloc   = 1;
-    }
-  }
+  /* if ( mesh->info.parTyp & MG_Vert ) { */
+  /* for (i=0; i<mesh->info.npar; i++) { */
+  /*   par = &mesh->info.par[i]; */
+  /*   if ( (par->elt == MMG5_Vertex) && (p0->ref == par->ref ) ) { */
+  /*     hausd   = par->hausd; */
+  /*     isqhmin = par->hmin; */
+  /*     isqhmax = par->hmax; */
+  /*     isloc   = 1; */
+  /*   } */
+  /* } */
+  /*  } */
 
   ilist = _MMG5_boulesurfvolp(mesh,kel,ip,iface,listv,&ilistv,lists,&ilists,0);
 
   if ( ilist!=1 ) {
-    printf("%s:%d:Error: unable to compute the ball af the point %d.\n",
+    fprintf(stderr,"%s:%d:Error: unable to compute the ball af the point %d.\n",
            __FILE__,__LINE__, idp);
-    printf("Exit program.\n");
+    fprintf(stderr,"Exit program.\n");
     exit(EXIT_FAILURE);
   }
 
+  /* travel across the ball of ip to find the minimal local params imposed on
+   * tetras */
+  if ( mesh->info.parTyp & MG_Tetra ) {
+    i = 0;
+    do
+    {
+      if ( isloc )  break;
+
+      par = &mesh->info.par[i];
+      if ( par->elt != MMG5_Tetrahedron )  continue;
+
+      for ( k=0; k<ilistv; ++k ) {
+        pt = &mesh->tetra[listv[k]/4];
+        if ( par->ref == pt->ref ) {
+          hausd   = par->hausd;
+          isqhmin = par->hmin;
+          isqhmax = par->hmax;
+          isloc   = 1;
+          break;
+        }
+      }
+    } while ( ++i<mesh->info.npar );
+
+    for ( ; i<mesh->info.npar; ++i ) {
+      par = &mesh->info.par[i];
+      if ( par->elt != MMG5_Tetrahedron ) continue;
+
+      for ( k=0; k<ilistv; ++k ) {
+        pt = &mesh->tetra[listv[k]/4];
+        if ( par->ref == pt->ref ) {
+          hausd   = MG_MIN(hausd  ,par->hausd);
+          isqhmin = MG_MAX(isqhmin,par->hmin);
+          isqhmax = MG_MIN(isqhmax,par->hmax);
+          break;
+        }
+      }
+    }
+  }
+
   /* Computation of the rotation matrix T_p0 S -> [z = 0] */
-  assert( p0->xp && !MG_SIN(p0->tag) && !MG_EDG(p0->tag) && !(MG_NOM & p0->tag) );
+  assert( !(p0->tag & MG_NOSURF) );
+  assert( p0->xp && !MG_SIN(p0->tag) && !MG_EDG(p0->tag)
+              && !(MG_NOM & p0->tag) );
   px0 = &mesh->xpoint[p0->xp];
 
   n  = &px0->n1[0];
@@ -905,14 +909,14 @@ static int _MMG5_defmetreg(MMG5_pMesh mesh,MMG5_pSol met,int kel,int iface, int 
     det2d = lispoi[3*k+1]*lispoi[3*(k+1)+2] - lispoi[3*k+2]*lispoi[3*(k+1)+1];
     assert(det2d);
     if ( det2d <= 0.0 ) {
-      //printf("PROBLEM : BAD PROJECTION OVER TANGENT PLANE %f \n", det2d);
+      //fprintf(stderr,"PROBLEM : BAD PROJECTION OVER TANGENT PLANE %f \n", det2d);
       return(0);
     }
   }
   det2d = lispoi[3*(ilists-1)+1]*lispoi[3*0+2] - lispoi[3*(ilists-1)+2]*lispoi[3*0+1];
   assert(det2d);
   if ( det2d <= 0.0 ) {
-    //printf("PROBLEM : BAD PROJECTION OVER TANGENT PLANE %f \n", det2d);
+    //fprintf(stderr,"PROBLEM : BAD PROJECTION OVER TANGENT PLANE %f \n", det2d);
     return(0);
   }
 
@@ -921,8 +925,8 @@ static int _MMG5_defmetreg(MMG5_pMesh mesh,MMG5_pSol met,int kel,int iface, int 
 
   /* Second step : reconstitution of the curvature tensor at p0 in the tangent
      plane, with a quadric fitting approach */
-  memset(tAA,0.0,6*sizeof(double));
-  memset(tAb,0.0,3*sizeof(double));
+  memset(tAA,0x00,6*sizeof(double));
+  memset(tAb,0x00,3*sizeof(double));
 
   for (k=0; k<ilists; k++) {
     /* Approximation of the curvature in the normal section associated to tau :
@@ -955,21 +959,32 @@ static int _MMG5_defmetreg(MMG5_pMesh mesh,MMG5_pSol met,int kel,int iface, int 
     _MMG5_fillDefmetregSys(k,p0,i,b,r,c,lispoi,tAA,tAb);
 
     /* local parameters */
-    for (i=0; i<mesh->info.npar; i++) {
-      par = &mesh->info.par[i];
-      if ( (par->elt == MMG5_Triangle) && (pxt->ref[ifac] == par->ref ) ) {
-        if ( !isloc ) {
+    if ( mesh->info.parTyp & MG_Tria ) {
+      if ( isloc ) {
+        for ( i=0; i<mesh->info.npar; ++i ) {
+          par = &mesh->info.par[i];
+
+          if ( (par->elt != MMG5_Triangle) || (pxt->ref[ifac] != par->ref ) )
+            continue;
+
+          hausd   = MG_MIN(par->hausd,hausd);
+          isqhmin = MG_MAX(par->hmin,isqhmin);
+          isqhmax = MG_MIN(par->hmax,isqhmax);
+          break;
+        }
+      }
+      else {
+        for ( i=0; i<mesh->info.npar; ++i ) {
+          par = &mesh->info.par[i];
+
+          if ( (par->elt != MMG5_Triangle) || (pxt->ref[ifac] != par->ref ) )
+            continue;
+
           hausd   = par->hausd;
           isqhmin = par->hmin;
           isqhmax = par->hmax;
-          isloc = 1;
-        }
-        else {
-          // take the wanted value between the local parameters asked by the
-          // user.
-          hausd   = MG_MIN(hausd,par->hausd);
-          isqhmin = MG_MAX(isqhmin,par->hmin);
-          isqhmax = MG_MIN(isqhmax,par->hmax);
+          isloc   = 1;
+          break;
         }
       }
     }
@@ -995,12 +1010,19 @@ static int _MMG5_defmetreg(MMG5_pMesh mesh,MMG5_pSol met,int kel,int iface, int 
  */
 static inline
 int _MMG5_defmetvol(MMG5_pMesh mesh,MMG5_pSol met) {
+  MMG5_pTetra   pt,ptloc;
   MMG5_pPoint   ppt;
+  MMG5_pPar     par;
   double        v[3][3],lambda[3],isqhmax,isqhmin,*m;
-  int           k,i;
+  int           list[MMG3D_LMAX+2],ilist,k,l,i,j,isloc,ip;
 
   isqhmin = 1./(mesh->info.hmin*mesh->info.hmin);
   isqhmax = 1./(mesh->info.hmax*mesh->info.hmax);
+
+  for (k=1; k<=mesh->np; k++) {
+    ppt = &mesh->point[k];
+    ppt->flag = 0;
+  }
 
   if ( !met->m ) {
     met->np    = mesh->np;
@@ -1010,47 +1032,169 @@ int _MMG5_defmetvol(MMG5_pMesh mesh,MMG5_pSol met) {
     _MMG5_ADD_MEM(mesh,(6*(met->npmax+1))*sizeof(double),"solution",return(0));
     _MMG5_SAFE_MALLOC(met->m,(6*(mesh->npmax+1)),double);
 
-    for (k=1; k<=mesh->np; k++) {
-      ppt = &mesh->point[k];
 
-      if ( ppt->tag & MG_BDY || !MG_VOK(ppt) ) continue;
+    for (k=1; k<=mesh->ne; k++) {
+      pt = &mesh->tetra[k];
+      if ( !MG_EOK(pt) ) continue;
 
-      /** 1. no metric is provided: Set isotropic hmax size at the vertex */
+      for ( l=0; l<4; ++l ) {
 
-     /* Local parameters at vertex: warning do no take care about local param at
-      * triangles */
-      /* for (i=0; i<mesh->info.npar; i++) { */
-      /*   par = &mesh->info.par[i]; */
-      /*   if ( (par->elt == MMG5_Vertex) && (ppt->ref == par->ref ) ) { */
-      /*     hausd_v = par->hausd; */
-      /*     isqhmin = 1./(par->hmin*par->hmin); */
-      /*     isqhmax = 1./(par->hmax*par->hmax); */
-      /*   } */
-      /* } */
-      m = &met->m[met->size*k];
-      m[0] = isqhmax;
-      m[1] = 0.;
-      m[2] = 0.;
-      m[3] = isqhmax;
-      m[4] = 0.;
-      m[5] = isqhmax;
+        ip = pt->v[l];
+        ppt = &mesh->point[ip];
+        if ( ppt->flag || ppt->tag & MG_BDY || !MG_VOK(ppt) ) continue;
+
+        /** 1. no metric is provided: Set isotropic hmax size at the vertex */
+
+        /** First step: search for local parameters */
+        if ( mesh->info.parTyp ) {
+          isqhmax = mesh->info.hmax;
+          isloc   = 0;
+
+          /* Local parameters at vertex */
+          /* if ( mesh->info.parTyp & MG_Vert ) { */
+             /* for (i=0; i<mesh->info.npar; i++) { */
+          /*   par = &mesh->info.par[i]; */
+          /*   if ( (par->elt == MMG5_Vertex) && (ppt->ref == par->ref ) ) { */
+          /*     isqhmax = par->hmax; */
+          /*     isloc   = 1; */
+          /*     break;       */
+          /*   } */
+          /* } */
+          /* } */
+
+          /* Local parameters at tetra */
+          if ( mesh->info.parTyp & MG_Tetra ) {
+            ilist = _MMG5_boulevolp(mesh,k,l,list);
+
+            i = 0;
+            do
+            {
+              if ( isloc )  break;
+
+              par = &mesh->info.par[i];
+              if ( par->elt != MMG5_Tetrahedron )  continue;
+
+              for ( j=0; j<ilist; ++j ) {
+                ptloc = &mesh->tetra[list[j]/4];
+                if ( par->ref == ptloc->ref ) {
+                  isqhmax = par->hmax;
+                  isloc   = 1;
+                  break;
+                }
+              }
+            } while ( ++i<mesh->info.npar );
+
+            for ( ; i<mesh->info.npar; ++i ) {
+              par = &mesh->info.par[i];
+              if ( par->elt != MMG5_Tetrahedron ) continue;
+
+              for ( j=0; j<ilist; ++j ) {
+                ptloc = &mesh->tetra[list[j]/4];
+                if ( par->ref == ptloc->ref ) {
+                  isqhmax = MG_MIN(isqhmax,par->hmax);
+                  break;
+                }
+              }
+            }
+          }
+          isqhmax = 1./(isqhmax*isqhmax);
+        }
+
+        /** Second step: set metric */
+        m = &met->m[met->size*ip];
+        m[0] = isqhmax;
+        m[1] = 0.;
+        m[2] = 0.;
+        m[3] = isqhmax;
+        m[4] = 0.;
+        m[5] = isqhmax;
+        ppt->flag = 1;
+      }
     }
+    return(1);
   }
-  else {
-    for (k=1; k<=mesh->np; k++) {
-      ppt = &mesh->point[k];
 
-      if ( ppt->tag & MG_BDY || !MG_VOK(ppt) ) continue;
+  /** 2. A metric is provided: truncate it by hmax/hmin */
+  for (k=1; k<=mesh->ne; k++) {
+    pt = &mesh->tetra[k];
+    if ( !MG_EOK(pt) ) continue;
 
-      /** 2. A metric is provided: truncate it by hmax/hmin */
-      m = &met->m[met->size*k];
+    for ( l=0; l<4; ++l ) {
+
+      ip = pt->v[l];
+      ppt = &mesh->point[ip];
+      if ( ppt->flag || ppt->tag & MG_BDY || !MG_VOK(ppt) ) continue;
+
+      /** First step: search for local parameters */
+      if ( mesh->info.parTyp ) {
+        isqhmin = mesh->info.hmin;
+        isqhmax = mesh->info.hmax;
+        isloc   = 0;
+
+        /* Local parameters at vertex */
+        /* if ( mesh->info.parTyp & MG_Vert ) { */
+           /* for (i=0; i<mesh->info.npar; i++) { */
+        /*   par = &mesh->info.par[i]; */
+        /*   if ( (par->elt == MMG5_Vertex) && (ppt->ref == par->ref ) ) { */
+        /*     isqhmin = par->hmin; */
+        /*     isqhmax = par->hmax; */
+        /*     isloc   = 1; */
+        /*     break;       */
+        /*   } */
+        /* } */
+        /* } */
+
+        /* Local parameters at tetra */
+        if ( mesh->info.parTyp & MG_Tetra ) {
+          ilist = _MMG5_boulevolp(mesh,k,l,list);
+
+          i = 0;
+          do
+          {
+            if ( isloc )  break;
+
+            par = &mesh->info.par[i];
+            if ( par->elt != MMG5_Tetrahedron )  continue;
+
+            for ( j=0; j<ilist; ++j ) {
+              ptloc = &mesh->tetra[list[j]/4];
+              if ( par->ref == ptloc->ref ) {
+                isqhmin = par->hmin;
+                isqhmax = par->hmax;
+                isloc   = 1;
+                break;
+              }
+            }
+          } while ( ++i<mesh->info.npar );
+
+          for ( ; i<mesh->info.npar; ++i ) {
+            par = &mesh->info.par[i];
+            if ( par->elt != MMG5_Tetrahedron ) continue;
+
+            for ( j=0; j<ilist; ++j ) {
+              ptloc = &mesh->tetra[list[j]/4];
+              if ( par->ref == ptloc->ref ) {
+                isqhmin = MG_MAX(isqhmin,par->hmin);
+                isqhmax = MG_MIN(isqhmax,par->hmax);
+                break;
+              }
+            }
+          }
+        }
+        isqhmin = 1./(isqhmin*isqhmin);
+        isqhmax = 1./(isqhmax*isqhmax);
+      }
+
+
+      /** Second step: set metric */
+      m = &met->m[met->size*ip];
       _MMG5_eigenv(1,m,lambda,v);
 
       for (i=0; i<3; i++) {
         if(lambda[i]<=0) {
-          printf("%s:%d:Error: wrong metric at point %d -- eigenvalues :"
-                 " %e %e %e\n",__FILE__,__LINE__,
-                 k,lambda[0],lambda[1],lambda[2]);
+          fprintf(stderr,"%s:%d:Error: wrong metric at point %d -- eigenvalues :"
+                  " %e %e %e\n",__FILE__,__LINE__,
+                  ip,lambda[0],lambda[1],lambda[2]);
           return(0);
         }
         lambda[i]=MG_MIN(isqhmin,lambda[i]);
@@ -1118,6 +1262,160 @@ int _MMG3D_intextmet(MMG5_pMesh mesh,MMG5_pSol met,int np,double me[6]) {
 }
 
 
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param iel tetra in which we work
+ * \param iploc local index of point where metric must be defined
+ * \param iface face to which belong \a iploc
+ * \return 0 if fail, 1 otherwise.
+ *
+ * Define metric at point \a iploc of tetra \a iel for \a iploc a surface point
+ * marked by option nosurf.
+ *
+ * If a metric is provided, preserve it except on
+ * ridges points where a metric with hmax size and directions normal to the
+ * ridges is intersected with the user metric.
+ *
+ * Without initial metric, an isotropic metric is computed from the mean of the
+ * lengths of the edges passing through the point (except on ridges points).
+ *
+ */
+static inline
+int _MMG3D_nosurfsiz_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel, int iploc,
+                         int iface,int ismet) {
+
+  MMG5_pTetra   pt;
+  MMG5_pPoint   ppt,p0,p1;
+  double        *m,isqhmin,isqhmax,ux,uy,uz,lm,lambda[3],v[3][3];
+  int           lists[MMG3D_LMAX+2],listv[MMG3D_LMAX+2],ilists,ilistv;
+  int           i,iadr,i0,ip0,ip1,i1,ia,j;
+
+  pt    = &mesh->tetra[iel];
+  ip0   = pt->v[iploc];
+  iadr  = ip0*6;
+  ppt   = &mesh->point[ip0];
+
+  if ( ismet ) {
+
+    if ( ppt->flag ) return(1);
+
+    /** A metric is provided: metric truncature */
+    /* Step 1: recover the local hmin and hmax values */
+    if ( !(ppt->tag & MG_NOM) ) {
+      if ( _MMG5_boulesurfvolp(mesh,iel,iploc,iface,listv,&ilistv,lists,&ilists,0)!=1 ||
+           !_MMG3D_localParamReg(mesh,ip0,listv,ilistv,lists,ilists,NULL,&isqhmin,&isqhmax) )
+      {
+        isqhmin = mesh->info.hmin;
+        isqhmax = mesh->info.hmax;
+      }
+    }
+    else {
+      i0 = _MMG5_idirinv[iface][iploc];
+      j = _MMG5_inxt2[i0];
+      ia = _MMG5_iarf[iface][j];
+
+      if ( !_MMG3D_localParamNm(mesh,iel,iface,ia,NULL,&isqhmin,&isqhmax) ) {
+        isqhmin  = mesh->info.hmin;
+        isqhmax  = mesh->info.hmax;
+      }
+    }
+    isqhmin = 1./(isqhmin*isqhmin);
+    isqhmax = 1./(isqhmax*isqhmax);
+
+    /* Step 2: size truncature */
+    m = &met->m[iadr];
+    _MMG5_eigenv(1,m,lambda,v);
+
+    for (i=0; i<3; i++) {
+      if(lambda[i]<=0) {
+        fprintf(stderr,"%s:%d:Error: wrong metric at point %d -- eigenvalues :"
+                " %e %e %e\n",__FILE__,__LINE__,
+                ip0,lambda[0],lambda[1],lambda[2]);
+        return(0);
+      }
+      lambda[i]=MG_MIN(isqhmin,lambda[i]);
+      lambda[i]=MG_MAX(isqhmax,lambda[i]);
+    }
+
+    m[0] = v[0][0]*v[0][0]*lambda[0] + v[1][0]*v[1][0]*lambda[1]
+      + v[2][0]*v[2][0]*lambda[2];
+    m[1] = v[0][0]*v[0][1]*lambda[0] + v[1][0]*v[1][1]*lambda[1]
+      + v[2][0]*v[2][1]*lambda[2];
+    m[2] = v[0][0]*v[0][2]*lambda[0] + v[1][0]*v[1][2]*lambda[1]
+      + v[2][0]*v[2][2]*lambda[2];
+    m[3] = v[0][1]*v[0][1]*lambda[0] + v[1][1]*v[1][1]*lambda[1]
+      + v[2][1]*v[2][1]*lambda[2];
+    m[4] = v[0][1]*v[0][2]*lambda[0] + v[1][1]*v[1][2]*lambda[1]
+      + v[2][1]*v[2][2]*lambda[2];
+    m[5] = v[0][2]*v[0][2]*lambda[0] + v[1][2]*v[1][2]*lambda[1]
+      + v[2][2]*v[2][2]*lambda[2];
+  }
+  else {
+    /** No metric is provided: Define size at regular surface point for the
+     * -nosurf option (ie a manifold point): the size is computed as the mean of
+     * the length of edges passing through the point */
+    if ( !(ppt->tag & MG_NOM) ) {
+
+      if ( ppt->flag ) return(1);
+
+      /* First step: search for local parameters */
+      // To improve: compute the volume and surface ball af the non-manifold
+      // point to apply local parameters
+      if ( _MMG5_boulesurfvolp(mesh,iel,iploc,iface,listv,&ilistv,lists,&ilists,0) !=1 )
+        return(0);
+
+      if ( !_MMG3D_localParamReg(mesh,ip0,listv,ilistv,lists,ilists,
+                                 NULL,&isqhmin,&isqhmax) ) {
+        isqhmin = mesh->info.hmin;
+        isqhmax = mesh->info.hmax;
+      }
+
+      /* Step 2: edge length computation */
+      lm = _MMG5_meansizreg_iso(mesh,met,ip0,lists,ilists,isqhmin,isqhmax);
+      met->m[iadr] = 1./(lm*lm);
+      met->m[iadr+3] = met->m[iadr+5] = met->m[iadr];
+      met->m[iadr+1] = met->m[iadr+2] = met->m[iadr+4] = 0;
+    }
+    else {
+      i0 = _MMG5_idirinv[iface][iploc];
+      j = _MMG5_inxt2[i0];
+      ia = _MMG5_iarf[iface][j];
+      i0 = _MMG5_iare[ia][0];
+      i1 = _MMG5_iare[ia][1];
+      ip0 = pt->v[i0];
+      ip1 = pt->v[i1];
+      p0  = &mesh->point[ip0];
+      p1  = &mesh->point[ip1];
+      if ( !MG_EDG(mesh->xtetra[pt->xt].tag[ia]) ) return(0);
+
+      /** First step: search for local parameters */
+      if ( !_MMG3D_localParamNm(mesh,iel,iface,ia,NULL,&isqhmin,&isqhmax) ) {
+        isqhmin  = mesh->info.hmin;
+        isqhmax  = mesh->info.hmax;
+      }
+      isqhmin =  1.0 / (isqhmin*isqhmin);
+      isqhmax =  1.0 / (isqhmax*isqhmax);
+
+      /** Second step: Very rough eval of the metric at non-manifold point: take
+       * the non-manifold edge length */
+      ux = (p0->c[0]-p1->c[0]);
+      uy = (p0->c[1]-p1->c[1]);
+      uz = (p0->c[2]-p1->c[2]);
+      lm = ux*ux + uy*uy + uz*uz;
+
+      lm = MG_MAX(isqhmax,MG_MIN(isqhmin,1./lm));
+      met->m[iadr] = MG_MAX(met->m[iadr],lm);
+
+      met->m[iadr+3] = met->m[iadr+5] = met->m[iadr];
+      met->m[iadr+1] = met->m[iadr+2] = met->m[iadr+4] = 0;
+    }
+  }
+
+  return(1);
+
+}
+
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -1141,11 +1439,21 @@ int _MMG3D_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
 
   if ( mesh->info.hmax < 0.0 ) {
     //  mesh->info.hmax = 0.5 * mesh->info.delta;
-    fprintf(stdout,"%s:%d:Error: negative hmax value.\n",__FILE__,__LINE__);
+    fprintf(stderr,"%s:%d:Error: negative hmax value.\n",__FILE__,__LINE__);
     return(0);
   }
 
-  ismet = (met->m > 0);
+  if ( met->m )
+    ismet = 1;
+  else {
+    ismet = 0;
+
+    _MMG5_caltet         = _MMG5_caltet_ani;
+    _MMG5_caltri         = _MMG5_caltri_ani;
+    _MMG5_lenedg         = _MMG5_lenedg_ani;
+    MMG3D_lenedgCoor     = _MMG5_lenedgCoor_ani;
+    _MMG5_lenSurfEdg     = _MMG5_lenSurfEdg_ani;
+  }
 
   if ( !_MMG5_defmetvol(mesh,met) )  return(0);
 
@@ -1171,26 +1479,33 @@ int _MMG3D_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
         iploc = _MMG5_idir[l][i];
         ppt   = &mesh->point[pt->v[iploc]];
 
-        if ( ppt->flag || !MG_VOK(ppt) )  continue;
-        if ( ismet )  memcpy(mm,&met->m[6*(pt->v[iploc])],6*sizeof(double));
+        if ( !MG_VOK(ppt) )  continue;
 
-        if ( MG_SIN(ppt->tag) || (ppt->tag & MG_NOM) ) {
-          if ( !_MMG5_defmetsin(mesh,met,k,l,iploc) )  continue;
-        }
-        else if ( ppt->tag & MG_GEO ) {
-          if ( !_MMG5_defmetrid(mesh,met,k,l,iploc))  continue;
-        }
-        else if ( ppt->tag & MG_REF ) {
-          if ( !_MMG5_defmetref(mesh,met,k,l,iploc) )  continue;
+        if ( mesh->info.nosurf ) {
+          if ( !_MMG3D_nosurfsiz_ani(mesh,met,k,iploc,l,ismet) ) continue;
         }
         else {
-          if ( !_MMG5_defmetreg(mesh,met,k,l,iploc) )  continue;
-        }
-        if ( ismet ) {
-          if ( !_MMG3D_intextmet(mesh,met,pt->v[iploc],mm) ) {
-            fprintf(stdout,"%s:%d:Error: unable to intersect metrics"
-                    " at point %d.\n",__FILE__,__LINE__, pt->v[iploc]);
-            return(0);
+          if ( ppt->flag ) continue;
+
+          if ( ismet )  memcpy(mm,&met->m[6*(pt->v[iploc])],6*sizeof(double));
+
+          if ( (MG_SIN(ppt->tag) || (ppt->tag & MG_NOM) ) ) {
+            if ( !_MMG5_defmetsin(mesh,met,k,l,iploc) )  continue;
+          }
+          else if ( ppt->tag & MG_GEO ) {
+            if ( !_MMG5_defmetrid(mesh,met,k,l,iploc))  continue;
+          }
+          else if ( ppt->tag & MG_REF ) {
+            if ( !_MMG5_defmetref(mesh,met,k,l,iploc) )  continue;
+          } else {
+            if ( !_MMG5_defmetreg(mesh,met,k,l,iploc) )  continue;
+          }
+          if ( ismet ) {
+            if ( !_MMG3D_intextmet(mesh,met,pt->v[iploc],mm) ) {
+              fprintf(stderr,"%s:%d:Error: unable to intersect metrics"
+                      " at point %d.\n",__FILE__,__LINE__, pt->v[iploc]);
+              return(0);
+            }
           }
         }
         ppt->flag = 1;

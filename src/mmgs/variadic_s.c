@@ -55,9 +55,9 @@ void _MMGS_Alloc_mesh(MMG5_pMesh *mesh, MMG5_pSol *sol) {
 
   /* sol allocation */
   if ( !sol ) {
-    printf("  ## Error: an allocatable solution structure of type \"MMG5_pSol\""
+    fprintf(stderr,"  ## Error: an allocatable solution structure of type \"MMG5_pSol\""
            " is needed.\n");
-    printf("            Exit program.\n");
+    fprintf(stderr,"            Exit program.\n");
     exit(EXIT_FAILURE);
   }
 
@@ -96,12 +96,20 @@ void _MMGS_Init_woalloc_mesh(MMG5_pMesh mesh, MMG5_pSol sol ) {
 
 /**
  * \param argptr list of the mmg structures that must be initialized. Each
- * structure must follow a member of the \a MMG5_arg enum that allow to identify
- * it.  \a argptr contains at least a pointer toward a \a MMG5_pMesh structure
- * (that will contain the mesh and identified by the MMG5_ARG_ppMesh keyword)
- * and a pointer toward a \a MMG5_pSol structure (that will contain the ouput
+ * structure must follow one of the \a MMG5_ARG* preprocessor variable that allow
+ * to identify it.
+ *
+ * \a argptr contains at least a pointer toward a \a MMG5_pMesh structure
+ * (that will contain the mesh and identified by the MMG5_ARG_ppMesh keyword).
+ *
+ *  To call the \a MMGS_mmgslib function, you must also provide
+ * a pointer toward a \a MMG5_pSol structure (that will contain the ouput
  * metric (and the input one, if provided) and identified by the MMG5_ARG_ppMet
  * keyword).
+ *
+ *  To call the \a MMGS_mmgsls function, you must also provide a pointer
+ * toward a \a MMG5_pSol structure (that will contain the level-set function and
+ * identified by the MMG5_ARG_ppLs keyword).
  *
  * Internal function for structure allocations (taking a va_list argument).
  *
@@ -109,14 +117,14 @@ void _MMGS_Init_woalloc_mesh(MMG5_pMesh mesh, MMG5_pSol sol ) {
 void _MMGS_Init_mesh_var( va_list argptr ) {
   MMG5_pMesh     *mesh;
   MMG5_pSol      *sol;
-  enum MMG5_arg  typArg;
+  int            typArg;
   int            meshCount;
 
   meshCount = 0;
   sol = NULL;
 
 
-  while ( (typArg = va_arg(argptr,enum MMG5_arg)) != MMG5_ARG_end )
+  while ( (typArg = va_arg(argptr,int)) != MMG5_ARG_end )
   {
     switch ( typArg )
     {
@@ -124,14 +132,15 @@ void _MMGS_Init_mesh_var( va_list argptr ) {
       mesh = va_arg(argptr,MMG5_pMesh*);
       ++meshCount;
       break;
-    case(MMG5_ARG_ppMet):
+    case MMG5_ARG_ppMet: case MMG5_ARG_ppLs:
       sol = va_arg(argptr,MMG5_pSol*);
       break;
     default:
       fprintf(stderr,"  ## Error: MMGS_Init_mesh:\n"
               " unexpected argument type: %d\n",typArg);
-      fprintf(stderr," Argument type must be one of the following members"
-              " of the MMG5_arg enum: MMG5_ARG_ppMesh, MMG5_ARG_ppMet.\n");
+      fprintf(stderr," Argument type must be one of the following"
+              " preprocessor variable: MMG5_ARG_ppMesh, MMG5_ARG_ppMet,"
+              " MMG5_ARG_ppLs.\n");
       exit(EXIT_FAILURE);
     }
   }
@@ -146,9 +155,9 @@ void _MMGS_Init_mesh_var( va_list argptr ) {
   if ( !sol ) {
     fprintf(stderr,"  ## Error: MMGS_Init_mesh:\n"
             " you need to initialize a solution structure"
-            " (of type MMG5_pSol and indentified by the MMG5_ARG_ppMet member"
-            " of the MMG5_arg enum) that will contain the output mesh metric"
-            " informations, and the input one, if provided.\n.");
+            " (of type MMG5_pSol and indentified by the MMG5_ARG_ppMet or the"
+            " MMG5_ARG_ppLs preprocessor variable) that will contain the output"
+            " mesh metric informations, and the input one, if provided.\n.");
     exit(EXIT_FAILURE);
   }
 
@@ -163,12 +172,20 @@ void _MMGS_Init_mesh_var( va_list argptr ) {
 
 /**
  * \param argptr list of the mmg structures that must be deallocated. Each
- * structure must follow a member of the \a MMG5_arg enum that allow to identify
- * it.  \a argptr contains at least a pointer toward a \a MMG5_pMesh structure
- * (that will contain the mesh and identified by the MMG5_ARG_ppMesh keyword)
- * and a pointer toward a \a MMG5_pSol structure (that will contain the ouput
+ * structure must follow one of the \a MMG5_ARG preprocessor variable that allow to
+ * identify it.
+ *
+ * \a argptr contains at least a pointer toward a \a MMG5_pMesh structure
+ * (that will contain the mesh and identified by the MMG5_ARG_ppMesh keyword).
+ *
+ *  To call the \a MMGS_mmgslib function, you must also provide
+ * a pointer toward a \a MMG5_pSol structure (that will contain the ouput
  * metric (and the input one, if provided) and identified by the MMG5_ARG_ppMet
  * keyword).
+ *
+ *  To call the \a MMGS_mmgsls function, you must also provide a pointer
+ * toward a \a MMG5_pSol structure (that will contain the level-set function and
+ * identified by the MMG5_ARG_ppLs keyword).
  *
  * Internal function for deallocations before return (taking a va_list as
  * argument).
@@ -181,13 +198,13 @@ void _MMGS_Free_all_var(va_list argptr)
 
   MMG5_pMesh     *mesh;
   MMG5_pSol      *sol;
-  enum MMG5_arg  typArg;
+  int            typArg;
   int            meshCount;
 
   meshCount = 0;
   sol = NULL;
 
-  while ( (typArg = va_arg(argptr,enum MMG5_arg)) != MMG5_ARG_end )
+  while ( (typArg = va_arg(argptr,int)) != MMG5_ARG_end )
   {
     switch ( typArg )
     {
@@ -195,14 +212,15 @@ void _MMGS_Free_all_var(va_list argptr)
       mesh = va_arg(argptr,MMG5_pMesh*);
       ++meshCount;
       break;
-    case(MMG5_ARG_ppMet):
+    case(MMG5_ARG_ppMet): case(MMG5_ARG_ppLs):
       sol = va_arg(argptr,MMG5_pSol*);
       break;
     default:
       fprintf(stderr,"  ## Error: MMGS_Free_all:\n"
               " unexpected argument type: %d\n",typArg);
-      fprintf(stderr," Argument type must be one of the following members"
-              " of the MMG5_arg enum: MMG5_ARG_ppMesh or MMG5_ARG_ppMet\n");
+      fprintf(stderr," Argument type must be one of the following"
+              " preprocessor variable: MMG5_ARG_ppMesh, MMG5_ARG_ppMet or "
+              "MMG5_ARG_ppLs.\n");
       exit(EXIT_FAILURE);
     }
   }
@@ -217,8 +235,9 @@ void _MMGS_Free_all_var(va_list argptr)
   if ( !sol ) {
     fprintf(stderr,"  ## Error: MMGS_Free_all:\n"
             " you need to provide your metric structure"
-            " (of type MMG5_pSol and indentified by the MMG5_ARG_ppMet member"
-            " of the MMG5_arg enum) to allow to free the associated memory.\n");
+            " (of type MMG5_pSol and indentified by the MMG5_ARG_ppMet or"
+            " the MMG5_ARG_ppLs preprocessor variable)"
+            " to allow to free the associated memory.\n");
   }
 
 
@@ -236,12 +255,20 @@ void _MMGS_Free_all_var(va_list argptr)
 
 /**
  * \param argptr list of the mmg structures that must be deallocated. Each
- * structure must follow a member of the \a MMG5_arg enum that allow to identify
- * it.  \a argptr contains at least a pointer toward a \a MMG5_pMesh structure
- * (that will contain the mesh and identified by the MMG5_ARG_ppMesh keyword)
- * and a pointer toward a \a MMG5_pSol structure (that will contain the ouput
+ * structure must follow one of the \a MMG5_ARG* preprocessor variable that allow
+ * to identify it.
+ *
+ * \a argptr contains at least a pointer toward a \a MMG5_pMesh structure
+ * (that will contain the mesh and identified by the MMG5_ARG_ppMesh keyword).
+ *
+ *  To call the \a MMGS_mmgslib function, you must also provide
+ * a pointer toward a \a MMG5_pSol structure (that will contain the ouput
  * metric (and the input one, if provided) and identified by the MMG5_ARG_ppMet
  * keyword).
+ *
+ *  To call the \a MMGS_mmgsls function, you must also provide a pointer
+ * toward a \a MMG5_pSol structure (that will contain the level-set function and
+ * identified by the MMG5_ARG_ppLs keyword).
  *
  * Internal function for structures deallocations before return (taking a
  * va_list as argument).
@@ -255,13 +282,13 @@ void _MMGS_Free_structures_var(va_list argptr)
 
   MMG5_pMesh     *mesh;
   MMG5_pSol      *sol;
-  enum MMG5_arg  typArg;
+  int            typArg;
   int            meshCount;
 
   meshCount = 0;
   sol = NULL;
 
-  while ( (typArg = va_arg(argptr,enum MMG5_arg)) != MMG5_ARG_end )
+  while ( (typArg = va_arg(argptr,int)) != MMG5_ARG_end )
   {
     switch ( typArg )
     {
@@ -269,14 +296,15 @@ void _MMGS_Free_structures_var(va_list argptr)
       mesh = va_arg(argptr,MMG5_pMesh*);
       ++meshCount;
       break;
-    case(MMG5_ARG_ppMet):
+    case(MMG5_ARG_ppMet): case(MMG5_ARG_ppLs):
       sol = va_arg(argptr,MMG5_pSol*);
       break;
     default:
       fprintf(stderr,"  ## Error: MMGS_Free_structures:\n"
               " unexpected argument type: %d\n",typArg);
-      fprintf(stderr," Argument type must be one of the following members"
-              " of the MMG5_arg enum: MMG5_ARG_ppMesh or MMG5_ARG_ppMet\n");
+      fprintf(stderr," Argument type must be one of the following"
+              " preprocessor variable: MMG5_ARG_ppMesh, MMG5_ARG_ppMet or"
+              " MMG5_ARG_ppLs.\n");
       exit(EXIT_FAILURE);
     }
   }
@@ -301,13 +329,13 @@ void _MMGS_Free_structures_var(va_list argptr)
     _MMG5_DEL_MEM((*mesh),(*mesh)->edge,((*mesh)->na+1)*sizeof(MMG5_Edge));
 
   if ( (*mesh)->adja )
-    _MMG5_DEL_MEM((*mesh),(*mesh)->adja,(4*(*mesh)->nemax+5)*sizeof(int));
+    _MMG5_DEL_MEM((*mesh),(*mesh)->adja,(3*(*mesh)->ntmax+5)*sizeof(int));
 
   if ( (*mesh)->xpoint )
     _MMG5_DEL_MEM((*mesh),(*mesh)->xpoint,((*mesh)->xpmax+1)*sizeof(MMG5_xPoint));
 
   if ( (*mesh)->tria )
-    _MMG5_DEL_MEM((*mesh),(*mesh)->tria,((*mesh)->nt+1)*sizeof(MMG5_Tria));
+    _MMG5_DEL_MEM((*mesh),(*mesh)->tria,((*mesh)->ntmax+1)*sizeof(MMG5_Tria));
 
   /* sol */
   if ( sol && (*sol) && (*sol)->m )
@@ -325,12 +353,21 @@ void _MMGS_Free_structures_var(va_list argptr)
 
 /**
  * \param argptr list of the mmg structures for whose we want to deallocate the
- * name. Each structure must follow a member of the \a MMG5_arg enum that allow
- * to identify it.  \a argptr contains at least a pointer toward a \a MMG5_pMesh
+ * name. Each structure must follow one of the \a MMG5_ARG preprocessor variable
+ * that allow to identify it.
+ *
+ * \a argptr contains at least a pointer toward a \a MMG5_pMesh
  * structure (that will contain the mesh and identified by the MMG5_ARG_ppMesh
- * keyword) and a pointer toward a \a MMG5_pSol structure (that will contain the
- * ouput metric (and the input one, if provided) and identified by the
- * MMG5_ARG_ppMet keyword).
+ * keyword).
+ *
+ *  To call the \a MMGS_mmgslib function, you must also provide
+ * a pointer toward a \a MMG5_pSol structure (that will contain the ouput
+ * metric (and the input one, if provided) and identified by the MMG5_ARG_ppMet
+ * keyword).
+ *
+ *  To call the \a MMGS_mmgsls function, you must also provide a pointer
+ * toward a \a MMG5_pSol structure (that will contain the level-set function and
+ * identified by the MMG5_ARG_ppLs keyword).
  *
  * Internal function for name deallocations before return (taking a va_list as
  * argument).
@@ -344,13 +381,13 @@ void _MMGS_Free_names_var(va_list argptr)
 
   MMG5_pMesh     *mesh;
   MMG5_pSol      *sol;
-  enum MMG5_arg  typArg;
+  int            typArg;
   int            meshCount;
 
   meshCount = 0;
   sol = NULL;
 
-  while ( (typArg = va_arg(argptr,enum MMG5_arg)) != MMG5_ARG_end )
+  while ( (typArg = va_arg(argptr,int)) != MMG5_ARG_end )
   {
     switch ( typArg )
     {
@@ -358,14 +395,15 @@ void _MMGS_Free_names_var(va_list argptr)
       mesh = va_arg(argptr,MMG5_pMesh*);
       ++meshCount;
       break;
-    case(MMG5_ARG_ppMet):
+    case(MMG5_ARG_ppMet): case(MMG5_ARG_ppLs):
       sol = va_arg(argptr,MMG5_pSol*);
       break;
     default:
       fprintf(stderr,"  ## Error: MMGS_Free_names:\n"
               " unexpected argument type: %d\n",typArg);
-      fprintf(stderr," Argument type must be one of the following members"
-              " of the MMG5_arg enum: MMG5_ARG_ppMesh or MMG5_ARG_ppMet\n");
+      fprintf(stderr," Argument type must be one of the following"
+              " preprocessor variable: MMG5_ARG_ppMesh, MMG5_ARG_ppMet "
+              " or MMG5_ARG_ppLs\n");
       exit(EXIT_FAILURE);
     }
   }
@@ -379,8 +417,9 @@ void _MMGS_Free_names_var(va_list argptr)
   if ( !sol ) {
     fprintf(stderr,"  ## Error: MMGS_Free_names:\n"
             " you need to provide your metric structure"
-            " (of type MMG5_pSol and indentified by the MMG5_ARG_ppMet member"
-            " of the MMG5_arg enum) to allow to free the associated memory.\n");
+            " (of type MMG5_pSol and indentified by the MMG5_ARG_ppMet or the "
+            " MMG5_ARG_ppLs preprocessor variable)"
+            " to allow to free the associated memory.\n");
   }
 
   /* mesh & met */

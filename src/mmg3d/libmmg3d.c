@@ -39,7 +39,7 @@
  *
  */
 
-#include "mmg3d.h"
+#include "inlined_functions_3d.h"
 
 /**
  * Pack the mesh \a mesh and its associated metric \a met and return \a val.
@@ -58,7 +58,7 @@
   }while(0)
 
 /** Free adja, xtetra and xpoint tables */
-static inline
+inline
 void _MMG3D_Free_topoTables(MMG5_pMesh mesh) {
   int k;
 
@@ -68,6 +68,11 @@ void _MMG3D_Free_topoTables(MMG5_pMesh mesh) {
 
   _MMG5_freeXTets(mesh);
 
+  if ( mesh->adjapr )
+    _MMG5_DEL_MEM(mesh,mesh->adjapr,(5*mesh->nprism+6)*sizeof(int));
+
+  _MMG5_freeXPrisms(mesh);
+
   if ( mesh->xpoint )
     _MMG5_DEL_MEM(mesh,mesh->xpoint,(mesh->xpmax+1)*sizeof(MMG5_xPoint));
 
@@ -75,6 +80,84 @@ void _MMG3D_Free_topoTables(MMG5_pMesh mesh) {
     mesh->point[k].xp = 0;
   }
 
+  return;
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the solution structure.
+ *
+ * Truncate a scalar metric by hmax and hmin values.
+ *
+ */
+static inline
+void _MMG3D_scalarSolTruncature(MMG5_pMesh mesh, MMG5_pSol met) {
+  MMG5_pTetra pt;
+  MMG5_pPoint ppt;
+  int         i,k,sethmin,sethmax;
+
+  /* Detect the point used only by prisms */
+  if ( mesh->nprism ) {
+    for (k=1; k<=mesh->np; k++) {
+      mesh->point[k].flag = 0;
+    }
+    for (k=1; k<=mesh->ne; k++) {
+      pt = &mesh->tetra[k];
+      if ( !MG_EOK(pt) ) continue;
+
+      for (i=0; i<4; i++) {
+        mesh->point[pt->v[i]].flag = 1;
+      }
+
+    }
+  }
+
+
+  /* If not provided by the user, compute hmin/hmax from the metric computed by
+   * the DoSol function (isotropic metric) */
+  sethmin = sethmax = 1;
+  if ( mesh->info.hmin < 0 ) {
+    sethmin = 0;
+    mesh->info.hmin = FLT_MAX;
+    for (k=1; k<=mesh->np; k++)  {
+      ppt = &mesh->point[k];
+      if ( !MG_VOK(ppt) || !ppt->flag ) continue;
+      mesh->info.hmin = MG_MIN(mesh->info.hmin,met->m[k]);
+    }
+  }
+  if ( mesh->info.hmax < 0 ) {
+    sethmax = 1;
+    mesh->info.hmax = 0.;
+    for (k=1; k<=mesh->np; k++)  {
+      ppt = &mesh->point[k];
+      if ( !MG_VOK(ppt) || !ppt->flag ) continue;
+      mesh->info.hmax = MG_MAX(mesh->info.hmax,met->m[k]);
+    }
+  }
+
+  if ( !sethmin ) {
+    mesh->info.hmin *=.1;
+    /* Check that user has not given a hmax value lower that the founded
+     * hmin. */
+    if ( mesh->info.hmin > mesh->info.hmax ) {
+      mesh->info.hmin = 0.1*mesh->info.hmax;
+    }
+  }
+  if ( !sethmax ) {
+    mesh->info.hmax *=10.;
+    /* Check that user has not given a hmin value bigger that the founded
+     * hmax. */
+    if ( mesh->info.hmax < mesh->info.hmin ) {
+      mesh->info.hmax = 10.*mesh->info.hmin;
+    }
+  }
+
+  /* vertex size */
+  for (k=1; k<=mesh->np; k++) {
+    ppt = &mesh->point[k];
+    if ( !MG_VOK(ppt) ) continue;
+    met->m[k] = MG_MIN(mesh->info.hmax,MG_MAX(mesh->info.hmin,met->m[k]));
+  }
   return;
 }
 
@@ -89,9 +172,11 @@ void _MMG3D_Free_topoTables(MMG5_pMesh mesh) {
  * out of library
  *
  */
-static inline
+/* static inline */
 int _MMG3D_packMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
   MMG5_pTetra   pt,ptnew;
+  MMG5_pPrism   pp;
+  MMG5_pQuad    pq;
   MMG5_pPoint   ppt,pptnew;
   MMG5_hgeom   *ph;
   int     np,nc,nr, k,ne,nbl,imet,imetnew,i;
@@ -103,16 +188,12 @@ int _MMG3D_packMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
     ppt = &mesh->point[k];
     if ( !MG_VOK(ppt) )  continue;
     ppt->tmp = ++np;
-    if ( ppt->tag & MG_CRN ) {
-      if ( mesh->info.nosurf && (ppt->tag & MG_REQ) ) {
-        // Warning: in -nosurf option : we loose the corner and the required
-        // points
-        ppt->tag &= ~MG_CRN;
+
+    if ( mesh->info.nosurf && (ppt->tag & MG_NOSURF) )
         ppt->tag &= ~MG_REQ;
-        continue;
-      }
-      nc++;
-    }
+
+    if ( ppt->tag & MG_CRN )  nc++;
+
     ppt->ref = abs(ppt->ref);
   }
 
@@ -148,6 +229,28 @@ int _MMG3D_packMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
     nbl++;
   }
   mesh->ne = ne;
+
+  /* update prisms and quads vertex indices */
+  for (k=1; k<=mesh->nprism; k++) {
+    pp = &mesh->prism[k];
+    if ( !MG_EOK(pp) )  continue;
+
+    pp->v[0] = mesh->point[pp->v[0]].tmp;
+    pp->v[1] = mesh->point[pp->v[1]].tmp;
+    pp->v[2] = mesh->point[pp->v[2]].tmp;
+    pp->v[3] = mesh->point[pp->v[3]].tmp;
+    pp->v[4] = mesh->point[pp->v[4]].tmp;
+    pp->v[5] = mesh->point[pp->v[5]].tmp;
+  }
+  for (k=1; k<=mesh->nquad; k++) {
+    pq = &mesh->quad[k];
+    if ( !MG_EOK(pq) )  continue;
+
+    pq->v[0] = mesh->point[pq->v[0]].tmp;
+    pq->v[1] = mesh->point[pq->v[1]].tmp;
+    pq->v[2] = mesh->point[pq->v[2]].tmp;
+    pq->v[3] = mesh->point[pq->v[3]].tmp;
+  }
 
   /* compact metric */
   nbl = 1;
@@ -200,10 +303,32 @@ int _MMG3D_packMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
   if ( disp && disp->m )
     disp->np = np;
 
+  /* create prism adjacency */
+  if ( !MMG3D_hashPrism(mesh) ) {
+    fprintf(stderr,"  ## Prism hashing problem. Exit program.\n");
+    return(0);
+  }
+
+  /* Remove the MG_REQ tags added by the nosurf option */
+  if ( mesh->info.nosurf ) {
+    for (k=1; k<=mesh->ne; k++) {
+      pt   = &mesh->tetra[k];
+      if ( MG_EOK(pt) &&  pt->xt ) {
+
+        for (i=0; i<6; i++) {
+          if ( mesh->xtetra[pt->xt].tag[i] & MG_NOSURF ) {
+            mesh->xtetra[pt->xt].tag[i] &= ~MG_REQ;
+            mesh->xtetra[pt->xt].tag[i] &= ~MG_NOSURF;
+          }
+        }
+      }
+    }
+  }
+
   /* rebuild triangles*/
   mesh->nt = 0;
   if ( !_MMG5_chkBdryTria(mesh) ) {
-    fprintf(stdout," ## Error: unable to rebuild triangles\n");
+    fprintf(stderr," ## Error: unable to rebuild triangles\n");
     return(0);
   }
 
@@ -226,12 +351,6 @@ int _MMG3D_packMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
       pt   = &mesh->tetra[k];
       if ( MG_EOK(pt) &&  pt->xt ) {
         for (i=0; i<6; i++) {
-          if ( mesh->info.nosurf ) {
-            if ( mesh->xtetra[pt->xt].tag[i] & MG_CRN ) {
-              mesh->xtetra[pt->xt].tag[i] &= ~MG_CRN;
-              mesh->xtetra[pt->xt].tag[i] &= ~MG_REQ;
-            }
-          }
           if ( mesh->xtetra[pt->xt].edg[i] ||
                ( mesh->xtetra[pt->xt].tag[i] & MG_REQ ||
                  MG_EDG(mesh->xtetra[pt->xt].tag[i])) )
@@ -288,7 +407,7 @@ int _MMG3D_packMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
 
   /* to could save the mesh, the adjacency have to be correct */
   if ( mesh->info.ddebug && (!_MMG5_chkmsh(mesh,1,1) ) ) {
-    fprintf(stdout,"  ##  Problem. Invalid mesh.\n");
+    fprintf(stderr,"  ##  Problem. Invalid mesh.\n");
     return(0);
   }
 
@@ -303,16 +422,6 @@ int _MMG3D_packMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
   return(1);
 }
 
-/**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward a sol structure (metric).
- * \return \ref MMG5_SUCCESS if success, \ref MMG5_LOWFAILURE if failed
- * but a conform mesh is saved and \ref MMG5_STRONGFAILURE if failed and we
- * can't save the mesh.
- *
- * Main program for the remesh library .
- *
- */
 int MMG3D_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met) {
   mytime    ctim[TIMEMAX];
   char      stim[32];
@@ -341,14 +450,19 @@ int MMG3D_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met) {
 
   /* Check options */
   if ( mesh->info.lag > -1 ) {
-    fprintf(stdout,"  ## Error: lagrangian mode unavailable (MMG3D_IPARAM_lag):\n"
+    fprintf(stderr,"  ## Error: lagrangian mode unavailable (MMG3D_IPARAM_lag):\n"
             "            You must call the MMG3D_mmg3dmov function to move a rigidbody.\n");
     _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
   }
   else if ( mesh->info.iso ) {
-    fprintf(stdout,"  ## Error: level-set discretisation unavailable"
+    fprintf(stderr,"  ## Error: level-set discretisation unavailable"
             " (MMG3D_IPARAM_iso):\n"
             "          You must call the MMG3D_mmg3dmov function to use this option.\n");
+    _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
+  }
+  else if ( mesh->info.optimLES && met->size==6 ) {
+    fprintf(stdout,"  ## Error: strong mesh optimization for LES methods"
+            " unavailable (MMG3D_IPARAM_optimLES) with an anisotropic metric.\n");
     _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
   }
 
@@ -369,7 +483,7 @@ int MMG3D_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met) {
     met->np = 0;
   }
   else if ( met->size!=1 && met->size!=6 ) {
-    fprintf(stdout,"  ## ERROR: WRONG DATA TYPE.\n");
+    fprintf(stderr,"  ## ERROR: WRONG DATA TYPE.\n");
     _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
   }
 
@@ -395,20 +509,23 @@ int MMG3D_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met) {
   if ( abs(mesh->info.imprim) > 0 ) {
     if ( !_MMG3D_inqua(mesh,met) ) {
       if ( !_MMG5_unscaleMesh(mesh,met) ) _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
-      _MMG5_RETURN_AND_PACK(mesh,met,NULL,MMG5_LOWFAILURE);
+      _LIBMMG5_RETURN(mesh,met,MMG5_LOWFAILURE);
     }
   }
 
   /* specific meshing */
-  if ( mesh->info.optim && !met->np && !MMG3D_DoSol(mesh,met) ) {
-    if ( !_MMG5_unscaleMesh(mesh,met) )  _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
-    _MMG5_RETURN_AND_PACK(mesh,met,NULL,MMG5_LOWFAILURE);
+  if ( mesh->info.optim && !met->np ) {
+    if ( !MMG3D_doSol(mesh,met) ) {
+      if ( !_MMG5_unscaleMesh(mesh,met) )  _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
+      _LIBMMG5_RETURN(mesh,met,MMG5_LOWFAILURE);
+    }
+    _MMG3D_scalarSolTruncature(mesh,met);
   }
 
   /* mesh analysis */
   if ( !_MMG3D_analys(mesh) ) {
     if ( !_MMG5_unscaleMesh(mesh,met) )  _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
-    _MMG5_RETURN_AND_PACK(mesh,met,NULL,MMG5_LOWFAILURE);
+    _LIBMMG5_RETURN(mesh,met,MMG5_LOWFAILURE);
   }
 
   if ( mesh->info.imprim > 1 && met->m ) _MMG3D_prilen(mesh,met,0);
@@ -424,6 +541,7 @@ int MMG3D_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met) {
     fprintf(stdout,"\n  -- PHASE 2 : %s MESHING\n",met->size < 6 ? "ISOTROPIC" : "ANISOTROPIC");
   }
 
+
   /* renumerotation if available */
   if ( !_MMG5_scotchCall(mesh,met) )
   {
@@ -434,7 +552,7 @@ int MMG3D_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met) {
 #ifdef PATTERN
   if ( !_MMG5_mmg3d1_pattern(mesh,met) ) {
     if ( !(mesh->adja) && !MMG3D_hashTetra(mesh,1) ) {
-      fprintf(stdout,"  ## Hashing problem. Invalid mesh.\n");
+      fprintf(stderr,"  ## Hashing problem. Invalid mesh.\n");
       _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
     }
     if ( !_MMG5_unscaleMesh(mesh,met) )  _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
@@ -443,7 +561,7 @@ int MMG3D_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met) {
 #else
   if ( !_MMG5_mmg3d1_delone(mesh,met) ) {
     if ( (!mesh->adja) && !MMG3D_hashTetra(mesh,1) ) {
-      fprintf(stdout,"  ## Hashing problem. Invalid mesh.\n");
+      fprintf(stderr,"  ## Hashing problem. Invalid mesh.\n");
       _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
     }
     if ( !_MMG5_unscaleMesh(mesh,met) )  _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
@@ -480,16 +598,6 @@ int MMG3D_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met) {
   _LIBMMG5_RETURN(mesh,met,MMG5_SUCCESS);
 }
 
-/**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward a sol structure (level-set).
- * \return \ref MMG5_SUCCESS if success, \ref MMG5_LOWFAILURE if failed
- * but a conform mesh is saved and \ref MMG5_STRONGFAILURE if failed and we
- * can't save the mesh.
- *
- * Main program for the levelset discretization library .
- *
- */
 int MMG3D_mmg3dls(MMG5_pMesh mesh,MMG5_pSol met) {
   mytime    ctim[TIMEMAX];
   char      stim[32];
@@ -514,8 +622,14 @@ int MMG3D_mmg3dls(MMG5_pMesh mesh,MMG5_pSol met) {
 
   /* Check options */
   if ( mesh->info.lag > -1 ) {
-    fprintf(stdout,"  ## Error: lagrangian mode unavailable (MMG3D_IPARAM_lag):\n"
+    fprintf(stderr,"  ## Error: lagrangian mode unavailable (MMG3D_IPARAM_lag):\n"
             "            You must call the MMG3D_mmg3dmov function to move a rigidbody.\n");
+    _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
+  }
+  else if ( mesh->info.optimLES ) {
+    fprintf(stdout,"  ## Error: strong mesh optimization for LES methods"
+            " unavailable (MMG3D_IPARAM_optimLES) in isosurface"
+            " discretization mode.\n");
     _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
   }
 
@@ -534,7 +648,7 @@ int MMG3D_mmg3dls(MMG5_pMesh mesh,MMG5_pSol met) {
     met->np = 0;
   }
   else if ( met->size!=1 ) {
-    fprintf(stdout,"  ## ERROR: WRONG DATA TYPE.\n");
+    fprintf(stderr,"  ## ERROR: WRONG DATA TYPE.\n");
     _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
   }
 
@@ -560,16 +674,16 @@ int MMG3D_mmg3dls(MMG5_pMesh mesh,MMG5_pSol met) {
   if ( abs(mesh->info.imprim) > 0 ) {
     if ( !_MMG3D_inqua(mesh,met) ) {
       if ( !_MMG5_unscaleMesh(mesh,met) ) _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
-      _MMG5_RETURN_AND_PACK(mesh,met,NULL,MMG5_LOWFAILURE);
+      _LIBMMG5_RETURN(mesh,met,MMG5_LOWFAILURE);
     }
   }
 
   /* specific meshing */
   if ( !met->np ) {
-    fprintf(stdout,"\n  ## ERROR: A VALID SOLUTION FILE IS NEEDED \n");
+    fprintf(stderr,"\n  ## ERROR: A VALID SOLUTION FILE IS NEEDED \n");
     _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
   }
-  if ( !_MMG5_mmg3d2(mesh,met) ) _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
+  if ( !_MMG3D_mmg3d2(mesh,met) ) _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
 
   /* mesh analysis */
   if ( !_MMG3D_analys(mesh) ) {
@@ -599,7 +713,7 @@ int MMG3D_mmg3dls(MMG5_pMesh mesh,MMG5_pSol met) {
 #ifdef PATTERN
   if ( !_MMG5_mmg3d1_pattern(mesh,met) ) {
     if ( !(mesh->adja) && !MMG3D_hashTetra(mesh,1) ) {
-      fprintf(stdout,"  ## Hashing problem. Invalid mesh.\n");
+      fprintf(stderr,"  ## Hashing problem. Invalid mesh.\n");
       _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
     }
     if ( !_MMG5_unscaleMesh(mesh,met) )  _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
@@ -608,7 +722,7 @@ int MMG3D_mmg3dls(MMG5_pMesh mesh,MMG5_pSol met) {
 #else
   if ( !_MMG5_mmg3d1_pattern(mesh,met) ) {
     if ( !(mesh->adja) && !MMG3D_hashTetra(mesh,1) ) {
-      fprintf(stdout,"  ## Hashing problem. Invalid mesh.\n");
+      fprintf(stderr,"  ## Hashing problem. Invalid mesh.\n");
       _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
     }
     if ( !_MMG5_unscaleMesh(mesh,met) )  _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
@@ -643,20 +757,6 @@ int MMG3D_mmg3dls(MMG5_pMesh mesh,MMG5_pSol met) {
 }
 
 
-/**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward a sol structure (for the output metric).
- * \param disp pointer toward a sol structure (displacement for the
- * lagrangian motion mode).
- * \return \ref MMG5_SUCCESS if success, \ref MMG5_LOWFAILURE if failed
- * but a conform mesh is saved and \ref MMG5_STRONGFAILURE if failed and we
- * can't save the mesh.
- *
- * Main program for the rigidbody moving library.
- *
- * \warning set the disp->npi field at the good value at the good moment (needed
- * by API).
- */
 int MMG3D_mmg3dmov(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp) {
   mytime    ctim[TIMEMAX];
   char      stim[32];
@@ -681,9 +781,14 @@ int MMG3D_mmg3dmov(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp) {
 
   /* Check options */
   if ( mesh->info.iso ) {
-    fprintf(stdout,"  ## Error: level-set discretisation unavailable"
+    fprintf(stderr,"  ## Error: level-set discretisation unavailable"
             " (MMG3D_IPARAM_iso):\n"
             "          You must call the MMG3D_mmg3dmov function to use this option.\n");
+    _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
+  }
+  else if ( mesh->info.optimLES ) {
+    fprintf(stdout,"  ## Error: strong mesh optimization for LES methods"
+            " unavailable (MMG3D_IPARAM_optimLES) in lagrangian mode.\n");
     _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
   }
 
@@ -705,14 +810,14 @@ int MMG3D_mmg3dmov(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp) {
     mesh->info.lag = 1;
   }
 
-#ifndef USE_SUSCELAS
-  fprintf(stdout,"  ## Error: you need to compile with the USE_SUSCELAS"
+#ifndef USE_ELAS
+  fprintf(stderr,"  ## Error: you need to compile with the USE_ELAS"
     " CMake's flag set to ON to use the rigidbody movement library.\n");
   _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
 #endif
 
   if ( !disp ) {
-    fprintf(stdout,"  ## Error: in lagrangian mode, a structure of type"
+    fprintf(stderr,"  ## Error: in lagrangian mode, a structure of type"
             " \"MMG5_pSol\" is needed to store the displacement field.\n"
             "            This structure must be different from the one used"
             " to store the metric.\n");
@@ -724,7 +829,7 @@ int MMG3D_mmg3dmov(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp) {
     disp->np = 0;
   }
   else if (disp->size!=3) {
-    fprintf(stdout,"  ## ERROR: LAGRANGIAN MOTION OPTION NEED A VECTORIAL DISPLACEMENT\n");
+    fprintf(stderr,"  ## ERROR: LAGRANGIAN MOTION OPTION NEED A VECTORIAL DISPLACEMENT\n");
     _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
   }
 
@@ -741,7 +846,7 @@ int MMG3D_mmg3dmov(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp) {
 
   if ( abs(mesh->info.imprim) > 0 ) {
     if ( !_MMG3D_inqua(mesh,met) ) {
-      _MMG5_RETURN_AND_PACK(mesh,met,disp,MMG5_LOWFAILURE);
+      _LIBMMG5_RETURN(mesh,met,MMG5_LOWFAILURE);
     }
   }
 
@@ -780,7 +885,7 @@ int MMG3D_mmg3dmov(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp) {
     _MMG5_RETURN_AND_PACK(mesh,met,disp,MMG5_LOWFAILURE);
   }
 
-#ifdef USE_SUSCELAS
+#ifdef USE_ELAS
   /* Lagrangian mode */
   if ( !_MMG5_mmg3d3(mesh,disp,met) ) {
     disp->npi = disp->np;
@@ -789,60 +894,17 @@ int MMG3D_mmg3dmov(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp) {
 #endif
   disp->npi = disp->np;
 
-  if ( !met->np && !MMG3D_DoSol(mesh,met) ) {
-    if ( !_MMG5_unscaleMesh(mesh,disp) ) {
-      _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
+  if ( !met->np ) {
+    if ( !MMG3D_doSol(mesh,met) ) {
+      if ( !_MMG5_unscaleMesh(mesh,disp) ) {
+        _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
+      }
+      _MMG5_RETURN_AND_PACK(mesh,met,disp,MMG5_LOWFAILURE);
     }
-    _MMG5_RETURN_AND_PACK(mesh,met,disp,MMG5_LOWFAILURE);
+    _MMG3D_scalarSolTruncature(mesh,met);
   }
 
-/*   /\* ******************* Part to skip in lag mode ? *************************** *\/ */
-/* #ifdef PATTERN */
-/*   if ( !_MMG5_mmg3d1_pattern(mesh,met) ) { */
-/*     if ( !(mesh->adja) && !MMG3D_hashTetra(mesh,1) ) { */
-/*       fprintf(stdout,"  ## Hashing problem. Invalid mesh.\n"); */
-/*       disp->npi = disp->np; */
-/*       _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE); */
-/*     } */
-/*     if ( !_MMG5_unscaleMesh(mesh,met) ) { */
-/*       disp->npi = disp->np; */
-/*       _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE); */
-/*     } */
-/*     _MMG5_RETURN_AND_PACK(mesh,met,disp,MMG5_LOWFAILURE); */
-/*   } */
-/* #else */
-/*   /\** Patterns in iso mode, delauney otherwise *\/ */
-/*   if ( !mesh->info.iso ) { */
-/*     if ( !_MMG5_mmg3d1_delone(mesh,met) ) { */
-/*       if ( !(mesh->adja) && !MMG3D_hashTetra(mesh,1) ) { */
-/*         fprintf(stdout,"  ## Hashing problem. Invalid mesh.\n"); */
-/*         disp->npi = disp->np; */
-/*         _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE); */
-/*       } */
-/*       if ( !_MMG5_unscaleMesh(mesh,met) ) { */
-/*         disp->npi = disp->np; */
-/*         _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE); */
-/*       } */
-/*       _MMG5_RETURN_AND_PACK(mesh,met,disp,MMG5_LOWFAILURE); */
-/*     } */
-/*   } */
-/*   else { */
-/*     if ( !_MMG5_mmg3d1_pattern(mesh,met) ) { */
-/*       if ( !(mesh->adja) && !MMG3D_hashTetra(mesh,1) ) { */
-/*         fprintf(stdout,"  ## Hashing problem. Invalid mesh.\n"); */
-/*         disp->npi = disp->np; */
-/*         _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE); */
-/*       } */
-/*       if ( !_MMG5_unscaleMesh(mesh,met) ) { */
-/*         disp->npi = disp->np; */
-/*         _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE); */
-/*       } */
-/*       _MMG5_RETURN_AND_PACK(mesh,met,disp,MMG5_LOWFAILURE); */
-/*     } */
-/*   } */
-/* #endif */
-
-/* *************************************** End of part to skip in lag mode ? *************************** */
+/* ******************* Add mesh improvement ? *************************** */
 
   chrono(OFF,&(ctim[3]));
   printim(ctim[3].gdif,stim);
@@ -886,18 +948,6 @@ int MMG3D_mmg3dmov(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp) {
 
 /** Old API °°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°*/
 
-/**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward a sol structure (metric or solution).
- * lagrangian motion mode).
- * \return Return \ref MMG5_SUCCESS if success, \ref MMG5_LOWFAILURE if failed
- * but a conform mesh is saved and \ref MMG5_STRONGFAILURE if failed and we
- * can't save the mesh.
- * \warning Do not use: will became obsolete
- *
- * Main program for the library .
- *
- */
 int MMG5_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met)
 {
   printf("  ## MMG5_mmg3dlib: "

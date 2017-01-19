@@ -58,6 +58,17 @@ int main(int argc,char *argv[]) {
 
   /** ================== 2d remeshing using the mmg2d library ========== */
 
+ /* Name and path of the mesh file */
+  pwd = getenv("PWD");
+  filename = (char *) calloc(strlen(pwd) +
+                             strlen("/../libexamples/mmg/adaptation_example0/init")+1,
+                             sizeof(char));
+  if ( filename == NULL ) {
+    perror("  ## Memory problem: calloc");
+    exit(EXIT_FAILURE);
+  }
+  sprintf(filename, "%s%s%s", pwd, "/../libexamples/mmg/adaptation_example0/", "init");
+
   /** ------------------------------ STEP   I -------------------------- */
   /** 1) Initialisation of mesh and sol structures */
   /* args of InitMesh:
@@ -77,14 +88,14 @@ int main(int argc,char *argv[]) {
       file formatted or manually set your mesh using the MMG2D_Set* functions */
 
   /** with MMG2D_loadMesh function */
-  if ( MMG2D_loadMesh(mmgMesh,"init.mesh") != 1 )  exit(EXIT_FAILURE);
+  if ( MMG2D_loadMesh(mmgMesh,filename) != 1 )  exit(EXIT_FAILURE);
   /** 3) Build sol in MMG5 format */
   /** Two solutions: just use the MMG2D_loadSol function that will read a .sol(b)
       file formatted or manually set your sol using the MMG2D_Set* functions */
-  if ( MMG2D_loadSol(mmgMesh,mmgSol,"init") != 1 )  exit(EXIT_FAILURE);
+  if ( MMG2D_loadSol(mmgMesh,mmgSol,filename) != 1 )  exit(EXIT_FAILURE);
 
   /** ------------------------------ STEP  II -------------------------- */
-  /** library call */
+  /** remesh function */
   ier = MMG2D_mmg2dlib(mmgMesh,mmgSol);
 
   if ( ier == MMG5_STRONGFAILURE ) {
@@ -110,22 +121,28 @@ int main(int argc,char *argv[]) {
                  MMG5_ARG_ppMesh,&mmgMesh, MMG5_ARG_ppMet,&mmgSol,
                  MMG5_ARG_end);
 
+  free(filename);
+  filename = NULL;
   /** ================ surface remeshing using the mmgs library ======== */
 
   /* Name and path of the mesh file */
   pwd = getenv("PWD");
-  filename = (char *) calloc(strlen(pwd) + 47, sizeof(char));
+  filename = (char *) calloc(strlen(pwd) + 1 +
+                             strlen("/../libexamples/mmg/adaptation_example0/cube"),
+                             sizeof(char));
   if ( filename == NULL ) {
     perror("  ## Memory problem: calloc");
     exit(EXIT_FAILURE);
   }
-  filename_os = (char *) calloc(strlen(pwd) + 47, sizeof(char));
+  filename_os = (char *) calloc(strlen(pwd) + 1 +
+                                strlen("/../libexamples/mmg/adaptation_example0/cube.s"),
+                                sizeof(char));
   if ( filename_os == NULL ) {
     perror("  ## Memory problem: calloc");
     exit(EXIT_FAILURE);
   }
-  sprintf(filename, "%s%s%s", pwd, "/../libexamples/mmg/example0/", "cube");
-  sprintf(filename_os, "%s%s%s", pwd, "/../libexamples/mmg/example0/", "cube.s");
+  sprintf(filename, "%s%s%s", pwd, "/../libexamples/mmg/adaptation_example0/", "cube");
+  sprintf(filename_os, "%s%s%s", pwd, "/../libexamples/mmg/adaptation_example0/", "cube.s");
 
   /** ------------------------------ STEP   I -------------------------- */
   /** 1) Initialisation of mesh and sol structures */
@@ -147,27 +164,17 @@ int main(int argc,char *argv[]) {
       file formatted or manually set your mesh using the MMGS_Set* functions */
 
   /** with MMGS_loadMesh function */
-  /** a) (not mandatory): give the mesh name
-      (by default, the "mesh.mesh" file is oppened)*/
-  if ( MMGS_Set_inputMeshName(mmgMesh,filename) != 1 )
-    exit(EXIT_FAILURE);
-  /** b) function calling */
+  /** function calling */
   if ( MMGS_loadMesh(mmgMesh,filename) != 1 )  exit(EXIT_FAILURE);
   /** 3) Build sol in MMG5 format */
   /** Two solutions: just use the MMGS_loadSol function that will read a .sol(b)
       file formatted or manually set your sol using the MMGS_Set* functions */
 
   /** With MMGS_loadSol function */
-  /** a) (not mandatory): give the sol name (by default, the name with the same
-      name as the mesh but the .sol extension file is oppened)*/
-  if ( MMGS_Set_inputSolName(mmgMesh,mmgSol,filename) != 1 )
-    exit(EXIT_FAILURE);
-
-  /** b) function calling */
   if ( MMGS_loadSol(mmgMesh,mmgSol,filename) != 1 )  exit(EXIT_FAILURE);
 
   /** ------------------------------ STEP  II -------------------------- */
-  /** library call */
+  /** remesh function */
   ier = MMGS_mmgslib(mmgMesh,mmgSol);
 
   if ( ier == MMG5_STRONGFAILURE ) {
@@ -183,21 +190,9 @@ int main(int argc,char *argv[]) {
       using the MMGS_getMesh/MMGS_getSol functions */
 
   /** 1) Automatically save the mesh */
-  /** a)  (not mandatory): give the ouptut mesh name using MMGS_Set_outputMeshName
-      (by default, the mesh is saved in the "mesh.o.mesh" file */
-  if ( MMGS_Set_outputMeshName(mmgMesh,filename_os) != 1 )
-    exit(EXIT_FAILURE);
-  /** b) function calling */
-  /*save result*/
   if ( MMGS_saveMesh(mmgMesh,filename_os) != 1 )  exit(EXIT_FAILURE);
 
   /** 2) Automatically save the solution */
-  /** a)  (not mandatory): give the ouptut sol name using MMGS_Set_outputSolName
-      (by default, the mesh is saved in the "mesh.o.sol" file */
-  if ( MMGS_Set_outputSolName(mmgMesh,mmgSol,filename_os) != 1 )
-    exit(EXIT_FAILURE);
-  /** b) function calling */
-  /*save metric*/
   if ( MMGS_saveSol(mmgMesh,mmgSol,filename_os) != 1 )  exit(EXIT_FAILURE);
 
   /** 3) Free the MMGS structures */
@@ -206,12 +201,14 @@ int main(int argc,char *argv[]) {
                 MMG5_ARG_end);
 
   /** ================== 3d remeshing using the mmg3d library ========== */
-  filename_o3d = (char *) calloc(strlen(pwd) + 47, sizeof(char));
+  filename_o3d = (char *) calloc(strlen(pwd) + 1 +
+                                 strlen("/../libexamples/mmg/adaptation_example0/cube.3d"),
+                                 sizeof(char));
   if ( filename_o3d == NULL ) {
     perror("  ## Memory problem: calloc");
     exit(EXIT_FAILURE);
   }
-  sprintf(filename_o3d, "%s%s%s", pwd, "/../libexamples/mmg/example0/", "cube.3d");
+  sprintf(filename_o3d, "%s%s%s", pwd, "/../libexamples/mmg/adaptation_example0/", "cube.3d");
 
   /** ------------------------------ STEP   I -------------------------- */
   /** 1) Initialisation of mesh and sol structures */
@@ -232,11 +229,6 @@ int main(int argc,char *argv[]) {
       file formatted or manually set your mesh using the MMG3D_Set* functions */
 
   /** with MMG3D_loadMesh function */
-  /** a) (not mandatory): give the mesh name
-      (by default, the "mesh.mesh" file is oppened)*/
-  if ( MMG3D_Set_inputMeshName(mmgMesh,filename) != 1 )
-    exit(EXIT_FAILURE);
-  /** b) function calling */
   if ( MMG3D_loadMesh(mmgMesh,filename) != 1 )  exit(EXIT_FAILURE);
 
   /** 3) Build sol in MMG5 format */
@@ -244,15 +236,10 @@ int main(int argc,char *argv[]) {
       file formatted or manually set your sol using the MMG3D_Set* functions */
 
   /** With MMG3D_loadSol function */
-  /** a) (not mandatory): give the sol name
-      (by default, the "mesh.sol" file is oppened)*/
-  if ( MMG3D_Set_inputSolName(mmgMesh,mmgSol,filename) != 1 )
-    exit(EXIT_FAILURE);
-  /** b) function calling */
   if ( MMG3D_loadSol(mmgMesh,mmgSol,filename) != 1 )  exit(EXIT_FAILURE);
 
   /** ------------------------------ STEP  II -------------------------- */
-  /** library call */
+  /** remesh function */
   ier = MMG3D_mmg3dlib(mmgMesh,mmgSol);
 
   if ( ier == MMG5_STRONGFAILURE ) {
@@ -268,19 +255,9 @@ int main(int argc,char *argv[]) {
       using the MMG3D_getMesh/MMG3D_getSol functions */
 
   /** 1) Automatically save the mesh */
-  /** a)  (not mandatory): give the ouptut mesh name using MMG3D_Set_outputMeshName
-      (by default, the mesh is saved in the "mesh.o.mesh" file */
-  if ( MMG3D_Set_outputMeshName(mmgMesh,filename_o3d) != 1 )
-    exit(EXIT_FAILURE);
-  /** b) function calling */
   if ( MMG3D_saveMesh(mmgMesh,filename_o3d) != 1 )  exit(EXIT_FAILURE);
 
   /** 2) Automatically save the solution */
-  /** a)  (not mandatory): give the ouptut sol name using MMG3D_Set_outputSolName
-      (by default, the mesh is saved in the "mesh.o.sol" file */
-  if ( MMG3D_Set_outputSolName(mmgMesh,mmgSol,filename_o3d) != 1 )
-    exit(EXIT_FAILURE);
-  /** b) function calling */
   if ( MMG3D_saveSol(mmgMesh,mmgSol,filename_o3d) != 1 )  exit(EXIT_FAILURE);
 
   /** 3) Free the MMG3D structures */

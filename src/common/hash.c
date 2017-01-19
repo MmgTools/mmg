@@ -207,7 +207,7 @@ int _MMG5_hashEdge(MMG5_pMesh mesh,_MMG5_Hash *hash, int a,int b,int k) {
 
     if ( hash->nxt >= hash->max-1 ) {
       if ( mesh->info.ddebug )
-        fprintf(stdout,"  ## Memory alloc problem (edge): %d\n",hash->max);
+        fprintf(stderr,"  ## Memory alloc problem (edge): %d\n",hash->max);
       _MMG5_TAB_RECALLOC(mesh,hash->item,hash->max,0.2,_MMG5_hedge,
                          "_MMG5_edge",return(0));
       /* ph pointer may be false after realloc */
@@ -240,6 +240,8 @@ int _MMG5_hashGet(_MMG5_Hash *hash,int a,int b) {
   _MMG5_hedge  *ph;
   int          key,ia,ib;
 
+  if ( !hash->item ) return(0);
+
   ia  = MG_MIN(a,b);
   ib  = MG_MAX(a,b);
   key = (_MMG5_KA*ia + _MMG5_KB*ib) % hash->siz;
@@ -268,15 +270,15 @@ int _MMG5_hashNew(MMG5_pMesh mesh,_MMG5_Hash *hash,int hsiz,int hmax) {
   int   k;
 
   /* adjust hash table params */
-  hash->siz  = hsiz;
-  hash->max  = hmax + 1;
-  hash->nxt  = hsiz;
+  hash->siz  = hsiz+1;
+  hash->max  = hmax + 2;
+  hash->nxt  = hash->siz;
 
   _MMG5_ADD_MEM(mesh,(hash->max+1)*sizeof(_MMG5_hedge),"hash table",
                 return(0));
   _MMG5_SAFE_CALLOC(hash->item,hmax+2,_MMG5_hedge);
 
-  for (k=hsiz; k<hash->max; k++)
+  for (k=hash->siz; k<hash->max; k++)
     hash->item[k].nxt = k+1;
 
   return(1);

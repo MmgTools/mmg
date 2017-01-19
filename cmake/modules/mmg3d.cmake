@@ -100,27 +100,27 @@ FILE(
 #####
 ############################################################################
 
-IF( USE_SUSCELAS )
+IF( USE_ELAS )
   # Set flags for building test program
-  INCLUDE_DIRECTORIES(${SUSCELAS_INCLUDE_DIR})
+  INCLUDE_DIRECTORIES(${ELAS_INCLUDE_DIR})
 
-  SET(CMAKE_REQUIRED_INCLUDES ${SUSCELAS_INCLUDE_DIR})
-  SET(CMAKE_REQUIRED_LIBRARIES ${SUSCELAS_LIBRARY})
+  SET(CMAKE_REQUIRED_INCLUDES ${ELAS_INCLUDE_DIR})
+  SET(CMAKE_REQUIRED_LIBRARIES ${ELAS_LIBRARY})
 
-  SET(CMAKE_C_FLAGS "-DUSE_SUSCELAS ${CMAKE_C_FLAGS}")
+  SET(CMAKE_C_FLAGS "-DUSE_ELAS ${CMAKE_C_FLAGS}")
   MESSAGE(STATUS
-    "Compilation with the Elas library: ${SUSCELAS_LIBRARY} ")
-  SET( LIBRARIES ${SUSCELAS_LINK_FLAGS} ${LIBRARIES})
-  SET( LIBRARIES ${SUSCELAS_LIBRARY} ${LIBRARIES})
+    "Compilation with the Elas library: ${ELAS_LIBRARY} ")
+  SET( LIBRARIES ${ELAS_LINK_FLAGS} ${LIBRARIES})
+  SET( LIBRARIES ${ELAS_LIBRARY} ${LIBRARIES})
 ENDIF()
 
-IF (SUSCELAS_NOTFOUND)
-  MESSAGE ( WARNING "SUscElas is a library to solve the linear elasticity "
-    "problem (see https://github.com/SUscTools/SUscElas to download it). "
+IF (ELAS_NOTFOUND)
+  MESSAGE ( WARNING "Elas is a library to solve the linear elasticity "
+    "problem (see https://github.com/SUscTools/Elas to download it). "
     "This library is needed to use the lagrangian motion option. "
-    "If you have already installed SUscElas and want to use it, "
-    "please set the CMake variable or environment variable SUSCELAS_DIR "
-    "to your SUscElas directory.")
+    "If you have already installed Elas and want to use it, "
+    "please set the CMake variable or environment variable ELAS_DIR "
+    "to your Elas directory.")
 ENDIF ( )
 
 ############################################################################
@@ -243,6 +243,7 @@ IF ( BUILD_TESTING )
   ##------- Set the continuous integration options --------------------##
   ##-------------------------------------------------------------------##
   SET(MMG3D_CI_TESTS ${CMAKE_SOURCE_DIR}/ci_tests/mmg3d )
+  SET(MMG_CI_TESTS ${CMAKE_SOURCE_DIR}/ci_tests/mmg )
 
   ##-------------------------------------------------------------------##
   ##--------------------------- Add tests and configure it ------------##
@@ -288,7 +289,7 @@ IF ( BUILD_TESTING )
       ADD_TEST(NAME libmmg3d_example0_b COMMAND ${LIBMMG3D_EXEC0_b})
       ADD_TEST(NAME libmmg3d_example1   COMMAND ${LIBMMG3D_EXEC1})
       ADD_TEST(NAME libmmg3d_example2   COMMAND ${LIBMMG3D_EXEC2})
-      IF ( USE_SUSCELAS )
+      IF ( USE_ELAS )
         ADD_TEST(NAME libmmg3d_example4   COMMAND ${LIBMMG3D_EXEC4})
       ENDIF ()
       ADD_TEST(NAME libmmg3d_example5   COMMAND ${LIBMMG3D_EXEC5})

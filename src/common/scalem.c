@@ -67,7 +67,9 @@ int _MMG5_boundingBox(MMG5_pMesh mesh) {
     if ( dd > mesh->info.delta )  mesh->info.delta = dd;
   }
   if ( mesh->info.delta < _MMG5_EPSD ) {
-    fprintf(stdout,"  ## Unable to scale mesh.\n");
+    fprintf(stderr,"  ## Unable to scale mesh:\n");
+    fprintf(stderr,"  ## Check that your mesh contains non-zero points and "
+            "valid elements.\n");
     return(0);
   }
 
@@ -107,6 +109,15 @@ int _MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met) {
   }
 
   mesh->info.hausd *= dd;
+  mesh->info.ls    *= dd;
+
+  /* normalize local parameters */
+  for (k=0; k<mesh->info.npar; k++) {
+    par = &mesh->info.par[k];
+    par->hmin  *= dd;
+    par->hmax  *= dd;
+    par->hausd *= dd;
+  }
 
   /* Check if hmin/hmax have been provided by the user and scale it if yes */
   sethmin = 0;
@@ -123,18 +134,18 @@ int _MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met) {
 
   /* Warning: we don't want to compute hmin/hmax from the level-set or the
    * displacement! */
-  if ( mesh->info.iso || (mesh->info.lag>-1) || (!met->m) ) {
+  if ( mesh->info.iso || (mesh->info.lag>-1) || (!met->m && !mesh->info.optim) ) {
     /* Set default values to hmin/hmax from the bounding box if not provided by
      * the user */
     if ( !sethmin )  mesh->info.hmin  = 0.01;
 
-    if ( !sethmax )  mesh->info.hmax  = 1.;
+    if ( !sethmax )  mesh->info.hmax  = 2.;
 
     if ( mesh->info.hmax < mesh->info.hmin ) {
       if ( sethmin && sethmax ) {
-        fprintf(stdout,"  ## Error: mismatch parameters:"
+        fprintf(stderr,"  ## Error: mismatch parameters:"
                 " minimal mesh size larger than maximal one.\n");
-        fprintf(stdout,"  Exit program.\n");
+        fprintf(stderr,"  Exit program.\n");
         exit(EXIT_FAILURE);
       }
       else if ( sethmin )
@@ -154,7 +165,7 @@ int _MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met) {
         met->m[k] *= dd;
         /* Check the metric */
         if ( (!mesh->info.iso) && met->m[k] <= 0) {
-          printf("  ## ERROR: WRONG METRIC AT POINT %d -- \n",k);
+          fprintf(stderr,"  ## ERROR: WRONG METRIC AT POINT %d -- \n",k);
           return(0);
         }
       }
@@ -203,16 +214,16 @@ int _MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met) {
 
         /* Check the input metric */
         if ( !_MMG5_eigenv(1,m,lambda,v) ) {
-          printf("  ## ERROR: WRONG METRIC AT POINT %d -- \n",k);
+          fprintf(stderr,"  ## ERROR: WRONG METRIC AT POINT %d -- \n",k);
           return(0);
         }
         for (i=0; i<3; i++) {
           if(lambda[i]<=0) {
-            printf("  ## ERROR: WRONG METRIC AT POINT %d -- eigenvalue :"
+            fprintf(stderr,"  ## ERROR: WRONG METRIC AT POINT %d -- eigenvalue :"
                    " %e %e %e -- det %e\n",k,lambda[0],lambda[1],lambda[2],
                    m[0]*(m[3]*m[5]-m[4]*m[4])-m[1]*(m[1]*m[5]-m[2]*m[4])+
                    m[2]*(m[1]*m[4]-m[2]*m[3]));
-            printf("WRONG METRIC AT POINT %d -- metric %e %e %e %e %e %e\n",
+            fprintf(stderr,"WRONG METRIC AT POINT %d -- metric %e %e %e %e %e %e\n",
                    k,m[0],m[1],m[2],m[3],m[4],m[5]);
             return(0);
           }
@@ -239,14 +250,6 @@ int _MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met) {
         mesh->info.hmax = 10.*mesh->info.hmin;
       }
     }
-  }
-
-  /* normalize local parameters */
-  for (k=0; k<mesh->info.npar; k++) {
-    par = &mesh->info.par[k];
-    par->hmin  *= dd;
-    par->hmax  *= dd;
-    par->hausd *= dd;
   }
 
   return(1);
@@ -276,6 +279,20 @@ int _MMG5_unscaleMesh(MMG5_pMesh mesh,MMG5_pSol met) {
     ppt->c[2] = ppt->c[2] * dd + mesh->info.min[2];
   }
 
+  /* unscale paramter values */
+  mesh->info.hmin  *= dd;
+  mesh->info.hmax  *= dd;
+  mesh->info.hausd *= dd;
+  mesh->info.ls    *= dd;
+
+  /* normalize local parameters */
+  for (k=0; k<mesh->info.npar; k++) {
+    par = &mesh->info.par[k];
+    par->hmin  *= dd;
+    par->hmax  *= dd;
+    par->hausd *= dd;
+  }
+
   /* unscale sizes */
   if ( met->m ) {
     if ( met->size == 6 ) {
@@ -292,19 +309,6 @@ int _MMG5_unscaleMesh(MMG5_pMesh mesh,MMG5_pSol met) {
         if ( MG_VOK(ppt) )  met->m[k] *= dd;
       }
     }
-  }
-
-  /* unscale paramter values */
-  mesh->info.hmin  *= dd;
-  mesh->info.hmax  *= dd;
-  mesh->info.hausd *= dd;
-
-  /* normalize local parameters */
-  for (k=0; k<mesh->info.npar; k++) {
-    par = &mesh->info.par[k];
-    par->hmin  *= dd;
-    par->hmax  *= dd;
-    par->hausd *= dd;
   }
 
   return(1);

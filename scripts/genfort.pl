@@ -47,6 +47,7 @@ my $fichier;
 #my $format = "MMG_INTEGER, PARAMETER :: %-30s = %d";
 my $format = "#define %-30s %d";
 my $formatbyval = "#define %-30s \%val(%d)";
+my $definebyval = "#define MMG5_ARG_%-30s \%val(%d)\n";
 my %opts;
 
 ###############################################################################
@@ -122,13 +123,14 @@ sub printTab # ($chaine, $tabcount, $comm)
 sub Convert {
 
     my $startcom  = 0;
+    my $cppdef    = 0;
     my $startenum = 0;
     my $countenum = 0;
     my $byvalue   = 0;
     my $chaine;
     my $tabcount = 0;
     my $interfaceprinted = 0;
-    my $startdef = 0;
+    my $modulename;
 
     open (APIc, $fichier);
 
@@ -175,36 +177,34 @@ sub Convert {
                     # Discard line and replace it by a white line
                     print "\n";
                 }
+                elsif($line =~ /\#ifndef/ )
+                {
+                    printTab($line,0,0 );
+                }
+                elsif ($line =~ /\#ifdef __cplusplus/ ) {
+                    $cppdef = 1;
+                    $chaine = sprintf("! %s",$line);
+                    printTab($chaine,0,0 );
+                }
+                elsif($line =~ /\#endif/ )
+                {
+                    if ( $cppdef ) {
+                        $cppdef = 0;
+                        $chaine = sprintf("! %s",$line);
+                        printTab($chaine,0,0 );
+                    }
+                    else {
+                        printTab($line,0,0 );
+                    }
+                }
+                elsif ($line =~ /\#define MMG5_ARG_(\w*)\s+(.*)/)
+                {
+                    $chaine = sprintf($definebyval,$1,$2);
+                    printTab($chaine,1,0 );
+                }
                 elsif ($line =~ /\#define/)
                 {
-                    if ($line =~ /\_MMG3DLIB\_H/ )
-                    {
-                        #print "\#ifndef \_MMG3DLIBF\_H\n";
-                        #print "\#define \_MMG3DLIBF\_H\n\n";
-                        #$startdef = 1;
-                    }
-                    elsif ($line =~ /\_MMG2DLIB\_H/ )
-                    {
-                        #print "\#ifndef \_MMG2DLIBF\_H\n";
-                        #print "\#define \_MMG2DLIBF\_H\n\n";
-                        #$startdef = 1;
-                    }
-                    elsif ($line =~ /\_MMGSLIB\_H/ )
-                    {
-                        #print "\#ifndef \_MMGSLIBF\_H\n";
-                        #print "\#define \_MMGSLIBF\_H\n\n";
-                        #$startdef = 1;
-                    }
-                   elsif ($line =~ /\_MMGLIB\_H/ )
-                    {
-                        #print "\#ifndef \_MMGLIBF\_H\n";
-                        #print "\#define \_MMGLIBF\_H\n\n";
-                        #$startdef = 1;
-                    }
-                    else
-                    {
-                        printTab($line,1,0 );
-                    }
+                    printTab($line,1,0 );
                 }
                 elsif($line =~ /typedef/)
                 {
@@ -254,7 +254,7 @@ sub Convert {
                     if ( $key =~ /(.*)(\/\*.*\*\/)/ )
                     {
                         if ( $byvalue ) {
-                            # Fortran code must pass an value and not a
+                            # Fortran code must pass a value and not a
                             # reference over a value
                             $chaine = sprintf($formatbyval, $1,$countenum);
                         }
@@ -265,8 +265,8 @@ sub Convert {
                     }
                     else
                     {
-                        if ( 0 && $byvalue ) {
-                            # Fortran code must pass an value and not a
+                        if ( $byvalue ) {
+                            # Fortran code must pass a value and not a
                             # reference over a value
                             $chaine = sprintf($formatbyval, $key, $countenum,);
                         }
@@ -284,16 +284,28 @@ sub Convert {
         }
         else
         {
-            if ($line =~ /^[ ]*> (.*)/)
+            if ($line =~ /^[ \*]*> (.*)\\n/ )
             {
                 if ($interfaceprinted == 0)
                 {
-                    $chaine = "INTERFACE\n";
+                    if ( $startcom == 1 ) {
+                        $chaine = "!  */\nINTERFACE\n";
+                    }
+                    else {
+                        $chaine = "INTERFACE\n";
+                    }
                     printTab($chaine, $tabcount);
-                    $tabcount = 1;
+                    $tabcount = $tabcount+1;
                     $interfaceprinted = 1;
                 }
-                $chaine = sprintf("%s\n", $line);
+
+                $chaine = sprintf("%s\n", $1);
+                if ( $interfaceprinted == 1 && $1=~/.*END SUBROUTINE/  )
+                {
+                    $chaine = sprintf("%s%s\n",$chaine,"END INTERFACE");
+                    $interfaceprinted = 0;
+                }
+
                 printTab($chaine, $tabcount, 0);
             }
             elsif ($line =~ /(.*)\*\//)
@@ -314,20 +326,17 @@ sub Convert {
             }
             elsif($line =~ /(.*)/)
             {
-
-
                 $chaine = sprintf("! %s\n", $line);
-                if ($line =~ /mmg3d's constants/)
+                if ($line =~ /Mmg's constants/)
                 {
-                    my $chaine2 = "END INTERFACE\n\n";
-                    $chaine2 .= "!\n";
-                    $chaine2 .= "!   Enum: KINDS\n";
+                    my $chaine2 .= "!   Enum: KINDS\n";
                     $chaine2 .= "!\n";
                     $chaine2 .= "!   Type kinds\n";
                     $chaine2 .= "!\n";
                     $chaine2 .= "!   Contains:\n";
-                    $chaine2 .= "!     MMG5_REAL_KIND - Kind to use for REAL\n";
-                    $chaine2 .= "!     MMG5_INT_KIND  - Kind to use for INT\n";
+                    $chaine2 .= "!     MMG5_DATA_PTR_T - Kind to use for POINTERS\n";
+                   # $chaine2 .= "!     MMG5_REAL_KIND  - Kind to use for REAL\n";
+                   # $chaine2 .= "!     MMG5_INT_KIND   - Kind to use for INT\n";
                     $chaine2 .= "!\n";
                     if ($real != 0)
                     {
@@ -347,12 +356,8 @@ sub Convert {
 
 
     }
+
     close APIc;
-    if ($startdef == 1)
-    {
-        #print "\#endif\n";
-        #$startdef = 0;
-    }
 }
 
 

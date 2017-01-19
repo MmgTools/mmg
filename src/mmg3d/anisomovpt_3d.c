@@ -33,11 +33,12 @@
  * \todo Doxygen documentation
  */
 
-#include "mmg3d.h"
+#include "inlined_functions_3d.h"
 
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
+ * \param octree pointer toward the octree structure.
  * \param list pointer toward the volumic ball of the point.
  * \param ilist size of the volumic ball.
  * \param improve force the new minimum element quality to be greater or equal
@@ -51,7 +52,7 @@
  * \remark we don't check if we break the hausdorff criterion.
  *
  */
-int _MMG5_movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,
+int _MMG5_movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree octree, int *list,int ilist,
                        int improve) {
 
 
@@ -67,11 +68,11 @@ int _MMG5_movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,
   ppt0   = &mesh->point[0];
   memset(ppt0,0,sizeof(MMG5_Point));
 
-  iel = list[0] / 4;
-  i0  = list[0] % 4;
-
-  if ( met->m )
+  if ( met->m ) {
+    iel = list[0] / 4;
+    i0  = list[0] % 4;
     memcpy(&met->m[0],&met->m[met->size*mesh->tetra[iel].v[i0]],met->size*sizeof(double));
+  }
 
   /* Coordinates of optimal point */
   calold = DBL_MAX;
@@ -151,6 +152,9 @@ int _MMG5_movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,
   }
 
   /* update position */
+  if ( octree )
+    _MMG3D_moveOctree(mesh, octree, pt->v[i0], ppt0->c, p0->c);
+
   p0 = &mesh->point[pt->v[i0]];
   p0->c[0] = ppt0->c[0];
   p0->c[1] = ppt0->c[1];
@@ -166,6 +170,7 @@ int _MMG5_movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
+ * \param octree pointer toward the octree structure.
  * \param listv pointer toward the volumic ball of the point.
  * \param ilistv size of the volumic ball.
  * \param lists pointer toward the surfacic ball of the point.
@@ -181,7 +186,7 @@ int _MMG5_movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,
  * Move boundary regular point, whose volumic and surfacic balls are passed.
  *
  */
-int _MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met,int *listv,
+int _MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree, int *listv,
                           int ilistv,int *lists,int ilists,
                           int improve) {
   MMG5_pTetra       pt,pt0;
@@ -193,9 +198,13 @@ int _MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met,int *listv,
   double            *n,r[3][3],lispoi[3*MMG3D_LMAX+1],ux,uy,uz,det2d;
   double            detloc,gv[2],step,lambda[3];
   double            uv[2],o[3],no[3],to[3],*m0;
-  double            calold,calnew,caltmp,callist[ilistv];
+  double            calold,calnew,caltmp,*callist;
   int               k,kel,iel,l,n0,na,nb,ntempa,ntempb,ntempc,nxp;
   unsigned char     i0,iface,i;
+  static int        warn = 0;
+
+  // Dynamic alloc for windows comptibility
+  _MMG5_SAFE_MALLOC(callist, ilistv, double);
 
   step = 0.1;
   if ( ilists < 2 )      return(0);
@@ -211,7 +220,10 @@ int _MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met,int *listv,
   n = &(mesh->xpoint[p0->xp].n1[0]);
 
   /** Step 1 : rotation matrix that sends normal n to the third coordinate vector of R^3 */
-  if ( !_MMG5_rotmatrix(n,r) ) return(0);
+  if ( !_MMG5_rotmatrix(n,r) ) {
+    _MMG5_SAFE_FREE(callist);
+    return(0);
+  }
 
   /** Step 2 : rotation of the oriented surfacic ball with r : lispoi[k] is the common edge
       between faces lists[k-1] and lists[k] */
@@ -306,10 +318,16 @@ int _MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met,int *listv,
   /* Check all projections over tangent plane. */
   for (k=0; k<ilists-1; k++) {
     det2d = lispoi[3*k+1]*lispoi[3*(k+1)+2] - lispoi[3*k+2]*lispoi[3*(k+1)+1];
-    if ( det2d < 0.0 )  return(0);
+    if ( det2d < 0.0 ) {
+      _MMG5_SAFE_FREE(callist);
+      return(0);
+    }
   }
   det2d = lispoi[3*(ilists-1)+1]*lispoi[3*0+2] - lispoi[3*(ilists-1)+2]*lispoi[3*0+1];
-  if ( det2d < 0.0 )    return(0);
+  if ( det2d < 0.0 ) {
+    _MMG5_SAFE_FREE(callist);
+    return(0);
+  }
 
   /** Step 3 :  Compute gradient towards optimal position = centre of mass of the
       ball, projected to tangent plane */
@@ -325,11 +343,20 @@ int _MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met,int *listv,
     _MMG5_tet2tri(mesh,iel,iface,&tt);
 
     if(!_MMG5_bezierCP(mesh,&tt,&pb,MG_GET(pxt->ori,iface))){
+      _MMG5_SAFE_FREE(callist);
       return(0);
     }
 
     /* Compute integral of sqrt(T^J(xi)  M(P(xi)) J(xi)) * P(xi) over the triangle */
-    if ( !_MMG5_elementWeight(mesh,met,&tt,p0,&pb,r,gv) )  return(0);
+    if ( !_MMG5_elementWeight(mesh,met,&tt,p0,&pb,r,gv) ) {
+      if ( !warn ) {
+        ++warn;
+        printf("  ## Warning: unable to compute optimal position for at least"
+               " 1 point.\n" );
+      }
+      _MMG5_SAFE_FREE(callist);
+      return(0);
+    }
   }
 
   /* At this point : gv = - gradient of V = direction to follow */
@@ -344,7 +371,10 @@ int _MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met,int *listv,
         break;
       }
     }
-    if ( k == ilists ) return(0);
+    if ( k == ilists ) {
+      _MMG5_SAFE_FREE(callist);
+      return(0);
+    }
   }
   else {
     for (k=ilists-1; k>=0; k--) {
@@ -354,13 +384,19 @@ int _MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met,int *listv,
         break;
       }
     }
-    if ( k == -1 ) return(0);
+    if ( k == -1 ) {
+      _MMG5_SAFE_FREE(callist);
+      return(0);
+    }
   }
 
   /* Sizing of time step : make sure point does not go out corresponding triangle. */
   det2d = -gv[1]*(lispoi[3*(kel+1)+1] - lispoi[3*(kel)+1]) + \
     gv[0]*(lispoi[3*(kel+1)+2] - lispoi[3*(kel)+2]);
-  if ( fabs(det2d) < _MMG5_EPSD ) return(0);
+  if ( fabs(det2d) < _MMG5_EPSD ) {
+    _MMG5_SAFE_FREE(callist);
+    return(0);
+  }
 
   det2d = 1.0 / det2d;
   step *= det2d;
@@ -374,7 +410,10 @@ int _MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met,int *listv,
 
   /* Computation of the barycentric coordinates of the new point in the corresponding triangle. */
   det2d = lispoi[3*kel+1]*lispoi[3*(kel+1)+2] - lispoi[3*kel+2]*lispoi[3*(kel+1)+1];
-  if ( det2d < _MMG5_EPSD )    return(0);
+  if ( det2d < _MMG5_EPSD ) {
+    _MMG5_SAFE_FREE(callist);
+    return(0);
+  }
   det2d = 1.0 / det2d;
   lambda[1] = lispoi[3*(kel+1)+2]*gv[0] - lispoi[3*(kel+1)+1]*gv[1];
   lambda[2] = -lispoi[3*(kel)+2]*gv[0] + lispoi[3*(kel)+1]*gv[1];
@@ -391,6 +430,7 @@ int _MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met,int *listv,
   _MMG5_tet2tri(mesh,iel,iface,&tt);
 
   if(!_MMG5_bezierCP(mesh,&tt,&pb,MG_GET(pxt->ori,iface))){
+    _MMG5_SAFE_FREE(callist);
     return(0);
   }
 
@@ -455,6 +495,7 @@ int _MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met,int *listv,
     }
   }
   if(!_MMG3D_bezierInt(&pb,uv,o,no,to)){
+    _MMG5_SAFE_FREE(callist);
     return(0);
   }
 
@@ -472,6 +513,7 @@ int _MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met,int *listv,
   if ( nxp > mesh->xpmax ) {
     _MMG5_TAB_RECALLOC(mesh,mesh->xpoint,mesh->xpmax,0.2,MMG5_xPoint,
                        "larger xpoint table",
+                       _MMG5_SAFE_FREE(callist);
                        return(0));
     n = &(mesh->xpoint[p0->xp].n1[0]);
   }
@@ -483,7 +525,10 @@ int _MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met,int *listv,
   pxp->n1[2] = no[2];
 
   // parallel transport of metric at p0 to new point.
-  if ( !_MMG5_paratmet(p0->c,n,m0,o,no,&met->m[0]) ) return 0;
+  if ( !_MMG5_paratmet(p0->c,n,m0,o,no,&met->m[0]) ) {
+    _MMG5_SAFE_FREE(callist);
+    return 0;
+  }
 
   /* For each surfacic triangle, build a virtual displaced triangle for check purposes */
   calold = calnew = DBL_MAX;
@@ -498,13 +543,28 @@ int _MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met,int *listv,
     assert(i<3);
     tt.v[i] = 0;
     caltmp = _MMG5_caltri(mesh,met,&tt);
-    if ( caltmp < _MMG5_EPSD )        return(0);
+    if ( caltmp < _MMG5_EPSD ) {
+      _MMG5_SAFE_FREE(callist);
+      return(0);
+    }
     calnew = MG_MIN(calnew,caltmp);
   }
-  if ( calold < _MMG5_NULKAL && calnew <= calold )    return(0);
-  else if (calnew < _MMG5_NULKAL) return(0);
-  else if (improve && calnew < 1.02*calold) return(0);
-  else if ( calnew < 0.3*calold )        return(0);
+  if ( calold < _MMG5_NULKAL && calnew <= calold ) {
+    _MMG5_SAFE_FREE(callist);
+    return(0);
+  }
+  else if (calnew < _MMG5_NULKAL) {
+    _MMG5_SAFE_FREE(callist);
+    return(0);
+  }
+  else if (improve && calnew < 1.02*calold) {
+    _MMG5_SAFE_FREE(callist);
+    return(0);
+  }
+  else if ( calnew < 0.3*calold ) {
+    _MMG5_SAFE_FREE(callist);
+    return(0);
+  }
   memset(pxp,0,sizeof(MMG5_xPoint));
 
   /* Test : check whether all volumes remain positive with new position of the point */
@@ -518,24 +578,34 @@ int _MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met,int *listv,
     pt0->v[i0] = 0;
     calold = MG_MIN(calold, pt->qual);
     callist[l]=_MMG5_orcal(mesh,met,0);
-    if ( callist[l] < _MMG5_EPSD )        return(0);
+    if ( callist[l] < _MMG5_EPSD )  {
+      _MMG5_SAFE_FREE(callist);
+      return(0);
+    }
     calnew = MG_MIN(calnew,callist[l]);
   }
 
   if ( calold < _MMG5_NULKAL && calnew <= calold ) {
+    _MMG5_SAFE_FREE(callist);
     return(0);
   }
   else if (calnew < _MMG5_NULKAL) {
+    _MMG5_SAFE_FREE(callist);
     return(0);
   }
   else if (improve && calnew < calold) {
+    _MMG5_SAFE_FREE(callist);
     return(0);
   }
   else if ( calnew < 0.3*calold ) {
+    _MMG5_SAFE_FREE(callist);
     return(0);
   }
 
   /* When all tests have been carried out, update coordinates, normals and metrics*/
+  if ( octree )
+    _MMG3D_moveOctree(mesh, octree, n0, o, p0->c);
+
   p0->c[0] = o[0];
   p0->c[1] = o[1];
   p0->c[2] = o[2];
@@ -549,6 +619,7 @@ int _MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met,int *listv,
   for(l=0; l<ilistv; l++){
     (&mesh->tetra[listv[l]/4])->qual= callist[l];
   }
+  _MMG5_SAFE_FREE(callist);
   return(1);
 }
 
@@ -556,6 +627,7 @@ int _MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met,int *listv,
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
+ * \param octree pointer toward the octree structure.
  * \param listv pointer toward the volumic ball of the point.
  * \param ilistv size of the volumic ball.
  * \param lists pointer toward the surfacic ball of the point.
@@ -570,7 +642,7 @@ int _MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met,int *listv,
  * Move boundary reference point, whose volumic and surfacic balls are passed.
  *
  */
-int _MMG5_movbdyrefpt_ani(MMG5_pMesh mesh, MMG5_pSol met, int *listv,
+int _MMG5_movbdyrefpt_ani(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree, int *listv,
                           int ilistv, int *lists, int ilists,
                           int improve){
   MMG5_pTetra           pt,pt0;
@@ -581,8 +653,8 @@ int _MMG5_movbdyrefpt_ani(MMG5_pMesh mesh, MMG5_pSol met, int *listv,
   double                o[3],no[3],to[3];
   double                calold,calnew,caltmp,*callist;
   int                   l,iel,ip0,ipa,ipb,iptmpa,iptmpb,it1,it2,ip1,ip2,ip,nxp;
+  int16_t               tag;
   unsigned char         i,i0,ie,iface,iface1,iface2,iea,ieb,ie1,ie2;
-  char                  tag;
 
   step = 0.1;
   ip1 = ip2 = 0;
@@ -803,15 +875,6 @@ int _MMG5_movbdyrefpt_ani(MMG5_pMesh mesh, MMG5_pSol met, int *listv,
     caltmp = _MMG5_caltri(mesh,met,&tt);
     if ( caltmp < _MMG5_EPSD )        return(0);
     calnew = MG_MIN(calnew,caltmp);
-    // The check that we don't break the Hausdorf criterion is comentated to
-    // match with the surface model of mmgs
-    /* if ( _MMG5_chkedg(mesh,&tt,MG_GET(pxt->ori,iface)) ) { */
-    /*   // Algiane: 09/12/2013 commit: we break the hausdorff criteria so we dont want */
-    /*   // the point to move? (modification not tested because I could not find a case */
-    /*   // passing here) */
-    /*   memset(pxp,0,sizeof(MMG5_xPoint)); */
-    /*   return(0); */
-    /* } */
   }
   if ( calold < _MMG5_NULKAL && calnew <= calold )    return(0);
   else if ( calnew < calold )    return(0);
@@ -831,22 +894,25 @@ int _MMG5_movbdyrefpt_ani(MMG5_pMesh mesh, MMG5_pSol met, int *listv,
     pt0->v[i0] = 0;
     calold = MG_MIN(calold, pt->qual);
     callist[l] = _MMG5_orcal(mesh,met,0);
-	if (callist[l] < _MMG5_EPSD) {
-		_MMG5_SAFE_FREE(callist);
-		return(0);
-	}
+    if (callist[l] < _MMG5_EPSD) {
+      _MMG5_SAFE_FREE(callist);
+      return(0);
+    }
     calnew = MG_MIN(calnew,callist[l]);
   }
   if ((calold < _MMG5_NULKAL && calnew <= calold) ||
-	  (calnew < _MMG5_NULKAL) || (calnew <= 0.3*calold)) {
-	  _MMG5_SAFE_FREE(callist);
-	  return(0);
+      (calnew < _MMG5_NULKAL) || (calnew <= 0.3*calold)) {
+    _MMG5_SAFE_FREE(callist);
+    return(0);
   } else if (improve && calnew < calold) {
-	  _MMG5_SAFE_FREE(callist);
-	  return(0);
+    _MMG5_SAFE_FREE(callist);
+    return(0);
   }
 
   /* Update coordinates, normals, for new point */
+  if ( octree )
+    _MMG3D_moveOctree(mesh, octree, ip0, o, p0->c);
+
   p0->c[0] = o[0];
   p0->c[1] = o[1];
   p0->c[2] = o[2];
@@ -873,6 +939,7 @@ int _MMG5_movbdyrefpt_ani(MMG5_pMesh mesh, MMG5_pSol met, int *listv,
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
+ * \param octree pointer toward the octree structure.
  * \param listv pointer toward the volumic ball of the point.
  * \param ilistv size of the volumic ball.
  * \param lists pointer toward the surfacic ball of the point.
@@ -887,7 +954,7 @@ int _MMG5_movbdyrefpt_ani(MMG5_pMesh mesh, MMG5_pSol met, int *listv,
  * \remark we don't check if we break the hausdorff criterion.
  *
  */
-int _MMG5_movbdynompt_ani(MMG5_pMesh mesh,MMG5_pSol met, int *listv,
+int _MMG5_movbdynompt_ani(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree octree, int *listv,
                           int ilistv, int *lists, int ilists,
                           int improve){
   MMG5_pTetra       pt,pt0;
@@ -898,7 +965,8 @@ int _MMG5_movbdynompt_ani(MMG5_pMesh mesh,MMG5_pSol met, int *listv,
   double            calold,calnew,caltmp,*callist;
   double            o[3],no[3],to[3];
   int               ip0,ip1,ip2,ip,iel,ipa,ipb,l,iptmpa,iptmpb,it1,it2,nxp;
-  char              iface,i,i0,iea,ieb,ie,tag,ie1,ie2,iface1,iface2;
+  int16_t           tag;
+  char              iface,i,i0,iea,ieb,ie,ie1,ie2,iface1,iface2;
 
   step = 0.1;
   ip1 = ip2 = 0;
@@ -1119,15 +1187,6 @@ int _MMG5_movbdynompt_ani(MMG5_pMesh mesh,MMG5_pSol met, int *listv,
     caltmp = _MMG5_caltri(mesh,met,&tt);
     if ( caltmp < _MMG5_EPSD )        return(0);
     calnew = MG_MIN(calnew,caltmp);
-    // The check that we don't break the Hausdorf criterion is comentated to
-    // match with the surface model of mmgs
-    /* if ( _MMG5_chkedg(mesh,&tt,MG_GET(pxt->ori,iface)) ) { */
-    /*   // Algiane: 09/12/2013 commit: we break the hausdorff criteria so we dont want */
-    /*   // the point to move? (modification not tested because I could not find a case */
-    /*   // passing here) */
-    /*   memset(pxp,0,sizeof(MMG5_xPoint)); */
-    /*   return(0); */
-    /* } */
   }
   if ( calold < _MMG5_NULKAL && calnew <= calold )    return(0);
   else if ( calnew < calold )    return(0);
@@ -1147,22 +1206,25 @@ int _MMG5_movbdynompt_ani(MMG5_pMesh mesh,MMG5_pSol met, int *listv,
     pt0->v[i0] = 0;
     calold = MG_MIN(calold, pt->qual);
     callist[l]= _MMG5_orcal(mesh,met,0);
-	if (callist[l] < _MMG5_EPSD) {
-		_MMG5_SAFE_FREE(callist);
-		return(0);
-	}
+    if (callist[l] < _MMG5_EPSD) {
+      _MMG5_SAFE_FREE(callist);
+      return(0);
+    }
     calnew = MG_MIN(calnew,callist[l]);
   }
   if ((calold < _MMG5_NULKAL && calnew <= calold) ||
-	  (calnew < _MMG5_NULKAL) || (calnew <= 0.3*calold)) {
-	  _MMG5_SAFE_FREE(callist);
-	  return(0);
+      (calnew < _MMG5_NULKAL) || (calnew <= 0.3*calold)) {
+    _MMG5_SAFE_FREE(callist);
+    return(0);
   } else if (improve && calnew < calold) {
-	  _MMG5_SAFE_FREE(callist);
-	  return(0);
+    _MMG5_SAFE_FREE(callist);
+    return(0);
   }
 
   /* Update coordinates, normals, for new point */
+  if ( octree )
+    _MMG3D_moveOctree(mesh, octree, ip0, o, p0->c);
+
   p0->c[0] = o[0];
   p0->c[1] = o[1];
   p0->c[2] = o[2];
@@ -1189,6 +1251,7 @@ int _MMG5_movbdynompt_ani(MMG5_pMesh mesh,MMG5_pSol met, int *listv,
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
+ * \param octree pointer toward the octree structure.
  * \param listv pointer toward the volumic ball of the point.
  * \param ilistv size of the volumic ball.
  * \param lists pointer toward the surfacic ball of the point.
@@ -1201,7 +1264,7 @@ int _MMG5_movbdynompt_ani(MMG5_pMesh mesh,MMG5_pSol met, int *listv,
  * Move boundary ridge point, whose volumic and surfacic balls are passed.
  *
  */
-int _MMG5_movbdyridpt_ani(MMG5_pMesh mesh, MMG5_pSol met, int *listv,
+int _MMG5_movbdyridpt_ani(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree, int *listv,
                           int ilistv,int *lists,int ilists,
                           int improve) {
   MMG5_pTetra          pt,pt0;
@@ -1212,8 +1275,8 @@ int _MMG5_movbdyridpt_ani(MMG5_pMesh mesh, MMG5_pSol met, int *listv,
   double               o[3],no1[3],no2[3],to[3];
   double               calold,calnew,caltmp,*callist;
   int                  l,iel,ip0,ipa,ipb,iptmpa,iptmpb,it1,it2,ip1,ip2,ip,nxp;
+  int16_t              tag;
   unsigned char        i,i0,ie,iface,iface1,iface2,iea,ieb,ie1,ie2;
-  char                 tag;
 
   step = 0.1;
   ip1 = ip2 = 0;
@@ -1440,12 +1503,6 @@ int _MMG5_movbdyridpt_ani(MMG5_pMesh mesh, MMG5_pSol met, int *listv,
     caltmp = _MMG5_caltri(mesh,met,&tt);
     if ( caltmp < _MMG5_EPSD )        return(0);
     calnew = MG_MIN(calnew,caltmp);
-    // The check that we don't break the Hausdorf criterion is comentated to
-    // match with the surface model of mmgs
-    /* if ( _MMG5_chkedg(mesh,&tt,MG_GET(pxt->ori,iface)) ) { */
-    /*   memset(pxp,0,sizeof(MMG5_xPoint)); */
-    /*   return(0); */
-    /* } */
   }
   if ( calold < _MMG5_NULKAL && calnew <= calold )    return(0);
   else if ( calnew <= calold )  return(0);
@@ -1476,11 +1533,14 @@ int _MMG5_movbdyridpt_ani(MMG5_pMesh mesh, MMG5_pSol met, int *listv,
     _MMG5_SAFE_FREE(callist);
     return(0);
   } else if (improve && calnew < calold) {
-	  _MMG5_SAFE_FREE(callist);
-	  return(0);
+    _MMG5_SAFE_FREE(callist);
+    return(0);
   }
 
   /* Update coordinates, normals, for new point */
+  if ( octree )
+    _MMG3D_moveOctree(mesh, octree, ip0, o, p0->c);
+
   p0->c[0] = o[0];
   p0->c[1] = o[1];
   p0->c[2] = o[2];

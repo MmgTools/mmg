@@ -32,23 +32,6 @@
  */
 
 #include "mmg2d.h"
-/* compute tria area */
-double MMG2_quickarea(double a[2],double b[2],double c[2]) {
-  double     abx,aby,acx,acy;//,bcx,bcy;
-  double     aire;
-
-  abx = b[0] - a[0];
-  aby = b[1] - a[1];
-  acx = c[0] - a[0];
-  acy = c[1] - a[1];
-  // bcx = c[0] - b[0];
-  // bcy = c[1] - b[1];
-  //
-  /* orientation */
-  aire = abx*acy - aby*acx;
-
-  return(aire);
-}
 
 /* compute tria quality iso */
 double caltri_iso_in(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pTria pt) {
@@ -115,9 +98,9 @@ double caltri_ani_in(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pTria pt) {
   if(a1 < 0) return(cal) ;
 
   /* average metric */
-  ma = &sol->m[(pt->v[0]-1)*sol->size+1];
-  mb = &sol->m[(pt->v[1]-1)*sol->size+1];
-  mc = &sol->m[(pt->v[2]-1)*sol->size+1];
+  ma = &sol->m[pt->v[0]*sol->size];
+  mb = &sol->m[pt->v[1]*sol->size];
+  mc = &sol->m[pt->v[2]*sol->size];
   for (i=0; i<3; i++)  m[i] = (ma[i]+mb[i]+mc[i]) / 3.0;
 
   abx = b[0] - a[0];
@@ -209,9 +192,9 @@ double caltri_ani(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pTria pt) {
   if(a1 < 0) return(cal) ;
 
   /* average metric */
-  ma = &sol->m[(pt->v[0]-1)*sol->size+1];
-  mb = &sol->m[(pt->v[1]-1)*sol->size+1];
-  mc = &sol->m[(pt->v[2]-1)*sol->size+1];
+  ma = &sol->m[(pt->v[0])*sol->size];
+  mb = &sol->m[(pt->v[1])*sol->size];
+  mc = &sol->m[(pt->v[2])*sol->size];
   for (i=0; i<3; i++)  m[i] = (ma[i]+mb[i]+mc[i]) / 3.0;
 
   abx = b[0] - a[0];

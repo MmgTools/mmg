@@ -3,6 +3,9 @@
 !> @brief
 !>  Example for using mmg3dlib (basic use)
 
+PROGRAM main
+
+  IMPLICIT NONE
 
 !> Include the mmg3d library hader file
 ! if the header file is in the "include" directory
@@ -10,7 +13,6 @@
 ! if the header file is in "include/mmg/mmg3d"
 #include "mmg/mmg3d/libmmg3df.h"
 
-PROGRAM main
   MMG5_DATA_PTR_T  :: mmgMesh
   MMG5_DATA_PTR_T  :: mmgSol
   INTEGER          :: ier,k
@@ -41,14 +43,16 @@ PROGRAM main
   CALL MMG3D_Init_mesh(MMG5_ARG_start, &
        MMG5_ARG_ppMesh,mmgMesh,MMG5_ARG_ppMet,mmgSol, &
        MMG5_ARG_end)
+  CALL MMG3D_SET_IPARAMETER(mmgMesh,mmgSol,MMG3D_IPARAM_verbose,5,ier)
 
   !> 2) Build mesh in MMG5 format
   !! Two solutions: just use the MMG3D_loadMesh function that will read a .mesh(b)
   !! file formatted or manually set your mesh using the MMG3D_Set* functions
 
   !> Manually set of the mesh
-  !! a) give the size of the mesh: 12 vertices, 12 tetra, 20 triangles, 0 edges
-  CALL MMG3D_Set_meshSize(mmgMesh,12,12,20,0,ier)
+  !! a) give the size of the mesh: 12 vertices, 12 tetra,0 prisms, 20 triangles,
+  !! 0 quads, 0 edges
+  CALL MMG3D_Set_meshSize(mmgMesh,12,12,0,20,0,0,ier)
   IF ( ier /= 1 ) CALL EXIT(101)
 
   !> b) give the vertices: for each vertex, give the coordinates, the reference
@@ -172,7 +176,7 @@ PROGRAM main
   IF ( ier /= 1 ) CALL EXIT(107)
 
   !> ------------------------------ STEP  II --------------------------
-  !! library call
+  !! remesh function
   CALL MMG3D_mmg3dlib(mmgMesh,mmgSol,ier)
 
   IF ( ier == MMG5_STRONGFAILURE ) THEN
@@ -194,8 +198,8 @@ PROGRAM main
   WRITE(inm,*),"MeshVersionFormatted 2"
   WRITE(inm,*),"Dimension 3"
 
-  !> a) get the size of the mesh: vertices, tetra, triangles, edges
-  CALL MMG3D_Get_meshSize(mmgMesh,np,ne,nt,na,ier)
+  !> a) get the size of the mesh: vertices, tetra,prisms, triangles, quads,edges
+  CALL MMG3D_Get_meshSize(mmgMesh,np,ne,%val(0),nt,%val(0),na,ier)
   IF ( ier /= 1 ) CALL EXIT(108)
 
   ! Table to know if a vertex is corner

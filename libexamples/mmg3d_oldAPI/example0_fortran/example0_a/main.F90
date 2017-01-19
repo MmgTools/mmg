@@ -77,7 +77,7 @@ PROGRAM main
   IF ( ier ==0 ) CALL EXIT(105)
 
   !> ------------------------------ STEP  II --------------------------
-  !! library call
+  !! remesh function
   CALL MMG5_mmg3dlib(mmgMesh,mmgSol,ier)
   IF ( ier == MMG5_STRONGFAILURE ) THEN
      PRINT*,"BAD ENDING OF MMG3DLIB: UNABLE TO SAVE MESH"

@@ -32,13 +32,6 @@
 
 #include "mmg2d.h"
 
-/**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the sol structure.
- *
- * Set function pointers depending if case is iso or aniso.
- *
- */
 void MMG2D_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
   if ( met->size == 3 ) {
     MMG2_length    = long_ani;
@@ -65,19 +58,6 @@ void MMG2D_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
   return;
 }
 
-/**
- * \brief Return adjacent elements of a triangle.
- * \param mesh pointer toward the mesh structure.
- * \param kel triangle index.
- * \param listri pointer toward the table of the indices of the three adjacent
- * triangles of the elt \a kel (the index is 0 if there is no adjacent).
- * \return 1.
- *
- * Find the indices of the 3 adjacent elements of triangle \a
- * kel. \f$listri[i] = 0\f$ if the \f$i^{th}\f$ face has no adjacent element
- * (so we are on a boundary face).
- *
- */
 int MMG2D_Get_adjaTri(MMG5_pMesh mesh, int kel, int listri[3]) {
 
   if ( ! mesh->adja ) {
@@ -92,18 +72,6 @@ int MMG2D_Get_adjaTri(MMG5_pMesh mesh, int kel, int listri[3]) {
   return(1);
 }
 
-/**
- * \brief Return adjacent elements of a triangle.
- * \param mesh pointer toward the mesh structure.
- * \param ip vertex index.
- * \param lispoi pointer toward an array of size MMG2D_LMAX that will contain
- * the indices of adjacent vertices to the vertex \a k.
- * \return 1 if success.
- *
- * Find the indices of the adjacent vertices of the vertex \a
- * ip.
- *
- */
 inline
 int MMG2D_Get_adjaVertices(MMG5_pMesh mesh, int ip, int lispoi[MMG2D_LMAX])
 {
@@ -117,19 +85,6 @@ int MMG2D_Get_adjaVertices(MMG5_pMesh mesh, int ip, int lispoi[MMG2D_LMAX])
   return MMG2D_Get_adjaVerticesFast(mesh,ip,start,lispoi);
 }
 
-/**
- * \brief Return adjacent elements of a triangle.
- * \param mesh pointer toward the mesh structure.
- * \param ip vertex index.
- * \param start index of a triangle holding \a ip.
- * \param lispoi pointer toward an array of size MMG2D_LMAX that will contain
- * the indices of adjacent vertices to the vertex \a ip.
- * \return nbpoi the number of adjacent points if success, 0 if fail.
- *
- * Find the indices of the adjacent vertices of the vertex \a
- * ip of the triangle \a start.
- *
- */
 inline
 int MMG2D_Get_adjaVerticesFast(MMG5_pMesh mesh, int ip,int start, int lispoi[MMG2D_LMAX])
 {
@@ -202,12 +157,23 @@ int MMG2D_Get_adjaVerticesFast(MMG5_pMesh mesh, int ip,int start, int lispoi[MMG
   return nbpoi;
 }
 
-/**
- * \param mesh pointer toward the mesh structure
- *
- * Free the mesh elements (and the adjacency).
- *
- */
+int MMG2D_Get_triFromEdge(MMG5_pMesh mesh, int ked, int *ktri, int *ied)
+{
+  int val;
+
+  val = mesh->edge[ked].base;
+
+  if ( !val ) return(0);
+
+  *ktri = val/3;
+
+  *ied = val%3;
+
+  return 1;
+
+
+}
+
 void MMG2D_Free_triangles(MMG5_pMesh mesh) {
 
   if ( mesh->adja )
@@ -223,12 +189,6 @@ void MMG2D_Free_triangles(MMG5_pMesh mesh) {
   return;
 }
 
-/**
- * \param mesh pointer toward the mesh structure
- *
- * Free the mesh edges (and the associated xpoints).
- *
- */
 void MMG2D_Free_edges(MMG5_pMesh mesh) {
 
   if ( mesh->edge )
@@ -246,13 +206,6 @@ void MMG2D_Free_edges(MMG5_pMesh mesh) {
   return;
 }
 
-/**
- * \param mesh pointer toward the mesh structure
- * \param sol pointer toward the solution structure
- *
- * Free the solution.
- *
- */
 void MMG2D_Free_solutions(MMG5_pMesh mesh,MMG5_pSol sol) {
 
   /* sol */

@@ -41,6 +41,24 @@
 
 /**
  * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the solution structure.
+ *
+ * Truncate a scalar metric by hmax and hmin values.
+ *
+ */
+static inline
+void _MMG2D_scalarSolTruncature(MMG5_pMesh mesh, MMG5_pSol met) {
+  int         k;
+
+  /* vertex size */
+  for (k=1; k<=mesh->np; k++) {
+    met->m[k] = MG_MIN(mesh->info.hmax,MG_MAX(mesh->info.hmin,met->m[k]));
+  }
+  return;
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the solution structure.
  * \return 0 if memory problem (uncomplete mesh), 1 otherwise.
  *
@@ -49,10 +67,12 @@
  *
  * \warning edges are not packed.
  */
+static inline
 int MMG2_tassage(MMG5_pMesh mesh,MMG5_pSol sol) {
   MMG5_pEdge         ped;
   MMG5_pTria         pt,ptnew;
   MMG5_pPoint        ppt,pptnew;
+  _MMG5_Hash         hash;
   int                np,nt,k,nbl,isol,isolnew,i,memWarn,num;
   int                iadr,iadrnew,iadrv,*adjav,*adja,*adjanew,voy;
 
@@ -60,7 +80,10 @@ int MMG2_tassage(MMG5_pMesh mesh,MMG5_pSol sol) {
   np=0;
   for (k=1; k<=mesh->np; k++) {
     ppt = &mesh->point[k];
-    if ( ppt->tag & M_NUL )  continue;
+    if ( ppt->tag & MG_NUL ) {
+      ppt->tmp = 0;
+      continue;
+    }
     ppt->tmp = ++np;
   }
 
@@ -110,6 +133,7 @@ int MMG2_tassage(MMG5_pMesh mesh,MMG5_pSol sol) {
           ped = &mesh->edge[num];
           ped->a = pt->v[MMG2_iare[i][0]];
           ped->b = pt->v[MMG2_iare[i][1]];
+          ped->base = 3*k+i;
           ped->ref  = M_MIN(mesh->point[pt->v[MMG2_iare[i][0]]].ref,
                             mesh->point[pt->v[MMG2_iare[i][1]]].ref);
         }
@@ -118,11 +142,13 @@ int MMG2_tassage(MMG5_pMesh mesh,MMG5_pSol sol) {
   }
 
   nbl = 0;
+
   for (k=1; k<=mesh->na; k++) {
     ped  = &mesh->edge[k];
     if(!ped->a) continue;
     ped->a = mesh->point[ped->a].tmp;
     ped->b = mesh->point[ped->b].tmp;
+
     /* impossible to do that without update triangle....*/
     /* if(k!=nbl) { */
     /*   pednew = &mesh->edge[nbl]; */
@@ -170,14 +196,42 @@ triangles:
   }
   mesh->nt = nt;
 
+  /* Travel through the tria and hash the boundary edges in order to recover
+   * from which tria comes a boundary edges */
+  hash.item = NULL;
+  if ( _MMG5_hashNew(mesh,&hash,mesh->nt,3*mesh->nt) ) {
+
+    for (k=1; k<=mesh->nt; k++) {
+      pt = &mesh->tria[k];
+      if (!pt->v[0]) continue;
+      for (i=0 ; i<3 ; i++) {
+        if ( !_MMG5_hashEdge(mesh,&hash,pt->v[_MMG5_inxt2[i]],pt->v[_MMG5_iprv2[i]],3*k+i) ) {
+          fprintf(stdout,"  ## Warning: unable hash boundary edges.\n");
+          break;
+        }
+      }
+    }
+
+  }
+
+  for (k=1; k<=mesh->na; k++) {
+    ped  = &mesh->edge[k];
+    if(!ped->a || !ped->b) continue;
+
+    ped->base = _MMG5_hashGet(&hash,ped->a,ped->b);
+  }
+
+  if ( hash.item )  _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
+
+
   /* compact metric */
   if ( sol->m ) {
     nbl = 1;
     for (k=1; k<=mesh->np; k++) {
       ppt = &mesh->point[k];
-      if ( ppt->tag & M_NUL )  continue;
-      isol    = (k-1) * sol->size + 1;
-      isolnew = (nbl-1) * sol->size + 1;
+      if ( ppt->tag & MG_NUL )  continue;
+      isol    = k * sol->size;
+      isolnew = nbl* sol->size;
 
       for (i=0; i<sol->size; i++)
         sol->m[isolnew + i] = sol->m[isol + i];
@@ -190,7 +244,7 @@ triangles:
   nbl = 1;
   for (k=1; k<=mesh->np; k++) {
     ppt = &mesh->point[k];
-    if ( ppt->tag & M_NUL )  continue;
+    if ( ppt->tag & MG_NUL )  continue;
 
     /* remove the required tag at vertices in -nosurf mode */
     if ( mesh->info.nosurf && (ppt->tag & M_NOSURF) ) {
@@ -200,14 +254,14 @@ triangles:
     if(k!=nbl) {
       pptnew = &mesh->point[nbl];
       memcpy(pptnew,ppt,sizeof(MMG5_Point));
-      ppt->tag   &= ~M_NUL;
+      ppt->tag   &= ~MG_NUL;
       assert(ppt->tmp == nbl);
     }
     np++;
     if(k != nbl) {
       ppt = &mesh->point[k];
       memset(ppt,0,sizeof(MMG5_Point));
-      ppt->tag    = M_NUL;
+      ppt->tag    = MG_NUL;
     }
     nbl++;
   }
@@ -260,16 +314,6 @@ triangles:
   optdbl[1] =ar
 */
 
-/**
- * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward a sol structure (metric).
- * \return \ref MMG5_SUCCESS if success, \ref MMG5_LOWFAILURE if failed
- * but a conform mesh is saved and \ref MMG5_STRONGFAILURE if failed and we
- * can't save the mesh.
- *
- * Main program for the mesh adaptation library .
- *
- */
 int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol sol)
 //,void (*titi)(int ,int ,int,int,int)
 {
@@ -390,15 +434,27 @@ int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol sol)
     fprintf(stdout,"  ** SETTING ADJACENCIES\n");
 
   if ( !MMG2_scaleMesh(mesh,sol) )  _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
-  if ( !sol->np && !MMG2_doSol(mesh,sol) )  _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
+
+  if ( !sol->np ) {
+    if ( !MMG2D_doSol(mesh,sol) )  _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
+    _MMG2D_scalarSolTruncature(mesh,sol);
+  }
+
+  if ( (mesh)->adja )
+     _MMG5_DEL_MEM((mesh),(mesh)->adja,(3*(mesh)->ntmax+5)*sizeof(int));
 
   if ( !MMG2_hashel(mesh) )
     _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
 
   if ( mesh->info.ddebug && !_MMG5_chkmsh(mesh,1,0) )  _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
+
   /*geom : corner detection*/
   if ( mesh->info.dhd>0 )
     if( !MMG2_evalgeom(mesh) ) _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
+
+  /* Update the metric definition by taking into accounts the
+     curvature of the external and internal curves present in the mesh */
+  if ( sol->size==1 && !_MMG2D_defBdrySiz(mesh,sol) ) return(0);
 
   /*mesh gradation*/
   if( mesh->info.hgrad > 0 ) {
@@ -445,7 +501,7 @@ int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol sol)
   printim(ctim[3].gdif,stim);
   if ( mesh->info.imprim ) {
     fprintf(stdout,"  -- PHASE 2 COMPLETED.     %s\n",stim);
-    fprintf(stdout,"\n  %s\n   END OF MODULE MMGS: IMB-LJLL \n  %s\n",MG_STR,MG_STR);
+    fprintf(stdout,"\n  %s\n   END OF MODULE MMG2D: IMB-LJLL \n  %s\n",MG_STR,MG_STR);
   }
 
   if ( !MMG2_unscaleMesh(mesh,sol) )  _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
@@ -473,18 +529,51 @@ int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol sol)
 
 /**
  * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward a sol structure (metric).
- * \return \ref MMG5_SUCCESS if success, \ref MMG5_LOWFAILURE if failed
- * but a conform mesh is saved and \ref MMG5_STRONGFAILURE if failed and we
- * can't save the mesh.
+ * \return 0 if fail (lack of memory), 1 otherwise.
  *
- * Main program for the mesh generation library .
+ * Clean the mesh structure when we just call the MMG2D_Free_Triangles and
+ * MMG2D_Free_Edges functions between 2 call of the MMG2D_mmg2dmesh function:
+ *   - Allocate the tria and edge structures if needed;
+ *   - Reset the tags at vertices.
  *
  */
+static inline
+int _MMG2D_restart(MMG5_pMesh mesh){
+  int k;
+
+ /** If needed, reallocate the missing structures */
+  if ( !mesh->tria ) {
+    /* If we call the library more than one time and if we free the triangles
+     * using the MMG2D_Free_triangles function we need to reallocate it */
+    _MMG5_ADD_MEM(mesh,(mesh->ntmax+1)*sizeof(MMG5_Tria),
+                  "initial triangles",return(0));
+    _MMG5_SAFE_CALLOC(mesh->tria,mesh->ntmax+1,MMG5_Tria);
+    mesh->nenil = mesh->nt + 1;
+    for ( k=mesh->nenil; k<mesh->ntmax-1; k++) {
+      mesh->tria[k].v[2] = k+1;
+    }
+  }
+  if ( !mesh->edge ) {
+    /* If we call the library more than one time and if we free the triangles
+     * using the MMG2D_Free_triangles function we need to reallocate it */
+    _MMG5_ADD_MEM(mesh,(mesh->namax+1)*sizeof(MMG5_Edge),
+                  "initial edges",return(0));
+    _MMG5_SAFE_CALLOC(mesh->edge,mesh->namax+1,MMG5_Edge);
+    mesh->nanil = mesh->na + 1;
+    for ( k=mesh->nanil; k<mesh->namax-1; k++) {
+      mesh->edge[k].b = k+1;
+    }
+  }
+
+  for ( k=1; k<=mesh->np;  ++k ) {
+    mesh->point[k].tag = 0;
+  }
+  return 1;
+}
+
 int MMG2D_mmg2dmesh(MMG5_pMesh mesh,MMG5_pSol sol) {
   mytime    ctim[TIMEMAX];
   char      stim[32];
-  int       k;
 
   fprintf(stdout,"  -- MMG2D, Release %s (%s) \n",MG_VER,MG_REL);
   fprintf(stdout,"     %s\n",MG_CPY);
@@ -554,33 +643,19 @@ int MMG2D_mmg2dmesh(MMG5_pMesh mesh,MMG5_pSol sol) {
   /* analysis */
   chrono(ON,&ctim[2]);
 
-  /** If needed, reallocate the missing structures */
-  if ( !mesh->tria ) {
-    /* If we call the library more than one time and if we free the triangles
-     * using the MMG2D_Free_triangles function we need to reallocate it */
-    _MMG5_ADD_MEM(mesh,(mesh->ntmax+1)*sizeof(MMG5_Tria),"initial triangles",return(0));
-    _MMG5_SAFE_CALLOC(mesh->tria,mesh->ntmax+1,MMG5_Tria);
-    mesh->nenil = mesh->nt + 1;
-    for ( k=mesh->nenil; k<mesh->ntmax-1; k++) {
-      mesh->tria[k].v[2] = k+1;
-    }
-  }
-  if ( !mesh->edge ) {
-    /* If we call the library more than one time and if we free the triangles
-     * using the MMG2D_Free_triangles function we need to reallocate it */
-    _MMG5_ADD_MEM(mesh,(mesh->namax+1)*sizeof(MMG5_Edge),"initial edges",return(0));
-    _MMG5_SAFE_CALLOC(mesh->edge,mesh->namax+1,MMG5_Edge);
-    mesh->nanil = mesh->na + 1;
-    for ( k=mesh->nanil; k<mesh->namax-1; k++) {
-      mesh->edge[k].b = k+1;
-    }
-  }
+  if ( !_MMG2D_restart(mesh) ) {
+    _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
+  };
 
   if ( mesh->info.imprim )   fprintf(stdout,"\n  -- PHASE 1 : DATA ANALYSIS\n");
   if ( abs(mesh->info.imprim) > 4 )
     fprintf(stdout,"  ** SETTING ADJACENCIES\n");
   if ( !MMG2_scaleMesh(mesh,sol) )  _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
-  if ( !sol->np && !MMG2_doSol(mesh,sol) )  _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
+
+  if ( !sol->np ) {
+    if ( !MMG2D_doSol(mesh,sol) )  _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
+    _MMG2D_scalarSolTruncature(mesh,sol);
+  }
 
   if ( mesh->info.ddebug && !_MMG5_chkmsh(mesh,1,0) )  _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
   /*geom : corner detection*/
@@ -625,6 +700,9 @@ int MMG2D_mmg2dmesh(MMG5_pMesh mesh,MMG5_pSol sol) {
   if ( mesh->info.dhd>0 )
     if( !MMG2_evalgeom(mesh) ) _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
 
+  /* Update the metric definition by taking into accounts the
+     curvature of the external and internal curves present in the mesh */
+  if ( sol->size==1 && !_MMG2D_defBdrySiz(mesh,sol) ) return(0);
 
   /*mesh gradation*/
   if( mesh->nt && mesh->info.hgrad > 0 ) {
@@ -684,16 +762,6 @@ int MMG2D_mmg2dmesh(MMG5_pMesh mesh,MMG5_pSol sol) {
 
 }
 
-/**
- * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward a sol structure (metric).
- * \return \ref MMG5_SUCCESS if success, \ref MMG5_LOWFAILURE if failed
- * but a conform mesh is saved and \ref MMG5_STRONGFAILURE if failed and we
- * can't save the mesh.
- *
- * Main program for the level-set discretization library .
- *
- */
 int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol)
 {
   mytime    ctim[TIMEMAX];
@@ -796,6 +864,7 @@ int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol)
   if ( mesh->info.imprim )
     fprintf(stdout,"  -- PHASE 2 COMPLETED.     %s\n",stim);
 
+
   /* mesh improvement */
   chrono(ON,&ctim[4]);
   if ( mesh->info.imprim ) {
@@ -808,11 +877,16 @@ int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol)
                 "initial solution",return(0));
   _MMG5_SAFE_CALLOC(sol->m,sol->size*(mesh->npmax+1),double);
   sol->np = 0;
-  if ( !MMG2_doSol(mesh,sol) )  _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
+  if ( !MMG2D_doSol(mesh,sol) )  _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
+  _MMG2D_scalarSolTruncature(mesh,sol);
 
   /*geom : corner detection*/
   if ( mesh->info.dhd>0 )
     if( !MMG2_evalgeom(mesh) ) _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
+
+  /* Update the metric definition by taking into accounts the
+     curvature of the external and internal curves present in the mesh */
+  if ( sol->size==1 && !_MMG2D_defBdrySiz(mesh,sol) ) return(0);
 
   /*mesh gradation*/
   if( mesh->info.hgrad > 0 ) {
@@ -865,16 +939,6 @@ int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol)
 
 }
 
-/**
- * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward a sol structure (displacement).
- * \return \ref MMG5_SUCCESS if success, \ref MMG5_LOWFAILURE if failed
- * but a conform mesh is saved and \ref MMG5_STRONGFAILURE if failed and we
- * can't save the mesh.
- *
- * Main program for the rigid body movement library .
- *
- */
 int MMG2D_mmg2dmov(MMG5_pMesh mesh,MMG5_pSol sol)
 // MMG5_pSol,met)
 {

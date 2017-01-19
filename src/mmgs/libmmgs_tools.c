@@ -34,45 +34,40 @@
  */
 
 #include "mmgs.h"
+#include "inlined_functions.h"
 
-/**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the sol structure.
- *
- * Set function pointers depending if case is iso or aniso.
- *
- */
 void MMGS_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
   if ( met->size < 6 ) {
-    _MMG5_calelt  = _MMG5_caltri_iso;
-    _MMG5_defsiz  = _MMGS_defsiz_iso;
-    gradsiz = gradsiz_iso;
+    _MMG5_calelt      = _MMG5_caltri_iso;
     _MMG5_lenSurfEdg  = _MMG5_lenSurfEdg_iso;
-    intmet  = intmet_iso;
-    movintpt= movintpt_iso;
-    movridpt= movridpt_iso;
+    _MMG5_defsiz      = _MMGS_defsiz_iso;
+    gradsiz           = gradsiz_iso;
+    intmet            = intmet_iso;
+    movintpt          = movintpt_iso;
+    movridpt          = movridpt_iso;
   }
   else {
-    _MMG5_calelt  = _MMG5_caltri_ani;
+    if ( !met->m ) {
+      _MMG5_calelt     = _MMG5_caltri_iso;
+      _MMG5_lenSurfEdg = _MMG5_lenSurfEdg_iso;
+    }
+    else {
+      _MMG5_calelt     = _MMG5_caltri_ani;
+      _MMG5_lenSurfEdg = _MMG5_lenSurfEdg_ani;
+    }
     _MMG5_defsiz  = _MMGS_defsiz_ani;
-    gradsiz = gradsiz_ani;
-    _MMG5_lenSurfEdg  = _MMG5_lenSurfEdg_ani;
-    intmet  = intmet_ani;
-    movintpt= movintpt_ani;
-    movridpt= movridpt_ani;
+    gradsiz       = gradsiz_ani;
+    intmet        = intmet_ani;
+    movintpt      = movintpt_ani;
+    movridpt      = movridpt_ani;
   }
 }
 
-/**
- * \param prog pointer toward the program name.
- *
- * Print help for mmgs options.
- *
- */
 void MMGS_usage(char *prog) {
   _MMG5_mmgUsage(prog);
-  fprintf(stdout,"-A           enable anisotropy (without metric file).\n");
 
+  fprintf(stdout,"-A           enable anisotropy (without metric file).\n");
+  fprintf(stdout,"-keep-ref    preserve initial domain references in level-set mode.\n");
   fprintf(stdout,"-nreg        normal regul.\n");
 #ifdef USE_SCOTCH
   fprintf(stdout,"-rn [n]      Turn on or off the renumbering using SCOTCH [0/1] \n");
@@ -82,13 +77,6 @@ void MMGS_usage(char *prog) {
   exit(EXIT_FAILURE);
 }
 
-/**
- * \param mesh pointer toward the mesh structure.
- * \return 0 if fail, 1 if success.
- *
- * Print the default parameters values.
- *
- */
 void MMGS_defaultValues(MMG5_pMesh mesh) {
 
   _MMG5_mmgDefaultValues(mesh);
@@ -102,14 +90,250 @@ void MMGS_defaultValues(MMG5_pMesh mesh) {
   exit(EXIT_FAILURE);
 }
 
-/**
- * \param mesh pointer toward the mesh structure.
- * \param info pointer toward the info structure.
- * \return 1.
- *
- * Store the info structure in the mesh structure.
- *
- */
+int MMGS_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
+  int    i;
+  char   namein[128];
+
+  /* First step: search if user want to see the default parameters values. */
+  for ( i=1; i< argc; ++i ) {
+    if ( !strcmp(argv[i],"-val") ) {
+      MMGS_defaultValues(mesh);
+    }
+  }
+
+  /* Second step: read all other arguments. */
+  i = 1;
+  while ( i < argc ) {
+    if ( *argv[i] == '-' ) {
+      switch(argv[i][1]) {
+      case '?':
+        MMGS_usage(argv[0]);
+        break;
+      case 'a': /* ridge angle */
+        if ( !strcmp(argv[i],"-ar") && ++i < argc ) {
+          if ( !MMGS_Set_dparameter(mesh,met,MMGS_DPARAM_angleDetection,
+                                    atof(argv[i])) )
+            exit(EXIT_FAILURE);
+        }
+        break;
+      case 'A': /* anisotropy */
+        if ( !MMGS_Set_solSize(mesh,met,MMG5_Vertex,0,MMG5_Tensor) )
+          exit(EXIT_FAILURE);
+        break;
+      case 'h':
+        if ( !strcmp(argv[i],"-hmin") && ++i < argc ) {
+          if ( !MMGS_Set_dparameter(mesh,met,MMGS_DPARAM_hmin,
+                                    atof(argv[i])) )
+            exit(EXIT_FAILURE);
+        }
+        else if ( !strcmp(argv[i],"-hmax") && ++i < argc ) {
+          if ( !MMGS_Set_dparameter(mesh,met,MMGS_DPARAM_hmax,
+                                    atof(argv[i])) )
+            exit(EXIT_FAILURE);
+        }
+        else if ( !strcmp(argv[i],"-hausd") && ++i <= argc ) {
+          if ( !MMGS_Set_dparameter(mesh,met,MMGS_DPARAM_hausd,
+                                    atof(argv[i])) )
+            exit(EXIT_FAILURE);
+        }
+        else if ( !strcmp(argv[i],"-hgrad") && ++i <= argc ) {
+          if ( !MMGS_Set_dparameter(mesh,met,MMGS_DPARAM_hgrad,
+                                    atof(argv[i])) )
+            exit(EXIT_FAILURE);
+        }
+        else
+          MMGS_usage(argv[0]);
+        break;
+      case 'd':
+        if ( !strcmp(argv[i],"-default") ) {
+          mesh->mark=1;
+        }
+        else {
+          if ( !MMGS_Set_iparameter(mesh,met,MMGS_IPARAM_debug,1) )
+            exit(EXIT_FAILURE);
+        }
+        break;
+      case 'i':
+        if ( !strcmp(argv[i],"-in") ) {
+          if ( ++i < argc && isascii(argv[i][0]) && argv[i][0]!='-') {
+            if ( !MMGS_Set_inputMeshName(mesh, argv[i]) )
+              exit(EXIT_FAILURE);
+
+            if ( !MMGS_Set_iparameter(mesh,met,MMGS_IPARAM_verbose,5) )
+              exit(EXIT_FAILURE);
+          }else{
+            fprintf(stderr,"Missing filname for %c%c\n",argv[i-1][1],argv[i-1][2]);
+            MMGS_usage(argv[0]);
+          }
+        }
+        break;
+      case 'k':
+        if ( !strcmp(argv[i],"-keep-ref") ) {
+          if ( !MMGS_Set_iparameter(mesh,met,MMGS_IPARAM_keepRef,1) )
+            exit(EXIT_FAILURE);
+        }
+        break;
+      case 'l':
+        if ( !strcmp(argv[i],"-ls") ) {
+          if ( !MMGS_Set_iparameter(mesh,met,MMGS_IPARAM_iso,1) )
+            exit(EXIT_FAILURE);
+          if ( ++i < argc && (isdigit(argv[i][0]) ||
+                              (argv[i][0]=='-' && isdigit(argv[i][1])) ) ) {
+            if ( !MMGS_Set_dparameter(mesh,met,MMGS_DPARAM_ls,atof(argv[i])) )
+              exit(EXIT_FAILURE);
+          }
+          else i--;
+        }
+        break;
+      case 'm':
+        if ( ++i < argc && isdigit(argv[i][0]) ) {
+          if ( !MMGS_Set_iparameter(mesh,met,MMGS_IPARAM_mem,atoi(argv[i])) )
+            exit(EXIT_FAILURE);
+        }
+        else {
+          fprintf(stderr,"Missing argument option %c\n",argv[i-1][1]);
+          MMGS_usage(argv[0]);
+        }
+        break;
+      case 'n':
+        if ( !strcmp(argv[i],"-nr") ) {
+          if ( !MMGS_Set_iparameter(mesh,met,MMGS_IPARAM_angle,0) )
+            exit(EXIT_FAILURE);
+        }
+        else if ( !strcmp(argv[i],"-noswap") ) {
+          if ( !MMGS_Set_iparameter(mesh,met,MMGS_IPARAM_noswap,1) )
+            exit(EXIT_FAILURE);
+        }
+        else if( !strcmp(argv[i],"-noinsert") ) {
+          if ( !MMGS_Set_iparameter(mesh,met,MMGS_IPARAM_noinsert,1) )
+            exit(EXIT_FAILURE);
+        }
+        else if( !strcmp(argv[i],"-nomove") ) {
+          if ( !MMGS_Set_iparameter(mesh,met,MMGS_IPARAM_nomove,1) )
+            exit(EXIT_FAILURE);
+        }
+        else if ( !strcmp(argv[i],"-nreg") ) {
+          if ( !MMGS_Set_iparameter(mesh,met,MMGS_IPARAM_nreg,1) )
+            exit(EXIT_FAILURE);
+        }
+        break;
+      case 'o':
+        if ( !strcmp(argv[i],"-out") ) {
+          if ( ++i < argc && isascii(argv[i][0])  && argv[i][0]!='-') {
+            if ( !MMGS_Set_outputMeshName(mesh,argv[i]) )
+              exit(EXIT_FAILURE);
+          }else{
+            fprintf(stderr,"Missing filname for %c%c%c\n",
+                    argv[i-1][1],argv[i-1][2],argv[i-1][3]);
+            MMGS_usage(argv[0]);
+          }
+        }
+        break;
+#ifdef USE_SCOTCH
+      case 'r':
+        if ( !strcmp(argv[i],"-rn") ) {
+          if ( ++i < argc ) {
+            if ( isdigit(argv[i][0]) ) {
+              if ( !MMGS_Set_iparameter(mesh,met,MMGS_IPARAM_renum,atoi(argv[i])) )
+                exit(EXIT_FAILURE);
+            }
+            else {
+              fprintf(stderr,"Missing argument option %s\n",argv[i-1]);
+              MMGS_usage(argv[0]);
+            }
+          }
+          else {
+            fprintf(stderr,"Missing argument option %s\n",argv[i-1]);
+            MMGS_usage(argv[0]);
+          }
+        }
+        break;
+#endif
+      case 's':
+        if ( !strcmp(argv[i],"-sol") ) {
+          if ( ++i < argc && isascii(argv[i][0]) && argv[i][0]!='-' ) {
+            if ( !MMGS_Set_inputSolName(mesh,met,argv[i]) )
+              exit(EXIT_FAILURE);
+          }
+          else {
+            fprintf(stderr,"Missing filname for %c%c%c\n",argv[i-1][1],argv[i-1][2],argv[i-1][3]);
+            MMGS_usage(argv[0]);
+          }
+        }
+        break;
+      case 'v':
+        if ( ++i < argc ) {
+          if ( argv[i][0] == '-' || isdigit(argv[i][0]) ) {
+            if ( !MMGS_Set_iparameter(mesh,met,MMGS_IPARAM_verbose,atoi(argv[i])) )
+              exit(EXIT_FAILURE);
+          }
+          else
+            i--;
+        }
+        else {
+          fprintf(stderr,"Missing argument option %c\n",argv[i-1][1]);
+          MMGS_usage(argv[0]);
+        }
+        break;
+      default:
+        fprintf(stderr,"Unrecognized option %s\n",argv[i]);
+        MMGS_usage(argv[0]);
+      }
+    }
+    else {
+      if ( mesh->namein == NULL ) {
+        if ( !MMGS_Set_inputMeshName(mesh,argv[i]) )
+          exit(EXIT_FAILURE);
+        if ( mesh->info.imprim == -99 ) {
+          if ( !MMGS_Set_iparameter(mesh,met,MMGS_IPARAM_verbose,5) )
+            exit(EXIT_FAILURE);
+        }
+      }
+      else if ( mesh->nameout == NULL ) {
+        if ( !MMGS_Set_outputMeshName(mesh,argv[i]) )
+          exit(EXIT_FAILURE);
+      }
+      else {
+        fprintf(stdout,"Argument %s ignored\n",argv[i]);
+        MMGS_usage(argv[0]);
+      }
+    }
+    i++;
+  }
+
+  /* check file names */
+  if ( mesh->info.imprim == -99 ) {
+    fprintf(stdout,"\n  -- PRINT (0 10(advised) -10) ?\n");
+    fflush(stdin);
+    fscanf(stdin,"%d",&i);
+    if ( !MMGS_Set_iparameter(mesh,met,MMGS_IPARAM_verbose,i) )
+      exit(EXIT_FAILURE);
+  }
+
+  if ( mesh->namein == NULL ) {
+    fprintf(stdout,"  -- INPUT MESH NAME ?\n");
+    fflush(stdin);
+    fscanf(stdin,"%s",namein);
+    if ( !MMGS_Set_inputMeshName(mesh,namein) )
+      exit(EXIT_FAILURE);
+  }
+
+  if ( mesh->nameout == NULL ) {
+    if ( !MMGS_Set_outputMeshName(mesh,"") )
+      exit(EXIT_FAILURE);
+  }
+
+  if ( met->namein == NULL ) {
+    if ( !MMGS_Set_inputSolName(mesh,met,"") )
+      exit(EXIT_FAILURE);
+  }
+  if ( met->nameout == NULL ) {
+    if ( !MMGS_Set_outputSolName(mesh,met,"") )
+      exit(EXIT_FAILURE);
+  }
+  return(1);
+}
+
 int MMGS_stockOptions(MMG5_pMesh mesh, MMG5_Info *info) {
 
   memcpy(&mesh->info,info,sizeof(MMG5_Info));
@@ -122,32 +346,13 @@ int MMGS_stockOptions(MMG5_pMesh mesh, MMG5_Info *info) {
   }
   return(1);
 }
-/**
- * \param mesh pointer toward the mesh structure.
- * \param info pointer toward the info structure.
- *
- * Recover the info structure stored in the mesh structure.
- *
- */
+
 void MMGS_destockOptions(MMG5_pMesh mesh, MMG5_Info *info) {
 
   memcpy(info,&mesh->info,sizeof(MMG5_Info));
   return;
 }
 
-/**
- * \brief Return adjacent elements of a triangle.
- * \param mesh pointer toward the mesh structure.
- * \param kel triangle index.
- * \param listri pointer toward the table of the indices of the three adjacent
- * triangles of the elt \a kel (the index is 0 if there is no adjacent).
- * \return 1 if success
- *
- * Find the indices of the 3 adjacent elements of triangle \a
- * kel. \f$listr[i] = 0\f$ if the \f$i^{th}\f$ face has no adjacent element
- * (so we are on a boundary face).
- *
- */
 int MMGS_Get_adjaTri(MMG5_pMesh mesh, int kel, int listri[3]) {
 
   if ( ! mesh->adja ) {
@@ -162,19 +367,6 @@ int MMGS_Get_adjaTri(MMG5_pMesh mesh, int kel, int listri[3]) {
   return(1);
 }
 
-/**
- * \brief Return adjacent elements of a triangle.
- * \param mesh pointer toward the mesh structure.
- * \param ip vertex index.
- * \param start index of a triangle holding \a ip.
- * \param lispoi pointer toward an array of size MMGS_LMAX that will contain
- * the indices of adjacent vertices to the vertex \a ip.
- * \return nbpoi the number of adjacent points if success, 0 if fail.
- *
- * Find the indices of the adjacent vertices of the vertex \a
- * ip of the triangle \a start.
- *
- */
 inline
 int MMGS_Get_adjaVerticesFast(MMG5_pMesh mesh, int ip,int start, int lispoi[MMGS_LMAX])
 {
@@ -194,7 +386,7 @@ int MMGS_Get_adjaVerticesFast(MMG5_pMesh mesh, int ip,int start, int lispoi[MMGS
   nbpoi = 0;
   do {
     if ( nbpoi == MMGS_LMAX ) {
-      fprintf(stdout,"  ## Warning: unable to compute adjacent vertices of the"
+      fprintf(stderr,"  ## Warning: unable to compute adjacent vertices of the"
               " vertex %d:\nthe ball of point contain too many elements.\n",ip);
       return(0);
     }
@@ -214,7 +406,7 @@ int MMGS_Get_adjaVerticesFast(MMG5_pMesh mesh, int ip,int start, int lispoi[MMGS
 
   /* store the last point of the boundary triangle */
   if ( nbpoi == MMGS_LMAX ) {
-    fprintf(stdout,"  ## Warning: unable to compute adjacent vertices of the"
+    fprintf(stderr,"  ## Warning: unable to compute adjacent vertices of the"
             " vertex %d:\nthe ball of point contain too many elements.\n",ip);
     return(0);
   }
@@ -232,7 +424,7 @@ int MMGS_Get_adjaVerticesFast(MMG5_pMesh mesh, int ip,int start, int lispoi[MMGS
     if ( k == 0 )  break;
 
     if ( nbpoi == MMGS_LMAX ) {
-      fprintf(stdout,"  ## Warning: unable to compute adjacent vertices of the"
+      fprintf(stderr,"  ## Warning: unable to compute adjacent vertices of the"
               " vertex %d:\nthe ball of point contain too many elements.\n",ip);
       return(0);
     }

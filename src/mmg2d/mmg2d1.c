@@ -115,13 +115,13 @@ static int cassar(MMG5_pMesh mesh,MMG5_pSol sol,int ia,int ib,double t) {
 
 
   /*interpol metric*/
-  iadr = (ia-1)*sol->size + 1;
+  iadr = ia*sol->size;
   ma  = &sol->m[iadr];
 
-  iadr = (ib-1)*sol->size + 1;
+  iadr = ib*sol->size;
   mb  = &sol->m[iadr];
 
-  iadr = (ip-1)*sol->size + 1;
+  iadr = ip*sol->size;
   mp  = &sol->m[iadr];
 
   if ( sol->size==1 ) {
@@ -312,13 +312,13 @@ static int cassarbdry(MMG5_pMesh mesh,MMG5_pSol sol,int ied,int ia,int ib,double
 /*   } */
 
   /*interpol metric*/
-  iadr = (ia-1)*sol->size + 1;
+  iadr = ia*sol->size;
   ma  = &sol->m[iadr];
 
-  iadr = (ib-1)*sol->size + 1;
+  iadr = ib*sol->size;
   mb  = &sol->m[iadr];
 
-  iadr = (ip-1)*sol->size + 1;
+  iadr = ip*sol->size;
   mp  = &sol->m[iadr];
 
   if ( sol->size==1 ) {
@@ -369,7 +369,7 @@ static int analar(MMG5_pMesh mesh,MMG5_pSol sol,pBucket bucket,
   (*ni)  = 0;
   (*nc)  = 0;
   nt  = mesh->nt;
-  npp = 0.0;
+  npp = 0;
 
   for (k=1; k<=nt; k++) {
     pt = &mesh->tria[k];
@@ -401,9 +401,9 @@ static int analar(MMG5_pMesh mesh,MMG5_pSol sol,pBucket bucket,
       }
       ca   = &ppa->c[0];
       cb   = &ppb->c[0];
-      iadr = (i1-1)*sol->size + 1;
+      iadr = i1*sol->size;
       ma   = &sol->m[iadr];
-      iadr = (i2-1)*sol->size + 1;
+      iadr = i2*sol->size;
       mb   = &sol->m[iadr];
       tail = MMG2_length(ca,cb,ma,mb);
 
@@ -450,7 +450,7 @@ static int analar(MMG5_pMesh mesh,MMG5_pSol sol,pBucket bucket,
               break;
             } else {
               mesh->point[ip].tag |= M_SD;
-              ins = MMG2_split(mesh,sol,ip,k,voi[i]);
+              ins = MMG2_split(mesh,sol,ip,k,voi[i],0.05);
               if(!ins) {
                 _MMG2D_delPt(mesh,ip);
                 continue;
@@ -460,7 +460,7 @@ static int analar(MMG5_pMesh mesh,MMG5_pSol sol,pBucket bucket,
             }
             continue;
           } else {
-            ins = MMG2_split(mesh,sol,ip,k,voi[i]);
+            ins = MMG2_split(mesh,sol,ip,k,voi[i],0.65);
             if(!ins) {
               _MMG2D_delPt(mesh,ip);
               continue;
@@ -645,12 +645,13 @@ int MMG2_mmg2d1(MMG5_pMesh mesh,MMG5_pSol sol) {
   /* 1. Geometric mesh */
   if ( mesh->info.imprim > 3 )
     fprintf(stdout,"  -- GEOMETRIC MESH\n");
+
   ngeom = analargeom(mesh,sol,&alert);
   if ( mesh->info.imprim && (abs(mesh->info.imprim) < 6) )
     fprintf(stdout,"     %8d splitted\n",ngeom);
 
   /* 2. field points */
-  bucket = MMG2_newBucket(mesh,M_MAX(mesh->info.bucket,BUCKSIZ));
+  bucket = MMG2_newBucket(mesh,M_MAX(mesh->info.octree,BUCKSIZ));
   assert(bucket);
   declic = 1.5 / ALPHA;
   maxtou = 30;

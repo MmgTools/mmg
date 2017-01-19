@@ -3,15 +3,16 @@
 !> @brief
 !>  Example for using mmg2dlib (basic use)
 
-!> Include the mmg2d library hader file */
-! if the header file is in the "include" directory
-! #include "libmmg2df.h"
-! if the header file is in "include/mmg/mmg2d"
-#include "mmg/mmg2d/libmmg2df.h"
-
 PROGRAM main
 
   IMPLICIT NONE
+
+  !> Include here the mmg3d library hader file
+! if the header file is in the "include" directory
+! #include "libmmg2df.h"
+
+! if the header file is in "include/mmg/mmg2d"
+#include "mmg/mmg2d/libmmg2df.h"
 
   MMG5_DATA_PTR_T    :: mmgMesh
   MMG5_DATA_PTR_T    :: mmgSol
@@ -46,15 +47,6 @@ PROGRAM main
   !! file formatted or manually set your mesh using the MMG2D_Set* functions
 
   !> with MMG2D_loadMesh function
-  !! a) (not mandatory): give the mesh name
-  !!   (by default, the "mesh.mesh" file is oppened)
-  CALL MMG2D_Set_inputMeshName(mmgMesh,TRIM(ADJUSTL(filename)),&
-       LEN(TRIM(ADJUSTL(filename))),ier)
-  IF ( ier /= 1 ) THEN
-     CALL EXIT(101)
-  ENDIF
-
-  !> b) function calling
   CALL MMG2D_loadMesh(mmgMesh,TRIM(ADJUSTL(filename)),&
        LEN(TRIM(ADJUSTL(filename))),ier)
   IF ( ier /= 1 )  CALL EXIT(102)
@@ -64,15 +56,6 @@ PROGRAM main
   !!    file formatted or manually set your sol using the MMG2D_Set* functions
 
   !> With MMG2D_loadSol function
-  !! a) (not mandatory): give the sol name
-  !!   (by default, the "mesh.sol" file is oppened)
-  CALL MMG2D_Set_inputSolName(mmgMesh,mmgSol,TRIM(ADJUSTL(filename)),&
-       LEN(TRIM(ADJUSTL(filename))),ier)
-  IF ( ier /= 1 ) THEN
-     CALL EXIT(103)
-  ENDIF
-
-  !> b) function calling
   CALL MMG2D_loadSol(mmgMesh,mmgSol,TRIM(ADJUSTL(filename)),&
        LEN(TRIM(ADJUSTL(filename))),ier)
   IF ( ier /= 1 ) THEN
@@ -84,7 +67,7 @@ PROGRAM main
   IF ( ier /= 1 ) CALL EXIT(107)
 
   !> ------------------------------ STEP  II --------------------------
-  !! library call
+  !! remesh function
  ! NULLIFY(va)
   CALL MMG2D_mmg2dlib(mmgMesh,mmgSol,ier)
   IF ( ier == MMG5_STRONGFAILURE ) THEN
@@ -103,18 +86,10 @@ PROGRAM main
   !!    using the MMG2D_getMesh/MMG2D_getSol functions
 
   !> 1) Automatically save the mesh
-  !! a)  (not mandatory): give the ouptut mesh name using MMG2D_Set_outputMeshName
-  !!   (by default, the mesh is saved in the "mesh.o.mesh" file
-  !!call MMG2D_Set_outputMeshName(mmgMesh,"output.mesh",len("output.mesh"),ier)
-  !! b) function calling
   CALL MMG2D_saveMesh(mmgMesh,"sortie.o.mesh",LEN("sortie.o.mesh"),ier)
   IF ( ier /= 1 ) CALL EXIT(106)
 
   !> 2) Automatically save the solution
-  !! a)  (not mandatory): give the ouptut sol name using MMG2D_Set_outputSolName
-  !!   (by default, the mesh is saved in the "mesh.o.sol" file
-  !!call MMG2D_Set_outputSolName(mmgMesh,mmgSol,"output.sol",len("output.sol"),ier)
-  !! b) function calling
   CALL MMG2D_saveSol(mmgMesh,mmgSol,"sortie.o.sol",LEN("sortie.o.sol"),ier)
   IF ( ier /= 1 ) CALL EXIT(107)
 

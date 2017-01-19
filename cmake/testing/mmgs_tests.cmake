@@ -42,6 +42,24 @@ ADD_TEST(NAME SphereAni
   ${MMGS_CI_TESTS}/SphereAni/sphere
   -out ${MMGS_CI_TESTS}/SphereAni/sphere.d.meshb)
 
+
+###############################################################################
+#####
+#####         Input/Output
+#####
+###############################################################################
+
+# Binary gmsh
+ADD_TEST(NAME binary_gmsh_s
+  COMMAND ${EXECUT_MMGS} -v 5
+  ${MMGS_CI_TESTS}/GmshInout/cube.mshb)
+
+# Ascii gmsh
+ADD_TEST(NAME ascii_gmsh_s
+  COMMAND ${EXECUT_MMGS} -v 5
+  ${MMGS_CI_TESTS}/GmshInout/cube.msh)
+
+
 ###############################################################################
 #####
 #####         Check Memory Leaks
@@ -68,6 +86,32 @@ ADD_TEST(NAME Cow_NM_hausd10
   COMMAND ${EXECUT_MMGS} -v 5
   ${MMGS_CI_TESTS}/Cow_NM/cow -hausd 10
   -out ${MMGS_CI_TESTS}/Cow_NM/cow.d.meshb)
+
+###############################################################################
+#####
+#####         Test results
+#####
+###############################################################################
+# Test the Ls option
+ADD_TEST(NAME OptLs_teapot
+  COMMAND ${EXECUT_MMGS} -v 5 -ls
+  ${MMGS_CI_TESTS}/OptLs_teapot/teapot
+  ${MMGS_CI_TESTS}/OptLs_teapot/teapot.simple.o.meshb)
+
+ADD_TEST(NAME OptLs_teapot_keepRef
+  COMMAND ${EXECUT_MMGS} -v 5 -ls -keep-ref
+  ${MMGS_CI_TESTS}/OptLs_teapot/teapot
+  ${MMGS_CI_TESTS}/OptLs_teapot/teapot.keep-ref.o.meshb)
+
+ADD_TEST(NAME OptLs_teapot_0.5_keepRef
+  COMMAND ${EXECUT_MMGS} -v 5 -ls 0.5 -keep-ref
+  ${MMGS_CI_TESTS}/OptLs_teapot/teapot
+  ${MMGS_CI_TESTS}/OptLs_teapot/teapot.0.5.keep-ref.o.meshb)
+
+ADD_TEST(NAME OptLs_teapot2
+  COMMAND ${EXECUT_MMGS} -v 5 -ls -nr
+  ${MMGS_CI_TESTS}/OptLs_teapot/teapot
+  ${MMGS_CI_TESTS}/OptLs_teapot/teapot.o.meshb)
 
 
 ###############################################################################

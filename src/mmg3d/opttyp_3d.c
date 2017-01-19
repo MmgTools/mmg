@@ -30,7 +30,7 @@
  * \copyright GNU Lesser General Public License.
  */
 
-#include "mmg3d.h"
+#include "inlined_functions_3d.h"
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -216,8 +216,9 @@ int MMG3D_typelt(MMG5_pMesh mesh,int iel,int *item) {
 
     if ( isur > 2 ) {
       dd = rapmin / rapmax;
-      item[0] = iarmin;
-      item[1] = _MMG5_idir[iarmin][0];
+      item[0] = 0; //iarmin;
+      // Changed by 0 because we overflow idir
+      item[1] = 0; //_MMG5_idir[iarmin][0];
       if ( dd < 0.01 )  return(4);
       if ( s[0]+s[1] > ssmall ) {
         item[0] = 0;
@@ -248,12 +249,12 @@ int MMG3D_typelt(MMG5_pMesh mesh,int iel,int *item) {
     for (k=0; k<4; k++) {
       for (i=0; i<3; i++) {
         i0 = _MMG5_idir[k][i];
-        i1 = _MMG5_idir[k][_MMG5_inxt3[i]];
-        i2 = _MMG5_idir[k][_MMG5_inxt3[i+1]];
+        i1 = _MMG5_idir[k][_MMG5_inxt2[i]];
+        i2 = _MMG5_idir[k][_MMG5_inxt2[i+1]];
         if ( h[i0]+h[i1] < 1.2*h[i2] ) {/*1.4 ie une face obtus*/
           nobtus++;
           item[0] = i2;
-          item[1] = _MMG5_idir[k][_MMG5_inxt3[i+1]];
+          item[1] = _MMG5_idir[k][_MMG5_inxt2[i+1]];
         }
       }
     }
@@ -283,8 +284,8 @@ int MMG3D_typelt(MMG5_pMesh mesh,int iel,int *item) {
     for (k=0; k<4; k++) {
       for (i=0; i<3; i++) {
         i0 = _MMG5_idir[k][i];
-        i1 = _MMG5_idir[k][_MMG5_inxt3[i]];
-        i2 = _MMG5_idir[k][_MMG5_inxt3[i+1]];
+        i1 = _MMG5_idir[k][_MMG5_inxt2[i]];
+        i2 = _MMG5_idir[k][_MMG5_inxt2[i+1]];
         if ( h[i0]+h[i1] > 1.5*h[i2] )  naigu++;/*1.5*/
       }
     }
@@ -309,7 +310,7 @@ int MMG3D_typelt(MMG5_pMesh mesh,int iel,int *item) {
   item[0] = 0;
   return(1);
 }
-static inline int _MMG3D_swpItem(MMG5_pMesh mesh,  MMG5_pSol met,_MMG5_pBucket bucket,int k,int iar) {
+static inline int _MMG3D_swpItem(MMG5_pMesh mesh,  MMG5_pSol met,_MMG3D_pOctree octree,int k,int iar) {
   MMG5_pTetra   pt,pt1;
   MMG5_pxTetra  pxt;
   int           l,list[MMG3D_LMAX+2],lon,iel,nconf,ier;
@@ -348,7 +349,7 @@ static inline int _MMG3D_swpItem(MMG5_pMesh mesh,  MMG5_pSol met,_MMG5_pBucket b
 
       nconf = _MMG5_chkswpgen(mesh,met,k,iar,&lon,list,OCRIT,2);
       if ( nconf ) {
-        ier = _MMG5_swpgen(mesh,met,nconf,lon,list,bucket,2);
+        ier = _MMG5_swpgen(mesh,met,nconf,lon,list,octree,2);
         if ( ier < 0 ) return(-1);
         else
           return(ier);
@@ -362,7 +363,7 @@ static inline int _MMG3D_swpItem(MMG5_pMesh mesh,  MMG5_pSol met,_MMG5_pBucket b
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
- * \param bucket pointer toward the bucket structure.
+ * \param octree pointer toward the octree structure.
  * \param k elt index.
  * \param iar index of edge to not try to swap.
  * \return -1 if fail, 0 if we don't swap anything, 1 otherwise.
@@ -371,14 +372,14 @@ static inline int _MMG3D_swpItem(MMG5_pMesh mesh,  MMG5_pSol met,_MMG5_pBucket b
  *
  */
 static inline
-int _MMG3D_swpalmostall(MMG5_pMesh mesh,  MMG5_pSol met,_MMG5_pBucket bucket,
+int _MMG3D_swpalmostall(MMG5_pMesh mesh,  MMG5_pSol met,_MMG3D_pOctree octree,
                         int k,int iar) {
   int           i,ier;
 
   ier = 0;
   for(i=0 ; i<6 ; i++) {
     if(i==iar) continue;
-    ier = _MMG3D_swpItem(mesh,met,bucket,k,i);
+    ier = _MMG3D_swpItem(mesh,met,octree,k,i);
     if ( ier < 0 ) return(-1);
     else if(ier)
       return(ier);
@@ -389,7 +390,7 @@ int _MMG3D_swpalmostall(MMG5_pMesh mesh,  MMG5_pSol met,_MMG5_pBucket bucket,
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
- * \param bucket pointer toward the bucket structure.
+ * \param octree pointer toward the octree structure.
  * \param k elt index.
  * \param iar index of edge to split.
  * \param OCRIT quality threshold.
@@ -399,7 +400,7 @@ int _MMG3D_swpalmostall(MMG5_pMesh mesh,  MMG5_pSol met,_MMG5_pBucket bucket,
  *
  */
 static inline
-int _MMG3D_splitItem(MMG5_pMesh mesh,  MMG5_pSol met,_MMG5_pBucket bucket,
+int _MMG3D_splitItem(MMG5_pMesh mesh,  MMG5_pSol met,_MMG3D_pOctree octree,
                      int k,int iar,double OCRIT) {
   MMG5_pTetra   pt;
   double        len;
@@ -418,7 +419,11 @@ int _MMG3D_splitItem(MMG5_pMesh mesh,  MMG5_pSol met,_MMG5_pBucket bucket,
       if(pt->v[j] == ier) break;
     }
     assert(j<4);
-    ier = _MMG3D_movv_ani(mesh,met,k,j);
+    if(met->size!=1)
+      ier = _MMG3D_movv_ani(mesh,met,k,j);
+    else
+      ier = _MMG3D_movv_iso(mesh,met,k,j);
+
   }
   return(ier);
 }
@@ -426,7 +431,7 @@ int _MMG3D_splitItem(MMG5_pMesh mesh,  MMG5_pSol met,_MMG5_pBucket bucket,
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
- * \param bucket pointer toward the bucket structure.
+ * \param octree pointer toward the octree structure.
  * \param k elt index.
  * \param iar index of edge to not split.
  * \return 1 if success, 0 otherwise
@@ -435,7 +440,7 @@ int _MMG3D_splitItem(MMG5_pMesh mesh,  MMG5_pSol met,_MMG5_pBucket bucket,
  *
  */
 static inline
-int _MMG3D_splitalmostall(MMG5_pMesh mesh,  MMG5_pSol met,_MMG5_pBucket bucket,
+int _MMG3D_splitalmostall(MMG5_pMesh mesh,  MMG5_pSol met,_MMG3D_pOctree octree,
                           int k,int iar) {
   int           i,ier;
   double        OCRIT=1.01;
@@ -449,7 +454,7 @@ int _MMG3D_splitalmostall(MMG5_pMesh mesh,  MMG5_pSol met,_MMG5_pBucket bucket,
 
   for(i=0 ; i<6 ; i++) {
     if(i==iar) continue;
-    ier = _MMG3D_splitItem(mesh,met,bucket,k,i,OCRIT);
+    ier = _MMG3D_splitItem(mesh,met,octree,k,i,OCRIT);
     if(ier) return(ier);
   }
 
@@ -459,14 +464,14 @@ int _MMG3D_splitalmostall(MMG5_pMesh mesh,  MMG5_pSol met,_MMG5_pBucket bucket,
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
- * \param bucket pointer toward the bucket structure.
+ * \param octree pointer toward the octree structure.
  * \return 0 if fail, number of improved elts otherwise.
  *
  * Travel across the mesh to detect element with very bad quality (less than
  * 0.2) and try to improve them by every means.
  *
  */
-int MMG3D_opttyp(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket) {
+int MMG3D_opttyp(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree) {
   MMG5_pTetra    pt;
   double         crit;
   int            k,ityp,cs[10],ds[10],item[2],*adja,iadr;
@@ -481,8 +486,9 @@ int MMG3D_opttyp(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket) {
     printf("on a splitte %d\n",ier);
     /* memory free */
     _MMG5_DEL_MEM(mesh,mesh->adja,(4*mesh->nemax+5)*sizeof(int));
+    // Attention, faut-il recalculer la table d'adjacence des prisme ici?
     if ( !MMG3D_hashTetra(mesh,1) ) {
-      fprintf(stdout,"  ## Hashing problem. Exit program.\n");
+      fprintf(stderr,"  ## Hashing problem. Exit program.\n");
       return(0);
     }
   }
@@ -546,7 +552,7 @@ int MMG3D_opttyp(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket) {
       case 7:
       default:
         if(mesh->info.noswap) break;
-        ier = _MMG3D_swpItem(mesh,met,bucket,k,item[0]);
+        ier = _MMG3D_swpItem(mesh,met,octree,k,item[0]);
         if(ddebug) printf("on swp %d ?\n",ier);
         if(ier > 0) {
           nd++;
@@ -559,7 +565,7 @@ int MMG3D_opttyp(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket) {
             /*   OCRIT *= 0.5; */
             /* } else */
             /*   OCRIT *= 0.75; */
-            ier = 0;//_MMG3D_splitItem(mesh,met,bucket,k,item[0],OCRIT);
+            ier = 0;//_MMG3D_splitItem(mesh,met,octree,k,item[0],OCRIT);
             if(ddebug) printf("on split %d ?\n",ier);
 
             if(ier) {
@@ -569,7 +575,7 @@ int MMG3D_opttyp(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket) {
             }
           } /*end noinsert*/
 
-          ier = _MMG3D_swpalmostall(mesh,met,bucket,k,item[0]);
+          ier = _MMG3D_swpalmostall(mesh,met,octree,k,item[0]);
           if(ddebug) printf("on swp2 %d ?\n",ier);
 
           if(ier > 0) {
@@ -577,7 +583,7 @@ int MMG3D_opttyp(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket) {
             ds[ityp]++;
             break;
           }
-          ier = 0;//_MMG3D_splitalmostall(mesh,met,bucket,k,item[0]);
+          ier = 0;//_MMG3D_splitalmostall(mesh,met,octree,k,item[0]);
           if(ddebug) printf("on split2 %d ?\n",ier);
 
           if(ier > 0) {
@@ -586,15 +592,22 @@ int MMG3D_opttyp(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket) {
             break;
           }
         }
+        for(i=0 ; i<4 ; i++) {
+          if(((met->size!=1) && _MMG3D_movv_ani(mesh,met,k,i)) || ((met->size==1) && _MMG3D_movv_iso(mesh,met,k,i))) {
+            nd++;
+            ds[ityp]++;
+            break;
+          }
+        }
         break;
       case 2: /*chapeau*/
-        if((met->size!=1) && _MMG3D_movv_ani(mesh,met,k,item[0])) {
+        if(((met->size!=1) && _MMG3D_movv_ani(mesh,met,k,item[0])) || ((met->size==1) && _MMG3D_movv_iso(mesh,met,k,item[0]))) {
           nd++;
           ds[ityp]++;
         } else {
           for(i=0 ; i<4 ; i++) {
             if(item[0]==i) continue;
-            if((met->size!=1) && _MMG3D_movv_ani(mesh,met,k,i)) {
+            if(((met->size!=1) && _MMG3D_movv_ani(mesh,met,k,i)) || ((met->size==1) && _MMG3D_movv_iso(mesh,met,k,i))) {
               nd++;
               ds[ityp]++;
               break;

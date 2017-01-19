@@ -50,9 +50,9 @@ char  ddb;
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
- * \param bucket pointer toward the bucket structure.
+ * \param octree pointer toward the octree structure.
  * \param ne number of elements.
- * \param ifilt pointer to store the number of vertices filtered by the bucket.
+ * \param ifilt pointer to store the number of vertices filtered by the octree.
  * \param ns pointer to store the number of vertices insertions.
  * \param nc pointer to store the number of collapse.
  * \param warn pointer to store a flag that warn the user in case of
@@ -66,7 +66,7 @@ char  ddb;
  *
  */
 static inline int
-_MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
+_MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree,int ne,
                  int* ifilt,int* ns,int* nc,int* warn,int it) {
   MMG5_pTetra     pt;
   MMG5_pxTetra    pxt;
@@ -74,19 +74,21 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
   MMG5_pPoint     p0,p1,ppt;
   MMG5_pxPoint    pxp;
   double     dd,len,lmax,o[3],to[3],no1[3],no2[3],v[3];
-  int        k,ip,ip1,ip2,list[MMG3D_LMAX+2],ilist,ref;
-  char       imax,tag,j,i,i1,i2,ifa0,ifa1;
+  int        k,ip,ip1,ip2,list[MMG3D_LMAX+2],ilist,lists[MMG3D_LMAX+2],ilists,ref;
+  int16_t    tag;
+  char       imax,j,i,i1,i2,ifa0,ifa1;
   int        lon,ret,ier;
-  double     lmin;
+  double     lmin,lfilt;
   int        imin,iq;
   int        ii;
   double     lmaxtet,lmintet;
-  int        imaxtet,imintet;
+  int        imaxtet,imintet,base;
 
+  base  = ++mesh->mark;
   for (k=1; k<=ne; k++) {
     pt = &mesh->tetra[k];
     if ( !MG_EOK(pt)  || (pt->tag & MG_REQ) )   continue;
-
+    else if ( pt->mark < base-1 )  continue;
     pxt = pt->xt ? &mesh->xtetra[pt->xt] : 0;
 
     /* 1) find longest and shortest edge  and try to manage it*/
@@ -105,10 +107,10 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
         imin = ii;
       }
     }
-    if ( imax==-1 )
+    if ( imax==-1 && (mesh->info.ddebug || mesh->info.imprim > 5 ) )
       fprintf(stdout,"%s:%d: Warning: all edges of tetra %d are boundary and required\n",
               __FILE__,__LINE__,k);
-    if ( imin==-1 )
+    if ( imin==-1  && (mesh->info.ddebug || mesh->info.imprim > 5 ) )
       fprintf(stdout,"%s:%d: Warning: all edges of tetra %d are boundary and required\n",
               __FILE__,__LINE__,k);
 
@@ -178,16 +180,10 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
         ip = _MMG3D_newPt(mesh,o,tag);
         if ( !ip ) {
           /* reallocation of point table */
-          if ( bucket ) {
-            _MMG5_POINT_AND_BUCKET_REALLOC(mesh,met,ip,mesh->gap,
-                                           *warn=1;
-                                           goto collapse,
-                                           o,tag);
-          }
-          else {
-            printf("ERROR: function not available in delaunay mode. Exiting\n");
-            exit(EXIT_FAILURE);
-          }
+          _MMG5_POINT_REALLOC(mesh,met,ip,mesh->gap,
+                              *warn=1;
+                              goto collapse,
+                              o,tag);
         }
         if ( met->m ) {
           if ( _MMG5_intmet(mesh,met,k,imax,ip,0.5) <=0 ) {
@@ -207,7 +203,7 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
         pxt = pt->xt ? &mesh->xtetra[pt->xt] : 0;
 
         if ( ier < 0 ) {
-          fprintf(stdout,"  ## Error: unable to split.\n");
+          fprintf(stderr,"  ## Error: unable to split.\n");
           _MMG3D_delPt(mesh,ip);
           return(-1);
         }
@@ -257,17 +253,10 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
 
         if ( !ip )  {
           /* reallocation of point table */
-          if ( bucket ) {
-            _MMG5_POINT_AND_BUCKET_REALLOC(mesh,met,ip,mesh->gap,
-                                           *warn=1;
-                                           goto collapse,
-                                           o,MG_NOTAG);
-          }
-          else {
-            printf("ERROR: function not available in delaunay mode. Exiting\n");
-            exit(EXIT_FAILURE);
-          }
-
+          _MMG5_POINT_REALLOC(mesh,met,ip,mesh->gap,
+                              *warn=1;
+                              goto collapse,
+                              o,MG_NOTAG);
         }
         ppt = &mesh->point[ip];
         if ( met->m ) {
@@ -278,7 +267,7 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
         }
         ier = _MMG5_split1b(mesh,met,list,ilist,ip,1,1);
         if ( ier < 0 ) {
-          fprintf(stdout,"  ## Error: unable to split.\n");
+          fprintf(stderr,"  ## Error: unable to split.\n");
           _MMG3D_delPt(mesh,ip);
           return(-1);
         }
@@ -287,7 +276,10 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
           goto collapse;
         }
         else {
-          _MMG5_addBucket(mesh,bucket,ip);
+          if ( octree ) {
+            _MMG3D_addOctree(mesh,octree,ip);
+          }
+
           (*ns)++;
           continue;
         }
@@ -305,16 +297,10 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
 
         if ( !ip )  {
           /* reallocation of point table */
-          if ( bucket ) {
-            _MMG5_POINT_AND_BUCKET_REALLOC(mesh,met,ip,mesh->gap,
-                                           *warn=1;
-                                           goto collapse,
-                                           o,MG_NOTAG);
-          }
-          else {
-            printf("ERROR: function not available in delaunay mode. Exiting\n");
-            exit(EXIT_FAILURE);
-          }
+          _MMG5_POINT_REALLOC(mesh,met,ip,mesh->gap,
+                              *warn=1;
+                              goto collapse,
+                              o,MG_NOTAG);
         }
         ppt = &mesh->point[ip];
         if ( met->m ) {
@@ -325,7 +311,12 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
         }
 
         /* Delaunay */
-        if ( !_MMG5_buckin(mesh,met,bucket,ip) ) {
+        if ( lmax<1.6 ) {
+          lfilt = 0.7;
+        }
+        else lfilt = 0.2;
+
+        if ( octree && !_MMG3D_octreein(mesh,met,octree,ip,lfilt) ) {
           _MMG3D_delPt(mesh,ip);
           (*ifilt)++;
           goto collapse;
@@ -338,7 +329,9 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
           } else {
             ret = _MMG5_delone(mesh,met,ip,list,lon);
             if ( ret > 0 ) {
-              _MMG5_addBucket(mesh,bucket,ip);
+              if ( octree ) {
+                _MMG3D_addOctree(mesh,octree,ip);
+              }
               (*ns)++;
               continue;
             }
@@ -381,7 +374,12 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
         tag |= MG_BDY;
         if ( p0->tag > tag )   continue;
         if ( ( tag & MG_NOM ) && (mesh->adja[4*(k-1)+1+i]) ) continue;
-        ilist = _MMG5_chkcol_bdy(mesh,met,k,i,j,list,2);
+
+        if (_MMG5_boulesurfvolp(mesh,k,i1,i,
+                                list,&ilist,lists,&ilists,(p0->tag & MG_NOM)) < 0 )
+          return(-1);
+
+        ilist = _MMG5_chkcol_bdy(mesh,met,k,i,j,list,ilist,lists,ilists,2);
         if ( ilist > 0 ) {
           ier = _MMG5_colver(mesh,met,list,ilist,i2,2);
 
@@ -396,14 +394,17 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
       }
       /* Case of an internal face */
       else {
+        ilist = _MMG5_boulevolp(mesh,k,i1,list);
+
         if ( p0->tag & MG_BDY )  continue;
-        ilist = _MMG5_chkcol_int(mesh,met,k,i,j,list,2);
+        ilist = _MMG5_chkcol_int(mesh,met,k,i,j,list,ilist,2);
         if ( ilist > 0 ) {
           ier = _MMG5_colver(mesh,met,list,ilist,i2,2);
           if ( ilist < 0 ) continue;
           if ( ier < 0 ) return(-1);
           else if(ier) {
-            _MMG5_delBucket(mesh,bucket,ier);
+            if ( octree )
+              _MMG3D_delOctree(mesh, octree, ier);
             _MMG3D_delPt(mesh,ier);
             (*nc)++;
             continue;
@@ -499,16 +500,10 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
           ip = _MMG3D_newPt(mesh,o,tag);
           if ( !ip ){
             /* reallocation of point table */
-            if ( bucket ) {
-              _MMG5_POINT_AND_BUCKET_REALLOC(mesh,met,ip,mesh->gap,
-                                             *warn=1;
-                                             goto collapse2//break
-                                             ,o,tag);
-            }
-            else {
-              printf("ERROR: function not available in delaunay mode. Exiting\n");
-              exit(EXIT_FAILURE);
-            }
+            _MMG5_POINT_REALLOC(mesh,met,ip,mesh->gap,
+                                *warn=1;
+                                goto collapse2//break
+                                ,o,tag);
           }
           if ( met->m ) {
             if ( _MMG5_intmet(mesh,met,k,imax,ip,0.5)<=0 ) {
@@ -527,7 +522,7 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
           pxt = pt->xt ? &mesh->xtetra[pt->xt] : 0;
 
           if ( ier < 0 ) {
-            fprintf(stdout,"  ## Error: unable to split.\n");
+            fprintf(stderr,"  ## Error: unable to split.\n");
             return(-1);
           }
           else if ( !ier ) {
@@ -535,7 +530,8 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
             goto collapse2;//continue;
           } else {
             (*ns)++;
-            //_MMG5_addBucket(mesh,bucket,ip);
+            //~ if ( octree )
+              //~ _MMG3D_addOctree(mesh,octree,ip);
 
             ppt = &mesh->point[ip];
 
@@ -578,16 +574,10 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
 
           if ( !ip )  {
             /* reallocation of point table */
-            if ( bucket ) {
-              _MMG5_POINT_AND_BUCKET_REALLOC(mesh,met,ip,mesh->gap,
-                                             *warn=1;
-                                             goto collapse2
-                                             ,o,MG_NOTAG);
-            }
-            else {
-              printf("ERROR: function not available in delaunay mode. Exiting\n");
-              exit(EXIT_FAILURE);
-            }
+            _MMG5_POINT_REALLOC(mesh,met,ip,mesh->gap,
+                                *warn=1;
+                                goto collapse2
+                                ,o,MG_NOTAG);
           }
           ppt = &mesh->point[ip];
           if ( met->m ) {
@@ -598,7 +588,7 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
           }
           ier = _MMG5_split1b(mesh,met,list,ilist,ip,1,1);
           if ( ier < 0 ) {
-            fprintf(stdout,"  ## Error: unable to split.\n");
+            fprintf(stderr,"  ## Error: unable to split.\n");
             _MMG3D_delPt(mesh,ip);
             return(-1);
           }
@@ -607,11 +597,12 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
             goto collapse2;
           }
           else {
-            _MMG5_addBucket(mesh,bucket,ip);
+            if ( octree )
+              _MMG3D_addOctree(mesh,octree,ip);
             (*ns)++;
             break;//imax continue;
           }
-          printf("on doit pas passer la\n");
+
           /* Case of an internal face */
         } else {
           ilist = _MMG5_coquil(mesh,k,imax,list);
@@ -625,15 +616,10 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
 
           if ( !ip )  {
             /* reallocation of point table */
-            if ( bucket ) {
-              _MMG5_POINT_AND_BUCKET_REALLOC(mesh,met,ip,mesh->gap,
-                                             *warn=1;
-                                             goto collapse2,
-                                             o,MG_NOTAG);
-            } else {
-              printf("ERROR: function not available in delaunay mode. Exiting\n");
-              exit(EXIT_FAILURE);
-            }
+            _MMG5_POINT_REALLOC(mesh,met,ip,mesh->gap,
+                                *warn=1;
+                                goto collapse2,
+                                o,MG_NOTAG);
           }
           ppt = &mesh->point[ip];
           if ( met->m ) {
@@ -642,7 +628,13 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
               goto collapse2;
             }
           }
-          if ( /*lmax>4 &&*/ /*it &&*/  !_MMG5_buckin_iso(mesh,met,bucket,ip) ) {
+
+          if ( lmaxtet<1.6 ) {
+            lfilt = 0.7;
+          }
+          else lfilt = 0.2;
+
+          if (  /*it &&*/  octree && !_MMG3D_octreein(mesh,met,octree,ip,lfilt) ) {
             _MMG3D_delPt(mesh,ip);
             (*ifilt)++;
             goto collapse2;
@@ -655,7 +647,8 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
             } else {
               ret = _MMG5_delone(mesh,met,ip,list,lon);
               if ( ret > 0 ) {
-                _MMG5_addBucket(mesh,bucket,ip);
+                if ( octree )
+                  _MMG3D_addOctree(mesh,octree,ip);
                 (*ns)++;
                 break;//imax continue;
               }
@@ -698,7 +691,12 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
         tag |= MG_BDY;
         if ( p0->tag > tag )   continue;
         if ( ( tag & MG_NOM ) && (mesh->adja[4*(k-1)+1+i]) ) continue;
-        ilist = _MMG5_chkcol_bdy(mesh,met,k,i,j,list,2);
+
+        if (_MMG5_boulesurfvolp(mesh,k,i1,i,
+                                list,&ilist,lists,&ilists,(p0->tag & MG_NOM)) < 0 )
+          return(-1);
+
+        ilist = _MMG5_chkcol_bdy(mesh,met,k,i,j,list,ilist,lists,ilists,2);
         if ( ilist > 0 ) {
           ier = _MMG5_colver(mesh,met,list,ilist,i2,2);
           if ( ier < 0 ) return(-1);
@@ -713,13 +711,15 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
       /* Case of an internal face */
       else {
         if ( p0->tag & MG_BDY )  continue;
-        ilist = _MMG5_chkcol_int(mesh,met,k,i,j,list,2);
+        ilist = _MMG5_boulevolp(mesh,k,i1,list);
+        ilist = _MMG5_chkcol_int(mesh,met,k,i,j,list,ilist,2);
         if ( ilist > 0 ) {
           ier = _MMG5_colver(mesh,met,list,ilist,i2,2);
           if ( ilist < 0 ) continue;
           if ( ier < 0 ) return(-1);
           else if(ier) {
-            _MMG5_delBucket(mesh,bucket,ier);
+            if ( octree )
+              _MMG3D_delOctree(mesh,octree,ier);
             _MMG3D_delPt(mesh,ier);
             (*nc)++;
             break;
@@ -736,7 +736,7 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
- * \param bucket pointer toward the bucket structure.
+ * \param octree pointer toward the octree structure.
  * \param warn set to 1 if we can't insert point due to lack of memory.
  * \return -1 if fail and we dont try to end the remesh process,
  * 0 if fail but we try to end the remesh process and 1 if success.
@@ -746,7 +746,7 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket,int ne,
  *
  */
 static int
-_MMG5_adpsplcol(MMG5_pMesh mesh,MMG5_pSol met,_MMG5_pBucket bucket, int* warn) {
+_MMG5_adpsplcol(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pOctree octree, int* warn) {
   int        nfilt,ifilt,ne,ier;
   int        ns,nc,it,nnc,nns,nnf,nnm,maxit,nf,nm;
   double     maxgap;
@@ -763,26 +763,26 @@ _MMG5_adpsplcol(MMG5_pMesh mesh,MMG5_pSol met,_MMG5_pBucket bucket, int* warn) {
       nf = nm = 0;
       ifilt = 0;
       ne = mesh->ne;
-      ier = _MMG5_boucle_for(mesh,met,bucket,ne,&ifilt,&ns,&nc,warn,it);
+      ier = _MMG5_boucle_for(mesh,met,octree,ne,&ifilt,&ns,&nc,warn,it);
       if(ier<0) exit(EXIT_FAILURE);
       else if(!ier) return(-1);
     } /* End conditional loop on mesh->info.noinsert */
     else  ns = nc = ifilt = 0;
 
     if ( !mesh->info.noswap ) {
-      nf = _MMG5_swpmsh(mesh,met,bucket,2);
+      nf = _MMG5_swpmsh(mesh,met,octree,2);
       if ( nf < 0 ) {
-        fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
+        fprintf(stderr,"  ## Unable to improve mesh. Exiting.\n");
         return(0);
       }
       nnf += nf;
       if(it==2 || it==6/*&& it==1 || it==3 || it==5 || it > 8*/) {
-        nf += _MMG5_swptet(mesh,met,1.053,bucket,2);
+        nf += _MMG5_swptet(mesh,met,1.053,octree,2);
       } else {
         nf += 0;
       }
       if ( nf < 0 ) {
-        fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
+        fprintf(stderr,"  ## Unable to improve mesh. Exiting.\n");
         return(0);
       }
     }
@@ -790,9 +790,9 @@ _MMG5_adpsplcol(MMG5_pMesh mesh,MMG5_pSol met,_MMG5_pBucket bucket, int* warn) {
 
     if ( !mesh->info.nomove ) {
       /*perform only boundary moves*/
-      nm = _MMG5_movtet(mesh,met,-1);
+      nm = _MMG5_movtet(mesh,met,octree,-1);
       if ( nm < 0 ) {
-        fprintf(stdout,"  ## Unable to improve mesh.\n");
+        fprintf(stderr,"  ## Unable to improve mesh.\n");
         return(0);
       }
     }
@@ -835,14 +835,94 @@ _MMG5_adpsplcol(MMG5_pMesh mesh,MMG5_pSol met,_MMG5_pBucket bucket, int* warn) {
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
- * \param bucket pointer toward the bucket structure.
+ * \param octree pointer toward the octree structure.
+ * \return 0 if failed, 1 otherwise.
+ *
+ * Mesh optimization for LES computation (improve the element skewness).
+ *
+ */
+static int
+_MMG5_optetLES(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree) {
+  int it,nnm,nnf,maxit,nm,nf,nw;
+  double declic;
+
+  it = nnm = nnf = 0;
+  maxit = 10;
+  declic = 1.01;
+  do {
+    /* treatment of bad elements*/
+    if(it < 5) {
+      nw = MMG3D_opttyp(mesh,met,octree);
+    }
+    else
+      nw = 0;
+    /* badly shaped process */
+    if ( !mesh->info.noswap ) {
+      nf = _MMG5_swptet(mesh,met,declic,octree,2);
+      if ( nf < 0 ) {
+        fprintf(stderr,"  ## Unable to improve mesh. Exiting.\n");
+        return(0);
+      }
+    }
+    else  nf = 0;
+
+    if ( !mesh->info.nomove ) {
+      nm = _MMG5_movtet(mesh,met,octree, 3);
+      if ( nm < 0 ) {
+        fprintf(stderr,"  ## Unable to improve mesh.\n");
+        return(0);
+      }
+    }
+    else  nm = 0;
+    nnm += nm;
+
+//be careful, this procedure can degrade the worst elt
+    if ( !mesh->info.nomove && (it==2)) {
+      _MMG3D_optlap(mesh,met);
+    }
+
+    if ( (abs(mesh->info.imprim) > 4 || mesh->info.ddebug) && nw+nf+nm > 0 ){
+      fprintf(stdout,"                                          ");
+      fprintf(stdout,"  %8d improved, %8d swapped, %8d moved\n",nw,nf,nm);
+    }
+  }
+  while( ++it < maxit && nw+nm+nf > 0 );
+
+  if ( !mesh->info.nomove ) {
+    nm = _MMG5_movtet(mesh,met,octree, 3);
+    if ( nm < 0 ) {
+      fprintf(stderr,"  ## Unable to improve mesh.\n");
+      return(0);
+    }
+  }
+  else  nm = 0;
+  nnm += nm;
+  if ( (abs(mesh->info.imprim) > 4 || mesh->info.ddebug) && nm > 0 ) {
+    fprintf(stdout,"                                            "
+            "                                ");
+    fprintf(stdout,"     %8d moved\n",nm);
+  }
+
+
+  if ( mesh->info.imprim ) {
+    if ( abs(mesh->info.imprim) < 5 && (nnf > 0 || nnm > 0) )
+      fprintf(stdout,"                                                 "
+              "        "
+              "      %8d swapped, %8d moved, %d iter. \n",nnf,nnm,it);
+  }
+  return(1);
+}
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param octree pointer toward the octree structure.
  * \return 0 if failed, 1 otherwise.
  *
  * Mesh optimization using egde swapping and point relocation.
  *
  */
 static int
-_MMG5_optet(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket) {
+_MMG5_optet(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree) {
   int it,nnm,nnf,maxit,nm,nf,nw;
   double declic;
 
@@ -853,31 +933,31 @@ _MMG5_optet(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket) {
   do {
     /* treatment of bad elements*/
     if(it < 5) {
-      nw = MMG3D_opttyp(mesh,met,bucket);
+      nw = MMG3D_opttyp(mesh,met,octree);
     }
     else
       nw = 0;
     /* badly shaped process */
     if ( !mesh->info.noswap ) {
-      nf = _MMG5_swpmsh(mesh,met,bucket,2);
+      nf = _MMG5_swpmsh(mesh,met,octree,2);
       if ( nf < 0 ) {
-        fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
+        fprintf(stderr,"  ## Unable to improve mesh. Exiting.\n");
         return(0);
       }
       nnf += nf;
 
-      nf = _MMG5_swptet(mesh,met,declic,bucket,2);
+      nf = _MMG5_swptet(mesh,met,declic,octree,2);
       if ( nf < 0 ) {
-        fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
+        fprintf(stderr,"  ## Unable to improve mesh. Exiting.\n");
         return(0);
       }
     }
     else  nf = 0;
 
     if ( !mesh->info.nomove ) {
-      nm = _MMG5_movtet(mesh,met,0);
+      nm = _MMG5_movtet(mesh,met,octree,0);
       if ( nm < 0 ) {
-        fprintf(stdout,"  ## Unable to improve mesh.\n");
+        fprintf(stderr,"  ## Unable to improve mesh.\n");
         return(0);
       }
     }
@@ -892,9 +972,9 @@ _MMG5_optet(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket) {
   while( ++it < maxit && nw+nm+nf > 0 );
 
   if ( !mesh->info.nomove ) {
-    nm = _MMG5_movtet(mesh,met,3);
+    nm = _MMG5_movtet(mesh,met,octree,3);
     if ( nm < 0 ) {
-      fprintf(stdout,"  ## Unable to improve mesh.\n");
+      fprintf(stderr,"  ## Unable to improve mesh.\n");
       return(0);
     }
   }
@@ -918,7 +998,7 @@ _MMG5_optet(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket) {
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
- * \param bucket pointer toward the bucket structure.
+ * \param octree pointer toward the octree structure.
  * \return 0 if failed, 1 otherwise.
  *
  * Analyze tetrahedra and split long / collapse short, according to
@@ -926,21 +1006,21 @@ _MMG5_optet(MMG5_pMesh mesh, MMG5_pSol met,_MMG5_pBucket bucket) {
  *
  */
 static int
-_MMG5_adptet_delone(MMG5_pMesh mesh,MMG5_pSol met,_MMG5_pBucket bucket) {
+_MMG5_adptet_delone(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pOctree octree) {
   int      nnf,ns,nf;
   int      warn;
 
   /*initial swap*/
   if ( !mesh->info.noswap ) {
-    nf = _MMG5_swpmsh(mesh,met,bucket,2);
+    nf = _MMG5_swpmsh(mesh,met,octree,2);
     if ( nf < 0 ) {
-      fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
+      fprintf(stderr,"  ## Unable to improve mesh. Exiting.\n");
       return(0);
     }
     nnf = nf;
-    nf = _MMG5_swptet(mesh,met,1.053,bucket,2);
+    nf = _MMG5_swptet(mesh,met,1.053,octree,2);
     if ( nf < 0 ) {
-      fprintf(stdout,"  ## Unable to improve mesh. Exiting.\n");
+      fprintf(stderr,"  ## Unable to improve mesh. Exiting.\n");
       return(0);
     }
     nnf+=nf;
@@ -954,28 +1034,32 @@ _MMG5_adptet_delone(MMG5_pMesh mesh,MMG5_pSol met,_MMG5_pBucket bucket) {
   /* Iterative mesh modifications */
   warn = 0;
 
-  ns = _MMG5_adpsplcol(mesh,met,bucket,&warn);
+  ns = _MMG5_adpsplcol(mesh,met,octree,&warn);
 
   if ( ns < 0 ) {
-    fprintf(stdout,"  ## Unable to complete mesh. Exit program.\n");
+    fprintf(stderr,"  ## Unable to complete mesh. Exit program.\n");
     return(0);
   }
 
   if ( warn ) {
-    fprintf(stdout,"  ## Error:");
-    fprintf(stdout," unable to allocate a new point in last call of adpspl.\n");
-    fprintf(stdout,"  ## Check the mesh size or ");
-    fprintf(stdout,"increase the maximal authorized memory with the -m option.\n");
-    fprintf(stdout,"  ## Uncomplete mesh. Exiting\n" );
+    fprintf(stderr,"  ## Error:");
+    fprintf(stderr," unable to allocate a new point in last call of adpspl.\n");
+    fprintf(stderr,"  ## Check the mesh size or ");
+    fprintf(stderr,"increase the maximal authorized memory with the -m option.\n");
+    fprintf(stderr,"  ## Uncomplete mesh. Exiting\n" );
     return(0);
   }
 
   /* renumerotation if available */
   if ( !_MMG5_scotchCall(mesh,met) )
     return(0);
-
-  if(!_MMG5_optet(mesh,met,bucket)) return(0);
-
+  
+  if(mesh->info.optimLES) {
+    if(!_MMG5_optetLES(mesh,met,octree)) return(0);
+  }
+  else {
+    if(!_MMG5_optet(mesh,met,octree)) return(0);
+  }
   return(1);
 }
 
@@ -988,13 +1072,13 @@ _MMG5_adptet_delone(MMG5_pMesh mesh,MMG5_pSol met,_MMG5_pBucket bucket) {
  *
  */
 int _MMG5_mmg3d1_delone(MMG5_pMesh mesh,MMG5_pSol met) {
-  _MMG5_pBucket bucket;
+  _MMG3D_pOctree octree = NULL;
 
   if ( abs(mesh->info.imprim) > 4 )
     fprintf(stdout,"  ** MESH ANALYSIS\n");
 
   if ( mesh->info.iso && !_MMG5_chkmani(mesh) ) {
-    fprintf(stdout,"  ## Non orientable implicit surface. Exit program.\n");
+    fprintf(stderr,"  ## Non orientable implicit surface. Exit program.\n");
     return(0);
   }
 
@@ -1003,12 +1087,15 @@ int _MMG5_mmg3d1_delone(MMG5_pMesh mesh,MMG5_pSol met) {
     fprintf(stdout,"  ** GEOMETRIC MESH\n");
 
   if ( !_MMG5_anatet(mesh,met,1,0) ) {
-    fprintf(stdout,"  ## Unable to split mesh. Exiting.\n");
+    fprintf(stderr,"  ## Unable to split mesh. Exiting.\n");
+    if ( octree )
+      /*free octree*/
+      _MMG3D_freeOctree(mesh,&octree);
     return(0);
   }
 
 #ifdef DEBUG
-  _MMG3D_inqua(mesh,met);
+  _MMG3D_inqua(mesh,met0);
 #endif
 
   /**--- stage 2: computational mesh */
@@ -1017,20 +1104,29 @@ int _MMG5_mmg3d1_delone(MMG5_pMesh mesh,MMG5_pSol met) {
 
   /* define metric map */
   if ( !_MMG5_defsiz(mesh,met) ) {
-    fprintf(stdout,"  ## Metric undefined. Exit program.\n");
+    fprintf(stderr,"  ## Metric undefined. Exit program.\n");
+    if ( octree )
+      /*free octree*/
+      _MMG3D_freeOctree(mesh,&octree);
     return(0);
   }
 
   if ( mesh->info.hgrad > 0. ) {
     if ( mesh->info.imprim )   fprintf(stdout,"\n  -- GRADATION : %8f\n",exp(mesh->info.hgrad));
     if ( !_MMG5_gradsiz(mesh,met) ) {
-      fprintf(stdout,"  ## Gradation problem. Exit program.\n");
+      fprintf(stderr,"  ## Gradation problem. Exit program.\n");
+      if ( octree )
+        /*free octree*/
+        _MMG3D_freeOctree(mesh,&octree);
       return(0);
     }
   }
 
   if ( !_MMG5_anatet(mesh,met,2,0) ) {
-    fprintf(stdout,"  ## Unable to split mesh. Exiting.\n");
+    fprintf(stderr,"  ## Unable to split mesh. Exiting.\n");
+    if ( octree )
+      /*free octree*/
+      _MMG3D_freeOctree(mesh,&octree);
     return(0);
   }
 
@@ -1040,15 +1136,26 @@ int _MMG5_mmg3d1_delone(MMG5_pMesh mesh,MMG5_pSol met) {
 #endif
 
   /* renumerotation if available */
-  if ( !_MMG5_scotchCall(mesh,met) )
+  if ( !_MMG5_scotchCall(mesh,met) ) {
+    if ( octree )
+      /*free octree*/
+      _MMG3D_freeOctree(mesh,&octree);
     return(0);
+  }
 
-  /* CEC : create filter */
-  bucket = _MMG5_newBucket(mesh,mesh->info.bucket); //M_MAX(mesh->mesh->info.bucksiz,BUCKSIZ));
-  if ( !bucket )  return(0);
+  if ( mesh->info.octree > 0 ) {
+    if ( !_MMG3D_initOctree(mesh,&octree,mesh->info.octree) ) {
+      if ( octree )
+        /*free octree*/
+        _MMG3D_freeOctree(mesh,&octree);
+    }
+  }
 
-  if ( !_MMG5_adptet_delone(mesh,met,bucket) ) {
-    fprintf(stdout,"  ## Unable to adapt. Exit program.\n");
+  if ( !_MMG5_adptet_delone(mesh,met,octree) ) {
+    fprintf(stderr,"  ## Unable to adapt. Exit program.\n");
+    if ( octree )
+      /*free octree*/
+      _MMG3D_freeOctree(mesh,&octree);
     return(0);
   }
 
@@ -1058,19 +1165,24 @@ int _MMG5_mmg3d1_delone(MMG5_pMesh mesh,MMG5_pSol met) {
 #endif
   /* in test phase: check if no element with 2 bdry faces */
   if ( !_MMG5_chkfemtopo(mesh) ) {
-    fprintf(stdout,"  ## Topology of mesh unsuited for fem computations. Exit program.\n");
+    fprintf(stderr,"  ## Topology of mesh unsuited for fem computations. Exit program.\n");
+    if ( octree )
+      /*free octree*/
+      _MMG3D_freeOctree(mesh,&octree);
     return(0);
   }
 
   if ( mesh->info.iso && !_MMG5_chkmani(mesh) ) {
-    fprintf(stdout,"  ## Non orientable implicit surface. Exit program.\n");
+    fprintf(stderr,"  ## Non orientable implicit surface. Exit program.\n");
+    if ( octree )
+      /*free octree*/
+      _MMG3D_freeOctree(mesh,&octree);
     return(0);
   }
 
-  /*free bucket*/
-  _MMG5_DEL_MEM(mesh,bucket->head,(bucket->size*bucket->size*bucket->size+1)*sizeof(int));
-  _MMG5_DEL_MEM(mesh,bucket->link,(mesh->npmax+1)*sizeof(int));
-  _MMG5_DEL_MEM(mesh,bucket,sizeof(_MMG5_Bucket));
+  if ( octree )
+    /*free octree*/
+    _MMG3D_freeOctree(mesh,&octree);
 
   return(1);
 }

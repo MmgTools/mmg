@@ -202,6 +202,7 @@ IF ( BUILD_TESTING )
   ##------- Set the continuous integration options --------------------##
   ##-------------------------------------------------------------------##
   SET(MMGS_CI_TESTS ${CMAKE_SOURCE_DIR}/ci_tests/mmgs )
+  SET(MMG_CI_TESTS ${CMAKE_SOURCE_DIR}/ci_tests/mmg )
 
   ##-------------------------------------------------------------------##
   ##--------------------------- Add tests and configure it ------------##
@@ -232,10 +233,12 @@ IF ( BUILD_TESTING )
       SET(LIBMMGS_EXEC0_a ${EXECUTABLE_OUTPUT_PATH}/libmmgs_example0_a)
       SET(LIBMMGS_EXEC0_b ${EXECUTABLE_OUTPUT_PATH}/libmmgs_example0_b)
       SET(LIBMMGS_EXEC1   ${EXECUTABLE_OUTPUT_PATH}/libmmgs_example1)
+      SET(LIBMMGS_EXEC2   ${EXECUTABLE_OUTPUT_PATH}/libmmgs_example2)
 
       ADD_TEST(NAME libmmgs_example0_a   COMMAND ${LIBMMGS_EXEC0_a})
       ADD_TEST(NAME libmmgs_example0_b   COMMAND ${LIBMMGS_EXEC0_b})
       ADD_TEST(NAME libmmgs_example1   COMMAND ${LIBMMGS_EXEC1})
+      ADD_TEST(NAME libmmgs_example2   COMMAND ${LIBMMGS_EXEC2})
 
       IF ( CMAKE_Fortran_COMPILER)
         SET(LIBMMGS_EXECFORTRAN_a ${EXECUTABLE_OUTPUT_PATH}/libmmgs_fortran_a)
@@ -247,6 +250,11 @@ IF ( BUILD_TESTING )
     ENDIF()
     # Add mmgs tests
     INCLUDE( ${CMAKE_SOURCE_DIR}/cmake/testing/mmgs_tests.cmake )
+
+    IF ( RUN_AGAIN )
+      INCLUDE( ${CMAKE_SOURCE_DIR}/cmake/testing/mmgs_rerun_tests.cmake )
+    ENDIF()
+
 
   ENDIF ( MMGS_CI )
 

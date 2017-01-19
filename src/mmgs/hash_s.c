@@ -92,10 +92,8 @@ void _MMG5_setNmTag(MMG5_pMesh mesh) {
  *
  */
 int _MMGS_hashTria(MMG5_pMesh mesh) {
-  //MMG5_pTria          pt;
   _MMG5_Hash          hash;
   int                 ier;
-  //int                 *adja,k,i;
 
   if ( mesh->adja )  return(1);
   if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug )
@@ -105,34 +103,28 @@ int _MMGS_hashTria(MMG5_pMesh mesh) {
   paktri(mesh);
 
   _MMG5_ADD_MEM(mesh,(3*mesh->ntmax+5)*sizeof(int),"adjacency table",
-                printf("  Exit program.\n");
+                fprintf(stderr,"  Exit program.\n");
                 exit(EXIT_FAILURE));
   _MMG5_SAFE_CALLOC(mesh->adja,3*mesh->ntmax+5,int);
 
   ier = _MMG5_mmgHashTria(mesh, mesh->adja, &hash, 0);
   _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
 
-//warning the following loop seems to be unused : commentated because the s
-//field is used (without initialization) in boulechknm and it may lead to errors.
-  /* set seed */
-  /* for (k=1; k<=mesh->nt; k++) { */
-  /*   pt   = &mesh->tria[k]; */
-  /*   adja = &mesh->adja[3*(k-1)+1]; */
-  /*   for (i=0; i<3; i++) { */
-  /*     if ( !adja[i] ) { */
-  /*       mesh->point[pt->v[_MMG5_inxt2[i]]].s = k; */
-  /*     } */
-  /*   } */
-  /* } */
-
   return(ier);
 }
 
 /**
  * \param mesh pointer toward the mesh structure.
- * \return 1 if success, 0 
+ * \return 1 if success, 0.
  *
- * Store edges in hash table
+ * Copy the properties (ref and tag) of the declared edges to the triangles,
+ * where they are assigned to the individual corners of the triangle. First a
+ * hash is created for rapid lookup of the edges. Then in a loop over all edges
+ * of all triangles, the hash is probed for each edge, and if it exists its
+ * properties are copied. Thus, declared edges that do not occur in any triangle
+ * will be silently ignored.
+ *
+ * \remark this function handle all the provided edges.
  *
  */
 int assignEdge(MMG5_pMesh mesh) {

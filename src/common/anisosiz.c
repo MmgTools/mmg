@@ -36,221 +36,6 @@
 
 /**
  * \param mesh pointer toward the mesh structure.
- * \param np0 index of edge's extremity.
- * \param np1 index of edge's extremity.
- * \param m0 metric at point np0.
- * \param m1 metric at point np1.
- * \param isedg 1 if the edge is a ridge, 0 otherwise.
- * \return length of edge according to the prescribed metric.
- *
- * Compute length of surface edge \f$[np0;np1]\f$ according to the prescribed
- * aniso metrics \a m0 and \a m1.
- *
- */
-static inline
-double _MMG5_lenEdg(MMG5_pMesh mesh,int np0,int np1,
-                    double *m0,double *m1,char isedg) {
-  MMG5_pPoint   p0,p1;
-  double        gammaprim0[3],gammaprim1[3],t[3],*n1,*n2,ux,uy,uz,ps1,ps2,l0,l1;
-
-  p0 = &mesh->point[np0];
-  p1 = &mesh->point[np1];
-
-  ux = p1->c[0] - p0->c[0];
-  uy = p1->c[1] - p0->c[1];
-  uz = p1->c[2] - p0->c[2];
-
-  /* computation of the two tangent vectors to the underlying curve of [i0i1] */
-  if ( MG_SIN(p0->tag) || (MG_NOM & p0->tag) ) {
-    gammaprim0[0] = ux;
-    gammaprim0[1] = uy;
-    gammaprim0[2] = uz;
-  }
-  else if ( isedg ) {
-    memcpy(t,p0->n,3*sizeof(double));
-    ps1 = ux*t[0] + uy*t[1] + uz*t[2];
-    gammaprim0[0] = ps1*t[0];
-    gammaprim0[1] = ps1*t[1];
-    gammaprim0[2] = ps1*t[2];
-  }
-  else {
-    if ( MG_GEO & p0->tag ) {
-      //assert(p0->xp);
-      n1 = &mesh->xpoint[p0->xp].n1[0];
-      n2 = &mesh->xpoint[p0->xp].n2[0];
-      ps1 = ux*n1[0] + uy*n1[1] + uz*n1[2];
-      ps2 = ux*n2[0] + uy*n2[1] + uz*n2[2];
-
-      if ( fabs(ps2) < fabs(ps1) ) {
-        n1  = &mesh->xpoint[p0->xp].n2[0];
-        ps1 = ps2;
-      }
-    }
-    else if ( MG_REF & p0->tag || MG_BDY & p0->tag ) {
-      // ( MG_BDY  & p0->tag ) => mmg3d
-      n1  = &mesh->xpoint[p0->xp].n1[0];
-      ps1 = ux*n1[0] + uy*n1[1] + uz*n1[2];
-    }
-    else {
-      // we come from mmgs because in mmg3d the boundary points are tagged
-      // MG_BDY.
-      n1  = &(p0->n[0]);
-      ps1 = ux*n1[0] + uy*n1[1] + uz*n1[2];
-    }
-    gammaprim0[0] = ux - ps1*n1[0];
-    gammaprim0[1] = uy - ps1*n1[1];
-    gammaprim0[2] = uz - ps1*n1[2];
-  }
-
-  if ( MG_SIN(p1->tag) || (MG_NOM & p1->tag) ) {
-    gammaprim1[0] = -ux;
-    gammaprim1[1] = -uy;
-    gammaprim1[2] = -uz;
-  }
-  else if ( isedg ) {
-    memcpy(t,p1->n,3*sizeof(double));
-    ps1 = -ux*t[0] - uy*t[1] - uz*t[2];
-    gammaprim1[0] = ps1*t[0];
-    gammaprim1[1] = ps1*t[1];
-    gammaprim1[2] = ps1*t[2];
-  }
-  else {
-    if ( MG_GEO & p1->tag ) {
-      n1 = &mesh->xpoint[p1->xp].n1[0];
-      n2 = &mesh->xpoint[p1->xp].n2[0];
-      ps1 = -ux*n1[0] - uy*n1[1] - uz*n1[2];
-      ps2 = -ux*n2[0] - uy*n2[1] - uz*n2[2];
-
-      if ( fabs(ps2) < fabs(ps1) ) {
-        n1  = &mesh->xpoint[p1->xp].n2[0];
-        ps1 = ps2;
-      }
-    }
-    else if ( MG_REF & p1->tag || MG_BDY & p1->tag ) {
-      // ( MG_BDY  & p1->tag ) => mmg3d )
-      n1  = &mesh->xpoint[p1->xp].n1[0];
-      ps1 = - ux*n1[0] - uy*n1[1] - uz*n1[2];
-    }
-    else {
-      // we come from mmgs because in mmg3d the boundary points are tagged
-      // MG_BDY.
-      n1  = &(p1->n[0]);
-      ps1 = -ux*n1[0] - uy*n1[1] - uz*n1[2];
-    }
-    gammaprim1[0] = - ux - ps1*n1[0];
-    gammaprim1[1] = - uy - ps1*n1[1];
-    gammaprim1[2] = - uz - ps1*n1[2];
-  }
-
-  /* computation of the length of the two tangent vectors in their respective tangent plane */
-  /* l_ab = int_a^b sqrt(m_ij d_t x_i(t) d_t x_j(t) ) : evaluated by a 2-point quadrature method. */
-  l0 = m0[0]*gammaprim0[0]*gammaprim0[0] + m0[3]*gammaprim0[1]*gammaprim0[1] \
-    + m0[5]*gammaprim0[2]*gammaprim0[2] \
-    + 2.0*m0[1]*gammaprim0[0]*gammaprim0[1]  + 2.0*m0[2]*gammaprim0[0]*gammaprim0[2] \
-    + 2.0*m0[4]*gammaprim0[1]*gammaprim0[2];
-
-  l1 = m1[0]*gammaprim1[0]*gammaprim1[0] + m1[3]*gammaprim1[1]*gammaprim1[1] \
-    + m1[5]*gammaprim1[2]*gammaprim1[2] \
-    +2.0*m1[1]*gammaprim1[0]*gammaprim1[1]  + 2.0*m1[2]*gammaprim1[0]*gammaprim1[2] \
-    + 2.0*m1[4]*gammaprim1[1]*gammaprim1[2];
-
-  if(l0 < 0) {
-    printf("%s:%d:Error: negative edge length (%e)\n",__FILE__,__LINE__,l0);
-    exit(EXIT_FAILURE);
-  }
-  if(l1 < 0) {
-    printf("%s:%d:Error: negative edge length (%e)\n",__FILE__,__LINE__,l1);
-    exit(EXIT_FAILURE);
-  }
-  l0 = 0.5*(sqrt(l0) + sqrt(l1));
-
-  return(l0);
-}
-
-/**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the sol structure.
- * \param np0 index of edge's extremity.
- * \param np1 index of edge's extremity.
- * \param isedg 1 if the edge is a ridge, 0 otherwise.
- * \return length of edge according to the prescribed metric.
- *
- * Compute length of surface edge \f$[i0;i1]\f$ according to the prescribed
- * aniso metric (for special storage of metrics at ridges points). Here the
- * length is computed taking into account the curve nature of the surface edge.
- *
- */
-double _MMG5_lenSurfEdg_ani(MMG5_pMesh mesh,MMG5_pSol met,int np0,int np1,char isedg) {
-  MMG5_pPoint   p0,p1;
-  double        *m0,*m1,met0[6],met1[6],ux,uy,uz;
-
-  p0 = &mesh->point[np0];
-  p1 = &mesh->point[np1];
-
-  ux = p1->c[0] - p0->c[0];
-  uy = p1->c[1] - p0->c[1];
-  uz = p1->c[2] - p0->c[2];
-
-  /* Set metrics */
-  if ( MG_SIN(p0->tag) || (MG_NOM & p0->tag)) {
-    m0 = &met->m[6*np0];
-  }
-  else if ( MG_GEO & p0->tag ) {
-    if ( !_MMG5_buildridmet(mesh,met,np0,ux,uy,uz,met0) )  {
-      printf("%s:%d:Error: Unable to compute the metric along the ridge.\n "
-             "Exit program.\n",__FILE__,__LINE__);
-      exit(EXIT_FAILURE);
-    }
-    m0 = met0;
-  }
-  else {
-    m0 = &met->m[6*np0];
-  }
-
-  if ( MG_SIN(p1->tag) || (MG_NOM & p1->tag)) {
-    m1 = &met->m[6*np1];
-  }
-  else if ( MG_GEO & p1->tag ) {
-    if ( !_MMG5_buildridmet(mesh,met,np1,ux,uy,uz,met1) )  {
-      printf("%s:%d:Error: Unable to compute the metric along the ridge.\n "
-             "Exit program.\n",__FILE__,__LINE__);
-      exit(EXIT_FAILURE);
-    }
-    m1 = met1;
-  }
-  else {
-    m1 = &met->m[6*np1];
-  }
-
-  return(_MMG5_lenEdg(mesh,np0,np1,m0,m1,isedg));
-}
-
-
-/**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the sol structure.
- * \param np0 index of edge's extremity.
- * \param np1 index of edge's extremity.
- * \param isedg 1 if the edge is a ridge, 0 otherwise.
- * \return length of edge according to the prescribed metric.
- *
- * Compute length of surface edge \f$[i0;i1]\f$ according to the prescribed
- * aniso metric (for classic storage of metrics at ridges points).
- *
- */
-double _MMG5_lenSurfEdg33_ani(MMG5_pMesh mesh,MMG5_pSol met,
-                              int np0,int np1,char isedg) {
-  double        *m0,*m1;
-
-  /* Set metrics */
-  m0 = &met->m[6*np0];
-  m1 = &met->m[6*np1];
-
-  return(_MMG5_lenEdg(mesh,np0,np1,m0,m1,isedg));
-}
-
-/**
- * \param mesh pointer toward the mesh structure.
  * \param m pointer toward the metric at triangle vertices.
  * \param ptt pointer toward the triangle structure.
  * \return The double of the triangle area.
@@ -439,17 +224,23 @@ void _MMG5_defUninitSize(MMG5_pMesh mesh,MMG5_pSol met,char ismet)
 
     m = &met->m[6*k];
     if(ismet) {
+      if ( !MG_SIN(ppt->tag) && (ppt->tag & MG_GEO) ) {
+        m[0] = m[1] = m[2] = m[3] = m[4] = isqhmax;
+        m[5] = 0;
+      }
+
       ppt->flag = 1;
       continue;
     }
+
     memset(m,0,6*sizeof(double));
-    if ( MG_SIN(ppt->tag) || (MG_NOM & ppt->tag) ) {
+    if (  (MG_SIN(ppt->tag) || (MG_NOM & ppt->tag)) ) {
       m[0] = m[3] = m[5] = isqhmax;
     }
     else if ( ppt->tag & MG_GEO ) {
       /* We store the size in the tangent dir in m[0], in the n1 dir in m[1] and
        * in the n2 dir in m[2]. */
-      m[0] = m[1] = m[2] = isqhmax;
+      m[0] = m[1] = m[2] = m[3] = m[4] = isqhmax;
     }
     else {
       n = ppt->tag & MG_REF ? &mesh->xpoint[ppt->xp].n1[0] : ppt->n;
@@ -476,8 +267,8 @@ void _MMG5_defUninitSize(MMG5_pMesh mesh,MMG5_pSol met,char ismet)
  * \param tAA matrix to fill
  * \param tAb second member
  *
- * Fill matrice tAA and second member tAb with \f$ A=(\sum X_{P_i}^2 \sum
- * Y_{P_i}^2 \sum X_{P_i}Y_{P_i}) \f$ and \f$ b=\sum Z_{P_i}\f$ with P_i the
+ * Fill matrice \sum tAA and second member \sum tAb with \f$ A=( X_{P_i}^2
+ * Y_{P_i}^2 X_{P_i}Y_{P_i}) \f$ and \f$ b= Z_{P_i}\f$ with P_i the
  * physical points at edge [i0;i1] extremities and middle.  Compute the physical
  * coor \a c of the curve edge's mid-point for a regular or reference point.
  *
@@ -521,8 +312,8 @@ void _MMG5_fillDefmetregSys( int k, MMG5_pPoint p0, int i0, _MMG5_Bezier b,
   c[1] = 3.0/8.0*b0[1] + 3.0/8.0*b1[1] + 1.0/8.0*lispoi[3*k+2];
   c[2] = 3.0/8.0*b0[2] + 3.0/8.0*b1[2] + 1.0/8.0*lispoi[3*k+3];
 
-/* Fill matrice tAA and second member tAb with \f$A=(\sum X_{P_i}^2 \sum
- * Y_{P_i}^2 \sum X_{P_i}Y_{P_i})\f$ and \f$b=\sum Z_{P_i}\f$ with P_i the
+/* Fill matrice \sum tAA and second member \sum tAb with \f$A=( X_{P_i}^2
+ * Y_{P_i}^2 X_{P_i}Y_{P_i})\f$ and \f$b= Z_{P_i}\f$ with P_i the
  * physical points at edge [i0;i1] extremities and middle. */
   tAA[0] += c[0]*c[0]*c[0]*c[0];
   tAA[1] += c[0]*c[0]*c[1]*c[1];
@@ -634,7 +425,7 @@ int _MMG5_solveDefmetregSys( MMG5_pMesh mesh, double r[3][3], double c[3],
 {
   double intm[3], kappa[2], vp[2][2], b0[3], b1[3], b2[3];
 
-  memset(intm,0.0,3*sizeof(double));
+  memset(intm,0x0,3*sizeof(double));
 
   /* case planar surface : tAb = 0 => no curvature */
   /* isotropic metric with hmax size*/
@@ -754,7 +545,7 @@ int _MMG5_solveDefmetrefSys( MMG5_pMesh mesh, MMG5_pPoint p0, int ipref[2],
   double       gammasec[3],tau[2], ux, uy, uz, ps1, l, ll, *t, *t1;
   int          i;
 
-  memset(intm,0.0,3*sizeof(double));
+  memset(intm,0x0,3*sizeof(double));
 
   /* case planar surface : tAb = 0 => no curvature */
   /* isotropic metric with hmax size*/
@@ -986,7 +777,7 @@ double _MMG5_ridSizeInTangentDir(MMG5_pMesh mesh, MMG5_pPoint p0, int idp,
  *
  **/
 double _MMG5_ridSizeInNormalDir(MMG5_pMesh mesh,int i0,double* bcu,
-                                _MMG5_Bezier *b,int isqhmin,int isqhmax)
+                                _MMG5_Bezier *b,double isqhmin,double isqhmax)
 {
   double lambda[2],Jacb[3][2],Hb[3][3],tau[3],ll,l,gammasec[3],c[3];
   double ps,kappacur;

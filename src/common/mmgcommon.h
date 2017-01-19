@@ -55,16 +55,23 @@ extern "C" {
 #include "eigenv.h"
 #include "libmmgcommon.h"
 
-#define MG_VER   "5.1.4"
-#define MG_REL   "Oct 18, 2016"
+#define MG_VER   "5.2.0"
+#define MG_REL   "Jan 20, 2017"
 #define MG_CPY   "Copyright (c) IMB-LJLL, 2004-"
 #define MG_STR   "&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&"
+
+/** Check if \a a and \a b have the same sign */
+#define MG_SMSGN(a,b)  (((double)(a)*(double)(b) > (0.0)) ? (1) : (0))
 
 /** size of box for renumbering with scotch. */
 #define _MMG5_BOXSIZE 500
 
 /** Maximal memory used if available memory compitation fail. */
 #define _MMG5_MEMMAX  800
+
+/* Domain refs in iso mode */
+#define MG_PLUS    2
+#define MG_MINUS   3
 
 /* numerical accuracy */
 #define _MMG5_ANGEDG    0.707106781186548   /*0.573576436351046 */
@@ -100,7 +107,14 @@ extern "C" {
 #define  MG_NOM       (1 << 3)        /**< 8  non manifold    */
 #define  MG_BDY       (1 << 4)        /**< 16  boundary entity */
 #define  MG_CRN       (1 << 5)        /**< 32  corner         */
-#define  MG_NUL       (1 << 6)        /**< 64  vertex removed */
+#define  MG_NOSURF    (1 << 6)        /**< 64  freezed boundary */
+// 1 << 13 reserveed for MG_INTERFACE tag of parMmg
+#define  MG_NUL       (1 << 14)       /**< 16384 vertex removed */
+
+/* binary tags for local parameters */
+#define  MG_Vert   (1 << 0 )  /**< 1 local parameter applied over vertex */
+#define  MG_Tria   (1 << 1 )  /**< 2 local parameter applied over triangle */
+#define  MG_Tetra  (1 << 2 )  /**< 4 local parameter applied over tetrahedron */
 
 #define MG_VOK(ppt)      (ppt && ((ppt)->tag < MG_NUL)) /**< Vertex OK */
 #define MG_EOK(pt)       (pt && ((pt)->v[0] > 0))       /**< Element OK */
@@ -115,8 +129,6 @@ extern "C" {
 #define _MMG5_KA 7 /*!< Key for hash tables. */
 #define _MMG5_KB 11  /*!< Key for hash tables. */
 
-/* Domain refs in iso mode */
-#define MG_ISO    10
 
 /** Reset the customized signals and set the internal counters of points, edges,
  * tria and tetra to the suitable value (needed by users to recover their mesh
@@ -144,10 +156,10 @@ extern "C" {
   {                                                                     \
     if ( ((mesh)->memCur) > ((mesh)->memMax) ||                         \
          ((mesh)->memCur < 0 )) {                                       \
-      fprintf(stdout,"  ## Error:");                                    \
-      fprintf(stdout," unable to allocate %s.\n",string);               \
-      fprintf(stdout,"  ## Check the mesh size or ");                   \
-      fprintf(stdout,"increase maximal authorized memory with the -m option.\n"); \
+      fprintf(stderr,"  ## Error:");                                    \
+      fprintf(stderr," unable to allocate %s.\n",string);               \
+      fprintf(stderr,"  ## Check the mesh size or ");                   \
+      fprintf(stderr,"increase maximal authorized memory with the -m option.\n"); \
       (mesh)->memCur -= (long long)(size);                              \
       law;                                                              \
     }                                                                   \
@@ -252,10 +264,10 @@ extern "C" {
          (long long) (wantedGap*initSize*sizeof(type)) ) {              \
       gap = (int)((mesh->memMax-mesh->memCur)/sizeof(type));            \
       if(gap<1) {                                                       \
-        fprintf(stdout,"  ## Error:");                                  \
-        fprintf(stdout," unable to allocate %s.\n",message);            \
-        fprintf(stdout,"  ## Check the mesh size or ");                 \
-        fprintf(stdout,"increase maximal authorized memory with the -m option.\n"); \
+        fprintf(stderr,"  ## Error:");                                  \
+        fprintf(stderr," unable to allocate %s.\n",message);            \
+        fprintf(stderr,"  ## Check the mesh size or ");                 \
+        fprintf(stderr,"increase maximal authorized memory with the -m option.\n"); \
         law;                                                            \
       }                                                                 \
     }                                                                   \
@@ -361,7 +373,7 @@ void _MMG5_excfun(int sigid) {
 
 
 /* Global variables */
-static const unsigned char _MMG5_inxt2[3] = {1,2,0}; /*!< next vertex of triangle: {1,2,0} */
+  static const unsigned char _MMG5_inxt2[6] = {1,2,0,1,2}; /*!< next vertex of triangle: {1,2,0} */
 static const unsigned char _MMG5_iprv2[3] = {2,0,1}; /*!< previous vertex of triangle: {2,0,1} */
 
 /* Private structures */
@@ -385,7 +397,8 @@ typedef _MMG5_Bezier * _MMG5_pBezier;
  */
 typedef struct {
   int   a,b,nxt;
-  int   s,k; /*!< k = point along edge a b or triangle index */
+  int   k; /*!< k = point along edge a b or triangle index */
+  int   s;
 } _MMG5_hedge;
 
 /**
@@ -399,7 +412,34 @@ typedef struct {
 } _MMG5_Hash;
 
 
+/**
+ * \struct _MMG5_iNode
+ * \brief Cell for linked list of integer value.
+ */
+typedef struct _MMG5_iNode_s {
+  int val;
+  struct _MMG5_iNode_s *nxt;
+} _MMG5_iNode;
+
+/**
+ * \struct _MMG5_dNode
+ * \brief Cell for linked list of double value.
+ */
+typedef struct _MMG5_dNode_s {
+  int    k;
+  double val;
+  struct _MMG5_dNode_s *nxt;
+} _MMG5_dNode;
+
+
 /* Functions declarations */
+extern double _MMG5_det3pt1vec(double c0[3],double c1[3],double c2[3],double v[3]);
+extern double _MMG5_det4pt(double c0[3],double c1[3],double c2[3],double c3[3]);
+extern double _MMG5_orvol(MMG5_pPoint point,int *v);
+extern int _MMG5_Add_inode( MMG5_pMesh mesh, _MMG5_iNode **liLi, int val );
+extern int _MMG5_Alloc_inode( MMG5_pMesh mesh, _MMG5_iNode **node );
+extern int _MMG5_Add_dnode( MMG5_pMesh mesh, _MMG5_dNode **liLi, int, double);
+extern int _MMG5_Alloc_dnode( MMG5_pMesh mesh, _MMG5_dNode **node );
 extern void   _MMG5_bezierEdge(MMG5_pMesh, int, int, double*, double*, char,double*);
 int    _MMG5_buildridmet(MMG5_pMesh,MMG5_pSol,int,double,double,double,double*);
 extern int    _MMG5_buildridmetfic(MMG5_pMesh,double*,double*,double,double,double,double*);
@@ -420,6 +460,8 @@ int    _MMG5_elementWeight(MMG5_pMesh,MMG5_pSol,MMG5_pTria,MMG5_pPoint,
                            _MMG5_Bezier*,double r[3][3],double gv[2]);
 void   _MMG5_fillDefmetregSys( int, MMG5_pPoint, int, _MMG5_Bezier,double r[3][3],
                                double *, double *, double *, double *);
+extern void _MMG5_Free_ilinkedList( MMG5_pMesh mesh, _MMG5_iNode *liLi );
+extern void _MMG5_Free_dlinkedList( MMG5_pMesh mesh, _MMG5_dNode *liLi );
 int    _MMG5_grad2metSurf(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int i);
 int    _MMG5_hashEdge(MMG5_pMesh mesh,_MMG5_Hash *hash,int a,int b,int k);
 int    _MMG5_hashGet(_MMG5_Hash *hash,int a,int b);
@@ -428,15 +470,12 @@ int    _MMG5_intmetsavedir(MMG5_pMesh mesh, double *m,double *n,double *mr);
 int    _MMG5_intridmet(MMG5_pMesh,MMG5_pSol,int,int,double,double*,double*);
 int    _MMG5_mmgIntmet33_ani(double*,double*,double*,double);
 int    _MMG5_mmgIntextmet(MMG5_pMesh,MMG5_pSol,int,double *,double *);
-double _MMG5_lenSurfEdg_ani(MMG5_pMesh mesh,MMG5_pSol met,int ip1,int ip2,char);
-double _MMG5_lenSurfEdg33_ani(MMG5_pMesh,MMG5_pSol,int,int,char);
-extern double _MMG5_lenSurfEdg_iso(MMG5_pMesh ,MMG5_pSol ,int ,int, char );
 long long _MMG5_memSize(void);
 void   _MMG5_mmgDefaultValues(MMG5_pMesh mesh);
 int    _MMG5_mmgHashTria(MMG5_pMesh mesh, int *adja, _MMG5_Hash*, int chkISO);
 void   _MMG5_mmgInit_parameters(MMG5_pMesh mesh);
 void   _MMG5_mmgUsage(char *prog);
-int    _MMG5_nonUnitNorPts(MMG5_pMesh,int,int,int,double*);
+extern int    _MMG5_nonUnitNorPts(MMG5_pMesh,int,int,int,double*);
 extern double _MMG5_nonorsurf(MMG5_pMesh mesh,MMG5_pTria pt);
 extern int    _MMG5_norpts(MMG5_pMesh,int,int,int,double *);
 extern int    _MMG5_nortri(MMG5_pMesh mesh,MMG5_pTria pt,double *n);
@@ -444,7 +483,7 @@ void   _MMG5_printTria(MMG5_pMesh mesh,char* fileName);
 extern int    _MMG5_rotmatrix(double n[3],double r[3][3]);
 int    _MMG5_invmat(double *m,double *mi);
 int    _MMG5_invmatg(double m[9],double mi[9]);
-double _MMG5_ridSizeInNormalDir(MMG5_pMesh,int,double*,_MMG5_pBezier,int,int);
+double _MMG5_ridSizeInNormalDir(MMG5_pMesh,int,double*,_MMG5_pBezier,double,double);
 double _MMG5_ridSizeInTangentDir(MMG5_pMesh, MMG5_pPoint,int,int*,double,double);
 extern long _MMG5_safeLL2LCast(long long val);
 int    _MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met);
@@ -462,6 +501,19 @@ int    _MMG5_unscaleMesh(MMG5_pMesh mesh,MMG5_pSol met);
 int    _MMG5_interpreg_ani(MMG5_pMesh,MMG5_pSol,MMG5_pTria,char,double,double *mr);
 int    _MMG5_interp_iso(double *ma,double *mb,double *mp,double t);
 int    _MMG5_intersecmet22(MMG5_pMesh mesh, double *m,double *n,double *mr);
+extern int _MMG5_countLocalParamAtTri( MMG5_pMesh,_MMG5_iNode **);
+extern int _MMG5_writeLocalParamAtTri( MMG5_pMesh,_MMG5_iNode *,FILE*);
+double MMG2_quickarea(double a[2],double b[2],double c[2]);
+
+int MMG5_loadMshMesh_part1(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename,
+                           FILE **inm,long *posNodes, long *posElts,
+                           long *posNodeData, int *bin, int *iswp,
+                           int *nelts);
+
+int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol sol,FILE **inm,
+                           const long posNodes,const long posElts,
+                           const long posNodeData,const int bin,const int iswp,
+                           const int nelts);
 
 /* function pointers */
 int    (*_MMG5_chkmsh)(MMG5_pMesh,int,int);

@@ -32,7 +32,7 @@
  * \todo doxygen documentation.
  */
 
-#include "mmg3d.h"
+#include "inlined_functions_3d.h"
 
 #ifndef PATTERN
 
@@ -150,7 +150,7 @@ int _MMG5_delone(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist) {
 
   //obsolete avec la realloc
   // if ( mesh->ne + 2*ilist > mesh->nemax )  {printf("on passe ici boum\n");return(0);}
-  base = mesh->mark;
+  base = mesh->base;
   /* external faces */
   size = 0;
   for (k=0; k<ilist; k++) {
@@ -164,7 +164,7 @@ int _MMG5_delone(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist) {
     vois[3]  = adja[3] >> 2;
     for (i=0; i<4; i++) {
       jel = vois[i];
-      if ( !jel || mesh->tetra[jel].mark != base ) {
+      if ( !jel || mesh->tetra[jel].flag != base ) {
         for (j=0; j<3; j++) {
           i1  = _MMG5_idir[i][j];
           ppt = &mesh->point[ pt1->v[i1] ];
@@ -197,7 +197,7 @@ int _MMG5_delone(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist) {
   /* hash table params */
   if ( size > 3*LONMAX )  return(0);
   if ( !_MMG5_hashNew(mesh,&hedg,size,3*size) ) { /*3*size suffit */
-    fprintf(stdout,"  ## Unable to complete mesh.\n");
+    fprintf(stderr,"  ## Unable to complete mesh.\n");
     return(-1);
   }
 
@@ -208,7 +208,8 @@ int _MMG5_delone(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist) {
 
     if ( !ielnum[k] ) {
       _MMG5_TETRA_REALLOC(mesh,ielnum[k],mesh->gap,
-                          printf("  ## Warning: unable to allocate a new element but the mesh will be valid.\n");
+                          fprintf(stderr,"  ## Error: unable to allocate a new"
+                                  " element but the mesh will be valid.\n");
                           for(ll=1 ; ll<k ; ll++) {
                             mesh->tetra[ielnum[ll]].v[0] = 1;
                             _MMG3D_delElt(mesh,ielnum[ll]);
@@ -244,7 +245,7 @@ int _MMG5_delone(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist) {
       j   = vois[i] % 4;
 
       /* external face */
-      if ( !jel || (mesh->tetra[jel].mark != base) ) {
+      if ( !jel || (mesh->tetra[jel].flag != base) ) {
         iel = ielnum[size++];
         assert(iel);
 
@@ -253,24 +254,13 @@ int _MMG5_delone(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist) {
         pt1->v[i] = ip;
         pt1->qual = _MMG5_orcal(mesh,sol,iel);
         pt1->ref = mesh->tetra[old].ref;
-
-        if ( pt1->qual < 1e-10 ) {
-          fprintf(stdout,"  ## Warning: creation of a very bad element.\n");
-        }
-
+        pt1->mark = mesh->mark;
         iadr = (iel-1)*4 + 1;
         adjb = &mesh->adja[iadr];
         adjb[i] = adja[i];
 
         if(ixt) {
           if( xt.ref[i] || xt.ftag[i]) {
-            // if(!adja[i] || (mesh->tetra[jel].ref != pt1->ref)) {
-            /*  if((old==20329) || (iel==20329)) { */
-            /*  printf("eh eh on en a un!!!"); */
-            /*  printf("adj of %d : %d %d %d %d\n",old,adja[0],adja[1],adja[2],adja[3]); */
-            /*  printf("adj of %d : %d %d %d %d\n",iel,adjb[0],adjb[1],adjb[2],adjb[3]); */
-            /* printf("on traite %d\n",i); */
-            /*  } */
             if(!isused) {
               pt1->xt = pt->xt;
               pt->xt = 0;
@@ -291,7 +281,7 @@ int _MMG5_delone(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist) {
                 _MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
                                    "larger xtetra table",
                                    mesh->xt--;
-                                   printf("  Exit program.\n");
+                                   fprintf(stderr,"  Exit program.\n");
                                    exit(EXIT_FAILURE));
               }
               pt1->xt = mesh->xt;
@@ -336,8 +326,7 @@ int _MMG5_delone(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist) {
   /* remove old tetra */
   tref = mesh->tetra[list[0]].ref;
   for (k=0; k<ilist; k++) {
-    if(tref!=mesh->tetra[list[k]].ref)
-      printf("arg ref ???? %d %d\n",tref,mesh->tetra[list[k]].ref);
+    assert(tref==mesh->tetra[list[k]].ref);
     _MMG3D_delElt(mesh,list[k]);
   }
 
@@ -358,7 +347,7 @@ static int _MMG5_correction_ani(MMG5_pMesh mesh,MMG5_pSol met,int ip,int* list,i
 
   ppt  = &mesh->point[ip];
   if ( ppt->tag & MG_NUL )  return(ilist);
-  base = mesh->mark;
+  base = mesh->base;
   lon  = ilist;
   eps  = _MMG5_EPSCON;
   eps2 = eps*eps;
@@ -385,7 +374,7 @@ static int _MMG5_correction_ani(MMG5_pMesh mesh,MMG5_pSol met,int ip,int* list,i
       for (i=0; i<4; i++) {
         adj = vois[i];
         // MMG_cas = 0;// uncomment to debug
-        if ( adj && mesh->tetra[adj].mark == base)  continue;
+        if ( adj && mesh->tetra[adj].flag == base)  continue;
 
         ib = pt->v[ _MMG5_idir[i][0] ];
         ic = pt->v[ _MMG5_idir[i][1] ];
@@ -482,7 +471,7 @@ static int _MMG5_correction_ani(MMG5_pMesh mesh,MMG5_pSol met,int ip,int* list,i
       if ( i < 4 || pt->tag & MG_REQ ) {
         if ( ipil <= nedep )   {/*printf("on veut tout retirer ? %d %d\n",ipil,nedep);*/return(0);   }
         /* remove iel from list */
-        pt->mark = base-1;
+        pt->flag = base-1;
         list[ipil] = list[--lon];
         ncor = 1;
         break;
@@ -508,7 +497,7 @@ _MMG5_correction_iso(MMG5_pMesh mesh,int ip,int *list,int ilist,int nedep) {
 
   ppt  = &mesh->point[ip];
   if ( ppt->tag & MG_NUL )  return(ilist);
-  base = mesh->mark;
+  base = mesh->base;
   lon  = ilist;
   eps  = _MMG5_EPSCON;
   eps2 = eps*eps;
@@ -529,7 +518,7 @@ _MMG5_correction_iso(MMG5_pMesh mesh,int ip,int *list,int ilist,int nedep) {
       for (i=0; i<4; i++) {
         adj = vois[i];
         // MMG_cas = 0; // uncomment to debug
-        if ( adj && mesh->tetra[adj].mark == base )  continue;
+        if ( adj && mesh->tetra[adj].flag == base )  continue;
 
         ib = pt->v[ _MMG5_idir[i][0] ];
         ic = pt->v[ _MMG5_idir[i][1] ];
@@ -567,7 +556,7 @@ _MMG5_correction_iso(MMG5_pMesh mesh,int ip,int *list,int ilist,int nedep) {
       if ( i < 4 ||  pt->tag & MG_REQ ) {
         if ( ipil <= nedep )  {/*printf("on veut tout retirer ? %d %d\n",ipil,nedep);*/return(0);   }
         /* remove iel from list */
-        pt->mark = base-1;
+        pt->flag = base-1;
         list[ipil] = list[--lon];
 
         ncor = 1;
@@ -608,13 +597,13 @@ int _MMG5_cavity_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel,int ip,int* list,int 
   if ( lon < 1 )  return(0);
   ppt = &mesh->point[ip];
   if ( ppt->tag & MG_NUL )  return(0);
-  base  = ++mesh->mark;
+  base  = ++mesh->base;
 
   isreq = 0;
 
   tref = mesh->tetra[list[0]/6].ref;
   for (k=0; k<lon; k++) {
-    mesh->tetra[list[k]/6].mark = base;
+    mesh->tetra[list[k]/6].flag = base;
 
     if (tref!=mesh->tetra[list[k]/6].ref) {
       //printf("pbs coquil %d %d tet %d\n",tref,mesh->tetra[list[k]/6].ref,list[k]/6);
@@ -623,7 +612,7 @@ int _MMG5_cavity_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel,int ip,int* list,int 
   }
   for (k=0; k<lon; k++)
     list[k] = list[k] / 6;
-  
+
   /* grow cavity by adjacency */
   eps   = _MMG5_EPSRAD * _MMG5_EPSRAD;
   ilist = lon;
@@ -642,12 +631,15 @@ int _MMG5_cavity_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel,int ip,int* list,int 
     ptc  = &mesh->tetra[jel];
 
     for (i=0; i<4; i++) {
-      adj = vois[i] >> 2;
-      voy = vois[i] % 4;
+      adj = vois[i];
+
       if ( !adj )  continue;
+
+      adj >>= 2;
+      voy = vois[i] % 4;
       pt  = &mesh->tetra[adj];
       /* boundary face */
-      if ( pt->mark == base || pt->ref != ptc->ref )  continue;
+      if ( pt->flag == base || pt->ref != ptc->ref )  continue;
       for (j=0,l=0; j<4; j++,l+=3) {
         memcpy(&ct[l],mesh->point[pt->v[j]].c,3*sizeof(double));
       }
@@ -687,19 +679,22 @@ int _MMG5_cavity_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel,int ip,int* list,int 
 
       for (j=0; j<4; j++) {
         if ( j == voy )  continue;
-        adi = adjb[j] >> 2;
-        assert(adi !=jel);
+        adi = adjb[j];
+
         if ( !adi )  continue;
+
+        adi >>= 2;
+        assert(adi !=jel);
+
         pt1 = &mesh->tetra[adi];
-//#warning demander a cecile quand ca arrive??
-        if ( pt1->mark == base ) {
+        if ( pt1->flag == base ) {
           if ( pt1->ref != tref )  break;
         }
       }
       /* store tetra */
       if ( j == 4 ) {
         if ( pt->tag & MG_REQ ) isreq = 1;
-        pt->mark = base;
+        pt->flag = base;
         list[ilist++] = adj;
       }
     }
@@ -749,13 +744,13 @@ int _MMG5_cavity_iso(MMG5_pMesh mesh,MMG5_pSol sol,int iel,int ip,int *list,int 
   if ( lon < 1 )  return(0);
   ppt = &mesh->point[ip];
   if ( ppt->tag & MG_NUL )  return(0);
-  base  = ++mesh->mark;
+  base  = ++mesh->base;
 
   isreq = 0;
 
   tref = mesh->tetra[list[0]/6].ref;
   for (k=0; k<lon; k++) {
-    mesh->tetra[list[k]/6].mark = base;
+    mesh->tetra[list[k]/6].flag = base;
 
     if (tref!=mesh->tetra[list[k]/6].ref) {
       //printf("pbs coquil %d %d tet %d\n",tref,mesh->tetra[list[k]/6].ref,list[k]/6);
@@ -781,12 +776,14 @@ int _MMG5_cavity_iso(MMG5_pMesh mesh,MMG5_pSol sol,int iel,int ip,int *list,int 
     ptc  = &mesh->tetra[jel];
 
     for (i=0; i<4; i++) {
-      adj = vois[i] >> 2;
-      voy = vois[i] % 4;
+      adj = vois[i];
       if ( !adj )  continue;
+
+      adj >>= 2;
+      voy = vois[i] % 4;
       pt  = &mesh->tetra[adj];
       /* boundary face */
-      if ( pt->mark == base || pt->ref != ptc->ref )  continue;
+      if ( pt->flag == base || pt->ref != ptc->ref )  continue;
 
       for (j=0,l=0; j<4; j++,l+=3) {
         memcpy(&ct[l],mesh->point[pt->v[j]].c,3*sizeof(double));
@@ -807,18 +804,21 @@ int _MMG5_cavity_iso(MMG5_pMesh mesh,MMG5_pSol sol,int iel,int ip,int *list,int 
 
       for (j=0; j<4; j++) {
         if ( j == voy )  continue;
-        adi = adjb[j] >> 2;
-        assert(adi !=jel);
+        adi = adjb[j];
         if ( !adi )  continue;
+
+        adi >>= 2;
+        assert(adi !=jel);
+
         pt1 = &mesh->tetra[adi];
-        if ( pt1->mark == base ) {
+        if ( pt1->flag == base ) {
           if ( pt1->ref != tref )  break;
         }
       }
       /* store tetra */
       if ( j == 4 ) {
         if ( pt->tag & MG_REQ ) isreq = 1;
-        pt->mark = base;
+        pt->flag = base;
         list[ilist++] = adj;
       }
     }

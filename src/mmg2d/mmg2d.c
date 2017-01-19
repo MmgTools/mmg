@@ -27,7 +27,6 @@ mytime   MMG5_ctim[TIMEMAX];
 static void usage(char *name) {
   _MMG5_mmgUsage(name);
 
-  //fprintf(stdout,"-ls     val     create mesh of isovalue 0\n");
   fprintf(stdout,"-lag [0/1/2]    Lagrangian mesh displacement according to mode 0/1/2\n");
   fprintf(stdout,"-mov filedep    (with -lag option)\n");
   fprintf(stdout,"-nsd val        only if no given triangle, save the subdomain nb (0==all subdomain)\n");
@@ -68,7 +67,7 @@ static inline void _MMG5_defaultValues(MMG5_pMesh mesh, double qdegrad[2]) {
   fprintf(stdout,"Optimization threshold "
           "   (-degrad) : %e %e\n",qdegrad[0],qdegrad[1]);
   fprintf(stdout,"Bucket size per dimension (-bucket) : %d\n",
-          mesh->info.bucket);
+          mesh->info.octree);
   fprintf(stdout,"\n\n");
 
   exit(EXIT_FAILURE);
@@ -377,7 +376,7 @@ int main(int argc,char *argv[]) {
   MMG5_pMesh    mesh;
   MMG5_pSol     sol;
   double        qdegrad[2];
-  int           ier;
+  int           ier,ierSave,msh;
   char          stim[32];
 
   /* interrupts */
@@ -410,25 +409,39 @@ int main(int argc,char *argv[]) {
   /* load data */
   fprintf(stdout,"\n  -- INPUT DATA\n");
   chrono(ON,&MMG5_ctim[1]);
-  if ( MMG2D_loadMesh(mesh,mesh->namein) < 1)
+
+  /* read mesh file */
+  msh = 0;
+  ier = MMG2D_loadMesh(mesh,mesh->namein);
+  if ( !ier ) {
+    ier = MMG2D_loadMshMesh(mesh,sol,mesh->namein);
+    msh = 1;
+  }
+
+  if ( ier < 1)
+
     _MMG2D_RETURN_AND_FREE(mesh,sol,MMG5_STRONGFAILURE);
   /* Set default metric size */
-  if ( !MMG2D_Set_solSize(mesh,sol,MMG5_Vertex,0,MMG5_Scalar) )
+  if ( !msh && !MMG2D_Set_solSize(mesh,sol,MMG5_Vertex,0,MMG5_Scalar) )
     _MMG2D_RETURN_AND_FREE(mesh,sol,MMG5_STRONGFAILURE);
 
   /* read displacement if any */
   if ( mesh->info.lag >= 0 ) {
-    ier = MMG2D_loadSol(mesh,sol,sol->namein);
-    if ( ier < 1 ) {
-      fprintf(stdout,"  ## ERROR: UNABLE TO LOAD DISPLACEMENT.\n");
-      _MMG2D_RETURN_AND_FREE(mesh,sol,MMG5_STRONGFAILURE);
-    } else if ( sol->size != 2 ) {
+
+    if ( !msh ) {
+      ier = MMG2D_loadSol(mesh,sol,sol->namein);
+      if ( ier < 1 ) {
+        fprintf(stdout,"  ## ERROR: UNABLE TO LOAD DISPLACEMENT.\n");
+        _MMG2D_RETURN_AND_FREE(mesh,sol,MMG5_STRONGFAILURE);
+      }
+    }
+    if ( sol->size != 2 ) {
       fprintf(stdout,"  ## ERROR: WRONG DATA TYPE.\n");
       _MMG2D_RETURN_AND_FREE(mesh,sol,MMG5_STRONGFAILURE);
     }
   }
   /* read metric if any */
-  else {
+  else if ( !msh ) {
     ier = MMG2D_loadSol(mesh,sol,sol->namein);
     if ( ier == -1 ) {
       if ( (sol->size != MMG5_Scalar) && (sol->size != MMG5_Tensor) ) {
@@ -459,8 +472,22 @@ int main(int argc,char *argv[]) {
     ier = MMG2D_mmg2dlib(mesh,sol);
   }
 
-  MMG2D_saveMesh(mesh,mesh->nameout);
-  if( sol->np )
+  if ( !strcmp(&mesh->nameout[strlen(mesh->nameout)-5],".mesh") ||
+       !strcmp(&mesh->nameout[strlen(mesh->nameout)-6],".meshb") )
+    msh = 0;
+  else if (!strcmp(&mesh->nameout[strlen(mesh->nameout)-4],".msh") ||
+           !strcmp(&mesh->nameout[strlen(mesh->nameout)-5],".mshb") )
+    msh = 1;
+
+  if ( !msh )
+    ierSave = MMG2D_saveMesh(mesh,mesh->nameout);
+  else
+    ierSave = MMG2D_saveMshMesh(mesh,sol,mesh->nameout);
+
+  if ( !ierSave )
+    _MMG2D_RETURN_AND_FREE(mesh,sol,MMG5_STRONGFAILURE);
+
+  if( !msh &&  sol->np )
     MMG2D_saveSol(mesh,sol,mesh->nameout);
 
   chrono(OFF,&MMG5_ctim[1]);
@@ -470,5 +497,6 @@ int main(int argc,char *argv[]) {
   chrono(OFF,&MMG5_ctim[0]);
   printim(MMG5_ctim[0].gdif,stim);
   fprintf(stdout,"\n   MMG2D: ELAPSED TIME  %s\n",stim);
+
   _MMG2D_RETURN_AND_FREE(mesh,sol,ier);
 }

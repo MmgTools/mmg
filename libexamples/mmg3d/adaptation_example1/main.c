@@ -76,8 +76,9 @@ int main(int argc,char *argv[]) {
       file formatted or manually set your mesh using the MMG3D_Set* functions */
 
   /** Manually set of the mesh */
-  /** a) give the size of the mesh: 12 vertices, 12 tetra, 20 triangles, 0 edges */
-  if ( MMG3D_Set_meshSize(mmgMesh,12,12,20,0) != 1 )  exit(EXIT_FAILURE);
+  /** a) give the size of the mesh: 12 vertices, 12 tetra,0 prisms, 20
+   * triangles, 0 quads, 0 edges */
+  if ( MMG3D_Set_meshSize(mmgMesh,12,12,0,20,0,0) != 1 )  exit(EXIT_FAILURE);
 
   /** b) give the vertices: for each vertex, give the coordinates, the reference
       and the position in mesh of the vertex */
@@ -137,7 +138,7 @@ int main(int argc,char *argv[]) {
   if ( MMG3D_Chk_meshData(mmgMesh,mmgSol) != 1 ) exit(EXIT_FAILURE);
 
   /** ------------------------------ STEP  II -------------------------- */
-  /** library call */
+  /** remesh function */
   // WARNING: the MMG3D_mmg3dlib function returns 1 if success, 0 if fail.
   // The MMG3D4 library was working opposite.
   ier = MMG3D_mmg3dlib(mmgMesh,mmgSol);
@@ -156,18 +157,9 @@ int main(int argc,char *argv[]) {
       using the MMG3D_getMesh/MMG3D_getSol functions */
 
   /** 1) Automatically save the mesh */
-  /** a)  (not mandatory): give the ouptut mesh name using MMG3D_Set_outputMeshName
-      (by default, the mesh is saved in the "mesh.o.mesh" file */
-  if ( MMG3D_Set_outputMeshName(mmgMesh,"result0.mesh") != 1 ) exit(EXIT_FAILURE);
-  /** b) function calling */
   if ( MMG3D_saveMesh(mmgMesh,"result0.mesh") != 1 ) exit(EXIT_FAILURE);
 
   /** 2) Automatically save the solution */
-  /** a)  (not mandatory): give the ouptut sol name using MMG3D_Set_outputSolName
-      (by default, the mesh is saved in the "mesh.o.sol" file */
-  if ( MMG3D_Set_outputSolName(mmgMesh,mmgSol,"result0.sol") != 1 )
-    exit(EXIT_FAILURE);
-  /** b) function calling */
   if ( MMG3D_saveSol(mmgMesh,mmgSol,"result0.sol") !=1 ) exit(EXIT_FAILURE);
 
   /** 3) Free the MMG3D5 structures */
