@@ -3,7 +3,7 @@ mmg is an open source software for bidimensional and tridimensional surface and 
 
 It provides 3 applications and 4 libraries:
   * the **mmg2d** application and library: adaptation and optimization of a bidimensionnal triangulation;
-  * the **mmgs** application and library: adaptation and optimization of a surface triangulation representing a piecewise linear approximation of an underlying surface geometry;
+  * the **mmgs** application and library: adaptation and optimization of a surface triangulation and isovalue discretization;
   * the **mmg3d** application and library: adaptation and optimization of a tetrahedral mesh and implicit domain meshing;
   * the **mmg** library gathering the **mmg2d**, **mmgs** and **mmg3d** libraries.
 
