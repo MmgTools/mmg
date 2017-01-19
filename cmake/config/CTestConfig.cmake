@@ -20,7 +20,7 @@
 ##  use this copy of the mmg distribution only if you accept them.
 ## =============================================================================
 
-SET(CTEST_PROJECT_NAME "forkJean")
+SET(CTEST_PROJECT_NAME "Mmg3d5")
 SET(UPDATE_COMMAND "${GITCOMMAND}")
 
 SET(CTEST_CONTINUOUS_DURATION 600) # duration of Continuous dashboard
