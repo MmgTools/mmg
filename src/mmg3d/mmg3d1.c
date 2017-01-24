@@ -761,19 +761,23 @@ static int _MMG5_coltet(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
         else if ( (p0->tag & MG_REQ) || (p0->tag > p1->tag) )  continue;
 
 
-       /* boundary face: collapse ip on iq */
-        if ( pt->xt && (pxt->ftag[i] & MG_BDY) ) {
-          tag = pxt->tag[_MMG5_iarf[i][j]];
-          isnm = (tag & MG_NOM);
+        /* Ball of point: computed here if needed for the local parameter
+         * evaluation, after length check otherwise (because the ball
+         * computation is time consuming) */
+        if ( mesh->info.npar ) {
+          if ( pt->xt && (pxt->ftag[i] & MG_BDY) ) {
+            tag = pxt->tag[_MMG5_iarf[i][j]];
+            isnm = (tag & MG_NOM);
 
-          if ( p0->tag > tag ) continue;
-          if ( isnm && mesh->adja[4*(k-1)+1+i] )  continue;
-          if (_MMG5_boulesurfvolp(mesh,k,ip,i,
-                                  list,&ilist,lists,&ilists,p0->tag & MG_NOM) < 0 )
-            return(-1);
-        }
-        else {
-          ilist = _MMG5_boulevolp(mesh,k,ip,list);
+            if ( p0->tag > tag ) continue;
+            if ( isnm && mesh->adja[4*(k-1)+1+i] )  continue;
+            if (_MMG5_boulesurfvolp(mesh,k,ip,i,
+                                    list,&ilist,lists,&ilists,p0->tag & MG_NOM) < 0 )
+              return(-1);
+          }
+          else {
+            ilist = _MMG5_boulevolp(mesh,k,ip,list);
+          }
         }
 
         /* check length */
@@ -872,6 +876,24 @@ static int _MMG5_coltet(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
           // Case of an internal tetra with 4 ridges vertices.
           if ( ll == 0 ) continue;
           if ( ll > _MMG5_LSHRT )  continue;
+        }
+
+
+        /* Ball computation if not computed before */
+        if ( !mesh->info.npar ) {
+          if ( pt->xt && (pxt->ftag[i] & MG_BDY) ) {
+            tag = pxt->tag[_MMG5_iarf[i][j]];
+            isnm = (tag & MG_NOM);
+
+            if ( p0->tag > tag ) continue;
+            if ( isnm && mesh->adja[4*(k-1)+1+i] )  continue;
+            if (_MMG5_boulesurfvolp(mesh,k,ip,i,
+                                    list,&ilist,lists,&ilists,p0->tag & MG_NOM) < 0 )
+              return(-1);
+          }
+          else {
+            ilist = _MMG5_boulevolp(mesh,k,ip,list);
+          }
         }
 
         /* boundary face: collapse ip on iq */

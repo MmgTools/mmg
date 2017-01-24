@@ -554,7 +554,7 @@ int _MMG3D_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
           }
         }
 
-        /* Local param ar tetrahedra */
+        /* Local param at tetrahedra */
         if ( mesh->info.parTyp & MG_Tetra ) {
           ilistv = _MMG5_boulevolp(mesh,k,i,listv);
           l = 0;
@@ -751,10 +751,10 @@ int _MMG3D_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
           hp  = _MMG5_defsizreg(mesh,met,ip0,lists,ilists,hmin,hmax,hausd);
         }
         else {
-          /* Define size at regular surface point for the -nosurf option :
-           * If a metric is provided, we preserve it. Without initial metric, the
-           * size is computed as the mean of the length of edges passing through
-           * the point */
+          /* Define size at regular surface point for the -nosurf option (ie a
+           * manifold point): If a metric is provided, we preserve it. Without
+           * initial metric, the size is computed as the mean of the length of
+           * edges passing through the point */
             hp = _MMG5_meansizreg_iso(mesh,met,ip0,lists,ilists,hmin,hmax);
         }
 
@@ -862,14 +862,18 @@ int _MMG3D_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
             met->m[ip1] = MG_MAX(hmin,MG_MIN(met->m[ip1],lm));
         }
         else {
-          /* Very rough eval of the metric at edge/ridge point */
-          lm = (p0->c[0]-p1->c[0])*(p0->c[0]-p1->c[0]);
-          lm = (p0->c[1]-p1->c[1])*(p0->c[1]-p1->c[1]);
-          lm = (p0->c[2]-p1->c[2])*(p0->c[2]-p1->c[2]);
-          lm = sqrt(lm);
+          if ( !p0->flag ) {
+            /* -nosurf option: very rough eval of the metric over non-manifold
+             * points: take the non-manifold edge length */
+            lm  = (p0->c[0]-p1->c[0])*(p0->c[0]-p1->c[0]);
+            lm += (p0->c[1]-p1->c[1])*(p0->c[1]-p1->c[1]);
+            lm += (p0->c[2]-p1->c[2])*(p0->c[2]-p1->c[2]);
 
-          lm = MG_MIN(hmax,MG_MAX(hmin,lm));
-          met->m[ip0] = MG_MIN(met->m[ip0],lm);
+            lm = sqrt(lm);
+
+            lm = MG_MIN(hmax,MG_MAX(hmin,lm));
+            met->m[ip0] = MG_MIN(met->m[ip0],lm);
+          }
         }
       }
     }

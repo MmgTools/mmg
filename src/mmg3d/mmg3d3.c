@@ -33,7 +33,7 @@
  * \todo Doxygen documentation
  */
 
-#ifdef USE_SUSCELAS
+#ifdef USE_ELAS
 
 #include "mmg3d.h"
 #include "ls_calls.h"

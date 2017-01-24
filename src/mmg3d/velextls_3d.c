@@ -32,7 +32,7 @@
  * \copyright GNU Lesser General Public License.
  * \todo Doxygen documentation
  */
-#ifdef USE_SUSCELAS
+#ifdef USE_ELAS
 
 #include "mmg3d.h"
 #include "ls_calls.h"
@@ -163,9 +163,9 @@ int* _MMG5_packLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,int *npfin) {
 
   /* Set verbosity and debug info */
   if ( !mesh->info.imprim )
-    LS_setPar(lsst,0,0,0);
+    LS_setPar(lsst,0,0);
   else
-    LS_setPar(lsst,1,0,0);
+    LS_setPar(lsst,1,0);
   
   /* Step 5: fill the LS mesh */
   /* Add vertices */
@@ -255,8 +255,8 @@ int* _MMG5_packLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,int *npfin) {
   }
   
   /* Transfer displacement */
-  if ( !LS_CreaSol(lsst) ) {
-    fprintf(stderr,"  ## Problem in fn LS_CreaSol. Exiting.\n");
+  if ( !LS_newSol(lsst) ) {
+    fprintf(stderr,"  ## Problem in fn LS_newSol. Exiting.\n");
     return(0);
   }
   

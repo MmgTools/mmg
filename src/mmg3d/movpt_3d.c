@@ -1893,7 +1893,8 @@ int _MMG3D_movv_ani(MMG5_pMesh mesh,MMG5_pSol sol,int k,int ib) {
       pt1 = &mesh->tetra[iel];
 
       qual = _MMG5_caltet(mesh,sol,pt1);
-      if ( !((qual > pt1->qual) || (qual > pt->qual /2.)) )  break;
+      /*warning if we increase the coefficient (ex 1.4), the mesh quality becomes poor very quickly*/
+      if ( qual*1.01 <= pt1->qual) break;
       qualtet[l] = qual;
 
     }

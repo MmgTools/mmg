@@ -316,7 +316,7 @@ inline int _MMG5_sys33sym(double a[6], double b[3], double r[3]){
   /* Multiply matrix by a constant coefficient for stability purpose (because of the scaling) */
   m = fabs(a[0]);
   for(i=1;i<6;i++){
-    if(fabs(a[i])<m){
+    if(fabs(a[i])<m && fabs(a[i]) > 0.){
       m = fabs(a[i]);
     }
   }

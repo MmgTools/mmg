@@ -228,7 +228,7 @@ int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol sol)
   printim(ctim[3].gdif,stim);
   if ( mesh->info.imprim ) {
     fprintf(stdout,"  -- PHASE 2 COMPLETED.     %s\n",stim);
-    fprintf(stdout,"\n  %s\n   END OF MODULE MMGS: IMB-LJLL \n  %s\n",MG_STR,MG_STR);
+    fprintf(stdout,"\n  %s\n   END OF MODULE MMG2D: IMB-LJLL \n  %s\n",MG_STR,MG_STR);
   }
 
   /* Unscale mesh */

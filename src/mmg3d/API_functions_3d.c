@@ -1663,14 +1663,14 @@ int MMG3D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam,int val){
         exit(EXIT_FAILURE);
     break;
   case MMG3D_IPARAM_lag :
-#ifdef USE_SUSCELAS
+#ifdef USE_ELAS
     if ( val < 0 || val > 2 )
       exit(EXIT_FAILURE);
     mesh->info.lag = val;
 #else
     fprintf(stderr,"  ## Error:"
             " \"lagrangian motion\" option unavailable (-lag):\n"
-            " set the USE_SUSCELAS CMake's flag to ON when compiling the mmg3d"
+            " set the USE_ELAS CMake's flag to ON when compiling the mmg3d"
             " library to enable this feature.\n");
     return(0);
 #endif

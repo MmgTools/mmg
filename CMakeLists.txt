@@ -31,9 +31,9 @@ PROJECT (mmg)
 #####
 ###############################################################################
 SET (CMAKE_RELEASE_VERSION_MAJOR "5" )
-SET (CMAKE_RELEASE_VERSION_MINOR "1" )
-SET (CMAKE_RELEASE_VERSION_PATCH "4" )
-SET (CMAKE_RELEASE_DATE "Oct 18, 2016" )
+SET (CMAKE_RELEASE_VERSION_MINOR "2" )
+SET (CMAKE_RELEASE_VERSION_PATCH "1" )
+SET (CMAKE_RELEASE_DATE "Jan 22, 2017" )
 
 SET (CMAKE_RELEASE_VERSION
   "${CMAKE_RELEASE_VERSION_MAJOR}.${CMAKE_RELEASE_VERSION_MINOR}.${CMAKE_RELEASE_VERSION_PATCH}")
@@ -238,33 +238,11 @@ ENDIF ( )
 
 ############################################################################
 #####
-##### Set the full RPATH to find libraries independently from
-##### LD_LIBRARY_PATH (for MacOSX)
+##### RPATH for MacOSX
 #####
 ############################################################################
 
-SET(CMAKE_MACOSX_RPATH FALSE)
-
-# use, i.e. don't skip the full RPATH for the build tree
-SET(CMAKE_SKIP_BUILD_RPATH  FALSE)
-
-# when building, don't use the install RPATH already
-# (but later on when installing)
-SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
-
-SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
-
-# add the automatically determined parts of the RPATH
-# which point to directories outside the build tree to the install RPATH
-SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
-
-# the RPATH to be used when installing, but only if it's not a system
-# directory
-LIST(FIND CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES
-  "${CMAKE_INSTALL_PREFIX}/lib" isSystemDir)
-IF("${isSystemDir}" STREQUAL "-1")
-  SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
-ENDIF("${isSystemDir}" STREQUAL "-1")
+SET(CMAKE_MACOSX_RPATH 1)
 
 ###############################################################################
 #####
@@ -342,7 +320,7 @@ CMAKE_DEPENDENT_OPTION ( PATTERN
 #-- Remove the next line to have this option visible in basic cmake mode
 MARK_AS_ADVANCED(PATTERN)
 
-# add Elas library?
+# add Elastic library?
 SET(ELAS_DIR "" CACHE PATH "Installation directory for Elas")
 INCLUDE(cmake/modules/FindElas.cmake)
 CMAKE_DEPENDENT_OPTION (

@@ -114,7 +114,7 @@ void MMG3D_usage(char *prog) {
   _MMG5_mmgUsage(prog);
   fprintf(stdout,"-A           enable anisotropy (without metric file).\n");
 
-#ifdef USE_SUSCELAS
+#ifdef USE_ELAS
   fprintf(stdout,"-lag [0/1/2] Lagrangian mesh displacement according to mode 0/1/2\n");
 #endif
 #ifndef PATTERN

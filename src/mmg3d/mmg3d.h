@@ -173,9 +173,9 @@ int _MMG3D_isCellIncluded(double* cellCenter, double l, double* zoneCenter, doub
 void _MMG3D_placeInListDouble(double*, double, int, int);
 void _MMG3D_placeInListOctree(_MMG3D_octree_s**, _MMG3D_octree_s*, int, int);
 int _MMG3D_seekIndex (double* distList, double dist, int indexMin, int indexMax);
-void _MMG3D_intersectRect(double *rectin, double *rectinout);
-void _MMG3D_getListSquareRec(_MMG3D_octree_s*,double*,double*,
-                             _MMG3D_octree_s***,double*,double*,double, int, int, int*);
+int _MMG3D_intersectRect(double *rectin, double *rectinout);
+int _MMG3D_getListSquareRec(_MMG3D_octree_s*,double*,double*,
+                            _MMG3D_octree_s***,double*,double*,double, int, int, int*);
 int  _MMG3D_getListSquare(MMG5_pMesh,double*,_MMG3D_octree*,double*,_MMG3D_octree_s***);
 int _MMG3D_addOctreeRec(MMG5_pMesh,_MMG3D_octree_s*,double*, const int, int);
 int _MMG3D_addOctree(MMG5_pMesh mesh, _MMG3D_octree* q, const int no);

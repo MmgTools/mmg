@@ -810,8 +810,8 @@ int MMG3D_mmg3dmov(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp) {
     mesh->info.lag = 1;
   }
 
-#ifndef USE_SUSCELAS
-  fprintf(stderr,"  ## Error: you need to compile with the USE_SUSCELAS"
+#ifndef USE_ELAS
+  fprintf(stderr,"  ## Error: you need to compile with the USE_ELAS"
     " CMake's flag set to ON to use the rigidbody movement library.\n");
   _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
 #endif
@@ -885,7 +885,7 @@ int MMG3D_mmg3dmov(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp) {
     _MMG5_RETURN_AND_PACK(mesh,met,disp,MMG5_LOWFAILURE);
   }
 
-#ifdef USE_SUSCELAS
+#ifdef USE_ELAS
   /* Lagrangian mode */
   if ( !_MMG5_mmg3d3(mesh,disp,met) ) {
     disp->npi = disp->np;
