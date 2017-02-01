@@ -112,22 +112,24 @@
 #define   MMG3D_IPARAM_numberOfLocalParam 12
 ! /*!< [1/0] Turn on/off point relocation with Scotch */
 #define   MMG3D_IPARAM_renum              13
+! /*!< [1/0] Turn on/off anisotropic metric creation when no metric is provided */
+#define   MMG3D_IPARAM_anisosize          14
 ! /*!< [n] Specify the max number of points per octree cell (DELAUNAY) */
-#define   MMG3D_IPARAM_octree             14
+#define   MMG3D_IPARAM_octree             15
 ! /*!< [val] Value for angle detection */
-#define   MMG3D_DPARAM_angleDetection     15
+#define   MMG3D_DPARAM_angleDetection     16
 ! /*!< [val] Minimal mesh size */
-#define   MMG3D_DPARAM_hmin               16
+#define   MMG3D_DPARAM_hmin               17
 ! /*!< [val] Maximal mesh size */
-#define   MMG3D_DPARAM_hmax               17
+#define   MMG3D_DPARAM_hmax               18
 ! /*!< [val] Control global Hausdorff distance (on all the boundary surfaces of the mesh) */
-#define   MMG3D_DPARAM_hausd              18
+#define   MMG3D_DPARAM_hausd              19
 ! /*!< [val] Control gradation */
-#define   MMG3D_DPARAM_hgrad              19
+#define   MMG3D_DPARAM_hgrad              20
 ! /*!< [val] Value of level-set */
-#define   MMG3D_DPARAM_ls                 20
+#define   MMG3D_DPARAM_ls                 21
 ! /*!< [n] Number of parameters */
-#define   MMG3D_PARAM_size                21
+#define   MMG3D_PARAM_size                22
 
 ! /*--------------------------- functions header ---------------------------*/
 ! /* Initialization functions */

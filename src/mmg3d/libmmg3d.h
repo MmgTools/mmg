@@ -80,6 +80,7 @@ enum MMG3D_Param {
   MMG3D_IPARAM_nosurf,            /*!< [1/0], Avoid/allow surface modifications */
   MMG3D_IPARAM_numberOfLocalParam,/*!< [n], Number of local parameters */
   MMG3D_IPARAM_renum,             /*!< [1/0], Turn on/off point relocation with Scotch */
+  MMG3D_IPARAM_anisosize,         /*!< [1/0], Turn on/off anisotropic metric creation when no metric is provided */
   MMG3D_IPARAM_octree,            /*!< [n], Specify the max number of points per octree cell (DELAUNAY) */
   MMG3D_DPARAM_angleDetection,    /*!< [val], Value for angle detection */
   MMG3D_DPARAM_hmin,              /*!< [val], Minimal mesh size */
