@@ -145,7 +145,14 @@ int MMG2_tassage(MMG5_pMesh mesh,MMG5_pSol sol) {
 
   for (k=1; k<=mesh->na; k++) {
     ped  = &mesh->edge[k];
-    if(!ped->a) continue;
+
+    if ( !ped->a )
+      continue;
+    else if ( !ped->b ) {
+      ped->a = 0;
+      continue;
+    }
+
     ped->a = mesh->point[ped->a].tmp;
     ped->b = mesh->point[ped->b].tmp;
 
@@ -157,6 +164,13 @@ int MMG2_tassage(MMG5_pMesh mesh,MMG5_pSol sol) {
     /* } */
     /*nbl++;*/
   }
+
+  ped = &mesh->edge[mesh->na];
+
+  while ( !ped->a ) {
+    ped = &mesh->edge[--mesh->na];
+  }
+
   /* mesh->na = nbl;*/
 
   /* compact triangle */
