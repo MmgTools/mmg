@@ -469,8 +469,8 @@ int _MMG5_chkcol_bdy(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
     ipp = listv[l] % 4;
     pt  = &mesh->tetra[iel];
 
-    if ( pt->ref == MG_MINUS ) isminp = 1;
-    else if ( pt->ref == MG_PLUS ) isplp = 1;
+    if ( isMG_MINUS(pt->ref)   ) isminp = 1;
+    else if ( isMG_PLUS(pt->ref) ) isplp = 1;
 
     /* Topological test for tetras of the shell */
     for (iq=0; iq<4; iq++)
@@ -511,9 +511,9 @@ int _MMG5_chkcol_bdy(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
 
     /* Volume test for tetras outside the shell */
     if ( mesh->info.iso ) {
-      if ( !ndepmin && pt->ref == MG_MINUS )
+      if ( !ndepmin && isMG_MINUS(pt->ref)   )
         ndepmin = iel;
-      else if ( !ndepplus && pt->ref == MG_PLUS )
+      else if ( !ndepplus && isMG_PLUS(pt->ref)   )
         ndepplus = iel;
     }
 

@@ -57,7 +57,25 @@
  * Implicite domain ref in iso mode
  *
  */
-#define MG_ISO    10
+#define MG_ISO_    8
+
+static inline char isMG_ISO(const unsigned ref ){
+  
+  const char b0 = ref % 2;
+  const char b1 = (ref/2) % 2;
+  const char b2 = (ref/4) % 2;
+  const char b3 = (ref/8) % 2;
+  if( b3) return 1;
+  return 0;
+};
+
+static inline char setMG_ISO(unsigned* ref ){
+  
+  if( isMG_ISO(*ref)) return ;
+  *ref += MG_ISO_;
+};
+
+
 
 #include <stdarg.h>
 

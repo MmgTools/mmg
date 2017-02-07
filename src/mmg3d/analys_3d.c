@@ -579,7 +579,7 @@ static void _MMG5_nmgeom(MMG5_pMesh mesh){
           if ( p0->ref != 0 )
             p0->ref = -abs(p0->ref);
           else
-            p0->ref = MG_ISO;
+            setMG_ISO(&(p0->ref));
         }
         else {
           if ( !p0->xp ) {

@@ -224,7 +224,7 @@ int _MMGS_chkmaniball(MMG5_pMesh mesh, int start, char istart) {
   i = istart;
 
   i1 = _MMG5_iprv2[i];
-  assert( MG_EDG(pt->tag[i1]) && (pt->edg[i1]==MG_ISO) );
+  assert( MG_EDG(pt->tag[i1]) && ( isMG_ISO(pt->edg[i1]) ) );
 
   /* First travel, while another part of the implicit boundary is not met */
   do {
@@ -234,7 +234,7 @@ int _MMGS_chkmaniball(MMG5_pMesh mesh, int start, char istart) {
     k = adja[i1] / 3;
     i = adja[i1] % 3;
 
-    if ( !k || mesh->tria[k].edg[i]==MG_ISO ) break;
+    if ( !k ||  isMG_ISO(mesh->tria[k].edg[i]) ) break;
 
     i = _MMG5_inxt2[i];
   }
@@ -265,7 +265,7 @@ int _MMGS_chkmaniball(MMG5_pMesh mesh, int start, char istart) {
       k = adja[i1] / 3;
       i = adja[i1] % 3;
 
-      if ( (!k) || mesh->tria[k].edg[i]==MG_ISO ) break;
+      if ( (!k) || isMG_ISO(mesh->tria[k].edg[i]) ) break;
 
       i = _MMG5_iprv2[i];
     }
@@ -285,7 +285,7 @@ int _MMGS_chkmaniball(MMG5_pMesh mesh, int start, char istart) {
     k = adja[i1] / 3;
     i = adja[i1] % 3;
 
-    if ( (!k) || mesh->tria[k].edg[i]==MG_ISO ) break;
+    if ( (!k) || isMG_ISO(mesh->tria[k].edg[i]) ) break;
 
     i = _MMG5_inxt2[i];
   }
@@ -327,7 +327,7 @@ int _MMGS_chkmanimesh(MMG5_pMesh mesh) {
         continue;
       }
       else {
-        if ( pt->edg[i] == MG_ISO ) cnt++;
+        if ( isMG_ISO(pt->edg[i]) ) cnt++;
       }
     }
     if( cnt == 3 ) {
@@ -347,7 +347,7 @@ int _MMGS_chkmanimesh(MMG5_pMesh mesh) {
       adja = &mesh->adja[3*(k-1)+1];
       iel = adja[i] / 3;
 
-      if ( (!iel) || (pt->edg[i] != MG_ISO) ) continue;
+      if ( (!iel) || !isMG_ISO(pt->edg[i] ) ) continue;
 
       i1 = _MMG5_inxt2[i];
       if ( !_MMGS_chkmaniball(mesh,k,i1) )
@@ -532,11 +532,11 @@ static int _MMGS_setref_ls(MMG5_pMesh mesh, MMG5_pSol sol) {
       /* Keep the initial triangle references of the mesh */
       if ( npls ) {
         assert(!nmns);
-        pt->ref = MG_PLUS;
+        setMG_PLUS(&(pt->ref));
       }
       else {
         assert(nmns);
-        pt->ref = MG_MINUS;
+        setMG_MINUS(&(pt->ref));
       }
     }
 
@@ -548,7 +548,7 @@ static int _MMGS_setref_ls(MMG5_pMesh mesh, MMG5_pSol sol) {
         v   = sol->m[ip] -mesh->info.ls;
         v1  = sol->m[ip1]-mesh->info.ls;
         if ( v == 0.0 && v1 == 0.0) {
-          pt->edg[i]  = MG_ISO;
+          setMG_ISO(&(pt->edg[i]));
           pt->tag[i] |= MG_REF;
         }
       }

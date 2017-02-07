@@ -577,7 +577,7 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol sol,FILE **inm,
           pa->tag |= MG_REF;
         }
         else {
-          if ( abs(ref)!= MG_ISO ) {
+          if ( !isMG_ISO(abs(ref))  ) {
             pa = &mesh->edge[++na];
             fscanf((*inm),"%d %d ",&pa->a,&pa->b);
             pa->ref = abs(ref);
@@ -599,7 +599,7 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol sol,FILE **inm,
           ptt->ref = abs(ref);
         }
         else {
-          if ( abs(ref)!= MG_ISO ) {
+          if ( !isMG_ISO(abs(ref))  ) {
             ptt = &mesh->tria[++nt];
             fscanf((*inm),"%d %d %d",&ptt->v[0],&ptt->v[1],&ptt->v[2]);
             ptt->ref = abs(ref);
@@ -709,7 +709,7 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol sol,FILE **inm,
             pa->tag |= MG_REF;
           }
           else {
-            if( abs(ref)!= MG_ISO ) {
+            if( !isMG_ISO(abs(ref))   ) {
               pa = &mesh->edge[++na];
               fread(&pa->a,sw,1,(*inm));
               fread(&pa->b,sw,1,(*inm));
@@ -768,7 +768,7 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol sol,FILE **inm,
             ptt->ref = abs(ref);
           }
           else {
-            if( abs(ref)!= MG_ISO ) {
+            if( !isMG_ISO(abs(ref)) ) {
               ptt = &mesh->tria[++nt];
               for ( i=0; i<3 ; ++i ) {
                 fread(&l,sw,1,(*inm));
@@ -1041,7 +1041,7 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol sol,FILE **inm,
         }
 
         /* Set the elements references to 0 in iso mode */
-        if ( mesh->info.iso )  pt->ref = 0;
+        //if ( mesh->info.iso )  pt->ref = 0;
 
         /* Possibly switch 2 vertices number so that each tet is positively oriented */
         if ( _MMG5_orvol(mesh->point,pt->v) < 0.0 ) {

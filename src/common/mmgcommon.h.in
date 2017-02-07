@@ -70,8 +70,45 @@ extern "C" {
 #define _MMG5_MEMMAX  800
 
 /* Domain refs in iso mode */
-#define MG_PLUS    2
-#define MG_MINUS   3
+#define MG_PLUS_    2
+#define MG_MINUS_   4
+
+static inline char isMG_PLUS(const unsigned ref ){
+  
+  const char b0 = ref % 2;
+  const char b1 = (ref/2) % 2;
+  if( b1) return 1;
+  return 0;
+};
+
+
+
+static inline char isMG_MINUS(const unsigned ref ){
+  
+  const char b0 = ref % 2;
+  const char b1 = (ref/2) % 2;
+  const char b2 = (ref/4) % 2;
+  if( b2) return 1;
+  return 0;
+};
+
+static inline void setMG_PLUS(unsigned* ref){
+  if (isMG_PLUS(*ref)) return;
+  if (isMG_MINUS(*ref)){
+    *ref -= MG_MINUS_;
+  };
+  *ref += MG_PLUS_;
+};
+
+static inline void setMG_MINUS(unsigned* ref){
+  if (isMG_MINUS(*ref)) return;
+  if (isMG_PLUS(*ref)){
+    *ref -= MG_PLUS_;
+  };
+  *ref += MG_MINUS_;
+};
+
+
 
 /* numerical accuracy */
 #define _MMG5_ANGEDG    0.707106781186548   /*0.573576436351046 */

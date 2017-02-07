@@ -88,7 +88,7 @@ int _MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, int *list,int ilist,
     for (k=0; k<ilist; k++) {
       iel = list[k] / 6;
       pt = &mesh->tetra[iel];
-      if ( pt->ref == MG_MINUS )
+      if ( isMG_MINUS(pt->ref) )
         nminus++;
       else
         nplus++;

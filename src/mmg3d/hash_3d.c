@@ -1134,7 +1134,11 @@ int _MMG5_hGeom(MMG5_pMesh mesh) {
         if ( !kk || pt->tag[i] & MG_NOM ) {
           if ( pt->tag[i] & MG_NOM ) {
             if ( mesh->info.iso )
-              pt->edg[i] = ( pt->edg[i] != 0 ) ?  -abs(pt->edg[i]) : MG_ISO;
+	      if ( pt->edg[i] != 0 && !isMG_ISO(pt->ref) ){
+		pt->edg[i] =  -abs(pt->edg[i]) ;
+	      }else {
+		setMG_ISO(&(pt->edg[i]));
+	      }
           }
           _MMG5_hEdge(mesh,pt->v[i1],pt->v[i2],pt->edg[i],pt->tag[i]);
         }
@@ -1238,7 +1242,7 @@ int _MMG5_bdryTria(MMG5_pMesh mesh, int ntmesh) {
           if ( pxt->tag[_MMG5_iarf[i][2]] )  ptt->tag[2] = pxt->tag[_MMG5_iarf[i][2]];
         }
         if ( adj ) {
-          if ( mesh->info.iso ) ptt->ref = MG_ISO;
+          if ( mesh->info.iso  && ( isMG_PLUS(pt->ref) != isMG_PLUS(pt1->ref) ) ) setMG_ISO(&(ptt->ref));
           /* useful only when saving mesh */
           else ptt->ref  = pxt ? pxt->ref[i] : MG_MIN(pt->ref,pt1->ref);
         }
@@ -1326,7 +1330,7 @@ int _MMG5_bdryTria(MMG5_pMesh mesh, int ntmesh) {
           if ( pxpr->tag[_MMG5_iarf_pr[i][2]] )  ptt->tag[2] = pxpr->tag[_MMG5_iarf_pr[i][2]];
         }
         if ( adj ) {
-          if ( mesh->info.iso ) ptt->ref = MG_ISO;
+          if ( mesh->info.iso ) setMG_ISO(&(ptt->ref));
           /* useful only when saving mesh */
           else ptt->ref  = pxpr ? pxpr->ref[i] : 0;
         }
@@ -1692,7 +1696,7 @@ int _MMG5_bdrySet(MMG5_pMesh mesh) {
       else  MG_SET(pxt->ori,i);
       /* Set edge tag */
       if ( pxt->ftag[i] ) {
-        if ( adj && (pt->ref <= pt1->ref || (pt->ref == MG_PLUS)) ) {
+        if ( adj && (pt->ref <= pt1->ref || (isMG_PLUS(pt->ref)  )) ) {
           continue;
         }
         else {
@@ -1891,7 +1895,7 @@ int _MMG5_bdryPerm(MMG5_pMesh mesh) {
     for (i=0; i<4; i++) {
       adj = adja[i] / 4;
       pt1 = &mesh->tetra[adj];
-      if ( adj && (pt->ref <= pt1->ref || pt->ref == MG_PLUS) )
+      if ( adj && (pt->ref <= pt1->ref || isMG_PLUS(pt->ref)  ) )
         continue;
       ia = pt->v[_MMG5_idir[i][0]];
       ib = pt->v[_MMG5_idir[i][1]];

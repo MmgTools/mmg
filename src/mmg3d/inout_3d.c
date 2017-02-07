@@ -513,7 +513,7 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,const char *filename) {
           fread(&ref,sw,1,inm);
           if(iswp) ref=_MMG5_swapbin(ref);
         }
-        if( abs(ref) != MG_ISO ) {
+        if( !isMG_ISO(abs(ref))  ) {
           pt1 = &mesh->tria[++mesh->nt];
           pt1->v[0] = v[0];
           pt1->v[1] = v[1];
@@ -653,7 +653,7 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,const char *filename) {
       }
       pa->tag |= MG_REF;
       if ( mesh->info.iso ) {
-        if( abs(pa->ref) != MG_ISO ) {
+        if( !isMG_ISO(abs(pa->ref)) ) {
           ++mesh->na;
           pa->ref = abs(pa->ref);
           memmove(&mesh->edge[mesh->na],&mesh->edge[k],sizeof(MMG5_Edge));
@@ -761,7 +761,7 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,const char *filename) {
       ppt->tag &= ~MG_NUL;
     }
 
-    if ( mesh->info.iso )  pt->ref = 0;
+    //if ( mesh->info.iso )  pt->ref = 0;
 
     /* Possibly switch 2 vertices number so that each tet is positively oriented */
     if ( _MMG5_orvol(mesh->point,pt->v) < 0.0 ) {
