@@ -25,6 +25,8 @@
  * Types
  */
 #include <stdint.h>
+#include <stdarg.h>
+
 
 #ifndef _LIBMMGTYPES_H
 #define _LIBMMGTYPES_H
@@ -58,8 +60,6 @@
  *
  */
 #define MG_ISO    10
-
-#include <stdarg.h>
 
 /**
  * \def MMG5_ARG_start
