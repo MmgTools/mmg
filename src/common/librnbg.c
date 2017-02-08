@@ -52,7 +52,7 @@
 int _MMG5_kPartBoxCompute(SCOTCH_Graph graf, int vertNbr, int boxVertNbr,
                           SCOTCH_Num *permVrtTab,MMG5_pMesh mesh) {
   int boxNbr, vertIdx;
-#if SCOTCH_VERSION<6
+#ifdef SCOTCH_5
   SCOTCH_Num logMaxVal, SupMaxVal, InfMaxVal, maxVal;
 #endif
   char s[200];
@@ -69,7 +69,7 @@ int _MMG5_kPartBoxCompute(SCOTCH_Graph graf, int vertNbr, int boxVertNbr,
 
   /* Initializing SCOTCH functions */
   CHECK_SCOTCH(SCOTCH_stratInit(&strat), "scotch_stratInit", 0) ;
-#if SCOTCH_VERSION>=6
+#ifdef SCOTCH_6
   CHECK_SCOTCH(SCOTCH_archCmplt(&arch, boxNbr), "scotch_archCmplt", 0) ;
 #else
   CHECK_SCOTCH(SCOTCH_archVcmplt(&arch), "scotch_archVcmplt", 0) ;
@@ -84,7 +84,7 @@ int _MMG5_kPartBoxCompute(SCOTCH_Graph graf, int vertNbr, int boxVertNbr,
   CHECK_SCOTCH(SCOTCH_graphMap(&graf, &arch, &strat, sortPartTb), "scotch_graphMap", 0);
 
 
-#if SCOTCH_VERSION<6
+#ifdef SCOTCH_6
   // Looking for the max value in sortPartTb and computing sortPartTb as
   // followed :
   //  - sortPartTb[2i] is the box value
@@ -94,13 +94,13 @@ int _MMG5_kPartBoxCompute(SCOTCH_Graph graf, int vertNbr, int boxVertNbr,
   for (vertIdx = vertNbr - 1 ; vertIdx >= 0 ; vertIdx--) {
     sortPartTb[2*vertIdx] = sortPartTb[vertIdx];
     sortPartTb[2*vertIdx+1] = vertIdx + 1;
-#if SCOTCH_VERSION<6
+#ifdef SCOTCH_5
     if (sortPartTb[vertIdx] > maxVal)
       maxVal = sortPartTb[vertIdx];
 #endif
   }
 
-#if SCOTCH_VERSION<6
+#ifdef SCOTCH_5
   // Determining the log of MaxVal
   logMaxVal = 0;
   while ( maxVal > 0) {
