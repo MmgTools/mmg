@@ -174,6 +174,7 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,const char *filename) {
         posnpreq = ftell(inm);
         continue;
       } else if(!strncmp(chaine,"Triangles",strlen("Triangles"))) {
+        if ( !strncmp(chaine,"TrianglesP",strlen("TrianglesP")) ) continue;
         fscanf(inm,"%d",&mesh->nti);
         posnt = ftell(inm);
         continue;
@@ -192,6 +193,7 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,const char *filename) {
         continue;
 
       } else if(!strncmp(chaine,"Tetrahedra",strlen("Tetrahedra"))) {
+        if ( !strncmp(chaine,"TetrahedraP",strlen("TetrahedraP")) ) continue;
         fscanf(inm,"%d",&mesh->nei);
         posne = ftell(inm);
         continue;
