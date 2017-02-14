@@ -108,7 +108,7 @@ extern "C" {
 #define  MG_BDY       (1 << 4)        /**< 16  boundary entity */
 #define  MG_CRN       (1 << 5)        /**< 32  corner         */
 #define  MG_NOSURF    (1 << 6)        /**< 64  freezed boundary */
-// 1 << 13 reserveed for MG_INTERFACE tag of parMmg
+// 1 << 13 reserveed for MG_PARBDY tag of parMmg
 #define  MG_NUL       (1 << 14)       /**< 16384 vertex removed */
 
 /* binary tags for local parameters */

@@ -327,6 +327,7 @@ int  _MMG5_intvolmet(MMG5_pMesh,MMG5_pSol,int,char,double, double*);
 int _MMG3D_localParamReg(MMG5_pMesh,int,int*,int,int*,int,double*,double*,double*);
 int _MMG3D_localParamNm(MMG5_pMesh,int,int,int,double*,double*,double*);
 int _MMG3D_packMesh(MMG5_pMesh,MMG5_pSol,MMG5_pSol);
+int _MMG3D_bdryBuild(MMG5_pMesh);
 
 /* useful functions to debug */
 int  _MMG3D_indElt(MMG5_pMesh mesh,int kel);
@@ -358,7 +359,7 @@ int _MMG5_cavity_ani(MMG5_pMesh mesh,MMG5_pSol sol,int iel,int ip,int *list,int 
 int _MMG5_cenrad_iso(MMG5_pMesh mesh,double *ct,double *c,double *rad);
 int _MMG5_cenrad_ani(MMG5_pMesh mesh,double *ct,double *m,double *c,double *rad);
 
-/*mmg3d1.c*/
+/* mmg3d1.c */
 void _MMG5_tet2tri(MMG5_pMesh mesh,int k,char ie,MMG5_Tria *ptt);
 int  _MMG3D_dichoto(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx);
 int  _MMG3D_dichoto1b(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int);

@@ -163,6 +163,100 @@ void _MMG3D_scalarSolTruncature(MMG5_pMesh mesh, MMG5_pSol met) {
 
 /**
  * \param mesh pointer toward the mesh structure (unused).
+ * \return -1 if fail, the number of detected ridges otherwise
+ *
+ * Create the boundary entities of the mesh (triangles and edges).
+ *
+ * \warning mesh must be packed
+ */
+int _MMG3D_bdryBuild(MMG5_pMesh mesh) {
+  MMG5_pTetra pt;
+  MMG5_hgeom  *ph;
+  int         k,i,nr;
+
+  nr = 0;
+
+  /* rebuild triangles*/
+  mesh->nt = 0;
+  if ( !_MMG5_chkBdryTria(mesh) ) {
+    fprintf(stderr," ## Error: unable to rebuild triangles\n");
+    return(-1);
+  }
+
+  /* build hash table for edges */
+  if ( mesh->htab.geom )
+    _MMG5_DEL_MEM(mesh,mesh->htab.geom,(mesh->htab.max+1)*sizeof(MMG5_hgeom));
+
+  mesh->na = 0;
+  /* in the worst case (all edges are marked), we will have around 1 edge per *
+   * triangle (we count edges only one time) */
+  mesh->memCur += (long long)((3*mesh->nt+2)*sizeof(MMG5_hgeom));
+  if ( (mesh->memCur) > (mesh->memMax) ) {
+    mesh->memCur -= (long long)((3*mesh->nt+2)*sizeof(MMG5_hgeom));
+    fprintf(stdout,"  ## Warning:");
+    fprintf(stdout," unable to allocate an hash table to store the mesh edges."
+      "\n  ## Warning: uncomplete mesh\n");
+  }
+  else if ( _MMG5_hNew(&mesh->htab,mesh->nt,3*(mesh->nt),0) ) {
+    for (k=1; k<=mesh->ne; k++) {
+      pt   = &mesh->tetra[k];
+      if ( MG_EOK(pt) &&  pt->xt ) {
+        for (i=0; i<6; i++) {
+          if ( mesh->xtetra[pt->xt].edg[i] ||
+               ( mesh->xtetra[pt->xt].tag[i] & MG_REQ ||
+                 MG_EDG(mesh->xtetra[pt->xt].tag[i])) )
+            _MMG5_hEdge(mesh,pt->v[_MMG5_iare[i][0]],pt->v[_MMG5_iare[i][1]],
+                        mesh->xtetra[pt->xt].edg[i],mesh->xtetra[pt->xt].tag[i]);
+        }
+      }
+    }
+
+    /* edges + ridges + required edges */
+    for (k=0; k<=mesh->htab.max; k++) {
+      ph = &mesh->htab.geom[k];
+      if ( !(ph->a) )  continue;
+      mesh->na++;
+    }
+    if ( mesh->na ) {
+      _MMG5_ADD_MEM(mesh,(mesh->na+1)*sizeof(MMG5_Edge),"edges",
+                    mesh->na = 0;
+                    printf("  ## Warning: uncomplete mesh\n")
+        );
+    }
+
+    if ( mesh->na ) {
+      _MMG5_SAFE_CALLOC(mesh->edge,mesh->na+1,MMG5_Edge);
+
+      mesh->na = 0;
+      for (k=0; k<=mesh->htab.max; k++) {
+        ph = &mesh->htab.geom[k];
+        if ( !ph->a )  continue;
+        mesh->na++;
+        mesh->edge[mesh->na ].a  = mesh->point[ph->a].tmp;
+        mesh->edge[mesh->na ].b  = mesh->point[ph->b].tmp;
+        mesh->edge[mesh->na].tag = ( ph->tag | MG_REF ) ;
+        mesh->edge[mesh->na].ref = ph->ref;
+
+        if ( MG_GEO & ph->tag ) nr++;
+      }
+    }
+    _MMG5_DEL_MEM(mesh,mesh->htab.geom,(mesh->htab.max+1)*sizeof(MMG5_hgeom));
+  }
+  else
+    mesh->memCur -= (long long)((3*mesh->nt+2)*sizeof(MMG5_hgeom));
+
+  if ( mesh->info.imprim ) {
+    if ( mesh->na )
+      fprintf(stdout,"     NUMBER OF EDGES      %8d   RIDGES  %8d\n",mesh->na,nr);
+    if ( mesh->nt )
+      fprintf(stdout,"     NUMBER OF TRIANGLES  %8d\n",mesh->nt);
+  }
+
+  return nr;
+}
+
+/**
+ * \param mesh pointer toward the mesh structure (unused).
  * \param met pointer toward the solution (metric or level-set) structure.
  * \param disp pointer toward the solution (displacement) structure.
  * \return 1 if success, 0 if chkmsh fail or if we are unable to build
@@ -172,18 +266,16 @@ void _MMG3D_scalarSolTruncature(MMG5_pMesh mesh, MMG5_pSol met) {
  * out of library
  *
  */
-/* static inline */
 int _MMG3D_packMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
   MMG5_pTetra   pt,ptnew;
   MMG5_pPrism   pp;
   MMG5_pQuad    pq;
   MMG5_pPoint   ppt,pptnew;
-  MMG5_hgeom   *ph;
   int     np,nc,nr, k,ne,nbl,imet,imetnew,i;
   int     iadr,iadrnew,iadrv,*adjav,*adja,*adjanew,voy;
 
   /* compact vertices */
-  np = nc = nr = 0;
+  np = nc = 0;
   for (k=1; k<=mesh->np; k++) {
     ppt = &mesh->point[k];
     if ( !MG_VOK(ppt) )  continue;
@@ -325,74 +417,13 @@ int _MMG3D_packMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
     }
   }
 
-  /* rebuild triangles*/
-  mesh->nt = 0;
-  if ( !_MMG5_chkBdryTria(mesh) ) {
-    fprintf(stderr," ## Error: unable to rebuild triangles\n");
-    return(0);
+  if ( mesh->info.imprim ) {
+    fprintf(stdout,"     NUMBER OF VERTICES   %8d   CORNERS %8d\n",mesh->np,nc);
+    fprintf(stdout,"     NUMBER OF ELEMENTS   %8d\n",mesh->ne);
   }
 
-  /* build hash table for edges */
-  if ( mesh->htab.geom )
-    _MMG5_DEL_MEM(mesh,mesh->htab.geom,(mesh->htab.max+1)*sizeof(MMG5_hgeom));
-
-  mesh->na = 0;
-  /* in the worst case (all edges are marked), we will have around 1 edge per *
-   * triangle (we count edges only one time) */
-  mesh->memCur += (long long)((3*mesh->nt+2)*sizeof(MMG5_hgeom));
-  if ( (mesh->memCur) > (mesh->memMax) ) {
-    mesh->memCur -= (long long)((3*mesh->nt+2)*sizeof(MMG5_hgeom));
-    fprintf(stdout,"  ## Warning:");
-    fprintf(stdout," unable to allocate an hash table to store the mesh edges."
-      "\n  ## Warning: uncomplete mesh\n");
-  }
-  else if ( _MMG5_hNew(&mesh->htab,mesh->nt,3*(mesh->nt),0) ) {
-    for (k=1; k<=mesh->ne; k++) {
-      pt   = &mesh->tetra[k];
-      if ( MG_EOK(pt) &&  pt->xt ) {
-        for (i=0; i<6; i++) {
-          if ( mesh->xtetra[pt->xt].edg[i] ||
-               ( mesh->xtetra[pt->xt].tag[i] & MG_REQ ||
-                 MG_EDG(mesh->xtetra[pt->xt].tag[i])) )
-            _MMG5_hEdge(mesh,pt->v[_MMG5_iare[i][0]],pt->v[_MMG5_iare[i][1]],
-                        mesh->xtetra[pt->xt].edg[i],mesh->xtetra[pt->xt].tag[i]);
-        }
-      }
-    }
-
-    /* edges + ridges + required edges */
-    for (k=0; k<=mesh->htab.max; k++) {
-      ph = &mesh->htab.geom[k];
-      if ( !(ph->a) )  continue;
-      mesh->na++;
-    }
-    if ( mesh->na ) {
-      _MMG5_ADD_MEM(mesh,(mesh->na+1)*sizeof(MMG5_Edge),"edges",
-                    mesh->na = 0;
-                    printf("  ## Warning: uncomplete mesh\n")
-        );
-    }
-
-    if ( mesh->na ) {
-      _MMG5_SAFE_CALLOC(mesh->edge,mesh->na+1,MMG5_Edge);
-
-      mesh->na = 0;
-      for (k=0; k<=mesh->htab.max; k++) {
-        ph = &mesh->htab.geom[k];
-        if ( !ph->a )  continue;
-        mesh->na++;
-        mesh->edge[mesh->na ].a  = mesh->point[ph->a].tmp;
-        mesh->edge[mesh->na ].b  = mesh->point[ph->b].tmp;
-        mesh->edge[mesh->na].tag = ( ph->tag | MG_REF ) ;
-        mesh->edge[mesh->na].ref = ph->ref;
-
-        if ( MG_GEO & ph->tag ) nr++;
-      }
-    }
-    _MMG5_DEL_MEM(mesh,mesh->htab.geom,(mesh->htab.max+1)*sizeof(MMG5_hgeom));
-  }
-  else
-    mesh->memCur -= (long long)((3*mesh->nt+2)*sizeof(MMG5_hgeom));
+  nr = _MMG3D_bdryBuild(mesh);
+  if ( nr < 0 ) return 0;
 
   for(k=1 ; k<=mesh->np ; k++)
     mesh->point[k].tmp = 0;
@@ -411,14 +442,6 @@ int _MMG3D_packMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
     return(0);
   }
 
-  if ( mesh->info.imprim ) {
-    fprintf(stdout,"     NUMBER OF VERTICES   %8d   CORNERS %8d\n",mesh->np,nc);
-    if ( mesh->na )
-      fprintf(stdout,"     NUMBER OF EDGES      %8d   RIDGES  %8d\n",mesh->na,nr);
-    if ( mesh->nt )
-      fprintf(stdout,"     NUMBER OF TRIANGLES  %8d\n",mesh->nt);
-    fprintf(stdout,"     NUMBER OF ELEMENTS   %8d\n",mesh->ne);
-  }
   return(1);
 }
 
