@@ -232,8 +232,8 @@ int _MMG3D_bdryBuild(MMG5_pMesh mesh) {
         ph = &mesh->htab.geom[k];
         if ( !ph->a )  continue;
         mesh->na++;
-        mesh->edge[mesh->na ].a  = mesh->point[ph->a].tmp;
-        mesh->edge[mesh->na ].b  = mesh->point[ph->b].tmp;
+        mesh->edge[mesh->na ].a  = ph->a;
+        mesh->edge[mesh->na ].b  = ph->b;
         mesh->edge[mesh->na].tag = ( ph->tag | MG_REF ) ;
         mesh->edge[mesh->na].ref = ph->ref;
 
