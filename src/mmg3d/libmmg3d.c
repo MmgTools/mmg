@@ -167,7 +167,7 @@ void _MMG3D_scalarSolTruncature(MMG5_pMesh mesh, MMG5_pSol met) {
  *
  * Create the boundary entities of the mesh (triangles and edges).
  *
- * \warning mesh must be packed
+ * \warning mesh must be packed and hashed
  */
 int _MMG3D_bdryBuild(MMG5_pMesh mesh) {
   MMG5_pTetra pt;
