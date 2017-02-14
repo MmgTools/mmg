@@ -86,15 +86,15 @@ int _MMG5_chkcol_int(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
       }
     }
 
-    /* Prevent from creating a tetra with 4 ridges vertices */
+    /* Prevent from creating a tetra with 4 bdy vertices */
     p0 = &mesh->point[nq];
-    if ( p0->tag & MG_GEO ) {
+    if ( p0->tag & MG_BDY ) {
       i  = ip;
       nr = 0;
       for (jj=0; jj<3; jj++) {
         i = _MMG5_inxt3[i];
         p0 = &mesh->point[pt->v[i]];
-        if ( p0->tag & MG_GEO ) ++nr;
+        if ( p0->tag & MG_BDY ) ++nr;
       }
       if ( nr==3 ) return(0);
     }
