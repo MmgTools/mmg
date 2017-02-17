@@ -90,7 +90,6 @@ void _MMG3D_Free_topoTables(MMG5_pMesh mesh) {
  * Truncate a scalar metric by hmax and hmin values.
  *
  */
-static inline
 void _MMG3D_scalarSolTruncature(MMG5_pMesh mesh, MMG5_pSol met) {
   MMG5_pTetra pt;
   MMG5_pPoint ppt;
@@ -527,7 +526,7 @@ int MMG3D_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met) {
   /* scaling mesh */
   if ( !_MMG5_scaleMesh(mesh,met) ) _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
 
-  if ( !_MMG3D_meshQua(mesh,met) ) _LIBMMG5_RETURN(mesh,met,MMG5_LOWFAILURE);
+  if ( !_MMG3D_tetraQual(mesh,met) ) _LIBMMG5_RETURN(mesh,met,MMG5_LOWFAILURE);
 
   if ( abs(mesh->info.imprim) > 0 ) {
     if ( !_MMG3D_inqua(mesh,met) ) {
@@ -692,7 +691,7 @@ int MMG3D_mmg3dls(MMG5_pMesh mesh,MMG5_pSol met) {
  /* scaling mesh */
   if ( !_MMG5_scaleMesh(mesh,met) ) _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
 
-  if ( !_MMG3D_meshQua(mesh,met) ) _LIBMMG5_RETURN(mesh,met,MMG5_LOWFAILURE);
+  if ( !_MMG3D_tetraQual(mesh,met) ) _LIBMMG5_RETURN(mesh,met,MMG5_LOWFAILURE);
 
   if ( abs(mesh->info.imprim) > 0 ) {
     if ( !_MMG3D_inqua(mesh,met) ) {
@@ -865,7 +864,7 @@ int MMG3D_mmg3dmov(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp) {
   chrono(ON,&(ctim[2]));
   MMG3D_setfunc(mesh,met);
 
-  if ( !_MMG3D_meshQua(mesh,met) ) _LIBMMG5_RETURN(mesh,met,MMG5_LOWFAILURE);
+  if ( !_MMG3D_tetraQual(mesh,met) ) _LIBMMG5_RETURN(mesh,met,MMG5_LOWFAILURE);
 
   if ( abs(mesh->info.imprim) > 0 ) {
     if ( !_MMG3D_inqua(mesh,met) ) {
