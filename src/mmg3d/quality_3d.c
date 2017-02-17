@@ -193,9 +193,10 @@ inline double _MMG5_caltet33_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt) {
  */
 int _MMG3D_prilen(MMG5_pMesh mesh, MMG5_pSol met, char metRidTyp) {
   MMG5_pTetra     pt;
+  MMG5_pPoint     ppt;
   _MMG5_Hash      hash;
   double          len,avlen,lmin,lmax;
-  int             k,np,nq,amin,bmin,amax,bmax,ned,hl[9];
+  int             k,np,nq,amin,bmin,amax,bmax,ned,hl[9],n;
   char            ia,i0,i1,ier,i;
   static double   bd[9]= {0.0, 0.3, 0.6, 0.7071, 0.9, 1.3, 1.4142, 2.0, 5.0};
   //{0.0, 0.2, 0.5, 0.7071, 0.9, 1.111, 1.4142, 2.0, 5.0};
@@ -233,7 +234,15 @@ int _MMG3D_prilen(MMG5_pMesh mesh, MMG5_pSol met, char metRidTyp) {
   for(k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
     if ( !MG_EOK(pt) ) continue;
-
+    n = 0;
+    for(i=0 ; i<4 ; i++) {
+      ppt = &mesh->point[pt->v[i]];
+      if(!(MG_SIN(ppt->tag) || MG_NOM & ppt->tag) && (ppt->tag & MG_GEO)) continue;
+      n++;
+    }
+    if(!n) {
+      continue;
+    }
     for(ia=0; ia<6; ia++) {
       i0 = _MMG5_iare[ia][0];
       i1 = _MMG5_iare[ia][1];
@@ -497,8 +506,9 @@ int _MMG3D_inqua(MMG5_pMesh mesh,MMG5_pSol met) {
  */
 int _MMG3D_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTetra    pt;
+  MMG5_pPoint    ppt;
   double   rap,rapmin,rapmax,rapavg,med,good;
-  int      i,k,iel,ok,ir,imax,nex,his[5];
+  int      i,k,iel,ok,ir,imax,nex,his[5],n,nrid;
 
   if( mesh->info.optimLES ) return(_MMG3D_printquaLES(mesh,met));
 
@@ -518,7 +528,7 @@ int _MMG3D_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
 
   for (k=0; k<5; k++)  his[k] = 0;
 
-  nex = ok = 0;
+  nex = ok = nrid = 0;
   for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
     if( !MG_EOK(pt) ) {
@@ -528,6 +538,16 @@ int _MMG3D_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
     ok++;
     if ( _MMG5_orvol(mesh->point,pt->v) < 0.0 ) {
       fprintf(stdout," ## Warning: negative volume\n");
+    }
+    n = 0;
+    for(i=0 ; i<4 ; i++) {
+      ppt = &mesh->point[pt->v[i]];
+      if(!(MG_SIN(ppt->tag) || MG_NOM & ppt->tag) && (ppt->tag & MG_GEO)) continue;
+      n++;
+    }
+    if(!n) {
+      nrid++;
+      continue;
     }
     rap = _MMG5_ALPHAD * pt->qual;
     if ( rap < rapmin ) {
@@ -573,6 +593,7 @@ int _MMG3D_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
       fprintf(stdout,"     %5.1f < Q < %5.1f   %7d   %6.2f %%\n",
               i/5.,i/5.+0.2,his[i],100.*(his[i]/(float)(mesh->ne-nex)));
     }
+    if(nrid) fprintf(stdout,"\n  ## WARNING: %d TETRA WITH 4 RIDGES POINTS\n",nrid);
   }
   if (rapmin == 0){
     fprintf(stderr,"  ## ERROR: TOO BAD QUALITY FOR THE WORST ELEMENT\n");
