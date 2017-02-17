@@ -117,17 +117,18 @@ _MMG5_BezierGeod(double c1[3],double c2[3],double t1[3],double t2[3]) {
 
   ll = ux*ux + uy*uy + uz*uz;
 
-  t[0] = _MMG5_ATHIRD*(t2[0]-t1[0]);
-  t[1] = _MMG5_ATHIRD*(t2[1]-t1[1]);
-  t[2] = _MMG5_ATHIRD*(t2[2]-t1[2]);
+  /* tentative to do something...*/
+  /* t[0] = _MMG5_ATHIRD*(t2[0]-t1[0]); */
+  /* t[1] = _MMG5_ATHIRD*(t2[1]-t1[1]); */
+  /* t[2] = _MMG5_ATHIRD*(t2[2]-t1[2]); */
 
-  nt2 = t[0]*t[0] + t[1]*t[1] + t[2]*t[2];
-  nt2 = 16.0 - nt2;
+  /* nt2 = t[0]*t[0] + t[1]*t[1] + t[2]*t[2]; */
+  /* nt2 = 16.0 - nt2; */
 
-  ps = t[0]*ux + t[1]*uy + t[2]*uz;
+  /* ps = t[0]*ux + t[1]*uy + t[2]*uz; */
 
-  alpha = ps + sqrt(ps*ps + ll*nt2);
-  alpha *= (6.0 / nt2);
+  /* alpha = ps + sqrt(ps*ps + ll*nt2); */
+  /* alpha *= (6.0 / nt2); */
 
   return(_MMG5_ATHIRD*sqrt(ll));
 }
