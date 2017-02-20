@@ -53,7 +53,7 @@ ENDIF ()
 
 # Create mmgcommon.h file with the good release and architecture infos.
 CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/src/common/mmgcommon.h.in
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/common/mmgcommon.h @ONLY)
+  ${CMAKE_BUILD_DIR}/src/common/mmgcommon.h @ONLY)
 
 ###############################################################################
 #####

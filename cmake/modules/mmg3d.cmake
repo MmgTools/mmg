@@ -27,6 +27,7 @@
 ## =============================================================================
 
 SET(MMG3D_SOURCE_DIR ${CMAKE_SOURCE_DIR}/src/mmg3d)
+SET(MMG3D_BUILD_DIR  ${CMAKE_BUILD_DIR}/src/mmg3d)
 
 ############################################################################
 #####
@@ -35,12 +36,12 @@ SET(MMG3D_SOURCE_DIR ${CMAKE_SOURCE_DIR}/src/mmg3d)
 ############################################################################
 
 IF ( NOT WIN32 )
-  ADD_CUSTOM_COMMAND(OUTPUT ${MMG3D_SOURCE_DIR}/libmmg3df.h
-    COMMAND genheader ${MMG3D_SOURCE_DIR}/libmmg3df.h
+  ADD_CUSTOM_COMMAND(OUTPUT ${MMG3D_BUILD_DIR}/libmmg3df.h
+    COMMAND genheader ${MMG3D_BUILD_DIR}/libmmg3df.h
     ${MMG3D_SOURCE_DIR}/libmmg3d.h ${CMAKE_SOURCE_DIR}/scripts/genfort.pl
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
     DEPENDS genheader ${MMG3D_SOURCE_DIR}/libmmg3d.h
-    ${COMMON_SOURCE_DIR}/libmmgtypesf.h
+    ${COMMON_BUILD_DIR}/libmmgtypesf.h
     ${COMMON_SOURCE_DIR}/libmmgtypes.h
     ${CMAKE_SOURCE_DIR}/scripts/genfort.pl
     COMMENT "Generating Fortran header for mmg3d"
@@ -80,7 +81,6 @@ LIST(REMOVE_ITEM source_files
   ${MMG3D_SOURCE_DIR}/mmg3d.c
   ${MMG3D_SOURCE_DIR}/lib${PROJECT_NAME}3df.c
   ${CMAKE_SOURCE_DIR}/src/libmmg.h
-  ${CMAKE_SOURCE_DIR}/src/libmmgf.h
   ${REMOVE_FILE})
 FILE(
   GLOB
@@ -132,7 +132,7 @@ ENDIF ( )
 # Compile static library
 IF ( LIBMMG3D_STATIC )
   ADD_LIBRARY(${PROJECT_NAME}3d_a  STATIC
-    ${MMG3D_SOURCE_DIR}/lib${PROJECT_NAME}3df.h
+    ${MMG3D_BUILD_DIR}/lib${PROJECT_NAME}3df.h
     ${source_files} ${lib_file} )
   SET_TARGET_PROPERTIES(${PROJECT_NAME}3d_a PROPERTIES OUTPUT_NAME
     ${PROJECT_NAME}3d)
@@ -145,7 +145,7 @@ ENDIF()
 # Compile shared library
 IF ( LIBMMG3D_SHARED )
   ADD_LIBRARY(${PROJECT_NAME}3d_so SHARED
-    ${MMG3D_SOURCE_DIR}/lib${PROJECT_NAME}3df.h
+    ${MMG3D_BUILD_DIR}/lib${PROJECT_NAME}3df.h
     ${source_files} ${lib_file})
   SET_TARGET_PROPERTIES(${PROJECT_NAME}3d_so PROPERTIES
     VERSION ${CMAKE_RELEASE_VERSION} SOVERSION 5)
@@ -161,9 +161,9 @@ IF ( LIBMMG3D_STATIC OR LIBMMG3D_SHARED )
   # mmg3d header files needed for library
   SET( mmg3d_headers
     ${MMG3D_SOURCE_DIR}/libmmg3d.h
-    ${MMG3D_SOURCE_DIR}/libmmg3df.h
+    ${MMG3D_BUILD_DIR}/libmmg3df.h
     ${COMMON_SOURCE_DIR}/libmmgtypes.h
-    ${COMMON_SOURCE_DIR}/libmmgtypesf.h
+    ${COMMON_BUILD_DIR}/libmmgtypesf.h
     )
   SET(MMG3D_INCLUDE ${CMAKE_SOURCE_DIR}/include/mmg/mmg3d )
   SET( mmg3d_includes
@@ -179,11 +179,11 @@ IF ( LIBMMG3D_STATIC OR LIBMMG3D_SHARED )
     COMMAND ${CMAKE_COMMAND} -E copy ${COMMON_SOURCE_DIR}/libmmgtypesf.h
     ${MMG3D_INCLUDE}/libmmgtypesf.h
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-    DEPENDS ${COMMON_SOURCE_DIR}/libmmgtypesf.h)
+    DEPENDS ${COMMON_BUILD_DIR}/libmmgtypesf.h)
   ADD_CUSTOM_COMMAND(OUTPUT ${MMG3D_INCLUDE}/libmmg3df.h
-    COMMAND ${CMAKE_COMMAND} -E copy ${MMG3D_SOURCE_DIR}/libmmg3df.h ${MMG3D_INCLUDE}/libmmg3df.h
+    COMMAND ${CMAKE_COMMAND} -E copy ${MMG3D_BUILD_DIR}/libmmg3df.h ${MMG3D_INCLUDE}/libmmg3df.h
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-    DEPENDS ${MMG3D_SOURCE_DIR}/libmmg3df.h)
+    DEPENDS ${MMG3D_BUILD_DIR}/libmmg3df.h)
 
   # Install header files in project directory
   FILE(INSTALL  ${mmg3d_headers} DESTINATION ${MMG3D_INCLUDE}
@@ -212,7 +212,7 @@ ENDIF()
 #####
 ###############################################################################
 ADD_EXECUTABLE(${PROJECT_NAME}3d
-  ${MMG3D_SOURCE_DIR}/lib${PROJECT_NAME}3df.h
+  ${MMG3D_BUILD_DIR}/lib${PROJECT_NAME}3df.h
   ${source_files} ${main_file})
 
 IF ( WIN32 AND NOT MINGW AND USE_SCOTCH )
