@@ -62,7 +62,7 @@ int _MMG3D_newPt(MMG5_pMesh mesh,double c[3],int16_t tag) {
     }
     ppt->xp  = mesh->xp;
   }
-  assert(tag < 127);
+  assert(tag < 24704);
   assert(tag >= 0);
   ppt->n[0]   = 0;
   ppt->n[1]   = 0;

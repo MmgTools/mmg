@@ -63,10 +63,16 @@ _MMG5_paktet(MMG5_pMesh mesh) {
   while ( ++k < mesh->ne );
 
   /* Recreate nil chain */
-  mesh->nenil = mesh->ne + 1;
+  assert(mesh->ne<=mesh->nemax);
 
-  for(k=mesh->nenil; k<=mesh->nemax-1; k++){
-    mesh->tetra[k].v[3] = k+1;
+  if ( mesh->ne == mesh->nemax )
+    mesh->nenil = 0;
+  else {
+    mesh->nenil = mesh->ne + 1;
+
+    for(k=mesh->nenil; k<=mesh->nemax-1; k++){
+      mesh->tetra[k].v[3] = k+1;
+    }
   }
 }
 
