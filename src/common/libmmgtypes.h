@@ -260,7 +260,7 @@ typedef struct {
   int      flag;
   int16_t  tag[3]; /*!< tag[i] contains the tag associated to the
                      \f$i^{th}\f$ edge of triangle */
-} MMG5_Tria;
+  } MMG5_Tria;
 typedef MMG5_Tria * MMG5_pTria;
 
 

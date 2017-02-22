@@ -483,15 +483,16 @@ END INTERFACE
 !  */
 
 !   int  MMG2D_Set_triangles(MMG5_pMesh mesh, int *tria, int *refs);
-! /* /\** */
-! /*  * \param mesh pointer toward the mesh structure. */
-! /*  * \param k triangle index. */
-! /*  * \return 1. */
-! /*  * */
-! /*  * Set triangle \a k as required. */
-! /*  * */
-! /*  *\/ */
-! /* int  MMG2D_Set_requiredTriangle(MMG5_pMesh mesh, int k); */
+! /**
+!  * \param mesh pointer toward the mesh structure.
+!  * \param k triangle index.
+!  * \return 1.
+!  *
+!  * Set triangle \a k as required.
+!  *
+!  */
+
+! int  MMG2D_Set_requiredTriangle(MMG5_pMesh mesh, int k);
 
 ! /**
 !  * \param mesh pointer toward the mesh structure.
