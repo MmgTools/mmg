@@ -453,7 +453,7 @@ int _MMG2_colelt(MMG5_pMesh mesh,MMG5_pSol met,int typchk) {
       i2 = _MMG5_iprv2[i];
       p1 = &mesh->point[pt->v[i1]];
       p2 = &mesh->point[pt->v[i2]];
-      if ( MG_SIN(p1->tag) ) continue;
+      if ( MG_SIN(p1->tag) || p1->tag & MG_NOM ) continue;
 
       /* Impossible to collapse a surface point onto a non surface point -- impossible to
        collapse a surface point along a non geometric edge */
@@ -584,7 +584,7 @@ int _MMG2_adptri(MMG5_pMesh mesh,MMG5_pSol met) {
     }
     else
       nm = 0;
-
+    
     nns  += ns;
     nnc  += nc;
     nnsw += nsw;
@@ -702,7 +702,7 @@ int _MMG2_adpcol(MMG5_pMesh mesh,MMG5_pSol met) {
       p1 = &mesh->point[pt->v[i1]];
       p2 = &mesh->point[pt->v[i2]];
 
-      if ( MG_SIN(p1->tag) ) continue;
+      if ( MG_SIN(p1->tag) || p1->tag & MG_NOM ) continue;
       else if ( p1->tag & MG_GEO ) {
         if ( ! (p2->tag & MG_GEO) || !(pt->tag[i] & MG_GEO) ) continue;
       }
