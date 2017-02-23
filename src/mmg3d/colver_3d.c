@@ -430,7 +430,7 @@ _MMG5_topchkcol_bdy(MMG5_pMesh mesh,int k,int iface,char iedg,int *lists,int ili
 int _MMG5_chkcol_bdy(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
                      char iedg,int *listv,int ilistv,int *lists,int ilists,
                      char typchk) {
-  MMG5_pTetra        pt,pt0;
+  MMG5_pTetra        pt,pt0,pt1;
   MMG5_pxTetra       pxt;
   MMG5_pPoint        p0;
   MMG5_Tria          tt;
