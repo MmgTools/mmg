@@ -312,6 +312,20 @@ int _MMG3D_simbulgept(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int ip) {
   return(1);
 }
 
+static inline int _MMG5_devangle(double* n1,double *n2,double crit) {
+  double dev;
+
+  dev = n1[0]*n2[0] + n1[1]*n2[1] + n1[2]*n2[2];
+
+  if(dev < crit) {
+    if(dev < 0) printf("dev negatif %e\n",dev);
+    return(0);
+  }
+
+  return(1);
+
+}
+
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
@@ -332,16 +346,90 @@ int _MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,
                   int cas,char metRidTyp){
   MMG5_pTetra         pt,pt1,pt0;
   MMG5_xTetra         xt,xt1;
-  MMG5_pxTetra        pxt0;
-  int            ilist,k,open,iel,jel,*newtet,nump,*adja,j;
-  int            *adjan,nei2,nei3,mel;
+  MMG5_pxTetra        pxt0,pxt;
+  int            ilist,k,open,iel,jel,*newtet,nump,*adja,j,ia,ib;
+  int            *adjan,nei2,nei3,mel,ifirst;
   char           ie,tau[4],isxt,isxt1,i,voy;
   unsigned char  *taued;
   double         lmin,lmax,len;
+  double         n[3],n1[3],new0[3],new1[3],devnew,ar;
 
   ilist = ret / 2;
   open  = ret % 2;
+#warning CECILE modification angle in split1b
+  /*check the deviation for new triangles*/
+  {
+    ar = 0.9;///*_MMG5_ANGEDG*/
+    /* analyze surfacic ball of p */
+    ifirst = 0;
+    for (k=0; k<ilist; k++) {
+      iel = list[k] / 6;
+      ie  = list[k] % 6;
+      ia = _MMG5_iare[ie][0];
+      ib = _MMG5_iare[ie][1];
 
+      pt   = &mesh->tetra[iel];
+      if(!pt->xt) continue;
+      pxt  = &mesh->xtetra[pt->xt];
+
+      pt0  = &mesh->tetra[0];
+      
+      int *adja = &mesh->adja[4*(iel-1)+1];
+#warning treat SD case
+      for(int iad=0 ; iad<4 ; iad++) {
+        if(adja[iad]) continue;
+        /*normal at the two new triangles*/
+        memcpy(pt0,pt,sizeof(MMG5_Tetra));
+        pt0->v[ia] = ip;
+        if ( !_MMG5_norface(mesh,0,iad,n) )  return(0);
+        /*test deviation angle with the splitted edge */
+        if(ifirst) {
+          if(ifirst==pt->v[ia]) {/*compare n and new0*/
+            if(!_MMG5_devangle(n,new0,ar)) {
+              return(0);
+            }
+          } else { /*compare n and new1*/
+            if(!_MMG5_devangle(n,new1,ar)) {
+              return(0);
+            }
+          }
+            
+        } else {
+          memcpy(new0,n,3*sizeof(double));
+        }
+        //memcpy(pt0,pt,sizeof(MMG5_Tetra));
+        pt0->v[ia] = pt->v[ia];
+        pt0->v[ib] = ip;
+        if ( !_MMG5_norface(mesh,0,iad,n1) )  return(0);
+
+        /*test deviation angle with the splitted edge */
+        if(ifirst) {
+          if(ifirst==pt->v[ib]) {/*compare n1 and new0*/
+            if(!_MMG5_devangle(n1,new0,ar)) {
+              return(0);
+            }
+          } else { /*compare n and new1*/
+            if(!_MMG5_devangle(n1,new1,ar)) {
+              return(0);
+            }
+          }
+        } else {
+          memcpy(new1,n1,3*sizeof(double));
+        }
+
+        /* check normal deviation for new edge*/
+        if(!_MMG5_devangle(n,n1,ar)) {
+          return(0);
+        }
+      }
+      if(!ifirst) ifirst = pt->v[ia];
+
+    }
+  }
+  
+  
+  
+  
   if ( cas && met->m ) {
     lmin = 0.6;
     lmax = 1.3;
